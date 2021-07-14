@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-01-02T20:57:30.472971Z"
+   url="svn+ssh://dz@goblin.dz.ru/opt/svn/drive/import/openttd_3352/src_3352/strgen"
+   last-author="dz"
+   kind="dir"
+   revision="1"/>
+<entry
+   committed-rev="1"
+   name="strgen.tgt"
+   text-time="2005-12-29T08:34:24.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="d5f51c5acd942d0c2a9a0bfcbaff9016"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="strgen.c"
+   text-time="2005-12-29T08:34:24.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="32c67e208a73e48d8c4f11faeee32092"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="strgen.vcproj"
+   text-time="2005-12-29T08:34:24.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="02fc113aaf420ffa95bf4b9d2086b6fc"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="strgen.dsp"
+   text-time="2005-12-29T08:34:24.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="d503e3aaa2170af0659686a4d6069bb9"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="strgen.dsw"
+   text-time="2005-12-29T08:34:24.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="a81d23c4f1187053be22fad5cf5ca4ba"
+   last-author="dz"
+   kind="file"/>
+</wc-entries>

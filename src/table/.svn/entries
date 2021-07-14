@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-01-02T20:57:30.472971Z"
+   url="svn+ssh://dz@goblin.dz.ru/opt/svn/drive/import/openttd_3352/src_3352/table"
+   last-author="dz"
+   kind="dir"
+   revision="1"/>
+<entry
+   committed-rev="1"
+   name="sprites.h"
+   text-time="2005-12-29T08:38:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="5ec44c06af28b21285e6a75616e96fba"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="bridge_land.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="7bfad0269cd8061232699bb840625d9e"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="tree_land.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="b43bc5b8d3f2c967ba06078693aada56"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="train_cmd.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="38076eab3ad47cb0d28f47648c96f151"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="ai_rail.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="f0c74457012ace98553acc885bd7a5b7"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="build_industry.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="3b8d579aa68d123dd16dbd3c1e289c4f"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="landscape_const.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="e2038f70d293ebf9cad2a4690ccd97ea"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="track_land.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="f1f0a6464dcf8e483c74790027a1b4b5"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="files.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="2aca7ab38b9a2d69064c2b0406b3ccfc"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="namegen_rus.h"
+   text-time="2005-07-05T08:25:34.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="4f700b370e461115b28e29c2799c24b1"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="animcursors.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="f4c9e35f25977abb349ff006ffc7796b"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="genland.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="e1731bc79c4ae01c09f52b612feaf995"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="namegen.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="9756af8e833874351e000e095417be25"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="station_land.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="a4697e33467a0875fd90b8b71b38d7d7"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="industry_land.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="b12a06f95dbe8ed5410352aab74198d6"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="landscape_sprite.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="8307537c49581dde1d471d7f02c542de"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="autorail.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="aaba01e26ca6191fb7192f34153eee34"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="water_land.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="1a658a6b7a803421a6fecfc5dcd62f8c"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="palettes.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="4bb6acdde2fd5c81a29605c9a77e23af"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="road_land.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="fee9119111fb09f3a309c0288872d345"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="clear_land.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="1f798978e247ea6faac2412960cf26d8"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="town_land.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="272dd994bbc67917eb7cad1851fe7065"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="unmovable_land.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="ebfc137579262abd91d78e199d6ea435"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="engines.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="951bd49d66f531cb54613112c6902b5c"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="roadveh.h"
+   text-time="2005-12-29T08:34:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="5fe6394b8d49dde6df43f711d815aef6"
+   last-author="dz"
+   kind="file"/>
+</wc-entries>

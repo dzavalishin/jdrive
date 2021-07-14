@@ -1,0 +1,18 @@
+/* $Id: screenshot.h 2962 2005-09-18 20:56:44Z Darkvater $ */
+
+#ifndef SCREENSHOT_H
+#define SCREENSHOT_H
+
+void InitializeScreenshotFormats(void);
+
+const char *GetScreenshotFormatDesc(int i);
+void SetScreenshotFormat(int i);
+
+bool MakeScreenshot(void);
+bool MakeWorldScreenshot(int left, int top, int width, int height, int zoom);
+
+extern char _screenshot_format_name[8];
+extern uint _num_screenshot_formats;
+extern uint _cur_screenshot_format;
+
+#endif /* SCREENSHOT_H */

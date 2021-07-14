@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-01-02T20:57:30.472971Z"
+   url="svn+ssh://dz@goblin.dz.ru/opt/svn/drive/import/openttd_3352/src_3352/sound"
+   last-author="dz"
+   kind="dir"
+   revision="1"/>
+<entry
+   committed-rev="1"
+   name="null_s.h"
+   text-time="2005-12-29T08:33:38.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="178f3801c5126a65ae205b64cff6cef9"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="sdl_s.c"
+   text-time="2005-12-29T08:33:38.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="2b53adec6c08c06c1a818344b1db2ea3"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="win32_s.c"
+   text-time="2005-12-29T08:33:38.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="1252e1d21228c0445f2ef1737bcb07dd"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="cocoa_s.c"
+   text-time="2005-12-29T08:33:38.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="06bedc37fd048221e108273dfa5b13bf"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="sdl_s.h"
+   text-time="2005-12-29T08:33:38.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="6206bd42ea8b7a563797b6c53e3e5532"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="win32_s.h"
+   text-time="2005-12-29T08:33:38.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="998605beeedb006587fb1c98ee94f7bd"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="cocoa_s.h"
+   text-time="2005-12-29T08:33:38.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="d4bd9ac16f3cb467f545f32ceff33584"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="null_s.c"
+   text-time="2005-12-29T08:33:38.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="9a284793805ea5c015a9ecd1d0a48135"
+   last-author="dz"
+   kind="file"/>
+</wc-entries>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-01-02T20:57:30.472971Z"
+   url="svn+ssh://dz@goblin.dz.ru/opt/svn/drive/import/openttd_3352/src_3352/ai/trolly"
+   last-author="dz"
+   kind="dir"
+   revision="1"/>
+<entry
+   committed-rev="1"
+   name="build.c"
+   text-time="2005-12-29T08:35:08.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="0206e03e28f4942b088cb22cf33d70ae"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="pathfinder.c"
+   text-time="2005-12-29T08:35:08.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="01b8665f6351831c90e4407e656a89f9"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="trolly.c"
+   text-time="2005-12-29T08:35:08.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="3dbdd225d36ae5038908feb8d02da235"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="shared.c"
+   text-time="2005-12-29T08:35:08.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="56d9e7665f97564d56a28f433d7bcddd"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="trolly.h"
+   text-time="2005-12-29T08:35:08.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="02e2cb840ff5585454d383fd407dc338"
+   last-author="dz"
+   kind="file"/>
+</wc-entries>

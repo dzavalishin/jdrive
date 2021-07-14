@@ -1,0 +1,25 @@
+/* $Id: network_client.h 2962 2005-09-18 20:56:44Z Darkvater $ */
+
+#ifndef NETWORK_CLIENT_H
+#define NETWORK_CLIENT_H
+
+#ifdef ENABLE_NETWORK
+
+DEF_CLIENT_SEND_COMMAND(PACKET_CLIENT_GAME_INFO);
+DEF_CLIENT_SEND_COMMAND(PACKET_CLIENT_COMPANY_INFO);
+DEF_CLIENT_SEND_COMMAND_PARAM(PACKET_CLIENT_COMMAND)(CommandPacket *cp);
+DEF_CLIENT_SEND_COMMAND_PARAM(PACKET_CLIENT_ERROR)(NetworkErrorCode errorno);
+DEF_CLIENT_SEND_COMMAND_PARAM(PACKET_CLIENT_QUIT)(const char *leavemsg);
+DEF_CLIENT_SEND_COMMAND_PARAM(PACKET_CLIENT_CHAT)(NetworkAction action, DestType desttype, int dest, const char *msg);
+DEF_CLIENT_SEND_COMMAND_PARAM(PACKET_CLIENT_PASSWORD)(NetworkPasswordType type, const char *password);
+DEF_CLIENT_SEND_COMMAND_PARAM(PACKET_CLIENT_SET_PASSWORD)(const char *password);
+DEF_CLIENT_SEND_COMMAND_PARAM(PACKET_CLIENT_SET_NAME)(const char *name);
+DEF_CLIENT_SEND_COMMAND(PACKET_CLIENT_ACK);
+DEF_CLIENT_SEND_COMMAND_PARAM(PACKET_CLIENT_RCON)(const char *pass, const char *command);
+
+NetworkRecvStatus NetworkClient_ReadPackets(NetworkClientState *cs);
+void NetworkClient_Connected(void);
+
+#endif /* ENABLE_NETWORK */
+
+#endif /* NETWORK_CLIENT_H */

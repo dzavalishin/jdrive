@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-01-02T20:57:30.472971Z"
+   url="svn+ssh://dz@goblin.dz.ru/opt/svn/drive/import/openttd_3352/src_3352/ai/default"
+   last-author="dz"
+   kind="dir"
+   revision="1"/>
+<entry
+   committed-rev="1"
+   name="default.c"
+   text-time="2005-12-29T08:35:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="1809a82d3e9090604e9050e9f658ee6b"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="default.h"
+   text-time="2005-12-29T08:35:06.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="7fffcf96669c3f975f77a730708e0fcf"
+   last-author="dz"
+   kind="file"/>
+</wc-entries>

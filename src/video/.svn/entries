@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="1"
+   name=""
+   committed-date="2006-01-02T20:57:30.472971Z"
+   url="svn+ssh://dz@goblin.dz.ru/opt/svn/drive/import/openttd_3352/src_3352/video"
+   last-author="dz"
+   kind="dir"
+   revision="1"/>
+<entry
+   committed-rev="1"
+   name="cocoa_v.h"
+   text-time="2005-12-29T08:31:58.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="8458d3b7f5bd06d8f23df1873860f1ce"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="null_v.c"
+   text-time="2005-12-29T08:31:58.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="9f8667decfb48e1762644cc21fc620e0"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="dedicated_v.h"
+   text-time="2005-12-29T08:31:58.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="4f53f73ee6001c8e7344dc894abf22ca"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="cocoa_v.m"
+   text-time="2005-12-29T08:31:58.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="8220b00898d991482f03b40623885604"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="null_v.h"
+   text-time="2005-12-29T08:31:58.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="2dc3965f611efbc451c59b11ce7ec714"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="sdl_v.c"
+   text-time="2005-12-29T08:31:58.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="92f516f317e5b6eb9dd74f381c372dad"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="win32_v.c"
+   text-time="2005-12-29T08:31:58.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="efe21236565e7b5eda1a5fbc86ffee55"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="dedicated_v.c"
+   text-time="2005-12-29T08:31:58.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="18273b0d1d7bd07714c0389229497413"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="sdl_v.h"
+   text-time="2005-12-29T08:31:58.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="7eb02c1ce3ba7ee643b51f9b3a3e45d9"
+   last-author="dz"
+   kind="file"/>
+<entry
+   committed-rev="1"
+   name="win32_v.h"
+   text-time="2005-12-29T08:31:58.000000Z"
+   committed-date="2006-01-02T20:57:30.472971Z"
+   checksum="602651099e56d0055ad13c375b8ffd7b"
+   last-author="dz"
+   kind="file"/>
+</wc-entries>

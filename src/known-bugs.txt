@@ -1,0 +1,74 @@
+README
+------------------------------------------------------------------------
+All bugs listed below are marked as known. Please do not submit any bugs
+that are the same as these. If you do, don't act surprised, because
+we WILL flame you!!
+
+There is an experimental AI included in the game which you can enable
+from the "Configure Patches" window. All bugs related to this AI should
+go to: http://www.tt-forums.net/viewtopic.php?t=9576
+
+Of course if you have more knowledge about any of these bugs, have more
+specifics, we welcome you to report them. React to the given bug indicated
+by the number below on http://sourceforge.net/tracker/?group_id=103924&atid=636365
+If the the bug report is closed, it has been fixed, which then can be verified
+in the latest SVN version.
+
+Bugs for 0.4.0.1
+------------------------------------------------------------------------
+URL: http://sourceforge.net/tracker/?atid=636365&group_id=103924&func=browse
+
+-		"Broken" autoreplace for dual-headed trains
+-1203319	Pre-signal exits not working when one way signal
+-1197116	Some stations are cargo-less
+-1188897	Station with cargo enroute_from INVALID_STATION
+-1186802	Company value problem (loans)
+-1181888	Invaild Station Order => Crash
+-1174829	Waypoint / Orders Bug
+-1168820	Some mouse and keyboard events are lost
+-1167810	Cargo payment after deleting stations (st->xy = 0)
+-1157244	Can't save game if name contains german umlauts
+-1144510	Make install tries to install scenarios to the wrong place
+-1116638	"More, but smaller changes" deficiency
+-1106356	re-offered prototypes
+-1099233	production down before it's working
+-1085486	Subsidies: Only count when station is in right suburb
+-992677		BeOS MIDI does not initialise on newer BeOS releases
+
+Minor Bugs for 0.4.0.1
+------------------------------------------------------------------------
+URL: http://sourceforge.net/tracker/?atid=669662&group_id=103924&func=browse
+
+-1201284	permanent hilight in a depot
+-1197258	Window Z-order locked when exiting openttd
+-1193882	problems with dualhead engins in DB Set XL (v0.81)
+-1193870	keep the date counter running
+-1185852	Scrollbars get arbitrarily small
+-1184634	Replace vehicles window bug
+-1183253	Incorrect Load vs Loading Sprites
+-1183251	Hangar sprite does not update when refit.
+-1179933	autorail removal does not go completely red.
+-1160732	little bug with transparency
+-1153937	Game wont run from a start menu shortcut
+-1117731	Editor-StartingDate
+-1114237	Wrong autoreplace hint
+-1112784	detailed sound options
+-1108046	game freezes
+-1106889	Chat Interface enhancements
+-1104358	train lost message - history
+-1102174	Bug if 3 people buy 25% shares in one company
+-1087407	wrong message in history
+-1084620	Minor bug considering buses/trucks
+-1034310	color mauve in diagrams
+-1030661	It's possible to build a tunnel under oil wells
+-1009171	Canals and locks at sea level cause flooding
+-993516		Canal + bouy -> wrong graphics.
+-987891		Large UFO destruction bug
+-987884		farm fences
+-987883		Aircraft landing/taking off
+-987880		company league table updating
+-985924		aircraft taxi speed
+-980276		Overflow in factory directory
+-976824		transmitter base
+-941694		Clipping problems stations/vehicles on slopes
+-936997		Stationname too long to fit in trainwindow bug
