@@ -23,7 +23,7 @@ static void GfxMainBlitter(const Sprite *sprite, int x, int y, int mode);
 
 static int _stringwidth_out;
 static Pixel _cursor_backup[64 * 64];
-static Rect _invalid_rect;
+//static Rect _invalid_rect;
 static const byte *_color_remap_ptr;
 static byte _string_colorremap[3];
 
@@ -1813,7 +1813,7 @@ void DrawDirtyBlocks(void)
 	_invalid_rect.bottom = 0;
 }
 
-
+/*
 void SetDirtyBlocks(int left, int top, int right, int bottom)
 {
 	byte *b;
@@ -1982,3 +1982,4 @@ uint16 GetDrawStringPlayerColor(PlayerID player)
 	if (player == OWNER_SPECTATOR || player == OWNER_SPECTATOR - 1) return 1;
 	return (_color_list[_player_colors[player]].window_color_1b) | IS_PALETTE_COLOR;
 }
+*/

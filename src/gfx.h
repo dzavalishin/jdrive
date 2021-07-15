@@ -11,7 +11,7 @@ typedef struct ColorList {
 	byte window_color_bga, window_color_bgb;
 	byte window_color_2;
 } ColorList;
-
+/*
 struct DrawPixelInfo {
 	Pixel *dst_ptr;
 	int left, top, width, height;
@@ -33,7 +33,7 @@ typedef struct CursorVars {
 	bool dirty;
 	bool fix_at;
 } CursorVars;
-
+*/
 
 void RedrawScreenRect(int left, int top, int right, int bottom);
 void GfxScroll(int left, int top, int width, int height, int xo, int yo);
@@ -101,10 +101,10 @@ static inline byte GetCharacterWidth(uint key)
 	return _stringwidth_table[key - ASCII_LETTERSTART];
 }
 
-VARDEF DrawPixelInfo _screen;
-VARDEF DrawPixelInfo *_cur_dpi;
+//VARDEF DrawPixelInfo _screen;
+//VARDEF DrawPixelInfo *_cur_dpi;
 VARDEF ColorList _color_list[16];
-VARDEF CursorVars _cursor;
+//VARDEF CursorVars _cursor;
 
 VARDEF int _pal_first_dirty;
 VARDEF int _pal_last_dirty;
