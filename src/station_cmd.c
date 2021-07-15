@@ -432,7 +432,7 @@ static Station* GetClosestStationFromTile(TileIndex tile, uint threshold, Player
 
 	return best_station;
 }
-
+/*
 static void StationInitialize(Station *st, TileIndex tile)
 {
 	GoodsEntry *ge;
@@ -627,6 +627,7 @@ static void MergePoint(ottd_Rectangle* rect, TileIndex tile)
 	if (rect->max_y < y) rect->max_y = y;
 }
 
+
 // Update the acceptance for a station.
 // show_msg controls whether to display a message that acceptance was changed.
 static void UpdateStationAcceptance(Station *st, bool show_msg)
@@ -644,7 +645,7 @@ static void UpdateStationAcceptance(Station *st, bool show_msg)
 	// Don't update acceptance for a buoy
 	if (IsBuoy(st)) return;
 
-	/* old accepted goods types */
+	/* old accepted goods types * /
 	old_acc = GetAcceptanceMask(st);
 
 	// Put all the tiles that span an area in the table.
@@ -709,7 +710,7 @@ static void UpdateStationAcceptance(Station *st, bool show_msg)
 
 	// show a message to report that the acceptance was changed?
 	if (show_msg && st->owner == _local_player && st->facilities) {
-		uint32 accept=0, reject=0; /* these contain two string ids each */
+		uint32 accept=0, reject=0; /* these contain two string ids each * /
 		const StringID *str = _cargoc.names_s;
 
 		do {
@@ -738,6 +739,7 @@ static void DeleteStationIfEmpty(Station* st)
 		InvalidateWindow(WC_STATION_LIST, st->owner);
 	}
 }
+*/
 
 static int32 ClearTile_Station(TileIndex tile, byte flags);
 

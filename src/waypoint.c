@@ -1,5 +1,5 @@
 /* $Id: waypoint.c 3297 2005-12-14 06:20:23Z tron $ */
-
+#if 0
 #include "stdafx.h"
 #include "openttd.h"
 
@@ -506,3 +506,4 @@ static void Load_WAYP(void)
 const ChunkHandler _waypoint_chunk_handlers[] = {
 	{ 'CHKP', Save_WAYP, Load_WAYP, CH_ARRAY | CH_LAST},
 };
+#endif

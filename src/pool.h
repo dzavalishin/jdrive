@@ -1,5 +1,5 @@
 /* $Id: pool.h 2962 2005-09-18 20:56:44Z Darkvater $ */
-
+#if 0
 #ifndef POOL_H
 #define POOL_H
 
@@ -53,3 +53,4 @@ static inline byte *GetItemFromPool(const MemoryPool *pool, uint index)
 }
 
 #endif /* POOL_H */
+#endif

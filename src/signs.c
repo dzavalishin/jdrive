@@ -1,5 +1,5 @@
 /* $Id: signs.c 3337 2005-12-24 20:51:21Z tron $ */
-
+#if 0
 #include "stdafx.h"
 #include "openttd.h"
 #include "table/strings.h"
@@ -275,3 +275,4 @@ static void Load_SIGN(void)
 const ChunkHandler _sign_chunk_handlers[] = {
 	{ 'SIGN', Save_SIGN, Load_SIGN, CH_ARRAY | CH_LAST},
 };
+#endif

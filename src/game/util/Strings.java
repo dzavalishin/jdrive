@@ -1,50 +1,25 @@
-/* $Id: strings.c 3192 2005-11-16 11:17:52Z tron $ */
-#if 0
-#include "stdafx.h"
-#include "openttd.h"
-#include "currency.h"
-#include "functions.h"
-#include "string.h"
-#include "strings.h"
-#include "table/strings.h"
-#include "namegen.h"
-#include "station.h"
-#include "town.h"
-#include "vehicle.h"
-#include "news.h"
-#include "screenshot.h"
-#include "waypoint.h"
-#include "industry.h"
-#include "variables.h"
+public class Strings
+{
 
-char _userstring[128];
 
-static char *StationGetSpecialString(char *buff, int x);
-static char *GetSpecialTownNameString(char *buff, int ind, uint32 seed);
-static char *GetSpecialPlayerNameString(char *buff, int ind, const int32 *argv);
+String _userstring;
 
-static char *FormatString(char *buff, const char *str, const int32 *argv, uint casei);
+//private String StationGetSpecialString(String buff, int x);
+//private String GetSpecialTownNameString(String buff, int ind, int seed);
+//private String GetSpecialPlayerNameString(String buff, int ind, final int *argv);
 
-extern const char _openttd_revision[];
+//private String FormatString(String buff, final String str, final int *argv, uint casei);
 
-typedef struct LanguagePack {
-	uint32 ident;
-	uint32 version;			// 32-bits of auto generated version info which is basically a hash of strings.h
-	char name[32];			// the international name of this language
-	char own_name[32];	// the localized name of this language
-	char isocode[16];	// the ISO code for the language (not country code)
-	uint16 offsets[32];	// the offsets
-	byte plural_form;		// how to compute plural forms
-	byte pad[3];				// pad header to be a multiple of 4
-	char data[VARARRAY_SIZE];
-} LanguagePack;
+final char _openttd_revision[];
 
-static char **_langpack_offs;
-static LanguagePack *_langpack;
-static uint _langtab_num[32]; // Offset into langpack offs
-static uint _langtab_start[32]; // Offset into langpack offs
 
-static const StringID _cargo_string_list[NUM_LANDSCAPE][NUM_CARGO] = {
+private char **_langpack_offs;
+private LanguagePack *_langpack;
+private uint _langtab_num[32]; // Offset into langpack offs
+private uint _langtab_start[32]; // Offset into langpack offs
+
+//private final StringID _cargo_string_list[NUM_LANDSCAPE][NUM_CARGO] = {
+private final StringID _cargo_string_list[][] = {
 	{ /* LT_NORMAL */
 		STR_PASSENGERS,
 		STR_TONS,
@@ -107,28 +82,28 @@ static const StringID _cargo_string_list[NUM_LANDSCAPE][NUM_CARGO] = {
 };
 
 
-// Read an int64 from the argv array.
-static inline int64 GetInt64(const int32 **argv)
+// Read an long from the argv array.
+private  long Getlong(final int **argv)
 {
-	int64 result;
+	long result;
 
 	assert(argv);
-	result = (uint32)(*argv)[0] + ((uint64)(uint32)(*argv)[1] << 32);
+	result = (int)(*argv)[0] + ((ulong)(int)(*argv)[1] << 32);
 	(*argv)+=2;
 	return result;
 }
 
-// Read an int32 from the argv array.
-static inline int32 GetInt32(const int32 **argv)
+// Read an int from the argv array.
+private  int Getint(final int **argv)
 {
 	assert(argv);
 	return *(*argv)++;
 }
 
 // Read an array from the argv array.
-static inline const int32 *GetArgvPtr(const int32 **argv, int n)
+private  final int *GetArgvPtr(final int **argv, int n)
 {
-	const int32 *result;
+	final int *result;
 	assert(*argv);
 	result = *argv;
 	(*argv) += n;
@@ -139,15 +114,15 @@ static inline const int32 *GetArgvPtr(const int32 **argv, int n)
 #define NUM_BOUND_STRINGS 8
 
 // Array to hold the bound strings.
-static const char *_bound_strings[NUM_BOUND_STRINGS];
+private final String_bound_strings[NUM_BOUND_STRINGS];
 
 // This index is used to implement a "round-robin" allocating of
 // slots for BindCString. NUM_BOUND_STRINGS slots are reserved.
 // Which means that after NUM_BOUND_STRINGS calls to BindCString,
 // the indices will be reused.
-static int _bind_index;
+private int _bind_index;
 
-static const char *GetStringPtr(StringID string)
+private final StringGetStringPtr(StringID string)
 {
 	return _langpack_offs[_langtab_start[string >> 11] + (string & 0x7FF)];
 }
@@ -156,8 +131,9 @@ static const char *GetStringPtr(StringID string)
 // These 8 bits will only be set when FormatString wants to print
 // the string in a different case. No one else except FormatString
 // should set those bits.
-char *GetStringWithArgs(char *buffr, uint string, const int32 *argv)
+String GetStringWithArgs(int string, final int *argv)
 {
+    StringBuilder buffr = new StringBuilder();
 	uint index = GB(string,  0, 11);
 	uint tab   = GB(string, 11,  5);
 
@@ -166,7 +142,7 @@ char *GetStringWithArgs(char *buffr, uint string, const int32 *argv)
 	switch (tab) {
 		case 4:
 			if (index >= 0xC0)
-				return GetSpecialTownNameString(buffr, index - 0xC0, GetInt32(&argv));
+				return GetSpecialTownNameString(buffr, index - 0xC0, Getint(&argv));
 			break;
 
 		case 14:
@@ -198,16 +174,16 @@ char *GetStringWithArgs(char *buffr, uint string, const int32 *argv)
 	return FormatString(buffr, GetStringPtr(GB(string, 0, 16)), argv, GB(string, 24, 8));
 }
 
-char *GetString(char *buffr, StringID string)
+String GetString(StringID string)
 {
-	return GetStringWithArgs(buffr, string, (int32*)_decode_parameters);
+	return GetStringWithArgs(string, (int*)_decode_parameters);
 }
 
 
 // This function takes a C-string and allocates a temporary string ID.
 // The duration of the bound string is valid only until the next GetString,
 // so be careful.
-StringID BindCString(const char *str)
+StringID BindCString(final String str)
 {
 	int idx = (++_bind_index) & (NUM_BOUND_STRINGS - 1);
 	_bound_strings[idx] = str;
@@ -215,17 +191,17 @@ StringID BindCString(const char *str)
 }
 
 // This function is used to "bind" a C string to a OpenTTD dparam slot.
-void SetDParamStr(uint n, const char *str)
+void SetDParamStr(uint n, final String str)
 {
 	SetDParam(n, BindCString(str));
 }
 
 void InjectDParam(int amount)
 {
-	memmove(_decode_parameters + amount, _decode_parameters, sizeof(_decode_parameters) - amount * sizeof(uint32));
+	memmove(_decode_parameters + amount, _decode_parameters, sizeof(_decode_parameters) - amount * sizeof(int));
 }
 
-static const uint32 _divisor_table[] = {
+private final int _divisor_table[] = {
 	1000000000,
 	100000000,
 	10000000,
@@ -239,15 +215,16 @@ static const uint32 _divisor_table[] = {
 	1
 };
 
-static char *FormatCommaNumber(char *buff, int32 number)
+private String FormatCommaNumber(int number)
 {
-	uint32 quot,divisor;
+	int quot,divisor;
 	int i;
-	uint32 tot;
-	uint32 num;
+	int tot;
+	int num;
+    StringBuilder buff = new StringBuilder();
 
 	if (number < 0) {
-		*buff++ = '-';
+		buff.append( '-' );
 		number = -number;
 	}
 
@@ -262,25 +239,24 @@ static char *FormatCommaNumber(char *buff, int32 number)
 			num = num % _divisor_table[i];
 		}
 		if (tot |= quot || i == 9) {
-			*buff++ = '0' + quot;
+			buff.append( '0' + quot );
 			if (i == 0 || i == 3 || i == 6) *buff++ = ',';
 		}
 	}
 
-	*buff = '\0';
-
-	return buff;
+	return buff.toString();
 }
 
-static char *FormatNoCommaNumber(char *buff, int32 number)
+private String FormatNoCommaNumber(int number)
 {
-	uint32 quot,divisor;
+	int quot,divisor;
 	int i;
-	uint32 tot;
-	uint32 num;
+	int tot;
+	int num;
+    StringBuilder buff = new StringBuilder();
 
 	if (number < 0) {
-		*buff++ = '-';
+		buff.append( '-' );
 		number = -number;
 	}
 
@@ -295,20 +271,19 @@ static char *FormatNoCommaNumber(char *buff, int32 number)
 			num = num % _divisor_table[i];
 		}
 		if (tot |= quot || i == 9) {
-			*buff++ = '0' + quot;
+			buff.append( '0' + quot );
 		}
 	}
-
-	*buff = '\0';
 
 	return buff;
 }
 
 
-static char *FormatYmdString(char *buff, uint16 number)
+private String FormatYmdString(int number)
 {
-	const char *src;
+	final String src;
 	YearMonthDay ymd;
+    StringBuilder buff = new StringBuilder();
 
 	ConvertDayToYMD(&ymd, number);
 
@@ -321,9 +296,9 @@ static char *FormatYmdString(char *buff, uint16 number)
 	return FormatNoCommaNumber(buff + 4, ymd.year + MAX_YEAR_BEGIN_REAL);
 }
 
-static char *FormatMonthAndYear(char *buff, uint16 number)
+private String FormatMonthAndYear(int number)
 {
-	const char *src;
+	final String src;
 	YearMonthDay ymd;
 
 	ConvertDayToYMD(&ymd, number);
@@ -334,22 +309,24 @@ static char *FormatMonthAndYear(char *buff, uint16 number)
 	return FormatNoCommaNumber(buff, ymd.year + MAX_YEAR_BEGIN_REAL);
 }
 
-static char *FormatTinyDate(char *buff, uint16 number)
+private String FormatTinyDate(int number)
 {
 	YearMonthDay ymd;
+    StringBuilder buff = new StringBuilder();
 
 	ConvertDayToYMD(&ymd, number);
 	buff += sprintf(buff, " %02i-%02i-%04i", ymd.day, ymd.month + 1, ymd.year + MAX_YEAR_BEGIN_REAL);
 
-	return buff;
+	return buff.toString();
 }
 
-static char *FormatGenericCurrency(char *buff, const CurrencySpec *spec, int64 number, bool compact)
+private String FormatGenericCurrency(final CurrencySpec *spec, long number, bool compact)
 {
-	const char *s;
+	final String s;
 	char c;
 	char buf[40], *p;
 	int j;
+    StringBuilder buff = new StringBuilder();
 
 	// multiply by exchange rate
 	number *= spec->rate;
@@ -394,10 +371,10 @@ static char *FormatGenericCurrency(char *buff, const CurrencySpec *spec, int64 n
 	s = spec->suffix;
 	while (s != spec->suffix + lengthof(spec->suffix) && (c = *s++) != '\0') *buff++ = c;
 
-	return buff;
+	return buff.toString();
 }
 
-static int DeterminePluralForm(int32 n)
+private int DeterminePluralForm(int n)
 {
 	// The absolute value determines plurality
 	if (n < 0) n = -n;
@@ -461,7 +438,7 @@ static int DeterminePluralForm(int32 n)
 	}
 }
 
-static const char *ParseStringChoice(const char *b, uint form, char *dst, int *dstlen)
+private final String ParseStringChoice(final String b, uint form, String dst, int *dstlen)
 {
 	//<NUM> {Length of each string} {each string}
 	uint n = (byte)*b++;
@@ -480,11 +457,12 @@ static const char *ParseStringChoice(const char *b, uint form, char *dst, int *d
 }
 
 
-static char *FormatString(char *buff, const char *str, const int32 *argv, uint casei)
+private String FormatString(final String str, final int *argv, uint casei)
 {
 	byte b;
-	const int32 *argv_orig = argv;
+	final int *argv_orig = argv;
 	uint modifier = 0;
+    StringBuilder buff = new StringBuilder();
 
 	while ((b = *str++) != '\0') {
 		switch (b) {
@@ -500,16 +478,16 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 
 		case 0x81: // {STRINL}
 			str += 2;
-			buff = GetStringWithArgs(buff, READ_LE_UINT16(str-2), argv);
+			buff = GetStringWithArgs(buff, READ_LE_int(str-2), argv);
 			break;
 		case 0x82: // {DATE_LONG}
-			buff = FormatYmdString(buff, GetInt32(&argv));
+			buff = FormatYmdString(buff, Getint(&argv));
 			break;
 		case 0x83: // {DATE_SHORT}
-			buff = FormatMonthAndYear(buff, GetInt32(&argv));
+			buff = FormatMonthAndYear(buff, Getint(&argv));
 			break;
 		case 0x84: {// {VELOCITY}
-			int value = GetInt32(&argv);
+			int value = Getint(&argv);
 			if (_opt_ptr->kilometers) value = value * 1648 >> 10;
 			buff = FormatCommaNumber(buff, value);
 			if (_opt_ptr->kilometers) {
@@ -525,7 +503,7 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 		case 0x85:
 			switch (*str++) {
 			case 0: /* {CURRCOMPACT} */
-				buff = FormatGenericCurrency(buff, _currency, GetInt32(&argv), true);
+				buff = FormatGenericCurrency(buff, _currency, Getint(&argv), true);
 				break;
 			case 2: /* {REV} */
 				buff = strecpy(buff, _openttd_revision, NULL);
@@ -534,62 +512,62 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 				// Short description of cargotypes. Layout:
 				// 8-bit = cargo type
 				// 16-bit = cargo count
-				StringID cargo_str = _cargo_string_list[_opt_ptr->landscape][GetInt32(&argv)];
-				uint16 multiplier = (cargo_str == STR_LITERS) ? 1000 : 1;
+				StringID cargo_str = _cargo_string_list[_opt_ptr->landscape][Getint(&argv)];
+				int multiplier = (cargo_str == STR_LITERS) ? 1000 : 1;
 				// liquid type of cargo is multiplied by 100 to get correct amount
-				buff = FormatCommaNumber(buff, GetInt32(&argv) * multiplier);
+				buff = FormatCommaNumber(buff, Getint(&argv) * multiplier);
 				buff = strecpy(buff, " ", NULL);
 				buff = strecpy(buff, GetStringPtr(cargo_str), NULL);
 			} break;
 			case 4: {/* {CURRCOMPACT64} */
 				// 64 bit compact currency-unit
-				buff = FormatGenericCurrency(buff, _currency, GetInt64(&argv), true);
+				buff = FormatGenericCurrency(buff, _currency, Getlong(&argv), true);
 				break;
 			}
 			case 5: { /* {STRING1} */
 				// String that consumes ONE argument
-				uint str = modifier + GetInt32(&argv);
+				uint str = modifier + Getint(&argv);
 				buff = GetStringWithArgs(buff, str, GetArgvPtr(&argv, 1));
 				modifier = 0;
 				break;
 			}
 			case 6: { /* {STRING2} */
 				// String that consumes TWO arguments
-				uint str = modifier + GetInt32(&argv);
+				uint str = modifier + Getint(&argv);
 				buff = GetStringWithArgs(buff, str, GetArgvPtr(&argv, 2));
 				modifier = 0;
 				break;
 			}
 			case 7: { /* {STRING3} */
 				// String that consumes THREE arguments
-				uint str = modifier + GetInt32(&argv);
+				uint str = modifier + Getint(&argv);
 				buff = GetStringWithArgs(buff, str, GetArgvPtr(&argv, 3));
 				modifier = 0;
 				break;
 			}
 			case 8: { /* {STRING4} */
 				// String that consumes FOUR arguments
-				uint str = modifier + GetInt32(&argv);
+				uint str = modifier + Getint(&argv);
 				buff = GetStringWithArgs(buff, str, GetArgvPtr(&argv, 4));
 				modifier = 0;
 				break;
 			}
 			case 9: { /* {STRING5} */
 				// String that consumes FIVE arguments
-				uint str = modifier + GetInt32(&argv);
+				uint str = modifier + Getint(&argv);
 				buff = GetStringWithArgs(buff, str, GetArgvPtr(&argv, 5));
 				modifier = 0;
 				break;
 			}
 
 			case 10: { /* {STATIONFEATURES} */
-				buff = StationGetSpecialString(buff, GetInt32(&argv));
+				buff = StationGetSpecialString(buff, Getint(&argv));
 				break;
 			}
 
 			case 11: { /* {INDUSTRY} */
-				Industry *i = GetIndustry(GetInt32(&argv));
-				int32 args[2];
+				Industry *i = GetIndustry(Getint(&argv));
+				int args[2];
 
 				// industry not valid anymore?
 				if (i->xy == 0)
@@ -605,7 +583,7 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 			}
 
 			case 12: { // {VOLUME}
-				buff = FormatCommaNumber(buff, GetInt32(&argv) * 1000);
+				buff = FormatCommaNumber(buff, Getint(&argv) * 1000);
 				buff = strecpy(buff, " ", NULL);
 				buff = FormatString(buff, GetStringPtr(STR_LITERS), NULL, modifier >> 24);
 				modifier = 0;
@@ -613,7 +591,7 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 			}
 
 			case 13: { // {G 0 Der Die Das}
-				const byte* s = (const byte*)GetStringPtr(argv_orig[(byte)*str++]); // contains the string that determines gender.
+				final byte* s = (final byte*)GetStringPtr(argv_orig[(byte)*str++]); // contains the string that determines gender.
 				int len;
 				int gender = 0;
 				if (s != NULL && s[0] == 0x87) gender = s[1];
@@ -623,7 +601,7 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 			}
 
 			case 14: { // {DATE_TINY}
-				buff = FormatTinyDate(buff, GetInt32(&argv));
+				buff = FormatTinyDate(buff, Getint(&argv));
 				break;
 			}
 
@@ -631,7 +609,7 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 				// Layout now is:
 				//   8bit   - cargo type
 				//   16-bit - cargo count
-				StringID cargo_str = _cargoc.names_long[GetInt32(&argv)];
+				StringID cargo_str = _cargoc.names_long[Getint(&argv)];
 				buff = GetStringWithArgs(buff, cargo_str, argv++);
 				break;
 			}
@@ -652,7 +630,7 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 			break;
 
 		case 0x88: {// {STRING}
-			uint str = modifier + GetInt32(&argv);
+			uint str = modifier + Getint(&argv);
 			// WARNING. It's prohibited for the included string to consume any arguments.
 			// For included strings that consume argument, you should use STRING1, STRING2 etc.
 			// To debug stuff you can set argv to NULL and it will tell you
@@ -662,7 +640,7 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 		}
 
 		case 0x8B: // {COMMA}
-			buff = FormatCommaNumber(buff, GetInt32(&argv));
+			buff = FormatCommaNumber(buff, Getint(&argv));
 			break;
 
 		case 0x8C: // Move argument pointer
@@ -670,7 +648,7 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 			break;
 
 		case 0x8D: { // {P}
-			int32 v = argv_orig[(byte)*str++]; // contains the number that determines plural
+			int v = argv_orig[(byte)*str++]; // contains the number that determines plural
 			int len;
 			str = ParseStringChoice(str, DeterminePluralForm(v), buff, &len);
 			buff += len;
@@ -678,16 +656,16 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 		}
 
 		case 0x8E: // {NUM}
-			buff = FormatNoCommaNumber(buff, GetInt32(&argv));
+			buff = FormatNoCommaNumber(buff, Getint(&argv));
 			break;
 
 		case 0x8F: // {CURRENCY}
-			buff = FormatGenericCurrency(buff, _currency, GetInt32(&argv), false);
+			buff = FormatGenericCurrency(buff, _currency, Getint(&argv), false);
 			break;
 
 		case 0x99: { // {WAYPOINT}
-			int32 temp[2];
-			Waypoint *wp = GetWaypoint(GetInt32(&argv));
+			int temp[2];
+			Waypoint *wp = GetWaypoint(Getint(&argv));
 			StringID str;
 			if (wp->string != STR_NULL) {
 				str = wp->string;
@@ -700,8 +678,8 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 		} break;
 
 		case 0x9A: { // {STATION}
-			const Station* st = GetStation(GetInt32(&argv));
-			int32 temp[2];
+			final Station* st = GetStation(Getint(&argv));
+			int temp[2];
 
 			if (st->xy == 0) { // station doesn't exist anymore
 				buff = GetStringWithArgs(buff, STR_UNKNOWN_DESTINATION, NULL);
@@ -713,8 +691,8 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 			break;
 		}
 		case 0x9B: { // {TOWN}
-			const Town* t = GetTown(GetInt32(&argv));
-			int32 temp[1];
+			final Town* t = GetTown(Getint(&argv));
+			int temp[1];
 
 			assert(t->xy != 0);
 
@@ -724,7 +702,7 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 		}
 
 		case 0x9C: { // {CURRENCY64}
-			buff = FormatGenericCurrency(buff, _currency, GetInt64(&argv), false);
+			buff = FormatGenericCurrency(buff, _currency, Getlong(&argv), false);
 			break;
 		}
 
@@ -756,31 +734,30 @@ static char *FormatString(char *buff, const char *str, const int32 *argv, uint c
 			*buff++ = b;
 		}
 	}
-	*buff = '\0';
-	return buff;
+
+    return buff.toString();
 }
 
 
-static char *StationGetSpecialString(char *buff, int x)
+private String StationGetSpecialString(int x)
 {
-	if (x & 0x01) *buff++ = '\x94';
+    StringBuilder buff = new StringBuilder();
+
+    if (x & 0x01) *buff++ = '\x94';
 	if (x & 0x02) *buff++ = '\x95';
 	if (x & 0x04) *buff++ = '\x96';
 	if (x & 0x08) *buff++ = '\x97';
 	if (x & 0x10) *buff++ = '\x98';
-	*buff = '\0';
-	return buff;
+
+    return buff.toString();
 }
 
-static char *GetSpecialTownNameString(char *buff, int ind, uint32 seed)
+private String GetSpecialTownNameString(int ind, int seed)
 {
-	_town_name_generators[ind](buff, seed);
-
-	while (*buff != '\0') buff++;
-	return buff;
+	return _town_name_generators[ind](seed);
 }
 
-static const char* const _silly_company_names[] = {
+private final String _silly_company_names[] = {
 	"Bloggs Brothers",
 	"Tiny Transport Ltd.",
 	"Express Travel",
@@ -796,7 +773,7 @@ static const char* const _silly_company_names[] = {
 	"Getout & Pushit Ltd."
 };
 
-static const char* const _surname_list[] = {
+private final String _surname_list[] = {
 	"Adams",
 	"Allan",
 	"Baker",
@@ -828,7 +805,7 @@ static const char* const _surname_list[] = {
 	"Watkins"
 };
 
-static const char* const _silly_surname_list[] = {
+private final String _silly_surname_list[] = {
 	"Grumpy",
 	"Dozy",
 	"Speedy",
@@ -843,35 +820,36 @@ static const char* const _silly_surname_list[] = {
 	"Nutkins"
 };
 
-static const char _initial_name_letters[] = {
+private final char _initial_name_letters[] = {
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
 	'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'W',
 };
 
-static char *GenAndCoName(char *buff, uint32 arg)
+private String GenAndCoName(int arg)
 {
-	const char* const* base;
+	String[] base;
 	uint num;
+    StringBuilder buff = new StringBuilder();
 
 	if (_opt_ptr->landscape == LT_CANDY) {
 		base = _silly_surname_list;
-		num  = lengthof(_silly_surname_list);
 	} else {
 		base = _surname_list;
-		num  = lengthof(_surname_list);
 	}
+    num  = base.length;
 
-	buff = strecpy(buff, base[num * GB(arg, 16, 8) >> 8], NULL);
+	buff.append( strecpy(buff, base[num * GB(arg, 16, 8) >> 8], NULL) );
 	buff = strecpy(buff, " & Co.", NULL);
 
-	return buff;
+	return buff.toString();
 }
 
-static char *GenPresidentName(char *buff, uint32 x)
+private String GenPresidentName(int x)
 {
-	const char* const* base;
+	final String[] base;
 	uint num;
 	uint i;
+    StringBuilder buff = new StringBuilder();
 
 	buff[0] = _initial_name_letters[sizeof(_initial_name_letters) * GB(x, 0, 8) >> 8];
 	buff[1] = '.';
@@ -896,10 +874,10 @@ static char *GenPresidentName(char *buff, uint32 x)
 
 	buff = strecpy(buff, base[num * GB(x, 16, 8) >> 8], NULL);
 
-	return buff;
+	return buff.toString();
 }
 
-static const char * const _song_names[] = {
+private final String _song_names[] = {
 	"Tycoon DELUXE Theme",
 	"Easy Driver",
 	"Little Red Diesel",
@@ -924,25 +902,27 @@ static const char * const _song_names[] = {
 	"Hard Drivin'"
 };
 
-static char *GetSpecialPlayerNameString(char *buff, int ind, const int32 *argv)
+private String GetSpecialPlayerNameString(int ind, final int *argv)
 {
-	switch (ind) {
+    StringBuilder buff = new StringBuilder();
+
+    switch (ind) {
 		case 1: // not used
-			return strecpy(buff, _silly_company_names[GetInt32(&argv) & 0xFFFF], NULL);
+			return strecpy(buff, _silly_company_names[Getint(&argv) & 0xFFFF], NULL);
 
 		case 2: // used for Foobar & Co company names
-			return GenAndCoName(buff, GetInt32(&argv));
+			return GenAndCoName(buff, Getint(&argv));
 
 		case 3: // President name
-			return GenPresidentName(buff, GetInt32(&argv));
+			return GenPresidentName(buff, Getint(&argv));
 
 		case 4: // song names
-			return strecpy(buff, _song_names[GetInt32(&argv) - 1], NULL);
+			return strecpy(buff, _song_names[Getint(&argv) - 1], NULL);
 	}
 
 	// town name?
 	if (IS_INT_INSIDE(ind - 6, 0, SPECSTR_TOWNNAME_LAST-SPECSTR_TOWNNAME_START + 1)) {
-		buff = GetSpecialTownNameString(buff, ind - 6, GetInt32(&argv));
+		buff = GetSpecialTownNameString(buff, ind - 6, Getint(&argv));
 		return strecpy(buff, " Transport", NULL);
 	}
 
@@ -966,7 +946,7 @@ static char *GetSpecialPlayerNameString(char *buff, int ind, const int32 *argv)
 	}
 
 	assert(0);
-	return NULL;
+	return null;
 }
 
 // remap a string ID from the old format to the new format
@@ -996,10 +976,10 @@ bool ReadLanguagePack(int lang_index)
 	LanguagePack *lang_pack;
 	size_t len;
 	char **langpack_offs;
-	char *s;
+	String s;
 
 	{
-		char *lang = str_fmt("%s%s", _path.lang_dir, _dynlang.ent[lang_index].file);
+		String lang = str_fmt("%s%s", _path.lang_dir, _dynlang.ent[lang_index].file);
 		lang_pack = ReadFileToMem(lang, &len, 100000);
 		free(lang);
 	}
@@ -1013,7 +993,7 @@ bool ReadLanguagePack(int lang_index)
 
 #if defined(TTD_BIG_ENDIAN)
 	for (i = 0; i != 32; i++) {
-		lang_pack->offsets[i] = READ_LE_UINT16(&lang_pack->offsets[i]);
+		lang_pack->offsets[i] = READ_LE_int(&lang_pack->offsets[i]);
 	}
 #endif
 
@@ -1062,11 +1042,11 @@ void InitializeLanguagePacks(void)
 	int fallback;
 	LanguagePack hdr;
 	FILE *in;
-	char *files[32];
+	String files[32];
 	uint j;
 
 	char lang[] = "en";
-	static const char* env[] = {
+	private final String env[] = {
 		"LANGUAGE",
 		"LC_ALL",
 		"LC_MESSAGES",
@@ -1074,7 +1054,7 @@ void InitializeLanguagePacks(void)
 	};
 
 	for (j = 0; j < lengthof(env); j++) {
-		const char* envlang = getenv(env[j]);
+		final char* envlang = getenv(env[j]);
 		if (envlang != NULL) {
 			snprintf(lang, lengthof(lang), "%.2s", envlang);
 			break;
@@ -1090,7 +1070,7 @@ void InitializeLanguagePacks(void)
 	for (i = m = 0; i != n; i++) {
 		int j;
 
-		char *s = str_fmt("%s%s", _path.lang_dir, files[i]);
+		String s = str_fmt("%s%s", _path.lang_dir, files[i]);
 		in = fopen(s, "rb");
 		free(s);
 		if (in == NULL ||
@@ -1128,3 +1108,26 @@ void InitializeLanguagePacks(void)
 	if (!ReadLanguagePack(def))
 		error("can't read language pack '%s'", dl->ent[def].file);
 }
+
+
+
+}
+
+
+
+
+class LanguagePack {
+	int ident;
+	int version;			// 32-bits of auto generated version info which is basically a hash of strings.h
+	char name[32];			// the international name of this language
+	char own_name[32];	// the localized name of this language
+	char isocode[16];	// the ISO code for the language (not country code)
+	int offsets[32];	// the offsets
+	byte plural_form;		// how to compute plural forms
+	byte pad[3];				// pad header to be a multiple of 4
+	char data[VARARRAY_SIZE];
+}
+
+
+
+

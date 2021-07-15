@@ -4,7 +4,7 @@
 #define WAYPOINT_H
 
 #include "pool.h"
-
+/*
 struct Waypoint {
 	TileIndex xy;      ///< Tile of waypoint
 	uint16 index;      ///< Index of waypoint
@@ -22,7 +22,7 @@ struct Waypoint {
 
 	byte deleted;      ///< Delete counter. If greater than 0 then it is decremented until it reaches 0; the waypoint is then is deleted.
 };
-
+* /
 enum {
 	RAIL_TYPE_WAYPOINT = 0xC4,
 	RAIL_WAYPOINT_TRACK_MASK = 1,
@@ -32,7 +32,7 @@ extern MemoryPool _waypoint_pool;
 
 /**
  * Get the pointer to the waypoint with index 'index'
- */
+ * /
 static inline Waypoint *GetWaypoint(uint index)
 {
 	return (Waypoint*)GetItemFromPool(&_waypoint_pool, index);
@@ -40,7 +40,7 @@ static inline Waypoint *GetWaypoint(uint index)
 
 /**
  * Get the current size of the WaypointPool
- */
+ * /
 static inline uint16 GetWaypointPoolSize(void)
 {
 	return _waypoint_pool.total_items;
@@ -63,7 +63,7 @@ static inline bool IsRailWaypoint(TileIndex tile)
  * Fetch a waypoint by tile
  * @param tile Tile of waypoint
  * @return Waypoint
- */
+ * /
 static inline Waypoint *GetWaypointByTile(TileIndex tile)
 {
 	assert(IsTileType(tile, MP_RAILWAY) && IsRailWaypoint(tile));
@@ -78,5 +78,5 @@ void UpdateWaypointSign(Waypoint *cp);
 void FixOldWaypoints(void);
 void UpdateAllWaypointSigns(void);
 void UpdateAllWaypointCustomGraphics(void);
-
+*/
 #endif /* WAYPOINT_H */

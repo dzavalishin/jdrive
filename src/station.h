@@ -9,7 +9,7 @@
 #include "tile.h"
 #include "vehicle.h"
 #include "station_newgrf.h"
-
+/*
 typedef struct GoodsEntry {
 	uint16 waiting_acceptance;
 	byte days_since_pickup;
@@ -20,7 +20,7 @@ typedef struct GoodsEntry {
 	byte last_age;
 	int32 feeder_profit;
 } GoodsEntry;
-
+*/
 typedef enum RoadStopType {
 	RS_BUS,
 	RS_TRUCK
@@ -47,6 +47,7 @@ typedef struct RoadStop {
 	struct RoadStop *prev;
 } RoadStop;
 
+/*
 struct Station {
 	TileIndex xy;
 	RoadStop *bus_stops;
@@ -84,7 +85,7 @@ struct Station {
 	VehicleID last_vehicle;
 	GoodsEntry goods[NUM_CARGO];
 
-	/* Stuff that is no longer used, but needed for conversion */
+	// Stuff that is no longer used, but needed for conversion 
 	TileIndex bus_tile_obsolete;
 	TileIndex lorry_tile_obsolete;
 
@@ -92,6 +93,7 @@ struct Station {
 	byte bus_stop_status_obsolete;
 	byte blocked_months_obsolete;
 };
+*/
 
 enum {
 	FACIL_TRAIN = 1,

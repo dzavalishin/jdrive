@@ -1,5 +1,5 @@
 /* $Id: signs.h 3337 2005-12-24 20:51:21Z tron $ */
-
+#if 0
 #ifndef SIGNS_H
 #define SIGNS_H
 
@@ -61,3 +61,4 @@ void PlaceProc_Sign(TileIndex tile);
 void ShowRenameSignWindow(const SignStruct *ss);
 
 #endif /* SIGNS_H */
+#endif
