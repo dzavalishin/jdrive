@@ -206,6 +206,7 @@ void DrawOverlappedWindow(Window *w, int left, int top, int right, int bottom)
 	}
 }
 
+/*
 void CallWindowEventNP(Window *w, int event)
 {
 	WindowEvent e;
@@ -214,12 +215,13 @@ void CallWindowEventNP(Window *w, int event)
 	w->wndproc(w, &e);
 }
 
+
 void SetWindowDirty(const Window* w)
 {
 	if (w == NULL) return;
 	SetDirtyBlocks(w->left, w->top, w->left + w->width, w->top + w->height);
 }
-
+*/
 void DeleteWindow(Window *w)
 {
 	WindowClass wc;

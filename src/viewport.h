@@ -2,7 +2,7 @@
 
 #ifndef VIEWPORT_H
 #define VIEWPORT_H
-
+/*
 struct ViewPort {
 	int left,top;												// screen coordinates for the viewport
 	int width, height;									// screen width/height for the viewport
@@ -12,7 +12,7 @@ struct ViewPort {
 
 	byte zoom;
 };
-
+*/
 void SetSelectionRed(bool);
 
 /* viewport.c */

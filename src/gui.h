@@ -3,6 +3,8 @@
 #ifndef GUI_H
 #define GUI_H
 
+#if 0
+
 #include "station.h"
 #include "window.h"
 
@@ -151,5 +153,5 @@ void InitializeGUI(void);
 
 /* m_airport.c */
 void MA_AskAddAirport(void);
-
+#endif
 #endif /* GUI_H */

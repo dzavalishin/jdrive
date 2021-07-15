@@ -5,7 +5,7 @@
 
 typedef union WindowEvent WindowEvent;
 
-typedef void WindowProc(Window *w, WindowEvent *e);
+//typedef void WindowProc(Window *w, WindowEvent *e);
 
 /* How the resize system works:
     First, you need to add a WWT_RESIZEBOX to the widgets, and you need
@@ -49,7 +49,7 @@ enum {
 	RESIZE_LRTB   = RESIZE_LEFT  | RESIZE_RIGHT  | RESIZE_TOP | RESIZE_BOTTOM,
 	RESIZE_RTB    = RESIZE_RIGHT | RESIZE_TOP    | RESIZE_BOTTOM,
 };
-
+/*
 typedef struct Widget {
 	byte type;
 	byte resize_flag;
@@ -58,7 +58,7 @@ typedef struct Widget {
 	uint16 unkA;
 	StringID tooltips;
 } Widget;
-
+*/
 enum FrameFlags {
 	FR_TRANSPARENT  = 0x01,  ///< Makes the background transparent if set
 	FR_NOBORDER     = 0x08,  ///< Hide border (draws just a solid box)
@@ -201,7 +201,7 @@ enum WindowKeyCodes {
 
 	// backquote is the key left of "1"
 	// we only store this key here, no matter what character is really mapped to it
-	// on a particular keyboard. (US keyboard: ` and ~ ; German keyboard: ^ and °)
+	// on a particular keyboard. (US keyboard: ` and ~ ; German keyboard: ^ and ï¿½)
 	WKC_BACKQUOTE = 45,
 	WKC_PAUSE     = 46,
 
@@ -259,16 +259,16 @@ typedef struct querystr_d {
 //  instead of a hardcoded number.
 // if any struct becomes bigger the querystr_d, it should be replaced.
 #define WINDOW_CUSTOM_SIZE sizeof(querystr_d)
-
+/*
 typedef struct Scrollbar {
 	uint16 count, cap, pos;
 } Scrollbar;
-
+/*
 typedef struct ResizeInfo {
-	uint width; /* Minimum width and height */
+	uint width; /* Minimum width and height * /
 	uint height;
 
-	uint step_width; /* In how big steps the width and height go */
+	uint step_width; /* In how big steps the width and height go * 
 	uint step_height;
 } ResizeInfo;
 
@@ -277,7 +277,7 @@ typedef struct WindowMessage {
 		int wparam;
 		int lparam;
 } WindowMessage;
-
+/*
 struct Window {
 	uint16 flags4;
 	WindowClass window_class;
@@ -301,7 +301,7 @@ struct Window {
 	WindowMessage message;
 	byte custom[WINDOW_CUSTOM_SIZE];
 };
-
+*/
 typedef struct {
 	byte item_count; /* follow_vehicle */
 	byte sel_index;		/* scrollpos_x */

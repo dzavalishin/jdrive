@@ -22,6 +22,8 @@ public class Global {
 
 	public static final boolean AYSTAR_DEBUG = true;
 
+	static public Hal hal = new JavaHal();
+
 	static int _map_log_x;
 	static int _map_size_x;
 	static int _map_size_y;
