@@ -57,9 +57,9 @@ static inline int64 BIGMULS(int32 a, int32 b) {
 #define IS_INSIDE_1D(x, base, size) ( (uint)((x) - (base)) < ((uint)(size)) )
 
 
-#define HASBIT(x,y)    ((x) &   (1 << (y)))
-#define SETBIT(x,y)    ((x) |=  (1 << (y)))
-#define CLRBIT(x,y)    ((x) &= ~(1 << (y)))
+//#define HASBIT(x,y)    ((x) &   (1 << (y)))
+//#define SETBIT(x,y)    ((x) |=  (1 << (y)))
+//#define CLRBIT(x,y)    ((x) &= ~(1 << (y)))
 #define TOGGLEBIT(x,y) ((x) ^=  (1 << (y)))
 
 // checking more bits. Maybe unneccessary, but easy to use

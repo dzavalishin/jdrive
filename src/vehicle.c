@@ -26,7 +26,7 @@
 #include "train.h"
 
 #define INVALID_COORD (-0x8000)
-#define GEN_HASH(x,y) (((x & 0x1F80)>>7) + ((y & 0xFC0)))
+//#define GEN_HASH(x,y) (((x & 0x1F80)>>7) + ((y & 0xFC0)))
 
 /*
  *	These command macros are used to call vehicle type specific commands with non type specific commands
@@ -81,6 +81,7 @@ static void VehiclePoolNewBlock(uint start_item)
 /* Initialize the vehicle-pool */
 MemoryPool _vehicle_pool = { "Vehicle", VEHICLES_POOL_MAX_BLOCKS, VEHICLES_POOL_BLOCK_SIZE_BITS, sizeof(Vehicle), &VehiclePoolNewBlock, 0, 0, NULL };
 
+/*
 void VehicleServiceInDepot(Vehicle *v)
 {
 	if (GetTileOwner(v->tile) == OWNER_TOWN) 
@@ -89,7 +90,7 @@ void VehicleServiceInDepot(Vehicle *v)
 	v->date_of_last_service = _date;
 	v->breakdowns_since_last_service = 0;
 	v->reliability = GetEngine(v->engine_type)->reliability;
-}
+}*/
 
 bool VehicleNeedsService(const Vehicle *v)
 {
@@ -198,6 +199,7 @@ Vehicle *FindVehicleBetween(TileIndex from, TileIndex to, byte z)
 	return NULL;
 }
 
+/*
 void VehiclePositionChanged(Vehicle *v)
 {
 	int img = v->cur_image;
@@ -214,6 +216,7 @@ void VehiclePositionChanged(Vehicle *v)
 	v->right_coord = pt.x + spr->width + 2;
 	v->bottom_coord = pt.y + spr->height + 2;
 }
+*/
 
 // Called after load to update coordinates
 void AfterLoadVehicles(void)
@@ -362,7 +365,7 @@ bool AllocateVehicles(Vehicle **vl, int num)
 }
 
 
-static VehicleID _vehicle_position_hash[0x1000];
+//static VehicleID _vehicle_position_hash[0x1000];
 
 void *VehicleFromPos(TileIndex tile, void *data, VehicleFromPosProc *proc)
 {
@@ -404,7 +407,7 @@ void *VehicleFromPos(TileIndex tile, void *data, VehicleFromPosProc *proc)
 }
 
 
-
+/*
 void UpdateVehiclePosHash(Vehicle *v, int x, int y)
 {
 	VehicleID *old_hash, *new_hash;
@@ -417,7 +420,7 @@ void UpdateVehiclePosHash(Vehicle *v, int x, int y)
 
 	if (old_hash == new_hash) return;
 
-	/* remove from hash table? */
+	/* remove from hash table? * /
 	if (old_hash != NULL) {
 		Vehicle *last = NULL;
 		VehicleID idx = *old_hash;
@@ -434,13 +437,13 @@ void UpdateVehiclePosHash(Vehicle *v, int x, int y)
 		}
 	}
 
-	/* insert into hash table? */
+	/* insert into hash table? * /
 	if (new_hash != NULL) {
 		v->next_hash = *new_hash;
 		*new_hash = v->index;
 	}
 }
-
+*/
 void InitializeVehicles(void)
 {
 	int i;
@@ -502,7 +505,7 @@ Vehicle *GetPrevVehicleInChain(const Vehicle *v)
 /** Finds the first vehicle in a chain.
  * This function reads out the v->first cache. Should the cache be dirty,
  * it determines the first vehicle in a chain, and updates the cache.
- */
+ * /
 Vehicle *GetFirstVehicleInChain(const Vehicle *v)
 {
 	Vehicle* u;
@@ -520,22 +523,23 @@ Vehicle *GetFirstVehicleInChain(const Vehicle *v)
 	* first engine and set the pointers correctly. Also the first pointer
 	* is not saved in a savegame, so this has to be fixed up after loading */
 
-	/* Find the 'locomotive' or the first wagon in a chain */
+	/* Find the 'locomotive' or the first wagon in a chain * /
 	while ((u = GetPrevVehicleInChain_bruteforce(v)) != NULL) v = u;
 
-	/* Set the first pointer of all vehicles in that chain to the first wagon */
+	/* Set the first pointer of all vehicles in that chain to the first wagon * /
 	if (IsFrontEngine(v))
 		for (u = (Vehicle *)v; u != NULL; u = u->next) u->first = (Vehicle *)v;
 
 	return (Vehicle*)v;
 }
-
+/*
 uint CountVehiclesInChain(const Vehicle* v)
 {
 	uint count = 0;
 	do count++; while ((v = v->next) != NULL);
 	return count;
 }
+
 
 void DeleteVehicle(Vehicle *v)
 {
@@ -555,6 +559,7 @@ void DeleteVehicle(Vehicle *v)
 		v = u;
 	} while (v != NULL && has_artic_part);
 }
+* /
 
 void DeleteVehicleChain(Vehicle *v)
 {
@@ -564,7 +569,7 @@ void DeleteVehicleChain(Vehicle *v)
 		DeleteVehicle(u);
 	} while (v != NULL);
 }
-
+*/
 
 void Aircraft_Tick(Vehicle *v);
 void RoadVeh_Tick(Vehicle *v);

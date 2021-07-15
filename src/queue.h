@@ -246,7 +246,7 @@ typedef bool VQueue_InitProc(VehicleQueue* q);
  * WARNING: Do NOT directly manipulate data inside this queue!
  * Queue is *very* sensitive and will toss assertions if it detects
  * improper values!
- */
+ * /
 typedef struct VQueueItem VQueueItem;
 struct VQueueItem
 {
@@ -258,7 +258,7 @@ struct VQueueItem
 
 	// Queue item belongs to (so we can have reverse lookups)
 	VehicleQueue *queue;
-};
+};*/
 
 //typedef struct VehicleQueue VehicleQueue;
 

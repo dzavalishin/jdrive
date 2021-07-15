@@ -7,7 +7,7 @@
 #ifndef VARDEF
 #define VARDEF extern
 #endif
-
+/*
 typedef struct Rect {
 	int left,top,right,bottom;
 } Rect;
@@ -20,6 +20,7 @@ typedef struct Pair {
 	int a;
 	int b;
 } Pair;
+*/
 
 /**
  * Is used as a general sortable struct (using qsort and friends). Is used for
@@ -273,12 +274,13 @@ typedef struct TileDesc {
 	uint16 build_date;
 	uint32 dparam[2];
 } TileDesc;
-
+/*
 typedef struct {
 	int32 left;
 	int32 top;
 	byte width_1, width_2;
 } ViewportSign;
+*/
 
 typedef int32 CommandProc(int x, int y, uint32 flags, uint32 p1, uint32 p2);
 

@@ -152,7 +152,7 @@ public abstract class AyStar
 		new_node.g = g;
 		new_node.path.parent = parent;
 		new_node.path.node = new AyStarNode( node );
-		OpenListHash.Hash_Set(node->tile, node->direction, new_node);
+		OpenListHash.Hash_Set(node.tile, node.direction, new_node);
 
 		// Add it to the queue
 		OpenListQueue.push(new_node, f);

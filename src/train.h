@@ -11,7 +11,7 @@
  * enum to handle train subtypes
  * Do not access it directly unless you have to. Use the access functions below
  * This is an enum to tell what bit to access as it is a bitmask
- */
+ * /
 
 typedef enum TrainSubtypes {
 	Train_Front             = 0, // Leading engine of a train
@@ -26,7 +26,7 @@ typedef enum TrainSubtypes {
 /** Check if a vehicle is front engine
  * @param v vehicle to check
  * @return Returns true if vehicle is a front engine
- */
+ * /
 static inline bool IsFrontEngine(const Vehicle *v)
 {
 	return HASBIT(v->subtype, Train_Front);
@@ -34,7 +34,7 @@ static inline bool IsFrontEngine(const Vehicle *v)
 
 /** Set front engine state
  * @param v vehicle to change
- */
+ * /
 static inline void SetFrontEngine(Vehicle *v)
 {
 	SETBIT(v->subtype, Train_Front);
@@ -42,7 +42,7 @@ static inline void SetFrontEngine(Vehicle *v)
 
 /** Remove the front engine state
  * @param v vehicle to change
- */
+ * /
 static inline void ClearFrontEngine(Vehicle *v)
 {
 	CLRBIT(v->subtype, Train_Front);
@@ -51,7 +51,7 @@ static inline void ClearFrontEngine(Vehicle *v)
 /** Check if a vehicle is an articulated part of an engine
  * @param v vehicle to check
  * @return Returns true if vehicle is an articulated part
- */
+ * /
 static inline bool IsArticulatedPart(const Vehicle *v)
 {
 	return HASBIT(v->subtype, Train_Articulated_Part);
@@ -59,7 +59,7 @@ static inline bool IsArticulatedPart(const Vehicle *v)
 
 /** Set a vehicle to be an articulated part
  * @param v vehicle to change
- */
+ * /
 static inline void SetArticulatedPart(Vehicle *v)
 {
 	SETBIT(v->subtype, Train_Articulated_Part);
@@ -67,7 +67,7 @@ static inline void SetArticulatedPart(Vehicle *v)
 
 /** Clear a vehicle from being an articulated part
  * @param v vehicle to change
- */
+ * /
 static inline void ClearArticulatedPart(Vehicle *v)
 {
 	CLRBIT(v->subtype, Train_Articulated_Part);
@@ -76,7 +76,7 @@ static inline void ClearArticulatedPart(Vehicle *v)
 /** Check if a vehicle is a wagon
  * @param v vehicle to check
  * @return Returns true if vehicle is a wagon
- */
+ * /
 static inline bool IsTrainWagon(const Vehicle *v)
 {
 	return HASBIT(v->subtype, Train_Wagon);
@@ -84,7 +84,7 @@ static inline bool IsTrainWagon(const Vehicle *v)
 
 /** Set a vehicle to be a wagon
  * @param v vehicle to change
- */
+ * /
 static inline void SetTrainWagon(Vehicle *v)
 {
 	SETBIT(v->subtype, Train_Wagon);
@@ -92,7 +92,7 @@ static inline void SetTrainWagon(Vehicle *v)
 
 /** Clear wagon property
  * @param v vehicle to change
- */
+ * /
 static inline void ClearTrainWagon(Vehicle *v)
 {
 	CLRBIT(v->subtype, Train_Wagon);
@@ -101,7 +101,7 @@ static inline void ClearTrainWagon(Vehicle *v)
 /** Check if a vehicle is an engine (can be first in a train)
  * @param v vehicle to check
  * @return Returns true if vehicle is an engine
- */
+ * /
 static inline bool IsTrainEngine(const Vehicle *v)
 {
 	return HASBIT(v->subtype, Train_Engine);
@@ -109,7 +109,7 @@ static inline bool IsTrainEngine(const Vehicle *v)
 
 /** Set engine status
  * @param v vehicle to change
- */
+ * /
 static inline void SetTrainEngine(Vehicle *v)
 {
 	SETBIT(v->subtype, Train_Engine);
@@ -117,7 +117,7 @@ static inline void SetTrainEngine(Vehicle *v)
 
 /** Clear engine status
  * @param v vehicle to change
- */
+ * /
 static inline void ClearTrainEngine(Vehicle *v)
 {
 	CLRBIT(v->subtype, Train_Engine);
@@ -126,7 +126,7 @@ static inline void ClearTrainEngine(Vehicle *v)
 /** Check if a vehicle is a free wagon (got no engine in front of it)
  * @param v vehicle to check
  * @return Returns true if vehicle is a free wagon
- */
+ * /
 static inline bool IsFreeWagon(const Vehicle *v)
 {
 	return HASBIT(v->subtype, Train_Free_Wagon);
@@ -134,7 +134,7 @@ static inline bool IsFreeWagon(const Vehicle *v)
 
 /** Set if a vehicle is a free wagon
  * @param v vehicle to change
- */
+ * /
 static inline void SetFreeWagon(Vehicle *v)
 {
 	SETBIT(v->subtype, Train_Free_Wagon);
@@ -142,7 +142,7 @@ static inline void SetFreeWagon(Vehicle *v)
 
 /** Clear a vehicle from being a free wagon
  * @param v vehicle to change
- */
+ * /
 static inline void ClearFreeWagon(Vehicle *v)
 {
 	CLRBIT(v->subtype, Train_Free_Wagon);
@@ -151,7 +151,7 @@ static inline void ClearFreeWagon(Vehicle *v)
 /** Check if a vehicle is a multiheaded engine
  * @param v vehicle to check
  * @return Returns true if vehicle is a multiheaded engine
- */
+ * /
 static inline bool IsMultiheaded(const Vehicle *v)
 {
 	return HASBIT(v->subtype, Train_Multiheaded);
@@ -159,7 +159,7 @@ static inline bool IsMultiheaded(const Vehicle *v)
 
 /** Set if a vehicle is a multiheaded engine
  * @param v vehicle to change
- */
+ * /
 static inline void SetMultiheaded(Vehicle *v)
 {
 	SETBIT(v->subtype, Train_Multiheaded);
@@ -167,16 +167,19 @@ static inline void SetMultiheaded(Vehicle *v)
 
 /** Clear multiheaded engine property
  * @param v vehicle to change
- */
+ * /
 static inline void ClearMultiheaded(Vehicle *v)
 {
 	CLRBIT(v->subtype, Train_Multiheaded);
 }
 
+----------
+*/
+
 /** Get the next real (non-articulated part) vehicle in the consist.
  * @param v Vehicle.
  * @return Next vehicle in the consist.
- */
+ * /
 static inline Vehicle *GetNextVehicle(const Vehicle *v)
 {
 	Vehicle *u = v->next;
@@ -184,12 +187,12 @@ static inline Vehicle *GetNextVehicle(const Vehicle *v)
 		u = u->next;
 	}
 	return u;
-}
+} */
 
 /** Check if an engine has an articulated part.
  * @param v Vehicle.
  * @return True if the engine has an articulated part.
- */
+ * /
 static inline bool EngineHasArticPart(const Vehicle *v)
 {
 	return (v->next != NULL && IsArticulatedPart(v->next));
@@ -198,7 +201,7 @@ static inline bool EngineHasArticPart(const Vehicle *v)
 /** Get the last part of a multi-part engine.
  * @param v Vehicle.
  * @return Last part of the engine.
- */
+ * /
 static inline Vehicle *GetLastEnginePart(Vehicle *v)
 {
 	while (EngineHasArticPart(v)) v = v->next;

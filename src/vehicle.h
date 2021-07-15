@@ -42,6 +42,7 @@ typedef enum EffectVehicle {
 	EV_BUBBLE          = 9
 } EffectVehicle;
 
+/*
 typedef struct VehicleRail {
 	uint16 last_speed;		// NOSAVE: only used in UI
 	uint16 crash_anim_pos;
@@ -62,7 +63,7 @@ typedef struct VehicleRail {
 	 * bit 4 - 5 = type of effect. (0 = default for engine class, 1 = steam, 2 = diesel, 3 = electric)
 	 * bit     6 = disable visual effect.
 	 * bit     7 = disable powered wagons.
-	 */
+	 * /
 	byte cached_vis_effect;
 
 	// NOSAVE: for wagon override - id of the first engine in train
@@ -84,12 +85,13 @@ typedef struct VehicleRail {
 	  * first byte holds the length of the shortest station. Updated each time order 0 is reached
 	  * last byte is the shortest station reached this round though the orders. It can be invalidated by
 	  *   skip station and alike by setting it to 0. That way we will ensure that a complete loop is used to find the shortest station
-	  */
+	  * /
 	byte shortest_platform[2];
 
 	// Link between the two ends of a multiheaded engine
 	Vehicle *other_multiheaded_part;
 } VehicleRail;
+* /
 
 enum {
 	VRF_REVERSING = 0,
@@ -101,6 +103,7 @@ enum {
 	// used to store if a wagon is powered or not
 	VRF_POWEREDWAGON = 3,
 };
+* /
 
 typedef struct VehicleAir {
 	uint16 crashed_counter;
@@ -139,7 +142,7 @@ typedef struct VehicleShip {
 	byte state;
 } VehicleShip;
 
-
+/*
 struct Vehicle {
 	byte type;	// type, ie roadven,train,ship,aircraft,special
 	byte subtype;     // subtype (Filled with values from EffectVehicles or TrainSubTypes)
@@ -198,7 +201,7 @@ struct Vehicle {
 	byte day_counter; // increased by one for each day
 	byte tick_counter;// increased by one for each tick
 
-	/* Begin Order-stuff */
+	/* Begin Order-stuff * /
 	Order current_order;     //! The current order (+ status, like: loading)
 	OrderID cur_order_index; //! The index to the current order
 
@@ -207,7 +210,7 @@ struct Vehicle {
 
 	Vehicle *next_shared;    //! If not NULL, this points to the next vehicle that shared the order
 	Vehicle *prev_shared;    //! If not NULL, this points to the prev vehicle that shared the order
-	/* End Order-stuff */
+	/* End Order-stuff * /
 
 	// Boundaries for the current position in the world and a next hash link.
 	// NOSAVE: All of those can be updated with VehiclePositionChanged()
@@ -250,11 +253,11 @@ struct Vehicle {
 		VehicleShip ship;
 	} u;
 };
-
+*/
 #define is_custom_sprite(x) (x >= 0xFD)
 #define IS_CUSTOM_FIRSTHEAD_SPRITE(x) (x == 0xFD)
 #define IS_CUSTOM_SECONDHEAD_SPRITE(x) (x == 0xFE)
-
+/*
 typedef void VehicleTickProc(Vehicle *v);
 typedef void *VehicleFromPosProc(Vehicle *v, void *data);
 
@@ -272,6 +275,8 @@ Vehicle *GetFirstVehicleInChain(const Vehicle *v);
 uint CountVehiclesInChain(const Vehicle* v);
 void DeleteVehicle(Vehicle *v);
 void DeleteVehicleChain(Vehicle *v);
+*/
+
 void *VehicleFromPos(TileIndex tile, void *data, VehicleFromPosProc *proc);
 void CallVehicleTicks(void);
 Vehicle *FindVehicleOnTileZ(TileIndex tile, byte z);
@@ -446,7 +451,7 @@ VARDEF VehicleID _new_vehicle_id;
 VARDEF uint16 _aircraft_refit_capacity;
 VARDEF byte _cmd_build_rail_veh_score;
 
-#define INVALID_VEHICLE 0xFFFF
+//#define INVALID_VEHICLE 0xFFFF
 #define INVALID_ENGINE 0xFFFF
 
 /* A lot of code calls for the invalidation of the status bar, which is widget 5.

@@ -213,6 +213,7 @@ void DeleteCustomEngineNames(void);
 
 bool IsEngineBuildable(uint engine, byte type);
 
+/*
 enum {
 	NUM_NORMAL_RAIL_ENGINES = 54,
 	NUM_MONORAIL_ENGINES = 30,
@@ -226,6 +227,7 @@ enum {
 	SHIP_ENGINES_INDEX = NUM_TRAIN_ENGINES + NUM_ROAD_ENGINES,
 	ROAD_ENGINES_INDEX = NUM_TRAIN_ENGINES,
 };
+*/
 VARDEF Engine _engines[TOTAL_NUM_ENGINES];
 #define FOR_ALL_ENGINES(e) for (e = _engines; e != endof(_engines); e++)
 

@@ -4,10 +4,10 @@
 #define INDUSTRY_H
 
 #include "pool.h"
-
+/*
 struct Industry {
 	TileIndex xy;
-	byte width; /* swapped order of w/h with town */
+	byte width; /* swapped order of w/h with town * /
 	byte height;
 	const Town* town;
 	byte produced_cargo[2];
@@ -30,6 +30,7 @@ struct Industry {
 
 	uint16 index;
 };
+*/
 
 extern MemoryPool _industry_pool;
 

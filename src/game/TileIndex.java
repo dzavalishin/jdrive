@@ -3,7 +3,7 @@ package game;
 public class TileIndex {
 	private int tile;
 	
-	/** static inline TileIndex TileXY(uint x, uint y)
+	/** static  TileIndex TileXY(int x, int y)
 	 * 
 	 * @param x
 	 * @param y
@@ -11,6 +11,8 @@ public class TileIndex {
 	public TileIndex(int x, int y)
 	{
 		tile = (y * Global.MapSizeX()) + x;
+		assert( tile > 0 );
+		// TODO assert < max
 	}
 
 	@Override
@@ -40,6 +42,50 @@ public class TileIndex {
 	}
 	
 	
+	int GetTileSlope(IntContainer h)
+	{
+		int a;
+		int b;
+		int c;
+		int d;
+		int min;
+		int r;
+
+		assert(tile < Global.MapSize());
+
+		if (TileX() == Global.MapMaxX() || TileY() == Global.MapMaxY()) {
+			if (h != null) h.v = 0;
+			return 0;
+		}
+
+		min = a = TileHeight();
+		b = TileHeight(tile + TileDiffXY(1, 0).diff);
+		if (min >= b) min = b;
+		c = TileHeight(tile + TileDiffXY(0, 1).diff);
+		if (min >= c) min = c;
+		d = TileHeight(tile + TileDiffXY(1, 1).diff);
+		if (min >= d) min = d;
+
+		r = 0;
+		if ((a -= min) != 0) r += (--a << 4) + 8;
+		if ((c -= min) != 0) r += (--c << 4) + 4;
+		if ((d -= min) != 0) r += (--d << 4) + 2;
+		if ((b -= min) != 0) r += (--b << 4) + 1;
+
+		if (h != null)
+			h.v = min * 8;
+
+		return r;
+	}
+
+	int GetTileZ()
+	{
+		IntContainer h = new IntContainer();
+		GetTileSlope(h);
+		return h.v;
+	}
+
+	
 	/* Approximation of the length of a straight track, relative to a diagonal
 	 * track (ie the size of a tile side). #defined instead of const so it can
 	 * stay integer. (no runtime float operations) Is this needed?
@@ -48,5 +94,104 @@ public class TileIndex {
 	 * This value should be sqrt(2)/2 ~ 0.7071 */
 	public static int STRAIGHT_TRACK_LENGTH = 7071/10000;
 	
+
+	
+	
+	
+	
+	
+	static TileIndexDiff TileDiffXY(int x, int y)
+	{
+		// Multiplication gives much better optimization on MSVC than shifting.
+		// 0 << shift isn't optimized to 0 properly.
+		// Typically x and y are constants, and then this doesn't result
+		// in any actual multiplication in the assembly code..
+		return new TileIndexDiff((y * Global.MapSizeX()) + x);
+	}
+	
+	
+	
+	static TileIndex TileVirtXY(int x, int y)
+	{
+		return new TileIndex((y >> 4 << Global.MapLogX()) + (x >> 4));
+	}
+	
+	
+	int TileHeight()
+	{
+		//assert(tile < MapSize());
+		return Global._m[tile].height;
+	}
+
+	static int TileHeight(int index)
+	{
+		assert(index < Global.MapSize());
+		assert(index > 0);
+		return Global._m[index].height;
+	}
+
+	int TilePixelHeight()
+	{
+		return TileHeight() * 8;
+	}
+	
+	static  boolean IsSteepTileh(int tileh)
+	{
+		return 0 != (tileh & 0x10);
+	}
+
+	void SetTileHeight(int height)
+	{
+		//assert(tile < MapSize());
+		assert(height < 16);
+		Global._m[tile].height = height;
+	}
+
+	TileType GetTileType()
+	{
+		//assert(tile < MapSize());
+		return new TileType(Global._m[tile].type);
+	}
+
+	void SetTileType(TileType type)
+	{
+		//assert(tile < MapSize());
+		Global._m[tile].type = type.type;
+	}
+
+	boolean IsTileType(TileType type)
+	{
+		return GetTileType().type == type.type;
+	}
+
+	static  boolean IsTunnelTile(TileIndex tile)
+	{
+		return IsTileType(tile, MP_TUNNELBRIDGE) && GB(_m[tile].m5, 4, 4) == 0;
+	}
+
+	static  Owner GetTileOwner(TileIndex tile)
+	{
+		assert(tile < MapSize());
+		assert(!IsTileType(tile, MP_HOUSE));
+		assert(!IsTileType(tile, MP_VOID));
+		assert(!IsTileType(tile, MP_INDUSTRY));
+
+		return _m[tile].m1;
+	}
+
+	static  void SetTileOwner(TileIndex tile, Owner owner)
+	{
+		assert(tile < MapSize());
+		assert(!IsTileType(tile, MP_HOUSE));
+		assert(!IsTileType(tile, MP_VOID));
+		assert(!IsTileType(tile, MP_INDUSTRY));
+
+		_m[tile].m1 = owner;
+	}
+
+	static  boolean IsTileOwner(TileIndex tile, Owner owner)
+	{
+		return GetTileOwner(tile) == owner;
+	}
 	
 }

@@ -24,6 +24,7 @@ void UpdateTownMaxPass(Town *t);
 
 bool IsValidTile(TileIndex tile);
 
+/*
 static inline Point RemapCoords(int x, int y, uint32 z)
 {
 #if !defined(NEW_ROTATION)
@@ -37,6 +38,7 @@ static inline Point RemapCoords(int x, int y, uint32 z)
 #endif
 	return pt;
 }
+*/
 
 static inline Point RemapCoords2(int x, int y)
 {

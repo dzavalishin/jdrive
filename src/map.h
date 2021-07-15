@@ -17,7 +17,7 @@ extern uint _map_size;
 
 #define TILE_MASK(x) ((x) & _map_tile_mask)
 #define TILE_ASSERT(x) assert(TILE_MASK(x) == (x));
-
+/*
 typedef struct Tile {
 	byte type_height;
 	byte m1;
@@ -27,8 +27,8 @@ typedef struct Tile {
 	byte m5;
 	byte extra;
 } Tile;
-
-extern Tile* _m;
+*/
+//extern Tile* _m;
 
 void AllocateMap(uint size_x, uint size_y);
 
@@ -54,7 +54,7 @@ static inline TileIndex TileXY(uint x, uint y)
 {
 	return (y * MapSizeX()) + x;
 }
-
+/*
 static inline TileIndexDiff TileDiffXY(int x, int y)
 {
 	// Multiplication gives much better optimization on MSVC than shifting.
@@ -62,12 +62,13 @@ static inline TileIndexDiff TileDiffXY(int x, int y)
 	// Typically x and y are constants, and then this doesn't result
 	// in any actual multiplication in the assembly code..
 	return (y * MapSizeX()) + x;
-}
+}* /
 
 static inline TileIndex TileVirtXY(uint x, uint y)
 {
 	return (y >> 4 << MapLogX()) + (x >> 4);
 }
+*/
 
 typedef enum {
 	OWNER_TOWN			= 0xf,	// a town owns the tile

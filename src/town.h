@@ -6,6 +6,7 @@
 #include "pool.h"
 #include "player.h"
 
+/*
 struct Town {
 	TileIndex xy;
 
@@ -75,6 +76,7 @@ struct Town {
 	// NOSAVE: UpdateTownRadius updates this given the house count.
 	uint16 radius[5];
 };
+*/
 
 uint32 GetWorldPopulation(void);
 
@@ -93,6 +95,7 @@ enum {
 	INDUSTRY_REMOVE = 2
 };
 
+/*
 enum {
 	// These refer to the maximums, so Appalling is -1000 to -400
 	// MAXIMUM RATINGS BOUNDARIES
@@ -128,7 +131,7 @@ enum {
 	RATING_BRIBE_MAXIMUM = 800,
 	RATING_BRIBE_DOWN_TO = -50 					// XXX SHOULD BE SOMETHING LOWER?
 };
-
+*/
 bool CheckforTownRating(TileIndex tile, uint32 flags, Town *t, byte type);
 
 VARDEF uint16 *_town_sort;

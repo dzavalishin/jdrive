@@ -3,6 +3,7 @@
 #ifndef SPRITECACHE_H
 #define SPRITECACHE_H
 
+/*
 typedef struct Sprite {
 	byte info;
 	byte height;
@@ -11,7 +12,7 @@ typedef struct Sprite {
 	int16 y_offs;
 	byte data[VARARRAY_SIZE];
 } Sprite;
-
+*/
 const void *GetRawSprite(SpriteID sprite);
 
 static inline const Sprite *GetSprite(SpriteID sprite)

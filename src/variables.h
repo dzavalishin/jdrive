@@ -38,14 +38,14 @@ VARDEF GameOptions _opt_newgame;
 VARDEF GameOptions *_opt_ptr;
 
 // Current date
-VARDEF uint16 _date;
-VARDEF uint16 _date_fract;
+//VARDEF uint16 _date;
+//VARDEF uint16 _date_fract;
 
 // Amount of game ticks
-VARDEF uint16 _tick_counter;
+//VARDEF uint16 _tick_counter;
 
 // This one is not used anymore.
-VARDEF VehicleID _vehicle_id_ctr_day;
+//VARDEF VehicleID _vehicle_id_ctr_day;
 
 // Skip aging of cargo?
 VARDEF byte _age_cargo_skip_counter;

@@ -211,7 +211,7 @@ void UpdatePlayerMoney32(Player *p);
 VARDEF PlayerID _local_player;
 VARDEF PlayerID _current_player;
 
-#define MAX_PLAYERS 8
+//#define MAX_PLAYERS 8
 VARDEF Player _players[MAX_PLAYERS];
 // NOSAVE: can be determined from player structs
 VARDEF byte _player_colors[MAX_PLAYERS];

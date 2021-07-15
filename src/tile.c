@@ -15,7 +15,7 @@ uint GetMapExtraBits(TileIndex tile)
 	return GB(_m[tile].extra, 0, 2);
 }
 
-
+/*
 uint GetTileSlope(TileIndex tile, uint *h)
 {
 	uint a;
@@ -58,3 +58,4 @@ uint GetTileZ(TileIndex tile)
 	GetTileSlope(tile, &h);
 	return h;
 }
+*/

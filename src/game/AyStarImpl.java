@@ -43,7 +43,7 @@ public abstract class AyStarImpl extends AyStar {
 	@Override
 	void addstart(AyStarNode start_node, int g) {
 		if( Global.AYSTAR_DEBUG )
-			Global.printf("[AyStar] Starting A* Algorithm from node (%d, %d, %d)\n", start_node.tile.TileX(), start_node.tile.TileY(), start_node->direction);
+			Global.printf( String.format("[AyStar] Starting A* Algorithm from node (%d, %d, %d)\n", start_node.tile.TileX(), start_node.tile.TileY(), start_node.direction) );
 
 		AyStarMain_OpenList_Add( null, start_node, 0, g);
 
@@ -109,13 +109,13 @@ public abstract class AyStarImpl extends AyStar {
 		int i, r;
 
 		// Get the best node from OpenList
-		OpenListNode current = AyStarMain_OpenList_Pop();
+		OpenListNode current = OpenList_Pop();
 		
 		// If empty, drop an error
 		if (current == null) return AYSTAR_EMPTY_OPENLIST;
 
 		// Check for end node and if found, return that code
-		if (aystar->EndNodeCheck(aystar, current) == AYSTAR_FOUND_END_NODE) {
+		if (EndNodeCheck(current) == AYSTAR_FOUND_END_NODE) {
 			//if (aystar->FoundEndNode != null)
 				FoundEndNode(current);
 			//free(current);
@@ -123,13 +123,13 @@ public abstract class AyStarImpl extends AyStar {
 		}
 
 		// Add the node to the ClosedList
-		AyStarMain_ClosedList_Add(current.path);
+		ClosedList_Add(current.path);
 
 		// Load the neighbours
 		GetNeighbours(current);
 
 		// Go through all neighbours
-		for (i=0;i<aystar->num_neighbours;i++) {
+		for (i=0;i<num_neighbours;i++) {
 			// Check and add them to the OpenList if needed
 			r = checktile(neighbours[i], current);
 		}
@@ -160,7 +160,7 @@ public abstract class AyStarImpl extends AyStar {
 		OpenListNode check;
 
 		// Check the new node against the ClosedList
-		if (AyStarMain_ClosedList_IsInList( current) != null) return AYSTAR_DONE;
+		if(ClosedList_IsInList( current) != null) return AYSTAR_DONE;
 
 		// Calculate the G-value for this node
 		new_g = CalculateG(current, parent);
@@ -171,7 +171,7 @@ public abstract class AyStarImpl extends AyStar {
 		assert(new_g >= 0);
 		// Add the parent g-value to the new g-value
 		new_g += parent.g;
-		if (max_path_cost != 0 && (uint)new_g > max_path_cost) return AYSTAR_DONE;
+		if (max_path_cost != 0 && new_g > max_path_cost) return AYSTAR_DONE;
 
 		// Calculate the h-value
 		new_h = CalculateH(current, parent);
@@ -182,10 +182,10 @@ public abstract class AyStarImpl extends AyStar {
 		new_f = new_g + new_h;
 
 		// Get the pointer to the parent in the ClosedList (the currentone is to a copy of the one in the OpenList)
-		closedlist_parent = AyStarMain_ClosedList_IsInList( parent.path.node);
+		closedlist_parent = ClosedList_IsInList( parent.path.node );
 
 		// Check if this item is already in the OpenList
-		if ((check = AyStarMain_OpenList_IsInList(aystar, current)) != null) {
+		if ((check = OpenList_IsInList(current)) != null) {
 			int i;
 			// Yes, check if this g value is lower..
 			if (new_g > check.g) return AYSTAR_DONE;
@@ -194,13 +194,13 @@ public abstract class AyStarImpl extends AyStar {
 			check.g = new_g;
 			check.path.parent = closedlist_parent;
 			/* Copy user data, will probably have changed */
-			for (i=0;i<lengthof(current->user_data);i++)
-				check.path.node.user_data[i] = current->user_data[i];
+			for( i=0; i < current.user_data.length; i++ )
+				check.path.node.user_data[i] = current.user_data[i];
 			// Readd him in the OpenListQueue
 			OpenListQueue.push(check, new_f);
 		} else {
 			// A new node, add him to the OpenList
-			AyStarMain_OpenList_Add( closedlist_parent, current, new_f, new_g);
+			OpenList_Add( closedlist_parent, current, new_f, new_g);
 		}
 
 		return AYSTAR_DONE;
@@ -228,16 +228,16 @@ public abstract class AyStarImpl extends AyStar {
 	
 	
 	
-	// This looks in the Hash if a node exists in ClosedList
+// This looks in the Hash if a node exists in ClosedList
 //  If so, it returns the PathNode, else NULL
-PathNode AyStarMain_ClosedList_IsInList(AyStarNode node)
+PathNode ClosedList_IsInList(AyStarNode node)
 {
 	return (PathNode)ClosedListHash.Hash_Get( node.tile, node.direction);
 }
 
 // This adds a node to the ClosedList
 //  It makes a copy of the data
-void AyStarMain_ClosedList_Add(PathNode node)
+void ClosedList_Add(PathNode node)
 {
 	// Add a node to the ClosedList
 	PathNode new_node = new PathNode(node);
@@ -247,15 +247,15 @@ void AyStarMain_ClosedList_Add(PathNode node)
 
 // Checks if a node is in the OpenList
 //   If so, it returns the OpenListNode, else NULL
-OpenListNode AyStarMain_OpenList_IsInList(AyStarNode node)
+OpenListNode OpenList_IsInList(AyStarNode node)
 {
-	return (OpenListNode)OpenListHash.Hash_Get( node.tile, node.direction);
+	return (OpenListNode)OpenListHash.Hash_Get( node.tile, node.direction );
 }
 
 // Gets the best node from OpenList
 //  returns the best node, or NULL of none is found
 // Also it deletes the node from the OpenList
-OpenListNode AyStarMain_OpenList_Pop()
+OpenListNode OpenList_Pop()
 {
 	// Return the item the Queue returns.. the best next OpenList item.
 	OpenListNode res = (OpenListNode)OpenListQueue.pop();
@@ -267,13 +267,16 @@ OpenListNode AyStarMain_OpenList_Pop()
 
 // Adds a node to the OpenList
 //  It makes a copy of node, and puts the pointer of parent in the struct
-void AyStarMain_OpenList_Add(PathNode parent, AyStarNode node, int f, int g)
+void OpenList_Add(PathNode parent, AyStarNode node, int f, int g)
 {
 	// Add a new Node to the OpenList
 	OpenListNode new_node = new OpenListNode();
 	new_node.g = g;
 	new_node.path.parent = parent;
-	new_node.path.node = *node;
+	
+	//new_node.path.node = *node; 
+	new_node.path.node = node; // TODO need a copy?
+	
 	OpenListHash.Hash_Set(node.tile, node.direction, new_node);
 
 	// Add it to the queue

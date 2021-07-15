@@ -41,10 +41,11 @@ public class Player
 		//PlayerAI ai;
 		PlayerAiNew ainew;
 
-		int64 yearly_expenses[3][13];
+		//long yearly_expenses[3][13];
+		
 		PlayerEconomyEntry cur_economy;
 		PlayerEconomyEntry old_economy[];
-		EngineID engine_replacement[TOTAL_NUM_ENGINES];
+		EngineID engine_replacement[];
 		boolean engine_renew;
 		boolean renew_keep_length;
 		int engine_renew_months;
@@ -55,5 +56,6 @@ public class Player
 		{
 			share_owners = new PlayerID[4];
 			old_economy = new PlayerEconomyEntry[24];
+			engine_replacement = new EngineID[Global.TOTAL_NUM_ENGINES];
 		}
 }
