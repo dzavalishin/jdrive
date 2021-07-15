@@ -169,29 +169,29 @@ public class TileIndex {
 		return IsTileType(tile, MP_TUNNELBRIDGE) && GB(_m[tile].m5, 4, 4) == 0;
 	}
 
-	static  Owner GetTileOwner(TileIndex tile)
+	Owner GetTileOwner()
 	{
-		assert(tile < MapSize());
+		//assert(tile < MapSize());
 		assert(!IsTileType(tile, MP_HOUSE));
 		assert(!IsTileType(tile, MP_VOID));
 		assert(!IsTileType(tile, MP_INDUSTRY));
 
-		return _m[tile].m1;
+		return new Owner(Global._m[tile].m1);
 	}
 
-	static  void SetTileOwner(TileIndex tile, Owner owner)
+	void SetTileOwner(Owner owner)
 	{
-		assert(tile < MapSize());
+		//assert(tile < MapSize());
 		assert(!IsTileType(tile, MP_HOUSE));
 		assert(!IsTileType(tile, MP_VOID));
 		assert(!IsTileType(tile, MP_INDUSTRY));
 
-		_m[tile].m1 = owner;
+		Global._m[tile].m1 = owner.owner;
 	}
 
-	static  boolean IsTileOwner(TileIndex tile, Owner owner)
+	boolean IsTileOwner(Owner owner)
 	{
-		return GetTileOwner(tile) == owner;
+		return GetTileOwner() == owner;
 	}
 	
 }

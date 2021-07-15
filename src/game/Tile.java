@@ -6,7 +6,7 @@ public class Tile {
 	int type;
 	int height;
 	
-	byte m1;
+	int m1; // owner?
 	int m2;
 	byte m3;
 	byte m4;

@@ -62,7 +62,7 @@ static inline uint TileHeight(TileIndex tile)
 	assert(tile < MapSize());
 	return GB(_m[tile].type_height, 0, 4);
 }*/
-
+/*
 static inline bool IsSteepTileh(uint tileh)
 {
 	return (tileh & 0x10);
@@ -126,5 +126,5 @@ static inline bool IsTileOwner(TileIndex tile, Owner owner)
 {
 	return GetTileOwner(tile) == owner;
 }
-
+*/
 #endif /* TILE_H */
