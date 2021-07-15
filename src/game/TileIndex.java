@@ -2,6 +2,8 @@ package game;
 
 public class TileIndex {
 	private int tile;
+
+	
 	
 	/** static  TileIndex TileXY(int x, int y)
 	 * 
@@ -164,17 +166,22 @@ public class TileIndex {
 		return GetTileType().type == type.type;
 	}
 
-	static  boolean IsTunnelTile(TileIndex tile)
+	boolean IsTileType(TileTypes type)
 	{
-		return IsTileType(tile, MP_TUNNELBRIDGE) && GB(_m[tile].m5, 4, 4) == 0;
+		return GetTileType().type == type.ordinal();
+	}
+	
+	boolean IsTunnelTile()
+	{
+		return IsTileType(TileTypes.MP_TUNNELBRIDGE) && GB(Global._m[tile].m5, 4, 4) == 0;
 	}
 
 	Owner GetTileOwner()
 	{
 		//assert(tile < MapSize());
-		assert(!IsTileType(tile, MP_HOUSE));
-		assert(!IsTileType(tile, MP_VOID));
-		assert(!IsTileType(tile, MP_INDUSTRY));
+		assert(!IsTileType(TileTypes.MP_HOUSE));
+		assert(!IsTileType(TileTypes.MP_VOID));
+		assert(!IsTileType(TileTypes.MP_INDUSTRY));
 
 		return new Owner(Global._m[tile].m1);
 	}
@@ -182,9 +189,9 @@ public class TileIndex {
 	void SetTileOwner(Owner owner)
 	{
 		//assert(tile < MapSize());
-		assert(!IsTileType(tile, MP_HOUSE));
-		assert(!IsTileType(tile, MP_VOID));
-		assert(!IsTileType(tile, MP_INDUSTRY));
+		assert(!IsTileType(TileTypes.MP_HOUSE));
+		assert(!IsTileType(TileTypes.MP_VOID));
+		assert(!IsTileType(TileTypes.MP_INDUSTRY));
 
 		Global._m[tile].m1 = owner.owner;
 	}
@@ -194,4 +201,19 @@ public class TileIndex {
 		return GetTileOwner() == owner;
 	}
 	
+}
+
+
+enum TileTypes {
+	MP_CLEAR,
+	MP_RAILWAY,
+	MP_STREET,
+	MP_HOUSE,
+	MP_TREES,
+	MP_STATION,
+	MP_WATER,
+	MP_VOID, // invisible tiles at the SW and SE border
+	MP_INDUSTRY,
+	MP_TUNNELBRIDGE,
+	MP_UNMOVABLE,
 }
