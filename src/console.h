@@ -1,5 +1,5 @@
 /* $Id: console.h 2701 2005-07-24 14:12:37Z tron $ */
-
+#if 0
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
@@ -163,3 +163,4 @@ void IConsoleVarProcAdd(const char *name, IConsoleCmdProc *proc);
 // ** Supporting functions **//
 bool GetArgumentInteger(uint32 *value, const char *arg);
 #endif /* CONSOLE_H */
+#endif

@@ -34,16 +34,16 @@ typedef enum Directions {
 	INVALID_DIR = 0xFF,
 } Direction;
 
-/* Direction commonly used as the direction of entering and leaving tiles, 4-way */
+/* Direction commonly used as the direction of entering and leaving tiles, 4-way * /
 typedef enum DiagonalDirections {
-	DIAGDIR_NE  = 0,      /* Northeast, upper right on your monitor */
+	DIAGDIR_NE  = 0,      /* Northeast, upper right on your monitor * /
 	DIAGDIR_SE  = 1,
 	DIAGDIR_SW  = 2,
 	DIAGDIR_NW  = 3,
 	DIAGDIR_END,
 	INVALID_DIAGDIR = 0xFF,
 } DiagDirection;
-
+*/
 void SetMapExtraBits(TileIndex tile, byte flags);
 uint GetMapExtraBits(TileIndex tile);
 

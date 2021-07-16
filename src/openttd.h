@@ -93,7 +93,7 @@ enum SwitchModes {
 	SM_LOAD_SCENARIO = 9,
 	SM_START_SCENARIO = 10,
 };
-
+/*
 typedef enum TransportTypes {
 	/* These constants are for now linked to the representation of bridges
 	 * and tunnels, so they can be used by GetTileTrackStatus_TunnelBridge
@@ -101,14 +101,14 @@ typedef enum TransportTypes {
 	 * constants would be used everywhere when accessing tunnels and
 	 * bridges. For now, you should just not change the values for road
 	 * and rail.
-	 */
+	 * /
   TRANSPORT_RAIL = 0,
 	TRANSPORT_ROAD = 1,
 	TRANSPORT_WATER,	// = 2
 	TRANSPORT_END,
 	INVALID_TRANSPORT = 0xff,
 } TransportType;
-
+*/
 /*
 typedef struct TileInfo {
 	uint x;

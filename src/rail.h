@@ -140,10 +140,10 @@ typedef enum SignalStates {
 } SignalState;
 
 /** This struct contains all the info that is needed to draw and construct tracks.
- */
+ * /
 typedef struct RailtypeInfo {
 	/** Struct containing the main sprites. @note not all sprites are listed, but only
-	 *  the ones used directly in the code */
+	 *  the ones used directly in the code * /
 	struct {
 		SpriteID track_y;      ///< single piece of rail in Y direction, with ground
 		SpriteID track_ns;     ///< two pieces of rail in North and South corner (East-West direction)
@@ -159,7 +159,7 @@ typedef struct RailtypeInfo {
 	} base_sprites;
 
 	/** struct containing the sprites for the rail GUI. @note only sprites referred to
-	 * directly in the code are listed */
+	 * directly in the code are listed * /
 	struct {
 		SpriteID build_ns_rail;      ///< button for building single rail in N-S direction
 		SpriteID build_x_rail;       ///< button for building single rail in X direction
@@ -186,10 +186,10 @@ typedef struct RailtypeInfo {
 		StringID toolbar_caption;
 	} strings;
 
-	/** sprite number difference between a piece of track on a snowy ground and the corresponding one on normal ground */
+	/** sprite number difference between a piece of track on a snowy ground and the corresponding one on normal ground * /
 	SpriteID snow_offset;
 
-	/** bitmask to the OTHER railtypes that can be used by an engine of THIS railtype */
+	/** bitmask to the OTHER railtypes that can be used by an engine of THIS railtype * /
 	byte compatible_railtypes;
 
 	/**
@@ -199,17 +199,17 @@ typedef struct RailtypeInfo {
 	 * 2) The position where the railtype is loaded must always be the same, otherwise
 	 *    the offset will fail.<p>
 	 * @note: Something more flexible might be desirable in the future.
-	 */
+	 * /
 	SpriteID total_offset;
 
 	/**
 	  * Bridge offset
-	  */
+	  * /
 	SpriteID bridge_offset;
 } RailtypeInfo;
 
 extern const RailtypeInfo _railtypes[RAILTYPE_END];
-
+*/
 // these are the maximums used for updating signal blocks, and checking if a depot is in a pbs block
 enum {
 	NUM_SSD_ENTRY = 256, // max amount of blocks

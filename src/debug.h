@@ -7,7 +7,7 @@
 	#define DEBUG(name, level)
 #else
 	#define DEBUG(name, level) if (level == 0 || _debug_ ## name ## _level >= level) debug
-
+/*
 	extern int _debug_ai_level;
 	extern int _debug_driver_level;
 	extern int _debug_grf_level;
@@ -20,6 +20,7 @@
 	extern int _debug_pbs_level;
 	extern int _debug_ntp_level;
 	extern int _debug_npf_level;
+*/
 #endif
 
 void CDECL debug(const char *s, ...);

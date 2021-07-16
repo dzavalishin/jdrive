@@ -18,6 +18,18 @@ public class Global {
 	public static final int SHIP_ENGINES_INDEX = NUM_TRAIN_ENGINES + NUM_ROAD_ENGINES;
 	public static final int ROAD_ENGINES_INDEX = NUM_TRAIN_ENGINES;
 
+		/* These constants are for now linked to the representation of bridges
+		 * and tunnels, so they can be used by GetTileTrackStatus_TunnelBridge
+		 * to compare against the map5 array. In an ideal world, these
+		 * constants would be used everywhere when accessing tunnels and
+		 * bridges. For now, you should just not change the values for road
+		 * and rail.
+		 */
+	public static final int TRANSPORT_RAIL = 0;
+	public static final int TRANSPORT_ROAD = 1;
+	public static final int TRANSPORT_WATER  = 2;
+	public static final int TRANSPORT_END = 3;
+	public static final int INVALID_TRANSPORT = 0xff;
 
 
 	public static final boolean AYSTAR_DEBUG = true;
@@ -51,13 +63,49 @@ public class Global {
 	public static int MapSize() { return _map_size; }
 
 
-	public static void printf(String s) {
-		System.out.print(s);		
+	public static void printf(String s, Object ... arg) {
+	 	String buf = String.format(s, arg);
+		System.out.print(buf);		
 	}
-	public static void error(String s) {
-		System.err.print(s);		
+
+	public static void error(String s, Object ... arg) {
+	 	String buf = String.format(s, arg);
+		System.err.print(buf);		
 	}
 
 	public static final StringID  INVALID_STRING_ID = new StringID(0xFFFF);
 
+	
+	//void DEBUG(name, level) if (level == 0 || _debug_ ## name ## _level >= level) debug
+
+	 int _debug_ai_level;
+	 int _debug_driver_level;
+	 int _debug_grf_level;
+	 int _debug_map_level;
+	 int _debug_misc_level;
+	 int _debug_ms_level;
+	 int _debug_net_level;
+	 int _debug_spritecache_level;
+	 int _debug_oldloader_level;
+	 int _debug_pbs_level;
+	 int _debug_ntp_level;
+	 int _debug_npf_level;
+	
+	
+	 
+	 void debug(String s, Object ... arg)
+	 {
+	 	String buf = String.format(s, arg);
+
+	 	error( "dbg: %s\n", buf);
+	 	Console.IConsoleDebug(buf);
+	 }
+	 
+	 
 }
+/*
+class DebugLevel {
+	String name;
+	IntContainer level;
+} */
+

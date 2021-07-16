@@ -17,6 +17,11 @@ public class TileIndex {
 		// TODO assert < max
 	}
 
+	// TODO rename to getTileIndex
+	public int getTile() {
+		return tile;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TileIndex) {

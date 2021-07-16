@@ -1,5 +1,5 @@
 /* $Id: depot.h 3019 2005-10-05 07:20:26Z tron $ */
-
+#if 0
 #ifndef DEPOT_H
 #define DEPOT_H
 
@@ -146,3 +146,4 @@ Depot *AllocateDepot(void);
 void DoDeleteDepot(TileIndex tile);
 
 #endif /* DEPOT_H */
+#endif

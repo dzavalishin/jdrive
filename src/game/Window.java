@@ -1,3 +1,5 @@
+package game;
+
 abstract public class Window
 {
 	int flags4;
@@ -39,7 +41,7 @@ abstract public class Window
 
 void SetWindowDirty()
 {
-	Global.hal.SetDirtyBlocks(w->left, w->top, w->left + w->width, w->top + w->height);
+	Global.hal.SetDirtyBlocks(left, top, left + width, top + height);
 }
 
 

@@ -1,5 +1,5 @@
 /* $Id: console.c 3339 2005-12-24 20:54:31Z tron $ */
-
+#if 0
 #include "stdafx.h"
 #include "openttd.h"
 #include "table/strings.h"
@@ -1135,3 +1135,4 @@ void IConsoleCmdExec(const char *cmdstr)
 
 	 IConsoleError("command or variable not found");
 }
+#endif
