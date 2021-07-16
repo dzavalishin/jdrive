@@ -90,8 +90,9 @@ enum {
 	NOTHING_block							= 1 << 30
 };
 
+/*
 ///////////////////////////////////////////////////////////////////////
-/////*********Movement Positions on Airports********************///////
+/////*********Movement Positions on Airports******************** ///////
 // Country Airfield (small) 4x3
 static const AirportMovingData _airport_moving_data_country[22] = {
 	{ 53, 3,AMED_EXACTPOS,3},											// 00 In Hangar
@@ -259,6 +260,7 @@ static const AirportMovingData _airport_moving_data_oilrig[9] = {
 	{ 69,-49,AMED_NOSPDCLAMP | AMED_SLOWTURN,0},	// 7 - circle #3 (south-west)
 	{ 70,  9,AMED_NOSPDCLAMP | AMED_SLOWTURN,0},	// 8 - circle #4 (south)
 };
+*/
 
 ///////////////////////////////////////////////////////////////////////
 /////**********Movement Machine on Airports*********************///////

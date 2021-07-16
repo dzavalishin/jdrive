@@ -1,3 +1,4 @@
+#if 0
 /* $Id: airport.c 3297 2005-12-14 06:20:23Z tron $ */
 
 #include "stdafx.h"
@@ -381,3 +382,4 @@ uint32 GetValidAirports(void)
 	if (_date >= 25568) SETBIT(bytemask, 4); // international airport 1990
 	return bytemask;
 }
+#endif

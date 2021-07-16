@@ -99,12 +99,12 @@ static inline uint TileY(TileIndex tile)
 {
 	return tile >> MapLogX();
 }
-*/
 
 typedef struct TileIndexDiffC {
 	int16 x;
 	int16 y;
 } TileIndexDiffC;
+*/
 
 static inline TileIndexDiff ToTileIndexDiff(TileIndexDiffC tidc)
 {

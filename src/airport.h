@@ -1,5 +1,5 @@
 /* $Id: airport.h 2701 2005-07-24 14:12:37Z tron $ */
-
+/*
 #ifndef AIRPORT_H
 #define AIRPORT_H
 
@@ -24,7 +24,7 @@ enum {
 	ALL = 1,
 	HELICOPTERS_ONLY = 2
 };
-
+/*
 // Finite sTate mAchine --> FTA
 typedef struct AirportFTAClass {
 	byte nofelements;							// number of positions the airport consists of
@@ -49,12 +49,12 @@ typedef struct AirportFTA {
 void InitializeAirports(void);
 void UnInitializeAirports(void);
 const AirportFTAClass* GetAirport(const byte airport_type);
-
+*/
 /** Get buildable airport bitmask.
  * @return get all buildable airports at this given time, bitmasked.
  * Bit 0 means the small airport is buildable, etc.
  * @todo set availability of airports by year, instead of airplane
  */
-uint32 GetValidAirports(void);
+//uint32 GetValidAirports(void);
 
 #endif /* AIRPORT_H */
