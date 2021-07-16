@@ -2,6 +2,7 @@ package game.util;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
 
 import game.Global;
 
@@ -11,24 +12,24 @@ import game.Global;
 
 public class FileIO {
 
-	private static final int FIO_BUFFER_SIZE = 512;
+	//private static final int FIO_BUFFER_SIZE = 512;
 
 	public static final int SEEK_SET = 0; // TODO check
 	public static final int SEEK_CUR = 1;
-	
+
 	//byte *buffer, *buffer_end;
 	long pos;
 	//FILE *cur_fh;
 	//FILE *handles[32];
 	//byte buffer_start[512];
 
-	 //FileInputStream fis = new FileInputStream(raf.getFD());
-	 //BufferedInputStream bis = new BufferedInputStream(fis);
+	//FileInputStream fis = new FileInputStream(raf.getFD());
+	//BufferedInputStream bis = new BufferedInputStream(fis);
 
-	BufferedInputStream cur_fh;
-	BufferedInputStream handles[] = new BufferedInputStream[32];
-	
-	
+	BufferedRandomAccessFile cur_fh;
+	BufferedRandomAccessFile handles[];// = new BufferedInputStream[32];
+
+
 	FileIO _fio = this;
 
 	// Get current position in file
@@ -42,14 +43,21 @@ public class FileIO {
 	{
 		if (mode == SEEK_CUR) pos += FioGetPos();
 		//_fio.buffer = _fio.buffer_end = _fio.buffer_start + FIO_BUFFER_SIZE;
-		fseek(_fio.cur_fh, (_fio.pos=pos), SEEK_SET);
+		//fseek(_fio.cur_fh, (_fio.pos=pos), SEEK_SET);
+		try {
+			_fio.cur_fh.seek(_fio.pos=pos);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(33);
+		}
 	}
 
 	// Seek to a file and a position
 	void FioSeekToFile(long pos)
 	{
 		assert pos > 0;
-		BufferedInputStream f = _fio.handles[(int) (pos >> 24)];
+		BufferedRandomAccessFile f = _fio.handles[(int) (pos >> 24)];
 		assert(f != null);
 		_fio.cur_fh = f;
 		FioSeekTo(pos & 0xFFFFFF, SEEK_SET);
@@ -63,11 +71,18 @@ public class FileIO {
 			fread(_fio.buffer = _fio.buffer_start, 1, FIO_BUFFER_SIZE, _fio.cur_fh);
 		}
 		return *_fio.buffer++;
-		*/
-		
-		int d = cur_fh.read();
+		 */
+
+		int d = 0;
+		try {
+			d = cur_fh.read();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(33);
+		}
 		assert( d >= 0 );
-		
+
 		return (byte) d;
 	}
 
@@ -101,14 +116,29 @@ public class FileIO {
 		FioSeekTo(FioGetPos(), SEEK_SET);
 		_fio.pos += size;
 		//fread(ptr, 1, size, _fio.cur_fh);
-		return cur_fh.readNBytes(size);
+		//return cur_fh.readNBytes(size);
+
+		byte[] buf = new byte[size];
+		try {
+			cur_fh.read(buf, 0, size);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(33);
+		}
+		return buf;
 	}
 
 	private void FioCloseFile(int slot)
 	{
 		if (_fio.handles[slot] != null) {
 			//fclose(_fio.handles[slot]);
-			_fio.handles[slot].close();
+			try {
+				_fio.handles[slot].close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			_fio.handles[slot] = null;
 		}
 	}
@@ -121,12 +151,18 @@ public class FileIO {
 			FioCloseFile(i);
 	}
 
-	
+
 	boolean FiosCheckFileExists(String filename)
 	{
-		BufferedInputStream f = FioFOpenFile(filename);
-		if( null != f ) f.close();
-		
+		BufferedRandomAccessFile f = FioFOpenFile(filename);
+		if( null != f )
+			try {
+				f.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		return f != null;
 	}
 
@@ -143,7 +179,7 @@ public class FileIO {
 			char *s;
 			// Make lower case and try again
 			for(s=buf + strlen(_path.data_dir) - 1; *s != 0; s++)
-				*s = tolower(*s);
+	 *s = tolower(*s);
 			f = fopen(buf, "rb");
 
 			#if defined SECOND_DATA_DIR
@@ -151,7 +187,7 @@ public class FileIO {
 			if (f == NULL) {
 				sprintf(buf, "%s%s", _path.second_data_dir, filename);
 				for(s=buf + strlen(_path.second_data_dir) - 1; *s != 0; s++)
-					*s = tolower(*s);
+	 *s = tolower(*s);
 				f = fopen(buf, "rb");
 			}
 			#endif
@@ -166,17 +202,19 @@ public class FileIO {
 		}
 	}*/
 
-	BufferedInputStream FioFOpenFile(String filename)
+	BufferedRandomAccessFile FioFOpenFile(String filename)
 	{
-		BufferedInputStream f;
+		BufferedRandomAccessFile f;
 		String buf;
 
 		buf.format( "%s%s", Global._path.data_dir, filename);
 
-		 FileInputStream fis = new FileInputStream(buf);
-		 f = new BufferedInputStream(fis);
-		 
-		 return f;
+		//FileInputStream fis = new FileInputStream(buf);
+		//f = new BufferedInputStream(fis);
+
+		f = new BufferedRandomAccessFile(buf,"r", 10240 );
+
+		return f;
 
 		/*
 		f = fopen(buf, "rb");
@@ -185,7 +223,7 @@ public class FileIO {
 			char *s;
 			// Make lower case and try again
 			for(s=buf + strlen(_path.data_dir) - 1; *s != 0; s++)
-				*s = tolower(*s);
+		 *s = tolower(*s);
 			f = fopen(buf, "rb");
 
 			#if defined SECOND_DATA_DIR
@@ -193,7 +231,7 @@ public class FileIO {
 			if (f == NULL) {
 				sprintf(buf, "%s%s", _path.second_data_dir, filename);
 				for(s=buf + strlen(_path.second_data_dir) - 1; *s != 0; s++)
-					*s = tolower(*s);
+		 *s = tolower(*s);
 				f = fopen(buf, "rb");
 			}
 			#endif
@@ -201,7 +239,7 @@ public class FileIO {
 		#endif
 
 		return f;
-		*/
+		 */
 	}
 
 	void FioOpenFile(int slot, String filename)
@@ -218,7 +256,7 @@ public class FileIO {
 			char *s;
 			// Make lower case and try again
 			for(s=buf + strlen(_path.data_dir) - 1; *s != 0; s++)
-				*s = tolower(*s);
+		 *s = tolower(*s);
 			f = fopen(buf, "rb");
 
 			#if defined SECOND_DATA_DIR
@@ -226,7 +264,7 @@ public class FileIO {
 			if (f == NULL) {
 				sprintf(buf, "%s%s", _path.second_data_dir, filename);
 				for(s=buf + strlen(_path.second_data_dir) - 1; *s != 0; s++)
-					*s = tolower(*s);
+		 *s = tolower(*s);
 				f = fopen(buf, "rb");
 			}
 
@@ -236,12 +274,12 @@ public class FileIO {
 			#endif
 		}
 		#endif
-		*/
+		 */
 
-		BufferedInputStream f = FioFOpenFile(filename);
-		
+		BufferedRandomAccessFile f = FioFOpenFile(filename);
+
 		if (f == null)
-			error("Cannot open file '%s'", filename);
+			Global.error(String.format("Cannot open file '%s'", filename));
 
 		FioCloseFile(slot); // if file was opened before, close it
 		_fio.handles[slot] = f;

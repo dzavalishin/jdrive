@@ -1,5 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -11,7 +12,7 @@ public class MemoryPool<CType>
 {
     Map<Integer,CType> pool = new HashMap<>();
 
-    public CleanPool()
+    public void CleanPool()
     {
         pool.clear();
     }
@@ -32,9 +33,14 @@ public class MemoryPool<CType>
         return pool.size();
     }
 
-    public forEach( BiConsumer c )
+    public void forEach( BiConsumer<Integer,CType> c )
     {
         pool.forEach( c );
+    }
+
+    public void forEach( Consumer<CType> c )
+    {
+        pool.forEach( (i,o) -> c.accept(o) );
     }
 
 }

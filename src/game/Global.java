@@ -52,7 +52,12 @@ public class Global {
 
 
 	public static void printf(String s) {
+		System.out.print(s);		
+	}
+	public static void error(String s) {
 		System.err.print(s);		
 	}
+
+	public static final StringID  INVALID_STRING_ID = new StringID(0xFFFF);
 
 }

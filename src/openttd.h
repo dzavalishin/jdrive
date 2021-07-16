@@ -526,7 +526,7 @@ enum {
 
 VARDEF byte _savegame_sort_order;
 
-#define INVALID_STRING_ID 0xFFFF
+//#define INVALID_STRING_ID 0xFFFF
 
 enum {
 	MAX_SCREEN_WIDTH = 2048,

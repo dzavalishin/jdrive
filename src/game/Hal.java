@@ -9,11 +9,11 @@ public abstract class Hal
     
     void toggle_fullscreen(boolean fullscreen) { } // TODO
 
-	DrawPixelInfo _screen = new DrawPixelInfo();
-	DrawPixelInfo _cur_dpi = new DrawPixelInfo();
+	public static DrawPixelInfo _screen = new DrawPixelInfo();
+	public static DrawPixelInfo _cur_dpi = new DrawPixelInfo();
 
-	Rect _invalid_rect = new Rect();
-	CursorVars _cursor = new CursorVars();
+	public static Rect _invalid_rect = new Rect();
+	public static CursorVars _cursor = new CursorVars();
 
 
 	void SetDirtyBlocks(int left, int top, int right, int bottom)
