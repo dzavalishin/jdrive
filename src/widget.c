@@ -129,7 +129,7 @@ void ScrollbarClickHandler(Window *w, const Widget *wi, int x, int y)
  * @param *w Window to look inside
  * @param  x,y Window client coordinates
  * @return A widget index, or -1 if no widget was found.
- */
+ * /
 int GetWidgetFromPos(const Window *w, int x, int y)
 {
 	const Widget *wi;
@@ -148,7 +148,7 @@ int GetWidgetFromPos(const Window *w, int x, int y)
 
 	return found_index;
 }
-
+*/
 
 void DrawWindowWidgets(const Window *w)
 {

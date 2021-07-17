@@ -14,11 +14,11 @@ abstract public class Window
 
 	byte caption_color;
 
-    int click_state, disabled_state, hidden_state;
-    
-    ViewPort viewport;
+	int click_state, disabled_state, hidden_state;
+
+	ViewPort viewport;
 	Widget original_widget;
- 	Widget widget;
+	Widget widget;
 	int desc_flags;
 
 	WindowMessage message;
@@ -27,31 +27,55 @@ abstract public class Window
 
 
 	//WindowProc *wndproc;
-    abstract void WindowProc( WindowEvent e);
-    void wndproc(WindowEvent e) { WindowProc(e); }
+	abstract void WindowProc( WindowEvent e);
+	void wndproc(WindowEvent e) { WindowProc(e); }
 
-    void CallWindowEventNP(int event)
-{
-	WindowEvent e = new WindowEvent();
+	void CallWindowEventNP(int event)
+	{
+		WindowEvent e = new WindowEvent();
 
-	e.event = event;
-	wndproc(e);
-}
+		e.event = event;
+		wndproc(e);
+	}
 
 
-void SetWindowDirty()
-{
-	Global.hal.SetDirtyBlocks(left, top, left + width, top + height);
-}
+	void SetWindowDirty()
+	{
+		Global.hal.SetDirtyBlocks(left, top, left + width, top + height);
+	}
 
+	/** Returns the index for the widget located at the given position
+	 * relative to the window. It includes all widget-corner pixels as well.
+	 * @param *w Window to look inside
+	 * @param  x,y Window client coordinates
+	 * @return A widget index, or -1 if no widget was found.
+	 */
+	int GetWidgetFromPos(int x, int y)
+	{
+		Widget wi;
+		int index, found_index = -1;
+
+		// Go through the widgets and check if we find the widget that the coordinate is
+		// inside.
+		for (index = 0,wi = widget; wi.type != WWT_LAST; index++, wi++) {
+			if (wi.type == WWT_EMPTY || wi.type == WWT_FRAME) continue;
+
+			if (x >= wi.left && x <= wi.right && y >= wi.top &&  y <= wi.bottom &&
+					!BitOps.HASBIT(w.hidden_state,index)) {
+				found_index = index;
+			}
+		}
+
+		return found_index;
+	}
 
 
 }
 
 class WindowMessage {
-    int msg;
-    int wparam;
-    int lparam;
+	int msg;
+	int wparam;
+	int lparam;
 }
 
 
@@ -65,12 +89,12 @@ class ResizeInfo {
 
 
 class WindowClass  {
-    int v;
+	int v;
 }
 
 
 class WindowNumber {
-    int n;
+	int n;
 }
 
 
@@ -116,36 +140,36 @@ class ViewPort {
  * rewrite after 0.4.0 */
 class WindowEvent {
 	int event;
-    Point pt;
+	Point pt;
 
-    // click, dragdrop, mouseover
-    int widget;
+	// click, dragdrop, mouseover
+	int widget;
 
-    // place
-		TileIndex tile;
-		TileIndex starttile;
-		int userdata;
+	// place
+	TileIndex tile;
+	TileIndex starttile;
+	int userdata;
 
-    // sizing
-		Point size;
-		Point diff;
+	// sizing
+	Point size;
+	Point diff;
 
-    // edittext
-        String str;
-        
+	// edittext
+	String str;
+
 	// popupmenu;
 
-    // dropdown
-		int button;
-		int index;
+	// dropdown
+	int button;
+	int index;
 
-    // keypress
-		boolean cont;   // continue the search? (default true)
-		byte ascii;  // 8-bit ASCII-value of the key
-		int keycode;// untranslated key (including shift-state)
+	// keypress
+	boolean cont;   // continue the search? (default true)
+	byte ascii;  // 8-bit ASCII-value of the key
+	int keycode;// untranslated key (including shift-state)
 
-    // message
-		int msg;    // message to be sent
-		int wparam; // additional message-specific information
-		int lparam; // additional message-specific information
+	// message
+	int msg;    // message to be sent
+	int wparam; // additional message-specific information
+	int lparam; // additional message-specific information
 }
