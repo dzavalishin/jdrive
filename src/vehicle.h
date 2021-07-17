@@ -366,11 +366,11 @@ byte GetDirectionTowards(const Vehicle *v, int x, int y);
 /* vehicle.c */
 VARDEF SortStruct *_vehicle_sort;
 
-extern MemoryPool _vehicle_pool;
+//extern MemoryPool _vehicle_pool;
 
 /**
  * Get the pointer to the vehicle with index 'index'
- */
+ * /
 static inline Vehicle *GetVehicle(VehicleID index)
 {
 	return (Vehicle*)GetItemFromPool(&_vehicle_pool, index);
@@ -378,7 +378,7 @@ static inline Vehicle *GetVehicle(VehicleID index)
 
 /**
  * Get the current size of the VehiclePool
- */
+ * /
 static inline uint16 GetVehiclePoolSize(void)
 {
 	return _vehicle_pool.total_items;
@@ -389,7 +389,7 @@ static inline uint16 GetVehiclePoolSize(void)
 
 /**
  * Check if a Vehicle really exists.
- */
+ * /
 static inline bool IsValidVehicle(const Vehicle *v)
 {
 	return v->type != 0;
@@ -399,13 +399,13 @@ static inline bool IsValidVehicle(const Vehicle *v)
  * Check if an index is a vehicle-index (so between 0 and max-vehicles)
  *
  * @return Returns true if the vehicle-id is in range
- */
+ * /
 static inline bool IsVehicleIndex(uint index)
 {
 	return index < GetVehiclePoolSize();
 }
 
-/* Returns order 'index' of a vehicle or NULL when it doesn't exists */
+/* Returns order 'index' of a vehicle or NULL when it doesn't exists * /
 static inline Order *GetVehicleOrder(const Vehicle *v, int index)
 {
 	Order *order = v->orders;
@@ -418,7 +418,7 @@ static inline Order *GetVehicleOrder(const Vehicle *v, int index)
 	return order;
 }
 
-/* Returns the last order of a vehicle, or NULL if it doesn't exists */
+/* Returns the last order of a vehicle, or NULL if it doesn't exists * /
 static inline Order *GetLastVehicleOrder(const Vehicle *v)
 {
 	Order *order = v->orders;
@@ -431,7 +431,7 @@ static inline Order *GetLastVehicleOrder(const Vehicle *v)
 	return order;
 }
 
-/* Get the first vehicle of a shared-list, so we only have to walk forwards */
+/* Get the first vehicle of a shared-list, so we only have to walk forwards * /
 static inline Vehicle *GetFirstVehicleFromSharedList(Vehicle *v)
 {
 	Vehicle *u = v;
@@ -440,7 +440,7 @@ static inline Vehicle *GetFirstVehicleFromSharedList(Vehicle *v)
 
 	return u;
 }
-
+*/
 // NOSAVE: Return values from various commands.
 VARDEF VehicleID _new_train_id;
 VARDEF VehicleID _new_wagon_id;

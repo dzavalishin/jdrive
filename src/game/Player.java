@@ -58,4 +58,7 @@ public class Player
 			old_economy = new PlayerEconomyEntry[24];
 			engine_replacement = new EngineID[Global.TOTAL_NUM_ENGINES];
 		}
+		
+		public static PlayerID _current_player;
+		
 }

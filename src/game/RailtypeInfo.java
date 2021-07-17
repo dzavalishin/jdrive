@@ -1,5 +1,7 @@
 package game;
 
+import game.util.BitOps;
+
 public class RailtypeInfo 
 {
 	public static final int SIG_SEMAPHORE_MASK = (1 << 3);
@@ -154,7 +156,7 @@ static  byte SignalOnTrack(Track track) {
 	static  boolean HasTrack(TileIndex tile, Track track)
 	{
 		assert(IsValidTrack(track));
-		return HASBIT(GetTrackBits(tile).getValue(), track.getValue());
+		return BitOps.HASBIT(GetTrackBits(tile).getValue(), track.getValue());
 	}
 
 	/*
@@ -421,13 +423,13 @@ static  byte SignalOnTrack(Track track) {
 		{
 		/* When map5 bit 3 is set, the road runs in the y direction (DIAG2) */
 		case TRACK_DIAG1:
-			return (HASBIT(_m[tile].m5, 3) ? TRANSPORT_RAIL : TRANSPORT_ROAD);
+			return (BitOps.HASBIT(Global._m[tile.getTile()].m5, 3) ? TransportType.TRANSPORT_RAIL : TransportType.TRANSPORT_ROAD);
 		case TRACK_DIAG2:
-			return (HASBIT(_m[tile].m5, 3) ? TRANSPORT_ROAD : TRANSPORT_RAIL);
+			return (BitOps.HASBIT(tile.getMap().m5, 3) ? TransportType.TRANSPORT_ROAD : TransportType.TRANSPORT_RAIL);
 		default:
 			assert(0);
 		}
-		return INVALID_TRANSPORT;
+		return TransportType.INVALID_TRANSPORT;
 	}
 
 	/**
@@ -451,7 +453,7 @@ static  byte SignalOnTrack(Track track) {
 	 */
 	static  boolean IsCompatibleRail(RailType enginetype, RailType tiletype)
 	{
-		return HASBIT(GetRailTypeInfo(enginetype)->compatible_railtypes, tiletype);
+		return BitOps.HASBIT(GetRailTypeInfo(enginetype)->compatible_railtypes, tiletype);
 	}
 
 	/**

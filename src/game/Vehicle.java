@@ -1,6 +1,6 @@
 package game;
 
-public abstract class Vehicle 
+public abstract class Vehicle implements IPoolItem 
 {
 	static public final int INVALID_VEHICLE = -1; //0xFFFF; // TODO -1?
 	private static final int INVALID_COORD = -0x8000;
@@ -71,11 +71,11 @@ public abstract class Vehicle
 	Order current_order;     //! The current order (+ status, like: loading)
 	OrderID cur_order_index; //! The index to the current order
 
-	Order *orders;           //! Pointer to the first order for this vehicle
+	Order orders;           //! Pointer to the first order for this vehicle
 	OrderID num_orders;      //! How many orders there are in the list
 
-	Vehicle next_shared;    //! If not NULL, this points to the next vehicle that shared the order
-	Vehicle prev_shared;    //! If not NULL, this points to the prev vehicle that shared the order
+	Vehicle next_shared;    //! If not null, this points to the next vehicle that shared the order
+	Vehicle prev_shared;    //! If not null, this points to the prev vehicle that shared the order
 	/* End Order-stuff */
 
 	// Boundaries for the current position in the world and a next hash link.
@@ -131,7 +131,7 @@ public abstract class Vehicle
 
 	void VehicleServiceInDepot()
 	{
-		if (GetTileOwner(tile) == OWNER_TOWN) 
+		if (tile.GetTileOwner() == OWNER_TOWN) 
 			MA_Tax(value, this);
 
 		date_of_last_service = Global._date;
@@ -139,6 +139,7 @@ public abstract class Vehicle
 		reliability = GetEngine(engine_type).reliability;
 	}
 
+	/* TODO fixme
 	void UpdateVehiclePosHash(int x, int y)
 	{
 		VehicleID *old_hash, *new_hash;
@@ -151,29 +152,30 @@ public abstract class Vehicle
 
 		if (old_hash == new_hash) return;
 
-		/* remove from hash table? */
-		if (old_hash != NULL) {
+		// remove from hash table? 
+		if (old_hash != null) {
 			Vehicle last = null;
 			VehicleID idx = *old_hash;
 			while ((u = GetVehicle(idx)) != v) {
-				idx = u->next_hash;
+				idx = u.next_hash;
 				assert(idx != INVALID_VEHICLE);
 				last = u;
 			}
 
-			if (last == NULL) {
-				*old_hash = next_hash;
+			if (last == null) {
+	 *old_hash = next_hash;
 			} else {
-				last->next_hash = next_hash;
+				last.next_hash = next_hash;
 			}
 		}
 
-		/* insert into hash table? */
-		if (new_hash != NULL) {
+		// insert into hash table? 
+		if (new_hash != null) {
 			next_hash = *new_hash;
-			*new_hash = index;
+	 *new_hash = index;
 		}
 	}
+	 */
 
 	void VehiclePositionChanged()
 	{
@@ -193,10 +195,6 @@ public abstract class Vehicle
 	}
 
 
-	void AfterLoadVehicles();
-
-	Vehicle GetLastVehicleInChain();
-	Vehicle GetPrevVehicleInChain();
 
 	Vehicle GetFirstVehicleInChain()
 	{
@@ -212,7 +210,7 @@ public abstract class Vehicle
 		}
 
 		/* It is the fact (currently) that newly built vehicles do not have
-		 * their ->first pointer set. When this is the case, go up to the
+		 * their .first pointer set. When this is the case, go up to the
 		 * first engine and set the pointers correctly. Also the first pointer
 		 * is not saved in a savegame, so this has to be fixed up after loading */
 
@@ -221,9 +219,9 @@ public abstract class Vehicle
 
 		/* Set the first pointer of all vehicles in that chain to the first wagon */
 		if( v.IsFrontEngine())
-			for (u = (Vehicle *)v; u != null; u = u->next) u->first = (Vehicle *)v;
+			for (u = v; u != null; u = u.next) u.first = v;
 
-			return (Vehicle)v;
+		return (Vehicle)v;
 	}
 
 	int CountVehiclesInChain()
@@ -257,7 +255,7 @@ public abstract class Vehicle
 			v.next_hash = Vehicle.INVALID_VEHICLE;
 
 			if (v.orders != null)
-				DeleteVehicleOrders(v);
+				v.DeleteVehicleOrders();
 			v = u;
 		} while (v != null && has_artic_part);
 	}
@@ -475,6 +473,88 @@ public abstract class Vehicle
 		while (v.EngineHasArticPart()) v = v.next;
 		return v;
 	}
+
+	/**
+	 * Check if a Vehicle really exists.
+	 */
+	private boolean IsValidVehicle()
+	{
+		return type != 0;
+	}
+
+	/* ERROR FIXME text Returns order 'index' of a vehicle or null when it doesn't exists */
+	private Order GetVehicleOrder(int index)
+	{
+		Order order = orders;
+
+		if (index < 0) return null;
+
+		while (order != null && index-- > 0)
+			order = order.next;
+
+		return order;
+	}
+
+	/* Returns the last order of a vehicle, or null if it doesn't exists */
+	private Order GetLastVehicleOrder()
+	{
+		Order order = orders;
+
+		if (order == null) return null;
+
+		while (order.next != null)
+			order = order.next;
+
+		return order;
+	}
+
+
+	/* Get the first vehicle of a shared-list, so we only have to walk forwards */
+	private Vehicle GetFirstVehicleFromSharedList()
+	{
+		Vehicle u = this;
+		while (u.prev_shared != null)
+			u = u.prev_shared;
+
+		return u;
+	}
+
+	static IPoolItemFactory<Vehicle> factory = new IPoolItemFactory<Vehicle>() 
+	{		
+		@Override
+		public Vehicle createObject() {
+			return new Vehicle();
+		}
+	}; 
+
+	private final static MemoryPool<Vehicle> _vehicle_pool = new MemoryPool<Vehicle>(factory);
+
+	/**
+	 * Get the pointer to the vehicle with index 'index'
+	 */
+	private Vehicle getVehicle(VehicleID index)
+	{
+		return _vehicle_pool.GetItemFromPool(index.id);
+	}
+
+	/**
+	 * Get the current size of the VehiclePool
+	 */
+	static private int GetVehiclePoolSize()
+	{
+		return _vehicle_pool.total_items();
+	}
+
+	/**
+	 * Check if an index is a vehicle-index (so between 0 and max-vehicles)
+	 *
+	 * @return Returns true if the vehicle-id is in range
+	 */
+	private static boolean IsVehicleIndex(int index)
+	{
+		return (index >= 0) && (index < GetVehiclePoolSize());
+	}
+
 
 
 }

@@ -1,3 +1,4 @@
+#if 0
 /* $Id: macros.h 3322 2005-12-20 20:52:05Z Darkvater $ */
 
 #ifndef MACROS_H
@@ -166,3 +167,4 @@ static inline void swap_tile(TileIndex *a, TileIndex *b) { TileIndex t = *a; *a 
 #define ALIGN(x, n) (((x) + (n) - 1) & ~((n) - 1))
 
 #endif /* MACROS_H */
+#endif

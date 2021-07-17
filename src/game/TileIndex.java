@@ -1,5 +1,7 @@
 package game;
 
+import game.util.BitOps;
+
 public class TileIndex {
 	private int tile;
 
@@ -20,6 +22,11 @@ public class TileIndex {
 	// TODO rename to getTileIndex
 	public int getTile() {
 		return tile;
+	}
+	
+	public Tile getMap()
+	{
+		return Global._m[tile];
 	}
 	
 	@Override
@@ -178,7 +185,7 @@ public class TileIndex {
 	
 	boolean IsTunnelTile()
 	{
-		return IsTileType(TileTypes.MP_TUNNELBRIDGE) && GB(Global._m[tile].m5, 4, 4) == 0;
+		return IsTileType(TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(Global._m[tile].m5, 4, 4) == 0;
 	}
 
 	Owner GetTileOwner()
@@ -205,7 +212,22 @@ public class TileIndex {
 	{
 		return GetTileOwner() == owner;
 	}
-	
+
+	public void clrBit_m1(int i) {		Global._m[tile].m1 = BitOps.RETCLRBIT(Global._m[tile].m1, i);	}
+	public void setBit_m1(int i) {		Global._m[tile].m1 = BitOps.RETSETBIT(Global._m[tile].m1, i);	}
+
+	public void clrBit_m2(int i) {		Global._m[tile].m2 = BitOps.RETCLRBIT(Global._m[tile].m2, i);	}
+	public void setBit_m2(int i) {		Global._m[tile].m2 = BitOps.RETSETBIT(Global._m[tile].m2, i);	}
+
+	public void clrBit_m3(int i) {		Global._m[tile].m3 = BitOps.RETCLRBIT(Global._m[tile].m3, i);	}
+	public void setBit_m3(int i) {		Global._m[tile].m3 = BitOps.RETSETBIT(Global._m[tile].m3, i);	}
+
+	public void clrBit_m4(int i) {		Global._m[tile].m4 = BitOps.RETCLRBIT(Global._m[tile].m4, i);	}
+	public void setBit_m4(int i) {		Global._m[tile].m4 = BitOps.RETSETBIT(Global._m[tile].m4, i);	}
+
+	public void clrBit_m5(int i) {		Global._m[tile].m5 = BitOps.RETCLRBIT(Global._m[tile].m5, i);	}
+	public void setBit_m5(int i) {		Global._m[tile].m5 = BitOps.RETSETBIT(Global._m[tile].m5, i);	}
+
 }
 
 

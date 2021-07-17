@@ -239,7 +239,7 @@ typedef struct Cheats {
 } Cheats;
 
 VARDEF Cheats _cheats;
-
+/*
 typedef struct Paths {
 	char *personal_dir;  // includes cfg file and save folder
 	char *game_data_dir; // includes data, gm, lang
@@ -253,7 +253,7 @@ typedef struct Paths {
 } Paths;
 
 VARDEF Paths _path;
-
+*/
 // NOSAVE: Used in palette animations only, not really important.
 VARDEF int _timer_counter;
 

@@ -1,5 +1,7 @@
 package game;
 
+import game.util.Paths;
+
 public class Global {
 
 	// TODO INIT 
@@ -36,19 +38,20 @@ public class Global {
 
 	static public Hal hal = new JavaHal();
 
-	static int _map_log_x;
-	static int _map_size_x;
-	static int _map_size_y;
-	static int _map_tile_mask;
-	static int _map_size;
+	public static int _map_log_x;
+	public static int _map_size_x;
+	public static int _map_size_y;
+	public static int _map_tile_mask;
+	public static int _map_size;
 
-	static int _date;
-	static int _date_fract;
+	public static int _date;
+	public static int _date_fract;
 
-	static int _tick_counter;
+	public static int _tick_counter;
 	
+	public static Paths _path = new Paths();
 	
-	static Tile _m[];
+	public static Tile _m[];
 
 
 	// binary logarithm of the map size, try to avoid using this one

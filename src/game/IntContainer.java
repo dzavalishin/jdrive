@@ -1,5 +1,5 @@
 package game;
 
 public class IntContainer {
-	int v;
+	public int v;
 }

@@ -2,6 +2,7 @@ package game.util;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import game.Global;
@@ -207,12 +208,18 @@ public class FileIO {
 		BufferedRandomAccessFile f;
 		String buf;
 
-		buf.format( "%s%s", Global._path.data_dir, filename);
+		buf = String.format( "%s%s", Global._path.data_dir, filename);
 
 		//FileInputStream fis = new FileInputStream(buf);
 		//f = new BufferedInputStream(fis);
 
-		f = new BufferedRandomAccessFile(buf,"r", 10240 );
+		try {
+			f = new BufferedRandomAccessFile(buf,"r", 10240 );
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			return null;
+		}
 
 		return f;
 

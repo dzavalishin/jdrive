@@ -1,3 +1,5 @@
+import game.util.BitOps;
+
 public class Station
 {
 
@@ -131,8 +133,8 @@ private int GetAcceptanceMask()
 private void ShowRejectOrAcceptNews(int items, StringID msg)
 {
 	if (items) {
-		SetDParam(2, GB(items, 16, 16));
-		SetDParam(1, GB(items,  0, 16));
+		SetDParam(2, BitOps.GB(items, 16, 16));
+		SetDParam(1, BitOps.GB(items,  0, 16));
 		SetDParam(0, index);
 		AddNewsItem(msg + ((items >> 16)?1:0), NEWS_FLAGS(NM_SMALL, NF_VIEWPORT|NF_TILE, NT_ACCEPTANCE, 0), xy, 0);
 	}

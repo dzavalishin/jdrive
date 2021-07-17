@@ -20,7 +20,7 @@ SaveOrLoadResult SaveOrLoad(const char *filename, int mode);
 void WaitTillSaved(void);
 
 
-typedef void ChunkSaveLoadProc(void);
+//typedef void ChunkSaveLoadProc(void);
 typedef void AutolengthProc(void *arg);
 
 typedef struct SaveLoadGlobVarList {
@@ -30,12 +30,14 @@ typedef struct SaveLoadGlobVarList {
 	uint16 to_version;
 } SaveLoadGlobVarList;
 
+/*
 typedef struct {
 	uint32 id;
 	ChunkSaveLoadProc *save_proc;
 	ChunkSaveLoadProc *load_proc;
 	uint32 flags;
 } ChunkHandler;
+*/
 
 typedef struct {
 	byte null;
@@ -58,7 +60,7 @@ extern byte   _sl_minor_version; /// the minor savegame version, DO NOT USE!
 enum {
 	INC_VEHICLE_COMMON = 0,
 };
-
+/*
 enum {
 	CH_RIFF = 0,
 	CH_ARRAY = 1,
@@ -73,7 +75,7 @@ enum {
 	CH_PRI_SHL = 4,
 	CH_NUM_PRI_LEVELS = 4,
 };
-
+*/
 typedef enum VarTypes {
 	SLE_FILE_I8  = 0,
 	SLE_FILE_U8  = 1,

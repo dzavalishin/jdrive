@@ -1,5 +1,7 @@
 package game;
 
+import game.util.BitOps;
+
 public class Depot implements IPoolItem
 {
 	TileIndex xy;
@@ -107,10 +109,10 @@ public class Depot implements IPoolItem
 			case Global.TRANSPORT_RAIL:
 			case Global.TRANSPORT_ROAD:
 				/* Rail and road store a diagonal direction in bits 0 and 1 */
-				return new DiagDirection(GB(_m[tile].m5, 0, 2));
+				return new DiagDirection(BitOps.GB(Global._m[tile.getTile()].m5, 0, 2));
 			case Global.TRANSPORT_WATER:
 				/* Water is stubborn, it stores the directions in a different order. */
-				switch (GB(_m[tile].m5, 0, 2)) {
+				switch (BitOps.GB(Global._m[tile.getTile()].m5, 0, 2)) {
 					case 0: return Tile.DIAGDIR_NE;
 					case 1: return Tile.DIAGDIR_SW;
 					case 2: return Tile.DIAGDIR_NW;
