@@ -1,5 +1,7 @@
 package game;
 
+import game.util.wcustom.AbstractWinCustom;
+
 abstract public class Window
 {
 	int flags4;
@@ -23,8 +25,8 @@ abstract public class Window
 
 	WindowMessage message;
 	//byte custom[WINDOW_CUSTOM_SIZE];
-	byte custom[];
-
+	//byte custom[];
+	AbstractWinCustom custom;
 
 	//WindowProc *wndproc;
 	abstract void WindowProc( WindowEvent e);

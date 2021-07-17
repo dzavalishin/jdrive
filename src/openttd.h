@@ -75,7 +75,7 @@ typedef struct DrawPixelInfo DrawPixelInfo;
 typedef uint32 WindowNumber;
 typedef byte WindowClass;
 
-
+/*
 enum GameModes {
 	GM_MENU,
 	GM_NORMAL,
@@ -198,7 +198,7 @@ typedef struct Prices {
 } Prices;
 
 #define GAME_DIFFICULTY_NUM 18
-
+/*
 typedef struct GameDifficulty {
 	int max_no_competitors;
 	int competitor_start_time;
@@ -219,7 +219,7 @@ typedef struct GameDifficulty {
 	int disasters;
 	int town_council_tolerance;	// minimum required town ratings to be allowed to demolish stuff
 } GameDifficulty;
-
+*/
 enum {
 	// Temperate
 	CT_PASSENGERS = 0,
@@ -546,13 +546,13 @@ VARDEF byte _no_scroll;
 
 /** To have a concurrently running thread interface with the main program, use
  * the OTTD_SendThreadMessage() function. Actions to perform upon the message are handled
- * in the ProcessSentMessage() function */
+ * in the ProcessSentMessage() function * /
 typedef enum ThreadMsgs {
 	MSG_OTTD_SAVETHREAD_START  = 1,
 	MSG_OTTD_SAVETHREAD_DONE   = 2,
 	MSG_OTTD_SAVETHREAD_ERROR  = 3,
 } ThreadMsg;
-
+*/
 void OTTD_SendThreadMessage(ThreadMsg msg);
 
 #endif /* OPENTTD_H */

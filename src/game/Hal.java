@@ -1,11 +1,11 @@
 public abstract class Hal
 {
     // graphics
-	abstract void start_video(String parm);
-	abstract void stop_video();
-	abstract void make_dirty(int left, int top, int width, int height);
-	abstract void main_loop();
-	abstract boolean change_resolution(int w, int h);
+	public abstract void start_video(String parm);
+	public abstract void stop_video();
+	public abstract void make_dirty(int left, int top, int width, int height);
+	public abstract void main_loop();
+	public abstract boolean change_resolution(int w, int h);
     
     void toggle_fullscreen(boolean fullscreen) { } // TODO
 
@@ -14,6 +14,8 @@ public abstract class Hal
 
 	public static Rect _invalid_rect = new Rect();
 	public static CursorVars _cursor = new CursorVars();
+
+	//HalVideoDriver _video_driver;
 
 
 	void SetDirtyBlocks(int left, int top, int right, int bottom)

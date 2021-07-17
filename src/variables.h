@@ -14,7 +14,7 @@ VARDEF uint16 _price_frac[NUM_PRICES];
 
 VARDEF uint32 _cargo_payment_rates[NUM_CARGO];
 VARDEF uint16 _cargo_payment_rates_frac[NUM_CARGO];
-
+/*
 typedef struct {
 	GameDifficulty diff;
 	byte diff_level;
@@ -26,16 +26,16 @@ typedef struct {
 	byte autosave;
 	byte road_side;
 } GameOptions;
-
+*/
 /* These are the options for the current game
  * either ingame, or loaded. Also used for networking games */
-VARDEF GameOptions _opt;
+//VARDEF GameOptions _opt;
 
 /* These are the default options for a new game */
-VARDEF GameOptions _opt_newgame;
+//VARDEF GameOptions _opt_newgame;
 
 // Pointer to one of the two _opt OR _opt_newgame structs
-VARDEF GameOptions *_opt_ptr;
+//VARDEF GameOptions *_opt_ptr;
 
 // Current date
 //VARDEF uint16 _date;

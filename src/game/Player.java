@@ -54,11 +54,13 @@ public class Player
 
 		public Player()
 		{
+			is_active = false;
+			
 			share_owners = new PlayerID[4];
 			old_economy = new PlayerEconomyEntry[24];
 			engine_replacement = new EngineID[Global.TOTAL_NUM_ENGINES];
 		}
 		
-		public static PlayerID _current_player;
+		//public static PlayerID _current_player;
 		
 }

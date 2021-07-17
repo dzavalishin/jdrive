@@ -8,6 +8,12 @@ public class Global {
 
 	public static final int MAX_PLAYERS = 8;
 
+	Player[] _players = new Player[MAX_PLAYERS];
+	// NOSAVE: can be determined from player structs
+	byte [] _player_colors = new byte[MAX_PLAYERS];
+	public static PlayerID _current_player;
+	
+	
 	public static final int NUM_NORMAL_RAIL_ENGINES = 54;
 	public static final int NUM_MONORAIL_ENGINES = 30;
 	public static final int NUM_MAGLEV_ENGINES = 32;
@@ -38,6 +44,9 @@ public class Global {
 
 	static public Hal hal = new JavaHal();
 
+	public static GameModes _game_mode;
+	public static boolean _exit_game = false;
+	
 	public static int _map_log_x;
 	public static int _map_size_x;
 	public static int _map_size_y;
@@ -52,6 +61,12 @@ public class Global {
 	public static Paths _path = new Paths();
 	
 	public static Tile _m[];
+
+	// main/startup
+	public static String _config_file;
+	public static boolean _dedicated_forks;
+	public static SwitchModes _switch_mode;
+
 
 
 	// binary logarithm of the map size, try to avoid using this one
@@ -81,18 +96,18 @@ public class Global {
 	
 	//void DEBUG(name, level) if (level == 0 || _debug_ ## name ## _level >= level) debug
 
-	 int _debug_ai_level;
-	 int _debug_driver_level;
-	 int _debug_grf_level;
-	 int _debug_map_level;
-	 int _debug_misc_level;
-	 int _debug_ms_level;
-	 int _debug_net_level;
-	 int _debug_spritecache_level;
-	 int _debug_oldloader_level;
-	 int _debug_pbs_level;
-	 int _debug_ntp_level;
-	 int _debug_npf_level;
+	 int _debug_ai_level = 0;
+	 int _debug_driver_level = 0;
+	 int _debug_grf_level = 0;
+	 int _debug_map_level = 0;
+	 int _debug_misc_level = 0;
+	 int _debug_ms_level = 0;
+	 int _debug_net_level = 0;
+	 int _debug_spritecache_level = 0;
+	 int _debug_oldloader_level = 0;
+	 int _debug_pbs_level = 0;
+	 int _debug_ntp_level = 0;
+	 int _debug_npf_level = 0;
 	
 	
 	 
@@ -103,8 +118,20 @@ public class Global {
 	 	error( "dbg: %s\n", buf);
 	 	Console.IConsoleDebug(buf);
 	 }
-	 
-	 
+	
+	 // instead of DEBUG(ai, 0)( printf args)
+	 public void DEBUG_ai( int level, String s, Object ... arg )
+	 {
+		 if( level >= _debug_ai_level )
+			 debug( s, arg );
+	 }
+
+	 public void DEBUG_misc( int level, String s, Object ... arg )
+	 {
+		 if( level >= _debug_misc_level )
+			 debug( s, arg );
+	 }
+
 }
 /*
 class DebugLevel {
