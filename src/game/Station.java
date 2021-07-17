@@ -173,7 +173,7 @@ static void GetProductionAroundTiles(AcceptedCargo produced, TileIndex tile0,
 		for (xc = x1; xc != x2; xc++) {
 			if (!(IS_INSIDE_1D(xc, x, w) && IS_INSIDE_1D(yc, y, h))) {
 				GetProducedCargoProc *gpc;
-				TileIndex tile1 = TileXY(xc, yc);
+				TileIndex tile1 = new TileIndex(xc, yc);
 
 				gpc = _tile_type_procs[GetTileType(tile1)].get_produced_cargo_proc;
 				if (gpc != NULL) {
@@ -219,7 +219,7 @@ static void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile0,
 
 	for (yc = y1; yc != y2; yc++) {
 		for (xc = x1; xc != x2; xc++) {
-			TileIndex tile1 = TileXY(xc, yc);
+			TileIndex tile1 = new TileIndex(xc, yc);
 
 			if (!IsTileType(tile1, MP_STATION)) {
 				AcceptedCargo ac;
@@ -290,7 +290,7 @@ private void UpdateStationAcceptance(boolean show_msg)
 	if (rect.max_x >= rect.min_x) {
 		GetAcceptanceAroundTiles(
 			accepts,
-			TileXY(rect.min_x, rect.min_y),
+			new TileIndex(rect.min_x, rect.min_y),
 			rect.max_x - rect.min_x + 1,
 			rect.max_y - rect.min_y + 1,
 			rad

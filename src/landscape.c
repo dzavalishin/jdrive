@@ -1,5 +1,5 @@
 /* $Id: landscape.c 3181 2005-11-14 19:48:04Z tron $ */
-
+#if 0
 #include "stdafx.h"
 #include "openttd.h"
 #include "functions.h"
@@ -699,3 +699,4 @@ bool IsValidTile(TileIndex tile)
 {
 	return (tile < MapSizeX() * MapMaxY() && TileX(tile) != MapMaxX());
 }
+#endif

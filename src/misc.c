@@ -121,7 +121,7 @@ void StartupDisasters(void);
 void GenerateTrees(void);
 
 void ConvertGroundTilesIntoWaterTiles(void);
-
+/*
 void InitializeGame(uint size_x, uint size_y)
 {
 	AllocateMap(size_x, size_y);
@@ -226,6 +226,7 @@ void GenerateWorld(int mode, uint size_x, uint size_y)
 
 	ResetObjectToPlace();
 }
+*/
 
 void DeleteName(StringID id)
 {
@@ -239,7 +240,7 @@ char *GetName(int id, char *buff)
 	return strecpy(buff, _name_array[id & ~0x600], NULL);
 }
 
-
+/*
 static void InitializeCheats(void)
 {
 	memset(&_cheats, 0, sizeof(Cheats));
@@ -250,7 +251,7 @@ static void InitializeNameMgr(void)
 {
 	memset(_name_array, 0, sizeof(_name_array));
 }
-
+*/
 StringID RealAllocateName(const char *name, byte skip, bool check_double)
 {
 	char (*free_item)[lengthof(*_name_array)] = NULL;

@@ -1,3 +1,4 @@
+#if 0
 /* $Id: genland.h 2701 2005-07-24 14:12:37Z tron $ */
 
 #define M(x,y) {x, y}
@@ -157,3 +158,4 @@ static const TileIndexDiffC _make_desert_or_rainforest_data[] = {
 
 
 #undef M
+#endif

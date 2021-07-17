@@ -100,6 +100,31 @@ public class BitOps {
 	//static void SETBITS(x,y) ((x) |= (y))
 	//static void CLRBITS(x,y) ((x) &= ~(y))
 
+	public static int RETSETBITS( int x, int y)
+	{
+		x |= y;
+		return x;
+	}
+
+	public static byte RETSETBITS( byte x, byte y)
+	{
+		x |= y;
+		return x;
+	}
+
+	public static int RETCLRBITS( int x, int y)
+	{
+		x &= ~y;
+		return x;
+	}
+
+	public static byte RETCLRBITS( byte x, byte y)
+	{
+		x &= ~y;
+		return x;
+	}
+	
+	
 	//static void PLAYER_SPRITE_COLOR(owner) ( (_player_colors[owner] + 0x307) << PALETTE_SPRITE_START)
 	//static void SPRITE_PALETTE(x) ((x) | PALETTE_MODIFIER_COLOR)
 

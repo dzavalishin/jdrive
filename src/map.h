@@ -15,8 +15,8 @@ extern uint _map_tile_mask;
 extern uint _map_size;
 */
 
-#define TILE_MASK(x) ((x) & _map_tile_mask)
-#define TILE_ASSERT(x) assert(TILE_MASK(x) == (x));
+//#define TILE_MASK(x) ((x) & _map_tile_mask)
+//#define TILE_ASSERT(x) assert(TILE_MASK(x) == (x));
 /*
 typedef struct Tile {
 	byte type_height;
@@ -104,13 +104,13 @@ typedef struct TileIndexDiffC {
 	int16 x;
 	int16 y;
 } TileIndexDiffC;
-*/
-
+* /
+// in tileindex
 static inline TileIndexDiff ToTileIndexDiff(TileIndexDiffC tidc)
 {
 	return (tidc.y << MapLogX()) + tidc.x;
 }
-
+*/
 
 #ifndef _DEBUG
 	#define TILE_ADD(x,y) ((x) + (y))

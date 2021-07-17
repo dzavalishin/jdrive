@@ -302,13 +302,15 @@ struct Window {
 	byte custom[WINDOW_CUSTOM_SIZE];
 };
 */
+
+/*
 typedef struct {
-	byte item_count; /* follow_vehicle */
-	byte sel_index;		/* scrollpos_x */
-	byte main_button; /* scrollpos_y */
+	byte item_count; /* follow_vehicle * /
+	byte sel_index;		/* scrollpos_x * /
+	byte main_button; /* scrollpos_y * /
 	byte action_id;
-	StringID string_id; /* unk30 */
-	uint16 checked_items; /* unk32 */
+	StringID string_id; /* unk30 * /
+	uint16 checked_items; /* unk32 * /
 	byte disabled_items;
 } menu_d;
 assert_compile(WINDOW_CUSTOM_SIZE >= sizeof(menu_d));
@@ -465,7 +467,7 @@ typedef struct dropdown_d {
 	bool drag_mode;
 } dropdown_d;
 assert_compile(WINDOW_CUSTOM_SIZE >= sizeof(dropdown_d));
-
+*/
 enum WindowEvents {
 	WE_CLICK = 0,
 	WE_PAINT = 1,

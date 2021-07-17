@@ -19,6 +19,11 @@ public class TileIndex {
 		// TODO assert < max
 	}
 
+	public static  TileIndex TileXY(int x, int y)
+	{
+		return new TileIndex(x, y);
+	}
+
 	// TODO rename to getTileIndex
 	public int getTile() {
 		return tile;
@@ -161,26 +166,28 @@ public class TileIndex {
 		Global._m[tile].height = height;
 	}
 
-	TileType GetTileType()
+	TileTypes GetTileType()
 	{
 		//assert(tile < MapSize());
-		return new TileType(Global._m[tile].type);
+		//return new TileType(Global._m[tile].type);
+		return TileTypes.values[Global._m[tile].type];
+
 	}
 
-	void SetTileType(TileType type)
+	void SetTileType(TileTypes type)
 	{
 		//assert(tile < MapSize());
-		Global._m[tile].type = type.type;
+		Global._m[tile].type = type.ordinal();
 	}
 
 	boolean IsTileType(TileType type)
 	{
-		return GetTileType().type == type.type;
+		return GetTileType().ordinal() == type.type;
 	}
 
 	boolean IsTileType(TileTypes type)
 	{
-		return GetTileType().type == type.ordinal();
+		return GetTileType() == type;
 	}
 	
 	boolean IsTunnelTile()
@@ -213,6 +220,17 @@ public class TileIndex {
 		return GetTileOwner() == owner;
 	}
 
+	
+	public static TileIndexDiff ToTileIndexDiff(TileIndexDiffC tidc)
+	{
+		return new TileIndexDiff((tidc.y << Global.MapLogX()) + tidc.x);
+	}
+
+	
+	public static int TILE_MASK(int x) { return (x & Global._map_tile_mask); }
+	public void TILE_ASSERT(int x) { assert TILE_MASK(x) == x; }
+
+	
 	public void clrBit_m1(int i) {		Global._m[tile].m1 = BitOps.RETCLRBIT(Global._m[tile].m1, i);	}
 	public void setBit_m1(int i) {		Global._m[tile].m1 = BitOps.RETSETBIT(Global._m[tile].m1, i);	}
 
@@ -242,5 +260,8 @@ enum TileTypes {
 	MP_VOID, // invisible tiles at the SW and SE border
 	MP_INDUSTRY,
 	MP_TUNNELBRIDGE,
-	MP_UNMOVABLE,
+	MP_UNMOVABLE;
+	
+	static TileTypes[] values = values();
+	
 }

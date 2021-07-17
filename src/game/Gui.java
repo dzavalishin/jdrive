@@ -52,12 +52,12 @@ void SetupColorsAndInitialWindow()
 	switch (Global._game_mode) {
 	case GameModes.GM_MENU:
 		w = AllocateWindow(0, 0, width, height, MainWindowWndProc, WC_MAIN_WINDOW, NULL);
-		AssignWindowViewport(w, 0, 0, width, height, TileXY(32, 32), 0);
+		AssignWindowViewport(w, 0, 0, width, height, new TileIndex(32, 32), 0);
 		ShowSelectGameWindow();
 		break;
 	case GM_NORMAL:
 		w = AllocateWindow(0, 0, width, height, MainWindowWndProc, WC_MAIN_WINDOW, NULL);
-		AssignWindowViewport(w, 0, 0, width, height, TileXY(32, 32), 0);
+		AssignWindowViewport(w, 0, 0, width, height, new TileIndex(32, 32), 0);
 
 		ShowVitalWindows();
 

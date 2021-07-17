@@ -284,11 +284,11 @@ typedef struct {
 
 typedef int32 CommandProc(int x, int y, uint32 flags, uint32 p1, uint32 p2);
 
-typedef void DrawTileProc(TileInfo *ti);
-typedef uint GetSlopeZProc(const TileInfo* ti);
-typedef int32 ClearTileProc(TileIndex tile, byte flags);
-typedef void GetAcceptedCargoProc(TileIndex tile, AcceptedCargo res);
-typedef void GetTileDescProc(TileIndex tile, TileDesc *td);
+//typedef void DrawTileProc(TileInfo *ti);
+//typedef uint GetSlopeZProc(const TileInfo* ti);
+//typedef int32 ClearTileProc(TileIndex tile, byte flags);
+//typedef void GetAcceptedCargoProc(TileIndex tile, AcceptedCargo res);
+//typedef void GetTileDescProc(TileIndex tile, TileDesc *td);
 /* GetTileTrackStatusProcs return a value that contains the possible tracks
  * that can be taken on a given tile by a given transport. The return value is
  * composed as follows: 0xaabbccdd. ccdd and aabb are bitmasks of trackdirs,
@@ -308,20 +308,20 @@ typedef void GetTileDescProc(TileIndex tile, TileDesc *td);
  * possible options: 0-5 and 8-13, so we need 14 bits for a trackdir bitmask
  * above.
  */
-typedef uint32 GetTileTrackStatusProc(TileIndex tile, TransportType mode);
-typedef void GetProducedCargoProc(TileIndex tile, byte *b);
-typedef void ClickTileProc(TileIndex tile);
-typedef void AnimateTileProc(TileIndex tile);
-typedef void TileLoopProc(TileIndex tile);
-typedef void ChangeTileOwnerProc(TileIndex tile, PlayerID old_player, PlayerID new_player);
+//typedef uint32 GetTileTrackStatusProc(TileIndex tile, TransportType mode);
+//typedef void GetProducedCargoProc(TileIndex tile, byte *b);
+//typedef void ClickTileProc(TileIndex tile);
+//typedef void AnimateTileProc(TileIndex tile);
+//typedef void TileLoopProc(TileIndex tile);
+//typedef void ChangeTileOwnerProc(TileIndex tile, PlayerID old_player, PlayerID new_player);
 /* Return value has bit 0x2 set, when the vehicle enters a station. Then,
  * result << 8 contains the id of the station entered. If the return value has
  * bit 0x8 set, the vehicle could not and did not enter the tile. Are there
  * other bits that can be set? */
-typedef uint32 VehicleEnterTileProc(Vehicle *v, TileIndex tile, int x, int y);
-typedef void VehicleLeaveTileProc(Vehicle *v, TileIndex tile, int x, int y);
-typedef uint GetSlopeTilehProc(const TileInfo *ti);
-
+//typedef uint32 VehicleEnterTileProc(Vehicle *v, TileIndex tile, int x, int y);
+//typedef void VehicleLeaveTileProc(Vehicle *v, TileIndex tile, int x, int y);
+//typedef uint GetSlopeTilehProc(const TileInfo *ti);
+/*
 typedef struct {
 	DrawTileProc *draw_tile_proc;
 	GetSlopeZProc *get_slope_z_proc;
@@ -338,7 +338,7 @@ typedef struct {
 	VehicleLeaveTileProc *vehicle_leave_tile_proc;
 	GetSlopeTilehProc *get_slope_tileh_proc;
 } TileTypeProcs;
-
+*/
 
 
 #define MP_SETTYPE(x) ((x+1) << 8)
@@ -359,7 +359,7 @@ enum {
 
 	MP_NODIRTY = 1<<15,
 };
-
+/*
 enum {
 	WC_MAIN_WINDOW = 0x0,
 	WC_MAIN_TOOLBAR = 0x1,
@@ -440,7 +440,7 @@ enum {
 	WC_SIGN_LIST = 0x4F,
 	WC_BUILD_SIGNALS = 0x50,
 };
-
+*/
 
 enum {
 	EXPENSES_CONSTRUCTION = 0,

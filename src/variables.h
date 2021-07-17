@@ -262,19 +262,19 @@ VARDEF int _timer_counter;
 VARDEF byte _cur_year;
 VARDEF byte _cur_month;
 
-VARDEF uint32 _frame_counter;
+//VARDEF uint32 _frame_counter;
 
 VARDEF bool _is_old_ai_player; // current player is an oldAI player? (enables a lot of cheats..)
 
 VARDEF bool _do_autosave;
 VARDEF int _autosave_ctr;
-
-VARDEF byte _display_opt;
-VARDEF byte _pause;
+//
+//VARDEF byte _display_opt;
+//VARDEF byte _pause;
 VARDEF int _caret_timer;
 VARDEF uint32 _news_display_opt;
 VARDEF bool _news_ticker_sound;
-VARDEF byte _game_mode;
+//VARDEF byte _game_mode;
 
 VARDEF StringID _error_message;
 VARDEF StringID _error_message_2;
@@ -282,10 +282,10 @@ VARDEF int32 _additional_cash_required;
 
 VARDEF uint32 _decode_parameters[20];
 
-VARDEF uint32 _pressed_key; // Low 8 bits = ASCII, High 16 bits = keycode
-VARDEF bool _ctrl_pressed;  // Is Ctrl pressed?
-VARDEF bool _shift_pressed;  // Is Alt pressed?
-VARDEF byte _dirkeys;				// 1=left, 2=up, 4=right, 8=down
+//VARDEF uint32 _pressed_key; // Low 8 bits = ASCII, High 16 bits = keycode
+//VARDEF bool _ctrl_pressed;  // Is Ctrl pressed?
+//VARDEF bool _shift_pressed;  // Is Alt pressed?
+//VARDEF byte _dirkeys;				// 1=left, 2=up, 4=right, 8=down
 
 VARDEF bool _fullscreen;
 VARDEF bool _double_size;
@@ -302,19 +302,19 @@ VARDEF TileIndex _build_tunnel_endtile;
 VARDEF bool _generating_world;
 VARDEF int _new_town_size;
 VARDEF uint _returned_refit_amount;
-
+/*
 // Deals with the type of the savegame, independent of extension
 typedef struct {
 	int mode;             // savegame/scenario type (old, new)
 	char name[MAX_PATH];  // name
 	char title[255];      // internal name of the game
 } SmallFiosItem;
-
+*/
 // Used when switching from the intro menu.
 VARDEF byte _switch_mode;
 VARDEF StringID _switch_mode_errorstr;
 VARDEF bool _exit_game;
-VARDEF SmallFiosItem _file_to_saveload;
+//VARDEF SmallFiosItem _file_to_saveload;
 VARDEF byte _make_screenshot;
 
 VARDEF byte _get_z_hint; // used as a hint to getslopez to return the right height at a bridge.

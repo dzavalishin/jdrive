@@ -1,15 +1,13 @@
 package game;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import game.util.BufferedRandomAccessFile;
+import game.util.BitOps;
 
 public class Main {
 
-	SmallFiosItem _file_to_saveload = new SmallFiosItem();
-
-
-
+	private static SmallFiosItem _file_to_saveload = new SmallFiosItem();
 
 
 
@@ -21,10 +19,10 @@ public class Main {
 	{
 		String buf = String.format(s, args);
 
-		ShowOSErrorBox(buf);
+		Global.hal.ShowOSErrorBox(buf);
 		Global.hal.stop_video();
 
-		assert(0);
+		assert(false);
 		System.exit(1);
 	}
 
@@ -52,9 +50,24 @@ public class Main {
 			return null;
 		}
 
-		int len = f.read(buf);
+		int len;
+		try {
+			len = f.read(buf);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} finally
+		{
+			try {
+				f.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
 
-		f.close();
 
 		if( len < 0 )
 		{
@@ -70,34 +83,33 @@ public class Main {
 
 	static void showhelp()
 	{
-		char buf[4096], *p;
+		//char buf[4096], *p;
 
-		p = strecpy(buf,
-				"Command line options:\n"
-				"  -v drv              = Set video driver (see below)\n"
-				"  -s drv              = Set sound driver (see below)\n"
-				"  -m drv              = Set music driver (see below)\n"
-				"  -r res              = Set resolution (for instance 800x600)\n"
-				"  -h                  = Display this help text\n"
-				"  -t date             = Set starting date\n"
-				"  -d [[fac=]lvl[,...]]= Debug mode\n"
-				"  -e                  = Start Editor\n"
-				"  -g [savegame]       = Start new/save game immediately\n"
-				"  -G seed             = Set random seed\n"
-				"  -n [ip#player:port] = Start networkgame\n"
-				"  -D                  = Start dedicated server\n"
+		String help =
+				"Command line options:\n" +
+				"  -v drv              = Set video driver (see below)\n" +
+				"  -s drv              = Set sound driver (see below)\n" +
+				"  -m drv              = Set music driver (see below)\n" +
+				"  -r res              = Set resolution (for instance 800x600)\n" +
+				"  -h                  = Display this help text\n" +
+				"  -t date             = Set starting date\n" +
+				"  -d [[fac=]lvl[,...]]= Debug mode\n" +
+				"  -e                  = Start Editor\n" +
+				"  -g [savegame]       = Start new/save game immediately\n" +
+				"  -G seed             = Set random seed\n" +
+				"  -n [ip#player:port] = Start networkgame\n" +
+				"  -D                  = Start dedicated server\n" +
 				//#if !defined(__MORPHOS__) && !defined(__AMIGA__)
 				//"  -f                  = Fork into the background (dedicated only)\n"
 				//#endif
-				"  -i                  = Force to use the DOS palette (use this if you see a lot of pink)\n"
-				"  -p #player          = Player as #player (deprecated) (network only)\n"
-				"  -c config_file      = Use 'config_file' instead of 'openttd.cfg'\n",
-				lastof(buf)
-				);
+				"  -i                  = Force to use the DOS palette (use this if you see a lot of pink)\n" +
+				"  -p #player          = Player as #player (deprecated) (network only)\n" +
+				"  -c config_file      = Use 'config_file' instead of 'openttd.cfg'\n"
+				;
 
-		GetDriverList(p);
+		// TODO GetDriverList(p);
 
-		ShowInfo(buf);
+		ShowInfo(help);
 	}
 
 
@@ -119,23 +131,26 @@ public class Main {
 
 	static void InitializeDynamicVariables()
 	{
+		// supposed to be unused in jaba code
 		/* Dynamic stuff needs to be initialized somewhere... */
-		_station_sort  = null;
-		_vehicle_sort  = null;
-		_town_sort     = null;
-		_industry_sort = null;
+		//_station_sort  = null;
+		//_vehicle_sort  = null;
+		//_town_sort     = null;
+		//_industry_sort = null;
 	}
 
 	static void UnInitializeDynamicVariables()
 	{
 		/* Dynamic stuff needs to be free'd somewhere... */
+		// TODO do we need?
+		/*
 		CleanPool(&_town_pool);
 		CleanPool(&_industry_pool);
 		CleanPool(&_station_pool);
 		CleanPool(&_vehicle_pool);
 		CleanPool(&_sign_pool);
 		CleanPool(&_order_pool);
-
+		*/
 		//free(_station_sort);
 		//free(_vehicle_sort);
 		//free(_town_sort);
@@ -154,7 +169,8 @@ public class Main {
 		String filename;
 
 		Global._game_mode = GameModes.GM_MENU;
-		CLRBITS(_display_opt, DO_TRANS_BUILDINGS); // don't make buildings transparent in intro
+		//CLRBITS(_display_opt, DO_TRANS_BUILDINGS); // don't make buildings transparent in intro
+		Global._display_opt = BitOps.RETCLRBITS( Global._display_opt, DO_TRANS_BUILDINGS );
 		GameOptions._opt_ptr = GameOptions._opt_newgame;
 
 		GfxLoadSprites();
@@ -165,8 +181,9 @@ public class Main {
 		SetupColorsAndInitialWindow();
 
 		// Generate a world.
-		sprintf(filename, "%sopntitle.dat",  _path.data_dir);
-		if (SaveOrLoad(filename, SL_LOAD) != SL_OK) {
+		filename = String.format( "%sopntitle.dat",  _path.data_dir );
+		if (SaveOrLoad(filename, SL_LOAD) != SL_OK) 
+		{
 			/*#if defined SECOND_DATA_DIR
 			sprintf(filename, "%sopntitle.dat",  _path.second_data_dir);
 			if (SaveOrLoad(filename, SL_LOAD) != SL_OK)
@@ -174,12 +191,12 @@ public class Main {
 			GenerateWorld(1, 64, 64); // if failed loading, make empty world.
 		}
 
-		Global._pause = 0;
-		Global._local_player = 0;
+		Global._pause = false;
+		Global._local_player = null;
 		Global.hal.MarkWholeScreenDirty();
 
 		// Play main theme
-		if (_music_driver.is_song_playing()) ResetMusic();
+		// TODO if (_music_driver.is_song_playing()) ResetMusic();
 	}
 
 
@@ -215,7 +232,7 @@ public class Main {
 		//optformat = "bm:s:v:hDn::eit:d::r:g::G:p:c:"; // no fork option
 		//#endif
 
-		mgo.MyGetOptInit( argc-1, argv+1, optformat);
+		mgo.MyGetOptInit( argv, optformat);
 		
 		while ((i = mgo.MyGetOpt()) != -1) {
 			switch(i) {
@@ -248,7 +265,7 @@ public class Main {
 				//#endif
 				if (mgo.opt != null) SetDebugString(mgo.opt);
 			} break;
-			case 'e': Global._switch_mode = SM_EDITOR; break;
+			case 'e': Global._switch_mode = SwitchModes.SM_EDITOR; break;
 			case 'i': Global._use_dos_palette = true; break;
 			case 'g':
 				if (mgo.opt != null) {
@@ -321,8 +338,8 @@ public class Main {
 
 		// Sample catalogue
 		Global.DEBUG_misc( 1, "Loading sound effects...");
-		MxInitialize(11025);
-		SoundInitialize("sample.cat");
+		// TODO MxInitialize(11025);
+		// TODO SoundInitialize("sample.cat");
 
 		// This must be done early, since functions use the InvalidateWindow* calls
 		InitWindowSystem();
@@ -422,7 +439,7 @@ public class Main {
 	{
 		if (Global._exit_game) return;
 		while (_message != ThreadMsg.MSG_OTTD_SAVETHREAD_ZERO) 
-			CSleep(10);
+			Global.hal.CSleep(10);
 
 		_message = msg;
 	}
@@ -586,7 +603,7 @@ public class Main {
 		}
 	}
 
-	void SwitchMode(int new_mode)
+	static void SwitchMode(SwitchModes new_mode)
 	{
 		/*
 		// If we are saving something, the network stays in his current state
@@ -713,13 +730,13 @@ public class Main {
 		// _frame_counter is increased somewhere else when in network-mode
 		//  Sidenote: _frame_counter is ONLY used for _savedump in non-MP-games
 		//    Should that not be deleted? If so, the next 2 lines can also be deleted
-		if (!Global._networking) _frame_counter++;
+		if (!Global._networking) Global._frame_counter++;
 
 		if (_savedump_path[0] && (int)_frame_counter >= _savedump_first && (int)(_frame_counter -_savedump_first) % _savedump_freq == 0 ) {
-			char buf[100];
-			sprintf(buf, "%s%.5d.sav", _savedump_path, _frame_counter);
+			String buf;
+			buf = String.format( "%s%.5d.sav", Global._savedump_path, Global._frame_counter);
 			SaveOrLoad(buf, SL_SAVE);
-			if ((int)_frame_counter >= _savedump_last) exit(1);
+			if ((int)Global._frame_counter >= _savedump_last) exit(1);
 		}
 
 		if (Global._game_mode == GameModes.GM_EDITOR) {
@@ -731,7 +748,7 @@ public class Main {
 		} else {
 			// All these actions has to be done from OWNER_NONE
 			//  for multiplayer compatibility
-			PlayerID p = Global._current_player;
+			Player p = Global._current_player;
 			Global._current_player = OWNER_NONE;
 
 			AnimateAnimatedTiles();
@@ -780,8 +797,8 @@ public class Main {
 	static void ScrollMainViewport(int x, int y)
 	{
 		if (Global._game_mode != GameModes.GM_MENU) {
-			Window w = FindWindowById(WC_MAIN_WINDOW, 0);
-			assert(w);
+			Window w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+			assert(w != null);
 
 			WP(w,vp_d).scrollpos_x += x << w.viewport.zoom;
 			WP(w,vp_d).scrollpos_y += y << w.viewport.zoom;
@@ -810,7 +827,7 @@ public class Main {
 
 	static void HandleKeyScrolling()
 	{
-		if (Global._dirkeys && !_no_scroll) {
+		if (Global._dirkeys != 0 && !_no_scroll) {
 			int factor = _shift_pressed ? 50 : 10;
 			ScrollMainViewport(scrollamt[_dirkeys][0] * factor, scrollamt[_dirkeys][1] * factor);
 		}
@@ -821,7 +838,8 @@ public class Main {
 		SwitchModes m;
 		ThreadMsg message;
 
-		if ((message = OTTD_PollThreadEvent()) != 0) ProcessSentMessage(message);
+		if ((message = OTTD_PollThreadEvent()) != ThreadMsg.MSG_OTTD_SAVETHREAD_ZERO) 
+			ProcessSentMessage(message);
 
 		// autosave game?
 		if (Global._do_autosave) {
@@ -897,11 +915,11 @@ public class Main {
 
 	void BeforeSaveGame()
 	{
-		final Window w = FindWindowById(WC_MAIN_WINDOW, 0);
+		final Window w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 
 		if (w != null) {
-			_saved_scrollpos_x = WP(w,  vp_d).scrollpos_x;
-			_saved_scrollpos_y = WP(w,  vp_d).scrollpos_y;
+			_saved_scrollpos_x = ((vp_d)w.custom).scrollpos_x;
+			_saved_scrollpos_y = ((vp_d)w.custom).scrollpos_y;
 			_saved_scrollpos_zoom = w.viewport.zoom;
 		}
 	}
@@ -925,9 +943,10 @@ public class Main {
 	// before savegame version 4, the name of the company determined if it existed
 	static void CheckIsPlayerActive()
 	{
-		Player p;
 
-		FOR_ALL_PLAYERS(p) {
+		//FOR_ALL_PLAYERS(p) 
+		for( Player p: Global._players )
+		{
 			if (p.name_1 != 0) p.is_active = true;
 		}
 	}
@@ -1013,7 +1032,7 @@ public class Main {
 		    walk through the whole map.. */
 		/* TODO check me
 		if (CheckSavegameVersionOldStyle(4, 3)) {
-			TileIndex tile = TileXY(0, 0);
+			TileIndex tile = new TileIndex(0, 0);
 			int w = MapSizeX();
 			int h = MapSizeY();
 
@@ -1024,7 +1043,7 @@ public class Main {
 		}*/
 
 		// convert road side to my format.
-		if (GameOptions._opt.road_side) GameOptions._opt.road_side = 1;
+		if (GameOptions._opt.road_side != 0) GameOptions._opt.road_side = 1;
 
 		// Load the sprites
 		GfxLoadSprites();
@@ -1095,11 +1114,11 @@ public class Main {
 		Global.hal.MarkWholeScreenDirty();
 
 		// // FIXME KILLME In 5.1, Oilrigs have been moved (again)
-		if (CheckSavegameVersionOldStyle(5, 1)) UpdateOilRig();
+		//if (CheckSavegameVersionOldStyle(5, 1)) UpdateOilRig();
 
 		/* // FIXME KILLME In version 6.1 we put the town index in the map-array. To do this, we need
 		 *  to use m2 (16bit big), so we need to clean m2, and that is where this is
-		 *  all about ;) */
+		 *  all about ;) * /
 		if (CheckSavegameVersionOldStyle(6, 1)) {
 			BEGIN_TILE_LOOP(tile, MapSizeX(), MapSizeY(), 0) {
 				if (IsTileType(tile, MP_HOUSE)) {
@@ -1121,16 +1140,17 @@ public class Main {
 				}
 			} END_TILE_LOOP(tile, MapSizeX(), MapSizeY(), 0);
 		}
-
+		*/
 		/* // FIXME KILLME From version 9.0, we update the max passengers of a town (was sometimes negative
-		 *  before that. */
+		 *  before that. * /
 		if (CheckSavegameVersion(9)) {
 			Town *t;
 			FOR_ALL_TOWNS(t) UpdateTownMaxPass(t);
-		}
+		}*/
 
 		/* // FIXME KILLME From version 15.0, we moved a semaphore bit from bit 2 to bit 3 in m4, making
 		 *  room for PBS. While doing that, clean some blocks that should be empty, for PBS. */
+		/*
 		if (CheckSavegameVersion(15)) {
 			BEGIN_TILE_LOOP(tile, MapSizeX(), MapSizeY(), 0) {
 				if (IsTileType(tile, MP_RAILWAY) && HasSignals(tile) && HASBIT(_m[tile].m4, 2)) {
@@ -1141,10 +1161,11 @@ public class Main {
 				if (IsTileType(tile, MP_RAILWAY) && !HASBIT(_m[tile].m5, 7))
 					SB(_m[tile].m4, 4, 4, 0);
 			} END_TILE_LOOP(tile, MapSizeX(), MapSizeY(), 0);
-		}
+		}*/
 
 		/* // FIXME KILLME From version 16.0, we included autorenew on engines, which are now saved, but
 		 *  of course, we do need to initialize them for older savegames. */
+		/*
 		if (CheckSavegameVersion(16)) {
 			FOR_ALL_PLAYERS(p) {
 				InitialiseEngineReplacement(p);
@@ -1164,7 +1185,7 @@ public class Main {
 
 		/* // FIXME KILLME In version 16.1 of the savegame, trains became aware of station lengths
 			need to initialized to the invalid state
-			players needs to set renew_keep_length too */
+			players needs to set renew_keep_length too * /
 		if (CheckSavegameVersionOldStyle(16, 1)) {
 			Vehicle *v;
 			FOR_ALL_PLAYERS(p) {
@@ -1182,7 +1203,7 @@ public class Main {
 		/* // FIXME KILLME In version 17, ground type is moved from m2 to m4 for depots and
 		 * waypoints to make way for storing the index in m2. The custom graphics
 		 * id which was stored in m4 is now saved as a grf/id reference in the
-		 * waypoint struct. */
+		 * waypoint struct. * /
 		if (CheckSavegameVersion(17)) {
 			Waypoint *wp;
 
@@ -1212,11 +1233,13 @@ public class Main {
 			}
 		} else {
 			/* As of version 17, we recalculate the custom graphic ID of waypoints
-			 * from the GRF ID / station index. */
+			 * from the GRF ID / station index. * /
 			UpdateAllWaypointCustomGraphics();
 		}
-
-		FOR_ALL_PLAYERS(p) p.avail_railtypes = GetPlayerRailtypes(p.index);
+		*/
+		//FOR_ALL_PLAYERS(p) 
+		for( Player p: Global._players )
+			p.avail_railtypes = GetPlayerRailtypes(p.index);
 
 		return true;
 	}
@@ -1233,38 +1256,62 @@ class MyGetOptData
 	String opt;
 	int numleft;
 	String [] argv;
-	final String options;
-	String cont;
+	String arg;
+	String options;
+	//String cont;
+	
+	int curarg;
+	private int argpos;
 
 
-	public void MyGetOptInit( int argc, String *argv, final String options)
+	public void MyGetOptInit( String []argv, final String options)
 	{
-		md.cont = null;
-		md.numleft = argc;
-		md.argv = argv;
-		md.options = options;
+		//this.cont = null;
+		this.numleft = argv.length;
+		this.argv = argv;
+		this.options = options;
+		
+		this.curarg = 0;
+		this.argpos = 0;
+		
+		this.arg = argv[0];
 	}
 
+	private boolean argEmpty()
+	{
+		return argpos >= arg.length();
+	}
+	
+	private char argChar()
+	{
+		return arg.charAt(argpos);
+	}
+	
 	public int MyGetOpt()
 	{
-		String s;
+		//String s;
 		String r;
 		String t;
 
-		s = md.cont;
-		if (s != null)
-			goto md_continue_here;
+		//s = cont;
+		//if (s != null)			goto md_continue_here;
 
 		for (;;) {
-			if (--md.numleft < 0) return -1;
 
-			s = *md.argv++;
-			if (*s == '-') {
-				md_continue_here:;
-				s++;
-				if (*s != 0) {
+			if( argEmpty() )
+			{
+				//s = *argv++;
+				if (--numleft < 0) return -1;
+				arg = argv[++curarg];
+				argpos = 0;
+			}
+			
+			if(argChar() == '-') {
+				//md_continue_here:;
+				argpos++;
+				if (!argEmpty()) {
 					// Found argument, try to locate it in options.
-					if (*s == ':' || (r = strchr(md.options, *s)) == null) {
+					if (argChar() == ':' || (r = strchr(options, argChar())) == null) {
 						// ERROR!
 						return -2;
 					}
@@ -1272,23 +1319,23 @@ class MyGetOptData
 						// Item wants an argument. Check if the argument follows, or if it comes as a separate arg.
 						if (!*(t = s + 1)) {
 							// It comes as a separate arg. Check if out of args?
-							if (--md.numleft < 0 || *(t = *md.argv) == '-') {
+							if (--numleft < 0 || *(t = *argv) == '-') {
 								// Check if item is optional?
 								if (r[2] != ':')
 									return -2;
-								md.numleft++;
+								numleft++;
 								t = null;
 							} else {
-								md.argv++;
+								argv++;
 							}
 						}
-						md.opt = t;
-						md.cont = null;
-						return *s;
+						opt = t;
+						cont = null;
+						return argChar();
 					}
-					md.opt = null;
-					md.cont = s;
-					return *s;
+					opt = null;
+					cont = s;
+					return argChar();
 				}
 			} else {
 				// This is currently not supported.

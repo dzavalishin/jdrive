@@ -34,7 +34,7 @@ typedef struct {
 
 VARDEF HalMusicDriver *_music_driver;
 VARDEF HalSoundDriver *_sound_driver;
-VARDEF HalVideoDriver *_video_driver;
+//VARDEF HalVideoDriver *_video_driver;
 
 enum DriverType {
 	VIDEO_DRIVER = 0,

@@ -1,8 +1,9 @@
 package game;
 
+import game.util.WindowConstants;
 import game.util.wcustom.AbstractWinCustom;
 
-abstract public class Window
+abstract public class Window extends WindowConstants
 {
 	int flags4;
 	WindowClass window_class;

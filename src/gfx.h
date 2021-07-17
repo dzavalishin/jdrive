@@ -109,7 +109,7 @@ VARDEF ColorList _color_list[16];
 VARDEF int _pal_first_dirty;
 VARDEF int _pal_last_dirty;
 
-VARDEF bool _use_dos_palette;
+//VARDEF bool _use_dos_palette;
 
 typedef struct Colour {
 	byte r;
