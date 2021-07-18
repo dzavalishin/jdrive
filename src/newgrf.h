@@ -1,4 +1,4 @@
-/* $Id: newgrf.h 3311 2005-12-18 08:01:05Z tron $ */
+/* $Id: newgrf.h 3311 2005-12-18 08:01:05Z tron $ * /
 
 #ifndef NEWGRF_H
 #define NEWGRF_H
@@ -24,7 +24,7 @@ struct GRFFile {
 	 * cargo at a given *stage* - that is usually its load stage. Ie. you
 	 * can have a spriteset for an empty wagon, wagon full of coal,
 	 * half-filled wagon etc.  Each spriteset contains eight sprites (one
-	 * per direction) or four sprites if the vehicle is symmetric. */
+	 * per direction) or four sprites if the vehicle is symmetric. * /
 
 	int spriteset_start;
 	int spriteset_numsets;

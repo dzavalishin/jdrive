@@ -12,21 +12,21 @@ public class WayPoint implements IPoolItem
 	public static final int MAX_WAYPOINTS_PER_TOWN        = 64;
 
 
-	TileIndex xy;      ///< Tile of waypoint
-	int index;      ///< Index of waypoint
+	TileIndex xy;      ///< Tile of WayPoint
+	int index;      ///< Index of WayPoint
 
-	int town_index; ///< Town associated with the waypoint
-	byte town_cn;      ///< The Nth waypoint for this town (consecutive number)
+	int town_index; ///< Town associated with the WayPoint
+	byte town_cn;      ///< The Nth WayPoint for this town (consecutive number)
 	StringID string;   ///< If this is zero (i.e. no custom name), town + town_cn is used for naming
 
 	ViewportSign sign; ///< Dimensions of sign (not saved)
 	int build_date; ///< Date of construction
 
-	byte stat_id;      ///< ID of waypoint within the waypoint class (not saved)
+	byte stat_id;      ///< ID of WayPoint within the WayPoint class (not saved)
 	int grfid;      ///< ID of GRF file
 	byte localidx;     ///< Index of station within GRF file
 
-	byte deleted;      ///< Delete counter. If greater than 0 then it is decremented until it reaches 0; the waypoint is then is deleted.
+	byte deleted;      ///< Delete counter. If greater than 0 then it is decremented until it reaches 0; the WayPoint is then is deleted.
 
 
 
@@ -40,7 +40,7 @@ public class WayPoint implements IPoolItem
 
 	private static MemoryPool<WayPoint> _waypoint_pool = new MemoryPool<WayPoint>(factory);
 	/* Initialize the town-pool */
-	//MemoryPool _waypoint_pool = { "Waypoints", WAYPOINT_POOL_MAX_BLOCKS, WAYPOINT_POOL_BLOCK_SIZE_BITS, sizeof(Waypoint), &WaypointPoolNewBlock, 0, 0, null };
+	//MemoryPool _waypoint_pool = { "Waypoints", WAYPOINT_POOL_MAX_BLOCKS, WAYPOINT_POOL_BLOCK_SIZE_BITS, sizeof(WayPoint), &WaypointPoolNewBlock, 0, 0, null };
 
 	private void clear()
 	{
@@ -63,11 +63,11 @@ public class WayPoint implements IPoolItem
 
 
 	/**
-	 * Get the pointer to the waypoint with index 'index'
+	 * Get the pointer to the WayPoint with index 'index'
 	 */
-	private  Waypoint GetWaypoint(int index)
+	private static WayPoint GetWaypoint(int index)
 	{
-		return (Waypoint)_waypoint_pool.GetItemFromPool(index);
+		return _waypoint_pool.GetItemFromPool(index);
 	}
 
 	/**
@@ -95,11 +95,11 @@ public class WayPoint implements IPoolItem
 	}
 
 	/**
-	 * Fetch a waypoint by tile
-	 * @param tile Tile of waypoint
-	 * @return Waypoint
+	 * Fetch a WayPoint by tile
+	 * @param tile Tile of WayPoint
+	 * @return WayPoint
 	 */
-	private static Waypoint GetWaypointByTile(TileIndex tile)
+	private static WayPoint GetWaypointByTile(TileIndex tile)
 	{
 		assert(IsTileType(tile, MP_RAILWAY) && IsRailWaypoint(tile));
 		return GetWaypoint(tile.getMap().m2);
@@ -108,11 +108,11 @@ public class WayPoint implements IPoolItem
 
 	// TODO NOT CALLED
 	/**
-	 * Called if a new block is added to the waypoint-pool
+	 * Called if a new block is added to the WayPoint-pool
 	 * /
 private void WaypointPoolNewBlock(int start_item)
 {
-	Waypoint wp;
+	WayPoint wp;
 
 	//FOR_ALL_WAYPOINTS_FROM(wp, start_item)
     for (wp = GetWaypoint(start_item); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null)
@@ -124,10 +124,10 @@ private void WaypointPoolNewBlock(int start_item)
 		this.index = index;	
 	}
 
-	/* Create a new waypoint */
-	private static Waypoint AllocateWaypoint()
+	/* Create a new WayPoint */
+	private static WayPoint AllocateWaypoint()
 	{
-		Waypoint ret = null;
+		WayPoint ret = null;
 
 		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
 		_waypoint_pool.forEach((i,wp) ->
@@ -135,7 +135,7 @@ private void WaypointPoolNewBlock(int start_item)
 			if (wp.xy == null) {
 				int index = wp.index;
 
-				//memset(wp, 0, sizeof(Waypoint));
+				//memset(wp, 0, sizeof(WayPoint));
 				wp.clear();
 				wp.index = index;
 
@@ -152,7 +152,7 @@ private void WaypointPoolNewBlock(int start_item)
 		return null;
 	}
 
-	/* Update the sign for the waypoint */
+	/* Update the sign for the WayPoint */
 	void UpdateWaypointSign()
 	{
 		Point pt = RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
@@ -160,7 +160,7 @@ private void WaypointPoolNewBlock(int start_item)
 		UpdateViewportSignPos(sign, pt.x, pt.y - 0x20, STR_WAYPOINT_VIEWPORT);
 	}
 
-	/* Redraw the sign of a waypoint */
+	/* Redraw the sign of a WayPoint */
 	private void RedrawWaypointSign()
 	{
 		MarkAllViewportsDirty(
@@ -173,7 +173,7 @@ private void WaypointPoolNewBlock(int start_item)
 	/* Update all signs */
 	static void UpdateAllWaypointSigns()
 	{
-		//Waypoint wp;
+		//WayPoint wp;
 
 		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
 		_waypoint_pool.forEach((i,wp) ->
@@ -183,10 +183,10 @@ private void WaypointPoolNewBlock(int start_item)
 		});
 	}
 
-	/* Set the default name for a waypoint */
+	/* Set the default name for a WayPoint */
 	private void MakeDefaultWaypointName()
 	{
-		//Waypoint local_wp;
+		//WayPoint local_wp;
 		boolean used_waypoint[] = new boolean[MAX_WAYPOINTS_PER_TOWN];
 		int i;
 
@@ -194,9 +194,9 @@ private void WaypointPoolNewBlock(int start_item)
 
 		memset(used_waypoint, 0, sizeof(used_waypoint));
 
-		/* Find an unused waypoint number belonging to this town */
+		/* Find an unused WayPoint number belonging to this town */
 		//for (local_wp = GetWaypoint(0); local_wp != null; local_wp = (local_wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(local_wp.index + 1) : null) 
-		_waypoint_pool.forEach((i,local_wp) ->
+		_waypoint_pool.forEach((ii,local_wp) ->
 		{
 			if (this == local_wp)
 				continue;
@@ -212,10 +212,10 @@ private void WaypointPoolNewBlock(int start_item)
 		town_cn = i;
 	}
 
-	/* Find a deleted waypoint close to a tile. */
-	private static Waypoint FindDeletedWaypointCloseTo(TileIndex tile)
+	/* Find a deleted WayPoint close to a tile. */
+	private static WayPoint FindDeletedWaypointCloseTo(TileIndex tile)
 	{
-		Waypoint best = null;
+		WayPoint best = null;
 		int thres = 8, cur_dist;
 
 		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
@@ -234,12 +234,12 @@ private void WaypointPoolNewBlock(int start_item)
 	}
 
 	/**
-	 * Update waypoint graphics id against saved GRFID/localidx.
+	 * Update WayPoint graphics id against saved GRFID/localidx.
 	 * This is to ensure the chosen graphics are correct if GRF files are changed.
 	 */
 	static void UpdateAllWaypointCustomGraphics()
 	{
-		Waypoint wp;
+		//WayPoint wp;
 
 		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
 		_waypoint_pool.forEach((ix,wp) ->
@@ -259,10 +259,10 @@ private void WaypointPoolNewBlock(int start_item)
 		});
 	}
 
-	/** Convert existing rail to waypoint. Eg build a waypoint station over
+	/** Convert existing rail to WayPoint. Eg build a WayPoint station over
 	 * piece of rail
-	 * @param x,y coordinates where waypoint will be built
-	 * @param p1 graphics for waypoint type, 0 indicates standard graphics
+	 * @param x,y coordinates where WayPoint will be built
+	 * @param p1 graphics for WayPoint type, 0 indicates standard graphics
 	 * @param p2 unused
 	 *
 	 * @todo When checking for the tile slope,
@@ -271,7 +271,7 @@ private void WaypointPoolNewBlock(int start_item)
 	static int CmdBuildTrainWaypoint(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile = TileVirtXY(x, y);
-		Waypoint wp;
+		WayPoint wp;
 		int tileh;
 		int dir;
 
@@ -280,7 +280,7 @@ private void WaypointPoolNewBlock(int start_item)
 		/* if custom gfx are used, make sure it is within bounds */
 		if (p1 >= GetNumCustomStations(STAT_CLASS_WAYP)) return CMD_ERROR;
 
-		if (!IsTileType(tile, MP_RAILWAY) || ((dir = 0, _m[tile].m5 != 1) && (dir = 1, _m[tile].m5 != 2)))
+		if (!IsTileType(tile, MP_RAILWAY) || ((dir = 0, tile.getMap().m5 != 1) && (dir = 1, _tile.getMap().m5 != 2)))
 			return_cmd_error(STR_1005_NO_SUITABLE_RAILROAD_TRACK);
 
 		if (!CheckTileOwnership(tile))
@@ -288,13 +288,13 @@ private void WaypointPoolNewBlock(int start_item)
 
 		if (!EnsureNoVehicle(tile)) return CMD_ERROR;
 
-		tileh = GetTileSlope(tile, null);
+		tileh = tile.GetTileSlope(null);
 		if (tileh != 0) {
 			if (!_patches.build_on_slopes || IsSteepTileh(tileh) || !(tileh & (0x3 << dir)) || !(tileh & ~(0x3 << dir)))
 				return_cmd_error(STR_0007_FLAT_LAND_REQUIRED);
 		}
 
-		/* Check if there is an already existing, deleted, waypoint close to us that we can reuse. */
+		/* Check if there is an already existing, deleted, WayPoint close to us that we can reuse. */
 		wp = FindDeletedWaypointCloseTo(tile);
 		if (wp == null) {
 			wp = AllocateWaypoint();
@@ -339,16 +339,16 @@ private void WaypointPoolNewBlock(int start_item)
 			wp.build_date = Global._date;
 
 			if (wp.town_index == STR_null)
-				MakeDefaultWaypointName(wp);
+				wp.MakeDefaultWaypointName();
 
-			UpdateWaypointSign(wp);
-			RedrawWaypointSign(wp);
+			wp.UpdateWaypointSign();
+			wp.RedrawWaypointSign();
 		}
 
 		return _price.build_train_depot;
 	}
 
-	/* Internal handler to delete a waypoint */
+	/* Internal handler to delete a WayPoint */
 	private void DoDeleteWaypoint()
 	{
 		Order order;
@@ -356,7 +356,7 @@ private void WaypointPoolNewBlock(int start_item)
 		xy = null;
 
 		order.type = OT_GOTO_WAYPOINT;
-		order.station = wp.index;
+		order.station = index;
 		DeleteDestinationFromVehicleOrder(order);
 
 		if (string != STR_null)
@@ -374,9 +374,9 @@ private void WaypointPoolNewBlock(int start_item)
 
 		});
 		/*
-    Waypoint wp;
+    WayPoint wp;
 
-	// Check if we need to delete a waypoint 
+	// Check if we need to delete a WayPoint 
 	for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
     {
 		if (wp.deleted && !--wp.deleted) {
@@ -386,12 +386,12 @@ private void WaypointPoolNewBlock(int start_item)
 		 */
 	}
 
-	/* Remove a waypoint */
+	/* Remove a WayPoint */
 	static int RemoveTrainWaypoint(TileIndex tile, int flags, boolean justremove)
 	{
-		Waypoint wp;
+		WayPoint wp;
 
-		/* Make sure it's a waypoint */
+		/* Make sure it's a WayPoint */
 		if (!IsTileType(tile, MP_RAILWAY) || !IsRailWaypoint(tile))
 			return CMD_ERROR;
 
@@ -429,8 +429,8 @@ private void WaypointPoolNewBlock(int start_item)
 		return _price.remove_train_depot;
 	}
 
-	/** Delete a waypoint
-	 * @param x,y coordinates where waypoint is to be deleted
+	/** Delete a WayPoint
+	 * @param x,y coordinates where WayPoint is to be deleted
 	 * @param p1 unused
 	 * @param p2 unused
 	 */
@@ -441,14 +441,14 @@ private void WaypointPoolNewBlock(int start_item)
 		return RemoveTrainWaypoint(tile, flags, true);
 	}
 
-	/** Rename a waypoint.
+	/** Rename a WayPoint.
 	 * @param x,y unused
-	 * @param p1 id of waypoint
+	 * @param p1 id of WayPoint
 	 * @param p2 unused
 	 */
 	static int CmdRenameWaypoint(int x, int y, int flags, int p1, int p2)
 	{
-		Waypoint wp;
+		WayPoint wp;
 		StringID str;
 
 		if (!IsWaypointIndex(p1)) return CMD_ERROR;
@@ -485,10 +485,10 @@ private void WaypointPoolNewBlock(int start_item)
 		return 0;
 	}
 
-	/* This hacks together some dummy one-shot Station structure for a waypoint. */
+	/* This hacks together some dummy one-shot Station structure for a WayPoint. */
 	Station ComposeWaypointStation(TileIndex tile)
 	{
-		Waypoint wp = GetWaypointByTile(tile);
+		WayPoint wp = GetWaypointByTile(tile);
 		static Station stat;
 
 		stat.train_tile = stat.xy = wp.xy;
@@ -504,7 +504,7 @@ private void WaypointPoolNewBlock(int start_item)
 	//extern uint16 _custom_sprites_base;
 
 	// TODO fixme
-	/* Draw a waypoint * /
+	/* Draw a WayPoint * /
 	static void DrawWaypointSprite(int x, int y, int stat_id, RailType railtype)
 	{
 		final StationSpec stat;
@@ -521,7 +521,7 @@ private void WaypointPoolNewBlock(int start_item)
 
 		stat = GetCustomStation(STAT_CLASS_WAYP, stat_id);
 		if (stat == null) {
-			// stat is null for default waypoints and when waypoint graphics are
+			// stat is null for default waypoints and when WayPoint graphics are
 			// not loaded.
 			DrawDefaultWaypointSprite(x, y, railtype);
 			return;
@@ -549,7 +549,7 @@ private void WaypointPoolNewBlock(int start_item)
 	/* Fix savegames which stored waypoints in their old format * /
 void FixOldWaypoints()
 {
-	Waypoint *wp;
+	WayPoint *wp;
 
 	// Convert the old 'town_or_string', to 'string' / 'town' / 'town_cn' * /
 	for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
@@ -574,16 +574,16 @@ void FixOldWaypoints()
 	}
 	/*
 static final SaveLoad _waypoint_desc[] = {
-	SLE_CONDVAR(Waypoint, xy, SLE_FILE_U16 | SLE_VAR_U32, 0, 5),
-	SLE_CONDVAR(Waypoint, xy, SLE_int, 6, 255),
-	SLE_CONDVAR(Waypoint, town_index, SLE_UINT16, 12, 255),
-	SLE_CONDVAR(Waypoint, town_cn, SLE_UINT8, 12, 255),
-	SLE_VAR(Waypoint, string, SLE_UINT16),
-	SLE_VAR(Waypoint, deleted, SLE_UINT8),
+	SLE_CONDVAR(WayPoint, xy, SLE_FILE_U16 | SLE_VAR_U32, 0, 5),
+	SLE_CONDVAR(WayPoint, xy, SLE_int, 6, 255),
+	SLE_CONDVAR(WayPoint, town_index, SLE_UINT16, 12, 255),
+	SLE_CONDVAR(WayPoint, town_cn, SLE_UINT8, 12, 255),
+	SLE_VAR(WayPoint, string, SLE_UINT16),
+	SLE_VAR(WayPoint, deleted, SLE_UINT8),
 
-	SLE_CONDVAR(Waypoint, build_date, SLE_UINT16,  3, 255),
-	SLE_CONDVAR(Waypoint, localidx,   SLE_UINT8,   3, 255),
-	SLE_CONDVAR(Waypoint, grfid,      SLE_int, 17, 255),
+	SLE_CONDVAR(WayPoint, build_date, SLE_UINT16,  3, 255),
+	SLE_CONDVAR(WayPoint, localidx,   SLE_UINT8,   3, 255),
+	SLE_CONDVAR(WayPoint, grfid,      SLE_int, 17, 255),
 
 	SLE_END()
 };
@@ -595,7 +595,7 @@ static final SaveLoad _waypoint_desc[] = {
 		int index;
 
 		while ((index = SlIterateArray()) != -1) {
-			Waypoint wp;
+			WayPoint wp;
 
 			if (!AddBlockIfNeeded(&_waypoint_pool, index))
 				error("Waypoints: failed loading savegame: too many waypoints");
@@ -609,11 +609,11 @@ static final SaveLoad _waypoint_desc[] = {
 		
 		@Override
 		void save_proc() {
-			Waypoint wp;
+			WayPoint wp;
 
 			for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
 			{
-				if (wp.xy != 0) {
+				if (wp.xy != null) {
 					SlSetArrayIndex(wp.index);
 					SlObject(wp, _waypoint_desc);
 				}

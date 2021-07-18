@@ -25,7 +25,7 @@
  * Contains portions of documentation by TTDPatch team.
  * Thanks especially to Josef Drexler for the documentation as well as a lot
  * of help at #tycoon. Also thanks to Michael Blunck for is GRF files which
- * served as subject to the initial testing of this codec. */
+ * served as subject to the initial testing of this codec. * /
 
 
 uint16 _custom_sprites_base;
@@ -38,9 +38,9 @@ GRFFile *_first_grffile;
 static int _cur_spriteid;
 static int _cur_stage;
 
-/* 32 * 8 = 256 flags. Apparently TTDPatch uses this many.. */
+/* 32 * 8 = 256 flags. Apparently TTDPatch uses this many.. * /
 static uint32 _ttdpatch_flags[8];
-
+*/
 
 typedef enum grfspec_feature {
 	GSF_TRAIN,
@@ -657,7 +657,7 @@ static bool ShipVehicleChangeInfo(uint engine, int numinfo, int prop, byte **buf
 	*bufp = buf;
 	return ret;
 }
-
+#if 0
 static bool AircraftVehicleChangeInfo(uint engine, int numinfo, int prop, byte **bufp, int len)
 {
 	AircraftVehicleInfo *avi = &_aircraft_vehicle_info[engine];
@@ -2424,7 +2424,7 @@ static void ResetCustomStations(void)
 /**
  * Reset all NewGRF loaded data
  * TODO
- */
+ * /
 static void ResetNewGRFData(void)
 {
 	int i;
@@ -2464,14 +2464,16 @@ static void ResetNewGRFData(void)
 	ResetStationClasses();
 	ResetCustomStations();
 }
+*/
 
+/*
 static void InitNewGRFFile(const char* filename, int sprite_offset)
 {
 	GRFFile *newfile;
 
 	newfile = GetFileByFilename(filename);
 	if (newfile != NULL) {
-		/* We already loaded it once. */
+		/* We already loaded it once. * /
 		newfile->sprite_offset = sprite_offset;
 		_cur_grffile = newfile;
 		return;
@@ -2496,7 +2498,7 @@ static void InitNewGRFFile(const char* filename, int sprite_offset)
 
 /**
  * Precalculate refit masks from cargo classes for all vehicles.
- */
+ * /
 static void CalculateRefitMasks(void)
 {
 	EngineID engine;
@@ -2523,13 +2525,14 @@ static void CalculateRefitMasks(void)
 		_engine_info[engine].refit_mask = ((mask & ~not_mask) ^ xor_mask) & _landscape_global_cargo_mask[_opt.landscape];
 	}
 }
-
+*/
+#if 0
 /* Here we perform initial decoding of some special sprites (as are they
  * described at http://www.ttdpatch.net/src/newgrf.txt, but this is only a very
  * partial implementation yet). */
 /* XXX: We consider GRF files trusted. It would be trivial to exploit OTTD by
  * a crafted invalid GRF file. We should tell that to the user somehow, or
- * better make this more robust in the future. */
+ * better make this more robust in the future. * /
 static void DecodeSpecialSprite(const char* filename, uint num, uint stage)
 {
 	/* XXX: There is a difference between staged loading in TTDPatch and
@@ -2540,7 +2543,7 @@ static void DecodeSpecialSprite(const char* filename, uint num, uint stage)
 	 * overwritten after action 3 associates them. But overwriting happens
 	 * in an earlier stage than associating, so...  We just process actions
 	 * 1 and 2 in stage 1 now, let's hope that won't get us into problems.
-	 * --pasky */
+	 * --pasky * /
 	uint32 action_mask = (stage == 0) ? 0x0001FF40 : 0x0001FFBF;
 	static const SpecialSpriteHandler handlers[] = {
 		/* 0x00 */ VehicleChangeInfo,
@@ -2582,8 +2585,8 @@ static void DecodeSpecialSprite(const char* filename, uint num, uint stage)
 	}
 	free(buf);
 }
-
-
+#endif
+/*
 static void LoadNewGRFFile(const char* filename, uint file_index, uint stage)
 {
 	uint16 num;
@@ -2596,7 +2599,7 @@ static void LoadNewGRFFile(const char* filename, uint file_index, uint stage)
 	 *
 	 * During activation, only actions 0, 1, 2, 3, 4, 5, 7, 8, 9, 0A and 0B are
 	 * carried out.  All others are ignored, because they only need to be
-	 * processed once at initialization.  */
+	 * processed once at initialization.  * /
 	if (stage != 0) {
 		_cur_grffile = GetFileByFilename(filename);
 		if (_cur_grffile == NULL) error("File ``%s'' lost in cache.\n", filename);
@@ -2610,7 +2613,7 @@ static void LoadNewGRFFile(const char* filename, uint file_index, uint stage)
 
 	/* Skip the first sprite; we don't care about how many sprites this
 	 * does contain; newest TTDPatches and George's longvehicles don't
-	 * neither, apparently. */
+	 * neither, apparently. * /
 	if (FioReadWord() == 4 && FioReadByte() == 0xFF) {
 		FioReadDword();
 	} else {
@@ -2661,7 +2664,7 @@ static void LoadNewGRFFile(const char* filename, uint file_index, uint stage)
 	ReleaseSpriteGroups(_cur_grffile);
 }
 
-
+/*
 void LoadNewGRF(uint load_index, uint file_index)
 {
 	static bool initialized = false; // XXX yikes
@@ -2676,7 +2679,7 @@ void LoadNewGRF(uint load_index, uint file_index)
 
 	/* Load newgrf sprites
 	 * in each loading stage, (try to) open each file specified in the config
-	 * and load information from it. */
+	 * and load information from it. * /
 	_custom_sprites_base = load_index;
 	for (stage = 0; stage < 2; stage++) {
 		uint slot = file_index;
