@@ -11,7 +11,7 @@ public class GenerateWorld {
 		// Make sure everything is done via OWNER_NONE
 		Global._current_player = OWNER_NONE;
 
-		_generating_world = true;
+		Global._generating_world = true;
 		InitializeGame(size_x, size_y);
 		SetObjectToPlace(SPR_CURSOR_ZZZ, 0, 0, 0);
 

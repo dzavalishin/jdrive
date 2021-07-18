@@ -1,3 +1,4 @@
+#if 0
 /* $Id: economy.c 3226 2005-11-22 15:55:38Z truelight $ */
 
 #include "stdafx.h"
@@ -1729,3 +1730,4 @@ const ChunkHandler _economy_chunk_handlers[] = {
 	{ 'SUBS', Save_SUBS,			Load_SUBS, CH_ARRAY},
 	{ 'ECMY', SaveLoad_ECMY, SaveLoad_ECMY, CH_RIFF | CH_LAST},
 };
+#endif

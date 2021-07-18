@@ -131,7 +131,7 @@ public abstract class Vehicle implements IPoolItem
 
 	void VehicleServiceInDepot()
 	{
-		if (tile.GetTileOwner() == OWNER_TOWN) 
+		if (tile.GetTileOwner() == Owner.OWNER_TOWN) 
 			MA_Tax(value, this);
 
 		date_of_last_service = Global._date;

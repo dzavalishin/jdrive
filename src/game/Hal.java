@@ -1,3 +1,5 @@
+package game;
+
 public abstract class Hal
 {
 	// graphics
@@ -49,7 +51,7 @@ public abstract class Hal
 		do {
 			int i = width;
 
-			do { b[--i] = 0xFF; } while (i);
+			do { b[--i] = (byte) 0xFF; } while (i);
 
 			b += DIRTY_BYTES_PER_LINE;
 		} while (--height != 0);
@@ -184,7 +186,7 @@ void SortResolutions(int count)
 	{
 		// Get the color for DrawString-subroutines which matches the color
 		//  of the player
-		if (player == OWNER_SPECTATOR || player == OWNER_SPECTATOR - 1) return 1;
+		if (player.id == Owner.OWNER_SPECTATOR || player.id == Owner.OWNER_SPECTATOR - 1) return 1;
 		return (_color_list[_player_colors[player]].window_color_1b) | IS_PALETTE_COLOR;
 	}
 
@@ -195,6 +197,7 @@ void SortResolutions(int count)
 	}
 	
 	public abstract void ShowOSErrorBox(String buf);
+	protected abstract int Random();
 
 
 }

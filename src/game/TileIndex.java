@@ -61,6 +61,20 @@ public class TileIndex {
 	}
 	
 	
+	void SetMapExtraBits(int i)
+	{
+		//assert(tile < Global.MapSize());
+		Global._m[tile].extra = (byte) BitOps.RETSB(Global._m[tile].extra, 0, 2, i & 3);
+	}
+
+	int GetMapExtraBits()
+	{
+		//assert(tile < MapSize());
+		return BitOps.GB(Global._m[tile].extra, 0, 2);
+	}
+
+	
+	
 	int GetTileSlope(IntContainer h)
 	{
 		int a;
@@ -245,6 +259,11 @@ public class TileIndex {
 
 	public void clrBit_m5(int i) {		Global._m[tile].m5 = BitOps.RETCLRBIT(Global._m[tile].m5, i);	}
 	public void setBit_m5(int i) {		Global._m[tile].m5 = BitOps.RETSETBIT(Global._m[tile].m5, i);	}
+
+	public TileIndex TILE_MASK() {
+		tile = TILE_MASK(tile);
+		return this;
+	}
 
 }
 

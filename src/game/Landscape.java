@@ -222,7 +222,7 @@ public class Landscape extends GenLandTable
 			sprite_base += 14;
 
 			AddSortableSpriteToDraw(
-					HASBIT((1<<1) | (1<<2) | (1<<4) | (1<<8), ti.tileh) ? sprite_base + (f - 15) : SPR_FOUNDATION_BASE + ti.tileh,
+					BitOps.HASBIT((1<<1) | (1<<2) | (1<<4) | (1<<8), ti.tileh) ? sprite_base + (f - 15) : SPR_FOUNDATION_BASE + ti.tileh,
 							ti.x, ti.y, 1, 1, 1, ti.z
 					);
 
@@ -253,7 +253,8 @@ public class Landscape extends GenLandTable
 
 	void GetAcceptedCargo(TileIndex tile, AcceptedCargo ac)
 	{
-		memset(ac, 0, sizeof(AcceptedCargo));
+		//memset(ac, 0, sizeof(AcceptedCargo));
+		ac.clear();
 		_tile_type_procs[GetTileType(tile)].get_accepted_cargo_proc(tile, ac);
 	}
 
@@ -697,12 +698,12 @@ public class Landscape extends GenLandTable
 	TileIndex AdjustTileCoordRandomly(TileIndex a, byte rng)
 	{
 		int rn = rng;
-		int r = Random();
+		int r = Global.Random();
 
-		return TILE_MASK(new TileIndex(
-				TileX(a) + (GB(r, 0, 8) * rn * 2 >> 8) - rn,
-				TileY(a) + (GB(r, 8, 8) * rn * 2 >> 8) - rn
-				));
+		return new TileIndex(
+				a.TileX() + (BitOps.GB(r, 0, 8) * rn * 2 >> 8) - rn,
+				a.TileY() + (BitOps.GB(r, 8, 8) * rn * 2 >> 8) - rn
+				).TILE_MASK();
 	}
 
 	boolean IsValidTile(TileIndex tile)

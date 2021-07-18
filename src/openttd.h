@@ -266,7 +266,7 @@ enum {
 	CT_INVALID = 0xFF
 };
 
-typedef uint AcceptedCargo[NUM_CARGO];
+//typedef uint AcceptedCargo[NUM_CARGO];
 
 typedef struct TileDesc {
 	StringID str;

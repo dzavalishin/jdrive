@@ -1,5 +1,5 @@
 /* $Id: economy.h 3172 2005-11-13 13:43:55Z tron $ */
-
+#if 0
 #ifndef ECONOMY_H
 #define ECONOMY_H
 
@@ -68,3 +68,4 @@ int32 GetTransportedGoodsIncome(uint num_pieces, uint dist, byte transit_days, b
 uint MoveGoodsToStation(TileIndex tile, int w, int h, int type, uint amount);
 
 #endif /* ECONOMY_H */
+#endif

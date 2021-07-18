@@ -13,6 +13,13 @@ public class BitOps {
 	{
 		x.v = (x.v & ~(((1 << n) - 1) << s)) | (d << s);
 	}
+
+	/// Set n bits starting at bit s in x to d
+	static public int RETSB(int x, int s, int n, int d)
+	{
+		x = (x & ~(((1 << n) - 1) << s)) | (d << s);
+		return x;
+	}
 	
 	/// Add i to the n bits starting at bit s in x
 	static public void AB(IntContainer x, int s, int n, int i)

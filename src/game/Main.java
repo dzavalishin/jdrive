@@ -493,7 +493,7 @@ public class Main {
 
 		// In a dedicated server, the server does not play
 		if (Global._network_dedicated) {
-			Global._local_player = OWNER_SPECTATOR;
+			Global._local_player = Owner.OWNER_SPECTATOR;
 		} else {
 			// Create a single player
 			DoStartupNewPlayer(false);
@@ -526,7 +526,7 @@ public class Main {
 		// Startup the game system
 		GenerateWorld(1, 1 << _patches.map_x, 1 << _patches.map_y);
 
-		Global._local_player = OWNER_NONE;
+		Global._local_player = Owner.OWNER_NONE;
 		Global.hal.MarkWholeScreenDirty();
 	}
 
@@ -676,11 +676,11 @@ public class Main {
 
 				GameOptions._opt_ptr = GameOptions._opt;
 
-				Global._local_player = OWNER_NONE;
+				Global._local_player = Owner.OWNER_NONE;
 				_generating_world = true;
 				// delete all players.
 				for (i = 0; i != MAX_PLAYERS; i++) {
-					ChangeOwnershipOfPlayerItems(i, OWNER_SPECTATOR);
+					ChangeOwnershipOfPlayerItems(i, Owner.OWNER_SPECTATOR);
 					Global._players[i].is_active = false;
 				}
 				_generating_world = false;
@@ -708,7 +708,7 @@ public class Main {
 		case SM_GENRANDLAND: /* Generate random land within scenario editor */
 			GenerateWorld(2, 1<<_patches.map_x, 1<<_patches.map_y);
 			// XXX: set date
-			Global._local_player = OWNER_NONE;
+			Global._local_player = Owner.OWNER_NONE;
 			Global.hal.MarkWholeScreenDirty();
 			break;
 		}
@@ -749,7 +749,7 @@ public class Main {
 			// All these actions has to be done from OWNER_NONE
 			//  for multiplayer compatibility
 			Player p = Global._current_player;
-			Global._current_player = OWNER_NONE;
+			Global._current_player = Owner.OWNER_NONE;
 
 			AnimateAnimatedTiles();
 			IncreaseDate();
@@ -769,7 +769,7 @@ public class Main {
 	{
 		String buf;
 
-		if (_patches.keep_all_autosave && _local_player != OWNER_SPECTATOR) {
+		if (_patches.keep_all_autosave && _local_player != Owner.OWNER_SPECTATOR) {
 			final Player p = GetPlayer(_local_player);
 			String s;
 			sprintf(buf, "%s%s", _path.autosave_dir, PATHSEP);
@@ -931,11 +931,11 @@ public class Main {
 
 		for (tile = 0; tile != MapSize(); tile++) {
 			if (IsTileType(tile, MP_STREET)) {
-				if (IsLevelCrossing(tile) && _m[tile].m3 & 0x80) _m[tile].m3 = OWNER_TOWN;
+				if (IsLevelCrossing(tile) && _m[tile].m3 & 0x80) _m[tile].m3 = Owner.OWNER_TOWN;
 
-				if (_m[tile].m1 & 0x80) SetTileOwner(tile, OWNER_TOWN);
+				if (_m[tile].m1 & 0x80) SetTileOwner(tile, Owner.OWNER_TOWN);
 			} else if (IsTileType(tile, MP_TUNNELBRIDGE)) {
-				if (_m[tile].m1 & 0x80) SetTileOwner(tile, OWNER_TOWN);
+				if (_m[tile].m1 & 0x80) SetTileOwner(tile, Owner.OWNER_TOWN);
 			}
 		}
 	}*/
@@ -1130,7 +1130,7 @@ public class Main {
 				} else if (IsTileType(tile, MP_STREET)) {
 					//XXX magic
 					_m[tile].m4 |= (_m[tile].m2 << 4);
-					if (IsTileOwner(tile, OWNER_TOWN)) {
+					if (IsTileOwner(tile, Owner.OWNER_TOWN)) {
 						SetTileType(tile, MP_VOID);
 						_m[tile].m2 = ClosestTownFromTile(tile,(int)-1).index;
 						SetTileType(tile, MP_STREET);

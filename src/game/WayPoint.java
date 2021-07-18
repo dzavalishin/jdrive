@@ -395,7 +395,7 @@ private void WaypointPoolNewBlock(int start_item)
 		if (!IsTileType(tile, MP_RAILWAY) || !IsRailWaypoint(tile))
 			return CMD_ERROR;
 
-		if (!CheckTileOwnership(tile) && !(Player._current_player == OWNER_WATER))
+		if (!CheckTileOwnership(tile) && !(Player._current_player == Owner.OWNER_WATER))
 			return CMD_ERROR;
 
 		if (!EnsureNoVehicle(tile))

@@ -13,6 +13,8 @@ public class Global {
 	public static byte [] _player_colors = new byte[MAX_PLAYERS];
 	public static PlayerID _current_player;
 
+	public static Economy _economy = new Economy();
+
 
 	public static final int NUM_NORMAL_RAIL_ENGINES = 54;
 	public static final int NUM_MONORAIL_ENGINES = 30;
@@ -142,6 +144,10 @@ public class Global {
 	{
 		if( level >= _debug_misc_level )
 			debug( s, arg );
+	}
+
+	public static int Random() {
+		return hal.Random();
 	}
 
 }
