@@ -12,12 +12,12 @@ package game;
 
 public class GRFFile 
 {
-	char *filename;
-	uint32 grfid;
-	uint16 flags;
-	uint16 sprite_offset;
+	String filename;
+	int grfid;
+	int flags;
+	int sprite_offset;
 	SpriteID first_spriteset; ///< Holds the first spriteset's sprite offset.
-	GRFFile *next;
+	GRFFile next;
 
 	/* A sprite group contains all sprites of a given vehicle (or multiple
 	 * vehicles) when carrying given cargo. It consists of several sprite
@@ -36,12 +36,12 @@ public class GRFFile
 	int spriteset_feature;
 
 	int spritegroups_count;
-	SpriteGroup **spritegroups;
+	SpriteGroup [][] spritegroups;
 
-	StationSpec stations[256];
+	StationSpec stations[] = new StationSpec[256];
 
-	uint32 param[0x80];
-	uint param_end; /// one more than the highest set parameter
+	int param[] = new int[0x80];
+	int param_end; /// one more than the highest set parameter
 
 
 
@@ -68,72 +68,72 @@ public class GRFFile
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	static inline byte grf_load_byte(byte **buf)
+	/* Debugging messages policy:
+	 *
+	 * These should be the severities used for direct DEBUG() calls
+	 * (there is room for exceptions, but you have to have a good cause):
+	 *
+	 * 0..2 - dedicated to grfmsg()
+	 * 3
+	 * 4
+	 * 5
+	 * 6 - action handler entry reporting - one per action
+	 * 7 - basic action progress reporting - in loops, only single one allowed
+	 * 8 - more detailed progress reporting - less important stuff, in deep loops etc
+	 * 9 - extremely detailed progress reporting - detailed reports inside of deep loops and so
+	 */
+
+	static final String [] severitystr = {
+			"Notice",
+			"Warning",
+			"Error",
+			"Fatal"
+		};
+
+
+	static void grfmsg(grfmsg_severity severity, String str, Object ... args)
 	{
-		return *(*buf)++;
+		int export_severity = 0;
+		String buf;
+
+		buf = String.format(str, args);
+
+		export_severity = 2 - (severity == GMS_FATAL ? 2 : severity);
+		Global.DEBUG_grf( export_severity, "[%s][%s] %s", _cur_grffile->filename, severitystr[severity], buf);
 	}
 
-	static uint16 grf_load_word(byte **buf)
+	
+	
+	
+	
+	
+	
+	
+
+
+	static GRFFile GetFileByGRFID(int grfid)
 	{
-		uint16 val;
-		byte *p = *buf;
-		val = p[0];
-		val |= p[1] << 8;
-		*buf = p + 2;
-		return val;
-	}
+		GRFFile file;
 
-	static uint16 grf_load_extended(byte** buf)
-	{
-		uint16 val;
-		val = grf_load_byte(buf);
-		if (val == 0xFF) val = grf_load_word(buf);
-		return val;
-	}
-
-	static uint32 grf_load_dword(byte **buf)
-	{
-		uint32 val;
-		byte *p = *buf;
-		val = p[0];
-		val |= p[1] << 8;
-		val |= p[2] << 16;
-		val |= p[3] << 24;
-		*buf = p + 4;
-		return val;
-	}
-
-
-	static GRFFile *GetFileByGRFID(uint32 grfid)
-	{
-		GRFFile *file;
-
-		for (file = _first_grffile; file != NULL; file = file->next) {
-			if (file->grfid == grfid) break;
+		for (file = _first_grffile; file != NULL; file = file.next) {
+			if (file.grfid == grfid) break;
 		}
 		return file;
 	}
 
-	static GRFFile *GetFileByFilename(const char *filename)
+	static GRFFile GetFileByFilename(final String filename)
 	{
-		GRFFile *file;
+		GRFFile file;
 
-		for (file = _first_grffile; file != NULL; file = file->next) {
-			if (strcmp(file->filename, filename) == 0) break;
+		for (file = _first_grffile; file != NULL; file = file.next) {
+			if (strcmp(file.filename, filename) == 0) break;
 		}
 		return file;
 	}
 
 
-	typedef bool (*VCI_Handler)(uint engine, int numinfo, int prop, byte **buf, int len);
+	//typedef boolean (*VCI_Handler)(int engine, int numinfo, int prop, byte **buf, int len);
 
-	#define FOR_EACH_OBJECT for (i = 0; i < numinfo; i++)
 
 	static void dewagonize(int condition, int engine)
 	{
@@ -141,40 +141,40 @@ public class GRFFile
 		RailVehicleInfo *rvi = &_rail_vehicle_info[engine];
 
 		if (condition != 0) {
-			ei->unk2 &= ~0x80;
-			rvi->flags &= ~2;
+			ei.unk2 &= ~0x80;
+			rvi.flags &= ~2;
 		} else {
-			ei->unk2 |= 0x80;
-			rvi->flags |= 2;
+			ei.unk2 |= 0x80;
+			rvi.flags |= 2;
 		}
 	}
 
-	static bool RailVehicleChangeInfo(uint engine, int numinfo, int prop, byte **bufp, int len)
+	static boolean RailVehicleChangeInfo(int engine, int numinfo, int prop, DataLoader bufp, int len)
 	{
-		EngineInfo *ei = &_engine_info[engine];
-		RailVehicleInfo *rvi = &_rail_vehicle_info[engine];
-		byte *buf = *bufp;
+		EngineInfo ei = _engine_info[engine];
+		RailVehicleInfo rvi = _rail_vehicle_info[engine];
+		// byte *buf = *bufp;
 		int i;
-		bool ret = false;
+		boolean ret = false;
 
 		switch (prop) {
 			case 0x05: { /* Track type */
-				FOR_EACH_OBJECT {
-					uint8 tracktype = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte tracktype = bufp.grf_load_byte();
 
 					ei[i].railtype = tracktype;
 				}
 			} break;
 			case 0x08: { /* AI passenger service */
 				/* TODO */
-				FOR_EACH_OBJECT {
-					grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_byte();
 				}
 				ret = true;
 			} break;
 			case 0x09: { /* Speed */
-				FOR_EACH_OBJECT {
-					uint16 speed = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					int speed = bufp.grf_load_word();
 					if (speed == 0xFFFF)
 						speed = 0;
 
@@ -182,8 +182,8 @@ public class GRFFile
 				}
 			} break;
 			case 0x0B: { /* Power */
-				FOR_EACH_OBJECT {
-					uint16 power = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					int power = bufp.grf_load_word();
 
 					if (rvi[i].flags & RVI_MULTIHEAD)
 						power /= 2;
@@ -193,16 +193,16 @@ public class GRFFile
 				}
 			} break;
 			case 0x0D: { /* Running cost factor */
-				FOR_EACH_OBJECT {
-					uint8 runcostfact = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte runcostfact = bufp.grf_load_byte();
 
 					rvi[i].running_cost_base = runcostfact;
 					dewagonize(runcostfact, engine + i);
 				}
 			} break;
 			case 0x0E: { /* Running cost base */
-				FOR_EACH_OBJECT {
-					uint32 base = grf_load_dword(&buf);
+				for (i = 0; i < numinfo; i++) {
+					int base = bufp.grf_load_dword();
 
 					switch (base) {
 						case 0x4C30: rvi[i].engclass = 0; break;
@@ -213,15 +213,15 @@ public class GRFFile
 				}
 			} break;
 			case 0x12: { /* Sprite ID */
-				FOR_EACH_OBJECT {
-					uint8 spriteid = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte spriteid = bufp.grf_load_byte();
 
 					rvi[i].image_index = spriteid;
 				}
 			} break;
 			case 0x13: { /* Dual-headed */
-				FOR_EACH_OBJECT {
-					uint8 dual = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte dual = bufp.grf_load_byte();
 
 					if (dual != 0) {
 						if (!(rvi[i].flags & RVI_MULTIHEAD)) // adjust power if needed
@@ -235,45 +235,45 @@ public class GRFFile
 				}
 			} break;
 			case 0x14: { /* Cargo capacity */
-				FOR_EACH_OBJECT {
-					uint8 capacity = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte capacity = bufp.grf_load_byte();
 
 					rvi[i].capacity = capacity;
 				}
 			} break;
 			case 0x15: { /* Cargo type */
-				FOR_EACH_OBJECT {
-					uint8 ctype = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte ctype = bufp.grf_load_byte();
 
 					rvi[i].cargo_type = ctype;
 				}
 			} break;
 			case 0x16: { /* Weight */
-				FOR_EACH_OBJECT {
-					uint8 weight = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte weight = bufp.grf_load_byte();
 
 					SB(rvi[i].weight, 0, 8, weight);
 				}
 			} break;
 			case 0x17: { /* Cost factor */
-				FOR_EACH_OBJECT {
-					uint8 cfactor = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte cfactor = bufp.grf_load_byte();
 
 					rvi[i].base_cost = cfactor;
 				}
 			} break;
 			case 0x18: { /* AI rank */
 				/* TODO: _railveh_score should be merged to _rail_vehicle_info. */
-				FOR_EACH_OBJECT {
-					grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_byte();
 				}
 				ret = true;
 			} break;
 			case 0x19: { /* Engine traction type */
 				/* TODO: What do the individual numbers mean?
 				 * XXX: And in what base are they, in fact? --pasky */
-				FOR_EACH_OBJECT {
-					uint8 traction = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte traction = bufp.grf_load_byte();
 					int engclass;
 
 					if (traction <= 0x07)
@@ -289,51 +289,51 @@ public class GRFFile
 				}
 			} break;
 			case 0x1B: { /* Powered wagons power bonus */
-				FOR_EACH_OBJECT {
-					uint16 wag_power = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					int wag_power = bufp.grf_load_word();
 
 					rvi[i].pow_wag_power = wag_power;
 				}
 			} break;
 			case 0x1D: { /* Refit cargo */
-				FOR_EACH_OBJECT {
-					uint32 refit_mask = grf_load_dword(&buf);
+				for (i = 0; i < numinfo; i++) {
+					int refit_mask = bufp.grf_load_dword();
 
 					_engine_info[engine + i].refit_mask = refit_mask;
 				}
 			} break;
 			case 0x1E: { /* Callback */
-				FOR_EACH_OBJECT {
-					byte callbacks = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte callbacks = bufp.grf_load_byte();
 
 					rvi[i].callbackmask = callbacks;
 				}
 			} break;
 			case 0x21: { /* Shorter vehicle */
-				FOR_EACH_OBJECT {
-					byte shorten_factor = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte shorten_factor = bufp.grf_load_byte();
 
 					rvi[i].shorten_factor = shorten_factor;
 				}
 			} break;
 			case 0x22: { /* Visual effect */
-				// see note in engine.h about rvi->visual_effect
-				FOR_EACH_OBJECT {
-					byte visual = grf_load_byte(&buf);
+				// see note in engine.h about rvi.visual_effect
+				for (i = 0; i < numinfo; i++) {
+					byte visual = bufp.grf_load_byte();
 
 					rvi[i].visual_effect = visual;
 				}
 			} break;
 			case 0x23: { /* Powered wagons weight bonus */
-				FOR_EACH_OBJECT {
-					byte wag_weight = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte wag_weight = bufp.grf_load_byte();
 
 					rvi[i].pow_wag_weight = wag_weight;
 				}
 			} break;
 			case 0x24: { /* High byte of vehicle weight */
-				FOR_EACH_OBJECT {
-					byte weight = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte weight = bufp.grf_load_byte();
 
 					if (weight > 4) {
 						grfmsg(GMS_NOTICE, "RailVehicleChangeInfo: Nonsensical weight of %d tons, ignoring.", weight << 8);
@@ -343,13 +343,13 @@ public class GRFFile
 				}
 			} break;
 			case 0x28: { /* Cargo classes allowed */
-				FOR_EACH_OBJECT {
-					cargo_allowed[engine + i] = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					cargo_allowed[engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x29: { /* Cargo classes disallowed */
-				FOR_EACH_OBJECT {
-					cargo_disallowed[engine + i] = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					cargo_disallowed[engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			/* TODO */
@@ -362,50 +362,50 @@ public class GRFFile
 			case 0x26:	/* Retire vehicle early */
 				{
 				/* TODO */
-				FOR_EACH_OBJECT {
-					grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_byte();
 				}
 				ret = true;
 			}	break;
 			default:
 				ret = true;
 		}
-		*bufp = buf;
+		// *bufp = buf;
 		return ret;
 	}
 
-	static bool RoadVehicleChangeInfo(uint engine, int numinfo, int prop, byte **bufp, int len)
+	static boolean RoadVehicleChangeInfo(int engine, int numinfo, int prop, DataLoader bufp, int len)
 	{
-		RoadVehicleInfo *rvi = &_road_vehicle_info[engine];
-		byte *buf = *bufp;
+		RoadVehicleInfo rvi = _road_vehicle_info[engine];
+		// byte *buf = *bufp;
 		int i;
-		bool ret = false;
+		boolean ret = false;
 
 		switch (prop) {
 			case 0x08: { /* Speed */
-				FOR_EACH_OBJECT {
-					uint8 speed = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte speed = bufp.grf_load_byte();
 
 					rvi[i].max_speed = speed; // ?? units
 				}
 			} break;
 			case 0x09: { /* Running cost factor */
-				FOR_EACH_OBJECT {
-					uint8 runcost = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte runcost = bufp.grf_load_byte();
 
 					rvi[i].running_cost = runcost;
 				}
 			} break;
 			case 0x0A: { /* Running cost base */
 				/* TODO: I have no idea. --pasky */
-				FOR_EACH_OBJECT {
-					grf_load_dword(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_dword();
 				}
 				ret = true;
 			} break;
 			case 0x0E: { /* Sprite ID */
-				FOR_EACH_OBJECT {
-					uint8 spriteid = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte spriteid = bufp.grf_load_byte();
 
 					if (spriteid == 0xFF)
 						spriteid = 0xFD; // cars have different custom id in the GRF file
@@ -414,29 +414,29 @@ public class GRFFile
 				}
 			} break;
 			case 0x0F: { /* Cargo capacity */
-				FOR_EACH_OBJECT {
-					uint16 capacity = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					int capacity = bufp.grf_load_byte();
 
 					rvi[i].capacity = capacity;
 				}
 			} break;
 			case 0x10: { /* Cargo type */
-				FOR_EACH_OBJECT {
-					uint8 cargo = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte cargo = bufp.grf_load_byte();
 
 					rvi[i].cargo_type = cargo;
 				}
 			} break;
 			case 0x11: { /* Cost factor */
-				FOR_EACH_OBJECT {
-					uint8 cost_factor = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte cost_factor = bufp.grf_load_byte();
 
 					rvi[i].base_cost = cost_factor; // ?? is it base_cost?
 				}
 			} break;
 			case 0x12: { /* SFX */
-				FOR_EACH_OBJECT {
-					uint8 sfx = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte sfx = bufp.grf_load_byte();
 
 					rvi[i].sfx = sfx;
 				}
@@ -447,26 +447,26 @@ public class GRFFile
 				/* TODO: Support for road vehicles realistic power
 				 * computations (called rvpower in TTDPatch) is just
 				 * missing in OTTD yet. --pasky */
-				FOR_EACH_OBJECT {
-					grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_byte();
 				}
 				ret = true;
 				break;
 			case 0x16: { /* Cargos available for refitting */
-				FOR_EACH_OBJECT {
-					uint32 refit_mask = grf_load_dword(&buf);
+				for (i = 0; i < numinfo; i++) {
+					int refit_mask = bufp.grf_load_dword();
 
 					_engine_info[ROAD_ENGINES_INDEX + engine + i].refit_mask = refit_mask;
 				}
 			} break;
 			case 0x1D: { /* Cargo classes allowed */
-				FOR_EACH_OBJECT {
-					cargo_allowed[ROAD_ENGINES_INDEX + engine + i] = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					cargo_allowed[ROAD_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x1E: { /* Cargo classes disallowed */
-				FOR_EACH_OBJECT {
-					cargo_disallowed[ROAD_ENGINES_INDEX + engine + i] = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					cargo_disallowed[ROAD_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x17:      /* Callback */
@@ -477,8 +477,8 @@ public class GRFFile
 			case 0x1C:      /* Miscellaneous flags */
 				{
 				/* TODO */
-				FOR_EACH_OBJECT {
-					grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_byte();
 				}
 				ret = true;
 				break;
@@ -487,22 +487,22 @@ public class GRFFile
 				ret = true;
 		}
 
-		*bufp = buf;
+		// *bufp = buf;
 		return ret;
 	}
 
-	static bool ShipVehicleChangeInfo(uint engine, int numinfo, int prop, byte **bufp, int len)
+	static boolean ShipVehicleChangeInfo(int engine, int numinfo, int prop, DataLoader bufp, int len)
 	{
 		ShipVehicleInfo *svi = &_ship_vehicle_info[engine];
-		byte *buf = *bufp;
+		// byte *buf = *bufp;
 		int i;
-		bool ret = false;
+		boolean ret = false;
 
 		//printf("e %x prop %x?\n", engine, prop);
 		switch (prop) {
 			case 0x08: {	/* Sprite ID */
-				FOR_EACH_OBJECT {
-					uint8 spriteid = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte spriteid = bufp.grf_load_byte();
 
 					if (spriteid == 0xFF)
 						spriteid = 0xFD; // ships have different custom id in the GRF file
@@ -511,76 +511,76 @@ public class GRFFile
 				}
 			}	break;
 			case 0x09: {	/* Refittable */
-				FOR_EACH_OBJECT {
-					uint8 refittable = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte refittable = bufp.grf_load_byte();
 
 					svi[i].refittable = refittable;
 				}
 			}	break;
 			case 0x0A: {	/* Cost factor */
-				FOR_EACH_OBJECT {
-					uint8 cost_factor = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte cost_factor = bufp.grf_load_byte();
 
 					svi[i].base_cost = cost_factor; // ?? is it base_cost?
 				}
 			}	break;
 			case 0x0B: {	/* Speed */
-				FOR_EACH_OBJECT {
-					uint8 speed = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte speed = bufp.grf_load_byte();
 
 					svi[i].max_speed = speed; // ?? units
 				}
 			}	break;
 			case 0x0C: { /* Cargo type */
-				FOR_EACH_OBJECT {
-					uint8 cargo = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte cargo = bufp.grf_load_byte();
 
 					// XXX: Need to consult this with patchman yet.
-	#if 0
+	if(0) {
 					// Documentation claims this is already the
 					// per-landscape cargo type id, but newships.grf
 					// assume otherwise.
 					cargo = local_cargo_id_ctype[cargo];
-	#endif
+	}
 					svi[i].cargo_type = cargo;
 				}
 			}	break;
 			case 0x0D: {	/* Cargo capacity */
-				FOR_EACH_OBJECT {
-					uint16 capacity = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					int capacity = bufp.grf_load_word();
 
 					svi[i].capacity = capacity;
 				}
 			}	break;
 			case 0x0F: {	/* Running cost factor */
-				FOR_EACH_OBJECT {
-					uint8 runcost = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte runcost = bufp.grf_load_byte();
 
 					svi[i].running_cost = runcost;
 				}
 			} break;
 			case 0x10: {	/* SFX */
-				FOR_EACH_OBJECT {
-					uint8 sfx = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte sfx = bufp.grf_load_byte();
 
 					svi[i].sfx = sfx;
 				}
 			}	break;
 			case 0x11: {	/* Cargos available for refitting */
-				FOR_EACH_OBJECT {
-					uint32 refit_mask = grf_load_dword(&buf);
+				for (i = 0; i < numinfo; i++) {
+					int refit_mask = bufp.grf_load_dword();
 
 					_engine_info[SHIP_ENGINES_INDEX + engine + i].refit_mask = refit_mask;
 				}
 			}	break;
 			case 0x18: { /* Cargo classes allowed */
-				FOR_EACH_OBJECT {
-					cargo_allowed[SHIP_ENGINES_INDEX + engine + i] = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					cargo_allowed[SHIP_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x19: { /* Cargo classes disallowed */
-				FOR_EACH_OBJECT {
-					cargo_disallowed[SHIP_ENGINES_INDEX + engine + i] = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					cargo_disallowed[SHIP_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x12: /* Callback */
@@ -591,8 +591,8 @@ public class GRFFile
 			case 0x17: /* Miscellaneous flags */
 			{
 				/* TODO */
-				FOR_EACH_OBJECT {
-					grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_byte();
 				}
 				ret = true;
 			}	break;
@@ -600,7 +600,7 @@ public class GRFFile
 				ret = true;
 		}
 
-		*bufp = buf;
+		// *bufp = buf;
 		return ret;
 	}
 
@@ -621,18 +621,18 @@ public class GRFFile
 	
 	
 	
-	static bool AircraftVehicleChangeInfo(uint engine, int numinfo, int prop, byte **bufp, int len)
+	static boolean AircraftVehicleChangeInfo(int engine, int numinfo, int prop, DataLoader bufp, int len)
 	{
-		AircraftVehicleInfo *avi = &_aircraft_vehicle_info[engine];
-		byte *buf = *bufp;
+		AircraftVehicleInfo avi = _aircraft_vehicle_info[engine];
+		// byte *buf = *bufp;
 		int i;
-		bool ret = false;
+		boolean ret = false;
 
 		//printf("e %x prop %x?\n", engine, prop);
 		switch (prop) {
 			case 0x08: {	/* Sprite ID */
-				FOR_EACH_OBJECT {
-					uint8 spriteid = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte spriteid = bufp.grf_load_byte();
 
 					if (spriteid == 0xFF)
 						spriteid = 0xFD; // ships have different custom id in the GRF file
@@ -641,83 +641,83 @@ public class GRFFile
 				}
 			}	break;
 			case 0x09: {	/* Helicopter */
-				FOR_EACH_OBJECT {
-					uint8 heli = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte heli = bufp.grf_load_byte();
 					avi[i].subtype &= ~0x01; // remove old property
 					avi[i].subtype |= (heli == 0) ? 0 : 1;
 				}
 			}	break;
 			case 0x0A: {	/* Large */
-				FOR_EACH_OBJECT {
-					uint8 large = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte large = bufp.grf_load_byte();
 					avi[i].subtype &= ~0x02; // remove old property
 					avi[i].subtype |= (large == 1) ? 2 : 0;
 				}
 			}	break;
 			case 0x0B: {	/* Cost factor */
-				FOR_EACH_OBJECT {
-					uint8 cost_factor = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte cost_factor = bufp.grf_load_byte();
 
 					avi[i].base_cost = cost_factor; // ?? is it base_cost?
 				}
 			}	break;
 			case 0x0C: {	/* Speed */
-				FOR_EACH_OBJECT {
-					uint8 speed = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte speed = bufp.grf_load_byte();
 
 					avi[i].max_speed = speed; // ?? units
 				}
 			}	break;
 			case 0x0D: {	/* Acceleration */
-				FOR_EACH_OBJECT {
-					uint8 accel = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte accel = bufp.grf_load_byte();
 
 					avi[i].acceleration = accel;
 				}
 			} break;
 			case 0x0E: {	/* Running cost factor */
-				FOR_EACH_OBJECT {
-					uint8 runcost = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte runcost = bufp.grf_load_byte();
 
 					avi[i].running_cost = runcost;
 				}
 			} break;
 			case 0x0F: {	/* Passenger capacity */
-				FOR_EACH_OBJECT {
-					uint16 capacity = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					int capacity = bufp.grf_load_word();
 
 					avi[i].passenger_capacity = capacity;
 				}
 			}	break;
 			case 0x11: {	/* Mail capacity */
-				FOR_EACH_OBJECT {
-					uint8 capacity = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte capacity = bufp.grf_load_byte();
 
 					avi[i].mail_capacity = capacity;
 				}
 			}	break;
 			case 0x12: {	/* SFX */
-				FOR_EACH_OBJECT {
-					uint8 sfx = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					byte sfx = bufp.grf_load_byte();
 
 					avi[i].sfx = sfx;
 				}
 			}	break;
 			case 0x13: {	/* Cargos available for refitting */
-				FOR_EACH_OBJECT {
-					uint32 refit_mask = grf_load_dword(&buf);
+				for (i = 0; i < numinfo; i++) {
+					int refit_mask = bufp.grf_load_dword();
 
 					_engine_info[AIRCRAFT_ENGINES_INDEX + engine + i].refit_mask = refit_mask;
 				}
 			}	break;
 			case 0x18: { /* Cargo classes allowed */
-				FOR_EACH_OBJECT {
-					cargo_allowed[AIRCRAFT_ENGINES_INDEX + engine + i] = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					cargo_allowed[AIRCRAFT_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x19: { /* Cargo classes disallowed */
-				FOR_EACH_OBJECT {
-					cargo_disallowed[AIRCRAFT_ENGINES_INDEX + engine + i] = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					cargo_disallowed[AIRCRAFT_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x14: /* Callback */
@@ -726,8 +726,8 @@ public class GRFFile
 			case 0x17: /* Miscellaneous flags */
 			{
 				/* TODO */
-				FOR_EACH_OBJECT {
-					grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_byte();
 				}
 				ret = true;
 			}	break;
@@ -735,13 +735,13 @@ public class GRFFile
 				ret = true;
 		}
 
-		*bufp = buf;
+		// *bufp = buf;
 		return ret;
 	}
 
-	static bool StationChangeInfo(uint stid, int numinfo, int prop, byte **bufp, int len)
+	static boolean StationChangeInfo(int stid, int numinfo, int prop, DataLoader bufp, int len)
 	{
-		byte *buf = *bufp;
+		// byte *buf = *bufp;
 		int i;
 		int ret = 0;
 
@@ -752,64 +752,69 @@ public class GRFFile
 		switch (prop) {
 			case 0x08:
 			{	/* Class ID */
-				FOR_EACH_OBJECT {
-					StationSpec *stat = &_cur_grffile->stations[stid + i];
-					uint32 classid;
+				for (i = 0; i < numinfo; i++) {
+					StationSpec stat = _cur_grffile.stations[stid + i];
+					int classid;
 
 					/* classid, for a change, is always little-endian */
-					classid = *(buf++) << 24;
-					classid |= *(buf++) << 16;
-					classid |= *(buf++) << 8;
-					classid |= *(buf++);
+					//classid = *(buf++) << 24;
+					//classid |= *(buf++) << 16;
+					//classid |= *(buf++) << 8;
+					//classid |= *(buf++);
+					classid = bufp.grf_load_dword_le();
 
-					stat->sclass = AllocateStationClass(classid);
+					stat.sclass = AllocateStationClass(classid);
 				}
 				break;
 			}
 			case 0x09:
 			{	/* Define sprite layout */
-				FOR_EACH_OBJECT {
-					StationSpec *stat = &_cur_grffile->stations[stid + i];
+				for (i = 0; i < numinfo; i++) {
+					StationSpec stat = _cur_grffile.stations[stid + i];
 					int t;
 
-					stat->tiles = grf_load_extended(&buf);
-					stat->renderdata = calloc(stat->tiles, sizeof(*stat->renderdata));
-					for (t = 0; t < stat->tiles; t++) {
-						DrawTileSprites *dts = &stat->renderdata[t];
+					stat.tiles = bufp.grf_load_extended();
+					stat.renderdata = calloc(stat.tiles, sizeof(*stat.renderdata));
+					for (t = 0; t < stat.tiles; t++) {
+						DrawTileSprites dts = stat.renderdata[t];
 						int seq_count = 0;
 						PalSpriteID ground_sprite;
 
-						ground_sprite = grf_load_dword(&buf);
+						ground_sprite = bufp.grf_load_dword();
 						if (ground_sprite == 0) {
-							static const DrawTileSeqStruct empty = {0x80, 0, 0, 0, 0, 0, 0};
-							dts->seq = &empty;
+							//static final DrawTileSeqStruct empty = {0x80, 0, 0, 0, 0, 0, 0};
+							//dts.seq = empty;
+							dts.seq = new DrawTileSeqStruct(0x80, 0, 0, 0, 0, 0, 0);
 							continue;
 						}
 
 						if (HASBIT(ground_sprite, 31)) {
 							// Bit 31 indicates that we should use a custom sprite.
-							dts->ground_sprite = GB(ground_sprite, 0, 15) - 0x42D;
-							dts->ground_sprite += _cur_grffile->first_spriteset;
+							dts.ground_sprite = GB(ground_sprite, 0, 15) - 0x42D;
+							dts.ground_sprite += _cur_grffile.first_spriteset;
 						} else {
-							dts->ground_sprite = ground_sprite;
+							dts.ground_sprite = ground_sprite;
 						}
 
-						dts->seq = NULL;
-						while (buf < *bufp + len) {
-							DrawTileSeqStruct *dtss;
+						dts.seq = NULL;
+						//while (buf < *bufp + len)
+						//while (bufp.isNotEmpty())
+						while (bufp.has(len))
+						{
+							DrawTileSeqStruct dtss;
 
 							// no relative bounding box support
-							dts->seq = realloc((void*)dts->seq, ++seq_count * sizeof(DrawTileSeqStruct));
-							dtss = (DrawTileSeqStruct*) &dts->seq[seq_count - 1];
+							dts.seq = realloc((void*)dts.seq, ++seq_count * sizeof(DrawTileSeqStruct));
+							dtss = (DrawTileSeqStruct*) &dts.seq[seq_count - 1];
 
-							dtss->delta_x = grf_load_byte(&buf);
-							if ((byte) dtss->delta_x == 0x80) break;
-							dtss->delta_y = grf_load_byte(&buf);
-							dtss->delta_z = grf_load_byte(&buf);
-							dtss->width = grf_load_byte(&buf);
-							dtss->height = grf_load_byte(&buf);
-							dtss->unk = grf_load_byte(&buf);
-							dtss->image = grf_load_dword(&buf) - 0x42d;
+							dtss.delta_x = bufp.grf_load_byte();
+							if ((byte) dtss.delta_x == 0x80) break;
+							dtss.delta_y = bufp.grf_load_byte();
+							dtss.delta_z = bufp.grf_load_byte();
+							dtss.width = bufp.grf_load_byte();
+							dtss.height = bufp.grf_load_byte();
+							dtss.unk = bufp.grf_load_byte();
+							dtss.image = bufp.grf_load_dword() - 0x42d;
 						}
 					}
 				}
@@ -817,36 +822,37 @@ public class GRFFile
 			}
 			case 0x0a:
 			{	/* Copy sprite layout */
-				FOR_EACH_OBJECT {
-					StationSpec *stat = &_cur_grffile->stations[stid + i];
-					byte srcid = grf_load_byte(&buf);
-					const StationSpec *srcstat = &_cur_grffile->stations[srcid];
+				for (i = 0; i < numinfo; i++) {
+					StationSpec stat = _cur_grffile.stations[stid + i];
+					byte srcid = bufp.grf_load_byte();
+					final StationSpec srcstat = _cur_grffile.stations[srcid];
 					int t;
 
-					stat->tiles = srcstat->tiles;
-					stat->renderdata = calloc(stat->tiles, sizeof(*stat->renderdata));
-					for (t = 0; t < stat->tiles; t++) {
-						DrawTileSprites *dts = &stat->renderdata[t];
-						const DrawTileSprites *sdts = &srcstat->renderdata[t];
-						DrawTileSeqStruct const *sdtss = sdts->seq;
+					stat.tiles = srcstat.tiles;
+					stat.renderdata = calloc(stat.tiles, sizeof(*stat.renderdata));
+					for (t = 0; t < stat.tiles; t++) {
+						DrawTileSprites dts = stat.renderdata[t];
+						final DrawTileSprites sdts = srcstat.renderdata[t];
+						final DrawTileSeqStruct  sdtss = sdts.seq;
 						int seq_count = 0;
 
-						dts->ground_sprite = sdts->ground_sprite;
-						if (!dts->ground_sprite) {
-							static const DrawTileSeqStruct empty = {0x80, 0, 0, 0, 0, 0, 0};
-							dts->seq = &empty;
+						dts.ground_sprite = sdts.ground_sprite;
+						if (!dts.ground_sprite) {
+							//static final DrawTileSeqStruct empty = {0x80, 0, 0, 0, 0, 0, 0};
+							//dts.seq = empty;
+							dts.seq = new DrawTileSeqStruct(0x80, 0, 0, 0, 0, 0, 0);
 							continue;
 						}
 
-						dts->seq = NULL;
+						dts.seq = NULL;
 						while (1) {
-							DrawTileSeqStruct *dtss;
+							DrawTileSeqStruct dtss;
 
 							// no relative bounding box support
-							dts->seq = realloc((void*)dts->seq, ++seq_count * sizeof(DrawTileSeqStruct));
-							dtss = (DrawTileSeqStruct*) &dts->seq[seq_count - 1];
+							dts.seq = realloc((void*)dts.seq, ++seq_count * sizeof(DrawTileSeqStruct));
+							dtss = (DrawTileSeqStruct*) &dts.seq[seq_count - 1];
 							*dtss = *sdtss;
-							if ((byte) dtss->delta_x == 0x80) break;
+							if ((byte) dtss.delta_x == 0x80) break;
 							sdtss++;
 						}
 					}
@@ -856,78 +862,78 @@ public class GRFFile
 			case 0x0b:
 			{	/* Callback */
 				/* TODO */
-				FOR_EACH_OBJECT {
-					grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_byte();
 				}
 				ret = 1;
 				break;
 			}
 			case 0x0C:
 			{	/* Platforms number */
-				FOR_EACH_OBJECT {
-					StationSpec *stat = &_cur_grffile->stations[stid + i];
+				for (i = 0; i < numinfo; i++) {
+					StationSpec stat = _cur_grffile.stations[stid + i];
 
-					stat->allowed_platforms = ~grf_load_byte(&buf);
+					stat.allowed_platforms = ~bufp.grf_load_byte();
 				}
 				break;
 			}
 			case 0x0D:
 			{	/* Platforms length */
-				FOR_EACH_OBJECT {
-					StationSpec *stat = &_cur_grffile->stations[stid + i];
+				for (i = 0; i < numinfo; i++) {
+					StationSpec stat = _cur_grffile.stations[stid + i];
 
-					stat->allowed_lengths = ~grf_load_byte(&buf);
+					stat.allowed_lengths = ~bufp.grf_load_byte();
 				}
 				break;
 			}
 			case 0x0e:
 			{	/* Define custom layout */
-				FOR_EACH_OBJECT {
-					StationSpec *stat = &_cur_grffile->stations[stid + i];
+				for (i = 0; i < numinfo; i++) {
+					StationSpec stat = _cur_grffile.stations[stid + i];
 
-					while (buf < *bufp + len) {
-						byte length = grf_load_byte(&buf);
-						byte number = grf_load_byte(&buf);
+					while (bufp.has(len)) {
+						byte length = bufp.grf_load_byte();
+						byte number = bufp.grf_load_byte();
 						StationLayout layout;
 						int l, p;
 
 						if (length == 0 || number == 0) break;
 
-						//debug("l %d > %d ?", length, stat->lengths);
-						if (length > stat->lengths) {
-							stat->platforms = realloc(stat->platforms, length);
-							memset(stat->platforms + stat->lengths, 0, length - stat->lengths);
+						//debug("l %d > %d ?", length, stat.lengths);
+						if (length > stat.lengths) {
+							stat.platforms = realloc(stat.platforms, length);
+							memset(stat.platforms + stat.lengths, 0, length - stat.lengths);
 
-							stat->layouts = realloc(stat->layouts, length * sizeof(*stat->layouts));
-							memset(stat->layouts + stat->lengths, 0,
-							       (length - stat->lengths) * sizeof(*stat->layouts));
+							stat.layouts = realloc(stat.layouts, length * sizeof(*stat.layouts));
+							memset(stat.layouts + stat.lengths, 0,
+							       (length - stat.lengths) * sizeof(*stat.layouts));
 
-							stat->lengths = length;
+							stat.lengths = length;
 						}
 						l = length - 1; // index is zero-based
 
-						//debug("p %d > %d ?", number, stat->platforms[l]);
-						if (number > stat->platforms[l]) {
-							stat->layouts[l] = realloc(stat->layouts[l],
-							                               number * sizeof(**stat->layouts));
+						//debug("p %d > %d ?", number, stat.platforms[l]);
+						if (number > stat.platforms[l]) {
+							stat.layouts[l] = realloc(stat.layouts[l],
+							                               number * sizeof(**stat.layouts));
 							// We expect NULL being 0 here, but C99 guarantees that.
-							memset(stat->layouts[l] + stat->platforms[l], 0,
-							       (number - stat->platforms[l]) * sizeof(**stat->layouts));
+							memset(stat.layouts[l] + stat.platforms[l], 0,
+							       (number - stat.platforms[l]) * sizeof(**stat.layouts));
 
-							stat->platforms[l] = number;
+							stat.platforms[l] = number;
 						}
 
 						p = 0;
 						layout = malloc(length * number);
 						for (l = 0; l < length; l++)
 							for (p = 0; p < number; p++)
-								layout[l * number + p] = grf_load_byte(&buf);
+								layout[l * number + p] = bufp.grf_load_byte();
 
 						l--;
 						p--;
 						assert(p >= 0);
-						free(stat->layouts[l][p]);
-						stat->layouts[l][p] = layout;
+						free(stat.layouts[l][p]);
+						stat.layouts[l][p] = layout;
 					}
 				}
 				break;
@@ -935,8 +941,8 @@ public class GRFFile
 			case 0x0f:
 			{	/* Copy custom layout */
 				/* TODO */
-				FOR_EACH_OBJECT {
-					grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_byte();
 				}
 				ret = 1;
 				break;
@@ -944,8 +950,8 @@ public class GRFFile
 			case 0x10:
 			{	/* Little/lots cargo threshold */
 				/* TODO */
-				FOR_EACH_OBJECT {
-					grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_word();
 				}
 				ret = 1;
 				break;
@@ -953,8 +959,8 @@ public class GRFFile
 			case 0x11:
 			{	/* Pylon placement */
 				/* TODO; makes sense only for electrified tracks */
-				FOR_EACH_OBJECT {
-					grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_word();
 				}
 				ret = 1;
 				break;
@@ -962,8 +968,8 @@ public class GRFFile
 			case 0x12:
 			{	/* Cargo types for random triggers */
 				/* TODO */
-				FOR_EACH_OBJECT {
-					grf_load_dword(&buf);
+				for (i = 0; i < numinfo; i++) {
+					bufp.grf_load_dword();
 				}
 				ret = 1;
 				break;
@@ -973,82 +979,82 @@ public class GRFFile
 				break;
 		}
 
-		*bufp = buf;
+		// *bufp = buf;
 		return ret;
 	}
 
-	static bool BridgeChangeInfo(uint brid, int numinfo, int prop, byte **bufp, int len)
+	static boolean BridgeChangeInfo(int brid, int numinfo, int prop, DataLoader bufp, int len)
 	{
-		byte *buf = *bufp;
+		// byte *buf = *bufp;
 		int i;
 		int ret = 0;
 
 		switch (prop) {
 			case 0x08: /* Year of availability */
-				FOR_EACH_OBJECT {
-					_bridge[brid + i].avail_year = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					_bridge[brid + i].avail_year = bufp.grf_load_byte();
 				}
 				break;
 
 			case 0x09: /* Minimum length */
-				FOR_EACH_OBJECT {
-					_bridge[brid + i].min_length = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					_bridge[brid + i].min_length = bufp.grf_load_byte();
 				}
 				break;
 
 			case 0x0A: /* Maximum length */
-				FOR_EACH_OBJECT {
-					_bridge[brid + i].max_length = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					_bridge[brid + i].max_length = bufp.grf_load_byte();
 				}
 				break;
 
 			case 0x0B: /* Cost factor */
-				FOR_EACH_OBJECT {
-					_bridge[brid + i].price = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					_bridge[brid + i].price = bufp.grf_load_byte();
 				}
 				break;
 
 			case 0x0C: /* Maximum speed */
-				FOR_EACH_OBJECT {
-					_bridge[brid + i].speed = grf_load_word(&buf);
+				for (i = 0; i < numinfo; i++) {
+					_bridge[brid + i].speed = bufp.grf_load_word();
 				}
 				break;
 
 			case 0x0D: /* Bridge sprite tables */
-				FOR_EACH_OBJECT {
+				for (i = 0; i < numinfo; i++) {
 					Bridge *bridge = &_bridge[brid + i];
-					byte tableid = grf_load_byte(&buf);
-					byte numtables = grf_load_byte(&buf);
+					byte tableid = bufp.grf_load_byte();
+					byte numtables = bufp.grf_load_byte();
 					byte table, sprite;
 
-					if (bridge->sprite_table == NULL) {
+					if (bridge.sprite_table == NULL) {
 						/* Allocate memory for sprite table pointers and set to NULL */
-						bridge->sprite_table = malloc(7 * sizeof(*bridge->sprite_table));
+						bridge.sprite_table = malloc(7 * sizeof(*bridge.sprite_table));
 						for (table = 0; table < 7; table++)
-							bridge->sprite_table[table] = NULL;
+							bridge.sprite_table[table] = NULL;
 					}
 
 					for (table = tableid; table < tableid + numtables; table++) {
 						if (table < 7) {
-							if (bridge->sprite_table[table] == NULL) {
-								bridge->sprite_table[table] = malloc(32 * sizeof(**bridge->sprite_table));
+							if (bridge.sprite_table[table] == NULL) {
+								bridge.sprite_table[table] = malloc(32 * sizeof(**bridge.sprite_table));
 							}
 
 							for (sprite = 0; sprite < 32; sprite++)
-								bridge->sprite_table[table][sprite] = grf_load_dword(&buf);
+								bridge.sprite_table[table][sprite] = bufp.grf_load_dword();
 						} else {
 							grfmsg(GMS_WARN, "BridgeChangeInfo: Table %d >= 7, skipping.", table);
 							// Skip past invalid data.
 							for (sprite = 0; sprite < 32; sprite++)
-								grf_load_dword(&buf);
+								bufp.grf_load_dword();
 						}
 					}
 				}
 				break;
 
 			case 0x0E: /* Flags; bit 0 - disable far pillars */
-				FOR_EACH_OBJECT {
-					_bridge[brid + i].flags = grf_load_byte(&buf);
+				for (i = 0; i < numinfo; i++) {
+					_bridge[brid + i].flags = bufp.grf_load_byte();
 				}
 				break;
 
@@ -1056,21 +1062,21 @@ public class GRFFile
 				ret = 1;
 		}
 
-		*bufp = buf;
+		// *bufp = buf;
 		return ret;
 	}
 
-	static bool GlobalVarChangeInfo(uint gvid, int numinfo, int prop, byte **bufp, int len)
+	static boolean GlobalVarChangeInfo(int gvid, int numinfo, int prop, DataLoader bufp, int len)
 	{
-		byte *buf = *bufp;
+		// byte *buf = *bufp;
 		int i;
-		bool ret = false;
+		boolean ret = false;
 
 		switch (prop) {
 			case 0x08: { /* Cost base factor */
-				FOR_EACH_OBJECT {
-					byte factor = grf_load_byte(&buf);
-					uint price = gvid + i;
+				for (i = 0; i < numinfo; i++) {
+					byte factor = bufp.grf_load_byte();
+					int price = gvid + i;
 
 					if (price < NUM_PRICES) {
 						SetPriceBaseMultiplier(price, factor);
@@ -1082,14 +1088,26 @@ public class GRFFile
 			default:
 				ret = true;
 		}
-		*bufp = buf;
+		// *bufp = buf;
 		return ret;
 	}
 
+	static final VCI_Handler handler[] = {
+			/* GSF_TRAIN */    RailVehicleChangeInfo,
+			/* GSF_ROAD */     RoadVehicleChangeInfo,
+			/* GSF_SHIP */     ShipVehicleChangeInfo,
+			/* GSF_AIRCRAFT */ AircraftVehicleChangeInfo,
+			/* GSF_STATION */  StationChangeInfo,
+			/* GSF_CANAL */    NULL,
+			/* GSF_BRIDGE */   BridgeChangeInfo,
+			/* GSF_TOWNHOUSE */NULL,
+			/* GSF_GLOBALVAR */GlobalVarChangeInfo,
+		};
+	
 	/* Action 0x00 */
-	static void VehicleChangeInfo(byte *buf, int len)
+	static void VehicleChangeInfo(DataLoader bufp, int len)
 	{
-		byte *bufend = buf + len;
+		//byte *bufend = buf + len;
 		int i;
 
 		/* <00> <feature> <num-props> <num-info> <id> (<property <new-info>)...
@@ -1105,36 +1123,25 @@ public class GRFFile
 		 * V new-info      new bytes of info (variable size; depends on properties) */
 		/* TODO: Bridges, town houses. */
 
-		static const VCI_Handler handler[] = {
-			/* GSF_TRAIN */    RailVehicleChangeInfo,
-			/* GSF_ROAD */     RoadVehicleChangeInfo,
-			/* GSF_SHIP */     ShipVehicleChangeInfo,
-			/* GSF_AIRCRAFT */ AircraftVehicleChangeInfo,
-			/* GSF_STATION */  StationChangeInfo,
-			/* GSF_CANAL */    NULL,
-			/* GSF_BRIDGE */   BridgeChangeInfo,
-			/* GSF_TOWNHOUSE */NULL,
-			/* GSF_GLOBALVAR */GlobalVarChangeInfo,
-		};
 
-		uint8 feature;
-		uint8 numprops;
-		uint8 numinfo;
+		byte feature;
+		byte numprops;
+		byte numinfo;
 		byte engine;
-		EngineInfo *ei = NULL;
+		EngineInfo ei = NULL;
 
 		if (len == 1) {
-			DEBUG(grf, 8) ("Silently ignoring one-byte special sprite 0x00.");
+			Global.DEBUG_grf( 8, "Silently ignoring one-byte special sprite 0x00.");
 			return;
 		}
 
-		check_length(len, 6, "VehicleChangeInfo");
+		bufp.check_length( 6, "VehicleChangeInfo");
 		feature = buf[1];
 		numprops = buf[2];
 		numinfo = buf[3];
 		engine = buf[4];
 
-		DEBUG(grf, 6) ("VehicleChangeInfo: Feature %d, %d properties, to apply to %d+%d",
+		Global.DEBUG_grf( 6, "VehicleChangeInfo: Feature %d, %d properties, to apply to %d+%d",
 		               feature, numprops, engine, numinfo);
 
 		if (feature >= lengthof(handler) || handler[feature] == NULL) {
@@ -1147,14 +1154,16 @@ public class GRFFile
 				grfmsg(GMS_ERROR, "VehicleChangeInfo: Last engine ID %d out of bounds (max %d), skipping.", engine + numinfo, _vehcounts[feature]);
 				return;
 			}
-			ei = &_engine_info[engine + _vehshifts[feature]];
+			ei = _engine_info[engine + _vehshifts[feature]];
 		}
 
 		buf += 5;
 
-		while (numprops-- && buf < bufend) {
-			uint8 prop = grf_load_byte(&buf);
-			bool ignoring = false;
+		//while (numprops-- && buf < bufend) 
+		while (numprops-- && bufp.has(len)) 
+		{
+			byte prop = bufp.grf_load_byte();
+			boolean ignoring = false;
 
 			switch (feature) {
 				case GSF_TRAIN:
@@ -1164,37 +1173,37 @@ public class GRFFile
 					/* Common properties for vehicles */
 					switch (prop) {
 						case 0x00: { /* Introduction date */
-							FOR_EACH_OBJECT {
-								uint16 date = grf_load_word(&buf);
+							for (i = 0; i < numinfo; i++) {
+								int date = bufp.grf_load_word();
 
 								ei[i].base_intro = date;
 							}
 						}	break;
 						case 0x02: { /* Decay speed */
-							FOR_EACH_OBJECT {
-								uint8 decay = grf_load_byte(&buf);
+							for (i = 0; i < numinfo; i++) {
+								byte decay = bufp.grf_load_byte();
 
 								ei[i].unk2 &= 0x80;
 								ei[i].unk2 |= decay & 0x7f;
 							}
 						}	break;
 						case 0x03: { /* Vehicle life */
-							FOR_EACH_OBJECT {
-								uint8 life = grf_load_byte(&buf);
+							for (i = 0; i < numinfo; i++) {
+								byte life = bufp.grf_load_byte();
 
 								ei[i].lifelength = life;
 							}
 						}	break;
 						case 0x04: { /* Model life */
-							FOR_EACH_OBJECT {
-								uint8 life = grf_load_byte(&buf);
+							for (i = 0; i < numinfo; i++) {
+								byte life = bufp.grf_load_byte();
 
 								ei[i].base_life = life;
 							}
 						}	break;
 						case 0x06: { /* Climates available */
-							FOR_EACH_OBJECT {
-								uint8 climates = grf_load_byte(&buf);
+							for (i = 0; i < numinfo; i++) {
+								byte climates = bufp.grf_load_byte();
 
 								ei[i].climates = climates;
 							}
@@ -1206,22 +1215,22 @@ public class GRFFile
 							 * credit ;-). --pasky */
 							/* TODO: This needs to be supported by
 							 * LoadUnloadVehicle() first. */
-							FOR_EACH_OBJECT {
-								grf_load_byte(&buf);
+							for (i = 0; i < numinfo; i++) {
+								bufp.grf_load_byte();
 							}
 							ignoring = true;
 							break;
 						}
 
 						default:
-							if (handler[feature](engine, numinfo, prop, &buf, bufend - buf))
+							if (handler[feature](engine, numinfo, prop, bufp, bufend - buf))
 								ignoring = true;
 							break;
 					}
 					break;
 
 				default:
-					if (handler[feature](engine, numinfo, prop, &buf, bufend - buf))
+					if (handler[feature](engine, numinfo, prop, bufp, bufend - buf))
 						ignoring = true;
 					break;
 			}
@@ -1231,18 +1240,17 @@ public class GRFFile
 		}
 	}
 
-	#undef FOR_EACH_OBJECT
 
 	/**
 	 * Creates a spritegroup representing a callback result
 	 * @param value The value that was used to represent this callback result
 	 * @return A spritegroup representing that callback result
 	 */
-	static SpriteGroup* NewCallBackResultSpriteGroup(uint16 value)
+	static SpriteGroup* NewCallBackResultSpriteGroup(int value)
 	{
-		SpriteGroup *group = calloc(1, sizeof(*group));
+		SpriteGroup group = new SpriteGroup(); //calloc(1, sizeof(*group));
 
-		group->type = SGT_CALLBACK;
+		group.type = SGT_CALLBACK;
 
 		// Old style callback results have the highest byte 0xFF so signify it is a callback result
 		// New style ones only have the highest bit set (allows 15-bit results, instead of just 8)
@@ -1251,7 +1259,7 @@ public class GRFFile
 		else
 			value &= ~0x8000;
 
-		group->g.callback.result = value;
+		group.g.callback.result = value;
 
 		return group;
 	}
@@ -1262,17 +1270,17 @@ public class GRFFile
 	 * @param sprites The number of sprites per set.
 	 * @return A spritegroup representing the sprite number result.
 	 */
-	static SpriteGroup* NewResultSpriteGroup(uint16 value, byte sprites)
+	static SpriteGroup NewResultSpriteGroup(int value, byte sprites)
 	{
-		SpriteGroup *group = calloc(1, sizeof(*group));
-		group->type = SGT_RESULT;
-		group->g.result.result = value;
-		group->g.result.sprites = sprites;
+		SpriteGroup group = new SpriteGroup();
+		group.type = SGT_RESULT;
+		group.g.result.result = value;
+		group.g.result.sprites = sprites;
 		return group;
 	}
 
 	/* Action 0x01 */
-	static void NewSpriteSet(byte *buf, int len)
+	static void NewSpriteSet(DataLoader bufp, int len)
 	{
 		/* <01> <feature> <num-sets> <num-ent>
 		 *
@@ -1287,23 +1295,23 @@ public class GRFFile
 		 *                 For stations, must be 12 (hex) for the eighteen
 		 *                         different sprites that make up a station */
 		/* TODO: No stations support. */
-		uint8 feature;
-		uint num_sets;
-		uint num_ents;
-		uint i;
+		byte feature;
+		int num_sets;
+		int num_ents;
+		int i;
 
-		check_length(len, 4, "NewSpriteSet");
+		bufp.check_length(4, "NewSpriteSet");
 		buf++;
-		feature  = grf_load_byte(&buf);
-		num_sets = grf_load_byte(&buf);
-		num_ents = grf_load_extended(&buf);
+		feature  = bufp.grf_load_byte();
+		num_sets = bufp.grf_load_byte();
+		num_ents = bufp.grf_load_extended();
 
-		_cur_grffile->spriteset_start = _cur_spriteid;
-		_cur_grffile->spriteset_feature = feature;
-		_cur_grffile->spriteset_numsets = num_sets;
-		_cur_grffile->spriteset_numents = num_ents;
+		_cur_grffile.spriteset_start = _cur_spriteid;
+		_cur_grffile.spriteset_feature = feature;
+		_cur_grffile.spriteset_numsets = num_sets;
+		_cur_grffile.spriteset_numents = num_ents;
 
-		DEBUG(grf, 7) (
+		Global.DEBUG_grf( 7, 
 			"New sprite set at %d of type %d, "
 			"consisting of %d sets with %d views each (total %d)",
 			_cur_spriteid, feature, num_sets, num_ents, num_sets * num_ents
@@ -1315,9 +1323,9 @@ public class GRFFile
 	}
 
 	/* Action 0x02 */
-	static void NewSpriteGroup(byte *buf, int len)
+	static void NewSpriteGroup(DataLoader bufp, int len)
 	{
-		byte *bufend = buf + len;
+		//byte *bufend = buf + len;
 
 		/* <02> <feature> <set-id> <type/num-entries> <feature-specific-data...>
 		 *
@@ -1333,34 +1341,34 @@ public class GRFFile
 		/* TODO: Also, empty sprites aren't handled for now. Need to investigate
 		 * the "opacity" rules for these, that is which sprite to fall back to
 		 * when. --pasky */
-		uint8 feature;
-		uint8 setid;
+		byte feature;
+		byte setid;
 		/* XXX: For stations, these two are "little cargo" and "lotsa cargo" sets. */
-		uint8 numloaded;
-		uint8 numloading;
-		SpriteGroup *group;
-		RealSpriteGroup *rg;
+		byte numloaded;
+		byte numloading;
+		SpriteGroup group;
+		RealSpriteGroup rg;
 		byte *loaded_ptr;
 		byte *loading_ptr;
 		int i;
 
-		check_length(len, 5, "NewSpriteGroup");
+		bufp.check_length( 5, "NewSpriteGroup");
 		feature = buf[1];
 		setid = buf[2];
 		numloaded = buf[3];
 		numloading = buf[4];
 
-		if (setid >= _cur_grffile->spritegroups_count) {
+		if (setid >= _cur_grffile.spritegroups_count) {
 			// Allocate memory for new sprite group references.
-			_cur_grffile->spritegroups = realloc(_cur_grffile->spritegroups, (setid + 1) * sizeof(*_cur_grffile->spritegroups));
+			_cur_grffile.spritegroups = realloc(_cur_grffile.spritegroups, (setid + 1) * sizeof(*_cur_grffile.spritegroups));
 			// Initialise new space to NULL
-			for (; _cur_grffile->spritegroups_count < (setid + 1); _cur_grffile->spritegroups_count++)
-				_cur_grffile->spritegroups[_cur_grffile->spritegroups_count] = NULL;
+			for (; _cur_grffile.spritegroups_count < (setid + 1); _cur_grffile.spritegroups_count++)
+				_cur_grffile.spritegroups[_cur_grffile.spritegroups_count] = NULL;
 		}
 
 		if (numloaded == 0x81 || numloaded == 0x82) {
 			DeterministicSpriteGroup *dg;
-			uint16 groupid;
+			int groupid;
 			int i;
 
 			// Ok, this is gonna get a little wild, so hold your breath...
@@ -1369,68 +1377,68 @@ public class GRFFile
 			 * EvalDeterministicSpriteGroup(). */
 
 			buf += 4; len -= 4;
-			check_length(len, 6, "NewSpriteGroup 0x81/0x82");
+			bufp.check_length( 6, "NewSpriteGroup 0x81/0x82");
 
-			group = calloc(1, sizeof(*group));
-			group->type = SGT_DETERMINISTIC;
-			dg = &group->g.determ;
+			group = new SpriteGroup();
+			group.type = SGT_DETERMINISTIC;
+			dg = group.g.determ;
 
 			/* XXX: We don't free() anything, assuming that if there was
 			 * some action here before, it got associated by action 3.
 			 * We should perhaps keep some refcount? --pasky */
 
-			dg->var_scope = numloaded == 0x82 ? VSG_SCOPE_PARENT : VSG_SCOPE_SELF;
-			dg->variable = grf_load_byte(&buf);
+			dg.var_scope = numloaded == 0x82 ? VSG_SCOPE_PARENT : VSG_SCOPE_SELF;
+			dg.variable = bufp.grf_load_byte();
 			/* Variables 0x60 - 0x7F include an extra parameter */
-			if (IS_BYTE_INSIDE(dg->variable, 0x60, 0x80))
-				dg->parameter = grf_load_byte(&buf);
+			if (IS_BYTE_INSIDE(dg.variable, 0x60, 0x80))
+				dg.parameter = bufp.grf_load_byte();
 
-			dg->shift_num = grf_load_byte(&buf);
-			dg->and_mask = grf_load_byte(&buf);
-			dg->operation = dg->shift_num >> 6; /* w00t */
-			dg->shift_num &= 0x3F;
-			if (dg->operation != DSG_OP_NONE) {
-				dg->add_val = grf_load_byte(&buf);
-				dg->divmod_val = grf_load_byte(&buf);
+			dg.shift_num = bufp.grf_load_byte();
+			dg.and_mask = bufp.grf_load_byte();
+			dg.operation = dg.shift_num >> 6; /* w00t */
+			dg.shift_num &= 0x3F;
+			if (dg.operation != DSG_OP_NONE) {
+				dg.add_val = bufp.grf_load_byte();
+				dg.divmod_val = bufp.grf_load_byte();
 			}
 
 			/* (groupid & 0x8000) means this is callback result. */
 
-			dg->num_ranges = grf_load_byte(&buf);
-			dg->ranges = calloc(dg->num_ranges, sizeof(*dg->ranges));
-			for (i = 0; i < dg->num_ranges; i++) {
-				groupid = grf_load_word(&buf);
+			dg.num_ranges = bufp.grf_load_byte();
+			dg.ranges = calloc(dg.num_ranges, sizeof(*dg.ranges));
+			for (i = 0; i < dg.num_ranges; i++) {
+				groupid = bufp.grf_load_word();
 				if (HASBIT(groupid, 15)) {
-					dg->ranges[i].group = NewCallBackResultSpriteGroup(groupid);
-					dg->ranges[i].group->ref_count++;
-				} else if (groupid >= _cur_grffile->spritegroups_count || _cur_grffile->spritegroups[groupid] == NULL) {
+					dg.ranges[i].group = NewCallBackResultSpriteGroup(groupid);
+					dg.ranges[i].group.ref_count++;
+				} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
 					grfmsg(GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
-					dg->ranges[i].group = NULL;
+					dg.ranges[i].group = NULL;
 				} else {
-					dg->ranges[i].group = _cur_grffile->spritegroups[groupid];
-					dg->ranges[i].group->ref_count++;
+					dg.ranges[i].group = _cur_grffile.spritegroups[groupid];
+					dg.ranges[i].group.ref_count++;
 				}
 
-				dg->ranges[i].low = grf_load_byte(&buf);
-				dg->ranges[i].high = grf_load_byte(&buf);
+				dg.ranges[i].low = bufp.grf_load_byte();
+				dg.ranges[i].high = bufp.grf_load_byte();
 			}
 
-			groupid = grf_load_word(&buf);
+			groupid = bufp.grf_load_word();
 			if (HASBIT(groupid, 15)) {
-				dg->default_group = NewCallBackResultSpriteGroup(groupid);
-				dg->default_group->ref_count++;
-			} else if (groupid >= _cur_grffile->spritegroups_count || _cur_grffile->spritegroups[groupid] == NULL) {
+				dg.default_group = NewCallBackResultSpriteGroup(groupid);
+				dg.default_group.ref_count++;
+			} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
 				grfmsg(GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
-				dg->default_group = NULL;
+				dg.default_group = NULL;
 			} else {
-				dg->default_group = _cur_grffile->spritegroups[groupid];
-			dg->default_group->ref_count++;
+				dg.default_group = _cur_grffile.spritegroups[groupid];
+			dg.default_group.ref_count++;
 			}
 
-			if (_cur_grffile->spritegroups[setid] != NULL)
-				UnloadSpriteGroup(&_cur_grffile->spritegroups[setid]);
-			_cur_grffile->spritegroups[setid] = group;
-			group->ref_count++;
+			if (_cur_grffile.spritegroups[setid] != NULL)
+				UnloadSpriteGroup(&_cur_grffile.spritegroups[setid]);
+			_cur_grffile.spritegroups[setid] = group;
+			group.ref_count++;
 			return;
 
 		} else if (numloaded == 0x80 || numloaded == 0x83) {
@@ -1442,55 +1450,55 @@ public class GRFFile
 
 			buf += 4;
 			len -= 4;
-			check_length(len, 6, "NewSpriteGroup 0x80/0x83");
+			bufp.check_length( 6, "NewSpriteGroup 0x80/0x83");
 
-			group = calloc(1, sizeof(*group));
-			group->type = SGT_RANDOMIZED;
-			rg = &group->g.random;
+			group = new SpriteGroup();
+			group.type = SGT_RANDOMIZED;
+			rg = group.g.random;
 
 			/* XXX: We don't free() anything, assuming that if there was
 			 * some action here before, it got associated by action 3.
 			 * We should perhaps keep some refcount? --pasky */
 
-			rg->var_scope = numloaded == 0x83 ? VSG_SCOPE_PARENT : VSG_SCOPE_SELF;
+			rg.var_scope = numloaded == 0x83 ? VSG_SCOPE_PARENT : VSG_SCOPE_SELF;
 
-			rg->triggers = grf_load_byte(&buf);
-			rg->cmp_mode = rg->triggers & 0x80;
-			rg->triggers &= 0x7F;
+			rg.triggers = bufp.grf_load_byte();
+			rg.cmp_mode = rg.triggers & 0x80;
+			rg.triggers &= 0x7F;
 
-			rg->lowest_randbit = grf_load_byte(&buf);
-			rg->num_groups = grf_load_byte(&buf);
+			rg.lowest_randbit = bufp.grf_load_byte();
+			rg.num_groups = bufp.grf_load_byte();
 
-			rg->groups = calloc(rg->num_groups, sizeof(*rg->groups));
-			for (i = 0; i < rg->num_groups; i++) {
-				uint16 groupid = grf_load_word(&buf);
+			rg.groups = calloc(rg.num_groups, sizeof(*rg.groups));
+			for (i = 0; i < rg.num_groups; i++) {
+				int groupid = bufp.grf_load_word();
 
 				if (HASBIT(groupid, 15)) {
-					rg->groups[i] = NewCallBackResultSpriteGroup(groupid);
-					rg->groups[i]->ref_count++;
-				} else if (groupid >= _cur_grffile->spritegroups_count || _cur_grffile->spritegroups[groupid] == NULL) {
+					rg.groups[i] = NewCallBackResultSpriteGroup(groupid);
+					rg.groups[i].ref_count++;
+				} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
 					grfmsg(GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
-					rg->groups[i] = NULL;
+					rg.groups[i] = NULL;
 				} else {
-					rg->groups[i] = _cur_grffile->spritegroups[groupid];
-					rg->groups[i]->ref_count++;
+					rg.groups[i] = _cur_grffile.spritegroups[groupid];
+					rg.groups[i].ref_count++;
 				}
 			}
 
-			if (_cur_grffile->spritegroups[setid] != NULL)
-				UnloadSpriteGroup(&_cur_grffile->spritegroups[setid]);
-			_cur_grffile->spritegroups[setid] = group;
-			group->ref_count++;
+			if (_cur_grffile.spritegroups[setid] != NULL)
+				UnloadSpriteGroup(&_cur_grffile.spritegroups[setid]);
+			_cur_grffile.spritegroups[setid] = group;
+			group.ref_count++;
 			return;
 		}
 
-		if (!_cur_grffile->spriteset_start) {
+		if (!_cur_grffile.spriteset_start) {
 			grfmsg(GMS_ERROR, "NewSpriteGroup: No sprite set to work on! Skipping.");
 			return;
 		}
 
-		if (_cur_grffile->spriteset_feature != feature) {
-			grfmsg(GMS_ERROR, "NewSpriteGroup: Group feature %x doesn't match set feature %x! Playing it risky and trying to use it anyway.", feature, _cur_grffile->spriteset_feature);
+		if (_cur_grffile.spriteset_feature != feature) {
+			grfmsg(GMS_ERROR, "NewSpriteGroup: Group feature %x doesn't match set feature %x! Playing it risky and trying to use it anyway.", feature, _cur_grffile.spriteset_feature);
 			// return; // XXX: we can't because of MB's newstats.grf --pasky
 		}
 
@@ -1500,8 +1508,8 @@ public class GRFFile
 		loaded_ptr = buf;
 		loading_ptr = buf + 2 * numloaded;
 
-		if (_cur_grffile->first_spriteset == 0)
-			_cur_grffile->first_spriteset = _cur_grffile->spriteset_start;
+		if (_cur_grffile.first_spriteset == 0)
+			_cur_grffile.first_spriteset = _cur_grffile.spriteset_start;
 
 		if (numloaded > 16) {
 			grfmsg(GMS_WARN, "NewSpriteGroup: More than 16 sprites in group %x, skipping the rest.", setid);
@@ -1512,49 +1520,49 @@ public class GRFFile
 			numloading = 16;
 		}
 
-		group = calloc(1, sizeof(*group));
-		group->type = SGT_REAL;
-		rg = &group->g.real;
+		group = new SpriteGroup();
+		group.type = SGT_REAL;
+		rg = group.g.real;
 
-		rg->sprites_per_set = _cur_grffile->spriteset_numents;
-		rg->loaded_count  = numloaded;
-		rg->loading_count = numloading;
+		rg.sprites_per_set = _cur_grffile.spriteset_numents;
+		rg.loaded_count  = numloaded;
+		rg.loading_count = numloading;
 
-		DEBUG(grf, 6) ("NewSpriteGroup: New SpriteGroup 0x%02hhx, %u views, %u loaded, %u loading, sprites %u - %u",
-				setid, rg->sprites_per_set, rg->loaded_count, rg->loading_count,
-				_cur_grffile->spriteset_start - _cur_grffile->sprite_offset,
-				_cur_grffile->spriteset_start + (_cur_grffile->spriteset_numents * (numloaded + numloading)) - _cur_grffile->sprite_offset);
+		Global.DEBUG_grf( 6, "NewSpriteGroup: New SpriteGroup 0x%02hhx, %u views, %u loaded, %u loading, sprites %u - %u",
+				setid, rg.sprites_per_set, rg.loaded_count, rg.loading_count,
+				_cur_grffile.spriteset_start - _cur_grffile.sprite_offset,
+				_cur_grffile.spriteset_start + (_cur_grffile.spriteset_numents * (numloaded + numloading)) - _cur_grffile.sprite_offset);
 
 		for (i = 0; i < numloaded; i++) {
-			uint16 spriteset_id = grf_load_word(&loaded_ptr);
+			int spriteset_id = grf_load_word(&loaded_ptr);
 			if (HASBIT(spriteset_id, 15)) {
-				rg->loaded[i] = NewCallBackResultSpriteGroup(spriteset_id);
+				rg.loaded[i] = NewCallBackResultSpriteGroup(spriteset_id);
 			} else {
-				rg->loaded[i] = NewResultSpriteGroup(_cur_grffile->spriteset_start + spriteset_id * _cur_grffile->spriteset_numents, rg->sprites_per_set);
+				rg.loaded[i] = NewResultSpriteGroup(_cur_grffile.spriteset_start + spriteset_id * _cur_grffile.spriteset_numents, rg.sprites_per_set);
 			}
-			rg->loaded[i]->ref_count++;
-			DEBUG(grf, 8) ("NewSpriteGroup: + rg->loaded[%i]  = %u (subset %u)", i, rg->loaded[i]->g.result.result, spriteset_id);
+			rg.loaded[i].ref_count++;
+			Global.DEBUG_grf( 8, "NewSpriteGroup: + rg.loaded[%i]  = %u (subset %u)", i, rg.loaded[i].g.result.result, spriteset_id);
 		}
 
 		for (i = 0; i < numloading; i++) {
-			uint16 spriteset_id = grf_load_word(&loading_ptr);
+			int spriteset_id = grf_load_word(&loading_ptr);
 			if (HASBIT(spriteset_id, 15)) {
-				rg->loading[i] = NewCallBackResultSpriteGroup(spriteset_id);
+				rg.loading[i] = NewCallBackResultSpriteGroup(spriteset_id);
 			} else {
-				rg->loading[i] = NewResultSpriteGroup(_cur_grffile->spriteset_start + spriteset_id * _cur_grffile->spriteset_numents, rg->sprites_per_set);
+				rg.loading[i] = NewResultSpriteGroup(_cur_grffile.spriteset_start + spriteset_id * _cur_grffile.spriteset_numents, rg.sprites_per_set);
 			}
-			rg->loading[i]->ref_count++;
-			DEBUG(grf, 8) ("NewSpriteGroup: + rg->loading[%i] = %u (subset %u)", i, rg->loading[i]->g.result.result, spriteset_id);
+			rg.loading[i].ref_count++;
+			Global.DEBUG_grf( 8, "NewSpriteGroup: + rg.loading[%i] = %u (subset %u)", i, rg.loading[i].g.result.result, spriteset_id);
 		}
 
-		if (_cur_grffile->spritegroups[setid] != NULL)
-			UnloadSpriteGroup(&_cur_grffile->spritegroups[setid]);
-		_cur_grffile->spritegroups[setid] = group;
-		group->ref_count++;
+		if (_cur_grffile.spritegroups[setid] != NULL)
+			UnloadSpriteGroup(&_cur_grffile.spritegroups[setid]);
+		_cur_grffile.spritegroups[setid] = group;
+		group.ref_count++;
 	}
 
 	/* Action 0x03 */
-	static void NewVehicle_SpriteGroupMapping(byte *buf, int len)
+	static void NewVehicle_SpriteGroupMapping(DataLoader bufp, int len)
 	{
 		/* <03> <feature> <n-id> <ids>... <num-cid> [<cargo-type> <cid>]... <def-cid>
 		 * id-list	:= [<id>] [id-list]
@@ -1573,23 +1581,23 @@ public class GRFFile
 		/* TODO: Multiple cargo support could be useful even for trains/cars -
 		 * cargo id 0xff is used for showing images in the build train list. */
 
-		static byte *last_engines;
+		static byte [] last_engines;
 		static int last_engines_count;
-		uint8 feature;
-		uint8 idcount;
-		bool wagover;
-		uint8 cidcount;
+		byte feature;
+		byte idcount;
+		boolean wagover;
+		byte cidcount;
 		int c, i;
 
-		check_length(len, 7, "VehicleMapSpriteGroup");
+		bufp.check_length( 7, "VehicleMapSpriteGroup");
 		feature = buf[1];
 		idcount = buf[2] & 0x7F;
 		wagover = (buf[2] & 0x80) == 0x80;
-		check_length(len, 3 + idcount, "VehicleMapSpriteGroup");
+		bufp.check_length( 3 + idcount, "VehicleMapSpriteGroup");
 		cidcount = buf[3 + idcount];
-		check_length(len, 4 + idcount + cidcount * 3, "VehicleMapSpriteGroup");
+		bufp.check_length( 4 + idcount + cidcount * 3, "VehicleMapSpriteGroup");
 
-		DEBUG(grf, 6) ("VehicleMapSpriteGroup: Feature %d, %d ids, %d cids, wagon override %d.",
+		Global.DEBUG_grf( 6, "VehicleMapSpriteGroup: Feature %d, %d ids, %d cids, wagon override %d.",
 				feature, idcount, cidcount, wagover);
 
 		if (feature > GSF_STATION) {
@@ -1601,18 +1609,19 @@ public class GRFFile
 		if (feature == GSF_STATION) {
 			// We do things differently for stations.
 
-			for (i = 0; i < idcount; i++) {
-				uint8 stid = buf[3 + i];
-				StationSpec *stat = &_cur_grffile->stations[stid];
+			for (i = 0; i < idcount; i++) 
+			{
+				byte stid = buf[3 + i];
+				StationSpec stat = &_cur_grffile.stations[stid];
 				byte *bp = &buf[4 + idcount];
 
 				for (c = 0; c < cidcount; c++) {
-					uint8 ctype = grf_load_byte(&bp);
-					uint16 groupid = grf_load_word(&bp);
+					byte ctype = grf_load_byte(&bp);
+					int groupid = grf_load_word(&bp);
 
-					if (groupid >= _cur_grffile->spritegroups_count || _cur_grffile->spritegroups[groupid] == NULL) {
+					if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
 						grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.",
-						       groupid, _cur_grffile->spritegroups_count);
+						       groupid, _cur_grffile.spritegroups_count);
 						return;
 					}
 
@@ -1621,29 +1630,29 @@ public class GRFFile
 						continue;
 					}
 
-					stat->spritegroup[1] = _cur_grffile->spritegroups[groupid];
-					stat->spritegroup[1]->ref_count++;
+					stat.spritegroup[1] = _cur_grffile.spritegroups[groupid];
+					stat.spritegroup[1].ref_count++;
 				}
 			}
 
 			{
 				byte *bp = buf + 4 + idcount + cidcount * 3;
-				uint16 groupid = grf_load_word(&bp);
+				int groupid = grf_load_word(&bp);
 
-				if (groupid >= _cur_grffile->spritegroups_count || _cur_grffile->spritegroups[groupid] == NULL) {
+				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
 					grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.",
-					       groupid, _cur_grffile->spritegroups_count);
+					       groupid, _cur_grffile.spritegroups_count);
 					return;
 				}
 
 				for (i = 0; i < idcount; i++) {
-					uint8 stid = buf[3 + i];
-					StationSpec *stat = &_cur_grffile->stations[stid];
+					byte stid = buf[3 + i];
+					StationSpec stat = _cur_grffile.stations[stid];
 
-					stat->spritegroup[0] = _cur_grffile->spritegroups[groupid];
-					stat->spritegroup[0]->ref_count++;
-					stat->grfid = _cur_grffile->grfid;
-					stat->localidx = stid;
+					stat.spritegroup[0] = _cur_grffile.spritegroups[groupid];
+					stat.spritegroup[0].ref_count++;
+					stat.grfid = _cur_grffile.grfid;
+					stat.localidx = stid;
 					SetCustomStation(stat);
 				}
 			}
@@ -1663,7 +1672,7 @@ public class GRFFile
 		// 03 00 01 19 01 00 00 00 00 - this is missing one 00 at the end,
 		// what should we exactly do with that? --pasky
 
-		if (!_cur_grffile->spriteset_start || !_cur_grffile->spritegroups) {
+		if (!_cur_grffile.spriteset_start || !_cur_grffile.spritegroups) {
 			grfmsg(GMS_WARN, "VehicleMapSpriteGroup: No sprite set to work on! Skipping.");
 			return;
 		}
@@ -1678,14 +1687,14 @@ public class GRFFile
 				grfmsg(GMS_ERROR, "VehicleMapSpriteGroup: WagonOverride: No engine to do override with.");
 				return;
 			}
-			DEBUG(grf, 6) ("VehicleMapSpriteGroup: WagonOverride: %u engines, %u wagons.",
+			Global.DEBUG_grf( 6, "VehicleMapSpriteGroup: WagonOverride: %u engines, %u wagons.",
 					last_engines_count, idcount);
 		}
 
 
 		for (i = 0; i < idcount; i++) {
-			uint8 engine_id = buf[3 + i];
-			uint8 engine = engine_id + _vehshifts[feature];
+			byte engine_id = buf[3 + i];
+			byte engine = engine_id + _vehshifts[feature];
 			byte *bp = &buf[4 + idcount];
 
 			if (engine_id > _vehcounts[feature]) {
@@ -1694,16 +1703,16 @@ public class GRFFile
 				return;
 			}
 
-			DEBUG(grf, 7) ("VehicleMapSpriteGroup: [%d] Engine %d...", i, engine);
+			Global.DEBUG_grf( 7, "VehicleMapSpriteGroup: [%d] Engine %d...", i, engine);
 
 			for (c = 0; c < cidcount; c++) {
-				uint8 ctype = grf_load_byte(&bp);
-				uint16 groupid = grf_load_word(&bp);
+				byte ctype = grf_load_byte(&bp);
+				int groupid = grf_load_word(&bp);
 
-				DEBUG(grf, 8) ("VehicleMapSpriteGroup: * [%d] Cargo type %x, group id %x", c, ctype, groupid);
+				Global.DEBUG_grf( 8, "VehicleMapSpriteGroup: * [%d] Cargo type %x, group id %x", c, ctype, groupid);
 
-				if (groupid >= _cur_grffile->spritegroups_count || _cur_grffile->spritegroups[groupid] == NULL) {
-					grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.", groupid, _cur_grffile->spritegroups_count);
+				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
+					grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.", groupid, _cur_grffile.spritegroups_count);
 					return;
 				}
 
@@ -1711,9 +1720,9 @@ public class GRFFile
 
 				if (wagover) {
 					// TODO: No multiple cargo types per vehicle yet. --pasky
-					SetWagonOverrideSprites(engine, _cur_grffile->spritegroups[groupid], last_engines, last_engines_count);
+					SetWagonOverrideSprites(engine, _cur_grffile.spritegroups[groupid], last_engines, last_engines_count);
 				} else {
-					SetCustomEngineSprites(engine, ctype, _cur_grffile->spritegroups[groupid]);
+					SetCustomEngineSprites(engine, ctype, _cur_grffile.spritegroups[groupid]);
 					last_engines[i] = engine;
 				}
 			}
@@ -1721,24 +1730,24 @@ public class GRFFile
 
 		{
 			byte *bp = buf + 4 + idcount + cidcount * 3;
-			uint16 groupid = grf_load_word(&bp);
+			int groupid = grf_load_word(&bp);
 
-			DEBUG(grf, 8) ("-- Default group id %x", groupid);
+			Global.DEBUG_grf( 8, "-- Default group id %x", groupid);
 
 			for (i = 0; i < idcount; i++) {
-				uint8 engine = buf[3 + i] + _vehshifts[feature];
+				byte engine = buf[3 + i] + _vehshifts[feature];
 
 				// Don't tell me you don't love duplicated code!
-				if (groupid >= _cur_grffile->spritegroups_count || _cur_grffile->spritegroups[groupid] == NULL) {
-					grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.", groupid, _cur_grffile->spritegroups_count);
+				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
+					grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.", groupid, _cur_grffile.spritegroups_count);
 					return;
 				}
 
 				if (wagover) {
 					// TODO: No multiple cargo types per vehicle yet. --pasky
-					SetWagonOverrideSprites(engine, _cur_grffile->spritegroups[groupid], last_engines, last_engines_count);
+					SetWagonOverrideSprites(engine, _cur_grffile.spritegroups[groupid], last_engines, last_engines_count);
 				} else {
-					SetCustomEngineSprites(engine, GC_DEFAULT, _cur_grffile->spritegroups[groupid]);
+					SetCustomEngineSprites(engine, GC_DEFAULT, _cur_grffile.spritegroups[groupid]);
 					last_engines[i] = engine;
 				}
 			}
@@ -1746,7 +1755,7 @@ public class GRFFile
 	}
 
 	/* Action 0x04 */
-	static void VehicleNewName(byte *buf, int len)
+	static void VehicleNewName(DataLoader bufp, int len)
 	{
 		/* <04> <veh-type> <language-id> <num-veh> <offset> <data...>
 		 *
@@ -1763,29 +1772,29 @@ public class GRFFile
 		 * name), not only the original four ones. --pasky */
 		/* TODO: Support for custom station class/type names. */
 
-		uint8 feature;
-		uint8 lang;
-		uint8 num;
-		uint16 id;
-		uint16 endid;
-		const char* name;
+		byte feature;
+		byte lang;
+		byte num;
+		int id;
+		int endid;
+		final String  name;
 
-		check_length(len, 6, "VehicleNewName");
+		bufp.check_length( 6, "VehicleNewName");
 		buf++;
-		feature  = grf_load_byte(&buf);
-		lang     = grf_load_byte(&buf);
-		num      = grf_load_byte(&buf);
-		id       = (lang & 0x80) ? grf_load_word(&buf) : grf_load_byte(&buf);
+		feature  = bufp.grf_load_byte();
+		lang     = bufp.grf_load_byte();
+		num      = bufp.grf_load_byte();
+		id       = (lang & 0x80) ? bufp.grf_load_word() : bufp.grf_load_byte();
 
 		if (feature > 3) {
-			DEBUG(grf, 7) ("VehicleNewName: Unsupported feature %d, skipping", feature);
+			Global.DEBUG_grf( 7, "VehicleNewName: Unsupported feature %d, skipping", feature);
 			return;
 		}
 
 		id      += _vehshifts[feature];
 		endid    = id + num;
 
-		DEBUG(grf, 6) ("VehicleNewName: About to rename engines %d..%d (feature %d) in language 0x%x.",
+		Global.DEBUG_grf( 6, "VehicleNewName: About to rename engines %d..%d (feature %d) in language 0x%x.",
 		               id, endid, feature, lang);
 
 		if (lang & 0x80) {
@@ -1795,28 +1804,30 @@ public class GRFFile
 
 		if (!(lang & 3)) {
 			/* XXX: If non-English name, silently skip it. */
-			DEBUG(grf, 7) ("VehicleNewName: Skipping non-English name.");
+			Global.DEBUG_grf( 7, "VehicleNewName: Skipping non-English name.");
 			return;
 		}
 
-		name = (const char*)buf;
+		//name = (final String )buf;
 		len -= (lang & 0x80) ? 6 : 5;
-		for (; id < endid && len > 0; id++) {
-			size_t ofs = strlen(name) + 1;
+		for (; id < endid && len > 0; id++) 
+		{
+			String name = bufp.grf_load_string();
+			size_t ofs = name.length() + 1;
 
 			if (ofs < 128) {
-				DEBUG(grf, 8) ("VehicleNewName: %d <- %s", id, name);
+				Global.DEBUG_grf( 8, "VehicleNewName: %d <- %s", id, name);
 				SetCustomEngineName(id, name);
 			} else {
-				DEBUG(grf, 7) ("VehicleNewName: Too long a name (%d)", ofs);
+				Global.DEBUG_grf( 7, "VehicleNewName: Too long a name (%d)", ofs);
 			}
-			name += ofs;
+			//name += ofs;
 			len -= ofs;
 		}
 	}
 
 	/* Action 0x05 */
-	static void GraphicsNew(byte *buf, int len)
+	static void GraphicsNew(DataLoader bufp, int len)
 	{
 		/* <05> <graphics-type> <num-sprites> <other data...>
 		 *
@@ -1825,20 +1836,20 @@ public class GRFFile
 		 * V other data    Graphics type specific data.  Currently unused. */
 		/* TODO */
 
-		uint8 type;
-		uint16 num;
+		byte type;
+		int num;
 
-		check_length(len, 2, "GraphicsNew");
+		bufp.check_length( 2, "GraphicsNew");
 		buf++;
-		type = grf_load_byte(&buf);
-		num  = grf_load_extended(&buf);
+		type = bufp.grf_load_byte();
+		num  = bufp.grf_load_extended();
 
 		grfmsg(GMS_NOTICE, "GraphicsNew: Custom graphics (type %x) sprite block of length %d (unimplemented, ignoring).\n",
 		       type, num);
 	}
 
 	/* Action 0x06 */
-	static void CfgApply(byte *buf, int len)
+	static void CfgApply(DataLoader bufp, int len)
 	{
 		/* <06> <param-num> <param-size> <offset> ... <FF>
 		 *
@@ -1856,7 +1867,7 @@ public class GRFFile
 
 	/* Action 0x07 */
 	/* Action 0x09 */
-	static void SkipIf(byte *buf, int len)
+	static void SkipIf(DataLoader bufp, int len)
 	{
 		/* <07/09> <param-num> <param-size> <condition-type> <value> <num-sprites>
 		 *
@@ -1866,15 +1877,15 @@ public class GRFFile
 		 * V value
 		 * B num-sprites */
 		/* TODO: More params. More condition types. */
-		uint8 param;
-		uint8 paramsize;
-		uint8 condtype;
-		uint8 numsprites;
-		uint32 param_val = 0;
-		uint32 cond_val = 0;
-		bool result;
+		byte param;
+		byte paramsize;
+		byte condtype;
+		byte numsprites;
+		int param_val = 0;
+		int cond_val = 0;
+		boolean result;
 
-		check_length(len, 6, "SkipIf");
+		bufp.check_length( 6, "SkipIf");
 		param = buf[1];
 		paramsize = buf[2];
 		condtype = buf[3];
@@ -1886,9 +1897,9 @@ public class GRFFile
 
 		buf += 4;
 		switch (paramsize) {
-			case 4: cond_val = grf_load_dword(&buf); break;
-			case 2: cond_val = grf_load_word(&buf);  break;
-			case 1: cond_val = grf_load_byte(&buf);  break;
+			case 4: cond_val = bufp.grf_load_dword(); break;
+			case 2: cond_val = bufp.grf_load_word();  break;
+			case 1: cond_val = bufp.grf_load_byte();  break;
 			default: break;
 		}
 
@@ -1911,10 +1922,10 @@ public class GRFFile
 			}	break;
 
 			case 0x8B: { /* TTDPatch version */
-				uint major    = 2;
-				uint minor    = 0;
-				uint revision = 10; // special case: 2.0.1 is 2.0.10
-				uint build    = 49;
+				int major    = 2;
+				int minor    = 0;
+				int revision = 10; // special case: 2.0.1 is 2.0.10
+				int build    = 49;
 				param_val = (major << 24) | (minor << 20) | (revision << 16) | (build * 10);
 				break;
 			}
@@ -1933,7 +1944,7 @@ public class GRFFile
 			default:
 				if (param < 0x80) {
 					/* Parameter. */
-					param_val = _cur_grffile->param[param];
+					param_val = _cur_grffile.param[param];
 				} else {
 					/* In-game variable. */
 					grfmsg(GMS_WARN, "Unsupported in-game variable 0x%02X. Ignoring test.", param);
@@ -1941,7 +1952,7 @@ public class GRFFile
 				}
 		}
 
-		DEBUG(grf, 7) ("Test condtype %d, param %x, condval %x", condtype, param_val, cond_val);
+		Global.DEBUG_grf( 7, "Test condtype %d, param %x, condval %x", condtype, param_val, cond_val);
 		switch (condtype) {
 			case 0: result = !!(param_val & (1 << cond_val));
 				break;
@@ -1970,7 +1981,7 @@ public class GRFFile
 			return;
 		}
 
-		numsprites = grf_load_byte(&buf);
+		numsprites = bufp.grf_load_byte();
 		grfmsg(GMS_NOTICE, "Skipping %d sprites, test was true.", numsprites);
 		_skip_sprites = numsprites;
 		if (_skip_sprites == 0) {
@@ -1981,7 +1992,7 @@ public class GRFFile
 		}
 	}
 
-	static void GRFInfo(byte *buf, int len)
+	static void GRFInfo(DataLoader bufp, int len)
 	{
 		/* <08> <version> <grf-id> <name> <info>
 		 *
@@ -1990,26 +2001,26 @@ public class GRFFile
 		 * S name          name of this .grf set
 		 * S info          string describing the set, and e.g. author and copyright */
 		/* TODO: Check version. (We should have own versioning done somehow.) */
-		uint8 version;
-		uint32 grfid;
-		const char *name;
-		const char *info;
+		byte version;
+		int grfid;
+		final String name;
+		final String info;
 
-		check_length(len, 8, "GRFInfo");
+		bufp.check_length( 8, "GRFInfo");
 		version = buf[1];
 		/* this is de facto big endian - grf_load_dword() unsuitable */
 		grfid = buf[2] << 24 | buf[3] << 16 | buf[4] << 8 | buf[5];
-		name = (const char*)(buf + 6);
+		name = (final String )(buf + 6);
 		info = name + strlen(name) + 1;
 
-		_cur_grffile->grfid = grfid;
-		_cur_grffile->flags |= 0x0001; /* set active flag */
+		_cur_grffile.grfid = grfid;
+		_cur_grffile.flags |= 0x0001; /* set active flag */
 
 		DEBUG(grf, 1) ("[%s] Loaded GRFv%d set %08lx - %s:\n%s",
-		               _cur_grffile->filename, version, grfid, name, info);
+		               _cur_grffile.filename, version, grfid, name, info);
 	}
 
-	static void SpriteReplace(byte *buf, int len)
+	static void SpriteReplace(DataLoader bufp, int len)
 	{
 		/* <0A> <num-sets> <set1> [<set2> ...]
 		 * <set>: <num-sprites> <first-sprite>
@@ -2018,16 +2029,16 @@ public class GRFFile
 		 * Each set:
 		 * B num-sprites   How many sprites are in this set
 		 * W first-sprite  First sprite number to replace */
-		uint8 num_sets;
-		uint i;
+		byte num_sets;
+		int i;
 
 		buf++; /* skip action byte */
-		num_sets = grf_load_byte(&buf);
+		num_sets = bufp.grf_load_byte();
 
 		for (i = 0; i < num_sets; i++) {
-			uint8 num_sprites = grf_load_byte(&buf);
-			uint16 first_sprite = grf_load_word(&buf);
-			uint j;
+			byte num_sprites = bufp.grf_load_byte();
+			int first_sprite = bufp.grf_load_word();
+			int j;
 
 			grfmsg(GMS_NOTICE,
 				"SpriteReplace: [Set %d] Changing %d sprites, beginning with %d",
@@ -2040,7 +2051,7 @@ public class GRFFile
 		}
 	}
 
-	static void GRFError(byte *buf, int len)
+	static void GRFError(DataLoader bufp, int len)
 	{
 		/* <0B> <severity> <language-id> <message-id> [<message...> 00] [<data...>] 00 [<parnum>]
 		 *
@@ -2058,16 +2069,16 @@ public class GRFFile
 		 * B parnum        see action 6, only used with built-in message 03 */
 		/* TODO: For now we just show the message, sometimes incomplete and never translated. */
 
-		static const char * const msgstr[4] = {
+		static final String  final msgstr[4] = {
 			"Requires at least pseudo-TTDPatch version %s.",
 			"This file is for %s version of TTD.",
 			"Designed to be used with %s.",
 			"Invalid parameter %s.",
 		};
-		uint8 severity;
-		uint8 msgid;
+		byte severity;
+		byte msgid;
 
-		check_length(len, 6, "GRFError");
+		bufp.check_length( 6, "GRFError");
 		severity = buf[1];
 		msgid = buf[3];
 
@@ -2083,7 +2094,7 @@ public class GRFFile
 		}
 	}
 
-	static void GRFComment(byte *buf, int len)
+	static void GRFComment(DataLoader bufp, int len)
 	{
 		/* <0C> [<ignored...>]
 		 *
@@ -2091,7 +2102,7 @@ public class GRFFile
 	}
 
 	/* Action 0x0D */
-	static void ParamSet(byte *buf, int len)
+	static void ParamSet(DataLoader bufp, int len)
 	{
 		/* <0D> <target> <operation> <source1> <source2> [<data>]
 		 *
@@ -2117,19 +2128,19 @@ public class GRFFile
 
 		byte target;
 		byte oper;
-		uint32 src1;
-		uint32 src2;
-		uint32 data = 0;
-		uint32 res;
+		int src1;
+		int src2;
+		int data = 0;
+		int res;
 
-		check_length(len, 5, "ParamSet");
+		bufp.check_length( 5, "ParamSet");
 		buf++;
-		target = grf_load_byte(&buf);
-		oper = grf_load_byte(&buf);
-		src1 = grf_load_byte(&buf);
-		src2 = grf_load_byte(&buf);
+		target = bufp.grf_load_byte();
+		oper = bufp.grf_load_byte();
+		src1 = bufp.grf_load_byte();
+		src2 = bufp.grf_load_byte();
 
-		if (len >= 8) data = grf_load_dword(&buf);
+		if (len >= 8) data = bufp.grf_load_dword();
 
 		/* You can add 80 to the operation to make it apply only if the target
 		 * is not defined yet.  In this respect, a parameter is taken to be
@@ -2138,7 +2149,7 @@ public class GRFFile
 		 * - it OR A PARAMETER WITH HIGHER NUMBER has been set to any value by
 		 *   an earlier action D */
 		if (oper & 0x80) {
-			if (_cur_grffile->param_end < target)
+			if (_cur_grffile.param_end < target)
 				oper &= 0x7F;
 			else
 				return;
@@ -2152,13 +2163,13 @@ public class GRFFile
 		if (src1 == 0xFF) {
 			src1 = data;
 		} else {
-			src1 = _cur_grffile->param_end >= src1 ? _cur_grffile->param[src1] : 0;
+			src1 = _cur_grffile.param_end >= src1 ? _cur_grffile.param[src1] : 0;
 		}
 
 		if (src2 == 0xFF) {
 			src2 = data;
 		} else {
-			src2 = _cur_grffile->param_end >= src2 ? _cur_grffile->param[src2] : 0;
+			src2 = _cur_grffile.param_end >= src2 ? _cur_grffile.param[src2] : 0;
 		}
 
 		/* TODO: You can access the parameters of another GRF file by using
@@ -2260,21 +2271,21 @@ public class GRFFile
 			case 0x96: // Tile refresh offset downwards
 			case 0x97: // Snow line height
 			case 0x99: // Global ID offset
-				DEBUG(grf, 7) ("ParamSet: Skipping unimplemented target 0x%02X", target);
+				Global.DEBUG_grf( 7, "ParamSet: Skipping unimplemented target 0x%02X", target);
 				break;
 
 			default:
 				if (target < 0x80) {
-					_cur_grffile->param[target] = res;
-					if (target + 1U > _cur_grffile->param_end) _cur_grffile->param_end = target + 1;
+					_cur_grffile.param[target] = res;
+					if (target + 1U > _cur_grffile.param_end) _cur_grffile.param_end = target + 1;
 				} else {
-					DEBUG(grf, 7) ("ParamSet: Skipping unknown target 0x%02X", target);
+					Global.DEBUG_grf( 7, "ParamSet: Skipping unknown target 0x%02X", target);
 				}
 				break;
 		}
 	}
 
-	static void GRFInhibit(byte *buf, int len)
+	static void GRFInhibit(DataLoader bufp, int len)
 	{
 		/* <0E> <num> <grfids...>
 		 *
@@ -2284,25 +2295,25 @@ public class GRFFile
 		byte num;
 		int i;
 
-		check_length(len, 1, "GRFInhibit");
+		bufp.check_length( 1, "GRFInhibit");
 		buf++, len--;
-		num = grf_load_byte(&buf); len--;
-		check_length(len, 4 * num, "GRFInhibit");
+		num = bufp.grf_load_byte(); len--;
+		bufp.check_length( 4 * num, "GRFInhibit");
 
 		for (i = 0; i < num; i++) {
-			uint32 grfid = grf_load_dword(&buf);
-			GRFFile *file = GetFileByGRFID(grfid);
+			int grfid = bufp.grf_load_dword();
+			GRFFile file = GetFileByGRFID(grfid);
 
 			/* Unset activation flag */
 			if (file != NULL) {
-				grfmsg(GMS_NOTICE, "GRFInhibit: Deactivating file ``%s''", file->filename);
-				file->flags &= 0xFFFE;
+				grfmsg(GMS_NOTICE, "GRFInhibit: Deactivating file ``%s''", file.filename);
+				file.flags &= 0xFFFE;
 			}
 		}
 	}
 
 
-	static void InitializeGRFSpecial(void)
+	static void InitializeGRFSpecial()
 	{
 		/* FIXME: We should rather reflect reality in _ttdpatch_flags[]. */
 
@@ -2345,40 +2356,40 @@ public class GRFFile
 	 * Called after loading each GRF file.
 	 * @param file GRF file
 	 */
-	static void ReleaseSpriteGroups(GRFFile *file)
+	static void ReleaseSpriteGroups(GRFFile file)
 	{
 		int i;
 
 		// Bail out if no spritegroups were defined.
-		if (file->spritegroups == NULL)
+		if (file.spritegroups == NULL)
 			return;
 
-		DEBUG(grf, 6)("ReleaseSpriteGroups: Releasing for `%s'.", file->filename);
-		for (i = 0; i < file->spritegroups_count; i++) {
-			if (file->spritegroups[i] != NULL)
-				UnloadSpriteGroup(&file->spritegroups[i]);
+		DEBUG(grf, 6)("ReleaseSpriteGroups: Releasing for `%s'.", file.filename);
+		for (i = 0; i < file.spritegroups_count; i++) {
+			if (file.spritegroups[i] != NULL)
+				UnloadSpriteGroup(&file.spritegroups[i]);
 		}
-		free(file->spritegroups);
-		file->spritegroups = NULL;
-		file->spritegroups_count = 0;
+		free(file.spritegroups);
+		file.spritegroups = NULL;
+		file.spritegroups_count = 0;
 	}
 
-	static void ResetCustomStations(void)
+	static void ResetCustomStations()
 	{
-		GRFFile *file;
-		uint i;
+		GRFFile file;
+		int i;
 		CargoID c;
 
-		for (file = _first_grffile; file != NULL; file = file->next) {
-			for (i = 0; i < lengthof(file->stations); i++) {
-				if (file->stations[i].grfid != file->grfid) continue;
+		for (file = _first_grffile; file != NULL; file = file.next) {
+			for (i = 0; i < lengthof(file.stations); i++) {
+				if (file.stations[i].grfid != file.grfid) continue;
 
 				// TODO: Release renderdata, platforms and layouts
 
 				// Release this stations sprite groups.
 				for (c = 0; c < NUM_GLOBAL_CID; c++) {
-					if (file->stations[i].spritegroup[c] != NULL)
-						UnloadSpriteGroup(&file->stations[i].spritegroup[c]);
+					if (file.stations[i].spritegroup[c] != NULL)
+						UnloadSpriteGroup(&file.stations[i].spritegroup[c]);
 				}
 			}
 		}
@@ -2394,7 +2405,7 @@ public class GRFFile
 	 * Reset all NewGRF loaded data
 	 * TODO
 	 */
-	static void ResetNewGRFData(void)
+	static void ResetNewGRFData()
 	{
 		int i;
 
@@ -2436,14 +2447,14 @@ public class GRFFile
 
 	
 
-static void InitNewGRFFile(const char* filename, int sprite_offset)
+static void InitNewGRFFile(final String  filename, int sprite_offset)
 {
-	GRFFile *newfile;
+	GRFFile newfile;
 
 	newfile = GetFileByFilename(filename);
 	if (newfile != NULL) {
 		/* We already loaded it once. */
-		newfile->sprite_offset = sprite_offset;
+		newfile.sprite_offset = sprite_offset;
 		_cur_grffile = newfile;
 		return;
 	}
@@ -2453,14 +2464,14 @@ static void InitNewGRFFile(const char* filename, int sprite_offset)
 	if (newfile == NULL)
 		error ("Out of memory");
 
-	newfile->filename = strdup(filename);
-	newfile->sprite_offset = sprite_offset;
+	newfile.filename = strdup(filename);
+	newfile.sprite_offset = sprite_offset;
 
 	if (_first_grffile == NULL) {
 		_cur_grffile = newfile;
 		_first_grffile = newfile;
 	} else {
-		_cur_grffile->next = newfile;
+		_cur_grffile.next = newfile;
 		_cur_grffile = newfile;
 	}
 }
@@ -2468,14 +2479,14 @@ static void InitNewGRFFile(const char* filename, int sprite_offset)
 /**
  * Precalculate refit masks from cargo classes for all vehicles.
  */
-static void CalculateRefitMasks(void)
+static void CalculateRefitMasks()
 {
 	EngineID engine;
 
 	for (engine = 0; engine < TOTAL_NUM_ENGINES; engine++) {
-		uint32 mask = 0;
-		uint32 not_mask = 0;
-		uint32 xor_mask = _engine_info[engine].refit_mask;
+		int mask = 0;
+		int not_mask = 0;
+		int xor_mask = _engine_info[engine].refit_mask;
 		byte i;
 
 		if (cargo_allowed[engine] != 0) {
@@ -2488,8 +2499,8 @@ static void CalculateRefitMasks(void)
 			}
 		} else {
 			// Don't apply default refit mask to wagons or engines with no capacity
-			if (xor_mask == 0 && !(GetEngine(engine)->type == VEH_Train && (RailVehInfo(engine)->capacity == 0 || RailVehInfo(engine)->flags & RVI_WAGON)))
-				xor_mask = _default_refitmasks[GetEngine(engine)->type - VEH_Train];
+			if (xor_mask == 0 && !(GetEngine(engine).type == VEH_Train && (RailVehInfo(engine).capacity == 0 || RailVehInfo(engine).flags & RVI_WAGON)))
+				xor_mask = _default_refitmasks[GetEngine(engine).type - VEH_Train];
 		}
 		_engine_info[engine].refit_mask = ((mask & ~not_mask) ^ xor_mask) & _landscape_global_cargo_mask[_opt.landscape];
 	}
@@ -2503,7 +2514,7 @@ static void CalculateRefitMasks(void)
 	/* XXX: We consider GRF files trusted. It would be trivial to exploit OTTD by
 	 * a crafted invalid GRF file. We should tell that to the user somehow, or
 	 * better make this more robust in the future. */
-	static void DecodeSpecialSprite(const char* filename, uint num, uint stage)
+	static void DecodeSpecialSprite(final String  filename, int num, int stage)
 	{
 		/* XXX: There is a difference between staged loading in TTDPatch and
 		 * here.  In TTDPatch, for some reason actions 1 and 2 are carried out
@@ -2514,8 +2525,8 @@ static void CalculateRefitMasks(void)
 		 * in an earlier stage than associating, so...  We just process actions
 		 * 1 and 2 in stage 1 now, let's hope that won't get us into problems.
 		 * --pasky */
-		uint32 action_mask = (stage == 0) ? 0x0001FF40 : 0x0001FFBF;
-		static const SpecialSpriteHandler handlers[] = {
+		int action_mask = (stage == 0) ? 0x0001FF40 : 0x0001FFBF;
+		static final SpecialSpriteHandler handlers[] = {
 			/* 0x00 */ VehicleChangeInfo,
 			/* 0x01 */ NewSpriteSet,
 			/* 0x02 */ NewSpriteGroup,
@@ -2544,22 +2555,22 @@ static void CalculateRefitMasks(void)
 		action = buf[0];
 
 		if (action >= lengthof(handlers)) {
-			DEBUG(grf, 7) ("Skipping unknown action 0x%02X", action);
+			Global.DEBUG_grf( 7, "Skipping unknown action 0x%02X", action);
 		} else if (!HASBIT(action_mask, action)) {
-			DEBUG(grf, 7) ("Skipping action 0x%02X in stage %d", action, stage);
+			Global.DEBUG_grf( 7, "Skipping action 0x%02X in stage %d", action, stage);
 		} else if (handlers[action] == NULL) {
-			DEBUG(grf, 7) ("Skipping unsupported Action 0x%02X", action);
+			Global.DEBUG_grf( 7, "Skipping unsupported Action 0x%02X", action);
 		} else {
-			DEBUG(grf, 7) ("Handling action 0x%02X in stage %d", action, stage);
+			Global.DEBUG_grf( 7, "Handling action 0x%02X in stage %d", action, stage);
 			handlers[action](buf, num);
 		}
 		free(buf);
 	}
 
 	
-	static void LoadNewGRFFile(const char* filename, uint file_index, uint stage)
+	static void LoadNewGRFFile(final String  filename, int file_index, int stage)
 	{
-		uint16 num;
+		int num;
 
 		/* A .grf file is activated only if it was active when the game was
 		 * started.  If a game is loaded, only its active .grfs will be
@@ -2573,13 +2584,13 @@ static void CalculateRefitMasks(void)
 		if (stage != 0) {
 			_cur_grffile = GetFileByFilename(filename);
 			if (_cur_grffile == NULL) error("File ``%s'' lost in cache.\n", filename);
-			if (!(_cur_grffile->flags & 0x0001)) return;
+			if (!(_cur_grffile.flags & 0x0001)) return;
 		}
 
 		FioOpenFile(file_index, filename);
 		_file_index = file_index; // XXX
 
-		DEBUG(grf, 7) ("Reading NewGRF-file '%s'", filename);
+		Global.DEBUG_grf( 7, "Reading NewGRF-file '%s'", filename);
 
 		/* Skip the first sprite; we don't care about how many sprites this
 		 * does contain; newest TTDPatches and George's longvehicles don't
@@ -2603,7 +2614,7 @@ static void CalculateRefitMasks(void)
 					FioSkipBytes(num);
 				}
 			} else {
-				if (_skip_sprites == 0) DEBUG(grf, 7) ("Skipping unexpected sprite");
+				if (_skip_sprites == 0) Global.DEBUG_grf( 7, "Skipping unexpected sprite");
 
 				FioSkipBytes(7);
 				num -= 8;
@@ -2636,10 +2647,10 @@ static void CalculateRefitMasks(void)
 
 
 
-	void LoadNewGRF(uint load_index, uint file_index)
+	void LoadNewGRF(int load_index, int file_index)
 	{
-		static bool initialized = false; // XXX yikes
-		uint stage;
+		static boolean initialized = false; // XXX yikes
+		int stage;
 
 		if (!initialized) {
 			InitializeGRFSpecial();
@@ -2653,8 +2664,8 @@ static void CalculateRefitMasks(void)
 		 * and load information from it. */
 		_custom_sprites_base = load_index;
 		for (stage = 0; stage < 2; stage++) {
-			uint slot = file_index;
-			uint j;
+			int slot = file_index;
+			int j;
 
 			_cur_stage = stage;
 			_cur_spriteid = load_index;
@@ -2674,3 +2685,81 @@ static void CalculateRefitMasks(void)
 	}
 
 }
+
+
+
+
+class DataLoader
+{
+	
+	
+	 byte grf_load_byte()
+	{
+		return *(*buf)++;
+	}
+
+	 int grf_load_word()
+	{
+		int val;
+		byte *p = *buf;
+		val = p[0];
+		val |= p[1] << 8;
+		*buf = p + 2;
+		return val;
+	}
+
+	 int grf_load_extended()
+	{
+		int val;
+		val = grf_load_byte(buf);
+		if (val == 0xFF) val = grf_load_word(buf);
+		return val;
+	}
+
+	 int grf_load_dword()
+	{
+		int val;
+		byte *p = *buf;
+		val = p[0];
+		val |= p[1] << 8;
+		val |= p[2] << 16;
+		val |= p[3] << 24;
+		*buf = p + 4;
+		return val;
+	}
+
+	 // zero terminated
+	public String grf_load_string() 
+	{
+		StringBuilder sb = new StringBuilder();
+		byte c;
+		while(true) {
+			c = grf_load_byte();
+			if( c == 0 ) break;
+			sb.append(c);
+		}
+		return sb.toString();
+	}
+	
+	public void check_length( int wanted, String where ) 
+	{
+
+		if (real < wanted) { 
+			grfmsg(GMS_ERROR, "%s/%d: Invalid special sprite length %d (expected %d)!", \
+			       where, _cur_spriteid - _cur_grffile->sprite_offset, real, wanted); \
+			throw new GrfLoadException();
+		} 
+	} 
+	
+}
+
+
+
+enum grfmsg_severity {
+	GMS_NOTICE,
+	GMS_WARN,
+	GMS_ERROR,
+	GMS_FATAL,
+} 
+
+

@@ -73,7 +73,7 @@ static const int _vehshifts[4] = {
 
 static uint16 cargo_allowed[TOTAL_NUM_ENGINES];
 static uint16 cargo_disallowed[TOTAL_NUM_ENGINES];
-
+#if 0
 /* Debugging messages policy:
  *
  * These should be the severities used for direct DEBUG() calls
@@ -117,7 +117,7 @@ static void CDECL grfmsg(grfmsg_severity severity, const char *str, ...)
 	DEBUG(grf, export_severity) ("[%s][%s] %s", _cur_grffile->filename, severitystr[severity], buf);
 }
 
-
+#if 0
 #define check_length(real, wanted, where) \
 do { \
 	if (real < wanted) { \

@@ -192,6 +192,14 @@ public class Global {
 			debug( s, arg );
 	}
 
+	public void DEBUG_grf( int level, String s, Object ... arg )
+	{
+		if( level >= _debug_grf_level )
+			debug( s, arg );
+	}
+	
+	
+	
 	public static int Random() {
 		return hal.Random();
 	}

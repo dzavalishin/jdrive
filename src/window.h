@@ -32,7 +32,7 @@ typedef union WindowEvent WindowEvent;
     the default height/width of the window itself. You can change this
     AFTER window-creation, with:
      w->resize.width or w->resize.height.
-   That was all.. good luck, and enjoy :) -- TrueLight */
+   That was all.. good luck, and enjoy :) -- TrueLight * /
 
 enum {
 	RESIZE_NONE   = 0,
@@ -209,7 +209,7 @@ enum WindowKeyCodes {
 	// A-Z are mapped to 65-90
 	// a-z are mapped to 97-122
 };
-
+/*
 typedef struct WindowDesc {
 	int16 left, top, width, height;
 	WindowClass cls;
@@ -218,7 +218,8 @@ typedef struct WindowDesc {
 	const Widget *widgets;
 	WindowProc *proc;
 } WindowDesc;
-
+*/
+#if 0
 enum {
 	WDF_STD_TOOLTIPS   = 1, /* use standard routine when displaying tooltips */
 	WDF_DEF_WIDGET     = 2,	/* default widget control for some widgets in the on click event */
@@ -228,7 +229,7 @@ enum {
 	WDF_STICKY_BUTTON  =32, /* Set window to sticky mode; they are not closed unless closed with 'X' (widget 2) */
 	WDF_RESIZABLE      =64, /* A window can be resized */
 };
-
+#endif
 /* can be used as x or y coordinates to cause a specific placement */
 enum {
 	WDP_AUTO = -1,

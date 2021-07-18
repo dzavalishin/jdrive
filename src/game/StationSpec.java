@@ -30,7 +30,7 @@ public class StationSpec
 
 	byte lengths;
 	byte []platforms;
-	StationLayout [][]layouts;
+	StationLayout [][] layouts;
 
 	/**
 	 * NUM_GLOBAL_CID sprite groups.

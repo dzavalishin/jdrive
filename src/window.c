@@ -1,5 +1,5 @@
 /* $Id: window.c 3336 2005-12-24 15:01:17Z tron $ */
-
+#if 0
 #include "stdafx.h"
 #include "openttd.h"
 #include "debug.h"

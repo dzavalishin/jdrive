@@ -1,5 +1,5 @@
 /* $Id: terraform_gui.c 3338 2005-12-24 20:53:02Z tron $ */
-
+#if 0
 #include "stdafx.h"
 #include "openttd.h"
 #include "table/sprites.h"
