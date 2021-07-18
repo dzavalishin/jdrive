@@ -280,7 +280,7 @@ VARDEF StringID _error_message;
 VARDEF StringID _error_message_2;
 VARDEF int32 _additional_cash_required;
 
-VARDEF uint32 _decode_parameters[20];
+//VARDEF uint32 _decode_parameters[20];
 
 //VARDEF uint32 _pressed_key; // Low 8 bits = ASCII, High 16 bits = keycode
 //VARDEF bool _ctrl_pressed;  // Is Ctrl pressed?
@@ -370,7 +370,7 @@ typedef struct {
 } CargoConst;
 
 VARDEF CargoConst _cargoc;
-
+/*
 
 static inline void SetDParamX(uint32 *s, uint n, uint32 v)
 {
@@ -400,7 +400,7 @@ static inline uint32 GetDParam(uint n)
 	assert(n < lengthof(_decode_parameters));
 	return _decode_parameters[n];
 }
-
+*/
 // Used to bind a C string name to a dparam number.
 // NOTE: This has a short lifetime. You can't
 //       use this string much later or it will be gone.
@@ -435,7 +435,7 @@ VARDEF char _screenshot_name[128];
 VARDEF byte _vehicle_design_names;
 
 /* tunnelbridge */
-#define MAX_BRIDGES 13
+//#define MAX_BRIDGES 13
 
 /* For new pathfinding. Define here so it is globally available without having
  * to include npf.h */

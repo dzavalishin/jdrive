@@ -467,7 +467,7 @@ typedef struct dropdown_d {
 	bool drag_mode;
 } dropdown_d;
 assert_compile(WINDOW_CUSTOM_SIZE >= sizeof(dropdown_d));
-*/
+* /
 enum WindowEvents {
 	WE_CLICK = 0,
 	WE_PAINT = 1,

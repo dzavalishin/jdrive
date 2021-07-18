@@ -1,24 +1,9 @@
-/* $Id: sound.h 2701 2005-07-24 14:12:37Z tron $ */
+package game;
 
-#ifndef SOUND_H
-#define SOUND_H
-
-typedef struct MusicFileSettings {
-	byte playlist;
-	byte music_vol;
-	byte effect_vol;
-	byte custom_1[33];
-	byte custom_2[33];
-	bool btn_down;
-	bool shuffle;
-	char extmidi[80];
-} MusicFileSettings;
-
-VARDEF MusicFileSettings msf;
-
-bool SoundInitialize(const char *filename);
-/*
-typedef enum SoundFx {
+public enum SoundFx {
+	// [dz] added
+	SND_NONE,
+	
 	SND_02_SPLAT,                          //  0 == 0x00 !
 	SND_03_FACTORY_WHISTLE,
 	SND_04_TRAIN,
@@ -92,10 +77,5 @@ typedef enum SoundFx {
 	SND_46_PLANE_ENGINE_SPUTTERING,
 	SND_47_MAGLEV_2,
 	SND_48_DISTANT_BIRD                    // 72 == 0x48
-} SoundFx;
-*/
-void SndPlayTileFx(SoundFx sound, TileIndex tile);
-void SndPlayVehicleFx(SoundFx sound, const Vehicle *v);
-void SndPlayFx(SoundFx sound);
 
-#endif /* SOUND_H */
+}

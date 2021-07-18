@@ -20,7 +20,7 @@ typedef struct GoodsEntry {
 	byte last_age;
 	int32 feeder_profit;
 } GoodsEntry;
-*/
+* /
 typedef enum RoadStopType {
 	RS_BUS,
 	RS_TRUCK
@@ -31,10 +31,10 @@ enum {
 	INVALID_SLOT = 0xFFFF,
 	NUM_SLOTS = 2,
 	ROAD_STOP_LIMIT = 8,
-};
+}; */
 
 typedef uint16 StationID;
-
+/*
 typedef struct RoadStop {
 	TileIndex xy;
 	bool used;
@@ -137,11 +137,11 @@ void UpdateAllStationVirtCoord(void);
 
 VARDEF SortStruct *_station_sort;
 
-extern MemoryPool _station_pool;
+//extern MemoryPool _station_pool;
 
 /**
  * Get the pointer to the station with index 'index'
- */
+ * /
 static inline Station *GetStation(StationID index)
 {
 	return (Station*)GetItemFromPool(&_station_pool, index);
@@ -149,7 +149,7 @@ static inline Station *GetStation(StationID index)
 
 /**
  * Get the current size of the StationPool
- */
+ * /
 static inline uint16 GetStationPoolSize(void)
 {
 	return _station_pool.total_items;
@@ -166,7 +166,7 @@ static inline bool IsStationIndex(uint index)
 
 /* Stuff for ROADSTOPS */
 
-extern MemoryPool _roadstop_pool;
+//extern MemoryPool _roadstop_pool;
 
 /**
  * Get the pointer to the roadstop with index 'index'
@@ -206,10 +206,10 @@ void StationPickerDrawSprite(int x, int y, RailType railtype, int image);
 uint32 GetCustomStationRelocation(const StationSpec *spec, const Station *st, byte ctype);
 
 RoadStop * GetRoadStopByTile(TileIndex tile, RoadStopType type);
-static inline int GetRoadStopType(TileIndex tile)
+/*static inline int GetRoadStopType(TileIndex tile)
 {
 	return (_m[tile].m5 < 0x47) ? RS_TRUCK : RS_BUS;
-}
+}*/
 
 uint GetNumRoadStops(const Station *st, RoadStopType type);
 RoadStop * GetPrimaryRoadStop(const Station *st, RoadStopType type);

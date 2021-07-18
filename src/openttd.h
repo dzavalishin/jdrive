@@ -219,7 +219,7 @@ typedef struct GameDifficulty {
 	int disasters;
 	int town_council_tolerance;	// minimum required town ratings to be allowed to demolish stuff
 } GameDifficulty;
-*/
+* /
 enum {
 	// Temperate
 	CT_PASSENGERS = 0,
@@ -265,7 +265,7 @@ enum {
 
 	CT_INVALID = 0xFF
 };
-
+*/
 //typedef uint AcceptedCargo[NUM_CARGO];
 
 typedef struct TileDesc {

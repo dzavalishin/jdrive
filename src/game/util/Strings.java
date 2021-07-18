@@ -193,7 +193,7 @@ StringID BindCString(final String str)
 // This function is used to "bind" a C string to a OpenTTD dparam slot.
 void SetDParamStr(uint n, final String str)
 {
-	SetDParam(n, BindCString(str));
+	Global.SetDParam(n, BindCString(str));
 }
 
 void InjectDParam(int amount)

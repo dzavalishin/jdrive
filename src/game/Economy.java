@@ -41,7 +41,7 @@ public class Economy
 	//  the scores together of public static final int SCORE_info is allowed to be more!
 
 	class ScoreInfo {
-		byte id;			// Unique ID of the score
+		int id;			// Unique ID of the score
 		int needed;			// How much you need to get the perfect score
 		int score;			// How much score it will give
 		
@@ -95,10 +95,12 @@ public class Economy
 		if (val <= tile.getMap().m5)
 			return;
 
-		_m[tile + TileDiffXY(0, 0)].m5 =   val;
-		_m[tile + TileDiffXY(0, 1)].m5 = ++val;
-		_m[tile + TileDiffXY(1, 0)].m5 = ++val;
-		_m[tile + TileDiffXY(1, 1)].m5 = ++val;
+		int ti = tile.getTile();
+		
+		Global._m[ti + TileDiffXY(0, 0)].m5 =   val;
+		Global._m[ti + TileDiffXY(0, 1)].m5 = ++val;
+		Global._m[ti + TileDiffXY(1, 0)].m5 = ++val;
+		Global._m[ti + TileDiffXY(1, 1)].m5 = ++val;
 
 		MarkTileDirtyByTile(tile + TileDiffXY(0, 0));
 		MarkTileDirtyByTile(tile + TileDiffXY(0, 1));
@@ -156,7 +158,7 @@ public class Economy
 
 	/* Count vehicles */
 		{
-			Vehicle *v;
+			Vehicle v;
 			int min_profit = _score_info[SCORE_MIN_PROFIT].needed;
 			int num = 0;
 
@@ -183,7 +185,7 @@ public class Economy
 	/* Count stations */
 		{
 			int num = 0;
-			Station *st;
+			Station st;
 
 			FOR_ALL_STATIONS(st) {
 				if (st.xy != 0 && st.owner == owner) {
@@ -196,7 +198,7 @@ public class Economy
 
 	/* Generate statistics depending on recent income statistics */
 		{
-			PlayerEconomyEntry *pee;
+			PlayerEconomyEntry pee;
 			int numec;
 			int min_income;
 			int max_income;
@@ -207,8 +209,8 @@ public class Economy
 				max_income = 0;
 				pee = p.old_economy;
 				do {
-					min_income = min(min_income, pee.income + pee.expenses);
-					max_income = max(max_income, pee.income + pee.expenses);
+					min_income = Integer.min(min_income, pee.income + pee.expenses);
+					max_income = Integer.max(max_income, pee.income + pee.expenses);
 				} while (++pee,--numec);
 
 				if (min_income > 0)
@@ -220,9 +222,9 @@ public class Economy
 
 	/* Generate score depending on amount of transported cargo */
 		{
-			PlayerEconomyEntry *pee;
+			PlayerEconomyEntry pee;
 			int numec;
-			uint32 total_delivered;
+			int total_delivered;
 
 			numec = min(p.num_valid_stat_ent, 4);
 			if (numec != 0) {
@@ -294,26 +296,26 @@ public class Economy
 		return score;
 	}
 
-	// use OWNER_SPECTATOR as new_player to delete the player.
+	// use Owner.OWNER_SPECTATOR as new_player to delete the player.
 	void ChangeOwnershipOfPlayerItems(PlayerID old_player, PlayerID new_player)
 	{
 		PlayerID old = _current_player;
 		_current_player = old_player;
 
-		if (new_player == OWNER_SPECTATOR) {
+		if (new_player == Owner.OWNER_SPECTATOR) {
 			Subsidy s;
 
 			for (s = _subsidies; s != endof(_subsidies); s++) {
-				if (s.cargo_type != CT_INVALID && s.age >= 12) {
+				if (s.cargo_type != AcceptedCargo.CT_INVALID && s.age >= 12) {
 					if (GetStation(s.to).owner == old_player)
-						s.cargo_type = CT_INVALID;
+						s.cargo_type = AcceptedCargo.CT_INVALID;
 				}
 			}
 		}
 
 		/* Take care of rating in towns */
 		{ Town t;
-			if (new_player != OWNER_SPECTATOR) {
+			if (new_player != Owner.OWNER_SPECTATOR) {
 				FOR_ALL_TOWNS(t) {
 					/* If a player takes over, give the ratings to that player. */
 					if (IsValidTown(t) && HASBIT(t.have_ratings, old_player)) {
@@ -365,7 +367,7 @@ public class Economy
 
 			FOR_ALL_VEHICLES(v) {
 				if (v.owner == old_player && IS_BYTE_INSIDE(v.type, VEH_Train, VEH_Aircraft+1) ) {
-					if (new_player == OWNER_SPECTATOR) {
+					if (new_player == Owner.OWNER_SPECTATOR) {
 						DeleteWindowById(WC_VEHICLE_VIEW, v.index);
 						DeleteWindowById(WC_VEHICLE_DETAILS, v.index);
 						DeleteWindowById(WC_VEHICLE_ORDERS, v.index);
@@ -394,7 +396,7 @@ public class Economy
 		}
 
 		// Change color of existing windows
-		if (new_player != OWNER_SPECTATOR) {
+		if (new_player != Owner.OWNER_SPECTATOR) {
 			Window w;
 			for (w = _windows; w != _last_window; w++) {
 				if (w.caption_color == old_player)
@@ -413,13 +415,13 @@ public class Economy
 				for (i = 0; i < 4; i++) {
 					/* 'Sell' the share if this player has any */
 					if (p.share_owners[i] == _current_player)
-						p.share_owners[i] = OWNER_SPECTATOR;
+						p.share_owners[i] = Owner.OWNER_SPECTATOR;
 				}
 			}
 			p = GetPlayer(_current_player);
 			/* Sell all the shares that people have on this company */
 			for (i = 0; i < 4; i++)
-				p.share_owners[i] = OWNER_SPECTATOR;
+				p.share_owners[i] = Owner.OWNER_SPECTATOR;
 		}
 
 		_current_player = old;
@@ -472,8 +474,8 @@ public class Economy
 				DeletePlayerWindows(owner);
 
 //			Show bankrupt news
-				SetDParam(0, p.name_1);
-				SetDParam(1, p.name_2);
+				Global.SetDParam(0, p.name_1);
+				Global.SetDParam(1, p.name_2);
 				AddNewsItem( (StringID)(owner + 16*3), NEWS_FLAGS(NM_CALLBACK, 0, NT_COMPANY_INFO, DNC_BANKRUPCY),0,0);
 
 				// If the player is human, and it is no network play, leave the player playing
@@ -491,7 +493,7 @@ public class Economy
 						FOR_ALL_CLIENTS(cs) {
 							ci = DEREF_CLIENT_INFO(cs);
 							if ((ci.client_playas-1) == owner) {
-								ci.client_playas = OWNER_SPECTATOR;
+								ci.client_playas = Owner.OWNER_SPECTATOR;
 								// Send the new info to all the clients
 								NetworkUpdateClientInfo(_network_own_client_index);
 							}
@@ -500,13 +502,13 @@ public class Economy
 					// Make sure the player no longer controls the company
 					if (IS_HUMAN_PLAYER(owner) && owner == _local_player) {
 						// Switch the player to spectator..
-						_local_player = OWNER_SPECTATOR;
+						_local_player = Owner.OWNER_SPECTATOR;
 					}
 	#endif /* ENABLE_NETWORK */
 
 					// Convert everything the player owns to NO_OWNER
 					p.money64 = p.player_money = 100000000;
-					ChangeOwnershipOfPlayerItems(owner, Owner.OWNER_SPECTATOR);
+					ChangeOwnershipOfPlayerItems(owner, Owner.Owner.OWNER_SPECTATOR);
 					// Register the player as not-active
 					p.is_active = false;
 
@@ -529,8 +531,8 @@ public class Economy
 		DrawPlayerFace(p.face, p.player_color, 2, 23);
 		GfxFillRect(3, 23, 3+91, 23+118, 0x323 | USE_COLORTABLE);
 
-		SetDParam(0, p.president_name_1);
-		SetDParam(1, p.president_name_2);
+		Global.SetDParam(0, p.president_name_1);
+		Global.SetDParam(1, p.president_name_2);
 
 		DrawStringMultiCenter(49, 148, STR_7058_PRESIDENT, 94);
 
@@ -538,8 +540,8 @@ public class Economy
 		case 1:
 			DrawStringCentered(w.width>>1, 1, STR_7056_TRANSPORT_COMPANY_IN_TROUBLE, 0);
 
-			SetDParam(0, p.name_1);
-			SetDParam(1, p.name_2);
+			Global.SetDParam(0, p.name_1);
+			Global.SetDParam(1, p.name_2);
 
 			DrawStringMultiCenter(
 				((w.width - 101) >> 1) + 98,
@@ -553,10 +555,10 @@ public class Economy
 
 			DrawStringCentered(w.width>>1, 1, STR_7059_TRANSPORT_COMPANY_MERGER, 0);
 			COPY_IN_DPARAM(0,WP(w,news_d).ni.params, 2);
-			SetDParam(2, p.name_1);
-			SetDParam(3, p.name_2);
+			Global.SetDParam(2, p.name_1);
+			Global.SetDParam(3, p.name_2);
 			price = WP(w,news_d).ni.params[2];
-			SetDParam(4, price);
+			Global.SetDParam(4, price);
 			DrawStringMultiCenter(
 				((w.width - 101) >> 1) + 98,
 				90,
@@ -577,8 +579,8 @@ public class Economy
 
 		case 4:
 			DrawStringCentered(w.width>>1, 1, STR_705E_NEW_TRANSPORT_COMPANY_LAUNCHED, 0);
-			SetDParam(0, p.name_1);
-			SetDParam(1, p.name_2);
+			Global.SetDParam(0, p.name_1);
+			Global.SetDParam(1, p.name_2);
 			COPY_IN_DPARAM(2,WP(w,news_d).ni.params, 2);
 			DrawStringMultiCenter(
 				((w.width - 101) >> 1) + 98,
@@ -598,29 +600,29 @@ public class Economy
 
 		switch (ni.string_id >> 4) {
 		case 1:
-			SetDParam(0, STR_7056_TRANSPORT_COMPANY_IN_TROUBLE);
-			SetDParam(1, STR_7057_WILL_BE_SOLD_OFF_OR_DECLARED);
-			SetDParam(2, p.name_1);
-			SetDParam(3, p.name_2);
+			Global.SetDParam(0, STR_7056_TRANSPORT_COMPANY_IN_TROUBLE);
+			Global.SetDParam(1, STR_7057_WILL_BE_SOLD_OFF_OR_DECLARED);
+			Global.SetDParam(2, p.name_1);
+			Global.SetDParam(3, p.name_2);
 			return STR_02B6;
 		case 2:
-			SetDParam(0, STR_7059_TRANSPORT_COMPANY_MERGER);
-			SetDParam(1, STR_705A_HAS_BEEN_SOLD_TO_FOR);
+			Global.SetDParam(0, STR_7059_TRANSPORT_COMPANY_MERGER);
+			Global.SetDParam(1, STR_705A_HAS_BEEN_SOLD_TO_FOR);
 			COPY_IN_DPARAM(2,ni.params, 2);
-			SetDParam(4, p.name_1);
-			SetDParam(5, p.name_2);
+			Global.SetDParam(4, p.name_1);
+			Global.SetDParam(5, p.name_2);
 			COPY_IN_DPARAM(6,ni.params + 2, 1);
 			return STR_02B6;
 		case 3:
-			SetDParam(0, STR_705C_BANKRUPT);
-			SetDParam(1, STR_705D_HAS_BEEN_CLOSED_DOWN_BY);
+			Global.SetDParam(0, STR_705C_BANKRUPT);
+			Global.SetDParam(1, STR_705D_HAS_BEEN_CLOSED_DOWN_BY);
 			COPY_IN_DPARAM(2,ni.params, 2);
 			return STR_02B6;
 		case 4:
-			SetDParam(0, STR_705E_NEW_TRANSPORT_COMPANY_LAUNCHED);
-			SetDParam(1, STR_705F_STARTS_CONSTRUCTION_NEAR);
-			SetDParam(2, p.name_1);
-			SetDParam(3, p.name_2);
+			Global.SetDParam(0, STR_705E_NEW_TRANSPORT_COMPANY_LAUNCHED);
+			Global.SetDParam(1, STR_705F_STARTS_CONSTRUCTION_NEAR);
+			Global.SetDParam(2, p.name_1);
+			Global.SetDParam(3, p.name_2);
 			COPY_IN_DPARAM(4,ni.params, 2);
 			return STR_02B6;
 		default:
@@ -868,37 +870,37 @@ public class Economy
 		Pair tp;
 
 		/* if mode is false, use the singular form */
-		SetDParam(0, _cargoc.names_s[s.cargo_type] + (mode ? 0 : 32));
+		Global.SetDParam(0, _cargoc.names_s[s.cargo_type] + (mode ? 0 : 32));
 
 		if (s.age < 12) {
-			if (s.cargo_type != CT_PASSENGERS && s.cargo_type != CT_MAIL) {
-				SetDParam(1, STR_INDUSTRY);
-				SetDParam(2, s.from);
+			if (s.cargo_type != AcceptedCargo.CT_PASSENGERS && s.cargo_type != AcceptedCargo.CT_MAIL) {
+				Global.SetDParam(1, STR_INDUSTRY);
+				Global.SetDParam(2, s.from);
 				tile = GetIndustry(s.from).xy;
 
-				if (s.cargo_type != CT_GOODS && s.cargo_type != CT_FOOD) {
-					SetDParam(4, STR_INDUSTRY);
-					SetDParam(5, s.to);
+				if (s.cargo_type != AcceptedCargo.CT_GOODS && s.cargo_type != AcceptedCargo.CT_FOOD) {
+					Global.SetDParam(4, STR_INDUSTRY);
+					Global.SetDParam(5, s.to);
 					tile2 = GetIndustry(s.to).xy;
 				} else {
-					SetDParam(4, STR_TOWN);
-					SetDParam(5, s.to);
+					Global.SetDParam(4, STR_TOWN);
+					Global.SetDParam(5, s.to);
 					tile2 = GetTown(s.to).xy;
 				}
 			} else {
-				SetDParam(1, STR_TOWN);
-				SetDParam(2, s.from);
+				Global.SetDParam(1, STR_TOWN);
+				Global.SetDParam(2, s.from);
 				tile = GetTown(s.from).xy;
 
-				SetDParam(4, STR_TOWN);
-				SetDParam(5, s.to);
+				Global.SetDParam(4, STR_TOWN);
+				Global.SetDParam(5, s.to);
 				tile2 = GetTown(s.to).xy;
 			}
 		} else {
-			SetDParam(1, s.from);
+			Global.SetDParam(1, s.from);
 			tile = GetStation(s.from).xy;
 
-			SetDParam(2, s.to);
+			Global.SetDParam(2, s.to);
 			tile2 = GetStation(s.to).xy;
 		}
 
@@ -913,23 +915,23 @@ public class Economy
 		Subsidy *s;
 
 		for(s=_subsidies; s != endof(_subsidies); s++) {
-			if (s.cargo_type != CT_INVALID && s.age < 12 &&
-					s.cargo_type != CT_PASSENGERS && s.cargo_type != CT_MAIL &&
-					(index == s.from || (s.cargo_type!=CT_GOODS && s.cargo_type!=CT_FOOD && index==s.to))) {
-				s.cargo_type = CT_INVALID;
+			if (s.cargo_type != AcceptedCargo.CT_INVALID && s.age < 12 &&
+					s.cargo_type != AcceptedCargo.CT_PASSENGERS && s.cargo_type != AcceptedCargo.CT_MAIL &&
+					(index == s.from || (s.cargo_type!=AcceptedCargo.CT_GOODS && s.cargo_type!=AcceptedCargo.CT_FOOD && index==s.to))) {
+				s.cargo_type = AcceptedCargo.CT_INVALID;
 			}
 		}
 	}
 
 	void DeleteSubsidyWithStation(uint16 index)
 	{
-		Subsidy *s;
+		Subsidy s;
 		boolean dirty = false;
 
 		for(s=_subsidies; s != endof(_subsidies); s++) {
-			if (s.cargo_type != CT_INVALID && s.age >= 12 &&
+			if (s.cargo_type != AcceptedCargo.CT_INVALID && s.age >= 12 &&
 					(s.from == index || s.to == index)) {
-				s.cargo_type = CT_INVALID;
+				s.cargo_type = AcceptedCargo.CT_INVALID;
 				dirty = true;
 			}
 		}
@@ -975,7 +977,7 @@ public class Economy
 			return;
 
 		// Randomize cargo type
-		if (Global.Random()&1 && i.produced_cargo[1] != CT_INVALID) {
+		if (Global.Random()&1 && i.produced_cargo[1] != AcceptedCargo.CT_INVALID) {
 			cargo = i.produced_cargo[1];
 			trans = i.pct_transported[1];
 			total = i.total_production[1];
@@ -988,12 +990,12 @@ public class Economy
 		// Quit if no production in this industry
 		//  or if the cargo type is passengers
 		//  or if the pct transported is already large enough
-		if (total == 0 || trans > 42 || cargo == CT_INVALID || cargo == CT_PASSENGERS)
+		if (total == 0 || trans > 42 || cargo == AcceptedCargo.CT_INVALID || cargo == AcceptedCargo.CT_PASSENGERS)
 			return;
 
 		fr.cargo = cargo;
 
-		if (cargo == CT_GOODS || cargo == CT_FOOD) {
+		if (cargo == AcceptedCargo.CT_GOODS || cargo == AcceptedCargo.CT_FOOD) {
 			// The destination is a town
 			Town t = GetTown(RandomRange(_total_towns));
 
@@ -1026,7 +1028,7 @@ public class Economy
 					ss.from == s.from &&
 					ss.to == s.to &&
 					ss.cargo_type == s.cargo_type) {
-				s.cargo_type = CT_INVALID;
+				s.cargo_type = AcceptedCargo.CT_INVALID;
 				return true;
 			}
 		}
@@ -1044,13 +1046,13 @@ public class Economy
 		boolean modified = false;
 
 		for(s=_subsidies; s != endof(_subsidies); s++) {
-			if (s.cargo_type == CT_INVALID)
+			if (s.cargo_type == AcceptedCargo.CT_INVALID)
 				continue;
 
 			if (s.age == 12-1) {
 				pair = SetupSubsidyDecodeParam(s, 1);
 				AddNewsItem(STR_202E_OFFER_OF_SUBSIDY_EXPIRED, NEWS_FLAGS(NM_NORMAL, NF_TILE, NT_SUBSIDIES, 0), pair.a, pair.b);
-				s.cargo_type = CT_INVALID;
+				s.cargo_type = AcceptedCargo.CT_INVALID;
 				modified = true;
 			} else if (s.age == 2*12-1) {
 				st = GetStation(s.to);
@@ -1058,7 +1060,7 @@ public class Economy
 					pair = SetupSubsidyDecodeParam(s, 1);
 					AddNewsItem(STR_202F_SUBSIDY_WITHDRAWN_SERVICE, NEWS_FLAGS(NM_NORMAL, NF_TILE, NT_SUBSIDIES, 0), pair.a, pair.b);
 				}
-				s.cargo_type = CT_INVALID;
+				s.cargo_type = AcceptedCargo.CT_INVALID;
 				modified = true;
 			} else {
 				s.age++;
@@ -1069,7 +1071,7 @@ public class Economy
 		if (CHANCE16(1,4)) {
 			// Find a free slot
 			s = _subsidies;
-			while (s.cargo_type != CT_INVALID) {
+			while (s.cargo_type != AcceptedCargo.CT_INVALID) {
 				if (++s == endof(_subsidies))
 					goto no_add;
 			}
@@ -1078,7 +1080,7 @@ public class Economy
 			do {
 				FindSubsidyPassengerRoute(&fr);
 				if (fr.distance <= 70) {
-					s.cargo_type = CT_PASSENGERS;
+					s.cargo_type = AcceptedCargo.CT_PASSENGERS;
 					s.from = ((Town*)fr.from).index;
 					s.to = ((Town*)fr.to).index;
 					goto add_subsidy;
@@ -1087,7 +1089,7 @@ public class Economy
 				if (fr.distance <= 70) {
 					s.cargo_type = fr.cargo;
 					s.from = ((Industry*)fr.from).index;
-					s.to = (fr.cargo == CT_GOODS || fr.cargo == CT_FOOD) ? ((Town*)fr.to).index : ((Industry*)fr.to).index;
+					s.to = (fr.cargo == AcceptedCargo.CT_GOODS || fr.cargo == AcceptedCargo.CT_FOOD) ? ((Town*)fr.to).index : ((Industry*)fr.to).index;
 		add_subsidy:
 					if (!CheckSubsidyDuplicate(s)) {
 						s.age = 0;
@@ -1121,7 +1123,7 @@ public class Economy
 
 		for(i=0; i!=lengthof(_subsidies); i++) {
 			s = &_subsidies[i];
-			if (s.cargo_type != CT_INVALID) {
+			if (s.cargo_type != AcceptedCargo.CT_INVALID) {
 				SlSetArrayIndex(i);
 				SlObject(s, _subsidies_desc);
 			}
@@ -1141,7 +1143,7 @@ public class Economy
 		byte f;
 
 		/* zero the distance if it's the bank and very short transport. */
-		if (_opt.landscape == LT_NORMAL && cargo == CT_VALUABLES && dist < 10)
+		if (_opt.landscape == LT_NORMAL && cargo == AcceptedCargo.CT_VALUABLES && dist < 10)
 			dist = 0;
 
 		f = 255;
@@ -1211,7 +1213,7 @@ public class Economy
 			if (s.cargo_type == cargo_type && s.age < 12) {
 
 				/* Check distance from source */
-				if (cargo_type == CT_PASSENGERS || cargo_type == CT_MAIL) {
+				if (cargo_type == AcceptedCargo.CT_PASSENGERS || cargo_type == AcceptedCargo.CT_MAIL) {
 					xy = GetTown(s.from).xy;
 				} else {
 					xy = (GetIndustry(s.from)).xy;
@@ -1220,7 +1222,7 @@ public class Economy
 					continue;
 
 				/* Check distance from dest */
-				if (cargo_type == CT_PASSENGERS || cargo_type == CT_MAIL || cargo_type == CT_GOODS || cargo_type == CT_FOOD) {
+				if (cargo_type == AcceptedCargo.CT_PASSENGERS || cargo_type == AcceptedCargo.CT_MAIL || cargo_type == AcceptedCargo.CT_GOODS || cargo_type == AcceptedCargo.CT_FOOD) {
 					xy = GetTown(s.to).xy;
 				} else {
 					xy = (GetIndustry(s.to)).xy;
@@ -1239,8 +1241,8 @@ public class Economy
 				InjectDParam(2);
 
 				p = GetPlayer(_current_player);
-				SetDParam(0, p.name_1);
-				SetDParam(1, p.name_2);
+				Global.SetDParam(0, p.name_1);
+				Global.SetDParam(1, p.name_2);
 				AddNewsItem(
 					STR_2031_SERVICE_SUBSIDY_AWARDED + _opt.diff.subsidy_multiplier,
 					NEWS_FLAGS(NM_NORMAL, NF_TILE, NT_SUBSIDIES, 0),
@@ -1276,8 +1278,8 @@ public class Economy
 		subsidised = CheckSubsidised(s_from, s_to, cargo_type);
 
 		// Increase town's counter for some special goods types
-		if (cargo_type == CT_FOOD) s_to.town.new_act_food += num_pieces;
-		if (cargo_type == CT_WATER)  s_to.town.new_act_water += num_pieces;
+		if (cargo_type == AcceptedCargo.CT_FOOD) s_to.town.new_act_food += num_pieces;
+		if (cargo_type == AcceptedCargo.CT_WATER)  s_to.town.new_act_water += num_pieces;
 
 		// Give the goods to the industry.
 		DeliverGoodsToIndustry(s_to.xy, cargo_type, num_pieces);
@@ -1552,13 +1554,13 @@ public class Economy
 
 			if (profit != 0) {
 
-				if (GetStation(last_visited).owner == OWNER_TOWN 
-					&& GetStation(original_cargo_source).owner == OWNER_TOWN)
+				if (GetStation(last_visited).owner == Owner.OWNER_TOWN 
+					&& GetStation(original_cargo_source).owner == Owner.OWNER_TOWN)
 					
 					MA_Tax(profit*2, v);
 
-				else if (GetStation(last_visited).owner == OWNER_TOWN 
-					|| GetStation(original_cargo_source).owner == OWNER_TOWN)
+				else if (GetStation(last_visited).owner == Owner.OWNER_TOWN 
+					|| GetStation(original_cargo_source).owner == Owner.OWNER_TOWN)
 
 					MA_Tax(profit, v);
 
@@ -1593,9 +1595,9 @@ public class Economy
 		int i,pi;
 		long value;
 
-		SetDParam(0, p.name_1);
-		SetDParam(1, p.name_2);
-		SetDParam(2, p.bankrupt_value);
+		Global.SetDParam(0, p.name_1);
+		Global.SetDParam(1, p.name_2);
+		Global.SetDParam(2, p.bankrupt_value);
 		AddNewsItem( (StringID)(_current_player + 16*2), NEWS_FLAGS(NM_CALLBACK, 0, NT_COMPANY_INFO, DNC_BANKRUPCY),0,0);
 
 		// original code does this a little bit differently
@@ -1609,7 +1611,7 @@ public class Economy
 
 		value = CalculateCompanyValue(p) >> 2;
 		for(i=0; i!=4; i++) {
-			if (p.share_owners[i] != Owner.OWNER_SPECTATOR) {
+			if (p.share_owners[i] != Owner.Owner.OWNER_SPECTATOR) {
 				owner = GetPlayer(p.share_owners[i]);
 				owner.money64 += value;
 				owner.yearly_expenses[0][EXPENSES_OTHER] += value;
@@ -1630,7 +1632,7 @@ public class Economy
 	 * @param p1 player to buy the shares from
 	 * @param p2 unused
 	 */
-	int CmdBuyShareInCompany(int x, int y, uint32 flags, uint32 p1, uint32 p2)
+	int CmdBuyShareInCompany(int x, int y, int flags, int p1, int p2)
 	{
 		Player p;
 		long cost;
@@ -1645,17 +1647,17 @@ public class Economy
 		if (_cur_year - p.inaugurated_year < 6) return_cmd_error(STR_7080_PROTECTED);
 
 		/* Those lines are here for network-protection (clients can be slow) */
-		if (GetAmountOwnedBy(p, Owner.OWNER_SPECTATOR) == 0) return 0;
+		if (GetAmountOwnedBy(p, Owner.Owner.OWNER_SPECTATOR) == 0) return 0;
 
 		/* We can not buy out a real player (temporarily). TODO: well, enable it obviously */
-		if (GetAmountOwnedBy(p, Owner.OWNER_SPECTATOR) == 1 && !p.is_ai) return 0;
+		if (GetAmountOwnedBy(p, Owner.Owner.OWNER_SPECTATOR) == 1 && !p.is_ai) return 0;
 
 		cost = CalculateCompanyValue(p) >> 2;
 		if (flags & DC_EXEC) {
 			PlayerID* b = p.share_owners;
 			int i;
 
-			while (*b != Owner.OWNER_SPECTATOR) b++; /* share owners is guaranteed to contain at least one OWNER_SPECTATOR */
+			while (*b != Owner.Owner.OWNER_SPECTATOR) b++; /* share owners is guaranteed to contain at least one Owner.OWNER_SPECTATOR */
 			*b = _current_player;
 
 			for (i = 0; p.share_owners[i] == _current_player;) {
@@ -1675,7 +1677,7 @@ public class Economy
 	 * @param p1 player to sell the shares from
 	 * @param p2 unused
 	 */
-	int CmdSellShareInCompany(int x, int y, uint32 flags, uint32 p1, uint32 p2)
+	int CmdSellShareInCompany(int x, int y, int flags, int p1, int p2)
 	{
 		Player p;
 		long cost;
@@ -1696,7 +1698,7 @@ public class Economy
 		if (flags & DC_EXEC) {
 			PlayerID* b = p.share_owners;
 			while (*b != _current_player) b++; /* share owners is guaranteed to contain player */
-			*b = Owner.OWNER_SPECTATOR;
+			*b = Owner.Owner.OWNER_SPECTATOR;
 			InvalidateWindow(WC_COMPANY, (int)p1);
 		}
 		return cost;
@@ -1710,12 +1712,12 @@ public class Economy
 	 * @param p1 player/company to buy up
 	 * @param p2 unused
 	 */
-	int CmdBuyCompany(int x, int y, uint32 flags, uint32 p1, uint32 p2)
+	int CmdBuyCompany(int x, int y, int flags, int p1, int p2)
 	{
 		Player p;
 
 		/* Disable takeovers in multiplayer games */
-		if (p1 >= MAX_PLAYERS || _networking) return CMD_ERROR;
+		if (p1 >= Global.MAX_PLAYERS || _networking) return CMD_ERROR;
 
 		SET_EXPENSES_TYPE(EXPENSES_OTHER);
 		p = GetPlayer(p1);
@@ -1727,7 +1729,7 @@ public class Economy
 		}
 		return p.bankrupt_value;
 	}
-
+/*
 	// Prices
 	static void SaveLoad_PRIC()
 	{
@@ -1764,5 +1766,5 @@ public class Economy
 		{ 'SUBS', Save_SUBS,			Load_SUBS, CH_ARRAY},
 		{ 'ECMY', SaveLoad_ECMY, SaveLoad_ECMY, CH_RIFF | CH_LAST},
 	};
-
+*/
 }

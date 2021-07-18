@@ -26,7 +26,7 @@ oldest                   current   lastest
 [O------------F-------------C---------L           ]
               |
            forced
-*/
+* /
 
 #define MAX_NEWS 30
 
@@ -38,10 +38,11 @@ static byte _oldest_news = 0;    // points to first item in fifo queue
 static byte _latest_news = INVALID_NEWS;  // points to last item in fifo queue
 /* if the message being shown was forced by the user, its index is stored in
  * _forced_news. forced_news is INVALID_NEWS otherwise.
- * (Users can force messages through history or "last message") */
+ * (Users can force messages through history or "last message") * /
 static byte _forced_news = INVALID_NEWS;
 
 static byte _total_news = 0; // total news count
+*/
 
 void DrawNewsNewTrainAvail(Window *w);
 void DrawNewsNewRoadVehAvail(Window *w);
@@ -71,7 +72,7 @@ GetNewsStringCallbackProc * const _get_news_string_callback[] = {
 	GetNewsStringNewAircraftAvail, /* DNC_AIRCRAFTAVAIL */
 	GetNewsStringBankrupcy,        /* DNC_BANKRUPCY */
 };
-
+#if 0
 void InitNewsItemStructs(void)
 {
 	memset(_news_items, 0, sizeof(_news_items));
@@ -227,7 +228,7 @@ static byte increaseIndex(byte i)
 		i = i % MAX_NEWS;
 	return i;
 }
-
+/*
 void AddNewsItem(StringID string, uint32 flags, uint data_a, uint data_b)
 {
 	NewsItem *ni;
@@ -276,13 +277,13 @@ void AddNewsItem(StringID string, uint32 flags, uint data_a, uint data_b)
 }
 
 /* To add a news item with an attached validation function. This validation function
- * makes sure that the news item is not outdated when the newspaper pops up. */
+ * makes sure that the news item is not outdated when the newspaper pops up. * /
 void AddValidatedNewsItem(StringID string, uint32 flags, uint data_a, uint data_b, ValidationProc *validation)
 {
 	AddNewsItem(string, flags, data_a, data_b);
 	_news_items[_latest_news].isValid = validation;
 }
-
+*/
 // don't show item if it's older than x days
 static const byte _news_items_age[] = {60, 60, 90, 60, 90, 30, 150, 30, 90, 180};
 
@@ -865,3 +866,4 @@ void ShowMessageOptions(void)
 	DeleteWindowById(WC_GAME_OPTIONS, 0);
 	AllocateWindowDesc(&_message_options_desc);
 }
+#endif

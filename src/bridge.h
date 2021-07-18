@@ -6,7 +6,7 @@
 #define BRIDGE_H
 
 /** Struct containing information about a single bridge type
- */
+ * /
 typedef struct Bridge {
 	byte avail_year;     ///< the year in which the bridge becomes available
 	byte min_length;     ///< the minimum length of the bridge (not counting start and end tile)

@@ -1,5 +1,5 @@
 /* $Id: bridge_gui.c 3282 2005-12-10 12:05:39Z peter1138 $ */
-
+#if 0
 /** @file bridge_gui.c Graphical user interface for bridge construction*/
 
 #include "stdafx.h"
@@ -165,3 +165,4 @@ void ShowBuildBridgeWindow(TileIndex start, TileIndex end, byte bridge_type)
 		ShowErrorMessage(errmsg, STR_5015_CAN_T_BUILD_BRIDGE_HERE, TileX(end) * 16, TileY(end) * 16);
 	}
 }
+#endif

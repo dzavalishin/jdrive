@@ -41,6 +41,52 @@ public class Global {
 	public static final int TRANSPORT_END = 3;
 	public static final int INVALID_TRANSPORT = 0xff;
 
+	/* AcceptedCargo
+	public static final int CT_PASSENGERS = 0;
+	public static final int CT_COAL = 1;
+	public static final int CT_MAIL = 2;
+	public static final int CT_OIL = 3;
+	public static final int CT_LIVESTOCK = 4;
+	public static final int CT_GOODS = 5;
+	public static final int CT_GRAIN = 6;
+	public static final int CT_WOOD = 7;
+	public static final int CT_IRON_ORE = 8;
+	public static final int CT_STEEL = 9;
+	public static final int CT_VALUABLES = 10;
+	public static final int CT_FOOD = 11;
+
+	// Arctic
+	public static final int CT_WHEAT = 6;
+	public static final int CT_HILLY_UNUSED = 8;
+	public static final int CT_PAPER = 9;
+	public static final int CT_GOLD = 10;
+
+	// Tropic
+	public static final int CT_RUBBER = 1;
+	public static final int CT_FRUIT = 4;
+	public static final int CT_MAIZE = 6;
+	public static final int CT_COPPER_ORE = 8;
+	public static final int CT_WATER = 9;
+	public static final int CT_DIAMONDS = 10;
+
+	// Toyland
+	public static final int CT_SUGAR = 1;
+	public static final int CT_TOYS = 3;
+	public static final int CT_BATTERIES = 4;
+	public static final int CT_CANDY = 5;
+	public static final int CT_TOFFEE = 6;
+	public static final int CT_COLA = 7;
+	public static final int CT_COTTON_CANDY = 8;
+	public static final int CT_BUBBLES = 9;
+	public static final int CT_PLASTIC = 10;
+	public static final int CT_FIZZY_DRINKS = 11;
+
+	public static final int NUM_CARGO = 12;
+
+	public static final int CT_INVALID = 0xFF;
+	
+	*/
+	
 
 	public static final boolean AYSTAR_DEBUG = true;
 
@@ -150,6 +196,43 @@ public class Global {
 		return hal.Random();
 	}
 
+	
+	
+/* dont use me
+static inline void SetDParamX(uint32 *s, uint n, uint32 v)
+{
+	s[n] = v;
+}
+
+static inline uint32 GetDParamX(const uint32 *s, uint n)
+{
+	return s[n];
+}
+*/
+static private int _decode_parameters[] = new int[20];
+
+
+static void SetDParam(int n, int v)
+{
+	//assert(n < _decode_parameters.length);
+	_decode_parameters[n] = v;
+}
+
+static void SetDParam64(int n, long v)
+{
+	//assert(n + 1 < lengthof(_decode_parameters));
+	_decode_parameters[n + 0] = (int) (v & 0xffffffff);
+	_decode_parameters[n + 1] = (int) (v >> 32);
+}
+
+static int GetDParam(int n)
+{
+	//assert(n < lengthof(_decode_parameters));
+	return _decode_parameters[n];
+}
+	
+	
+	
 }
 /*
 class DebugLevel {

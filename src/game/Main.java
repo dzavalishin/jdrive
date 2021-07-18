@@ -774,9 +774,9 @@ public class Main {
 			String s;
 			sprintf(buf, "%s%s", _path.autosave_dir, PATHSEP);
 
-			SetDParam(0, p.name_1);
-			SetDParam(1, p.name_2);
-			SetDParam(2, _date);
+			Global.SetDParam(0, p.name_1);
+			Global.SetDParam(1, p.name_2);
+			Global.SetDParam(2, _date);
 			s = GetString(buf + strlen(_path.autosave_dir) + strlen(PATHSEP), STR_4004);
 			strcpy(s, ".sav");
 		} else { /* generate a savegame name and number according to _patches.max_num_autosaves */

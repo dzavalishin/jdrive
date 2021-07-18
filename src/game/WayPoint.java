@@ -155,8 +155,8 @@ private void WaypointPoolNewBlock(int start_item)
 	/* Update the sign for the waypoint */
 	void UpdateWaypointSign()
 	{
-		Point pt = RemapCoords2(TileX(xy) * 16, TileY(xy) * 16);
-		SetDParam(0, index);
+		Point pt = RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
+		Global.SetDParam(0, index);
 		UpdateViewportSignPos(sign, pt.x, pt.y - 0x20, STR_WAYPOINT_VIEWPORT);
 	}
 

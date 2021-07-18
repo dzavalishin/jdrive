@@ -224,21 +224,21 @@ uint Hash_Size(Hash* h);
 typedef struct VehicleQueue VehicleQueue;
 
 // O(1), always
-typedef bool VQueue_PushProc(VehicleQueue* q, Vehicle* item);
+//typedef bool VQueue_PushProc(VehicleQueue* q, Vehicle* item);
 // O(1), unless offset is > 2147483647 - then O(n) -- increments offset
-typedef Vehicle* VQueue_PopProc(VehicleQueue* q);
+//typedef Vehicle* VQueue_PopProc(VehicleQueue* q);
 // O(1)
-typedef Vehicle* VQueue_GetTopProc(VehicleQueue* q);
+//typedef Vehicle* VQueue_GetTopProc(VehicleQueue* q);
 // O(n) -- Rebuilds the "position"s, resets the offset, asserts the size.
-typedef void VQueue_CleanProc(VehicleQueue* q);
+//typedef void VQueue_CleanProc(VehicleQueue* q);
 // O(n)
-typedef void VQueue_ClearProc(VehicleQueue* q);
+//typedef void VQueue_ClearProc(VehicleQueue* q);
 // O(1) -- sets dirty bit
-typedef void VQueue_DeleteProc(VehicleQueue* q, Vehicle* item);
+//typedef void VQueue_DeleteProc(VehicleQueue* q, Vehicle* item);
 // O(1) if not dirty, otherwise O(n) -- Gets current position in queue.
-typedef uint32 VQueue_GetPosProc(VehicleQueue* q, Vehicle* item);
+//typedef uint32 VQueue_GetPosProc(VehicleQueue* q, Vehicle* item);
 // O(1)
-typedef bool VQueue_InitProc(VehicleQueue* q);
+//typedef bool VQueue_InitProc(VehicleQueue* q);
 
 //typedef void VQueue_FreeProc(Queue* q, bool free_values);
 
@@ -263,7 +263,7 @@ struct VQueueItem
 //typedef struct VehicleQueue VehicleQueue;
 
 VehicleQueue *new_VQueue();
-
+/*
 struct VehicleQueue
 {
 	// Ahh, yes! Classic C functional programming!
@@ -288,6 +288,6 @@ struct VehicleQueue
 	// Offset for "position" in queue - allows for O(1) pushes & pops
 	uint32 offset;
 };
-
+*/
 
 #endif /* QUEUE_H */

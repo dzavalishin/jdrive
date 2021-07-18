@@ -736,7 +736,7 @@ void* Hash_Get(Hash* h, uint key1, uint key2) {
 uint Hash_Size(Hash* h) {
     return h->size;
 }
-
+/*
 // Returns success
 bool VPush(VehicleQueue *q, Vehicle *v)
 {
