@@ -81,6 +81,35 @@ public class WindowConstants {
 	public static final int WC_SIGN_LIST = 0x4F;
 	public static final int WC_BUILD_SIGNALS = 0x50;
 	
+
+	
+	public static final int WWT_EMPTY = 0;
+
+	public static final int WWT_IMGBTN = 1;						/* button with image */
+	public static final int WWT_PANEL =  WWT_IMGBTN;
+	public static final int WWT_PANEL_2 = 2;					/* button with diff image when clicked */
+
+	public static final int WWT_TEXTBTN = 3;					/* button with text */
+	public static final int WWT_4 = 4;								/* button with diff text when clicked */
+	public static final int WWT_5 = 5;								/* label */
+	public static final int WWT_6 = 6;								/* combo box text area */
+	public static final int WWT_MATRIX = 7;
+	public static final int WWT_SCROLLBAR = 8;
+	public static final int WWT_FRAME = 9;						/* frame */
+	public static final int WWT_CAPTION = 10;
+
+	public static final int WWT_HSCROLLBAR = 11;
+	public static final int WWT_STICKYBOX = 12;
+	public static final int WWT_SCROLL2BAR = 13;				/* 2nd vertical scrollbar*/
+	public static final int WWT_RESIZEBOX = 14;
+	public static final int WWT_CLOSEBOX = 15;
+	public static final int WWT_LAST = 16;						/* Last Item. use WIDGETS_END to fill up padding!! */
+
+	public static final int WWT_MASK = 31;
+
+	public static final int WWT_PUSHTXTBTN	=  WWT_TEXTBTN	| WWB_PUSHBUTTON;
+	public static final int WWT_PUSHIMGBTN	=  WWT_IMGBTN	| WWB_PUSHBUTTON;
+	public static final int WWT_NODISTXTBTN =  WWT_TEXTBTN	| WWB_NODISBUTTON;
 	
 	
 }

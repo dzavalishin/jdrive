@@ -503,7 +503,7 @@ enum WindowWidgetBehaviours {
 	WWB_NODISBUTTON = 2 << 5,
 };
 
-
+#if 0
 enum WindowWidgetTypes {
 	WWT_EMPTY = 0,
 
@@ -533,7 +533,7 @@ enum WindowWidgetTypes {
 	WWT_PUSHIMGBTN	= WWT_IMGBTN	| WWB_PUSHBUTTON,
 	WWT_NODISTXTBTN = WWT_TEXTBTN	| WWB_NODISBUTTON,
 };
-
+#endif
 #define WIDGETS_END WWT_LAST,   RESIZE_NONE,     0,     0,     0,     0,     0, 0, STR_NULL
 
 enum WindowFlags {
@@ -630,7 +630,7 @@ void HideVitalWindows(void);
 void ShowVitalWindows(void);
 
 /* window.c */
-VARDEF Window _windows[25];
+//VARDEF Window _windows[25];
 VARDEF Window *_last_window;
 
 VARDEF Point _cursorpos_drag_start;

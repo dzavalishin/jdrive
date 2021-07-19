@@ -2,11 +2,13 @@ package game;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.function.BiConsumer;
 
 import game.util.WindowConstants;
 import game.util.wcustom.AbstractWinCustom;
 
-abstract public class Window extends WindowConstants
+public class Window extends WindowConstants
 {
 	int flags4;
 	WindowClass window_class;
@@ -23,8 +25,8 @@ abstract public class Window extends WindowConstants
 	int click_state, disabled_state, hidden_state;
 
 	ViewPort viewport;
-	Widget original_widget;
-	Widget widget;
+	Widget [] original_widget;
+	List<Widget> widget;
 	int desc_flags;
 
 	WindowMessage message;
@@ -32,20 +34,48 @@ abstract public class Window extends WindowConstants
 	//byte custom[];
 	AbstractWinCustom custom;
 
-	
+	BiConsumer<Window,WindowEvent> wndproc;
+
+	public Window() {
+		left = top = width = height = flags4 = 0;
+		caption_color = 0;
+		click_state = disabled_state = hidden_state = 0;
+		desc_flags = 0;
+
+		window_class = null;
+		window_number = null;
+
+		hscroll  = null;
+		vscroll  = null;
+		vscroll2 = null;
+		resize = null;
+
+
+		viewport = null;
+		original_widget = null;
+		//widget = null;
+
+		message = null;
+		custom = null;
+		wndproc = null;
+
+		List<Widget> widget =  new ArrayList<Widget>();
+
+	}	
+
 	//static Window _windows[] = new Window[25];
 	static List<Window> _windows = new ArrayList<Window>();
-	
+
 	//WindowProc *wndproc;
-	abstract void WindowProc( WindowEvent e);
-	void wndproc(WindowEvent e) { WindowProc(e); }
+	//abstract void WindowProc( WindowEvent e);
+	//void wndproc(WindowEvent e) { WindowProc(e); }
 
 	void CallWindowEventNP(WindowEvents event)
 	{
 		WindowEvent e = new WindowEvent();
 
 		e.event = event;
-		wndproc(e);
+		wndproc.accept(this,e);
 	}
 
 
@@ -62,12 +92,16 @@ abstract public class Window extends WindowConstants
 	 */
 	int GetWidgetFromPos(int x, int y)
 	{
-		Widget wi;
+		//Widget wi;
 		int index, found_index = -1;
 
 		// Go through the widgets and check if we find the widget that the coordinate is
 		// inside.
-		for (index = 0,wi = widget; wi.type != WWT_LAST; index++, wi++) {
+		//for (index = 0,wi = widget; wi.type != WWT_LAST; index++, wi++) 
+		int index = -1;
+		for(Widget wi : widget)
+		{
+			index++;
 			if (wi.type == WWT_EMPTY || wi.type == WWT_FRAME) continue;
 
 			if (x >= wi.left && x <= wi.right && y >= wi.top &&  y <= wi.bottom &&
@@ -79,10 +113,10 @@ abstract public class Window extends WindowConstants
 		return found_index;
 	}
 
-	
-	
-	
-	
+
+
+
+
 	/* How the resize system works:
     First, you need to add a WWT_RESIZEBOX to the widgets, and you need
      to add the flag WDF_RESIZABLE to the window. Now the window is ready
@@ -124,8 +158,8 @@ abstract public class Window extends WindowConstants
 	public static final int RESIZE_LRTB   = RESIZE_LEFT  | RESIZE_RIGHT  | RESIZE_TOP | RESIZE_BOTTOM;
 	public static final int RESIZE_RTB    = RESIZE_RIGHT | RESIZE_TOP    | RESIZE_BOTTOM;
 
-	
-	
+
+
 
 	// delta between mouse cursor and upper left corner of dragged window
 	static Point _drag_delta;
@@ -147,54 +181,54 @@ abstract public class Window extends WindowConstants
 		e.event = WE_CLICK;
 
 		if (w.desc_flags & WDF_DEF_WIDGET) {
-			e.click.widget = GetWidgetFromPos(w, x, y);
-			if (e.click.widget < 0) return; /* exit if clicked outside of widgets */
+			e.widget = GetWidgetFromPos(w, x, y);
+			if (e.widget < 0) return; /* exit if clicked outside of widgets */
 
-			wi = w.widget[e.click.widget];
+			wi = w.widget.get(e.widget);
 
 			/* don't allow any interaction if the button has been disabled */
-			if (HASBIT(w.disabled_state, e.click.widget))
+			if (0 != BitOps.HASBIT(w.disabled_state, e.widget))
 				return;
 
-			if (wi.type & 0xE0) {
+			if (0 != (wi.type & 0xE0)) {
 				/* special widget handling for buttons*/
 				switch(wi.type) {
 				case WWT_IMGBTN  | WWB_PUSHBUTTON: /* WWT_PUSHIMGBTN */
 				case WWT_TEXTBTN | WWB_PUSHBUTTON: /* WWT_PUSHTXTBTN */
-					HandleButtonClick(w, e.click.widget);
+					w.HandleButtonClick(e.widget);
 					break;
 				case WWT_NODISTXTBTN:
 					break;
 				}
 			} else if (wi.type == WWT_SCROLLBAR || wi.type == WWT_SCROLL2BAR || wi.type == WWT_HSCROLLBAR) {
-				ScrollbarClickHandler(w, wi, e.click.pt.x, e.click.pt.y);
+				ScrollbarClickHandler(w, wi, e.pt.x, e.pt.y);
 			}
 
 			if (w.desc_flags & WDF_STD_BTN) {
-				if (e.click.widget == 0) { /* 'X' */
-					DeleteWindow(w);
+				if (e.widget == 0) { /* 'X' */
+					w.DeleteWindow();
 					return;
 				}
 
-				if (e.click.widget == 1) { /* 'Title bar' */
-					StartWindowDrag(w); // if not return then w = StartWindowDrag(w); to get correct pointer
+				if (e.widget == 1) { /* 'Title bar' */
+					w.StartWindowDrag(); // if not return then w = StartWindowDrag(w); to get correct pointer
 					return;
 				}
 			}
 
 			if (w.desc_flags & WDF_RESIZABLE && wi.type == WWT_RESIZEBOX) {
-				StartWindowSizing(w); // if not return then w = StartWindowSizing(w); to get correct pointer
+				w.StartWindowSizing(); // if not return then w = StartWindowSizing(w); to get correct pointer
 				return;
 			}
 
 			if (w.desc_flags & WDF_STICKY_BUTTON && wi.type == WWT_STICKYBOX) {
 				w.flags4 ^= WF_STICKY;
-				InvalidateWidget(w, e.click.widget);
+				InvalidateWidget(w, e.widget);
 				return;
 			}
 		}
 
-		w.wndproc(w, e);
+		w.wndproc.accept(w, e);
 	}
 
 	static void DispatchRightClickEvent(Window  w, int x, int y)
@@ -203,20 +237,20 @@ abstract public class Window extends WindowConstants
 
 		/* default tooltips handler? */
 		if (w.desc_flags & WDF_STD_TOOLTIPS) {
-			e.click.widget = GetWidgetFromPos(w, x, y);
-			if (e.click.widget < 0)
+			e.widget = GetWidgetFromPos(w, x, y);
+			if (e.widget < 0)
 				return; /* exit if clicked outside of widgets */
 
-			if (w.widget[e.click.widget].tooltips != 0) {
-				GuiShowTooltips(w.widget[e.click.widget].tooltips);
+			if (w.widget.get(e.widget).tooltips != null) {
+				GuiShowTooltips(w.widget.get(e.widget).tooltips);
 				return;
 			}
 		}
 
 		e.event = WE_RCLICK;
-		e.click.pt.x = x;
-		e.click.pt.y = y;
-		w.wndproc(w, e);
+		e.pt.x = x;
+		e.pt.y = y;
+		w.wndproc.accept(w, e);
 	}
 
 	/** Dispatch the mousewheel-action to the window which will scroll any
@@ -227,13 +261,13 @@ abstract public class Window extends WindowConstants
 	 */
 	static void DispatchMouseWheelEvent(Window  w, int widget, int wheel)
 	{
-		final Widget wi1, wi2;
+		Widget wi1, wi2;
 		Scrollbar sb;
 
 		if (widget < 0) return;
 
-		wi1 = w.widget[widget];
-		wi2 = w.widget[widget + 1];
+		wi1 = w.widget.get(widget);
+		wi2 = w.widget.get(widget + 1);
 
 		/* The listbox can only scroll if scrolling was done on the scrollbar itself,
 		 * or on the listbox (and the next item is (must be) the scrollbar)
@@ -243,10 +277,10 @@ abstract public class Window extends WindowConstants
 				(sb = w.vscroll2, wi2.type == WWT_SCROLL2BAR) || (sb = w.vscroll, wi2.type == WWT_SCROLLBAR) ) {
 
 			if (sb.count > sb.cap) {
-				int pos = clamp(sb.pos + wheel, 0, sb.count - sb.cap);
+				int pos = BitOps.clamp(sb.pos + wheel, 0, sb.count - sb.cap);
 				if (pos != sb.pos) {
 					sb.pos = pos;
-					SetWindowDirty(w);
+					w.SetWindowDirty();
 				}
 			}
 		}
@@ -332,11 +366,11 @@ abstract public class Window extends WindowConstants
 
 	void SetWindowDirty(final Window  w)
 	{
-		if (w == NULL) return;
+		if (w == null) return;
 		SetDirtyBlocks(w.left, w.top, w.left + w.width, w.top + w.height);
 	}
-	*/
-	void DeleteWindow(Window w)
+	 */
+	void DeleteWindow()
 	{
 		WindowClass wc;
 		WindowNumber wn;
@@ -344,82 +378,95 @@ abstract public class Window extends WindowConstants
 		Window v;
 		int count;
 
-		if (w == NULL) return;
+		//if (w == null) return;
 
-		if (_thd.place_mode != 0 && _thd.window_class == w.window_class && _thd.window_number == w.window_number) {
+		if (ViewPort.ViewPort._thd.place_mode != 0 && ViewPort._thd.window_class == window_class && ViewPort._thd.window_number == window_number) {
 			ResetObjectToPlace();
 		}
 
-		wc = w.window_class;
-		wn = w.window_number;
+		wc = window_class;
+		wn = window_number;
 
-		CallWindowEventNP(w, WE_DESTROY);
+		CallWindowEventNP(this, WE_DESTROY);
 
-		w = FindWindowById(wc, wn);
+		Window w = FindWindowById(wc, wn);
 
 		vp = w.viewport;
-		w.viewport = NULL;
-		if (vp != NULL) {
+		w.viewport = null;
+		if (vp != null) {
 			_active_viewports &= ~(1 << (vp - _viewports));
 			vp.width = 0;
 		}
 
-		SetWindowDirty(w);
+		w.SetWindowDirty();
 
-		free(w.widget);
+		//free(w.widget);
 
-		v = --_last_window;
-		count = (byte*)v - (byte*)w;
-		memmove(w, w + 1, count);
+		//v = --_last_window;
+		//count = (byte*)v - (byte*)w;
+		//memmove(w, w + 1, count);
+		_windows.remove(w);
 	}
 
-	Window FindWindowById(WindowClass cls, WindowNumber number)
+	static Window FindWindowById(WindowClass cls, WindowNumber number)
 	{
-		Window w;
+		//Window w;
 
 		for (Window w : _windows) {
 			if (w.window_class == cls && w.window_number == number) return w;
 		}
 
-		return NULL;
+		return null;
 	}
 
-	void DeleteWindowById(WindowClass cls, WindowNumber number)
+	static Window FindWindowById(int cls, int number)
 	{
-		DeleteWindow(FindWindowById(cls, number));
+		for (Window w : _windows) {
+			if (w.window_class.v == cls && w.window_number.n == number) 
+				return w;
+		}
+
+		return null;
 	}
 
-	void DeleteWindowByClass(WindowClass cls)
+	static void DeleteWindowById(WindowClass cls, WindowNumber number)
 	{
-		Window w;
+		FindWindowById(cls, number).DeleteWindow();
+	}
 
-		for (w = _windows; w != _last_window;) {
+	static void DeleteWindowByClass(WindowClass cls)
+	{
+
+		for(int i = 0; i < _windows.size();) 
+		{
+			Window w = _windows.get(i);
+
 			if (w.window_class == cls) {
-				DeleteWindow(w);
-				w = _windows;
+				w.DeleteWindow();
+				i = 0;
 			} else {
-				w++;
+				i++;
 			}
 		}
 	}
 
-	Window *BringWindowToFrontById(WindowClass cls, WindowNumber number)
+	static Window BringWindowToFrontById(WindowClass cls, WindowNumber number)
 	{
 		Window w = FindWindowById(cls, number);
 
-		if (w != NULL) {
+		if (w != null) {
 			w.flags4 |= WF_WHITE_BORDER_MASK;
-			SetWindowDirty(w);
-			w = BringWindowToFront(w);
+			w.SetWindowDirty();
+			w.BringWindowToFront();
 		}
 
 		return w;
 	}
 
-	static inline bool IsVitalWindow(final Window w)
+	public boolean IsVitalWindow()
 	{
-		WindowClass wc = w.window_class;
-		return (wc == WC_MAIN_TOOLBAR || wc == WC_STATUS_BAR || wc == WC_NEWS_WINDOW || wc == WC_SEND_NETWORK_MSG);
+		WindowClass wc = window_class;
+		return (wc.v == WC_MAIN_TOOLBAR || wc.v == WC_STATUS_BAR || wc == WC_NEWS_WINDOW || wc == WC_SEND_NETWORK_MSG);
 	}
 
 	/** On clicking on a window, make it the frontmost window of all. However
@@ -428,9 +475,9 @@ abstract public class Window extends WindowConstants
 	 * - New window, Chatbar (only if open)
 	 * @param w window that is put into the foreground
 	 */
-	Window *BringWindowToFront(Window w)
+	Window BringWindowToFront(Window w)
 	{
-		Window *v;
+		Window v;
 		Window temp;
 
 		v = _last_window;
@@ -458,16 +505,16 @@ abstract public class Window extends WindowConstants
 	 * - Any sticked windows since we wanted to keep these
 	 * @return w pointer to the window that is going to be deleted
 	 */
-	static Window *FindDeletableWindow()
+	static Window FindDeletableWindow()
 	{
-		Window w;
+		//Window w;
 
-		for (w = _windows; w < endof(_windows); w++) {
-			if (w.window_class != WC_MAIN_WINDOW && !IsVitalWindow(w) && !(w.flags4 & WF_STICKY)) {
+		/*for (w = _windows; w < endof(_windows); w++) {
+			if (w.window_class.v != WC_MAIN_WINDOW && !IsVitalWindow(w) && !(w.flags4 & WF_STICKY)) {
 				return w;
 			}
-		}
-		return NULL;
+		}*/
+		return null;  // in java we can't
 	}
 
 	/** A window must be freed, and all are marked as important windows. Ease the
@@ -476,37 +523,50 @@ abstract public class Window extends WindowConstants
 	 * @see FindDeletableWindow()
 	 * @return w Pointer to the window that is being deleted
 	 */
-	static Window *ForceFindDeletableWindow()
+	static private Window ForceFindDeletableWindow()
 	{
-		Window w;
+		//Window w;
 
-		for (w = _windows;; w++) {
-			assert(w < _last_window);
-			if (w.window_class != WC_MAIN_WINDOW && !IsVitalWindow(w)) return w;
+		for (Window w : _windows) {
+			//assert(w < _last_window);
+			if (w.window_class.v != WC_MAIN_WINDOW && !w.IsVitalWindow()) return w;
 		}
 	}
 
-	bool IsWindowOfPrototype(final Window  w, final Widget* widget)
+	static boolean IsWindowOfPrototype(final Window  w, final Widget[] widget)
 	{
 		return (w.original_widget == widget);
 	}
 
 	/* Copies 'widget' to 'w.widget' to allow for resizable windows */
-	void AssignWidgetToWindow(Window w, final Widget widget)
+	void AssignWidgetToWindow(final Widget[] nwidget)
 	{
+		/*
 		w.original_widget = widget;
 
-		if (widget != NULL) {
-			uint index = 1;
-			final Widget* wi;
+		if (widget != null) {
+			int index = 1;
+			final Widget wi;
 
 			for (wi = widget; wi.type != WWT_LAST; wi++) index++;
 
 			w.widget = realloc(w.widget, sizeof(*w.widget) * index);
 			memcpy(w.widget, widget, sizeof(*w.widget) * index);
 		} else {
-			w.widget = NULL;
+			w.widget = null;
 		}
+		 */
+		original_widget = nwidget;
+		widget.clear(); // XXX really?
+		if(nwidget != null)
+		{
+			for( Widget ww : nwidget)
+			{
+				if(ww.type != WWT_LAST)
+					widget.add(ww);
+			}
+		}
+		//else			widget.clear(); // XXX really?
 	}
 
 	/** Open a new window. If there is no space for a new window, close an open
@@ -522,55 +582,57 @@ abstract public class Window extends WindowConstants
 	 * @param *widget @see Widget pointer to the window layout and various elements
 	 * @return @see Window pointer of the newly created window
 	 */
-	Window *AllocateWindow(
-								int x, int y, int width, int height,
-								WindowProc *proc, WindowClass cls, final Widget widget)
+	Window AllocateWindow(
+			int x, int y, int width, int height,
+			BiConsumer<Window,WindowEvent> proc, WindowClass cls, final Widget widget)
 	{
-		Window w = _last_window; // last window keeps track of the highest open window
+		Window w = new Window();
 
+		/* TODO limit windows count?
 		// We have run out of windows, close one and use that as the place for our new one
 		if (w >= endof(_windows)) {
 			w = FindDeletableWindow();
 
-			if (w == NULL) w = ForceFindDeletableWindow();
+			if (w == null) w = ForceFindDeletableWindow();
 
 			DeleteWindow(w);
 			w = _last_window;
-		}
+		} */
+
 
 		/* XXX - This very strange construction makes sure that the chatbar is always
 		 * on top of other windows. Why? It is created as last_window (so, on top).
 		 * Any other window will go below toolbar/statusbar/news window, which implicitely
 		 * also means it is below the chatbar. Very likely needs heavy improvement
-		 * to de-braindeadize */
+		 * to de-braindeadize * /
 		if (w != _windows && cls != WC_SEND_NETWORK_MSG) {
-			Window *v;
+			Window v;
 
-			/* XXX - if not this order (toolbar/statusbar and then news), game would
-			 * crash because it will try to copy a negative size for the news-window.
-			 * Eg. window was already moved BELOW news (which is below toolbar/statusbar)
-			 * and now needs to move below those too. That is a negative move. */
+			// * XXX - if not this order (toolbar/statusbar and then news), game would
+			// * crash because it will try to copy a negative size for the news-window.
+			// * Eg. window was already moved BELOW news (which is below toolbar/statusbar)
+			// * and now needs to move below those too. That is a negative move. 
 			v = FindWindowById(WC_MAIN_TOOLBAR, 0);
-			if (v != NULL) {
+			if (v != null) {
 				memmove(v+1, v, (byte*)w - (byte*)v);
 				w = v;
 			}
 
 			v = FindWindowById(WC_STATUS_BAR, 0);
-			if (v != NULL) {
+			if (v != null) {
 				memmove(v+1, v, (byte*)w - (byte*)v);
 				w = v;
 			}
 
 			v = FindWindowById(WC_NEWS_WINDOW, 0);
-			if (v != NULL) {
+			if (v != null) {
 				memmove(v+1, v, (byte*)w - (byte*)v);
 				w = v;
 			}
-		}
+		} */
 
 		// Set up window properties
-		memset(w, 0, sizeof(Window));
+		//memset(w, 0, sizeof(Window));
 		w.window_class = cls;
 		w.flags4 = WF_WHITE_BORDER_MASK; // just opened windows have a white border
 		w.caption_color = 0xFF;
@@ -585,7 +647,8 @@ abstract public class Window extends WindowConstants
 		w.resize.step_width = 1;
 		w.resize.step_height = 1;
 
-		_last_window++;
+		_windows.add(w);
+		//_last_window++;
 
 		SetWindowDirty(w);
 
@@ -594,53 +657,49 @@ abstract public class Window extends WindowConstants
 		return w;
 	}
 
-	Window *AllocateWindowAutoPlace2(
-		WindowClass exist_class,
-		WindowNumber exist_num,
-		int width,
-		int height,
-		WindowProc *proc,
-		WindowClass cls,
-		final Widget widget)
+	Window AllocateWindowAutoPlace2(
+			WindowClass exist_class,
+			WindowNumber exist_num,
+			int width,
+			int height,
+			BiConsumer<Window,WindowEvent> proc,
+			WindowClass cls,
+			final Widget widget)
 	{
 		Window w;
 		int x;
 
 		w = FindWindowById(exist_class, exist_num);
-		if (w == NULL || w.left >= (_screen.width-20) || w.left <= -60 || w.top >= (_screen.height-20)) {
+		if (w == null || w.left >= (Global.hal._screen.width-20) || w.left <= -60 || w.top >= (Global.hal._screen.height-20)) {
 			return AllocateWindowAutoPlace(width,height,proc,cls,widget);
 		}
 
 		x = w.left;
-		if (x > _screen.width - width) x = _screen.width - width - 20;
+		if (x > Global.hal._screen.width - width) x = Global.hal._screen.width - width - 20;
 
 		return AllocateWindow(x + 10, w.top + 10, width, height, proc, cls, widget);
 	}
 
 
-	typedef struct SizeRect {
-		int left,top,width,height;
-	} SizeRect;
-
 
 	static SizeRect _awap_r;
 
-	static bool IsGoodAutoPlace1(int left, int top)
+	static boolean IsGoodAutoPlace1(int left, int top)
 	{
 		int right,bottom;
-		Window w;
+		//Window w;
 
 		_awap_r.left= left;
 		_awap_r.top = top;
 		right = _awap_r.width + left;
 		bottom = _awap_r.height + top;
 
-		if (left < 0 || top < 22 || right > _screen.width || bottom > _screen.height)
+		if (left < 0 || top < 22 || right > Global.hal._screen.width || bottom > Global.hal._screen.height)
 			return false;
 
 		// Make sure it is not obscured by any window.
 		for (Window w : _windows) {
-			if (w.window_class == WC_MAIN_WINDOW) continue;
+			if (w.window_class.v == WC_MAIN_WINDOW) continue;
 
 			if (right > w.left &&
 					w.left + w.width > left &&
@@ -653,24 +712,24 @@ abstract public class Window extends WindowConstants
 		return true;
 	}
 
-	static bool IsGoodAutoPlace2(int left, int top)
+	static boolean IsGoodAutoPlace2(int left, int top)
 	{
 		int width,height;
-		Window w;
+		//Window w;
 
 		_awap_r.left= left;
 		_awap_r.top = top;
 		width = _awap_r.width;
 		height = _awap_r.height;
 
-		if (left < -(width>>2) || left > _screen.width - (width>>1))
+		if (left < -(width>>2) || left > Global.hal._screen.width - (width>>1))
 			return false;
-		if (top < 22 || top > _screen.height - (height>>2))
+		if (top < 22 || top > Global.hal._screen.height - (height>>2))
 			return false;
 
 		// Make sure it is not obscured by any window.
 		for (Window w : _windows) {
-			if (w.window_class == WC_MAIN_WINDOW) continue;
+			if (w.window_class.v == WC_MAIN_WINDOW) continue;
 
 			if (left + width > w.left &&
 					w.left + w.width > left &&
@@ -685,16 +744,22 @@ abstract public class Window extends WindowConstants
 
 	static Point GetAutoPlacePosition(int width, int height)
 	{
-		Window w;
+		//Window w;
 		Point pt;
 
 		_awap_r.width = width;
 		_awap_r.height = height;
 
-		if (IsGoodAutoPlace1(0, 24)) goto ok_pos;
+		if (IsGoodAutoPlace1(0, 24)) 
+		{
+			//goto ok_pos;
+			pt.x = _awap_r.left;
+			pt.y = _awap_r.top;
+			return pt;
+		}
 
 		for (Window w : _windows) {
-			if (w.window_class == WC_MAIN_WINDOW) continue;
+			if (w.window_class.v == WC_MAIN_WINDOW) continue;
 
 			if (IsGoodAutoPlace1(w.left+w.width+2,w.top)) goto ok_pos;
 			if (IsGoodAutoPlace1(w.left-   width-2,w.top)) goto ok_pos;
@@ -707,7 +772,7 @@ abstract public class Window extends WindowConstants
 		}
 
 		for (Window w : _windows) {
-			if (w.window_class == WC_MAIN_WINDOW) continue;
+			if (w.window_class.v == WC_MAIN_WINDOW) continue;
 
 			if (IsGoodAutoPlace2(w.left+w.width+2,w.top)) goto ok_pos;
 			if (IsGoodAutoPlace2(w.left-   width-2,w.top)) goto ok_pos;
@@ -718,54 +783,60 @@ abstract public class Window extends WindowConstants
 		{
 			int left=0,top=24;
 
-	restart:;
-			for (Window w : _windows) {
-				if (w.left == left && w.top == top) {
-					left += 5;
-					top += 5;
-					goto restart;
+			//restart:;
+			while(true)
+			{
+				boolean again = false;
+				for (Window w : _windows) {
+					if (w.left == left && w.top == top) {
+						left += 5;
+						top += 5;
+						//goto restart;
+						again = true;
+						break;
+					}
+					if(!again) break;
 				}
 			}
-
 			pt.x = left;
 			pt.y = top;
 			return pt;
 		}
 
-	ok_pos:;
+		//ok_pos:;
 		pt.x = _awap_r.left;
 		pt.y = _awap_r.top;
 		return pt;
 	}
 
-	Window *AllocateWindowAutoPlace(
-		int width,
-		int height,
-		WindowProc *proc,
-		WindowClass cls,
-		final Widget widget) {
+	Window AllocateWindowAutoPlace(
+			int width,
+			int height,
+			BiConsumer<Window,WindowEvent> proc,
+			WindowClass cls,
+			final Widget widget) {
 
 		Point pt = GetAutoPlacePosition(width, height);
 		return AllocateWindow(pt.x, pt.y, width, height, proc, cls, widget);
 	}
 
-	Window *AllocateWindowDescFront(final WindowDesc *desc, int value)
+	Window AllocateWindowDescFront(final WindowDesc desc, int value)
 	{
 		Window w;
 
-		if (BringWindowToFrontById(desc.cls, value)) return NULL;
+		if (BringWindowToFrontById(desc.cls, value)) return null;
 		w = AllocateWindowDesc(desc);
 		w.window_number = value;
 		return w;
 	}
 
-	Window *AllocateWindowDesc(final WindowDesc *desc)
+	Window AllocateWindowDesc(final WindowDesc desc)
 	{
 		Point pt;
 		Window w;
 
 		if (desc.parent_cls != WC_MAIN_WINDOW &&
-				(w = FindWindowById(desc.parent_cls, _alloc_wnd_parent_num), _alloc_wnd_parent_num=0, w) != NULL &&
+				(w = FindWindowById(desc.parent_cls, _alloc_wnd_parent_num), _alloc_wnd_parent_num=0, w) != null &&
 				w.left < _screen.width-20 && w.left > -60 && w.top < _screen.height-20) {
 			pt.x = w.left + 10;
 			if (pt.x > _screen.width + 10 - desc.width)
@@ -775,9 +846,9 @@ abstract public class Window extends WindowConstants
 			/* Override the position if a toolbar is opened according to the place of the maintoolbar
 			 * The main toolbar (WC_MAIN_TOOLBAR) is 640px in width */
 			switch (_patches.toolbar_pos) {
-				case 1:  pt.x = ((_screen.width + 640) >> 1) - desc.width; break;
-				case 2:  pt.x = _screen.width - desc.width; break;
-				default: pt.x = 640 - desc.width;
+			case 1:  pt.x = ((_screen.width + 640) >> 1) - desc.width; break;
+			case 2:  pt.x = _screen.width - desc.width; break;
+			default: pt.x = 640 - desc.width;
 			}
 			pt.y = desc.top;
 		} else {
@@ -797,57 +868,61 @@ abstract public class Window extends WindowConstants
 		return w;
 	}
 
-	Window *FindWindowFromPt(int x, int y)
-	{
-		Window w;
+	static public Window FindWindowFromPt(int x, int y)
+	{		
+		ListIterator<Window> i = _windows.listIterator(_windows.size());
 
-		for (w = _last_window; w != _windows;) {
-			--w;
+		while (i.hasPrevious()) {
+			Window w = i.previous();
 			if (IS_INSIDE_1D(x, w.left, w.width) &&
 					IS_INSIDE_1D(y, w.top, w.height)) {
 				return w;
 			}
 		}
 
-		return NULL;
+		return null;
 	}
 
-	void InitWindowSystem()
+	public static void InitWindowSystem()
 	{
 		IConsoleClose();
 
-		memset(&_windows, 0, sizeof(_windows));
-		_last_window = _windows;
+		//memset(&_windows, 0, sizeof(_windows));
+		//_last_window = _windows;
 		memset(_viewports, 0, sizeof(_viewports));
 		_active_viewports = 0;
 		_no_scroll = 0;
 	}
 
-	void UnInitWindowSystem()
+	static void UnInitWindowSystem()
 	{
-		Window w;
+
+		/*
+		//Window w;
 		// delete all malloced widgets
 		for (Window w : _windows) {
-			free(w.widget);
-			w.widget = NULL;
-		}
+			//free(w.widget);
+			w.widget = null;
+		}*/
 	}
 
-	void ResetWindowSystem()
+	static void ResetWindowSystem()
 	{
 		UnInitWindowSystem();
 		InitWindowSystem();
-		_thd.pos.x = 0;
-		_thd.pos.y = 0;
+		ViewPort._thd.pos.x = 0;
+		ViewPort._thd.pos.y = 0;
 	}
 
 	static void DecreaseWindowCounters()
 	{
-		Window w;
+		//Window w;
+		ListIterator<Window> i = _windows.listIterator(_windows.size());
 
-
-		for (w = _last_window; w != _windows;) {
-			--w;
+		//for (w = _last_window; w != _windows;) {
+		//	--w;
+		while (i.hasPrevious()) {
+			Window w = i.previous();
 			// Unclick scrollbar buttons if they are pressed.
 			if (w.flags4 & (WF_SCROLL_DOWN | WF_SCROLL_UP)) {
 				w.flags4 &= ~(WF_SCROLL_DOWN | WF_SCROLL_UP);
@@ -856,8 +931,11 @@ abstract public class Window extends WindowConstants
 			CallWindowEventNP(w, WE_MOUSELOOP);
 		}
 
-		for (w = _last_window; w != _windows;) {
-			--w;
+		i = _windows.listIterator(_windows.size());
+		//for (w = _last_window; w != _windows;) {
+		//	--w;
+		while (i.hasPrevious()) {
+			Window w = i.previous();
 
 			if (w.flags4&WF_TIMEOUT_MASK && !(--w.flags4&WF_TIMEOUT_MASK)) {
 				CallWindowEventNP(w, WE_TIMEOUT);
@@ -866,9 +944,9 @@ abstract public class Window extends WindowConstants
 		}
 	}
 
-	Window *GetCallbackWnd()
+	static Window GetCallbackWnd()
 	{
-		return FindWindowById(_thd.window_class, _thd.window_number);
+		return FindWindowById(ViewPort._thd.window_class, ViewPort._thd.window_number);
 	}
 
 	static void HandlePlacePresize()
@@ -879,19 +957,19 @@ abstract public class Window extends WindowConstants
 		if (_special_mouse_mode != WSM_PRESIZE) return;
 
 		w = GetCallbackWnd();
-		if (w == NULL) return;
+		if (w == null) return;
 
 		e.place.pt = GetTileBelowCursor();
 		if (e.place.pt.x == -1) {
-			_thd.selend.x = -1;
+			ViewPort._thd.selend.x = -1;
 			return;
 		}
 		e.place.tile = TileVirtXY(e.place.pt.x, e.place.pt.y);
 		e.event = WE_PLACE_PRESIZE;
-		w.wndproc(w, &e);
+		w.wndproc.accept(w, e);
 	}
 
-	static bool HandleDragDrop()
+	static boolean HandleDragDrop()
 	{
 		Window w;
 		WindowEvent e;
@@ -904,18 +982,18 @@ abstract public class Window extends WindowConstants
 
 		ResetObjectToPlace();
 
-		if (w != NULL) {
+		if (w != null) {
 			// send an event in client coordinates.
 			e.event = WE_DRAGDROP;
 			e.dragdrop.pt.x = _cursor.pos.x - w.left;
 			e.dragdrop.pt.y = _cursor.pos.y - w.top;
 			e.dragdrop.widget = GetWidgetFromPos(w, e.dragdrop.pt.x, e.dragdrop.pt.y);
-			w.wndproc(w, &e);
+			w.wndproc.accept(w, e);
 		}
 		return false;
 	}
 
-	static bool HandlePopupMenu()
+	static boolean HandlePopupMenu()
 	{
 		Window w;
 		WindowEvent e;
@@ -923,7 +1001,7 @@ abstract public class Window extends WindowConstants
 		if (!_popup_menu_active) return true;
 
 		w = FindWindowById(WC_TOOLBAR_MENU, 0);
-		if (w == NULL) {
+		if (w == null) {
 			_popup_menu_active = false;
 			return false;
 		}
@@ -937,21 +1015,21 @@ abstract public class Window extends WindowConstants
 			e.popupmenu.pt = _cursor.pos;
 		}
 
-		w.wndproc(w, &e);
+		w.wndproc.accept(w, e);
 
 		return false;
 	}
 
-	static bool HandleMouseOver()
+	static Window last_w = null;
+	static boolean HandleMouseOver()
 	{
 		Window w;
 		WindowEvent e;
-		static Window *last_w = NULL;
 
 		w = FindWindowFromPt(_cursor.pos.x, _cursor.pos.y);
 
 		// We changed window, put a MOUSEOVER event to the last window
-		if (last_w != NULL && last_w != w) {
+		if (last_w != null && last_w != w) {
 			e.event = WE_MOUSEOVER;
 			e.mouseover.pt.x = -1;
 			e.mouseover.pt.y = -1;
@@ -959,12 +1037,12 @@ abstract public class Window extends WindowConstants
 		}
 		last_w = w;
 
-		if (w != NULL) {
+		if (w != null) {
 			// send an event in client coordinates.
 			e.event = WE_MOUSEOVER;
 			e.mouseover.pt.x = _cursor.pos.x - w.left;
 			e.mouseover.pt.y = _cursor.pos.y - w.top;
-			if (w.widget != NULL) {
+			if (w.widget != null) {
 				e.mouseover.widget = GetWidgetFromPos(w, e.mouseover.pt.x, e.mouseover.pt.y);
 			}
 			w.wndproc(w, &e);
@@ -975,9 +1053,9 @@ abstract public class Window extends WindowConstants
 	}
 
 
-	static bool _dragging_window;
+	static boolean _dragging_window;
 
-	static bool HandleWindowDragging()
+	static boolean HandleWindowDragging()
 	{
 		Window w;
 		// Get out immediately if no window is being dragged at all.
@@ -986,8 +1064,8 @@ abstract public class Window extends WindowConstants
 		// Otherwise find the window...
 		for (Window w : _windows) {
 			if (w.flags4 & WF_DRAGGING) {
-				final Widget t = &w.widget[1]; // the title bar ... ugh
-				final Window *v;
+				final Widget t = w.widget[1]; // the title bar ... ugh
+				final Window v;
 				int x;
 				int y;
 				int nx;
@@ -999,7 +1077,7 @@ abstract public class Window extends WindowConstants
 					break;
 				}
 
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 
 				x = _cursor.pos.x + _drag_delta.x;
 				y = _cursor.pos.y + _drag_delta.y;
@@ -1087,7 +1165,7 @@ abstract public class Window extends WindowConstants
 
 				// Make sure the title bar isn't hidden by behind the main tool bar
 				v = FindWindowById(WC_MAIN_TOOLBAR, 0);
-				if (v != NULL) {
+				if (v != null) {
 					int v_bottom = v.top + v.height;
 					int v_right = v.left + v.width;
 					if (ny + t.top >= v.top && ny + t.top < v_bottom) {
@@ -1109,14 +1187,14 @@ abstract public class Window extends WindowConstants
 					}
 				}
 
-				if (w.viewport != NULL) {
+				if (w.viewport != null) {
 					w.viewport.left += nx - w.left;
 					w.viewport.top  += ny - w.top;
 				}
 				w.left = nx;
 				w.top  = ny;
 
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 				return false;
 			} else if (w.flags4 & WF_SIZING) {
 				WindowEvent e;
@@ -1153,17 +1231,17 @@ abstract public class Window extends WindowConstants
 				_drag_delta.x += x;
 				_drag_delta.y += y;
 
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 
 				/* Scroll through all the windows and update the widgets if needed */
 				{
 					Widget wi = w.widget;
-					bool resize_height = false;
-					bool resize_width = false;
+					boolean resize_height = false;
+					boolean resize_width = false;
 
 					while (wi.type != WWT_LAST) {
 						if (wi.resize_flag != RESIZE_NONE) {
-							/* Resize this Widget /
+							/* Resize this Widget */
 							if (wi.resize_flag & RESIZE_LEFT) {
 								wi.left += x;
 								resize_width = true;
@@ -1206,40 +1284,39 @@ abstract public class Window extends WindowConstants
 		return false;
 	}
 
-	Window *StartWindowDrag(Window w)
+	void StartWindowDrag()
 	{
-		w.flags4 |= WF_DRAGGING;
+		flags4 |= WF_DRAGGING;
 		_dragging_window = true;
 
 		_drag_delta.x = w.left - _cursor.pos.x;
 		_drag_delta.y = w.top  - _cursor.pos.y;
 
-		w = BringWindowToFront(w);
+		BringWindowToFront();
 		DeleteWindowById(WC_DROPDOWN_MENU, 0);
-		return w;
 	}
 
-	Window *StartWindowSizing(Window w)
+	void StartWindowSizing()
 	{
-		w.flags4 |= WF_SIZING;
+		flags4 |= WF_SIZING;
 		_dragging_window = true;
 
 		_drag_delta.x = _cursor.pos.x;
 		_drag_delta.y = _cursor.pos.y;
 
-		w = BringWindowToFront(w);
+		BringWindowToFront();
 		DeleteWindowById(WC_DROPDOWN_MENU, 0);
-		SetWindowDirty(w);
-		return w;
+		SetWindowDirty();
+		//eturn w;
 	}
 
 
-	static bool HandleScrollbarScrolling()
+	static boolean HandleScrollbarScrolling()
 	{
 		Window w;
 		int i;
 		int pos;
-		Scrollbar *sb;
+		Scrollbar sb;
 
 		// Get out quickly if no item is being scrolled
 		if (!_scrolling_scrollbar) return true;
@@ -1255,13 +1332,13 @@ abstract public class Window extends WindowConstants
 				}
 
 				if (w.flags4 & WF_HSCROLL) {
-					sb = &w.hscroll;
+					sb = w.hscroll;
 					i = _cursor.pos.x - _cursorpos_drag_start.x;
 				} else if (w.flags4 & WF_SCROLL2){
-					sb = &w.vscroll2;
+					sb = w.vscroll2;
 					i = _cursor.pos.y - _cursorpos_drag_start.y;
 				} else {
-					sb = &w.vscroll;
+					sb = w.vscroll;
 					i = _cursor.pos.y - _cursorpos_drag_start.y;
 				}
 
@@ -1269,7 +1346,7 @@ abstract public class Window extends WindowConstants
 				pos = min(max(0, i + _scrollbar_start_pos) * sb.count / _scrollbar_size, max(0, sb.count - sb.cap));
 				if (pos != sb.pos) {
 					sb.pos = pos;
-					SetWindowDirty(w);
+					w.SetWindowDirty();
 				}
 				return false;
 			}
@@ -1279,23 +1356,23 @@ abstract public class Window extends WindowConstants
 		return false;
 	}
 
-	static bool HandleViewportScroll()
+	static boolean HandleViewportScroll()
 	{
 		Window w;
-		ViewPort *vp;
+		ViewPort vp;
 		int dx,dy, x, y, sub;
 
 		if (!_scrolling_viewport) return true;
 
 		if (!_right_button_down) {
-	stop_capt:;
+			stop_capt:;
 			_cursor.fix_at = false;
 			_scrolling_viewport = false;
 			return true;
 		}
 
 		w = FindWindowFromPt(_cursor.pos.x, _cursor.pos.y);
-		if (w == NULL) goto stop_capt;
+		if (w == null) goto stop_capt;
 
 		if (_patches.reverse_scroll) {
 			dx = -_cursor.delta.x;
@@ -1305,9 +1382,9 @@ abstract public class Window extends WindowConstants
 			dy = _cursor.delta.y;
 		}
 
-		if (w.window_class != WC_SMALLMAP) {
+		if (w.window_class.v != WC_SMALLMAP) {
 			vp = IsPtInWindowViewport(w, _cursor.pos.x, _cursor.pos.y);
-			if (vp == NULL)
+			if (vp == null)
 				goto stop_capt;
 
 			WP(w,vp_d).scrollpos_x += dx << vp.zoom;
@@ -1373,19 +1450,19 @@ abstract public class Window extends WindowConstants
 
 			_cursor.delta.x = _cursor.delta.y = 0;
 
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 			return false;
 		}
 	}
 
-	static Window *MaybeBringWindowToFront(Window w)
+	static Window MaybeBringWindowToFront(Window w)
 	{
-		Window *u;
+		Window u;
 
-		if (w.window_class == WC_MAIN_WINDOW ||
+		if (w.window_class.v.v == WC_MAIN_WINDOW ||
 				IsVitalWindow(w) ||
-				w.window_class == WC_TOOLTIPS ||
-				w.window_class == WC_DROPDOWN_MENU) {
+				w.window_class.v.v§ == WC_TOOLTIPS ||
+				w.window_class.v == WC_DROPDOWN_MENU) {
 			return w;
 		}
 
@@ -1416,16 +1493,16 @@ abstract public class Window extends WindowConstants
 	 * @param wparam Specifies additional message-specific information
 	 * @param lparam Specifies additional message-specific information
 	 */
-	static void SendWindowMessageW(Window  w, uint msg, uint wparam, uint lparam)
+	static void SendWindowMessageW(Window  w, int msg, int wparam, int lparam)
 	{
 		WindowEvent e;
 
-		e.message.event  = WE_MESSAGE;
-		e.message.msg    = msg;
-		e.message.wparam = wparam;
-		e.message.lparam = lparam;
+		e.event  = WE_MESSAGE;
+		e.msg    = msg;
+		e.wparam = wparam;
+		e.lparam = lparam;
 
-		w.wndproc(w, &e);
+		w.wndproc.accept(w, e);
 	}
 
 	/** Send a message from one window to another. The receiving window is found by
@@ -1435,65 +1512,67 @@ abstract public class Window extends WindowConstants
 	 * @param wparam Specifies additional message-specific information
 	 * @param lparam Specifies additional message-specific information
 	 */
-	void SendWindowMessage(WindowClass wnd_class, WindowNumber wnd_num, uint msg, uint wparam, uint lparam)
+	static void SendWindowMessage(WindowClass wnd_class, WindowNumber wnd_num, int msg, int wparam, int lparam)
 	{
 		Window w = FindWindowById(wnd_class, wnd_num);
-		if (w != NULL) SendWindowMessageW(w, msg, wparam, lparam);
+		if (w != null) SendWindowMessageW(w, msg, wparam, lparam);
 	}
 
-	static void HandleKeypress(uint32 key)
+	static void HandleKeypress(int key)
 	{
 		Window w;
 		WindowEvent we;
-	 /* Stores if a window with a textfield for typing is open
-	  * If this is the case, keypress events are only passed to windows with text fields and
-		* to thein this main toolbar. */
-		bool query_open = false;
+		/* Stores if a window with a textfield for typing is open
+		 * If this is the case, keypress events are only passed to windows with text fields and
+		 * to thein this main toolbar. */
+		boolean query_open = false;
 
 		// Setup event
 		we.keypress.event = WE_KEYPRESS;
 		we.keypress.ascii = key & 0xFF;
 		we.keypress.keycode = key >> 16;
-		we.keypress.cont = true;
+			we.keypress.cont = true;
 
-		// check if we have a query string window open before allowing hotkeys
-		if (FindWindowById(WC_QUERY_STRING,     0) != NULL ||
-				FindWindowById(WC_SEND_NETWORK_MSG, 0) != NULL ||
-				FindWindowById(WC_CONSOLE,          0) != NULL ||
-				FindWindowById(WC_SAVELOAD,         0) != NULL) {
-			query_open = true;
-		}
-
-		// Call the event, start with the uppermost window.
-		for (w = _last_window; w != _windows;) {
-			--w;
-			// if a query window is open, only call the event for certain window types
-			if (query_open &&
-					w.window_class != WC_QUERY_STRING &&
-					w.window_class != WC_SEND_NETWORK_MSG &&
-					w.window_class != WC_CONSOLE &&
-					w.window_class != WC_SAVELOAD) {
-				continue;
+			// check if we have a query string window open before allowing hotkeys
+			if (FindWindowById(WC_QUERY_STRING,     0) != null ||
+					FindWindowById(WC_SEND_NETWORK_MSG, 0) != null ||
+					FindWindowById(WC_CONSOLE,          0) != null ||
+					FindWindowById(WC_SAVELOAD,         0) != null) {
+				query_open = true;
 			}
-			w.wndproc(w, &we);
-			if (!we.keypress.cont) break;
-		}
 
-		if (we.keypress.cont) {
-			w = FindWindowById(WC_MAIN_TOOLBAR, 0);
-			// When there is no toolbar w is null, check for that
-			if (w != NULL) w.wndproc(w, &we);
-		}
+			// Call the event, start with the uppermost window.
+			for (w = _last_window; w != _windows;) {
+				--w;
+				// if a query window is open, only call the event for certain window types
+				if (query_open &&
+						w.window_class.v != WC_QUERY_STRING &&
+						w.window_class.v != WC_SEND_NETWORK_MSG &&
+						w.window_class.v != WC_CONSOLE &&
+						w.window_class.v != WC_SAVELOAD) {
+					continue;
+				}
+				w.wndproc.accept(w, we);
+				if (!we.keypress.cont) break;
+			}
+
+			if (we.keypress.cont) {
+				w = FindWindowById(WC_MAIN_TOOLBAR, 0);
+				// When there is no toolbar w is null, check for that
+				if (w != null) w.wndproc(w, &we);
+			}
 	}
 
-	extern void UpdateTileSelection();
-	extern bool VpHandlePlaceSizingDrag();
+	//extern void UpdateTileSelection();
+	//extern boolean VpHandlePlaceSizingDrag();
+
+	private static final int  scrollspeed = 3;
 
 	static void MouseLoop(int click, int mousewheel)
 	{
 		int x,y;
 		Window w;
-		ViewPort *vp;
+		ViewPort vp;
 
 		DecreaseWindowCounters();
 		HandlePlacePresize();
@@ -1511,15 +1590,15 @@ abstract public class Window extends WindowConstants
 
 
 		if (click == 0 && mousewheel == 0) {
-			if (_patches.autoscroll && _game_mode != GM_MENU) {
+			if (_patches.autoscroll && Global._game_mode != GM_MENU) {
 				w = FindWindowFromPt(x, y);
-				if (w == NULL || w.flags4 & WF_DISABLE_VP_SCROLL ) return;
+				if (w == null || w.flags4 & WF_DISABLE_VP_SCROLL ) return;
 				vp = IsPtInWindowViewport(w, x, y);
 				if (vp) {
 					x -= vp.left;
 					y -= vp.top;
 					//here allows scrolling in both x and y axis
-	#define scrollspeed 3
+					//#define scrollspeed 3
 					if (x - 15 < 0) {
 						WP(w, vp_d).scrollpos_x += (x - 15) * scrollspeed << vp.zoom;
 					} else if (15 - (vp.width - x) > 0) {
@@ -1530,31 +1609,31 @@ abstract public class Window extends WindowConstants
 					} else if (15 - (vp.height - y) > 0) {
 						WP(w,vp_d).scrollpos_y += (15 - (vp.height - y)) * scrollspeed << vp.zoom;
 					}
-	#undef scrollspeed
+					//#undef scrollspeed
 				}
 			}
 			return;
 		}
 
 		w = FindWindowFromPt(x, y);
-		if (w == NULL) return;
+		if (w == null) return;
 		w = MaybeBringWindowToFront(w);
 		vp = IsPtInWindowViewport(w, x, y);
-		if (vp != NULL) {
-			if (_game_mode == GM_MENU) return;
+		if (vp != null) {
+			if (Global._game_mode == GM_MENU) return;
 
 			// only allow zooming in-out in main window, or in viewports
 			if (mousewheel &&
 					!(w.flags4 & WF_DISABLE_VP_SCROLL) && (
-						w.window_class == WC_MAIN_WINDOW ||
-						w.window_class == WC_EXTRA_VIEW_PORT
-					)) {
+							w.window_class.v == WC_MAIN_WINDOW ||
+							w.window_class.v == WC_EXTRA_VIEW_PORT
+							)) {
 				ZoomInOrOutToCursorWindow(mousewheel < 0,w);
 			}
 
 			if (click == 1) {
-				DEBUG(misc, 2) ("cursor: 0x%X (%d)", _cursor.sprite, _cursor.sprite);
-				if (_thd.place_mode != 0 &&
+				Global.DEBUG_misc( 2, "cursor: 0x%X (%d)", _cursor.sprite, _cursor.sprite);
+				if (ViewPort._thd.place_mode != 0 &&
 						// query button and place sign button work in pause mode
 						_cursor.sprite != SPR_CURSOR_QUERY &&
 						_cursor.sprite != SPR_CURSOR_SIGN &&
@@ -1563,7 +1642,7 @@ abstract public class Window extends WindowConstants
 					return;
 				}
 
-				if (_thd.place_mode == 0) {
+				if (ViewPort._thd.place_mode == 0) {
 					HandleViewportClicked(vp, x, y);
 				} else {
 					PlaceObject();
@@ -1579,8 +1658,8 @@ abstract public class Window extends WindowConstants
 				DispatchMouseWheelEvent(w, GetWidgetFromPos(w, x - w.left, y - w.top), mousewheel);
 
 			switch (click) {
-				case 1: DispatchLeftClickEvent(w, x - w.left, y - w.top);  break;
-				case 2: DispatchRightClickEvent(w, x - w.left, y - w.top); break;
+			case 1: DispatchLeftClickEvent(w, x - w.left, y - w.top);  break;
+			case 2: DispatchRightClickEvent(w, x - w.left, y - w.top); break;
 			}
 		}
 	}
@@ -1590,11 +1669,11 @@ abstract public class Window extends WindowConstants
 		int click;
 		int mousewheel;
 
-		_current_player = _local_player;
+		Global._current_player = Global._local_player;
 
 		// Handle pressed keys
-		if (_pressed_key) {
-			uint32 key = _pressed_key; _pressed_key = 0;
+		if (_pressed_key != 0) {
+			int key = _pressed_key; _pressed_key = 0;
 			HandleKeypress(key);
 		}
 
@@ -1620,7 +1699,7 @@ abstract public class Window extends WindowConstants
 
 	static int _we4_timer;
 
-	void UpdateWindows()
+	static void UpdateWindows()
 	{
 		Window w;
 		int t;
@@ -1648,7 +1727,7 @@ abstract public class Window extends WindowConstants
 		DrawDirtyBlocks();
 
 		for (Window w : _windows) {
-			if (w.viewport != NULL) UpdateViewportPosition(w);
+			if (w.viewport != null) UpdateViewportPosition(w);
 		}
 		DrawTextMessage();
 		// Redraw mouse cursor in case it was hidden
@@ -1669,18 +1748,18 @@ abstract public class Window extends WindowConstants
 		return -1;
 	}
 
-	void InvalidateWindow(WindowClass cls, WindowNumber number)
+	static void InvalidateWindow(WindowClass cls, WindowNumber number)
 	{
-		final Window  w;
+		//final Window  w;
 
 		for (Window w : _windows) {
 			if (w.window_class == cls && w.window_number == number) SetWindowDirty(w);
 		}
 	}
 
-	void InvalidateWidget(final Window  w, byte widget_index)
+	static void InvalidateWidget(final Window  w, byte widget_index)
 	{
-		final Widget wi = &w.widget[widget_index];
+		final Widget wi = w.widget.get(widget_index);
 
 		/* Don't redraw the window if the widget is invisible or of no-type */
 		if (wi.type == WWT_EMPTY || HASBIT(w.hidden_state, widget_index)) return;
@@ -1688,9 +1767,9 @@ abstract public class Window extends WindowConstants
 		SetDirtyBlocks(w.left + wi.left, w.top + wi.top, w.left + wi.right + 1, w.top + wi.bottom + 1);
 	}
 
-	void InvalidateWindowWidget(WindowClass cls, WindowNumber number, byte widget_index)
+	static void InvalidateWindowWidget(WindowClass cls, WindowNumber number, byte widget_index)
 	{
-		final Window  w;
+		//final Window  w;
 
 		for (Window w : _windows) {
 			if (w.window_class == cls && w.window_number == number) {
@@ -1699,17 +1778,17 @@ abstract public class Window extends WindowConstants
 		}
 	}
 
-	void InvalidateWindowClasses(WindowClass cls)
+	static void InvalidateWindowClasses(WindowClass cls)
 	{
-		final Window  w;
+		//final Window  w;
 
 		for (Window w : _windows) {
-			if (w.window_class == cls) SetWindowDirty(w);
+			if (w.window_class == cls) w.SetWindowDirty();
 		}
 	}
 
 
-	void CallWindowTickEvent()
+	static void CallWindowTickEvent()
 	{
 		Window w;
 
@@ -1719,22 +1798,22 @@ abstract public class Window extends WindowConstants
 		}
 	}
 
-	void DeleteNonVitalWindows()
+	static void DeleteNonVitalWindows()
 	{
-		Window w;
-
-		for (w = _windows; w != _last_window;) {
-			if (w.window_class != WC_MAIN_WINDOW &&
-					w.window_class != WC_SELECT_GAME &&
-					w.window_class != WC_MAIN_TOOLBAR &&
-					w.window_class != WC_STATUS_BAR &&
-					w.window_class != WC_TOOLBAR_MENU &&
-					w.window_class != WC_TOOLTIPS &&
+		for (int i = 0; i < _windows.size();) 
+		{
+			Window w = _windows.get(i);
+			if (w.window_class.v != WC_MAIN_WINDOW &&
+					w.window_class.v != WC_SELECT_GAME &&
+					w.window_class.v != WC_MAIN_TOOLBAR &&
+					w.window_class.v != WC_STATUS_BAR &&
+					w.window_class.v != WC_TOOLBAR_MENU &&
+					w.window_class.v != WC_TOOLTIPS &&
 					(w.flags4 & WF_STICKY) == 0) { // do not delete windows which are 'pinned'
 				DeleteWindow(w);
-				w = _windows;
+				i = 0;
 			} else {
-				w++;
+				i++;
 			}
 		}
 	}
@@ -1744,54 +1823,57 @@ abstract public class Window extends WindowConstants
 	 * with this function. It closes all windows calling the standard function,
 	 * then, does a little hacked loop of closing all stickied windows. Note
 	 * that standard windows (status bar, etc.) are not stickied, so these aren't affected */
-	void DeleteAllNonVitalWindows()
+	static void DeleteAllNonVitalWindows()
 	{
-		Window w;
+		//Window w;
 
 		// Delete every window except for stickied ones
 		DeleteNonVitalWindows();
 		// Delete all sticked windows
-		for (w = _windows; w != _last_window;) {
+		//for (w = _windows; w != _last_window;) {
+		for (int i = 0; i < _windows.size();) 
+		{
+			Window w = _windows.get(i);
 			if (w.flags4 & WF_STICKY) {
 				DeleteWindow(w);
-				w = _windows;
+				i = 0;
 			} else
-				w++;
+				i++;
 		}
 	}
 
 	/* Delete all always on-top windows to get an empty screen */
-	void HideVitalWindows()
+	static void HideVitalWindows()
 	{
 		DeleteWindowById(WC_MAIN_TOOLBAR, 0);
 		DeleteWindowById(WC_STATUS_BAR, 0);
 	}
 
-	int PositionMainToolbar(Window w)
+	static int PositionMainToolbar(Window w)
 	{
-		DEBUG(misc, 1) ("Repositioning Main Toolbar...");
+		Global.DEBUG_misc( 1, "Repositioning Main Toolbar...");
 
-		if (w == NULL || w.window_class != WC_MAIN_TOOLBAR)
+		if (w == null || w.window_class.v != WC_MAIN_TOOLBAR)
 			w = FindWindowById(WC_MAIN_TOOLBAR, 0);
 
 		switch (_patches.toolbar_pos) {
-			case 1:  w.left = (_screen.width - w.width) >> 1; break;
-			case 2:  w.left = _screen.width - w.width; break;
-			default: w.left = 0;
+		case 1:  w.left = (_screen.width - w.width) >> 1; break;
+		case 2:  w.left = _screen.width - w.width; break;
+		default: w.left = 0;
 		}
 		SetDirtyBlocks(0, 0, _screen.width, w.height); // invalidate the whole top part
 		return w.left;
 	}
 
-	void RelocateAllWindows(int neww, int newh)
+	static void RelocateAllWindows(int neww, int newh)
 	{
-		Window w;
+		//Window w;
 
 		for (Window w : _windows) {
 			int left, top;
 
-			if (w.window_class == WC_MAIN_WINDOW) {
-				ViewPort *vp = w.viewport;
+			if (w.window_class.v == WC_MAIN_WINDOW) {
+				ViewPort vp = w.viewport;
 				vp.width = w.width = neww;
 				vp.height = w.height = newh;
 				vp.virtual_width = neww << vp.zoom;
@@ -1801,19 +1883,19 @@ abstract public class Window extends WindowConstants
 
 			IConsoleResize();
 
-			if (w.window_class == WC_MAIN_TOOLBAR) {
+			if (w.window_class.v == WC_MAIN_TOOLBAR) {
 				top = w.top;
 				left = PositionMainToolbar(w); // changes toolbar orientation
-			} else if (w.window_class == WC_SELECT_GAME || w.window_class == WC_GAME_OPTIONS || w.window_class == WC_NETWORK_WINDOW){
+			} else if (w.window_class.v == WC_SELECT_GAME || w.window_class.v == WC_GAME_OPTIONS || w.window_class.v == WC_NETWORK_WINDOW){
 				top = (newh - w.height) >> 1;
 				left = (neww - w.width) >> 1;
-			} else if (w.window_class == WC_NEWS_WINDOW) {
+			} else if (w.window_class.v == WC_NEWS_WINDOW) {
 				top = newh - w.height;
 				left = (neww - w.width) >> 1;
-			} else if (w.window_class == WC_STATUS_BAR) {
+			} else if (w.window_class.v == WC_STATUS_BAR) {
 				top = newh - w.height;
 				left = (neww - w.width) >> 1;
-			} else if (w.window_class == WC_SEND_NETWORK_MSG) {
+			} else if (w.window_class.v == WC_SEND_NETWORK_MSG) {
 				top = (newh - 26); // 26 = height of status bar + height of chat bar
 				left = (neww - w.width) >> 1;
 			} else {
@@ -1823,7 +1905,7 @@ abstract public class Window extends WindowConstants
 				if (top + (w.height>>1) >= newh) top = newh - w.height;
 			}
 
-			if (w.viewport != NULL) {
+			if (w.viewport != null) {
 				w.viewport.left += left - w.left;
 				w.viewport.top += top - w.top;
 			}
@@ -1832,7 +1914,7 @@ abstract public class Window extends WindowConstants
 			w.top = top;
 		}
 	}
-	
+
 
 }
 
@@ -1853,7 +1935,7 @@ class ResizeInfo {
 
 
 class WindowClass  {
-	
+
 	public WindowClass(int cls) {
 		v = cls;
 	}
@@ -1887,15 +1969,6 @@ class Widget {
 
 
 
-class ViewPort {
-	int left,top;												// screen coordinates for the viewport
-	int width, height;									// screen width/height for the viewport
-
-	int virtual_left, virtual_top;			// virtual coordinates
-	int virtual_width, virtual_height;	// these are just width << zoom, height << zoom
-
-	byte zoom;
-};
 
 
 
@@ -1943,3 +2016,7 @@ class WindowEvent {
 	int wparam; // additional message-specific information
 	int lparam; // additional message-specific information
 }
+
+class SizeRect {
+	int left,top,width,height;
+} 

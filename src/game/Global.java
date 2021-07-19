@@ -156,22 +156,22 @@ public class Global {
 
 	//void DEBUG(name, level) if (level == 0 || _debug_ ## name ## _level >= level) debug
 
-	int _debug_ai_level = 0;
-	int _debug_driver_level = 0;
-	int _debug_grf_level = 0;
-	int _debug_map_level = 0;
-	int _debug_misc_level = 0;
-	int _debug_ms_level = 0;
-	int _debug_net_level = 0;
-	int _debug_spritecache_level = 0;
-	int _debug_oldloader_level = 0;
-	int _debug_pbs_level = 0;
-	int _debug_ntp_level = 0;
-	int _debug_npf_level = 0;
+	static int _debug_ai_level = 0;
+	static int _debug_driver_level = 0;
+	static int _debug_grf_level = 0;
+	static int _debug_map_level = 0;
+	static int _debug_misc_level = 0;
+	static int _debug_ms_level = 0;
+	static int _debug_net_level = 0;
+	static int _debug_spritecache_level = 0;
+	static int _debug_oldloader_level = 0;
+	static int _debug_pbs_level = 0;
+	static int _debug_ntp_level = 0;
+	static int _debug_npf_level = 0;
 
 
 
-	void debug(String s, Object ... arg)
+	static void debug(String s, Object ... arg)
 	{
 		String buf = String.format(s, arg);
 
@@ -180,19 +180,19 @@ public class Global {
 	}
 
 	// instead of DEBUG(ai, 0)( printf args)
-	public void DEBUG_ai( int level, String s, Object ... arg )
+	public static void DEBUG_ai( int level, String s, Object ... arg )
 	{
 		if( level >= _debug_ai_level )
 			debug( s, arg );
 	}
 
-	public void DEBUG_misc( int level, String s, Object ... arg )
+	public static void DEBUG_misc( int level, String s, Object ... arg )
 	{
 		if( level >= _debug_misc_level )
 			debug( s, arg );
 	}
 
-	public void DEBUG_grf( int level, String s, Object ... arg )
+	public static void DEBUG_grf( int level, String s, Object ... arg )
 	{
 		if( level >= _debug_grf_level )
 			debug( s, arg );

@@ -91,7 +91,7 @@ enum {
 	HT_DIR_VL = 4, // vertical left
 	HT_DIR_VR = 5, // vertical right
 };
-
+/*
 typedef struct TileHighlightData {
 	Point size;
 	Point outersize;
@@ -119,7 +119,7 @@ typedef struct TileHighlightData {
 	int userdata;
 	TileIndex redsq;
 } TileHighlightData;
-
+*/
 
 // common button handler
 bool HandlePlacePushButton(Window *w, int widget, uint32 cursor, int mode, PlaceProc *placeproc);
@@ -131,7 +131,7 @@ VARDEF uint32 _active_viewports;
 
 VARDEF Point _tile_fract_coords;
 
-extern TileHighlightData _thd;
+//extern TileHighlightData _thd;
 
 
 void ViewportDoDraw(const ViewPort *vp, int left, int top, int right, int bottom);
