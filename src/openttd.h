@@ -542,7 +542,7 @@ enum {
 	SCROLL_SAVE = 2,
 	SCROLL_CHAT = 4,
 };
-VARDEF byte _no_scroll;
+//VARDEF byte _no_scroll;
 
 /** To have a concurrently running thread interface with the main program, use
  * the OTTD_SendThreadMessage() function. Actions to perform upon the message are handled

@@ -827,9 +827,9 @@ public class Main {
 
 	static void HandleKeyScrolling()
 	{
-		if (Global._dirkeys != 0 && !_no_scroll) {
-			int factor = _shift_pressed ? 50 : 10;
-			ScrollMainViewport(scrollamt[_dirkeys][0] * factor, scrollamt[_dirkeys][1] * factor);
+		if (Global._dirkeys != 0 && 0 == Global._no_scroll) {
+			int factor = Global._shift_pressed ? 50 : 10;
+			ScrollMainViewport(scrollamt[Global._dirkeys][0] * factor, scrollamt[_dirkeys][1] * factor);
 		}
 	}
 

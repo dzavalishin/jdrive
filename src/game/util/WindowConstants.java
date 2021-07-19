@@ -83,6 +83,11 @@ public class WindowConstants {
 
 
 
+	/****************** THESE ARE NOT WIDGET TYPES!!!!! *******************/
+	//enum WindowWidgetBehaviours {
+	public static final int WWB_PUSHBUTTON = 1 << 5;
+	public static final int WWB_NODISBUTTON = 2 << 5;
+	//};
 
 
 
@@ -138,6 +143,12 @@ public class WindowConstants {
 
 
 
+	//enum SpecialMouseMode {
+	public static final int  WSM_NONE = 0;
+	public static final int  WSM_DRAGDROP = 1;
+	public static final int  WSM_SIZING = 2;
+	public static final int  WSM_PRESIZE = 3;
+	//}
 
 
 

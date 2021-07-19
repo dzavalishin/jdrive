@@ -12,6 +12,7 @@ public class Global {
 	// NOSAVE: can be determined from player structs
 	public static byte [] _player_colors = new byte[MAX_PLAYERS];
 	public static PlayerID _current_player;
+	public static PlayerID _local_player;
 
 	public static Economy _economy = new Economy();
 
@@ -118,6 +119,8 @@ public class Global {
 	public static boolean _shift_pressed;  // Is Alt pressed?
 	public static byte _dirkeys;				// 1=left, 2=up, 4=right, 8=down
 
+	public static byte _no_scroll;
+	
 	// main/startup
 	public static String _config_file;
 	public static boolean _dedicated_forks;

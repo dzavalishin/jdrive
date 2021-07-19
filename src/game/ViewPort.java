@@ -3,6 +3,8 @@ package game;
 import java.util.ArrayList;
 import java.util.List;
 
+import game.util.BitOps;
+
 public class ViewPort {
 	int left,top;												// screen coordinates for the viewport
 	int width, height;									// screen width/height for the viewport
@@ -15,6 +17,18 @@ public class ViewPort {
 	// don't need
 	//boolean active; // used instead of bit in _active_viewports
 
+	
+	public static final int VHM_NONE = 0;    // default
+	public static final int VHM_RECT = 1;    // rectangle (stations; depots; ...)
+	public static final int VHM_POINT = 2;   // point (lower land; raise land; level land; ...)
+	public static final int VHM_SPECIAL = 3; // special mode used for highlighting while dragging (and for tunnels/docks)
+	public static final int VHM_DRAG = 4;    // dragging items in the depot windows
+	public static final int VHM_RAIL = 5;    // rail pieces
+	
+	
+	
+	
+	
 	
 	public static TileHighlightData _thd = new TileHighlightData();
 	public static List<ViewPort> _viewports = new ArrayList<ViewPort>();
@@ -44,7 +58,7 @@ public class ViewPort {
 
 	// Quick hack to know how much memory to reserve when allocating from the spritelist
 	// to prevent a buffer overflow.
-	#define LARGEST_SPRITELIST_STRUCT ParentSpriteToDraw
+	//#define LARGEST_SPRITELIST_STRUCT ParentSpriteToDraw
 
 
 	static ViewportDrawer _cur_vd;
@@ -85,7 +99,7 @@ public class ViewPort {
 		vp.virtual_height = height << zoom;
 
 		if (follow_flags & 0x80000000) {
-			final Vehicle *veh;
+			Vehicle veh;
 
 			WP(w, vp_d).follow_vehicle = (VehicleID)(follow_flags & 0xFFFF);
 			veh = GetVehicle(WP(w, vp_d).follow_vehicle);
@@ -95,7 +109,7 @@ public class ViewPort {
 			int y = TileY(follow_flags) * 16;
 
 			WP(w, vp_d).follow_vehicle = INVALID_VEHICLE;
-			pt = MapXYZToViewport(vp, x, y, GetSlopeZ(x, y));
+			pt = MapXYZToViewport(vp, x, y, Landscape.GetSlopeZ(x, y));
 		}
 
 		WP(w, vp_d).scrollpos_x = pt.x;
@@ -147,27 +161,27 @@ public class ViewPort {
 			int xo = _vp_move_offs.x;
 			int yo = _vp_move_offs.y;
 
-			if (abs(xo) >= width || abs(yo) >= height) {
+			if (Math.abs(xo) >= width || Math.abs(yo) >= height) {
 				/* fully_outside */
-				RedrawScreenRect(left, top, left + width, top + height);
+				Gfx.RedrawScreenRect(left, top, left + width, top + height);
 				return;
 			}
 
-			GfxScroll(left, top, width, height, xo, yo);
+			Gfx.GfxScroll(left, top, width, height, xo, yo);
 
 			if (xo > 0) {
-				RedrawScreenRect(left, top, xo + left, top + height);
+				Gfx.RedrawScreenRect(left, top, xo + left, top + height);
 				left += xo;
 				width -= xo;
 			} else if (xo < 0) {
-				RedrawScreenRect(left+width+xo, top, left+width, top + height);
+				Gfx.RedrawScreenRect(left+width+xo, top, left+width, top + height);
 				width += xo;
 			}
 
 			if (yo > 0) {
-				RedrawScreenRect(left, top, width+left, top + yo);
+				Gfx.RedrawScreenRect(left, top, width+left, top + yo);
 			} else if (yo < 0) {
-				RedrawScreenRect(left, top + height + yo, width+left, top + height);
+				Gfx.RedrawScreenRect(left, top + height + yo, width+left, top + height);
 			}
 		}
 	}
@@ -222,19 +236,19 @@ public class ViewPort {
 		}
 	}
 
-
+	/* gone to Window
 	ViewPort IsPtInWindowViewport(final Window w, int x, int y)
 	{
 		ViewPort vp = w.viewport;
 
 		if (vp != null &&
-		    IS_INT_INSIDE(x, vp.left, vp.left + vp.width) &&
-				IS_INT_INSIDE(y, vp.top, vp.top + vp.height))
+		    BitOps.IS_INT_INSIDE(x, vp.left, vp.left + vp.width) &&
+				BitOps.IS_INT_INSIDE(y, vp.top, vp.top + vp.height))
 			return vp;
 
 		return null;
 	}
-
+	*/
 	static Point TranslateXYToTileCoord(final ViewPort vp, int x, int y)
 	{
 		int z;
@@ -256,16 +270,16 @@ public class ViewPort {
 		a = x+y;
 		b = x-y;
 	//#endif
-		z = GetSlopeZ(a, b) >> 1;
-		z = GetSlopeZ(a+z, b+z) >> 1;
-		z = GetSlopeZ(a+z, b+z) >> 1;
-		z = GetSlopeZ(a+z, b+z) >> 1;
-		z = GetSlopeZ(a+z, b+z) >> 1;
+		z = Landscape.GetSlopeZ(a, b) >> 1;
+		z = Landscape.GetSlopeZ(a+z, b+z) >> 1;
+		z = Landscape.GetSlopeZ(a+z, b+z) >> 1;
+		z = Landscape.GetSlopeZ(a+z, b+z) >> 1;
+		z = Landscape.GetSlopeZ(a+z, b+z) >> 1;
 
 		pt.x = a+z;
 		pt.y = b+z;
 
-		if ((int)pt.x >= MapMaxX() * 16 || (int)pt.y >= MapMaxY() * 16) {
+		if ((int)pt.x >= Global.MapMaxX() * 16 || (int)pt.y >= Global.MapMaxY() * 16) {
 			pt.x = pt.y = -1;
 		}
 
@@ -281,21 +295,21 @@ public class ViewPort {
 		ViewPort vp;
 		Point pt;
 
-		if ( (w = FindWindowFromPt(x, y)) != null &&
-				 (vp = IsPtInWindowViewport(w, x, y)) != null)
+		if ( (w = Window.FindWindowFromPt(x, y)) != null &&
+				 (vp = w.IsPtInWindowViewport(x, y)) != null)
 					return TranslateXYToTileCoord(vp, zoom_x, zoom_y);
 
 		pt.y = pt.x = -1;
 		return pt;
 	}
 
-	Point GetTileBelowCursor()
+	static Point GetTileBelowCursor()
 	{
-		return GetTileFromScreenXY(_cursor.pos.x, _cursor.pos.y, _cursor.pos.x, _cursor.pos.y);
+		return GetTileFromScreenXY(Hal._cursor.pos.x, Hal._cursor.pos.y, Hal._cursor.pos.x, Hal._cursor.pos.y);
 	}
 
 
-	Point GetTileZoomCenterWindow(boolean in, Window  w)
+	static Point GetTileZoomCenterWindow(boolean in, Window  w)
 	{
 		int x, y;
 		ViewPort  vp;
@@ -303,14 +317,14 @@ public class ViewPort {
 		vp = w.viewport;
 
 		if (in) {
-			x = ((_cursor.pos.x - vp.left) >> 1) + (vp.width >> 2);
-			y = ((_cursor.pos.y - vp.top) >> 1) + (vp.height >> 2);
+			x = ((Hal._cursor.pos.x - vp.left) >> 1) + (vp.width >> 2);
+			y = ((Hal._cursor.pos.y - vp.top) >> 1) + (vp.height >> 2);
 		} else {
-			x = vp.width - (_cursor.pos.x - vp.left);
-			y = vp.height - (_cursor.pos.y - vp.top);
+			x = vp.width - (Hal._cursor.pos.x - vp.left);
+			y = vp.height - (Hal._cursor.pos.y - vp.top);
 		}
 		/* Get the tile below the cursor and center on the zoomed-out center */
-		return GetTileFromScreenXY(_cursor.pos.x, _cursor.pos.y, x + vp.left, y + vp.top);
+		return GetTileFromScreenXY(Hal._cursor.pos.x, Hal._cursor.pos.y, x + vp.left, y + vp.top);
 	}
 
 	void DrawGroundSpriteAt(int image, int x, int y, byte z)
@@ -321,7 +335,7 @@ public class ViewPort {
 		assert((image & SPRITE_MASK) < MAX_SPRITES);
 
 		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
-			DEBUG(misc, 0) ("Out of sprite mem");
+			DEBUG_misc( 0, "Out of sprite mem");
 			return;
 		}
 		ts = (TileSpriteToDraw)vd.spritelist_mem;
@@ -389,7 +403,7 @@ public class ViewPort {
 		vd.last_child = null;
 
 		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
-			DEBUG(misc, 0) ("Out of sprite mem");
+			DEBUG_misc( 0, "Out of sprite mem");
 			return;
 		}
 		ps = (ParentSpriteToDraw )vd.spritelist_mem;
@@ -401,7 +415,7 @@ public class ViewPort {
 			//  parent_list somewhere below to a higher number.
 			// This can not really hurt you, it just gives some black
 			//  spots on the screen ;)
-			DEBUG(misc, 0) ("Out of sprite mem (parent_list)");
+			DEBUG_misc( 0, "Out of sprite mem (parent_list)");
 			return;
 		}
 
@@ -454,7 +468,7 @@ public class ViewPort {
 		assert((image & SPRITE_MASK) < MAX_SPRITES);
 
 		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
-			DEBUG(misc, 0) ("Out of sprite mem");
+			DEBUG_misc( 0, "Out of sprite mem");
 			return;
 		}
 		cs = (ChildScreenSpriteToDraw*)vd.spritelist_mem;
@@ -479,7 +493,7 @@ public class ViewPort {
 		StringSpriteToDraw ss;
 
 		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
-			DEBUG(misc, 0) ("Out of sprite mem");
+			DEBUG_misc( 0, "Out of sprite mem");
 			return null;
 		}
 		ss = (StringSpriteToDraw*)vd.spritelist_mem;
@@ -611,7 +625,7 @@ public class ViewPort {
 					z += 8;
 					if (!(ti.tileh & 2) && (IsSteepTileh(ti.tileh))) z += 8;
 				}
-				DrawGroundSpriteAt(_cur_dpi.zoom != 2 ? SPR_DOT : SPR_DOT_SMALL, ti.x, ti.y, z);
+				DrawGroundSpriteAt(Hal._cur_dpi.zoom != 2 ? SPR_DOT : SPR_DOT_SMALL, ti.x, ti.y, z);
 			} else if (_thd.drawstyle & HT_RAIL /*&& _thd.place_mode == VHM_RAIL*/) {
 				// autorail highlight piece under cursor
 				int type = _thd.drawstyle & 0xF;
@@ -1091,11 +1105,11 @@ public class ViewPort {
 
 	static void ViewportDrawStrings(DrawPixelInfo dpi, final StringSpriteToDraw ss)
 	{
-		DrawPixelInfo dp;
+		DrawPixelInfo dp = new DrawPixelInfo();
 		byte zoom;
 
-		_cur_dpi = &dp;
-		dp = *dpi;
+		Hal._cur_dpi = dp;
+		dp.assignFrom( dpi );
 
 		zoom = dp.zoom;
 		dp.zoom = 0;
@@ -1153,7 +1167,7 @@ public class ViewPort {
 			ss = ss.next;
 		} while (ss != null);
 
-		_cur_dpi = dpi;
+		Hal._cur_dpi = dpi;
 	}
 
 	void ViewportDoDraw(final ViewPort vp, int left, int top, int right, int bottom)
@@ -1169,8 +1183,8 @@ public class ViewPort {
 
 		_cur_vd = &vd;
 
-		old_dpi = _cur_dpi;
-		_cur_dpi = &vd.dpi;
+		old_dpi = Hal._cur_dpi;
+		Hal._cur_dpi = &vd.dpi;
 
 		vd.dpi.zoom = vp.zoom;
 		mask = (-1) << vp.zoom;
@@ -1223,7 +1237,7 @@ public class ViewPort {
 
 		if (vd.first_string != null) ViewportDrawStrings(&vd.dpi, vd.first_string);
 
-		_cur_dpi = old_dpi;
+		Hal._cur_dpi = old_dpi;
 	}
 
 	// Make sure we don't draw a too big area at a time.
@@ -1269,7 +1283,7 @@ public class ViewPort {
 
 	void DrawWindowViewport(Window w)
 	{
-		DrawPixelInfo dpi = _cur_dpi;
+		DrawPixelInfo dpi = Hal._cur_dpi;
 
 		dpi.left += w.left;
 		dpi.top += w.top;
@@ -1280,17 +1294,17 @@ public class ViewPort {
 		dpi.top -= w.top;
 	}
 
-	void UpdateViewportPosition(Window w)
+	static void UpdateViewportPosition(Window w)
 	{
 		final ViewPort vp = w.viewport;
 
 		if (WP(w, vp_d).follow_vehicle != INVALID_VEHICLE) {
-			final Vehicle* veh = GetVehicle(WP(w,vp_d).follow_vehicle);
+			final Vehicle veh = GetVehicle(WP(w,vp_d).follow_vehicle);
 			Point pt = MapXYZToViewport(vp, veh.x_pos, veh.y_pos, veh.z_pos);
 
 			SetViewportPosition(w, pt.x, pt.y);
 		} else {
-	#if !defined(NEW_ROTATION)
+	//#if !defined(NEW_ROTATION)
 			int x;
 			int y;
 			int vx;
@@ -1312,7 +1326,7 @@ public class ViewPort {
 			// Set position
 			WP(w, vp_d).scrollpos_x = x - vp.virtual_width / 2;
 			WP(w, vp_d).scrollpos_y = y - vp.virtual_height / 2;
-	#else
+	/*#else
 			int x,y,t;
 			int err;
 
@@ -1325,13 +1339,13 @@ public class ViewPort {
 			err= 0;
 
 			if (err != 0) {
-				/* coordinate remap */
+				// coordinate remap 
 				Point pt = Point.RemapCoords(x, y, 0);
 				t = (-1) << vp.zoom;
 				WP(w,vp_d).scrollpos_x = pt.x & t;
 				WP(w,vp_d).scrollpos_y = pt.y & t;
 			}
-	#endif
+	#endif */
 
 			SetViewportPosition(w, WP(w, vp_d).scrollpos_x, WP(w, vp_d).scrollpos_y);
 		}
@@ -1361,7 +1375,7 @@ public class ViewPort {
 		);
 	}
 
-	void MarkAllViewportsDirty(int left, int top, int right, int bottom)
+	static void MarkAllViewportsDirty(int left, int top, int right, int bottom)
 	{
 		final ViewPort vp = _viewports;
 		int act = _active_viewports;
@@ -1375,7 +1389,7 @@ public class ViewPort {
 
 	void MarkTileDirtyByTile(TileIndex tile)
 	{
-		Point pt = Point.RemapCoords(TileX(tile) * 16, TileY(tile) * 16, GetTileZ(tile));
+		Point pt = Point.RemapCoords(tile.TileX() * 16, tile.TileY() * 16, tile.GetTileZ());
 		MarkAllViewportsDirty(
 			pt.x - 31,
 			pt.y - 122,
@@ -1384,14 +1398,14 @@ public class ViewPort {
 		);
 	}
 
-	void MarkTileDirty(int x, int y)
+	static void MarkTileDirty(int x, int y)
 	{
 		int z = 0;
 		Point pt;
 
-		if (IS_INT_INSIDE(x, 0, MapSizeX() * 16) &&
-				IS_INT_INSIDE(y, 0, MapSizeY() * 16))
-			z = GetTileZ(TileVirtXY(x, y));
+		if (BitOps.IS_INT_INSIDE(x, 0, Global.MapSizeX() * 16) &&
+				BitOps.IS_INT_INSIDE(y, 0, Global.MapSizeY() * 16))
+			z = TileIndex.TileVirtXY(x, y).GetTileZ();
 		pt = Point.RemapCoords(x, y, z);
 
 		MarkAllViewportsDirty(
@@ -1411,7 +1425,7 @@ public class ViewPort {
 		x_size = _thd.size.x;
 		y_size = _thd.size.y;
 
-		if (_thd.outersize.x) {
+		if (0 != _thd.outersize.x) {
 			x_size += _thd.outersize.x;
 			x += _thd.offs.x;
 			y_size += _thd.outersize.y;
@@ -1443,7 +1457,7 @@ public class ViewPort {
 
 	static boolean CheckClickOnTown(final ViewPort vp, int x, int y)
 	{
-		final Town *t;
+		Town t;
 
 		if (!(_display_opt & DO_SHOW_TOWN_NAMES)) return false;
 
@@ -1545,7 +1559,7 @@ public class ViewPort {
 
 	static boolean CheckClickOnSign(final ViewPort vp, int x, int y)
 	{
-		final SignStruct *ss;
+		final SignStruct ss;
 
 		if (!(_display_opt & DO_SHOW_SIGNS)) return false;
 
@@ -1596,7 +1610,7 @@ public class ViewPort {
 
 	static boolean CheckClickOnWaypoint(final ViewPort vp, int x, int y)
 	{
-		final Waypoint *wp;
+		final Waypoint wp;
 
 		if (!(_display_opt & DO_WAYPOINTS)) return false;
 
@@ -1650,7 +1664,7 @@ public class ViewPort {
 	{
 		Point pt = TranslateXYToTileCoord(vp, x, y);
 
-		if (pt.x != -1) ClickTile(TileVirtXY(pt.x, pt.y));
+		if (pt.x != -1) ClickTile(TileIndex.TileVirtXY(pt.x, pt.y));
 	}
 
 
@@ -1660,10 +1674,11 @@ public class ViewPort {
 	  ShowTrainViewWindow(v);
 	}
 
-	static void Nop(final Vehicle* v) {}
+	static void Nop(final Vehicle v) {}
 
-	typedef void OnVehicleClickProc(final Vehicle* v);
-	static OnVehicleClickProc* final _on_vehicle_click_proc[] = {
+	typedef void OnVehicleClickProc(final Vehicle v);
+
+	static OnVehicleClickProc _on_vehicle_click_proc[] = {
 		SafeShowTrainViewWindow,
 		ShowRoadVehViewWindow,
 		ShowShipViewWindow,
@@ -1672,9 +1687,10 @@ public class ViewPort {
 		Nop  // Disaster vehicles
 	};
 
-	void HandleViewportClicked(final ViewPort vp, int x, int y)
+	void HandleViewportClicked(int x, int y)
 	{
-		final Vehicle* v;
+		final Vehicle v;
+		final ViewPort vp = this;
 
 		if (CheckClickOnTown(vp, x, y)) return;
 		if (CheckClickOnStation(vp, x, y)) return;
@@ -1691,19 +1707,19 @@ public class ViewPort {
 		final Window  w;
 		final ViewPort  vp;
 
-		int x = _cursor.pos.x;
-		int y = _cursor.pos.y;
+		int x = Hal._cursor.pos.x;
+		int y = Hal._cursor.pos.y;
 
-		w = FindWindowFromPt(x, y);
+		w = Window.FindWindowFromPt(x, y);
 		if (w == null) return null;
 
-		vp = IsPtInWindowViewport(w, x, y);
+		vp = w.IsPtInWindowViewport(x, y);
 		return (vp != null) ? CheckClickOnVehicle(vp, x, y) : null;
 	}
 
 
 
-	void PlaceObject()
+	static void PlaceObject()
 	{
 		Point pt;
 		Window w;
@@ -1736,7 +1752,7 @@ public class ViewPort {
 	{
 		Point pt;
 
-		pt = MapXYZToViewport(w.viewport, x, y, GetSlopeZ(x, y));
+		pt = MapXYZToViewport(w.viewport, x, y, Landscape.GetSlopeZ(x, y));
 		WP(w, vp_d).follow_vehicle = INVALID_VEHICLE;
 
 		if (WP(w, vp_d).scrollpos_x == pt.x && WP(w, vp_d).scrollpos_y == pt.y)
@@ -1750,20 +1766,20 @@ public class ViewPort {
 	/* scrolls the viewport in a window to a given tile */
 	boolean ScrollWindowToTile(TileIndex tile, Window  w)
 	{
-		return ScrollWindowTo(TileX(tile) * 16 + 8, TileY(tile) * 16 + 8, w);
+		return ScrollWindowTo(tile.TileX() * 16 + 8, tile.TileY() * 16 + 8, w);
 	}
 
 
 
 	boolean ScrollMainWindowTo(int x, int y)
 	{
-		return ScrollWindowTo(x, y, FindWindowById(WC_MAIN_WINDOW, 0));
+		return ScrollWindowTo(x, y, Window.FindWindowById(Window.WC_MAIN_WINDOW, 0));
 	}
 
 
 	boolean ScrollMainWindowToTile(TileIndex tile)
 	{
-		return ScrollMainWindowTo(TileX(tile) * 16 + 8, TileY(tile) * 16 + 8);
+		return ScrollMainWindowTo(tile.TileX() * 16 + 8, tile.TileY() * 16 + 8);
 	}
 
 	void SetRedErrorSquare(TileIndex tile)
@@ -1774,8 +1790,8 @@ public class ViewPort {
 		_thd.redsq = tile;
 
 		if (tile != old) {
-			if (tile != 0) MarkTileDirtyByTile(tile);
-			if (old  != 0) MarkTileDirtyByTile(old);
+			if (tile != null) MarkTileDirtyByTile(tile);
+			if (old  != null) MarkTileDirtyByTile(old);
 		}
 	}
 
@@ -1802,7 +1818,7 @@ public class ViewPort {
 	}
 
 	// called regular to update tile highlighting in all cases
-	void UpdateTileSelection()
+	static void UpdateTileSelection()
 	{
 		int x1;
 		int y1;
@@ -1870,10 +1886,10 @@ public class ViewPort {
 	void VpStartPlaceSizing(TileIndex tile, int user)
 	{
 		_thd.userdata = user;
-		_thd.selend.x = TileX(tile) * 16;
-		_thd.selstart.x = TileX(tile) * 16;
-		_thd.selend.y = TileY(tile) * 16;
-		_thd.selstart.y = TileY(tile) * 16;
+		_thd.selend.x = tile.TileX() * 16;
+		_thd.selstart.x = tile.TileX() * 16;
+		_thd.selend.y = tile.TileY() * 16;
+		_thd.selstart.y = tile.TileY() * 16;
 		if (_thd.place_mode == VHM_RECT) {
 			_thd.place_mode = VHM_SPECIAL;
 			_thd.next_drawstyle = HT_RECT;
@@ -1892,12 +1908,12 @@ public class ViewPort {
 		_thd.sizelimit = limit;
 	}
 
-	void VpSetPresizeRange(int from, int to)
+	void VpSetPresizeRange(TileIndex from, TileIndex to)
 	{
-		_thd.selend.x = TileX(to) * 16;
-		_thd.selend.y = TileY(to) * 16;
-		_thd.selstart.x = TileX(from) * 16;
-		_thd.selstart.y = TileY(from) * 16;
+		_thd.selend.x = to.TileX() * 16;
+		_thd.selend.y = to.TileY() * 16;
+		_thd.selstart.x = from.TileX() * 16;
+		_thd.selstart.y = from.TileY() * 16;
 		_thd.next_drawstyle = HT_RECT;
 	}
 
@@ -1943,7 +1959,7 @@ public class ViewPort {
 
 
 	// while dragging
-	static void CalcRaildirsDrawstyle(TileHighlightData *thd, int x, int y, int method)
+	static void CalcRaildirsDrawstyle(TileHighlightData thd, int x, int y, int method)
 	{
 		int d;
 		byte b=6;
@@ -1951,10 +1967,10 @@ public class ViewPort {
 
 		int dx = thd.selstart.x - (thd.selend.x&~0xF);
 		int dy = thd.selstart.y - (thd.selend.y&~0xF);
-		w = myabs(dx) + 16;
-		h = myabs(dy) + 16;
+		w = BitOps.myabs(dx) + 16;
+		h = BitOps.myabs(dy) + 16;
 
-		if (TileVirtXY(thd.selstart.x, thd.selstart.y) == TileVirtXY(x, y)) { // check if we're only within one tile
+		if (TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y) == TileIndex.TileVirtXY(x, y)) { // check if we're only within one tile
 			if (method == VPM_RAILDIRS)
 				b = GetAutorailHT(x, y);
 			else // rect for autosignals on one tile
@@ -2060,7 +2076,7 @@ public class ViewPort {
 		if (method == VPM_RAILDIRS || method == VPM_SIGNALDIRS) {
 			_thd.selend.x = x;
 			_thd.selend.y = y;
-			CalcRaildirsDrawstyle(&_thd, x, y, method);
+			CalcRaildirsDrawstyle(_thd, x, y, method);
 			return;
 		}
 
@@ -2102,7 +2118,7 @@ public class ViewPort {
 	}
 
 	// while dragging
-	boolean VpHandlePlaceSizingDrag()
+	static boolean VpHandlePlaceSizingDrag()
 	{
 		Window w;
 		WindowEvent e;
@@ -2166,8 +2182,8 @@ public class ViewPort {
 		// undo clicking on button
 		if (_thd.place_mode != 0) {
 			_thd.place_mode = 0;
-			w = FindWindowById(_thd.window_class, _thd.window_number);
-			if (w != null) CallWindowEventNP(w, WE_ABORT_PLACE_OBJ);
+			w = Window.FindWindowById(_thd.window_class, _thd.window_number);
+			if (w != null) w.CallWindowEventNP(WindowEvents.WE_ABORT_PLACE_OBJ);
 		}
 
 		SetTileSelectSize(1, 1);
@@ -2194,7 +2210,7 @@ public class ViewPort {
 			SetMouseCursor(icon);
 	}
 
-	void ResetObjectToPlace()
+	static void ResetObjectToPlace()
 	{
 		SetObjectToPlace(SPR_CURSOR_MOUSE, 0, 0, 0);
 	}
@@ -2212,7 +2228,7 @@ class StringSpriteToDraw {
 	StringSpriteToDraw next;
 	int x;
 	int y;
-	int params[3];
+	int params[] = new int[3];
 	int width;
 } 
 

@@ -59,7 +59,7 @@ enum {
 	VPM_X_AND_Y_LIMITED = 5,
 	VPM_SIGNALDIRS = 6
 };
-
+/*
 // viewport highlight mode (for highlighting tiles below cursor)
 enum {
 	VHM_NONE = 0,    // default
@@ -68,7 +68,7 @@ enum {
 	VHM_SPECIAL = 3, // special mode used for highlighting while dragging (and for tunnels/docks)
 	VHM_DRAG = 4,    // dragging items in the depot windows
 	VHM_RAIL = 5,    // rail pieces
-};
+}; */
 
 void VpSelectTilesWithMethod(int x, int y, int method);
 

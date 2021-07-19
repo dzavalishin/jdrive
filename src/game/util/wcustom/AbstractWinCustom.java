@@ -1,7 +1,6 @@
 package game.util.wcustom;
 
 import game.EngineID;
-import game.NewsItem;
 import game.StringID;
 import game.VehicleID;
 
@@ -10,13 +9,6 @@ public class AbstractWinCustom {
 	// empty
 }
 
-
-class def_d extends AbstractWinCustom {
-	int data_1, data_2, data_3;
-	int data_4, data_5;
-	boolean close;
-	byte byte_1;
-} ;
 
 class void_d extends AbstractWinCustom {
 	byte [] data;
@@ -33,13 +25,6 @@ class plstations_d extends AbstractWinCustom {
 
 class tooltips_d extends AbstractWinCustom {
 	StringID string_id;
-} ;
-
-class buildtrain_d extends AbstractWinCustom {
-	byte railtype;
-	byte sel_index;
-	EngineID sel_engine;
-	EngineID rename_engine;
 } ;
 
 class replaceveh_d extends AbstractWinCustom {
@@ -61,12 +46,6 @@ class traindetails_d extends AbstractWinCustom {
 	byte tab;
 } ;
 
-class smallmap_d extends AbstractWinCustom {
-	int scroll_x;
-	int scroll_y;
-	int subscroll;
-} ;
-
 class facesel_d extends AbstractWinCustom {
 	int face;
 	byte gender;
@@ -75,12 +54,6 @@ class facesel_d extends AbstractWinCustom {
 class refit_d extends AbstractWinCustom {
 	int sel;
 	byte cargo;
-} ;
-
-class vp_d extends AbstractWinCustom {
-	VehicleID follow_vehicle;
-	int scrollpos_x;
-	int scrollpos_y;
 } ;
 
 // vp2_d is the same as vp_d, except for the data_# values..
@@ -93,35 +66,8 @@ class vp2_d extends AbstractWinCustom {
 	byte data_3;
 } ;
 
-class news_d extends AbstractWinCustom {
-	int follow_vehicle;
-	int scrollpos_x;
-	int scrollpos_y;
-	NewsItem ni;
-} ;
-
 class highscore_d extends AbstractWinCustom {
 	int background_img;
 	int rank;
-} ;
-
-class scroller_d extends AbstractWinCustom {
-	int height;
-	int counter;
-} ;
-
-
-class vehiclelist_d extends AbstractWinCustom  {
-	//SortStruct *sort_list;
-	int list_length;
-	byte sort_type;
-	VehicleListFlags flags;
-	int resort_timer;
-} ;
-
-class message_d extends AbstractWinCustom  {
-	int msg;
-	int wparam;
-	int lparam;
 } ;
 

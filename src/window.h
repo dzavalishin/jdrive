@@ -498,12 +498,12 @@ enum WindowEvents {
 };
 
 
-/****************** THESE ARE NOT WIDGET TYPES!!!!! *******************/
+/****************** THESE ARE NOT WIDGET TYPES!!!!! ******************* /
 enum WindowWidgetBehaviours {
 	WWB_PUSHBUTTON = 1 << 5,
 	WWB_NODISBUTTON = 2 << 5,
 };
-
+*/
 #if 0
 enum WindowWidgetTypes {
 	WWT_EMPTY = 0,

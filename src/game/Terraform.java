@@ -232,7 +232,7 @@ public class Terraform {
 			break;
 
 		case WE_ABORT_PLACE_OBJ:
-			UnclickWindowButtons(w);
+			w.UnclickWindowButtons();
 			SetWindowDirty(w);
 
 			w = FindWindowById(WC_BUILD_STATION, 0);

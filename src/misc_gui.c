@@ -189,7 +189,7 @@ static const char *credits[] = {
 	"  Bjarni Corfitzen (Bjarni) - MacOSX port, coder",
 	"  Matthijs Kooijman (blathijs) - Pathfinder-god",
 	"  Victor Fischer (Celestar) - Programming everywhere you need him to",
-	"  Tamás Faragó (Darkvater) - Lead coder",
+	"  Tamï¿½s Faragï¿½ (Darkvater) - Lead coder",
 	"  Kerekes Miham (MiHaMiX) - Translator system, and Nightlies host",
 	"  Owen Rudge (orudge) - Forum- and masterserver host, OS/2 port",
 	"  Peter Nelson (peter1138) - Spiritual descendant from newgrf gods",
@@ -205,13 +205,13 @@ static const char *credits[] = {
 	"  Josef Drexler - For his great work on TTDPatch",
 	"  Marcin Grzegorczyk - For his documentation of TTD internals",
 	"  Petr Baudis (pasky) - Many patches, newgrf support",
-	"  Stefan Meißner (sign_de) - For his work on the console",
+	"  Stefan Meiï¿½ner (sign_de) - For his work on the console",
 	"  Simon Sasburg (HackyKid) - Many bugfixes he has blessed us with (and PBS)",
 	"  Cian Duffy (MYOB) - BeOS port / manual writing",
 	"  Christian Rosentreter (tokaiz) - MorphOS / AmigaOS port",
 	"",
-	"  Michael Blunck - Pre-Signals and Semaphores © 2003",
-	"  George - Canal/Lock graphics © 2003-2004",
+	"  Michael Blunck - Pre-Signals and Semaphores ï¿½ 2003",
+	"  George - Canal/Lock graphics ï¿½ 2003-2004",
 	"  Marcin Grzegorczyk - Foundations for Tracks on Slopes",
 	"  All Translators - Who made OpenTTD a truly international game",
 	"  Bug Reporters - Without whom OpenTTD would still be full of bugs!",
@@ -721,7 +721,7 @@ void CheckRedrawStationCoverage(const Window* w)
 	}
 }
 
-
+/*
 void UnclickSomeWindowButtons(Window *w, uint32 mask)
 {
 	uint32 x = w->click_state & mask;
@@ -737,7 +737,7 @@ void UnclickWindowButtons(Window *w)
 {
 	UnclickSomeWindowButtons(w, (uint32)-1);
 }
-
+*/
 
 void SetVScrollCount(Window *w, int num)
 {

@@ -60,57 +60,58 @@ public class Window extends WindowConstants
 		custom = null;
 		wndproc = null;
 
-		List<Widget> widget =  new ArrayList<Widget>();
+		//List<Widget> 
+		widget =  new ArrayList<Widget>();
 
 	}	
 
-	
+
 	// ------------------------------------
 	// static state
-	
-	
+
+
 	//static Window _windows[] = new Window[25];
 	static List<Window> _windows = new ArrayList<Window>();
 
-	
-	
-	 Point _cursorpos_drag_start = new Point();
 
-	 boolean _left_button_down;
-	 boolean _left_button_clicked;
 
-	 boolean _right_button_down;
-	 boolean _right_button_clicked;
+	static Point _cursorpos_drag_start = null;//new Point();
+
+	static boolean _left_button_down;
+	static boolean _left_button_clicked;
+
+	static boolean _right_button_down;
+	static boolean _right_button_clicked;
 
 	// XXX added parameter to AllocateWindowDesc
 	// int _alloc_wnd_parent_num;
 
-	 int _scrollbar_start_pos;
-	 int _scrollbar_size;
-	 byte _scroller_click_timeout;
+	static int _scrollbar_start_pos;
+	static int _scrollbar_size;
+	static byte _scroller_click_timeout;
 
-		/**
-		 * TODO Controlled fro Widget
-		 */
-		public static boolean _scrolling_scrollbar = false;
+	/**
+	 * TODO Controlled fro Widget
+	 */
+	public static boolean _scrolling_scrollbar = false;
 
-		/**
-		 * TODO control it from outside
-		 */
-		public static boolean _scrolling_viewport = false;
-	 boolean _popup_menu_active;
+	/**
+	 * TODO control it from outside
+	 */
+	public static boolean _scrolling_viewport = false;
+	static boolean _popup_menu_active;
 
-	 byte _special_mouse_mode;
+	static byte _special_mouse_mode;
 
-	
-	
-	
-	
+
+
+
+
 	// -----------------------------------
-	
-	
-	
-	
+
+
+
+
 	//WindowProc *wndproc;
 	//abstract void WindowProc( WindowEvent e);
 	//void wndproc(WindowEvent e) { WindowProc(e); }
@@ -124,10 +125,6 @@ public class Window extends WindowConstants
 	}
 
 
-	void SetWindowDirty()
-	{
-		Global.hal.SetDirtyBlocks(left, top, left + width, top + height);
-	}
 
 	/** Returns the index for the widget located at the given position
 	 * relative to the window. It includes all widget-corner pixels as well.
@@ -265,6 +262,55 @@ public class Window extends WindowConstants
 	 * @param widget the widget where the scrollwheel was used
 	 * @param wheel scroll up or down
 	 */
+	void DispatchMouseWheelEvent(int widgeti, int wheel)
+	{
+		Widget wi1, wi2;
+		//Scrollbar sb;
+
+		if (widgeti < 0) return;
+
+		wi1 = widget.get(widgeti);
+		wi2 = widget.get(widgeti + 1);
+
+		/* The listbox can only scroll if scrolling was 
+		 * done on the scrollbar itself,
+		 * or on the listbox (and the next item 
+		 * is (must be) the scrollbar)
+		 * XXX - should be rewritten as a 
+		 * widget-dependent scroller but that's
+		 * not happening until someone rewrites 
+		 * the whole widget-code */
+		if(wi1.type == WWT_SCROLLBAR) 
+			scrollBarDirty(this, wheel, vscroll);
+		
+		if(wi1.type == WWT_SCROLL2BAR) 
+			scrollBarDirty(this, wheel, vscroll2);		
+	
+		if(wi2.type == WWT_SCROLL2BAR) 
+			scrollBarDirty(this, wheel, vscroll2);
+		
+		if (wi2.type == WWT_SCROLLBAR)  
+			scrollBarDirty(this, wheel, vscroll);
+		
+	}
+
+
+	private static void scrollBarDirty(Window w, int wheel, Scrollbar sb) {
+		if (sb.count > sb.cap) {
+			int pos = BitOps.clamp(sb.pos + wheel, 0, sb.count - sb.cap);
+			if (pos != sb.pos) {
+				sb.pos = pos;
+				w.SetWindowDirty();
+			}
+		}
+	}
+
+	void SetWindowDirty()
+	{
+		Global.hal.SetDirtyBlocks(left, top, left + width, top + height);
+	}
+	
+	/*
 	static void DispatchMouseWheelEvent(Window  w, int widget, int wheel)
 	{
 		Widget wi1, wi2;
@@ -278,7 +324,7 @@ public class Window extends WindowConstants
 		/* The listbox can only scroll if scrolling was done on the scrollbar itself,
 		 * or on the listbox (and the next item is (must be) the scrollbar)
 		 * XXX - should be rewritten as a widget-dependent scroller but that's
-		 * not happening until someone rewrites the whole widget-code */
+		 * not happening until someone rewrites the whole widget-code * /
 		if ((sb = w.vscroll,  wi1.type == WWT_SCROLLBAR)  || (sb = w.vscroll2, wi1.type == WWT_SCROLL2BAR)  ||
 				(sb = w.vscroll2, wi2.type == WWT_SCROLL2BAR) || (sb = w.vscroll, wi2.type == WWT_SCROLLBAR) ) {
 
@@ -291,13 +337,13 @@ public class Window extends WindowConstants
 			}
 		}
 	}
-
+	*/
 
 	void DrawOverlappedWindowForAll(int left, int top, int right, int bottom)
 	{
-		Window w;
-		DrawPixelInfo bk;
-		Global._cur_dpi = bk;
+		//Window w;
+		DrawPixelInfo bk = new DrawPixelInfo();
+		Hal._cur_dpi = bk;
 
 		for (Window w : _windows) {
 			if (right > w.left &&
@@ -311,10 +357,18 @@ public class Window extends WindowConstants
 
 	void DrawOverlappedWindow(Window w, int left, int top, int right, int bottom)
 	{
-		final Window  v = w;
-		int x;
+		//final Window  v = w;
+		int x, wi, wie;
 
-		while (++v != _last_window) {
+		wi = _windows.indexOf(w);
+		wie = _windows.size();
+		assert wi >= 0;
+
+		//while (++v != _last_window) 
+		while (++wi < wie) 
+		{
+			final Window  v = _windows.get(wi);
+
 			if (right > v.left &&
 					bottom > v.top &&
 					left < v.left + v.width &&
@@ -348,15 +402,15 @@ public class Window extends WindowConstants
 		}
 
 		{
-			DrawPixelInfo dp = _cur_dpi;
+			DrawPixelInfo dp = Hal._cur_dpi;
 			dp.width = right - left;
 			dp.height = bottom - top;
 			dp.left = left - w.left;
 			dp.top = top - w.top;
-			dp.pitch = _screen.pitch;
-			dp.dst_ptr = _screen.dst_ptr + top * _screen.pitch + left;
+			dp.pitch = Hal._screen.pitch;
+			dp.dst_ptr = Hal._screen.dst_ptr + top * Hal._screen.pitch + left;
 			dp.zoom = 0;
-			CallWindowEventNP(w, WindowEvents.WE_PAINT);
+			w.CallWindowEventNP(WindowEvents.WE_PAINT);
 		}
 	}
 
@@ -381,19 +435,19 @@ public class Window extends WindowConstants
 		WindowClass wc;
 		WindowNumber wn;
 		ViewPort vp;
-		Window v;
-		int count;
+		//Window v;
+		//int count;
 
 		//if (w == null) return;
 
 		if (ViewPort._thd.place_mode != 0 && ViewPort._thd.window_class == window_class && ViewPort._thd.window_number == window_number) {
-			ResetObjectToPlace();
+			ViewPort.ResetObjectToPlace();
 		}
 
 		wc = window_class;
 		wn = window_number;
 
-		CallWindowEventNP(this, WindowEvents.WE_DESTROY);
+		CallWindowEventNP(WindowEvents.WE_DESTROY);
 
 		Window w = FindWindowById(wc, wn);
 
@@ -491,7 +545,7 @@ public class Window extends WindowConstants
 	public boolean IsVitalWindow()
 	{
 		WindowClass wc = window_class;
-		return (wc.v == WC_MAIN_TOOLBAR || wc.v == WC_STATUS_BAR || wc == WC_NEWS_WINDOW || wc == WC_SEND_NETWORK_MSG);
+		return (wc.v == WC_MAIN_TOOLBAR || wc.v == WC_STATUS_BAR || wc.v == WC_NEWS_WINDOW || wc.v == WC_SEND_NETWORK_MSG);
 	}
 
 	/** On clicking on a window, make it the frontmost window of all. However
@@ -500,6 +554,34 @@ public class Window extends WindowConstants
 	 * - New window, Chatbar (only if open)
 	 * @param w window that is put into the foreground
 	 */
+	Window BringWindowToFront()
+	{
+		Window v;
+
+		int wi = _windows.indexOf(this);
+		int we = _windows.size();
+		assert wi >= 0;
+
+		int i = we;
+		while(true) 
+		{
+			i--;
+			if( i < 0 ) return this;
+			v = _windows.get(i);
+			if( !v.IsVitalWindow() )
+				break;
+		}		
+
+		assert i > wi;
+
+		// insert w above i
+		_windows.remove(this); // all windows moved a step down
+		_windows.add(i, this);
+		SetWindowDirty();
+
+		return this; // TODO kill me, make void
+	}
+	/*
 	Window BringWindowToFront(Window w)
 	{
 		Window v;
@@ -516,12 +598,12 @@ public class Window extends WindowConstants
 
 		temp = *w;
 		memmove(w, w + 1, (v - w) * sizeof(Window));
-		*v = temp;
+	 *v = temp;
 
 		SetWindowDirty(v);
 
 		return v;
-	}
+	} */
 
 	/** We have run out of windows, so find a suitable candidate for replacement.
 	 * Keep all important windows intact. These are
@@ -698,12 +780,12 @@ public class Window extends WindowConstants
 		int x;
 
 		w = FindWindowById(exist_class, exist_num);
-		if (w == null || w.left >= (Global.hal._screen.width-20) || w.left <= -60 || w.top >= (Global.hal._screen.height-20)) {
+		if (w == null || w.left >= (Hal._screen.width-20) || w.left <= -60 || w.top >= (Hal._screen.height-20)) {
 			return AllocateWindowAutoPlace(width,height,proc,cls,widget);
 		}
 
 		x = w.left;
-		if (x > Global.hal._screen.width - width) x = Global.hal._screen.width - width - 20;
+		if (x > Hal._screen.width - width) x = Hal._screen.width - width - 20;
 
 		return AllocateWindow(x + 10, w.top + 10, width, height, proc, cls, widget);
 	}
@@ -722,7 +804,7 @@ public class Window extends WindowConstants
 		right = _awap_r.width + left;
 		bottom = _awap_r.height + top;
 
-		if (left < 0 || top < 22 || right > Global.hal._screen.width || bottom > Global.hal._screen.height)
+		if (left < 0 || top < 22 || right > Hal._screen.width || bottom > Hal._screen.height)
 			return false;
 
 		// Make sure it is not obscured by any window.
@@ -750,9 +832,9 @@ public class Window extends WindowConstants
 		width = _awap_r.width;
 		height = _awap_r.height;
 
-		if (left < -(width>>2) || left > Global.hal._screen.width - (width>>1))
+		if (left < -(width>>2) || left > Hal._screen.width - (width>>1))
 			return false;
-		if (top < 22 || top > Global.hal._screen.height - (height>>2))
+		if (top < 22 || top > Hal._screen.height - (height>>2))
 			return false;
 
 		// Make sure it is not obscured by any window.
@@ -874,9 +956,9 @@ public class Window extends WindowConstants
 
 	Window AllocateWindowDesc(WindowDesc desc, int parentWindowNum)
 	{
-		Point pt;
+		Point pt = new Point(0,0);
 		Window w = null;
-		final DrawPixelInfo _screen = Global.hal._screen;
+		final DrawPixelInfo _screen = Hal._screen;
 
 		//if (desc.parent_cls != WC_MAIN_WINDOW &&
 		//		(w = FindWindowById(desc.parent_cls, _alloc_wnd_parent_num), _alloc_wnd_parent_num=0, w) != null &&
@@ -940,14 +1022,14 @@ public class Window extends WindowConstants
 
 	public static void InitWindowSystem()
 	{
-		IConsoleClose();
+		Console.IConsoleClose();
 
 		//memset(&_windows, 0, sizeof(_windows));
 		//_last_window = _windows;
 		//memset(_viewports, 0, sizeof(_viewports));
 		//_active_viewports = 0;
 		ViewPort._viewports.clear();
-		_no_scroll = 0;
+		Global._no_scroll = 0;
 	}
 
 	static void UnInitWindowSystem()
@@ -1009,19 +1091,19 @@ public class Window extends WindowConstants
 	static void HandlePlacePresize()
 	{
 		Window w;
-		WindowEvent e;
+		WindowEvent e = new WindowEvent();
 
 		if (_special_mouse_mode != WSM_PRESIZE) return;
 
 		w = GetCallbackWnd();
 		if (w == null) return;
 
-		e.pt = GetTileBelowCursor();
+		e.pt = ViewPort.GetTileBelowCursor();
 		if (e.pt.x == -1) {
 			ViewPort._thd.selend.x = -1;
 			return;
 		}
-		e.tile = TileVirtXY(e.pt.x, e.pt.y);
+		e.tile = TileIndex.TileVirtXY(e.pt.x, e.pt.y);
 		e.event = WindowEvents.WE_PLACE_PRESIZE;
 		w.wndproc.accept(w, e);
 	}
@@ -1029,7 +1111,7 @@ public class Window extends WindowConstants
 	static boolean HandleDragDrop()
 	{
 		Window w;
-		WindowEvent e;
+		WindowEvent e = new WindowEvent();
 
 		if (_special_mouse_mode != WSM_DRAGDROP) return true;
 
@@ -1037,13 +1119,13 @@ public class Window extends WindowConstants
 
 		w = GetCallbackWnd();
 
-		ResetObjectToPlace();
+		ViewPort.ResetObjectToPlace();
 
 		if (w != null) {
 			// send an event in client coordinates.
 			e.event = WindowEvents.WE_DRAGDROP;
-			e.pt.x = _cursor.pos.x - w.left;
-			e.pt.y = _cursor.pos.y - w.top;
+			e.pt.x = Hal._cursor.pos.x - w.left;
+			e.pt.y = Hal._cursor.pos.y - w.top;
 			e.widget = w.GetWidgetFromPos(e.pt.x, e.pt.y);
 			w.wndproc.accept(w, e);
 		}
@@ -1053,7 +1135,7 @@ public class Window extends WindowConstants
 	static boolean HandlePopupMenu()
 	{
 		Window w;
-		WindowEvent e;
+		WindowEvent e = new WindowEvent();
 
 		if (!_popup_menu_active) return true;
 
@@ -1065,11 +1147,11 @@ public class Window extends WindowConstants
 
 		if (_left_button_down) {
 			e.event = WindowEvents.WE_POPUPMENU_OVER;
-			e.pt = _cursor.pos;
+			e.pt = Hal._cursor.pos;
 		} else {
 			_popup_menu_active = false;
 			e.event = WindowEvents.WE_POPUPMENU_SELECT;
-			e.pt = _cursor.pos;
+			e.pt = Hal._cursor.pos;
 		}
 
 		w.wndproc.accept(w, e);
@@ -1081,9 +1163,9 @@ public class Window extends WindowConstants
 	static boolean HandleMouseOver()
 	{
 		Window w;
-		WindowEvent e;
+		WindowEvent e = new WindowEvent();
 
-		w = FindWindowFromPt(_cursor.pos.x, _cursor.pos.y);
+		w = FindWindowFromPt(Hal._cursor.pos.x, Hal._cursor.pos.y);
 
 		// We changed window, put a MOUSEOVER event to the last window
 		if (last_w != null && last_w != w) {
@@ -1097,8 +1179,8 @@ public class Window extends WindowConstants
 		if (w != null) {
 			// send an event in client coordinates.
 			e.event = WindowEvents.WE_MOUSEOVER;
-			e.pt.x = _cursor.pos.x - w.left;
-			e.pt.y = _cursor.pos.y - w.top;
+			e.pt.x = Hal._cursor.pos.x - w.left;
+			e.pt.y = Hal._cursor.pos.y - w.top;
 			if (w.widget != null) {
 				e.widget = w.GetWidgetFromPos(e.pt.x, e.pt.y);
 			}
@@ -1136,8 +1218,8 @@ public class Window extends WindowConstants
 
 				w.SetWindowDirty();
 
-				x = _cursor.pos.x + _drag_delta.x;
-				y = _cursor.pos.y + _drag_delta.y;
+				x = Hal._cursor.pos.x + _drag_delta.x;
+				y = Hal._cursor.pos.y + _drag_delta.y;
 				nx = x;
 				ny = y;
 
@@ -1217,7 +1299,7 @@ public class Window extends WindowConstants
 					}
 				}
 
-				DrawPixelInfo _screen = Global.hal._screen;
+				DrawPixelInfo _screen = Hal._screen;
 
 				// Make sure the window doesn't leave the screen
 				// 13 is the height of the title bar
@@ -1258,18 +1340,18 @@ public class Window extends WindowConstants
 				w.SetWindowDirty();
 				return false;
 			} else if (0 != (w.flags4 & WF_SIZING)) {
-				WindowEvent e;
+				WindowEvent e = new WindowEvent();
 				int x, y;
 
 				/* Stop the sizing if the left mouse button was released */
 				if (!_left_button_down) {
 					w.flags4 &= ~WF_SIZING;
-					SetWindowDirty(w);
+					w.SetWindowDirty();
 					break;
 				}
 
-				x = _cursor.pos.x - _drag_delta.x;
-				y = _cursor.pos.y - _drag_delta.y;
+				x = Hal._cursor.pos.x - _drag_delta.x;
+				y = Hal._cursor.pos.y - _drag_delta.y;
 
 				/* X and Y has to go by step.. calculate it.
 				 * The cast to int is necessary else x/y are implicitly casted to
@@ -1287,7 +1369,7 @@ public class Window extends WindowConstants
 				/* Window already on size */
 				if (x == 0 && y == 0) return false;
 
-				/* Now find the new cursor pos.. this is NOT _cursor, because
+				/* Now find the new cursor pos.. this is NOT Hal._cursor, because
 				    we move in steps. */
 				_drag_delta.x += x;
 				_drag_delta.y += y;
@@ -1352,8 +1434,8 @@ public class Window extends WindowConstants
 		flags4 |= WF_DRAGGING;
 		_dragging_window = true;
 
-		_drag_delta.x = left - _cursor.pos.x;
-		_drag_delta.y = top  - _cursor.pos.y;
+		_drag_delta.x = left - Hal._cursor.pos.x;
+		_drag_delta.y = top  - Hal._cursor.pos.y;
 
 		BringWindowToFront();
 		DeleteWindowById(WC_DROPDOWN_MENU, 0);
@@ -1364,8 +1446,8 @@ public class Window extends WindowConstants
 		flags4 |= WF_SIZING;
 		_dragging_window = true;
 
-		_drag_delta.x = _cursor.pos.x;
-		_drag_delta.y = _cursor.pos.y;
+		_drag_delta.x = Hal._cursor.pos.x;
+		_drag_delta.y = Hal._cursor.pos.y;
 
 		BringWindowToFront();
 		DeleteWindowById(WC_DROPDOWN_MENU, 0);
@@ -1376,7 +1458,7 @@ public class Window extends WindowConstants
 
 	static boolean HandleScrollbarScrolling()
 	{
-		Window w;
+		//Window w;
 		int i;
 		int pos;
 		Scrollbar sb;
@@ -1390,19 +1472,19 @@ public class Window extends WindowConstants
 				// Abort if no button is clicked any more.
 				if (!_left_button_down) {
 					w.flags4 &= ~WF_SCROLL_MIDDLE;
-					SetWindowDirty(w);
+					w.SetWindowDirty();
 					break;
 				}
 
 				if (0 != (w.flags4 & WF_HSCROLL)) {
 					sb = w.hscroll;
-					i = _cursor.pos.x - _cursorpos_drag_start.x;
-				} else if (w.flags4 & WF_SCROLL2){
+					i = Hal._cursor.pos.x - _cursorpos_drag_start.x;
+				} else if (0 != (w.flags4 & WF_SCROLL2)){
 					sb = w.vscroll2;
-					i = _cursor.pos.y - _cursorpos_drag_start.y;
+					i = Hal._cursor.pos.y - _cursorpos_drag_start.y;
 				} else {
 					sb = w.vscroll;
-					i = _cursor.pos.y - _cursorpos_drag_start.y;
+					i = Hal._cursor.pos.y - _cursorpos_drag_start.y;
 				}
 
 				// Find the item we want to move to and make sure it's inside bounds.
@@ -1430,43 +1512,43 @@ public class Window extends WindowConstants
 
 		if (!_right_button_down) {
 			//stop_capt:;
-			_cursor.fix_at = false;
+			Hal._cursor.fix_at = false;
 			_scrolling_viewport = false;
 			return true;
 		}
 
-		w = FindWindowFromPt(_cursor.pos.x, _cursor.pos.y);
+		w = FindWindowFromPt(Hal._cursor.pos.x, Hal._cursor.pos.y);
 		if (w == null) //goto stop_capt;
 		{
 			//stop_capt:;
-			_cursor.fix_at = false;
+			Hal._cursor.fix_at = false;
 			_scrolling_viewport = false;
 			return true;
 		}
 
-		if (_patches.reverse_scroll) {
-			dx = -_cursor.delta.x;
-			dy = -_cursor.delta.y;
+		if (Global._patches.reverse_scroll) {
+			dx = -Hal._cursor.delta.x;
+			dy = -Hal._cursor.delta.y;
 		} else {
-			dx = _cursor.delta.x;
-			dy = _cursor.delta.y;
+			dx = Hal._cursor.delta.x;
+			dy = Hal._cursor.delta.y;
 		}
 
 		if (w.window_class.v != WC_SMALLMAP) {
-			vp = IsPtInWindowViewport(w, _cursor.pos.x, _cursor.pos.y);
+			vp = w.IsPtInWindowViewport(Hal._cursor.pos.x, Hal._cursor.pos.y);
 			if (vp == null)
 				//goto stop_capt;
 			{
 				//stop_capt:;
-				_cursor.fix_at = false;
+				Hal._cursor.fix_at = false;
 				_scrolling_viewport = false;
 				return true;
 			}
 
-			WP(w,vp_d).scrollpos_x += dx << vp.zoom;
-			WP(w,vp_d).scrollpos_y += dy << vp.zoom;
+			((vp_d)w.custom).scrollpos_x += dx << vp.zoom;
+			((vp_d)w.custom).scrollpos_y += dy << vp.zoom;
 
-			_cursor.delta.x = _cursor.delta.y = 0;
+			Hal._cursor.delta.x = Hal._cursor.delta.y = 0;
 			return false;
 		} else {
 			// scroll the smallmap ?
@@ -1475,12 +1557,12 @@ public class Window extends WindowConstants
 			int hvx;
 			int hvy;
 
-			_cursor.fix_at = true;
+			Hal._cursor.fix_at = true;
 
-			x = WP(w,smallmap_d).scroll_x;
-			y = WP(w,smallmap_d).scroll_y;
+			x = ((smallmap_d)w.custom).scroll_x;
+			y = ((smallmap_d)w.custom).scroll_y;
 
-			sub = WP(w,smallmap_d).subscroll + dx;
+			sub = ((smallmap_d)w.custom).subscroll + dx;
 
 			x -= (sub >> 2) << 4;
 			y += (sub >> 2) << 4;
@@ -1489,7 +1571,7 @@ public class Window extends WindowConstants
 			x += (dy >> 1) << 4;
 			y += (dy >> 1) << 4;
 
-			if (dy & 1) {
+			if (0 != (dy & 1)) {
 				x += 16;
 				sub += 2;
 				if (sub > 3) {
@@ -1499,32 +1581,32 @@ public class Window extends WindowConstants
 				}
 			}
 
-			hx = (w.widget[4].right  - w.widget[4].left) / 2;
-			hy = (w.widget[4].bottom - w.widget[4].top ) / 2;
+			hx = (w.widget.get(4).right  - w.widget.get(4).left) / 2;
+			hy = (w.widget.get(4).bottom - w.widget.get(4).top ) / 2;
 			hvx = hx * -4 + hy * 8;
 			hvy = hx *  4 + hy * 8;
 			if (x < -hvx) {
 				x = -hvx;
 				sub = 0;
 			}
-			if (x > (int)MapMaxX() * 16 - hvx) {
-				x = MapMaxX() * 16 - hvx;
+			if (x > (int)Global.MapMaxX() * 16 - hvx) {
+				x = Global.MapMaxX() * 16 - hvx;
 				sub = 0;
 			}
 			if (y < -hvy) {
 				y = -hvy;
 				sub = 0;
 			}
-			if (y > (int)MapMaxY() * 16 - hvy) {
-				y = MapMaxY() * 16 - hvy;
+			if (y > (int)Global.MapMaxY() * 16 - hvy) {
+				y = Global.MapMaxY() * 16 - hvy;
 				sub = 0;
 			}
 
-			WP(w,smallmap_d).scroll_x = x;
-			WP(w,smallmap_d).scroll_y = y;
-			WP(w,smallmap_d).subscroll = sub;
+			((smallmap_d)w.custom).scroll_x = x;
+			((smallmap_d)w.custom).scroll_y = y;
+			((smallmap_d)w.custom).subscroll = sub;
 
-			_cursor.delta.x = _cursor.delta.y = 0;
+			Hal._cursor.delta.x = Hal._cursor.delta.y = 0;
 
 			w.SetWindowDirty();
 			return false;
@@ -1543,10 +1625,10 @@ public class Window extends WindowConstants
 		}
 
 		for (u = w; ++u != _last_window;) {
-			if (u.window_class == WC_MAIN_WINDOW ||
-					IsVitalWindow(u) ||
-					u.window_class == WC_TOOLTIPS ||
-					u.window_class == WC_DROPDOWN_MENU) {
+			if (u.window_class.v == WC_MAIN_WINDOW ||
+					w.IsVitalWindow() ||
+					u.window_class.v == WC_TOOLTIPS ||
+					u.window_class.v == WC_DROPDOWN_MENU) {
 				continue;
 			}
 
@@ -1571,7 +1653,7 @@ public class Window extends WindowConstants
 	 */
 	static void SendWindowMessageW(Window  w, int msg, int wparam, int lparam)
 	{
-		WindowEvent e;
+		WindowEvent e = new WindowEvent();
 
 		e.event  = WindowEvents.WE_MESSAGE;
 		e.msg    = msg;
@@ -1653,8 +1735,8 @@ public class Window extends WindowConstants
 
 		DecreaseWindowCounters();
 		HandlePlacePresize();
-		UpdateTileSelection();
-		if (!VpHandlePlaceSizingDrag())  return;
+		ViewPort.UpdateTileSelection();
+		if (!ViewPort.VpHandlePlaceSizingDrag())  return;
 		if (!HandleDragDrop())           return;
 		if (!HandlePopupMenu())          return;
 		if (!HandleWindowDragging())     return;
@@ -1662,16 +1744,16 @@ public class Window extends WindowConstants
 		if (!HandleViewportScroll())     return;
 		if (!HandleMouseOver())          return;
 
-		x = _cursor.pos.x;
-		y = _cursor.pos.y;
+		x = Hal._cursor.pos.x;
+		y = Hal._cursor.pos.y;
 
 
 		if (click == 0 && mousewheel == 0) {
-			if (_patches.autoscroll && Global._game_mode != GM_MENU) {
+			if (Global._patches.autoscroll && Global._game_mode != GameModes.GM_MENU) {
 				w = FindWindowFromPt(x, y);
-				if (w == null || w.flags4 & WF_DISABLE_VP_SCROLL ) return;
-				vp = IsPtInWindowViewport(w, x, y);
-				if (vp) {
+				if (w == null || 0 != (w.flags4 & WF_DISABLE_VP_SCROLL) ) return;
+				vp = w.IsPtInWindowViewport(x, y);
+				if (vp != null) {
 					vp_d vpd = (vp_d)w.custom;
 					x -= vp.left;
 					y -= vp.top;
@@ -1696,13 +1778,13 @@ public class Window extends WindowConstants
 		w = FindWindowFromPt(x, y);
 		if (w == null) return;
 		w = MaybeBringWindowToFront(w);
-		vp = IsPtInWindowViewport(w, x, y);
+		vp = w.IsPtInWindowViewport(x, y);
 		if (vp != null) {
-			if (Global._game_mode == GM_MENU) return;
+			if (Global._game_mode == GameModes.GM_MENU) return;
 
 			// only allow zooming in-out in main window, or in viewports
-			if (mousewheel &&
-					!(w.flags4 & WF_DISABLE_VP_SCROLL) && (
+			if (mousewheel != 0 &&
+					(0 == (w.flags4 & WF_DISABLE_VP_SCROLL)) && (
 							w.window_class.v == WC_MAIN_WINDOW ||
 							w.window_class.v == WC_EXTRA_VIEW_PORT
 							)) {
@@ -1710,30 +1792,30 @@ public class Window extends WindowConstants
 			}
 
 			if (click == 1) {
-				Global.DEBUG_misc( 2, "cursor: 0x%X (%d)", _cursor.sprite, _cursor.sprite);
+				Global.DEBUG_misc( 2, "cursor: 0x%X (%d)", Hal._cursor.sprite, Hal._cursor.sprite);
 				if (ViewPort._thd.place_mode != 0 &&
 						// query button and place sign button work in pause mode
-						_cursor.sprite != SPR_CURSOR_QUERY &&
-						_cursor.sprite != SPR_CURSOR_SIGN &&
-						_pause != 0 &&
-						!_cheats.build_in_pause.value) {
+						Hal._cursor.sprite != SPR_CURSOR_QUERY &&
+						Hal._cursor.sprite != SPR_CURSOR_SIGN &&
+						Global._pause &&
+						0 == Global._cheats.build_in_pause.value) {
 					return;
 				}
 
 				if (ViewPort._thd.place_mode == 0) {
-					HandleViewportClicked(vp, x, y);
+					vp.HandleViewportClicked(x, y);
 				} else {
-					PlaceObject();
+					ViewPort.PlaceObject();
 				}
 			} else if (click == 2) {
-				if (!(w.flags4 & WF_DISABLE_VP_SCROLL)) {
+				if (0 == (w.flags4 & WF_DISABLE_VP_SCROLL)) {
 					_scrolling_viewport = true;
-					_cursor.fix_at = true;
+					Hal._cursor.fix_at = true;
 				}
 			}
 		} else {
-			if (mousewheel)
-				DispatchMouseWheelEvent(w, GetWidgetFromPos(w, x - w.left, y - w.top), mousewheel);
+			if (mousewheel != 0)
+				w.DispatchMouseWheelEvent(w.GetWidgetFromPos(x - w.left, y - w.top), mousewheel);
 
 			switch (click) {
 			case 1: DispatchLeftClickEvent(w, x - w.left, y - w.top);  break;
@@ -1750,8 +1832,8 @@ public class Window extends WindowConstants
 		Global._current_player = Global._local_player;
 
 		// Handle pressed keys
-		if (_pressed_key != 0) {
-			int key = _pressed_key; _pressed_key = 0;
+		if (Global._pressed_key != 0) {
+			int key = Global._pressed_key; Global._pressed_key = 0;
 			HandleKeypress(key);
 		}
 
@@ -1766,9 +1848,9 @@ public class Window extends WindowConstants
 		}
 
 		mousewheel = 0;
-		if (_cursor.wheel) {
-			mousewheel = _cursor.wheel;
-			_cursor.wheel = 0;
+		if (0 != Hal._cursor.wheel) {
+			mousewheel = Hal._cursor.wheel;
+			Hal._cursor.wheel = 0;
 		}
 
 		MouseLoop(click, mousewheel);
@@ -1805,14 +1887,15 @@ public class Window extends WindowConstants
 			}
 		}
 
-		DrawDirtyBlocks();
+		Gfx.DrawDirtyBlocks();
 
-		for (Window w : _windows) {
-			if (w.viewport != null) UpdateViewportPosition(w);
+		for (Window ww : _windows) {
+			if (ww.viewport != null) 
+				ViewPort.UpdateViewportPosition(ww);
 		}
-		DrawTextMessage();
+		TextEffect.DrawTextMessage();
 		// Redraw mouse cursor in case it was hidden
-		DrawMouseCursor();
+		Gfx.DrawMouseCursor();
 	}
 
 
@@ -1838,7 +1921,8 @@ public class Window extends WindowConstants
 		//final Window  w;
 
 		for (Window w : _windows) {
-			if (w.window_class == cls && w.window_number == number) SetWindowDirty(w);
+			if (w.window_class == cls && w.window_number == number) 
+				w.SetWindowDirty();
 		}
 	}
 
@@ -1941,11 +2025,11 @@ public class Window extends WindowConstants
 			w = FindWindowById(WC_MAIN_TOOLBAR, 0);
 
 		switch (Global._patches.toolbar_pos) {
-		case 1:  w.left = (Global.hal._screen.width - w.width) >> 1; break;
-		case 2:  w.left = Global.hal._screen.width - w.width; break;
+		case 1:  w.left = (Hal._screen.width - w.width) >> 1; break;
+		case 2:  w.left = Hal._screen.width - w.width; break;
 		default: w.left = 0;
 		}
-		Global.hal.SetDirtyBlocks(0, 0, Global.hal._screen.width, w.height); // invalidate the whole top part
+		Global.hal.SetDirtyBlocks(0, 0, Hal._screen.width, w.height); // invalidate the whole top part
 		return w.left;
 	}
 
@@ -1965,7 +2049,7 @@ public class Window extends WindowConstants
 				continue; // don't modify top,left
 			}
 
-			IConsoleResize();
+			Console.IConsoleResize();
 
 			if (w.window_class.v == WC_MAIN_TOOLBAR) {
 				top = w.top;
@@ -1999,8 +2083,56 @@ public class Window extends WindowConstants
 		}
 	}
 
+	
+	
+	ViewPort IsPtInWindowViewport(int x, int y)
+	{
+		ViewPort vp = viewport;
+
+		if (vp != null &&
+		    BitOps.IS_INT_INSIDE(x, vp.left, vp.left + vp.width) &&
+				BitOps.IS_INT_INSIDE(y, vp.top, vp.top + vp.height))
+			return vp;
+
+		return null;
+	}
+	
+	
+	
+	
+	void UnclickSomeWindowButtons(int mask)
+	{
+		int x = click_state & mask;
+		int i = 0;
+		
+		click_state ^= x;
+		
+		do {
+			if (0 != (x & 1)) 
+				InvalidateWidget(i);
+			i++;
+		} while( 0 != (x >>= 1));
+	}
+
+
+	void UnclickWindowButtons()
+	{
+		UnclickSomeWindowButtons(-1);
+	}
+	
+	
+	
 
 }
+
+
+
+
+
+
+
+
+
 
 class WindowMessage {
 	int msg;
@@ -2109,9 +2241,3 @@ class SizeRect {
 	int left,top,width,height;
 } 
 
-enum SpecialMouseMode {
-	WSM_NONE = 0,
-	WSM_DRAGDROP = 1,
-	WSM_SIZING = 2,
-	WSM_PRESIZE = 3,
-}

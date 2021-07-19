@@ -184,10 +184,18 @@ public class BitOps {
 	 */
 	/* [min,max), strictly less than */
 	//static void IS_BYTE_INSIDE(a,min,max) ((byte)((a)-(min)) < (byte)((max)-(min)))
-	
-	static boolean IS_INT_INSIDE(int a, int min, int max)
+	//IS_BYTE_INSIDE(a,min,max)
+
+	public static boolean IS_BYTE_INSIDE(byte a, byte min, byte max)
 	{
-	return ((uint)((a)-(min)) < (uint)((max)-(min)))
+		return Integer.compareUnsigned(a-min, max-min) < 0;
+		//return ((uint)((a)-(min)) < (uint)((max)-(min)))
+	}
+	
+	public static boolean IS_INT_INSIDE(int a, int min, int max)
+	{
+		return Integer.compareUnsigned(a-min, max-min) < 0;
+		//return ((uint)((a)-(min)) < (uint)((max)-(min)))
 	}
 
 	//static void CHANCE16(a,b) ((uint16)Random() <= (uint16)((65536 * a) / b))
@@ -200,6 +208,8 @@ public class BitOps {
 		for(_i=0; _b!=0; _i++,_b>>=1)								\
 			if (_b&1)
 	 */
+	public static  int myabs(int a) { if (a<0) a = -a; return a; }
+	public static  long myabs64(long a) { if (a<0) a = -a; return a; }
 
 
 	/*
@@ -208,8 +218,6 @@ public class BitOps {
 	static  int uintxchg_(uint *a, uint b) { uint t = *a; *a = b; return t; }
 	static void uintswap(a,b) ((b) = uintxchg_(&(a), (b)))
 
-	static  int myabs(int a) { if (a<0) a = -a; return a; }
-	static  long myabs64(long a) { if (a<0) a = -a; return a; }
 
 	/*
 	static  void swap_byte(byte *a, byte *b) { byte t = *a; *a = *b; *b = t; }
