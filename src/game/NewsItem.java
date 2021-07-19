@@ -129,7 +129,7 @@ public class NewsItem {
 		ni.flags = (byte)(flags >> 8) | NF_NOEXPIRE;
 
 		// show this news message in color?
-		if (_date >= ConvertIntDate(_patches.colored_news_date))
+		if (_date >= ConvertIntDate(Global._patches.colored_news_date))
 			ni.flags |= NF_INCOLOR;
 
 		ni.type = (byte)(flags >> 16);
@@ -342,7 +342,7 @@ public class NewsItem {
 		ni.flags = (byte)(flags >> 8) | NF_NOEXPIRE;
 
 		// show this news message in color?
-		if (_date >= ConvertIntDate(_patches.colored_news_date))
+		if (_date >= ConvertIntDate(Global._patches.colored_news_date))
 			ni.flags |= NF_INCOLOR;
 
 		ni.type = (byte)(flags >> 16);

@@ -59,7 +59,7 @@ public class Depot implements IPoolItem
 	 */
 	static int GetServiceIntervalClamped(int index)
 	{
-		return (_patches.servint_ispercent) ? clamp(index, MIN_SERVINT_PERCENT, MAX_SERVINT_PERCENT) : clamp(index, MIN_SERVINT_DAYS, MAX_SERVINT_DAYS);
+		return (Global._patches.servint_ispercent) ? BitOps.clamp(index, MIN_SERVINT_PERCENT, MAX_SERVINT_PERCENT) : BitOps.clamp(index, MIN_SERVINT_DAYS, MAX_SERVINT_DAYS);
 	}
 
 	 TileIndex _last_built_train_depot_tile;

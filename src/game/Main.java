@@ -316,7 +316,7 @@ public class Main {
 		if (sounddriver[0]) ttd_strlcpy(_ini_sounddriver, sounddriver, sizeof(_ini_sounddriver));
 		if (videodriver[0]) ttd_strlcpy(_ini_videodriver, videodriver, sizeof(_ini_videodriver));
 		if (resolution[0]) { _cur_resolution[0] = resolution[0]; _cur_resolution[1] = resolution[1]; }
-		if (startdate != (int)-1) _patches.starting_date = startdate;
+		if (startdate != (int)-1) Global._patches.starting_date = startdate;
 
 		if (Global._dedicated_forks && !dedicated)
 			Global._dedicated_forks = false;
@@ -489,7 +489,7 @@ public class Main {
 		SetupColorsAndInitialWindow();
 
 		// Randomize world
-		GenerateWorld(0, 1<<_patches.map_x, 1<<_patches.map_y);
+		GenerateWorld(0, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
 
 		// In a dedicated server, the server does not play
 		if (Global._network_dedicated) {
@@ -500,7 +500,7 @@ public class Main {
 
 			Global._local_player = 0;
 			Global._current_player = Global._local_player;
-			DoCommandP(0, (_patches.autorenew << 15 ) | (_patches.autorenew_months << 16) | 4, _patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
+			DoCommandP(0, (Global._patches.autorenew << 15 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
 		}
 
 		Global.hal.MarkWholeScreenDirty();
@@ -524,7 +524,7 @@ public class Main {
 		SetupColorsAndInitialWindow();
 
 		// Startup the game system
-		GenerateWorld(1, 1 << _patches.map_x, 1 << _patches.map_y);
+		GenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
 
 		Global._local_player = Owner.OWNER_NONE;
 		Global.hal.MarkWholeScreenDirty();
@@ -576,7 +576,7 @@ public class Main {
 
 		Global._local_player = 0;
 		Global._current_player = Global._local_player;
-		DoCommandP(0, (_patches.autorenew << 15 ) | (_patches.autorenew_months << 16) | 4, _patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
+		DoCommandP(0, (Global._patches.autorenew << 15 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
 
 		Global.hal.MarkWholeScreenDirty();
 	}
@@ -706,7 +706,7 @@ public class Main {
 			break;
 
 		case SM_GENRANDLAND: /* Generate random land within scenario editor */
-			GenerateWorld(2, 1<<_patches.map_x, 1<<_patches.map_y);
+			GenerateWorld(2, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
 			// XXX: set date
 			Global._local_player = Owner.OWNER_NONE;
 			Global.hal.MarkWholeScreenDirty();
@@ -769,8 +769,8 @@ public class Main {
 	{
 		String buf;
 
-		if (_patches.keep_all_autosave && _local_player != Owner.OWNER_SPECTATOR) {
-			final Player p = GetPlayer(_local_player);
+		if (Global._patches.keep_all_autosave && Global._local_player != Owner.OWNER_SPECTATOR) {
+			final Player p = GetPlayer(Global._local_player);
 			String s;
 			sprintf(buf, "%s%s", _path.autosave_dir, PATHSEP);
 
@@ -783,7 +783,7 @@ public class Main {
 			sprintf(buf, "%s%sautosave%d.sav", _path.autosave_dir, PATHSEP, _autosave_ctr);
 
 			_autosave_ctr++;
-			if (_autosave_ctr >= _patches.max_num_autosaves) {
+			if (_autosave_ctr >= Global._patches.max_num_autosaves) {
 				// we reached the limit for numbers of autosaves. We will start over
 				_autosave_ctr = 0;
 			}
@@ -1177,9 +1177,9 @@ public class Main {
 				// Set the human controlled player to the patch settings
 				// Scenario editor do not have any companies
 				p = GetPlayer(_local_player);
-				p.engine_renew = _patches.autorenew;
-				p.engine_renew_months = _patches.autorenew_months;
-				p.engine_renew_money = _patches.autorenew_money;
+				p.engine_renew = Global._patches.autorenew;
+				p.engine_renew_months = Global._patches.autorenew_months;
+				p.engine_renew_money = Global._patches.autorenew_money;
 			}
 		}
 

@@ -262,7 +262,7 @@ struct VQueueItem
 
 //typedef struct VehicleQueue VehicleQueue;
 
-VehicleQueue *new_VQueue();
+//VehicleQueue *new_VQueue();
 /*
 struct VehicleQueue
 {

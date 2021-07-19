@@ -1,5 +1,5 @@
 /* $Id: viewport.c 3254 2005-12-02 19:41:35Z Darkvater $ */
-
+#if 0
 #include "stdafx.h"
 #include "openttd.h"
 #include "debug.h"

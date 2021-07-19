@@ -6,7 +6,7 @@
 
 /* The following describes bunch of sprites to be drawn together in a single 3D
  * bounding box. Used especially for various multi-sprite buildings (like
- * depots or stations): */
+ * depots or stations): * /
 
 typedef struct DrawTileSeqStruct {
 	int8 delta_x; // 0x80 is sequence terminator

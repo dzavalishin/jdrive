@@ -1173,7 +1173,7 @@ public class Economy
 		/* Check if there's an industry close to the station that accepts
 		 * the cargo */
 		best = NULL;
-		u = _patches.station_spread + 8;
+		u = Global._patches.station_spread + 8;
 		FOR_ALL_INDUSTRIES(ind) {
 			if (ind.xy != 0 && (cargo_type == ind.accepts_cargo[0] || cargo_type
 					 == ind.accepts_cargo[1] || cargo_type == ind.accepts_cargo[2]) &&
@@ -1417,7 +1417,7 @@ public class Economy
 					 * aircraft are delivering in very short time!
 					 */
 					if(v.type == VEH_Aircraft)
-						profit += DeliverGoods(v.cargo_count, v.cargo_type, v.cargo_source, last_visited, v.cargo_days * _patches.aircraft_speed_coeff);
+						profit += DeliverGoods(v.cargo_count, v.cargo_type, v.cargo_source, last_visited, v.cargo_days * Global._patches.aircraft_speed_coeff);
 					else
 						profit += DeliverGoods(v.cargo_count, v.cargo_type, v.cargo_source, last_visited, v.cargo_days);
 
@@ -1435,7 +1435,7 @@ public class Economy
 						v_profit = GetTransportedGoodsIncome(
 								v.cargo_count,
 								DistanceManhattan(GetStation(v.cargo_source).xy, GetStation(last_visited).xy),
-								v.cargo_days * _patches.aircraft_speed_coeff,
+								v.cargo_days * Global._patches.aircraft_speed_coeff,
 								v.cargo_type) * 3 / 2;
 					} else {
 						v_profit = GetTransportedGoodsIncome(
@@ -1496,7 +1496,7 @@ public class Economy
 
 				/* Skip loading this vehicle if another train/vehicle is already handling
 				 * the same cargo type at this station */
-				if (_patches.improved_load && LoadWait(v,u)) continue;
+				if (Global._patches.improved_load && LoadWait(v,u)) continue;
 
 				/* TODO: Regarding this, when we do gradual loading, we
 				 * should first unload all vehicles and then start
@@ -1580,11 +1580,11 @@ public class Economy
 	void PlayersMonthlyLoop()
 	{
 		PlayersGenStatistics();
-		if (_patches.inflation && _cur_year < MAX_YEAR_END)
+		if (Global._patches.inflation && Global._cur_year < MAX_YEAR_END)
 			AddInflation();
 		PlayersPayInterest();
 		// Reset the _current_player flag
-		_current_player = Owner.OWNER_NONE;
+		Global._current_player = Owner.OWNER_NONE;
 		HandleEconomyFluctuations();
 		SubsidyMonthlyHandler();
 	}
@@ -1638,13 +1638,13 @@ public class Economy
 		long cost;
 
 		/* Check if buying shares is allowed (protection against modified clients */
-		if (p1 >= Global.MAX_PLAYERS || !_patches.allow_shares) return CMD_ERROR;
+		if (p1 >= Global.MAX_PLAYERS || !Global._patches.allow_shares) return CMD_ERROR;
 
 		SET_EXPENSES_TYPE(EXPENSES_OTHER);
 		p = GetPlayer(p1);
 
 		/* Protect new companies from hostile takeovers */
-		if (_cur_year - p.inaugurated_year < 6) return_cmd_error(STR_7080_PROTECTED);
+		if (Global._cur_year - p.inaugurated_year < 6) return_cmd_error(STR_7080_PROTECTED);
 
 		/* Those lines are here for network-protection (clients can be slow) */
 		if (GetAmountOwnedBy(p, Owner.Owner.OWNER_SPECTATOR) == 0) return 0;
@@ -1654,7 +1654,7 @@ public class Economy
 
 		cost = CalculateCompanyValue(p) >> 2;
 		if (flags & DC_EXEC) {
-			PlayerID* b = p.share_owners;
+			PlayerID b = p.share_owners;
 			int i;
 
 			while (*b != Owner.Owner.OWNER_SPECTATOR) b++; /* share owners is guaranteed to contain at least one Owner.OWNER_SPECTATOR */
@@ -1683,7 +1683,7 @@ public class Economy
 		long cost;
 
 		/* Check if buying shares is allowed (protection against modified clients */
-		if (p1 >= Global.MAX_PLAYERS || !_patches.allow_shares) return CMD_ERROR;
+		if (p1 >= Global.MAX_PLAYERS || !Global._patches.allow_shares) return CMD_ERROR;
 
 		SET_EXPENSES_TYPE(EXPENSES_OTHER);
 		p = GetPlayer(p1);
@@ -1696,7 +1696,7 @@ public class Economy
 		cost = -(cost - (cost >> 7));
 
 		if (flags & DC_EXEC) {
-			PlayerID* b = p.share_owners;
+			PlayerID b = p.share_owners;
 			while (*b != _current_player) b++; /* share owners is guaranteed to contain player */
 			*b = Owner.Owner.OWNER_SPECTATOR;
 			InvalidateWindow(WC_COMPANY, (int)p1);

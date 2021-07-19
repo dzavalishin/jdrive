@@ -229,12 +229,13 @@ enum {
 	WDF_STICKY_BUTTON  =32, /* Set window to sticky mode; they are not closed unless closed with 'X' (widget 2) */
 	WDF_RESIZABLE      =64, /* A window can be resized */
 };
-#endif
+
 /* can be used as x or y coordinates to cause a specific placement */
 enum {
 	WDP_AUTO = -1,
 	WDP_CENTER = -2,
 };
+#endif
 
 typedef struct Textbuf {
 	char *buf;                  /* buffer in which text is saved */
@@ -631,8 +632,8 @@ void ShowVitalWindows(void);
 
 /* window.c */
 //VARDEF Window _windows[25];
-VARDEF Window *_last_window;
-
+//VARDEF Window *_last_window;
+/*
 VARDEF Point _cursorpos_drag_start;
 
 VARDEF bool _left_button_down;
@@ -641,7 +642,8 @@ VARDEF bool _left_button_clicked;
 VARDEF bool _right_button_down;
 VARDEF bool _right_button_clicked;
 
-VARDEF int _alloc_wnd_parent_num;
+// XXX added parameter to AllocateWindowDesc
+//VARDEF int _alloc_wnd_parent_num;
 
 VARDEF int _scrollbar_start_pos;
 VARDEF int _scrollbar_size;

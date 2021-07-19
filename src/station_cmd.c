@@ -59,8 +59,8 @@ static void RoadStopPoolNewBlock(uint start_item)
 }
 
 /* Initialize the station-pool and roadstop-pool */
-MemoryPool _station_pool = { "Stations", STATION_POOL_MAX_BLOCKS, STATION_POOL_BLOCK_SIZE_BITS, sizeof(Station), &StationPoolNewBlock, 0, 0, NULL };
-MemoryPool _roadstop_pool = { "RoadStop", ROADSTOP_POOL_MAX_BLOCKS, ROADSTOP_POOL_BLOCK_SIZE_BITS, sizeof(RoadStop), &RoadStopPoolNewBlock, 0, 0, NULL };
+//MemoryPool _station_pool = { "Stations", STATION_POOL_MAX_BLOCKS, STATION_POOL_BLOCK_SIZE_BITS, sizeof(Station), &StationPoolNewBlock, 0, 0, NULL };
+//MemoryPool _roadstop_pool = { "RoadStop", ROADSTOP_POOL_MAX_BLOCKS, ROADSTOP_POOL_BLOCK_SIZE_BITS, sizeof(RoadStop), &RoadStopPoolNewBlock, 0, 0, NULL };
 
 
 // FIXME -- need to be embedded into Airport variable. Is dynamically
@@ -83,7 +83,7 @@ static void MarkStationDirty(const Station* st)
 			st->sign.top + 48);
 	}
 }
-
+/*
 static void InitializeRoadStop(RoadStop *road_stop, RoadStop *previous, TileIndex tile, StationID index)
 {
 	road_stop->xy = tile;
@@ -144,12 +144,12 @@ RoadStop *AllocateRoadStop(void)
 		}
 	}
 
-	/* Check if we can add a block to the pool */
+	/* Check if we can add a block to the pool * /
 	if (AddBlockToPool(&_roadstop_pool)) return AllocateRoadStop();
 
 	return NULL;
 }
-
+*/
 /* Calculate the radius of the station. Basicly it is the biggest
     radius that is available within the station */
 static uint FindCatchmentRadius(const Station* st)

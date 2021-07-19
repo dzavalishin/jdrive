@@ -2,7 +2,7 @@
 
 #ifndef NEWS_H
 #define NEWS_H
-
+/*
 struct NewsItem {
 	StringID string_id;
 	uint16 duration;
@@ -22,7 +22,7 @@ struct NewsItem {
 	 * false, the news item won't be displayed. */
 	bool (*isValid) ( uint data_a, uint data_b );
 };
-
+*/
 typedef bool ValidationProc ( uint data_a, uint data_b );
 typedef void DrawNewsCallbackProc(Window *w);
 typedef StringID GetNewsStringCallbackProc(const NewsItem *ni);

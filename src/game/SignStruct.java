@@ -101,7 +101,7 @@ public class SignStruct implements IPoolItem
 	 */
 	private void UpdateSignVirtCoords()
 	{
-		Point pt = RemapCoords(x, y, z);
+		Point pt = Point.RemapCoords(x, y, z);
 		Global.SetDParam(0, str);
 		UpdateViewportSignPos(sign, pt.x, pt.y - 6, STR_2806);
 	}

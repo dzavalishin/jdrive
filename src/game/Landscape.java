@@ -171,7 +171,7 @@ public class Landscape extends GenLandTable
 		return z;
 	}
 
-	int GetSlopeZ(int x,  int y)
+	public static int GetSlopeZ(int x,  int y)
 	{
 		TileInfo ti;
 

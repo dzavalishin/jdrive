@@ -88,7 +88,7 @@ public class Station implements IPoolItem
     // st = Station to update for.
     private void UpdateStationVirtCoord()
     {
-        Point pt = RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
+        Point pt = Point.RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
     
         pt.y -= 32;
         if (facilities & FACIL_AIRPORT && airport_type == AT_OILRIG) pt.y -= 16;
@@ -296,7 +296,7 @@ private void UpdateStationAcceptance(boolean show_msg)
 		rect.MergePoint( cur_rs.xy);
 	}
 
-	rad = (_patches.modified_catchment) ? FindCatchmentRadius(st) : 4;
+	rad = (Global._patches.modified_catchment) ? FindCatchmentRadius(st) : 4;
 
 	// And retrieve the acceptance.
 	if (rect.max_x >= rect.min_x) {

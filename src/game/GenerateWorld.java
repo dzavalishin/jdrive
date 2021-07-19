@@ -61,15 +61,15 @@ public class GenerateWorld {
 
 		SetObjectToPlace(SPR_CURSOR_ZZZ, 0, 0, 0);
 
-		_pause = 0;
-		_fast_forward = 0;
-		_tick_counter = 0;
-		_date_fract = 0;
-		_cur_tileloop_tile = 0;
+		Global._pause = false;
+		Global._fast_forward = 0;
+		Global._tick_counter = 0;
+		Global._date_fract = 0;
+		Global._cur_tileloop_tile = 0;
 
 		{
-			uint starting = ConvertIntDate(_patches.starting_date);
-			if ( starting == (uint)-1) starting = 10958;
+			int starting = ConvertIntDate(Global._patches.starting_date);
+			if ( starting == -1) starting = 10958;
 			SetDate(starting);
 		}
 

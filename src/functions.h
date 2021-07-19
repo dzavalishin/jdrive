@@ -38,13 +38,13 @@ static inline Point RemapCoords(int x, int y, uint32 z)
 #endif
 	return pt;
 }
-*/
+* /
 
 static inline Point RemapCoords2(int x, int y)
 {
 	return RemapCoords(x, y, GetSlopeZ(x, y));
 }
-
+*/
 
 /* clear_land.c */
 void DrawHillyLandTile(const TileInfo *ti);

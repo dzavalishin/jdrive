@@ -2317,14 +2317,14 @@ public class GRFFile
 	{
 		/* FIXME: We should rather reflect reality in _ttdpatch_flags[]. */
 
-		_ttdpatch_flags[0] = (_patches.always_small_airport ? (1 << 0x0C) : 0)  /* keepsmallairport */
+		_ttdpatch_flags[0] = (Global._patches.always_small_airport ? (1 << 0x0C) : 0)  /* keepsmallairport */
 		                   | (1 << 0x0E)  /* largestations */
-		                   | (_patches.longbridges ? (1 << 0x0F) : 0)           /* longbridges */
+		                   | (Global._patches.longbridges ? (1 << 0x0F) : 0)           /* longbridges */
 		                   | (1 << 0x12)  /* presignals */
 		                   | (1 << 0x13)  /* extpresignals */
-		                   | (_patches.never_expire_vehicles ? (1 << 0x16) : 0) /* enginespersist */
+		                   | (Global._patches.never_expire_vehicles ? (1 << 0x16) : 0) /* enginespersist */
 		                   | (1 << 0x1B); /* multihead */
-		_ttdpatch_flags[1] = (_patches.mammoth_trains ? (1 << 0x08) : 0)        /* mammothtrains */
+		_ttdpatch_flags[1] = (Global._patches.mammoth_trains ? (1 << 0x08) : 0)        /* mammothtrains */
 		                   | (1 << 0x09)  /* trainrefit */
 		                   | (1 << 0x14)  /* bridgespeedlimits */
 		                   | (1 << 0x16)  /* eternalgame */
@@ -2332,19 +2332,19 @@ public class GRFFile
 		                   | (1 << 0x18)  /* newrvs */
 		                   | (1 << 0x19)  /* newships */
 		                   | (1 << 0x1A)  /* newplanes */
-		                   | (_patches.signal_side ? (1 << 0x1B) : 0);          /* signalsontrafficside */
+		                   | (Global._patches.signal_side ? (1 << 0x1B) : 0);          /* signalsontrafficside */
 		                   /* Uncomment following if you want to fool the GRF file.
 		                    * Some GRF files will refuse to load without this
 		                    * but you can still squeeze something from them even
 		                    * without the support - i.e. USSet. --pasky */
 				               //| (1 << 0x1C); /* electrifiedrailway */
 
-		_ttdpatch_flags[2] = (_patches.build_on_slopes ? (1 << 0x0D) : 0)       /* buildonslopes */
-		                   | (_patches.build_on_slopes ? (1 << 0x15) : 0)       /* buildoncoasts */
+		_ttdpatch_flags[2] = (Global._patches.build_on_slopes ? (1 << 0x0D) : 0)       /* buildonslopes */
+		                   | (Global._patches.build_on_slopes ? (1 << 0x15) : 0)       /* buildoncoasts */
 		                   | (1 << 0x16)  /* canals */
 		                   | (1 << 0x17)  /* newstartyear */
 		                   | (1 << 0x1A)  /* newbridges */
-		                   | (_patches.wagon_speed_limits ? (1 << 0x1D) : 0);   /* wagonspeedlimits */
+		                   | (Global._patches.wagon_speed_limits ? (1 << 0x1D) : 0);   /* wagonspeedlimits */
 		_ttdpatch_flags[3] = (1 << 0x03)  /* pathbasedsignalling */
 		                   | (1 << 0x0C)  /* enhancemultiplayer */
 		                   | (1 << 0x0E)  /* irregularstations */

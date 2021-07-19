@@ -91,6 +91,7 @@ public class Global {
 	public static final boolean AYSTAR_DEBUG = true;
 
 	static public Hal hal = new JavaHal();
+	static public Patches _patches = new Patches();
 
 	public static GameModes _game_mode;
 	public static boolean _exit_game = false;

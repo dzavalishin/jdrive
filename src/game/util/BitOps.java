@@ -7,7 +7,7 @@ public class BitOps {
 
 	/// Fetch n bits starting at bit s from x
 	static public int GB(int x, int s, int n) { return (x >> s) & ((1 << n) - 1); }
-	
+
 	/// Set n bits starting at bit s in x to d
 	static public void SB(IntContainer x, int s, int n, int d)
 	{
@@ -20,18 +20,18 @@ public class BitOps {
 		x = (x & ~(((1 << n) - 1) << s)) | (d << s);
 		return x;
 	}
-	
+
 	/// Add i to the n bits starting at bit s in x
 	static public void AB(IntContainer x, int s, int n, int i)
 	{
 		x.v = (x.v & ~(((1 << n) - 1) << s)) | ((x.v + (i << s)) & (((1 << n) - 1) << s));	
 	}
 
-	
+
 	static public int min(int a, int b) { if (a <= b) return a; return b; }
 	static public int max(int a, int b) { if (a >= b) return a; return b; }
 	static public long max64(long a, long b) { if (a >= b) return a; return b; }
-	
+
 	//static  uint minu(uint a, uint b) { if (a <= b) return a; return b; }
 	//static  uint maxu(uint a, uint b) { if (a >= b) return a; return b; }
 
@@ -59,12 +59,17 @@ public class BitOps {
 	static  long BIGMULS(int a, int b) {
 		return (int)(((long)(a) * (long)(b)));
 	}
-	*/
-	
+	 */
+
 	/* OPT: optimized into an unsigned comparison */
 	//static void IS_INSIDE_1D(x, base, size) ((x) >= (base) && (x) < (base) + (size))
-	//static boolean IS_INSIDE_1D(x, base, size) ( (uint)((x) - (base)) < ((uint)(size)) )
-
+	public static boolean IS_INSIDE_1D(int x, int base, int size)
+	{
+		return (x >= base) && (x < (base + size));
+		//assert (x) - (base) > 0;
+		//assert size > 0;
+		//return (x - base) < size;
+	}
 
 	static public boolean HASBIT(int x, int y) { return 0 != (x &   (1 << y)); }
 	//static void SETBIT(x,y)    ((x) |=  (1 << (y)))
@@ -85,7 +90,7 @@ public class BitOps {
 		x ^=  (1 << y);
 		return x;
 	}
-	
+
 	public static int RETCLRBIT(int x, int y) {
 		x &= ~(1 << y);
 		return x;
@@ -101,7 +106,7 @@ public class BitOps {
 		return x;
 	}
 
-	
+
 	// checking more bits. Maybe unneccessary, but easy to use
 	static public boolean HASBITS(int x, int y) { return 0 != (x & y); }
 	//static void SETBITS(x,y) ((x) |= (y))
@@ -130,13 +135,13 @@ public class BitOps {
 		x &= ~y;
 		return x;
 	}
-	
-	
+
+
 	//static void PLAYER_SPRITE_COLOR(owner) ( (_player_colors[owner] + 0x307) << PALETTE_SPRITE_START)
 	//static void SPRITE_PALETTE(x) ((x) | PALETTE_MODIFIER_COLOR)
 
 	//extern const byte _ffb_64[128];
-	
+
 	/* Returns the position of the first bit that is not zero, counted from the
 	 * left. Ie, 10110100 returns 2, 00000001 returns 0, etc. When x == 0 returns
 	 * 0.
@@ -158,7 +163,7 @@ public class BitOps {
 	//	return i + FIND_FIRST_BIT(value & 0x3F);
 
 	//Faster ( or at least cleaner ) implementation below?
-	
+
 		if (GB(value, 0, 8) == 0) {
 			return FIND_FIRST_BIT(GB(value, 8, 6)) + 8;
 		} else {
@@ -167,7 +172,7 @@ public class BitOps {
 
 	}
 
-	
+
 	static  int KillFirstBit2x64(int value)
 	{
 		if (GB(value, 0, 8) == 0) {
@@ -176,11 +181,14 @@ public class BitOps {
 			return value & (KILL_FIRST_BIT(GB(value, 0, 6)) | 0x3F00);
 		}
 	}
-*/
+	 */
 	/* [min,max), strictly less than */
 	//static void IS_BYTE_INSIDE(a,min,max) ((byte)((a)-(min)) < (byte)((max)-(min)))
-	//static void IS_INT_INSIDE(a,min,max) ((uint)((a)-(min)) < (uint)((max)-(min)))
-
+	
+	static boolean IS_INT_INSIDE(int a, int min, int max)
+	{
+	return ((uint)((a)-(min)) < (uint)((max)-(min)))
+	}
 
 	//static void CHANCE16(a,b) ((uint16)Random() <= (uint16)((65536 * a) / b))
 	//static void CHANCE16R(a,b,r) ((uint16)(r=Random()) <= (uint16)((65536 * a) / b))
@@ -191,8 +199,8 @@ public class BitOps {
 	#define for_each_bit(_i,_b)										\
 		for(_i=0; _b!=0; _i++,_b>>=1)								\
 			if (_b&1)
-	*/
-	
+	 */
+
 
 	/*
 	static  int intxchg_(IntContainer a, int b) { int t = a.v; a.v = b; return t; }
@@ -220,8 +228,8 @@ public class BitOps {
 			return ((const byte*)b)[0] + (((const byte*)b)[1] << 8);
 		}
 	#endif
-	*/
-	
+	 */
+
 	/**
 	 * ROtate x Left/Right by n (must be >= 0)
 	 * @note Assumes a byte has 8 bits
@@ -238,6 +246,6 @@ public class BitOps {
 		return (x + n - 1) & ~(n - 1); 
 	}
 
-	
-	
+
+
 }

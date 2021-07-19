@@ -1,6 +1,7 @@
 package game.util.wcustom;
 
 import game.EngineID;
+import game.NewsItem;
 import game.StringID;
 import game.VehicleID;
 
@@ -10,18 +11,6 @@ public class AbstractWinCustom {
 }
 
 
-class menu_d extends AbstractWinCustom 
-{
-	byte item_count; /* follow_vehicle */
-	byte sel_index;		/* scrollpos_x */
-	byte main_button; /* scrollpos_y */
-	byte action_id;
-	StringID string_id; /* unk30 */
-	int checked_items; /* unk32 */
-	byte disabled_items;
-}
-
- 
 class def_d extends AbstractWinCustom {
 	int data_1, data_2, data_3;
 	int data_4, data_5;
@@ -55,9 +44,9 @@ class buildtrain_d extends AbstractWinCustom {
 
 class replaceveh_d extends AbstractWinCustom {
 	byte vehicletype;
-	byte sel_index[2];
-	EngineID sel_engine[2];
-	int count[2];
+	byte [] sel_index = new byte[2];
+	EngineID [] sel_engine = new EngineID[2];
+	int [] count = new int[2];
 } ;
 
 class  traindepot_d extends AbstractWinCustom {
@@ -121,11 +110,6 @@ class scroller_d extends AbstractWinCustom {
 	int counter;
 } ;
 
- enum VehicleListFlags {
-	VL_DESC    = 0x01,
-	VL_RESORT  = 0x02,
-	VL_REBUILD = 0x04
-} ;
 
 class vehiclelist_d extends AbstractWinCustom  {
 	//SortStruct *sort_list;
@@ -141,15 +125,3 @@ class message_d extends AbstractWinCustom  {
 	int lparam;
 } ;
 
-class dropdown_d extends AbstractWinCustom  {
-	int disabled_state;
-	int hidden_state;
-	WindowClass parent_wnd_class;
-	WindowNumber parent_wnd_num;
-	byte parent_button;
-	byte num_items;
-	byte selected_index;
-	StringID items[];
-	byte click_delay;
-	boolean drag_mode;
-} ;

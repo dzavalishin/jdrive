@@ -155,7 +155,7 @@ private void WaypointPoolNewBlock(int start_item)
 	/* Update the sign for the WayPoint */
 	void UpdateWaypointSign()
 	{
-		Point pt = RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
+		Point pt = Point.RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
 		Global.SetDParam(0, index);
 		UpdateViewportSignPos(sign, pt.x, pt.y - 0x20, STR_WAYPOINT_VIEWPORT);
 	}
@@ -290,7 +290,7 @@ private void WaypointPoolNewBlock(int start_item)
 
 		tileh = tile.GetTileSlope(null);
 		if (tileh != 0) {
-			if (!_patches.build_on_slopes || IsSteepTileh(tileh) || !(tileh & (0x3 << dir)) || !(tileh & ~(0x3 << dir)))
+			if (!Global._patches.build_on_slopes || IsSteepTileh(tileh) || !(tileh & (0x3 << dir)) || !(tileh & ~(0x3 << dir)))
 				return_cmd_error(STR_0007_FLAT_LAND_REQUIRED);
 		}
 
@@ -539,7 +539,7 @@ private void WaypointPoolNewBlock(int start_item)
 		DrawSprite(img, x, y);
 
 		foreach_draw_tile_seq(seq, cust.seq) {
-			Point pt = RemapCoords(seq.delta_x, seq.delta_y, seq.delta_z);
+			Point pt = Point.RemapCoords(seq.delta_x, seq.delta_y, seq.delta_z);
 			int image = seq.image + relocation;
 			DrawSprite((image & SPRITE_MASK) | ormod, x + pt.x, y + pt.y);
 		}

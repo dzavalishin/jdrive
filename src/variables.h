@@ -82,7 +82,7 @@ VARDEF int _saved_scrollpos_y;
 VARDEF byte _saved_scrollpos_zoom;
 
 // ********* END OF SAVE REGION
-
+#if 0
 typedef struct Patches {
 	bool modified_catchment;	//different-size catchment areas
 	bool vehicle_speed;			// show vehicle speed
@@ -185,7 +185,7 @@ typedef struct Patches {
 
 	/*
 	 * New Path Finding
-	 */
+	 * / 
 	bool new_pathfinding_all; /* Use the newest pathfinding algorithm for all */
 
 	/**
@@ -193,7 +193,7 @@ typedef struct Patches {
 	 * limit should make sure performance stays at acceptable levels at the cost
 	 * of not being perfect anymore. This will probably be fixed in a more
 	 * sophisticated way sometime soon
-	 */
+	 * /
 	uint32 npf_max_search_nodes;
 
 	uint32 npf_rail_firstred_penalty; /* The penalty for when the first signal is red (and it is not an exit or combo signal) */
@@ -211,8 +211,8 @@ typedef struct Patches {
 	bool population_in_label; // Show the population of a town in his label?
 	uint8 day_length;		// Multiplyer for length of one day
 } Patches;
-
-VARDEF Patches _patches;
+#endif
+//VARDEF Patches _patches;
 
 
 typedef struct Cheat {
