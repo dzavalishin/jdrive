@@ -7,10 +7,10 @@
   */
 
 #include "sprite.h"
-
+/*
 typedef struct RailVehicleInfo {
 	byte image_index;
-	byte flags; /* 1=multihead engine, 2=wagon */
+	byte flags; // 1=multihead engine, 2=wagon 
 	byte base_cost;
 	uint16 max_speed;
 	uint16 power;
@@ -39,7 +39,7 @@ typedef struct ShipVehicleInfo {
 	byte sfx;
 	byte refittable;
 } ShipVehicleInfo;
-
+/*
 typedef struct AircraftVehicleInfo {
 	byte image_index;
 	byte base_cost;
@@ -64,7 +64,7 @@ typedef struct RoadVehicleInfo {
 
 /** Information about a vehicle
   * @see table/engines.h
-  */
+  * /
 typedef struct EngineInfo {
 	uint16 base_intro;
 	byte unk2;              ///< Carriages have the highest bit set in this one
@@ -75,6 +75,7 @@ typedef struct EngineInfo {
 	uint32 refit_mask;
 } EngineInfo;
 
+/*
 typedef struct Engine {
 	uint16 intro_date;
 	uint16 age;
@@ -90,7 +91,7 @@ typedef struct Engine {
 	byte player_avail;
 	byte type;				// type, ie VEH_Road, VEH_Train, etc. Same as in vehicle.h
 } Engine;
-
+*/
 
 enum {
 	RVI_MULTIHEAD = 1,

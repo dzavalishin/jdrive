@@ -1,5 +1,5 @@
 /* $Id: depot.c 2701 2005-07-24 14:12:37Z tron $ */
-
+#if 0
 #include "stdafx.h"
 #include "openttd.h"
 #include "depot.h"

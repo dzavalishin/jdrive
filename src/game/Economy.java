@@ -418,7 +418,7 @@ public class Economy
 						p.share_owners[i] = Owner.OWNER_SPECTATOR;
 				}
 			}
-			p = GetPlayer(_current_player);
+			p = _current_player.GetPlayer();
 			/* Sell all the shares that people have on this company */
 			for (i = 0; i < 4; i++)
 				p.share_owners[i] = Owner.OWNER_SPECTATOR;
@@ -527,7 +527,7 @@ public class Economy
 
 		DrawNewsBorder(w);
 
-		p = GetPlayer(WP(w,news_d).ni.string_id & 15);
+		p = WP(w,news_d).ni.string_id & 15).GetPlayer();
 		DrawPlayerFace(p.face, p.player_color, 2, 23);
 		GfxFillRect(3, 23, 3+91, 23+118, 0x323 | USE_COLORTABLE);
 
@@ -596,7 +596,7 @@ public class Economy
 
 	StringID GetNewsStringBankrupcy(final NewsItem ni)
 	{
-		final Player p = GetPlayer(ni.string_id & 0xF);
+		final Player p = new PlayerID(ni.string_id.id & 0xF).GetPlayer();
 
 		switch (ni.string_id >> 4) {
 		case 1:
@@ -1240,7 +1240,7 @@ public class Economy
 				pair = SetupSubsidyDecodeParam(s, 0);
 				InjectDParam(2);
 
-				p = GetPlayer(_current_player);
+				p = _current_player.GetPlayer();
 				Global.SetDParam(0, p.name_1);
 				Global.SetDParam(1, p.name_2);
 				AddNewsItem(
@@ -1265,7 +1265,7 @@ public class Economy
 
 		// Update player statistics
 		{
-			Player p = GetPlayer(_current_player);
+			Player p = _current_player.GetPlayer();
 			p.cur_economy.delivered_cargo += num_pieces;
 			SETBIT(p.cargo_types, cargo_type);
 		}
@@ -1605,14 +1605,14 @@ public class Economy
 		ChangeOwnershipOfPlayerItems(pi, _current_player);
 
 		if (p.bankrupt_value == 0) {
-			owner = GetPlayer(_current_player);
+			owner = _current_player.GetPlayer();
 			owner.current_loan += p.current_loan;
 		}
 
 		value = CalculateCompanyValue(p) >> 2;
 		for(i=0; i!=4; i++) {
 			if (p.share_owners[i] != Owner.Owner.OWNER_SPECTATOR) {
-				owner = GetPlayer(p.share_owners[i]);
+				owner = p.share_owners[i].GetPlayer();
 				owner.money64 += value;
 				owner.yearly_expenses[0][EXPENSES_OTHER] += value;
 				UpdatePlayerMoney32(owner);
@@ -1641,7 +1641,7 @@ public class Economy
 		if (p1 >= Global.MAX_PLAYERS || !Global._patches.allow_shares) return CMD_ERROR;
 
 		SET_EXPENSES_TYPE(EXPENSES_OTHER);
-		p = GetPlayer(p1);
+		p = new PlayerID(p1).GetPlayer();
 
 		/* Protect new companies from hostile takeovers */
 		if (Global._cur_year - p.inaugurated_year < 6) return_cmd_error(STR_7080_PROTECTED);
@@ -1686,7 +1686,7 @@ public class Economy
 		if (p1 >= Global.MAX_PLAYERS || !Global._patches.allow_shares) return CMD_ERROR;
 
 		SET_EXPENSES_TYPE(EXPENSES_OTHER);
-		p = GetPlayer(p1);
+		p = new PLayerID(p1).GetPlayer();
 
 		/* Those lines are here for network-protection (clients can be slow) */
 		if (GetAmountOwnedBy(p, _current_player) == 0) return 0;
@@ -1720,7 +1720,7 @@ public class Economy
 		if (p1 >= Global.MAX_PLAYERS || _networking) return CMD_ERROR;
 
 		SET_EXPENSES_TYPE(EXPENSES_OTHER);
-		p = GetPlayer(p1);
+		p = new PlayerID(p1).GetPlayer();
 
 		if (!p.is_ai) return CMD_ERROR;
 

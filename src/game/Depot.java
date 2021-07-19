@@ -14,7 +14,7 @@ public class Depot implements IPoolItem
 		index = 0;
 	}
 	
-	IPoolItemFactory<Depot> factory = new IPoolItemFactory<Depot>() {		
+	static IPoolItemFactory<Depot> factory = new IPoolItemFactory<Depot>() {		
 		@Override
 		public Depot createObject() {
 			return new Depot();
@@ -83,16 +83,16 @@ public class Depot implements IPoolItem
 		switch(type)
 		{
 			case Global.TRANSPORT_RAIL:
-				return IsTileType(tile, MP_RAILWAY) && (_m[tile].m5 & 0xFC) == 0xC0;
+				return tile.IsTileType( TileTypes.MP_RAILWAY) && (tile.getMap().m5 & 0xFC) == 0xC0;
 
 			case Global.TRANSPORT_ROAD:
-				return IsTileType(tile, MP_STREET) && (_m[tile].m5 & 0xF0) == 0x20;
+				return tile.IsTileType( TileTypes.MP_STREET) && (tile.getMap().m5 & 0xF0) == 0x20;
 
 			case Global.TRANSPORT_WATER:
-				return IsTileType(tile, MP_WATER) && (_m[tile].m5 & ~3) == 0x80;
+				return tile.IsTileType( TileTypes.MP_WATER) && (tile.getMap().m5 & ~3) == 0x80;
 
 			default:
-				assert(0);
+				assert false;
 				return false;
 		}
 	}
@@ -233,7 +233,7 @@ public class Depot implements IPoolItem
 		depot = GetDepotByTile(tile);
 
 		/* Clear the tile */
-		DoClearSquare(tile);
+		Landscape.DoClearSquare(tile);
 
 		/* Clear the depot */
 		depot.xy = null;
@@ -244,7 +244,7 @@ public class Depot implements IPoolItem
 		DeleteDestinationFromVehicleOrder(order);
 
 		/* Delete the depot-window */
-		DeleteWindowById(WC_VEHICLE_DEPOT, tile);
+		Window.DeleteWindowById(Window.WC_VEHICLE_DEPOT, tile);
 	}
 
 	static void InitializeDepot()

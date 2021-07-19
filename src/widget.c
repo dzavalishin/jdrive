@@ -1,5 +1,5 @@
 /* $Id: widget.c 3349 2005-12-28 08:39:43Z peter1138 $ */
-
+#if 0
 #include "stdafx.h"
 #include "openttd.h"
 #include "functions.h"

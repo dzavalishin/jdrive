@@ -129,7 +129,7 @@ enum SaveLoadTypes {
 	SL_END       = 15
 };
 
-/** SaveLoad type struct. Do NOT use this directly but use the SLE_ macros defined just below! */
+/** SaveLoad type struct. Do NOT use this directly but use the SLE_ macros defined just below! * /
 typedef struct SaveLoad {
 	byte cmd;             /// the action to take with the saved/loaded type, All types need different action
 	VarType type;         /// type of the variable to be saved, int

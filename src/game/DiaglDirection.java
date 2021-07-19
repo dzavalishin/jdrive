@@ -18,4 +18,6 @@ public enum DiaglDirection
 	public int getValue() {
 		return value;
 	}
+	
+	public static DiaglDirection [] values = values();
 }

@@ -1,5 +1,5 @@
 package game;
 
 public class AbstractID {
-	int id;
+	public int id;
 }

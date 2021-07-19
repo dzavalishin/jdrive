@@ -4,7 +4,7 @@ package game;
 public class GenerateWorld {
 
 
-	static void GenerateWorld(int mode, uint size_x, uint size_y)
+	static void GenerateWorld(int mode, int size_x, int size_y)
 	{
 		int i;
 
@@ -53,7 +53,7 @@ public class GenerateWorld {
 	
 	
 	
-	static void InitializeGame(uint size_x, uint size_y)
+	static void InitializeGame(int size_x, int size_y)
 	{
 		AllocateMap(size_x, size_y);
 

@@ -19,7 +19,7 @@ public class FileIO {
 	public static final int SEEK_CUR = 1;
 
 	//byte *buffer, *buffer_end;
-	long pos;
+	static long pos;
 	//FILE *cur_fh;
 	//FILE *handles[32];
 	//byte buffer_start[512];
@@ -27,26 +27,26 @@ public class FileIO {
 	//FileInputStream fis = new FileInputStream(raf.getFD());
 	//BufferedInputStream bis = new BufferedInputStream(fis);
 
-	BufferedRandomAccessFile cur_fh;
-	BufferedRandomAccessFile handles[];// = new BufferedInputStream[32];
+	static BufferedRandomAccessFile cur_fh;
+	static BufferedRandomAccessFile handles[];// = new BufferedInputStream[32];
 
 
-	FileIO _fio = this;
+	//static FileIO _fio = this;
 
 	// Get current position in file
-	long FioGetPos()
+	public static long FioGetPos()
 	{
 		//return _fio.pos + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
-		return _fio.pos;// + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
+		return pos;// + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
 	}
 
-	void FioSeekTo(long pos, int mode)
+	public static void FioSeekTo(long ppos, int mode)
 	{
 		if (mode == SEEK_CUR) pos += FioGetPos();
 		//_fio.buffer = _fio.buffer_end = _fio.buffer_start + FIO_BUFFER_SIZE;
 		//fseek(_fio.cur_fh, (_fio.pos=pos), SEEK_SET);
 		try {
-			_fio.cur_fh.seek(_fio.pos=pos);
+			cur_fh.seek(pos=ppos);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -55,16 +55,16 @@ public class FileIO {
 	}
 
 	// Seek to a file and a position
-	void FioSeekToFile(long pos)
+	public static void FioSeekToFile(long ppos)
 	{
 		assert pos > 0;
-		BufferedRandomAccessFile f = _fio.handles[(int) (pos >> 24)];
+		BufferedRandomAccessFile f = handles[(int) (ppos >> 24)];
 		assert(f != null);
-		_fio.cur_fh = f;
+		cur_fh = f;
 		FioSeekTo(pos & 0xFFFFFF, SEEK_SET);
 	}
 
-	byte FioReadByte()
+	public static byte FioReadByte()
 	{
 		/*
 		if (_fio.buffer == _fio.buffer_end) {
@@ -87,7 +87,7 @@ public class FileIO {
 		return (byte) d;
 	}
 
-	void FioSkipBytes(int n)
+	public static void FioSkipBytes(int n)
 	{
 		for(;;) {
 			//int m = min(_fio.buffer_end - _fio.buffer, n);
@@ -100,22 +100,22 @@ public class FileIO {
 	}
 
 
-	int FioReadWord()
+	public static int FioReadWord()
 	{
 		byte b = FioReadByte();
 		return (FioReadByte() << 8) | b;
 	}
 
-	int FioReadDword()
+	public static int FioReadDword()
 	{
 		int b = 0xFFFF & FioReadWord();
 		return (FioReadWord() << 16) | b;
 	}
 
-	byte[] FioReadBlock(int size)
+	public static byte[] FioReadBlock(int size)
 	{
 		FioSeekTo(FioGetPos(), SEEK_SET);
-		_fio.pos += size;
+		pos += size;
 		//fread(ptr, 1, size, _fio.cur_fh);
 		//return cur_fh.readNBytes(size);
 
@@ -130,30 +130,30 @@ public class FileIO {
 		return buf;
 	}
 
-	private void FioCloseFile(int slot)
+	private static void FioCloseFile(int slot)
 	{
-		if (_fio.handles[slot] != null) {
+		if (handles[slot] != null) {
 			//fclose(_fio.handles[slot]);
 			try {
-				_fio.handles[slot].close();
+				handles[slot].close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			_fio.handles[slot] = null;
+			handles[slot] = null;
 		}
 	}
 
-	void FioCloseAll()
+	public static void FioCloseAll()
 	{
 		int i;
 
-		for (i = 0; i != _fio.handles.length; i++)
+		for (i = 0; i != handles.length; i++)
 			FioCloseFile(i);
 	}
 
 
-	boolean FiosCheckFileExists(String filename)
+	public static boolean FiosCheckFileExists(String filename)
 	{
 		BufferedRandomAccessFile f = FioFOpenFile(filename);
 		if( null != f )
@@ -203,7 +203,7 @@ public class FileIO {
 		}
 	}*/
 
-	BufferedRandomAccessFile FioFOpenFile(String filename)
+	public static BufferedRandomAccessFile FioFOpenFile(String filename)
 	{
 		BufferedRandomAccessFile f;
 		String buf;
@@ -249,7 +249,7 @@ public class FileIO {
 		 */
 	}
 
-	void FioOpenFile(int slot, String filename)
+	public static void FioOpenFile(int slot, String filename)
 	{
 		/*
 		FILE *f;
@@ -289,7 +289,7 @@ public class FileIO {
 			Global.error(String.format("Cannot open file '%s'", filename));
 
 		FioCloseFile(slot); // if file was opened before, close it
-		_fio.handles[slot] = f;
+		handles[slot] = f;
 		FioSeekToFile(slot << 24);
 	}
 

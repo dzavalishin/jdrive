@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import game.util.BitOps;
+import game.util.FileIO;
 
 public class Main {
 
@@ -29,7 +30,7 @@ public class Main {
 	void  ShowInfoF( String str, Object ... args)
 	{
 		String buf = String.format(s, args);
-		ShowInfo(buf);
+		Hal.ShowInfo(buf);
 	}
 
 
@@ -109,7 +110,7 @@ public class Main {
 
 		// TODO GetDriverList(p);
 
-		ShowInfo(help);
+		Hal.ShowInfo(help);
 	}
 
 
@@ -159,7 +160,7 @@ public class Main {
 
 	static void UnInitializeGame()
 	{
-		UnInitWindowSystem();
+		Window.UnInitWindowSystem();
 
 		//free(_config_file);
 	}
@@ -177,7 +178,7 @@ public class Main {
 		LoadStringWidthTable();
 
 		// Setup main window
-		ResetWindowSystem();
+		Window.ResetWindowSystem();
 		SetupColorsAndInitialWindow();
 
 		// Generate a world.
@@ -261,7 +262,7 @@ public class Main {
 			case 't': startdate = Integer.parseInt(mgo.opt); break;
 			case 'd': {
 				//#if defined(WIN32)
-				CreateConsole();
+				Console.CreateConsole();
 				//#endif
 				if (mgo.opt != null) SetDebugString(mgo.opt);
 			} break;
@@ -280,7 +281,7 @@ public class Main {
 			case 'p': {
 				int i = Integer.parseInt(mgo.opt);
 				// Play as an other player in network games
-				if (IS_INT_INSIDE(i, 1, MAX_PLAYERS)) _network_playas = i;
+				if (BitOps.IS_INT_INSIDE(i, 1, Global.MAX_PLAYERS)) _network_playas = i;
 				break;
 			}
 			case 'c':
@@ -312,10 +313,10 @@ public class Main {
 		LoadFromHighScore();
 
 		// override config?
-		if (musicdriver[0]) ttd_strlcpy(_ini_musicdriver, musicdriver, sizeof(_ini_musicdriver));
-		if (sounddriver[0]) ttd_strlcpy(_ini_sounddriver, sounddriver, sizeof(_ini_sounddriver));
-		if (videodriver[0]) ttd_strlcpy(_ini_videodriver, videodriver, sizeof(_ini_videodriver));
-		if (resolution[0]) { _cur_resolution[0] = resolution[0]; _cur_resolution[1] = resolution[1]; }
+		// TODO if (musicdriver[0]) ttd_strlcpy(_ini_musicdriver, musicdriver, sizeof(_ini_musicdriver));
+		// TODO if (sounddriver[0]) ttd_strlcpy(_ini_sounddriver, sounddriver, sizeof(_ini_sounddriver));
+		// TODO if (videodriver[0]) ttd_strlcpy(_ini_videodriver, videodriver, sizeof(_ini_videodriver));
+		// TODO if (resolution[0]) { _cur_resolution[0] = resolution[0]; _cur_resolution[1] = resolution[1]; }
 		if (startdate != (int)-1) Global._patches.starting_date = startdate;
 
 		if (Global._dedicated_forks && !dedicated)
@@ -342,15 +343,15 @@ public class Main {
 		// TODO SoundInitialize("sample.cat");
 
 		// This must be done early, since functions use the InvalidateWindow* calls
-		InitWindowSystem();
+		Window.InitWindowSystem();
 
 		GfxLoadSprites();
 		LoadStringWidthTable();
 
 		Global.DEBUG_misc( 1, "Loading drivers...");
-		LoadDriver(SOUND_DRIVER, _ini_sounddriver);
-		LoadDriver(MUSIC_DRIVER, _ini_musicdriver);
-		LoadDriver(VIDEO_DRIVER, _ini_videodriver); // load video last, to prevent an empty window while sound and music loads
+		// TODO LoadDriver(SOUND_DRIVER, _ini_sounddriver);
+		// TODO LoadDriver(MUSIC_DRIVER, _ini_musicdriver);
+		// TODO LoadDriver(VIDEO_DRIVER, _ini_videodriver); // load video last, to prevent an empty window while sound and music loads
 		_savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 
 		// initialize network-core
@@ -363,11 +364,11 @@ public class Main {
 			SetDifficultyLevel(0, GameOptions._opt_newgame);
 
 		// initialize the ingame console
-		IConsoleInit();
+		Console.IConsoleInit();
 		InitializeGUI();
-		IConsoleCmdExec("exec scripts/autoexec.scr 0");
+		Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
-		GenerateWorld(1, 64, 64); // Make the viewport initialization happy
+		GenerateWorld.GenerateWorld(1, 64, 64); // Make the viewport initialization happy
 		/*
 		if ((network) && (_network_available)) {
 			if (network_conn != null) {
@@ -391,7 +392,7 @@ public class Main {
 		Global.hal.main_loop();
 
 		WaitTillSaved();
-		IConsoleFree();
+		Console.IConsoleFree();
 
 		/*
 		if (_network_available) {
@@ -423,14 +424,14 @@ public class Main {
 		FileIO.FioCloseAll();
 		UnInitializeGame();
 
-		return 0;
+		//return 0;
 	}
 
 	/** Mutex so that only one thread can communicate with the main program
 	 * at any given time */
 	static ThreadMsg _message = ThreadMsg.MSG_OTTD_SAVETHREAD_ZERO;
 
-	static  void OTTD_ReleaseMutex() {_message = 0;}
+	static  void OTTD_ReleaseMutex() {_message = ThreadMsg.MSG_OTTD_SAVETHREAD_ZERO;}
 	static  ThreadMsg OTTD_PollThreadEvent() {return _message;}
 
 	/** Called by running thread to execute some action in the main game.
@@ -461,14 +462,14 @@ public class Main {
 	}
 
 	static void ShowScreenshotResult(boolean b)
-	{
+	{/* TODO
 		if (b) {
 			SetDParamStr(0, _screenshot_name);
 			ShowErrorMessage(INVALID_STRING_ID, STR_031B_SCREENSHOT_SUCCESSFULLY, 0, 0);
 		} else {
 			ShowErrorMessage(INVALID_STRING_ID, STR_031C_SCREENSHOT_FAILED, 0, 0);
 		}
-
+		*/
 	}
 
 	static void MakeNewGame()
@@ -483,17 +484,17 @@ public class Main {
 		GfxLoadSprites();
 
 		// Reinitialize windows
-		ResetWindowSystem();
+		Window.ResetWindowSystem();
 		LoadStringWidthTable();
 
 		SetupColorsAndInitialWindow();
 
 		// Randomize world
-		GenerateWorld(0, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
+		GenerateWorld.GenerateWorld(0, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
 
 		// In a dedicated server, the server does not play
 		if (Global._network_dedicated) {
-			Global._local_player = Owner.OWNER_SPECTATOR;
+			Global._local_player = new PlayerID( Owner.OWNER_SPECTATOR);
 		} else {
 			// Create a single player
 			DoStartupNewPlayer(false);
@@ -518,15 +519,15 @@ public class Main {
 		GfxLoadSprites();
 
 		// Re-init the windowing system
-		ResetWindowSystem();
+		Window.ResetWindowSystem();
 
 		// Create toolbars
 		SetupColorsAndInitialWindow();
 
 		// Startup the game system
-		GenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
+		GenerateWorld.GenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
 
-		Global._local_player = Owner.OWNER_NONE;
+		Global._local_player = new PlayerID(Owner.OWNER_NONE);
 		Global.hal.MarkWholeScreenDirty();
 	}
 
@@ -544,7 +545,7 @@ public class Main {
 
 		// invalid type
 		if (_file_to_saveload.mode == SL_INVALID) {
-			printf("Savegame is obsolete or invalid format: %s\n", _file_to_saveload.name);
+			Global.error("Savegame is obsolete or invalid format: %s\n", _file_to_saveload.name);
 			ShowErrorMessage(INVALID_STRING_ID, STR_4009_GAME_LOAD_FAILED, 0, 0);
 			Global._game_mode = GameModes.GM_MENU;
 			return;
@@ -553,7 +554,7 @@ public class Main {
 		GfxLoadSprites();
 
 		// Reinitialize windows
-		ResetWindowSystem();
+		Window.ResetWindowSystem();
 		LoadStringWidthTable();
 
 		SetupColorsAndInitialWindow();
@@ -676,7 +677,7 @@ public class Main {
 
 				GameOptions._opt_ptr = GameOptions._opt;
 
-				Global._local_player = Owner.OWNER_NONE;
+				Global._local_player = new PlayerID(Owner.OWNER_NONE);
 				_generating_world = true;
 				// delete all players.
 				for (i = 0; i != MAX_PLAYERS; i++) {
@@ -769,8 +770,8 @@ public class Main {
 	{
 		String buf;
 
-		if (Global._patches.keep_all_autosave && Global._local_player != Owner.OWNER_SPECTATOR) {
-			final Player p = GetPlayer(Global._local_player);
+		if (Global._patches.keep_all_autosave && Global._local_player.id != Owner.OWNER_SPECTATOR) {
+			final Player p = Global._local_player.GetPlayer();
 			String s;
 			sprintf(buf, "%s%s", _path.autosave_dir, PATHSEP);
 
@@ -1176,7 +1177,7 @@ public class Main {
 			if (_local_player < MAX_PLAYERS) {
 				// Set the human controlled player to the patch settings
 				// Scenario editor do not have any companies
-				p = GetPlayer(_local_player);
+				p = _local_player.GetPlayer();
 				p.engine_renew = Global._patches.autorenew;
 				p.engine_renew_months = Global._patches.autorenew_months;
 				p.engine_renew_money = Global._patches.autorenew_money;

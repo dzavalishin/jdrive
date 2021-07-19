@@ -1,6 +1,7 @@
 package game;
 
 import java.io.FileWriter;
+import game.util.BitOps;
 
 public class Console {
 	// maximum length of a typed in command
@@ -66,20 +67,20 @@ public class Console {
 
 
 	static final Widget _iconsole_window_widgets[] = {
-			{WIDGETS_END}
+			new Widget( WIDGETS_END )
 	};
 
-	static final WindowDesc _iconsole_window_desc = {
+	static final WindowDesc _iconsole_window_desc = new WindowDesc(
 			0, 0, 2, 2,
 			WC_CONSOLE, 0,
 			WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
 			_iconsole_window_widgets,
-			null,
-	};
+			windowProc,
+	);
 
 	static void IConsoleInit()
 	{
-		extern final char _openttd_revision[];
+		//extern final char _openttd_revision[];
 		_iconsole_output_file = null;
 		_icolour_def  =  1;
 		_icolour_err  =  3;
@@ -161,16 +162,16 @@ public class Console {
 
 	static void IConsoleResize()
 	{
-		_iconsole_win = FindWindowById(WC_CONSOLE, 0);
+		_iconsole_win = Window.FindWindowById(Window.WC_CONSOLE, 0);
 
 		switch (_iconsole_mode) {
 		case ICONSOLE_OPENED:
-			_iconsole_win.height = _screen.height / 3;
-			_iconsole_win.width = _screen.width;
+			_iconsole_win.height = Hal._screen.height / 3;
+			_iconsole_win.width = Hal._screen.width;
 			break;
 		case ICONSOLE_FULL:
-			_iconsole_win.height = _screen.height - ICON_BOTTOM_BORDERWIDTH;
-			_iconsole_win.width = _screen.width;
+			_iconsole_win.height = Hal._screen.height - ICON_BOTTOM_BORDERWIDTH;
+			_iconsole_win.width = Hal._screen.width;
 			break;
 		default: break;
 		}
@@ -182,9 +183,9 @@ public class Console {
 	{
 		switch (_iconsole_mode) {
 		case ICONSOLE_CLOSED:
-			_iconsole_win = AllocateWindowDesc(&_iconsole_window_desc);
-			_iconsole_win.height = _screen.height / 3;
-			_iconsole_win.width = _screen.width;
+			_iconsole_win = Window.AllocateWindowDesc(_iconsole_window_desc,0);
+			_iconsole_win.height = Hal._screen.height / 3;
+			_iconsole_win.width = Hal._screen.width;
 			_iconsole_mode = ICONSOLE_OPENED;
 			Global._noscroll = BitOps.RETSETBIT(Global._no_scroll, SCROLL_CON); // override cursor arrows; the gamefield will not scroll
 			break;
@@ -192,7 +193,7 @@ public class Console {
 			DeleteWindowById(WC_CONSOLE, 0);
 			_iconsole_win = null;
 			_iconsole_mode = ICONSOLE_CLOSED;
-			CLRBIT(_no_scroll, SCROLL_CON);
+			CLRBIT(Global._no_scroll, SCROLL_CON);
 			break;
 		}
 
@@ -263,8 +264,8 @@ public class Console {
 		#endif
 		*/
 
-		if (_network_dedicated) {
-			printf("%s\n", string);
+		if (_network_dedicated != 0) {
+			Global.error("%s\n", string);
 			IConsoleWriteToLogFile(string);
 			return;
 		}
@@ -288,7 +289,7 @@ public class Console {
 
 		IConsoleWriteToLogFile(string);
 
-		if(_iconsole_win != null) SetWindowDirty(_iconsole_win);
+		if(_iconsole_win != null) _iconsole_win.§SetWindowDirty();
 	}
 
 	/**
@@ -373,7 +374,7 @@ public class Console {
 	 * @param type type access trigger
 	 * @param proc function called when the hook criteria is met
 	 */
-	static private void IConsoleHookAdd(IConsoleHooks *hooks, IConsoleHookTypes type, IConsoleHook *proc)
+	static private void IConsoleHookAdd(IConsoleHooks hooks, IConsoleHookTypes type, IConsoleHook proc)
 	{
 		if (hooks == null || proc == null) return;
 
@@ -387,7 +388,7 @@ public class Console {
 		case ICONSOLE_HOOK_POST_ACTION:
 			hooks.post = proc;
 			break;
-		default: NOT_REACHED();
+		default: assert false; //NOT_REACHED();
 		}
 	}
 
@@ -399,9 +400,9 @@ public class Console {
 	 * @return true on a successfull execution of the hook command or if there
 	 * is no hook/trigger present at all. False otherwise
 	 */
-	static private boolean IConsoleHookHandle(final IConsoleHooks *hooks, IConsoleHookTypes type)
+	static private boolean IConsoleHookHandle(final IConsoleHooks hooks, IConsoleHookTypes type)
 	{
-		IConsoleHook *proc = null;
+		IConsoleHook proc = null;
 		if (hooks == null) return false;
 
 		switch (type) {
@@ -426,9 +427,9 @@ public class Console {
 	 * @param type type of hook that is added (ACCESS, BEFORE and AFTER change)
 	 * @param proc function called when the hook criteria is met
 	 */
-	static void IConsoleCmdHookAdd(final String name, IConsoleHookTypes type, IConsoleHook *proc)
+	static void IConsoleCmdHookAdd(final String name, IConsoleHookTypes type, IConsoleHook proc)
 	{
-		IConsoleCmd *cmd = IConsoleCmdGet(name);
+		IConsoleCmd cmd = IConsoleCmdGet(name);
 		if (cmd == null) return;
 		IConsoleHookAdd(&cmd.hook, type, proc);
 	}
@@ -439,7 +440,7 @@ public class Console {
 	 * @param type type of hook that is added (ACCESS, BEFORE and AFTER change)
 	 * @param proc function called when the hook criteria is met
 	 */
-	static void IConsoleVarHookAdd(final String name, IConsoleHookTypes type, IConsoleHook *proc)
+	static void IConsoleVarHookAdd(final String name, IConsoleHookTypes type, IConsoleHook proc)
 	{
 		IConsoleVar *var = IConsoleVarGet(name);
 		if (var == null) return;
@@ -493,9 +494,9 @@ public class Console {
 	 * @param name name of the command that will be used
 	 * @param proc function that will be called upon execution of command
 	 */
-	static void IConsoleCmdRegister(final String name, IConsoleCmdProc *proc)
+	static void IConsoleCmdRegister(final String name, IConsoleCmdProc proc)
 	{
-		String new_cmd = strdup(name);
+		String new_cmd = new String(name);
 		IConsoleCmd item_new = new IConsoleCmd();
 
 		item_new.next = null;
@@ -744,9 +745,9 @@ public class Console {
 	{
 		if (var.type != ICONSOLE_VAR_STRING || var.addr == null) return;
 
-		IConsoleHookHandle(&var.hook, ICONSOLE_HOOK_PRE_ACTION);
+		IConsoleHookHandle(var.hook, ICONSOLE_HOOK_PRE_ACTION);
 		ttd_strlcpy((String )var.addr, (String )value, var.size);
-		IConsoleHookHandle(&var.hook, ICONSOLE_HOOK_POST_ACTION);
+		IConsoleHookHandle(var.hook, ICONSOLE_HOOK_POST_ACTION);
 		IConsoleVarPrintSetValue(var); // print out the new value, giving feedback
 		return;
 	}
@@ -1023,24 +1024,8 @@ public class Console {
 		IConsoleError("command or variable not found");
 	}
 
-
-}
-
-
-
-
-
-
-
-
-// --------------------------------------------
-// More classes
-// --------------------------------------------
-
-
-class ConsoleWindow extends Window
-{
-	void WindowProc( WindowEvent e)
+	
+	static void windowProc( Window w, WindowEvent e)
 	{
 		switch (e.event) {
 		case WE_PAINT: {
@@ -1166,7 +1151,23 @@ class ConsoleWindow extends Window
 		}
 
 	}
+
+
 }
+
+
+
+
+
+
+
+
+// --------------------------------------------
+// More classes
+// --------------------------------------------
+
+
+
 
 
 

@@ -327,7 +327,7 @@ public class ViewPort {
 		return GetTileFromScreenXY(Hal._cursor.pos.x, Hal._cursor.pos.y, x + vp.left, y + vp.top);
 	}
 
-	void DrawGroundSpriteAt(int image, int x, int y, byte z)
+	static void DrawGroundSpriteAt(int image, int x, int y, byte z)
 	{
 		ViewportDrawer vd = _cur_vd;
 		TileSpriteToDraw ts;
@@ -390,7 +390,7 @@ public class ViewPort {
 	{
 		ViewportDrawer vd = _cur_vd;
 		ParentSpriteToDraw ps;
-		final Sprite* spr;
+		final Sprite spr;
 		Point pt;
 
 		assert((image & SPRITE_MASK) < MAX_SPRITES);
@@ -463,7 +463,7 @@ public class ViewPort {
 	void AddChildSpriteScreen(int image, int x, int y)
 	{
 		ViewportDrawer vd = _cur_vd;
-		ChildScreenSpriteToDraw *cs;
+		ChildScreenSpriteToDraw cs;
 
 		assert((image & SPRITE_MASK) < MAX_SPRITES);
 
@@ -556,7 +556,7 @@ public class ViewPort {
 	static void DrawSelectionSprite(int image, final TileInfo ti)
 	{
 		if (_added_tile_sprite && !(_thd.drawstyle & HT_LINE)) { // draw on real ground
-			DrawGroundSpriteAt(image, ti.x, ti.y, ti.z + 7);
+			DrawGroundSpriteAt(image, ti.x, ti.y, (byte) (ti.z + 7));
 		} else { // draw on top of foundation
 			AddSortableSpriteToDraw(image, ti.x, ti.y, 0x10, 0x10, 1, ti.z + 7);
 		}

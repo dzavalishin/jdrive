@@ -187,7 +187,7 @@ void SortResolutions(int count)
 		// Get the color for DrawString-subroutines which matches the color
 		//  of the player
 		if (player.id == Owner.OWNER_SPECTATOR || player.id == Owner.OWNER_SPECTATOR - 1) return 1;
-		return (_color_list[_player_colors[player]].window_color_1b) | IS_PALETTE_COLOR;
+		return (_color_list[Global._player_colors[player.id]].window_color_1b) | IS_PALETTE_COLOR;
 	}
 
 	
@@ -198,6 +198,9 @@ void SortResolutions(int count)
 	
 	public abstract void ShowOSErrorBox(String buf);
 	protected abstract int Random();
+	public static void ShowInfo(String help) {
+		System.err.println(help);
+	}
 
 
 }
@@ -205,7 +208,7 @@ void SortResolutions(int count)
 
 
 class DrawPixelInfo {
-	Pixel *dst_ptr;
+	Pixel dst_ptr;
 	int left, top, width, height;
 	int pitch;
 	int zoom;

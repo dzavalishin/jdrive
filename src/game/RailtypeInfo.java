@@ -103,7 +103,7 @@ static  byte SignalOnTrack(Track track) {
 	 */
 	static  RailTileType GetRailTileType(TileIndex tile)
 	{
-		assert(IsTileType(tile, MP_RAILWAY));
+		assert(tile.IsTileType(TileTypes.MP_RAILWAY));
 		return RailTileType.values[ Global._m[tile.getTile()].m5 & RailTileType.RAIL_TILE_TYPE_MASK.getValue() ];
 	}
 
@@ -127,7 +127,7 @@ static  byte SignalOnTrack(Track track) {
 	static  RailTileSubtype GetRailTileSubtype(TileIndex tile)
 	{
 		assert(GetRailTileType(tile) == RailTileType.RAIL_TYPE_DEPOT_WAYPOINT);
-		return (RailTileSubtype)(Global._m[tile.getTile()].m5 & RAIL_SUBTYPE_MASK);
+		return RailTileSubtype.values[(Global._m[tile.getTile()].m5 & RAIL_SUBTYPE_MASK)];
 	}
 
 	/**
@@ -316,7 +316,7 @@ static  byte SignalOnTrack(Track track) {
 	 */
 	static  DiagDirection DirToDiagdir(Direction dir) {
 		assert(dir < Direction.DIR_END);
-		return (DiagDirection)(dir >> 1);
+		return DiagDirection.values[ (dir >> 1) ];
 	}
 
 	/* Checks if a given Track is diagonal */
@@ -589,6 +589,8 @@ enum RailTileSubtype {
 		return value;
 	}
 
+	public static RailTileSubtype [] values = values();
+	
 } 
 
 enum SignalType {

@@ -6,7 +6,7 @@ import game.util.GenLandTable;
 public class Landscape extends GenLandTable
 {
 
-	/*
+	
 	 static final TileTypeProcs
 		_tile_type_clear_procs,
 		_tile_type_rail_procs,
@@ -33,7 +33,7 @@ public class Landscape extends GenLandTable
 		&_tile_type_tunnelbridge_procs,
 		&_tile_type_unmovable_procs,
 	};
-	 */
+	 *
 	/* landscape slope => sprite */
 	static final byte[] _tileh_to_sprite = {
 			0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,0,
@@ -45,7 +45,7 @@ public class Landscape extends GenLandTable
 	};
 
 
-	void FindLandscapeHeightByTile(TileInfo ti, TileIndex tile)
+	static void FindLandscapeHeightByTile(TileInfo ti, TileIndex tile)
 	{
 		assert(tile.getTile() < Global.MapSize());
 		
@@ -59,7 +59,7 @@ public class Landscape extends GenLandTable
 	}
 
 	/* find the landscape height for the coordinates x y */
-	void FindLandscapeHeight(TileInfo ti, int x, int y)
+	static void FindLandscapeHeight(TileInfo ti, int x, int y)
 	{
 		ti.x = x;
 		ti.y = y;
@@ -76,7 +76,7 @@ public class Landscape extends GenLandTable
 		FindLandscapeHeightByTile(ti, TileIndex.TileVirtXY(x, y));
 	}
 
-	int GetPartialZ(int x, int y, int corners)
+	static int GetPartialZ(int x, int y, int corners)
 	{
 		int z = 0;
 
@@ -231,7 +231,7 @@ public class Landscape extends GenLandTable
 		}
 	}
 
-	void DoClearSquare(TileIndex tile)
+	static void DoClearSquare(TileIndex tile)
 	{
 		ModifyTile(tile,
 				MP_SETTYPE(MP_CLEAR) |
@@ -241,39 +241,39 @@ public class Landscape extends GenLandTable
 				);
 	}
 
-	int GetTileTrackStatus(TileIndex tile, TransportType mode)
+	static int GetTileTrackStatus(TileIndex tile, TransportType mode)
 	{
 		return _tile_type_procs[GetTileType(tile)].get_tile_track_status_proc(tile, mode);
 	}
 
-	void ChangeTileOwner(TileIndex tile, byte old_player, byte new_player)
+	static void ChangeTileOwner(TileIndex tile, byte old_player, byte new_player)
 	{
 		_tile_type_procs[GetTileType(tile)].change_tile_owner_proc(tile, old_player, new_player);
 	}
 
-	void GetAcceptedCargo(TileIndex tile, AcceptedCargo ac)
+	static void GetAcceptedCargo(TileIndex tile, AcceptedCargo ac)
 	{
 		//memset(ac, 0, sizeof(AcceptedCargo));
 		ac.clear();
 		_tile_type_procs[GetTileType(tile)].get_accepted_cargo_proc(tile, ac);
 	}
 
-	void AnimateTile(TileIndex tile)
+	static void AnimateTile(TileIndex tile)
 	{
 		_tile_type_procs[GetTileType(tile)].animate_tile_proc(tile);
 	}
 
-	void ClickTile(TileIndex tile)
+	static void ClickTile(TileIndex tile)
 	{
 		_tile_type_procs[GetTileType(tile)].click_tile_proc(tile);
 	}
 
-	void DrawTile(TileInfo ti)
+	static void DrawTile(TileInfo ti)
 	{
 		_tile_type_procs[ti.type].draw_tile_proc(ti);
 	}
 
-	void GetTileDesc(TileIndex tile, TileDesc td)
+	static void GetTileDesc(TileIndex tile, TileDesc td)
 	{
 		_tile_type_procs[GetTileType(tile)].get_tile_desc_proc(tile, td);
 	}
@@ -283,7 +283,7 @@ public class Landscape extends GenLandTable
 	 * @param p1 unused
 	 * @param p2 unused
 	 */
-	int CmdLandscapeClear(int x, int y, int flags, int p1, int p2)
+	static int CmdLandscapeClear(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 
@@ -297,7 +297,7 @@ public class Landscape extends GenLandTable
 	 * @param p1 start tile of area dragging
 	 * @param p2 unused
 	 */
-	int CmdClearArea(int ex, int ey, int flags, int p1, int p2)
+	static int CmdClearArea(int ex, int ey, int flags, int p1, int p2)
 	{
 		int cost, ret, money;
 		int sx,sy;
@@ -321,7 +321,7 @@ public class Landscape extends GenLandTable
 
 		for (x = sx; x <= ex; x += 16) {
 			for (y = sy; y <= ey; y += 16) {
-				ret = DoCommandByTile(TileVirtXY(x, y), 0, 0, flags & ~DC_EXEC, CMD_LANDSCAPE_CLEAR);
+				ret = DoCommandByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags & ~DC_EXEC, CMD_LANDSCAPE_CLEAR);
 				if (CmdFailed(ret)) continue;
 				cost += ret;
 				success = true;
@@ -331,7 +331,7 @@ public class Landscape extends GenLandTable
 						_additional_cash_required = ret;
 						return cost - ret;
 					}
-					DoCommandByTile(TileVirtXY(x, y), 0, 0, flags, CMD_LANDSCAPE_CLEAR);
+					DoCommandByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 
 					// draw explosion animation...
 					if ((x == sx || x == ex) && (y == sy || y == ey)) {
@@ -349,7 +349,7 @@ public class Landscape extends GenLandTable
 
 
 	/* utility function used to modify a tile */
-	void ModifyTile(TileIndex tile, int flags, int ... args)
+	static void ModifyTile(TileIndex tile, int flags, int ... args)
 	{
 		int i;
 		int p = 0;
@@ -397,7 +397,7 @@ public class Landscape extends GenLandTable
 	#define TILELOOP_ASSERTMASK ((TILELOOP_SIZE-1) + ((TILELOOP_SIZE-1) << MapLogX()))
 	#define TILELOOP_CHKMASK (((1 << (MapLogX() - TILELOOP_BITS))-1) << TILELOOP_BITS)
 	 */
-	void RunTileLoop()
+	static void RunTileLoop()
 	{
 		TileIndex tile;
 		int count;
@@ -423,7 +423,7 @@ public class Landscape extends GenLandTable
 		_cur_tileloop_tile = tile;
 	}
 
-	void InitializeLandscape()
+	static void InitializeLandscape()
 	{
 		int map_size;
 		int i;
@@ -441,13 +441,13 @@ public class Landscape extends GenLandTable
 		}
 
 		// create void tiles at the border
-		for (i = 0; i < MapMaxY(); ++i)
-			SetTileType(i * MapSizeX() + MapMaxX(), MP_VOID);
-		for (i = 0; i < MapSizeX(); ++i)
-			SetTileType(MapSizeX() * MapMaxY() + i, MP_VOID);
+		for (i = 0; i < Global.MapMaxY(); ++i)
+			SetTileType(i * Global.MapSizeX() + Global.MapMaxX(), TileTypes.MP_VOID);
+		for (i = 0; i < Global.MapSizeX(); ++i)
+			SetTileType(Global.MapSizeX() * Global.MapMaxY() + i, TileTypes.MP_VOID);
 	}
 
-	void ConvertGroundTilesIntoWaterTiles()
+	static void ConvertGroundTilesIntoWaterTiles()
 	{
 		IntContainer h;
 
@@ -644,7 +644,7 @@ public class Landscape extends GenLandTable
 		}
 	}
 
-	void GenerateLandscape()
+	static void GenerateLandscape()
 	{
 		int i;
 		int flag;
@@ -684,7 +684,7 @@ public class Landscape extends GenLandTable
 	}
 
 
-	void CallLandscapeTick()
+	static void CallLandscapeTick()
 	{
 		OnTick_Town();
 		OnTick_Trees();
@@ -695,7 +695,7 @@ public class Landscape extends GenLandTable
 		OnTick_Train();
 	}
 
-	TileIndex AdjustTileCoordRandomly(TileIndex a, byte rng)
+	static TileIndex AdjustTileCoordRandomly(TileIndex a, byte rng)
 	{
 		int rn = rng;
 		int r = Global.Random();
@@ -706,7 +706,8 @@ public class Landscape extends GenLandTable
 				).TILE_MASK();
 	}
 
-	boolean IsValidTile(TileIndex tile)
+	// TODO move 
+	static boolean IsValidTile(TileIndex tile)
 	{
 		return (tile.getTile() < Global.MapSizeX() * Global.MapMaxY() && tile.TileX() != Global.MapMaxX());
 	}
