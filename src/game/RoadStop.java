@@ -1,7 +1,5 @@
 package game;
 
-import java.util.Optional;
-
 public class RoadStop implements IPoolItem
 {
 
@@ -35,6 +33,18 @@ public class RoadStop implements IPoolItem
 
 	public RoadStop() {
 		clear();
+	}
+
+	public RoadStop( RoadStop src ) {
+		clear();
+		xy = src.xy;
+		used = false; // TODO check usage!
+		status = src.status;
+		index = 0;
+		slot = new int[NUM_SLOTS];
+		station = src.station;
+		type = src.type;
+		prev = next = null;
 	}
 	
 	@Override

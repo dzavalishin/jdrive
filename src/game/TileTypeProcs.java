@@ -1,10 +1,20 @@
 package game;
 
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 public abstract class TileTypeProcs {
 	abstract void draw_tile_proc(TileInfo ti);
+	//Consumer<TileInfo> draw_tile_proc;
+	
 	abstract int get_slope_z_proc(TileInfo ti);
+	//Consumer<TileInfo> get_slope_z_proc;
+	
 	abstract int clear_tile_proc(TileIndex tile, byte flags);
+	//BiConsumer<TileIndex, Byte> clear_tile_proc;
+	
 	abstract AcceptedCargo get_accepted_cargo_proc(TileIndex tile);
+	
 	abstract TileDesc get_tile_desc_proc(TileIndex tile);
 
 	/**

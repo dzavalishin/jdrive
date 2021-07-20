@@ -251,7 +251,7 @@ public class Landscape extends GenLandTable
 		_tile_type_procs[GetTileType(tile)].change_tile_owner_proc(tile, old_player, new_player);
 	}
 
-	static void GetAcceptedCargo(TileIndex tile, AcceptedCargo ac)
+	public static void GetAcceptedCargo(TileIndex tile, AcceptedCargo ac)
 	{
 		//memset(ac, 0, sizeof(AcceptedCargo));
 		ac.clear();

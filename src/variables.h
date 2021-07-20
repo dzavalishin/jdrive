@@ -60,8 +60,8 @@ VARDEF TileIndex _cur_tileloop_tile;
 VARDEF uint16 _disaster_delay;
 
 // Determines what station to operate on in the
-//  tick handler.
-VARDEF uint16 _station_tick_ctr;
+//  tick handler. In Station class
+//VARDEF uint16 _station_tick_ctr;
 
 VARDEF uint32 _random_seeds[2][2];
 

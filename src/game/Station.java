@@ -6,7 +6,7 @@ public class Station implements IPoolItem
 {
 
 	TileIndex xy;
-	RoadStop bus_stops;
+	RoadStop bus_stops; //TODO use ArrayList for stops fields!
 	RoadStop truck_stops;
 	TileIndex train_tile;
 	TileIndex airport_tile;
@@ -52,320 +52,326 @@ public class Station implements IPoolItem
 
 
 
+	// Determines what station to operate on in the
+	//  tick handler.
+	public static int _station_tick_ctr = 0;
 
-    private void StationInitialize(TileIndex tile)
-    {
-    	// GoodsEntry ge;
-    
-        xy = tile;
-        airport_tile = dock_tile = train_tile = 0;
-        bus_stops = truck_stops = null;
-        had_vehicle_of_type = 0;
-        time_since_load = (byte) 255;
-        time_since_unload = (byte) 255;
-        delete_ctr = 0;
-        facilities = 0;
-    
-        last_vehicle = INVALID_VEHICLE;
-    
-        //for (ge = goods; ge != endof(goods); ge++) 
-        for(GoodsEntry ge : goods)
-        {
-            ge.waiting_acceptance = 0;
-            ge.days_since_pickup = 0;
-            ge.enroute_from = INVALID_STATION;
-            ge.rating = (byte) 175;
-            ge.last_speed = 0;
-            ge.last_age = (byte) 0xFF;
-            ge.feeder_profit = 0;
-        }
-    
-        airport_queue = VehicleQueue.new_VQueue();
-        helicopter_queue = VehicleQueue.new_VQueue();
-    
-        _global_station_sort_dirty = true; // build a new station
-    }
-    
-    // Update the virtual coords needed to draw the station sign.
-    // st = Station to update for.
-    private void UpdateStationVirtCoord()
-    {
-        Point pt = Point.RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
-    
-        pt.y -= 32;
-        if (facilities & FACIL_AIRPORT && airport_type == AT_OILRIG) pt.y -= 16;
-    
-        Global.SetDParam(0, index);
-        Global.SetDParam(1, facilities);
-        UpdateViewportSignPos(sign, pt.x, pt.y, STR_305C_0);
-    }
 
-    
-    // Update the virtual coords needed to draw the station sign for all stations.
-void UpdateAllStationVirtCoord()
-{
-	//Station st;
 
-	//FOR_ALL_STATIONS(st) 
-	_station_pool.forEach( (i,st) .
+
+	private void StationInitialize(TileIndex tile)
 	{
-		if (st.xy != null) st.UpdateStationVirtCoord();
-	});
-}
+		// GoodsEntry ge;
 
-// Update the station virt coords while making the modified parts dirty.
-private void UpdateStationVirtCoordDirty()
-{
-	MarkStationDirty();
-	UpdateStationVirtCoord();
-	MarkStationDirty();
-}
+		xy = tile;
+		airport_tile = dock_tile = train_tile = null;
+		bus_stops = truck_stops = null;
+		had_vehicle_of_type = 0;
+		time_since_load = (byte) 255;
+		time_since_unload = (byte) 255;
+		delete_ctr = 0;
+		facilities = 0;
 
+		last_vehicle = INVALID_VEHICLE;
 
+		//for (ge = goods; ge != endof(goods); ge++) 
+		for(GoodsEntry ge : goods)
+		{
+			ge.waiting_acceptance = 0;
+			ge.days_since_pickup = 0;
+			ge.enroute_from = INVALID_STATION;
+			ge.rating = (byte) 175;
+			ge.last_speed = 0;
+			ge.last_age = (byte) 0xFF;
+			ge.feeder_profit = 0;
+		}
 
-// Get a mask of the cargo types that the station accepts.
-private int GetAcceptanceMask()
-{
-	int mask = 0;
-	int i;
+		airport_queue = VehicleQueue.new_VQueue();
+		helicopter_queue = VehicleQueue.new_VQueue();
 
-	for (i = 0; i != Global.NUM_CARGO; i++) {
-		if (goods[i].waiting_acceptance & 0x8000) mask |= 1 << i;
+		_global_station_sort_dirty = true; // build a new station
 	}
-	return mask;
-}
 
-// Items contains the two cargo names that are to be accepted or rejected.
-// msg is the string id of the message to display.
-private void ShowRejectOrAcceptNews(int items, StringID msg)
-{
-	if (items > 0) {
-		Global.SetDParam(2, BitOps.GB(items, 16, 16));
-		Global.SetDParam(1, BitOps.GB(items,  0, 16));
+	// Update the virtual coords needed to draw the station sign.
+	// st = Station to update for.
+	private void UpdateStationVirtCoord()
+	{
+		Point pt = Point.RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
+
+		pt.y -= 32;
+		if ( (0 != (facilities & FACIL_AIRPORT)) && airport_type == AT_OILRIG) pt.y -= 16;
+
 		Global.SetDParam(0, index);
-		AddNewsItem(msg + ((items >> 16)?1:0), NEWS_FLAGS(NM_SMALL, NF_VIEWPORT|NF_TILE, NT_ACCEPTANCE, 0), xy, 0);
+		Global.SetDParam(1, facilities);
+		UpdateViewportSignPos(sign, pt.x, pt.y, STR_305C_0);
 	}
-}
 
 
-//CT_
+	// Update the virtual coords needed to draw the station sign for all stations.
+	void UpdateAllStationVirtCoord()
+	{
+		_station_pool.forEach( (i,st) ->
+		{
+			if (st.xy != null) st.UpdateStationVirtCoord();
+		});
+	}
 
-// Get a list of the cargo types being produced around the tile.
-static void GetProductionAroundTiles(AcceptedCargo produced, TileIndex tile0,
-	int w, int h, int rad)
-{
-	int x,y;
-	int x1,y1,x2,y2;
-	int xc,yc;
+	// Update the station virt coords while making the modified parts dirty.
+	private void UpdateStationVirtCoordDirty()
+	{
+		MarkStationDirty();
+		UpdateStationVirtCoord();
+		MarkStationDirty();
+	}
 
-	//memset(produced, 0, sizeof(AcceptedCargo));
-	produced.clear();
 
-	x = tile0.TileX();
-	y = tile0.TileY();
 
-	// expand the region by rad tiles on each side
-	// while making sure that we remain inside the board.
-	x2 = Integer.min(x + w + rad, Global.MapSizeX());
-	x1 = Integer.Math.max(x - rad, 0);
+	// Get a mask of the cargo types that the station accepts.
+	private int GetAcceptanceMask()
+	{
+		int mask = 0;
+		int i;
 
-	y2 = Integer.min(y + h + rad, Global.MapSizeY());
-	y1 = Integer.Math.max(y - rad, 0);
+		for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
+			if( 0 != (goods[i].waiting_acceptance & 0x8000) ) 
+				mask |= 1 << i;
+		}
+		return mask;
+	}
 
-	assert(x1 < x2);
-	assert(y1 < y2);
-	assert(w > 0);
-	assert(h > 0);
+	// Items contains the two cargo names that are to be accepted or rejected.
+	// msg is the string id of the message to display.
+	private void ShowRejectOrAcceptNews(int items, StringID msg)
+	{
+		if (items > 0) {
+			Global.SetDParam(2, BitOps.GB(items, 16, 16));
+			Global.SetDParam(1, BitOps.GB(items,  0, 16));
+			Global.SetDParam(0, index);
+			AddNewsItem(msg.id + (((items >> 16) != 0 )?1:0), NEWS_FLAGS(NM_SMALL, NF_VIEWPORT|NF_TILE, NT_ACCEPTANCE, 0), xy, 0);
+		}
+	}
 
-	for (yc = y1; yc != y2; yc++) {
-		for (xc = x1; xc != x2; xc++) {
-			if (!(BitOps.IS_INSIDE_1D(xc, x, w) && BitOps.IS_INSIDE_1D(yc, y, h))) {
-				//GetProducedCargoProc gpc;
-				TileIndex tile1 = new TileIndex(xc, yc);
 
-				/*
+	//CT_
+
+	// Get a list of the cargo types being produced around the tile.
+	static void GetProductionAroundTiles(AcceptedCargo produced, TileIndex tile0,
+			int w, int h, int rad)
+	{
+		int x,y;
+		int x1,y1,x2,y2;
+		int xc,yc;
+
+		//memset(produced, 0, sizeof(AcceptedCargo));
+		produced.clear();
+
+		x = tile0.TileX();
+		y = tile0.TileY();
+
+		// expand the region by rad tiles on each side
+		// while making sure that we remain inside the board.
+		x2 = Integer.min(x + w + rad, Global.MapSizeX());
+		x1 = Integer.max(x - rad, 0);
+
+		y2 = Integer.min(y + h + rad, Global.MapSizeY());
+		y1 = Integer.max(y - rad, 0);
+
+		assert(x1 < x2);
+		assert(y1 < y2);
+		assert(w > 0);
+		assert(h > 0);
+
+		for (yc = y1; yc != y2; yc++) {
+			for (xc = x1; xc != x2; xc++) {
+				if (!(BitOps.IS_INSIDE_1D(xc, x, w) && BitOps.IS_INSIDE_1D(yc, y, h))) {
+					//GetProducedCargoProc gpc;
+					TileIndex tile1 = new TileIndex(xc, yc);
+
+					/*
 				gpc = _tile_type_procs[GetTileType(tile1)].get_produced_cargo_proc;
 				if (gpc != null) {
 					byte cargos[2] = { AcceptedCargo.CT_INVALID, AcceptedCargo.CT_INVALID };
 
 					gpc(tile1, cargos);
-					*/
-				{
-					byte cargos[2] = { AcceptedCargo.CT_INVALID, AcceptedCargo.CT_INVALID };
-					_tile_type_procs[tile1.GetTileType().ordinal()].get_produced_cargo_proc(tile1, cargos);
-					if (cargos[0] != AcceptedCargo.CT_INVALID) {
-						produced[cargos[0]]++;
-						if (cargos[1] != AcceptedCargo.CT_INVALID) {
-							produced[cargos[1]]++;
+					 */
+					{
+						int cargos[] = { AcceptedCargo.CT_INVALID, AcceptedCargo.CT_INVALID };
+						_tile_type_procs[tile1.GetTileType().ordinal()].get_produced_cargo_proc(tile1, cargos);
+						if (cargos[0] != AcceptedCargo.CT_INVALID) {
+							produced.ct[cargos[0]]++;
+							if (cargos[1] != AcceptedCargo.CT_INVALID) {
+								produced.ct[cargos[1]]++;
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-}
 
-// Get a list of the cargo types that are accepted around the tile.
-static void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile0,
-	int w, int h, int rad)
-{
-	int x,y;
-	int x1,y1,x2,y2;
-	int xc,yc;
+	// Get a list of the cargo types that are accepted around the tile.
+	static void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile0,
+			int w, int h, int rad)
+	{
+		int x,y;
+		int x1,y1,x2,y2;
+		int xc,yc;
 
-	//memset(accepts, 0, sizeof(AcceptedCargo));
-	accepts.clear();
+		//memset(accepts, 0, sizeof(AcceptedCargo));
+		accepts.clear();
 
-	x = tile0.TileX();
-	y = tile0.TileY();
+		x = tile0.TileX();
+		y = tile0.TileY();
 
-	// expand the region by rad tiles on each side
-	// while making sure that we remain inside the board.
-	x2 = Integer.min(x + w + rad, Global.MapSizeX());
-	y2 = Integer.min(y + h + rad, Global.MapSizeY());
-	x1 = Integer.Math.max(x - rad, 0);
-	y1 = Integer.Math.max(y - rad, 0);
+		// expand the region by rad tiles on each side
+		// while making sure that we remain inside the board.
+		x2 = Integer.min(x + w + rad, Global.MapSizeX());
+		y2 = Integer.min(y + h + rad, Global.MapSizeY());
+		x1 = Integer.max(x - rad, 0);
+		y1 = Integer.max(y - rad, 0);
 
-	assert(x1 < x2);
-	assert(y1 < y2);
-	assert(w > 0);
-	assert(h > 0);
+		assert(x1 < x2);
+		assert(y1 < y2);
+		assert(w > 0);
+		assert(h > 0);
 
-	for (yc = y1; yc != y2; yc++) {
-		for (xc = x1; xc != x2; xc++) {
-			TileIndex tile1 = new TileIndex(xc, yc);
+		for (yc = y1; yc != y2; yc++) {
+			for (xc = x1; xc != x2; xc++) {
+				TileIndex tile1 = new TileIndex(xc, yc);
 
-			if (!tile1.IsTileType(TileTypes.MP_STATION)) {
-				AcceptedCargo ac;
-				int i;
+				if (!tile1.IsTileType(TileTypes.MP_STATION)) {
+					AcceptedCargo ac;
+					int i;
 
-				GetAcceptedCargo(tile1, ac);
-				for (i = 0; i < lengthof(ac); ++i) accepts[i] += ac[i];
+					Landscape.GetAcceptedCargo(tile1, ac);
+					for (i = 0; i < ac.ct.length; ++i) 
+						accepts.ct[i] += ac.ct[i];
+				}
 			}
 		}
 	}
-}
 
 
 
 
 
-// Update the acceptance for a station.
-// show_msg controls whether to display a message that acceptance was changed.
-private void UpdateStationAcceptance(boolean show_msg)
-{
-	int old_acc, new_acc;
-	RoadStop cur_rs;
-	int i;
-	ottd_Rectangle rect;
-	int rad;
-	AcceptedCargo accepts;
+	// Update the acceptance for a station.
+	// show_msg controls whether to display a message that acceptance was changed.
+	private void UpdateStationAcceptance(boolean show_msg)
+	{
+		int old_acc, new_acc;
+		RoadStop cur_rs;
+		int i;
+		ottd_Rectangle rect;
+		int rad;
+		AcceptedCargo accepts;
 
-	rect.min_x = Global.MapSizeX();
-	rect.min_y = Global.MapSizeY();
-	rect.max_x = rect.max_y = 0;
-	// Don't update acceptance for a buoy
-	if (IsBuoy()) return;
+		rect.min_x = Global.MapSizeX();
+		rect.min_y = Global.MapSizeY();
+		rect.max_x = rect.max_y = 0;
+		// Don't update acceptance for a buoy
+		if (IsBuoy()) return;
 
-	/* old accepted goods types */
-	old_acc = GetAcceptanceMask();
+		/* old accepted goods types */
+		old_acc = GetAcceptanceMask();
 
-	// Put all the tiles that span an area in the table.
-	if (train_tile != null) {
-		rect.MergePoint(train_tile);
-		rect.MergePoint(
-			train_tile + TileDiffXY(trainst_w - 1, trainst_h - 1)
-		);
+		// Put all the tiles that span an area in the table.
+		if (train_tile != null) {
+			rect.MergePoint(train_tile);
+			rect.MergePoint(
+					train_tile + TileDiffXY(trainst_w - 1, trainst_h - 1)
+					);
+		}
+
+		if (airport_tile != null) {
+			rect.MergePoint( airport_tile);
+			rect.MergePoint(
+					airport_tile + TileDiffXY(
+							_airport_size_x[airport_type] - 1,
+							_airport_size_y[airport_type] - 1
+							)
+					);
+		}
+
+		if (dock_tile != null) rect.MergePoint( dock_tile);
+
+		for (cur_rs = bus_stops; cur_rs != null; cur_rs = cur_rs.next) {
+			rect.MergePoint( cur_rs.xy);
+		}
+
+		for (cur_rs = truck_stops; cur_rs != null; cur_rs = cur_rs.next) {
+			rect.MergePoint( cur_rs.xy);
+		}
+
+		rad = (Global._patches.modified_catchment) ? FindCatchmentRadius(st) : 4;
+
+		// And retrieve the acceptance.
+		if (rect.max_x >= rect.min_x) {
+			GetAcceptanceAroundTiles(
+					accepts,
+					new TileIndex(rect.min_x, rect.min_y),
+					rect.max_x - rect.min_x + 1,
+					rect.max_y - rect.min_y + 1,
+					rad
+					);
+		} else {
+			//memset(accepts, 0, sizeof(accepts));
+			accepts.clear();
+		}
+
+		// Adjust in case our station only accepts fewer kinds of goods
+		for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
+			int amt = Integer.min(accepts[i], 15);
+
+			// Make sure the station can accept the goods type.
+			if ((i != AcceptedCargo.CT_PASSENGERS && !(facilities & (byte)~FACIL_BUS_STOP)) ||
+					(i == AcceptedCargo.CT_PASSENGERS && !(facilities & (byte)~FACIL_TRUCK_STOP)))
+				amt = 0;
+
+			goods[i].waiting_acceptance = BitOps.RETSB(goods[i].waiting_acceptance, 12, 4, amt);
+		}
+
+		// Only show a message in case the acceptance was actually changed.
+		new_acc = GetAcceptanceMask(st);
+		if (old_acc == new_acc)
+			return;
+
+		// show a message to report that the acceptance was changed?
+		if (show_msg && owner == Global._local_player && facilities) {
+			int accept=0, reject=0; /* these contain two string ids each */
+			final StringID[] str = _cargoc.names_s;
+
+			int si = 0;
+			do {
+				if (new_acc & 1) {
+					if(0 ==(old_acc & 1)) accept = (accept << 16) | str[si];
+				} else {
+					if(old_acc & 1) reject = (reject << 16) | str[si];
+				}
+				si++;
+			} while ((new_acc>>=1) != (old_acc>>=1));
+
+			ShowRejectOrAcceptNews(st, accept, STR_3040_NOW_ACCEPTS);
+			ShowRejectOrAcceptNews(st, reject, STR_303E_NO_LONGER_ACCEPTS);
+		}
+
+		// redraw the station view since acceptance changed
+		InvalidateWindowWidget(WC_STATION_VIEW, index, 4);
 	}
 
-	if (airport_tile != null) {
-		rect.MergePoint( airport_tile);
-		rect.MergePoint(
-			airport_tile + TileDiffXY(
-				_airport_size_x[airport_type] - 1,
-				_airport_size_y[airport_type] - 1
-			)
-		);
+	// This is called right after a station was deleted.
+	// It checks if the whole station is free of substations, and if so, the station will be
+	// deleted after a little while.
+	private void DeleteStationIfEmpty()
+	{
+		if (facilities == 0) {
+			delete_ctr = 0;
+			Window.InvalidateWindow(Window.WC_STATION_LIST, owner.id);
+		}
 	}
-
-	if (dock_tile != null) rect.MergePoint( dock_tile);
-
-	for (cur_rs = bus_stops; cur_rs != null; cur_rs = cur_rs.next) {
-		rect.MergePoint( cur_rs.xy);
-	}
-
-	for (cur_rs = truck_stops; cur_rs != null; cur_rs = cur_rs.next) {
-		rect.MergePoint( cur_rs.xy);
-	}
-
-	rad = (Global._patches.modified_catchment) ? FindCatchmentRadius(st) : 4;
-
-	// And retrieve the acceptance.
-	if (rect.max_x >= rect.min_x) {
-		GetAcceptanceAroundTiles(
-			accepts,
-			new TileIndex(rect.min_x, rect.min_y),
-			rect.max_x - rect.min_x + 1,
-			rect.max_y - rect.min_y + 1,
-			rad
-		);
-	} else {
-		//memset(accepts, 0, sizeof(accepts));
-		accepts.clear();
-	}
-
-	// Adjust in case our station only accepts fewer kinds of goods
-	for (i = 0; i != Global.NUM_CARGO; i++) {
-		int amt = Integer.min(accepts[i], 15);
-
-		// Make sure the station can accept the goods type.
-		if ((i != AcceptedCargo.CT_PASSENGERS && !(facilities & (byte)~FACIL_BUS_STOP)) ||
-				(i == AcceptedCargo.CT_PASSENGERS && !(facilities & (byte)~FACIL_TRUCK_STOP)))
-			amt = 0;
-
-		goods[i].waiting_acceptance = BitOps.RETSB(goods[i].waiting_acceptance, 12, 4, amt);
-	}
-
-	// Only show a message in case the acceptance was actually changed.
-	new_acc = GetAcceptanceMask(st);
-	if (old_acc == new_acc)
-		return;
-
-	// show a message to report that the acceptance was changed?
-	if (show_msg && owner == Global._local_player && facilities) {
-		int accept=0, reject=0; /* these contain two string ids each */
-		final StringID[] str = _cargoc.names_s;
-
-		int si = 0;
-		do {
-			if (new_acc & 1) {
-				if (!(old_acc & 1)) accept = (accept << 16) | str[si];
-			} else {
-				if (old_acc & 1) reject = (reject << 16) | str[si];
-			}
-		} while (si++,(new_acc>>=1) != (old_acc>>=1));
-
-		ShowRejectOrAcceptNews(st, accept, STR_3040_NOW_ACCEPTS);
-		ShowRejectOrAcceptNews(st, reject, STR_303E_NO_LONGER_ACCEPTS);
-	}
-
-	// redraw the station view since acceptance changed
-	InvalidateWindowWidget(WC_STATION_VIEW, index, 4);
-}
-
-// This is called right after a station was deleted.
-// It checks if the whole station is free of substations, and if so, the station will be
-// deleted after a little while.
-private void DeleteStationIfEmpty()
-{
-	if (facilities == 0) {
-		delete_ctr = 0;
-		InvalidateWindow(WC_STATION_LIST, owner);
-	}
-}
 
 	private static IPoolItemFactory<Station> factory = new IPoolItemFactory<Station>() {
-		
+
 		@Override
 		public Station createObject() {
 			// TODO Auto-generated method stub
@@ -400,41 +406,41 @@ private void DeleteStationIfEmpty()
 	{
 		return index < GetStationPoolSize();
 	}
-	
-	
 
-	
+
+
+
 
 	/*enum {
-		// Math.max stations: 64000 (64 * 1000) 
+		// max stations: 64000 (64 * 1000) 
 		STATION_POOL_BLOCK_SIZE_BITS = 6,       // In bits, so (1 << 6) == 64 
 		STATION_POOL_MAX_BLOCKS      = 1000,
 
-		// Math.max roadstops: 64000 (32 * 2000) 
+		// max roadstops: 64000 (32 * 2000) 
 		ROADSTOP_POOL_BLOCK_SIZE_BITS = 5,       // In bits, so (1 << 5) == 32 
 		ROADSTOP_POOL_MAX_BLOCKS      = 2000,
 	};*/
 
 	/**
 	 * Called if a new block is added to the station-pool
-	 */
+	 * /
 	static void StationPoolNewBlock(int start_item)
 	{
 		Station st;
-
 		FOR_ALL_STATIONS_FROM(st, start_item) st.index = start_item++;
+
 	}
 
 	/**
 	 * Called if a new block is added to the roadstop-pool
-	 */
+	 * /
 	static void RoadStopPoolNewBlock(int start_item)
 	{
 		RoadStop rs;
 
 		FOR_ALL_ROADSTOPS_FROM(rs, start_item) rs.index = start_item++;
 	}
-
+	 */
 	/* Initialize the station-pool and roadstop-pool */
 	//MemoryPool _station_pool = { "Stations", STATION_POOL_MAX_BLOCKS, STATION_POOL_BLOCK_SIZE_BITS, sizeof(Station), &StationPoolNewBlock, 0, 0, null };
 	//MemoryPool _roadstop_pool = { "RoadStop", ROADSTOP_POOL_MAX_BLOCKS, ROADSTOP_POOL_BLOCK_SIZE_BITS, sizeof(RoadStop), &RoadStopPoolNewBlock, 0, 0, null };
@@ -448,16 +454,16 @@ private void DeleteStationIfEmpty()
 	//void ShowAircraftDepotWindow(TileIndex tile);
 	//extern void UpdateAirplanesOnNewStation(Station st);
 
-	private static void MarkStationDirty(final  Station  st)
+	private void MarkStationDirty()
 	{
-		if (st.sign.width_1 != 0) {
-			Window.InvalidateWindowWidget(Window.WC_STATION_VIEW, st.index, 1);
+		if (sign.width_1 != 0) {
+			Window.InvalidateWindowWidget(Window.WC_STATION_VIEW, index, 1);
 
 			MarkAllViewportsDirty(
-				st.sign.left - 6,
-				st.sign.top,
-				st.sign.left + (st.sign.width_1 << 2) + 12,
-				st.sign.top + 48);
+					sign.left - 6,
+					sign.top,
+					sign.left + (sign.width_1 << 2) + 12,
+					sign.top + 48);
 		}
 	}
 
@@ -474,12 +480,12 @@ private void DeleteStationIfEmpty()
 
 		if (st.airport_tile) {
 			switch (st.airport_type) {
-				case AT_OILRIG:        ret = Math.max(ret, CA_AIR_OILPAD);   break;
-				case AT_SMALL:         ret = Math.max(ret, CA_AIR_SMALL);    break;
-				case AT_HELIPORT:      ret = Math.max(ret, CA_AIR_HELIPORT); break;
-				case AT_LARGE:         ret = Math.max(ret, CA_AIR_LARGE);    break;
-				case AT_METROPOLITAN:  ret = Math.max(ret, CA_AIR_METRO);    break;
-				case AT_INTERNATIONAL: ret = Math.max(ret, CA_AIR_INTER);    break;
+			case AT_OILRIG:        ret = Math.max(ret, CA_AIR_OILPAD);   break;
+			case AT_SMALL:         ret = Math.max(ret, CA_AIR_SMALL);    break;
+			case AT_HELIPORT:      ret = Math.max(ret, CA_AIR_HELIPORT); break;
+			case AT_LARGE:         ret = Math.max(ret, CA_AIR_LARGE);    break;
+			case AT_METROPOLITAN:  ret = Math.max(ret, CA_AIR_METRO);    break;
+			case AT_INTERNATIONAL: ret = Math.max(ret, CA_AIR_INTER);    break;
 			}
 		}
 
@@ -491,7 +497,8 @@ private void DeleteStationIfEmpty()
 	private static Station  GetStationAround(TileIndex tile, int w, int h, StationID closest_station)
 	{
 		// check around to see if there's any stations there
-		BEGIN_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
+		//BEGIN_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
+		TileIndex.forAll(w + 2, h + 2, tile.sub( new TileDiffXY(1, 1) ), (tile_cur) -> {
 			if (IsTileType(tile_cur, MP_STATION)) {
 				StationID t = _m[tile_cur].m2;
 				{
@@ -508,25 +515,26 @@ private void DeleteStationIfEmpty()
 					return CHECK_STATIONS_ERR;
 				}
 			}
-		END_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
+		});
+		//END_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
 		return (closest_station == INVALID_STATION) ? null : GetStation(closest_station);
 	}
 
 	public static TileIndex GetStationTileForVehicle(final  Vehicle v, final  Station st)
 	{
 		switch (v.type) {
-			case VEH_Train: 		return st.train_tile;
-			case VEH_Aircraft:	return st.airport_tile;
-			case VEH_Ship:			return st.dock_tile;
-			case VEH_Road:
-				if (v.cargo_type == CT_PASSENGERS) {
-					return (st.bus_stops != null) ? st.bus_stops.xy : 0;
-				} else {
-					return (st.truck_stops != null) ? st.truck_stops.xy : 0;
-				}
-			default:
-				assert(false);
-				return 0;
+		case VEH_Train: 		return st.train_tile;
+		case VEH_Aircraft:	return st.airport_tile;
+		case VEH_Ship:			return st.dock_tile;
+		case VEH_Road:
+			if (v.cargo_type == CT_PASSENGERS) {
+				return (st.bus_stops != null) ? st.bus_stops.xy : 0;
+			} else {
+				return (st.truck_stops != null) ? st.truck_stops.xy : 0;
+			}
+		default:
+			assert(false);
+			return 0;
 		}
 	}
 
@@ -562,40 +570,45 @@ private void DeleteStationIfEmpty()
 
 	private static Station AllocateStation()
 	{
-		Station st = null;
+		Station ret = null;
 
-		FOR_ALL_STATIONS(st) {
-			if (st.xy == 0) {
+		//FOR_ALL_STATIONS(st) 
+		_station_pool.forEach( (i,st) ->
+		{
+			if (st.xy == null) {
 				StationID index = st.index;
 
 				//memset(st, 0, sizeof(Station));
 				st.clear();
 				st.index = index;
 
-				return st;
+				ret = st;
 			}
-		}
+		});
+
+		if( ret != null ) return ret;
 
 		/* Check if we can add a block to the pool */
-		if (AddBlockToPool(&_station_pool)) return AllocateStation();
+		if(_station_pool.AddBlockToPool()) 
+			return AllocateStation();
 
-		_error_message = STR_3008_TOO_MANY_STATIONS_LOADING;
+		Global._error_message = STR_3008_TOO_MANY_STATIONS_LOADING;
 		return null;
 	}
 
 
 	static final  TileIndexDiffC _count_square_table[] = 
 		{
-			new TileIndexDiffC(-3, -3), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-			new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-			new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-			new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-			new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-			new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-			new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0)
+				new TileIndexDiffC(-3, -3), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0)
 		};
-	
-	private static int CountMapSquareAround(TileIndex tile, byte type, byte min, byte Math.max)
+
+	private static int CountMapSquareAround(TileIndex tile, byte type, byte min, byte max)
 	{
 		int num = 0;
 
@@ -603,7 +616,7 @@ private void DeleteStationIfEmpty()
 		{
 			tile = TILE_MASK(tile + ToTileIndexDiff(p));
 
-			if (IsTileType(tile, type) && _m[tile].m5 >= min && _m[tile].m5 <= Math.max)
+			if (IsTileType(tile, type) && _m[tile].m5 >= min && _m[tile].m5 <= max)
 				num++;
 		}
 
@@ -612,23 +625,32 @@ private void DeleteStationIfEmpty()
 
 	//#define M(x) ((x) - STR_SV_STNAME)
 	/*static final  int _gen_station_name_bits[] = {
-			0,                                      /* 0 */
-			1 << M(STR_SV_STNAME_AIRPORT),          /* 1 */
-			1 << M(STR_SV_STNAME_OILFIELD),         /* 2 */
-			1 << M(STR_SV_STNAME_DOCKS),            /* 3 */
-			0x1FF << M(STR_SV_STNAME_BUOY_1),       /* 4 */
-			1 << M(STR_SV_STNAME_HELIPORT),         /* 5 */
-		};*/
+			0,                                      // 0 
+	1 << M(STR_SV_STNAME_AIRPORT),          // 1 
+	1 << M(STR_SV_STNAME_OILFIELD),         // 2 
+	1 << M(STR_SV_STNAME_DOCKS),            // 3 
+	0x1FF << M(STR_SV_STNAME_BUOY_1),       // 4 
+	1 << M(STR_SV_STNAME_HELIPORT),         // 5 
+	};*/
+
+	private static int M(int x) { return ((x) - STR_SV_STNAME); }
 
 	static final  int _gen_station_name_bits[] = {
 			0,                                      /* 0 */
-			1 << STR_SV_STNAME_AIRPORT - STR_SV_STNAME,          /* 1 */
-			1 << STR_SV_STNAME_OILFIELD - STR_SV_STNAME,         /* 2 */
-			1 << STR_SV_STNAME_DOCKS - STR_SV_STNAME,            /* 3 */
-			0x1FF << STR_SV_STNAME_BUOY_1 - STR_SV_STNAME,       /* 4 */
-			1 << STR_SV_STNAME_HELIPORT - STR_SV_STNAME,         /* 5 */
-		};
-	
+			1 << (STR_SV_STNAME_AIRPORT - STR_SV_STNAME),          /* 1 */
+			1 << (STR_SV_STNAME_OILFIELD - STR_SV_STNAME),         /* 2 */
+			1 << (STR_SV_STNAME_DOCKS - STR_SV_STNAME),            /* 3 */
+			0x1FF << (STR_SV_STNAME_BUOY_1 - STR_SV_STNAME),       /* 4 */
+			1 << (STR_SV_STNAME_HELIPORT - STR_SV_STNAME_),         /* 5 */
+	};
+
+	static final  int _direction_and_table[] = {
+			~( (1<<M(STR_SV_STNAME_WEST)) | (1<<M(STR_SV_STNAME_EAST)) | (1<<M(STR_SV_STNAME_NORTH)) ),
+			~( (1<<M(STR_SV_STNAME_SOUTH)) | (1<<M(STR_SV_STNAME_WEST)) | (1<<M(STR_SV_STNAME_NORTH)) ),
+			~( (1<<M(STR_SV_STNAME_SOUTH)) | (1<<M(STR_SV_STNAME_EAST)) | (1<<M(STR_SV_STNAME_NORTH)) ),
+			~( (1<<M(STR_SV_STNAME_SOUTH)) | (1<<M(STR_SV_STNAME_WEST)) | (1<<M(STR_SV_STNAME_EAST)) ),
+	};
+
 	private static boolean GenerateStationName(Station st, TileIndex tile, int flag)
 	{
 
@@ -636,28 +658,30 @@ private void DeleteStationIfEmpty()
 		int free_names = (int)-1;
 		int found;
 		int z,z2;
-		unsigned long tmp;
+		long tmp;
 
+		//Station s;
+		//FOR_ALL_STATIONS(s) 
+		_station_pool.forEach( (i,s) ->			
 		{
-			Station s;
-
-			FOR_ALL_STATIONS(s) {
-				if (s != st && s.xy != 0 && s.town==t) {
-					int str = M(s.string_id);
-					if (str <= 0x20) {
-						if (str == M(STR_SV_STNAME_FOREST))
-							str = M(STR_SV_STNAME_WOODS);
-						CLRBIT(free_names, str);
-					}
+			if (s != st && s.xy != null && s.town==t) {
+				int str = M(s.string_id);
+				if (str <= 0x20) {
+					if (str == M(STR_SV_STNAME_FOREST))
+						str = M(STR_SV_STNAME_WOODS);
+					free_names = BitOps.RETCLRBIT(free_names, str);
 				}
 			}
-		}
+		});
+
 
 		/* check default names */
 		tmp = free_names & _gen_station_name_bits[flag];
 		if (tmp != 0) {
 			found = FindFirstBit(tmp);
-			goto done;
+			//goto done;
+			st.string_id = found + STR_SV_STNAME;
+			return true;
 		}
 
 		/* check mine? */
@@ -668,17 +692,29 @@ private void DeleteStationIfEmpty()
 					CountMapSquareAround(tile, MP_INDUSTRY, 0x48, 0x58) >= 2 ||
 					CountMapSquareAround(tile, MP_INDUSTRY, 0x5B, 0x63) >= 2) {
 				found = M(STR_SV_STNAME_MINES);
-				goto done;
+				//goto done;
+				st.string_id = found + STR_SV_STNAME;
+				return true;
 			}
 		}
 
 		/* check close enough to town to get central as name? */
 		if (DistanceMax(tile,t.xy) < 8) {
 			found = M(STR_SV_STNAME);
-			if (HASBIT(free_names, M(STR_SV_STNAME))) goto done;
+			if (BitOps.HASBIT(free_names, M(STR_SV_STNAME)))
+			{
+				//goto done;
+				st.string_id = found + STR_SV_STNAME;
+				return true;
+			}
 
 			found = M(STR_SV_STNAME_CENTRAL);
-			if (HASBIT(free_names, M(STR_SV_STNAME_CENTRAL))) goto done;
+			if (BitOps.HASBIT(free_names, M(STR_SV_STNAME_CENTRAL)))
+			{
+				//goto done;
+				st.string_id = found + STR_SV_STNAME;
+				return true;
+			}
 		}
 
 		/* Check lakeside */
@@ -686,42 +722,50 @@ private void DeleteStationIfEmpty()
 				DistanceFromEdge(tile) < 20 &&
 				CountMapSquareAround(tile, MP_WATER, 0, 0) >= 5) {
 			found = M(STR_SV_STNAME_LAKESIDE);
-			goto done;
+			//goto done;
+			st.string_id = found + STR_SV_STNAME;
+			return true;
 		}
 
 		/* Check woods */
-		if (HASBIT(free_names, M(STR_SV_STNAME_WOODS)) && (
-					CountMapSquareAround(tile, MP_TREES, 0, 255) >= 8 ||
-					CountMapSquareAround(tile, MP_INDUSTRY, 0x10, 0x11) >= 2)
+		if (BitOps.HASBIT(free_names, M(STR_SV_STNAME_WOODS)) && (
+				CountMapSquareAround(tile, MP_TREES, 0, 255) >= 8 ||
+				CountMapSquareAround(tile, MP_INDUSTRY, 0x10, 0x11) >= 2)
 				) {
-			found = _opt.landscape == LT_DESERT ?
-				M(STR_SV_STNAME_FOREST) : M(STR_SV_STNAME_WOODS);
-			goto done;
+			found = Global._opt.landscape == LT_DESERT ?
+					M(STR_SV_STNAME_FOREST) : M(STR_SV_STNAME_WOODS);
+			//goto done;
+			st.string_id = found + STR_SV_STNAME;
+			return true;
 		}
 
-		/* check elevation compared to Town /
-		z = GetTileZ(tile);
-		z2 = GetTileZ(t.xy);
+		/* check elevation compared to Town */
+		z = tile.GetTileZ();
+		z2 = t.xy.GetTileZ();
 		if (z < z2) {
 			found = M(STR_SV_STNAME_VALLEY);
-			if (HASBIT(free_names, M(STR_SV_STNAME_VALLEY))) goto done;
+			if (BitOps.HASBIT(free_names, M(STR_SV_STNAME_VALLEY))) 
+			{
+				//goto done;
+				st.string_id = found + STR_SV_STNAME;
+				return true;
+			}
 		} else if (z > z2) {
 			found = M(STR_SV_STNAME_HEIGHTS);
-			if (HASBIT(free_names, M(STR_SV_STNAME_HEIGHTS))) goto done;
+			if (BitOps.HASBIT(free_names, M(STR_SV_STNAME_HEIGHTS))) 
+			{
+				//goto done;
+				st.string_id = found + STR_SV_STNAME;
+				return true;
+			}
 		}
 
-		/* check direction compared to Town /
+		/* check direction compared to Town */
 		{
-			static final  int8 _direction_and_table[] = {
-				~( (1<<M(STR_SV_STNAME_WEST)) | (1<<M(STR_SV_STNAME_EAST)) | (1<<M(STR_SV_STNAME_NORTH)) ),
-				~( (1<<M(STR_SV_STNAME_SOUTH)) | (1<<M(STR_SV_STNAME_WEST)) | (1<<M(STR_SV_STNAME_NORTH)) ),
-				~( (1<<M(STR_SV_STNAME_SOUTH)) | (1<<M(STR_SV_STNAME_EAST)) | (1<<M(STR_SV_STNAME_NORTH)) ),
-				~( (1<<M(STR_SV_STNAME_SOUTH)) | (1<<M(STR_SV_STNAME_WEST)) | (1<<M(STR_SV_STNAME_EAST)) ),
-			};
 
 			free_names &= _direction_and_table[
-				(TileX(tile) < TileX(t.xy)) +
-				(TileY(tile) < TileY(t.xy)) * 2];
+			                                   (TileX(tile) < TileX(t.xy)) +
+			                                   (TileY(tile) < TileY(t.xy)) * 2];
 		}
 
 		tmp = free_names & ((1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<6)|(1<<7)|(1<<12)|(1<<26)|(1<<27)|(1<<28)|(1<<29)|(1<<30));
@@ -731,7 +775,7 @@ private void DeleteStationIfEmpty()
 		}
 		found = FindFirstBit(tmp);
 
-	done:
+		//done:
 		st.string_id = found + STR_SV_STNAME;
 		return true;
 	}
@@ -740,10 +784,12 @@ private void DeleteStationIfEmpty()
 	private static Station  GetClosestStationFromTile(TileIndex tile, int threshold, PlayerID owner)
 	{
 		Station  best_station = null;
-		Station  st;
+		//Station  st;
 
-		FOR_ALL_STATIONS(st) {
-			if (st.xy != 0 && (owner == OWNER_SPECTATOR || st.owner == owner)) {
+		//FOR_ALL_STATIONS(st) 
+		_station_pool.forEach( (i,st) ->			
+		{
+			if (st.xy != null && (owner.id == Owner.OWNER_SPECTATOR || st.owner == owner)) {
 				int cur_dist = DistanceManhattan(tile, st.xy);
 
 				if (cur_dist < threshold) {
@@ -751,16 +797,29 @@ private void DeleteStationIfEmpty()
 					best_station = st;
 				}
 			}
-		}
+		});
 
 		return best_station;
 	}
 
 	//static int ClearTile_Station(TileIndex tile, byte flags);
 
-	// Tries to clear the given area. Returns the cost in case of success.
-	// Or an error code if it failed.
-	static public int CheckFlatLandBelow(TileIndex tile, int w, int h, int flags, int invalid_dirs, StationID* station)
+	/**
+	 * 
+	 * Tries to clear the given area. Returns the cost in case of success.
+	 * Or an error code if it failed.
+	 * 
+	 * @param tile
+	 * @param w
+	 * @param h
+	 * @param flags
+	 * @param invalid_dirs
+	 * @param station - return something here? :)
+	 * @return
+	 */
+	// 
+	// 
+	static public int CheckFlatLandBelow(TileIndex tile, int w, int h, int flags, int invalid_dirs, StationID[] station)
 	{
 		int cost = 0, ret;
 
@@ -769,10 +828,15 @@ private void DeleteStationIfEmpty()
 		int allowed_z = -1;
 		int flat_z;
 
-		BEGIN_TILE_LOOP(tile_cur, w, h, tile)
+		//BEGIN_TILE_LOOP(tile_cur, w, h, tile)
+
+		TileIndex.forAll(w, h, tile, (tile_cur) -> {
+
 			if (!EnsureNoVehicle(tile_cur)) return CMD_ERROR;
 
-			tileh = GetTileSlope(tile_cur, &z);
+			IntPointer zp = new IntPointer(); 
+			tileh = tile_cur.GetTileSlope(zp);
+			z = zp.v;
 
 			/* Prohibit building if
 				1) The tile is "steep" (i.e. stretches two height levels)
@@ -781,10 +845,10 @@ private void DeleteStationIfEmpty()
 					a) the player building is an "old-school" AI
 					-OR-
 					b) the build_on_slopes switch is disabled
-			*/
+			 */
 			if (IsSteepTileh(tileh) ||
 					((_is_old_ai_player || !_patches.build_on_slopes) && tileh != 0)) {
-				_error_message = STR_0007_FLAT_LAND_REQUIRED;
+				Global._error_message = STR_0007_FLAT_LAND_REQUIRED;
 				return CMD_ERROR;
 			}
 
@@ -807,23 +871,23 @@ private void DeleteStationIfEmpty()
 				// first tile
 				allowed_z = flat_z;
 			} else if (allowed_z != flat_z) {
-				_error_message = STR_0007_FLAT_LAND_REQUIRED;
+				Global._error_message = STR_0007_FLAT_LAND_REQUIRED;
 				return CMD_ERROR;
 			}
 
 			// if station is set, then we have special handling to allow building on top of already existing stations.
 			// so station points to INVALID_STATION if we can build on any station. or it points to a station if we're only allowed to build
 			// on exactly that station.
-			if (station != null && IsTileType(tile_cur, MP_STATION)) {
-				if (_m[tile_cur].m5 >= 8) {
-					_error_message = ClearTile_Station(tile_cur, DC_AUTO); // get error message
+			if (station != null && tile_cur.IsTileType(TileTypes.MP_STATION)) {
+				if (tile_cur.getMap().m5 >= 8) {
+					Global._error_message = ClearTile_Station(tile_cur, DC_AUTO); // get error message
 					return CMD_ERROR;
 				} else {
-					StationID st = _m[tile_cur].m2;
-					if (*station == INVALID_STATION) {
-						*station = st;
-					} else if (*station != st) {
-						_error_message = STR_3006_ADJOINS_MORE_THAN_ONE_EXISTING;
+					StationID st = tile_cur.getMap().m2;
+					if (station[0] == INVALID_STATION) {
+						station[0] = st;
+					} else if (station[0] != st) {
+						Global._error_message = STR_3006_ADJOINS_MORE_THAN_ONE_EXISTING;
 						return CMD_ERROR;
 					}
 				}
@@ -832,29 +896,32 @@ private void DeleteStationIfEmpty()
 				if (CmdFailed(ret)) return CMD_ERROR;
 				cost += ret;
 			}
-		END_TILE_LOOP(tile_cur, w, h, tile)
+
+		});
+		//END_TILE_LOOP(tile_cur, w, h, tile)
 
 		return cost;
+
 	}
 
 	private static boolean CanExpandRailroadStation(Station st, int [] fin, int direction)
 	{
 		int curw = st.trainst_w, curh = st.trainst_h;
-		TileIndex tile = fin[0];
+		TileIndex tile = new TileIndex( fin[0] );
 		int w = fin[1];
 		int h = fin[2];
 
-		if (_patches.nonuniform_stations) {
+		if (Global._patches.nonuniform_stations) {
 			// determine new size of train station region..
-			int x = min(TileX(st.train_tile), TileX(tile));
-			int y = min(TileY(st.train_tile), TileY(tile));
-			curw = Math.max(TileX(st.train_tile) + curw, TileX(tile) + w) - x;
-			curh = Math.max(TileY(st.train_tile) + curh, TileY(tile) + h) - y;
-			tile = TileXY(x, y);
+			int x = Math.min(st.train_tile.TileX(), tile.TileX());
+			int y = Math.min(st.train_tile.TileY(), tile.TileY());
+			curw = Math.max(st.train_tile.TileX() + curw, tile.TileX() + w) - x;
+			curh = Math.max(st.train_tile.TileY() + curh, tile.TileY() + h) - y;
+			tile = TileIndex.TileXY(x, y);
 		} else {
 			// check so the direction is the same
-			if ((_m[st.train_tile].m5 & 1) != direction) {
-				_error_message = STR_306D_NONUNIFORM_STATIONS_DISALLOWED;
+			if ((st.train_tile.getMap().m5 & 1) != direction) {
+				Global._error_message = STR_306D_NONUNIFORM_STATIONS_DISALLOWED;
 				return false;
 			}
 
@@ -874,7 +941,7 @@ private void DeleteStationIfEmpty()
 				tile -= TileDiffXY(curw, 0);
 				curw += w;
 			} else {
-				_error_message = STR_306D_NONUNIFORM_STATIONS_DISALLOWED;
+				Global._error_message = STR_306D_NONUNIFORM_STATIONS_DISALLOWED;
 				return false;
 			}
 		}
@@ -935,7 +1002,7 @@ private void DeleteStationIfEmpty()
 			}
 		}
 	}
-	*/
+	 */
 
 	/** Build railroad station
 	 * @param x,y starting position of station dragging/placement
@@ -954,7 +1021,7 @@ private void DeleteStationIfEmpty()
 		TileIndex tile_org;
 		int w_org, h_org;
 		int cost, ret;
-		StationID est;
+		StationID[] est = { 0 };
 		int plat_len, numtracks;
 		int direction;
 		int finalvalues = new int[3];
@@ -988,19 +1055,19 @@ private void DeleteStationIfEmpty()
 		finalvalues[2] = h_org;
 
 		// Make sure the area below consists of clear tiles. (OR tiles belonging to a certain rail station)
-		est = INVALID_STATION;
+		est[0] = INVALID_STATION;
 		// If DC_EXEC is in flag, do not want to pass it to CheckFlatLandBelow, because of a nice bug
 		//  for detail info, see: https://sourceforge.net/tracker/index.php?func=detail&aid=1029064&group_id=103924&atid=636365
-		if (CmdFailed(ret = CheckFlatLandBelow(tile_org, w_org, h_org, flags&~DC_EXEC, 5 << direction, _patches.nonuniform_stations ? &est : null))) return CMD_ERROR;
+		if (CmdFailed(ret = CheckFlatLandBelow(tile_org, w_org, h_org, flags&~DC_EXEC, 5 << direction, _patches.nonuniform_stations ? est : null))) return CMD_ERROR;
 		cost = ret + (numtracks * _price.train_station_track + _price.train_station_length) * plat_len;
 
 		// Make sure there are no similar stations around us.
-		st = GetStationAround(tile_org, w_org, h_org, est);
+		st = GetStationAround(tile_org, w_org, h_org, est[0]);
 		if (st == CHECK_STATIONS_ERR) return CMD_ERROR;
 
 		// See if there is a deleted station close to us.
 		if (st == null) {
-			st = GetClosestStationFromTile(tile_org, 8, _current_player);
+			st = GetClosestStationFromTile(tile_org, 8, Global._current_player);
 			if (st != null && st.facilities) st = null;
 		}
 
@@ -1035,14 +1102,14 @@ private void DeleteStationIfEmpty()
 
 		if (flags & DC_EXEC) {
 			TileIndexDiff tile_delta;
-			byte *layout_ptr;
+			byte [] layout_ptr;
 			StationID station_index = st.index;
 			final  StationSpec *statspec;
 
 			// Now really clear the land below the station
 			// It should never return CMD_ERROR.. but you never know ;)
 			//  (a bit strange function name for it, but it really does clear the land, when DC_EXEC is in flags)
-			if (CmdFailed(CheckFlatLandBelow(tile_org, w_org, h_org, flags, 5 << direction, _patches.nonuniform_stations ? &est : null))) return CMD_ERROR;
+			if (CmdFailed(CheckFlatLandBelow(tile_org, w_org, h_org, flags, 5 << direction, _patches.nonuniform_stations ? est : null))) return CMD_ERROR;
 
 			st.train_tile = finalvalues[0];
 			if (!st.facilities) st.xy = finalvalues[0];
@@ -1057,7 +1124,7 @@ private void DeleteStationIfEmpty()
 			tile_delta = direction ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
 
 			statspec = (p2 & 0x10) != 0 ? GetCustomStation(STAT_CLASS_DFLT, p2 >> 8) : null;
-			layout_ptr = alloca(numtracks * plat_len);
+			layout_ptr = new byte[numtracks * plat_len];
 			GetStationLayout(layout_ptr, numtracks, plat_len, statspec);
 
 			do {
@@ -1066,13 +1133,13 @@ private void DeleteStationIfEmpty()
 				do {
 
 					ModifyTile(tile,
-						MP_SETTYPE(MP_STATION) | MP_MAPOWNER_CURRENT |
-						MP_MAP2 | MP_MAP5 | MP_MAP3LO | MP_MAP3HI,
-						station_index, /* map2 parameter */
-						p2 & 0xFF,     /* map3lo parameter */
-						p2 >> 8,       /* map3hi parameter */
-						(*layout_ptr++) + direction   /* map5 parameter */
-					);
+							MP_SETTYPE(MP_STATION) | MP_MAPOWNER_CURRENT |
+							MP_MAP2 | MP_MAP5 | MP_MAP3LO | MP_MAP3HI,
+							station_index, /* map2 parameter */
+							p2 & 0xFF,     /* map3lo parameter */
+							p2 >> 8,       /* map3hi parameter */
+					(*layout_ptr++) + direction   /* map5 parameter */
+							);
 
 					tile += tile_delta;
 				} while (--w);
@@ -1094,63 +1161,63 @@ private void DeleteStationIfEmpty()
 		TileIndex tile = st.train_tile;
 		int i;
 
-	//restart:
+		//restart:
 		boolean restart = false;
 		while(true)
 		{
 			restart = false;
-			
-		// too small?
-		if (w != 0 && h != 0) {
-			// check the left side, x = constant, y changes
-			for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(0, i));) {
-				// the left side is unused?
-				if (++i == h) {
-					tile += TileDiffXY(1, 0);
-					w--;
-					//goto restart;
-					restart = true; break;
-				}
-			}
-			if( restart ) continue;
 
-			// check the right side, x = constant, y changes
-			for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(w - 1, i));) {
-				// the right side is unused?
-				if (++i == h) {
-					w--;
-					//goto restart;
-					restart = true; break;
+			// too small?
+			if (w != 0 && h != 0) {
+				// check the left side, x = constant, y changes
+				for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(0, i));) {
+					// the left side is unused?
+					if (++i == h) {
+						tile += TileDiffXY(1, 0);
+						w--;
+						//goto restart;
+						restart = true; break;
+					}
 				}
-			}
-			if( restart ) continue;
-			
-			// check the upper side, y = constant, x changes
-			for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(i, 0));) {
-				// the left side is unused?
-				if (++i == w) {
-					tile += TileDiffXY(0, 1);
-					h--;
-					//goto restart;
-					restart = true; break;
+				if( restart ) continue;
+
+				// check the right side, x = constant, y changes
+				for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(w - 1, i));) {
+					// the right side is unused?
+					if (++i == h) {
+						w--;
+						//goto restart;
+						restart = true; break;
+					}
 				}
-			}
-			if( restart ) continue;
-			
-			// check the lower side, y = constant, x changes
-			for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(i, h - 1));) {
-				// the left side is unused?
-				if (++i == w) {
-					h--;
-					//goto restart;
-					restart = true; break;
+				if( restart ) continue;
+
+				// check the upper side, y = constant, x changes
+				for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(i, 0));) {
+					// the left side is unused?
+					if (++i == w) {
+						tile += TileDiffXY(0, 1);
+						h--;
+						//goto restart;
+						restart = true; break;
+					}
 				}
+				if( restart ) continue;
+
+				// check the lower side, y = constant, x changes
+				for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(i, h - 1));) {
+					// the left side is unused?
+					if (++i == w) {
+						h--;
+						//goto restart;
+						restart = true; break;
+					}
+				}
+				if( restart ) continue;
+
+			} else {
+				tile = 0;
 			}
-			if( restart ) continue;
-			
-		} else {
-			tile = 0;
-		}
 			break;
 		}
 		st.trainst_w = w;
@@ -1166,15 +1233,15 @@ private void DeleteStationIfEmpty()
 	 */
 	public static int CmdRemoveFromRailroadStation(int x, int y, int flags, int p1, int p2)
 	{
-		TileIndex tile = TileVirtXY(x, y);
+		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		Station st;
 
-		SET_EXPENSES_TYPE(EXPENSES_CONSTRUCTION);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		// make sure the specified tile belongs to the current player, and that it is a railroad station.
-		if (!tile.IsTileType(MP_STATION) || tile.getMap().m5 >= 8 || !_patches.nonuniform_stations) return CMD_ERROR;
-		st = GetStation(_m[tile].m2);
-		if (_current_player != OWNER_WATER && (!CheckOwnership(st.owner) || !EnsureNoVehicle(tile))) return CMD_ERROR;
+		if (!tile.IsTileType(TileTypes.MP_STATION) || tile.getMap().m5 >= 8 || !Global._patches.nonuniform_stations) return CMD_ERROR;
+		st = GetStation(tile.getMap().m2);
+		if (_current_player != Owner.OWNER_WATER && (!CheckOwnership(st.owner) || !EnsureNoVehicle(tile))) return CMD_ERROR;
 
 		// if we reached here, it means we can actually delete it. do that.
 		if (flags & DC_EXEC) {
@@ -1194,12 +1261,13 @@ private void DeleteStationIfEmpty()
 	}
 
 	// determine the number of platforms for the station
-	public static int GetStationPlatforms(final  Station st, TileIndex tile)
+	public static int GetStationPlatforms( Station st, TileIndex tile)
 	{
 		TileIndex t;
 		TileIndexDiff delta;
 		int dir;
 		int len;
+
 		assert(TileBelongsToRailStation(st, tile));
 
 		len = 0;
@@ -1211,14 +1279,14 @@ private void DeleteStationIfEmpty()
 		do {
 			t -= delta;
 			len++;
-		} while (TileBelongsToRailStation(st, t) && (_m[t].m5 & 1) == dir);
+		} while (TileBelongsToRailStation(st, t) && (t.getMap().m5 & 1) == dir);
 
 		// find ending tile
 		t = tile;
 		do {
 			t += delta;
 			len++;
-		} while (TileBelongsToRailStation(st, t) && (_m[t].m5 & 1) == dir);
+		} while (TileBelongsToRailStation(st, t) && (t.getMap().m5 & 1) == dir);
 
 		return len - 1;
 	}
@@ -1226,66 +1294,66 @@ private void DeleteStationIfEmpty()
 	private static RealSpriteGroup ResolveStationSpriteGroup(final SpriteGroup spg, final  Station st)
 	{
 		switch (spg.type) {
-			case SGT_REAL:
-				return spg.g.real;
+		case SGT_REAL:
+			return spg.g.real;
 
-			case SGT_DETERMINISTIC: {
-				final  DeterministicSpriteGroup dsg = spg.g.determ;
-				SpriteGroup target;
-				int value = -1;
+		case SGT_DETERMINISTIC: {
+			final  DeterministicSpriteGroup dsg = spg.g.determ;
+			SpriteGroup target;
+			int value = -1;
 
-				if ((dsg.variable >> 6) == 0) {
-					/* General property */
-					value = GetDeterministicSpriteValue(dsg.variable);
+			if ((dsg.variable >> 6) == 0) {
+				/* General property */
+				value = GetDeterministicSpriteValue(dsg.variable);
 
-				} else {
-					if (st == null) {
-						/* We are in a build dialog of something,
-						 * and we are checking for something undefined.
-						 * That means we should get the first target
-						 * (NOT the default one). */
-						if (dsg.num_ranges > 0) {
-							target = dsg.ranges[0].group;
-						} else {
-							target = dsg.default_group;
-						}
-						return ResolveStationSpriteGroup(target, null);
+			} else {
+				if (st == null) {
+					/* We are in a build dialog of something,
+					 * and we are checking for something undefined.
+					 * That means we should get the first target
+					 * (NOT the default one). */
+					if (dsg.num_ranges > 0) {
+						target = dsg.ranges[0].group;
+					} else {
+						target = dsg.default_group;
 					}
+					return ResolveStationSpriteGroup(target, null);
+				}
 
-					/* Station-specific property. */
-					if (dsg.var_scope == VSG_SCOPE_PARENT) {
-						/* TODO: Town structure. */
+				/* Station-specific property. */
+				if (dsg.var_scope == VSG_SCOPE_PARENT) {
+					/* TODO: Town structure. */
 
-					} else /* VSG_SELF */ {
-						if (dsg.variable == 0x40 || dsg.variable == 0x41) {
-							/* FIXME: This is ad hoc only
-							 * for waypoints. */
-							value = 0x01010000;
-						} else {
-							/* TODO: Only small fraction done. */
-							// TTDPatch runs on little-endian arch;
-							// Variable is 0x70 + offset in the TTD's station structure
-							switch (dsg.variable - 0x70) {
-								case 0x80: value = st.facilities;             break;
-								case 0x81: value = st.airport_type;           break;
-								case 0x82: value = st.truck_stops.status;    break;
-								case 0x83: value = st.bus_stops.status;      break;
-								case 0x86: value = st.airport_flags & 0xFFFF; break;
-								case 0x87: value = st.airport_flags & 0xFF;   break;
-								case 0x8A: value = st.build_date;             break;
-							}
+				} else /* VSG_SELF */ {
+					if (dsg.variable == 0x40 || dsg.variable == 0x41) {
+						/* FIXME: This is ad hoc only
+						 * for waypoints. */
+						value = 0x01010000;
+					} else {
+						/* TODO: Only small fraction done. */
+						// TTDPatch runs on little-endian arch;
+						// Variable is 0x70 + offset in the TTD's station structure
+						switch (dsg.variable - 0x70) {
+						case 0x80: value = st.facilities;             break;
+						case 0x81: value = st.airport_type;           break;
+						case 0x82: value = st.truck_stops.status;    break;
+						case 0x83: value = st.bus_stops.status;      break;
+						case 0x86: value = st.airport_flags & 0xFFFF; break;
+						case 0x87: value = st.airport_flags & 0xFF;   break;
+						case 0x8A: value = st.build_date;             break;
 						}
 					}
 				}
-
-				target = value != -1 ? EvalDeterministicSpriteGroup(dsg, value) : dsg.default_group;
-				return ResolveStationSpriteGroup(target, st);
 			}
 
-			default:
-			case SGT_RANDOMIZED:
-				error("I don't know how to handle random spritegroups yet!");
-				return null;
+			target = value != -1 ? EvalDeterministicSpriteGroup(dsg, value) : dsg.default_group;
+			return ResolveStationSpriteGroup(target, st);
+		}
+
+		default:
+		case SGT_RANDOMIZED:
+			error("I don't know how to handle random spritegroups yet!");
+			return null;
 		}
 	}
 
@@ -1300,7 +1368,7 @@ private void DeleteStationIfEmpty()
 		}
 
 		error("Custom station 0x%08x::0x%02x has no sprites associated.",
-			spec.grfid, spec.localidx);
+				spec.grfid, spec.localidx);
 		/* This is what gets subscribed of dtss.image in newgrf.c,
 		 * so it's probably kinda "default offset". Try to use it as
 		 * emergency measure. */
@@ -1313,11 +1381,11 @@ private void DeleteStationIfEmpty()
 		int cost;
 
 		/* if there is flooding and non-uniform stations are enabled, remove platforms tile by tile */
-		if (_current_player == OWNER_WATER && _patches.nonuniform_stations)
+		if (Global._current_player == Owner.OWNER_WATER && Global._patches.nonuniform_stations)
 			return DoCommandByTile(tile, 0, 0, DC_EXEC, CMD_REMOVE_FROM_RAILROAD_STATION);
 
 		/* Current player owns the station? */
-		if (_current_player != OWNER_WATER && !CheckOwnership(st.owner))
+		if (Global._current_player != Owner.OWNER_WATER && !CheckOwnership(st.owner))
 			return CMD_ERROR;
 
 		/* determine width and height of platforms */
@@ -1360,19 +1428,19 @@ private void DeleteStationIfEmpty()
 
 	public static int DoConvertStationRail(TileIndex tile, int totype, boolean exec)
 	{
-		final  Station st = GetStation(_m[tile].m2);
+		final  Station st = GetStation(tile.getMap().m2);
 		if (!CheckOwnership(st.owner) || !EnsureNoVehicle(tile)) return CMD_ERROR;
 
 		// tile is not a railroad station?
 		if (_m[tile].m5 >= 8) return CMD_ERROR;
 
 		// tile is already of requested type?
-		if (BitOps.GB(_m[tile].m3, 0, 4) == totype) return CMD_ERROR;
+		if (BitOps.GB(tile.getMap().m3, 0, 4) == totype) return CMD_ERROR;
 
 		if (exec) {
 			// change type.
-			SB(_m[tile].m3, 0, 4, totype);
-			MarkTileDirtyByTile(tile);
+			tile.getMap().m3 = BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
+			tile.MarkTileDirtyByTile();
 		}
 
 		return _price.build_rail >> 1;
@@ -1388,14 +1456,14 @@ private void DeleteStationIfEmpty()
 		if (*primary_stop == null) {
 			//we have no station of the type yet, so write a "primary station"
 			//(the one at st.foo_stops)
-			*currstop = primary_stop;
+	 *currstop = primary_stop;
 		} else {
 			//there are stops already, so append to the end of the list
-			*prev = *primary_stop;
-			*currstop = &(*primary_stop).next;
+	 *prev = *primary_stop;
+	 *currstop = &(*primary_stop).next;
 			while (**currstop != null) {
-				*prev = (*prev).next;
-				*currstop = &(**currstop).next;
+	 *prev = (*prev).next;
+	 *currstop = &(**currstop).next;
 			}
 		}
 	}*/
@@ -1409,7 +1477,7 @@ private void DeleteStationIfEmpty()
 	{
 		Station st;
 		RoadStop road_stop;
-		RoadStop currstop;
+		RoadStop currstop = new RoadStop();
 		RoadStop prev = null;
 		TileIndex tile;
 		int cost;
@@ -1418,7 +1486,7 @@ private void DeleteStationIfEmpty()
 		/* Saveguard the parameters */
 		if (p1 > 3) return CMD_ERROR;
 
-		SET_EXPENSES_TYPE(EXPENSES_CONSTRUCTION);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		tile = TileVirtXY(x, y);
 
@@ -1452,7 +1520,7 @@ private void DeleteStationIfEmpty()
 			if (!CheckStationSpreadOut(st, tile, 1, 1))
 				return CMD_ERROR;
 
-			FindRoadStationSpot(type, st, &currstop, &prev);
+			FindRoadStationSpot(type, st, currstop, &prev);
 		} else {
 			Town t;
 
@@ -1461,7 +1529,7 @@ private void DeleteStationIfEmpty()
 
 			st.town = t = ClosestTownFromTile(tile, (int)-1);
 
-			FindRoadStationSpot(type, st, &currstop, &prev);
+			FindRoadStationSpot(type, st, currstop, &prev);
 
 			if (_current_player < MAX_PLAYERS && flags&DC_EXEC)
 				SETBIT(t.have_ratings, _current_player);
@@ -1477,11 +1545,11 @@ private void DeleteStationIfEmpty()
 
 		if (flags & DC_EXEC) {
 			//point to the correct item in the _busstops or _truckstops array
-			*currstop = road_stop;
+			currstop = new RoadStop( road_stop );
 
 			//initialize an empty station
 			InitializeRoadStop(road_stop, prev, tile, st.index);
-			(*currstop).type = type;
+			currstop.type = type;
 			if (!st.facilities) st.xy = tile;
 			st.facilities |= (type) ? FACIL_TRUCK_STOP : FACIL_BUS_STOP;
 			st.owner = _current_player;
@@ -1489,36 +1557,37 @@ private void DeleteStationIfEmpty()
 			st.build_date = _date;
 
 			ModifyTile(tile,
-				MP_SETTYPE(MP_STATION) | MP_MAPOWNER_CURRENT |
-				MP_MAP2 | MP_MAP5 | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR,
-				st.index,                       /* map2 parameter */
-				/* XXX - Truck stops have 0x43 _m[].m5 value + direction
-				 * XXX - Bus stops have a _map5 value of 0x47 + direction */
-				((type) ? 0x43 : 0x47) + p1 /* map5 parameter */
-			);
+					MP_SETTYPE(MP_STATION) | MP_MAPOWNER_CURRENT |
+					MP_MAP2 | MP_MAP5 | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR,
+					st.index,                       /* map2 parameter */
+					/* XXX - Truck stops have 0x43 _m[].m5 value + direction
+					 * XXX - Bus stops have a _map5 value of 0x47 + direction */
+					((type) ? 0x43 : 0x47) + p1 /* map5 parameter */
+					);
 
 			UpdateStationVirtCoordDirty(st);
 			UpdateStationAcceptance(st, false);
-			InvalidateWindow(WC_STATION_LIST, st.owner);
+			Window.InvalidateWindow(Window.WC_STATION_LIST, st.owner);
 		}
 		return cost;
 	}
 
-	// Remove a bus station
+	// TODO to method
+	// Remove a bus station TODO use ArrayList for stops fields!
 	private static int RemoveRoadStop(Station st, int flags, TileIndex tile)
 	{
-		RoadStop *primary_stop;
+		RoadStop primary_stop;
 		RoadStop cur_stop;
-		boolean is_truck = _m[tile].m5 < 0x47;
+		boolean is_truck = tile.getMap().m5 < 0x47;
 
-		if (_current_player != OWNER_WATER && !CheckOwnership(st.owner))
+		if (Global._current_player.id != Owner.OWNER_WATER && !CheckOwnership(st.owner))
 			return CMD_ERROR;
 
 		if (is_truck) { // truck stop
-			primary_stop = &st.truck_stops;
+			//primary_stop = &st.truck_stops;
 			cur_stop = GetRoadStopByTile(tile, RS_TRUCK);
 		} else {
-			primary_stop = &st.bus_stops;
+			//primary_stop = &st.bus_stops;
 			cur_stop = GetRoadStopByTile(tile, RS_BUS);
 		}
 
@@ -1546,16 +1615,25 @@ private void DeleteStationIfEmpty()
 			//we only had one stop left
 			if (cur_stop.next == null && cur_stop.prev == null) {
 				//so we remove ALL stops
-				*primary_stop = null;
+				//*primary_stop = null;
+				if(is_truck)
+					st.truck_stops = null;
+				else
+					st.bus_stops = null;
+
 				st.facilities &= (is_truck) ? ~FACIL_TRUCK_STOP : ~FACIL_BUS_STOP;
-			} else if (cur_stop == *primary_stop) {
+			} else if (cur_stop == primary_stop) {
 				//removed the first stop in the list
 				//need to set the primary element to the next stop
-				*primary_stop = (*primary_stop).next;
+				//*primary_stop = (*primary_stop).next;
+				if(is_truck)
+					st.truck_stops = st.truck_stops.next;
+				else
+					st.bus_stops = st.bus_stops.next;
 			}
 
-			UpdateStationVirtCoordDirty(st);
-			DeleteStationIfEmpty(st);
+			st.UpdateStationVirtCoordDirty();
+			st.DeleteStationIfEmpty();
 		}
 
 		return (is_truck) ? _price.remove_truck_station : _price.remove_bus_station;
@@ -1566,53 +1644,53 @@ private void DeleteStationIfEmpty()
 	// FIXME -- need to move to its corresponding Airport variable
 	// Country Airfield (small)
 	static final  byte _airport_map5_tiles_country[] = {
-		54, 53, 52, 65,
-		58, 57, 56, 55,
-		64, 63, 63, 62
+			54, 53, 52, 65,
+			58, 57, 56, 55,
+			64, 63, 63, 62
 	};
 
 	// City Airport (large)
 	static final  byte _airport_map5_tiles_town[] = {
-		31,  9, 33,  9,  9, 32,
-		27, 36, 29, 34,  8, 10,
-		30, 11, 35, 13, 20, 21,
-		51, 12, 14, 17, 19, 28,
-		38, 13, 15, 16, 18, 39,
-		26, 22, 23, 24, 25, 26
+			31,  9, 33,  9,  9, 32,
+			27, 36, 29, 34,  8, 10,
+			30, 11, 35, 13, 20, 21,
+			51, 12, 14, 17, 19, 28,
+			38, 13, 15, 16, 18, 39,
+			26, 22, 23, 24, 25, 26
 	};
 
 	// Metropolitain Airport (large) - 2 runways
 	static final  byte _airport_map5_tiles_metropolitan[] = {
-		 31,  9, 33,  9,  9, 32,
-		 27, 36, 29, 34,  8, 10,
-		 30, 11, 35, 13, 20, 21,
-		102,  8,  8,  8,  8, 28,
-		 83, 84, 84, 84, 84, 83,
-		 26, 23, 23, 23, 23, 26
+			31,  9, 33,  9,  9, 32,
+			27, 36, 29, 34,  8, 10,
+			30, 11, 35, 13, 20, 21,
+			102,  8,  8,  8,  8, 28,
+			83, 84, 84, 84, 84, 83,
+			26, 23, 23, 23, 23, 26
 	};
 
 	// International Airport (large) - 2 runways
 	static final  byte _airport_map5_tiles_international[] = {
-	  88, 89, 89, 89, 89, 89,  88,
-	 	51,  8,  8,  8,  8,  8,  32,
-		30,  8, 11, 27, 11,  8,  10,
-		32,  8, 11, 27, 11,  8, 114,
-		87,  8, 11, 85, 11,  8, 114,
-		87,  8,  8,  8,  8,  8,  90,
-		26, 23, 23, 23, 23, 23,  26
+			88, 89, 89, 89, 89, 89,  88,
+			51,  8,  8,  8,  8,  8,  32,
+			30,  8, 11, 27, 11,  8,  10,
+			32,  8, 11, 27, 11,  8, 114,
+			87,  8, 11, 85, 11,  8, 114,
+			87,  8,  8,  8,  8,  8,  90,
+			26, 23, 23, 23, 23, 23,  26
 	};
 
 	// Heliport
 	static final  byte _airport_map5_tiles_heliport[] = {
-		66,
+			66,
 	};
 
 	static final  byte [][] _airport_map5_tiles = {
-		_airport_map5_tiles_country,				// Country Airfield (small)
-		_airport_map5_tiles_town,						// City Airport (large)
-		_airport_map5_tiles_heliport,				// Heliport
-		_airport_map5_tiles_metropolitan,   // Metropolitain Airport (large)
-		_airport_map5_tiles_international,	// International Airport (xlarge)
+			_airport_map5_tiles_country,				// Country Airfield (small)
+			_airport_map5_tiles_town,						// City Airport (large)
+			_airport_map5_tiles_heliport,				// Heliport
+			_airport_map5_tiles_metropolitan,   // Metropolitain Airport (large)
+			_airport_map5_tiles_international,	// International Airport (xlarge)
 	};
 
 	/** Place an Airport.
@@ -1731,9 +1809,9 @@ private void DeleteStationIfEmpty()
 
 				BEGIN_TILE_LOOP(tile_cur,w,h,tile) {
 					ModifyTile(tile_cur,
-						MP_SETTYPE(MP_STATION) | MP_MAPOWNER_CURRENT |
-						MP_MAP2 | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR | MP_MAP5,
-						st.index, *b++);
+							MP_SETTYPE(MP_STATION) | MP_MAPOWNER_CURRENT |
+							MP_MAP2 | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR | MP_MAP5,
+							st.index, *b++);
 				} END_TILE_LOOP(tile_cur,w,h,tile)
 			}
 
@@ -1765,7 +1843,7 @@ private void DeleteStationIfEmpty()
 		cost = w * h * _price.remove_airport;
 
 		{
-	BEGIN_TILE_LOOP(tile_cur,w,h,tile)
+			BEGIN_TILE_LOOP(tile_cur,w,h,tile)
 			if (!EnsureNoVehicle(tile_cur))
 				return CMD_ERROR;
 
@@ -1773,7 +1851,7 @@ private void DeleteStationIfEmpty()
 				DeleteAnimatedTile(tile_cur);
 				DoClearSquare(tile_cur);
 			}
-	END_TILE_LOOP(tile_cur, w,h,tile)
+			END_TILE_LOOP(tile_cur, w,h,tile)
 		}
 
 		if (flags & DC_EXEC) {
@@ -1830,12 +1908,12 @@ private void DeleteStationIfEmpty()
 			st.build_date = _date;
 
 			ModifyTile(ti.tile,
-				MP_SETTYPE(MP_STATION) |
-				MP_MAP2 | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR | MP_MAPOWNER | MP_MAP5,
-				st.index,		/* map2 */
-				OWNER_NONE,		/* map_owner */
-				0x52					/* map5 */
-			);
+					MP_SETTYPE(MP_STATION) |
+					MP_MAP2 | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR | MP_MAPOWNER | MP_MAP5,
+					st.index,		/* map2 */
+					OWNER_NONE,		/* map_owner */
+					0x52					/* map5 */
+					);
 
 			UpdateStationVirtCoordDirty(st);
 
@@ -1885,11 +1963,11 @@ private void DeleteStationIfEmpty()
 			st.had_vehicle_of_type &= ~HVOT_BUOY;
 
 			ModifyTile(tile,
-				MP_SETTYPE(MP_WATER) |
-				MP_MAP2_CLEAR | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR | MP_MAPOWNER | MP_MAP5 | MP_MAP2_CLEAR,
-				OWNER_WATER, /* map_owner */
-				0			/* map5 */
-			);
+					MP_SETTYPE(MP_WATER) |
+					MP_MAP2_CLEAR | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR | MP_MAPOWNER | MP_MAP5 | MP_MAP2_CLEAR,
+					OWNER_WATER, /* map_owner */
+					0			/* map5 */
+					);
 
 			UpdateStationVirtCoordDirty(st);
 			DeleteStationIfEmpty(st);
@@ -1930,7 +2008,7 @@ private void DeleteStationIfEmpty()
 				(direction++,ti.tileh) != 12 &&
 				(direction++,ti.tileh) != 6)
 			return_cmd_error(STR_304B_SITE_UNSUITABLE);
-		*/
+		 */
 
 		direction=0;
 		if(ti.tileh != 3)
@@ -1944,7 +2022,7 @@ private void DeleteStationIfEmpty()
 		direction++;
 		if(ti.tileh != 6)
 			return_cmd_error(STR_304B_SITE_UNSUITABLE);
-		
+
 		if (!EnsureNoVehicle(ti.tile)) return CMD_ERROR;
 
 		cost = DoCommandByTile(ti.tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
@@ -1967,8 +2045,8 @@ private void DeleteStationIfEmpty()
 
 		/* middle */
 		st = GetStationAround(
-			tile + ToTileIndexDiff(_dock_tileoffs_chkaround[direction]),
-			_dock_w_chk[direction], _dock_h_chk[direction], -1);
+				tile + ToTileIndexDiff(_dock_tileoffs_chkaround[direction]),
+				_dock_w_chk[direction], _dock_h_chk[direction], -1);
 		if (st == CHECK_STATIONS_ERR) return CMD_ERROR;
 
 		/* Find a station close to us */
@@ -2011,18 +2089,18 @@ private void DeleteStationIfEmpty()
 			st.build_date = _date;
 
 			ModifyTile(tile,
-				MP_SETTYPE(MP_STATION) | MP_MAPOWNER_CURRENT |
-				MP_MAP2 | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR |
-				MP_MAP5,
-				st.index,
-				direction + 0x4C);
+					MP_SETTYPE(MP_STATION) | MP_MAPOWNER_CURRENT |
+					MP_MAP2 | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR |
+					MP_MAP5,
+					st.index,
+					direction + 0x4C);
 
 			ModifyTile(tile + TileOffsByDir(direction),
-				MP_SETTYPE(MP_STATION) | MP_MAPOWNER_CURRENT |
-				MP_MAP2 | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR |
-				MP_MAP5,
-				st.index,
-				(direction&1) + 0x50);
+					MP_SETTYPE(MP_STATION) | MP_MAPOWNER_CURRENT |
+					MP_MAP2 | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR |
+					MP_MAP5,
+					st.index,
+					(direction&1) + 0x50);
 
 			UpdateStationVirtCoordDirty(st);
 			UpdateStationAcceptance(st, false);
@@ -2177,7 +2255,7 @@ private void DeleteStationIfEmpty()
 		/* not used */
 	}
 
-	private static void GetTileDesc_Station(TileIndex tile, TileDesc *td)
+	private static void GetTileDesc_Station(TileIndex tile, TileDesc td)
 	{
 		byte m5;
 		StringID str;
@@ -2204,23 +2282,23 @@ private void DeleteStationIfEmpty()
 		int j = 0;
 
 		switch (mode) {
-			case TRANSPORT_RAIL:
-				if (i < 8) {
-					static final  byte tile_track_status_rail[] = { 1, 2, 1, 2, 1, 2, 1, 2 };
-					j = tile_track_status_rail[i];
-				}
-				j += (j << 8);
-				break;
+		case TRANSPORT_RAIL:
+			if (i < 8) {
+				static final  byte tile_track_status_rail[] = { 1, 2, 1, 2, 1, 2, 1, 2 };
+				j = tile_track_status_rail[i];
+			}
+			j += (j << 8);
+			break;
 
-			case TRANSPORT_WATER:
-				// buoy is coded as a station, it is always on open water
-				// (0x3F, all tracks available)
-				if (i == 0x52) j = 0x3F;
-				j += (j << 8);
-				break;
+		case TRANSPORT_WATER:
+			// buoy is coded as a station, it is always on open water
+			// (0x3F, all tracks available)
+			if (i == 0x52) j = 0x3F;
+			j += (j << 8);
+			break;
 
-			default:
-				break;
+		default:
+			break;
 		}
 
 		return j;
@@ -2232,42 +2310,42 @@ private void DeleteStationIfEmpty()
 		// FIXME -- GetTileTrackStatus_Station . animated stationtiles
 		// hardcoded.....not good
 		switch (_m[tile].m5) {
-			case 0x27: // large big airport
-			case 0x3A: // flag small airport
-			case 0x5A: // radar international airport
-			case 0x66: // radar metropolitan airport
-				AddAnimatedTile(tile);
-				break;
+		case 0x27: // large big airport
+		case 0x3A: // flag small airport
+		case 0x5A: // radar international airport
+		case 0x66: // radar metropolitan airport
+			AddAnimatedTile(tile);
+			break;
 
-			case 0x4B: // oilrig (station part)
-			case 0x52: // bouy
-				TileLoop_Water(tile);
-				break;
+		case 0x4B: // oilrig (station part)
+		case 0x52: // bouy
+			TileLoop_Water(tile);
+			break;
 
-			default: break;
+		default: break;
 		}
 	}
 
 
 	private static void AnimateTile_Station(TileIndex tile)
 	{
-		byte m5 = _m[tile].m5;
+		byte m5 = tile.getMap().m5;
 		//FIXME -- AnimateTile_Station . not nice code, lots of things double
-	  // again hardcoded...was a quick hack
+		// again hardcoded...was a quick hack
 
-	  // turning radar / windsack on airport
+		// turning radar / windsack on airport
 		if (m5 >= 39 && m5 <= 50) { // turning radar (39 - 50)
-			if (_tick_counter & 3)
+			if( 0 != (Global._tick_counter & 3) )
 				return;
 
 			if (++m5 == 50+1)
 				m5 = 39;
 
-			_m[tile].m5 = m5;
-			MarkTileDirtyByTile(tile);
-	  //added - begin
+			tile.getMap().m5 = m5;
+			tile.MarkTileDirtyByTile();
+			//added - begin
 		} else if (m5 >= 90 && m5 <= 113) { // turning radar with ground under it (different fences) (90 - 101 | 102 - 113)
-			if (_tick_counter & 3)
+			if( 0 != (Global._tick_counter & 3) )
 				return;
 
 			m5++;
@@ -2275,34 +2353,34 @@ private void DeleteStationIfEmpty()
 			if (m5 == 101+1) {m5 = 90;}  // radar with fences in south
 			else if (m5 == 113+1) {m5 = 102;} // radar with fences in north
 
-			_m[tile].m5 = m5;
-			MarkTileDirtyByTile(tile);
-		//added - end
+			tile.getMap().m5 = m5;
+			tile.MarkTileDirtyByTile();
+			//added - end
 		} else if (m5 >= 0x3A && m5 <= 0x3D) {  // windsack (58 - 61)
-			if (_tick_counter & 1)
+			if( 0 != (Global._tick_counter & 1) )
 				return;
 
 			if (++m5 == 0x3D+1)
 				m5 = 0x3A;
 
-			_m[tile].m5 = m5;
-			MarkTileDirtyByTile(tile);
+			tile.getMap().m5 = m5;
+			tile.MarkTileDirtyByTile();
 		}
 	}
 
 	private static void ClickTile_Station(TileIndex tile)
 	{
-	  // 0x20 - hangar large airport (32)
-	  // 0x41 - hangar small airport (65)
-		if (_m[tile].m5 == 32 || _m[tile].m5 == 65) {
+		// 0x20 - hangar large airport (32)
+		// 0x41 - hangar small airport (65)
+		if (tile.getMap().m5 == 32 || tile.getMap().m5 == 65) {
 			ShowAircraftDepotWindow(tile);
 		} else {
-			ShowStationViewWindow(_m[tile].m2);
+			ShowStationViewWindow(tile.getMap().m2);
 		}
 	}
 
 	static final  byte _enter_station_speedtable[] = {
-		215, 195, 175, 155, 135, 115, 95, 75, 55, 35, 15, 0
+			(byte)215, (byte)195, (byte)175, (byte)155, (byte)135, 115, 95, 75, 55, 35, 15, 0
 	};
 
 	private static int VehicleEnter_Station(Vehicle v, TileIndex tile, int x, int y)
@@ -2314,7 +2392,7 @@ private void DeleteStationIfEmpty()
 			if (IS_BYTE_INSIDE(_m[tile].m5, 0, 8) && IsFrontEngine(v) &&
 					!IsCompatibleTrainStationTile(tile + TileOffsByDir(v.direction >> 1), tile)) {
 
-				station_id = _m[tile].m2;
+				station_id = tile.getMap().m2;
 				if ((!(v.current_order.flags & OF_NON_STOP) && !_patches.new_nonstop) ||
 						(v.current_order.type == OT_GOTO_STATION && v.current_order.station == station_id)) {
 					if (!(_patches.new_nonstop && v.current_order.flags & OF_NON_STOP) &&
@@ -2349,21 +2427,21 @@ private void DeleteStationIfEmpty()
 					 * 0 means occupied, 1 means free. */
 
 					// Check if station is busy or if there are no free bays.
-					if (HASBIT(rs.status, 7) || BitOps.GB(rs.status, 0, 2) == 0)
+					if (BitOps.HASBIT(rs.status, 7) || BitOps.GB(rs.status, 0, 2) == 0)
 						return 8;
 
 					v.u.road.state += 32;
 
 					// if the first bay is free, allocate that, else the second bay must be free.
-					if (HASBIT(rs.status, 0)) {
-						CLRBIT(rs.status, 0);
+					if (BitOps.HASBIT(rs.status, 0)) {
+						rs.status = BitOps.RETCLRBIT(rs.status, 0);
 					} else {
-						CLRBIT(rs.status, 1);
+						rs.status = BitOps.RETCLRBIT(rs.status, 1);
 						v.u.road.state += 2;
 					}
 
 					// mark the station as busy
-					SETBIT(rs.status, 7);
+					rs.status = BitOps.RETSETBIT(rs.status, 7);
 				}
 			}
 		}
@@ -2372,13 +2450,13 @@ private void DeleteStationIfEmpty()
 	}
 
 	/** Removes a station from the list.
-	  * This is done by setting the .xy property to 0,
-	  * and doing some maintenance, especially clearing vehicle orders.
-	  * Aircraft-Hangar orders need special treatment here, as the hangars are
-	  * actually part of a station (tiletype is STATION), but the order type
-	  * is OT_GOTO_DEPOT.
-	  * @param st Station to be deleted
-	  */
+	 * This is done by setting the .xy property to 0,
+	 * and doing some maintenance, especially clearing vehicle orders.
+	 * Aircraft-Hangar orders need special treatment here, as the hangars are
+	 * actually part of a station (tiletype is STATION), but the order type
+	 * is OT_GOTO_DEPOT.
+	 * @param st Station to be deleted
+	 */
 	private static void DeleteStation(Station st)
 	{
 		Order order;
@@ -2447,9 +2525,9 @@ private void DeleteStationIfEmpty()
 					final  Vehicle v = GetVehicle(rs.slot[k]);
 
 					if (v.type != VEH_Road || v.u.road.slot != rs) {
-						DEBUG(ms, 0) (
-							"Multistop: Orphaned %s slot at 0x%X of station %d (don't panic)",
-							(rst == RS_BUS) ? "bus" : "truck", rs.xy, st.index);
+						DEBUG_ms( 0,
+								"Multistop: Orphaned %s slot at 0x%X of station %d (don't panic)",
+								(rst == RS_BUS) ? "bus" : "truck", rs.xy, st.index);
 						rs.slot[k] = INVALID_SLOT;
 					}
 				}
@@ -2511,12 +2589,12 @@ private void DeleteStationIfEmpty()
 					byte days = ge.days_since_pickup;
 					if (st.last_vehicle != INVALID_VEHICLE &&
 							GetVehicle(st.last_vehicle).type == VEH_Ship)
-								days >>= 2;
-					(days > 21) ||
-					(rating += 25, days > 12) ||
-					(rating += 25, days > 6) ||
-					(rating += 45, days > 3) ||
-					(rating += 35, true);
+						days >>= 2;
+				(days > 21) ||
+				(rating += 25, days > 12) ||
+				(rating += 25, days > 6) ||
+				(rating += 45, days > 3) ||
+				(rating += 35, true);
 				}
 
 				{
@@ -2625,8 +2703,8 @@ private void DeleteStationIfEmpty()
 	private static void UpdateStationWaiting(Station st, int type, int amount)
 	{
 		SB(st.goods[type].waiting_acceptance, 0, 12,
-			min(0xFFF, BitOps.GB(st.goods[type].waiting_acceptance, 0, 12) + amount)
-		);
+				min(0xFFF, BitOps.GB(st.goods[type].waiting_acceptance, 0, 12) + amount)
+				);
 
 		st.goods[type].enroute_time = 0;
 		st.goods[type].enroute_from = st.index;
@@ -2695,60 +2773,60 @@ private void DeleteStationIfEmpty()
 			h += 16;
 			max_rad = 8;
 		} else {
-	 		w += 8;
-	 		h += 8;
+			w += 8;
+			h += 8;
 			max_rad = 4;
 		}
 
 		BEGIN_TILE_LOOP(cur_tile, w, h, tile - TileDiffXY(max_rad, max_rad))
-			cur_tile = TILE_MASK(cur_tile);
-			if (IsTileType(cur_tile, MP_STATION)) {
-				st_index = _m[cur_tile].m2;
-				for (i = 0; i != 8; i++) {
-					if (around[i] == INVALID_STATION) {
-						st = GetStation(st_index);
-						if (!IsBuoy(st) &&
-								( !st.town.exclusive_counter || (st.town.exclusivity == st.owner) ) && // check exclusive transport rights
-								st.goods[type].rating != 0 &&
-								(!_patches.selectgoods || st.goods[type].last_speed) && // if last_speed is 0, no vehicle has been there.
-								((st.facilities & (byte)~FACIL_BUS_STOP)!=0 || type==CT_PASSENGERS) && // if we have other fac. than a bus stop, or the cargo is passengers
-								((st.facilities & (byte)~FACIL_TRUCK_STOP)!=0 || type!=CT_PASSENGERS)) { // if we have other fac. than a cargo bay or the cargo is not passengers
-									if (_patches.modified_catchment) {
-										rad = FindCatchmentRadius(st);
-										x_min_prod = y_min_prod = 9;
-										x_max_prod = 8 + w_prod;
-										y_max_prod = 8 + h_prod;
+		cur_tile = TILE_MASK(cur_tile);
+		if (IsTileType(cur_tile, MP_STATION)) {
+			st_index = _m[cur_tile].m2;
+			for (i = 0; i != 8; i++) {
+				if (around[i] == INVALID_STATION) {
+					st = GetStation(st_index);
+					if (!IsBuoy(st) &&
+							( !st.town.exclusive_counter || (st.town.exclusivity == st.owner) ) && // check exclusive transport rights
+							st.goods[type].rating != 0 &&
+							(!_patches.selectgoods || st.goods[type].last_speed) && // if last_speed is 0, no vehicle has been there.
+							((st.facilities & (byte)~FACIL_BUS_STOP)!=0 || type==CT_PASSENGERS) && // if we have other fac. than a bus stop, or the cargo is passengers
+							((st.facilities & (byte)~FACIL_TRUCK_STOP)!=0 || type!=CT_PASSENGERS)) { // if we have other fac. than a cargo bay or the cargo is not passengers
+						if (_patches.modified_catchment) {
+							rad = FindCatchmentRadius(st);
+							x_min_prod = y_min_prod = 9;
+							x_max_prod = 8 + w_prod;
+							y_max_prod = 8 + h_prod;
 
-										x_dist = min(w_cur - x_min_prod, x_max_prod - w_cur);
+							x_dist = min(w_cur - x_min_prod, x_max_prod - w_cur);
 
-										if (w_cur < x_min_prod) {
-											x_dist = x_min_prod - w_cur;
-										} else {        //save cycles
-											if (w_cur > x_max_prod) x_dist = w_cur - x_max_prod;
-										}
+							if (w_cur < x_min_prod) {
+								x_dist = x_min_prod - w_cur;
+							} else {        //save cycles
+								if (w_cur > x_max_prod) x_dist = w_cur - x_max_prod;
+							}
 
-										y_dist = min(h_cur - y_min_prod, y_max_prod - h_cur);
-										if (h_cur < y_min_prod) {
-											y_dist = y_min_prod - h_cur;
-										} else {
-											if (h_cur > y_max_prod) y_dist = h_cur - y_max_prod;
-										}
+							y_dist = min(h_cur - y_min_prod, y_max_prod - h_cur);
+							if (h_cur < y_min_prod) {
+								y_dist = y_min_prod - h_cur;
+							} else {
+								if (h_cur > y_max_prod) y_dist = h_cur - y_max_prod;
+							}
 
-									} else {
-										x_dist = y_dist = 0;
-									}
+						} else {
+							x_dist = y_dist = 0;
+						}
 
-									if ( !(x_dist > rad) && !(y_dist > rad) ) {
+						if ( !(x_dist > rad) && !(y_dist > rad) ) {
 
-										around[i] = st_index;
-										around_ptr[i] = st;
-									}
-								}
-						break;
-					} else if (around[i] == st_index)
-						break;
-				}
+							around[i] = st_index;
+							around_ptr[i] = st;
+						}
+					}
+					break;
+				} else if (around[i] == st_index)
+					break;
 			}
+		}
 		END_TILE_LOOP(cur_tile, w, h, tile - TileDiffXY(max_rad, max_rad))
 
 		/* no stations around at all? */
@@ -2810,25 +2888,25 @@ private void DeleteStationIfEmpty()
 		Station st = AllocateStation();
 
 		if (st == null) {
-			DEBUG(misc, 0) ("Couldn't allocate station for oilrig at %#X, reverting to oilrig only...", tile);
+			DEBUG_misc( 0, "Couldn't allocate station for oilrig at %#X, reverting to oilrig only...", tile.getTile());
 			return;
 		}
 		if (!GenerateStationName(st, tile, 2)) {
-			DEBUG(misc, 0) ("Couldn't allocate station-name for oilrig at %#X, reverting to oilrig only...", tile);
+			DEBUG_misc( 0, "Couldn't allocate station-name for oilrig at %#X, reverting to oilrig only...", tile.getTile());
 			return;
 		}
 
 		st.town = ClosestTownFromTile(tile, -1);
 		st.sign.width_1 = 0;
 
-		SetTileType(tile, MP_STATION);
-		SetTileOwner(tile, OWNER_NONE);
-		_m[tile].m2 = st.index;
-		_m[tile].m3 = 0;
-		_m[tile].m4 = 0;
-		_m[tile].m5 = 0x4B;
+		tile.SetTileType(MP_STATION);
+		tile.SetTileOwner(Owner.OWNER_NONE);
+		tile.getMap().m2 = st.index;
+		tile.getMap().m3 = 0;
+		tile.getMap().m4 = 0;
+		tile.getMap().m5 = 0x4B;
 
-		st.owner = OWNER_NONE;
+		st.owner = Owner.OWNER_NONE;
 		st.airport_flags = 0;
 		st.airport_type = AT_OILRIG;
 		st.xy = tile;
@@ -2860,7 +2938,7 @@ private void DeleteStationIfEmpty()
 
 	public static void DeleteOilRig(TileIndex tile)
 	{
-		Station st = GetStation(_m[tile].m2);
+		Station st = GetStation(tile.getMap().m2);
 
 		DoClearSquare(tile);
 
@@ -2874,14 +2952,14 @@ private void DeleteStationIfEmpty()
 
 	private static void ChangeTileOwner_Station(TileIndex tile, PlayerID old_player, PlayerID new_player)
 	{
-		if (!IsTileOwner(tile, old_player)) return;
+		if (!tile.IsTileOwner(new Owner(old_player.id))) return;
 
-		if (new_player != OWNER_SPECTATOR) {
-			Station st = GetStation(_m[tile].m2);
-			SetTileOwner(tile, new_player);
+		if (new_player.id != Owner.OWNER_SPECTATOR) {
+			Station st = GetStation(tile.getMap().m2);
+			tile.SetTileOwner(new_player);
 			st.owner = new_player;
 			_global_station_sort_dirty = true; // transfer ownership of station to another player
-			InvalidateWindowClasses(WC_STATION_LIST);
+			Window.InvalidateWindowClasses(Window.WC_STATION_LIST);
 		} else {
 			DoCommandByTile(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
 		}
@@ -2889,7 +2967,7 @@ private void DeleteStationIfEmpty()
 
 	private static int ClearTile_Station(TileIndex tile, byte flags)
 	{
-		byte m5 = _m[tile].m5;
+		byte m5 = tile.getMap().m5;
 		Station st;
 
 		if (flags & DC_AUTO) {
@@ -2903,7 +2981,7 @@ private void DeleteStationIfEmpty()
 			return_cmd_error(STR_4800_IN_THE_WAY);
 		}
 
-		st = GetStation(_m[tile].m2);
+		st = GetStation(tile.getMap().m2);
 
 		if (m5 < 8) return RemoveRailroadStation(st, tile, flags);
 		// original airports < 67, new airports between 83 - 114
@@ -2918,12 +2996,12 @@ private void DeleteStationIfEmpty()
 	public static void InitializeStations()
 	{
 		/* Clean the station pool and create 1 block in it */
-		CleanPool(&_station_pool);
-		AddBlockToPool(&_station_pool);
+		_station_pool.CleanPool();
+		_station_pool.AddBlockToPool();
 
 		/* Clean the roadstop pool and create 1 block in it */
-		CleanPool(&_roadstop_pool);
-		AddBlockToPool(&_roadstop_pool);
+		//CleanPool(&_roadstop_pool);
+		//AddBlockToPool(&_roadstop_pool);
 
 		_station_tick_ctr = 0;
 
@@ -2933,21 +3011,27 @@ private void DeleteStationIfEmpty()
 	}
 
 
-	final  TileTypeProcs _tile_type_station_procs = {
-		DrawTile_Station,						/* draw_tile_proc */
-		GetSlopeZ_Station,					/* get_slope_z_proc */
-		ClearTile_Station,					/* clear_tile_proc */
-		GetAcceptedCargo_Station,		/* get_accepted_cargo_proc */
-		GetTileDesc_Station,				/* get_tile_desc_proc */
-		GetTileTrackStatus_Station,	/* get_tile_track_status_proc */
-		ClickTile_Station,					/* click_tile_proc */
-		AnimateTile_Station,				/* animate_tile_proc */
-		TileLoop_Station,						/* tile_loop_clear */
-		ChangeTileOwner_Station,		/* change_tile_owner_clear */
-		null,												/* get_produced_cargo_proc */
-		VehicleEnter_Station,				/* vehicle_enter_tile_proc */
-		null,												/* vehicle_leave_tile_proc */
-		GetSlopeTileh_Station,			/* get_slope_tileh_proc */
+	final  TileTypeProcs _tile_type_station_procs = new TileTypeProcs() {
+	};
+
+
+
+	/*
+	{
+		Station::DrawTile_Station,						// draw_tile_proc 
+		Station::GetSlopeZ_Station,					// get_slope_z_proc 
+		Station::ClearTile_Station,					// clear_tile_proc 
+		Station::GetAcceptedCargo_Station,		// get_accepted_cargo_proc 
+		Station::GetTileDesc_Station,				// get_tile_desc_proc 
+		Station::GetTileTrackStatus_Station,	// get_tile_track_status_proc 
+		Station::ClickTile_Station,					// click_tile_proc 
+		Station::AnimateTile_Station,				// animate_tile_proc 
+		Station::TileLoop_Station,						// tile_loop_clear 
+		Station::ChangeTileOwner_Station,		// change_tile_owner_clear 
+		null,												// get_produced_cargo_proc 
+		Station::VehicleEnter_Station,				// vehicle_enter_tile_proc 
+		null,												// vehicle_leave_tile_proc 
+		Station::GetSlopeTileh_Station,			// get_slope_tileh_proc 
 	};
 	/*
 	static final  SaveLoad _roadstop_desc[] = {
@@ -3142,7 +3226,7 @@ private void DeleteStationIfEmpty()
 		{ 'STNS', Save_STNS,      Load_STNS,      CH_ARRAY },
 		{ 'ROAD', Save_ROADSTOP,  Load_ROADSTOP,  CH_ARRAY | CH_LAST},
 	};
-	*/
+	 */
 }
 
 
@@ -3155,16 +3239,16 @@ class ottd_Rectangle {
 	int max_y;
 
 
-    void MergePoint(TileIndex tile)
-    {
-	int x = tile.TileX();
-	int y = tile.TileY();
+	void MergePoint(TileIndex tile)
+	{
+		int x = tile.TileX();
+		int y = tile.TileY();
 
-	if (min_x > x) min_x = x;
-	if (min_y > y) min_y = y;
-	if (max_x < x) max_x = x;
-	if (max_y < y) max_y = y;
-    }
+		if (min_x > x) min_x = x;
+		if (min_y > y) min_y = y;
+		if (max_x < x) max_x = x;
+		if (max_y < y) max_y = y;
+	}
 
 }
 

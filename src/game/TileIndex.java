@@ -1,11 +1,60 @@
 package game;
 
+import java.util.function.Consumer;
+
 import game.util.BitOps;
 
 public class TileIndex {
 	private int tile;
 
 	
+	/**
+	 * Iterate over a tiles rectangle.
+	 * 
+	 * NB! TileIndex passed to Consumer is reused, make a copy if need it!
+	 * 
+	 * @param w - rectangle width
+	 * @param h - height
+	 * @param tile - start pos
+	 * @param c - code to run for each tile
+	 */
+	public static void forAll( int w, int h, int tile, Consumer<TileIndex> c )
+	{
+		TileIndex ti = new TileIndex(tile);
+	
+		                      
+		{                                                        
+			int h_cur = h;                                         
+			int var = tile;                                       
+			do {                                                   
+				int w_cur = w;                                       
+				do {
+
+					ti.tile = var;
+					c.accept(ti);
+	                     
+					++var;
+				} while ( --w_cur != 0);
+				//int diff = (y * Global.MapSizeX()) + x);
+				var += Global.MapSizeX() - w;
+			//} while (var += TileDiffXY(0, 1) - (w), --h_cur != 0);				
+			} while ( --h_cur != 0); 
+		}
+		
+		
+	}
+	
+	public TileIndex sub(TileIndexDiff diff)
+	{
+		tile -= diff.diff;
+		return this;
+	}
+
+	public TileIndex add(TileIndexDiff diff)
+	{
+		tile += diff.diff;
+		return this;
+	}
 	
 	/** static  TileIndex TileXY(int x, int y)
 	 * 
@@ -24,6 +73,13 @@ public class TileIndex {
 		return new TileIndex(x, y);
 	}
 
+	
+	public TileIndex(TileIndex src)
+	{
+		tile = src.tile;
+	}
+	
+	
 	// TODO rename to getTileIndex
 	public int getTile() {
 		return tile;

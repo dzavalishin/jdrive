@@ -1,5 +1,7 @@
 package game;
 
+import java.util.function.Consumer;
+
 public class Tile {
 
 	//byte type_height;

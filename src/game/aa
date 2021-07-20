@@ -1,0 +1,301 @@
+Station.java:1107: error: <identifier> expected
+			final  StationSpec *statspec;
+			                  ^
+Station.java:1107: error: not a statement
+			final  StationSpec *statspec;
+			                    ^
+Station.java:1141: error: illegal start of expression
+					(*layout_ptr++) + direction   /* map5 parameter */
+					 ^
+Station.java:1523: error: illegal start of expression
+			FindRoadStationSpot(type, st, currstop, &prev);
+			                                        ^
+Station.java:1532: error: illegal start of expression
+			FindRoadStationSpot(type, st, currstop, &prev);
+			                                        ^
+Station.java:1725: error: ';' expected
+			FOR_ALL_STATIONS(st) {
+			                    ^
+Station.java:1784: error: <identifier> expected
+			final  AirportFTAClass *afc = GetAirport(p1);
+			                      ^
+Station.java:1808: error: <identifier> expected
+				final  byte *b = _airport_map5_tiles[p1];
+				           ^
+Station.java:1810: error: ';' expected
+				BEGIN_TILE_LOOP(tile_cur,w,h,tile) {
+				                                  ^
+Station.java:1814: error: illegal start of expression
+							st.index, *b++);
+							          ^
+Station.java:1815: error: ';' expected
+				} END_TILE_LOOP(tile_cur,w,h,tile)
+				                                  ^
+Station.java:1846: error: ';' expected
+			BEGIN_TILE_LOOP(tile_cur,w,h,tile)
+			                                  ^
+Station.java:1854: error: ';' expected
+			END_TILE_LOOP(tile_cur, w,h,tile)
+			                                 ^
+Station.java:1858: error: <identifier> expected
+			final  AirportFTAClass *afc = GetAirport(st.airport_type);
+			                      ^
+Station.java:1931: error: ';' expected
+		FOR_ALL_VEHICLES(v) {
+		                   ^
+Station.java:1933: error: <identifier> expected
+				final  Order *order;
+				            ^
+Station.java:1933: error: not a statement
+				final  Order *order;
+				              ^
+Station.java:1934: error: ';' expected
+				FOR_VEHICLE_ORDERS(v, order) {
+				                            ^
+Station.java:2042: error: illegal start of expression
+		FindLandscapeHeightByTile(&ti, tile_cur);
+		                          ^
+Station.java:2205: error: ';' expected
+		foreach_draw_tile_seq(dtss, t.seq) {
+		                                  ^
+Station.java:2237: error: ';' expected
+		foreach_draw_tile_seq(dtss, t.seq) {
+		                                  ^
+Station.java:2267: error: ')' expected
+		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
+		                              ^
+Station.java:2267: error: not a statement
+		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
+		^
+Station.java:2267: error: illegal start of type
+		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
+		                                     ^
+Station.java:2267: error: not a statement
+		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
+		                                   ^
+Station.java:2267: error: ';' expected
+		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
+		                                      ^
+Station.java:2267: error: illegal start of expression
+		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
+		                                        ^
+Station.java:2267: error: ';' expected
+		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
+		                                          ^
+Station.java:2268: error: ';' expected
+		(str=STR_305F_AIRCRAFT_HANGAR, m5==32 || m5==45) || // hangars
+		                             ^
+Station.java:2268: error: not a statement
+		(str=STR_305F_AIRCRAFT_HANGAR, m5==32 || m5==45) || // hangars
+		                                      ^
+Station.java:2268: error: ';' expected
+		(str=STR_305F_AIRCRAFT_HANGAR, m5==32 || m5==45) || // hangars
+		                                               ^
+Station.java:2269: error: ';' expected
+		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
+		                     ^
+Station.java:2269: error: illegal start of type
+		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
+		                            ^
+Station.java:2269: error: not a statement
+		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
+		                          ^
+Station.java:2269: error: ';' expected
+		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
+		                                ^
+Station.java:2269: error: not a statement
+		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
+		                                    ^
+Station.java:2269: error: ';' expected
+		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
+		                                                           ^
+Station.java:2270: error: ';' expected
+		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
+		                                ^
+Station.java:2270: error: illegal start of type
+		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
+		                                       ^
+Station.java:2270: error: not a statement
+		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
+		                                     ^
+Station.java:2270: error: ';' expected
+		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
+		                                           ^
+Station.java:2270: error: illegal start of expression
+		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
+		                                             ^
+Station.java:2270: error: ';' expected
+		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
+		                                               ^
+Station.java:2271: error: ';' expected
+		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
+		                         ^
+Station.java:2271: error: illegal start of type
+		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
+		                                ^
+Station.java:2271: error: not a statement
+		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
+		                              ^
+Station.java:2271: error: ';' expected
+		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
+		                                    ^
+Station.java:2271: error: illegal start of expression
+		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
+		                                      ^
+Station.java:2271: error: ';' expected
+		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
+		                                        ^
+Station.java:2272: error: ';' expected
+		(str=STR_4807_OIL_RIG, m5 == 0x4B) ||
+		                     ^
+Station.java:2272: error: not a statement
+		(str=STR_4807_OIL_RIG, m5 == 0x4B) ||
+		                          ^
+Station.java:2272: error: ';' expected
+		(str=STR_4807_OIL_RIG, m5 == 0x4B) ||
+		                                 ^
+Station.java:2273: error: ';' expected
+		(str=STR_3063_SHIP_DOCK, m5 != 0x52) ||
+		                       ^
+Station.java:2273: error: not a statement
+		(str=STR_3063_SHIP_DOCK, m5 != 0x52) ||
+		                            ^
+Station.java:2273: error: ';' expected
+		(str=STR_3063_SHIP_DOCK, m5 != 0x52) ||
+		                                   ^
+Station.java:2274: error: ';' expected
+		(str=STR_3069_BUOY, true);
+		                  ^
+Station.java:2287: error: illegal start of expression
+				static final  byte tile_track_status_rail[] = { 1, 2, 1, 2, 1, 2, 1, 2 };
+				^
+Station.java:2481: error: ';' expected
+		FOR_ALL_VEHICLES(v) {
+		                   ^
+Station.java:2484: error: not a statement
+				Order *order;
+				      ^
+Station.java:2485: error: ';' expected
+				FOR_VEHICLE_ORDERS(v, order) {
+				                            ^
+Station.java:2512: error: ';' expected
+		FOR_ALL_STATIONS(st) {
+		                    ^
+Station.java:2550: error: <identifier> expected
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                     ^
+Station.java:2550: error: invalid method declaration; return type required
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                           ^
+Station.java:2550: error: <identifier> expected
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                            ^
+Station.java:2550: error: ';' expected
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                              ^
+Station.java:2550: error: illegal start of type
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                               ^
+Station.java:2550: error: <identifier> expected
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                                ^
+Station.java:2550: error: ';' expected
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                                  ^
+Station.java:2550: error: <identifier> expected
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                                         ^
+Station.java:2550: error: illegal start of expression
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                                            ^
+Station.java:2550: error: illegal start of type
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                                                    ^
+Station.java:2550: error: <identifier> expected
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                                                         ^
+Station.java:2550: error: ';' expected
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                                                            ^
+Station.java:2550: error: illegal start of type
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                                                              ^
+Station.java:2550: error: <identifier> expected
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                                                               ^
+Station.java:2550: error: ';' expected
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                                                                 ^
+Station.java:2550: error: illegal start of type
+	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+	                                                                                   ^
+Station.java:2552: error: class, interface, or enum expected
+	private static void UpdateStationRating(Station st)
+	               ^
+Station.java:2555: error: class, interface, or enum expected
+		int rating;
+		^
+Station.java:2556: error: class, interface, or enum expected
+		StationID index;
+		^
+Station.java:2557: error: class, interface, or enum expected
+		int waiting;
+		^
+Station.java:2558: error: class, interface, or enum expected
+		boolean waiting_changed = false;
+		^
+Station.java:2560: error: class, interface, or enum expected
+		byte_inc_sat(&st.time_since_load);
+		^
+Station.java:2561: error: class, interface, or enum expected
+		byte_inc_sat(&st.time_since_unload);
+		^
+Station.java:2563: error: class, interface, or enum expected
+		ge = st.goods;
+		^
+Station.java:2564: error: class, interface, or enum expected
+		do {
+		^
+Station.java:2567: error: class, interface, or enum expected
+				byte_inc_sat(&ge.days_since_pickup);
+				^
+Station.java:2569: error: class, interface, or enum expected
+				rating = 0;
+				^
+Station.java:2571: error: class, interface, or enum expected
+				{
+				^
+Station.java:2573: error: class, interface, or enum expected
+					if ((b-=85) >= 0)
+					^
+Station.java:2575: error: class, interface, or enum expected
+				}
+				^
+Station.java:2579: error: class, interface, or enum expected
+					(age >= 3) ||
+					^
+Station.java:2583: error: class, interface, or enum expected
+				}
+				^
+Station.java:2588: error: class, interface, or enum expected
+				{
+				^
+Station.java:2590: error: class, interface, or enum expected
+					if (st.last_vehicle != INVALID_VEHICLE &&
+					^
+Station.java:2593: error: class, interface, or enum expected
+				(days > 21) ||
+				^
+Station.java:2598: error: class, interface, or enum expected
+				}
+				^
+Station.java:2602: error: class, interface, or enum expected
+					(rating -= 90, waiting > 1500) ||
+					^
+Station.java:2608: error: class, interface, or enum expected
+				}
+				^
+Station.java:2614: error: class, interface, or enum expected
+					ge.rating = rating = or + clamp(clamp(rating, 0, 255) - or, -2, 2);
+					^
+100 errors
