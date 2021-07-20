@@ -1,5 +1,7 @@
 package game;
 
+import java.util.function.Consumer;
+
 public abstract class Vehicle implements IPoolItem 
 {
 	static public final int INVALID_VEHICLE = -1; //0xFFFF; // TODO -1?
@@ -126,12 +128,22 @@ public abstract class Vehicle implements IPoolItem
 	//abstract Vehicle ForceAllocateVehicle();
 	//abstract Vehicle ForceAllocateSpecialVehicle();
 
+	
+	
+	public static final int VEH_Train = 0x10;
+	public static final int VEH_Road = 0x11;
+	public static final int VEH_Ship = 0x12;
+	public static final int VEH_Aircraft = 0x13;
+	public static final int VEH_Special = 0x14;
+	public static final int VEH_Disaster = 0x15;
+	
+	
 	abstract void VehicleTickProc();
 	//typedef void *VehicleFromPosProc(Vehicle *v, void *data);
 
 	void VehicleServiceInDepot()
 	{
-		if (tile.GetTileOwner() == Owner.OWNER_TOWN) 
+		if (tile.GetTileOwner().owner == Owner.OWNER_TOWN) 
 			MA_Tax(value, this);
 
 		date_of_last_service = Global._date;
@@ -519,7 +531,7 @@ public abstract class Vehicle implements IPoolItem
 		return u;
 	}
 
-	static IPoolItemFactory<Vehicle> factory = new IPoolItemFactory<Vehicle>() 
+	private static IPoolItemFactory<Vehicle> factory = new IPoolItemFactory<Vehicle>() 
 	{		
 		@Override
 		public Vehicle createObject() {
@@ -556,5 +568,15 @@ public abstract class Vehicle implements IPoolItem
 	}
 
 
+	public static void forEach( Consumer<Vehicle> c )
+	{
+		_vehicle_pool.forEach(c);
+	}
 
+	public void forEachOrder(Consumer<Order> c)
+	{
+		for( Order o = orders; o != null; o = o.next )
+			c.accept(o);
+	}
+	
 }

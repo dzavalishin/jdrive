@@ -1,0 +1,267 @@
+package game;
+
+public class Map {
+
+	
+	final static TileIndexDiffC _tileoffs_by_dir[] = {
+			new TileIndexDiffC( -1,  0),
+			new TileIndexDiffC(  0,  1),
+			new TileIndexDiffC(  1,  0),
+			new TileIndexDiffC(  0, -1)
+		};
+	
+
+	//void AllocateMap(int size_x, int size_y);
+
+
+	// Scale a number relative to the map size
+	//int ScaleByMapSize(int); // Scale relative to the number of tiles
+	//int ScaleByMapSize1D(int); // Scale relative to the circumference of the map
+
+
+	static  TileIndex TileXY(int x, int y)
+	{
+		return new TileIndex( (y * Global.MapSizeX()) + x );
+	}
+	/*
+	static  TileIndexDiff TileDiffXY(int x, int y)
+	{
+		// Multiplication gives much better optimization on MSVC than shifting.
+		// 0 << shift isn't optimized to 0 properly.
+		// Typically x and y are constants, and then this doesn't result
+		// in any actual multiplication in the assembly code..
+		return (y * MapSizeX()) + x;
+	}* /
+
+	static  TileIndex TileVirtXY(int x, int y)
+	{
+		return (y >> 4 << MapLogX()) + (x >> 4);
+	}
+	*/
+	/*
+	typedef enum {
+		OWNER_TOWN			= 0xf,	// a town owns the tile
+		OWNER_NONE			= 0x10,	// nobody owns the tile
+		OWNER_WATER			= 0x11,	// "water" owns the tile
+		OWNER_SPECTATOR	= 0xff,	// spectator in MP or in scenario editor
+	} Owner;
+	*/
+	//enum {
+	public static final TileIndex INVALID_TILE = new TileIndex(-1);
+	//};
+
+
+	/*
+	#ifndef _DEBUG
+		#define TILE_ADD(x,y) ((x) + (y))
+	#else
+		extern TileIndex TileAdd(TileIndex tile, TileIndexDiff add,
+			final char *exp, final char *file, int line);
+		#define TILE_ADD(x, y) (TileAdd((x), (y), #x " + " #y, __FILE__, __LINE__))
+	#endif
+
+	#define TILE_ADDXY(tile, x, y) TILE_ADD(tile, TileDiffXY(x, y))
+	*/
+	//int TileAddWrap(TileIndex tile, int addx, int addy);
+
+	static  TileIndexDiffC TileIndexDiffCByDir(int dir) {
+		//extern final TileIndexDiffC _tileoffs_by_dir[4];
+		return _tileoffs_by_dir[dir];
+	}
+
+	/* Returns tile + the diff given in diff. If the result tile would end up
+	 * outside of the map, INVALID_TILE is returned instead.
+	 */
+	static  TileIndex AddTileIndexDiffCWrap(TileIndex tile, TileIndexDiffC diff) {
+		int x = tile.TileX() + diff.x;
+		int y = tile.TileY() + diff.y;
+		if (x < 0 || y < 0 || x > (int)Global.MapMaxX() || y > (int)Global.MapMaxY())
+			return INVALID_TILE;
+		else
+			return TileXY(x, y);
+	}
+
+	// Functions to calculate distances
+	//int DistanceManhattan(TileIndex, TileIndex); // also known as L1-Norm. Is the shortest distance one could go over diagonal tracks (or roads)
+	//int DistanceSquare(TileIndex, TileIndex); // euclidian- or L2-Norm squared
+	//int DistanceMax(TileIndex, TileIndex); // also known as L-Infinity-Norm
+	//int DistanceMaxPlusManhattan(TileIndex, TileIndex); // Max + Manhattan
+	//int DistanceFromEdge(TileIndex); // shortest distance from any edge of the map
+
+
+
+
+	static  TileIndexDiff TileOffsByDir(int dir)
+	{
+		//extern final TileIndexDiffC _tileoffs_by_dir[4];
+
+		assert(dir < _tileoffs_by_dir.length);
+		return TileIndex.ToTileIndexDiff(_tileoffs_by_dir[dir]);
+	}
+
+	/* Approximation of the length of a straight track, relative to a diagonal
+	 * track (ie the size of a tile side). #defined instead of final so it can
+	 * stay integer. (no runtime float operations) Is this needed?
+	 * Watch out! There are _no_ brackets around here, to prevent intermediate
+	 * rounding! Be careful when using this!
+	 * This value should be sqrt(2)/2 ~ 0.7071 */
+	public static final int STRAIGHT_TRACK_LENGTH = 7071/10000;
+
+	
+	
+
+
+	/*
+	int _map_log_x;
+	int _map_size_x;
+	int _map_size_y;
+	int _map_tile_mask;
+	int _map_size;
+
+	Tile* _m = null;
+	*/
+
+	void AllocateMap(int size_x, int size_y)
+	{
+		// Make sure that the map size is within the limits and that
+		// the x axis size is a power of 2.
+		if (size_x < 64 || size_x > 2048 ||
+				size_y < 64 || size_y > 2048 ||
+				(size_x&(size_x-1)) != 0 ||
+				(size_y&(size_y-1)) != 0)
+			Global.error("Invalid map size");
+
+		Global.DEBUG_map( 1, "Allocating map of size %dx%d", size_x, size_y);
+
+		Global._map_log_x = FindFirstBit(size_x);
+		Global._map_size_x = size_x;
+		Global._map_size_y = size_y;
+		Global._map_size = size_x * size_y;
+		Global._map_tile_mask = Global._map_size - 1;
+
+		//free(_m);
+		Global._m = new Tile[Global._map_size];
+
+		// XXX TODO handle memory shortage more gracefully
+		if (Global._m == null) Global.error("Failed to allocate memory for the map");
+	}
+
+
+	/*
+	#ifdef _DEBUG
+	TileIndex TileAdd(TileIndex tile, TileIndexDiff add,
+		final char *exp, final char *file, int line)
+	{
+		int dx;
+		int dy;
+		int x;
+		int y;
+
+		dx = add & MapMaxX();
+		if (dx >= (int)MapSizeX() / 2) dx -= MapSizeX();
+		dy = (add - dx) / (int)MapSizeX();
+
+		x = TileX(tile) + dx;
+		y = TileY(tile) + dy;
+
+		if (x >= MapSizeX() || y >= MapSizeY()) {
+			char buf[512];
+
+			sprintf(buf, "TILE_ADD(%s) when adding 0x%.4X and 0x%.4X failed",
+				exp, tile, add);
+	#if !defined(_MSC_VER)
+			fprintf(stderr, "%s:%d %s\n", file, line, buf);
+	#else
+			_assert(buf, (char*)file, line);
+	#endif
+		}
+
+		assert(TileXY(x,y) == TILE_MASK(tile + add));
+
+		return TileXY(x,y);
+	}
+	#endif
+	*/
+
+	int ScaleByMapSize(int n)
+	{
+		// First shift by 12 to prevent integer overflow for large values of n.
+		// >>12 is safe since the min mapsize is 64x64
+		// Add (1<<4)-1 to round upwards.
+		return (n * (Global.MapSize() >> 12) + (1<<4) - 1) >> 4;
+	}
+
+
+	// Scale relative to the circumference of the map
+	int ScaleByMapSize1D(int n)
+	{
+		// Normal circumference for the X+Y is 256+256 = 1<<9
+		// Note, not actually taking the full circumference into account,
+		// just half of it.
+		// (1<<9) - 1 is there to scale upwards.
+		return (n * (Global.MapSizeX() + Global.MapSizeY()) + (1<<9) - 1) >> 9;
+	}
+
+
+	// This function checks if we add addx/addy to tile, if we
+	//  do wrap around the edges. For example, tile = (10,2) and
+	//  addx = +3 and addy = -4. This function will now return
+	//  INVALID_TILE, because the y is wrapped. This is needed in
+	//  for example, farmland. When the tile is not wrapped,
+	//  the result will be tile + TileDiffXY(addx, addy)
+	int TileAddWrap(TileIndex tile, int addx, int addy)
+	{
+		int x = tile.TileX() + addx;
+		int y = tile.TileY() + addy;
+
+		// Are we about to wrap?
+		if (x < Global.MapMaxX() && y < Global.MapMaxY())
+			return tile.getTile() + TileIndex.TileDiffXY(addx, addy).diff;
+
+		return INVALID_TILE.getTile();
+	}
+
+
+	int DistanceManhattan(TileIndex t0, TileIndex t1)
+	{
+		final int dx = Math.abs(t0.TileX() - t1.TileX());
+		final int dy = Math.abs(t0.TileY() - t1.TileY());
+		return dx + dy;
+	}
+
+
+	int DistanceSquare(TileIndex t0, TileIndex t1)
+	{
+		final int dx = t0.TileX() - t1.TileX();
+		final int dy = t0.TileY() - t1.TileY();
+		return dx * dx + dy * dy;
+	}
+
+
+	int DistanceMax(TileIndex t0, TileIndex t1)
+	{
+		final int dx = Math.abs(t0.TileX() - t1.TileX());
+		final int dy = Math.abs(t0.TileY() - t1.TileY());
+		return dx > dy ? dx : dy;
+	}
+
+
+	int DistanceMaxPlusManhattan(TileIndex t0, TileIndex t1)
+	{
+		final int dx = Math.abs(t0.TileX() - t1.TileX());
+		final int dy = Math.abs(t0.TileY() - t1.TileY());
+		return dx > dy ? 2 * dx + dy : 2 * dy + dx;
+	}
+
+	int DistanceFromEdge(TileIndex tile)
+	{
+		final int xl = tile.TileX();
+		final int yl = tile.TileY();
+		final int xh = Global.MapSizeX() - 1 - xl;
+		final int yh = Global.MapSizeY() - 1 - yl;
+		final int minl = xl < yl ? xl : yl;
+		final int minh = xh < yh ? xh : yh;
+		return minl < minh ? minl : minh;
+	}
+	
+}

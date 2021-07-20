@@ -33,7 +33,7 @@ enum {
 	ROAD_STOP_LIMIT = 8,
 }; */
 
-typedef uint16 StationID;
+//typedef uint16 StationID;
 /*
 typedef struct RoadStop {
 	TileIndex xy;

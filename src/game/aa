@@ -1,301 +1,499 @@
-Station.java:1107: error: <identifier> expected
-			final  StationSpec *statspec;
-			                  ^
-Station.java:1107: error: not a statement
-			final  StationSpec *statspec;
-			                    ^
-Station.java:1141: error: illegal start of expression
-					(*layout_ptr++) + direction   /* map5 parameter */
-					 ^
-Station.java:1523: error: illegal start of expression
-			FindRoadStationSpot(type, st, currstop, &prev);
-			                                        ^
-Station.java:1532: error: illegal start of expression
-			FindRoadStationSpot(type, st, currstop, &prev);
-			                                        ^
-Station.java:1725: error: ';' expected
-			FOR_ALL_STATIONS(st) {
-			                    ^
-Station.java:1784: error: <identifier> expected
-			final  AirportFTAClass *afc = GetAirport(p1);
-			                      ^
-Station.java:1808: error: <identifier> expected
-				final  byte *b = _airport_map5_tiles[p1];
-				           ^
-Station.java:1810: error: ';' expected
-				BEGIN_TILE_LOOP(tile_cur,w,h,tile) {
-				                                  ^
-Station.java:1814: error: illegal start of expression
-							st.index, *b++);
-							          ^
-Station.java:1815: error: ';' expected
-				} END_TILE_LOOP(tile_cur,w,h,tile)
-				                                  ^
-Station.java:1846: error: ';' expected
-			BEGIN_TILE_LOOP(tile_cur,w,h,tile)
-			                                  ^
-Station.java:1854: error: ';' expected
-			END_TILE_LOOP(tile_cur, w,h,tile)
-			                                 ^
-Station.java:1858: error: <identifier> expected
-			final  AirportFTAClass *afc = GetAirport(st.airport_type);
-			                      ^
-Station.java:1931: error: ';' expected
-		FOR_ALL_VEHICLES(v) {
-		                   ^
-Station.java:1933: error: <identifier> expected
-				final  Order *order;
-				            ^
-Station.java:1933: error: not a statement
-				final  Order *order;
-				              ^
-Station.java:1934: error: ';' expected
-				FOR_VEHICLE_ORDERS(v, order) {
-				                            ^
-Station.java:2042: error: illegal start of expression
-		FindLandscapeHeightByTile(&ti, tile_cur);
-		                          ^
-Station.java:2205: error: ';' expected
-		foreach_draw_tile_seq(dtss, t.seq) {
-		                                  ^
-Station.java:2237: error: ';' expected
-		foreach_draw_tile_seq(dtss, t.seq) {
-		                                  ^
-Station.java:2267: error: ')' expected
-		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
-		                              ^
-Station.java:2267: error: not a statement
-		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
-		^
-Station.java:2267: error: illegal start of type
-		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
-		                                     ^
-Station.java:2267: error: not a statement
-		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
-		                                   ^
-Station.java:2267: error: ';' expected
-		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
-		                                      ^
-Station.java:2267: error: illegal start of expression
-		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
-		                                        ^
-Station.java:2267: error: ';' expected
-		(str=STR_305E_RAILROAD_STATION, m5 < 8) ||
-		                                          ^
-Station.java:2268: error: ';' expected
-		(str=STR_305F_AIRCRAFT_HANGAR, m5==32 || m5==45) || // hangars
-		                             ^
-Station.java:2268: error: not a statement
-		(str=STR_305F_AIRCRAFT_HANGAR, m5==32 || m5==45) || // hangars
-		                                      ^
-Station.java:2268: error: ';' expected
-		(str=STR_305F_AIRCRAFT_HANGAR, m5==32 || m5==45) || // hangars
-		                                               ^
-Station.java:2269: error: ';' expected
-		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
-		                     ^
-Station.java:2269: error: illegal start of type
-		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
-		                            ^
-Station.java:2269: error: not a statement
-		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
-		                          ^
-Station.java:2269: error: ';' expected
-		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
-		                                ^
-Station.java:2269: error: not a statement
-		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
-		                                    ^
-Station.java:2269: error: ';' expected
-		(str=STR_3060_AIRPORT, m5 < 0x43 || (m5 >= 83 && m5 <= 114)) ||
-		                                                           ^
-Station.java:2270: error: ';' expected
-		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
-		                                ^
-Station.java:2270: error: illegal start of type
-		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
-		                                       ^
-Station.java:2270: error: not a statement
-		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
-		                                     ^
-Station.java:2270: error: ';' expected
-		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
-		                                           ^
-Station.java:2270: error: illegal start of expression
-		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
-		                                             ^
-Station.java:2270: error: ';' expected
-		(str=STR_3061_TRUCK_LOADING_AREA, m5 < 0x47) ||
-		                                               ^
-Station.java:2271: error: ';' expected
-		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
-		                         ^
-Station.java:2271: error: illegal start of type
-		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
-		                                ^
-Station.java:2271: error: not a statement
-		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
-		                              ^
-Station.java:2271: error: ';' expected
-		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
-		                                    ^
-Station.java:2271: error: illegal start of expression
-		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
-		                                      ^
-Station.java:2271: error: ';' expected
-		(str=STR_3062_BUS_STATION, m5 < 0x4B) ||
-		                                        ^
-Station.java:2272: error: ';' expected
-		(str=STR_4807_OIL_RIG, m5 == 0x4B) ||
-		                     ^
-Station.java:2272: error: not a statement
-		(str=STR_4807_OIL_RIG, m5 == 0x4B) ||
-		                          ^
-Station.java:2272: error: ';' expected
-		(str=STR_4807_OIL_RIG, m5 == 0x4B) ||
-		                                 ^
-Station.java:2273: error: ';' expected
-		(str=STR_3063_SHIP_DOCK, m5 != 0x52) ||
-		                       ^
-Station.java:2273: error: not a statement
-		(str=STR_3063_SHIP_DOCK, m5 != 0x52) ||
-		                            ^
-Station.java:2273: error: ';' expected
-		(str=STR_3063_SHIP_DOCK, m5 != 0x52) ||
-		                                   ^
-Station.java:2274: error: ';' expected
-		(str=STR_3069_BUOY, true);
-		                  ^
-Station.java:2287: error: illegal start of expression
-				static final  byte tile_track_status_rail[] = { 1, 2, 1, 2, 1, 2, 1, 2 };
-				^
-Station.java:2481: error: ';' expected
-		FOR_ALL_VEHICLES(v) {
-		                   ^
-Station.java:2484: error: not a statement
-				Order *order;
-				      ^
-Station.java:2485: error: ';' expected
-				FOR_VEHICLE_ORDERS(v, order) {
-				                            ^
-Station.java:2512: error: ';' expected
-		FOR_ALL_STATIONS(st) {
-		                    ^
-Station.java:2550: error: <identifier> expected
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                     ^
-Station.java:2550: error: invalid method declaration; return type required
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                           ^
-Station.java:2550: error: <identifier> expected
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                            ^
-Station.java:2550: error: ';' expected
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                              ^
-Station.java:2550: error: illegal start of type
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+Station.java:3: error: package game.util does not exist
+import game.util.BitOps;
+                ^
+Station.java:5: error: cannot find symbol
+public class Station implements IPoolItem
+                                ^
+  symbol: class IPoolItem
+Station.java:8: error: cannot find symbol
+	TileIndex xy;
+	^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:9: error: cannot find symbol
+	RoadStop bus_stops; //TODO use ArrayList for stops fields!
+	^
+  symbol:   class RoadStop
+  location: class Station
+Station.java:10: error: cannot find symbol
+	RoadStop truck_stops;
+	^
+  symbol:   class RoadStop
+  location: class Station
+Station.java:11: error: cannot find symbol
+	TileIndex train_tile;
+	^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:12: error: cannot find symbol
+	TileIndex airport_tile;
+	^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:13: error: cannot find symbol
+	TileIndex dock_tile;
+	^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:14: error: cannot find symbol
+	Town town;
+	^
+  symbol:   class Town
+  location: class Station
+Station.java:17: error: cannot find symbol
+	ViewportSign sign;
+	^
+  symbol:   class ViewportSign
+  location: class Station
+Station.java:24: error: cannot find symbol
+	PlayerID owner;
+	^
+  symbol:   class PlayerID
+  location: class Station
+Station.java:39: error: cannot find symbol
+	VehicleQueue airport_queue;			// airport queue
+	^
+  symbol:   class VehicleQueue
+  location: class Station
+Station.java:40: error: cannot find symbol
+	VehicleQueue helicopter_queue;			// airport queue
+	^
+  symbol:   class VehicleQueue
+  location: class Station
+Station.java:42: error: cannot find symbol
+	VehicleID last_vehicle;
+	^
+  symbol:   class VehicleID
+  location: class Station
+Station.java:43: error: cannot find symbol
+	GoodsEntry goods[] = new GoodsEntry[AcceptedCargo.NUM_CARGO];
+	^
+  symbol:   class GoodsEntry
+  location: class Station
+Station.java:62: error: cannot find symbol
+	private void StationInitialize(TileIndex tile)
+	                               ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:144: error: cannot find symbol
+	private void ShowRejectOrAcceptNews(int items, StringID msg)
 	                                               ^
-Station.java:2550: error: <identifier> expected
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                                ^
-Station.java:2550: error: ';' expected
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                                  ^
-Station.java:2550: error: <identifier> expected
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                                         ^
-Station.java:2550: error: illegal start of expression
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
+  symbol:   class StringID
+  location: class Station
+Station.java:158: error: cannot find symbol
+	static void GetProductionAroundTiles(AcceptedCargo produced, TileIndex tile0,
+	                                     ^
+  symbol:   class AcceptedCargo
+  location: class Station
+Station.java:158: error: cannot find symbol
+	static void GetProductionAroundTiles(AcceptedCargo produced, TileIndex tile0,
+	                                                             ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:213: error: cannot find symbol
+	static void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile0,
+	                                     ^
+  symbol:   class AcceptedCargo
+  location: class Station
+Station.java:213: error: cannot find symbol
+	static void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile0,
 	                                                            ^
-Station.java:2550: error: illegal start of type
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                                                    ^
-Station.java:2550: error: <identifier> expected
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                                                         ^
-Station.java:2550: error: ';' expected
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                                                            ^
-Station.java:2550: error: illegal start of type
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                                                              ^
-Station.java:2550: error: <identifier> expected
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                                                               ^
-Station.java:2550: error: ';' expected
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                                                                 ^
-Station.java:2550: error: illegal start of type
-	private static inline void byte_inc_sat(byte *p) { byte b = *p + 1; if (b != 0) *p = b; }
-	                                                                                   ^
-Station.java:2552: error: class, interface, or enum expected
-	private static void UpdateStationRating(Station st)
+  symbol:   class TileIndex
+  location: class Station
+Station.java:373: error: cannot find symbol
+	private static IPoolItemFactory<Station> factory = new IPoolItemFactory<Station>() {
 	               ^
-Station.java:2555: error: class, interface, or enum expected
-		int rating;
+  symbol:   class IPoolItemFactory
+  location: class Station
+Station.java:381: error: cannot find symbol
+	private static MemoryPool<Station> _station_pool = new MemoryPool<Station>(factory);
+	               ^
+  symbol:   class MemoryPool
+  location: class Station
+Station.java:497: error: cannot find symbol
+	private static Station  GetStationAround(TileIndex tile, int w, int h, StationID closest_station)
+	                                         ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:497: error: cannot find symbol
+	private static Station  GetStationAround(TileIndex tile, int w, int h, StationID closest_station)
+	                                                                       ^
+  symbol:   class StationID
+  location: class Station
+Station.java:523: error: cannot find symbol
+	public static TileIndex GetStationTileForVehicle(final  Vehicle v, final  Station st)
+	                                                        ^
+  symbol:   class Vehicle
+  location: class Station
+Station.java:523: error: cannot find symbol
+	public static TileIndex GetStationTileForVehicle(final  Vehicle v, final  Station st)
+	              ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:541: error: cannot find symbol
+	private static boolean CheckStationSpreadOut(Station st, TileIndex tile, int w, int h)
+	                                                         ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:600: error: cannot find symbol
+	static final  TileIndexDiffC _count_square_table[] = 
+	              ^
+  symbol:   class TileIndexDiffC
+  location: class Station
+Station.java:611: error: cannot find symbol
+	private static int CountMapSquareAround(TileIndex tile, byte type, byte min, byte max)
+	                                        ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:654: error: cannot find symbol
+	private static boolean GenerateStationName(Station st, TileIndex tile, int flag)
+	                                                       ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:784: error: cannot find symbol
+	private static Station  GetClosestStationFromTile(TileIndex tile, int threshold, PlayerID owner)
+	                                                  ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:784: error: cannot find symbol
+	private static Station  GetClosestStationFromTile(TileIndex tile, int threshold, PlayerID owner)
+	                                                                                 ^
+  symbol:   class PlayerID
+  location: class Station
+Station.java:822: error: cannot find symbol
+	static public int CheckFlatLandBelow(TileIndex tile, int w, int h, int flags, int invalid_dirs, StationID[] station)
+	                                     ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:822: error: cannot find symbol
+	static public int CheckFlatLandBelow(TileIndex tile, int w, int h, int flags, int invalid_dirs, StationID[] station)
+	                                                                                                ^
+  symbol:   class StationID
+  location: class Station
+Station.java:1265: error: cannot find symbol
+	public static int GetStationPlatforms( Station st, TileIndex tile)
+	                                                   ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:1295: error: cannot find symbol
+	private static RealSpriteGroup ResolveStationSpriteGroup(final SpriteGroup spg, final  Station st)
+	                                                               ^
+  symbol:   class SpriteGroup
+  location: class Station
+Station.java:1295: error: cannot find symbol
+	private static RealSpriteGroup ResolveStationSpriteGroup(final SpriteGroup spg, final  Station st)
+	               ^
+  symbol:   class RealSpriteGroup
+  location: class Station
+Station.java:1361: error: cannot find symbol
+	public static int GetCustomStationRelocation(final  StationSpec spec, final  Station st, byte ctype)
+	                                                    ^
+  symbol:   class StationSpec
+  location: class Station
+Station.java:1379: error: cannot find symbol
+	private static int RemoveRailroadStation(Station st, TileIndex tile, int flags)
+	                                                     ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:1430: error: cannot find symbol
+	public static int DoConvertStationRail(TileIndex tile, int totype, boolean exec)
+	                                       ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:1578: error: cannot find symbol
+	private static int RemoveRoadStop(Station st, int flags, TileIndex tile)
+	                                                         ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:1995: error: cannot find symbol
+	static final  TileIndexDiffC _dock_tileoffs_chkaround[] = {
+	              ^
+  symbol:   class TileIndexDiffC
+  location: class Station
+Station.java:2162: error: cannot find symbol
+	private static void DrawTile_Station(TileInfo ti)
+	                                     ^
+  symbol:   class TileInfo
+  location: class Station
+Station.java:2240: error: cannot find symbol
+	public static void StationPickerDrawSprite(int x, int y, RailType railtype, int image)
+	                                                         ^
+  symbol:   class RailType
+  location: class Station
+Station.java:2263: error: cannot find symbol
+	private static int GetSlopeZ_Station(final  TileInfo  ti)
+	                                            ^
+  symbol:   class TileInfo
+  location: class Station
+Station.java:2268: error: cannot find symbol
+	private static int GetSlopeTileh_Station(final  TileInfo ti)
+	                                                ^
+  symbol:   class TileInfo
+  location: class Station
+Station.java:2273: error: cannot find symbol
+	private static void GetAcceptedCargo_Station(TileIndex tile, AcceptedCargo ac)
+	                                             ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:2273: error: cannot find symbol
+	private static void GetAcceptedCargo_Station(TileIndex tile, AcceptedCargo ac)
+	                                                             ^
+  symbol:   class AcceptedCargo
+  location: class Station
+Station.java:2278: error: cannot find symbol
+	private static void GetTileDesc_Station(TileIndex tile, TileDesc td)
+	                                        ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:2278: error: cannot find symbol
+	private static void GetTileDesc_Station(TileIndex tile, TileDesc td)
+	                                                        ^
+  symbol:   class TileDesc
+  location: class Station
+Station.java:2303: error: cannot find symbol
+	private static int GetTileTrackStatus_Station(TileIndex tile, TransportType mode)
+	                                              ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:2303: error: cannot find symbol
+	private static int GetTileTrackStatus_Station(TileIndex tile, TransportType mode)
+	                                                              ^
+  symbol:   class TransportType
+  location: class Station
+Station.java:2331: error: cannot find symbol
+	private static void TileLoop_Station(TileIndex tile)
+	                                     ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:2353: error: cannot find symbol
+	private static void AnimateTile_Station(TileIndex tile)
+	                                        ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:2394: error: cannot find symbol
+	private static void ClickTile_Station(TileIndex tile)
+	                                      ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:2409: error: cannot find symbol
+	private static int VehicleEnter_Station(Vehicle v, TileIndex tile, int x, int y)
+	                                        ^
+  symbol:   class Vehicle
+  location: class Station
+Station.java:2409: error: cannot find symbol
+	private static int VehicleEnter_Station(Vehicle v, TileIndex tile, int x, int y)
+	                                                   ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:2546: error: cannot find symbol
+	private static void CheckOrphanedSlots(final  Station st, RoadStopType rst)
+	                                                          ^
+  symbol:   class RoadStopType
+  location: class Station
+Station.java:2739: error: cannot find symbol
+	public static void ModifyStationRatingAround(TileIndex tile, PlayerID owner, int amount, int radius)
+	                                             ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:2739: error: cannot find symbol
+	public static void ModifyStationRatingAround(TileIndex tile, PlayerID owner, int amount, int radius)
+	                                                             ^
+  symbol:   class PlayerID
+  location: class Station
+Station.java:2806: error: cannot find symbol
+	public static int MoveGoodsToStation(TileIndex tile, int w, int h, int type, int amount)
+	                                     ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:2946: error: cannot find symbol
+	public static void BuildOilRig(TileIndex tile)
+	                               ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:3000: error: cannot find symbol
+	public static void DeleteOilRig(TileIndex tile)
+	                                ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:3014: error: cannot find symbol
+	private static void ChangeTileOwner_Station(TileIndex tile, PlayerID old_player, PlayerID new_player)
+	                                            ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:3014: error: cannot find symbol
+	private static void ChangeTileOwner_Station(TileIndex tile, PlayerID old_player, PlayerID new_player)
+	                                                            ^
+  symbol:   class PlayerID
+  location: class Station
+Station.java:3014: error: cannot find symbol
+	private static void ChangeTileOwner_Station(TileIndex tile, PlayerID old_player, PlayerID new_player)
+	                                                                                 ^
+  symbol:   class PlayerID
+  location: class Station
+Station.java:3029: error: cannot find symbol
+	private static int ClearTile_Station(TileIndex tile, byte flags)
+	                                     ^
+  symbol:   class TileIndex
+  location: class Station
+Station.java:3075: error: cannot find symbol
+	final  TileTypeProcs _tile_type_station_procs = new TileTypeProcs() {
+	       ^
+  symbol:   class TileTypeProcs
+  location: class Station
+Station.java:3303: error: cannot find symbol
+	void MergePoint(TileIndex tile)
+	                ^
+  symbol:   class TileIndex
+  location: class ottd_Rectangle
+Station.java:43: error: cannot find symbol
+	GoodsEntry goods[] = new GoodsEntry[AcceptedCargo.NUM_CARGO];
+	                         ^
+  symbol:   class GoodsEntry
+  location: class Station
+Station.java:43: error: cannot find symbol
+	GoodsEntry goods[] = new GoodsEntry[AcceptedCargo.NUM_CARGO];
+	                                    ^
+  symbol:   variable AcceptedCargo
+  location: class Station
+Station.java:75: error: cannot find symbol
+		last_vehicle = INVALID_VEHICLE;
+		               ^
+  symbol:   variable INVALID_VEHICLE
+  location: class Station
+Station.java:78: error: cannot find symbol
+		for(GoodsEntry ge : goods)
+		    ^
+  symbol:   class GoodsEntry
+  location: class Station
+Station.java:82: error: cannot find symbol
+			ge.enroute_from = INVALID_STATION;
+			                  ^
+  symbol:   variable INVALID_STATION
+  location: class Station
+Station.java:89: error: cannot find symbol
+		airport_queue = VehicleQueue.new_VQueue();
+		                ^
+  symbol:   variable VehicleQueue
+  location: class Station
+Station.java:90: error: cannot find symbol
+		helicopter_queue = VehicleQueue.new_VQueue();
+		                   ^
+  symbol:   variable VehicleQueue
+  location: class Station
+Station.java:92: error: cannot find symbol
+		_global_station_sort_dirty = true; // build a new station
 		^
-Station.java:2556: error: class, interface, or enum expected
-		StationID index;
+  symbol:   variable _global_station_sort_dirty
+  location: class Station
+Station.java:99: error: cannot find symbol
+		Point pt = Point.RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
 		^
-Station.java:2557: error: class, interface, or enum expected
-		int waiting;
+  symbol:   class Point
+  location: class Station
+Station.java:99: error: cannot find symbol
+		Point pt = Point.RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
+		           ^
+  symbol:   variable Point
+  location: class Station
+Station.java:102: error: cannot find symbol
+		if ( (0 != (facilities & FACIL_AIRPORT)) && airport_type == AT_OILRIG) pt.y -= 16;
+		                         ^
+  symbol:   variable FACIL_AIRPORT
+  location: class Station
+Station.java:102: error: cannot find symbol
+		if ( (0 != (facilities & FACIL_AIRPORT)) && airport_type == AT_OILRIG) pt.y -= 16;
+		                                                            ^
+  symbol:   variable AT_OILRIG
+  location: class Station
+Station.java:104: error: cannot find symbol
+		Global.SetDParam(0, index);
 		^
-Station.java:2558: error: class, interface, or enum expected
-		boolean waiting_changed = false;
+  symbol:   variable Global
+  location: class Station
+Station.java:105: error: cannot find symbol
+		Global.SetDParam(1, facilities);
 		^
-Station.java:2560: error: class, interface, or enum expected
-		byte_inc_sat(&st.time_since_load);
-		^
-Station.java:2561: error: class, interface, or enum expected
-		byte_inc_sat(&st.time_since_unload);
-		^
-Station.java:2563: error: class, interface, or enum expected
-		ge = st.goods;
-		^
-Station.java:2564: error: class, interface, or enum expected
-		do {
-		^
-Station.java:2567: error: class, interface, or enum expected
-				byte_inc_sat(&ge.days_since_pickup);
-				^
-Station.java:2569: error: class, interface, or enum expected
-				rating = 0;
-				^
-Station.java:2571: error: class, interface, or enum expected
-				{
-				^
-Station.java:2573: error: class, interface, or enum expected
-					if ((b-=85) >= 0)
+  symbol:   variable Global
+  location: class Station
+Station.java:106: error: cannot find symbol
+		UpdateViewportSignPos(sign, pt.x, pt.y, STR_305C_0);
+		                                        ^
+  symbol:   variable STR_305C_0
+  location: class Station
+Station.java:135: error: cannot find symbol
+		for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
+		                 ^
+  symbol:   variable AcceptedCargo
+  location: class Station
+Station.java:147: error: cannot find symbol
+			Global.SetDParam(2, BitOps.GB(items, 16, 16));
+			                    ^
+  symbol:   variable BitOps
+  location: class Station
+Station.java:147: error: cannot find symbol
+			Global.SetDParam(2, BitOps.GB(items, 16, 16));
+			^
+  symbol:   variable Global
+  location: class Station
+Station.java:148: error: cannot find symbol
+			Global.SetDParam(1, BitOps.GB(items,  0, 16));
+			                    ^
+  symbol:   variable BitOps
+  location: class Station
+Station.java:148: error: cannot find symbol
+			Global.SetDParam(1, BitOps.GB(items,  0, 16));
+			^
+  symbol:   variable Global
+  location: class Station
+Station.java:149: error: cannot find symbol
+			Global.SetDParam(0, index);
+			^
+  symbol:   variable Global
+  location: class Station
+Station.java:150: error: cannot find symbol
+			AddNewsItem(msg.id + (((items >> 16) != 0 )?1:0), NEWS_FLAGS(NM_SMALL, NF_VIEWPORT|NF_TILE, NT_ACCEPTANCE, 0), xy, 0);
+			                                                             ^
+  symbol:   variable NM_SMALL
+  location: class Station
+Station.java:150: error: cannot find symbol
+			AddNewsItem(msg.id + (((items >> 16) != 0 )?1:0), NEWS_FLAGS(NM_SMALL, NF_VIEWPORT|NF_TILE, NT_ACCEPTANCE, 0), xy, 0);
+			                                                                       ^
+  symbol:   variable NF_VIEWPORT
+  location: class Station
+Station.java:150: error: cannot find symbol
+			AddNewsItem(msg.id + (((items >> 16) != 0 )?1:0), NEWS_FLAGS(NM_SMALL, NF_VIEWPORT|NF_TILE, NT_ACCEPTANCE, 0), xy, 0);
+			                                                                                   ^
+  symbol:   variable NF_TILE
+  location: class Station
+Station.java:150: error: cannot find symbol
+			AddNewsItem(msg.id + (((items >> 16) != 0 )?1:0), NEWS_FLAGS(NM_SMALL, NF_VIEWPORT|NF_TILE, NT_ACCEPTANCE, 0), xy, 0);
+			                                                                                            ^
+  symbol:   variable NT_ACCEPTANCE
+  location: class Station
+Station.java:173: error: cannot find symbol
+		x2 = Integer.min(x + w + rad, Global.MapSizeX());
+		                              ^
+  symbol:   variable Global
+  location: class Station
+Station.java:176: error: cannot find symbol
+		y2 = Integer.min(y + h + rad, Global.MapSizeY());
+		                              ^
+  symbol:   variable Global
+  location: class Station
+Station.java:186: error: cannot find symbol
+				if (!(BitOps.IS_INSIDE_1D(xc, x, w) && BitOps.IS_INSIDE_1D(yc, y, h))) {
+				      ^
+  symbol:   variable BitOps
+  location: class Station
+Station.java:186: error: cannot find symbol
+				if (!(BitOps.IS_INSIDE_1D(xc, x, w) && BitOps.IS_INSIDE_1D(yc, y, h))) {
+				                                       ^
+  symbol:   variable BitOps
+  location: class Station
+Station.java:188: error: cannot find symbol
+					TileIndex tile1 = new TileIndex(xc, yc);
 					^
-Station.java:2575: error: class, interface, or enum expected
-				}
-				^
-Station.java:2579: error: class, interface, or enum expected
-					(age >= 3) ||
-					^
-Station.java:2583: error: class, interface, or enum expected
-				}
-				^
-Station.java:2588: error: class, interface, or enum expected
-				{
-				^
-Station.java:2590: error: class, interface, or enum expected
-					if (st.last_vehicle != INVALID_VEHICLE &&
-					^
-Station.java:2593: error: class, interface, or enum expected
-				(days > 21) ||
-				^
-Station.java:2598: error: class, interface, or enum expected
-				}
-				^
-Station.java:2602: error: class, interface, or enum expected
-					(rating -= 90, waiting > 1500) ||
-					^
-Station.java:2608: error: class, interface, or enum expected
-				}
-				^
-Station.java:2614: error: class, interface, or enum expected
-					ge.rating = rating = or + clamp(clamp(rating, 0, 255) - or, -2, 2);
-					^
+  symbol:   class TileIndex
+  location: class Station
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
 100 errors

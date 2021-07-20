@@ -1,3 +1,4 @@
+#if 0
 /* $Id: map.h 3342 2005-12-25 19:44:23Z tron $ */
 
 #ifndef MAP_H

@@ -1,3 +1,4 @@
+#if 0
 /* $Id: map.c 3077 2005-10-22 06:39:32Z tron $ */
 
 #include "stdafx.h"
