@@ -227,7 +227,7 @@ void GenerateWorld(int mode, uint size_x, uint size_y)
 	ResetObjectToPlace();
 }
 */
-
+/*
 void DeleteName(StringID id)
 {
 	if ((id & 0xF800) == 0x7800) {
@@ -239,7 +239,7 @@ char *GetName(int id, char *buff)
 {
 	return strecpy(buff, _name_array[id & ~0x600], NULL);
 }
-
+*/
 /*
 static void InitializeCheats(void)
 {
@@ -251,7 +251,7 @@ static void InitializeNameMgr(void)
 {
 	memset(_name_array, 0, sizeof(_name_array));
 }
-*/
+* /
 StringID RealAllocateName(const char *name, byte skip, bool check_double)
 {
 	char (*free_item)[lengthof(*_name_array)] = NULL;
@@ -274,7 +274,7 @@ StringID RealAllocateName(const char *name, byte skip, bool check_double)
 		return 0;
 	}
 }
-
+*/
 
 #define M(a,b) ((a<<5)|b)
 static const uint16 _month_date_from_year_day[] = {

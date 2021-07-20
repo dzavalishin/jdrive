@@ -1,5 +1,8 @@
 package game;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import game.util.Paths;
 
 public class Global {
@@ -42,52 +45,6 @@ public class Global {
 	public static final int TRANSPORT_END = 3;
 	public static final int INVALID_TRANSPORT = 0xff;
 
-	/* AcceptedCargo
-	public static final int CT_PASSENGERS = 0;
-	public static final int CT_COAL = 1;
-	public static final int CT_MAIL = 2;
-	public static final int CT_OIL = 3;
-	public static final int CT_LIVESTOCK = 4;
-	public static final int CT_GOODS = 5;
-	public static final int CT_GRAIN = 6;
-	public static final int CT_WOOD = 7;
-	public static final int CT_IRON_ORE = 8;
-	public static final int CT_STEEL = 9;
-	public static final int CT_VALUABLES = 10;
-	public static final int CT_FOOD = 11;
-
-	// Arctic
-	public static final int CT_WHEAT = 6;
-	public static final int CT_HILLY_UNUSED = 8;
-	public static final int CT_PAPER = 9;
-	public static final int CT_GOLD = 10;
-
-	// Tropic
-	public static final int CT_RUBBER = 1;
-	public static final int CT_FRUIT = 4;
-	public static final int CT_MAIZE = 6;
-	public static final int CT_COPPER_ORE = 8;
-	public static final int CT_WATER = 9;
-	public static final int CT_DIAMONDS = 10;
-
-	// Toyland
-	public static final int CT_SUGAR = 1;
-	public static final int CT_TOYS = 3;
-	public static final int CT_BATTERIES = 4;
-	public static final int CT_CANDY = 5;
-	public static final int CT_TOFFEE = 6;
-	public static final int CT_COLA = 7;
-	public static final int CT_COTTON_CANDY = 8;
-	public static final int CT_BUBBLES = 9;
-	public static final int CT_PLASTIC = 10;
-	public static final int CT_FIZZY_DRINKS = 11;
-
-	public static final int NUM_CARGO = 12;
-
-	public static final int CT_INVALID = 0xFF;
-	
-	*/
-	
 
 	public static final boolean AYSTAR_DEBUG = true;
 
@@ -103,11 +60,37 @@ public class Global {
 	public static int _map_tile_mask;
 	public static int _map_size;
 
+
+	
+	//public static StringID _error_message;
+	//public static StringID _error_message_2;
+	public static int _error_message;
+	public static int _error_message_2;
+	public static int _additional_cash_required;
+	
+
+
+	/* --- 1 Day is 74 ticks ---
+	 * The game's internal structure is dictated by ticks. The date counter (date_fract) is an integer of
+	 * uint16 type, so it can have a max value of 65536. Every tick this variable (date_fract) is
+	 * increased by 885. When it overflows, the new day loop is called.
+	 * * this that means 1 day is : 65536 / 885 = 74 ticks
+	 * * 1 tick is approximately 27ms.
+	 * * 1 day is thus about 2 seconds (74*27 = 1998) on a machine that can run OpenTTD normally
+	 */
+	public static int DAY_TICKS = 74;
+	public static int MAX_YEAR_BEGIN_REAL = 1920;
+	public static int MAX_YEAR_END_REAL = 2090;
+	public static int MAX_YEAR_END = 170;
+
 	public static int _date;
 	public static int _date_fract;
 
 	public static int _tick_counter;
 	public static int _frame_counter;
+
+
+
 
 	public static Paths _path = new Paths();
 
@@ -120,13 +103,21 @@ public class Global {
 	public static byte _dirkeys;				// 1=left, 2=up, 4=right, 8=down
 
 	public static byte _no_scroll;
-	
+
+	public static boolean _generating_world = false;
+
+	// Net
+	public static boolean _networking = false;
+	public static boolean _network_available = false;  // is network mode available?
+	public static boolean _network_server = false; // network-server is active
+	public static boolean _network_dedicated = false; // are we a dedicated server?
+	public static byte _network_playas; // an id to play as..
+
 	// main/startup
 	public static String _config_file;
 	public static boolean _dedicated_forks;
 	public static SwitchModes _switch_mode;
 	public static boolean _pause = false;
-	public static boolean _networking = false;
 	public static byte _display_opt;
 	public static boolean _do_autosave;
 	public static boolean _use_dos_palette = false;
@@ -201,21 +192,21 @@ public class Global {
 		if( level >= _debug_grf_level )
 			debug( s, arg );
 	}
-	
+
 	public static void DEBUG_spritecache( int level, String s, Object ... arg )
 	{
 		if( level >= _debug_spritecache_level )
 			debug( s, arg );
 	}
-	
-	
+
+
 	public static int Random() {
 		return hal.Random();
 	}
 
-	
-	
-/* dont use me
+
+
+	/* dont use me
 static inline void SetDParamX(uint32 *s, uint n, uint32 v)
 {
 	s[n] = v;
@@ -225,31 +216,96 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 {
 	return s[n];
 }
-*/
-static private int _decode_parameters[] = new int[20];
+	 */
+	static private int _decode_parameters[] = new int[20];
 
 
-static void SetDParam(int n, int v)
-{
-	//assert(n < _decode_parameters.length);
-	_decode_parameters[n] = v;
-}
+	static void SetDParam(int n, int v)
+	{
+		//assert(n < _decode_parameters.length);
+		_decode_parameters[n] = v;
+	}
 
-static void SetDParam64(int n, long v)
-{
-	//assert(n + 1 < lengthof(_decode_parameters));
-	_decode_parameters[n + 0] = (int) (v & 0xffffffff);
-	_decode_parameters[n + 1] = (int) (v >> 32);
-}
+	static void SetDParam64(int n, long v)
+	{
+		//assert(n + 1 < lengthof(_decode_parameters));
+		_decode_parameters[n + 0] = (int) (v & 0xffffffff);
+		_decode_parameters[n + 1] = (int) (v >> 32);
+	}
 
-static int GetDParam(int n)
-{
-	//assert(n < lengthof(_decode_parameters));
-	return _decode_parameters[n];
-}
+	static int GetDParam(int n)
+	{
+		//assert(n < lengthof(_decode_parameters));
+		return _decode_parameters[n];
+	}
+
+
+
+
+	private static int next_name_id = 0;
+	private static Map<Integer,String> _name_array = new HashMap<Integer,String>();
+
+	public static void DeleteName(int id)
+	{
+		if ((id & 0xF800) == 0x7800) {
+			_name_array.remove(id & 0x1FF);
+		}
+	}
+
+	public static String GetName(int id)
+	{
+		return new String(_name_array.get(id & ~0x600));
+	}
+
+
+	public static StringID AllocateNameUnique(String name, byte skip) { return RealAllocateName(name, skip, true); }
+	public static StringID AllocateName(String name, byte skip) { return RealAllocateName(name, skip, false); }
+
+	static void InitializeNameMgr()
+	{
+		_name_array.clear();
+	}
+
+	public static StringID RealAllocateName(String name, byte skip, boolean check_double)
+	{
+
+		if(check_double)
+		{
+			if( _name_array.containsValue(name) )
+			{
+				_error_message = STR_0132_CHOSEN_NAME_IN_USE_ALREADY;
+				return new StringID(0);
+			}
+		}
+
+
+		int tries = 0x1FF;
+		while(true)
+		{
+			if( tries-- <= 0)
+			{
+				_error_message = STR_0131_TOO_MANY_NAMES_DEFINED;
+				return new StringID(0);
+			}
+
+			if( null == _name_array.get(next_name_id & 0x1FF) )
+			{
+				int freeid = next_name_id++;
+				_name_array.put(freeid, name);
+				return new StringID(freeid | 0x7800 | (skip << 8));
+			}
+
+			next_name_id++;
+		}
+
+	}
 	
-	
-	
+	public static void DeleteName(StringID str) {
+		DeleteName(str.id);		
+	}
+
+
+
 }
 /*
 class DebugLevel {

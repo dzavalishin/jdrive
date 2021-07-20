@@ -460,6 +460,11 @@ public class SpriteCache {
 		return GetRawSprite(sprite);
 	}
 
+	static Sprite GetSprite(int sprite)
+	{
+		return GetRawSprite(sprite);
+	}
+
 	/*
 	static byte[] GetNonSpriteData(SpriteID sprite)
 	{
@@ -467,7 +472,7 @@ public class SpriteCache {
 	}*/
 
 	
-	void GfxInitSpriteMem()
+	static void GfxInitSpriteMem()
 	{
 		/*
 		// initialize sprite cache heap

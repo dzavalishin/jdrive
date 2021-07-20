@@ -162,9 +162,5 @@ class JavaHal extends Hal
 		JOptionPane.showMessageDialog(null, buf);
 	}
 
-	@Override
-	protected int Random() {		
-		return (int) (Math.random() * Integer.MAX_VALUE);
-	}
 
 }

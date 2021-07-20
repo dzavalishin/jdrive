@@ -1,3 +1,4 @@
+#if 0
 /* $Id: players.c 3343 2005-12-26 15:41:24Z peter1138 $ */
 
 /** @file players.c

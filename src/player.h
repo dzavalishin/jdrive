@@ -208,14 +208,15 @@ void InvalidatePlayerWindows(const Player* p);
 void UpdatePlayerMoney32(Player *p);
 //#define FOR_ALL_PLAYERS(p) for(p=_players; p != endof(_players); p++)
 
-VARDEF PlayerID _local_player;
-VARDEF PlayerID _current_player;
-
+//VARDEF PlayerID _local_player;
+//VARDEF PlayerID _current_player;
+/*
 //#define MAX_PLAYERS 8
 VARDEF Player _players[MAX_PLAYERS];
 // NOSAVE: can be determined from player structs
 VARDEF byte _player_colors[MAX_PLAYERS];
 
+/*
 static inline Player* GetPlayer(PlayerID i)
 {
 	assert(i < lengthof(_players));
@@ -226,7 +227,7 @@ static inline bool IsLocalPlayer(void)
 {
 	return _local_player == _current_player;
 }
-
+*/
 void DeletePlayerWindows(PlayerID pi);
 byte GetPlayerRailtypes(PlayerID p);
 

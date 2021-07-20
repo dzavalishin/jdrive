@@ -104,8 +104,8 @@ public class FileIO {
 
 	public static int FioReadWord()
 	{
-		byte b = FioReadByte();
-		return (FioReadByte() << 8) | b;
+		int b = FioReadByte() & 0xFF;
+		return 0xFFFF & ((FioReadByte() << 8) | b);
 	}
 
 	public static int FioReadDword()

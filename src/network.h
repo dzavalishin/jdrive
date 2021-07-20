@@ -215,11 +215,11 @@ NetworkGameList *NetworkQueryServer(const char* host, unsigned short port, bool 
 VARDEF char *_network_host_list[MAX_SAVED_SERVERS];
 #define MAX_BANS 25
 VARDEF char *_network_ban_list[MAX_BANS];
-VARDEF bool _networking;
-VARDEF bool _network_available;  // is network mode available?
-VARDEF bool _network_server; // network-server is active
-VARDEF bool _network_dedicated; // are we a dedicated server?
-VARDEF byte _network_playas; // an id to play as..
+//VARDEF bool _networking;
+//VARDEF bool _network_available;  // is network mode available?
+//VARDEF bool _network_server; // network-server is active
+//VARDEF bool _network_dedicated; // are we a dedicated server?
+//VARDEF byte _network_playas; // an id to play as..
 
 void ParseConnectionString(const char **player, const char **port, char *connection_string);
 void NetworkUpdateClientInfo(uint16 client_index);

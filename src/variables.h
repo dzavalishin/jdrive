@@ -70,8 +70,9 @@ VARDEF uint32 _cur_town_ctr;
 // Frequency iterator at the same place
 VARDEF uint32 _cur_town_iter;
 
-VARDEF uint _cur_player_tick_index;
-VARDEF uint _next_competitor_start;
+// Player
+//VARDEF uint _cur_player_tick_index;
+//VARDEF uint _next_competitor_start;
 
 // Determines how often to run the tree loop
 VARDEF byte _trees_tick_ctr;
@@ -214,7 +215,7 @@ typedef struct Patches {
 #endif
 //VARDEF Patches _patches;
 
-
+/*
 typedef struct Cheat {
 	bool been_used;	// has this cheat been used before?
 	byte value;			// active?
@@ -276,9 +277,9 @@ VARDEF uint32 _news_display_opt;
 VARDEF bool _news_ticker_sound;
 //VARDEF byte _game_mode;
 
-VARDEF StringID _error_message;
-VARDEF StringID _error_message_2;
-VARDEF int32 _additional_cash_required;
+//VARDEF StringID _error_message;
+//VARDEF StringID _error_message_2;
+//VARDEF int32 _additional_cash_required;
 
 //VARDEF uint32 _decode_parameters[20];
 
@@ -296,10 +297,10 @@ VARDEF bool _fast_forward;
 VARDEF bool _rightclick_emulate;
 
 // IN/OUT parameters to commands
-VARDEF byte _yearly_expenses_type;
+//VARDEF byte _yearly_expenses_type;
 VARDEF TileIndex _terraform_err_tile;
 VARDEF TileIndex _build_tunnel_endtile;
-VARDEF bool _generating_world;
+//VARDEF bool _generating_world;
 VARDEF int _new_town_size;
 VARDEF uint _returned_refit_amount;
 /*
@@ -416,7 +417,7 @@ StringID BindCString(const char *str);
 #define COPY_OUT_DPARAM(dst,offs,num) memcpy(dst,_decode_parameters + offs, sizeof(uint32) * (num))
 
 
-#define SET_EXPENSES_TYPE(x) _yearly_expenses_type = x;
+//#define SET_EXPENSES_TYPE(x) _yearly_expenses_type = x;
 
 /* landscape.c */
 extern const byte _tileh_to_sprite[32];

@@ -218,14 +218,14 @@ public class SignStruct implements IPoolItem
 		 * So rename the sign. If it is empty, it has no name, so delete it */
 		if (_cmd_text[0] != '\0') {
 			/* Create the name */
-			StringID str = AllocateName(_cmd_text, 0);
+			StringID str = Global.AllocateName(_cmd_text, 0);
 			if (str == null) return CMD_ERROR;
 
 			if (flags & DC_EXEC) {
 				SignStruct ss = GetSign(p1);
 
 				/* Delete the old name */
-				DeleteName(ss.str);
+				Global.DeleteName(ss.str);
 				/* Assign the new one */
 				ss.str = str;
 				ss.owner = Player._current_player;
@@ -239,14 +239,14 @@ public class SignStruct implements IPoolItem
 				_sign_sort_dirty = true;
 			} else {
 				/* Free the name, because we did not assign it yet */
-				DeleteName(str);
+				Global.DeleteName(str);
 			}
 		} else { /* Delete sign */
 			if (flags & DC_EXEC) {
 				SignStruct ss = GetSign(p1);
 
 				/* Delete the name */
-				DeleteName(ss.str);
+				Global.DeleteName(ss.str);
 				ss.str = null;
 
 				ss.MarkSignDirty();

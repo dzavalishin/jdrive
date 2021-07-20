@@ -287,7 +287,7 @@ public class Landscape extends GenLandTable
 	{
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 
-		SET_EXPENSES_TYPE(EXPENSES_CONSTRUCTION);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		return _tile_type_procs[GetTileType(tile)].clear_tile_proc(tile, flags);
 	}
@@ -308,7 +308,7 @@ public class Landscape extends GenLandTable
 
 		TileIndex pi1 = new TileIndex(p1);
 
-		SET_EXPENSES_TYPE(EXPENSES_CONSTRUCTION);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		// make sure sx,sy are smaller than ex,ey
 		sx = pi1.TileX() * 16;

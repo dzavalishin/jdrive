@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import game.ai.Ai;
 import game.util.BitOps;
 import game.util.FileIO;
 
@@ -174,12 +175,12 @@ public class Main {
 		Global._display_opt = 0; // TODO BitOps.RETCLRBITS( Global._display_opt, DO_TRANS_BUILDINGS );
 		GameOptions._opt_ptr = GameOptions._opt_newgame;
 
-		GfxLoadSprites();
-		LoadStringWidthTable();
+		GfxInit.GfxLoadSprites();
+		Gfx.LoadStringWidthTable();
 
 		// Setup main window
 		Window.ResetWindowSystem();
-		SetupColorsAndInitialWindow();
+		Gui.SetupColorsAndInitialWindow();
 
 		// Generate a world.
 		filename = String.format( "%sopntitle.dat",  _path.data_dir );
@@ -189,7 +190,7 @@ public class Main {
 			sprintf(filename, "%sopntitle.dat",  _path.second_data_dir);
 			if (SaveOrLoad(filename, SL_LOAD) != SL_OK)
 	#endif*/
-			GenerateWorld(1, 64, 64); // if failed loading, make empty world.
+			GenerateWorld.GenerateWorld(1, 64, 64); // if failed loading, make empty world.
 		}
 
 		Global._pause = false;
@@ -257,13 +258,10 @@ public class Main {
 				else
 					network_conn = null;
 			} break; 
-			case 'b': _ai.network_client = true; break;
+			case 'b': Ai._ai.network_client = true; break;
 			//case 'r': ParseResolution(resolution, mgo.opt); break;
 			case 't': startdate = Integer.parseInt(mgo.opt); break;
 			case 'd': {
-				//#if defined(WIN32)
-				Console.CreateConsole();
-				//#endif
 				if (mgo.opt != null) SetDebugString(mgo.opt);
 			} break;
 			case 'e': Global._switch_mode = SwitchModes.SM_EDITOR; break;
@@ -279,9 +277,9 @@ public class Main {
 				_random_seeds[0][0] = Integer.parseInt(mgo.opt);
 				break;
 			case 'p': {
-				int i = Integer.parseInt(mgo.opt);
+				int netp = Integer.parseInt(mgo.opt);
 				// Play as an other player in network games
-				if (BitOps.IS_INT_INSIDE(i, 1, Global.MAX_PLAYERS)) _network_playas = i;
+				if (BitOps.IS_INT_INSIDE(i, 1, Global.MAX_PLAYERS)) Global._network_playas = (byte) netp;
 				break;
 			}
 			case 'c':
@@ -294,8 +292,8 @@ public class Main {
 			}
 		}
 
-		if (_ai.network_client && !network) {
-			_ai.network_client = false;
+		if (Ai._ai.network_client && !network) {
+			Ai._ai.network_client = false;
 			Global.DEBUG_ai( 0, "[AI] Can't enable network-AI, because '-n' is not used\n");
 		}
 
@@ -304,8 +302,8 @@ public class Main {
 
 		//#if defined(UNIX) && !defined(__MORPHOS__)
 		// We must fork here, or we'll end up without some resources we need (like sockets)
-		if (Global._dedicated_forks)
-			DedicatedFork();
+		// TODO if (Global._dedicated_forks)
+		//	DedicatedFork();
 		//#endif
 
 		LoadFromConfig();
@@ -335,7 +333,7 @@ public class Main {
 		InitializeDynamicVariables();
 
 		/* start the AI */
-		AI_Initialize();
+		Ai.AI_Initialize();
 
 		// Sample catalogue
 		Global.DEBUG_misc( 1, "Loading sound effects...");
@@ -345,8 +343,8 @@ public class Main {
 		// This must be done early, since functions use the InvalidateWindow* calls
 		Window.InitWindowSystem();
 
-		GfxLoadSprites();
-		LoadStringWidthTable();
+		GfxInit.GfxLoadSprites();
+		Gfx.LoadStringWidthTable();
 
 		Global.DEBUG_misc( 1, "Loading drivers...");
 		// TODO LoadDriver(SOUND_DRIVER, _ini_sounddriver);
@@ -355,7 +353,7 @@ public class Main {
 		_savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 
 		// initialize network-core
-		NetworkStartUp();
+		// TODO NetworkStartUp();
 
 		GameOptions._opt_ptr = GameOptions._opt_newgame;
 
@@ -418,7 +416,7 @@ public class Main {
 		UnInitializeDynamicVariables();
 
 		/* stop the AI */
-		AI_Uninitialize();
+		Ai.AI_Uninitialize();
 
 		/* Close all and any open filehandles */
 		FileIO.FioCloseAll();
@@ -483,13 +481,13 @@ public class Main {
 		//memcpy(_opt_ptr, &_opt_newgame, sizeof(*_opt_ptr));
 		GameOptions._opt_ptr.assign(GameOptions._opt_newgame);
 
-		GfxLoadSprites();
+		GfxInit.GfxLoadSprites();
 
 		// Reinitialize windows
 		Window.ResetWindowSystem();
-		LoadStringWidthTable();
+		Gfx.LoadStringWidthTable();
 
-		SetupColorsAndInitialWindow();
+		Gui.SetupColorsAndInitialWindow();
 
 		// Randomize world
 		GenerateWorld.GenerateWorld(0, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
@@ -501,9 +499,9 @@ public class Main {
 			// Create a single player
 			DoStartupNewPlayer(false);
 
-			Global._local_player = 0;
+			Global._local_player = new PlayerID(0); 
 			Global._current_player = Global._local_player;
-			DoCommandP(0, (Global._patches.autorenew << 15 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
+			DoCommandP(0, (Global._patches.autorenew ? (1 << 15) : 0 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
 		}
 
 		Global.hal.MarkWholeScreenDirty();
@@ -518,13 +516,13 @@ public class Main {
 		//memcpy(_opt_ptr, &_opt_newgame, sizeof(GameOptions));
 		GameOptions._opt_ptr.assign(GameOptions._opt_newgame);
 
-		GfxLoadSprites();
+		GfxInit.GfxLoadSprites();
 
 		// Re-init the windowing system
 		Window.ResetWindowSystem();
 
 		// Create toolbars
-		SetupColorsAndInitialWindow();
+		Gui.SetupColorsAndInitialWindow();
 
 		// Startup the game system
 		GenerateWorld.GenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
@@ -553,13 +551,13 @@ public class Main {
 			return;
 		}
 
-		GfxLoadSprites();
+		GfxInit.GfxLoadSprites();
 
 		// Reinitialize windows
 		Window.ResetWindowSystem();
-		LoadStringWidthTable();
+		Gfx.LoadStringWidthTable();
 
-		SetupColorsAndInitialWindow();
+		Gui.SetupColorsAndInitialWindow();
 
 		// Load game
 		if (SaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode) != SL_OK) {
@@ -579,7 +577,7 @@ public class Main {
 
 		Global._local_player = 0;
 		Global._current_player = Global._local_player;
-		DoCommandP(0, (Global._patches.autorenew << 15 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
+		DoCommandP(0, (Global._patches.autorenew ? 1 << 15 : 0 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
 
 		Global.hal.MarkWholeScreenDirty();
 	}
@@ -674,19 +672,19 @@ public class Main {
 		}
 
 		case SM_LOAD_SCENARIO: { /* Load scenario from scenario editor */
-			if (SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GM_EDITOR)) {
+			if (SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GameModes.GM_EDITOR)) {
 				PlayerID i;
 
 				GameOptions._opt_ptr = GameOptions._opt;
 
 				Global._local_player = new PlayerID(Owner.OWNER_NONE);
-				_generating_world = true;
+				Global._generating_world = true;
 				// delete all players.
-				for (i = 0; i != MAX_PLAYERS; i++) {
+				for (i = 0; i != Global.MAX_PLAYERS; i++) {
 					ChangeOwnershipOfPlayerItems(i, Owner.OWNER_SPECTATOR);
 					Global._players[i].is_active = false;
 				}
-				_generating_world = false;
+				Global._generating_world = false;
 				// delete all stations owned by a player
 				DeleteAllPlayerStations();
 			} else {
@@ -709,9 +707,9 @@ public class Main {
 			break;
 
 		case SM_GENRANDLAND: /* Generate random land within scenario editor */
-			GenerateWorld(2, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
+			GenerateWorld.GenerateWorld(2, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
 			// XXX: set date
-			Global._local_player = Owner.OWNER_NONE;
+			Global._local_player = new PlayerID( Owner.OWNER_NONE );
 			Global.hal.MarkWholeScreenDirty();
 			break;
 		}
@@ -874,7 +872,7 @@ public class Main {
 			SwitchMode(m);
 		}
 
-		IncreaseSpriteLRU();
+		//IncreaseSpriteLRU();
 		InteractiveRandom();
 
 		if (_scroller_click_timeout > 3) {
@@ -1040,7 +1038,7 @@ public class Main {
 			int h = MapSizeY();
 
 			BEGIN_TILE_LOOP(tile_cur, w, h, tile)
-			if (IsTileType(tile_cur, MP_WATER) && GetTileOwner(tile_cur) >= MAX_PLAYERS)
+			if (IsTileType(tile_cur, MP_WATER) && GetTileOwner(tile_cur) >= Global.MAX_PLAYERS)
 				SetTileOwner(tile_cur, OWNER_WATER);
 			END_TILE_LOOP(tile_cur, w, h, tile)
 		}*/
@@ -1049,7 +1047,7 @@ public class Main {
 		if (GameOptions._opt.road_side != 0) GameOptions._opt.road_side = 1;
 
 		// Load the sprites
-		GfxLoadSprites();
+		GfxInit.GfxLoadSprites();
 
 		// Update current year
 		SetDate(_date);
@@ -1077,15 +1075,15 @@ public class Main {
 
 		// make sure there is a town in the game
 		if (Global._game_mode == GameModes.GM_NORMAL && !ClosestTownFromTile(0, (int)-1)) {
-			_error_message = STR_NO_TOWN_IN_SCENARIO;
+			Global._error_message = STR_NO_TOWN_IN_SCENARIO;
 			return false;
 		}
 
 		// Initialize windows
-		ResetWindowSystem();
-		SetupColorsAndInitialWindow();
+		Window.ResetWindowSystem();
+		Gui.SetupColorsAndInitialWindow();
 
-		w = FindWindowById(WC_MAIN_WINDOW, 0);
+		w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 
 		//WP(w,vp_d).scrollpos_x = _saved_scrollpos_x;
 		//WP(w,vp_d).scrollpos_y = _saved_scrollpos_y;
@@ -1176,7 +1174,7 @@ public class Main {
 				p.engine_renew_months = -6;
 				p.engine_renew_money = 100000;
 			}
-			if (_local_player < MAX_PLAYERS) {
+			if (_local_player < Global.MAX_PLAYERS) {
 				// Set the human controlled player to the patch settings
 				// Scenario editor do not have any companies
 				p = _local_player.GetPlayer();

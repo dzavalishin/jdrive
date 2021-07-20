@@ -8,6 +8,10 @@ public class PlayerID extends AbstractID {
 		id = i;
 	}
 
+	public PlayerID(Owner o) {
+		id = o.owner;
+	}
+
 	public Player GetPlayer() {
 		// TODO Auto-generated method stub
 		//return null;

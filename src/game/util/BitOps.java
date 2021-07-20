@@ -35,6 +35,19 @@ public class BitOps {
 	//static  uint minu(uint a, uint b) { if (a <= b) return a; return b; }
 	//static  uint maxu(uint a, uint b) { if (a >= b) return a; return b; }
 
+	
+	public static long minu(int a, int b) 
+	{ 
+		long la = Integer.toUnsignedLong(a); long lb = Integer.toUnsignedLong(b); 
+		if (la <= lb) return la; return lb; 
+	}
+	
+	public static long maxu(int a, int b) 
+	{ 
+		long la = Integer.toUnsignedLong(a); long lb = Integer.toUnsignedLong(b); 
+		if (la >= lb) return la; return lb; 
+	}
+	
 	static public int clamp(int a, int min, int max)
 	{
 		if (a <= min) return min;

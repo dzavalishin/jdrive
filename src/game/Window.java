@@ -954,7 +954,7 @@ public class Window extends WindowConstants
 	 * @apiNote NB! _alloc_wnd_parent_num is not used anymore,
 	 */
 
-	Window AllocateWindowDesc(WindowDesc desc, int parentWindowNum)
+	public static Window AllocateWindowDesc(WindowDesc desc, int parentWindowNum)
 	{
 		Point pt = new Point(0,0);
 		Window w = null;
@@ -1922,6 +1922,16 @@ public class Window extends WindowConstants
 
 		for (Window w : _windows) {
 			if (w.window_class == cls && w.window_number == number) 
+				w.SetWindowDirty();
+		}
+	}
+	
+	static void InvalidateWindow(int cls, int number)
+	{
+		//final Window  w;
+
+		for (Window w : _windows) {
+			if (w.window_class.v == cls && w.window_number.n == number) 
 				w.SetWindowDirty();
 		}
 	}

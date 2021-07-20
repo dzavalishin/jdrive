@@ -1,5 +1,8 @@
 package game;
 
+import game.Window.Widget;
+import game.Window.WindowEvent;
+
 /** Struct containing information about a single bridge type
  */
 
@@ -12,7 +15,8 @@ public class Bridge
 	int speed;        ///< maximum travel speed
 	PalSpriteID sprite;  ///< the sprite which is used in the GUI (possibly with a recolor sprite)
 	StringID material;   ///< the string that contains the bridge description
-	PalSpriteID **sprite_table; ///< table of sprites for drawing the bridge
+	//PalSpriteID **sprite_table; ///< table of sprites for drawing the bridge
+	PalSpriteID [][] sprite_table; ///< table of sprites for drawing the bridge
 	byte flags;          ///< bit 0 set: disable drawing of far pillars.
 
 	static public final int MAX_BRIDGES = 13;
@@ -26,7 +30,7 @@ public class Bridge
 
 	void CcBuildBridge(boolean success, TileIndex tile, int p1, int p2)
 	{
-		if (success) SndPlayTileFx(SoundFx.SND_27_BLACKSMITH_ANVIL, tile);
+		// TODO if (success) SndPlayTileFx(SoundFx.SND_27_BLACKSMITH_ANVIL, tile);
 	}
 
 	static void BuildBridge(Window w, int i)
@@ -51,9 +55,9 @@ public class Bridge
 				Global.SetDParam(2, _bridgedata.costs[i + w.vscroll.pos]);
 				Global.SetDParam(1, (b.speed >> 4) * 10);
 				Global.SetDParam(0, b.material);
-				DrawSprite(b.sprite, 3, 15 + i * 22);
+				Gfx.DrawSprite(b.sprite.id, 3, 15 + i * 22);
 
-				DrawString(44, 15 + i * 22 , STR_500D, 0);
+				Gfx.DrawString(44, 15 + i * 22 , STR_500D, 0);
 			}
 		} break;
 
@@ -78,16 +82,16 @@ public class Bridge
 	}
 
 	static final Widget _build_bridge_widgets[] = {
-	new Widget(   WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, STR_00C5,										STR_018B_CLOSE_WINDOW),
-	new Widget(    WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   199,     0,    13, STR_100D_SELECT_RAIL_BRIDGE,	STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(     WWT_MATRIX,   Window.RESIZE_NONE,     7,     0,   187,    14,   101, 0x401,												STR_101F_BRIDGE_SELECTION_CLICK),
-	new Widget(  WWT_SCROLLBAR,   Window.RESIZE_NONE,     7,   188,   199,    14,   101, 0x0,													STR_0190_SCROLL_BAR_SCROLLS_LIST),
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, STR_00C5,										STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   199,     0,    13, STR_100D_SELECT_RAIL_BRIDGE,	STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(     Window.WWT_MATRIX,   Window.RESIZE_NONE,     7,     0,   187,    14,   101, 0x401,												STR_101F_BRIDGE_SELECTION_CLICK),
+	new Widget(  Window.WWT_SCROLLBAR,   Window.RESIZE_NONE,     7,   188,   199,    14,   101, 0x0,													STR_0190_SCROLL_BAR_SCROLLS_LIST),
 	new Widget(   WIDGETS_END),
 	};
 
 	static final WindowDesc _build_bridge_desc = new WindowDesc(
 		-1, -1, 200, 102,
-		WC_BUILD_BRIDGE,WC_BUILD_TOOLBAR,
+		Window.WC_BUILD_BRIDGE,Window.WC_BUILD_TOOLBAR,
 		WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
 		_build_bridge_widgets,
 		BuildBridgeWndProc
@@ -130,7 +134,7 @@ public class Bridge
 		ret = DoCommandByTile(end, start, (bridge_type << 8), DC_AUTO | DC_QUERY_COST, CMD_BUILD_BRIDGE);
 
 		if (CmdFailed(ret)) {
-			errmsg = _error_message;
+			errmsg = new StringID(Global._error_message);
 		} else {
 			// check which bridges can be built
 			int bridge_len;			// length of the middle parts of the bridge
@@ -157,7 +161,7 @@ public class Bridge
 		_bridgedata.count = j;
 
 		if (j != 0) {
-			Window w = AllocateWindowDesc((_bridgedata.type & 0x80) ? _build_road_bridge_desc : _build_bridge_desc);
+			Window w = Window.AllocateWindowDesc( 0 != (_bridgedata.type & 0x80) ? _build_road_bridge_desc : _build_bridge_desc, 0 );
 			w.vscroll.cap = 4;
 			w.vscroll.count = (byte)j;
 		} else {

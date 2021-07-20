@@ -275,7 +275,7 @@ private void WaypointPoolNewBlock(int start_item)
 		int tileh;
 		int dir;
 
-		SET_EXPENSES_TYPE(EXPENSES_CONSTRUCTION);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		/* if custom gfx are used, make sure it is within bounds */
 		if (p1 >= GetNumCustomStations(STAT_CLASS_WAYP)) return CMD_ERROR;
@@ -360,7 +360,7 @@ private void WaypointPoolNewBlock(int start_item)
 		DeleteDestinationFromVehicleOrder(order);
 
 		if (string != STR_null)
-			DeleteName(string);
+			Global.DeleteName(string);
 
 		RedrawWaypointSign();
 	}
@@ -437,7 +437,7 @@ private void WaypointPoolNewBlock(int start_item)
 	static int CmdRemoveTrainWaypoint(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile = TileVirtXY(x, y);
-		SET_EXPENSES_TYPE(EXPENSES_CONSTRUCTION);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 		return RemoveTrainWaypoint(tile, flags, true);
 	}
 
@@ -453,15 +453,15 @@ private void WaypointPoolNewBlock(int start_item)
 
 		if (!IsWaypointIndex(p1)) return CMD_ERROR;
 
-		if (_cmd_text[0] != '\0') {
-			str = AllocateNameUnique(_cmd_text, 0);
+		if (Global._cmd_text[0] != '\0') {
+			str = Global.AllocateNameUnique(Global._cmd_text, 0);
 			if (str == null)
 				return CMD_ERROR;
 
 			if (flags & DC_EXEC) {
 				wp = GetWaypoint(p1);
 				if (wp.string != STR_null)
-					DeleteName(wp.string);
+					Global.DeleteName(wp.string);
 
 				wp.string = str;
 				wp.town_cn = 0;
@@ -469,13 +469,13 @@ private void WaypointPoolNewBlock(int start_item)
 				UpdateWaypointSign(wp);
 				MarkWholeScreenDirty();
 			} else {
-				DeleteName(str);
+				Global.DeleteName(str);
 			}
 		} else {
 			if (flags & DC_EXEC) {
 				wp = GetWaypoint(p1);
 				if (wp.string != STR_null)
-					DeleteName(wp.string);
+					Global.DeleteName(wp.string);
 
 				MakeDefaultWaypointName(wp);
 				UpdateWaypointSign(wp);

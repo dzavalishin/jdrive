@@ -1,3 +1,5 @@
+import game.Global;
+
 public class Strings
 {
 
@@ -152,7 +154,7 @@ String GetStringWithArgs(int string, final int *argv)
 
 		// User defined name
 		case 15:
-			return GetName(index, buffr);
+			return Global.GetName(index, buffr);
 
 		case 31:
 			// dynamic strings. These are NOT to be passed through the formatter,

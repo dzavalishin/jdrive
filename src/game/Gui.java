@@ -32,7 +32,7 @@ static byte _fios_colors[];
 
 
 
-void SetupColorsAndInitialWindow()
+static void SetupColorsAndInitialWindow()
 {
 	uint i;
 	Window w;

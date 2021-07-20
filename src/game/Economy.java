@@ -641,7 +641,7 @@ public class Economy
 		FOR_ALL_STATIONS(st) {
 			if (st.xy != 0) {
 				_current_player = st.owner;
-				SET_EXPENSES_TYPE(EXPENSES_PROPERTY);
+				Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
 				SubtractMoneyFromPlayer(_price.station_value >> 1);
 			}
 		}
@@ -720,11 +720,11 @@ public class Economy
 			if (!p.is_active) continue;
 
 			_current_player = p.index;
-			SET_EXPENSES_TYPE(EXPENSES_LOAN_INT);
+			Player.SET_EXPENSES_TYPE(Player.EXPENSES_LOAN_INT);
 
 			SubtractMoneyFromPlayer(BIGMULUS(p.current_loan, interest, 16));
 
-			SET_EXPENSES_TYPE(EXPENSES_OTHER);
+			Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 			SubtractMoneyFromPlayer(_price.station_value >> 2);
 		}
 	}
@@ -1614,7 +1614,7 @@ public class Economy
 			if (p.share_owners[i] != Owner.Owner.OWNER_SPECTATOR) {
 				owner = p.share_owners[i].GetPlayer();
 				owner.money64 += value;
-				owner.yearly_expenses[0][EXPENSES_OTHER] += value;
+				owner.yearly_expenses[0][Player.EXPENSES_OTHER] += value;
 				UpdatePlayerMoney32(owner);
 			}
 		}
@@ -1640,7 +1640,7 @@ public class Economy
 		/* Check if buying shares is allowed (protection against modified clients */
 		if (p1 >= Global.MAX_PLAYERS || !Global._patches.allow_shares) return CMD_ERROR;
 
-		SET_EXPENSES_TYPE(EXPENSES_OTHER);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 		p = new PlayerID(p1).GetPlayer();
 
 		/* Protect new companies from hostile takeovers */
@@ -1685,7 +1685,7 @@ public class Economy
 		/* Check if buying shares is allowed (protection against modified clients */
 		if (p1 >= Global.MAX_PLAYERS || !Global._patches.allow_shares) return CMD_ERROR;
 
-		SET_EXPENSES_TYPE(EXPENSES_OTHER);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 		p = new PLayerID(p1).GetPlayer();
 
 		/* Those lines are here for network-protection (clients can be slow) */
@@ -1719,7 +1719,7 @@ public class Economy
 		/* Disable takeovers in multiplayer games */
 		if (p1 >= Global.MAX_PLAYERS || _networking) return CMD_ERROR;
 
-		SET_EXPENSES_TYPE(EXPENSES_OTHER);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 		p = new PlayerID(p1).GetPlayer();
 
 		if (!p.is_ai) return CMD_ERROR;

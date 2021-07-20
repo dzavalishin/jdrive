@@ -249,7 +249,7 @@ public abstract class Vehicle implements IPoolItem
 		do {
 			u = v.next;
 			has_artic_part = v.EngineHasArticPart();
-			//DeleteName(v.string_id);
+			Global.DeleteName(v.string_id);
 			v.type = 0;
 			UpdateVehiclePosHash(v, INVALID_COORD, 0);
 			v.next_hash = Vehicle.INVALID_VEHICLE;

@@ -6,10 +6,24 @@ import game.util.Sprites;
 
 public class GfxInit extends LandscapeSprites  
 {
+	static String[] files_win = 
+		{ 
+				"TRG1R.GRF",
+				"TRGIR.GRF",
+				"nsignalsw.grf",
+				null
+		};
 
+	static String[] files_landscape = 
+		{ 
+			"TRGC.GRF",
+			"TRGH.GRF",
+			"TRGT.GRF",
+				null
+		};
 
 	//#include "table/files.h"
-/*
+	/*
 	static FileList files_dos = {
 			{
 				{ "TRG1.GRF", {0x93,0x11,0x67,0x62,0x80,0xe5,0xb1,0x40,0x77,0xa8,0xee,0x41,0xc1,0xb4,0x21,0x92} },     //    0 - 4792 inclusive
@@ -23,8 +37,8 @@ public class GfxInit extends LandscapeSprites
 				{ "TRGT.GRF", {0xfc,0xde,0x1d,0x7e,0x8a,0x74,0x19,0x7d,0x72,0xa6,0x26,0x95,0x88,0x4b,0x90,0x9e} }
 			}
 	};
-*/
-/*	
+	 */
+	/*	
 	static FileList files_win = {
 			{
 				{ "TRG1R.GRF", {0xb0,0x4c,0xe5,0x93,0xd8,0xc5,0x01,0x6e,0x07,0x47,0x3a,0x74,0x3d,0x7d,0x33,0x58} },    //    0 - 4792 inclusive
@@ -41,7 +55,7 @@ public class GfxInit extends LandscapeSprites
 
 	static MD5File sample_cat_win = { "SAMPLE.CAT", {0x92,0x12,0xe8,0x1e,0x72,0xba,0xdd,0x4b,0xbe,0x1e,0xae,0xae,0x66,0x45,0x8e,0x10} };
 	static MD5File sample_cat_dos = { "SAMPLE.CAT", {0x42,0x2e,0xa3,0xdd,0x07,0x4d,0x28,0x59,0xbb,0x51,0x63,0x9a,0x6e,0x0e,0x85,0xda} };
-*/
+	 */
 
 	//#include "table/landscape_sprite.h"
 
@@ -94,7 +108,7 @@ public class GfxInit extends LandscapeSprites
 		{
 			int start = index_tbl[i++];
 			int end = index_tbl[i++];
-			
+
 			if (start == SKIP) { // skip sprites (amount in second var)
 				SpriteCache.SkipSprites(end);
 			} else { // load sprites and use indexes from start to end
@@ -188,12 +202,12 @@ public class GfxInit extends LandscapeSprites
 			fprintf(stderr, "Your sample.cat file is corrupted or missing!\n");
 
 		/*
-		 * forced DOS palette via command line . leave it that way
-		 * all Windows files present . Windows palette
-		 * all DOS files present . DOS palette
-		 * no Windows files present and any DOS file present . DOS palette
-		 * otherwise . Windows palette
-		 * /
+	 * forced DOS palette via command line . leave it that way
+	 * all Windows files present . Windows palette
+	 * all DOS files present . DOS palette
+	 * no Windows files present and any DOS file present . DOS palette
+	 * otherwise . Windows palette
+	 * /
 		if (_use_dos_palette) {
 			return;
 		} else if (win == 5) {
@@ -204,7 +218,7 @@ public class GfxInit extends LandscapeSprites
 			_use_dos_palette = false;
 		}
 	}
-*/
+	 */
 
 	//static final SpriteID trg1idx[] = {
 	static final int trg1idx[] = {
@@ -334,7 +348,8 @@ public class GfxInit extends LandscapeSprites
 			END
 	};
 
-	private static byte _sprite_page_to_load = (byte) 0xFF;
+	// TODO return me private static byte _sprite_page_to_load = (byte) 0xFF;
+	private static byte _sprite_page_to_load = 2; // desert
 
 	//private static boolean _use_dos_palette = false;
 
@@ -342,23 +357,29 @@ public class GfxInit extends LandscapeSprites
 	private static void LoadSpriteTables()
 	{
 		//final FileList files = _use_dos_palette ? files_dos : files_win;
-		final FileList files = files_win;
+		//final FileList files = files_win;
+		final String[] files = files_win;
 		int load_index;
 		int i;
 
-		LoadGrfIndexed(files.basic[0].filename, trg1idx, 0);
+		//LoadGrfIndexed(files.basic[0].filename, trg1idx, 0);
+		LoadGrfIndexed(files[0], trg1idx, 0);
 		SpriteCache.DupSprite(  2, 130); // non-breaking space medium
 		SpriteCache.DupSprite(226, 354); // non-breaking space tiny
 		SpriteCache.DupSprite(450, 578); // non-breaking space large
 		load_index = 4793;
 
-		for (i = 1; files.basic[i].filename != null; i++) {
-			load_index += LoadGrfFile(files.basic[i].filename, load_index, i);
+		// TODO why start from 1?
+		
+		//for (i = 1; files.basic[i].filename != null; i++) {
+		for (i = 1; files[i] != null; i++) {
+			load_index += LoadGrfFile(files[i], load_index, i);
 		}
 
 		if (_sprite_page_to_load != 0) {
 			LoadGrfIndexed(
-					files.landscape[_sprite_page_to_load - 1].filename,
+					files_landscape[_sprite_page_to_load - 1],
+					//files.landscape[_sprite_page_to_load - 1].filename,
 					_landscape_spriteindexes[_sprite_page_to_load - 1],
 					i++
 					);
@@ -368,7 +389,8 @@ public class GfxInit extends LandscapeSprites
 		load_index += LoadGrfFile("canalsw.grf", load_index, i++);
 
 		assert(load_index == Sprites.SPR_SLOPES_BASE);
-		LoadGrfIndexed("trkfoundw.grf", _slopes_spriteindexes[_opt.landscape], i++);
+		// TODO LoadGrfIndexed("trkfoundw.grf", _slopes_spriteindexes[_opt.landscape], i++);
+		LoadGrfIndexed("trkfoundw.grf", _slopes_spriteindexes[_sprite_page_to_load], i++);
 
 		load_index = Sprites.SPR_AUTORAIL_BASE;
 		load_index += LoadGrfFile("autorail.grf", load_index, i++);
@@ -384,8 +406,8 @@ public class GfxInit extends LandscapeSprites
 	public static void GfxLoadSprites()
 	{
 		// Need to reload the sprites only if the landscape changed
-		if (_sprite_page_to_load != _opt.landscape) {
-			_sprite_page_to_load = _opt.landscape;
+		// TODO if (_sprite_page_to_load != _opt.landscape) {
+		//	_sprite_page_to_load = _opt.landscape;
 
 			// Sprites cache
 			Global.DEBUG_spritecache( 1,"Loading Sprite set %d.", _sprite_page_to_load);
@@ -393,10 +415,11 @@ public class GfxInit extends LandscapeSprites
 			SpriteCache.GfxInitSpriteMem();
 			LoadSpriteTables();
 			Gfx.GfxInitPalettes();
-		}
+		//}
 	}
 
 }
+
 
 /*
 class MD5File {
@@ -418,4 +441,4 @@ enum {
 	SKIP = 0xFFFE,
 			END  = 0xFFFF
 };
-*/
+ */

@@ -42,12 +42,12 @@ typedef struct YearMonthDay {
 * * this that means 1 day is : 65536 / 885 = 74 ticks
 * * 1 tick is approximately 27ms.
 * * 1 day is thus about 2 seconds (74*27 = 1998) on a machine that can run OpenTTD normally
-*/
+* /
 #define DAY_TICKS 74
 #define MAX_YEAR_BEGIN_REAL 1920
 #define MAX_YEAR_END_REAL 2090
 #define MAX_YEAR_END 170
-
+*/
 #include "map.h"
 
 // Forward declarations of structs.
@@ -441,7 +441,7 @@ enum {
 	WC_BUILD_SIGNALS = 0x50,
 };
 */
-
+/*
 enum {
 	EXPENSES_CONSTRUCTION = 0,
 	EXPENSES_NEW_VEHICLES = 1,
@@ -457,7 +457,7 @@ enum {
 	EXPENSES_LOAN_INT = 11,
 	EXPENSES_OTHER = 12,
 };
-
+*/
 // special string constants
 enum SpecialStrings {
 

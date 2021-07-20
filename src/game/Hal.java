@@ -114,7 +114,7 @@ public abstract class Hal
 
 		if (cv.sprite == cursor) return;
 
-		p = GetSprite(cursor & SPRITE_MASK);
+		p = SpriteCache.GetSprite(cursor.id & Sprite.SPRITE_MASK);
 		cv.sprite = cursor;
 		cv.size.y = p.height;
 		cv.size.x = p.width;
@@ -127,17 +127,34 @@ public abstract class Hal
 	void SwitchAnimatedCursor()
 	{
 		CursorVars cv = _cursor;
-		CursorID cur = cv.animate_cur;
+		
+		if(
+				(cv.animate_list[cv.animate_pos] == null)
+				||
+				(cv.animate_list[cv.animate_pos].id == 0xFFFF)
+				)
+		{
+			cv.animate_pos = 0;
+		}
+		
+		CursorID sprite = cv.animate_list[cv.animate_pos];
+		cv.animate_timeout = cv.animate_list[cv.animate_pos+1].id;
+		cv.animate_pos += 2;
+		
+		SetCursorSprite(sprite);
+		/*
+		CursorID[] cur = cv.animate_cur;
 		CursorID sprite;
 
 		// ANIM_CURSOR_END is 0xFFFF in table/animcursors.h
-		if (cur == null || cur.id == 0xFFFF) cur = cv.animate_list;
+		if (cur[0] == null || cur[0].id == 0xFFFF) cur = cv.animate_list;
 
 		sprite = cur[0];
-		cv.animate_timeout = cur[1];
+		cv.animate_timeout = cur[1].id;
 		cv.animate_cur = new CursorId( cur.id + 2);
 
 		SetCursorSprite(sprite);
+		*/
 	}
 
 	void CursorTick()
@@ -154,10 +171,10 @@ public abstract class Hal
 		SetCursorSprite(cursor);
 	}
 
-	void SetAnimatedMouseCursor( CursorID table)
+	void SetAnimatedMouseCursor( CursorID[] table)
 	{
 		_cursor.animate_list = table;
-		_cursor.animate_cur = null;
+		_cursor.animate_pos = 0;
 		SwitchAnimatedCursor();
 	}
 
@@ -193,11 +210,21 @@ void SortResolutions(int count)
 	
 	void CSleep(int milliseconds)
 	{
-		Thread.sleep(milliseconds);
+		try {
+			Thread.sleep(milliseconds);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public abstract void ShowOSErrorBox(String buf);
-	protected abstract int Random();
+	
+	public static int Random() {		
+		return (int) (Math.random() * Integer.MAX_VALUE);
+	}
+
+	
 	public static void ShowInfo(String help) {
 		System.err.println(help);
 	}
@@ -221,7 +248,8 @@ class CursorVars {
 	CursorID sprite;
 
 	int wheel; // mouse wheel movement
-	CursorID animate_list, animate_cur;
+	CursorID [] animate_list;
+	int animate_pos;
 	int animate_timeout;
 
 	boolean visible;
