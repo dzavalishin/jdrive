@@ -686,7 +686,7 @@ public class Main {
 				}
 				Global._generating_world = false;
 				// delete all stations owned by a player
-				DeleteAllPlayerStations();
+				Station.DeleteAllPlayerStations();
 			} else {
 				ShowErrorMessage(INVALID_STRING_ID, STR_4009_GAME_LOAD_FAILED, 0, 0);
 			}
@@ -702,7 +702,7 @@ public class Main {
 			if (SaveOrLoad(_file_to_saveload.name, SL_SAVE) != SL_OK) {
 				ShowErrorMessage(INVALID_STRING_ID, STR_4007_GAME_SAVE_FAILED, 0, 0);
 			} else {
-				DeleteWindowById(WC_SAVELOAD, 0);
+				Window.DeleteWindowById(Window.WC_SAVELOAD, 0);
 			}
 			break;
 

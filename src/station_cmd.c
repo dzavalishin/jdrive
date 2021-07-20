@@ -1,3 +1,4 @@
+# if 0
 /* $Id: station_cmd.c 3341 2005-12-25 15:05:59Z truelight $ */
 
 /** @file station_cmd.c

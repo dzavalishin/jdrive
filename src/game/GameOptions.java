@@ -7,7 +7,7 @@ public class GameOptions
 	byte currency;
 	boolean kilometers;
 	byte town_name;
-	byte landscape;
+	public byte landscape;
 	byte snow_line;
 	byte autosave;
 	byte road_side;

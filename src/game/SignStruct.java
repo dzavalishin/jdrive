@@ -62,7 +62,7 @@ public class SignStruct implements IPoolItem
 	//#define FOR_ALL_SIGNS(ss) FOR_ALL_SIGNS_FROM(ss, 0)
 
 	static boolean _sign_sort_dirty;
-	int *_sign_sort;
+	//int *_sign_sort;
 
 
 
@@ -102,7 +102,7 @@ public class SignStruct implements IPoolItem
 	private void UpdateSignVirtCoords()
 	{
 		Point pt = Point.RemapCoords(x, y, z);
-		Global.SetDParam(0, str);
+		Global.SetDParam(0, str.id);
 		UpdateViewportSignPos(sign, pt.x, pt.y - 6, STR_2806);
 	}
 
@@ -131,7 +131,7 @@ public class SignStruct implements IPoolItem
 	 */
 	private void MarkSignDirty()
 	{
-		MarkAllViewportsDirty(
+		ViewPort.MarkAllViewportsDirty(
 				sign.left - 6,
 				sign.top  - 3,
 				sign.left + sign.width_1 * 4 + 12,
@@ -191,8 +191,8 @@ public class SignStruct implements IPoolItem
 			ss.str = STR_280A_SIGN;
 			ss.x = x;
 			ss.y = y;
-			ss.owner = Player._current_player; // owner of the sign; just eyecandy
-			ss.z = GetSlopeZ(x,y);
+			ss.owner = Global._current_player; // owner of the sign; just eyecandy
+			ss.z = (byte) Landscape.GetSlopeZ(x,y);
 			ss.UpdateSignVirtCoords();
 			ss.MarkSignDirty();
 			InvalidateWindow(WC_SIGN_LIST, 0);
@@ -228,7 +228,7 @@ public class SignStruct implements IPoolItem
 				Global.DeleteName(ss.str);
 				/* Assign the new one */
 				ss.str = str;
-				ss.owner = Player._current_player;
+				ss.owner = Global._current_player;
 
 				/* Update; mark sign dirty twice, because it can either becom longer, or shorter */
 				ss.MarkSignDirty();
@@ -250,7 +250,7 @@ public class SignStruct implements IPoolItem
 				ss.str = null;
 
 				ss.MarkSignDirty();
-				InvalidateWindow(WC_SIGN_LIST, 0);
+				Window.InvalidateWindow(Window.WC_SIGN_LIST, 0);
 				_sign_sort_dirty = true;
 			}
 		}
@@ -308,7 +308,7 @@ static const SaveLoad _sign_desc[] = {
 	 *
 	 * Save all signs
 	 *
-	 */
+	 * /
 	static void Save_SIGN()
 	{
 		//SignStruct *ss;
@@ -316,7 +316,7 @@ static const SaveLoad _sign_desc[] = {
 		//FOR_ALL_SIGNS(ss) 
 		_sign_pool.forEach( (i,ss) ->
 		{
-			/* Don't save empty signs */
+			// Don't save empty signs 
 			if (ss.str != null) {
 				SlSetArrayIndex(ss.index);
 				SlObject(ss, _sign_desc);
@@ -328,7 +328,7 @@ static const SaveLoad _sign_desc[] = {
 	 *
 	 * Load all signs
 	 *
-	 */
+	 * /
 	static void Load_SIGN()
 	{
 		int index;

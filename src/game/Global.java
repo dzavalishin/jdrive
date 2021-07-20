@@ -217,7 +217,7 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 	return s[n];
 }
 	 */
-	static private int _decode_parameters[] = new int[20];
+	public static Object[] _decode_parameters = new Object[20];
 
 
 	static void SetDParam(int n, int v)
@@ -233,12 +233,17 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 		_decode_parameters[n + 1] = (int) (v >> 32);
 	}
 
-	static int GetDParam(int n)
+	static Object GetDParam(int n)
 	{
 		//assert(n < lengthof(_decode_parameters));
 		return _decode_parameters[n];
 	}
 
+	static void InjectDParam(int amount)
+	{
+		//memmove(_decode_parameters + amount, _decode_parameters, sizeof(_decode_parameters) - amount * sizeof(int));
+		System.arraycopy(_decode_parameters, amount, _decode_parameters, 0, _decode_parameters.length - amount);
+	}
 
 
 

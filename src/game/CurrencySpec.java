@@ -2,11 +2,11 @@ package game;
 
 public class CurrencySpec {
 
-	private int rate;
-	private char separator;
-	private long to_euro;
-	private String prefix;
-	private String suffix;
+	public int rate;
+	public  char separator;
+	public  long to_euro;
+	public  String prefix;
+	public  String suffix;
 
 	public static final int CF_NOEURO = 0;
 	public static final int CF_ISEURO = 1;
@@ -29,7 +29,7 @@ public class CurrencySpec {
 			//{    1, ',', CF_NOEURO, "\xA3", ""     }, // british pounds
 			new CurrencySpec(    1, ',', CF_NOEURO, "", "gbp"     ), // british pounds
 			new CurrencySpec(    2, ',', CF_NOEURO, "$",    ""     ), // us dollars
-			new CurrencySpec(    2, ',', CF_ISEURO, "¤",    ""     ), // Euro
+			new CurrencySpec(    2, ',', CF_ISEURO, "ï¿½",    ""     ), // Euro
 			//{  200, ',', CF_NOEURO, "\xA5", ""     ), // yen
 			new CurrencySpec(    200, ',', CF_NOEURO, "", "yen"     ), // yen
 			new CurrencySpec(    19, ',', 2002,      "",     " S."  ), // austrian schilling
