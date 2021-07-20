@@ -1,14 +1,9 @@
 package game;
 
+import game.util.BitOps;
+
 public class Map {
 
-	
-	final static TileIndexDiffC _tileoffs_by_dir[] = {
-			new TileIndexDiffC( -1,  0),
-			new TileIndexDiffC(  0,  1),
-			new TileIndexDiffC(  1,  0),
-			new TileIndexDiffC(  0, -1)
-		};
 	
 
 	//void AllocateMap(int size_x, int size_y);
@@ -19,10 +14,6 @@ public class Map {
 	//int ScaleByMapSize1D(int); // Scale relative to the circumference of the map
 
 
-	static  TileIndex TileXY(int x, int y)
-	{
-		return new TileIndex( (y * Global.MapSizeX()) + x );
-	}
 	/*
 	static  TileIndexDiff TileDiffXY(int x, int y)
 	{
@@ -64,22 +55,6 @@ public class Map {
 	*/
 	//int TileAddWrap(TileIndex tile, int addx, int addy);
 
-	static  TileIndexDiffC TileIndexDiffCByDir(int dir) {
-		//extern final TileIndexDiffC _tileoffs_by_dir[4];
-		return _tileoffs_by_dir[dir];
-	}
-
-	/* Returns tile + the diff given in diff. If the result tile would end up
-	 * outside of the map, INVALID_TILE is returned instead.
-	 */
-	static  TileIndex AddTileIndexDiffCWrap(TileIndex tile, TileIndexDiffC diff) {
-		int x = tile.TileX() + diff.x;
-		int y = tile.TileY() + diff.y;
-		if (x < 0 || y < 0 || x > (int)Global.MapMaxX() || y > (int)Global.MapMaxY())
-			return INVALID_TILE;
-		else
-			return TileXY(x, y);
-	}
 
 	// Functions to calculate distances
 	//int DistanceManhattan(TileIndex, TileIndex); // also known as L1-Norm. Is the shortest distance one could go over diagonal tracks (or roads)
@@ -90,14 +65,6 @@ public class Map {
 
 
 
-
-	static  TileIndexDiff TileOffsByDir(int dir)
-	{
-		//extern final TileIndexDiffC _tileoffs_by_dir[4];
-
-		assert(dir < _tileoffs_by_dir.length);
-		return TileIndex.ToTileIndexDiff(_tileoffs_by_dir[dir]);
-	}
 
 	/* Approximation of the length of a straight track, relative to a diagonal
 	 * track (ie the size of a tile side). #defined instead of final so it can
@@ -133,7 +100,7 @@ public class Map {
 
 		Global.DEBUG_map( 1, "Allocating map of size %dx%d", size_x, size_y);
 
-		Global._map_log_x = FindFirstBit(size_x);
+		Global._map_log_x = BitOps.FindFirstBit(size_x);
 		Global._map_size_x = size_x;
 		Global._map_size_y = size_y;
 		Global._map_size = size_x * size_y;
@@ -202,24 +169,6 @@ public class Map {
 		return (n * (Global.MapSizeX() + Global.MapSizeY()) + (1<<9) - 1) >> 9;
 	}
 
-
-	// This function checks if we add addx/addy to tile, if we
-	//  do wrap around the edges. For example, tile = (10,2) and
-	//  addx = +3 and addy = -4. This function will now return
-	//  INVALID_TILE, because the y is wrapped. This is needed in
-	//  for example, farmland. When the tile is not wrapped,
-	//  the result will be tile + TileDiffXY(addx, addy)
-	int TileAddWrap(TileIndex tile, int addx, int addy)
-	{
-		int x = tile.TileX() + addx;
-		int y = tile.TileY() + addy;
-
-		// Are we about to wrap?
-		if (x < Global.MapMaxX() && y < Global.MapMaxY())
-			return tile.getTile() + TileIndex.TileDiffXY(addx, addy).diff;
-
-		return INVALID_TILE.getTile();
-	}
 
 
 	int DistanceManhattan(TileIndex t0, TileIndex t1)

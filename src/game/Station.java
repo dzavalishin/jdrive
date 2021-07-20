@@ -501,7 +501,7 @@ public class Station implements IPoolItem
 	{
 		// check around to see if there's any stations there
 		//BEGIN_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
-		TileIndex.forAll(w + 2, h + 2, tile.sub( new TileDiffXY(1, 1) ), (tile_cur) -> {
+		TileIndex.forAll(w + 2, h + 2, tile.sub( TileIndex.TileDiffXY(1, 1) ).getTile(), (tile_cur) -> {
 			if (IsTileType(tile_cur, MP_STATION)) {
 				StationID t = _m[tile_cur].m2;
 				{

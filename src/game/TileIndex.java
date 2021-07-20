@@ -11,7 +11,7 @@ public class TileIndex {
 	/**
 	 * Iterate over a tiles rectangle.
 	 * 
-	 * NB! TileIndex passed to Consumer is reused, make a copy if need it!
+	 * TODO Rename to forEach
 	 * 
 	 * @param w - rectangle width
 	 * @param h - height
@@ -20,7 +20,7 @@ public class TileIndex {
 	 */
 	public static void forAll( int w, int h, int tile, Consumer<TileIndex> c )
 	{
-		TileIndex ti = new TileIndex(tile);
+		//TileIndex ti = new TileIndex(tile);
 	
 		                      
 		{                                                        
@@ -30,8 +30,9 @@ public class TileIndex {
 				int w_cur = w;                                       
 				do {
 
-					ti.tile = var;
-					c.accept(ti);
+					//ti.tile = var;
+					//c.accept(ti);
+					c.accept( new TileIndex(var) );
 	                     
 					++var;
 				} while ( --w_cur != 0);
@@ -175,13 +176,77 @@ public class TileIndex {
 	}
 
 	
+	// This function checks if we add addx/addy to tile, if we
+	//  do wrap around the edges. For example, tile = (10,2) and
+	//  addx = +3 and addy = -4. This function will now return
+	//  INVALID_TILE, because the y is wrapped. This is needed in
+	//  for example, farmland. When the tile is not wrapped,
+	//  the result will be tile + TileDiffXY(addx, addy)
+	int TileAddWrap(TileIndex tile, int addx, int addy)
+	{
+		int x = tile.TileX() + addx;
+		int y = tile.TileY() + addy;
+
+		// Are we about to wrap?
+		if (x < Global.MapMaxX() && y < Global.MapMaxY())
+			return tile.getTile() + TileIndex.TileDiffXY(addx, addy).diff;
+
+		return INVALID_TILE.getTile();
+	}
+
+
+	
+	final static TileIndexDiffC _tileoffs_by_dir[] = {
+			new TileIndexDiffC( -1,  0),
+			new TileIndexDiffC(  0,  1),
+			new TileIndexDiffC(  1,  0),
+			new TileIndexDiffC(  0, -1)
+		};
+	
+
+	static  TileIndexDiff TileOffsByDir(int dir)
+	{
+		//extern final TileIndexDiffC _tileoffs_by_dir[4];
+
+		assert(dir < _tileoffs_by_dir.length);
+		return TileIndex.ToTileIndexDiff(_tileoffs_by_dir[dir]);
+	}
+	
+
+	static  TileIndexDiffC TileIndexDiffCByDir(int dir) {
+		//extern final TileIndexDiffC _tileoffs_by_dir[4];
+		return _tileoffs_by_dir[dir];
+	}
+
+	/* Returns tile + the diff given in diff. If the result tile would end up
+	 * outside of the map, INVALID_TILE is returned instead.
+	 */
+	static  TileIndex AddTileIndexDiffCWrap(TileIndex tile, TileIndexDiffC diff) {
+		int x = tile.TileX() + diff.x;
+		int y = tile.TileY() + diff.y;
+		if (x < 0 || y < 0 || x > (int)Global.MapMaxX() || y > (int)Global.MapMaxY())
+			return INVALID_TILE;
+		else
+			return TileXY(x, y);
+	}
+	
+	
+	
+	/*
+	static  TileIndex TileXY(int x, int y)
+	{
+		return new TileIndex( (y * Global.MapSizeX()) + x );
+	}
+	*/
+	
+	
 	/* Approximation of the length of a straight track, relative to a diagonal
 	 * track (ie the size of a tile side). #defined instead of const so it can
 	 * stay integer. (no runtime float operations) Is this needed?
 	 * Watch out! There are _no_ brackets around here, to prevent intermediate
 	 * rounding! Be careful when using this!
 	 * This value should be sqrt(2)/2 ~ 0.7071 */
-	public static int STRAIGHT_TRACK_LENGTH = 7071/10000;
+	public static int STRAIGHT_TRACK_LENGTH = Map.STRAIGHT_TRACK_LENGTH;
 	
 
 	
