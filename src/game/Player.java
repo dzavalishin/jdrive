@@ -91,7 +91,7 @@ public class Player
 
 
 
-	private static byte _yearly_expenses_type; // TODO fixme, use parameter where possible
+	static byte _yearly_expenses_type; // TODO fixme, use parameter where possible
 	public static void SET_EXPENSES_TYPE(int x) { _yearly_expenses_type = (byte) x; }
 
 	public static final int EXPENSES_CONSTRUCTION = 0;

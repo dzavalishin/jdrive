@@ -94,7 +94,7 @@ float D2R(uint degrees)
 {
 	return degrees * (PI / 180.0);
 }
-
+/*
 //calculates tax
 void MA_Tax(uint income, Vehicle *v)
 {
@@ -128,7 +128,7 @@ void MA_Tax(uint income, Vehicle *v)
 	}
 	return;
 }
-
+*/
 //checks to see if we have used our quota at any municipal station;
 bool MA_WithinVehicleQuota(Station *st)
 {

@@ -7,15 +7,15 @@
 #include "order.h"
 #include "rail.h"
 #include "queue.h"
-
-enum {
+/*
+//enum {
 	VEH_Train = 0x10,
 	VEH_Road = 0x11,
 	VEH_Ship = 0x12,
 	VEH_Aircraft = 0x13,
 	VEH_Special = 0x14,
 	VEH_Disaster = 0x15,
-} ;
+//} ;
 
 enum VehStatus {
 	VS_HIDDEN = 1,
@@ -28,7 +28,7 @@ enum VehStatus {
 	VS_CRASHED = 0x80,
 };
 
-/* Effect vehicle types */
+// Effect vehicle types 
 typedef enum EffectVehicle {
 	EV_CHIMNEY_SMOKE   = 0,
 	EV_STEAM_SMOKE     = 1,
@@ -41,7 +41,7 @@ typedef enum EffectVehicle {
 	EV_BULLDOZER       = 8,
 	EV_BUBBLE          = 9
 } EffectVehicle;
-
+*/
 /*
 typedef struct VehicleRail {
 	uint16 last_speed;		// NOSAVE: only used in UI

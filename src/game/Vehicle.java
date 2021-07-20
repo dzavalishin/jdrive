@@ -132,21 +132,95 @@ public abstract class Vehicle implements IPoolItem
 
 	
 	
+	
+	
+	
 	public static final int VEH_Train = 0x10;
 	public static final int VEH_Road = 0x11;
 	public static final int VEH_Ship = 0x12;
 	public static final int VEH_Aircraft = 0x13;
 	public static final int VEH_Special = 0x14;
 	public static final int VEH_Disaster = 0x15;
+
 	
 	
-	abstract void VehicleTickProc();
+	public static final int VS_HIDDEN = 1;
+	public static final int VS_STOPPED = 2;
+	public static final int VS_UNCLICKABLE = 4;
+	public static final int VS_DEFPAL = 0x8;
+	public static final int VS_TRAIN_SLOWING = 0x10;
+	public static final int VS_DISASTER = 0x20;
+	public static final int VS_AIRCRAFT_BROKEN = 0x40;
+	public static final int VS_CRASHED = 0x80;
+
+
+
+	public static final int EV_CHIMNEY_SMOKE   = 0;
+	public static final int EV_STEAM_SMOKE     = 1;
+	public static final int EV_DIESEL_SMOKE    = 2;
+	public static final int EV_ELECTRIC_SPARK  = 3;
+	public static final int EV_SMOKE           = 4;
+	public static final int EV_EXPLOSION_LARGE = 5;
+	public static final int EV_BREAKDOWN_SMOKE = 6;
+	public static final int EV_EXPLOSION_SMALL = 7;
+	public static final int EV_BULLDOZER       = 8;
+	public static final int EV_BUBBLE          = 9;
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//abstract void VehicleTickProc();
 	//typedef void *VehicleFromPosProc(Vehicle v, void *data);
 
+	//calculates tax
+	public void MA_Tax(int income)
+	{
+		int old_expenses_type = Player._yearly_expenses_type;
+		assert income >= 0;
+
+		if(Global._patches.allow_municipal_airports) {
+			double tax = (income / 100.0) * 20; //_patches.municipal_airports_tax;
+
+			ShowCostOrIncomeAnimation(x_pos ,y_pos ,z_pos - 13, tax);
+
+			switch(type) {
+
+			case VEH_Aircraft:	
+				SET_EXPENSES_TYPE(EXPENSES_AIRCRAFT_RUN);
+				break;
+			case VEH_Train:		
+				SET_EXPENSES_TYPE(EXPENSES_TRAIN_RUN);
+				break;
+			case VEH_Ship:		
+				SET_EXPENSES_TYPE(EXPENSES_SHIP_RUN);				
+				break;
+			case VEH_Road:		
+				SET_EXPENSES_TYPE(EXPENSES_ROADVEH_RUN);				
+				break;
+
+			}
+			
+			Player.SubtractMoneyFromPlayer((int)tax);
+			Player._yearly_expenses_type = old_expenses_type;
+		}
+		return;
+	}
+	
+	
 	void VehicleServiceInDepot()
 	{
 		if (tile.GetTileOwner().owner == Owner.OWNER_TOWN) 
-			MA_Tax(value, this);
+			MA_Tax(value);
 
 		date_of_last_service = Global._date;
 		breakdowns_since_last_service = 0;
@@ -654,10 +728,10 @@ public abstract class Vehicle implements IPoolItem
 
 	public boolean VehicleNeedsService()
 	{
-		if (vehstatus & VS_CRASHED)
+		if( 0 != (vehstatus & VS_CRASHED) )
 			return false; /* Crashed vehicles don't need service anymore */
 
-		if (GetPlayer(owner).engine_replacement[engine_type] != INVALID_ENGINE)
+		if (Player.GetPlayer(owner).engine_replacement[engine_type] != INVALID_ENGINE)
 			return true; /* Vehicle is due to be replaced */
 
 		if (Global._patches.no_servicing_if_no_breakdowns && Global._opt.diff.vehicle_breakdowns == 0)
@@ -689,12 +763,12 @@ public abstract class Vehicle implements IPoolItem
 
 	public static boolean EnsureNoVehicle(TileIndex tile)
 	{
-		return VehicleFromPos(tile, &tile, EnsureNoVehicleProc) == null;
+		return VehicleFromPos(tile, tile, Vehicle::EnsureNoVehicleProc) == null;
 	}
 
 	public Object EnsureNoVehicleProcZ(Object data)
 	{
-		final TileInfo ti = data;
+		final TileInfo ti = (TileInfo) data;
 
 		if (tile != ti.tile || z_pos != ti.z || type == VEH_Disaster)
 			return null;
@@ -712,27 +786,27 @@ public abstract class Vehicle implements IPoolItem
 
 	public static int GetCorrectTileHeight(TileIndex tile)
 	{
-		return Correct_Z(GetTileSlope(tile, null));
+		return Correct_Z(tile.GetTileSlope(null));
 	}
 
 	public static boolean EnsureNoVehicleZ(TileIndex tile, byte z)
 	{
-		TileInfo ti;
+		TileInfo ti = new TileInfo();
 
-		FindLandscapeHeightByTile(&ti, tile);
+		FindLandscapeHeightByTile(ti, tile);
 		ti.z = z + Correct_Z(ti.tileh);
 
-		return VehicleFromPos(tile, &ti, EnsureNoVehicleProcZ) == null;
+		return VehicleFromPos(tile, ti, Vehicle::EnsureNoVehicleProcZ) == null;
 	}
 
 	public static Vehicle FindVehicleOnTileZ(TileIndex tile, byte z)
 	{
-		TileInfo ti;
+		TileInfo ti = new TileInfo();
 
 		ti.tile = tile;
 		ti.z = z;
 
-		return VehicleFromPos(tile, &ti, EnsureNoVehicleProcZ);
+		return VehicleFromPos(tile, ti, Vehicle::EnsureNoVehicleProcZ);
 	}
 
 	public static Vehicle FindVehicleBetween(TileIndex from, TileIndex to, byte z)
@@ -929,7 +1003,7 @@ public abstract class Vehicle implements IPoolItem
 
 	//static VehicleID _vehicle_position_hash[0x1000];
 
-	Object VehicleFromPos(TileIndex tile, Object data, VehicleFromPosProc proc)
+	static Object VehicleFromPos(TileIndex tile, Object data, VehicleFromPosProc proc)
 	{
 		int x,y,x2,y2;
 		Point pt = Point.RemapCoords(tile.TileX() * 16, tile.TileY() * 16, 0);
@@ -939,16 +1013,16 @@ public abstract class Vehicle implements IPoolItem
 
 		y2 = ((pt.y + 56) & 0xFC0);
 		y  = ((pt.y - 294) & 0xFC0);
-
+		
 		for (;;) {
 			int xb = x;
 			for (;;) {
 				VehicleID veh = _vehicle_position_hash[(x + y) & 0xFFFF];
-				while (veh != INVALID_VEHICLE) {
+				while (veh.id != INVALID_VEHICLE) {
 					Vehicle v = GetVehicle(veh);
 					Object a;
 
-					a = proc(v, data);
+					a = proc.apply(v, data);
 					if (a != null) return a;
 					veh = v.next_hash;
 				}
@@ -3047,4 +3121,18 @@ class BubbleMovement {
 		this.image = 0;
 	}
 
+}
+
+
+@FunctionalInterface
+interface VehicleFromPosProc {
+
+    /**
+     * Applies this function to the given arguments.
+     *
+     * @param t the first function argument
+     * @param u the second function argument
+     * @return the function result
+     */
+    Object apply(Vehicle v, Object o);
 }
