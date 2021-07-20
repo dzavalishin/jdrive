@@ -1,5 +1,5 @@
 /* $Id: gfxinit.c 3181 2005-11-14 19:48:04Z tron $ */
-
+#if 0
 #include "stdafx.h"
 #include "openttd.h"
 #include "debug.h"
@@ -196,7 +196,7 @@ static const SpriteID trg1idx[] = {
 /* Medium font */
 	   2,   92, // ' ' till 'z'
 	SKIP,   36,
-	 160,  160, // Move ¾ to the correct position
+	 160,  160, // Move ï¿½ to the correct position
 	  98,   98, // Up arrow
 	 131,  133,
 	SKIP,    1, // skip currency sign
@@ -221,7 +221,7 @@ static const SpriteID trg1idx[] = {
 /* Small font */
 	 226,  316, // ' ' till 'z'
 	SKIP,   36,
-	 384,  384, // Move ¾ to the correct position
+	 384,  384, // Move ï¿½ to the correct position
 	 322,  322, // Up arrow
 	 355,  357,
 	SKIP,    1, // skip currency sign
@@ -243,7 +243,7 @@ static const SpriteID trg1idx[] = {
 /* Big font */
 	 450,  540, // ' ' till 'z'
 	SKIP,   36,
-	 608,  608, // Move ¾ to the correct position
+	 608,  608, // Move ï¿½ to the correct position
 	SKIP,    1,
 	 579,  581,
 	SKIP,    1,
@@ -283,33 +283,33 @@ static const SpriteID _openttd_grf_indexes[] = {
 	582, 582,  // euro symbol large size
 	358, 358,  // euro symbol tiny
 	SPR_CURSOR_CANAL, SPR_IMG_FASTFORWARD, // more icons
-	648, 648, // nordic char: æ
-	616, 616, // nordic char: Æ
-	666, 666, // nordic char: ø
-	634, 634, // nordic char: Ø
+	648, 648, // nordic char: ï¿½
+	616, 616, // nordic char: ï¿½
+	666, 666, // nordic char: ï¿½
+	634, 634, // nordic char: ï¿½
 	SPR_PIN_UP, SPR_CURSOR_CLONE, // more icons
-	382, 383, // ¼ ½ tiny
-	158, 159, // ¼ ½ medium
-	606, 607, // ¼ ½ large
-	360, 360, // ¦ tiny
-	362, 362, // ¨ tiny
-	136, 136, // ¦ medium
-	138, 138, // ¨ medium
-	584, 584, // ¦ large
-	586, 586, // ¨ large
-	626, 626, // Ð large
-	658, 658, // ð large
-	374, 374, // ´ tiny
-	378, 378, // ¸ tiny
-	150, 150, // ´ medium
-	154, 154, // ¸ medium
-	598, 598, // ´ large
-	602, 602, // ¸ large
-	640, 640, // Þ large
-	672, 672, // þ large
-	380, 380, // º tiny
-	156, 156, // º medium
-	604, 604, // º large
+	382, 383, // ï¿½ ï¿½ tiny
+	158, 159, // ï¿½ ï¿½ medium
+	606, 607, // ï¿½ ï¿½ large
+	360, 360, // ï¿½ tiny
+	362, 362, // ï¿½ tiny
+	136, 136, // ï¿½ medium
+	138, 138, // ï¿½ medium
+	584, 584, // ï¿½ large
+	586, 586, // ï¿½ large
+	626, 626, // ï¿½ large
+	658, 658, // ï¿½ large
+	374, 374, // ï¿½ tiny
+	378, 378, // ï¿½ tiny
+	150, 150, // ï¿½ medium
+	154, 154, // ï¿½ medium
+	598, 598, // ï¿½ large
+	602, 602, // ï¿½ large
+	640, 640, // ï¿½ large
+	672, 672, // ï¿½ large
+	380, 380, // ï¿½ tiny
+	156, 156, // ï¿½ medium
+	604, 604, // ï¿½ large
 	317, 320, // { | } ~ tiny
 	 93,  96, // { | } ~ medium
 	541, 544, // { | } ~ large

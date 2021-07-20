@@ -1,5 +1,5 @@
 /* $Id: sprites.h 3181 2005-11-14 19:48:04Z tron $ */
-
+# if 0
 #ifndef SPRITES_H
 #define SPRITES_H
 

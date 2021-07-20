@@ -29,7 +29,7 @@ public class Main {
 
 	void  ShowInfoF( String str, Object ... args)
 	{
-		String buf = String.format(s, args);
+		String buf = String.format(str, args);
 		Hal.ShowInfo(buf);
 	}
 
@@ -171,7 +171,7 @@ public class Main {
 
 		Global._game_mode = GameModes.GM_MENU;
 		//CLRBITS(_display_opt, DO_TRANS_BUILDINGS); // don't make buildings transparent in intro
-		Global._display_opt = BitOps.RETCLRBITS( Global._display_opt, DO_TRANS_BUILDINGS );
+		Global._display_opt = 0; // TODO BitOps.RETCLRBITS( Global._display_opt, DO_TRANS_BUILDINGS );
 		GameOptions._opt_ptr = GameOptions._opt_newgame;
 
 		GfxLoadSprites();
@@ -449,13 +449,15 @@ public class Main {
 	/** Handle the user-messages sent to us
 	 * @param message message sent
 	 */
-	void ProcessSentMessage(ThreadMsg message)
+	static void ProcessSentMessage(ThreadMsg message)
 	{
 		switch (message) {
+		/* TODO MSG
 		case MSG_OTTD_SAVETHREAD_START: SaveFileStart(); break;
 		case MSG_OTTD_SAVETHREAD_DONE:  SaveFileDone(); break;
 		case MSG_OTTD_SAVETHREAD_ERROR: SaveFileError(); break;
-		default: NOT_REACHED();
+		*/
+		default: assert false;
 		}
 
 		OTTD_ReleaseMutex(); // release mutex so that other threads, messages can be handled
@@ -834,7 +836,7 @@ public class Main {
 		}
 	}
 
-	void GameLoop()
+	static void GameLoop()
 	{
 		SwitchModes m;
 		ThreadMsg message;

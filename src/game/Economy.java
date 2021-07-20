@@ -731,13 +731,13 @@ public class Economy
 
 	static void HandleEconomyFluctuations()
 	{
-		if (_opt.diff.economy == 0) return;
+		if (Global._opt.diff.economy == 0) return;
 
 		if (--_economy.fluct == 0) {
-			_economy.fluct = -(int)GB(Random(), 0, 2);
+			_economy.fluct = -(int)BitOps.GB(Random(), 0, 2);
 			AddNewsItem(STR_7073_WORLD_RECESSION_FINANCIAL, NEWS_FLAGS(NM_NORMAL,0,NT_ECONOMY,0), 0, 0);
 		} else if (_economy.fluct == -12) {
-			_economy.fluct = GB(Random(), 0, 8) + 312;
+			_economy.fluct = BitOps.GB(Random(), 0, 8) + 312;
 			AddNewsItem(STR_7074_RECESSION_OVER_UPTURN_IN, NEWS_FLAGS(NM_NORMAL,0,NT_ECONOMY,0), 0, 0);
 		}
 	}

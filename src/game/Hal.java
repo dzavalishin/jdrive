@@ -208,7 +208,8 @@ void SortResolutions(int count)
 
 
 class DrawPixelInfo {
-	Pixel dst_ptr;
+	//Pixel dst_ptr;
+	int [] dst_ptr; // image buffer - (green << 24) | (red << 16) | blue
 	int left, top, width, height;
 	int pitch;
 	int zoom;

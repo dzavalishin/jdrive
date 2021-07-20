@@ -157,14 +157,14 @@ bool LoadNextSprite(int load_index, byte file_index)
 }
 
 
-void DupSprite(SpriteID old, SpriteID new)
+static void DupSprite(SpriteID old, SpriteID new)
 {
 	_sprite_file_pos[new] = _sprite_file_pos[old];
 	_sprite_ptr[new] = NULL;
 }
 
 
-void SkipSprites(uint count)
+static void SkipSprites(uint count)
 {
 	for (; count > 0; --count) {
 		if (!ReadSpriteHeaderSkipData()) return;

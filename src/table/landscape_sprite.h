@@ -1,5 +1,5 @@
 /* $Id: landscape_sprite.h 3125 2005-11-03 15:25:45Z tron $ */
-
+#if 0
 static const SpriteID _landscape_spriteindexes_1[] = {
  0xF67,  0xF9F,
  0xAAD,  0xAB0,

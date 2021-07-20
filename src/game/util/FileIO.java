@@ -64,7 +64,9 @@ public class FileIO {
 		FioSeekTo(pos & 0xFFFFFF, SEEK_SET);
 	}
 
-	public static byte FioReadByte()
+	// Use int to prevent signed conversion to int in caller
+	//public static byte FioReadByte()
+	public static int FioReadByte()
 	{
 		/*
 		if (_fio.buffer == _fio.buffer_end) {
@@ -84,7 +86,7 @@ public class FileIO {
 		}
 		assert( d >= 0 );
 
-		return (byte) d;
+		return d & 0xFF;
 	}
 
 	public static void FioSkipBytes(int n)

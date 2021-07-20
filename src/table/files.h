@@ -1,5 +1,5 @@
 /* $Id: files.h 3314 2005-12-18 12:17:53Z tron $ */
-
+#if 0
 /*
 	MD5 sums of graphics files
 

@@ -1,58 +1,61 @@
 package game;
 
+import game.util.FileIO;
+
 public class SpriteCache {
 
-	/*
+
 	final static int SPRITE_CACHE_SIZE = 1024*1024;
 
 	//#define WANT_NEW_LRU
 
 
-	static void* _sprite_ptr[MAX_SPRITES];
-	static int _sprite_file_pos[MAX_SPRITES];
+	static Sprite[] _sprite_ptr = new Sprite[Sprite.MAX_SPRITES];
+	static int [] _sprite_file_pos = new int[Sprite.MAX_SPRITES];
 
 	//#if defined(WANT_NEW_LRU)
-	static int _sprite_lru_new[MAX_SPRITES];
+	//static int _sprite_lru_new[Sprite.MAX_SPRITES];
 	//#else
-	//static uint16 _sprite_lru[MAX_SPRITES];
-	//static uint16 _sprite_lru_cur[MAX_SPRITES];
+	//static int _sprite_lru[MAX_SPRITES];
+	//static int _sprite_lru_cur[MAX_SPRITES];
 	//#endif
 
 
-	static int _sprite_lru_counter;
-	static MemBlock *_spritecache_ptr;
-	static int _compact_cache_counter;
-	*/
+	//static int _sprite_lru_counter;
+	//static MemBlock _spritecache_ptr;
+	//static int _compact_cache_counter;
 
-	private boolean ReadSpriteHeaderSkipData()
-	{
-		uint16 num = FioReadWord();
+
+	private static boolean ReadSpriteHeaderSkipData() {
+		int num = FileIO.FioReadWord();
 		byte type;
 
-		if (num == 0) return false;
+		if (num == 0)
+			return false;
 
-		type = FioReadByte();
+		type = (byte) FileIO.FioReadByte();
 		if (type == 0xFF) {
-			FioSkipBytes(num);
+			FileIO.FioSkipBytes(num);
 			return true;
 		}
 
-		FioSkipBytes(7);
+		FileIO.FioSkipBytes(7);
 		num -= 8;
-		if (num == 0) return true;
+		if (num == 0)
+			return true;
 
-		if (type & 2) {
-			FioSkipBytes(num);
+		if (0 != (type & 2)) {
+			FileIO.FioSkipBytes(num);
 		} else {
 			while (num > 0) {
-				int8 i = FioReadByte();
+				byte i = (byte) FileIO.FioReadByte();
 				if (i >= 0) {
 					num -= i;
-					FioSkipBytes(i);
+					FileIO.FioSkipBytes(i);
 				} else {
-					i = -(i >> 3);
+					i = (byte) -(i >> 3);
 					num -= i;
-					FioReadByte();
+					FileIO.FioReadByte();
 				}
 			}
 		}
@@ -60,63 +63,72 @@ public class SpriteCache {
 		return true;
 	}
 
-	//static void* AllocSprite(size_t);
+	// static void* AllocSprite(size_t);
 
-	private void* ReadSprite(SpriteID id)
+	private static Sprite ReadSprite(int id)
 	{
 		int num;
 		byte type;
 
-		DEBUG(spritecache, 9) ("load sprite %d", id);
+		Global.DEBUG_spritecache( 9, "load sprite %d", id);
 
 		if (_sprite_file_pos[id] == 0 && id != 0) {
-			error(
-				"Tried to load non-existing sprite #%d.\n"
+			Global.error(
+				"Tried to load non-existing sprite #%d.\n"+
 				"Probable cause: Wrong/missing NewGRFs",
 				id
 			);
 		}
 
-		FioSeekToFile(_sprite_file_pos[id]);
+		FileIO.FioSeekToFile(_sprite_file_pos[id]);
 
-		num  = FioReadWord();
-		type = FioReadByte();
+		num  = FileIO.FioReadWord();
+		type = (byte) FileIO.FioReadByte();
 		if (type == 0xFF) {
-			byte* dest = AllocSprite(num);
+			//byte[] dest = new byte[num]; // AllocSprite(num);
 
-			_sprite_ptr[id] = dest;
-			FioReadBlock(dest, num);
+			//_sprite_ptr[id] = dest;
+			//FileIO.FioReadBlock(dest, num);
+			byte[] dest = FileIO.FioReadBlock(num);
 
-			return dest;
+			//return dest;
+			// Suppose that 0xFF is non-sprite used to keep some data
+			// Create and return special sprite
+			return new DataCarrier(dest);
 		} else {
-			uint height = FioReadByte();
-			uint width  = FioReadWord();
-			Sprite* sprite;
-			byte* dest;
+			int height = FileIO.FioReadByte();
+			int width  = FileIO.FioReadWord();
+			Sprite sprite;
+			byte[] dest;
 
-			num = (type & 0x02) ? width * height : num - 8;
-			sprite = AllocSprite(sizeof(*sprite) + num);
+			num = (0 != (type & 0x02)) ? width * height : (num - 8);
+			sprite = new Sprite(num); // AllocSprite(sizeof(*sprite) + num);
+			//sprite = new Sprite(); // AllocSprite(sizeof(*sprite) + num);
 			_sprite_ptr[id] = sprite;
-			sprite->info   = type;
-			sprite->height = (id != 142) ? height : 10; // Compensate for a TTD bug
-			sprite->width  = width;
-			sprite->x_offs = FioReadWord();
-			sprite->y_offs = FioReadWord();
+			sprite.info   = type;
+			sprite.height = (byte) ((id != 142) ? height : 10); // Compensate for a TTD bug
+			sprite.width  = width;
+			sprite.x_offs = FileIO.FioReadWord();
+			sprite.y_offs = FileIO.FioReadWord();
 
-			dest = sprite->data;
+			dest = sprite.data;
+			int di = 0;
 			while (num > 0) {
-				int8 i = FioReadByte();
+				byte i = (byte) FileIO.FioReadByte(); // treat as signed!
 
 				if (i >= 0) {
 					num -= i;
-					for (; i > 0; --i) *dest++ = FioReadByte();
+					for (; i > 0; --i) 
+						dest[di++] = (byte) FileIO.FioReadByte();
 				} else {
-					const byte* rel = dest - (((i & 7) << 8) | FioReadByte());
+					//const byte* rel = dest - (((i & 7) << 8) | FileIO.FioReadByte());
+					int relp = di - (((i & 7) << 8) | FileIO.FioReadByte());
 
-					i = -(i >> 3);
+					i = (byte) -(i >> 3);
 					num -= i;
 
-					for (; i > 0; --i) *dest++ = *rel++;
+					for (; i > 0; --i) 
+						dest[di++] = dest[relp++];
 				}
 			}
 
@@ -124,39 +136,35 @@ public class SpriteCache {
 		}
 	}
 
+	public static boolean LoadNextSprite(int load_index, byte file_index) {
+		int file_pos = (int) (FileIO.FioGetPos() | (file_index << 24));
 
-	boolean LoadNextSprite(int load_index, byte file_index)
-	{
-		int file_pos = FioGetPos() | (file_index << 24);
-
-		if (!ReadSpriteHeaderSkipData()) return false;
+		if (!ReadSpriteHeaderSkipData())
+			return false;
 
 		_sprite_file_pos[load_index] = file_pos;
 
 		_sprite_ptr[load_index] = null;
 
-	//#if defined(WANT_NEW_LRU)
-		_sprite_lru_new[load_index] = 0;
-	/*#else
-		_sprite_lru[load_index] = 0xFFFF;
-		_sprite_lru_cur[load_index] = 0;
-	#endif*/
+		// #if defined(WANT_NEW_LRU)
+		//_sprite_lru_new[load_index] = 0;
+		/*
+		 * #else _sprite_lru[load_index] = 0xFFFF; _sprite_lru_cur[load_index] = 0;
+		 * #endif
+		 */
 
 		return true;
 	}
 
-
-	void DupSprite(SpriteID old, SpriteID newp)
-	{
+	static void DupSprite(int old, int newp) {
 		_sprite_file_pos[newp] = _sprite_file_pos[old];
 		_sprite_ptr[newp] = null;
 	}
 
-
-	void SkipSprites(int count)
-	{
+	static void SkipSprites(int count) {
 		for (; count > 0; --count) {
-			if (!ReadSpriteHeaderSkipData()) return;
+			if (!ReadSpriteHeaderSkipData())
+				return;
 		}
 	}
 
@@ -165,7 +173,7 @@ public class SpriteCache {
 
 	static inline MemBlock* NextBlock(MemBlock* block)
 	{
-		return (MemBlock*)((byte*)block + (block->size & ~S_FREE_MASK));
+		return (MemBlock*)((byte*)block + (block.size & ~S_FREE_MASK));
 	}
 
 	static int GetSpriteCacheUsage()
@@ -173,8 +181,8 @@ public class SpriteCache {
 		size_t tot_size = 0;
 		MemBlock* s;
 
-		for (s = _spritecache_ptr; s->size != 0; s = NextBlock(s))
-			if (!(s->size & S_FREE_MASK)) tot_size += s->size;
+		for (s = _spritecache_ptr; s.size != 0; s = NextBlock(s))
+			if (!(s.size & S_FREE_MASK)) tot_size += s.size;
 
 		return tot_size;
 	}
@@ -224,34 +232,34 @@ public class SpriteCache {
 			"compacting sprite cache, inuse=%d", GetSpriteCacheUsage()
 		);
 
-		for (s = _spritecache_ptr; s->size != 0;) {
-			if (s->size & S_FREE_MASK) {
+		for (s = _spritecache_ptr; s.size != 0;) {
+			if (s.size & S_FREE_MASK) {
 				MemBlock* next = NextBlock(s);
 				MemBlock temp;
 				void** i;
 
 				// Since free blocks are automatically coalesced, this should hold true.
-				assert(!(next->size & S_FREE_MASK));
+				assert(!(next.size & S_FREE_MASK));
 
 				// If the next block is the sentinel block, we can safely return
-				if (next->size == 0)
+				if (next.size == 0)
 					break;
 
 				// Locate the sprite belonging to the next pointer.
-				for (i = _sprite_ptr; *i != next->data; ++i) {
+				for (i = _sprite_ptr; *i != next.data; ++i) {
 					assert(i != endof(_sprite_ptr));
 				}
 
-				*i = s->data; // Adjust sprite array entry
+				*i = s.data; // Adjust sprite array entry
 				// Swap this and the next block
 				temp = *s;
-				memmove(s, next, next->size);
+				memmove(s, next, next.size);
 				s = NextBlock(s);
 				*s = temp;
 
 				// Coalesce free blocks
-				while (NextBlock(s)->size & S_FREE_MASK) {
-					s->size += NextBlock(s)->size & ~S_FREE_MASK;
+				while (NextBlock(s).size & S_FREE_MASK) {
+					s.size += NextBlock(s).size & ~S_FREE_MASK;
 				}
 			} else {
 				s = NextBlock(s);
@@ -278,7 +286,7 @@ public class SpriteCache {
 		}
 	/*#else
 		{
-		uint16 cur_lru = 0, cur_lru_cur = 0xffff;
+		int cur_lru = 0, cur_lru_cur = 0xffff;
 		for (i = 0; i != MAX_SPRITES; i++) {
 			if (_sprite_ptr[i] == null || _sprite_lru[i] < cur_lru) continue;
 
@@ -300,19 +308,19 @@ public class SpriteCache {
 		// Display an error message and die, in case we found no sprite at all.
 		// This shouldn't really happen, unless all sprites are locked.
 		if (best == -1)
-			error("Out of sprite memory");
+			Global.error("Out of sprite memory");
 
 		// Mark the block as free (the block must be in use)
 		s = (MemBlock*)_sprite_ptr[best] - 1;
-		assert(!(s->size & S_FREE_MASK));
-		s->size |= S_FREE_MASK;
+		assert(!(s.size & S_FREE_MASK));
+		s.size |= S_FREE_MASK;
 		_sprite_ptr[best] = null;
 
 		// And coalesce adjacent free blocks
-		for (s = _spritecache_ptr; s->size != 0; s = NextBlock(s)) {
-			if (s->size & S_FREE_MASK) {
-				while (NextBlock(s)->size & S_FREE_MASK) {
-					s->size += NextBlock(s)->size & ~S_FREE_MASK;
+		for (s = _spritecache_ptr; s.size != 0; s = NextBlock(s)) {
+			if (s.size & S_FREE_MASK) {
+				while (NextBlock(s).size & S_FREE_MASK) {
+					s.size += NextBlock(s).size & ~S_FREE_MASK;
 				}
 			}
 		}
@@ -328,22 +336,22 @@ public class SpriteCache {
 		for (;;) {
 			MemBlock* s;
 
-			for (s = _spritecache_ptr; s->size != 0; s = NextBlock(s)) {
-				if (s->size & S_FREE_MASK) {
-					size_t cur_size = s->size & ~S_FREE_MASK;
+			for (s = _spritecache_ptr; s.size != 0; s = NextBlock(s)) {
+				if (s.size & S_FREE_MASK) {
+					size_t cur_size = s.size & ~S_FREE_MASK;
 
 					//* Is the block exactly the size we need or big enough for an additional free block? * /
 					if (cur_size == mem_req ||
 							cur_size >= mem_req + sizeof(MemBlock)) {
 						// Set size and in use
-						s->size = mem_req;
+						s.size = mem_req;
 
 						// Do we need to inject a free block too?
 						if (cur_size != mem_req) {
-							NextBlock(s)->size = (cur_size - mem_req) | S_FREE_MASK;
+							NextBlock(s).size = (cur_size - mem_req) | S_FREE_MASK;
 						}
 
-						return s->data;
+						return s.data;
 					}
 				}
 			}
@@ -360,7 +368,7 @@ public class SpriteCache {
 	#define MAP(from,to,map) else if (s >= from && s <= to) { s = map[s - from] + from; }
 
 
-	static uint RotateSprite(uint s)
+	static int RotateSprite(int s)
 	{
 		static const byte _rotate_tile_sprite[19] = { 0,2,4,6,8,10,12,14,1,3,5,7,9,11,13,17,18,16,15 };
 		static const byte _coast_map[9] = {0, 4, 3, 1, 2, 6, 8, 5, 7};
@@ -423,34 +431,66 @@ public class SpriteCache {
 		return p;
 	}*/
 
-	// TODO cache
-	byte [] GetRawSprite(SpriteID sprite)
+	private static Sprite GetRawSprite(SpriteID sprite)
 	{
-		return ReadSprite(sprite);
+		return GetRawSprite(sprite.id);	
 	}
 	
-/*
+	private static Sprite GetRawSprite(int sprite)
+	{
+		Sprite p;
+
+		assert(sprite < Sprite.MAX_SPRITES);
+
+
+		p = _sprite_ptr[sprite];
+		// Load the sprite, if it is not loaded, yet
+		if (p == null) p = ReadSprite(sprite);
+		return p;
+	}	
+	/* TODO cache
+	byte [] GetRawSprite(SpriteID sprite)
+	{
+		return ReadSprite(sprite.id).data;
+	}*/
+	
+
+	static Sprite GetSprite(SpriteID sprite)
+	{
+		return GetRawSprite(sprite);
+	}
+
+	/*
+	static byte[] GetNonSpriteData(SpriteID sprite)
+	{
+		return GetRawSprite(sprite);
+	}*/
+
+	
 	void GfxInitSpriteMem()
 	{
+		/*
 		// initialize sprite cache heap
 		if (_spritecache_ptr == null) _spritecache_ptr = malloc(SPRITE_CACHE_SIZE);
 
 		// A big free block
-		_spritecache_ptr->size = (SPRITE_CACHE_SIZE - sizeof(MemBlock)) | S_FREE_MASK;
+		_spritecache_ptr.size = (SPRITE_CACHE_SIZE - sizeof(MemBlock)) | S_FREE_MASK;
 		// Sentinel block (identified by size == 0)
-		NextBlock(_spritecache_ptr)->size = 0;
+		NextBlock(_spritecache_ptr).size = 0;
 
 		memset(_sprite_ptr, 0, sizeof(_sprite_ptr));
 
 		_compact_cache_counter = 0;
+		*/
 	}
-*/	
+	
 	
 
 }
 
-
+/*
 class MemBlock {
 	int size;
 	byte data[] = new byte[SpriteCache.VARARRAY_SIZE]; // VARARRAY_SIZE
 }
+*/

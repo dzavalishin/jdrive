@@ -202,6 +202,11 @@ public class Global {
 			debug( s, arg );
 	}
 	
+	public static void DEBUG_spritecache( int level, String s, Object ... arg )
+	{
+		if( level >= _debug_spritecache_level )
+			debug( s, arg );
+	}
 	
 	
 	public static int Random() {
