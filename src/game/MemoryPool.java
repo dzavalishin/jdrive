@@ -57,10 +57,12 @@ public class MemoryPool<CType extends IPoolItem>
         pool.forEach( (i,o) -> c.accept(o) );
     }
 
-	public boolean AddBlockToPool() {
-
+	public boolean AddBlockToPool() 
+	{
+		int key = lastIndex ++;
 		CType o = ctor.createObject();
-		o.setIndex(lastIndex ++);
+		o.setIndex(key);
+		pool.put(key, o);
 		
 		return true;
 	}

@@ -337,6 +337,8 @@ public class TileIndex {
 		return IsTileType(TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(Global._m[tile].m5, 4, 4) == 0;
 	}
 
+	boolean IsWaterTile() { return IsTileType(TileTypes.MP_WATER) && getMap().m5 == 0; }
+
 	Owner GetTileOwner()
 	{
 		//assert(tile < MapSize());

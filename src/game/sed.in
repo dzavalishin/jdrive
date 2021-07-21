@@ -11,6 +11,7 @@ s/int16/int/g
 s/uint8/byte/g
 s/int18/byte/g
 
+s/uint/int/g
 s/bool/boolean/g
 
 s/typedef struct/class/g
@@ -19,14 +20,21 @@ s/NULL/null/g
 s/_m[[]tile][.]/tile.getMap()./g
 
 s/GB(/BitOps.GB(/g
+s/SB(/BitOps.RET SB(/g
 s/HASBIT(/BitOps.HASBIT(/g
 s/CHANCE16/BitOps.CHANCE16/g
 
+s/Player \*/Player /g
+s/Player\*/Player /g
+s/Station \*/Station /g
+s/Station\*/Station /g
 s/Town\ \*/Town /g
 s/TileInfo \*/TileInfo /g
+s/TileInfo\*/TileInfo /g
 s/DrawTownTileStruct \*/DrawTownTileStruct /g
-
-
+s/Industry \*/Industry /g
+s/Industry\*/Industry /g
+s/TileIndex *\*/TileIndex /g
 
 s/CMD_/Cmd.CMD_/g
 
@@ -39,7 +47,10 @@ s/MP_/TileTypes.MP_/g
 s/OWNER_/Owner.OWNER_/g
 s/GM_/GameModes.GM_/g
 
+s/Random(/Hal.Random(/g
 
+s/InvalidateWindow(/Window.InvalidateWindow(/g
+s/DeleteWindowById(/Window.DeleteWindowById(/g
 
 s/IsTileType(tile\w*,/tile.IsTileType(/g
 
@@ -48,7 +59,11 @@ s/SetDParam/Global.SetDParam/g
 s/_current_player/Global._current_player/g
 s/_game_mode/Global._game_mode/g
 s/GetString/Global.GetString/g
+s/_opt/Global._opt/g
+s/_patches/Global._patches/g
+s/_cmd_text/Global._cmd_text/g
 
 s/GetStation(/Station.GetStation(/g
 s/SET_EXPENSES_TYPE(/Player.SET_EXPENSES_TYPE(/g
 s/EXPENSES_/Player.EXPENSES_/
+

@@ -22,9 +22,9 @@ public class BitOps {
 	}
 
 	/// Add i to the n bits starting at bit s in x
-	static public void AB(IntContainer x, int s, int n, int i)
+	static public int RETAB(int x, int s, int n, int i)
 	{
-		x.v = (x.v & ~(((1 << n) - 1) << s)) | ((x.v + (i << s)) & (((1 << n) - 1) << s));	
+		return (x & ~(((1 << n) - 1) << s)) | ((x + (i << s)) & (((1 << n) - 1) << s));	
 	}
 
 

@@ -1,7 +1,7 @@
 /* $Id: town_land.h 3118 2005-11-02 13:06:07Z tron $ */
 
 /** @file town_land.h
- */
+ * /
 
 enum {
 	HOUSE_TEMP_CHURCH    = 0x03,
