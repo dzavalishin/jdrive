@@ -19,7 +19,7 @@ struct NewsItem {
 
 	/* The validation functions for news items get called immediately
 	 * before the news are supposed to be shown. If this funcion returns
-	 * false, the news item won't be displayed. */
+	 * false, the news item won't be displayed. * /
 	bool (*isValid) ( uint data_a, uint data_b );
 };
 */
@@ -35,7 +35,7 @@ void DrawNewsBorder(const Window *w);
 void InitNewsItemStructs(void);
 
 VARDEF NewsItem _statusbar_news_item;
-
+/*
 enum {
 	NT_ARRIVAL_PLAYER = 0,
 	NT_ARRIVAL_OTHER = 1,

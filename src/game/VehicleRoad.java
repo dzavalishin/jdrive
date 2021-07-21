@@ -1,6 +1,6 @@
 package game;
 
-public class VehicleRoad extends Vehicle {
+public class VehicleRoad extends VehicleChild {
 	
 	byte state;
 	byte frame;

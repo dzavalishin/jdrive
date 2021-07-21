@@ -1,6 +1,6 @@
 package game;
 
-public class VehicleDisaster extends Vehicle {
+public class VehicleDisaster extends VehicleChild {
 
 	int image_override;
 

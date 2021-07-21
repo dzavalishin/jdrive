@@ -27,7 +27,19 @@ public class Order implements IPoolItem {
 		to.station = from.station;
 	}
 		
+	private void clean() 
+	{
+		type    = 0;
+		flags   = 0;
+		station = Station.INVALID_STATION;
+		next = null;
+		index = 0;
+	}
 
+	public Order() {
+		clean();
+	}
+	
 	public static final int OT_NOTHING       = 0;
 	public static final int OT_GOTO_STATION  = 1;
 	public static final int OT_GOTO_DEPOT    = 2;
@@ -115,7 +127,7 @@ public class Order implements IPoolItem {
 	 */
 	Order UnpackOldOrder(int packed)
 	{
-		Order order;
+		Order order = new Order();
 		order.type    = BitOps.GB(packed, 0, 4);
 		order.flags   = BitOps.GB(packed, 4, 4);
 		order.station = BitOps.GB(packed, 8, 8);
@@ -138,7 +150,7 @@ public class Order implements IPoolItem {
 	 */
 	Order UnpackVersion4Order(int packed)
 	{
-		Order order;
+		Order order = new Order();
 		order.type    = BitOps.GB(packed, 0, 4);
 		order.flags   = BitOps.GB(packed, 4, 4);
 		order.station = BitOps.GB(packed, 8, 8);
@@ -155,7 +167,8 @@ public class Order implements IPoolItem {
 	 */
 	static void SwapOrders(Order order1, Order order2)
 	{
-		Order temp_order = order1;
+		Order temp_order = new Order();
+		AssignOrder(temp_order, order1);
 		Order temp_next = order1.next;
 		
 		AssignOrder(order1, order2);
@@ -174,24 +187,22 @@ public class Order implements IPoolItem {
 	 */
 	static Order AllocateOrder()
 	{
-		Order ret;
+		Order [] ret = { null };
 
 		//FOR_ALL_ORDERS(order)
 		_order_pool.forEach( (ii,order) ->
 		{
 			if (order.type == OT_NOTHING) {
 				int index = order.index;
-
-				//memset(order, 0, sizeof(*order));
 				order.clean();
 				order.index = index;
 				order.next = null;
 
 				// TODO return order;
-				ret = order;
+				ret[0] = order;
 			}
 		});
-		if(ret != null) return ret;
+		if(ret[0] != null) return ret[0];
 
 		/* Check if we can add a block to the pool */
 		if (_order_pool.AddBlockToPool()) 
@@ -199,6 +210,7 @@ public class Order implements IPoolItem {
 
 		return null;
 	}
+
 
 
 	/** Add an order to the orderlist of a vehicle.
@@ -378,7 +390,7 @@ public class Order implements IPoolItem {
 			default: return Cmd.CMD_ERROR;
 		}
 
-		if (sel_ord.id > v.num_orders.id) return Cmd.CMD_ERROR;
+		if (sel_ord.id > v.num_orders) return Cmd.CMD_ERROR;
 
 		// XXX need? if (IsOrderPoolFull()) return_cmd_error(STR_8831_NO_MORE_SPACE_FOR_ORDERS);
 
@@ -432,10 +444,10 @@ public class Order implements IPoolItem {
 				}
 			}
 
-			u = GetFirstVehicleFromSharedList(v);
+			u = v.GetFirstVehicleFromSharedList();
 			while (u != null) {
 				/* Increase amount of orders */
-				u.num_orders++;
+				u.num_orders.id++;
 
 				/* If the orderlist was empty, assign it */
 				if (u.orders == null) u.orders = v.orders;
@@ -443,15 +455,15 @@ public class Order implements IPoolItem {
 				assert(v.orders == u.orders);
 
 				/* If there is added an order before the current one, we need
-				to update the selected Order /
-				if (sel_ord <= u.cur_order_index) {
-					int cur = u.cur_order_index + 1;
+				to update the selected Order */
+				if (sel_ord.id <= u.cur_order_index.id) {
+					int cur = u.cur_order_index.id + 1;
 					/* Check if we don't go out of bound */
 					if (cur < u.num_orders)
 						u.cur_order_index = cur;
 				}
 				/* Update any possible open window of the Vehicle */
-				InvalidateVehicleOrder(u);
+				u.InvalidateVehicleOrder();
 				if (u.type == Vehicle.VEH_Train) u.u.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
 
 				u = u.next_shared;
@@ -486,8 +498,8 @@ public class Order implements IPoolItem {
 	int CmdDeleteOrder(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v, u;
-		VehicleID veh_id = p1;
-		OrderID sel_ord = p2;
+		VehicleID veh_id = new VehicleID( p1 );
+		OrderID sel_ord = new OrderID( p2 );
 		Order order;
 
 		if (!IsVehicleIndex(veh_id)) return Cmd.CMD_ERROR;
@@ -495,7 +507,7 @@ public class Order implements IPoolItem {
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		/* If we did not select an order, we maybe want to de-clone the orders */
-		if (sel_ord.id >= v.num_orders.id)
+		if (sel_ord.id >= v.num_orders)
 			return DecloneOrder(v, flags);
 
 		order = v.GetVehicleOrder(sel_ord);
@@ -531,9 +543,9 @@ public class Order implements IPoolItem {
 			}
 
 
-			u = GetFirstVehicleFromSharedList(v);
+			u = v.GetFirstVehicleFromSharedList();
 			while (u != null) {
-				u.num_orders.id--;
+				u.num_orders--;
 
 				if (u.type == Vehicle.VEH_Aircraft) {
 					/* Take out of airport queue
@@ -544,8 +556,8 @@ public class Order implements IPoolItem {
 					}
 				}
 
-				if (sel_ord < u.cur_order_index)
-					u.cur_order_index--;
+				if (sel_ord.id < u.cur_order_index.id)
+					u.cur_order_index.id--;
 
 				/* If we removed the last order, make sure the shared vehicles
 				 * also set their orders to null */
@@ -588,8 +600,8 @@ public class Order implements IPoolItem {
 
 		if (0 != (flags & Cmd.DC_EXEC)) {
 			/* Goto next Order*/
-			OrderID b = v.cur_order_index + 1;
-			if (b >= v.num_orders) b = null;
+			OrderID b = new OrderID( v.cur_order_index.id + 1 ); 
+			if (b.id >= v.num_orders) b = null;
 
 			v.cur_order_index = b;
 
@@ -645,7 +657,7 @@ public class Order implements IPoolItem {
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		/* Is it a valid order? */
-		if (sel_ord.id >= v.num_orders.id) return Cmd.CMD_ERROR;
+		if (sel_ord.id >= v.num_orders) return Cmd.CMD_ERROR;
 
 		order = v.GetVehicleOrder(sel_ord);
 		if (order.type != OT_GOTO_STATION &&
@@ -674,7 +686,7 @@ public class Order implements IPoolItem {
 
 			/* Update the windows and full load flags, also for vehicles that share the same order list */
 			{
-				Vehicle u = GetFirstVehicleFromSharedList(v);
+				Vehicle u = v.GetFirstVehicleFromSharedList();
 				while (u != null) {
 					/* toggle u.current_order "Full load" flag if it changed */
 					if (sel_ord == u.cur_order_index &&
@@ -747,7 +759,7 @@ public class Order implements IPoolItem {
 
 				/* Is the vehicle already in the shared list? */
 				{
-					Vehicle u = GetFirstVehicleFromSharedList(src);
+					Vehicle u = src.GetFirstVehicleFromSharedList();
 					while (u != null) {
 						if (u == dst)
 							return Cmd.CMD_ERROR;
@@ -812,7 +824,7 @@ public class Order implements IPoolItem {
 				}
 
 				/* make sure there are orders available */
-				delta = dst.IsOrderListShared() ? src.num_orders.id + 1 : src.num_orders.id - dst.num_orders.id;
+				delta = dst.IsOrderListShared() ? src.num_orders + 1 : src.num_orders - dst.num_orders;
 				//if (!HasOrderPoolFree(delta))					return_cmd_error(STR_8831_NO_MORE_SPACE_FOR_ORDERS);
 
 				if (0 != (flags & Cmd.DC_EXEC)) {
@@ -879,7 +891,7 @@ public class Order implements IPoolItem {
 		v = Vehicle.GetVehicle(p1);
 		/* Check the vehicle type and ownership, and if the service interval and order are in range */
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
-		if (serv_int != GetServiceIntervalClamped(serv_int) || cur_ord.id >= v.num_orders.id) return Cmd.CMD_ERROR;
+		if (serv_int != GetServiceIntervalClamped(serv_int) || cur_ord.id >= v.num_orders) return Cmd.CMD_ERROR;
 
 		if (0 != (flags & Cmd.DC_EXEC)) {
 			v.cur_order_index = cur_ord;
@@ -894,7 +906,7 @@ public class Order implements IPoolItem {
 	 * Check the orders of a vehicle, to see if there are invalid orders and stuff
 	 *
 	 */
-	boolean CheckOrders(int data_a, int data_b)
+	static boolean CheckOrders(int data_a, int data_b)
 	{
 		final Vehicle  v = Vehicle.GetVehicle(data_a);
 
@@ -947,7 +959,7 @@ public class Order implements IPoolItem {
 			}
 
 			/* Check if the last and the first order are the same */
-			if (v.num_orders.id > 1 &&
+			if (v.num_orders > 1 &&
 					v.orders.type    == v.GetLastVehicleOrder().type &&
 					v.orders.flags   == v.GetLastVehicleOrder().flags &&
 					v.orders.station == v.GetLastVehicleOrder().station)
@@ -982,7 +994,7 @@ public class Order implements IPoolItem {
 				NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT | NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0),
 				v.index,
 				OC_VALIDATE,	//next time, just validate the orders
-				CheckOrders);
+				Order::CheckOrders);
 		}
 
 		return true;
@@ -1098,7 +1110,35 @@ public class Order implements IPoolItem {
 
 		_backup_orders_tile = 0;
 	}
-/*
+
+	
+	
+	
+	
+	@Deprecated
+	static int PackOrder(final Order order)
+	{
+		return (0xFFFF & order.station) << 16 | (0xFF & order.flags) << 8 | (0xFF & order.type);
+	}
+
+	@Deprecated
+	static Order UnpackOrder(int packed)
+	{
+		Order order;
+		order.type    = BitOps.GB(packed,  0,  8);
+		order.flags   = BitOps.GB(packed,  8,  8);
+		order.station = BitOps.GB(packed, 16, 16);
+		order.next    = null;
+		order.index   = 0; // avoid compiler warning
+		return order;
+	}
+	
+	
+	
+	
+	
+	
+	/*
 	static final SaveLoad _order_desc[] = {
 		SLE_VAR(Order,type,					SLE_UINT8),
 		SLE_VAR(Order,flags,				SLE_UINT8),

@@ -57,6 +57,21 @@ public class NewsItem {
 	public static final int DNC_BANKRUPCY = 4;
 
 
+	//enum NewsMode {
+	public static final int NM_SMALL = 0;
+	public static final int NM_NORMAL = 1;
+	public static final int NM_THIN = 2;
+	public static final int NM_CALLBACK = 3;
+
+	//enum NewsFlags {
+	public static final int NF_VIEWPORT = 1;
+	public static final int NF_TILE = 4;
+	public static final int NF_VEHICLE = 8;
+	public static final int NF_FORCE_BIG = 0x10;
+	public static final int NF_NOEXPIRE = 0x20;
+	public static final int NF_INCOLOR = 0x40;
+
+
 
 
 
@@ -370,47 +385,47 @@ public class NewsItem {
 	static final int _news_items_age[] = {60, 60, 90, 60, 90, 30, 150, 30, 90, 180};
 
 	static final Widget _news_type13_widgets[] = {
-			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,   429,     0,   169, 0x0, STR_null),
-			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,    10,     0,    11, 0x0, STR_null),
+			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,   429,     0,   169, 0x0, STR_NULL),
+			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,    10,     0,    11, 0x0, STR_NULL),
 			new Widget(   WIDGETS_END),
 	};
 
 	static WindowDesc _news_type13_desc = new WindowDesc(
-			WDP_CENTER, 476, 430, 170,
-			WC_NEWS_WINDOW, 0,
-			WDF_DEF_WIDGET,
+			Window.WDP_CENTER, 476, 430, 170,
+			Window.WC_NEWS_WINDOW, 0,
+			Window.WDF_DEF_WIDGET,
 			_news_type13_widgets,
-			NewsWindowProc
+			NewsItem::NewsWindowProc
 			);
 
 	static final Widget _news_type2_widgets[] = {
-			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,   429,     0,   129, 0x0, STR_null),
-			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,    10,     0,    11, 0x0, STR_null),
+			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,   429,     0,   129, 0x0, STR_NULL),
+			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,    10,     0,    11, 0x0, STR_NULL),
 			new Widget(   WIDGETS_END),
 	};
 
 	static WindowDesc _news_type2_desc = new WindowDesc(
-			WDP_CENTER, 476, 430, 130,
-			WC_NEWS_WINDOW, 0,
-			WDF_DEF_WIDGET,
+			Window.WDP_CENTER, 476, 430, 130,
+			Window.WC_NEWS_WINDOW, 0,
+			Window.WDF_DEF_WIDGET,
 			_news_type2_widgets,
-			NewsWindowProc
+			NewsItem::NewsWindowProc
 			);
 
 	static final Widget _news_type0_widgets[] = {
-			new Widget(       WWT_PANEL,   Window.RESIZE_NONE,     5,     0,   279,    14,    86, 0x0,								STR_null),
+			new Widget(       WWT_PANEL,   Window.RESIZE_NONE,     5,     0,   279,    14,    86, 0x0,								STR_NULL),
 			new Widget(    WWT_CLOSEBOX,   Window.RESIZE_NONE,     5,     0,    10,     0,    13, STR_00C5,					STR_018B_CLOSE_WINDOW),
-			new Widget(     WWT_CAPTION,   Window.RESIZE_NONE,     5,    11,   279,     0,    13, STR_012C_MESSAGE,	STR_null),
-			new Widget(           WWT_6,   Window.RESIZE_NONE,     5,     2,   277,    16,    64, 0x0,								STR_null),
+			new Widget(     WWT_CAPTION,   Window.RESIZE_NONE,     5,    11,   279,     0,    13, STR_012C_MESSAGE,	STR_NULL),
+			new Widget(           WWT_6,   Window.RESIZE_NONE,     5,     2,   277,    16,    64, 0x0,								STR_NULL),
 			new Widget(    WIDGETS_END),
 	};
 
 	static WindowDesc _news_type0_desc = new WindowDesc(
-			WDP_CENTER, 476, 280, 87,
-			WC_NEWS_WINDOW, 0,
-			WDF_DEF_WIDGET,
+			Window.WDP_CENTER, 476, 280, 87,
+			Window.WC_NEWS_WINDOW, 0,
+			Window.WDF_DEF_WIDGET,
 			_news_type0_widgets,
-			NewsWindowProc
+			NewsItem::NewsWindowProc
 			);
 
 	static final SoundFx _news_sounds[] = {
@@ -905,7 +920,7 @@ public class NewsItem {
 	static final Widget _message_options_widgets[] = {
 			new Widget(   WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,   10,     0,    13, STR_00C5,             STR_018B_CLOSE_WINDOW),
 			new Widget(     WWT_CAPTION,   Window.RESIZE_NONE,    13,    11,  409,     0,    13, STR_0204_MESSAGE_OPTIONS, STR_018C_WINDOW_TITLE_DRAG_THIS),
-			new Widget(       WWT_PANEL,   Window.RESIZE_NONE,    13,     0,  409,    14,   184, STR_null,             STR_null),
+			new Widget(       WWT_PANEL,   Window.RESIZE_NONE,    13,     0,  409,    14,   184, STR_NULL,             STR_NULL),
 
 			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    26,    37, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
 			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    26,    37, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
@@ -937,9 +952,9 @@ public class NewsItem {
 			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,   134,   145, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
 			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,   134,   145, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
 
-			new Widget(       WWT_PANEL,   Window.RESIZE_NONE,     3,     4,   86,   154,   165, STR_null,             STR_null),
-			new Widget(     WWT_TEXTBTN,   Window.RESIZE_NONE,     3,    87,   98,   154,   165, STR_0225,             STR_null),
-			new Widget(           WWT_4,   Window.RESIZE_NONE,     3,     4,   98,   166,   177, STR_02DB_OFF,         STR_null),
+			new Widget(       WWT_PANEL,   Window.RESIZE_NONE,     3,     4,   86,   154,   165, STR_NULL,             STR_NULL),
+			new Widget(     WWT_TEXTBTN,   Window.RESIZE_NONE,     3,    87,   98,   154,   165, STR_0225,             STR_NULL),
+			new Widget(           WWT_4,   Window.RESIZE_NONE,     3,     4,   98,   166,   177, STR_02DB_OFF,         STR_NULL),
 
 			new Widget(    WIDGETS_END),
 	};

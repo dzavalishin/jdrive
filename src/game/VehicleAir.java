@@ -1,6 +1,6 @@
 package game;
 
-public class VehicleAir extends Vehicle {
+public class VehicleAir extends VehicleChild {
 
 	int crashed_counter;
 	byte pos;

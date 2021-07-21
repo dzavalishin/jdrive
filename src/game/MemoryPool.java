@@ -1,6 +1,7 @@
 package game;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -78,6 +79,11 @@ public class MemoryPool<CType extends IPoolItem>
 		return true;
 	}
 
+	Iterator<CType> getIterator()
+	{
+		return pool.values().iterator();
+	}
+	
 }
 
 

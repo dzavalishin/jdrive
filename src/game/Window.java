@@ -2829,15 +2829,6 @@ class Scrollbar {
 
 
 
-class Widget {
-	byte type;
-	byte resize_flag;
-	byte color;
-	int left, right, top, bottom;
-	int unkA;
-	StringID tooltips;
-} ;
-
 
 
 

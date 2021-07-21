@@ -1,6 +1,6 @@
 package game;
 
-public class VehicleRail extends Vehicle {
+public class VehicleRail extends VehicleChild {
 	int last_speed;		// NOSAVE: only used in UI
 	int crash_anim_pos;
 	int days_since_order_progr;
@@ -43,7 +43,7 @@ public class VehicleRail extends Vehicle {
 	 * last byte is the shortest station reached this round though the orders. It can be invalidated by
 	 *   skip station and alike by setting it to 0. That way we will ensure that a complete loop is used to find the shortest station
 	 */
-	byte shortest_platform[2];
+	byte [] shortest_platform = new byte[2];
 
 	// Link between the two ends of a multiheaded engine
 	Vehicle other_multiheaded_part;

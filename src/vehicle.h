@@ -336,7 +336,7 @@ int32 GetTrainRunningCost(const Vehicle *v);
 int CheckTrainStoppedInDepot(const Vehicle *v);
 
 bool VehicleNeedsService(const Vehicle *v);
-
+/*
 typedef struct GetNewVehiclePosResult {
 	int x,y;
 	TileIndex old_tile;

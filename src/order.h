@@ -116,7 +116,7 @@ static inline Order *GetOrder(uint index)
 
 /**
  * Get the current size of the OrderPool
- */
+ * /
 static inline uint16 GetOrderPoolSize(void)
 {
 	return _order_pool.total_items;
@@ -132,7 +132,7 @@ static inline bool HasOrderPoolFree(uint amount)
 {
 	const Order *order;
 
-	/* There is always room if not all blocks in the pool are reserved */
+	//* There is always room if not all blocks in the pool are reserved * /
 	if (_order_pool.current_blocks < _order_pool.max_blocks)
 		return true;
 
@@ -149,7 +149,7 @@ static inline bool IsOrderPoolFull(void)
 	return !HasOrderPoolFree(1);
 }
 
-/* Pack and unpack routines */
+/* Pack and unpack routines * /
 
 static inline uint32 PackOrder(const Order *order)
 {

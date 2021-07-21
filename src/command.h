@@ -1,3 +1,4 @@
+#if 0
 /* $Id: command.h 2764 2005-07-31 13:08:08Z bjarni $ */
 
 #ifndef COMMAND_H
