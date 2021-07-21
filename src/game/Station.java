@@ -61,6 +61,36 @@ public class Station implements IPoolItem
 	public static final int INVALID_SLOT = RoadStop.INVALID_SLOT;
 	static public final int INVALID_VEHICLE = Vehicle.INVALID_VEHICLE;
 
+	
+	
+	public static final int FACIL_TRAIN = 1;
+	public static final int FACIL_TRUCK_STOP = 2;
+	public static final int FACIL_BUS_STOP = 4;
+	public static final int FACIL_AIRPORT = 8;
+	public static final int FACIL_DOCK = 0x10;
+
+
+//		public static final int HVOT_PENDING_DELETE = 1<<0; // not needed anymore
+	public static final int HVOT_TRAIN = 1<<1;
+	public static final int HVOT_BUS = 1 << 2;
+	public static final int HVOT_TRUCK = 1 << 3;
+	public static final int HVOT_AIRCRAFT = 1 << 4;
+	public static final int HVOT_SHIP = 1 << 5;
+		/* This bit is used to mark stations. No; it does not belong here; but what
+		 * can we do? ;-) */
+	public static final int HVOT_BUOY = 1 << 6;
+
+	public static final int CA_BUS = 3;
+	public static final int CA_TRUCK = 3;
+	public static final int CA_AIR_OILPAD = 3;
+	public static final int CA_TRAIN = 4;
+	public static final int CA_AIR_HELIPORT = 4;
+	public static final int CA_AIR_SMALL = 4;
+	public static final int CA_AIR_LARGE = 5;
+	public static final int CA_DOCK = 5;
+	public static final int CA_AIR_METRO = 6;
+	public static final int CA_AIR_INTER = 8;
+	
 
 
 	private void StationInitialize(TileIndex tile)
@@ -3090,6 +3120,22 @@ public class Station implements IPoolItem
 	final  TileTypeProcs _tile_type_station_procs = new TileTypeProcs() {
 	};
 
+	
+	
+	/**
+	 * Check if a station really exists.
+	 */
+	public boolean IsValidStation()
+	{
+		return xy != null; /* XXX: Replace by INVALID_TILE someday */
+	}
+	
+	public boolean IsBuoy()
+	{
+		return had_vehicle_of_type & HVOT_BUOY; /* XXX: We should really ditch this ugly coding and switch to something sane... */
+	}
+	
+	
 
 
 	/*

@@ -77,7 +77,7 @@ public abstract class Vehicle implements IPoolItem
 	OrderID cur_order_index; //! The index to the current order
 
 	Order orders;           //! Pointer to the first order for this vehicle
-	OrderID num_orders;      //! How many orders there are in the list
+	OrderID num_orders = new OrderID(0);      //! How many orders there are in the list TODO [dz] its just int?
 
 	Vehicle next_shared;    //! If not null, this points to the next vehicle that shared the order
 	Vehicle prev_shared;    //! If not null, this points to the prev vehicle that shared the order
@@ -572,7 +572,7 @@ public abstract class Vehicle implements IPoolItem
 	}
 
 	/* ERROR FIXME text Returns order 'index' of a vehicle or null when it doesn't exists */
-	private Order GetVehicleOrder(int index)
+	public Order GetVehicleOrder(int index)
 	{
 		Order order = orders;
 
@@ -583,9 +583,11 @@ public abstract class Vehicle implements IPoolItem
 
 		return order;
 	}
-
+	
+	public Order GetVehicleOrder(OrderID id) { return GetVehicleOrder(id.id); }
+	
 	/* Returns the last order of a vehicle, or null if it doesn't exists */
-	private Order GetLastVehicleOrder()
+	public Order GetLastVehicleOrder()
 	{
 		Order order = orders;
 
@@ -621,11 +623,19 @@ public abstract class Vehicle implements IPoolItem
 	/**
 	 * Get the pointer to the vehicle with index 'index'
 	 */
-	private Vehicle getVehicle(VehicleID index)
+	public static Vehicle getVehicle(VehicleID index)
 	{
 		return _vehicle_pool.GetItemFromPool(index.id);
 	}
 
+	/**
+	 * Get the pointer to the vehicle with index 'index'
+	 */
+	public static Vehicle getVehicle(int index)
+	{
+		return _vehicle_pool.GetItemFromPool(index);
+	}
+	
 	/**
 	 * Get the current size of the VehiclePool
 	 */
@@ -639,7 +649,7 @@ public abstract class Vehicle implements IPoolItem
 	 *
 	 * @return Returns true if the vehicle-id is in range
 	 */
-	private static boolean IsVehicleIndex(int index)
+	public static boolean IsVehicleIndex(int index)
 	{
 		return (index >= 0) && (index < GetVehiclePoolSize());
 	}
@@ -2684,6 +2694,229 @@ public abstract class Vehicle implements IPoolItem
 		return unit_num;
 	}
 
+	
+	// ----------------------------- Orders
+	
+	/**
+	 *
+	 * Check if a vehicle has any valid orders
+	 *
+	 * @return false if there are no valid orders
+	 *
+	 */
+	public boolean CheckForValidOrders()
+	{
+		//final Order order;
+		boolean ok = false;
+
+		//FOR_VEHICLE_ORDERS(v, order)
+		/*
+		_order_pool.forEach( (ii,order) ->
+		{
+			if (order.type != OT_DUMMY) ok = true; // TODO return true;
+		});
+		*/
+		
+		for(Order order = orders; order != null; order = order.next )
+			if (order.type != Order.OT_DUMMY) 
+				return true;
+		
+		return false;
+	}
+
+	
+	
+	/**
+	 *
+	 * Delete all orders from a vehicle
+	 *
+	 */
+	public void DeleteVehicleOrders()
+	{
+		Order order, cur;
+
+		/* If we have a shared order-list, don't delete the list, but just
+		    remove our pointer */
+		if (IsOrderListShared()) {
+			final Vehicle u = this;
+
+			orders = null;
+			num_orders = 0;
+
+			/* Unlink ourself */
+			if (prev_shared != null) {
+				prev_shared.next_shared = next_shared;
+				u = prev_shared;
+			}
+			if (next_shared != null) {
+				next_shared.prev_shared = prev_shared;
+				u = next_shared;
+			}
+			prev_shared = null;
+			next_shared = null;
+
+			/* We only need to update this-one, because if there is a third
+			    vehicle which shares the same order-list, nothing will change. If
+			    this is the last vehicle, the last line of the order-window
+			    will change from Shared order list, to Order list, so it needs
+			    an update */
+			u.InvalidateVehicleOrder();
+			return;
+		}
+
+		/* Remove the orders */
+		cur = orders;
+		orders = null;
+		num_orders = 0;
+
+		if (type == VEH_Aircraft) {
+			/* Take out of airport queue
+			 */
+			if(queue_item != null)
+			{
+				queue_item.queue.del(queue_item.queue, this);
+			}
+		}
+
+		order = null;
+		while (cur != null) {
+			if (order != null) {
+				order.type = Order.OT_NOTHING;
+				order.next = null;
+			}
+
+			order = cur;
+			cur = cur.next;
+		}
+
+		if (order != null) {
+			order.type = Order.OT_NOTHING;
+			order.next = null;
+		}
+	}
+	
+	/**
+	 *
+	 * Checks if a vehicle has a GOTO_DEPOT in his order list
+	 *
+	 * @return True if this is true (lol ;))
+	 *
+	 */
+	public boolean VehicleHasDepotOrders()
+	{
+		//final Order order;
+
+		//FOR_VEHICLE_ORDERS(v, order) 
+		for(Order order = orders; order != null; order = order.next )
+		{
+			if (order.type == Order.OT_GOTO_DEPOT)
+				return true;
+		}
+
+		return false;
+	}
+
+	
+	
+	/**
+	 *
+	 * Updates the widgets of a vehicle which contains the order-data
+	 *
+	 */
+	public void InvalidateVehicleOrder()
+	{
+		Window.InvalidateWindow(Window.WC_VEHICLE_VIEW,   index.id);
+		Window.InvalidateWindow(Window.WC_VEHICLE_ORDERS, index.id);
+	}
+	
+	
+	
+	/**
+	 *
+	 * Backup a vehicle order-list, so you can replace a vehicle
+	 *  without loosing the order-list
+	 *
+	 */
+	void BackupVehicleOrders(final Vehicle v, BackuppedOrders bak)
+	{
+		/* Save general info */
+		bak.orderindex       = v.cur_order_index;
+		bak.service_interval = v.service_interval;
+
+		/* Safe custom string, if any */
+		if ((v.string_id.id & 0xF800) != 0x7800) {
+			bak.name = null;
+		} else {
+			bak.name = Global.GetName(v.string_id.id & 0x7FF);
+		}
+
+		/* If we have shared orders, store it on a special way */
+		if (v.IsOrderListShared()) {
+			final Vehicle u = (v.next_shared) ? v.next_shared : v.prev_shared;
+
+			bak.clone = u.index;
+		} else {
+			/* Else copy the orders */
+			//Order dest;
+
+			//dest = bak.order;
+
+			/* We do not have shared orders */
+			bak.clone = INVALID_VEHICLE;
+
+			/* Copy the orders */
+			//FOR_VEHICLE_ORDERS(v, order) 
+			for(Order order = orders; order != null; order = order.next )
+			{
+				//*dest = *order;
+				//dest++;
+				bak.order.add(order);
+			}
+			/* End the list with an OT_NOTHING */
+			dest.type = OT_NOTHING;
+			dest.next = null;
+		}
+	}
+
+	/**
+	 *
+	 * Restore vehicle orders that are backupped via BackupVehicleOrders
+	 *
+	 */
+	void RestoreVehicleOrders(final Vehicle  v, final BackuppedOrders bak)
+	{
+		//int i;
+
+		/* If we have a custom name, process that */
+		if (bak.name != null) {
+			Global._cmd_text = bak.name;
+			DoCommandP(0, v.index, 0, null, CMD_NAME_VEHICLE);
+		}
+
+		/* If we had shared orders, recover that */
+		if (bak.clone != INVALID_VEHICLE) {
+			DoCommandP(0, v.index | (bak.clone << 16), 0, null, CMD_CLONE_ORDER);
+			return;
+		}
+
+		/* CMD_NO_TEST_IF_IN_NETWORK is used here, because CMD_INSERT_ORDER checks if the
+		    order number is one more than the current amount of orders, and because
+		    in network the commands are queued before send, the second insert always
+		    fails in test mode. By bypassing the test-mode, that no longer is a problem. */
+		//for (i = 0; bak.order[i].type != OT_NOTHING; i++)
+		for( Order bo : bak.order)
+		{
+			//if (!DoCommandP(0, v.index + (i << 16), PackOrder(bak.order[i]), null, CMD_INSERT_ORDER | CMD_NO_TEST_IF_IN_NETWORK))
+			if (!DoCommandP(0, v.index + (i << 16), PackOrder(bo), null, CMD_INSERT_ORDER | CMD_NO_TEST_IF_IN_NETWORK))
+				break;
+		}
+
+		/* Restore vehicle order-index and service interval */
+		DoCommandP(0, v.index, bak.orderindex | (bak.service_interval << 16) , null, CMD_RESTORE_ORDER_INDEX);
+	}
+	
+	
+	
 /*
 	// Save and load of vehicles
 	final SaveLoad _common_veh_desc[] = {

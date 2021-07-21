@@ -1966,6 +1966,15 @@ public class Window extends WindowConstants
 		}
 	}
 
+	static void InvalidateWindowClasses(int cls)
+	{
+		//final Window  w;
+
+		for (Window w : _windows) {
+			if (w.window_class.v == cls) w.SetWindowDirty();
+		}
+	}
+	
 
 	static void CallWindowTickEvent()
 	{
@@ -2279,18 +2288,18 @@ public class Window extends WindowConstants
 		case WWT_PANEL_2: {
 			int img;
 
-			DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
+			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
 
 			img = wi.unkA;
 			if (img != 0) { // has an image
 				// show diff image when clicked
 				if ((wi.type & WWT_MASK) == WWT_PANEL_2 && clicked) img++;
 
-				DrawSprite(img, r.left + 1 + clickshift, r.top + 1 + clickshift);
+				Gfx.DrawSprite(img, r.left + 1 + clickshift, r.top + 1 + clickshift);
 			}
 			//goto draw_default;
 			if (disabled) 
-				GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, _color_list[wi.color&0xF].unk2 | PALETTE_MODIFIER_GREYOUT);			
+				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, _color_list[wi.color&0xF].unk2 | PALETTE_MODIFIER_GREYOUT);			
 			break;
 		}
 
@@ -2305,17 +2314,17 @@ public class Window extends WindowConstants
 
 			if ((wi.type&WWT_MASK) == WWT_4 && clicked) str.id++;
 
-			DrawStringCentered(((r.left + r.right + 1) >> 1) + clickshift, ((r.top + r.bottom + 1) >> 1) - 5 + clickshift, str, 0);
+			Gfx.DrawStringCentered(((r.left + r.right + 1) >> 1) + clickshift, ((r.top + r.bottom + 1) >> 1) - 5 + clickshift, str, 0);
 			//DrawStringCentered((r.left + r.right+1)>>1, ((r.top+r.bottom + 1)>>1) - 5, str, 0);
 			//goto draw_default;
 			if (disabled) 
-				GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, _color_list[wi.color&0xF].unk2 | PALETTE_MODIFIER_GREYOUT);			
+				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, _color_list[wi.color&0xF].unk2 | PALETTE_MODIFIER_GREYOUT);			
 			break;
 		}
 
 		case WWT_6: {
 			StringID str;
-			DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, FR_LOWERED | FR_DARKENED);
+			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, FR_LOWERED | FR_DARKENED);
 
 			str = wi.unkA;
 			if (str != null) DrawString(r.left + 2, r.top + 1, str, 0);
@@ -2330,7 +2339,7 @@ public class Window extends WindowConstants
 			int x, amt1, amt2;
 			int color;
 
-			DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
+			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
 
 			c = BitOps.GB(wi.unkA, 0, 8);
 			amt1 = (wi.right - wi.left + 1) / c;
@@ -2381,11 +2390,11 @@ public class Window extends WindowConstants
 
 			// draw up/down buttons
 			clicked = !!((flags4 & (WF_SCROLL_UP | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_UP);
-			DrawFrameRect(r.left, r.top, r.right, r.top + 9, wi.color, (clicked) ? FR_LOWERED : 0);
+			Gfx.DrawFrameRect(r.left, r.top, r.right, r.top + 9, wi.color, (clicked) ? FR_LOWERED : 0);
 			DoDrawString(UPARROW, r.left + 2 + clickshift, r.top + clickshift, 0x10);
 
 			clicked = !!(((flags4 & (WF_SCROLL_DOWN | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_DOWN));
-			DrawFrameRect(r.left, r.bottom - 9, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
+			Gfx.DrawFrameRect(r.left, r.bottom - 9, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
 			DoDrawString(DOWNARROW, r.left + 2 + clickshift, r.bottom - 9 + clickshift, 0x10);
 
 			c1 = _color_list[wi.color&0xF].window_color_1a;
@@ -2401,8 +2410,8 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+7, r.top+10, r.left+7, r.bottom-10, c1);
 			Gfx.GfxFillRect(r.left+8, r.top+10, r.left+8, r.bottom-10, c2);
 
-			pt = HandleScrollbarHittest(&w.vscroll, r.top, r.bottom);
-			DrawFrameRect(r.left, pt.x, r.right, pt.y, wi.color, (w.flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_MIDDLE ? FR_LOWERED : 0);
+			pt = HandleScrollbarHittest(w.vscroll, r.top, r.bottom);
+			Gfx.DrawFrameRect(r.left, pt.x, r.right, pt.y, wi.color, (w.flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_MIDDLE ? FR_LOWERED : 0);
 			break;
 		}
 		case WWT_SCROLL2BAR: {
@@ -2433,7 +2442,7 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+7, r.top+10, r.left+7, r.bottom-10, c1);
 			Gfx.GfxFillRect(r.left+8, r.top+10, r.left+8, r.bottom-10, c2);
 
-			pt = HandleScrollbarHittest(&w.vscroll2, r.top, r.bottom);
+			pt = HandleScrollbarHittest(w.vscroll2, r.top, r.bottom);
 			DrawFrameRect(r.left, pt.x, r.right, pt.y, wi.color, (w.flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_MIDDLE | WF_SCROLL2) ? FR_LOWERED : 0);
 			break;
 		}

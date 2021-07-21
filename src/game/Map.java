@@ -88,7 +88,7 @@ public class Map {
 	Tile* _m = null;
 	*/
 
-	void AllocateMap(int size_x, int size_y)
+	static void AllocateMap(int size_x, int size_y)
 	{
 		// Make sure that the map size is within the limits and that
 		// the x axis size is a power of 2.
@@ -150,7 +150,7 @@ public class Map {
 	#endif
 	*/
 
-	int ScaleByMapSize(int n)
+	static int ScaleByMapSize(int n)
 	{
 		// First shift by 12 to prevent integer overflow for large values of n.
 		// >>12 is safe since the min mapsize is 64x64
@@ -160,7 +160,7 @@ public class Map {
 
 
 	// Scale relative to the circumference of the map
-	int ScaleByMapSize1D(int n)
+	static int ScaleByMapSize1D(int n)
 	{
 		// Normal circumference for the X+Y is 256+256 = 1<<9
 		// Note, not actually taking the full circumference into account,
@@ -171,7 +171,7 @@ public class Map {
 
 
 
-	int DistanceManhattan(TileIndex t0, TileIndex t1)
+	static int DistanceManhattan(TileIndex t0, TileIndex t1)
 	{
 		final int dx = Math.abs(t0.TileX() - t1.TileX());
 		final int dy = Math.abs(t0.TileY() - t1.TileY());
@@ -179,7 +179,7 @@ public class Map {
 	}
 
 
-	int DistanceSquare(TileIndex t0, TileIndex t1)
+	static int DistanceSquare(TileIndex t0, TileIndex t1)
 	{
 		final int dx = t0.TileX() - t1.TileX();
 		final int dy = t0.TileY() - t1.TileY();
@@ -187,7 +187,7 @@ public class Map {
 	}
 
 
-	int DistanceMax(TileIndex t0, TileIndex t1)
+	static int DistanceMax(TileIndex t0, TileIndex t1)
 	{
 		final int dx = Math.abs(t0.TileX() - t1.TileX());
 		final int dy = Math.abs(t0.TileY() - t1.TileY());
@@ -195,14 +195,14 @@ public class Map {
 	}
 
 
-	int DistanceMaxPlusManhattan(TileIndex t0, TileIndex t1)
+	static int DistanceMaxPlusManhattan(TileIndex t0, TileIndex t1)
 	{
 		final int dx = Math.abs(t0.TileX() - t1.TileX());
 		final int dy = Math.abs(t0.TileY() - t1.TileY());
 		return dx > dy ? 2 * dx + dy : 2 * dy + dx;
 	}
 
-	int DistanceFromEdge(TileIndex tile)
+	static int DistanceFromEdge(TileIndex tile)
 	{
 		final int xl = tile.TileX();
 		final int yl = tile.TileY();

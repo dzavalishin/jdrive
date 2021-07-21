@@ -61,6 +61,7 @@ public class Global {
 	public static int _map_size;
 
 
+	public static String _cmd_text = null;
 	
 	//public static StringID _error_message;
 	//public static StringID _error_message_2;

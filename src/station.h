@@ -94,7 +94,7 @@ struct Station {
 	byte blocked_months_obsolete;
 };
 */
-
+/*
 enum {
 	FACIL_TRAIN = 1,
 	FACIL_TRUCK_STOP = 2,
@@ -110,8 +110,8 @@ enum {
 	HVOT_TRUCK = 1 << 3,
 	HVOT_AIRCRAFT = 1 << 4,
 	HVOT_SHIP = 1 << 5,
-	/* This bit is used to mark stations. No, it does not belong here, but what
-	 * can we do? ;-) */
+	//* This bit is used to mark stations. No, it does not belong here, but what
+	// * can we do? ;-) * /
 	HVOT_BUOY = 1 << 6
 };
 
@@ -127,7 +127,7 @@ enum {
 	CA_AIR_METRO = 6,
 	CA_AIR_INTER = 8,
 };
-
+*/
 void ModifyStationRatingAround(TileIndex tile, PlayerID owner, int amount, uint radius);
 
 TileIndex GetStationTileForVehicle(const Vehicle *v, const Station *st);
@@ -215,7 +215,7 @@ uint GetNumRoadStops(const Station *st, RoadStopType type);
 RoadStop * GetPrimaryRoadStop(const Station *st, RoadStopType type);
 RoadStop * AllocateRoadStop( void );
 void ClearSlot(Vehicle *v, RoadStop *rs);
-
+/*
 static inline bool IsTrainStationTile(TileIndex tile)
 {
 	return IsTileType(tile, MP_STATION) && IS_BYTE_INSIDE(_m[tile].m5, 0, 8);
@@ -236,22 +236,22 @@ static inline bool IsRoadStationTile(TileIndex tile) {
 
 /**
  * Check if a station really exists.
- */
+ * /
 static inline bool IsValidStation(const Station *st)
 {
-	return st->xy != 0; /* XXX: Replace by INVALID_TILE someday */
+	return st->xy != 0; // XXX: Replace by INVALID_TILE someday  
 }
 
 static inline bool IsBuoy(const Station* st)
 {
-	return st->had_vehicle_of_type & HVOT_BUOY; /* XXX: We should really ditch this ugly coding and switch to something sane... */
+	return st->had_vehicle_of_type & HVOT_BUOY; // XXX: We should really ditch this ugly coding and switch to something sane... 
 }
 
 static inline bool IsBuoyTile(TileIndex tile)
 {
 	return IsTileType(tile, MP_STATION) && _m[tile].m5 == 0x52;
 }
-
+*/
 static inline bool TileBelongsToRailStation(const Station *st, TileIndex tile)
 {
 	return IsTileType(tile, MP_STATION) && _m[tile].m2 == st->index && _m[tile].m5 < 8;

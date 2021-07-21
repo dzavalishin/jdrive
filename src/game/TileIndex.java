@@ -7,7 +7,7 @@ import game.util.BitOps;
 public class TileIndex {
 	private int tile;
 
-	
+
 	/**
 	 * Iterate over a tiles rectangle.
 	 * 
@@ -21,8 +21,8 @@ public class TileIndex {
 	public static void forAll( int w, int h, int tile, Consumer<TileIndex> c )
 	{
 		//TileIndex ti = new TileIndex(tile);
-	
-		                      
+
+
 		{                                                        
 			int h_cur = h;                                         
 			int var = tile;                                       
@@ -33,18 +33,18 @@ public class TileIndex {
 					//ti.tile = var;
 					//c.accept(ti);
 					c.accept( new TileIndex(var) );
-	                     
+
 					++var;
 				} while ( --w_cur != 0);
 				//int diff = (y * Global.MapSizeX()) + x);
 				var += Global.MapSizeX() - w;
-			//} while (var += TileDiffXY(0, 1) - (w), --h_cur != 0);				
+				//} while (var += TileDiffXY(0, 1) - (w), --h_cur != 0);				
 			} while ( --h_cur != 0); 
 		}
-		
-		
+
+
 	}
-	
+
 	public TileIndex sub(TileIndexDiff diff)
 	{
 		tile -= diff.diff;
@@ -56,7 +56,7 @@ public class TileIndex {
 		tile += diff.diff;
 		return this;
 	}
-	
+
 	/** static  TileIndex TileXY(int x, int y)
 	 * 
 	 * @param x
@@ -74,23 +74,23 @@ public class TileIndex {
 		return new TileIndex(x, y);
 	}
 
-	
+
 	public TileIndex(TileIndex src)
 	{
 		tile = src.tile;
 	}
-	
-	
+
+
 	// TODO rename to getTileIndex
 	public int getTile() {
 		return tile;
 	}
-	
+
 	public Tile getMap()
 	{
 		return Global._m[tile];
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TileIndex) {
@@ -99,14 +99,14 @@ public class TileIndex {
 		}
 		return super.equals(obj);
 	}
-	
+
 	public TileIndex(int tile)
 	{
 		this.tile = tile;
 	}
-	
+
 	public static TileIndex INVALID_TILE = new TileIndex(-1);
-	
+
 	int TileX()
 	{
 		return tile & Global.MapMaxX();
@@ -116,7 +116,7 @@ public class TileIndex {
 	{
 		return tile >> Global.MapLogX();
 	}
-	
+
 	static boolean CorrectZ(int tileh)
 	{
 		/* tile height must be corrected if the north corner is not raised, but
@@ -124,7 +124,7 @@ public class TileIndex {
 		return BitOps.IS_INT_INSIDE(tileh, 1, 8);
 	}
 
-	
+
 	void SetMapExtraBits(int i)
 	{
 		//assert(tile < Global.MapSize());
@@ -137,8 +137,8 @@ public class TileIndex {
 		return BitOps.GB(Global._m[tile].extra, 0, 2);
 	}
 
-	
-	
+
+
 	int GetTileSlope(IntContainer h)
 	{
 		int a;
@@ -182,7 +182,7 @@ public class TileIndex {
 		return h.v;
 	}
 
-	
+
 	// This function checks if we add addx/addy to tile, if we
 	//  do wrap around the edges. For example, tile = (10,2) and
 	//  addx = +3 and addy = -4. This function will now return
@@ -202,14 +202,14 @@ public class TileIndex {
 	}
 
 
-	
+
 	final static TileIndexDiffC _tileoffs_by_dir[] = {
 			new TileIndexDiffC( -1,  0),
 			new TileIndexDiffC(  0,  1),
 			new TileIndexDiffC(  1,  0),
 			new TileIndexDiffC(  0, -1)
-		};
-	
+	};
+
 
 	static  TileIndexDiff TileOffsByDir(int dir)
 	{
@@ -218,7 +218,7 @@ public class TileIndex {
 		assert(dir < _tileoffs_by_dir.length);
 		return TileIndex.ToTileIndexDiff(_tileoffs_by_dir[dir]);
 	}
-	
+
 
 	static  TileIndexDiffC TileIndexDiffCByDir(int dir) {
 		//extern final TileIndexDiffC _tileoffs_by_dir[4];
@@ -236,17 +236,17 @@ public class TileIndex {
 		else
 			return TileXY(x, y);
 	}
-	
-	
-	
+
+
+
 	/*
 	static  TileIndex TileXY(int x, int y)
 	{
 		return new TileIndex( (y * Global.MapSizeX()) + x );
 	}
-	*/
-	
-	
+	 */
+
+
 	/* Approximation of the length of a straight track, relative to a diagonal
 	 * track (ie the size of a tile side). #defined instead of const so it can
 	 * stay integer. (no runtime float operations) Is this needed?
@@ -254,13 +254,13 @@ public class TileIndex {
 	 * rounding! Be careful when using this!
 	 * This value should be sqrt(2)/2 ~ 0.7071 */
 	public static int STRAIGHT_TRACK_LENGTH = Map.STRAIGHT_TRACK_LENGTH;
-	
 
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	static TileIndexDiff TileDiffXY(int x, int y)
 	{
 		// Multiplication gives much better optimization on MSVC than shifting.
@@ -269,15 +269,15 @@ public class TileIndex {
 		// in any actual multiplication in the assembly code..
 		return new TileIndexDiff((y * Global.MapSizeX()) + x);
 	}
-	
-	
-	
+
+
+
 	static TileIndex TileVirtXY(int x, int y)
 	{
 		return new TileIndex((y >> 4 << Global.MapLogX()) + (x >> 4));
 	}
-	
-	
+
+
 	int TileHeight()
 	{
 		//assert(tile < MapSize());
@@ -295,7 +295,7 @@ public class TileIndex {
 	{
 		return TileHeight() * 8;
 	}
-	
+
 	static  boolean IsSteepTileh(int tileh)
 	{
 		return 0 != (tileh & 0x10);
@@ -331,7 +331,7 @@ public class TileIndex {
 	{
 		return GetTileType() == type;
 	}
-	
+
 	boolean IsTunnelTile()
 	{
 		return IsTileType(TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(Global._m[tile].m5, 4, 4) == 0;
@@ -362,17 +362,17 @@ public class TileIndex {
 		return GetTileOwner() == owner;
 	}
 
-	
+
 	public static TileIndexDiff ToTileIndexDiff(TileIndexDiffC tidc)
 	{
 		return new TileIndexDiff((tidc.y << Global.MapLogX()) + tidc.x);
 	}
 
-	
+
 	public static int TILE_MASK(int x) { return (x & Global._map_tile_mask); }
 	public void TILE_ASSERT(int x) { assert TILE_MASK(x) == x; }
 
-	
+
 	public void clrBit_m1(int i) {		Global._m[tile].m1 = BitOps.RETCLRBIT(Global._m[tile].m1, i);	}
 	public void setBit_m1(int i) {		Global._m[tile].m1 = BitOps.RETSETBIT(Global._m[tile].m1, i);	}
 
@@ -393,6 +393,33 @@ public class TileIndex {
 		return this;
 	}
 
+
+
+	public boolean IsTrainStationTile()
+	{
+		return IsTileType(TileTypes.MP_STATION) && BitOps.IS_BYTE_INSIDE(getMap().m5, (byte)0, (byte)8);
+	}
+
+	public boolean IsCompatibleTrainStationTile(TileIndex ref)
+	{
+		assert(ref.IsTrainStationTile());
+		return
+				IsTrainStationTile() &&
+				BitOps.GB(getMap().m3, 0, 4) == BitOps.GB(ref.getMap().m3, 0, 4) && // same rail type?
+				BitOps.GB(getMap().m5, 0, 1) == BitOps.GB(ref.getMap().m5, 0, 1);   // same direction?
+	}
+
+	public boolean IsRoadStationTile() {
+		return IsTileType(TileTypes.MP_STATION) && BitOps.IS_INT_INSIDE(getMap().m5, 0x43, 0x4B);
+	}
+
+
+	public boolean IsBuoyTile()
+	{
+		return IsTileType(TileTypes.MP_STATION) && getMap().m5 == 0x52;
+	}
+	
+	
 }
 
 
@@ -408,7 +435,7 @@ enum TileTypes {
 	MP_INDUSTRY,
 	MP_TUNNELBRIDGE,
 	MP_UNMOVABLE;
-	
+
 	static TileTypes[] values = values();
-	
+
 }

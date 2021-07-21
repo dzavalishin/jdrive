@@ -91,8 +91,8 @@ typedef struct Order {
 } Order;
 */
 
-#define MAX_BACKUP_ORDER_COUNT 40
-
+//#define MAX_BACKUP_ORDER_COUNT 40
+/*
 typedef struct {
 	VehicleID clone;
 	OrderID orderindex;
@@ -100,15 +100,15 @@ typedef struct {
 	uint16 service_interval;
 	char name[32];
 } BackuppedOrders;
-
+*/
 VARDEF TileIndex _backup_orders_tile;
 VARDEF BackuppedOrders _backup_orders_data[1];
 
-extern MemoryPool _order_pool;
+//extern MemoryPool _order_pool;
 
 /**
  * Get the pointer to the order with index 'index'
- */
+ * /
 static inline Order *GetOrder(uint index)
 {
 	return (Order*)GetItemFromPool(&_order_pool, index);
