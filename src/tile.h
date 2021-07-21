@@ -50,6 +50,7 @@ uint GetMapExtraBits(TileIndex tile);
 uint GetTileSlope(TileIndex tile, uint *h);
 uint GetTileZ(TileIndex tile);
 
+/*
 static inline bool CorrectZ(uint tileh)
 {
 	/* tile height must be corrected if the north corner is not raised, but

@@ -178,9 +178,9 @@ char *GetName(int id, char *buff);
 
 // AllocateNameUnique also tests if the name used is not used anywere else
 //  and if it is used, it returns an error.
-#define AllocateNameUnique(name, skip) RealAllocateName(name, skip, true)
-#define AllocateName(name, skip) RealAllocateName(name, skip, false)
-StringID RealAllocateName(const char *name, byte skip, bool check_double);
+//#define AllocateNameUnique(name, skip) RealAllocateName(name, skip, true)
+//#define AllocateName(name, skip) RealAllocateName(name, skip, false)
+//StringID RealAllocateName(const char *name, byte skip, bool check_double);
 void ConvertDayToYMD(YearMonthDay *ymd, uint16 date);
 uint ConvertYMDToDay(uint year, uint month, uint day);
 uint ConvertIntDate(uint date);

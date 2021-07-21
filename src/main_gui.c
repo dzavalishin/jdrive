@@ -2391,7 +2391,7 @@ static void MainWindowWndProc(Window *w, WindowEvent *e) {
 
 void ShowSelectGameWindow(void);
 extern void ShowJoinStatusWindowAfterJoin(void);
-
+/*
 void SetupColorsAndInitialWindow(void)
 {
 	uint i;
@@ -2421,7 +2421,7 @@ void SetupColorsAndInitialWindow(void)
 
 		ShowVitalWindows();
 
-		/* Bring joining GUI to front till the client is really joined */
+		/* Bring joining GUI to front till the client is really joined * /
 		if (_networking && !_network_server)
 			ShowJoinStatusWindowAfterJoin();
 
@@ -2440,7 +2440,7 @@ void SetupColorsAndInitialWindow(void)
 		NOT_REACHED();
 	}
 }
-
+*/
 void ShowVitalWindows(void)
 {
 	Window *w;

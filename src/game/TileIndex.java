@@ -117,6 +117,13 @@ public class TileIndex {
 		return tile >> Global.MapLogX();
 	}
 	
+	static boolean CorrectZ(int tileh)
+	{
+		/* tile height must be corrected if the north corner is not raised, but
+		 * any other corner is. These are the cases 1 till 7 */
+		return BitOps.IS_INT_INSIDE(tileh, 1, 8);
+	}
+
 	
 	void SetMapExtraBits(int i)
 	{

@@ -837,7 +837,7 @@ public class Station implements IPoolItem
 
 		TileIndex.forAll(w, h, tile, (tile_cur) -> {
 
-			if (!EnsureNoVehicle(tile_cur)) return CMD_ERROR;
+			if (!Vehicle.EnsureNoVehicle(tile_cur)) return CMD_ERROR;
 
 			IntPointer zp = new IntPointer(); 
 			tileh = tile_cur.GetTileSlope(zp);

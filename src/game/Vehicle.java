@@ -7,6 +7,7 @@ import game.util.BitOps;
 public abstract class Vehicle implements IPoolItem 
 {
 	static public final int INVALID_VEHICLE = -1; //0xFFFF; // TODO -1?
+	static public final int INVALID_ENGINE  = -1;
 	private static final int INVALID_COORD = -0x8000;
 
 
@@ -340,7 +341,7 @@ public abstract class Vehicle implements IPoolItem
 			Global.DeleteName(v.string_id);
 			v.type = 0;
 			UpdateVehiclePosHash(v, INVALID_COORD, 0);
-			v.next_hash = Vehicle.INVALID_VEHICLE;
+			v.next_hash = new VehicleID(Vehicle.INVALID_VEHICLE);
 
 			if (v.orders != null)
 				v.DeleteVehicleOrders();
@@ -658,7 +659,7 @@ public abstract class Vehicle implements IPoolItem
 	
 	
 
-	#define INVALID_COORD (-0x8000)
+	//public static final int INVALID_COORD = (-0x8000);
 	//#define GEN_HASH(x,y) (((x & 0x1F80)>>7) + ((y & 0xFC0)))
 
 	/*
@@ -668,9 +669,10 @@ public abstract class Vehicle implements IPoolItem
 	 *	VEH_Train is used as an offset because the vehicle type values doesn't start with 0
 	 */
 
-	#define CMD_BUILD_VEH(x)		   _veh_build_proc_table[ x - VEH_Train]
-	#define CMD_SELL_VEH(x)				_veh_sell_proc_table[ x - VEH_Train]
-	#define CMD_REFIT_VEH(x)		   _veh_refit_proc_table[ x - VEH_Train]
+	// TODO used?
+	//#define CMD_BUILD_VEH(x)		   _veh_build_proc_table[ x - VEH_Train]
+	//#define CMD_SELL_VEH(x)				_veh_sell_proc_table[ x - VEH_Train]
+	//#define CMD_REFIT_VEH(x)		   _veh_refit_proc_table[ x - VEH_Train]
 
 	static final int _veh_build_proc_table[] = {
 		CMD_BUILD_RAIL_VEHICLE,
@@ -731,7 +733,7 @@ public abstract class Vehicle implements IPoolItem
 		if( 0 != (vehstatus & VS_CRASHED) )
 			return false; /* Crashed vehicles don't need service anymore */
 
-		if (Player.GetPlayer(owner).engine_replacement[engine_type] != INVALID_ENGINE)
+		if (Player.GetPlayer(owner).engine_replacement[engine_type.id].id != INVALID_ENGINE)
 			return true; /* Vehicle is due to be replaced */
 
 		if (Global._patches.no_servicing_if_no_breakdowns && Global._opt.diff.vehicle_breakdowns == 0)
@@ -781,7 +783,7 @@ public abstract class Vehicle implements IPoolItem
 	{
 		// needs z correction for slope-type graphics that have the NORTHERN tile lowered
 		// 1, 2, 3, 4, 5, 6 and 7
-		return CorrectZ(tileh) ? 8 : 0;
+		return TileIndex.CorrectZ(tileh) ? 8 : 0;
 	}
 
 	public static int GetCorrectTileHeight(TileIndex tile)
@@ -793,7 +795,7 @@ public abstract class Vehicle implements IPoolItem
 	{
 		TileInfo ti = new TileInfo();
 
-		FindLandscapeHeightByTile(ti, tile);
+		Landscape.FindLandscapeHeightByTile(ti, tile);
 		ti.z = z + Correct_Z(ti.tileh);
 
 		return VehicleFromPos(tile, ti, Vehicle::EnsureNoVehicleProcZ) == null;
@@ -806,32 +808,37 @@ public abstract class Vehicle implements IPoolItem
 		ti.tile = tile;
 		ti.z = z;
 
-		return VehicleFromPos(tile, ti, Vehicle::EnsureNoVehicleProcZ);
+		return (Vehicle) VehicleFromPos(tile, ti, Vehicle::EnsureNoVehicleProcZ);
 	}
 
 	public static Vehicle FindVehicleBetween(TileIndex from, TileIndex to, byte z)
 	{
-		int x1 = TileX(from);
-		int y1 = TileY(from);
-		int x2 = TileX(to);
-		int y2 = TileY(to);
-		Vehicle veh;
+		int x1 = from.TileX();
+		int y1 = from.TileY();
+		int x2 = to.TileX();
+		int y2 = to.TileY();
+		Vehicle ret = null;
 
 		/* Make sure x1 < x2 or y1 < y2 */
 		if (x1 > x2 || y1 > y2) {
-			intswap(x1,x2);
-			intswap(y1,y2);
+			int t;
+			t = x1; x1 = x2; x2 = t;
+			t = y1; y1 = y2; y2 = t;
+			//intswap(x1,x2);
+			//intswap(y1,y2);
 		}
-		FOR_ALL_VEHICLES(veh) 
+		//FOR_ALL_VEHICLES(veh)
+		_vehicle_pool.forEach( (ii,veh) ->
 		{
 			if ((veh.type == VEH_Train || veh.type == VEH_Road) && (z==0xFF || veh.z_pos == z)) {
 				if ((veh.x_pos>>4) >= x1 && (veh.x_pos>>4) <= x2 &&
 						(veh.y_pos>>4) >= y1 && (veh.y_pos>>4) <= y2) {
-					return veh;
+					ret = veh;
 				}
 			}
-		}
-		return null;
+		});
+		
+		return ret;
 	}
 
 	/*
@@ -856,9 +863,10 @@ public abstract class Vehicle implements IPoolItem
 	// Called after load to update coordinates
 	public static void AfterLoadVehicles()
 	{
-		Vehicle v;
+		//Vehicle v;
 
-		FOR_ALL_VEHICLES(v) 
+		//FOR_ALL_VEHICLES(v)
+		_vehicle_pool.forEach( (ii,v) ->
 		{
 			v.first = null;
 			if (v.type != 0) {
@@ -876,12 +884,12 @@ public abstract class Vehicle implements IPoolItem
 				}
 
 				v.left_coord = INVALID_COORD;
-				VehiclePositionChanged(v);
+				v.VehiclePositionChanged();
 
-				if (v.type == VEH_Train && (IsFrontEngine(v) || IsFreeWagon(v)))
+				if (v.type == VEH_Train && (v.IsFrontEngine() || v.IsFreeWagon()))
 					TrainConsistChanged(v);
 			}
-		}
+		});
 	}
 
 	private static Vehicle InitializeVehicle(Vehicle v)
@@ -898,8 +906,8 @@ public abstract class Vehicle implements IPoolItem
 		v.left_coord = INVALID_COORD;
 		v.first = null;
 		v.next = null;
-		v.next_hash = INVALID_VEHICLE;
-		v.string_id = 0;
+		v.next_hash = new VehicleID(INVALID_VEHICLE);
+		v.string_id = null;
 		v.next_shared = null;
 		v.prev_shared = null;
 		v.depot_list  = null;
@@ -924,18 +932,20 @@ public abstract class Vehicle implements IPoolItem
 		 * BLOCKS_FOR_SPECIAL_VEHICLES times block_size vehicles that may only
 		 * be used for special vehicles.. should work nicely :) */
 
-		Vehicle v;
+		Vehicle ret = null;
 
-		FOR_ALL_VEHICLES(v) {
-			/* No more room for the special vehicles, return null */
-			if (v.index >= (1 << _vehicle_pool.block_size_bits) * BLOCKS_FOR_SPECIAL_VEHICLES)
-				return null;
+		//FOR_ALL_VEHICLES(v)
+		_vehicle_pool.forEach( (ii,v) ->
+		{
+			/* TODO speedup No more room for the special vehicles, return null */
+			//if (v.index >= (1 << _vehicle_pool.block_size_bits) * BLOCKS_FOR_SPECIAL_VEHICLES)
+			//	return null;
 
 			if (v.type == 0)
-				return InitializeVehicle(v);
-		}
+				ret = InitializeVehicle(v);
+		});
 
-		return null;
+		return ret;
 	}
 
 	/*
@@ -953,9 +963,10 @@ public abstract class Vehicle implements IPoolItem
 		Vehicle v;
 		final int offset = (1 << VEHICLES_POOL_BLOCK_SIZE_BITS) * BLOCKS_FOR_SPECIAL_VEHICLES;
 
-		if (skip_vehicles[0] < (_vehicle_pool.total_items - offset)) {	// make sure the offset in the array is not larger than the array itself
+		if (skip_vehicles[0].id < (_vehicle_pool.total_items() - offset)) 
+		{	// make sure the offset in the array is not larger than the array itself
 			FOR_ALL_VEHICLES_FROM(v, offset + skip_vehicles[0]) {
-				skip_vehicles[0]++;
+				skip_vehicles[0].id++;
 				if (v.type == 0)
 					return InitializeVehicle(v);
 			}
@@ -971,7 +982,7 @@ public abstract class Vehicle implements IPoolItem
 
 	Vehicle AllocateVehicle()
 	{
-		VehicleID[] counter = { 0 ); // TODO not static?
+		VehicleID[] counter = { new VehicleID(0) }; // TODO not static?
 		return AllocateSingleVehicle(counter);
 	}
 
@@ -985,7 +996,7 @@ public abstract class Vehicle implements IPoolItem
 	{
 		int i;
 		Vehicle v;
-		VehicleID[] counter = { 0 };
+		VehicleID[] counter = { new VehicleID(0) };
 
 		for(i = 0; i != num; i++) {
 			v = AllocateSingleVehicle(counter);
@@ -1080,20 +1091,21 @@ public abstract class Vehicle implements IPoolItem
 		}
 	}
 	*/
-	void InitializeVehicles()
+	public static void InitializeVehicles()
 	{
 		int i;
 
 		/* Clean the vehicle pool, and reserve enough blocks
 		 *  for the special vehicles, plus one for all the other
 		 *  vehicles (which is increased on-the-fly) */
-		CleanPool(&_vehicle_pool);
-		AddBlockToPool(&_vehicle_pool);
+		_vehicle_pool.CleanPool();
+		_vehicle_pool.AddBlockToPool();
+		
 		for (i = 0; i < BLOCKS_FOR_SPECIAL_VEHICLES; i++)
-			AddBlockToPool(&_vehicle_pool);
+			_vehicle_pool.AddBlockToPool();
 
 		// clear it...
-		memset(_vehicle_position_hash, -1, sizeof(_vehicle_position_hash));
+		//memset(_vehicle_position_hash, -1, sizeof(_vehicle_position_hash));
 	}
 
 	Vehicle GetLastVehicleInChain(Vehicle v)
@@ -1125,18 +1137,18 @@ public abstract class Vehicle implements IPoolItem
 	 * While this function is fast, it cannot be used in the GetFirstVehicleInChain
 	 * function, otherwise you'll end up in an infinite loop call
 	 */
-	Vehicle GetPrevVehicleInChain(final Vehicle v)
+	public Vehicle GetPrevVehicleInChain()
 	{
 		Vehicle u;
-		assert(v != null);
+		//assert(v != null);
 
-		u = GetFirstVehicleInChain(v);
+		u = GetFirstVehicleInChain();
 
 	 	// Check to see if this is the first
-		if (v == u) return null;
+		if (this == u) return null;
 
 		do {
-			if (u.next == v) return u;
+			if (u.next == this) return u;
 		} while ( ( u = u.next) != null);
 
 		return null;
@@ -1260,18 +1272,20 @@ public abstract class Vehicle implements IPoolItem
 
 	void CallVehicleTicks()
 	{
-		Vehicle v;
+		//Vehicle v;
 
 		_first_veh_in_depot_list = null;	// now we are sure it's initialized at the start of each tick
 
-		FOR_ALL_VEHICLES(v) {
+		//FOR_ALL_VEHICLES(v)
+		_vehicle_pool.forEach( (ii,v) ->
+		{
 			if (v.type != 0) {
-				_vehicle_tick_procs[v.type - 0x10](v);
+				_vehicle_tick_procs[v.type - 0x10].apply(v);
 			}
-		}
+		});
 
 		// now we handle all the vehicles that entered a depot this tick
-		v = _first_veh_in_depot_list;
+		Vehicle v = _first_veh_in_depot_list;
 		while (v != null) {
 			Vehicle w = v.depot_list;
 			v.depot_list = null;	// it should always be null at the end of each tick
@@ -1311,17 +1325,17 @@ public abstract class Vehicle implements IPoolItem
 	{
 		TileIndex tile = v.tile;
 
-		if (IsTileType(tile, MP_STATION) ||
+		if (tile.IsTileType(TileTypes.MP_STATION) ||
 				(v.type == VEH_Ship && (
-					IsTileType(TILE_ADDXY(tile,  1,  0), MP_STATION) ||
-					IsTileType(TILE_ADDXY(tile, -1,  0), MP_STATION) ||
-					IsTileType(TILE_ADDXY(tile,  0,  1), MP_STATION) ||
-					IsTileType(TILE_ADDXY(tile,  0, -1), MP_STATION) ||
-					IsTileType(TILE_ADDXY(tile, -2,  0), MP_STATION)
+					tile.add(TileIndex.TileDiffXY(1,  0)).IsTileType(TileTypes.MP_STATION) ||
+					tile.add(TileIndex.TileDiffXY(-1, 0)).IsTileType(TileTypes.MP_STATION) ||
+					tile.add(TileIndex.TileDiffXY(0,  1)).IsTileType(TileTypes.MP_STATION) ||
+					tile.add(TileIndex.TileDiffXY(0, -1)).IsTileType(TileTypes.MP_STATION) ||
+					tile.add(TileIndex.TileDiffXY(-2, 0)).IsTileType(TileTypes.MP_STATION)
 				))) {
 
 			// If patch is active, use alternative CanFillVehicle-function
-			if (_patches.full_load_any)
+			if (Global._patches.full_load_any)
 				return CanFillVehicle_FullLoadAny(v);
 
 			do {
@@ -1347,10 +1361,10 @@ public abstract class Vehicle implements IPoolItem
 	{
 		int image = v.cur_image;
 
-		if (v.vehstatus & VS_DISASTER) {
+		if(0!=(v.vehstatus & VS_DISASTER)) {
 			MAKE_TRANSPARENT(image);
-		} else if (v.vehstatus & VS_DEFPAL) {
-			image |= (v.vehstatus & VS_CRASHED) ? PALETTE_CRASH : SPRITE_PALETTE(PLAYER_SPRITE_COLOR(v.owner));
+		} else if( 0 != (v.vehstatus & VS_DEFPAL) ) {
+			image |= (0!=(v.vehstatus & VS_CRASHED)) ? Sprite.PALETTE_CRASH : SPRITE_PALETTE(PLAYER_SPRITE_COLOR(v.owner));
 		}
 
 		AddSortableSpriteToDraw(image, v.x_pos + v.x_offs, v.y_pos + v.y_offs,
@@ -1373,7 +1387,7 @@ public abstract class Vehicle implements IPoolItem
 			xb = x;
 			for(;;) {
 				veh = _vehicle_position_hash[(x + y) & 0xFFFF];
-				while (veh != INVALID_VEHICLE) {
+				while(veh.id != INVALID_VEHICLE) {
 					v = GetVehicle(veh);
 
 					if (!(v.vehstatus & VS_HIDDEN) &&
@@ -1414,27 +1428,27 @@ public abstract class Vehicle implements IPoolItem
 
 			BeginVehicleMove(v);
 
-			tile = TileVirtXY(v.x_pos, v.y_pos);
-			if (!IsTileType(tile, MP_INDUSTRY)) {
+			tile = TileIndex.TileVirtXY(v.x_pos, v.y_pos);
+			if (!tile.IsTileType(TileTypes.MP_INDUSTRY)) {
 				EndVehicleMove(v);
 				DeleteVehicle(v);
 				return;
 			}
 
-			if (v.cur_image != SPR_CHIMNEY_SMOKE_7) {
+			if (v.cur_image != Sprite.SPR_CHIMNEY_SMOKE_7) {
 				v.cur_image++;
 			} else {
-				v.cur_image = SPR_CHIMNEY_SMOKE_0;
+				v.cur_image = Sprite.SPR_CHIMNEY_SMOKE_0;
 			}
 			v.progress = 7;
-			VehiclePositionChanged(v);
+			v.VehiclePositionChanged();
 			EndVehicleMove(v);
 		}
 	}
 
 	static void SteamSmokeInit(Vehicle v)
 	{
-		v.cur_image = SPR_STEAM_SMOKE_0;
+		v.cur_image = Sprite.SPR_STEAM_SMOKE_0;
 		v.progress = 12;
 	}
 
@@ -1452,7 +1466,7 @@ public abstract class Vehicle implements IPoolItem
 		}
 
 		if ((v.progress & 0xF) == 4) {
-			if (v.cur_image != SPR_STEAM_SMOKE_4) {
+			if (v.cur_image != Sprite.SPR_STEAM_SMOKE_4) {
 				v.cur_image++;
 			} else {
 				EndVehicleMove(v);
@@ -1463,14 +1477,14 @@ public abstract class Vehicle implements IPoolItem
 		}
 
 		if (moved) {
-			VehiclePositionChanged(v);
+			v.VehiclePositionChanged();
 			EndVehicleMove(v);
 		}
 	}
 
 	static void DieselSmokeInit(Vehicle v)
 	{
-		v.cur_image = SPR_DIESEL_SMOKE_0;
+		v.cur_image = Sprite.SPR_DIESEL_SMOKE_0;
 		v.progress = 0;
 	}
 
@@ -1481,13 +1495,13 @@ public abstract class Vehicle implements IPoolItem
 		if ((v.progress & 3) == 0) {
 			BeginVehicleMove(v);
 			v.z_pos++;
-			VehiclePositionChanged(v);
+			v.VehiclePositionChanged();
 			EndVehicleMove(v);
 		} else if ((v.progress & 7) == 1) {
 			BeginVehicleMove(v);
-			if (v.cur_image != SPR_DIESEL_SMOKE_5) {
+			if (v.cur_image != Sprite.SPR_DIESEL_SMOKE_5) {
 				v.cur_image++;
-				VehiclePositionChanged(v);
+				v.VehiclePositionChanged();
 				EndVehicleMove(v);
 			} else {
 				EndVehicleMove(v);
@@ -1498,7 +1512,7 @@ public abstract class Vehicle implements IPoolItem
 
 	static void ElectricSparkInit(Vehicle v)
 	{
-		v.cur_image = SPR_ELECTRIC_SPARK_0;
+		v.cur_image = Sprite.SPR_ELECTRIC_SPARK_0;
 		v.progress = 1;
 	}
 
@@ -1509,9 +1523,9 @@ public abstract class Vehicle implements IPoolItem
 		} else {
 			v.progress = 0;
 			BeginVehicleMove(v);
-			if (v.cur_image != SPR_ELECTRIC_SPARK_5) {
+			if (v.cur_image != Sprite.SPR_ELECTRIC_SPARK_5) {
 				v.cur_image++;
-				VehiclePositionChanged(v);
+				v.VehiclePositionChanged();
 				EndVehicleMove(v);
 			} else {
 				EndVehicleMove(v);
@@ -1522,7 +1536,7 @@ public abstract class Vehicle implements IPoolItem
 
 	static void SmokeInit(Vehicle v)
 	{
-		v.cur_image = SPR_SMOKE_0;
+		v.cur_image = Sprite.SPR_SMOKE_0;
 		v.progress = 12;
 	}
 
@@ -1540,7 +1554,7 @@ public abstract class Vehicle implements IPoolItem
 		}
 
 		if ((v.progress & 0xF) == 4) {
-			if (v.cur_image != SPR_SMOKE_4) {
+			if (v.cur_image != Sprite.SPR_SMOKE_4) {
 				v.cur_image++;
 			} else {
 				EndVehicleMove(v);
@@ -1551,14 +1565,14 @@ public abstract class Vehicle implements IPoolItem
 		}
 
 		if (moved) {
-			VehiclePositionChanged(v);
+			v.VehiclePositionChanged();
 			EndVehicleMove(v);
 		}
 	}
 
 	static void ExplosionLargeInit(Vehicle v)
 	{
-		v.cur_image = SPR_EXPLOSION_LARGE_0;
+		v.cur_image = Sprite.SPR_EXPLOSION_LARGE_0;
 		v.progress = 0;
 	}
 
@@ -1567,9 +1581,9 @@ public abstract class Vehicle implements IPoolItem
 		v.progress++;
 		if ((v.progress & 3) == 0) {
 			BeginVehicleMove(v);
-			if (v.cur_image != SPR_EXPLOSION_LARGE_F) {
+			if (v.cur_image != Sprite.SPR_EXPLOSION_LARGE_F) {
 				v.cur_image++;
-				VehiclePositionChanged(v);
+				v.VehiclePositionChanged();
 				EndVehicleMove(v);
 			} else {
 				EndVehicleMove(v);
@@ -1580,7 +1594,7 @@ public abstract class Vehicle implements IPoolItem
 
 	static void BreakdownSmokeInit(Vehicle v)
 	{
-		v.cur_image = SPR_BREAKDOWN_SMOKE_0;
+		v.cur_image = Sprite.SPR_BREAKDOWN_SMOKE_0;
 		v.progress = 0;
 	}
 
@@ -1589,12 +1603,12 @@ public abstract class Vehicle implements IPoolItem
 		v.progress++;
 		if ((v.progress & 7) == 0) {
 			BeginVehicleMove(v);
-			if (v.cur_image != SPR_BREAKDOWN_SMOKE_3) {
+			if (v.cur_image != Sprite.SPR_BREAKDOWN_SMOKE_3) {
 				v.cur_image++;
 			} else {
-				v.cur_image = SPR_BREAKDOWN_SMOKE_0;
+				v.cur_image = Sprite.SPR_BREAKDOWN_SMOKE_0;
 			}
-			VehiclePositionChanged(v);
+			v.VehiclePositionChanged();
 			EndVehicleMove(v);
 		}
 
@@ -1608,7 +1622,7 @@ public abstract class Vehicle implements IPoolItem
 
 	static void ExplosionSmallInit(Vehicle v)
 	{
-		v.cur_image = SPR_EXPLOSION_SMALL_0;
+		v.cur_image = Sprite.SPR_EXPLOSION_SMALL_0;
 		v.progress = 0;
 	}
 
@@ -1617,9 +1631,9 @@ public abstract class Vehicle implements IPoolItem
 		v.progress++;
 		if ((v.progress & 3) == 0) {
 			BeginVehicleMove(v);
-			if (v.cur_image != SPR_EXPLOSION_SMALL_B) {
+			if (v.cur_image != Sprite.SPR_EXPLOSION_SMALL_B) {
 				v.cur_image++;
-				VehiclePositionChanged(v);
+				v.VehiclePositionChanged();
 				EndVehicleMove(v);
 			} else {
 				EndVehicleMove(v);
@@ -1630,7 +1644,7 @@ public abstract class Vehicle implements IPoolItem
 
 	static void BulldozerInit(Vehicle v)
 	{
-		v.cur_image = SPR_BULLDOZER_NE;
+		v.cur_image = Sprite.SPR_BULLDOZER_NE;
 		v.progress = 0;
 		v.u.special.unk0 = 0;
 		v.u.special.unk2 = 0;
@@ -1682,7 +1696,7 @@ public abstract class Vehicle implements IPoolItem
 		{  0, -1 }
 	};*/
 
-	Point[]_inc_by_dir = {
+	static Point[]_inc_by_dir = {
 			new Point(  -1,  0 ),
 			new Point(   0,  1 ),
 			new Point(   1,  0 ),
@@ -1693,11 +1707,11 @@ public abstract class Vehicle implements IPoolItem
 	{
 		v.progress++;
 		if ((v.progress & 7) == 0) {
-			final BulldozerMovement* b = &_bulldozer_movement[v.u.special.unk0];
+			final BulldozerMovement b = _bulldozer_movement[v.u.special.unk0];
 
 			BeginVehicleMove(v);
 
-			v.cur_image = SPR_BULLDOZER_NE + b.image;
+			v.cur_image = Sprite.SPR_BULLDOZER_NE + b.image;
 
 			v.x_pos += _inc_by_dir[b.direction].x;
 			v.y_pos += _inc_by_dir[b.direction].y;
@@ -1706,20 +1720,20 @@ public abstract class Vehicle implements IPoolItem
 			if (v.u.special.unk2 >= b.duration) {
 				v.u.special.unk2 = 0;
 				v.u.special.unk0++;
-				if (v.u.special.unk0 == lengthof(_bulldozer_movement)) {
+				if (v.u.special.unk0 == _bulldozer_movement.length) {
 					EndVehicleMove(v);
 					DeleteVehicle(v);
 					return;
 				}
 			}
-			VehiclePositionChanged(v);
+			v.VehiclePositionChanged();
 			EndVehicleMove(v);
 		}
 	}
 
 	static void BubbleInit(Vehicle v)
 	{
-		v.cur_image = SPR_BUBBLE_GENERATE_0;
+		v.cur_image = Sprite.SPR_BUBBLE_GENERATE_0;
 		v.spritenum = 0;
 		v.progress = 0;
 	}
@@ -1877,7 +1891,7 @@ public abstract class Vehicle implements IPoolItem
 		 *  multiplayer!! (that is: in ToyLand)
 		 */
 		int et;
-		final BubbleMovement *b;
+		final BubbleMovement b;
 
 		v.progress++;
 		if ((v.progress & 3) != 0)
@@ -1887,8 +1901,8 @@ public abstract class Vehicle implements IPoolItem
 
 		if (v.spritenum == 0) {
 			v.cur_image++;
-			if (v.cur_image < SPR_BUBBLE_GENERATE_3) {
-				VehiclePositionChanged(v);
+			if (v.cur_image < Sprite.SPR_BUBBLE_GENERATE_3) {
+				v.VehiclePositionChanged();
 				EndVehicleMove(v);
 				return;
 			}
@@ -1899,10 +1913,10 @@ public abstract class Vehicle implements IPoolItem
 			}
 			et = 0;
 		} else {
-			et = v.engine_type + 1;
+			et = v.engine_type.id + 1;
 		}
 
-		b = &_bubble_movement[v.spritenum - 1][et];
+		b = _bubble_movement[v.spritenum - 1][et];
 
 		if (b.y == 4 && b.x == 0) {
 			EndVehicleMove(v);
@@ -1922,21 +1936,21 @@ public abstract class Vehicle implements IPoolItem
 			TileIndex tile;
 
 			et++;
-			SndPlayVehicleFx(SND_31_EXTRACT, v);
+			// TODO SndPlayVehicleFx(SND_31_EXTRACT, v);
 
-			tile = TileVirtXY(v.x_pos, v.y_pos);
-			if (IsTileType(tile, MP_INDUSTRY) && _m[tile].m5 == 0xA2) AddAnimatedTile(tile);
+			tile = TileIndex.TileVirtXY(v.x_pos, v.y_pos);
+			if (tile.IsTileType( TileTypes.MP_INDUSTRY) && tile.getMap().m5 == 0xA2) AddAnimatedTile(tile);
 		}
 
-		v.engine_type = et;
-		b = &_bubble_movement[v.spritenum - 1][et];
+		v.engine_type = new EngineID(et);
+		b = _bubble_movement[v.spritenum - 1][et];
 
 		v.x_pos += b.x;
 		v.y_pos += b.y;
 		v.z_pos += b.z;
-		v.cur_image = SPR_BUBBLE_0 + b.image;
+		v.cur_image = Sprite.SPR_BUBBLE_0 + b.image;
 
-		VehiclePositionChanged(v);
+		v.VehiclePositionChanged();
 		EndVehicleMove(v);
 	}
 
@@ -1944,7 +1958,7 @@ public abstract class Vehicle implements IPoolItem
 	//typedef void EffectInitProc(Vehicle v);
 	//typedef void EffectTickProc(Vehicle v);
 
-	static final Consumer<Vehicle>  _effect_init_procs[] = {
+	static final Consumer<Vehicle> []  _effect_init_procs = {
 			Vehicle::ChimneySmokeInit,
 			Vehicle::SteamSmokeInit,
 			Vehicle::DieselSmokeInit,
@@ -1987,9 +2001,9 @@ public abstract class Vehicle implements IPoolItem
 			v.tile = 0;
 			v.vehstatus = VS_UNCLICKABLE;
 
-			_effect_init_procs[type](v);
+			_effect_init_procs[type].apply(v);
 
-			VehiclePositionChanged(v);
+			v.VehiclePositionChanged();
 			BeginVehicleMove(v);
 			EndVehicleMove(v);
 		}
@@ -2008,7 +2022,7 @@ public abstract class Vehicle implements IPoolItem
 
 	static void EffectVehicle_Tick(Vehicle v)
 	{
-		_effect_tick_procs[v.subtype](v);
+		_effect_tick_procs[v.subtype].apply(v);
 	}
 
 	Vehicle CheckClickOnVehicle(final ViewPort vp, int x, int y)
@@ -2047,7 +2061,7 @@ public abstract class Vehicle implements IPoolItem
 	void DecreaseVehicleValue(Vehicle v)
 	{
 		v.value -= v.value >> 8;
-		InvalidateWindow(WC_VEHICLE_DETAILS, v.index);
+		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index.id);
 	}
 
 	static final int _breakdown_chance[] = {
@@ -2070,14 +2084,14 @@ public abstract class Vehicle implements IPoolItem
 		/* decrease reliability */
 		v.reliability = rel = Math.max((rel_old = v.reliability) - v.reliability_spd_dec, 0);
 		if ((rel_old >> 8) != (rel >> 8))
-			InvalidateWindow(WC_VEHICLE_DETAILS, v.index);
+			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index.id);
 
-		if (v.breakdown_ctr != 0 || v.vehstatus & VS_STOPPED ||
-				v.cur_speed < 5 || _game_mode == GM_MENU) {
+		if (v.breakdown_ctr != 0 || (0 != (v.vehstatus & VS_STOPPED)) ||
+				v.cur_speed < 5 || Global._game_mode == GameModes.GM_MENU) {
 			return;
 		}
 
-		r = Random();
+		r = Hal.Random();
 
 		/* increase chance of failure */
 		chance = v.breakdown_chance + 1;
@@ -2111,14 +2125,14 @@ public abstract class Vehicle implements IPoolItem
 
 	static void ShowVehicleGettingOld(Vehicle v, StringID msg)
 	{
-		if (v.owner != _local_player) return;
+		if (v.owner != Global._local_player) return;
 
 		// Do not show getting-old message if autorenew is active
-		if (GetPlayer(v.owner).engine_renew) return;
+		if (Player.GetPlayer(v.owner).engine_renew) return;
 
-		SetDParam(0, _vehicle_type_names[v.type - 0x10]);
-		SetDParam(1, v.unitnumber);
-		AddNewsItem(msg, NEWS_FLAGS(NM_SMALL, NF_VIEWPORT|NF_VEHICLE, NT_ADVICE, 0), v.index, 0);
+		Global.SetDParam(0, _vehicle_type_names[v.type - 0x10].id);
+		Global.SetDParam(1, v.unitnumber.id);
+		NewsItem.AddNewsItem(msg, NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 	}
 
 	void AgeVehicle(Vehicle v)
@@ -2132,7 +2146,7 @@ public abstract class Vehicle implements IPoolItem
 		if (age == 366*0 || age == 366*1 || age == 366*2 || age == 366*3 || age == 366*4)
 			v.reliability_spd_dec <<= 1;
 
-		InvalidateWindow(WC_VEHICLE_DETAILS, v.index);
+		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index.id);
 
 		if (age == -366) {
 			ShowVehicleGettingOld(v, STR_01A0_IS_GETTING_OLD);
@@ -2148,10 +2162,10 @@ public abstract class Vehicle implements IPoolItem
 	* @param p1 the original vehicle's index
 	* @param p2 1 = shared orders, else copied orders
 	*/
-	int32 CmdCloneVehicle(int x, int y, int flags, int p1, int p2)
+	int CmdCloneVehicle(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v_front, *v;
-		Vehicle w_front, *w, *w_rear;
+		Vehicle v_front, v;
+		Vehicle w_front, w, w_rear;
 		int cost, total_cost = 0;
 
 		if (!IsVehicleIndex(p1)) return CMD_ERROR;
@@ -2268,11 +2282,11 @@ public abstract class Vehicle implements IPoolItem
 	 * @param flags is the flags to use when calling DoCommand(). Mainly DC_EXEC counts
 	 * @return value is cost of the replacement or CMD_ERROR
 	 */
-	static int32 ReplaceVehicle(Vehicle [] w, byte flags)
+	static int ReplaceVehicle(Vehicle [] w, byte flags)
 	{
-		int32 cost;
+		int cost;
 		Vehicle old_v = w[0];
-		final Player p = GetPlayer(old_v.owner);
+		final Player p = Player.GetPlayer(old_v.owner);
 		EngineID new_engine_type;
 		final UnitID cached_unitnumber = old_v.unitnumber;
 		boolean new_front = false;
@@ -2302,12 +2316,12 @@ public abstract class Vehicle implements IPoolItem
 				 * We add the new engine after the old one instead of replacing it. It will give the same result anyway when we
 				 * sell the old engine in a moment
 				 */
-				DoCommand(0, 0, (GetPrevVehicleInChain(old_v).index << 16) | new_v.index, 1, DC_EXEC, CMD_MOVE_RAIL_VEHICLE);
+				DoCommand(0, 0, (old_v.GetPrevVehicleInChain().index.id << 16) | new_v.index.id, 1, DC_EXEC, CMD_MOVE_RAIL_VEHICLE);
 				/* Now we move the old one out of the train */
-				DoCommand(0, 0, (INVALID_VEHICLE << 16) | old_v.index, 0, DC_EXEC, CMD_MOVE_RAIL_VEHICLE);
+				DoCommand(0, 0, (INVALID_VEHICLE << 16) | old_v.index.id, 0, DC_EXEC, CMD_MOVE_RAIL_VEHICLE);
 			} else {
 				// copy/clone the orders
-				DoCommand(0, 0, (old_v.index << 16) | new_v.index, IsOrderListShared(old_v) ? CO_SHARE : CO_COPY, DC_EXEC, CMD_CLONE_ORDER);
+				DoCommand(0, 0, (old_v.index.id << 16) | new_v.index.id, IsOrderListShared(old_v) ? CO_SHARE : CO_COPY, DC_EXEC, CMD_CLONE_ORDER);
 				new_v.cur_order_index = old_v.cur_order_index;
 				ChangeVehicleViewWindow(old_v, new_v);
 				new_v.profit_this_year = old_v.profit_this_year;
@@ -2363,7 +2377,7 @@ public abstract class Vehicle implements IPoolItem
 		Vehicle w;
 		final Player p = Player.GetPlayer(v.owner);
 		byte flags = 0;
-		int32 cost, temp_cost = 0;
+		int cost, temp_cost = 0;
 		boolean stopped = false;
 		boolean train_fits_in_station = false;
 		//MA vars
@@ -2376,7 +2390,7 @@ public abstract class Vehicle implements IPoolItem
 
 		assert(v.type == VEH_Train || v.type == VEH_Road || v.type == VEH_Ship || v.type == VEH_Aircraft);
 
-		assert(v.vehstatus & VS_STOPPED);	// the vehicle should have been stopped in VehicleEnteredDepotThisTick() if needed
+		assert 0 != (v.vehstatus & VS_STOPPED);	// the vehicle should have been stopped in VehicleEnteredDepotThisTick() if needed
 
 		if (v.leave_depot_instantly) {
 			// we stopped the vehicle to do this, so we have to remember to start it again when we are done
@@ -2429,8 +2443,8 @@ public abstract class Vehicle implements IPoolItem
 				cost += temp_cost;
 			} while (w.type == VEH_Train && (w = GetNextVehicle(w)) != null);
 
-			if (!(flags & DC_EXEC) && (CmdFailed(temp_cost) || p.money64 < (int32)(cost + p.engine_renew_money) || cost == 0)) {
-				if (p.money64 < (int32)(cost + p.engine_renew_money) && ( Global._local_player == v.owner ) && cost != 0) {
+			if (!(flags & DC_EXEC) && (CmdFailed(temp_cost) || p.money64 < (int)(cost + p.engine_renew_money) || cost == 0)) {
+				if (p.money64 < (int)(cost + p.engine_renew_money) && ( Global._local_player == v.owner ) && cost != 0) {
 					StringID message;
 					Global.SetDParam(0, v.unitnumber);
 					switch (v.type) {
@@ -2503,12 +2517,12 @@ public abstract class Vehicle implements IPoolItem
 	 * @param p1 vehicle ID to name
 	 * @param p2 unused
 	 */
-	int32 CmdNameVehicle(int x, int y, int flags, int p1, int p2)
+	int CmdNameVehicle(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		StringID str;
 
-		if (!IsVehicleIndex(p1) || _cmd_text[0] == '\0') return CMD_ERROR;
+		if (!IsVehicleIndex(p1) || Global._cmd_text == null) return CMD_ERROR;
 
 		v = GetVehicle(p1);
 
@@ -2593,15 +2607,15 @@ public abstract class Vehicle implements IPoolItem
 
 		dir = v.direction;
 
-		dirdiff = _new_direction_table[i] - dir;
+		dirdiff = (byte) (_new_direction_table[i] - dir);
 		if (dirdiff == 0)
 			return dir;
-		return (dir+((dirdiff&7)<5?1:-1)) & 7;
+		return (byte) ((dir+((dirdiff&7)<5?1:-1)) & 7);
 	}
 
 	Trackdir GetVehicleTrackdir(final Vehicle  v)
 	{
-		if (v.vehstatus & VS_CRASHED) return 0xFF;
+		if( 0 != (v.vehstatus & VS_CRASHED)) return Trackdir.INVALID_TRACKDIR;
 
 		switch(v.type)
 		{
@@ -2647,7 +2661,7 @@ public abstract class Vehicle implements IPoolItem
 		 * we cannot enter the tile at all. In that case, don't call
 		 * leave_tile. */
 		if (!(result & 8) && old_tile != tile) {
-			VehicleLeaveTileProc *proc = _tile_type_procs[GetTileType(old_tile)].vehicle_leave_tile_proc;
+			VehicleLeaveTileProc proc = _tile_type_procs[GetTileType(old_tile)].vehicle_leave_tile_proc;
 			if (proc != null)
 				proc(v, old_tile, x, y);
 		}
@@ -2661,8 +2675,9 @@ public abstract class Vehicle implements IPoolItem
 
 	restart:
 		unit_num++;
-		FOR_ALL_VEHICLES(u) {
-			if (u.type == type && u.owner == _current_player &&
+		FOR_ALL_VEHICLES(u) 
+		{
+			if (u.type == type && u.owner == Global._current_player &&
 			    unit_num == u.unitnumber)
 						goto restart;
 		}
