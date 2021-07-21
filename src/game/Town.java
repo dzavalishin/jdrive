@@ -3,8 +3,9 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 import game.util.BitOps;
+import game.util.TownTables;
 
-public class Town implements IPoolItem 
+public class Town extends TownTables implements IPoolItem 
 {
 
 	TileIndex xy;
@@ -132,7 +133,6 @@ public class Town implements IPoolItem
 	public static final int HOUSE_TROP_CHURCH    = 0x53;
 	public static final int HOUSE_TOY_CHURCH     = 0x5b;
 
-	public static final int HOUSE_MAX            = 110;
 	
 	
 
@@ -324,14 +324,14 @@ public class Town implements IPoolItem
 		int old;
 		int a,b;
 
-		if (Global._tick_counter & 3) return;
+		if( 0 != (Global._tick_counter & 3)) return;
 
 		// If the house is not one with a lift anymore, then stop this animating.
 		// Not exactly sure when this happens, but probably when a house changes.
 		// Before this was just a return...so it'd leak animated tiles..
 		// That bug seems to have been here since day 1??
 		if (!(_housetype_extra_flags[tile.getMap().m4] & 0x20)) {
-			DeleteAnimatedTile(tile);
+			TextEffect.DeleteAnimatedTile(tile);
 			return;
 		}
 
@@ -356,7 +356,7 @@ public class Town implements IPoolItem
 		if (a == b) {
 			tile.getMap().m1 &= 0x7F;
 			tile.getMap().m5 &= 0x40;
-			DeleteAnimatedTile(tile);
+			TextEffect.DeleteAnimatedTile(tile);
 		}
 
 		MarkTileDirtyByTile(tile);
@@ -1544,7 +1544,7 @@ public class Town implements IPoolItem
 	{
 		assert(tile.IsTileType( TileTypes.MP_HOUSE));
 		DoClearSquare(tile);
-		DeleteAnimatedTile(tile);
+		TextEffect.DeleteAnimatedTile(tile);
 	}
 
 	static void ClearTownHouse(Town t, TileIndex tile)
@@ -2263,14 +2263,3 @@ public class Town implements IPoolItem
 interface TownDrawTileProc extends Consumer<TileInfo>;
 
 
-class DrawTownTileStruct {
-	SpriteID sprite_1;
-	SpriteID sprite_2;
-
-	byte subtile_x;
-	byte subtile_y;
-	byte width;
-	byte height;
-	byte dz;
-	byte proc;
-}

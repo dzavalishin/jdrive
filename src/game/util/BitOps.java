@@ -1,6 +1,7 @@
 package game.util;
 
 import game.IntContainer;
+import game.Hal;
 
 // macros.h stuff
 public class BitOps {
