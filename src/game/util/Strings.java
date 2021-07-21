@@ -7,7 +7,7 @@ import game.GameOptions;
 import game.Global;
 import game.StringID;
 
-public class Strings
+public class Strings extends StringTable
 {
 
 
@@ -22,13 +22,14 @@ public class Strings
 	static final String _openttd_revision = "TODO generate revision";
 
 
-	private char **_langpack_offs;
-	private LanguagePack *_langpack;
-	private int _langtab_num[32]; // Offset into langpack offs
-	private int _langtab_start[32]; // Offset into langpack offs
+	// TODO fix me
+	//private char **_langpack_offs;
+	//private LanguagePack *_langpack;
+	//private int _langtab_num[32]; // Offset into langpack offs
+	//private int _langtab_start[32]; // Offset into langpack offs
 
 	//private final StringID _cargo_string_list[NUM_LANDSCAPE][NUM_CARGO] = {
-	private final StringID _cargo_string_list[][] = {
+	private final int _cargo_string_list[][] = {
 			{ /* LT_NORMAL */
 				STR_PASSENGERS,
 				STR_TONS,
@@ -525,20 +526,20 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		int stri = 0;
 		char[] str = pstr.toCharArray();
 
-		while ((b = str[stri++]) != '\0') {
-			switch (b) {
+		while ((b = (byte) str[stri++]) != '\0') {
+			switch ((int)b) {
 			case 0x1: // {SETX}
 				buff.append( b );
 				buff.append( str[stri++] );
 				break;
 			case 0x2: // {SETXY}
-				buff.append(  b;
+				buff.append(  b );
 				buff.append( str[stri++] );
 				buff.append( str[stri++] );
 				break;
 
 				case 0x81: // {STRINL}
-					str += 2;
+					stri += 2;
 					buff.append( GetStringWithArgs(READ_LE_int(str-2), argv));
 					break;
 				case 0x82: // {DATE_LONG}
@@ -551,7 +552,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 					int value = Getint(arg[argc++]);
 					if (_opt_ptr.kilometers) value = value * 1648 >> 10;
 			buff.append( FormatCommaNumber(value) );
-			if (_opt_ptr.kilometers) {
+			if (Global._opt_ptr.kilometers) {
 				buff.append(  " km/h", 5);
 			} else {
 				buff.append( " mph", 4);
@@ -560,7 +561,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				}
 				// 0x85 is used as escape character..
 				case 0x85:
-					switch (str[stri++]) {
+					switch ((int)str[stri++]) {
 					case 0: /* {CURRCOMPACT} */
 						buff.append( FormatGenericCurrency(_currency, Getint(arg[argc++]), true);
 						break;
@@ -585,40 +586,40 @@ private  final int *GetArgvPtr(final int **argv, int n)
 						}
 						case 5: { /* {STRING1} */
 							// String that consumes ONE argument
-							int str = modifier + Getint(arg[argc++]);
-							buff.append( GetStringWithArgs(str, GetArgvPtr(arg, argc, 1)));
+							int sstr = modifier + Getint(arg[argc++]);
+							buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 1)));
 							argc += 1;
 							modifier = 0;
 							break;
 						}
 						case 6: { /* {STRING2} */
 							// String that consumes TWO arguments
-							int str = modifier + Getint(arg[argc++]);
-							buff.append( GetStringWithArgs(str, GetArgvPtr(arg, argc, 2)));
+							int sstr = modifier + Getint(arg[argc++]);
+							buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 2)));
 							argc += 2;
 							modifier = 0;
 							break;
 						}
 						case 7: { /* {STRING3} */
 							// String that consumes THREE arguments
-							int str = modifier + Getint(arg[argc++]);
-							buff.append( GetStringWithArgs(str, GetArgvPtr(arg, argc, 3)));
+							int sstr = modifier + Getint(arg[argc++]);
+							buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 3)));
 							argc += 3;
 							modifier = 0;
 							break;
 						}
 						case 8: { /* {STRING4} */
 							// String that consumes FOUR arguments
-							int str = modifier + Getint(arg[argc++]);
-							buff.append( GetStringWithArgs(str, GetArgvPtr(arg, argc, 4)));
+							int sstr = modifier + Getint(arg[argc++]);
+							buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 4)));
 							argc += 4;
 							modifier = 0;
 							break;
 						}
 						case 9: { /* {STRING5} */
 							// String that consumes FIVE arguments
-							int str = modifier + Getint(arg[argc++]);
-							buff.append( GetStringWithArgs(str, GetArgvPtr(&argv, 5)));
+							int sstr = modifier + Getint(arg[argc++]);
+							buff.append( GetStringWithArgs(sstr, GetArgvPtr(&argv, 5)));
 							argc += 5;
 							modifier = 0;
 							break;
@@ -630,8 +631,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 						}
 
 						case 11: { /* {INDUSTRY} */
-							Industry *i = GetIndustry(Getint(arg[argc++]));
-							int args[2];
+							Industry i = GetIndustry(Getint(arg[argc++]));
+							int args[] = new int[2];
 
 							// industry not valid anymore?
 							if (i.xy == 0)
@@ -692,17 +693,17 @@ private  final int *GetArgvPtr(final int **argv, int n)
 							//   8bit   - cargo type
 							//   16-bit - cargo count
 							StringID cargo_str = _cargoc.names_long[Getint(arg[argc++])];
-							buff.append( GetStringWithArgs(cargo_str, argv++) );
+							buff.append( GetStringWithArgs(cargo_str, arg[argc++]) );
 							break;
 						}
 
 						default:
-							error("!invalid escape sequence in string");
+							Global.error("!invalid escape sequence in string");
 					}
 					break;
 
 				case 0x86: // {SKIP}
-					argv++;
+					argc++;
 					break;
 
 					// This sets up the gender for the string.
@@ -712,33 +713,38 @@ private  final int *GetArgvPtr(final int **argv, int n)
 					break;
 
 				case 0x88: {// {STRING}
-					int stri = modifier + Getint(arg[argc++]);
+					int sstri = modifier + Getint(arg[argc++]);
 					// WARNING. It's prohibited for the included string to consume any arguments.
 					// For included strings that consume argument, you should use STRING1, STRING2 etc.
 					// To debug stuff you can set argv to null and it will tell you
-					buff.append( GetStringWithArgs(stri, argv) );
+					int acnt = arg.length - argc;
+					Object [] acopy = new Object[acnt];
+					System.arraycopy(arg, argc, acopy, 0, acnt);
+					argc += acnt; // TODO wrong, must get used count from GetStringWithArgs 
+					buff.append( GetStringWithArgs(sstri, acopy) );
 					modifier = 0;
 					break;
 				}
 
 				case 0x8B: // {COMMA}
-					buff.append( FormatCommaNumber(Getint(arg[argc++]) );
+					buff.append( FormatCommaNumber(Getint(arg[argc++]) ) );
 					break;
 
 					case 0x8C: // Move argument pointer
-						argv = argv_orig + (byte)str[stri++];
+						//argv = argv_orig + (byte)str[stri++];
+						argc = str[stri++];
 						break;
 
 					case 0x8D: { // {P}
 						int v = argv_orig[(byte)str[stri++]]; // contains the number that determines plural
-						int len;
-						str = ParseStringChoice(str, DeterminePluralForm(v), buff, &len);
-						buff += len;
+						int [] len = { 0 };
+						str = ParseStringChoice(str, DeterminePluralForm(v), buff, len);
+						buff += len[0];
 						break;
 					}
 
 					case 0x8E: // {NUM}
-						buff.append( FormatNoCommaNumber(Getint(arg[argc++]) );
+						buff.append( FormatNoCommaNumber(Getint(arg[argc++]) ) );
 						break;
 
 						case 0x8F: // {CURRENCY}
@@ -746,8 +752,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 							break;
 
 						case 0x99: { // {WAYPOINT}
-							int temp[2];
-							Waypoint *wp = GetWaypoint(Getint(arg[argc++]));
+							int [] temp = new int[2];
+							Waypoint wp = GetWaypoint(Getint(arg[argc++]));
 							StringID str;
 							if (wp.string != STR_NULL) {
 								str = wp.string;
@@ -760,8 +766,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 						} break;
 
 						case 0x9A: { // {STATION}
-							final Station* st = GetStation(Getint(arg[argc++]));
-							int temp[2];
+							final Station st = GetStation(Getint(arg[argc++]));
+							int [] temp = new int[2];
 
 							if (st.xy == 0) { // station doesn't exist anymore
 								buff.append( GetStringWithArgs(STR_UNKNOWN_DESTINATION, null) );
@@ -773,8 +779,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 							break;
 						}
 						case 0x9B: { // {TOWN}
-							final Town* t = GetTown(Getint(arg[argc++]));
-							int temp[1];
+							final Town t = Town.GetTown(Getint(arg[argc++]));
+							int temp[] = new int[1];
 
 							assert(t.xy != 0);
 
@@ -939,17 +945,17 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		int i;
 		StringBuilder buff = new StringBuilder();
 
-		buff.append( _initial_name_letters[sizeof(_initial_name_letters) * BitOps.GB(x, 0, 8) >> 8] );
+		buff.append( _initial_name_letters[_initial_name_letters.length * BitOps.GB(x, 0, 8) >> 8] );
 		buff.append( ". " );
 		// Insert a space after initial and period "I. Firstname" instead of "I.Firstname"
 
-		i = (sizeof(_initial_name_letters) + 35) * BitOps.GB(x, 8, 8) >> 8;
-		if (i < sizeof(_initial_name_letters)) {
+		i = (_initial_name_letters.length + 35) * BitOps.GB(x, 8, 8) >> 8;
+		if (i < _initial_name_letters.length) {
 			buff.append( _initial_name_letters[i] );
 			buff.append( ". " );
 		}
 
-		if (_opt_ptr.landscape == LT_CANDY) {
+		if (Global._opt_ptr.landscape == LT_CANDY) {
 			base = _silly_surname_list;
 			num  = lengthof(_silly_surname_list);
 		} else {
@@ -1248,6 +1254,7 @@ class LanguagePack {
 			offsets[i] = bb.getInt();
 
 		plural_form = bb.get();
+		return true;
 	}
 }
 

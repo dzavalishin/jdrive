@@ -56,7 +56,8 @@ public class Ai {
 		
 	}
 
-	public static void AI_StartNewAI(PlayerID index) {
+	//public static void AI_StartNewAI(PlayerID index) {
+	public static void AI_StartNewAI(int index) {
 		// TODO Auto-generated method stub
 		Global.error("Ai?");
 	}

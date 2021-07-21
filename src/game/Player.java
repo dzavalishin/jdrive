@@ -1,6 +1,11 @@
 package game;
 
 import game.util.BitOps;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
 import game.ai.Ai;
 
 /** @file players.c
@@ -52,7 +57,8 @@ public class Player
 
 	PlayerEconomyEntry cur_economy;
 	PlayerEconomyEntry old_economy[];
-	EngineID engine_replacement[];
+	//EngineID engine_replacement[];
+	int engine_replacement[];
 	boolean engine_renew;
 	boolean renew_keep_length;
 	int engine_renew_months;
@@ -303,7 +309,7 @@ public class Player
 			PlayerID pid = Global._current_player;
 			if (pid.id < Global.MAX_PLAYERS && cost > GetPlayer(pid).player_money) {
 				Global.SetDParam(0, cost);
-				Global._error_message = STR_0003_NOT_ENOUGH_CASH_REQUIRES;
+				Global._error_message = Str.STR_0003_NOT_ENOUGH_CASH_REQUIRES;
 				return false;
 			}
 		}
@@ -361,7 +367,7 @@ public class Player
 
 		if (owner.id != Owner.OWNER_TOWN) {
 			if (owner.id >= 8)
-				Global.SetDParam(0, STR_0150_SOMEONE);
+				Global.SetDParam(0, Str.STR_0150_SOMEONE);
 			else {
 				Player p = GetPlayer(owner);
 				Global.SetDParam(0, p.name_1);
@@ -369,7 +375,7 @@ public class Player
 			}
 		} else {
 			Town t = Town.ClosestTownFromTile(tile, (int)-1);
-			Global.SetDParam(0, STR_TOWN);
+			Global.SetDParam(0, Str.STR_TOWN);
 			Global.SetDParam(1, t.index);
 		}
 	}
@@ -381,7 +387,7 @@ public class Player
 
 		if (owner == Global._current_player)
 			return true;
-		Global._error_message = STR_013B_OWNED_BY;
+		Global._error_message = Str.STR_013B_OWNED_BY;
 		GetNameOfOwner(owner, new TileIndex(0) );
 		return false;
 	}
@@ -394,7 +400,7 @@ public class Player
 
 		if (owner == Global._current_player)
 			return true;
-		Global._error_message = STR_013B_OWNED_BY;
+		Global._error_message = Str.STR_013B_OWNED_BY;
 
 		// no need to get the name of the owner unless we're the local player (saves some time)
 		if (IsLocalPlayer()) GetNameOfOwner(owner, tile);
@@ -410,7 +416,7 @@ public class Player
 		int strp;
 		String buffer;
 
-		if (name_1 != STR_SV_UNNAMED)
+		if (name_1 != Str.STR_SV_UNNAMED)
 			return;
 
 		tile = last_build_coordinate;
@@ -419,8 +425,8 @@ public class Player
 
 		t = ClosestTownFromTile(tile, (int)-1);
 
-		if (IS_INT_INSIDE(t.townnametype, SPECSTR_TOWNNAME_START, SPECSTR_TOWNNAME_LAST+1)) {
-			str = t.townnametype - SPECSTR_TOWNNAME_START + SPECSTR_PLAYERNAME_START;
+		if (IS_INT_INSIDE(t.townnametype, SPECStr.STR_TOWNNAME_START, SPECStr.STR_TOWNNAME_LAST+1)) {
+			str = t.townnametype - SPECStr.STR_TOWNNAME_START + SPECStr.STR_PLAYERNAME_START;
 			strp = t.townnameparts;
 
 			verify_name:;
@@ -448,12 +454,12 @@ public class Player
 		}
 		bad_town_name:;
 
-		if (president_name_1 == SPECSTR_PRESIDENT_NAME) {
-			str = SPECSTR_ANDCO_NAME;
+		if (president_name_1 == SPECStr.STR_PRESIDENT_NAME) {
+			str = SPECStr.STR_ANDCO_NAME;
 			strp = president_name_2;
 			goto set_name;
 		} else {
-			str = SPECSTR_ANDCO_NAME;
+			str = SPECStr.STR_ANDCO_NAME;
 			strp = Hal.Random();
 			goto verify_name;
 		}
@@ -544,7 +550,7 @@ public class Player
 			restart:;
 
 			president_name_2 = Hal.Random();
-			president_name_1 = SPECSTR_PRESIDENT_NAME;
+			president_name_1 = SPECStr.STR_PRESIDENT_NAME;
 
 			Global.SetDParam(0, president_name_2);
 			GetString(buffer, president_name_1);
@@ -595,7 +601,7 @@ public class Player
 		// Make a color
 		p.player_color = GeneratePlayerColor();
 		_player_colors[p.index.id] = p.player_color;
-		p.name_1 = STR_SV_UNNAMED;
+		p.name_1 = Str.STR_SV_UNNAMED;
 		p.is_active = true;
 
 		p.money64 = p.player_money = p.current_loan = 100000;
@@ -649,7 +655,7 @@ public class Player
 		if (n < (int)GameOptions._opt.diff.max_no_competitors)
 			if (n < (Global._network_server ? InteractiveRandomRange(GameOptions._opt.diff.max_no_competitors + 2) : RandomRange(GameOptions._opt.diff.max_no_competitors + 2)) )
 				// Send a command to all clients to start  up a new AI. Works fine for Multiplayer and SinglePlayer 
-				DoCommandP(0, 1, 0, null, CMD_PLAYER_CTRL);
+				DoCommandP(0, 1, 0, null, Cmd.CMD_PLAYER_CTRL);
 
 		// The next AI starts like the difficulty setting said, with +2 month max
 		_next_competitor_start = GameOptions._opt.diff.competitor_start_time * 90 * Global.DAY_TICKS + 1;
@@ -684,13 +690,14 @@ public class Player
 	}
 
 	// index is the next parameter in _decode_parameters to set up
-	static StringID GetPlayerNameString(PlayerID player, int index)
+	//static StringID GetPlayerNameString(PlayerID player, int index)
+	static int GetPlayerNameString(PlayerID player, int index)
 	{
-		if (IS_HUMAN_PLAYER(player) && player < MAX_PLAYERS) {
-			Global.SetDParam(index, player+1);
-			return STR_7002_PLAYER;
+		if (IS_HUMAN_PLAYER(player) && player.id < Global.MAX_PLAYERS) {
+			Global.SetDParam(index, player.id+1);
+			return Str.STR_7002_PLAYER;
 		}
-		return STR_EMPTY;
+		return Str.STR_EMPTY;
 	}
 
 	//extern void ShowPlayerFinances(int player);
@@ -739,7 +746,7 @@ public class Player
 		//EngineID i;
 		int i;
 
-		for (i = 0; i != TOTAL_NUM_ENGINES; i++) {
+		for (i = 0; i != Global.TOTAL_NUM_ENGINES; i++) {
 			final Engine e = Engine.GetEngine(i);
 
 			if (e.type == VEH_Train &&
@@ -795,16 +802,16 @@ public class Player
 	{
 		Player p;
 		if (!(Global._current_player.id < Global.MAX_PLAYERS))
-			return CMD_ERROR;
+			return Cmd.CMD_ERROR;
 
-		p = GetPlayer(_current_player);
+		p = GetPlayer(Global._current_player);
 		switch (BitOps.GB(p1, 0, 3)) {
 		case 0:
-			if (p.engine_renew == (boolean)BitOps.GB(p2, 0, 1))
-				return CMD_ERROR;
+			if (p.engine_renew == ( 0 != BitOps.GB(p2, 0, 1)) )
+				return Cmd.CMD_ERROR;
 
-			if (flags & DC_EXEC) {
-				p.engine_renew = (boolean)BitOps.GB(p2, 0, 1);
+			if(0 != (flags & Cmd.DC_EXEC)) {
+				p.engine_renew = ( 0 != BitOps.GB(p2, 0, 1) );
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew = p.engine_renew;
 					InvalidateWindow(WC_GAME_OPTIONS, 0);
@@ -813,9 +820,9 @@ public class Player
 			break;
 		case 1:
 			if (p.engine_renew_months == (int16)p2)
-				return CMD_ERROR;
+				return Cmd.CMD_ERROR;
 
-			if (flags & DC_EXEC) {
+			if(0 != (flags & Cmd.DC_EXEC)) {
 				p.engine_renew_months = (int16)p2;
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew_months = p.engine_renew_months;
@@ -825,13 +832,13 @@ public class Player
 			break;
 		case 2:
 			if (p.engine_renew_money == (int)p2)
-				return CMD_ERROR;
+				return Cmd.CMD_ERROR;
 
-			if (flags & DC_EXEC) {
+			if(0 != (flags & Cmd.DC_EXEC)) {
 				p.engine_renew_money = (int)p2;
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew_money = p.engine_renew_money;
-					InvalidateWindow(WC_GAME_OPTIONS, 0);
+					Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
 				}
 			}
 			break;
@@ -839,23 +846,23 @@ public class Player
 			EngineID old_engine_type = BitOps.GB(p2, 0, 16);
 			EngineID new_engine_type = BitOps.GB(p2, 16, 16);
 
-			if (new_engine_type != INVALID_ENGINE) {
+			if (new_engine_type != Engine.INVALID_ENGINE) {
 				/* First we make sure that it's a valid type the user requested
 				 * check that it's an engine that is in the engine array */
 				if(!IsEngineIndex(new_engine_type))
-					return CMD_ERROR;
+					return Cmd.CMD_ERROR;
 
 				// check that the new vehicle type is the same as the original one
 				if (GetEngine(old_engine_type).type != GetEngine(new_engine_type).type)
-					return CMD_ERROR;
+					return Cmd.CMD_ERROR;
 
 				// make sure that we do not replace a plane with a helicopter or vise versa
 				if (GetEngine(new_engine_type).type == VEH_Aircraft && HASBIT(AircraftVehInfo(old_engine_type).subtype, 0) != HASBIT(AircraftVehInfo(new_engine_type).subtype, 0))
-					return CMD_ERROR;
+					return Cmd.CMD_ERROR;
 
 				// make sure that the player can actually buy the new engine
-				if (!HASBIT(GetEngine(new_engine_type).player_avail, _current_player))
-					return CMD_ERROR;
+				if (!HASBIT(GetEngine(new_engine_type).player_avail, Global._current_player))
+					return Cmd.CMD_ERROR;
 
 				return AddEngineReplacement(p, old_engine_type, new_engine_type, flags);
 			} else {
@@ -864,27 +871,27 @@ public class Player
 		}
 
 		case 4:
-			if (flags & DC_EXEC) {
-				p.engine_renew = (boolean)BitOps.GB(p1, 15, 1);
-				p.engine_renew_months = (int16)BitOps.GB(p1, 16, 16);
+			if(0 != (flags & Cmd.DC_EXEC)) {
+				p.engine_renew = 0 != BitOps.GB(p1, 15, 1);
+				p.engine_renew_months = (int)BitOps.GB(p1, 16, 16);
 				p.engine_renew_money = (int)p2;
 
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew = p.engine_renew;
 					Global._patches.autorenew_months = p.engine_renew_months;
 					Global._patches.autorenew_money = p.engine_renew_money;
-					InvalidateWindow(WC_GAME_OPTIONS, 0);
+					Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
 				}
 			}
 			break;
 		case 5:
-			if (p.renew_keep_length == (boolean)BitOps.GB(p2, 0, 1))
-				return CMD_ERROR;
+			if (p.renew_keep_length == ( 0 != BitOps.GB(p2, 0, 1)))
+				return Cmd.CMD_ERROR;
 
-			if (flags & DC_EXEC) {
-				p.renew_keep_length = (boolean)BitOps.GB(p2, 0, 1);
+			if(0 != (flags & Cmd.DC_EXEC)) {
+				p.renew_keep_length = ( 0 != BitOps.GB(p2, 0, 1) );
 				if (IsLocalPlayer()) {
-					InvalidateWindow(WC_REPLACE_VEHICLE, VEH_Train);
+					Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, VEH_Train);
 				}
 			}
 			break;
@@ -914,14 +921,15 @@ public class Player
 	 */
 	static int CmdPlayerCtrl(int x, int y, int flags, int p1, int p2)
 	{
-		if (flags & DC_EXEC) _current_player = Owner.OWNER_NONE;
+		if(0 != (flags & Cmd.DC_EXEC)) Global._current_player = Owner.OWNER_NONE;
 
 		switch (p1) {
 		case 0: { // Create a new Player 
 			Player p;
-			PlayerID pid = p2;
+			//PlayerID pid = p2;
+			int pid = p2;
 
-			if (!(flags & DC_EXEC) || pid >= MAX_PLAYERS) return 0;
+			if (0 == (flags & Cmd.DC_EXEC) || pid >= Global.MAX_PLAYERS) return 0;
 
 			p = DoStartupNewPlayer(false);
 
@@ -932,24 +940,24 @@ public class Player
 			#endif /* ENABLE_NETWORK */
 
 			if (p != null) {
-				if (_local_player == Owner.OWNER_SPECTATOR && (!_ai.network_client || _ai.network_playas == Owner.OWNER_SPECTATOR)) {
+				if (Global._local_player == Owner.OWNER_SPECTATOR && (!Ai._ai.network_client || Ai._ai.network_playas == Owner.OWNER_SPECTATOR)) {
 					/* Check if we do not want to be a spectator in network */
-					if (!_networking || (_network_server && !_network_dedicated) || _network_playas != Owner.OWNER_SPECTATOR || _ai.network_client) {
-						if (_ai.network_client) {
+					if (!Global._networking || (Global._network_server && !Global._network_dedicated) || Global._network_playas != Owner.OWNER_SPECTATOR || Ai._ai.network_client) {
+						if (Ai._ai.network_client) {
 							/* As ai-network-client, we have our own rulez (disable GUI and stuff) */
-							_ai.network_playas = p.index;
-							_local_player      = OWNER_SPECTATOR;
-							if (_ai.network_playas != OWNER_SPECTATOR) {
+							Ai._ai.network_playas = p.index;
+							Global._local_player      = Owner.OWNER_SPECTATOR;
+							if (Ai._ai.network_playas != Owner.OWNER_SPECTATOR) {
 								/* If we didn't join the game as a spectator, activate the AI */
-								AI_StartNewAI(_ai.network_playas);
+								Ai.AI_StartNewAI(Ai._ai.network_playas);
 							}
 						} else {
-							_local_player = p.index;
+							Global._local_player = p.index;
 						}
-						MarkWholeScreenDirty();
+						Global.hal.MarkWholeScreenDirty();
 					}
-				} else if (p.index == _local_player) {
-					DoCommandP(0, (Global._patches.autorenew << 15 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
+				} else if (p.index == Global._local_player) {
+					DoCommandP(0, (Global._patches.autorenew << 15 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 				}
 				/* #ifdef ENABLE_NETWORK
 				if (_network_server) {
@@ -976,7 +984,7 @@ public class Player
 						// * For example in network_client.c:534? 
 						_cmd_text = ci.client_name;
 						_local_player = ci.client_playas - 1;
-						NetworkSend_Command(0, 0, 0, CMD_CHANGE_PRESIDENT_NAME, null);
+						NetworkSend_Command(0, 0, 0, Cmd.CMD_CHANGE_PRESIDENT_NAME, null);
 						_local_player = player_backup;
 					}
 				}
@@ -992,18 +1000,18 @@ public class Player
 			//#endif /* ENABLE_NETWORK */
 		} break;
 
-		case 1: /* Make a new AI Player /
-		if (!(flags & DC_EXEC)) return 0;
+		case 1: /* Make a new AI Player */
+			if (0 == (flags & Cmd.DC_EXEC)) return 0;
 
-		DoStartupNewPlayer(true);
-		break;
+			DoStartupNewPlayer(true);
+			break;
 
-	case 2: { /* Delete a Player /
+		case 2: { /* Delete a Player */
 		Player p;
 
-		if (p2 >= MAX_PLAYERS) return CMD_ERROR;
+		if (p2 >= Global.MAX_PLAYERS) return Cmd.CMD_ERROR;
 
-		if (!(flags & DC_EXEC)) return 0;
+		if (0 == (flags & Cmd.DC_EXEC)) return 0;
 
 		p = GetPlayer(p2);
 
@@ -1015,68 +1023,68 @@ public class Player
 				/* Show the bankrupt news */
 				Global.SetDParam(0, p.name_1);
 				Global.SetDParam(1, p.name_2);
-				AddNewsItem( (StringID)(p.index + 16*3), NEWS_FLAGS(NM_CALLBACK, 0, NT_COMPANY_INFO, DNC_BANKRUPCY),0,0);
+				NewsItem.AddNewsItem( new StringID(p.index.id + 16*3), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 
 				/* Remove the company */
-				ChangeOwnershipOfPlayerItems(p.index, OWNER_SPECTATOR);
+				ChangeOwnershipOfPlayerItems(p.index, Owner.OWNER_SPECTATOR);
 				p.money64 = p.player_money = 100000000; // XXX - wtf?
 				p.is_active = false;
 			}
 		} break;
 
-	case 3: { /* Merge a company (#1) into another company (#2), elimination company #1 */
-		PlayerID pid_old = BitOps.GB(p2,  0, 16);
-		PlayerID pid_new = BitOps.GB(p2, 16, 16);
+		case 3: { /* Merge a company (#1) into another company (#2), elimination company #1 */
+			PlayerID pid_old = BitOps.GB(p2,  0, 16);
+			PlayerID pid_new = BitOps.GB(p2, 16, 16);
 
-		if (pid_old >= MAX_PLAYERS || pid_new >= MAX_PLAYERS) return CMD_ERROR;
+			if (pid_old >= MAX_PLAYERS || pid_new >= MAX_PLAYERS) return Cmd.CMD_ERROR;
 
-		if (!(flags & DC_EXEC)) return CMD_ERROR;
+			if (0 == (flags & Cmd.DC_EXEC)) return Cmd.CMD_ERROR;
 
-		ChangeOwnershipOfPlayerItems(pid_old, pid_new);
-		DeletePlayerStuff(pid_old);
-	} break;
-	default: return CMD_ERROR;
+			ChangeOwnershipOfPlayerItems(pid_old, pid_new);
+			DeletePlayerStuff(pid_old);
+		} break;
+		default: return Cmd.CMD_ERROR;
+		}
+
+		return 0;
 	}
 
-	return 0;
-}
+	//static final StringID _endgame_perf_titles[] = {
+	static final int _endgame_perf_titles[] = {
+			Str.STR_0213_BUSINESSMAN,
+			Str.STR_0213_BUSINESSMAN,
+			Str.STR_0213_BUSINESSMAN,
+			Str.STR_0213_BUSINESSMAN,
+			Str.STR_0213_BUSINESSMAN,
+			Str.STR_0214_ENTREPRENEUR,
+			Str.STR_0214_ENTREPRENEUR,
+			Str.STR_0215_INDUSTRIALIST,
+			Str.STR_0215_INDUSTRIALIST,
+			Str.STR_0216_CAPITALIST,
+			Str.STR_0216_CAPITALIST,
+			Str.STR_0217_MAGNATE,
+			Str.STR_0217_MAGNATE,
+			Str.STR_0218_MOGUL,
+			Str.STR_0218_MOGUL,
+			Str.STR_0219_TYCOON_OF_THE_CENTURY,
+	};
 
-//static final StringID _endgame_perf_titles[] = {
-static final int _endgame_perf_titles[] = {
-		STR_0213_BUSINESSMAN,
-		STR_0213_BUSINESSMAN,
-		STR_0213_BUSINESSMAN,
-		STR_0213_BUSINESSMAN,
-		STR_0213_BUSINESSMAN,
-		STR_0214_ENTREPRENEUR,
-		STR_0214_ENTREPRENEUR,
-		STR_0215_INDUSTRIALIST,
-		STR_0215_INDUSTRIALIST,
-		STR_0216_CAPITALIST,
-		STR_0216_CAPITALIST,
-		STR_0217_MAGNATE,
-		STR_0217_MAGNATE,
-		STR_0218_MOGUL,
-		STR_0218_MOGUL,
-		STR_0219_TYCOON_OF_THE_CENTURY,
-};
+	//static StringID EndGameGetPerformanceTitleFromValue(int value)
+	static int EndGameGetPerformanceTitleFromValue(int value)
+	{
 
-//static StringID EndGameGetPerformanceTitleFromValue(int value)
-static int EndGameGetPerformanceTitleFromValue(int value)
-{
+		long lvalue = BitOps.minu(value, 1000) >>> 6;
+					if (lvalue >= _endgame_perf_titles.length) 
+						lvalue = _endgame_perf_titles.length - 1;
 
-	long lvalue = BitOps.minu(value, 1000) >>> 6;
-	if (lvalue >= _endgame_perf_titles.length) 
-		lvalue = _endgame_perf_titles.length - 1;
-
-	return _endgame_perf_titles[(int) lvalue];
-}
+					return _endgame_perf_titles[(int) lvalue];
+	}
 
 
-// Save the highscore for the Player 
-static byte SaveHighScoreValue(final Player p)
-{
-	/*
+	// Save the highscore for the Player 
+	static byte SaveHighScoreValue(final Player p)
+	{
+		/*
 	HighScore hs = _highscore_table[GameOptions._opt.diff_level];
 	int i;
 	uint16 score = p.old_economy[0].performance_history;
@@ -1096,185 +1104,194 @@ static byte SaveHighScoreValue(final Player p)
 			Global.SetDParam(1, p.president_name_2);
 			Global.SetDParam(2, p.name_1);
 			Global.SetDParam(3, p.name_2);
-			GetString(buf, STR_HIGHSCORE_NAME); // get manager/company name string
+			GetString(buf, Str.STR_HIGHSCORE_NAME); // get manager/company name string
 			ttd_strlcpy(hs[i].company, buf, sizeof(buf));
 			hs[i].score = score;
 			hs[i].title = EndGameGetPerformanceTitleFromValue(score);
 			return i;
 		}
 	}
-	*/
-	return -1; // too bad; we did not make it into the top5
-}
-
-/* Sort all players given their performance */
-static int  HighScoreSorter(final void *a, final void *b)
-{
-	final Player pa = *(final Player* final*)a;
-	final Player pb = *(final Player* final*)b;
-
-	return pb.old_economy[0].performance_history - pa.old_economy[0].performance_history;
-}
-
-/* Save the highscores in a network game when it has ended */
-//#define LAST_HS_ITEM lengthof(_highscore_table) - 1
-static byte SaveHighScoreValueNetwork()
-{
-	Player player_sort[MAX_PLAYERS];
-	size_t count = 0;
-	byte player = -1;
-
-	/* Sort all active players with the highest score first */
-	for( Player p : _players ) {
-		if (p.is_active)
-			player_sort[count++] = p;
+		 */
+		return -1; // too bad; we did not make it into the top5
 	}
-	qsort(player_sort, count, sizeof(player_sort[0]), HighScoreSorter);
 
+	/* Sort all players given their performance */
+	static int  HighScoreSorter(final void *a, final void *b)
 	{
-		HighScore hs;
-		Player* final *p_cur = &player_sort[0];
-		ubyte i;
+		final Player pa = *(final Player* final*)a;
+		final Player pb = *(final Player* final*)b;
 
-		memset(_highscore_table[LAST_HS_ITEM], 0, sizeof(_highscore_table[0]));
-
-		/* Copy over Top5 companies */
-		for (i = 0; i < lengthof(_highscore_table[LAST_HS_ITEM]) && i < count; i++) {
-			char buf[sizeof(_highscore_table[0].company)];
-
-			hs = &_highscore_table[LAST_HS_ITEM][i];
-			Global.SetDParam(0, (*p_cur).president_name_1);
-			Global.SetDParam(1, (*p_cur).president_name_2);
-			Global.SetDParam(2, (*p_cur).name_1);
-			Global.SetDParam(3, (*p_cur).name_2);
-			GetString(buf, STR_HIGHSCORE_NAME); // get manager/company name string
-
-			ttd_strlcpy(hs.company, buf, sizeof(buf));
-			hs.score = (*p_cur).old_economy[0].performance_history;
-			hs.title = EndGameGetPerformanceTitleFromValue(hs.score);
-
-			// get the ranking of the local player
-			if ((*p_cur).index == _local_player)
-				player = i;
-
-			p_cur++;
-		}
+		return pb.old_economy[0].performance_history - pa.old_economy[0].performance_history;
 	}
 
-	/* Add top5 players to highscore table */
-	return player;
-}
+	/* Save the highscores in a network game when it has ended */
+	//#define LAST_HS_ITEM lengthof(_highscore_table) - 1
+	static byte SaveHighScoreValueNetwork()
+	{
+		Player player_sort[MAX_PLAYERS];
+		size_t count = 0;
+		byte player = -1;
 
-/* Save HighScore table to file */
-static void SaveToHighScore()
-{
-	FILE *fp = fopen(_highscore_file, "wb");
-
-	if (fp != null) {
-		int i;
-		HighScore hs;
-
-		for (i = 0; i < LAST_HS_ITEM; i++) { // don't save network highscores
-			for (hs = _highscore_table[i]; hs != endof(_highscore_table[i]); hs++) {
-				/* First character is a command character, so strlen will fail on that */
-				byte length = min(sizeof(hs.company), (hs.company[0] == '\0') ? 0 : strlen(&hs.company[1]) + 1);
-
-				fwrite(&length, sizeof(length), 1, fp); // write away string length
-				fwrite(hs.company, length, 1, fp);
-				fwrite(&hs.score, sizeof(hs.score), 1, fp);
-				fwrite("", 2, 1, fp); /* XXX - placeholder for hs.title, not saved anymore; compatibility */
-			}
+		/* Sort all active players with the highest score first */
+		for( Player p : _players ) {
+			if (p.is_active)
+				player_sort[count++] = p;
 		}
-		fclose(fp);
-	}
-}
+		qsort(player_sort, count, sizeof(player_sort[0]), HighScoreSorter);
 
-/* Initialize the highscore table to 0 and if any file exists, load in values */
-static void LoadFromHighScore()
-{
-	FILE *fp = fopen(_highscore_file, "rb");
+		{
+			HighScore hs;
+			Player* final *p_cur = &player_sort[0];
+			ubyte i;
 
-	memset(_highscore_table, 0, sizeof(_highscore_table));
+			memset(_highscore_table[LAST_HS_ITEM], 0, sizeof(_highscore_table[0]));
 
-	if (fp != null) {
-		int i;
-		HighScore hs;
+			/* Copy over Top5 companies */
+			for (i = 0; i < lengthof(_highscore_table[LAST_HS_ITEM]) && i < count; i++) {
+				char buf[sizeof(_highscore_table[0].company)];
 
-		for (i = 0; i < LAST_HS_ITEM; i++) { // don't load network highscores
-			for (hs = _highscore_table[i]; hs != endof(_highscore_table[i]); hs++) {
-				byte length;
-				fread(&length, sizeof(length), 1, fp);
+				hs = &_highscore_table[LAST_HS_ITEM][i];
+				Global.SetDParam(0, (*p_cur).president_name_1);
+				Global.SetDParam(1, (*p_cur).president_name_2);
+				Global.SetDParam(2, (*p_cur).name_1);
+				Global.SetDParam(3, (*p_cur).name_2);
+				GetString(buf, Str.STR_HIGHSCORE_NAME); // get manager/company name string
 
-				fread(hs.company, 1, length, fp);
-				fread(&hs.score, sizeof(hs.score), 1, fp);
-				fseek(fp, 2, SEEK_CUR); /* XXX - placeholder for hs.title, not saved anymore; compatibility */
+				ttd_strlcpy(hs.company, buf, sizeof(buf));
+				hs.score = (*p_cur).old_economy[0].performance_history;
 				hs.title = EndGameGetPerformanceTitleFromValue(hs.score);
+
+				// get the ranking of the local player
+				if ((*p_cur).index == _local_player)
+					player = i;
+
+				p_cur++;
 			}
 		}
-		fclose(fp);
+
+		/* Add top5 players to highscore table */
+		return player;
 	}
 
-	// Initialize end of game variable (when to show highscore chart) 
-	Global._patches.ending_date = 2051;
-}
+	/* Save HighScore table to file * /
+	static void SaveToHighScore()
+	{
+		FILE *fp = fopen(_highscore_file, "wb");
 
-public void InitialiseEngineReplacement()
-{
-	EngineID engine;
+		if (fp != null) {
+			int i;
+			HighScore hs;
 
-	for (engine = 0; engine < TOTAL_NUM_ENGINES; engine++)
-		engine_replacement[engine] = INVALID_ENGINE;
-}
+			for (i = 0; i < LAST_HS_ITEM; i++) { // don't save network highscores
+				for (hs = _highscore_table[i]; hs != endof(_highscore_table[i]); hs++) {
+					// First character is a command character, so strlen will fail on that 
+					byte length = min(sizeof(hs.company), (hs.company[0] == '\0') ? 0 : strlen(&hs.company[1]) + 1);
 
-/**
- * Retrieve the engine replacement for the given player and original engine type.
- * @param p Player.
- * @param engine Engine type.
- * @return Assigned replacement engine.
- */
-public EngineID EngineReplacement(EngineID engine)
-{
-	return engine_replacement[engine];
-}
+					fwrite(&length, sizeof(length), 1, fp); // write away string length
+					fwrite(hs.company, length, 1, fp);
+					fwrite(&hs.score, sizeof(hs.score), 1, fp);
+					fwrite("", 2, 1, fp); // XXX - placeholder for hs.title, not saved anymore; compatibility 
+				}
+			}
+			fclose(fp);
+		}
+	}
 
-/**
- * Check if an engine has a replacement set up.
- * @param p Player.
- * @param engine Engine type.
- * @return True if there is a replacement for the original engine type.
- */
-public boolean EngineHasReplacement(EngineID engine)
-{
-	return EngineReplacement(engine) != INVALID_ENGINE;
-}
+	/* Initialize the highscore table to 0 and if any file exists, load in values * /
+	static void LoadFromHighScore()
+	{
+		FILE *fp = fopen(_highscore_file, "rb");
 
-/**
- * Add an engine replacement for the player.
- * @param p Player.
- * @param old_engine The original engine type.
- * @param new_engine The replacement engine type.
- * @param flags The calling command flags.
- * @return 0 on success, CMD_ERROR on failure.
- */
-public int AddEngineReplacement(EngineID old_engine, EngineID new_engine, int flags)
-{
-	if (flags & DC_EXEC) engine_replacement[old_engine] = new_engine;
-	return 0;
-}
+		memset(_highscore_table, 0, sizeof(_highscore_table));
 
-/**
- * Remove an engine replacement for the player.
- * @param p Player.
- * @param engine The original engine type.
- * @param flags The calling command flags.
- * @return 0 on success, CMD_ERROR on failure.
- */
-public int RemoveEngineReplacement(EngineID engine, int flags)
-{
-	if (flags & DC_EXEC) engine_replacement[engine] = INVALID_ENGINE;
-	return 0;
-}
-/*
+		if (fp != null) {
+			int i;
+			HighScore hs;
+
+			for (i = 0; i < LAST_HS_ITEM; i++) { // don't load network highscores
+				for (hs = _highscore_table[i]; hs != endof(_highscore_table[i]); hs++) {
+					byte length;
+					fread(&length, sizeof(length), 1, fp);
+
+					fread(hs.company, 1, length, fp);
+					fread(&hs.score, sizeof(hs.score), 1, fp);
+					fseek(fp, 2, SEEK_CUR); // XXX - placeholder for hs.title, not saved anymore; compatibility 
+					hs.title = EndGameGetPerformanceTitleFromValue(hs.score);
+				}
+			}
+			fclose(fp);
+		}
+
+		// Initialize end of game variable (when to show highscore chart) 
+		Global._patches.ending_date = 2051;
+	}
+	*/
+	public void InitialiseEngineReplacement()
+	{
+		//EngineID engine;
+		int engine;
+
+		for (engine = 0; engine < Global.TOTAL_NUM_ENGINES; engine++)
+			engine_replacement[engine] = Engine.INVALID_ENGINE;
+	}
+
+	/**
+	 * Retrieve the engine replacement for the given player and original engine type.
+	 * @param p Player.
+	 * @param engine Engine type.
+	 * @return Assigned replacement engine.
+	 */
+	public EngineID EngineReplacement(EngineID engine)
+	{
+		return engine_replacement[engine];
+	}
+
+	/**
+	 * Check if an engine has a replacement set up.
+	 * @param p Player.
+	 * @param engine Engine type.
+	 * @return True if there is a replacement for the original engine type.
+	 */
+	public boolean EngineHasReplacement(EngineID engine)
+	{
+		return EngineReplacement(engine) != Engine.INVALID_ENGINE;
+	}
+
+	/**
+	 * Add an engine replacement for the player.
+	 * @param p Player.
+	 * @param old_engine The original engine type.
+	 * @param new_engine The replacement engine type.
+	 * @param flags The calling command flags.
+	 * @return 0 on success, CMD_ERROR on failure.
+	 */
+	public int AddEngineReplacement(EngineID old_engine, EngineID new_engine, int flags)
+	{
+		if(0 != (flags & Cmd.DC_EXEC)) engine_replacement[old_engine] = new_engine;
+		return 0;
+	}
+
+	/**
+	 * Remove an engine replacement for the player.
+	 * @param p Player.
+	 * @param engine The original engine type.
+	 * @param flags The calling command flags.
+	 * @return 0 on success, CMD_ERROR on failure.
+	 */
+	public int RemoveEngineReplacement(EngineID engine, int flags)
+	{
+		if(0 != (flags & Cmd.DC_EXEC)) engine_replacement[engine.id] = Engine.INVALID_ENGINE;
+		return 0;
+	}
+
+
+	public static Iterator<Player> getIterator()
+	{
+		List<Player> list = Arrays.asList(_players);
+		return list.iterator();
+	}
+
+	/*
 // Save/load of players
 static final SaveLoad _player_desc[] = {
 		SLE_VAR(Player,name_2,					SLE_UINT32),
@@ -1407,9 +1424,9 @@ static final SaveLoad _player_ai_build_rec_desc[] = {
 		SLE_VAR(AiBuildRec,cargo,					SLE_Ubyte),
 		SLE_END()
 };
- */
+	 */
 
-/*
+	/*
 static void SaveLoad_PLYR(Player p) {
 	int i;
 
@@ -1462,5 +1479,5 @@ static void Load_PLYR()
 final ChunkHandler _player_chunk_handlers[] = {
 		{ 'PLYR', Save_PLYR, Load_PLYR, CH_ARRAY | CH_LAST},
 };
-*/
+	 */
 }

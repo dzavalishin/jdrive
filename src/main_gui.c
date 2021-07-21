@@ -1,3 +1,4 @@
+#if 0
 /* $Id: main_gui.c 3300 2005-12-14 06:49:54Z tron $ */
 
 #include "stdafx.h"

@@ -46,7 +46,7 @@ s/CT_/AcceptedCargo.CT_/g
 s/MP_/TileTypes.MP_/g
 s/OWNER_/Owner.OWNER_/g
 s/GM_/GameModes.GM_/g
-
+s/WE_/WindowEvents.WE_/g
 s/Random(/Hal.Random(/g
 
 s/InvalidateWindow(/Window.InvalidateWindow(/g
@@ -67,3 +67,7 @@ s/GetStation(/Station.GetStation(/g
 s/SET_EXPENSES_TYPE(/Player.SET_EXPENSES_TYPE(/g
 s/EXPENSES_/Player.EXPENSES_/
 
+s/min(/Math.min(/g
+s/max(/Math.max(/g
+
+s/_ai\./Ai._ai./g

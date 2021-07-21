@@ -54,6 +54,16 @@ public class Global {
 	public static GameModes _game_mode;
 	public static boolean _exit_game = false;
 
+	public static boolean _fullscreen;
+	public static boolean _double_size;
+	public static boolean _force_full_redraw;
+	public static boolean _fast_forward;
+	public static boolean _rightclick_emulate;
+
+	public static int _display_hz;
+	public static int _fullscreen_bpp;
+	
+	
 	public static int _map_log_x;
 	public static int _map_size_x;
 	public static int _map_size_y;

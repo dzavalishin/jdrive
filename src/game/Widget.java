@@ -6,7 +6,8 @@ public class Widget {
 	byte color;
 	int left, right, top, bottom;
 	int unkA;
-	StringID tooltips;
+	//StringID tooltips;
+	int tooltips;
 
 	public Widget(
 			int type,
@@ -14,7 +15,8 @@ public class Widget {
 			int color,
 			int left, int right, int top, int bottom,
 			int unkA,
-			StringID tooltips
+			//StringID tooltips
+			int tooltips
 			) {
 
 		this.left = left;
