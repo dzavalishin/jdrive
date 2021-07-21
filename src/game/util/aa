@@ -1,0 +1,78 @@
+TownNameGenerator.java:5: error: cannot find symbol
+public class TownNameGenerator extends TownNameTables 
+                                       ^
+  symbol: class TownNameTables
+TownNameGenerator.java:55: error: cannot find symbol
+		i = SeedChanceBias(0, lengthof(name_original_english_1), seed, 50);
+		                               ^
+  symbol:   variable name_original_english_1
+  location: class TownNameGenerator
+TownNameGenerator.java:57: error: cannot find symbol
+			buf += (name_original_english_1[i]);
+			        ^
+  symbol:   variable name_original_english_1
+  location: class TownNameGenerator
+TownNameGenerator.java:60: error: cannot find symbol
+		buf += ( name_original_english_2[SeedChance(4,  lengthof(name_original_english_2), seed)]);
+		         ^
+  symbol:   variable name_original_english_2
+  location: class TownNameGenerator
+TownNameGenerator.java:60: error: cannot find symbol
+		buf += ( name_original_english_2[SeedChance(4,  lengthof(name_original_english_2), seed)]);
+		                                                         ^
+  symbol:   variable name_original_english_2
+  location: class TownNameGenerator
+TownNameGenerator.java:61: error: cannot find symbol
+		buf += ( name_original_english_3[SeedChance(7,  lengthof(name_original_english_3), seed)]);
+		         ^
+  symbol:   variable name_original_english_3
+  location: class TownNameGenerator
+TownNameGenerator.java:61: error: cannot find symbol
+		buf += ( name_original_english_3[SeedChance(7,  lengthof(name_original_english_3), seed)]);
+		                                                         ^
+  symbol:   variable name_original_english_3
+  location: class TownNameGenerator
+TownNameGenerator.java:62: error: cannot find symbol
+		buf += ( name_original_english_4[SeedChance(10, lengthof(name_original_english_4), seed)]);
+		         ^
+  symbol:   variable name_original_english_4
+  location: class TownNameGenerator
+TownNameGenerator.java:62: error: cannot find symbol
+		buf += ( name_original_english_4[SeedChance(10, lengthof(name_original_english_4), seed)]);
+		                                                         ^
+  symbol:   variable name_original_english_4
+  location: class TownNameGenerator
+TownNameGenerator.java:63: error: cannot find symbol
+		buf += ( name_original_english_5[SeedChance(13, lengthof(name_original_english_5), seed)]);
+		         ^
+  symbol:   variable name_original_english_5
+  location: class TownNameGenerator
+TownNameGenerator.java:63: error: cannot find symbol
+		buf += ( name_original_english_5[SeedChance(13, lengthof(name_original_english_5), seed)]);
+		                                                         ^
+  symbol:   variable name_original_english_5
+  location: class TownNameGenerator
+TownNameGenerator.java:66: error: cannot find symbol
+		i = SeedChanceBias(15, lengthof(name_original_english_6), seed, 60);
+		                                ^
+  symbol:   variable name_original_english_6
+  location: class TownNameGenerator
+TownNameGenerator.java:68: error: cannot find symbol
+			buf += ( name_original_english_6[i]);
+			         ^
+  symbol:   variable name_original_english_6
+  location: class TownNameGenerator
+TownNameGenerator.java:608: error: cannot find symbol
+		return name_russian_real[SeedChance(0, lengthof(name_russian_real), seed)];
+		       ^
+  symbol:   variable name_russian_real
+  location: class TownNameGenerator
+TownNameGenerator.java:608: error: cannot find symbol
+		return name_russian_real[SeedChance(0, lengthof(name_russian_real), seed)];
+		                                                ^
+  symbol:   variable name_russian_real
+  location: class TownNameGenerator
+TownNameGenerator.java:613: error: generic array creation
+	{
+	^
+16 errors
