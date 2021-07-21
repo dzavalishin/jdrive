@@ -1,3 +1,4 @@
+#if 0
 /* $Id: town_cmd.c 3339 2005-12-24 20:54:31Z tron $ */
 
 #include "stdafx.h"

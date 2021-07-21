@@ -1,0 +1,54 @@
+s/(void)/()/g
+s/->/./g
+s/.*\#include.*//g
+s/const/final/g
+
+s/uint32/int/g
+s/int32/int/g
+s/uint16/int/g
+s/int16/int/g
+
+s/uint8/byte/g
+s/int18/byte/g
+
+s/bool/boolean/g
+
+s/typedef struct/class/g
+s/NULL/null/g
+
+s/_m[[]tile][.]/tile.getMap()./g
+
+s/GB(/BitOps.GB(/g
+s/HASBIT(/BitOps.HASBIT(/g
+s/CHANCE16/BitOps.CHANCE16/g
+
+s/Town\ \*/Town /g
+s/TileInfo \*/TileInfo /g
+s/DrawTownTileStruct \*/DrawTownTileStruct /g
+
+
+
+s/CMD_/Cmd.CMD_/g
+
+s/RESIZE_/Window.RESIZE_/g
+s/WC_/Window.WC_/g
+s/DC_/Cmd.DC_/g
+s/VEH_/Vehicle.VEH_/g
+s/CT_/AcceptedCargo.CT_/g
+s/MP_/TileTypes.MP_/g
+s/OWNER_/Owner.OWNER_/g
+s/GM_/GameModes.GM_/g
+
+
+
+s/IsTileType(tile\w*,/tile.IsTileType(/g
+
+s/MAX_PLAYERS/Global.MAX_PLAYERS/g
+s/SetDParam/Global.SetDParam/g
+s/_current_player/Global._current_player/g
+s/_game_mode/Global._game_mode/g
+s/GetString/Global.GetString/g
+
+s/GetStation(/Station.GetStation(/g
+s/SET_EXPENSES_TYPE(/Player.SET_EXPENSES_TYPE(/g
+s/EXPENSES_/Player.EXPENSES_/

@@ -17,17 +17,18 @@ public class MemoryPool<CType extends IPoolItem>
 {
     Map<Integer,CType> pool = new HashMap<>();
     IPoolItemFactory<CType> ctor;
-    private static int lastIndex = 0;
+    private static int lastIndex = 1;
 
 
     public MemoryPool(IPoolItemFactory<CType> ctor) {
 		this.ctor = ctor;
+		CleanPool();
 	}
     
     public void CleanPool()
     {
         pool.clear();
-        lastIndex = 0;
+        lastIndex = 1;
     }
 
     public CType GetItemFromPool(int index)

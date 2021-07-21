@@ -1,6 +1,6 @@
 package game;
 
-import game.Window.Widget;
+import game.Widget;
 import game.Window.WindowEvent;
 
 /** Struct containing information about a single bridge type
@@ -38,7 +38,7 @@ public class Bridge
 		w.DeleteWindow();
 		DoCommandP(_bridgedata.end_tile, _bridgedata.start_tile,
 			_bridgedata.indexes[i] | (_bridgedata.type << 8), CcBuildBridge,
-			CMD_BUILD_BRIDGE | CMD_AUTO | CMD_MSG(STR_5015_CAN_T_BUILD_BRIDGE_HERE));
+			Cmd.CMD_BUILD_BRIDGE | Cmd.CMD_AUTO | Cmd.CMD_MSG(STR_5015_CAN_T_BUILD_BRIDGE_HERE));
 	}
 
 	static void BuildBridgeWndProc(Window w, WindowEvent e)
@@ -94,7 +94,7 @@ public class Bridge
 		Window.WC_BUILD_BRIDGE,Window.WC_BUILD_TOOLBAR,
 		WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
 		_build_bridge_widgets,
-		BuildBridgeWndProc
+		Bridge::BuildBridgeWndProc
 	);
 
 
@@ -110,8 +110,8 @@ public class Bridge
 		-1, -1, 200, 102,
 		WC_BUILD_BRIDGE,WC_BUILD_TOOLBAR,
 		WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-		_build_road_bridge_widgets,
-		BuildBridgeWndProc
+		Bridge::_build_road_bridge_widgets,
+		Bridge::BuildBridgeWndProc
 	);
 
 
@@ -121,7 +121,7 @@ public class Bridge
 		int ret;
 		StringID errmsg;
 
-		DeleteWindowById(WC_BUILD_BRIDGE, 0);
+		Window.DeleteWindowById(Window.WC_BUILD_BRIDGE, 0);
 
 		_bridgedata.type = bridge_type;
 		_bridgedata.start_tile = start;
@@ -131,7 +131,7 @@ public class Bridge
 
 		// only query bridge building possibility once, result is the same for all bridges!
 		// returns CMD_ERROR on failure, and price on success
-		ret = DoCommandByTile(end, start, (bridge_type << 8), DC_AUTO | DC_QUERY_COST, CMD_BUILD_BRIDGE);
+		ret = DoCommandByTile(end, start, (bridge_type << 8), Cmd.DC_AUTO | Cmd.DC_QUERY_COST, Cmd.CMD_BUILD_BRIDGE);
 
 		if (CmdFailed(ret)) {
 			errmsg = new StringID(Global._error_message);

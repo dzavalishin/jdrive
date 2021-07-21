@@ -1,3 +1,4 @@
+#if 0
 /* $Id: town.h 3024 2005-10-07 07:35:15Z tron $ */
 
 #ifndef TOWN_H
@@ -87,7 +88,7 @@ void DeleteTown(Town *t);
 void ExpandTown(Town *t);
 bool GrowTown(Town *t);
 Town *CreateRandomTown(uint attempts);
-
+/*
 enum {
 	ROAD_REMOVE = 0,
 	UNMOVEABLE_REMOVE = 1,
