@@ -283,6 +283,9 @@ public class Vehicle implements IPoolItem
 
 
 
+	private static int CMD_BUILD_VEH(int x) { return _veh_build_proc_table[ x - VEH_Train]; }
+	private static int CMD_SELL_VEH(int x)	{ return _veh_sell_proc_table[ x - VEH_Train]; }
+	private static int CMD_REFIT_VEH(int x)	{ return _veh_refit_proc_table[ x - VEH_Train]; }
 
 
 
@@ -457,7 +460,7 @@ public class Vehicle implements IPoolItem
 			//UpdateVehiclePosHash(v, INVALID_COORD, 0);
 			//v.next_hash = new VehicleID(Vehicle.INVALID_VEHICLE);
 			_hash.remove(v);
-			
+
 			if (v.orders != null)
 				v.DeleteVehicleOrders();
 			v = u;
@@ -738,7 +741,7 @@ public class Vehicle implements IPoolItem
 
 	private void UpdateVehiclePosHash(int x, int y) { _hash.put(x,y, this); }
 
-	
+
 	/**
 	 * Get the pointer to the vehicle with index 'index'
 	 */
@@ -876,10 +879,10 @@ public class Vehicle implements IPoolItem
 	public void VehicleInTheWayErrMsg()
 	{
 		switch (type) {
-		case VEH_Train:    Global.Global._error_message = STR_8803_TRAIN_IN_THE_WAY;        break;
-		case VEH_Road:     Global.Global._error_message = STR_9000_ROAD_VEHICLE_IN_THE_WAY; break;
-		case VEH_Aircraft: Global.Global._error_message = STR_A015_AIRCRAFT_IN_THE_WAY;     break;
-		default:           Global.Global._error_message = STR_980E_SHIP_IN_THE_WAY;         break;
+		case VEH_Train:    Global._error_message = Str.STR_8803_TRAIN_IN_THE_WAY;        break;
+		case VEH_Road:     Global._error_message = Str.STR_9000_ROAD_VEHICLE_IN_THE_WAY; break;
+		case VEH_Aircraft: Global._error_message = Str.STR_A015_AIRCRAFT_IN_THE_WAY;     break;
+		default:           Global._error_message = Str.STR_980E_SHIP_IN_THE_WAY;         break;
 		}
 	}
 
@@ -1356,7 +1359,7 @@ public class Vehicle implements IPoolItem
 	static void VehicleEnteredDepotThisTick(Vehicle v)
 	{
 		// we need to set v.leave_depot_instantly as we have no control of it's contents at this time
-		if (HASBIT(v.current_order.flags, OFB_HALT_IN_DEPOT) && !HASBIT(v.current_order.flags, OFB_PART_OF_ORDERS) && v.current_order.type == OT_GOTO_DEPOT) {
+		if (BitOps.HASBIT(v.current_order.flags, OFB_HALT_IN_DEPOT) && !BitOps.HASBIT(v.current_order.flags, OFB_PART_OF_ORDERS) && v.current_order.type == Order.OT_GOTO_DEPOT) {
 			// we keep the vehicle in the depot since the user ordered it to stay
 			v.leave_depot_instantly = false;
 		} else {
@@ -1376,7 +1379,7 @@ public class Vehicle implements IPoolItem
 		}
 	}
 
-	static Consumer<Vehicle> _vehicle_tick_procs[] = {
+	static ConsumerOfVehicle[] _vehicle_tick_procs = {
 			Train::Train_Tick,
 			RoadVeh_Tick,
 			Ship_Tick,
@@ -1469,7 +1472,7 @@ public class Vehicle implements IPoolItem
 	boolean CanRefitTo(EngineID engine_type, CargoID cid_to)
 	{
 		CargoID cid = _global_cargo_id[GameOptions._opt_ptr.landscape][cid_to];
-		return HASBIT(_engine_info[engine_type].refit_mask, cid) != 0;
+		return BitOps.HASBIT(_engine_info[engine_type].refit_mask, cid) != 0;
 	}
 
 	static void DoDrawVehicle(final Vehicle v)
@@ -2022,7 +2025,7 @@ public class Vehicle implements IPoolItem
 				return;
 			}
 			if (v.special.unk2 != 0) {
-				v.spritenum = BitOps.GB(InteractiveRandom(), 0, 2) + 1;
+				v.spritenum = (byte) (BitOps.GB(Hal.InteractiveRandom(), 0, 2) + 1);
 			} else {
 				v.spritenum = 6;
 			}
@@ -2040,7 +2043,7 @@ public class Vehicle implements IPoolItem
 		}
 
 		if (b.y == 4 && b.x == 1) {
-			if (v.z_pos > 180 || CHANCE16I(1, 96, InteractiveRandom())) {
+			if (v.z_pos > 180 || BitOps.CHANCE16I(1, 96, Hal.InteractiveRandom())) {
 				v.spritenum = 5;
 				// TODO SndPlayVehicleFx(SND_2F_POP, v);
 			}
@@ -2074,7 +2077,7 @@ public class Vehicle implements IPoolItem
 	//typedef void EffectInitProc(Vehicle v);
 	//typedef void EffectTickProc(Vehicle v);
 
-	static final Consumer<Vehicle> []  _effect_init_procs = {
+	static final ConsumerOfVehicle []  _effect_init_procs = {
 			Vehicle::ChimneySmokeInit,
 			Vehicle::SteamSmokeInit,
 			Vehicle::DieselSmokeInit,
@@ -2087,7 +2090,7 @@ public class Vehicle implements IPoolItem
 			Vehicle::BubbleInit,
 	};
 
-	static final Consumer<Vehicle>  _effect_tick_procs[] = {
+	static final ConsumerOfVehicle  _effect_tick_procs[] = {
 			Vehicle::ChimneySmokeTick,
 			Vehicle::SteamSmokeTick,
 			Vehicle::DieselSmokeTick,
@@ -2222,24 +2225,24 @@ public class Vehicle implements IPoolItem
 		if (v.type == VEH_Ship) rel += 0x6666;
 
 		/* disabled breakdowns? */
-		if (Global._opt.diff.vehicle_breakdowns < 1) return;
+		if (GameOptions._opt.diff.vehicle_breakdowns < 1) return;
 
 		/* reduced breakdowns? */
-		if (Global._opt.diff.vehicle_breakdowns == 1) rel += 0x6666;
+		if (GameOptions._opt.diff.vehicle_breakdowns == 1) rel += 0x6666;
 
 		/* check if to break down */
 		if (_breakdown_chance[(int)Math.min(rel, 0xffff) >> 10] <= v.breakdown_chance) {
-			v.breakdown_ctr    = BitOps.GB(r, 16, 6) + 0x3F;
-			v.breakdown_delay  = BitOps.GB(r, 24, 7) + 0x80;
+			v.breakdown_ctr    = (byte) (BitOps.GB(r, 16, 6) + 0x3F);
+			v.breakdown_delay  = (byte) (BitOps.GB(r, 24, 7) + 0x80);
 			v.breakdown_chance = 0;
 		}
 	}
 
-	static final StringID _vehicle_type_names[] = {
-			STR_019F_TRAIN,
-			STR_019C_ROAD_VEHICLE,
-			STR_019E_SHIP,
-			STR_019D_AIRCRAFT,
+	static final int _vehicle_type_names[] = {
+			Str.STR_019F_TRAIN,
+			Str.STR_019C_ROAD_VEHICLE,
+			Str.STR_019E_SHIP,
+			Str.STR_019D_AIRCRAFT,
 	};
 
 	static void ShowVehicleGettingOld(Vehicle v, StringID msg)
@@ -2251,7 +2254,7 @@ public class Vehicle implements IPoolItem
 
 		Global.SetDParam(0, _vehicle_type_names[v.type - 0x10].id);
 		Global.SetDParam(1, v.unitnumber.id);
-		NewsItem.AddNewsItem(msg, NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
+		NewsItem.AddNewsItem(msg, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 	}
 
 	void AgeVehicle(Vehicle v)
@@ -2268,11 +2271,11 @@ public class Vehicle implements IPoolItem
 		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
 		if (age == -366) {
-			ShowVehicleGettingOld(v, STR_01A0_IS_GETTING_OLD);
+			ShowVehicleGettingOld(v, Str.STR_01A0_IS_GETTING_OLD);
 		} else if (age == 0) {
-			ShowVehicleGettingOld(v, STR_01A1_IS_GETTING_VERY_OLD);
+			ShowVehicleGettingOld(v, Str.STR_01A1_IS_GETTING_VERY_OLD);
 		} else if (age == 366*1 || age == 366*2 || age == 366*3 || age == 366*4 || age == 366*5) {
-			ShowVehicleGettingOld(v, STR_01A2_IS_GETTING_VERY_OLD_AND);
+			ShowVehicleGettingOld(v, Str.STR_01A2_IS_GETTING_VERY_OLD_AND);
 		}
 	}
 
@@ -2288,7 +2291,7 @@ public class Vehicle implements IPoolItem
 		int cost, total_cost = 0;
 
 		if (!IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
-		v = GetVehicle(p1);
+		v = Vehicle.GetVehicle(p1);
 		v_front = v;
 		w = null;
 		w_front = null;
@@ -2315,7 +2318,7 @@ public class Vehicle implements IPoolItem
 			} while ((v = v.next) != null);
 
 			if (!AllocateVehicles(null, veh_counter)) {
-				return_cmd_error(STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
+				return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 			}
 		}
 
@@ -2330,7 +2333,7 @@ public class Vehicle implements IPoolItem
 
 			cost = DoCommand(x, y, v.engine_type, 1, flags, CMD_BUILD_VEH(v.type));
 
-			if (CmdFailed(cost)) return cost;
+			if (Cmd.CmdFailed(cost)) return cost;
 
 			total_cost += cost;
 
@@ -2346,7 +2349,7 @@ public class Vehicle implements IPoolItem
 				if (v.type == VEH_Train && !IsFrontEngine(v)) {
 					// this s a train car
 					// add this unit to the end of the train
-					DoCommand(x, y, (w_rear.index << 16) | w.index, 1, flags, CMD_MOVE_RAIL_VEHICLE);
+					DoCommand(x, y, (w_rear.index << 16) | w.index, 1, flags, Cmd.CMD_MOVE_RAIL_VEHICLE);
 				} else {
 					// this is a front engine or not a train. It need orders
 					w_front = w;
@@ -2415,17 +2418,17 @@ public class Vehicle implements IPoolItem
 		new_engine_type = EngineReplacement(p, old_v.engine_type);
 		if (new_engine_type.id == INVALID_ENGINE) new_engine_type = old_v.engine_type;
 
-		cost = DoCommand(old_v.x_pos, old_v.y_pos, new_engine_type, 1, flags, Cmd.CMD_BUILD_VEH(old_v.type));
-		if (CmdFailed(cost)) return cost;
+		cost = DoCommand(old_v.x_pos, old_v.y_pos, new_engine_type, 1, flags, CMD_BUILD_VEH(old_v.type));
+		if (Cmd.CmdFailed(cost)) return cost;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			new_v = GetVehicle(_new_vehicle_id);
+			new_v = Vehicle.GetVehicle(_new_vehicle_id);
 			w[0] = new_v;	//we changed the vehicle, so MaybeReplaceVehicle needs to work on the new one. Now we tell it what the new one is
 
 			/* refit if needed */
 			if (new_v.type != VEH_Road) { // road vehicles can't be refitted
 				if (old_v.cargo_type != new_v.cargo_type && old_v.cargo_cap != 0 && new_v.cargo_cap != 0) {// some train engines do not have cargo capacity
-					DoCommand(0, 0, new_v.index, old_v.cargo_type, Cmd.DC_EXEC, Cmd.CMD_REFIT_VEH(new_v.type));
+					DoCommand(0, 0, new_v.index, old_v.cargo_type, Cmd.DC_EXEC, CMD_REFIT_VEH(new_v.type));
 				}
 			}
 
@@ -2450,8 +2453,8 @@ public class Vehicle implements IPoolItem
 				new_v.current_order = old_v.current_order;
 				if (old_v.type == VEH_Train){
 					// move the entire train to the new engine, including the old engine. It will be sold in a moment anyway
-					if (GetNextVehicle(old_v) != null) {
-						DoCommand(0, 0, (new_v.index << 16) | GetNextVehicle(old_v).index, 1, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
+					if (old_v.GetNextVehicle() != null) {
+						DoCommand(0, 0, (new_v.index << 16) | old_v.GetNextVehicle().index, 1, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 					}
 					new_v.rail.shortest_platform[0] = old_v.rail.shortest_platform[0];
 					new_v.rail.shortest_platform[1] = old_v.rail.shortest_platform[1];
@@ -2469,7 +2472,7 @@ public class Vehicle implements IPoolItem
 		}
 
 		// sell the engine/ find out how much you get for the old engine
-		cost += DoCommand(0, 0, old_v.index, 0, flags, Cmd.CMD_SELL_VEH(old_v.type));
+		cost += DoCommand(0, 0, old_v.index, 0, flags, CMD_SELL_VEH(old_v.type));
 
 		if (new_front) {
 			// now we assign the old unitnumber to the new vehicle
@@ -2557,20 +2560,20 @@ public class Vehicle implements IPoolItem
 					v = w;
 				}
 
-				if (CmdFailed(temp_cost)) break;
+				if (Cmd.CmdFailed(temp_cost)) break;
 
 				cost += temp_cost;
 			} while (w.type == VEH_Train && (w = GetNextVehicle(w)) != null);
 
-			if (0 == (flags & Cmd.DC_EXEC) && (CmdFailed(temp_cost) || p.money64 < (int)(cost + p.engine_renew_money) || cost == 0)) {
+			if (0 == (flags & Cmd.DC_EXEC) && (Cmd.CmdFailed(temp_cost) || p.money64 < (int)(cost + p.engine_renew_money) || cost == 0)) {
 				if (p.money64 < (int)(cost + p.engine_renew_money) && ( Global._local_player == v.owner ) && cost != 0) {
-					StringID message;
+					int message;
 					Global.SetDParam(0, v.unitnumber.id);
 					switch (v.type) {
-					case VEH_Train:    message = STR_TRAIN_AUTORENEW_FAILED;       break;
-					case VEH_Road:     message = STR_ROADVEHICLE_AUTORENEW_FAILED; break;
-					case VEH_Ship:     message = STR_SHIP_AUTORENEW_FAILED;        break;
-					case VEH_Aircraft: message = STR_AIRCRAFT_AUTORENEW_FAILED;    break;
+					case VEH_Train:    message = Str.STR_TRAIN_AUTORENEW_FAILED;       break;
+					case VEH_Road:     message = Str.STR_ROADVEHICLE_AUTORENEW_FAILED; break;
+					case VEH_Ship:     message = Str.STR_SHIP_AUTORENEW_FAILED;        break;
+					case VEH_Aircraft: message = Str.STR_AIRCRAFT_AUTORENEW_FAILED;    break;
 					// This should never happen
 					default: assert false; message = 0; break;
 					}
@@ -2583,11 +2586,12 @@ public class Vehicle implements IPoolItem
 			}
 
 			//MA CHECKS
-			if(MA_VehicleServesMS(v) > 0) {
+			if(MA_VehicleServesMS(v) > 0) 
+			{
 				for(i =  1; i <= MA_VehicleServesMS(v) ; i++) {
 					st = Station.GetStation(MA_Find_MS_InVehicleOrders(v, i));
 					if(!MA_WithinVehicleQuota(st)) {
-						Global._error_message = STR_MA_EXCEED_MAX_QUOTA;
+						Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 						return Cmd.CMD_ERROR;
 					}
 				}
@@ -2612,8 +2616,8 @@ public class Vehicle implements IPoolItem
 				}
 				if (w == null) {
 					// we failed to make the train short enough
-					SetDParam(0, v.unitnumber);
-					AddNewsItem(STR_TRAIN_TOO_LONG_AFTER_REPLACEMENT, NEWS_FLAGS(NM_SMALL, NF_VIEWPORT|NF_VEHICLE, NT_ADVICE, 0), v.index, 0);
+					Global.SetDParam(0, v.unitnumber);
+					NewsItem.AddNewsItem(Str.STR_TRAIN_TOO_LONG_AFTER_REPLACEMENT, NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 					break;
 				}
 				temp = w;
@@ -2833,7 +2837,7 @@ public class Vehicle implements IPoolItem
 		/*
 		_order_pool.forEach( (ii,order) ->
 		{
-			if (order.type != OT_DUMMY) ok = true; // TODO return true;
+			if (order.type != Order.OT_DUMMY) ok = true; // TODO return true;
 		});
 		 */
 
@@ -2992,8 +2996,8 @@ public class Vehicle implements IPoolItem
 				//dest++;
 				bak.order.add(order);
 			}
-			/* End the list with an OT_NOTHING */
-			dest.type = OT_NOTHING;
+			/* End the list with an Order.OT_NOTHING */
+			dest.type = Order.OT_NOTHING;
 			dest.next = null;
 		}
 	}
@@ -3023,7 +3027,7 @@ public class Vehicle implements IPoolItem
 		    order number is one more than the current amount of orders, and because
 		    in network the commands are queued before send, the second insert always
 		    fails in test mode. By bypassing the test-mode, that no longer is a problem. */
-		//for (i = 0; bak.order[i].type != OT_NOTHING; i++)
+		//for (i = 0; bak.order[i].type != Order.OT_NOTHING; i++)
 		for( Order bo : bak.order)
 		{
 			//if (!DoCommandP(0, v.index + (i << 16), PackOrder(bak.order[i]), null, CMD_INSERT_ORDER | CMD_NO_TEST_IF_IN_NETWORK))
@@ -3328,7 +3332,7 @@ public class Vehicle implements IPoolItem
 
 		FOR_ALL_VEHICLES(v) {
 			if (v.type == VEH_Train) {
-				if (HASBIT(v.subtype, 7) && ((v.subtype & ~0x80) == 0 || (v.subtype & ~0x80) == 4)) {
+				if (BitOps.HASBIT(v.subtype, 7) && ((v.subtype & ~0x80) == 0 || (v.subtype & ~0x80) == 4)) {
 					Vehicle u = v;
 
 					BEGIN_ENUM_WAGONS(u)
@@ -3517,3 +3521,6 @@ class GetNewVehiclePosResult {
 	TileIndex old_tile;
 	TileIndex new_tile;
 }
+
+@FunctionalInterface
+interface ConsumerOfVehicle extends Consumer<Vehicle> {}

@@ -119,7 +119,7 @@ public class Clear {
 		if (!skip_clear) {
 			int ret = DoCommandByTile(tile, 0,0, ts.flags & ~Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 
-			if (CmdFailed(ret)) {
+			if (Cmd.CmdFailed(ret)) {
 				_terraform_err_tile = tile;
 				return -1;
 			}
@@ -362,7 +362,7 @@ public class Clear {
 			curh = TileHeight(tile2);
 			while (curh != h) {
 				ret = DoCommandByTile(tile2, 8, (curh > h) ? 0 : 1, flags & ~Cmd.DC_EXEC, Cmd.CMD_TERRAFORM_LAND);
-				if (CmdFailed(ret)) break;
+				if (Cmd.CmdFailed(ret)) break;
 				cost += ret;
 
 				if (flags & Cmd.DC_EXEC) {
@@ -402,7 +402,7 @@ public class Clear {
 			return_cmd_error(Str.STR_5807_YOU_ALREADY_OWN_IT);
 
 		cost = DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
-		if (CmdFailed(cost)) return Cmd.CMD_ERROR;
+		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
 
 		if (flags & Cmd.DC_EXEC) {
 			ModifyTile(tile,

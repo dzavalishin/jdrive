@@ -1,5 +1,7 @@
 package game;
 
+import game.util.BitOps;
+
 public abstract class Hal
 {
 	// graphics
@@ -224,6 +226,20 @@ void SortResolutions(int count)
 		return (int) (Math.random() * Integer.MAX_VALUE);
 	}
 
+
+	static int InteractiveRandom()
+	{
+		int t = Global._random_seeds[1][1];
+		int s = Global._random_seeds[1][0];
+		Global._random_seeds[1][0] = s + ROR(t ^ 0x1234567F, 7) + 1;
+		return Global._random_seeds[1][1] = ROR(s, 3) - 1;
+	}
+
+	static int InteractiveRandomRange(int max)
+	{
+		return BitOps.GB(InteractiveRandom(), 0, 16) * max >> 16;
+	}
+	
 	
 	public static void ShowInfo(String help) {
 		System.err.println(help);

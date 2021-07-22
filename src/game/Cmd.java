@@ -173,7 +173,7 @@ public class Cmd {
 	 * @param res the resulting value from the command to be checked
 	 * @return Return true if the command failed, false otherwise
 	 */
-	boolean CmdFailed(int res)
+	static boolean CmdFailed(int res)
 	{
 		// lower 16bits are the StringID of the possible error
 		return res <= (CMD_ERROR | INVALID_STRING_ID);

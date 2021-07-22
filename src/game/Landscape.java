@@ -334,7 +334,7 @@ public class Landscape extends GenLandTable
 		for (x = sx; x <= ex; x += 16) {
 			for (y = sy; y <= ey; y += 16) {
 				ret = DoCommandByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags & ~Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
-				if (CmdFailed(ret)) continue;
+				if (Cmd.CmdFailed(ret)) continue;
 				cost += ret;
 				success = true;
 

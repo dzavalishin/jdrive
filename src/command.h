@@ -185,12 +185,12 @@ typedef struct Command {
  * Check the return value of a DoCommand*() function
  * @param res the resulting value from the command to be checked
  * @return Return true if the command failed, false otherwise
- */
+ * /
 static inline bool CmdFailed(int32 res)
 {
 	// lower 16bits are the StringID of the possible error
 	return res <= (CMD_ERROR | INVALID_STRING_ID);
-}
+}*/
 
 /* command.c */
 int32 DoCommand(int x, int y, uint32 p1, uint32 p2, uint32 flags, uint procc);

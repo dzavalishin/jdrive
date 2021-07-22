@@ -61,7 +61,7 @@ uint RandomRange(uint max)
 }
 #endif
 
-
+/*
 uint32 InteractiveRandom(void)
 {
 	uint32 t = _random_seeds[1][1];
@@ -74,7 +74,7 @@ uint InteractiveRandomRange(uint max)
 {
 	return GB(InteractiveRandom(), 0, 16) * max >> 16;
 }
-
+*/
 void SetDate(uint date)
 {
 	YearMonthDay ymd;

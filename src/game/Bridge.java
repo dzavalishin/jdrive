@@ -133,7 +133,7 @@ public class Bridge
 		// returns CMD_ERROR on failure, and price on success
 		ret = DoCommandByTile(end, start, (bridge_type << 8), Cmd.DC_AUTO | Cmd.DC_QUERY_COST, Cmd.CMD_BUILD_BRIDGE);
 
-		if (CmdFailed(ret)) {
+		if (Cmd.CmdFailed(ret)) {
 			errmsg = new StringID(Global._error_message);
 		} else {
 			// check which bridges can be built
