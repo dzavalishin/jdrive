@@ -143,6 +143,16 @@ public class WindowConstants {
 
 
 
+
+	// enum FrameFlags {
+	public static final int  FR_TRANSPARENT  = 0x01;  ///< Makes the background transparent if set
+	public static final int  FR_NOBORDER     = 0x08;  ///< Hide border (draws just a solid box)
+	public static final int  FR_BORDERONLY   = 0x10;  ///< Draw border only; no background
+	public static final int  FR_LOWERED      = 0x20;  ///< If set the frame is lowered and the background color brighter (ie. buttons when pressed)
+	public static final int  FR_DARKENED     = 0x40;  ///< If set the background is darker; allows for lowered frames with normal background color when used with FR_LOWERED (ie. dropdown boxes)
+
+
+
 	//enum SpecialMouseMode {
 	public static final int  WSM_NONE = 0;
 	public static final int  WSM_DRAGDROP = 1;

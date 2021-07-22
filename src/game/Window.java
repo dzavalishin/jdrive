@@ -109,7 +109,30 @@ public class Window extends WindowConstants
 
 	// -----------------------------------
 
+	def_d as_def_d() { return (def_d) custom; }
+	buildtrain_d as_buildtrain_d() { return (buildtrain_d) custom; }
+	dropdown_d as_dropdown_d() { return (dropdown_d) custom; }
+	facesel_d as_facesel_d() { return (facesel_d) custom; }
+	highscore_d as_highscore_d() { return (highscore_d) custom; }
+	menu_d as_menu_d() { return (menu_d) custom; }
+	message_d as_message_d() { return (message_d) custom; }
+	news_d as_news_d() { return (news_d) custom; }
+	order_d as_order_d() { return (order_d) custom; }
+	plstations_d as_plstations_d() { return (plstations_d) custom; }
+	refit_d as_refit_d() { return (refit_d) custom; }
+	replaceveh_d as_replaceveh_d() { return (replaceveh_d) custom; }
+	scroller_d as_scroller_d() { return (scroller_d) custom; }
+	smallmap_d as_smallmap_d() { return (smallmap_d) custom; }
+	tooltips_d as_tooltips_d() { return (tooltips_d) custom; }
+	traindepot_d as_traindepot_d() { return (traindepot_d) custom; }
+	traindetails_d as_traindetails_d() { return (traindetails_d) custom; }
+	tree_d as_tree_d() { return (tree_d) custom; }
+	vehiclelist_d as_vehiclelist_d() { return (vehiclelist_d) custom; }
+	void_d as_void_d() { return (void_d) custom; }
+	vp_d as_vp_d() { return (vp_d) custom; }
+	vp2_d as_vp2_d() { return (vp2_d) custom; }
 
+	// -----------------------------------
 
 
 	//WindowProc *wndproc;
@@ -176,7 +199,7 @@ public class Window extends WindowConstants
 
 	static void DispatchLeftClickEvent(Window  w, int x, int y)
 	{
-		WindowEvent e;
+		WindowEvent e = new WindowEvent();
 		final Widget wi;
 
 		e.pt.x = x;
@@ -236,7 +259,7 @@ public class Window extends WindowConstants
 
 	static void DispatchRightClickEvent(Window  w, int x, int y)
 	{
-		WindowEvent e;
+		WindowEvent e = new WindowEvent();
 
 		/* default tooltips handler? */
 		if (0 != (w.desc_flags & WindowDesc.WDF_STD_TOOLTIPS)) {
@@ -244,7 +267,7 @@ public class Window extends WindowConstants
 			if (e.widget < 0)
 				return; /* exit if clicked outside of widgets */
 
-			if (w.widget.get(e.widget).tooltips != null) {
+			if (w.widget.get(e.widget).tooltips != 0) {
 				GuiShowTooltips(w.widget.get(e.widget).tooltips);
 				return;
 			}
@@ -692,7 +715,7 @@ public class Window extends WindowConstants
 	 * @param *widget @see Widget pointer to the window layout and various elements
 	 * @return @see Window pointer of the newly created window
 	 */
-	Window AllocateWindow(
+	static Window AllocateWindow(
 			int x, int y, int width, int height,
 			BiConsumer<Window,WindowEvent> proc, WindowClass cls, final Widget[] widget)
 	{
@@ -855,7 +878,7 @@ public class Window extends WindowConstants
 	static Point GetAutoPlacePosition(int width, int height)
 	{
 		//Window w;
-		Point pt;
+		Point pt = new Point(0, 0);
 
 		_awap_r.width = width;
 		_awap_r.height = height;
@@ -870,7 +893,7 @@ public class Window extends WindowConstants
 
 		for (Window w : _windows) {
 			if (w.window_class.v == WC_MAIN_WINDOW) continue;
-
+			/*
 			if (IsGoodAutoPlace1(w.left+w.width+2,w.top)) goto ok_pos;
 			if (IsGoodAutoPlace1(w.left-   width-2,w.top)) goto ok_pos;
 			if (IsGoodAutoPlace1(w.left,w.top+w.height+2)) goto ok_pos;
@@ -879,15 +902,47 @@ public class Window extends WindowConstants
 			if (IsGoodAutoPlace1(w.left-   width-2,w.top+w.height-height)) goto ok_pos;
 			if (IsGoodAutoPlace1(w.left+w.width-width,w.top+w.height+2)) goto ok_pos;
 			if (IsGoodAutoPlace1(w.left+w.width-width,w.top-   height-2)) goto ok_pos;
+			 */
+			if (
+					IsGoodAutoPlace1(w.left+w.width+2,w.top) ||
+					IsGoodAutoPlace1(w.left-   width-2,w.top) ||
+					IsGoodAutoPlace1(w.left,w.top+w.height+2) ||
+					IsGoodAutoPlace1(w.left,w.top-   height-2) ||
+					IsGoodAutoPlace1(w.left+w.width+2,w.top+w.height-height) ||
+					IsGoodAutoPlace1(w.left-   width-2,w.top+w.height-height) ||
+					IsGoodAutoPlace1(w.left+w.width-width,w.top+w.height+2) ||
+					IsGoodAutoPlace1(w.left+w.width-width,w.top-   height-2) 
+					)
+			{
+				pt.x = _awap_r.left;
+				pt.y = _awap_r.top;
+				return pt;
+			}
+
 		}
 
 		for (Window w : _windows) {
 			if (w.window_class.v == WC_MAIN_WINDOW) continue;
 
+			/*
 			if (IsGoodAutoPlace2(w.left+w.width+2,w.top)) goto ok_pos;
 			if (IsGoodAutoPlace2(w.left-   width-2,w.top)) goto ok_pos;
 			if (IsGoodAutoPlace2(w.left,w.top+w.height+2)) goto ok_pos;
 			if (IsGoodAutoPlace2(w.left,w.top-   height-2)) goto ok_pos;
+			 */
+
+			if(
+					IsGoodAutoPlace2(w.left+w.width+2,w.top) ||
+					IsGoodAutoPlace2(w.left-   width-2,w.top) ||
+					IsGoodAutoPlace2(w.left,w.top+w.height+2) ||
+					IsGoodAutoPlace2(w.left,w.top-   height-2) 
+					)
+			{
+				pt.x = _awap_r.left;
+				pt.y = _awap_r.top;
+				return pt;
+			}
+
 		}
 
 		{
@@ -905,18 +960,21 @@ public class Window extends WindowConstants
 						again = true;
 						break;
 					}
-					if(!again) break;
 				}
+				if(!again) break;				
 			}
+
 			pt.x = left;
 			pt.y = top;
 			return pt;
 		}
 
+		/*
 		//ok_pos:;
 		pt.x = _awap_r.left;
 		pt.y = _awap_r.top;
 		return pt;
+		*/
 	}
 
 	Window AllocateWindowAutoPlace(
@@ -1795,8 +1853,8 @@ public class Window extends WindowConstants
 				Global.DEBUG_misc( 2, "cursor: 0x%X (%d)", Hal._cursor.sprite, Hal._cursor.sprite);
 				if (ViewPort._thd.place_mode != 0 &&
 						// query button and place sign button work in pause mode
-						Hal._cursor.sprite != SPR_CURSOR_QUERY &&
-						Hal._cursor.sprite != SPR_CURSOR_SIGN &&
+						Hal._cursor.sprite.id != Sprite.SPR_CURSOR_QUERY &&
+						Hal._cursor.sprite.id != Sprite.SPR_CURSOR_SIGN &&
 						Global._pause &&
 						0 == Global._cheats.build_in_pause.value) {
 					return;
@@ -1906,7 +1964,7 @@ public class Window extends WindowConstants
 
 			menu_d md = (menu_d) w.custom;
 			//if (y < WP(w, final menu_d).item_count &&
-			//		!HASBIT(WP(w, final menu_d).disabled_items, y)) 
+			//		!BitOps.HASBIT(WP(w, final menu_d).disabled_items, y)) 
 			if (y < md.item_count &&
 					!BitOps.HASBIT(md.disabled_items, y)) 
 			{
@@ -1925,7 +1983,7 @@ public class Window extends WindowConstants
 				w.SetWindowDirty();
 		}
 	}
-	
+
 	static void InvalidateWindow(int cls, int number)
 	{
 		//final Window  w;
@@ -1974,7 +2032,7 @@ public class Window extends WindowConstants
 			if (w.window_class.v == cls) w.SetWindowDirty();
 		}
 	}
-	
+
 
 	static void CallWindowTickEvent()
 	{
@@ -2299,7 +2357,7 @@ public class Window extends WindowConstants
 			}
 			//goto draw_default;
 			if (disabled) 
-				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, _color_list[wi.color&0xF].unk2 | PALETTE_MODIFIER_GREYOUT);			
+				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, Global._color_list[wi.color&0xF].unk2 | Sprite.PALETTE_MODIFIER_GREYOUT);			
 			break;
 		}
 
@@ -2318,19 +2376,20 @@ public class Window extends WindowConstants
 			//DrawStringCentered((r.left + r.right+1)>>1, ((r.top+r.bottom + 1)>>1) - 5, str, 0);
 			//goto draw_default;
 			if (disabled) 
-				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, _color_list[wi.color&0xF].unk2 | PALETTE_MODIFIER_GREYOUT);			
+				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, Global._color_list[wi.color&0xF].unk2 | Sprite.PALETTE_MODIFIER_GREYOUT);			
 			break;
 		}
 
 		case WWT_6: {
-			StringID str;
+			//StringID str;
+			int str;
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, FR_LOWERED | FR_DARKENED);
 
 			str = wi.unkA;
-			if (str != null) DrawString(r.left + 2, r.top + 1, str, 0);
+			if (str != 0) Gfx.DrawString(r.left + 2, r.top + 1, new StringID( str ), 0);
 			//goto draw_default;
 			if (disabled) 
-				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, _color_list[wi.color&0xF].unk2 | PALETTE_MODIFIER_GREYOUT);			
+				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, Global._color_list[wi.color&0xF].unk2 | Sprite.PALETTE_MODIFIER_GREYOUT);			
 			break;
 		}
 
@@ -2347,7 +2406,7 @@ public class Window extends WindowConstants
 			d = BitOps.GB(wi.unkA, 8, 8);
 			amt2 = (wi.bottom - wi.top + 1) / d;
 
-			color = _color_list[wi.color & 0xF].window_color_bgb;
+			color = Global._color_list[wi.color & 0xF].window_color_bgb;
 
 			x = r.left;
 			for (ctr = c; ctr > 1; ctr--) {
@@ -2361,7 +2420,7 @@ public class Window extends WindowConstants
 				Gfx.GfxFillRect(r.left + 1, x, r.right - 1, x, color);
 			}
 
-			color = _color_list[wi.color&0xF].window_color_1b;
+			color = Global._color_list[wi.color&0xF].window_color_1b;
 
 			x = r.left - 1;
 			for (ctr = c; ctr > 1; ctr--) {
@@ -2377,7 +2436,7 @@ public class Window extends WindowConstants
 
 			//goto draw_default;
 			if (disabled) 
-				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, _color_list[wi.color&0xF].unk2 | PALETTE_MODIFIER_GREYOUT);			
+				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, Global._color_list[wi.color&0xF].unk2 | Sprite.PALETTE_MODIFIER_GREYOUT);			
 			break;
 		}
 
@@ -2391,18 +2450,18 @@ public class Window extends WindowConstants
 			// draw up/down buttons
 			clicked = !!((flags4 & (WF_SCROLL_UP | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_UP);
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.top + 9, wi.color, (clicked) ? FR_LOWERED : 0);
-			DoDrawString(UPARROW, r.left + 2 + clickshift, r.top + clickshift, 0x10);
+			Gfx.DoDrawString(Gfx.UPARROW, r.left + 2 + clickshift, r.top + clickshift, 0x10);
 
 			clicked = !!(((flags4 & (WF_SCROLL_DOWN | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_DOWN));
 			Gfx.DrawFrameRect(r.left, r.bottom - 9, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
-			DoDrawString(DOWNARROW, r.left + 2 + clickshift, r.bottom - 9 + clickshift, 0x10);
+			Gfx.DoDrawString(Gfx.DOWNARROW, r.left + 2 + clickshift, r.bottom - 9 + clickshift, 0x10);
 
-			c1 = _color_list[wi.color&0xF].window_color_1a;
-			c2 = _color_list[wi.color&0xF].window_color_2;
+			c1 = Global._color_list[wi.color&0xF].window_color_1a;
+			c2 = Global._color_list[wi.color&0xF].window_color_2;
 
 			// draw "shaded" background
 			Gfx.GfxFillRect(r.left, r.top+10, r.right, r.bottom-10, c2);
-			Gfx.GfxFillRect(r.left, r.top+10, r.right, r.bottom-10, c1 | PALETTE_MODIFIER_GREYOUT);
+			Gfx.GfxFillRect(r.left, r.top+10, r.right, r.bottom-10, c1 | Sprite.PALETTE_MODIFIER_GREYOUT);
 
 			// draw shaded lines
 			Gfx.GfxFillRect(r.left+2, r.top+10, r.left+2, r.bottom-10, c1);
@@ -2410,8 +2469,8 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+7, r.top+10, r.left+7, r.bottom-10, c1);
 			Gfx.GfxFillRect(r.left+8, r.top+10, r.left+8, r.bottom-10, c2);
 
-			pt = HandleScrollbarHittest(w.vscroll, r.top, r.bottom);
-			Gfx.DrawFrameRect(r.left, pt.x, r.right, pt.y, wi.color, (w.flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_MIDDLE ? FR_LOWERED : 0);
+			pt = HandleScrollbarHittest(vscroll, r.top, r.bottom);
+			Gfx.DrawFrameRect(r.left, pt.x, r.right, pt.y, wi.color, (flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_MIDDLE ? FR_LOWERED : 0);
 			break;
 		}
 		case WWT_SCROLL2BAR: {
@@ -2421,20 +2480,20 @@ public class Window extends WindowConstants
 			assert(r.right - r.left == 11); // XXX - to ensure the same sizes are used everywhere!
 
 			// draw up/down buttons
-			clicked = !!((w.flags4 & (WF_SCROLL_UP | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_UP | WF_SCROLL2));
-			DrawFrameRect(r.left, r.top, r.right, r.top + 9, wi.color,  (clicked) ? FR_LOWERED : 0);
-			DoDrawString(UPARROW, r.left + 2 + clicked, r.top + clicked, 0x10);
+			clicked = !!((flags4 & (WF_SCROLL_UP | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_UP | WF_SCROLL2));
+			Gfx.DrawFrameRect(r.left, r.top, r.right, r.top + 9, wi.color,  (clicked) ? FR_LOWERED : 0);
+			Gfx.DoDrawString(Gfx.UPARROW, r.left + 2 + (clicked ? 1 : 0), r.top + (clicked ? 1 : 0), 0x10);
 
-			clicked = !!((w.flags4 & (WF_SCROLL_DOWN | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_DOWN | WF_SCROLL2));
-			DrawFrameRect(r.left, r.bottom - 9, r.right, r.bottom, wi.color,  (clicked) ? FR_LOWERED : 0);
-			DoDrawString(DOWNARROW, r.left + 2 + clicked, r.bottom - 9 + clicked, 0x10);
+			clicked = !!((flags4 & (WF_SCROLL_DOWN | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_DOWN | WF_SCROLL2));
+			Gfx.DrawFrameRect(r.left, r.bottom - 9, r.right, r.bottom, wi.color,  (clicked) ? FR_LOWERED : 0);
+			Gfx.DoDrawString(Gfx.DOWNARROW, r.left + 2 + (clicked ? 1 : 0), r.bottom - 9 + (clicked ? 1 : 0), 0x10);
 
-			c1 = _color_list[wi.color&0xF].window_color_1a;
-			c2 = _color_list[wi.color&0xF].window_color_2;
+			c1 = Global._color_list[wi.color&0xF].window_color_1a;
+			c2 = Global._color_list[wi.color&0xF].window_color_2;
 
 			// draw "shaded" background
 			Gfx.GfxFillRect(r.left, r.top+10, r.right, r.bottom-10, c2);
-			Gfx.GfxFillRect(r.left, r.top+10, r.right, r.bottom-10, c1 | PALETTE_MODIFIER_GREYOUT);
+			Gfx.GfxFillRect(r.left, r.top+10, r.right, r.bottom-10, c1 | Sprite.PALETTE_MODIFIER_GREYOUT);
 
 			// draw shaded lines
 			Gfx.GfxFillRect(r.left+2, r.top+10, r.left+2, r.bottom-10, c1);
@@ -2442,8 +2501,8 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+7, r.top+10, r.left+7, r.bottom-10, c1);
 			Gfx.GfxFillRect(r.left+8, r.top+10, r.left+8, r.bottom-10, c2);
 
-			pt = HandleScrollbarHittest(w.vscroll2, r.top, r.bottom);
-			DrawFrameRect(r.left, pt.x, r.right, pt.y, wi.color, (w.flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_MIDDLE | WF_SCROLL2) ? FR_LOWERED : 0);
+			pt = HandleScrollbarHittest(vscroll2, r.top, r.bottom);
+			Gfx.DrawFrameRect(r.left, pt.x, r.right, pt.y, wi.color, (flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_MIDDLE | WF_SCROLL2) ? FR_LOWERED : 0);
 			break;
 		}
 
@@ -2456,18 +2515,18 @@ public class Window extends WindowConstants
 
 			clicked = !!((w.flags4 & (WF_SCROLL_UP | WF_HSCROLL)) == (WF_SCROLL_UP | WF_HSCROLL));
 			DrawFrameRect(r.left, r.top, r.left + 9, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
-			DrawSprite(SPR_ARROW_LEFT, r.left + 1 + clicked, r.top + 1 + clicked);
+			DrawSprite(Sprite.SPR_ARROW_LEFT, r.left + 1 + (clicked ? 1 : 0), r.top + 1 + (clicked ? 1 : 0));
 
 			clicked = !!((w.flags4 & (WF_SCROLL_DOWN | WF_HSCROLL)) == (WF_SCROLL_DOWN | WF_HSCROLL));
 			DrawFrameRect(r.right-9, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
-			DrawSprite(SPR_ARROW_RIGHT, r.right - 8 + clicked, r.top + 1 + clicked);
+			DrawSprite(Sprite.SPR_ARROW_RIGHT, r.right - 8 + (clicked ? 1 : 0), r.top + 1 + (clicked ? 1 : 0));
 
-			c1 = _color_list[wi.color&0xF].window_color_1a;
-			c2 = _color_list[wi.color&0xF].window_color_2;
+			c1 = Global._color_list[wi.color&0xF].window_color_1a;
+			c2 = Global._color_list[wi.color&0xF].window_color_2;
 
 			// draw "shaded" background
 			Gfx.GfxFillRect(r.left+10, r.top, r.right-10, r.bottom, c2);
-			Gfx.GfxFillRect(r.left+10, r.top, r.right-10, r.bottom, c1 | PALETTE_MODIFIER_GREYOUT);
+			Gfx.GfxFillRect(r.left+10, r.top, r.right-10, r.bottom, c1 | Sprite.PALETTE_MODIFIER_GREYOUT);
 
 			// draw shaded lines
 			Gfx.GfxFillRect(r.left+10, r.top+2, r.right-10, r.top+2, c1);
@@ -2476,7 +2535,7 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+10, r.top+8, r.right-10, r.top+8, c2);
 
 			// draw actual scrollbar
-			pt = HandleScrollbarHittest(&w.hscroll, r.left, r.right);
+			pt = HandleScrollbarHittest(w.hscroll, r.left, r.right);
 			DrawFrameRect(pt.x, r.top, pt.y, r.bottom, wi.color, (w.flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL)) == (WF_SCROLL_MIDDLE | WF_HSCROLL) ? FR_LOWERED : 0);
 
 			break;
@@ -2486,10 +2545,10 @@ public class Window extends WindowConstants
 			int c1,c2;
 			int x2 = r.left; // by default the left side is the left side of the widget
 
-			if (wi.unkA != 0) x2 = DrawString(r.left + 6, r.top, wi.unkA, 0);
+			if (wi.unkA != 0) x2 = Gfx.DrawString(r.left + 6, r.top, wi.unkA, 0);
 
-			c1 = _color_list[wi.color].window_color_1a;
-			c2 = _color_list[wi.color].window_color_2;
+			c1 = Global._color_list[wi.color].window_color_1a;
+			c2 = Global._color_list[wi.color].window_color_2;
 
 			//Line from upper left corner to start of text
 			Gfx.GfxFillRect(r.left, r.top+4, r.left+4,r.top+4, c1);
@@ -2512,49 +2571,49 @@ public class Window extends WindowConstants
 
 			//goto draw_default;
 			if (disabled) 
-				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, _color_list[wi.color&0xF].unk2 | PALETTE_MODIFIER_GREYOUT);			
+				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, Global._color_list[wi.color&0xF].unk2 | Sprite.PALETTE_MODIFIER_GREYOUT);			
 			break;
 		}
 
 		case WWT_STICKYBOX: {
 			assert(r.right - r.left == 11); // XXX - to ensure the same sizes are used everywhere!
 
-			clicked = !!(w.flags4 & WF_STICKY);
-			DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
-			DrawSprite((clicked) ? SPR_PIN_UP : SPR_PIN_DOWN, r.left + 2 + clicked, r.top + 3 + clicked);
+			clicked = 0 != (flags4 & WF_STICKY);
+			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
+			Gfx.DrawSprite((clicked) ? Sprite.SPR_PIN_UP : Sprite.SPR_PIN_DOWN, r.left + 2 + (clicked ? 1 : 0), r.top + 3 + (clicked ? 1 : 0));
 			break;
 		}
 
 		case WWT_RESIZEBOX: {
 			assert(r.right - r.left == 11); // XXX - to ensure the same sizes are used everywhere!
 
-			clicked = !!(w.flags4 & WF_SIZING);
-			DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
-			DrawSprite(SPR_WINDOW_RESIZE, r.left + 3 + clicked, r.top + 3 + clicked);
+			clicked = 0 != (flags4 & WF_SIZING);
+			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
+			Gfx.DrawSprite(Sprite.SPR_WINDOW_RESIZE, r.left + 3 + (clicked ? 1 : 0), r.top + 3 + (clicked ? 1 : 0));
 			break;
 		}
 
 		case WWT_CLOSEBOX: {
 			assert(r.right - r.left == 10); // ensure the same sizes are used everywhere
 
-			DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, 0);
-			DrawString(r.left + 2, r.top + 2, STR_00C5, 0);
+			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, 0);
+			Gfx.DrawString(r.left + 2, r.top + 2, new StringID( Str.STR_00C5 ), 0);
 			break;
 		}
 
 		case WWT_CAPTION: {
 			assert(r.bottom - r.top == 13); // XXX - to ensure the same sizes are used everywhere!
-			DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, FR_BORDERONLY);
-			DrawFrameRect(r.left+1, r.top+1, r.right-1, r.bottom-1, wi.color, (w.caption_color == 0xFF) ? FR_LOWERED | FR_DARKENED : FR_LOWERED | FR_DARKENED | FR_BORDERONLY);
+			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, FR_BORDERONLY);
+			Gfx.DrawFrameRect(r.left+1, r.top+1, r.right-1, r.bottom-1, wi.color, (caption_color == 0xFF) ? FR_LOWERED | FR_DARKENED : FR_LOWERED | FR_DARKENED | FR_BORDERONLY);
 
-			if (w.caption_color != 0xFF) {
-				Gfx.GfxFillRect(r.left+2, r.top+2, r.right-2, r.bottom-2, _color_list[_player_colors[w.caption_color]].window_color_1b);
+			if (caption_color != 0xFF) {
+				Gfx.GfxFillRect(r.left+2, r.top+2, r.right-2, r.bottom-2, Global._color_list[Global._player_colors[caption_color]].window_color_1b);
 			}
 
-			DrawStringCentered( (r.left+r.right+1)>>1, r.top+2, wi.unkA, 0x84);
+			Gfx.DrawStringCentered( (r.left+r.right+1)>>1, r.top+2, new StringID( wi.unkA ), 0x84);
 			//draw_default:;
-			if (cur_disabled & 1) {
-				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, _color_list[wi.color&0xF].unk2 | PALETTE_MODIFIER_GREYOUT);
+			if(0 != (cur_disabled & 1)) {
+				Gfx.GfxFillRect(r.left+1, r.top+1, r.right-1, r.bottom-1, Global._color_list[wi.color&0xF].unk2 | Sprite.PALETTE_MODIFIER_GREYOUT);
 			}
 		}
 		}
@@ -2578,14 +2637,13 @@ public class Window extends WindowConstants
 
 		if (0 != (flags4 & WF_WHITE_BORDER_MASK)) {
 			//DrawFrameRect(w.left, w.top, w.left + w.width-1, w.top+w.height-1, 0xF, 0x10);
-			DrawFrameRect(0, 0, w.width-1, w.height-1, 0xF, FR_BORDERONLY);
+			Gfx.DrawFrameRect(0, 0, width-1, height-1, 0xF, FR_BORDERONLY);
 		}
 
 	}
 
 	static final Widget _dropdown_menu_widgets[] = {
-			new Widget(     WWT_IMGBTN,   RESIZE_NONE,     0,     0, 0,     0, 0, 0x0, STR_NULL),
-			new Widget(   WIDGETS_END),
+			new Widget(     WWT_IMGBTN,   RESIZE_NONE,     0,     0, 0,     0, 0, 0x0, Str.STR_NULL),
 	};
 
 	static int GetDropdownItem(final Window w)
@@ -2593,26 +2651,26 @@ public class Window extends WindowConstants
 		byte item, counter;
 		int y;
 
-		if (GetWidgetFromPos(w, _cursor.pos.x - w.left, _cursor.pos.y - w.top) < 0)
+		if (w.GetWidgetFromPos(Hal._cursor.pos.x - w.left, Hal._cursor.pos.y - w.top) < 0)
 			return -1;
 
-		y = _cursor.pos.y - w.top - 2;
+		y = Hal._cursor.pos.y - w.top - 2;
 
 		if (y < 0)
 			return - 1;
 
-		item = y / 10;
-		if (item >= WP(w,dropdown_d).num_items || (HASBIT(WP(w,dropdown_d).disabled_state, item) && !HASBIT(WP(w,dropdown_d).hidden_state, item)) || WP(w,dropdown_d).items[item] == 0)
+		item = (byte) (y / 10);
+		if (item >= w.as_dropdown_d().num_items || (BitOps.HASBIT(w.as_dropdown_d().disabled_state, item) && !BitOps.HASBIT(w.as_dropdown_d().hidden_state, item)) || w.as_dropdown_d().items[item] == 0)
 			return - 1;
 
 		// Skip hidden items -- +1 for each hidden item before the clicked item.
 		for (counter = 0; item >= counter; ++counter)
-			if (HASBIT(WP(w,dropdown_d).hidden_state, counter)) item++;
+			if (BitOps.HASBIT(w.as_dropdown_d().hidden_state, counter)) item++;
 
 		return item;
 	}
 
-	static void DropdownMenuWndProc(Window *w, WindowEvent *e)
+	static void DropdownMenuWndProc(Window w, WindowEvent e)
 	{
 		int item;
 
@@ -2620,32 +2678,32 @@ public class Window extends WindowConstants
 		case WE_PAINT: {
 			int x,y,i,sel;
 
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			x = 1;
 			y = 2;
-			sel    = WP(w,dropdown_d).selected_index;
+			sel = w.as_dropdown_d().selected_index;
 
-			for (i = 0; WP(w,dropdown_d).items[i] != INVALID_STRING_ID; i++) {
-				if (HASBIT(WP(w,dropdown_d).hidden_state, i)) {
+			for (i = 0; w.as_dropdown_d().items[i] != INVALID_STRING_ID; i++) {
+				if (BitOps.HASBIT(w.as_dropdown_d().hidden_state, i)) {
 					sel--;
 					continue;
 				}
-				if (WP(w,dropdown_d).items[i] != 0) {
-					if (sel == 0) GfxFillRect(x + 1, y, x + w.width - 4, y + 9, 0);
-					DrawString(x + 2, y, WP(w,dropdown_d).items[i], sel == 0 ? 12 : 16);
+				if (w.as_dropdown_d().items[i].id != 0) {
+					if (sel == 0) Gfx.GfxFillRect(x + 1, y, x + w.width - 4, y + 9, 0);
+					Gfx.DrawString(x + 2, y, w.as_dropdown_d().items[i], sel == 0 ? 12 : 16);
 
-					if (HASBIT(WP(w,dropdown_d).disabled_state, i)) {
-						GfxFillRect(x, y, x + w.width - 3, y + 9,
-								PALETTE_MODIFIER_GREYOUT | _color_list[_dropdown_menu_widgets[0].color].window_color_bga
+					if (BitOps.HASBIT(w.as_dropdown_d().disabled_state, i)) {
+						Gfx.GfxFillRect(x, y, x + w.width - 3, y + 9,
+								Sprite.PALETTE_MODIFIER_GREYOUT | Global._color_list[_dropdown_menu_widgets[0].color].window_color_bga
 								);
 					}
 				} else {
-					int c1 = _color_list[_dropdown_menu_widgets[0].color].window_color_1a;
-					int c2 = _color_list[_dropdown_menu_widgets[0].color].window_color_2;
+					int c1 = Global._color_list[_dropdown_menu_widgets[0].color].window_color_1a;
+					int c2 = Global._color_list[_dropdown_menu_widgets[0].color].window_color_2;
 
-					GfxFillRect(x + 1, y + 3, x + w.width - 5, y + 3, c1);
-					GfxFillRect(x + 1, y + 4, x + w.width - 5, y + 4, c2);
+					Gfx.GfxFillRect(x + 1, y + 3, x + w.width - 5, y + 3, c1);
+					Gfx.GfxFillRect(x + 1, y + 4, x + w.width - 5, y + 4, c2);
 				}
 				y += 10;
 				sel--;
@@ -2655,85 +2713,85 @@ public class Window extends WindowConstants
 		case WE_CLICK: {
 			item = GetDropdownItem(w);
 			if (item >= 0) {
-				WP(w,dropdown_d).click_delay = 4;
-				WP(w,dropdown_d).selected_index = item;
-				SetWindowDirty(w);
+				w.as_dropdown_d().click_delay = 4;
+				w.as_dropdown_d().selected_index = item;
+				w.SetWindowDirty();
 			}
 		} break;
 
 		case WE_MOUSELOOP: {
-			Window *w2 = FindWindowById(WP(w,dropdown_d).parent_wnd_class, WP(w,dropdown_d).parent_wnd_num);
-			if (w2 == NULL) {
-				DeleteWindow(w);
+			Window w2 = FindWindowById(w.as_dropdown_d().parent_wnd_class, w.as_dropdown_d().parent_wnd_num);
+			if (w2 == null) {
+				w.DeleteWindow();
 				return;
 			}
 
-			if (WP(w,dropdown_d).click_delay != 0 && --WP(w,dropdown_d).click_delay == 0) {
-				WindowEvent e;
-				e.event = WE_DROPDOWN_SELECT;
-				e.dropdown.button = WP(w,dropdown_d).parent_button;
-				e.dropdown.index = WP(w,dropdown_d).selected_index;
-				w2.wndproc(w2, &e);
-				DeleteWindow(w);
+			if (w.as_dropdown_d().click_delay != 0 && --w.as_dropdown_d().click_delay == 0) {
+				WindowEvent ee = new WindowEvent();
+				ee.event = WindowEvents.WE_DROPDOWN_SELECT;
+				ee.button = w.as_dropdown_d().parent_button;
+				ee.index = w.as_dropdown_d().selected_index;
+				w2.wndproc.accept(w2, ee);
+				w.DeleteWindow();
 				return;
 			}
 
-			if (WP(w,dropdown_d).drag_mode) {
+			if (w.as_dropdown_d().drag_mode) {
 				item = GetDropdownItem(w);
 
 				if (!_left_button_clicked) {
-					WP(w,dropdown_d).drag_mode = false;
+					w.as_dropdown_d().drag_mode = false;
 					if (item < 0) return;
-					WP(w,dropdown_d).click_delay = 2;
+					w.as_dropdown_d().click_delay = 2;
 				} else {
 					if (item < 0) return;
 				}
 
-				WP(w,dropdown_d).selected_index = item;
-				SetWindowDirty(w);
+				w.as_dropdown_d().selected_index = (byte) item;
+				w.SetWindowDirty();
 			}
 		} break;
 
 		case WE_DESTROY: {
-			Window *w2 = FindWindowById(WP(w,dropdown_d).parent_wnd_class, WP(w,dropdown_d).parent_wnd_num);
-			if (w2 != NULL) {
-				CLRBIT(w2.click_state, WP(w,dropdown_d).parent_button);
-				InvalidateWidget(w2, WP(w,dropdown_d).parent_button);
+			Window w2 = FindWindowById(w.as_dropdown_d().parent_wnd_class, w.as_dropdown_d().parent_wnd_num);
+			if (w2 != null) {
+				w2.click_state = BitOps.RETCLRBIT(w2.click_state, w.as_dropdown_d().parent_button);
+				w2.InvalidateWidget(w.as_dropdown_d().parent_button);
 			}
 		} break;
 		}
 	}
 
-	void ShowDropDownMenu(Window *w, final StringID *strings, int selected, int button, uint32 disabled_mask, uint32 hidden_mask)
+	void ShowDropDownMenu(Window w, final StringID []strings, int selected, int button, int disabled_mask, int hidden_mask)
 	{
 		WindowNumber num;
 		WindowClass cls;
 		int i;
-		final Widget *wi;
-		Window *w2;
-		uint32 old_click_state = w.click_state;
+		final Widget wi;
+		Window w2;
+		int old_click_state = w.click_state;
 
 		cls = w.window_class;
 		num = w.window_number;
 		DeleteWindowById(WC_DROPDOWN_MENU, 0);
 		w = FindWindowById(cls, num);
 
-		if (HASBIT(old_click_state, button)) return;
+		if (BitOps.HASBIT(old_click_state, button)) return;
 
-		SETBIT(w.click_state, button);
+		w.click_state = BitOps.RETSETBIT(w.click_state, button);
 
-		InvalidateWidget(w, button);
+		w.InvalidateWidget(button);
 
 		for (i = 0; strings[i] != INVALID_STRING_ID; i++) {}
 		if (i == 0) return;
 
-		wi = &w.widget[button];
+		wi = w.widget.get(button);
 
 		if (hidden_mask != 0) {
-			uint j;
+			int j;
 
 			for (j = 0; strings[j] != INVALID_STRING_ID; j++) {
-				if (HASBIT(hidden_mask, j)) i--;
+				if (BitOps.HASBIT(hidden_mask, j)) i--;
 			}
 		}
 
@@ -2742,7 +2800,7 @@ public class Window extends WindowConstants
 				w.top + wi.bottom + 2,
 				wi.right - wi[-1].left + 1,
 				i * 10 + 4,
-				DropdownMenuWndProc,
+				Window::DropdownMenuWndProc,
 				0x3F,
 				_dropdown_menu_widgets);
 
@@ -2752,19 +2810,19 @@ public class Window extends WindowConstants
 
 		w2.flags4 &= ~WF_WHITE_BORDER_MASK;
 
-		WP(w2,dropdown_d).disabled_state = disabled_mask;
-		WP(w2,dropdown_d).hidden_state = hidden_mask;
+		w2.as_dropdown_d().disabled_state = disabled_mask;
+		w2.as_dropdown_d().hidden_state = hidden_mask;
 
-		WP(w2,dropdown_d).parent_wnd_class = w.window_class;
-		WP(w2,dropdown_d).parent_wnd_num = w.window_number;
-		WP(w2,dropdown_d).parent_button = button;
+		w2.as_dropdown_d().parent_wnd_class = w.window_class;
+		w2.as_dropdown_d().parent_wnd_num = w.window_number;
+		w2.as_dropdown_d().parent_button = (byte) button;
 
-		WP(w2,dropdown_d).num_items = i;
-		WP(w2,dropdown_d).selected_index = selected;
-		WP(w2,dropdown_d).items = strings;
+		w2.as_dropdown_d().num_items = i;
+		w2.as_dropdown_d().selected_index = (byte) selected;
+		w2.as_dropdown_d().items = strings;
 
-		WP(w2,dropdown_d).click_delay = 0;
-		WP(w2,dropdown_d).drag_mode = true;
+		w2.as_dropdown_d().click_delay = 0;
+		w2.as_dropdown_d().drag_mode = true;
 	}
 
 
@@ -2803,23 +2861,7 @@ class ResizeInfo {
 } 
 
 
-class WindowClass  {
 
-	public WindowClass(int cls) {
-		v = cls;
-	}
-
-	int v;
-}
-
-
-class WindowNumber {
-	public WindowNumber(int value) {
-		n = value;
-	}
-
-	int n;
-}
 
 
 class Scrollbar {
@@ -2840,46 +2882,6 @@ class Scrollbar {
 
 
 
-/* XXX - outside "byte event" so you can set event directly without going into
- * the union elements at first. Because of this every first element of the union
- * MUST BE 'byte event'. Whoever did this must get shot! Scheduled for immediate
- * rewrite after 0.4.0 */
-class WindowEvent {
-	//int 
-	WindowEvents event;
-	Point pt;
-
-	// click, dragdrop, mouseover
-	int widget;
-
-	// place
-	TileIndex tile;
-	TileIndex starttile;
-	int userdata;
-
-	// sizing
-	Point size;
-	Point diff;
-
-	// edittext
-	String str;
-
-	// popupmenu;
-
-	// dropdown
-	int button;
-	int index;
-
-	// keypress
-	boolean cont;   // continue the search? (default true)
-	byte ascii;  // 8-bit ASCII-value of the key
-	int keycode;// untranslated key (including shift-state)
-
-	// message
-	int msg;    // message to be sent
-	int wparam; // additional message-specific information
-	int lparam; // additional message-specific information
-}
 
 class SizeRect {
 	int left,top,width,height;

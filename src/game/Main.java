@@ -363,7 +363,7 @@ public class Main {
 
 		// initialize the ingame console
 		Console.IConsoleInit();
-		InitializeGUI();
+		Gui.InitializeGUI();
 		Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
 		GenerateWorld.GenerateWorld(1, 64, 64); // Make the viewport initialization happy
@@ -465,9 +465,9 @@ public class Main {
 	{/* TODO
 		if (b) {
 			SetDParamStr(0, _screenshot_name);
-			ShowErrorMessage(INVALID_STRING_ID, STR_031B_SCREENSHOT_SUCCESSFULLY, 0, 0);
+			ShowErrorMessage(INVALID_STRING_ID, Str.STR_031B_SCREENSHOT_SUCCESSFULLY, 0, 0);
 		} else {
-			ShowErrorMessage(INVALID_STRING_ID, STR_031C_SCREENSHOT_FAILED, 0, 0);
+			ShowErrorMessage(INVALID_STRING_ID, Str.STR_031C_SCREENSHOT_FAILED, 0, 0);
 		}
 		*/
 	}
@@ -546,7 +546,7 @@ public class Main {
 		// invalid type
 		if (_file_to_saveload.mode == SL_INVALID) {
 			Global.error("Savegame is obsolete or invalid format: %s\n", _file_to_saveload.name);
-			ShowErrorMessage(INVALID_STRING_ID, STR_4009_GAME_LOAD_FAILED, 0, 0);
+			ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			Global._game_mode = GameModes.GM_MENU;
 			return;
 		}
@@ -562,7 +562,7 @@ public class Main {
 		// Load game
 		if (SaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode) != SL_OK) {
 			LoadIntroGame();
-			ShowErrorMessage(INVALID_STRING_ID, STR_4009_GAME_LOAD_FAILED, 0, 0);
+			ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 		}
 
 		GameOptions._opt_ptr = GameOptions._opt;
@@ -575,7 +575,7 @@ public class Main {
 		StartupEngines();
 		StartupDisasters();
 
-		Global._local_player = 0;
+		Global._local_player = null;
 		Global._current_player = Global._local_player;
 		DoCommandP(0, (Global._patches.autorenew ? 1 << 15 : 0 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
 
@@ -659,7 +659,7 @@ public class Main {
 
 			if (!SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GM_NORMAL)) {
 				LoadIntroGame();
-				ShowErrorMessage(INVALID_STRING_ID, STR_4009_GAME_LOAD_FAILED, 0, 0);
+				ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			} else {
 				Global._local_player = 0;
 				DoCommandP(0, 0, 0, null, CMD_PAUSE); // decrease pause counter (was increased from opening load dialog)
@@ -688,7 +688,7 @@ public class Main {
 				// delete all stations owned by a player
 				Station.DeleteAllPlayerStations();
 			} else {
-				ShowErrorMessage(INVALID_STRING_ID, STR_4009_GAME_LOAD_FAILED, 0, 0);
+				ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			}
 			break;
 		}
@@ -700,7 +700,7 @@ public class Main {
 
 		case SM_SAVE: /* Save game */
 			if (SaveOrLoad(_file_to_saveload.name, SL_SAVE) != SL_OK) {
-				ShowErrorMessage(INVALID_STRING_ID, STR_4007_GAME_SAVE_FAILED, 0, 0);
+				ShowErrorMessage(INVALID_STRING_ID, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
 			} else {
 				Window.DeleteWindowById(Window.WC_SAVELOAD, 0);
 			}
@@ -778,7 +778,7 @@ public class Main {
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
 			Global.SetDParam(2, _date);
-			s = GetString(buf + strlen(_path.autosave_dir) + strlen(PATHSEP), STR_4004);
+			s = GetString(buf + strlen(_path.autosave_dir) + strlen(PATHSEP), Str.STR_4004);
 			strcpy(s, ".sav");
 		} else { /* generate a savegame name and number according to _patches.max_num_autosaves */
 			sprintf(buf, "%s%sautosave%d.sav", _path.autosave_dir, PATHSEP, _autosave_ctr);
@@ -792,7 +792,7 @@ public class Main {
 
 		Global.DEBUG_misc( 2, "Autosaving to %s", buf);
 		if (SaveOrLoad(buf, SL_SAVE) != SL_OK)
-			ShowErrorMessage(INVALID_STRING_ID, STR_AUTOSAVE_FAILED, 0, 0);
+			ShowErrorMessage(INVALID_STRING_ID, Str.STR_AUTOSAVE_FAILED, 0, 0);
 	}
 
 	static void ScrollMainViewport(int x, int y)
@@ -1075,7 +1075,7 @@ public class Main {
 
 		// make sure there is a town in the game
 		if (Global._game_mode == GameModes.GM_NORMAL && !ClosestTownFromTile(0, (int)-1)) {
-			Global._error_message = STR_NO_TOWN_IN_SCENARIO;
+			Global._error_message = Str.STR_NO_TOWN_IN_SCENARIO;
 			return false;
 		}
 

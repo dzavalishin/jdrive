@@ -1,3 +1,4 @@
+#if 0
 /* $Id: engine_gui.c 3270 2005-12-07 15:48:52Z peter1138 $ */
 
 #include "stdafx.h"

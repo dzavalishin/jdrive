@@ -5,8 +5,14 @@ public class Gfx {
 	static boolean _dbg_screen_rect;
 
 
-	Colour _cur_palette[256];
+	static Colour [] _cur_palette = new Colour[256];
 
+	// XXX doesn't really belong here, but the only
+	// consumers always use it in conjunction with DoDrawString()
+	public static final String UPARROW   = "\x80";
+	public static final String DOWNARROW = "\xAA";
+
+	
 	//static void GfxMainBlitter(final Sprite *sprite, int x, int y, int mode);
 
 	static int _stringwidth_out;
@@ -310,14 +316,19 @@ public class Gfx {
 	}
 
 	/* returns right coordinate */
-	static int DrawString(int x, int y, StringID str, int color)
+	static int DrawString(int x, int y, int str, int color)
 	{
-		char buffer[512];
+		String buffer;
 
-		GetString(buffer, str);
+		buffer = GetString( str);
 		return DoDrawString(buffer, x, y, color);
 	}
-
+	/* returns right coordinate */
+	static int DrawString(int x, int y, StringID str, int color)
+	{
+		DrawString(x, y, str.id, color);
+	}
+	
 	static int DrawStringTruncated(int x, int y, StringID str, int color, uint maxw)
 	{
 		char buffer[512];
@@ -422,7 +433,8 @@ public class Gfx {
 		}
 	}
 
-	static void DrawStringMultiCenter(int x, int y, StringID str, int maxw)
+	//static void DrawStringMultiCenter(int x, int y, StringID str, int maxw)
+	static void DrawStringMultiCenter(int x, int y, int str, int maxw)
 	{
 		char buffer[512];
 		int tmp;

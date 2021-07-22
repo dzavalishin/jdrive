@@ -1468,7 +1468,7 @@ public class Vehicle implements IPoolItem
 	 */
 	boolean CanRefitTo(EngineID engine_type, CargoID cid_to)
 	{
-		CargoID cid = _global_cargo_id[_opt_ptr.landscape][cid_to];
+		CargoID cid = _global_cargo_id[GameOptions._opt_ptr.landscape][cid_to];
 		return HASBIT(_engine_info[engine_type].refit_mask, cid) != 0;
 	}
 

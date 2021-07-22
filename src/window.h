@@ -58,7 +58,7 @@ typedef struct Widget {
 	uint16 unkA;
 	StringID tooltips;
 } Widget;
-*/
+* /
 enum FrameFlags {
 	FR_TRANSPARENT  = 0x01,  ///< Makes the background transparent if set
 	FR_NOBORDER     = 0x08,  ///< Hide border (draws just a solid box)

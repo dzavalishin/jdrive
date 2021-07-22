@@ -9,11 +9,11 @@
 #endif
 
 // Prices and also the fractional part.
-VARDEF Prices _price;
-VARDEF uint16 _price_frac[NUM_PRICES];
+//VARDEF Prices _price;
+//VARDEF uint16 _price_frac[NUM_PRICES];
 
-VARDEF uint32 _cargo_payment_rates[NUM_CARGO];
-VARDEF uint16 _cargo_payment_rates_frac[NUM_CARGO];
+//VARDEF uint32 _cargo_payment_rates[NUM_CARGO];
+//VARDEF uint16 _cargo_payment_rates_frac[NUM_CARGO];
 /*
 typedef struct {
 	GameDifficulty diff;

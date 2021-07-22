@@ -180,7 +180,7 @@ public class NewsItem {
 		_total_news = 0;
 	}
 
-	void DrawNewsBorder(final Window w)
+	static void DrawNewsBorder(final Window w)
 	{
 		int left = 0;
 		int right = w.width - 1;

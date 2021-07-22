@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import game.util.Paths;
+import game.util.Prices;
 
 public class Global {
 
@@ -71,6 +72,9 @@ public class Global {
 	public static int _map_size;
 
 
+	public static ColorList [] _color_list = new ColorList[16];
+	
+	
 	public static String _cmd_text = null;
 	
 	//public static StringID _error_message;
@@ -79,6 +83,16 @@ public class Global {
 	public static int _error_message_2;
 	public static int _additional_cash_required;
 	
+	
+	
+	
+	public static final int NUM_PRICES = 49;
+	
+	public static Prices _price;
+	public static int [] _price_frac = new int[NUM_PRICES];
+
+	public static int []_cargo_payment_rates = new int[NUM_CARGO];
+	public static int [] _cargo_payment_rates_frac = new int[NUM_CARGO];
 
 
 	/* --- 1 Day is 74 ticks ---
@@ -237,7 +251,7 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 	public static Object[] _decode_parameters = new Object[20];
 
 
-	static void SetDParam(int n, int v)
+	public static void SetDParam(int n, int v)
 	{
 		//assert(n < _decode_parameters.length);
 		_decode_parameters[n] = v;

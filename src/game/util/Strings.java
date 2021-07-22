@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import game.CurrencySpec;
 import game.GameOptions;
 import game.Global;
+import game.Station;
 import game.StringID;
 
 public class Strings extends StringTable
@@ -224,7 +225,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	// This function is used to "bind" a C string to a OpenTTD dparam slot.
 	static void SetDParamStr(int n, final String str)
 	{
-		Global.SetDParam(n, BindCString(str));
+		Global.SetDParam(n, BindCString(str).id);
 	}
 
 
@@ -550,9 +551,9 @@ private  final int *GetArgvPtr(final int **argv, int n)
 					break;
 				case 0x84: {// {VELOCITY}
 					int value = Getint(arg[argc++]);
-					if (_opt_ptr.kilometers) value = value * 1648 >> 10;
+					if (GameOptions._opt_ptr.kilometers) value = value * 1648 >> 10;
 			buff.append( FormatCommaNumber(value) );
-			if (Global._opt_ptr.kilometers) {
+			if (GameOptions._opt_ptr.kilometers) {
 				buff.append(  " km/h", 5);
 			} else {
 				buff.append( " mph", 4);
@@ -572,7 +573,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 							// Short description of cargotypes. Layout:
 							// 8-bit = cargo type
 							// 16-bit = cargo count
-							StringID cargo_str = _cargo_string_list[_opt_ptr.landscape][Getint(arg[argc++])];
+							StringID cargo_str = _cargo_string_list[GameOptions._opt_ptr.landscape][Getint(arg[argc++])];
 							int multiplier = (cargo_str == STR_LITERS) ? 1000 : 1;
 							// liquid type of cargo is multiplied by 100 to get correct amount
 							buff.append( FormatCommaNumber(Getint(arg[argc++]) * multiplier) );
@@ -766,7 +767,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 						} break;
 
 						case 0x9A: { // {STATION}
-							final Station st = GetStation(Getint(arg[argc++]));
+							final Station st = Station.GetStation(Getint(arg[argc++]));
 							int [] temp = new int[2];
 
 							if (st.xy == 0) { // station doesn't exist anymore
@@ -955,7 +956,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			buff.append( ". " );
 		}
 
-		if (Global._opt_ptr.landscape == LT_CANDY) {
+		if (GameOptions._opt_ptr.landscape == LT_CANDY) {
 			base = _silly_surname_list;
 			num  = lengthof(_silly_surname_list);
 		} else {

@@ -143,10 +143,10 @@ enum {
 	NUM_LANDSCAPE = 4,
 };
 
-enum {
+//enum {
 	NUM_PRICES = 49,
-};
-
+//};
+/*
 typedef struct Prices {
 	int32 station_value;
 	int32 build_rail;
@@ -196,7 +196,7 @@ typedef struct Prices {
 	int32 ship_running;
 	int32 build_industry;
 } Prices;
-
+*/
 #define GAME_DIFFICULTY_NUM 18
 /*
 typedef struct GameDifficulty {

@@ -16,6 +16,7 @@ s/bool/boolean/g
 
 s/typedef struct/class/g
 s/NULL/null/g
+s/STR_null/STR_NULL/g
 
 s/_m[[]tile][.]/tile.getMap()./g
 
@@ -35,9 +36,17 @@ s/DrawTownTileStruct \*/DrawTownTileStruct /g
 s/Industry \*/Industry /g
 s/Industry\*/Industry /g
 s/TileIndex *\*/TileIndex /g
+s/Window *\*/Window /g
+s/WindowEvent *\*/WindowEvent /g
+s/NewsItem *\*/NewsItem /g
+s/RoadVehicleInfo *\*/RoadVehicleInfo /g
+s/AircraftVehicleInfo *\*/AircraftVehicleInfo /g
+s/RailVehicleInfo *\*/RailVehicleInfo /g
+s/ShipVehicleInfo *\*/ShipVehicleInfo /g
+s/DrawEngineInfo *\*/DrawEngineInfo /g
 
+s/STR_/Str.STR_/g
 s/CMD_/Cmd.CMD_/g
-
 s/RESIZE_/Window.RESIZE_/g
 s/WC_/Window.WC_/g
 s/DC_/Cmd.DC_/g
@@ -47,8 +56,11 @@ s/MP_/TileTypes.MP_/g
 s/OWNER_/Owner.OWNER_/g
 s/GM_/GameModes.GM_/g
 s/WE_/WindowEvents.WE_/g
-s/Random(/Hal.Random(/g
+s/WDP_/Window.WDP_/g
+s/WWT_/Window.WWT_/g
+s/WDF_/WindowDesc.WDF_/g
 
+s/Random(/Hal.Random(/g
 s/InvalidateWindow(/Window.InvalidateWindow(/g
 s/DeleteWindowById(/Window.DeleteWindowById(/g
 
@@ -59,15 +71,33 @@ s/SetDParam/Global.SetDParam/g
 s/_current_player/Global._current_player/g
 s/_game_mode/Global._game_mode/g
 s/GetString/Global.GetString/g
-s/_opt/Global._opt/g
+s/_opt/GameOptions._opt/g
 s/_patches/Global._patches/g
 s/_cmd_text/Global._cmd_text/g
+s/_price/Global._price/g
+s/_color_list/Global._color_list/g
+
+s/GfxFillRect/Gfx.GfxFillRect/g
+s/DrawStringMultiCenter/Gfx.DrawStringMultiCenter/g
+s/DrawNewsBorder/NewsItem.DrawNewsBorder/g
+s/DoDrawString/Gfx.DoDrawString/g
+s/DrawFrameRect/Gfx.DrawFrameRect/g
+s/DrawSprite/Gfx.DrawSprite/g
+s/_cursor\./Hal._cursor./g
 
 s/GetStation(/Station.GetStation(/g
 s/SET_EXPENSES_TYPE(/Player.SET_EXPENSES_TYPE(/g
 s/EXPENSES_/Player.EXPENSES_/
 
+s/NUM_TRAIN_ENGINES/Global.NUM_TRAIN_ENGINES/g
+s/NUM_ROAD_ENGINES/Global.NUM_ROAD_ENGINES/g
+s/NUM_SHIP_ENGINES/Global.NUM_SHIP_ENGINES/g
+
 s/min(/Math.min(/g
 s/max(/Math.max(/g
 
 s/_ai\./Ai._ai./g
+
+
+s/WP\(w,news_d)/w.as_news_d()/g
+s/WP\(w,dropdown_d)/w.as_dropdown_d()/g
