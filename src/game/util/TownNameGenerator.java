@@ -610,7 +610,7 @@ public class TownNameGenerator extends TownNameTables
 	}
 
 
-	final TownGenFunction [] _town_name_generators =
+	final static TownGenFunction [] _town_name_generators =
 	{
 		TownNameGenerator::MakeEnglishOriginalTownName,
 		TownNameGenerator::MakeRussianTownName,

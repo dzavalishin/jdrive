@@ -12,21 +12,21 @@ public class WayPoint implements IPoolItem
 	public static final int MAX_WAYPOINTS_PER_TOWN        = 64;
 
 
-	TileIndex xy;      ///< Tile of WayPoint
-	int index;      ///< Index of WayPoint
+	public TileIndex xy;      ///< Tile of WayPoint
+	public int index;      ///< Index of WayPoint
 
-	int town_index; ///< Town associated with the WayPoint
-	byte town_cn;      ///< The Nth WayPoint for this town (consecutive number)
-	StringID string;   ///< If this is zero (i.e. no custom name), town + town_cn is used for naming
+	public int town_index; ///< Town associated with the WayPoint
+	public byte town_cn;      ///< The Nth WayPoint for this town (consecutive number)
+	public StringID string;   ///< If this is zero (i.e. no custom name), town + town_cn is used for naming
 
-	ViewportSign sign; ///< Dimensions of sign (not saved)
-	int build_date; ///< Date of construction
+	public ViewportSign sign; ///< Dimensions of sign (not saved)
+	public int build_date; ///< Date of construction
 
-	byte stat_id;      ///< ID of WayPoint within the WayPoint class (not saved)
-	int grfid;      ///< ID of GRF file
-	byte localidx;     ///< Index of station within GRF file
+	public byte stat_id;      ///< ID of WayPoint within the WayPoint class (not saved)
+	public int grfid;      ///< ID of GRF file
+	public byte localidx;     ///< Index of station within GRF file
 
-	byte deleted;      ///< Delete counter. If greater than 0 then it is decremented until it reaches 0; the WayPoint is then is deleted.
+	public byte deleted;      ///< Delete counter. If greater than 0 then it is decremented until it reaches 0; the WayPoint is then is deleted.
 
 
 
@@ -65,7 +65,7 @@ public class WayPoint implements IPoolItem
 	/**
 	 * Get the pointer to the WayPoint with index 'index'
 	 */
-	private static WayPoint GetWaypoint(int index)
+	public static WayPoint GetWaypoint(int index)
 	{
 		return _waypoint_pool.GetItemFromPool(index);
 	}

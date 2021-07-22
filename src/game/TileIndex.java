@@ -137,7 +137,16 @@ public class TileIndex {
 		return BitOps.GB(Global._m[tile].extra, 0, 2);
 	}
 
-
+	void MarkTileDirtyByTile()
+	{
+		Point pt = Point.RemapCoords(TileX() * 16, TileY() * 16, GetTileZ());
+		ViewPort.MarkAllViewportsDirty(
+			pt.x - 31,
+			pt.y - 122,
+			pt.x - 31 + 67,
+			pt.y - 122 + 154
+		);
+	}
 
 	int GetTileSlope(IntContainer h)
 	{
@@ -359,6 +368,16 @@ public class TileIndex {
 		Global._m[tile].m1 = owner.owner;
 	}
 
+	void SetTileOwner(int owner)
+	{
+		//assert(tile < MapSize());
+		assert(!IsTileType(TileTypes.MP_HOUSE));
+		assert(!IsTileType(TileTypes.MP_VOID));
+		assert(!IsTileType(TileTypes.MP_INDUSTRY));
+
+		Global._m[tile].m1 = owner;
+	}
+
 	boolean IsTileOwner(Owner owner)
 	{
 		return GetTileOwner() == owner;
@@ -420,6 +439,10 @@ public class TileIndex {
 	{
 		return IsTileType(TileTypes.MP_STATION) && getMap().m5 == 0x52;
 	}
+
+	
+	static TileIndex RandomTileSeed(int r) { return TILE_MASK(r); }
+	static TileIndex RandomTile() { return new TileIndex(Hal.Random())); }
 	
 	
 }

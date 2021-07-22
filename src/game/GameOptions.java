@@ -2,25 +2,25 @@ package game;
 
 public class GameOptions 
 {
-	GameDifficulty diff;
-	byte diff_level;
-	byte currency;
-	boolean kilometers;
-	byte town_name;
+	public GameDifficulty diff;
+	public byte diff_level;
+	public byte currency;
+	public boolean kilometers;
+	public byte town_name;
 	public byte landscape;
-	byte snow_line;
-	byte autosave;
-	byte road_side;
+	public byte snow_line;
+	public byte autosave;
+	public byte road_side;
 
 	/* These are the options for the current game
 	 * either ingame, or loaded. Also used for networking games */
-	static GameOptions _opt;
+	public static GameOptions _opt;
 
 	/* These are the default options for a new game */
-	static GameOptions _opt_newgame;
+	public static GameOptions _opt_newgame;
 
 	// Pointer to one of the two _opt OR _opt_newgame structs
-	static GameOptions _opt_ptr;
+	public static GameOptions _opt_ptr;
 
 
 	public void assign(GameOptions src)
@@ -42,24 +42,24 @@ public class GameOptions
 
 
 class GameDifficulty {
-	int max_no_competitors;
-	int competitor_start_time;
-	int number_towns;
-	int number_industries;
-	int max_loan;
-	int initial_interest;
-	int vehicle_costs;
-	int competitor_speed;
-	int competitor_intelligence; // no longer in use
-	int vehicle_breakdowns;
-	int subsidy_multiplier;
-	int construction_cost;
-	int terrain_type;
-	int quantity_sea_lakes;
-	int economy;
-	int line_reverse_mode;
-	int disasters;
-	int town_council_tolerance;	// minimum required town ratings to be allowed to demolish stuff
+	public int max_no_competitors;
+	public int competitor_start_time;
+	public int number_towns;
+	public int number_industries;
+	public int max_loan;
+	public int initial_interest;
+	public int vehicle_costs;
+	public int competitor_speed;
+	public int competitor_intelligence; // no longer in use
+	public int vehicle_breakdowns;
+	public int subsidy_multiplier;
+	public int construction_cost;
+	public int terrain_type;
+	public int quantity_sea_lakes;
+	public int economy;
+	public int line_reverse_mode;
+	public int disasters;
+	public int town_council_tolerance;	// minimum required town ratings to be allowed to demolish stuff
 
 	protected GameDifficulty makeClone() // throws CloneNotSupportedException {
 	{

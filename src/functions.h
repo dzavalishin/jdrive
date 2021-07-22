@@ -112,9 +112,10 @@ uint32 RandomMT(void);
 #endif
 #endif // MERSENNE_TWISTER
 
+/*
 static inline TileIndex RandomTileSeed(uint32 r) { return TILE_MASK(r); }
 static inline TileIndex RandomTile(void) { return TILE_MASK(Random()); }
-
+*/
 
 uint32 InteractiveRandom(void); /* Used for random sequences that are not the same on the other end of the multiplayer link */
 uint InteractiveRandomRange(uint max);

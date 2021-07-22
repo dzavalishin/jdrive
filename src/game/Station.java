@@ -2305,15 +2305,17 @@ public class Station implements IPoolItem
 		return 0;
 	}
 
-	private static void GetAcceptedCargo_Station(TileIndex tile, AcceptedCargo ac)
+	//private static void GetAcceptedCargo_Station(TileIndex tile, AcceptedCargo ac)
+	private static AcceptedCargo GetAcceptedCargo_Station(TileIndex tile)
 	{
 		/* not used */
 	}
 
-	private static void GetTileDesc_Station(TileIndex tile, TileDesc td)
+	private static TileDesc GetTileDesc_Station(TileIndex tile)
 	{
 		byte m5;
 		StringID str;
+		TileDesc td = new TileDesc();
 
 		td.owner = GetTileOwner(tile);
 		td.build_date = GetStation(tile.getMap().m2).build_date;
@@ -2330,12 +2332,14 @@ public class Station implements IPoolItem
 		else 						str=STR_3069_BUOY;
 
 		td.str = str;
+		return td;
 	}
 
 
 	static final  byte tile_track_status_rail[] = { 1, 2, 1, 2, 1, 2, 1, 2 };
 
-	private static int GetTileTrackStatus_Station(TileIndex tile, TransportType mode)
+	//private static int GetTileTrackStatus_Station(TileIndex tile, TransportType mode)
+	private static int GetTileTrackStatus_Station(TileIndex tile, int mode)
 	{
 		int i = tile.getMap().m5;
 		int j = 0;
@@ -3117,8 +3121,22 @@ public class Station implements IPoolItem
 	}
 
 
-	final  TileTypeProcs _tile_type_station_procs = new TileTypeProcs() {
-	};
+	final static  TileTypeProcs _tile_type_station_procs = new TileTypeProcs(
+		Station::DrawTile_Station,						/* draw_tile_proc */
+		Station::GetSlopeZ_Station,					/* get_slope_z_proc */
+		Station::ClearTile_Station,					/* clear_tile_proc */
+		Station::GetAcceptedCargo_Station,		/* get_accepted_cargo_proc */
+		Station::GetTileDesc_Station,				/* get_tile_desc_proc */
+		Station::GetTileTrackStatus_Station,	/* get_tile_track_status_proc */
+		Station::ClickTile_Station,					/* click_tile_proc */
+		Station::AnimateTile_Station,				/* animate_tile_proc */
+		Station::TileLoop_Station,						/* tile_loop_clear */
+		Station::ChangeTileOwner_Station,		/* change_tile_owner_clear */
+		null,												/* get_produced_cargo_proc */
+		Station::VehicleEnter_Station,				/* vehicle_enter_tile_proc */
+		null,												/* vehicle_leave_tile_proc */
+		Station::GetSlopeTileh_Station			/* get_slope_tileh_proc */
+	);
 
 	
 	

@@ -24,6 +24,7 @@ s/GB(/BitOps.GB(/g
 s/SB(/BitOps.RET SB(/g
 s/HASBIT(/BitOps.HASBIT(/g
 s/CHANCE16/BitOps.CHANCE16/g
+s/IS_INT_INSIDE/BitOps.IS_INT_INSIDE/g
 
 s/Player \*/Player /g
 s/Player\*/Player /g
@@ -59,6 +60,7 @@ s/WE_/WindowEvents.WE_/g
 s/WDP_/Window.WDP_/g
 s/WWT_/Window.WWT_/g
 s/WDF_/WindowDesc.WDF_/g
+s/LT_/Landscape.LT_/g
 
 s/Random(/Hal.Random(/g
 s/InvalidateWindow(/Window.InvalidateWindow(/g
@@ -99,5 +101,6 @@ s/max(/Math.max(/g
 s/_ai\./Ai._ai./g
 
 
-s/WP\(w,news_d)/w.as_news_d()/g
-s/WP\(w,dropdown_d)/w.as_dropdown_d()/g
+s/WP\(w,news_d\)/w.as_news_d()/g
+s/WP\(w,dropdown_d\)/w.as_dropdown_d()/g
+

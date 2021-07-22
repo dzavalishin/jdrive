@@ -6,8 +6,18 @@ import game.util.GenLandTable;
 public class Landscape extends GenLandTable
 {
 
+	/* Landscape types */
+	//enum {
+		public static final int LT_NORMAL = 0;
+		public static final int LT_HILLY = 1;
+		public static final int LT_DESERT = 2;
+		public static final int LT_CANDY = 3;
+
+		public static final int NUM_LANDSCAPE = 4;
 	
-	 static final TileTypeProcs
+	
+	
+	 /*static final TileTypeProcs
 		_tile_type_clear_procs,
 		_tile_type_rail_procs,
 		_tile_type_road_procs,
@@ -18,22 +28,22 @@ public class Landscape extends GenLandTable
 		_tile_type_dummy_procs,
 		_tile_type_industry_procs,
 		_tile_type_tunnelbridge_procs,
-		_tile_type_unmovable_procs;
+		_tile_type_unmovable_procs;*/
 
-	static final TileTypeProcs  static final _tile_type_procs[] = {
-		&_tile_type_clear_procs,
-		&_tile_type_rail_procs,
-		&_tile_type_road_procs,
-		&_tile_type_town_procs,
-		&_tile_type_trees_procs,
-		&_tile_type_station_procs,
-		&_tile_type_water_procs,
-		&_tile_type_dummy_procs,
-		&_tile_type_industry_procs,
-		&_tile_type_tunnelbridge_procs,
-		&_tile_type_unmovable_procs,
+	static final TileTypeProcs _tile_type_procs[] = {
+		_tile_type_clear_procs,
+		_tile_type_rail_procs,
+		_tile_type_road_procs,
+		Town._tile_type_town_procs,
+		_tile_type_trees_procs,
+		Station._tile_type_station_procs,
+		_tile_type_water_procs,
+		_tile_type_dummy_procs,
+		_tile_type_industry_procs,
+		_tile_type_tunnelbridge_procs,
+		_tile_type_unmovable_procs,
 	};
-	 *
+	 
 	/* landscape slope => sprite */
 	static final byte[] _tileh_to_sprite = {
 			0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,0,

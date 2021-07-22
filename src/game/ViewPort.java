@@ -1387,6 +1387,13 @@ public class ViewPort {
 		} while (vp++,act>>=1);
 	}
 
+
+	@Deprecated
+	void MarkTileDirtyByTile(TileIndex tile)
+	{
+		tile.MarkTileDirtyByTile();		
+	}	
+	/*
 	void MarkTileDirtyByTile(TileIndex tile)
 	{
 		Point pt = Point.RemapCoords(tile.TileX() * 16, tile.TileY() * 16, tile.GetTileZ());
@@ -1396,7 +1403,7 @@ public class ViewPort {
 			pt.x - 31 + 67,
 			pt.y - 122 + 154
 		);
-	}
+	}*/
 
 	static void MarkTileDirty(int x, int y)
 	{

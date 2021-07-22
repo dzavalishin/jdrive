@@ -2,11 +2,18 @@ package game.util;
 
 import java.nio.ByteBuffer;
 
+
 import game.CurrencySpec;
 import game.GameOptions;
 import game.Global;
+import game.Industry;
+import game.Landscape;
 import game.Station;
+import game.Str;
 import game.StringID;
+import game.Town;
+import game.WayPoint;
+import game.*;
 
 public class Strings extends StringTable
 {
@@ -23,6 +30,66 @@ public class Strings extends StringTable
 	static final String _openttd_revision = "TODO generate revision";
 
 
+	// special string constants
+	//enum SpecialStrings {
+
+		// special strings for town names. the town name is generated dynamically on request.
+		public static final int SPECSTR_TOWNNAME_START = 0x20C0;
+		public static final int SPECSTR_TOWNNAME_ENGLISH = SPECSTR_TOWNNAME_START;
+		public static final int SPECSTR_TOWNNAME_RUSSIAN = SPECSTR_TOWNNAME_START+1;
+		/*
+		public static final int SPECSTR_TOWNNAME_FRENCH;
+		public static final int SPECSTR_TOWNNAME_GERMAN;
+		public static final int SPECSTR_TOWNNAME_AMERICAN;
+		public static final int SPECSTR_TOWNNAME_LATIN;
+		public static final int SPECSTR_TOWNNAME_SILLY;
+		public static final int SPECSTR_TOWNNAME_SWEDISH;
+		public static final int SPECSTR_TOWNNAME_DUTCH;
+		public static final int SPECSTR_TOWNNAME_FINNISH;
+		public static final int SPECSTR_TOWNNAME_POLISH;
+		public static final int SPECSTR_TOWNNAME_SLOVAKISH;
+		public static final int SPECSTR_TOWNNAME_NORWEGIAN;
+		public static final int SPECSTR_TOWNNAME_HUNGARIAN;
+		public static final int SPECSTR_TOWNNAME_AUSTRIAN;
+		public static final int SPECSTR_TOWNNAME_ROMANIAN;
+		public static final int SPECSTR_TOWNNAME_CZECH;
+		public static final int SPECSTR_TOWNNAME_SWISS;
+		public static final int SPECSTR_TOWNNAME_DANISH;
+		public static final int SPECSTR_TOWNNAME_LAST = SPECSTR_TOWNNAME_DANISH;
+		*/
+		public static final int SPECSTR_TOWNNAME_LAST = SPECSTR_TOWNNAME_RUSSIAN;
+
+		// special strings for player names on the form "TownName transport".
+		public static final int SPECSTR_PLAYERNAME_START = 0x70EA;
+		public static final int SPECSTR_PLAYERNAME_ENGLISH = SPECSTR_PLAYERNAME_START;
+		public static final int SPECSTR_PLAYERNAME_FRENCH = SPECSTR_PLAYERNAME_START+1;
+		public static final int SPECSTR_PLAYERNAME_GERMAN = SPECSTR_PLAYERNAME_START+2;
+		public static final int SPECSTR_PLAYERNAME_AMERICAN = SPECSTR_PLAYERNAME_START+3;
+		public static final int SPECSTR_PLAYERNAME_LATIN = SPECSTR_PLAYERNAME_START+4;
+		public static final int SPECSTR_PLAYERNAME_SILLY = SPECSTR_PLAYERNAME_START+5;
+		public static final int SPECSTR_PLAYERNAME_LAST = SPECSTR_PLAYERNAME_SILLY;
+
+		public static final int SPECSTR_ANDCO_NAME = 0x70E6;
+		public static final int SPECSTR_PRESIDENT_NAME = 0x70E7;
+		public static final int SPECSTR_SONGNAME = 0x70E8;
+
+		// reserve 32 strings for the *.lng files
+		public static final int SPECSTR_LANGUAGE_START = 0x7100;
+		public static final int SPECSTR_LANGUAGE_END = 0x711f;
+
+		// reserve 32 strings for various screen resolutions
+		public static final int SPECSTR_RESOLUTION_START = 0x7120;
+		public static final int SPECSTR_RESOLUTION_END = 0x713f;
+
+		// reserve 32 strings for screenshot formats
+		public static final int SPECSTR_SCREENSHOT_START = 0x7140;
+		public static final int SPECSTR_SCREENSHOT_END = 0x715F;
+
+		// Used to implement SetDParamStr
+		public static final int STR_SPEC_DYNSTRING = 0xF800;
+		public static final int STR_SPEC_USERSTRING = 0xF808;
+	
+	
 	// TODO fix me
 	//private char **_langpack_offs;
 	//private LanguagePack *_langpack;
@@ -152,11 +219,18 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	// the indices will be reused.
 	private static int _bind_index = 0;
 
-	private static String StringGetStringPtr(StringID string)
+	//private static String StringGetStringPtr(StringID string)
+	private static String StringGetStringPtr(int string)
 	{
 		return _langpack_offs[_langtab_start[string.id >> 11] + (string.id & 0x7FF)];
 	}
 
+	/* TODO rewrite
+	static const char []GetStringPtr(StringID string)
+	{
+		return _langpack_offs[_langtab_start[string >> 11] + (string & 0x7FF)];
+	}*/
+	
 	// The highest 8 bits of string contain the "case index".
 	// These 8 bits will only be set when FormatString wants to print
 	// the string in a different case. No one else except FormatString
@@ -203,7 +277,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 					);
 		}
 
-		return FormatString( GetStringPtr(BitOps.GB(string, 0, 16)), argv, BitOps.GB(string, 24, 8));
+		return FormatString( StringGetStringPtr(BitOps.GB(string, 0, 16)), argv, BitOps.GB(string, 24, 8));
 	}
 
 	static String GetString(StringID string)
@@ -215,7 +289,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	// This function takes a C-string and allocates a temporary string ID.
 	// The duration of the bound string is valid only until the next GetString,
 	// so be careful.
-	static StringID BindCString(final String str)
+	//static StringID BindCString(final String str)
+	static int BindCString(final String str)
 	{
 		int idx = (++_bind_index) & (NUM_BOUND_STRINGS - 1);
 		_bound_strings[idx] = str;
@@ -229,7 +304,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	}
 
 
-	private final int _divisor_table[] = {
+	private static final int _divisor_table[] = {
 			1000000000,
 			100000000,
 			10000000,
@@ -266,9 +341,9 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				quot = num / _divisor_table[i];
 				num = num % _divisor_table[i];
 			}
-			if (tot |= quot || i == 9) {
+			if ( 0 != (tot |= quot) || (i == 9)) {
 				buff.append( '0' + quot );
-				if (i == 0 || i == 3 || i == 6) buff.append(  ',';
+				if (i == 0 || i == 3 || i == 6) buff.append( ',' );
 			}
 		}
 
@@ -298,56 +373,56 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				quot = num / _divisor_table[i];
 				num = num % _divisor_table[i];
 			}
-			if (tot |= quot || i == 9) {
+			if ( (0 != (tot |= quot)) || (i == 9)) {
 				buff.append( '0' + quot );
 			}
 		}
 
-		return buff;
+		return buff.toString();
 	}
 
 
 	private static String FormatYmdString(int number)
 	{
 		final String src;
-		YearMonthDay ymd;
+		YearMonthDay ymd = new YearMonthDay();
 		StringBuilder buff = new StringBuilder();
 
-		ConvertDayToYMD(ymd, number);
+		GameDate.ConvertDayToYMD(ymd, number);
 
-		buff.append(GetStringPtr(ymd.day + STR_01AC_1ST - 1));
+		buff.append(StringGetStringPtr(ymd.day + STR_01AC_1ST - 1));
 
 		// TODO buff[-1] = ' ';
-		buff.append(GetStringPtr(STR_0162_JAN + ymd.month), 4);
+		buff.append(StringGetStringPtr(STR_0162_JAN + ymd.month));
 		//TODO buff[3] = ' ';
 
-		buff.append( FormatNoCommaNumber( ymd.year + MAX_YEAR_BEGIN_REAL) )
+		buff.append( FormatNoCommaNumber( ymd.year + Global.MAX_YEAR_BEGIN_REAL) );
 		return buff.toString();
 	}
 
 	private static String FormatMonthAndYear(int number)
 	{
-		final String src;
-		YearMonthDay ymd;
+		String src;
+		YearMonthDay ymd = new YearMonthDay();
 		StringBuilder buff = new StringBuilder();
 
-		ConvertDayToYMD(ymd, number);
+		GameDate.ConvertDayToYMD(ymd, number);
 
 		//for (src = GetStringPtr(STR_MONTH_JAN + ymd.month); (*buff++ = *src++) != '\0';) {}
-		buff.append( GetStringPtr(STR_MONTH_JAN + ymd.month) );
+		buff.append( StringGetStringPtr(STR_MONTH_JAN + ymd.month) );
 		// TODO buff[-1] = ' ';
-		buff.append( FormatNoCommaNumber( ymd.year + MAX_YEAR_BEGIN_REAL) )
+		buff.append( FormatNoCommaNumber( ymd.year + Global.MAX_YEAR_BEGIN_REAL) );
 
 		return buff.toString();
 	}
 
 	private static String FormatTinyDate(int number)
 	{
-		YearMonthDay ymd;
+		YearMonthDay ymd = new YearMonthDay();
 		StringBuilder buff = new StringBuilder();
 
-		ConvertDayToYMD(ymd, number);
-		buff += sprintf(buff, " %02i-%02i-%04i", ymd.day, ymd.month + 1, ymd.year + MAX_YEAR_BEGIN_REAL);
+		GameDate.ConvertDayToYMD(ymd, number);
+		buff.append( String.format(" %02i-%02i-%04i", ymd.day, ymd.month + 1, ymd.year + Global.MAX_YEAR_BEGIN_REAL) );
 
 		return buff.toString();
 	}
@@ -425,7 +500,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		//   Greek, Hebrew, Italian, Portuguese, Spanish, Esperanto
 		case 0:
 		default:
-			return n != 1;
+			return n != 1 ? 1 : 0;
 
 			// Only one form
 			// Used in:
@@ -437,7 +512,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			// Used in:
 			//   French, Brazilian Portuguese
 		case 2:
-			return n > 1;
+			return n > 1 ? 1 : 0;
 
 			// Three forms, special case for zero
 			// Used in:
@@ -449,7 +524,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			// Used in:
 			//   Gaelige (Irish)
 		case 4:
-			return n==1 ? 0 : n==2 ? 1 : 2;
+			return n==1 ? 0 : (n==2 ? 1 : 2);
 
 			// Three forms, special case for numbers ending in 1[2-9]
 			// Used in:
@@ -539,139 +614,142 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				buff.append( str[stri++] );
 				break;
 
-				case 0x81: // {STRINL}
-					stri += 2;
-					buff.append( GetStringWithArgs(READ_LE_int(str-2), argv));
-					break;
-				case 0x82: // {DATE_LONG}
-					buff.append( FormatYmdString(buff, Getint(arg[argc++])) );
-					break;
-				case 0x83: // {DATE_SHORT}
-					buff.append( FormatMonthAndYear(buff, Getint(arg[argc++])) );
-					break;
-				case 0x84: {// {VELOCITY}
-					int value = Getint(arg[argc++]);
-					if (GameOptions._opt_ptr.kilometers) value = value * 1648 >> 10;
+			case 0x81: // {STRINL}
+				stri += 2;
+				buff.append( GetStringWithArgs(READ_LE_int(str-2), argv));
+				break;
+			case 0x82: // {DATE_LONG}
+				buff.append( FormatYmdString(buff, Getint(arg[argc++])) );
+				break;
+			case 0x83: // {DATE_SHORT}
+				buff.append( FormatMonthAndYear(buff, Getint(arg[argc++])) );
+				break;
+			case 0x84: {// {VELOCITY}
+				int value = Getint(arg[argc++]);
+				if (GameOptions._opt_ptr.kilometers) value = value * 1648 >> 10;
 			buff.append( FormatCommaNumber(value) );
 			if (GameOptions._opt_ptr.kilometers) {
-				buff.append(  " km/h", 5);
+				buff.append( " km/h" );
 			} else {
-				buff.append( " mph", 4);
+				buff.append( " mph" );
 			}
 			break;
+			}
+			// 0x85 is used as escape character..
+			case 0x85:
+				switch ((int)str[stri++]) {
+				case 0: /* {CURRCOMPACT} */
+					buff.append( FormatGenericCurrency(_currency, Getint(arg[argc++]), true) );
+					break;
+				case 2: /* {REV} */
+					buff.append( _openttd_revision );
+					break;
+				case 3: { /* {SHORTCARGO} */
+					// Short description of cargotypes. Layout:
+					// 8-bit = cargo type
+					// 16-bit = cargo count
+					StringID cargo_str = _cargo_string_list[GameOptions._opt_ptr.landscape][Getint(arg[argc++])];
+					int multiplier = (cargo_str.id == Str.STR_LITERS) ? 1000 : 1;
+					// liquid type of cargo is multiplied by 100 to get correct amount
+					buff.append( FormatCommaNumber(Getint(arg[argc++]) * multiplier) );
+					buff.append( " " );
+					buff.append( StringGetStringPtr(cargo_str) );
+				} break;
+				case 4: {/* {CURRCOMPACT64} */
+					// 64 bit compact currency-unit
+					buff.append( FormatGenericCurrency(_currency, Getlong(arg[argc++]), true) );
+					break;
 				}
-				// 0x85 is used as escape character..
-				case 0x85:
-					switch ((int)str[stri++]) {
-					case 0: /* {CURRCOMPACT} */
-						buff.append( FormatGenericCurrency(_currency, Getint(arg[argc++]), true);
+				case 5: { /* {STRING1} */
+					// String that consumes ONE argument
+					int sstr = modifier + Getint(arg[argc++]);
+					buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 1)));
+					argc += 1;
+					modifier = 0;
+					break;
+				}
+				case 6: { /* {STRING2} */
+					// String that consumes TWO arguments
+					int sstr = modifier + Getint(arg[argc++]);
+					buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 2)));
+					argc += 2;
+					modifier = 0;
+					break;
+				}
+				case 7: { /* {STRING3} */
+					// String that consumes THREE arguments
+					int sstr = modifier + Getint(arg[argc++]);
+					buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 3)));
+					argc += 3;
+					modifier = 0;
+					break;
+				}
+				case 8: { /* {STRING4} */
+					// String that consumes FOUR arguments
+					int sstr = modifier + Getint(arg[argc++]);
+					buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 4)));
+					argc += 4;
+					modifier = 0;
+					break;
+				}
+				case 9: { /* {STRING5} */
+					// String that consumes FIVE arguments
+					int sstr = modifier + Getint(arg[argc++]);
+					buff.append( GetStringWithArgs(sstr, GetArgvPtr(&argv, 5)));
+					argc += 5;
+					modifier = 0;
+					break;
+				}
+
+				case 10: { /* {STATIONFEATURES} */
+					buff.append( StationGetSpecialString(Getint(arg[argc++])));
+					break;
+				}
+
+				case 11: { /* {INDUSTRY} */
+					Industry i = Industry.GetIndustry(Getint(arg[argc++]));
+					int args[] = new int[2];
+
+					// industry not valid anymore?
+					if (i.xy == 0)
 						break;
-						case 2: /* {REV} */
-							buff.append( _openttd_revision );
-							break;
-						case 3: { /* {SHORTCARGO} */
-							// Short description of cargotypes. Layout:
-							// 8-bit = cargo type
-							// 16-bit = cargo count
-							StringID cargo_str = _cargo_string_list[GameOptions._opt_ptr.landscape][Getint(arg[argc++])];
-							int multiplier = (cargo_str == STR_LITERS) ? 1000 : 1;
-							// liquid type of cargo is multiplied by 100 to get correct amount
-							buff.append( FormatCommaNumber(Getint(arg[argc++]) * multiplier) );
-							buff.append( " " );
-							buff.append( GetStringPtr(cargo_str) );
-						} break;
-						case 4: {/* {CURRCOMPACT64} */
-							// 64 bit compact currency-unit
-							buff.append( FormatGenericCurrency(_currency, Getlong(arg[argc++]), true) );
-							break;
-						}
-						case 5: { /* {STRING1} */
-							// String that consumes ONE argument
-							int sstr = modifier + Getint(arg[argc++]);
-							buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 1)));
-							argc += 1;
-							modifier = 0;
-							break;
-						}
-						case 6: { /* {STRING2} */
-							// String that consumes TWO arguments
-							int sstr = modifier + Getint(arg[argc++]);
-							buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 2)));
-							argc += 2;
-							modifier = 0;
-							break;
-						}
-						case 7: { /* {STRING3} */
-							// String that consumes THREE arguments
-							int sstr = modifier + Getint(arg[argc++]);
-							buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 3)));
-							argc += 3;
-							modifier = 0;
-							break;
-						}
-						case 8: { /* {STRING4} */
-							// String that consumes FOUR arguments
-							int sstr = modifier + Getint(arg[argc++]);
-							buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 4)));
-							argc += 4;
-							modifier = 0;
-							break;
-						}
-						case 9: { /* {STRING5} */
-							// String that consumes FIVE arguments
-							int sstr = modifier + Getint(arg[argc++]);
-							buff.append( GetStringWithArgs(sstr, GetArgvPtr(&argv, 5)));
-							argc += 5;
-							modifier = 0;
-							break;
-						}
 
-						case 10: { /* {STATIONFEATURES} */
-							buff.append( StationGetSpecialString(Getint(arg[argc++])));
-							break;
-						}
+					// First print the town name and the industry type name
+					// The string STR_INDUSTRY_PATTERN controls the formatting
+					args[0] = i.town.index;
+					args[1] = i.type + STR_4802_COAL_MINE;
+					buff.append( FormatString( StringGetStringPtr(STR_INDUSTRY_FORMAT), args, modifier >> 24) );
+					modifier = 0;
+					break;
+				}
 
-						case 11: { /* {INDUSTRY} */
-							Industry i = GetIndustry(Getint(arg[argc++]));
-							int args[] = new int[2];
+				case 12: { // {VOLUME}
+					buff.append( FormatCommaNumber(Getint(arg[argc++]) * 1000) );
+					buff.append( " " );
+					buff.append( FormatString( StringGetStringPtr(STR_LITERS), null, modifier >> 24) );
+					modifier = 0;
+					break;
+				}
 
-							// industry not valid anymore?
-							if (i.xy == 0)
-								break;
-
-							// First print the town name and the industry type name
-							// The string STR_INDUSTRY_PATTERN controls the formatting
-							args[0] = i.town.index;
-							args[1] = i.type + STR_4802_COAL_MINE;
-							buff.append( FormatString( GetStringPtr(STR_INDUSTRY_FORMAT), args, modifier >> 24) );
-							modifier = 0;
-							break;
-						}
-
-						case 12: { // {VOLUME}
-							buff.append( FormatCommaNumber(Getint(arg[argc++]) * 1000) );
-							buff.append( " " );
-							buff.append( FormatString(GetStringPtr(STR_LITERS), null, modifier >> 24) );
-							modifier = 0;
-							break;
-						}
-
-						case 13: { // {G 0 Der Die Das}
-							/*
-				final byte* s = (final byte*)GetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
+				case 13: { // {G 0 Der Die Das}
+					/*
+				//final byte* s = (final byte*)GetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
+				final String s = StringGetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
 				int len;
 				int gender = 0;
 				if (s != null && s[0] == 0x87) gender = s[1];
 				str = ParseStringChoice(str, gender, buff, &len);
 				buff += len;
-							 */
+					 */
 
-							/*
+					/*
 							//final byte* s = (final byte*)GetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
+							final String s = StringGetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
 
 							byte argindex = (byte)str[stri++];
 							Object arg = argv_orig[argindex];
-							byte[] s = (byte [])GetStringPtr(arg);
+							//byte[] s = (byte [])GetStringPtr(arg);
+							String s = StringGetStringPtr(arg);
 
 							int gender = 0;
 							if (s != null && s[0] == 0x87) gender = s[1];
@@ -679,148 +757,148 @@ private  final int *GetArgvPtr(final int **argv, int n)
 							int[]skip = { 0 };
 							buff.append( ExtractChoice( str, skip, gender)
 							str = str.substring(skip[0] );
-							 */
-							buff.append( " !!fixCase13!! " );
-							break;
-						}
-
-						case 14: { // {DATE_TINY}
-							buff.append( FormatTinyDate(Getint(arg[argc++]) );
-							break;
-						}
-
-						case 15: { // {CARGO}
-							// Layout now is:
-							//   8bit   - cargo type
-							//   16-bit - cargo count
-							StringID cargo_str = _cargoc.names_long[Getint(arg[argc++])];
-							buff.append( GetStringWithArgs(cargo_str, arg[argc++]) );
-							break;
-						}
-
-						default:
-							Global.error("!invalid escape sequence in string");
-					}
-					break;
-
-				case 0x86: // {SKIP}
-					argc++;
-					break;
-
-					// This sets up the gender for the string.
-					// We just ignore this one. It's used in {G 0 Der Die Das} to determine the case.
-				case 0x87: // {GENDER 0}
-					stri++;
-					break;
-
-				case 0x88: {// {STRING}
-					int sstri = modifier + Getint(arg[argc++]);
-					// WARNING. It's prohibited for the included string to consume any arguments.
-					// For included strings that consume argument, you should use STRING1, STRING2 etc.
-					// To debug stuff you can set argv to null and it will tell you
-					int acnt = arg.length - argc;
-					Object [] acopy = new Object[acnt];
-					System.arraycopy(arg, argc, acopy, 0, acnt);
-					argc += acnt; // TODO wrong, must get used count from GetStringWithArgs 
-					buff.append( GetStringWithArgs(sstri, acopy) );
-					modifier = 0;
+					 */
+					buff.append( " !!fixCase13!! " );
 					break;
 				}
 
-				case 0x8B: // {COMMA}
-					buff.append( FormatCommaNumber(Getint(arg[argc++]) ) );
+				case 14: { // {DATE_TINY}
+					buff.append( FormatTinyDate(Getint(arg[argc++]) ) );
 					break;
+				}
 
-					case 0x8C: // Move argument pointer
-						//argv = argv_orig + (byte)str[stri++];
-						argc = str[stri++];
-						break;
+				case 15: { // {CARGO}
+					// Layout now is:
+					//   8bit   - cargo type
+					//   16-bit - cargo count
+					StringID cargo_str = _cargoc.names_long[Getint(arg[argc++])];
+					buff.append( GetStringWithArgs(cargo_str, arg[argc++]) );
+					break;
+				}
 
-					case 0x8D: { // {P}
-						int v = argv_orig[(byte)str[stri++]]; // contains the number that determines plural
-						int [] len = { 0 };
-						str = ParseStringChoice(str, DeterminePluralForm(v), buff, len);
-						buff += len[0];
+				default:
+					Global.error("!invalid escape sequence in string");
+				}
+				break;
+
+			case 0x86: // {SKIP}
+				argc++;
+				break;
+
+				// This sets up the gender for the string.
+				// We just ignore this one. It's used in {G 0 Der Die Das} to determine the case.
+			case 0x87: // {GENDER 0}
+				stri++;
+				break;
+
+			case 0x88: {// {STRING}
+				int sstri = modifier + Getint(arg[argc++]);
+				// WARNING. It's prohibited for the included string to consume any arguments.
+				// For included strings that consume argument, you should use STRING1, STRING2 etc.
+				// To debug stuff you can set argv to null and it will tell you
+				int acnt = arg.length - argc;
+				Object [] acopy = new Object[acnt];
+				System.arraycopy(arg, argc, acopy, 0, acnt);
+				argc += acnt; // TODO wrong, must get used count from GetStringWithArgs 
+				buff.append( GetStringWithArgs(sstri, acopy) );
+				modifier = 0;
+				break;
+			}
+
+			case 0x8B: // {COMMA}
+				buff.append( FormatCommaNumber(Getint(arg[argc++]) ) );
+				break;
+
+			case 0x8C: // Move argument pointer
+				//argv = argv_orig + (byte)str[stri++];
+				argc = str[stri++];
+				break;
+
+			case 0x8D: { // {P}
+				int v = argv_orig[(byte)str[stri++]]; // contains the number that determines plural
+				int [] len = { 0 };
+				str = ParseStringChoice(str, DeterminePluralForm(v), buff, len);
+				buff += len[0];
+				break;
+			}
+
+			case 0x8E: // {NUM}
+				buff.append( FormatNoCommaNumber(Getint(arg[argc++]) ) );
+				break;
+
+			case 0x8F: // {CURRENCY}
+				buff.append( FormatGenericCurrency(_currency, Getint(arg[argc++]), false) );
+				break;
+
+			case 0x99: { // {WAYPOINT}
+				int [] temp = new int[2];
+				WayPoint wp = WayPoint.GetWaypoint(Getint(arg[argc++]));
+				StringID str;
+				if (wp.string != STR_NULL) {
+					str = wp.string;
+				} else {
+					temp[0] = wp.town_index;
+					temp[1] = wp.town_cn + 1;
+					str = wp.town_cn == 0 ? STR_WAYPOINTNAME_CITY : STR_WAYPOINTNAME_CITY_SERIAL;
+				}
+				buff.append( GetStringWithArgs(str, temp) );
+			} break;
+
+			case 0x9A: { // {STATION}
+				final Station st = Station.GetStation(Getint(arg[argc++]));
+				int [] temp = new int[2];
+
+				if (st.xy == null) { // station doesn't exist anymore
+					buff.append( GetStringWithArgs(STR_UNKNOWN_DESTINATION ) );
+					break;
+				}
+				temp[0] = st.town.townnametype;
+				temp[1] = st.town.townnameparts;
+				buff = GetStringWithArgs(buff, st.string_id, temp);
+				break;
+			}
+			case 0x9B: { // {TOWN}
+				final Town t = Town.GetTown(Getint(arg[argc++]));
+				int temp[] = new int[1];
+
+				assert(t.xy != 0);
+
+				temp[0] = t.townnameparts;
+				buff.append( GetStringWithArgs( t.townnametype, temp) );
+				break;
+			}
+
+			case 0x9C: { // {CURRENCY64}
+				buff.append( FormatGenericCurrency(_currency, Getlong(arg[argc++]), false) );
+				break;
+			}
+
+			case 0x9D: { // {SETCASE}
+				// This is a pseudo command, it's outputted when someone does {STRING.ack}
+				// The modifier is added to all subsequent GetStringWithArgs that accept the modifier.
+				modifier = (byte)str[stri++] << 24;
+				break;
+			}
+
+			case 0x9E: { // {Used to implement case switching}
+				// <0x9E> <NUM CASES> <CASE1> <LEN1> <STRING1> <CASE2> <LEN2> <STRING2> <CASE3> <LEN3> <STRING3> <STRINGDEFAULT>
+				// Each LEN is printed using 2 bytes in big endian order.
+				int num = (byte)str[stri++];
+				while (num) {
+					if ((byte)str[0] == casei) {
+						// Found the case, adjust str pointer and continue
+						str += 3;
 						break;
 					}
+					// Otherwise skip to the next case
+					str += 3 + (str[1] << 8) + str[2];
+					num--;
+				}
+				break;
+			}
 
-					case 0x8E: // {NUM}
-						buff.append( FormatNoCommaNumber(Getint(arg[argc++]) ) );
-						break;
-
-						case 0x8F: // {CURRENCY}
-							buff.append( FormatGenericCurrency(_currency, Getint(arg[argc++]), false) );
-							break;
-
-						case 0x99: { // {WAYPOINT}
-							int [] temp = new int[2];
-							Waypoint wp = GetWaypoint(Getint(arg[argc++]));
-							StringID str;
-							if (wp.string != STR_NULL) {
-								str = wp.string;
-							} else {
-								temp[0] = wp.town_index;
-								temp[1] = wp.town_cn + 1;
-								str = wp.town_cn == 0 ? STR_WAYPOINTNAME_CITY : STR_WAYPOINTNAME_CITY_SERIAL;
-							}
-							buff.append( GetStringWithArgs(str, temp) );
-						} break;
-
-						case 0x9A: { // {STATION}
-							final Station st = Station.GetStation(Getint(arg[argc++]));
-							int [] temp = new int[2];
-
-							if (st.xy == 0) { // station doesn't exist anymore
-								buff.append( GetStringWithArgs(STR_UNKNOWN_DESTINATION, null) );
-								break;
-							}
-							temp[0] = st.town.townnametype;
-							temp[1] = st.town.townnameparts;
-							buff = GetStringWithArgs(buff, st.string_id, temp);
-							break;
-						}
-						case 0x9B: { // {TOWN}
-							final Town t = Town.GetTown(Getint(arg[argc++]));
-							int temp[] = new int[1];
-
-							assert(t.xy != 0);
-
-							temp[0] = t.townnameparts;
-							buff.append( GetStringWithArgs( t.townnametype, temp) );
-							break;
-						}
-
-						case 0x9C: { // {CURRENCY64}
-							buff.append( FormatGenericCurrency(_currency, Getlong(arg[argc++]), false) );
-							break;
-						}
-
-						case 0x9D: { // {SETCASE}
-							// This is a pseudo command, it's outputted when someone does {STRING.ack}
-							// The modifier is added to all subsequent GetStringWithArgs that accept the modifier.
-							modifier = (byte)str[stri++] << 24;
-							break;
-						}
-
-						case 0x9E: { // {Used to implement case switching}
-							// <0x9E> <NUM CASES> <CASE1> <LEN1> <STRING1> <CASE2> <LEN2> <STRING2> <CASE3> <LEN3> <STRING3> <STRINGDEFAULT>
-							// Each LEN is printed using 2 bytes in big endian order.
-							int num = (byte)str[stri++];
-							while (num) {
-								if ((byte)str[0] == casei) {
-									// Found the case, adjust str pointer and continue
-									str += 3;
-									break;
-								}
-								// Otherwise skip to the next case
-								str += 3 + (str[1] << 8) + str[2];
-								num--;
-							}
-							break;
-						}
-
-						default:
-							buff.append( b );
+			default:
+				buff.append( b );
 			}
 		}
 
@@ -849,7 +927,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	private static String GetSpecialTownNameString(int ind, int seed)
 	{
-		return _town_name_generators[ind](seed);
+		return TownNameGenerator._town_name_generators[ind].apply(seed);
 	}
 
 	private final static String _silly_company_names[] = {
@@ -868,7 +946,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			"Getout & Pushit Ltd."
 	};
 
-	private final String _surname_list[] = {
+	private final static String _surname_list[] = {
 			"Adams",
 			"Allan",
 			"Baker",
@@ -900,7 +978,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			"Watkins"
 	};
 
-	private final String _silly_surname_list[] = {
+	private final static String _silly_surname_list[] = {
 			"Grumpy",
 			"Dozy",
 			"Speedy",
@@ -926,15 +1004,15 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		int num;
 		StringBuilder buff = new StringBuilder();
 
-		if (GameOptions._opt_ptr.landscape == LT_CANDY) {
+		if (GameOptions._opt_ptr.landscape == Landscape.LT_CANDY) {
 			base = _silly_surname_list;
 		} else {
 			base = _surname_list;
 		}
 		num  = base.length;
 
-		buff.append( strecpy(buff, base[num * BitOps.GB(arg, 16, 8) >> 8], null) );
-		buff = strecpy(buff, " & Co.", null);
+		buff.append( base[num * BitOps.GB(arg, 16, 8) >> 8] );
+		buff.append( " & Co." );
 
 		return buff.toString();
 	}
@@ -956,12 +1034,12 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			buff.append( ". " );
 		}
 
-		if (GameOptions._opt_ptr.landscape == LT_CANDY) {
+		if (GameOptions._opt_ptr.landscape == Landscape.LT_CANDY) {
 			base = _silly_surname_list;
-			num  = lengthof(_silly_surname_list);
+			num  = _silly_surname_list.length;
 		} else {
 			base = _surname_list;
-			num  = lengthof(_surname_list);
+			num  = _surname_list.length;
 		}
 
 		buff.append( base[num * BitOps.GB(x, 16, 8) >> 8] );
@@ -1003,18 +1081,18 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			return _silly_company_names[Getint(arg[argc++]) & 0xFFFF];
 
 		case 2: // used for Foobar & Co company names
-			return GenAndCoName(Getint(arg[argc++]);
+			return GenAndCoName(Getint(arg[argc++]));
 
-			case 3: // President name
-				return GenPresidentName( Getint(arg[argc++]);
+		case 3: // President name
+			return GenPresidentName( Getint(arg[argc++]));
 
-				case 4: // song names
-					return _song_names[Getint(arg[argc++]) - 1];
+		case 4: // song names
+			return _song_names[Getint(arg[argc++]) - 1];
 		}
 
 		// town name?
 		if (BitOps.IS_INT_INSIDE(ind - 6, 0, SPECSTR_TOWNNAME_LAST-SPECSTR_TOWNNAME_START + 1)) {
-			return GetSpecialTownNameString(buff, ind - 6, Getint(arg[argc++])) + " Transport";
+			return GetSpecialTownNameString( ind - 6, Getint(arg[argc++])) + " Transport";
 		}
 
 		// language name?
@@ -1040,17 +1118,13 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	}
 
 
-	/* TODO rewrite
-	static const char []GetStringPtr(StringID string)
-	{
-		return _langpack_offs[_langtab_start[string >> 11] + (string & 0x7FF)];
-	}*/
 
-	
+
 	// remap a string ID from the old format to the new format
-	static StringID RemapOldStringID(StringID s)
+	//static StringID RemapOldStringID(StringID s)
+	static int RemapOldStringID(int s)
 	{
-		switch (s.id) {
+		switch (s) {
 		case 0x0006: return STR_SV_EMPTY;
 		case 0x7000: return STR_SV_UNNAMED;
 		case 0x70E4: return SPECSTR_PLAYERNAME_ENGLISH;
@@ -1260,5 +1334,8 @@ class LanguagePack {
 }
 
 
+class YearMonthDay {
+	int year, month, day;
+} 
 
 

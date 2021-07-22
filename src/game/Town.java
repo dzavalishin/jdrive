@@ -538,18 +538,20 @@ public class Town extends TownTables implements IPoolItem
 		return cost;
 	}
 
-	static void GetAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
+	static AcceptedCargo GetAcceptedCargo_Town(TileIndex tile)
 	{
+		AcceptedCargo ac = new AcceptedCargo();
 		byte type = tile.getMap().m4;
 
-		ac[AcceptedCargo.CT_PASSENGERS] = _housetype_cargo_passengers[type];
-		ac[AcceptedCargo.CT_MAIL]       = _housetype_cargo_mail[type];
-		ac[AcceptedCargo.CT_GOODS]      = _housetype_cargo_goods[type];
-		ac[AcceptedCargo.CT_FOOD]       = _housetype_cargo_food[type];
+		ac.ct[AcceptedCargo.CT_PASSENGERS] = _housetype_cargo_passengers[type];
+		ac.ct[AcceptedCargo.CT_MAIL]       = _housetype_cargo_mail[type];
+		ac.ct[AcceptedCargo.CT_GOODS]      = _housetype_cargo_goods[type];
+		ac.ct[AcceptedCargo.CT_FOOD]       = _housetype_cargo_food[type];
 	}
 
-	static void GetTileDesc_Town(TileIndex tile, TileDesc td)
+	static TileDesc GetTileDesc_Town(TileIndex tile)
 	{
+		TileDesc td = new TileDesc();
 		td.str = _town_tile_names[tile.getMap().m4];
 		if ((tile.getMap().m3 & 0xC0) != 0xC0) {
 			Global.SetDParamX(td.dparam, 0, td.str);
@@ -559,7 +561,7 @@ public class Town extends TownTables implements IPoolItem
 		td.owner = Owner.OWNER_TOWN;
 	}
 
-	static int GetTileTrackStatus_Town(TileIndex tile, TransportType mode)
+	static int GetTileTrackStatus_Town(TileIndex tile, int mode)
 	{
 		/* not used */
 		return 0;
@@ -1996,7 +1998,7 @@ public class Town extends TownTables implements IPoolItem
 	}
 
 
-	Town ClosestTownFromTile(TileIndex tile, int threshold)
+	static Town ClosestTownFromTile(TileIndex tile, int threshold)
 	{
 		Town t;
 		int dist, best = threshold;
@@ -2022,7 +2024,7 @@ public class Town extends TownTables implements IPoolItem
 		return best_town;
 	}
 
-	void ChangeTownRating(Town t, int add, int max)
+	static void ChangeTownRating(Town t, int add, int max)
 	{
 		int rating;
 
@@ -2119,22 +2121,22 @@ public class Town extends TownTables implements IPoolItem
 		_town_sort_dirty = true;
 	}
 
-	final TileTypeProcs _tile_type_town_procs = {
-			DrawTile_Town,						/* draw_tile_proc */
-			GetSlopeZ_Town,						/* get_slope_z_proc */
-			ClearTile_Town,						/* clear_tile_proc */
-			GetAcceptedCargo_Town,		/* get_accepted_cargo_proc */
-			GetTileDesc_Town,					/* get_tile_desc_proc */
-			GetTileTrackStatus_Town,	/* get_tile_track_status_proc */
-			ClickTile_Town,						/* click_tile_proc */
-			AnimateTile_Town,					/* animate_tile_proc */
-			TileLoop_Town,						/* tile_loop_clear */
-			ChangeTileOwner_Town,			/* change_tile_owner_clear */
+	final static TileTypeProcs _tile_type_town_procs = new TileTypeProcs(
+			Town::DrawTile_Town,						/* draw_tile_proc */
+			Town::GetSlopeZ_Town,						/* get_slope_z_proc */
+			Town::ClearTile_Town,						/* clear_tile_proc */
+			Town::GetAcceptedCargo_Town,		/* get_accepted_cargo_proc */
+			Town::GetTileDesc_Town,					/* get_tile_desc_proc */
+			Town::GetTileTrackStatus_Town,	/* get_tile_track_status_proc */
+			Town::ClickTile_Town,						/* click_tile_proc */
+			Town::AnimateTile_Town,					/* animate_tile_proc */
+			Town::TileLoop_Town,						/* tile_loop_clear */
+			Town::ChangeTileOwner_Town,			/* change_tile_owner_clear */
 			null,											/* get_produced_cargo_proc */
 			null,											/* vehicle_enter_tile_proc */
 			null,											/* vehicle_leave_tile_proc */
-			GetSlopeTileh_Town,				/* get_slope_tileh_proc */
-	};
+			Town::GetSlopeTileh_Town				/* get_slope_tileh_proc */
+			);
 
 	/*
 	// Save and load of towns.

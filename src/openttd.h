@@ -31,6 +31,7 @@ typedef struct SortStruct {
 	byte		owner;
 } SortStruct;
 
+/*
 typedef struct YearMonthDay {
 	int year, month, day;
 } YearMonthDay;
@@ -133,7 +134,7 @@ enum {
 	DO_TRANS_SIGNS =        1 << 7,
 };
 
-/* Landscape types */
+/* Landscape types * /
 enum {
 	LT_NORMAL = 0,
 	LT_HILLY = 1,
@@ -267,7 +268,7 @@ enum {
 };
 */
 //typedef uint AcceptedCargo[NUM_CARGO];
-
+/*
 typedef struct TileDesc {
 	StringID str;
 	byte owner;
@@ -457,7 +458,7 @@ enum {
 	EXPENSES_LOAN_INT = 11,
 	EXPENSES_OTHER = 12,
 };
-*/
+* /
 // special string constants
 enum SpecialStrings {
 
@@ -514,7 +515,7 @@ enum SpecialStrings {
 	STR_SPEC_DYNSTRING = 0xF800,
 	STR_SPEC_USERSTRING = 0xF808,
 };
-
+*/
 typedef void PlaceProc(TileIndex tile);
 
 enum {
