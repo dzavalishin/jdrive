@@ -38,12 +38,12 @@ typedef struct CursorVars {
 void RedrawScreenRect(int left, int top, int right, int bottom);
 void GfxScroll(int left, int top, int width, int height, int xo, int yo);
 
-
+/*
 // XXX doesn't really belong here, but the only
 // consumers always use it in conjunction with DoDrawString()
 #define UPARROW   "\x80"
 #define DOWNARROW "\xAA"
-
+*/
 
 int DrawStringCentered(int x, int y, StringID str, uint16 color);
 int DrawStringCenteredTruncated(int xl, int xr, int y, StringID str, uint16 color);
@@ -103,7 +103,7 @@ static inline byte GetCharacterWidth(uint key)
 
 //VARDEF DrawPixelInfo _screen;
 //VARDEF DrawPixelInfo *_cur_dpi;
-VARDEF ColorList _color_list[16];
+//VARDEF ColorList _color_list[16];
 //VARDEF CursorVars _cursor;
 
 VARDEF int _pal_first_dirty;

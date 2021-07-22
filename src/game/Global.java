@@ -114,6 +114,7 @@ public class Global {
 	public static int _tick_counter;
 	public static int _frame_counter;
 
+	public static int _cur_tileloop_tile;
 
 
 
@@ -280,6 +281,7 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 
 	private static int next_name_id = 0;
 	private static Map<Integer,String> _name_array = new HashMap<Integer,String>();
+
 
 	public static void DeleteName(int id)
 	{

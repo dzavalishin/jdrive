@@ -1267,12 +1267,12 @@ public class Gui
 
 	static void PlaceProc_LightHouse(TileIndex tile)
 	{
-		if (!IsTileType(tile, MP_CLEAR) || IsSteepTileh(GetTileSlope(tile, null))) {
+		if (!tile.IsTileType(TileTypes.MP_CLEAR) || IsSteepTileh(GetTileSlope(tile, null))) {
 			return;
 		}
 
-		ModifyTile(tile, MP_SETTYPE(MP_UNMOVABLE) | MP_MAP5, 1);
-		SndPlayTileFx(SND_1F_SPLAT, tile);
+		Landscape.ModifyTile(tile, MP_SETTYPE(MP_UNMOVABLE) | MP_MAP5, 1);
+		//SndPlayTileFx(SND_1F_SPLAT, tile);
 	}
 
 	static void PlaceProc_Transmitter(TileIndex tile)
@@ -1281,8 +1281,8 @@ public class Gui
 			return;
 		}
 
-		ModifyTile(tile, MP_SETTYPE(MP_UNMOVABLE) | MP_MAP5, 0);
-		SndPlayTileFx(SND_1F_SPLAT, tile);
+		Landscape.ModifyTile(tile, MP_SETTYPE(MP_UNMOVABLE) | MP_MAP5, 0);
+		//SndPlayTileFx(SND_1F_SPLAT, tile);
 	}
 
 	static void PlaceProc_DesertArea(TileIndex tile)

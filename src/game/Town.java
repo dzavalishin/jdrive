@@ -603,7 +603,7 @@ public class Town extends TownTables implements IPoolItem
 		UpdateTownRadius(t);
 	}
 
-	void OnTick_Town()
+	static void OnTick_Town()
 	{
 		if (Global._game_mode == GameModes.GM_EDITOR) return;
 

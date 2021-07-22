@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import game.util.BitOps;
 
 public class TileIndex {
-	private int tile;
+	protected int tile;
 
 
 	/**
@@ -45,18 +45,7 @@ public class TileIndex {
 
 	}
 
-	public TileIndex sub(TileIndexDiff diff)
-	{
-		tile -= diff.diff;
-		return this;
-	}
-
-	public TileIndex add(TileIndexDiff diff)
-	{
-		tile += diff.diff;
-		return this;
-	}
-
+	
 	/** static  TileIndex TileXY(int x, int y)
 	 * 
 	 * @param x
@@ -141,11 +130,11 @@ public class TileIndex {
 	{
 		Point pt = Point.RemapCoords(TileX() * 16, TileY() * 16, GetTileZ());
 		ViewPort.MarkAllViewportsDirty(
-			pt.x - 31,
-			pt.y - 122,
-			pt.x - 31 + 67,
-			pt.y - 122 + 154
-		);
+				pt.x - 31,
+				pt.y - 122,
+				pt.x - 31 + 67,
+				pt.y - 122 + 154
+				);
 	}
 
 	int GetTileSlope(IntContainer h)
@@ -383,6 +372,11 @@ public class TileIndex {
 		return GetTileOwner() == owner;
 	}
 
+	boolean IsTileOwner(int owner)
+	{
+		return GetTileOwner().owner == owner;
+	}
+
 
 	public static TileIndexDiff ToTileIndexDiff(TileIndexDiffC tidc)
 	{
@@ -440,9 +434,84 @@ public class TileIndex {
 		return IsTileType(TileTypes.MP_STATION) && getMap().m5 == 0x52;
 	}
 
+
+	static TileIndex RandomTileSeed(int r) { return new TileIndex( TILE_MASK(r) ); }
+	static TileIndex RandomTile() { return new TileIndex(Hal.Random()); }
+
+	public boolean EnsureNoVehicle() {
+		return Vehicle.EnsureNoVehicle(this);
+	}
+
+	public boolean CheckTileOwnership() {
+		return Player.CheckTileOwnership(this);
+	}
+
+	public static int GetPartialZ(int x, int y, int corners) {
+		return Landscape.GetPartialZ(x, y, corners);
+	}
+
+
+	/**
+	 * Immutable sub
+	 * @param diff
+	 * @return returns modified TileIndex, original one is not changed
+	 */
+	public TileIndex isub(TileIndexDiff diff)
+	{
+		TileIndex ni = new TileIndex(this);
+		ni.tile -= diff.diff;
+		return ni;
+	}
+
+	/**
+	 * Immutable add
+	 * @param diff
+	 * @return returns modified TileIndex, original one is not changed
+	 */
+	public TileIndex iadd(TileIndexDiff diff)
+	{
+		TileIndex ni = new TileIndex(this);
+		ni.tile += diff.diff;
+		return ni;
+	}
+
+	/**
+	 * Immutable sub
+	 * @param diff
+	 * @return returns modified TileIndex, original one is not changed
+	 */
+	public TileIndex isub(int diff)
+	{
+		TileIndex ni = new TileIndex(this);
+		ni.tile -= diff;
+		return ni;
+	}
+
+	/**
+	 * Immutable add
+	 * @param diff
+	 * @return returns modified TileIndex, original one is not changed
+	 */
+	public TileIndex iadd(int diff)
+	{
+		TileIndex ni = new TileIndex(this);
+		ni.tile += diff;
+		return ni;
+	}
 	
-	static TileIndex RandomTileSeed(int r) { return TILE_MASK(r); }
-	static TileIndex RandomTile() { return new TileIndex(Hal.Random())); }
+
+	/**
+	 * Immutable add - steps with given x and y 
+	 * @param x
+	 * @param y
+	 * @return returns modified TileIndex, original one is not changed
+	 */
+	public TileIndex iadd(int x, int y)
+	{
+		TileIndex ni = new TileIndex(this);
+		ni.tile += (y * Global.MapSizeX()) + x;
+		return ni;
+	}
 	
 	
 }
@@ -462,5 +531,23 @@ enum TileTypes {
 	MP_UNMOVABLE;
 
 	static TileTypes[] values = values();
+
+
+	public static int MP_SETTYPE( TileTypes x ) { return  ((x.ordinal()+1) << 8); }
+
+	public static final int MP_MAP2 = 1<<0;
+	public static final int MP_MAP3LO = 1<<1;
+	public static final int MP_MAP3HI = 1<<2;
+	public static final int MP_MAP5 = 1<<3;
+	public static final int MP_MAPOWNER_CURRENT = 1<<4;
+	public static final int MP_MAPOWNER = 1<<5;
+
+	public static final int MP_TYPE_MASK = 0xF << 8;
+
+	public static final int MP_MAP2_CLEAR = 1 << 12;
+	public static final int MP_MAP3LO_CLEAR = 1 << 13;
+	public static final int MP_MAP3HI_CLEAR = 1 << 14;
+
+	public static final int MP_NODIRTY = 1<<15;
 
 }

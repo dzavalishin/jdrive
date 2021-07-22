@@ -341,7 +341,7 @@ typedef struct {
 } TileTypeProcs;
 */
 
-
+/*
 #define MP_SETTYPE(x) ((x+1) << 8)
 
 enum {

@@ -35,7 +35,7 @@ public class Landscape extends GenLandTable
 		_tile_type_rail_procs,
 		_tile_type_road_procs,
 		Town._tile_type_town_procs,
-		_tile_type_trees_procs,
+		Tree._tile_type_trees_procs,
 		Station._tile_type_station_procs,
 		_tile_type_water_procs,
 		_tile_type_dummy_procs,
@@ -187,15 +187,15 @@ public class Landscape extends GenLandTable
 
 		FindLandscapeHeight(ti, x, y);
 
-		return _tile_type_procs[ti.type].get_slope_z_proc(ti);
+		return _tile_type_procs[ti.type].get_slope_z_proc.apply(ti);
 	}
 
 	// direction=true:  check for foundation in east and south corner
 	// direction=false: check for foundation in west and south corner
-	static boolean hasFoundation(static final TileInfo ti, boolean direction)
+	static boolean hasFoundation(final TileInfo ti, boolean direction)
 	{
 		boolean south, other; // southern corner and east/west corner
-		int slope = _tile_type_procs[ti.type].get_slope_tileh_proc(ti);
+		int slope = _tile_type_procs[ti.type].get_slope_tileh_proc.apply(ti);
 		int tileh = ti.tileh;
 
 		if (slope == 0 && slope != tileh) tileh = 15;
@@ -211,7 +211,7 @@ public class Landscape extends GenLandTable
 
 	void DrawFoundation(TileInfo ti, int f)
 	{
-		int sprite_base = SPR_SLOPES_BASE-14;
+		int sprite_base = Sprite.SPR_SLOPES_BASE-14;
 
 		TileInfo ti2;
 		FindLandscapeHeight(ti2, ti.x, ti.y - 1);
@@ -221,71 +221,73 @@ public class Landscape extends GenLandTable
 
 		if (f < 15) {
 			// leveled foundation
-			if (sprite_base < SPR_SLOPES_BASE) sprite_base = SPR_FOUNDATION_BASE + 1; // use original slope sprites
+			if (sprite_base < Sprite.SPR_SLOPES_BASE) sprite_base = Sprite.SPR_FOUNDATION_BASE + 1; // use original slope sprites
 
-			AddSortableSpriteToDraw(f - 1 + sprite_base, ti.x, ti.y, 16, 16, 7, ti.z);
+			ViewPort.AddSortableSpriteToDraw(f - 1 + sprite_base, ti.x, ti.y, 16, 16, 7, ti.z);
 			ti.z += 8;
 			ti.tileh = 0;
-			OffsetGroundSprite(31, 1);
+			ViewPort.OffsetGroundSprite(31, 1);
 		} else {
 			// inclined foundation
 			sprite_base += 14;
 
-			AddSortableSpriteToDraw(
-					BitOps.HASBIT((1<<1) | (1<<2) | (1<<4) | (1<<8), ti.tileh) ? sprite_base + (f - 15) : SPR_FOUNDATION_BASE + ti.tileh,
+			ViewPort.AddSortableSpriteToDraw(
+					BitOps.HASBIT((1<<1) | (1<<2) | (1<<4) | (1<<8), ti.tileh) ? sprite_base + (f - 15) : Sprite.SPR_FOUNDATION_BASE + ti.tileh,
 							ti.x, ti.y, 1, 1, 1, ti.z
 					);
 
 			ti.tileh = _inclined_tileh[f - 15];
-			OffsetGroundSprite(31, 9);
+			ViewPort.OffsetGroundSprite(31, 9);
 		}
 	}
 
 	static void DoClearSquare(TileIndex tile)
 	{
-		ModifyTile(tile,
-				MP_SETTYPE(MP_CLEAR) |
-				MP_MAP2_CLEAR | MP_MAP3LO_CLEAR | MP_MAP3HI_CLEAR | MP_MAPOWNER | MP_MAP5,
-				OWNER_NONE, /* map_owner */
-				_generating_world ? 3 : 0 /* map5 */
+		Landscape.ModifyTile(tile,
+				TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) |
+				TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5,
+				Owner.OWNER_NONE, /* map_owner */
+				Global._generating_world ? 3 : 0 /* map5 */
 				);
 	}
 
-	static int GetTileTrackStatus(TileIndex tile, TransportType mode)
+	//static int GetTileTrackStatus(TileIndex tile, TransportType mode)
+	static int GetTileTrackStatus(TileIndex tile, int mode)
 	{
-		return _tile_type_procs[GetTileType(tile)].get_tile_track_status_proc(tile, mode);
+		return _tile_type_procs[tile.GetTileType().ordinal()].get_tile_track_status_proc.applyAsInt(tile, mode);
 	}
 
 	static void ChangeTileOwner(TileIndex tile, byte old_player, byte new_player)
 	{
-		_tile_type_procs[GetTileType(tile)].change_tile_owner_proc(tile, old_player, new_player);
+		_tile_type_procs[tile.GetTileType().ordinal()].change_tile_owner_proc.apply(tile, new PlayerID( old_player ), new PlayerID( new_player) );
 	}
 
-	public static void GetAcceptedCargo(TileIndex tile, AcceptedCargo ac)
+	public static AcceptedCargo GetAcceptedCargo(TileIndex tile)
 	{
+		//AcceptedCargo ac = new AcceptedCargo();
 		//memset(ac, 0, sizeof(AcceptedCargo));
-		ac.clear();
-		_tile_type_procs[GetTileType(tile)].get_accepted_cargo_proc(tile, ac);
+		//ac.clear();
+		return _tile_type_procs[tile.GetTileType().ordinal()].get_accepted_cargo_proc.apply(tile);
 	}
 
 	static void AnimateTile(TileIndex tile)
 	{
-		_tile_type_procs[GetTileType(tile)].animate_tile_proc(tile);
+		_tile_type_procs[tile.GetTileType().ordinal()].animate_tile_proc.accept(tile);
 	}
 
 	static void ClickTile(TileIndex tile)
 	{
-		_tile_type_procs[GetTileType(tile)].click_tile_proc(tile);
+		_tile_type_procs[tile.GetTileType().ordinal()].click_tile_proc.accept(tile);
 	}
 
 	static void DrawTile(TileInfo ti)
 	{
-		_tile_type_procs[ti.type].draw_tile_proc(ti);
+		_tile_type_procs[ti.type].draw_tile_proc.accept(ti);
 	}
 
-	static void GetTileDesc(TileIndex tile, TileDesc td)
+	static TileDesc GetTileDesc(TileIndex tile)
 	{
-		_tile_type_procs[GetTileType(tile)].get_tile_desc_proc(tile, td);
+		return _tile_type_procs[tile.GetTileType().ordinal()].get_tile_desc_proc.apply(tile);
 	}
 
 	/** Clear a piece of landscape
@@ -299,7 +301,7 @@ public class Landscape extends GenLandTable
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		return _tile_type_procs[GetTileType(tile)].clear_tile_proc(tile, flags);
+		return _tile_type_procs[tile.GetTileType().ordinal()].clear_tile_proc.applyAsInt(tile, (byte)flags);
 	}
 
 	/** Clear a big piece of landscape
@@ -314,7 +316,7 @@ public class Landscape extends GenLandTable
 		int x,y;
 		boolean success = false;
 
-		if (p1 > Global.MapSize()) return CMD_ERROR;
+		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 
 		TileIndex pi1 = new TileIndex(p1);
 
@@ -331,30 +333,30 @@ public class Landscape extends GenLandTable
 
 		for (x = sx; x <= ex; x += 16) {
 			for (y = sy; y <= ey; y += 16) {
-				ret = DoCommandByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags & ~DC_EXEC, CMD_LANDSCAPE_CLEAR);
+				ret = DoCommandByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags & ~Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 				if (CmdFailed(ret)) continue;
 				cost += ret;
 				success = true;
 
-				if (flags & DC_EXEC) {
+				if(0 != (flags & Cmd.DC_EXEC)) {
 					if (ret > 0 && (money -= ret) < 0) {
 						_additional_cash_required = ret;
 						return cost - ret;
 					}
-					DoCommandByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags, CMD_LANDSCAPE_CLEAR);
+					DoCommandByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 
 					// draw explosion animation...
 					if ((x == sx || x == ex) && (y == sy || y == ey)) {
 						// big explosion in each corner, or small explosion for single tiles
-						CreateEffectVehicleAbove(x + 8, y + 8, 2,
-								sy == ey && sx == ex ? EV_EXPLOSION_SMALL : EV_EXPLOSION_LARGE
+						Vehicle.CreateEffectVehicleAbove(x + 8, y + 8, 2,
+								sy == ey && sx == ex ? Vehicle.EV_EXPLOSION_SMALL : Vehicle.EV_EXPLOSION_LARGE
 								);
 					}
 				}
 			}
 		}
 
-		return (success) ? cost : CMD_ERROR;
+		return (success) ? cost : Cmd.CMD_ERROR;
 	}
 
 
@@ -368,69 +370,72 @@ public class Landscape extends GenLandTable
 			tile.SetTileType( TileTypes.values[(i - 1)] );
 		}
 
-		if (flags & (MP_MAP2_CLEAR | MP_MAP2)) {
+		if( 0 != (flags & (TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP2)) ) {
 			int x = 0;
-			if (flags & MP_MAP2) x = args[p++];
+			if(0 != (flags & TileTypes.MP_MAP2)) x = args[p++];
 			tile.getMap().m2 = x;
 		}
 
-		if (flags & (MP_MAP3LO_CLEAR | MP_MAP3LO)) {
+		if( 0 != (flags & (TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3LO)) ) {
 			int x = 0;
-			if (flags & MP_MAP3LO) x = args[p++];
-			tile.getMap().m3 = x;
+			if( 0 != (flags & TileTypes.MP_MAP3LO) ) x = args[p++];
+			tile.getMap().m3 = (byte) x;
 		}
 
-		if (flags & (MP_MAP3HI_CLEAR | MP_MAP3HI)) {
+		if( 0 !=  (flags & (TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAP3HI)) ) {
 			int x = 0;
-			if (flags & MP_MAP3HI) x = args[p++];
-			tile.getMap().m4 = x;
+			if( 0 !=  (flags & TileTypes.MP_MAP3HI) ) x = args[p++];
+			tile.getMap().m4 = (byte) x;
 		}
 
-		if (flags & (MP_MAPOWNER|MP_MAPOWNER_CURRENT)) {
-			PlayerID x = _current_player;
-			if (flags & MP_MAPOWNER) x = args[p++];
+		if( 0 != (flags & (TileTypes.MP_MAPOWNER|TileTypes.MP_MAPOWNER_CURRENT)) ) {
+			/*PlayerID*/ int x = Global._current_player.id;
+			if(0 != (flags & TileTypes.MP_MAPOWNER) ) x = args[p++];
 			tile.getMap().m1 = x;
 		}
 
-		if (flags & MP_MAP5) {
-			tile.getMap().m5 = args[p++];
+		if( 0 != (flags & TileTypes.MP_MAP5) ) {
+			tile.getMap().m5 = (byte) args[p++];
 		}
 
 
-		if (!(flags & MP_NODIRTY))
-			MarkTileDirtyByTile(tile);
+		if ( 0 == (flags & TileTypes.MP_NODIRTY))
+			tile.MarkTileDirtyByTile();
 	}
 
-	/*
-	#define TILELOOP_BITS 4
-	#define TILELOOP_SIZE (1 << TILELOOP_BITS)
-	#define TILELOOP_ASSERTMASK ((TILELOOP_SIZE-1) + ((TILELOOP_SIZE-1) << MapLogX()))
-	#define TILELOOP_CHKMASK (((1 << (MapLogX() - TILELOOP_BITS))-1) << TILELOOP_BITS)
-	 */
+	private static final int TILELOOP_BITS = 4;
+	private static final int TILELOOP_SIZE = (1 << TILELOOP_BITS);
+	private static final int TILELOOP_ASSERTMASK = ((TILELOOP_SIZE-1) + ((TILELOOP_SIZE-1) << Global.MapLogX()));
+	private static final int TILELOOP_CHKMASK  =(((1 << (Global.MapLogX() - TILELOOP_BITS))-1) << TILELOOP_BITS);
+
 	static void RunTileLoop()
 	{
-		TileIndex tile;
+		int tile;
 		int count;
 
-		tile = _cur_tileloop_tile;
+		tile = Global._cur_tileloop_tile;
 
 		assert( (tile & ~TILELOOP_ASSERTMASK) == 0);
-		count = (MapSizeX() / TILELOOP_SIZE) * (MapSizeY() / TILELOOP_SIZE);
+		count = (Global.MapSizeX() / TILELOOP_SIZE) * (Global.MapSizeY() / TILELOOP_SIZE);
 		do {
-			_tile_type_procs[GetTileType(tile)].tile_loop_proc(tile);
+			TileIndex itile = new TileIndex(tile);
+			_tile_type_procs[itile.GetTileType().ordinal()].tile_loop_proc.accept(itile);
 
-			if (TileX(tile) < MapSizeX() - TILELOOP_SIZE) {
+			if (itile.TileX() < Global.MapSizeX() - TILELOOP_SIZE) {
 				tile += TILELOOP_SIZE; /* no overflow */
 			} else {
-				tile = TILE_MASK(tile - TILELOOP_SIZE * (MapSizeX() / TILELOOP_SIZE - 1) + TileDiffXY(0, TILELOOP_SIZE)); /* x would overflow, also increase y */
+				tile = TileIndex.TILE_MASK(
+						tile 
+						- TILELOOP_SIZE * (Global.MapSizeX() / TILELOOP_SIZE - 1) 
+						+ TileIndex.TileDiffXY(0, TILELOOP_SIZE).diff ); /* x would overflow, also increase y */
 			}
-		} while (--count);
+		} while (--count != 0);
 		assert( (tile & ~TILELOOP_ASSERTMASK) == 0);
 
 		tile += 9;
-		if (tile & TILELOOP_CHKMASK)
-			tile = (tile + MapSizeX()) & TILELOOP_ASSERTMASK;
-		_cur_tileloop_tile = tile;
+		if(0 != (tile & TILELOOP_CHKMASK) )
+			tile = (tile + Global.MapSizeX()) & TILELOOP_ASSERTMASK;
+		Global._cur_tileloop_tile = tile;
 	}
 
 	static void InitializeLandscape()
@@ -442,7 +447,7 @@ public class Landscape extends GenLandTable
 		for (i = 0; i < map_size; i++) {
 			Global._m[i].type        = TileTypes.MP_CLEAR.ordinal();
 			Global._m[i].height      = 0;
-			Global._m[i].m1          = OWNER_NONE;
+			Global._m[i].m1          = Owner.OWNER_NONE;
 			Global._m[i].m2          = 0;
 			Global._m[i].m3          = 0;
 			Global._m[i].m4          = 0;
@@ -452,9 +457,16 @@ public class Landscape extends GenLandTable
 
 		// create void tiles at the border
 		for (i = 0; i < Global.MapMaxY(); ++i)
-			SetTileType(i * Global.MapSizeX() + Global.MapMaxX(), TileTypes.MP_VOID);
+		{			
+			TileIndex t = new TileIndex(i * Global.MapSizeX() + Global.MapMaxX());
+			t.SetTileType(TileTypes.MP_VOID);
+		}
+
 		for (i = 0; i < Global.MapSizeX(); ++i)
-			SetTileType(Global.MapSizeX() * Global.MapMaxY() + i, TileTypes.MP_VOID);
+		{
+			TileIndex t = new TileIndex(Global.MapSizeX() * Global.MapMaxY() + i);
+			t.SetTileType(TileTypes.MP_VOID);
+		}
 	}
 
 	static void ConvertGroundTilesIntoWaterTiles()
@@ -468,7 +480,7 @@ public class Landscape extends GenLandTable
 			if (tile.IsTileType(TileTypes.MP_CLEAR) && tile.GetTileSlope(h) == 0 && h.v == 0) {
 				tile.SetTileType(TileTypes.MP_WATER);
 				tile.getMap().m5 = 0;
-				tile.SetTileOwner(OWNER_WATER);
+				tile.SetTileOwner(Owner.OWNER_WATER);
 			}
 		}
 	}
@@ -484,12 +496,15 @@ public class Landscape extends GenLandTable
 		int w;
 		int h;
 		static final Sprite template;
-		static final byte p[];
-		Tile tile;
+		
+		static final byte[] p;
+		int pi = 0; // p index
+		//TileIndex tile;
+		//Tile tile;
 		byte direction;
 
-		r = Random();
-		template = GetSprite((((r >> 24) * _genterrain_tbl_1[type]) >> 8) + _genterrain_tbl_2[type] + 4845);
+		r = Hal.Random();
+		template = SpriteCache.GetSprite((((r >> 24) * _genterrain_tbl_1[type]) >> 8) + _genterrain_tbl_2[type] + 4845);
 
 		x = r & Global.MapMaxX();
 		y = (r >> Global.MapLogX()) & Global.MapMaxY();
@@ -498,7 +513,7 @@ public class Landscape extends GenLandTable
 		if (x < 2 || y < 2)
 			return;
 
-		direction = BitOps.GB(r, 22, 2);
+		direction = (byte) BitOps.GB(r, 22, 2);
 		if (0 != (direction & 1)) {
 			w = template.height;
 			h = template.width;
@@ -538,64 +553,64 @@ public class Landscape extends GenLandTable
 		if (y + h >= Global.MapMaxY() - 1)
 			return;
 
-		tile = new TileIndex(x, y).getMap();
+		MutableTileIndex tile = new MutableTileIndex(new TileIndex(x, y));//.getMap();
 
 		switch (direction) {
 		case 0:
 			do {
-				Tile tile_cur = tile;
+				MutableTileIndex tile_cur = new MutableTileIndex(tile);
 				int w_cur;
 
 				for (w_cur = w; w_cur != 0; --w_cur) {
-					if (*p >= tile_cur.type_height) tile_cur.type_height = *p;
-					p++;
-					tile_cur++;
+					if (p[pi] >= tile_cur.getMap().get_type_height()) tile_cur.getMap().set_type_height( p[pi] );
+					pi++;
+					tile_cur.madd(1);
 				}
-				tile += TileIndex.TileDiffXY(0, 1);
+				tile.madd( TileIndex.TileDiffXY(0, 1) );
 			} while (--h != 0);
 			break;
 
 		case 1:
 			do {
-				Tile tile_cur = tile;
+				MutableTileIndex tile_cur = new MutableTileIndex(tile);
 				int h_cur;
 
 				for (h_cur = h; h_cur != 0; --h_cur) {
-					if (*p >= tile_cur.type_height) tile_cur.type_height = *p;
-					p++;
-					tile_cur += TileIndex.TileDiffXY(0, 1);
+					if (p[pi] >= tile_cur.getMap().get_type_height()) tile_cur.getMap().set_type_height( p[pi] );
+					pi++;
+					tile_cur.madd( TileIndex.TileDiffXY(0, 1) );
 				}
-				tile++;
+				tile.madd(1);
 			} while (--w != 0);
 			break;
 
 		case 2:
-			tile += TileIndex.TileDiffXY(w - 1, 0);
+			tile.madd( TileIndex.TileDiffXY(w - 1, 0) );
 			do {
-				Tile tile_cur = tile;
+				MutableTileIndex tile_cur = new MutableTileIndex(tile);
 				int w_cur;
 
 				for (w_cur = w; w_cur != 0; --w_cur) {
-					if (*p >= tile_cur.type_height) tile_cur.type_height = *p;
-					p++;
-					tile_cur--;
+					if (p[pi] >= tile_cur.getMap().get_type_height()) tile_cur.getMap().set_type_height( p[pi] );
+					pi++;
+					tile_cur.msub(1);
 				}
-				tile += TileIndex.TileDiffXY(0, 1);
+				tile.madd( TileIndex.TileDiffXY(0, 1) );
 			} while (--h != 0);
 			break;
 
 		case 3:
-			tile += TileIndex.TileDiffXY(0, h - 1);
+			tile.madd( TileIndex.TileDiffXY(0, h - 1) );
 			do {
-				Tile tile_cur = tile;
+				MutableTileIndex tile_cur = new MutableTileIndex(tile);
 				int h_cur;
 
 				for (h_cur = h; h_cur != 0; --h_cur) {
-					if (*p >= tile_cur.type_height) tile_cur.type_height = *p;
-					p++;
-					tile_cur -= TileIndex.TileDiffXY(0, 1);
+					if (p[pi] >= tile_cur.getMap().get_type_height()) tile_cur.getMap().set_type_height( p[pi] );
+					pi++;
+					tile_cur.msub( TileIndex.TileDiffXY(0, 1) );
 				}
-				tile++;
+				tile.madd(1);
 			} while (--w != 0);
 			break;
 		}
@@ -660,48 +675,48 @@ public class Landscape extends GenLandTable
 		int flag;
 		int r;
 
-		if (Global._opt.landscape == LT_HILLY) {
-			for (i = ScaleByMapSize((Random() & 0x7F) + 950); i != 0; --i)
+		if (GameOptions._opt.landscape == LT_HILLY) {
+			for (i = Map.ScaleByMapSize((Hal.Random() & 0x7F) + 950); i != 0; --i)
 				GenerateTerrain(2, 0);
 
-			r = Random();
-			flag = GB(r, 0, 2) | 4;
-			for (i = ScaleByMapSize(GB(r, 16, 7) + 450); i != 0; --i)
+			r = Hal.Random();
+			flag = BitOps.GB(r, 0, 2) | 4;
+			for (i = Map.ScaleByMapSize(BitOps.GB(r, 16, 7) + 450); i != 0; --i)
 				GenerateTerrain(4, flag);
-		} else if (_opt.landscape == LT_DESERT) {
-			for (i = ScaleByMapSize((Random()&0x7F) + 170); i != 0; --i)
+		} else if (GameOptions._opt.landscape == LT_DESERT) {
+			for (i = Map.ScaleByMapSize((Hal.Random()&0x7F) + 170); i != 0; --i)
 				GenerateTerrain(0, 0);
 
-			r = Random();
-			flag = GB(r, 0, 2) | 4;
-			for (i = ScaleByMapSize(GB(r, 16, 8) + 1700); i != 0; --i)
+			r = Hal.Random();
+			flag = BitOps.GB(r, 0, 2) | 4;
+			for (i = Map.ScaleByMapSize(BitOps.GB(r, 16, 8) + 1700); i != 0; --i)
 				GenerateTerrain(0, flag);
 
 			flag ^= 2;
 
-			for (i = ScaleByMapSize((Random() & 0x7F) + 410); i != 0; --i)
+			for (i = Map.ScaleByMapSize((Hal.Random() & 0x7F) + 410); i != 0; --i)
 				GenerateTerrain(3, flag);
 		} else {
-			i = ScaleByMapSize((Random() & 0x7F) + (3 - _opt.diff.quantity_sea_lakes) * 256 + 100);
+			i = Map.ScaleByMapSize((Hal.Random() & 0x7F) + (3 - GameOptions._opt.diff.quantity_sea_lakes) * 256 + 100);
 			for (; i != 0; --i)
-				GenerateTerrain(_opt.diff.terrain_type, 0);
+				GenerateTerrain(GameOptions._opt.diff.terrain_type, 0);
 		}
 
 		ConvertGroundTilesIntoWaterTiles();
 
-		if (_opt.landscape == LT_DESERT)
+		if (GameOptions._opt.landscape == LT_DESERT)
 			CreateDesertOrRainForest();
 	}
 
 
 	static void CallLandscapeTick()
 	{
-		OnTick_Town();
-		OnTick_Trees();
-		OnTick_Station();
-		OnTick_Industry();
+		Town.OnTick_Town();
+		Tree.OnTick_Trees();
+		Station.OnTick_Station();
+		Industry.OnTick_Industry();
 
-		OnTick_Players();
+		Player.OnTick_Players();
 		OnTick_Train();
 	}
 

@@ -1442,11 +1442,11 @@ public class Vehicle implements IPoolItem
 
 		if (tile.IsTileType(TileTypes.MP_STATION) ||
 				(v.type == VEH_Ship && (
-						tile.add(TileIndex.TileDiffXY(1,  0)).IsTileType(TileTypes.MP_STATION) ||
-						tile.add(TileIndex.TileDiffXY(-1, 0)).IsTileType(TileTypes.MP_STATION) ||
-						tile.add(TileIndex.TileDiffXY(0,  1)).IsTileType(TileTypes.MP_STATION) ||
-						tile.add(TileIndex.TileDiffXY(0, -1)).IsTileType(TileTypes.MP_STATION) ||
-						tile.add(TileIndex.TileDiffXY(-2, 0)).IsTileType(TileTypes.MP_STATION)
+						tile.iadd(TileIndex.TileDiffXY(1,  0)).IsTileType(TileTypes.MP_STATION) ||
+						tile.iadd(TileIndex.TileDiffXY(-1, 0)).IsTileType(TileTypes.MP_STATION) ||
+						tile.iadd(TileIndex.TileDiffXY(0,  1)).IsTileType(TileTypes.MP_STATION) ||
+						tile.iadd(TileIndex.TileDiffXY(0, -1)).IsTileType(TileTypes.MP_STATION) ||
+						tile.iadd(TileIndex.TileDiffXY(-2, 0)).IsTileType(TileTypes.MP_STATION)
 						))) {
 
 			// If patch is active, use alternative CanFillVehicle-function
@@ -2102,7 +2102,7 @@ public class Vehicle implements IPoolItem
 
 
 	//Vehicle CreateEffectVehicle(int x, int y, int z, EffectVehicle type)
-	Vehicle CreateEffectVehicle(int x, int y, int z, int type)
+	static Vehicle CreateEffectVehicle(int x, int y, int z, int type)
 	{
 		Vehicle v;
 
@@ -2128,7 +2128,7 @@ public class Vehicle implements IPoolItem
 	}
 
 	//Vehicle CreateEffectVehicleAbove(int x, int y, int z, EffectVehicle type)
-	Vehicle CreateEffectVehicleAbove(int x, int y, int z, int type)
+	static Vehicle CreateEffectVehicleAbove(int x, int y, int z, int type)
 	{
 		return CreateEffectVehicle(x, y, Landscape.GetSlopeZ(x, y) + z, type);
 	}

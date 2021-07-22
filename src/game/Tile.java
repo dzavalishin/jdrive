@@ -1,7 +1,5 @@
 package game;
 
-import java.util.function.Consumer;
-
 public class Tile {
 
 	//byte type_height;
@@ -22,6 +20,16 @@ public class Tile {
 	public static final int DIAGDIR_NW  = 3;
 	public static final int DIAGDIR_END = 4;
 	public static final int INVALID_DIAGDIR = 0xFF;
+	
+	public byte get_type_height() {
+		// TODO Auto-generated method stub
+		return (byte) (((type << 4) & 0xF0) | (height & 0x0F));
+	}
+	
+	public void set_type_height(byte b) {
+		type = b >> 4;
+		height = b & 0xF;		
+	}
 
 
 

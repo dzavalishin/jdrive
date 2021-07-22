@@ -8,8 +8,8 @@ import java.util.function.ToIntBiFunction;
 public class TileTypeProcs {
 	public TileTypeProcs(
 			Consumer<TileInfo> draw_tile,
-			Consumer<TileInfo> get_slope_z,
-			BiConsumer<TileIndex, Byte> clear_tile,
+			Function<TileInfo,Integer> get_slope_z,
+			ToIntBiFunction<TileIndex, Byte> clear_tile,
 			Function<TileIndex,AcceptedCargo> get_accepted_cargo,
 			Function<TileIndex,TileDesc> get_tile_desc,
 			ToIntBiFunction<TileIndex,Integer> get_tile_track_status, 
@@ -43,10 +43,12 @@ public class TileTypeProcs {
 	Consumer<TileInfo> draw_tile_proc;
 	
 	//abstract int get_slope_z_proc(TileInfo ti);
-	Consumer<TileInfo> get_slope_z_proc;
+	//Consumer<TileInfo> get_slope_z_proc;
+	Function<TileInfo,Integer> get_slope_z_proc;
 	
 	//abstract int clear_tile_proc(TileIndex tile, byte flags);
-	BiConsumer<TileIndex, Byte> clear_tile_proc;
+	//BiConsumer<TileIndex, Byte> clear_tile_proc;
+	ToIntBiFunction<TileIndex, Byte> clear_tile_proc;
 	
 	//abstract AcceptedCargo get_accepted_cargo_proc(TileIndex tile);
 	Function<TileIndex,AcceptedCargo> get_accepted_cargo_proc;

@@ -24,6 +24,12 @@ public class Sprite extends Sprites {
 		width = x_offs = y_offs = 0;
 		data = null;	
 	}
+	
+	// It is natural to have it here
+	public static Sprite GetSprite(SpriteID sprite)
+	{
+		return SpriteCache.GetSprite(sprite);
+	}
 }
 
 // User should decide by object type

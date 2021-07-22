@@ -1,5 +1,5 @@
 /* $Id: clear_cmd.c 3249 2005-11-30 07:31:54Z peter1138 $ */
-
+#if 0
 #include "stdafx.h"
 #include "openttd.h"
 #include "table/strings.h"

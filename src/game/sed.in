@@ -61,12 +61,14 @@ s/WDP_/Window.WDP_/g
 s/WWT_/Window.WWT_/g
 s/WDF_/WindowDesc.WDF_/g
 s/LT_/Landscape.LT_/g
+s/SPR_/Sprite.SPR_/g
 
 s/Random(/Hal.Random(/g
 s/InvalidateWindow(/Window.InvalidateWindow(/g
 s/DeleteWindowById(/Window.DeleteWindowById(/g
 
 s/IsTileType(tile\w*,/tile.IsTileType(/g
+s/GetTileOwner\(\w*tile\w*\)/tile.GetTileOwner()/g
 
 s/MAX_PLAYERS/Global.MAX_PLAYERS/g
 s/SetDParam/Global.SetDParam/g
@@ -78,6 +80,8 @@ s/_patches/Global._patches/g
 s/_cmd_text/Global._cmd_text/g
 s/_price/Global._price/g
 s/_color_list/Global._color_list/g
+s/_error_message/Global._error_message/g
+
 
 s/GfxFillRect/Gfx.GfxFillRect/g
 s/DrawStringMultiCenter/Gfx.DrawStringMultiCenter/g

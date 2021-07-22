@@ -363,7 +363,7 @@ public class ViewPort {
 	}
 
 
-	void OffsetGroundSprite(int x, int y)
+	static void OffsetGroundSprite(int x, int y)
 	{
 		_cur_vd.offs_x = x;
 		_cur_vd.offs_y = y;
@@ -386,7 +386,7 @@ public class ViewPort {
 	}
 
 
-	void AddSortableSpriteToDraw(int image, int x, int y, int w, int h, int dz, int z)
+	static void AddSortableSpriteToDraw(int image, int x, int y, int w, int h, int dz, int z)
 	{
 		ViewportDrawer vd = _cur_vd;
 		ParentSpriteToDraw ps;
