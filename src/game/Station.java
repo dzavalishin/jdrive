@@ -651,7 +651,7 @@ public class Station implements IPoolItem
 		{
 			tile = TILE_MASK(tile + ToTileIndexDiff(p));
 
-			if (IsTileType(tile, type) && _m[tile].m5 >= min && _m[tile].m5 <= max)
+			if (IsTileType(tile, type) && tile.getMap().m5 >= min && tile.getMap().m5 <= max)
 				num++;
 		}
 
@@ -1307,7 +1307,7 @@ public class Station implements IPoolItem
 		assert(TileBelongsToRailStation(st, tile));
 
 		len = 0;
-		dir = _m[tile].m5 & 1;
+		dir = tile.getMap().m5 & 1;
 		delta = dir ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
 
 		// find starting tile..
@@ -1468,7 +1468,7 @@ public class Station implements IPoolItem
 		if (!CheckOwnership(st.owner) || !EnsureNoVehicle(tile)) return Cmd.CMD_ERROR;
 
 		// tile is not a railroad station?
-		if (_m[tile].m5 >= 8) return Cmd.CMD_ERROR;
+		if (tile.getMap().m5 >= 8) return Cmd.CMD_ERROR;
 
 		// tile is already of requested type?
 		if (BitOps.GB(tile.getMap().m3, 0, 4) == totype) return Cmd.CMD_ERROR;
@@ -1983,7 +1983,7 @@ public class Station implements IPoolItem
 				//FOR_VEHICLE_ORDERS(v, order)
 				v.forEachOrder( (order) ->
 				{
-					if (order.type == OT_GOTO_STATION && order.station == st.index) {
+					if (order.type == Order.OT_GOTO_STATION && order.station == st.index) {
 						ret = true;
 					}
 				});
@@ -2451,14 +2451,14 @@ public class Station implements IPoolItem
 		byte dir;
 
 		if (v.type == Vehicle.VEH_Train) {
-			if (BitOps.IS_BYTE_INSIDE(_m[tile].m5, 0, 8) && IsFrontEngine(v) &&
+			if (BitOps.IS_BYTE_INSIDE(tile.getMap().m5, 0, 8) && v.IsFrontEngine(v) &&
 					!IsCompatibleTrainStationTile(tile + TileOffsByDir(v.direction >> 1), tile)) {
 
 				station_id = tile.getMap().m2;
-				if ((!(v.current_order.flags & OF_NON_STOP) && !Global._patches.new_nonstop) ||
-						(v.current_order.type == OT_GOTO_STATION && v.current_order.station == station_id)) {
-					if (!(Global._patches.new_nonstop && v.current_order.flags & OF_NON_STOP) &&
-							v.current_order.type != OT_LEAVESTATION &&
+				if ((!(v.current_order.flags & Order.OF_NON_STOP) && !Global._patches.new_nonstop) ||
+						(v.current_order.type == Order.OT_GOTO_STATION && v.current_order.station == station_id)) {
+					if (!(Global._patches.new_nonstop && v.current_order.flags & Order.OF_NON_STOP) &&
+							v.current_order.type != Order.OT_LEAVESTATION &&
 							v.last_station_visited != station_id) {
 						x &= 0xF;
 						y &= 0xF;
@@ -2481,7 +2481,7 @@ public class Station implements IPoolItem
 			}
 		} else if (v.type == Vehicle.VEH_Road) {
 			if (v.u.road.state < 16 && !BitOps.HASBIT(v.u.road.state, 2) && v.u.road.frame == 0) {
-				if (BitOps.IS_BYTE_INSIDE(_m[tile].m5, 0x43, 0x4B)) {
+				if (BitOps.IS_BYTE_INSIDE(tile.getMap().m5, 0x43, 0x4B)) {
 					/* Attempt to allocate a parking bay in a road stop */
 					RoadStop rs = GetRoadStopByTile(tile, GetRoadStopType(tile));
 
@@ -2535,7 +2535,7 @@ public class Station implements IPoolItem
 		Window.DeleteWindowById(Window.WC_STATION_VIEW, index);
 
 		//Now delete all orders that go to the station
-		order.type = OT_GOTO_STATION;
+		order.type = Order.OT_GOTO_STATION;
 		order.station = index;
 		DeleteDestinationFromVehicleOrder(order);
 
@@ -2549,8 +2549,8 @@ public class Station implements IPoolItem
 				//FOR_VEHICLE_ORDERS(v, order)
 				v.forEachOrder( (order) ->
 				{
-					if (order.type == OT_GOTO_DEPOT && order.station == index) {
-						order.type = OT_DUMMY;
+					if (order.type == Order.OT_GOTO_DEPOT && order.station == index) {
+						order.type = Order.OT_DUMMY;
 						order.flags = 0;
 						invalidate = true;
 					}
