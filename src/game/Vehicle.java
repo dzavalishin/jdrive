@@ -2326,7 +2326,7 @@ public class Vehicle implements IPoolItem
 
 		do {
 
-			if (IsMultiheaded(v) && !IsTrainEngine(v)) {
+			if (v.IsMultiheaded() && !v.IsTrainEngine()) {
 				/* we build the rear ends of multiheaded trains with the front ones */
 				continue;
 			}
@@ -2337,7 +2337,7 @@ public class Vehicle implements IPoolItem
 
 			total_cost += cost;
 
-			if (flags & DC_EXEC) {
+			if (flags & Cmd.DC_EXEC) {
 				w = GetVehicle(_new_vehicle_id);
 
 				if (v.type != VEH_Road) { // road vehicles can't be refitted
@@ -2359,7 +2359,7 @@ public class Vehicle implements IPoolItem
 			}
 		} while (v.type == VEH_Train && (v = GetNextVehicle(v)) != null);
 
-		if (flags & DC_EXEC && v_front.type == VEH_Train) {
+		if (flags & Cmd.DC_EXEC && v_front.type == VEH_Train) {
 			// _new_train_id needs to be the front engine due to the callback function
 			_new_train_id = w_front.index;
 		}
@@ -2563,7 +2563,7 @@ public class Vehicle implements IPoolItem
 				if (Cmd.CmdFailed(temp_cost)) break;
 
 				cost += temp_cost;
-			} while (w.type == VEH_Train && (w = GetNextVehicle(w)) != null);
+			} while (w.type == VEH_Train && (w = w.GetNextVehicle()) != null);
 
 			if (0 == (flags & Cmd.DC_EXEC) && (Cmd.CmdFailed(temp_cost) || p.money64 < (int)(cost + p.engine_renew_money) || cost == 0)) {
 				if (p.money64 < (int)(cost + p.engine_renew_money) && ( Global._local_player == v.owner ) && cost != 0) {
@@ -2622,7 +2622,7 @@ public class Vehicle implements IPoolItem
 				}
 				temp = w;
 				w = GetNextVehicle(w);
-				DoCommand(0, 0, (INVALID_VEHICLE << 16) | temp.index, 0, DC_EXEC, CMD_MOVE_RAIL_VEHICLE);
+				DoCommand(0, 0, (INVALID_VEHICLE << 16) | temp.index, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 				MoveVehicleCargo(v, temp);
 				cost += DoCommand(0, 0, temp.index, 0, flags, CMD_SELL_VEH(temp.type));
 			}
@@ -2651,17 +2651,17 @@ public class Vehicle implements IPoolItem
 
 		if (!CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		str = AllocateNameUnique(_cmd_text, 2);
+		str = Global.AllocateNameUnique(_cmd_text, 2);
 		if (str == 0) return Cmd.CMD_ERROR;
 
 		if (flags & DC_EXEC) {
 			StringID old_str = v.string_id;
 			v.string_id = str;
-			DeleteName(old_str);
+			Global.DeleteName(old_str);
 			ResortVehicleLists();
 			MarkWholeScreenDirty();
 		} else {
-			DeleteName(str);
+			Global.DeleteName(str);
 		}
 
 		return 0;
@@ -2778,13 +2778,13 @@ public class Vehicle implements IPoolItem
 	int VehicleEnterTile(Vehicle v, TileIndex tile, int x, int y)
 	{
 		TileIndex old_tile = v.tile;
-		int result = _tile_type_procs[GetTileType(tile)].vehicle_enter_tile_proc(v, tile, x, y);
+		int result = Landscape._tile_type_procs[tile.GetTileType().ordinal()].vehicle_enter_tile_proc.apply(v, tile, x, y);
 
 		/* When vehicle_enter_tile_proc returns 8, that apparently means that
 		 * we cannot enter the tile at all. In that case, don't call
 		 * leave_tile. */
-		if (!(result & 8) && old_tile != tile) {
-			VehicleLeaveTileProc proc = _tile_type_procs[GetTileType(old_tile)].vehicle_leave_tile_proc;
+		if (0 == (result & 8) && old_tile != tile) {
+			VehicleLeaveTileProc proc = Landscape._tile_type_procs[GetTileType(old_tile)].vehicle_leave_tile_proc;
 			if (proc != null)
 				proc(v, old_tile, x, y);
 		}
