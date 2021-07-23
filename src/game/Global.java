@@ -20,6 +20,18 @@ public class Global {
 
 	public static Economy _economy = new Economy();
 
+	
+	/* Display Options */
+	//enum {
+	public static final int DO_SHOW_TOWN_NAMES =    1 << 0;
+	public static final int DO_SHOW_STATION_NAMES = 1 << 1;
+	public static final int DO_SHOW_SIGNS =         1 << 2;
+	public static final int DO_FULL_ANIMATION =     1 << 3;
+	public static final int DO_TRANS_BUILDINGS =    1 << 4;
+	public static final int DO_FULL_DETAIL =        1 << 5;
+	public static final int DO_WAYPOINTS =          1 << 6;
+	public static final int DO_TRANS_SIGNS =        1 << 7;
+	
 
 	public static final int NUM_NORMAL_RAIL_ENGINES = 54;
 	public static final int NUM_MONORAIL_ENGINES = 30;

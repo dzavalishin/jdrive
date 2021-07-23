@@ -122,7 +122,7 @@ typedef struct TileInfo {
 } TileInfo;
 */
 
-/* Display Options */
+/* Display Options * /
 enum {
 	DO_SHOW_TOWN_NAMES =    1 << 0,
 	DO_SHOW_STATION_NAMES = 1 << 1,

@@ -1,6 +1,8 @@
 package game.util.wcustom;
 
 import game.StringID;
+import game.WindowClass;
+import game.WindowNumber;
 
 public class dropdown_d extends AbstractWinCustom  {
 	public int disabled_state;

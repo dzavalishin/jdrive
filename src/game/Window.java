@@ -8,6 +8,7 @@ import java.util.function.BiConsumer;
 import game.util.BitOps;
 import game.util.WindowConstants;
 import game.util.wcustom.*;
+import game.WindowClass;
 
 public class Window extends WindowConstants
 {
@@ -1846,7 +1847,7 @@ public class Window extends WindowConstants
 							w.window_class.v == WC_MAIN_WINDOW ||
 							w.window_class.v == WC_EXTRA_VIEW_PORT
 							)) {
-				ZoomInOrOutToCursorWindow(mousewheel < 0,w);
+				Gui.ZoomInOrOutToCursorWindow(mousewheel < 0,w);
 			}
 
 			if (click == 1) {
@@ -2684,7 +2685,7 @@ public class Window extends WindowConstants
 			y = 2;
 			sel = w.as_dropdown_d().selected_index;
 
-			for (i = 0; w.as_dropdown_d().items[i] != INVALID_STRING_ID; i++) {
+			for (i = 0; w.as_dropdown_d().items[i] != Global.INVALID_STRING_ID; i++) {
 				if (BitOps.HASBIT(w.as_dropdown_d().hidden_state, i)) {
 					sel--;
 					continue;
@@ -2782,7 +2783,7 @@ public class Window extends WindowConstants
 
 		w.InvalidateWidget(button);
 
-		for (i = 0; strings[i] != INVALID_STRING_ID; i++) {}
+		for (i = 0; strings[i] != Global.INVALID_STRING_ID; i++) {}
 		if (i == 0) return;
 
 		wi = w.widget.get(button);
@@ -2790,7 +2791,7 @@ public class Window extends WindowConstants
 		if (hidden_mask != 0) {
 			int j;
 
-			for (j = 0; strings[j] != INVALID_STRING_ID; j++) {
+			for (j = 0; strings[j] != Global.INVALID_STRING_ID; j++) {
 				if (BitOps.HASBIT(hidden_mask, j)) i--;
 			}
 		}
@@ -2804,9 +2805,9 @@ public class Window extends WindowConstants
 				0x3F,
 				_dropdown_menu_widgets);
 
-		w2.widget[0].color = wi.color;
-		w2.widget[0].right = wi.right - wi[-1].left;
-		w2.widget[0].bottom = i * 10 + 3;
+		w2.widget.get(0).color = wi.color;
+		w2.widget.get(0).right = wi.right - wi[-1].left;
+		w2.widget.get(0).bottom = i * 10 + 3;
 
 		w2.flags4 &= ~WF_WHITE_BORDER_MASK;
 
@@ -2861,25 +2862,9 @@ class ResizeInfo {
 } 
 
 
-
-
-
 class Scrollbar {
 	int count, cap, pos;
 } ;
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

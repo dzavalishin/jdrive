@@ -1,5 +1,6 @@
 package game;
 
+import java.util.Iterator;
 import java.util.function.Consumer;
 import game.util.BitOps;
 
@@ -101,7 +102,7 @@ public class Gui
 
 	static byte _terraform_size = 1;
 	static RailType _last_built_railtype;
-	//extern void GenerateWorld(int mode, uint size_x, uint size_y);
+	//extern void GenerateWorld(int mode, int size_x, int size_y);
 
 	//extern void GenerateIndustries();
 	//extern boolean GenerateTowns();
@@ -535,10 +536,10 @@ public class Gui
 
 			DrawWindowWidgets(w);
 
-			count = WP(w,menu_d).item_count;
-			sel = WP(w,menu_d).sel_index;
-			chk = WP(w,menu_d).checked_items;
-			string = WP(w,menu_d).string_id;
+			count = w.as_menu_d().item_count;
+			sel = w.as_menu_d().sel_index;
+			chk = w.as_menu_d().checked_items;
+			string = w.as_menu_d().string_id;
 
 			x = 1;
 			y = 1;
@@ -550,7 +551,7 @@ public class Gui
 			do {
 				if (sel== 0) GfxFillRect(x, y, x + eo, y+9, 0);
 				color = sel == 0 ? 0xC : 0x10;
-				if (HASBIT(WP(w,menu_d).disabled_items, (string - WP(w, menu_d).string_id))) color = 0xE;
+				if (HASBIT(w.as_menu_d().disabled_items, (string - WP(w, menu_d).string_id))) color = 0xE;
 				DrawString(x + 2, y, string + (chk & 1), color);
 				y += 10;
 				string += inc;
@@ -561,7 +562,7 @@ public class Gui
 
 		case WindowEvents.WE_DESTROY: {
 				Window v = FindWindowById(WC_MAIN_TOOLBAR, 0);
-				v.click_state &= ~(1 << WP(w,menu_d).main_button);
+				v.click_state &= ~(1 << w.as_menu_d().main_button);
 				SetWindowDirty(v);
 				return;
 			}
@@ -573,11 +574,11 @@ public class Gui
 
 			if (index < 0) {
 				Window w2 = FindWindowById(WC_MAIN_TOOLBAR,0);
-				if (GetWidgetFromPos(w2, e.popupmenu.pt.x - w2.left, e.popupmenu.pt.y - w2.top) == WP(w,menu_d).main_button)
-					index = WP(w,menu_d).sel_index;
+				if (GetWidgetFromPos(w2, e.popupmenu.pt.x - w2.left, e.popupmenu.pt.y - w2.top) == w.as_menu_d().main_button)
+					index = w.as_menu_d().sel_index;
 			}
 
-			action_id = WP(w,menu_d).action_id;
+			action_id = w.as_menu_d().action_id;
 			DeleteWindow(w);
 
 			if (index >= 0) _menu_clicked_procs[action_id](index);
@@ -588,9 +589,9 @@ public class Gui
 		case WindowEvents.WE_POPUPMENU_OVER: {
 			int index = GetMenuItemIndex(w, e.popupmenu.pt.x, e.popupmenu.pt.y);
 
-			if (index == -1 || index == WP(w,menu_d).sel_index) return;
+			if (index == -1 || index == w.as_menu_d().sel_index) return;
 
-			WP(w,menu_d).sel_index = index;
+			w.as_menu_d().sel_index = index;
 			SetWindowDirty(w);
 			return;
 			}
@@ -612,11 +613,12 @@ public class Gui
 	static int GetPlayerIndexFromMenu(int index)
 	{
 		if (index >= 0) {
-			final Player p;
 
-			FOR_ALL_PLAYERS(p)
-			//Player._player_
+			//FOR_ALL_PLAYERS(p)
+			Iterator<Player> i = Player.getIterator();
+			while(i.hasNext())
 			{
+				final Player p = i.next();
 				if (p.is_active && --index < 0) return p.index;
 			}
 		}
@@ -625,23 +627,27 @@ public class Gui
 
 	static void UpdatePlayerMenuHeight(Window w)
 	{
-		uint num = 0;
-		final Player p;
+		int num = 0;
+		//final Player p;
 
-		FOR_ALL_PLAYERS(p) {
+		//FOR_ALL_PLAYERS(p) {
+		Iterator<Player> i = Player.getIterator();
+		while(i.hasNext())
+		{
+			final Player p = i.next();
 			if (p.is_active) num++;
 		}
 
 		// Increase one to fit in PlayerList in the menu when in network
-		if (_networking && WP(w,menu_d).main_button == 9) num++;
+		if (Global._networking && w.as_menu_d().main_button == 9) num++;
 
-		if (WP(w,menu_d).item_count != num) {
-			WP(w,menu_d).item_count = num;
-			SetWindowDirty(w);
+		if (w.as_menu_d().item_count != num) {
+			w.as_menu_d().item_count = (byte) num;
+			w.SetWindowDirty();
 			num = num * 10 + 2;
 			w.height = num;
-			w.widget[0].bottom = w.widget[0].top + num - 1;
-			SetWindowDirty(w);
+			w.widget.get(0).bottom = w.widget.get(0).top + num - 1;
+			w.SetWindowDirty();
 		}
 	}
 
@@ -653,7 +659,7 @@ public class Gui
 		case WindowEvents.WE_PAINT: {
 			int x,y;
 			byte sel, color;
-			Player p;
+			//Player p;
 			int chk;
 
 			UpdatePlayerMenuHeight(w);
@@ -661,30 +667,34 @@ public class Gui
 
 			x = 1;
 			y = 1;
-			sel = WP(w,menu_d).sel_index;
-			chk = WP(w,menu_d).checked_items; // let this mean gray items.
+			sel = w.as_menu_d().sel_index;
+			chk = w.as_menu_d().checked_items; // let this mean gray items.
 
 			// 9 = playerlist
-			if (_networking && WP(w,menu_d).main_button == 9) {
+			if (Global._networking && w.as_menu_d().main_button == 9) {
 				if (sel == 0) {
-					GfxFillRect(x, y, x + 238, y + 9, 0);
+					Gfx.GfxFillRect(x, y, x + 238, y + 9, 0);
 				}
-				DrawString(x + 19, y, Str.STR_NETWORK_CLIENT_LIST, 0x0);
+				Gfx.DrawString(x + 19, y, Str.STR_NETWORK_CLIENT_LIST, 0x0);
 				y += 10;
 				sel--;
 			}
 
-			FOR_ALL_PLAYERS(p) {
+			//FOR_ALL_PLAYERS(p) {
+			Iterator<Player> i = Player.getIterator();
+			while(i.hasNext())
+			{
+				final Player p = i.next();
 				if (p.is_active) {
 					if (p.index == sel) {
-						GfxFillRect(x, y, x + 238, y + 9, 0);
+						Gfx.GfxFillRect(x, y, x + 238, y + 9, 0);
 					}
 
 					DrawPlayerIcon(p.index, x + 2, y + 1);
 
-					SetDParam(0, p.name_1);
-					SetDParam(1, p.name_2);
-					SetDParam(2, GetPlayerNameString(p.index, 3));
+					Global.SetDParam(0, p.name_1);
+					Global.SetDParam(1, p.name_2);
+					Global.SetDParam(2, GetPlayerNameString(p.index, 3));
 
 					color = (p.index == sel) ? 0xC : 0x10;
 					if (chk&1) color = 14;
@@ -700,18 +710,18 @@ public class Gui
 
 		case WindowEvents.WE_DESTROY: {
 			Window v = FindWindowById(WC_MAIN_TOOLBAR, 0);
-			v.click_state &= ~(1 << WP(w,menu_d).main_button);
+			v.click_state &= ~(1 << w.as_menu_d().main_button);
 			SetWindowDirty(v);
 			return;
 			}
 
 		case WindowEvents.WE_POPUPMENU_SELECT: {
 			int index = GetMenuItemIndex(w, e.popupmenu.pt.x, e.popupmenu.pt.y);
-			int action_id = WP(w,menu_d).action_id;
+			int action_id = w.as_menu_d().action_id;
 
 			// We have a new entry at the top of the list of menu 9 when networking
 			//  so keep that in count
-			if (_networking && WP(w,menu_d).main_button == 9) {
+			if (_networking && w.as_menu_d().main_button == 9) {
 				if (index > 0) index = GetPlayerIndexFromMenu(index - 1) + 1;
 			} else {
 				index = GetPlayerIndexFromMenu(index);
@@ -719,8 +729,8 @@ public class Gui
 
 			if (index < 0) {
 				Window w2 = FindWindowById(WC_MAIN_TOOLBAR,0);
-				if (GetWidgetFromPos(w2, e.popupmenu.pt.x - w2.left, e.popupmenu.pt.y - w2.top) == WP(w,menu_d).main_button)
-					index = WP(w,menu_d).sel_index;
+				if (GetWidgetFromPos(w2, e.popupmenu.pt.x - w2.left, e.popupmenu.pt.y - w2.top) == w.as_menu_d().main_button)
+					index = w.as_menu_d().sel_index;
 			}
 
 			DeleteWindow(w);
@@ -738,22 +748,23 @@ public class Gui
 
 			// We have a new entry at the top of the list of menu 9 when networking
 			//  so keep that in count
-			if (_networking && WP(w,menu_d).main_button == 9) {
+			if (_networking && w.as_menu_d().main_button == 9) {
 				if (index > 0) index = GetPlayerIndexFromMenu(index - 1) + 1;
 			} else {
 				index = GetPlayerIndexFromMenu(index);
 			}
 
-			if (index == -1 || index == WP(w,menu_d).sel_index) return;
+			if (index == -1 || index == w.as_menu_d().sel_index) return;
 
-			WP(w,menu_d).sel_index = index;
+			w.as_menu_d().sel_index = index;
 			SetWindowDirty(w);
 			return;
 			}
 		}
 	}
 
-	static Window PopupMainToolbMenu(Window w, int x, int main_button, StringID base_string, int item_count, byte disabled_mask)
+	//static Window PopupMainToolbMenu(Window w, int x, int main_button, StringID base_string, int item_count, byte disabled_mask)
+	static Window PopupMainToolbMenu(Window w, int x, int main_button, int base_string, int item_count, int disabled_mask)
 	{
 		x += w.left;
 
@@ -763,16 +774,16 @@ public class Gui
 		Window.DeleteWindowById(Window.WC_TOOLBAR_MENU, 0);
 
 		w = Window.AllocateWindow(x, 0x16, 0xA0, item_count * 10 + 2, Gui::MenuWndProc, Window.WC_TOOLBAR_MENU, _menu_widgets);
-		w.widget[0].bottom = item_count * 10 + 1;
+		w.widget.get(0).bottom = item_count * 10 + 1;
 		w.flags4 &= ~WF_WHITE_BORDER_MASK;
 
-		WP(w,menu_d).item_count = item_count;
-		WP(w,menu_d).sel_index = 0;
-		WP(w,menu_d).main_button = main_button;
-		WP(w,menu_d).action_id = (main_button >> 8) ? (main_button >> 8) : main_button;
-		WP(w,menu_d).string_id = base_string;
-		WP(w,menu_d).checked_items = 0;
-		WP(w,menu_d).disabled_items = disabled_mask;
+		w.as_menu_d().item_count = item_count;
+		w.as_menu_d().sel_index = 0;
+		w.as_menu_d().main_button = main_button;
+		w.as_menu_d().action_id = (main_button >> 8) ? (main_button >> 8) : main_button;
+		w.as_menu_d().string_id = base_string;
+		w.as_menu_d().checked_items = 0;
+		w.as_menu_d().disabled_items = disabled_mask;
 
 		Global._popup_menu_active = true;
 
@@ -789,22 +800,22 @@ public class Gui
 		w.InvalidateWidget(main_button);
 
 		Window.DeleteWindowById(Window.WC_TOOLBAR_MENU, 0);
-		w = AllocateWindow(x, 0x16, 0xF1, 0x52, Gui::PlayerMenuWndProc, Window.WC_TOOLBAR_MENU, _player_menu_widgets);
+		w = Window.AllocateWindow(x, 0x16, 0xF1, 0x52, Gui::PlayerMenuWndProc, Window.WC_TOOLBAR_MENU, _player_menu_widgets);
 		w.flags4 &= ~WF_WHITE_BORDER_MASK;
-		WP(w,menu_d).item_count = 0;
-		WP(w,menu_d).sel_index = (Global._local_player != Owner.OWNER_SPECTATOR) ? _local_player : GetPlayerIndexFromMenu(0);
+		w.as_menu_d().item_count = 0;
+		w.as_menu_d().sel_index = (Global._local_player != Owner.OWNER_SPECTATOR) ? _local_player : GetPlayerIndexFromMenu(0);
 		if (Global._networking && main_button == 9) {
 			if (Global._local_player != Owner.OWNER_SPECTATOR) {
-				WP(w,menu_d).sel_index++;
+				w.as_menu_d().sel_index++;
 			} else {
 				/* Select client list by default for spectators */
-				WP(w,menu_d).sel_index = 0;
+				w.as_menu_d().sel_index = 0;
 			}
 		}
-		WP(w,menu_d).action_id = main_button;
-		WP(w,menu_d).main_button = main_button;
-		WP(w,menu_d).checked_items = gray;
-		WP(w,menu_d).disabled_items = 0;
+		w.as_menu_d().action_id = main_button;
+		w.as_menu_d().main_button = main_button;
+		w.as_menu_d().checked_items = gray;
+		w.as_menu_d().disabled_items = 0;
 		_popup_menu_active = true;
 		SndPlayFx(SND_15_BEEP);
 		return w;
@@ -906,18 +917,18 @@ public class Gui
 
 	/* Zooms a viewport in a window in or out */
 	/* No button handling or what so ever */
-	boolean DoZoomInOutWindow(int how, Window w)
+	static boolean DoZoomInOutWindow(int how, Window w)
 	{
-		ViewPort *vp;
+		ViewPort vp;
 		int button;
 
-		switch (_game_mode) {
-			case GameModes.GM_EDITOR: button = 9;  break;
-			case GameModes.GM_NORMAL: button = 17; break;
+		switch (Global._game_mode) {
+			case GM_EDITOR: button = 9;  break;
+			case GM_NORMAL: button = 17; break;
 			default: return false;
 		}
 
-		assert(w);
+		assert(w != null);
 		vp = w.viewport;
 
 		if (how == ZOOM_IN) {
@@ -926,16 +937,16 @@ public class Gui
 			vp.virtual_width >>= 1;
 			vp.virtual_height >>= 1;
 
-			WP(w,vp_d).scrollpos_x += vp.virtual_width >> 1;
-			WP(w,vp_d).scrollpos_y += vp.virtual_height >> 1;
+			w.as_vp_d().scrollpos_x += vp.virtual_width >> 1;
+			w.as_vp_d().scrollpos_y += vp.virtual_height >> 1;
 
 			w.SetWindowDirty();
 		} else if (how == ZOOM_OUT) {
 			if (vp.zoom == 2) return false;
 			vp.zoom++;
 
-			WP(w,vp_d).scrollpos_x -= vp.virtual_width >> 1;
-			WP(w,vp_d).scrollpos_y -= vp.virtual_height >> 1;
+			w.as_vp_d().scrollpos_x -= vp.virtual_width >> 1;
+			w.as_vp_d().scrollpos_y -= vp.virtual_height >> 1;
 
 			vp.virtual_width <<= 1;
 			vp.virtual_height <<= 1;
@@ -947,25 +958,25 @@ public class Gui
 		{
 			Window wt = null;
 
-			switch (w.window_class) {
+			switch (w.window_class.v) {
 				case Window.WC_MAIN_WINDOW:
 					wt = Window.FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
 					break;
 
 				case Window.WC_EXTRA_VIEW_PORT:
-					wt = Window.FindWindowById(Window.WC_EXTRA_VIEW_PORT, w.window_number);
+					wt = Window.FindWindowById(Window.WC_EXTRA_VIEW_PORT, w.window_number.n);
 					button = 5;
 					break;
 			}
 
-			assert(wt);
+			assert(wt != null);
 
 			// update the toolbar button too
-			CLRBIT(wt.disabled_state, button);
-			CLRBIT(wt.disabled_state, button + 1);
+			wt.disabled_state = BitOps.RETCLRBIT(wt.disabled_state, button);
+			wt.disabled_state = BitOps.RETCLRBIT(wt.disabled_state, button + 1);
 			switch (vp.zoom) {
-				case 0: SETBIT(wt.disabled_state, button); break;
-				case 2: SETBIT(wt.disabled_state, button + 1); break;
+				case 0: wt.disabled_state = BitOps.RETSETBIT(wt.disabled_state, button); break;
+				case 2: wt.disabled_state = BitOps.RETSETBIT(wt.disabled_state, button + 1); break;
 			}
 			wt.SetWindowDirty();
 		}
@@ -981,22 +992,22 @@ public class Gui
 	static void ToolbarZoomInClick(Window w)
 	{
 		if (DoZoomInOutWindow(ZOOM_IN, Window.FindWindowById(Window.WC_MAIN_WINDOW, 0))) {
-			HandleButtonClick(w, 17);
-			SndPlayFx(SND_15_BEEP);
+			w.HandleButtonClick(17);
+			//SndPlayFx(SND_15_BEEP);
 		}
 	}
 
 	static void ToolbarZoomOutClick(Window w)
 	{
 		if (DoZoomInOutWindow(ZOOM_OUT,Window.FindWindowById(Window.WC_MAIN_WINDOW, 0))) {
-			HandleButtonClick(w, 18);
-			SndPlayFx(SND_15_BEEP);
+			w.HandleButtonClick(18);
+			//SndPlayFx(SND_15_BEEP);
 		}
 	}
 
 	static void ToolbarBuildRailClick(Window w)
 	{
-		final Player p = Player.GetPlayer(_local_player);
+		final Player p = Player.GetPlayer(Global._local_player);
 		Window w2;
 		w2 = PopupMainToolbMenu(w, 457, 19, Str.STR_1015_RAILROAD_CONSTRUCTION, RAILTYPE_END, ~p.avail_railtypes);
 		WP(w2,menu_d).sel_index = _last_built_railtype;
@@ -1044,15 +1055,15 @@ public class Gui
 		w = PopupMainToolbMenu(w,  43, 2, Str.STR_02C3_GAME_OPTIONS, 13, 0);
 
 		x = (int)-1;
-		if (_display_opt & DO_SHOW_TOWN_NAMES)    CLRBIT(x,  5);
-		if (_display_opt & DO_SHOW_STATION_NAMES) CLRBIT(x,  6);
-		if (_display_opt & DO_SHOW_SIGNS)         CLRBIT(x,  7);
-		if (_display_opt & DO_WAYPOINTS)          CLRBIT(x,  8);
-		if (_display_opt & DO_FULL_ANIMATION)     CLRBIT(x,  9);
-		if (_display_opt & DO_FULL_DETAIL)        CLRBIT(x, 10);
-		if (_display_opt & DO_TRANS_BUILDINGS)    CLRBIT(x, 11);
-		if (_display_opt & DO_TRANS_SIGNS)        CLRBIT(x, 12);
-		WP(w,menu_d).checked_items = x;
+		if(0 != (Global._display_opt & Global.DO_SHOW_TOWN_NAMES))    x = BitOps.RETCLRBIT(x,  5);
+		if(0 != (Global._display_opt & Global.DO_SHOW_STATION_NAMES)) x = BitOps.RETCLRBIT(x,  6);
+		if(0 != (Global._display_opt & Global.DO_SHOW_SIGNS))         x = BitOps.RETCLRBIT(x,  7);
+		if(0 != (Global._display_opt & Global.DO_WAYPOINTS))          x = BitOps.RETCLRBIT(x,  8);
+		if(0 != (Global._display_opt & Global.DO_FULL_ANIMATION))     x = BitOps.RETCLRBIT(x,  9);
+		if(0 != (Global._display_opt & Global.DO_FULL_DETAIL))        x = BitOps.RETCLRBIT(x, 10);
+		if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS))    x = BitOps.RETCLRBIT(x, 11);
+		if(0 != (Global._display_opt & Global.DO_TRANS_SIGNS))        x = BitOps.RETCLRBIT(x, 12);
+		w.as_menu_d().checked_items = x;
 	}
 
 
@@ -1106,12 +1117,12 @@ public class Gui
 		}
 	}
 
-	void ZoomInOrOutToCursorWindow(boolean in, Window w)
+	static void ZoomInOrOutToCursorWindow(boolean in, Window w)
 	{
 		ViewPort vp;
 		Point pt;
 
-		assert(w != 0);
+		assert(w != null);
 
 		vp = w.viewport;
 
@@ -1149,7 +1160,7 @@ public class Gui
 	// Ask first to reset landscape or to make a random landscape
 	static void AskResetLandscapeWndProc(Window w, WindowEvent e)
 	{
-		uint mode = w.window_number;
+		int mode = w.window_number;
 
 		switch (e.event) {
 		case WindowEvents.WE_PAINT:
@@ -1191,7 +1202,7 @@ public class Gui
 		Gui::AskResetLandscapeWndProc
 	);
 
-	static void AskResetLandscape(uint mode)
+	static void AskResetLandscape(int mode)
 	{
 		AllocateWindowDescFront(&_ask_reset_landscape_desc, mode);
 	}
@@ -1397,7 +1408,7 @@ public class Gui
 		switch (e.event) {
 		case WindowEvents.WE_CREATE:
 			// XXX - lighthouse button is widget 10!! Don't forget when changing
-			w.widget[10].tooltips = (_opt.landscape == LT_DESERT) ? Str.STR_028F_DEFINE_DESERT_AREA : Str.STR_028D_PLACE_LIGHTHOUSE;
+			w.widget.get(10).tooltips = (_opt.landscape == LT_DESERT) ? Str.STR_028F_DEFINE_DESERT_AREA : Str.STR_028D_PLACE_LIGHTHOUSE;
 			break;
 
 		case WindowEvents.WE_PAINT:
@@ -1420,7 +1431,7 @@ public class Gui
 			break;
 
 		case WindowEvents.WE_KEYPRESS: {
-			uint i;
+			int i;
 
 			for (i = 0; i != lengthof(_editor_terraform_keycodes); i++) {
 				if (e.keypress.keycode == _editor_terraform_keycodes[i]) {
@@ -1990,12 +2001,12 @@ public class Gui
 		case WindowEvents.WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
 
 		case WindowEvents.WE_MOUSELOOP:
-			if (((w.click_state) & 1) != (uint)!!_pause) {
+			if (((w.click_state) & 1) != (int)!!_pause) {
 				w.click_state ^= (1 << 0);
 				SetWindowDirty(w);
 			}
 
-			if (((w.click_state >> 1) & 1) != (uint)!!_fast_forward) {
+			if (((w.click_state >> 1) & 1) != (int)!!_fast_forward) {
 				w.click_state ^= (1 << 1);
 				SetWindowDirty(w);
 			}
@@ -2187,12 +2198,12 @@ public class Gui
 		case WindowEvents.WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
 
 		case WindowEvents.WE_MOUSELOOP:
-			if (((w.click_state) & 1) != (uint)!!_pause) {
+			if (((w.click_state) & 1) != (int)!!_pause) {
 				w.click_state ^= (1 << 0);
 				SetWindowDirty(w);
 			}
 
-			if (((w.click_state >> 1) & 1) != (uint)!!_fast_forward) {
+			if (((w.click_state >> 1) & 1) != (int)!!_fast_forward) {
 				w.click_state ^= (1 << 1);
 				SetWindowDirty(w);
 			}
@@ -2455,12 +2466,12 @@ public class Gui
 	}
 
 
-	void ShowSelectGameWindow();
-	extern void ShowJoinStatusWindowAfterJoin();
+	//void ShowSelectGameWindow();
+	//extern void ShowJoinStatusWindowAfterJoin();
 	/*
 	void SetupColorsAndInitialWindow()
 	{
-		uint i;
+		int i;
 		Window w;
 		int width,height;
 
