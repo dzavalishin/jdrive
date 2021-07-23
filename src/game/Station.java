@@ -181,7 +181,7 @@ public class Station implements IPoolItem
 			Global.SetDParam(2, BitOps.GB(items, 16, 16));
 			Global.SetDParam(1, BitOps.GB(items,  0, 16));
 			Global.SetDParam(0, index);
-			NewsItem.AddNewsItem(msg.id + (((items >> 16) != 0 )?1:0), NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ACCEPTANCE, 0), xy, 0);
+			NewsItem.AddNewsItem(msg.id + (((items >> 16) != 0 )?1:0), NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ACCEPTANCE, 0), xy, 0);
 		}
 	}
 
@@ -2259,13 +2259,13 @@ public class Station implements IPoolItem
 			image = dtss.image + relocation;
 			image += offset;
 			if (_display_opt & DO_TRANS_BUILDINGS) {
-				MAKE_TRANSPARENT(image);
+				image = Sprite.RET_MAKE_TRANSPARENT(image);
 			} else {
 				if (image & PALETTE_MODIFIER_COLOR) image |= image_or_modificator;
 			}
 
 			if ((byte)dtss.delta_z != 0x80) {
-				AddSortableSpriteToDraw(image, ti.x + dtss.delta_x, ti.y + dtss.delta_y, dtss.width, dtss.height, dtss.unk, ti.z + dtss.delta_z);
+				ViewPort.AddSortableSpriteToDraw(image, ti.x + dtss.delta_x, ti.y + dtss.delta_y, dtss.width, dtss.height, dtss.unk, ti.z + dtss.delta_z);
 			} else {
 				AddChildSpriteScreen(image, dtss.delta_x, dtss.delta_y);
 			}

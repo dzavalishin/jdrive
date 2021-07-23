@@ -301,7 +301,8 @@ public class Tree {
 			i = (ti.map5 >> 6) + 1;
 			do {
 				int image = s[0] + (--i == 0 ? BitOps.GB(ti.map5, 0, 3) : 3);
-				if (_displayGameOptions._opt & DO_TRANS_BUILDINGS) MAKE_TRANSPARENT(image);
+				if (_displayGameOptions._opt & DO_TRANS_BUILDINGS) 
+					image = Sprite.RET_MAKE_TRANSPARENT(image);
 				te[i].image = image;
 				te[i].x = d.x;
 				te[i].y = d.y;
@@ -324,7 +325,7 @@ public class Tree {
 
 				if (tep == null) break;
 
-				AddSortableSpriteToDraw(tep.image, ti.x + tep.x, ti.y + tep.y, 5, 5, 0x10, z);
+				ViewPort.AddSortableSpriteToDraw(tep.image, ti.x + tep.x, ti.y + tep.y, 5, 5, 0x10, z);
 				tep.image = 0;
 			}
 		}

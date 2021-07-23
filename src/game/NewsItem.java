@@ -72,6 +72,7 @@ public class NewsItem {
 	public static final int NF_INCOLOR = 0x40;
 
 
+	public int NEWS_FLAGS(int mode,int flag,int type,int cb) { return ((cb)<<24 | (type)<<16 | (flag)<<8 | (mode)); }
 
 
 

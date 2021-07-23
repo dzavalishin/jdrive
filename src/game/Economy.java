@@ -446,15 +446,15 @@ public class Economy
 
 		switch (p.quarters_of_bankrupcy) {
 			case 2:
-				AddNewsItem( (StringID)(owner + 16),
-					NEWS_FLAGS(NM_CALLBACK, 0, NT_COMPANY_INFO, DNC_BANKRUPCY),0,0);
+				NewsItem.AddNewsItem( (StringID)(owner + 16),
+					NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 				break;
 			case 3: {
 				/* XXX - In multiplayer, should we ask other players if it wants to take
 			          over when it is a human company? -- TrueLight */
 				if (IS_HUMAN_PLAYER(owner)) {
-					AddNewsItem( (StringID)(owner + 16),
-						NEWS_FLAGS(NM_CALLBACK, 0, NT_COMPANY_INFO, DNC_BANKRUPCY),0,0);
+					NewsItem.AddNewsItem( (StringID)(owner + 16),
+						NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 					break;
 				}
 
@@ -476,7 +476,7 @@ public class Economy
 //			Show bankrupt news
 				Global.SetDParam(0, p.name_1);
 				Global.SetDParam(1, p.name_2);
-				AddNewsItem( (StringID)(owner + 16*3), NEWS_FLAGS(NM_CALLBACK, 0, NT_COMPANY_INFO, DNC_BANKRUPCY),0,0);
+				NewsItem.AddNewsItem( (StringID)(owner + 16*3), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 
 				// If the player is human, and it is no network play, leave the player playing
 				if (IS_HUMAN_PLAYER(owner) && !_networking) {
@@ -735,10 +735,10 @@ public class Economy
 
 		if (--_economy.fluct == 0) {
 			_economy.fluct = -(int)BitOps.GB(Random(), 0, 2);
-			AddNewsItem(STR_7073_WORLD_RECESSION_FINANCIAL, NEWS_FLAGS(NM_NORMAL,0,NT_ECONOMY,0), 0, 0);
+			NewsItem.AddNewsItem(STR_7073_WORLD_RECESSION_FINANCIAL, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL,0,NewsItem.NT_ECONOMY,0), 0, 0);
 		} else if (_economy.fluct == -12) {
 			_economy.fluct = BitOps.GB(Random(), 0, 8) + 312;
-			AddNewsItem(STR_7074_RECESSION_OVER_UPTURN_IN, NEWS_FLAGS(NM_NORMAL,0,NT_ECONOMY,0), 0, 0);
+			NewsItem.AddNewsItem(STR_7074_RECESSION_OVER_UPTURN_IN, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL,0,NewsItem.NT_ECONOMY,0), 0, 0);
 		}
 	}
 
@@ -1051,14 +1051,14 @@ public class Economy
 
 			if (s.age == 12-1) {
 				pair = SetupSubsidyDecodeParam(s, 1);
-				AddNewsItem(STR_202E_OFFER_OF_SUBSIDY_EXPIRED, NEWS_FLAGS(NM_NORMAL, NF_TILE, NT_SUBSIDIES, 0), pair.a, pair.b);
+				NewsItem.AddNewsItem(STR_202E_OFFER_OF_SUBSIDY_EXPIRED, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 				s.cargo_type = AcceptedCargo.CT_INVALID;
 				modified = true;
 			} else if (s.age == 2*12-1) {
 				st = GetStation(s.to);
 				if (st.owner == _local_player) {
 					pair = SetupSubsidyDecodeParam(s, 1);
-					AddNewsItem(STR_202F_SUBSIDY_WITHDRAWN_SERVICE, NEWS_FLAGS(NM_NORMAL, NF_TILE, NT_SUBSIDIES, 0), pair.a, pair.b);
+					NewsItem.AddNewsItem(STR_202F_SUBSIDY_WITHDRAWN_SERVICE, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 				}
 				s.cargo_type = AcceptedCargo.CT_INVALID;
 				modified = true;
@@ -1094,7 +1094,7 @@ public class Economy
 					if (!CheckSubsidyDuplicate(s)) {
 						s.age = 0;
 						pair = SetupSubsidyDecodeParam(s, 0);
-						AddNewsItem(STR_2030_SERVICE_SUBSIDY_OFFERED, NEWS_FLAGS(NM_NORMAL, NF_TILE, NT_SUBSIDIES, 0), pair.a, pair.b);
+						NewsItem.AddNewsItem(STR_2030_SERVICE_SUBSIDY_OFFERED, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 						modified = true;
 						break;
 					}
@@ -1243,9 +1243,9 @@ public class Economy
 				p = _current_player.GetPlayer();
 				Global.SetDParam(0, p.name_1);
 				Global.SetDParam(1, p.name_2);
-				AddNewsItem(
+				NewsItem.AddNewsItem(
 					STR_2031_SERVICE_SUBSIDY_AWARDED + _opt.diff.subsidy_multiplier,
-					NEWS_FLAGS(NM_NORMAL, NF_TILE, NT_SUBSIDIES, 0),
+					NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0),
 					pair.a, pair.b);
 
 				InvalidateWindow(WC_SUBSIDIES_LIST, 0);
@@ -1598,7 +1598,7 @@ public class Economy
 		Global.SetDParam(0, p.name_1);
 		Global.SetDParam(1, p.name_2);
 		Global.SetDParam(2, p.bankrupt_value);
-		AddNewsItem( (StringID)(_current_player + 16*2), NEWS_FLAGS(NM_CALLBACK, 0, NT_COMPANY_INFO, DNC_BANKRUPCY),0,0);
+		NewsItem.AddNewsItem( (StringID)(_current_player + 16*2), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 
 		// original code does this a little bit differently
 		pi = p.index;

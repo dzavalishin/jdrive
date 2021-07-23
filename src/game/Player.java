@@ -448,7 +448,7 @@ public class Player
 
 			if (!IS_HUMAN_PLAYER(p.index)) {
 				Global.SetDParam(0, t.index);
-				News.AddNewsItem(p.index + (4 << 4), NEWS_FLAGS(NM_CALLBACK, NF_TILE, NT_COMPANY_INFO, DNC_BANKRUPCY), last_build_coordinate, 0);
+				News.AddNewsItem(p.index + (4 << 4), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, NewsItem.NF_TILE, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY), last_build_coordinate, 0);
 			}
 			return;
 		}

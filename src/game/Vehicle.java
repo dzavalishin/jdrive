@@ -1382,7 +1382,7 @@ public class Vehicle implements IPoolItem
 	static ConsumerOfVehicle[] _vehicle_tick_procs = {
 			Train::Train_Tick,
 			RoadVeh_Tick,
-			Ship_Tick,
+			Ship::Ship_Tick,
 			Aircraft_Tick,
 			EffectVehicle_Tick,
 			DisasterVehicle_Tick,
@@ -1480,12 +1480,12 @@ public class Vehicle implements IPoolItem
 		int image = v.cur_image;
 
 		if(0!=(v.vehstatus & VS_DISASTER)) {
-			MAKE_TRANSPARENT(image);
+			image = Sprite.RET_MAKE_TRANSPARENT(image);
 		} else if( 0 != (v.vehstatus & VS_DEFPAL) ) {
 			image |= (0!=(v.vehstatus & VS_CRASHED)) ? Sprite.PALETTE_CRASH : SPRITE_PALETTE(PLAYER_SPRITE_COLOR(v.owner));
 		}
 
-		AddSortableSpriteToDraw(image, v.x_pos + v.x_offs, v.y_pos + v.y_offs,
+		ViewPort.AddSortableSpriteToDraw(image, v.x_pos + v.x_offs, v.y_pos + v.y_offs,
 				v.sprite_width, v.sprite_height, v.z_height, v.z_pos);
 	}
 
@@ -1504,7 +1504,8 @@ public class Vehicle implements IPoolItem
 			for(;;) {
 				xb = x;
 				for(;;) {
-					veh = _vehicle_position_hash[(x + y) & 0xFFFF];
+					//veh = _vehicle_position_hash[(x + y) & 0xFFFF];
+					veh = _hash.get(x, y);
 					while(veh.id != INVALID_VEHICLE) {
 						v = GetVehicle(veh);
 
@@ -1544,11 +1545,11 @@ public class Vehicle implements IPoolItem
 		} else {
 			TileIndex tile;
 
-			BeginVehicleMove(v);
+			v.BeginVehicleMove();
 
 			tile = TileIndex.TileVirtXY(v.x_pos, v.y_pos);
 			if (!tile.IsTileType(TileTypes.MP_INDUSTRY)) {
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 				DeleteVehicle(v);
 				return;
 			}
@@ -1560,7 +1561,7 @@ public class Vehicle implements IPoolItem
 			}
 			v.progress = 7;
 			v.VehiclePositionChanged();
-			EndVehicleMove(v);
+			v.EndVehicleMove();
 		}
 	}
 
@@ -1574,7 +1575,7 @@ public class Vehicle implements IPoolItem
 	{
 		boolean moved = false;
 
-		BeginVehicleMove(v);
+		v.BeginVehicleMove();
 
 		v.progress++;
 
@@ -1587,7 +1588,7 @@ public class Vehicle implements IPoolItem
 			if (v.cur_image != Sprite.SPR_STEAM_SMOKE_4) {
 				v.cur_image++;
 			} else {
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 				DeleteVehicle(v);
 				return;
 			}
@@ -1596,7 +1597,7 @@ public class Vehicle implements IPoolItem
 
 		if (moved) {
 			v.VehiclePositionChanged();
-			EndVehicleMove(v);
+			v.EndVehicleMove();
 		}
 	}
 
@@ -1611,18 +1612,18 @@ public class Vehicle implements IPoolItem
 		v.progress++;
 
 		if ((v.progress & 3) == 0) {
-			BeginVehicleMove(v);
+			v.BeginVehicleMove();
 			v.z_pos++;
 			v.VehiclePositionChanged();
-			EndVehicleMove(v);
+			v.EndVehicleMove();
 		} else if ((v.progress & 7) == 1) {
-			BeginVehicleMove(v);
+			v.BeginVehicleMove();
 			if (v.cur_image != Sprite.SPR_DIESEL_SMOKE_5) {
 				v.cur_image++;
 				v.VehiclePositionChanged();
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 			} else {
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 				DeleteVehicle(v);
 			}
 		}
@@ -1640,13 +1641,13 @@ public class Vehicle implements IPoolItem
 			v.progress++;
 		} else {
 			v.progress = 0;
-			BeginVehicleMove(v);
+			v.BeginVehicleMove();
 			if (v.cur_image != Sprite.SPR_ELECTRIC_SPARK_5) {
 				v.cur_image++;
 				v.VehiclePositionChanged();
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 			} else {
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 				DeleteVehicle(v);
 			}
 		}
@@ -1662,7 +1663,7 @@ public class Vehicle implements IPoolItem
 	{
 		boolean moved = false;
 
-		BeginVehicleMove(v);
+		v.BeginVehicleMove();
 
 		v.progress++;
 
@@ -1675,7 +1676,7 @@ public class Vehicle implements IPoolItem
 			if (v.cur_image != Sprite.SPR_SMOKE_4) {
 				v.cur_image++;
 			} else {
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 				DeleteVehicle(v);
 				return;
 			}
@@ -1684,7 +1685,7 @@ public class Vehicle implements IPoolItem
 
 		if (moved) {
 			v.VehiclePositionChanged();
-			EndVehicleMove(v);
+			v.EndVehicleMove();
 		}
 	}
 
@@ -1698,13 +1699,13 @@ public class Vehicle implements IPoolItem
 	{
 		v.progress++;
 		if ((v.progress & 3) == 0) {
-			BeginVehicleMove(v);
+			v.BeginVehicleMove();
 			if (v.cur_image != Sprite.SPR_EXPLOSION_LARGE_F) {
 				v.cur_image++;
 				v.VehiclePositionChanged();
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 			} else {
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 				DeleteVehicle(v);
 			}
 		}
@@ -1720,20 +1721,20 @@ public class Vehicle implements IPoolItem
 	{
 		v.progress++;
 		if ((v.progress & 7) == 0) {
-			BeginVehicleMove(v);
+			v.BeginVehicleMove();
 			if (v.cur_image != Sprite.SPR_BREAKDOWN_SMOKE_3) {
 				v.cur_image++;
 			} else {
 				v.cur_image = Sprite.SPR_BREAKDOWN_SMOKE_0;
 			}
 			v.VehiclePositionChanged();
-			EndVehicleMove(v);
+			v.EndVehicleMove();
 		}
 
 		v.special.unk0--;
 		if (v.special.unk0 == 0) {
-			BeginVehicleMove(v);
-			EndVehicleMove(v);
+			v.BeginVehicleMove();
+			v.EndVehicleMove();
 			DeleteVehicle(v);
 		}
 	}
@@ -1748,13 +1749,13 @@ public class Vehicle implements IPoolItem
 	{
 		v.progress++;
 		if ((v.progress & 3) == 0) {
-			BeginVehicleMove(v);
+			v.BeginVehicleMove();
 			if (v.cur_image != Sprite.SPR_EXPLOSION_SMALL_B) {
 				v.cur_image++;
 				v.VehiclePositionChanged();
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 			} else {
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 				DeleteVehicle(v);
 			}
 		}
@@ -1827,7 +1828,7 @@ public class Vehicle implements IPoolItem
 		if ((v.progress & 7) == 0) {
 			final BulldozerMovement b = _bulldozer_movement[v.special.unk0];
 
-			BeginVehicleMove(v);
+			v.BeginVehicleMove();
 
 			v.cur_image = Sprite.SPR_BULLDOZER_NE + b.image;
 
@@ -1839,13 +1840,13 @@ public class Vehicle implements IPoolItem
 				v.special.unk2 = 0;
 				v.special.unk0++;
 				if (v.special.unk0 == _bulldozer_movement.length) {
-					EndVehicleMove(v);
+					v.EndVehicleMove();
 					DeleteVehicle(v);
 					return;
 				}
 			}
 			v.VehiclePositionChanged();
-			EndVehicleMove(v);
+			v.EndVehicleMove();
 		}
 	}
 
@@ -2015,13 +2016,13 @@ public class Vehicle implements IPoolItem
 		if ((v.progress & 3) != 0)
 			return;
 
-		BeginVehicleMove(v);
+		v.BeginVehicleMove();
 
 		if (v.spritenum == 0) {
 			v.cur_image++;
 			if (v.cur_image < Sprite.SPR_BUBBLE_GENERATE_3) {
 				v.VehiclePositionChanged();
-				EndVehicleMove(v);
+				v.EndVehicleMove();
 				return;
 			}
 			if (v.special.unk2 != 0) {
@@ -2037,7 +2038,7 @@ public class Vehicle implements IPoolItem
 		b = _bubble_movement[v.spritenum - 1][et];
 
 		if (b.y == 4 && b.x == 0) {
-			EndVehicleMove(v);
+			v.EndVehicleMove();
 			DeleteVehicle(v);
 			return;
 		}
@@ -2070,7 +2071,7 @@ public class Vehicle implements IPoolItem
 		v.cur_image = Sprite.SPR_BUBBLE_0 + b.image;
 
 		v.VehiclePositionChanged();
-		EndVehicleMove(v);
+		v.EndVehicleMove();
 	}
 
 
@@ -2124,8 +2125,8 @@ public class Vehicle implements IPoolItem
 			_effect_init_procs[type].accept(v);
 
 			v.VehiclePositionChanged();
-			BeginVehicleMove(v);
-			EndVehicleMove(v);
+			v.BeginVehicleMove();
+			v.EndVehicleMove();
 		}
 		return v;
 	}
@@ -2180,10 +2181,10 @@ public class Vehicle implements IPoolItem
 	}
 
 
-	void DecreaseVehicleValue(Vehicle v)
+	void DecreaseVehicleValue()
 	{
-		v.value -= v.value >> 8;
-				Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
+		value -= value >> 8;
+		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, index);
 	}
 
 	static final int _breakdown_chance[] = {
@@ -2197,11 +2198,12 @@ public class Vehicle implements IPoolItem
 			150, 170, 190, 210, 230, 250, 250, 250,
 	};
 
-	void CheckVehicleBreakdown(Vehicle v)
+	void CheckVehicleBreakdown()
 	{
 		int rel, rel_old;
 		int r;
 		int chance;
+		Vehicle v = this;
 
 		/* decrease reliability */
 		v.reliability = rel = Math.max((rel_old = v.reliability) - v.reliability_spd_dec, 0);
@@ -2257,9 +2259,10 @@ public class Vehicle implements IPoolItem
 		NewsItem.AddNewsItem(msg, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 	}
 
-	void AgeVehicle(Vehicle v)
+	void AgeVehicle()
 	{
 		int age;
+		Vehicle v = this;
 
 		if (v.age < 65535)
 			v.age++;
@@ -2308,7 +2311,7 @@ public class Vehicle implements IPoolItem
 
 		if (!CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (v.type == VEH_Train && !IsFrontEngine(v)) return Cmd.CMD_ERROR;
+		if (v.type == VEH_Train && !v.IsFrontEngine()) return Cmd.CMD_ERROR;
 
 		// check that we can allocate enough vehicles
 		if (!(flags & DC_EXEC)) {
@@ -2337,7 +2340,7 @@ public class Vehicle implements IPoolItem
 
 			total_cost += cost;
 
-			if (flags & Cmd.DC_EXEC) {
+			if(0 != (flags & Cmd.DC_EXEC)) {
 				w = GetVehicle(_new_vehicle_id);
 
 				if (v.type != VEH_Road) { // road vehicles can't be refitted
@@ -2578,7 +2581,7 @@ public class Vehicle implements IPoolItem
 					default: assert false; message = 0; break;
 					}
 
-					NewsItem.AddNewsItem(message, NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
+					NewsItem.AddNewsItem(message, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 				}
 				if (stopped) v.vehstatus &= ~VS_STOPPED;
 				Global._current_player = new PlayerID(Owner.OWNER_NONE);
@@ -2612,7 +2615,7 @@ public class Vehicle implements IPoolItem
 			while (v.rail.shortest_platform[0]*16 < v.rail.cached_total_length) {
 				// the train is too long. We will remove cars one by one from the start of the train until it's short enough
 				while (w != null && !(RailVehInfo(w.engine_type).flags&RVI_WAGON) ) {
-					w = GetNextVehicle(w);
+					w = w.GetNextVehicle();
 				}
 				if (w == null) {
 					// we failed to make the train short enough
@@ -2631,7 +2634,7 @@ public class Vehicle implements IPoolItem
 		if (IsLocalPlayer()) ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
 
 		if (stopped) v.vehstatus &= ~VS_STOPPED;
-		_current_player = Owner.OWNER_NONE;
+		Global._current_player = new PlayerID( Owner.OWNER_NONE );
 	}
 
 
@@ -2713,9 +2716,9 @@ public class Vehicle implements IPoolItem
 			2, 3, 4,
 	};
 
-	byte GetDirectionTowards(final Vehicle v, int x, int y)
+	int GetDirectionTowards(final Vehicle v, int x, int y)
 	{
-		byte dirdiff, dir;
+		int dirdiff, dir;
 		int i = 0;
 
 		if (y >= v.y_pos) {

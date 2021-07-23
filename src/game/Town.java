@@ -287,9 +287,10 @@ public class Town extends TownTables implements IPoolItem
 		/* Add a house on top of the ground? */
 		image = dcts.sprite_2;
 		if (image != 0) {
-			if (Global._display_opt & DO_TRANS_BUILDINGS) MAKE_TRANSPARENT(image);
+			if (Global._display_opt & DO_TRANS_BUILDINGS) 
+				image = Sprite.RET_MAKE_TRANSPARENT(image);
 
-			AddSortableSpriteToDraw(image,
+			ViewPort.AddSortableSpriteToDraw(image,
 					ti.x + dcts.subtile_x,
 					ti.y + dcts.subtile_y,
 					dcts.width + 1,
@@ -1725,12 +1726,12 @@ public class Town extends TownTables implements IPoolItem
 
 		Global.SetDParam(0, t.index);
 
-		p = GetPlayer(Global._current_player);
+		p = Player.GetPlayer(Global._current_player);
 		Global.SetDParam(1, p.name_1);
 		Global.SetDParam(2, p.name_2);
 
-		AddNewsItem(STR_2055_TRAFFIC_CHAOS_IN_ROAD_REBUILDING,
-				NEWS_FLAGS(NM_NORMAL, NF_TILE, NT_GENERAL, 0), t.xy, 0);
+		NewsItem.AddNewsItem(STR_2055_TRAFFIC_CHAOS_IN_ROAD_REBUILDING,
+			NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_GENERAL, 0), t.xy, 0);
 	}
 
 	static boolean DoBuildStatueOfCompany(TileIndex tile)

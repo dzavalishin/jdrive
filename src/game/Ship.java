@@ -122,13 +122,13 @@ public class Ship {
 
 		Order.CheckOrders(v.index, OC_INIT);
 
-		if (v.vehstatus & Vehicle.VS_STOPPED) return;
+		if( 0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
 
 		cost = ShipVehInfo(v.engine_type).running_cost * Global._price.ship_running / 364;
 		v.profit_this_year -= cost >> 8;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);
-		SubtractMoneyFromPlayerFract(v.owner, cost);
+		Player.SubtractMoneyFromPlayerFract(v.owner, cost);
 
 		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 		//we need this for the profit
@@ -156,7 +156,7 @@ public class Ship {
 		}
 
 		if (0 == (v.tick_counter & 1)) {
-			if (!--v.breakdown_delay) {
+			if (0 == --v.breakdown_delay) {
 				v.breakdown_ctr = 0;
 				Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 			}
@@ -302,12 +302,12 @@ public class Ship {
 		UpdateShipDeltaXY(v, v.direction);
 		v.cur_image = GetShipImage(v, v.direction);
 		MarkShipDirty(v);
-		Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile);
+		Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 	}
 
 	static final TileIndexDiffC _ship_leave_depot_offs[] = {
-		{-1,  0},
-		{ 0, -1}
+		new TileIndexDiffC(-1,  0),
+		new TileIndexDiffC( 0, -1)
 	};
 
 	static void CheckShipLeaveDepot(Vehicle v)
@@ -353,7 +353,7 @@ public class Ship {
 		if (spd != v.cur_speed) {
 			v.cur_speed = spd;
 			if (Global._patches.vehicle_speed)
-				InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 		}
 
 		// Decrease somewhat when turning
@@ -402,7 +402,7 @@ public class Ship {
 					Global.SetDParam(0, v.unitnumber);
 					NewsItem.AddNewsItem(
 						Str.STR_981C_SHIP_IS_WAITING_IN_DEPOT,
-						NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0),
+						NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0),
 						v.index,
 						0);
 				}
@@ -420,7 +420,7 @@ public class Ship {
 			st.had_vehicle_of_type |= HVOT_SHIP;
 
 			Global.SetDParam(0, st.index);
-			flags = (v.owner == Global._local_player) ? NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+			flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 			NewsItem.AddNewsItem(
 				Str.STR_9833_CITIZENS_CELEBRATE_FIRST,
 				flags,
@@ -435,13 +435,13 @@ public class Ship {
 		// Found dest?
 		if (tile == pfs.dest_coords) {
 			pfs.best_bird_dist = 0;
-			pfs.best_length = minu(pfs.best_length, length);
+			pfs.best_length = (int) BitOps.minu(pfs.best_length, length);
 			return true;
 		}
 
 		// Skip this tile in the calculation
 		if (tile != pfs.skiptile) {
-			pfs.best_bird_dist = minu(pfs.best_bird_dist, Map.DistanceMaxPlusManhattan(pfs.dest_coords, tile));
+			pfs.best_bird_dist = (int) BitOps.minu(pfs.best_bird_dist, Map.DistanceMaxPlusManhattan(pfs.dest_coords, tile));
 		}
 
 		return false;
@@ -460,7 +460,7 @@ public class Ship {
 
 	static int FindShipTrack(Vehicle v, TileIndex tile, int dir, int bits, TileIndex skiptile, int [] track)
 	{
-		PathFindShip pfs;
+		PathFindShip pfs = new PathFindShip();
 		int i, best_track;
 		int best_bird_dist = 0;
 		int best_length    = 0;
@@ -479,7 +479,8 @@ public class Ship {
 			pfs.best_bird_dist = (int)-1;
 			pfs.best_length = (int)-1;
 
-			FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], (TPFEnumProc*)ShipTrackFollower, null, &pfs);
+			//FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], (TPFEnumProc*)ShipTrackFollower, null, &pfs);
+			FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], ShipTrackFollower, null, pfs);
 
 			if (best_track >= 0) {
 				if (pfs.best_bird_dist != 0) {
@@ -641,7 +642,7 @@ public class Ship {
 			v.breakdown_ctr--;
 		}
 
-		if (v.vehstatus & Vehicle.VS_STOPPED) return;
+		if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
 
 		ProcessShipOrder(v);
 		HandleShipLoading(v);
@@ -753,23 +754,23 @@ public class Ship {
 				return;
 			}
 
-			b = _ship_subcoord[dir][track];
+			byte [] b = _ship_subcoord[dir][track];
 
 			gp.x = (gp.x&~0xF) | b[0];
 			gp.y = (gp.y&~0xF) | b[1];
 
 			/* Call the landscape function and tell it that the vehicle entered the tile */
-			r = VehicleEnterTile(v, gp.new_tile, gp.x, gp.y);
-			if (r&0x8) 
+			r = v.VehicleEnterTile(gp.new_tile, gp.x, gp.y);
+			if(0 != (r&0x8) ) 
 			{
 				//goto reverse_direction;
 				ShipController_reverse_direction(v);
 				return;
 			}
 
-			if (!(r&0x4)) {
+			if (0 == (r&0x4)) {
 				v.tile = gp.new_tile;
-				v.ship.state = 1 << track;
+				v.ship.state = (byte) (1 << track);
 			}
 
 			v.direction = b[2];
@@ -779,7 +780,7 @@ public class Ship {
 		dir = ShipGetNewDirection(v, gp.x, gp.y);
 		v.x_pos = gp.x;
 		v.y_pos = gp.y;
-		v.z_pos = GetSlopeZ(gp.x, gp.y);
+		v.z_pos = Landscape.GetSlopeZ(gp.x, gp.y);
 		
 		ShipController_getout( v, dir );
 		return;
@@ -831,16 +832,17 @@ public class Ship {
 
 	void ShipsYearlyLoop()
 	{
-		Vehicle v;
+		//Vehicle v;
 
-		FOR_ALL_VEHICLES(v) 
+		//FOR_ALL_VEHICLES(v)
+		Vehicle.forEach( (v) ->
 		{
 			if (v.type == Vehicle.VEH_Ship) {
 				v.profit_last_year = v.profit_this_year;
 				v.profit_this_year = 0;
 				Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 			}
-		}
+		});
 	}
 
 	/** Build a ship.
@@ -868,7 +870,7 @@ public class Ship {
 		if (!IsTileDepotType(tile, Global.TRANSPORT_WATER)) return Cmd.CMD_ERROR;
 		if (!IsTileOwner(tile, Global._current_player)) return Cmd.CMD_ERROR;
 
-		v = AllocateVehicle();
+		v = Vehicle.AllocateVehicle(); // TODO can pass type or make subobject for ship
 		if (v == null || IsOrderPoolFull() ||
 				(unit_num = GetFreeUnitNumber(Vehicle.VEH_Ship)) > Global._patches.max_ships)
 			return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);

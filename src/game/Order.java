@@ -991,7 +991,7 @@ public class Order implements IPoolItem {
 			Global.SetDParam(0, v.unitnumber.id);
 			NewsItem.AddValidatedNewsItem(
 				message,
-				NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT | NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0),
+				NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT | NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0),
 				v.index,
 				OC_VALIDATE,	//next time, just validate the orders
 				Order::CheckOrders);

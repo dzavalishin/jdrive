@@ -1125,7 +1125,7 @@ public class Sprites {
 	public static final int PALETTE_59E 								= PALETTE_RECOLOR_SPRITE(0x59E);
 	public static final int PALETTE_59F 								= PALETTE_RECOLOR_SPRITE(0x59F);
 
-	static int RET_MAKE_TRANSPARENT(int img) { return (img & SPRITE_MASK) | PALETTE_TO_TRANSPARENT; }
+	public static int RET_MAKE_TRANSPARENT(int img) { return (img & SPRITE_MASK) | PALETTE_TO_TRANSPARENT; }
 
 }
 
