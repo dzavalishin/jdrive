@@ -1168,7 +1168,7 @@ public class Station implements IPoolItem
 				int w = plat_len;
 				do {
 
-					ModifyTile(tile,
+					Landscape.ModifyTile(tile,
 							TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
 							TileTypes.MP_MAP2 | TileTypes.MP_MAP5 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI,
 							station_index, /* map2 parameter */
@@ -1592,7 +1592,7 @@ public class Station implements IPoolItem
 
 			st.build_date = _date;
 
-			ModifyTile(tile,
+			Landscape.ModifyTile(tile,
 					TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP5 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR,
 					st.index,                       /* map2 parameter */
@@ -1849,7 +1849,7 @@ public class Station implements IPoolItem
 				//BEGIN_TILE_LOOP(tile_cur,w,h,tile)
 				TileIndex.forAll(w, h, tile, (tile_cur) ->
 				{
-					ModifyTile(tile_cur,
+					Landscape.ModifyTile(tile_cur,
 							TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
 							TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAP5,
 							st.index, b[bi++]);
@@ -1952,7 +1952,7 @@ public class Station implements IPoolItem
 
 			st.build_date = _date;
 
-			ModifyTile(ti.tile,
+			Landscape.ModifyTile(ti.tile,
 					TileTypes.MP_SETTYPE(TileTypes.MP_STATION) |
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5,
 					st.index,		/* map2 */
@@ -2013,7 +2013,7 @@ public class Station implements IPoolItem
 			st.facilities &= ~FACIL_DOCK;
 			st.had_vehicle_of_type &= ~HVOT_BUOY;
 
-			ModifyTile(tile,
+			Landscape.ModifyTile(tile,
 					TileTypes.MP_SETTYPE(TileTypes.MP_WATER) |
 					TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR,
 					OWNER_WATER, /* map_owner */
@@ -2139,14 +2139,14 @@ public class Station implements IPoolItem
 
 			st.build_date = _date;
 
-			ModifyTile(tile,
+			Landscape.ModifyTile(tile,
 					TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR |
 					TileTypes.MP_MAP5,
 					st.index,
 					direction + 0x4C);
 
-			ModifyTile(tile + TileOffsByDir(direction),
+					Landscape.ModifyTile(tile + TileOffsByDir(direction),
 					TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR |
 					TileTypes.MP_MAP5,
@@ -2177,7 +2177,7 @@ public class Station implements IPoolItem
 			DoClearSquare(tile1);
 
 			// convert the water tile to water.
-			ModifyTile(tile2, TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, OWNER_WATER, 0);
+			Landscape.ModifyTile(tile2, TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, OWNER_WATER, 0);
 
 			st.dock_tile = 0;
 			st.facilities &= ~FACIL_DOCK;

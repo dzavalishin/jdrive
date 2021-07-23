@@ -1,18 +1,23 @@
 package game;
+import game.util.BitOps;
 
 //Finite sTate mAchine -. FTA
 public class AirportFTAClass 
 {
-	byte nofelements;							// number of positions the airport consists of
+	int nofelements;							// number of positions the airport consists of
 	final byte terminals[];
 	final byte helipads[];
-	byte entry_point;							// when an airplane arrives at this airport, enter it at position entry_point
-	byte acc_planes;							// accept airplanes or helicopters or both
+	int entry_point;							// when an airplane arrives at this airport, enter it at position entry_point
+	int acc_planes;							// accept airplanes or helicopters or both
 	final TileIndexDiffC airport_depots;	// gives the position of the depots on the airports
-	byte nof_depots;							// number of depots this airport has
+	int nof_depots;							// number of depots this airport has
 	AirportFTA layout[];		// state machine for airport
 
 
+	public static final int MAX_ELEMENTS = 255;
+	public static final int MAX_HEADINGS = 18;
+	
+	
 	public static final int MAX_TERMINALS = 6;
 	public static final int MAX_HELIPADS  = 2;
 
@@ -49,12 +54,12 @@ public class AirportFTAClass
 	 * @todo set availability of airports by year, instead of airplane
 	 */
 	int GetValidAirports()	{
-		int bytemask = _avail_aircraft; /// sets the first 3 bytes, 0 - 2, @see AdjustAvailAircraft()
+		int bytemask = Global._avail_aircraft; /// sets the first 3 bytes, 0 - 2, @see AdjustAvailAircraft()
 
 		// 1980-1-1 is -. 21915
 		// 1990-1-1 is -. 25568
-		if (Global._date >= 21915) SETBIT(bytemask, 3); // metropilitan airport 1980
-		if (Global._date >= 25568) SETBIT(bytemask, 4); // international airport 1990
+		if (Global._date >= 21915) bytemask = BitOps.RETSETBIT(bytemask, 3); // metropilitan airport 1980
+		if (Global._date >= 25568) bytemask = BitOps.RETSETBIT(bytemask, 4); // international airport 1990
 		return bytemask;
 	}
 
@@ -144,10 +149,11 @@ public class AirportFTAClass
 			final AirportFTAbuildup FA[],
 			final TileIndexDiffC depots[] ) //, final byte nof_depots)
 	{
-		byte nofterminals, nofhelipads;
-		byte nofterminalgroups = 0;
-		byte nofhelipadgroups = 0;
-		final byte * curr;
+		int nofterminals, nofhelipads;
+		int nofterminalgroups = 0;
+		int nofhelipadgroups = 0;
+		//final byte [] curr;
+		int icurr;
 		int i;
 		nofterminals = nofhelipads = 0;
 
@@ -155,11 +161,12 @@ public class AirportFTAClass
 		if (terminals != null) {
 			i = terminals[0];
 			nofterminalgroups = i;
-			curr = terminals;
+			//curr = terminals;
+			icurr = 0;
 			while (i-- > 0) {
-				curr++;
-				assert(*curr != 0);	//we don't want to have an empty group
-				nofterminals += *curr;
+				icurr++;
+				assert(terminals[icurr] != 0);	//we don't want to have an empty group
+				nofterminals += terminals[icurr];
 			}
 
 		}
@@ -169,11 +176,12 @@ public class AirportFTAClass
 		if (helipads != null) {
 			i = helipads[0];
 			nofhelipadgroups = i;
-			curr = helipads;
+			//curr = helipads;
+			icurr = 0;
 			while (i-- > 0) {
-				curr++;
-				assert(*curr != 0); //no empty groups please
-				nofhelipads += *curr;
+				icurr++;
+				assert(helipads[icurr] != 0); //no empty groups please
+				nofhelipads += helipads[icurr];
 			}
 
 		}
@@ -181,8 +189,8 @@ public class AirportFTAClass
 
 		// if there are more terminals than 6, internal variables have to be changed, so don't allow that
 		// same goes for helipads
-		if (nofterminals > MAX_TERMINALS) { printf("Currently only maximum of %2d terminals are supported (you wanted %2d)\n", MAX_TERMINALS, nofterminals);}
-		if (nofhelipads > MAX_HELIPADS) { printf("Currently only maximum of %2d helipads are supported (you wanted %2d)\n", MAX_HELIPADS, nofhelipads);}
+		if (nofterminals > MAX_TERMINALS) { Global.error("Currently only maximum of %2d terminals are supported (you wanted %2d)\n", MAX_TERMINALS, nofterminals);}
+		if (nofhelipads > MAX_HELIPADS) { Global.error("Currently only maximum of %2d helipads are supported (you wanted %2d)\n", MAX_HELIPADS, nofhelipads);}
 		// terminals/helipads are divided into groups. Groups are computed by dividing the number
 		// of terminals by the number of groups. Half in half. If #terminals is uneven, first group
 		// will get the less # of terminals
@@ -192,7 +200,7 @@ public class AirportFTAClass
 
 		Airport.nofelements = AirportGetNofElements(FA);
 		// check
-		if (entry_point >= Airport.nofelements) {printf("Entry point (%2d) must be within the airport positions (which is max %2d)\n", entry_point, Airport.nofelements);}
+		if (entry_point >= Airport.nofelements) {Global.error("Entry point (%2d) must be within the airport positions (which is max %2d)\n", entry_point, Airport.nofelements);}
 		assert(entry_point < Airport.nofelements);
 
 		Airport.acc_planes = acc_planes;
@@ -203,14 +211,14 @@ public class AirportFTAClass
 
 		// build the state machine
 		AirportBuildAutomata(Airport, FA);
-		DEBUG(misc, 1) ("#Elements %2d; #Terminals %2d in %d group(s); #Helipads %2d in %d group(s); Entry Point %d",
+		Global.DEBUG_misc( 1, "#Elements %2d; #Terminals %2d in %d group(s); #Helipads %2d in %d group(s); Entry Point %d",
 				Airport.nofelements, nofterminals, nofterminalgroups, nofhelipads, nofhelipadgroups, Airport.entry_point
 				);
 
 
 		{
-			byte ret = AirportTestFTA(Airport);
-			if (ret != MAX_ELEMENTS) printf("ERROR with element: %d\n", ret - 1);
+			int ret = AirportTestFTA(Airport);
+			if (ret != MAX_ELEMENTS) Global.error("ERROR with element: %d\n", ret - 1);
 			assert(ret == MAX_ELEMENTS);
 		}
 		// print out full information
@@ -236,7 +244,7 @@ public class AirportFTAClass
 		//free(Airport);
 	}
 
-	static int AirportGetNofElements(final AirportFTAbuildup FA)
+	static int AirportGetNofElements(final AirportFTAbuildup [] FA)
 	{
 		int i;
 		int nofelements = 0;
@@ -252,12 +260,12 @@ public class AirportFTAClass
 		return nofelements;
 	}
 
-	static void AirportBuildAutomata(AirportFTAClass Airport, final AirportFTAbuildup FA)
+	static void AirportBuildAutomata(AirportFTAClass Airport, final AirportFTAbuildup[] FA)
 	{
-		AirportFTA FAutomata;
+		AirportFTA []FAutomata;
 		AirportFTA current;
 		int internalcounter, i;
-		FAutomata = malloc(sizeof(AirportFTA) * Airport.nofelements);
+		FAutomata = new AirportFTA[ Airport.nofelements];
 		Airport.layout = FAutomata;
 		internalcounter = 0;
 
@@ -286,9 +294,9 @@ public class AirportFTAClass
 		}
 	}
 
-	static byte AirportTestFTA(final AirportFTAClass Airport)
+	static int AirportTestFTA(final AirportFTAClass Airport)
 	{
-		byte position, i, next_element;
+		int position, i, next_element;
 		AirportFTA temp;
 		next_element = 0;
 
@@ -389,9 +397,9 @@ static byte AirportBlockToString(int block)
 		case AT_OILRIG: Airport = Oilrig; break;
 		case AT_INTERNATIONAL: Airport = InternationalAirport; break;
 		default:
-			#ifdef DEBUG__
+			/* #ifdef DEBUG__
 			printf("Airport AircraftNextAirportPos_and_Order not yet implemented\n");
-			#endif
+			#endif */
 			assert(airport_type <= AT_INTERNATIONAL);
 		}
 		return Airport;
@@ -403,9 +411,9 @@ static byte AirportBlockToString(int block)
 
 //internal structure used in openttd - Finite sTate mAchine -. FTA
 class AirportFTA {
-	byte position;										// the position that an airplane is at
-	byte next_position;								// next position from this position
+	int position;										// the position that an airplane is at
+	int next_position;								// next position from this position
 	int block;	// 32 bit blocks (st.airport_flags), should be enough for the most complex airports
-	byte heading;	// heading (current orders), guiding an airplane to its target on an airport
+	int heading;	// heading (current orders), guiding an airplane to its target on an airport
 	AirportFTA next_in_chain;	// possible extra movement choices from this position
 }

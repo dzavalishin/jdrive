@@ -103,7 +103,7 @@ public class Clear {
 			int tileh = tile.GetTileSlope(null) & 0xF;
 			if (tileh == _railway_dangslopes[mode] ||
 					tileh == _railway_dangslopes2[mode]) {
-				_terraform_err_tile = tile;
+						Global._terraform_err_tile = tile;
 				Global._error_message = Str.STR_1008_MUST_REMOVE_RAILROAD_TRACK;
 				return -1;
 			}
@@ -120,7 +120,7 @@ public class Clear {
 			int ret = DoCommandByTile(tile, 0,0, ts.flags & ~Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 
 			if (Cmd.CmdFailed(ret)) {
-				_terraform_err_tile = tile;
+				Global._terraform_err_tile = tile;
 				return -1;
 			}
 
@@ -221,7 +221,7 @@ public class Clear {
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		Global._error_message = INVALID_STRING_ID;
-		_terraform_err_tile = 0;
+		Global._terraform_err_tile = 0;
 
 		ts.direction = direction = (p2 != 0) ? 1 : -1;
 		ts.flags = flags;

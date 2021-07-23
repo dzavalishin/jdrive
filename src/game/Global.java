@@ -129,10 +129,6 @@ public class Global {
 	public static int _tick_counter;
 	public static int _frame_counter;
 
-	public static int _cur_tileloop_tile;
-
-
-
 	public static Paths _path = new Paths();
 
 	public static Tile _m[];
@@ -145,8 +141,29 @@ public class Global {
 
 	public static byte _no_scroll;
 
+	// IN/OUT parameters to commands
+	//VARDEF byte _yearly_expenses_type;
+	public static TileIndex _terraform_err_tile;
+	public static TileIndex _build_tunnel_endtile;
 	public static boolean _generating_world = false;
+	public static int _new_town_size;
+	public static int _returned_refit_amount;
 
+	
+	// etc
+	// Skip aging of cargo?
+	public static int _age_cargo_skip_counter;
+
+	// Available aircraft types
+	public static int _avail_aircraft = 0; // TODO who assigns?
+
+	// Position in tile loop
+	public static TileIndex _cur_tileloop_tile = null;
+	//public static int _cur_tileloop_tile;
+
+	// Also save scrollpos_x, scrollpos_y and zoom
+	public static int _disaster_delay;
+	
 	// Net
 	public static boolean _networking = false;
 	public static boolean _network_available = false;  // is network mode available?

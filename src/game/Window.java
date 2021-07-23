@@ -102,10 +102,21 @@ public class Window extends WindowConstants
 	public static boolean _scrolling_viewport = false;
 	static boolean _popup_menu_active;
 
-	static byte _special_mouse_mode;
+	public static byte _special_mouse_mode;
 
 
 
+	// -----------------------------------
+	
+	
+	//enum SpecialMouseMode {
+	public static final int WSM_NONE = 0;
+	public static final int WSM_DRAGDROP = 1;
+	public static final int WSM_SIZING = 2;
+	public static final int WSM_PRESIZE = 3;
+	//};
+	
+	
 
 
 	// -----------------------------------

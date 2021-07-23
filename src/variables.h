@@ -46,7 +46,7 @@ typedef struct {
 
 // This one is not used anymore.
 //VARDEF VehicleID _vehicle_id_ctr_day;
-
+/*
 // Skip aging of cargo?
 VARDEF byte _age_cargo_skip_counter;
 
@@ -58,7 +58,7 @@ VARDEF TileIndex _cur_tileloop_tile;
 
 // Also save scrollpos_x, scrollpos_y and zoom
 VARDEF uint16 _disaster_delay;
-
+*/
 // Determines what station to operate on in the
 //  tick handler. In Station class
 //VARDEF uint16 _station_tick_ctr;
@@ -298,11 +298,11 @@ VARDEF bool _rightclick_emulate;
 
 // IN/OUT parameters to commands
 //VARDEF byte _yearly_expenses_type;
-VARDEF TileIndex _terraform_err_tile;
-VARDEF TileIndex _build_tunnel_endtile;
+//VARDEF TileIndex _terraform_err_tile;
+//VARDEF TileIndex _build_tunnel_endtile;
 //VARDEF bool _generating_world;
-VARDEF int _new_town_size;
-VARDEF uint _returned_refit_amount;
+//VARDEF int _new_town_size;
+//VARDEF uint _returned_refit_amount;
 /*
 // Deals with the type of the savegame, independent of extension
 typedef struct {

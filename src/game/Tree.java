@@ -589,7 +589,7 @@ public class Tree {
 					) 
 			{
 
-				ModifyTile(tile,
+				Landscape.ModifyTile(tile,
 						TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
 						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5,
 						(m == 4 ? 0x10 : 0),
@@ -622,7 +622,7 @@ public class Tree {
 					m2 = ((tile.getMap().m5 & 3) << 6) | 0x20;
 				}
 
-				ModifyTile(tile,
+				Landscape.ModifyTile(tile,
 						TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
 						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5,
 						m2,

@@ -1289,7 +1289,7 @@ public class Gui
 
 	static void PlaceProc_RockyArea(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, VPM_X_AND_Y | GUI_PlaceProc_RockyArea);
+		VpStartPlaceSizing(tile, ViewPort.VPM_X_AND_Y | GUI_PlaceProc_RockyArea);
 	}
 
 	static void PlaceProc_LightHouse(TileIndex tile)
@@ -1314,12 +1314,12 @@ public class Gui
 
 	static void PlaceProc_DesertArea(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, VPM_X_AND_Y | GUI_PlaceProc_DesertArea);
+		VpStartPlaceSizing(tile, ViewPort.VPM_X_AND_Y | GUI_PlaceProc_DesertArea);
 	}
 
 	static void PlaceProc_WaterArea(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, VPM_X_AND_Y | GUI_PlaceProc_WaterArea);
+		VpStartPlaceSizing(tile, ViewPort.VPM_X_AND_Y | GUI_PlaceProc_WaterArea);
 	}
 
 	static final Widget _scen_edit_land_gen_widgets[] = {

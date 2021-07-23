@@ -1475,7 +1475,7 @@ public class Town extends TownTables implements IPoolItem
 
 			assert(tile.IsTileType( TileTypes.MP_CLEAR));
 
-			ModifyTile(tile,
+			Landscape.ModifyTile(tile,
 					TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | TileTypes.MP_MAP3HI | TileTypes.MP_MAP3LO | TileTypes.MP_MAP2 | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
 					t.index,
 					m3lo,   /* map3_lo */
@@ -1488,7 +1488,7 @@ public class Town extends TownTables implements IPoolItem
 
 			if (eflags&0x18) {
 				assert(IsTileType(tile + TileDiffXY(0, 1), TileTypes.MP_CLEAR));
-				ModifyTile(tile + TileDiffXY(0, 1),
+				Landscape.ModifyTile(tile + TileDiffXY(0, 1),
 						TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
 						t.index,
 						m3lo,			/* map3_lo */
@@ -1500,7 +1500,7 @@ public class Town extends TownTables implements IPoolItem
 
 			if (eflags&0x14) {
 				assert(IsTileType(tile + TileDiffXY(1, 0), TileTypes.MP_CLEAR));
-				ModifyTile(tile + TileDiffXY(1, 0),
+				Landscape.ModifyTile(tile + TileDiffXY(1, 0),
 						TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
 						t.index,
 						m3lo,			/* map3_lo */
@@ -1512,7 +1512,7 @@ public class Town extends TownTables implements IPoolItem
 
 			if (eflags&0x10) {
 				assert(IsTileType(tile + TileDiffXY(1, 1), TileTypes.MP_CLEAR));
-				ModifyTile(tile + TileDiffXY(1, 1),
+				Landscape.ModifyTile(tile + TileDiffXY(1, 1),
 						TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
 						t.index,
 						m3lo,			/* map3_lo */
@@ -1753,7 +1753,7 @@ public class Town extends TownTables implements IPoolItem
 
 		if (Cmd.CmdFailed(r)) return false;
 
-		ModifyTile(tile, TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOwner.OWNER_CURRENT | TileTypes.MP_MAP5,
+		Landscape.ModifyTile(tile, TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOwner.OWNER_CURRENT | TileTypes.MP_MAP5,
 				2 /* map5 */
 				);
 
@@ -2137,6 +2137,11 @@ public class Town extends TownTables implements IPoolItem
 			null,											/* vehicle_leave_tile_proc */
 			Town::GetSlopeTileh_Town				/* get_slope_tileh_proc */
 			);
+
+
+	public static void forEach(Consumer<Town> c) {
+		_town_pool.forEach(c);
+	}
 
 	/*
 	// Save and load of towns.

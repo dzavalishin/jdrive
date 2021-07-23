@@ -1,5 +1,5 @@
 /* $Id: animcursors.h 2702 2005-07-24 15:56:31Z celestar $ */
-
+#if 0 
 /** @file animcursors.h
  * This file defines all the the animated cursors.
  * Animated cursors consist of the number of sprites that are

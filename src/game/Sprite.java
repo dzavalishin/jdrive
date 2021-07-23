@@ -30,6 +30,10 @@ public class Sprite extends Sprites {
 	{
 		return SpriteCache.GetSprite(sprite);
 	}
+	public static Sprite GetSprite(int sprite)
+	{
+		return SpriteCache.GetSprite(sprite);
+	}
 }
 
 // User should decide by object type

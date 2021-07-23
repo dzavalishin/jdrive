@@ -308,7 +308,7 @@ private void WaypointPoolNewBlock(int start_item)
 		if (flags & DC_EXEC) {
 			final StationSpec spec = null;
 			boolean reserved = PBSTileReserved(tile) != 0;
-			ModifyTile(tile, MP_MAP2 | MP_MAP5, wp.index, RAIL_TYPE_WAYPOINT | dir);
+			Landscape.ModifyTile(tile, MP_MAP2 | MP_MAP5, wp.index, RAIL_TYPE_WAYPOINT | dir);
 
 			if (BitOps.GB(p1, 0, 8) < GetNumCustomStations(STAT_CLASS_WAYP))
 				spec = GetCustomStation(STAT_CLASS_WAYP, BitOps.GB(p1, 0, 8));
@@ -411,7 +411,7 @@ private void WaypointPoolNewBlock(int start_item)
 
 			if (justremove) {
 				boolean reserved = PBSTileReserved(tile) != 0;
-				ModifyTile(tile, MP_MAP2_CLEAR | MP_MAP5, 1<<direction);
+				Landscape.ModifyTile(tile, MP_MAP2_CLEAR | MP_MAP5, 1<<direction);
 				//CLRBIT(_m[tile].m3, 4);
 				tile.clrBit_m3(4);
 				tile.getMap().m4 = 0;

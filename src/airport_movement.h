@@ -31,8 +31,8 @@ enum {
 	AMED_HELI_LOWER	= 1<<7,
 };
 
-enum {MAX_ELEMENTS = 255};
-enum {MAX_HEADINGS = 18};
+//enum {MAX_ELEMENTS = 255};
+//enum {MAX_HEADINGS = 18};
 
 ///////////////////////////////////////////////////////////////////////
 ///////***********Movement States on Airports********************//////

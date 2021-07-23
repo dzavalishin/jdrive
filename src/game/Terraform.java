@@ -11,16 +11,16 @@ public class Terraform {
 		if (success) {
 			// TODO SndPlayTileFx(SND_1F_SPLAT, tile);
 		} else {
-			SetRedErrorSquare(_terraform_err_tile);
+			ViewPort.SetRedErrorSquare(Global._terraform_err_tile);
 		}
 	}
 
 	static void GenericRaiseLowerLand(TileIndex tile, int mode)
 	{
 		if (mode!=0) {
-			DoCommandP(tile, 8, (int)mode, CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0808_CAN_T_RAISE_LAND_HERE));
+			DoCommandP(tile, 8, (int)mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0808_CAN_T_RAISE_LAND_HERE));
 		} else {
-			DoCommandP(tile, 8, (int)mode, CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0809_CAN_T_LOWER_LAND_HERE));
+			DoCommandP(tile, 8, (int)mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0809_CAN_T_LOWER_LAND_HERE));
 		}
 	}
 
@@ -45,7 +45,7 @@ public class Terraform {
 		TileIndex.forAll( size_x, size_y, TileIndex.TileXY(sx, sy), (tile) ->
 		{
 			if (tile.GetTileType() != TileTypes.MP_WATER) {
-				SetMapExtraBits(tile, (_ctrl_pressed) ? 0 : 1);
+				tile.SetMapExtraBits( (Global._ctrl_pressed) ? 0 : 1);
 				DoCommandP(tile, 0, 0, null, Cmd.CMD_LANDSCAPE_CLEAR);
 				tile.MarkTileDirtyByTile();
 			}
@@ -53,7 +53,7 @@ public class Terraform {
 		Global._generating_world = false;
 	}
 
-	/** Scenario editor command that generates desert areas */
+	/** tor command that generates desert areas */
 	static void GenerateRockyArea(TileIndex end, TileIndex start)
 	{
 		int size_x, size_y;
@@ -74,7 +74,7 @@ public class Terraform {
 		TileIndex.forAll( size_x, size_y, TileIndex.TileXY(sx, sy), (tile) ->
 		{
 			if (tile.IsTileType(TileTypes.MP_CLEAR) || tile.IsTileType( TileTypes.MP_TREES)) {
-				TileIndex.ModifyTile(tile.getTile(),TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) | TileTypes.MP_MAP5, (tile.getMap().m5 & ~0x1C) | 0xB);
+				Landscape.ModifyTile(tile,TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) | TileTypes.MP_MAP5, (tile.getMap().m5 & ~0x1C) | 0xB);
 				success = true;
 			}
 		}); // END_TILE_LOOP(tile, size_x, size_y, 0);
@@ -90,25 +90,25 @@ public class Terraform {
 	 * allows for additional implements that are more local. For example X_Y drag
 	 * of convertrail which belongs in rail_gui.c and not terraform_gui.c
 	 **/
-	boolean GUIPlaceProcDragXY(final WindowEvent we)
+	static boolean GUIPlaceProcDragXY(final WindowEvent we)
 	{
 		TileIndex start_tile = we.starttile;
 		TileIndex end_tile = we.tile;
 
 		switch (we.userdata >> 4) {
-		case GUI_PlaceProc_DemolishArea >> 4:
-			DoCommandP(end_tile, start_tile, 0, CcPlaySound10, Cmd.CMD_CLEAR_AREA | Cmd_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
+		case Gui.GUI_PlaceProc_DemolishArea >> 4:
+			DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_CLEAR_AREA | Cmd_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
 			break;
-		case GUI_PlaceProc_LevelArea >> 4:
-			DoCommandP(end_tile, start_tile, 0, CcPlaySound10, Cmd.CMD_LEVEL_LAND | Cmd_AUTO);
+		case Gui.GUI_PlaceProc_LevelArea >> 4:
+			DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_LEVEL_LAND | Cmd_AUTO);
 			break;
-		case GUI_PlaceProc_RockyArea >> 4:
+		case Gui.GUI_PlaceProc_RockyArea >> 4:
 			GenerateRockyArea(end_tile, start_tile);
 			break;
-		case GUI_PlaceProc_DesertArea >> 4:
+		case Gui.GUI_PlaceProc_DesertArea >> 4:
 			GenerateDesertArea(end_tile, start_tile);
 			break;
-		case GUI_PlaceProc_WaterArea >> 4:
+		case Gui.GUI_PlaceProc_WaterArea >> 4:
 			DoCommandP(end_tile, start_tile, 0, CcBuildCanal, Cmd.CMD_BUILD_CANAL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_CANT_BUILD_CANALS));
 			break;
 		default: return false;
@@ -129,64 +129,64 @@ public class Terraform {
 		'O',
 	};
 
-	void PlaceProc_DemolishArea(TileIndex tile)
+	static void PlaceProc_DemolishArea(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, VPM_X_AND_Y | GUI_PlaceProc_DemolishArea);
+		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_X_AND_Y | Gui.GUI_PlaceProc_DemolishArea);
 	}
 
-	void PlaceProc_RaiseLand(TileIndex tile)
+	static void PlaceProc_RaiseLand(TileIndex tile)
 	{
 		GenericRaiseLowerLand(tile, 1);
 	}
 
-	void PlaceProc_LowerLand(TileIndex tile)
+	static void PlaceProc_LowerLand(TileIndex tile)
 	{
 		GenericRaiseLowerLand(tile, 0);
 	}
 
-	void PlaceProc_LevelLand(TileIndex tile)
+	static void PlaceProc_LevelLand(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, VPM_X_AND_Y | GUI_PlaceProc_LevelArea);
+		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_X_AND_Y | Gui.GUI_PlaceProc_LevelArea);
 	}
 
 	static void PlaceProc_PlantTree(TileIndex tile) {}
 
 	static void TerraformClick_Lower(Window w)
 	{
-		HandlePlacePushButton(w, 4, Sprite.ANIMCURSOR_LOWERLAND, 2, PlaceProc_LowerLand);
+		Gui.HandlePlacePushButton(w, 4, Sprite.ANIMCURSOR_LOWERLAND, 2, Terraform::PlaceProc_LowerLand);
 	}
 
 	static void TerraformClick_Raise(Window w)
 	{
-		HandlePlacePushButton(w, 5, Sprite.ANIMCURSOR_RAISELAND, 2, PlaceProc_RaiseLand);
+		Gui.HandlePlacePushButton(w, 5, Sprite.ANIMCURSOR_RAISELAND, 2, Terraform::PlaceProc_RaiseLand);
 	}
 
 	static void TerraformClick_Level(Window w)
 	{
-		HandlePlacePushButton(w, 6, Sprite.SPR_CURSOR_LEVEL_LAND, 2, PlaceProc_LevelLand);
+		Gui.HandlePlacePushButton(w, 6, Sprite.SPR_CURSOR_LEVEL_LAND, 2, Terraform::PlaceProc_LevelLand);
 	}
 
 	static void TerraformClick_Dynamite(Window w)
 	{
-		HandlePlacePushButton(w, 7, Sprite.ANIMCURSOR_DEMOLISH , 1, PlaceProc_DemolishArea);
+		Gui.HandlePlacePushButton(w, 7, Sprite.ANIMCURSOR_DEMOLISH , 1, Terraform::PlaceProc_DemolishArea);
 	}
 
 	static void TerraformClick_BuyLand(Window w)
 	{
-		HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_BUY_LAND, 1, PlaceProc_BuyLand);
+		Gui.HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_BUY_LAND, 1, ::PlaceProc_BuyLand);
 	}
 
 	static void TerraformClick_Trees(Window w)
 	{
-		if (HandlePlacePushButton(w, 9, Sprite.SPR_CURSOR_MOUSE, 1, PlaceProc_PlantTree)) ShowBuildTreesToolbar();
+		if (HandlePlacePushButton(w, 9, Sprite.SPR_CURSOR_MOUSE, 1, Terraform::PlaceProc_PlantTree)) ShowBuildTreesToolbar();
 	}
 
 	static void TerraformClick_PlaceSign(Window w)
 	{
-		HandlePlacePushButton(w, 10, Sprite.SPR_CURSOR_SIGN, 1, PlaceProc_Sign);
+		Gui.HandlePlacePushButton(w, 10, Sprite.SPR_CURSOR_SIGN, 1, ::PlaceProc_Sign);
 	}
 
-	static final Consumer <Window>  _terraform_button_proc[] = {
+	static final ButtonProc  _terraform_button_proc[] = {
 		Terraform::TerraformClick_Lower,
 		Terraform::TerraformClick_Raise,
 		Terraform::TerraformClick_Level,
@@ -204,7 +204,7 @@ public class Terraform {
 			break;
 
 		case WE_CLICK:
-			if (e.widget >= 4) _terraform_button_proc[e.widget - 4](w);
+			if (e.widget >= 4) _terraform_button_proc[e.widget - 4].accept(w);
 			break;
 
 		case WE_KEYPRESS: {
@@ -225,12 +225,12 @@ public class Terraform {
 			return;
 
 		case WE_PLACE_DRAG:
-			VpSelectTilesWithMethod(e.pt.x, e.pt.y, e.userdata & 0xF);
+			ViewPort.VpSelectTilesWithMethod(e.pt.x, e.pt.y, e.userdata & 0xF);
 			break;
 
 		case WE_PLACE_MOUSEUP:
 			if (e.pt.x != -1) {
-				if ((e.userdata & 0xF) == VPM_X_AND_Y) // dragged actions
+				if ((e.userdata & 0xF) == ViewPort.VPM_X_AND_Y) // dragged actions
 					GUIPlaceProcDragXY(e);
 			}
 			break;
@@ -286,3 +286,6 @@ public class Terraform {
 	
 	
 }
+
+@FunctionalInterface
+interface ButtonProc extends Consumer <Window>{}

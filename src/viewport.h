@@ -49,7 +49,7 @@ void VpSetPresizeRange(uint from, uint to);
 void VpSetPlaceSizingLimit(int limit);
 
 Vehicle *CheckMouseOverVehicle(void);
-
+/*
 enum {
 	VPM_X_OR_Y = 0,
 	VPM_FIX_X = 1,
@@ -71,19 +71,19 @@ enum {
 }; */
 
 void VpSelectTilesWithMethod(int x, int y, int method);
-
+/*
 // highlighting draw styles
 enum {
 	HT_NONE = 0,
 	HT_RECT = 0x80,
 	HT_POINT = 0x40,
-	HT_LINE = 0x20, /* used for autorail highlighting (longer streches)
-									 * (uses lower bits to indicate direction) */
-	HT_RAIL = 0x10, /* autorail (one piece)
-									 * (uses lower bits to indicate direction) */
+	HT_LINE = 0x20, //* used for autorail highlighting (longer streches)
+					//				 * (uses lower bits to indicate direction) 
+	HT_RAIL = 0x10, //* autorail (one piece)
+					//				 * (uses lower bits to indicate direction) 
 
-	/* lower bits (used with HT_LINE and HT_RAIL):
-	 * (see ASCII art in autorail.h for a visual interpretation) */
+	///* lower bits (used with HT_LINE and HT_RAIL):
+	// * (see ASCII art in autorail.h for a visual interpretation) 
 	HT_DIR_X = 0,  // X direction
 	HT_DIR_Y = 1,  // Y direction
 	HT_DIR_HU = 2, // horizontal upper
