@@ -1,3 +1,4 @@
+#if 0
 /* $Id: ship_cmd.c 3352 2005-12-28 22:29:59Z peter1138 $ */
 
 #include "stdafx.h"
