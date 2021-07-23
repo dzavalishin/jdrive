@@ -53,12 +53,12 @@ public class Gui
 		switch (Global._game_mode) {
 		case GM_MENU:
 			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
-			w.AssignWindowViewport( 0, 0, width, height, new TileIndex(32, 32), 0);
+			ViewPort.AssignWindowViewport( w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
 			ShowSelectGameWindow();
 			break;
-		case GameModes.GM_NORMAL:
-			w = AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
-			AssignWindowViewport(w, 0, 0, width, height, new TileIndex(32, 32), 0);
+		case GM_NORMAL:
+			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
+			ViewPort.AssignWindowViewport(w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
 
 			ShowVitalWindows();
 
@@ -69,13 +69,13 @@ public class Gui
 			break;
 		case GameModes.GM_EDITOR:
 			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
-			w.AssignWindowViewport(0, 0, width, height, 0, 0);
+			ViewPort.AssignWindowViewport(w, 0, 0, width, height, 0, 0);
 
-			w = AllocateWindowDesc(_toolb_scen_desc);
+			w = Window.AllocateWindowDesc(_toolb_scen_desc,0);
 			w.disabled_state = 1 << 9;
-			CLRBITS(w.flags4, WF_WHITE_BORDER_MASK);
+			CLRBITS(w.flags4, Window.WF_WHITE_BORDER_MASK);
 
-			PositionMainToolbar(w); // already WC_MAIN_TOOLBAR passed (&_toolb_scen_desc)
+			w.PositionMainToolbar(w); // already WC_MAIN_TOOLBAR passed (&_toolb_scen_desc)
 			break;
 		default:
 			assert false;
@@ -122,7 +122,7 @@ public class Gui
 
 	void HandleOnEditText(WindowEvent e)
 	{
-		final char *b = e.edittext.str;
+		//final char *b = e.edittext.str;
 		int id;
 
 		_Cmd.CMD_text = b;
@@ -182,30 +182,31 @@ public class Gui
 
 	 * @return true if the button is clicked, false if it's unclicked
 	 */
-	boolean HandlePlacePushButton(Window w, int widget, CursorID cursor, int mode, PlaceProc placeproc)
+	//boolean HandlePlacePushButton(Window w, int widget, CursorID cursor, int mode, Consumer<TileIndex> placeproc)
+	static boolean HandlePlacePushButton(Window w, int widget, int cursor, int mode, Consumer<TileIndex> placeproc)
 	{
 		int mask = 1 << widget;
 
-		if (w.disabled_state & mask) return false;
+		if( 0 != (w.disabled_state & mask)) return false;
 
-		SndPlayFx(SND_15_BEEP);
-		SetWindowDirty(w);
+		//SndPlayFx(SND_15_BEEP);
+		w.SetWindowDirty();
 
-		if (w.click_state & mask) {
+		if(0 != (w.click_state & mask)) {
 			ResetObjectToPlace();
 			return false;
 		}
 
 		SetObjectToPlace(cursor, mode, w.window_class, w.window_number);
 		w.click_state |= mask;
-		_place_proc = placeproc;
+		Global._place_proc = placeproc;
 		return true;
 	}
 
 
 	void CcPlaySound10(boolean success, TileIndex tile, int p1, int p2)
 	{
-		if (success) SndPlayTileFx(SND_12_EXPLOSION, tile);
+		//if (success) SndPlayTileFx(SND_12_EXPLOSION, tile);
 	}
 
 
@@ -233,16 +234,16 @@ public class Gui
 			case 2: ShowPatchesSelection(); return;
 			case 3: ShowNewgrf();           return;
 
-			case  5: _display_opt ^= DO_SHOW_TOWN_NAMES;    break;
-			case  6: _display_opt ^= DO_SHOW_STATION_NAMES; break;
-			case  7: _display_opt ^= DO_SHOW_SIGNS;         break;
-			case  8: _display_opt ^= DO_WAYPOINTS;          break;
-			case  9: _display_opt ^= DO_FULL_ANIMATION;     break;
-			case 10: _display_opt ^= DO_FULL_DETAIL;        break;
-			case 11: _display_opt ^= DO_TRANS_BUILDINGS;    break;
-			case 12: _display_opt ^= DO_TRANS_SIGNS;        break;
+			case  5: Global._display_opt ^= Global.DO_SHOW_TOWN_NAMES;    break;
+			case  6: Global._display_opt ^= Global.DO_SHOW_STATION_NAMES; break;
+			case  7: Global._display_opt ^= Global.DO_SHOW_SIGNS;         break;
+			case  8: Global._display_opt ^= Global.DO_WAYPOINTS;          break;
+			case  9: Global._display_opt ^= Global.DO_FULL_ANIMATION;     break;
+			case 10: Global._display_opt ^= Global.DO_FULL_DETAIL;        break;
+			case 11: Global._display_opt ^= Global.DO_TRANS_BUILDINGS;    break;
+			case 12: Global._display_opt ^= Global.DO_TRANS_SIGNS;        break;
 		}
-		MarkWholeScreenDirty();
+		Hal.MarkWholeScreenDirty();
 	}
 
 	static void MenuClickSaveLoad(int index)
@@ -428,20 +429,20 @@ public class Gui
 		ShowQueryString(ss.str, Str.STR_280B_EDIT_SIGN_TEXT, 30, 180, 1, 0);
 	}
 
-	void ShowRenameWaypointWindow(final Waypoint wp)
+	void ShowRenameWaypointWindow(final WayPoint wp)
 	{
 		int id = wp.index;
 
 		/* Are we allowed to change the name of the waypoint? */
-		if (!CheckTileOwnership(wp.xy)) {
-			ShowErrorMessage(_error_message, Str.STR_CANT_CHANGE_WAYPOINT_NAME,
-				TileX(wp.xy) * 16, TileY(wp.xy) * 16);
+		if (!wp.xy.CheckTileOwnership()) {
+			ShowErrorMessage(Global._error_message, Str.STR_CANT_CHANGE_WAYPOINT_NAME,
+					wp.xy.TileX() * 16, wp.xy.TileY() * 16);
 			return;
 		}
 
 		_rename_id = id;
 		_rename_what = 1;
-		SetDParam(0, id);
+		Global.SetDParam(0, id);
 		ShowQueryString(Str.STR_WAYPOINT_RAW, Str.STR_EDIT_WAYPOINT_NAME, 30, 180, 1, 0);
 	}
 
@@ -451,7 +452,7 @@ public class Gui
 			ResetObjectToPlace();
 		} else {
 			SetObjectToPlace(Sprite.SPR_CURSOR_SIGN, 1, 1, 0);
-			_place_proc = PlaceProc_Sign;
+			_place_proc = SignStruct::PlaceProc_Sign;
 		}
 	}
 
@@ -581,7 +582,7 @@ public class Gui
 			action_id = w.as_menu_d().action_id;
 			DeleteWindow(w);
 
-			if (index >= 0) _menu_clicked_procs[action_id](index);
+			if (index >= 0) _menu_clicked_procs[action_id].accept(index);
 
 			break;
 			}
@@ -619,7 +620,7 @@ public class Gui
 			while(i.hasNext())
 			{
 				final Player p = i.next();
-				if (p.is_active && --index < 0) return p.index;
+				if (p.is_active && --index < 0) return p.index.id;
 			}
 		}
 		return -1;
@@ -737,7 +738,7 @@ public class Gui
 
 			if (index >= 0) {
 				assert(index >= 0 && index < 30);
-				_menu_clicked_procs[action_id](index);
+				_menu_clicked_procs[action_id].accept(index);
 			}
 			break;
 			}
@@ -773,14 +774,14 @@ public class Gui
 
 		Window.DeleteWindowById(Window.WC_TOOLBAR_MENU, 0);
 
-		w = Window.AllocateWindow(x, 0x16, 0xA0, item_count * 10 + 2, Gui::MenuWndProc, Window.WC_TOOLBAR_MENU, _menu_widgets);
+		w = Window.AllocateWindow(x, 0x16, 0xA0, item_count * 10 + 2, Gui::MenuWndProc, new WindowClass(Window.WC_TOOLBAR_MENU), _menu_widgets);
 		w.widget.get(0).bottom = item_count * 10 + 1;
-		w.flags4 &= ~WF_WHITE_BORDER_MASK;
+		w.flags4 &= ~Window.WF_WHITE_BORDER_MASK;
 
 		w.as_menu_d().item_count = item_count;
 		w.as_menu_d().sel_index = 0;
 		w.as_menu_d().main_button = main_button;
-		w.as_menu_d().action_id = (main_button >> 8) ? (main_button >> 8) : main_button;
+		w.as_menu_d().action_id = (0 != (main_button >> 8)) ? (main_button >> 8) : main_button;
 		w.as_menu_d().string_id = base_string;
 		w.as_menu_d().checked_items = 0;
 		w.as_menu_d().disabled_items = disabled_mask;
@@ -800,12 +801,12 @@ public class Gui
 		w.InvalidateWidget(main_button);
 
 		Window.DeleteWindowById(Window.WC_TOOLBAR_MENU, 0);
-		w = Window.AllocateWindow(x, 0x16, 0xF1, 0x52, Gui::PlayerMenuWndProc, Window.WC_TOOLBAR_MENU, _player_menu_widgets);
-		w.flags4 &= ~WF_WHITE_BORDER_MASK;
+		w = Window.AllocateWindow(x, 0x16, 0xF1, 0x52, Gui::PlayerMenuWndProc, new WindowClass(Window.WC_TOOLBAR_MENU), _player_menu_widgets);
+		w.flags4 &= ~Window.WF_WHITE_BORDER_MASK;
 		w.as_menu_d().item_count = 0;
-		w.as_menu_d().sel_index = (Global._local_player != Owner.OWNER_SPECTATOR) ? _local_player : GetPlayerIndexFromMenu(0);
+		w.as_menu_d().sel_index = (Global._local_player.id != Owner.OWNER_SPECTATOR) ? Global._local_player.id : GetPlayerIndexFromMenu(0);
 		if (Global._networking && main_button == 9) {
-			if (Global._local_player != Owner.OWNER_SPECTATOR) {
+			if (Global._local_player.id != Owner.OWNER_SPECTATOR) {
 				w.as_menu_d().sel_index++;
 			} else {
 				/* Select client list by default for spectators */
@@ -817,7 +818,7 @@ public class Gui
 		w.as_menu_d().checked_items = gray;
 		w.as_menu_d().disabled_items = 0;
 		_popup_menu_active = true;
-		SndPlayFx(SND_15_BEEP);
+		//SndPlayFx(SND_15_BEEP);
 		return w;
 	}
 
@@ -873,46 +874,55 @@ public class Gui
 
 	static void ToolbarTrainClick(Window w)
 	{
-		final Vehicle v;
-		int dis = -1;
+		//final Vehicle v;
+		int [] dis = { -1 };
 
-		FOR_ALL_VEHICLES(v) {
-			if (v.type == VEH_Train && IsFrontEngine(v)) CLRBIT(dis, v.owner);
-		}
-		PopupMainPlayerToolbMenu(w, 310, 13, dis);
+		//FOR_ALL_VEHICLES(v) 
+		Vehicle.forEach( (v) ->
+		{
+			if (v.type == Vehicle.VEH_Train && v.IsFrontEngine()) 
+				dis[0] = BitOps.RETCLRBIT(dis[0], v.owner.id);
+		});
+		PopupMainPlayerToolbMenu(w, 310, 13, dis[0]);
 	}
 
 	static void ToolbarRoadClick(Window w)
 	{
-		final Vehicle v;
-		int dis = -1;
+		//final Vehicle v;
+		int [] dis = {-1};
 
-		FOR_ALL_VEHICLES(v) {
-			if (v.type == VEH_Road) CLRBIT(dis, v.owner);
-		}
-		PopupMainPlayerToolbMenu(w, 332, 14, dis);
+		//FOR_ALL_VEHICLES(v) 
+		Vehicle.forEach( (v) ->
+		{
+			if (v.type == Vehicle.VEH_Road) dis[0] = BitOps.RETCLRBIT(dis[0], v.owner.id);
+		});
+		PopupMainPlayerToolbMenu(w, 332, 14, dis[0]);
 	}
 
 	static void ToolbarShipClick(Window w)
 	{
-		final Vehicle v;
-		int dis = -1;
+		//final Vehicle v;
+		int []dis = {-1};
 
-		FOR_ALL_VEHICLES(v) {
-			if (v.type == VEH_Ship) CLRBIT(dis, v.owner);
-		}
-		PopupMainPlayerToolbMenu(w, 354, 15, dis);
+		//FOR_ALL_VEHICLES(v) 
+		Vehicle.forEach( (v) ->
+		{
+			if (v.type == Vehicle.VEH_Ship) dis[0] = BitOps.RETCLRBIT(dis[0], v.owner.id);
+		});
+		PopupMainPlayerToolbMenu(w, 354, 15, dis[0]);
 	}
 
 	static void ToolbarAirClick(Window w)
 	{
-		final Vehicle v;
-		int dis = -1;
+		//final Vehicle v;
+		int []dis = {-1};
 
-		FOR_ALL_VEHICLES(v) {
-			if (v.type == VEH_Aircraft) CLRBIT(dis, v.owner);
-		}
-		PopupMainPlayerToolbMenu(w, 376, 16, dis);
+		//FOR_ALL_VEHICLES(v) 
+		Vehicle.forEach( (v) ->
+		{
+			if (v.type == Vehicle.VEH_Aircraft) dis[0] = BitOps.RETCLRBIT(dis[0], v.owner.id);
+		});
+		PopupMainPlayerToolbMenu(w, 376, 16, dis[0]);
 	}
 
 	/* Zooms a viewport in a window in or out */
@@ -1075,11 +1085,11 @@ public class Gui
 	static void ToolbarScenDateBackward(Window w)
 	{
 		// don't allow too fast scrolling
-		if ((w.flags4 & WF_TIMEOUT_MASK) <= 2 << WF_TIMEOUT_SHL) {
+		if ((w.flags4 & Window.WF_TIMEOUT_MASK) <= 2 << Window.WF_TIMEOUT_SHL) {
 			w.HandleButtonClick(6);
 			w.InvalidateWidget(5);
 
-			if (_date > MinDate) SetDate(ConvertYMDToDay(_cur_year - 1, 0, 1));
+			if (Global._date > MinDate) SetDate(ConvertYMDToDay(Global._cur_year - 1, 0, 1));
 		}
 		_left_button_clicked = false;
 	}
@@ -1087,11 +1097,11 @@ public class Gui
 	static void ToolbarScenDateForward(Window w)
 	{
 		// don't allow too fast scrolling
-		if ((w.flags4 & WF_TIMEOUT_MASK) <= 2 << WF_TIMEOUT_SHL) {
+		if ((w.flags4 & Window.WF_TIMEOUT_MASK) <= 2 << Window.WF_TIMEOUT_SHL) {
 			w.HandleButtonClick(7);
 			w.InvalidateWidget(5);
 
-			if (_date < MaxDate) SetDate(ConvertYMDToDay(_cur_year + 1, 0, 1));
+			if (Global._date < MaxDate) SetDate(ConvertYMDToDay(Global._cur_year + 1, 0, 1));
 		}
 		_left_button_clicked = false;
 	}
@@ -1141,10 +1151,10 @@ public class Gui
 
 	static void ResetLandscape()
 	{
-		_random_seeds[0][0] = InteractiveRandom();
-		_random_seeds[0][1] = InteractiveRandom();
+		Global._random_seeds[0][0] = Hal.InteractiveRandom();
+		Global._random_seeds[0][1] = Hal.InteractiveRandom();
 
-		GenerateWorld.GenerateWorld(1, 1 << _patches.map_x, 1 << _patches.map_y);
+		GenerateWorld.GenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
 		Hal.MarkWholeScreenDirty();
 	}
 
@@ -1160,19 +1170,19 @@ public class Gui
 	// Ask first to reset landscape or to make a random landscape
 	static void AskResetLandscapeWndProc(Window w, WindowEvent e)
 	{
-		int mode = w.window_number;
+		int mode = w.window_number.n;
 
 		switch (e.event) {
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 			w.DrawWindowWidgets();
-			DrawStringMultiCenter(
+			Gfx.DrawStringMultiCenter(
 				90, 38,
-				mode ? Str.STR_022D_ARE_YOU_SURE_YOU_WANT_TO : Str.STR_GENERATE_RANDOM_LANDSCAPE,
+				mode != 0 ? Str.STR_022D_ARE_YOU_SURE_YOU_WANT_TO : Str.STR_GENERATE_RANDOM_LANDSCAPE,
 				168
 			);
 			break;
-		case WindowEvents.WE_CLICK:
-			switch (e.click.widget) {
+		case WE_CLICK:
+			switch (e.widget) {
 			case 3:
 				w.DeleteWindow();
 				break;
@@ -1182,7 +1192,7 @@ public class Gui
 				Window.DeleteWindowByClass(Window.WC_TOWN_VIEW);
 				Window.DeleteWindowByClass(Window.WC_LAND_INFO);
 
-				if (mode) { // reset landscape
+				if (mode!=0) { // reset landscape
 					ResetLandscape();
 				} else { // make random landscape
 					//SndPlayFx(SND_15_BEEP);
@@ -1204,7 +1214,7 @@ public class Gui
 
 	static void AskResetLandscape(int mode)
 	{
-		AllocateWindowDescFront(&_ask_reset_landscape_desc, mode);
+		Window.AllocateWindowDescFront(_ask_reset_landscape_desc, mode);
 	}
 
 	// TODO - Incorporate into game itself to allow for ingame raising/lowering of
@@ -1219,7 +1229,7 @@ public class Gui
 	static void CommonRaiseLowerBigLand(TileIndex tile, int mode)
 	{
 		int sizex, sizey;
-		byte h;
+		int h;
 
 		Global._error_message_2 = mode ? Str.STR_0808_CAN_T_RAISE_LAND_HERE : Str.STR_0809_CAN_T_LOWER_LAND_HERE;
 
@@ -1240,22 +1250,28 @@ public class Gui
 			if (mode != 0) {
 				/* Raise land */
 				h = 15; // XXX - max height
-				BEGIN_TILE_LOOP(tile2, sizex, sizey, tile) {
-					h = Math.min(h, TileHeight(tile2));
-				} END_TILE_LOOP(tile2, sizex, sizey, tile)
+				//BEGIN_TILE_LOOP(tile2, sizex, sizey, tile) 
+				TileIndex.forAll( sizex, sizey, tile, (tile2) ->
+				{
+					h = Math.min(h, tile2.TileHeight());
+				});// END_TILE_LOOP(tile2, sizex, sizey, tile)
 			} else {
 				/* Lower land */
 				h = 0;
-				BEGIN_TILE_LOOP(tile2, sizex, sizey, tile) {
-					h = Math.max(h, TileHeight(tile2));
-				} END_TILE_LOOP(tile2, sizex, sizey, tile)
+				//BEGIN_TILE_LOOP(tile2, sizex, sizey, tile) 
+				TileIndex.forAll( sizex, sizey, tile, (tile2) ->
+				{
+					h = Math.max(h, tile2.TileHeight());
+				}); //END_TILE_LOOP(tile2, sizex, sizey, tile)
 			}
 
-			BEGIN_TILE_LOOP(tile2, sizex, sizey, tile) {
-				if (TileHeight(tile2) == h) {
+			//BEGIN_TILE_LOOP(tile2, sizex, sizey, tile) 
+			TileIndex.forAll( sizex, sizey, tile, (tile2) ->
+			{
+				if (tile2.TileHeight() == h) {
 					DoCommandP(tile2, 8, (int)mode, null, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO);
 				}
-			} END_TILE_LOOP(tile2, sizex, sizey, tile)
+			}); //END_TILE_LOOP(tile2, sizex, sizey, tile)
 		}
 
 		Global._generating_world = false;
@@ -1278,7 +1294,7 @@ public class Gui
 
 	static void PlaceProc_LightHouse(TileIndex tile)
 	{
-		if (!tile.IsTileType(TileTypes.MP_CLEAR) || IsSteepTileh(GetTileSlope(tile, null))) {
+		if (!tile.IsTileType(TileTypes.MP_CLEAR) || IsSteepTileh(tile.GetTileSlope(null))) {
 			return;
 		}
 
@@ -1288,7 +1304,7 @@ public class Gui
 
 	static void PlaceProc_Transmitter(TileIndex tile)
 	{
-		if (!IsTileType(tile, MP_CLEAR) || IsSteepTileh(GetTileSlope(tile, null))) {
+		if (!tile.IsTileType(TileTypes.MP_CLEAR) || IsSteepTileh(tile.GetTileSlope(null))) {
 			return;
 		}
 
@@ -1342,42 +1358,42 @@ public class Gui
 	// and changed OnButtonClick to include the widget as well in the function decleration. Post 0.4.0 - Darkvater
 	static void EditorTerraformClick_Dynamite(Window w)
 	{
-		HandlePlacePushButton(w, 4, ANIMCURSOR_DEMOLISH, 1, PlaceProc_DemolishArea);
+		HandlePlacePushButton(w, 4, Sprite.ANIMCURSOR_DEMOLISH, 1, Gui::PlaceProc_DemolishArea);
 	}
 
 	static void EditorTerraformClick_LowerBigLand(Window w)
 	{
-		HandlePlacePushButton(w, 5, ANIMCURSOR_LOWERLAND, 2, PlaceProc_LowerBigLand);
+		HandlePlacePushButton(w, 5, Sprite.ANIMCURSOR_LOWERLAND, 2, Gui::PlaceProc_LowerBigLand);
 	}
 
 	static void EditorTerraformClick_RaiseBigLand(Window w)
 	{
-		HandlePlacePushButton(w, 6, ANIMCURSOR_RAISELAND, 2, PlaceProc_RaiseBigLand);
+		HandlePlacePushButton(w, 6, Sprite.ANIMCURSOR_RAISELAND, 2, Gui::PlaceProc_RaiseBigLand);
 	}
 
 	static void EditorTerraformClick_LevelLand(Window w)
 	{
-		HandlePlacePushButton(w, 7, Sprite.SPR_CURSOR_LEVEL_LAND, 2, PlaceProc_LevelLand);
+		HandlePlacePushButton(w, 7, Sprite.SPR_CURSOR_LEVEL_LAND, 2, Gui::PlaceProc_LevelLand);
 	}
 
 	static void EditorTerraformClick_WaterArea(Window w)
 	{
-		HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_CANAL, 1, PlaceProc_WaterArea);
+		HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_CANAL, 1, Gui::PlaceProc_WaterArea);
 	}
 
 	static void EditorTerraformClick_RockyArea(Window w)
 	{
-		HandlePlacePushButton(w, 9, Sprite.SPR_CURSOR_ROCKY_AREA, 1, PlaceProc_RockyArea);
+		HandlePlacePushButton(w, 9, Sprite.SPR_CURSOR_ROCKY_AREA, 1, Gui::PlaceProc_RockyArea);
 	}
 
 	static void EditorTerraformClick_DesertLightHouse(Window w)
 	{
-		HandlePlacePushButton(w, 10, Sprite.SPR_CURSOR_LIGHTHOUSE, 1, (_opt.landscape == LT_DESERT) ? PlaceProc_DesertArea : PlaceProc_LightHouse);
+		HandlePlacePushButton(w, 10, Sprite.SPR_CURSOR_LIGHTHOUSE, 1, (GameOptions._opt.landscape == Landscape.LT_DESERT) ? Gui::PlaceProc_DesertArea : Gui::PlaceProc_LightHouse);
 	}
 
 	static void EditorTerraformClick_Transmitter(Window w)
 	{
-		HandlePlacePushButton(w, 11, Sprite.SPR_CURSOR_TRANSMITTER, 1, PlaceProc_Transmitter);
+		HandlePlacePushButton(w, 11, Sprite.SPR_CURSOR_TRANSMITTER, 1, Gui::PlaceProc_Transmitter);
 	}
 
 	static final int _editor_terraform_keycodes[] = {
@@ -1764,22 +1780,22 @@ public class Gui
 		int button;
 
 		switch(e.event) {
-		case WindowEvents.WE_PAINT:
-			DrawWindowWidgets(w);
+		case WE_PAINT:
+			w.DrawWindowWidgets();
 			break;
 
-		case WindowEvents.WE_CLICK:
-			if (e.click.widget == 3) {
-				HandleButtonClick(w, 3);
+		case WE_CLICK:
+			if (e.widget == 3) {
+				w.HandleButtonClick(3);
 
 				if (!AnyTownExists()) {
 					ShowErrorMessage(Str.STR_0286_MUST_BUILD_TOWN_FIRST, Str.STR_CAN_T_GENERATE_INDUSTRIES, 0, 0);
 					return;
 				}
 
-				_generating_world = true;
+				Global._generating_world = true;
 				GenerateIndustries();
-				_generating_world = false;
+				Global._generating_world = false;
 			}
 
 			if ((button=e.click.widget) >= 4) {
@@ -1787,68 +1803,68 @@ public class Gui
 					_industry_type_to_place = _industry_type_list[_opt.landscape][button - 4];
 			}
 			break;
-		case WindowEvents.WE_PLACE_OBJ: {
+		case WE_PLACE_OBJ: {
 			int type;
 
 			// Show error if no town exists at all
 			type = _industry_type_to_place;
 			if (!AnyTownExists()) {
-				SetDParam(0, type + Str.STR_4802_COAL_MINE);
+				Global.SetDParam(0, type + Str.STR_4802_COAL_MINE);
 				ShowErrorMessage(Str.STR_0286_MUST_BUILD_TOWN_FIRST,Str.STR_0285_CAN_T_BUILD_HERE,e.place.pt.x, e.place.pt.y);
 				return;
 			}
 
-			_current_player = OWNER_NONE;
-			_generating_world = true;
-			_ignore_restrictions = true;
+			Global._current_player = OWNER_NONE;
+			Global._generating_world = true;
+			Global._ignore_restrictions = true;
 			if (!TryBuildIndustry(e.place.tile,type)) {
 				SetDParam(0, type + Str.STR_4802_COAL_MINE);
 				ShowErrorMessage(_error_message, Str.STR_0285_CAN_T_BUILD_HERE, e.place.pt.x, e.place.pt.y);
 			}
-			_ignore_restrictions = false;
-			_generating_world = false;
+			Global._ignore_restrictions = false;
+			Global._generating_world = false;
 			break;
 		}
-		case WindowEvents.WE_ABORT_PLACE_OBJ:
+		case WE_ABORT_PLACE_OBJ:
 			w.click_state = 0;
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 			break;
-		case WindowEvents.WE_TIMEOUT:
-			UnclickSomeWindowButtons(w, 1<<3);
+		case WE_TIMEOUT:
+			w.UnclickSomeWindowButtons(1<<3);
 			break;
 		}
 	}
 
 	static final WindowDesc _scenedit_industry_normal_desc = new WindowDesc(
 		-1,-1, 170, 225,
-		WC_SCEN_INDUSTRY,0,
+		Window.WC_SCEN_INDUSTRY,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_scenedit_industry_normal_widgets,
-		ScenEditIndustryWndProc,
+		Gui::ScenEditIndustryWndProc
 	);
 
 	static final WindowDesc _scenedit_industry_hilly_desc = new WindowDesc(
 		-1,-1, 170, 225,
-		WC_SCEN_INDUSTRY,0,
+		Window.WC_SCEN_INDUSTRY,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_scenedit_industry_hilly_widgets,
-		ScenEditIndustryWndProc,
+		Gui::ScenEditIndustryWndProc
 	);
 
 	static final WindowDesc _scenedit_industry_desert_desc = new WindowDesc(
 		-1,-1, 170, 225,
-		WC_SCEN_INDUSTRY,0,
+		Window.WC_SCEN_INDUSTRY,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_scenedit_industry_desert_widgets,
-		ScenEditIndustryWndProc,
+		Gui::ScenEditIndustryWndProc
 	);
 
 	static final WindowDesc _scenedit_industry_candy_desc = new WindowDesc(
 		-1,-1, 170, 225,
-		WC_SCEN_INDUSTRY,0,
+		Window.WC_SCEN_INDUSTRY,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_scenedit_industry_candy_widgets,
-		ScenEditIndustryWndProc,
+		Gui::ScenEditIndustryWndProc
 	);
 
 	static final WindowDesc _scenedit_industry_descs[] = {
@@ -1861,29 +1877,29 @@ public class Gui
 
 	static void ToolbarScenGenIndustry(Window w)
 	{
-		HandleButtonClick(w, 13);
-		SndPlayFx(SND_15_BEEP);
-		AllocateWindowDescFront(_scenedit_industry_descs[_opt.landscape],0);
+		w.HandleButtonClick(13);
+		//SndPlayFx(SND_15_BEEP);
+		AllocateWindowDescFront(_scenedit_industry_descs[GameOptions._opt.landscape],0);
 	}
 
 	static void ToolbarScenBuildRoad(Window w)
 	{
-		HandleButtonClick(w, 14);
-		SndPlayFx(SND_15_BEEP);
+		w.HandleButtonClick(14);
+		//SndPlayFx(SND_15_BEEP);
 		ShowBuildRoadScenToolbar();
 	}
 
 	static void ToolbarScenPlantTrees(Window w)
 	{
-		HandleButtonClick(w, 15);
-		SndPlayFx(SND_15_BEEP);
+		w.HandleButtonClick(15);
+		//SndPlayFx(SND_15_BEEP);
 		ShowBuildTreesScenToolbar();
 	}
 
 	static void ToolbarScenPlaceSign(Window w)
 	{
-		HandleButtonClick(w, 16);
-		SndPlayFx(SND_15_BEEP);
+		w.HandleButtonClick(16);
+		//SndPlayFx(SND_15_BEEP);
 		SelectSignTool();
 	}
 
@@ -1892,65 +1908,65 @@ public class Gui
 	}
 
 
-	typedef void ToolbarButtonProc(Window w);
+	//typedef void ToolbarButtonProc(Window w);
 
-	static ToolbarButtonProc* final _toolbar_button_procs[] = {
-		ToolbarPauseClick,
-		ToolbarFastForwardClick,
-		ToolbarOptionsClick,
-		ToolbarSaveClick,
-		ToolbarMapClick,
-		ToolbarTownClick,
-		ToolbarSubsidiesClick,
-		ToolbarStationsClick,
-		ToolbarMoneyClick,
-		ToolbarPlayersClick,
-		ToolbarGraphsClick,
-		ToolbarLeagueClick,
-		ToolbarIndustryClick,
-		ToolbarTrainClick,
-		ToolbarRoadClick,
-		ToolbarShipClick,
-		ToolbarAirClick,
-		ToolbarZoomInClick,
-		ToolbarZoomOutClick,
-		ToolbarBuildRailClick,
-		ToolbarBuildRoadClick,
-		ToolbarBuildWaterClick,
-		ToolbarBuildAirClick,
-		ToolbarForestClick,
-		ToolbarMusicClick,
-		ToolbarNewspaperClick,
-		ToolbarHelpClick,
+	static final ToolbarButtonProc  _toolbar_button_procs[] = {
+		Gui::ToolbarPauseClick,
+		Gui::ToolbarFastForwardClick,
+		Gui::ToolbarOptionsClick,
+		Gui::ToolbarSaveClick,
+		Gui::ToolbarMapClick,
+		Gui::ToolbarTownClick,
+		Gui::ToolbarSubsidiesClick,
+		Gui::ToolbarStationsClick,
+		Gui::ToolbarMoneyClick,
+		Gui::ToolbarPlayersClick,
+		Gui::ToolbarGraphsClick,
+		Gui::ToolbarLeagueClick,
+		Gui::ToolbarIndustryClick,
+		Gui::ToolbarTrainClick,
+		Gui::ToolbarRoadClick,
+		Gui::ToolbarShipClick,
+		Gui::ToolbarAirClick,
+		Gui::ToolbarZoomInClick,
+		Gui::ToolbarZoomOutClick,
+		Gui::ToolbarBuildRailClick,
+		Gui::ToolbarBuildRoadClick,
+		Gui::ToolbarBuildWaterClick,
+		Gui::ToolbarBuildAirClick,
+		Gui::ToolbarForestClick,
+		Gui::ToolbarMusicClick,
+		Gui::ToolbarNewspaperClick,
+		Gui::ToolbarHelpClick,
 	};
 
 	static void MainToolbarWndProc(Window w, WindowEvent e)
 	{
 		switch(e.event) {
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 
 			// Draw brown-red toolbar bg.
-			GfxFillRect(0, 0, w.width-1, w.height-1, 0xB2);
-			GfxFillRect(0, 0, w.width-1, w.height-1, 0xB4 | PALETTE_MODIFIER_GREYOUT);
+			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB2);
+			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB4 | PALETTE_MODIFIER_GREYOUT);
 
 			// if spectator, disable things
-			if (_current_player == OWNER_SPECTATOR){
+			if (Global._current_player == Owner.OWNER_SPECTATOR){
 				w.disabled_state |= (1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23);
 			} else {
 				w.disabled_state &= ~((1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23));
 			}
 
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 			break;
 		}
 
-		case WindowEvents.WE_CLICK: {
-			if (_game_mode != GameModes.GM_MENU && !HASBIT(w.disabled_state, e.click.widget))
+		case WE_CLICK: {
+			if (_game_mode != GameModes.GM_MENU && !BitOps.HASBIT(w.disabled_state, e.click.widget))
 				_toolbar_button_procs[e.click.widget](w);
 		} break;
 
 		case WindowEvents.WE_KEYPRESS: {
-			PlayerID local = (_local_player != OWNER_SPECTATOR) ? _local_player : 0;
+			PlayerID local = (Global._local_player != Owner.OWNER_SPECTATOR) ? _local_player : 0;
 
 			switch (e.keypress.keycode) {
 			case WKC_F1: case WKC_PAUSE:
@@ -1989,18 +2005,18 @@ public class Gui
 			e.keypress.cont = false;
 		} break;
 
-		case WindowEvents.WE_PLACE_OBJ: {
-			_place_proc(e.place.tile);
+		case WE_PLACE_OBJ: {
+			Global._place_proc(e.place.tile);
 		} break;
 
-		case WindowEvents.WE_ABORT_PLACE_OBJ: {
+		case WE_ABORT_PLACE_OBJ: {
 			w.click_state &= ~(1<<25);
 			SetWindowDirty(w);
 		} break;
 
-		case WindowEvents.WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
+		case WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
 
-		case WindowEvents.WE_MOUSELOOP:
+		case WE_MOUSELOOP:
 			if (((w.click_state) & 1) != (int)!!_pause) {
 				w.click_state ^= (1 << 0);
 				SetWindowDirty(w);
@@ -2008,12 +2024,12 @@ public class Gui
 
 			if (((w.click_state >> 1) & 1) != (int)!!_fast_forward) {
 				w.click_state ^= (1 << 1);
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 			}
 			break;
 
-		case WindowEvents.WE_TIMEOUT:
-			UnclickSomeWindowButtons(w, ~(1<<0 | 1<<1));
+		case WE_TIMEOUT:
+			w.UnclickSomeWindowButtons(~(1<<0 | 1<<1));
 			break;
 		}
 	}
@@ -2293,10 +2309,10 @@ public class Gui
 				DrawStringCentered(320, 1,	Str.STR_032F_AUTOSAVE, 0);
 			} else if (_pause) {
 				DrawStringCentered(320, 1,	Str.STR_0319_PAUSED, 0);
-			} else if (WP(w,def_d).data_1 > -1280 && FindWindowById(WC_NEWS_WINDOW,0) == null && _statusbar_news_item.string_id != 0) {
+			} else if (w.as_def_d().data_1 > -1280 && FindWindowById(WC_NEWS_WINDOW,0) == null && _statusbar_news_item.string_id != 0) {
 				// Draw the scrolling news text
-				if (!DrawScrollingStatusText(&_statusbar_news_item, WP(w,def_d).data_1))
-					WP(w,def_d).data_1 = -1280;
+				if (!DrawScrollingStatusText(&_statusbar_news_item, w.as_def_d().data_1))
+					w.as_def_d().data_1 = -1280;
 			} else {
 				if (p != null) {
 					// This is the default text
@@ -2363,8 +2379,8 @@ public class Gui
 		int off_x;
 
 		switch(e.event) {
-		case WindowEvents.WE_PAINT:
-			DrawWindowViewport(w);
+		case WE_PAINT:
+			ViewPort.DrawWindowViewport(w);
 			if (_game_mode == GameModes.GM_MENU) {
 				off_x = _screen.width / 2;
 
@@ -2397,7 +2413,7 @@ public class Gui
 			}
 			break;
 
-		case WindowEvents.WE_KEYPRESS:
+		case WE_KEYPRESS:
 			if (e.keypress.keycode == WKC_BACKQUOTE) {
 				IConsoleSwitch();
 				e.keypress.cont = false;
@@ -2411,7 +2427,7 @@ public class Gui
 					break;
 			}
 
-			if (_game_mode == GameModes.GM_MENU) break;
+			if (Global._game_mode == GameModes.GM_MENU) break;
 
 			switch (e.keypress.keycode) {
 				case 'C':
@@ -2425,31 +2441,31 @@ public class Gui
 				}
 
 				case WKC_ESC: ResetObjectToPlace(); break;
-				case WKC_DELETE: DeleteNonVitalWindows(); break;
-				case WKC_DELETE | WKC_SHIFT: DeleteAllNonVitalWindows(); break;
-				case 'R' | WKC_CTRL: MarkWholeScreenDirty(); break;
+				case WKC_DELETE: Window.DeleteNonVitalWindows(); break;
+				case WKC_DELETE | WKC_SHIFT: Window.DeleteAllNonVitalWindows(); break;
+				case 'R' | WKC_CTRL: Hal.MarkWholeScreenDirty(); break;
 
-	#if defined(_DEBUG)
-				case '0' | WKC_ALT: /* Crash the game */
+	/*#if defined(_DEBUG)
+				case '0' | WKC_ALT: // Crash the game 
 					*(byte*)0 = 0;
 					break;
 
-				case '1' | WKC_ALT: /* Gimme money */
-					/* Server can not cheat in advertise mode either! */
-	/*#ifdef ENABLE_NETWORK
-					if (!_networking || !_network_server || !_network_advertise)
-	#endif */
+				case '1' | WKC_ALT: // Gimme money 
+					/* Server can not cheat in advertise mode either! 
+	//#ifdef ENABLE_NETWORK
+	//				if (!_networking || !_network_server || !_network_advertise)
+	//#endif 
 						DoCommandP(0, -10000000, 0, null, Cmd.CMD_MONEY_CHEAT);
 					break;
 
-				case '2' | WKC_ALT: /* Update the coordinates of all station signs */
+				case '2' | WKC_ALT: // Update the coordinates of all station signs 
 					UpdateAllStationVirtCoord();
 					break;
-	#endif
+	#endif */
 
 				case 'X':
-					_display_opt ^= DO_TRANS_BUILDINGS;
-					MarkWholeScreenDirty();
+					Global._display_opt ^= DO_TRANS_BUILDINGS;
+					Hal.MarkWholeScreenDirty();
 					break;
 
 	/*#ifdef ENABLE_NETWORK
@@ -2522,32 +2538,32 @@ public class Gui
 	{
 		Window w;
 
-		w = AllocateWindowDesc(_toolb_normal_desc);
+		w = Window.AllocateWindowDesc(_toolb_normal_desc,0);
 		w.disabled_state = 1 << 17; // disable zoom-in button (by default game is zoomed in)
-		CLRBITS(w.flags4, WF_WHITE_BORDER_MASK);
+		w.flags4 = BitOps.RETCLRBITS(w.flags4, Window.WF_WHITE_BORDER_MASK);
 
-		if (_networking) { // if networking, disable fast-forward button
-			SETBIT(w.disabled_state, 1);
-			if (!_network_server) // if not server, disable pause button
-				SETBIT(w.disabled_state, 0);
+		if (Global._networking) { // if networking, disable fast-forward button
+			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 1);
+			if (!Global._network_server) // if not server, disable pause button
+				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 0);
 		}
 
-		PositionMainToolbar(w); // already WC_MAIN_TOOLBAR passed (&_toolb_normal_desc)
+		w.PositionMainToolbar(w); // already WC_MAIN_TOOLBAR passed (&_toolb_normal_desc)
 
-		_main_status_desc.top = _screen.height - 12;
-		w = AllocateWindowDesc(&_main_status_desc);
-		CLRBITS(w.flags4, WF_WHITE_BORDER_MASK);
+		_main_status_desc.top = Hal._screen.height - 12;
+		w = Window.AllocateWindowDesc(_main_status_desc,0);
+		w.flags4 = BitOps.RETCLRBITS(w.flags4, Window.WF_WHITE_BORDER_MASK);
 
-		WP(w,def_d).data_1 = -1280;
+		w.as_def_d().data_1 = -1280;
 	}
 
 	void GameSizeChanged()
 	{
-		_cur_resolution[0] = _screen.width;
-		_cur_resolution[1] = _screen.height;
-		RelocateAllWindows(_screen.width, _screen.height);
+		Global._cur_resolution[0] = _screen.width;
+		Global._cur_resolution[1] = _screen.height;
+		Window.RelocateAllWindows(_screen.width, _screen.height);
 		ScreenSizeChanged();
-		MarkWholeScreenDirty();
+		Hal.MarkWholeScreenDirty();
 	}
 	
 
@@ -2560,4 +2576,8 @@ interface MenuClickedProc extends Consumer<Integer> {}
 
 @FunctionalInterface
 interface OnButtonClick extends Consumer<Window> {} 
+
+@FunctionalInterface
+interface ToolbarButtonProc extends Consumer<Window> {} 
+
 

@@ -526,12 +526,16 @@ public class Window extends WindowConstants
 
 	static void DeleteWindowByClass(WindowClass cls)
 	{
+		DeleteWindowByClass(cls.v);
+	}
+	static void DeleteWindowByClass(int cls)
+	{
 
 		for(int i = 0; i < _windows.size();) 
 		{
 			Window w = _windows.get(i);
 
-			if (w.window_class == cls) {
+			if (w.window_class.v == cls) {
 				w.DeleteWindow();
 				i = 0;
 			} else {
@@ -994,7 +998,7 @@ public class Window extends WindowConstants
 	 * @param value win number?
 	 * @return
 	 */
-	Window AllocateWindowDescFront(final WindowDesc desc, int value)
+	static Window AllocateWindowDescFront(final WindowDesc desc, int value)
 	{
 		Window w;
 
@@ -2327,7 +2331,7 @@ public class Window extends WindowConstants
 	private void drawOneWidget(Widget wi, int cur_click, int cur_disabled, int cur_hidden)
 	{
 		final DrawPixelInfo dpi = Hal._cur_dpi;
-		Rect r;
+		Rect r = new Rect();
 
 		boolean clicked = 0 != (cur_click & 1);
 		boolean disabled = 0 != (cur_disabled & 1);
@@ -2339,7 +2343,7 @@ public class Window extends WindowConstants
 				dpi.top > (r.bottom=/*w.top +*/ wi.bottom) ||
 				dpi.top + dpi.height <= (r.top = /*w.top +*/ wi.top) ||
 				(0 != (cur_hidden & 1))) {
-			continue;
+			return; // TODO check continue;
 		}
 
 		switch (wi.type & WWT_MASK) {
@@ -2364,7 +2368,7 @@ public class Window extends WindowConstants
 
 		case WWT_TEXTBTN: /* WWT_TEXTBTN */
 		case WWT_4: {
-			DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
+			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
 		}
 		/* fall through */
 
@@ -2514,13 +2518,13 @@ public class Window extends WindowConstants
 
 			assert(r.bottom - r.top == 11); // XXX - to ensure the same sizes are used everywhere!
 
-			clicked = !!((w.flags4 & (WF_SCROLL_UP | WF_HSCROLL)) == (WF_SCROLL_UP | WF_HSCROLL));
-			DrawFrameRect(r.left, r.top, r.left + 9, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
-			DrawSprite(Sprite.SPR_ARROW_LEFT, r.left + 1 + (clicked ? 1 : 0), r.top + 1 + (clicked ? 1 : 0));
+			clicked = !!((flags4 & (WF_SCROLL_UP | WF_HSCROLL)) == (WF_SCROLL_UP | WF_HSCROLL));
+			Gfx.DrawFrameRect(r.left, r.top, r.left + 9, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
+			Gfx.DrawSprite(Sprite.SPR_ARROW_LEFT, r.left + 1 + (clicked ? 1 : 0), r.top + 1 + (clicked ? 1 : 0));
 
-			clicked = !!((w.flags4 & (WF_SCROLL_DOWN | WF_HSCROLL)) == (WF_SCROLL_DOWN | WF_HSCROLL));
-			DrawFrameRect(r.right-9, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
-			DrawSprite(Sprite.SPR_ARROW_RIGHT, r.right - 8 + (clicked ? 1 : 0), r.top + 1 + (clicked ? 1 : 0));
+			clicked = !!((flags4 & (WF_SCROLL_DOWN | WF_HSCROLL)) == (WF_SCROLL_DOWN | WF_HSCROLL));
+			Gfx.DrawFrameRect(r.right-9, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
+			Gfx.DrawSprite(Sprite.SPR_ARROW_RIGHT, r.right - 8 + (clicked ? 1 : 0), r.top + 1 + (clicked ? 1 : 0));
 
 			c1 = Global._color_list[wi.color&0xF].window_color_1a;
 			c2 = Global._color_list[wi.color&0xF].window_color_2;
@@ -2536,8 +2540,8 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+10, r.top+8, r.right-10, r.top+8, c2);
 
 			// draw actual scrollbar
-			pt = HandleScrollbarHittest(w.hscroll, r.left, r.right);
-			DrawFrameRect(pt.x, r.top, pt.y, r.bottom, wi.color, (w.flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL)) == (WF_SCROLL_MIDDLE | WF_HSCROLL) ? FR_LOWERED : 0);
+			pt = HandleScrollbarHittest(hscroll, r.left, r.right);
+			Gfx.DrawFrameRect(pt.x, r.top, pt.y, r.bottom, wi.color, (flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL)) == (WF_SCROLL_MIDDLE | WF_HSCROLL) ? FR_LOWERED : 0);
 
 			break;
 		}
@@ -2661,7 +2665,7 @@ public class Window extends WindowConstants
 			return - 1;
 
 		item = (byte) (y / 10);
-		if (item >= w.as_dropdown_d().num_items || (BitOps.HASBIT(w.as_dropdown_d().disabled_state, item) && !BitOps.HASBIT(w.as_dropdown_d().hidden_state, item)) || w.as_dropdown_d().items[item] == 0)
+		if (item >= w.as_dropdown_d().num_items || (BitOps.HASBIT(w.as_dropdown_d().disabled_state, item) && !BitOps.HASBIT(w.as_dropdown_d().hidden_state, item)) || w.as_dropdown_d().items[item].id == 0)
 			return - 1;
 
 		// Skip hidden items -- +1 for each hidden item before the clicked item.
@@ -2796,17 +2800,22 @@ public class Window extends WindowConstants
 			}
 		}
 
+		final Widget wi_prev = w.widget.get(button-1);
+		
 		w2 = AllocateWindow(
-				w.left + wi[-1].left + 1,
+//				w.left + wi[-1].left + 1,
+				w.left + wi_prev.left + 1,
 				w.top + wi.bottom + 2,
-				wi.right - wi[-1].left + 1,
+//				wi.right - wi[-1].left + 1,
+				wi.right - wi_prev.left + 1,
 				i * 10 + 4,
 				Window::DropdownMenuWndProc,
 				0x3F,
 				_dropdown_menu_widgets);
 
 		w2.widget.get(0).color = wi.color;
-		w2.widget.get(0).right = wi.right - wi[-1].left;
+//		w2.widget.get(0).right = wi.right - wi[-1].left;
+		w2.widget.get(0).right = wi.right - wi_prev.left;
 		w2.widget.get(0).bottom = i * 10 + 3;
 
 		w2.flags4 &= ~WF_WHITE_BORDER_MASK;

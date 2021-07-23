@@ -2,6 +2,7 @@ package game;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import game.util.Paths;
 import game.util.Prices;
@@ -20,6 +21,7 @@ public class Global {
 
 	public static Economy _economy = new Economy();
 
+	public static Consumer<TileIndex> _place_proc;
 	
 	/* Display Options */
 	//enum {
@@ -83,6 +85,7 @@ public class Global {
 	public static int _map_tile_mask;
 	public static int _map_size;
 
+	public static int [][] _random_seeds = new int[2][2];
 
 	public static ColorList [] _color_list = new ColorList[16];
 	

@@ -22,7 +22,7 @@ public abstract class Hal
 	//HalVideoDriver _video_driver;
 
 
-	void SetDirtyBlocks(int left, int top, int right, int bottom)
+	static void SetDirtyBlocks(int left, int top, int right, int bottom)
 	{
 		byte b[];
 		int width;
@@ -60,7 +60,7 @@ public abstract class Hal
 	}
 
 
-	void MarkWholeScreenDirty()
+	static void MarkWholeScreenDirty()
 	{
 		SetDirtyBlocks(0, 0, _screen.width, _screen.height);
 	}

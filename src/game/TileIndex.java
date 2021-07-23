@@ -8,6 +8,10 @@ public class TileIndex {
 	protected int tile;
 
 
+	public static void forAll( int w, int h, TileIndex tile, Consumer<TileIndex> c )
+	{
+		forAll( w, h, tile.getTile(), c );		
+	}	
 	/**
 	 * Iterate over a tiles rectangle.
 	 * 

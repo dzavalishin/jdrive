@@ -18,9 +18,9 @@ public class Terraform {
 	static void GenericRaiseLowerLand(TileIndex tile, int mode)
 	{
 		if (mode!=0) {
-			DoCommandP(tile, 8, (int)mode, CcTerraform, CMD_TERRAFORM_LAND | CMD_AUTO | CMD_MSG(STR_0808_CAN_T_RAISE_LAND_HERE));
+			DoCommandP(tile, 8, (int)mode, CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0808_CAN_T_RAISE_LAND_HERE));
 		} else {
-			DoCommandP(tile, 8, (int)mode, CcTerraform, CMD_TERRAFORM_LAND | CMD_AUTO | CMD_MSG(STR_0809_CAN_T_LOWER_LAND_HERE));
+			DoCommandP(tile, 8, (int)mode, CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0809_CAN_T_LOWER_LAND_HERE));
 		}
 	}
 
@@ -40,15 +40,17 @@ public class Terraform {
 		size_x = (ex - sx) + 1;
 		size_y = (ey - sy) + 1;
 
-		_generating_world = true;
-		BEGIN_TILE_LOOP(tile, size_x, size_y, TileXY(sx, sy)) {
-			if (GetTileType(tile) != MP_WATER) {
+		Global._generating_world = true;
+		//BEGIN_TILE_LOOP(tile, size_x, size_y, TileXY(sx, sy)) 
+		TileIndex.forAll( size_x, size_y, TileIndex.TileXY(sx, sy), (tile) ->
+		{
+			if (tile.GetTileType() != TileTypes.MP_WATER) {
 				SetMapExtraBits(tile, (_ctrl_pressed) ? 0 : 1);
-				DoCommandP(tile, 0, 0, null, CMD_LANDSCAPE_CLEAR);
-				MarkTileDirtyByTile(tile);
+				DoCommandP(tile, 0, 0, null, Cmd.CMD_LANDSCAPE_CLEAR);
+				tile.MarkTileDirtyByTile();
 			}
-		} END_TILE_LOOP(tile, size_x, size_y, 0);
-		_generating_world = false;
+		}); //END_TILE_LOOP(tile, size_x, size_y, 0);
+		Global._generating_world = false;
 	}
 
 	/** Scenario editor command that generates desert areas */
@@ -68,12 +70,14 @@ public class Terraform {
 		size_x = (ex - sx) + 1;
 		size_y = (ey - sy) + 1;
 
-		BEGIN_TILE_LOOP(tile, size_x, size_y, TileXY(sx, sy)) {
-			if (IsTileType(tile, MP_CLEAR) || IsTileType(tile, MP_TREES)) {
-				ModifyTile(tile, MP_SETTYPE(MP_CLEAR) | MP_MAP5, (_m[tile].m5 & ~0x1C) | 0xB);
+		//BEGIN_TILE_LOOP(tile, size_x, size_y, TileXY(sx, sy)) 
+		TileIndex.forAll( size_x, size_y, TileIndex.TileXY(sx, sy), (tile) ->
+		{
+			if (tile.IsTileType(TileTypes.MP_CLEAR) || tile.IsTileType( TileTypes.MP_TREES)) {
+				TileIndex.ModifyTile(tile.getTile(),TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) | TileTypes.MP_MAP5, (tile.getMap().m5 & ~0x1C) | 0xB);
 				success = true;
 			}
-		} END_TILE_LOOP(tile, size_x, size_y, 0);
+		}); // END_TILE_LOOP(tile, size_x, size_y, 0);
 
 		// TODO if (success) SndPlayTileFx(SND_1F_SPLAT, end);
 	}
@@ -93,10 +97,10 @@ public class Terraform {
 
 		switch (we.userdata >> 4) {
 		case GUI_PlaceProc_DemolishArea >> 4:
-			DoCommandP(end_tile, start_tile, 0, CcPlaySound10, CMD_CLEAR_AREA | CMD_MSG(STR_00B5_CAN_T_CLEAR_THIS_AREA));
+			DoCommandP(end_tile, start_tile, 0, CcPlaySound10, Cmd.CMD_CLEAR_AREA | Cmd_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
 			break;
 		case GUI_PlaceProc_LevelArea >> 4:
-			DoCommandP(end_tile, start_tile, 0, CcPlaySound10, CMD_LEVEL_LAND | CMD_AUTO);
+			DoCommandP(end_tile, start_tile, 0, CcPlaySound10, Cmd.CMD_LEVEL_LAND | Cmd_AUTO);
 			break;
 		case GUI_PlaceProc_RockyArea >> 4:
 			GenerateRockyArea(end_tile, start_tile);
@@ -105,7 +109,7 @@ public class Terraform {
 			GenerateDesertArea(end_tile, start_tile);
 			break;
 		case GUI_PlaceProc_WaterArea >> 4:
-			DoCommandP(end_tile, start_tile, 0, CcBuildCanal, CMD_BUILD_CANAL | CMD_AUTO | CMD_MSG(STR_CANT_BUILD_CANALS));
+			DoCommandP(end_tile, start_tile, 0, CcBuildCanal, Cmd.CMD_BUILD_CANAL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_CANT_BUILD_CANALS));
 			break;
 		default: return false;
 		}
@@ -149,37 +153,37 @@ public class Terraform {
 
 	static void TerraformClick_Lower(Window w)
 	{
-		HandlePlacePushButton(w, 4, ANIMCURSOR_LOWERLAND, 2, PlaceProc_LowerLand);
+		HandlePlacePushButton(w, 4, Sprite.ANIMCURSOR_LOWERLAND, 2, PlaceProc_LowerLand);
 	}
 
 	static void TerraformClick_Raise(Window w)
 	{
-		HandlePlacePushButton(w, 5, ANIMCURSOR_RAISELAND, 2, PlaceProc_RaiseLand);
+		HandlePlacePushButton(w, 5, Sprite.ANIMCURSOR_RAISELAND, 2, PlaceProc_RaiseLand);
 	}
 
 	static void TerraformClick_Level(Window w)
 	{
-		HandlePlacePushButton(w, 6, SPR_CURSOR_LEVEL_LAND, 2, PlaceProc_LevelLand);
+		HandlePlacePushButton(w, 6, Sprite.SPR_CURSOR_LEVEL_LAND, 2, PlaceProc_LevelLand);
 	}
 
 	static void TerraformClick_Dynamite(Window w)
 	{
-		HandlePlacePushButton(w, 7, ANIMCURSOR_DEMOLISH , 1, PlaceProc_DemolishArea);
+		HandlePlacePushButton(w, 7, Sprite.ANIMCURSOR_DEMOLISH , 1, PlaceProc_DemolishArea);
 	}
 
 	static void TerraformClick_BuyLand(Window w)
 	{
-		HandlePlacePushButton(w, 8, SPR_CURSOR_BUY_LAND, 1, PlaceProc_BuyLand);
+		HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_BUY_LAND, 1, PlaceProc_BuyLand);
 	}
 
 	static void TerraformClick_Trees(Window w)
 	{
-		if (HandlePlacePushButton(w, 9, SPR_CURSOR_MOUSE, 1, PlaceProc_PlantTree)) ShowBuildTreesToolbar();
+		if (HandlePlacePushButton(w, 9, Sprite.SPR_CURSOR_MOUSE, 1, PlaceProc_PlantTree)) ShowBuildTreesToolbar();
 	}
 
 	static void TerraformClick_PlaceSign(Window w)
 	{
-		HandlePlacePushButton(w, 10, SPR_CURSOR_SIGN, 1, PlaceProc_Sign);
+		HandlePlacePushButton(w, 10, Sprite.SPR_CURSOR_SIGN, 1, PlaceProc_Sign);
 	}
 
 	static final Consumer <Window>  _terraform_button_proc[] = {
@@ -196,20 +200,20 @@ public class Terraform {
 	{
 		switch(e.event) {
 		case WE_PAINT:
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 			break;
 
 		case WE_CLICK:
-			if (e.widget >= 4) _terraform_button_proc[e.click.widget - 4](w);
+			if (e.widget >= 4) _terraform_button_proc[e.widget - 4](w);
 			break;
 
 		case WE_KEYPRESS: {
-			uint i;
+			int i;
 
 			for (i = 0; i != _terraform_keycodes.length; i++) {
 				if (e.keycode == _terraform_keycodes[i]) {
 					e.cont = false;
-					_terraform_button_proc[i](w);
+					_terraform_button_proc[i].accept(w);
 					break;
 				}
 			}
@@ -217,28 +221,28 @@ public class Terraform {
 		}
 
 		case WE_PLACE_OBJ:
-			_place_proc(e.tile);
+			Global._place_proc.accept(e.tile);
 			return;
 
 		case WE_PLACE_DRAG:
-			VpSelectTilesWithMethod(e.place.pt.x, e.place.pt.y, e.place.userdata & 0xF);
+			VpSelectTilesWithMethod(e.pt.x, e.pt.y, e.userdata & 0xF);
 			break;
 
 		case WE_PLACE_MOUSEUP:
-			if (e.click.pt.x != -1) {
-				if ((e.place.userdata & 0xF) == VPM_X_AND_Y) // dragged actions
+			if (e.pt.x != -1) {
+				if ((e.userdata & 0xF) == VPM_X_AND_Y) // dragged actions
 					GUIPlaceProcDragXY(e);
 			}
 			break;
 
 		case WE_ABORT_PLACE_OBJ:
 			w.UnclickWindowButtons();
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 
-			w = FindWindowById(WC_BUILD_STATION, 0);
-			if (w != null) WP(w,def_d).close=true;
-			w = FindWindowById(WC_BUILD_DEPOT, 0);
-			if (w != null) WP(w,def_d).close=true;
+			w = Window.FindWindowById(Window.WC_BUILD_STATION, 0);
+			if (w != null) w.as_def_d().close=true;
+			w = Window.FindWindowById(Window.WC_BUILD_DEPOT, 0);
+			if (w != null) w.as_def_d().close=true;
 			break;
 
 		case WE_PLACE_PRESIZE: {
@@ -247,20 +251,20 @@ public class Terraform {
 	}
 
 	static final Widget _terraform_widgets[] = {
-	new Widget(  WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,   0,  10,   0,  13, STR_00C5,                STR_018B_CLOSE_WINDOW),
-	new Widget(   WWT_CAPTION,   Window.RESIZE_NONE,     7,  11, 145,   0,  13, STR_LANDSCAPING_TOOLBAR, STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget( WWT_STICKYBOX,   Window.RESIZE_NONE,     7, 146, 157,   0,  13, STR_NULL,                STR_STICKY_BUTTON),
+	new Widget(  Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,   0,  10,   0,  13, Str.STR_00C5,                Str.STR_018B_CLOSE_WINDOW),
+	new Widget(   Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,  11, 145,   0,  13, Str.STR_LANDSCAPING_TOOLBAR, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget( Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7, 146, 157,   0,  13, Str.STR_NULL,                Str.STR_STICKY_BUTTON),
 
-	new Widget(     WWT_PANEL,   Window.RESIZE_NONE,     7,  66,  69,  14,  35, STR_NULL,                STR_NULL),
-	new Widget(     WWT_PANEL,   Window.RESIZE_NONE,     7,   0,  21,  14,  35, SPR_IMG_TERRAFORM_DOWN,  STR_018E_LOWER_A_CORNER_OF_LAND),
-	new Widget(     WWT_PANEL,   Window.RESIZE_NONE,     7,  22,  43,  14,  35, SPR_IMG_TERRAFORM_UP,    STR_018F_RAISE_A_CORNER_OF_LAND),
-	new Widget(     WWT_PANEL,   Window.RESIZE_NONE,     7,  44,  65,  14,  35, SPR_IMG_LEVEL_LAND,      STR_LEVEL_LAND_TOOLTIP),
-	new Widget(     WWT_PANEL,   Window.RESIZE_NONE,     7,  70,  91,  14,  35, SPR_IMG_DYNAMITE,        STR_018D_DEMOLISH_BUILDINGS_ETC),
-	new Widget(     WWT_PANEL,   Window.RESIZE_NONE,     7,  92, 113,  14,  35, SPR_IMG_BUY_LAND,        STR_0329_PURCHASE_LAND_FOR_FUTURE),
-	new Widget(     WWT_PANEL,   Window.RESIZE_NONE,     7, 114, 135,  14,  35, SPR_IMG_PLANTTREES,      STR_0185_PLANT_TREES_PLACE_SIGNS),
-	new Widget(     WWT_PANEL,   Window.RESIZE_NONE,     7, 136, 157,  14,  35, SPR_IMG_PLACE_SIGN,      STR_0289_PLACE_SIGN),
+	new Widget(     Window.WWT_PANEL,   Window.RESIZE_NONE,     7,  66,  69,  14,  35, Str.STR_NULL,                Str.STR_NULL),
+	new Widget(     Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   0,  21,  14,  35, Sprite.SPR_IMG_TERRAFORM_DOWN,  Str.STR_018E_LOWER_A_CORNER_OF_LAND),
+	new Widget(     Window.WWT_PANEL,   Window.RESIZE_NONE,     7,  22,  43,  14,  35, Sprite.SPR_IMG_TERRAFORM_UP,    Str.STR_018F_RAISE_A_CORNER_OF_LAND),
+	new Widget(     Window.WWT_PANEL,   Window.RESIZE_NONE,     7,  44,  65,  14,  35, Sprite.SPR_IMG_LEVEL_LAND,      Str.STR_LEVEL_LAND_TOOLTIP),
+	new Widget(     Window.WWT_PANEL,   Window.RESIZE_NONE,     7,  70,  91,  14,  35, Sprite.SPR_IMG_DYNAMITE,        Str.STR_018D_DEMOLISH_BUILDINGS_ETC),
+	new Widget(     Window.WWT_PANEL,   Window.RESIZE_NONE,     7,  92, 113,  14,  35, Sprite.SPR_IMG_BUY_LAND,        Str.STR_0329_PURCHASE_LAND_FOR_FUTURE),
+	new Widget(     Window.WWT_PANEL,   Window.RESIZE_NONE,     7, 114, 135,  14,  35, Sprite.SPR_IMG_PLANTTREES,      Str.STR_0185_PLANT_TREES_PLACE_SIGNS),
+	new Widget(     Window.WWT_PANEL,   Window.RESIZE_NONE,     7, 136, 157,  14,  35, Sprite.SPR_IMG_PLACE_SIGN,      Str.STR_0289_PLACE_SIGN),
 
-	new Widget(    WIDGETS_END),
+	//new Widget(    WIDGETS_END),
 	};
 
 	static final WindowDesc _terraform_desc = new WindowDesc(
@@ -277,7 +281,7 @@ public class Terraform {
 	void ShowTerraformToolbar()
 	{
 		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
-		AllocateWindowDescFront(_terraform_desc, 0);
+		Window.AllocateWindowDescFront(_terraform_desc, 0);
 	}
 	
 	

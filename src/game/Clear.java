@@ -358,7 +358,9 @@ public class Clear {
 		money = GetAvailableMoneyForCommand();
 		cost = 0;
 
-		BEGIN_TILE_LOOP(tile2, size_x, size_y, tile) {
+		//BEGIN_TILE_LOOP(tile2, size_x, size_y, tile) 
+		TileIndex.forAll( sizex, sizey, tile, (tile2) ->
+		{
 			curh = TileHeight(tile2);
 			while (curh != h) {
 				ret = DoCommandByTile(tile2, 8, (curh > h) ? 0 : 1, flags & ~Cmd.DC_EXEC, Cmd.CMD_TERRAFORM_LAND);
@@ -375,7 +377,7 @@ public class Clear {
 
 				curh += (curh > h) ? -1 : 1;
 			}
-		} END_TILE_LOOP(tile2, size_x, size_y, tile)
+		}); //END_TILE_LOOP(tile2, size_x, size_y, tile)
 
 		return (cost == 0) ? Cmd.CMD_ERROR : cost;
 	}

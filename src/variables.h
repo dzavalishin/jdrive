@@ -63,7 +63,7 @@ VARDEF uint16 _disaster_delay;
 //  tick handler. In Station class
 //VARDEF uint16 _station_tick_ctr;
 
-VARDEF uint32 _random_seeds[2][2];
+//VARDEF uint32 _random_seeds[2][2];
 
 // Iterator through all towns in OnTick_Town
 VARDEF uint32 _cur_town_ctr;

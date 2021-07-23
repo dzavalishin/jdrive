@@ -75,8 +75,8 @@ public class ViewPort {
 		return p;
 	}
 
-	void AssignWindowViewport(Window w, int x, int y,
-		int width, int height, int follow_flags, byte zoom)
+	static void AssignWindowViewport(Window w, int x, int y,
+		int width, int height, int follow_flags, int zoom)
 	{
 		ViewPort vp;
 		Point pt;
@@ -1281,7 +1281,7 @@ public class ViewPort {
 		ViewportDrawChk(vp, left, top, right, bottom);
 	}
 
-	void DrawWindowViewport(Window w)
+	static void DrawWindowViewport(Window w)
 	{
 		DrawPixelInfo dpi = Hal._cur_dpi;
 

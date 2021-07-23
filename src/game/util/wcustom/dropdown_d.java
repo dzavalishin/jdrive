@@ -9,10 +9,10 @@ public class dropdown_d extends AbstractWinCustom  {
 	public int hidden_state;
 	public WindowClass parent_wnd_class;
 	public WindowNumber parent_wnd_num;
-	public byte parent_button;
-	public byte num_items;
-	public byte selected_index;
+	public int parent_button;
+	public int num_items;
+	public int selected_index;
 	public StringID items[];
-	public byte click_delay;
+	public int click_delay;
 	public boolean drag_mode;
 } ;
