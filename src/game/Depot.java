@@ -1,5 +1,7 @@
 package game;
 
+import java.util.function.Consumer;
+
 import game.util.BitOps;
 
 public class Depot implements IPoolItem
@@ -70,7 +72,7 @@ public class Depot implements IPoolItem
 	/**
 	 * Check if a depot really exists.
 	 */
-	private boolean IsValidDepot()
+	public boolean IsValidDepot()
 	{
 		return (xy != null) && (xy.getTile() != 0); /* XXX: Replace by INVALID_TILE someday */
 	}
@@ -244,7 +246,12 @@ public class Depot implements IPoolItem
 		DeleteDestinationFromVehicleOrder(order);
 
 		/* Delete the depot-window */
-		Window.DeleteWindowById(Window.WC_VEHICLE_DEPOT, tile);
+		Window.DeleteWindowById(Window.WC_VEHICLE_DEPOT, tile.tile);
+	}
+
+	public static void forEach( Consumer<Depot> c ) {
+		_depot_pool.forEach(c);
+		
 	}
 
 	static void InitializeDepot()
@@ -253,7 +260,7 @@ public class Depot implements IPoolItem
 		_depot_pool.AddBlockToPool();
 	}
 
-
+	/*
 	static final SaveLoad _depot_desc[] = {
 		SLE_CONDVAR(Depot, xy,			SLE_FILE_U16 | SLE_VAR_U32, 0, 5),
 		SLE_CONDVAR(Depot, xy,			SLE_UINT32, 6, 255),
@@ -292,6 +299,9 @@ public class Depot implements IPoolItem
 	staic final ChunkHandler _depot_chunk_handlers[] = {
 		{ 'DEPT', Save_DEPT, Load_DEPT, CH_ARRAY | CH_LAST},
 	};
+	*/
 	
-	
+
 }
+
+

@@ -37,7 +37,7 @@ public class Vehicle implements IPoolItem
 	int x_pos;			// coordinates
 	int y_pos;
 	int z_pos;		// Was byte, changed for aircraft queueing
-	byte direction;		// facing
+	int direction;		// facing
 
 	byte spritenum; // currently displayed sprite index
 	// 0xfd == custom sprite, 0xfe == custom second head sprite
@@ -2671,20 +2671,20 @@ public class Vehicle implements IPoolItem
 
 	static Rect _old_vehicle_coords;
 
-	private static void BeginVehicleMove(Vehicle v) {
-		_old_vehicle_coords.left = v.left_coord;
-		_old_vehicle_coords.top = v.top_coord;
-		_old_vehicle_coords.right = v.right_coord;
-		_old_vehicle_coords.bottom = v.bottom_coord;
+	public void BeginVehicleMove() {
+		_old_vehicle_coords.left = left_coord;
+		_old_vehicle_coords.top = top_coord;
+		_old_vehicle_coords.right = right_coord;
+		_old_vehicle_coords.bottom = bottom_coord;
 	}
 
-	private static void EndVehicleMove(Vehicle v)
+	public void EndVehicleMove()
 	{
 		ViewPort.MarkAllViewportsDirty(
-				Math.min(_old_vehicle_coords.left,v.left_coord),
-				Math.min(_old_vehicle_coords.top,v.top_coord),
-				Math.max(_old_vehicle_coords.right,v.right_coord)+1,
-				Math.max(_old_vehicle_coords.bottom,v.bottom_coord)+1
+				Math.min(_old_vehicle_coords.left,left_coord),
+				Math.min(_old_vehicle_coords.top,top_coord),
+				Math.max(_old_vehicle_coords.right,right_coord)+1,
+				Math.max(_old_vehicle_coords.bottom,bottom_coord)+1
 				);
 	}
 
@@ -2694,15 +2694,15 @@ public class Vehicle implements IPoolItem
 	};
 
 	/* returns true if staying in the same tile */
-	boolean GetNewVehiclePos(final Vehicle v, GetNewVehiclePosResult gp)
+	boolean GetNewVehiclePos(GetNewVehiclePosResult gp)
 	{
 
-		int x = v.x_pos + _delta_coord[v.direction];
-		int y = v.y_pos + _delta_coord[v.direction + 8];
+		int x = x_pos + _delta_coord[direction];
+		int y = y_pos + _delta_coord[direction + 8];
 
 		gp.x = x;
 		gp.y = y;
-		gp.old_tile = v.tile;
+		gp.old_tile = tile;
 		gp.new_tile = TileIndex.TileVirtXY(x, y);
 		return gp.old_tile == gp.new_tile;
 	}
@@ -2775,10 +2775,10 @@ public class Vehicle implements IPoolItem
 	 * result << 8 contains the id of the station entered. If the return value has
 	 * bit 0x8 set, the vehicle could not and did not enter the tile. Are there
 	 * other bits that can be set? */
-	int VehicleEnterTile(Vehicle v, TileIndex tile, int x, int y)
+	int VehicleEnterTile(TileIndex tile, int x, int y)
 	{
-		TileIndex old_tile = v.tile;
-		int result = Landscape._tile_type_procs[tile.GetTileType().ordinal()].vehicle_enter_tile_proc.apply(v, tile, x, y);
+		TileIndex old_tile = tile;
+		int result = Landscape._tile_type_procs[tile.GetTileType().ordinal()].vehicle_enter_tile_proc.apply(this, tile, x, y);
 
 		/* When vehicle_enter_tile_proc returns 8, that apparently means that
 		 * we cannot enter the tile at all. In that case, don't call

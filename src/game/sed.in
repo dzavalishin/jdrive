@@ -45,6 +45,11 @@ s/AircraftVehicleInfo *\*/AircraftVehicleInfo /g
 s/RailVehicleInfo *\*/RailVehicleInfo /g
 s/ShipVehicleInfo *\*/ShipVehicleInfo /g
 s/DrawEngineInfo *\*/DrawEngineInfo /g
+s/Vehicle *\*/Vehicle /g
+s/Depot *\*/Depot /g
+s/Order *\*/Order /g
+s/Engine *\*/Engine /g
+
 
 s/STR_/Str.STR_/g
 s/CMD_/Cmd.CMD_/g
@@ -81,6 +86,7 @@ s/_cmd_text/Global._cmd_text/g
 s/_price/Global._price/g
 s/_color_list/Global._color_list/g
 s/_error_message/Global._error_message/g
+s/_local_player/Global._local_player/g
 
 
 s/GfxFillRect/Gfx.GfxFillRect/g
@@ -93,7 +99,7 @@ s/_cursor\./Hal._cursor./g
 
 s/GetStation(/Station.GetStation(/g
 s/SET_EXPENSES_TYPE(/Player.SET_EXPENSES_TYPE(/g
-s/EXPENSES_/Player.EXPENSES_/
+s/(EXPENSES_/(Player.EXPENSES_/
 
 s/NUM_TRAIN_ENGINES/Global.NUM_TRAIN_ENGINES/g
 s/NUM_ROAD_ENGINES/Global.NUM_ROAD_ENGINES/g
