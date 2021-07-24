@@ -1,3 +1,4 @@
+#if 0
 /* $Id: npf.c 3271 2005-12-08 09:12:25Z hackykid $ */
 
 #include "stdafx.h"

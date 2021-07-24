@@ -1,3 +1,4 @@
+#if 0
 /* $Id: npf.h 3339 2005-12-24 20:54:31Z tron $ */
 
 #ifndef NPF_H

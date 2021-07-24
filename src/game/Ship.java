@@ -473,8 +473,8 @@ public class Ship {
 		best_track = -1;
 
 		do {
-			i = FIND_FIRST_BIT(bits);
-			bits = KILL_FIRST_BIT(bits);
+			i = BitOps.FIND_FIRST_BIT(bits);
+			bits = BitOps.KILL_FIRST_BIT(bits);
 
 			pfs.best_bird_dist = (int)-1;
 			pfs.best_length = (int)-1;
