@@ -230,11 +230,11 @@ static  byte SignalOnTrack(Track track) {
 	/**
 	 * Maps a trackdir to the (4-way) direction the tile is exited when following
 	 * that trackdir.
-	 */
+	 * /
 	static  DiagDirection TrackdirToExitdir(Trackdir trackdir) {
 		final DiagDirection _trackdir_to_exitdir[TRACKDIR_END];
 		return _trackdir_to_exitdir[trackdir];
-	}
+	} */
 
 	/**
 	 * Maps a track and an (4-way) dir to the trackdir that represents the track
@@ -416,7 +416,7 @@ static  byte SignalOnTrack(Track track) {
 	 * @return  The transport type of the given track, either TRANSPORT_ROAD,
 	 * TRANSPORT_RAIL.
 	 */
-	static  TransportType GetCrossingTransportType(TileIndex tile, Track track)
+	static  /*TransportType*/ int GetCrossingTransportType(TileIndex tile, Track track)
 	{
 		/* XXX: Nicer way to write this? */
 		switch(track)

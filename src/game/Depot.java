@@ -80,7 +80,8 @@ public class Depot implements IPoolItem
 	/**
 	 * Check if a tile is a depot of the given type.
 	 */
-	static private boolean IsTileDepotType(TileIndex tile, TransportType type)
+	//static private boolean IsTileDepotType(TileIndex tile, TransportType type)
+	public static boolean IsTileDepotType(TileIndex tile, int type)
 	{
 		switch(type)
 		{
@@ -102,7 +103,8 @@ public class Depot implements IPoolItem
 	/**
 	 * Returns the direction the exit of the depot on the given tile is facing.
 	 */
-	private DiagDirection GetDepotDirection(TileIndex tile, TransportType type)
+	//private DiagDirection GetDepotDirection(TileIndex tile, TransportType type)
+	private DiagDirection GetDepotDirection(TileIndex tile, int type)
 	{
 		assert(IsTileDepotType(tile, type));
 

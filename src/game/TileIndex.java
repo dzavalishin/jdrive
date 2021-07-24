@@ -516,6 +516,14 @@ public class TileIndex {
 		ni.tile += (y * Global.MapSizeX()) + x;
 		return ni;
 	}
+	public boolean IsTileDepotType(int transportType) {
+		return Depot.IsTileDepotType(this, transportType);
+	}
+
+	public boolean IsValidTile() 
+	{
+		return (tile < Global.MapSizeX() * Global.MapMaxY() && TileX() != Global.MapMaxX());
+	}
 	
 	
 }

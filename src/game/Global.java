@@ -62,6 +62,7 @@ public class Global {
 
 
 	public static final boolean AYSTAR_DEBUG = true;
+	public static final int NPF_TILE_LENGTH = 100;
 
 	static public Hal hal = new JavaHal();
 	static public Patches _patches = new Patches();

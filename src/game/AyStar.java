@@ -92,6 +92,9 @@ public abstract class AyStar
 	//void *user_target;
 	//int user_data[10];
 
+	// [dz] can be some superclass or interface of NPFFoundTargetData? 
+	NPFFoundTargetData user_path;
+	
 	/* How many loops are there called before AyStarMain_Main gives
 	 * control back to the caller. 0 = until done */
 	byte loops_per_tick;

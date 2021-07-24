@@ -1,55 +1,54 @@
 package game;
 
+import game.util.BitOps;
+
 public class Npf {
 
+	static AyStar _npf_aystar = new AyStar();
 
-
-
-
-
-
+	public static final int NPF_TILE_LENGTH = Global.NPF_TILE_LENGTH;
 
 	//mowing grass
-	enum {
-		NPF_HASH_BITS = 12, /* The size of the hash used in pathfinding. Just changing this value should be sufficient to change the hash size. Should be an even value. */
-		/* Do no change below values */
-		NPF_HASH_SIZE = 1 << NPF_HASH_BITS,
-		NPF_HASH_HALFBITS = NPF_HASH_BITS / 2,
-		NPF_HASH_HALFMASK = (1 << NPF_HASH_HALFBITS) - 1
-	};
+	//enum {
+	private static final int NPF_HASH_BITS = 12; /* The size of the hash used in pathfinding. Just changing this value should be sufficient to change the hash size. Should be an even value. */
+	/* Do no change below values */
+	private static final int NPF_HASH_SIZE = 1 << NPF_HASH_BITS;
+	private static final int NPF_HASH_HALFBITS = NPF_HASH_BITS / 2;
+	private static final int NPF_HASH_HALFMASK = (1 << NPF_HASH_HALFBITS) - 1;
+	//};
 
-		/** This penalty is the equivalent of "inifite", which means that paths that
-		 * get this penalty will be chosen, but only if there is no other route
-		 * without it. Be careful with not applying this penalty to often, or the
-		 * total path cost might overflow..
-		 * For now, this is just a Very Big Penalty, we might actually implement
-		 * this in a nicer way :-)
-		 */
-		private static final int NPF_INFINITE_PENALTY = 1000 * NPF_TILE_LENGTH;
+	/** This penalty is the equivalent of "inifite", which means that paths that
+	 * get this penalty will be chosen, but only if there is no other route
+	 * without it. Be careful with not applying this penalty to often, or the
+	 * total path cost might overflow..
+	 * For now, this is just a Very Big Penalty, we might actually implement
+	 * this in a nicer way :-)
+	 */
+	private static final int NPF_INFINITE_PENALTY = 1000 * NPF_TILE_LENGTH;
 
 
-	enum { /* Indices into AyStar.userdata[] */
-		NPF_TYPE = 0, /* Contains a TransportTypes value */
-		NPF_OWNER, /* Contains an Owner value */
-		NPF_RAILTYPE, /* Contains the RailType value of the engine when NPF_TYPE == TRANSPORT_RAIL. Unused otherwise. */
-		NPF_PBS_MODE, /* Contains the pbs mode, see pbs.h */
-	};
+	//enum { /* Indices into AyStar.userdata[] */
+	private static final int NPF_TYPE = 0; /* Contains a TransportTypes value */
+	private static final int NPF_OWNER = 1; /* Contains an Owner value */
+	private static final int NPF_RAILTYPE = 2; /* Contains the RailType value of the engine when NPF_TYPE == Global.TRANSPORT_RAIL. Unused otherwise. */
+	private static final int NPF_PBS_MODE = 3; /* Contains the pbs mode, see pbs.h */
+	//};
 
-	enum { /* Indices into AyStarNode.userdata[] */
-		NPF_TRACKDIR_CHOICE = 0, /* The trackdir chosen to get here */
-		NPF_NODE_FLAGS,
-	}
+	//enum { /* Indices into AyStarNode.userdata[] */
+	private static final int NPF_TRACKDIR_CHOICE = 0; /* The trackdir chosen to get here */
+	private static final int NPF_NODE_FLAGS = 1;
+	//}
 
-	enum NPFNodeFlag { /* Flags for AyStarNode.userdata[NPF_NODE_FLAGS]. Use NPFGetBit() and NPFGetBit() to use them. */
-		NPF_FLAG_SEEN_SIGNAL, /* Used to mark that a signal was seen on the way, for rail only */
-		NPF_FLAG_REVERSE, /* Used to mark that this node was reached from the second start node, if applicable */
-		NPF_FLAG_LAST_SIGNAL_RED, /* Used to mark that the last signal on this path was red */
-		NPF_FLAG_PBS_EXIT, /* Used to mark tracks inside a pbs block, for rail only, for the end node, this is set when the path found goes through a pbs block */
-		NPF_FLAG_PBS_BLOCKED, /* Used to mark that this path crosses another pbs path */
-		NPF_FLAG_PBS_RED, /* Used to mark that this path goes through a red exit-pbs signal */
-		NPF_FLAG_PBS_CHOICE, /* Used to mark that the train has had a choice on this path */
-		NPF_FLAG_PBS_TARGET_SEEN, /* Used to mark that a target tile has been passed on this path */
-	} ;
+	//enum /* NPFNodeFlag */ int  { /* Flags for AyStarNode.userdata[NPF_NODE_FLAGS]. Use NPFGetBit() and NPFGetBit() to use them. */
+	public static final int NPF_FLAG_SEEN_SIGNAL; /* Used to mark that a signal was seen on the way; for rail only */
+	public static final int NPF_FLAG_REVERSE; /* Used to mark that this node was reached from the second start node; if applicable */
+	public static final int NPF_FLAG_LAST_SIGNAL_RED; /* Used to mark that the last signal on this path was red */
+	public static final int NPF_FLAG_PBS_EXIT; /* Used to mark tracks inside a pbs block; for rail only; for the end node; this is set when the path found goes through a pbs block */
+	public static final int NPF_FLAG_PBS_BLOCKED; /* Used to mark that this path crosses another pbs path */
+	public static final int NPF_FLAG_PBS_RED; /* Used to mark that this path goes through a red exit-pbs signal */
+	public static final int NPF_FLAG_PBS_CHOICE; /* Used to mark that the train has had a choice on this path */
+	public static final int NPF_FLAG_PBS_TARGET_SEEN; /* Used to mark that a target tile has been passed on this path */
+	//} ;
 
 
 	/* These functions below are _not_ re-entrant, in favor of speed! */
@@ -57,28 +56,28 @@ public class Npf {
 	/* Will search from the given tile and direction, for a route to the given
 	 * station for the given transport type. See the declaration of
 	 * NPFFoundTargetData above for the meaning of the result. */
-	NPFFoundTargetData NPFRouteToStationOrTile(TileIndex tile, Trackdir trackdir, NPFFindStationOrTileData  target, TransportType type, Owner owner, RailType railtype, byte pbs_mode);
+	//NPFFoundTargetData NPFRouteToStationOrTile(TileIndex tile, Trackdir trackdir, NPFFindStationOrTileData  target, TransportType type, Owner owner, RailType railtype, byte pbs_mode);
 
 	/* Will search as above, but with two start nodes, the second being the
 	 * reverse. Look at the NPF_FLAG_REVERSE flag in the result node to see which
 	 * direction was taken (NPFGetBit(result.node, NPF_FLAG_REVERSE)) */
-	NPFFoundTargetData NPFRouteToStationOrTileTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, NPFFindStationOrTileData  target, TransportType type, Owner owner, RailType railtype, byte pbs_mode);
+	//NPFFoundTargetData NPFRouteToStationOrTileTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, NPFFindStationOrTileData  target, TransportType type, Owner owner, RailType railtype, byte pbs_mode);
 
 	/* Will search a route to the closest depot. */
 
 	/* Search using breadth first. Good for little track choice and inaccurate
 	 * heuristic, such as railway/road.*/
-	NPFFoundTargetData NPFRouteToDepotBreadthFirst(TileIndex tile, Trackdir trackdir, TransportType type, Owner owner, RailType railtype);
+	//NPFFoundTargetData NPFRouteToDepotBreadthFirst(TileIndex tile, Trackdir trackdir, TransportType type, Owner owner, RailType railtype);
 	/* Same as above but with two start nodes, the second being the reverse. Call
 	 * NPFGetBit(result.node, NPF_FLAG_REVERSE) to see from which node the path
 	 * orginated. All pathfs from the second node will have the given
 	 * reverse_penalty applied (NPF_TILE_LENGTH is the equivalent of one full
 	 * tile).
 	 */
-	NPFFoundTargetData NPFRouteToDepotBreadthFirstTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, TransportType type, Owner owner, RailType railtype, int reverse_penalty);
+	//NPFFoundTargetData NPFRouteToDepotBreadthFirstTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, TransportType type, Owner owner, RailType railtype, int reverse_penalty);
 	/* Search by trying each depot in order of Manhattan Distance. Good for lots
 	 * of choices and accurate heuristics, such as water. */
-	NPFFoundTargetData NPFRouteToDepotTrialError(TileIndex tile, Trackdir trackdir, TransportType type, Owner owner, RailType railtype);
+	//NPFFoundTargetData NPFRouteToDepotTrialError(TileIndex tile, Trackdir trackdir, TransportType type, Owner owner, RailType railtype);
 
 
 
@@ -89,7 +88,7 @@ public class Npf {
 	/**
 	 * Returns the current value of the given flag on the given AyStarNode.
 	 */
-	static  boolean NPFGetFlag(final AyStarNode  node, NPFNodeFlag flag)
+	static  boolean NPFGetFlag(final AyStarNode  node, /* NPFNodeFlag */ int  flag)
 	{
 		return BitOps.HASBIT(node.user_data[NPF_NODE_FLAGS], flag);
 	}
@@ -97,43 +96,31 @@ public class Npf {
 	/**
 	 * Sets the given flag on the given AyStarNode to the given value.
 	 */
-	static  void NPFSetFlag(AyStarNode  node, NPFNodeFlag flag, boolean value)
+	static  void NPFSetFlag(AyStarNode  node, /* NPFNodeFlag */ int  flag, boolean value)
 	{
 		if (value)
-			SETBIT(node.user_data[NPF_NODE_FLAGS], flag);
+			node.user_data[NPF_NODE_FLAGS] = BitOps.RETSETBIT(node.user_data[NPF_NODE_FLAGS], flag);
 		else
-			CLRBIT(node.user_data[NPF_NODE_FLAGS], flag);
+			node.user_data[NPF_NODE_FLAGS] = BitOps.RETCLRBIT(node.user_data[NPF_NODE_FLAGS], flag);
 	}
 
-	#endif /* NPF_H */
-
-
-	
-	/* $Id: npf.c 3271 2005-12-08 09:12:25Z hackykid $ */
 
 
 
 
-
-
-
-
-
-
-
-
-
-	static AyStar _npf_aystar;
 
 	/* The cost of each trackdir. A diagonal piece is the full NPF_TILE_LENGTH,
 	 * the shorter piece is sqrt(2)/2*NPF_TILE_LENGTH =~ 0.7071
 	 */
-	#define NPF_STRAIGHT_LENGTH (int)(NPF_TILE_LENGTH * STRAIGHT_TRACK_LENGTH)
-	static final int _trackdir_length[TRACKDIR_END] = {
-		NPF_TILE_LENGTH, NPF_TILE_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH,
-		0, 0,
-		NPF_TILE_LENGTH, NPF_TILE_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH
-	};
+	static final int NPF_STRAIGHT_LENGTH = (int)(NPF_TILE_LENGTH * STRAIGHT_TRACK_LENGTH);
+
+	//static final int _trackdir_length[TRACKDIR_END] = 
+	static final int _trackdir_length[] = 
+		{
+				NPF_TILE_LENGTH, NPF_TILE_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH,
+				0, 0,
+				NPF_TILE_LENGTH, NPF_TILE_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH, NPF_STRAIGHT_LENGTH
+		};
 
 	/**
 	 * Calculates the minimum distance traveled to get from t0 to t1 when only
@@ -143,8 +130,8 @@ public class Npf {
 	 */
 	static int NPFDistanceTrack(TileIndex t0, TileIndex t1)
 	{
-		final int dx = abs(TileX(t0) - TileX(t1));
-		final int dy = abs(TileY(t0) - TileY(t1));
+		final int dx = Math.abs(t0.TileX() - t1.TileX());
+		final int dy = Math.abs(t0.TileY() - t1.TileY());
 
 		final int straightTracks = 2 * Math.min(dx, dy); /* The number of straight (not full length) tracks */
 		/* OPTIMISATION:
@@ -166,7 +153,7 @@ public class Npf {
 	 */
 	static boolean IsEndOfLine(TileIndex tile, Trackdir trackdir, RailType enginetype)
 	{
-		byte exitdir = TrackdirToExitdir(trackdir);
+		byte exitdir = trackdir.TrackdirToExitdir();
 		TileIndex dst_tile;
 		int ts;
 
@@ -177,39 +164,40 @@ public class Npf {
 		}
 
 		/* Cannot go through the back of a depot */
-		if (IsTileDepotType(tile, TRANSPORT_RAIL) && (exitdir != GetDepotDirection(tile, TRANSPORT_RAIL)))
+		if (tile.IsTileDepotType(Global.TRANSPORT_RAIL) && (exitdir != tile.GetDepotDirection(Global.TRANSPORT_RAIL)))
 			return true;
 
 		/* Calculate next tile */
 		dst_tile = tile + TileOffsByDir(exitdir);
 		// determine the track status on the next tile.
-		ts = GetTileTrackStatus(dst_tile, TRANSPORT_RAIL) & TrackdirReachesTrackdirs(trackdir);
+		ts = dst_tile.GetTileTrackStatus(Global.TRANSPORT_RAIL) & TrackdirReachesTrackdirs(trackdir);
 
 		// when none of the trackdir bits are set, we cant enter the new tile
-		if ( (ts & TRACKDIR_BIT_MASK) == 0)
+		if ( (ts & Trackdir.TRACKDIR_BIT_MASK) == 0)
 			return true;
 
 		{
 			byte dst_type = GetTileRailType(dst_tile, exitdir);
 			if (!IsCompatibleRail(enginetype, dst_type))
 				return true;
-			if (GetTileOwner(tile) != GetTileOwner(dst_tile))
+			if (tile.GetTileOwner() != dst_tile.GetTileOwner())
 				return true;
 
 			/* Prevent us from entering a depot from behind */
-			if (IsTileDepotType(dst_tile, TRANSPORT_RAIL) && (exitdir != ReverseDiagdir(GetDepotDirection(dst_tile, TRANSPORT_RAIL))))
+			if (dst_tile.IsTileDepotType(Global.TRANSPORT_RAIL) && (exitdir != ReverseDiagdir(GetDepotDirection(dst_tile, Global.TRANSPORT_RAIL))))
 				return true;
 
 			/* Prevent us from falling off a slope into a tunnel exit */
-			if (IsTileType(dst_tile, TileTypes.MP_TUNNELBRIDGE) &&
-					BitOps.GB(_m[dst_tile].m5, 4, 4) == 0 &&
-					(DiagDirection)BitOps.GB(_m[dst_tile].m5, 0, 2) == ReverseDiagdir(exitdir)) {
+			if (dst_tile.IsTileType(TileTypes.MP_TUNNELBRIDGE) &&
+					BitOps.GB(dst_tile.getMap().m5, 4, 4) == 0 &&
+					(DiagDirection)BitOps.GB(dst_tile.getMap().m5, 0, 2) == ReverseDiagdir(exitdir)) {
 				return true;
 			}
 
 			/* Check for oneway signal against us */
-			if (IsTileType(dst_tile, TileTypes.MP_RAILWAY) && GetRailTileType(dst_tile) == RAIL_TYPE_SIGNALS) {
-				if (HasSignalOnTrackdir(dst_tile, ReverseTrackdir(FindFirstBit2x64(ts))) && !HasSignalOnTrackdir(dst_tile, FindFirstBit2x64(ts)))
+			if (dst_tile.IsTileType(TileTypes.MP_RAILWAY) && dst_tile.GetRailTileType() == RAIL_TYPE_SIGNALS) {
+				if (dst_tile.HasSignalOnTrackdir(ReverseTrackdir(BitOps.FindFirstBit2x64(ts))) 
+						&& !dst_tile.HasSignalOnTrackdir(BitOps.FindFirstBit2x64(ts)))
 					// if one way signal not pointing towards us, stop going in this direction.
 					return true;
 			}
@@ -218,13 +206,13 @@ public class Npf {
 		}
 	}
 
-	#if 0
+	/*
 	static int NTPHash(int key1, int key2)
 	{
-		/* This function uses the old hash, which is fixed on 10 bits (1024 buckets) */
+		// This function uses the old hash, which is fixed on 10 bits (1024 buckets) 
 		return PATHFIND_HASH_TILE(key1);
 	}
-	#endif
+	 */
 
 	/**
 	 * Calculates a hash value for use in the NPF.
@@ -235,13 +223,16 @@ public class Npf {
 	 */
 	static int NPFHash(int key1, int key2)
 	{
-		/* TODO: think of a better hash? */
-		int part1 = TileX(key1) & NPF_HASH_HALFMASK;
-		int part2 = TileY(key1) & NPF_HASH_HALFMASK;
+		TileIndex t1 = new TileIndex(key1);
 
 		assert(IsValidTrackdir(key2));
-		assert(IsValidTile(key1));
-		return ((((part1 << NPF_HASH_HALFBITS) | part2)) + (NPF_HASH_SIZE * key2 / TRACKDIR_END)) % NPF_HASH_SIZE;
+		assert(t1.IsValidTile());
+
+		/* TODO: think of a better hash? */
+		int part1 = t1.TileX() & NPF_HASH_HALFMASK;
+		int part2 = t1.TileY() & NPF_HASH_HALFMASK;
+
+		return ((((part1 << NPF_HASH_HALFBITS) | part2)) + (NPF_HASH_SIZE * key2 / Trackdir.TRACKDIR_END.ordinal())) % NPF_HASH_SIZE;
 	}
 
 	static int NPFCalcZero(AyStar  as, AyStarNode  current, OpenListNode  parent)
@@ -257,8 +248,8 @@ public class Npf {
 	{
 		final Station  st = Station.GetStation(station);
 
-		int minx = TileX(st.train_tile);  // topmost corner of station
-		int miny = TileY(st.train_tile);
+		int minx = st.train_tile.TileX();  // topmost corner of station
+		int miny = st.train_tile.TileY();
 		int maxx = minx + st.trainst_w - 1; // lowermost corner of station
 		int maxy = miny + st.trainst_h - 1;
 		int x;
@@ -266,42 +257,46 @@ public class Npf {
 
 		// we are going the aim for the x coordinate of the closest corner
 		// but if we are between those coordinates, we will aim for our own x coordinate
-		x = clamp(TileX(tile), minx, maxx);
+		x = BitOps.clamp(tile.TileX(), minx, maxx);
 
 		// same for y coordinate, see above comment
-		y = clamp(TileY(tile), miny, maxy);
+		y = BitOps.clamp(tile.TileY(), miny, maxy);
 
 		// return the tile of our target coordinates
-		return TileXY(x, y);
+		return TileIndex.TileXY(x, y);
 	}
 
 	/* On PBS pathfinding runs, this is called before pathfinding ends (BeforeExit aystar callback), and will
 	 * reserve the appropriate tracks, if needed. */
-	static void NPFReservePBSPath(AyStar *as)
+	static void NPFReservePBSPath(AyStar as)
 	{
-		NPFFoundTargetData* ftd = (NPFFoundTargetData*)as.user_path;
+		NPFFoundTargetData ftd = (NPFFoundTargetData)as.user_path;
 		boolean eol_end = false;
 
-		if (ftd.best_trackdir == 0xFF)
+		if (ftd.best_trackdir.ordinal() == 0xFF)
 			return;
 
-		if (!NPFGetFlag(&ftd.node, NPF_FLAG_PBS_EXIT) && IsEndOfLine(ftd.node.tile, ftd.node.direction, as.user_data[NPF_RAILTYPE]) && !NPFGetFlag(&ftd.node, NPF_FLAG_SEEN_SIGNAL)) {
+		if (!NPFGetFlag(ftd.node, NPF_FLAG_PBS_EXIT) 
+				&& IsEndOfLine(ftd.node.tile, ftd.node.direction, as.user_data[NPF_RAILTYPE]) 
+				&& !NPFGetFlag(ftd.node, NPF_FLAG_SEEN_SIGNAL)) 
+		{
 			/* The path ends in an end of line, we'll need to reserve a path.
 			 * We treat and end of line as a red exit signal */
 			eol_end = true;
-			NPFSetFlag(&ftd.node, NPF_FLAG_PBS_EXIT, true);
-			if (!NPFGetFlag(&ftd.node, NPF_FLAG_PBS_TARGET_SEEN))
-				NPFSetFlag(&ftd.node, NPF_FLAG_PBS_RED, true);
+			NPFSetFlag(ftd.node, NPF_FLAG_PBS_EXIT, true);
+			if (!NPFGetFlag(ftd.node, NPF_FLAG_PBS_TARGET_SEEN))
+				NPFSetFlag(ftd.node, NPF_FLAG_PBS_RED, true);
 		}
 
-		if (!NPFGetFlag(&ftd.node, NPF_FLAG_PBS_CHOICE)) {
+		if (!NPFGetFlag(ftd.node, NPF_FLAG_PBS_CHOICE)) {
 			/* there have been no choices to make on our path, we dont care if our end signal is red */
-			NPFSetFlag(&ftd.node, NPF_FLAG_PBS_RED, false);
+			NPFSetFlag(ftd.node, NPF_FLAG_PBS_RED, false);
 		}
 
-		if (NPFGetFlag(&ftd.node, NPF_FLAG_PBS_EXIT) && // we passed an exit signal
-			 !NPFGetFlag(&ftd.node, NPF_FLAG_PBS_BLOCKED) && // we didnt encounter reserver tracks
-			 ((as.user_data[NPF_PBS_MODE] != PBS_MODE_GREEN) || (!NPFGetFlag(&ftd.node, NPF_FLAG_PBS_RED))) ) { // our mode permits having a red exit signal, or the signal is green
+		if (NPFGetFlag(ftd.node, NPF_FLAG_PBS_EXIT) && // we passed an exit signal
+				!NPFGetFlag(ftd.node, NPF_FLAG_PBS_BLOCKED) && // we didnt encounter reserver tracks
+				((as.user_data[NPF_PBS_MODE] != PBS_MODE_GREEN) || (!NPFGetFlag(&ftd.node, NPF_FLAG_PBS_RED))) ) 
+		{ // our mode permits having a red exit signal, or the signal is green
 			PathNode parent;
 			PathNode *curr;
 			PathNode *prev;
@@ -318,8 +313,8 @@ public class Npf {
 					/* check for already reserved track on this path, if they clash with what we
 					   currently trying to reserve, we have a self-crossing path :-( */
 					if ((PBSTileUnavail(curr.node.tile) & (1 << curr.node.direction))
-					&& !(PBSTileReserved(curr.node.tile) & (1 << (curr.node.direction & 7)))
-					&& (start != INVALID_TILE)) {
+							&& !(PBSTileReserved(curr.node.tile) & (1 << (curr.node.direction & 7)))
+							&& (start != INVALID_TILE)) {
 						/* It's actually quite bad if this happens, it means the pathfinder
 						 * found a path that is intersecting with itself, which is a very bad
 						 * thing in a pbs block. Also there is not much we can do about it at
@@ -328,8 +323,8 @@ public class Npf {
 						 * so we'll just stop this train, the user will eventually notice, so he can fix it.
 						 */
 						PBSClearPath(start, trackdir, curr.node.tile, curr.node.direction);
-						NPFSetFlag(&ftd.node, NPF_FLAG_PBS_BLOCKED, true);
-						DEBUG(pbs, 1) ("PBS: Self-crossing path!!!");
+						NPFSetFlag(ftd.node, NPF_FLAG_PBS_BLOCKED, true);
+						DEBUG_pbs( 1, "PBS: Self-crossing path!!!");
 						return;
 					};
 
@@ -365,18 +360,18 @@ public class Npf {
 	static int NPFCalcStationOrTileHeuristic(AyStar  as, AyStarNode  current, OpenListNode  parent)
 	{
 		NPFFindStationOrTileData  fstd = (NPFFindStationOrTileData )as.user_target;
-		NPFFoundTargetData* ftd = (NPFFoundTargetData*)as.user_path;
+		NPFFoundTargetData ftd = (NPFFoundTargetData)as.user_path;
 		TileIndex from = current.tile;
 		TileIndex to = fstd.dest_coords;
 		int dist;
 
 		// for train-stations, we are going to aim for the closest station tile
-		if ((as.user_data[NPF_TYPE] == TRANSPORT_RAIL) && (fstd.station_index != -1))
+		if ((as.user_data[NPF_TYPE] == Global.TRANSPORT_RAIL) && (fstd.station_index != -1))
 			to = CalcClosestStationTile(fstd.station_index, from);
 
-		if (as.user_data[NPF_TYPE] == TRANSPORT_ROAD)
+		if (as.user_data[NPF_TYPE] == Global.TRANSPORT_ROAD)
 			/* Since roads only have diagonal pieces, we use manhattan distance here */
-			dist = DistanceManhattan(from, to) * NPF_TILE_LENGTH;
+			dist = Map.DistanceManhattan(from, to) * NPF_TILE_LENGTH;
 		else
 			/* Ships and trains can also go diagonal, so the minimum distance is shorter */
 			dist = NPFDistanceTrack(from, to);
@@ -386,14 +381,14 @@ public class Npf {
 		/* for pbs runs, we ignore tiles inside the pbs block for the tracking
 		   of the 'closest' tile */
 		if ((as.user_data[NPF_PBS_MODE] != PBS_MODE_NONE)
-		&&  (!NPFGetFlag(current , NPF_FLAG_SEEN_SIGNAL))
-		&&  (!IsEndOfLine(current.tile, current.direction, as.user_data[NPF_RAILTYPE])))
+				&&  (!NPFGetFlag(current , NPF_FLAG_SEEN_SIGNAL))
+				&&  (!IsEndOfLine(current.tile, current.direction, as.user_data[NPF_RAILTYPE])))
 			return dist;
 
 		if ((dist < ftd.best_bird_dist) ||
-			/* for pbs runs, prefer tiles that pass a green exit signal to the pbs blocks */
-			((as.user_data[NPF_PBS_MODE] != PBS_MODE_NONE) && !NPFGetFlag(current, NPF_FLAG_PBS_RED) && NPFGetFlag(&ftd.node, NPF_FLAG_PBS_RED))
-	) {
+				/* for pbs runs, prefer tiles that pass a green exit signal to the pbs blocks */
+				((as.user_data[NPF_PBS_MODE] != PBS_MODE_NONE) && !NPFGetFlag(current, NPF_FLAG_PBS_RED) && NPFGetFlag(&ftd.node, NPF_FLAG_PBS_RED))
+				) {
 			ftd.best_bird_dist = dist;
 			ftd.best_trackdir = current.user_data[NPF_TRACKDIR_CHOICE];
 			ftd.path = parent.path;
@@ -408,7 +403,7 @@ public class Npf {
 	static void NPFFillTrackdirChoice(AyStarNode  current, OpenListNode  parent)
 	{
 		if (parent.path.parent == null) {
-			Trackdir trackdir = (Trackdir)current.direction;
+			Trackdir trackdir = Trackdir.fromInt(current.direction);
 			/* This is a first order decision, so we'd better save the
 			 * direction we chose */
 			current.user_data[NPF_TRACKDIR_CHOICE] = trackdir;
@@ -444,7 +439,7 @@ public class Npf {
 
 	static int NPFSlopeCost(AyStarNode  current)
 	{
-		TileIndex next = current.tile + TileOffsByDir(TrackdirToExitdir(current.direction));
+		TileIndex next = current.tile + TileOffsByDir(Trackdir.fromInt(current.direction).TrackdirToExitdir());
 		int x,y;
 		int8 z1,z2;
 
@@ -471,29 +466,31 @@ public class Npf {
 	/* Mark tiles by mowing the grass when npf debug level >= 1 */
 	static void NPFMarkTile(TileIndex tile)
 	{
-	#ifdef NO_DEBUG_MESSAGES
-		return;
-	#else
+		//#ifdef NO_DEBUG_MESSAGES
+		//return;
+		//#else
 		if (_debug_npf_level >= 1)
-			switch(GetTileType(tile)) {
-				case TileTypes.MP_RAILWAY:
-					/* DEBUG: mark visited tiles by mowing the grass under them
-					 * ;-) */
-					if (!IsTileDepotType(tile, TRANSPORT_RAIL)) {
-						BitOps.RET SB(tile.getMap().m2, 0, 4, 0);
-						MarkTileDirtyByTile(tile);
-					}
-					break;
-				case TileTypes.MP_STREET:
-					if (!IsTileDepotType(tile, TRANSPORT_ROAD)) {
-						BitOps.RET SB(tile.getMap().m2, 4, 3, 0);
-						MarkTileDirtyByTile(tile);
-					}
-					break;
-				default:
-					break;
+		{
+			switch(tile.GetTileType()) {
+			case TileTypes.MP_RAILWAY:
+				/* DEBUG: mark visited tiles by mowing the grass under them
+				 * ;-) */
+				if (!tile.IsTileDepotType(Global.TRANSPORT_RAIL)) {
+					tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 0, 4, 0);
+					MarkTileDirtyByTile(tile);
+				}
+				break;
+			case TileTypes.MP_STREET:
+				if (!tile.IsTileDepotType(Global.TRANSPORT_ROAD)) {
+					tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 4, 3, 0);
+					MarkTileDirtyByTile(tile);
+				}
+				break;
+			default:
+				break;
 			}
-	#endif
+		}
+		//#endif
 	}
 
 	static int NPFWaterPathCost(AyStar  as, AyStarNode  current, OpenListNode  parent)
@@ -522,22 +519,22 @@ public class Npf {
 		int cost = 0;
 
 		/* Determine base length */
-		switch (GetTileType(tile)) {
-			case TileTypes.MP_TUNNELBRIDGE:
-				if (BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
-					cost = NPFTunnelCost(current);
-					break;
-				}
-				cost = NPF_TILE_LENGTH;
+		switch (tile.GetTileType()) {
+		case MP_TUNNELBRIDGE:
+			if (BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
+				cost = NPFTunnelCost(current);
 				break;
-			case TileTypes.MP_STREET:
-				cost = NPF_TILE_LENGTH;
-				/* Increase the cost for level crossings */
-				if (IsLevelCrossing(tile))
-					cost += Global._patches.npf_crossing_penalty;
-				break;
-			default:
-				break;
+			}
+			cost = NPF_TILE_LENGTH;
+			break;
+		case MP_STREET:
+			cost = NPF_TILE_LENGTH;
+			/* Increase the cost for level crossings */
+			if (tile.IsLevelCrossing())
+				cost += Global._patches.npf_crossing_penalty;
+			break;
+		default:
+			break;
 		}
 
 		/* Determine extra costs */
@@ -567,37 +564,41 @@ public class Npf {
 
 		/* Determine base length */
 		switch (GetTileType(tile)) {
-			case TileTypes.MP_TUNNELBRIDGE:
-				if (BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
-					cost = NPFTunnelCost(current);
-					break;
-				}
-				/* Fall through if above if is false, it is a bridge
-				 * then. We treat that as ordinary rail */
-			case TileTypes.MP_RAILWAY:
-				cost = _trackdir_length[trackdir]; /* Should be different for diagonal tracks */
+		case TileTypes.MP_TUNNELBRIDGE:
+			if (BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
+				cost = NPFTunnelCost(current);
 				break;
-			case TileTypes.MP_STREET: /* Railway crossing */
-				cost = NPF_TILE_LENGTH;
-				break;
-			case TileTypes.MP_STATION:
-				/* We give a station tile a penalty. Logically we would only
-						* want to give station tiles that are not our destination
-						* this penalty. This would discourage trains to drive through
-						* busy stations. But, we can just give any station tile a
-						* penalty, because every possible route will get this penalty
-						* exactly once, on its end tile (if it's a station) and it
-				* will therefore not make a difference. */
-				cost = NPF_TILE_LENGTH + Global._patches.npf_rail_station_penalty;
-				break;
-			default:
-				break;
+			}
+			/* Fall through if above if is false, it is a bridge
+			 * then. We treat that as ordinary rail */
+		case TileTypes.MP_RAILWAY:
+			cost = _trackdir_length[trackdir]; /* Should be different for diagonal tracks */
+			break;
+		case TileTypes.MP_STREET: /* Railway crossing */
+			cost = NPF_TILE_LENGTH;
+			break;
+		case TileTypes.MP_STATION:
+			/* We give a station tile a penalty. Logically we would only
+			 * want to give station tiles that are not our destination
+			 * this penalty. This would discourage trains to drive through
+			 * busy stations. But, we can just give any station tile a
+			 * penalty, because every possible route will get this penalty
+			 * exactly once, on its end tile (if it's a station) and it
+			 * will therefore not make a difference. */
+			cost = NPF_TILE_LENGTH + Global._patches.npf_rail_station_penalty;
+			break;
+		default:
+			break;
 		}
 
 		/* Determine extra costs */
 
 		/* Check for reserved tracks (PBS) */
-		if ((as.user_data[NPF_PBS_MODE] != PBS_MODE_NONE) && !(NPFGetFlag(current, NPF_FLAG_PBS_EXIT)) && !(NPFGetFlag(current, NPF_FLAG_PBS_BLOCKED)) && (PBSTileUnavail(tile) & (1<<trackdir))) {
+		if ((as.user_data[NPF_PBS_MODE] != PBS_MODE_NONE) 
+				&& !(NPFGetFlag(current, NPF_FLAG_PBS_EXIT)) 
+				&& !(NPFGetFlag(current, NPF_FLAG_PBS_BLOCKED)) 
+				&& (PBSTileUnavail(tile) & (1<<trackdir))) 
+		{
 			NPFSetFlag(current, NPF_FLAG_PBS_BLOCKED, true);
 		};
 
@@ -619,7 +620,9 @@ public class Npf {
 						cost += Global._patches.npf_rail_firstred_penalty;
 
 					/* for pbs runs, store the fact that the exit signal to the pbs block was red */
-					if (!(NPFGetFlag(current, NPF_FLAG_PBS_EXIT)) && !(NPFGetFlag(current, NPF_FLAG_PBS_RED)) && NPFGetFlag(current, NPF_FLAG_PBS_CHOICE))
+					if (!(NPFGetFlag(current, NPF_FLAG_PBS_EXIT)) 
+							&& !(NPFGetFlag(current, NPF_FLAG_PBS_RED)) 
+							&& NPFGetFlag(current, NPF_FLAG_PBS_CHOICE))
 						NPFSetFlag(current, NPF_FLAG_PBS_RED, true);
 				}
 				/* Record the state of this signal */
@@ -659,7 +662,7 @@ public class Npf {
 
 
 		/* Check for depots */
-		if (IsTileDepotType(tile, TRANSPORT_RAIL)) {
+		if (IsTileDepotType(tile, Global.TRANSPORT_RAIL)) {
 			/* Penalise any depot tile that is not the last tile in the path. This
 			 * _should_ penalise every occurence of reversing in a depot (and only
 			 * that) */
@@ -701,20 +704,20 @@ public class Npf {
 	}
 
 	/* Will find a station identified using the NPFFindStationOrTileData */
-	static int NPFFindStationOrTile(AyStar  as, OpenListNode *current)
+	static int NPFFindStationOrTile(AyStar  as, OpenListNode current)
 	{
 		NPFFindStationOrTileData  fstd = (NPFFindStationOrTileData )as.user_target;
-		AyStarNode *node = &current.path.node;
+		AyStarNode node = current.path.node;
 		TileIndex tile = node.tile;
 
 		/* If GetNeighbours said we could get here, we assume the station type
 		 * is correct */
 		if (
-			(fstd.station_index == -1 && tile == fstd.dest_coords) || /* We've found the tile, or */
-			(tile.IsTileType( TileTypes.MP_STATION) && tile.getMap().m2 == fstd.station_index) || /* the station */
-			(NPFGetFlag(node, NPF_FLAG_PBS_TARGET_SEEN)) /* or, we've passed it already (for pbs) */
-		) {
-			NPFSetFlag(&current.path.node, NPF_FLAG_PBS_TARGET_SEEN, true);
+				(fstd.station_index == -1 && tile == fstd.dest_coords) || /* We've found the tile, or */
+				(tile.IsTileType( TileTypes.MP_STATION) && tile.getMap().m2 == fstd.station_index) || /* the station */
+				(NPFGetFlag(node, NPF_FLAG_PBS_TARGET_SEEN)) /* or, we've passed it already (for pbs) */
+				) {
+			NPFSetFlag(current.path.node, NPF_FLAG_PBS_TARGET_SEEN, true);
 			/* for pbs runs, only accept we've found the target if we've also found a way out of the block */
 			if ((as.user_data[NPF_PBS_MODE] != PBS_MODE_NONE) && !NPFGetFlag(node, NPF_FLAG_SEEN_SIGNAL) && !IsEndOfLine(node.tile, node.direction, as.user_data[NPF_RAILTYPE]))
 				return AYSTAR_DONE;
@@ -730,7 +733,7 @@ public class Npf {
 	 */
 	static void NPFSaveTargetData(AyStar  as, OpenListNode  current)
 	{
-		NPFFoundTargetData* ftd = (NPFFoundTargetData*)as.user_path;
+		NPFFoundTargetData ftd = (NPFFoundTargetData)as.user_path;
 		ftd.best_trackdir = (Trackdir)current.path.node.user_data[NPF_TRACKDIR_CHOICE];
 		ftd.best_path_dist = current.g;
 		ftd.best_bird_dist = 0;
@@ -750,26 +753,27 @@ public class Npf {
 	static boolean VehicleMayEnterTile(Owner owner, TileIndex tile, DiagDirection enterdir)
 	{
 		if (
-			tile.IsTileType( TileTypes.MP_RAILWAY) /* Rail tile (also rail depot) */
-			|| IsTrainStationTile(tile) /* Rail station tile */
-			|| IsTileDepotType(tile, TRANSPORT_ROAD) /* Road depot tile */
-			|| IsRoadStationTile(tile) /* Road station tile */
-			|| IsTileDepotType(tile, TRANSPORT_WATER) /* Water depot tile */
-			)
+				tile.IsTileType( TileTypes.MP_RAILWAY) /* Rail tile (also rail depot) */
+				|| IsTrainStationTile(tile) /* Rail station tile */
+				|| IsTileDepotType(tile, Global.TRANSPORT_ROAD) /* Road depot tile */
+				|| IsRoadStationTile(tile) /* Road station tile */
+				|| IsTileDepotType(tile, Global.TRANSPORT_WATER) /* Water depot tile */
+				)
 			return IsTileOwner(tile, owner); /* You need to own these tiles entirely to use them */
 
 		switch (GetTileType(tile)) {
-			case TileTypes.MP_STREET:
-				/* rail-road crossing : are we looking at the railway part? */
-				if (IsLevelCrossing(tile) && GetCrossingTransportType(tile, TrackdirToTrack(DiagdirToDiagTrackdir(enterdir))) == TRANSPORT_RAIL)
-					return IsTileOwner(tile, owner); /* Railway needs owner check, while the street is public */
-				break;
-			case TileTypes.MP_TUNNELBRIDGE:
-	#if 0
-	/* OPTIMISATION: If we are on the middle of a bridge, we will not do the cpu
-	 * intensive owner check, instead we will just assume that if the vehicle
-	 * managed to get on the bridge, it is probably allowed to :-)
-	 */
+		case TileTypes.MP_STREET:
+			/* rail-road crossing : are we looking at the railway part? */
+			if (IsLevelCrossing(tile) && GetCrossingTransportType(tile, TrackdirToTrack(DiagdirToDiagTrackdir(enterdir))) == Global.TRANSPORT_RAIL)
+				return IsTileOwner(tile, owner); /* Railway needs owner check, while the street is public */
+			break;
+		case TileTypes.MP_TUNNELBRIDGE:
+			if( 0 )
+			{
+				/* OPTIMISATION: If we are on the middle of a bridge, we will not do the cpu
+				 * intensive owner check, instead we will just assume that if the vehicle
+				 * managed to get on the bridge, it is probably allowed to :-)
+				 */
 				if ((tile.getMap().m5 & 0xC6) == 0xC0 && BitOps.GB(tile.getMap().m5, 0, 1) == (enterdir & 0x1)) {
 					/* on the middle part of a railway bridge: find bridge ending */
 					while (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && !((tile.getMap().m5 & 0xC6) == 0x80)) {
@@ -777,16 +781,16 @@ public class Npf {
 					}
 				}
 				/* if we were on a railway middle part, we are now at a railway bridge ending */
-	#endif
-				if (
+			}
+			if (
 					(tile.getMap().m5 & 0xFC) == 0 /* railway tunnel */
 					|| (tile.getMap().m5 & 0xC6) == 0x80 /* railway bridge ending */
 					|| ((tile.getMap().m5 & 0xF8) == 0xE0 && BitOps.GB(tile.getMap().m5, 0, 1) != (enterdir & 0x1)) /* railway under bridge */
 					)
-					return IsTileOwner(tile, owner);
-				break;
-			default:
-				break;
+				return IsTileOwner(tile, owner);
+			break;
+		default:
+			break;
 		}
 
 		return true; /* no need to check */
@@ -807,7 +811,8 @@ public class Npf {
 		TileIndex dst_tile;
 		int i;
 		TrackdirBits trackdirbits, ts;
-		TransportType type = aystar.user_data[NPF_TYPE];
+		//TransportType type = aystar.user_data[NPF_TYPE];
+		int type = aystar.user_data[NPF_TYPE];
 		/* Initialize to 0, so we can jump out (return) somewhere an have no neighbours */
 		aystar.num_neighbours = 0;
 		DEBUG_npf( 4, "Expanding: (%d, %d, %d) [%d]", TileX(src_tile), TileY(src_tile), src_trackdir, src_tile);
@@ -823,7 +828,7 @@ public class Npf {
 			flotr = FindLengthOfTunnel(src_tile, src_exitdir);
 			dst_tile = flotr.tile;
 		} else {
-			if (type != TRANSPORT_WATER && (src_tile.IsRoadStationTile() || src_tile.IsTileDepotType(type)))
+			if (type != Global.TRANSPORT_WATER && (src_tile.IsRoadStationTile() || src_tile.IsTileDepotType(type)))
 			{
 				/* This is a road station or a train or road depot. We can enter and exit
 				 * those from one side only. Trackdirs don't support that (yet), so we'll
@@ -840,7 +845,7 @@ public class Npf {
 				 * otherwise (only for trains, since only with trains you can
 				 * (sometimes) reach tiles after reversing that you couldn't reach
 				 * without reversing. */
-				if (src_trackdir == DiagdirToDiagTrackdir(ReverseDiagdir(exitdir)) && type == TRANSPORT_RAIL)
+				if (src_trackdir == DiagdirToDiagTrackdir(ReverseDiagdir(exitdir)) && type == Global.TRANSPORT_RAIL)
 					/* We are headed inwards. We can only reverse here, so we'll not
 					 * consider this direction, but jump ahead to the reverse direction.
 					 * It would be nicer to return one neighbour here (the reverse
@@ -868,7 +873,7 @@ public class Npf {
 		}
 
 		/* check correct rail type (mono, maglev, etc) */
-		if (type == TRANSPORT_RAIL) {
+		if (type == Global.TRANSPORT_RAIL) {
 			RailType dst_type = dst_tile.GetTileRailType(src_trackdir);
 			if (!IsCompatibleRail(aystar.user_data[NPF_RAILTYPE], dst_type))
 				return;
@@ -880,7 +885,7 @@ public class Npf {
 		}
 
 		/* Determine available tracks */
-		if (type != TRANSPORT_WATER && (dst_tile.IsRoadStationTile() || dst_tile.IsTileDepotType(type)))
+		if (type != Global.TRANSPORT_WATER && (dst_tile.IsRoadStationTile() || dst_tile.IsTileDepotType(type)))
 		{
 			/* Road stations and road and train depots return 0 on GTTS, so we have to do this by hand... */
 			DiagDirection exitdir;
@@ -896,14 +901,14 @@ public class Npf {
 		} else {
 			ts = GetTileTrackStatus(dst_tile, type);
 		}
-		trackdirbits = ts & TRACKDIR_BIT_MASK; /* Filter out signal status and the unused bits */
+		trackdirbits = ts & Trackdir.TRACKDIR_BIT_MASK; /* Filter out signal status and the unused bits */
 
 		DEBUG_npf( 4, "Next node: (%d, %d) [%d], possible trackdirs: %#x", dst_tile.TileX(), dst_tile.TileY(), dst_tile.getTile(), trackdirbits);
 		/* Select only trackdirs we can reach from our current trackdir */
 		trackdirbits &= TrackdirReachesTrackdirs(src_trackdir);
-		if (Global._patches.forbid_90_deg && (type == TRANSPORT_RAIL || type == TRANSPORT_WATER)) /* Filter out trackdirs that would make 90 deg turns for trains */
+		if (Global._patches.forbid_90_deg && (type == Global.TRANSPORT_RAIL || type == Global.TRANSPORT_WATER)) /* Filter out trackdirs that would make 90 deg turns for trains */
 
-		trackdirbits &= ~TrackdirCrossesTrackdirs(src_trackdir);
+			trackdirbits &= ~TrackdirCrossesTrackdirs(src_trackdir);
 
 		if (BitOps.KillFirstBit2x64(trackdirbits) != 0)
 			NPFSetFlag(current.path.node, NPF_FLAG_PBS_CHOICE, true);
@@ -954,7 +959,8 @@ public class Npf {
 	 * multiple targets that are spread around, we should perform a breadth first
 	 * search by specifiying CalcZero as our heuristic.
 	 */
-	static NPFFoundTargetData NPFRouteInternal(AyStarNode  start1, AyStarNode  start2, NPFFindStationOrTileData  target, AyStar_EndNodeCheck target_proc, AyStar_CalculateH heuristic_proc, TransportType type, Owner owner, RailType railtype, int reverse_penalty, byte pbs_mode)
+	//static NPFFoundTargetData NPFRouteInternal(AyStarNode  start1, AyStarNode  start2, NPFFindStationOrTileData  target, AyStar_EndNodeCheck target_proc, AyStar_CalculateH heuristic_proc, TransportType type, Owner owner, RailType railtype, int reverse_penalty, byte pbs_mode)
+	static NPFFoundTargetData NPFRouteInternal(AyStarNode  start1, AyStarNode  start2, NPFFindStationOrTileData  target, AyStar_EndNodeCheck target_proc, AyStar_CalculateH heuristic_proc, int type, Owner owner, RailType railtype, int reverse_penalty, byte pbs_mode)
 	{
 		int r;
 		NPFFoundTargetData result;
@@ -964,11 +970,11 @@ public class Npf {
 		_npf_aystar.EndNodeCheck = target_proc;
 		_npf_aystar.FoundEndNode = NPFSaveTargetData;
 		_npf_aystar.GetNeighbours = NPFFollowTrack;
-		if (type == TRANSPORT_RAIL)
+		if (type == Global.TRANSPORT_RAIL)
 			_npf_aystar.CalculateG = NPFRailPathCost;
-		else if (type == TRANSPORT_ROAD)
+		else if (type == Global.TRANSPORT_ROAD)
 			_npf_aystar.CalculateG = NPFRoadPathCost;
-		else if (type == TRANSPORT_WATER)
+		else if (type == Global.TRANSPORT_WATER)
 			_npf_aystar.CalculateG = NPFWaterPathCost;
 		else
 			assert(0);
@@ -981,12 +987,12 @@ public class Npf {
 		/* Initialize Start Node(s) */
 		start1.user_data[NPF_TRACKDIR_CHOICE] = INVALID_TRACKDIR;
 		start1.user_data[NPF_NODE_FLAGS] = 0;
-		_npf_aystar.addstart(&_npf_aystar, start1, 0);
+		_npf_aystar.addstart(_npf_aystar, start1, 0);
 		if (start2) {
 			start2.user_data[NPF_TRACKDIR_CHOICE] = INVALID_TRACKDIR;
 			start2.user_data[NPF_NODE_FLAGS] = 0;
 			NPFSetFlag(start2, NPF_FLAG_REVERSE, true);
-			_npf_aystar.addstart(&_npf_aystar, start2, reverse_penalty);
+			_npf_aystar.addstart(_npf_aystar, start2, reverse_penalty);
 		}
 
 		/* Initialize result */
@@ -1020,7 +1026,8 @@ public class Npf {
 		return result;
 	}
 
-	NPFFoundTargetData NPFRouteToStationOrTileTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, NPFFindStationOrTileData  target, TransportType type, Owner owner, RailType railtype, byte pbs_mode)
+	//NPFFoundTargetData NPFRouteToStationOrTileTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, NPFFindStationOrTileData  target, TransportType type, Owner owner, RailType railtype, byte pbs_mode)
+	NPFFoundTargetData NPFRouteToStationOrTileTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, NPFFindStationOrTileData  target, int type, Owner owner, RailType railtype, byte pbs_mode)
 	{
 		AyStarNode start1;
 		AyStarNode start2;
@@ -1037,12 +1044,12 @@ public class Npf {
 		return NPFRouteInternal(&start1, (IsValidTile(tile2) ? &start2 : null), target, NPFFindStationOrTile, NPFCalcStationOrTileHeuristic, type, owner, railtype, 0, pbs_mode);
 	}
 
-	NPFFoundTargetData NPFRouteToStationOrTile(TileIndex tile, Trackdir trackdir, NPFFindStationOrTileData  target, TransportType type, Owner owner, RailType railtype, byte pbs_mode)
+	NPFFoundTargetData NPFRouteToStationOrTile(TileIndex tile, Trackdir trackdir, NPFFindStationOrTileData  target, /*TransportType*/ int type, Owner owner, RailType railtype, byte pbs_mode)
 	{
 		return NPFRouteToStationOrTileTwoWay(tile, trackdir, INVALID_TILE, 0, target, type, owner, railtype, pbs_mode);
 	}
 
-	NPFFoundTargetData NPFRouteToDepotBreadthFirstTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, TransportType type, Owner owner, RailType railtype, int reverse_penalty)
+	NPFFoundTargetData NPFRouteToDepotBreadthFirstTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, /*TransportType*/ int type, Owner owner, RailType railtype, int reverse_penalty)
 	{
 		AyStarNode start1;
 		AyStarNode start2;
@@ -1061,12 +1068,12 @@ public class Npf {
 		return NPFRouteInternal(&start1, (IsValidTile(tile2) ? &start2 : null), null, NPFFindDepot, NPFCalcZero, type, owner, railtype, reverse_penalty, PBS_MODE_NONE);
 	}
 
-	NPFFoundTargetData NPFRouteToDepotBreadthFirst(TileIndex tile, Trackdir trackdir, TransportType type, Owner owner, RailType railtype)
+	NPFFoundTargetData NPFRouteToDepotBreadthFirst(TileIndex tile, Trackdir trackdir, /*TransportType*/ int type, Owner owner, RailType railtype)
 	{
 		return NPFRouteToDepotBreadthFirstTwoWay(tile, trackdir, INVALID_TILE, 0, type, owner, railtype, 0);
 	}
 
-	NPFFoundTargetData NPFRouteToDepotTrialError(TileIndex tile, Trackdir trackdir, TransportType type, Owner owner, RailType railtype)
+	NPFFoundTargetData NPFRouteToDepotTrialError(TileIndex tile, Trackdir trackdir, /*TransportType*/ int type, Owner owner, RailType railtype)
 	{
 		/* Okay, what we're gonna do. First, we look at all depots, calculate
 		 * the manhatten distance to get to each depot. We then sort them by
@@ -1102,11 +1109,11 @@ public class Npf {
 		_npf_aystar.EndNodeCheck = NPFFindStationOrTile;
 		_npf_aystar.FoundEndNode = NPFSaveTargetData;
 		_npf_aystar.GetNeighbours = NPFFollowTrack;
-		if (type == TRANSPORT_RAIL)
+		if (type == Global.TRANSPORT_RAIL)
 			_npf_aystar.CalculateG = NPFRailPathCost;
-		else if (type == TRANSPORT_ROAD)
+		else if (type == Global.TRANSPORT_ROAD)
 			_npf_aystar.CalculateG = NPFRoadPathCost;
-		else if (type == TRANSPORT_WATER)
+		else if (type == Global.TRANSPORT_WATER)
 			_npf_aystar.CalculateG = NPFWaterPathCost;
 		else
 			assert(0);
@@ -1197,8 +1204,8 @@ public class Npf {
 			fstd.station_index = -1;
 		}
 	}
-	
-	
-	
-	
+
+
+
+
 }
