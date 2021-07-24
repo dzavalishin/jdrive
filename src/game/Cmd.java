@@ -615,6 +615,10 @@ public class Cmd {
 		return false;
 	}
 
+	public static int return_cmd_error(int errcode) {
+		return CMD_ERROR | (errcode);		
+	}
+
 
 
 

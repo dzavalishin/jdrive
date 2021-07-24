@@ -514,11 +514,11 @@ public class Clear {
 		}
 
 		if (BitOps.GB(m4, 5, 3) != 0) {
-			Gfx.DrawGroundSpriteAt(_clear_land_fence_sprites_1[BitOps.GB(m4, 5, 3) - 1] + _fence_mod_by_tileh[ti.tileh], ti.x, ti.y, z);
+			ViewPort.DrawGroundSpriteAt(_clear_land_fence_sprites_1[BitOps.GB(m4, 5, 3) - 1] + _fence_mod_by_tileh[ti.tileh], ti.x, ti.y, z);
 		}
 
 		if (BitOps.GB(m4, 2, 3) != 0) {
-			DrawGroundSpriteAt(_clear_land_fence_sprites_1[BitOps.GB(m4, 2, 3) - 1] + _fence_mod_by_tileh_2[ti.tileh], ti.x, ti.y, z);
+			ViewPort.DrawGroundSpriteAt(_clear_land_fence_sprites_1[BitOps.GB(m4, 2, 3) - 1] + _fence_mod_by_tileh_2[ti.tileh], ti.x, ti.y, z);
 		}
 	}
 

@@ -531,13 +531,13 @@ public class Gfx {
 
 	static void DrawStringMultiLine(int x, int y, StringID str, int maxw)
 	{
-		char buffer[512];
+		//char buffer[512];
 		int tmp;
 		int num, mt;
 		final String src;
 		byte c;
 
-		GetString(buffer, str);
+		String buffer = Global.GetString(str);
 
 		tmp = FormatStringLinebreaks(buffer, maxw);
 		num = BitOps.GB(tmp, 0, 16);
@@ -579,7 +579,7 @@ public class Gfx {
 		int base = _stringwidth_base;
 		int strp = 0;
 		char [] ca = str.toCharArray();
-		for (c = ca[strp]; c != '\0' && strp < ca.length; c = ca[strp++]) {
+		for (c = ca[strp]; /*c != '\0' &&*/ strp < ca.length; c = ca[strp++]) {
 			if (c >= ASCII_LETTERSTART) {
 				w += GetCharacterWidth(base + c);
 			} else {
