@@ -117,7 +117,7 @@ public class Clear {
 		}
 
 		if (!skip_clear) {
-			int ret = DoCommandByTile(tile, 0,0, ts.flags & ~Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
+			int ret = Cmd.DoCommandByTile(tile, 0,0, ts.flags & ~Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 
 			if (Cmd.CmdFailed(ret)) {
 				Global._terraform_err_tile = tile;
@@ -363,7 +363,7 @@ public class Clear {
 		{
 			curh = TileHeight(tile2);
 			while (curh != h) {
-				ret = DoCommandByTile(tile2, 8, (curh > h) ? 0 : 1, flags & ~Cmd.DC_EXEC, Cmd.CMD_TERRAFORM_LAND);
+				ret = Cmd.DoCommandByTile(tile2, 8, (curh > h) ? 0 : 1, flags & ~Cmd.DC_EXEC, Cmd.CMD_TERRAFORM_LAND);
 				if (Cmd.CmdFailed(ret)) break;
 				cost += ret;
 
@@ -372,7 +372,7 @@ public class Clear {
 						_additional_cash_required = ret;
 						return cost - ret;
 					}
-					DoCommandByTile(tile2, 8, (curh > h) ? 0 : 1, flags, Cmd.CMD_TERRAFORM_LAND);
+					Cmd.DoCommandByTile(tile2, 8, (curh > h) ? 0 : 1, flags, Cmd.CMD_TERRAFORM_LAND);
 				}
 
 				curh += (curh > h) ? -1 : 1;
@@ -403,7 +403,7 @@ public class Clear {
 				tile.IsTileOwner(Global._current_player.id))
 			return_cmd_error(Str.STR_5807_YOU_ALREADY_OWN_IT);
 
-		cost = DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+		cost = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
 
 		if (flags & Cmd.DC_EXEC) {

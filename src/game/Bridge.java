@@ -36,7 +36,7 @@ public class Bridge
 	static void BuildBridge(Window w, int i)
 	{
 		w.DeleteWindow();
-		DoCommandP(_bridgedata.end_tile, _bridgedata.start_tile,
+		Cmd.DoCommandP(_bridgedata.end_tile, _bridgedata.start_tile,
 			_bridgedata.indexes[i] | (_bridgedata.type << 8), CcBuildBridge,
 			Cmd.CMD_BUILD_BRIDGE | Cmd.CMD_AUTO | Cmd.CMD_MSG(STR_5015_CAN_T_BUILD_BRIDGE_HERE));
 	}

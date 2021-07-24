@@ -131,11 +131,11 @@ public class Gui
 
 		switch (_rename_what) {
 		case 0: /* Rename a s sign, if string is empty, delete sign */
-			DoCommandP(0, id, 0, null, Cmd.CMD_RENAME_SIGN | Cmd.CMD_MSG(Str.STR_280C_CAN_T_CHANGE_SIGN_NAME));
+			Cmd.DoCommandP(0, id, 0, null, Cmd.CMD_RENAME_SIGN | Cmd.CMD_MSG(Str.STR_280C_CAN_T_CHANGE_SIGN_NAME));
 			break;
 		case 1: /* Rename a waypoint */
 			if (*b == '\0') return;
-			DoCommandP(0, id, 0, null, Cmd.CMD_RENAME_WAYPOINT | Cmd.CMD_MSG(Str.STR_CANT_CHANGE_WAYPOINT_NAME));
+			Cmd.DoCommandP(0, id, 0, null, Cmd.CMD_RENAME_WAYPOINT | Cmd.CMD_MSG(Str.STR_CANT_CHANGE_WAYPOINT_NAME));
 			break;
 	/* #ifdef ENABLE_NETWORK
 		case 2: // Speak to.. 
@@ -152,7 +152,7 @@ public class Gui
 			money = clamp(money, 0, 20000000); // Clamp between 20 million and 0
 
 			// Give 'id' the money, and substract it from ourself
-			if (!DoCommandP(0, money, id, null, Cmd.CMD_GIVE_MONEY | Cmd.CMD_MSG(Str.STR_INSUFFICIENT_FUNDS))) break;
+			if (!Cmd.DoCommandP(0, money, id, null, Cmd.CMD_GIVE_MONEY | Cmd.CMD_MSG(Str.STR_INSUFFICIENT_FUNDS))) break;
 
 			// Inform the player of this action
 			snprintf(msg, sizeof(msg), "%d", money);
@@ -214,7 +214,7 @@ public class Gui
 	{
 		if (Global._networking && !Global._network_server) return; // only server can pause the game
 
-		if (DoCommandP(0, Global._pause ? 0 : 1, 0, null, Cmd.CMD_PAUSE)) {
+		if (Cmd.DoCommandP(0, Global._pause ? 0 : 1, 0, null, Cmd.CMD_PAUSE)) {
 			// TODO SndPlayFx(SND_15_BEEP);
 		}
 	}
@@ -1236,7 +1236,7 @@ public class Gui
 		Global._generating_world = true; // used to create green terraformed land
 
 		if (_terraform_size == 1) {
-			DoCommandP(tile, 8, (int)mode, CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(_error_message_2));
+			Cmd.DoCommandP(tile, 8, (int)mode, CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(_error_message_2));
 		} else {
 			// TODO SndPlayTileFx(SND_1F_SPLAT, tile);
 
@@ -1269,7 +1269,7 @@ public class Gui
 			TileIndex.forAll( sizex, sizey, tile, (tile2) ->
 			{
 				if (tile2.TileHeight() == h) {
-					DoCommandP(tile2, 8, (int)mode, null, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO);
+					Cmd.DoCommandP(tile2, 8, (int)mode, null, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO);
 				}
 			}); //END_TILE_LOOP(tile2, sizex, sizey, tile)
 		}
@@ -1540,7 +1540,7 @@ public class Gui
 
 	static void PlaceProc_Town(TileIndex tile)
 	{
-		DoCommandP(tile, 0, 0, CcBuildTown, Cmd.CMD_BUILD_TOWN | Cmd.CMD_MSG(Str.STR_0236_CAN_T_BUILD_TOWN_HERE));
+		Cmd.DoCommandP(tile, 0, 0, CcBuildTown, Cmd.CMD_BUILD_TOWN | Cmd.CMD_MSG(Str.STR_0236_CAN_T_BUILD_TOWN_HERE));
 	}
 
 
@@ -2455,7 +2455,7 @@ public class Gui
 	//#ifdef ENABLE_NETWORK
 	//				if (!_networking || !_network_server || !_network_advertise)
 	//#endif 
-						DoCommandP(0, -10000000, 0, null, Cmd.CMD_MONEY_CHEAT);
+						Cmd.DoCommandP(0, -10000000, 0, null, Cmd.CMD_MONEY_CHEAT);
 					break;
 
 				case '2' | WKC_ALT: // Update the coordinates of all station signs 

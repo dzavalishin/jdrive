@@ -279,7 +279,7 @@ public class SignStruct implements IPoolItem
 	 */
 	static void PlaceProc_Sign(TileIndex tile)
 	{
-		DoCommandP(tile, 0, 0, CcPlaceSign, CMD_PLACE_SIGN | CMD_MSG(STR_2809_CAN_T_PLACE_SIGN_HERE));
+		Cmd.DoCommandP(tile, 0, 0, CcPlaceSign, CMD_PLACE_SIGN | CMD_MSG(STR_2809_CAN_T_PLACE_SIGN_HERE));
 	}
 
 	/**

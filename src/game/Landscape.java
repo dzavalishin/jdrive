@@ -333,7 +333,7 @@ public class Landscape extends GenLandTable
 
 		for (x = sx; x <= ex; x += 16) {
 			for (y = sy; y <= ey; y += 16) {
-				ret = DoCommandByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags & ~Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
+				ret = Cmd.DoCommandByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags & ~Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 				if (Cmd.CmdFailed(ret)) continue;
 				cost += ret;
 				success = true;
@@ -343,7 +343,7 @@ public class Landscape extends GenLandTable
 						_additional_cash_required = ret;
 						return cost - ret;
 					}
-					DoCommandByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+					Cmd.ByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 
 					// draw explosion animation...
 					if ((x == sx || x == ex) && (y == sy || y == ey)) {

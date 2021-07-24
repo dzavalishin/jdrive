@@ -1625,7 +1625,7 @@ public class AirCraft {
 					(p.engine_renew && v.age - v.max_age > p.engine_renew_months * 30)
 				)) {
 			Global._current_player = Global._local_player;
-			DoCommandP(v.tile, v.index, 1, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
+			Cmd.DoCommandP(v.tile, v.index, 1, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
 			Global._current_player = Owner.OWNER_NONE;
 		}
 	}
@@ -1752,7 +1752,7 @@ public class AirCraft {
 				(p.engine_renew && v.age - v.max_age > (p.engine_renew_months * 30))) {
 				// send the aircraft to the hangar at next airport (bit 17 set)
 				Global._current_player = Global._local_player;
-				DoCommandP(v.tile, v.index, 1 << 16, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
+				Cmd.DoCommandP(v.tile, v.index, 1 << 16, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
 				Global._current_player = Owner.OWNER_NONE;
 			}
 		}
@@ -2413,7 +2413,7 @@ public class AirCraft {
 			case 5: { /* build */
 				EngineID sel_eng = WP(w,buildtrain_d).sel_engine;
 				if (sel_eng != INVALID_ENGINE)
-					DoCommandP(w.window_number, sel_eng, 0, CcBuildAircraft, Cmd.CMD_BUILD_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT));
+					Cmd.DoCommandP(w.window_number, sel_eng, 0, CcBuildAircraft, Cmd.CMD_BUILD_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT));
 			} break;
 
 			case 6:	{ /* rename */
@@ -2436,7 +2436,7 @@ public class AirCraft {
 		case WindowEvents.WE_ON_EDIT_TEXT: {
 			if (e.edittext.str[0] != '\0') {
 				Global._cmd_text = e.edittext.str;
-				DoCommandP(0, WP(w, buildtrain_d).rename_engine, 0, null,
+				Cmd.DoCommandP(0, WP(w, buildtrain_d).rename_engine, 0, null,
 					Cmd.CMD_RENAME_ENGINE | Cmd.CMD_MSG(Str.STR_A03A_CAN_T_RENAME_AIRCRAFT_TYPE));
 			}
 		} break;
@@ -2526,7 +2526,7 @@ public class AirCraft {
 			case 4: /* refit button */
 				if (w.as_refit_d().cargo != AcceptedCargo.CT_INVALID) {
 					final Vehicle v = Vehicle.GetVehicle(w.window_number);
-					if (DoCommandP(v.tile, v.index, w.as_refit_d().cargo, null, Cmd.CMD_REFIT_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A042_CAN_T_REFIT_AIRCRAFT)))
+					if (Cmd.DoCommandP(v.tile, v.index, w.as_refit_d().cargo, null, Cmd.CMD_REFIT_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A042_CAN_T_REFIT_AIRCRAFT)))
 						DeleteWindow(w);
 				}
 			  break;
@@ -2675,7 +2675,7 @@ public class AirCraft {
 				mod = GetServiceIntervalClamped(mod + v.service_interval);
 				if (mod == v.service_interval) return;
 
-				DoCommandP(v.tile, v.index, mod, null, Cmd.CMD_CHANGE_AIRCRAFT_SERVICE_INT | Cmd.CMD_MSG(Str.STR_018A_CAN_T_CHANGE_SERVICING));
+				Cmd.DoCommandP(v.tile, v.index, mod, null, Cmd.CMD_CHANGE_AIRCRAFT_SERVICE_INT | Cmd.CMD_MSG(Str.STR_018A_CAN_T_CHANGE_SERVICING));
 				break;
 			}
 		} break;
@@ -2688,7 +2688,7 @@ public class AirCraft {
 		case WindowEvents.WE_ON_EDIT_TEXT:
 			if (e.edittext.str[0] != '\0') {
 				Global._cmd_text = e.edittext.str;
-				DoCommandP(0, w.window_number, 0, null,
+				Cmd.DoCommandP(0, w.window_number, 0, null,
 					Cmd.CMD_NAME_VEHICLE | Cmd.CMD_MSG(Str.STR_A031_CAN_T_NAME_AIRCRAFT));
 			}
 			break;
@@ -2820,13 +2820,13 @@ public class AirCraft {
 
 			switch (e.click.widget) {
 			case 5: /* start stop */
-				DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_START_STOP_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A016_CAN_T_STOP_START_AIRCRAFT));
+				Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_START_STOP_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A016_CAN_T_STOP_START_AIRCRAFT));
 				break;
 			case 6: /* center main view */
 				ScrollMainWindowTo(v.x_pos, v.y_pos);
 				break;
 			case 7: /* goto hangar */
-				DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_MSG(Str.STR_A012_CAN_T_SEND_AIRCRAFT_TO));
+				Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_MSG(Str.STR_A012_CAN_T_SEND_AIRCRAFT_TO));
 				break;
 			case 8: /* refit */
 				ShowAircraftRefitWindow(v);
@@ -2839,7 +2839,7 @@ public class AirCraft {
 				break;
 			case 11:
 				/* clone vehicle */
-				DoCommandP(v.tile, v.index, _ctrl_pressed ? 1 : 0, CcCloneAircraft, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT));
+				Cmd.DoCommandP(v.tile, v.index, _ctrl_pressed ? 1 : 0, CcCloneAircraft, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT));
 				break;
 			}
 		} break;
@@ -3006,7 +3006,7 @@ public class AirCraft {
 			break;
 
 		case -2: // click start/stop flag
-			DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_START_STOP_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A016_CAN_T_STOP_START_AIRCRAFT));
+			Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_START_STOP_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A016_CAN_T_STOP_START_AIRCRAFT));
 			break;
 
 		default:
@@ -3023,7 +3023,7 @@ public class AirCraft {
 	{
 		if (v == null || v.type != Vehicle.VEH_Aircraft) return;
 
-		DoCommandP(w.window_number, v.index, _ctrl_pressed ? 1 : 0,
+		Cmd.DoCommandP(w.window_number, v.index, _ctrl_pressed ? 1 : 0,
 			CcCloneAircraft, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT)
 		);
 
@@ -3128,7 +3128,7 @@ public class AirCraft {
 					_backup_orders_tile = v.tile;
 					BackupVehicleOrders(v, _backup_orders_data);
 
-					if (!DoCommandP(v.tile, v.index, 0, null,  Cmd.CMD_SELL_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A01C_CAN_T_SELL_AIRCRAFT)))
+					if (!Cmd.DoCommandP(v.tile, v.index, 0, null,  Cmd.CMD_SELL_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A01C_CAN_T_SELL_AIRCRAFT)))
 						_backup_orders_tile = 0;
 				}
 				break;

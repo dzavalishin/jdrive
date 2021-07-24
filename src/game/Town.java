@@ -654,8 +654,8 @@ public class Town extends TownTables implements IPoolItem
 				// No, try to build one in the direction.
 				// if that fails clear the land, and if that fails exit.
 				// This is to make sure that we can build a road here later.
-				if (Cmd.CmdFailed(DoCommandByTile(tile, (dir&1)?0xA:0x5, 0, Cmd.DC_AUTO, Cmd.CMD_BUILD_ROAD)) &&
-						Cmd.CmdFailed(DoCommandByTile(tile, 0, 0, Cmd.DC_AUTO, Cmd.CMD_LANDSCAPE_CLEAR)))
+				if (Cmd.CmdFailed(Cmd.DoCommandByTile(tile, (dir&1)?0xA:0x5, 0, Cmd.DC_AUTO, Cmd.CMD_BUILD_ROAD)) &&
+						Cmd.CmdFailed(Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_AUTO, Cmd.CMD_LANDSCAPE_CLEAR)))
 					return false;
 			}
 
@@ -683,10 +683,10 @@ public class Town extends TownTables implements IPoolItem
 					int res;
 
 					if (BitOps.CHANCE16I(1, 16, r)) {
-						res = DoCommandByTile(tile, slope, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER,
+						res = Cmd.DoCommandByTile(tile, slope, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER,
 								Cmd.CMD_TERRAFORM_LAND);
 					} else {
-						res = DoCommandByTile(tile, slope^0xF, 1, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER,
+						res = Cmd.DoCommandByTile(tile, slope^0xF, 1, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER,
 								Cmd.CMD_TERRAFORM_LAND);
 					}
 					if (Cmd.CmdFailed(res) && BitOps.CHANCE16I(1, 3, r)) {
@@ -706,9 +706,9 @@ public class Town extends TownTables implements IPoolItem
 
 		TILE_ASSERT(tile);
 
-		r = DoCommandByTile(tile, edges, dir, Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_TERRAFORM_LAND);
+		r = Cmd.DoCommandByTile(tile, edges, dir, Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_TERRAFORM_LAND);
 		if (Cmd.CmdFailed(r) || r >= 126 * 16) return false;
-		DoCommandByTile(tile, edges, dir, Cmd.DC_AUTO | Cmd.DC_NO_WATER | Cmd.DC_EXEC, Cmd.CMD_TERRAFORM_LAND);
+		Cmd.DoCommandByTile(tile, edges, dir, Cmd.DC_AUTO | Cmd.DC_NO_WATER | Cmd.DC_EXEC, Cmd.CMD_TERRAFORM_LAND);
 		return true;
 	}
 
@@ -834,7 +834,7 @@ public class Town extends TownTables implements IPoolItem
 				(i++,ti.tileh != 12) &&
 				(i++,ti.tileh != 6)) {
 			build_road_and_exit:
-				if (!Cmd.CmdFailed(DoCommandByTile(tile, rcmd, t1.index, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD)))
+				if (!Cmd.CmdFailed(Cmd.DoCommandByTile(tile, rcmd, t1.index, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD)))
 					_grow_town_result = -1;
 			return;
 		}
@@ -860,7 +860,7 @@ public class Town extends TownTables implements IPoolItem
 			do {
 				byte bridge_type = RandomRange(MAX_BRIDGES - 1);
 				if (CheckBridge_Stuff(bridge_type, bridge_len)) {
-					if (!Cmd.CmdFailed(DoCommandByTile(tile, tmptile, 0x8000 + bridge_type, Cmd.DC_EXEC | Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE)))
+					if (!Cmd.CmdFailed(Cmd.DoCommandByTile(tile, tmptile, 0x8000 + bridge_type, Cmd.DC_EXEC | Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE)))
 						_grow_town_result = -1;
 
 					// obviously, if building any bridge would fail, there is no need to try other bridge-types
@@ -980,8 +980,8 @@ public class Town extends TownTables implements IPoolItem
 
 			// Only work with plain land that not already has a house with map5=0
 			if (ti.tileh == 0 && (ti.type != TileTypes.MP_HOUSE || ti.map5 != 0)) {
-				if (!Cmd.CmdFailed(DoCommandByTile(tile, 0, 0, Cmd.DC_AUTO, Cmd.CMD_LANDSCAPE_CLEAR))) {
-					DoCommandByTile(tile, GenRandomRoadBits(), t.index, Cmd.DC_EXEC | Cmd.DC_AUTO, Cmd.CMD_BUILD_ROAD);
+				if (!Cmd.CmdFailed(Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_AUTO, Cmd.CMD_LANDSCAPE_CLEAR))) {
+					Cmd.DoCommandByTile(tile, GenRandomRoadBits(), t.index, Cmd.DC_EXEC | Cmd.DC_AUTO, Cmd.CMD_BUILD_ROAD);
 					Global._current_player = old_player;
 					return true;
 				}
@@ -1311,7 +1311,7 @@ public class Town extends TownTables implements IPoolItem
 		if (b)
 			return false;
 
-		return !Cmd.CmdFailed(DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_LANDSCAPE_CLEAR));
+		return !Cmd.CmdFailed(Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_LANDSCAPE_CLEAR));
 	}
 
 	int GetTownRadiusGroup(final Town t, TileIndex tile)
@@ -1349,7 +1349,7 @@ public class Town extends TownTables implements IPoolItem
 			if (TileIndex.GetTileSlope(tile, null))
 				return false;
 
-			if (Cmd.CmdFailed(DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER | Cmd.DC_FORCETEST, Cmd.CMD_LANDSCAPE_CLEAR)))
+			if (Cmd.CmdFailed(Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER | Cmd.DC_FORCETEST, Cmd.CMD_LANDSCAPE_CLEAR)))
 				return false;
 		}
 
@@ -1535,7 +1535,7 @@ public class Town extends TownTables implements IPoolItem
 		if (!(tile.EnsureNoVehicle)) return false;
 		if (GetTileSlope(tile, null) & 0x10) return false;
 
-		r = DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_LANDSCAPE_CLEAR);
+		r = Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(r)) return false;
 
 		DoBuildTownHouse(t, tile);
@@ -1660,14 +1660,14 @@ public class Town extends TownTables implements IPoolItem
 			switch (GetTileType(tile)) {
 			case TileTypes.MP_HOUSE:
 				if (GetTown(tile.getMap().m2) == t)
-					DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
+					Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 				break;
 
 			case TileTypes.MP_STREET:
 			case TileTypes.MP_TUNNELBRIDGE:
 				if (IsTileOwner(tile, Owner.OWNER_TOWN) &&
 						ClosestTownFromTile(tile, (int)-1) == t)
-					DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
+					Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 				break;
 
 			default:
@@ -1749,7 +1749,7 @@ public class Town extends TownTables implements IPoolItem
 
 		old = Global._current_player;
 		Global._current_player = Owner.OWNER_NONE;
-		r = DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
+		r = Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 		Global._current_player = old;
 
 		if (Cmd.CmdFailed(r)) return false;

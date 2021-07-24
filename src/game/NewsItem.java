@@ -31,7 +31,7 @@ public class NewsItem {
 	{
 		string_id = null;
 		duration = 0;
-		date;
+		date = 0;
 		flags = display_mode = type = callback = 0;
 		data_a = data_b = null;
 		int params[] = new int[10];
@@ -137,7 +137,7 @@ public class NewsItem {
 			_oldest_news = increaseIndex(_oldest_news); // but make sure we're not overflowing here
 
 		// add news to _latest_news
-		ni = &_news_items[_latest_news];
+		ni = _news_items[_latest_news];
 		memset(ni, 0, sizeof(*ni));
 
 		ni.string_id = string;
@@ -156,9 +156,9 @@ public class NewsItem {
 		ni.isValid = valid;
 		COPY_OUT_DPARAM(ni.params, 0, lengthof(ni.params));
 
-		w = FindWindowById(WC_MESSAGE_HISTORY, 0);
+		w = Window.FindWindowById(Window.WC_MESSAGE_HISTORY, 0);
 		if (w == null) return;
-		SetWindowDirty(w);
+		w.SetWindowDirty();
 		w.vscroll.count = _total_news;
 	}
 
@@ -213,7 +213,7 @@ public class NewsItem {
 		} break;
 
 		case WE_PAINT: {
-			final NewsItem *ni = WP(w, news_d).ni;
+			final NewsItem *ni = w.as_news_d().ni;
 			ViewPort *vp;
 
 			switch (ni.display_mode) {
@@ -272,13 +272,13 @@ public class NewsItem {
 		case WE_CLICK: {
 			switch (e.click.widget) {
 			case 1: {
-				NewsItem *ni = WP(w, news_d).ni;
+				NewsItem *ni = w.as_news_d().ni;
 				DeleteWindow(w);
 				ni.duration = 0;
 				_forced_news = INVALID_NEWS;
 			} break;
 			case 0: {
-				NewsItem *ni = WP(w, news_d).ni;
+				NewsItem *ni = w.as_news_d().ni;
 				if (ni.flags & NF_VEHICLE) {
 					Vehicle *v = GetVehicle(ni.data_a);
 					ScrollMainWindowTo(v.x_pos, v.y_pos);
@@ -392,45 +392,45 @@ public class NewsItem {
 	static final int _news_items_age[] = {60, 60, 90, 60, 90, 30, 150, 30, 90, 180};
 
 	static final Widget _news_type13_widgets[] = {
-			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,   429,     0,   169, 0x0, STR_NULL),
-			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,    10,     0,    11, 0x0, STR_NULL),
-			new Widget(   WIDGETS_END),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    15,     0,   429,     0,   169, 0x0, STR_NULL),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    15,     0,    10,     0,    11, 0x0, STR_NULL),
+			//new Widget(   WIDGETS_END),
 	};
 
 	static WindowDesc _news_type13_desc = new WindowDesc(
 			Window.WDP_CENTER, 476, 430, 170,
 			Window.WC_NEWS_WINDOW, 0,
-			Window.WDF_DEF_WIDGET,
+			WindowDesc.WDF_DEF_WIDGET,
 			_news_type13_widgets,
 			NewsItem::NewsWindowProc
 			);
 
 	static final Widget _news_type2_widgets[] = {
-			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,   429,     0,   129, 0x0, STR_NULL),
-			new Widget(      WWT_PANEL,   Window.RESIZE_NONE,    15,     0,    10,     0,    11, 0x0, STR_NULL),
-			new Widget(   WIDGETS_END),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    15,     0,   429,     0,   129, 0x0, STR_NULL),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    15,     0,    10,     0,    11, 0x0, STR_NULL),
+			//new Widget(   WIDGETS_END),
 	};
 
 	static WindowDesc _news_type2_desc = new WindowDesc(
 			Window.WDP_CENTER, 476, 430, 130,
 			Window.WC_NEWS_WINDOW, 0,
-			Window.WDF_DEF_WIDGET,
+			WindowDesc.WDF_DEF_WIDGET,
 			_news_type2_widgets,
 			NewsItem::NewsWindowProc
 			);
 
 	static final Widget _news_type0_widgets[] = {
-			new Widget(       WWT_PANEL,   Window.RESIZE_NONE,     5,     0,   279,    14,    86, 0x0,								STR_NULL),
-			new Widget(    WWT_CLOSEBOX,   Window.RESIZE_NONE,     5,     0,    10,     0,    13, STR_00C5,					STR_018B_CLOSE_WINDOW),
-			new Widget(     WWT_CAPTION,   Window.RESIZE_NONE,     5,    11,   279,     0,    13, STR_012C_MESSAGE,	STR_NULL),
-			new Widget(           WWT_6,   Window.RESIZE_NONE,     5,     2,   277,    16,    64, 0x0,								STR_NULL),
-			new Widget(    WIDGETS_END),
+			new Widget(       Window.WWT_PANEL,   Window.RESIZE_NONE,     5,     0,   279,    14,    86, 0x0,								STR_NULL),
+			new Widget(    Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     5,     0,    10,     0,    13, STR_00C5,					STR_018B_CLOSE_WINDOW),
+			new Widget(     Window.WWT_CAPTION,   Window.RESIZE_NONE,     5,    11,   279,     0,    13, STR_012C_MESSAGE,	STR_NULL),
+			new Widget(           Window.WWT_6,   Window.RESIZE_NONE,     5,     2,   277,    16,    64, 0x0,								STR_NULL),
+			//new Widget(    WIDGETS_END),
 	};
 
 	static WindowDesc _news_type0_desc = new WindowDesc(
 			Window.WDP_CENTER, 476, 280, 87,
 			Window.WC_NEWS_WINDOW, 0,
-			Window.WDF_DEF_WIDGET,
+			WindowDesc.WDF_DEF_WIDGET,
 			_news_type0_widgets,
 			NewsItem::NewsWindowProc
 			);
@@ -487,7 +487,7 @@ public class NewsItem {
 		case NM_NORMAL:
 		case NM_CALLBACK: {
 			_news_type13_desc.top = top;
-			w = AllocateWindowDesc(&_news_type13_desc);
+			w = AllocateWindowDesc(_news_type13_desc);
 			if (ni.flags & NF_VIEWPORT)
 				AssignWindowViewport(w, 2, 58, 0x1AA, 0x6E,
 						ni.data_a | (ni.flags & NF_VEHICLE ? 0x80000000 : 0), 0);
@@ -496,7 +496,7 @@ public class NewsItem {
 
 		case NM_THIN: {
 			_news_type2_desc.top = top;
-			w = AllocateWindowDesc(&_news_type2_desc);
+			w = AllocateWindowDesc(_news_type2_desc);
 			if (ni.flags & NF_VIEWPORT)
 				AssignWindowViewport(w, 2, 58, 0x1AA, 0x46,
 						ni.data_a | (ni.flags & NF_VEHICLE ? 0x80000000 : 0), 0);
@@ -505,14 +505,14 @@ public class NewsItem {
 
 		default: {
 			_news_type0_desc.top = top;
-			w = AllocateWindowDesc(&_news_type0_desc);
+			w = AllocateWindowDesc(_news_type0_desc);
 			if (ni.flags & NF_VIEWPORT)
 				AssignWindowViewport(w, 3, 17, 0x112, 0x2F,
 						ni.data_a | (ni.flags & NF_VEHICLE ? 0x80000000 : 0), 0);
 			break;
 		}
 		}
-		WP(w, news_d).ni = &_news_items[_forced_news == INVALID_NEWS ? _current_news : _forced_news];
+		w.as_news_d().ni = _news_items[_forced_news == INVALID_NEWS ? _current_news : _forced_news];
 		w.flags4 |= WF_DISABLE_VP_SCROLL;
 	}
 
@@ -760,19 +760,19 @@ public class NewsItem {
 	}
 
 	static final Widget _message_history_widgets[] = {
-			new Widget(   WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, STR_00C5,			STR_018B_CLOSE_WINDOW),
-			new Widget(    WWT_CAPTION,  Window.RESIZE_RIGHT,    13,    11,   387,     0,    13, STR_MESSAGE_HISTORY,	STR_018C_WINDOW_TITLE_DRAG_THIS),
-			new Widget(  WWT_STICKYBOX,     Window.RESIZE_LR,    13,   388,   399,     0,    13, 0x0,										STR_STICKY_BUTTON),
-			new Widget(     WWT_IMGBTN,     Window.RESIZE_RB,    13,     0,   387,    14,   139, 0x0, STR_MESSAGE_HISTORY_TIP),
-			new Widget(  WWT_SCROLLBAR,    Window.RESIZE_LRB,    13,   388,   399,    14,   127, 0x0, STR_0190_SCROLL_BAR_SCROLLS_LIST),
-			new Widget(  WWT_RESIZEBOX,   Window.RESIZE_LRTB,    13,   388,   399,   128,   139, 0x0, STR_RESIZE_BUTTON),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, STR_00C5,			STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    13,    11,   387,     0,    13, STR_MESSAGE_HISTORY,	STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    13,   388,   399,     0,    13, 0x0,										STR_STICKY_BUTTON),
+			new Widget(     Window.WWT_IMGBTN,     Window.RESIZE_RB,    13,     0,   387,    14,   139, 0x0, STR_MESSAGE_HISTORY_TIP),
+			new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    13,   388,   399,    14,   127, 0x0, STR_0190_SCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    13,   388,   399,   128,   139, 0x0, STR_RESIZE_BUTTON),
 			new Widget(   WIDGETS_END),
 	};
 
 	static final WindowDesc _message_history_desc = new WindowDesc(
 			240, 22, 400, 140,
-			WC_MESSAGE_HISTORY, 0,
-			WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
+			Window.WC_MESSAGE_HISTORY, 0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 			_message_history_widgets,
 			MessageHistoryWndProc
 	);
@@ -925,53 +925,53 @@ public class NewsItem {
 	}
 
 	static final Widget _message_options_widgets[] = {
-			new Widget(   WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,   10,     0,    13, STR_00C5,             STR_018B_CLOSE_WINDOW),
-			new Widget(     WWT_CAPTION,   Window.RESIZE_NONE,    13,    11,  409,     0,    13, STR_0204_MESSAGE_OPTIONS, STR_018C_WINDOW_TITLE_DRAG_THIS),
-			new Widget(       WWT_PANEL,   Window.RESIZE_NONE,    13,     0,  409,    14,   184, STR_NULL,             STR_NULL),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,   10,     0,    13, STR_00C5,             STR_018B_CLOSE_WINDOW),
+			new Widget(     Window.WWT_CAPTION,   Window.RESIZE_NONE,    13,    11,  409,     0,    13, STR_0204_MESSAGE_OPTIONS, STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(       Window.WWT_PANEL,   Window.RESIZE_NONE,    13,     0,  409,    14,   184, STR_NULL,             STR_NULL),
 
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    26,    37, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    26,    37, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    26,    37, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    26,    37, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
 
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    38,    49, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    38,    49, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    38,    49, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    38,    49, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
 
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    50,    61, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    50,    61, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    50,    61, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    50,    61, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
 
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    62,    73, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    62,    73, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    62,    73, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    62,    73, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
 
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    74,    85, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    74,    85, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    74,    85, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    74,    85, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
 
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    86,    97, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    86,    97, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    86,    97, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    86,    97, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
 
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    98,   109, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    98,   109, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,    98,   109, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,    98,   109, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
 
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,   110,   121, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,   110,   121, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,   110,   121, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,   110,   121, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
 
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,   122,   133, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,   122,   133, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,   122,   133, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,   122,   133, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
 
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,   134,   145, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
-			new Widget(  WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,   134,   145, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,     4,   12,   134,   145, SPR_ARROW_LEFT,       STR_HSCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,     3,    90,   98,   134,   145, SPR_ARROW_RIGHT,      STR_HSCROLL_BAR_SCROLLS_LIST),
 
-			new Widget(       WWT_PANEL,   Window.RESIZE_NONE,     3,     4,   86,   154,   165, STR_NULL,             STR_NULL),
-			new Widget(     WWT_TEXTBTN,   Window.RESIZE_NONE,     3,    87,   98,   154,   165, STR_0225,             STR_NULL),
-			new Widget(           WWT_4,   Window.RESIZE_NONE,     3,     4,   98,   166,   177, STR_02DB_OFF,         STR_NULL),
+			new Widget(       Window.WWT_PANEL,   Window.RESIZE_NONE,     3,     4,   86,   154,   165, STR_NULL,             STR_NULL),
+			new Widget(     Window.WWT_TEXTBTN,   Window.RESIZE_NONE,     3,    87,   98,   154,   165, STR_0225,             STR_NULL),
+			new Widget(           Window.WWT_4,   Window.RESIZE_NONE,     3,     4,   98,   166,   177, STR_02DB_OFF,         STR_NULL),
 
-			new Widget(    WIDGETS_END),
+			//new Widget(    WIDGETS_END),
 	};
 
 	static final WindowDesc _message_options_desc = new WindowDesc(
 			270, 22, 410, 185,
-			WC_GAME_OPTIONS, 0,
-			WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
+			Window.WC_GAME_OPTIONS, 0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 			_message_options_widgets,
-			MessageOptionsWndProc
+			NewsItem::MessageOptionsWndProc
 	);
 
 	void ShowMessageOptions()

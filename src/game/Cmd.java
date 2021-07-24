@@ -182,161 +182,8 @@ public class Cmd {
 
 
 
-
-
-	final char* Global._cmd_text = null;
-	/*
-	#define DEF_COMMAND(yyyy) int yyyy(int x, int y, int flags, int p1, int p2)
-
-	DEF_COMMAND(CmdBuildRailroadTrack);
-	DEF_COMMAND(CmdRemoveRailroadTrack);
-	DEF_COMMAND(CmdBuildSingleRail);
-	DEF_COMMAND(CmdRemoveSingleRail);
-
-	DEF_COMMAND(CmdLandscapeClear);
-
-	DEF_COMMAND(CmdBuildBridge);
-
-	DEF_COMMAND(CmdBuildRailroadStation);
-	DEF_COMMAND(CmdRemoveFromRailroadStation);
-	DEF_COMMAND(CmdConvertRail);
-
-	DEF_COMMAND(CmdBuildSingleSignal);
-	DEF_COMMAND(CmdRemoveSingleSignal);
-
-	DEF_COMMAND(CmdTerraformLand);
-
-	DEF_COMMAND(CmdPurchaseLandArea);
-	DEF_COMMAND(CmdSellLandArea);
-
-	DEF_COMMAND(CmdBuildTunnel);
-
-	DEF_COMMAND(CmdBuildTrainDepot);
-	DEF_COMMAND(CmdBuildTrainWaypoint);
-	DEF_COMMAND(CmdRenameWaypoint);
-	DEF_COMMAND(CmdRemoveTrainWaypoint);
-
-	DEF_COMMAND(CmdBuildRoadStop);
-
-	DEF_COMMAND(CmdBuildLongRoad);
-	DEF_COMMAND(CmdRemoveLongRoad);
-	DEF_COMMAND(CmdBuildRoad);
-	DEF_COMMAND(CmdRemoveRoad);
-
-	DEF_COMMAND(CmdBuildRoadDepot);
-
-	DEF_COMMAND(CmdBuildAirport);
-
-	DEF_COMMAND(CmdBuildDock);
-
-	DEF_COMMAND(CmdBuildShipDepot);
-
-	DEF_COMMAND(CmdBuildBuoy);
-
-	DEF_COMMAND(CmdPlantTree);
-
-	DEF_COMMAND(CmdBuildRailVehicle);
-	DEF_COMMAND(CmdMoveRailVehicle);
-
-	DEF_COMMAND(CmdStartStopTrain);
-
-	DEF_COMMAND(CmdSellRailWagon);
-
-	DEF_COMMAND(CmdSendTrainToDepot);
-	DEF_COMMAND(CmdForceTrainProceed);
-	DEF_COMMAND(CmdReverseTrainDirection);
-
-	DEF_COMMAND(CmdModifyOrder);
-	DEF_COMMAND(CmdSkipOrder);
-	DEF_COMMAND(CmdDeleteOrder);
-	DEF_COMMAND(CmdInsertOrder);
-	DEF_COMMAND(CmdChangeTrainServiceInt);
-	DEF_COMMAND(CmdRestoreOrderIndex);
-
-	DEF_COMMAND(CmdBuildIndustry);
-
-	DEF_COMMAND(CmdBuildCompanyHQ);
-	DEF_COMMAND(CmdSetPlayerFace);
-	DEF_COMMAND(CmdSetPlayerColor);
-
-	DEF_COMMAND(CmdIncreaseLoan);
-	DEF_COMMAND(CmdDecreaseLoan);
-
-	DEF_COMMAND(CmdWantEnginePreview);
-
-	DEF_COMMAND(CmdNameVehicle);
-	DEF_COMMAND(CmdRenameEngine);
-
-	DEF_COMMAND(CmdChangeCompanyName);
-	DEF_COMMAND(CmdChangePresidentName);
-
-	DEF_COMMAND(CmdRenameStation);
-
-	DEF_COMMAND(CmdSellAircraft);
-	DEF_COMMAND(CmdStartStopAircraft);
-	DEF_COMMAND(CmdBuildAircraft);
-	DEF_COMMAND(CmdSendAircraftToHangar);
-	DEF_COMMAND(CmdChangeAircraftServiceInt);
-	DEF_COMMAND(CmdRefitAircraft);
-
-	DEF_COMMAND(CmdPlaceSign);
-	DEF_COMMAND(CmdRenameSign);
-
-	DEF_COMMAND(CmdBuildRoadVeh);
-	DEF_COMMAND(CmdStartStopRoadVeh);
-	DEF_COMMAND(CmdSellRoadVeh);
-	DEF_COMMAND(CmdSendRoadVehToDepot);
-	DEF_COMMAND(CmdTurnRoadVeh);
-	DEF_COMMAND(CmdChangeRoadVehServiceInt);
-
-	DEF_COMMAND(CmdPause);
-
-	DEF_COMMAND(CmdBuyShareInCompany);
-	DEF_COMMAND(CmdSellShareInCompany);
-	DEF_COMMAND(CmdBuyCompany);
-
-	DEF_COMMAND(CmdBuildTown);
-
-	DEF_COMMAND(CmdRenameTown);
-	DEF_COMMAND(CmdDoTownAction);
-
-	DEF_COMMAND(CmdSetRoadDriveSide);
-
-	DEF_COMMAND(CmdChangeDifficultyLevel);
-	DEF_COMMAND(CmdChangePatchSetting);
-
-	DEF_COMMAND(CmdStartStopShip);
-	DEF_COMMAND(CmdSellShip);
-	DEF_COMMAND(CmdBuildShip);
-	DEF_COMMAND(CmdSendShipToDepot);
-	DEF_COMMAND(CmdChangeShipServiceInt);
-	DEF_COMMAND(CmdRefitShip);
-
-	DEF_COMMAND(CmdCloneOrder);
-
-	DEF_COMMAND(CmdClearArea);
-
-	DEF_COMMAND(CmdGiveMoney);
-	DEF_COMMAND(CmdMoneyCheat);
-	DEF_COMMAND(CmdBuildCanal);
-	DEF_COMMAND(CmdBuildLock);
-
-	DEF_COMMAND(CmdPlayerCtrl);
-
-	DEF_COMMAND(CmdLevelLand);
-
-	DEF_COMMAND(CmdRefitRailVehicle);
-
-	DEF_COMMAND(CmdBuildSignalTrack);
-	DEF_COMMAND(CmdRemoveSignalTrack);
-
-	DEF_COMMAND(CmdReplaceVehicle);
-
-	DEF_COMMAND(CmdCloneVehicle);
-	*/
-
 	/* The master command table */
-	static final Command _command_proc_table[] = {
+	static final Command [] _command_proc_table = {
 			{CmdBuildRailroadTrack,                  0}, /*   0 */
 			{CmdRemoveRailroadTrack,                 0}, /*   1 */
 			{CmdBuildSingleRail,                     0}, /*   2 */
@@ -347,18 +194,18 @@ public class Cmd {
 			{CmdBuildTrainDepot,                     0}, /*   7 */
 			{CmdBuildSingleSignal,                   0}, /*   8 */
 			{CmdRemoveSingleSignal,                  0}, /*   9 */
-			{CmdTerraformLand,                       0}, /*  10 */
-			{CmdPurchaseLandArea,                    0}, /*  11 */
-			{CmdSellLandArea,                        0}, /*  12 */
+			{Clear::CmdTerraformLand,                       0}, /*  10 */
+			{Clear::CmdPurchaseLandArea,                    0}, /*  11 */
+			{Clear::CmdSellLandArea,                        0}, /*  12 */
 			{CmdBuildTunnel,                         0}, /*  13 */
 			{CmdRemoveFromRailroadStation,           0}, /*  14 */
 			{CmdConvertRail,                         0}, /*  15 */
-			{CmdBuildTrainWaypoint,                  0}, /*  16 */
-			{CmdRenameWaypoint,                      0}, /*  17 */
-			{CmdRemoveTrainWaypoint,                 0}, /*  18 */
+			{WayPoint::CmdBuildTrainWaypoint,                  0}, /*  16 */
+			{WayPoint::CmdRenameWaypoint,                      0}, /*  17 */
+			{WayPoint::CmdRemoveTrainWaypoint,                 0}, /*  18 */
 			{null,                                   0}, /*  19 */
 			{null,                                   0}, /*  20 */
-			{CmdBuildRoadStop,                       0}, /*  21 */
+			{Station::CmdBuildRoadStop,                       0}, /*  21 */
 			{null,                                   0}, /*  22 */
 			{CmdBuildLongRoad,                       0}, /*  23 */
 			{CmdRemoveLongRoad,                      0}, /*  24 */
@@ -366,11 +213,11 @@ public class Cmd {
 			{CmdRemoveRoad,                          0}, /*  26 */
 			{CmdBuildRoadDepot,                      0}, /*  27 */
 			{null,                                   0}, /*  28 */
-			{CmdBuildAirport,                        0}, /*  29 */
-			{CmdBuildDock,                           0}, /*  30 */
-			{CmdBuildShipDepot,                      0}, /*  31 */
-			{CmdBuildBuoy,                           0}, /*  32 */
-			{CmdPlantTree,                           0}, /*  33 */
+			{Station::CmdBuildAirport,                        0}, /*  29 */
+			{Station::CmdBuildDock,                           0}, /*  30 */
+			{Station::CmdBuildShipDepot,                      0}, /*  31 */
+			{Station::CmdBuildBuoy,                           0}, /*  32 */
+			{Tree::CmdPlantTree,                           0}, /*  33 */
 			{CmdBuildRailVehicle,                    0}, /*  34 */
 			{CmdMoveRailVehicle,                     0}, /*  35 */
 			{CmdStartStopTrain,                      0}, /*  36 */
@@ -380,10 +227,10 @@ public class Cmd {
 			{CmdForceTrainProceed,                   0}, /*  40 */
 			{CmdReverseTrainDirection,               0}, /*  41 */
 
-			{CmdModifyOrder,                         0}, /*  42 */
-			{CmdSkipOrder,                           0}, /*  43 */
-			{CmdDeleteOrder,                         0}, /*  44 */
-			{CmdInsertOrder,                         0}, /*  45 */
+			{Order::CmdModifyOrder,                         0}, /*  42 */
+			{Order::CmdSkipOrder,                           0}, /*  43 */
+			{Order::CmdDeleteOrder,                         0}, /*  44 */
+			{Order::CmdInsertOrder,                         0}, /*  45 */
 
 			{CmdChangeTrainServiceInt,               0}, /*  46 */
 
@@ -403,15 +250,15 @@ public class Cmd {
 			{CmdChangeCompanyName,                   0}, /*  56 */
 			{CmdChangePresidentName,                 0}, /*  57 */
 
-			{CmdRenameStation,                       0}, /*  58 */
+			{Station::CmdRenameStation,                       0}, /*  58 */
 
-			{CmdSellAircraft,                        0}, /*  59 */
-			{CmdStartStopAircraft,                   0}, /*  60 */
+			{AirCraft::CmdSellAircraft,                        0}, /*  59 */
+			{AirCraft::CmdStartStopAircraft,                   0}, /*  60 */
 
-			{CmdBuildAircraft,                       0}, /*  61 */
-			{CmdSendAircraftToHangar,                0}, /*  62 */
-			{CmdChangeAircraftServiceInt,            0}, /*  63 */
-			{CmdRefitAircraft,                       0}, /*  64 */
+			{AirCraft::CmdBuildAircraft,                       0}, /*  61 */
+			{AirCraft::CmdSendAircraftToHangar,                0}, /*  62 */
+			{AirCraft::CmdChangeAircraftServiceInt,            0}, /*  63 */
+			{AirCraft::CmdRefitAircraft,                       0}, /*  64 */
 
 			{CmdPlaceSign,                           0}, /*  65 */
 			{CmdRenameSign,                          0}, /*  66 */
@@ -429,23 +276,23 @@ public class Cmd {
 			{CmdSellShareInCompany,                  0}, /*  75 */
 			{CmdBuyCompany,                          0}, /*  76 */
 
-			{CmdBuildTown,                 Cmd.CMD_OFFLINE}, /*  77 */
+			{Town::CmdBuildTown,                 Cmd.CMD_OFFLINE}, /*  77 */
 			{null,                                   0}, /*  78 */
 			{null,                                   0}, /*  79 */
-			{CmdRenameTown,                 Cmd.CMD_SERVER}, /*  80 */
-			{CmdDoTownAction,                        0}, /*  81 */
+			{Town::CmdRenameTown,                 Cmd.CMD_SERVER}, /*  80 */
+			{Town::CmdDoTownAction,                        0}, /*  81 */
 
 			{CmdSetRoadDriveSide,           Cmd.CMD_SERVER}, /*  82 */
 			{null,                                   0}, /*  83 */
 			{null,                                   0}, /*  84 */
 			{CmdChangeDifficultyLevel,      Cmd.CMD_SERVER}, /*  85 */
 
-			{CmdStartStopShip,                       0}, /*  86 */
-			{CmdSellShip,                            0}, /*  87 */
-			{CmdBuildShip,                           0}, /*  88 */
-			{CmdSendShipToDepot,                     0}, /*  89 */
-			{CmdChangeShipServiceInt,                0}, /*  90 */
-			{CmdRefitShip,                           0}, /*  91 */
+			{Ship::CmdStartStopShip,                       0}, /*  86 */
+			{Ship::CmdSellShip,                            0}, /*  87 */
+			{Ship::CmdBuildShip,                           0}, /*  88 */
+			{Ship::CmdSendShipToDepot,                     0}, /*  89 */
+			{Ship::CmdChangeShipServiceInt,                0}, /*  90 */
+			{Ship::CmdRefitShip,                           0}, /*  91 */
 
 			{null,                                   0}, /*  92 */
 			{null,                                   0}, /*  93 */
@@ -457,14 +304,14 @@ public class Cmd {
 
 			{CmdCloneOrder,                          0}, /*  99 */
 
-			{CmdClearArea,                           0}, /* 100 */
+			{Landscape::CmdClearArea,                           0}, /* 100 */
 			{null,                                   0}, /* 101 */
 
 			{CmdMoneyCheat,                Cmd.CMD_OFFLINE}, /* 102 */
 			{CmdBuildCanal,                          0}, /* 103 */
 			{CmdPlayerCtrl,                          0}, /* 104 */
 
-			{CmdLevelLand,                           0}, /* 105 */
+			{Clear::CmdLevelLand,                           0}, /* 105 */
 
 			{CmdRefitRailVehicle,                    0}, /* 106 */
 			{CmdRestoreOrderIndex,                   0}, /* 107 */
@@ -484,6 +331,7 @@ public class Cmd {
 	{
 		cmd &= 0xFF;
 
+
 		return
 				cmd < lengthof(_command_proc_table) &&
 				_command_proc_table[cmd].proc != null;
@@ -502,31 +350,43 @@ public class Cmd {
 	int DoCommand(int x, int y, int p1, int p2, int flags, int procc)
 	{
 		int res;
-		CommandProc *proc;
+		CommandProc proc;
 
 		/* Do not even think about executing out-of-bounds tile-commands */
-		if (TileVirtXY(x, y) > MapSize()) {
+		//if (TileIndex.TileVirtXY(x, y) > MapSize()) {
+		if (!TileIndex.TileVirtXY(x, y).isValid()) {
 			Global._cmd_text = null;
 			return Cmd.CMD_ERROR;
 		}
 
 		proc = _command_proc_table[procc].proc;
 
-		if (_docommand_recursive == 0) Global._error_message = INVALID_STRING_ID;
+		if (_docommand_recursive == 0) Global._error_message = String.INVALID_STRING_ID;
 
 		_docommand_recursive++;
 
 		// only execute the test call if it's toplevel, or we're not execing.
-		if (_docommand_recursive == 1 || !(flags & Cmd.DC_EXEC) || (flags & Cmd.DC_FORCETEST) ) {
-			res = proc(x, y, flags&~Cmd.DC_EXEC, p1, p2);
+		if (_docommand_recursive == 1 || 0 == (flags & Cmd.DC_EXEC) || 0 != (flags & Cmd.DC_FORCETEST) ) 
+		{
+			res = proc.exec(x, y, flags&~Cmd.DC_EXEC, p1, p2);
 			if (CmdFailed(res)) {
 				if (res & 0xFFFF) Global._error_message = res & 0xFFFF;
-				goto error;
+				{
+					//goto error;
+					_docommand_recursive--;
+					Global._cmd_text = null;
+					return Cmd.CMD_ERROR;
+				}
 			}
 
 			if (_docommand_recursive == 1) {
 				if (!(flags&Cmd.DC_QUERY_COST) && res != 0 && !CheckPlayerHasMoney(res))
-					goto error;
+				{
+					//goto error;
+					_docommand_recursive--;
+					Global._cmd_text = null;
+					return Cmd.CMD_ERROR;
+				}
 			}
 
 			if (!(flags & Cmd.DC_EXEC)) {
@@ -541,18 +401,18 @@ public class Cmd {
 		res = proc(x, y, flags, p1, p2);
 		if (CmdFailed(res)) {
 			if (res & 0xFFFF) Global._error_message = res & 0xFFFF;
-			error:
-				_docommand_recursive--;
+			//error:
+			_docommand_recursive--;
 			Global._cmd_text = null;
 			return Cmd.CMD_ERROR;
 		}
 
 		// if toplevel, subtract the money.
 		if (--_docommand_recursive == 0) {
-			SubtractMoneyFromPlayer(res);
+			Player.SubtractMoneyFromPlayer(res);
 			// XXX - Old AI hack which doesn't use DoCommandDP; update last build coord of player
 			if ( (x|y) != 0 && Global._current_player < Global.MAX_PLAYERS) {
-				GetPlayer(Global._current_player).last_build_coordinate = TileVirtXY(x, y);
+				Player.GetPlayer(Global._current_player).last_build_coordinate = TileIndex.TileVirtXY(x, y);
 			}
 		}
 
@@ -569,7 +429,7 @@ public class Cmd {
 
 	// toplevel network safe docommand function for the current player. must not be called recursively.
 	// the callback is called when the command succeeded or failed.
-	boolean DoCommandP(TileIndex tile, int p1, int p2, CommandCallback *callback, int cmd)
+	boolean DoCommandP(TileIndex tile, int p1, int p2, CommandCallback callback, int cmd)
 	{
 		int res = 0,res2;
 		CommandProc *proc;
@@ -580,7 +440,7 @@ public class Cmd {
 		int y = TileY(tile) * 16;
 
 		/* Do not even think about executing out-of-bounds tile-commands */
-		if (tile > MapSize()) {
+		if (tile > Global.MapSize()) {
 			Global._cmd_text = null;
 			return false;
 		}
@@ -593,8 +453,8 @@ public class Cmd {
 
 		/** Spectator has no rights except for the dedicated server which
 		 * is a spectator but is the server, so can do anything */
-		if (Global._current_player == Owner.OWNER_SPECTATOR && !_network_dedicated) {
-			ShowErrorMessage(Global._error_message, Global._error_message_2, x, y);
+		if (Global._current_player.id == Owner.OWNER_SPECTATOR && !Global._network_dedicated) {
+			Global.ShowErrorMessage(Global._error_message, Global._error_message_2, x, y);
 			Global._cmd_text = null;
 			return false;
 		}
@@ -604,7 +464,7 @@ public class Cmd {
 		if (cmd & Cmd.CMD_NO_WATER) flags |= Cmd.DC_NO_WATER;
 
 		// get pointer to command handler
-		assert((cmd & 0xFF) < lengthof(_command_proc_table));
+		assert((cmd & 0xFF) < _command_proc_table.length);
 		proc = _command_proc_table[cmd & 0xFF].proc;
 		if (proc == null) {
 			Global._cmd_text = null;
@@ -630,12 +490,12 @@ public class Cmd {
 		_docommand_recursive = 1;
 
 		// cost estimation only?
-		if (_shift_pressed && IsLocalPlayer() && !(cmd & (Cmd.CMD_NETWORK_COMMAND | Cmd.CMD_SHOW_NO_ERROR))) {
+		if (Global._shift_pressed && Player.IsLocalPlayer() && !(cmd & (Cmd.CMD_NETWORK_COMMAND | Cmd.CMD_SHOW_NO_ERROR))) {
 			// estimate the cost.
-			res = proc(x, y, flags, p1, p2);
+			res = proc.exec(x, y, flags, p1, p2);
 			if (CmdFailed(res)) {
 				if (res & 0xFFFF) Global._error_message = res & 0xFFFF;
-				ShowErrorMessage(Global._error_message, Global._error_message_2, x, y);
+				Global.ShowErrorMessage(Global._error_message, Global._error_message_2, x, y);
 			} else {
 				ShowEstimatedCostOrIncome(res, x, y);
 			}
@@ -646,24 +506,35 @@ public class Cmd {
 		}
 
 
-		if (!((cmd & Cmd.CMD_NO_TEST_IF_IN_NETWORK) && _networking)) {
+		if (!((cmd & Cmd.CMD_NO_TEST_IF_IN_NETWORK) && Global._networking)) {
 			// first test if the command can be executed.
-			res = proc(x,y, flags, p1, p2);
+			res = proc.exec(x,y, flags, p1, p2);
 			if (CmdFailed(res)) {
 				if (res & 0xFFFF) Global._error_message = res & 0xFFFF;
-				goto show_error;
+				{
+					//goto show_error;
+					// show error message if the command fails?
+					if (IsLocalPlayer() && Global._error_message_2 != 0)
+						ShowErrorMessage(Global._error_message, Global._error_message_2, x,y);
+
+					//callb_err:
+					_docommand_recursive = 0;
+
+					if (callback) callback(false, tile, p1, p2);
+					Global._cmd_text = null;
+					return false;
+				}
 			}
 			// no money? Only check if notest is off
 			if (!notest && res != 0 && !CheckPlayerHasMoney(res)) goto show_error;
 		}
 
-		#ifdef ENABLE_NETWORK
-		/** If we are in network, and the command is not from the network
-		 * send it to the command-queue and abort execution
-		 * If we are a dedicated server temporarily switch local player, otherwise
-		 * the other parties won't be able to execute our command and will desync.
-		 * @todo Rewrite dedicated server to something more than a dirty hack!
-		 */
+		/*#ifdef ENABLE_NETWORK
+		//** If we are in network, and the command is not from the network
+		// * send it to the command-queue and abort execution
+		// * If we are a dedicated server temporarily switch local player, otherwise
+		// * the other parties won't be able to execute our command and will desync.
+		// * @todo Rewrite dedicated server to something more than a dirty hack!
 		if (_networking && !(cmd & Cmd.CMD_NETWORK_COMMAND)) {
 			if (_network_dedicated) Global._local_player = 0;
 			NetworkSend_Command(tile, p1, p2, cmd, callback);
@@ -689,7 +560,19 @@ public class Cmd {
 		} else {
 			if (CmdFailed(res2)) {
 				if (res2 & 0xFFFF) Global._error_message = res2 & 0xFFFF;
-				goto show_error;
+				{
+					//goto show_error;
+					// show error message if the command fails?
+					if (IsLocalPlayer() && Global._error_message_2 != 0)
+						ShowErrorMessage(Global._error_message, Global._error_message_2, x,y);
+
+					//callb_err:
+					_docommand_recursive = 0;
+
+					if (callback) callback(false, tile, p1, p2);
+					Global._cmd_text = null;
+					return false;
+				}
 			}
 		}
 
@@ -701,7 +584,15 @@ public class Cmd {
 			if (_additional_cash_required) {
 				Global.SetDParam(0, _additional_cash_required);
 				ShowErrorMessage(Str.STR_0003_NOT_ENOUGH_CASH_REQUIRES, Global._error_message_2, x,y);
-				if (res2 == 0) goto callb_err;
+				if (res2 == 0) 
+				{
+					//goto callb_err;
+					_docommand_recursive = 0;
+
+					if (callback) callback(false, tile, p1, p2);
+					Global._cmd_text = null;
+					return false;
+				}
 			}
 		}
 
@@ -711,13 +602,13 @@ public class Cmd {
 		Global._cmd_text = null;
 		return true;
 
-		show_error:
-			// show error message if the command fails?
-			if (IsLocalPlayer() && Global._error_message_2 != 0)
-				ShowErrorMessage(Global._error_message, Global._error_message_2, x,y);
+		//show_error:
+		// show error message if the command fails?
+		if (IsLocalPlayer() && Global._error_message_2 != 0)
+			ShowErrorMessage(Global._error_message, Global._error_message_2, x,y);
 
-		callb_err:
-			_docommand_recursive = 0;
+		//callb_err:
+		_docommand_recursive = 0;
 
 		if (callback) callback(false, tile, p1, p2);
 		Global._cmd_text = null;
@@ -727,6 +618,14 @@ public class Cmd {
 
 
 
+}
+
+
+
+//typedef int32 CommandProc(int x, int y, uint32 flags, uint32 p1, uint32 p2);
+@FunctionalInterface
+interface CommandProc {
+	int exec(int x, int y, int flags, int p1, int p2);
 }
 
 

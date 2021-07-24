@@ -927,7 +927,7 @@ public class Station implements IPoolItem
 					}
 				}
 			} else {
-				ret = DoCommandByTile(tile_cur, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+				ret = Cmd.DoCommandByTile(tile_cur, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 				if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
 				cost += ret;
 			}
@@ -1418,7 +1418,7 @@ public class Station implements IPoolItem
 
 		/* if there is flooding and non-uniform stations are enabled, remove platforms tile by tile */
 		if (Global._current_player.id == Owner.OWNER_WATER && Global._patches.nonuniform_stations)
-			return DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_REMOVE_FROM_RAILROAD_STATION);
+			return Cmd.ByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_REMOVE_FROM_RAILROAD_STATION);
 
 		/* Current player owns the station? */
 		if (Global._current_player != Owner.OWNER_WATER && !CheckOwnership(st.owner))
@@ -2086,7 +2086,7 @@ public class Station implements IPoolItem
 		FindLandscapeHeightByTile(ti, tile_cur);
 		if (ti.tileh != 0 || ti.type != TileTypes.MP_WATER) return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
 
-		cost = DoCommandByTile(tile_cur, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+		cost = Cmd.DoCommandByTile(tile_cur, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
 
 		tile_cur = tile_cur + TileOffsByDir(direction);
@@ -3071,7 +3071,7 @@ public class Station implements IPoolItem
 			_global_station_sort_dirty = true; // transfer ownership of station to another player
 			Window.InvalidateWindowClasses(Window.WC_STATION_LIST);
 		} else {
-			DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
+			Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 		}
 	}
 

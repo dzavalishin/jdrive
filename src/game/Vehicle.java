@@ -796,7 +796,7 @@ public class Vehicle implements IPoolItem
 
 	/*
 	 *	These command macros are used to call vehicle type specific commands with non type specific commands
-	 *	it should be used like: DoCommandP(x, y, p1, p2, flags, CMD_STARTSTOP_VEH(v.type))
+	 *	it should be used like: Cmd.DoCommandP(x, y, p1, p2, flags, CMD_STARTSTOP_VEH(v.type))
 	 *	that line will start/stop a vehicle nomatter what type it is
 	 *	VEH_Train is used as an offset because the vehicle type values doesn't start with 0
 	 */
@@ -2316,7 +2316,7 @@ public class Vehicle implements IPoolItem
 		if (v.type == VEH_Train && !v.IsFrontEngine()) return Cmd.CMD_ERROR;
 
 		// check that we can allocate enough vehicles
-		if (!(flags & DC_EXEC)) {
+		if (!(flags & Cmd.DC_EXEC)) {
 			int veh_counter = 0;
 			do {
 				veh_counter++;
@@ -2336,7 +2336,7 @@ public class Vehicle implements IPoolItem
 				continue;
 			}
 
-			cost = DoCommand(x, y, v.engine_type, 1, flags, CMD_BUILD_VEH(v.type));
+			cost = Cmd.DoCommand(x, y, v.engine_type, 1, flags, CMD_BUILD_VEH(v.type));
 
 			if (Cmd.CmdFailed(cost)) return cost;
 
@@ -2347,18 +2347,18 @@ public class Vehicle implements IPoolItem
 
 				if (v.type != VEH_Road) { // road vehicles can't be refitted
 					if (v.cargo_type != w.cargo_type) {
-						DoCommand(x, y, w.index, v.cargo_type, flags, CMD_REFIT_VEH(v.type));
+						Cmd.DoCommand(x, y, w.index, v.cargo_type, flags, CMD_REFIT_VEH(v.type));
 					}
 				}
 
 				if (v.type == VEH_Train && !IsFrontEngine(v)) {
 					// this s a train car
 					// add this unit to the end of the train
-					DoCommand(x, y, (w_rear.index << 16) | w.index, 1, flags, Cmd.CMD_MOVE_RAIL_VEHICLE);
+					Cmd.DoCommand(x, y, (w_rear.index << 16) | w.index, 1, flags, Cmd.CMD_MOVE_RAIL_VEHICLE);
 				} else {
 					// this is a front engine or not a train. It need orders
 					w_front = w;
-					DoCommand(x, y, (v.index << 16) | w.index, p2 & 1 ? CO_SHARE : CO_COPY, flags, CMD_CLONE_ORDER);
+					Cmd.DoCommand(x, y, (v.index << 16) | w.index, p2 & 1 ? CO_SHARE : CO_COPY, flags, CMD_CLONE_ORDER);
 				}
 				w_rear = w;	// trains needs to know the last car in the train, so they can add more in next loop
 			}
@@ -2406,7 +2406,7 @@ public class Vehicle implements IPoolItem
 	 * This function is only called from MaybeReplaceVehicle()
 	 * Must be called with _current_player set to the owner of the vehicle
 	 * @param w pointer to (1-item array) Vehicle to replace
-	 * @param flags is the flags to use when calling DoCommand(). Mainly DC_EXEC counts
+	 * @param flags is the flags to use when calling Cmd.DoCommand(). Mainly DC_EXEC counts
 	 * @return value is cost of the replacement or Cmd.CMD_ERROR
 	 */
 	static int ReplaceVehicle(Vehicle [] w, byte flags)
@@ -2423,7 +2423,7 @@ public class Vehicle implements IPoolItem
 		new_engine_type = EngineReplacement(p, old_v.engine_type);
 		if (new_engine_type.id == INVALID_ENGINE) new_engine_type = old_v.engine_type;
 
-		cost = DoCommand(old_v.x_pos, old_v.y_pos, new_engine_type, 1, flags, CMD_BUILD_VEH(old_v.type));
+		cost = Cmd.DoCommand(old_v.x_pos, old_v.y_pos, new_engine_type, 1, flags, CMD_BUILD_VEH(old_v.type));
 		if (Cmd.CmdFailed(cost)) return cost;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -2433,7 +2433,7 @@ public class Vehicle implements IPoolItem
 			/* refit if needed */
 			if (new_v.type != VEH_Road) { // road vehicles can't be refitted
 				if (old_v.cargo_type != new_v.cargo_type && old_v.cargo_cap != 0 && new_v.cargo_cap != 0) {// some train engines do not have cargo capacity
-					DoCommand(0, 0, new_v.index, old_v.cargo_type, Cmd.DC_EXEC, CMD_REFIT_VEH(new_v.type));
+					Cmd.DoCommand(0, 0, new_v.index, old_v.cargo_type, Cmd.DC_EXEC, CMD_REFIT_VEH(new_v.type));
 				}
 			}
 
@@ -2443,12 +2443,12 @@ public class Vehicle implements IPoolItem
 				 * We add the new engine after the old one instead of replacing it. It will give the same result anyway when we
 				 * sell the old engine in a moment
 				 */
-				DoCommand(0, 0, (old_v.GetPrevVehicleInChain().index.id << 16) | new_v.index.id, 1, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
+				Cmd.DoCommand(0, 0, (old_v.GetPrevVehicleInChain().index.id << 16) | new_v.index.id, 1, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 				/* Now we move the old one out of the train */
-				DoCommand(0, 0, (INVALID_VEHICLE << 16) | old_v.index.id, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
+				Cmd.DoCommand(0, 0, (INVALID_VEHICLE << 16) | old_v.index.id, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 			} else {
 				// copy/clone the orders
-				DoCommand(0, 0, (old_v.index.id << 16) | new_v.index.id, old_v.IsOrderListShared() ? CO_SHARE : CO_COPY, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
+				Cmd.DoCommand(0, 0, (old_v.index.id << 16) | new_v.index.id, old_v.IsOrderListShared() ? CO_SHARE : CO_COPY, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
 				new_v.cur_order_index = old_v.cur_order_index;
 				ChangeVehicleViewWindow(old_v, new_v);
 				new_v.profit_this_year = old_v.profit_this_year;
@@ -2459,7 +2459,7 @@ public class Vehicle implements IPoolItem
 				if (old_v.type == VEH_Train){
 					// move the entire train to the new engine, including the old engine. It will be sold in a moment anyway
 					if (old_v.GetNextVehicle() != null) {
-						DoCommand(0, 0, (new_v.index << 16) | old_v.GetNextVehicle().index, 1, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
+						Cmd.DoCommand(0, 0, (new_v.index << 16) | old_v.GetNextVehicle().index, 1, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 					}
 					new_v.rail.shortest_platform[0] = old_v.rail.shortest_platform[0];
 					new_v.rail.shortest_platform[1] = old_v.rail.shortest_platform[1];
@@ -2477,7 +2477,7 @@ public class Vehicle implements IPoolItem
 		}
 
 		// sell the engine/ find out how much you get for the old engine
-		cost += DoCommand(0, 0, old_v.index, 0, flags, CMD_SELL_VEH(old_v.type));
+		cost += Cmd.DoCommand(0, 0, old_v.index, 0, flags, CMD_SELL_VEH(old_v.type));
 
 		if (new_front) {
 			// now we assign the old unitnumber to the new vehicle
@@ -2487,7 +2487,7 @@ public class Vehicle implements IPoolItem
 		// Transfer the name of the old vehicle.
 		if ( (0 != (flags & Cmd.DC_EXEC)) && vehicle_name != null) {
 			Global._cmd_text = vehicle_name;
-			DoCommand(0, 0, new_v.index, 0, Cmd.DC_EXEC, Cmd.CMD_NAME_VEHICLE);
+			Cmd.DoCommand(0, 0, new_v.index, 0, Cmd.DC_EXEC, Cmd.CMD_NAME_VEHICLE);
 		}
 
 		return cost;
@@ -2627,9 +2627,9 @@ public class Vehicle implements IPoolItem
 				}
 				temp = w;
 				w = GetNextVehicle(w);
-				DoCommand(0, 0, (INVALID_VEHICLE << 16) | temp.index, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
+				Cmd.DoCommand(0, 0, (INVALID_VEHICLE << 16) | temp.index, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 				MoveVehicleCargo(v, temp);
-				cost += DoCommand(0, 0, temp.index, 0, flags, CMD_SELL_VEH(temp.type));
+				cost += Cmd.DoCommand(0, 0, temp.index, 0, flags, CMD_SELL_VEH(temp.type));
 			}
 		}
 
@@ -2659,7 +2659,7 @@ public class Vehicle implements IPoolItem
 		str = Global.AllocateNameUnique(_cmd_text, 2);
 		if (str == 0) return Cmd.CMD_ERROR;
 
-		if (flags & DC_EXEC) {
+		if (flags & Cmd.DC_EXEC) {
 			StringID old_str = v.string_id;
 			v.string_id = str;
 			Global.DeleteName(old_str);
@@ -3019,12 +3019,12 @@ public class Vehicle implements IPoolItem
 		/* If we have a custom name, process that */
 		if (bak.name != null) {
 			Global._cmd_text = bak.name;
-			DoCommandP(0, v.index, 0, null, Cmd.CMD_NAME_VEHICLE);
+			Cmd.DoCommandP(0, v.index, 0, null, Cmd.CMD_NAME_VEHICLE);
 		}
 
 		/* If we had shared orders, recover that */
 		if (bak.clone != INVALID_VEHICLE) {
-			DoCommandP(0, v.index | (bak.clone << 16), 0, null, Cmd.CMD_CLONE_ORDER);
+			Cmd.DoCommandP(0, v.index | (bak.clone << 16), 0, null, Cmd.CMD_CLONE_ORDER);
 			return;
 		}
 
@@ -3035,13 +3035,13 @@ public class Vehicle implements IPoolItem
 		//for (i = 0; bak.order[i].type != Order.OT_NOTHING; i++)
 		for( Order bo : bak.order)
 		{
-			//if (!DoCommandP(0, v.index + (i << 16), PackOrder(bak.order[i]), null, CMD_INSERT_ORDER | CMD_NO_TEST_IF_IN_NETWORK))
-			if (!DoCommandP(0, v.index + (i << 16), PackOrder(bo), null, Cmd.CMD_INSERT_ORDER | Cmd.CMD_NO_TEST_IF_IN_NETWORK))
+			//if (!Cmd.DoCommandP(0, v.index + (i << 16), PackOrder(bak.order[i]), null, CMD_INSERT_ORDER | CMD_NO_TEST_IF_IN_NETWORK))
+			if (!Cmd.DoCommandP(0, v.index + (i << 16), PackOrder(bo), null, Cmd.CMD_INSERT_ORDER | Cmd.CMD_NO_TEST_IF_IN_NETWORK))
 				break;
 		}
 
 		/* Restore vehicle order-index and service interval */
-		DoCommandP(0, v.index, bak.orderindex | (bak.service_interval << 16) , null, Cmd.CMD_RESTORE_ORDER_INDEX);
+		Cmd.DoCommandP(0, v.index, bak.orderindex | (bak.service_interval << 16) , null, Cmd.CMD_RESTORE_ORDER_INDEX);
 	}
 
 

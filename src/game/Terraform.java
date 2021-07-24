@@ -18,9 +18,9 @@ public class Terraform {
 	static void GenericRaiseLowerLand(TileIndex tile, int mode)
 	{
 		if (mode!=0) {
-			DoCommandP(tile, 8, (int)mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0808_CAN_T_RAISE_LAND_HERE));
+			Cmd.DoCommandP(tile, 8, (int)mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0808_CAN_T_RAISE_LAND_HERE));
 		} else {
-			DoCommandP(tile, 8, (int)mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0809_CAN_T_LOWER_LAND_HERE));
+			Cmd.DoCommandP(tile, 8, (int)mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0809_CAN_T_LOWER_LAND_HERE));
 		}
 	}
 
@@ -46,7 +46,7 @@ public class Terraform {
 		{
 			if (tile.GetTileType() != TileTypes.MP_WATER) {
 				tile.SetMapExtraBits( (Global._ctrl_pressed) ? 0 : 1);
-				DoCommandP(tile, 0, 0, null, Cmd.CMD_LANDSCAPE_CLEAR);
+				Cmd.DoCommandP(tile, 0, 0, null, Cmd.CMD_LANDSCAPE_CLEAR);
 				tile.MarkTileDirtyByTile();
 			}
 		}); //END_TILE_LOOP(tile, size_x, size_y, 0);
@@ -97,10 +97,10 @@ public class Terraform {
 
 		switch (we.userdata >> 4) {
 		case Gui.GUI_PlaceProc_DemolishArea >> 4:
-			DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_CLEAR_AREA | Cmd_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
+			Cmd.DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_CLEAR_AREA | Cmd_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
 			break;
 		case Gui.GUI_PlaceProc_LevelArea >> 4:
-			DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_LEVEL_LAND | Cmd_AUTO);
+			Cmd.DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_LEVEL_LAND | Cmd_AUTO);
 			break;
 		case Gui.GUI_PlaceProc_RockyArea >> 4:
 			GenerateRockyArea(end_tile, start_tile);
@@ -109,7 +109,7 @@ public class Terraform {
 			GenerateDesertArea(end_tile, start_tile);
 			break;
 		case Gui.GUI_PlaceProc_WaterArea >> 4:
-			DoCommandP(end_tile, start_tile, 0, CcBuildCanal, Cmd.CMD_BUILD_CANAL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_CANT_BUILD_CANALS));
+			Cmd.DoCommandP(end_tile, start_tile, 0, CcBuildCanal, Cmd.CMD_BUILD_CANAL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_CANT_BUILD_CANALS));
 			break;
 		default: return false;
 		}

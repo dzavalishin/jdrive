@@ -655,7 +655,7 @@ public class Player
 		if (n < (int)GameOptions._opt.diff.max_no_competitors)
 			if (n < (Global._network_server ? InteractiveRandomRange(GameOptions._opt.diff.max_no_competitors + 2) : RandomRange(GameOptions._opt.diff.max_no_competitors + 2)) )
 				// Send a command to all clients to start  up a new AI. Works fine for Multiplayer and SinglePlayer 
-				DoCommandP(0, 1, 0, null, Cmd.CMD_PLAYER_CTRL);
+				Cmd.DoCommandP(0, 1, 0, null, Cmd.CMD_PLAYER_CTRL);
 
 		// The next AI starts like the difficulty setting said, with +2 month max
 		_next_competitor_start = GameOptions._opt.diff.competitor_start_time * 90 * Global.DAY_TICKS + 1;
@@ -957,7 +957,7 @@ public class Player
 						Global.hal.MarkWholeScreenDirty();
 					}
 				} else if (p.index == Global._local_player) {
-					DoCommandP(0, (Global._patches.autorenew << 15 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
+					Cmd.DoCommandP(0, (Global._patches.autorenew << 15 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 				}
 				/* #ifdef ENABLE_NETWORK
 				if (_network_server) {
