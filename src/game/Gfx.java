@@ -1,8 +1,19 @@
 package game;
 
+import game.util.BitOps;
+
 public class Gfx {
 
 	static boolean _dbg_screen_rect;
+
+
+	static int _pal_first_dirty;
+	static int _pal_last_dirty;
+
+
+	//typedef enum StringColorFlags {
+	static final int IS_PALETTE_COLOR = 0x100; // color value is already a real palette color index, not an index of a StringColor
+	//} StringColorFlags;
 
 
 	static Colour [] _cur_palette = new Colour[256];
@@ -12,14 +23,23 @@ public class Gfx {
 	public static final String UPARROW   = String.valueOf(0x80); // "\x80";
 	public static final String DOWNARROW = String.valueOf(0xAA); // "\xAA";
 
-	
+
 	//static void GfxMainBlitter(final Sprite *sprite, int x, int y, int mode);
 
+	private static final int ASCII_LETTERSTART = 32;
+	private static int _stringwidth_base = 0;
+	//VARDEF byte _stringwidth_table[0x2A0];
+	private static byte [] _stringwidth_table = new byte[0x2A0];
+	
 	static int _stringwidth_out;
-	static Pixel []_cursor_backup = new Pixel[64 * 64];
+	//static /* Pixel */ byte  []_cursor_backup = new /* Pixel */ byte [64 * 64];
+
+	
+	
+	static byte []_cursor_backup = new byte[64 * 64];
 	//static Rect _invalid_rect;
 	static final byte []_color_remap_ptr;
-	static byte _string_colorremap = new byte[3];
+	static byte [] _string_colorremap = new byte[3];
 
 	//#define DIRTY_BYTES_PER_LINE (MAX_SCREEN_WIDTH / 64)
 	//static byte _dirty_blocks[DIRTY_BYTES_PER_LINE * MAX_SCREEN_HEIGHT / 8];
@@ -42,21 +62,21 @@ public class Gfx {
 
 	static void GfxScroll(int left, int top, int width, int height, int xo, int yo)
 	{
-		final Pixel src;
-		Pixel dst;
+		final /* Pixel */ byte  src;
+		/* Pixel */ byte  dst;
 		int p;
 		int ht;
 
 		if (xo == 0 && yo == 0) return;
 
-		if (_cursor.visible) UndrawMouseCursor();
+		if (Hal._cursor.visible) UndrawMouseCursor();
 		UndrawTextMessage();
 
-		p = _screen.pitch;
+		p = Hal._screen.pitch;
 
 		if (yo > 0) {
 			// Calculate pointers
-			dst = _screen.dst_ptr + (top + height - 1) * p + left;
+			dst = Hal._screen.dst_ptr + (top + height - 1) * p + left;
 			src = dst - yo * p;
 
 			// Decrease height and increase top
@@ -81,7 +101,7 @@ public class Gfx {
 			}
 		} else {
 			// Calculate pointers
-			dst = _screen.dst_ptr + top * p + left;
+			dst = Hal._screen.dst_ptr + top * p + left;
 			src = dst - yo * p;
 
 			// Decrese height. (yo is <=0).
@@ -114,7 +134,7 @@ public class Gfx {
 	static void GfxFillRect(int left, int top, int right, int bottom, int color)
 	{
 		final DrawPixelInfo  dpi = Hal._cur_dpi;
-		Pixel *dst;
+		/* Pixel */ byte  *dst;
 		final int otop = top;
 		final int oleft = left;
 
@@ -249,47 +269,59 @@ public class Gfx {
 	// 15-31 - 17 colors
 
 
-	enum {
-		ASCII_SETX = 1,
-		ASCII_SETXY = 2,
+	//enum {
+	public static final int ASCII_SETX = 1;
+	public static final int ASCII_SETXY = 2;
 
-		ASCII_TINYFONT = 8,
-		ASCII_BIGFONT = 9,
-		ASCII_NL = 10,
+	public static final int ASCII_TINYFONT = 8;
+	public static final int ASCII_BIGFONT = 9;
+	public static final int ASCII_NL = 10;
 
-		ASCII_COLORSTART = 15,
-	};
+	public static final int ASCII_COLORSTART = 15;
+	//};
 
 	/** Truncate a given string to a maximum width if neccessary.
 	 * If the string is truncated, add three dots ('...') to show this.
-	 * @param *dest string that is checked and possibly truncated
+	 * @param str string that is checked and possibly truncated
 	 * @param maxw maximum width in pixels of the string
-	 * @return new width of (truncated) string */
-	private static int TruncateString(String str, int maxw)
+	 * @param retwidth new width of (truncated) string
+	 * @return truncated string
+	 * */
+	private static String TruncateString(String sstr, int maxw, int[] retwidth)
 	{
+		StringBuilder sb = new StringBuilder();
 		int w = 0;
 		int base = _stringwidth_base;
 		int ddd, ddd_w;
 
-		byte c;
-		String ddd_pos;
+		int c;
+		int ddd_pos;
 
 		base = _stringwidth_base;
 		ddd_w = ddd = GetCharacterWidth(base + '.') * 3;
 
-		for (ddd_pos = str; (c = *str++) != '\0'; ) {
+		char[] ca = sstr.toCharArray();
+		int cap = 0;
+		
+		for (ddd_pos = cap; (c = ca[cap++]) != '\0' && cap < ca.length; ) 
+		{
 			if (c >= ASCII_LETTERSTART) {
 				w += GetCharacterWidth(base + c);
 
 				if (w >= maxw) {
 					// string got too big... insert dotdotdot
-					ddd_pos[0] = ddd_pos[1] = ddd_pos[2] = '.';
-					ddd_pos[3] = 0;
-					return ddd_w;
+					//ddd_pos[0] = ddd_pos[1] = ddd_pos[2] = '.';
+					//ddd_pos[3] = 0;
+					//return ddd_w;
+
+					if(retwidth != null) retwidth[0] = w; 
+					String s = sb.toString().substring(0, ddd_pos-1);
+					return s+"...";
+					
 				}
 			} else {
-				if (c == ASCII_SETX) str++;
-				else if (c == ASCII_SETXY) str += 2;
+				if (c == ASCII_SETX) cap++;
+				else if (c == ASCII_SETXY) cap += 2;
 				else if (c == ASCII_TINYFONT) {
 					base = 224;
 					ddd = GetCharacterWidth(base + '.') * 3;
@@ -302,11 +334,12 @@ public class Gfx {
 			// Remember the last position where three dots fit.
 			if (w + ddd < maxw) {
 				ddd_w = w + ddd;
-				ddd_pos = str;
+				ddd_pos = cap;
 			}
 		}
 
-		return w;
+		if(retwidth != null) retwidth[0] = w; 
+		return sb.toString();
 	}
 
 	/*private static int TruncateStringID(StringID src, String dest, int maxw)
@@ -314,18 +347,15 @@ public class Gfx {
 		GetString(dest, src);
 		return TruncateString(dest, maxw);
 	}*/
-	private static String TruncateStringID(StringID src, int maxw)
+	private static String TruncateStringID(StringID src, int maxw, int [] retmax)
 	{
-		
-		return TruncateString(Global.GetString(src);, maxw);
+		return TruncateString(Global.GetString(src), maxw, retmax);
 	}
 
 	/* returns right coordinate */
 	static int DrawString(int x, int y, int str, int color)
 	{
-		String buffer;
-
-		buffer = GetString( str);
+		String buffer = String.GetString( str);
 		return DoDrawString(buffer, x, y, color);
 	}
 	/* returns right coordinate */
@@ -333,7 +363,7 @@ public class Gfx {
 	{
 		DrawString(x, y, str.id, color);
 	}
-	
+
 	static int DrawStringTruncated(int x, int y, StringID str, int color, int maxw)
 	{
 		//char buffer[512];
@@ -371,7 +401,7 @@ public class Gfx {
 	{
 		return DrawStringCentered(x, y, str.id, color);
 	}
-	
+
 	static int DrawStringCentered(int x, int y, int str, int color)
 	{
 		//char buffer[512];
@@ -387,9 +417,10 @@ public class Gfx {
 
 	static int DrawStringCenteredTruncated(int xl, int xr, int y, StringID str, int color)
 	{
-		char buffer[512];
-		int w = TruncateStringID(str, buffer, xr - xl);
-		return DoDrawString(buffer, (xl + xr - w) / 2, y, color);
+		//char buffer[512];
+		int w[] = {0};
+		String s = TruncateStringID(str, xr - xl, w);
+		return DoDrawString( s, (xl + xr - w[0]) / 2, y, color);
 	}
 
 	static int DoDrawStringCentered(int x, int y, final String str, int color)
@@ -421,7 +452,7 @@ public class Gfx {
 
 		for(;;) {
 			w = 0;
-			last_space = NULL;
+			last_space = null;
 
 			for(;;) {
 				c = *str++;
@@ -431,7 +462,7 @@ public class Gfx {
 					w += GetCharacterWidth(base + (byte)c);
 					if (w > maxw) {
 						str = last_space;
-						if (str == NULL)
+						if (str == null)
 							return num + (base << 16);
 						break;
 					}
@@ -454,21 +485,21 @@ public class Gfx {
 	//static void DrawStringMultiCenter(int x, int y, StringID str, int maxw)
 	static void DrawStringMultiCenter(int x, int y, int str, int maxw)
 	{
-		char buffer[512];
+		//char buffer[512];
 		int tmp;
 		int num, w, mt;
 		final String src;
 		byte c;
 
-		GetString(buffer, str);
+		String buffer = Global.GetString(str);
 
 		tmp = FormatStringLinebreaks(buffer, maxw);
-		num = GB(tmp, 0, 16);
+		num = BitOps.GB(tmp, 0, 16);
 
-		switch (GB(tmp, 16, 16)) {
-			case   0: mt = 10; break;
-			case 244: mt =  6; break;
-			default:  mt = 18; break;
+		switch (BitOps.GB(tmp, 16, 16)) {
+		case   0: mt = 10; break;
+		case 244: mt =  6; break;
+		default:  mt = 18; break;
 		}
 
 		y -= (mt >> 1) * num;
@@ -509,12 +540,12 @@ public class Gfx {
 		GetString(buffer, str);
 
 		tmp = FormatStringLinebreaks(buffer, maxw);
-		num = GB(tmp, 0, 16);
+		num = BitOps.GB(tmp, 0, 16);
 
-		switch (GB(tmp, 16, 16)) {
-			case   0: mt = 10; break;
-			case 244: mt =  6; break;
-			default:  mt = 18; break;
+		switch (BitOps.GB(tmp, 16, 16)) {
+		case   0: mt = 10; break;
+		case 244: mt =  6; break;
+		default:  mt = 18; break;
 		}
 
 		src = buffer;
@@ -544,14 +575,16 @@ public class Gfx {
 	static int GetStringWidth(final String str)
 	{
 		int w = 0;
-		byte c;
+		char c;
 		int base = _stringwidth_base;
-		for (c = *str; c != '\0'; c = *(++str)) {
+		int strp = 0;
+		char [] ca = str.toCharArray();
+		for (c = ca[strp]; c != '\0' && strp < ca.length; c = ca[strp++]) {
 			if (c >= ASCII_LETTERSTART) {
 				w += GetCharacterWidth(base + c);
 			} else {
-				if (c == ASCII_SETX) str++;
-				else if (c == ASCII_SETXY) str += 2;
+				if (c == ASCII_SETX) strp++;
+				else if (c == ASCII_SETXY) strp += 2;
 				else if (c == ASCII_TINYFONT) base = 224;
 				else if (c == ASCII_BIGFONT) base = 448;
 			}
@@ -566,13 +599,13 @@ public class Gfx {
 		byte color_3 = _color_list[ctab].window_color_bgb;
 		byte color = _color_list[ctab].window_color_2;
 
-		if (!(flags & 0x8)) {
-			if (!(flags & 0x20)) {
+		if (0 ==(flags & 0x8)) {
+			if (0==(flags & 0x20)) {
 				GfxFillRect(left, top, left, bottom - 1, color);
 				GfxFillRect(left + 1, top, right - 1, top, color);
 				GfxFillRect(right, top, right, bottom - 1, color_2);
 				GfxFillRect(left, bottom, right, bottom, color_2);
-				if (!(flags & 0x10)) {
+				if (0==(flags & 0x10)) {
 					GfxFillRect(left + 1, top + 1, right - 1, bottom - 1, color_interior);
 				}
 			} else {
@@ -580,12 +613,12 @@ public class Gfx {
 				GfxFillRect(left + 1, top, right, top, color_2);
 				GfxFillRect(right, top + 1, right, bottom - 1, color);
 				GfxFillRect(left + 1, bottom, right, bottom, color);
-				if (!(flags & 0x10)) {
+				if (0==(flags & 0x10)) {
 					GfxFillRect(left + 1, top + 1, right - 1, bottom - 1,
-						flags & 0x40 ? color_interior : color_3);
+							0 != (flags & 0x40) ? color_interior : color_3);
 				}
 			}
-		} else if (flags & 0x1) {
+		} else if(0 != (flags & 0x1)) {
 			// transparency
 			GfxFillRect(left, top, right, bottom, 0x322 | Sprite.USE_COLORTABLE);
 		} else {
@@ -605,13 +638,13 @@ public class Gfx {
 
 		if (color != 0xFE) {
 			if (x >= dpi.left + dpi.width ||
-					x + _screen.width*2 <= dpi.left ||
+					x + Hal._screen.width*2 <= dpi.left ||
 					y >= dpi.top + dpi.height ||
-					y + _screen.height <= dpi.top)
-						return x;
+					y + Hal._screen.height <= dpi.top)
+				return x;
 
 			if (color != 0xFF) {
-	switch_color:;
+				switch_color:;
 				if (real_color & IS_PALETTE_COLOR) {
 					_string_colorremap[1] = color;
 					_string_colorremap[2] = 215;
@@ -623,18 +656,18 @@ public class Gfx {
 			}
 		}
 
-	check_bounds:
-		if (y + 19 <= dpi.top || dpi.top + dpi.height <= y) {
-	skip_char:;
-			for(;;) {
-				c = *string++;
-				if (c < ASCII_LETTERSTART) goto skip_cont;
+		check_bounds:
+			if (y + 19 <= dpi.top || dpi.top + dpi.height <= y) {
+				skip_char:;
+				for(;;) {
+					c = *string++;
+					if (c < ASCII_LETTERSTART) goto skip_cont;
+				}
 			}
-		}
 
 		for(;;) {
 			c = *string++;
-	skip_cont:;
+			skip_cont:;
 			if (c == 0) {
 				_stringwidth_out = base;
 				return x;
@@ -667,29 +700,29 @@ public class Gfx {
 			} else if (c == ASCII_BIGFONT) { // {BIGFONT}
 				base = 0x1C0;
 			} else {
-				printf("Unknown string command character %d\n", c);
+				Global.error("Unknown string command character %d\n", c);
 			}
 		}
 	}
 
 	static int DoDrawStringTruncated(final String str, int x, int y, int color, int maxw)
 	{
-		char buffer[512];
-		ttd_strlcpy(buffer, str, sizeof(buffer));
-		TruncateString(buffer, maxw);
+		//char buffer[512];
+		//ttd_strlcpy(buffer, str, sizeof(buffer));
+		String buffer = TruncateString(str, maxw, null);
 		return DoDrawString(buffer, x, y, color);
 	}
 
 	static void DrawSprite(int img, int x, int y)
 	{
-		if (img & PALETTE_MODIFIER_COLOR) {
-			_color_remap_ptr = GetNonSprite(GB(img, PALETTE_SPRITE_START, PALETTE_SPRITE_WIDTH)) + 1;
-			GfxMainBlitter(GetSprite(img & SPRITE_MASK), x, y, 1);
-		} else if (img & PALETTE_MODIFIER_TRANSPARENT) {
-			_color_remap_ptr = GetNonSprite(GB(img, PALETTE_SPRITE_START, PALETTE_SPRITE_WIDTH)) + 1;
-			GfxMainBlitter(GetSprite(img & SPRITE_MASK), x, y, 2);
+		if( 0 != (img & Sprite.PALETTE_MODIFIER_COLOR) ) {
+			_color_remap_ptr = GetNonSprite(BitOps.GB(img, Sprite.PALETTE_SPRITE_START, Sprite.PALETTE_SPRITE_WIDTH)) + 1;
+			GfxMainBlitter(GetSprite(img & Sprite.SPRITE_MASK), x, y, 1);
+		} else if(0 != (img & Sprite.PALETTE_MODIFIER_TRANSPARENT)) {
+			_color_remap_ptr = GetNonSprite(BitOps.GB(img, Sprite.PALETTE_SPRITE_START, Sprite.PALETTE_SPRITE_WIDTH)) + 1;
+			GfxMainBlitter(Sprite.GetSprite(img & Sprite.SPRITE_MASK), x, y, 2);
 		} else {
-			GfxMainBlitter(GetSprite(img & SPRITE_MASK), x, y, 0);
+			GfxMainBlitter(Sprite.GetSprite(img & Sprite.SPRITE_MASK), x, y, 0);
 		}
 	}
 
@@ -697,7 +730,7 @@ public class Gfx {
 		int start_x, start_y;
 		final byte* sprite;
 		final byte* sprite_org;
-		Pixel *dst;
+		/* Pixel */ byte  *dst;
 		int mode;
 		int width, height;
 		int width_org;
@@ -712,7 +745,7 @@ public class Gfx {
 		final byte* src;
 		int num, skip;
 		byte done;
-		Pixel *dst;
+		/* Pixel */ byte  *dst;
 		final byte* ctab;
 
 		if (bp.mode & 1) {
@@ -818,7 +851,7 @@ public class Gfx {
 						num -= skip;
 						if (num <= 0) continue;
 					}
-	#if defined(_WIN32)
+					#if defined(_WIN32)
 					if (num & 1) *dst++ = *src++;
 					if (num & 2) { *(int*)dst = *(int*)src; dst += 2; src += 2; }
 					if (num >>= 2) {
@@ -828,9 +861,9 @@ public class Gfx {
 							src += 4;
 						} while (--num != 0);
 					}
-	#else
-					memcpy(dst, src, num);
-	#endif
+					#else
+						memcpy(dst, src, num);
+					#endif
 				} while (!(done & 0x80));
 
 				bp.dst += bp.pitch;
@@ -841,7 +874,7 @@ public class Gfx {
 	private static void GfxBlitZoomInUncomp(BlitterParams bp)
 	{
 		final byte *src = bp.sprite;
-		Pixel *dst = bp.dst;
+		/* Pixel */ byte  *dst = bp.dst;
 		int height = bp.height;
 		int width = bp.width;
 		int i;
@@ -914,7 +947,7 @@ public class Gfx {
 		final byte* src;
 		int num, skip;
 		byte done;
-		Pixel *dst;
+		/* Pixel */ byte  *dst;
 		final byte* ctab;
 
 		if (bp.mode & 1) {
@@ -952,11 +985,11 @@ public class Gfx {
 
 					ctab = _color_remap_ptr;
 					num = (num + 1) >> 1;
-					for (; num != 0; num--) {
+						for (; num != 0; num--) {
 							*dst = ctab[*src];
 							dst++;
 							src += 2;
-					}
+						}
 				} while (!(done & 0x80));
 				bp.dst += bp.pitch;
 				if (--bp.height == 0) return;
@@ -998,10 +1031,10 @@ public class Gfx {
 
 					ctab = _color_remap_ptr;
 					num = (num + 1) >> 1;
-					for (; num != 0; num--) {
+						for (; num != 0; num--) {
 							*dst = ctab[*dst];
 							dst++;
-					}
+						}
 				} while (!(done & 0x80));
 				bp.dst += bp.pitch;
 				if (--bp.height == 0) return;
@@ -1046,11 +1079,11 @@ public class Gfx {
 
 					num = (num + 1) >> 1;
 
-					for (; num != 0; num--) {
+						for (; num != 0; num--) {
 							*dst = *src;
 							dst++;
 							src += 2;
-					}
+						}
 
 				} while (!(done & 0x80));
 
@@ -1068,7 +1101,7 @@ public class Gfx {
 	private static void GfxBlitZoomMediumUncomp(BlitterParams bp)
 	{
 		final byte *src = bp.sprite;
-		Pixel *dst = bp.dst;
+		/* Pixel */ byte  *dst = bp.dst;
 		int height = bp.height;
 		int width = bp.width;
 		int i;
@@ -1119,7 +1152,7 @@ public class Gfx {
 		final byte* src;
 		int num, skip;
 		byte done;
-		Pixel *dst;
+		/* Pixel */ byte  *dst;
 		final byte* ctab;
 
 		if (bp.mode & 1) {
@@ -1164,11 +1197,11 @@ public class Gfx {
 
 					ctab = _color_remap_ptr;
 					num = (num + 3) >> 2;
-					for (; num != 0; num--) {
+						for (; num != 0; num--) {
 							*dst = ctab[*src];
 							dst++;
 							src += 4;
-					}
+						}
 				} while (!(done & 0x80));
 				bp.dst += bp.pitch;
 				if (--bp.height == 0) return;
@@ -1229,10 +1262,10 @@ public class Gfx {
 
 					ctab = _color_remap_ptr;
 					num = (num + 3) >> 2;
-					for (; num != 0; num--) {
+						for (; num != 0; num--) {
 							*dst = ctab[*dst];
 							dst++;
-					}
+						}
 
 				} while (!(done & 0x80));
 				bp.dst += bp.pitch;
@@ -1298,11 +1331,11 @@ public class Gfx {
 
 					num = (num + 3) >> 2;
 
-					for (; num != 0; num--) {
+						for (; num != 0; num--) {
 							*dst = *src;
 							dst++;
 							src += 4;
-					}
+						}
 				} while (!(done & 0x80));
 
 				bp.dst += bp.pitch;
@@ -1332,7 +1365,7 @@ public class Gfx {
 	private static void GfxBlitZoomOutUncomp(BlitterParams bp)
 	{
 		final byte* src = bp.sprite;
-		Pixel *dst = bp.dst;
+		/* Pixel */ byte  *dst = bp.dst;
 		int height = bp.height;
 		int width = bp.width;
 		int i;
@@ -1388,17 +1421,17 @@ public class Gfx {
 		int zoom_mask = ~((1 << dpi.zoom) - 1);
 
 		static final BlitZoomFunc zf_tile[3] =
-		{
-			GfxBlitTileZoomIn,
-			GfxBlitTileZoomMedium,
-			GfxBlitTileZoomOut
-		};
+			{
+					GfxBlitTileZoomIn,
+					GfxBlitTileZoomMedium,
+					GfxBlitTileZoomOut
+			};
 		static final BlitZoomFunc zf_uncomp[3] =
-		{
-			GfxBlitZoomInUncomp,
-			GfxBlitZoomMediumUncomp,
-			GfxBlitZoomOutUncomp
-		};
+			{
+					GfxBlitZoomInUncomp,
+					GfxBlitZoomMediumUncomp,
+					GfxBlitZoomOutUncomp
+			};
 
 		/* decode sprite header */
 		x += sprite.x_offs;
@@ -1452,12 +1485,12 @@ public class Gfx {
 			bp.start_x = start_x;
 			bp.dst += x >> dpi.zoom;
 
-			if ( (x = x + bp.width - dpi.width) > 0) {
-				bp.width -= x;
-				if (bp.width <= 0) return;
-			}
+				if ( (x = x + bp.width - dpi.width) > 0) {
+					bp.width -= x;
+					if (bp.width <= 0) return;
+				}
 
-			zf_tile[dpi.zoom](&bp);
+				zf_tile[dpi.zoom](&bp);
 		} else {
 			bp.sprite += bp.width * (bp.height & ~zoom_mask);
 			bp.height &= zoom_mask;
@@ -1489,20 +1522,22 @@ public class Gfx {
 			}
 			bp.dst += x >> dpi.zoom;
 
-			if (bp.width > dpi.width - x) {
-				bp.width = dpi.width - x;
-				if (bp.width <= 0) return;
-			}
+				if (bp.width > dpi.width - x) {
+					bp.width = dpi.width - x;
+					if (bp.width <= 0) return;
+				}
 
-			zf_uncomp[dpi.zoom](&bp);
+				zf_uncomp[dpi.zoom](&bp);
 		}
 	}
 
-	void DoPaletteAnimations();
+	//void DoPaletteAnimations();
 
 	static void GfxInitPalettes()
 	{
-		memcpy(_cur_palette, _palettes[_use_dos_palette ? 1 : 0], sizeof(_cur_palette));
+		//memcpy(_cur_palette, _palettes[_use_dos_palette ? 1 : 0], sizeof(_cur_palette));
+		
+		System.arraycopy(_palettes[0], 0, _cur_palette, 0, _cur_palette.length );
 
 		_pal_first_dirty = 0;
 		_pal_last_dirty = 255;
@@ -1521,7 +1556,7 @@ public class Gfx {
 		 * 245-254 for DOS and 217-226 for Windows.  */
 		final ExtraPaletteValues ev = _extra_palette_values;
 		int c = _use_dos_palette ? 38 : 28;
-		Colour old_val[38]; // max(38, 28)
+		Colour [] old_val = new Colour[38]; // max(38, 28)
 		int i;
 		int j;
 
@@ -1623,45 +1658,58 @@ public class Gfx {
 	}
 
 
+
+
 	static void LoadStringWidthTable()
 	{
-		byte *b = _stringwidth_table;
+		//byte *b = _stringwidth_table;
 		int i;
+		int bp = 0;
 
 		// 2 equals space.
 		for (i = 2; i != 226; i++) {
-			*b++ = i != 97 && (i < 99 || i > 113) && i != 116 && i != 117 && (i < 123 || i > 129) && (i < 151 || i > 153) && i != 155 ? GetSprite(i).width : 0;
+			//*b++ = i != 97 && (i < 99 || i > 113) && i != 116 && i != 117 && (i < 123 || i > 129) && (i < 151 || i > 153) && i != 155 ? GetSprite(i).width : 0;
+			_stringwidth_table[bp++] = i != 97 && (i < 99 || i > 113) && i != 116 && i != 117 && (i < 123 || i > 129) && (i < 151 || i > 153) && i != 155 ? GetSprite(i).width : 0;
 		}
 
 		for (i = 226; i != 450; i++) {
-			*b++ = i != 321 && (i < 323 || i > 353) && i != 367 && (i < 375 || i > 377) && i != 379 ? GetSprite(i).width + 1 : 0;
+			//*b++ = i != 321 && (i < 323 || i > 353) && i != 367 && (i < 375 || i > 377) && i != 379 ? GetSprite(i).width + 1 : 0;
+			_stringwidth_table[bp++] = i != 321 && (i < 323 || i > 353) && i != 367 && (i < 375 || i > 377) && i != 379 ? GetSprite(i).width + 1 : 0;
 		}
 
 		for (i = 450; i != 674; i++) {
-			*b++ = (i < 545 || i > 577) && i != 585 && i != 587 && i != 588 && (i < 590 || i > 597) && (i < 599 || i > 601) && i != 603 && i != 633 && i != 665 ? GetSprite(i).width + 1 : 0;
+			//*b++ = (i < 545 || i > 577) && i != 585 && i != 587 && i != 588 && (i < 590 || i > 597) && (i < 599 || i > 601) && i != 603 && i != 633 && i != 665 ? GetSprite(i).width + 1 : 0;
+			_stringwidth_table[bp++] = (i < 545 || i > 577) && i != 585 && i != 587 && i != 588 && (i < 590 || i > 597) && (i < 599 || i > 601) && i != 603 && i != 633 && i != 665 ? GetSprite(i).width + 1 : 0;
 		}
 	}
+
+	static int GetCharacterWidth(int key)
+	{
+		assert(key >= ASCII_LETTERSTART && key - ASCII_LETTERSTART < lengthof(_stringwidth_table));
+		return _stringwidth_table[key - ASCII_LETTERSTART];
+	}
+
 
 	static void ScreenSizeChanged()
 	{
 		// check the dirty rect
-		if (_invalid_rect.right >= _screen.width) _invalid_rect.right = _screen.width;
-		if (_invalid_rect.bottom >= _screen.height) _invalid_rect.bottom = _screen.height;
+		if (_invalid_rect.right >= Hal._screen.width) _invalid_rect.right = Hal._screen.width;
+		if (_invalid_rect.bottom >= Hal._screen.height) _invalid_rect.bottom = Hal._screen.height;
 
 		// screen size changed and the old bitmap is invalid now, so we don't want to undraw it
-		_cursor.visible = false;
+		Hal._cursor.visible = false;
 	}
 
 	static void UndrawMouseCursor()
 	{
-		if (_cursor.visible) {
-			_cursor.visible = false;
+		if (Hal._cursor.visible) {
+			Hal._cursor.visible = false;
 			memcpy_pitch(
-				_screen.dst_ptr + _cursor.draw_pos.x + _cursor.draw_pos.y * _screen.pitch,
-				_cursor_backup,
-				_cursor.draw_size.x, _cursor.draw_size.y, _cursor.draw_size.x, _screen.pitch);
+					Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
+					_cursor_backup,
+					Hal._cursor.draw_size.x, Hal._cursor.draw_size.y, Hal._cursor.draw_size.x, Hal._screen.pitch);
 
-			Global.hal._video_driver.make_dirty(_cursor.draw_pos.x, _cursor.draw_pos.y, _cursor.draw_size.x, _cursor.draw_size.y);
+			Global.hal._video_driver.make_dirty(Hal._cursor.draw_pos.x, Hal._cursor.draw_pos.y, Hal._cursor.draw_size.x, Hal._cursor.draw_size.y);
 		}
 	}
 
@@ -1673,49 +1721,49 @@ public class Gfx {
 		int h;
 
 		// Don't draw the mouse cursor if it's already drawn
-		if (_cursor.visible) {
-			if (!_cursor.dirty) return;
+		if (Hal._cursor.visible) {
+			if (!Hal._cursor.dirty) return;
 			UndrawMouseCursor();
 		}
 
-		w = _cursor.size.x;
-		x = _cursor.pos.x + _cursor.offs.x;
+		w = Hal._cursor.size.x;
+		x = Hal._cursor.pos.x + Hal._cursor.offs.x;
 		if (x < 0) {
 			w += x;
 			x = 0;
 		}
-		if (w > _screen.width - x) w = _screen.width - x;
+		if (w > Hal._screen.width - x) w = Hal._screen.width - x;
 		if (w <= 0) return;
-		_cursor.draw_pos.x = x;
-		_cursor.draw_size.x = w;
+		Hal._cursor.draw_pos.x = x;
+		Hal._cursor.draw_size.x = w;
 
-		h = _cursor.size.y;
-		y = _cursor.pos.y + _cursor.offs.y;
+		h = Hal._cursor.size.y;
+		y = Hal._cursor.pos.y + Hal._cursor.offs.y;
 		if (y < 0) {
 			h += y;
 			y = 0;
 		}
-		if (h > _screen.height - y) h = _screen.height - y;
+		if (h > Hal._screen.height - y) h = Hal._screen.height - y;
 		if (h <= 0) return;
-		_cursor.draw_pos.y = y;
-		_cursor.draw_size.y = h;
+		Hal._cursor.draw_pos.y = y;
+		Hal._cursor.draw_size.y = h;
 
 		assert(w * h < (int)sizeof(_cursor_backup));
 
 		// Make backup of stuff below cursor
 		memcpy_pitch(
-			_cursor_backup,
-			Hal._screen.dst_ptr + _cursor.draw_pos.x + _cursor.draw_pos.y * _screen.pitch,
-			_cursor.draw_size.x, _cursor.draw_size.y, _screen.pitch, _cursor.draw_size.x);
+				_cursor_backup,
+				Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
+				Hal._cursor.draw_size.x, Hal._cursor.draw_size.y, Hal._screen.pitch, Hal._cursor.draw_size.x);
 
 		// Draw cursor on screen
 		Hal._cur_dpi = Hal._screen;
-		DrawSprite(_cursor.sprite, _cursor.pos.x, _cursor.pos.y);
+		DrawSprite(Hal._cursor.sprite, Hal._cursor.pos.x, Hal._cursor.pos.y);
 
-		Global.hal._video_driver.make_dirty(_cursor.draw_pos.x, _cursor.draw_pos.y, _cursor.draw_size.x, _cursor.draw_size.y);
+		Global.hal._video_driver.make_dirty(Hal._cursor.draw_pos.x, Hal._cursor.draw_pos.y, Hal._cursor.draw_size.x, Hal._cursor.draw_size.y);
 
-		_cursor.visible = true;
-		_cursor.dirty = false;
+		Hal._cursor.visible = true;
+		Hal._cursor.dirty = false;
 	}
 
 	/*#if defined(_DEBUG)
@@ -1726,7 +1774,7 @@ public class Gfx {
 
 		old = Hal._cur_dpi;
 		Hal._cur_dpi = &dp;
-		dp = _screen;
+		dp = Hal._screen;
 		GfxFillRect(left, top, right - 1, bottom - 1, rand() & 255);
 		Hal._cur_dpi = old;
 	}
@@ -1734,23 +1782,23 @@ public class Gfx {
 
 	static void RedrawScreenRect(int left, int top, int right, int bottom)
 	{
-		assert(right <= _screen.width && bottom <= _screen.height);
-		if (_cursor.visible) {
-			if (right > _cursor.draw_pos.x &&
-					left < _cursor.draw_pos.x + _cursor.draw_size.x &&
-					bottom > _cursor.draw_pos.y &&
-					top < _cursor.draw_pos.y + _cursor.draw_size.y) {
+		assert(right <= Hal._screen.width && bottom <= Hal._screen.height);
+		if (Hal._cursor.visible) {
+			if (right > Hal._cursor.draw_pos.x &&
+					left < Hal._cursor.draw_pos.x + Hal._cursor.draw_size.x &&
+					bottom > Hal._cursor.draw_pos.y &&
+					top < Hal._cursor.draw_pos.y + Hal._cursor.draw_size.y) {
 				UndrawMouseCursor();
 			}
 		}
 		UndrawTextMessage();
 
-	/* #if defined(_DEBUG)
+		/* #if defined(_DEBUG)
 		if (_dbg_screen_rect)
 			DbgScreenRect(left, top, right, bottom);
 		else
 	#endif */
-			DrawOverlappedWindowForAll(left, top, right, bottom);
+		DrawOverlappedWindowForAll(left, top, right, bottom);
 
 		Global.hal._video_driver.make_dirty(left, top, right - left, bottom - top);
 	}
@@ -1758,8 +1806,8 @@ public class Gfx {
 	static void DrawDirtyBlocks()
 	{
 		byte *b = _dirty_blocks;
-		final int w = ALIGN(_screen.width, 64);
-		final int h = ALIGN(_screen.height, 8);
+		final int w = BitOps.ALIGN(Hal._screen.width, 64);
+		final int h = BitOps.ALIGN(Hal._screen.height, 8);
 		int x;
 		int y;
 
@@ -1809,7 +1857,7 @@ public class Gfx {
 					}
 					no_more_coalesc:
 
-					left = x;
+						left = x;
 					top = y;
 
 					if (left   < _invalid_rect.left  ) left   = _invalid_rect.left;
@@ -1840,8 +1888,8 @@ public class Gfx {
 
 		if (left < 0) left = 0;
 		if (top < 0) top = 0;
-		if (right > _screen.width) right = _screen.width;
-		if (bottom > _screen.height) bottom = _screen.height;
+		if (right > Hal._screen.width) right = Hal._screen.width;
+		if (bottom > Hal._screen.height) bottom = Hal._screen.height;
 
 		if (left >= right || top >= bottom) return;
 
@@ -1871,14 +1919,14 @@ public class Gfx {
 
 	void MarkWholeScreenDirty()
 	{
-		SetDirtyBlocks(0, 0, _screen.width, _screen.height);
+		SetDirtyBlocks(0, 0, Hal._screen.width, Hal._screen.height);
 	}
 
 	boolean FillDrawPixelInfo(DrawPixelInfo  n, final DrawPixelInfo  o, int left, int top, int width, int height)
 	{
 		int t;
 
-		if (o == NULL) o = Hal._cur_dpi;
+		if (o == null) o = Hal._cur_dpi;
 
 		n.zoom = 0;
 
@@ -1942,7 +1990,7 @@ public class Gfx {
 		CursorID sprite;
 
 		// ANIM_CURSOR_END is 0xFFFF in table/animcursors.h
-		if (cur == NULL || *cur == 0xFFFF) cur = cv.animate_list;
+		if (cur == null || *cur == 0xFFFF) cur = cv.animate_list;
 
 		sprite = cur[0];
 		cv.animate_timeout = cur[1];
@@ -1968,14 +2016,14 @@ public class Gfx {
 	void SetAnimatedMouseCursor(final CursorID *table)
 	{
 		_cursor.animate_list = table;
-		_cursor.animate_cur = NULL;
+		_cursor.animate_cur = null;
 		SwitchAnimatedCursor();
 	}
 
 	boolean ChangeResInGame(int w, int h)
 	{
 		return
-			(_screen.width == w && _screen.height == h) ||
+			(Hal._screen.width == w && Hal._screen.height == h) ||
 			Global.hal._video_driver.change_resolution(w, h);
 	}
 
@@ -2000,6 +2048,15 @@ public class Gfx {
 		if (player == OWNER_SPECTATOR || player == OWNER_SPECTATOR - 1) return 1;
 		return (_color_list[_player_colors[player]].window_color_1b) | IS_PALETTE_COLOR;
 	}
-	*/	
-	
+	 */	
+
 }
+
+
+
+
+class Colour {
+	byte r;
+	byte g;
+	byte b;
+} 

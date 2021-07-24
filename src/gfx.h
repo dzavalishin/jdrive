@@ -3,7 +3,7 @@
 #ifndef GFX_H
 #define GFX_H
 
-typedef byte Pixel;
+//typedef byte Pixel;
 
 typedef struct ColorList {
 	byte unk0, unk1, unk2;
@@ -92,20 +92,20 @@ void SortResolutions(int count);
 void ToggleFullScreen(bool fs);
 
 /* gfx.c */
-#define ASCII_LETTERSTART 32
-VARDEF int _stringwidth_base;
-VARDEF byte _stringwidth_table[0x2A0];
-static inline byte GetCharacterWidth(uint key)
+//#define ASCII_LETTERSTART 32
+//VARDEF int _stringwidth_base;
+//VARDEF byte _stringwidth_table[0x2A0];
+/*static inline byte GetCharacterWidth(uint key)
 {
 	assert(key >= ASCII_LETTERSTART && key - ASCII_LETTERSTART < lengthof(_stringwidth_table));
 	return _stringwidth_table[key - ASCII_LETTERSTART];
-}
+}*/
 
 //VARDEF DrawPixelInfo _screen;
 //VARDEF DrawPixelInfo *_cur_dpi;
 //VARDEF ColorList _color_list[16];
 //VARDEF CursorVars _cursor;
-
+/*
 VARDEF int _pal_first_dirty;
 VARDEF int _pal_last_dirty;
 
@@ -123,7 +123,7 @@ extern Colour _cur_palette[256];
 typedef enum StringColorFlags {
 	IS_PALETTE_COLOR = 0x100, // color value is already a real palette color index, not an index of a StringColor
 } StringColorFlags;
-
+*/
 #ifdef _DEBUG
 extern bool _dbg_screen_rect;
 #endif
