@@ -1969,35 +1969,35 @@ public class Gui
 			PlayerID local = (Global._local_player != Owner.OWNER_SPECTATOR) ? _local_player : 0;
 
 			switch (e.keypress.keycode) {
-			case WKC_F1: case WKC_PAUSE:
+			case Window.WKC_F1: case Window.WKC_PAUSE:
 				ToolbarPauseClick(w);
 				break;
-			case WKC_F2: ShowGameOptions(); break;
-			case WKC_F3: MenuClickSaveLoad(0); break;
-			case WKC_F4: ShowSmallMap(); break;
-			case WKC_F5: ShowTownDirectory(); break;
-			case WKC_F6: ShowSubsidiesList(); break;
-			case WKC_F7: ShowPlayerStations(local); break;
-			case WKC_F8: ShowPlayerFinances(local); break;
-			case WKC_F9: ShowPlayerCompany(local); break;
-			case WKC_F10:ShowOperatingProfitGraph(); break;
-			case WKC_F11: ShowCompanyLeagueTable(); break;
-			case WKC_F12: ShowBuildIndustryWindow(); break;
-			case WKC_SHIFT | WKC_F1: ShowPlayerTrains(local, Station.INVALID_STATION); break;
-			case WKC_SHIFT | WKC_F2: ShowPlayerRoadVehicles(local, Station.INVALID_STATION); break;
-			case WKC_SHIFT | WKC_F3: ShowPlayerShips(local, Station.INVALID_STATION); break;
-			case WKC_SHIFT | WKC_F4: ShowPlayerAircraft(local, Station.INVALID_STATION); break;
-			case WKC_SHIFT | WKC_F5: ToolbarZoomInClick(w); break;
-			case WKC_SHIFT | WKC_F6: ToolbarZoomOutClick(w); break;
-			case WKC_SHIFT | WKC_F7: ShowBuildRailToolbar(_last_built_railtype,-1); break;
-			case WKC_SHIFT | WKC_F8: ShowBuildRoadToolbar(); break;
-			case WKC_SHIFT | WKC_F9: ShowBuildDocksToolbar(); break;
-			case WKC_SHIFT | WKC_F10:ShowBuildAirToolbar(); break;
-			case WKC_SHIFT | WKC_F11: ShowBuildTreesToolbar(); break;
-			case WKC_SHIFT | WKC_F12: ShowMusicWindow(); break;
-			case WKC_CTRL  | 'S': _make_screenshot = 1; break;
-			case WKC_CTRL  | 'G': _make_screenshot = 2; break;
-			case WKC_CTRL | WKC_ALT | 'C': if (!_networking) ShowCheatWindow(); break;
+			case Window.WKC_F2: ShowGameOptions(); break;
+			case Window.WKC_F3: MenuClickSaveLoad(0); break;
+			case Window.WKC_F4: ShowSmallMap(); break;
+			case Window.WKC_F5: ShowTownDirectory(); break;
+			case Window.WKC_F6: ShowSubsidiesList(); break;
+			case Window.WKC_F7: ShowPlayerStations(local); break;
+			case Window.WKC_F8: ShowPlayerFinances(local); break;
+			case Window.WKC_F9: ShowPlayerCompany(local); break;
+			case Window.WKC_F10:ShowOperatingProfitGraph(); break;
+			case Window.WKC_F11: ShowCompanyLeagueTable(); break;
+			case Window.WKC_F12: ShowBuildIndustryWindow(); break;
+			case Window.WKC_SHIFT | Window.WKC_F1: ShowPlayerTrains(local, Station.INVALID_STATION); break;
+			case Window.WKC_SHIFT | Window.WKC_F2: ShowPlayerRoadVehicles(local, Station.INVALID_STATION); break;
+			case Window.WKC_SHIFT | Window.WKC_F3: ShowPlayerShips(local, Station.INVALID_STATION); break;
+			case Window.WKC_SHIFT | Window.WKC_F4: ShowPlayerAircraft(local, Station.INVALID_STATION); break;
+			case Window.WKC_SHIFT | Window.WKC_F5: ToolbarZoomInClick(w); break;
+			case Window.WKC_SHIFT | Window.WKC_F6: ToolbarZoomOutClick(w); break;
+			case Window.WKC_SHIFT | Window.WKC_F7: ShowBuildRailToolbar(_last_built_railtype,-1); break;
+			case Window.WKC_SHIFT | Window.WKC_F8: ShowBuildRoadToolbar(); break;
+			case Window.WKC_SHIFT | Window.WKC_F9: ShowBuildDocksToolbar(); break;
+			case Window.WKC_SHIFT | Window.WKC_F10:ShowBuildAirToolbar(); break;
+			case Window.WKC_SHIFT | Window.WKC_F11: ShowBuildTreesToolbar(); break;
+			case Window.WKC_SHIFT | Window.WKC_F12: ShowMusicWindow(); break;
+			case Window.WKC_CTRL  | 'S': _make_screenshot = 1; break;
+			case Window.WKC_CTRL  | 'G': _make_screenshot = 2; break;
+			case Window.WKC_CTRL | Window.WKC_ALT | 'C': if (!_networking) ShowCheatWindow(); break;
 			case 'A': ShowBuildRailToolbar(_last_built_railtype, 4); break; /* Invoke Autorail */
 			case 'L': ShowTerraformToolbar(); break;
 			default: return;
@@ -2185,19 +2185,19 @@ public class Gui
 
 		case WindowEvents.WE_KEYPRESS:
 			switch (e.keypress.keycode) {
-			case WKC_F1: ToolbarPauseClick(w); break;
-			case WKC_F2: ShowGameOptions(); break;
-			case WKC_F3: MenuClickSaveLoad(0); break;
-			case WKC_F4: ToolbarScenGenLand(w); break;
-			case WKC_F5: ToolbarScenGenTown(w); break;
-			case WKC_F6: ToolbarScenGenIndustry(w); break;
-			case WKC_F7: ToolbarScenBuildRoad(w); break;
-			case WKC_F8: ToolbarScenPlantTrees(w); break;
-			case WKC_F9: ToolbarScenPlaceSign(w); break;
-			case WKC_F10: ShowMusicWindow(); break;
-			case WKC_F11: PlaceLandBlockInfo(); break;
-			case WKC_CTRL | 'S': _make_screenshot = 1; break;
-			case WKC_CTRL | 'G': _make_screenshot = 2; break;
+			case Window.WKC_F1: ToolbarPauseClick(w); break;
+			case Window.WKC_F2: ShowGameOptions(); break;
+			case Window.WKC_F3: MenuClickSaveLoad(0); break;
+			case Window.WKC_F4: ToolbarScenGenLand(w); break;
+			case Window.WKC_F5: ToolbarScenGenTown(w); break;
+			case Window.WKC_F6: ToolbarScenGenIndustry(w); break;
+			case Window.WKC_F7: ToolbarScenBuildRoad(w); break;
+			case Window.WKC_F8: ToolbarScenPlantTrees(w); break;
+			case Window.WKC_F9: ToolbarScenPlaceSign(w); break;
+			case Window.WKC_F10: ShowMusicWindow(); break;
+			case Window.WKC_F11: PlaceLandBlockInfo(); break;
+			case Window.WKC_CTRL | 'S': _make_screenshot = 1; break;
+			case Window.WKC_CTRL | 'G': _make_screenshot = 2; break;
 			case 'L': ShowEditorTerraformToolBar(); break;
 			}
 			break;
@@ -2414,15 +2414,15 @@ public class Gui
 			break;
 
 		case WE_KEYPRESS:
-			if (e.keypress.keycode == WKC_BACKQUOTE) {
+			if (e.keypress.keycode == Window.WKC_BACKQUOTE) {
 				IConsoleSwitch();
 				e.keypress.cont = false;
 				break;
 			}
 
 			switch (e.keypress.keycode) {
-				case 'Q' | WKC_CTRL:
-				case 'Q' | WKC_META:
+				case 'Q' | Window.WKC_CTRL:
+				case 'Q' | Window.WKC_META:
 					AskExitGame();
 					break;
 			}
@@ -2440,17 +2440,17 @@ public class Gui
 					break;
 				}
 
-				case WKC_ESC: ResetObjectToPlace(); break;
-				case WKC_DELETE: Window.DeleteNonVitalWindows(); break;
-				case WKC_DELETE | WKC_SHIFT: Window.DeleteAllNonVitalWindows(); break;
-				case 'R' | WKC_CTRL: Hal.MarkWholeScreenDirty(); break;
+				case Window.WKC_ESC: ResetObjectToPlace(); break;
+				case Window.WKC_DELETE: Window.DeleteNonVitalWindows(); break;
+				case Window.WKC_DELETE | Window.WKC_SHIFT: Window.DeleteAllNonVitalWindows(); break;
+				case 'R' | Window.WKC_CTRL: Hal.MarkWholeScreenDirty(); break;
 
 	/*#if defined(_DEBUG)
-				case '0' | WKC_ALT: // Crash the game 
+				case '0' | Window.WKC_ALT: // Crash the game 
 					*(byte*)0 = 0;
 					break;
 
-				case '1' | WKC_ALT: // Gimme money 
+				case '1' | Window.WKC_ALT: // Gimme money 
 					/* Server can not cheat in advertise mode either! 
 	//#ifdef ENABLE_NETWORK
 	//				if (!_networking || !_network_server || !_network_advertise)
@@ -2458,7 +2458,7 @@ public class Gui
 						Cmd.DoCommandP(0, -10000000, 0, null, Cmd.CMD_MONEY_CHEAT);
 					break;
 
-				case '2' | WKC_ALT: // Update the coordinates of all station signs 
+				case '2' | Window.WKC_ALT: // Update the coordinates of all station signs 
 					UpdateAllStationVirtCoord();
 					break;
 	#endif */
@@ -2469,7 +2469,7 @@ public class Gui
 					break;
 
 	/*#ifdef ENABLE_NETWORK
-				case WKC_RETURN: case 'T' | WKC_SHIFT:
+				case Window.WKC_RETURN: case 'T' | Window.WKC_SHIFT:
 					if (_networking) ShowNetworkChatQueryWindow(DESTTYPE_BROADCAST, 0);
 					break;
 	#endif */

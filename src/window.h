@@ -70,7 +70,7 @@ enum FrameFlags {
 /* XXX - outside "byte event" so you can set event directly without going into
  * the union elements at first. Because of this every first element of the union
  * MUST BE 'byte event'. Whoever did this must get shot! Scheduled for immediate
- * rewrite after 0.4.0 */
+ * rewrite after 0.4.0 * /
 union WindowEvent {
 	byte event;
 	struct {
@@ -135,7 +135,7 @@ union WindowEvent {
 		uint lparam; // additional message-specific information
 	} message;
 };
-
+* /
 enum WindowKeyCodes {
 	WKC_SHIFT = 0x8000,
 	WKC_CTRL  = 0x4000,

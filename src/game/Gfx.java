@@ -138,7 +138,7 @@ public class Gfx {
 		dst = dpi.dst_ptr + top * dpi.pitch + left;
 
 		if (!(color & PALETTE_MODIFIER_GREYOUT)) {
-			if (!(color & USE_COLORTABLE)) {
+			if (!(color & Sprite.USE_COLORTABLE)) {
 				do {
 					memset(dst, color, right);
 					dst += dpi.pitch;
@@ -334,7 +334,7 @@ public class Gfx {
 		DrawString(x, y, str.id, color);
 	}
 	
-	static int DrawStringTruncated(int x, int y, StringID str, int color, uint maxw)
+	static int DrawStringTruncated(int x, int y, StringID str, int color, int maxw)
 	{
 		//char buffer[512];
 		//TruncateStringID(str, buffer, maxw);
@@ -358,7 +358,7 @@ public class Gfx {
 		DoDrawString(buffer, x - GetStringWidth(buffer), y, color);
 	}
 
-	static void DrawStringRightAlignedTruncated(int x, int y, StringID str, int color, uint maxw)
+	static void DrawStringRightAlignedTruncated(int x, int y, StringID str, int color, int maxw)
 	{
 		//char buffer[512];
 
@@ -367,16 +367,20 @@ public class Gfx {
 		DoDrawString(buffer, x - GetStringWidth(buffer), y, color);
 	}
 
-
 	static int DrawStringCentered(int x, int y, StringID str, int color)
 	{
-		char buffer[512];
+		return DrawStringCentered(x, y, str.id, color);
+	}
+	
+	static int DrawStringCentered(int x, int y, int str, int color)
+	{
+		//char buffer[512];
 		int w;
 
-		GetString(buffer, str);
+		String s = Global.GetString(str);
 
-		w = GetStringWidth(buffer);
-		DoDrawString(buffer, x - w / 2, y, color);
+		w = GetStringWidth(s);
+		DoDrawString(s, x - w / 2, y, color);
 
 		return w;
 	}
@@ -583,7 +587,7 @@ public class Gfx {
 			}
 		} else if (flags & 0x1) {
 			// transparency
-			GfxFillRect(left, top, right, bottom, 0x322 | USE_COLORTABLE);
+			GfxFillRect(left, top, right, bottom, 0x322 | Sprite.USE_COLORTABLE);
 		} else {
 			GfxFillRect(left, top, right, bottom, color_interior);
 		}
@@ -668,7 +672,7 @@ public class Gfx {
 		}
 	}
 
-	static int DoDrawStringTruncated(final String str, int x, int y, int color, uint maxw)
+	static int DoDrawStringTruncated(final String str, int x, int y, int color, int maxw)
 	{
 		char buffer[512];
 		ttd_strlcpy(buffer, str, sizeof(buffer));
@@ -1518,8 +1522,8 @@ public class Gfx {
 		final ExtraPaletteValues ev = _extra_palette_values;
 		int c = _use_dos_palette ? 38 : 28;
 		Colour old_val[38]; // max(38, 28)
-		uint i;
-		uint j;
+		int i;
+		int j;
 
 		d = &_cur_palette[217];
 		memcpy(old_val, d, c * sizeof(*old_val));
@@ -1622,7 +1626,7 @@ public class Gfx {
 	static void LoadStringWidthTable()
 	{
 		byte *b = _stringwidth_table;
-		uint i;
+		int i;
 
 		// 2 equals space.
 		for (i = 2; i != 226; i++) {

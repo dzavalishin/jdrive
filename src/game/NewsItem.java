@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import game.util.BitOps;
+import game.util.GameDate;
 import game.util.wcustom.def_d;
 
 public class NewsItem {
@@ -166,12 +167,12 @@ public class NewsItem {
 		ni = _news_items[_latest_news];
 		//memset(ni, 0, sizeof(*ni));
 
-		ni.string_id = string;
+		ni.string_id = new StringID( string );
 		ni.display_mode = (byte)flags;
 		ni.flags = (byte)(flags >> 8) | NF_NOEXPIRE;
 
 		// show this news message in color?
-		if (Global._date >= ConvertIntDate(Global._patches.colored_news_date))
+		if (Global._date >= GameDate.ConvertIntDate(Global._patches.colored_news_date))
 			ni.flags |= NF_INCOLOR;
 
 		ni.type = (byte)(flags >> 16);
@@ -266,7 +267,7 @@ public class NewsItem {
 					vp = w.viewport;
 					Gfx.GfxFillRect(vp.left - w.left, vp.top - w.top,
 							vp.left - w.left + vp.width - 1, vp.top - w.top + vp.height - 1,
-							(0 !=(ni.flags & NF_INCOLOR) ? 0x322 : 0x323) | USE_COLORTABLE
+							(0 !=(ni.flags & NF_INCOLOR) ? 0x322 : 0x323) | Sprite.USE_COLORTABLE
 							);
 
 					Global.COPY_IN_DPARAM(0, ni.params, ni.params.length);
@@ -317,7 +318,7 @@ public class NewsItem {
 		} break;
 
 		case WE_KEYPRESS:
-			if (e.keycode == WKC_SPACE) {
+			if (e.keycode == Window.WKC_SPACE) {
 				// Don't continue.
 				e.cont = false;
 				w.DeleteWindow();
@@ -539,7 +540,7 @@ public class NewsItem {
 		}
 		}
 		w.as_news_d().ni = _news_items[_forced_news == INVALID_NEWS ? _current_news : _forced_news];
-		w.flags4 |= WF_DISABLE_VP_SCROLL;
+		w.flags4 |= Window.WF_DISABLE_VP_SCROLL;
 	}
 
 	// show news item in the ticker
@@ -569,7 +570,7 @@ public class NewsItem {
 		// Ticker message
 		// Check if the status bar message is still being displayed?
 		w = Window.FindWindowById(Window.WC_STATUS_BAR, 0);
-		if (w != null && WP(w, final def_d).data_1 > -1280) return false;
+		if (w != null && w.as_def_d().data_1 > -1280) return false;
 
 		// Newspaper message
 		// Wait until duration reaches 0
@@ -598,7 +599,7 @@ public class NewsItem {
 			if (Global._date - _news_items_age[ni.type] > ni.date) return;
 
 			// execute the validation function to see if this item is still valid
-			if (ni.isValid != null && !ni.isValid(ni.data_a, ni.data_b)) return;
+			if (ni.isValid != null && !ni.isValid.test(ni.data_a.getTile(), ni.data_b.getTile())) return;
 
 			switch (GetNewsDisplayValue(ni.type)) {
 			case 0: { /* Off - show nothing only a small reminder in the status bar */
@@ -634,7 +635,7 @@ public class NewsItem {
 	}
 
 	/* Do a forced show of a specific message */
-	static void ShowNewsMessage(byte i)
+	static void ShowNewsMessage(int i)
 	{
 		if (_total_news == 0) return;
 
@@ -696,7 +697,7 @@ public class NewsItem {
 		StringID str;
 
 		if (ni.display_mode == 3) {
-			str = _get_news_string_callback[ni.callback].accept(ni);
+			str = new StringID( _get_news_string_callback[ni.callback].apply(ni) );
 		} else {
 			Global.COPY_IN_DPARAM(0, ni.params, ni.params.length);
 			str = ni.string_id;
@@ -720,7 +721,7 @@ public class NewsItem {
 		for( char c : ca )
 		{
 			if (c == '\r') {
-				sb.append("    ")
+				sb.append("    ");
 			} else if (c >= ' ' && (c < 0x88 || c >= 0x99)) {
 				sb.append(c);
 			}
@@ -738,19 +739,19 @@ public class NewsItem {
 		switch (e.event) {
 		case WE_PAINT: {
 			int y = 19;
-			byte p, show;
+			int p, show;
 
 			w.DrawWindowWidgets();
 
 			if (_total_news == 0) break;
-			show = min(_total_news, w.vscroll.cap);
+			show = Math.min(_total_news, w.vscroll.cap);
 
 			for (p = w.vscroll.pos; p < w.vscroll.pos + show; p++) {
 				// get news in correct order
-				final NewsItem *ni = &_news_items[getNews(p)];
+				final NewsItem ni = _news_items[getNews(p)];
 
 				Global.SetDParam(0, ni.date);
-				DrawString(4, y, Str.STR_SHORT_DATE, 12);
+				Gfx.DrawString(4, y, Str.STR_SHORT_DATE, 12);
 
 				DrawNewsString(82, y, 12, ni, w.width - 95);
 				y += 12;
@@ -759,23 +760,23 @@ public class NewsItem {
 		}
 
 		case WE_CLICK:
-			switch (e.click.widget) {
+			switch (e.widget) {
 			case 3: {
-				int y = (e.click.pt.y - 19) / 12;
-				byte p, q;
+				int y = (e.pt.y - 19) / 12;
+				int p, q;
 
 
-				if(fasle)
+				if(false)
 				{
 					// === DEBUG code only
 					for (p = 0; p < _total_news; p++) {
 						NewsItem ni;
-						byte buffer[256];
+						//byte buffer[256];
 						ni = _news_items[p];
-						GetNewsString(ni, buffer);
-						Global.error("%i\t%i\t%s\n", p, ni.date, buffer);
+						String s = GetNewsString(ni);
+						Global.error("%i\t%i\t%s\n", p, ni.date, s);
 					}
-					printf("=========================\n");
+					//printf("=========================\n");
 				}
 
 				p = y + w.vscroll.pos;
@@ -794,7 +795,7 @@ public class NewsItem {
 			break;
 
 		case WE_RESIZE:
-			w.vscroll.cap += e.sizing.diff.y / 12;
+			w.vscroll.cap += e.diff.y / 12;
 			break;
 		}
 	}
@@ -821,8 +822,8 @@ public class NewsItem {
 	{
 		Window w;
 
-		DeleteWindowById(WC_MESSAGE_HISTORY, 0);
-		w = AllocateWindowDesc(&_message_history_desc);
+		Window.DeleteWindowById(Window.WC_MESSAGE_HISTORY, 0);
+		w = Window.AllocateWindowDesc(_message_history_desc);
 
 		if (w != null) {
 			w.vscroll.cap = 10;
@@ -840,7 +841,7 @@ public class NewsItem {
 	 * Same-wise for all the others. Starting value of 3 is the first widget
 	 * group. These are grouped as [<][>] .. [<][>], etc.
 	 */
-	static void SetMessageButtonStates(Window w, byte value, int element)
+	static void SetMessageButtonStates(Window w, int value, int element)
 	{
 		element *= 2;
 		switch (value) {
@@ -861,7 +862,7 @@ public class NewsItem {
 	}
 
 
-	private static final StringID message_opt[] = {Str.STR_OFF, Str.STR_SUMMARY, Str.STR_FULL, INVALID_STRING_ID};
+	private static final int message_opt[] = {Str.STR_OFF, Str.STR_SUMMARY, Str.STR_FULL, Global.INVALID_STRING_ID.id};
 	private static final int message_val[] = {0x0, 0x55555555, 0xAAAAAAAA}; // 0x555.. = 01010101010101010101 (all summary), 286.. 1010... (full)
 	private static final int message_dis[] = 
 		{
@@ -892,17 +893,20 @@ public class NewsItem {
 			int click_state = ((def_d)w.custom).data_1;
 			int i, y;
 
-			if (Global._news_ticker_sound) SETBIT(w.click_state, 25);
+			if (Global._news_ticker_sound) w.click_state = BitOps.RETSETBIT(w.click_state, 25);
 			w.DrawWindowWidgets();
 			Gfx.DrawStringCentered(185, 15, Str.STR_0205_MESSAGE_TYPES, 0);
 
 			/* XXX - Draw the fake widgets-buttons. Can't add these to the widget-desc since
 			 * openttd currently can only handle 32 widgets. So hack it *g* */
 			for (i = 0, y = 26; i != 10; i++, y += 12, click_state >>= 1, val >>= 2) {
-				boolean clicked = !!(click_state & 1);
+				//boolean clicked = !!(click_state & 1);
+				int clicked = (click_state & 1) != 0 ? 1 : 0;
 
-				Gfx.DrawFrameRect(13, y, 89, 11 + y, 3, (clicked) ? FR_LOWERED : 0);
-				Gfx.DrawStringCentered(((13 + 89 + 1) >> 1) + clicked, ((y + 11 + y + 1) >> 1) - 5 + clicked, message_opt[val & 0x3], 0x10);
+				Gfx.DrawFrameRect(13, y, 89, 11 + y, 3, clicked != 0 ? Window.FR_LOWERED : 0);
+				Gfx.DrawStringCentered(
+						((13 + 89 + 1) >> 1) + clicked, 
+						((y + 11 + y + 1) >> 1) - 5 + clicked, message_opt[val & 0x3], 0x10);
 				Gfx.DrawString(103, y + 1, i + Str.STR_0206_ARRIVAL_OF_FIRST_VEHICLE, 0);
 			}
 
@@ -917,33 +921,33 @@ public class NewsItem {
 			case 2: /* Clicked on any of the fake widgets */
 				if (e.pt.x > 13 && e.pt.x < 89 && e.pt.y > 26 && e.pt.y < 146) {
 					int element = (e.pt.y - 26) / 12;
-					byte val = (GetNewsDisplayValue(element) + 1) % 3;
+					byte val = (byte) ((GetNewsDisplayValue(element) + 1) % 3);
 
 					SetMessageButtonStates(w, val, element);
-					SetNewsDisplayValue(element, val);
+					SetNewsDisplayValue((byte) element, val);
 
 					//w.as_def_d().data_1 |= (1 << element);
 					((def_d)w.custom).data_1 |= (1 << element);
-					w.flags4 |= 5 << WF_TIMEOUT_SHL; // XXX - setup unclick (fake widget)
+					w.flags4 |= 5 << Window.WF_TIMEOUT_SHL; // XXX - setup unclick (fake widget)
 					w.SetWindowDirty();
 				}
 				break;
 			case 23: case 24: /* Dropdown menu for all settings */
-				ShowDropDownMenu(w, message_opt, ((def_d)w.custom).data_2, 24, 0, 0);
+				Window.ShowDropDownMenu( w, message_opt, ((def_d)w.custom).data_2, 24, 0, 0);
 				break;
 			case 25: /* Change ticker sound on/off */
-				_news_ticker_sound ^= 1;
-				TOGGLEBIT(w.click_state, e.widget);
+				Global._news_ticker_sound = !Global._news_ticker_sound;
+				w.click_state = BitOps.RETTOGGLEBIT(w.click_state, e.widget);
 				w.InvalidateWidget(e.widget);
 				break;
 			default: { /* Clicked on the [<] .. [>] widgets */
 				int wid = e.widget;
 				if (wid > 2 && wid < 23) {
 					int element = (wid - 3) / 2;
-					byte val = (GetNewsDisplayValue(element) + ((wid & 1) ? -1 : 1)) % 3;
+					byte val = (byte) ((GetNewsDisplayValue(element) + (0 != (wid & 1) ? -1 : 1)) % 3);
 
 					SetMessageButtonStates(w, val, element);
-					SetNewsDisplayValue(element, val);
+					SetNewsDisplayValue((byte)element, val);
 					w.SetWindowDirty();
 				}
 			} break;

@@ -205,7 +205,7 @@ public class TextEffect
 			if (_text_message_list[i].message == null) continue;
 
 			j++;
-			GfxFillRect(_textmessage_box_left, Hal._screen.height-_textmessage_box_bottom-j*13-2, _textmessage_box_left+_textmessage_width - 1, Hal._screen.height-_textmessage_box_bottom-j*13+10, /* black, but with some alpha */ 0x322 | USE_COLORTABLE);
+			GfxFillRect(_textmessage_box_left, Hal._screen.height-_textmessage_box_bottom-j*13-2, _textmessage_box_left+_textmessage_width - 1, Hal._screen.height-_textmessage_box_bottom-j*13+10, /* black, but with some alpha */ 0x322 | Sprite.USE_COLORTABLE);
 
 			DoDrawString(_text_message_list[i].message, _textmessage_box_left + 2, Hal._screen.height - _textmessage_box_bottom - j * 13 - 1, 0x10);
 			DoDrawString(_text_message_list[i].message, _textmessage_box_left + 3, Hal._screen.height - _textmessage_box_bottom - j * 13, _text_message_list[i].color);

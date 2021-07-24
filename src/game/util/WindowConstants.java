@@ -2,6 +2,96 @@ package game.util;
 
 public class WindowConstants {
 
+	
+	
+	//enum WindowKeyCodes {
+		public static final int WKC_SHIFT = 0x8000;
+		public static final int WKC_CTRL  = 0x4000;
+		public static final int WKC_ALT   = 0x2000;
+		public static final int WKC_META  = 0x1000;
+
+		// Special ones
+		public static final int WKC_NONE = 0;
+		public static final int WKC_ESC=1;
+		public static final int WKC_BACKSPACE = 2;
+		public static final int WKC_INSERT = 3;
+		public static final int WKC_DELETE = 4;
+
+		public static final int WKC_PAGEUP = 5;
+		public static final int WKC_PAGEDOWN = 6;
+		public static final int WKC_END = 7;
+		public static final int WKC_HOME = 8;
+
+		// Arrow keys
+		public static final int WKC_LEFT = 9;
+		public static final int WKC_UP = 10;
+		public static final int WKC_RIGHT = 11;
+		public static final int WKC_DOWN = 12;
+
+		// Return & tab
+		public static final int WKC_RETURN = 13;
+		public static final int WKC_TAB = 14;
+
+		// Numerical keyboard
+		public static final int WKC_NUM_0 = 16;
+		public static final int WKC_NUM_1 = 17;
+		public static final int WKC_NUM_2 = 18;
+		public static final int WKC_NUM_3 = 19;
+		public static final int WKC_NUM_4 = 20;
+		public static final int WKC_NUM_5 = 21;
+		public static final int WKC_NUM_6 = 22;
+		public static final int WKC_NUM_7 = 23;
+		public static final int WKC_NUM_8 = 24;
+		public static final int WKC_NUM_9 = 25;
+		public static final int WKC_NUM_DIV = 26;
+		public static final int WKC_NUM_MUL = 27;
+		public static final int WKC_NUM_MINUS = 28;
+		public static final int WKC_NUM_PLUS = 29;
+		public static final int WKC_NUM_ENTER = 30;
+		public static final int WKC_NUM_DECIMAL = 31;
+
+		// Space
+		public static final int WKC_SPACE = 32;
+
+		// Function keys
+		public static final int WKC_F1 = 33;
+		public static final int WKC_F2 = 34;
+		public static final int WKC_F3 = 35;
+		public static final int WKC_F4 = 36;
+		public static final int WKC_F5 = 37;
+		public static final int WKC_F6 = 38;
+		public static final int WKC_F7 = 39;
+		public static final int WKC_F8 = 40;
+		public static final int WKC_F9 = 41;
+		public static final int WKC_F10 = 42;
+		public static final int WKC_F11 = 43;
+		public static final int WKC_F12 = 44;
+
+		// backquote is the key left of "1"
+		// we only store this key here; no matter what character is really mapped to it
+		// on a particular keyboard. (US keyboard: ` and ~ ; German keyboard: ^ and ([dz] some char))
+		public static final int WKC_BACKQUOTE = 45;
+		public static final int WKC_PAUSE     = 46;
+
+		// 0-9 are mapped to 48-57
+		// A-Z are mapped to 65-90
+		// a-z are mapped to 97-122
+//	};
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public static final int WC_MAIN_WINDOW = 0x0;
 	public static final int WC_MAIN_TOOLBAR = 0x1;
 	public static final int WC_STATUS_BAR = 0x2;
@@ -207,5 +297,12 @@ public class WindowConstants {
 	/* can be used as x or y coordinates to cause a specific placement */
 	public static final int WDP_AUTO = -1;
 	public static final int WDP_CENTER = -2;
+
+	
+	
+	
+	
+	
+	
 
 }

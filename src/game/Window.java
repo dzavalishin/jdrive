@@ -2784,7 +2784,8 @@ public class Window extends WindowConstants
 		}
 	}
 
-	void ShowDropDownMenu(Window w, final StringID []strings, int selected, int button, int disabled_mask, int hidden_mask)
+	//void ShowDropDownMenu(Window w, final StringID []strings, int selected, int button, int disabled_mask, int hidden_mask)
+	static void ShowDropDownMenu(Window w, final int []strings, int selected, int button, int disabled_mask, int hidden_mask)
 	{
 		WindowNumber num;
 		WindowClass cls;
@@ -2804,7 +2805,8 @@ public class Window extends WindowConstants
 
 		w.InvalidateWidget(button);
 
-		for (i = 0; strings[i] != Global.INVALID_STRING_ID; i++) {}
+		//for (i = 0; strings[i] != Global.INVALID_STRING_ID; i++) {}
+		for (i = 0; strings[i] != Global.INVALID_STRING_ID.id; i++) {}
 		if (i == 0) return;
 
 		wi = w.widget.get(button);
@@ -2812,7 +2814,8 @@ public class Window extends WindowConstants
 		if (hidden_mask != 0) {
 			int j;
 
-			for (j = 0; strings[j] != Global.INVALID_STRING_ID; j++) {
+			//for (j = 0; strings[j] != Global.INVALID_STRING_ID; j++) {
+			for (j = 0; strings[j] != Global.INVALID_STRING_ID.id; j++) {
 				if (BitOps.HASBIT(hidden_mask, j)) i--;
 			}
 		}

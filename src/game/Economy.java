@@ -539,7 +539,7 @@ public class Economy
 
 		p = Player.GetPlayer(w.as_news_d().ni.string_id.id & 15);
 		DrawPlayerFace(p.face, p.player_color, 2, 23);
-		Gfx.GfxFillRect(3, 23, 3+91, 23+118, 0x323 | USE_COLORTABLE);
+		Gfx.GfxFillRect(3, 23, 3+91, 23+118, 0x323 | Sprite.USE_COLORTABLE);
 
 		Global.SetDParam(0, p.president_name_1);
 		Global.SetDParam(1, p.president_name_2);

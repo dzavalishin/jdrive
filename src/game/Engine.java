@@ -180,7 +180,7 @@ public class Engine {
 		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_885A, w.width - 2);
 
 		DrawTrainEngine(w.width >> 1, 88, engine, 0);
-		Gfx.GfxFillRect(25, 56, w.width - 56, 112, 0x323 | USE_COLORTABLE);
+		Gfx.GfxFillRect(25, 56, w.width - 56, 112, 0x323 | Sprite.USE_COLORTABLE);
 		DrawTrainEngineInfo(engine, w.width >> 1, 129, w.width - 52);
 	}
 
@@ -261,7 +261,7 @@ public class Engine {
 		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_9029, w.width - 2);
 
 		DrawRoadVehEngine(w.width >> 1, 88, engine, 0);
-		Gfx.GfxFillRect(25, 56, w.width - 56, 112, 0x323 | USE_COLORTABLE);
+		Gfx.GfxFillRect(25, 56, w.width - 56, 112, 0x323 | Sprite.USE_COLORTABLE);
 		DrawRoadVehEngineInfo(engine, w.width >> 1, 129, w.width - 52);
 	}
 
@@ -299,7 +299,7 @@ public class Engine {
 		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_982D, w.width - 2);
 
 		DrawShipEngine(w.width >> 1, 93, engine, 0);
-		Gfx.GfxFillRect(25, 56, w.width - 56, 110, 0x323 | USE_COLORTABLE);
+		Gfx.GfxFillRect(25, 56, w.width - 56, 110, 0x323 | Sprite.USE_COLORTABLE);
 		DrawShipEngineInfo(engine, w.width >> 1, 131, w.width - 52);
 	}
 
