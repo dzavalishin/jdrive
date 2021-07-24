@@ -9,8 +9,8 @@ public class AirportFTAClass
 	final byte helipads[];
 	int entry_point;							// when an airplane arrives at this airport, enter it at position entry_point
 	int acc_planes;							// accept airplanes or helicopters or both
-	final TileIndexDiffC airport_depots;	// gives the position of the depots on the airports
-	int nof_depots;							// number of depots this airport has
+	final TileIndexDiffC[] airport_depots;	// gives the position of the depots on the airports
+	//int nof_depots;							// number of depots this airport has
 	AirportFTA layout[];		// state machine for airport
 
 
@@ -72,7 +72,7 @@ public class AirportFTAClass
 	{
 		// country airport
 		CountryAirport = new AirportFTAClass(
-				CountryAirport,
+				//CountryAirport,
 				AirportFTAbuildup._airport_terminal_country,
 				null,
 				16,
@@ -84,7 +84,7 @@ public class AirportFTAClass
 
 		// city airport
 		CityAirport = new AirportFTAClass(
-				CityAirport,
+				//CityAirport,
 				AirportFTAbuildup._airport_terminal_city,
 				null,
 				19,
@@ -96,7 +96,7 @@ public class AirportFTAClass
 
 		// metropolitan airport
 		MetropolitanAirport = new AirportFTAClass(
-				MetropolitanAirport,
+				//MetropolitanAirport,
 				AirportFTAbuildup._airport_terminal_metropolitan,
 				null,
 				20,
@@ -108,7 +108,7 @@ public class AirportFTAClass
 
 		// international airport
 		InternationalAirport = new AirportFTAClass(
-				InternationalAirport,
+				//InternationalAirport,
 				AirportFTAbuildup._airport_terminal_international,
 				AirportFTAbuildup._airport_helipad_international,
 				37,
@@ -120,7 +120,7 @@ public class AirportFTAClass
 
 		// heliport, oilrig
 		Heliport = new AirportFTAClass(
-				Heliport,
+				//Heliport,
 				null,
 				AirportFTAbuildup._airport_helipad_heliport_oilrig,
 				7,
@@ -135,15 +135,15 @@ public class AirportFTAClass
 
 	void UnInitializeAirports()
 	{
-		AirportFTAClass_Destructor(CountryAirport);
-		AirportFTAClass_Destructor(CityAirport);
-		AirportFTAClass_Destructor(Heliport);
-		AirportFTAClass_Destructor(MetropolitanAirport);
-		AirportFTAClass_Destructor(InternationalAirport);
+		CountryAirport.AirportFTAClass_Destructor();
+		CityAirport.AirportFTAClass_Destructor();
+		Heliport.AirportFTAClass_Destructor();
+		MetropolitanAirport.AirportFTAClass_Destructor();
+		InternationalAirport.AirportFTAClass_Destructor();
 	}
 
 	private AirportFTAClass(
-			AirportFTAClass Airport,
+			//AirportFTAClass Airport,
 			final byte terminals[], final byte helipads[],
 			final int entry_point, final int acc_planes,
 			final AirportFTAbuildup FA[],
@@ -170,7 +170,7 @@ public class AirportFTAClass
 			}
 
 		}
-		Airport.terminals = terminals;
+		this.terminals = terminals;
 
 		//read helipads
 		if (helipads != null) {
@@ -185,7 +185,7 @@ public class AirportFTAClass
 			}
 
 		}
-		Airport.helipads = helipads;
+		this.helipads = helipads;
 
 		// if there are more terminals than 6, internal variables have to be changed, so don't allow that
 		// same goes for helipads
@@ -198,26 +198,26 @@ public class AirportFTAClass
 		assert(nofterminals <= MAX_TERMINALS);
 		assert(nofhelipads <= MAX_HELIPADS);
 
-		Airport.nofelements = AirportGetNofElements(FA);
+		this.nofelements = AirportGetNofElements(FA);
 		// check
-		if (entry_point >= Airport.nofelements) {Global.error("Entry point (%2d) must be within the airport positions (which is max %2d)\n", entry_point, Airport.nofelements);}
-		assert(entry_point < Airport.nofelements);
+		if (entry_point >= this.nofelements) {Global.error("Entry point (%2d) must be within the airport positions (which is max %2d)\n", entry_point, this.nofelements);}
+		assert(entry_point < this.nofelements);
 
-		Airport.acc_planes = acc_planes;
-		Airport.entry_point = entry_point;
-		Airport.airport_depots = depots;
-		Airport.nof_depots = nof_depots;
+		this.acc_planes = acc_planes;
+		this.entry_point = entry_point;
+		this.airport_depots = depots;
+		//this.nof_depots = nof_depots;
 
 
 		// build the state machine
-		AirportBuildAutomata(Airport, FA);
+		AirportBuildAutomata(this, FA);
 		Global.DEBUG_misc( 1, "#Elements %2d; #Terminals %2d in %d group(s); #Helipads %2d in %d group(s); Entry Point %d",
-				Airport.nofelements, nofterminals, nofterminalgroups, nofhelipads, nofhelipadgroups, Airport.entry_point
+				this.nofelements, nofterminals, nofterminalgroups, nofhelipads, nofhelipadgroups, this.entry_point
 				);
 
 
 		{
-			int ret = AirportTestFTA(Airport);
+			int ret = AirportTestFTA(this);
 			if (ret != MAX_ELEMENTS) Global.error("ERROR with element: %d\n", ret - 1);
 			assert(ret == MAX_ELEMENTS);
 		}
@@ -227,13 +227,13 @@ public class AirportFTAClass
 		//AirportPrintOut(Airport, false);
 	}
 
-	static void AirportFTAClass_Destructor(AirportFTAClass Airport)
+	private void AirportFTAClass_Destructor()
 	{
 		int i;
 		AirportFTA current, next;
 
-		for (i = 0; i < Airport.nofelements; i++) {
-			current = Airport.layout[i].next_in_chain;
+		for (i = 0; i < this.nofelements; i++) {
+			current = this.layout[i].next_in_chain;
 			while (current != null) {
 				next = current.next_in_chain;
 				//free(current);

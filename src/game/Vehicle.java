@@ -314,16 +314,16 @@ public class Vehicle implements IPoolItem
 			switch(type) {
 
 			case VEH_Aircraft:	
-				SET_EXPENSES_TYPE(EXPENSES_AIRCRAFT_RUN);
+				Player.SET_EXPENSES_TYPE(Player.EXPENSES_AIRCRAFT_RUN);
 				break;
 			case VEH_Train:		
-				SET_EXPENSES_TYPE(EXPENSES_TRAIN_RUN);
+				Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_RUN);
 				break;
 			case VEH_Ship:		
-				SET_EXPENSES_TYPE(EXPENSES_SHIP_RUN);				
+				Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);				
 				break;
 			case VEH_Road:		
-				SET_EXPENSES_TYPE(EXPENSES_ROADVEH_RUN);				
+				Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_RUN);				
 				break;
 
 			}
@@ -1506,18 +1506,18 @@ public class Vehicle implements IPoolItem
 				for(;;) {
 					//veh = _vehicle_position_hash[(x + y) & 0xFFFF];
 					veh = _hash.get(x, y);
-					while(veh.id != INVALID_VEHICLE) {
+					//while(veh.id != INVALID_VEHICLE) {
 						v = GetVehicle(veh);
 
-						if (!(v.vehstatus & VS_HIDDEN) &&
+						if (0 != (v.vehstatus & VS_HIDDEN) &&
 								dpi.left <= v.right_coord &&
 								dpi.top <= v.bottom_coord &&
 								dpi.left + dpi.width >= v.left_coord &&
 								dpi.top + dpi.height >= v.top_coord) {
 							DoDrawVehicle(v);
 						}
-						veh = v.next_hash;
-					}
+					//	veh = v.next_hash;
+					//}
 
 					if (x == x2)
 						break;
@@ -2150,7 +2150,7 @@ public class Vehicle implements IPoolItem
 
 	Vehicle CheckClickOnVehicle(final ViewPort vp, int x, int y)
 	{
-		Vehicle found = null, v;
+		Vehicle found = null; //, v;
 		int dist, best_dist = (int)-1;
 
 		if ( (int)(x -= vp.left) >= (int)vp.width ||
@@ -2160,14 +2160,16 @@ public class Vehicle implements IPoolItem
 		x = (x << vp.zoom) + vp.virtual_left;
 		y = (y << vp.zoom) + vp.virtual_top;
 
-		FOR_ALL_VEHICLES(v) {
+		//FOR_ALL_VEHICLES(v)
+		Vehicle.forEach( (v) ->
+		{
 			if (v.type != 0 && (v.vehstatus & (VS_HIDDEN|VS_UNCLICKABLE)) == 0 &&
 					x >= v.left_coord && x <= v.right_coord &&
 					y >= v.top_coord && y <= v.bottom_coord) {
 
 				dist = Math.max(
-						myabs( ((v.left_coord + v.right_coord)>>1) - x ),
-						myabs( ((v.top_coord + v.bottom_coord)>>1) - y )
+						/*myabs*/ Math.abs( ((v.left_coord + v.right_coord)>>1) - x ),
+						Math.abs( ((v.top_coord + v.bottom_coord)>>1) - y )
 						);
 
 				if (dist < best_dist) {
@@ -2175,7 +2177,7 @@ public class Vehicle implements IPoolItem
 					best_dist = dist;
 				}
 			}
-		}
+		});
 
 		return found;
 	}
@@ -2247,14 +2249,14 @@ public class Vehicle implements IPoolItem
 			Str.STR_019D_AIRCRAFT,
 	};
 
-	static void ShowVehicleGettingOld(Vehicle v, StringID msg)
+	static void ShowVehicleGettingOld(Vehicle v, /*StringID*/ int msg)
 	{
 		if (v.owner != Global._local_player) return;
 
 		// Do not show getting-old message if autorenew is active
 		if (Player.GetPlayer(v.owner).engine_renew) return;
 
-		Global.SetDParam(0, _vehicle_type_names[v.type - 0x10].id);
+		Global.SetDParam(0, _vehicle_type_names[v.type - 0x10]);
 		Global.SetDParam(1, v.unitnumber.id);
 		NewsItem.AddNewsItem(msg, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 	}

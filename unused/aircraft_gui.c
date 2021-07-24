@@ -1,3 +1,4 @@
+#if 0
 /* $Id: aircraft_gui.c 3346 2005-12-27 16:37:50Z peter1138 $ */
 
 #include "stdafx.h"

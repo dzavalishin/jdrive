@@ -38,7 +38,7 @@ public enum Trackdir {
 		public static final int TRACKDIR_BIT_LEFT_N   = 0x1000;
 		public static final int TRACKDIR_BIT_RIGHT_N  = 0x2000;
 		
-		public static final int TRACKDIR_BIT_MASK			= 0x3F3F;
+		public static final int TRACKDIR_BIT_MASK	= 0x3F3F;
 		public static final int INVALID_TRACKDIR_BIT  = 0xFFFF;
 //	} TrackdirBits;
 	

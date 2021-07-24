@@ -1,3 +1,4 @@
+#if 0
 /* $Id: command.c 3319 2005-12-18 22:48:45Z Darkvater $ */
 
 #include "stdafx.h"

@@ -72,7 +72,7 @@ public class NewsItem {
 	public static final int NF_INCOLOR = 0x40;
 
 
-	public int NEWS_FLAGS(int mode,int flag,int type,int cb) { return ((cb)<<24 | (type)<<16 | (flag)<<8 | (mode)); }
+	public static int NEWS_FLAGS(int mode,int flag,int type,int cb) { return ((cb)<<24 | (type)<<16 | (flag)<<8 | (mode)); }
 
 
 
@@ -163,7 +163,13 @@ public class NewsItem {
 	}
 
 	//public static void AddValidatedNewsItem(StringID string, int flags, uint data_a, uint data_b, ValidationProc *validation)
-	static public void AddNewsItem(StringID string, int flags, uint data_a, uint data_b)
+	static public void AddNewsItem(StringID string, int flags, int data_a, int data_b)
+	{
+		AddValidatedNewsItem(string, flags, data_a, data_b, null);
+		//_news_items[_latest_news].isValid = validation;
+	}
+
+	static public void AddNewsItem(int string, int flags, int data_a, int data_b)
 	{
 		AddValidatedNewsItem(string, flags, data_a, data_b, null);
 		//_news_items[_latest_news].isValid = validation;
