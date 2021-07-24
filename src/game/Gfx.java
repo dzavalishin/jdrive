@@ -9,23 +9,23 @@ public class Gfx {
 
 	// XXX doesn't really belong here, but the only
 	// consumers always use it in conjunction with DoDrawString()
-	public static final String UPARROW   = "\x80";
-	public static final String DOWNARROW = "\xAA";
+	public static final String UPARROW   = String.valueOf(0x80); // "\x80";
+	public static final String DOWNARROW = String.valueOf(0xAA); // "\xAA";
 
 	
 	//static void GfxMainBlitter(final Sprite *sprite, int x, int y, int mode);
 
 	static int _stringwidth_out;
-	static Pixel _cursor_backup[64 * 64];
+	static Pixel []_cursor_backup = new Pixel[64 * 64];
 	//static Rect _invalid_rect;
 	static final byte []_color_remap_ptr;
-	static byte _string_colorremap[3];
+	static byte _string_colorremap = new byte[3];
 
 	//#define DIRTY_BYTES_PER_LINE (MAX_SCREEN_WIDTH / 64)
 	//static byte _dirty_blocks[DIRTY_BYTES_PER_LINE * MAX_SCREEN_HEIGHT / 8];
 
 
-
+	/* TODO
 	static void memcpy_pitch(void *d, void *s, int w, int h, int spitch, int dpitch)
 	{
 		byte *dp = (byte*)d;
@@ -37,7 +37,7 @@ public class Gfx {
 			dp += dpitch;
 			sp += spitch;
 		}
-	}
+	}*/
 
 
 	static void GfxScroll(int left, int top, int width, int height, int xo, int yo)
@@ -309,10 +309,15 @@ public class Gfx {
 		return w;
 	}
 
-	private static int TruncateStringID(StringID src, String dest, int maxw)
+	/*private static int TruncateStringID(StringID src, String dest, int maxw)
 	{
 		GetString(dest, src);
 		return TruncateString(dest, maxw);
+	}*/
+	private static String TruncateStringID(StringID src, int maxw)
+	{
+		
+		return TruncateString(Global.GetString(src);, maxw);
 	}
 
 	/* returns right coordinate */
@@ -331,25 +336,34 @@ public class Gfx {
 	
 	static int DrawStringTruncated(int x, int y, StringID str, int color, uint maxw)
 	{
-		char buffer[512];
-		TruncateStringID(str, buffer, maxw);
+		//char buffer[512];
+		//TruncateStringID(str, buffer, maxw);
+		String buffer = TruncateStringID(str, maxw);
 		return DoDrawString(buffer, x, y, color);
 	}
 
 
 	static void DrawStringRightAligned(int x, int y, StringID str, int color)
 	{
-		char buffer[512];
+		//char buffer[512];
 
-		GetString(buffer, str);
+		String buffer = Global.GetString(str);
+		DoDrawString(buffer, x - GetStringWidth(buffer), y, color);
+	}
+	static void DrawStringRightAligned(int x, int y, int str, int color)
+	{
+		//char buffer[512];
+
+		String buffer = Global.GetString(str);
 		DoDrawString(buffer, x - GetStringWidth(buffer), y, color);
 	}
 
 	static void DrawStringRightAlignedTruncated(int x, int y, StringID str, int color, uint maxw)
 	{
-		char buffer[512];
+		//char buffer[512];
 
-		TruncateStringID(str, buffer, maxw);
+		//TruncateStringID(str, buffer, maxw);
+		String buffer = TruncateStringID(str, maxw);
 		DoDrawString(buffer, x - GetStringWidth(buffer), y, color);
 	}
 

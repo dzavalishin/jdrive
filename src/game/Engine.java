@@ -164,7 +164,7 @@ public class Engine {
 		Gfx.DrawStringMultiCenter(x, y, Str.STR_885B_COST_WEIGHT_T_SPEED_POWER, maxw);
 	}
 
-	void DrawNewsNewTrainAvail(Window w)
+	static void DrawNewsNewTrainAvail(Window w)
 	{
 		EngineID engine;
 
@@ -185,7 +185,7 @@ public class Engine {
 	}
 
 	//StringID GetNewsStringNewTrainAvail(final NewsItem ni)
-	int GetNewsStringNewTrainAvail(final NewsItem ni)
+	static int GetNewsStringNewTrainAvail(final NewsItem ni)
 	{
 		EngineID engine = ni.string_id;
 		Global.SetDParam(0, Str.STR_8859_NEW_NOW_AVAILABLE);
@@ -206,7 +206,7 @@ public class Engine {
 		Gfx.DrawStringMultiCenter(x, y, Str.STR_A02E_COST_MAX_SPEED_CAPACITY, maxw);
 	}
 
-	void DrawNewsNewAircraftAvail(Window w)
+	static void DrawNewsNewAircraftAvail(Window w)
 	{
 		EngineID engine;
 
@@ -225,7 +225,7 @@ public class Engine {
 		DrawAircraftEngineInfo(engine, w.width >> 1, 131, w.width - 52);
 	}
 
-	StringID GetNewsStringNewAircraftAvail(final NewsItem ni)
+	static int GetNewsStringNewAircraftAvail(final NewsItem ni)
 	{
 		EngineID engine = ni.string_id;
 		Global.SetDParam(0, Str.STR_A02C_NEW_AIRCRAFT_NOW_AVAILABLE);
@@ -247,7 +247,7 @@ public class Engine {
 		Gfx.DrawStringMultiCenter(x, y, Str.STR_902A_COST_SPEED_RUNNING_COST, maxw);
 	}
 
-	void DrawNewsNewRoadVehAvail(Window w)
+	static void DrawNewsNewRoadVehAvail(Window w)
 	{
 		EngineID engine;
 
@@ -265,7 +265,7 @@ public class Engine {
 		DrawRoadVehEngineInfo(engine, w.width >> 1, 129, w.width - 52);
 	}
 
-	StringID GetNewsStringNewRoadVehAvail(final NewsItem ni)
+	static /*StringID*/ int GetNewsStringNewRoadVehAvail(final NewsItem ni)
 	{
 		EngineID engine = ni.string_id;
 		Global.SetDParam(0, Str.STR_9028_NEW_ROAD_VEHICLE_NOW_AVAILABLE);
@@ -284,7 +284,7 @@ public class Engine {
 		Gfx.DrawStringMultiCenter(x, y, Str.STR_982E_COST_MAX_SPEED_CAPACITY, maxw);
 	}
 
-	void DrawNewsNewShipAvail(Window w)
+	static void DrawNewsNewShipAvail(Window w)
 	{
 		EngineID engine;
 
@@ -303,7 +303,7 @@ public class Engine {
 		DrawShipEngineInfo(engine, w.width >> 1, 131, w.width - 52);
 	}
 
-	StringID GetNewsStringNewShipAvail(final NewsItem ni)
+	static int GetNewsStringNewShipAvail(final NewsItem ni)
 	{
 		EngineID engine = ni.string_id;
 		Global.SetDParam(0, Str.STR_982C_NEW_SHIP_NOW_AVAILABLE);

@@ -1019,6 +1019,12 @@ public class Window extends WindowConstants
 		return w;
 	}
 
+	
+	public static Window AllocateWindowDesc(WindowDesc desc)
+	{
+		return AllocateWindowDesc(desc, 0 );
+	}
+	
 	/**
 	 * 
 	 * @param desc
@@ -2844,6 +2850,11 @@ public class Window extends WindowConstants
 
 		w2.as_dropdown_d().click_delay = 0;
 		w2.as_dropdown_d().drag_mode = true;
+	}
+	
+	public void DrawWindowViewport() {
+		ViewPort.DrawWindowViewport(this);
+		
 	}
 
 

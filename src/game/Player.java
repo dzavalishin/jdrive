@@ -5,6 +5,7 @@ import game.util.BitOps;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 import game.ai.Ai;
 
@@ -1124,7 +1125,7 @@ public class Player
 		return pb.old_economy[0].performance_history - pa.old_economy[0].performance_history;
 	}
 
-	/* Save the highscores in a network game when it has ended */
+	/* Save the highscores in a network game when it has ended 
 	//#define LAST_HS_ITEM lengthof(_highscore_table) - 1
 	static byte SaveHighScoreValueNetwork()
 	{
@@ -1132,7 +1133,7 @@ public class Player
 		size_t count = 0;
 		byte player = -1;
 
-		/* Sort all active players with the highest score first */
+		//* Sort all active players with the highest score first 
 		for( Player p : _players ) {
 			if (p.is_active)
 				player_sort[count++] = p;
@@ -1146,7 +1147,7 @@ public class Player
 
 			memset(_highscore_table[LAST_HS_ITEM], 0, sizeof(_highscore_table[0]));
 
-			/* Copy over Top5 companies */
+			//* Copy over Top5 companies 
 			for (i = 0; i < lengthof(_highscore_table[LAST_HS_ITEM]) && i < count; i++) {
 				char buf[sizeof(_highscore_table[0].company)];
 
@@ -1169,10 +1170,11 @@ public class Player
 			}
 		}
 
-		/* Add top5 players to highscore table */
+		// Add top5 players to highscore table 
 		return player;
 	}
-
+*/
+	
 	/* Save HighScore table to file * /
 	static void SaveToHighScore()
 	{
@@ -1289,6 +1291,13 @@ public class Player
 	{
 		List<Player> list = Arrays.asList(_players);
 		return list.iterator();
+	}
+
+	public static void forEach( Consumer<Player> p )
+	{
+		Iterator<Player> i = getIterator();
+		while(i.hasNext())
+			p.accept(i.next());
 	}
 
 	/*

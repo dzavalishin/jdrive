@@ -1,5 +1,8 @@
 package game;
 
+import game.ai.Ai;
+import game.util.BitOps;
+
 public class Economy 
 {
 
@@ -53,7 +56,7 @@ public class Economy
 	} 
 
 	//static ScoreInfo _score_info[];
-	int _score_part[][] = new int [Global.MAX_PLAYERS][NUM_SCORE];
+	static int _score_part[][] = new int [Global.MAX_PLAYERS][NUM_SCORE];
 
 	static Subsidy[] _subsidies = new Subsidy[Global.MAX_PLAYERS];
 
@@ -114,15 +117,17 @@ public class Economy
 		long value;
 
 		{
-			Station st;
+			//Station st;
 			int num = 0;
 
-			FOR_ALL_STATIONS(st) {
-				if (st.xy != 0 && st.owner == owner) {
+			//FOR_ALL_STATIONS(st)
+			Station.forEach( (ii,st) ->
+			{
+				if (st.xy != null && st.owner == owner) {
 					int facil = st.facilities;
 					do num += (facil&1); while (facil >>= 1);
 				}
-			}
+			});
 
 			value = num * _price.station_value * 25;
 		}
@@ -149,20 +154,23 @@ public class Economy
 
 	// if update is set to true, the economy is updated with this score
 	//  (also the house is updated, should only be true in the on-tick event)
-	int UpdateCompanyRatingAndValue(Player p, boolean update)
+	static int UpdateCompanyRatingAndValue(Player p, boolean update)
 	{
-		byte owner = p.index;
+		int owner = p.index.id;
 		int score = 0;
 
-		memset(_score_part[owner], 0, sizeof(_score_part[owner]));
+		//memset(_score_part[owner], 0, sizeof(_score_part[owner]));
+		_score_part[owner] = new int[NUM_SCORE];
 
 	/* Count vehicles */
 		{
-			Vehicle v;
+			//Vehicle v;
 			int min_profit = _score_info[SCORE_MIN_PROFIT].needed;
 			int num = 0;
 
-			FOR_ALL_VEHICLES(v) {
+			//FOR_ALL_VEHICLES(v) 
+			Vehicle.forEach( (v) ->
+			{
 				if (v.owner != owner)
 					continue;
 				if ((v.type == VEH_Train && IsFrontEngine(v)) ||
@@ -175,7 +183,7 @@ public class Economy
 							min_profit = v.profit_last_year;
 					}
 				}
-			}
+			});
 
 			_score_part[owner][SCORE_VEHICLES] = num;
 			if (min_profit > 0)
@@ -185,14 +193,16 @@ public class Economy
 	/* Count stations */
 		{
 			int num = 0;
-			Station st;
+			//Station st;
 
-			FOR_ALL_STATIONS(st) {
-				if (st.xy != 0 && st.owner == owner) {
+			//FOR_ALL_STATIONS(st)
+			Station.forEach( (ii,st) ->
+			{
+				if (st.xy != null && st.owner.id == owner) {
 					int facil = st.facilities;
-					do num += facil&1; while (facil>>=1);
+					do { num += facil&1; } while (0 != (facil>>=1) );
 				}
-			}
+			});
 			_score_part[owner][SCORE_STATIONS] = num;
 		}
 
@@ -512,121 +522,123 @@ public class Economy
 					// Register the player as not-active
 					p.is_active = false;
 
-					if (!IS_HUMAN_PLAYER(owner) && (!_networking || _network_server) && _ai.enabled)
-						AI_PlayerDied(owner);
-					if (IS_HUMAN_PLAYER(owner) && owner == _local_player && _ai.network_client)
-						AI_PlayerDied(owner);
+					if (!IS_HUMAN_PLAYER(owner) && (!Global._networking || Global._network_server) && Ai._ai.enabled)
+						Ai.AI_PlayerDied(owner);
+					if (IS_HUMAN_PLAYER(owner) && owner == Global._local_player && Ai._ai.network_client)
+						Ai.AI_PlayerDied(owner);
 				}
 			}
 		}
 	}
 
-	void DrawNewsBankrupcy(Window w)
+	static void DrawNewsBankrupcy(Window w)
 	{
 		Player p;
 
-		DrawNewsBorder(w);
+		w.DrawNewsBorder();
 
-		p = WP(w,news_d).ni.string_id & 15).GetPlayer();
+		p = Player.GetPlayer(w.as_news_d().ni.string_id.id & 15);
 		DrawPlayerFace(p.face, p.player_color, 2, 23);
-		GfxFillRect(3, 23, 3+91, 23+118, 0x323 | USE_COLORTABLE);
+		Gfx.GfxFillRect(3, 23, 3+91, 23+118, 0x323 | USE_COLORTABLE);
 
 		Global.SetDParam(0, p.president_name_1);
 		Global.SetDParam(1, p.president_name_2);
 
-		DrawStringMultiCenter(49, 148, STR_7058_PRESIDENT, 94);
+		Gfx.DrawStringMultiCenter(49, 148, Str.STR_7058_PRESIDENT, 94);
 
-		switch(WP(w,news_d).ni.string_id >> 4) {
+		switch(w.as_news_d().ni.string_id.id >> 4) {
 		case 1:
-			DrawStringCentered(w.width>>1, 1, STR_7056_TRANSPORT_COMPANY_IN_TROUBLE, 0);
+			Gfx.DrawStringCentered(w.width>>1, 1, Str.STR_7056_TRANSPORT_COMPANY_IN_TROUBLE, 0);
 
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
 
-			DrawStringMultiCenter(
+			Gfx.DrawStringMultiCenter(
 				((w.width - 101) >> 1) + 98,
 				90,
-				STR_7057_WILL_BE_SOLD_OFF_OR_DECLARED,
+				Str.STR_7057_WILL_BE_SOLD_OFF_OR_DECLARED,
 				w.width - 101);
 			break;
 
 		case 2: {
 			int price;
 
-			DrawStringCentered(w.width>>1, 1, STR_7059_TRANSPORT_COMPANY_MERGER, 0);
-			COPY_IN_DPARAM(0,WP(w,news_d).ni.params, 2);
+			Gfx.DrawStringCentered(w.width>>1, 1, Str.STR_7059_TRANSPORT_COMPANY_MERGER, 0);
+			Global.COPY_IN_DPARAM(0,w.as_news_d().ni.params, 2);
 			Global.SetDParam(2, p.name_1);
 			Global.SetDParam(3, p.name_2);
-			price = WP(w,news_d).ni.params[2];
+			price = w.as_news_d().ni.params[2];
 			Global.SetDParam(4, price);
-			DrawStringMultiCenter(
+			Gfx.DrawStringMultiCenter(
 				((w.width - 101) >> 1) + 98,
 				90,
-				price==0 ? STR_707F_HAS_BEEN_TAKEN_OVER_BY : STR_705A_HAS_BEEN_SOLD_TO_FOR,
+				price==0 ? Str.STR_707F_HAS_BEEN_TAKEN_OVER_BY : Str.STR_705A_HAS_BEEN_SOLD_TO_FOR,
 				w.width - 101);
 			break;
 		}
 
 		case 3:
-			DrawStringCentered(w.width>>1, 1, STR_705C_BANKRUPT, 0);
-			COPY_IN_DPARAM(0,WP(w,news_d).ni.params, 2);
-			DrawStringMultiCenter(
+			Gfx.DrawStringCentered(w.width>>1, 1, Str.STR_705C_BANKRUPT, 0);
+			Global.COPY_IN_DPARAM(0,w.as_news_d().ni.params, 2);
+			Gfx.DrawStringMultiCenter(
 				((w.width - 101) >> 1) + 98,
 				90,
-				STR_705D_HAS_BEEN_CLOSED_DOWN_BY,
+				Str.STR_705D_HAS_BEEN_CLOSED_DOWN_BY,
 				w.width - 101);
 			break;
 
 		case 4:
-			DrawStringCentered(w.width>>1, 1, STR_705E_NEW_TRANSPORT_COMPANY_LAUNCHED, 0);
+			Gfx.DrawStringCentered(w.width>>1, 1, Str.STR_705E_NEW_TRANSPORT_COMPANY_LAUNCHED, 0);
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
-			COPY_IN_DPARAM(2,WP(w,news_d).ni.params, 2);
-			DrawStringMultiCenter(
+			Global.COPY_IN_DPARAM(2,w.as_news_d().ni.params, 2);
+			Gfx.DrawStringMultiCenter(
 				((w.width - 101) >> 1) + 98,
 				90,
-				STR_705F_STARTS_CONSTRUCTION_NEAR,
+				Str.STR_705F_STARTS_CONSTRUCTION_NEAR,
 				w.width - 101);
 			break;
 
 		default:
-			NOT_REACHED();
+			assert false;
+			//NOT_REACHED();
 		}
 	}
 
-	StringID GetNewsStringBankrupcy(final NewsItem ni)
+	static int GetNewsStringBankrupcy(final NewsItem ni)
 	{
 		final Player p = new PlayerID(ni.string_id.id & 0xF).GetPlayer();
 
-		switch (ni.string_id >> 4) {
+		switch (ni.string_id.id >> 4) {
 		case 1:
-			Global.SetDParam(0, STR_7056_TRANSPORT_COMPANY_IN_TROUBLE);
-			Global.SetDParam(1, STR_7057_WILL_BE_SOLD_OFF_OR_DECLARED);
+			Global.SetDParam(0, Str.STR_7056_TRANSPORT_COMPANY_IN_TROUBLE);
+			Global.SetDParam(1, Str.STR_7057_WILL_BE_SOLD_OFF_OR_DECLARED);
 			Global.SetDParam(2, p.name_1);
 			Global.SetDParam(3, p.name_2);
-			return STR_02B6;
+			return Str.STR_02B6;
 		case 2:
-			Global.SetDParam(0, STR_7059_TRANSPORT_COMPANY_MERGER);
-			Global.SetDParam(1, STR_705A_HAS_BEEN_SOLD_TO_FOR);
-			COPY_IN_DPARAM(2,ni.params, 2);
+			Global.SetDParam(0, Str.STR_7059_TRANSPORT_COMPANY_MERGER);
+			Global.SetDParam(1, Str.STR_705A_HAS_BEEN_SOLD_TO_FOR);
+			Global.COPY_IN_DPARAM(2,ni.params, 2);
 			Global.SetDParam(4, p.name_1);
 			Global.SetDParam(5, p.name_2);
-			COPY_IN_DPARAM(6,ni.params + 2, 1);
-			return STR_02B6;
+			Global.COPY_IN_DPARAM(6,ni.params + 2, 1);
+			return Str.STR_02B6;
 		case 3:
-			Global.SetDParam(0, STR_705C_BANKRUPT);
-			Global.SetDParam(1, STR_705D_HAS_BEEN_CLOSED_DOWN_BY);
-			COPY_IN_DPARAM(2,ni.params, 2);
-			return STR_02B6;
+			Global.SetDParam(0, Str.STR_705C_BANKRUPT);
+			Global.SetDParam(1, Str.STR_705D_HAS_BEEN_CLOSED_DOWN_BY);
+			Global.COPY_IN_DPARAM(2,ni.params, 2);
+			return Str.STR_02B6;
 		case 4:
-			Global.SetDParam(0, STR_705E_NEW_TRANSPORT_COMPANY_LAUNCHED);
-			Global.SetDParam(1, STR_705F_STARTS_CONSTRUCTION_NEAR);
+			Global.SetDParam(0, Str.STR_705E_NEW_TRANSPORT_COMPANY_LAUNCHED);
+			Global.SetDParam(1, Str.STR_705F_STARTS_CONSTRUCTION_NEAR);
 			Global.SetDParam(2, p.name_1);
 			Global.SetDParam(3, p.name_2);
-			COPY_IN_DPARAM(4,ni.params, 2);
-			return STR_02B6;
+			Global.COPY_IN_DPARAM(4,ni.params, 2);
+			return Str.STR_02B6;
 		default:
-			NOT_REACHED();
+			assert false;
+			//NOT_REACHED();
 		}
 
 		/* useless, but avoids compiler warning this way */
@@ -635,24 +647,37 @@ public class Economy
 
 	static void PlayersGenStatistics()
 	{
-		Station st;
-		Player p;
+		//Station st;
+		//Player p;
 
-		FOR_ALL_STATIONS(st) {
-			if (st.xy != 0) {
-				_current_player = st.owner;
+		//FOR_ALL_STATIONS(st)
+		Station.forEach( (ii,st) ->
+		{
+			if (st.xy != null) {
+				Global._current_player = st.owner; // TODO kill global
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
-				SubtractMoneyFromPlayer(_price.station_value >> 1);
+				Player.SubtractMoneyFromPlayer(Global._price.station_value >> 1);
 			}
-		}
+		});
 
-		if (!HASBIT(1<<0|1<<3|1<<6|1<<9, _cur_month))
+		if (!BitOps.HASBIT(1<<0|1<<3|1<<6|1<<9, Global._cur_month))
 			return;
 
-		FOR_ALL_PLAYERS(p) {
+		//FOR_ALL_PLAYERS(p) 
+		Player.forEach( (p) ->
+		{
 			if (p.is_active) {
-				memmove(&p.old_economy, &p.cur_economy, sizeof(p.old_economy));
-				memset(&p.cur_economy, 0, sizeof(p.cur_economy));
+				//
+				// Looks like it was a C hack - using the fact that p.old_economy and p.cur_economy are 
+				// one next to other
+				// 
+				
+				//memmove(&p.old_economy, &p.cur_economy, sizeof(p.old_economy));
+				//memset(&p.cur_economy, 0, sizeof(p.cur_economy));
+				
+				System.arraycopy( p.old_economy, 0, p.old_economy, 1, p.old_economy.length-1 );
+				p.old_economy[0] = p.cur_economy;
+				p.cur_economy = new PlayerEconomyEntry();
 
 				if (p.num_valid_stat_ent != 24)
 					p.num_valid_stat_ent++;
@@ -663,14 +688,14 @@ public class Economy
 				if (p.block_preview != 0)
 					p.block_preview--;
 			}
-		}
+		});
 
-		InvalidateWindow(WC_INCOME_GRAPH, 0);
-		InvalidateWindow(WC_OPERATING_PROFIT, 0);
-		InvalidateWindow(WC_DELIVERED_CARGO, 0);
-		InvalidateWindow(WC_PERFORMANCE_HISTORY, 0);
-		InvalidateWindow(WC_COMPANY_VALUE, 0);
-		InvalidateWindow(WC_COMPANY_LEAGUE, 0);
+		Window.InvalidateWindow(Window.WC_INCOME_GRAPH, 0);
+		Window.InvalidateWindow(Window.WC_OPERATING_PROFIT, 0);
+		Window.InvalidateWindow(Window.WC_DELIVERED_CARGO, 0);
+		Window.InvalidateWindow(Window.WC_PERFORMANCE_HISTORY, 0);
+		Window.InvalidateWindow(Window.WC_COMPANY_VALUE, 0);
+		Window.InvalidateWindow(Window.WC_COMPANY_LEAGUE, 0);
 	}
 
 	static void AddSingleInflation(int *value, uint16 *frac, int amt)
@@ -735,10 +760,10 @@ public class Economy
 
 		if (--_economy.fluct == 0) {
 			_economy.fluct = -(int)BitOps.GB(Random(), 0, 2);
-			NewsItem.AddNewsItem(STR_7073_WORLD_RECESSION_FINANCIAL, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL,0,NewsItem.NT_ECONOMY,0), 0, 0);
+			NewsItem.AddNewsItem(Str.STR_7073_WORLD_RECESSION_FINANCIAL, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL,0,NewsItem.NT_ECONOMY,0), 0, 0);
 		} else if (_economy.fluct == -12) {
 			_economy.fluct = BitOps.GB(Random(), 0, 8) + 312;
-			NewsItem.AddNewsItem(STR_7074_RECESSION_OVER_UPTURN_IN, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL,0,NewsItem.NT_ECONOMY,0), 0, 0);
+			NewsItem.AddNewsItem(Str.STR_7074_RECESSION_OVER_UPTURN_IN, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL,0,NewsItem.NT_ECONOMY,0), 0, 0);
 		}
 	}
 
@@ -874,25 +899,25 @@ public class Economy
 
 		if (s.age < 12) {
 			if (s.cargo_type != AcceptedCargo.CT_PASSENGERS && s.cargo_type != AcceptedCargo.CT_MAIL) {
-				Global.SetDParam(1, STR_INDUSTRY);
+				Global.SetDParam(1, Str.STR_INDUSTRY);
 				Global.SetDParam(2, s.from);
 				tile = GetIndustry(s.from).xy;
 
 				if (s.cargo_type != AcceptedCargo.CT_GOODS && s.cargo_type != AcceptedCargo.CT_FOOD) {
-					Global.SetDParam(4, STR_INDUSTRY);
+					Global.SetDParam(4, Str.STR_INDUSTRY);
 					Global.SetDParam(5, s.to);
 					tile2 = GetIndustry(s.to).xy;
 				} else {
-					Global.SetDParam(4, STR_TOWN);
+					Global.SetDParam(4, Str.STR_TOWN);
 					Global.SetDParam(5, s.to);
 					tile2 = GetTown(s.to).xy;
 				}
 			} else {
-				Global.SetDParam(1, STR_TOWN);
+				Global.SetDParam(1, Str.STR_TOWN);
 				Global.SetDParam(2, s.from);
 				tile = GetTown(s.from).xy;
 
-				Global.SetDParam(4, STR_TOWN);
+				Global.SetDParam(4, Str.STR_TOWN);
 				Global.SetDParam(5, s.to);
 				tile2 = GetTown(s.to).xy;
 			}
@@ -1051,14 +1076,14 @@ public class Economy
 
 			if (s.age == 12-1) {
 				pair = SetupSubsidyDecodeParam(s, 1);
-				NewsItem.AddNewsItem(STR_202E_OFFER_OF_SUBSIDY_EXPIRED, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
+				NewsItem.AddNewsItem(Str.STR_202E_OFFER_OF_SUBSIDY_EXPIRED, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 				s.cargo_type = AcceptedCargo.CT_INVALID;
 				modified = true;
 			} else if (s.age == 2*12-1) {
 				st = GetStation(s.to);
 				if (st.owner == _local_player) {
 					pair = SetupSubsidyDecodeParam(s, 1);
-					NewsItem.AddNewsItem(STR_202F_SUBSIDY_WITHDRAWN_SERVICE, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
+					NewsItem.AddNewsItem(Str.STR_202F_SUBSIDY_WITHDRAWN_SERVICE, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 				}
 				s.cargo_type = AcceptedCargo.CT_INVALID;
 				modified = true;
@@ -1094,7 +1119,7 @@ public class Economy
 					if (!CheckSubsidyDuplicate(s)) {
 						s.age = 0;
 						pair = SetupSubsidyDecodeParam(s, 0);
-						NewsItem.AddNewsItem(STR_2030_SERVICE_SUBSIDY_OFFERED, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
+						NewsItem.AddNewsItem(Str.STR_2030_SERVICE_SUBSIDY_OFFERED, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 						modified = true;
 						break;
 					}
@@ -1116,6 +1141,7 @@ public class Economy
 		SLE_END()
 	};
 
+	/*
 	static void Save_SUBS()
 	{
 		int i;
@@ -1135,15 +1161,15 @@ public class Economy
 		int index;
 		while ((index = SlIterateArray()) != -1)
 			SlObject(&_subsidies[index], _subsidies_desc);
-	}
+	} */
 
 	int GetTransportedGoodsIncome(int num_pieces, int dist, byte transit_days, byte cargo_type)
 	{
 		int cargo = cargo_type;
-		byte f;
+		int f;
 
 		/* zero the distance if it's the bank and very short transport. */
-		if (_opt.landscape == LT_NORMAL && cargo == AcceptedCargo.CT_VALUABLES && dist < 10)
+		if (GameOptions._opt.landscape == Landscape.LT_NORMAL && cargo == AcceptedCargo.CT_VALUABLES && dist < 10)
 			dist = 0;
 
 		f = 255;
@@ -1244,7 +1270,7 @@ public class Economy
 				Global.SetDParam(0, p.name_1);
 				Global.SetDParam(1, p.name_2);
 				NewsItem.AddNewsItem(
-					STR_2031_SERVICE_SUBSIDY_AWARDED + _opt.diff.subsidy_multiplier,
+					Str.STR_2031_SERVICE_SUBSIDY_AWARDED + _opt.diff.subsidy_multiplier,
 					NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0),
 					pair.a, pair.b);
 
@@ -1644,7 +1670,7 @@ public class Economy
 		p = new PlayerID(p1).GetPlayer();
 
 		/* Protect new companies from hostile takeovers */
-		if (Global._cur_year - p.inaugurated_year < 6) return_cmd_error(STR_7080_PROTECTED);
+		if (Global._cur_year - p.inaugurated_year < 6) return_cmd_error(Str.STR_7080_PROTECTED);
 
 		/* Those lines are here for network-protection (clients can be slow) */
 		if (GetAmountOwnedBy(p, Owner.Owner.OWNER_SPECTATOR) == 0) return 0;

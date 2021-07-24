@@ -273,8 +273,8 @@ VARDEF int _autosave_ctr;
 //VARDEF byte _display_opt;
 //VARDEF byte _pause;
 VARDEF int _caret_timer;
-VARDEF uint32 _news_display_opt;
-VARDEF bool _news_ticker_sound;
+//VARDEF uint32 _news_display_opt;
+//VARDEF bool _news_ticker_sound;
 //VARDEF byte _game_mode;
 
 //VARDEF StringID _error_message;
@@ -412,10 +412,10 @@ void SetDParamStr(uint n, const char *str);
 // so be careful.
 StringID BindCString(const char *str);
 
-
+/*
 #define COPY_IN_DPARAM(offs,src,num) memcpy(_decode_parameters + offs, src, sizeof(uint32) * (num))
 #define COPY_OUT_DPARAM(dst,offs,num) memcpy(dst,_decode_parameters + offs, sizeof(uint32) * (num))
-
+*/
 
 //#define SET_EXPENSES_TYPE(x) _yearly_expenses_type = x;
 

@@ -280,7 +280,12 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		return FormatString( StringGetStringPtr(BitOps.GB(string, 0, 16)), argv, BitOps.GB(string, 24, 8));
 	}
 
-	static String GetString(StringID string)
+	public static String GetString(StringID string)
+	{
+		return GetStringWithArgs(string.id, Global._decode_parameters);
+	}
+	
+	public static String GetString(int string)
 	{
 		return GetStringWithArgs(string, Global._decode_parameters);
 	}

@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 
 import game.util.Paths;
 import game.util.Prices;
+import game.util.Strings;
 
 public class Global {
 
@@ -99,6 +100,11 @@ public class Global {
 	public static int _error_message_2;
 	public static int _additional_cash_required;
 	
+	
+
+	public static int _news_display_opt = 0;
+	public static boolean _news_ticker_sound = false;
+	public static NewsItem _statusbar_news_item = null;
 	
 	
 	
@@ -310,10 +316,25 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 		System.arraycopy(_decode_parameters, amount, _decode_parameters, 0, _decode_parameters.length - amount);
 	}
 
+	public static void COPY_IN_DPARAM(int offs, int [] src, int num) 
+	{
+		//memcpy(_decode_parameters + offs, src, sizeof(uint32) * (num))
+		
+		System.arraycopy(src, 0, _decode_parameters, offs, num );
+	}
+
+	public static void COPY_OUT_DPARAM(int [] dst, int offs, int num) 
+	{
+		//memcpy(dst,_decode_parameters + offs, sizeof(uint32) * (num))
+		System.arraycopy( _decode_parameters, offs, dst, 0, num  );
+	}
+
 
 
 	private static int next_name_id = 0;
 	private static Map<Integer,String> _name_array = new HashMap<Integer,String>();
+
+	
 
 
 	public static void DeleteName(int id)
@@ -344,7 +365,7 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 		{
 			if( _name_array.containsValue(name) )
 			{
-				_error_message = STR_0132_CHOSEN_NAME_IN_USE_ALREADY;
+				_error_message = Str.STR_0132_CHOSEN_NAME_IN_USE_ALREADY;
 				return new StringID(0);
 			}
 		}
@@ -355,7 +376,7 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 		{
 			if( tries-- <= 0)
 			{
-				_error_message = STR_0131_TOO_MANY_NAMES_DEFINED;
+				_error_message = Str.STR_0131_TOO_MANY_NAMES_DEFINED;
 				return new StringID(0);
 			}
 
@@ -376,7 +397,18 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 	}
 
 
+	
+	
+	static String GetString(StringID string)
+	{
+		return Strings.GetString(string);
+	}
 
+	public static String GetString(int string)
+	{
+		return Strings.GetString(string);
+	}
+	
 }
 /*
 class DebugLevel {

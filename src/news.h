@@ -24,17 +24,17 @@ struct NewsItem {
 };
 */
 typedef bool ValidationProc ( uint data_a, uint data_b );
-typedef void DrawNewsCallbackProc(Window *w);
-typedef StringID GetNewsStringCallbackProc(const NewsItem *ni);
+//typedef void DrawNewsCallbackProc(Window *w);
+//typedef StringID GetNewsStringCallbackProc(const NewsItem *ni);
 
 //#define NEWS_FLAGS(mode,flag,type,cb) ((cb)<<24 | (type)<<16 | (flag)<<8 | (mode))
-void AddNewsItem(StringID string, uint32 flags, uint data_a, uint data_b);
-void AddValidatedNewsItem(StringID string, uint32 flags, uint data_a, uint data_b, ValidationProc *validation);
-void NewsLoop(void);
-void DrawNewsBorder(const Window *w);
-void InitNewsItemStructs(void);
+//void AddNewsItem(StringID string, uint32 flags, uint data_a, uint data_b);
+//void AddValidatedNewsItem(StringID string, uint32 flags, uint data_a, uint data_b, ValidationProc *validation);
+//void NewsLoop(void);
+//void DrawNewsBorder(const Window *w);
+//void InitNewsItemStructs(void);
 
-VARDEF NewsItem _statusbar_news_item;
+//VARDEF NewsItem _statusbar_news_item;
 /*
 enum {
 	NT_ARRIVAL_PLAYER = 0,

@@ -1861,13 +1861,13 @@ public class ViewPort
 
 
 
-	boolean ScrollMainWindowTo(int x, int y)
+	static boolean ScrollMainWindowTo(int x, int y)
 	{
 		return ScrollWindowTo(x, y, Window.FindWindowById(Window.WC_MAIN_WINDOW, 0));
 	}
 
 
-	boolean ScrollMainWindowToTile(TileIndex tile)
+	static boolean ScrollMainWindowToTile(TileIndex tile)
 	{
 		return ScrollMainWindowTo(tile.TileX() * 16 + 8, tile.TileY() * 16 + 8);
 	}

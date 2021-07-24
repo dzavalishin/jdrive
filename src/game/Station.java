@@ -1,5 +1,7 @@
 package game;
 
+import java.util.function.BiConsumer;
+
 import game.util.BitOps;
 
 public class Station implements IPoolItem
@@ -3150,7 +3152,13 @@ public class Station implements IPoolItem
 	
 	public boolean IsBuoy()
 	{
-		return had_vehicle_of_type & HVOT_BUOY; /* XXX: We should really ditch this ugly coding and switch to something sane... */
+		return 0 != (had_vehicle_of_type & HVOT_BUOY); /* XXX: We should really ditch this ugly coding and switch to something sane... */
+	}
+
+	public static void forEach(BiConsumer<Integer, Station> c) 
+	{
+		_station_pool.forEach(c);
+		
 	}
 	
 	

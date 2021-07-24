@@ -42,7 +42,7 @@ static byte _latest_news = INVALID_NEWS;  // points to last item in fifo queue
 static byte _forced_news = INVALID_NEWS;
 
 static byte _total_news = 0; // total news count
-*/
+
 
 void DrawNewsNewTrainAvail(Window *w);
 void DrawNewsNewRoadVehAvail(Window *w);
@@ -56,7 +56,8 @@ StringID GetNewsStringNewRoadVehAvail(const NewsItem *ni);
 StringID GetNewsStringNewShipAvail(const NewsItem *ni);
 StringID GetNewsStringNewAircraftAvail(const NewsItem *ni);
 StringID GetNewsStringBankrupcy(const NewsItem *ni);
-
+*/
+#if 0
 static DrawNewsCallbackProc * const _draw_news_callback[] = {
 	DrawNewsNewTrainAvail,    /* DNC_TRAINAVAIL */
 	DrawNewsNewRoadVehAvail,  /* DNC_ROADAVAIL */
@@ -72,7 +73,9 @@ GetNewsStringCallbackProc * const _get_news_string_callback[] = {
 	GetNewsStringNewAircraftAvail, /* DNC_AIRCRAFTAVAIL */
 	GetNewsStringBankrupcy,        /* DNC_BANKRUPCY */
 };
-#if 0
+
+
+
 void InitNewsItemStructs(void)
 {
 	memset(_news_items, 0, sizeof(_news_items));
