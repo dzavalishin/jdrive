@@ -1,3 +1,4 @@
+#if 0
 /* $Id: build_industry.h 3135 2005-11-04 16:12:48Z tron $ */
 
 #define MK(x,y, m) {{x, y}, m}

@@ -179,7 +179,7 @@ typedef struct Command {
 } Command;
 
 //#define return_cmd_error(errcode) do { _error_message=(errcode); return CMD_ERROR; } while(0)
-#define return_cmd_error(errcode) do { return CMD_ERROR | (errcode); } while (0)
+//#define return_cmd_error(errcode) do { return CMD_ERROR | (errcode); } while (0)
 
 /**
  * Check the return value of a DoCommand*() function

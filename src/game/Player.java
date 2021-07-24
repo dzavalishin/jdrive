@@ -16,13 +16,13 @@ import game.ai.Ai;
 public class Player 
 {
 
-	long name_2;
+	int name_2;
 	int name_1;
 
 	int president_name_1;
-	long president_name_2;
+	int president_name_2;
 
-	long face;
+	int face;
 
 	int player_money;
 	int current_loan;

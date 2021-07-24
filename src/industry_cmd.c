@@ -1,3 +1,4 @@
+#if 0
 /* $Id: industry_cmd.c 3282 2005-12-10 12:05:39Z peter1138 $ */
 
 #include "stdafx.h"

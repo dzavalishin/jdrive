@@ -58,7 +58,7 @@ public class Economy
 	//static ScoreInfo _score_info[];
 	static int _score_part[][] = new int [Global.MAX_PLAYERS][NUM_SCORE];
 
-	static Subsidy[] _subsidies = new Subsidy[Global.MAX_PLAYERS];
+	public static Subsidy[] _subsidies = new Subsidy[Global.MAX_PLAYERS];
 
 
 
@@ -888,7 +888,7 @@ public class Economy
 		_economy.fluct = GB(Random(), 0, 8) + 168;
 	}
 
-	Pair SetupSubsidyDecodeParam(final Subsidy s, boolean mode)
+	static Pair SetupSubsidyDecodeParam(final Subsidy s, boolean mode)
 	{
 		TileIndex tile;
 		TileIndex tile2;

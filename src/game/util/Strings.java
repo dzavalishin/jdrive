@@ -1338,9 +1338,9 @@ class LanguagePack {
 	}
 }
 
-
+/*
 class YearMonthDay {
 	int year, month, day;
 } 
-
+*/
 
