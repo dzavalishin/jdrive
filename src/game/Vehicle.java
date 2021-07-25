@@ -290,6 +290,15 @@ public class Vehicle implements IPoolItem
 	private static int CMD_REFIT_VEH(int x)	{ return _veh_refit_proc_table[ x - VEH_Train]; }
 
 
+	
+	public static final int VRF_REVERSING = 0;
+
+	// used to calculate if train is going up or down
+	public static final int VRF_GOINGUP   = 1;
+	public static final int VRF_GOINGDOWN = 2;
+
+	// used to store if a wagon is powered or not
+	public static final int VRF_POWEREDWAGON = 3;
 
 
 

@@ -5,6 +5,10 @@ import java.util.function.Function;
 
 import game.util.BitOps;
 
+// TODO make == work for TileIndex or we're busted - make fabric and disable new(), 
+// return same TileIndex for each TileIndex.tile
+// same with Mutable
+
 public class TileIndex {
 	protected int tile;
 
@@ -582,6 +586,15 @@ public class TileIndex {
 	public boolean IsValidTile() 
 	{
 		return (tile < Global.MapSizeX() * Global.MapMaxY() && TileX() != Global.MapMaxX());
+	}
+
+	
+	/**
+	 * Returns whether the given tile is a level crossing.
+	 */
+	public boolean IsLevelCrossing()
+	{
+		return (getMap().m5 & 0xF0) == 0x10;
 	}
 	
 	

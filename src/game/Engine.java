@@ -1,8 +1,9 @@
 package game;
 
+import game.tables.EngineTables;
 import game.util.Prices;
 
-public class Engine {
+public class Engine extends EngineTables {
 	int intro_date;
 	int age;
 	int reliability;
@@ -313,6 +314,27 @@ public class Engine {
 		return Str.STR_02B6;
 	}
 
+	
+	static Engine _engines[TOTAL_NUM_ENGINES];
+	static /*StringID*/ int _engine_name_strings[TOTAL_NUM_ENGINES];
+
+	public static Engine GetEngine(EngineID i)
+	{
+	  assert(i.id < _engines.length);
+	  return _engines[i.id];
+	}
+
+	public static Engine GetEngine(int i)
+	{
+	  assert(i < _engines.length);
+	  return _engines[i];
+	}
+
+	public static boolean IsEngineIndex(int index)
+	{
+		return index < TOTAL_NUM_ENGINES;
+	}
+	
 
 }
 

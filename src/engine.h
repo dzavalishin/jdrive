@@ -91,7 +91,7 @@ typedef struct Engine {
 	byte player_avail;
 	byte type;				// type, ie VEH_Road, VEH_Train, etc. Same as in vehicle.h
 } Engine;
-*/
+* /
 
 enum {
 	RVI_MULTIHEAD = 1,
@@ -141,6 +141,7 @@ enum GlobalCargo {
 	NUM_GLOBAL_CID  =  31
 };
 
+/*
 // This enum lists the implemented callbacks
 // Use as argument for the GetCallBackResult function (see comments there)
 enum CallbackID {
@@ -167,7 +168,7 @@ enum CallbackMask {
 	CBM_REFIT_CAP = 3,
 	CBM_ARTIC_ENGINE = 4,
 };
-
+*/
 /*enum {
 	CALLBACK_FAILED = 0xFFFF
 };*/
@@ -187,6 +188,7 @@ bool UsesWagonOverride(const Vehicle *v);
 #define GetCustomVehicleSprite(v, direction) GetCustomEngineSprite(v->engine_type, v, direction)
 #define GetCustomVehicleIcon(et, direction) GetCustomEngineSprite(et, NULL, direction)
 
+/*
 typedef enum VehicleTrigger {
 	VEHICLE_TRIGGER_NEW_CARGO = 1,
 	// Externally triggered only for the first vehicle in chain
@@ -196,6 +198,7 @@ typedef enum VehicleTrigger {
 	// Not triggered externally (called for the whole chain if we got NEW_CARGO)
 	VEHICLE_TRIGGER_ANY_NEW_CARGO = 8,
 } VehicleTrigger;
+*/
 void TriggerVehicle(Vehicle *veh, VehicleTrigger trigger);
 
 void SetCustomEngineName(EngineID engine, const char *name);
@@ -229,9 +232,9 @@ enum {
 	ROAD_ENGINES_INDEX = NUM_TRAIN_ENGINES,
 };
 */
-VARDEF Engine _engines[TOTAL_NUM_ENGINES];
-#define FOR_ALL_ENGINES(e) for (e = _engines; e != endof(_engines); e++)
-
+//VARDEF Engine _engines[TOTAL_NUM_ENGINES];
+//#define FOR_ALL_ENGINES(e) for (e = _engines; e != endof(_engines); e++)
+/*
 static inline Engine* GetEngine(EngineID i)
 {
   assert(i < lengthof(_engines));
@@ -258,7 +261,7 @@ extern RailVehicleInfo _rail_vehicle_info[NUM_TRAIN_ENGINES];
 extern ShipVehicleInfo _ship_vehicle_info[NUM_SHIP_ENGINES];
 extern AircraftVehicleInfo _aircraft_vehicle_info[NUM_AIRCRAFT_ENGINES];
 extern RoadVehicleInfo _road_vehicle_info[NUM_ROAD_ENGINES];
-
+/*
 static inline const RailVehicleInfo* RailVehInfo(EngineID e)
 {
 	assert(e < lengthof(_rail_vehicle_info));
@@ -282,7 +285,7 @@ static inline const RoadVehicleInfo* RoadVehInfo(EngineID e)
 	assert(e >= ROAD_ENGINES_INDEX && e < ROAD_ENGINES_INDEX + lengthof(_road_vehicle_info));
 	return &_road_vehicle_info[e - ROAD_ENGINES_INDEX];
 }
-
+*/
 void UnloadWagonOverrides(void);
 void UnloadCustomEngineSprites(void);
 void UnloadCustomEngineNames(void);

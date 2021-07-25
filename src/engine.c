@@ -1,3 +1,4 @@
+#if 0
 /* $Id: engine.c 3316 2005-12-18 14:03:28Z peter1138 $ */
 
 #include "stdafx.h"
