@@ -412,7 +412,7 @@ public class Order implements IPoolItem {
 					Station.GetStation(new_order.station).xy // XXX type != OT_GOTO_STATION?
 			);
 			if (dist >= 130)
-				return_cmd_error(Str.STR_0210_TOO_FAR_FROM_PREVIOUS_DESTINATIO);
+				return Cmd.return_cmd_error(Str.STR_0210_TOO_FAR_FROM_PREVIOUS_DESTINATIO);
 		}
 
 		if (0 != (flags & Cmd.DC_EXEC)) {

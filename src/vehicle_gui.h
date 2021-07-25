@@ -1,5 +1,5 @@
 /* $Id: vehicle_gui.h 3081 2005-10-24 19:40:48Z bjarni $ */
-
+#if 0
 #ifndef VEHICLE_GUI_H
 #define VEHICLE_GUI_H
 
