@@ -3,6 +3,15 @@ package game.tables;
 public class TrainTables 
 {
 
+	public static final int RAILTYPE_RAIL   = 0;
+	public static final int RAILTYPE_MONO   = 1;
+	public static final int RAILTYPE_MAGLEV = 2;
+	public static final int RAILTYPE_END = 3;
+	public static final int RAILTYPE_MASK   =  0x3;
+	public static final int INVALID_RAILTYPE = 0xFF;
+
+	
+	
 	static final byte _vehicle_initial_x_fract[] = {10,8,4,8};
 	static final byte _vehicle_initial_y_fract[] = {8,4,8,10};
 	static final byte _state_dir_table[] = { 0x20, 8, 0x10, 4 };
@@ -136,7 +145,10 @@ public class TrainTables
 			1, 3, 1, 3, 5, 3, 0, 0,
 			5, 7, 7, 5, 7, 1,
 		};
+
 	
+	static byte _matching_tracks[] = {0x30, 1, 0xC, 2, 0x30, 1, 0xC, 2};
+
 	
 	/*
 	static final SoundFx sfx[] = {
