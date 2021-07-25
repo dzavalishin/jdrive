@@ -49,8 +49,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	}
 
 
-	public static Industry GetIndustry(int offs) {
-	}
+	//public static Industry GetIndustry(int offs) {	}
 
 
 
@@ -80,8 +79,40 @@ public class Industry extends IndustryTables implements IPoolItem {
 		}
 	};
 	/* Initialize the industry-pool */
-	static MemoryPool _industry_pool = new MemoryPool<Industry>(factory); 
+	static MemoryPool<Industry> _industry_pool = new MemoryPool<Industry>(factory); 
 	//{ "Industry", INDUSTRY_POOL_MAX_BLOCKS, INDUSTRY_POOL_BLOCK_SIZE_BITS, sizeof(Industry), &IndustryPoolNewBlock, 0, 0, null };
+
+
+
+
+	@Override
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+
+	/**
+	 * Check if an Industry really exists.
+	 */
+	public static boolean IsValidIndustry(Industry industry)
+	{
+		return industry.xy != null; /* XXX: Replace by INVALID_TILE someday */
+	}
+
+	/**
+	 * Get the pointer to the industry with index 'index'
+	 */
+	public static Industry GetIndustry(int index)
+	{
+		return _industry_pool.GetItemFromPool(index);
+	}
+
+
+
+
+
+
+
 
 	static byte _industry_sound_ctr;
 	static TileIndex _industry_sound_tile;
@@ -145,16 +176,16 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		if (0 == (ti.tile.getMap().m1 & 0x80)) return;
 
-		d = _draw_industry_spec1[_m[ti.tile].m3];
+		d = _draw_industry_spec1[ti.tile.getMap().m3];
 
-		AddChildSpriteScreen(0x12A7 + d.image_1, d.x, 0);
+		ViewPort.AddChildSpriteScreen(0x12A7 + d.image_1, d.x, 0);
 
 		image = d.image_2;
-		if (image != 0) AddChildSpriteScreen(0x12B0 + image - 1, 8, 41);
+		if (image != 0) ViewPort.AddChildSpriteScreen(0x12B0 + image - 1, 8, 41);
 
 		image = d.image_3;
 		if (image != 0) {
-			AddChildSpriteScreen(0x12AC + image - 1,
+			ViewPort.AddChildSpriteScreen(0x12AC + image - 1,
 					_drawtile_proc1_x[image - 1], _drawtile_proc1_y[image - 1]);
 		}
 	}
@@ -163,22 +194,22 @@ public class Industry extends IndustryTables implements IPoolItem {
 	{
 		int x = 0;
 
-		if (_m[ti.tile].m1 & 0x80) {
-			x = _industry_anim_offs[_m[ti.tile].m3];
+		if (ti.tile.getMap().m1 & 0x80) {
+			x = _industry_anim_offs[ti.tile.getMap().m3];
 			if ( (byte)x == 0xFF)
 				x = 0;
 		}
 
-		AddChildSpriteScreen(0x129F, 22 - x, 24 + x);
-		AddChildSpriteScreen(0x129E, 6, 0xE);
+		ViewPort.AddChildSpriteScreen(0x129F, 22 - x, 24 + x);
+		ViewPort.AddChildSpriteScreen(0x129E, 6, 0xE);
 	}
 
 	static void IndustryDrawTileProc3(final TileInfo ti)
 	{
 		if(0!=(ti.tile.getMap().m1 & 0x80)) {
-			AddChildSpriteScreen(0x128B, 5, _industry_anim_offs_2[_m[ti.tile].m3]);
+			ViewPort.AddChildSpriteScreen(0x128B, 5, _industry_anim_offs_2[ti.tile.getMap().m3]);
 		} else {
-			AddChildSpriteScreen(4746, 3, 67);
+			ViewPort.AddChildSpriteScreen(4746, 3, 67);
 		}
 	}
 
@@ -186,27 +217,27 @@ public class Industry extends IndustryTables implements IPoolItem {
 	{
 		final DrawIndustrySpec4Struct d;
 
-		d = _industry_anim_offs_3[_m[ti.tile].m3];
+		d = _industry_anim_offs_3[ti.tile.getMap().m3];
 
 		if (d.image_1 != 0xFF) {
-			AddChildSpriteScreen(0x126F, 0x32 - d.image_1 * 2, 0x60 + d.image_1);
+			ViewPort.AddChildSpriteScreen(0x126F, 0x32 - d.image_1 * 2, 0x60 + d.image_1);
 		}
 
 		if (d.image_2 != 0xFF) {
-			AddChildSpriteScreen(0x1270, 0x10 - d.image_2 * 2, 100 + d.image_2);
+			ViewPort.AddChildSpriteScreen(0x1270, 0x10 - d.image_2 * 2, 100 + d.image_2);
 		}
 
-		AddChildSpriteScreen(0x126E, 7, d.image_3);
-		AddChildSpriteScreen(0x126D, 0, 42);
+		ViewPort.AddChildSpriteScreen(0x126E, 7, d.image_3);
+		ViewPort.AddChildSpriteScreen(0x126D, 0, 42);
 	}
 
 	static void DrawCoalPlantSparkles(final TileInfo ti)
 	{
-		int image = _m[ti.tile].m1;
+		int image = ti.tile.getMap().m1;
 		if (image & 0x80) {
 			image = BitOps.GB(image, 2, 5);
 			if (image != 0 && image < 7) {
-				AddChildSpriteScreen(image + 0x806,
+				ViewPort.AddChildSpriteScreen(image + 0x806,
 						_coal_plant_sparkles_x[image - 1],
 						_coal_plant_sparkles_y[image - 1]
 						);
@@ -231,11 +262,11 @@ public class Industry extends IndustryTables implements IPoolItem {
 		int image, ormod;
 
 		/* Pointer to industry */
-		ind = GetIndustry(_m[ti.tile].m2);
+		ind = GetIndustry(ti.tile.getMap().m2);
 		ormod = (ind.color_map + 0x307) << PALETTE_SPRITE_START;
 
 		/* Retrieve pointer to the draw industry tile struct */
-		dits = _industry_draw_tile_data[(ti.map5 << 2) | BitOps.GB(_m[ti.tile].m1, 0, 2)];
+		dits = _industry_draw_tile_data[(ti.map5 << 2) | BitOps.GB(ti.tile.getMap().m1, 0, 2)];
 
 		image = dits.sprite_1;
 		if (image & PALETTE_MODIFIER_COLOR && (image & PALETTE_SPRITE_MASK) == 0)
@@ -244,8 +275,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 		z = ti.z;
 		/* Add bricks below the industry? */
 		if (ti.tileh & 0xF) {
-			AddSortableSpriteToDraw(Sprite.SPR_FOUNDATION_BASE + (ti.tileh & 0xF), ti.x, ti.y, 16, 16, 7, z);
-			AddChildSpriteScreen(image, 0x1F, 1);
+			ViewPort.AddSortableSpriteToDraw(Sprite.SPR_FOUNDATION_BASE + (ti.tileh & 0xF), ti.x, ti.y, 16, 16, 7, z);
+			ViewPort.AddChildSpriteScreen(image, 0x1F, 1);
 			z += 8;
 		} else {
 			/* Else draw regular ground */
@@ -258,9 +289,9 @@ public class Industry extends IndustryTables implements IPoolItem {
 			if (image & PALETTE_MODIFIER_COLOR && (image & PALETTE_SPRITE_MASK) == 0)
 				image |= ormod;
 
-			if (_displayGameOptions._opt & DO_TRANS_BUILDINGS) MAKE_TRANSPARENT(image);
+			if (Global._display_opt & DO_TRANS_BUILDINGS) MAKE_TRANSPARENT(image);
 
-			AddSortableSpriteToDraw(image,
+			ViewPort.AddSortableSpriteToDraw(image,
 					ti.x + dits.subtile_x,
 					ti.y + dits.subtile_y,
 					dits.width  + 1,
@@ -268,7 +299,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					dits.dz,
 					z);
 
-			if (_displayGameOptions._opt & DO_TRANS_BUILDINGS) return;
+			if (Global._display_opt & DO_TRANS_BUILDINGS) return;
 		}
 
 		{
@@ -280,7 +311,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	static int GetSlopeZ_Industry(final TileInfo  ti)
 	{
-		return GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
+		return Landscape.GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
 	}
 
 	static int GetSlopeTileh_Industry(final TileInfo  ti)
@@ -292,23 +323,23 @@ public class Industry extends IndustryTables implements IPoolItem {
 	{
 		AcceptedCargo ac = new AcceptedCargo();
 		int m5 = tile.getMap().m5;
-		CargoID a;
+		/*CargoID*/ int a;
 
 		a = _industry_map5_accepts_1[m5];
-		if (a != AcceptedCargo.CT_INVALID) ac[a] = (a == 0) ? 1 : 8;
+		if (a != AcceptedCargo.CT_INVALID) ac.ct[a] = (a == 0) ? 1 : 8;
 
 		a = _industry_map5_accepts_2[m5];
-		if (a != AcceptedCargo.CT_INVALID) ac[a] = 8;
+		if (a != AcceptedCargo.CT_INVALID) ac.ct[a] = 8;
 
 		a = _industry_map5_accepts_3[m5];
-		if (a != AcceptedCargo.CT_INVALID) ac[a] = 8;
-		
+		if (a != AcceptedCargo.CT_INVALID) ac.ct[a] = 8;
+
 		return ac;
 	}
 
 	static TileDesc GetTileDesc_Industry(TileIndex tile)
 	{
-		TileDesc td = new TileDesc()
+		TileDesc td = new TileDesc();
 		final Industry  i = GetIndustry(tile.getMap().m2);
 
 		td.owner = i.owner;
@@ -317,7 +348,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			Global.SetDParamX(td.dparam, 0, td.str);
 			td.str = Str.STR_2058_UNDER_CONSTRUCTION;
 		}
-		
+
 		return td;
 	}
 
@@ -330,14 +361,14 @@ public class Industry extends IndustryTables implements IPoolItem {
 		 * with magic_bulldozer cheat you can destroy industries
 		 * (area around OILRIG is water, so water shouldn't flood it
 		 */
-		if ((Global._current_player != Owner.OWNER_WATER && Global._game_mode != GameModes.GM_EDITOR &&
-				!_cheats.magic_bulldozer.value) ||
-				(Global._current_player == Owner.OWNER_WATER && i.type == IT_OIL_RIG) ) {
+		if ((Global._current_player.id != Owner.OWNER_WATER && Global._game_mode != GameModes.GM_EDITOR &&
+				!Global._cheats.magic_bulldozer.value) ||
+				(Global._current_player.id == Owner.OWNER_WATER && i.type == IT_OIL_RIG) ) {
 			Global.SetDParam(0, Str.STR_4802_COAL_MINE + i.type);
-			return_cmd_error(Str.STR_4800_IN_THE_WAY);
+			return Cmd.return_cmd_error(Str.STR_4800_IN_THE_WAY);
 		}
 
-		if (flags & Cmd.DC_EXEC) DeleteIndustry(i);
+		if( 0!= (flags & Cmd.DC_EXEC)) DeleteIndustry(i);
 		return 0;
 	}
 
@@ -371,7 +402,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			if (am != 0 && (m5 = _industry_produce_map5[tile.getMap().m5]) != 0xFF) {
 				tile.getMap().m1 = 0x80;
 				tile.getMap().m5 = m5;
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 			}
 		}
 
@@ -391,11 +422,11 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	static void AnimateTile_Industry(TileIndex tile)
 	{
-		byte m,n;
+		int m,n;
 
-		switch(tile.getMap().m5) {
+		switch((int)tile.getMap().m5) {
 		case 174:
-			if ((_tick_counter & 1) == 0) {
+			if ((Global._tick_counter & 1) == 0) {
 				m = tile.getMap().m3 + 1;
 
 				switch(m & 7) {
@@ -407,14 +438,14 @@ public class Industry extends IndustryTables implements IPoolItem {
 					m = 0;
 					DeleteAnimatedTile(tile);
 				}
-				tile.getMap().m3 = m;
+				tile.getMap().m3 = (byte) m;
 
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 			}
 			break;
 
 		case 165:
-			if ((_tick_counter & 3) == 0) {
+			if ((Global._tick_counter & 3) == 0) {
 				m = tile.getMap().m3;
 
 				if (_industry_anim_offs[m] == 0xFF) {
@@ -427,12 +458,12 @@ public class Industry extends IndustryTables implements IPoolItem {
 				}
 				tile.getMap().m3 = m;
 
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 			}
 			break;
 
 		case 162:
-			if ((_tick_counter&1) == 0) {
+			if ((Global._tick_counter&1) == 0) {
 				m = tile.getMap().m3;
 
 				if (++m >= 40) {
@@ -441,13 +472,13 @@ public class Industry extends IndustryTables implements IPoolItem {
 				}
 				tile.getMap().m3 = m;
 
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 			}
 			break;
 
 			// Sparks on a coal plant
 		case 10:
-			if ((_tick_counter & 3) == 0) {
+			if ((Global._tick_counter & 3) == 0) {
 				m = tile.getMap().m1;
 				if (BitOps.GB(m, 2, 5) == 6) {
 					tile.getMap().m1 = BitOps.RETSB(tile.getMap().m1, 2, 5, 0);
@@ -460,7 +491,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			break;
 
 		case 143:
-			if ((_tick_counter & 1) == 0) {
+			if ((Global._tick_counter & 1) == 0) {
 				m = tile.getMap().m3 + 1;
 
 				if (m == 1) {
@@ -480,23 +511,23 @@ public class Industry extends IndustryTables implements IPoolItem {
 				}
 
 				tile.getMap().m3 = m;
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 			}
 			break;
 
 		case 148: case 149: case 150: case 151:
 		case 152: case 153: case 154: case 155:
-			if ((_tick_counter & 3) == 0) {
+			if ((Global._tick_counter & 3) == 0) {
 				m = tile.getMap().m5	+ 1;
 				if (m == 155+1) m = 148;
 				tile.getMap().m5 = m;
 
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 			}
 			break;
 
 		case 30: case 31: case 32:
-			if ((_tick_counter & 7) == 0) {
+			if ((Global._tick_counter & 7) == 0) {
 				boolean b = BitOps.CHANCE16(1,7);
 				m = tile.getMap().m1;
 				m = (m & 3) + 1;
@@ -504,11 +535,11 @@ public class Industry extends IndustryTables implements IPoolItem {
 				if (m == 4 && (m=0,++n) == 32+1 && (n=30,b)) {
 					tile.getMap().m1 = 0x83;
 					tile.getMap().m5 = 29;
-					DeleteAnimatedTile(tile);
+					tile.DeleteAnimatedTile();
 				} else {
 					tile.getMap().m1 = BitOps.RETSB(tile.getMap().m1, 0, 2, m);
 					tile.getMap().m5 = n;
-					MarkTileDirtyByTile(tile);
+					tile.MarkTileDirtyByTile();
 				}
 			}
 			break;
@@ -516,7 +547,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		case 88:
 		case 48:
 		case 1: {
-			int state = _tick_counter & 0x7FF;
+			int state = Global._tick_counter & 0x7FF;
 
 			if ((state -= 0x400) < 0)
 				return;
@@ -536,7 +567,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				m = (tile.getMap().m1 + 1) | 0x40;
 				if (m > 0xC2) m = 0xC0;
 				tile.getMap().m1 = m;
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 			} else if (state >= 0x200 && state < 0x3A0) {
 				int i;
 				i = (state < 0x220 || state >= 0x380) ? 7 : 3;
@@ -545,8 +576,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 				m = (tile.getMap().m1 & 0xBF) - 1;
 				if (m < 0x80) m = 0x82;
-				tile.getMap().m1 = m;
-				MarkTileDirtyByTile(tile);
+				tile.getMap().m1 = m;				
+				tile.MarkTileDirtyByTile();
 			}
 		} break;
 		}
@@ -568,13 +599,13 @@ public class Industry extends IndustryTables implements IPoolItem {
 			return;
 		}
 
-		size = (size + 1) & 3;
+		size = (byte) ((size + 1) & 3);
 		if (size == 3) size |= 0x80;
 		tile.getMap().m1 = size | b;
 
-		MarkTileDirtyByTile(tile);
+		tile.MarkTileDirtyByTile();
 
-		if (!(tile.getMap().m1 & 0x80))
+		if (0 == (tile.getMap().m1 & 0x80))
 			return;
 
 		switch(tile.getMap().m5) {
@@ -600,24 +631,24 @@ public class Industry extends IndustryTables implements IPoolItem {
 		}
 	}
 
+	static final int _tileloop_ind_case_161[] = {
+			11, 0, -4, -14,
+			-4, -10, -4, 1,
+			49, 59, 60, 65,
+	};
 
 	static void TileLoopIndustryCase161(TileIndex tile)
 	{
 		int dir;
 		Vehicle v;
-		static final int8 _tileloop_ind_case_161[12] = {
-				11, 0, -4, -14,
-				-4, -10, -4, 1,
-				49, 59, 60, 65,
-		};
 
-		SndPlayTileFx(SND_2E_EXTRAAcceptedCargo.CT_AND_POP, tile);
+		//SndPlayTileFx(SND_2E_EXTRAAcceptedCargo.CT_AND_POP, tile);
 
 		dir = Hal.Random() & 3;
 
 		v = CreateEffectVehicleAbove(
-				TileX(tile) * 16 + _tileloop_ind_case_161[dir + 0],
-				TileY(tile) * 16 + _tileloop_ind_case_161[dir + 4],
+				tile.TileX() * 16 + _tileloop_ind_case_161[dir + 0],
+				tile.TileY() * 16 + _tileloop_ind_case_161[dir + 4],
 				_tileloop_ind_case_161[dir + 8],
 				EV_BUBBLE
 				);
@@ -629,7 +660,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	{
 		byte n;
 
-		if (!(tile.getMap().m1 & 0x80)) {
+		if (0 == (tile.getMap().m1 & 0x80)) {
 			MakeIndustryTileBigger(tile, tile.getMap().m1);
 			return;
 		}
@@ -642,7 +673,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		if (n != 255) {
 			tile.getMap().m1 = 0;
 			tile.getMap().m5 = n;
-			MarkTileDirtyByTile(tile);
+			tile.MarkTileDirtyByTile();
 			return;
 		}
 
@@ -659,17 +690,17 @@ public class Industry extends IndustryTables implements IPoolItem {
 			break;
 
 		case 0:
-			if (!(_tick_counter & 0x400) && BitOps.CHANCE16(1,2))
+			if (!(Global._tick_counter & 0x400) && BitOps.CHANCE16(1,2))
 				SET_AND_ANIMATE(tile,1,0x80);
 			break;
 
 		case 47:
-			if (!(_tick_counter & 0x400) && BitOps.CHANCE16(1,2))
+			if (!(Global._tick_counter & 0x400) && BitOps.CHANCE16(1,2))
 				SET_AND_ANIMATE(tile,0x30,0x80);
 			break;
 
 		case 79:
-			if (!(_tick_counter & 0x400) && BitOps.CHANCE16(1,2))
+			if (!(Global._tick_counter & 0x400) && BitOps.CHANCE16(1,2))
 				SET_AND_ANIMATE(tile,0x58,0x80);
 			break;
 
@@ -679,17 +710,17 @@ public class Industry extends IndustryTables implements IPoolItem {
 			break;
 
 		case 1:
-			if (!(_tick_counter & 0x400))
+			if (!(Global._tick_counter & 0x400))
 				SET_AND_UNANIMATE(tile, 0, 0x83);
 			break;
 
 		case 48:
-			if (!(_tick_counter & 0x400))
+			if (!(Global._tick_counter & 0x400))
 				SET_AND_UNANIMATE(tile, 0x2F, 0x83);
 			break;
 
 		case 88:
-			if (!(_tick_counter & 0x400))
+			if (!(Global._tick_counter & 0x400))
 				SET_AND_UNANIMATE(tile, 0x4F, 0x83);
 			break;
 
@@ -747,7 +778,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		ac.cargo[0] = i.produced_cargo[0];
 		ac.cargo[1] = i.produced_cargo[1];
-		
+
 		return ac;
 	}
 
@@ -781,12 +812,12 @@ public class Industry extends IndustryTables implements IPoolItem {
 	static boolean IsBadFarmFieldTile(TileIndex tile)
 	{
 		switch (tile.GetTileType()) {
-		case TileTypes.MP_CLEAR: {
-			byte m5 = tile.getMap().m5 & 0x1C;
+		case MP_CLEAR: {
+			int m5 = tile.getMap().m5 & 0x1C;
 			return m5 == 0xC || m5 == 0x10;
 		}
 
-		case TileTypes.MP_TREES:
+		case MP_TREES:
 			return false;
 
 		default:
@@ -797,12 +828,12 @@ public class Industry extends IndustryTables implements IPoolItem {
 	static boolean IsBadFarmFieldTile2(TileIndex tile)
 	{
 		switch (tile.GetTileType()) {
-		case TileTypes.MP_CLEAR: {
-			byte m5 = tile.getMap().m5 & 0x1C;
+		case MP_CLEAR: {
+			int m5 = tile.getMap().m5 & 0x1C;
 			return m5 == 0x10;
 		}
 
-		case TileTypes.MP_TREES:
+		case MP_TREES:
 			return false;
 
 		default:
@@ -832,7 +863,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			}
 
 			tile += direction ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
-		} while (--size);
+		} while (--size > 0);
 	}
 
 	static void PlantFarmField(TileIndex tile)
@@ -858,10 +889,15 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		/* check the amount of bad tiles */
 		count = 0;
-		BEGIN_TILE_LOOP(cur_tile, size_x, size_y, tile)
-		cur_tile = TILE_MASK(cur_tile);
-		count += IsBadFarmFieldTile(cur_tile);
-		END_TILE_LOOP(cur_tile, size_x, size_y, tile)
+
+		//BEGIN_TILE_LOOP(cur_tile, size_x, size_y, tile)
+		TileIndex.forAll(size_x, size_y, tile, (cur_tile) ->
+		{
+			//cur_tile = TILE_MASK(cur_tile);
+			count += IsBadFarmFieldTile(TILE_MASK(cur_tile));
+		});
+		//END_TILE_LOOP(cur_tile, size_x, size_y, tile)
+
 		if (count * 2 >= size_x * size_y) return;
 
 		/* determine type of field */
@@ -869,28 +905,31 @@ public class Industry extends IndustryTables implements IPoolItem {
 		type = ((r & 0xE0) | 0xF);
 		type2 = BitOps.GB(r, 8, 8) * 9 >> 8;
 
-				/* make field */
-				BEGIN_TILE_LOOP(cur_tile, size_x, size_y, tile)
-				cur_tile = TILE_MASK(cur_tile);
-				if (!IsBadFarmFieldTile2(cur_tile)) {
-					ModifyTile(cur_tile,
-							TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) |
-							TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5,
-							type2,			/* map3_lo */
-							Owner.OWNER_NONE,	/* map_owner */
-							type);			/* map5 */
-				}
-				END_TILE_LOOP(cur_tile, size_x, size_y, tile)
+		/* make field */
+		//BEGIN_TILE_LOOP(cur_tile, size_x, size_y, tile)
+		TileIndex.forAll(size_x, size_y, tile, (cur_tile1) ->
+		{
+			TileIndex cur_tile = TILE_MASK(cur_tile1);
+			if (!IsBadFarmFieldTile2(cur_tile)) {
+				Landscape.ModifyTile(cur_tile,
+						TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) |
+						TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5,
+						type2,			/* map3_lo */
+						Owner.OWNER_NONE,	/* map_owner */
+						type);			/* map5 */
+			}
+		});
+		//END_TILE_LOOP(cur_tile, size_x, size_y, tile)
 
-				type = 3;
-				if (GameOptions._opt.landscape != Landscape.LT_HILLY && GameOptions._opt.landscape != Landscape.LT_DESERT) {
-					type = _plantfarmfield_type[Hal.Random() & 0xF];
-				}
+		type = 3;
+		if (GameOptions._opt.landscape != Landscape.LT_HILLY && GameOptions._opt.landscape != Landscape.LT_DESERT) {
+			type = _plantfarmfield_type[Hal.Random() & 0xF];
+		}
 
-				SetupFarmFieldFence(tile - TileDiffXY(1, 0), size_y, type, 1);
-				SetupFarmFieldFence(tile - TileDiffXY(0, 1), size_x, type, 0);
-				SetupFarmFieldFence(tile + TileDiffXY(size_x - 1, 0), size_y, type, 1);
-				SetupFarmFieldFence(tile + TileDiffXY(0, size_y - 1), size_x, type, 0);
+		SetupFarmFieldFence(tile - TileDiffXY(1, 0), size_y, type, 1);
+		SetupFarmFieldFence(tile - TileDiffXY(0, 1), size_x, type, 0);
+		SetupFarmFieldFence(tile + TileDiffXY(size_x - 1, 0), size_y, type, 1);
+		SetupFarmFieldFence(tile + TileDiffXY(0, size_y - 1), size_x, type, 0);
 	}
 
 	static void MaybePlantFarmField(final Industry  i)
@@ -945,7 +984,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 						return;
 					}
 					tile += ToTileIndexDiff(_chop_dir[dir]);
-				} while (--j);
+				} while (--j > 0);
 			}
 			tile -= TileDiffXY(1, 1);
 		}
@@ -991,7 +1030,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			{0},
 			{0},
 	};
-	*/
+	 */
 
 	static void ProduceIndustryGoods(Industry i)
 	{
@@ -1000,9 +1039,9 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		/* play a sound? */
 		if ((i.counter & 0x3F) == 0) {
-			if (BitOps.CHANCE16R(1,14,r) && (num=_industry_sounds[i.type][0]) != 0) {
+			//if (BitOps.CHANCE16R(1,14,r) && (num=_industry_sounds[i.type][0]) != 0) {
 				//SndPlayTileFx(					_industry_sounds[i.type][1] + (((r >> 16) * num) >> 16),					i.xy);
-			}
+			//}
 		}
 
 		i.counter--;
@@ -1096,7 +1135,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	static boolean CheckNewIndustry_Water(TileIndex tile, int type)
 	{
 		if (tile.GetMapExtraBits() != 1) {
-			Global._error_message = Str.STR_0318_CAN_ONLY_BE_BUILandscape.LT_IN_DESERT;
+			Global._error_message = Str.STR_0318_CAN_ONLY_BE_BUILT_IN_DESERT;
 			return false;
 		}
 
@@ -1106,7 +1145,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	static boolean CheckNewIndustry_Lumbermill(TileIndex tile, int type)
 	{
 		if (tile.GetMapExtraBits() != 2) {
-			Global._error_message = Str.STR_0317_CAN_ONLY_BE_BUILandscape.LT_IN_RAINFOREST;
+			Global._error_message = Str.STR_0317_CAN_ONLY_BE_BUILT_IN_RAINFOREST;
 			return false;
 		}
 		return true;
@@ -1130,10 +1169,10 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	static boolean CheckSuitableIndustryPos(TileIndex tile)
 	{
-		int x = TileX(tile);
-		int y = TileY(tile);
+		int x = tile.TileX();
+		int y = tile.TileY();
 
-		if (x < 2 || y < 2 || x > MapMaxX() - 3 || y > MapMaxY() - 3) {
+		if (x < 2 || y < 2 || x > Global.MapMaxX() - 3 || y > Global.MapMaxY() - 3) {
 			Global._error_message = Str.STR_0239_SITE_UNSUITABLE;
 			return false;
 		}
@@ -1327,7 +1366,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		i.width = i.height = 0;
 		i.type = type;
 
-		spec = &_industry_spec[type];
+		spec = _industry_spec[type];
 
 		i.produced_cargo[0] = spec.produced_cargo[0];
 		i.produced_cargo[1] = spec.produced_cargo[1];
@@ -1525,23 +1564,23 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		if (type == IT_OIL_REFINERY || type == IT_OIL_RIG) {
 			// These are always placed next to the coastline, so we scale by the perimeter instead.
-			num = ScaleByMapSize1D(num);
+			num = Map.ScaleByMapSize1D(num);
 		} else {
-			num = ScaleByMapSize(num);
+			num = Map.ScaleByMapSize(num);
 		}
 
 		if (GameOptions._opt.diff.number_industries != 0) {
 			PlayerID old_player = Global._current_player;
-			Global._current_player = Owner.OWNER_NONE;
+			Global._current_player = new PlayerID( Owner.OWNER_NONE );
 			assert(num > 0);
 
 			do {
 				int i;
 
 				for (i = 0; i < 2000; i++) {
-					if (CreateNewIndustry(RandomTile(), type) != null) break;
+					if (CreateNewIndustry(Hal.RandomTile(), type) != null) break;
 				}
-			} while (--num);
+			} while (--num > 0);
 
 			Global._current_player = old_player;
 		}
@@ -1704,7 +1743,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	static void ChangeIndustryProduction(Industry i)
 	{
 		boolean only_decrease = false;
-		StringID str = Str.STR_NULL;
+		/*StringID*/ int str = Str.STR_NULL;
 		int type = i.type;
 
 		switch (_industry_close_mode[type]) {
@@ -1936,7 +1975,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		} break;
 
 		case WindowEvents.WE_PLACE_OBJ:
-			if (Cmd.DoCommandP(e.place.tile, _build_industry_types[GameOptions._opt_ptr.landscape][w.as_def_d().data_1], 0, null, Cmd.CMD_BUILD_INDUSTRY | Cmd.CMD_MSG(Str.STR_4830_CAN_T_CONSTRUAcceptedCargo.CT_THIS_INDUSTRY)))
+			if (Cmd.DoCommandP(e.place.tile, _build_industry_types[GameOptions._opt_ptr.landscape][w.as_def_d().data_1], 0, null, Cmd.CMD_BUILD_INDUSTRY | Cmd.CMD_MSG(Str.STR_4830_CAN_T_CONSTRUCT_THIS_INDUSTRY)))
 				ResetObjectToPlace();
 			break;
 
@@ -1951,11 +1990,11 @@ public class Industry extends IndustryTables implements IPoolItem {
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,											Str.STR_018B_CLOSE_WINDOW),
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_0314_FUND_NEW_INDUSTRY,		Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   169,    14,   115, 0x0,														Str.STR_NULL),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0241_POWER_STATION,				Str.STR_0263_CONSTRUAcceptedCargo.CT_POWER_STATION),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_0242_SAWMILL,							Str.STR_0264_CONSTRUAcceptedCargo.CT_SAWMILL),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,					Str.STR_0266_CONSTRUAcceptedCargo.CT_OIL_REFINERY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0246_FACTORY,							Str.STR_0268_CONSTRUAcceptedCargo.CT_FACTORY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0247_STEEL_MILL,						Str.STR_0269_CONSTRUAcceptedCargo.CT_STEEL_MILL),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0241_POWER_STATION,				Str.STR_0263_CONSTRUCT_POWER_STATION),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_0242_SAWMILL,							Str.STR_0264_CONSTRUCT_SAWMILL),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,					Str.STR_0266_CONSTRUCT_OIL_REFINERY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0246_FACTORY,							Str.STR_0268_CONSTRUCT_FACTORY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0247_STEEL_MILL,						Str.STR_0269_CONSTRUCT_STEEL_MILL),
 
 	};
 
@@ -1963,11 +2002,11 @@ public class Industry extends IndustryTables implements IPoolItem {
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,											Str.STR_018B_CLOSE_WINDOW),
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_0314_FUND_NEW_INDUSTRY,		Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   169,    14,   115, 0x0,														Str.STR_NULL),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0241_POWER_STATION,				Str.STR_0263_CONSTRUAcceptedCargo.CT_POWER_STATION),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_024C_PAPER_MILL,						Str.STR_026E_CONSTRUAcceptedCargo.CT_PAPER_MILL),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,					Str.STR_0266_CONSTRUAcceptedCargo.CT_OIL_REFINERY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_024D_FOOD_PROCESSING_PLANT,Str.STR_026F_CONSTRUAcceptedCargo.CT_FOOD_PROCESSING),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_024E_PRINTING_WORKS,				Str.STR_0270_CONSTRUAcceptedCargo.CT_PRINTING_WORKS),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0241_POWER_STATION,				Str.STR_0263_CONSTRUCT_POWER_STATION),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_024C_PAPER_MILL,						Str.STR_026E_CONSTRUCT_PAPER_MILL),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,					Str.STR_0266_CONSTRUCT_OIL_REFINERY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_024D_FOOD_PROCESSING_PLANT,Str.STR_026F_CONSTRUCT_FOOD_PROCESSING),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_024E_PRINTING_WORKS,				Str.STR_0270_CONSTRUCT_PRINTING_WORKS),
 
 	};
 
@@ -1975,11 +2014,11 @@ public class Industry extends IndustryTables implements IPoolItem {
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,											Str.STR_018B_CLOSE_WINDOW),
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_0314_FUND_NEW_INDUSTRY,		Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   169,    14,   115, 0x0,														Str.STR_NULL),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0250_LUMBER_MILL,					Str.STR_0273_CONSTRUAcceptedCargo.CT_LUMBER_MILL_TO),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_024D_FOOD_PROCESSING_PLANT,Str.STR_026F_CONSTRUAcceptedCargo.CT_FOOD_PROCESSING),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,					Str.STR_0266_CONSTRUAcceptedCargo.CT_OIL_REFINERY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0246_FACTORY,							Str.STR_0268_CONSTRUAcceptedCargo.CT_FACTORY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0254_WATER_TOWER,					Str.STR_0277_CONSTRUAcceptedCargo.CT_WATER_TOWER_CAN),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0250_LUMBER_MILL,					Str.STR_0273_CONSTRUCT_LUMBER_MILL_TO),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_024D_FOOD_PROCESSING_PLANT,Str.STR_026F_CONSTRUCT_FOOD_PROCESSING),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,					Str.STR_0266_CONSTRUCT_OIL_REFINERY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0246_FACTORY,							Str.STR_0268_CONSTRUCT_FACTORY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0254_WATER_TOWER,					Str.STR_0277_CONSTRUCT_WATER_TOWER_CAN),
 
 	};
 
@@ -1987,10 +2026,10 @@ public class Industry extends IndustryTables implements IPoolItem {
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,											Str.STR_018B_CLOSE_WINDOW),
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_0314_FUND_NEW_INDUSTRY,		Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   169,    14,   115, 0x0,														Str.STR_NULL),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0258_CANDY_FACTORY,				Str.STR_027B_CONSTRUAcceptedCargo.CT_CANDY_FACTORY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_025B_TOY_SHOP,							Str.STR_027E_CONSTRUAcceptedCargo.CT_TOY_SHOP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_025C_TOY_FACTORY,					Str.STR_027F_CONSTRUAcceptedCargo.CT_TOY_FACTORY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_025E_FIZZY_DRINK_FACTORY,	Str.STR_0281_CONSTRUAcceptedCargo.CT_FIZZY_DRINK_FACTORY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0258_CANDY_FACTORY,				Str.STR_027B_CONSTRUCT_CANDY_FACTORY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_025B_TOY_SHOP,							Str.STR_027E_CONSTRUCT_TOY_SHOP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_025C_TOY_FACTORY,					Str.STR_027F_CONSTRUCT_TOY_FACTORY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_025E_FIZZY_DRINK_FACTORY,	Str.STR_0281_CONSTRUCT_FIZZY_DRINK_FACTORY),
 
 	};
 
@@ -1999,18 +2038,18 @@ public class Industry extends IndustryTables implements IPoolItem {
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_0314_FUND_NEW_INDUSTRY,Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   169,    14,   187, 0x0,										Str.STR_NULL),
 
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0241_POWER_STATION,Str.STR_0263_CONSTRUAcceptedCargo.CT_POWER_STATION),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_0242_SAWMILL,			Str.STR_0264_CONSTRUAcceptedCargo.CT_SAWMILL),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,	Str.STR_0266_CONSTRUAcceptedCargo.CT_OIL_REFINERY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0246_FACTORY,					Str.STR_0268_CONSTRUAcceptedCargo.CT_FACTORY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0247_STEEL_MILL,		Str.STR_0269_CONSTRUAcceptedCargo.CT_STEEL_MILL),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0241_POWER_STATION,Str.STR_0263_CONSTRUCT_POWER_STATION),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_0242_SAWMILL,			Str.STR_0264_CONSTRUCT_SAWMILL),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,	Str.STR_0266_CONSTRUCT_OIL_REFINERY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0246_FACTORY,					Str.STR_0268_CONSTRUCT_FACTORY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0247_STEEL_MILL,		Str.STR_0269_CONSTRUCT_STEEL_MILL),
 
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    84,    95, Str.STR_0240_COAL_MINE,		Str.STR_CONSTRUAcceptedCargo.CT_COAL_MINE_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    97,    108, Str.STR_0243_FOREST,			Str.STR_CONSTRUAcceptedCargo.CT_FOREST_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    110,    121, Str.STR_0245_OIL_RIG,		Str.STR_CONSTRUAcceptedCargo.CT_OIL_RIG_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    123,    134, Str.STR_0248_FARM,						Str.STR_CONSTRUAcceptedCargo.CT_FARM_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    136,    147, Str.STR_024A_OIL_WELLS,			Str.STR_CONSTRUAcceptedCargo.CT_OIL_WELLS_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    149,    160, Str.STR_0249_IRON_ORE_MINE,	Str.STR_CONSTRUAcceptedCargo.CT_IRON_ORE_MINE_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    84,    95, Str.STR_0240_COAL_MINE,		Str.STR_CONSTRUCT_COAL_MINE_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    97,    108, Str.STR_0243_FOREST,			Str.STR_CONSTRUCT_FOREST_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    110,    121, Str.STR_0245_OIL_RIG,		Str.STR_CONSTRUCT_OIL_RIG_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    123,    134, Str.STR_0248_FARM,						Str.STR_CONSTRUCT_FARM_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    136,    147, Str.STR_024A_OIL_WELLS,			Str.STR_CONSTRUCT_OIL_WELLS_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    149,    160, Str.STR_0249_IRON_ORE_MINE,	Str.STR_CONSTRUCT_IRON_ORE_MINE_TIP),
 
 
 	};
@@ -2020,17 +2059,17 @@ public class Industry extends IndustryTables implements IPoolItem {
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_0314_FUND_NEW_INDUSTRY,		Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   169,    14,   174, 0x0,											Str.STR_NULL),
 
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0241_POWER_STATION,	Str.STR_0263_CONSTRUAcceptedCargo.CT_POWER_STATION),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_024C_PAPER_MILL,			Str.STR_026E_CONSTRUAcceptedCargo.CT_PAPER_MILL),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,		Str.STR_0266_CONSTRUAcceptedCargo.CT_OIL_REFINERY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_024D_FOOD_PROCESSING_PLANT,Str.STR_026F_CONSTRUAcceptedCargo.CT_FOOD_PROCESSING),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_024E_PRINTING_WORKS,	Str.STR_0270_CONSTRUAcceptedCargo.CT_PRINTING_WORKS),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0241_POWER_STATION,	Str.STR_0263_CONSTRUCT_POWER_STATION),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_024C_PAPER_MILL,			Str.STR_026E_CONSTRUCT_PAPER_MILL),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,		Str.STR_0266_CONSTRUCT_OIL_REFINERY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_024D_FOOD_PROCESSING_PLANT,Str.STR_026F_CONSTRUCT_FOOD_PROCESSING),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_024E_PRINTING_WORKS,	Str.STR_0270_CONSTRUCT_PRINTING_WORKS),
 
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81+3,    92+3, Str.STR_0240_COAL_MINE,	Str.STR_CONSTRUAcceptedCargo.CT_COAL_MINE_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94+3,   105+3, Str.STR_0243_FOREST,			Str.STR_CONSTRUAcceptedCargo.CT_FOREST_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    107+3,  118+3, Str.STR_0248_FARM,				Str.STR_CONSTRUAcceptedCargo.CT_FARM_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    120+3,  131+3, Str.STR_024A_OIL_WELLS,	Str.STR_CONSTRUAcceptedCargo.CT_OIL_WELLS_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    133+3,  144+3, Str.STR_024F_GOLD_MINE,	Str.STR_CONSTRUAcceptedCargo.CT_GOLD_MINE_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81+3,    92+3, Str.STR_0240_COAL_MINE,	Str.STR_CONSTRUCT_COAL_MINE_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94+3,   105+3, Str.STR_0243_FOREST,			Str.STR_CONSTRUCT_FOREST_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    107+3,  118+3, Str.STR_0248_FARM,				Str.STR_CONSTRUCT_FARM_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    120+3,  131+3, Str.STR_024A_OIL_WELLS,	Str.STR_CONSTRUCT_OIL_WELLS_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    133+3,  144+3, Str.STR_024F_GOLD_MINE,	Str.STR_CONSTRUCT_GOLD_MINE_TIP),
 
 	};
 
@@ -2039,19 +2078,19 @@ public class Industry extends IndustryTables implements IPoolItem {
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_0314_FUND_NEW_INDUSTRY,			Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   169,    14,   200, 0x0,										Str.STR_NULL),
 
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0250_LUMBER_MILL,	Str.STR_0273_CONSTRUAcceptedCargo.CT_LUMBER_MILL_TO),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_024D_FOOD_PROCESSING_PLANT,Str.STR_026F_CONSTRUAcceptedCargo.CT_FOOD_PROCESSING),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,	Str.STR_0266_CONSTRUAcceptedCargo.CT_OIL_REFINERY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0246_FACTORY,			Str.STR_0268_CONSTRUAcceptedCargo.CT_FACTORY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0254_WATER_TOWER,	Str.STR_0277_CONSTRUAcceptedCargo.CT_WATER_TOWER_CAN),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0250_LUMBER_MILL,	Str.STR_0273_CONSTRUCT_LUMBER_MILL_TO),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_024D_FOOD_PROCESSING_PLANT,Str.STR_026F_CONSTRUCT_FOOD_PROCESSING),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0244_OIL_REFINERY,	Str.STR_0266_CONSTRUCT_OIL_REFINERY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0246_FACTORY,			Str.STR_0268_CONSTRUCT_FACTORY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0254_WATER_TOWER,	Str.STR_0277_CONSTRUCT_WATER_TOWER_CAN),
 
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81+3,    92+3, Str.STR_024A_OIL_WELLS,Str.STR_CONSTRUAcceptedCargo.CT_OIL_WELLS_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94+3,    105+3, Str.STR_0255_DIAMOND_MINE,			Str.STR_CONSTRUAcceptedCargo.CT_DIAMOND_MINE_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    107+3,    118+3, Str.STR_0256_COPPER_ORE_MINE,	Str.STR_CONSTRUAcceptedCargo.CT_COPPER_ORE_MINE_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    120+3,    131+3, Str.STR_0248_FARM,		Str.STR_CONSTRUAcceptedCargo.CT_FARM_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    133+3,    144+3, Str.STR_0251_FRUIT_PLANTATION,	Str.STR_CONSTRUAcceptedCargo.CT_FRUIT_PLANTATION_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    146+3,    157+3, Str.STR_0252_RUBBER_PLANTATION,Str.STR_CONSTRUAcceptedCargo.CT_RUBBER_PLANTATION_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    159+3,    170+3, Str.STR_0253_WATER_SUPPLY,			Str.STR_CONSTRUAcceptedCargo.CT_WATER_SUPPLY_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81+3,    92+3, Str.STR_024A_OIL_WELLS,Str.STR_CONSTRUCT_OIL_WELLS_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94+3,    105+3, Str.STR_0255_DIAMOND_MINE,			Str.STR_CONSTRUCT_DIAMOND_MINE_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    107+3,    118+3, Str.STR_0256_COPPER_ORE_MINE,	Str.STR_CONSTRUCT_COPPER_ORE_MINE_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    120+3,    131+3, Str.STR_0248_FARM,		Str.STR_CONSTRUCT_FARM_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    133+3,    144+3, Str.STR_0251_FRUIT_PLANTATION,	Str.STR_CONSTRUCT_FRUIT_PLANTATION_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    146+3,    157+3, Str.STR_0252_RUBBER_PLANTATION,Str.STR_CONSTRUCT_RUBBER_PLANTATION_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    159+3,    170+3, Str.STR_0253_WATER_SUPPLY,			Str.STR_CONSTRUCT_WATER_SUPPLY_TIP),
 
 	};
 
@@ -2060,18 +2099,18 @@ public class Industry extends IndustryTables implements IPoolItem {
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_0314_FUND_NEW_INDUSTRY,			Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   169,    14,   187, 0x0,	Str.STR_NULL),
 
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0258_CANDY_FACTORY,	Str.STR_027B_CONSTRUAcceptedCargo.CT_CANDY_FACTORY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_025B_TOY_SHOP,				Str.STR_027E_CONSTRUAcceptedCargo.CT_TOY_SHOP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_025C_TOY_FACTORY,		Str.STR_027F_CONSTRUAcceptedCargo.CT_TOY_FACTORY),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_025E_FIZZY_DRINK_FACTORY,		Str.STR_0281_CONSTRUAcceptedCargo.CT_FIZZY_DRINK_FACTORY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_0258_CANDY_FACTORY,	Str.STR_027B_CONSTRUCT_CANDY_FACTORY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    29,    40, Str.STR_025B_TOY_SHOP,				Str.STR_027E_CONSTRUCT_TOY_SHOP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_025C_TOY_FACTORY,		Str.STR_027F_CONSTRUCT_TOY_FACTORY),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_025E_FIZZY_DRINK_FACTORY,		Str.STR_0281_CONSTRUCT_FIZZY_DRINK_FACTORY),
 
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68+3,    79+3, Str.STR_0257_COTTON_CANDY_FOREST,Str.STR_CONSTRUAcceptedCargo.CT_COTTON_CANDY_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81+3,    92+3, Str.STR_0259_BATTERY_FARM,				Str.STR_CONSTRUAcceptedCargo.CT_BATTERY_FARM_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94+3,    105+3, Str.STR_025A_COLA_WELLS,				Str.STR_CONSTRUAcceptedCargo.CT_COLA_WELLS_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    107+3,    118+3, Str.STR_025D_PLASTIC_FOUNTAINS,Str.STR_CONSTRUAcceptedCargo.CT_PLASTIC_FOUNTAINS_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    120+3,    131+3, Str.STR_025F_BUBBLE_GENERATOR,	Str.STR_CONSTRUAcceptedCargo.CT_BUBBLE_GENERATOR_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    133+3,    144+3, Str.STR_0260_TOFFEE_QUARRY,		Str.STR_CONSTRUAcceptedCargo.CT_TOFFEE_QUARRY_TIP),
-			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    146+3,    157+3, Str.STR_0261_SUGAR_MINE,				Str.STR_CONSTRUAcceptedCargo.CT_SUGAR_MINE_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68+3,    79+3, Str.STR_0257_COTTON_CANDY_FOREST,Str.STR_CONSTRUCT_COTTON_CANDY_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81+3,    92+3, Str.STR_0259_BATTERY_FARM,				Str.STR_CONSTRUCT_BATTERY_FARM_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94+3,    105+3, Str.STR_025A_COLA_WELLS,				Str.STR_CONSTRUCT_COLA_WELLS_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    107+3,    118+3, Str.STR_025D_PLASTIC_FOUNTAINS,Str.STR_CONSTRUCT_PLASTIC_FOUNTAINS_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    120+3,    131+3, Str.STR_025F_BUBBLE_GENERATOR,	Str.STR_CONSTRUCT_BUBBLE_GENERATOR_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    133+3,    144+3, Str.STR_0260_TOFFEE_QUARRY,		Str.STR_CONSTRUCT_TOFFEE_QUARRY_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    146+3,    157+3, Str.STR_0261_SUGAR_MINE,				Str.STR_CONSTRUCT_SUGAR_MINE_TIP),
 
 	};
 
@@ -2160,7 +2199,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 		AllocateWindowDescFront(_industry_window_desc[Global._patches.build_rawmaterial_ind][GameOptions._opt_ptr.landscape],0);
 	}
 
-	#define NEED_ALTERB	((Global._game_mode == GameModes.GM_EDITOR || _cheats.setup_prod.value) && (i.accepts_cargo[0] == AcceptedCargo.CT_INVALID || i.accepts_cargo[0] == AcceptedCargo.CT_VALUABLES))
+	//#define NEED_ALTERB	((Global._game_mode == GameModes.GM_EDITOR || _cheats.setup_prod.value) && (i.accepts_cargo[0] == AcceptedCargo.CT_INVALID || i.accepts_cargo[0] == AcceptedCargo.CT_VALUABLES))
+	
 	static void IndustryViewWndProc(Window w, WindowEvent e)
 	{
 		// w.as_vp2_d().data_1 is for the editbox line
@@ -2168,13 +2208,13 @@ public class Industry extends IndustryTables implements IPoolItem {
 		// w.as_vp2_d().data_3 is for the click pos (left or right)
 
 		switch(e.event) {
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			final Industry i;
 			StringID str;
 
-			i = GetIndustry(w.window_number);
-			Global.SetDParam(0, w.window_number);
-			DrawWindowWidgets(w);
+			i = GetIndustry(w.window_number.n);
+			Global.SetDParam(0, w.window_number.n);
+			w.DrawWindowWidgets();
 
 			if (i.accepts_cargo[0] != AcceptedCargo.CT_INVALID) {
 				Global.SetDParam(0, _cargoc.names_s[i.accepts_cargo[0]]);
@@ -2328,18 +2368,18 @@ public class Industry extends IndustryTables implements IPoolItem {
 			Industry::IndustryViewWndProc
 			);
 
-	void ShowIndustryViewWindow(int industry)
+	static void ShowIndustryViewWindow(int industry)
 	{
 		Window w;
 		Industry i;
 
 		w = Window.AllocateWindowDescFront(_industry_view_desc, industry);
-		if (w) {
-			w.flags4 |= WF_DISABLE_VP_SCROLL;
+		if (w != null) {
+			w.flags4 |= Window.WF_DISABLE_VP_SCROLL;
 			w.as_vp2_d().data_1 = 0;
 			w.as_vp2_d().data_2 = 0;
 			w.as_vp2_d().data_3 = 0;
-			i = GetIndustry(w.window_number);
+			i = GetIndustry(w.window_number.n);
 			w.AssignWindowViewport( 3, 17, 0xFE, 0x56, i.xy + TileIndex.TileDiffXY(1, 1), 1);
 		}
 	}
@@ -2355,13 +2395,13 @@ public class Industry extends IndustryTables implements IPoolItem {
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    13,   401,   495,    14,    25, 0x0,											Str.STR_NULL),
 			new Widget(     Window.WWT_IMGBTN, Window.RESIZE_BOTTOM,    13,     0,   495,    26,   189, 0x0,											Str.STR_200A_TOWN_NAMES_CLICK_ON_NAME),
 			new Widget(  Window.WWT_SCROLLBAR, Window.RESIZE_BOTTOM,    13,   496,   507,    14,   177, 0x0,											Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
-			new Widget(  Window.WWT_RESIZEBOX,     Window.RESIZE_TB,    13,   496,   507,   178,   189, 0x0,											Str.STR_Window.RESIZE_BUTTON),
+			new Widget(  Window.WWT_RESIZEBOX,     Window.RESIZE_TB,    13,   496,   507,   178,   189, 0x0,											Str.STR_RESIZE_BUTTON),
 
 	};
 
 	static int _num_industry_sort;
 
-	static char _bufcache[96];
+	//static char _bufcache[96];
 	static int _last_industry_idx;
 
 	static byte _industry_sort_order;
@@ -2576,6 +2616,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			w.SetWindowDirty();
 		}
 	}
+
 
 
 

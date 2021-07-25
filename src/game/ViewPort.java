@@ -496,7 +496,7 @@ public class ViewPort
 		_cur_vd.combine_sprites = 0;
 	}
 
-	void AddChildSpriteScreen(int image, int x, int y)
+	static void AddChildSpriteScreen(int image, int x, int y)
 	{
 		ViewportDrawer vd = _cur_vd;
 		ChildScreenSpriteToDraw cs;

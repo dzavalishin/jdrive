@@ -7,6 +7,46 @@ import game.TileIndexDiffC;
 public class IndustryTables 
 {
 
+	//enum {
+		public static final int IT_COAL_MINE = 0;
+		public static final int IT_POWER_STATION = 1;
+		public static final int IT_SAWMILL = 2;
+		public static final int IT_FOREST = 3;
+		public static final int IT_OIL_REFINERY = 4;
+		public static final int IT_OIL_RIG = 5;
+		public static final int IT_FACTORY = 6;
+		public static final int IT_PRINTING_WORKS = 7;
+		public static final int IT_STEEL_MILL = 8;
+		public static final int IT_FARM = 9;
+		public static final int IT_COPPER_MINE = 10;
+		public static final int IT_OIL_WELL = 11;
+		public static final int IT_BANK = 12;
+		public static final int IT_FOOD_PROCESS = 13;
+		public static final int IT_PAPER_MILL = 14;
+		public static final int IT_GOLD_MINE = 15;
+		public static final int IT_BANK_2 = 16;
+		public static final int IT_DIAMOND_MINE = 17;
+		public static final int IT_IRON_MINE = 18;
+		public static final int IT_FRUIT_PLANTATION = 19;
+		public static final int IT_RUBBER_PLANTATION = 20;
+		public static final int IT_WATER_SUPPLY = 21;
+		public static final int IT_WATER_TOWER = 22;
+		public static final int IT_FACTORY_2 = 23;
+		public static final int IT_FARM_2 = 24;
+		public static final int IT_LUMBER_MILL = 25;
+		public static final int IT_COTTON_CANDY = 26;
+		public static final int IT_CANDY_FACTORY = 27;
+		public static final int IT_BATTERY_FARM = 28;
+		public static final int IT_COLA_WELLS = 29;
+		public static final int IT_TOY_SHOP = 30;
+		public static final int IT_TOY_FACTORY = 31;
+		public static final int IT_PLASTIC_FOUNTAINS = 32;
+		public static final int IT_FIZZY_DRINK_FACTORY = 33;
+		public static final int IT_BUBBLE_GENERATOR = 34;
+		public static final int IT_TOFFEE_QUARRY = 35;
+		public static final int IT_SUGAR_MINE = 36;
+	
+	
 	public static final /* StringID */ int _industry_prod_up_strings[] = {
 			Str.STR_4836_NEW_COAL_SEAM_FOUND_AT,
 			Str.STR_4835_INCREASES_PRODUCTION,
@@ -1268,7 +1308,7 @@ public class IndustryTables
 
 
 	
-	static final IndustrySpec _industry_spec[] = {
+	public static final IndustrySpec _industry_spec[] = {
 	/*        name                    not close to   produce prodrate  accepts     checkproc */
 		new IndustrySpec(_tile_table_coal_mine,         1,255,255,    1,255,  15, 0,  255,255,255,  0),
 		new IndustrySpec(_tile_table_power_station,     0,255,255,  255,255,   0, 0,    1,255,255,  0),
@@ -1310,13 +1350,13 @@ public class IndustryTables
 	};
 	//#undef MK
 
-	final	int _industry_type_costs[] = {
+	public final int _industry_type_costs[] = {
 		210, 30,   28, 200,  31, 240,  26,  26,  27, 250, 205, 220, 193,  26,
 		28,  208,  19, 213, 220, 225, 218, 199,  14,  26, 250, 17,  195,  26,
 		187, 193,  17,  20, 192,  22, 203, 213, 210
 	};
 
-	final byte _build_industry_types[][] = {
+	public final byte _build_industry_types[][] = {
 		{ 1,  2, 4,  6, 8, 0, 3, 5,  9, 11, 18 },
 		{ 1, 14, 4, 13, 7, 0, 3, 9, 11, 15 },
 		{ 25, 13, 4, 23, 22, 11, 17, 10, 24, 19, 20, 21 },
@@ -1385,7 +1425,7 @@ public class IndustryTables
 		0
 	};
 
-	static final byte [][] _industry_create_table = {
+	public static final byte [][] _industry_create_table = {
 		_industry_create_table_0,
 		_industry_create_table_1,
 		_industry_create_table_2,
@@ -1429,7 +1469,7 @@ public class IndustryTables
 
 	private static final int  INV = AcceptedCargo.CT_INVALID;
 
-	static final /*CargoID*/int _industry_map5_accepts_1[] = {
+	public static final /*CargoID*/int _industry_map5_accepts_1[] = {
 		INV, INV, INV, PAS, INV, INV, INV, INV,
 		PAS, INV, INV, PAS, PAS, PAS, INV, INV,
 		INV, INV, INV, INV, INV, INV, INV, PAS,
@@ -1455,7 +1495,7 @@ public class IndustryTables
 	};
 
 
-	static final int _industry_map5_accepts_2[] = {
+	public static final int _industry_map5_accepts_2[] = {
 		INV, INV, INV, INV, INV, INV, INV, INV,
 		INV, INV, INV, INV, INV, INV, INV, INV,
 		INV, INV, INV, INV, INV, INV, INV, INV,
@@ -1480,7 +1520,7 @@ public class IndustryTables
 		INV, INV, INV, INV, INV, INV, INV
 	};
 
-	static final int _industry_map5_accepts_3[] = {
+	public static final int _industry_map5_accepts_3[] = {
 		INV, INV, INV, INV, INV, INV, INV, INV,
 		COL, INV, INV, INV, INV, WOD, INV, INV,
 		INV, INV, INV, INV, OIL, INV, INV, INV,

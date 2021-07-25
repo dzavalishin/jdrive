@@ -23,7 +23,7 @@ public class Global {
 	public static Economy _economy = new Economy();
 
 	public static Consumer<TileIndex> _place_proc;
-	
+
 	/* Display Options */
 	//enum {
 	public static final int DO_SHOW_TOWN_NAMES =    1 << 0;
@@ -34,7 +34,7 @@ public class Global {
 	public static final int DO_FULL_DETAIL =        1 << 5;
 	public static final int DO_WAYPOINTS =          1 << 6;
 	public static final int DO_TRANS_SIGNS =        1 << 7;
-	
+
 
 	public static final int NUM_NORMAL_RAIL_ENGINES = 54;
 	public static final int NUM_MONORAIL_ENGINES = 30;
@@ -79,8 +79,8 @@ public class Global {
 
 	public static int _display_hz;
 	public static int _fullscreen_bpp;
-	
-	
+
+
 	public static int _map_log_x;
 	public static int _map_size_x;
 	public static int _map_size_y;
@@ -90,26 +90,26 @@ public class Global {
 	public static int [][] _random_seeds = new int[2][2];
 
 	public static ColorList [] _color_list = new ColorList[16];
-	
-	
+
+
 	public static String _cmd_text = null;
-	
+
 	//public static StringID _error_message;
 	//public static StringID _error_message_2;
 	public static int _error_message;
 	public static int _error_message_2;
 	public static int _additional_cash_required;
-	
-	
+
+
 
 	public static int _news_display_opt = 0;
 	public static boolean _news_ticker_sound = false;
 	public static NewsItem _statusbar_news_item = null;
-	
-	
-	
+
+
+
 	public static final int NUM_PRICES = 49;
-	
+
 	public static Prices _price;
 	public static int [] _price_frac = new int[NUM_PRICES];
 
@@ -156,7 +156,7 @@ public class Global {
 	public static int _new_town_size;
 	public static int _returned_refit_amount;
 
-	
+
 	// etc
 	// Skip aging of cargo?
 	public static int _age_cargo_skip_counter;
@@ -170,7 +170,7 @@ public class Global {
 
 	// Also save scrollpos_x, scrollpos_y and zoom
 	public static int _disaster_delay;
-	
+
 	// Net
 	public static boolean _networking = false;
 	public static boolean _network_available = false;  // is network mode available?
@@ -277,17 +277,18 @@ public class Global {
 
 
 
-	/* dont use me
-static inline void SetDParamX(uint32 *s, uint n, uint32 v)
-{
-	s[n] = v;
-}
+	@Deprecated
+	public static void SetDParamX(int []s, int n, int v)
+	{
+		s[n] = v;
+	}
 
-static inline uint32 GetDParamX(const uint32 *s, uint n)
-{
-	return s[n];
-}
-	 */
+	@Deprecated
+	public static int GetDParamX(int []s, int n)
+	{
+		return s[n];
+	}
+
 	public static Object[] _decode_parameters = new Object[20];
 
 
@@ -319,7 +320,7 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 	public static void COPY_IN_DPARAM(int offs, int [] src, int num) 
 	{
 		//memcpy(_decode_parameters + offs, src, sizeof(uint32) * (num))
-		
+
 		System.arraycopy(src, 0, _decode_parameters, offs, num );
 	}
 
@@ -334,7 +335,7 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 	private static int next_name_id = 0;
 	private static Map<Integer,String> _name_array = new HashMap<Integer,String>();
 
-	
+
 
 
 	public static void DeleteName(int id)
@@ -391,14 +392,14 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 		}
 
 	}
-	
+
 	public static void DeleteName(StringID str) {
 		DeleteName(str.id);		
 	}
 
 
-	
-	
+
+
 	static String GetString(StringID string)
 	{
 		return Strings.GetString(string);
@@ -408,7 +409,7 @@ static inline uint32 GetDParamX(const uint32 *s, uint n)
 	{
 		return Strings.GetString(string);
 	}
-	
+
 }
 /*
 class DebugLevel {

@@ -32,11 +32,11 @@ struct Industry {
 };
 */
 
-extern MemoryPool _industry_pool;
+//extern MemoryPool _industry_pool;
 
 /**
  * Check if an Industry really exists.
- */
+ * /
 static inline bool IsValidIndustry(Industry* industry)
 {
 	return industry->xy != 0; /* XXX: Replace by INVALID_TILE someday */
@@ -44,7 +44,7 @@ static inline bool IsValidIndustry(Industry* industry)
 
 /**
  * Get the pointer to the industry with index 'index'
- */
+ * /
 static inline Industry *GetIndustry(uint index)
 {
 	return (Industry*)GetItemFromPool(&_industry_pool, index);
@@ -67,7 +67,7 @@ VARDEF uint16 *_industry_sort;
 VARDEF bool _industry_sort_dirty;
 
 void DeleteIndustry(Industry *is);
-
+/*
 enum {
 	IT_COAL_MINE = 0,
 	IT_POWER_STATION = 1,
