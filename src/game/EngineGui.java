@@ -7,25 +7,25 @@ public class EngineGui extends EngineTables
 
 
 
-	static inline final RailVehicleInfo  RailVehInfo(EngineID e)
+	static  final RailVehicleInfo  RailVehInfo(EngineID e)
 	{
 		assert(e < lengthof(_rail_vehicle_info));
 		return &_rail_vehicle_info[e];
 	}
 
-	static inline final ShipVehicleInfo  ShipVehInfo(EngineID e)
+	static  final ShipVehicleInfo  ShipVehInfo(EngineID e)
 	{
 		assert(e >= SHIP_ENGINES_INDEX && e < SHIP_ENGINES_INDEX + lengthof(_ship_vehicle_info));
 		return &_ship_vehicle_info[e - SHIP_ENGINES_INDEX];
 	}
 
-	static inline final AircraftVehicleInfo  AircraftVehInfo(EngineID e)
+	static  final AircraftVehicleInfo  AircraftVehInfo(EngineID e)
 	{
 		assert(e >= AIRCRAFT_ENGINES_INDEX && e < AIRCRAFT_ENGINES_INDEX + lengthof(_aircraft_vehicle_info));
 		return &_aircraft_vehicle_info[e - AIRCRAFT_ENGINES_INDEX];
 	}
 
-	static inline final RoadVehicleInfo  RoadVehInfo(EngineID e)
+	static  final RoadVehicleInfo  RoadVehInfo(EngineID e)
 	{
 		assert(e >= ROAD_ENGINES_INDEX && e < ROAD_ENGINES_INDEX + lengthof(_road_vehicle_info));
 		return &_road_vehicle_info[e - ROAD_ENGINES_INDEX];
@@ -37,11 +37,11 @@ public class EngineGui extends EngineTables
 
 
 
-	EngineInfo _engine_info[Global.TOTAL_NUM_ENGINES];
-	RailVehicleInfo _rail_vehicle_info[Global.NUM_TRAIN_ENGINES];
-	ShipVehicleInfo _ship_vehicle_info[Global.NUM_SHIP_ENGINES];
-	AircraftVehicleInfo _aircraft_vehicle_info[NUM_AIRCRAFT_ENGINES];
-	RoadVehicleInfo _road_vehicle_info[Global.NUM_ROAD_ENGINES];
+	EngineInfo 			[] _engine_info = new EngineInfo[Global.TOTAL_NUM_ENGINES];
+	RailVehicleInfo 	[] _rail_vehicle_info = new RailVehicleInfo[Global.NUM_TRAIN_ENGINES];
+	ShipVehicleInfo 	[] _ship_vehicle_info = new ShipVehicleInfo[Global.NUM_SHIP_ENGINES];
+	AircraftVehicleInfo [] _aircraft_vehicle_info = new AircraftVehicleInfo[Global.NUM_AIRCRAFT_ENGINES];
+	RoadVehicleInfo 	[] _road_vehicle_info = new RoadVehicleInfo [Global.NUM_ROAD_ENGINES];
 
 
 
@@ -186,43 +186,47 @@ public class EngineGui extends EngineTables
 	// TODO: We don't support cargo-specific wagon overrides. Pretty exotic... ;-) --pasky
 
 	static class WagonOverride {
-		byte *train_id;
+		byte [] train_id;
 		int trains;
-		SpriteGroup *group;
+		SpriteGroup group;
 	}
 
 	static class WagonOverrides {
 		int overrides_count;
-		WagonOverride *overrides;
+		WagonOverride [] overrides;
 	}
 
-	static WagonOverrides _engine_wagon_overrides = new WagonOverrides[Global.TOTAL_NUM_ENGINES];
+	static WagonOverrides[] _engine_wagon_overrides = new WagonOverrides[Global.TOTAL_NUM_ENGINES];
 
-	void SetWagonOverrideSprites(EngineID engine, SpriteGroup group, byte *train_id,
+	void SetWagonOverrideSprites(EngineID engine, SpriteGroup group, byte [] train_id,
 			int trains)
 	{
 		WagonOverrides wos;
 		WagonOverride wo;
 
-		wos = &_engine_wagon_overrides[engine];
+		wos = _engine_wagon_overrides[engine];
 		wos.overrides_count++;
-		wos.overrides = realloc(wos.overrides,
-				wos.overrides_count * sizeof(*wos.overrides));
-
-		wo = &wos.overrides[wos.overrides_count - 1];
+		//wos.overrides = realloc(wos.overrides,				wos.overrides_count * sizeof(*wos.overrides));
+		//wos.overrides = new WagonOverride[wos.overrides_count];
+		WagonOverride [] newo = = new WagonOverride[wos.overrides_count];
+		System.arraycopy(wos.overrides, 0, newo, 0, wos.overrides_count-1);
+		wos.overrides = newo;
+		
+		wo = wos.overrides[wos.overrides_count - 1];
 		/* FIXME: If we are replacing an override, release original SpriteGroup
 		 * to prevent leaks. But first we need to refcount the SpriteGroup.
 		 * --pasky */
 		wo.group = group;
 		group.ref_count++;
 		wo.trains = trains;
-		wo.train_id = malloc(trains);
-		memcpy(wo.train_id, train_id, trains);
+		wo.train_id = new byte[trains];
+		//memcpy(wo.train_id, train_id, trains);
+		System.arraycopy(train_id, 0, wo.train_id, 0, trains);
 	}
 
-	static final SpriteGroup *GetWagonOverrideSpriteSet(EngineID engine, byte overriding_engine)
+	static final SpriteGroup GetWagonOverrideSpriteSet(EngineID engine, byte overriding_engine)
 	{
-		final WagonOverrides *wos = &_engine_wagon_overrides[engine];
+		final WagonOverrides wos = _engine_wagon_overrides[engine];
 		int i;
 
 		// XXX: This could turn out to be a timesink on profiles. We could
@@ -231,7 +235,7 @@ public class EngineGui extends EngineTables
 		// that. --pasky
 
 		for (i = 0; i < wos.overrides_count; i++) {
-			final WagonOverride *wo = &wos.overrides[i];
+			final WagonOverride wo = wos.overrides[i];
 			int j;
 
 			for (j = 0; j < wo.trains; j++) {
@@ -247,19 +251,19 @@ public class EngineGui extends EngineTables
 	 */
 	void UnloadWagonOverrides()
 	{
-		WagonOverrides *wos;
-		WagonOverride *wo;
+		WagonOverrides wos;
+		WagonOverride wo;
 		EngineID engine;
 		int i;
 
 		for (engine = 0; engine < Global.TOTAL_NUM_ENGINES; engine++) {
-			wos = &_engine_wagon_overrides[engine];
+			wos = _engine_wagon_overrides[engine];
 			for (i = 0; i < wos.overrides_count; i++) {
-				wo = &wos.overrides[i];
-				UnloadSpriteGroup(&wo.group);
-				free(wo.train_id);
+				wo = wos.overrides[i];
+				UnloadSpriteGroup(wo.group);
+				//free(wo.train_id);
 			}
-			free(wos.overrides);
+			//free(wos.overrides);
 			wos.overrides_count = 0;
 			wos.overrides = null;
 		}
@@ -269,12 +273,12 @@ public class EngineGui extends EngineTables
 	// (It isn't and shouldn't be like this in the GRF files since new cargo types
 	// may appear in future - however it's more convenient to store it like this in
 	// memory. --pasky)
-	static SpriteGroup *engine_custom_sprites[Global.TOTAL_NUM_ENGINES][NUM_GLOBAL_CID];
+	static SpriteGroup [][] engine_custom_sprites = new SpriteGroup[Global.TOTAL_NUM_ENGINES][NUM_GLOBAL_CID];
 
-	void SetCustomEngineSprites(EngineID engine, byte cargo, SpriteGroup *group)
+	void SetCustomEngineSprites(EngineID engine, byte cargo, SpriteGroup group)
 	{
 		if (engine_custom_sprites[engine][cargo] != null) {
-			DEBUG(grf, 6)("SetCustomEngineSprites: engine `%d' cargo `%d' already has group -- removing.", engine, cargo);
+			Global.DEBUG_grf( 6,"SetCustomEngineSprites: engine `%d' cargo `%d' already has group -- removing.", engine, cargo);
 			UnloadSpriteGroup(&engine_custom_sprites[engine][cargo]);
 		}
 		engine_custom_sprites[engine][cargo] = group;
@@ -292,7 +296,7 @@ public class EngineGui extends EngineTables
 		for (engine = 0; engine < Global.TOTAL_NUM_ENGINES; engine++) {
 			for (cargo = 0; cargo < NUM_GLOBAL_CID; cargo++) {
 				if (engine_custom_sprites[engine][cargo] != null) {
-					DEBUG(grf, 6)("UnloadCustomEngineSprites: Unloading group for engine `%d' cargo `%d'.", engine, cargo);
+					Global.DEBUG_grf( 6,"UnloadCustomEngineSprites: Unloading group for engine `%d' cargo `%d'.", engine, cargo);
 					UnloadSpriteGroup(&engine_custom_sprites[engine][cargo]);
 				}
 			}
@@ -307,10 +311,11 @@ public class EngineGui extends EngineTables
 		return 2;
 	}
 
+	/*
 	typedef SpriteGroup *(*resolve_callback)(final SpriteGroup *spritegroup,
 			final Vehicle veh, int callback_info, void *resolve_func); /* XXX data pointer used as function pointer */
 
-	static final SpriteGroup* ResolveVehicleSpriteGroup(final SpriteGroup *spritegroup,
+	static final SpriteGroup ResolveVehicleSpriteGroup(final SpriteGroup spritegroup,
 			final Vehicle veh, int callback_info, resolve_callback resolve_func)
 	{
 		if (spritegroup == null)
@@ -323,8 +328,8 @@ public class EngineGui extends EngineTables
 			return spritegroup;
 
 		case SGT_DETERMINISTIC: {
-			final DeterministicSpriteGroup *dsg = &spritegroup.g.determ;
-			final SpriteGroup *target;
+			final DeterministicSpriteGroup dsg = (DeterministicSpriteGroup)spritegroup;
+			final SpriteGroup target;
 			int value = -1;
 
 			//debug("[%p] Having fun resolving variable %x", veh, dsg.variable);
@@ -349,7 +354,7 @@ public class EngineGui extends EngineTables
 					} else {
 						target = dsg.default_group;
 					}
-					return resolve_func(target, null, callback_info, resolve_func);
+					return resolve_func.apply(target, null, callback_info, resolve_func);
 				}
 
 				if (dsg.var_scope == VSG_SCOPE_PARENT) {
@@ -384,75 +389,75 @@ public class EngineGui extends EngineTables
 					// TTDPatch runs on little-endian arch;
 					// Variable is 0x80 + offset in TTD's vehicle structure
 					switch (dsg.variable - 0x80) {
-					#define veh_prop(id_, value_) case (id_): value = (value_); break
-					veh_prop(0x00, veh.type);
-					veh_prop(0x01, MapOldSubType(veh));
-					veh_prop(0x04, veh.index);
-					veh_prop(0x05, veh.index & 0xFF);
+					//#define veh_prop(id_, value_) case (id_): value = (value_); break
+					case 0x00: value =  veh.type; break;
+					case 0x01: value =  MapOldSubType(veh); break;
+					case 0x04: value =  veh.index; break;
+					case 0x05: value =  veh.index & 0xFF; break;
 					/* XXX? Is THIS right? */
-					veh_prop(0x0A, PackOrder(&veh.current_order));
-					veh_prop(0x0B, PackOrder(&veh.current_order) & 0xff);
-					veh_prop(0x0C, veh.num_orders);
-					veh_prop(0x0D, veh.cur_order_index);
-					veh_prop(0x10, veh.load_unload_time_rem);
-					veh_prop(0x11, veh.load_unload_time_rem & 0xFF);
-					veh_prop(0x12, veh.date_of_last_service);
-					veh_prop(0x13, veh.date_of_last_service & 0xFF);
-					veh_prop(0x14, veh.service_interval);
-					veh_prop(0x15, veh.service_interval & 0xFF);
-					veh_prop(0x16, veh.last_station_visited);
-					veh_prop(0x17, veh.tick_counter);
-					veh_prop(0x18, veh.max_speed);
-					veh_prop(0x19, veh.max_speed & 0xFF);
-					veh_prop(0x1F, veh.direction);
-					veh_prop(0x28, veh.cur_image);
-					veh_prop(0x29, veh.cur_image & 0xFF);
-					veh_prop(0x32, veh.vehstatus);
-					veh_prop(0x33, veh.vehstatus);
-					veh_prop(0x34, veh.cur_speed);
-					veh_prop(0x35, veh.cur_speed & 0xFF);
-					veh_prop(0x36, veh.subspeed);
-					veh_prop(0x37, veh.acceleration);
-					veh_prop(0x39, veh.cargo_type);
-					veh_prop(0x3A, veh.cargo_cap);
-					veh_prop(0x3B, veh.cargo_cap & 0xFF);
-					veh_prop(0x3C, veh.cargo_count);
-					veh_prop(0x3D, veh.cargo_count & 0xFF);
-					veh_prop(0x3E, veh.cargo_source); // Probably useless; so what
-					veh_prop(0x3F, veh.cargo_days);
-					veh_prop(0x40, veh.age);
-					veh_prop(0x41, veh.age & 0xFF);
-					veh_prop(0x42, veh.max_age);
-					veh_prop(0x43, veh.max_age & 0xFF);
-					veh_prop(0x44, veh.build_year);
-					veh_prop(0x45, veh.unitnumber);
-					veh_prop(0x46, veh.engine_type);
-					veh_prop(0x47, veh.engine_type & 0xFF);
-					veh_prop(0x48, veh.spritenum);
-					veh_prop(0x49, veh.day_counter);
-					veh_prop(0x4A, veh.breakdowns_since_last_service);
-					veh_prop(0x4B, veh.breakdown_ctr);
-					veh_prop(0x4C, veh.breakdown_delay);
-					veh_prop(0x4D, veh.breakdown_chance);
-					veh_prop(0x4E, veh.reliability);
-					veh_prop(0x4F, veh.reliability & 0xFF);
-					veh_prop(0x50, veh.reliability_spd_dec);
-					veh_prop(0x51, veh.reliability_spd_dec & 0xFF);
-					veh_prop(0x52, veh.profit_this_year);
-					veh_prop(0x53, veh.profit_this_year & 0xFFFFFF);
-					veh_prop(0x54, veh.profit_this_year & 0xFFFF);
-					veh_prop(0x55, veh.profit_this_year & 0xFF);
-					veh_prop(0x56, veh.profit_last_year);
-					veh_prop(0x57, veh.profit_last_year & 0xFF);
-					veh_prop(0x58, veh.profit_last_year);
-					veh_prop(0x59, veh.profit_last_year & 0xFF);
-					veh_prop(0x5A, veh.next == null ? INVALID_VEHICLE : veh.next.index);
-					veh_prop(0x5C, veh.value);
-					veh_prop(0x5D, veh.value & 0xFFFFFF);
-					veh_prop(0x5E, veh.value & 0xFFFF);
-					veh_prop(0x5F, veh.value & 0xFF);
-					veh_prop(0x60, veh.string_id);
-					veh_prop(0x61, veh.string_id & 0xFF);
+					case 0x0A: value =  PackOrder(veh.current_order); break;
+					case 0x0B: value =  PackOrder(veh.current_order) & 0xff; break;
+					case 0x0C: value =  veh.num_orders; break;
+					case 0x0D: value =  veh.cur_order_index; break;
+					case 0x10: value =  veh.load_unload_time_rem; break;
+					case 0x11: value =  veh.load_unload_time_rem & 0xFF; break;
+					case 0x12: value =  veh.date_of_last_service; break;
+					case 0x13: value =  veh.date_of_last_service & 0xFF; break;
+					case 0x14: value =  veh.service_interval; break;
+					case 0x15: value =  veh.service_interval & 0xFF; break;
+					case 0x16: value =  veh.last_station_visited; break;
+					case 0x17: value =  veh.tick_counter; break;
+					case 0x18: value =  veh.max_speed; break;
+					case 0x19: value =  veh.max_speed & 0xFF; break;
+					case 0x1F: value =  veh.direction; break;
+					case 0x28: value =  veh.cur_image; break;
+					case 0x29: value =  veh.cur_image & 0xFF; break;
+					case 0x32: value =  veh.vehstatus; break;
+					case 0x33: value =  veh.vehstatus; break;
+					case 0x34: value =  veh.cur_speed; break;
+					case 0x35: value =  veh.cur_speed & 0xFF; break;
+					case 0x36: value =  veh.subspeed; break;
+					case 0x37: value =  veh.acceleration; break;
+					case 0x39: value =  veh.cargo_type; break;
+					case 0x3A: value =  veh.cargo_cap; break;
+					case 0x3B: value =  veh.cargo_cap & 0xFF; break;
+					case 0x3C: value =  veh.cargo_count; break;
+					case 0x3D: value =  veh.cargo_count & 0xFF; break;
+					case 0x3E: value =  veh.cargo_source; break; // Probably useless; so what
+					case 0x3F: value =  veh.cargo_days; break;
+					case 0x40: value =  veh.age; break;
+					case 0x41: value =  veh.age & 0xFF; break;
+					case 0x42: value =  veh.max_age; break;
+					case 0x43: value =  veh.max_age & 0xFF; break;
+					case 0x44: value =  veh.build_year; break;
+					case 0x45: value =  veh.unitnumber; break;
+					case 0x46: value =  veh.engine_type; break;
+					case 0x47: value =  veh.engine_type & 0xFF; break;
+					case 0x48: value =  veh.spritenum; break;
+					case 0x49: value =  veh.day_counter; break;
+					case 0x4A: value =  veh.breakdowns_since_last_service; break;
+					case 0x4B: value =  veh.breakdown_ctr; break;
+					case 0x4C: value =  veh.breakdown_delay; break;
+					case 0x4D: value =  veh.breakdown_chance; break;
+					case 0x4E: value =  veh.reliability; break;
+					case 0x4F: value =  veh.reliability & 0xFF; break;
+					case 0x50: value =  veh.reliability_spd_dec; break;
+					case 0x51: value =  veh.reliability_spd_dec & 0xFF; break;
+					case 0x52: value =  veh.profit_this_year; break;
+					case 0x53: value =  veh.profit_this_year & 0xFFFFFF; break;
+					case 0x54: value =  veh.profit_this_year & 0xFFFF; break;
+					case 0x55: value =  veh.profit_this_year & 0xFF; break;
+					case 0x56: value =  veh.profit_last_year; break;
+					case 0x57: value =  veh.profit_last_year & 0xFF; break;
+					case 0x58: value =  veh.profit_last_year; break;
+					case 0x59: value =  veh.profit_last_year & 0xFF; break;
+					case 0x5A: value =  veh.next == null ? INVALID_VEHICLE : veh.next.index; break;
+					case 0x5C: value =  veh.value; break;
+					case 0x5D: value =  veh.value & 0xFFFFFF; break;
+					case 0x5E: value =  veh.value & 0xFFFF; break;
+					case 0x5F: value =  veh.value & 0xFF; break;
+					case 0x60: value =  veh.string_id; break;
+					case 0x61: value =  veh.string_id & 0xFF; break;
 					/* 00h..07h=sub image? 40h=in tunnel; actually some kind of status
 					 * aircraft: >=13h when in flight
 					 * train, ship: 80h=in depot
@@ -493,12 +498,12 @@ public class EngineGui extends EngineTables
 		}
 
 		default:
-			error("I don't know how to handle such a spritegroup %d!", spritegroup.type);
+			Global.error("I don't know how to handle such a spritegroup %d!", spritegroup.type);
 			return null;
 		}
 	}
 
-	static final SpriteGroup *GetVehicleSpriteGroup(EngineID engine, final Vehicle v)
+	static final SpriteGroup GetVehicleSpriteGroup(EngineID engine, final Vehicle v)
 	{
 		final SpriteGroup *group;
 		byte cargo = GC_PURCHASE;
