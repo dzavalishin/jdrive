@@ -168,9 +168,9 @@ enum CallbackMask {
 	CBM_ARTIC_ENGINE = 4,
 };
 
-enum {
+/*enum {
 	CALLBACK_FAILED = 0xFFFF
-};
+};*/
 
 VARDEF const uint32 _default_refitmasks[NUM_VEHICLE_TYPES];
 VARDEF const CargoID _global_cargo_id[NUM_LANDSCAPE][NUM_CARGO];

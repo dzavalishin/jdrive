@@ -22,4 +22,19 @@ modify( int[] x )
 ```
 
 
+* Pointer or allocated local object
+
+```
+NPFFindStationOrTileData fstd;
+...
+NPFFillWithOrderData(&fstd, v);
+```
+must be
+
+```
+NPFFindStationOrTileData fstd = new NPFFindStationOrTileData();
+...
+NPFFillWithOrderData(fstd, v);
+```
+
 

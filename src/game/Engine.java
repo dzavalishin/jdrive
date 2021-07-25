@@ -24,6 +24,7 @@ public class Engine {
 
 
 
+	public static final int CALLBACK_FAILED = 0xFFFF;
 
 
 
