@@ -19,14 +19,14 @@ public class ViewPort
 	// don't need
 	//boolean active; // used instead of bit in _active_viewports
 
-	
+
 	public static final int VHM_NONE = 0;    // default
 	public static final int VHM_RECT = 1;    // rectangle (stations; depots; ...)
 	public static final int VHM_POINT = 2;   // point (lower land; raise land; level land; ...)
 	public static final int VHM_SPECIAL = 3; // special mode used for highlighting while dragging (and for tunnels/docks)
 	public static final int VHM_DRAG = 4;    // dragging items in the depot windows
 	public static final int VHM_RAIL = 5;    // rail pieces
-	
+
 
 	static public final int VPM_X_OR_Y = 0;
 	static public final int VPM_FIX_X = 1;
@@ -37,32 +37,32 @@ public class ViewPort
 	static public final int VPM_SIGNALDIRS = 6;
 
 	// highlighting draw styles
-		static public final int HT_NONE = 0;
-		static public final int HT_RECT = 0x80;
-		static public final int HT_POINT = 0x40;
-		static public final int HT_LINE = 0x20; /* used for autorail highlighting (longer streches)
-										 * (uses lower bits to indicate direction) */
-		static public final int HT_RAIL = 0x10; /* autorail (one piece)
-										 * (uses lower bits to indicate direction) */
+	static public final int HT_NONE = 0;
+	static public final int HT_RECT = 0x80;
+	static public final int HT_POINT = 0x40;
+	static public final int HT_LINE = 0x20; /* used for autorail highlighting (longer streches)
+	 * (uses lower bits to indicate direction) */
+	static public final int HT_RAIL = 0x10; /* autorail (one piece)
+	 * (uses lower bits to indicate direction) */
 
-		/* lower bits (used with static public final int HT_LINE and static public final int HT_RAIL):
-		 * (see ASCII art in autorail.h for a visual interpretation) */
-		static public final int HT_DIR_X = 0;  // X direction
-		static public final int HT_DIR_Y = 1;  // Y direction
-		static public final int HT_DIR_HU = 2; // horizontal upper
-		static public final int HT_DIR_HL = 3; // horizontal lower
-		static public final int HT_DIR_VL = 4; // vertical left
-		static public final int HT_DIR_VR = 5; // vertical right
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	/* lower bits (used with static public final int HT_LINE and static public final int HT_RAIL):
+	 * (see ASCII art in autorail.h for a visual interpretation) */
+	static public final int HT_DIR_X = 0;  // X direction
+	static public final int HT_DIR_Y = 1;  // Y direction
+	static public final int HT_DIR_HU = 2; // horizontal upper
+	static public final int HT_DIR_HL = 3; // horizontal lower
+	static public final int HT_DIR_VL = 4; // vertical left
+	static public final int HT_DIR_VR = 5; // vertical right
+
+
+
+
+
+
+
+
+
+
 	public static TileHighlightData _thd = new TileHighlightData();
 	public static List<ViewPort> _viewports = new ArrayList<ViewPort>();
 
@@ -70,18 +70,18 @@ public class ViewPort
 	{
 		_viewports.remove(this);
 	}
-	
+
 	public void addToAll()
 	{
 		_viewports.add(this);
 	}
-	
+
 	public ViewPort() {
 		//_viewports.add(this);
 	}
-	
-	
-	
+
+
+
 
 	//#define VIEWPORT_DRAW_MEM (65536 * 2)
 
@@ -109,27 +109,32 @@ public class ViewPort
 	}
 
 	static void AssignWindowViewport(Window w, int x, int y,
-		int width, int height, int follow_flags, int zoom)
+			int width, int height, int follow_flags, int zoom)
 	{
-		//ViewPort vp;
+		ViewPort vp;
 		Point pt;
 		int bit = 1;
 		//for (vp = _viewports, bit = 1; ; vp++, bit <<= 1) 
-		for (ViewPort vp : _viewports ) 
+		for (ViewPort vps : _viewports ) 
 		{
 			//assert(vp != endof(_viewports));
-			if (vp.width == 0) break;
+			if (vps.width == 0)
+			{
+				vp = vps;
+				break;
+			}
 			bit <<= 1;
 		}
-		
-		Global._active_viewports |= bit;
+
+		assert vp != null;
+		//Global._active_viewports |= bit;
 
 		vp.left = x + w.left;
 		vp.top = y + w.top;
 		vp.width = width;
 		vp.height = height;
 
-		vp.zoom = zoom;
+		vp.zoom = (byte) zoom;
 
 		vp.virtual_width = width << zoom;
 		vp.virtual_height = height << zoom;
@@ -137,15 +142,16 @@ public class ViewPort
 		if(0 != (follow_flags & 0x80000000)) {
 			Vehicle veh;
 
-			w.as_vp_d().follow_vehicle = (VehicleID)(follow_flags & 0xFFFF);
+			w.as_vp_d().follow_vehicle = new VehicleID(follow_flags & 0xFFFF);
 			veh = Vehicle.GetVehicle(w.as_vp_d().follow_vehicle);
 			pt = MapXYZToViewport(vp, veh.x_pos, veh.y_pos, veh.z_pos);
 		} else {
-			int x = follow_flags.TileX().getTile() * 16;
-			int y = follow_flags.TileY().getTile() * 16;
+			TileIndex tt = new TileIndex(follow_flags);
+			int tx = tt.TileX() * 16;
+			int ty = tt.TileY() * 16;
 
 			w.as_vp_d().follow_vehicle = Vehicle.INVALID_VEHICLE;
-			pt = MapXYZToViewport(vp, x, y, Landscape.GetSlopeZ(x, y));
+			pt = MapXYZToViewport(vp, tx, ty, Landscape.GetSlopeZ(tx, ty));
 		}
 
 		w.as_vp_d().scrollpos_x = pt.x;
@@ -234,42 +240,42 @@ public class ViewPort
 		vp.virtual_top = y;
 
 		old_left >>= vp.zoom;
-		old_top >>= vp.zoom;
-		x >>= vp.zoom;
-		y >>= vp.zoom;
+			old_top >>= vp.zoom;
+			x >>= vp.zoom;
+			y >>= vp.zoom;
 
-		old_left -= x;
-		old_top -= y;
+			old_left -= x;
+			old_top -= y;
 
-		if (old_top == 0 && old_left == 0) return;
+			if (old_top == 0 && old_left == 0) return;
 
-		_vp_move_offs.x = old_left;
-		_vp_move_offs.y = old_top;
+			_vp_move_offs.x = old_left;
+			_vp_move_offs.y = old_top;
 
-		left = vp.left;
-		top = vp.top;
-		width = vp.width;
-		height = vp.height;
+			left = vp.left;
+			top = vp.top;
+			width = vp.width;
+			height = vp.height;
 
-		if (left < 0) {
-			width += left;
-			left = 0;
-		}
-
-		i = left + width - Hal._screen.width;
-		if (i >= 0) width -= i;
-
-		if (width > 0) {
-			if (top < 0) {
-				height += top;
-				top = 0;
+			if (left < 0) {
+				width += left;
+				left = 0;
 			}
 
-			i = top + height - Hal._screen.height;
-			if (i >= 0) height -= i;
+			i = left + width - Hal._screen.width;
+			if (i >= 0) width -= i;
 
-			if (height > 0) DoSetViewportPosition(w + 1, left, top, width, height);
-		}
+			if (width > 0) {
+				if (top < 0) {
+					height += top;
+					top = 0;
+				}
+
+				i = top + height - Hal._screen.height;
+				if (i >= 0) height -= i;
+
+				if (height > 0) DoSetViewportPosition(w + 1, left, top, width, height);
+			}
 	}
 
 	/* gone to Window
@@ -284,7 +290,7 @@ public class ViewPort
 
 		return null;
 	}
-	*/
+	 */
 	static Point TranslateXYToTileCoord(final ViewPort vp, int x, int y)
 	{
 		int z;
@@ -292,20 +298,20 @@ public class ViewPort
 		int a,b;
 
 		if ( (int)(x -= vp.left) >= (int)vp.width ||
-					(int)(y -= vp.top) >= (int)vp.height) {
-					return new Point(-1, -1);
+				(int)(y -= vp.top) >= (int)vp.height) {
+			return new Point(-1, -1);
 		}
 
 		x = ((x << vp.zoom) + vp.virtual_left) >> 2;
 		y = ((y << vp.zoom) + vp.virtual_top) >> 1;
 
-	/*#if !defined(NEW_ROTATION)
+		/*#if !defined(NEW_ROTATION)
 		a = y-x;
 		b = y+x;
 	#else*/
 		a = x+y;
 		b = x-y;
-	//#endif
+		//#endif
 		z = Landscape.GetSlopeZ(a, b) >> 1;
 		z = Landscape.GetSlopeZ(a+z, b+z) >> 1;
 		z = Landscape.GetSlopeZ(a+z, b+z) >> 1;
@@ -332,8 +338,8 @@ public class ViewPort
 		Point pt;
 
 		if ( (w = Window.FindWindowFromPt(x, y)) != null &&
-				 (vp = w.IsPtInWindowViewport(x, y)) != null)
-					return TranslateXYToTileCoord(vp, zoom_x, zoom_y);
+				(vp = w.IsPtInWindowViewport(x, y)) != null)
+			return TranslateXYToTileCoord(vp, zoom_x, zoom_y);
 
 		pt.y = pt.x = -1;
 		return pt;
@@ -439,7 +445,7 @@ public class ViewPort
 		vd.last_child = null;
 
 		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
-			DEBUG_misc( 0, "Out of sprite mem");
+			Global.DEBUG_misc( 0, "Out of sprite mem");
 			return;
 		}
 		ps = (ParentSpriteToDraw )vd.spritelist_mem;
@@ -507,7 +513,8 @@ public class ViewPort
 			DEBUG_misc( 0, "Out of sprite mem");
 			return;
 		}
-		cs = (ChildScreenSpriteToDraw*)vd.spritelist_mem;
+		//cs = (ChildScreenSpriteToDraw*)vd.spritelist_mem;
+		cs = (ChildScreenSpriteToDraw)vd.spritelist_mem;
 
 		if (vd.last_child == null) return;
 
@@ -545,7 +552,7 @@ public class ViewPort
 		ss.params[2] = params_3;
 		ss.width = 0;
 
-		*vd.last_string = ss;
+	 *vd.last_string = ss;
 		vd.last_string = &ss.next;
 
 		return ss;
@@ -620,12 +627,12 @@ public class ViewPort
 
 	// [direction][side]
 	static final int _AutorailType[][] = {
-		{ HT_DIR_X,  HT_DIR_X },
-		{ HT_DIR_Y,  HT_DIR_Y },
-		{ HT_DIR_HU, HT_DIR_HL },
-		{ HT_DIR_HL, HT_DIR_HU },
-		{ HT_DIR_VL, HT_DIR_VR },
-		{ HT_DIR_VR, HT_DIR_VL }
+			{ HT_DIR_X,  HT_DIR_X },
+			{ HT_DIR_Y,  HT_DIR_Y },
+			{ HT_DIR_HU, HT_DIR_HL },
+			{ HT_DIR_HL, HT_DIR_HU },
+			{ HT_DIR_VL, HT_DIR_VR },
+			{ HT_DIR_VR, HT_DIR_VL }
 	};
 
 	#include "table/autorail.h"
@@ -634,9 +641,9 @@ public class ViewPort
 	{
 		int image;
 
-	//#ifdef DEBUG_HILIGHT_MARKED_TILES
-	//	DrawHighlighedTile(ti);
-	//#endif
+		//#ifdef DEBUG_HILIGHT_MARKED_TILES
+		//	DrawHighlighedTile(ti);
+		//#endif
 
 		// Draw a red error square?
 		if (_thd.redsq != 0 && _thd.redsq == ti.tile) {
@@ -708,16 +715,16 @@ public class ViewPort
 	{
 		ViewportDrawer vd = _cur_vd;
 		int x, y, width, height;
-		TileInfo ti;
+		TileInfo ti = new TileInfo();
 		boolean direction;
 
-		_cur_ti = &ti;
+		_cur_ti = ti;
 
 		// Transform into tile coordinates and round to closest full tile
-	//#if !defined(NEW_ROTATION)
+		//#if !defined(NEW_ROTATION)
 		x = ((vd.dpi.top >> 1) - (vd.dpi.left >> 2)) & ~0xF;
 		y = ((vd.dpi.top >> 1) + (vd.dpi.left >> 2) - 0x10) & ~0xF;
-	/*#else
+		/*#else
 		x = ((vd.dpi.top >> 1) + (vd.dpi.left >> 2) - 0x10) & ~0xF;
 		y = ((vd.dpi.left >> 2) - (vd.dpi.top >> 1)) & ~0xF;
 	#endif */
@@ -739,33 +746,33 @@ public class ViewPort
 			int y_cur = y;
 
 			do {
-				FindLandscapeHeight(&ti, x_cur, y_cur);
-	//#if !defined(NEW_ROTATION)
+				FindLandscapeHeight(ti, x_cur, y_cur);
+				//#if !defined(NEW_ROTATION)
 				y_cur += 0x10;
 				x_cur -= 0x10;
-	/*#else
+				/*#else
 				y_cur += 0x10;
 				x_cur += 0x10;
 	#endif*/
 				_added_tile_sprite = false;
 				_offset_ground_sprites = false;
 
-				DrawTile(&ti);
-				DrawTileSelection(&ti);
-			} while (--width_cur);
+				DrawTile(ti);
+				DrawTileSelection(ti);
+			} while (--width_cur > 0);
 
-	//#if !defined(NEW_ROTATION)
+			//#if !defined(NEW_ROTATION)
 			if ( (direction^=1) != 0)
 				y += 0x10;
 			else
 				x += 0x10;
-	/*#else
+			/*#else
 			if ( (direction^=1) != 0)
 				x += 0x10;
 			else
 				y -= 0x10;
 	#endif*/
-		} while (--height);
+		} while (--height > 0);
 	}
 
 
@@ -786,15 +793,15 @@ public class ViewPort
 			//FOR_ALL_TOWNS(t) 
 			Town.forEach( (t) ->
 			{
-				if (t.xy &&
-				    bottom > t.sign.top &&
+				if (t.xy != null &&
+						bottom > t.sign.top &&
 						top < t.sign.top + 12 &&
 						right > t.sign.left &&
 						left < t.sign.left + t.sign.width_1) {
 
 					AddStringToDraw(t.sign.left + 1, t.sign.top + 1,
-						Global._patches.population_in_label ? Str.STR_TOWN_LABEL_POP : Str.STR_TOWN_LABEL,
-						t.index, t.population, 0);
+							Global._patches.population_in_label ? Str.STR_TOWN_LABEL_POP : Str.STR_TOWN_LABEL,
+									t.index, t.population, 0);
 				}
 			});
 		} else if (dpi.zoom == 1) {
@@ -804,15 +811,15 @@ public class ViewPort
 			//FOR_ALL_TOWNS(t) 
 			Town.forEach( (t) ->
 			{
-				if (t.xy &&
-				    bottom > t.sign.top &&
+				if (t.xy != null &&
+						bottom > t.sign.top &&
 						top < t.sign.top + 24 &&
 						right > t.sign.left &&
 						left < t.sign.left + t.sign.width_1*2) {
 
 					AddStringToDraw(t.sign.left + 1, t.sign.top + 1,
 							Global._patches.population_in_label ? Str.STR_TOWN_LABEL_POP : Str.STR_TOWN_LABEL,
-						t.index, t.population, 0);
+									t.index, t.population, 0);
 				}
 			});
 		} else {
@@ -824,7 +831,7 @@ public class ViewPort
 			Town.forEach( (t) ->
 			{
 				if (t.xy &&
-				    bottom > t.sign.top &&
+						bottom > t.sign.top &&
 						top < t.sign.top + 24 &&
 						right > t.sign.left &&
 						left < t.sign.left + t.sign.width_2*4) {
@@ -842,7 +849,7 @@ public class ViewPort
 		//Station st;
 		StringSpriteToDraw sstd;
 
-		if (0 == (Global._display_opt & Global.DO_SHOW_STATION_NAMES) || _game_mode == GM_MENU)
+		if (0 == (Global._display_opt & Global.DO_SHOW_STATION_NAMES) || Global._game_mode == GameModes.GM_MENU)
 			return;
 
 		left = dpi.left;
@@ -854,15 +861,15 @@ public class ViewPort
 			//FOR_ALL_STATIONS(st) 
 			Station.forEach( (st) ->
 			{
-				if (st.xy &&
-				    bottom > st.sign.top &&
+				if (st.xy != null &&
+						bottom > st.sign.top &&
 						top < st.sign.top + 12 &&
 						right > st.sign.left &&
 						left < st.sign.left + st.sign.width_1) {
 
 					sstd=AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
 					if (sstd != null) {
-						sstd.color = (st.owner == OWNER_NONE || st.owner == OWNER_TOWN || !st.facilities) ? 0xE : _player_colors[st.owner];
+						sstd.color = (st.owner.id == Owner.OWNER_NONE || st.owner.id == Owner.OWNER_TOWN || !st.facilities) ? 0xE : _player_colors[st.owner];
 						sstd.width = st.sign.width_1;
 					}
 				}
@@ -875,7 +882,7 @@ public class ViewPort
 			Station.forEach( (st) ->
 			{
 				if (st.xy &&
-				    bottom > st.sign.top &&
+						bottom > st.sign.top &&
 						top < st.sign.top + 24 &&
 						right > st.sign.left &&
 						left < st.sign.left + st.sign.width_1*2) {
@@ -898,7 +905,7 @@ public class ViewPort
 			Station.forEach( (st) ->
 			{
 				if (st.xy &&
-				    bottom > st.sign.top &&
+						bottom > st.sign.top &&
 						top < st.sign.top + 24 &&
 						right > st.sign.left &&
 						left < st.sign.left + st.sign.width_2*4) {
@@ -1055,7 +1062,7 @@ public class ViewPort
 		}
 	}
 
-	void UpdateViewportSignPos(ViewportSign sign, int left, int top, StringID str)
+	void UpdateViewportSignPos(ViewportSign sign, int left, int top, int str)
 	{
 		//char buffer[128];
 		String buffer;
@@ -1063,14 +1070,14 @@ public class ViewPort
 
 		sign.top = top;
 
-		buffer = GetString(str);
-		w = GetStringWidth(buffer) + 3;
+		buffer = Global.GetString(str);
+		w = String.GetStringWidth(buffer) + 3;
 		sign.width_1 = w;
 		sign.left = left - w / 2;
 
 		// zoomed out version
 		_stringwidth_base = 0xE0;
-		w = GetStringWidth(buffer) + 3;
+		w = String.GetStringWidth(buffer) + 3;
 		_stringwidth_base = 0;
 		sign.width_2 = w;
 	}
@@ -1106,18 +1113,18 @@ public class ViewPort
 					ParentSpriteToDraw  ps2 = psd[pp2];
 					if(ps2 == null)
 						break;
-					
+
 					boolean mustswap = false;
 
 					if( 0 != (ps2.unk16 & 1) ) continue;
 
 					// Decide which sort order algorithm to use, based on whether the sprites have some overlapping area.
 					if (((ps2.tile_x > ps.tile_x && ps2.tile_x < ps.tile_right) ||
-					    (ps2.tile_right > ps.tile_x && ps2.tile_x < ps.tile_right)) &&        // overlap in X
-					    ((ps2.tile_y > ps.tile_y && ps2.tile_y < ps.tile_bottom) ||
-					    (ps2.tile_bottom > ps.tile_y && ps2.tile_y < ps.tile_bottom)) &&      // overlap in Y
-					    ((ps2.tile_z > ps.tile_z && ps2.tile_z < ps.tile_z_bottom) ||
-					    (ps2.tile_z_bottom > ps.tile_z && ps2.tile_z < ps.tile_z_bottom)) ) { // overlap in Z
+							(ps2.tile_right > ps.tile_x && ps2.tile_x < ps.tile_right)) &&        // overlap in X
+							((ps2.tile_y > ps.tile_y && ps2.tile_y < ps.tile_bottom) ||
+									(ps2.tile_bottom > ps.tile_y && ps2.tile_y < ps.tile_bottom)) &&      // overlap in Y
+							((ps2.tile_z > ps.tile_z && ps2.tile_z < ps.tile_z_bottom) ||
+									(ps2.tile_z_bottom > ps.tile_z && ps2.tile_z < ps.tile_z_bottom)) ) { // overlap in Z
 						// Sprites overlap.
 						// Use X+Y+Z as the sorting order, so sprites nearer the bottom of the screen,
 						// and with higher Z elevation, draw in front.
@@ -1125,15 +1132,15 @@ public class ViewPort
 						// i.e. X=(left+right)/2, etc.
 						// However, since we only care about order, don't actually calculate the division / 2.
 						mustswap = ps.tile_x + ps.tile_right + ps.tile_y + ps.tile_bottom + ps.tile_z + ps.tile_z_bottom >
-						           ps2.tile_x + ps2.tile_right + ps2.tile_y + ps2.tile_bottom + ps2.tile_z + ps2.tile_z_bottom;
+						ps2.tile_x + ps2.tile_right + ps2.tile_y + ps2.tile_bottom + ps2.tile_z + ps2.tile_z_bottom;
 					} else {
 						// No overlap; use the original TTD sort algorithm.
 						mustswap = (ps.tile_right >= ps2.tile_x &&
-						            ps.tile_bottom >= ps2.tile_y &&
-						            ps.tile_z_bottom >= ps2.tile_z &&
-						           (ps.tile_x >= ps2.tile_right ||
-						            ps.tile_y >= ps2.tile_bottom ||
-						            ps.tile_z >= ps2.tile_z_bottom));
+								ps.tile_bottom >= ps2.tile_y &&
+								ps.tile_z_bottom >= ps2.tile_z &&
+								(ps.tile_x >= ps2.tile_right ||
+								ps.tile_y >= ps2.tile_bottom ||
+								ps.tile_z >= ps2.tile_z_bottom));
 					}
 					if (mustswap) {
 						// Swap the two sprites ps and ps2 using bubble-sort algorithm.
@@ -1142,16 +1149,16 @@ public class ViewPort
 						do {
 							/*
 							ParentSpriteToDraw  temp = *psd3;
-							*psd3 = ps2;
+							 *psd3 = ps2;
 							ps2 = temp;
-							*/
+							 */
 							ParentSpriteToDraw  temp = psd[pp3];
 							psd[pp3] = psd[pp2];
 							psd[pp2] = temp;
 
 							//psd3++;
 							pp3++;
-						//} while (psd3 <= psd2);
+							//} while (psd3 <= psd2);
 						} while (pp3 <= pp2);
 					}
 				}
@@ -1170,7 +1177,7 @@ public class ViewPort
 			//final ParentSpriteToDraw  ps = *psd;
 			final ParentSpriteToDraw  ps = psd[pp];
 			if( ps == null ) break;
-			
+
 			Point pt = Point.RemapCoords(ps.tile_x, ps.tile_y, ps.tile_z);
 
 			final ChildScreenSpriteToDraw cs;
@@ -1186,7 +1193,7 @@ public class ViewPort
 	static void ViewportDrawStrings(DrawPixelInfo dpi, final StringSpriteToDraw ss)
 	{
 		DrawPixelInfo dp = new DrawPixelInfo();
-		byte zoom;
+		int zoom;
 
 		Hal._cur_dpi = dp;
 		dp.assignFrom( dpi );
@@ -1195,59 +1202,59 @@ public class ViewPort
 		dp.zoom = 0;
 
 		dp.left >>= zoom;
-		dp.top >>= zoom;
-		dp.width >>= zoom;
-		dp.height >>= zoom;
+						dp.top >>= zoom;
+						dp.width >>= zoom;
+						dp.height >>= zoom;
 
-		do {
-			if (ss.width != 0) {
-				int x = (ss.x >> zoom) - 1;
-				int y = (ss.y >> zoom) - 1;
-				int bottom = y + 11;
-				int w = ss.width;
+						do {
+							if (ss.width != 0) {
+								int x = (ss.x >> zoom) - 1;
+								int y = (ss.y >> zoom) - 1;
+								int bottom = y + 11;
+								int w = ss.width;
 
-				if (w & 0x8000) {
-					w &= ~0x8000;
-					y--;
-					bottom -= 6;
-					w -= 3;
-				}
+								if( 0 != (w & 0x8000) ) {
+									w &= ~0x8000;
+									y--;
+									bottom -= 6;
+									w -= 3;
+								}
 
-			/* Draw the rectangle if 'tranparent station signs' is off,
-			 * or if we are drawing a general text sign (Str.STR_2806) */
-				if (!(Global._display_opt & Global.DO_TRANS_SIGNS) || ss.string == Str.STR_2806)
-					DrawFrameRect(
-						x, y, x + w, bottom, ss.color,
-						(Global._display_opt & Global.DO_TRANS_BUILDINGS) ? FR_TRANSPARENT | FR_NOBORDER : 0
-					);
-			}
+								/* Draw the rectangle if 'tranparent station signs' is off,
+								 * or if we are drawing a general text sign (Str.STR_2806) */
+								if (0 == (Global._display_opt & Global.DO_TRANS_SIGNS) || ss.string == Str.STR_2806)
+									Gfx.DrawFrameRect(
+											x, y, x + w, bottom, ss.color,
+											(Global._display_opt & Global.DO_TRANS_BUILDINGS) ? FR_TRANSPARENT | FR_NOBORDER : 0
+											);
+							}
 
-			Global.SetDParam(0, ss.params[0]);
-			Global.SetDParam(1, ss.params[1]);
-			Global.SetDParam(2, ss.params[2]);
-			/* if we didn't draw a rectangle, or if transparant building is on,
-			 * draw the text in the color the rectangle would have */
-			if ((
-						(Global._display_opt & Global.DO_TRANS_BUILDINGS) ||
-						(Global._display_opt & Global.DO_TRANS_SIGNS && ss.string != Str.STR_2806)
-					) && ss.width != 0) {
-				/* Real colors need the IS_PALETTE_COLOR flag
-				 * otherwise colors from _string_colormap are assumed. */
-				gfx.DrawString(
-					ss.x >> zoom, (ss.y >> zoom) - (ss.width & 0x8000 ? 2 : 0),
-					ss.string, (_color_list[ss.color].window_color_bgb | IS_PALETTE_COLOR)
-				);
-			} else {
-				DrawString(
-					ss.x >> zoom, (ss.y >> zoom) - (ss.width & 0x8000 ? 2 : 0),
-					ss.string, 16
-				);
-			}
+							Global.SetDParam(0, ss.params[0]);
+							Global.SetDParam(1, ss.params[1]);
+							Global.SetDParam(2, ss.params[2]);
+							/* if we didn't draw a rectangle, or if transparant building is on,
+							 * draw the text in the color the rectangle would have */
+							if ((
+									(Global._display_opt & Global.DO_TRANS_BUILDINGS) ||
+									(Global._display_opt & Global.DO_TRANS_SIGNS && ss.string != Str.STR_2806)
+									) && ss.width != 0) {
+								/* Real colors need the IS_PALETTE_COLOR flag
+								 * otherwise colors from _string_colormap are assumed. */
+								gfx.DrawString(
+										ss.x >> zoom, (ss.y >> zoom) - (ss.width & 0x8000 ? 2 : 0),
+										ss.string, (_color_list[ss.color].window_color_bgb | IS_PALETTE_COLOR)
+										);
+							} else {
+								DrawString(
+										ss.x >> zoom, (ss.y >> zoom) - (ss.width & 0x8000 ? 2 : 0),
+										ss.string, 16
+										);
+							}
 
-			ss = ss.next;
-		} while (ss != null);
+							ss = ss.next;
+						} while (ss != null);
 
-		Hal._cur_dpi = dpi;
+						Hal._cur_dpi = dpi;
 	}
 
 	void ViewportDoDraw(final ViewPort vp, int left, int top, int right, int bottom)
@@ -1258,13 +1265,14 @@ public class ViewPort
 		int y;
 		DrawPixelInfo old_dpi;
 
-		byte mem[VIEWPORT_DRAW_MEM];
-		ParentSpriteToDraw parent_list[6144];
+		byte [] mem = new byte[VIEWPORT_DRAW_MEM];
+		ParentSpriteToDraw parent_list = new ParentSpriteToDraw[6144];
 
-		_cur_vd = &vd;
+		//_cur_vd = vd;
+		_cur_vd = vd;
 
 		old_dpi = Hal._cur_dpi;
-		Hal._cur_dpi = &vd.dpi;
+		Hal._cur_dpi = vd.dpi;
 
 		vd.dpi.zoom = vp.zoom;
 		mask = (-1) << vp.zoom;
@@ -1287,22 +1295,22 @@ public class ViewPort
 		vd.eof_parent_list = endof(parent_list);
 		vd.spritelist_mem = mem;
 		vd.eof_spritelist_mem = endof(mem) - sizeof(LARGEST_SPRITELIST_STRUCT);
-		vd.last_string = &vd.first_string;
+		vd.last_string = vd.first_string;
 		vd.first_string = null;
-		vd.last_tile = &vd.first_tile;
+		vd.last_tile = vd.first_tile;
 		vd.first_tile = null;
 
 		ViewportAddLandscape();
-		
-	//#if !defined(NEW_ROTATION)
-		ViewportAddVehicles(&vd.dpi);
-		DrawTextEffects(&vd.dpi);
 
-		ViewportAddTownNames(&vd.dpi);
-		ViewportAddStationNames(&vd.dpi);
-		ViewportAddSigns(&vd.dpi);
-		ViewportAddWaypoints(&vd.dpi);
-	//#endif
+		//#if !defined(NEW_ROTATION)
+		ViewportAddVehicles(vd.dpi);
+		DrawTextEffects(vd.dpi);
+
+		ViewportAddTownNames(vd.dpi);
+		ViewportAddStationNames(vd.dpi);
+		ViewportAddSigns(vd.dpi);
+		ViewportAddWaypoints(vd.dpi);
+		//#endif
 
 		// This assert should never happen (because the length of the parent_list
 		//  is checked)
@@ -1311,12 +1319,12 @@ public class ViewPort
 		if (vd.first_tile != null) ViewportDrawTileSprites(vd.first_tile);
 
 		/* null terminate parent sprite list */
-		*vd.parent_list = null;
+		//[dz] TODO !!! *vd.parent_list = null;
 
 		ViewportSortParentSprites(parent_list);
 		ViewportDrawParentSprites(parent_list);
 
-		if (vd.first_string != null) ViewportDrawStrings(&vd.dpi, vd.first_string);
+		if (vd.first_string != null) ViewportDrawStrings(vd.dpi, vd.first_string);
 
 		Hal._cur_dpi = old_dpi;
 	}
@@ -1328,8 +1336,8 @@ public class ViewPort
 		if (((bottom - top) * (right - left) << vp.zoom) > 180000) {
 			if ((bottom - top) > (right - left)) {
 				int t = (top + bottom) >> 1;
-				ViewportDrawChk(vp, left, top, right, t);
-				ViewportDrawChk(vp, left, t, right, bottom);
+		ViewportDrawChk(vp, left, top, right, t);
+		ViewportDrawChk(vp, left, t, right, bottom);
 			} else {
 				int t = (left + right) >> 1;
 				ViewportDrawChk(vp, left, top, t, bottom);
@@ -1337,11 +1345,11 @@ public class ViewPort
 			}
 		} else {
 			ViewportDoDraw(vp,
-				((left - vp.left) << vp.zoom) + vp.virtual_left,
-				((top - vp.top) << vp.zoom) + vp.virtual_top,
-				((right - vp.left) << vp.zoom) + vp.virtual_left,
-				((bottom - vp.top) << vp.zoom) + vp.virtual_top
-			);
+					((left - vp.left) << vp.zoom) + vp.virtual_left,
+					((top - vp.top) << vp.zoom) + vp.virtual_top,
+					((right - vp.left) << vp.zoom) + vp.virtual_left,
+					((bottom - vp.top) << vp.zoom) + vp.virtual_top
+					);
 		}
 	}
 
@@ -1380,12 +1388,12 @@ public class ViewPort
 		final ViewPort vp = w.viewport;
 
 		if (w.as_vp_d().follow_vehicle.id != Vehicle.INVALID_VEHICLE) {
-			final Vehicle veh = GetVehicle(w.as_vp_d().follow_vehicle);
+			final Vehicle veh = Vehicle.GetVehicle(w.as_vp_d().follow_vehicle);
 			Point pt = MapXYZToViewport(vp, veh.x_pos, veh.y_pos, veh.z_pos);
 
 			SetViewportPosition(w, pt.x, pt.y);
 		} else {
-	//#if !defined(NEW_ROTATION)
+			//#if !defined(NEW_ROTATION)
 			int x;
 			int y;
 			int vx;
@@ -1407,7 +1415,7 @@ public class ViewPort
 			// Set position
 			w.as_vp_d().scrollpos_x = x - vp.virtual_width / 2;
 			w.as_vp_d().scrollpos_y = y - vp.virtual_height / 2;
-	/*#else
+			/*#else
 			int x,y,t;
 			int err;
 
@@ -1449,15 +1457,16 @@ public class ViewPort
 		if (top >= vp.virtual_height) return;
 
 		Global.hal.SetDirtyBlocks(
-			(left >> vp.zoom) + vp.left,
-			(top >> vp.zoom) + vp.top,
-			(right >> vp.zoom) + vp.left,
-			(bottom >> vp.zoom) + vp.top
-		);
+				(left >> vp.zoom) + vp.left,
+				(top >> vp.zoom) + vp.top,
+				(right >> vp.zoom) + vp.left,
+				(bottom >> vp.zoom) + vp.top
+				);
 	}
 
 	static void MarkAllViewportsDirty(int left, int top, int right, int bottom)
 	{
+		/*
 		final ViewPort vp = _viewports;
 		int act = _active_viewports;
 		do {
@@ -1465,7 +1474,19 @@ public class ViewPort
 				assert(vp.width != 0);
 				MarkViewportDirty(vp, left, top, right, bottom);
 			}
-		} while (vp++,act>>=1);
+			vp++;
+		} while (act>>=1);
+		 */
+
+		//int act = _active_viewports;
+		for( ViewPort vp : _viewports )
+		{
+			//if (act & 1) {
+			assert(vp.width != 0);
+			MarkViewportDirty(vp, left, top, right, bottom);
+			//}
+			//if( act>>=1 <= 0 ) break;
+		}
 	}
 
 
@@ -1497,11 +1518,11 @@ public class ViewPort
 		pt = Point.RemapCoords(x, y, z);
 
 		MarkAllViewportsDirty(
-			pt.x - 31,
-			pt.y - 122,
-			pt.x - 31 + 67,
-			pt.y - 122 + 154
-		);
+				pt.x - 31,
+				pt.y - 122,
+				pt.x - 31 + 67,
+				pt.y - 122 + 154
+				);
 	}
 
 	static void SetSelectionTilesDirty()
@@ -1547,17 +1568,19 @@ public class ViewPort
 	{
 		//Town t;
 
-		if (!(Global._display_opt & Global.DO_SHOW_TOWN_NAMES)) return false;
+		if (0 == (Global._display_opt & Global.DO_SHOW_TOWN_NAMES)) return false;
 
 		if (vp.zoom < 1) {
 			x = x - vp.left + vp.virtual_left;
 			y = y - vp.top + vp.virtual_top;
 
-			FOR_ALL_TOWNS(t) 
-			
+			//FOR_ALL_TOWNS(t) 
+			i = Town.getIterator();
+			while(i.hasNext())
 			{
+				Town t = i.next();
 				if (t.xy &&
-				    y >= t.sign.top &&
+						y >= t.sign.top &&
 						y < t.sign.top + 12 &&
 						x >= t.sign.left &&
 						x < t.sign.left + t.sign.width_1) {
@@ -1568,9 +1591,14 @@ public class ViewPort
 		} else if (vp.zoom == 1) {
 			x = (x - vp.left + 1) * 2 + vp.virtual_left;
 			y = (y - vp.top + 1) * 2 + vp.virtual_top;
-			FOR_ALL_TOWNS(t) {
+
+			//FOR_ALL_TOWNS(t) 
+			i = Town.getIterator();
+			while(i.hasNext())
+			{
+				Town t = i.next();
 				if (t.xy &&
-				    y >= t.sign.top &&
+						y >= t.sign.top &&
 						y < t.sign.top + 24 &&
 						x >= t.sign.left &&
 						x < t.sign.left + t.sign.width_1 * 2) {
@@ -1581,9 +1609,14 @@ public class ViewPort
 		} else {
 			x = (x - vp.left + 3) * 4 + vp.virtual_left;
 			y = (y - vp.top + 3) * 4 + vp.virtual_top;
-			FOR_ALL_TOWNS(t) {
+
+			//FOR_ALL_TOWNS(t) 
+			i = Town.getIterator();
+			while(i.hasNext())
+			{
+				Town t = i.next();
 				if (t.xy &&
-				    y >= t.sign.top &&
+						y >= t.sign.top &&
 						y < t.sign.top + 24 &&
 						x >= t.sign.left &&
 						x < t.sign.left + t.sign.width_2 * 4) {
@@ -1598,18 +1631,21 @@ public class ViewPort
 
 	static boolean CheckClickOnStation(final ViewPort vp, int x, int y)
 	{
-		final Station st;
+		//final Station st;
 
-		if (!(Global._display_opt & Global.DO_SHOW_STATION_NAMES)) return false;
+		if (0 == (Global._display_opt & Global.DO_SHOW_STATION_NAMES)) return false;
 
 		if (vp.zoom < 1) {
 			x = x - vp.left + vp.virtual_left;
 			y = y - vp.top + vp.virtual_top;
 
-			FOR_ALL_STATIONS(st) 
+			//FOR_ALL_STATIONS(st) 
+			i = Station.getIterator();
+			while(i.hasNext())
 			{
+				Station st = i.next();
 				if (st.xy &&
-				    y >= st.sign.top &&
+						y >= st.sign.top &&
 						y < st.sign.top + 12 &&
 						x >= st.sign.left &&
 						x < st.sign.left + st.sign.width_1) {
@@ -1620,9 +1656,14 @@ public class ViewPort
 		} else if (vp.zoom == 1) {
 			x = (x - vp.left + 1) * 2 + vp.virtual_left;
 			y = (y - vp.top + 1) * 2 + vp.virtual_top;
-			FOR_ALL_STATIONS(st) {
+
+			//FOR_ALL_STATIONS(st) 
+			i = Station.getIterator();
+			while(i.hasNext())
+			{
+				Station st = i.next();
 				if (st.xy &&
-				    y >= st.sign.top &&
+						y >= st.sign.top &&
 						y < st.sign.top + 24 &&
 						x >= st.sign.left &&
 						x < st.sign.left + st.sign.width_1 * 2) {
@@ -1633,9 +1674,14 @@ public class ViewPort
 		} else {
 			x = (x - vp.left + 3) * 4 + vp.virtual_left;
 			y = (y - vp.top + 3) * 4 + vp.virtual_top;
-			FOR_ALL_STATIONS(st) {
+
+			//FOR_ALL_STATIONS(st) 
+			i = Station.getIterator();
+			while(i.hasNext())
+			{
+				Station st = i.next();
 				if (st.xy &&
-				    y >= st.sign.top &&
+						y >= st.sign.top &&
 						y < st.sign.top + 24 &&
 						x >= st.sign.left &&
 						x < st.sign.left + st.sign.width_2 * 4) {
@@ -1650,17 +1696,21 @@ public class ViewPort
 
 	static boolean CheckClickOnSign(final ViewPort vp, int x, int y)
 	{
-		final SignStruct ss;
+		//final SignStruct ss;
 
-		if (!(Global._display_opt & Global.DO_SHOW_SIGNS)) return false;
+		if (0 == (Global._display_opt & Global.DO_SHOW_SIGNS)) return false;
 
 		if (vp.zoom < 1) {
 			x = x - vp.left + vp.virtual_left;
 			y = y - vp.top + vp.virtual_top;
 
-			FOR_ALL_SIGNS(ss) {
+			//FOR_ALL_SIGNS(ss) 
+			i = SignStruct.getIterator();
+			while(i.hasNext())
+			{
+				SignStruct ss = i.next();
 				if (ss.str &&
-				    y >= ss.sign.top &&
+						y >= ss.sign.top &&
 						y < ss.sign.top + 12 &&
 						x >= ss.sign.left &&
 						x < ss.sign.left + ss.sign.width_1) {
@@ -1671,9 +1721,14 @@ public class ViewPort
 		} else if (vp.zoom == 1) {
 			x = (x - vp.left + 1) * 2 + vp.virtual_left;
 			y = (y - vp.top + 1) * 2 + vp.virtual_top;
-			FOR_ALL_SIGNS(ss) {
+
+			//FOR_ALL_SIGNS(ss) 
+			i = SignStruct.getIterator();
+			while(i.hasNext())
+			{
+				SignStruct ss = i.next();
 				if (ss.str &&
-				    y >= ss.sign.top &&
+						y >= ss.sign.top &&
 						y < ss.sign.top + 24 &&
 						x >= ss.sign.left &&
 						x < ss.sign.left + ss.sign.width_1 * 2) {
@@ -1684,9 +1739,14 @@ public class ViewPort
 		} else {
 			x = (x - vp.left + 3) * 4 + vp.virtual_left;
 			y = (y - vp.top + 3) * 4 + vp.virtual_top;
-			FOR_ALL_SIGNS(ss) {
+
+			//FOR_ALL_SIGNS(ss) {
+			i = SignStruct.getIterator();
+			while(i.hasNext())
+			{
+				SignStruct ss = i.next();
 				if (ss.str &&
-				    y >= ss.sign.top &&
+						y >= ss.sign.top &&
 						y < ss.sign.top + 24 &&
 						x >= ss.sign.left &&
 						x < ss.sign.left + ss.sign.width_2 * 4) {
@@ -1701,17 +1761,21 @@ public class ViewPort
 
 	static boolean CheckClickOnWaypoint(final ViewPort vp, int x, int y)
 	{
-		final Waypoint wp;
+		//final Waypoint wp;
 
-		if (!(Global._display_opt & Global.DO_WAYPOINTS)) return false;
+		if (0 == (Global._display_opt & Global.DO_WAYPOINTS)) return false;
 
 		if (vp.zoom < 1) {
 			x = x - vp.left + vp.virtual_left;
 			y = y - vp.top + vp.virtual_top;
 
-			FOR_ALL_WAYPOINTS(wp) {
+			//FOR_ALL_WAYPOINTS(wp) {
+			i = WayPoint.getIterator();
+			while(i.hasNext())
+			{
+				WayPoint wp = i.next();
 				if (wp.xy &&
-				    y >= wp.sign.top &&
+						y >= wp.sign.top &&
 						y < wp.sign.top + 12 &&
 						x >= wp.sign.left &&
 						x < wp.sign.left + wp.sign.width_1) {
@@ -1722,9 +1786,14 @@ public class ViewPort
 		} else if (vp.zoom == 1) {
 			x = (x - vp.left + 1) * 2 + vp.virtual_left;
 			y = (y - vp.top + 1) * 2 + vp.virtual_top;
-			FOR_ALL_WAYPOINTS(wp) {
+
+			//FOR_ALL_WAYPOINTS(wp) {
+			i = WayPoint.getIterator();
+			while(i.hasNext())
+			{
+				WayPoint wp = i.next();
 				if (wp.xy &&
-				    y >= wp.sign.top &&
+						y >= wp.sign.top &&
 						y < wp.sign.top + 24 &&
 						x >= wp.sign.left &&
 						x < wp.sign.left + wp.sign.width_1 * 2) {
@@ -1735,9 +1804,13 @@ public class ViewPort
 		} else {
 			x = (x - vp.left + 3) * 4 + vp.virtual_left;
 			y = (y - vp.top + 3) * 4 + vp.virtual_top;
-			FOR_ALL_WAYPOINTS(wp) {
+			//FOR_ALL_WAYPOINTS(wp) {
+			i = WayPoint.getIterator();
+			while(i.hasNext())
+			{
+				WayPoint wp = i.next();
 				if (wp.xy &&
-				    y >= wp.sign.top &&
+						y >= wp.sign.top &&
 						y < wp.sign.top + 24 &&
 						x >= wp.sign.left &&
 						x < wp.sign.left + wp.sign.width_2 * 4) {
@@ -1761,8 +1834,8 @@ public class ViewPort
 
 	static void SafeShowTrainViewWindow(final Vehicle v)
 	{
-	  if (!v.IsFrontEngine()) v = GetFirstVehicleInChain(v);
-	  ShowTrainViewWindow(v);
+		if (!v.IsFrontEngine()) v = v.GetFirstVehicleInChain();
+		ShowTrainViewWindow(v);
 	}
 
 	static void Nop(final Vehicle v) {}
@@ -1771,10 +1844,10 @@ public class ViewPort
 	static OnVehicleClickProc _on_vehicle_click_proc[] = {
 			ViewPort::SafeShowTrainViewWindow,
 			::ShowRoadVehViewWindow,
-			::ShowShipViewWindow,
+			Ship::ShowShipViewWindow,
 			::ShowAircraftViewWindow,
-		ViewPort::Nop, // Special vehicles
-		ViewPort::Nop  // Disaster vehicles
+			ViewPort::Nop, // Special vehicles
+			ViewPort::Nop  // Disaster vehicles
 	};
 
 	void HandleViewportClicked(int x, int y)
@@ -1843,7 +1916,7 @@ public class ViewPort
 		Point pt;
 
 		pt = MapXYZToViewport(w.viewport, x, y, Landscape.GetSlopeZ(x, y));
-		w.as_vp_d().follow_vehicle = Vehicle.INVALID_VEHICLE;
+		w.as_vp_d().follow_vehicle = new VehicleID( Vehicle.INVALID_VEHICLE );
 
 		if (w.as_vp_d().scrollpos_x == pt.x && w.as_vp_d().scrollpos_y == pt.y)
 			return false;
@@ -1938,16 +2011,16 @@ public class ViewPort
 			y1 = pt.y;
 			if (x1 != -1) {
 				switch (_thd.place_mode) {
-					case VHM_RECT:
-						_thd.new_drawstyle = HT_RECT;
-						break;
-					case VHM_POINT:
-						_thd.new_drawstyle = HT_POINT;
-						x1 += 8;
-						y1 += 8;
-						break;
-					case VHM_RAIL:
-						_thd.new_drawstyle = GetAutorailHT(pt.x, pt.y); // draw one highlighted tile
+				case VHM_RECT:
+					_thd.new_drawstyle = HT_RECT;
+					break;
+				case VHM_POINT:
+					_thd.new_drawstyle = HT_POINT;
+					x1 += 8;
+					y1 += 8;
+					break;
+				case VHM_RAIL:
+					_thd.new_drawstyle = GetAutorailHT(pt.x, pt.y); // draw one highlighted tile
 				}
 				_thd.new_pos.x = x1 & ~0xF;
 				_thd.new_pos.y = y1 & ~0xF;
@@ -2057,8 +2130,8 @@ public class ViewPort
 
 		int dx = thd.selstart.x - (thd.selend.x&~0xF);
 		int dy = thd.selstart.y - (thd.selend.y&~0xF);
-		w = BitOps.Math.abs(dx) + 16;
-		h = BitOps.Math.abs(dy) + 16;
+		w = Math.abs(dx) + 16;
+		h = Math.abs(dy) + 16;
 
 		if (TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y) == TileIndex.TileVirtXY(x, y)) { // check if we're only within one tile
 			if (method == VPM_RAILDIRS)
@@ -2179,28 +2252,28 @@ public class ViewPort
 		sy = _thd.selstart.y;
 
 		switch (method) {
-			case VPM_FIX_X:
-				x = sx;
-				break;
+		case VPM_FIX_X:
+			x = sx;
+			break;
 
-			case VPM_FIX_Y:
-				y = sy;
-				break;
+		case VPM_FIX_Y:
+			y = sy;
+			break;
 
-			case VPM_X_OR_Y:
-				if (Math.abs(sy - y) < Math.abs(sx - x)) y = sy; else x = sx;
-				break;
+		case VPM_X_OR_Y:
+			if (Math.abs(sy - y) < Math.abs(sx - x)) y = sy; else x = sx;
+			break;
 
-			case VPM_X_AND_Y:
-				break;
+		case VPM_X_AND_Y:
+			break;
 
 			// limit the selected area to a 10x10 rect.
-			case VPM_X_AND_Y_LIMITED: {
-				int limit = (_thd.sizelimit - 1) * 16;
-				x = sx + BitOps.clamp(x - sx, -limit, limit);
-				y = sy + BitOps.clamp(y - sy, -limit, limit);
-				break;
-			}
+		case VPM_X_AND_Y_LIMITED: {
+			int limit = (_thd.sizelimit - 1) * 16;
+			x = sx + BitOps.clamp(x - sx, -limit, limit);
+			y = sy + BitOps.clamp(y - sy, -limit, limit);
+			break;
+		}
 		}
 
 		_thd.selend.x = x;
@@ -2249,10 +2322,10 @@ public class ViewPort
 		SetTileSelectSize(1, 1);
 
 		// and call the mouseup event.
-		e.event = WE_PLACE_MOUSEUP;
-		e.place.pt = _thd.selend;
-		e.place.tile = TileVirtXY(e.place.pt.x, e.place.pt.y);
-		e.place.starttile = TileVirtXY(_thd.selstart.x, _thd.selstart.y);
+		e.event = WindowEvents.WE_PLACE_MOUSEUP;
+		e.pt = _thd.selend;
+		e.tile = TileIndex.TileVirtXY(e.pt.x, e.pt.y);
+		e.starttile = TileIndex.TileVirtXY(_thd.selstart.x, _thd.selstart.y);
 		w.wndproc.accept(w, e);
 
 		return false;
@@ -2308,9 +2381,9 @@ public class ViewPort
 	{
 		SetObjectToPlace(Sprite.SPR_CURSOR_MOUSE, 0, 0, 0);
 	}
-	
-	
-	
+
+
+
 }
 
 

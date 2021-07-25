@@ -330,38 +330,38 @@ public class Clear {
 	 */
 	int CmdLevelLand(int ex, int ey, int flags, int p1, int p2)
 	{
-		int size_x, size_y;
+		//int size_x, size_y;
 		int sx, sy;
-		int h, curh;
+		int h;
 		TileIndex tile;
 		int ret, cost, money;
 
-		if (p1 > MapSize()) return Cmd.CMD_ERROR;
+		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 
-		Player.SET_Player.EXPENSES_TYPE(EXPENSES_CONSTRUCTION);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		// remember level height
-		h = TileHeight(p1);
+		h = p1.TileHeight();
 
 		ex >>= 4; ey >>= 4;
 
 		// make sure sx,sy are smaller than ex,ey
-		sx = TileX(p1);
-		sy = TileY(p1);
+		sx = p1.TileX();
+		sy = p1.TileY();
 		if (ex < sx) intswap(ex, sx);
 		if (ey < sy) intswap(ey, sy);
-		tile = TileXY(sx, sy);
+		tile = TileIndex.TileXY(sx, sy);
 
-		size_x = ex-sx+1;
-		size_y = ey-sy+1;
+		int size_x = ex-sx+1;
+		int size_y = ey-sy+1;
 
 		money = GetAvailableMoneyForCommand();
 		cost = 0;
 
 		//BEGIN_TILE_LOOP(tile2, size_x, size_y, tile) 
-		TileIndex.forAll( sizex, sizey, tile, (tile2) ->
+		TileIndex.forAll( size_x, size_y, tile, (tile2) ->
 		{
-			curh = TileHeight(tile2);
+			int curh = tile2.TileHeight();
 			while (curh != h) {
 				ret = Cmd.DoCommandByTile(tile2, 8, (curh > h) ? 0 : 1, flags & ~Cmd.DC_EXEC, Cmd.CMD_TERRAFORM_LAND);
 				if (Cmd.CmdFailed(ret)) break;
@@ -370,13 +370,15 @@ public class Clear {
 				if (flags & Cmd.DC_EXEC) {
 					if ((money -= ret) < 0) {
 						_additional_cash_required = ret;
-						return cost - ret;
+						cost = cost - ret;
+						return true;
 					}
 					Cmd.DoCommandByTile(tile2, 8, (curh > h) ? 0 : 1, flags, Cmd.CMD_TERRAFORM_LAND);
 				}
 
 				curh += (curh > h) ? -1 : 1;
 			}
+			return false;
 		}); //END_TILE_LOOP(tile2, size_x, size_y, tile)
 
 		return (cost == 0) ? Cmd.CMD_ERROR : cost;

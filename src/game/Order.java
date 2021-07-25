@@ -1,5 +1,8 @@
 package game;
 
+import java.util.Iterator;
+import java.util.function.Consumer;
+
 import game.util.BitOps;
 
 public class Order implements IPoolItem {
@@ -1110,6 +1113,18 @@ public class Order implements IPoolItem {
 
 		_backup_orders_tile = 0;
 	}
+
+	
+	public static Iterator<Order> getIterator()
+	{
+		return _order_pool.pool.values().iterator();
+	}
+
+	static void forEach( Consumer<Order> c )
+	{
+		_order_pool.forEach(c);
+	}
+	
 
 	
 	

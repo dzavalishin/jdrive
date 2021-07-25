@@ -49,6 +49,7 @@ public class Terraform {
 				Cmd.DoCommandP(tile, 0, 0, null, Cmd.CMD_LANDSCAPE_CLEAR);
 				tile.MarkTileDirtyByTile();
 			}
+			return false;
 		}); //END_TILE_LOOP(tile, size_x, size_y, 0);
 		Global._generating_world = false;
 	}
@@ -77,6 +78,7 @@ public class Terraform {
 				Landscape.ModifyTile(tile,TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) | TileTypes.MP_MAP5, (tile.getMap().m5 & ~0x1C) | 0xB);
 				success = true;
 			}
+			return false;
 		}); // END_TILE_LOOP(tile, size_x, size_y, 0);
 
 		// TODO if (success) SndPlayTileFx(SND_1F_SPLAT, end);

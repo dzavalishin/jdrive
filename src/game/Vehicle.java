@@ -788,6 +788,10 @@ public class Vehicle implements IPoolItem
 			c.accept(o);
 	}
 
+	public static Iterator<Vehicle> getIterator()
+	{
+		return _vehicle_pool.pool.values().iterator();
+	}
 
 
 
@@ -2316,14 +2320,14 @@ public class Vehicle implements IPoolItem
 		if (v.type == VEH_Train && !v.IsFrontEngine()) return Cmd.CMD_ERROR;
 
 		// check that we can allocate enough vehicles
-		if (!(flags & Cmd.DC_EXEC)) {
+		if (0 == (flags & Cmd.DC_EXEC)) {
 			int veh_counter = 0;
 			do {
 				veh_counter++;
 			} while ((v = v.next) != null);
 
 			if (!AllocateVehicles(null, veh_counter)) {
-				return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
+				return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 			}
 		}
 
@@ -2364,7 +2368,7 @@ public class Vehicle implements IPoolItem
 			}
 		} while (v.type == VEH_Train && (v = GetNextVehicle(v)) != null);
 
-		if (flags & Cmd.DC_EXEC && v_front.type == VEH_Train) {
+		if( (0 != (flags & Cmd.DC_EXEC) && v_front.type == VEH_Train)) {
 			// _new_train_id needs to be the front engine due to the callback function
 			_new_train_id = w_front.index;
 		}
@@ -2443,12 +2447,12 @@ public class Vehicle implements IPoolItem
 				 * We add the new engine after the old one instead of replacing it. It will give the same result anyway when we
 				 * sell the old engine in a moment
 				 */
-				Cmd.DoCommand(0, 0, (old_v.GetPrevVehicleInChain().index.id << 16) | new_v.index.id, 1, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
+				Cmd.DoCommand(0, 0, (old_v.GetPrevVehicleInChain().index << 16) | new_v.index, 1, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 				/* Now we move the old one out of the train */
-				Cmd.DoCommand(0, 0, (INVALID_VEHICLE << 16) | old_v.index.id, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
+				Cmd.DoCommand(0, 0, (INVALID_VEHICLE << 16) | old_v.index, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 			} else {
 				// copy/clone the orders
-				Cmd.DoCommand(0, 0, (old_v.index.id << 16) | new_v.index.id, old_v.IsOrderListShared() ? CO_SHARE : CO_COPY, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
+				Cmd.DoCommand(0, 0, (old_v.index << 16) | new_v.index, old_v.IsOrderListShared() ? CO_SHARE : CO_COPY, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
 				new_v.cur_order_index = old_v.cur_order_index;
 				ChangeVehicleViewWindow(old_v, new_v);
 				new_v.profit_this_year = old_v.profit_this_year;
@@ -2498,8 +2502,9 @@ public class Vehicle implements IPoolItem
 	 * @param v The vehicle to replace
 	 *	if the vehicle is a train, v needs to be the front engine
 	 *	return value is a pointer to the new vehicle, which is the same as the argument if nothing happened
+	 * @return 
 	 */
-	static void MaybeReplaceVehicle(Vehicle v)
+	static int MaybeReplaceVehicle(Vehicle v)
 	{
 		Vehicle w;
 		final Player p = Player.GetPlayer(v.owner);
@@ -2587,7 +2592,7 @@ public class Vehicle implements IPoolItem
 				}
 				if (stopped) v.vehstatus &= ~VS_STOPPED;
 				Global._current_player = new PlayerID(Owner.OWNER_NONE);
-				return;
+				return 0;
 			}
 
 			//MA CHECKS
@@ -2621,12 +2626,12 @@ public class Vehicle implements IPoolItem
 				}
 				if (w == null) {
 					// we failed to make the train short enough
-					Global.SetDParam(0, v.unitnumber);
-					NewsItem.AddNewsItem(Str.STR_TRAIN_TOO_LONG_AFTER_REPLACEMENT, NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
+					Global.SetDParam(0, v.unitnumber.id);
+					NewsItem.AddNewsItem(Str.STR_TRAIN_TOO_LONG_AFTER_REPLACEMENT, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 					break;
 				}
 				temp = w;
-				w = GetNextVehicle(w);
+				w = w.GetNextVehicle();
 				Cmd.DoCommand(0, 0, (INVALID_VEHICLE << 16) | temp.index, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 				MoveVehicleCargo(v, temp);
 				cost += Cmd.DoCommand(0, 0, temp.index, 0, flags, CMD_SELL_VEH(temp.type));
@@ -2637,6 +2642,8 @@ public class Vehicle implements IPoolItem
 
 		if (stopped) v.vehstatus &= ~VS_STOPPED;
 		Global._current_player = new PlayerID( Owner.OWNER_NONE );
+		
+		return 0;
 	}
 
 

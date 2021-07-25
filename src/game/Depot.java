@@ -1,5 +1,6 @@
 package game;
 
+import java.util.Iterator;
 import java.util.function.Consumer;
 
 import game.util.BitOps;
@@ -46,6 +47,21 @@ public class Depot implements IPoolItem
 		return index < GetDepotPoolSize();
 	}
 
+	public static Iterator<Depot> getIterator()
+	{
+		return _depot_pool.pool.values().iterator();
+	}
+
+	static void forEach( Consumer<Depot> c )
+	{
+		_depot_pool.forEach(c);
+	}
+
+	
+	
+	
+	
+	
 	//public static final int  FOR_ALL_DEPOTS_FROM(d, start) for (d = GetDepot(start); d != null; d = (d.index + 1 < GetDepotPoolSize()) ? GetDepot(d.index + 1) : null)
 	//public static final int  FOR_ALL_DEPOTS(d) FOR_ALL_DEPOTS_FROM(d, 0)
 
@@ -251,10 +267,6 @@ public class Depot implements IPoolItem
 		Window.DeleteWindowById(Window.WC_VEHICLE_DEPOT, tile.tile);
 	}
 
-	public static void forEach( Consumer<Depot> c ) {
-		_depot_pool.forEach(c);
-		
-	}
 
 	static void InitializeDepot()
 	{

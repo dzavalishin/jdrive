@@ -269,11 +269,16 @@ public class BitOps {
 		return (x + n - 1) & ~(n - 1); 
 	}
 
+	// TODO check me
 	public static int FindFirstBit(int a) {
 		//return Integer.numberOfTrailingZeros(a)+1;
 		return 32-Integer.numberOfLeadingZeros(a);
 	}
 
+	public static int FindFirstBit(long a) {
+		//return Integer.numberOfTrailingZeros(a)+1;
+		return 32-Long.numberOfLeadingZeros(a);
+	}
 
 
 }

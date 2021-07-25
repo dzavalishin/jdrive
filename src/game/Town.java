@@ -2144,6 +2144,13 @@ public class Town extends TownTables implements IPoolItem
 		_town_pool.forEach(c);
 	}
 
+	public static Iterator<Town> getIterator()
+	{
+		return _town_pool.pool.values().iterator();
+	}
+
+	
+	
 	/*
 	// Save and load of towns.
 	static final SaveLoad _town_desc[] = {

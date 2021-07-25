@@ -1,5 +1,8 @@
 package game;
 
+import java.util.Iterator;
+import java.util.function.Consumer;
+
 public class RoadStop implements IPoolItem
 {
 
@@ -53,13 +56,34 @@ public class RoadStop implements IPoolItem
 	}
 	
 	
-	private IPoolItemFactory<RoadStop> factory = new IPoolItemFactory<RoadStop>() {		
+	private static IPoolItemFactory<RoadStop> factory = new IPoolItemFactory<RoadStop>() {		
 		@Override
 		public RoadStop createObject() {
 			return new RoadStop();
 		}
 	};
-	private MemoryPool<RoadStop> _roadstop_pool = new MemoryPool<RoadStop>(factory);
+	
+	private static MemoryPool<RoadStop> _roadstop_pool = new MemoryPool<RoadStop>(factory);
+
+	
+	public static Iterator<RoadStop> getIterator()
+	{
+		return _roadstop_pool.pool.values().iterator();
+	}
+
+	public static void forEach( Consumer<RoadStop> c )
+	{
+		_roadstop_pool.forEach(c);
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	static public RoadStopType GetRoadStopType(TileIndex tile)
 	{

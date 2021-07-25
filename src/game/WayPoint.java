@@ -1,3 +1,6 @@
+import java.util.Iterator;
+import java.util.function.Consumer;
+
 import game.util.BitOps;
 
 public class WayPoint implements IPoolItem
@@ -42,6 +45,17 @@ public class WayPoint implements IPoolItem
 	/* Initialize the town-pool */
 	//MemoryPool _waypoint_pool = { "Waypoints", WAYPOINT_POOL_MAX_BLOCKS, WAYPOINT_POOL_BLOCK_SIZE_BITS, sizeof(WayPoint), &WaypointPoolNewBlock, 0, 0, null };
 
+	public static Iterator<WayPoint> getIterator()
+	{
+		return _waypoint_pool.pool.values().iterator();
+	}
+
+	public static void forEach( Consumer<WayPoint> c )
+	{
+		_waypoint_pool.forEach(c);
+	}
+	
+	
 	private void clear()
 	{
 		xy = null;

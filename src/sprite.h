@@ -1,3 +1,4 @@
+#if 0
 /* $Id: sprite.h 3077 2005-10-22 06:39:32Z tron $ */
 
 #ifndef SPRITE_H

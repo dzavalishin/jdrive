@@ -2026,12 +2026,19 @@ public class Window extends WindowConstants
 		Global.hal.SetDirtyBlocks(left + wi.left, top + wi.top, left + wi.right + 1, top + wi.bottom + 1);
 	}
 
-	static void InvalidateWindowWidget(WindowClass cls, WindowNumber number, byte widget_index)
+	static void InvalidateWindowWidget(WindowClass cls, WindowNumber number, int widget_index)
 	{
-		//final Window  w;
-
 		for (Window w : _windows) {
 			if (w.window_class == cls && w.window_number == number) {
+				w.InvalidateWidget(widget_index);
+			}
+		}
+	}
+
+	static void InvalidateWindowWidget(int cls, int number, int widget_index)
+	{
+		for (Window w : _windows) {
+			if (w.window_class.v == cls && w.window_number.n == number) {
 				w.InvalidateWidget(widget_index);
 			}
 		}

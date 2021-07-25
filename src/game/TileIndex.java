@@ -1,6 +1,7 @@
 package game;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import game.util.BitOps;
 
@@ -8,7 +9,7 @@ public class TileIndex {
 	protected int tile;
 
 
-	public static void forAll( int w, int h, TileIndex tile, Consumer<TileIndex> c )
+	public static void forAll( int w, int h, TileIndex tile, Function<TileIndex,Boolean> c )
 	{
 		forAll( w, h, tile.getTile(), c );		
 	}	
@@ -20,9 +21,9 @@ public class TileIndex {
 	 * @param w - rectangle width
 	 * @param h - height
 	 * @param tile - start pos
-	 * @param c - code to run for each tile
+	 * @param c - code to run for each tile, breaks loop if returns true
 	 */
-	public static void forAll( int w, int h, int tile, Consumer<TileIndex> c )
+	public static void forAll( int w, int h, int tile, Function<TileIndex,Boolean> c )
 	{
 		//TileIndex ti = new TileIndex(tile);
 
@@ -36,7 +37,8 @@ public class TileIndex {
 
 					//ti.tile = var;
 					//c.accept(ti);
-					c.accept( new TileIndex(var) );
+					if( c.apply( new TileIndex(var) ) )
+						return;
 
 					++var;
 				} while ( --w_cur != 0);
@@ -49,6 +51,58 @@ public class TileIndex {
 
 	}
 
+	
+	
+
+	/**
+	 * Iterate over a tiles rectangle.
+	 * 
+	 * @param w - rectangle width
+	 * @param h - height
+	 * @param tile - start pos
+	 * @param c - code to run for each tile, breaks loop if returns true
+	 */
+	public static void forEach( int w, int h, int tile, TileIterator c )
+	{
+		//TileIndex ti = new TileIndex(tile);
+
+
+		{                                                        
+			int h_cur = h;                                         
+			int var = tile;                                       
+			do {                                                   
+				int w_cur = w;                                       
+				do {
+
+					//ti.tile = var;
+					//c.accept(ti);
+					if( c.apply( new TileIndex(var), h_cur, w_cur ) )
+						return;
+
+					++var;
+				} while ( --w_cur != 0);
+				//int diff = (y * Global.MapSizeX()) + x);
+				var += Global.MapSizeX() - w;
+				//} while (var += TileDiffXY(0, 1) - (w), --h_cur != 0);				
+			} while ( --h_cur != 0); 
+		}
+
+
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	/** static  TileIndex TileXY(int x, int y)
 	 * 
@@ -324,6 +378,11 @@ public class TileIndex {
 		Global._m[tile].type = type.ordinal();
 	}
 
+	boolean IsTileType(int type)
+	{
+		return GetTileType().ordinal() == type;
+	}
+
 	boolean IsTileType(TileType type)
 	{
 		return GetTileType().ordinal() == type.type;
@@ -563,3 +622,11 @@ enum TileTypes {
 	public static final int MP_NODIRTY = 1<<15;
 
 }
+
+
+@FunctionalInterface
+interface TileIterator 
+{
+	boolean apply( TileIndex ti, int h_cur, int v_cur );
+}
+

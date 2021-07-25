@@ -1254,6 +1254,7 @@ public class Gui
 				TileIndex.forAll( sizex, sizey, tile, (tile2) ->
 				{
 					h = Math.min(h, tile2.TileHeight());
+					return false;
 				});// END_TILE_LOOP(tile2, sizex, sizey, tile)
 			} else {
 				/* Lower land */
@@ -1262,6 +1263,7 @@ public class Gui
 				TileIndex.forAll( sizex, sizey, tile, (tile2) ->
 				{
 					h = Math.max(h, tile2.TileHeight());
+					return false;
 				}); //END_TILE_LOOP(tile2, sizex, sizey, tile)
 			}
 
@@ -1271,6 +1273,7 @@ public class Gui
 				if (tile2.TileHeight() == h) {
 					Cmd.DoCommandP(tile2, 8, (int)mode, null, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO);
 				}
+				return false;
 			}); //END_TILE_LOOP(tile2, sizex, sizey, tile)
 		}
 

@@ -256,6 +256,17 @@ class DrawPixelInfo {
 	int left, top, width, height;
 	int pitch;
 	int zoom;
+	
+	public void assignFrom(DrawPixelInfo dpi) 
+	{
+		dst_ptr = dpi.dst_ptr; // image buffer - (green << 24) | (red << 16) | blue
+		left = dpi.left; 
+		top = dpi.top; 
+		width = dpi.width; 
+		height = dpi.height;
+		pitch = dpi.pitch;
+		zoom = dpi.zoom;
+	}
 }
 
 class CursorVars {

@@ -1,3 +1,9 @@
+package game;
+
+
+import java.util.Iterator;
+import java.util.function.Consumer;
+
 public class SignStruct implements IPoolItem
 {
 	StringID     str;
@@ -10,7 +16,7 @@ public class SignStruct implements IPoolItem
 
 	int          index;
 
-	private static IPoolItemFactory<SignStruct> factory = new IPoolItemFactory<T>() {
+	private static IPoolItemFactory<SignStruct> factory = new IPoolItemFactory<SignStruct>() {
 		public SignStruct createObject() { return new SignStruct(); };
 	};
 
@@ -61,6 +67,17 @@ public class SignStruct implements IPoolItem
 	//#define FOR_ALL_SIGNS_FROM(ss, start) for (ss = GetSign(start); ss != NULL; ss = (ss.index + 1 < GetSignPoolSize()) ? GetSign(ss.index + 1) : NULL)
 	//#define FOR_ALL_SIGNS(ss) FOR_ALL_SIGNS_FROM(ss, 0)
 
+	public static Iterator<SignStruct> getIterator()
+	{
+		return _sign_pool.pool.values().iterator();
+	}
+
+	public static void forEach( Consumer<SignStruct> c )
+	{
+		_sign_pool.forEach(c);
+	}
+	
+	
 	static boolean _sign_sort_dirty;
 	//int *_sign_sort;
 
@@ -103,7 +120,7 @@ public class SignStruct implements IPoolItem
 	{
 		Point pt = Point.RemapCoords(x, y, z);
 		Global.SetDParam(0, str.id);
-		UpdateViewportSignPos(sign, pt.x, pt.y - 6, STR_2806);
+		ViewPort.UpdateViewportSignPos(sign, pt.x, pt.y - 6, Str.STR_2806);
 	}
 
 	/**
@@ -184,11 +201,11 @@ public class SignStruct implements IPoolItem
 
 		/* Try to locate a new sign */
 		ss = AllocateSign();
-		if (ss == null) return_cmd_error(STR_2808_TOO_MANY_SIGNS);
+		if (ss == null) return_cmd_error(Str.STR_2808_TOO_MANY_SIGNS);
 
 		/* When we execute, really make the sign */
-		if (flags & DC_EXEC) {
-			ss.str = STR_280A_SIGN;
+		if (flags & Cmd.DC_EXEC) {
+			ss.str = Str.STR_280A_SIGN;
 			ss.x = x;
 			ss.y = y;
 			ss.owner = Global._current_player; // owner of the sign; just eyecandy
@@ -212,16 +229,16 @@ public class SignStruct implements IPoolItem
 	 */
 	static int CmdRenameSign(int x, int y, int flags, int p1, int p2)
 	{
-		if (!IsSignIndex(p1)) return CMD_ERROR;
+		if (!IsSignIndex(p1)) return Cmd.CMD_ERROR;
 
 		/* If _cmd_text 0 means the new text for the sign is non-empty.
 		 * So rename the sign. If it is empty, it has no name, so delete it */
-		if (_cmd_text[0] != '\0') {
+		if (_cmd_text != null) {
 			/* Create the name */
 			StringID str = Global.AllocateName(_cmd_text, 0);
-			if (str == null) return CMD_ERROR;
+			if (str == null) return Cmd.CMD_ERROR;
 
-			if (flags & DC_EXEC) {
+			if (flags & Cmd.DC_EXEC) {
 				SignStruct ss = GetSign(p1);
 
 				/* Delete the old name */
@@ -235,14 +252,14 @@ public class SignStruct implements IPoolItem
 				ss.UpdateSignVirtCoords();
 				ss.MarkSignDirty();
 
-				InvalidateWindow(WC_SIGN_LIST, 0);
+				Window.InvalidateWindow(Window.WC_SIGN_LIST, 0);
 				_sign_sort_dirty = true;
 			} else {
 				/* Free the name, because we did not assign it yet */
 				Global.DeleteName(str);
 			}
 		} else { /* Delete sign */
-			if (flags & DC_EXEC) {
+			if( 0 != (flags & Cmd.DC_EXEC)) {
 				SignStruct ss = GetSign(p1);
 
 				/* Delete the name */
@@ -279,7 +296,7 @@ public class SignStruct implements IPoolItem
 	 */
 	static void PlaceProc_Sign(TileIndex tile)
 	{
-		Cmd.DoCommandP(tile, 0, 0, CcPlaceSign, CMD_PLACE_SIGN | CMD_MSG(STR_2809_CAN_T_PLACE_SIGN_HERE));
+		Cmd.DoCommandP(tile, 0, 0, CcPlaceSign, Cmd.CMD_PLACE_SIGN | CMD_MSG(Str.STR_2809_CAN_T_PLACE_SIGN_HERE));
 	}
 
 	/**
@@ -348,7 +365,7 @@ static const SaveLoad _sign_desc[] = {
 	final ChunkHandler _sign_chunk_handlers[] = {
 			{ 'SIGN', Save_SIGN, Load_SIGN, CH_ARRAY | CH_LAST},
 	};
-
+*/
 
 
 

@@ -1,9 +1,16 @@
 package game;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.function.Consumer;
 
 import game.tables.IndustryTables;
 import game.util.BitOps;
+
+import game.tables.DrawIndustrySpec1Struct;
+import game.tables.DrawIndustrySpec4Struct;
+import game.tables.DrawIndustryTileStruct;
 
 public class Industry extends IndustryTables implements IPoolItem {
 
@@ -31,7 +38,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	byte owner;
 	byte color_map;
 	byte last_prod_year;
-	byte was_cargo_delivered;
+	boolean was_cargo_delivered;
 
 	int index;
 
@@ -108,6 +115,17 @@ public class Industry extends IndustryTables implements IPoolItem {
 	}
 
 
+	public static Iterator<Industry> getIterator()
+	{
+		return _industry_pool.pool.values().iterator();
+	}
+
+	static void forEach( Consumer<Industry> c )
+	{
+		_industry_pool.forEach(c);
+	}
+	
+	
 
 
 
@@ -120,7 +138,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	//void ShowIndustryViewWindow(int industry);
 	//void BuildOilRig(TileIndex tile);
 	//void DeleteOilRig(TileIndex tile);
-
+	/*
 	class DrawIndustryTileStruct {
 		int sprite_1;
 		int sprite_2;
@@ -146,7 +164,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		byte image_2;
 		byte image_3;
 	}
-
+	*/
 	/*class IndustryTileTable {
 		TileIndexDiffC ti;
 		byte map5;
@@ -194,7 +212,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	{
 		int x = 0;
 
-		if (ti.tile.getMap().m1 & 0x80) {
+		if(0 != (ti.tile.getMap().m1 & 0x80)) {
 			x = _industry_anim_offs[ti.tile.getMap().m3];
 			if ( (byte)x == 0xFF)
 				x = 0;
@@ -234,7 +252,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	static void DrawCoalPlantSparkles(final TileInfo ti)
 	{
 		int image = ti.tile.getMap().m1;
-		if (image & 0x80) {
+		if(0 != (image & 0x80)) {
 			image = BitOps.GB(image, 2, 5);
 			if (image != 0 && image < 7) {
 				ViewPort.AddChildSpriteScreen(image + 0x806,
@@ -274,7 +292,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		z = ti.z;
 		/* Add bricks below the industry? */
-		if (ti.tileh & 0xF) {
+		if(0 != (ti.tileh & 0xF)) {
 			ViewPort.AddSortableSpriteToDraw(Sprite.SPR_FOUNDATION_BASE + (ti.tileh & 0xF), ti.x, ti.y, 16, 16, 7, z);
 			ViewPort.AddChildSpriteScreen(image, 0x1F, 1);
 			z += 8;
@@ -399,7 +417,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 			am = MoveGoodsToStation(i.xy, i.width, i.height, i.produced_cargo[0], cw);
 			i.last_mo_transported[0] += am;
-			if (am != 0 && (m5 = _industry_produce_map5[tile.getMap().m5]) != 0xFF) {
+			if (am != 0 && (m5 = (byte) _industry_produce_map5[tile.getMap().m5]) != 0xFF) {
 				tile.getMap().m1 = 0x80;
 				tile.getMap().m5 = m5;
 				tile.MarkTileDirtyByTile();
@@ -456,7 +474,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					m = 0;
 					DeleteAnimatedTile(tile);
 				}
-				tile.getMap().m3 = m;
+				tile.getMap().m3 = (byte)m;
 
 				tile.MarkTileDirtyByTile();
 			}
@@ -485,7 +503,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					DeleteAnimatedTile(tile);
 				} else {
 					tile.getMap().m1 = m + (1<<2);
-					MarkTileDirtyByTile(tile);
+					tile.MarkTileDirtyByTile();
 				}
 			}
 			break;
@@ -510,7 +528,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					}
 				}
 
-				tile.getMap().m3 = m;
+				tile.getMap().m3 = (byte) m;
 				tile.MarkTileDirtyByTile();
 			}
 			break;
@@ -520,7 +538,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			if ((Global._tick_counter & 3) == 0) {
 				m = tile.getMap().m5	+ 1;
 				if (m == 155+1) m = 148;
-				tile.getMap().m5 = m;
+				tile.getMap().m5 = (byte) m;
 
 				tile.MarkTileDirtyByTile();
 			}
@@ -554,14 +572,14 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 			if (state < 0x1A0) {
 				if (state < 0x20 || state >= 0x180) {
-					if (!(tile.getMap().m1 & 0x40)) {
+					if (0 == (tile.getMap().m1 & 0x40)) {
 						tile.getMap().m1 |= 0x40;
-						SndPlayTileFx(SND_0B_MINING_MACHINERY, tile);
+						//SndPlayTileFx(SND_0B_MINING_MACHINERY, tile);
 					}
-					if (state & 7)
+					if(0 != (state & 7))
 						return;
 				} else {
-					if (state & 3)
+					if(0 != (state & 3))
 						return;
 				}
 				m = (tile.getMap().m1 + 1) | 0x40;
@@ -571,7 +589,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			} else if (state >= 0x200 && state < 0x3A0) {
 				int i;
 				i = (state < 0x220 || state >= 0x380) ? 7 : 3;
-				if (state & i)
+				if(0 != (state & i))
 					return;
 
 				m = (tile.getMap().m1 & 0xBF) - 1;
@@ -608,7 +626,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		if (0 == (tile.getMap().m1 & 0x80))
 			return;
 
-		switch(tile.getMap().m5) {
+		switch((int)tile.getMap().m5) {
 		case 8:
 			MakeIndustryTileBiggerCase8(tile);
 			break;
@@ -669,7 +687,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		TransportIndustryGoods(tile);
 
-		n = _industry_map5_animation_next[tile.getMap().m5];
+		n = (byte) _industry_map5_animation_next[tile.getMap().m5];
 		if (n != 255) {
 			tile.getMap().m1 = 0;
 			tile.getMap().m5 = n;
@@ -690,17 +708,17 @@ public class Industry extends IndustryTables implements IPoolItem {
 			break;
 
 		case 0:
-			if (!(Global._tick_counter & 0x400) && BitOps.CHANCE16(1,2))
+			if (0 == (Global._tick_counter & 0x400) && BitOps.CHANCE16(1,2))
 				SET_AND_ANIMATE(tile,1,0x80);
 			break;
 
 		case 47:
-			if (!(Global._tick_counter & 0x400) && BitOps.CHANCE16(1,2))
+			if (0 == (Global._tick_counter & 0x400) && BitOps.CHANCE16(1,2))
 				SET_AND_ANIMATE(tile,0x30,0x80);
 			break;
 
 		case 79:
-			if (!(Global._tick_counter & 0x400) && BitOps.CHANCE16(1,2))
+			if (0 == (Global._tick_counter & 0x400) && BitOps.CHANCE16(1,2))
 				SET_AND_ANIMATE(tile,0x58,0x80);
 			break;
 
@@ -710,23 +728,23 @@ public class Industry extends IndustryTables implements IPoolItem {
 			break;
 
 		case 1:
-			if (!(Global._tick_counter & 0x400))
+			if (0 == (Global._tick_counter & 0x400))
 				SET_AND_UNANIMATE(tile, 0, 0x83);
 			break;
 
 		case 48:
-			if (!(Global._tick_counter & 0x400))
+			if (0 == (Global._tick_counter & 0x400))
 				SET_AND_UNANIMATE(tile, 0x2F, 0x83);
 			break;
 
 		case 88:
-			if (!(Global._tick_counter & 0x400))
+			if (0 == (Global._tick_counter & 0x400))
 				SET_AND_UNANIMATE(tile, 0x4F, 0x83);
 			break;
 
 		case 10:
 			if (BitOps.CHANCE16(1,3)) {
-				SndPlayTileFx(SND_0C_ELECTRIC_SPARK, tile);
+				//SndPlayTileFx(SND_0C_ELECTRIC_SPARK, tile);
 				AddAnimatedTile(tile);
 			}
 			break;
@@ -895,6 +913,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		{
 			//cur_tile = TILE_MASK(cur_tile);
 			count += IsBadFarmFieldTile(TILE_MASK(cur_tile));
+			return false;
 		});
 		//END_TILE_LOOP(cur_tile, size_x, size_y, tile)
 
@@ -918,6 +937,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 						Owner.OWNER_NONE,	/* map_owner */
 						type);			/* map5 */
 			}
+			return false;
 		});
 		//END_TILE_LOOP(cur_tile, size_x, size_y, tile)
 
@@ -1040,7 +1060,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		/* play a sound? */
 		if ((i.counter & 0x3F) == 0) {
 			//if (BitOps.CHANCE16R(1,14,r) && (num=_industry_sounds[i.type][0]) != 0) {
-				//SndPlayTileFx(					_industry_sounds[i.type][1] + (((r >> 16) * num) >> 16),					i.xy);
+			//SndPlayTileFx(					_industry_sounds[i.type][1] + (((r >> 16) * num) >> 16),					i.xy);
 			//}
 		}
 
@@ -2200,7 +2220,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	}
 
 	//#define NEED_ALTERB	((Global._game_mode == GameModes.GM_EDITOR || _cheats.setup_prod.value) && (i.accepts_cargo[0] == AcceptedCargo.CT_INVALID || i.accepts_cargo[0] == AcceptedCargo.CT_VALUABLES))
-	
+
 	static void IndustryViewWndProc(Window w, WindowEvent e)
 	{
 		// w.as_vp2_d().data_1 is for the editbox line
@@ -2399,73 +2419,74 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	};
 
-	static int _num_industry_sort;
 
 	//static char _bufcache[96];
-	static int _last_industry_idx;
+	//static int _last_industry_idx;
 
+	private static boolean _industry_sort_dirty = true;
 	static byte _industry_sort_order;
+	private static Industry[] _industry_sort = null;
 
-	static int GeneralIndustrySorter(final void *a, final void *b)
-	{
-		char buf1[96];
-		int val;
-		Industry i = GetIndustry(*(final int*)a);
-		Industry j = GetIndustry(*(final int*)b);
-		int r = 0;
 
-		switch (_industry_sort_order >> 1) {
-		/* case 0: Sort by Name (handled later) */
-		case 1: /* Sort by Type */
-			r = i.type - j.type;
-			break;
-			// FIXME - Production & Transported sort need to be inversed...but, WTF it does not wanna!
-			// FIXME - And no simple -. "if (!(_industry_sort_order & 1)) r = -r;" hack at the bottom!!
-		case 2: { /* Sort by Production */
-			if (i.produced_cargo[0] != AcceptedCargo.CT_INVALID && j.produced_cargo[0] != AcceptedCargo.CT_INVALID) { // both industries produce cargo?
-				if (i.produced_cargo[1] == AcceptedCargo.CT_INVALID) // producing one or two things?
-					r = j.total_production[0] - i.total_production[0];
+	private class IndustryComparator implements Comparator<Industry> {
+		public int compare(Industry i, Industry j) 
+		{
+			int val;
+			int r = 0;
+
+			switch (_industry_sort_order >> 1) {
+			/* case 0: Sort by Name (handled later) */
+			case 1: /* Sort by Type */
+				r = i.type - j.type;
+				break;
+				// FIXME - Production & Transported sort need to be inversed...but, WTF it does not wanna!
+				// FIXME - And no simple -. "if (!(_industry_sort_order & 1)) r = -r;" hack at the bottom!!
+			case 2: { /* Sort by Production */
+				if (i.produced_cargo[0] != AcceptedCargo.CT_INVALID && j.produced_cargo[0] != AcceptedCargo.CT_INVALID) 
+				{ // both industries produce cargo?
+					if (i.produced_cargo[1] == AcceptedCargo.CT_INVALID) // producing one or two things?
+						r = j.total_production[0] - i.total_production[0];
+					else
+						r = (j.total_production[0] + j.total_production[1]) / 2 - (i.total_production[0] + i.total_production[1]) / 2;
+				} else if (i.produced_cargo[0] == AcceptedCargo.CT_INVALID && j.produced_cargo[0] == AcceptedCargo.CT_INVALID) // none of them producing anything, let them go to the name-sorting
+					r = 0;
+				else if (i.produced_cargo[0] == AcceptedCargo.CT_INVALID) // end up the non-producer industry first/last in list
+					r = 1;
 				else
-					r = (j.total_production[0] + j.total_production[1]) / 2 - (i.total_production[0] + i.total_production[1]) / 2;
-			} else if (i.produced_cargo[0] == AcceptedCargo.CT_INVALID && j.produced_cargo[0] == AcceptedCargo.CT_INVALID) // none of them producing anything, let them go to the name-sorting
-				r = 0;
-			else if (i.produced_cargo[0] == AcceptedCargo.CT_INVALID) // end up the non-producer industry first/last in list
-				r = 1;
-			else
-				r = -1;
-			break;
-		}
-		case 3: /* Sort by Transported amount */
-			if (i.produced_cargo[0] != AcceptedCargo.CT_INVALID && j.produced_cargo[0] != AcceptedCargo.CT_INVALID) { // both industries produce cargo?
-				if (i.produced_cargo[1] == AcceptedCargo.CT_INVALID) // producing one or two things?
-					r = (j.pct_transported[0] * 100 >> 8) - (i.pct_transported[0] * 100 >> 8);
-				else
-					r = ((j.pct_transported[0] * 100 >> 8) + (j.pct_transported[1] * 100 >> 8)) / 2 - ((i.pct_transported[0] * 100 >> 8) + (i.pct_transported[1] * 100 >> 8)) / 2;
-			} else if (i.produced_cargo[0] == AcceptedCargo.CT_INVALID && j.produced_cargo[0] == AcceptedCargo.CT_INVALID) // none of them producing anything, let them go to the name-sorting
-				r = 0;
-			else if (i.produced_cargo[0] == AcceptedCargo.CT_INVALID) // end up the non-producer industry first/last in list
-				r = 1;
-			else
-				r = -1;
-			break;
-		}
-
-		// default to string sorting if they are otherwise equal
-		if (r == 0) {
-			Global.SetDParam(0, i.town.index);
-			Global.GetString(buf1, Str.STR_TOWN);
-
-			if ( (val=*(final int*)b) != _last_industry_idx) {
-				_last_industry_idx = val;
-				Global.SetDParam(0, j.town.index);
-				Global.GetString(_bufcache, Str.STR_TOWN);
+					r = -1;
+				break;
 			}
-			r = strcmp(buf1, _bufcache);
-		}
+			case 3: /* Sort by Transported amount */
+				if (i.produced_cargo[0] != AcceptedCargo.CT_INVALID && j.produced_cargo[0] != AcceptedCargo.CT_INVALID) { // both industries produce cargo?
+					if (i.produced_cargo[1] == AcceptedCargo.CT_INVALID) // producing one or two things?
+						r = (j.pct_transported[0] * 100 >> 8) - (i.pct_transported[0] * 100 >> 8);
+					else
+						r = ((j.pct_transported[0] * 100 >> 8) + (j.pct_transported[1] * 100 >> 8)) / 2 - ((i.pct_transported[0] * 100 >> 8) + (i.pct_transported[1] * 100 >> 8)) / 2;
+				} else if (i.produced_cargo[0] == AcceptedCargo.CT_INVALID && j.produced_cargo[0] == AcceptedCargo.CT_INVALID) // none of them producing anything, let them go to the name-sorting
+					r = 0;
+				else if (i.produced_cargo[0] == AcceptedCargo.CT_INVALID) // end up the non-producer industry first/last in list
+					r = 1;
+				else
+					r = -1;
+				break;
+			}
 
-		if (_industry_sort_order & 1) r = -r;
-		return r;
+			// default to string sorting if they are otherwise equal
+			if (r == 0) {
+				Global.SetDParam(0, i.town.index);
+				String buf1 = Global.GetString(Str.STR_TOWN);
+
+				Global.SetDParam(0, j.town.index);
+				String buf2 = Global.GetString(Str.STR_TOWN);
+
+				r = buf1.compareToIgnoreCase(buf2);
+			}
+
+			if( 0 != (_industry_sort_order & 1)) r = -r;
+			return r;
+		}
 	}
+
 
 	static void MakeSortedIndustryList()
 	{
@@ -2473,39 +2494,42 @@ public class Industry extends IndustryTables implements IPoolItem {
 		int n = 0;
 
 		/* Create array for sorting */
-		_industry_sort = realloc(_industry_sort, GetIndustryPoolSize() * sizeof(_industry_sort[0]));
-		if (_industry_sort == null)
-			error("Could not allocate memory for the industry-sorting-list");
+		//_industry_sort = realloc(_industry_sort, GetIndustryPoolSize() * sizeof(_industry_sort[0]));
+		_industry_sort = (Industry[]) _industry_pool.pool.values().toArray();
 
+		if (_industry_sort == null)
+			Global.error("Could not allocate memory for the industry-sorting-list");
+
+		/*
 		FOR_ALL_INDUSTRIES(i) 
 		{
 			if(i.xy)
 				_industry_sort[n++] = i.index;
-		}
-		_num_industry_sort = n;
-		_last_industry_idx = 0xFFFF; // used for "cache"
+		}*/
+		//_last_industry_idx = 0xFFFF; // used for "cache"
 
-		qsort(_industry_sort, n, sizeof(_industry_sort[0]), GeneralIndustrySorter);
+		//qsort(_industry_sort, n, sizeof(_industry_sort[0]), GeneralIndustrySorter);
+		Arrays.sort(_industry_sort, new IndustryComparator());
 
-		DEBUG_misc( 1, "Resorting Industries list...");
+		Global.DEBUG_misc( 1, "Resorting Industries list...");
 	}
 
 
+	private static final int _indicator_positions[] = {88, 187, 284, 387};
 	static void IndustryDirectoryWndProc(Window w, WindowEvent e)
 	{
 		switch(e.event) {
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			int n;
 			int p;
 			Industry i;
-			static final int _indicator_positions[4] = {88, 187, 284, 387};
 
 			if (_industry_sort_dirty) {
 				_industry_sort_dirty = false;
 				MakeSortedIndustryList();
 			}
 
-			SetVScrollCount(w, _num_industry_sort);
+			SetVScrollCount(w, _industry_sort.length);
 
 			DrawWindowWidgets(w);
 			Gfx.DoDrawString(_industry_sort_order & 1 ? DOWNARROW : UPARROW, _indicator_positions[_industry_sort_order>>1], 15, 0x10);
@@ -2513,7 +2537,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 			p = w.vscroll.pos;
 			n = 0;
 
-			while (p < _num_industry_sort) {
+			while (p < _industry_sort.length) 
+			{
 				i = GetIndustry(_industry_sort[p]);
 				Global.SetDParam(0, i.index);
 				if (i.produced_cargo[0] != AcceptedCargo.CT_INVALID) {
@@ -2573,7 +2598,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				if (!BitOps.IS_INT_INSIDE(y, 0, w.vscroll.cap))
 					return;
 				p = y + w.vscroll.pos;
-				if (p < _num_industry_sort) {
+				if (p < _industry_sort.length) {
 					c = GetIndustry(_industry_sort[p]);
 					ScrollMainWindowToTile(c.xy);
 				}
@@ -2606,10 +2631,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 	void ShowIndustryDirectory()
 	{
 		/* Industry List */
-		Window w;
-
-		w = Window.AllocateWindowDescFront(_industry_directory_desc, 0);
-		if (w) {
+		Window w = Window.AllocateWindowDescFront(_industry_directory_desc, 0);
+		if (w != null) {
 			w.vscroll.cap = 16;
 			w.resize.height = w.height - 6 * 10; // minimum 10 items
 			w.resize.step_height = 10;

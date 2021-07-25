@@ -1,0 +1,14 @@
+package game.tables;
+
+public class DrawIndustrySpec4Struct {
+	public int image_1;
+	public int image_2;
+	public int image_3;
+	
+	public DrawIndustrySpec4Struct(int j, int k, int l) 
+	{
+		image_1 = j;
+		image_2 = k;
+		image_3 = l;
+	}
+}

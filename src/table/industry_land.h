@@ -1,3 +1,4 @@
+#if 0 
 /* $Id: industry_land.h 3195 2005-11-16 11:55:06Z tron $ */
 
 #define M(s1, s2, sx, sy, w, h, dz, p) { s1, s2, sx, sy, w - 1, h - 1, dz, p }

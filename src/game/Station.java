@@ -1,6 +1,8 @@
 package game;
 
+import java.util.Iterator;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import game.util.BitOps;
 
@@ -20,18 +22,18 @@ public class Station implements IPoolItem
 
 	int had_vehicle_of_type;
 
-	byte time_since_load;
-	byte time_since_unload;
-	byte delete_ctr;
+	int time_since_load;
+	int time_since_unload;
+	int delete_ctr;
 	PlayerID owner;
-	byte facilities;
-	byte airport_type;
+	int facilities;
+	int airport_type;
 
 	// trainstation width/height
-	byte trainst_w, trainst_h;
+	int trainst_w, trainst_h;
 
-	byte class_id; // custom graphics station class
-	byte stat_id; // custom graphics station id in the @class_id class
+	int class_id; // custom graphics station class
+	int stat_id; // custom graphics station id in the @class_id class
 	int build_date;
 
 	//int airport_flags;
@@ -54,17 +56,60 @@ public class Station implements IPoolItem
 
 
 
+	private void clear()
+	{
+		xy= null;
+		bus_stops=null;
+		truck_stops=null;
+		train_tile=airport_tile=dock_tile = null;
+		town = null;
+		string_id = 0;
+
+		sign= null;
+
+		had_vehicle_of_type = 0;
+
+		time_since_load = 0;
+		time_since_unload = 0;
+		delete_ctr = 0;
+		owner= null;
+		facilities = 0;
+		airport_type = 0;
+
+		// trainstation width/height
+		trainst_w = trainst_h = 0;
+
+		class_id = 0; // custom graphics station class
+		stat_id = 0; // custom graphics station id in the @class_id class
+		build_date = 0;
+
+		// airport_flags;
+		airport_flags = 0;
+		//StationID index;
+		index = 0;
+		airport_queue= null;			// airport queue
+		helicopter_queue= null;			// airport queue
+
+		last_vehicle= null;
+		goods = new GoodsEntry[AcceptedCargo.NUM_CARGO];
+	}
+
+
+
+	private static final StationID CHECK_STATIONS_ERR = new StationID(-1);
+
 	// Determines what station to operate on in the
 	//  tick handler.
 	public static int _station_tick_ctr = 0;
+	public static boolean _global_station_sort_dirty = false;
 
 	//
 	public static final int INVALID_STATION = RoadStop.INVALID_STATION;//0xFFFF;
 	public static final int INVALID_SLOT = RoadStop.INVALID_SLOT;
 	static public final int INVALID_VEHICLE = Vehicle.INVALID_VEHICLE;
 
-	
-	
+
+
 	public static final int FACIL_TRAIN = 1;
 	public static final int FACIL_TRUCK_STOP = 2;
 	public static final int FACIL_BUS_STOP = 4;
@@ -72,14 +117,14 @@ public class Station implements IPoolItem
 	public static final int FACIL_DOCK = 0x10;
 
 
-//		public static final int HVOT_PENDING_DELETE = 1<<0; // not needed anymore
+	//		public static final int HVOT_PENDING_DELETE = 1<<0; // not needed anymore
 	public static final int HVOT_TRAIN = 1<<1;
 	public static final int HVOT_BUS = 1 << 2;
 	public static final int HVOT_TRUCK = 1 << 3;
 	public static final int HVOT_AIRCRAFT = 1 << 4;
 	public static final int HVOT_SHIP = 1 << 5;
-		/* This bit is used to mark stations. No; it does not belong here; but what
-		 * can we do? ;-) */
+	/* This bit is used to mark stations. No; it does not belong here; but what
+	 * can we do? ;-) */
 	public static final int HVOT_BUOY = 1 << 6;
 
 	public static final int CA_BUS = 3;
@@ -92,7 +137,7 @@ public class Station implements IPoolItem
 	public static final int CA_DOCK = 5;
 	public static final int CA_AIR_METRO = 6;
 	public static final int CA_AIR_INTER = 8;
-	
+
 
 
 	private void StationInitialize(TileIndex tile)
@@ -135,7 +180,7 @@ public class Station implements IPoolItem
 		Point pt = Point.RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
 
 		pt.y -= 32;
-		if ( (0 != (facilities & FACIL_AIRPORT)) && airport_type == AT_OILRIG) pt.y -= 16;
+		if ( (0 != (facilities & FACIL_AIRPORT)) && airport_type == AirportFTAClass.AT_OILRIG) pt.y -= 16;
 
 		Global.SetDParam(0, index);
 		Global.SetDParam(1, facilities);
@@ -494,7 +539,7 @@ public class Station implements IPoolItem
 		if (sign.width_1 != 0) {
 			Window.InvalidateWindowWidget(Window.WC_STATION_VIEW, index, 1);
 
-			MarkAllViewportsDirty(
+			ViewPort.MarkAllViewportsDirty(
 					sign.left - 6,
 					sign.top,
 					sign.left + (sign.width_1 << 2) + 12,
@@ -510,49 +555,48 @@ public class Station implements IPoolItem
 
 		if (st.bus_stops != null)   ret = Math.max(ret, CA_BUS);
 		if (st.truck_stops != null) ret = Math.max(ret, CA_TRUCK);
-		if (st.train_tile) ret = Math.max(ret, CA_TRAIN);
-		if (st.dock_tile)  ret = Math.max(ret, CA_DOCK);
+		if (st.train_tile != null) ret = Math.max(ret, CA_TRAIN);
+		if (st.dock_tile != null)  ret = Math.max(ret, CA_DOCK);
 
-		if (st.airport_tile) {
+		if (st.airport_tile != null) {
 			switch (st.airport_type) {
-			case AT_OILRIG:        ret = Math.max(ret, CA_AIR_OILPAD);   break;
-			case AT_SMALL:         ret = Math.max(ret, CA_AIR_SMALL);    break;
-			case AT_HELIPORT:      ret = Math.max(ret, CA_AIR_HELIPORT); break;
-			case AT_LARGE:         ret = Math.max(ret, CA_AIR_LARGE);    break;
-			case AT_METROPOLITAN:  ret = Math.max(ret, CA_AIR_METRO);    break;
-			case AT_INTERNATIONAL: ret = Math.max(ret, CA_AIR_INTER);    break;
+			case AirportFTAClass.AT_OILRIG:        ret = Math.max(ret, CA_AIR_OILPAD);   break;
+			case AirportFTAClass.AT_SMALL:         ret = Math.max(ret, CA_AIR_SMALL);    break;
+			case AirportFTAClass.AT_HELIPORT:      ret = Math.max(ret, CA_AIR_HELIPORT); break;
+			case AirportFTAClass.AT_LARGE:         ret = Math.max(ret, CA_AIR_LARGE);    break;
+			case AirportFTAClass.AT_METROPOLITAN:  ret = Math.max(ret, CA_AIR_METRO);    break;
+			case AirportFTAClass.AT_INTERNATIONAL: ret = Math.max(ret, CA_AIR_INTER);    break;
 			}
 		}
 
 		return ret;
 	}
 
-	//#define CHECK_STATIONS_ERR ((Station )-1)
 
 	private static Station  GetStationAround(TileIndex tile, int w, int h, StationID closest_station)
 	{
 		// check around to see if there's any stations there
 		//BEGIN_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
 		TileIndex.forAll(w + 2, h + 2, tile.isub( TileIndex.TileDiffXY(1, 1) ).getTile(), (tile_cur) -> {
-			if (IsTileType(tile_cur, TileTypes.MP_STATION)) {
-				StationID t = _m[tile_cur].m2;
+			if (tile_cur.IsTileType(TileTypes.MP_STATION)) {
+				/*StationID*/ int t = tile_cur.getMap().m2;
 				{
 					Station st = GetStation(t);
 					// you cannot take control of an oilrig!!
-					if (st.airport_type == AT_OILRIG && st.facilities == (FACIL_AIRPORT|FACIL_DOCK))
+					if (st.airport_type == AirportFTAClass.AT_OILRIG && st.facilities == (FACIL_AIRPORT|FACIL_DOCK))
 						continue;
 				}
 
-				if (closest_station == INVALID_STATION) {
-					closest_station = t;
-				} else if (closest_station != t) {
+				if (closest_station.id == INVALID_STATION) {
+					closest_station = new StationID(t);
+				} else if (closest_station.id != t) {
 					Global._error_message = Str.STR_3006_ADJOINS_MORE_THAN_ONE_EXISTING;
-					return CHECK_STATIONS_ERR;
+					return null; //CHECK_STATIONS_ERR;
 				}
 			}
 		});
 		//END_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
-		return (closest_station == INVALID_STATION) ? null : GetStation(closest_station);
+		return (closest_station.id == INVALID_STATION) ? null : GetStation(closest_station.id);
 	}
 
 	public static TileIndex GetStationTileForVehicle(final  Vehicle v, final  Station st)
@@ -569,7 +613,7 @@ public class Station implements IPoolItem
 			}
 		default:
 			assert(false);
-			return 0;
+			return TileIndex.INVALID_TILE;
 		}
 	}
 
@@ -645,7 +689,7 @@ public class Station implements IPoolItem
 				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0)
 		};
 
-	private static int CountMapSquareAround(TileIndex tile, byte type, byte min, byte max)
+	private static int CountMapSquareAround(TileIndex tile, TileTypes type, int min, int max)
 	{
 		int num = 0;
 
@@ -653,7 +697,7 @@ public class Station implements IPoolItem
 		{
 			tile = TILE_MASK(tile + ToTileIndexDiff(p));
 
-			if (IsTileType(tile, type) && tile.getMap().m5 >= min && tile.getMap().m5 <= max)
+			if (tile.IsTileType(type) && tile.getMap().m5 >= min && tile.getMap().m5 <= max)
 				num++;
 		}
 
@@ -715,7 +759,7 @@ public class Station implements IPoolItem
 		/* check default names */
 		tmp = free_names & _gen_station_name_bits[flag];
 		if (tmp != 0) {
-			found = FindFirstBit(tmp);
+			found = BitOps.FindFirstBit(tmp);
 			//goto done;
 			st.string_id = found + Str.STR_SV_STNAME;
 			return true;
@@ -736,7 +780,7 @@ public class Station implements IPoolItem
 		}
 
 		/* check close enough to town to get central as name? */
-		if (DistanceMax(tile,t.xy) < 8) {
+		if (Map.DistanceMax(tile,t.xy) < 8) {
 			found = M(Str.STR_SV_STNAME);
 			if (BitOps.HASBIT(free_names, M(Str.STR_SV_STNAME)))
 			{
@@ -755,8 +799,8 @@ public class Station implements IPoolItem
 		}
 
 		/* Check lakeside */
-		if (HASBIT(free_names, M(Str.STR_SV_STNAME_LAKESIDE)) &&
-				DistanceFromEdge(tile) < 20 &&
+		if (BitOps.HASBIT(free_names, M(Str.STR_SV_STNAME_LAKESIDE)) &&
+				Map.DistanceFromEdge(tile) < 20 &&
 				CountMapSquareAround(tile, TileTypes.MP_WATER, 0, 0) >= 5) {
 			found = M(Str.STR_SV_STNAME_LAKESIDE);
 			//goto done;
@@ -801,8 +845,8 @@ public class Station implements IPoolItem
 		{
 
 			free_names &= _direction_and_table[
-			                                   (TileX(tile) < TileX(t.xy)) +
-			                                   (TileY(tile) < TileY(t.xy)) * 2];
+			                                   ((tile.TileX() < t.xy.TileX()) ? 1 : 0) +
+			                                   (((tile.TileY() < t.xy.TileY()) ? 1 : 0) * 2)];
 		}
 
 		tmp = free_names & ((1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<6)|(1<<7)|(1<<12)|(1<<26)|(1<<27)|(1<<28)|(1<<29)|(1<<30));
@@ -810,7 +854,7 @@ public class Station implements IPoolItem
 			Global._error_message = Str.STR_3007_TOO_MANY_STATIONS_LOADING;
 			return false;
 		}
-		found = FindFirstBit(tmp);
+		found = BitOps.FindFirstBit(tmp);
 
 		//done:
 		st.string_id = found + Str.STR_SV_STNAME;
@@ -827,7 +871,7 @@ public class Station implements IPoolItem
 		_station_pool.forEach( (i,st) ->			
 		{
 			if (st.xy != null && (owner.id == Owner.OWNER_SPECTATOR || st.owner == owner)) {
-				int cur_dist = DistanceManhattan(tile, st.xy);
+				int cur_dist = Map.DistanceManhattan(tile, st.xy);
 
 				if (cur_dist < threshold) {
 					threshold = cur_dist;
@@ -864,13 +908,17 @@ public class Station implements IPoolItem
 		int z;
 		int allowed_z = -1;
 		int flat_z;
+		int error = 0;
 
 		//BEGIN_TILE_LOOP(tile_cur, w, h, tile)
+ 
+		TileIndex.forEach(w, h, tile.getTile(), (tile_cur, h_cur, w_cur ) -> {
 
-		TileIndex.forAll(w, h, tile, (tile_cur) -> {
-
-			if (!Vehicle.EnsureNoVehicle(tile_cur)) return Cmd.CMD_ERROR;
-
+			if (!Vehicle.EnsureNoVehicle(tile_cur))
+			{
+				error= Cmd.CMD_ERROR;
+				return true;
+			}
 			IntContainer zp = new IntContainer(); 
 			tileh = tile_cur.GetTileSlope(zp);
 			z = zp.v;
@@ -883,21 +931,23 @@ public class Station implements IPoolItem
 					-OR-
 					b) the build_on_slopes switch is disabled
 			 */
-			if (IsSteepTileh(tileh) ||
+			if (TileIndex.IsSteepTileh(tileh) ||
 					((_is_old_ai_player || !Global._patches.build_on_slopes) && tileh != 0)) {
 				Global._error_message = Str.STR_0007_FLAT_LAND_REQUIRED;
-				return Cmd.CMD_ERROR;
+				error= Cmd.CMD_ERROR;
+				return true;
 			}
 
 			flat_z = z;
-			if (tileh) {
+			if (tileh>0) {
 				// need to check so the entrance to the station is not pointing at a slope.
-				if ((invalid_dirs&1 && !(tileh & 0xC) && (int)w_cur == w) ||
-						(invalid_dirs&2 && !(tileh & 6) &&	h_cur == 1) ||
-						(invalid_dirs&4 && !(tileh & 3) && w_cur == 1) ||
-						(invalid_dirs&8 && !(tileh & 9) && (int)h_cur == h)) {
+				if (((invalid_dirs&1)!=0 && 0==(tileh & 0xC) && (int)w_cur == w) ||
+						((invalid_dirs&2)!=0 && 0==(tileh & 6) &&	h_cur == 1) ||
+						((invalid_dirs&4)!=0 && 0==(tileh & 3) && w_cur == 1) ||
+						((invalid_dirs&8)!=0 && 0==(tileh & 9) && (int)h_cur == h)) {
 					Global._error_message = Str.STR_0007_FLAT_LAND_REQUIRED;
-					return Cmd.CMD_ERROR;
+					error= Cmd.CMD_ERROR;
+					return true;
 				}
 				cost += _price.terraform;
 				flat_z += 8;
@@ -909,7 +959,8 @@ public class Station implements IPoolItem
 				allowed_z = flat_z;
 			} else if (allowed_z != flat_z) {
 				Global._error_message = Str.STR_0007_FLAT_LAND_REQUIRED;
-				return Cmd.CMD_ERROR;
+				error= Cmd.CMD_ERROR;
+				return true;
 			}
 
 			// if station is set, then we have special handling to allow building on top of already existing stations.
@@ -918,24 +969,33 @@ public class Station implements IPoolItem
 			if (station != null && tile_cur.IsTileType(TileTypes.MP_STATION)) {
 				if (tile_cur.getMap().m5 >= 8) {
 					Global._error_message = ClearTile_Station(tile_cur, Cmd.DC_AUTO); // get error message
-					return Cmd.CMD_ERROR;
+					error= Cmd.CMD_ERROR;
+					return true;
 				} else {
-					StationID st = tile_cur.getMap().m2;
+					StationID st = new StationID( tile_cur.getMap().m2 );
 					if (station[0].id == INVALID_STATION) {
 						station[0] = st;
 					} else if (station[0] != st) {
 						Global._error_message = Str.STR_3006_ADJOINS_MORE_THAN_ONE_EXISTING;
-						return Cmd.CMD_ERROR;
+						error= Cmd.CMD_ERROR;
+						return true;
 					}
 				}
 			} else {
 				ret = Cmd.DoCommandByTile(tile_cur, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
-				if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
+				if (Cmd.CmdFailed(ret))
+				{
+					error= Cmd.CMD_ERROR;
+					return true;
+				}
 				cost += ret;
 			}
 
+			return false;
 		});
 		//END_TILE_LOOP(tile_cur, w, h, tile)
+
+		if(error != 0) return error; 
 
 		return cost;
 
@@ -944,7 +1004,7 @@ public class Station implements IPoolItem
 	private static boolean CanExpandRailroadStation(Station st, int [] fin, int direction)
 	{
 		int curw = st.trainst_w, curh = st.trainst_h;
-		TileIndex tile = new TileIndex( fin[0] );
+		MutableTileIndex tile = new MutableTileIndex( new TileIndex(fin[0]) );
 		int w = fin[1];
 		int h = fin[2];
 
@@ -954,7 +1014,7 @@ public class Station implements IPoolItem
 			int y = Math.min(st.train_tile.TileY(), tile.TileY());
 			curw = Math.max(st.train_tile.TileX() + curw, tile.TileX() + w) - x;
 			curh = Math.max(st.train_tile.TileY() + curh, tile.TileY() + h) - y;
-			tile = TileIndex.TileXY(x, y);
+			tile = new MutableTileIndex( TileIndex.TileXY(x, y) );
 		} else {
 			// check so the direction is the same
 			if ((st.train_tile.getMap().m5 & 1) != direction) {
@@ -963,19 +1023,19 @@ public class Station implements IPoolItem
 			}
 
 			// check if the new station adjoins the old station in either direction
-			if (curw == w && st.train_tile == tile + TileDiffXY(0, h)) {
+			if (curw == w && st.train_tile == tile.iadd(0, h)) {
 				// above
 				curh += h;
-			} else if (curw == w && st.train_tile == tile - TileDiffXY(0, curh)) {
+			} else if (curw == w && st.train_tile == tile.iadd(0, -curh)) {
 				// below
-				tile -= TileDiffXY(0, curh);
+				tile.madd(0, -curh);
 				curh += h;
-			} else if (curh == h && st.train_tile == tile + TileDiffXY(w, 0)) {
+			} else if (curh == h && st.train_tile == tile.iadd(w, 0)) {
 				// to the left
 				curw += w;
-			} else if (curh == h && st.train_tile == tile - TileDiffXY(curw, 0)) {
+			} else if (curh == h && st.train_tile == tile.iadd(-curw, 0)) {
 				// to the right
-				tile -= TileDiffXY(curw, 0);
+				tile.madd(-curw, 0);
 				curw += w;
 			} else {
 				Global._error_message = Str.STR_306D_NONUNIFORM_STATIONS_DISALLOWED;
@@ -990,7 +1050,7 @@ public class Station implements IPoolItem
 
 		// now tile contains the new value for st.train_tile
 		// curw, curh contain the new value for width and height
-		fin[0] = tile;
+		fin[0] = tile.tile;
 		fin[1] = curw;
 		fin[2] = curh;
 		return true;
@@ -1061,14 +1121,14 @@ public class Station implements IPoolItem
 		StationID[] est = { 0 };
 		int plat_len, numtracks;
 		int direction;
-		int finalvalues = new int[3];
+		int [] finalvalues = new int[3];
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		tile_org = TileIndex.TileVirtXY(x, y);
 
 		/* Does the authority allow this? */
-		if (!(flags & Cmd.DC_NO_TOWN_RATING) && !CheckIfAuthorityAllows(tile_org)) return Cmd.CMD_ERROR;
+		if (0 == (flags & Cmd.DC_NO_TOWN_RATING) && !CheckIfAuthorityAllows(tile_org)) return Cmd.CMD_ERROR;
 		if (!ValParamRailtype(p2 & 0xF)) return Cmd.CMD_ERROR;
 
 		/* unpack parameters */
@@ -1076,7 +1136,7 @@ public class Station implements IPoolItem
 		numtracks = BitOps.GB(p1,  8, 8);
 		plat_len  = BitOps.GB(p1, 16, 8);
 		/* w = length, h = num_tracks */
-		if (direction) {
+		if (direction != 0) {
 			h_org = plat_len;
 			w_org = numtracks;
 		} else {
@@ -1087,7 +1147,7 @@ public class Station implements IPoolItem
 		if (h_org > Global._patches.station_spread || w_org > Global._patches.station_spread) return Cmd.CMD_ERROR;
 
 		// these values are those that will be stored in train_tile and station_platforms
-		finalvalues[0] = tile_org;
+		finalvalues[0] = tile_org.getTile();
 		finalvalues[1] = w_org;
 		finalvalues[2] = h_org;
 
@@ -1110,13 +1170,13 @@ public class Station implements IPoolItem
 
 		if (st != null) {
 			// Reuse an existing station.
-			if (st.owner != Owner.OWNER_NONE && st.owner != Global._current_player)
-				return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
+			if (st.owner.id != Owner.OWNER_NONE && st.owner != Global._current_player)
+				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
-			if (st.train_tile != 0) {
+			if (st.train_tile != null) {
 				// check if we want to expanding an already existing station?
 				if (_is_old_ai_player || !Global._patches.join_stations)
-					return_cmd_error(Str.STR_3005_TOO_CLOSE_TO_ANOTHER_RAILROAD);
+					return Cmd.return_cmd_error(Str.STR_3005_TOO_CLOSE_TO_ANOTHER_RAILROAD);
 				if (!CanExpandRailroadStation(st, finalvalues, direction))
 					return Cmd.CMD_ERROR;
 			}
@@ -1129,15 +1189,15 @@ public class Station implements IPoolItem
 			if (st == null) return Cmd.CMD_ERROR;
 
 			st.town = ClosestTownFromTile(tile_org, (int)-1);
-			if (_current_player < MAX_PLAYERS && flags & Cmd.DC_EXEC)
-				SETBIT(st.town.have_ratings, _current_player);
+			if (Global._current_player < Global.MAX_PLAYERS && flags & Cmd.DC_EXEC)
+				st.town.have_ratings = BitOps.RETSETBIT(st.town.have_ratings, Global._current_player);
 
 			if (!GenerateStationName(st, tile_org, 0)) return Cmd.CMD_ERROR;
 
 			if (flags & Cmd.DC_EXEC) StationInitialize(st, tile_org);
 		}
 
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			TileIndexDiff tile_delta;
 			StationID station_index = st.index;
 			StationSpec statspec;
@@ -1155,9 +1215,9 @@ public class Station implements IPoolItem
 			st.trainst_w = finalvalues[1];
 			st.trainst_h = finalvalues[2];
 
-			st.build_date = _date;
+			st.build_date = Global._date;
 
-			tile_delta = direction ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
+			tile_delta = direction != 0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 
 			statspec = (p2 & 0x10) != 0 ? GetCustomStation(STAT_CLASS_DFLT, p2 >> 8) : null;
 			byte [] layout_ptr = new byte[numtracks * plat_len];
@@ -1180,13 +1240,13 @@ public class Station implements IPoolItem
 							);
 
 					tile += tile_delta;
-				} while (--w);
-				tile_org += tile_delta ^ TileDiffXY(1, 1); // perpendicular to tile_delta
-			} while (--numtracks);
+				} while (--w > 0);
+				tile_org += tile_delta ^ TileIndex.TileDiffXY(1, 1); // perpendicular to tile_delta
+			} while (--numtracks > 0);
 
 			UpdateStationVirtCoordDirty(st);
 			UpdateStationAcceptance(st, false);
-			InvalidateWindow(WC_STATION_LIST, st.owner);
+			Window.InvalidateWindow(Window.WC_STATION_LIST, st.owner.id);
 		}
 
 		return cost;
@@ -1196,7 +1256,7 @@ public class Station implements IPoolItem
 	{
 		int w = st.trainst_w;
 		int h = st.trainst_h;
-		TileIndex tile = st.train_tile;
+		MutableTileIndex tile = new MutableTileIndex( st.train_tile );
 		int i;
 
 		//restart:
@@ -1208,10 +1268,10 @@ public class Station implements IPoolItem
 			// too small?
 			if (w != 0 && h != 0) {
 				// check the left side, x = constant, y changes
-				for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(0, i));) {
+				for (i = 0; !TileBelongsToRailStation(st, tile.iadd(0, i));) {
 					// the left side is unused?
 					if (++i == h) {
-						tile += TileDiffXY(1, 0);
+						tile.madd(1, 0);
 						w--;
 						//goto restart;
 						restart = true; break;
@@ -1220,7 +1280,7 @@ public class Station implements IPoolItem
 				if( restart ) continue;
 
 				// check the right side, x = constant, y changes
-				for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(w - 1, i));) {
+				for (i = 0; !TileBelongsToRailStation(st, tile.iadd(w - 1, i));) {
 					// the right side is unused?
 					if (++i == h) {
 						w--;
@@ -1234,7 +1294,7 @@ public class Station implements IPoolItem
 				for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(i, 0));) {
 					// the left side is unused?
 					if (++i == w) {
-						tile += TileDiffXY(0, 1);
+						tile.madd(0, 1);
 						h--;
 						//goto restart;
 						restart = true; break;
@@ -1254,7 +1314,7 @@ public class Station implements IPoolItem
 				if( restart ) continue;
 
 			} else {
-				tile = 0;
+				tile = null;
 			}
 			break;
 		}
@@ -1279,17 +1339,17 @@ public class Station implements IPoolItem
 		// make sure the specified tile belongs to the current player, and that it is a railroad station.
 		if (!tile.IsTileType(TileTypes.MP_STATION) || tile.getMap().m5 >= 8 || !Global._patches.nonuniform_stations) return Cmd.CMD_ERROR;
 		st = GetStation(tile.getMap().m2);
-		if (_current_player != Owner.OWNER_WATER && (!CheckOwnership(st.owner) || !EnsureNoVehicle(tile))) return Cmd.CMD_ERROR;
+		if (Global._current_player.id != Owner.OWNER_WATER && (!CheckOwnership(st.owner) || !EnsureNoVehicle(tile))) return Cmd.CMD_ERROR;
 
 		// if we reached here, it means we can actually delete it. do that.
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			DoClearSquare(tile);
 			// now we need to make the "spanned" area of the railway station smaller if we deleted something at the edges.
 			// we also need to adjust train_tile.
 			MakeRailwayStationAreaSmaller(st);
 
 			// if we deleted the whole station, delete the train facility.
-			if (st.train_tile == 0) {
+			if (st.train_tile == null) {
 				st.facilities &= ~FACIL_TRAIN;
 				UpdateStationVirtCoordDirty(st);
 				DeleteStationIfEmpty(st);
@@ -1301,7 +1361,7 @@ public class Station implements IPoolItem
 	// determine the number of platforms for the station
 	public static int GetStationPlatforms( Station st, TileIndex tile)
 	{
-		TileIndex t;
+		MutableTileIndex t;
 		TileIndexDiff delta;
 		int dir;
 		int len;
@@ -1310,19 +1370,19 @@ public class Station implements IPoolItem
 
 		len = 0;
 		dir = tile.getMap().m5 & 1;
-		delta = dir ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
+		delta = dir!=0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 
 		// find starting tile..
-		t = tile;
+		t = new MutableTileIndex(tile);
 		do {
-			t -= delta;
+			t.msub( delta );
 			len++;
 		} while (TileBelongsToRailStation(st, t) && (t.getMap().m5 & 1) == dir);
 
 		// find ending tile
 		t = tile;
 		do {
-			t += delta;
+			t.madd( delta );
 			len++;
 		} while (TileBelongsToRailStation(st, t) && (t.getMap().m5 & 1) == dir);
 
@@ -1333,10 +1393,10 @@ public class Station implements IPoolItem
 	{
 		switch (spg.type) {
 		case SGT_REAL:
-			return spg.g.real;
+			return (RealSpriteGroup)spg;
 
 		case SGT_DETERMINISTIC: {
-			final  DeterministicSpriteGroup dsg = spg.g.determ;
+			final  DeterministicSpriteGroup dsg = spg;
 			SpriteGroup target;
 			int value = -1;
 
@@ -1359,7 +1419,7 @@ public class Station implements IPoolItem
 				}
 
 				/* Station-specific property. */
-				if (dsg.var_scope == VSG_SCOPE_PARENT) {
+				if (dsg.var_scope == VarSpriteGroupScope.VSG_SCOPE_PARENT) {
 					/* TODO: Town structure. */
 
 				} else /* VSG_SELF */ {
@@ -1390,7 +1450,7 @@ public class Station implements IPoolItem
 
 		default:
 		case SGT_RANDOMIZED:
-			error("I don't know how to handle random spritegroups yet!");
+			Global.error("I don't know how to handle random spritegroups yet!");
 			return null;
 		}
 	}
@@ -1400,12 +1460,12 @@ public class Station implements IPoolItem
 		final  RealSpriteGroup rsg = ResolveStationSpriteGroup(spec.spritegroup[ctype], st);
 
 		if (rsg.sprites_per_set != 0) {
-			if (rsg.loading_count != 0) return rsg.loading[0].g.result.result;
+			if (rsg.loading.length != 0) return ((ResultSpriteGroup)rsg.loading[0]).result;
 
-			if (rsg.loaded_count != 0) return rsg.loaded[0].g.result.result;
+			if (rsg.loaded.length!= 0) return ((ResultSpriteGroup)rsg.loaded[0]).result;
 		}
 
-		error("Custom station 0x%08x::0x%02x has no sprites associated.",
+		Global.error("Custom station 0x%08x::0x%02x has no sprites associated.",
 				spec.grfid, spec.localidx);
 		/* This is what gets subscribed of dtss.image in newgrf.c,
 		 * so it's probably kinda "default offset". Try to use it as
@@ -1423,7 +1483,7 @@ public class Station implements IPoolItem
 			return Cmd.ByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_REMOVE_FROM_RAILROAD_STATION);
 
 		/* Current player owns the station? */
-		if (Global._current_player != Owner.OWNER_WATER && !CheckOwnership(st.owner))
+		if (Global._current_player.id != Owner.OWNER_WATER && !CheckOwnership(st.owner))
 			return Cmd.CMD_ERROR;
 
 		/* determine width and height of platforms */
@@ -1519,16 +1579,16 @@ public class Station implements IPoolItem
 		RoadStop prev = new RoadStop();
 		TileIndex tile;
 		int cost;
-		boolean type = !!p2;
+		boolean type = p2 != 0 ;
 
 		/* Saveguard the parameters */
 		if (p1 > 3) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		tile = TileVirtXY(x, y);
+		tile = TileIndex.TileVirtXY(x, y);
 
-		if (!(flags & DC_NO_TOWN_RATING) && !CheckIfAuthorityAllows(tile))
+		if (0==(flags & Cmd.DC_NO_TOWN_RATING) && !CheckIfAuthorityAllows(tile))
 			return Cmd.CMD_ERROR;
 
 		cost = CheckFlatLandBelow(tile, 1, 1, flags, 1 << p1, null);
@@ -1763,7 +1823,7 @@ public class Station implements IPoolItem
 			//FOR_ALL_STATIONS(st) 
 			_station_pool.forEach( (i,st) ->
 			{
-				if (st.owner.id != Owner.OWNER_TOWN && st.xy != null && st.town == t && st.facilities&FACIL_AIRPORT && st.airport_type != AT_OILRIG)
+				if (st.owner.id != Owner.OWNER_TOWN && st.xy != null && st.town == t && 0 != (st.facilities&FACIL_AIRPORT) && st.airport_type != AirportFTAClass.AT_OILRIG)
 					num++;
 			});
 			if (num >= 2 && _current_player != OWNER_TOWN) {
@@ -1811,7 +1871,7 @@ public class Station implements IPoolItem
 
 			// if airport type equals Heliport then generate
 			// type 5 name, which is heliport, otherwise airport names (1)
-			if (!GenerateStationName(st, tile, (p1 == AT_HELIPORT) ? 5 : 1))
+			if (!GenerateStationName(st, tile, (p1 == AirportFTAClass.AT_HELIPORT) ? 5 : 1))
 				return Cmd.CMD_ERROR;
 
 			if (flags & Cmd.DC_EXEC)
@@ -1820,7 +1880,7 @@ public class Station implements IPoolItem
 
 		cost += _price.build_airport * w * h;
 
-		if (flags & Cmd.DC_EXEC) {
+		if( 0 != (flags & Cmd.DC_EXEC)) {
 			final AirportFTAClass afc = GetAirport(p1);
 
 			st.owner = _current_player;
@@ -1855,6 +1915,7 @@ public class Station implements IPoolItem
 							TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
 							TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAP5,
 							st.index, b[bi++]);
+					return false;
 				}); 
 				//END_TILE_LOOP(tile_cur,w,h,tile)
 			}
@@ -1876,7 +1937,7 @@ public class Station implements IPoolItem
 		int w,h;
 		int cost;
 
-		if (_current_player != OWNER_WATER && !CheckOwnership(st.owner))
+		if (Global._current_player.id != Owner.OWNER_WATER && !CheckOwnership(st.owner))
 			return Cmd.CMD_ERROR;
 
 		tile = st.airport_tile;
@@ -1886,20 +1947,26 @@ public class Station implements IPoolItem
 
 		cost = w * h * _price.remove_airport;
 
+		int err = 0;
 		{
 			//BEGIN_TILE_LOOP(tile_cur,w,h,tile)
 			TileIndex.forAll(w, h, tile, (tile_cur) ->
 			{
-				if (!EnsureNoVehicle(tile_cur))
-					return Cmd.CMD_ERROR;
+				if (!tile_cur.EnsureNoVehicle())
+				{
+					err = Cmd.CMD_ERROR;
+					return true;
+				}
 
-				if (flags & Cmd.DC_EXEC) {
+				if(0 != (flags & Cmd.DC_EXEC)) {
 					DeleteAnimatedTile(tile_cur);
 					DoClearSquare(tile_cur);
 				}
+				return false;
 			});
 			//END_TILE_LOOP(tile_cur, w,h,tile)
 		}
+		if( err != 0 ) return err;
 
 		if (flags & Cmd.DC_EXEC) {
 			final  AirportFTAClass afc = GetAirport(st.airport_type);
@@ -1932,18 +1999,18 @@ public class Station implements IPoolItem
 
 		Landscape.FindLandscapeHeight(ti, x, y);
 
-		if (ti.type != TileTypes.MP_WATER || ti.tileh != 0 || ti.map5 != 0 || ti.tile == 0)
-			return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
+		if (ti.type != TileTypes.MP_WATER.ordinal() || ti.tileh != 0 || ti.map5 != 0 || ti.tile == null)
+			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
 
 		st = AllocateStation();
 		if (st == null) return Cmd.CMD_ERROR;
 
-		st.town = ClosestTownFromTile(ti.tile, (int)-1);
+		st.town = Town.ClosestTownFromTile(ti.tile, (int)-1);
 		st.sign.width_1 = 0;
 
 		if (!GenerateStationName(st, ti.tile, 4)) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			StationInitialize(st, ti.tile);
 			st.dock_tile = ti.tile;
 			st.facilities |= FACIL_DOCK;
@@ -2000,16 +2067,16 @@ public class Station implements IPoolItem
 
 		if (Global._current_player.id >= Global.MAX_PLAYERS) {
 			/* XXX: strange stuff */
-			return_cmd_error(INVALID_STRING_ID);
+			return Cmd.return_cmd_error(Str.INVALID_STRING_ID.id);
 		}
 
 		tile = st.dock_tile;
 
-		if (CheckShipsOnBuoy(st))   return_cmd_error(Str.STR_BUOY_IS_IN_USE);
-		if (!EnsureNoVehicle(tile)) return Cmd.CMD_ERROR;
+		if (CheckShipsOnBuoy(st))   return Cmd.return_cmd_error(Str.STR_BUOY_IS_IN_USE);
+		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) {
-			st.dock_tile = 0;
+		if(0 != (flags & Cmd.DC_EXEC)) {
+			st.dock_tile = null;
 			/* Buoys are marked in the Station struct by this flag. Yes, it is this
 			 * braindead.. */
 			st.facilities &= ~FACIL_DOCK;
@@ -2018,7 +2085,7 @@ public class Station implements IPoolItem
 			Landscape.ModifyTile(tile,
 					TileTypes.MP_SETTYPE(TileTypes.MP_WATER) |
 					TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR,
-					OWNER_WATER, /* map_owner */
+					Owner.OWNER_WATER, /* map_owner */
 					0			/* map5 */
 					);
 
@@ -2051,9 +2118,9 @@ public class Station implements IPoolItem
 		TileIndex tile, tile_cur;
 		Station st;
 
-		SET_EXPENSES_TYPE(EXPENSES_CONSTRUCTION);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		FindLandscapeHeight(ti, x, y);
+		Landscape.FindLandscapeHeight(ti, x, y);
 
 		/*
 		if ((direction=0,ti.tileh) != 3 &&
@@ -2065,18 +2132,18 @@ public class Station implements IPoolItem
 
 		direction=0;
 		if(ti.tileh != 3)
-			return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
+			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
 		direction++;
 		if(ti.tileh != 9 )
-			return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
+			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
 		direction++;
 		if(ti.tileh != 12 )
-			return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
+			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
 		direction++;
 		if(ti.tileh != 6)
-			return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
+			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
 
-		if (!EnsureNoVehicle(ti.tile)) return Cmd.CMD_ERROR;
+		if (!ti.tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
 		cost = DoCommandByTile(ti.tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
@@ -2086,7 +2153,7 @@ public class Station implements IPoolItem
 		if (!EnsureNoVehicle(tile_cur)) return Cmd.CMD_ERROR;
 
 		FindLandscapeHeightByTile(ti, tile_cur);
-		if (ti.tileh != 0 || ti.type != TileTypes.MP_WATER) return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
+		if (ti.tileh != 0 || ti.type != TileTypes.MP_WATER) return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
 
 		cost = Cmd.DoCommandByTile(tile_cur, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
@@ -2094,7 +2161,7 @@ public class Station implements IPoolItem
 		tile_cur = tile_cur + TileOffsByDir(direction);
 		FindLandscapeHeightByTile(ti, tile_cur);
 		if (ti.tileh != 0 || ti.type != TileTypes.MP_WATER)
-			return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
+			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
 
 		/* middle */
 		st = GetStationAround(
@@ -2110,11 +2177,11 @@ public class Station implements IPoolItem
 
 		if (st != null) {
 			if (st.owner != OWNER_NONE && st.owner != _current_player)
-				return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
+				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
 			if (!CheckStationSpreadOut(st, tile, 1, 1)) return Cmd.CMD_ERROR;
 
-			if (st.dock_tile != 0) return_cmd_error(Str.STR_304C_TOO_CLOSE_TO_ANOTHER_DOCK);
+			if (st.dock_tile != 0) return Cmd.return_cmd_error(Str.STR_304C_TOO_CLOSE_TO_ANOTHER_DOCK);
 		} else {
 			Town t;
 
@@ -2148,7 +2215,7 @@ public class Station implements IPoolItem
 					st.index,
 					direction + 0x4C);
 
-					Landscape.ModifyTile(tile + TileOffsByDir(direction),
+			Landscape.ModifyTile(tile + TileOffsByDir(direction),
 					TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR |
 					TileTypes.MP_MAP5,
@@ -3020,7 +3087,7 @@ public class Station implements IPoolItem
 
 		st.owner = Owner.OWNER_NONE;
 		st.airport_flags = 0;
-		st.airport_type = AT_OILRIG;
+		st.airport_type = AirportFTAClass.AT_OILRIG;
 		st.xy = tile;
 		st.bus_stops = null;
 		st.truck_stops = null;
@@ -3083,14 +3150,14 @@ public class Station implements IPoolItem
 		Station st;
 
 		if (flags & Cmd.DC_AUTO) {
-			if (m5 < 8) return_cmd_error(Str.STR_300B_MUST_DEMOLISH_RAILROAD);
-			if (m5 < 0x43 || (m5 >= 83 && m5 <= 114)) return_cmd_error(Str.STR_300E_MUST_DEMOLISH_AIRPORT_FIRST);
-			if (m5 < 0x47) return_cmd_error(Str.STR_3047_MUST_DEMOLISH_TRUCK_STATION);
-			if (m5 < 0x4B) return_cmd_error(Str.STR_3046_MUST_DEMOLISH_BUS_STATION);
-			if (m5 == 0x52) return_cmd_error(Str.STR_306A_BUOY_IN_THE_WAY);
-			if (m5 != 0x4B && m5 < 0x53) return_cmd_error(Str.STR_304D_MUST_DEMOLISH_DOCK_FIRST);
+			if (m5 < 8) return Cmd.return_cmd_error(Str.STR_300B_MUST_DEMOLISH_RAILROAD);
+			if (m5 < 0x43 || (m5 >= 83 && m5 <= 114)) return Cmd.return_cmd_error(Str.STR_300E_MUST_DEMOLISH_AIRPORT_FIRST);
+			if (m5 < 0x47) return Cmd.return_cmd_error(Str.STR_3047_MUST_DEMOLISH_TRUCK_STATION);
+			if (m5 < 0x4B) return Cmd.return_cmd_error(Str.STR_3046_MUST_DEMOLISH_BUS_STATION);
+			if (m5 == 0x52) return Cmd.return_cmd_error(Str.STR_306A_BUOY_IN_THE_WAY);
+			if (m5 != 0x4B && m5 < 0x53) return Cmd.return_cmd_error(Str.STR_304D_MUST_DEMOLISH_DOCK_FIRST);
 			SetDParam(0, Str.STR_4807_OIL_RIG);
-			return_cmd_error(Str.STR_4800_IN_THE_WAY);
+			return Cmd.return_cmd_error(Str.STR_4800_IN_THE_WAY);
 		}
 
 		st = GetStation(tile.getMap().m2);
@@ -3124,24 +3191,24 @@ public class Station implements IPoolItem
 
 
 	final static  TileTypeProcs _tile_type_station_procs = new TileTypeProcs(
-		Station::DrawTile_Station,						/* draw_tile_proc */
-		Station::GetSlopeZ_Station,					/* get_slope_z_proc */
-		Station::ClearTile_Station,					/* clear_tile_proc */
-		Station::GetAcceptedCargo_Station,		/* get_accepted_cargo_proc */
-		Station::GetTileDesc_Station,				/* get_tile_desc_proc */
-		Station::GetTileTrackStatus_Station,	/* get_tile_track_status_proc */
-		Station::ClickTile_Station,					/* click_tile_proc */
-		Station::AnimateTile_Station,				/* animate_tile_proc */
-		Station::TileLoop_Station,						/* tile_loop_clear */
-		Station::ChangeTileOwner_Station,		/* change_tile_owner_clear */
-		null,												/* get_produced_cargo_proc */
-		Station::VehicleEnter_Station,				/* vehicle_enter_tile_proc */
-		null,												/* vehicle_leave_tile_proc */
-		Station::GetSlopeTileh_Station			/* get_slope_tileh_proc */
-	);
+			Station::DrawTile_Station,						/* draw_tile_proc */
+			Station::GetSlopeZ_Station,					/* get_slope_z_proc */
+			Station::ClearTile_Station,					/* clear_tile_proc */
+			Station::GetAcceptedCargo_Station,		/* get_accepted_cargo_proc */
+			Station::GetTileDesc_Station,				/* get_tile_desc_proc */
+			Station::GetTileTrackStatus_Station,	/* get_tile_track_status_proc */
+			Station::ClickTile_Station,					/* click_tile_proc */
+			Station::AnimateTile_Station,				/* animate_tile_proc */
+			Station::TileLoop_Station,						/* tile_loop_clear */
+			Station::ChangeTileOwner_Station,		/* change_tile_owner_clear */
+			null,												/* get_produced_cargo_proc */
+			Station::VehicleEnter_Station,				/* vehicle_enter_tile_proc */
+			null,												/* vehicle_leave_tile_proc */
+			Station::GetSlopeTileh_Station			/* get_slope_tileh_proc */
+			);
 
-	
-	
+
+
 	/**
 	 * Check if a station really exists.
 	 */
@@ -3149,7 +3216,7 @@ public class Station implements IPoolItem
 	{
 		return xy != null; /* XXX: Replace by INVALID_TILE someday */
 	}
-	
+
 	public boolean IsBuoy()
 	{
 		return 0 != (had_vehicle_of_type & HVOT_BUOY); /* XXX: We should really ditch this ugly coding and switch to something sane... */
@@ -3158,10 +3225,21 @@ public class Station implements IPoolItem
 	public static void forEach(BiConsumer<Integer, Station> c) 
 	{
 		_station_pool.forEach(c);
-		
+
 	}
-	
-	
+
+	public static Iterator<Station> getIterator()
+	{
+		return _station_pool.pool.values().iterator();
+	}
+
+	public static void forEach( Consumer<Station> c )
+	{
+		_station_pool.forEach(c);
+	}
+
+
+
 
 
 	/*
