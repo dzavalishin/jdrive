@@ -251,7 +251,7 @@ public class Order implements IPoolItem {
 
 				//MA checks
 				if(Global._patches.allow_municipal_airports && !MA_WithinVehicleQuota(Station.GetStation(new_order.station))) {
-					Global._error_message = STR_MA_EXCEED_MAX_QUOTA;
+					Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 					return Cmd.CMD_ERROR;
 				//End MA checks
 
@@ -332,15 +332,15 @@ public class Order implements IPoolItem {
 
 					switch (v.type) {
 						case Vehicle.VEH_Train:
-							if (!IsTileDepotType(dp.xy, TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
+							if (!IsTileDepotType(dp.xy, Global.TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
 							break;
 
 						case Vehicle.VEH_Road:
-							if (!IsTileDepotType(dp.xy, TRANSPORT_ROAD)) return Cmd.CMD_ERROR;
+							if (!IsTileDepotType(dp.xy, Global.TRANSPORT_ROAD)) return Cmd.CMD_ERROR;
 							break;
 
 						case Vehicle.VEH_Ship:
-							if (!IsTileDepotType(dp.xy, TRANSPORT_WATER)) return Cmd.CMD_ERROR;
+							if (!IsTileDepotType(dp.xy, Global.TRANSPORT_WATER)) return Cmd.CMD_ERROR;
 							break;
 
 						default: return Cmd.CMD_ERROR;
@@ -395,11 +395,11 @@ public class Order implements IPoolItem {
 
 		if (sel_ord.id > v.num_orders) return Cmd.CMD_ERROR;
 
-		// XXX need? if (IsOrderPoolFull()) return_cmd_error(STR_8831_NO_MORE_SPACE_FOR_ORDERS);
+		// XXX need? if (IsOrderPoolFull()) return_cmd_error(Str.STR_8831_NO_MORE_SPACE_FOR_ORDERS);
 
 		/* XXX - This limit is only here because the backuppedorders can't
 		 * handle any more then this.. */
-		//if (v.num_orders >= MAX_BACKUP_ORDER_COUNT) return_cmd_error(STR_8832_TOO_MANY_ORDERS);
+		//if (v.num_orders >= MAX_BACKUP_ORDER_COUNT) return_cmd_error(Str.STR_8832_TOO_MANY_ORDERS);
 
 		/* For ships, make sure that the station is not too far away from the
 		 * previous destination, for human players with new pathfinding disabled */
@@ -412,7 +412,7 @@ public class Order implements IPoolItem {
 					Station.GetStation(new_order.station).xy // XXX type != OT_GOTO_STATION?
 			);
 			if (dist >= 130)
-				return_cmd_error(STR_0210_TOO_FAR_FROM_PREVIOUS_DESTINATIO);
+				return_cmd_error(Str.STR_0210_TOO_FAR_FROM_PREVIOUS_DESTINATIO);
 		}
 
 		if (0 != (flags & Cmd.DC_EXEC)) {
@@ -450,7 +450,7 @@ public class Order implements IPoolItem {
 			u = v.GetFirstVehicleFromSharedList();
 			while (u != null) {
 				/* Increase amount of orders */
-				u.num_orders.id++;
+				u.num_orders++;
 
 				/* If the orderlist was empty, assign it */
 				if (u.orders == null) u.orders = v.orders;
@@ -463,7 +463,7 @@ public class Order implements IPoolItem {
 					int cur = u.cur_order_index.id + 1;
 					/* Check if we don't go out of bound */
 					if (cur < u.num_orders)
-						u.cur_order_index = cur;
+						u.cur_order_index = new OrderID( cur );
 				}
 				/* Update any possible open window of the Vehicle */
 				u.InvalidateVehicleOrder();
@@ -555,7 +555,7 @@ public class Order implements IPoolItem {
 					*/
 					if(u.queue_item != null)
 					{
-						v.queue_item.queue.del(v.queue_item.queue, v);
+						v.queue_item.queue.del(v);
 					}
 				}
 
@@ -623,12 +623,12 @@ public class Order implements IPoolItem {
 
 		/* We have an aircraft/ship, they have a mini-schedule, so update them all */
 		if (v.type == Vehicle.VEH_Aircraft) {
-			InvalidateWindowClasses(WC_AIRCRAFT_LIST);
+			Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
 			/* Take out of airport queue
 			 */
 			if(v.queue_item != null)
 			{
-				v.queue_item.queue.del(v.queue_item.queue, v);
+				v.queue_item.queue.del(v);
 			}
 		}
 		if (v.type == Vehicle.VEH_Ship) Window.InvalidateWindowClasses(Window.WC_SHIPS_LIST);
@@ -735,7 +735,7 @@ public class Order implements IPoolItem {
 				st = GetStation(MA_Find_MS_InVehicleOrders(Vehicle.GetVehicle(veh_src), i));
 				if(!MA_WithinVehicleQuota(st)) 
 				{ 
-					Global._error_message = STR_MA_EXCEED_MAX_QUOTA;
+					Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 					return Cmd.CMD_ERROR;
 				}//if
 			}//for
@@ -828,7 +828,7 @@ public class Order implements IPoolItem {
 
 				/* make sure there are orders available */
 				delta = dst.IsOrderListShared() ? src.num_orders + 1 : src.num_orders - dst.num_orders;
-				//if (!HasOrderPoolFree(delta))					return_cmd_error(STR_8831_NO_MORE_SPACE_FOR_ORDERS);
+				//if (!HasOrderPoolFree(delta))					return_cmd_error(Str.STR_8831_NO_MORE_SPACE_FOR_ORDERS);
 
 				if (0 != (flags & Cmd.DC_EXEC)) {
 					final Order order;
@@ -988,7 +988,7 @@ public class Order implements IPoolItem {
 				return true;
 			}
 
-			message = STR_TRAIN_HAS_TOO_FEW_ORDERS + ((v.type - Vehicle.VEH_Train) << 2) + problem_type;
+			message = Str.STR_TRAIN_HAS_TOO_FEW_ORDERS + ((v.type - Vehicle.VEH_Train) << 2) + problem_type;
 			/*DEBUG(misc, 3) ("Checkorder mode 0: Triggered News Item for %d", v.index);*/
 
 			Global.SetDParam(0, v.unitnumber.id);
@@ -1010,7 +1010,7 @@ public class Order implements IPoolItem {
 	 * @param dest type and station has to be set. This order will be removed from all orders of vehicles
 	 *
 	 */
-	void DeleteDestinationFromVehicleOrder(Order dest)
+	static void DeleteDestinationFromVehicleOrder(Order dest)
 	{
 		//Vehicle v;
 		//Order order;

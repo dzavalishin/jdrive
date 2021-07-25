@@ -102,7 +102,7 @@ public class RoadStop implements IPoolItem
 		road_stop.station = sindex;
 	}
 
-	RoadStop GetPrimaryRoadStop(final Station st, RoadStopType type)
+	static RoadStop GetPrimaryRoadStop(final Station st, RoadStopType type)
 	{
 		switch (type) {
 			case RS_BUS:   return st.bus_stops;
@@ -113,7 +113,7 @@ public class RoadStop implements IPoolItem
 		return null;
 	}
 
-	RoadStop GetRoadStopByTile(TileIndex tile, RoadStopType type)
+	static RoadStop GetRoadStopByTile(TileIndex tile, RoadStopType type)
 	{
 		final Station st = Station.GetStation(tile.getMap().m2);
 		RoadStop rs;
@@ -125,7 +125,7 @@ public class RoadStop implements IPoolItem
 		return rs;
 	}
 
-	int GetNumRoadStops(final Station st, RoadStopType type)
+	static int GetNumRoadStops(final Station st, RoadStopType type)
 	{
 		int num = 0;
 		RoadStop rs;
@@ -136,7 +136,7 @@ public class RoadStop implements IPoolItem
 		return num;
 	}
 
-	RoadStop AllocateRoadStop()
+	static RoadStop AllocateRoadStop()
 	{
 		RoadStop[] ret = { null };
 	

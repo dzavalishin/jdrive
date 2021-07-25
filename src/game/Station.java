@@ -2383,10 +2383,10 @@ public class Station implements IPoolItem
 	private static TileDesc GetTileDesc_Station(TileIndex tile)
 	{
 		byte m5;
-		StringID str;
+		int str;
 		TileDesc td = new TileDesc();
 
-		td.owner = GetTileOwner(tile);
+		td.owner = tile.GetTileOwner().owner;
 		td.build_date = GetStation(tile.getMap().m2).build_date;
 
 		m5 = tile.getMap().m5;
@@ -2414,14 +2414,14 @@ public class Station implements IPoolItem
 		int j = 0;
 
 		switch (mode) {
-		case TRANSPORT_RAIL:
+		case Global.TRANSPORT_RAIL:
 			if (i < 8) {
 				j = tile_track_status_rail[i];
 			}
 			j += (j << 8);
 			break;
 
-		case TRANSPORT_WATER:
+		case Global.TRANSPORT_WATER:
 			// buoy is coded as a station, it is always on open water
 			// (0x3F, all tracks available)
 			if (i == 0x52) j = 0x3F;
@@ -2520,7 +2520,7 @@ public class Station implements IPoolItem
 		byte dir;
 
 		if (v.type == Vehicle.VEH_Train) {
-			if (BitOps.IS_BYTE_INSIDE(tile.getMap().m5, 0, 8) && v.IsFrontEngine(v) &&
+			if (BitOps.IS_INT_INSIDE(tile.getMap().m5, 0, 8) && v.IsFrontEngine() &&
 					!IsCompatibleTrainStationTile(tile + TileOffsByDir(v.direction >> 1), tile)) {
 
 				station_id = tile.getMap().m2;
@@ -2590,8 +2590,8 @@ public class Station implements IPoolItem
 	 */
 	private static void DeleteStation(Station st)
 	{
-		Order order;
-		StationID index;
+		//StationID 
+		int index;
 		//Vehicle v;
 		st.xy = null;
 
@@ -2603,11 +2603,14 @@ public class Station implements IPoolItem
 		index = st.index;
 		Window.DeleteWindowById(Window.WC_STATION_VIEW, index);
 
+		{
 		//Now delete all orders that go to the station
+		Order order = new Order();
 		order.type = Order.OT_GOTO_STATION;
 		order.station = index;
-		DeleteDestinationFromVehicleOrder(order);
-
+		Order.DeleteDestinationFromVehicleOrder(order);
+		}
+		
 		//And do the same with aircraft that have the station as a hangar-stop
 		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
@@ -2656,10 +2659,10 @@ public class Station implements IPoolItem
 		RoadStop rs;
 		int k;
 
-		for (rs = GetPrimaryRoadStop(st, rst); rs != null; rs = rs.next) {
-			for (k = 0; k < NUM_SLOTS; k++) {
+		for (rs = RoadStop.GetPrimaryRoadStop(st, rst); rs != null; rs = rs.next) {
+			for (k = 0; k < RoadStop.NUM_SLOTS; k++) {
 				if (rs.slot[k] != INVALID_SLOT) {
-					final  Vehicle v = GetVehicle(rs.slot[k]);
+					final  Vehicle v = Vehicle.GetVehicle(rs.slot[k]);
 
 					if (v.type != Vehicle.VEH_Road || v.u.road.slot != rs) {
 						DEBUG_ms( 0,
@@ -2684,24 +2687,25 @@ public class Station implements IPoolItem
 		CheckOrphanedSlots(st, RS_TRUCK);
 	}
 
-	private static byte byte_inc_sat_RET(byte p) { byte b = p + 1; if (b != 0) p = b; return p; }
+	private static byte byte_inc_sat_RET(byte p) { byte b = (byte) (p + 1); if (b != 0) p = b; return p; }
 
 	private static void UpdateStationRating(Station st)
 	{
-		GoodsEntry ge;
+		//GoodsEntry ge;
 		int rating;
 		StationID index;
 		int waiting;
 		boolean waiting_changed = false;
 
-		st.time_since_load = byte_inc_sat_RET(st.time_since_load);
-		st.time_since_unload = byte_inc_sat_RET(st.time_since_unload);
+		st.time_since_load = byte_inc_sat_RET((byte) st.time_since_load);
+		st.time_since_unload = byte_inc_sat_RET((byte) st.time_since_unload);
 
-		ge = st.goods;
-		do {
+		//do {
+		for( GoodsEntry ge : st.goods )
+		{
 			if (ge.enroute_from != INVALID_STATION) {
-				ge.enroute_time = byte_inc_sat(ge.enroute_time);
-				ge.days_since_pickup = byte_inc_sat(ge.days_since_pickup);
+				ge.enroute_time = byte_inc_sat_RET(ge.enroute_time);
+				ge.days_since_pickup = byte_inc_sat_RET(ge.days_since_pickup);
 
 				rating = 0;
 
@@ -2725,13 +2729,13 @@ public class Station implements IPoolItem
 					}
 				}
 
-				if (st.owner.id < Global.MAX_PLAYERS && BitOps.HASBIT(st.town.statues, st.owner))
+				if (st.owner.id < Global.MAX_PLAYERS && BitOps.HASBIT(st.town.statues, st.owner.id))
 					rating += 26;
 
 				{
 					byte days = ge.days_since_pickup;
-					if (st.last_vehicle != INVALID_VEHICLE &&
-							GetVehicle(st.last_vehicle).type == Vehicle.VEH_Ship)
+					if (st.last_vehicle.id != INVALID_VEHICLE &&
+							Vehicle.GetVehicle(st.last_vehicle).type == Vehicle.VEH_Ship)
 						days >>= 2;
 				if(days <= 21) 
 				{
@@ -2795,14 +2799,14 @@ public class Station implements IPoolItem
 					if (waiting_changed) SB(ge.waiting_acceptance, 0, 12, waiting);
 				}
 			}
-		} while (++ge != endof(st.goods));
+		} //while (++ge != endof(st.goods));
 
 		index = st.index;
 
 		if (waiting_changed)
-			InvalidateWindow(WC_STATION_VIEW, index);
+			Window.InvalidateWindow(Window.WC_STATION_VIEW, index);
 		else
-			InvalidateWindowWidget(WC_STATION_VIEW, index, 5);
+			Window.InvalidateWindowWidget(Window.WC_STATION_VIEW, index, 5);
 	}
 
 	/* called for every station each tick */
@@ -2812,7 +2816,7 @@ public class Station implements IPoolItem
 
 		if (st.facilities == 0) return;
 
-		b = st.delete_ctr + 1;
+		b = (byte) (st.delete_ctr + 1);
 		if (b >= 185) b = 0;
 		st.delete_ctr = b;
 
@@ -2824,13 +2828,13 @@ public class Station implements IPoolItem
 		int i;
 		Station st;
 
-		if (_game_mode == GM_EDITOR) return;
+		if (Global._game_mode == GameModes.GM_EDITOR) return;
 
 		i = _station_tick_ctr;
 		if (++_station_tick_ctr == GetStationPoolSize()) _station_tick_ctr = 0;
 
 		st = GetStation(i);
-		if (st.xy != 0) StationHandleBigTick(st);
+		if (st.xy != null) StationHandleBigTick(st);
 
 		//FOR_ALL_STATIONS(st)
 		_station_pool.forEach( (ii,sst) ->
@@ -2852,14 +2856,14 @@ public class Station implements IPoolItem
 		_station_pool.forEach( (ii,st) ->
 		{
 			if (st.xy != null && st.owner == owner &&
-					DistanceManhattan(tile, st.xy) <= radius) {
+					Map.DistanceManhattan(tile, st.xy) <= radius) {
 				int i;
 
-				for (i = 0; i != NUM_CARGO; i++) {
+				for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
 					GoodsEntry ge = st.goods[i];
 
 					if (ge.enroute_from != INVALID_STATION) {
-						ge.rating = BitOps.clamp(ge.rating + amount, 0, 255);
+						ge.rating = (byte) BitOps.clamp(ge.rating + amount, 0, 255);
 					}
 				}
 			}
@@ -2892,7 +2896,7 @@ public class Station implements IPoolItem
 
 		if (!st.IsValidStation() || !CheckOwnership(st.owner)) return Cmd.CMD_ERROR;
 
-		str = AllocateNameUnique(_cmd_text, 6);
+		str = Global.AllocateNameUnique(Global._cmd_text, 6);
 		if (str == 0) return Cmd.CMD_ERROR;
 
 		if (flags & Cmd.DC_EXEC) {
@@ -2900,11 +2904,11 @@ public class Station implements IPoolItem
 
 			st.string_id = str;
 			UpdateStationVirtCoord(st);
-			DeleteName(old_str);
+			Global.DeleteName(old_str);
 			_station_sort_dirty[st.owner] = true; // rename a station
-			MarkWholeScreenDirty();
+			Hal.MarkWholeScreenDirty();
 		} else {
-			DeleteName(str);
+			Global.DeleteName(str);
 		}
 
 		return 0;
@@ -2914,7 +2918,7 @@ public class Station implements IPoolItem
 	public static int MoveGoodsToStation(TileIndex tile, int w, int h, int type, int amount)
 	{
 		Station around_ptr[] = new Station[8];
-		StationID around = new StationID[8];
+		StationID [] around = new StationID[8];
 		StationID st_index;
 		int i;
 		Station st;
@@ -2945,7 +2949,7 @@ public class Station implements IPoolItem
 		}
 
 		//BEGIN_TILE_LOOP(cur_tile, w, h, tile - TileDiffXY(max_rad, max_rad))
-		TileIndex.forAll(w, h, tile - TileDiffXY(max_rad, max_rad), (cur_tile) -> 
+		TileIndex.forAll(w, h, tile.isub(max_rad, max_rad), (cur_tile) -> 
 		{
 			cur_tile = TILE_MASK(cur_tile);
 			if (cur_tile.IsTileType( TileTypes.MP_STATION)) 
@@ -3149,14 +3153,14 @@ public class Station implements IPoolItem
 		byte m5 = tile.getMap().m5;
 		Station st;
 
-		if (flags & Cmd.DC_AUTO) {
+		if( 0 != (flags & Cmd.DC_AUTO)) {
 			if (m5 < 8) return Cmd.return_cmd_error(Str.STR_300B_MUST_DEMOLISH_RAILROAD);
 			if (m5 < 0x43 || (m5 >= 83 && m5 <= 114)) return Cmd.return_cmd_error(Str.STR_300E_MUST_DEMOLISH_AIRPORT_FIRST);
 			if (m5 < 0x47) return Cmd.return_cmd_error(Str.STR_3047_MUST_DEMOLISH_TRUCK_STATION);
 			if (m5 < 0x4B) return Cmd.return_cmd_error(Str.STR_3046_MUST_DEMOLISH_BUS_STATION);
 			if (m5 == 0x52) return Cmd.return_cmd_error(Str.STR_306A_BUOY_IN_THE_WAY);
 			if (m5 != 0x4B && m5 < 0x53) return Cmd.return_cmd_error(Str.STR_304D_MUST_DEMOLISH_DOCK_FIRST);
-			SetDParam(0, Str.STR_4807_OIL_RIG);
+			Global.SetDParam(0, Str.STR_4807_OIL_RIG);
 			return Cmd.return_cmd_error(Str.STR_4800_IN_THE_WAY);
 		}
 
