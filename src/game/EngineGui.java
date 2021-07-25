@@ -1,34 +1,47 @@
 package game;
 
+import java.util.Iterator;
+
 import game.tables.EngineTables;
+import game.util.BitOps;
 
 public class EngineGui extends EngineTables 
 {
 
 
 
-	static  final RailVehicleInfo  RailVehInfo(EngineID e)
+
+
+	static EngineInfo 			[] _engine_info = new EngineInfo[Global.TOTAL_NUM_ENGINES];
+	static RailVehicleInfo 		[] _rail_vehicle_info = new RailVehicleInfo[Global.NUM_TRAIN_ENGINES];
+	static ShipVehicleInfo 		[] _ship_vehicle_info = new ShipVehicleInfo[Global.NUM_SHIP_ENGINES];
+	static AircraftVehicleInfo 	[] _aircraft_vehicle_info = new AircraftVehicleInfo[Global.NUM_AIRCRAFT_ENGINES];
+	static RoadVehicleInfo 		[] _road_vehicle_info = new RoadVehicleInfo [Global.NUM_ROAD_ENGINES];
+
+	
+	
+	static  final RailVehicleInfo  RailVehInfo(int e)
 	{
-		assert(e < lengthof(_rail_vehicle_info));
-		return &_rail_vehicle_info[e];
+		assert(e < _rail_vehicle_info.length);
+		return _rail_vehicle_info[e];
 	}
 
-	static  final ShipVehicleInfo  ShipVehInfo(EngineID e)
+	static  final ShipVehicleInfo  ShipVehInfo(int e ) //EngineID e)
 	{
-		assert(e >= SHIP_ENGINES_INDEX && e < SHIP_ENGINES_INDEX + lengthof(_ship_vehicle_info));
-		return &_ship_vehicle_info[e - SHIP_ENGINES_INDEX];
+		assert(e >= Global.SHIP_ENGINES_INDEX && e < Global.SHIP_ENGINES_INDEX + _ship_vehicle_info.length);
+		return _ship_vehicle_info[e - Global.SHIP_ENGINES_INDEX];
 	}
 
-	static  final AircraftVehicleInfo  AircraftVehInfo(EngineID e)
+	static  final AircraftVehicleInfo  AircraftVehInfo(int e)
 	{
-		assert(e >= AIRCRAFT_ENGINES_INDEX && e < AIRCRAFT_ENGINES_INDEX + lengthof(_aircraft_vehicle_info));
-		return &_aircraft_vehicle_info[e - AIRCRAFT_ENGINES_INDEX];
+		assert(e >= Global.AIRCRAFT_ENGINES_INDEX && e < Global.AIRCRAFT_ENGINES_INDEX + _aircraft_vehicle_info.length);
+		return _aircraft_vehicle_info[e - Global.AIRCRAFT_ENGINES_INDEX];
 	}
 
-	static  final RoadVehicleInfo  RoadVehInfo(EngineID e)
+	static  final RoadVehicleInfo  RoadVehInfo(int e)
 	{
-		assert(e >= ROAD_ENGINES_INDEX && e < ROAD_ENGINES_INDEX + lengthof(_road_vehicle_info));
-		return &_road_vehicle_info[e - ROAD_ENGINES_INDEX];
+		assert(e >= Global.ROAD_ENGINES_INDEX && e < Global.ROAD_ENGINES_INDEX + _road_vehicle_info.length);
+		return _road_vehicle_info[e - Global.ROAD_ENGINES_INDEX];
 	}
 
 
@@ -37,17 +50,9 @@ public class EngineGui extends EngineTables
 
 
 
-	EngineInfo 			[] _engine_info = new EngineInfo[Global.TOTAL_NUM_ENGINES];
-	RailVehicleInfo 	[] _rail_vehicle_info = new RailVehicleInfo[Global.NUM_TRAIN_ENGINES];
-	ShipVehicleInfo 	[] _ship_vehicle_info = new ShipVehicleInfo[Global.NUM_SHIP_ENGINES];
-	AircraftVehicleInfo [] _aircraft_vehicle_info = new AircraftVehicleInfo[Global.NUM_AIRCRAFT_ENGINES];
-	RoadVehicleInfo 	[] _road_vehicle_info = new RoadVehicleInfo [Global.NUM_ROAD_ENGINES];
+	//void ShowEnginePreviewWindow(EngineID engine);
 
-
-
-	void ShowEnginePreviewWindow(EngineID engine);
-
-	void DeleteCustomEngineNames()
+	static void DeleteCustomEngineNames()
 	{
 		int i;
 		StringID old;
@@ -61,7 +66,7 @@ public class EngineGui extends EngineTables
 		_vehicle_design_names &= ~1;
 	}
 
-	void LoadCustomEngineNames()
+	static void LoadCustomEngineNames()
 	{
 		// XXX: not done */
 		DEBUG(misc, 1) ("LoadCustomEngineNames: not done");
@@ -112,7 +117,7 @@ public class EngineGui extends EngineTables
 		}
 	}
 
-	void AddTypeToEngines()
+	static void AddTypeToEngines()
 	{
 		Engine  e = _engines;
 
@@ -123,7 +128,7 @@ public class EngineGui extends EngineTables
 		do e.type = Vehicle.VEH_Special;  while (++e < endof(_engines));
 	}
 
-	void StartupEngines()
+	static void StartupEngines()
 	{
 		Engine e;
 		final EngineInfo *ei;
@@ -198,7 +203,7 @@ public class EngineGui extends EngineTables
 
 	static WagonOverrides[] _engine_wagon_overrides = new WagonOverrides[Global.TOTAL_NUM_ENGINES];
 
-	void SetWagonOverrideSprites(EngineID engine, SpriteGroup group, byte [] train_id,
+	static void SetWagonOverrideSprites(EngineID engine, SpriteGroup group, byte [] train_id,
 			int trains)
 	{
 		WagonOverrides wos;
@@ -249,7 +254,7 @@ public class EngineGui extends EngineTables
 	/**
 	 * Unload all wagon override sprite groups.
 	 */
-	void UnloadWagonOverrides()
+	static void UnloadWagonOverrides()
 	{
 		WagonOverrides wos;
 		WagonOverride wo;
@@ -275,7 +280,7 @@ public class EngineGui extends EngineTables
 	// memory. --pasky)
 	static SpriteGroup [][] engine_custom_sprites = new SpriteGroup[Global.TOTAL_NUM_ENGINES][NUM_GLOBAL_CID];
 
-	void SetCustomEngineSprites(EngineID engine, byte cargo, SpriteGroup group)
+	static void SetCustomEngineSprites(EngineID engine, byte cargo, SpriteGroup group)
 	{
 		if (engine_custom_sprites[engine][cargo] != null) {
 			Global.DEBUG_grf( 6,"SetCustomEngineSprites: engine `%d' cargo `%d' already has group -- removing.", engine, cargo);
@@ -288,7 +293,7 @@ public class EngineGui extends EngineTables
 	/**
 	 * Unload all engine sprite groups.
 	 */
-	void UnloadCustomEngineSprites()
+	static void UnloadCustomEngineSprites()
 	{
 		EngineID engine;
 		CargoID cargo;
@@ -306,8 +311,8 @@ public class EngineGui extends EngineTables
 	static int MapOldSubType(final Vehicle v)
 	{
 		if (v.type != Vehicle.VEH_Train) return v.subtype;
-		if (IsTrainEngine(v)) return 0;
-		if (IsFreeWagon(v)) return 4;
+		if (v.IsTrainEngine()) return 0;
+		if (v.IsFreeWagon()) return 4;
 		return 2;
 	}
 
@@ -315,8 +320,10 @@ public class EngineGui extends EngineTables
 	typedef SpriteGroup *(*resolve_callback)(final SpriteGroup *spritegroup,
 			final Vehicle veh, int callback_info, void *resolve_func); /* XXX data pointer used as function pointer */
 
-	static final SpriteGroup ResolveVehicleSpriteGroup(final SpriteGroup spritegroup,
-			final Vehicle veh, int callback_info, resolve_callback resolve_func)
+	static final SpriteGroup ResolveVehicleSpriteGroup(
+			final SpriteGroup spritegroup,
+			final Vehicle veh, int callback_info, 
+			resolve_callback resolve_func)
 	{
 		if (spritegroup == null)
 			return null;
@@ -468,7 +475,7 @@ public class EngineGui extends EngineTables
 					 * But they won't let us have an easy ride so surely *some* GRF
 					 * file does. So someone needs to do this too. --pasky */
 
-					#undef veh_prop
+					//#undef veh_prop
 					}
 				}
 			}
@@ -479,13 +486,13 @@ public class EngineGui extends EngineTables
 		}
 
 		case SGT_RANDOMIZED: {
-			final RandomizedSpriteGroup *rsg = &spritegroup.g.random;
+			final RandomizedSpriteGroup rsg = (RandomizedSpriteGroup)spritegroup;
 
 			if (veh == null) {
 				// Purchase list of something. Show the first one. 
 				assert(rsg.num_groups > 0);
 				//debug("going for %p: %d", rsg.groups[0], rsg.groups[0].type);
-				return resolve_func(rsg.groups[0], null, callback_info, resolve_func);
+				return resolve_func.apply(rsg.groups[0], null, callback_info, resolve_func);
 			}
 
 			if (rsg.var_scope == VSG_SCOPE_PARENT) {
@@ -494,7 +501,7 @@ public class EngineGui extends EngineTables
 					veh = GetFirstVehicleInChain(veh);
 			}
 
-			return resolve_func(EvalRandomizedSpriteGroup(rsg, veh.random_bits), veh, callback_info, resolve_func);
+			return resolve_func.apply(EvalRandomizedSpriteGroup(rsg, veh.random_bits), veh, callback_info, resolve_func);
 		}
 
 		default:
@@ -505,7 +512,7 @@ public class EngineGui extends EngineTables
 
 	static final SpriteGroup GetVehicleSpriteGroup(EngineID engine, final Vehicle v)
 	{
-		final SpriteGroup *group;
+		final SpriteGroup group;
 		byte cargo = GC_PURCHASE;
 
 		if (v != null) {
@@ -516,7 +523,7 @@ public class EngineGui extends EngineTables
 		group = engine_custom_sprites[engine][cargo];
 
 		if (v != null && v.type == Vehicle.VEH_Train) {
-			final SpriteGroup *overset = GetWagonOverrideSpriteSet(engine, v.u.rail.first_engine);
+			final SpriteGroup overset = GetWagonOverrideSpriteSet(engine, v.u.rail.first_engine);
 
 			if (overset != null) group = overset;
 		}
@@ -524,10 +531,10 @@ public class EngineGui extends EngineTables
 		return group;
 	}
 
-	int GetCustomEngineSprite(EngineID engine, final Vehicle v, byte direction)
+	static int GetCustomEngineSprite(EngineID engine, final Vehicle v, byte direction)
 	{
-		final SpriteGroup *group;
-		final RealSpriteGroup *rsg;
+		final SpriteGroup group;
+		final RealSpriteGroup rsg;
 		byte cargo = GC_PURCHASE;
 		byte loaded = 0;
 		boolean in_motion = 0;
@@ -595,7 +602,7 @@ public class EngineGui extends EngineTables
 	 * @param v The wagon to check
 	 * @return true if it is using an override, false otherwise
 	 */
-	boolean UsesWagonOverride(final Vehicle  v)
+	static boolean UsesWagonOverride(final Vehicle  v)
 	{
 		assert(v.type == Vehicle.VEH_Train);
 		return GetWagonOverrideSpriteSet(v.engine_type, v.u.rail.first_engine) != null;
@@ -610,7 +617,7 @@ public class EngineGui extends EngineTables
 	 * @param vehicle The vehicle to evaluate the callback for, null if it doesnt exist (yet)
 	 * @return The value the callback returned, or CALLBACK_FAILED if it failed
 	 */
-	int GetCallBackResult(int callback_info, EngineID engine, final Vehicle v)
+	static int GetCallBackResult(int callback_info, EngineID engine, final Vehicle v)
 	{
 		final SpriteGroup *group;
 		byte cargo = GC_DEFAULT;
@@ -647,7 +654,7 @@ public class EngineGui extends EngineTables
 	static byte _vsg_random_triggers;
 	static byte _vsg_bits_to_reseed;
 
-	static final SpriteGroup *TriggerVehicleSpriteGroup(final SpriteGroup *spritegroup,
+	static final SpriteGroup TriggerVehicleSpriteGroup(final SpriteGroup spritegroup,
 			Vehicle veh, int callback_info, resolve_callback resolve_func)
 	{
 		if (spritegroup == null)
@@ -655,9 +662,9 @@ public class EngineGui extends EngineTables
 
 		if (spritegroup.type == SGT_RANDOMIZED) {
 			_vsg_bits_to_reseed |= RandomizedSpriteGroupTriggeredBits(
-					&spritegroup.g.random,
+					spritegroup.g.random,
 					_vsg_random_triggers,
-					&veh.waiting_triggers
+					veh.waiting_triggers
 					);
 		}
 
@@ -666,8 +673,8 @@ public class EngineGui extends EngineTables
 
 	static void DoTriggerVehicle(Vehicle veh, VehicleTrigger trigger, byte base_random_bits, boolean first)
 	{
-		final SpriteGroup *group;
-		final RealSpriteGroup *rsg;
+		final SpriteGroup group;
+		final RealSpriteGroup rsg;
 		byte new_random_bits;
 
 		_vsg_random_triggers = trigger;
@@ -685,7 +692,7 @@ public class EngineGui extends EngineTables
 			return;
 
 		assert(group.type == SGT_REAL);
-		rsg = &group.g.real;
+		rsg = (RealSpriteGroup)group;
 
 		new_random_bits = Hal.Random();
 		veh.random_bits &= ~_vsg_bits_to_reseed;
@@ -747,56 +754,62 @@ public class EngineGui extends EngineTables
 
 	void UnloadCustomEngineNames()
 	{
-		char **i;
-		for (i = _engine_custom_names; i != endof(_engine_custom_names); i++) {
-			free(*i);
-			*i = null;
+		//char **i;
+		for (int i = 0; i < _engine_custom_names.length; i++) {
+			//free(*i);
+			_engine_custom_names[i] = null;
 		}
 	}
 
-	StringID GetCustomEngineName(EngineID engine)
+	//StringID GetCustomEngineName(EngineID engine)
+	StringID GetCustomEngineName(int engine)
 	{
-		if (!_engine_custom_names[engine])
+		if (null == _engine_custom_names[engine])
 			return _engine_name_strings[engine];
-		ttd_strlcpy(_userstring, _engine_custom_names[engine], lengthof(_userstring));
+		//ttd_strlcpy(_userstring, _engine_custom_names[engine], lengthof(_userstring));
+		_userstring = _engine_custom_names[engine];
 		return Str.STR_SPEC_USERSTRING;
 	}
 
 
 	void AcceptEnginePreview(Engine e, PlayerID player)
 	{
-		Player p = GetPlayer(player);
+		Player p = Player.GetPlayer(player);
 
 		assert(e.railtype < RAILTYPE_END);
-		SETBIT(e.player_avail, player);
-		SETBIT(p.avail_railtypes, e.railtype);
+		e.player_avail = BitOps.RETSETBIT(e.player_avail, player);
+		p.avail_railtypes = BitOps.RETSETBIT(p.avail_railtypes, e.railtype);
 
 		e.preview_player = 0xFF;
-		InvalidateWindowClasses(Window.WC_BUILD_VEHICLE);
-		InvalidateWindowClasses(Window.WC_REPLACE_VEHICLE);
+		Window.InvalidateWindowClasses(Window.WC_BUILD_VEHICLE);
+		Window.InvalidateWindowClasses(Window.WC_REPLACE_VEHICLE);
 	}
 
-	static PlayerID GetBestPlayer(PlayerID pp)
+	//static PlayerID GetBestPlayer(PlayerID pp)
+	static int GetBestPlayer(int pp)
 	{
-		final Player p;
+		//final Player p;
 		int best_hist;
-		PlayerID best_player;
+		//PlayerID 
+		int best_player;
 		int mask = 0;
 
 		do {
 			best_hist = -1;
 			best_player = Owner.OWNER_SPECTATOR;
-			FOR_ALL_PLAYERS(p) {
+			//FOR_ALL_PLAYERS(p)
+			Player.forEach( (p) ->
+			{
 				if (p.is_active && p.block_preview == 0 && !BitOps.HASBIT(mask, p.index) &&
 						p.old_economy[0].performance_history > best_hist) {
 					best_hist = p.old_economy[0].performance_history;
-					best_player = p.index;
+					best_player = p.index.id;
 				}
-			}
+			});
 
 			if (best_player == Owner.OWNER_SPECTATOR) return Owner.OWNER_SPECTATOR;
 
-			SETBIT(mask, best_player);
+			mask = BitOps.RETSETBIT(mask, best_player);
 		} while (--pp != 0);
 
 		return best_player;
@@ -806,10 +819,10 @@ public class EngineGui extends EngineTables
 	{
 		EngineID i;
 
-		if (_cur_year >= 130) return;
+		if (Global._cur_year >= 130) return;
 
-		for (i = 0; i != lengthof(_engines); i++) {
-			Engine  e = &_engines[i];
+		for (i = 0; i != _engines.length; i++) {
+			Engine  e = _engines[i];
 
 			if (e.flags & ENGINE_INTRODUCING) {
 				if (e.flags & ENGINE_PREVIEWING) {
@@ -848,12 +861,12 @@ public class EngineGui extends EngineTables
 	int CmdWantEnginePreview(int x, int y, int flags, int p1, int p2)
 	{
 		Engine e;
-		if (!IsEngineIndex(p1)) return Cmd.CMD_ERROR;
+		if (!Engine.IsEngineIndex(p1)) return Cmd.CMD_ERROR;
 
-		e = GetEngine(p1);
-		if (GetBestPlayer(e.preview_player) != Global._current_player) return Cmd.CMD_ERROR;
+		e = Engine.GetEngine(p1);
+		if (GetBestPlayer(e.preview_player) != Global._current_player.id) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC)
+		if( 0 != (flags & Cmd.DC_EXEC))
 			AcceptEnginePreview(e, Global._current_player);
 
 		return 0;
@@ -862,19 +875,26 @@ public class EngineGui extends EngineTables
 	// Determine if an engine type is a wagon (and not a loco)
 	static boolean IsWagon(EngineID index)
 	{
-		return index < Global.NUM_TRAIN_ENGINES && RailVehInfo(index).flags & RVI_WAGON;
+		return (index.id < Global.NUM_TRAIN_ENGINES) && 0 != (RailVehInfo(index.id).flags & RVI_WAGON);
+	}
+
+	static boolean IsWagon(int index)
+	{
+		return (index < Global.NUM_TRAIN_ENGINES) && 0 != (RailVehInfo(index).flags & RVI_WAGON);
 	}
 
 	static void NewVehicleAvailable(Engine e)
 	{
-		Vehicle v;
-		Player p;
+		//Vehicle v;
+		//Player p;
 		EngineID index = e - _engines;
 
 		// In case the player didn't build the vehicle during the intro period,
 		// prevent that player from getting future intro periods for a while.
 		if (e.flags & ENGINE_INTRODUCING) {
-			FOR_ALL_PLAYERS(p) {
+			//FOR_ALL_PLAYERS(p)
+			Player.forEach( (p) ->
+			{
 				int block_preview = p.block_preview;
 
 				if (!BitOps.HASBIT(e.player_avail, p.index)) continue;
@@ -882,22 +902,26 @@ public class EngineGui extends EngineTables
 				/* We assume the user did NOT build it.. prove me wrong ;) */
 				p.block_preview = 20;
 
-				FOR_ALL_VEHICLES(v) {
+				//FOR_ALL_VEHICLES(v)
+				Iterator<Vehicle> it = Vehicle.getIterator();
+				while(it.hasNext())
+				{
+					Vehicle v = it.next();
 					if (v.type == Vehicle.VEH_Train || v.type == Vehicle.VEH_Road || v.type == Vehicle.VEH_Ship ||
 							(v.type == Vehicle.VEH_Aircraft && v.subtype <= 2)) {
 						if (v.owner == p.index && v.engine_type == index) {
 							/* The user did prove me wrong, so restore old value */
-							p.block_preview = block_preview;
+							p.block_preview = (byte) block_preview;
 							break;
 						}
 					}
 				}
-			}
+			});
 		}
 
 		e.flags = (e.flags & ~ENGINE_INTRODUCING) | ENGINE_AVAILABLE;
-		InvalidateWindowClasses(Window.WC_BUILD_VEHICLE);
-		InvalidateWindowClasses(Window.WC_REPLACE_VEHICLE);
+		Window.InvalidateWindowClasses(Window.WC_BUILD_VEHICLE);
+		Window.InvalidateWindowClasses(Window.WC_REPLACE_VEHICLE);
 
 		// Now available for all players
 		e.player_avail = (byte)-1;
@@ -979,6 +1003,8 @@ public class EngineGui extends EngineTables
 		return 0;
 	}
 
+	
+	/*
 
 	static final SaveLoad _engine_desc[] = {
 			SLE_VAR(Engine,intro_date,						SLE_UINT16),
@@ -1032,7 +1058,7 @@ public class EngineGui extends EngineTables
 			{ 'ENGN', Save_ENGN, Load_ENGN, CH_ARRAY},
 			{ 'ENGS', LoadSave_ENGS, LoadSave_ENGS, CH_RIFF | CH_LAST},
 	};
-
+	*/
 
 	/*
 	 * returns true if an engine is valid, of the specified type, and buildable by
@@ -1046,15 +1072,15 @@ public class EngineGui extends EngineTables
 		final Engine e;
 
 		// check if it's an engine that is in the engine array
-		if (!IsEngineIndex(engine)) return false;
+		if (!Engine.IsEngineIndex(engine)) return false;
 
-		e = GetEngine(engine);
+		e = Engine.GetEngine(engine);
 
 		// check if it's an engine of specified type
 		if (e.type != type) return false;
 
 		// check if it's available
-		if (!BitOps.HASBIT(e.player_avail, Global._current_player)) return false;
+		if (!BitOps.HASBIT(e.player_avail, Global._current_player.id)) return false;
 
 		return true;
 	}
@@ -1062,9 +1088,25 @@ public class EngineGui extends EngineTables
 
 
 
-
-
-
-
-
 }
+
+/*
+typedef SpriteGroup *(*resolve_callback)
+	(final SpriteGroup *spritegroup,
+	final Vehicle veh, int callback_info, 
+	void *resolve_func); /* XXX data pointer used as function pointer */
+
+
+@FunctionalInterface
+interface resolve_callback 
+{
+	SpriteGroup apply
+		(
+				SpriteGroup spritegroup,
+				Vehicle veh, int callback_info, 
+				resolve_callback resolve_func
+	);
+}
+
+
+

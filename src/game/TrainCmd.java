@@ -1935,7 +1935,7 @@ public class TrainCmd extends TrainTables
 
 		EngineID engtype = v.engine_type;
 
-		switch (GetEngine(engtype).railtype) {
+		switch (Engine.GetEngine(engtype).railtype) {
 		case RAILTYPE_RAIL:
 			SndPlayVehicleFx(sfx[RailVehInfo(engtype).engclass], v);
 			break;
