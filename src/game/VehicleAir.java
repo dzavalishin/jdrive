@@ -3,12 +3,18 @@ package game;
 public class VehicleAir extends VehicleChild {
 
 	int crashed_counter;
-	byte pos;
-	byte previous_pos;
+	int pos;
+	int previous_pos;
 	int targetairport;
-	byte state;
+	int state;
 	int desired_speed;	
 	// Speed aircraft desires to maintain, used to
 	// decrease traffic to busy airports.
 
+	@Override
+	void clear() 
+	{
+		crashed_counter = pos = previous_pos =
+		targetairport = state = desired_speed = 0;	
+	}
 }

@@ -26,7 +26,8 @@ public class Vehicle implements IPoolItem
 	Vehicle first;   // NOSAVE: pointer to the first vehicle in the chain
 	Vehicle depot_list;	//NOSAVE: linked list to tell what vehicles entered a depot during the last tick. Used by autoreplace
 
-	StringID string_id; // Displayed string
+	//StringID string_id; // Displayed string
+	int string_id; // Displayed string
 
 	UnitID unitnumber;	// unit number, for display purposes only
 	PlayerID owner;				// which player owns the vehicle?
@@ -77,7 +78,8 @@ public class Vehicle implements IPoolItem
 
 	/* Begin Order-stuff */
 	Order current_order;     //! The current order (+ status, like: loading)
-	OrderID cur_order_index; //! The index to the current order
+	//OrderID cur_order_index; //! The index to the current order
+	int cur_order_index; //! The index to the current order
 
 	Order orders;           //! Pointer to the first order for this vehicle
 	//OrderID num_orders = new OrderID(0);      //! How many orders there are in the list TODO [dz] its just int?
@@ -745,7 +747,7 @@ public class Vehicle implements IPoolItem
 	/**
 	 * Get the pointer to the vehicle with index 'index'
 	 */
-	public static Vehicle getVehicle(VehicleID index)
+	public static Vehicle GetVehicle(VehicleID index)
 	{
 		return _vehicle_pool.GetItemFromPool(index.id);
 	}
@@ -753,7 +755,7 @@ public class Vehicle implements IPoolItem
 	/**
 	 * Get the pointer to the vehicle with index 'index'
 	 */
-	public static Vehicle getVehicle(int index)
+	public static Vehicle GetVehicle(int index)
 	{
 		return _vehicle_pool.GetItemFromPool(index);
 	}
@@ -1100,7 +1102,7 @@ public class Vehicle implements IPoolItem
 	}
 
 
-	Vehicle AllocateVehicle()
+	static Vehicle AllocateVehicle()
 	{
 		VehicleID[] counter = { new VehicleID(0) }; // TODO not static?
 		return AllocateSingleVehicle(counter);

@@ -20,6 +20,7 @@ public class Engine {
 	byte type;				
 
 	static public final int INVALID_ENGINE  = Vehicle.INVALID_ENGINE;
+	static public final EngineID INVALID_ENGINE_ID  = new EngineID( Vehicle.INVALID_ENGINE );
 
 
 

@@ -1,6 +1,11 @@
 package game;
 
 public class VehicleShip extends VehicleChild {
-	byte state;
+	int state;
+
+	@Override
+	void clear() {
+		state = 0;		
+	}
 
 }

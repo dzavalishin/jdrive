@@ -43,6 +43,13 @@ public class Order implements IPoolItem {
 		clean();
 	}
 	
+	public Order( Order src )
+	{
+		AssignOrder(this, src);
+		index = src.index;
+		next = src.next; // TODO Do we need it?
+	}
+	
 	public static final int OT_NOTHING       = 0;
 	public static final int OT_GOTO_STATION  = 1;
 	public static final int OT_GOTO_DEPOT    = 2;
