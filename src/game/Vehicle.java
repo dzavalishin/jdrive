@@ -2326,7 +2326,7 @@ public class Vehicle implements IPoolItem
 		 * w_rear is the rear end of the cloned train. It's used to add more cars and is only used by trains
 		 */
 
-		if (!CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
+		if (!Player.CheckOwnership(PlayerID.get( v.owner.id ) )) return Cmd.CMD_ERROR;
 
 		if (v.type == VEH_Train && !v.IsFrontEngine()) return Cmd.CMD_ERROR;
 
@@ -2351,7 +2351,7 @@ public class Vehicle implements IPoolItem
 				continue;
 			}
 
-			cost = Cmd.DoCommand(x, y, v.engine_type, 1, flags, CMD_BUILD_VEH(v.type));
+			cost = Cmd.DoCommand(x, y, v.engine_type.id, 1, flags, CMD_BUILD_VEH(v.type));
 
 			if (Cmd.CmdFailed(cost)) return cost;
 
@@ -2366,7 +2366,7 @@ public class Vehicle implements IPoolItem
 					}
 				}
 
-				if (v.type == VEH_Train && !IsFrontEngine(v)) {
+				if (v.type == VEH_Train && !v.IsFrontEngine()) {
 					// this s a train car
 					// add this unit to the end of the train
 					Cmd.DoCommand(x, y, (w_rear.index << 16) | w.index, 1, flags, Cmd.CMD_MOVE_RAIL_VEHICLE);
@@ -2377,11 +2377,11 @@ public class Vehicle implements IPoolItem
 				}
 				w_rear = w;	// trains needs to know the last car in the train, so they can add more in next loop
 			}
-		} while (v.type == VEH_Train && (v = GetNextVehicle(v)) != null);
+		} while (v.type == VEH_Train && (v = v.GetNextVehicle()) != null);
 
 		if( (0 != (flags & Cmd.DC_EXEC) && v_front.type == VEH_Train)) {
 			// _new_train_id needs to be the front engine due to the callback function
-			_new_train_id = w_front.index;
+			Global._new_train_id = VehicleID.get( w_front.index );
 		}
 		return total_cost;
 	}
@@ -2435,14 +2435,14 @@ public class Vehicle implements IPoolItem
 		Vehicle new_v = null;
 		String vehicle_name;
 
-		new_engine_type = EngineReplacement(p, old_v.engine_type);
+		new_engine_type = p.EngineReplacement(old_v.engine_type);
 		if (new_engine_type.id == INVALID_ENGINE) new_engine_type = old_v.engine_type;
 
-		cost = Cmd.DoCommand(old_v.x_pos, old_v.y_pos, new_engine_type, 1, flags, CMD_BUILD_VEH(old_v.type));
+		cost = Cmd.DoCommand(old_v.x_pos, old_v.y_pos, new_engine_type.id, 1, flags, CMD_BUILD_VEH(old_v.type));
 		if (Cmd.CmdFailed(cost)) return cost;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			new_v = Vehicle.GetVehicle(_new_vehicle_id);
+			new_v = Vehicle.GetVehicle(Global._new_vehicle_id);
 			w[0] = new_v;	//we changed the vehicle, so MaybeReplaceVehicle needs to work on the new one. Now we tell it what the new one is
 
 			/* refit if needed */
@@ -2465,7 +2465,7 @@ public class Vehicle implements IPoolItem
 				// copy/clone the orders
 				Cmd.DoCommand(0, 0, (old_v.index << 16) | new_v.index, old_v.IsOrderListShared() ? CO_SHARE : CO_COPY, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
 				new_v.cur_order_index = old_v.cur_order_index;
-				ChangeVehicleViewWindow(old_v, new_v);
+				VehicleGui.ChangeVehicleViewWindow(old_v, new_v);
 				new_v.profit_this_year = old_v.profit_this_year;
 				new_v.profit_last_year = old_v.profit_last_year;
 				new_front = true;
@@ -2484,10 +2484,10 @@ public class Vehicle implements IPoolItem
 			MoveVehicleCargo(new_v.type == VEH_Train ? new_v.GetFirstVehicleInChain() : new_v, old_v);
 
 			// Get the name of the old vehicle if it has a custom name.
-			if ((old_v.string_id.id & 0xF800) != 0x7800) {
+			if ((old_v.string_id & 0xF800) != 0x7800) {
 				vehicle_name = null;
 			} else {
-				vehicle_name = Global.GetName(old_v.string_id.id & 0x7FF);
+				vehicle_name = Global.GetName(old_v.string_id & 0x7FF);
 			}
 		}
 
@@ -2563,7 +2563,7 @@ public class Vehicle implements IPoolItem
 				if (!p.engine_renew ||
 						w.age - w.max_age < (p.engine_renew_months * 30) || // replace if engine is too old
 						w.max_age == 0) { // rail cars got a max age of 0
-					if (!EngineHasReplacement(p, w.engine_type)) // updates to a new model
+					if (!p.EngineHasReplacement(w.engine_type)) // updates to a new model
 						continue;
 				}
 
@@ -2607,11 +2607,11 @@ public class Vehicle implements IPoolItem
 			}
 
 			//MA CHECKS
-			if(MA_VehicleServesMS(v) > 0) 
+			if(mAirport.MA_VehicleServesMS(v) > 0) 
 			{
-				for(i =  1; i <= MA_VehicleServesMS(v) ; i++) {
-					st = Station.GetStation(MA_Find_MS_InVehicleOrders(v, i));
-					if(!MA_WithinVehicleQuota(st)) {
+				for(i =  1; i <= mAirport.MA_VehicleServesMS(v) ; i++) {
+					st = Station.GetStation(mAirport.MA_Find_MS_InVehicleOrders(v, i));
+					if(!mAirport.MA_WithinVehicleQuota(st)) {
 						Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 						return Cmd.CMD_ERROR;
 					}
@@ -2649,7 +2649,7 @@ public class Vehicle implements IPoolItem
 			}
 		}
 
-		if (IsLocalPlayer()) ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
+		if (Player.IsLocalPlayer()) ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
 
 		if (stopped) v.vehstatus &= ~VS_STOPPED;
 		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
@@ -2767,25 +2767,25 @@ public class Vehicle implements IPoolItem
 		{
 		case VEH_Train:
 			if (v.rail.track == 0x80) /* We'll assume the train is facing outwards */
-				return DiagdirToDiagTrackdir(GetDepotDirection(v.tile, TRANSPORT_RAIL)); /* Train in depot */
+				return DiagdirToDiagTrackdir(GetDepotDirection(v.tile, Global.TRANSPORT_RAIL)); /* Train in depot */
 
 			if (v.rail.track == 0x40) /* train in tunnel, so just use his direction and assume a diagonal track */
 				return DiagdirToDiagTrackdir((v.direction >> 1) & 3);
 
-			return TrackDirectionToTrackdir(FIND_FIRST_BIT(v.rail.track),v.direction);
+			return TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.rail.track),v.direction);
 
 		case VEH_Ship:
 			if (v.ship.state == 0x80)  /* Inside a depot? */
 				/* We'll assume the ship is facing outwards */
-				return DiagdirToDiagTrackdir(GetDepotDirection(v.tile, TRANSPORT_WATER)); /* Ship in depot */
+				return DiagdirToDiagTrackdir(GetDepotDirection(v.tile, Global.TRANSPORT_WATER)); /* Ship in depot */
 
-			return TrackDirectionToTrackdir(FIND_FIRST_BIT(v.ship.state),v.direction);
+			return TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.ship.state),v.direction);
 
 		case VEH_Road:
 			if (v.road.state == 254) /* We'll assume the road vehicle is facing outwards */
-				return DiagdirToDiagTrackdir(GetDepotDirection(v.tile, TRANSPORT_ROAD)); /* Road vehicle in depot */
+				return DiagdirToDiagTrackdir(GetDepotDirection(v.tile, Global.TRANSPORT_ROAD)); /* Road vehicle in depot */
 
-			if (IsRoadStationTile(v.tile)) /* We'll assume the road vehicle is facing outwards */
+			if (v.tile.IsRoadStationTile()) /* We'll assume the road vehicle is facing outwards */
 				return DiagdirToDiagTrackdir(GetRoadStationDir(v.tile)); /* Road vehicle in a station */
 
 			return DiagdirToDiagTrackdir((v.direction >> 1) & 3);
@@ -2807,9 +2807,9 @@ public class Vehicle implements IPoolItem
 		 * we cannot enter the tile at all. In that case, don't call
 		 * leave_tile. */
 		if (0 == (result & 8) && old_tile != tile) {
-			VehicleLeaveTileProc proc = Landscape._tile_type_procs[GetTileType(old_tile)].vehicle_leave_tile_proc;
+			VehicleLeaveTileProc proc = Landscape._tile_type_procs[old_tile.GetTileType().ordinal()].vehicle_leave_tile_proc;
 			if (proc != null)
-				proc(v, old_tile, x, y);
+				proc.accept(v, old_tile, x, y);
 		}
 		return result;
 	}
@@ -3547,3 +3547,20 @@ class GetNewVehiclePosResult {
 
 @FunctionalInterface
 interface ConsumerOfVehicle extends Consumer<Vehicle> {}
+
+
+//typedef uint32 VehicleEnterTileProc(Vehicle *v, TileIndex tile, int x, int y);
+@FunctionalInterface
+interface VehicleEnterTileProc
+{
+	int accept (Vehicle v, TileIndex tile, int x, int y);
+}
+
+//typedef void VehicleLeaveTileProc(Vehicle *v, TileIndex tile, int x, int y);
+
+@FunctionalInterface
+interface VehicleLeaveTileProc
+{
+	void accept (Vehicle v, TileIndex tile, int x, int y);
+}
+

@@ -347,7 +347,7 @@ public class Cmd {
 
 	static int _docommand_recursive;
 
-	int DoCommand(int x, int y, int p1, int p2, int flags, int procc)
+	static int DoCommand(int x, int y, int p1, int p2, int flags, int procc)
 	{
 		int res;
 		CommandProc proc;

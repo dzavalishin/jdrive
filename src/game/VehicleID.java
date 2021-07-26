@@ -1,11 +1,34 @@
 package game;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class VehicleID extends AbstractID {
-	public VehicleID() {
+	/*private VehicleID() {
 		id = -1;
+	}*/
+
+	private VehicleID(int i) {
+		super(i);
 	}
 
-	public VehicleID(int i) {
-		id = 1;
+
+	private static Map<Integer,VehicleID> ids = new HashMap<Integer,VehicleID>();
+	public static VehicleID get(int player) 
+	{
+		VehicleID old = ids.get(player);
+		if( old == null ) 
+		{
+			old = new VehicleID(player);
+			ids.put(player, old);
+		}
+		return old;
 	}
+
+	public static VehicleID getInvalid()
+	{
+		return get(-1);
+	}
+	
+	
 }

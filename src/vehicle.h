@@ -440,7 +440,7 @@ static inline Vehicle *GetFirstVehicleFromSharedList(Vehicle *v)
 
 	return u;
 }
-*/
+* /
 // NOSAVE: Return values from various commands.
 VARDEF VehicleID _new_train_id;
 VARDEF VehicleID _new_wagon_id;

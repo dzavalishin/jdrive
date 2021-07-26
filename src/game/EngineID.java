@@ -1,5 +1,8 @@
 package game;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class EngineID extends AbstractID {
 
 	public EngineID(int i) {
@@ -10,4 +13,17 @@ public class EngineID extends AbstractID {
 		id = -1;
 	}
 
+	private static Map<Integer,EngineID> ids = new HashMap<Integer,EngineID>();
+	public static EngineID get(int player) 
+	{
+		EngineID old = ids.get(player);
+		if( old == null ) 
+		{
+			old = new EngineID(player);
+			ids.put(player, old);
+		}
+		return old;
+	}
+	
+	
 }

@@ -5,7 +5,6 @@ import java.util.Map;
 
 public class PlayerID extends AbstractID {
 
-	private static Map<Integer,PlayerID> ids = new HashMap<Integer,PlayerID>();
 
 	private PlayerID(int i) {
 		super(i);
@@ -24,6 +23,7 @@ public class PlayerID extends AbstractID {
 		return get(o.owner);
 	}
 	
+	private static Map<Integer,PlayerID> ids = new HashMap<Integer,PlayerID>();
 	public static PlayerID get(int player) {
 
 		PlayerID old = ids.get(player);

@@ -104,6 +104,16 @@ public class Global {
 	public static int _error_message_2;
 	public static int _additional_cash_required;
 
+	// NOSAVE: Return values from various commands.
+	public static VehicleID 	_new_train_id;
+	public static VehicleID 	_new_wagon_id;
+	public static VehicleID 	_new_aircraft_id;
+	public static VehicleID 	_new_ship_id;
+	public static VehicleID 	_new_roadveh_id;
+	public static VehicleID 	_new_vehicle_id;
+	public static int 			_aircraft_refit_capacity;
+	public static int 			_cmd_build_rail_veh_score;
+
 
 
 	public static int _news_display_opt = 0;
@@ -155,7 +165,7 @@ public class Global {
 	public static byte _no_scroll;
 
 	// IN/OUT parameters to commands
-	//VARDEF byte _yearly_expenses_type;
+	// byte _yearly_expenses_type;
 	public static TileIndex _terraform_err_tile;
 	public static TileIndex _build_tunnel_endtile;
 	public static boolean _generating_world = false;
@@ -341,7 +351,7 @@ public class Global {
 	private static int next_name_id = 0;
 	private static Map<Integer,String> _name_array = new HashMap<Integer,String>();
 
-	
+
 
 
 
@@ -418,11 +428,11 @@ public class Global {
 		return Strings.GetString(string);
 	}
 
-	
-	
-	
-	
-	
+
+
+
+
+
 	void IncreaseDate()
 	{
 		YearMonthDay ymd = new YearMonthDay();
@@ -473,7 +483,7 @@ public class Global {
 			Town.TownsMonthlyLoop();
 			Industry.IndustryMonthlyLoop();
 			Station._global_station_sort_dirty();
-	/*#ifdef ENABLE_NETWORK
+			/*#ifdef ENABLE_NETWORK
 			if (_network_server)
 				NetworkServerMonthlyLoop();
 	#endif /* ENABLE_NETWORK */
@@ -491,15 +501,15 @@ public class Global {
 		RoadVehiclesYearlyLoop();
 		AircraftYearlyLoop();
 		Ship.ShipsYearlyLoop();
-	/*#ifdef ENABLE_NETWORK
+		/*#ifdef ENABLE_NETWORK
 		if (_network_server)
 			NetworkServerYearlyLoop();
 	#endif /* ENABLE_NETWORK */
 
 		/* check if we reached end of the game (31 dec 2050) */
 		if (Global._cur_year == Global._patches.ending_date - Global.MAX_YEAR_BEGIN_REAL) {
-				ShowEndGameChart();
-		/* check if we reached 2090 (MAX_YEAR_END_REAL), that's the maximum year. */
+			ShowEndGameChart();
+			/* check if we reached 2090 (MAX_YEAR_END_REAL), that's the maximum year. */
 		} else if (Global._cur_year == (Global.MAX_YEAR_END + 1)) {
 			//Vehicle v;
 			Global._cur_year = Global.MAX_YEAR_END;
@@ -520,23 +530,23 @@ public class Global {
 
 		/* XXX: check if year 2050 was reached */
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 /*
 class DebugLevel {

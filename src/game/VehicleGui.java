@@ -1032,7 +1032,7 @@ void InitializeGUI()
  * @param *from_v the current owner of the window
  * @param *to_v the new owner of the window
  */
-void ChangeVehicleViewWindow(final Vehicle from_v, final Vehicle to_v)
+static void ChangeVehicleViewWindow(final Vehicle from_v, final Vehicle to_v)
 {
 	Window w;
 
