@@ -23,6 +23,7 @@ public class Global {
 	public static byte [] _player_colors = new byte[MAX_PLAYERS];
 	public static PlayerID _current_player;
 	public static PlayerID _local_player;
+	public static boolean _is_old_ai_player = false;
 
 	public static Economy _economy = new Economy();
 
@@ -365,6 +366,7 @@ public class Global {
 
 	private static int next_name_id = 0;
 	private static Map<Integer,String> _name_array = new HashMap<Integer,String>();
+
 
 
 

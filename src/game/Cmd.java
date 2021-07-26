@@ -176,7 +176,7 @@ public class Cmd {
 	static boolean CmdFailed(int res)
 	{
 		// lower 16bits are the StringID of the possible error
-		return res <= (CMD_ERROR | INVALID_STRING_ID);
+		return res <= (CMD_ERROR | Str.INVALID_STRING_ID);
 	}
 
 
@@ -302,7 +302,7 @@ public class Cmd {
 			new Command(null,                                   0), /*  97 */
 			new Command(null,                                   0), /*  98 */
 
-			new Command(CmdCloneOrder,                          0), /*  99 */
+			new Command(Order::CmdCloneOrder,                          0), /*  99 */
 
 			new Command(Landscape::CmdClearArea,                           0), /* 100 */
 			new Command(null,                                   0), /* 101 */
@@ -333,11 +333,11 @@ public class Cmd {
 
 
 		return
-				cmd < lengthof(_command_proc_table) &&
+				cmd < _command_proc_table.length &&
 				_command_proc_table[cmd].proc != null;
 	}
 
-	byte GetCommandFlags(int cmd) {return _command_proc_table[cmd & 0xFF].flags;}
+	int GetCommandFlags(int cmd) {return _command_proc_table[cmd & 0xFF].flags;}
 
 	static int DoCommandByTile(TileIndex tile, int p1, int p2, int flags, int procc)
 	{
@@ -354,14 +354,14 @@ public class Cmd {
 
 		/* Do not even think about executing out-of-bounds tile-commands */
 		//if (TileIndex.TileVirtXY(x, y) > MapSize()) {
-		if (!TileIndex.TileVirtXY(x, y).isValid()) {
+		if (!TileIndex.TileVirtXY(x, y).IsValidTile()) {
 			Global._cmd_text = null;
 			return Cmd.CMD_ERROR;
 		}
 
 		proc = _command_proc_table[procc].proc;
 
-		if (_docommand_recursive == 0) Global._error_message = String.INVALID_STRING_ID;
+		if (_docommand_recursive == 0) Global._error_message = Str.INVALID_STRING_ID.id;
 
 		_docommand_recursive++;
 
@@ -370,7 +370,7 @@ public class Cmd {
 		{
 			res = proc.exec(x, y, flags&~Cmd.DC_EXEC, p1, p2);
 			if (CmdFailed(res)) {
-				if (res & 0xFFFF) Global._error_message = res & 0xFFFF;
+				if(0 != (res & 0xFFFF)) Global._error_message = res & 0xFFFF;
 				{
 					//goto error;
 					_docommand_recursive--;
@@ -380,7 +380,7 @@ public class Cmd {
 			}
 
 			if (_docommand_recursive == 1) {
-				if (!(flags&Cmd.DC_QUERY_COST) && res != 0 && !CheckPlayerHasMoney(res))
+				if(0 == (flags&Cmd.DC_QUERY_COST) && res != 0 && !Player.CheckPlayerHasMoney(res))
 				{
 					//goto error;
 					_docommand_recursive--;
@@ -389,7 +389,7 @@ public class Cmd {
 				}
 			}
 
-			if (!(flags & Cmd.DC_EXEC)) {
+			if (0 == (flags & Cmd.DC_EXEC)) {
 				_docommand_recursive--;
 				Global._cmd_text = null;
 				return res;
@@ -398,9 +398,9 @@ public class Cmd {
 
 		/* Execute the command here. All cost-relevant functions set the expenses type
 		 * themselves with "Player.SET_EXPENSES_TYPE(...);" at the beginning of the function */
-		res = proc(x, y, flags, p1, p2);
+		res = proc.exec(x, y, flags, p1, p2);
 		if (CmdFailed(res)) {
-			if (res & 0xFFFF) Global._error_message = res & 0xFFFF;
+			if(0 != (res & 0xFFFF)) Global._error_message = res & 0xFFFF;
 			//error:
 			_docommand_recursive--;
 			Global._cmd_text = null;
@@ -411,7 +411,7 @@ public class Cmd {
 		if (--_docommand_recursive == 0) {
 			Player.SubtractMoneyFromPlayer(res);
 			// XXX - Old AI hack which doesn't use DoCommandDP; update last build coord of player
-			if ( (x|y) != 0 && Global._current_player < Global.MAX_PLAYERS) {
+			if ( (x|y) != 0 && Global._current_player.id < Global.MAX_PLAYERS) {
 				Player.GetPlayer(Global._current_player).last_build_coordinate = TileIndex.TileVirtXY(x, y);
 			}
 		}

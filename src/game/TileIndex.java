@@ -461,14 +461,14 @@ public class TileIndex implements Comparable<TileIndex>{
 		return new Owner(Global._m[tile].m1);
 	}
 
-	void SetTileOwner(Owner owner)
+	void SetTileOwner(PlayerID owner)
 	{
 		//assert(tile < MapSize());
 		assert(!IsTileType(TileTypes.MP_HOUSE));
 		assert(!IsTileType(TileTypes.MP_VOID));
 		assert(!IsTileType(TileTypes.MP_INDUSTRY));
 
-		Global._m[tile].m1 = owner.owner;
+		Global._m[tile].m1 = owner.id;
 	}
 
 	void SetTileOwner(int owner)
