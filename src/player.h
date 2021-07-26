@@ -15,7 +15,7 @@ typedef struct PlayerEconomyEntry {
 	int32 performance_history;	// player score (scale 0-1000)
 	int64 company_value;
 } PlayerEconomyEntry;
-*/
+* /
 
 typedef struct AiBuildRec {
 	TileIndex spec_tile;
@@ -59,7 +59,7 @@ typedef struct PlayerAI {
 	byte cur_dir_b;
 	byte start_dir_b;
 
-	Vehicle *cur_veh; /* only used by some states */
+	Vehicle *cur_veh; // only used by some states 
 
 	AiBuildRec src, dst, mid1, mid2;
 

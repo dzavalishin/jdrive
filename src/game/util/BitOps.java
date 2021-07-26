@@ -280,5 +280,24 @@ public class BitOps {
 		return 32-Long.numberOfLeadingZeros(a);
 	}
 
+	public static int BIGMULUS(int a, int b, int shift) 
+	{
+		long prod = Math.abs( ((long)a) * ((long)b) );
+		return (int) (prod >>> shift);
+	}
+	
+	/*
+	static  int BIGMULSS(int a, int b, int shift) {
+		return (int)(((long)(a) * (long)(b)) >> (shift));
+	}
 
+	static  long BIGMULSS64(long a, long b, int shift) {
+		return ((a) * (b)) >> (shift);
+	}
+
+
+	static  long BIGMULS(int a, int b) {
+		return (int)(((long)(a) * (long)(b)));
+	}	
+	*/
 }

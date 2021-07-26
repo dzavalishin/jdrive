@@ -58,7 +58,7 @@ public class Patches
 
 	boolean autorenew;
 	int autorenew_months;
-	int autorenew_money;
+	long autorenew_money;
 
 	byte pf_maxdepth;				// maximum recursion depth when searching for a train route for new pathfinder
 	int pf_maxlength;		// maximum length when searching for a train route for new pathfinder

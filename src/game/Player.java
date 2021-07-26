@@ -52,7 +52,7 @@ public class Player
 
 	boolean is_active;
 	byte is_ai;
-	//PlayerAI ai;
+	PlayerAI ai = new PlayerAI();
 	PlayerAiNew ainew;
 
 	long [][] yearly_expenses = new long[3][13];
@@ -139,7 +139,7 @@ public class Player
 		return Global._local_player == Global._current_player;
 	}
 
-	
+
 
 	//static final SpriteID cheeks_table[] = {
 	static final int cheeks_table[] = {
@@ -203,7 +203,7 @@ public class Player
 				}
 			}
 		}
-/* TODO draw the mouth
+		/* TODO draw the mouth
 		// draw the mouth 
 		{
 			int val = BitOps.GB(face, 10, 6);
@@ -248,7 +248,7 @@ public class Player
 
 			skip_mouth:;
 		}
-*/
+		 */
 
 		// draw the hair 
 		{
@@ -410,16 +410,48 @@ public class Player
 		return false;
 	}
 
+
+	private boolean GenerateCompanyName_verify_name(StringID str, int strp)
+	{
+		// No player must have this name already
+		//FOR_ALL_PLAYERS(pp)
+		Iterator<Player> ii = Player.getIterator();
+		while(ii.hasNext())
+		{
+			Player pp = ii.next();
+			if (pp.name_1 == str.id && pp.name_2 == strp)
+				return false;
+		}
+
+		String buffer = Strings.GetString( str );
+		if (buffer.length() >= 32 || Gfx.GetStringWidth(buffer) >= 150)
+			return false;
+
+		return true;
+	}
+
+	private void GenerateCompanyName_set_name(Player p, Town t, StringID str, int strp) {
+		p.name_1 = str.id;
+		p.name_2 = strp;
+
+		Hal.MarkWholeScreenDirty();
+
+		if (!p.index.IS_HUMAN_PLAYER()) {
+			Global.SetDParam(0, t.index);
+			NewsItem.AddNewsItem(p.index.id + (4 << 4), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, NewsItem.NF_TILE, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY), last_build_coordinate.tile, 0);
+		}
+	}
+
 	private void GenerateCompanyName()
 	{
 		Player p = this;
-		
+
 		TileIndex tile;
 		Town t;
 		StringID str;
-		Player pp;
+		//Player pp;
 		int strp;
-		String buffer;
+		//String buffer;
 
 		if (name_1 != Str.STR_SV_UNNAMED)
 			return;
@@ -430,46 +462,38 @@ public class Player
 
 		t = Town.ClosestTownFromTile(tile, (int)-1);
 
-		if (BitOps.IS_INT_INSIDE(t.townnametype, Strings.SPECSTR_TOWNNAME_START, Strings.SPECSTR_TOWNNAME_LAST+1)) 
+		if (!BitOps.IS_INT_INSIDE(t.townnametype, Strings.SPECSTR_TOWNNAME_START, Strings.SPECSTR_TOWNNAME_LAST+1)) 
 		{
-			str = new StringID( t.townnametype - Strings.SPECSTR_TOWNNAME_START + Strings.SPECSTR_PLAYERNAME_START );
-			strp = t.townnameparts;
-
-			verify_name:;
-			// No player must have this name already
-			FOR_ALL_PLAYERS(pp) {
-				if (pp.name_1 == str && pp.name_2 == strp)
-					goto bad_town_name;
-			}
-
-			buffer = Strings.GetString( str);
-			if (buffer.length() >= 32 || Gfx.GetStringWidth(buffer) >= 150)
-				goto bad_town_name;
-
-			set_name:;
-			p.name_1 = str;
-			p.name_2 = strp;
-
-			Hal.MarkWholeScreenDirty();
-
-			if (!p.index.IS_HUMAN_PLAYER()) {
-				Global.SetDParam(0, t.index);
-				NewsItem.AddNewsItem(p.index + (4 << 4), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, NewsItem.NF_TILE, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY), last_build_coordinate, 0);
-			}
-			return;
+			goto bad_town_name;
 		}
+		
+		str = new StringID( t.townnametype - Strings.SPECSTR_TOWNNAME_START + Strings.SPECSTR_PLAYERNAME_START );
+		strp = t.townnameparts;
+
+		verify_name:;
+
+		if( !GenerateCompanyName_verify_name(str, strp) )
+		{
+			goto bad_town_name;
+		}
+
+		GenerateCompanyName_set_name(p, t, str, strp);
+		return;
+
 		bad_town_name:;
 
-		if (president_name_1 == SPECStr.STR_PRESIDENT_NAME) {
-			str = SPECStr.STR_ANDCO_NAME;
+		if (president_name_1 == Strings.SPECSTR_PRESIDENT_NAME) {
+			str = Strings.SPECSTR_ANDCO_NAME;
 			strp = president_name_2;
-			goto set_name;
+			GenerateCompanyName_set_name(p, t, str, strp);
+			return;
 		} else {
-			str = SPECStr.STR_ANDCO_NAME;
+			str = Strings.SPECSTR_ANDCO_NAME;
 			strp = Hal.Random();
 			goto verify_name;
 		}
 	}
+
 
 	private static void COLOR_SWAP( byte colors[], int i, int j)  
 	{ 
@@ -549,31 +573,38 @@ public class Player
 
 	private void GeneratePresidentName() // Player p)
 	{
-		Player pp;
-		char buffer[100], buffer2[40];
+		//Player pp;
+		String buffer;
 
 		for(;;) {
-			restart:;
+			//restart:;
 
 			president_name_2 = Hal.Random();
-			president_name_1 = SPECStr.STR_PRESIDENT_NAME;
+			president_name_1 = Strings.SPECSTR_PRESIDENT_NAME;
 
 			Global.SetDParam(0, president_name_2);
-			GetString(buffer, president_name_1);
-			if (strlen(buffer) >= 32 || GetStringWidth(buffer) >= 94)
+			buffer = Global.GetString(president_name_1);
+			if (buffer.length() >= 32 || Gfx.GetStringWidth(buffer) >= 94)
 				continue;
 			boolean restart = false;
-			FOR_ALL_PLAYERS(pp) {
-				if (pp.is_active && p != pp) {
+			
+			//FOR_ALL_PLAYERS(pp)
+			//Player.forEach( (pp) ->
+			Iterator<Player> ii = Player.getIterator();
+			while(ii.hasNext())
+			{
+				Player pp =  ii.next();
+				if (pp.is_active && this != pp) {
 					Global.SetDParam(0, pp.president_name_2);
-					GetString(buffer2, pp.president_name_1);
-					if (strcmp(buffer2, buffer) == 0)
+					String buffer2 = Global.GetString(pp.president_name_1);
+					if(buffer2.equalsIgnoreCase(buffer))
 					{
 						restart = true;
 						break;
 					}
 				}
 			}
+			
 			if( restart ) continue;
 			return;
 		}
@@ -612,9 +643,10 @@ public class Player
 
 		p.money64 = p.player_money = p.current_loan = 100000;
 
-		p.is_ai = is_ai;
+		p.is_ai = (byte) (is_ai ? 1 : 0);
 		p.ai.state = 5; /* AIS_WANT_NEW_ROUTE */
-		p.share_owners[0] = p.share_owners[1] = p.share_owners[2] = p.share_owners[3] = OWNER_SPECTATOR;
+		p.share_owners[0] = p.share_owners[1] = p.share_owners[2] = p.share_owners[3] = 
+				PlayerID.get( Owner.OWNER_SPECTATOR );
 
 		p.avail_railtypes = GetPlayerRailtypes(p.index);
 		p.inaugurated_year = Global._cur_year;
@@ -634,7 +666,7 @@ public class Player
 		Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 
 		if (is_ai && (!Global._networking || Global._network_server) && Ai._ai.enabled)
-			Ai.AI_StartNewAI(p.index);
+			Ai.AI_StartNewAI(p.index.id);
 
 		return p;
 	}
@@ -713,10 +745,20 @@ public class Player
 		//Player p;
 
 		// Copy statistics
-		for( Player p : _players ) {
-			if (p.is_active) {
-				memmove(p.yearly_expenses[1], p.yearly_expenses[0], sizeof(p.yearly_expenses) - sizeof(p.yearly_expenses[0]));
-				memset(p.yearly_expenses[0], 0, sizeof(p.yearly_expenses[0]));
+		for( Player p : _players ) 
+		{
+			if (p.is_active) 
+			{
+				//memmove(p.yearly_expenses[1], p.yearly_expenses[0], sizeof(p.yearly_expenses) - sizeof(p.yearly_expenses[0]));
+				//memset(p.yearly_expenses[0], 0, sizeof(p.yearly_expenses[0]));
+				
+				System.arraycopy(
+						p.yearly_expenses, 0, 
+						p.yearly_expenses, 1, 
+						p.yearly_expenses.length - 1);
+				
+				p.yearly_expenses[0] = new long[13]; // TODO 3? 
+				
 				Window.InvalidateWindow(Window.WC_FINANCES, p.index.id);
 			}
 		}
@@ -755,8 +797,8 @@ public class Player
 		for (i = 0; i != Global.TOTAL_NUM_ENGINES; i++) {
 			final Engine e = Engine.GetEngine(i);
 
-			if (e.type == VEH_Train &&
-					(BitOps.HASBIT(e.player_avail, p.id) || e.intro_date <= _date) &&
+			if (e.type == Vehicle.VEH_Train &&
+					(BitOps.HASBIT(e.player_avail, p.id) || e.intro_date <= Global._date) &&
 					!(RailVehInfo(i).flags & RVI_WAGON)) {
 				assert(e.railtype < RAILTYPE_END);
 				rt = BitOps.RETSETBIT(rt, e.railtype);
@@ -820,19 +862,19 @@ public class Player
 				p.engine_renew = ( 0 != BitOps.GB(p2, 0, 1) );
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew = p.engine_renew;
-					InvalidateWindow(WC_GAME_OPTIONS, 0);
+					Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
 				}
 			}
 			break;
 		case 1:
-			if (p.engine_renew_months == (int16)p2)
+			if (p.engine_renew_months == (int)p2)
 				return Cmd.CMD_ERROR;
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				p.engine_renew_months = (int16)p2;
+				p.engine_renew_months = (int)p2;
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew_months = p.engine_renew_months;
-					InvalidateWindow(WC_GAME_OPTIONS, 0);
+					Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
 				}
 			}
 			break;
@@ -863,7 +905,7 @@ public class Player
 					return Cmd.CMD_ERROR;
 
 				// make sure that we do not replace a plane with a helicopter or vise versa
-				if (Engine.GetEngine(new_engine_type).type == VEH_Aircraft && HASBIT(AircraftVehInfo(old_engine_type).subtype, 0) != HASBIT(AircraftVehInfo(new_engine_type).subtype, 0))
+				if (Engine.GetEngine(new_engine_type).type == Vehicle.VEH_Aircraft && HASBIT(AircraftVehInfo(old_engine_type).subtype, 0) != HASBIT(AircraftVehInfo(new_engine_type).subtype, 0))
 					return Cmd.CMD_ERROR;
 
 				// make sure that the player can actually buy the new engine
@@ -897,7 +939,7 @@ public class Player
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				p.renew_keep_length = ( 0 != BitOps.GB(p2, 0, 1) );
 				if (IsLocalPlayer()) {
-					Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, VEH_Train);
+					Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, Vehicle.VEH_Train);
 				}
 			}
 			break;
@@ -927,7 +969,7 @@ public class Player
 	 */
 	static int CmdPlayerCtrl(int x, int y, int flags, int p1, int p2)
 	{
-		if(0 != (flags & Cmd.DC_EXEC)) Global._current_player = Owner.OWNER_NONE;
+		if(0 != (flags & Cmd.DC_EXEC)) Global._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 		switch (p1) {
 		case 0: { // Create a new Player 
@@ -951,7 +993,7 @@ public class Player
 					if (!Global._networking || (Global._network_server && !Global._network_dedicated) || Global._network_playas != Owner.OWNER_SPECTATOR || Ai._ai.network_client) {
 						if (Ai._ai.network_client) {
 							/* As ai-network-client, we have our own rulez (disable GUI and stuff) */
-							Ai._ai.network_playas = p.index;
+							Ai._ai.network_playas = (byte) p.index.id;
 							Global._local_player      = PlayerID.get( Owner.OWNER_SPECTATOR );
 							if (Ai._ai.network_playas != Owner.OWNER_SPECTATOR) {
 								/* If we didn't join the game as a spectator, activate the AI */
@@ -963,7 +1005,7 @@ public class Player
 						Global.hal.MarkWholeScreenDirty();
 					}
 				} else if (p.index == Global._local_player) {
-					Cmd.DoCommandP(0, (Global._patches.autorenew << 15 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
+					Cmd.DoCommandP(TileIndex.get(0), ((Global._patches.autorenew ? 1:0) << 15 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 				}
 				/* #ifdef ENABLE_NETWORK
 				if (_network_server) {
@@ -1013,15 +1055,15 @@ public class Player
 			break;
 
 		case 2: { /* Delete a Player */
-		Player p;
+			Player p;
 
-		if (p2 >= Global.MAX_PLAYERS) return Cmd.CMD_ERROR;
+			if (p2 >= Global.MAX_PLAYERS) return Cmd.CMD_ERROR;
 
-		if (0 == (flags & Cmd.DC_EXEC)) return 0;
+			if (0 == (flags & Cmd.DC_EXEC)) return 0;
 
-		p = GetPlayer(p2);
+			p = GetPlayer(p2);
 
-		/* Only allow removal of HUMAN companies */
+			/* Only allow removal of HUMAN companies */
 			if (p.index.IS_HUMAN_PLAYER()) {
 				/* Delete any open window of the company */
 				DeletePlayerWindows(p.index);
@@ -1032,7 +1074,7 @@ public class Player
 				NewsItem.AddNewsItem( new StringID(p.index.id + 16*3), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 
 				/* Remove the company */
-				ChangeOwnershipOfPlayerItems(p.index, Owner.OWNER_SPECTATOR);
+				Economy.ChangeOwnershipOfPlayerItems(p.index, Owner.OWNER_SPECTATOR);
 				p.money64 = p.player_money = 100000000; // XXX - wtf?
 				p.is_active = false;
 			}
@@ -1046,7 +1088,7 @@ public class Player
 
 			if (0 == (flags & Cmd.DC_EXEC)) return Cmd.CMD_ERROR;
 
-			ChangeOwnershipOfPlayerItems(pid_old, pid_new);
+			Economy.ChangeOwnershipOfPlayerItems(pid_old, pid_new);
 			DeletePlayerStuff(pid_old);
 		} break;
 		default: return Cmd.CMD_ERROR;
@@ -1080,10 +1122,10 @@ public class Player
 	{
 
 		long lvalue = BitOps.minu(value, 1000) >>> 6;
-					if (lvalue >= _endgame_perf_titles.length) 
-						lvalue = _endgame_perf_titles.length - 1;
+				if (lvalue >= _endgame_perf_titles.length) 
+					lvalue = _endgame_perf_titles.length - 1;
 
-					return _endgame_perf_titles[(int) lvalue];
+				return _endgame_perf_titles[(int) lvalue];
 	}
 
 
@@ -1178,8 +1220,8 @@ public class Player
 		// Add top5 players to highscore table 
 		return player;
 	}
-*/
-	
+	 */
+
 	/* Save HighScore table to file * /
 	static void SaveToHighScore()
 	{
@@ -1232,7 +1274,7 @@ public class Player
 		// Initialize end of game variable (when to show highscore chart) 
 		Global._patches.ending_date = 2051;
 	}
-	*/
+	 */
 	public void InitialiseEngineReplacement()
 	{
 		//EngineID engine;
@@ -1250,7 +1292,7 @@ public class Player
 	 */
 	public EngineID EngineReplacement(EngineID engine)
 	{
-		return engine_replacement[engine];
+		return EngineID.get(engine_replacement[engine.id]);
 	}
 
 	/**
@@ -1261,7 +1303,7 @@ public class Player
 	 */
 	public boolean EngineHasReplacement(EngineID engine)
 	{
-		return EngineReplacement(engine) != Engine.INVALID_ENGINE;
+		return EngineReplacement(engine).id != Engine.INVALID_ENGINE;
 	}
 
 	/**
@@ -1274,7 +1316,8 @@ public class Player
 	 */
 	public int AddEngineReplacement(EngineID old_engine, EngineID new_engine, int flags)
 	{
-		if(0 != (flags & Cmd.DC_EXEC)) engine_replacement[old_engine] = new_engine;
+		if(0 != (flags & Cmd.DC_EXEC)) 
+			engine_replacement[old_engine.id] = new_engine.id;
 		return 0;
 	}
 
