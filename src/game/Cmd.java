@@ -423,8 +423,8 @@ public class Cmd {
 	static int GetAvailableMoneyForCommand()
 	{
 		PlayerID pid = Global._current_player;
-		if (pid >= Global.MAX_PLAYERS) return 0x7FFFFFFF; // max int
-		return GetPlayer(pid).player_money;
+		if (pid.id >= Global.MAX_PLAYERS) return 0x7FFFFFFF; // max int
+		return Player.GetPlayer(pid).player_money;
 	}
 
 	// toplevel network safe docommand function for the current player. must not be called recursively.
@@ -432,24 +432,26 @@ public class Cmd {
 	boolean DoCommandP(TileIndex tile, int p1, int p2, CommandCallback callback, int cmd)
 	{
 		int res = 0,res2;
-		CommandProc *proc;
+		CommandProc proc;
 		int flags;
 		boolean notest;
 
-		int x = TileX(tile) * 16;
-		int y = TileY(tile) * 16;
+		int x = tile.TileX() * 16;
+		int y = tile.TileY() * 16;
 
 		/* Do not even think about executing out-of-bounds tile-commands */
-		if (tile > Global.MapSize()) {
+		//if (tile.getTile() > Global.MapSize()) 
+		if (!tile.IsValidTile()) 
+		{
 			Global._cmd_text = null;
 			return false;
 		}
 
 		assert(_docommand_recursive == 0);
 
-		Global._error_message = INVALID_STRING_ID;
+		Global._error_message = Str.INVALID_STRING_ID.id;
 		Global._error_message_2 = cmd >> 16;
-		_additional_cash_required = 0;
+		Global._additional_cash_required = 0;
 
 		/** Spectator has no rights except for the dedicated server which
 		 * is a spectator but is the server, so can do anything */
@@ -460,8 +462,8 @@ public class Cmd {
 		}
 
 		flags = 0;
-		if (cmd & Cmd.CMD_AUTO) flags |= Cmd.DC_AUTO;
-		if (cmd & Cmd.CMD_NO_WATER) flags |= Cmd.DC_NO_WATER;
+		if(0 != (cmd & Cmd.CMD_AUTO)) flags |= Cmd.DC_AUTO;
+		if(0 != (cmd & Cmd.CMD_NO_WATER)) flags |= Cmd.DC_NO_WATER;
 
 		// get pointer to command handler
 		assert((cmd & 0xFF) < _command_proc_table.length);
@@ -490,11 +492,12 @@ public class Cmd {
 		_docommand_recursive = 1;
 
 		// cost estimation only?
-		if (Global._shift_pressed && Player.IsLocalPlayer() && !(cmd & (Cmd.CMD_NETWORK_COMMAND | Cmd.CMD_SHOW_NO_ERROR))) {
+		if (Global._shift_pressed && Player.IsLocalPlayer() && !(cmd & (Cmd.CMD_NETWORK_COMMAND | Cmd.CMD_SHOW_NO_ERROR))) 
+		{
 			// estimate the cost.
 			res = proc.exec(x, y, flags, p1, p2);
 			if (CmdFailed(res)) {
-				if (res & 0xFFFF) Global._error_message = res & 0xFFFF;
+				if(0 != (res & 0xFFFF) ) Global._error_message = res & 0xFFFF;
 				Global.ShowErrorMessage(Global._error_message, Global._error_message_2, x, y);
 			} else {
 				ShowEstimatedCostOrIncome(res, x, y);
@@ -506,27 +509,39 @@ public class Cmd {
 		}
 
 
-		if (!((cmd & Cmd.CMD_NO_TEST_IF_IN_NETWORK) && Global._networking)) {
+		if ((0 == (cmd & Cmd.CMD_NO_TEST_IF_IN_NETWORK)) && Global._networking) {
 			// first test if the command can be executed.
 			res = proc.exec(x,y, flags, p1, p2);
 			if (CmdFailed(res)) {
-				if (res & 0xFFFF) Global._error_message = res & 0xFFFF;
+				if(0 != (res & 0xFFFF)) Global._error_message = res & 0xFFFF;
 				{
 					//goto show_error;
 					// show error message if the command fails?
-					if (IsLocalPlayer() && Global._error_message_2 != 0)
-						ShowErrorMessage(Global._error_message, Global._error_message_2, x,y);
+					if (Player.IsLocalPlayer() && Global._error_message_2 != 0)
+						Global.ShowErrorMessage(Global._error_message, Global._error_message_2, x,y);
 
 					//callb_err:
 					_docommand_recursive = 0;
 
-					if (callback) callback(false, tile, p1, p2);
+					if (callback != null) callback.accept(false, tile, p1, p2);
 					Global._cmd_text = null;
 					return false;
 				}
 			}
 			// no money? Only check if notest is off
-			if (!notest && res != 0 && !CheckPlayerHasMoney(res)) goto show_error;
+			if (!notest && res != 0 && !Player.CheckPlayerHasMoney(res))
+			{
+				//goto show_error;
+				if (Player.IsLocalPlayer() && Global._error_message_2 != 0)
+					Global.ShowErrorMessage(Global._error_message, Global._error_message_2, x,y);
+
+				//callb_err:
+				_docommand_recursive = 0;
+
+				if (callback != null) callback.accept(false, tile, p1, p2);
+				Global._cmd_text = null;
+				return false;
+			}
 		}
 
 		/*#ifdef ENABLE_NETWORK
@@ -546,12 +561,13 @@ public class Cmd {
 		#endif /* ENABLE_NETWORK */
 
 		// update last build coordinate of player.
-		if ( tile != 0 && Global._current_player < Global.MAX_PLAYERS) GetPlayer(Global._current_player).last_build_coordinate = tile;
+		if ( tile != null && Global._current_player.id < Global.MAX_PLAYERS) 
+			Player.GetPlayer(Global._current_player).last_build_coordinate = tile;
 
 		/* Actually try and execute the command. If no cost-type is given
 		 * use the finalruction one */
-		_yearly_expenses_type = EXPENSES_CONSTRUCTION;
-		res2 = proc(x,y, flags|Cmd.DC_EXEC, p1, p2);
+		Player._yearly_expenses_type = Player.EXPENSES_CONSTRUCTION;
+		res2 = proc.exec(x,y, flags|Cmd.DC_EXEC, p1, p2);
 
 		// If notest is on, it means the result of the test can be different than
 		//   the real command.. so ignore the test
@@ -559,37 +575,37 @@ public class Cmd {
 			assert(res == res2); // sanity check
 		} else {
 			if (CmdFailed(res2)) {
-				if (res2 & 0xFFFF) Global._error_message = res2 & 0xFFFF;
+				if(0 != (res2 & 0xFFFF) ) Global._error_message = res2 & 0xFFFF;
 				{
 					//goto show_error;
 					// show error message if the command fails?
-					if (IsLocalPlayer() && Global._error_message_2 != 0)
-						ShowErrorMessage(Global._error_message, Global._error_message_2, x,y);
+					if (Player.IsLocalPlayer() && Global._error_message_2 != 0)
+						Global.ShowErrorMessage(Global._error_message, Global._error_message_2, x,y);
 
 					//callb_err:
 					_docommand_recursive = 0;
 
-					if (callback) callback(false, tile, p1, p2);
+					if (null != callback) callback.accept(false, tile, p1, p2);
 					Global._cmd_text = null;
 					return false;
 				}
 			}
 		}
 
-		SubtractMoneyFromPlayer(res2);
+		Player.SubtractMoneyFromPlayer(res2);
 
-		if (IsLocalPlayer() && Global._game_mode != GameModes.GM_EDITOR) {
+		if (Player.IsLocalPlayer() && Global._game_mode != GameModes.GM_EDITOR) {
 			if (res2 != 0)
-				ShowCostOrIncomeAnimation(x, y, GetSlopeZ(x, y), res2);
-			if (_additional_cash_required) {
-				Global.SetDParam(0, _additional_cash_required);
-				ShowErrorMessage(Str.STR_0003_NOT_ENOUGH_CASH_REQUIRES, Global._error_message_2, x,y);
+				ShowCostOrIncomeAnimation(x, y, Landscape.GetSlopeZ(x, y), res2);
+			if (Global._additional_cash_required != 0) {
+				Global.SetDParam(0, Global._additional_cash_required);
+				Global.ShowErrorMessage(Str.STR_0003_NOT_ENOUGH_CASH_REQUIRES, Global._error_message_2, x,y);
 				if (res2 == 0) 
 				{
 					//goto callb_err;
 					_docommand_recursive = 0;
 
-					if (callback) callback(false, tile, p1, p2);
+					if (null != callback) callback.accept(false, tile, p1, p2);
 					Global._cmd_text = null;
 					return false;
 				}
@@ -598,19 +614,19 @@ public class Cmd {
 
 		_docommand_recursive = 0;
 
-		if (callback) callback(true, tile, p1, p2);
+		if (null != callback) callback.accept(true, tile, p1, p2);
 		Global._cmd_text = null;
 		return true;
 
 		//show_error:
 		// show error message if the command fails?
-		if (IsLocalPlayer() && Global._error_message_2 != 0)
-			ShowErrorMessage(Global._error_message, Global._error_message_2, x,y);
+		if (Player.IsLocalPlayer() && Global._error_message_2 != 0)
+			Global.ShowErrorMessage(Global._error_message, Global._error_message_2, x,y);
 
 		//callb_err:
 		_docommand_recursive = 0;
 
-		if (callback) callback(false, tile, p1, p2);
+		if (null != callback) callback.accept(false, tile, p1, p2);
 		Global._cmd_text = null;
 		return false;
 	}
@@ -636,7 +652,7 @@ interface CommandProc {
 class Command 
 {
 	CommandProc proc;
-	byte flags;
+	int flags;
 
 	public Command(CommandProc p, int f) {
 		proc = p;

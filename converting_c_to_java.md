@@ -1,4 +1,6 @@
-if( 0 != ...
+* if( 0 != ...
+
+ if(0 != (cmd & Cmd.CMD_AUTO))
 
 byte -> int
 
@@ -37,4 +39,9 @@ NPFFindStationOrTileData fstd = new NPFFindStationOrTileData();
 NPFFillWithOrderData(fstd, v);
 ```
 
+
+* No enums
+
+if( flags & FLG_USED ) does not work on Java enums
+use constants and ints
 

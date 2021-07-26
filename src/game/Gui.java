@@ -101,7 +101,7 @@ public class Gui
 	static int _rename_what;
 
 	static byte _terraform_size = 1;
-	static RailType _last_built_railtype;
+	static /* RailType */ int _last_built_railtype;
 	//extern void GenerateWorld(int mode, int size_x, int size_y);
 
 	//extern void GenerateIndustries();

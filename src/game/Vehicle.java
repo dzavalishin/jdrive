@@ -301,7 +301,10 @@ public class Vehicle implements IPoolItem
 	public static final int VRF_POWEREDWAGON = 3;
 
 
-
+	// public enum VehicleListFlags {
+	public static final int VL_DESC    = 0x01;
+	public static final int VL_RESORT  = 0x02;
+	public static final int VL_REBUILD = 0x04;
 
 
 

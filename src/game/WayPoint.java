@@ -519,7 +519,7 @@ private void WaypointPoolNewBlock(int start_item)
 
 	// TODO fixme
 	/* Draw a WayPoint * /
-	static void DrawWaypointSprite(int x, int y, int stat_id, RailType railtype)
+	static void DrawWaypointSprite(int x, int y, int stat_id, /* RailType */ int railtype)
 	{
 		final StationSpec stat;
 		int relocation;

@@ -101,7 +101,7 @@ public class mAirport
 	//calculates tax
 	void MA_Tax(int income, Vehicle v)
 	{
-		int old_expenses_type = _yearly_expenses_type;
+		int old_expenses_type = Player._yearly_expenses_type;
 
 		if(Global._patches.allow_municipal_airports) {
 			float tax = 0;
@@ -127,7 +127,7 @@ public class mAirport
 			}
 			
 			SubtractMoneyFromPlayer(tax);
-			_yearly_expenses_type = old_expenses_type;
+			Player._yearly_expenses_type = old_expenses_type;
 		}
 		return;
 	}

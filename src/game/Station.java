@@ -2269,7 +2269,7 @@ public class Station implements IPoolItem
 		int image;
 		final  DrawTileSeqStruct dtss;
 		final  DrawTileSprites t = null;
-		RailType railtype = BitOps.GB(_m[ti.tile].m3, 0, 4);
+		/* RailType */ int railtype = BitOps.GB(_m[ti.tile].m3, 0, 4);
 		final  RailtypeInfo rti = GetRailTypeInfo(railtype);
 		SpriteID offset;
 		int relocation = 0;
@@ -2341,7 +2341,7 @@ public class Station implements IPoolItem
 		}
 	}
 
-	public static void StationPickerDrawSprite(int x, int y, RailType railtype, int image)
+	public static void StationPickerDrawSprite(int x, int y, /* RailType */ int railtype, int image)
 	{
 		int ormod, img;
 		final  DrawTileSeqStruct dtss;

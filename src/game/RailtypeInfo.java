@@ -401,7 +401,7 @@ static  byte SignalOnTrack(Track track) {
 	 * The given trackdir is used when there are (could be) multiple rail types on
 	 * one tile.
 	 */
-	//RailType GetTileRailType(TileIndex tile, Trackdir trackdir);
+	///* RailType */ int GetTileRailType(TileIndex tile, Trackdir trackdir);
 
 	/**
 	 * Returns whether the given tile is a level crossing.
@@ -437,7 +437,7 @@ static  byte SignalOnTrack(Track track) {
 	 * @param railtype the rail type which the information is requested for
 	 * @return The pointer to the RailtypeInfo
 	 */
-	static  final RailtypeInfo GetRailTypeInfo(RailType railtype)
+	static  final RailtypeInfo GetRailTypeInfo(/* RailType */ int railtype)
 	{
 		assert(railtype < RAILTYPE_END);
 		return &_railtypes[railtype];
@@ -451,7 +451,7 @@ static  byte SignalOnTrack(Track track) {
 	 * @param  enginetype The RailType of the engine we are considering.
 	 * @param  tiletype   The RailType of the tile we are considering.
 	 */
-	static  boolean IsCompatibleRail(RailType enginetype, RailType tiletype)
+	static  boolean IsCompatibleRail(/* RailType */ int enginetype, /* /* RailType */ int */ int tiletype)
 	{
 		return BitOps.HASBIT(GetRailTypeInfo(enginetype)->compatible_railtypes, tiletype);
 	}
