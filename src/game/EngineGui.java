@@ -839,7 +839,7 @@ public class EngineGui extends EngineTables
 						continue;
 					}
 
-					if (!IS_HUMAN_PLAYER(best_player)) {
+					if (!best_player.IS_HUMAN_PLAYER()) {
 						/* XXX - TTDBUG: TTD has a bug here ???? */
 						AcceptEnginePreview(e, best_player);
 					} else {

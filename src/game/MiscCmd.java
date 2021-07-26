@@ -69,7 +69,7 @@ public class MiscCmd {
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			/* Loan the maximum amount or not? */
-			int loan = (p2 != 0) ? Global._economy.max_loan - p.current_loan : (IS_HUMAN_PLAYER(Global._current_player) || Global._patches.ainew_active) ? 10000 : 50000;
+			int loan = (p2 != 0) ? Global._economy.max_loan - p.current_loan : (Global._current_player.IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000;
 
 			p.money64 += loan;
 			p.current_loan += loan;
@@ -103,7 +103,7 @@ public class MiscCmd {
 			loan = Math.max(loan, 10000);
 			loan -= loan % 10000;
 		} else {
-			loan = Math.min(loan, (IS_HUMAN_PLAYER(Global._current_player) || Global._patches.ainew_active) ? 10000 : 50000);
+			loan = Math.min(loan, (Global._current_player.IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000);
 		}
 
 		if (p.player_money < loan) {

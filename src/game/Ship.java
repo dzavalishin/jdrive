@@ -1100,7 +1100,7 @@ public class Ship {
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);
 
 		cost = 0;
-		if (IS_HUMAN_PLAYER(v.owner) && new_cid != v.cargo_type) {
+		if (v.owner.IS_HUMAN_PLAYER() && new_cid != v.cargo_type) {
 			cost = Global._price.ship_base >> 7;
 		}
 

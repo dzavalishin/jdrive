@@ -1,6 +1,7 @@
 package game;
 
 import game.util.BitOps;
+import game.util.Strings;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -41,7 +42,7 @@ public class Player
 
 	PlayerID share_owners[];
 
-	byte inaugurated_year;
+	int inaugurated_year;
 	byte num_valid_stat_ent;
 
 	byte quarters_of_bankrupcy;
@@ -76,16 +77,16 @@ public class Player
 
 		share_owners = new PlayerID[4];
 		old_economy = new PlayerEconomyEntry[24];
-		engine_replacement = new EngineID[Global.TOTAL_NUM_ENGINES];
+		engine_replacement = new int[Global.TOTAL_NUM_ENGINES];
 
 
 		inaugurated_year = num_valid_stat_ent = quarters_of_bankrupcy = bankrupt_asked =
 				is_ai = player_color = player_money_fraction = avail_railtypes = block_preview = 0;
 
-		name_1 = president_name_1 = player_money = current_loan = bankrupt_timeout =
+		name_2 = name_1 = president_name_1 = player_money = current_loan = bankrupt_timeout =
 				bankrupt_value = cargo_types = engine_renew_months = 0;
 
-		name_2 = money64 = engine_renew_money = president_name_2 = face = 0;
+		money64 = engine_renew_money = president_name_2 = face = 0;
 
 		engine_renew = renew_keep_length = false;
 	}
@@ -138,6 +139,7 @@ public class Player
 		return Global._local_player == Global._current_player;
 	}
 
+	
 
 	//static final SpriteID cheeks_table[] = {
 	static final int cheeks_table[] = {
@@ -159,14 +161,14 @@ public class Player
 		if ((((((face >> 7) ^ face) >> 7) ^ face) & 0x8080000) == 0x8000000)
 			flag |= 2;
 
-		/* draw the gradient */
+		// draw the gradient 
 		Gfx.DrawSprite((color + 0x307) << Sprite.PALETTE_SPRITE_START | Sprite.PALETTE_MODIFIER_COLOR | Sprite.SPR_GRADIENT, x, y);
 
-		/* draw the cheeks */
+		// draw the cheeks 
 		Gfx.DrawSprite(cheeks_table[flag&3], x, y);
 
-		/* draw the chin */
-		/* FIXME: real code uses -2 in zoomlevel 1 */
+		// draw the chin 
+		// FIXME: real code uses -2 in zoomlevel 1 
 		{
 			int val = BitOps.GB(face, 4, 2);
 			if (0 == (flag & 2)) {
@@ -175,7 +177,7 @@ public class Player
 				Gfx.DrawSprite((0 != (flag&1)?0x3B1:0x391) + (val>>1), x, y);
 			}
 		}
-		/* draw the eyes */
+		// draw the eyes 
 		{
 			int val1 = BitOps.GB(face,  6, 4);
 			int val2 = BitOps.GB(face, 20, 3);
@@ -201,8 +203,8 @@ public class Player
 				}
 			}
 		}
-
-		/* draw the mouth */
+/* TODO draw the mouth
+		// draw the mouth 
 		{
 			int val = BitOps.GB(face, 10, 6);
 			int val2;
@@ -212,7 +214,7 @@ public class Player
 
 				if (val2 < 3) {
 					Gfx.DrawSprite(( 0 != (flag&2) ? 0x397 : 0x367) + val2, x, y);
-					/* skip the rest */
+					// skip the rest 
 					goto skip_mouth;
 				}
 
@@ -246,9 +248,9 @@ public class Player
 
 			skip_mouth:;
 		}
+*/
 
-
-		/* draw the hair */
+		// draw the hair 
 		{
 			int val = BitOps.GB(face, 16, 4);
 			if( 0 != (flag & 2)) {
@@ -266,7 +268,7 @@ public class Player
 			}
 		}
 
-		/* draw the tie */
+		// draw the tie 
 		{
 			int val = BitOps.GB(face, 20, 8);
 
@@ -324,9 +326,9 @@ public class Player
 
 		yearly_expenses[0][_yearly_expenses_type] += cost;
 
-		if ( ( 1 << _yearly_expenses_type ) & (1<<7|1<<8|1<<9|1<<10))
+		if(0 != ( ( 1 << _yearly_expenses_type ) & (1<<7|1<<8|1<<9|1<<10)) )
 			cur_economy.income -= cost;
-		else if (( 1 << _yearly_expenses_type ) & (1<<2|1<<3|1<<4|1<<5|1<<6|1<<11))
+		else if(0 != (( 1 << _yearly_expenses_type ) & (1<<2|1<<3|1<<4|1<<5|1<<6|1<<11)) )
 			cur_economy.expenses -= cost;
 
 		InvalidatePlayerWindows();
@@ -410,6 +412,8 @@ public class Player
 
 	private void GenerateCompanyName()
 	{
+		Player p = this;
+		
 		TileIndex tile;
 		Town t;
 		StringID str;
@@ -421,13 +425,14 @@ public class Player
 			return;
 
 		tile = last_build_coordinate;
-		if (tile == 0)
+		if (tile == null)
 			return;
 
-		t = ClosestTownFromTile(tile, (int)-1);
+		t = Town.ClosestTownFromTile(tile, (int)-1);
 
-		if (IS_INT_INSIDE(t.townnametype, SPECStr.STR_TOWNNAME_START, SPECStr.STR_TOWNNAME_LAST+1)) {
-			str = t.townnametype - SPECStr.STR_TOWNNAME_START + SPECStr.STR_PLAYERNAME_START;
+		if (BitOps.IS_INT_INSIDE(t.townnametype, Strings.SPECSTR_TOWNNAME_START, Strings.SPECSTR_TOWNNAME_LAST+1)) 
+		{
+			str = new StringID( t.townnametype - Strings.SPECSTR_TOWNNAME_START + Strings.SPECSTR_PLAYERNAME_START );
 			strp = t.townnameparts;
 
 			verify_name:;
@@ -445,11 +450,11 @@ public class Player
 			p.name_1 = str;
 			p.name_2 = strp;
 
-			MarkWholeScreenDirty();
+			Hal.MarkWholeScreenDirty();
 
-			if (!IS_HUMAN_PLAYER(p.index)) {
+			if (!p.index.IS_HUMAN_PLAYER()) {
 				Global.SetDParam(0, t.index);
-				News.AddNewsItem(p.index + (4 << 4), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, NewsItem.NF_TILE, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY), last_build_coordinate, 0);
+				NewsItem.AddNewsItem(p.index + (4 << 4), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, NewsItem.NF_TILE, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY), last_build_coordinate, 0);
 			}
 			return;
 		}
@@ -654,13 +659,13 @@ public class Player
 
 		// when there's a lot of computers in game, the probability that a new one starts is lower
 		if (n < (int)GameOptions._opt.diff.max_no_competitors)
-			if (n < (Global._network_server ? InteractiveRandomRange(GameOptions._opt.diff.max_no_competitors + 2) : RandomRange(GameOptions._opt.diff.max_no_competitors + 2)) )
+			if (n < (Global._network_server ? Hal.InteractiveRandomRange(GameOptions._opt.diff.max_no_competitors + 2) : RandomRange(GameOptions._opt.diff.max_no_competitors + 2)) )
 				// Send a command to all clients to start  up a new AI. Works fine for Multiplayer and SinglePlayer 
-				Cmd.DoCommandP(0, 1, 0, null, Cmd.CMD_PLAYER_CTRL);
+				Cmd.DoCommandP(new TileIndex(0), 1, 0, null, Cmd.CMD_PLAYER_CTRL);
 
 		// The next AI starts like the difficulty setting said, with +2 month max
 		_next_competitor_start = GameOptions._opt.diff.competitor_start_time * 90 * Global.DAY_TICKS + 1;
-		_next_competitor_start += Global._network_server ? InteractiveRandomRange(60 * Global.DAY_TICKS) : RandomRange(60 * Global.DAY_TICKS);
+		_next_competitor_start += Global._network_server ? Hal.InteractiveRandomRange(60 * Global.DAY_TICKS) : RandomRange(60 * Global.DAY_TICKS);
 	}
 
 	static void InitializePlayers()
@@ -694,7 +699,7 @@ public class Player
 	//static StringID GetPlayerNameString(PlayerID player, int index)
 	static int GetPlayerNameString(PlayerID player, int index)
 	{
-		if (IS_HUMAN_PLAYER(player) && player.id < Global.MAX_PLAYERS) {
+		if (player.IS_HUMAN_PLAYER() && player.id < Global.MAX_PLAYERS) {
 			Global.SetDParam(index, player.id+1);
 			return Str.STR_7002_PLAYER;
 		}
@@ -844,30 +849,30 @@ public class Player
 			}
 			break;
 		case 3: {
-			EngineID old_engine_type = BitOps.GB(p2, 0, 16);
-			EngineID new_engine_type = BitOps.GB(p2, 16, 16);
+			EngineID old_engine_type = EngineID.get( BitOps.GB(p2, 0, 16) );
+			EngineID new_engine_type = EngineID.get( BitOps.GB(p2, 16, 16) );
 
-			if (new_engine_type != Engine.INVALID_ENGINE) {
+			if (new_engine_type.id != Engine.INVALID_ENGINE) {
 				/* First we make sure that it's a valid type the user requested
 				 * check that it's an engine that is in the engine array */
-				if(!IsEngineIndex(new_engine_type))
+				if(!Engine.IsEngineIndex(new_engine_type.id))
 					return Cmd.CMD_ERROR;
 
 				// check that the new vehicle type is the same as the original one
-				if (GetEngine(old_engine_type).type != GetEngine(new_engine_type).type)
+				if (Engine.GetEngine(old_engine_type).type != Engine.GetEngine(new_engine_type).type)
 					return Cmd.CMD_ERROR;
 
 				// make sure that we do not replace a plane with a helicopter or vise versa
-				if (GetEngine(new_engine_type).type == VEH_Aircraft && HASBIT(AircraftVehInfo(old_engine_type).subtype, 0) != HASBIT(AircraftVehInfo(new_engine_type).subtype, 0))
+				if (Engine.GetEngine(new_engine_type).type == VEH_Aircraft && HASBIT(AircraftVehInfo(old_engine_type).subtype, 0) != HASBIT(AircraftVehInfo(new_engine_type).subtype, 0))
 					return Cmd.CMD_ERROR;
 
 				// make sure that the player can actually buy the new engine
-				if (!HASBIT(GetEngine(new_engine_type).player_avail, Global._current_player))
+				if (!BitOps.HASBIT(Engine.GetEngine(new_engine_type).player_avail, Global._current_player.id))
 					return Cmd.CMD_ERROR;
 
-				return AddEngineReplacement(p, old_engine_type, new_engine_type, flags);
+				return p.AddEngineReplacement(old_engine_type, new_engine_type, flags);
 			} else {
-				return RemoveEngineReplacement(p, old_engine_type, flags);
+				return p.RemoveEngineReplacement(old_engine_type, flags);
 			}
 		}
 
@@ -941,13 +946,13 @@ public class Player
 			#endif /* ENABLE_NETWORK */
 
 			if (p != null) {
-				if (Global._local_player == Owner.OWNER_SPECTATOR && (!Ai._ai.network_client || Ai._ai.network_playas == Owner.OWNER_SPECTATOR)) {
+				if (Global._local_player.id == Owner.OWNER_SPECTATOR && (!Ai._ai.network_client || Ai._ai.network_playas == Owner.OWNER_SPECTATOR)) {
 					/* Check if we do not want to be a spectator in network */
 					if (!Global._networking || (Global._network_server && !Global._network_dedicated) || Global._network_playas != Owner.OWNER_SPECTATOR || Ai._ai.network_client) {
 						if (Ai._ai.network_client) {
 							/* As ai-network-client, we have our own rulez (disable GUI and stuff) */
 							Ai._ai.network_playas = p.index;
-							Global._local_player      = Owner.OWNER_SPECTATOR;
+							Global._local_player      = PlayerID.get( Owner.OWNER_SPECTATOR );
 							if (Ai._ai.network_playas != Owner.OWNER_SPECTATOR) {
 								/* If we didn't join the game as a spectator, activate the AI */
 								Ai.AI_StartNewAI(Ai._ai.network_playas);
@@ -1017,7 +1022,7 @@ public class Player
 		p = GetPlayer(p2);
 
 		/* Only allow removal of HUMAN companies */
-			if (IS_HUMAN_PLAYER(p.index)) {
+			if (p.index.IS_HUMAN_PLAYER()) {
 				/* Delete any open window of the company */
 				DeletePlayerWindows(p.index);
 
@@ -1034,10 +1039,10 @@ public class Player
 		} break;
 
 		case 3: { /* Merge a company (#1) into another company (#2), elimination company #1 */
-			PlayerID pid_old = BitOps.GB(p2,  0, 16);
-			PlayerID pid_new = BitOps.GB(p2, 16, 16);
+			PlayerID pid_old = PlayerID.get( BitOps.GB(p2,  0, 16) );
+			PlayerID pid_new = PlayerID.get( BitOps.GB(p2, 16, 16) );
 
-			if (pid_old >= MAX_PLAYERS || pid_new >= MAX_PLAYERS) return Cmd.CMD_ERROR;
+			if (pid_old.id >= Global.MAX_PLAYERS || pid_new.id >= Global.MAX_PLAYERS) return Cmd.CMD_ERROR;
 
 			if (0 == (flags & Cmd.DC_EXEC)) return Cmd.CMD_ERROR;
 
@@ -1116,14 +1121,14 @@ public class Player
 		return -1; // too bad; we did not make it into the top5
 	}
 
-	/* Sort all players given their performance */
+	/* Sort all players given their performance * /
 	static int  HighScoreSorter(final void *a, final void *b)
 	{
 		final Player pa = *(final Player* final*)a;
 		final Player pb = *(final Player* final*)b;
 
 		return pb.old_economy[0].performance_history - pa.old_economy[0].performance_history;
-	}
+	} */
 
 	/* Save the highscores in a network game when it has ended 
 	//#define LAST_HS_ITEM lengthof(_highscore_table) - 1
@@ -1442,7 +1447,7 @@ static void SaveLoad_PLYR(Player p) {
 	SlObject(p, _player_desc);
 
 	// Write AI?
-	if (!IS_HUMAN_PLAYER(p.index)) {
+	if (!p.index.IS_HUMAN_PLAYER()) {
 		SlObject(&p.ai, _player_ai_desc);
 		for(i=0; i!=p.ai.num_build_rec; i++)
 			SlObject(&p.ai.src + i, _player_ai_build_rec_desc);

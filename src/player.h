@@ -255,9 +255,10 @@ static inline RailType GetBestRailtype(const Player* p)
 	return RAILTYPE_RAIL;
 }
 
+/*
 #define IS_HUMAN_PLAYER(p) (!GetPlayer(p)->is_ai)
 #define IS_INTERACTIVE_PLAYER(p) ((p) == _local_player)
-
+*/
 typedef struct HighScore {
 	char company[100];
 	StringID title; // NO_SAVE, has troubles with changing string-numbers.

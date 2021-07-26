@@ -429,7 +429,7 @@ public class Cmd {
 
 	// toplevel network safe docommand function for the current player. must not be called recursively.
 	// the callback is called when the command succeeded or failed.
-	boolean DoCommandP(TileIndex tile, int p1, int p2, CommandCallback callback, int cmd)
+	static boolean DoCommandP(TileIndex tile, int p1, int p2, CommandCallback callback, int cmd)
 	{
 		int res = 0,res2;
 		CommandProc proc;

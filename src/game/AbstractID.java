@@ -2,10 +2,13 @@ package game;
 
 // TODO KILL ALL ID classes
 @Deprecated
-public class AbstractID {
+public abstract class AbstractID {
 	public int id;
 	
 	protected AbstractID(int id) {
 		this.id = id;
 	}
+	
+	@Override
+	public abstract boolean equals(Object obj);
 }

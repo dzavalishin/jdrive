@@ -517,7 +517,7 @@ public class AirCraft {
 		_aircraft_refit_capacity = pass;
 
 		cost = 0;
-		if (IS_HUMAN_PLAYER(v.owner) && new_cid != v.cargo_type) {
+		if (v.owner.IS_HUMAN_PLAYER() && new_cid != v.cargo_type) {
 			cost = Global._price.aircraft_base >> 7;
 		}
 

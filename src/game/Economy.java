@@ -466,7 +466,7 @@ public class Economy
 			case 3: {
 				/* XXX - In multiplayer, should we ask other players if it wants to take
 			          over when it is a human company? -- TrueLight */
-				if (IS_HUMAN_PLAYER(owner)) {
+				if (owner.IS_HUMAN_PLAYER()) {
 					NewsItem.AddNewsItem( (StringID)(owner + 16),
 						NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 					break;
@@ -493,12 +493,12 @@ public class Economy
 				NewsItem.AddNewsItem( (StringID)(owner + 16*3), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 
 				// If the player is human, and it is no network play, leave the player playing
-				if (IS_HUMAN_PLAYER(owner) && !_networking) {
+				if (owner.IS_HUMAN_PLAYER() && !_networking) {
 					p.bankrupt_asked = 255;
 					p.bankrupt_timeout = 0x456;
 				} else {
 	/*#ifdef ENABLE_NETWORK
-					if (IS_HUMAN_PLAYER(owner) && _network_server) {
+					if (owner.IS_HUMAN_PLAYER() && _network_server) {
 						// If we are the server, make sure it is clear that his player is no
 						//  longer with us!
 						NetworkClientInfo *ci;
@@ -514,7 +514,7 @@ public class Economy
 						}
 					}
 					// Make sure the player no longer controls the company
-					if (IS_HUMAN_PLAYER(owner) && owner == _local_player) {
+					if (owner.IS_HUMAN_PLAYER(owner) && owner == _local_player) {
 						// Switch the player to spectator..
 						_local_player = Owner.OWNER_SPECTATOR;
 					}
@@ -526,9 +526,9 @@ public class Economy
 					// Register the player as not-active
 					p.is_active = false;
 
-					if (!IS_HUMAN_PLAYER(owner) && (!Global._networking || Global._network_server) && Ai._ai.enabled)
+					if (!owner.IS_HUMAN_PLAYER() && (!Global._networking || Global._network_server) && Ai._ai.enabled)
 						Ai.AI_PlayerDied(owner);
-					if (IS_HUMAN_PLAYER(owner) && owner == Global._local_player && Ai._ai.network_client)
+					if (owner.IS_HUMAN_PLAYER() && owner == Global._local_player && Ai._ai.network_client)
 						Ai.AI_PlayerDied(owner);
 				}
 			}
