@@ -811,7 +811,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		TileIndex.forAll( i.width, i.height, i.xy, (tile_cur) ->
 		if (tile_cur.IsTileType( TileTypes.MP_INDUSTRY)) {
 			if (tile_cur.getMap().m2 == i.index) {
-				DoClearSquare(tile_cur);
+				Landscape.DoClearSquare(tile_cur);
 			}
 		} else if (tile_cur.IsTileType( TileTypes.MP_STATION) && tile_cur.getMap().m5 == 0x4B) {
 			DeleteOilRig(tile_cur);

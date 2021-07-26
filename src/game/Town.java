@@ -1596,7 +1596,7 @@ public class Town extends TownTables implements IPoolItem
 	static void DoClearTownHouseHelper(TileIndex tile)
 	{
 		assert(tile.IsTileType( TileTypes.MP_HOUSE));
-		DoClearSquare(tile);
+		Landscape.DoClearSquare(tile);
 		TextEffect.DeleteAnimatedTile(tile);
 	}
 

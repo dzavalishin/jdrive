@@ -21,7 +21,7 @@ public class Clear extends ClearTables {
 		int cost;
 
 		TileIndex [] tile_table;
-		TerraformerHeightMod modheight;
+		TerraformerHeightMod [] modheight;
 
 	}
 
@@ -141,7 +141,7 @@ public class Clear extends ClearTables {
 	static boolean TerraformTileHeight(TerraformerState ts, TileIndex tile, int height)
 	{
 		int nh;
-		TerraformerHeightMod mod;
+		//TerraformerHeightMod mod;
 		int count;
 
 		assert(tile.getTile() < Global.MapSize());
@@ -163,23 +163,23 @@ public class Clear extends ClearTables {
 		if (TerraformProc(ts, tile.iadd( TileIndex.TileDiffXY(-1, -1)), 2) < 0) return false;
 		if (TerraformProc(ts, tile.iadd( TileIndex.TileDiffXY(-1,  0)), 3) < 0) return false;
 
-		mod = ts.modheight;
+		//mod = ts.modheight;
 		count = ts.modheight_count;
-
-		for (;;) {
+		int i;
+		for (i = 0; i < count; i++ ) {
 			if (count == 0) {
 				if (ts.modheight_count >= 576)
 					return false;
 				ts.modheight_count++;
 				break;
 			}
-			if (mod.tile == tile) break;
-			mod++;
+			if (ts.modheight[i].tile == tile) break;
+			//mod++;
 			count--;
 		}
 
-		mod.tile = tile;
-		mod.height = (byte)height;
+		ts.modheight[i].tile = tile;
+		ts.modheight[i].height = (byte)height;
 
 		ts.cost += Global._price.terraform;
 
@@ -259,12 +259,13 @@ public class Clear extends ClearTables {
 
 		if (direction == -1) {
 			/* Check if tunnel would take damage */
-			int count;
-			MutableTileIndex ti = new MutableTileIndex( ts.tile_table );
-
-			for (count = ts.tile_table_count; count != 0; count--) {
+			//MutableTileIndex ti = new MutableTileIndex( ts.tile_table );
+			int count = ts.tile_table_count;
+			//for (count = ts.tile_table_count; count != 0; count--) 
+			for (int i = 0; i < count; i++ )
+			{
 				int z, t;
-				TileIndex tilei = new TileIndex( ti );
+				TileIndex tilei = new TileIndex( ts.tile_table[i] );
 
 				z = TerraformGetHeightOfTile(ts, tilei.iadd( TileIndex.TileDiffXY(0, 0)));
 				t = TerraformGetHeightOfTile(ts, tilei.iadd( TileIndex.TileDiffXY(1, 0)));
@@ -274,10 +275,10 @@ public class Clear extends ClearTables {
 				t = TerraformGetHeightOfTile(ts, tilei.iadd( TileIndex.TileDiffXY(0, 1)));
 				if (t <= z) z = t;
 
-				if (!CheckTunnelInWay(tile, z * 8)) {
+				if (!tile.CheckTunnelInWay(z * 8)) {
 					return Cmd.return_cmd_error(Str.STR_1002_EXCAVATION_WOULD_DAMAGE);
 					
-				ti.madd(1);
+				//ti.madd(1);
 				}
 			}
 		}
@@ -295,25 +296,24 @@ public class Clear extends ClearTables {
 
 			/* change the height */
 			{
-				int count;
-				TerraformerHeightMod mod;
+				int count = ts.modheight_count;
+				//TerraformerHeightMod mod;
+				//mod = ts.modheight;
+				for (int i; i < count; i++) {
+					TileIndex til = ts.modheight[i].tile;
 
-				mod = ts.modheight;
-				for (count = ts.modheight_count; count != 0; count--, mod++) {
-					TileIndex til = mod.tile;
-
-					til.SetTileHeight( mod.height);
+					til.SetTileHeight( ts.modheight[i].height);
 					TerraformAddDirtyTileAround(ts, til);
 				}
 			}
 
 			/* finally mark the dirty tiles dirty */
 			{
-				int count;
-				MutableTileIndex ti = new MutableTileIndex( ts.tile_table );
-				for (count = ts.tile_table_count; count != 0; count--) {
-					ti.MarkTileDirtyByTile();
-					ti.madd(1); // TODO check all .add / .sub for modification of TileIndex stored elsewhere
+				int count = ts.tile_table_count;
+				//MutableTileIndex ti = new MutableTileIndex( ts.tile_table );
+				for (int i = 0 ; i < count; i++) {
+					ts.tile_table[i].MarkTileDirtyByTile();
+					//ti.madd(1); // TODO check all .add / .sub for modification of TileIndex stored elsewhere
 				}
 			}
 		}
@@ -355,7 +355,7 @@ public class Clear extends ClearTables {
 		int size_x = ex-sx+1;
 		int size_y = ey-sy+1;
 
-		money = GetAvailableMoneyForCommand();
+		money = Cmd.GetAvailableMoneyForCommand();
 		cost = 0;
 
 		//BEGIN_TILE_LOOP(tile2, size_x, size_y, tile) 
@@ -456,7 +456,7 @@ public class Clear extends ClearTables {
 		final int price = clear_price_table[BitOps.GB(tile.getMap().m5, 0, 5)];
 
 		if( 0 != (flags & Cmd.DC_EXEC)) 
-			DoClearSquare(tile);
+			Landscape.DoClearSquare(tile);
 
 		return price;
 	}
@@ -482,7 +482,7 @@ public class Clear extends ClearTables {
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
 		if( 0 != (flags & Cmd.DC_EXEC) )
-			DoClearSquare(tile);
+			Landscape.DoClearSquare(tile);
 
 		return - Global._price.purchase_land * 2;
 	}

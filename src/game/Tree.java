@@ -357,7 +357,7 @@ public class Tree {
 		num = BitOps.GB(tile.getMap().m5, 6, 2) + 1;
 		if (BitOps.IS_INT_INSIDE(tile.getMap().m3, 20, 26 + 1)) num *= 4;
 
-		if(0 != (flags & Cmd.DC_EXEC)) DoClearSquare(tile);
+		if(0 != (flags & Cmd.DC_EXEC)) Landscape.DoClearSquare(tile);
 
 		return num * Global._price.remove_trees;
 	}

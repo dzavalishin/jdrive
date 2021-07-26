@@ -435,7 +435,7 @@ private void WaypointPoolNewBlock(int start_item)
 					PBSClearTrack(tile, direction);
 				}
 			} else {
-				DoClearSquare(tile);
+				Landscape.DoClearSquare(tile);
 				SetSignalsOnBothDir(tile, direction);
 			}
 		}

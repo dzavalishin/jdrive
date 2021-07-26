@@ -420,7 +420,7 @@ public class Cmd {
 		return res;
 	}
 
-	int GetAvailableMoneyForCommand()
+	static int GetAvailableMoneyForCommand()
 	{
 		PlayerID pid = Global._current_player;
 		if (pid >= Global.MAX_PLAYERS) return 0x7FFFFFFF; // max int

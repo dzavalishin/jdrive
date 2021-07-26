@@ -328,7 +328,7 @@ public class Landscape extends GenLandTable
 		if (ex < sx) intswap(ex, sx);
 		if (ey < sy) intswap(ey, sy);
 
-		money = GetAvailableMoneyForCommand();
+		money = Cmd.GetAvailableMoneyForCommand();
 		cost = 0;
 
 		for (x = sx; x <= ex; x += 16) {

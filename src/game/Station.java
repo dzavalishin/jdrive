@@ -1343,7 +1343,7 @@ public class Station implements IPoolItem
 
 		// if we reached here, it means we can actually delete it. do that.
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			DoClearSquare(tile);
+			Landscape.DoClearSquare(tile);
 			// now we need to make the "spanned" area of the railway station smaller if we deleted something at the edges.
 			// we also need to adjust train_tile.
 			MakeRailwayStationAreaSmaller(st);
@@ -1696,7 +1696,7 @@ public class Station implements IPoolItem
 
 		if (flags & Cmd.DC_EXEC) {
 			int i;
-			DoClearSquare(tile);
+			Landscape.DoClearSquare(tile);
 
 			/* Clear all vehicles destined for this Station */
 			for (i = 0; i != NUM_SLOTS; i++) {
@@ -1960,7 +1960,7 @@ public class Station implements IPoolItem
 
 				if(0 != (flags & Cmd.DC_EXEC)) {
 					DeleteAnimatedTile(tile_cur);
-					DoClearSquare(tile_cur);
+					Landscape.DoClearSquare(tile_cur);
 				}
 				return false;
 			});
@@ -2243,7 +2243,7 @@ public class Station implements IPoolItem
 		if (!EnsureNoVehicle(tile2)) return Cmd.CMD_ERROR;
 
 		if (flags & Cmd.DC_EXEC) {
-			DoClearSquare(tile1);
+			Landscape.DoClearSquare(tile1);
 
 			// convert the water tile to water.
 			Landscape.ModifyTile(tile2, TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, OWNER_WATER, 0);
@@ -3123,7 +3123,7 @@ public class Station implements IPoolItem
 	{
 		Station st = GetStation(tile.getMap().m2);
 
-		DoClearSquare(tile);
+		Landscape.DoClearSquare(tile);
 
 		st.dock_tile = 0;
 		st.airport_tile = 0;
