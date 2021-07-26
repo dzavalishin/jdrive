@@ -340,10 +340,10 @@ public class Landscape extends GenLandTable
 
 				if(0 != (flags & Cmd.DC_EXEC)) {
 					if (ret > 0 && (money -= ret) < 0) {
-						_additional_cash_required = ret;
+						Global._additional_cash_required = ret;
 						return cost - ret;
 					}
-					Cmd.ByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+					Cmd.DoCommandByTile(TileIndex.TileVirtXY(x, y), 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 
 					// draw explosion animation...
 					if ((x == sx || x == ex) && (y == sy || y == ey)) {

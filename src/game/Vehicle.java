@@ -695,7 +695,7 @@ public class Vehicle implements IPoolItem
 	/**
 	 * Check if a Vehicle really exists.
 	 */
-	private boolean IsValidVehicle()
+	public boolean IsValidVehicle()
 	{
 		return type != 0;
 	}
@@ -2666,23 +2666,20 @@ public class Vehicle implements IPoolItem
 	int CmdNameVehicle(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
-		StringID str;
 
 		if (!IsVehicleIndex(p1) || Global._cmd_text == null) return Cmd.CMD_ERROR;
-
 		v = GetVehicle(p1);
+		if (!Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (!CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
+		StringID str = Global.AllocateNameUnique(Global._cmd_text, 2);
+		if (str == null) return Cmd.CMD_ERROR;
 
-		str = Global.AllocateNameUnique(_cmd_text, 2);
-		if (str == 0) return Cmd.CMD_ERROR;
-
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			StringID old_str = v.string_id;
 			v.string_id = str;
 			Global.DeleteName(old_str);
 			ResortVehicleLists();
-			MarkWholeScreenDirty();
+			Hal.MarkWholeScreenDirty();
 		} else {
 			Global.DeleteName(str);
 		}
@@ -2809,7 +2806,7 @@ public class Vehicle implements IPoolItem
 		if (0 == (result & 8) && old_tile != tile) {
 			VehicleLeaveTileProc proc = Landscape._tile_type_procs[old_tile.GetTileType().ordinal()].vehicle_leave_tile_proc;
 			if (proc != null)
-				proc.accept(v, old_tile, x, y);
+				proc.accept(this, old_tile, x, y);
 		}
 		return result;
 	}
@@ -2838,7 +2835,7 @@ public class Vehicle implements IPoolItem
 			if(!restart) break;
 		}
 
-		return new UnitID(unit_num);
+		return UnitID.get(unit_num);
 	}
 
 
@@ -2921,7 +2918,7 @@ public class Vehicle implements IPoolItem
 			 */
 			if(queue_item != null)
 			{
-				queue_item.queue.del(queue_item.queue, this);
+				queue_item.queue.del(this);
 			}
 		}
 
@@ -2991,10 +2988,10 @@ public class Vehicle implements IPoolItem
 		bak.service_interval = v.service_interval;
 
 		/* Safe custom string, if any */
-		if ((v.string_id.id & 0xF800) != 0x7800) {
+		if ((v.string_id & 0xF800) != 0x7800) {
 			bak.name = null;
 		} else {
-			bak.name = Global.GetName(v.string_id.id & 0x7FF);
+			bak.name = Global.GetName(v.string_id & 0x7FF);
 		}
 
 		/* If we have shared orders, store it on a special way */

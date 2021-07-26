@@ -341,7 +341,7 @@ public class Cmd {
 
 	static int DoCommandByTile(TileIndex tile, int p1, int p2, int flags, int procc)
 	{
-		return DoCommand(TileX(tile) * 16, TileY(tile) * 16, p1, p2, flags, procc);
+		return DoCommand(tile.TileX() * 16, tile.TileY() * 16, p1, p2, flags, procc);
 	}
 
 

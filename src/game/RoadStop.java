@@ -17,8 +17,8 @@ public class RoadStop implements IPoolItem
 	RoadStop next;
 	RoadStop prev;
 
-	public static final int INVALID_STATION = 0xFFFF;
-	public static final int INVALID_SLOT = 0xFFFF;
+	public static final int INVALID_STATION = -1; //0xFFFF;
+	public static final int INVALID_SLOT = -1; //0xFFFF;
 	public static final int NUM_SLOTS = 2;
 	public static final int ROAD_STOP_LIMIT = 8;
 

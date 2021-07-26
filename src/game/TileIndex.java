@@ -1,5 +1,7 @@
 package game;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -9,10 +11,91 @@ import game.util.BitOps;
 // return same TileIndex for each TileIndex.tile
 // same with Mutable
 
-public class TileIndex {
+public class TileIndex implements Comparable<TileIndex>{
 	protected int tile;
 
 
+	/** static  TileIndex TileXY(int x, int y)
+	 * 
+	 * @param x
+	 * @param y
+	 */
+	public TileIndex(int x, int y)
+	{
+		tile = (y * Global.MapSizeX()) + x;
+		assert( tile > 0 );
+		// TODO assert < max
+	}
+
+	public static  TileIndex TileXY(int x, int y)
+	{
+		return new TileIndex(x, y);
+	}
+
+
+	public TileIndex(TileIndex src)
+	//public get(TileIndex src)
+	{
+		tile = src.tile;
+	}
+
+	/*
+	private static Map<Integer,TileIndex> ids = new HashMap<Integer,TileIndex>();
+	public static TileIndex get(int id) 
+	{
+		TileIndex old = ids.get(id);
+		if( old == null ) 
+		{
+			old = new TileIndex(id);
+			ids.put(id, old);
+		}
+		return old;
+	}*/
+
+	public static TileIndex get(int id) 
+	{
+		return new TileIndex(id);
+	}
+	public static TileIndex getInvalid() {
+		// TODO Auto-generated method stub
+		return get(-1);
+	}
+
+	public TileIndex(int tile)
+	{
+		this.tile = tile;
+	}
+
+	public static TileIndex INVALID_TILE = new TileIndex(-1);
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof TileIndex) {
+			TileIndex him = (TileIndex) obj;
+			return him.tile == tile;
+		}
+		return super.equals(obj);
+	}
+
+
+	@Override
+	public int compareTo(TileIndex o) {
+		// TODO Auto-generated method stub
+		return this.tile - o.tile;
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public static void forAll( int w, int h, TileIndex tile, Function<TileIndex,Boolean> c )
 	{
 		forAll( w, h, tile.getTile(), c );		
@@ -108,28 +191,6 @@ public class TileIndex {
 	
 	
 	
-	/** static  TileIndex TileXY(int x, int y)
-	 * 
-	 * @param x
-	 * @param y
-	 */
-	public TileIndex(int x, int y)
-	{
-		tile = (y * Global.MapSizeX()) + x;
-		assert( tile > 0 );
-		// TODO assert < max
-	}
-
-	public static  TileIndex TileXY(int x, int y)
-	{
-		return new TileIndex(x, y);
-	}
-
-
-	public TileIndex(TileIndex src)
-	{
-		tile = src.tile;
-	}
 
 
 	// TODO rename to getTileIndex
@@ -142,21 +203,7 @@ public class TileIndex {
 		return Global._m[tile];
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof TileIndex) {
-			TileIndex him = (TileIndex) obj;
-			return him.tile == tile;
-		}
-		return super.equals(obj);
-	}
 
-	public TileIndex(int tile)
-	{
-		this.tile = tile;
-	}
-
-	public static TileIndex INVALID_TILE = new TileIndex(-1);
 
 	int TileX()
 	{
@@ -313,7 +360,7 @@ public class TileIndex {
 	 * Watch out! There are _no_ brackets around here, to prevent intermediate
 	 * rounding! Be careful when using this!
 	 * This value should be sqrt(2)/2 ~ 0.7071 */
-	public static int STRAIGHT_TRACK_LENGTH = Map.STRAIGHT_TRACK_LENGTH;
+	public static int STRAIGHT_TRACK_LENGTH = game.Map.STRAIGHT_TRACK_LENGTH;
 
 
 

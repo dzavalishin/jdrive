@@ -22,4 +22,8 @@ public class StationID extends AbstractID
 		return old;
 	}
 
+	public static StationID getInvalid() {
+		return get(-1);
+	}
+
 }

@@ -38,7 +38,7 @@ public class Map {
 	} Owner;
 	*/
 	//enum {
-	public static final TileIndex INVALID_TILE = new TileIndex(-1);
+	public static final TileIndex INVALID_TILE = TileIndex.getInvalid(); //new TileIndex(-1);
 	//};
 
 
