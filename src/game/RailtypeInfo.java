@@ -615,7 +615,7 @@ enum SignalType {
 	
 	public static final SignalType values[] = values();
 } 
-
+/*
 enum RailType {
 	RAILTYPE_RAIL   (0),
 	RAILTYPE_MONO   (1),
@@ -637,7 +637,7 @@ enum RailType {
 	public static final RailType values[] = values();
 
 } 
-
+*/
 
 /** These are used to specify a single track. Can be translated to a trackbit
  * with TrackToTrackbit */

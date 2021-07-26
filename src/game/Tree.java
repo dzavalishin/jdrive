@@ -127,7 +127,7 @@ public class Tree {
 	 * @param p1 tree type, -1 means random.
 	 * @param p2 end tile of area-drag
 	 */
-	int CmdPlantTree(int ex, int ey, int flags, int p1, int p2)
+	static int CmdPlantTree(int ex, int ey, int flags, int p1, int p2)
 	{
 		int cost;
 		int sx, sy, x, y;
@@ -254,7 +254,7 @@ public class Tree {
 		if ((m2 & 0x30) == 0) {
 			DrawClearLandTile(ti, 3);
 		} else if ((m2 & 0x30) == 0x20) {
-			DrawGroundSprite(_tree_sprites_1[m2 >> 6] + _tileh_to_sprite[ti.tileh]);
+			ViewPort.DrawGroundSprite(_tree_sprites_1[m2 >> 6] + _tileh_to_sprite[ti.tileh]);
 		} else {
 			DrawHillyLandTile(ti);
 		}

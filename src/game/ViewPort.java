@@ -393,7 +393,7 @@ public class ViewPort
 		vd.last_tile = &ts.next;
 	}
 
-	void DrawGroundSprite(int image)
+	static void DrawGroundSprite(int image)
 	{
 		if (_offset_ground_sprites) {
 			// offset ground sprite because of foundation?

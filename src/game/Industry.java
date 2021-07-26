@@ -298,7 +298,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			z += 8;
 		} else {
 			/* Else draw regular ground */
-			DrawGroundSprite(image);
+			ViewPort.DrawGroundSprite(image);
 		}
 
 		/* Add industry on top of the ground? */
@@ -411,7 +411,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			i.cargo_waiting[0] -= cw;
 
 			/* fluctuating economy? */
-			if (_economy.fluct <= 0) cw = (cw + 1) / 2;
+			if (Global._economy.fluct <= 0) cw = (cw + 1) / 2;
 
 			i.last_mo_production[0] += cw;
 
@@ -428,7 +428,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		if (cw > _industry_min_cargo[i.type]) {
 			i.cargo_waiting[1] -= cw;
 
-			if (_economy.fluct <= 0) cw = (cw + 1) / 2;
+			if (Global._economy.fluct <= 0) cw = (cw + 1) / 2;
 
 			i.last_mo_production[1] += cw;
 

@@ -858,7 +858,7 @@ public class Ship {
 	 * @param p1 ship type being built (engine)
 	 * @param p2 unused
 	 */
-	int CmdBuildShip(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildShip(int x, int y, int flags, int p1, int p2)
 	{
 		int value;
 		Vehicle v;
@@ -946,7 +946,7 @@ public class Ship {
 	 * @param p1 vehicle ID to be sold
 	 * @param p2 unused
 	 */
-	int CmdSellShip(int x, int y, int flags, int p1, int p2)
+	static int CmdSellShip(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 
@@ -979,7 +979,7 @@ public class Ship {
 	 * @param p1 ship ID to start/stop
 	 * @param p2 unused
 	 */
-	int CmdStartStopShip(int x, int y, int flags, int p1, int p2)
+	static int CmdStartStopShip(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 
@@ -1004,7 +1004,7 @@ public class Ship {
 	 * @param p1 vehicle ID to send to the depot
 	 * @param p2 unused
 	 */
-	int CmdSendShipToDepot(int x, int y, int flags, int p1, int p2)
+	static int CmdSendShipToDepot(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		final Depot dep;
@@ -1052,7 +1052,7 @@ public class Ship {
 	 * @param p1 vehicle ID that is being service-interval-changed
 	 * @param p2 new service interval
 	 */
-	int CmdChangeShipServiceInt(int x, int y, int flags, int p1, int p2)
+	static int CmdChangeShipServiceInt(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		int serv_int = GetServiceIntervalClamped(p2); /* Double check the service interval from the user-input */
@@ -1077,7 +1077,7 @@ public class Ship {
 	 * @param p2 various bitstuffed elements
 	 * - p2 = (bit 0-7) - the new cargo type to refit to (p2 & 0xFF)
 	 */
-	int CmdRefitShip(int x, int y, int flags, int p1, int p2)
+	static int CmdRefitShip(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		int cost;

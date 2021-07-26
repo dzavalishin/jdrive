@@ -232,7 +232,7 @@ public class Order implements IPoolItem {
 	 *                        only the first 8 bits used currently (bit 16 - 23) (max 255)
 	 * @param p2 packed order to insert
 	 */
-	int CmdInsertOrder(int x, int y, int flags, int p1, int p2)
+	static int CmdInsertOrder(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		VehicleID veh   = new VehicleID( BitOps.GB(p1,  0, 16) );
@@ -505,7 +505,7 @@ public class Order implements IPoolItem {
 	 * @param p1 the ID of the vehicle
 	 * @param p2 the order to delete (max 255)
 	 */
-	int CmdDeleteOrder(int x, int y, int flags, int p1, int p2)
+	static int CmdDeleteOrder(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v, u;
 		VehicleID veh_id = new VehicleID( p1 );
@@ -599,7 +599,7 @@ public class Order implements IPoolItem {
 	 * @param p1 The ID of the vehicle which order is skipped
 	 * @param p2 unused
 	 */
-	int CmdSkipOrder(int x, int y, int flags, int p1, int p2)
+	static int CmdSkipOrder(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		VehicleID veh_id = p1;
@@ -653,7 +653,7 @@ public class Order implements IPoolItem {
 	 *                        only the first 8 bits used currently (bit 16 - 23) (max 255)
 	 * @param p2 mode to change the order to (always set)
 	 */
-	int CmdModifyOrder(int x, int y, int flags, int p1, int p2)
+	static int CmdModifyOrder(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		Order order;
@@ -717,7 +717,7 @@ public class Order implements IPoolItem {
 	 * - p1 = (bit 16-31) - source vehicle to clone orders from, if any (none for CO_UNSHARE)
 	 * @param p2 mode of cloning: CO_SHARE, CO_COPY, or CO_UNSHARE
 	 */
-	int CmdCloneOrder(int x, int y, int flags, int p1, int p2)
+	static int CmdCloneOrder(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle dst;
 		VehicleID veh_src = new VehicleID( BitOps.GB(p1, 16, 16) );
@@ -890,7 +890,7 @@ public class Order implements IPoolItem {
 	 * If we do want to backup/restore it, just add UnitID uid to BackuppedOrders, and
 	 * restore it as parameter 'y' (ugly hack I know) for example. "v.unitnumber = y;"
 	 */
-	int CmdRestoreOrderIndex(int x, int y, int flags, int p1, int p2)
+	static int CmdRestoreOrderIndex(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		OrderID cur_ord = new OrderID( BitOps.GB(p2,  0, 16) );

@@ -1,8 +1,9 @@
 package game;
+import game.tables.ClearTables;
 import game.util.BitOps;
 
 // clear_cmd.c
-public class Clear {
+public class Clear extends ClearTables {
 
 	class TerraformerHeightMod {
 		TileIndex tile;
@@ -19,7 +20,7 @@ public class Clear {
 
 		int cost;
 
-		TileIndex tile_table;
+		TileIndex [] tile_table;
 		TerraformerHeightMod modheight;
 
 	}
@@ -46,8 +47,9 @@ public class Clear {
 		TerraformerHeightMod mod = ts.modheight;
 		int count;
 
-		for (count = ts.modheight_count; count != 0; count--, mod++) {
+		for (count = ts.modheight_count; count != 0;  mod++) {
 			if (mod.tile == tile) return mod.height;
+			count--;
 		}
 
 		return tile.TileHeight();
@@ -55,18 +57,14 @@ public class Clear {
 
 	static void TerraformAddDirtyTile(TerraformerState ts, TileIndex tile)
 	{
-		int count;
+		int i, count;
 		MutableTileIndex t;
 
 		count = ts.tile_table_count;
-
 		if (count >= 625) return;
 
-		t = new MutableTileIndex( ts.tile_table );
-		
-		for(; count != 0; count--) {
-			if (t == tile) return;
-			t.madd(1);
+		for(i = 0; i < count; i++) {
+			if (ts.tile_table[i] == tile) return;
 		}
 
 		ts.tile_table[ts.tile_table_count++] = tile;
@@ -134,10 +132,10 @@ public class Clear {
 	}
 
 	private static final TileIndexDiffC _terraform_tilepos[] = {
-			{ 1,  0},
-			{-2,  0},
-			{ 1,  1},
-			{ 0, -2}
+			new TileIndexDiffC( 1,  0),
+			new TileIndexDiffC(-2,  0),
+			new TileIndexDiffC( 1,  1),
+			new TileIndexDiffC( 0, -2)
 		};
 	
 	static boolean TerraformTileHeight(TerraformerState ts, TileIndex tile, int height)
@@ -209,7 +207,7 @@ public class Clear {
 	 * @param p1 corners to terraform.
 	 * @param p2 direction; eg up or down
 	 */
-	int CmdTerraformLand(int x, int y, int flags, int p1, int p2)
+	static int CmdTerraformLand(int x, int y, int flags, int p1, int p2)
 	{
 		TerraformerState ts = new TerraformerState();
 		TileIndex tile;
@@ -220,8 +218,8 @@ public class Clear {
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		Global._error_message = INVALID_STRING_ID;
-		Global._terraform_err_tile = 0;
+		Global._error_message = Str.INVALID_STRING_ID.id;
+		Global._terraform_err_tile = null;
 
 		ts.direction = direction = (p2 != 0) ? 1 : -1;
 		ts.flags = flags;
@@ -237,25 +235,25 @@ public class Clear {
 
 		if(0 != (p1 & 1)) {
 			if (!TerraformTileHeight(ts, tile.iadd( TileIndex.TileDiffXY(1, 0) ),
-					TileHeight(tile.iadd(1, 0)) + direction))
+					tile.iadd(1, 0).TileHeight() + direction))
 						return Cmd.CMD_ERROR;
 		}
 
 		if(0 != (p1 & 2)) {
 			if (!TerraformTileHeight(ts, tile.iadd( TileIndex.TileDiffXY(1, 1) ),
-					TileHeight(tile.iadd(1, 1)) + direction))
+					tile.iadd(1, 1).TileHeight() + direction))
 						return Cmd.CMD_ERROR;
 		}
 
 		if(0 != (p1 & 4)) {
 			if (!TerraformTileHeight(ts, tile.iadd(0, 1),
-					TileHeight(tile.iadd(0, 1)) + direction))
+					tile.iadd(0, 1).TileHeight() + direction))
 						return Cmd.CMD_ERROR;
 		}
 
 		if(0 != (p1 & 8)) {
-			if (!TerraformTileHeight(ts, tile + TileIndex.TileDiffXY(0, 0),
-					TileHeight(tile + TileIndex.TileDiffXY(0, 0)) + direction))
+			if (!TerraformTileHeight(ts, tile.iadd(0, 0),
+					tile.iadd(0, 0).TileHeight() + direction))
 						return Cmd.CMD_ERROR;
 		}
 
@@ -277,7 +275,7 @@ public class Clear {
 				if (t <= z) z = t;
 
 				if (!CheckTunnelInWay(tile, z * 8)) {
-					return_cmd_error(Str.STR_1002_EXCAVATION_WOULD_DAMAGE);
+					return Cmd.return_cmd_error(Str.STR_1002_EXCAVATION_WOULD_DAMAGE);
 					
 				ti.madd(1);
 				}
@@ -288,10 +286,10 @@ public class Clear {
 			/* Clear the landscape at the tiles */
 			{
 				int count;
-				TileIndex ti = new TileIndex(ts.tile_table);
+				MutableTileIndex ti = new MutableTileIndex(ts.tile_table);
 				for (count = ts.tile_table_count; count != 0; count--) {
-					DoCommandByTile(ti, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
-					ti.add(1);
+					Cmd.DoCommandByTile(ti, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+					ti.madd(1);
 				}
 			}
 
@@ -304,7 +302,7 @@ public class Clear {
 				for (count = ts.modheight_count; count != 0; count--, mod++) {
 					TileIndex til = mod.tile;
 
-					SetTileHeight(til, mod.height);
+					til.SetTileHeight( mod.height);
 					TerraformAddDirtyTileAround(ts, til);
 				}
 			}
@@ -312,10 +310,10 @@ public class Clear {
 			/* finally mark the dirty tiles dirty */
 			{
 				int count;
-				TileIndex ti = new TileIndex( ts.tile_table );
+				MutableTileIndex ti = new MutableTileIndex( ts.tile_table );
 				for (count = ts.tile_table_count; count != 0; count--) {
 					ti.MarkTileDirtyByTile();
-					ti.add(1); // TODO check all .add / .sub for modification of TileIndex stored elsewhere
+					ti.madd(1); // TODO check all .add / .sub for modification of TileIndex stored elsewhere
 				}
 			}
 		}
@@ -328,7 +326,7 @@ public class Clear {
 	 * @param p1 start tile of area drag
 	 * @param p2 unused
 	 */
-	int CmdLevelLand(int ex, int ey, int flags, int p1, int p2)
+	static int CmdLevelLand(int ex, int ey, int flags, int pp1, int p2)
 	{
 		//int size_x, size_y;
 		int sx, sy;
@@ -336,10 +334,12 @@ public class Clear {
 		TileIndex tile;
 		int ret, cost, money;
 
-		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
+		if (pp1 > Global.MapSize()) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
+		TileIndex p1 = new TileIndex(pp1);
+		
 		// remember level height
 		h = p1.TileHeight();
 
@@ -367,9 +367,9 @@ public class Clear {
 				if (Cmd.CmdFailed(ret)) break;
 				cost += ret;
 
-				if (flags & Cmd.DC_EXEC) {
+				if(0 != (flags & Cmd.DC_EXEC)) {
 					if ((money -= ret) < 0) {
-						_additional_cash_required = ret;
+						Global._additional_cash_required = ret;
 						cost = cost - ret;
 						return true;
 					}
@@ -390,7 +390,7 @@ public class Clear {
 	 * @param p1 unused
 	 * @param p2 unused
 	 */
-	int CmdPurchaseLandArea(int x, int y, int flags, int p1, int p2)
+	static int CmdPurchaseLandArea(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile;
 		int cost;
@@ -403,12 +403,12 @@ public class Clear {
 
 		if (tile.IsTileType( TileTypes.MP_UNMOVABLE) && tile.getMap().m5 == 3 &&
 				tile.IsTileOwner(Global._current_player.id))
-			return_cmd_error(Str.STR_5807_YOU_ALREADY_OWN_IT);
+			return Cmd.return_cmd_error(Str.STR_5807_YOU_ALREADY_OWN_IT);
 
 		cost = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			ModifyTile(tile,
 				TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOwner.OWNER_CURRENT | TileTypes.MP_MAP5,
 				3 /* map5 */
@@ -467,7 +467,7 @@ public class Clear {
 	 * @param p1 unused
 	 * @param p2 unused
 	 */
-	int CmdSellLandArea(int x, int y, int flags, int p1, int p2)
+	static int CmdSellLandArea(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile;
 
@@ -491,17 +491,17 @@ public class Clear {
 
 
 
-	void DrawClearLandTile(final TileInfo ti, byte set)
+	static void DrawClearLandTile(final TileInfo ti, byte set)
 	{
-		DrawGroundSprite(Sprite.SPR_FLAT_BARE_LAND + _tileh_to_sprite[ti.tileh] + set * 19);
+		ViewPort.DrawGroundSprite(Sprite.SPR_FLAT_BARE_LAND + Landscape._tileh_to_sprite[ti.tileh] + set * 19);
 	}
 
-	void DrawHillyLandTile(final TileInfo ti)
+	static void DrawHillyLandTile(final TileInfo ti)
 	{
 		if (ti.tileh != 0) {
-			DrawGroundSprite(Sprite.SPR_FLAT_ROUGH_LAND + _tileh_to_sprite[ti.tileh]);
+			ViewPort.DrawGroundSprite(Sprite.SPR_FLAT_ROUGH_LAND + Landscape._tileh_to_sprite[ti.tileh]);
 		} else {
-			DrawGroundSprite(_landscape_clear_sprites[BitOps.GB(ti.x ^ ti.y, 4, 3)]);
+			ViewPort.DrawGroundSprite(_landscape_clear_sprites[BitOps.GB(ti.x ^ ti.y, 4, 3)]);
 		}
 	}
 
@@ -536,19 +536,19 @@ public class Clear {
 			break;
 
 		case 2:
-			DrawGroundSprite(Sprite.SPR_FLAT_ROCKY_LAND_1 + _tileh_to_sprite[ti.tileh]);
+			ViewPort.DrawGroundSprite(Sprite.SPR_FLAT_ROCKY_LAND_1 + Landscape._tileh_to_sprite[ti.tileh]);
 			break;
 
 		case 3:
-			DrawGroundSprite(_clear_land_sprites_1[BitOps.GB(_m[ti.tile].m3, 0, 4)] + _tileh_to_sprite[ti.tileh]);
+			ViewPort.DrawGroundSprite(_clear_land_sprites_1[BitOps.GB(ti.tile.getMap().m3, 0, 4)] + Landscape._tileh_to_sprite[ti.tileh]);
 			break;
 
 		case 4:
-			DrawGroundSprite(_clear_land_sprites_2[BitOps.GB(ti.map5, 0, 2)] + _tileh_to_sprite[ti.tileh]);
+			ViewPort.DrawGroundSprite(_clear_land_sprites_2[BitOps.GB(ti.map5, 0, 2)] + Landscape._tileh_to_sprite[ti.tileh]);
 			break;
 
 		case 5:
-			DrawGroundSprite(_clear_land_sprites_3[BitOps.GB(ti.map5, 0, 2)] + _tileh_to_sprite[ti.tileh]);
+			ViewPort.DrawGroundSprite(_clear_land_sprites_3[BitOps.GB(ti.map5, 0, 2)] + Landscape._tileh_to_sprite[ti.tileh]);
 			break;
 		}
 
@@ -859,7 +859,7 @@ public class Clear {
 		null,											/* get_produced_cargo_proc */
 		null,											/* vehicle_enter_tile_proc */
 		null,											/* vehicle_leave_tile_proc */
-		Clear::GetSlopeTileh_Clear,			/* get_slope_tileh_proc */
+		Clear::GetSlopeTileh_Clear			/* get_slope_tileh_proc */
 	);
 
 }

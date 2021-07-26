@@ -213,7 +213,7 @@ public class Economy
 			int min_income;
 			int max_income;
 
-			numec = min(p.num_valid_stat_ent, 12);
+			numec = Math.min(p.num_valid_stat_ent, 12);
 			if (numec != 0) {
 				min_income = 0x7FFFFFFF;
 				max_income = 0;
@@ -710,18 +710,18 @@ public class Economy
 	static void AddInflation()
 	{
 		int i;
-		int inf = _economy.infl_amount * 54;
+		int inf = Global._economy.infl_amount * 54;
 
 		for (i = 0; i != NUM_PRICES; i++) {
 			AddSingleInflation((int*)&_price + i, _price_frac + i, inf);
 		}
 
-		_economy.max_loan_unround += BIGMULUS(_economy.max_loan_unround, inf, 16);
+		Global._economy.max_loan_unround += BIGMULUS(Global._economy.max_loan_unround, inf, 16);
 
-		if (_economy.max_loan + 50000 <= _economy.max_loan_unround)
-			_economy.max_loan += 50000;
+		if (Global._economy.max_loan + 50000 <= Global._economy.max_loan_unround)
+			Global._economy.max_loan += 50000;
 
-		inf = _economy.infl_amount_pr * 54;
+		inf = Global._economy.infl_amount_pr * 54;
 		for (i = 0; i != NUM_CARGO; i++) {
 			AddSingleInflation(
 				(int*)_cargo_payment_rates + i,
@@ -739,7 +739,7 @@ public class Economy
 	static void PlayersPayInterest()
 	{
 		final Player p;
-		int interest = _economy.interest_rate * 54;
+		int interest = Global._economy.interest_rate * 54;
 
 		FOR_ALL_PLAYERS(p) {
 			if (!p.is_active) continue;
@@ -758,11 +758,11 @@ public class Economy
 	{
 		if (Global._opt.diff.economy == 0) return;
 
-		if (--_economy.fluct == 0) {
-			_economy.fluct = -(int)BitOps.GB(Random(), 0, 2);
+		if (--Global._economy.fluct == 0) {
+			Global._economy.fluct = -(int)BitOps.GB(Random(), 0, 2);
 			NewsItem.AddNewsItem(Str.STR_7073_WORLD_RECESSION_FINANCIAL, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL,0,NewsItem.NT_ECONOMY,0), 0, 0);
-		} else if (_economy.fluct == -12) {
-			_economy.fluct = BitOps.GB(Random(), 0, 8) + 312;
+		} else if (Global._economy.fluct == -12) {
+			Global._economy.fluct = BitOps.GB(Random(), 0, 8) + 312;
 			NewsItem.AddNewsItem(Str.STR_7074_RECESSION_OVER_UPTURN_IN, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL,0,NewsItem.NT_ECONOMY,0), 0, 0);
 		}
 	}
@@ -881,11 +881,11 @@ public class Economy
 			_price_frac[i] = 0;
 		}
 
-		_economy.interest_rate = _opt.diff.initial_interest;
-		_economy.infl_amount = _opt.diff.initial_interest;
-		_economy.infl_amount_pr = max(0, _opt.diff.initial_interest - 1);
-		_economy.max_loan_unround = _economy.max_loan = _opt.diff.max_loan * 1000;
-		_economy.fluct = GB(Random(), 0, 8) + 168;
+		Global._economy.interest_rate = _opt.diff.initial_interest;
+		Global._economy.infl_amount = _opt.diff.initial_interest;
+		Global._economy.infl_amount_pr = max(0, _opt.diff.initial_interest - 1);
+		Global._economy.max_loan_unround = Global._economy.max_loan = _opt.diff.max_loan * 1000;
+		Global._economy.fluct = GB(Random(), 0, 8) + 168;
 	}
 
 	static Pair SetupSubsidyDecodeParam(final Subsidy s, boolean mode)
@@ -1783,7 +1783,7 @@ public class Economy
 	// Economy variables
 	static void SaveLoad_ECMY()
 	{
-		SlObject(&_economy, _economy_desc);
+		SlObject(&Global._economy, _economy_desc);
 	}
 
 	final ChunkHandler _economy_chunk_handlers[] = {

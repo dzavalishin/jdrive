@@ -124,7 +124,7 @@ public class AirCraft {
 	 * @param p1 aircraft type being built (engine)
 	 * @param p2 unused
 	 */
-	int CmdBuildAircraft(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildAircraft(int x, int y, int flags, int p1, int p2)
 	{
 		int value;
 		Vehicle vl[3], *v, *u, *w;
@@ -329,7 +329,7 @@ public class AirCraft {
 	 * @param p1 vehicle ID to be sold
 	 * @param p2 unused
 	 */
-	int CmdSellAircraft(int x, int y, int flags, int p1, int p2)
+	static int CmdSellAircraft(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 
@@ -358,7 +358,7 @@ public class AirCraft {
 	 * @param p1 aircraft ID to start/stop
 	 * @param p2 unused
 	 */
-	int CmdStartStopAircraft(int x, int y, int flags, int p1, int p2)
+	static int CmdStartStopAircraft(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 
@@ -392,7 +392,7 @@ public class AirCraft {
 	 * - p2 non-zero - aircraft will try to goto a depot, but not stop there (eg forced servicing)
 	 * - p2 (bit 17) - aircraft will try to goto a depot at the next airport
 	 */
-	int CmdSendAircraftToHangar(int x, int y, int flags, int p1, int p2)
+	static int CmdSendAircraftToHangar(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 
@@ -451,7 +451,7 @@ public class AirCraft {
 	 * @param p1 vehicle ID that is being service-interval-changed
 	 * @param p2 new service interval
 	 */
-	int CmdChangeAircraftServiceInt(int x, int y, int flags, int p1, int p2)
+	static int CmdChangeAircraftServiceInt(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		int serv_int = GetServiceIntervalClamped(p2); /* Double check the service interval from the user-input */
@@ -476,7 +476,7 @@ public class AirCraft {
 	 * @param p2 various bitstuffed elements
 	 * - p2 = (bit 0-7) - the new cargo type to refit to
 	 */
-	int CmdRefitAircraft(int x, int y, int flags, int p1, int p2)
+	static int CmdRefitAircraft(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		int pass, mail;

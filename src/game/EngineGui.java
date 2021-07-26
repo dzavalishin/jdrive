@@ -954,7 +954,7 @@ public class EngineGui extends EngineTables
 	{
 		Engine e;
 
-		if (_cur_year < 130) {
+		if (Global._cur_year < 130) {
 			for (e = _engines; e != endof(_engines); e++) {
 				// Age the vehicle
 				if (e.flags & ENGINE_AVAILABLE && e.age != 0xFFFF) {

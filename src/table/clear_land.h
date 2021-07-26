@@ -1,5 +1,5 @@
 /* $Id: clear_land.h 3077 2005-10-22 06:39:32Z tron $ */
-
+#if 0
 static const SpriteID _landscape_clear_sprites[8] = {
 	0xFA0,
 	0xFB3,

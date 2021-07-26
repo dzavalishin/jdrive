@@ -359,15 +359,15 @@ public class Global {
 	}
 
 
-	public static StringID AllocateNameUnique(String name, byte skip) { return RealAllocateName(name, skip, true); }
-	public static StringID AllocateName(String name, byte skip) { return RealAllocateName(name, skip, false); }
+	public static StringID AllocateNameUnique(String name, int skip) { return RealAllocateName(name, skip, true); }
+	public static StringID AllocateName(String name, int skip) { return RealAllocateName(name, skip, false); }
 
 	static void InitializeNameMgr()
 	{
 		_name_array.clear();
 	}
 
-	public static StringID RealAllocateName(String name, byte skip, boolean check_double)
+	public static StringID RealAllocateName(String name, int skip, boolean check_double)
 	{
 
 		if(check_double)
