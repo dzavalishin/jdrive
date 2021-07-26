@@ -355,7 +355,7 @@ VARDEF char _savegame_format[8];
 VARDEF char *_config_file;
 VARDEF char *_highscore_file;
 VARDEF char *_log_file;
-
+/*
 // NOSAVE: These can be recalculated from InitializeLandscapeVariables
 typedef struct {
 	StringID names_s[NUM_CARGO];

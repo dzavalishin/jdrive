@@ -10,6 +10,7 @@ import game.util.Paths;
 import game.util.Prices;
 import game.util.Strings;
 import game.util.YearMonthDay;
+import game.tables.CargoConst;
 import game.util.BitOps;
 
 public class Global {
@@ -145,7 +146,7 @@ public class Global {
 
 	public static int []_cargo_payment_rates = new int[NUM_CARGO];
 	public static int [] _cargo_payment_rates_frac = new int[NUM_CARGO];
-
+	public static CargoConst _cargoc = new CargoConst();
 
 	/* --- 1 Day is 74 ticks ---
 	 * The game's internal structure is dictated by ticks. The date counter (date_fract) is an integer of
@@ -192,7 +193,8 @@ public class Global {
 	// etc
 	// Skip aging of cargo?
 	public static int _age_cargo_skip_counter;
-
+	public static Point _tile_fract_coords; // TODO to ViewPort?
+	
 	// Available aircraft types
 	public static int _avail_aircraft = 0; // TODO who assigns?
 

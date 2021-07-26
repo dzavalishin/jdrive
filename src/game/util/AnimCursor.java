@@ -76,7 +76,7 @@ public class AnimCursor {
 	 *  definitions we have above. This is the only thing that is
 	 *  accessed directly from other files
 	 */
-	static final AnimCursor [][] _animcursors = {
+	public static final AnimCursor [][] _animcursors = {
 		_demolish_animcursor,
 		_lower_land_animcursor,
 		_raise_land_animcursor,

@@ -129,7 +129,7 @@ bool HandlePlacePushButton(Window *w, int widget, uint32 cursor, int mode, Place
 //VARDEF ViewPort _viewports[25 - 2];
 //VARDEF uint32 _active_viewports;
 
-VARDEF Point _tile_fract_coords;
+//VARDEF Point _tile_fract_coords;
 
 //extern TileHighlightData _thd;
 

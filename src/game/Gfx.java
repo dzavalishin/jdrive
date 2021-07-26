@@ -27,7 +27,7 @@ public class Gfx {
 	//static void GfxMainBlitter(final Sprite *sprite, int x, int y, int mode);
 
 	private static final int ASCII_LETTERSTART = 32;
-	private static int _stringwidth_base = 0;
+	public static int _stringwidth_base = 0;
 	//VARDEF byte _stringwidth_table[0x2A0];
 	private static byte [] _stringwidth_table = new byte[0x2A0];
 	

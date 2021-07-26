@@ -361,7 +361,7 @@ public class Town extends TownTables implements IPoolItem
 		// Not exactly sure when this happens, but probably when a house changes.
 		// Before this was just a return...so it'd leak animated tiles..
 		// That bug seems to have been here since day 1??
-		if (!(_housetype_extra_flags[tile.getMap().m4] & 0x20)) {
+		if (0 == (_housetype_extra_flags[tile.getMap().m4] & 0x20)) {
 			TextEffect.DeleteAnimatedTile(tile);
 			return;
 		}
@@ -428,7 +428,7 @@ public class Town extends TownTables implements IPoolItem
 		Global.SetDParam(0, t.index);
 		Global.SetDParam(1, t.population);
 
-		UpdateViewportSignPos(t.sign, pt.x, pt.y - 24,
+		ViewPort.UpdateViewportSignPos(t.sign, pt.x, pt.y - 24,
 				Global._patches.population_in_label ? STR_TOWN_LABEL_POP : STR_TOWN_LABEL);
 
 		MarkTownSignDirty(t);
