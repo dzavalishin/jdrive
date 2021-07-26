@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.function.BiConsumer;
@@ -116,7 +117,12 @@ public class Window extends WindowConstants
 	public static final int WSM_PRESIZE = 3;
 	//};
 	
+
 	
+	public static Iterator<Window> getIterator() {
+		return _windows.iterator();
+	}
+
 
 
 	// -----------------------------------

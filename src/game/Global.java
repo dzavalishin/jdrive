@@ -115,6 +115,21 @@ public class Global {
 	public static int 			_cmd_build_rail_veh_score;
 
 
+	/* Access Vehicle Data */
+	//#include "table/engines.h"
+	//public static  finalEngineInfo orig_engine_info[TOTAL_NUM_ENGINES];
+	//public static  finalRailVehicleInfo orig_rail_vehicle_info[NUM_TRAIN_ENGINES];
+	//public static  finalShipVehicleInfo orig_ship_vehicle_info[NUM_SHIP_ENGINES];
+	//public static  finalAircraftVehicleInfo orig_aircraft_vehicle_info[NUM_AIRCRAFT_ENGINES];
+	//public static  finalRoadVehicleInfo orig_road_vehicle_info[NUM_ROAD_ENGINES];
+
+	public static  EngineInfo []			_engine_info = new EngineInfo[TOTAL_NUM_ENGINES];
+	public static  RailVehicleInfo []		_rail_vehicle_info = new RailVehicleInfo[NUM_TRAIN_ENGINES];
+	public static  ShipVehicleInfo []		_ship_vehicle_info = new ShipVehicleInfo[NUM_SHIP_ENGINES];
+	public static  AircraftVehicleInfo []	_aircraft_vehicle_info = new AircraftVehicleInfo[NUM_AIRCRAFT_ENGINES];
+	public static  RoadVehicleInfo []		_road_vehicle_info = new RoadVehicleInfo[NUM_ROAD_ENGINES];
+	
+	
 
 	public static int _news_display_opt = 0;
 	public static boolean _news_ticker_sound = false;

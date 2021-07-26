@@ -1,6 +1,8 @@
 package game;
 
 import java.util.Comparator;
+import java.util.Iterator;
+
 import game.util.BitOps;
 import game.util.wcustom.*;
 
@@ -14,6 +16,7 @@ public class VehicleGui {
 	static int _internal_name_sorter_id; // internal StringID for default vehicle-names
 	static int _last_vehicle_idx;        // cached index to hopefully speed up name-sorting
 	static boolean   _internal_sort_order;     // descending/ascending
+	//static int   _internal_sort_order;     // descending/ascending
 
 	static int [] _player_num_engines = new int[Global.TOTAL_NUM_ENGINES];
 	static RailType _railtype_selected_in_replace_gui;
@@ -46,7 +49,7 @@ public class VehicleGui {
 	static VehicleSortListingTypeFunction VehicleReliabilitySorter;
 	static VehicleSortListingTypeFunction VehicleMaxSpeedSorter;
  */
-static VehicleComparator _vehicle_sorter[] = {
+static abstractVehicleSorter _vehicle_sorter[] = {
 		new VehicleUnsortedSorter(),
 		new VehicleNumberSorter(),
 		new VehicleNameSorter(),
@@ -80,32 +83,41 @@ static int _rail_types_list[] = {
 
 void RebuildVehicleLists()
 {
-	Window w;
-
-	for (w = _windows; w != _last_window; ++w)
-		switch (w.window_class) {
-		case Window.WC_TRAINS_LIST: case Window.WC_ROADVehicle.VEH_LIST:
+	//Window w;
+	//for (w = _windows; w != _last_window; ++w)
+	Iterator<Window> it = Window.getIterator();
+	while(it.hasNext())
+	{
+		Window w = it.next();
+		
+		switch (w.window_class.v) {
+		case Window.WC_TRAINS_LIST: case Window.WC_ROADVEH_LIST:
 		case Window.WC_SHIPS_LIST:  case Window.WC_AIRCRAFT_LIST:
 			w.as_vehiclelist_d().flags |= VL_REBUILD;
 			w.SetWindowDirty();
 			break;
 		default: break;
 		}
+	}
 }
 
 void ResortVehicleLists()
 {
-	Window w;
-
-	for (w = _windows; w != _last_window; ++w)
-		switch (w.window_class) {
-		case Window.WC_TRAINS_LIST: case Window.WC_ROADVehicle.VEH_LIST:
+	//Window w;
+	//for (w = _windows; w != _last_window; ++w)
+	Iterator<Window> it = Window.getIterator();
+	while(it.hasNext())
+	{
+		Window w = it.next();
+		
+		switch (w.window_class.v) {
+		case Window.WC_TRAINS_LIST: case Window.WC_ROADVEH_LIST:
 		case Window.WC_SHIPS_LIST:  case Window.WC_AIRCRAFT_LIST:
 			w.as_vehiclelist_d().flags |= VL_RESORT;
-			SetWindowDirty(w);
-			break;
+			w.SetWindowDirty();			break;
 		default: break;
 		}
+	}
 }
 
 static SortStruct [] _vehicle_sort;
@@ -185,7 +197,7 @@ void SortVehicleList(vehiclelist_d vl)
 {
 	if (0 == (vl.flags & VL_RESORT)) return;
 
-	_internal_sort_order = vl.flags & VL_DESC;
+	_internal_sort_order = 0 != (vl.flags & VL_DESC) ? true : false;
 	_internal_name_sorter_id = Str.STR_SV_TRAIN_NAME;
 	//_last_vehicle_idx = 0; // used for "cache" in namesorting
 	//qsort(vl.sort_list, vl.list_length, sizeof(vl.sort_list[0]),_vehicle_sorter[vl.sort_type]);
@@ -256,7 +268,7 @@ CargoID DrawVehicleRefitWindow(final Vehicle v, int sel)
 	cmask = 0;
 	u = v;
 	do {
-		cmask |= _engine_info[u.engine_type].refit_mask;
+		cmask |= Global._engine_info[u.engine_type.id].refit_mask;
 		u = u.next;
 	} while (v.type == Vehicle.VEH_Train && u != null);
 
@@ -271,7 +283,7 @@ CargoID DrawVehicleRefitWindow(final Vehicle v, int sel)
 				colour = 12; 
 			} 
 			sel--; 
-			DrawString(6, y, _cargoc.names_s[cargo], colour); 
+			Gfx.DrawString(6, y, _cargoc.names_s[cargo], colour); 
 			y += 10; 
 		}
 	}
@@ -300,7 +312,7 @@ static void train_engine_drawing_loop(int [] x, int [] y, int [] pos, int []sel,
 	for (i = 0; i < Global.NUM_TRAIN_ENGINES; i++) 
 	{
 		final Engine e = Engine.GetEngine(i);
-		final RailVehicleInfo rvi = RailVehicleInfo.RailVehInfo(i);
+		final RailVehicleInfo rvi = EngineGui.RailVehInfo(i);
 		//final EngineInfo *info = &_engine_info[i];
 
 		if (!EngineHasReplacement(p, i) && _player_num_engines[i] == 0 && show_outdated) continue;
@@ -312,7 +324,7 @@ static void train_engine_drawing_loop(int [] x, int [] y, int [] pos, int []sel,
 
 
 		colour = sel[0] == 0 ? 0xC : 0x10;
-		if (!(ENGINE_AVAILABLE && show_outdated && RailVehInfo(i).power && e.railtype == railtype)) {
+		if (!(ENGINE_AVAILABLE && show_outdated && EngineGui.RailVehInfo(i).power && e.railtype == railtype)) {
 			if (e.railtype != railtype || !(rvi.flags & RVI_WAGON) != is_engine ||
 					!BitOps.HASBIT(e.player_avail, Global._local_player))
 				continue;
@@ -361,8 +373,8 @@ static void SetupScrollStuffForReplaceWindow(Window w)
 			final Engine e = GetEngine(engine_id);
 			//final EngineInfo info = &_engine_info[engine_id];
 
-			if (ENGINE_AVAILABLE && RailVehInfo(engine_id).power && e.railtype == railtype.ordinal()) {
-				if (_player_num_engines[engine_id] > 0 || EngineHasReplacement(p, engine_id)) {
+			if (ENGINE_AVAILABLE && EngineGui.RailVehInfo(engine_id).power && e.railtype == railtype.ordinal()) {
+				if (_player_num_engines[engine_id] > 0 || p.EngineHasReplacement(engine_id)) {
 					if (sel[0] == 0) selected_id[0] = engine_id;
 					count++;
 					sel[0]--;
@@ -395,11 +407,11 @@ static void SetupScrollStuffForReplaceWindow(Window w)
 		if (selected_id[0] != Engine.INVALID_ENGINE_ID) { // only draw right array if we have anything in the left one
 			num = Global.NUM_ROAD_ENGINES;
 			engine_id = Global.ROAD_ENGINES_INDEX;
-			cargo = RoadVehInfo(selected_id[0]).cargo_type;
+			cargo = EngineGui.RoadVehInfo(selected_id[0]).cargo_type;
 
 			do {
 				final Engine e = Engine.GetEngine(engine_id);
-				if (cargo == RoadVehInfo(engine_id).cargo_type && BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
+				if (cargo == EngineGui.RoadVehInfo(engine_id).cargo_type && BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
 					count2++;
 					if (sel[1] == 0) selected_id[1] = engine_id;
 					sel[1]--;
@@ -419,7 +431,7 @@ static void SetupScrollStuffForReplaceWindow(Window w)
 
 		do {
 			e = Engine.GetEngine(engine_id);
-			if (_player_num_engines[engine_id] > 0 || EngineHasReplacement(p, engine_id)) {
+			if (_player_num_engines[engine_id] > 0 || p.EngineHasReplacement(engine_id)) {
 				if (sel[0] == 0) selected_id[0] = engine_id;
 				count++;
 				sel[0]--;
@@ -432,13 +444,13 @@ static void SetupScrollStuffForReplaceWindow(Window w)
 			num = Global.NUM_SHIP_ENGINES;
 			//e = GetEngine(Global.SHIP_ENGINES_INDEX);
 			engine_id = Global.SHIP_ENGINES_INDEX;
-			cargo = ShipVehInfo(selected_id[0]).cargo_type;
-			refittable = ShipVehInfo(selected_id[0]).refittable;
+			cargo = EngineGui.ShipVehInfo(selected_id[0].id).cargo_type;
+			refittable = EngineGui.ShipVehInfo(selected_id[0].id).refittable;
 
 			do {
 				e = Engine.GetEngine(engine_id);
 				if (BitOps.HASBIT(e.player_avail, Global._local_player.id) &&
-						(cargo == ShipVehInfo(engine_id).cargo_type || refittable & ShipVehInfo(engine_id).refittable)) {
+						(cargo == EngineGui.ShipVehInfo(engine_id).cargo_type || refittable & EngineGui.ShipVehInfo(engine_id).refittable)) {
 					if (sel[1] == 0) selected_id[1] = engine_id;
 					sel[1]--;
 					count2++;
@@ -456,7 +468,7 @@ static void SetupScrollStuffForReplaceWindow(Window w)
 		engine_id = Global.AIRCRAFT_ENGINES_INDEX;
 
 		do {
-			if (_player_num_engines[engine_id] > 0 || EngineHasReplacement(p, engine_id)) {
+			if (_player_num_engines[engine_id] > 0 || p.EngineHasReplacement(engine_id)) {
 				count++;
 				if (sel[0] == 0) selected_id[0] = engine_id;
 				sel[0]--;
@@ -468,12 +480,12 @@ static void SetupScrollStuffForReplaceWindow(Window w)
 		if (selected_id[0] != Engine.INVALID_ENGINE_ID) {
 			num = NUM_AIRCRAFT_ENGINES;
 			//e = GetEngine(Global.AIRCRAFT_ENGINES_INDEX);
-			subtype = AircraftVehInfo(selected_id[0]).subtype;
+			subtype = EngineGui.AircraftVehInfo(selected_id[0].id).subtype;
 			engine_id = Global.AIRCRAFT_ENGINES_INDEX;
 			do {
 				Engine e = Engine.GetEngine(engine_id);
 				if (BitOps.HASBIT(e.player_avail, Global._local_player)) {
-					if (BitOps.HASBIT(subtype, 0) == BitOps.HASBIT(AircraftVehInfo(engine_id).subtype, 0)) {
+					if (BitOps.HASBIT(subtype, 0) == BitOps.HASBIT(EngineGui.AircraftVehInfo(engine_id).subtype, 0)) {
 						count2++;
 						if (sel[1] == 0) selected_id[1] = engine_id;
 						sel[1]--;
@@ -551,7 +563,7 @@ static void DrawEngineArrayInReplaceWindow(Window w, int px, int py, int px2, in
 		byte cargo;
 
 		if (selected_id0[0] >= Global.ROAD_ENGINES_INDEX && selected_id[0] < Global.SHIP_ENGINES_INDEX) {
-			cargo = RoadVehInfo(selected_id0[0]).cargo_type;
+			cargo = EngineGui.RoadVehInfo(selected_id0[0]).cargo_type;
 
 			do {
 				final Engine  e = Engine.GetEngine( engine_id );
@@ -568,7 +580,7 @@ static void DrawEngineArrayInReplaceWindow(Window w, int px, int py, int px2, in
 					sel0[0]--;
 				}
 
-				if (RoadVehInfo(engine_id).cargo_type == cargo && BitOps.HASBIT(e.player_avail, Global._local_player)) {
+				if (EngineGui.RoadVehInfo(engine_id).cargo_type == cargo && BitOps.HASBIT(e.player_avail, Global._local_player)) {
 					if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.cap, 0) && RoadVehInfo(engine_id).cargo_type == cargo) {
 						Gfx.DrawString(x2[0]+59, y2[0]+2, GetCustomEngineName(engine_id), sel1[0]==0 ? 0xC : 0x10);
 						DrawRoadVehEngine(x2[0]+29, y2[0]+6, engine_id, SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)));
@@ -585,34 +597,34 @@ static void DrawEngineArrayInReplaceWindow(Window w, int px, int py, int px2, in
 
 	case Vehicle.VEH_Ship: {
 		int num = Global.NUM_SHIP_ENGINES;
-		EngineID engine_id = Global.SHIP_ENGINES_INDEX;
+		EngineID engine_id = EngineID.get( Global.SHIP_ENGINES_INDEX );
 		byte cargo, refittable;
 
 		if (selected_id0[0] != Engine.INVALID_ENGINE_ID) {
-			cargo = ShipVehInfo(selected_id0[0]).cargo_type;
-			refittable = ShipVehInfo(selected_id0[0]).refittable;
+			cargo = EngineGui.ShipVehInfo(selected_id0[0]).cargo_type;
+			refittable = EngineGui.ShipVehInfo(selected_id0[0]).refittable;
 
 			do {
-				final Engine  e = GetEngine(engine_id);
+				final Engine  e = Engine.GetEngine(engine_id);
 
 				if (_player_num_engines[engine_id] > 0 || EngineHasReplacement(p, engine_id)) {
-					if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.cap, 0)) {
-						Gfx.DrawString(x+75, y+7, GetCustomEngineName(engine_id), sel[0]==0 ? 0xC : 0x10);
-						DrawShipEngine(x+35, y+10, engine_id, _player_num_engines[engine_id] > 0 ? SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
+					if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.cap, 0)) {
+						Gfx.DrawString(x[0]+75, y[0]+7, GetCustomEngineName(engine_id), sel[0]==0 ? 0xC : 0x10);
+						DrawShipEngine(x[0]+35, y[0]+10, engine_id, _player_num_engines[engine_id] > 0 ? SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
 						Global.SetDParam(0, _player_num_engines[engine_id]);
-						Gfx.DrawStringRightAligned(213, y+15, Str.STR_TINY_BLACK, 0);
-						y += 24;
+						Gfx.DrawStringRightAligned(213, y[0]+15, Str.STR_TINY_BLACK, 0);
+						y[0] += 24;
 					}
-					sel[0]--;
+					sel0[0]--;
 				}
 				if (selected_id[0] != Engine.INVALID_ENGINE_ID) {
-					if (BitOps.HASBIT(e.player_avail, Global._local_player) && ( cargo == ShipVehInfo(engine_id).cargo_type || refittable & ShipVehInfo(engine_id).refittable)) {
-						if (BitOps.IS_INT_INSIDE(--pos2, -w.vscroll.cap, 0)) {
-							Gfx.DrawString(x2+75, y2+7, GetCustomEngineName(engine_id), sel[1]==0 ? 0xC : 0x10);
-							DrawShipEngine(x2+35, y2+10, engine_id, SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)));
-							y2 += 24;
+					if (BitOps.HASBIT(e.player_avail, Global._local_player) && ( cargo == EngineGui.ShipVehInfo(engine_id).cargo_type || refittable & EngineGui.ShipVehInfo(engine_id).refittable)) {
+						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.cap, 0)) {
+							Gfx.DrawString(x2[0]+75, y2[0]+7, GetCustomEngineName(engine_id), sel1[0]==0 ? 0xC : 0x10);
+							DrawShipEngine(x2[0]+35, y2[0]+10, engine_id, SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)));
+							y2[0] += 24;
 						}
-						sel[1]--;
+						sel1[0]--;
 					}
 				}
 				++engine_id; //, ++e,
@@ -622,33 +634,33 @@ static void DrawEngineArrayInReplaceWindow(Window w, int px, int py, int px2, in
 	}   //end of ship
 
 	case Vehicle.VEH_Aircraft: {
-		if (selected_id[0] != Engine.INVALID_ENGINE_ID) {
+		if (selected_id0[0] != Engine.INVALID_ENGINE_ID) {
 			int num = NUM_AIRCRAFT_ENGINES;
-			final Engine  e = GetEngine(Global.AIRCRAFT_ENGINES_INDEX);
-			EngineID engine_id = Global.AIRCRAFT_ENGINES_INDEX;
-			byte subtype = AircraftVehInfo(selected_id[0]).subtype;
+			//final Engine  e = GetEngine(Global.AIRCRAFT_ENGINES_INDEX);
+			EngineID engine_id = EngineID.get( Global.AIRCRAFT_ENGINES_INDEX );
+			byte subtype = EngineGui.AircraftVehInfo(selected_id0[0]).subtype;
 
 			do {
-				final Engine  e = GetEngine(engine_id);
+				final Engine  e = Engine.GetEngine(engine_id);
 
-				if (_player_num_engines[engine_id] > 0 || EngineHasReplacement(p, engine_id)) {
-					if (sel[0] == 0) selected_id[0] = engine_id;
-					if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.cap, 0)) {
-						Gfx.DrawString(x+62, y+7, GetCustomEngineName(engine_id), sel[0]==0 ? 0xC : 0x10);
-						DrawAircraftEngine(x+29, y+10, engine_id, _player_num_engines[engine_id] > 0 ? SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
+				if (_player_num_engines[engine_id] > 0 || p.EngineHasReplacement(engine_id)) {
+					if (sel0[0] == 0) selected_id0[0] = engine_id;
+					if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.cap, 0)) {
+						Gfx.DrawString(x[0]+62, y[0]+7, GetCustomEngineName(engine_id), sel0[0]==0 ? 0xC : 0x10);
+						DrawAircraftEngine(x[0]+29, y[0]+10, engine_id, _player_num_engines[engine_id] > 0 ? SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
 						Global.SetDParam(0, _player_num_engines[engine_id]);
-						Gfx.DrawStringRightAligned(213, y+15, Str.STR_TINY_BLACK, 0);
-						y += 24;
+						Gfx.DrawStringRightAligned(213, y[0]+15, Str.STR_TINY_BLACK, 0);
+						y[0] += 24;
 					}
-					sel[0]--;
+					sel0[0]--;
 				}
-				if (BitOps.HASBIT(subtype, 0) == BitOps.HASBIT(AircraftVehInfo(engine_id).subtype, 0) &&
+				if (BitOps.HASBIT(subtype, 0) == BitOps.HASBIT(EngineGui.AircraftVehInfo(engine_id).subtype, 0) &&
 						BitOps.HASBIT(e.player_avail, Global._local_player)) {
-					if (sel[1] == 0) selected_id[1] = engine_id;
-					if (BitOps.IS_INT_INSIDE(--pos2, -w.vscroll.cap, 0)) {
-						Gfx.DrawString(x2+62, y2+7, GetCustomEngineName(engine_id), sel[1]==0 ? 0xC : 0x10);
-						DrawAircraftEngine(x2+29, y2+10, engine_id, SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)));
-						y2 += 24;
+					if (sel1[0] == 0) selected_id1[0] = engine_id;
+					if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.cap, 0)) {
+						Gfx.DrawString(x2[0]+62, y2[0]+7, GetCustomEngineName(engine_id), sel1[0]==0 ? 0xC : 0x10);
+						DrawAircraftEngine(x2[0]+29, y2[0]+10, engine_id, SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)));
+						y2[0] += 24;
 					}
 					sel[1]--;
 				}
@@ -670,10 +682,10 @@ private static final int _vehicle_type_names[] = {
 
 static void ReplaceVehicleWndProc(Window w, WindowEvent e)
 {
-	final Player p = GetPlayer(Global._local_player);
+	final Player p = Player.GetPlayer(Global._local_player);
 
 	switch (e.event) {
-	case WindowEvents.WE_PAINT: {
+	case WE_PAINT: {
 		int pos = w.vscroll.pos;
 		EngineID selected_id[] = { Engine.INVALID_ENGINE_ID, Engine.INVALID_ENGINE_ID };
 		int x = 1;
@@ -698,11 +710,11 @@ static void ReplaceVehicleWndProc(Window w, WindowEvent e)
 					if (vehicle.type == Vehicle.VEH_Aircraft && vehicle.subtype > 2) continue;
 
 					// do not count the vehicles, that contains only 0 in all var
-					if (vehicle.engine_type == 0 && vehicle.spritenum == 0) continue;
+					if (vehicle.engine_type == null && vehicle.spritenum == 0) continue;
 
-					if (vehicle.type != GetEngine(vehicle.engine_type).type) continue;
+					if (vehicle.type != Engine.GetEngine(vehicle.engine_type).type) continue;
 
-					_player_num_engines[vehicle.engine_type]++;
+					_player_num_engines[vehicle.engine_type.id]++;
 				}
 			});
 		}
@@ -715,7 +727,7 @@ static void ReplaceVehicleWndProc(Window w, WindowEvent e)
 		// sets the selected left item to the top one if it's greater than the number of vehicles in the left side
 
 		if (w.as_replaceveh_d().count[0] <= sel[0]) {
-			if (w.as_replaceveh_d().count[0]) {
+			if (w.as_replaceveh_d().count[0] != 0) {
 				sel[0] = 0;
 				w.as_replaceveh_d().sel_index[0] = 0;
 				w.vscroll.pos = 0;
@@ -728,7 +740,7 @@ static void ReplaceVehicleWndProc(Window w, WindowEvent e)
 		}
 
 		if (w.as_replaceveh_d().count[1] <= sel[1]) {
-			if (w.as_replaceveh_d().count[1]) {
+			if (w.as_replaceveh_d().count[1] != 0) {
 				sel[1] = 0;
 				w.as_replaceveh_d().sel_index[1] = 0;
 				w.vscroll2.pos = 0;
@@ -748,8 +760,8 @@ static void ReplaceVehicleWndProc(Window w, WindowEvent e)
 		if (selected_id[0] == Engine.INVALID_ENGINE_ID ||
 				selected_id[1] == Engine.INVALID_ENGINE_ID ||
 				selected_id[0] == selected_id[1] ||
-				EngineReplacement(p, selected_id[1]) != Engine.INVALID_ENGINE_ID ||
-				EngineReplacement(p, selected_id[0]) == selected_id[1]) {
+				p.EngineReplacement(selected_id[1]) != Engine.INVALID_ENGINE_ID ||
+				p.EngineReplacement(selected_id[0]) == selected_id[1]) {
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 4);
 		} else {
 			w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 4);
@@ -759,7 +771,7 @@ static void ReplaceVehicleWndProc(Window w, WindowEvent e)
 		//    The left list (existing vehicle) is empty
 		// or The selected vehicle has no replacement set up
 		if (selected_id[0] == Engine.INVALID_ENGINE_ID ||
-				!EngineHasReplacement(p, selected_id[0])) {
+				!p.EngineHasReplacement(selected_id[0])) {
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 6);
 		} else {
 			w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 6);
@@ -802,7 +814,7 @@ static void ReplaceVehicleWndProc(Window w, WindowEvent e)
 			for (i = 0 ; i < 2 ; i++) {
 				if (i > 0) offset = 228;
 				if (selected_id[i] != Engine.INVALID_ENGINE_ID) {
-					if (!(RailVehInfo(selected_id[i]).flags & RVI_WAGON)) {
+					if (!(EngineGui.RailVehInfo(selected_id[i]).flags & RVI_WAGON)) {
 						/* it's an engine */
 						DrawTrainEnginePurchaseInfo(2 + offset, 15 + (14 * w.vscroll.cap), selected_id[i]);
 					} else {
@@ -971,7 +983,7 @@ static final WindowDesc _replace_rail_vehicle_desc = new WindowDesc(
 		Window.WC_REPLACE_VEHICLE,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 		_replace_rail_vehicle_widgets,
-		ReplaceVehicleWndProc
+		VehicleGui::ReplaceVehicleWndProc
 		);
 
 static final WindowDesc _replace_road_vehicle_desc = new WindowDesc(
@@ -979,7 +991,7 @@ static final WindowDesc _replace_road_vehicle_desc = new WindowDesc(
 		Window.WC_REPLACE_VEHICLE,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 		_replace_road_vehicle_widgets,
-		ReplaceVehicleWndProc
+		VehicleGui::ReplaceVehicleWndProc
 		);
 
 static final WindowDesc _replace_ship_aircraft_vehicle_desc = new WindowDesc(
@@ -987,7 +999,7 @@ static final WindowDesc _replace_ship_aircraft_vehicle_desc = new WindowDesc(
 		Window.WC_REPLACE_VEHICLE,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 		_replace_ship_aircraft_vehicle_widgets,
-		ReplaceVehicleWndProc
+		VehicleGui::ReplaceVehicleWndProc
 		);
 
 
@@ -1016,7 +1028,7 @@ void ShowReplaceVehicleWindow(byte vehicletype)
 		break;
 	default: return;
 	}
-	w.caption_color = Global._local_player;
+	w.caption_color = (byte) Global._local_player.id;
 	w.as_replaceveh_d().vehicletype = vehicletype;
 	w.vscroll2.cap = w.vscroll.cap;   // these two are always the same
 }
@@ -1044,19 +1056,19 @@ static void ChangeVehicleViewWindow(final Vehicle from_v, final Vehicle to_v)
 
 		w = Window.FindWindowById(Window.WC_VEHICLE_ORDERS, from_v.index);
 		if (w != null) {
-			w.window_number = to_v.index;
+			w.window_number = new WindowNumber( to_v.index );
 			w.SetWindowDirty();
 		}
 
 		w = Window.FindWindowById(Window.WC_VEHICLE_REFIT, from_v.index);
 		if (w != null) {
-			w.window_number = to_v.index;
+			w.window_number = new WindowNumber( to_v.index );
 			w.SetWindowDirty();
 		}
 
 		w = Window.FindWindowById(Window.WC_VEHICLE_DETAILS, from_v.index);
 		if (w != null) {
-			w.window_number = to_v.index;
+			w.window_number = new WindowNumber( to_v.index );
 			w.SetWindowDirty();
 		}
 	}
@@ -1093,7 +1105,7 @@ abstract class abstractVehicleSorter implements Comparator<SortStruct>
 {
 
 	// if the sorting criteria had the same value, sort vehicle by unitnumber
-	private static int VEHICLEUNITNUMBERSORTER(int r, Vehicle a, Vehicle b) 
+	protected static int VEHICLEUNITNUMBERSORTER(int r, Vehicle a, Vehicle b) 
 	{
 		if (r == 0) 
 			return a.unitnumber.id - b.unitnumber.id;
@@ -1133,9 +1145,9 @@ class VehicleNumberSorter extends abstractVehicleSorter
 	{
 		final Vehicle va = Vehicle.GetVehicle(a.index);
 		final Vehicle vb = Vehicle.GetVehicle(b.index);
-		int r = va.unitnumber - vb.unitnumber;
+		int r = va.unitnumber.id - vb.unitnumber.id;
 
-		return (_internal_sort_order & 1) ? -r : r;
+		return VehicleGui._internal_sort_order ? -r : r;
 	}
 }
 
@@ -1163,7 +1175,7 @@ class VehicleNameSorter extends abstractVehicleSorter
 
 		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
 
-		return (_internal_sort_order & 1) ? -r : r;
+		return VehicleGui._internal_sort_order ? -r : r;
 	}
 }
 
@@ -1177,7 +1189,7 @@ class VehicleAgeSorter extends abstractVehicleSorter
 
 		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
 
-		return (_internal_sort_order & 1) ? -r : r;
+		return VehicleGui._internal_sort_order ? -r : r;
 	}
 }
 
@@ -1191,7 +1203,7 @@ class VehicleProfitThisYearSorter extends abstractVehicleSorter
 
 		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
 
-		return (_internal_sort_order & 1) ? -r : r;
+		return VehicleGui._internal_sort_order ? -r : r;
 	}
 }
 
@@ -1206,7 +1218,7 @@ class VehicleProfitLastYearSorter extends abstractVehicleSorter
 
 		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
 
-		return (_internal_sort_order & 1) ? -r : r;
+		return VehicleGui._internal_sort_order ? -r : r;
 	}
 }
 
@@ -1236,7 +1248,7 @@ class VehicleCargoSorter extends abstractVehicleSorter
 
 		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
 
-		return (_internal_sort_order & 1) ? -r : r;
+		return _internal_sort_order ? -r : r;
 	}
 }
 
@@ -1250,7 +1262,7 @@ class VehicleReliabilitySorter extends abstractVehicleSorter
 
 		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
 
-		return (_internal_sort_order & 1) ? -r : r;
+		return VehicleGui._internal_sort_order ? -r : r;
 	}
 }
 
@@ -1266,13 +1278,13 @@ class VehicleMaxSpeedSorter extends abstractVehicleSorter
 
 		if (va.type == Vehicle.VEH_Train && vb.type == Vehicle.VEH_Train) {
 			do {
-				if (RailVehInfo(ua.engine_type).max_speed != 0)
-					max_speed_a = Math.min(max_speed_a, RailVehInfo(ua.engine_type).max_speed);
+				if (EngineGui.RailVehInfo(ua.engine_type.id).max_speed != 0)
+					max_speed_a = Math.min(max_speed_a, EngineGui.RailVehInfo(ua.engine_type.id).max_speed);
 			} while ((ua = ua.next) != null);
 
 			do {
-				if (RailVehInfo(ub.engine_type).max_speed != 0)
-					max_speed_b = Math.min(max_speed_b, RailVehInfo(ub.engine_type).max_speed);
+				if (EngineGui.RailVehInfo(ub.engine_type.id).max_speed != 0)
+					max_speed_b = Math.min(max_speed_b, EngineGui.RailVehInfo(ub.engine_type.id).max_speed);
 			} while ((ub = ub.next) != null);
 
 			r = max_speed_a - max_speed_b;
@@ -1282,7 +1294,7 @@ class VehicleMaxSpeedSorter extends abstractVehicleSorter
 
 		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
 
-		return (_internal_sort_order & 1) ? -r : r;
+		return VehicleGui._internal_sort_order ? -r : r;
 	}
 }
 

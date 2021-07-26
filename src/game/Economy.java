@@ -407,10 +407,14 @@ public class Economy
 
 		// Change color of existing windows
 		if (new_player != Owner.OWNER_SPECTATOR) {
-			Window w;
-			for (w = _windows; w != _last_window; w++) {
+			//Window w;
+			//for (w = _windows; w != _last_window; w++) {
+			Iterator<Window> it = Window.getIterator();
+			while(it.hasNext())
+			{
+				Window w = it.next();
 				if (w.caption_color == old_player)
-					w.caption_color = new_player;
+				w.caption_color = new_player;
 			}
 		}
 

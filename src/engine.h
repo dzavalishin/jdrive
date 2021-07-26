@@ -248,7 +248,7 @@ static inline bool IsEngineIndex(uint index)
 	return index < TOTAL_NUM_ENGINES;
 }
 
-/* Access Vehicle Data */
+/* Access Vehicle Data * /
 //#include "table/engines.h"
 extern const EngineInfo orig_engine_info[TOTAL_NUM_ENGINES];
 extern const RailVehicleInfo orig_rail_vehicle_info[NUM_TRAIN_ENGINES];
