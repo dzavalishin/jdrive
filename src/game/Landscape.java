@@ -259,7 +259,7 @@ public class Landscape extends GenLandTable
 
 	static void ChangeTileOwner(TileIndex tile, byte old_player, byte new_player)
 	{
-		_tile_type_procs[tile.GetTileType().ordinal()].change_tile_owner_proc.apply(tile, new PlayerID( old_player ), new PlayerID( new_player) );
+		_tile_type_procs[tile.GetTileType().ordinal()].change_tile_owner_proc.apply(tile, PlayerID.get( old_player ), PlayerID.get( new_player) );
 	}
 
 	public static AcceptedCargo GetAcceptedCargo(TileIndex tile)

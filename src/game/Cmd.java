@@ -339,7 +339,7 @@ public class Cmd {
 
 	byte GetCommandFlags(int cmd) {return _command_proc_table[cmd & 0xFF].flags;}
 
-	int DoCommandByTile(TileIndex tile, int p1, int p2, int flags, int procc)
+	static int DoCommandByTile(TileIndex tile, int p1, int p2, int flags, int procc)
 	{
 		return DoCommand(TileX(tile) * 16, TileY(tile) * 16, p1, p2, flags, procc);
 	}

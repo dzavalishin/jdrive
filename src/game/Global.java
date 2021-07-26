@@ -1,12 +1,16 @@
 package game;
 
 import java.util.HashMap;
+
 import java.util.Map;
 import java.util.function.Consumer;
 
+import game.util.GameDate;
 import game.util.Paths;
 import game.util.Prices;
 import game.util.Strings;
+import game.util.YearMonthDay;
+import game.util.BitOps;
 
 public class Global {
 
@@ -132,6 +136,8 @@ public class Global {
 
 	public static int _date;
 	public static int _date_fract;
+	public static int _cur_year;
+	public static int _cur_month;
 
 	public static int _tick_counter;
 	public static int _frame_counter;
@@ -335,6 +341,8 @@ public class Global {
 	private static int next_name_id = 0;
 	private static Map<Integer,String> _name_array = new HashMap<Integer,String>();
 
+	
+
 
 
 
@@ -410,6 +418,125 @@ public class Global {
 		return Strings.GetString(string);
 	}
 
+	
+	
+	
+	
+	
+	void IncreaseDate()
+	{
+		YearMonthDay ymd = new YearMonthDay();
+
+		if (Global._game_mode == GameModes.GM_MENU) {
+			Global._tick_counter++;
+			return;
+		}
+
+		Vehicle.RunVehicleDayProc(Global._date_fract);
+
+		/* increase day, and check if a new day is there? */
+		Global._tick_counter++;
+
+		Global._date_fract++;
+		if (Global._date_fract < (Global.DAY_TICKS*Global._patches.day_length))
+			return;
+		Global._date_fract = 0;
+
+		/* yeah, increse day counter and call various daily loops */
+		Global._date++;
+
+		TextMessageDailyLoop();
+
+		DisasterDailyLoop();
+		WayPoint.WaypointsDailyLoop();
+
+		if (Global._game_mode != GameModes.GM_MENU) {
+			Window.InvalidateWindowWidget(Window.WC_STATUS_BAR, 0, 0);
+			EnginesDailyLoop();
+		}
+
+		/* check if we entered a new month? */
+		GameDate.ConvertDayToYMD(ymd, Global._date);
+		if ((byte)ymd.month == Global._cur_month)
+			return;
+		Global._cur_month = ymd.month;
+
+		/* yes, call various monthly loops */
+		if (Global._game_mode != GameModes.GM_MENU) {
+			if (BitOps.HASBIT(Global._autosave_months[_opt.autosave], Global._cur_month)) {
+				Global._do_autosave = true;
+				RedrawAutosave();
+			}
+
+			Player.PlayersMonthlyLoop();
+			Engine.EnginesMonthlyLoop();
+			Town.TownsMonthlyLoop();
+			Industry.IndustryMonthlyLoop();
+			Station._global_station_sort_dirty();
+	/*#ifdef ENABLE_NETWORK
+			if (_network_server)
+				NetworkServerMonthlyLoop();
+	#endif /* ENABLE_NETWORK */
+		}
+
+		/* check if we entered a new year? */
+		if ((byte)ymd.year == Global._cur_year)
+			return;
+		Global._cur_year = ymd.year;
+
+		/* yes, call various yearly loops */
+
+		Player.PlayersYearlyLoop();
+		Train.TrainsYearlyLoop();
+		RoadVehiclesYearlyLoop();
+		AircraftYearlyLoop();
+		Ship.ShipsYearlyLoop();
+	/*#ifdef ENABLE_NETWORK
+		if (_network_server)
+			NetworkServerYearlyLoop();
+	#endif /* ENABLE_NETWORK */
+
+		/* check if we reached end of the game (31 dec 2050) */
+		if (Global._cur_year == Global._patches.ending_date - Global.MAX_YEAR_BEGIN_REAL) {
+				ShowEndGameChart();
+		/* check if we reached 2090 (MAX_YEAR_END_REAL), that's the maximum year. */
+		} else if (Global._cur_year == (Global.MAX_YEAR_END + 1)) {
+			//Vehicle v;
+			Global._cur_year = Global.MAX_YEAR_END;
+			Global._date = 62093;
+			//FOR_ALL_VEHICLES(v)
+			Vehicle.forEach( (v) ->
+			{
+				v.date_of_last_service -= 365; // 1 year is 365 days long
+			});
+
+			/* Because the _date wraps here, and text-messages expire by game-days, we have to clean out
+			 *  all of them if the date is set back, else those messages will hang for ever */
+			InitTextMessage();
+		}
+
+		if (Global._patches.auto_euro)
+			CheckSwitchToEuro();
+
+		/* XXX: check if year 2050 was reached */
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 /*
 class DebugLevel {

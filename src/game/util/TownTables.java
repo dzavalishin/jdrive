@@ -41,7 +41,7 @@ extends Str // just import strings
 	 */
 	//#define new DrawTownTileStruct(s1, s2, sx, sy, w, h, dz, p) {s1, s2, sx, sy, w - 1, h - 1, dz, p}
 
-	static final DrawTownTileStruct _town_draw_tile_data[] = {
+	public static final DrawTownTileStruct _town_draw_tile_data[] = {
 			new DrawTownTileStruct( 0xf54,  0x58d,  0,  0, 14, 14,   8, 0),
 			new DrawTownTileStruct( 0xf54,  0x58e,  0,  0, 14, 14,  60, 0),
 			new DrawTownTileStruct( 0xf54,  0x58f,  0,  0, 14, 14,  60, 0),
@@ -1809,7 +1809,7 @@ extends Str // just import strings
 
 
 	//static final StringID _town_tile_names[] = {
-	static final int _town_tile_names[] = {
+	public static final int _town_tile_names[] = {
 			STR_200F_TALL_OFFICE_BLOCK,
 			STR_2010_OFFICE_BLOCK,
 			STR_2011_SMALL_BLOCK_OF_FLATS,
@@ -1923,7 +1923,7 @@ extends Str // just import strings
 	};
 	// TODO assert_compile(lengthof(_town_tile_names) == HOUSE_MAX);
 
-	static final int _housetype_flags[] = {
+	public static final int _housetype_flags[] = {
 			0x1010, 0x1018, 0x100E, 0x100F, 0x7010, 0x0810, 0x100F, 0x1014,
 			0x0000, 0x7018, 0x7010, 0x1004, 0x1008, 0x1018, 0x101C, 0x101C,
 			0x101C, 0x7010, 0x1010, 0x1010, 0x100F, 0x0000, 0x0000, 0x0000,
@@ -1941,7 +1941,7 @@ extends Str // just import strings
 	};
 	// TODO assert_compile(lengthof(_housetype_flags) == HOUSE_MAX);
 
-	static final byte _housetype_extra_flags[] = {
+	public static final byte _housetype_extra_flags[] = {
 			0, 0, 0, 0,32,32, 0, 8,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0,16, 0, 0, 0,
@@ -1959,7 +1959,7 @@ extends Str // just import strings
 	};
 	// TODO assert_compile(lengthof(_housetype_extra_flags) == HOUSE_MAX);
 
-	static final int _housetype_population[] = {
+	public static final int _housetype_population[] = {
 			187,  85,  40,   5, 220, 220,  30, 140,
 			0,   0,   0,   0,   0, 150,  95,  95,
 			95, 130,   6, 110,  65,   0,   0,   0,
@@ -1977,7 +1977,7 @@ extends Str // just import strings
 	};
 	// TODO assert_compile(lengthof(_housetype_population) == HOUSE_MAX);
 
-	static final byte _housetype_mailamount[] = {
+	public static final byte _housetype_mailamount[] = {
 			70, 55, 20,  2, 85, 85, 12, 22,
 			22,  0,  0,  0,  0, 65, 48, 48,
 			48, 50, 10, 55,  5,  5,  5,  5,
@@ -1996,7 +1996,7 @@ extends Str // just import strings
 	//assert_compile(lengthof(_housetype_mailamount) == HOUSE_MAX);
 	//static {	assert _housetype_remove_cost.length == HOUSE_MAX;	}
 
-	static final int _housetype_remove_cost[] = {
+	public static final int _housetype_remove_cost[] = {
 			150, 140, 100,  90, 160, 160,  80, 180,
 			180,  65,  65,  60,  60, 130, 110, 105,
 			107, 200, 145, 155, 250, 250, 250, 250,
@@ -2014,7 +2014,7 @@ extends Str // just import strings
 	};
 	static {	assert _housetype_remove_cost.length == HOUSE_MAX;	}
 
-	static final int _housetype_remove_ratingmod[] = {
+	public static final int _housetype_remove_ratingmod[] = {
 			140, 130,  90, 230, 160, 160,  80, 150,
 			150,  40,  40,  75,  75, 110, 100, 100,
 			100, 150, 110, 110, 300, 300, 300, 300,
@@ -2034,7 +2034,7 @@ extends Str // just import strings
 
 
 
-	static final HousetypeYear _housetype_years[] = {
+	public static final HousetypeYear _housetype_years[] = {
 			new HousetypeYear(43, 255),
 			new HousetypeYear(37, 255),
 			new HousetypeYear(48, 255),
@@ -2148,7 +2148,7 @@ extends Str // just import strings
 	};
 	static {	assert _housetype_years.length == HOUSE_MAX;	}
 
-	static final byte _housetype_cargo_passengers[] = {
+	public static final byte _housetype_cargo_passengers[] = {
 			8, 8, 8, 2, 10,10,4, 6,
 			6, 2, 2, 2, 2, 8, 6, 6,
 			6, 10,6, 6, 4, 4, 4, 4,
@@ -2166,7 +2166,7 @@ extends Str // just import strings
 	};
 	static {	assert _housetype_cargo_passengers.length == HOUSE_MAX;	}
 
-	static final byte _housetype_cargo_mail[] = {
+	public static final byte _housetype_cargo_mail[] = {
 			3, 3, 3, 0, 4, 4, 1, 1,
 			1, 0, 0, 0, 0, 2, 2, 2,
 			2, 3, 3, 2, 0, 0, 0, 0,
@@ -2184,7 +2184,7 @@ extends Str // just import strings
 	};
 	static {	assert _housetype_cargo_mail.length == HOUSE_MAX;	}
 
-	static final byte _housetype_cargo_goods[] = {
+	public static final byte _housetype_cargo_goods[] = {
 			4, 4, 1, 0, 6, 6, 0, 2,
 			2, 0, 0, 0, 0, 4, 3, 3,
 			3, 6, 8, 6, 0, 0, 0, 0,
@@ -2203,7 +2203,7 @@ extends Str // just import strings
 
 	static {	assert _housetype_cargo_goods.length == HOUSE_MAX;	}
 
-	static final byte _housetype_cargo_food[] = {
+	public static final byte _housetype_cargo_food[] = {
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
@@ -2222,7 +2222,7 @@ extends Str // just import strings
 
 	static {	assert _housetype_cargo_food.length == HOUSE_MAX;	}
 
-	static final byte _house_more_flags[] = {
+	public static final byte _house_more_flags[] = {
 			8,  8,  8,  8,  8,  8,  8, 12,
 			0,  8,  8,  8,  8,  8,  8,  8,
 			8,  8,  8,  8, 15,  0,  0,  0,

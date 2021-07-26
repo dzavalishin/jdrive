@@ -805,7 +805,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		/* not used */
 	}
 
-	void DeleteIndustry(Industry i)
+	static void DeleteIndustry(Industry i)
 	{
 		BEGIN_TILE_LOOP(tile_cur, i.width, i.height, i.xy);
 		TileIndex.forAll( i.width, i.height, i.xy, (tile_cur) ->
@@ -1591,7 +1591,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		if (GameOptions._opt.diff.number_industries != 0) {
 			PlayerID old_player = Global._current_player;
-			Global._current_player = new PlayerID( Owner.OWNER_NONE );
+			Global._current_player = PlayerID.get( Owner.OWNER_NONE );
 			assert(num > 0);
 
 			do {
@@ -1827,16 +1827,17 @@ public class Industry extends IndustryTables implements IPoolItem {
 		}
 	}
 
-	void IndustryMonthlyLoop()
+	static void IndustryMonthlyLoop()
 	{
-		Industry i;
+		//Industry i;
 		PlayerID old_player = Global._current_player;
-		Global._current_player = Owner.OWNER_NONE;
+		Global._current_player = PlayerID.Get( Owner.OWNER_NONE );
 
-		FOR_ALL_INDUSTRIES(i) 
+		//FOR_ALL_INDUSTRIES(i) 
+		Industry.forEach( (i) ->
 		{
-			if (i.xy != 0) UpdateIndustryStatistics(i);
-		}
+			if (i.xy != null) UpdateIndustryStatistics(i);
+		});
 
 		/* 3% chance that we start a new industry */
 		if (BitOps.CHANCE16(3, 100)) {

@@ -494,14 +494,14 @@ public class Main {
 
 		// In a dedicated server, the server does not play
 		if (Global._network_dedicated) {
-			Global._local_player = new PlayerID( Owner.OWNER_SPECTATOR);
+			Global._local_player = PlayerID.get( Owner.OWNER_SPECTATOR);
 		} else {
 			// Create a single player
 			DoStartupNewPlayer(false);
 
-			Global._local_player = new PlayerID(0); 
+			Global._local_player = PlayerID.get(0); 
 			Global._current_player = Global._local_player;
-			DoCommandP(0, (Global._patches.autorenew ? (1 << 15) : 0 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
+			Cmd.DoCommandP(0, (Global._patches.autorenew ? (1 << 15) : 0 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
 		}
 
 		Global.hal.MarkWholeScreenDirty();
@@ -527,7 +527,7 @@ public class Main {
 		// Startup the game system
 		GenerateWorld.GenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
 
-		Global._local_player = new PlayerID(Owner.OWNER_NONE);
+		Global._local_player = PlayerID.get(Owner.OWNER_NONE);
 		Global.hal.MarkWholeScreenDirty();
 	}
 
@@ -677,7 +677,7 @@ public class Main {
 
 				GameOptions._opt_ptr = GameOptions._opt;
 
-				Global._local_player = new PlayerID(Owner.OWNER_NONE);
+				Global._local_player = PlayerID.get(Owner.OWNER_NONE);
 				Global._generating_world = true;
 				// delete all players.
 				for (i = 0; i != Global.MAX_PLAYERS; i++) {
@@ -709,7 +709,7 @@ public class Main {
 		case SM_GENRANDLAND: /* Generate random land within scenario editor */
 			GenerateWorld.GenerateWorld(2, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
 			// XXX: set date
-			Global._local_player = new PlayerID( Owner.OWNER_NONE );
+			Global._local_player = PlayerID.get( Owner.OWNER_NONE );
 			Global.hal.MarkWholeScreenDirty();
 			break;
 		}

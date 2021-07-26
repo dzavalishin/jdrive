@@ -5,4 +5,7 @@ package game;
 public class AbstractID {
 	public int id;
 	
+	protected AbstractID(int id) {
+		this.id = id;
+	}
 }

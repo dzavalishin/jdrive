@@ -930,12 +930,14 @@ public class EngineGui extends EngineTables
 		if (IsWagon(index)) return;
 
 		// make maglev / monorail available
-		FOR_ALL_PLAYERS(p) {
+		//FOR_ALL_PLAYERS(p)
+		Player.forEach( (p) ->
+		{
 			if (p.is_active) {
 				assert(e.railtype < RAILTYPE_END);
-				SETBIT(p.avail_railtypes, e.railtype);
+				p.avail_railtypes = BitOps.RETSETBIT(p.avail_railtypes, e.railtype);
 			}
-		}
+		});
 
 		if (index < Global.NUM_TRAIN_ENGINES) {
 			AddNewsItem(index, NEWS_FLAGS(NM_CALLBACK, 0, NT_NEW_VEHICLES, DNC_TRAINAVAIL), 0, 0);

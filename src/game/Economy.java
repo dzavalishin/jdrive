@@ -1667,7 +1667,7 @@ public class Economy
 		if (p1 >= Global.MAX_PLAYERS || !Global._patches.allow_shares) return CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
-		p = new PlayerID(p1).GetPlayer();
+		p = PlayerID.get(p1).GetPlayer();
 
 		/* Protect new companies from hostile takeovers */
 		if (Global._cur_year - p.inaugurated_year < 6) return_cmd_error(Str.STR_7080_PROTECTED);
@@ -1746,7 +1746,7 @@ public class Economy
 		if (p1 >= Global.MAX_PLAYERS || _networking) return CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
-		p = new PlayerID(p1).GetPlayer();
+		p = PlayerID.get(p1).GetPlayer();
 
 		if (!p.is_ai) return CMD_ERROR;
 

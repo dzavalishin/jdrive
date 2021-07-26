@@ -100,7 +100,7 @@ public class Vehicle implements IPoolItem
 	// Related to age and service time
 	int age;				// Age in days
 	int max_age;		// Maximum age
-	int date_of_last_service;
+	public int date_of_last_service;
 	int service_interval;
 	int reliability;
 	int reliability_spd_dec;
@@ -2602,7 +2602,7 @@ public class Vehicle implements IPoolItem
 					NewsItem.AddNewsItem(message, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 				}
 				if (stopped) v.vehstatus &= ~VS_STOPPED;
-				Global._current_player = new PlayerID(Owner.OWNER_NONE);
+				Global._current_player = PlayerID.get(Owner.OWNER_NONE);
 				return 0;
 			}
 
@@ -2652,7 +2652,7 @@ public class Vehicle implements IPoolItem
 		if (IsLocalPlayer()) ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
 
 		if (stopped) v.vehstatus &= ~VS_STOPPED;
-		Global._current_player = new PlayerID( Owner.OWNER_NONE );
+		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
 		
 		return 0;
 	}

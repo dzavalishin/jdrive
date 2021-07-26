@@ -495,6 +495,7 @@ static void RunVehicleDayProc(uint daytick)
 	}
 }
 
+/*
 void IncreaseDate(void)
 {
 	YearMonthDay ymd;
@@ -506,7 +507,7 @@ void IncreaseDate(void)
 
 	RunVehicleDayProc(_date_fract);
 
-	/* increase day, and check if a new day is there? */
+	// increase day, and check if a new day is there? 
 	_tick_counter++;
 
 	_date_fract++;
@@ -514,7 +515,7 @@ void IncreaseDate(void)
 		return;
 	_date_fract = 0;
 
-	/* yeah, increse day counter and call various daily loops */
+	// yeah, increse day counter and call various daily loops 
 	_date++;
 
 	TextMessageDailyLoop();
@@ -527,13 +528,13 @@ void IncreaseDate(void)
 		EnginesDailyLoop();
 	}
 
-	/* check if we entered a new month? */
+	// check if we entered a new month? 
 	ConvertDayToYMD(&ymd, _date);
 	if ((byte)ymd.month == _cur_month)
 		return;
 	_cur_month = ymd.month;
 
-	/* yes, call various monthly loops */
+	// yes, call various monthly loops 
 	if (_game_mode != GM_MENU) {
 		if (HASBIT(_autosave_months[_opt.autosave], _cur_month)) {
 			_do_autosave = true;
@@ -548,15 +549,15 @@ void IncreaseDate(void)
 #ifdef ENABLE_NETWORK
 		if (_network_server)
 			NetworkServerMonthlyLoop();
-#endif /* ENABLE_NETWORK */
+#endif //* ENABLE_NETWORK 
 	}
 
-	/* check if we entered a new year? */
+	//* check if we entered a new year? 
 	if ((byte)ymd.year == _cur_year)
 		return;
 	_cur_year = ymd.year;
 
-	/* yes, call various yearly loops */
+	//* yes, call various yearly loops 
 
 	PlayersYearlyLoop();
 	TrainsYearlyLoop();
@@ -566,12 +567,12 @@ void IncreaseDate(void)
 #ifdef ENABLE_NETWORK
 	if (_network_server)
 		NetworkServerYearlyLoop();
-#endif /* ENABLE_NETWORK */
+#endif // ENABLE_NETWORK 
 
-	/* check if we reached end of the game (31 dec 2050) */
+	/// check if we reached end of the game (31 dec 2050) 
 	if (_cur_year == _patches.ending_date - MAX_YEAR_BEGIN_REAL) {
 			ShowEndGameChart();
-	/* check if we reached 2090 (MAX_YEAR_END_REAL), that's the maximum year. */
+	// check if we reached 2090 (MAX_YEAR_END_REAL), that's the maximum year. 
 	} else if (_cur_year == (MAX_YEAR_END + 1)) {
 		Vehicle *v;
 		_cur_year = MAX_YEAR_END;
@@ -580,17 +581,17 @@ void IncreaseDate(void)
 			v->date_of_last_service -= 365; // 1 year is 365 days long
 		}
 
-		/* Because the _date wraps here, and text-messages expire by game-days, we have to clean out
-		 *  all of them if the date is set back, else those messages will hang for ever */
+		//* Because the _date wraps here, and text-messages expire by game-days, we have to clean out
+		//*  all of them if the date is set back, else those messages will hang for ever 
 		InitTextMessage();
 	}
 
 	if (_patches.auto_euro)
 		CheckSwitchToEuro();
 
-	/* XXX: check if year 2050 was reached */
+	// XXX: check if year 2050 was reached 
 }
-
+*/
 int FindFirstBit(uint32 value)
 {
 	// This is much faster than the one that was before here.

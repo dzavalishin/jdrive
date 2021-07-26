@@ -395,7 +395,7 @@ public class Player
 
 	static boolean CheckTileOwnership(TileIndex tile)
 	{
-		PlayerID owner = new PlayerID( tile.GetTileOwner() );
+		PlayerID owner = PlayerID.get( tile.GetTileOwner() );
 
 		assert(owner.id <= Owner.OWNER_WATER);
 
@@ -583,7 +583,7 @@ public class Player
 				int i = p.index.id;
 				//memset(p, 0, sizeof(Player));
 				p.clear();
-				p.index = new PlayerID(i);
+				p.index = PlayerID.get(i);
 				return p;
 			}
 		}
@@ -670,7 +670,7 @@ public class Player
 
 		for(i = 0; i != Global.MAX_PLAYERS; i++)
 		{
-			_players[i].index=new PlayerID(i);
+			_players[i].index=PlayerID.get(i);
 		}
 		_cur_player_tick_index = 0;
 	}
@@ -703,7 +703,7 @@ public class Player
 
 	//extern void ShowPlayerFinances(int player);
 
-	static void PlayersYearlyLoop()
+	public static void PlayersYearlyLoop()
 	{
 		//Player p;
 

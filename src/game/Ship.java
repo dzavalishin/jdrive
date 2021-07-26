@@ -831,14 +831,14 @@ public class Ship {
 		if (v.cargo_days != 255) v.cargo_days++;
 	}
 
-	void Ship_Tick(Vehicle v)
+	public static void Ship_Tick(Vehicle v)
 	{
 		AgeShipCargo(v);
 		ShipController(v);
 	}
 
 
-	void ShipsYearlyLoop()
+	public static void ShipsYearlyLoop()
 	{
 		//Vehicle v;
 
