@@ -565,8 +565,10 @@ public class Clear extends ClearTables {
 		return ti.tileh;
 	}
 
-	static void GetAcceptedCargo_Clear(TileIndex tile, AcceptedCargo ac)
+	static AcceptedCargo GetAcceptedCargo_Clear(TileIndex tile)
 	{
+		AcceptedCargo ac = new AcceptedCargo();
+		return ac;
 		/* unused */
 	}
 
@@ -827,12 +829,14 @@ public class Clear extends ClearTables {
 		Str.STR_080D_GRASS,
 	};
 
-	static void GetTileDesc_Clear(TileIndex tile, TileDesc td)
+	static TileDesc GetTileDesc_Clear(TileIndex tile)	
 	{
+		TileDesc td = new TileDesc();
 		int i = BitOps.GB(tile.getMap().m5, 2, 3);
 		if (i == 0) i = BitOps.GB(tile.getMap().m5, 0, 2) + 8;
 		td.str = _clear_land_str[i - 1];
 		td.owner = (byte) tile.GetTileOwner().owner;
+		return td;
 	}
 
 	static void ChangeTileOwner_Clear(TileIndex tile, PlayerID old_player, PlayerID new_player)
