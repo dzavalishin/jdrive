@@ -317,7 +317,7 @@ public class RailTables {
 
 	/* Maps a Track to the bits that store the status of the two signals that can
 	 * be present on the given track */
-	static final int _signal_on_track[] = {
+	protected static final int _signal_on_track[] = {
 			0xC0, 0xC0, 0xC0, 0x30, 0xC0, 0x30
 	};
 

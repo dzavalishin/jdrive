@@ -96,12 +96,6 @@ public class Rail extends RailTables {
 		return (TrackdirBits)(1 << trackdir); 
 	}
 
-	/**
-	 * These functions check the validity of Tracks and Trackdirs. assert against
-	 * them when convenient.
-	 */
-	static  boolean IsValidTrack(Track track) { return track < TRACK_END; }
-	static  boolean IsValidTrackdir(Trackdir trackdir) { return (TrackdirToTrackdirBits(trackdir) & TRACKDIR_BIT_MASK) != 0; }
 
 	/**
 	 * Functions to map tracks to the corresponding bits in the signal
@@ -129,9 +123,9 @@ public class Rail extends RailTables {
 	 * Maps a Track to the bits that store the status of the two signals that can
 	 * be present on the given track.
 	 */
-	static  byte SignalOnTrack(Track track) {
+	static  byte SignalOnTrack(/* Track */ int  track) {
 		//extern final byte _signal_on_track[TRACK_END];
-		return _signal_on_track[track];
+		return (byte) _signal_on_track[track];
 	}
 
 	/*
@@ -145,16 +139,7 @@ public class Rail extends RailTables {
 
 
 
-	/**
-	 * Returns whether the given track is present on the given tile. Tile must be
-	 * a plain rail tile (IsPlainRailTile()).
-	 */
-	static  boolean HasTrack(TileIndex tile, Track track)
-	{
-		assert(IsValidTrack(track));
-		return BitOps.HASBIT(GetTrackBits(tile).ordinal(), track.ordinal());
-	}
-
+	
 	/*
 	 * Functions describing logical relations between Tracks, TrackBits, Trackdirs
 	 * TrackdirBits, Direction and DiagDirections.
@@ -3905,6 +3890,15 @@ public class Rail extends RailTables {
 	}
 
 	/**
+	 * These functions check the validity of Tracks and Trackdirs. assert against
+	 * them when convenient.
+	 */
+	//static  boolean IsValidTrack(/* Track */ int  track) { return track < TRACK_END; }
+	//static  boolean IsValidTrackdir(Trackdir trackdir) { return (TrackdirToTrackdirBits(trackdir) & TRACKDIR_BIT_MASK) != 0; }
+
+	
+	
+	/**
 	 * Functions to map tracks to the corresponding bits in the signal
 	 * presence/status bytes in the map. You should not use these directly, but
 	 * wrapper functions below instead. XXX: Which are these?
@@ -4063,6 +4057,16 @@ static  byte SignalOnTrack(Track track) {
 		return BitOps.HASBIT(GetTrackBits(tile), track);
 	}
 
+	/**
+	 * Returns whether the given track is present on the given tile. Tile must be
+	 * a plain rail tile (IsPlainRailTile()).
+	 */
+	//static  boolean HasTrack(TileIndex tile, /* Track */ int  track)
+	//	{
+	//	assert(IsValidTrack(track));
+	//		return BitOps.HASBIT(GetTrackBits(tile).ordinal(), track.ordinal());
+	//}
+	
 	/*
 	 * Functions describing logical relations between Tracks, TrackBits, Trackdirs
 	 * TrackdirBits, Direction and DiagDirections.
