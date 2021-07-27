@@ -45,3 +45,7 @@ NPFFillWithOrderData(fstd, v);
 if( flags & FLG_USED ) does not work on Java enums
 use constants and ints
 
+
+* bad replacements
+
+'finalruct' was 'construct' initially

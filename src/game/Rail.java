@@ -1,149 +1,12 @@
 package game;
 
-public class Rail {
+import game.tables.RailTables;
 
-	/* $Id: rail.h 3329 2005-12-21 13:53:44Z matthijs $ */
-
-	/** @file rail.h */
-
-	#ifndef RAIL_H
-	#define RAIL_H
+public class Rail extends RailTables {
 
 
 
-	/*
-	 * Some enums for accesing the map bytes for rail tiles
-	 */
-
-	/** These types are used in the map5 byte for rail tiles. Use GetRailTileType() to
-	 * get these values */
-	typedef enum RailTileTypes {
-		RAIL_TYPE_NORMAL         = 0x0,
-		RAIL_TYPE_SIGNALS        = 0x40,
-		RAIL_TYPE_UNUSED         = 0x80, /* XXX: Maybe this could become waypoints? */
-		RAIL_TYPE_DEPOT_WAYPOINT = 0xC0, /* Is really depots and waypoints... */
-		RAIL_TILE_TYPE_MASK      = 0xC0,
-	} RailTileType;
-
-	enum { /* DEPRECATED TODO: Rewrite all uses of this */
-		RAIL_TYPE_SPECIAL = 0x80, /* This used to say "If this bit is set, then it's
-															 * not a regular track.", but currently, you
-															 * should rather view map5[6..7] as one type,
-															 * containing a value from RailTileTypes above.
-															 * This value is only maintained for backwards
-															 * compatibility */
-
-		/* There used to be RAIL_BIT_* enums here, they moved to (for now) npf.c as
-		 * TRACK_BIT_* */
-	};
-
-	/** These subtypes are used in the map5 byte when the main rail type is
-	 * RAIL_TYPE_DEPOT_WAYPOINT */
-	typedef enum RailTileSubtypes {
-		RAIL_SUBTYPE_DEPOT    = 0x00,
-		RAIL_SUBTYPE_WAYPOINT = 0x04,
-		RAIL_SUBTYPE_MASK     = 0x3C,
-	} RailTileSubtype;
-
-	typedef enum SignalTypes {
-		/* Stored in m4[0..1] for TileTypes.MP_RAILWAY */
-		SIGTYPE_NORMAL  = 0,        // normal signal
-		SIGTYPE_ENTRY   = 1,        // presignal block entry
-		SIGTYPE_EXIT    = 2,        // presignal block exit
-		SIGTYPE_COMBO   = 3,        // presignal inter-block
-		SIGTYPE_PBS     = 4,        // pbs signal
-		SIGTYPE_END,
-		SIGTYPE_MASK    = 7,
-	} SignalType;
-
-	typedef enum RailTypes {
-		RAILTYPE_RAIL   = 0,
-		RAILTYPE_MONO   = 1,
-		RAILTYPE_MAGLEV = 2,
-		RAILTYPE_END,
-		RAILTYPE_MASK   = 0x3,
-		INVALID_RAILTYPE = 0xFF,
-	} RailType;
-
-	enum {
-		SIG_SEMAPHORE_MASK = 1 << 3,
-	};
-
-	/** These are used to specify a single track. Can be translated to a trackbit
-	 * with TrackToTrackbit */
-	typedef enum Tracks {
-		TRACK_DIAG1 = 0,
-		TRACK_DIAG2 = 1,
-		TRACK_UPPER = 2,
-		TRACK_LOWER = 3,
-		TRACK_LEFT  = 4,
-		TRACK_RIGHT = 5,
-		TRACK_END,
-		INVALID_TRACK = 0xFF,
-	} Track;
-
-	/** These are the bitfield variants of the above */
-	typedef enum TrackBits {
-		TRACK_BIT_DIAG1 = 1,  // 0
-		TRACK_BIT_DIAG2 = 2,  // 1
-		TRACK_BIT_UPPER = 4,  // 2
-		TRACK_BIT_LOWER = 8,  // 3
-		TRACK_BIT_LEFT  = 16, // 4
-		TRACK_BIT_RIGHT = 32, // 5
-		TRACK_BIT_MASK  = 0x3F,
-	} TrackBits;
-
-	/** These are a combination of tracks and directions. Values are 0-5 in one
-	direction (corresponding to the Track enum) and 8-13 in the other direction. */
-	typedef enum Trackdirs {
-		TRACKDIR_DIAG1_NE = 0,
-		TRACKDIR_DIAG2_SE = 1,
-		TRACKDIR_UPPER_E  = 2,
-		TRACKDIR_LOWER_E  = 3,
-		TRACKDIR_LEFT_S   = 4,
-		TRACKDIR_RIGHT_S  = 5,
-		/* Note the two missing values here. This enables trackdir . track
-		 * conversion by doing (trackdir & 7) */
-		TRACKDIR_DIAG1_SW = 8,
-		TRACKDIR_DIAG2_NW = 9,
-		TRACKDIR_UPPER_W  = 10,
-		TRACKDIR_LOWER_W  = 11,
-		TRACKDIR_LEFT_N   = 12,
-		TRACKDIR_RIGHT_N  = 13,
-		TRACKDIR_END,
-		INVALID_TRACKDIR  = 0xFF,
-	} Trackdir;
-
-	/** These are a combination of tracks and directions. Values are 0-5 in one
-	direction (corresponding to the Track enum) and 8-13 in the other direction. * /
-	typedef enum TrackdirBits {
-		TRACKDIR_BIT_DIAG1_NE = 0x1,
-		TRACKDIR_BIT_DIAG2_SE = 0x2,
-		TRACKDIR_BIT_UPPER_E  = 0x4,
-		TRACKDIR_BIT_LOWER_E  = 0x8,
-		TRACKDIR_BIT_LEFT_S   = 0x10,
-		TRACKDIR_BIT_RIGHT_S  = 0x20,
-		/* Again, note the two missing values here. This enables trackdir . track conversion by doing (trackdir & 0xFF) * /
-		TRACKDIR_BIT_DIAG1_SW = 0x0100,
-		TRACKDIR_BIT_DIAG2_NW = 0x0200,
-		TRACKDIR_BIT_UPPER_W  = 0x0400,
-		TRACKDIR_BIT_LOWER_W  = 0x0800,
-		TRACKDIR_BIT_LEFT_N   = 0x1000,
-		TRACKDIR_BIT_RIGHT_N  = 0x2000,
-		TRACKDIR_BIT_MASK			= 0x3F3F,
-		INVALID_TRACKDIR_BIT  = 0xFFFF,
-	} TrackdirBits; */
-
-	/** These are states in which a signal can be. Currently these are only two, so
-	 * simple booleanean logic will do. But do try to compare to this enum instead of
-	 * normal booleanean evaluation, since that will make future additions easier.
-	 */
-	typedef enum SignalStates {
-		SIGNAL_STATE_RED = 0,
-		SIGNAL_STATE_GREEN = 1,
-	} SignalState;
-
-	/** This struct contains all the info that is needed to draw and finalruct tracks.
+	/** This struct contains all the info that is needed to draw and construct tracks.
 	 * /
 	class RailtypeInfo {
 		/** Struct containing the main sprites. @note not all sprites are listed, but only
@@ -223,14 +86,14 @@ public class Rail {
 	/**
 	 * Maps a Trackdir to the corresponding TrackdirBits value
 	 */
-	static inline TrackdirBits TrackdirToTrackdirBits(Trackdir trackdir) { return (TrackdirBits)(1 << trackdir); }
+	static  TrackdirBits TrackdirToTrackdirBits(Trackdir trackdir) { return (TrackdirBits)(1 << trackdir); }
 
 	/**
 	 * These functions check the validity of Tracks and Trackdirs. assert against
 	 * them when convenient.
 	 */
-	static inline boolean IsValidTrack(Track track) { return track < TRACK_END; }
-	static inline boolean IsValidTrackdir(Trackdir trackdir) { return (TrackdirToTrackdirBits(trackdir) & TRACKDIR_BIT_MASK) != 0; }
+	static  boolean IsValidTrack(Track track) { return track < TRACK_END; }
+	static  boolean IsValidTrackdir(Trackdir trackdir) { return (TrackdirToTrackdirBits(trackdir) & TRACKDIR_BIT_MASK) != 0; }
 
 	/**
 	 * Functions to map tracks to the corresponding bits in the signal
@@ -243,13 +106,13 @@ public class Rail {
 	 * direction along with the trackdir.
 	 */
 	extern final byte _signal_along_trackdir[TRACKDIR_END];
-	static inline byte SignalAlongTrackdir(Trackdir trackdir) {return _signal_along_trackdir[trackdir];}
+	static  byte SignalAlongTrackdir(Trackdir trackdir) {return _signal_along_trackdir[trackdir];}
 
 	/**
 	 * Maps a trackdir to the bit that stores its status in the map arrays, in the
 	 * direction against the trackdir.
 	 */
-	static inline byte SignalAgainstTrackdir(Trackdir trackdir) {
+	static  byte SignalAgainstTrackdir(Trackdir trackdir) {
 		extern final byte _signal_against_trackdir[TRACKDIR_END];
 		return _signal_against_trackdir[trackdir];
 	}
@@ -258,7 +121,7 @@ public class Rail {
 	 * Maps a Track to the bits that store the status of the two signals that can
 	 * be present on the given track.
 	 */
-	static inline byte SignalOnTrack(Track track) {
+	static  byte SignalOnTrack(Track track) {
 		extern final byte _signal_on_track[TRACK_END];
 		return _signal_on_track[track];
 	}
@@ -271,7 +134,7 @@ public class Rail {
 	 * Returns the RailTileType of a given rail tile. (ie normal, with signals,
 	 * depot, etc.)
 	 */
-	static inline RailTileType GetRailTileType(TileIndex tile)
+	static  RailTileType GetRailTileType(TileIndex tile)
 	{
 		assert(tile.IsTileType( TileTypes.MP_RAILWAY));
 		return tile.getMap().m5 & RAIL_TILE_TYPE_MASK;
@@ -280,12 +143,12 @@ public class Rail {
 	/**
 	 * Returns the rail type of the given rail tile (ie rail, mono, maglev).
 	 */
-	static inline RailType GetRailType(TileIndex tile) { return (RailType)(tile.getMap().m3 & RAILTYPE_MASK); }
+	static  RailType GetRailType(TileIndex tile) { return (RailType)(tile.getMap().m3 & RAILTYPE_MASK); }
 
 	/**
 	 * Checks if a rail tile has signals.
 	 */
-	static inline boolean HasSignals(TileIndex tile)
+	static  boolean HasSignals(TileIndex tile)
 	{
 		return GetRailTileType(tile) == RAIL_TYPE_SIGNALS;
 	}
@@ -294,7 +157,7 @@ public class Rail {
 	 * Returns the RailTileSubtype of a given rail tile with type
 	 * RAIL_TYPE_DEPOT_WAYPOINT
 	 */
-	static inline RailTileSubtype GetRailTileSubtype(TileIndex tile)
+	static  RailTileSubtype GetRailTileSubtype(TileIndex tile)
 	{
 		assert(GetRailTileType(tile) == RAIL_TYPE_DEPOT_WAYPOINT);
 		return (RailTileSubtype)(tile.getMap().m5 & RAIL_SUBTYPE_MASK);
@@ -304,7 +167,7 @@ public class Rail {
 	 * Returns whether this is plain rails, with or without signals. Iow, if this
 	 * tiles RailTileType is RAIL_TYPE_NORMAL or RAIL_TYPE_SIGNALS.
 	 */
-	static inline boolean IsPlainRailTile(TileIndex tile)
+	static  boolean IsPlainRailTile(TileIndex tile)
 	{
 		RailTileType rtt = GetRailTileType(tile);
 		return rtt == RAIL_TYPE_NORMAL || rtt == RAIL_TYPE_SIGNALS;
@@ -313,7 +176,7 @@ public class Rail {
 	/**
 	 * Returns the tracks present on the given plain rail tile (IsPlainRailTile())
 	 */
-	static inline TrackBits GetTrackBits(TileIndex tile)
+	static  TrackBits GetTrackBits(TileIndex tile)
 	{
 		assert(GetRailTileType(tile) == RAIL_TYPE_NORMAL || GetRailTileType(tile) == RAIL_TYPE_SIGNALS);
 		return (TrackBits)(tile.getMap().m5 & TRACK_BIT_MASK);
@@ -323,7 +186,7 @@ public class Rail {
 	 * Returns whether the given track is present on the given tile. Tile must be
 	 * a plain rail tile (IsPlainRailTile()).
 	 */
-	static inline boolean HasTrack(TileIndex tile, Track track)
+	static  boolean HasTrack(TileIndex tile, Track track)
 	{
 		assert(IsValidTrack(track));
 		return BitOps.HASBIT(GetTrackBits(tile), track);
@@ -340,7 +203,7 @@ public class Rail {
 	/**
 	 * Maps a trackdir to the reverse trackdir.
 	 */
-	static inline Trackdir ReverseTrackdir(Trackdir trackdir) {
+	static  Trackdir ReverseTrackdir(Trackdir trackdir) {
 		extern final Trackdir _reverse_trackdir[TRACKDIR_END];
 		return _reverse_trackdir[trackdir];
 	}
@@ -348,12 +211,12 @@ public class Rail {
 	/**
 	 * Maps a Track to the corresponding TrackBits value
 	 */
-	static inline TrackBits TrackToTrackBits(Track track) { return (TrackBits)(1 << track); }
+	static  TrackBits TrackToTrackBits(Track track) { return (TrackBits)(1 << track); }
 
 	/**
 	 * Returns the Track that a given Trackdir represents
 	 */
-	static inline Track TrackdirToTrack(Trackdir trackdir) { return (Track)(trackdir & 0x7); }
+	static  Track TrackdirToTrack(Trackdir trackdir) { return (Track)(trackdir & 0x7); }
 
 	/**
 	 * Returns a Trackdir for the given Track. Since every Track corresponds to
@@ -361,26 +224,26 @@ public class Rail {
 	 * Note that the actual implementation is quite futile, but this might change
 	 * in the future.
 	 */
-	static inline Trackdir TrackToTrackdir(Track track) { return (Trackdir)track; }
+	static  Trackdir TrackToTrackdir(Track track) { return (Trackdir)track; }
 
 	/**
 	 * Returns a TrackdirBit mask that contains the two TrackdirBits that
 	 * correspond with the given Track (one for each direction).
 	 */
-	static inline TrackdirBits TrackToTrackdirBits(Track track) { Trackdir td = TrackToTrackdir(track); return TrackdirToTrackdirBits(td) | TrackdirToTrackdirBits(ReverseTrackdir(td));}
+	static  TrackdirBits TrackToTrackdirBits(Track track) { Trackdir td = TrackToTrackdir(track); return TrackdirToTrackdirBits(td) | TrackdirToTrackdirBits(ReverseTrackdir(td));}
 
 	/**
 	 * Discards all directional information from the given TrackdirBits. Any
 	 * Track which is present in either direction will be present in the result.
 	 */
-	static inline TrackBits TrackdirBitsToTrackBits(TrackdirBits bits) { return bits | (bits >> 8); }
+	static  TrackBits TrackdirBitsToTrackBits(TrackdirBits bits) { return bits | (bits >> 8); }
 
 	/**
 	 * Maps a trackdir to the trackdir that you will end up on if you go straight
 	 * ahead. This will be the same trackdir for diagonal trackdirs, but a
 	 * different (alternating) one for straight trackdirs
 	 */
-	static inline Trackdir NextTrackdir(Trackdir trackdir) {
+	static  Trackdir NextTrackdir(Trackdir trackdir) {
 		extern final Trackdir _next_trackdir[TRACKDIR_END];
 		return _next_trackdir[trackdir];
 	}
@@ -388,7 +251,7 @@ public class Rail {
 	/**
 	 * Maps a track to all tracks that make 90 deg turns with it.
 	 */
-	static inline TrackBits TrackCrossesTracks(Track track) {
+	static  TrackBits TrackCrossesTracks(Track track) {
 		extern final TrackBits _track_crosses_tracks[TRACK_END];
 		return _track_crosses_tracks[track];
 	}
@@ -397,7 +260,7 @@ public class Rail {
 	 * Maps a trackdir to the (4-way) direction the tile is exited when following
 	 * that trackdir.
 	 */
-	static inline DiagDirection TrackdirToExitdir(Trackdir trackdir) {
+	static  DiagDirection TrackdirToExitdir(Trackdir trackdir) {
 		extern final DiagDirection _trackdir_to_exitdir[TRACKDIR_END];
 		return _trackdir_to_exitdir[trackdir];
 	}
@@ -406,7 +269,7 @@ public class Rail {
 	 * Maps a track and an (4-way) dir to the trackdir that represents the track
 	 * with the exit in the given direction.
 	 */
-	static inline Trackdir TrackExitdirToTrackdir(Track track, DiagDirection diagdir) {
+	static  Trackdir TrackExitdirToTrackdir(Track track, DiagDirection diagdir) {
 		extern final Trackdir _track_exitdir_to_trackdir[TRACK_END][DIAGDIR_END];
 		return _track_exitdir_to_trackdir[track][diagdir];
 	}
@@ -415,7 +278,7 @@ public class Rail {
 	 * Maps a track and an (4-way) dir to the trackdir that represents the track
 	 * with the exit in the given direction.
 	 */
-	static inline Trackdir TrackEnterdirToTrackdir(Track track, DiagDirection diagdir) {
+	static  Trackdir TrackEnterdirToTrackdir(Track track, DiagDirection diagdir) {
 		extern final Trackdir _track_enterdir_to_trackdir[TRACK_END][DIAGDIR_END];
 		return _track_enterdir_to_trackdir[track][diagdir];
 	}
@@ -424,7 +287,7 @@ public class Rail {
 	 * Maps a track and a full (8-way) direction to the trackdir that represents
 	 * the track running in the given direction.
 	 */
-	static inline Trackdir TrackDirectionToTrackdir(Track track, Direction dir) {
+	static  Trackdir TrackDirectionToTrackdir(Track track, Direction dir) {
 		extern final Trackdir _track_direction_to_trackdir[TRACK_END][DIR_END];
 		return _track_direction_to_trackdir[track][dir];
 	}
@@ -433,7 +296,7 @@ public class Rail {
 	 * Maps a (4-way) direction to the diagonal trackdir that runs in that
 	 * direction.
 	 */
-	static inline Trackdir DiagdirToDiagTrackdir(DiagDirection diagdir) {
+	static  Trackdir DiagdirToDiagTrackdir(DiagDirection diagdir) {
 		extern final Trackdir _dir_to_diag_trackdir[DIAGDIR_END];
 		return _dir_to_diag_trackdir[diagdir];
 	}
@@ -444,19 +307,19 @@ public class Rail {
 	 * Returns all trackdirs that can be reached when entering a tile from a given
 	 * (diagonal) direction. This will obviously include 90 degree turns, since no
 	 * information is available about the exact angle of entering */
-	static inline TrackdirBits DiagdirReachesTrackdirs(DiagDirection diagdir) { return _exitdir_reaches_trackdirs[diagdir]; }
+	static  TrackdirBits DiagdirReachesTrackdirs(DiagDirection diagdir) { return _exitdir_reaches_trackdirs[diagdir]; }
 
 	/**
 	 * Returns all tracks that can be reached when entering a tile from a given
 	 * (diagonal) direction. This will obviously include 90 degree turns, since no
 	 * information is available about the exact angle of entering */
-	static inline TrackBits DiagdirReachesTracks(DiagDirection diagdir) { return TrackdirBitsToTrackBits(DiagdirReachesTrackdirs(diagdir)); }
+	static  TrackBits DiagdirReachesTracks(DiagDirection diagdir) { return TrackdirBitsToTrackBits(DiagdirReachesTrackdirs(diagdir)); }
 
 	/**
 	 * Maps a trackdir to the trackdirs that can be reached from it (ie, when
 	 * entering the next tile. This will include 90 degree turns!
 	 */
-	static inline TrackdirBits TrackdirReachesTrackdirs(Trackdir trackdir) { return _exitdir_reaches_trackdirs[TrackdirToExitdir(trackdir)]; }
+	static  TrackdirBits TrackdirReachesTrackdirs(Trackdir trackdir) { return _exitdir_reaches_trackdirs[TrackdirToExitdir(trackdir)]; }
 	/* Note that there is no direct table for this function (there used to be),
 	 * but it uses two simpeler tables to achieve the result */
 
@@ -464,7 +327,7 @@ public class Rail {
 	/**
 	 * Maps a trackdir to all trackdirs that make 90 deg turns with it.
 	 */
-	static inline TrackdirBits TrackdirCrossesTrackdirs(Trackdir trackdir) {
+	static  TrackdirBits TrackdirCrossesTrackdirs(Trackdir trackdir) {
 		extern final TrackdirBits _track_crosses_trackdirs[TRACKDIR_END];
 		return _track_crosses_trackdirs[TrackdirToTrack(trackdir)];
 	}
@@ -472,7 +335,7 @@ public class Rail {
 	/**
 	 * Maps a (4-way) direction to the reverse.
 	 */
-	static inline DiagDirection ReverseDiagdir(DiagDirection diagdir) {
+	static  DiagDirection ReverseDiagdir(DiagDirection diagdir) {
 		extern final DiagDirection _reverse_diagdir[DIAGDIR_END];
 		return _reverse_diagdir[diagdir];
 	}
@@ -480,16 +343,16 @@ public class Rail {
 	/**
 	 * Maps a (8-way) direction to a (4-way) DiagDirection
 	 */
-	static inline DiagDirection DirToDiagdir(Direction dir) {
+	static  DiagDirection DirToDiagdir(Direction dir) {
 		assert(dir < DIR_END);
 		return (DiagDirection)(dir >> 1);
 	}
 
 	/* Checks if a given Track is diagonal */
-	static inline boolean IsDiagonalTrack(Track track) { return (track == TRACK_DIAG1) || (track == TRACK_DIAG2); }
+	static  boolean IsDiagonalTrack(Track track) { return (track == TRACK_DIAG1) || (track == TRACK_DIAG2); }
 
 	/* Checks if a given Trackdir is diagonal. */
-	static inline boolean IsDiagonalTrackdir(Trackdir trackdir) { return IsDiagonalTrack(TrackdirToTrack(trackdir)); }
+	static  boolean IsDiagonalTrackdir(Trackdir trackdir) { return IsDiagonalTrack(TrackdirToTrack(trackdir)); }
 
 	/*
 	 * Functions quering signals on tiles.
@@ -499,7 +362,7 @@ public class Rail {
 	 * Checks for the presence of signals (either way) on the given track on the
 	 * given rail tile.
 	 */
-	static inline boolean HasSignalOnTrack(TileIndex tile, Track track)
+	static  boolean HasSignalOnTrack(TileIndex tile, Track track)
 	{
 		assert(IsValidTrack(track));
 		return ((GetRailTileType(tile) == RAIL_TYPE_SIGNALS) && ((tile.getMap().m3 & SignalOnTrack(track)) != 0));
@@ -512,7 +375,7 @@ public class Rail {
 	 * Along meaning if you are currently driving on the given trackdir, this is
 	 * the signal that is facing us (for which we stop when it's red).
 	 */
-	static inline boolean HasSignalOnTrackdir(TileIndex tile, Trackdir trackdir)
+	static  boolean HasSignalOnTrackdir(TileIndex tile, Trackdir trackdir)
 	{
 		assert (IsValidTrackdir(trackdir));
 		return (GetRailTileType(tile) == RAIL_TYPE_SIGNALS) && (tile.getMap().m3 & SignalAlongTrackdir(trackdir));
@@ -524,7 +387,7 @@ public class Rail {
 	 * Along meaning if you are currently driving on the given trackdir, this is
 	 * the signal that is facing us (for which we stop when it's red).
 	 */
-	static inline SignalState GetSignalState(TileIndex tile, Trackdir trackdir)
+	static  SignalState GetSignalState(TileIndex tile, Trackdir trackdir)
 	{
 		assert(IsValidTrackdir(trackdir));
 		assert(HasSignalOnTrack(tile, TrackdirToTrack(trackdir)));
@@ -538,7 +401,7 @@ public class Rail {
 	 * signal types cannot be mixed. This function is trying to be
 	 * future-compatible, though.
 	 */
-	static inline SignalType GetSignalType(TileIndex tile, Track track)
+	static  SignalType GetSignalType(TileIndex tile, Track track)
 	{
 		assert(IsValidTrack(track));
 		assert(GetRailTileType(tile) == RAIL_TYPE_SIGNALS);
@@ -554,7 +417,7 @@ public class Rail {
 	 * semaphores/electric signals cannot be mixed. This function is trying to be
 	 * future-compatible, though.
 	 */
-	static inline boolean HasSemaphores(TileIndex tile, Track track)
+	static  boolean HasSemaphores(TileIndex tile, Track track)
 	{
 		assert(IsValidTrack(track));
 		return (tile.getMap().m4 & SIG_SEMAPHORE_MASK);
@@ -572,7 +435,7 @@ public class Rail {
 	/**
 	 * Returns whether the given tile is a level crossing.
 	 * /
-	static inline boolean IsLevelCrossing(TileIndex tile)
+	static  boolean IsLevelCrossing(TileIndex tile)
 	{
 		return (tile.getMap().m5 & 0xF0) == 0x10;
 	}
@@ -582,7 +445,7 @@ public class Rail {
 	 * @return  The transport type of the given track, either TRANSPORT_ROAD,
 	 * TRANSPORT_RAIL.
 	 */
-	static inline TransportType GetCrossingTransportType(TileIndex tile, Track track)
+	static  TransportType GetCrossingTransportType(TileIndex tile, Track track)
 	{
 		/* XXX: Nicer way to write this? */
 		switch(track)
@@ -603,7 +466,7 @@ public class Rail {
 	 * @param railtype the rail type which the information is requested for
 	 * @return The pointer to the RailtypeInfo
 	 */
-	static inline final RailtypeInfo *GetRailTypeInfo(RailType railtype)
+	static  final RailtypeInfo *GetRailTypeInfo(RailType railtype)
 	{
 		assert(railtype < RAILTYPE_END);
 		return &_railtypes[railtype];
@@ -617,7 +480,7 @@ public class Rail {
 	 * @param  enginetype The RailType of the engine we are considering.
 	 * @param  tiletype   The RailType of the tile we are considering.
 	 */
-	static inline boolean IsCompatibleRail(RailType enginetype, RailType tiletype)
+	static  boolean IsCompatibleRail(RailType enginetype, RailType tiletype)
 	{
 		return BitOps.HASBIT(GetRailTypeInfo(enginetype).compatible_railtypes, tiletype);
 	}
@@ -629,7 +492,7 @@ public class Rail {
 	 * @param  bits The tracks present.
 	 * @return Whether the tracks present overlap in any way.
 	 */
-	static inline boolean TracksOverlap(TrackBits bits)
+	static  boolean TracksOverlap(TrackBits bits)
 	{
 	  /* With no, or only one track, there is no overlap */
 	  if (bits == 0 || KILL_FIRST_BIT(bits) == 0)
@@ -655,108 +518,6 @@ public class Rail {
 
 
 
-	/* XXX: Below 3 tables store duplicate data. Maybe remove some? */
-	/* Maps a trackdir to the bit that stores its status in the map arrays, in the
-	 * direction along with the trackdir */
-	final byte _signal_along_trackdir[] = {
-		0x80, 0x80, 0x80, 0x20, 0x40, 0x10, 0, 0,
-		0x40, 0x40, 0x40, 0x10, 0x80, 0x20
-	};
-
-	/* Maps a trackdir to the bit that stores its status in the map arrays, in the
-	 * direction against the trackdir */
-	final byte _signal_against_trackdir[] = {
-		0x40, 0x40, 0x40, 0x10, 0x80, 0x20, 0, 0,
-		0x80, 0x80, 0x80, 0x20, 0x40, 0x10
-	};
-
-	/* Maps a Track to the bits that store the status of the two signals that can
-	 * be present on the given track */
-	final byte _signal_on_track[] = {
-		0xC0, 0xC0, 0xC0, 0x30, 0xC0, 0x30
-	};
-
-	/* Maps a diagonal direction to the all trackdirs that are connected to any
-	 * track entering in this direction (including those making 90 degree turns)
-	 */
-	final TrackdirBits _exitdir_reaches_trackdirs[] = {
-		TRACKDIR_BIT_DIAG1_NE | TRACKDIR_BIT_LOWER_E | TRACKDIR_BIT_LEFT_N,  /* DIAGDIR_NE */
-		TRACKDIR_BIT_DIAG2_SE | TRACKDIR_BIT_LEFT_S  | TRACKDIR_BIT_UPPER_E, /* DIAGDIR_SE */
-		TRACKDIR_BIT_DIAG1_SW | TRACKDIR_BIT_UPPER_W | TRACKDIR_BIT_RIGHT_S, /* DIAGDIR_SW */
-		TRACKDIR_BIT_DIAG2_NW | TRACKDIR_BIT_RIGHT_N | TRACKDIR_BIT_LOWER_W  /* DIAGDIR_NW */
-	};
-
-	final Trackdir _next_trackdir[] = {
-		TRACKDIR_DIAG1_NE,  TRACKDIR_DIAG2_SE,  TRACKDIR_LOWER_E, TRACKDIR_UPPER_E, TRACKDIR_RIGHT_S, TRACKDIR_LEFT_S, INVALID_TRACKDIR, INVALID_TRACKDIR,
-		TRACKDIR_DIAG1_SW,  TRACKDIR_DIAG2_NW,  TRACKDIR_LOWER_W, TRACKDIR_UPPER_W, TRACKDIR_RIGHT_N, TRACKDIR_LEFT_N
-	};
-
-	/* Maps a trackdir to all trackdirs that make 90 deg turns with it. */
-	final TrackdirBits _track_crosses_trackdirs[] = {
-		TRACKDIR_BIT_DIAG2_SE | TRACKDIR_BIT_DIAG2_NW,                                               /* TRACK_DIAG1 */
-		TRACKDIR_BIT_DIAG1_NE | TRACKDIR_BIT_DIAG1_SW,                                               /* TRACK_DIAG2 */
-		TRACKDIR_BIT_RIGHT_N  | TRACKDIR_BIT_RIGHT_S  | TRACKDIR_BIT_LEFT_N  | TRACKDIR_BIT_LEFT_S,  /* TRACK_UPPER */
-		TRACKDIR_BIT_RIGHT_N  | TRACKDIR_BIT_RIGHT_S  | TRACKDIR_BIT_LEFT_N  | TRACKDIR_BIT_LEFT_S,  /* TRACK_LOWER */
-		TRACKDIR_BIT_UPPER_W  | TRACKDIR_BIT_UPPER_E  | TRACKDIR_BIT_LOWER_W | TRACKDIR_BIT_LOWER_E, /* TRACK_LEFT  */
-		TRACKDIR_BIT_UPPER_W  | TRACKDIR_BIT_UPPER_E  | TRACKDIR_BIT_LOWER_W | TRACKDIR_BIT_LOWER_E  /* TRACK_RIGHT */
-	};
-
-	/* Maps a track to all tracks that make 90 deg turns with it. */
-	final TrackBits _track_crosses_tracks[] = {
-		TRACK_BIT_DIAG2,                   /* TRACK_DIAG1 */
-		TRACK_BIT_DIAG1,                   /* TRACK_DIAG2 */
-		TRACK_BIT_LEFT  | TRACK_BIT_RIGHT, /* TRACK_UPPER */
-		TRACK_BIT_LEFT  | TRACK_BIT_RIGHT, /* TRACK_LOWER */
-		TRACK_BIT_UPPER | TRACK_BIT_LOWER, /* TRACK_LEFT  */
-		TRACK_BIT_UPPER | TRACK_BIT_LOWER  /* TRACK_RIGHT */
-	};
-
-	/* Maps a trackdir to the (4-way) direction the tile is exited when following
-	 * that trackdir * /
-	final DiagDirection _trackdir_to_exitdir[] = {
-		DIAGDIR_NE,DIAGDIR_SE,DIAGDIR_NE,DIAGDIR_SE,DIAGDIR_SW,DIAGDIR_SE, DIAGDIR_NE,DIAGDIR_NE,
-		DIAGDIR_SW,DIAGDIR_NW,DIAGDIR_NW,DIAGDIR_SW,DIAGDIR_NW,DIAGDIR_NE,
-	}; */
-
-	final Trackdir _track_exitdir_to_trackdir[][DIAGDIR_END] = {
-		{TRACKDIR_DIAG1_NE, INVALID_TRACKDIR,  TRACKDIR_DIAG1_SW, INVALID_TRACKDIR},
-		{INVALID_TRACKDIR,  TRACKDIR_DIAG2_SE, INVALID_TRACKDIR,  TRACKDIR_DIAG2_NW},
-		{TRACKDIR_UPPER_E,  INVALID_TRACKDIR,  INVALID_TRACKDIR,  TRACKDIR_UPPER_W},
-		{INVALID_TRACKDIR,  TRACKDIR_LOWER_E,  TRACKDIR_LOWER_W,  INVALID_TRACKDIR},
-		{INVALID_TRACKDIR,  INVALID_TRACKDIR,  TRACKDIR_LEFT_S,   TRACKDIR_LEFT_N},
-		{TRACKDIR_RIGHT_N,  TRACKDIR_RIGHT_S,  INVALID_TRACKDIR,  INVALID_TRACKDIR}
-	};
-
-	final Trackdir _track_enterdir_to_trackdir[][DIAGDIR_END] = { // TODO: replace magic with enums
-		{TRACKDIR_DIAG1_NE, INVALID_TRACKDIR,  TRACKDIR_DIAG1_SW, INVALID_TRACKDIR},
-		{INVALID_TRACKDIR,  TRACKDIR_DIAG2_SE, INVALID_TRACKDIR,  TRACKDIR_DIAG2_NW},
-		{INVALID_TRACKDIR,  TRACKDIR_UPPER_E,  TRACKDIR_UPPER_W,  INVALID_TRACKDIR},
-		{TRACKDIR_LOWER_E,  INVALID_TRACKDIR,  INVALID_TRACKDIR,  TRACKDIR_LOWER_W},
-		{TRACKDIR_LEFT_N,   TRACKDIR_LEFT_S,   INVALID_TRACKDIR,  INVALID_TRACKDIR},
-		{INVALID_TRACKDIR,  INVALID_TRACKDIR,  TRACKDIR_RIGHT_S,  TRACKDIR_RIGHT_N}
-	};
-
-	final Trackdir _track_direction_to_trackdir[][DIR_END] = {
-		{INVALID_TRACKDIR, TRACKDIR_DIAG1_NE, INVALID_TRACKDIR, INVALID_TRACKDIR,  INVALID_TRACKDIR, TRACKDIR_DIAG1_SW, INVALID_TRACKDIR, INVALID_TRACKDIR},
-		{INVALID_TRACKDIR, INVALID_TRACKDIR,  INVALID_TRACKDIR, TRACKDIR_DIAG2_SE, INVALID_TRACKDIR, INVALID_TRACKDIR,  INVALID_TRACKDIR, TRACKDIR_DIAG2_NW},
-		{INVALID_TRACKDIR, INVALID_TRACKDIR,  TRACKDIR_UPPER_E, INVALID_TRACKDIR,  INVALID_TRACKDIR, INVALID_TRACKDIR,  TRACKDIR_UPPER_W, INVALID_TRACKDIR},
-		{INVALID_TRACKDIR, INVALID_TRACKDIR,  TRACKDIR_LOWER_E, INVALID_TRACKDIR,  INVALID_TRACKDIR, INVALID_TRACKDIR,  TRACKDIR_LOWER_W, INVALID_TRACKDIR},
-		{TRACKDIR_LEFT_N,  INVALID_TRACKDIR,  INVALID_TRACKDIR, INVALID_TRACKDIR,  TRACKDIR_LEFT_S,  INVALID_TRACKDIR,  INVALID_TRACKDIR, INVALID_TRACKDIR},
-		{TRACKDIR_RIGHT_N, INVALID_TRACKDIR,  INVALID_TRACKDIR, INVALID_TRACKDIR,  TRACKDIR_RIGHT_S, INVALID_TRACKDIR,  INVALID_TRACKDIR, INVALID_TRACKDIR}
-	};
-
-	final Trackdir _dir_to_diag_trackdir[] = {
-		TRACKDIR_DIAG1_NE, TRACKDIR_DIAG2_SE, TRACKDIR_DIAG1_SW, TRACKDIR_DIAG2_NW,
-	};
-
-	final DiagDirection _reverse_diagdir[] = {
-		DIAGDIR_SW, DIAGDIR_NW, DIAGDIR_NE, DIAGDIR_SE
-	};
-
-	final Trackdir _reverse_trackdir[] = {
-		TRACKDIR_DIAG1_SW, TRACKDIR_DIAG2_NW, TRACKDIR_UPPER_W, TRACKDIR_LOWER_W, TRACKDIR_LEFT_N, TRACKDIR_RIGHT_N, INVALID_TRACKDIR, INVALID_TRACKDIR,
-		TRACKDIR_DIAG1_NE, TRACKDIR_DIAG2_SE, TRACKDIR_UPPER_E, TRACKDIR_LOWER_E, TRACKDIR_LEFT_S, TRACKDIR_RIGHT_S
-	};
 
 	RailType GetTileRailType(TileIndex tile, Trackdir trackdir)
 	{
@@ -839,51 +600,6 @@ public class Rail {
 
 	void ShowTrainDepotWindow(TileIndex tile);
 
-	/* Format of rail map5 byte.
-	 * 00 abcdef  => Normal rail
-	 * 01 abcdef  => Rail with signals
-	 * 10 ??????  => Unused
-	 * 11 ????dd  => Depot
-	 *
-	 * abcdef is a bitmask, which contains ones for all present tracks. Below the
-	 * value for each track is given.
-	 */
-
-	/*         4
-	 *     ---------
-	 *    |\       /|
-	 *    | \    1/ |
-	 *    |  \   /  |
-	 *    |   \ /   |
-	 *  16|    \    |32
-	 *    |   / \2  |
-	 *    |  /   \  |
-	 *    | /     \ |
-	 *    |/       \|
-	 *     ---------
-	 *         8
-	 */
-
-
-	// Constants for lower part of Map2 byte.
-	enum RailMap2Lower4 {
-		RAIL_MAP2LO_GROUND_MASK = 0xF,
-		RAIL_GROUND_BROWN = 0,
-		RAIL_GROUND_GREEN = 1,
-		RAIL_GROUND_FENCE_NW = 2,
-		RAIL_GROUND_FENCE_SE = 3,
-		RAIL_GROUND_FENCE_SENW = 4,
-		RAIL_GROUND_FENCE_NE = 5,
-		RAIL_GROUND_FENCE_SW = 6,
-		RAIL_GROUND_FENCE_NESW = 7,
-		RAIL_GROUND_FENCE_VERT1 = 8,
-		RAIL_GROUND_FENCE_VERT2 = 9,
-		RAIL_GROUND_FENCE_HORIZ1 = 10,
-		RAIL_GROUND_FENCE_HORIZ2 = 11,
-		RAIL_GROUND_ICE_DESERT = 12,
-	};
-
-
 	/* MAP2 byte:    abcd???? => Signal On? Same coding as map3lo
 	 * MAP3LO byte:  abcd???? => Signal Exists?
 	 *				 a and b are for diagonals, upper and left,
@@ -934,83 +650,6 @@ public class Rail {
 	}
 
 
-	static final byte _valid_tileh_slopes[4][15] = {
-
-	// set of normal ones
-	{
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-		TRACK_BIT_RIGHT,
-		TRACK_BIT_UPPER,
-		TRACK_BIT_DIAG1,
-
-		TRACK_BIT_LEFT,
-		0,
-		TRACK_BIT_DIAG2,
-		TRACK_BIT_LOWER,
-
-		TRACK_BIT_LOWER,
-		TRACK_BIT_DIAG2,
-		0,
-		TRACK_BIT_LEFT,
-
-		TRACK_BIT_DIAG1,
-		TRACK_BIT_UPPER,
-		TRACK_BIT_RIGHT,
-	},
-
-	// allowed rail for an evenly raised platform
-	{
-		0,
-		TRACK_BIT_LEFT,
-		TRACK_BIT_LOWER,
-		TRACK_BIT_DIAG2 | TRACK_BIT_LOWER | TRACK_BIT_LEFT,
-
-		TRACK_BIT_RIGHT,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-		TRACK_BIT_DIAG1 | TRACK_BIT_LOWER | TRACK_BIT_RIGHT,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-
-		TRACK_BIT_UPPER,
-		TRACK_BIT_DIAG1 | TRACK_BIT_UPPER | TRACK_BIT_LEFT,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-
-		TRACK_BIT_DIAG2 | TRACK_BIT_UPPER | TRACK_BIT_RIGHT,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-	},
-
-	// allowed rail on coast tile
-	{
-		0,
-		TRACK_BIT_LEFT,
-		TRACK_BIT_LOWER,
-		TRACK_BIT_DIAG2|TRACK_BIT_LEFT|TRACK_BIT_LOWER,
-
-		TRACK_BIT_RIGHT,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-		TRACK_BIT_DIAG1|TRACK_BIT_RIGHT|TRACK_BIT_LOWER,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-
-		TRACK_BIT_UPPER,
-		TRACK_BIT_DIAG1|TRACK_BIT_LEFT|TRACK_BIT_UPPER,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-
-		TRACK_BIT_DIAG2|TRACK_BIT_RIGHT|TRACK_BIT_UPPER,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-		TRACK_BIT_DIAG1|TRACK_BIT_DIAG2|TRACK_BIT_UPPER|TRACK_BIT_LOWER|TRACK_BIT_LEFT|TRACK_BIT_RIGHT,
-		},
-
-		// valid railway crossings on slopes
-		{
-			1, 0, 0, // 0, 1, 2
-			0, 0, 1, // 3, 4, 5
-			0, 1, 0, // 6, 7, 8
-			0, 1, 1, // 9, 10, 11
-			0, 1, 1, // 12, 13, 14
-		}
-	};
 
 	int GetRailFoundation(int tileh, int bits)
 	{
@@ -1062,7 +701,7 @@ public class Rail {
 	}
 
 	/* Validate functions for rail building */
-	static inline boolean ValParamTrackOrientation(Track track) {return IsValidTrack(track);}
+	static  boolean ValParamTrackOrientation(Track track) {return IsValidTrack(track);}
 
 	/** Build a single piece of rail
 	 * @param x,y coordinates on where to build
@@ -1104,7 +743,7 @@ public class Rail {
 
 						if (flags & Cmd.DC_EXEC) {
 							SetTileOwner(tile, Global._current_player);
-							BitOps.RET SB(tile.getMap().m3, 0, 4, p1);
+							tile.getMap().m3 = BitOps.RETSB(tile.getMap().m3, 0, 4, p1);
 							tile.getMap().m5 = (m5 & 0xC7) | 0x20; // railroad under bridge
 						}
 						break;
