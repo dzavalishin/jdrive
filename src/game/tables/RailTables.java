@@ -303,21 +303,21 @@ public class RailTables {
 	/* XXX: Below 3 tables store duplicate data. Maybe remove some? */
 	/* Maps a trackdir to the bit that stores its status in the map arrays, in the
 	 * direction along with the trackdir */
-	final int _signal_along_trackdir[] = {
+	static final int _signal_along_trackdir[] = {
 			0x80, 0x80, 0x80, 0x20, 0x40, 0x10, 0, 0,
 			0x40, 0x40, 0x40, 0x10, 0x80, 0x20
 	};
 
 	/* Maps a trackdir to the bit that stores its status in the map arrays, in the
 	 * direction against the trackdir */
-	final int _signal_against_trackdir[] = {
+	static final int _signal_against_trackdir[] = {
 			0x40, 0x40, 0x40, 0x10, 0x80, 0x20, 0, 0,
 			0x80, 0x80, 0x80, 0x20, 0x40, 0x10
 	};
 
 	/* Maps a Track to the bits that store the status of the two signals that can
 	 * be present on the given track */
-	final int _signal_on_track[] = {
+	static final int _signal_on_track[] = {
 			0xC0, 0xC0, 0xC0, 0x30, 0xC0, 0x30
 	};
 
@@ -325,7 +325,7 @@ public class RailTables {
 	 * track entering in this direction (including those making 90 degree turns)
 	 */
 	//final TrackdirBits _exitdir_reaches_trackdirs[] = 
-	final int _exitdir_reaches_trackdirs[] = 
+	static final int _exitdir_reaches_trackdirs[] = 
 		{
 				TRACKDIR_BIT_DIAG1_NE | TRACKDIR_BIT_LOWER_E | TRACKDIR_BIT_LEFT_N,  /* DIAGDIR_NE */
 				TRACKDIR_BIT_DIAG2_SE | TRACKDIR_BIT_LEFT_S  | TRACKDIR_BIT_UPPER_E, /* DIAGDIR_SE */
@@ -334,7 +334,7 @@ public class RailTables {
 		};
 
 	//final Trackdir _next_trackdir[] = 
-	final int _next_trackdir[] = 
+	static final int _next_trackdir[] = 
 		{
 				TRACKDIR_DIAG1_NE,  TRACKDIR_DIAG2_SE,  TRACKDIR_LOWER_E, TRACKDIR_UPPER_E, TRACKDIR_RIGHT_S, TRACKDIR_LEFT_S, INVALID_TRACKDIR, INVALID_TRACKDIR,
 				TRACKDIR_DIAG1_SW,  TRACKDIR_DIAG2_NW,  TRACKDIR_LOWER_W, TRACKDIR_UPPER_W, TRACKDIR_RIGHT_N, TRACKDIR_LEFT_N
@@ -342,7 +342,7 @@ public class RailTables {
 
 	/* Maps a trackdir to all trackdirs that make 90 deg turns with it. */
 	//final TrackdirBits _track_crosses_trackdirs[] = 
-	final int _track_crosses_trackdirs[] = 
+	static final int _track_crosses_trackdirs[] = 
 		{
 				TRACKDIR_BIT_DIAG2_SE | TRACKDIR_BIT_DIAG2_NW,                                               /* TRACK_DIAG1 */
 				TRACKDIR_BIT_DIAG1_NE | TRACKDIR_BIT_DIAG1_SW,                                               /* TRACK_DIAG2 */
@@ -354,7 +354,7 @@ public class RailTables {
 
 	/* Maps a track to all tracks that make 90 deg turns with it. */
 	//final TrackBits _track_crosses_tracks[] = 
-	final int _track_crosses_tracks[] = 
+	static final int _track_crosses_tracks[] = 
 		{
 				TRACK_BIT_DIAG2,                   /* TRACK_DIAG1 */
 				TRACK_BIT_DIAG1,                   /* TRACK_DIAG2 */
@@ -366,18 +366,18 @@ public class RailTables {
 
 	/* Maps a trackdir to the (4-way) direction the tile is exited when following
 	 * that trackdir */
-	
+
 	// TODO Duplicate
-	
+
 	//final DiagDirection _trackdir_to_exitdir[] = 
-	final int _trackdir_to_exitdir[] = 
+	static final int _trackdir_to_exitdir[] = 
 		{
-			DIAGDIR_NE,DIAGDIR_SE,DIAGDIR_NE,DIAGDIR_SE,DIAGDIR_SW,DIAGDIR_SE, DIAGDIR_NE,DIAGDIR_NE,
-			DIAGDIR_SW,DIAGDIR_NW,DIAGDIR_NW,DIAGDIR_SW,DIAGDIR_NW,DIAGDIR_NE,
-	}; 
+				DIAGDIR_NE,DIAGDIR_SE,DIAGDIR_NE,DIAGDIR_SE,DIAGDIR_SW,DIAGDIR_SE, DIAGDIR_NE,DIAGDIR_NE,
+				DIAGDIR_SW,DIAGDIR_NW,DIAGDIR_NW,DIAGDIR_SW,DIAGDIR_NW,DIAGDIR_NE,
+		}; 
 
 	//final Trackdir _track_exitdir_to_trackdir[][DIAGDIR_END] = 
-	final int _track_exitdir_to_trackdir[][] = 
+	static final int _track_exitdir_to_trackdir[][] = 
 		{
 				{TRACKDIR_DIAG1_NE, INVALID_TRACKDIR,  TRACKDIR_DIAG1_SW, INVALID_TRACKDIR},
 				{INVALID_TRACKDIR,  TRACKDIR_DIAG2_SE, INVALID_TRACKDIR,  TRACKDIR_DIAG2_NW},
@@ -388,7 +388,7 @@ public class RailTables {
 		};
 
 	//final Trackdir _track_enterdir_to_trackdir[][DIAGDIR_END] = 
-	final int _track_enterdir_to_trackdir[][] = 
+	static final int _track_enterdir_to_trackdir[][] = 
 		{ // TODO: replace magic with enums
 				{TRACKDIR_DIAG1_NE, INVALID_TRACKDIR,  TRACKDIR_DIAG1_SW, INVALID_TRACKDIR},
 				{INVALID_TRACKDIR,  TRACKDIR_DIAG2_SE, INVALID_TRACKDIR,  TRACKDIR_DIAG2_NW},
@@ -399,7 +399,7 @@ public class RailTables {
 		};
 
 	//final Trackdir _track_direction_to_trackdir[][DIR_END] = 
-	final int _track_direction_to_trackdir[][] = 
+	static final int _track_direction_to_trackdir[][] = 
 		{
 				{INVALID_TRACKDIR, TRACKDIR_DIAG1_NE, INVALID_TRACKDIR, INVALID_TRACKDIR,  INVALID_TRACKDIR, TRACKDIR_DIAG1_SW, INVALID_TRACKDIR, INVALID_TRACKDIR},
 				{INVALID_TRACKDIR, INVALID_TRACKDIR,  INVALID_TRACKDIR, TRACKDIR_DIAG2_SE, INVALID_TRACKDIR, INVALID_TRACKDIR,  INVALID_TRACKDIR, TRACKDIR_DIAG2_NW},
@@ -410,19 +410,19 @@ public class RailTables {
 		};
 
 	//final Trackdir _dir_to_diag_trackdir[] = 
-	final int _dir_to_diag_trackdir[] = 
+	static final int _dir_to_diag_trackdir[] = 
 		{
 				TRACKDIR_DIAG1_NE, TRACKDIR_DIAG2_SE, TRACKDIR_DIAG1_SW, TRACKDIR_DIAG2_NW,
 		};
 
 	//final DiagDirection _reverse_diagdir[] = 
-	final int _reverse_diagdir[] = 
+	static final int _reverse_diagdir[] = 
 		{
 				DIAGDIR_SW, DIAGDIR_NW, DIAGDIR_NE, DIAGDIR_SE
 		};
 
 	//final Trackdir _reverse_trackdir[] = 
-	final int _reverse_trackdir[] = 
+	static final int _reverse_trackdir[] = 
 		{
 				TRACKDIR_DIAG1_SW, TRACKDIR_DIAG2_NW, TRACKDIR_UPPER_W, TRACKDIR_LOWER_W, TRACKDIR_LEFT_N, TRACKDIR_RIGHT_N, INVALID_TRACKDIR, INVALID_TRACKDIR,
 				TRACKDIR_DIAG1_NE, TRACKDIR_DIAG2_SE, TRACKDIR_UPPER_E, TRACKDIR_LOWER_E, TRACKDIR_LEFT_S, TRACKDIR_RIGHT_S
@@ -434,12 +434,128 @@ public class RailTables {
 
 
 
+	static final byte _track_sloped_sprites[] = {
+			14, 15, 22, 13,
+			0, 21, 17, 12,
+			23,  0, 18, 20,
+			19, 16
+	};
 
 
 
 
+	static final int _signals_table[] = {
+			0x40, 0x40, 0x40, 0x10, 0x80, 0x20, 0, 0, // direction 1
+			0x80, 0x80, 0x80, 0x20, 0x40, 0x10, 0, 0  // direction 2
+	};
+
+	static final int _signals_table_other[] = {
+			0x80, 0x80, 0x80, 0x20, 0x40, 0x10, 0, 0, // direction 1
+			0x40, 0x40, 0x40, 0x10, 0x80, 0x20, 0, 0  // direction 2
+	};
+
+	static final int _signals_table_both[] = {
+			0xC0, 0xC0, 0xC0, 0x30, 0xC0, 0x30, 0, 0,	// both directions combined
+			0xC0, 0xC0, 0xC0, 0x30, 0xC0, 0x30, 0, 0
+	};
 
 
+	private static final int [] xinc = {
+			//  0   1   2   3   4   5
+			-16,  0,-16,  0, 16,  0,    0,  0,
+			16,  0,  0, 16,  0,-16,    0,  0,
+	};
+
+	private static final int [] yinc = {
+			0, 16,  0, 16,  0, 16,    0,  0,
+			0,-16,-16,  0,-16,  0,    0,  0,
+	};		
+
+	static class _RailBit {
+		int xinc[];
+		int yinc[];
+		public _RailBit(int[] xinc2, int[] yinc2) {
+			xinc = xinc2;
+			yinc = yinc2;
+		}
+	}
+
+	public static final _RailBit _railbit = new _RailBit( xinc, yinc );
 
 
+	
+	public static final byte _dir_from_track[] = {
+			0,1,0,1,2,1, 0,0,
+			2,3,3,2,3,0,
+		};
+	
+
+	
+	
+	
+	
+	// used for presignals
+	//static final SpriteID _signal_base_sprites[32] = {
+	static final int _signal_base_sprites[] = {
+		0x4FB,
+		0x1323,
+		0x1333,
+		0x1343,
+
+		// pbs signals
+		0x1393,
+		0x13A3,  // not used (yet?)
+		0x13B3,  // not used (yet?)
+		0x13C3,  // not used (yet?)
+
+		// semaphores
+		0x1353,
+		0x1363,
+		0x1373,
+		0x1383,
+
+		// pbs semaphores
+		0x13D3,
+		0x13E3,  // not used (yet?)
+		0x13F3,  // not used (yet?)
+		0x1403,  // not used (yet?)
+
+
+		// mirrored versions
+		0x4FB,
+		0x1323,
+		0x1333,
+		0x1343,
+
+		// pbs signals
+		0x1393,
+		0x13A3,  // not used (yet?)
+		0x13B3,  // not used (yet?)
+		0x13C3,  // not used (yet?)
+
+		// semaphores
+		0x1446,
+		0x1456,
+		0x1466,
+		0x1476,
+
+		// pbs semaphores
+		0x14C6,
+		0x14D6,  // not used (yet?)
+		0x14E6,  // not used (yet?)
+		0x14F6,  // not used (yet?)
+	};
+
+	// used to determine the side of the road for the signal
+	static final int _signal_position[] = {
+		/* original: left side position */
+		0x58,0x1E,0xE1,0xB9,0x01,0xA3,0x4B,0xEE,0x3B,0xD4,0x43,0xBD,
+		/* patch: ride side position */
+		0x1E,0xAC,0x64,0xE1,0x4A,0x10,0xEE,0xC5,0xDB,0x34,0x4D,0xB3
+	};
+
+	
+	
+	
+	
 }

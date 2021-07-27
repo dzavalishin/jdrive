@@ -1,5 +1,7 @@
 package game;
 
+import java.util.function.Consumer;
+
 import game.tables.RailTables;
 
 public class Rail extends RailTables {
@@ -105,7 +107,7 @@ public class Rail extends RailTables {
 	 * Maps a trackdir to the bit that stores its status in the map arrays, in the
 	 * direction along with the trackdir.
 	 */
-	extern final byte _signal_along_trackdir[TRACKDIR_END];
+	//extern final byte _signal_along_trackdir[TRACKDIR_END];
 	static  byte SignalAlongTrackdir(Trackdir trackdir) {return _signal_along_trackdir[trackdir];}
 
 	/**
@@ -301,7 +303,7 @@ public class Rail extends RailTables {
 		return _dir_to_diag_trackdir[diagdir];
 	}
 
-	extern final TrackdirBits _exitdir_reaches_trackdirs[DIAGDIR_END];
+	//extern final TrackdirBits _exitdir_reaches_trackdirs[DIAGDIR_END];
 
 	/**
 	 * Returns all trackdirs that can be reached when entering a tile from a given
@@ -430,7 +432,7 @@ public class Rail extends RailTables {
 	 * The given trackdir is used when there are (could be) multiple rail types on
 	 * one tile.
 	 */
-	RailType GetTileRailType(TileIndex tile, Trackdir trackdir);
+	//RailType GetTileRailType(TileIndex tile, Trackdir trackdir);
 
 	/**
 	 * Returns whether the given tile is a level crossing.
@@ -505,10 +507,10 @@ public class Rail extends RailTables {
 	  return true;
 	}
 
-	void DrawTrackBits(TileInfo ti, TrackBits track, boolean earth, boolean snow, boolean flat);
-	void DrawTrainDepotSprite(int x, int y, int image, RailType railtype);
-	void DrawDefaultWaypointSprite(int x, int y, RailType railtype);
-	#endif /* RAIL_H */
+	//void DrawTrackBits(TileInfo ti, TrackBits track, boolean earth, boolean snow, boolean flat);
+	//void DrawTrainDepotSprite(int x, int y, int image, RailType railtype);
+	//void DrawDefaultWaypointSprite(int x, int y, RailType railtype);
+	//#endif /* RAIL_H */
 	
 	
 	/* $Id: rail.c 3077 2005-10-22 06:39:32Z tron $ */
@@ -523,7 +525,7 @@ public class Rail extends RailTables {
 	{
 		RailType type = INVALID_RAILTYPE;
 		DiagDirection exitdir = TrackdirToExitdir(trackdir);
-		switch (GetTileType(tile)) {
+		switch (tile.GetTileType()) {
 			case TileTypes.MP_RAILWAY:
 				/* railway track */
 				type = tile.getMap().m3 & RAILTYPE_MASK;
@@ -589,14 +591,8 @@ public class Rail extends RailTables {
 
 
 
-	extern int _custom_sprites_base;
+	//extern int _custom_sprites_base;
 
-	final byte _track_sloped_sprites[14] = {
-		14, 15, 22, 13,
-		 0, 21, 17, 12,
-		23,  0, 18, 20,
-		19, 16
-	};
 
 	void ShowTrainDepotWindow(TileIndex tile);
 
@@ -720,14 +716,14 @@ public class Rail extends RailTables {
 
 		if (!ValParamRailtype(p1) || !ValParamTrackOrientation(track)) return Cmd.CMD_ERROR;
 
-		tile = TileVirtXY(x, y);
+		tile = TileIndex.TileVirtXY(x, y);
 		tileh = GetTileSlope(tile, null);
 		m5 = tile.getMap().m5;
 		trackbit = TrackToTrackBits(track);
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		switch (GetTileType(tile)) {
+		switch (tile.GetTileType()) {
 			case TileTypes.MP_TUNNELBRIDGE:
 				if ((m5 & 0xC0) != 0xC0 || // not bridge middle part?
 						(m5 & 0x01 ? TRACK_BIT_DIAG1 : TRACK_BIT_DIAG2) != trackbit) { // wrong direction?
@@ -828,20 +824,6 @@ public class Rail extends RailTables {
 		return cost + Global._price.build_rail;
 	}
 
-	static final byte _signals_table[] = {
-		0x40, 0x40, 0x40, 0x10, 0x80, 0x20, 0, 0, // direction 1
-		0x80, 0x80, 0x80, 0x20, 0x40, 0x10, 0, 0  // direction 2
-	};
-
-	static final byte _signals_table_other[] = {
-		0x80, 0x80, 0x80, 0x20, 0x40, 0x10, 0, 0, // direction 1
-		0x40, 0x40, 0x40, 0x10, 0x80, 0x20, 0, 0  // direction 2
-	};
-
-	static final byte _signals_table_both[] = {
-		0xC0, 0xC0, 0xC0, 0x30, 0xC0, 0x30, 0, 0,	// both directions combined
-		0xC0, 0xC0, 0xC0, 0x30, 0xC0, 0x30, 0, 0
-	};
 
 
 	/** Remove a single piece of track
@@ -862,7 +844,7 @@ public class Rail extends RailTables {
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		tile = TileVirtXY(x, y);
+		tile = TileIndex.TileVirtXY(x, y);
 
 		if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && !tile.IsTileType( TileTypes.MP_STREET) && !tile.IsTileType( TileTypes.MP_RAILWAY))
 			return Cmd.CMD_ERROR;
@@ -874,7 +856,7 @@ public class Rail extends RailTables {
 		if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && !EnsureNoVehicle(tile))
 			return Cmd.CMD_ERROR;
 
-		switch(GetTileType(tile))
+		switch(tile.GetTileType())
 		{
 			case TileTypes.MP_TUNNELBRIDGE:
 				if (!EnsureNoVehicleZ(tile, TilePixelHeight(tile)))
@@ -959,17 +941,6 @@ public class Rail extends RailTables {
 		return cost;
 	}
 
-	static final struct {
-		int8 xinc[16];
-		int8 yinc[16];
-	} _railbit = {{
-	//  0   1   2   3   4   5
-		-16,  0,-16,  0, 16,  0,    0,  0,
-		 16,  0,  0, 16,  0,-16,    0,  0,
-	},{
-		  0, 16,  0, 16,  0, 16,    0,  0,
-		  0,-16,-16,  0,-16,  0,    0,  0,
-	}};
 
 	static int ValidateAutoDrag(Trackdir *trackdir, int x, int y, int ex, int ey)
 	{
@@ -1031,7 +1002,7 @@ public class Rail extends RailTables {
 		RailType railtype = (RailType)BitOps.GB(p2, 0, 4);
 
 		if (!ValParamRailtype(railtype) || !ValParamTrackOrientation(track)) return Cmd.CMD_ERROR;
-		if (p1 > MapSize()) return Cmd.CMD_ERROR;
+		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 		trackdir = TrackToTrackdir(track);
 
 		/* unpack end point */
@@ -1042,7 +1013,7 @@ public class Rail extends RailTables {
 
 		if (CmdFailed(ValidateAutoDrag(&trackdir, x, y, ex, ey))) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) SndPlayTileFx(SND_20_SPLAT_2, TileVirtXY(x, y));
+		if (flags & Cmd.DC_EXEC) SndPlayTileFx(SND_20_SPLAT_2, TileIndex.TileVirtXY(x, y));
 
 		for(;;) {
 			ret = DoCommand(x, y, railtype, TrackdirToTrack(trackdir), flags, (mode == 0) ? Cmd.CMD_BUILD_SINGLE_RAIL : Cmd.CMD_REMOVE_SINGLE_RAIL);
@@ -1095,7 +1066,7 @@ public class Rail extends RailTables {
 	int CmdBuildTrainDepot(int x, int y, int flags, int p1, int p2)
 	{
 		Depot d;
-		TileIndex tile = TileVirtXY(x, y);
+		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		int cost, ret;
 		int tileh;
 
@@ -1167,7 +1138,7 @@ public class Rail extends RailTables {
 	+  */
 	int CmdBuildSingleSignal(int x, int y, int flags, int p1, int p2)
 	{
-		TileIndex tile = TileVirtXY(x, y);
+		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		boolean semaphore;
 		boolean pre_signal_cycle;
 		byte pre_signal_type;
@@ -1240,7 +1211,7 @@ public class Rail extends RailTables {
 					if (pre_signal_cycle) {
 						// cycle between normal . pre . exit . combo . pbs ....
 						byte type = ((GetSignalType(tile, track) + 1) % 5);
-						BitOps.RET SB(tile.getMap().m4, 0, 3, type);
+						tile.getMap().m4 = BitOps.RETSB(tile.getMap().m4, 0, 3, type);
 					} else {
 						// cycle between two-way . one-way . one-way . ...
 						/* TODO: Rewrite switch into something more general */
@@ -1284,10 +1255,6 @@ public class Rail extends RailTables {
 		return cost;
 	}
 
-	static final byte _dir_from_track[14] = {
-		0,1,0,1,2,1, 0,0,
-		2,3,3,2,3,0,
-	};
 
 	/**  Build many signals automagically,
 	 * Copy a signal along the entire length of connected rail, stopping only when a junction is reached
@@ -1342,7 +1309,7 @@ public class Rail extends RailTables {
 			x += _railbit.xinc[trackdir];
 			y += _railbit.yinc[trackdir];
 
-			tile = TileVirtXY(x, y);
+			tile = TileIndex.TileVirtXY(x, y);
 
 			m5 = tile.getMap().m5;
 
@@ -1522,7 +1489,7 @@ public class Rail extends RailTables {
 		int ex, ey;
 		int ret, total_cost, signal_ctr;
 		byte signals;
-		TileIndex tile = TileVirtXY(x, y);
+		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		boolean error = true;
 
 		int mode = p2 & 0x1;
@@ -1531,7 +1498,7 @@ public class Rail extends RailTables {
 		byte semaphores = (BitOps.HASBIT(p2, 3)) ? 16 : 0;
 		byte signal_density = (p2 >> 24);
 
-		if (p1 > MapSize()) return Cmd.CMD_ERROR;
+		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 		if (signal_density == 0 || signal_density > 20) return Cmd.CMD_ERROR;
 
 		if (!tile.IsTileType( TileTypes.MP_RAILWAY)) return Cmd.CMD_ERROR;
@@ -1621,7 +1588,7 @@ public class Rail extends RailTables {
 	 */
 	int CmdRemoveSingleSignal(int x, int y, int flags, int p1, int p2)
 	{
-		TileIndex tile = TileVirtXY(x, y);
+		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		Track track = (Track)(p1 & 0x7);
 
 		if (!ValParamTrackOrientation(track) || !tile.IsTileType( TileTypes.MP_RAILWAY) || !EnsureNoVehicle(tile))
@@ -1699,7 +1666,7 @@ public class Rail extends RailTables {
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		if (!ValParamRailtype(p2)) return Cmd.CMD_ERROR;
-		if (p1 > MapSize()) return Cmd.CMD_ERROR;
+		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 
 		// make sure sx,sy are smaller than ex,ey
 		sx = TileX(p1) * TILE_SIZE;
@@ -1712,10 +1679,10 @@ public class Rail extends RailTables {
 
 		for (x = sx; x <= ex; x += TILE_SIZE) {
 			for (y = sy; y <= ey; y += TILE_SIZE) {
-				TileIndex tile = TileVirtXY(x, y);
+				TileIndex tile = TileIndex.TileVirtXY(x, y);
 				DoConvertRailProc* proc;
 
-				switch (GetTileType(tile)) {
+				switch (tile.GetTileType()) {
 					case TileTypes.MP_RAILWAY:      proc = DoConvertRail;             break;
 					case TileTypes.MP_STATION:      proc = DoConvertStationRail;      break;
 					case TileTypes.MP_STREET:       proc = DoConvertStreetRail;       break;
@@ -1966,7 +1933,7 @@ public class Rail extends RailTables {
 			ti.x + 8, ti.y + 8, 1, 1, 4, z);
 	}
 
-	static void DrawTrackFence_WindowEvents.WE_1(final TileInfo ti)
+	static void DrawTrackFence_WE_1(final TileInfo ti)
 	{
 		int z = ti.z;
 		if (ti.tileh & 8) z += 8;
@@ -1974,7 +1941,7 @@ public class Rail extends RailTables {
 			ti.x + 8, ti.y + 8, 1, 1, 4, z);
 	}
 
-	static void DrawTrackFence_WindowEvents.WE_2(final TileInfo ti)
+	static void DrawTrackFence_WE_2(final TileInfo ti)
 	{
 		int z = ti.z;
 		if (ti.tileh & 2) z += 8;
@@ -1987,29 +1954,29 @@ public class Rail extends RailTables {
 		/* nothing should be here */
 	}
 
-	typedef void DetailedTrackProc(final TileInfo ti);
-	static DetailedTrackProc* final _detailed_track_proc[] = {
-		DetTrackDrawProc_Null,
-		DetTrackDrawProc_Null,
+	//typedef void DetailedTrackProc(final TileInfo ti);
+	static final DetailedTrackProc _detailed_track_proc[] = {
+		Rail::DetTrackDrawProc_Null,
+		Rail::DetTrackDrawProc_Null,
 
-		DrawTrackFence_NW,
-		DrawTrackFence_SE,
-		DrawTrackFence_NW_SE,
+		Rail::DrawTrackFence_NW,
+		Rail::DrawTrackFence_SE,
+		Rail::DrawTrackFence_NW_SE,
 
-		DrawTrackFence_NE,
-		DrawTrackFence_SW,
-		DrawTrackFence_NE_SW,
+		Rail::DrawTrackFence_NE,
+		Rail::DrawTrackFence_SW,
+		Rail::DrawTrackFence_NE_SW,
 
-		DrawTrackFence_NS_1,
-		DrawTrackFence_NS_2,
+		Rail::DrawTrackFence_NS_1,
+		Rail::DrawTrackFence_NS_2,
 
-		DrawTrackFence_WindowEvents.WE_1,
-		DrawTrackFence_WindowEvents.WE_2,
+		Rail::DrawTrackFence_WE_1,
+		Rail::DrawTrackFence_WE_2,
 
-		DetTrackDrawProc_Null,
-		DetTrackDrawProc_Null,
-		DetTrackDrawProc_Null,
-		DetTrackDrawProc_Null,
+		Rail::DetTrackDrawProc_Null,
+		Rail::DetTrackDrawProc_Null,
+		Rail::DetTrackDrawProc_Null,
+		Rail::DetTrackDrawProc_Null,
 	};
 
 	static void DrawSpecialBuilding(int image, int offset,
@@ -2106,7 +2073,7 @@ public class Rail extends RailTables {
 	static void DrawTile_Track(TileInfo ti)
 	{
 		byte m5;
-		final RailtypeInfo *rti = GetRailTypeInfo(GetRailType(ti.tile));
+		final RailtypeInfo rti = GetRailTypeInfo(GetRailType(ti.tile));
 		PalSpriteID image;
 
 		_drawtile_track_palette = SPRITE_PALETTE(PLAYER_SPRITE_COLOR(GetTileOwner(ti.tile)));
@@ -2164,7 +2131,7 @@ public class Rail extends RailTables {
 			}
 		} else {
 			/* draw depots / waypoints */
-			final DrawTrackSeqStruct *drss;
+			final DrawTrackSeqStruct drss;
 			byte type = m5 & 0x3F; // 0-3: depots, 4-5: waypoints
 
 			if (!(m5 & (RAIL_TILE_TYPE_MASK&~RAIL_TYPE_SPECIAL)))
@@ -2178,12 +2145,12 @@ public class Rail extends RailTables {
 			if (IsRailWaypoint(ti.tile) && BitOps.HASBIT(_m[ti.tile].m3, 4)) {
 				// look for customization
 				byte stat_id = GetWaypointByTile(ti.tile).stat_id;
-				final StationSpec *stat = GetCustomStation(STAT_CLASS_WAYP, stat_id);
+				final StationSpec stat = GetCustomStation(STAT_CLASS_WAYP, stat_id);
 
 				if (stat != null) {
-					DrawTileSeqStruct final *seq;
+					DrawTileSeqStruct final seq;
 					// emulate station tile - open with building
-					final DrawTileSprites *cust = &stat.renderdata[2 + (m5 & 0x1)];
+					final DrawTileSprites cust = &stat.renderdata[2 + (m5 & 0x1)];
 					int relocation = GetCustomStationRelocation(stat, ComposeWaypointStation(ti.tile), 0);
 
 					/* We don't touch the 0x8000 bit. In all this
@@ -3255,8 +3222,8 @@ public class Rail extends RailTables {
 	static void BuildRailClick_Remove(Window w)
 	{
 		if (BitOps.HASBIT(w.disabled_state, 16)) return;
-		SetWindowDirty(w);
-		SndPlayFx(SND_15_BEEP);
+		w.SetWindowDirty();
+		//SndPlayFx(SND_15_BEEP);
 
 		TOGGLEBIT(w.click_state, 16);
 		_remove_button_clicked = BitOps.HASBIT(w.click_state, 16) != 0;
@@ -3284,7 +3251,7 @@ public class Rail extends RailTables {
 
 	static void DoRailroadTrack(int mode)
 	{
-		DoCommandP(TileVirtXY(_thd.selstart.x, _thd.selstart.y), TileVirtXY(_thd.selend.x, _thd.selend.y), _cur_railtype | (mode << 4), null,
+		DoCommandP(TileIndex.TileVirtXY(_thd.selstart.x, _thd.selstart.y), TileIndex.TileVirtXY(_thd.selend.x, _thd.selend.y), _cur_railtype | (mode << 4), null,
 			_remove_button_clicked ?
 			Cmd.CMD_REMOVE_RAILROAD_TRACK | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1012_CAN_T_REMOVE_RAILROAD_TRACK) :
 			Cmd.CMD_BUILD_RAILROAD_TRACK  | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1011_CAN_T_BUILD_RAILROAD_TRACK)
@@ -3297,7 +3264,7 @@ public class Rail extends RailTables {
 		int trackstat = thd.drawstyle & 0xF; // 0..5
 
 		if (thd.drawstyle & HT_RAIL) { // one tile case
-			GenericPlaceRail(TileVirtXY(thd.selend.x, thd.selend.y), trackstat);
+			GenericPlaceRail(TileIndex.TileVirtXY(thd.selend.x, thd.selend.y), trackstat);
 			return;
 		}
 
@@ -3310,15 +3277,15 @@ public class Rail extends RailTables {
 		byte trackstat = thd.drawstyle & 0xF; // 0..5
 
 		if (thd.drawstyle == HT_RECT) { // one tile case
-			GenericPlaceSignals(TileVirtXY(thd.selend.x, thd.selend.y));
+			GenericPlaceSignals(TileIndex.TileVirtXY(thd.selend.x, thd.selend.y));
 			return;
 		}
 
 		// Global._patches.drag_signals_density is given as a parameter such that each user in a network
 		// game can specify his/her own signal density
 		DoCommandP(
-			TileVirtXY(thd.selstart.x, thd.selstart.y),
-			TileVirtXY(thd.selend.x, thd.selend.y),
+			TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y),
+			TileIndex.TileVirtXY(thd.selend.x, thd.selend.y),
 			(_ctrl_pressed ? 1 << 3 : 0) | (trackstat << 4) | (Global._patches.drag_signals_density << 24),
 			CcPlaySound1E,
 			_remove_button_clicked ?
@@ -3384,7 +3351,7 @@ public class Rail extends RailTables {
 				w.disabled_state |= (1 << 16);
 				w.click_state &= ~(1<<16);
 			}
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 			break;
 
 		case WindowEvents.WE_CLICK:
@@ -3447,14 +3414,14 @@ public class Rail extends RailTables {
 
 		case WindowEvents.WE_ABORT_PLACE_OBJ:
 			UnclickWindowButtons(w);
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 
 			w = FindWindowById(Window.WC_BUILD_STATION, 0);
-			if (w != null) WP(w,def_d).close = true;
+			if (w != null) w.as_def_d().close = true;
 			w = FindWindowById(Window.WC_BUILD_DEPOT, 0);
-			if (w != null) WP(w,def_d).close = true;
+			if (w != null) w.as_def_d().close = true;
 			w = FindWindowById(Window.WC_BUILD_SIGNALS, 0);
-			if (w != null) WP(w,def_d).close=true;
+			if (w != null) w.as_def_d().close=true;
 
 			break;
 
@@ -3473,30 +3440,30 @@ public class Rail extends RailTables {
 
 
 	static final Widget _build_rail_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   359,     0,    13, Str.STR_100A_RAILROAD_CONSTRUCTION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7,   360,   371,     0,    13, 0x0,     Str.STR_STICKY_BUTTON},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   359,     0,    13, Str.STR_100A_RAILROAD_CONSTRUCTION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7,   360,   371,     0,    13, 0x0,     Str.STR_STICKY_BUTTON),
 
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   110,   113,    14,    35, 0x0,			Str.STR_NULL},
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   110,   113,    14,    35, 0x0,			Str.STR_NULL),
 
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    0,     21,    14,    35, 0x4E3,		Str.STR_1018_BUILD_RAILROAD_TRACK},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    22,    43,    14,    35, 0x4E4,		Str.STR_1018_BUILD_RAILROAD_TRACK},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    44,    65,    14,    35, 0x4E5,		Str.STR_1018_BUILD_RAILROAD_TRACK},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    66,    87,    14,    35, 0x4E6,		Str.STR_1018_BUILD_RAILROAD_TRACK},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    88,   109,    14,    35, Sprite.SPR_IMG_AUTORAIL, Str.STR_BUILD_AUTORAIL_TIP},
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    0,     21,    14,    35, 0x4E3,		Str.STR_1018_BUILD_RAILROAD_TRACK),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    22,    43,    14,    35, 0x4E4,		Str.STR_1018_BUILD_RAILROAD_TRACK),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    44,    65,    14,    35, 0x4E5,		Str.STR_1018_BUILD_RAILROAD_TRACK),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    66,    87,    14,    35, 0x4E6,		Str.STR_1018_BUILD_RAILROAD_TRACK),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    88,   109,    14,    35, Sprite.SPR_IMG_AUTORAIL, Str.STR_BUILD_AUTORAIL_TIP),
 
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   114,   135,    14,    35, 0x2BF,		Str.STR_018D_DEMOLISH_BUILDINGS_ETC},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   136,   157,    14,    35, 0x50E,		Str.STR_1019_BUILD_TRAIN_DEPOT_FOR_BUILDING},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   158,   179,    14,    35, Sprite.SPR_IMG_WAYPOINT, Str.STR_CONVERT_RAIL_TO_WAYPOINT_TIP},
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   114,   135,    14,    35, 0x2BF,		Str.STR_018D_DEMOLISH_BUILDINGS_ETC),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   136,   157,    14,    35, 0x50E,		Str.STR_1019_BUILD_TRAIN_DEPOT_FOR_BUILDING),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   158,   179,    14,    35, Sprite.SPR_IMG_WAYPOINT, Str.STR_CONVERT_RAIL_TO_WAYPOINT_TIP),
 
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   180,   221,    14,    35, 0x512,		Str.STR_101A_BUILD_RAILROAD_STATION},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   222,   243,    14,    35, 0x50B,		Str.STR_101B_BUILD_RAILROAD_SIGNALS},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   244,   285,    14,    35, 0xA22,		Str.STR_101C_BUILD_RAILROAD_BRIDGE},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   286,   305,    14,    35, Sprite.SPR_IMG_TUNNEL_RAIL, Str.STR_101D_BUILD_RAILROAD_TUNNEL},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   306,   327,    14,    35, 0x2CA,		Str.STR_101E_TOGGLE_BUILD_REMOVE_FOR},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   328,   349,    14,    35, Sprite.SPR_IMG_CONVERT_RAIL, Str.STR_CONVERT_RAIL_TIP},
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   180,   221,    14,    35, 0x512,		Str.STR_101A_BUILD_RAILROAD_STATION),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   222,   243,    14,    35, 0x50B,		Str.STR_101B_BUILD_RAILROAD_SIGNALS),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   244,   285,    14,    35, 0xA22,		Str.STR_101C_BUILD_RAILROAD_BRIDGE),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   286,   305,    14,    35, Sprite.SPR_IMG_TUNNEL_RAIL, Str.STR_101D_BUILD_RAILROAD_TUNNEL),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   306,   327,    14,    35, 0x2CA,		Str.STR_101E_TOGGLE_BUILD_REMOVE_FOR),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   328,   349,    14,    35, Sprite.SPR_IMG_CONVERT_RAIL, Str.STR_CONVERT_RAIL_TIP),
 
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   350,   371,    14,    35, Sprite.SPR_IMG_LANDSCAPING,	Str.STR_LANDSCAPING_TOOLBAR_TIP},
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   350,   371,    14,    35, Sprite.SPR_IMG_LANDSCAPING,	Str.STR_LANDSCAPING_TOOLBAR_TIP),
 
 	{   WIDGETS_END},
 	};
@@ -3592,7 +3559,7 @@ public class Rail extends RailTables {
 			int rad;
 			int bits;
 
-			if (WP(w,def_d).close) return;
+			if (w.as_def_d().close) return;
 
 			bits = (1<<3) << ( _railstation.orientation);
 			if (_railstation.dragdrop) {
@@ -3626,7 +3593,7 @@ public class Rail extends RailTables {
 				SETBIT(w.disabled_state, bits + 12);
 			}
 
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			StationPickerGfx.DrawSprite(39, 42, _cur_railtype, 2);
 			StationPickerGfx.DrawSprite(107, 42, _cur_railtype, 3);
@@ -3644,8 +3611,8 @@ public class Rail extends RailTables {
 			case 3:
 			case 4:
 				_railstation.orientation = e.click.widget - 3;
-				SndPlayFx(SND_15_BEEP);
-				SetWindowDirty(w);
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
 				break;
 
 			case 5:
@@ -3657,8 +3624,8 @@ public class Rail extends RailTables {
 			case 11:
 				_railstation.numtracks = (e.click.widget - 5) + 1;
 				_railstation.dragdrop = false;
-				SndPlayFx(SND_15_BEEP);
-				SetWindowDirty(w);
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
 				break;
 
 			case 12:
@@ -3670,75 +3637,75 @@ public class Rail extends RailTables {
 			case 18:
 				_railstation.platlength = (e.click.widget - 12) + 1;
 				_railstation.dragdrop = false;
-				SndPlayFx(SND_15_BEEP);
-				SetWindowDirty(w);
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
 				break;
 
 			case 19:
 				_railstation.dragdrop ^= true;
-				SndPlayFx(SND_15_BEEP);
-				SetWindowDirty(w);
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
 				break;
 
 			case 20:
 			case 21:
 				_station_show_coverage = e.click.widget - 20;
-				SndPlayFx(SND_15_BEEP);
-				SetWindowDirty(w);
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
 				break;
 			}
 		} break;
 
 		case WindowEvents.WE_MOUSELOOP:
-			if (WP(w,def_d).close) {
-				DeleteWindow(w);
+			if (w.as_def_d().close) {
+				w.DeleteWindow();
 				return;
 			}
 			CheckRedrawStationCoverage(w);
 			break;
 
 		case WindowEvents.WE_DESTROY:
-			if (!WP(w,def_d).close) ResetObjectToPlace();
+			if (!w.as_def_d().close) ResetObjectToPlace();
 			break;
 		}
 	}
 
 	static final Widget _station_builder_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,		Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   147,     0,    13, Str.STR_3000_RAIL_STATION_SELECTION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   147,    14,   199, 0x0,					Str.STR_NULL},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     7,    72,    26,    73, 0x0,					Str.STR_304E_SELEAcceptedCargo.CT_RAILROAD_STATION},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    75,   140,    26,    73, 0x0,					Str.STR_304E_SELEAcceptedCargo.CT_RAILROAD_STATION},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,		Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   147,     0,    13, Str.STR_3000_RAIL_STATION_SELECTION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   147,    14,   199, 0x0,					Str.STR_NULL),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     7,    72,    26,    73, 0x0,					Str.STR_304E_SELEAcceptedCargo.CT_RAILROAD_STATION),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    75,   140,    26,    73, 0x0,					Str.STR_304E_SELEAcceptedCargo.CT_RAILROAD_STATION),
 
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    22,    36,    87,    98, Str.STR_00CB_1,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,    51,    87,    98, Str.STR_00CC_2,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    52,    66,    87,    98, Str.STR_00CD_3,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    67,    81,    87,    98, Str.STR_00CE_4,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    82,    96,    87,    98, Str.STR_00CF_5,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    97,   111,    87,    98, Str.STR_0335_6,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   112,   126,    87,    98, Str.STR_0336_7,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS},
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    22,    36,    87,    98, Str.STR_00CB_1,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,    51,    87,    98, Str.STR_00CC_2,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    52,    66,    87,    98, Str.STR_00CD_3,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    67,    81,    87,    98, Str.STR_00CE_4,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    82,    96,    87,    98, Str.STR_00CF_5,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    97,   111,    87,    98, Str.STR_0335_6,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   112,   126,    87,    98, Str.STR_0336_7,	Str.STR_304F_SELEAcceptedCargo.CT_NUMBER_OF_PLATFORMS),
 
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    22,    36,   112,   123, Str.STR_00CB_1,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,    51,   112,   123, Str.STR_00CC_2,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    52,    66,   112,   123, Str.STR_00CD_3,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    67,    81,   112,   123, Str.STR_00CE_4,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    82,    96,   112,   123, Str.STR_00CF_5,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    97,   111,   112,   123, Str.STR_0335_6,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   112,   126,   112,   123, Str.STR_0336_7,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD},
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    22,    36,   112,   123, Str.STR_00CB_1,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,    51,   112,   123, Str.STR_00CC_2,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    52,    66,   112,   123, Str.STR_00CD_3,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    67,    81,   112,   123, Str.STR_00CE_4,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    82,    96,   112,   123, Str.STR_00CF_5,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    97,   111,   112,   123, Str.STR_0335_6,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   112,   126,   112,   123, Str.STR_0336_7,	Str.STR_3050_SELEAcceptedCargo.CT_LENGTH_OF_RAILROAD),
 
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,   111,   126,   137, Str.STR_DRAG_DROP, Str.STR_STATION_DRAG_DROP},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    14,    73,   152,   163, Str.STR_02DB_OFF, Str.STR_3065_DON_T_HIGHLIGHT_COVERAGE},
-	{    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    74,   133,   152,   163, Str.STR_02DA_ON, Str.STR_3064_HIGHLIGHT_COVERAGE_AREA},
-	{   WIDGETS_END},
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,   111,   126,   137, Str.STR_DRAG_DROP, Str.STR_STATION_DRAG_DROP),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    14,    73,   152,   163, Str.STR_02DB_OFF, Str.STR_3065_DON_T_HIGHLIGHT_COVERAGE),
+	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    74,   133,   152,   163, Str.STR_02DA_ON, Str.STR_3064_HIGHLIGHT_COVERAGE_AREA),
+	//{   WIDGETS_END},
 	};
 
-	static final WindowDesc _station_builder_desc = {
+	static final WindowDesc _station_builder_desc = new WindowDesc(
 		-1, -1, 148, 200,
 		Window.WC_BUILD_STATION,Window.WC_BUILD_TOOLBAR,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_station_builder_widgets,
-		StationBuildWndProc
-	};
+		Rail::StationBuildWndProc
+	);
 
 	static void ShowStationBuilder()
 	{
@@ -3752,7 +3719,7 @@ public class Rail extends RailTables {
 			RailType r;
 
 			w.click_state = (1 << 3) << _build_depot_direction;
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			r = _cur_railtype;
 			DrawTrainDepotSprite(70, 17, 0, r);
@@ -3769,40 +3736,40 @@ public class Rail extends RailTables {
 				case 5:
 				case 6:
 					_build_depot_direction = e.click.widget - 3;
-					SndPlayFx(SND_15_BEEP);
-					SetWindowDirty(w);
+					//SndPlayFx(SND_15_BEEP);
+					w.SetWindowDirty();
 					break;
 			}
 			break;
 
 		case WindowEvents.WE_MOUSELOOP:
-			if (WP(w,def_d).close) DeleteWindow(w);
+			if (w.as_def_d().close) w.DeleteWindow();
 			return;
 
 		case WindowEvents.WE_DESTROY:
-			if (!WP(w,def_d).close) ResetObjectToPlace();
+			if (!w.as_def_d().close) ResetObjectToPlace();
 			break;
 		}
 	}
 
 	static final Widget _build_depot_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   139,     0,    13, Str.STR_1014_TRAIN_DEPOT_ORIENTATION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   139,    14,   121, 0x0,			Str.STR_NULL},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    17,    66, 0x0,			Str.STR_1020_SELEAcceptedCargo.CT_RAILROAD_DEPOT_ORIENTATIO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    69,   118, 0x0,			Str.STR_1020_SELEAcceptedCargo.CT_RAILROAD_DEPOT_ORIENTATIO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    69,   118, 0x0,			Str.STR_1020_SELEAcceptedCargo.CT_RAILROAD_DEPOT_ORIENTATIO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    17,    66, 0x0,			Str.STR_1020_SELEAcceptedCargo.CT_RAILROAD_DEPOT_ORIENTATIO},
-	{   WIDGETS_END},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   139,     0,    13, Str.STR_1014_TRAIN_DEPOT_ORIENTATION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   139,    14,   121, 0x0,			Str.STR_NULL),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    17,    66, 0x0,			Str.STR_1020_SELEAcceptedCargo.CT_RAILROAD_DEPOT_ORIENTATIO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    69,   118, 0x0,			Str.STR_1020_SELEAcceptedCargo.CT_RAILROAD_DEPOT_ORIENTATIO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    69,   118, 0x0,			Str.STR_1020_SELEAcceptedCargo.CT_RAILROAD_DEPOT_ORIENTATIO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    17,    66, 0x0,			Str.STR_1020_SELEAcceptedCargo.CT_RAILROAD_DEPOT_ORIENTATIO),
+	//{   WIDGETS_END},
 	};
 
-	static final WindowDesc _build_depot_desc = {
+	static final WindowDesc _build_depot_desc = new WindowDesc(
 		-1,-1, 140, 122,
 		Window.WC_BUILD_DEPOT,Window.WC_BUILD_TOOLBAR,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_build_depot_widgets,
-		BuildTrainDepotWndProc
-	};
+		Rail::BuildTrainDepotWndProc
+	);
 
 	static void ShowBuildTrainDepotPicker()
 	{
@@ -3817,7 +3784,7 @@ public class Rail extends RailTables {
 			int i;
 
 			w.click_state = (1 << 3) << (_cur_waypoint_type - w.hscroll.pos);
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			for (i = 0; i < 5; i++) {
 				if (w.hscroll.pos + i < _waypoint_count) {
@@ -3830,45 +3797,45 @@ public class Rail extends RailTables {
 			switch (e.click.widget) {
 			case 3: case 4: case 5: case 6: case 7:
 				_cur_waypoint_type = e.click.widget - 3 + w.hscroll.pos;
-				SndPlayFx(SND_15_BEEP);
-				SetWindowDirty(w);
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
 				break;
 			}
 			break;
 		}
 
 		case WindowEvents.WE_MOUSELOOP:
-			if (WP(w,def_d).close) DeleteWindow(w);
+			if (w.as_def_d().close) w.DeleteWindow();
 			break;
 
 		case WindowEvents.WE_DESTROY:
-			if (!WP(w,def_d).close) ResetObjectToPlace();
+			if (!w.as_def_d().close) ResetObjectToPlace();
 			break;
 		}
 	}
 
 	static final Widget _build_waypoint_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5, Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   343,     0,    13, Str.STR_WAYPOINT,Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   343,    14,    91, 0x0, 0},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5, Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   343,     0,    13, Str.STR_WAYPOINT,Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   343,    14,    91, 0x0, 0),
 
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     3,    68,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    71,   136,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   139,   204,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   207,   272,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   275,   340,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP},
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     3,    68,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    71,   136,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   139,   204,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   207,   272,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   275,   340,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
 
-	{ Window.WWT_HSCROLLBAR,   Window.RESIZE_NONE,    7,     1,   343,     80,    91, 0x0, Str.STR_0190_SCROLL_BAR_SCROLLS_LIST},
-	{    WIDGETS_END},
+	new Widget( Window.WWT_HSCROLLBAR,   Window.RESIZE_NONE,    7,     1,   343,     80,    91, 0x0, Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+	//{    WIDGETS_END},
 	};
 
-	static final WindowDesc _build_waypoint_desc = {
+	static final WindowDesc _build_waypoint_desc = new WindowDesc(
 		-1,-1, 344, 92,
 		Window.WC_BUILD_DEPOT,Window.WC_BUILD_TOOLBAR,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_build_waypoint_widgets,
-		BuildWaypointWndProc
-	};
+		Rail::BuildWaypointWndProc
+	);
 
 	static void ShowBuildWaypointPicker()
 	{
@@ -3888,7 +3855,7 @@ public class Rail extends RailTables {
 			w.click_state = ((1 << 4) << _cur_signal_type) | (_cur_autosig_compl ? 1 << 9 : 0);
 
 			Global.SetDParam(10, _presig_types_dropdown[_cur_presig_type]);
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			// Draw the string for current signal type
 			DrawStringCentered(69, 49, Str.STR_SIGNAL_TYPE_STANDARD + _cur_signal_type, 0);
@@ -3912,27 +3879,27 @@ public class Rail extends RailTables {
 				case 4: case 5: // select signal type
 					/* XXX TODO: take into account the scroll position for changing selected type */
 					_cur_signal_type = e.click.widget - 4;
-					SndPlayFx(SND_15_BEEP);
-					SetWindowDirty(w);
+					//SndPlayFx(SND_15_BEEP);
+					w.SetWindowDirty();
 					break;
 				case 7: // decrease drag density
 					if (Global._patches.drag_signals_density > 1) {
 						Global._patches.drag_signals_density--;
-						SndPlayFx(SND_15_BEEP);
-						SetWindowDirty(w);
+						//SndPlayFx(SND_15_BEEP);
+						w.SetWindowDirty();
 					};
 					break;
 				case 8: // increase drag density
 					if (Global._patches.drag_signals_density < 20) {
 						Global._patches.drag_signals_density++;
-						SndPlayFx(SND_15_BEEP);
-						SetWindowDirty(w);
+						//SndPlayFx(SND_15_BEEP);
+						w.SetWindowDirty();
 					};
 					break;
 				case 9: // autosignal mode toggle button
 					_cur_autosig_compl ^= 1;
-					SndPlayFx(SND_15_BEEP);
-					SetWindowDirty(w);
+					//SndPlayFx(SND_15_BEEP);
+					w.SetWindowDirty();
 					break;
 				case 10: case 11: // presignal-type dropdown list
 					ShowDropDownMenu(w, _presig_types_dropdown, _cur_presig_type, 11, 0, 0);
@@ -3941,45 +3908,45 @@ public class Rail extends RailTables {
 			break;
 		case WindowEvents.WE_DROPDOWN_SELECT: // change presignal type
 			_cur_presig_type = e.dropdown.index;
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 			break;
 		}
 
 		case WindowEvents.WE_MOUSELOOP:
-			if (WP(w,def_d).close)
-				DeleteWindow(w);
+			if (w.as_def_d().close)
+				w.DeleteWindow();
 			return;
 
 		case WindowEvents.WE_DESTROY:
-			if (!WP(w,def_d).close)
+			if (!w.as_def_d().close)
 				ResetObjectToPlace();
 			break;
 		}
 	}
 
 	static final Widget _build_signal_widgets[] = {
-	{   Window.WWT_CLOSEBOX, Window.RESIZE_NONE,    7,    0,   10,    0,   13, Str.STR_00C5                 , Str.STR_018B_CLOSE_WINDOW},
-	{   Window.WWT_CAPTION,  Window.RESIZE_NONE,    7,   11,  139,    0,   13, Str.STR_SIGNAL_SELECTION     , Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,    0,  139,   14,  114, 0x0                      , Str.STR_NULL},
-	{   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   22,   30,   29,   39, Sprite.SPR_ARROW_LEFT           , Str.STR_SIGNAL_TYPE_TIP},
-	{   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   43,   64,   24,   45, 0x50B                    , Str.STR_SIGNAL_TYPE_TIP},
-	{   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   75,   96,   24,   45, Sprite.SPR_SEMA                 , Str.STR_SIGNAL_TYPE_TIP},
-	{   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,  109,  117,   29,   39, Sprite.SPR_ARROW_RIGHT          , Str.STR_SIGNAL_TYPE_TIP},
-	{   Window.WWT_IMGBTN,   Window.RESIZE_NONE,    3,   25,   34,   72,   80, 0x0                      , Str.STR_SIGNAL_DENSITY_TIP},
-	{   Window.WWT_IMGBTN,   Window.RESIZE_NONE,    3,   35,   44,   72,   80, 0x0                      , Str.STR_SIGNAL_DENSITY_TIP},
-	{   Window.WWT_TEXTBTN,  Window.RESIZE_NONE,    7,   20,  119,   84,   95, Str.STR_SIGNAL_COMPLETION    , Str.STR_SIGNAL_COMPLETION_TIP},
-	{   Window.WWT_6,        Window.RESIZE_NONE,    7,   10,  129,   99,  110, Str.STR_SIGNAL_PRESIG_COMBO  , Str.STR_SIGNAL_PRESIG_TIP},
-	{   Window.WWT_CLOSEBOX, Window.RESIZE_NONE,    7,  118,  128,  100,  109, Str.STR_0225                 , Str.STR_SIGNAL_PRESIG_TIP},
-	{   WIDGETS_END},
+	new Widget(   Window.WWT_CLOSEBOX, Window.RESIZE_NONE,    7,    0,   10,    0,   13, Str.STR_00C5                 , Str.STR_018B_CLOSE_WINDOW),
+	new Widget(   Window.WWT_CAPTION,  Window.RESIZE_NONE,    7,   11,  139,    0,   13, Str.STR_SIGNAL_SELECTION     , Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,    0,  139,   14,  114, 0x0                      , Str.STR_NULL),
+	new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   22,   30,   29,   39, Sprite.SPR_ARROW_LEFT           , Str.STR_SIGNAL_TYPE_TIP),
+	new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   43,   64,   24,   45, 0x50B                    , Str.STR_SIGNAL_TYPE_TIP),
+	new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   75,   96,   24,   45, Sprite.SPR_SEMA                 , Str.STR_SIGNAL_TYPE_TIP),
+	new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,  109,  117,   29,   39, Sprite.SPR_ARROW_RIGHT          , Str.STR_SIGNAL_TYPE_TIP),
+	new Widget(   Window.WWT_IMGBTN,   Window.RESIZE_NONE,    3,   25,   34,   72,   80, 0x0                      , Str.STR_SIGNAL_DENSITY_TIP),
+	new Widget(   Window.WWT_IMGBTN,   Window.RESIZE_NONE,    3,   35,   44,   72,   80, 0x0                      , Str.STR_SIGNAL_DENSITY_TIP),
+	new Widget(   Window.WWT_TEXTBTN,  Window.RESIZE_NONE,    7,   20,  119,   84,   95, Str.STR_SIGNAL_COMPLETION    , Str.STR_SIGNAL_COMPLETION_TIP),
+	new Widget(   Window.WWT_6,        Window.RESIZE_NONE,    7,   10,  129,   99,  110, Str.STR_SIGNAL_PRESIG_COMBO  , Str.STR_SIGNAL_PRESIG_TIP),
+	new Widget(   Window.WWT_CLOSEBOX, Window.RESIZE_NONE,    7,  118,  128,  100,  109, Str.STR_0225                 , Str.STR_SIGNAL_PRESIG_TIP),
+	//{   WIDGETS_END},
 	};
 
-	static final WindowDesc _build_signal_desc = {
+	static final WindowDesc _build_signal_desc = new WindowDesc(
 		-1,-1, 140, 115,
 		Window.WC_BUILD_SIGNALS,Window.WC_BUILD_TOOLBAR,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_build_signal_widgets,
-		BuildSignalWndProc
-	};
+		Rail::BuildSignalWndProc
+	);
 
 	static void ShowSignalBuilder()
 	{
@@ -4025,3 +3992,10 @@ public class Rail extends RailTables {
 	
 	
 }
+
+
+
+//typedef void DetailedTrackProc(final TileInfo ti);
+
+@FunctionalInterface
+interface DetailedTrackProc extends Consumer<TileInfo> {}
