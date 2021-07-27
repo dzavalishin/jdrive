@@ -571,5 +571,21 @@ public class RailTables {
 	static final byte _search_dir_1[] = {1, 3, 1, 3, 5, 3};
 	static final byte _search_dir_2[] = {5, 7, 7, 5, 7, 1};
 	
+
+	
+	
+	/** Enum referring to the widgets of the build rail toolbar
+	 */
+	//typedef enum {
+		public static final int RTW_CAPTION = 1;
+		public static final int RTW_BUILD_NS = 4;
+		public static final int RTW_BUILD_X = 5;
+		public static final int RTW_BUILD_EW = 6;
+		public static final int RTW_BUILD_Y = 7;
+		public static final int RTW_AUTORAIL = 8;
+		public static final int RTW_BUILD_DEPOT = 10;
+		public static final int RTW_BUILD_TUNNEL = 15;
+		public static final int RTW_CONVERT_RAIL = 17;
+	//} RailToolbarWidgets;
 	
 }
