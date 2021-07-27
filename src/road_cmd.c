@@ -1,3 +1,4 @@
+#if 0
 /* $Id: road_cmd.c 3313 2005-12-18 12:10:46Z tron $ */
 
 #include "stdafx.h"

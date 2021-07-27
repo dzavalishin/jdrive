@@ -26,7 +26,7 @@ public class StationSpec
 	 * 6-7 = platform with roof, right side
 	 */
 	int tiles;
-	DrawTileSprites renderdata; ///< Array of tile layouts.
+	DrawTileSprites [] renderdata; ///< Array of tile layouts.
 
 	byte lengths;
 	byte []platforms;
