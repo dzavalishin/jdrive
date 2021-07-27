@@ -325,7 +325,7 @@ public class RailTables {
 	 * track entering in this direction (including those making 90 degree turns)
 	 */
 	//final TrackdirBits _exitdir_reaches_trackdirs[] = 
-	static final int _exitdir_reaches_trackdirs[] = 
+	protected static final int _exitdir_reaches_trackdirs[] = 
 		{
 				TRACKDIR_BIT_DIAG1_NE | TRACKDIR_BIT_LOWER_E | TRACKDIR_BIT_LEFT_N,  /* DIAGDIR_NE */
 				TRACKDIR_BIT_DIAG2_SE | TRACKDIR_BIT_LEFT_S  | TRACKDIR_BIT_UPPER_E, /* DIAGDIR_SE */
@@ -334,7 +334,7 @@ public class RailTables {
 		};
 
 	//final Trackdir _next_trackdir[] = 
-	static final int _next_trackdir[] = 
+	protected static final int _next_trackdir[] = 
 		{
 				TRACKDIR_DIAG1_NE,  TRACKDIR_DIAG2_SE,  TRACKDIR_LOWER_E, TRACKDIR_UPPER_E, TRACKDIR_RIGHT_S, TRACKDIR_LEFT_S, INVALID_TRACKDIR, INVALID_TRACKDIR,
 				TRACKDIR_DIAG1_SW,  TRACKDIR_DIAG2_NW,  TRACKDIR_LOWER_W, TRACKDIR_UPPER_W, TRACKDIR_RIGHT_N, TRACKDIR_LEFT_N
@@ -342,7 +342,7 @@ public class RailTables {
 
 	/* Maps a trackdir to all trackdirs that make 90 deg turns with it. */
 	//final TrackdirBits _track_crosses_trackdirs[] = 
-	static final int _track_crosses_trackdirs[] = 
+	protected static final int _track_crosses_trackdirs[] = 
 		{
 				TRACKDIR_BIT_DIAG2_SE | TRACKDIR_BIT_DIAG2_NW,                                               /* TRACK_DIAG1 */
 				TRACKDIR_BIT_DIAG1_NE | TRACKDIR_BIT_DIAG1_SW,                                               /* TRACK_DIAG2 */
@@ -354,7 +354,7 @@ public class RailTables {
 
 	/* Maps a track to all tracks that make 90 deg turns with it. */
 	//final TrackBits _track_crosses_tracks[] = 
-	static final int _track_crosses_tracks[] = 
+	protected static final int _track_crosses_tracks[] = 
 		{
 				TRACK_BIT_DIAG2,                   /* TRACK_DIAG1 */
 				TRACK_BIT_DIAG1,                   /* TRACK_DIAG2 */
@@ -370,14 +370,14 @@ public class RailTables {
 	// TODO Duplicate
 
 	//final DiagDirection _trackdir_to_exitdir[] = 
-	static final int _trackdir_to_exitdir[] = 
+	protected static final int _trackdir_to_exitdir[] = 
 		{
 				DIAGDIR_NE,DIAGDIR_SE,DIAGDIR_NE,DIAGDIR_SE,DIAGDIR_SW,DIAGDIR_SE, DIAGDIR_NE,DIAGDIR_NE,
 				DIAGDIR_SW,DIAGDIR_NW,DIAGDIR_NW,DIAGDIR_SW,DIAGDIR_NW,DIAGDIR_NE,
 		}; 
 
 	//final Trackdir _track_exitdir_to_trackdir[][DIAGDIR_END] = 
-	static final int _track_exitdir_to_trackdir[][] = 
+	protected static final int _track_exitdir_to_trackdir[][] = 
 		{
 				{TRACKDIR_DIAG1_NE, INVALID_TRACKDIR,  TRACKDIR_DIAG1_SW, INVALID_TRACKDIR},
 				{INVALID_TRACKDIR,  TRACKDIR_DIAG2_SE, INVALID_TRACKDIR,  TRACKDIR_DIAG2_NW},
@@ -388,7 +388,7 @@ public class RailTables {
 		};
 
 	//final Trackdir _track_enterdir_to_trackdir[][DIAGDIR_END] = 
-	static final int _track_enterdir_to_trackdir[][] = 
+	protected static final int _track_enterdir_to_trackdir[][] = 
 		{ // TODO: replace magic with enums
 				{TRACKDIR_DIAG1_NE, INVALID_TRACKDIR,  TRACKDIR_DIAG1_SW, INVALID_TRACKDIR},
 				{INVALID_TRACKDIR,  TRACKDIR_DIAG2_SE, INVALID_TRACKDIR,  TRACKDIR_DIAG2_NW},
@@ -399,7 +399,7 @@ public class RailTables {
 		};
 
 	//final Trackdir _track_direction_to_trackdir[][DIR_END] = 
-	static final int _track_direction_to_trackdir[][] = 
+	protected static final int _track_direction_to_trackdir[][] = 
 		{
 				{INVALID_TRACKDIR, TRACKDIR_DIAG1_NE, INVALID_TRACKDIR, INVALID_TRACKDIR,  INVALID_TRACKDIR, TRACKDIR_DIAG1_SW, INVALID_TRACKDIR, INVALID_TRACKDIR},
 				{INVALID_TRACKDIR, INVALID_TRACKDIR,  INVALID_TRACKDIR, TRACKDIR_DIAG2_SE, INVALID_TRACKDIR, INVALID_TRACKDIR,  INVALID_TRACKDIR, TRACKDIR_DIAG2_NW},
@@ -410,19 +410,19 @@ public class RailTables {
 		};
 
 	//final Trackdir _dir_to_diag_trackdir[] = 
-	static final int _dir_to_diag_trackdir[] = 
+	protected static final int _dir_to_diag_trackdir[] = 
 		{
 				TRACKDIR_DIAG1_NE, TRACKDIR_DIAG2_SE, TRACKDIR_DIAG1_SW, TRACKDIR_DIAG2_NW,
 		};
 
 	//final DiagDirection _reverse_diagdir[] = 
-	static final int _reverse_diagdir[] = 
+	protected static final int _reverse_diagdir[] = 
 		{
 				DIAGDIR_SW, DIAGDIR_NW, DIAGDIR_NE, DIAGDIR_SE
 		};
 
 	//final Trackdir _reverse_trackdir[] = 
-	static final int _reverse_trackdir[] = 
+	protected static final int _reverse_trackdir[] = 
 		{
 				TRACKDIR_DIAG1_SW, TRACKDIR_DIAG2_NW, TRACKDIR_UPPER_W, TRACKDIR_LOWER_W, TRACKDIR_LEFT_N, TRACKDIR_RIGHT_N, INVALID_TRACKDIR, INVALID_TRACKDIR,
 				TRACKDIR_DIAG1_NE, TRACKDIR_DIAG2_SE, TRACKDIR_UPPER_E, TRACKDIR_LOWER_E, TRACKDIR_LEFT_S, TRACKDIR_RIGHT_S
@@ -434,7 +434,7 @@ public class RailTables {
 
 
 
-	static final byte _track_sloped_sprites[] = {
+	protected static final byte _track_sloped_sprites[] = {
 			14, 15, 22, 13,
 			0, 21, 17, 12,
 			23,  0, 18, 20,
@@ -444,17 +444,17 @@ public class RailTables {
 
 
 
-	static final int _signals_table[] = {
+	protected static final int _signals_table[] = {
 			0x40, 0x40, 0x40, 0x10, 0x80, 0x20, 0, 0, // direction 1
 			0x80, 0x80, 0x80, 0x20, 0x40, 0x10, 0, 0  // direction 2
 	};
 
-	static final int _signals_table_other[] = {
+	protected static final int _signals_table_other[] = {
 			0x80, 0x80, 0x80, 0x20, 0x40, 0x10, 0, 0, // direction 1
 			0x40, 0x40, 0x40, 0x10, 0x80, 0x20, 0, 0  // direction 2
 	};
 
-	static final int _signals_table_both[] = {
+	protected static final int _signals_table_both[] = {
 			0xC0, 0xC0, 0xC0, 0x30, 0xC0, 0x30, 0, 0,	// both directions combined
 			0xC0, 0xC0, 0xC0, 0x30, 0xC0, 0x30, 0, 0
 	};

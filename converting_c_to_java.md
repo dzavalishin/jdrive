@@ -45,7 +45,32 @@ NPFFillWithOrderData(fstd, v);
 if( flags & FLG_USED ) does not work on Java enums
 use constants and ints
 
+* no macros
+
+```
+BitOps.SB(tile.getMap().m2, 0, 4, new_ground);
+```
+
+to
+
+
+```
+tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 0, 4, new_ground);
+```
+
 
 * bad replacements
 
 'finalruct' was 'construct' initially
+
+
+
+
+---
+SignalState
+Track
+TrackBits
+Trackdir
+TrackdirBits
+
+
