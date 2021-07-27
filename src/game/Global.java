@@ -146,8 +146,8 @@ public class Global {
 	public static Prices _price;
 	public static int [] _price_frac = new int[NUM_PRICES];
 
-	public static int []_cargo_payment_rates = new int[NUM_CARGO];
-	public static int [] _cargo_payment_rates_frac = new int[NUM_CARGO];
+	public static int []_cargo_payment_rates = new int[AcceptedCargo.NUM_CARGO];
+	public static int [] _cargo_payment_rates_frac = new int[AcceptedCargo.NUM_CARGO];
 	public static CargoConst _cargoc = new CargoConst();
 
 	/* --- 1 Day is 74 ticks ---
@@ -196,6 +196,8 @@ public class Global {
 	// Skip aging of cargo?
 	public static int _age_cargo_skip_counter;
 	public static Point _tile_fract_coords; // TODO to ViewPort?
+	public static String _screenshot_name;
+	public static byte _vehicle_design_names;
 	
 	// Available aircraft types
 	public static int _avail_aircraft = 0; // TODO who assigns?
@@ -306,7 +308,15 @@ public class Global {
 			debug( s, arg );
 	}
 
+	public static void DEBUG_npf( int level, String s, Object ... arg )
+	{
+		if( level >= _debug_npf_level )
+			debug( s, arg );
+	}
 
+	
+	
+	
 	public static int Random() {
 		return hal.Random();
 	}
@@ -483,7 +493,7 @@ public class Global {
 
 		if (Global._game_mode != GameModes.GM_MENU) {
 			Window.InvalidateWindowWidget(Window.WC_STATUS_BAR, 0, 0);
-			EnginesDailyLoop();
+			EngineGui.EnginesDailyLoop();
 		}
 
 		/* check if we entered a new month? */

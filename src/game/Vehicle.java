@@ -12,7 +12,10 @@ public class Vehicle implements IPoolItem
 	static public final int INVALID_ENGINE  = -1;
 	private static final int INVALID_COORD = -0x8000;
 
-
+	/* A lot of code calls for the invalidation of the status bar, which is widget 5.
+	 * Best is to have a virtual value for it when it needs to change again */
+	static public final int STATUS_BAR = 5;
+	
 	//private static int GEN_HASH(int x, int y) { return (((x & 0x1F80)>>7) + ((y & 0xFC0))); }
 	//static VehicleID _vehicle_position_hash[] = new VehicleID[0x1000];
 
@@ -1457,8 +1460,9 @@ public class Vehicle implements IPoolItem
 		return (not_full != 0) && (full & ~not_full) == 0;
 	}
 
-	boolean CanFillVehicle(Vehicle v)
+	boolean CanFillVehicle()
 	{
+		Vehicle v = this;
 		TileIndex tile = v.tile;
 
 		if (tile.IsTileType(TileTypes.MP_STATION) ||
@@ -2759,8 +2763,10 @@ public class Vehicle implements IPoolItem
 		return (byte) ((dir+((dirdiff&7)<5?1:-1)) & 7);
 	}
 
-	Trackdir GetVehicleTrackdir(final Vehicle  v)
+	Trackdir GetVehicleTrackdir()
 	{
+		final Vehicle  v = this;
+		
 		if( 0 != (v.vehstatus & VS_CRASHED)) return Trackdir.INVALID_TRACKDIR;
 
 		switch(v.type)
@@ -2814,7 +2820,7 @@ public class Vehicle implements IPoolItem
 		return result;
 	}
 
-	UnitID GetFreeUnitNumber(byte type)
+	static UnitID GetFreeUnitNumber(int type)
 	{
 		int unit_num = 0;
 
@@ -3088,7 +3094,11 @@ public class Vehicle implements IPoolItem
 		};
 	}
 
-
+	//public void TriggerVehicle(VehicleTrigger trigger)
+	public void TriggerVehicle(int trigger)
+	{
+		VehicleGui.TriggerVehicle(this, trigger);
+	}
 
 	/*
 	// Save and load of vehicles

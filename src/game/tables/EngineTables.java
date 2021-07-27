@@ -2,7 +2,7 @@ package game.tables;
 
 import game.AcceptedCargo;
 
-public class EngineTables 
+public class EngineTables extends EngineTables2  
 {
 
 	//enum {
@@ -164,9 +164,6 @@ public class EngineTables
 	};
 
 	
-	
-	
-	
-	
+		
 
 }

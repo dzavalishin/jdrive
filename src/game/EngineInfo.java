@@ -5,12 +5,12 @@ package game;
  */
 
 public class EngineInfo {
-	int base_intro;
-	byte unk2;              ///< Carriages have the highest bit set in this one
-	byte lifelength;
-	byte base_life;
-	byte railtype;
-	byte climates;
-	int refit_mask;
+	public int base_intro;
+	public byte unk2;              ///< Carriages have the highest bit set in this one
+	public byte lifelength;
+	public byte base_life;
+	public byte railtype;
+	public byte climates;
+	public int refit_mask;
 
 }

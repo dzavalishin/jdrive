@@ -246,7 +246,7 @@ public class Npf {
 	 */
 	static TileIndex CalcClosestStationTile(StationID station, TileIndex tile)
 	{
-		final Station  st = Station.GetStation(station);
+		final Station  st = Station.GetStation(station.id);
 
 		int minx = st.train_tile.TileX();  // topmost corner of station
 		int miny = st.train_tile.TileY();
@@ -407,7 +407,7 @@ public class Npf {
 			/* This is a first order decision, so we'd better save the
 			 * direction we chose */
 			current.user_data[NPF_TRACKDIR_CHOICE] = trackdir;
-			DEBUG_npf( 6, "Saving trackdir: %#x", trackdir);
+			Global.DEBUG_npf( 6, "Saving trackdir: %#x", trackdir);
 		} else {
 			/* We've already made the decision, so just save our parent's
 			 * decision */
@@ -1187,7 +1187,7 @@ public class Npf {
 		_npf_aystar.max_search_nodes = Global._patches.npf_max_search_nodes;
 	}
 
-	void NPFFillWithOrderData(NPFFindStationOrTileData  fstd, Vehicle  v)
+	static void NPFFillWithOrderData(NPFFindStationOrTileData  fstd, Vehicle  v)
 	{
 		/* Ships don't really reach their stations, but the tile in front. So don't
 		 * save the station id for ships. For roadvehs we don't store it either,
@@ -1195,7 +1195,7 @@ public class Npf {
 		 * dest_tile, not just any stop of that station.
 		 * So only for train orders to stations we fill fstd.station_index, for all
 		 * others only dest_coords */
-		if ((v.current_order.type) == OT_GOTO_STATION && v.type == Vehicle.VEH_Train) {
+		if ((v.current_order.type) == Order.OT_GOTO_STATION && v.type == Vehicle.VEH_Train) {
 			fstd.station_index = v.current_order.station;
 			/* Let's take the closest tile of the station as our target for trains */
 			fstd.dest_coords = CalcClosestStationTile(v.current_order.station, v.tile);

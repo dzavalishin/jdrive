@@ -432,8 +432,8 @@ extern const byte _airport_size_x[];
 extern const byte _airport_size_y[];
 
 /* misc */
-VARDEF char _screenshot_name[128];
-VARDEF byte _vehicle_design_names;
+//VARDEF char _screenshot_name[128];
+//VARDEF byte _vehicle_design_names;
 
 /* tunnelbridge */
 //#define MAX_BRIDGES 13

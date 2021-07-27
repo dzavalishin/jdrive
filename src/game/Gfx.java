@@ -30,12 +30,12 @@ public class Gfx {
 	public static int _stringwidth_base = 0;
 	//VARDEF byte _stringwidth_table[0x2A0];
 	private static byte [] _stringwidth_table = new byte[0x2A0];
-	
+
 	static int _stringwidth_out;
 	//static /* Pixel */ byte  []_cursor_backup = new /* Pixel */ byte [64 * 64];
 
-	
-	
+
+
 	static byte []_cursor_backup = new byte[64 * 64];
 	//static Rect _invalid_rect;
 	static final byte []_color_remap_ptr;
@@ -75,12 +75,12 @@ public class Gfx {
 		for (; h != 0; --h) {
 			//memcpy(dp, sp, w);
 			System.arraycopy(s, sp, d, dp, w);
-			
+
 			dp += dpitch;
 			sp += spitch;
 		}
 	}
-	
+
 
 	static void GfxScroll(int left, int top, int width, int height, int xo, int yo)
 	{
@@ -219,7 +219,7 @@ public class Gfx {
 		}
 	}
 
-	static static void GfxSetPixel(int x, int y, int color)
+	static void GfxSetPixel(int x, int y, int color)
 	{
 		final DrawPixelInfo  dpi = Hal._cur_dpi;
 		if ((x-=dpi.left) < 0 || x>=dpi.width || (y-=dpi.top)<0 || y>=dpi.height)
@@ -338,7 +338,7 @@ public class Gfx {
 
 		char[] ca = sstr.toCharArray();
 		int cap = 0;
-		
+
 		for (ddd_pos = cap; (c = ca[cap++]) != '\0' && cap < ca.length; ) 
 		{
 			if (c >= ASCII_LETTERSTART) {
@@ -353,7 +353,7 @@ public class Gfx {
 					if(retwidth != null) retwidth[0] = w; 
 					String s = sb.toString().substring(0, ddd_pos-1);
 					return s+"...";
-					
+
 				}
 			} else {
 				if (c == ASCII_SETX) cap++;
@@ -485,7 +485,7 @@ public class Gfx {
 		int w;
 		String last_space;
 		char c;
-		
+
 		char sc[] = str.toCharArray();
 		int sp = 0;
 
@@ -775,11 +775,11 @@ public class Gfx {
 		int start_x, start_y;
 		final byte[] sprite;
 		final byte[] sprite_org;
-		
+
 		///* Pixel */ byte  *dst;
 		int[]  dst_mem;
 		int  dst_offset;
-		
+
 		int mode;
 		int width, height;
 		int width_org;
@@ -791,11 +791,14 @@ public class Gfx {
 	private static void GfxBlitTileZoomIn(BlitterParams bp)
 	{
 		final byte[] src_o = bp.sprite;
-		final byte* src;
+		//final byte* src;
+		final byte[] src;
 		int num, skip;
 		byte done;
-		/* Pixel */ byte  *dst;
-		final byte* ctab;
+		///* Pixel */ byte  *dst;
+		/* Pixel */ byte  dst;
+		//final byte* ctab;
+		final byte[] ctab;
 
 		if (bp.mode & 1) {
 			src_o += READ_LE_UINT16(src_o + bp.start_y * 2);
@@ -835,7 +838,8 @@ public class Gfx {
 						dst += 4;
 						src += 4;
 					}
-					for (; num != 0; num--) *dst++ = ctab[*src++];
+					for (; num != 0; num--) 
+						dst_mem[dst++] = ctab[src_mem[src++]];
 				} while (!(done & 0x80));
 
 				bp.dst += bp.pitch;
@@ -900,7 +904,7 @@ public class Gfx {
 						num -= skip;
 						if (num <= 0) continue;
 					}
-					#if defined(_WIN32)
+					/*#if defined(_WIN32)
 					if (num & 1) *dst++ = *src++;
 					if (num & 2) { *(int*)dst = *(int*)src; dst += 2; src += 2; }
 					if (num >>= 2) {
@@ -910,9 +914,9 @@ public class Gfx {
 							src += 4;
 						} while (--num != 0);
 					}
-					#else
+					#else*/
 						memcpy(dst, src, num);
-					#endif
+					//#endif
 				} while (!(done & 0x80));
 
 				bp.dst += bp.pitch;
@@ -923,7 +927,8 @@ public class Gfx {
 	private static void GfxBlitZoomInUncomp(BlitterParams bp)
 	{
 		final byte [] src = bp.sprite;
-		/* Pixel */ byte  *dst = bp.dst;
+		///* Pixel */ byte  *dst = bp.dst;
+		/* Pixel */ byte  []dst = bp.dst;
 		int height = bp.height;
 		int width = bp.width;
 		int i;
@@ -933,7 +938,7 @@ public class Gfx {
 
 		if (bp.mode & 1) {
 			if (bp.info & 1) {
-				final byte *ctab = _color_remap_ptr;
+				final byte []ctab = _color_remap_ptr;
 
 				do {
 					for (i = 0; i != width; i++) {
@@ -990,13 +995,15 @@ public class Gfx {
 		}
 	}
 
+	/*
 	private static void GfxBlitTileZoomMedium(BlitterParams bp)
 	{
 		final byte* src_o = bp.sprite;
 		final byte* src;
 		int num, skip;
 		byte done;
-		/* Pixel */ byte  *dst;
+		// Pixel  
+		byte  *dst;
 		final byte* ctab;
 
 		if (bp.mode & 1) {
@@ -1150,7 +1157,8 @@ public class Gfx {
 	private static void GfxBlitZoomMediumUncomp(BlitterParams bp)
 	{
 		final byte *src = bp.sprite;
-		/* Pixel */ byte  *dst = bp.dst;
+		// Pixel  
+		byte  *dst = bp.dst;
 		int height = bp.height;
 		int width = bp.width;
 		int i;
@@ -1201,7 +1209,8 @@ public class Gfx {
 		final byte* src;
 		int num, skip;
 		byte done;
-		/* Pixel */ byte  *dst;
+		// Pixel  
+		byte  *dst;
 		final byte* ctab;
 
 		if (bp.mode & 1) {
@@ -1414,7 +1423,8 @@ public class Gfx {
 	private static void GfxBlitZoomOutUncomp(BlitterParams bp)
 	{
 		final byte* src = bp.sprite;
-		/* Pixel */ byte  *dst = bp.dst;
+		// Pixel  
+		byte  *dst = bp.dst;
 		int height = bp.height;
 		int width = bp.width;
 		int i;
@@ -1458,29 +1468,41 @@ public class Gfx {
 			}
 		}
 	}
-
+	*/
 	//typedef void (*BlitZoomFunc)(BlitterParams bp);
 
 	static final BlitZoomFunc zf_tile[] =
 		{
-				GfxBlitTileZoomIn,
-				GfxBlitTileZoomMedium,
-				GfxBlitTileZoomOut
+			Gfx::GfxBlitTileZoomIn,
+			Gfx::GfxBlitTileZoomIn,
+			Gfx::GfxBlitTileZoomIn,
+			
+				//Gfx::GfxBlitTileZoomIn,
+				//Gfx::GfxBlitTileZoomMedium,
+				//Gfx::GfxBlitTileZoomOut
 		};
 
 	static final BlitZoomFunc zf_uncomp[] =
 		{
-				GfxBlitZoomInUncomp,
-				GfxBlitZoomMediumUncomp,
-				GfxBlitZoomOutUncomp
+			Gfx::GfxBlitZoomInUncomp,
+			Gfx::GfxBlitZoomInUncomp,
+			Gfx::GfxBlitZoomInUncomp,
+
+				//Gfx::GfxBlitZoomInUncomp,
+				//Gfx::GfxBlitZoomMediumUncomp,
+				//Gfx::GfxBlitZoomOutUncomp
 		};
-	
+
 	private static void GfxMainBlitter(final Sprite  sprite, int x, int y, int mode)
 	{
 		final DrawPixelInfo  dpi = Hal._cur_dpi;
 		int start_x, start_y;
 		byte info;
 		BlitterParams bp;
+		
+		// TODO Fix Zoom
+		dpi.zoom = 0;
+		
 		int zoom_mask = ~((1 << dpi.zoom) - 1);
 
 
@@ -1587,7 +1609,7 @@ public class Gfx {
 	static void GfxInitPalettes()
 	{
 		//memcpy(_cur_palette, _palettes[_use_dos_palette ? 1 : 0], sizeof(_cur_palette));
-		
+
 		System.arraycopy(_palettes[0], 0, _cur_palette, 0, _cur_palette.length );
 
 		_pal_first_dirty = 0;
@@ -2111,3 +2133,10 @@ class Colour {
 	byte g;
 	byte b;
 } 
+
+
+//typedef void (*BlitZoomFunc)(BlitterParams bp);
+@FunctionalInterface
+interface BlitZoomFunc extends Consumer<BlitterParams> {}
+
+
