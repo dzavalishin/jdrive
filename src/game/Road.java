@@ -1,5 +1,7 @@
 package game;
 
+import game.util.BitOps;
+
 public class Road 
 {
 
@@ -13,7 +15,7 @@ public class Road
 	 * solution just like that... */
 	static boolean _road_special_gettrackstatus;
 
-	void RoadVehEnterDepot(Vehicle v);
+	//void RoadVehEnterDepot(Vehicle v);
 
 
 	static boolean HasTileRoadAt(TileIndex tile, int i)
@@ -21,12 +23,12 @@ public class Road
 		int mask;
 		byte b;
 
-		switch (GetTileType(tile)) {
-		case TileTypes.MP_STREET:
+		switch (tile.GetTileType()) {
+		case MP_STREET:
 			b = tile.getMap().m5;
 
 			if ((b & 0xF0) == 0) {
-			} else if (IsLevelCrossing(tile)) {
+			} else if (tile.IsLevelCrossing()) {
 				b = (b&8)?5:10;
 			} else if ((b & 0xF0) == 0x20) {
 				return (~b & 3) == i;
@@ -34,16 +36,16 @@ public class Road
 				return false;
 			break;
 
-		case TileTypes.MP_STATION:
+		case MP_STATION:
 			b = tile.getMap().m5;
-			if (!IS_BYTE_INSIDE(b, 0x43, 0x43+8))
+			if (!BitOps.IS_BYTE_INSIDE(b, 0x43, 0x43+8))
 				return false;
 			return ((~(b - 0x43) & 3) == i);
 
-		case TileTypes.MP_TUNNELBRIDGE:
+		case MP_TUNNELBRIDGE:
 			mask = GetRoadBitsByTile(tile);
-			b = 10; if (mask & 1) break;
-			b = 5;  if (mask & 2) break;
+			b = 10; if(0 != (mask & 1)) break;
+			b = 5;  if(0 != (mask & 2)) break;
 			return false;
 
 		default:
@@ -68,22 +70,22 @@ public class Road
 			return true;
 
 		// Only do the special processing for actual players.
-		if (Global._current_player >= Global.MAX_PLAYERS)
+		if (Global._current_player.id >= Global.MAX_PLAYERS)
 			return true;
 
 		// A railway crossing has the road owner in the map3_lo byte.
-		if (tile.IsTileType( TileTypes.MP_STREET) && IsLevelCrossing(tile)) {
+		if (tile.IsTileType( TileTypes.MP_STREET) && tile.IsLevelCrossing()) {
 			owner = tile.getMap().m3;
 		} else {
-			owner = GetTileOwner(tile);
+			owner = tile.GetTileOwner();
 		}
 		// Only do the special processing if the road is owned
 		// by a town
 		if (owner != Owner.OWNER_TOWN) {
-			return owner == Owner.OWNER_NONE || CheckOwnership(owner);
+			return owner == Owner.OWNER_NONE || Player.CheckOwnership(owner);
 		}
 
-		if (_cheats.magic_bulldozer.value)
+		if (Global._cheats.magic_bulldozer.value)
 			return true;
 
 		// Get a bitmask of which neighbouring roads has a tile
@@ -97,12 +99,12 @@ public class Road
 		// then allow it
 		if ((n & (n-1)) != 0 && (n & br) != 0) {
 			Town t;
-			*edge_road = false;
+			edge_road[0] = false;
 			// you can remove all kind of roads with extra dynamite
 			if (Global._patches.extra_dynamite)
 				return true;
 
-			t = ClosestTownFromTile(tile, Global._patches.dist_local_authority);
+			t = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 
 			Global.SetDParam(0, t.index);
 			Global._error_message = Str.STR_2009_LOCAL_AUTHORITY_REFUSES;
@@ -112,9 +114,9 @@ public class Road
 		return true;
 	}
 
-	int GetRoadBitsByTile(TileIndex tile)
+	static int GetRoadBitsByTile(TileIndex tile)
 	{
-		int r = GetTileTrackStatus(tile, TRANSPORT_ROAD);
+		int r = GetTileTrackStatus(tile, Global.TRANSPORT_ROAD);
 		return (byte)(r | (r >> 8));
 	}
 
@@ -126,7 +128,7 @@ public class Road
 	int CmdRemoveRoad(int x, int y, int flags, int p1, int p2)
 	{
 		// cost for removing inner/edge -roads
-		static final int road_remove_cost[2] = {50, 18};
+		static final int road_remove_cost[] = {50, 18};
 
 		TileInfo ti;
 		int cost;
@@ -258,18 +260,18 @@ public class Road
 
 		} else {
 	return_error:;
-			return_cmd_error(INVALID_STRING_ID);
+			return Cmd.return_cmd_error(INVALID_STRING_ID);
 		}
 	}
 
 
-	enum {
-		ROAD_NW = 1, // NW road track
-		ROAD_SW = 2, // SW road track
-		ROAD_SE = 4, // SE road track
-		ROAD_NE = 8, // NE road track
-		ROAD_ALL = (ROAD_NW | ROAD_SW | ROAD_SE | ROAD_NE)
-	};
+	//enum {
+		public static final int ROAD_NW = 1; // NW road track
+		public static final int ROAD_SW = 2; // SW road track
+		public static final int ROAD_SE = 4; // SE road track
+		public static final int ROAD_NE = 8; // NE road track
+		public static final int ROAD_ALL = (ROAD_NW | ROAD_SW | ROAD_SE | ROAD_NE);
+	//};
 
 	static final byte _valid_tileh_slopes_road[][] = {
 		// set of normal ones
@@ -312,29 +314,29 @@ public class Road
 	};
 
 
-	static int CheckRoadSlope(int tileh, byte *pieces, byte existing)
+	static int CheckRoadSlope(int tileh, byte [] pieces, byte existing)
 	{
 		if (!IsSteepTileh(tileh)) {
-			byte road_bits = *pieces | existing;
+			byte road_bits = pieces[0] | existing;
 
 			// no special foundation
 			if ((~_valid_tileh_slopes_road[0][tileh] & road_bits) == 0) {
 				// force that all bits are set when we have slopes
-				if (tileh != 0) *pieces |= _valid_tileh_slopes_road[0][tileh];
+				if (tileh != 0) pieces[0] |= _valid_tileh_slopes_road[0][tileh];
 				return 0; // no extra cost
 			}
 
 			// foundation is used. Whole tile is leveled up
 			if ((~_valid_tileh_slopes_road[1][tileh] & road_bits) == 0) {
-				return existing ? 0 : Global._price.terraform;
+				return 0 !=existing ? 0 : Global._price.terraform;
 			}
 
 			// partly leveled up tile, only if there's no road on that tile
-			if ( !existing && (tileh == 1 || tileh == 2 || tileh == 4 || tileh == 8) ) {
+			if ( 0 == existing && (tileh == 1 || tileh == 2 || tileh == 4 || tileh == 8) ) {
 				// force full pieces.
-				*pieces |= (*pieces & 0xC) >> 2;
-				*pieces |= (*pieces & 0x3) << 2;
-				return (*pieces == (ROAD_NE|ROAD_SW) || *pieces == (ROAD_SE|ROAD_NW)) ? Global._price.terraform : Cmd.CMD_ERROR;
+				pieces[0] |= (pieces[0] & 0xC) >> 2;
+				pieces[0] |= (pieces[0] & 0x3) << 2;
+				return (pieces[0] == (ROAD_NE|ROAD_SW) || pieces[0] == (ROAD_SE|ROAD_NW)) ? Global._price.terraform : Cmd.CMD_ERROR;
 			}
 		}
 		return Cmd.CMD_ERROR;
@@ -367,21 +369,21 @@ public class Road
 		if (ti.type == TileTypes.MP_STREET) {
 			if (!(ti.map5 & 0xF0)) {
 				if ((pieces & (byte)ti.map5) == pieces)
-					return_cmd_error(Str.STR_1007_ALREADY_BUILT);
+					return Cmd.return_cmd_error(Str.STR_1007_ALREADY_BUILT);
 				existing = ti.map5;
 			} else {
 				if (!(ti.map5 & 0xE0) && pieces != ((ti.map5 & 8) ? 5 : 10))
-					return_cmd_error(Str.STR_1007_ALREADY_BUILT);
+					return Cmd.return_cmd_error(Str.STR_1007_ALREADY_BUILT);
 				goto do_clear;
 			}
 		} else if (ti.type == TileTypes.MP_RAILWAY) {
 			byte m5;
 
 			if (IsSteepTileh(ti.tileh)) // very steep tile
-					return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
+					return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 
 			if(!_valid_tileh_slopes_road[2][ti.tileh]) // prevent certain slopes
-					return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
+					return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 
 			if (ti.map5 == 2) {
 				if (pieces & 5) goto do_clear;
@@ -411,7 +413,7 @@ public class Road
 
 			/* check for flat land */
 			if (IsSteepTileh(ti.tileh)) // very steep tile
-					return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
+					return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 
 			/* is this middle part of a bridge? */
 			if ((ti.map5 & 0xC0) != 0xC0)
@@ -423,11 +425,11 @@ public class Road
 
 			/* check if clear land under bridge */
 			if ((ti.map5 & 0xF8) == 0xE8) 			/* road under bridge */
-					return_cmd_error(Str.STR_1007_ALREADY_BUILT);
+					return Cmd.return_cmd_error(Str.STR_1007_ALREADY_BUILT);
 			else if ((ti.map5 & 0xE0) == 0xE0) 	/* other transport route under bridge */
-					return_cmd_error(Str.STR_1008_MUST_REMOVE_RAILROAD_TRACK);
+					return Cmd.return_cmd_error(Str.STR_1008_MUST_REMOVE_RAILROAD_TRACK);
 			else if ((ti.map5 & 0xF8) == 0xC8) 	/* water under bridge */
-					return_cmd_error(Str.STR_3807_CAN_T_BUILD_ON_WATER);
+					return Cmd.return_cmd_error(Str.STR_3807_CAN_T_BUILD_ON_WATER);
 
 			/* all checked, can build road now! */
 			cost = Global._price.build_road * 2;
@@ -445,7 +447,7 @@ public class Road
 		}
 
 		cost = CheckRoadSlope(ti.tileh, &pieces, existing);
-		if (CmdFailed(cost)) return_cmd_error(Str.STR_1800_LAND_SLOPED_IN_WRONG_DIRECTION);
+		if (CmdFailed(cost)) return Cmd.return_cmd_error(Str.STR_1800_LAND_SLOPED_IN_WRONG_DIRECTION);
 
 		if (cost && (!Global._patches.build_on_slopes || _is_old_ai_player))
 			return Cmd.CMD_ERROR;
@@ -483,18 +485,18 @@ public class Road
 	int DoConvertStreetRail(TileIndex tile, int totype, boolean exec)
 	{
 		// not a railroad crossing?
-		if (!IsLevelCrossing(tile)) return Cmd.CMD_ERROR;
+		if (!tile.IsLevelCrossing()) return Cmd.CMD_ERROR;
 
 		// not owned by me?
-		if (!CheckTileOwnership(tile) || !EnsureNoVehicle(tile)) return Cmd.CMD_ERROR;
+		if (!tile.CheckTileOwnership() || !tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
 		// tile is already of requested type?
 		if (BitOps.GB(tile.getMap().m4, 0, 4) == totype) return Cmd.CMD_ERROR;
 
 		if (exec) {
 			// change type.
-			tile.getMap().m4 = BitOps.RETSB(tile.getMap().m4, 0, 4, totype);
-			MarkTileDirtyByTile(tile);
+			tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 0, 4, totype);
+			tile.MarkTileDirtyByTile();
 		}
 
 		return Global._price.build_rail >> 1;
@@ -516,7 +518,7 @@ public class Road
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		if (p1 > MapSize()) return Cmd.CMD_ERROR;
+		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 
 		start_tile = p1;
 		end_tile = TileVirtXY(x, y);
@@ -571,7 +573,7 @@ public class Road
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		if (p1 > MapSize()) return Cmd.CMD_ERROR;
+		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 
 		start_tile = p1;
 		end_tile = TileVirtXY(x, y);
@@ -620,7 +622,7 @@ public class Road
 	 */
 	int CmdBuildRoadDepot(int x, int y, int flags, int p1, int p2)
 	{
-		TileInfo ti;
+		TileInfo ti = new TileInfo();
 		int cost;
 		Depot dep;
 		TileIndex tile;
@@ -629,28 +631,28 @@ public class Road
 
 		if (p1 > 3) return Cmd.CMD_ERROR; // check direction
 
-		FindLandscapeHeight(&ti, x, y);
+		Landscape.FindLandscapeHeight(ti, x, y);
 
 		tile = ti.tile;
 
-		if (!EnsureNoVehicle(tile)) return Cmd.CMD_ERROR;
+		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
 		if (ti.tileh != 0 && (
 					!Global._patches.build_on_slopes ||
 					IsSteepTileh(ti.tileh) ||
 					!CanBuildDepotByTileh(p1, ti.tileh)
 				)) {
-			return_cmd_error(Str.STR_0007_FLAT_LAND_REQUIRED);
+			return Cmd.return_cmd_error(Str.STR_0007_FLAT_LAND_REQUIRED);
 		}
 
-		cost = DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
-		if (CmdFailed(cost)) return Cmd.CMD_ERROR;
+		cost = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
 
 		dep = AllocateDepot();
 		if (dep == null) return Cmd.CMD_ERROR;
 
 		if (flags & Cmd.DC_EXEC) {
-			if (IsLocalPlayer()) _last_built_road_depot_tile = tile;
+			if (Player.IsLocalPlayer()) Global._last_built_road_depot_tile = tile;
 
 			dep.xy = tile;
 			dep.town_index = ClosestTownFromTile(tile, (int)-1).index;
@@ -667,17 +669,17 @@ public class Road
 
 	static int RemoveRoadDepot(TileIndex tile, int flags)
 	{
-		if (!CheckTileOwnership(tile) && Global._current_player != Owner.OWNER_WATER)
+		if (!CheckTileOwnership(tile) && Global._current_player.id != Owner.OWNER_WATER)
 			return Cmd.CMD_ERROR;
 
-		if (!EnsureNoVehicle(tile)) return Cmd.CMD_ERROR;
+		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) DoDeleteDepot(tile);
+		if(0 != (flags & Cmd.DC_EXEC)) Depot.DoDeleteDepot(tile);
 
 		return Global._price.remove_road_depot;
 	}
 
-	//#define M(x) (1<<(x))
+	private static int M( int x) { return  (1<<(x)); }
 
 	static int ClearTile_Road(TileIndex tile, byte flags)
 	{
@@ -685,28 +687,28 @@ public class Road
 		byte m5 = tile.getMap().m5;
 
 		if ( (m5 & 0xF0) == 0) {
-			byte b = m5 & 0xF;
+			byte b = (byte) (m5 & 0xF);
 
-			if (! ((1 << b) & (M(1)|M(2)|M(4)|M(8))) ) {
-				if ((!(flags & Cmd.DC_AI_BUILDING) || !IsTileOwner(tile, Owner.OWNER_TOWN)) && flags & Cmd.DC_AUTO)
-					return_cmd_error(Str.STR_1801_MUST_REMOVE_ROAD_FIRST);
+			if (0 == ((1 << b) & (M(1)|M(2)|M(4)|M(8))) ) {
+				if ((0 == (flags & Cmd.DC_AI_BUILDING) || !tile.IsTileOwner( Owner.OWNER_TOWN)) && 0 != (flags & Cmd.DC_AUTO))
+					return Cmd.return_cmd_error(Str.STR_1801_MUST_REMOVE_ROAD_FIRST);
 			}
-			return DoCommandByTile(tile, b, 0, flags, Cmd.CMD_REMOVE_ROAD);
+			return Cmd.DoCommandByTile(tile, b, 0, flags, Cmd.CMD_REMOVE_ROAD);
 		} else if ( (m5 & 0xE0) == 0) {
-			if (flags & Cmd.DC_AUTO)
-				return_cmd_error(Str.STR_1801_MUST_REMOVE_ROAD_FIRST);
+			if(0 != (flags & Cmd.DC_AUTO))
+				return Cmd.return_cmd_error(Str.STR_1801_MUST_REMOVE_ROAD_FIRST);
 
-			ret = DoCommandByTile(tile, (m5&8)?5:10, 0, flags, Cmd.CMD_REMOVE_ROAD);
-			if (CmdFailed(ret)) return Cmd.CMD_ERROR;
+			ret = Cmd.DoCommandByTile(tile, (m5&8)?5:10, 0, flags, Cmd.CMD_REMOVE_ROAD);
+			if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
 
-			if (flags & Cmd.DC_EXEC) {
-				DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+			if(0 !=  (flags & Cmd.DC_EXEC)) {
+				Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 			}
 
 			return ret;
 		} else {
-			if (flags & Cmd.DC_AUTO)
-				return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
+			if(0 !=  (flags & Cmd.DC_AUTO))
+				return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 			return RemoveRoadDepot(tile,flags);
 		}
 	}
@@ -765,8 +767,8 @@ public class Road
 	 */
 	void DrawRoadBits(TileInfo ti, byte road, byte ground_type, boolean snow, boolean flat)
 	{
-		final DrawRoadTileStruct *drts;
-		PalSpriteID image = 0;
+		final DrawRoadTileStruct drts;
+		PalSpriteID image = null;
 
 		if (ti.tileh != 0) {
 			int foundation;
@@ -797,7 +799,7 @@ public class Road
 		DrawGroundSprite(image);
 
 		// Return if full detail is disabled, or we are zoomed fully out.
-		if (!(_displayGameOptions._opt & DO_FULL_DETAIL) || _cur_dpi.zoom == 2) return;
+		if (!(Global._display_opt & DO_FULL_DETAIL) || _cur_dpi.zoom == 2) return;
 
 		if (ground_type >= 6) {
 			// Road works
@@ -812,21 +814,22 @@ public class Road
 			int y = ti.y | drts.subcoord_y;
 			byte z = ti.z;
 			if (ti.tileh != 0) z = GetSlopeZ(x, y);
-			AddSortableSpriteToDraw(image, x, y, 2, 2, 0x10, z);
+			ViewPort.AddSortableSpriteToDraw(image, x, y, 2, 2, 0x10, z);
 			drts++;
 		}
 	}
 
 	static void DrawTile_Road(TileInfo ti)
 	{
-		PalSpriteID image;
+		//PalSpriteID 
+		int image;
 		int m2;
 
 		if ( (ti.map5 & 0xF0) == 0) { // if it is a road the upper 4 bits are 0
 			DrawRoadBits(ti, BitOps.GB(ti.map5, 0, 4), BitOps.GB(_m[ti.tile].m4, 4, 3), BitOps.HASBIT(_m[ti.tile].m4, 7), false);
 		} else if ( (ti.map5 & 0xE0) == 0) { // railroad crossing
 			int f = GetRoadFoundation(ti.tileh, ti.map5 & 0xF);
-			if (f) DrawFoundation(ti, f);
+			if (f != 0) DrawFoundation(ti, f);
 
 			image = GetRailTypeInfo(BitOps.GB(_m[ti.tile].m4, 0, 4)).base_sprites.crossing;
 
@@ -858,13 +861,13 @@ public class Road
 		} else {
 			int ormod;
 			PlayerID player;
-			final DrawRoadSeqStruct *drss;
+			final DrawRoadSeqStruct drss;
 
 			if (ti.tileh != 0) { DrawFoundation(ti, ti.tileh); }
 
 			ormod = PALETTE_TO_GREY;	//was this a bug/problem?
 			player = GetTileOwner(ti.tile);
-			if (player < Global.MAX_PLAYERS)
+			if (player.id < Global.MAX_PLAYERS)
 				ormod = PLAYER_SPRITE_COLOR(player);
 
 			drss = _road_display_datas[ti.map5 & 0xF];
@@ -876,10 +879,10 @@ public class Road
 
 				if (image & PALETTE_MODIFIER_COLOR)
 					image |= ormod;
-				if (_displayGameOptions._opt & DO_TRANS_BUILDINGS) // show transparent depots
+				if (Global._display_opt & DO_TRANS_BUILDINGS) // show transparent depots
 					MAKE_TRANSPARENT(image);
 
-				AddSortableSpriteToDraw(image, ti.x | drss.subcoord_x,
+				ViewPort.AddSortableSpriteToDraw(image, ti.x | drss.subcoord_x,
 					ti.y | drss.subcoord_y, drss.width, drss.height, 0x14, ti.z);
 			}
 		}
@@ -888,7 +891,7 @@ public class Road
 	void DrawRoadDepotSprite(int x, int y, int image)
 	{
 		int ormod;
-		final DrawRoadSeqStruct *dtss;
+		final DrawRoadSeqStruct dtss;
 
 		ormod = PLAYER_SPRITE_COLOR(Global._local_player);
 
@@ -930,7 +933,7 @@ public class Road
 				// depot
 				return z + 8;
 			}
-			return GetPartialZ(ti.x&0xF, ti.y&0xF, th) + z;
+			return Landscape.GetPartialZ(ti.x&0xF, ti.y&0xF, th) + z;
 		}
 		return z; // normal Z if no slope
 	}
@@ -957,14 +960,16 @@ public class Road
 		return ti.tileh;
 	}
 
-	static void GetAcceptedCargo_Road(TileIndex tile, AcceptedCargo ac)
+	static AcceptedCargo GetAcceptedCargo_Road(TileIndex tile )
 	{
+		AcceptedCargo ac = new AcceptedCargo();
+				return ac;
 		/* not used */
 	}
 
 	static void AnimateTile_Road(TileIndex tile)
 	{
-		if (IsLevelCrossing(tile)) MarkTileDirtyByTile(tile);
+		if (tile.IsLevelCrossing()) tile.MarkTileDirtyByTile();
 	}
 
 	static final byte _town_road_types[][] = {
@@ -991,42 +996,42 @@ public class Road
 
 		if (GameOptions._opt.landscape == Landscape.LT_HILLY) {
 			// Fix snow style if the road is above the snowline
-			if ((tile.getMap().m4 & 0x80) != ((GetTileZ(tile) > GameOptions._opt.snow_line) ? 0x80 : 0x00)) {
+			if ((tile.getMap().m4 & 0x80) != ((tile.GetTileZ() > GameOptions._opt.snow_line) ? 0x80 : 0x00)) {
 				tile.getMap().m4 ^= 0x80;
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 			}
 		} else if (GameOptions._opt.landscape == Landscape.LT_DESERT) {
 			// Fix desert style
 			if (GetMapExtraBits(tile) == 1 && !(tile.getMap().m4 & 0x80)) {
 				tile.getMap().m4 |= 0x80;
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 			}
 		}
 
-		if (tile.getMap().m5 & 0xE0)
+		if(0 != (tile.getMap().m5 & 0xE0))
 			return;
 
 		if (BitOps.GB(tile.getMap().m4, 4, 3) < 6) {
-			t = ClosestTownFromTile(tile, (int)-1);
+			t = Town.ClosestTownFromTile(tile, (int)-1);
 
 			grp = 0;
 			if (t != null) {
-				grp = GetTownRadiusGroup(t, tile);
+				grp = t.GetTownRadiusGroup(tile);
 
 				// Show an animation to indicate road work
 				if (t.road_build_months != 0 &&
-						!(DistanceManhattan(t.xy, tile) >= 8 && grp == 0) &&
+						!(Map.DistanceManhattan(t.xy, tile) >= 8 && grp == 0) &&
 						(tile.getMap().m5==5 || tile.getMap().m5==10)) {
-					if (GetTileSlope(tile, null) == 0 && EnsureNoVehicle(tile) && BitOps.CHANCE16(1,20)) {
+					if (tile.GetTileSlope(null) == 0 && tile.EnsureNoVehicle() && BitOps.CHANCE16(1,20)) {
 						tile.getMap().m4 |= (BitOps.GB(tile.getMap().m4, 4, 3) <=  2 ? 7 : 6) << 4;
 
-						SndPlayTileFx(SND_21_JACKHAMMER, tile);
+						//SndPlayTileFx(SND_21_JACKHAMMER, tile);
 						CreateEffectVehicleAbove(
-							TileX(tile) * 16 + 7,
-							TileY(tile) * 16 + 7,
+								tile.TileX() * 16 + 7,
+								tile.TileY() * 16 + 7,
 							0,
 							EV_BULLDOZER);
-						MarkTileDirtyByTile(tile);
+						tile.MarkTileDirtyByTile();
 						return;
 					}
 				}
@@ -1034,7 +1039,7 @@ public class Road
 
 			{
 				final byte *p = (GameOptions._opt.landscape == Landscape.LT_CANDY) ? _town_road_types_2[grp] : _town_road_types[grp];
-				byte b = BitOps.GB(tile.getMap().m4, 4, 3);
+				byte b = (byte) BitOps.GB(tile.getMap().m4, 4, 3);
 
 				if (b == p[0])
 					return;
@@ -1047,7 +1052,7 @@ public class Road
 					b = 0;
 				}
 				tile.getMap().m4 = BitOps.RETSB(tile.getMap().m4, 4, 3, b);
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 			}
 		} else {
 			// Handle road work
@@ -1063,11 +1068,11 @@ public class Road
 			}
 			//roadworks finished
 			tile.getMap().m4 = (BitOps.GB(b, 4, 3) == 6 ? 1 : 2) << 4;
-			MarkTileDirtyByTile(tile);
+			tile.MarkTileDirtyByTile();
 		}
 	}
 
-	void ShowRoadDepotWindow(TileIndex tile);
+	//void ShowRoadDepotWindow(TileIndex tile);
 
 	static void ClickTile_Road(TileIndex tile)
 	{
@@ -1078,20 +1083,20 @@ public class Road
 		0x0, 0x0, 0x0, 0x10, 0x0, 0x2, 0x8, 0x1A, 0x0, 0x4, 0x1, 0x15, 0x20, 0x26, 0x29, 0x3F,
 	};
 
-	static int GetTileTrackStatus_Road(TileIndex tile, TransportType mode)
+	static int GetTileTrackStatus_Road(TileIndex tile, /*TransportType*/ int mode)
 	{
-		if (mode == TRANSPORT_RAIL) {
-			if (!IsLevelCrossing(tile))
+		if (mode == Global.TRANSPORT_RAIL) {
+			if (!tile.IsLevelCrossing())
 				return 0;
-			return tile.getMap().m5 & 8 ? 0x101 : 0x202;
-		} else if  (mode == TRANSPORT_ROAD) {
+			return 0 != (tile.getMap().m5 & 8) ? 0x101 : 0x202;
+		} else if  (mode == Global.TRANSPORT_ROAD) {
 			byte b = tile.getMap().m5;
 			if ((b & 0xF0) == 0) {
 				/* Ordinary road */
 				if (!_road_special_gettrackstatus && BitOps.GB(tile.getMap().m4, 4, 3) >= 6)
 					return 0;
 				return _road_trackbits[b&0xF] * 0x101;
-			} else if (IsLevelCrossing(tile)) {
+			} else if (tile.IsLevelCrossing()) {
 				/* Crossing */
 				int r = 0x101;
 				if (b&8) r <<= 1;
@@ -1119,13 +1124,14 @@ public class Road
 		Str.STR_1814_ROAD,
 	};
 
-	static void GetTileDesc_Road(TileIndex tile, TileDesc td)
+	static TileDesc GetTileDesc_Road(TileIndex tile )
 	{
+		TileDesc td = new TileDesc();
 		int i = (tile.getMap().m5 >> 4);
 		if (i == 0)
 			i = BitOps.GB(tile.getMap().m4, 4, 3) + 3;
 		td.str = _road_tile_strings[i - 1];
-		td.owner = GetTileOwner(tile);
+		td.owner = tile.GetTileOwner().owner;
 	}
 
 	static final byte _roadveh_enter_depot_unk0[] = {
@@ -1137,8 +1143,8 @@ public class Road
 		if (tile.IsLevelCrossing()) {
 			if (v.type == Vehicle.VEH_Train && BitOps.GB(tile.getMap().m5, 2, 1) == 0) {
 				/* train crossing a road */
-				SndPlayVehicleFx(SND_0E_LEVEL_CROSSING, v);
-				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
+				//SndPlayVehicleFx(SND_0E_LEVEL_CROSSING, v);
+				tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
 				tile.MarkTileDirtyByTile();
 			}
 		} else if (BitOps.GB(tile.getMap().m5, 4, 4) == 2) {
@@ -1154,58 +1160,58 @@ public class Road
 
 	static void VehicleLeave_Road(Vehicle v, TileIndex tile, int x, int y)
 	{
-		if (IsLevelCrossing(tile) && v.type == Vehicle.VEH_Train && v.next == null) {
+		if (tile.IsLevelCrossing() && v.type == Vehicle.VEH_Train && v.next == null) {
 			// Turn off level crossing lights
-			BitOps.RET SB(tile.getMap().m5, 2, 1, 0);
-			MarkTileDirtyByTile(tile);
+			tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 1, 0);
+			tile.MarkTileDirtyByTile();
 		}
 	}
 
 	static void ChangeTileOwner_Road(TileIndex tile, PlayerID old_player, PlayerID new_player)
 	{
 		// road/rail crossing where the road is owned by the current player?
-		if (old_player == tile.getMap().m3 && IsLevelCrossing(tile)) {
-			tile.getMap().m3 = (new_player == Owner.OWNER_SPECTATOR) ? Owner.OWNER_NONE : new_player;
+		if (old_player.id == tile.getMap().m3 && tile.IsLevelCrossing()) {
+			tile.getMap().m3 = (new_player.id == Owner.OWNER_SPECTATOR) ? Owner.OWNER_NONE : new_player;
 		}
 
-		if (!IsTileOwner(tile, old_player)) return;
+		if (!tile.IsTileOwner(old_player)) return;
 
-		if (new_player != Owner.OWNER_SPECTATOR) {
-			SetTileOwner(tile, new_player);
+		if (new_player.id != Owner.OWNER_SPECTATOR) {
+			tile.SetTileOwner(new_player);
 		}	else {
 			if (BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
-				SetTileOwner(tile, Owner.OWNER_NONE);
-			} else if (IsLevelCrossing(tile)) {
+				tile.SetTileOwner(Owner.OWNER_NONE);
+			} else if (tile.IsLevelCrossing()) {
 				tile.getMap().m5 = (tile.getMap().m5&8) ? 0x5 : 0xA;
-				SetTileOwner(tile, tile.getMap().m3);
+				tile.SetTileOwner( tile.getMap().m3);
 				tile.getMap().m3 = 0;
 				tile.getMap().m4 &= 0x80;
 			} else {
-				DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
+				Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 			}
 		}
 	}
 
 	void InitializeRoad()
 	{
-		_last_built_road_depot_tile = 0;
+		Global._last_built_road_depot_tile = 0;
 	}
 
-	final TileTypeProcs _tile_type_road_procs = {
-		DrawTile_Road,						/* draw_tile_proc */
-		GetSlopeZ_Road,						/* get_slope_z_proc */
-		ClearTile_Road,						/* clear_tile_proc */
-		GetAcceptedCargo_Road,		/* get_accepted_cargo_proc */
-		GetTileDesc_Road,					/* get_tile_desc_proc */
-		GetTileTrackStatus_Road,	/* get_tile_track_status_proc */
-		ClickTile_Road,						/* click_tile_proc */
-		AnimateTile_Road,					/* animate_tile_proc */
-		TileLoop_Road,						/* tile_loop_clear */
-		ChangeTileOwner_Road,			/* change_tile_owner_clear */
+	final TileTypeProcs _tile_type_road_procs = new TileTypeProcs(
+		Road::DrawTile_Road,						/* draw_tile_proc */
+		Road::GetSlopeZ_Road,						/* get_slope_z_proc */
+		Road::ClearTile_Road,						/* clear_tile_proc */
+		Road::GetAcceptedCargo_Road,		/* get_accepted_cargo_proc */
+		Road::GetTileDesc_Road,					/* get_tile_desc_proc */
+		Road::GetTileTrackStatus_Road,	/* get_tile_track_status_proc */
+		Road::ClickTile_Road,						/* click_tile_proc */
+		Road::AnimateTile_Road,					/* animate_tile_proc */
+		Road::TileLoop_Road,						/* tile_loop_clear */
+		Road::ChangeTileOwner_Road,			/* change_tile_owner_clear */
 		null,											/* get_produced_cargo_proc */
-		VehicleEnter_Road,				/* vehicle_enter_tile_proc */
-		VehicleLeave_Road,				/* vehicle_leave_tile_proc */
-		GetSlopeTileh_Road,				/* get_slope_tileh_proc */
-	};
+		Road::VehicleEnter_Road,				/* vehicle_enter_tile_proc */
+		Road::VehicleLeave_Road,				/* vehicle_leave_tile_proc */
+		Road::GetSlopeTileh_Road				/* get_slope_tileh_proc */
+	);
 
 }
