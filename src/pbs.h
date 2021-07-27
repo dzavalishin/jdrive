@@ -1,3 +1,4 @@
+#if 0
 /* $Id: pbs.h 2962 2005-09-18 20:56:44Z Darkvater $ */
 
 #ifndef PBS_H

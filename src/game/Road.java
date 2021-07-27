@@ -38,7 +38,7 @@ public class Road
 
 		case MP_STATION:
 			b = tile.getMap().m5;
-			if (!BitOps.IS_BYTE_INSIDE(b, 0x43, 0x43+8))
+			if (!BitOps.IS_INT_INSIDE(b, 0x43, 0x43+8))
 				return false;
 			return ((~(b - 0x43) & 3) == i);
 

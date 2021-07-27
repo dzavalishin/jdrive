@@ -1,3 +1,4 @@
+#if 0
 /* $Id: pbs.c 3210 2005-11-16 14:41:01Z truelight $ */
 
 #include "stdafx.h"
