@@ -105,7 +105,7 @@ public class WayPoint implements IPoolItem
 
 
 
-	private static boolean IsRailWaypoint(TileIndex tile)
+	public static boolean IsRailWaypoint(TileIndex tile)
 	{
 		return (tile.getMap().m5 & 0xFC) == 0xC4;
 	}

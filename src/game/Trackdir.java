@@ -67,7 +67,7 @@ public enum Trackdir {
 	 * Maps a trackdir to the (4-way) direction the tile is exited when following
 	 * that trackdir.
 	 */
-	DiagDirection TrackdirToExitdir() 
+	public static DiagDirection TrackdirToExitdir() 
 	{
 		//extern const DiagDirection _trackdir_to_exitdir[TRACKDIR_END];
 		return _trackdir_to_exitdir[ordinal()];

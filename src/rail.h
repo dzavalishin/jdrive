@@ -1,3 +1,4 @@
+#if 0
 /* $Id: rail.h 3329 2005-12-21 13:53:44Z matthijs $ */
 
 /** @file rail.h */
@@ -209,7 +210,7 @@ typedef struct RailtypeInfo {
 } RailtypeInfo;
 
 extern const RailtypeInfo _railtypes[RAILTYPE_END];
-*/
+* /
 // these are the maximums used for updating signal blocks, and checking if a depot is in a pbs block
 enum {
 	NUM_SSD_ENTRY = 256, // max amount of blocks

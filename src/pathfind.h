@@ -60,10 +60,10 @@ struct TrackPathFinder {
 
 void FollowTrack(TileIndex tile, uint16 flags, byte direction, TPFEnumProc *enum_proc, TPFAfterProc *after_proc, void *data);
 
-typedef struct {
+/*typedef struct {
 	TileIndex tile;
 	int length;
-} FindLengthOfTunnelResult;
+} FindLengthOfTunnelResult; */
 FindLengthOfTunnelResult FindLengthOfTunnel(TileIndex tile, uint direction);
 
 void NewTrainPathfind(TileIndex tile, TileIndex dest, byte direction, NTPEnumProc *enum_proc, void *data);

@@ -1,4 +1,6 @@
 package game;
+import game.struct.FindLengthOfTunnelResult;
+import game.util.BitOps;
 
 /** @file pbs.h Path-Based-Signalling header file
  *  @see pbs.c */
@@ -33,12 +35,20 @@ public class Pbs {
 	/**
 	 * finalants used for v.u.rail.pbs_status
 	 */
-	enum PBSStatus {
-		PBS_STAT_NONE = 0,
-		PBS_STAT_HAS_PATH = 1,
-		PBS_STAT_NEED_PATH = 2,
-	};
+	//enum PBSStatus {
+	public static final int PBS_STAT_NONE = 0;
+	public static final int PBS_STAT_HAS_PATH = 1;
+	public static final int PBS_STAT_NEED_PATH = 2;
+	//};
 
+	// TODO Move to Rail.java
+	// these are the maximums used for updating signal blocks, and checking if a depot is in a pbs block
+	//enum {
+	public static final int NUM_SSD_ENTRY = 256; // max amount of blocks
+	public static final int NUM_SSD_STACK = 32;// max amount of blocks to check recursively
+	//};
+
+	public static final int _TRACKDIR_BIT_MASK = TrackdirBits.TRACKDIR_BIT_MASK.ordinal();//  (0x3F3F),
 
 	//void PBSReserveTrack(TileIndex tile, Track track);
 	/**<
@@ -85,14 +95,6 @@ public class Pbs {
 	 * @return True when there are pbs signals on that tile
 	 */
 
-	//boolean PBSIsPbsSegment(int tile, Trackdir trackdir);
-	/**<
-	 * Checks if a signal/depot leads to a pbs block.
-	 * This means that the block needs to have at least 1 signal, and that all signals in it need to be pbs signals.
-	 * @param tile The tile to check
-	 * @param trackdir The direction in which to check
-	 * @return True when the depot is inside a pbs block
-	 */
 
 
 	
@@ -126,50 +128,56 @@ public class Pbs {
 		0xFFFF, 0xFFFF, 0xFFFF, 0x3F3F, 0x3F3F, 0x3F3F, 0x3F3F, 0xFFFF
 	};
 
-	void PBSReserveTrack(TileIndex tile, Track track) {
-		assert(IsValidTile(tile));
-		assert(track <= 5);
-		switch (GetTileType(tile)) {
-			case TileTypes.MP_RAILWAY:
-				if (IsRailWaypoint(tile)) {
+	void PBSReserveTrack(TileIndex tile, Track track) 
+	{
+		assert(tile.IsValidTile());
+		assert(track.ordinal() <= 5);
+		
+		switch (tile.GetTileType()) 
+		{
+			case MP_RAILWAY:
+				if (WayPoint.IsRailWaypoint(tile)) {
 					// waypoint
-					SETBIT(tile.getMap().m3, 6);
+					tile.getMap().m3 = BitOps.RETSETBIT(tile.getMap().m3, 6);
 				} else {
 					// normal rail track
-					byte encrt = BitOps.GB(tile.getMap().m4, 4, 4); // get current encoded info (see comments at top of file)
+					int encrt = BitOps.GB(tile.getMap().m4, 4, 4); // get current encoded info (see comments at top of file)
 
 					if (encrt == 0) // nothing reserved before
-						encrt = track + 1;
-					else if (encrt == (track^1) + 1) // opposite track reserved before
+						encrt = track.ordinal() + 1;
+					else if (encrt == (track.ordinal()^1) + 1) // opposite track reserved before
 						encrt |= 8;
 
-					BitOps.RET SB(tile.getMap().m4, 4, 4, encrt);
+					tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 4, 4, encrt);
 				}
 				break;
-			case TileTypes.MP_TUNNELBRIDGE:
-				tile.getMap().m4 |= (1 << track) & 3;
+			case MP_TUNNELBRIDGE:
+				tile.getMap().m4 |= (1 << track.ordinal()) & 3;
 				break;
-			case TileTypes.MP_STATION:
-				SETBIT(tile.getMap().m3, 6);
+			case MP_STATION:
+				tile.getMap().m3 = BitOps.RETSETBIT(tile.getMap().m3, 6);
 				break;
-			case TileTypes.MP_STREET:
+			case MP_STREET:
 				// make sure it is a railroad crossing
-				if (!IsLevelCrossing(tile)) return;
-				SETBIT(tile.getMap().m5, 0);
+				if (!tile.IsLevelCrossing()) return;
+				tile.getMap().m5 = BitOps.RETSETBIT(tile.getMap().m5, 0);
 				break;
 			default:
 				return;
 		}
 		// if debugging, mark tile dirty to show reserved status
-		if (_debug_pbs_level >= 1)
-			MarkTileDirtyByTile(tile);
+		if (Global._debug_pbs_level >= 1)
+			tile.MarkTileDirtyByTile();
 	}
 
-	byte PBSTileReserved(TileIndex tile) {
-		assert(IsValidTile(tile));
-		switch (GetTileType(tile)) {
-			case TileTypes.MP_RAILWAY:
-				if (IsRailWaypoint(tile)) {
+	int PBSTileReserved(TileIndex tile) 
+	{
+		assert(tile.IsValidTile());
+		
+		switch (tile.GetTileType()) 
+		{
+			case MP_RAILWAY:
+				if (WayPoint.IsRailWaypoint(tile)) {
 					// waypoint
 					// check if its reserved
 					if (!BitOps.HASBIT(tile.getMap().m3, 6)) return 0;
@@ -177,20 +185,20 @@ public class Pbs {
 					return BitOps.HASBIT(tile.getMap().m5, 0) ? 2 : 1;
 				} else {
 					// normal track
-					byte res = encrt_to_reserved[BitOps.GB(tile.getMap().m4, 4, 4)];
+					int res = encrt_to_reserved[BitOps.GB(tile.getMap().m4, 4, 4)];
 					assert(res != 0xFF);
 					return res;
 				}
-			case TileTypes.MP_TUNNELBRIDGE:
+			case MP_TUNNELBRIDGE:
 				return BitOps.GB(tile.getMap().m4, 0, 2);
-			case TileTypes.MP_STATION:
+			case MP_STATION:
 				// check if its reserved
 				if (!BitOps.HASBIT(tile.getMap().m3, 6)) return 0;
 				// return the track for the correct direction
 				return BitOps.HASBIT(tile.getMap().m5, 0) ? 2 : 1;
-			case TileTypes.MP_STREET:
+			case MP_STREET:
 				// make sure its a railroad crossing
-				if (!IsLevelCrossing(tile)) return 0;
+				if (!tile.IsLevelCrossing()) return 0;
 				// check if its reserved
 				if (!BitOps.HASBIT(tile.getMap().m5, 0)) return 0;
 				// return the track for the correct direction
@@ -201,101 +209,105 @@ public class Pbs {
 	}
 
 	int PBSTileUnavail(TileIndex tile) {
-		assert(IsValidTile(tile));
-		switch (GetTileType(tile)) {
-			case TileTypes.MP_RAILWAY:
-				if (IsRailWaypoint(tile)) {
+		assert(tile.IsValidTile());
+		switch (tile.GetTileType()) {
+			case MP_RAILWAY:
+				if (WayPoint.IsRailWaypoint(tile)) {
 					// waypoint
-					return BitOps.HASBIT(tile.getMap().m3, 6) ? TRACKDIR_BIT_MASK : 0;
+					return BitOps.HASBIT(tile.getMap().m3, 6) ? _TRACKDIR_BIT_MASK : 0;
 				} else {
 					// normal track
 					int res = encrt_to_unavail[BitOps.GB(tile.getMap().m4, 4, 4)];
 					assert(res != 0xFFFF);
 					return res;
 				}
-			case TileTypes.MP_TUNNELBRIDGE:
+			case MP_TUNNELBRIDGE:
 				return BitOps.GB(tile.getMap().m4, 0, 2) | (BitOps.GB(tile.getMap().m4, 0, 2) << 8);
-			case TileTypes.MP_STATION:
-				return BitOps.HASBIT(tile.getMap().m3, 6) ? TRACKDIR_BIT_MASK : 0;
-			case TileTypes.MP_STREET:
+			case MP_STATION:
+				return BitOps.HASBIT(tile.getMap().m3, 6) ? _TRACKDIR_BIT_MASK : 0;
+			case MP_STREET:
 				// make sure its a railroad crossing
-				if (!IsLevelCrossing(tile)) return 0;
+				if (!tile.IsLevelCrossing()) return 0;
 				// check if its reserved
-				return (BitOps.HASBIT(tile.getMap().m5, 0)) ? TRACKDIR_BIT_MASK : 0;
+				return (BitOps.HASBIT(tile.getMap().m5, 0)) ? _TRACKDIR_BIT_MASK : 0;
 			default:
 				return 0;
 		}
 	}
 
-	void PBSClearTrack(TileIndex tile, Track track) {
-		assert(IsValidTile(tile));
-		assert(track <= 5);
-		switch (GetTileType(tile)) {
-			case TileTypes.MP_RAILWAY:
-				if (IsRailWaypoint(tile)) {
+	void PBSClearTrack(TileIndex tile, Track track) 
+	{
+		assert(tile.IsValidTile());
+		assert(track.ordinal() <= 5);
+		
+		switch (tile.GetTileType()) 
+		{
+			case MP_RAILWAY:
+				if (WayPoint.IsRailWaypoint(tile)) {
 					// waypoint
-					CLRBIT(tile.getMap().m3, 6);
+					tile.getMap().m3 = BitOps.RETCLRBIT(tile.getMap().m3, 6);
 				} else {
 					// normal rail track
-					byte encrt = BitOps.GB(tile.getMap().m4, 4, 4);
+					int encrt = BitOps.GB(tile.getMap().m4, 4, 4);
 
-					if (encrt == track + 1)
+					if (encrt == track.ordinal() + 1)
 						encrt = 0;
-					else if (encrt == track + 1 + 8)
-						encrt = (track^1) + 1;
-					else if (encrt == (track^1) + 1 + 8)
+					else if (encrt == track.ordinal() + 1 + 8)
+						encrt = (track.ordinal()^1) + 1;
+					else if (encrt == (track.ordinal()^1) + 1 + 8)
 						encrt &= 7;
 
-					BitOps.RET SB(tile.getMap().m4, 4, 4, encrt);
+					tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 4, 4, encrt);
 				}
 				break;
-			case TileTypes.MP_TUNNELBRIDGE:
-				tile.getMap().m4 &= ~((1 << track) & 3);
+			case MP_TUNNELBRIDGE:
+				tile.getMap().m4 &= ~((1 << track.ordinal()) & 3);
 				break;
-			case TileTypes.MP_STATION:
-				CLRBIT(tile.getMap().m3, 6);
+			case MP_STATION:
+				tile.getMap().m3 = BitOps.RETCLRBIT(tile.getMap().m3, 6);
 				break;
-			case TileTypes.MP_STREET:
+			case MP_STREET:
 				// make sure it is a railroad crossing
-				if (!IsLevelCrossing(tile)) return;
-				CLRBIT(tile.getMap().m5, 0);
+				if (!tile.IsLevelCrossing()) return;
+				tile.getMap().m5 = BitOps.RETCLRBIT(tile.getMap().m5, 0);
 				break;
 			default:
 				return;
 		}
 		// if debugging, mark tile dirty to show reserved status
-		if (_debug_pbs_level >= 1)
-			MarkTileDirtyByTile(tile);
+		if (Global._debug_pbs_level >= 1)
+			tile.MarkTileDirtyByTile();
 	}
 
 	void PBSClearPath(TileIndex tile, Trackdir trackdir, TileIndex end_tile, Trackdir end_trackdir) {
 		int res;
 		FindLengthOfTunnelResult flotr;
-		assert(IsValidTile(tile));
+		
+		assert(tile.IsValidTile());
 		assert(IsValidTrackdir(trackdir));
 
 		do {
-			PBSClearTrack(tile, TrackdirToTrack(trackdir));
+			PBSClearTrack(tile, RailtypeInfo.TrackdirToTrack(trackdir));
 
-			if (tile == end_tile && TrackdirToTrack(trackdir) == TrackdirToTrack(end_trackdir))
+			if (tile == end_tile && RailtypeInfo.TrackdirToTrack(trackdir) == RailtypeInfo.TrackdirToTrack(end_trackdir))
 				return;
 
 			if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) &&
 					BitOps.GB(tile.getMap().m5, 4, 4) == 0 &&
-					BitOps.GB(tile.getMap().m5, 0, 2) == TrackdirToExitdir(trackdir)) {
+					BitOps.GB(tile.getMap().m5, 0, 2) == Trackdir.TrackdirToExitdir(trackdir)) {
 				// this is a tunnel
-				flotr = FindLengthOfTunnel(tile, TrackdirToExitdir(trackdir));
+				flotr = FindLengthOfTunnel(tile, Trackdir.TrackdirToExitdir(trackdir));
 
 				tile = flotr.tile;
 			} else {
-				byte exitdir = TrackdirToExitdir(trackdir);
-				tile = AddTileIndexDiffCWrap(tile, TileIndexDiffCByDir(exitdir));
+				byte exitdir = Trackdir.TrackdirToExitdir(trackdir);
+				tile = AddTileIndexDiffCWrap(tile, TileIndex.TileIndexDiffCByDir(exitdir));
 			}
 
 			res = PBSTileReserved(tile);
 			res |= res << 8;
 			res &= TrackdirReachesTrackdirs(trackdir);
-			trackdir = FindFirstBit2x64(res);
+			trackdir = BitOps.FindFirstBit2x64(res);
 
 		} while (res != 0);
 	}
@@ -317,7 +329,7 @@ public class Pbs {
 		if (!HasSignalOnTrackdir(tile, trackdir))
 			return false;
 
-		if (GetSignalType(tile, TrackdirToTrack(trackdir)) == 4)
+		if (GetSignalType(tile, RailtypeInfo.TrackdirToTrack(trackdir)) == 4)
 			return true;
 		else
 			return false;
@@ -327,41 +339,53 @@ public class Pbs {
 		int cur;
 
 		// these are used to keep track of the signals.
-		byte bit[NUM_SSD_ENTRY];
-		TileIndex tile[NUM_SSD_ENTRY];
-	} SetSignalsDataPbs;
+		byte [] bit = new byte[NUM_SSD_ENTRY];
+		TileIndex [] tile = new TileIndex[NUM_SSD_ENTRY];
+	} 
 
 	// This function stores the signals inside the SetSignalsDataPbs struct, passed as callback to FollowTrack() in the PBSIsPbsSegment() function below
-	static boolean SetSignalsEnumProcPBS(int tile, SetSignalsDataPbs *ssd, int trackdir, int length, byte *state)
+	static boolean SetSignalsEnumProcPBS(int itile, SetSignalsDataPbs ssd, int trackdir, int length, Object state)
 	{
+		TileIndex tile = new TileIndex(itile);
 		// the tile has signals?
-		if (tile.IsTileType( TileTypes.MP_RAILWAY)) {
-			if (HasSignalOnTrack(tile, TrackdirToTrack(trackdir))) {
+		if (tile.IsTileType( TileTypes.MP_RAILWAY)) 
+		{
+			if (HasSignalOnTrack(tile, RailtypeInfo.TrackdirToTrack(trackdir))) {
 
 					if (ssd.cur != NUM_SSD_ENTRY) {
 						ssd.tile[ssd.cur] = tile; // remember the tile index
-						ssd.bit[ssd.cur] = TrackdirToTrack(trackdir); // and the controlling bit number
+						ssd.bit[ssd.cur] = RailtypeInfo.TrackdirToTrack(trackdir); // and the controlling bit number
 						ssd.cur++;
 					}
 					return true;
-			} else if (IsTileDepotType(tile, TRANSPORT_RAIL))
+			} else if (Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL))
 				return true; // don't look further if the tile is a depot
 		}
 		return false;
 	}
 
-	boolean PBSIsPbsSegment(int tile, Trackdir trackdir)
+	/**<
+	 * Checks if a signal/depot leads to a pbs block.
+	 * This means that the block needs to have at least 1 signal, and that all signals in it need to be pbs signals.
+	 * @param tile The tile to check
+	 * @param trackdir The direction in which to check
+	 * @return True when the depot is inside a pbs block
+	 */
+
+	boolean PBSIsPbsSegment(TileIndex tilep, Trackdir trackdir)
+	//boolean PBSIsPbsSegment(int tilep, Trackdir trackdir)
 	{
-		SetSignalsDataPbs ssd;
-		boolean result = PBSIsPbsSignal(tile, trackdir);
-		DiagDirection direction = TrackdirToExitdir(trackdir);//GetDepotDirection(tile,TRANSPORT_RAIL);
+		SetSignalsDataPbs ssd = new SetSignalsDataPbs();
+		boolean result = PBSIsPbsSignal(tilep, trackdir);
+		DiagDirection direction = Trackdir.TrackdirToExitdir(trackdir);//GetDepotDirection(tile,TRANSPORT_RAIL);
 		int i;
 
 		ssd.cur = 0;
 
-		FollowTrack(tile, 0xC000 | TRANSPORT_RAIL, direction, (TPFEnumProc*)SetSignalsEnumProcPBS, null, &ssd);
+		FollowTrack(tilep, 0xC000 | Global.TRANSPORT_RAIL, direction, (TPFEnumProc)SetSignalsEnumProcPBS, null, ssd);
+		
 		for(i=0; i!=ssd.cur; i++) {
-			int tile = ssd.tile[i];
+			TileIndex tile = ssd.tile[i];
 			byte bit = ssd.bit[i];
 			if (!PBSIsPbsSignal(tile, bit) && !PBSIsPbsSignal(tile, bit | 8))
 				return false;
