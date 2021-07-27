@@ -555,7 +555,21 @@ public class RailTables {
 	};
 
 	
+	static final int _fractcoords_behind[] = { 0x8F, 0x8, 0x80, 0xF8 };
+	static final int _fractcoords_enter[] = { 0x8A, 0x48, 0x84, 0xA8 };
+	static final int _deltacoord_leaveoffset[] = {
+		-1,  0,  1,  0, /* x */
+		 0,  1,  0, -1  /* y */
+	};
+	static final int _enter_directions[] = {5, 7, 1, 3};
+	static final int _leave_directions[] = {1, 3, 5, 7};
+	static final int _depot_track_mask[] = {1, 2, 1, 2};
 	
+	static final byte _train_spec_tracks[] = {1,2,1,2,1,2};
+	
+	
+	static final byte _search_dir_1[] = {1, 3, 1, 3, 5, 3};
+	static final byte _search_dir_2[] = {5, 7, 7, 5, 7, 1};
 	
 	
 }
