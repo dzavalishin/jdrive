@@ -18,6 +18,8 @@ public class Global {
 	// TODO INIT 
 
 	public static final int MAX_PLAYERS = 8;
+	public static final int MAX_SCREEN_WIDTH = 2048;
+	public static final int MAX_SCREEN_HEIGHT = 1200;
 
 	public static Player[] _players = new Player[MAX_PLAYERS];
 	// NOSAVE: can be determined from player structs

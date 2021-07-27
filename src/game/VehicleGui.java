@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import game.tables.EngineTables;
 import game.util.BitOps;
 import game.util.wcustom.*;
 
@@ -129,38 +130,38 @@ void BuildVehicleList(vehiclelist_d  vl, int type, PlayerID owner, StationID sta
 	int n = 0;
 	int i;
 
-	if (!(vl.flags & Vehicle.VL_REBUILD)) return;
+	if (0 ==(vl.flags & Vehicle.VL_REBUILD)) return;
 
 	/* Create array for sorting */
-	_vehicle_sort = realloc(_vehicle_sort, GetVehiclePoolSize() * sizeof(_vehicle_sort[0]));
-	_vehicle_sort = new SortStruct[GetVehiclePoolSize()]; 
+	//_vehicle_sort = realloc(_vehicle_sort, GetVehiclePoolSize() * sizeof(_vehicle_sort[0]));
+	_vehicle_sort = new SortStruct[Vehicle.GetVehiclePoolSize()]; 
 	if (_vehicle_sort == null)
 		Global.error("Could not allocate memory for the vehicle-sorting-list");
 
 	Global.DEBUG_misc(1, "Building vehicle list for player %d station %d...",
 			owner, station);
 
-	if (station != INVALID_STATION) {
+	if (station.id != Station.INVALID_STATION) {
 		//final Vehicle v;
 		//FOR_ALL_VEHICLES(v)
-		it = Vehicle.getIterator();
+		Iterator<Vehicle> it = Vehicle.getIterator();
 		while(it.hasNext())
 		{
 			Vehicle v = it.next();
 			if (v.type == type && (
-					(type == Vehicle.VEH_Train && IsFrontEngine(v)) ||
+					(type == Vehicle.VEH_Train && v.IsFrontEngine()) ||
 					(type != Vehicle.VEH_Train && v.subtype <= subtype))) {
 				
 				//final Order order;
 
 				//FOR_VEHICLE_ORDERS(v, order)
-				voi = v.getOrdersIterator();
+				Iterator<Order> voi = v.getOrdersIterator();
 				while(voi.hasNext())
 				{
 					final Order order = voi.next();
-					if (order.type == Order.OT_GOTO_STATION && order.station == station) {
+					if (order.type == Order.OT_GOTO_STATION && order.station == station.id) {
 						_vehicle_sort[n].index = v.index;
-						_vehicle_sort[n].owner = v.owner;
+						_vehicle_sort[n].owner = v.owner.id;
 						++n;
 						break;
 					}
@@ -182,8 +183,10 @@ void BuildVehicleList(vehiclelist_d  vl, int type, PlayerID owner, StationID sta
 		});
 	}
 
-	free(vl.sort_list);
-	vl.sort_list = malloc(n * sizeof(vl.sort_list[0]));
+	//free(vl.sort_list);
+	//vl.sort_list = malloc(n * sizeof(vl.sort_list[0]));
+	vl.sort_list = new SortStruct[n];
+	
 	if (n != 0 && vl.sort_list == null)
 		Global.error("Could not allocate memory for the vehicle-sorting-list");
 	vl.list_length = n;
@@ -280,15 +283,15 @@ CargoID DrawVehicleRefitWindow(final Vehicle v, int sel)
 			//show_cargo(_local_cargo_id_ctype[cid]);
 			byte colour = 16; 
 			if (sel == 0) { 
-				cargo = _local_cargo_id_ctype[cid]; 
+				cargo = EngineTables._local_cargo_id_ctype[cid]; 
 				colour = 12; 
 			} 
 			sel--; 
-			Gfx.DrawString(6, y, _cargoc.names_s[cargo], colour); 
+			Gfx.DrawString(6, y, Global._cargoc.names_s[cargo], colour); 
 			y += 10; 
 		}
 	}
-	return cargo;
+	return CargoID.get( cargo );
 }
 
 
@@ -327,7 +330,7 @@ static void train_engine_drawing_loop(int [] x, int [] y, int [] pos, int []sel,
 		colour = sel[0] == 0 ? 0xC : 0x10;
 		if (!(ENGINE_AVAILABLE && show_outdated && EngineGui.RailVehInfo(i).power && e.railtype == railtype)) {
 			if (e.railtype != railtype || !(rvi.flags & RVI_WAGON) != is_engine ||
-					!BitOps.HASBIT(e.player_avail, Global._local_player))
+					!BitOps.HASBIT(e.player_avail, Global._local_player.id))
 				continue;
 		} /*else {
 			// TODO find a nice red colour for vehicles being replaced
@@ -396,7 +399,7 @@ static void SetupScrollStuffForReplaceWindow(Window w)
 		engine_id = Global.ROAD_ENGINES_INDEX;
 
 		do {
-			if (_player_num_engines[engine_id] > 0 || EngineHasReplacement(p, engine_id)) {
+			if (_player_num_engines[engine_id] > 0 || p.EngineHasReplacement(engine_id)) {
 				if (sel[0] == 0) selected_id[0] = engine_id;
 				count++;
 				sel[0]--;
@@ -608,7 +611,7 @@ static void DrawEngineArrayInReplaceWindow(Window w, int px, int py, int px2, in
 			do {
 				final Engine  e = Engine.GetEngine(engine_id);
 
-				if (_player_num_engines[engine_id] > 0 || EngineHasReplacement(p, engine_id)) {
+				if (_player_num_engines[engine_id] > 0 || p.EngineHasReplacement(engine_id)) {
 					if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.cap, 0)) {
 						Gfx.DrawString(x[0]+75, y[0]+7, GetCustomEngineName(engine_id), sel[0]==0 ? 0xC : 0x10);
 						DrawShipEngine(x[0]+35, y[0]+10, engine_id, _player_num_engines[engine_id] > 0 ? SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
@@ -871,19 +874,19 @@ static void ReplaceVehicleWndProc(Window w, WindowEvent e)
 			break;
 		}
 		case 17: { /* toggle renew_keep_length */
-			Cmd.DoCommandP(0, 5, p.renew_keep_length ? 0 : 1, null, Cmd.CMD_REPLACE_VEHICLE);
+			Cmd.DoCommandP( null, 5, p.renew_keep_length ? 0 : 1, null, Cmd.CMD_REPLACE_VEHICLE);
 		} break;
 		case 4: { /* Start replacing */
 			EngineID veh_from = w.as_replaceveh_d().sel_engine[0];
 			EngineID veh_to = w.as_replaceveh_d().sel_engine[1];
-			Cmd.DoCommandP(0, 3, veh_from + (veh_to << 16), null, Cmd.CMD_REPLACE_VEHICLE);
+			Cmd.DoCommandP( null, 3, veh_from.id + (veh_to.id << 16), null, Cmd.CMD_REPLACE_VEHICLE);
 			w.SetWindowDirty();
 			break;
 		}
 
 		case 6: { /* Stop replacing */
 			EngineID veh_from = w.as_replaceveh_d().sel_engine[0];
-			Cmd.DoCommandP(0, 3, veh_from + (Engine.INVALID_ENGINE << 16), null, Cmd.CMD_REPLACE_VEHICLE);
+			Cmd.DoCommandP( null, 3, veh_from.id + (Engine.INVALID_ENGINE << 16), null, Cmd.CMD_REPLACE_VEHICLE);
 			w.SetWindowDirty();
 			break;
 		}

@@ -529,10 +529,10 @@ VARDEF byte _savegame_sort_order;
 
 //#define INVALID_STRING_ID 0xFFFF
 
-enum {
-	MAX_SCREEN_WIDTH = 2048,
-	MAX_SCREEN_HEIGHT = 1200,
-};
+//enum {
+//	MAX_SCREEN_WIDTH = 2048,
+//	MAX_SCREEN_HEIGHT = 1200,
+//};
 
 /* In certain windows you navigate with the arrow keys. Do not scroll the
  * gameview when here. Bitencoded variable that only allows scrolling if all

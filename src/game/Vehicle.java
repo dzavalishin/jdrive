@@ -775,7 +775,7 @@ public class Vehicle implements IPoolItem
 	/**
 	 * Get the current size of the VehiclePool
 	 */
-	static private int GetVehiclePoolSize()
+	static int GetVehiclePoolSize()
 	{
 		return _vehicle_pool.total_items();
 	}
@@ -3066,6 +3066,26 @@ public class Vehicle implements IPoolItem
 	@Override
 	public void setIndex(int index) {
 		this.index = index;		
+	}
+	
+	public Iterator<Order> getOrdersIterator() 
+	{
+		return new Iterator<Order>() 
+		{
+			Order curr = orders; 
+			@Override
+			public boolean hasNext() {
+				return curr != null;
+			}
+
+			@Override
+			public Order next() {
+				Order ret = curr;
+				curr = curr.next;
+				return ret;
+			}
+			
+		};
 	}
 
 

@@ -41,11 +41,11 @@ public class Gfx {
 	static final byte []_color_remap_ptr;
 	static byte [] _string_colorremap = new byte[3];
 
-	//#define DIRTY_BYTES_PER_LINE (MAX_SCREEN_WIDTH / 64)
-	//static byte _dirty_blocks[DIRTY_BYTES_PER_LINE * MAX_SCREEN_HEIGHT / 8];
+	static final int DIRTY_BYTES_PER_LINE = (Global.MAX_SCREEN_WIDTH / 64);
+	static byte [] _dirty_blocks = new byte[DIRTY_BYTES_PER_LINE * Global.MAX_SCREEN_HEIGHT / 8];
 
 
-	/* TODO
+	/* 
 	static void memcpy_pitch(void *d, void *s, int w, int h, int spitch, int dpitch)
 	{
 		byte *dp = (byte*)d;
@@ -59,11 +59,35 @@ public class Gfx {
 		}
 	}*/
 
+	static void memcpy_pitch(
+			byte[] d, byte []s, 
+			int w, int h, 
+			int spitch, int dpitch,
+			int d_offset, int s_offset
+			)
+	{
+		//byte *dp = (byte*)d;
+		//byte *sp = (byte*)s;
+		int sp = s_offset;
+		int dp = d_offset;
+
+		assert(h >= 0);
+		for (; h != 0; --h) {
+			//memcpy(dp, sp, w);
+			System.arraycopy(s, sp, d, dp, w);
+			
+			dp += dpitch;
+			sp += spitch;
+		}
+	}
+	
 
 	static void GfxScroll(int left, int top, int width, int height, int xo, int yo)
 	{
-		final /* Pixel */ byte  src;
-		/* Pixel */ byte  dst;
+		//final /* Pixel */ byte  src;
+		///* Pixel */ byte  dst;
+		int  src; // index
+		int  dst; // index
 		int p;
 		int ht;
 
@@ -76,7 +100,8 @@ public class Gfx {
 
 		if (yo > 0) {
 			// Calculate pointers
-			dst = Hal._screen.dst_ptr + (top + height - 1) * p + left;
+			//dst = Hal._screen.dst_ptr + (top + height - 1) * p + left;
+			dst = (top + height - 1) * p + left;
 			src = dst - yo * p;
 
 			// Decrease height and increase top
@@ -95,13 +120,14 @@ public class Gfx {
 			}
 
 			for (ht = height; ht > 0; --ht) {
-				memcpy(dst, src, width);
+				//memcpy(dst, src, width);
+				System.arraycopy(Hal._screen.dst_ptr, src, Hal._screen.dst_ptr, dst, width);
 				src -= p;
 				dst -= p;
 			}
 		} else {
 			// Calculate pointers
-			dst = Hal._screen.dst_ptr + top * p + left;
+			dst = top * p + left;
 			src = dst - yo * p;
 
 			// Decrese height. (yo is <=0).
@@ -121,7 +147,8 @@ public class Gfx {
 			// the y-displacement may be 0 therefore we have to use memmove,
 			// because source and destination may overlap
 			for (ht = height; ht > 0; --ht) {
-				memmove(dst, src, width);
+				//memmove(dst, src, width);
+				System.arraycopy(Hal._screen.dst_ptr, src, Hal._screen.dst_ptr, dst, width);
 				src += p;
 				dst += p;
 			}
@@ -130,11 +157,17 @@ public class Gfx {
 		Global.hal.make_dirty(left, top, width, height);
 	}
 
+	static void memset( int[] mem, int dst, int color, int count)
+	{
+		while(count-- > 0)
+			mem[dst++] = color;
+	}
 
 	static void GfxFillRect(int left, int top, int right, int bottom, int color)
 	{
 		final DrawPixelInfo  dpi = Hal._cur_dpi;
-		/* Pixel */ byte  *dst;
+		///* Pixel */ byte  *dst;
+		int dst; // index
 		final int otop = top;
 		final int oleft = left;
 
@@ -155,29 +188,32 @@ public class Gfx {
 		bottom -= top;
 		assert(bottom > 0);
 
-		dst = dpi.dst_ptr + top * dpi.pitch + left;
+		//dst = dpi.dst_ptr + top * dpi.pitch + left;
+		dst = top * dpi.pitch + left;
 
-		if (!(color & PALETTE_MODIFIER_GREYOUT)) {
-			if (!(color & Sprite.USE_COLORTABLE)) {
+		if (0==(color & PALETTE_MODIFIER_GREYOUT)) {
+			if (0==(color & Sprite.USE_COLORTABLE)) {
 				do {
-					memset(dst, color, right);
+					memset(dpi.dst_ptr, dst, color, right);
 					dst += dpi.pitch;
-				} while (--bottom);
+				} while (--bottom > 0);
 			} else {
 				/* use colortable mode */
-				final byte* ctab = GetNonSprite(color & COLORTABLE_MASK) + 1;
+				final byte[] ctab = GetNonSprite(color & COLORTABLE_MASK) + 1;
 
 				do {
 					int i;
-					for (i = 0; i != right; i++) dst[i] = ctab[dst[i]];
+					for (i = 0; i != right; i++) 
+						dpi.dst_ptr[dst+i] = ctab[i%ctab.length]; //ctab[dst+i];
 					dst += dpi.pitch;
-				} while (--bottom);
+				} while (--bottom > 0);
 			}
 		} else {
-			byte bo = (oleft - left + dpi.left + otop - top + dpi.top) & 1;
+			byte bo =(byte) ((oleft - left + dpi.left + otop - top + dpi.top) & 1);
 			do {
 				int i;
-				for (i = (bo ^= 1); i < right; i += 2) dst[i] = (byte)color;
+				for (i = (bo ^= 1); i < right; i += 2) 
+					dpi.dst_ptr[dst+i] = (byte)color;
 				dst += dpi.pitch;
 			} while (--bottom > 0);
 		}
@@ -355,7 +391,7 @@ public class Gfx {
 	/* returns right coordinate */
 	static int DrawString(int x, int y, int str, int color)
 	{
-		String buffer = String.GetString( str);
+		String buffer = Global.GetString( str);
 		return DoDrawString(buffer, x, y, color);
 	}
 	/* returns right coordinate */
@@ -448,14 +484,17 @@ public class Gfx {
 		int base = _stringwidth_base;
 		int w;
 		String last_space;
-		byte c;
+		char c;
+		
+		char sc[] = str.toCharArray();
+		int sp = 0;
 
 		for(;;) {
 			w = 0;
 			last_space = null;
 
 			for(;;) {
-				c = *str++;
+				c = sc[sp++]; // *str++;
 				if (c == ASCII_LETTERSTART) last_space = str;
 
 				if (c >= ASCII_LETTERSTART) {
@@ -470,15 +509,15 @@ public class Gfx {
 					if (c == 0) return num + (base << 16);
 					if (c == ASCII_NL) break;
 
-					if (c == ASCII_SETX) str++;
-					else if (c == ASCII_SETXY) str += 2;
+					if (c == ASCII_SETX) sp++;
+					else if (c == ASCII_SETXY) sp += 2;
 					else if (c == ASCII_TINYFONT) base = 224;
 					else if (c == ASCII_BIGFONT) base = 448;
 				}
 			}
 
 			num++;
-			str[-1] = '\0';
+			//str[-1] = '\0'; TODO why?
 		}
 	}
 
@@ -489,11 +528,13 @@ public class Gfx {
 		int tmp;
 		int num, w, mt;
 		final String src;
-		byte c;
+		char c;
 
 		String buffer = Global.GetString(str);
+		char sc[] = buffer.toCharArray();
+		int sp = 0;
 
-		tmp = FormatStringLinebreaks(buffer, maxw);
+		tmp = FormatStringLinebreaks(buffer, maxw); // TODO used?
 		num = BitOps.GB(tmp, 0, 16);
 
 		switch (BitOps.GB(tmp, 16, 16)) {
@@ -512,7 +553,7 @@ public class Gfx {
 			_stringwidth_base = _stringwidth_out;
 
 			for(;;) {
-				c = *src++;
+				c = sc[sp++]; // *src++;
 				if (c == 0) {
 					y += mt;
 					if (--num < 0) {
@@ -521,9 +562,9 @@ public class Gfx {
 					}
 					break;
 				} else if (c == ASCII_SETX) {
-					src++;
+					sp++;
 				} else if (c == ASCII_SETXY) {
-					src+=2;
+					sp+=2;
 				}
 			}
 		}
@@ -535,7 +576,7 @@ public class Gfx {
 		int tmp;
 		int num, mt;
 		final String src;
-		byte c;
+		char c;
 
 		String buffer = Global.GetString(str);
 
@@ -549,13 +590,15 @@ public class Gfx {
 		}
 
 		src = buffer;
+		char sc[] = src.toCharArray();
+		int sp = 0;
 
 		for(;;) {
 			DoDrawString(src, x, y, 0xFE);
 			_stringwidth_base = _stringwidth_out;
 
 			for(;;) {
-				c = *src++;
+				c = sc[sp++]; // *src++;
 				if (c == 0) {
 					y += mt;
 					if (--num < 0) {
@@ -564,9 +607,9 @@ public class Gfx {
 					}
 					break;
 				} else if (c == ASCII_SETX) {
-					src++;
+					sp++;
 				} else if (c == ASCII_SETXY) {
-					src+=2;
+					sp+=2;
 				}
 			}
 		}
@@ -594,10 +637,10 @@ public class Gfx {
 
 	static void DrawFrameRect(int left, int top, int right, int bottom, int ctab, int flags)
 	{
-		byte color_2 = _color_list[ctab].window_color_1a;
-		byte color_interior = _color_list[ctab].window_color_bga;
-		byte color_3 = _color_list[ctab].window_color_bgb;
-		byte color = _color_list[ctab].window_color_2;
+		byte color_2 = Global._color_list[ctab].window_color_1a;
+		byte color_interior = Global._color_list[ctab].window_color_bga;
+		byte color_3 = Global._color_list[ctab].window_color_bgb;
+		byte color = Global._color_list[ctab].window_color_2;
 
 		if (0 ==(flags & 0x8)) {
 			if (0==(flags & 0x20)) {
@@ -630,9 +673,11 @@ public class Gfx {
 	{
 		DrawPixelInfo dpi = Hal._cur_dpi;
 		int base = _stringwidth_base;
-		byte c;
+		char c;
 		byte color;
 		int xo = x, yo = y;
+		int sp = 0;
+		char sc[] = string.toCharArray();
 
 		color = real_color & 0xFF;
 
@@ -660,13 +705,13 @@ public class Gfx {
 			if (y + 19 <= dpi.top || dpi.top + dpi.height <= y) {
 				skip_char:;
 				for(;;) {
-					c = *string++;
+					c = sc[sp++]; //*string++;
 					if (c < ASCII_LETTERSTART) goto skip_cont;
 				}
 			}
 
 		for(;;) {
-			c = *string++;
+			c = sc[sp++]; //*string++;
 			skip_cont:;
 			if (c == 0) {
 				_stringwidth_out = base;
@@ -691,10 +736,10 @@ public class Gfx {
 				color = (byte)(c - ASCII_COLORSTART);
 				goto switch_color;
 			} else if (c == ASCII_SETX) { // {SETX}
-				x = xo + (byte)*string++;
+				x = xo + (byte)sc[sp++]; //*string++;
 			} else if (c == ASCII_SETXY) {// {SETXY}
-				x = xo + (byte)*string++;
-				y = yo + (byte)*string++;
+				x = xo + (byte)sc[sp++]; // *string++;
+				y = yo + (byte)sc[sp++]; // *string++;
 			} else if (c == ASCII_TINYFONT) { // {TINYFONT}
 				base = 0xE0;
 			} else if (c == ASCII_BIGFONT) { // {BIGFONT}
@@ -728,9 +773,13 @@ public class Gfx {
 
 	class BlitterParams {
 		int start_x, start_y;
-		final byte* sprite;
-		final byte* sprite_org;
-		/* Pixel */ byte  *dst;
+		final byte[] sprite;
+		final byte[] sprite_org;
+		
+		///* Pixel */ byte  *dst;
+		int[]  dst_mem;
+		int  dst_offset;
+		
 		int mode;
 		int width, height;
 		int width_org;
@@ -741,7 +790,7 @@ public class Gfx {
 
 	private static void GfxBlitTileZoomIn(BlitterParams bp)
 	{
-		final byte* src_o = bp.sprite;
+		final byte[] src_o = bp.sprite;
 		final byte* src;
 		int num, skip;
 		byte done;
@@ -873,7 +922,7 @@ public class Gfx {
 
 	private static void GfxBlitZoomInUncomp(BlitterParams bp)
 	{
-		final byte *src = bp.sprite;
+		final byte [] src = bp.sprite;
 		/* Pixel */ byte  *dst = bp.dst;
 		int height = bp.height;
 		int width = bp.width;
@@ -1412,6 +1461,20 @@ public class Gfx {
 
 	//typedef void (*BlitZoomFunc)(BlitterParams bp);
 
+	static final BlitZoomFunc zf_tile[] =
+		{
+				GfxBlitTileZoomIn,
+				GfxBlitTileZoomMedium,
+				GfxBlitTileZoomOut
+		};
+
+	static final BlitZoomFunc zf_uncomp[] =
+		{
+				GfxBlitZoomInUncomp,
+				GfxBlitZoomMediumUncomp,
+				GfxBlitZoomOutUncomp
+		};
+	
 	private static void GfxMainBlitter(final Sprite  sprite, int x, int y, int mode)
 	{
 		final DrawPixelInfo  dpi = Hal._cur_dpi;
@@ -1420,18 +1483,6 @@ public class Gfx {
 		BlitterParams bp;
 		int zoom_mask = ~((1 << dpi.zoom) - 1);
 
-		static final BlitZoomFunc zf_tile[3] =
-			{
-					GfxBlitTileZoomIn,
-					GfxBlitTileZoomMedium,
-					GfxBlitTileZoomOut
-			};
-		static final BlitZoomFunc zf_uncomp[3] =
-			{
-					GfxBlitZoomInUncomp,
-					GfxBlitZoomMediumUncomp,
-					GfxBlitZoomOutUncomp
-			};
 
 		/* decode sprite header */
 		x += sprite.x_offs;
@@ -1685,7 +1736,7 @@ public class Gfx {
 
 	static int GetCharacterWidth(int key)
 	{
-		assert(key >= ASCII_LETTERSTART && key - ASCII_LETTERSTART < lengthof(_stringwidth_table));
+		assert(key >= ASCII_LETTERSTART && key - ASCII_LETTERSTART < _stringwidth_table.length);
 		return _stringwidth_table[key - ASCII_LETTERSTART];
 	}
 

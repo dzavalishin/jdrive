@@ -96,7 +96,7 @@ public class EngineTables
 	/** BEGIN --- TRANSLATE FROM GLOBAL CARGO TO LOCAL CARGO ID'S **/
 	/** Map global cargo ID's to local-cargo ID's */
 	//final CargoID _local_cargo_id_ctype[NUM_GLOBAL_CID] = {
-	public final int _local_cargo_id_ctype[] = {
+	public final static int _local_cargo_id_ctype[] = {
 			AcceptedCargo.CT_PASSENGERS,AcceptedCargo.CT_COAL,   AcceptedCargo.CT_MAIL,        AcceptedCargo.CT_OIL,      AcceptedCargo.CT_LIVESTOCK,AcceptedCargo.CT_GOODS,  AcceptedCargo.CT_GRAIN,      AcceptedCargo.CT_WOOD,         /*  0- 7 */
 			AcceptedCargo.CT_IRON_ORE,  AcceptedCargo.CT_STEEL,  AcceptedCargo.CT_VALUABLES,   AcceptedCargo.CT_PAPER,    AcceptedCargo.CT_FOOD,     AcceptedCargo.CT_FRUIT,  AcceptedCargo.CT_COPPER_ORE, AcceptedCargo.CT_WATER,        /*  8-15 */
 			AcceptedCargo.CT_RUBBER,    AcceptedCargo.CT_SUGAR,  AcceptedCargo.CT_TOYS,        AcceptedCargo.CT_BATTERIES,AcceptedCargo.CT_CANDY,    AcceptedCargo.CT_TOFFEE, AcceptedCargo.CT_COLA,       AcceptedCargo.CT_COTTON_CANDY, /* 16-23 */

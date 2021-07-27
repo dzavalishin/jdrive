@@ -1,5 +1,6 @@
 package game;
 
+import game.util.AnimCursor;
 import game.util.BitOps;
 
 public abstract class Hal
@@ -131,17 +132,20 @@ public abstract class Hal
 		CursorVars cv = _cursor;
 		
 		if(
-				(cv.animate_list[cv.animate_pos] == null)
+			(cv.animate_pos >= cv.animate_list.length )
+			||
+			(cv.animate_list[cv.animate_pos] == null)
 				||
-				(cv.animate_list[cv.animate_pos].id == 0xFFFF)
+				(cv.animate_list[cv.animate_pos].spriteId == 0xFFFF)
 				)
 		{
 			cv.animate_pos = 0;
 		}
 		
-		CursorID sprite = cv.animate_list[cv.animate_pos];
-		cv.animate_timeout = cv.animate_list[cv.animate_pos+1].id;
-		cv.animate_pos += 2;
+		CursorID sprite = CursorID.get( cv.animate_list[cv.animate_pos].spriteId );
+		cv.animate_timeout = cv.animate_list[cv.animate_pos].time;
+		//cv.animate_pos += 2;
+		cv.animate_pos++;
 		
 		SetCursorSprite(sprite);
 		/*
@@ -173,9 +177,9 @@ public abstract class Hal
 		SetCursorSprite(cursor);
 	}
 
-	void SetAnimatedMouseCursor( CursorID[] table)
+	void SetAnimatedMouseCursor( AnimCursor[] animcursors)
 	{
-		_cursor.animate_list = table;
+		_cursor.animate_list = animcursors;
 		_cursor.animate_pos = 0;
 		SwitchAnimatedCursor();
 	}
@@ -231,8 +235,8 @@ void SortResolutions(int count)
 	{
 		int t = Global._random_seeds[1][1];
 		int s = Global._random_seeds[1][0];
-		Global._random_seeds[1][0] = s + ROR(t ^ 0x1234567F, 7) + 1;
-		return Global._random_seeds[1][1] = ROR(s, 3) - 1;
+		Global._random_seeds[1][0] = s + BitOps.ROR(t ^ 0x1234567F, 7) + 1;
+		return Global._random_seeds[1][1] = BitOps.ROR(s, 3) - 1;
 	}
 
 	static int InteractiveRandomRange(int max)
@@ -278,7 +282,7 @@ class CursorVars {
 	CursorID sprite;
 
 	int wheel; // mouse wheel movement
-	CursorID [] animate_list;
+	AnimCursor[] animate_list;
 	int animate_pos;
 	int animate_timeout;
 

@@ -258,8 +258,13 @@ public class BitOps {
 	 * @note Assumes a byte has 8 bits
 	 */
 	//static void ROL(x, n) ((x) << (n) | (x) >> (sizeof(x) * 8 - (n)))
+	
 	//static void ROR(x, n) ((x) >> (n) | (x) << (sizeof(x) * 8 - (n)))
-
+	public static int ROR(int x, int n)
+	{
+		return (x >>> n) | (x << (Integer.BYTES * 8 - n));		
+	}
+	
 	/**
 	 * Return the smallest multiple of n equal or greater than x
 	 * @note n must be a power of 2
