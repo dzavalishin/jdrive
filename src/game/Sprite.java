@@ -34,6 +34,11 @@ public class Sprite extends Sprites {
 	{
 		return SpriteCache.GetSprite(sprite);
 	}
+
+	public static void UnloadSpriteGroup(SpriteGroup group) {
+		// TODO UnloadSpriteGroup stub
+		
+	}
 }
 
 // User should decide by object type

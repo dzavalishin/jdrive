@@ -1377,8 +1377,9 @@ public class Vehicle implements IPoolItem
 	/** Adds a vehicle to the list of vehicles, that visited a depot this tick
 	 * @param *v vehicle to add
 	 */
-	static void VehicleEnteredDepotThisTick(Vehicle v)
+	void VehicleEnteredDepotThisTick()
 	{
+		Vehicle v = this;
 		// we need to set v.leave_depot_instantly as we have no control of it's contents at this time
 		if (BitOps.HASBIT(v.current_order.flags, OFB_HALT_IN_DEPOT) && !BitOps.HASBIT(v.current_order.flags, OFB_PART_OF_ORDERS) && v.current_order.type == Order.OT_GOTO_DEPOT) {
 			// we keep the vehicle in the depot since the user ordered it to stay

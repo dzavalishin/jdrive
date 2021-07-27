@@ -78,7 +78,7 @@ public class EngineTables extends EngineTables2
 	 * the custom GRF  files. It is basically just a transcribed table from TTDPatch's newgrf.txt.
 	 */
 	//final CargoID _global_cargo_id[NUM_LANDSCAPE][NUM_CARGO] = 
-	final int _global_cargo_id[][] = 
+	public final static int _global_cargo_id[][] = 
 		{
 			/* Landscape.LT_NORMAL */ {GC_PASSENGERS, GC_COAL,  GC_MAIL, GC_OIL, GC_LIVESTOCK, GC_GOODS, GC_GRAIN, GC_WOOD, GC_IRON_ORE,    GC_STEEL,  GC_VALUABLES, GC_PAPER_TEMP},
 			/* Landscape.LT_HILLY */  {GC_PASSENGERS, GC_COAL,  GC_MAIL, GC_OIL, GC_LIVESTOCK, GC_GOODS, GC_GRAIN, GC_WOOD, GC_INVALID,     GC_PAPER,  GC_VALUABLES, GC_FOOD },
@@ -110,7 +110,7 @@ public class EngineTables extends EngineTables2
 	 * 0: Landscape.LT_NORMAL, 1: Landscape.LT_HILLY, 2: Landscape.LT_DESERT, 3: Landscape.LT_CANDY */
 	
 	//final int _landscape_global_cargo_mask[NUM_LANDSCAPE] =
-	final int _landscape_global_cargo_mask[] =
+	public final static int _landscape_global_cargo_mask[] =
 { /* Landscape.LT_NORMAL: temperate */
 		MC(GC_PASSENGERS)|MC(GC_COAL)|MC(GC_MAIL)|MC(GC_OIL)|MC(GC_LIVESTOCK)|MC(GC_GOODS)|MC(GC_GRAIN)|MC(GC_WOOD)|
 		MC(GC_IRON_ORE)|MC(GC_STEEL)|MC(GC_VALUABLES),
@@ -130,7 +130,7 @@ public class EngineTables extends EngineTables2
 	 * This coupled with the landscape information (_landscape_global_cargo_mask) gives
 	 * us exactly what is refittable and what is not */
 	//final int _default_refitmasks[NUM_VEHICLE_TYPES] = {
-	public final int _default_refitmasks[] = {
+	public final static int _default_refitmasks[] = {
 			/* Trains */
 			MC(GC_PASSENGERS)|MC(GC_COAL)|MC(GC_MAIL)|MC(GC_LIVESTOCK)|MC(GC_GOODS)|MC(GC_GRAIN)|MC(GC_WOOD)|MC(GC_IRON_ORE)|
 			MC(GC_STEEL)|MC(GC_VALUABLES)|MC(GC_PAPER)|MC(GC_FOOD)|MC(GC_FRUIT)|MC(GC_COPPER_ORE)|MC(GC_WATER)|MC(GC_SUGAR)|
@@ -151,7 +151,7 @@ public class EngineTables extends EngineTables2
 	/**
 	 * Bitmask of classes for cargo types.
 	 */
-	public final int cargo_classes[] = {
+	public final static int cargo_classes[] = {
 			/* Passengers */ MC(GC_PASSENGERS),
 			/* Mail       */ MC(GC_MAIL),
 			/* Express    */ MC(GC_GOODS)|MC(GC_FOOD)|MC(GC_CANDY),

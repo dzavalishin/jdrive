@@ -1,7 +1,7 @@
 package game;
 
 
-public class EngineGui extends EngineTables 
+public class EngineGui extends Engine 
 {
 
 

@@ -19,7 +19,7 @@ public class Strings extends StringTable
 {
 
 
-	static String _userstring;
+	public static String _userstring;
 
 	//private String StationGetSpecialString(String buff, int x);
 	//private String GetSpecialTownNameString(String buff, int ind, int seed);

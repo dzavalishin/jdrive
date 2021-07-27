@@ -14,7 +14,7 @@ public class Ship {
 		return (byte) (r | r >> 8);
 	}
 
-	void DrawShipEngine(int x, int y, EngineID engine, int image_ormod)
+	static void DrawShipEngine(int x, int y, EngineID engine, int image_ormod)
 	{
 		int spritenum = EngineGui.ShipVehInfo(engine).image_index;
 
