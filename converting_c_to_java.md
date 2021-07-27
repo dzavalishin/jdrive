@@ -65,12 +65,8 @@ tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 0, 4, new_ground);
 
 
 
+* unsigneds
 
----
-SignalState
-Track
-TrackBits
-Trackdir
-TrackdirBits
+Integer. and Long. have operations needed
 
 

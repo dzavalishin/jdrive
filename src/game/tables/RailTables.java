@@ -500,7 +500,7 @@ public class RailTables {
 
 	// used for presignals
 	//static final SpriteID _signal_base_sprites[32] = {
-	static final int _signal_base_sprites[] = {
+	protected static final int _signal_base_sprites[] = {
 			0x4FB,
 			0x1323,
 			0x1333,
@@ -551,7 +551,7 @@ public class RailTables {
 	};
 
 	// used to determine the side of the road for the signal
-	static final int _signal_position[] = {
+	protected static final int _signal_position[] = {
 			/* original: left side position */
 			0x58,0x1E,0xE1,0xB9,0x01,0xA3,0x4B,0xEE,0x3B,0xD4,0x43,0xBD,
 			/* patch: ride side position */
@@ -559,21 +559,21 @@ public class RailTables {
 	};
 
 
-	static final int _fractcoords_behind[] = { 0x8F, 0x8, 0x80, 0xF8 };
-	static final int _fractcoords_enter[] = { 0x8A, 0x48, 0x84, 0xA8 };
-	static final int _deltacoord_leaveoffset[] = {
+	protected static final int _fractcoords_behind[] = { 0x8F, 0x8, 0x80, 0xF8 };
+	protected static final int _fractcoords_enter[] = { 0x8A, 0x48, 0x84, 0xA8 };
+	protected static final int _deltacoord_leaveoffset[] = {
 			-1,  0,  1,  0, /* x */
 			0,  1,  0, -1  /* y */
 	};
-	static final int _enter_directions[] = {5, 7, 1, 3};
-	static final int _leave_directions[] = {1, 3, 5, 7};
-	static final int _depot_track_mask[] = {1, 2, 1, 2};
+	protected static final int _enter_directions[] = {5, 7, 1, 3};
+	protected static final int _leave_directions[] = {1, 3, 5, 7};
+	protected static final int _depot_track_mask[] = {1, 2, 1, 2};
 
-	static final byte _train_spec_tracks[] = {1,2,1,2,1,2};
+	protected static final byte _train_spec_tracks[] = {1,2,1,2,1,2};
 
 
-	static final byte _search_dir_1[] = {1, 3, 1, 3, 5, 3};
-	static final byte _search_dir_2[] = {5, 7, 7, 5, 7, 1};
+	protected static final byte _search_dir_1[] = {1, 3, 1, 3, 5, 3};
+	protected static final byte _search_dir_2[] = {5, 7, 7, 5, 7, 1};
 
 
 

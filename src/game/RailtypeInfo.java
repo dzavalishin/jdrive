@@ -1,7 +1,5 @@
 package game;
 
-import game.util.BitOps;
-
 public class RailtypeInfo 
 {
 
@@ -56,13 +54,13 @@ public class RailtypeInfo
 	{
 		base_sprites = new RailBaseSprites(base);
 		gui_sprites = new RailGuiSprites(gui);
-		RailCursors cursor = new RailCursors(cursors);
+		cursor = new RailCursors(cursors);
 
 		toolbar_caption = new StringID(captionStr);
-		SpriteID snow_offset = SpriteID.get(snowOffset);
+		snow_offset = SpriteID.get(snowOffset);
 		compatible_railtypes = (byte) i;
-		SpriteID total_offset = SpriteID.get(j);
-		SpriteID bridge_offset = SpriteID.get(k);
+		total_offset = SpriteID.get(j);
+		bridge_offset = SpriteID.get(k);
 
 	}
 
@@ -417,6 +415,6 @@ enum SignalState {
 	public int getValue() {
 		return value;
 	}
-
-} 
+*/
+ 
 
