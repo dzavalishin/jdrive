@@ -4,6 +4,7 @@ import game.util.BitOps;
 
 public class RailtypeInfo 
 {
+
 	public static final int SIG_SEMAPHORE_MASK = (1 << 3);
 
 	// these are the maximums used for updating signal blocks, and checking if a depot is in a pbs block
@@ -44,6 +45,28 @@ public class RailtypeInfo
 	SpriteID bridge_offset;
 
 
+
+	public RailtypeInfo(
+			int[] base, 
+			int[] gui, 
+			int[] cursors, 
+			int captionStr, 
+			int snowOffset,
+			int i, int j, int k) 
+	{
+		base_sprites = new RailBaseSprites(base);
+		gui_sprites = new RailGuiSprites(gui);
+		RailCursors cursor = new RailCursors(cursors);
+
+		toolbar_caption = new StringID(captionStr);
+		SpriteID snow_offset = SpriteID.get(snowOffset);
+		compatible_railtypes = (byte) i;
+		SpriteID total_offset = SpriteID.get(j);
+		SpriteID bridge_offset = SpriteID.get(k);
+
+	}
+
+
 	// ------------------------------------------------------------
 
 
@@ -61,6 +84,18 @@ class RailCursors {
 	CursorID depot;
 	CursorID tunnel;
 	CursorID convert;
+
+	public RailCursors(int[] cur) {
+		int i = 0;
+		 rail_ns = CursorID.get( cur[i++]);
+		 rail_swne = CursorID.get( cur[i++]);
+		 rail_ew = CursorID.get( cur[i++]);
+		 rail_nwse = CursorID.get( cur[i++]);
+		 autorail = CursorID.get( cur[i++]);
+		 depot = CursorID.get( cur[i++]);
+		 tunnel = CursorID.get( cur[i++]);
+		 convert = CursorID.get( cur[i++]);
+	}
 }
 
 class RailGuiSprites {
@@ -72,6 +107,20 @@ class RailGuiSprites {
 	SpriteID build_depot;        ///< button for building depots
 	SpriteID build_tunnel;       ///< button for building a tunnel
 	SpriteID convert_rail;       ///< button for converting rail
+
+	public RailGuiSprites(int[] spr) 
+	{
+		int i = 0;
+		build_ns_rail = SpriteID.get( spr[i++]);      
+		build_x_rail = SpriteID.get( spr[i++]);       
+		build_ew_rail = SpriteID.get( spr[i++]);      
+		build_y_rail = SpriteID.get( spr[i++]);       
+		auto_rail = SpriteID.get( spr[i++]);          
+		build_depot = SpriteID.get( spr[i++]);        
+		build_tunnel = SpriteID.get( spr[i++]);       
+		convert_rail = SpriteID.get( spr[i++]);       
+	}
+
 }
 
 class RailBaseSprites {
@@ -86,6 +135,23 @@ class RailBaseSprites {
 	SpriteID single_w;     ///< single piece of rail in the western corner
 	SpriteID crossing;     ///< level crossing, rail in X direction
 	SpriteID tunnel;       ///< tunnel sprites base
+
+	public RailBaseSprites(int[] spr) 
+	{
+		int i = 0;
+
+		track_y = SpriteID.get( spr[i++]);      
+		track_ns = SpriteID.get( spr[i++]);     
+		ground = SpriteID.get( spr[i++]);       
+		single_y = SpriteID.get( spr[i++]);     
+		single_x = SpriteID.get( spr[i++]);     
+		single_n = SpriteID.get( spr[i++]);     
+		single_s = SpriteID.get( spr[i++]);     
+		single_e = SpriteID.get( spr[i++]);     
+		single_w = SpriteID.get( spr[i++]);     
+		crossing = SpriteID.get( spr[i++]);     
+		tunnel = SpriteID.get( spr[i++]);       
+	}
 } 
 
 

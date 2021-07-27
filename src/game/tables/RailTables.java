@@ -1,5 +1,9 @@
 package game.tables;
 
+import game.RailtypeInfo;
+import game.Str;
+import game.util.Sprites;
+
 public class RailTables {
 
 	/*
@@ -303,14 +307,14 @@ public class RailTables {
 	/* XXX: Below 3 tables store duplicate data. Maybe remove some? */
 	/* Maps a trackdir to the bit that stores its status in the map arrays, in the
 	 * direction along with the trackdir */
-	static final int _signal_along_trackdir[] = {
+	protected static final int _signal_along_trackdir[] = {
 			0x80, 0x80, 0x80, 0x20, 0x40, 0x10, 0, 0,
 			0x40, 0x40, 0x40, 0x10, 0x80, 0x20
 	};
 
 	/* Maps a trackdir to the bit that stores its status in the map arrays, in the
 	 * direction against the trackdir */
-	static final int _signal_against_trackdir[] = {
+	protected static final int _signal_against_trackdir[] = {
 			0x40, 0x40, 0x40, 0x10, 0x80, 0x20, 0, 0,
 			0x80, 0x80, 0x80, 0x20, 0x40, 0x10
 	};
@@ -483,109 +487,267 @@ public class RailTables {
 	public static final _RailBit _railbit = new _RailBit( xinc, yinc );
 
 
-	
+
 	public static final byte _dir_from_track[] = {
 			0,1,0,1,2,1, 0,0,
 			2,3,3,2,3,0,
-		};
-	
+	};
 
-	
-	
-	
-	
+
+
+
+
+
 	// used for presignals
 	//static final SpriteID _signal_base_sprites[32] = {
 	static final int _signal_base_sprites[] = {
-		0x4FB,
-		0x1323,
-		0x1333,
-		0x1343,
+			0x4FB,
+			0x1323,
+			0x1333,
+			0x1343,
 
-		// pbs signals
-		0x1393,
-		0x13A3,  // not used (yet?)
-		0x13B3,  // not used (yet?)
-		0x13C3,  // not used (yet?)
+			// pbs signals
+			0x1393,
+			0x13A3,  // not used (yet?)
+			0x13B3,  // not used (yet?)
+			0x13C3,  // not used (yet?)
 
-		// semaphores
-		0x1353,
-		0x1363,
-		0x1373,
-		0x1383,
+			// semaphores
+			0x1353,
+			0x1363,
+			0x1373,
+			0x1383,
 
-		// pbs semaphores
-		0x13D3,
-		0x13E3,  // not used (yet?)
-		0x13F3,  // not used (yet?)
-		0x1403,  // not used (yet?)
+			// pbs semaphores
+			0x13D3,
+			0x13E3,  // not used (yet?)
+			0x13F3,  // not used (yet?)
+			0x1403,  // not used (yet?)
 
 
-		// mirrored versions
-		0x4FB,
-		0x1323,
-		0x1333,
-		0x1343,
+			// mirrored versions
+			0x4FB,
+			0x1323,
+			0x1333,
+			0x1343,
 
-		// pbs signals
-		0x1393,
-		0x13A3,  // not used (yet?)
-		0x13B3,  // not used (yet?)
-		0x13C3,  // not used (yet?)
+			// pbs signals
+			0x1393,
+			0x13A3,  // not used (yet?)
+			0x13B3,  // not used (yet?)
+			0x13C3,  // not used (yet?)
 
-		// semaphores
-		0x1446,
-		0x1456,
-		0x1466,
-		0x1476,
+			// semaphores
+			0x1446,
+			0x1456,
+			0x1466,
+			0x1476,
 
-		// pbs semaphores
-		0x14C6,
-		0x14D6,  // not used (yet?)
-		0x14E6,  // not used (yet?)
-		0x14F6,  // not used (yet?)
+			// pbs semaphores
+			0x14C6,
+			0x14D6,  // not used (yet?)
+			0x14E6,  // not used (yet?)
+			0x14F6,  // not used (yet?)
 	};
 
 	// used to determine the side of the road for the signal
 	static final int _signal_position[] = {
-		/* original: left side position */
-		0x58,0x1E,0xE1,0xB9,0x01,0xA3,0x4B,0xEE,0x3B,0xD4,0x43,0xBD,
-		/* patch: ride side position */
-		0x1E,0xAC,0x64,0xE1,0x4A,0x10,0xEE,0xC5,0xDB,0x34,0x4D,0xB3
+			/* original: left side position */
+			0x58,0x1E,0xE1,0xB9,0x01,0xA3,0x4B,0xEE,0x3B,0xD4,0x43,0xBD,
+			/* patch: ride side position */
+			0x1E,0xAC,0x64,0xE1,0x4A,0x10,0xEE,0xC5,0xDB,0x34,0x4D,0xB3
 	};
 
-	
+
 	static final int _fractcoords_behind[] = { 0x8F, 0x8, 0x80, 0xF8 };
 	static final int _fractcoords_enter[] = { 0x8A, 0x48, 0x84, 0xA8 };
 	static final int _deltacoord_leaveoffset[] = {
-		-1,  0,  1,  0, /* x */
-		 0,  1,  0, -1  /* y */
+			-1,  0,  1,  0, /* x */
+			0,  1,  0, -1  /* y */
 	};
 	static final int _enter_directions[] = {5, 7, 1, 3};
 	static final int _leave_directions[] = {1, 3, 5, 7};
 	static final int _depot_track_mask[] = {1, 2, 1, 2};
-	
+
 	static final byte _train_spec_tracks[] = {1,2,1,2,1,2};
-	
-	
+
+
 	static final byte _search_dir_1[] = {1, 3, 1, 3, 5, 3};
 	static final byte _search_dir_2[] = {5, 7, 7, 5, 7, 1};
-	
 
-	
-	
+
+
+
 	/** Enum referring to the widgets of the build rail toolbar
 	 */
 	//typedef enum {
-		public static final int RTW_CAPTION = 1;
-		public static final int RTW_BUILD_NS = 4;
-		public static final int RTW_BUILD_X = 5;
-		public static final int RTW_BUILD_EW = 6;
-		public static final int RTW_BUILD_Y = 7;
-		public static final int RTW_AUTORAIL = 8;
-		public static final int RTW_BUILD_DEPOT = 10;
-		public static final int RTW_BUILD_TUNNEL = 15;
-		public static final int RTW_CONVERT_RAIL = 17;
+	public static final int RTW_CAPTION = 1;
+	public static final int RTW_BUILD_NS = 4;
+	public static final int RTW_BUILD_X = 5;
+	public static final int RTW_BUILD_EW = 6;
+	public static final int RTW_BUILD_Y = 7;
+	public static final int RTW_AUTORAIL = 8;
+	public static final int RTW_BUILD_DEPOT = 10;
+	public static final int RTW_BUILD_TUNNEL = 15;
+	public static final int RTW_CONVERT_RAIL = 17;
 	//} RailToolbarWidgets;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/* Railway Main Sprites */
+	private static final int [] spr_rail_1 = { Sprites.SPR_RAIL_TRACK_Y, Sprites.SPR_RAIL_TRACK_N_S, Sprites.SPR_RAIL_TRACK_BASE, Sprites.SPR_RAIL_SINGLE_Y, Sprites.SPR_RAIL_SINGLE_X,
+			Sprites.SPR_RAIL_SINGLE_NORTH, Sprites.SPR_RAIL_SINGLE_SOUTH, Sprites.SPR_RAIL_SINGLE_EAST, Sprites.SPR_RAIL_SINGLE_WEST,
+			Sprites.SPR_CROSSING_OFF_X_RAIL,
+			Sprites.SPR_TUNNEL_ENTRY_REAR_RAIL
+	};
+	private static final int [] spr_rail_gui = { 0x4E3, 0x4E4, 0x4E5, 0x4E6,
+			Sprites.SPR_IMG_AUTORAIL,
+			Sprites.SPR_IMG_DEPOT_RAIL,
+			Sprites.SPR_IMG_TUNNEL_RAIL,
+			Sprites.SPR_IMG_CONVERT_RAIL
+	}; 
+	private static final int [] spr_rail_cursors = {
+			Sprites.SPR_CURSOR_NS_TRACK,
+			Sprites.SPR_CURSOR_SWNE_TRACK,
+			Sprites.SPR_CURSOR_EW_TRACK,
+			Sprites.SPR_CURSOR_NWSE_TRACK,
+			Sprites.SPR_CURSOR_AUTORAIL,
+			Sprites.SPR_CURSOR_RAIL_DEPOT,
+			Sprites.SPR_CURSOR_TUNNEL_RAIL,
+			Sprites.SPR_CURSOR_CONVERT_RAIL
+	}; 
+	//private static final int [] spr_rail_str = {  };
 	
+	
+	private static final int [] spr_mono_main = 
+		{ Sprites.SPR_MONO_TRACK_Y, Sprites.SPR_MONO_TRACK_N_S, Sprites.SPR_MONO_TRACK_BASE, Sprites.SPR_MONO_SINGLE_Y, Sprites.SPR_MONO_SINGLE_X,
+				Sprites.SPR_MONO_SINGLE_NORTH, Sprites.SPR_MONO_SINGLE_SOUTH, Sprites.SPR_MONO_SINGLE_EAST, Sprites.SPR_MONO_SINGLE_WEST,
+				Sprites.SPR_CROSSING_OFF_X_MONO,
+				Sprites.SPR_TUNNEL_ENTRY_REAR_MONO
+			}; 
+	private static final int [] spr_mono_gui = 
+		{ 0x4E7, 0x4E8, 0x4E9, 0x4EA,
+			Sprites.SPR_IMG_AUTOMONO,
+			Sprites.SPR_IMG_DEPOT_MONO,
+			Sprites.SPR_IMG_TUNNEL_MONO,
+			Sprites.SPR_IMG_CONVERT_MONO
+		}; 
+	private static final int [] spr_mono_cursors =
+		{
+				Sprites.SPR_CURSOR_NS_MONO,
+				Sprites.SPR_CURSOR_SWNE_MONO,
+				Sprites.SPR_CURSOR_EW_MONO,
+				Sprites.SPR_CURSOR_NWSE_MONO,
+				Sprites.SPR_CURSOR_AUTOMONO,
+				Sprites.SPR_CURSOR_MONO_DEPOT,
+				Sprites.SPR_CURSOR_TUNNEL_MONO,
+				Sprites.SPR_CURSOR_CONVERT_MONO
+			};
+	//private static final int [] spr_mono_str = { Str.STR_100B_MONORAIL_CONSTRUCTION };
+
+	private static final int [] spr_mag_main = 
+		{ Sprites.SPR_MGLV_TRACK_Y, Sprites.SPR_MGLV_TRACK_N_S, Sprites.SPR_MGLV_TRACK_BASE, Sprites.SPR_MGLV_SINGLE_Y, Sprites.SPR_MGLV_SINGLE_X,
+			Sprites.SPR_MGLV_SINGLE_NORTH, Sprites.SPR_MGLV_SINGLE_SOUTH, Sprites.SPR_MGLV_SINGLE_EAST, Sprites.SPR_MGLV_SINGLE_WEST,
+			Sprites.SPR_CROSSING_OFF_X_MAGLEV,
+			Sprites.SPR_TUNNEL_ENTRY_REAR_MAGLEV
+		}; 
+	private static final int [] spr_mag_gui = 
+		{ 0x4EB, 0x4EC, 0x4EE, 0x4ED,
+				Sprites.SPR_IMG_AUTOMAGLEV,
+				Sprites.SPR_IMG_DEPOT_MAGLEV,
+				Sprites.SPR_IMG_TUNNEL_MAGLEV,
+				Sprites.SPR_IMG_CONVERT_MAGLEV
+			}; 
+	private static final int [] spr_mag_cursors = 
+		{
+				Sprites.SPR_CURSOR_NS_MAGLEV,
+				Sprites.SPR_CURSOR_SWNE_MAGLEV,
+				Sprites.SPR_CURSOR_EW_MAGLEV,
+				Sprites.SPR_CURSOR_NWSE_MAGLEV,
+				Sprites.SPR_CURSOR_AUTOMAGLEV,
+				Sprites.SPR_CURSOR_MAGLEV_DEPOT,
+				Sprites.SPR_CURSOR_TUNNEL_MAGLEV,
+				Sprites.SPR_CURSOR_CONVERT_MAGLEV
+			};
+	//private static final int [] spr_mag_str = { Str.STR_100C_MAGLEV_CONSTRUCTION }; 	
+	
+	/** Global Railtype definition
+	 */
+	public static final RailtypeInfo _railtypes[] = {
+			/** Railway */
+			new RailtypeInfo( /* Main Sprites */
+					spr_rail_1,
+					/* GUI sprites */
+					spr_rail_gui,
+					spr_rail_cursors,
+					/* strings */
+					Str.STR_100A_RAILROAD_CONSTRUCTION,
+					/* Offset of snow tiles */
+					Sprites.SPR_RAIL_SNOW_OFFSET,
+					/* Compatible railtypes */
+					(1 << RAILTYPE_RAIL),
+					/* main offset */
+					0,
+					/* bridge offset */
+					0
+					),
+
+			/** Monorail */
+			new RailtypeInfo( /* Main Sprites */
+					spr_mono_main,
+					/* GUI sprites */
+					spr_mono_gui,
+					spr_mono_cursors,
+					/* strings */
+					Str.STR_100B_MONORAIL_CONSTRUCTION,
+					/* Offset of snow tiles */
+					Sprites.SPR_MONO_SNOW_OFFSET,
+					/* Compatible Railtypes */
+					(1 << RAILTYPE_MONO),
+					/* main offset */
+					82,
+					/* bridge offset */
+					16
+					),
+
+			/** Maglev */
+			new RailtypeInfo( /* Main sprites */
+					spr_mag_main,
+					/* GUI sprites */
+					spr_mag_gui,
+					spr_mag_cursors,
+					/* strings */
+					Str.STR_100C_MAGLEV_CONSTRUCTION,
+					/* Offset of snow tiles */
+					Sprites.SPR_MGLV_SNOW_OFFSET,
+					/* Compatible Railtypes */
+					(1 << RAILTYPE_MAGLEV),
+					/* main offset */
+					164,
+					/* bridge offset */
+					24
+					),
+	};
+
+
+
+
+
+
+
+
+
 }

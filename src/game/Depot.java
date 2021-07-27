@@ -120,7 +120,7 @@ public class Depot implements IPoolItem
 	 * Returns the direction the exit of the depot on the given tile is facing.
 	 */
 	//private DiagDirection GetDepotDirection(TileIndex tile, TransportType type)
-	private DiagDirection GetDepotDirection(TileIndex tile, int type)
+	public DiagDirection GetDepotDirection(TileIndex tile, int type)
 	{
 		assert(IsTileDepotType(tile, type));
 

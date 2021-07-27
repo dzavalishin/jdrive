@@ -3,7 +3,7 @@
 /** @file railtypes.h
  * All the railtype-specific information is stored here.
  */
-
+#if 0
 /** Global Railtype definition
  */
 const RailtypeInfo _railtypes[] = {
