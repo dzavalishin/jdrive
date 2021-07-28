@@ -127,7 +127,7 @@ public abstract class Hal
 		cv.dirty = true;
 	}
 
-	void SwitchAnimatedCursor()
+	static void SwitchAnimatedCursor()
 	{
 		CursorVars cv = _cursor;
 		
@@ -163,13 +163,13 @@ public abstract class Hal
 		*/
 	}
 
-	void CursorTick()
+	static void CursorTick()
 	{
 		if (_cursor.animate_timeout != 0 && --_cursor.animate_timeout == 0)
 			SwitchAnimatedCursor();
 	}
 
-	void SetMouseCursor(CursorID cursor)
+	static void SetMouseCursor(CursorID cursor)
 	{
 		// Turn off animation
 		_cursor.animate_timeout = 0;
@@ -177,14 +177,14 @@ public abstract class Hal
 		SetCursorSprite(cursor);
 	}
 
-	void SetAnimatedMouseCursor( AnimCursor[] animcursors)
+	static void SetAnimatedMouseCursor( AnimCursor[] animcursors)
 	{
 		_cursor.animate_list = animcursors;
 		_cursor.animate_pos = 0;
 		SwitchAnimatedCursor();
 	}
 
-	boolean ChangeResInGame(int w, int h)
+	static boolean ChangeResInGame(int w, int h)
 	{
 		return
 				(_screen.width == w && _screen.height == h) ||

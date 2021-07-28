@@ -1512,7 +1512,7 @@ public class Vehicle implements IPoolItem
 				v.sprite_width, v.sprite_height, v.z_height, v.z_pos);
 	}
 
-	void ViewportAddVehicles(DrawPixelInfo dpi)
+	static void ViewportAddVehicles(DrawPixelInfo dpi)
 	{
 		int x,xb, y, x2, y2;
 		VehicleID veh;

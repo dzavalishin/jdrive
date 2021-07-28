@@ -45,7 +45,7 @@ public class Landscape extends GenLandTable
 	};
 	 
 	/* landscape slope => sprite */
-	static final byte[] _tileh_to_sprite = {
+	public static final byte[] _tileh_to_sprite = {
 			0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,0,
 			0,0,0,0,0,0,0,16,0,0,0,17,0,15,18,0,
 	};
