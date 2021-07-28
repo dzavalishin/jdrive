@@ -1565,7 +1565,7 @@ public class ViewPort
 	}
 
 
-	void SetSelectionRed(boolean b)
+	static void SetSelectionRed(boolean b)
 	{
 		_thd.make_square_red = b;
 		SetSelectionTilesDirty();
@@ -2079,7 +2079,7 @@ public class ViewPort
 		_thd.sizelimit = limit;
 	}
 
-	void VpSetPresizeRange(TileIndex from, TileIndex to)
+	static void VpSetPresizeRange(TileIndex from, TileIndex to)
 	{
 		_thd.selend.x = to.TileX() * 16;
 		_thd.selend.y = to.TileY() * 16;

@@ -156,7 +156,7 @@ public class RailTables {
 
 
 	//static final byte _valid_tileh_slopes[4][15] = 
-	static final byte _valid_tileh_slopes[][] = 
+	protected static final byte _valid_tileh_slopes[][] = 
 		{
 
 				// set of normal ones
@@ -475,9 +475,9 @@ public class RailTables {
 			0,-16,-16,  0,-16,  0,    0,  0,
 	};		
 
-	static class _RailBit {
-		int xinc[];
-		int yinc[];
+	public static class _RailBit {
+		public int xinc[];
+		public int yinc[];
 		public _RailBit(int[] xinc2, int[] yinc2) {
 			xinc = xinc2;
 			yinc = yinc2;

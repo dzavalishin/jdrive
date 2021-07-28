@@ -280,7 +280,7 @@ public class Terraform {
 		Terraform::TerraformToolbWndProc
 	);
 
-	void ShowTerraformToolbar()
+	static void ShowTerraformToolbar()
 	{
 		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
 		Window.AllocateWindowDescFront(_terraform_desc, 0);

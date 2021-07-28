@@ -1348,6 +1348,14 @@ public class Player
 			p.accept(i.next());
 	}
 
+	
+	/* Validate functions for rail building */
+	static boolean ValParamRailtype(int rail) 
+	{ 
+		return BitOps.HASBIT(GetPlayer(Global._current_player).avail_railtypes, rail);
+	}
+
+	
 	/*
 // Save/load of players
 static final SaveLoad _player_desc[] = {

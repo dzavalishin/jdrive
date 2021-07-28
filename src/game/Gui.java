@@ -30,7 +30,7 @@ public class Gui
 
 
 	/* main_gui.c */
-	byte _station_show_coverage;
+	public static byte _station_show_coverage;
 	//PlaceProc *_place_proc;
 
 
@@ -203,6 +203,10 @@ public class Gui
 		return true;
 	}
 
+	static boolean HandlePlacePushButton(Window w, int widget, CursorID cursor, int mode, Consumer<TileIndex> placeproc)
+	{
+		return HandlePlacePushButton(w, widget, cursor.id, mode, placeproc);
+	}
 
 	void CcPlaySound10(boolean success, TileIndex tile, int p1, int p2)
 	{

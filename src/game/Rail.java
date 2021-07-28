@@ -3,6 +3,8 @@ package game;
 import java.util.function.Consumer;
 import game.util.BitOps;
 import game.util.Sprites;
+import game.ai.Ai;
+import game.struct.FindLengthOfTunnelResult;
 import game.tables.RailTables;
 
 public class Rail extends RailTables {
@@ -16,7 +18,7 @@ public class Rail extends RailTables {
 	 * /
 	class RailtypeInfo {
 		/** Struct containing the main sprites. @note not all sprites are listed, but only
-		 *  the ones used directly in the code * /
+	 *  the ones used directly in the code * /
 		struct {
 			SpriteID track_y;      ///< single piece of rail in Y direction, with ground
 			SpriteID track_ns;     ///< two pieces of rail in North and South corner (East-West direction)
@@ -32,7 +34,7 @@ public class Rail extends RailTables {
 		} base_sprites;
 
 		/** struct containing the sprites for the rail GUI. @note only sprites referred to
-		 * directly in the code are listed * /
+	 * directly in the code are listed * /
 		struct {
 			SpriteID build_ns_rail;      ///< button for building single rail in N-S direction
 			SpriteID build_x_rail;       ///< button for building single rail in X direction
@@ -66,23 +68,23 @@ public class Rail extends RailTables {
 		byte compatible_railtypes;
 
 		/**
-		 * Offset between the current railtype and normal rail. This means that:<p>
-		 * 1) All the sprites in a railset MUST be in the same order. This order
-		 *    is determined by normal rail. Check sprites 1005 and following for this order<p>
-		 * 2) The position where the railtype is loaded must always be the same, otherwise
-		 *    the offset will fail.<p>
-		 * @note: Something more flexible might be desirable in the future.
-		 * /
+	 * Offset between the current railtype and normal rail. This means that:<p>
+	 * 1) All the sprites in a railset MUST be in the same order. This order
+	 *    is determined by normal rail. Check sprites 1005 and following for this order<p>
+	 * 2) The position where the railtype is loaded must always be the same, otherwise
+	 *    the offset will fail.<p>
+	 * @note: Something more flexible might be desirable in the future.
+	 * /
 		SpriteID total_offset;
 
 		/**
-		  * Bridge offset
-		  * /
+	 * Bridge offset
+	 * /
 		SpriteID bridge_offset;
 	} RailtypeInfo;
 
 	extern final RailtypeInfo _railtypes[RAILTYPE_END];
-	* /
+	 * /
 	// these are the maximums used for updating signal blocks, and checking if a depot is in a pbs block
 	enum {
 		NUM_SSD_ENTRY = 256, // max amount of blocks
@@ -140,7 +142,7 @@ public class Rail extends RailTables {
 
 
 
-	
+
 	/*
 	 * Functions describing logical relations between Tracks, TrackBits, Trackdirs
 	 * TrackdirBits, Direction and DiagDirections.
@@ -263,7 +265,7 @@ public class Rail extends RailTables {
 	 * Maps a (8-way) direction to a (4-way) DiagDirection
 	 */
 	static  /*DiagDirection*/ int  DirToDiagdir(/*Direction*/ int dir) {
-		assert(dir < DIR_END);
+		assert(dir < TileIndex.DIR_END);
 		return (dir >> 1);
 	}
 
@@ -329,7 +331,7 @@ public class Rail extends RailTables {
 	 * @param railtype the rail type which the information is requested for
 	 * @return The pointer to the RailtypeInfo
 	 */
-	static final RailtypeInfo GetRailTypeInfo(RailType railtype)
+	static final RailtypeInfo GetRailTypeInfo(/*RailType*/ int railtype)
 	{
 		assert(railtype < RAILTYPE_END);
 		return _railtypes[railtype];
@@ -343,7 +345,7 @@ public class Rail extends RailTables {
 	 * @param  enginetype The RailType of the engine we are considering.
 	 * @param  tiletype   The RailType of the tile we are considering.
 	 */
-	static  boolean IsCompatibleRail(RailType enginetype, RailType tiletype)
+	static  boolean IsCompatibleRail(/*RailType*/ int enginetype, /*RailType*/ int tiletype)
 	{
 		return BitOps.HASBIT(GetRailTypeInfo(enginetype).compatible_railtypes, tiletype);
 	}
@@ -357,23 +359,23 @@ public class Rail extends RailTables {
 	 */
 	static  boolean TracksOverlap(/*TrackBits*/ int  bits)
 	{
-	  /* With no, or only one track, there is no overlap */
-	  if (bits == 0 || BitOps.KILL_FIRST_BIT(bits) == 0)
-	    return false;
-	  /* We know that there are at least two tracks present. When there are more
-	   * than 2 tracks, they will surely overlap. When there are two, they will
-	   * always overlap unless they are lower & upper or right & left. */
-	  if ((bits == (TRACK_BIT_UPPER|TRACK_BIT_LOWER)) || (bits == (TRACK_BIT_LEFT | TRACK_BIT_RIGHT)))
-	    return false;
-	  return true;
+		/* With no, or only one track, there is no overlap */
+		if (bits == 0 || BitOps.KILL_FIRST_BIT(bits) == 0)
+			return false;
+		/* We know that there are at least two tracks present. When there are more
+		 * than 2 tracks, they will surely overlap. When there are two, they will
+		 * always overlap unless they are lower & upper or right & left. */
+		if ((bits == (TRACK_BIT_UPPER|TRACK_BIT_LOWER)) || (bits == (TRACK_BIT_LEFT | TRACK_BIT_RIGHT)))
+			return false;
+		return true;
 	}
 
 	//void DrawTrackBits(TileInfo ti, TrackBits track, boolean earth, boolean snow, boolean flat);
 	//void DrawTrainDepotSprite(int x, int y, int image, RailType railtype);
 	//void DrawDefaultWaypointSprite(int x, int y, RailType railtype);
 	//#endif /* RAIL_H */
-	
-	
+
+
 	/* $Id: rail.c 3077 2005-10-22 06:39:32Z tron $ */
 
 
@@ -382,50 +384,50 @@ public class Rail extends RailTables {
 
 
 
-	RailType GetTileRailType(TileIndex tile, /*Trackdir*/ int trackdir)
+	/*RailType*/ int GetTileRailType(TileIndex tile, /*Trackdir*/ int trackdir)
 	{
-		RailType type = INVALID_RAILTYPE;
+		/*RailType*/ int type = INVALID_RAILTYPE;
 		/*DiagDirection*/ int  exitdir = TrackdirToExitdir(trackdir);
 		switch (tile.GetTileType()) {
-			case TileTypes.MP_RAILWAY:
-				/* railway track */
+		case MP_RAILWAY:
+			/* railway track */
+			type = tile.getMap().m3 & RAILTYPE_MASK;
+			break;
+		case MP_STREET:
+			/* rail/road crossing */
+			if (tile.IsLevelCrossing())
+				type = tile.getMap().m4 & RAILTYPE_MASK;
+			break;
+		case MP_STATION:
+			if (tile.IsTrainStationTile())
 				type = tile.getMap().m3 & RAILTYPE_MASK;
-				break;
-			case TileTypes.MP_STREET:
-				/* rail/road crossing */
-				if (tile.IsLevelCrossing())
-					type = tile.getMap().m4 & RAILTYPE_MASK;
-				break;
-			case TileTypes.MP_STATION:
-				if (IsTrainStationTile(tile))
-					type = tile.getMap().m3 & RAILTYPE_MASK;
-				break;
-			case TileTypes.MP_TUNNELBRIDGE:
-				/* railway tunnel */
-				if ((tile.getMap().m5 & 0xFC) == 0) type = tile.getMap().m3 & RAILTYPE_MASK;
-				/* railway bridge ending */
-				if ((tile.getMap().m5 & 0xC6) == 0x80) type = tile.getMap().m3 & RAILTYPE_MASK;
-				/* on railway bridge */
-				if ((tile.getMap().m5 & 0xC6) == 0xC0 && ((DiagDirection)(tile.getMap().m5 & 0x1)) == (exitdir & 0x1))
-					type = (tile.getMap().m3 >> 4) & RAILTYPE_MASK;
-				/* under bridge (any type) */
-				if ((tile.getMap().m5 & 0xC0) == 0xC0 && (tile.getMap().m5 & 0x1) != (exitdir & 0x1))
-					type = tile.getMap().m3 & RAILTYPE_MASK;
-				break;
-			default:
-				break;
+			break;
+		case MP_TUNNELBRIDGE:
+			/* railway tunnel */
+			if ((tile.getMap().m5 & 0xFC) == 0) type = tile.getMap().m3 & RAILTYPE_MASK;
+			/* railway bridge ending */
+			if ((tile.getMap().m5 & 0xC6) == 0x80) type = tile.getMap().m3 & RAILTYPE_MASK;
+			/* on railway bridge */
+			if ((tile.getMap().m5 & 0xC6) == 0xC0 && (tile.getMap().m5 & 0x1) == (exitdir & 0x1))
+				type = (tile.getMap().m3 >> 4) & RAILTYPE_MASK;
+			/* under bridge (any type) */
+			if ((tile.getMap().m5 & 0xC0) == 0xC0 && (tile.getMap().m5 & 0x1) != (exitdir & 0x1))
+				type = tile.getMap().m3 & RAILTYPE_MASK;
+			break;
+		default:
+			break;
 		}
 		return type;
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
 	/* $Id: rail_cmd.c 3298 2005-12-14 06:28:48Z tron $ */
 
 
@@ -455,7 +457,7 @@ public class Rail extends RailTables {
 	//extern int _custom_sprites_base;
 
 
-	void ShowTrainDepotWindow(TileIndex tile);
+	//void ShowTrainDepotWindow(TileIndex tile);
 
 	/* MAP2 byte:    abcd???? => Signal On? Same coding as map3lo
 	 * MAP3LO byte:  abcd???? => Signal Exists?
@@ -494,12 +496,12 @@ public class Rail extends RailTables {
 		}
 
 		/* Let's see if we may build this */
-		if (0 != (flags & Cmd.DC_NO_RAIL_OVERLAP) || type.ordinal() == RAIL_TYPE_SIGNALS) {
+		if (0 != (flags & Cmd.DC_NO_RAIL_OVERLAP) || type == RAIL_TYPE_SIGNALS) {
 			/* If we are not allowed to overlap (flag is on for ai players or we have
 			 * signals on the tile), check that */
 			return
-				future.ordinal() == (TRACK_BIT_UPPER | TRACK_BIT_LOWER) ||
-				future.ordinal() == (TRACK_BIT_LEFT  | TRACK_BIT_RIGHT);
+					future == (TRACK_BIT_UPPER | TRACK_BIT_LOWER) ||
+					future == (TRACK_BIT_LEFT  | TRACK_BIT_RIGHT);
 		} else {
 			/* Normally, we may overlap and any combination is valid */
 			return true;
@@ -533,7 +535,7 @@ public class Rail extends RailTables {
 
 			// don't allow building on the lower side of a coast
 			if (tile.IsTileType( TileTypes.MP_WATER) &&
-					~_valid_tileh_slopes[2][tileh] & rail_bits) {
+					(0 != (~_valid_tileh_slopes[2][tileh] & rail_bits)) ) {
 				return Cmd.return_cmd_error(Str.STR_3807_CAN_T_BUILD_ON_WATER);
 			}
 
@@ -542,12 +544,12 @@ public class Rail extends RailTables {
 				return 0;
 
 			if ((~_valid_tileh_slopes[1][tileh] & rail_bits) == 0 || ( // whole tile is leveled up
-						(rail_bits == TRACK_BIT_DIAG1 || rail_bits == TRACK_BIT_DIAG2) &&
-						(tileh == 1 || tileh == 2 || tileh == 4 || tileh == 8)
+					(rail_bits == TRACK_BIT_DIAG1 || rail_bits == TRACK_BIT_DIAG2) &&
+					(tileh == 1 || tileh == 2 || tileh == 4 || tileh == 8)
 					)) { // partly up
 				if (existing != 0) {
 					return 0;
-				} else if (!Global._patches.build_on_slopes || _is_old_ai_player) {
+				} else if (!Global._patches.build_on_slopes || Global._is_old_ai_player) {
 					return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 				} else {
 					return Global._price.terraform;
@@ -575,106 +577,106 @@ public class Rail extends RailTables {
 		int cost = 0;
 		int ret;
 
-		if (!ValParamRailtype(p1) || !ValParamTrackOrientation(track)) return Cmd.CMD_ERROR;
+		if (!Player.ValParamRailtype(p1) || !ValParamTrackOrientation(track)) return Cmd.CMD_ERROR;
 
 		tile = TileIndex.TileVirtXY(x, y);
-		tileh = GetTileSlope(tile, null);
+		tileh = tile.GetTileSlope(null);
 		m5 = tile.getMap().m5;
 		trackbit = TrackToTrackBits(track);
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		switch (tile.GetTileType()) {
-			case TileTypes.MP_TUNNELBRIDGE:
-				if ((m5 & 0xC0) != 0xC0 || // not bridge middle part?
-						(m5 & 0x01 ? TRACK_BIT_DIAG1 : TRACK_BIT_DIAG2) != trackbit) { // wrong direction?
-					// Get detailed error message
-					return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
-				}
+		case MP_TUNNELBRIDGE:
+			if ((m5 & 0xC0) != 0xC0 || // not bridge middle part?
+			( (0 != (m5 & 0x01)) ? TRACK_BIT_DIAG1 : TRACK_BIT_DIAG2) != trackbit) { // wrong direction?
+				// Get detailed error message
+				return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+			}
 
-				switch (m5 & 0x38) { // what's under the bridge?
-					case 0x00: // clear land
-						ret = CheckRailSlope(tileh, trackbit, 0, tile);
-						if (Cmd.CmdFailed(ret)) return ret;
-						cost += ret;
-
-						if (flags & Cmd.DC_EXEC) {
-							tile.SetTileOwner( Global._current_player);
-							tile.getMap().m3 = BitOps.RETSB(tile.getMap().m3, 0, 4, p1);
-							tile.getMap().m5 = (m5 & 0xC7) | 0x20; // railroad under bridge
-						}
-						break;
-
-					case 0x20: // rail already there
-						return Cmd.return_cmd_error(Str.STR_1007_ALREADY_BUILT);
-
-					default:
-						// Get detailed error message
-						return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
-				}
-				break;
-
-			case TileTypes.MP_RAILWAY:
-				if (!CheckTrackCombination(tile, trackbit, flags) ||
-						!tile.EnsureNoVehicle()) {
-					return Cmd.CMD_ERROR;
-				}
-				if (m5 & RAIL_TYPE_SPECIAL ||
-						!tile.IsTileOwner( Global._current_player) ||
-						BitOps.GB(tile.getMap().m3, 0, 4) != p1) {
-					// Get detailed error message
-					return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
-				}
-
-				ret = CheckRailSlope(tileh, trackbit, GetTrackBits(tile), tile);
-				if (Cmd.CmdFailed(ret)) return ret;
-				cost += ret;
-
-				if (flags & Cmd.DC_EXEC) {
-					tile.getMap().m2 &= ~RAIL_MAP2LO_GROUND_MASK; // Bare land
-					tile.getMap().m5 = m5 | trackbit;
-				}
-				break;
-
-			case TileTypes.MP_STREET:
-				if (!_valid_tileh_slopes[3][tileh]) // prevent certain slopes
-					return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
-				if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
-
-				if ((m5 & 0xF0) == 0 && ( // normal road?
-							(track == TRACK_DIAG1 && m5 == 0x05) ||
-							(track == TRACK_DIAG2 && m5 == 0x0A) // correct direction?
-						)) {
-					if (flags & Cmd.DC_EXEC) {
-						tile.getMap().m3 = GetTileOwner(tile);
-						tile.SetTileOwner( Global._current_player);
-						tile.getMap().m4 = p1;
-						tile.getMap().m5 = 0x10 | (track == TRACK_DIAG1 ? 0x08 : 0x00); // level crossing
-					}
-					break;
-				}
-
-				if (tile.IsLevelCrossing() && (m5 & 0x08 ? TRACK_DIAG1 : TRACK_DIAG2) == track)
-					return Cmd.return_cmd_error(Str.STR_1007_ALREADY_BUILT);
-				/* FALLTHROUGH */
-
-			default:
+			switch (m5 & 0x38) { // what's under the bridge?
+			case 0x00: // clear land
 				ret = CheckRailSlope(tileh, trackbit, 0, tile);
 				if (Cmd.CmdFailed(ret)) return ret;
 				cost += ret;
 
-				ret = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
-				if (Cmd.CmdFailed(ret)) return ret;
-				cost += ret;
-
-				if (flags & Cmd.DC_EXEC) {
-					SetTileType(tile, TileTypes.MP_RAILWAY);
+				if(0 != (flags & Cmd.DC_EXEC)) {
 					tile.SetTileOwner( Global._current_player);
-					tile.getMap().m2 = 0; // Bare land
-					tile.getMap().m3 = p1; // No signals, rail type
-					tile.getMap().m5 = trackbit;
+					tile.getMap().m3 = (byte) BitOps.RETSB(tile.getMap().m3, 0, 4, p1);
+					tile.getMap().m5 = (byte) ((m5 & 0xC7) | 0x20); // railroad under bridge
 				}
 				break;
+
+			case 0x20: // rail already there
+				return Cmd.return_cmd_error(Str.STR_1007_ALREADY_BUILT);
+
+			default:
+				// Get detailed error message
+				return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+			}
+			break;
+
+		case MP_RAILWAY:
+			if (!CheckTrackCombination(tile, trackbit, flags) ||
+					!tile.EnsureNoVehicle()) {
+				return Cmd.CMD_ERROR;
+			}
+			if ( (0 != (m5 & RAIL_TYPE_SPECIAL)) ||
+					!tile.IsTileOwner( Global._current_player) ||
+					BitOps.GB(tile.getMap().m3, 0, 4) != p1) {
+				// Get detailed error message
+				return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+			}
+
+			ret = CheckRailSlope(tileh, trackbit, GetTrackBits(tile), tile);
+			if (Cmd.CmdFailed(ret)) return ret;
+			cost += ret;
+
+			if(0 != (flags & Cmd.DC_EXEC)) {
+				tile.getMap().m2 &= ~RAIL_MAP2LO_GROUND_MASK; // Bare land
+				tile.getMap().m5 = (byte) (m5 | trackbit);
+			}
+			break;
+
+		case MP_STREET:
+			if (0 == _valid_tileh_slopes[3][tileh]) // prevent certain slopes
+				return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
+			if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
+
+			if ((m5 & 0xF0) == 0 && ( // normal road?
+					(track == TRACK_DIAG1 && m5 == 0x05) ||
+					(track == TRACK_DIAG2 && m5 == 0x0A) // correct direction?
+					)) {
+				if(0 != (flags & Cmd.DC_EXEC)) {
+					tile.getMap().m3 = GetTileOwner(tile);
+					tile.SetTileOwner( Global._current_player);
+					tile.getMap().m4 = p1;
+					tile.getMap().m5 = 0x10 | (track == TRACK_DIAG1 ? 0x08 : 0x00); // level crossing
+				}
+				break;
+			}
+
+			if (tile.IsLevelCrossing() && (m5 & 0x08 ? TRACK_DIAG1 : TRACK_DIAG2) == track)
+				return Cmd.return_cmd_error(Str.STR_1007_ALREADY_BUILT);
+			/* FALLTHROUGH */
+
+		default:
+			ret = CheckRailSlope(tileh, trackbit, 0, tile);
+			if (Cmd.CmdFailed(ret)) return ret;
+			cost += ret;
+
+			ret = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+			if (Cmd.CmdFailed(ret)) return ret;
+			cost += ret;
+
+			if (flags & Cmd.DC_EXEC) {
+				SetTileType(tile, TileTypes.MP_RAILWAY);
+				tile.SetTileOwner( Global._current_player);
+				tile.getMap().m2 = 0; // Bare land
+				tile.getMap().m3 = p1; // No signals, rail type
+				tile.getMap().m5 = trackbit;
+			}
+			break;
 		}
 
 		if (flags & Cmd.DC_EXEC) {
@@ -710,7 +712,7 @@ public class Rail extends RailTables {
 		if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && !tile.IsTileType( TileTypes.MP_STREET) && !tile.IsTileType( TileTypes.MP_RAILWAY))
 			return Cmd.CMD_ERROR;
 
-		if (Global._current_player != Owner.OWNER_WATER && !CheckTileOwnership(tile))
+		if (Global._current_player.id != Owner.OWNER_WATER && !Player.CheckTileOwnership(tile))
 			return Cmd.CMD_ERROR;
 
 		// allow building rail under bridge
@@ -719,114 +721,125 @@ public class Rail extends RailTables {
 
 		switch(tile.GetTileType())
 		{
-			case TileTypes.MP_TUNNELBRIDGE:
-				if (!EnsureNoVehicleZ(tile, TilePixelHeight(tile)))
+		case MP_TUNNELBRIDGE:
+			if (!tile.EnsureNoVehicleZ(TilePixelHeight(tile)))
+				return Cmd.CMD_ERROR;
+
+			if ((tile.getMap().m5 & 0xF8) != 0xE0)
+				return Cmd.CMD_ERROR;
+
+			if ((tile.getMap().m5 & 1 ? TRACK_BIT_DIAG1 : TRACK_BIT_DIAG2) != trackbit)
+				return Cmd.CMD_ERROR;
+
+			if (!(flags & Cmd.DC_EXEC))
+				return Global._price.remove_rail;
+
+			tile.SetTileOwner( Owner.OWNER_NONE);
+			tile.getMap().m5 = tile.getMap().m5 & 0xC7;
+			break;
+
+		case TileTypes.MP_STREET:
+			if (!tile.IsLevelCrossing()) return Cmd.CMD_ERROR;
+
+			/* This is a crossing, let's check if the direction is correct */
+			if (tile.getMap().m5 & 8) {
+				m5 = 5;
+				if (track != TRACK_DIAG1)
 					return Cmd.CMD_ERROR;
-
-				if ((tile.getMap().m5 & 0xF8) != 0xE0)
+			} else {
+				m5 = 10;
+				if (track != TRACK_DIAG2)
 					return Cmd.CMD_ERROR;
+			}
 
-				if ((tile.getMap().m5 & 1 ? TRACK_BIT_DIAG1 : TRACK_BIT_DIAG2) != trackbit)
-					return Cmd.CMD_ERROR;
+			if (!(flags & Cmd.DC_EXEC))
+				return Global._price.remove_rail;
 
-				if (!(flags & Cmd.DC_EXEC))
-					return Global._price.remove_rail;
+			tile.getMap().m5 = m5;
+			tile.SetTileOwner( tile.getMap().m3);
+			tile.getMap().m2 = 0;
+			break;
 
-				tile.SetTileOwner( Owner.OWNER_NONE);
-				tile.getMap().m5 = tile.getMap().m5 & 0xC7;
-				break;
+		case TileTypes.MP_RAILWAY:
+			if (!IsPlainRailTile(tile))
+				return Cmd.CMD_ERROR;
 
-			case TileTypes.MP_STREET:
-				if (!tile.IsLevelCrossing()) return Cmd.CMD_ERROR;
+			/* See if the track to remove is actually there */
+			if (!(GetTrackBits(tile) & trackbit))
+				return Cmd.CMD_ERROR;
 
-				/* This is a crossing, let's check if the direction is correct */
-				if (tile.getMap().m5 & 8) {
-					m5 = 5;
-					if (track != TRACK_DIAG1)
-						return Cmd.CMD_ERROR;
-				} else {
-					m5 = 10;
-					if (track != TRACK_DIAG2)
-						return Cmd.CMD_ERROR;
-				}
+			/* Charge extra to remove signals on the track, if they are there */
+			if (HasSignalOnTrack(tile, track))
+				cost += DoCommand(x, y, track, 0, flags, Cmd.CMD_REMOVE_SIGNALS);
 
-				if (!(flags & Cmd.DC_EXEC))
-					return Global._price.remove_rail;
+			if (!(flags & Cmd.DC_EXEC))
+				return cost;
 
-				tile.getMap().m5 = m5;
-				tile.SetTileOwner( tile.getMap().m3);
-				tile.getMap().m2 = 0;
-				break;
+			/* We remove the trackbit here. */
+			tile.getMap().m5 &= ~trackbit;
 
-			case TileTypes.MP_RAILWAY:
-				if (!IsPlainRailTile(tile))
-					return Cmd.CMD_ERROR;
+			/* Unreserve track for PBS */
+			if (PBSTileReserved(tile) & trackbit)
+				PBSClearTrack(tile, track);
 
-				/* See if the track to remove is actually there */
-				if (!(GetTrackBits(tile) & trackbit))
-					return Cmd.CMD_ERROR;
+			if (GetTrackBits(tile)  == 0) {
+				/* The tile has no tracks left, it is no longer a rail tile */
+				DoClearSquare(tile);
+				/* XXX: This is an optimisation, right? Is it really worth the ugly goto? */
+				//goto skip_mark_dirty;
+				SetSignalsOnBothDir(tile, track);
 
-				/* Charge extra to remove signals on the track, if they are there */
-				if (HasSignalOnTrack(tile, track))
-					cost += DoCommand(x, y, track, 0, flags, Cmd.CMD_REMOVE_SIGNALS);
+				return cost;
+			}
+			break;
 
-				if (!(flags & Cmd.DC_EXEC))
-					return cost;
-
-				/* We remove the trackbit here. */
-				tile.getMap().m5 &= ~trackbit;
-
-				/* Unreserve track for PBS */
-				if (PBSTileReserved(tile) & trackbit)
-					PBSClearTrack(tile, track);
-
-				if (GetTrackBits(tile)  == 0) {
-					/* The tile has no tracks left, it is no longer a rail tile */
-					DoClearSquare(tile);
-					/* XXX: This is an optimisation, right? Is it really worth the ugly goto? */
-					goto skip_mark_dirty;
-				}
-				break;
-
-			default:
-				assert(0);
+		default:
+			assert(0);
 		}
 
 		/* mark_dirty */
 		tile.MarkTileDirtyByTile();
 
-	skip_mark_dirty:;
+		//skip_mark_dirty:;
 
 		SetSignalsOnBothDir(tile, track);
 
 		return cost;
 	}
 
-
-	static int ValidateAutoDrag(/*Trackdir*/ int [] trackdirp, int x, int y, int ex, int ey)
+	/**
+	 * 
+	 * @param trackdir Pointer to single trackdir var - modified
+	 * @param x
+	 * @param y
+	 * @param ex
+	 * @param ey
+	 * @return
+	 */
+	static int ValidateAutoDrag(/*Trackdir*/ int [] trackdir, int x, int y, int ex, int ey)
 	{
 		int dx, dy, trdx, trdy;
 
-		if (!ValParamTrackOrientation(*trackdir)) return Cmd.CMD_ERROR;
+		if (!ValParamTrackOrientation(trackdir[0])) return Cmd.CMD_ERROR;
 
 		// calculate delta x,y from start to end tile
 		dx = ex - x;
 		dy = ey - y;
 
 		// calculate delta x,y for the first direction
-		trdx = _railbit.xinc[*trackdir];
-		trdy = _railbit.yinc[*trackdir];
+		trdx = _railbit.xinc[trackdir[0]];
+		trdy = _railbit.yinc[trackdir[0]];
 
-		if (!IsDiagonalTrackdir(*trackdir)) {
-			trdx += _railbit.xinc[*trackdir ^ 1];
-			trdy += _railbit.yinc[*trackdir ^ 1];
+		if (!IsDiagonalTrackdir(trackdir[0])) {
+			trdx += _railbit.xinc[trackdir[0] ^ 1];
+			trdy += _railbit.yinc[trackdir[0] ^ 1];
 		}
 
 		// validate the direction
 		while (((trdx <= 0) && (dx > 0)) || ((trdx >= 0) && (dx < 0)) ||
-		       ((trdy <= 0) && (dy > 0)) || ((trdy >= 0) && (dy < 0))) {
-			if (!BitOps.HASBIT(*trackdir, 3)) { // first direction is invalid, try the other
-				SETBIT(*trackdir, 3); // reverse the direction
+				((trdy <= 0) && (dy > 0)) || ((trdy >= 0) && (dy < 0))) {
+			if (!BitOps.HASBIT(trackdir[0], 3)) { // first direction is invalid, try the other
+				trackdir[0] = BitOps.RETSETBIT(trackdir[0], 3); // reverse the direction
 				trdx = -trdx;
 				trdy = -trdy;
 			} else // other direction is invalid too, invalid drag
@@ -835,10 +848,10 @@ public class Rail extends RailTables {
 
 		// (for diagonal tracks, this is already made sure of by above test), but:
 		// for non-diagonal tracks, check if the start and end tile are on 1 line
-		if (!IsDiagonalTrackdir(*trackdir)) {
-			trdx = _railbit.xinc[*trackdir];
-			trdy = _railbit.yinc[*trackdir];
-			if ((abs(dx) != abs(dy)) && (abs(dx) + abs(trdy) != abs(dy) + abs(trdx)))
+		if (!IsDiagonalTrackdir(trackdir[0])) {
+			trdx = _railbit.xinc[trackdir[0]];
+			trdy = _railbit.yinc[trackdir[0]];
+			if ((Math.abs(dx) != Math.abs(dy)) && (Math.abs(dx) + Math.abs(trdy) != Math.abs(dy) + Math.abs(trdx)))
 				return Cmd.CMD_ERROR;
 		}
 
@@ -859,25 +872,29 @@ public class Rail extends RailTables {
 		int ret, total_cost = 0;
 		/* Track */ int  track = BitOps.GB(p2, 4, 3);
 		/*Trackdir*/ int trackdir;
-		byte mode = BitOps.HASBIT(p2, 7);
-		RailType railtype = (RailType)BitOps.GB(p2, 0, 4);
+		byte mode = (byte) (BitOps.HASBIT(p2, 7) ? 1 : 0);
+		/*RailType*/ int railtype = BitOps.GB(p2, 0, 4);
 
-		if (!ValParamRailtype(railtype) || !ValParamTrackOrientation(track)) return Cmd.CMD_ERROR;
+		if (!Player.ValParamRailtype(railtype) || !ValParamTrackOrientation(track)) return Cmd.CMD_ERROR;
 		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 		trackdir = TrackToTrackdir(track);
 
+		TileIndex pp1 = TileIndex.get(p1);
 		/* unpack end point */
-		ex = TileX(p1) * TILE_SIZE;
-		ey = TileY(p1) * TILE_SIZE;
+		ex = pp1.TileX() * TileInfo.TILE_SIZE;
+		ey = pp1.TileY() * TileInfo.TILE_SIZE;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		if (Cmd.CmdFailed(ValidateAutoDrag(&trackdir, x, y, ex, ey))) return Cmd.CMD_ERROR;
-
-		if (flags & Cmd.DC_EXEC) SndPlayTileFx(SND_20_SPLAT_2, TileIndex.TileVirtXY(x, y));
+		{
+			int[] trackdirPtr = { trackdir };
+			if (Cmd.CmdFailed(ValidateAutoDrag( trackdirPtr, x, y, ex, ey))) return Cmd.CMD_ERROR;
+			trackdir = trackdirPtr[0];
+		}
+		//if(0!=(flags & Cmd.DC_EXEC)) SndPlayTileFx(SND_20_SPLAT_2, TileIndex.TileVirtXY(x, y));
 
 		for(;;) {
-			ret = DoCommand(x, y, railtype, TrackdirToTrack(trackdir), flags, (mode == 0) ? Cmd.CMD_BUILD_SINGLE_RAIL : Cmd.CMD_REMOVE_SINGLE_RAIL);
+			ret = Cmd.DoCommand(x, y, railtype, TrackdirToTrack(trackdir), flags, (mode == 0) ? Cmd.CMD_BUILD_SINGLE_RAIL : Cmd.CMD_REMOVE_SINGLE_RAIL);
 
 			if (Cmd.CmdFailed(ret)) {
 				if ((Global._error_message != Str.STR_1007_ALREADY_BUILT) && (mode == 0))
@@ -904,7 +921,7 @@ public class Rail extends RailTables {
 	 */
 	int CmdBuildRailroadTrack(int x, int y, int flags, int p1, int p2)
 	{
-		return CmdRailTrackHelper(x, y, flags, p1, CLRBIT(p2, 7));
+		return CmdRailTrackHelper(x, y, flags, p1, BitOps.RETCLRBIT(p2, 7));
 	}
 
 	/** Build rail on a stretch of track.
@@ -913,7 +930,7 @@ public class Rail extends RailTables {
 	 */
 	int CmdRemoveRailroadTrack(int x, int y, int flags, int p1, int p2)
 	{
-		return CmdRailTrackHelper(x, y, flags, p1, SETBIT(p2, 7));
+		return CmdRailTrackHelper(x, y, flags, p1, BitOps.RETSETBIT(p2, 7));
 	}
 
 	/** Build a train depot
@@ -935,9 +952,9 @@ public class Rail extends RailTables {
 
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 		/* check railtype and valid direction for depot (0 through 3), 4 in total */
-		if (!ValParamRailtype(p1) || p2 > 3) return Cmd.CMD_ERROR;
+		if (!Player.ValParamRailtype(p1) || p2 > 3) return Cmd.CMD_ERROR;
 
-		tileh = GetTileSlope(tile, null);
+		tileh = tile.GetTileSlope(null);
 
 		/* Prohibit finalruction if
 			The tile is non-flat AND
@@ -946,13 +963,13 @@ public class Rail extends RailTables {
 			3) the tile is steep i.e. spans two height levels
 			4) the exit points in the wrong direction
 
-		*/
+		 */
 
 		if (tileh != 0 && (
-					_is_old_ai_player ||
-					!Global._patches.build_on_slopes ||
-					IsSteepTileh(tileh) ||
-					!CanBuildDepotByTileh(p2, tileh)
+				Global._is_old_ai_player ||
+				!Global._patches.build_on_slopes ||
+				TileIndex.IsSteepTileh(tileh) ||
+				!Depot.CanBuildDepotByTileh(p2, tileh)
 				)) {
 			return Cmd.return_cmd_error(Str.STR_0007_FLAT_LAND_REQUIRED);
 		}
@@ -961,23 +978,23 @@ public class Rail extends RailTables {
 		if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
 		cost = ret;
 
-		d = AllocateDepot();
+		d = Depot.AllocateDepot();
 		if (d == null) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) {
-			if (IsLocalPlayer()) _last_built_train_depot_tile = tile;
+		if(0 != (flags & Cmd.DC_EXEC)) {
+			if (Player.IsLocalPlayer()) Depot._last_built_train_depot_tile = tile;
 
-			ModifyTile(tile,
-				TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |
-				TileTypes.MP_MAP3LO | TileTypes.MP_MAPOwner.OWNER_CURRENT | TileTypes.MP_MAP5,
-				p1, /* map3_lo */
-				p2 | RAIL_TYPE_DEPOT_WAYPOINT /* map5 */
-			);
+			Landscape.ModifyTile(tile,
+					TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |
+					TileTypes.MP_MAP3LO | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
+					p1, /* map3_lo */
+					p2 | RAIL_TYPE_DEPOT_WAYPOINT /* map5 */
+					);
 
 			d.xy = tile;
-			d.town_index = ClosestTownFromTile(tile, (int)-1).index;
+			d.town_index = Town.ClosestTownFromTile(tile, (int)-1).index;
 
-			SetSignalsOnBothDir(tile, (p2&1) ? 2 : 1);
+			SetSignalsOnBothDir(tile, (p2&1) != 0 ? 2 : 1);
 
 		}
 
@@ -1007,7 +1024,7 @@ public class Rail extends RailTables {
 		int cost;
 
 		// Same bit, used in different contexts
-//		semaphore = pre_signal = BitOps.HASBIT(p1, 3);
+		//		semaphore = pre_signal = BitOps.HASBIT(p1, 3);
 
 		if (!ValParamTrackOrientation(track) || !tile.IsTileType( TileTypes.MP_RAILWAY) || !tile.EnsureNoVehicle())
 			return Cmd.CMD_ERROR;
@@ -1018,17 +1035,17 @@ public class Rail extends RailTables {
 		/* You can only build signals on plain rail tiles, and the selected track must exist */
 		if (!IsPlainRailTile(tile) || !HasTrack(tile, track)) return Cmd.CMD_ERROR;
 
-		if (!CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
+		if (!Player.CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
 
 		Global._error_message = Str.STR_1005_NO_SUITABLE_RAILROAD_TRACK;
 
 		{
-	 		/* See if this is a valid track combination for signals, (ie, no overlap) */
-	 		/*TrackBits*/ int  trackbits = GetTrackBits(tile);
-			if (KILL_FIRST_BIT(trackbits) != 0 && /* More than one track present */
+			/* See if this is a valid track combination for signals, (ie, no overlap) */
+			/*TrackBits*/ int  trackbits = GetTrackBits(tile);
+			if (BitOps.KILL_FIRST_BIT(trackbits) != 0 && /* More than one track present */
 					trackbits != (TRACK_BIT_UPPER | TRACK_BIT_LOWER) && /* Horizontal parallel, non-intersecting tracks */
 					trackbits != (TRACK_BIT_LEFT | TRACK_BIT_RIGHT) /* Vertical parallel, non-intersecting tracks */
-			)
+					)
 				return Cmd.CMD_ERROR;
 		}
 
@@ -1038,8 +1055,8 @@ public class Rail extends RailTables {
 		pre_signal_cycle = BitOps.HASBIT(p1, 3);
 		// for placing new signals
 		semaphore = BitOps.HASBIT(p1, 4);
-	 	pre_signal_type = (p1 >> 5) & 7;
-	 
+		pre_signal_type = (p1 >> 5) & 7;
+
 
 		//if ((tile.getMap().m3 & _signals_table_both[track]) == 0) {
 		if (!HasSignalOnTrack(tile, track)) {
@@ -1058,9 +1075,9 @@ public class Rail extends RailTables {
 		if (flags & Cmd.DC_EXEC) {
 			if (GetRailTileType(tile) != RAIL_TYPE_SIGNALS) {
 				// there are no signals at all on this tile yet
-	 			tile.getMap().m5 |= RAIL_TYPE_SIGNALS; // change into signals
-	 			tile.getMap().m2 |= 0xF0;              // all signals are on
-	 			tile.getMap().m3 &= ~0xF0;          // no signals built by default
+				tile.getMap().m5 |= RAIL_TYPE_SIGNALS; // change into signals
+				tile.getMap().m2 |= 0xF0;              // all signals are on
+				tile.getMap().m3 &= ~0xF0;          // no signals built by default
 				tile.getMap().m4 = (semaphore ? 0x08 : 0) + pre_signal_type;
 			}
 
@@ -1077,22 +1094,22 @@ public class Rail extends RailTables {
 						// cycle between two-way . one-way . one-way . ...
 						/* TODO: Rewrite switch into something more general */
 						switch (track) {
-							case TRACK_LOWER:
-							case TRACK_RIGHT: {
-								byte signal = (tile.getMap().m3 - 0x10) & 0x30;
-								if (signal == 0) signal = 0x30;
-								tile.getMap().m3 &= ~0x30;
-								tile.getMap().m3 |= signal;
-								break;
-							}
+						case TRACK_LOWER:
+						case TRACK_RIGHT: {
+							byte signal = (tile.getMap().m3 - 0x10) & 0x30;
+							if (signal == 0) signal = 0x30;
+							tile.getMap().m3 &= ~0x30;
+							tile.getMap().m3 |= signal;
+							break;
+						}
 
-							default: {
-								byte signal = (tile.getMap().m3 - 0x40) & 0xC0;
-								if (signal == 0) signal = 0xC0;
-								tile.getMap().m3 &= ~0xC0;
-								tile.getMap().m3 |= signal;
-								break;
-							}
+						default: {
+							byte signal = (tile.getMap().m3 - 0x40) & 0xC0;
+							if (signal == 0) signal = 0xC0;
+							tile.getMap().m3 &= ~0xC0;
+							tile.getMap().m3 |= signal;
+							break;
+						}
 						}
 					}
 				}
@@ -1127,18 +1144,18 @@ public class Rail extends RailTables {
 	 * - p2 (bit 3)     - 0 = signals, 1 = semaphores
 	 * - p2 (bit 24-31) - user defined signals_density
 	 */
-	int BuildAutoSignals(int x, int y, /*Trackdir*/ int trackdir, int flags, int p2, byte signals)
+	static int BuildAutoSignals(int x, int y, /*Trackdir*/ int trackdir, int flags, int p2, byte signals)
 	{
-	  byte signal_density = (p2 >> 24);
+		byte signal_density = (byte) (p2 >> 24);
 		int signal_ctr = signal_density * 2;
 		byte signal_dir = 0;	// direction in which signals are placed 1=forward  2=backward  3=twoway
-		byte track_mode = 0;	// 128=bridge, 64=tunnel, 192=end of tunnel/bridge, 0=normal track
+		int track_mode = 0;	// 128=bridge, 64=tunnel, 192=end of tunnel/bridge, 0=normal track
 		byte track_height = 0; // height of tunnel currently in
 		int retr, total_cost = 0;
-		TileIndex tile = TileVirtXY/*TILE_FROM_XY*/(x, y);
+		TileIndex tile = TileIndex.TileVirtXY/*TILE_FROM_XY*/(x, y);
 		byte m5 = tile.getMap().m5;
 		byte m3 = tile.getMap().m3;
-		byte semaphores = (tile.getMap().m4 & ~3) ? 16 : 0;
+		byte semaphores = (byte) ((tile.getMap().m4 & ~3) != 0 ? 16 : 0);
 		int mode = p2 & 0x1;
 		int lx, ly;
 		byte dir;
@@ -1149,19 +1166,19 @@ public class Rail extends RailTables {
 		/*Trackdir*/ int srb = trackdir;
 
 		// get first signal mode
-		if (signals & _signals_table[trackdir]) signal_dir |= 1;
-		if (signals & _signals_table_other[trackdir]) signal_dir |= 2;
+		if(0 != (signals & _signals_table[trackdir])) signal_dir |= 1;
+		if(0 != (signals & _signals_table_other[trackdir])) signal_dir |= 2;
 
 		// check for semaphores
-	/*
+		/*
 		if (!(m5 & RAIL_TYPE_SPECIAL) && (m5 & RAIL_BIT_MASK) && (m5 & RAIL_TYPE_SIGNALS))
 			semaphores = (tile.getMap().m3 & ~3) ? 16 : 0; // copy signal/semaphores style (independent of GUI)
-	*/
+		 */
 		if (signal_dir == 0)
 			return Cmd.CMD_ERROR; // no signal on start tile to copy
 
-		semaphores = (HasSemaphores(tile, TrackdirToTrack(trackdir)) ? 16 : 0); // copy signal/semaphores style (independent of CTRL)
-		
+		semaphores = (byte) (HasSemaphores(tile, TrackdirToTrack(trackdir)) ? 16 : 0); // copy signal/semaphores style (independent of CTRL)
+
 		signals = 0;
 		lx = 0;
 		ly = 0;
@@ -1178,30 +1195,30 @@ public class Rail extends RailTables {
 
 			dir = _dir_from_track[trackdir];
 
-			if (track_mode & 128) { // currently on bridge
+			if(0 != (track_mode & 128)) { // currently on bridge
 				if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && ((m5 & 192) == 128))
 					// end of bridge
 					track_mode = 192;
-			} else if (track_mode & 64) { // currently in tunnel
+			} else if(0 != (track_mode & 64)) { // currently in tunnel
 				if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE)
-				&& ((m5 & 0xF0) == 0)
-				&& ((m5 & 3) == (dir ^ 2))
-				&& (GetSlopeZ(x+8, y+8) == track_height))
-	 				// end of tunnel
-						track_mode = 192;
+						&& ((m5 & 0xF0) == 0)
+						&& ((m5 & 3) == (dir ^ 2))
+						&& (Landscape.GetSlopeZ(x+8, y+8) == track_height))
+					// end of tunnel
+					track_mode = 192;
 			} else { // currently not on bridge/in tunnel
 				if (tile.IsTileType(TileTypes.MP_TUNNELBRIDGE)
-				&& (((m5 >> 1) & 3) == 0)
-				&& ((m5 & 192) == 128)
-				&& ((m5 & 1) == (dir & 1)) ) {
+						&& (((m5 >> 1) & 3) == 0)
+						&& ((m5 & 192) == 128)
+						&& ((m5 & 1) == (dir & 1)) ) {
 					// start of bridge
 					track_mode = 128;
 				} else if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE)
-				&& ((m5 & 0xF0) == 0)
-				&& (((m5 >> 2) & 3) == 0) ) {
+						&& ((m5 & 0xF0) == 0)
+						&& (((m5 >> 2) & 3) == 0) ) {
 					// start of tunnel
 					track_mode = 64;
-					track_height = GetSlopeZ(x+8, y+8);
+					track_height = (byte) Landscape.GetSlopeZ(x+8, y+8);
 				};
 			};
 
@@ -1210,12 +1227,13 @@ public class Rail extends RailTables {
 				 reset from that place. If a signal already is there, one will be placed one the first possible tile encountered.
 			   last place where a signal could be placed is remembered by lx,ly
 				 if signal==0 a signal is already on lx,ly
-			*/
-			if ( (tile.IsTileType( TileTypes.MP_RAILWAY) && ((m5 & ~1) == RAIL_TYPE_WAYPOINT)	&& ((m5 & 1) == (dir & 1))) // check for waypoints
-				|| (tile.IsTileType( TileTypes.MP_STREET) && ((m5 >> 4) == 1)										&& (!(m5 & 8) != !(dir & 1))) // check for road crossings
-				|| (tile.IsTileType(TileTypes.MP_TUNNELBRIDGE) && ((m5 & 0xF8) == 0xE0)					&& ((m5 & 1) != (dir & 1))) // check overhanging bridges
-				|| (track_mode != 0) // are we on a bridge/in a tunnel
-			) {
+			 */
+			if ( (tile.IsTileType( TileTypes.MP_RAILWAY) && ((m5 & ~1) == WayPoint.RAIL_TYPE_WAYPOINT)	&& ((m5 & 1) == (dir & 1))) // check for waypoints
+					|| (tile.IsTileType( TileTypes.MP_STREET) && ((m5 >> 4) == 1)										
+							&& ((0==(m5 & 8)) != (0==(dir & 1)))) // check for road crossings
+					|| (tile.IsTileType(TileTypes.MP_TUNNELBRIDGE) && ((m5 & 0xF8) == 0xE0)					&& ((m5 & 1) != (dir & 1))) // check overhanging bridges
+					|| (track_mode != 0) // are we on a bridge/in a tunnel
+					) {
 				if (track_mode == 192) track_mode = 0; // end of tunnel/bridge
 				signal_ctr -= 2; // these pieces are always diagonal, so count faster
 				if (signal_ctr <= 0) {
@@ -1228,7 +1246,7 @@ public class Rail extends RailTables {
 						x = lx;
 						y = ly;
 						// Place Signal
-						retr = DoCommand(x, y, TrackdirToTrack(trackdir) | semaphores, signals, flags, (mode == 1) ? Cmd.CMD_REMOVE_SIGNALS : Cmd.CMD_BUILD_SIGNALS);
+						retr = Cmd.DoCommand(x, y, TrackdirToTrack(trackdir) | semaphores, signals, flags, (mode == 1) ? Cmd.CMD_REMOVE_SIGNALS : Cmd.CMD_BUILD_SIGNALS);
 						if (retr == Cmd.CMD_ERROR) return Cmd.CMD_ERROR;
 						total_cost += retr;
 						signals = 0;
@@ -1241,64 +1259,64 @@ public class Rail extends RailTables {
 			if (!tile.IsTileType( TileTypes.MP_RAILWAY))
 				return total_cost;  // no more track, we are finished
 
-			if ((m5 & RAIL_TYPE_SPECIAL) || !(m5 & 0x3F))
+			if ((0!=(m5 & RAIL_TYPE_SPECIAL)) || 0==(m5 & 0x3F))
 				return total_cost;  // no more track, we are finished
 
 			// check for valid track combination, and calculate the railbit
 			m5 &= 0x3F;
 			switch (trackdir) {
-				case 0: case 2: case 13: { // from SW
-					if (m5 == TRACK_BIT_DIAG1) {	// SW to NE track
-						trackdir = 0;
-					} else if ((m5 & ~TRACK_BIT_UPPER) == TRACK_BIT_LOWER) { // SW to SE track
-						trackdir = 3;
-					} else if ((m5 & ~TRACK_BIT_RIGHT) == TRACK_BIT_LEFT) { // SW to NW track
-						trackdir = 12;
-					} else {
-						return total_cost; // unsuitable track for signals, we are finished
-					}
-				} break;
-				case 8: case 4: case 11: { // from NE
-					if (m5 == TRACK_BIT_DIAG1) { // NE to SW track
-						trackdir = 8;
-					} else if ((m5 & ~TRACK_BIT_LOWER) == TRACK_BIT_UPPER) { // NE to NW track
-						trackdir = 10;
-					} else if ((m5 & ~TRACK_BIT_LEFT) == TRACK_BIT_RIGHT) { // NE to SE track
-						trackdir = 5;
-					} else {
-						return total_cost; // unsuitable track for signals, we are finished
-					}
-				} break;
-				case 9: case 10: case 12: { // from SE
-					if (m5 == TRACK_BIT_DIAG2) { // SE to NW track
-						trackdir = 9;
-					} else if ((m5 & ~TRACK_BIT_UPPER) == TRACK_BIT_LOWER ) { // SE to SW track
-						trackdir = 11;
-					} else if ((m5 & ~TRACK_BIT_LEFT) == TRACK_BIT_RIGHT) { // SE to NE track
-						trackdir = 13;
-					} else {
-						return total_cost; // unsuitable track for signals, we are finished
-					}
-				} break;
-				case 1: case 3: case 5: { // from NW
-					if (m5 == TRACK_BIT_DIAG2) { // NW to SE track
-						trackdir = 1;
-					} else if ((m5 & ~TRACK_BIT_LOWER) == TRACK_BIT_UPPER) { // NW to NE track
-						trackdir = 2;
-					} else if((m5 & ~TRACK_BIT_RIGHT) == TRACK_BIT_LEFT) { // NW to SW track
-						trackdir = 4;
-					} else {
-						return total_cost; // unsuitable track for signals, we are finished
-					}
-				} break;
-				default:
-					assert(0);
+			case 0: case 2: case 13: { // from SW
+				if (m5 == TRACK_BIT_DIAG1) {	// SW to NE track
+					trackdir = 0;
+				} else if ((m5 & ~TRACK_BIT_UPPER) == TRACK_BIT_LOWER) { // SW to SE track
+					trackdir = 3;
+				} else if ((m5 & ~TRACK_BIT_RIGHT) == TRACK_BIT_LEFT) { // SW to NW track
+					trackdir = 12;
+				} else {
+					return total_cost; // unsuitable track for signals, we are finished
+				}
+			} break;
+			case 8: case 4: case 11: { // from NE
+				if (m5 == TRACK_BIT_DIAG1) { // NE to SW track
+					trackdir = 8;
+				} else if ((m5 & ~TRACK_BIT_LOWER) == TRACK_BIT_UPPER) { // NE to NW track
+					trackdir = 10;
+				} else if ((m5 & ~TRACK_BIT_LEFT) == TRACK_BIT_RIGHT) { // NE to SE track
+					trackdir = 5;
+				} else {
+					return total_cost; // unsuitable track for signals, we are finished
+				}
+			} break;
+			case 9: case 10: case 12: { // from SE
+				if (m5 == TRACK_BIT_DIAG2) { // SE to NW track
+					trackdir = 9;
+				} else if ((m5 & ~TRACK_BIT_UPPER) == TRACK_BIT_LOWER ) { // SE to SW track
+					trackdir = 11;
+				} else if ((m5 & ~TRACK_BIT_LEFT) == TRACK_BIT_RIGHT) { // SE to NE track
+					trackdir = 13;
+				} else {
+					return total_cost; // unsuitable track for signals, we are finished
+				}
+			} break;
+			case 1: case 3: case 5: { // from NW
+				if (m5 == TRACK_BIT_DIAG2) { // NW to SE track
+					trackdir = 1;
+				} else if ((m5 & ~TRACK_BIT_LOWER) == TRACK_BIT_UPPER) { // NW to NE track
+					trackdir = 2;
+				} else if((m5 & ~TRACK_BIT_RIGHT) == TRACK_BIT_LEFT) { // NW to SW track
+					trackdir = 4;
+				} else {
+					return total_cost; // unsuitable track for signals, we are finished
+				}
+			} break;
+			default:
+				assert false;
 			}
 
 			// calculate signals to place
 			signals = 0;
-			if (signal_dir & 1) signals |= _signals_table[trackdir];
-			if (signal_dir & 2) signals |= _signals_table_other[trackdir];
+			if(0 != (signal_dir & 1)) signals |= _signals_table[trackdir];
+			if(0 != (signal_dir & 2)) signals |= _signals_table_other[trackdir];
 
 			if (x == sx && y == sy && trackdir == srb)
 				return total_cost; // back at the start, we are finished
@@ -1307,7 +1325,7 @@ public class Rail extends RailTables {
 			lx = x;			ly = y;
 
 			m5 = tile.getMap().m5;
-			if (mode)
+			if (mode != 0)
 				// when removing signals, remove all signals we encounter
 				signal_ctr =( (((m5 & RAIL_TILE_TYPE_MASK) == RAIL_TYPE_SIGNALS)) && (m3 & _signals_table_both[trackdir]) ) ? 0 : 1;
 			else if (m5 & 0x3)
@@ -1356,8 +1374,8 @@ public class Rail extends RailTables {
 		int mode = p2 & 0x1;
 		/* Track */ int  track = BitOps.GB(p2, 4, 3);
 		/*Trackdir*/ int trackdir = TrackToTrackdir(track);
-		byte semaphores = (BitOps.HASBIT(p2, 3)) ? 16 : 0;
-		byte signal_density = (p2 >> 24);
+		int semaphores = (BitOps.HASBIT(p2, 3)) ? 16 : 0;
+		int signal_density = (p2 >> 24);
 
 		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 		if (signal_density == 0 || signal_density > 20) return Cmd.CMD_ERROR;
@@ -1367,21 +1385,27 @@ public class Rail extends RailTables {
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		/* for vertical/horizontal tracks, double the given signals density
-		* since the original amount will be too dense (shorter tracks) */
+		 * since the original amount will be too dense (shorter tracks) */
 		if (!IsDiagonalTrack(track))
 			signal_density *= 2;
 
+		{
 		// unpack end tile
-		ex = TileX(p1) * TILE_SIZE;
-		ey = TileY(p1) * TILE_SIZE;
-
-		if (Cmd.CmdFailed(ValidateAutoDrag(&trackdir, x, y, ex, ey))) return Cmd.CMD_ERROR;
-
+			TileIndex pp = TileIndex.get(p1);
+			ex = pp.TileX() * TileInfo.TILE_SIZE;
+			ey = pp.TileY() * TileInfo.TILE_SIZE;
+		}
+		
+		{
+			int[] tdp = { trackdir };
+			if (Cmd.CmdFailed(ValidateAutoDrag(tdp, x, y, ex, ey))) return Cmd.CMD_ERROR;
+			trackdir = tdp[0];
+		}
 		track = TrackdirToTrack(trackdir); /* trackdir might have changed, keep track in sync */
 
 		// copy the signal-style of the first rail-piece if existing
 		if (GetRailTileType(tile) == RAIL_TYPE_SIGNALS && GetTrackBits(tile) != 0) { /* XXX: GetTrackBits check useless? */
-			signals = tile.getMap().m3 & SignalOnTrack(track);
+			signals = (byte) (tile.getMap().m3 & SignalOnTrack(track));
 			if (signals == 0) signals = SignalOnTrack(track); /* Can this actually occur? */
 
 			semaphores = (HasSemaphores(tile, track) ? 16 : 0); // copy signal/semaphores style (independent of CTRL)
@@ -1400,7 +1424,7 @@ public class Rail extends RailTables {
 		for (;;) {
 			// only build/remove signals with the specified density
 			if ((signal_ctr % signal_density) == 0 ) {
-				ret = DoCommand(x, y, TrackdirToTrack(trackdir) | semaphores, signals, flags, (mode == 1) ? Cmd.CMD_REMOVE_SIGNALS : Cmd.CMD_BUILD_SIGNALS);
+				ret = Cmd.DoCommand(x, y, TrackdirToTrack(trackdir) | semaphores, signals, flags, (mode == 1) ? Cmd.CMD_REMOVE_SIGNALS : Cmd.CMD_BUILD_SIGNALS);
 
 				/* Abort placement for any other error than NOT_SUITABLE_TRACK
 				 * This includes vehicles on track, competitor's tracks, etc. */
@@ -1411,7 +1435,7 @@ public class Rail extends RailTables {
 					total_cost += ret;
 
 					/* when autocompletion is on, use that to place the rest of the signals */
-					if BitOps.HASBIT(p2, 1) {
+					if( BitOps.HASBIT(p2, 1)) {
 						ret = BuildAutoSignals(x, y, trackdir, flags, p2, signals);
 						if (ret == Cmd.CMD_ERROR)
 							return Cmd.CMD_ERROR;
@@ -1459,20 +1483,20 @@ public class Rail extends RailTables {
 			return Cmd.CMD_ERROR;
 
 		/* Only water can remove signals from anyone */
-		if (Global._current_player != Owner.OWNER_WATER && !CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
+		if (Global._current_player.id != Owner.OWNER_WATER && !Player.CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		/* Do it? */
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			tile.getMap().m3 &= ~SignalOnTrack(track);
 
 			/* removed last signal from tile? */
 			if (BitOps.GB(tile.getMap().m3, 4, 4) == 0) 
 			{
 				tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 4, 4, 0);
-				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 6, 2, RAIL_TYPE_NORMAL >> 6); // XXX >> because the finalant is meant for direct application, not use with SB
-				CLRBIT(tile.getMap().m4, 3); // remove any possible semaphores
+				tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 6, 2, RAIL_TYPE_NORMAL >> 6); // XXX >> because the finalant is meant for direct application, not use with SB
+				tile.getMap().m4 = BitOps.RETCLRBIT(tile.getMap().m4, 3); // remove any possible semaphores
 			}
 
 			SetSignalsOnBothDir(tile, track);
@@ -1489,7 +1513,7 @@ public class Rail extends RailTables {
 	 */
 	int CmdRemoveSignalTrack(int x, int y, int flags, int p1, int p2)
 	{
-		return CmdSignalTrackHelper(x, y, flags, p1, SETBIT(p2, 0));
+		return CmdSignalTrackHelper(x, y, flags, p1, BitOps.RETSETBIT(p2, 0));
 	}
 
 	//typedef int DoConvertRailProc(TileIndex tile, int totype, boolean exec);
@@ -1527,7 +1551,7 @@ public class Rail extends RailTables {
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		if (!ValParamRailtype(p2)) return Cmd.CMD_ERROR;
+		if (!Player.ValParamRailtype(p2)) return Cmd.CMD_ERROR;
 		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 
 		// make sure sx,sy are smaller than ex,ey
@@ -1545,11 +1569,11 @@ public class Rail extends RailTables {
 				DoConvertRailProc proc;
 
 				switch (tile.GetTileType()) {
-					case TileTypes.MP_RAILWAY:      proc = DoConvertRail;             break;
-					case TileTypes.MP_STATION:      proc = DoConvertStationRail;      break;
-					case TileTypes.MP_STREET:       proc = DoConvertStreetRail;       break;
-					case TileTypes.MP_TUNNELBRIDGE: proc = DoConvertTunnelBridgeRail; break;
-					default: continue;
+				case TileTypes.MP_RAILWAY:      proc = DoConvertRail;             break;
+				case TileTypes.MP_STATION:      proc = DoConvertStationRail;      break;
+				case TileTypes.MP_STREET:       proc = DoConvertStreetRail;       break;
+				case TileTypes.MP_TUNNELBRIDGE: proc = DoConvertTunnelBridgeRail; break;
+				default: continue;
 				}
 
 				ret = proc(tile, p2, false);
@@ -1572,16 +1596,16 @@ public class Rail extends RailTables {
 
 	static int RemoveTrainDepot(TileIndex tile, int flags)
 	{
-		if (!CheckTileOwnership(tile) && Global._current_player != Owner.OWNER_WATER)
+		if (!Player.CheckTileOwnership(tile) && Global._current_player.id != Owner.OWNER_WATER)
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle())
 			return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) {
-			/* Track */ int  track = TrackdirToTrack(DiagdirToDiagTrackdir(GetDepotDirection(tile, Global.TRANSPORT_RAIL)));
+		if(0 != (flags & Cmd.DC_EXEC)) {
+			/* Track */ int  track = TrackdirToTrack(DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, Global.TRANSPORT_RAIL)));
 
-			DoDeleteDepot(tile);
+			Depot.DoDeleteDepot(tile);
 			SetSignalsOnBothDir(tile, track);
 		}
 
@@ -1609,52 +1633,52 @@ public class Rail extends RailTables {
 		cost = 0;
 
 		switch (GetRailTileType(tile)) {
-			case RAIL_TYPE_SIGNALS:
-				if(0 != (tile.getMap().m3 & _signals_table_both[0])) {
-					ret = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_REMOVE_SIGNALS);
-					if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
-					cost += ret;
-				}
-				if(0 != (tile.getMap().m3 & _signals_table_both[3])) {
-					ret = Cmd.DoCommandByTile(tile, 3, 0, flags, Cmd.CMD_REMOVE_SIGNALS);
-					if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
-					cost += ret;
-				}
-
-				m5 &= TRACK_BIT_MASK;
-				if (0==(flags & Cmd.DC_EXEC)) {
-					for (; m5 != 0; m5 >>= 1) if(0 != (m5 & 1)) cost += Global._price.remove_rail;
-					return cost;
-				}
-				/* FALLTHROUGH */
-
-			case RAIL_TYPE_NORMAL: {
-				int i;
-
-				for (i = 0; m5 != 0; i++, m5 >>= 1) {
-					if(0 !=  (m5 & 1)) {
-						ret = Cmd.DoCommandByTile(tile, 0, i, flags, Cmd.CMD_REMOVE_SINGLE_RAIL);
-						if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
-						cost += ret;
-					}
-				}
-				return cost;
+		case RAIL_TYPE_SIGNALS:
+			if(0 != (tile.getMap().m3 & _signals_table_both[0])) {
+				ret = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_REMOVE_SIGNALS);
+				if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
+				cost += ret;
+			}
+			if(0 != (tile.getMap().m3 & _signals_table_both[3])) {
+				ret = Cmd.DoCommandByTile(tile, 3, 0, flags, Cmd.CMD_REMOVE_SIGNALS);
+				if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
+				cost += ret;
 			}
 
-			case RAIL_TYPE_DEPOT_WAYPOINT:
-				switch (m5 & RAIL_SUBTYPE_MASK) {
-					case RAIL_SUBTYPE_DEPOT:
-						return RemoveTrainDepot(tile, flags);
+			m5 &= TRACK_BIT_MASK;
+			if (0==(flags & Cmd.DC_EXEC)) {
+				for (; m5 != 0; m5 >>= 1) if(0 != (m5 & 1)) cost += Global._price.remove_rail;
+				return cost;
+			}
+			/* FALLTHROUGH */
 
-					case RAIL_SUBTYPE_WAYPOINT:
-						return WayPoint.RemoveTrainWaypoint(tile, flags, false);
+		case RAIL_TYPE_NORMAL: {
+			int i;
 
-					default:
-						return Cmd.CMD_ERROR;
+			for (i = 0; m5 != 0; i++, m5 >>= 1) {
+				if(0 !=  (m5 & 1)) {
+					ret = Cmd.DoCommandByTile(tile, 0, i, flags, Cmd.CMD_REMOVE_SINGLE_RAIL);
+					if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
+					cost += ret;
 				}
+			}
+			return cost;
+		}
+
+		case RAIL_TYPE_DEPOT_WAYPOINT:
+			switch (m5 & RAIL_SUBTYPE_MASK) {
+			case RAIL_SUBTYPE_DEPOT:
+				return RemoveTrainDepot(tile, flags);
+
+			case RAIL_SUBTYPE_WAYPOINT:
+				return WayPoint.RemoveTrainWaypoint(tile, flags, false);
 
 			default:
 				return Cmd.CMD_ERROR;
+			}
+
+		default:
+			return Cmd.CMD_ERROR;
 		}
 	}
 
@@ -1682,7 +1706,7 @@ public class Rail extends RailTables {
 		int image = 0x515;
 		if (ti.tileh != 0) image = (0 != (ti.tileh & 2)) ? 0x519 : 0x51B;
 		ViewPort.AddSortableSpriteToDraw(image | _drawtile_track_palette,
-			ti.x, ti.y+1, 16, 1, 4, ti.z);
+				ti.x, ti.y+1, 16, 1, 4, ti.z);
 	}
 
 	static void DrawTrackFence_SE(final TileInfo ti)
@@ -1690,7 +1714,7 @@ public class Rail extends RailTables {
 		int image = 0x515;
 		if (ti.tileh != 0) image = (0 != (ti.tileh & 2)) ? 0x519 : 0x51B;
 		ViewPort.AddSortableSpriteToDraw(image | _drawtile_track_palette,
-			ti.x, ti.y+15, 16, 1, 4, ti.z);
+				ti.x, ti.y+15, 16, 1, 4, ti.z);
 	}
 
 	static void DrawTrackFence_NW_SE(final TileInfo ti)
@@ -1704,7 +1728,7 @@ public class Rail extends RailTables {
 		int image = 0x516;
 		if (ti.tileh != 0) image = (0!=(ti.tileh & 2)) ? 0x51A : 0x51C;
 		ViewPort.AddSortableSpriteToDraw(image | _drawtile_track_palette,
-			ti.x+1, ti.y, 1, 16, 4, ti.z);
+				ti.x+1, ti.y, 1, 16, 4, ti.z);
 	}
 
 	static void DrawTrackFence_SW(final TileInfo ti)
@@ -1712,7 +1736,7 @@ public class Rail extends RailTables {
 		int image = 0x516;
 		if (ti.tileh != 0) image = (0!=(ti.tileh & 2)) ? 0x51A : 0x51C;
 		ViewPort.AddSortableSpriteToDraw(image | _drawtile_track_palette,
-			ti.x+15, ti.y, 1, 16, 4, ti.z);
+				ti.x+15, ti.y, 1, 16, 4, ti.z);
 	}
 
 	static void DrawTrackFence_NE_SW(final TileInfo ti)
@@ -1726,7 +1750,7 @@ public class Rail extends RailTables {
 		int z = ti.z;
 		if(0!=(ti.tileh & 1)) z += 8;
 		ViewPort.AddSortableSpriteToDraw(0x517 | _drawtile_track_palette,
-			ti.x + 8, ti.y + 8, 1, 1, 4, z);
+				ti.x + 8, ti.y + 8, 1, 1, 4, z);
 	}
 
 	static void DrawTrackFence_NS_2(final TileInfo ti)
@@ -1734,7 +1758,7 @@ public class Rail extends RailTables {
 		int z = ti.z;
 		if(0!=(ti.tileh & 4)) z += 8;
 		ViewPort.AddSortableSpriteToDraw(0x517 | _drawtile_track_palette,
-			ti.x + 8, ti.y + 8, 1, 1, 4, z);
+				ti.x + 8, ti.y + 8, 1, 1, 4, z);
 	}
 
 	static void DrawTrackFence_WE_1(final TileInfo ti)
@@ -1742,7 +1766,7 @@ public class Rail extends RailTables {
 		int z = ti.z;
 		if(0!=(ti.tileh & 8)) z += 8;
 		ViewPort.AddSortableSpriteToDraw(0x518 | _drawtile_track_palette,
-			ti.x + 8, ti.y + 8, 1, 1, 4, z);
+				ti.x + 8, ti.y + 8, 1, 1, 4, z);
 	}
 
 	static void DrawTrackFence_WE_2(final TileInfo ti)
@@ -1751,7 +1775,7 @@ public class Rail extends RailTables {
 		if(0 != (ti.tileh & 2)) 
 			z += 8;
 		ViewPort.AddSortableSpriteToDraw(0x518 | _drawtile_track_palette,
-			ti.x + 8, ti.y + 8, 1, 1, 4, z);
+				ti.x + 8, ti.y + 8, 1, 1, 4, z);
 	}
 
 	static void DetTrackDrawProc_Null(final TileInfo ti)
@@ -1761,35 +1785,35 @@ public class Rail extends RailTables {
 
 	//typedef void DetailedTrackProc(final TileInfo ti);
 	static final DetailedTrackProc _detailed_track_proc[] = {
-		Rail::DetTrackDrawProc_Null,
-		Rail::DetTrackDrawProc_Null,
+			Rail::DetTrackDrawProc_Null,
+			Rail::DetTrackDrawProc_Null,
 
-		Rail::DrawTrackFence_NW,
-		Rail::DrawTrackFence_SE,
-		Rail::DrawTrackFence_NW_SE,
+			Rail::DrawTrackFence_NW,
+			Rail::DrawTrackFence_SE,
+			Rail::DrawTrackFence_NW_SE,
 
-		Rail::DrawTrackFence_NE,
-		Rail::DrawTrackFence_SW,
-		Rail::DrawTrackFence_NE_SW,
+			Rail::DrawTrackFence_NE,
+			Rail::DrawTrackFence_SW,
+			Rail::DrawTrackFence_NE_SW,
 
-		Rail::DrawTrackFence_NS_1,
-		Rail::DrawTrackFence_NS_2,
+			Rail::DrawTrackFence_NS_1,
+			Rail::DrawTrackFence_NS_2,
 
-		Rail::DrawTrackFence_WE_1,
-		Rail::DrawTrackFence_WE_2,
+			Rail::DrawTrackFence_WE_1,
+			Rail::DrawTrackFence_WE_2,
 
-		Rail::DetTrackDrawProc_Null,
-		Rail::DetTrackDrawProc_Null,
-		Rail::DetTrackDrawProc_Null,
-		Rail::DetTrackDrawProc_Null,
+			Rail::DetTrackDrawProc_Null,
+			Rail::DetTrackDrawProc_Null,
+			Rail::DetTrackDrawProc_Null,
+			Rail::DetTrackDrawProc_Null,
 	};
 
 	static void DrawSpecialBuilding(int image, int offset,
-	                                final TileInfo  ti,
-	                                byte x, byte y, byte z,
-	                                byte xsize, byte ysize, byte zsize)
+			final TileInfo  ti,
+			byte x, byte y, byte z,
+			byte xsize, byte ysize, byte zsize)
 	{
-		if (image & PALETTE_MODIFIER_COLOR) image |= _drawtile_track_palette;
+		if (image & Sprites.PALETTE_MODIFIER_COLOR) image |= _drawtile_track_palette;
 		image += offset;
 		if (Global._displayGameOptions._opt & DO_TRANS_BUILDINGS) MAKE_TRANSPARENT(image);
 		ViewPort.AddSortableSpriteToDraw(image, ti.x + x, ti.y + y, xsize, ysize, zsize, ti.z + z);
@@ -1847,44 +1871,44 @@ public class Rail extends RailTables {
 		}
 
 		if (earth) {
-			image = (image & SPRITE_MASK) | PALETTE_TO_BARE_LAND; // Use brown palette
+			image = (image & SPRITE_MASK) | Sprites.PALETTE_TO_BARE_LAND; // Use brown palette
 		} else if (snow) {
 			image += rti.snow_offset;
 		}
 
-		DrawGroundSprite(image);
+		ViewPort.DrawGroundSprite(image);
 
 		// Draw track pieces individually for junction tiles
 		if (junction) {
-			if (track & TRACK_BIT_DIAG1) DrawGroundSprite(rti.base_sprites.single_y);
-			if (track & TRACK_BIT_DIAG2) DrawGroundSprite(rti.base_sprites.single_x);
-			if (track & TRACK_BIT_UPPER) DrawGroundSprite(rti.base_sprites.single_n);
-			if (track & TRACK_BIT_LOWER) DrawGroundSprite(rti.base_sprites.single_s);
-			if (track & TRACK_BIT_LEFT)  DrawGroundSprite(rti.base_sprites.single_w);
-			if (track & TRACK_BIT_RIGHT) DrawGroundSprite(rti.base_sprites.single_e);
+			if (track & TRACK_BIT_DIAG1) ViewPort.DrawGroundSprite(rti.base_sprites.single_y);
+			if (track & TRACK_BIT_DIAG2) ViewPort.DrawGroundSprite(rti.base_sprites.single_x);
+			if (track & TRACK_BIT_UPPER) ViewPort.DrawGroundSprite(rti.base_sprites.single_n);
+			if (track & TRACK_BIT_LOWER) ViewPort.DrawGroundSprite(rti.base_sprites.single_s);
+			if (track & TRACK_BIT_LEFT)  ViewPort.DrawGroundSprite(rti.base_sprites.single_w);
+			if (track & TRACK_BIT_RIGHT) ViewPort.DrawGroundSprite(rti.base_sprites.single_e);
 		}
 
 		if (_debug_pbs_level >= 1) {
 			byte pbs = PBSTileReserved(ti.tile) & track;
-			if (pbs & TRACK_BIT_DIAG1) DrawGroundSprite(rti.base_sprites.single_y | PALETTE_CRASH);
-			if (pbs & TRACK_BIT_DIAG2) DrawGroundSprite(rti.base_sprites.single_x | PALETTE_CRASH);
-			if (pbs & TRACK_BIT_UPPER) DrawGroundSprite(rti.base_sprites.single_n | PALETTE_CRASH);
-			if (pbs & TRACK_BIT_LOWER) DrawGroundSprite(rti.base_sprites.single_s | PALETTE_CRASH);
-			if (pbs & TRACK_BIT_LEFT)  DrawGroundSprite(rti.base_sprites.single_w | PALETTE_CRASH);
-			if (pbs & TRACK_BIT_RIGHT) DrawGroundSprite(rti.base_sprites.single_e | PALETTE_CRASH);
+			if (pbs & TRACK_BIT_DIAG1) ViewPort.DrawGroundSprite(rti.base_sprites.single_y | Sprites.PALETTE_CRASH);
+			if (pbs & TRACK_BIT_DIAG2) ViewPort.DrawGroundSprite(rti.base_sprites.single_x | Sprites.PALETTE_CRASH);
+			if (pbs & TRACK_BIT_UPPER) ViewPort.DrawGroundSprite(rti.base_sprites.single_n | Sprites.PALETTE_CRASH);
+			if (pbs & TRACK_BIT_LOWER) ViewPort.DrawGroundSprite(rti.base_sprites.single_s | Sprites.PALETTE_CRASH);
+			if (pbs & TRACK_BIT_LEFT)  ViewPort.DrawGroundSprite(rti.base_sprites.single_w | Sprites.PALETTE_CRASH);
+			if (pbs & TRACK_BIT_RIGHT) ViewPort.DrawGroundSprite(rti.base_sprites.single_e | Sprites.PALETTE_CRASH);
 		}
 	}
 
-	
-	private static boolean HAS_SIGNAL(int x) { return 0 != (m23 & (byte)(0x1 << (x))); }
-	private static boolean ISON_SIGNAL(int x) { return 0 != (m23 & (byte)(0x10 << (x))); }
-	
-	private static void MAYBE_DRAW_SIGNAL(TileInfo ti, int x, int y, int z)
+
+	private static boolean HAS_SIGNAL(int x, int m23) { return 0 != (m23 & (byte)(0x1 << (x))); }
+	private static boolean ISON_SIGNAL(int x, int m23) { return 0 != (m23 & (byte)(0x10 << (x))); }
+
+	private static void MAYBE_DRAW_SIGNAL(TileInfo ti, int x, int y, int z, int m23)
 	{
-		if (HAS_SIGNAL(x)) 
-			DrawSignalHelper(ti, ISON_SIGNAL(x), ((y-0x4FB) << 4)|(z));
+		if (HAS_SIGNAL(x,m23)) 
+			DrawSignalHelper(ti, ISON_SIGNAL(x,m23), ((y-0x4FB) << 4)|(z));
 	}
-	
+
 	static void DrawTile_Track(TileInfo ti)
 	{
 		byte m5;
@@ -1894,75 +1918,73 @@ public class Rail extends RailTables {
 		_drawtile_track_palette = SPRITE_PALETTE(PLAYER_SPRITE_COLOR(GetTileOwner(ti.tile)));
 
 		m5 = (byte)ti.map5;
-		if (!(m5 & RAIL_TYPE_SPECIAL)) {
-			boolean earth = (_m[ti.tile].m2 & RAIL_MAP2LO_GROUND_MASK) == RAIL_GROUND_BROWN;
-			boolean snow = (_m[ti.tile].m2 & RAIL_MAP2LO_GROUND_MASK) == RAIL_GROUND_ICE_DESERT;
+		if (0==(m5 & RAIL_TYPE_SPECIAL)) {
+			boolean earth = (ti.tile.getMap().m2 & RAIL_MAP2LO_GROUND_MASK) == RAIL_GROUND_BROWN;
+			boolean snow = (ti.tile.getMap().m2 & RAIL_MAP2LO_GROUND_MASK) == RAIL_GROUND_ICE_DESERT;
 
 			DrawTrackBits(ti, m5 & TRACK_BIT_MASK, earth, snow, false);
 
-			if (_displayGameOptions._opt & DO_FULL_DETAIL) {
-				_detailed_track_proc[_m[ti.tile].m2 & RAIL_MAP2LO_GROUND_MASK](ti);
+			if (Global._displayGameOptions._opt & DO_FULL_DETAIL) {
+				_detailed_track_proc[ti.tile.getMap().m2 & RAIL_MAP2LO_GROUND_MASK].accept(ti);
 			}
 
 			/* draw signals also? */
-			if (!(ti.map5 & RAIL_TYPE_SIGNALS))
+			if (0==(ti.map5 & RAIL_TYPE_SIGNALS))
 				return;
 
 			{
-				byte m23;
-
-				m23 = (_m[ti.tile].m3 >> 4) | (_m[ti.tile].m2 & 0xF0);
+				byte m23 = (byte) ((ti.tile.getMap().m3 >> 4) | (ti.tile.getMap().m2 & 0xF0));
 
 
-			if (!(m5 & TRACK_BIT_DIAG2)) {
-				if (!(m5 & TRACK_BIT_DIAG1)) {
-					if (m5 & TRACK_BIT_LEFT) {
-						MAYBE_DRAW_SIGNAL( ti, 2, 0x509, 0);
-						MAYBE_DRAW_SIGNAL( ti, 3, 0x507, 1);
-					}
-					if (m5 & TRACK_BIT_RIGHT) {
-						MAYBE_DRAW_SIGNAL( ti, 0, 0x509, 2);
-						MAYBE_DRAW_SIGNAL( ti, 1, 0x507, 3);
-					}
-					if (m5 & TRACK_BIT_UPPER) {
-						MAYBE_DRAW_SIGNAL( ti, 3, 0x505, 4);
-						MAYBE_DRAW_SIGNAL( ti, 2, 0x503, 5);
-					}
-					if (m5 & TRACK_BIT_LOWER) {
-						MAYBE_DRAW_SIGNAL( ti, 1, 0x505, 6);
-						MAYBE_DRAW_SIGNAL( ti, 0, 0x503, 7);
+				if (0==(m5 & TRACK_BIT_DIAG2)) {
+					if (0==(m5 & TRACK_BIT_DIAG1)) {
+						if(0 != (m5 & TRACK_BIT_LEFT)) {
+							MAYBE_DRAW_SIGNAL( ti, 2, 0x509, 0, m23);
+							MAYBE_DRAW_SIGNAL( ti, 3, 0x507, 1, m23);
+						}
+						if(0 != (m5 & TRACK_BIT_RIGHT)) {
+							MAYBE_DRAW_SIGNAL( ti, 0, 0x509, 2, m23);
+							MAYBE_DRAW_SIGNAL( ti, 1, 0x507, 3, m23);
+						}
+						if(0 != (m5 & TRACK_BIT_UPPER)) {
+							MAYBE_DRAW_SIGNAL( ti, 3, 0x505, 4, m23);
+							MAYBE_DRAW_SIGNAL( ti, 2, 0x503, 5, m23);
+						}
+						if(0 != (m5 & TRACK_BIT_LOWER)) {
+							MAYBE_DRAW_SIGNAL( ti, 1, 0x505, 6, m23);
+							MAYBE_DRAW_SIGNAL( ti, 0, 0x503, 7, m23);
+						}
+					} else {
+						MAYBE_DRAW_SIGNAL( ti, 3, 0x4FB, 8, m23);
+						MAYBE_DRAW_SIGNAL( ti, 2, 0x4FD, 9, m23);
 					}
 				} else {
-					MAYBE_DRAW_SIGNAL( ti, 3, 0x4FB, 8);
-					MAYBE_DRAW_SIGNAL( ti, 2, 0x4FD, 9);
+					MAYBE_DRAW_SIGNAL( ti, 3, 0x4FF, 10, m23);
+					MAYBE_DRAW_SIGNAL( ti, 2, 0x501, 11, m23);
 				}
-			} else {
-				MAYBE_DRAW_SIGNAL( ti, 3, 0x4FF, 10);
-				MAYBE_DRAW_SIGNAL( ti, 2, 0x501, 11);
-			}
 			}
 		} else {
 			/* draw depots / waypoints */
 			final DrawTrackSeqStruct drss;
-			byte type = m5 & 0x3F; // 0-3: depots, 4-5: waypoints
+			byte type = (byte) (m5 & 0x3F); // 0-3: depots, 4-5: waypoints
 
-			if (!(m5 & (RAIL_TILE_TYPE_MASK&~RAIL_TYPE_SPECIAL)))
+			if (0==(m5 & (RAIL_TILE_TYPE_MASK&~RAIL_TYPE_SPECIAL)))
 				/* XXX: There used to be "return;" here, but since I could not find out
 				 * why this would ever occur, I put assert(0) here. Let's see if someone
 				 * complains about it. If not, we'll remove this check. (Matthijs). */
-				 assert(0);
+				assert false;
 
 			if (ti.tileh != 0) DrawFoundation(ti, ti.tileh);
 
-			if (IsRailWaypoint(ti.tile) && BitOps.HASBIT(_m[ti.tile].m3, 4)) {
+			if (IsRailWaypoint(ti.tile) && BitOps.HASBIT(ti.tile.getMap().m3, 4)) {
 				// look for customization
-				byte stat_id = GetWaypointByTile(ti.tile).stat_id;
-				final StationSpec stat = GetCustomStation(STAT_CLASS_WAYP, stat_id);
+				byte stat_id = WayPoint.GetWaypointByTile(ti.tile).stat_id;
+				final StationSpec stat = Station.GetCustomStation(STAT_CLASS_WAYP, stat_id);
 
 				if (stat != null) {
-					DrawTileSeqStruct final seq;
+					final DrawTileSeqStruct seq;
 					// emulate station tile - open with building
-					final DrawTileSprites cust = &stat.renderdata[2 + (m5 & 0x1)];
+					final DrawTileSprites cust = stat.renderdata[2 + (m5 & 0x1)];
 					int relocation = GetCustomStationRelocation(stat, ComposeWaypointStation(ti.tile), 0);
 
 					/* We don't touch the 0x8000 bit. In all this
@@ -1977,13 +1999,16 @@ public class Rail extends RailTables {
 					image = cust.ground_sprite;
 					image += (image < _custom_sprites_base) ? rti.total_offset : GetRailType(ti.tile);
 
-					DrawGroundSprite(image);
+					ViewPort.DrawGroundSprite(image);
 
-					foreach_draw_tile_seq(seq, cust.seq) {
+					// #define foreach_draw_tile_seq(idx, list) for (idx = list; ((byte) idx->delta_x) != 0x80; idx++)
+					//foreach_draw_tile_seq(seq, cust.seq)
+					for (seq = cust.seq; ((byte) seq.delta_x) != 0x80; seq++)
+					{
 						int image = seq.image + relocation;
 						DrawSpecialBuilding(image, 0, ti,
-						                    seq.delta_x, seq.delta_y, seq.delta_z,
-						                    seq.width, seq.height, seq.unk);
+								seq.delta_x, seq.delta_y, seq.delta_z,
+								seq.width, seq.height, seq.unk);
 					}
 					return;
 				}
@@ -1993,41 +2018,41 @@ public class Rail extends RailTables {
 
 			image = drss++.image;
 			/* @note This is kind of an ugly hack, as the PALETTE_MODIFIER_COLOR indicates
-		 	 * whether the sprite is railtype dependent. Rewrite this asap */
-			if (image & PALETTE_MODIFIER_COLOR) image = (image & SPRITE_MASK) + rti.total_offset;
+			 * whether the sprite is railtype dependent. Rewrite this asap */
+			if (image & Sprite.PALETTE_MODIFIER_COLOR) image = (image & Sprite.SPRITE_MASK) + rti.total_offset;
 
 			// adjust ground tile for desert
 			// (don't adjust for arctic depots, because snow in depots looks weird)
 			// type >= 4 means waypoints
 			if ((ti.tile.getMap().m4 & RAIL_MAP2LO_GROUND_MASK) == RAIL_GROUND_ICE_DESERT && (GameOptions._opt.landscape == Landscape.LT_DESERT || type >= 4)) {
-				if (image != Sprite.SPR_FLAT_GRASS_TILE) {
+				if (image.id != Sprite.SPR_FLAT_GRASS_TILE) {
 					image += rti.snow_offset; // tile with tracks
 				} else {
-					image = Sprite.SPR_FLAT_SNOWY_TILE; // flat ground
+					image.id = Sprite.SPR_FLAT_SNOWY_TILE; // flat ground
 				}
 			}
 
-			DrawGroundSprite(image);
+			ViewPort.DrawGroundSprite(image.id);
 
-			if (_debug_pbs_level >= 1) {
-				byte pbs = PBSTileReserved(ti.tile);
-				if (pbs & TRACK_BIT_DIAG1) DrawGroundSprite(rti.base_sprites.single_y | PALETTE_CRASH);
-				if (pbs & TRACK_BIT_DIAG2) DrawGroundSprite(rti.base_sprites.single_x | PALETTE_CRASH);
-				if (pbs & TRACK_BIT_UPPER) DrawGroundSprite(rti.base_sprites.single_n | PALETTE_CRASH);
-				if (pbs & TRACK_BIT_LOWER) DrawGroundSprite(rti.base_sprites.single_s | PALETTE_CRASH);
-				if (pbs & TRACK_BIT_LEFT)  DrawGroundSprite(rti.base_sprites.single_w | PALETTE_CRASH);
-				if (pbs & TRACK_BIT_RIGHT) DrawGroundSprite(rti.base_sprites.single_e | PALETTE_CRASH);
+			if (Global._debug_pbs_level >= 1) {
+				int pbs = Pbs.PBSTileReserved(ti.tile);
+				if(0!=(pbs & TRACK_BIT_DIAG1)) ViewPort.DrawGroundSprite(rti.base_sprites.single_y.id | Sprites.PALETTE_CRASH);
+				if(0!=(pbs & TRACK_BIT_DIAG2)) ViewPort.DrawGroundSprite(rti.base_sprites.single_x.id | Sprites.PALETTE_CRASH);
+				if(0!=(pbs & TRACK_BIT_UPPER)) ViewPort.DrawGroundSprite(rti.base_sprites.single_n.id | Sprites.PALETTE_CRASH);
+				if(0!=(pbs & TRACK_BIT_LOWER)) ViewPort.DrawGroundSprite(rti.base_sprites.single_s.id | Sprites.PALETTE_CRASH);
+				if(0!=(pbs & TRACK_BIT_LEFT))  ViewPort.DrawGroundSprite(rti.base_sprites.single_w.id | Sprites.PALETTE_CRASH);
+				if(0!=(pbs & TRACK_BIT_RIGHT)) ViewPort.DrawGroundSprite(rti.base_sprites.single_e.id | Sprites.PALETTE_CRASH);
 			}
 
 			for (; drss.image != 0; drss++) {
 				DrawSpecialBuilding(drss.image, type < 4 ? rti.total_offset : 0, ti,
-				                    drss.subcoord_x, drss.subcoord_y, 0,
-				                    drss.width, drss.height, 0x17);
+						drss.subcoord_x, drss.subcoord_y, 0,
+						drss.width, drss.height, 0x17);
 			}
 		}
 	}
 
-	void DrawTrainDepotSprite(int x, int y, int image, RailType railtype)
+	static void DrawTrainDepotSprite(int x, int y, int image, /*RailType*/ int railtype)
 	{
 		int ormod, img;
 		final RailtypeInfo rti = GetRailTypeInfo(railtype);
@@ -2043,31 +2068,31 @@ public class Rail extends RailTables {
 		img = dtss++.image;
 		/* @note This is kind of an ugly hack, as the PALETTE_MODIFIER_COLOR indicates
 		 * whether the sprite is railtype dependent. Rewrite this asap */
-		if (img & PALETTE_MODIFIER_COLOR) img = (img & SPRITE_MASK) + rti.total_offset;
+		if (img & Sprites.PALETTE_MODIFIER_COLOR) img = (img & SPRITE_MASK) + rti.total_offset;
 		Gfx.DrawSprite(img, x, y);
 
 		for (; dtss.image != 0; dtss++) {
 			Point pt = RemapCoords(dtss.subcoord_x, dtss.subcoord_y, 0);
 			image = dtss.image;
-			if (image & PALETTE_MODIFIER_COLOR) image |= ormod;
+			if (image & Sprites.PALETTE_MODIFIER_COLOR) image |= ormod;
 			Gfx.DrawSprite(image + rti.total_offset, x + pt.x, y + pt.y);
 		}
 	}
 
-	void DrawDefaultWaypointSprite(int x, int y, RailType railtype)
+	void DrawDefaultWaypointSprite(int x, int y, /*RailType*/ int railtype)
 	{
 		final DrawTrackSeqStruct dtss = _track_depot_layout_table[4];
 		final RailtypeInfo rti = GetRailTypeInfo(railtype);
 		int img;
 
 		img = dtss++.image;
-		if (img & PALETTE_MODIFIER_COLOR) img = (img & SPRITE_MASK) + rti.total_offset;
+		if (img & Sprites.PALETTE_MODIFIER_COLOR) img = (img & SPRITE_MASK) + rti.total_offset;
 		Gfx.DrawSprite(img, x, y);
 
 		for (; dtss.image != 0; dtss++) {
 			Point pt = RemapCoords(dtss.subcoord_x, dtss.subcoord_y, 0);
 			img = dtss.image;
-			if (img & PALETTE_MODIFIER_COLOR) img |= PLAYER_SPRITE_COLOR(Global._local_player);
+			if (img & Sprites.PALETTE_MODIFIER_COLOR) img |= PLAYER_SPRITE_COLOR(Global._local_player);
 			Gfx.DrawSprite(img, x + pt.x, y + pt.y);
 		}
 	}
@@ -2078,10 +2103,11 @@ public class Rail extends RailTables {
 		boolean stop;
 		boolean has_presignal;
 
-		boolean has_pbssignal;
-			// lowest 2 bits = amount of pbs signals in the block, clamped at 2
-			// bit 2 = there is a pbs entry signal in this block
-			// bit 3 = there is a pbs exit signal in this block
+		//boolean has_pbssignal;
+		int has_pbssignal;
+		// lowest 2 bits = amount of pbs signals in the block, clamped at 2
+		// bit 2 = there is a pbs entry signal in this block
+		// bit 3 = there is a pbs exit signal in this block
 
 		// presignal info
 		int presignal_exits;
@@ -2110,18 +2136,19 @@ public class Rail extends RailTables {
 					// yes, add the signal to the list of signals
 					if (ssd.cur != NUM_SSD_ENTRY) {
 						ssd.tile[ssd.cur] = tile; // remember the tile index
-						ssd.bit[ssd.cur] = track; // and the controlling bit number
+						ssd.bit[ssd.cur] = (byte) track; // and the controlling bit number
 						ssd.cur++;
 					}
 
-				if (PBSIsPbsSignal(tile, ReverseTrackdir(track)))
-					ssd.has_pbssignal = BitOps.RETSETBIT(ssd.has_pbssignal, 2);
+					if (Pbs.PBSIsPbsSignal(tile, ReverseTrackdir(track)))
+						ssd.has_pbssignal = BitOps.RETSETBIT(ssd.has_pbssignal, 2);
 
 					// remember if this block has a presignal.
 					ssd.has_presignal |= (tile.getMap().m4&1);
 				}
 
-				if (PBSIsPbsSignal(tile, ReverseTrackdir(track)) || PBSIsPbsSignal(tile, track)) {
+				if (Pbs.PBSIsPbsSignal(tile, ReverseTrackdir(track)) || Pbs.PBSIsPbsSignal(tile, track)) 
+				{
 					byte num = ssd.has_pbssignal & 3;
 					num = clamp(num + 1, 0, 2);
 					ssd.has_pbssignal &= ~3;
@@ -2133,19 +2160,20 @@ public class Rail extends RailTables {
 					ssd.pbs_cur++;
 				}
 
-				if (tile.getMap().m3&_signals_table_other[track]) {
+				if(0 != (tile.getMap().m3&_signals_table_other[track])) 
+				{
 					if (tile.getMap().m4&2) {
 						// this is an exit signal that points out from the segment
 						ssd.presignal_exits++;
 						if ((tile.getMap().m2&_signals_table_other[track]) != 0)
 							ssd.presignal_exits_free++;
 					}
-					if (PBSIsPbsSignal(tile, track))
-						ssd.has_pbssignal = BitOps.SETBIT(ssd.has_pbssignal, 3);
+					if (Pbs.PBSIsPbsSignal(tile, track))
+						ssd.has_pbssignal = BitOps.RETSETBIT(ssd.has_pbssignal, 3);
 				}
 
 				return true;
-			} else if (IsTileDepotType(tile, Global.TRANSPORT_RAIL)) {
+			} else if (Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL)) {
 				return true; // don't look further if the tile is a depot
 			}
 		}
@@ -2176,7 +2204,7 @@ public class Rail extends RailTables {
 		if (tile != dest.tile) return null;
 
 		/* Are we on the same piece of track? */
-		if (dest.track & (v.rail.track + (v.rail.track << 8))) return v;
+		if(0 != (dest.track & (v.rail.track + (v.rail.track << 8)))) return v;
 
 		return null;
 	}
@@ -2196,7 +2224,7 @@ public class Rail extends RailTables {
 		if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
 			// It is a tunnel we're checking, we need to do some special stuff
 			// because VehicleFromPos will not find the vihicle otherwise
-			byte direction = BitOps.GB(tile.getMap().m5, 0, 2);
+			int direction = BitOps.GB(tile.getMap().m5, 0, 2);
 			FindLengthOfTunnelResult flotr;
 			flotr = FindLengthOfTunnel(tile, direction);
 			dest.track = 1 << (direction & 1); // get the trackbit the vehicle would have if it has not entered the tunnel yet (ie is still visible)
@@ -2225,7 +2253,7 @@ public class Rail extends RailTables {
 	static void SetSignalsAfterProc(TrackPathFinder tpf)
 	{
 		SetSignalsData ssd = tpf.userdata;
-		final TrackPathFinderLink* link;
+		final TrackPathFinderLink link;
 		int offs;
 		int i;
 
@@ -2274,59 +2302,59 @@ public class Rail extends RailTables {
 
 		// convert the block to pbs, if needed
 		if (Global._patches.auto_pbs_placement && !(ssd.stop) && (ssd.has_pbssignal == 0xE) && !ssd.has_presignal && (ssd.presignal_exits == 0)) // 0xE means at least 2 pbs signals, and at least 1 entry and 1 exit, see comments ssd.has_pbssignal
-		for (i = 0; i != ssd.pbs_cur; i++) {
-			TileIndex tile = ssd.pbs_tile[i];
-			tile.getMap().m4 = BitOps.RETSB(tile.getMap().m4, 0, 3, SIGTYPE_PBS);
-			tile.MarkTileDirtyByTile();
-		};
+			for (i = 0; i != ssd.pbs_cur; i++) {
+				TileIndex tile = ssd.pbs_tile[i];
+				tile.getMap().m4 = BitOps.RETSB(tile.getMap().m4, 0, 3, SIGTYPE_PBS);
+				tile.MarkTileDirtyByTile();
+			};
 
-		// then mark the signals in the segment accordingly
-		for (i = 0; i != ssd.cur; i++) {
-			TileIndex tile = ssd.tile[i];
-			byte bit = _signals_table[ssd.bit[i]];
-			int m2 = tile.getMap().m2;
+			// then mark the signals in the segment accordingly
+			for (i = 0; i != ssd.cur; i++) {
+				TileIndex tile = ssd.tile[i];
+				byte bit = _signals_table[ssd.bit[i]];
+				int m2 = tile.getMap().m2;
 
-			// presignals don't turn green if there is at least one presignal exit and none are free
-			if (tile.getMap().m4 & 1) {
-				int ex = ssd.presignal_exits, exfree = ssd.presignal_exits_free;
+				// presignals don't turn green if there is at least one presignal exit and none are free
+				if (tile.getMap().m4 & 1) {
+					int ex = ssd.presignal_exits, exfree = ssd.presignal_exits_free;
 
-				// subtract for dual combo signals so they don't count themselves
-				if (tile.getMap().m4&2 && tile.getMap().m3&_signals_table_other[ssd.bit[i]]) {
-					ex--;
-					if ((tile.getMap().m2&_signals_table_other[ssd.bit[i]]) != 0) exfree--;
+					// subtract for dual combo signals so they don't count themselves
+					if (tile.getMap().m4&2 && tile.getMap().m3&_signals_table_other[ssd.bit[i]]) {
+						ex--;
+						if ((tile.getMap().m2&_signals_table_other[ssd.bit[i]]) != 0) exfree--;
+					}
+
+					// if we have exits and none are free, make red.
+					if (ex && !exfree) goto make_red;
 				}
 
-				// if we have exits and none are free, make red.
-				if (ex && !exfree) goto make_red;
-			}
-
-			// check if the signal is unaffected.
-			if (ssd.stop) {
-	make_red:
-				// turn red
-				if ( (bit&m2) == 0 )
-					continue;
-			} else {
-				// turn green
-				if ( (bit&m2) != 0 )
-					continue;
-			}
-
-			/* Update signals on the other side of this exit-combo signal; it changed. */
-			if (tile.getMap().m4 & 2 ) {
-				if (ssd.cur_stack != NUM_SSD_STACK) {
-					ssd.next_tile[ssd.cur_stack] = tile;
-					ssd.next_dir[ssd.cur_stack] = _dir_from_track[ssd.bit[i]];
-					ssd.cur_stack++;
+				// check if the signal is unaffected.
+				if (ssd.stop) {
+					make_red:
+						// turn red
+						if ( (bit&m2) == 0 )
+							continue;
 				} else {
-					Global.error("NUM_SSD_STACK too small\n"); /// @todo WTF is this???
+					// turn green
+					if ( (bit&m2) != 0 )
+						continue;
 				}
-			}
 
-			// it changed, so toggle it
-			tile.getMap().m2 = m2 ^ bit;
-			tile.MarkTileDirtyByTile();
-		}
+				/* Update signals on the other side of this exit-combo signal; it changed. */
+				if (tile.getMap().m4 & 2 ) {
+					if (ssd.cur_stack != NUM_SSD_STACK) {
+						ssd.next_tile[ssd.cur_stack] = tile;
+						ssd.next_dir[ssd.cur_stack] = _dir_from_track[ssd.bit[i]];
+						ssd.cur_stack++;
+					} else {
+						Global.error("NUM_SSD_STACK too small\n"); /// @todo WTF is this???
+					}
+				}
+
+				// it changed, so toggle it
+				tile.getMap().m2 = m2 ^ bit;
+				tile.MarkTileDirtyByTile();
+			}
 	}
 
 
@@ -2361,7 +2389,7 @@ public class Rail extends RailTables {
 		return (boolean)result;
 	}
 
-	void SetSignalsOnBothDir(TileIndex tile, byte track)
+	static void SetSignalsOnBothDir(TileIndex tile, int track)
 	{
 		UpdateSignalsOnSegment(tile, _search_dir_1[track]);
 		UpdateSignalsOnSegment(tile, _search_dir_2[track]);
@@ -2436,19 +2464,19 @@ public class Rail extends RailTables {
 		old_ground = tile.getMap().m5 & RAIL_TYPE_SPECIAL ? BitOps.GB(tile.getMap().m4, 0, 4) : BitOps.GB(tile.getMap().m2, 0, 4);
 
 		switch (GameOptions._opt.landscape) {
-			case Landscape.LT_HILLY:
-				if (tile.GetTileZ() > GameOptions._opt.snow_line) { /* convert into snow? */
-					new_ground = RAIL_GROUND_ICE_DESERT;
-					goto modify_me;
-				}
-				break;
+		case Landscape.LT_HILLY:
+			if (tile.GetTileZ() > GameOptions._opt.snow_line) { /* convert into snow? */
+				new_ground = RAIL_GROUND_ICE_DESERT;
+				goto modify_me;
+			}
+			break;
 
-			case Landscape.LT_DESERT:
-				if (GetMapExtraBits(tile) == 1) { /* convert into desert? */
-					new_ground = RAIL_GROUND_ICE_DESERT;
-					goto modify_me;
-				}
-				break;
+		case Landscape.LT_DESERT:
+			if (GetMapExtraBits(tile) == 1) { /* convert into desert? */
+				new_ground = RAIL_GROUND_ICE_DESERT;
+				goto modify_me;
+			}
+			break;
 		}
 
 		// Don't continue tile loop for depots
@@ -2475,33 +2503,33 @@ public class Rail extends RailTables {
 					if (!IsTileType(tile + TileDiffXY(0, -1), TileTypes.MP_RAILWAY) ||
 							!IsTileOwner(tile + TileDiffXY(0, -1), owner) ||
 							(_m[tile + TileDiffXY(0, -1)].m5 == TRACK_BIT_UPPER || _m[tile + TileDiffXY(0, -1)].m5 == TRACK_BIT_LEFT))
-								new_ground = RAIL_GROUND_FENCE_NW;
+						new_ground = RAIL_GROUND_FENCE_NW;
 				}
 
 				if ( (!(rail&(TRACK_BIT_DIAG2|TRACK_BIT_LOWER|TRACK_BIT_RIGHT)) && (rail&TRACK_BIT_DIAG1)) || rail==(TRACK_BIT_UPPER|TRACK_BIT_LEFT)) {
 					if (!IsTileType(tile + TileDiffXY(0, 1), TileTypes.MP_RAILWAY) ||
 							!IsTileOwner(tile + TileDiffXY(0, 1), owner) ||
 							(_m[tile + TileDiffXY(0, 1)].m5 == TRACK_BIT_LOWER || _m[tile + TileDiffXY(0, 1)].m5 == TRACK_BIT_RIGHT))
-								new_ground = (new_ground == RAIL_GROUND_FENCE_NW) ? RAIL_GROUND_FENCE_SENW : RAIL_GROUND_FENCE_SE;
+						new_ground = (new_ground == RAIL_GROUND_FENCE_NW) ? RAIL_GROUND_FENCE_SENW : RAIL_GROUND_FENCE_SE;
 				}
 
 				if ( (!(rail&(TRACK_BIT_DIAG1|TRACK_BIT_UPPER|TRACK_BIT_RIGHT)) && (rail&TRACK_BIT_DIAG2)) || rail==(TRACK_BIT_LOWER|TRACK_BIT_LEFT)) {
 					if (!IsTileType(tile + TileDiffXY(-1, 0), TileTypes.MP_RAILWAY) ||
 							!IsTileOwner(tile + TileDiffXY(-1, 0), owner) ||
 							(_m[tile + TileDiffXY(-1, 0)].m5 == TRACK_BIT_UPPER || _m[tile + TileDiffXY(-1, 0)].m5 == TRACK_BIT_RIGHT))
-								new_ground = RAIL_GROUND_FENCE_NE;
+						new_ground = RAIL_GROUND_FENCE_NE;
 				}
 
 				if ( (!(rail&(TRACK_BIT_DIAG1|TRACK_BIT_LOWER|TRACK_BIT_LEFT)) && (rail&TRACK_BIT_DIAG2)) || rail==(TRACK_BIT_UPPER|TRACK_BIT_RIGHT)) {
 					if (!IsTileType(tile + TileDiffXY(1, 0), TileTypes.MP_RAILWAY) ||
 							!IsTileOwner(tile + TileDiffXY(1, 0), owner) ||
 							(_m[tile + TileDiffXY(1, 0)].m5 == TRACK_BIT_LOWER || _m[tile + TileDiffXY(1, 0)].m5 == TRACK_BIT_LEFT))
-								new_ground = (new_ground == RAIL_GROUND_FENCE_NE) ? RAIL_GROUND_FENCE_NESW : RAIL_GROUND_FENCE_SW;
+						new_ground = (new_ground == RAIL_GROUND_FENCE_NE) ? RAIL_GROUND_FENCE_NESW : RAIL_GROUND_FENCE_SW;
 				}
 			}
 		}
 
-	modify_me:;
+		modify_me:;
 		/* tile changed? */
 		if (old_ground != new_ground) {
 			if( 0 != (tile.getMap().m5 & RAIL_TYPE_SPECIAL)) {
@@ -2529,7 +2557,7 @@ public class Rail extends RailTables {
 			ret = (m5 | (m5 << 8)) & 0x3F3F;
 			if (!(m5 & RAIL_TYPE_SIGNALS)) {
 				if ( (ret & 0xFF) == 3)
-				/* Diagonal crossing? */
+					/* Diagonal crossing? */
 					ret |= 0x40;
 			} else {
 				/* has_signals */
@@ -2561,43 +2589,45 @@ public class Rail extends RailTables {
 
 	static void ClickTile_Track(TileIndex tile)
 	{
-		if (IsTileDepotType(tile, Global.TRANSPORT_RAIL)) {
+		if (tile.IsTileDepotType(Global.TRANSPORT_RAIL)) {
 			ShowTrainDepotWindow(tile);
-		} else if (IsRailWaypoint(tile)) {
+		} else if (tile.IsRailWaypoint()) {
 			ShowRenameWaypointWindow(GetWaypointByTile(tile));
 		}
 	}
 
+
+	private static final /*StringID*/ int signal_type[] = {
+			Str.STR_RAILROAD_TRACK_WITH_NORMAL_SIGNALS,
+			Str.STR_RAILROAD_TRACK_WITH_PRESIGNALS,
+			Str.STR_RAILROAD_TRACK_WITH_EXITSIGNALS,
+			Str.STR_RAILROAD_TRACK_WITH_COMBOSIGNALS,
+			Str.STR_RAILROAD_TRACK_WITH_PBSSIGNALS,
+			Str.STR_NULL, Str.STR_NULL
+	};
+
 	static TileDesc GetTileDesc_Track(TileIndex tile)
 	{
 		TileDesc td = new TileDesc();
-		td.owner = GetTileOwner(tile);
+		td.owner = tile.GetTileOwner().id;
 		switch (GetRailTileType(tile)) {
-			case RAIL_TYPE_NORMAL:
-				td.str = Str.STR_1021_RAILROAD_TRACK;
-				break;
+		case RAIL_TYPE_NORMAL:
+			td.str = Str.STR_1021_RAILROAD_TRACK;
+			break;
 
-			case RAIL_TYPE_SIGNALS: {
-				final StringID signal_type[7] = {
-					Str.STR_RAILROAD_TRACK_WITH_NORMAL_SIGNALS,
-					Str.STR_RAILROAD_TRACK_WITH_PRESIGNALS,
-					Str.STR_RAILROAD_TRACK_WITH_EXITSIGNALS,
-					Str.STR_RAILROAD_TRACK_WITH_COMBOSIGNALS,
-					Str.STR_RAILROAD_TRACK_WITH_PBSSIGNALS,
-					Str.STR_NULL, Str.STR_NULL
-				};
+		case RAIL_TYPE_SIGNALS: {
 
-				td.str = signal_type[BitOps.GB(tile.getMap().m4, 0, 3)];
-				break;
-			}
-
-			case RAIL_TYPE_DEPOT_WAYPOINT:
-			default:
-				td.str = ((tile.getMap().m5 & RAIL_SUBTYPE_MASK) == RAIL_SUBTYPE_DEPOT) ?
-					Str.STR_1023_RAILROAD_TRAIN_DEPOT : Str.STR_LANDINFO_WAYPOINT;
-				break;
+			td.str = signal_type[BitOps.GB(tile.getMap().m4, 0, 3)];
+			break;
 		}
-		
+
+		case RAIL_TYPE_DEPOT_WAYPOINT:
+		default:
+			td.str = ((tile.getMap().m5 & RAIL_SUBTYPE_MASK) == RAIL_SUBTYPE_DEPOT) ?
+					Str.STR_1023_RAILROAD_TRAIN_DEPOT : Str.STR_LANDINFO_WAYPOINT;
+			break;
+		}
+
 		return td;
 	}
 
@@ -2631,10 +2661,10 @@ public class Rail extends RailTables {
 		length = v.rail.cached_veh_length;
 
 		fract_coord_leave =
-			((_fractcoords_enter[dir] & 0x0F) +				// x
-				(length + 1) * _deltacoord_leaveoffset[dir]) +
-			(((_fractcoords_enter[dir] >> 4) +				// y
-				((length + 1) * _deltacoord_leaveoffset[dir+4])) << 4);
+				((_fractcoords_enter[dir] & 0x0F) +				// x
+						(length + 1) * _deltacoord_leaveoffset[dir]) +
+				(((_fractcoords_enter[dir] >> 4) +				// y
+						((length + 1) * _deltacoord_leaveoffset[dir+4])) << 4);
 
 		fract_coord = (x & 0xF) + ((y & 0xF) << 4);
 
@@ -2646,14 +2676,14 @@ public class Rail extends RailTables {
 				/* enter the depot */
 				if (v.next == null)
 					PBSClearTrack(v.tile, FIND_FIRST_BIT(v.rail.track));
-				
+
 				v.rail.track = 0x80;
 				v.vehstatus |= VS_HIDDEN; /* hide it */
 				v.direction ^= 4;
-				
+
 				if (v.next == null)
 					TrainEnterDepot(v, tile);
-				
+
 				v.tile = tile;
 				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, tile);
 				return 4;
@@ -2678,62 +2708,21 @@ public class Rail extends RailTables {
 	}
 
 	final TileTypeProcs _tile_type_rail_procs = new TileTypeProcs(
-		Rail::DrawTile_Track,						/* draw_tile_proc */
-		Rail::GetSlopeZ_Track,					/* get_slope_z_proc */
-		Rail::ClearTile_Track,					/* clear_tile_proc */
-		Rail::GetAcceptedCargo_Track,		/* get_accepted_cargo_proc */
-		Rail::GetTileDesc_Track,				/* get_tile_desc_proc */
-		Rail::GetTileTrackStatus_Track,	/* get_tile_track_status_proc */
-		Rail::ClickTile_Track,					/* click_tile_proc */
-		Rail::AnimateTile_Track,				/* animate_tile_proc */
-		Rail::TileLoop_Track,						/* tile_loop_clear */
-		Rail::ChangeTileOwner_Track,		/* change_tile_owner_clear */
-		null,											/* get_produced_cargo_proc */
-		Rail::VehicleEnter_Track,				/* vehicle_enter_tile_proc */
-		null,											/* vehicle_leave_tile_proc */
-		Rail::GetSlopeTileh_Track			/* get_slope_tileh_proc */
-	);
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
-	
-	
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/* $Id: rail_gui.c 3270 2005-12-07 15:48:52Z peter1138 $ */
-
-	/** @file rail_gui.c File for dealing with rail finalruction user interface */
-
-
-
-
-
-
+			Rail::DrawTile_Track,						/* draw_tile_proc */
+			Rail::GetSlopeZ_Track,					/* get_slope_z_proc */
+			Rail::ClearTile_Track,					/* clear_tile_proc */
+			Rail::GetAcceptedCargo_Track,		/* get_accepted_cargo_proc */
+			Rail::GetTileDesc_Track,				/* get_tile_desc_proc */
+			Rail::GetTileTrackStatus_Track,	/* get_tile_track_status_proc */
+			Rail::ClickTile_Track,					/* click_tile_proc */
+			Rail::AnimateTile_Track,				/* animate_tile_proc */
+			Rail::TileLoop_Track,						/* tile_loop_clear */
+			Rail::ChangeTileOwner_Track,		/* change_tile_owner_clear */
+			null,											/* get_produced_cargo_proc */
+			Rail::VehicleEnter_Track,				/* vehicle_enter_tile_proc */
+			null,											/* vehicle_leave_tile_proc */
+			Rail::GetSlopeTileh_Track			/* get_slope_tileh_proc */
+			);
 
 
 
@@ -2750,7 +2739,7 @@ public class Rail extends RailTables {
 
 	//static RailType _cur_railtype;
 	static int _cur_railtype;
-	
+
 	static boolean _remove_button_clicked;
 	static byte _build_depot_direction;
 	static byte _waypoint_count = 1;
@@ -2758,17 +2747,17 @@ public class Rail extends RailTables {
 	static byte _cur_signal_type;
 	static byte _cur_presig_type;
 	static boolean _cur_autosig_compl;
-	 
+
 	//static final StringID _presig_types_dropdown[] = 
 	static final int _presig_types_dropdown[] = 
 		{
-		Str.STR_SIGNAL_NORMAL,
-		Str.STR_SIGNAL_ENTRANCE,
-		Str.STR_SIGNAL_EXIT,
-		Str.STR_SIGNAL_COMBO,
-		Str.STR_SIGNAL_PBS,
-		Str.INVALID_STRING_ID.id
-	};
+				Str.STR_SIGNAL_NORMAL,
+				Str.STR_SIGNAL_ENTRANCE,
+				Str.STR_SIGNAL_EXIT,
+				Str.STR_SIGNAL_COMBO,
+				Str.STR_SIGNAL_PBS,
+				Str.INVALID_STRING_ID.id
+		};
 
 	static class _Railstation {
 		byte orientation;
@@ -2785,45 +2774,45 @@ public class Rail extends RailTables {
 	//static void ShowStationBuilder();
 	//static void ShowSignalBuilder();
 
-	void CcPlaySound1E(boolean success, TileIndex tile, int p1, int p2)
+	static void CcPlaySound1E(boolean success, TileIndex tile, int p1, int p2)
 	{
 		//if (success) SndPlayTileFx(SND_20_SPLAT_2, tile);
 	}
 
 	static void GenericPlaceRail(TileIndex tile, int cmd)
 	{
-		Cmd.DoCommandP(tile, _cur_railtype, cmd, CcPlaySound1E,
-			_remove_button_clicked ?
-			Cmd.CMD_REMOVE_SINGLE_RAIL | Cmd.CMD_MSG(Str.STR_1012_CAN_T_REMOVE_RAILROAD_TRACK) | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER :
-			Cmd.CMD_BUILD_SINGLE_RAIL | Cmd.CMD_MSG(Str.STR_1011_CAN_T_BUILD_RAILROAD_TRACK) | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER
-		);
+		Cmd.DoCommandP(tile, _cur_railtype, cmd, Rail::CcPlaySound1E,
+				_remove_button_clicked ?
+						Cmd.CMD_REMOVE_SINGLE_RAIL | Cmd.CMD_MSG(Str.STR_1012_CAN_T_REMOVE_RAILROAD_TRACK) | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER :
+							Cmd.CMD_BUILD_SINGLE_RAIL | Cmd.CMD_MSG(Str.STR_1011_CAN_T_BUILD_RAILROAD_TRACK) | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER
+				);
 	}
 
 	static void PlaceRail_N(TileIndex tile)
 	{
-		int cmd = _tile_fract_coords.x > _tile_fract_coords.y ? 4 : 5;
+		int cmd = Global._tile_fract_coords.x > Global._tile_fract_coords.y ? 4 : 5;
 		GenericPlaceRail(tile, cmd);
 	}
 
 	static void PlaceRail_NE(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, ViewPort.VPM_FIX_Y);
+		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_FIX_Y);
 	}
 
 	static void PlaceRail_E(TileIndex tile)
 	{
-		int cmd = _tile_fract_coords.x + _tile_fract_coords.y <= 15 ? 2 : 3;
+		int cmd = Global._tile_fract_coords.x + Global._tile_fract_coords.y <= 15 ? 2 : 3;
 		GenericPlaceRail(tile, cmd);
 	}
 
 	static void PlaceRail_NW(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, ViewPort.VPM_FIX_X);
+		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_FIX_X);
 	}
 
 	static void PlaceRail_AutoRail(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, ViewPort.VPM_RAILDIRS);
+		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_RAILDIRS);
 	}
 
 	static void PlaceExtraDepotRail(TileIndex tile, int extra)
@@ -2837,9 +2826,9 @@ public class Rail extends RailTables {
 	}
 
 	static final int _place_depot_extra[] = {
-		0x604,		0x2102,		0x1202,		0x505,
-		0x2400,		0x2801,		0x1800,		0x1401,
-		0x2203,		0x904,		0x0A05,		0x1103,
+			0x604,		0x2102,		0x1202,		0x505,
+			0x2400,		0x2801,		0x1800,		0x1401,
+			0x2203,		0x904,		0x0A05,		0x1103,
 	};
 
 
@@ -2848,8 +2837,8 @@ public class Rail extends RailTables {
 		if (success) {
 			int dir = p2;
 
-			SndPlayTileFx(SND_20_SPLAT_2, tile);
-			ResetObjectToPlace();
+			//SndPlayTileFx(SND_20_SPLAT_2, tile);
+			ViewPort.ResetObjectToPlace();
 
 			tile += TileOffsByDir(dir);
 
@@ -2863,8 +2852,8 @@ public class Rail extends RailTables {
 
 	static void PlaceRail_Depot(TileIndex tile)
 	{
-		Cmd.DoCommandP(tile, _cur_railtype, _build_depot_direction, CcRailDepot,
-			Cmd.CMD_BUILD_TRAIN_DEPOT | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_100E_CAN_T_BUILD_TRAIN_DEPOT));
+		Cmd.DoCommandP(tile, _cur_railtype, _build_depot_direction, Rail::CcRailDepot,
+				Cmd.CMD_BUILD_TRAIN_DEPOT | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_100E_CAN_T_BUILD_TRAIN_DEPOT));
 	}
 
 	static void PlaceRail_Waypoint(TileIndex tile)
@@ -2879,8 +2868,8 @@ public class Rail extends RailTables {
 	void CcStation(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
-			SndPlayTileFx(SND_20_SPLAT_2, tile);
-			ResetObjectToPlace();
+			//SndPlayTileFx(SND_20_SPLAT_2, tile);
+			ViewPort.ResetObjectToPlace();
 		}
 	}
 
@@ -2889,12 +2878,12 @@ public class Rail extends RailTables {
 		if(_remove_button_clicked)
 			Cmd.DoCommandP(tile, 0, 0, 0/*CcPlaySound1E*/, Cmd.CMD_REMOVE_FROM_RAILROAD_STATION | Cmd.CMD_MSG(Str.STR_CANT_REMOVE_PART_OF_STATION));
 		else if (_railstation.dragdrop) {
-			VpStartPlaceSizing(tile, ViewPort.VPM_X_AND_Y_LIMITED);
+			ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_X_AND_Y_LIMITED);
 			VpSetPlaceSizingLimit(Global._patches.station_spread);
 		} else {
 			// TODO: Custom station selector GUI. Now we just try using first custom station
 			// (and fall back to normal stations if it isn't available).
-			Cmd.DoCommandP(tile, _railstation.orientation | (_railstation.numtracks<<8) | (_railstation.platlength<<16),_cur_railtype|1<<4, CcStation,
+			Cmd.DoCommandP(tile, _railstation.orientation | (_railstation.numtracks<<8) | (_railstation.platlength<<16),_cur_railtype|1<<4, Rail::CcStation,
 					Cmd.CMD_BUILD_RAILROAD_STATION | Cmd.CMD_NO_WATER | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_100F_CAN_T_BUILD_RAILROAD_STATION));
 		}
 	}
@@ -2904,100 +2893,100 @@ public class Rail extends RailTables {
 		int trackstat;
 		int i;
 
-		trackstat = (byte)GetTileTrackStatus(tile, Global.TRANSPORT_RAIL);
+		trackstat = (byte)tile.GetTileTrackStatus(Global.TRANSPORT_RAIL);
 
-		if ((trackstat & 0x30)) // N-S direction
-			trackstat = (_tile_fract_coords.x <= _tile_fract_coords.y) ? 0x20 : 0x10;
+		if(0 != ((trackstat & 0x30))) // N-S direction
+			trackstat = (Global._tile_fract_coords.x <= Global._tile_fract_coords.y) ? 0x20 : 0x10;
 
-		if ((trackstat & 0x0C)) // E-W direction
-			trackstat = (_tile_fract_coords.x + _tile_fract_coords.y <= 15) ? 4 : 8;
+		if(0 !=  ((trackstat & 0x0C))) // E-W direction
+			trackstat = (Global._tile_fract_coords.x + Global._tile_fract_coords.y <= 15) ? 4 : 8;
 
 		// Lookup the bit index
 		i = 0;
 		if (trackstat != 0) {
-			for (; !(trackstat & 1); trackstat >>= 1) i++;
+			for (; 0 == (trackstat & 1); trackstat >>= 1) i++;
 		}
 
 		if (!_remove_button_clicked) {
-			Cmd.DoCommandP(tile, i + (_ctrl_pressed ? 8 : 0) +
-			                 (!BitOps.HASBIT(_cur_signal_type, 0) != !_ctrl_pressed ? 16 : 0) +
-			                 (_cur_presig_type << 5) ,
-			                 0, CcPlaySound1E, Cmd.CMD_BUILD_SIGNALS | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_1010_CAN_T_BUILD_SIGNALS_HERE));
+			Cmd.DoCommandP(tile, i + (Global._ctrl_pressed ? 8 : 0) +
+					(!BitOps.HASBIT(_cur_signal_type, 0) != !Global._ctrl_pressed ? 16 : 0) +
+					(_cur_presig_type << 5) ,
+					0, Rail::CcPlaySound1E, Cmd.CMD_BUILD_SIGNALS | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_1010_CAN_T_BUILD_SIGNALS_HERE));
 		} else {
-			Cmd.DoCommandP(tile, i, 0, CcPlaySound1E,
-				Cmd.CMD_REMOVE_SIGNALS | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_1013_CAN_T_REMOVE_SIGNALS_FROM));
+			Cmd.DoCommandP(tile, i, 0, Rail::CcPlaySound1E,
+					Cmd.CMD_REMOVE_SIGNALS | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_1013_CAN_T_REMOVE_SIGNALS_FROM));
 		}
 	}
 
 	static void PlaceRail_Bridge(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, ViewPort.VPM_X_OR_Y);
+		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_X_OR_Y);
 	}
 
 	void CcBuildRailTunnel(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			//SndPlayTileFx(SND_20_SPLAT_2, tile);
-			ResetObjectToPlace();
+			ViewPort.ResetObjectToPlace();
 		} else {
-			SetRedErrorSquare(_build_tunnel_endtile);
+			ViewPort.SetRedErrorSquare(Global._build_tunnel_endtile);
 		}
 	}
 
 	static void PlaceRail_Tunnel(TileIndex tile)
 	{
-		Cmd.DoCommandP(tile, _cur_railtype, 0, CcBuildRailTunnel,
-			Cmd.CMD_BUILD_TUNNEL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_5016_CAN_T_BUILD_TUNNEL_HERE));
+		Cmd.DoCommandP(tile, _cur_railtype, 0, Rail::CcBuildRailTunnel,
+				Cmd.CMD_BUILD_TUNNEL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_5016_CAN_T_BUILD_TUNNEL_HERE));
 	}
 
 	void PlaceProc_BuyLand(TileIndex tile)
 	{
-		Cmd.DoCommandP(tile, 0, 0, 0/*CcPlaySound1E*/, Cmd.CMD_PURCHASE_LAND_AREA | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_5806_CAN_T_PURCHASE_THIS_LAND));
+		Cmd.DoCommandP(tile, 0, 0, CcPlaySound1E, Cmd.CMD_PURCHASE_LAND_AREA | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_5806_CAN_T_PURCHASE_THIS_LAND));
 	}
 
 	static void PlaceRail_ConvertRail(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, ViewPort.VPM_X_AND_Y | GUI_PlaceProc_ConvertRailArea);
+		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_X_AND_Y | GUI_PlaceProc_ConvertRailArea);
 	}
 
 	static void PlaceRail_AutoSignals(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, ViewPort.VPM_SIGNALDIRS);
+		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_SIGNALDIRS);
 	}
 
 	static void BuildRailClick_N(Window w)
 	{
-		HandlePlacePushButton(w, 4, GetRailTypeInfo(_cur_railtype).cursor.rail_ns, 1, Rail::PlaceRail_N);
+		Gui.HandlePlacePushButton(w, 4, GetRailTypeInfo(_cur_railtype).cursor.rail_ns, 1, Rail::PlaceRail_N);
 	}
 
 	static void BuildRailClick_NE(Window w)
 	{
-		HandlePlacePushButton(w, 5, GetRailTypeInfo(_cur_railtype).cursor.rail_swne, 1, Rail::PlaceRail_NE);
+		Gui.HandlePlacePushButton(w, 5, GetRailTypeInfo(_cur_railtype).cursor.rail_swne, 1, Rail::PlaceRail_NE);
 	}
 
 	static void BuildRailClick_E(Window w)
 	{
-		HandlePlacePushButton(w, 6, GetRailTypeInfo(_cur_railtype).cursor.rail_ew, 1, Rail::PlaceRail_E);
+		Gui.HandlePlacePushButton(w, 6, GetRailTypeInfo(_cur_railtype).cursor.rail_ew, 1, Rail::PlaceRail_E);
 	}
 
 	static void BuildRailClick_NW(Window w)
 	{
-		HandlePlacePushButton(w, 7, GetRailTypeInfo(_cur_railtype).cursor.rail_nwse, 1, Rail::PlaceRail_NW);
+		Gui.HandlePlacePushButton(w, 7, GetRailTypeInfo(_cur_railtype).cursor.rail_nwse, 1, Rail::PlaceRail_NW);
 	}
 
 	static void BuildRailClick_AutoRail(Window w)
 	{
-		HandlePlacePushButton(w, 8, GetRailTypeInfo(_cur_railtype).cursor.autorail, VHM_RAIL, Rail::PlaceRail_AutoRail);
+		Gui.HandlePlacePushButton(w, 8, GetRailTypeInfo(_cur_railtype).cursor.autorail, VHM_RAIL, Rail::PlaceRail_AutoRail);
 	}
 
 	static void BuildRailClick_Demolish(Window w)
 	{
-		HandlePlacePushButton(w, 9, Sprites.ANIMCURSOR_DEMOLISH, 1, Rail::PlaceProc_DemolishArea);
+		Gui.HandlePlacePushButton(w, 9, Sprites.ANIMCURSOR_DEMOLISH, 1, Rail::PlaceProc_DemolishArea);
 	}
 
 	static void BuildRailClick_Depot(Window w)
 	{
-		if (HandlePlacePushButton(w, 10, GetRailTypeInfo(_cur_railtype).cursor.depot, 1, Rail::PlaceRail_Depot)) {
+		if (Gui.HandlePlacePushButton(w, 10, GetRailTypeInfo(_cur_railtype).cursor.depot, 1, Rail::PlaceRail_Depot)) {
 			ShowBuildTrainDepotPicker();
 		}
 	}
@@ -3005,7 +2994,7 @@ public class Rail extends RailTables {
 	static void BuildRailClick_Waypoint(Window w)
 	{
 		_waypoint_count = GetNumCustomStations(STAT_CLASS_WAYP);
-		if (HandlePlacePushButton(w, 11, Sprite.SPR_CURSOR_WAYPOINT, 1, Rail::PlaceRail_Waypoint) &&
+		if (Gui.HandlePlacePushButton(w, 11, Sprite.SPR_CURSOR_WAYPOINT, 1, Rail::PlaceRail_Waypoint) &&
 				_waypoint_count > 1) {
 			ShowBuildWaypointPicker();
 		}
@@ -3013,23 +3002,23 @@ public class Rail extends RailTables {
 
 	static void BuildRailClick_Station(Window w)
 	{
-		if (HandlePlacePushButton(w, 12, Sprite.SPR_CURSOR_RAIL_STATION, 1, Rail::PlaceRail_Station)) ShowStationBuilder();
+		if (Gui.HandlePlacePushButton(w, 12, Sprite.SPR_CURSOR_RAIL_STATION, 1, Rail::PlaceRail_Station)) ShowStationBuilder();
 	}
 
 	static void BuildRailClick_AutoSignals(Window w)
 	{
-		if (HandlePlacePushButton(w, 13, Sprites.ANIMCURSOR_BUILDSIGNALS, ViewPort.VHM_RECT, Rail::PlaceRail_AutoSignals))
+		if (Gui.HandlePlacePushButton(w, 13, Sprites.ANIMCURSOR_BUILDSIGNALS, ViewPort.VHM_RECT, Rail::PlaceRail_AutoSignals))
 			ShowSignalBuilder();
 	}
 
 	static void BuildRailClick_Bridge(Window w)
 	{
-		HandlePlacePushButton(w, 14, Sprite.SPR_CURSOR_BRIDGE, 1, Rail::PlaceRail_Bridge);
+		Gui.HandlePlacePushButton(w, 14, Sprite.SPR_CURSOR_BRIDGE, 1, Rail::PlaceRail_Bridge);
 	}
 
 	static void BuildRailClick_Tunnel(Window w)
 	{
-		HandlePlacePushButton(w, 15, GetRailTypeInfo(_cur_railtype).cursor.tunnel, 3, Rail::PlaceRail_Tunnel);
+		Gui.HandlePlacePushButton(w, 15, GetRailTypeInfo(_cur_railtype).cursor.tunnel, 3, Rail::PlaceRail_Tunnel);
 	}
 
 	static void BuildRailClick_Remove(Window w)
@@ -3040,12 +3029,12 @@ public class Rail extends RailTables {
 
 		w.click_state = BitOps.RETTOGGLEBIT(w.click_state, 16);
 		_remove_button_clicked = BitOps.HASBIT(w.click_state, 16);
-		SetSelectionRed(BitOps.HASBIT(w.click_state, 16));
+		ViewPort.SetSelectionRed(BitOps.HASBIT(w.click_state, 16));
 
 		// handle station builder
 		if (BitOps.HASBIT(w.click_state, 16)) {
 			if (_remove_button_clicked) {
-				SetTileSelectSize(1, 1);
+				ViewPort.SetTileSelectSize(1, 1);
 			} else {
 				Window.BringWindowToFrontById(Window.WC_BUILD_STATION, 0);
 			}
@@ -3054,21 +3043,21 @@ public class Rail extends RailTables {
 
 	static void BuildRailClick_Convert(Window w)
 	{
-		HandlePlacePushButton(w, 17, GetRailTypeInfo(_cur_railtype).cursor.convert, 1, PlaceRail_ConvertRail);
+		Gui.HandlePlacePushButton(w, 17, GetRailTypeInfo(_cur_railtype).cursor.convert, 1, PlaceRail_ConvertRail);
 	}
 
 	static void BuildRailClick_Landscaping(Window w)
 	{
-		ShowTerraformToolbar();
+		Terraform.ShowTerraformToolbar();
 	}
 
 	static void DoRailroadTrack(int mode)
 	{
-		Cmd.DoCommandP(TileIndex.TileVirtXY(_thd.selstart.x, _thd.selstart.y), TileIndex.TileVirtXY(_thd.selend.x, _thd.selend.y), _cur_railtype | (mode << 4), null,
-			_remove_button_clicked ?
-			Cmd.CMD_REMOVE_RAILROAD_TRACK | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1012_CAN_T_REMOVE_RAILROAD_TRACK) :
-			Cmd.CMD_BUILD_RAILROAD_TRACK  | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1011_CAN_T_BUILD_RAILROAD_TRACK)
-		);
+		Cmd.DoCommandP(TileIndex.TileVirtXY(_thd.selstart.x, _thd.selstart.y), TileIndex.TileVirtXY(_thd.selend.x, _thd.selend.y).getTile(), _cur_railtype | (mode << 4), null,
+				_remove_button_clicked ?
+						Cmd.CMD_REMOVE_RAILROAD_TRACK | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1012_CAN_T_REMOVE_RAILROAD_TRACK) :
+							Cmd.CMD_BUILD_RAILROAD_TRACK  | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1011_CAN_T_BUILD_RAILROAD_TRACK)
+				);
 	}
 
 	static void HandleAutodirPlacement()
@@ -3076,7 +3065,7 @@ public class Rail extends RailTables {
 		TileHighlightData thd = _thd;
 		int trackstat = thd.drawstyle & 0xF; // 0..5
 
-		if (thd.drawstyle & HT_RAIL) { // one tile case
+		if(0!=(thd.drawstyle & ViewPort.HT_RAIL)) { // one tile case
 			GenericPlaceRail(TileIndex.TileVirtXY(thd.selend.x, thd.selend.y), trackstat);
 			return;
 		}
@@ -3089,7 +3078,7 @@ public class Rail extends RailTables {
 		TileHighlightData thd = _thd;
 		byte trackstat = thd.drawstyle & 0xF; // 0..5
 
-		if (thd.drawstyle == HT_RECT) { // one tile case
+		if (thd.drawstyle == ViewPort.HT_RECT) { // one tile case
 			GenericPlaceSignals(TileIndex.TileVirtXY(thd.selend.x, thd.selend.y));
 			return;
 		}
@@ -3097,135 +3086,141 @@ public class Rail extends RailTables {
 		// Global._patches.drag_signals_density is given as a parameter such that each user in a network
 		// game can specify his/her own signal density
 		Cmd.DoCommandP(
-			TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y),
-			TileIndex.TileVirtXY(thd.selend.x, thd.selend.y),
-			(_ctrl_pressed ? 1 << 3 : 0) | (trackstat << 4) | (Global._patches.drag_signals_density << 24),
-			CcPlaySound1E,
-			_remove_button_clicked ?
-				Cmd.CMD_REMOVE_SIGNAL_TRACK | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1013_CAN_T_REMOVE_SIGNALS_FROM) :
-				Cmd.CMD_BUILD_SIGNAL_TRACK  | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1010_CAN_T_BUILD_SIGNALS_HERE)
-		);
+				TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y),
+				TileIndex.TileVirtXY(thd.selend.x, thd.selend.y),
+				(Global._ctrl_pressed ? 1 << 3 : 0) | (trackstat << 4) | (Global._patches.drag_signals_density << 24),
+				Rail::CcPlaySound1E,
+				_remove_button_clicked ?
+						(Cmd.CMD_REMOVE_SIGNAL_TRACK | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1013_CAN_T_REMOVE_SIGNALS_FROM)) 
+						:
+							(Cmd.CMD_BUILD_SIGNAL_TRACK  | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1010_CAN_T_BUILD_SIGNALS_HERE))
+				);
+
+
+		/* TODO What the hell is this?
+
 		(!BitOps.HASBIT(_cur_signal_type, 0) != !_ctrl_pressed ? 1 << 3 : 0) | 
 		(trackstat << 4) |
 		(Global._patches.drag_signals_density << 24) | 
 		(_cur_autosig_compl ? 2 : 0),
-		CcPlaySound1E,
+		Rail::CcPlaySound1E,
 		(_remove_button_clicked ? Cmd.CMD_REMOVE_SIGNAL_TRACK | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | 
 		Cmd.CMD_MSG(Str.STR_1013_CAN_T_REMOVE_SIGNALS_FROM) :
 	        Cmd.CMD_BUILD_SIGNAL_TRACK  | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1010_CAN_T_BUILD_SIGNALS_HERE) );
+		 */
 	}
 
 
 	//typedef void OnButtonClick(Window w);
 
 	static final OnButtonClick _build_railroad_button_proc[] = {
-		Rail::BuildRailClick_N,
-		Rail::BuildRailClick_NE,
-		Rail::BuildRailClick_E,
-		Rail::BuildRailClick_NW,
-		Rail::BuildRailClick_AutoRail,
-		Rail::BuildRailClick_Demolish,
-		Rail::BuildRailClick_Depot,
-		Rail::BuildRailClick_Waypoint,
-		Rail::BuildRailClick_Station,
-		Rail::BuildRailClick_AutoSignals,
-		Rail::BuildRailClick_Bridge,
-		Rail::BuildRailClick_Tunnel,
-		Rail::BuildRailClick_Remove,
-		Rail::BuildRailClick_Convert,
-		Rail::BuildRailClick_Landscaping,
+			Rail::BuildRailClick_N,
+			Rail::BuildRailClick_NE,
+			Rail::BuildRailClick_E,
+			Rail::BuildRailClick_NW,
+			Rail::BuildRailClick_AutoRail,
+			Rail::BuildRailClick_Demolish,
+			Rail::BuildRailClick_Depot,
+			Rail::BuildRailClick_Waypoint,
+			Rail::BuildRailClick_Station,
+			Rail::BuildRailClick_AutoSignals,
+			Rail::BuildRailClick_Bridge,
+			Rail::BuildRailClick_Tunnel,
+			Rail::BuildRailClick_Remove,
+			Rail::BuildRailClick_Convert,
+			Rail::BuildRailClick_Landscaping,
 	};
 
 	static final int _rail_keycodes[] = {
-		'1',
-		'2',
-		'3',
-		'4',
-		'5',
-		'6',
-		'7', // depot
-		'8', // waypoint
-		'9', // station
-		'S', // signals
-		'B', // bridge
-		'T', // tunnel
-		'R', // remove
-		'C', // convert rail
-		'L', // landscaping
+			'1',
+			'2',
+			'3',
+			'4',
+			'5',
+			'6',
+			'7', // depot
+			'8', // waypoint
+			'9', // station
+			'S', // signals
+			'B', // bridge
+			'T', // tunnel
+			'R', // remove
+			'C', // convert rail
+			'L', // landscaping
 	};
 
 
 	static void BuildRailToolbWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 			w.disabled_state &= ~(1 << 16);
-			if (!(w.click_state & ((1<<4)|(1<<5)|(1<<6)|(1<<7)|(1<<8)|(1<<11)|(1<<12)|(1<<13)))) {
+			if (0 == (w.click_state & ((1<<4)|(1<<5)|(1<<6)|(1<<7)|(1<<8)|(1<<11)|(1<<12)|(1<<13)))) {
 				w.disabled_state |= (1 << 16);
 				w.click_state &= ~(1<<16);
 			}
 			w.DrawWindowWidgets();
 			break;
 
-		case WindowEvents.WE_CLICK:
+		case WE_CLICK:
 			if (e.widget >= 4) {
 				_remove_button_clicked = false;
-				_build_railroad_button_proc[e.widget - 4](w);
+				_build_railroad_button_proc[e.widget - 4].accept(w);
 			}
-		break;
+			break;
 
-		case WindowEvents.WE_KEYPRESS: {
+		case WE_KEYPRESS: {
 			int i;
 
-			for (i = 0; i != lengthof(_rail_keycodes); i++) {
-				if (e.keypress.keycode == _rail_keycodes[i]) {
-					e.keypress.cont = false;
+			for (i = 0; i < _rail_keycodes.length; i++) {
+				if (e.keycode == _rail_keycodes[i]) {
+					e.cont = false;
 					_remove_button_clicked = false;
-					_build_railroad_button_proc[i](w);
+					_build_railroad_button_proc[i].accept(w);
 					break;
 				}
 			}
-			MarkTileDirty(_thd.pos.x, _thd.pos.y); // redraw tile selection
+			ViewPort.MarkTileDirty(_thd.pos.x, _thd.pos.y); // redraw tile selection
 			break;
 		}
 
-		case WindowEvents.WE_PLACE_OBJ:
-			_place_proc(e.place.tile);
+		case WE_PLACE_OBJ:
+			Global._place_proc.accept(e.tile);
 			return;
 
-		case WindowEvents.WE_PLACE_DRAG: {
-			VpSelectTilesWithMethod(e.place.pt.x, e.place.pt.y, e.place.userdata & 0xF);
+		case WE_PLACE_DRAG: {
+			ViewPort.VpSelectTilesWithMethod(e.pt.x, e.pt.y, e.userdata & 0xF);
 			return;
 		}
 
-		case WindowEvents.WE_PLACE_MOUSEUP:
+		case WE_PLACE_MOUSEUP:
 			if (e.pt.x != -1) {
-				TileIndex start_tile = e.place.starttile;
-				TileIndex end_tile = e.place.tile;
+				TileIndex start_tile = e.starttile;
+				TileIndex end_tile = e.tile;
 
-				if (e.place.userdata == ViewPort.VPM_X_OR_Y) {
-					ResetObjectToPlace();
-					ShowBuildBridgeWindow(start_tile, end_tile, _cur_railtype);
-				} else if (e.place.userdata == ViewPort.VPM_RAILDIRS) {
+				if (e.userdata == ViewPort.VPM_X_OR_Y) {
+					ViewPort.ResetObjectToPlace();
+					Bridge.ShowBuildBridgeWindow(start_tile, end_tile, _cur_railtype);
+				} else if (e.userdata == ViewPort.VPM_RAILDIRS) {
 					boolean old = _remove_button_clicked;
-					if (_ctrl_pressed) _remove_button_clicked = true;
+					if (Global._ctrl_pressed) _remove_button_clicked = true;
 					HandleAutodirPlacement();
 					_remove_button_clicked = old;
-				} else if (e.place.userdata == ViewPort.VPM_SIGNALDIRS) {
+				} else if (e.userdata == ViewPort.VPM_SIGNALDIRS) {
 					HandleAutoSignalPlacement();
-				} else if ((e.place.userdata & 0xF) == ViewPort.VPM_X_AND_Y) {
-					if (GUIPlaceProcDragXY(e)) break;
+				} else if ((e.userdata & 0xF) == ViewPort.VPM_X_AND_Y) {
+					if (Terraform.GUIPlaceProcDragXY(e)) break;
 
-					if ((e.place.userdata >> 4) == GUI_PlaceProc_ConvertRailArea >> 4)
-						Cmd.DoCommandP(end_tile, start_tile, _cur_railtype, CcPlaySound10, Cmd.CMD_CONVERT_RAIL | Cmd.CMD_MSG(Str.STR_CANT_CONVERT_RAIL));
-				} else if (e.place.userdata == ViewPort.VPM_X_AND_Y_LIMITED) {
+					if ((e.userdata >> 4) == Gui.GUI_PlaceProc_ConvertRailArea >> 4)
+						Cmd.DoCommandP(end_tile, start_tile.tile, _cur_railtype, null/*Rail::CcPlaySound10*/, Cmd.CMD_CONVERT_RAIL | Cmd.CMD_MSG(Str.STR_CANT_CONVERT_RAIL));
+				} else if (e.userdata == ViewPort.VPM_X_AND_Y_LIMITED) {
 					HandleStationPlacement(start_tile, end_tile);
 				} else
-					DoRailroadTrack(e.place.userdata & 1);
+					DoRailroadTrack(e.userdata & 1);
 			}
 			break;
 
-		case WindowEvents.WE_ABORT_PLACE_OBJ:
+		case WE_ABORT_PLACE_OBJ:
 			w.UnclickWindowButtons();
 			w.SetWindowDirty();
 
@@ -3238,14 +3233,14 @@ public class Rail extends RailTables {
 
 			break;
 
-		case WindowEvents.WE_PLACE_PRESIZE: {
-			TileIndex tile = e.place.tile;
+		case WE_PLACE_PRESIZE: {
+			TileIndex tile = e.tile;
 
 			Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_AUTO, Cmd.CMD_BUILD_TUNNEL);
-			VpSetPresizeRange(tile, _build_tunnel_endtile == 0 ? tile : _build_tunnel_endtile);
+			ViewPort.VpSetPresizeRange(tile, Global._build_tunnel_endtile == null ? tile : Global._build_tunnel_endtile);
 		} break;
 
-		case WindowEvents.WE_DESTROY:
+		case WE_DESTROY:
 			if (Global._patches.link_terraform_toolbar) Window.DeleteWindowById(Window.WC_SCEN_LAND_GEN, 0);
 			break;
 		}
@@ -3253,50 +3248,50 @@ public class Rail extends RailTables {
 
 
 	static final Widget _build_rail_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   359,     0,    13, Str.STR_100A_RAILROAD_CONSTRUCTION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7,   360,   371,     0,    13, 0x0,     Str.STR_STICKY_BUTTON),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   359,     0,    13, Str.STR_100A_RAILROAD_CONSTRUCTION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7,   360,   371,     0,    13, 0x0,     Str.STR_STICKY_BUTTON),
 
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   110,   113,    14,    35, 0x0,			Str.STR_NULL),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   110,   113,    14,    35, 0x0,			Str.STR_NULL),
 
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    0,     21,    14,    35, 0x4E3,		Str.STR_1018_BUILD_RAILROAD_TRACK),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    22,    43,    14,    35, 0x4E4,		Str.STR_1018_BUILD_RAILROAD_TRACK),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    44,    65,    14,    35, 0x4E5,		Str.STR_1018_BUILD_RAILROAD_TRACK),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    66,    87,    14,    35, 0x4E6,		Str.STR_1018_BUILD_RAILROAD_TRACK),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    88,   109,    14,    35, Sprite.SPR_IMG_AUTORAIL, Str.STR_BUILD_AUTORAIL_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    0,     21,    14,    35, 0x4E3,		Str.STR_1018_BUILD_RAILROAD_TRACK),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    22,    43,    14,    35, 0x4E4,		Str.STR_1018_BUILD_RAILROAD_TRACK),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    44,    65,    14,    35, 0x4E5,		Str.STR_1018_BUILD_RAILROAD_TRACK),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    66,    87,    14,    35, 0x4E6,		Str.STR_1018_BUILD_RAILROAD_TRACK),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    88,   109,    14,    35, Sprite.SPR_IMG_AUTORAIL, Str.STR_BUILD_AUTORAIL_TIP),
 
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   114,   135,    14,    35, 0x2BF,		Str.STR_018D_DEMOLISH_BUILDINGS_ETC),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   136,   157,    14,    35, 0x50E,		Str.STR_1019_BUILD_TRAIN_DEPOT_FOR_BUILDING),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   158,   179,    14,    35, Sprite.SPR_IMG_WAYPOINT, Str.STR_CONVERT_RAIL_TO_WAYPOINT_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   114,   135,    14,    35, 0x2BF,		Str.STR_018D_DEMOLISH_BUILDINGS_ETC),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   136,   157,    14,    35, 0x50E,		Str.STR_1019_BUILD_TRAIN_DEPOT_FOR_BUILDING),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   158,   179,    14,    35, Sprite.SPR_IMG_WAYPOINT, Str.STR_CONVERT_RAIL_TO_WAYPOINT_TIP),
 
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   180,   221,    14,    35, 0x512,		Str.STR_101A_BUILD_RAILROAD_STATION),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   222,   243,    14,    35, 0x50B,		Str.STR_101B_BUILD_RAILROAD_SIGNALS),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   244,   285,    14,    35, 0xA22,		Str.STR_101C_BUILD_RAILROAD_BRIDGE),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   286,   305,    14,    35, Sprite.SPR_IMG_TUNNEL_RAIL, Str.STR_101D_BUILD_RAILROAD_TUNNEL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   306,   327,    14,    35, 0x2CA,		Str.STR_101E_TOGGLE_BUILD_REMOVE_FOR),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   328,   349,    14,    35, Sprite.SPR_IMG_CONVERT_RAIL, Str.STR_CONVERT_RAIL_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   180,   221,    14,    35, 0x512,		Str.STR_101A_BUILD_RAILROAD_STATION),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   222,   243,    14,    35, 0x50B,		Str.STR_101B_BUILD_RAILROAD_SIGNALS),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   244,   285,    14,    35, 0xA22,		Str.STR_101C_BUILD_RAILROAD_BRIDGE),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   286,   305,    14,    35, Sprite.SPR_IMG_TUNNEL_RAIL, Str.STR_101D_BUILD_RAILROAD_TUNNEL),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   306,   327,    14,    35, 0x2CA,		Str.STR_101E_TOGGLE_BUILD_REMOVE_FOR),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   328,   349,    14,    35, Sprite.SPR_IMG_CONVERT_RAIL, Str.STR_CONVERT_RAIL_TIP),
 
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   350,   371,    14,    35, Sprite.SPR_IMG_LANDSCAPING,	Str.STR_LANDSCAPING_TOOLBAR_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   350,   371,    14,    35, Sprite.SPR_IMG_LANDSCAPING,	Str.STR_LANDSCAPING_TOOLBAR_TIP),
 
-//	{   WIDGETS_END},
+			//	{   WIDGETS_END},
 	};
 
 	static final WindowDesc _build_rail_desc = new WindowDesc(
-		640-372, 22, 372, 36,
-		Window.WC_BUILD_TOOLBAR,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STICKY_BUTTON,
-		_build_rail_widgets,
-		Rail::BuildRailToolbWndProc
-	);
+			640-372, 22, 372, 36,
+			Window.WC_BUILD_TOOLBAR,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STICKY_BUTTON,
+			_build_rail_widgets,
+			Rail::BuildRailToolbWndProc
+			);
 
 
 	/** Configures the rail toolbar for railtype given
 	 * @param railtype the railtype to display
 	 * @param w the window to modify
 	 */
-	static void SetupRailToolbar(RailType railtype, Window  w)
+	static void SetupRailToolbar(/*RailType*/ int railtype, Window  w)
 	{
-		final RailtypeInfo *rti = GetRailTypeInfo(railtype);
+		final RailtypeInfo rti = GetRailTypeInfo(railtype);
 
 		assert(railtype < RAILTYPE_END);
 		w.widget[RTW_CAPTION].unkA = rti.strings.toolbar_caption;
@@ -3310,14 +3305,14 @@ public class Rail extends RailTables {
 		w.widget[RTW_BUILD_TUNNEL].unkA = rti.gui_sprites.build_tunnel;
 	}
 
-	void ShowBuildRailToolbar(RailType railtype, int button)
+	void ShowBuildRailToolbar(/*RailType*/ int railtype, int button)
 	{
 		Window w;
 
-		if (Global._current_player == Owner.OWNER_SPECTATOR) return;
+		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
 
 		// don't recreate the window if we're clicking on a button and the window exists.
-		if (button < 0 || !(w = Window.FindWindowById(Window.WC_BUILD_TOOLBAR, 0)) || w.wndproc != BuildRailToolbWndProc) {
+		if (button < 0 || null == (w = Window.FindWindowById(Window.WC_BUILD_TOOLBAR, 0)) || (w.wndproc != Rail::BuildRailToolbWndProc) ) {
 			Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);
 			_cur_railtype = railtype;
 			w = Window.AllocateWindowDesc(_build_rail_desc);
@@ -3325,7 +3320,7 @@ public class Rail extends RailTables {
 		}
 
 		_remove_button_clicked = false;
-		if (w != null && button >= 0) _build_railroad_button_proc[button](w);
+		if (w != null && button >= 0) _build_railroad_button_proc[button].accept(w);
 		if (Global._patches.link_terraform_toolbar) ShowTerraformToolbar();
 	}
 
@@ -3349,7 +3344,7 @@ public class Rail extends RailTables {
 		// TODO: Custom station selector GUI. Now we just try using first custom station
 		// (and fall back to normal stations if it isn't available).
 		Cmd.DoCommandP(TileIndex.TileXY(sx, sy), _railstation.orientation | (w << 8) | (h << 16), _cur_railtype | 1 << 4, CcStation,
-			Cmd.CMD_BUILD_RAILROAD_STATION | Cmd.CMD_NO_WATER | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_100F_CAN_T_BUILD_RAILROAD_STATION));
+				Cmd.CMD_BUILD_RAILROAD_STATION | Cmd.CMD_NO_WATER | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_100F_CAN_T_BUILD_RAILROAD_STATION));
 	}
 
 	static void StationBuildWndProc(Window w, WindowEvent e)
@@ -3368,17 +3363,17 @@ public class Rail extends RailTables {
 				bits |= (1<<(5-1)) << (_railstation.numtracks);
 				bits |= (1<<(12-1)) << (_railstation.platlength);
 			}
-			bits |= (1<<20) << (Global._station_show_coverage);
+			bits |= (1<<20) << (Gui._station_show_coverage);
 			w.click_state = bits;
 
 			if (_railstation.dragdrop) {
-				SetTileSelectSize(1, 1);
+				ViewPort.SetTileSelectSize(1, 1);
 			} else {
 				int x = _railstation.numtracks;
 				int y = _railstation.platlength;
 				if (_railstation.orientation == 0) intswap(x,y);
 				if(!_remove_button_clicked)
-					SetTileSelectSize(x, y);
+					ViewPort.SetTileSelectSize(x, y);
 			}
 
 			rad = (Global._patches.modified_catchment) ? CA_TRAIN : 4;
@@ -3465,47 +3460,47 @@ public class Rail extends RailTables {
 			break;
 
 		case WindowEvents.WE_DESTROY:
-			if (!w.as_def_d().close) ResetObjectToPlace();
+			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
 			break;
 		}
 	}
 
 	static final Widget _station_builder_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,		Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   147,     0,    13, Str.STR_3000_RAIL_STATION_SELECTION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   147,    14,   199, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     7,    72,    26,    73, 0x0,					Str.STR_304E_SELECT_RAILROAD_STATION),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    75,   140,    26,    73, 0x0,					Str.STR_304E_SELECT_RAILROAD_STATION),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,		Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   147,     0,    13, Str.STR_3000_RAIL_STATION_SELECTION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   147,    14,   199, 0x0,					Str.STR_NULL),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     7,    72,    26,    73, 0x0,					Str.STR_304E_SELECT_RAILROAD_STATION),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    75,   140,    26,    73, 0x0,					Str.STR_304E_SELECT_RAILROAD_STATION),
 
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    22,    36,    87,    98, Str.STR_00CB_1,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,    51,    87,    98, Str.STR_00CC_2,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    52,    66,    87,    98, Str.STR_00CD_3,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    67,    81,    87,    98, Str.STR_00CE_4,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    82,    96,    87,    98, Str.STR_00CF_5,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    97,   111,    87,    98, Str.STR_0335_6,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   112,   126,    87,    98, Str.STR_0336_7,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    22,    36,    87,    98, Str.STR_00CB_1,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,    51,    87,    98, Str.STR_00CC_2,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    52,    66,    87,    98, Str.STR_00CD_3,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    67,    81,    87,    98, Str.STR_00CE_4,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    82,    96,    87,    98, Str.STR_00CF_5,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    97,   111,    87,    98, Str.STR_0335_6,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   112,   126,    87,    98, Str.STR_0336_7,	Str.STR_304F_SELECT_NUMBER_OF_PLATFORMS),
 
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    22,    36,   112,   123, Str.STR_00CB_1,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,    51,   112,   123, Str.STR_00CC_2,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    52,    66,   112,   123, Str.STR_00CD_3,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    67,    81,   112,   123, Str.STR_00CE_4,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    82,    96,   112,   123, Str.STR_00CF_5,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    97,   111,   112,   123, Str.STR_0335_6,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   112,   126,   112,   123, Str.STR_0336_7,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    22,    36,   112,   123, Str.STR_00CB_1,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,    51,   112,   123, Str.STR_00CC_2,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    52,    66,   112,   123, Str.STR_00CD_3,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    67,    81,   112,   123, Str.STR_00CE_4,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    82,    96,   112,   123, Str.STR_00CF_5,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    97,   111,   112,   123, Str.STR_0335_6,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   112,   126,   112,   123, Str.STR_0336_7,	Str.STR_3050_SELECT_LENGTH_OF_RAILROAD),
 
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,   111,   126,   137, Str.STR_DRAG_DROP, Str.STR_STATION_DRAG_DROP),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    14,    73,   152,   163, Str.STR_02DB_OFF, Str.STR_3065_DON_T_HIGHLIGHT_COVERAGE),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    74,   133,   152,   163, Str.STR_02DA_ON, Str.STR_3064_HIGHLIGHT_COVERAGE_AREA),
-	//{   WIDGETS_END},
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    37,   111,   126,   137, Str.STR_DRAG_DROP, Str.STR_STATION_DRAG_DROP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    14,    73,   152,   163, Str.STR_02DB_OFF, Str.STR_3065_DON_T_HIGHLIGHT_COVERAGE),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    74,   133,   152,   163, Str.STR_02DA_ON, Str.STR_3064_HIGHLIGHT_COVERAGE_AREA),
+			//{   WIDGETS_END},
 	};
 
 	static final WindowDesc _station_builder_desc = new WindowDesc(
-		-1, -1, 148, 200,
-		Window.WC_BUILD_STATION,Window.WC_BUILD_TOOLBAR,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
-		_station_builder_widgets,
-		Rail::StationBuildWndProc
-	);
+			-1, -1, 148, 200,
+			Window.WC_BUILD_STATION,Window.WC_BUILD_TOOLBAR,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
+			_station_builder_widgets,
+			Rail::StationBuildWndProc
+			);
 
 	static void ShowStationBuilder()
 	{
@@ -3527,49 +3522,49 @@ public class Rail extends RailTables {
 			DrawTrainDepotSprite( 2, 69, 2, r);
 			DrawTrainDepotSprite( 2, 17, 3, r);
 			break;
-			}
+		}
 
-		case WindowEvents.WE_CLICK:
+		case WE_CLICK:
 			switch (e.widget) {
-				case 3:
-				case 4:
-				case 5:
-				case 6:
-					_build_depot_direction = e.widget - 3;
-					//SndPlayFx(SND_15_BEEP);
-					w.SetWindowDirty();
-					break;
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+				_build_depot_direction = (byte) (e.widget - 3);
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
+				break;
 			}
 			break;
 
-		case WindowEvents.WE_MOUSELOOP:
+		case WE_MOUSELOOP:
 			if (w.as_def_d().close) w.DeleteWindow();
 			return;
 
-		case WindowEvents.WE_DESTROY:
-			if (!w.as_def_d().close) ResetObjectToPlace();
+		case WE_DESTROY:
+			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
 			break;
 		}
 	}
 
 	static final Widget _build_depot_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   139,     0,    13, Str.STR_1014_TRAIN_DEPOT_ORIENTATION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   139,    14,   121, 0x0,			Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    17,    66, 0x0,			Str.STR_1020_SELECT_RAILROAD_DEPOT_ORIENTATIO),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    69,   118, 0x0,			Str.STR_1020_SELECT_RAILROAD_DEPOT_ORIENTATIO),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    69,   118, 0x0,			Str.STR_1020_SELECT_RAILROAD_DEPOT_ORIENTATIO),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    17,    66, 0x0,			Str.STR_1020_SELECT_RAILROAD_DEPOT_ORIENTATIO),
-	//{   WIDGETS_END},
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   139,     0,    13, Str.STR_1014_TRAIN_DEPOT_ORIENTATION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   139,    14,   121, 0x0,			Str.STR_NULL),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    17,    66, 0x0,			Str.STR_1020_SELECT_RAILROAD_DEPOT_ORIENTATIO),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    69,   118, 0x0,			Str.STR_1020_SELECT_RAILROAD_DEPOT_ORIENTATIO),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    69,   118, 0x0,			Str.STR_1020_SELECT_RAILROAD_DEPOT_ORIENTATIO),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    17,    66, 0x0,			Str.STR_1020_SELECT_RAILROAD_DEPOT_ORIENTATIO),
+			//{   WIDGETS_END},
 	};
 
 	static final WindowDesc _build_depot_desc = new WindowDesc(
-		-1,-1, 140, 122,
-		Window.WC_BUILD_DEPOT,Window.WC_BUILD_TOOLBAR,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
-		_build_depot_widgets,
-		Rail::BuildTrainDepotWndProc
-	);
+			-1,-1, 140, 122,
+			Window.WC_BUILD_DEPOT,Window.WC_BUILD_TOOLBAR,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
+			_build_depot_widgets,
+			Rail::BuildTrainDepotWndProc
+			);
 
 	static void ShowBuildTrainDepotPicker()
 	{
@@ -3588,15 +3583,15 @@ public class Rail extends RailTables {
 
 			for (i = 0; i < 5; i++) {
 				if (w.hscroll.pos + i < _waypoint_count) {
-					DrawWaypointSprite(2 + i * 68, 25, w.hscroll.pos + i, _cur_railtype);
+					WayPoint.DrawWaypointSprite(2 + i * 68, 25, w.hscroll.pos + i, _cur_railtype);
 				}
 			}
 			break;
 		}
-		case WindowEvents.WE_CLICK: {
+		case WE_CLICK: {
 			switch (e.widget) {
 			case 3: case 4: case 5: case 6: case 7:
-				_cur_waypoint_type = e.widget - 3 + w.hscroll.pos;
+				_cur_waypoint_type = (byte) (e.widget - 3 + w.hscroll.pos);
 				//SndPlayFx(SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
@@ -3604,38 +3599,38 @@ public class Rail extends RailTables {
 			break;
 		}
 
-		case WindowEvents.WE_MOUSELOOP:
+		case WE_MOUSELOOP:
 			if (w.as_def_d().close) w.DeleteWindow();
 			break;
 
-		case WindowEvents.WE_DESTROY:
-			if (!w.as_def_d().close) ResetObjectToPlace();
+		case WE_DESTROY:
+			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
 			break;
 		}
 	}
 
 	static final Widget _build_waypoint_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5, Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   343,     0,    13, Str.STR_WAYPOINT,Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   343,    14,    91, 0x0, 0),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5, Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   343,     0,    13, Str.STR_WAYPOINT,Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   343,    14,    91, 0x0, 0),
 
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     3,    68,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    71,   136,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   139,   204,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   207,   272,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   275,   340,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     3,    68,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    71,   136,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   139,   204,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   207,   272,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   275,   340,    17,    76, 0x0, Str.STR_WAYPOINT_GRAPHICS_TIP),
 
-	new Widget( Window.WWT_HSCROLLBAR,   Window.RESIZE_NONE,    7,     1,   343,     80,    91, 0x0, Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
-	//{    WIDGETS_END},
+			new Widget( Window.WWT_HSCROLLBAR,   Window.RESIZE_NONE,    7,     1,   343,     80,    91, 0x0, Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+			//{    WIDGETS_END},
 	};
 
 	static final WindowDesc _build_waypoint_desc = new WindowDesc(
-		-1,-1, 344, 92,
-		Window.WC_BUILD_DEPOT,Window.WC_BUILD_TOOLBAR,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
-		_build_waypoint_widgets,
-		Rail::BuildWaypointWndProc
-	);
+			-1,-1, 344, 92,
+			Window.WC_BUILD_DEPOT,Window.WC_BUILD_TOOLBAR,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
+			_build_waypoint_widgets,
+			Rail::BuildWaypointWndProc
+			);
 
 	static void ShowBuildWaypointPicker()
 	{
@@ -3647,7 +3642,7 @@ public class Rail extends RailTables {
 	static void BuildSignalWndProc(Window w, WindowEvent e)
 	{
 		switch(e.event) {
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			/* XXX TODO: dont always hide the buttons when more than 2 signal types are available */
 			w.hidden_state = (1 << 3) | (1 << 6);
 
@@ -3670,47 +3665,48 @@ public class Rail extends RailTables {
 			Gfx.DrawStringCentered(40, 72, Str.STR_681A, 0);
 
 			break;
-			}
-		case WindowEvents.WE_CLICK: {
+		}
+		case WE_CLICK: {
 			switch(e.widget) {
-				case 3: case 6: // scroll signal types
-					/* XXX TODO: implement scrolling */
-					break;
-				case 4: case 5: // select signal type
-					/* XXX TODO: take into account the scroll position for changing selected type */
-					_cur_signal_type = e.widget - 4;
+			case 3: case 6: // scroll signal types
+				/* XXX TODO: implement scrolling */
+				break;
+			case 4: case 5: // select signal type
+				/* XXX TODO: take into account the scroll position for changing selected type */
+				_cur_signal_type = (byte) (e.widget - 4);
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
+				break;
+			case 7: // decrease drag density
+				if (Global._patches.drag_signals_density > 1) {
+					Global._patches.drag_signals_density--;
 					//SndPlayFx(SND_15_BEEP);
 					w.SetWindowDirty();
-					break;
-				case 7: // decrease drag density
-					if (Global._patches.drag_signals_density > 1) {
-						Global._patches.drag_signals_density--;
-						//SndPlayFx(SND_15_BEEP);
-						w.SetWindowDirty();
-					};
-					break;
-				case 8: // increase drag density
-					if (Global._patches.drag_signals_density < 20) {
-						Global._patches.drag_signals_density++;
-						//SndPlayFx(SND_15_BEEP);
-						w.SetWindowDirty();
-					};
-					break;
-				case 9: // autosignal mode toggle button
-					_cur_autosig_compl ^= 1;
+				};
+				break;
+			case 8: // increase drag density
+				if (Global._patches.drag_signals_density < 20) {
+					Global._patches.drag_signals_density++;
 					//SndPlayFx(SND_15_BEEP);
 					w.SetWindowDirty();
-					break;
-				case 10: case 11: // presignal-type dropdown list
-					ShowDropDownMenu(w, _presig_types_dropdown, _cur_presig_type, 11, 0, 0);
-					break;
+				};
+				break;
+			case 9: // autosignal mode toggle button
+				_cur_autosig_compl = !_cur_autosig_compl;
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
+				break;
+			case 10: case 11: // presignal-type dropdown list
+				Window.ShowDropDownMenu(w, _presig_types_dropdown, _cur_presig_type, 11, 0, 0);
+				break;
 			}
-			break;
-		case WindowEvents.WE_DROPDOWN_SELECT: // change presignal type
-			_cur_presig_type = e.dropdown.index;
+		}
+		break;
+		case WE_DROPDOWN_SELECT: // change presignal type
+			_cur_presig_type = e.index;
 			w.SetWindowDirty();
 			break;
-		}
+
 
 		case WindowEvents.WE_MOUSELOOP:
 			if (w.as_def_d().close)
@@ -3719,34 +3715,34 @@ public class Rail extends RailTables {
 
 		case WindowEvents.WE_DESTROY:
 			if (!w.as_def_d().close)
-				ResetObjectToPlace();
+				ViewPort.ResetObjectToPlace();
 			break;
 		}
 	}
 
 	static final Widget _build_signal_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX, Window.RESIZE_NONE,    7,    0,   10,    0,   13, Str.STR_00C5                 , Str.STR_018B_CLOSE_WINDOW),
-	new Widget(   Window.WWT_CAPTION,  Window.RESIZE_NONE,    7,   11,  139,    0,   13, Str.STR_SIGNAL_SELECTION     , Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,    0,  139,   14,  114, 0x0                      , Str.STR_NULL),
-	new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   22,   30,   29,   39, Sprite.SPR_ARROW_LEFT           , Str.STR_SIGNAL_TYPE_TIP),
-	new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   43,   64,   24,   45, 0x50B                    , Str.STR_SIGNAL_TYPE_TIP),
-	new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   75,   96,   24,   45, Sprite.SPR_SEMA                 , Str.STR_SIGNAL_TYPE_TIP),
-	new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,  109,  117,   29,   39, Sprite.SPR_ARROW_RIGHT          , Str.STR_SIGNAL_TYPE_TIP),
-	new Widget(   Window.WWT_IMGBTN,   Window.RESIZE_NONE,    3,   25,   34,   72,   80, 0x0                      , Str.STR_SIGNAL_DENSITY_TIP),
-	new Widget(   Window.WWT_IMGBTN,   Window.RESIZE_NONE,    3,   35,   44,   72,   80, 0x0                      , Str.STR_SIGNAL_DENSITY_TIP),
-	new Widget(   Window.WWT_TEXTBTN,  Window.RESIZE_NONE,    7,   20,  119,   84,   95, Str.STR_SIGNAL_COMPLETION    , Str.STR_SIGNAL_COMPLETION_TIP),
-	new Widget(   Window.WWT_6,        Window.RESIZE_NONE,    7,   10,  129,   99,  110, Str.STR_SIGNAL_PRESIG_COMBO  , Str.STR_SIGNAL_PRESIG_TIP),
-	new Widget(   Window.WWT_CLOSEBOX, Window.RESIZE_NONE,    7,  118,  128,  100,  109, Str.STR_0225                 , Str.STR_SIGNAL_PRESIG_TIP),
-	//{   WIDGETS_END},
+			new Widget(   Window.WWT_CLOSEBOX, Window.RESIZE_NONE,    7,    0,   10,    0,   13, Str.STR_00C5                 , Str.STR_018B_CLOSE_WINDOW),
+			new Widget(   Window.WWT_CAPTION,  Window.RESIZE_NONE,    7,   11,  139,    0,   13, Str.STR_SIGNAL_SELECTION     , Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,    0,  139,   14,  114, 0x0                      , Str.STR_NULL),
+			new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   22,   30,   29,   39, Sprite.SPR_ARROW_LEFT           , Str.STR_SIGNAL_TYPE_TIP),
+			new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   43,   64,   24,   45, 0x50B                    , Str.STR_SIGNAL_TYPE_TIP),
+			new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,   75,   96,   24,   45, Sprite.SPR_SEMA                 , Str.STR_SIGNAL_TYPE_TIP),
+			new Widget(   Window.WWT_PANEL,    Window.RESIZE_NONE,    7,  109,  117,   29,   39, Sprite.SPR_ARROW_RIGHT          , Str.STR_SIGNAL_TYPE_TIP),
+			new Widget(   Window.WWT_IMGBTN,   Window.RESIZE_NONE,    3,   25,   34,   72,   80, 0x0                      , Str.STR_SIGNAL_DENSITY_TIP),
+			new Widget(   Window.WWT_IMGBTN,   Window.RESIZE_NONE,    3,   35,   44,   72,   80, 0x0                      , Str.STR_SIGNAL_DENSITY_TIP),
+			new Widget(   Window.WWT_TEXTBTN,  Window.RESIZE_NONE,    7,   20,  119,   84,   95, Str.STR_SIGNAL_COMPLETION    , Str.STR_SIGNAL_COMPLETION_TIP),
+			new Widget(   Window.WWT_6,        Window.RESIZE_NONE,    7,   10,  129,   99,  110, Str.STR_SIGNAL_PRESIG_COMBO  , Str.STR_SIGNAL_PRESIG_TIP),
+			new Widget(   Window.WWT_CLOSEBOX, Window.RESIZE_NONE,    7,  118,  128,  100,  109, Str.STR_0225                 , Str.STR_SIGNAL_PRESIG_TIP),
+			//{   WIDGETS_END},
 	};
 
 	static final WindowDesc _build_signal_desc = new WindowDesc(
-		-1,-1, 140, 115,
-		Window.WC_BUILD_SIGNALS,Window.WC_BUILD_TOOLBAR,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
-		_build_signal_widgets,
-		Rail::BuildSignalWndProc
-	);
+			-1,-1, 140, 115,
+			Window.WC_BUILD_SIGNALS,Window.WC_BUILD_TOOLBAR,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
+			_build_signal_widgets,
+			Rail::BuildSignalWndProc
+			);
 
 	static void ShowSignalBuilder()
 	{
@@ -3766,37 +3762,37 @@ public class Rail extends RailTables {
 		_cur_presig_type = 0;
 		_cur_autosig_compl = false;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 	/**
 	 * Maps a Trackdir to the corresponding TrackdirBits value
-	 */
+	 * /
 	//static  TrackdirBits TrackdirToTrackdirBits(Trackdir trackdir) { return TrackdirBits.values[(1 << trackdir.getValue())]; }
 	static int TrackdirToTrackdirBits(int trackdir) 
 	{ 
@@ -3824,8 +3820,8 @@ public class Rail extends RailTables {
 	//static  boolean IsValidTrack(/* Track */ int  track) { return track < TRACK_END; }
 	//static  boolean IsValidTrackdir(Trackdir trackdir) { return (TrackdirToTrackdirBits(trackdir) & TRACKDIR_BIT_MASK) != 0; }
 
-	
-	
+
+
 	/**
 	 * Functions to map tracks to the corresponding bits in the signal
 	 * presence/status bytes in the map. You should not use these directly, but
@@ -3881,7 +3877,7 @@ static  byte SignalOnTrack(Track track) {
 		assert(tile.IsTileType( TileTypes.MP_RAILWAY));
 		return RailTileType.get( tile.getMap().m5 & RAIL_TILE_TYPE_MASK );
 	}	
-	
+
 	/**
 	 * Returns the rail type of the given rail tile (ie rail, mono, maglev).
 	 */
@@ -3932,8 +3928,8 @@ static  byte SignalOnTrack(Track track) {
 		return RailTileSubtype.get(tile.getMap().m5 & RAIL_SUBTYPE_MASK);
 	}
 
-	
-	
+
+
 	/**
 	 * Returns whether this is plain rails, with or without signals. Iow, if this
 	 * tiles RailTileType is RAIL_TYPE_NORMAL or RAIL_TYPE_SIGNALS.
@@ -3954,8 +3950,8 @@ static  byte SignalOnTrack(Track track) {
 		int rtt = GetRailTileType(tile);
 		return rtt == RAIL_TYPE_NORMAL || rtt == RAIL_TYPE_SIGNALS;
 	}
-	
-	
+
+
 	/**
 	 * Returns the tracks present on the given plain rail tile (IsPlainRailTile())
 	 */
@@ -3994,7 +3990,7 @@ static  byte SignalOnTrack(Track track) {
 	//	assert(IsValidTrack(track));
 	//		return BitOps.HASBIT(GetTrackBits(tile).ordinal(), track.ordinal());
 	//}
-	
+
 	/*
 	 * Functions describing logical relations between Tracks, TrackBits, Trackdirs
 	 * TrackdirBits, Direction and DiagDirections.
@@ -4005,7 +4001,7 @@ static  byte SignalOnTrack(Track track) {
 
 	/**
 	 * Maps a trackdir to the reverse trackdir.
-	 */
+	 * /
 	//static  Trackdir ReverseTrackdir(Trackdir trackdir) 
 	static int ReverseTrackdir(int trackdir) 
 	{
@@ -4026,7 +4022,7 @@ static  byte SignalOnTrack(Track track) {
 	 * Returns the Track that a given Trackdir represents
 	 */
 	//static  Track TrackdirToTrack(Trackdir trackdir) { return new Track(trackdir.getValue() & 0x7); }
-	static  /*Track*/ int TrackdirToTrack(int trackdir) { return trackdir & 0x7; }
+	//static  /*Track*/ int TrackdirToTrack(int trackdir) { return trackdir & 0x7; }
 
 	/**
 	 * Returns a Trackdir for the given Track. Since every Track corresponds to
@@ -4077,8 +4073,8 @@ static  byte SignalOnTrack(Track track) {
 		return _track_crosses_tracks[track];
 	}
 
-	
-	
+
+
 	/**
 	 * Maps a trackdir to the (4-way) direction the tile is exited when following
 	 * that trackdir.
@@ -4113,7 +4109,7 @@ static  byte SignalOnTrack(Track track) {
 	/**
 	 * Maps a track and a full (8-way) direction to the trackdir that represents
 	 * the track running in the given direction.
-	 */
+	 * /
 	//static  Trackdir TrackDirectionToTrackdir(Track track, Direction dir) 
 	static int TrackDirectionToTrackdir(int track, int dir) 
 	{
@@ -4196,15 +4192,15 @@ static  byte SignalOnTrack(Track track) {
 	{ 
 		return (track == TRACK_DIAG1) || (track == TRACK_DIAG2); 
 	}
-	
+
 	/* Checks if a given Track is diagonal */
 	static  boolean IsDiagonalTrack(/* Track */ int  track) 
 	{ 
 		return (track == TRACK_DIAG1) || (track == TRACK_DIAG2); 
 	}
 
-	
-	
+
+
 	/* Checks if a given Trackdir is diagonal. * /
 	//static  boolean IsDiagonalTrackdir(Trackdir trackdir) 
 	static  boolean IsDiagonalTrackdir(int trackdir) 
@@ -4284,16 +4280,16 @@ static  byte SignalOnTrack(Track track) {
 		return ((tile.getMap().m2 & SignalAlongTrackdir(trackdir)) != 0
 				?SIGNAL_STATE_GREEN:SIGNAL_STATE_RED);
 	}
-	
-	
+
+
 	/**
 	 * Gets the type of signal on a given track on a given rail tile with signals.
 	 *
 	 * Note that currently, the track argument is not used, since
 	 * signal types cannot be mixed. This function is trying to be
 	 * future-compatible, though.
-	 */
-	static  /*SignalType*/ int GetSignalType(TileIndex tile, /*Track*/ int track)
+	 * /
+	static  /*SignalType* / int GetSignalType(TileIndex tile, /*Track* / int track)
 	{
 		assert(IsValidTrack(track));
 		assert(GetRailTileType(tile) == RAIL_TYPE_SIGNALS);
@@ -4344,23 +4340,23 @@ static  byte SignalOnTrack(Track track) {
 		/* XXX: Nicer way to write this? */
 		switch(track)
 		{
-			/* When map5 bit 3 is set, the road runs in the y direction (DIAG2) */
-			case TRACK_DIAG1:
-				return (BitOps.HASBIT(tile.getMap().m5, 3) ? Global.TRANSPORT_RAIL : Global.TRANSPORT_ROAD);
-			case TRACK_DIAG2:
-				return (BitOps.HASBIT(tile.getMap().m5, 3) ? Global.TRANSPORT_ROAD : Global.TRANSPORT_RAIL);
-			default:
-				assert false;
+		/* When map5 bit 3 is set, the road runs in the y direction (DIAG2) */
+		case TRACK_DIAG1:
+			return (BitOps.HASBIT(tile.getMap().m5, 3) ? Global.TRANSPORT_RAIL : Global.TRANSPORT_ROAD);
+		case TRACK_DIAG2:
+			return (BitOps.HASBIT(tile.getMap().m5, 3) ? Global.TRANSPORT_ROAD : Global.TRANSPORT_RAIL);
+		default:
+			assert false;
 		}
 		return Global.INVALID_TRANSPORT;
 	}
-	
+
 	/**
 	 * Returns a pointer to the Railtype information for a given railtype
 	 * @param railtype the rail type which the information is requested for
 	 * @return The pointer to the RailtypeInfo
-	 */
-	static  final RailtypeInfo GetRailTypeInfo(/* RailType */ int railtype)
+	 * /
+	static  final RailtypeInfo GetRailTypeInfo(/* RailType * / int railtype)
 	{
 		assert(railtype < RAILTYPE_END);
 		return _railtypes[railtype];
@@ -4373,8 +4369,8 @@ static  byte SignalOnTrack(Track track) {
 	 * @return Whether the engine can drive on this tile.
 	 * @param  enginetype The RailType of the engine we are considering.
 	 * @param  tiletype   The RailType of the tile we are considering.
-	 */
-	static  boolean IsCompatibleRail(/* RailType */ int enginetype, /* RailType */ int tiletype)
+	 * /
+	static  boolean IsCompatibleRail(/* RailType * / int enginetype, /* RailType * / int tiletype)
 	{
 		return BitOps.HASBIT(GetRailTypeInfo(enginetype).compatible_railtypes, tiletype);
 	}
@@ -4403,12 +4399,12 @@ static  byte SignalOnTrack(Track track) {
 	} */
 
 
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 }
 
 

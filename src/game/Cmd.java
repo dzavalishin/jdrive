@@ -151,6 +151,7 @@ public class Cmd {
 	public static final int CMD_ERROR = ((int)0x80000000);
 
 	//#define public static final int CMD_MSG(x) ((x)<<16)
+	public static final int CMD_MSG(int x) { return x << 16; }
 
 	public static final int CMD_AUTO = 0x200;
 	public static final int CMD_NO_WATER = 0x400;

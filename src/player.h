@@ -239,7 +239,7 @@ static inline bool HasRailtypeAvail(const Player *p, RailType Railtype)
 }
 
 /* Validate functions for rail building */
-static inline bool ValParamRailtype(uint32 rail) { return HASBIT(GetPlayer(_current_player)->avail_railtypes, rail);}
+//static inline bool ValParamRailtype(uint32 rail) { return HASBIT(GetPlayer(_current_player)->avail_railtypes, rail);}
 
 /** Returns the "best" railtype a player can build.
   * As the AI doesn't know what the BEST one is, we

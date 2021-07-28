@@ -38,7 +38,7 @@ public class Bridge
 		w.DeleteWindow();
 		Cmd.DoCommandP(_bridgedata.end_tile, _bridgedata.start_tile,
 			_bridgedata.indexes[i] | (_bridgedata.type << 8), CcBuildBridge,
-			Cmd.CMD_BUILD_BRIDGE | Cmd.CMD_AUTO | Cmd.CMD_MSG(STR_5015_CAN_T_BUILD_BRIDGE_HERE));
+			Cmd.CMD_BUILD_BRIDGE | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_5015_CAN_T_BUILD_BRIDGE_HERE));
 	}
 
 	static void BuildBridgeWndProc(Window w, WindowEvent e)
@@ -57,7 +57,7 @@ public class Bridge
 				Global.SetDParam(0, b.material);
 				Gfx.DrawSprite(b.sprite.id, 3, 15 + i * 22);
 
-				Gfx.DrawString(44, 15 + i * 22 , STR_500D, 0);
+				Gfx.DrawString(44, 15 + i * 22 , Str.STR_500D, 0);
 			}
 		} break;
 
@@ -82,40 +82,40 @@ public class Bridge
 	}
 
 	static final Widget _build_bridge_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, STR_00C5,										STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   199,     0,    13, STR_100D_SELECT_RAIL_BRIDGE,	STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(     Window.WWT_MATRIX,   Window.RESIZE_NONE,     7,     0,   187,    14,   101, 0x401,												STR_101F_BRIDGE_SELECTION_CLICK),
-	new Widget(  Window.WWT_SCROLLBAR,   Window.RESIZE_NONE,     7,   188,   199,    14,   101, 0x0,													STR_0190_SCROLL_BAR_SCROLLS_LIST),
-	new Widget(   WIDGETS_END),
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,										Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   199,     0,    13, Str.STR_100D_SELECT_RAIL_BRIDGE,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(     Window.WWT_MATRIX,   Window.RESIZE_NONE,     7,     0,   187,    14,   101, 0x401,												Str.STR_101F_BRIDGE_SELECTION_CLICK),
+	new Widget(  Window.WWT_SCROLLBAR,   Window.RESIZE_NONE,     7,   188,   199,    14,   101, 0x0,													Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+	//new Widget(   WIDGETS_END),
 	};
 
 	static final WindowDesc _build_bridge_desc = new WindowDesc(
 		-1, -1, 200, 102,
 		Window.WC_BUILD_BRIDGE,Window.WC_BUILD_TOOLBAR,
-		WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
+		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_build_bridge_widgets,
 		Bridge::BuildBridgeWndProc
 	);
 
 
 	static final Widget _build_road_bridge_widgets[] = {
-	new Widget(   WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, STR_00C5,										STR_018B_CLOSE_WINDOW),
-	new Widget(    WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   199,     0,    13, STR_1803_SELECT_ROAD_BRIDGE,	STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(     WWT_MATRIX,   Window.RESIZE_NONE,     7,     0,   187,    14,   101, 0x401,												STR_101F_BRIDGE_SELECTION_CLICK),
-	new Widget(  WWT_SCROLLBAR,   Window.RESIZE_NONE,     7,   188,   199,    14,   101, 0x0,													STR_0190_SCROLL_BAR_SCROLLS_LIST),
-	new Widget(   WIDGETS_END),
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,										Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   199,     0,    13, Str.STR_1803_SELECT_ROAD_BRIDGE,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(     Window.WWT_MATRIX,   Window.RESIZE_NONE,     7,     0,   187,    14,   101, 0x401,												Str.STR_101F_BRIDGE_SELECTION_CLICK),
+	new Widget(  Window.WWT_SCROLLBAR,   Window.RESIZE_NONE,     7,   188,   199,    14,   101, 0x0,													Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+	//new Widget(   WIDGETS_END),
 	};
 
 	static final WindowDesc _build_road_bridge_desc = new WindowDesc(
 		-1, -1, 200, 102,
-		WC_BUILD_BRIDGE,WC_BUILD_TOOLBAR,
-		WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
+		Window.WC_BUILD_BRIDGE,Window.WC_BUILD_TOOLBAR,
+		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		Bridge::_build_road_bridge_widgets,
 		Bridge::BuildBridgeWndProc
 	);
 
 
-	void ShowBuildBridgeWindow(TileIndex start, TileIndex end, byte bridge_type)
+	static void ShowBuildBridgeWindow(TileIndex start, TileIndex end, int bridge_type)
 	{
 		int j = 0;
 		int ret;
@@ -131,7 +131,7 @@ public class Bridge
 
 		// only query bridge building possibility once, result is the same for all bridges!
 		// returns CMD_ERROR on failure, and price on success
-		ret = DoCommandByTile(end, start, (bridge_type << 8), Cmd.DC_AUTO | Cmd.DC_QUERY_COST, Cmd.CMD_BUILD_BRIDGE);
+		ret = Cmd.DoCommandByTile(end, start.tile, (bridge_type << 8), Cmd.DC_AUTO | Cmd.DC_QUERY_COST, Cmd.CMD_BUILD_BRIDGE);
 
 		if (Cmd.CmdFailed(ret)) {
 			errmsg = new StringID(Global._error_message);
@@ -165,7 +165,7 @@ public class Bridge
 			w.vscroll.cap = 4;
 			w.vscroll.count = (byte)j;
 		} else {
-			ShowErrorMessage(errmsg, STR_5015_CAN_T_BUILD_BRIDGE_HERE, end.TileX() * 16, end.TileY() * 16);
+			Global.ShowErrorMessage(errmsg, Str.STR_5015_CAN_T_BUILD_BRIDGE_HERE, end.TileX() * 16, end.TileY() * 16);
 		}
 	}
 

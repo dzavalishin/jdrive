@@ -170,7 +170,7 @@ public class Pbs {
 			tile.MarkTileDirtyByTile();
 	}
 
-	int PBSTileReserved(TileIndex tile) 
+	static int PBSTileReserved(TileIndex tile) 
 	{
 		assert(tile.IsValidTile());
 		
@@ -312,7 +312,7 @@ public class Pbs {
 		} while (res != 0);
 	}
 
-	boolean PBSIsPbsSignal(TileIndex tile, Trackdir trackdir)
+	static boolean PBSIsPbsSignal(TileIndex tile, /*Trackdir*/ int trackdir)
 	{
 		assert(tile.IsValidTile());
 		assert(IsValidTrackdir(trackdir));

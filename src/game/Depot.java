@@ -26,6 +26,11 @@ public class Depot implements IPoolItem
 	
 	static MemoryPool<Depot> _depot_pool = new MemoryPool<Depot>(factory);
 
+	static TileIndex _last_built_train_depot_tile;
+	static TileIndex _last_built_road_depot_tile;
+	static TileIndex _last_built_aircraft_depot_tile;
+	static TileIndex _last_built_ship_depot_tile;
+
 	/**
 	 * Get the pointer to the depot with index 'index'
 	 */
@@ -80,10 +85,6 @@ public class Depot implements IPoolItem
 		return (Global._patches.servint_ispercent) ? BitOps.clamp(index, MIN_SERVINT_PERCENT, MAX_SERVINT_PERCENT) : BitOps.clamp(index, MIN_SERVINT_DAYS, MAX_SERVINT_DAYS);
 	}
 
-	 TileIndex _last_built_train_depot_tile;
-	 TileIndex _last_built_road_depot_tile;
-	 TileIndex _last_built_aircraft_depot_tile;
-	 TileIndex _last_built_ship_depot_tile;
 
 	/**
 	 * Check if a depot really exists.
@@ -120,7 +121,7 @@ public class Depot implements IPoolItem
 	 * Returns the direction the exit of the depot on the given tile is facing.
 	 */
 	//private DiagDirection GetDepotDirection(TileIndex tile, TransportType type)
-	public DiagDirection GetDepotDirection(TileIndex tile, int type)
+	public static /*DiagDirection*/ int GetDepotDirection(TileIndex tile, int type)
 	{
 		assert(IsTileDepotType(tile, type));
 
@@ -129,7 +130,7 @@ public class Depot implements IPoolItem
 			case Global.TRANSPORT_RAIL:
 			case Global.TRANSPORT_ROAD:
 				/* Rail and road store a diagonal direction in bits 0 and 1 */
-				return new DiagDirection(BitOps.GB(Global._m[tile.getTile()].m5, 0, 2));
+				return BitOps.GB(Global._m[tile.getTile()].m5, 0, 2);
 			case Global.TRANSPORT_WATER:
 				/* Water is stubborn, it stores the directions in a different order. */
 				switch (BitOps.GB(Global._m[tile.getTile()].m5, 0, 2)) {
@@ -159,7 +160,7 @@ public class Depot implements IPoolItem
 	      03 (exit towards NW) we need either bit 0 or 4 set in tileh: 0x4C >> 3 = 1001<p>
 	      So ((0x4C >> p2) & tileh) determines whether the depot can be built on the current tileh
 	*/
-	static private boolean CanBuildDepotByTileh(int direction, int tileh)
+	public static boolean CanBuildDepotByTileh(int direction, int tileh)
 	{
 		return 0 != ((0x4C >> direction) & tileh);
 	}

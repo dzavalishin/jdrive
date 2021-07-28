@@ -1,8 +1,5 @@
 package game;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import game.util.BitOps;
@@ -67,7 +64,7 @@ public class TileIndex implements Comparable<TileIndex>{
 	}
 
 	public static TileIndex INVALID_TILE = new TileIndex(-1);
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TileIndex) {
@@ -84,18 +81,18 @@ public class TileIndex implements Comparable<TileIndex>{
 		return this.tile - o.tile;
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
 	public static void forAll( int w, int h, TileIndex tile, Function<TileIndex,Boolean> c )
 	{
 		forAll( w, h, tile.getTile(), c );		
@@ -138,8 +135,8 @@ public class TileIndex implements Comparable<TileIndex>{
 
 	}
 
-	
-	
+
+
 
 	/**
 	 * Iterate over a tiles rectangle.
@@ -177,20 +174,20 @@ public class TileIndex implements Comparable<TileIndex>{
 
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	// TODO rename to getTileIndex
@@ -451,14 +448,16 @@ public class TileIndex implements Comparable<TileIndex>{
 
 	boolean IsWaterTile() { return IsTileType(TileTypes.MP_WATER) && getMap().m5 == 0; }
 
-	Owner GetTileOwner()
+	//Owner GetTileOwner()
+	PlayerID GetTileOwner()
 	{
 		//assert(tile < MapSize());
 		assert(!IsTileType(TileTypes.MP_HOUSE));
 		assert(!IsTileType(TileTypes.MP_VOID));
 		assert(!IsTileType(TileTypes.MP_INDUSTRY));
 
-		return new Owner(Global._m[tile].m1);
+		//return new Owner(Global._m[tile].m1);
+		return PlayerID.get(Global._m[tile].m1);
 	}
 
 	void SetTileOwner(PlayerID owner)
@@ -483,12 +482,18 @@ public class TileIndex implements Comparable<TileIndex>{
 
 	boolean IsTileOwner(Owner owner)
 	{
+		return GetTileOwner().id == owner.owner;
+	}
+
+	boolean IsTileOwner(PlayerID owner)
+	{
 		return GetTileOwner() == owner;
 	}
 
+
 	boolean IsTileOwner(int owner)
 	{
-		return GetTileOwner().owner == owner;
+		return GetTileOwner().id == owner;
 	}
 
 
@@ -552,17 +557,6 @@ public class TileIndex implements Comparable<TileIndex>{
 	static TileIndex RandomTileSeed(int r) { return new TileIndex( TILE_MASK(r) ); }
 	static TileIndex RandomTile() { return new TileIndex(Hal.Random()); }
 
-	public boolean EnsureNoVehicle() {
-		return Vehicle.EnsureNoVehicle(this);
-	}
-
-	public boolean CheckTileOwnership() {
-		return Player.CheckTileOwnership(this);
-	}
-
-	public static int GetPartialZ(int x, int y, int corners) {
-		return Landscape.GetPartialZ(x, y, corners);
-	}
 
 
 	/**
@@ -612,7 +606,7 @@ public class TileIndex implements Comparable<TileIndex>{
 		ni.tile += diff;
 		return ni;
 	}
-	
+
 
 	/**
 	 * Immutable add - steps with given x and y 
@@ -635,7 +629,7 @@ public class TileIndex implements Comparable<TileIndex>{
 		return (tile < Global.MapSizeX() * Global.MapMaxY() && TileX() != Global.MapMaxX());
 	}
 
-	
+
 	/**
 	 * Returns whether the given tile is a level crossing.
 	 */
@@ -643,8 +637,43 @@ public class TileIndex implements Comparable<TileIndex>{
 	{
 		return (getMap().m5 & 0xF0) == 0x10;
 	}
+
+	/* Direction as commonly used in v->direction, 8 way. */
+	//typedef enum Directions {
+	public static final int DIR_N   = 0;
+	public static final int DIR_NE  = 1;      /* Northeast; upper right on your monitor */
+	public static final int DIR_E   = 2;
+	public static final int DIR_SE  = 3;
+	public static final int DIR_S   = 4;
+	public static final int DIR_SW  = 5;
+	public static final int DIR_W   = 6;
+	public static final int DIR_NW  = 7;
+	public static final int DIR_END = 8;
+	public static final int INVALID_DIR = 0xFF;
+	//} Direction;
+
+
+	// -----------------------------------------------
+	// Delegates
+	// -----------------------------------------------
 	
+	public boolean EnsureNoVehicle() {
+		return Vehicle.EnsureNoVehicle(this);
+	}
+
+	public boolean CheckTileOwnership() {
+		return Player.CheckTileOwnership(this);
+	}
+
+	public static int GetPartialZ(int x, int y, int corners) {
+		return Landscape.GetPartialZ(x, y, corners);
+	}
 	
+	public int GetTileTrackStatus(int mode) {
+		return Landscape.GetTileTrackStatus(this, mode);
+	}
+
+
 }
 
 
