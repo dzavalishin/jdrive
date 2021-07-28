@@ -293,6 +293,7 @@ public class ViewPort
 				i = top + height - Hal._screen.height;
 				if (i >= 0) height -= i;
 
+				// Window wnext = w.getNextWindow?
 				if (height > 0) DoSetViewportPosition(w + 1, left, top, width, height);
 			}
 	}
@@ -447,7 +448,10 @@ public class ViewPort
 				pt.y + spr.y_offs + spr.height <= vd.dpi.top)
 			return;
 
-		AddChildSpriteScreen(image, pt.x - vd.parent_list[-1].left, pt.y - vd.parent_list[-1].top);
+		ParentSpriteToDraw last_parent = vd.parent_list.get( vd.parent_list.size() - 1 );
+		AddChildSpriteScreen(image, pt.x - last_parent.left, pt.y - last_parent.top);
+		
+		//AddChildSpriteScreen(image, pt.x - vd.parent_list[-1].left, pt.y - vd.parent_list[-1].top);
 	}
 
 
@@ -565,7 +569,7 @@ public class ViewPort
 	}
 
 	/* Returns a StringSpriteToDraw */
-	Object AddStringToDraw(int x, int y, StringID string, int params_1, int params_2, int params_3)
+	static StringSpriteToDraw AddStringToDraw(int x, int y, StringID string, int params_1, int params_2, int params_3)
 	{
 		return AddStringToDraw( x,  y, string.id, params_1, params_2, params_3);
 	}
@@ -691,7 +695,7 @@ public class ViewPort
 
 		// Draw a red error square?
 		if (_thd.redsq != null && _thd.redsq == ti.tile) {
-			DrawSelectionSprite(Sprite.PALETTE_TILE_RED_PULSATING | (Sprite.SPR_SELECT_TILE + _tileh_to_sprite[ti.tileh]), ti);
+			DrawSelectionSprite(Sprite.PALETTE_TILE_RED_PULSATING | (Sprite.SPR_SELECT_TILE + Landscape._tileh_to_sprite[ti.tileh]), ti);
 			return;
 		}
 
@@ -710,7 +714,7 @@ public class ViewPort
 				int z = ti.z;
 				if(0 != (ti.tileh & 8)) {
 					z += 8;
-					if (0 == (ti.tileh & 2) && (ti.tileh.IsSteepTileh())) z += 8;
+					if (0 == (ti.tileh & 2) && (TileIndex.IsSteepTileh(ti.tileh))) z += 8;
 				}
 				DrawGroundSpriteAt(Hal._cur_dpi.zoom != 2 ? Sprite.SPR_DOT : Sprite.SPR_DOT_SMALL, ti.x, ti.y, z);
 			} else if( 0 != (_thd.drawstyle & HT_RAIL /*&& _thd.place_mode == VHM_RAIL*/)) {
@@ -915,7 +919,7 @@ public class ViewPort
 
 					sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
 					if (sstd != null) {
-						sstd.color = (st.owner.id == Owner.OWNER_NONE || st.owner.id == Owner.OWNER_TOWN || !st.facilities) ? 0xE : _player_colors[st.owner];
+						sstd.color = (st.owner.id == Owner.OWNER_NONE || st.owner.id == Owner.OWNER_TOWN || 0==st.facilities) ? 0xE : Global._player_colors[st.owner.id];
 						sstd.width = st.sign.width_1;
 					}
 				}
@@ -990,7 +994,7 @@ public class ViewPort
 						right > ss.sign.left &&
 						left < ss.sign.left + ss.sign.width_1) {
 
-					sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, Str.STR_2806, ss.str, 0, 0);
+					sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2806), ss.str.id, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_1;
 						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
@@ -1009,7 +1013,7 @@ public class ViewPort
 						right > ss.sign.left &&
 						left < ss.sign.left + ss.sign.width_1*2) {
 
-					sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, Str.STR_2806, ss.str, 0, 0);
+					sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2806), ss.str.id, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_1;
 						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
@@ -1029,7 +1033,7 @@ public class ViewPort
 						right > ss.sign.left &&
 						left < ss.sign.left + ss.sign.width_2*4) {
 
-					sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, Str.STR_2002, ss.str, 0, 0);
+					sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2002), ss.str.id, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_2 | 0x8000;
 						sstd.color = (ss.owner.id==Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
@@ -1106,7 +1110,7 @@ public class ViewPort
 					sstd = ViewPort.AddStringToDraw(wp.sign.left + 1, wp.sign.top + 1, Str.STR_WAYPOINT_VIEWPORT_TINY, wp.index, 0, 0);
 					if (sstd != null) {
 						sstd.width = wp.sign.width_2 | 0x8000;
-						sstd.color = (wp.deleted ? 0xE : 11);
+						sstd.color = (wp.deleted != 0 ? 0xE : 11);
 					}
 				}
 			});
@@ -1348,7 +1352,8 @@ public class ViewPort
 		x = ((vd.dpi.left - (vp.virtual_left&mask)) >> vp.zoom) + vp.left;
 		y = ((vd.dpi.top - (vp.virtual_top&mask)) >> vp.zoom) + vp.top;
 
-		vd.dpi.dst_ptr = old_dpi.dst_ptr + x - old_dpi.left + (y - old_dpi.top) * old_dpi.pitch;
+		vd.dpi.dst_ptr = old_dpi.dst_ptr;
+		vd.dpi.dst_ptr_shift =  x - old_dpi.left + (y - old_dpi.top) * old_dpi.pitch;
 
 		//vd.parent_list = parent_list;
 		//vd.eof_parent_list = endof(parent_list);
@@ -2063,8 +2068,9 @@ public class ViewPort
 				x1 &= ~0xF;
 				y1 &= ~0xF;
 
-				if (x1 >= x2) intswap(x1,x2);
-				if (y1 >= y2) intswap(y1,y2);
+				if (x1 >= x2) /* intswap(x1,x2);*/ { int t = x1; x1 = x2; x2 = t; }
+				if (y1 >= y2) /* intswap(y1,y2);*/ { int t = y1; y1 = y2; y2 = t; }
+				
 				_thd.new_pos.x = x1;
 				_thd.new_pos.y = y1;
 				_thd.new_size.x = x2 - x1 + 16;
