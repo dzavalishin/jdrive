@@ -123,6 +123,41 @@ public class Window extends WindowConstants
 		return _windows.iterator();
 	}
 
+	/**
+	 * 
+	 * @param startw iterate starting from this window (including it) up to topmost one.
+	 * @return
+	 */
+	public static Iterator<Window> getIterator(Window startw) 
+	{
+		int i = 0;
+
+		for(; i < _windows.size(); i++ )
+		{
+			if( _windows.get(i) == startw )
+			{
+				return new Iterator<Window>() {
+
+					int curw = i;
+					
+					@Override
+					public boolean hasNext() {
+						return _windows.get(curw) != null;
+					}
+
+					@Override
+					public Window next() {
+						return _windows.get(curw++);
+					}
+					
+				};
+				
+			}
+		}
+		
+		return null;
+	}
+
 
 
 	// -----------------------------------
@@ -2872,6 +2907,8 @@ public class Window extends WindowConstants
 		ViewPort.DrawWindowViewport(this);
 		
 	}
+
+
 
 
 

@@ -1,11 +1,23 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
 import game.util.AnimCursor;
 import game.util.BitOps;
+
+/**
+ * 
+ * [dz] impl notes
+ * 
+ * spritelist_mem is just an allocator for a structures, use new() instead
+ *
+ */
+
+
+
 
 public class ViewPort 
 {
@@ -143,7 +155,7 @@ public class ViewPort
 		if(0 != (follow_flags & 0x80000000)) {
 			Vehicle veh;
 
-			w.as_vp_d().follow_vehicle = new VehicleID(follow_flags & 0xFFFF);
+			w.as_vp_d().follow_vehicle = follow_flags & 0xFFFF;
 			veh = Vehicle.GetVehicle(w.as_vp_d().follow_vehicle);
 			pt = MapXYZToViewport(vp, veh.x_pos, veh.y_pos, veh.z_pos);
 		} else {
@@ -164,9 +176,14 @@ public class ViewPort
 
 	static Point _vp_move_offs;
 
-	static void DoSetViewportPosition(Window w, int left, int top, int width, int height)
+	static void DoSetViewportPosition(Window startw, int left, int top, int width, int height)
 	{
-		for (; w < _last_window; w++) {
+		//for (; w < _last_window; w++) 
+		Iterator<Window> ii = Window.getIterator( startw );
+		while(ii.hasNext())
+		{
+			Window w = ii.next();
+			
 			if (left + width > w.left &&
 					w.left + w.width > left &&
 					top + height > w.top &&
@@ -377,21 +394,25 @@ public class ViewPort
 
 		assert((image & Sprite.SPRITE_MASK) < Sprite.MAX_SPRITES);
 
+		/*
 		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
 			DEBUG_misc( 0, "Out of sprite mem");
 			return;
 		}
 		ts = (TileSpriteToDraw)vd.spritelist_mem;
-
 		vd.spritelist_mem += sizeof(TileSpriteToDraw);
-
+		*/
+		ts = new TileSpriteToDraw();
+		
 		ts.image = image;
 		ts.next = null;
 		ts.x = x;
 		ts.y = y;
 		ts.z = z;
-		*vd.last_tile = ts;
-		vd.last_tile = &ts.next;
+		
+		//*vd.last_tile = ts;
+		//vd.last_tile = &ts.next;
+		vd.tile_list.add(ts);
 	}
 
 	static void DrawGroundSprite(int image)
@@ -443,14 +464,18 @@ public class ViewPort
 			return;
 		}
 
-		vd.last_child = null;
+		vd.last_parent = null;
 
+		/*
 		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
 			Global.DEBUG_misc( 0, "Out of sprite mem");
 			return;
 		}
 		ps = (ParentSpriteToDraw )vd.spritelist_mem;
+		*/
+		ps = new ParentSpriteToDraw();
 
+		/*
 		if (vd.parent_list >= vd.eof_parent_list) {
 			// This can happen rarely, mostly when you zoom out completely
 			//  and have a lot of stuff that moves (and is added to the
@@ -458,11 +483,11 @@ public class ViewPort
 			//  parent_list somewhere below to a higher number.
 			// This can not really hurt you, it just gives some black
 			//  spots on the screen ;)
-			DEBUG_misc( 0, "Out of sprite mem (parent_list)");
+			Global.DEBUG_misc( 0, "Out of sprite mem (parent_list)");
 			return;
-		}
+		}*/
 
-		vd.spritelist_mem += sizeof(ParentSpriteToDraw);
+		//vd.spritelist_mem += sizeof(ParentSpriteToDraw);
 
 		ps.image = image;
 		ps.tile_x = x;
@@ -485,10 +510,13 @@ public class ViewPort
 		}
 
 		ps.unk16 = 0;
-		ps.child = null;
-		vd.last_child = &ps.child;
+		//ps.child = null;
+		//vd.last_child = &ps.child; // TODO vd.last_ps = ps and later last_ps.child = ...?
 
-		*vd.parent_list++ = ps;
+		vd.last_parent = ps;
+		
+		//*vd.parent_list++ = ps;
+		vd.parent_list.add( ps );
 
 		if (vd.combine_sprites == 1) vd.combine_sprites = 2;
 	}
@@ -508,26 +536,31 @@ public class ViewPort
 		ViewportDrawer vd = _cur_vd;
 		ChildScreenSpriteToDraw cs;
 
-		assert((image & SPRITE_MASK) < MAX_SPRITES);
+		assert((image & Sprite.SPRITE_MASK) < Sprite.MAX_SPRITES);
 
+		/*
 		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
 			DEBUG_misc( 0, "Out of sprite mem");
 			return;
 		}
 		//cs = (ChildScreenSpriteToDraw*)vd.spritelist_mem;
 		cs = (ChildScreenSpriteToDraw)vd.spritelist_mem;
+		*/
+		cs = new ChildScreenSpriteToDraw();
+		
+		if (vd.last_parent == null) return; // TODO whine here?
 
-		if (vd.last_child == null) return;
+		//vd.spritelist_mem += sizeof(ChildScreenSpriteToDraw);
 
-		vd.spritelist_mem += sizeof(ChildScreenSpriteToDraw);
+		//*vd.last_child = cs;
+		//vd.last_child = &cs.next;
 
-		*vd.last_child = cs;
-		vd.last_child = &cs.next;
-
+		vd.last_parent.children.add(cs);
+		
 		cs.image = image;
 		cs.x = x;
 		cs.y = y;
-		cs.next = null;
+		//cs.next = null;
 	}
 
 	/* Returns a StringSpriteToDraw /
@@ -892,7 +925,7 @@ public class ViewPort
 
 					sstd=AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
 					if (sstd != null) {
-						sstd.color = (st.owner == OWNER_NONE || st.owner == OWNER_TOWN || !st.facilities) ? 0xE : _player_colors[st.owner];
+						sstd.color = (st.owner.id == Owner.OWNER_NONE || st.owner.id == Owner.OWNER_TOWN || 0==st.facilities) ? 0xE : Global._player_colors[st.owner];
 						sstd.width = st.sign.width_1;
 					}
 				}
@@ -950,7 +983,7 @@ public class ViewPort
 					sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, Str.STR_2806, ss.str, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_1;
-						sstd.color = (ss.owner == OWNER_NONE || ss.owner == OWNER_TOWN)?14:_player_colors[ss.owner];
+						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
 					}
 				}
 			});
@@ -969,7 +1002,7 @@ public class ViewPort
 					sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, Str.STR_2806, ss.str, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_1;
-						sstd.color = (ss.owner == OWNER_NONE || ss.owner == OWNER_TOWN)?14:_player_colors[ss.owner];
+						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
 					}
 				}
 			});
@@ -1034,7 +1067,7 @@ public class ViewPort
 			//FOR_ALL_WAYPOINTS(wp) 
 			WayPoint.forEach( (wp) ->
 			{
-				if (wp.xy &&
+				if (wp.xy != null &&
 						bottom > wp.sign.top &&
 						top < wp.sign.top + 24 &&
 						right > wp.sign.left &&
@@ -1091,13 +1124,16 @@ public class ViewPort
 	}
 
 
-	static void ViewportDrawTileSprites(TileSpriteToDraw ts)
+	static void ViewportDrawTileSprites(List<TileSpriteToDraw> tiles)
 	{
-		do {
+		//do {
+		for( TileSpriteToDraw ts : tiles )
+		{
 			Point pt = Point.RemapCoords(ts.x, ts.y, ts.z);
 			Gfx.DrawSprite(ts.image, pt.x, pt.y);
-			ts = ts.next;
-		} while (ts != null);
+		}
+			//ts = ts.next;
+		//} while (ts != null);
 	}
 
 	static void ViewportSortParentSprites(ParentSpriteToDraw [] psd)
@@ -1188,11 +1224,13 @@ public class ViewPort
 
 			Point pt = Point.RemapCoords(ps.tile_x, ps.tile_y, ps.tile_z);
 
-			final ChildScreenSpriteToDraw cs;
+			//final ChildScreenSpriteToDraw cs;
 
 			Gfx.DrawSprite(ps.image, pt.x, pt.y);
 
-			for (cs = ps.child; cs != null; cs = cs.next) {
+			//for (cs = ps.child; cs != null; cs = cs.next) 
+			for( ChildScreenSpriteToDraw cs : ps.children )
+			{
 				Gfx.DrawSprite(cs.image, ps.left + cs.x, ps.top + cs.y);
 			}
 		}
@@ -1248,12 +1286,12 @@ public class ViewPort
 									) && ss.width != 0) {
 								/* Real colors need the IS_PALETTE_COLOR flag
 								 * otherwise colors from _string_colormap are assumed. */
-								gfx.DrawString(
+								Gfx.DrawString(
 										ss.x >> zoom, (ss.y >> zoom) - (ss.width & 0x8000 ? 2 : 0),
-										ss.string, (_color_list[ss.color].window_color_bgb | IS_PALETTE_COLOR)
+										ss.string, (Global._color_list[ss.color].window_color_bgb | IS_PALETTE_COLOR)
 										);
 							} else {
-								DrawString(
+								Gfx.DrawString(
 										ss.x >> zoom, (ss.y >> zoom) - (ss.width & 0x8000 ? 2 : 0),
 										ss.string, 16
 										);
@@ -1267,14 +1305,14 @@ public class ViewPort
 
 	static void ViewportDoDraw(final ViewPort vp, int left, int top, int right, int bottom)
 	{
-		ViewportDrawer vd;
+		ViewportDrawer vd = new ViewportDrawer();
 		int mask;
 		int x;
 		int y;
 		DrawPixelInfo old_dpi;
 
-		byte [] mem = new byte[VIEWPORT_DRAW_MEM];
-		ParentSpriteToDraw parent_list = new ParentSpriteToDraw[6144];
+		//byte [] mem = new byte[VIEWPORT_DRAW_MEM];
+		//ParentSpriteToDraw parent_list = new ParentSpriteToDraw[6144];
 
 		//_cur_vd = vd;
 		_cur_vd = vd;
@@ -1286,7 +1324,7 @@ public class ViewPort
 		mask = (-1) << vp.zoom;
 
 		vd.combine_sprites = 0;
-		vd.ground_child = 0;
+		vd.ground_child = false;
 
 		vd.dpi.width = (right - left) & mask;
 		vd.dpi.height = (bottom - top) & mask;
@@ -1299,15 +1337,16 @@ public class ViewPort
 
 		vd.dpi.dst_ptr = old_dpi.dst_ptr + x - old_dpi.left + (y - old_dpi.top) * old_dpi.pitch;
 
-		vd.parent_list = parent_list;
-		vd.eof_parent_list = endof(parent_list);
-		vd.spritelist_mem = mem;
-		vd.eof_spritelist_mem = endof(mem) - sizeof(LARGEST_SPRITELIST_STRUCT);
-		vd.last_string = vd.first_string;
-		vd.first_string = null;
-		vd.last_tile = vd.first_tile;
-		vd.first_tile = null;
+		//vd.parent_list = parent_list;
+		//vd.eof_parent_list = endof(parent_list);
+		//vd.spritelist_mem = mem;
+		//vd.eof_spritelist_mem = endof(mem) - sizeof(LARGEST_SPRITELIST_STRUCT);
+		//vd.last_string = vd.first_string;
+		//vd.first_string = null;
+		//vd.last_tile = vd.first_tile;
+		//vd.first_tile = null;
 
+		
 		ViewportAddLandscape();
 
 		//#if !defined(NEW_ROTATION)
@@ -1322,9 +1361,10 @@ public class ViewPort
 
 		// This assert should never happen (because the length of the parent_list
 		//  is checked)
-		assert(vd.parent_list <= endof(parent_list));
+		//assert(vd.parent_list <= endof(parent_list));
 
-		if (vd.first_tile != null) ViewportDrawTileSprites(vd.first_tile);
+		//if (vd.first_tile != null) ViewportDrawTileSprites(vd.first_tile);
+		ViewportDrawTileSprites(vd.tile_list);
 
 		/* null terminate parent sprite list */
 		//[dz] TODO !!! *vd.parent_list = null;
@@ -1332,7 +1372,8 @@ public class ViewPort
 		ViewportSortParentSprites(parent_list);
 		ViewportDrawParentSprites(parent_list);
 
-		if (vd.first_string != null) ViewportDrawStrings(vd.dpi, vd.first_string);
+		//if (vd.first_string != null) ViewportDrawStrings(vd.dpi, vd.first_string);
+		ViewportDrawStrings(vd.dpi, vd.string_list);
 
 		Hal._cur_dpi = old_dpi;
 	}
@@ -2419,7 +2460,7 @@ class ChildScreenSpriteToDraw {
 	int image;
 	int x;
 	int y;
-	ChildScreenSpriteToDraw next;
+	//ChildScreenSpriteToDraw next;
 } ;
 
 class ParentSpriteToDraw {
@@ -2432,10 +2473,12 @@ class ParentSpriteToDraw {
 	int tile_y;
 	int tile_right;
 	int tile_bottom;
-	ChildScreenSpriteToDraw child;
+	//ChildScreenSpriteToDraw child;
 	byte unk16;
 	int tile_z;
 	int tile_z_bottom;
+	
+	ArrayList<ChildScreenSpriteToDraw> children = new ArrayList<ChildScreenSpriteToDraw>();
 } ;
 
 
@@ -2445,13 +2488,18 @@ class ViewportDrawer {
 	//byte *spritelist_mem;
 	//final byte *eof_spritelist_mem;
 
-	StringSpriteToDraw last_string, first_string;
+	//StringSpriteToDraw last_string, first_string;
 	//TileSpriteToDraw **last_tile, *first_tile;
+	ArrayList<TileSpriteToDraw> tile_list = new ArrayList<TileSpriteToDraw>();
+	ArrayList<StringSpriteToDraw> string_list = new ArrayList<StringSpriteToDraw>();
 
 	//ChildScreenSpriteToDraw **last_child;
 
-	ParentSpriteToDraw parent_list;
-	ParentSpriteToDraw eof_parent_list;
+	ParentSpriteToDraw last_parent;
+	
+	//ParentSpriteToDraw parent_list;
+	//ParentSpriteToDraw eof_parent_list;
+	ArrayList<ParentSpriteToDraw> parent_list = new ArrayList<ParentSpriteToDraw>();
 
 	byte combine_sprites;
 
@@ -2463,3 +2511,4 @@ class ViewportDrawer {
 //typedef void OnVehicleClickProc(final Vehicle v);
 @FunctionalInterface
 interface OnVehicleClickProc extends Consumer<Vehicle> {}
+f
