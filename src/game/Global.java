@@ -314,6 +314,12 @@ public class Global {
 			debug( s, arg );
 	}
 
+	public static void DEBUG_ntp( int level, String s, Object ... arg )
+	{
+		if( level >= _debug_ntp_level )
+			debug( s, arg );
+	}
+
 	
 	
 	

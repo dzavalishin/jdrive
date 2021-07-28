@@ -2,7 +2,8 @@ package game.struct;
 
 import game.TileIndex;
 
-public class FindLengthOfTunnelResult {
+public class TrackPathFinderLink {
 	public TileIndex tile;
-	public int length;
+	public int flags;
+	public int next;
 }

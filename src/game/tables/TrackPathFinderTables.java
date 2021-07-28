@@ -1,5 +1,7 @@
 package game.tables;
 
+import game.Rail;
+
 public class TrackPathFinderTables 
 {
 
@@ -70,18 +72,18 @@ public class TrackPathFinderTables
 	
 	static final int _is_upwards_slope[] = {
 			0, // no tileh
-			(1 << TRACKDIR_DIAG1_SW) | (1 << TRACKDIR_DIAG2_NW), // 1
-			(1 << TRACKDIR_DIAG1_SW) | (1 << TRACKDIR_DIAG2_SE), // 2
-			(1 << TRACKDIR_DIAG1_SW), // 3
-			(1 << TRACKDIR_DIAG1_NE) | (1 << TRACKDIR_DIAG2_SE), // 4
+			(1 << Rail.TRACKDIR_DIAG1_SW) | (1 << Rail.TRACKDIR_DIAG2_NW), // 1
+			(1 << Rail.TRACKDIR_DIAG1_SW) | (1 << Rail.TRACKDIR_DIAG2_SE), // 2
+			(1 << Rail.TRACKDIR_DIAG1_SW), // 3
+			(1 << Rail.TRACKDIR_DIAG1_NE) | (1 << Rail.TRACKDIR_DIAG2_SE), // 4
 			0, // 5
-			(1 << TRACKDIR_DIAG2_SE), // 6
+			(1 << Rail.TRACKDIR_DIAG2_SE), // 6
 			0, // 7
-			(1 << TRACKDIR_DIAG1_NE) | (1 << TRACKDIR_DIAG2_NW), // 8,
-			(1 << TRACKDIR_DIAG2_NW), // 9
+			(1 << Rail.TRACKDIR_DIAG1_NE) | (1 << Rail.TRACKDIR_DIAG2_NW), // 8,
+			(1 << Rail.TRACKDIR_DIAG2_NW), // 9
 			0, //10
 			0, //11,
-			(1 << TRACKDIR_DIAG1_NE), //12
+			(1 << Rail.TRACKDIR_DIAG1_NE), //12
 			0, //13
 			0, //14
 		};
@@ -89,13 +91,13 @@ public class TrackPathFinderTables
 	
 	
 	
-	#define DIAG_FACTOR 3
-	#define STR_FACTOR 2
+	public static final int DIAG_FACTOR = 3;
+	public static final int STR_FACTOR  = 2;
 	
 	// These has to be small cause the max length of a track
 	// is currently limited to 16384
 
-	static final byte _length_of_track[16] = {
+	static final byte _length_of_track[] = {
 		DIAG_FACTOR,DIAG_FACTOR,STR_FACTOR,STR_FACTOR,STR_FACTOR,STR_FACTOR,0,0,
 		DIAG_FACTOR,DIAG_FACTOR,STR_FACTOR,STR_FACTOR,STR_FACTOR,STR_FACTOR,0,0
 	};

@@ -1,8 +1,12 @@
 package game;
 
+import game.struct.FindLengthOfTunnelResult;
+import game.struct.RememberData;
+import game.struct.TrackPathFinderLink;
 import game.tables.TrackPathFinderTables;
+import game.util.BitOps;
 
-public class TrackPathFinder extends TrackPathFinderTables 
+public class TrackPathFinder extends Pathfind 
 {
 	// -------------------------------------------------
 	// Fields
@@ -18,8 +22,8 @@ public class TrackPathFinder extends TrackPathFinderTables
 
 	int the_dir;
 
-	byte tracktype;
-	byte var2;
+	int tracktype;
+	int var2;
 	boolean disable_tile_hash;
 	boolean hasbit_13;
 
@@ -32,17 +36,17 @@ public class TrackPathFinder extends TrackPathFinderTables
 	// Static data
 	// -------------------------------------------------
 
-	
+
 	// -------------------------------------------------
 	// Methods
 	// -------------------------------------------------
 
-	
+
 	// remember which tiles we have already visited so we don't visit them again.
-	static boolean TPFSetTileBit(TrackPathFinder *tpf, TileIndex tile, int dir)
+	static boolean TPFSetTileBit(TrackPathFinder tpf, TileIndex tile, int dir)
 	{
 		int hash, val, offs;
-		TrackPathFinderLink *link, *new_link;
+		TrackPathFinderLink link, new_link;
 		int bits = 1 << dir;
 
 		if (tpf.disable_tile_hash)
@@ -58,13 +62,13 @@ public class TrackPathFinder extends TrackPathFinderTables
 			tpf.hash_head[hash] = bits;
 			tpf.hash_tile[hash] = tile;
 			return true;
-		} else if (!(val & 0x8000)) {
+		} else if (0==(val & 0x8000)) {
 			/* single tile */
 
 			if (tile == tpf.hash_tile[hash]) {
 				/* found another bit for the same tile,
 				 * check if this bit is already set, if so, return false */
-				if (val & bits)
+				if(0!=(val & bits))
 					return false;
 
 				/* otherwise set the bit and return true to indicate that the bit
@@ -104,7 +108,7 @@ public class TrackPathFinder extends TrackPathFinderTables
 					/* found the tile in the link list,
 					 * check if the bit was alrady set, if so return false to indicate that the
 					 * bit was already set */
-					if (link.flags & bits)
+					if(0!=(link.flags & bits))
 						return false;
 					link.flags |= bits;
 					return true;
@@ -115,7 +119,7 @@ public class TrackPathFinder extends TrackPathFinderTables
 		/* get here if we need to add a new link to link,
 		 * first, allocate a new link, in the same way as before */
 		if (tpf.num_links_left == 0) {
-				return false;
+			return false;
 		}
 		tpf.num_links_left--;
 		new_link = tpf.new_link++;
@@ -129,11 +133,13 @@ public class TrackPathFinder extends TrackPathFinderTables
 		link.next = PATHFIND_GET_LINK_OFFS(tpf, new_link);
 		return true;
 	}
-	
-	
-	
-	static void TPFMode1(TrackPathFinder *tpf, TileIndex tile, int direction)
+
+
+
+	void TPFMode1(TileIndex tile, int direction)
 	{
+		TrackPathFinder tpf = this;
+
 		int bits;
 		int i;
 		RememberData rd;
@@ -149,13 +155,13 @@ public class TrackPathFinder extends TrackPathFinderTables
 		tile += TileOffsByDir(direction);
 
 		/* Check in case of rail if the owner is the same */
-		if (tpf.tracktype == TRANSPORT_RAIL) {
+		if (tpf.tracktype == Global.TRANSPORT_RAIL) {
 			if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE))
 				if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE))
 					/* Check if we are on a bridge (middle parts don't have an owner */
 					if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) || (tile.getMap().m5 & 0xC0) != 0xC0)
 						if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) || (_m[tile_org].m5 & 0xC0) != 0xC0)
-							if (GetTileOwner(tile_org) != GetTileOwner(tile))
+							if (tile_org.GetTileOwner() != tile.GetTileOwner())
 								return;
 		}
 
@@ -172,15 +178,24 @@ public class TrackPathFinder extends TrackPathFinderTables
 		if (bits != 0) {
 			if (!tpf.disable_tile_hash || (tpf.rd.cur_length <= 64 && (KILL_FIRST_BIT(bits) == 0 || ++tpf.rd.depth <= 7))) {
 				do {
-					i = FIND_FIRST_BIT(bits);
-					bits = KILL_FIRST_BIT(bits);
+					i = BitOps.FIND_FIRST_BIT(bits);
+					bits = BitOps.KILL_FIRST_BIT(bits);
 
 					tpf.the_dir = (_otherdir_mask[direction] & (byte)(1 << i)) ? (i+8) : i;
 					rd = tpf.rd;
 
-					if (TPFSetTileBit(tpf, tile, tpf.the_dir) &&
-							!tpf.enum_proc(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, &tpf.rd.pft_var6) ) {
-						TPFMode1(tpf, tile, _tpf_new_direction[tpf.the_dir]);
+					{
+						int [] iptr = { tpf.rd.pft_var6 };
+						if (TPFSetTileBit(tpf, tile, tpf.the_dir) &&
+								!tpf.enum_proc.enumerate(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, iptr) ) 
+						{
+							tpf.rd.pft_var6 = iptr[0];
+							tpf.TPFMode1(tile, _tpf_new_direction[tpf.the_dir]);
+						}
+						else
+						{
+							tpf.rd.pft_var6 = iptr[0];
+						}
 					}
 					tpf.rd = rd;
 				} while (bits != 0);
@@ -214,33 +229,35 @@ public class TrackPathFinder extends TrackPathFinderTables
 			return;
 
 		do {
-			i = FIND_FIRST_BIT(bits);
-			bits = KILL_FIRST_BIT(bits);
+			i = BitOps.FIND_FIRST_BIT(bits);
+			bits = BitOps.KILL_FIRST_BIT(bits);
 
-			tpf.the_dir = (_otherdir_mask[direction] & (byte)(1 << i)) ? (i+8) : i;
+			tpf.the_dir = (_otherdir_mask[direction] & (byte)(1 << i)) != 0 ? (i+8) : i;
 			rd = tpf.rd;
 			if (TPFSetTileBit(tpf, tile, tpf.the_dir) &&
-					!tpf.enum_proc(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, &tpf.rd.pft_var6) ) {
-				TPFMode1(tpf, tile, _tpf_new_direction[tpf.the_dir]);
+					!tpf.enum_proc.enumerate(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, tpf.rd.pft_var6) ) {
+				tpf.TPFMode1(tile, _tpf_new_direction[tpf.the_dir]);
 			}
 			tpf.rd = rd;
 		} while (bits != 0);
 	}
-	
 
-	
-	
-	static void TPFMode2(TrackPathFinder *tpf, TileIndex tile, int direction)
+
+
+
+	public void TPFMode2( TileIndex tile, int direction)
 	{
+		TrackPathFinder tpf = this;
+
 		int bits;
 		int i;
 		RememberData rd;
 		int owner = -1;
 
 		/* XXX: Mode 2 is currently only used for ships, why is this code here? */
-		if (tpf.tracktype == TRANSPORT_RAIL) {
+		if (tpf.tracktype == Global.TRANSPORT_RAIL) {
 			if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE)) {
-				owner = GetTileOwner(tile);
+				owner = tile.GetTileOwner();
 				/* Check if we are on the middle of a bridge (has no owner) */
 				if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && (tile.getMap().m5 & 0xC0) == 0xC0)
 					owner = -1;
@@ -253,11 +270,11 @@ public class TrackPathFinder extends TrackPathFinderTables
 		tile = TILE_MASK(tile + TileOffsByDir(direction));
 
 		/* Check in case of rail if the owner is the same */
-		if (tpf.tracktype == TRANSPORT_RAIL) {
+		if (tpf.tracktype == Global.TRANSPORT_RAIL) {
 			if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE))
 				/* Check if we are on the middle of a bridge (has no owner) */
 				if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) || (tile.getMap().m5 & 0xC0) != 0xC0)
-					if (owner != -1 && !IsTileOwner(tile, owner))
+					if (owner != -1 && !tile.IsTileOwner(owner))
 						return;
 		}
 
@@ -295,7 +312,7 @@ public class TrackPathFinder extends TrackPathFinderTables
 				tpf.rd.pft_var6 = (byte)i;
 			}
 
-	continue_here:;
+			continue_here:;
 			tpf.the_dir = BitOps.HASBIT(_otherdir_mask[direction],i) ? (i+8) : i;
 
 			if (!tpf.enum_proc(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, null)) {
@@ -306,19 +323,19 @@ public class TrackPathFinder extends TrackPathFinderTables
 		} while (++i, bits>>=1);
 
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	static int SkipToEndOfTunnel(TrackPathFinder *tpf, TileIndex tile, int direction)
+
+
+
+
+
+
+
+
+
+
+
+
+	static TileIndex SkipToEndOfTunnel(TrackPathFinder tpf, TileIndex tile, int direction)
 	{
 		FindLengthOfTunnelResult flotr;
 		TPFSetTileBit(tpf, tile, 14);
@@ -328,13 +345,13 @@ public class TrackPathFinder extends TrackPathFinderTables
 		return flotr.tile;
 	}
 
-	
+
 	// -------------------------------------------------
 	// Static methods
 	// -------------------------------------------------
-	
-	
-	
-	
-	
+
+
+
+
+
 }

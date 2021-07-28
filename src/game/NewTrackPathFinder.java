@@ -1,29 +1,32 @@
 package game;
 
+import game.struct.HashLink;
+import game.struct.StackedItem;
 import game.tables.TrackPathFinderTables;
+import game.util.BitOps;
 
-public class NewTrackPathFinder extends TrackPathFinderTables 
+public class NewTrackPathFinder extends Pathfind 
 {
 	// -------------------------------------------------
 	// Fields
 	// -------------------------------------------------
-	NTPEnumProc *enum_proc;
+	NTPEnumProc enum_proc;
 	Object userdata;
 	TileIndex dest;
 
 	byte tracktype;
 	int maxlength;
 
-	HashLink *new_link;
+	HashLink new_link;
 	int num_links_left;
 
 	int nstack;
-	StackedItem stack[256]; // priority queue of stacked items
+	StackedItem [] stack = new StackedItem[256]; // priority queue of stacked items
 
-	int hash_head[0x400]; // hash heads. 0 means unused. 0xFFFC = length, 0x3 = dir
-	TileIndex hash_tile[0x400]; // tiles. or links.
+	int [] hash_head = new int[0x400]; // hash heads. 0 means unused. 0xFFFC = length, 0x3 = dir
+	TileIndex [] hash_tile = new TileIndex[0x400]; // tiles. or links.
 
-	HashLink links[0x400]; // hash links
+	HashLink[] links = new HashLink[0x400]; // hash links
 
 	// -------------------------------------------------
 	// Static data
@@ -42,7 +45,7 @@ public class NewTrackPathFinder extends TrackPathFinderTables
 	static boolean NtpVisit(NewTrackPathFinder tpf, TileIndex tile, int dir, int length)
 	{
 		int hash,head;
-		HashLink *link, *new_link;
+		HashLink link, new_link;
 
 		assert(length < 16384-1);
 
@@ -68,7 +71,7 @@ public class NewTrackPathFinder extends TrackPathFinderTables
 			// allocate a link. if out of links, handle this by returning
 			// that a tile was already visisted.
 			if (tpf.num_links_left == 0) {
-				DEBUG(ntp, 1) ("[NTP] no links left");
+				Global.DEBUG_ntp( 1, "[NTP] no links left");
 				return false;
 			}
 
@@ -102,7 +105,7 @@ public class NewTrackPathFinder extends TrackPathFinderTables
 		/* get here if we need to add a new link to link,
 		 * first, allocate a new link, in the same way as before */
 		if (tpf.num_links_left == 0) {
-			DEBUG(ntp, 1) ("[NTP] no links left");
+			Global.DEBUG_ntp( 1, "[NTP] no links left");
 			return false;
 		}
 		tpf.num_links_left--;
@@ -236,7 +239,7 @@ public class NewTrackPathFinder extends TrackPathFinderTables
 
 				// too long search length? bail out.
 				if (si.cur_length >= tpf.maxlength) {
-					DEBUG(ntp,1) ("[NTP] cur_length too big");
+					Global.DEBUG_ntp( 1, "[NTP] cur_length too big");
 					bits = 0;
 					break;
 				}
@@ -374,8 +377,8 @@ public class NewTrackPathFinder extends TrackPathFinderTables
 				si.priority = si.cur_length + estimation;
 
 				// out of stack items, bail out?
-				if (tpf.nstack >= lengthof(tpf.stack)) {
-					DEBUG(ntp, 1) ("[NTP] out of stack");
+				if (tpf.nstack >= tpf.stack.length) {
+					Global.DEBUG_ntp( 1, "[NTP] out of stack");
 					break;
 				}
 
