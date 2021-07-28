@@ -1,3 +1,4 @@
+#if 0
 /* $Id: pathfind.c 3329 2005-12-21 13:53:44Z matthijs $ */
 
 #include "stdafx.h"

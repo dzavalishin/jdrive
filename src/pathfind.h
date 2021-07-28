@@ -1,3 +1,4 @@
+#if 0
 /* $Id: pathfind.h 3019 2005-10-05 07:20:26Z tron $ */
 
 #ifndef PATHFIND_H
