@@ -1,5 +1,6 @@
 package game;
 
+import game.struct.DrawEngineInfo;
 import game.tables.EngineTables;
 import game.util.BitOps;
 import game.util.Prices;
@@ -512,7 +513,7 @@ public class Engine extends EngineTables {
 					case 0x57: value =  veh.profit_last_year & 0xFF; break;
 					case 0x58: value =  veh.profit_last_year; break;
 					case 0x59: value =  veh.profit_last_year & 0xFF; break;
-					case 0x5A: value =  veh.next == null ? INVALID_VEHICLE : veh.next.index; break;
+					case 0x5A: value =  veh.next == null ? Vehicle.INVALID_VEHICLE : veh.next.index; break;
 					case 0x5C: value =  veh.value; break;
 					case 0x5D: value =  veh.value & 0xFFFFFF; break;
 					case 0x5E: value =  veh.value & 0xFFFF; break;
@@ -1224,10 +1225,10 @@ public class Engine extends EngineTables {
 	//static void DrawAircraftEngineInfo(EngineID engine, int x, int y, int maxw);
 
 	static final DrawEngineInfo _draw_engine_list[] = {
-			{DrawTrainEngine,DrawTrainEngineInfo},
-			{DrawRoadVehEngine,DrawRoadVehEngineInfo},
-			{DrawShipEngine,DrawShipEngineInfo},
-			{DrawAircraftEngine,DrawAircraftEngineInfo},
+			new DrawEngineInfo( TrainCmd::DrawTrainEngine, Engine::DrawTrainEngineInfo ),
+			new DrawEngineInfo( Engine::DrawRoadVehEngine, Engine::DrawRoadVehEngineInfo ),
+			new DrawEngineInfo( Ship::DrawShipEngine, Engine::DrawShipEngineInfo ),
+			new DrawEngineInfo( AirCraft::DrawAircraftEngine, Engine::DrawAircraftEngineInfo ),
 	};
 
 	static void EnginePreviewWndProc(Window w, WindowEvent e)
@@ -1256,8 +1257,8 @@ public class Engine extends EngineTables {
 				dei = _draw_engine_list[3];
 
 			width = w.width;
-			dei.engine_proc(width >> 1, 100, engine, 0);
-			dei.info_proc(engine, width >> 1, 130, width - 52);
+			dei.engine_proc.accept(width >> 1, 100, engine, 0);
+			dei.info_proc.accept(engine, width >> 1, 130, width - 52);
 			break;
 		}
 
@@ -1348,7 +1349,7 @@ public class Engine extends EngineTables {
 
 	static void DrawAircraftEngineInfo(EngineID engine, int x, int y, int maxw)
 	{
-		final AircraftVehicleInfo avi = AircraftVehInfo(engine);
+		final AircraftVehicleInfo avi = AircraftVehInfo(engine.id);
 		Global.SetDParam(0, (Global._price.aircraft_base >> 3) * avi.base_cost >> 5);
 		Global.SetDParam(1, avi.max_speed << 3);
 		Global.SetDParam(2, avi.passenger_capacity);
@@ -1374,7 +1375,7 @@ public class Engine extends EngineTables {
 		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_A02D, w.width - 2);
 
 		DrawAircraftEngine(w.width >> 1, 93, engine, 0);
-		Gfx.GfxFillRect(25, 56, w.width - 56, 110, 0x323 | USE_COLORTABLE);
+		Gfx.GfxFillRect(25, 56, w.width - 56, 110, 0x323 | Sprite.USE_COLORTABLE);
 		DrawAircraftEngineInfo( EngineID.get( engine ), w.width >> 1, 131, w.width - 52);
 	}
 

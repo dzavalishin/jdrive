@@ -72,7 +72,7 @@ public class mAirport
 	{
 		if(!Global._patches.allow_municipal_airports)
 			return false;
-		if(v.tile.GetTileOwner().owner == Owner.OWNER_TOWN)
+		if(v.tile.GetTileOwner().id == Owner.OWNER_TOWN)
 			return true;
 
 		return false;
@@ -175,7 +175,7 @@ public class mAirport
 		
 	}
 
-	//returns a position of a tile on the circuference of a circle;
+	static //returns a position of a tile on the circuference of a circle;
 	TileIndex CircularPos(int radius, int angle, TileIndex centre)
 	{
 		return TileIndex.TileXY(
@@ -184,7 +184,7 @@ public class mAirport
 	}
 
 	//checks if site is level and buildable
-	boolean MA_CheckCandidate(TileIndex candidatetile_p, Town tn)
+	static boolean MA_CheckCandidate(TileIndex candidatetile_p, Town tn)
 	{
 		TileIndex candidatetile = candidatetile_p.iadd(-4, -4);
 		boolean [] retcode = { true };
@@ -230,14 +230,14 @@ public class mAirport
 	}
 
 	//adds a news item for display
-	void MA_AnnounceAirport(Town tn, TileIndex tl)
+	static void MA_AnnounceAirport(Town tn, TileIndex tl)
 	{
 		Global.SetDParam(0 ,tn.index);
 		NewsItem.AddNewsItem(Str.STR_MA_BUILT_MUNICIPAL_AIRPORT, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ECONOMY, 0), tl.tile, 0);
 	}
 
 	//looks for a goodsite (works in outward spiral)
-	TileIndex MA_FindSite(Town tn)
+	static TileIndex MA_FindSite(Town tn)
 	{
 		int angle,radius;
 
@@ -250,7 +250,7 @@ public class mAirport
 	}
 
 	//the fun bit 
-	void MA_BuildAirport(TileIndex buildtile_p)
+	static void MA_BuildAirport(TileIndex buildtile_p)
 	{
 		TileIndex buildtile = buildtile_p.iadd(-3,-3);
 
@@ -345,14 +345,14 @@ public class mAirport
 
 		if(Global._cur_year + 1920 < INT_AIRPORT_YEAR) {
 			Global.SetDParam(0, tn.index);
-			Gui.ShowErrorMessage(Str.STR_MA_CANT_BUILD_TOO_EARLY, Str.INVALID_STRING_ID, 300, 300);
+			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_TOO_EARLY, Str.INVALID_STRING_ID, 300, 300);
 			Global._current_player = old_player;
 			return;
 		}
 
 		if(tn.population < MA_MIN_POPULATION) {
 			Global.SetDParam(0, tn.index);
-			Gui.ShowErrorMessage(Str.STR_MA_CANT_BUILD_LOW_POPULATION, Str.INVALID_STRING_ID, 300, 300);
+			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_LOW_POPULATION, Str.INVALID_STRING_ID, 300, 300);
 			Global._current_player = old_player;
 			return;
 		}
@@ -361,7 +361,7 @@ public class mAirport
 
 		if(tl == TileIndex.INVALID_TILE) {
 			Global.SetDParam(0, tn.index);
-			Gui.ShowErrorMessage(Str.STR_MA_CANT_BUILD_NO_SITE, Str.INVALID_STRING_ID, 300, 300);
+			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_NO_SITE, Str.INVALID_STRING_ID, 300, 300);
 			Global._current_player = old_player;
 			return;
 		}

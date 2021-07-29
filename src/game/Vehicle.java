@@ -893,7 +893,7 @@ public class Vehicle implements IPoolItem
 			return false;
 
 		return Global._patches.servint_ispercent ?
-				(reliability < GetEngine(engine_type).reliability * (100 - service_interval) / 100) :
+				(reliability < Engine.GetEngine(engine_type).reliability * (100 - service_interval) / 100) :
 					(date_of_last_service + service_interval < Global._date);
 	}
 
@@ -1119,7 +1119,7 @@ public class Vehicle implements IPoolItem
 
 	static Vehicle AllocateVehicle()
 	{
-		VehicleID[] counter = { new VehicleID(0) }; // TODO not static?
+		VehicleID[] counter = { VehicleID.get(0) }; // TODO not static?
 		return AllocateSingleVehicle(counter);
 	}
 
@@ -1133,7 +1133,7 @@ public class Vehicle implements IPoolItem
 	{
 		int i;
 		Vehicle v;
-		VehicleID[] counter = { new VehicleID(0) };
+		VehicleID[] counter = { VehicleID.get(0) };
 
 		for(i = 0; i != num; i++) {
 			v = AllocateSingleVehicle(counter);
@@ -1167,13 +1167,14 @@ public class Vehicle implements IPoolItem
 			for (;;) {
 				//VehicleID veh = _vehicle_position_hash[(x + y) & 0xFFFF];
 				VehicleID veh = _hash.get(x, y);
-				while (veh.id != INVALID_VEHICLE) {
+				//while (veh.id != INVALID_VEHICLE) {
+				if (veh.id != INVALID_VEHICLE) {
 					Vehicle v = GetVehicle(veh);
 					Object a;
 
 					a = proc.apply(v, data);
 					if (a != null) return a;
-					veh = v.next_hash;
+					//veh = v.next_hash;
 				}
 
 				if (x == x2)
@@ -1381,7 +1382,7 @@ public class Vehicle implements IPoolItem
 	{
 		Vehicle v = this;
 		// we need to set v.leave_depot_instantly as we have no control of it's contents at this time
-		if (BitOps.HASBIT(v.current_order.flags, OFB_HALT_IN_DEPOT) && !BitOps.HASBIT(v.current_order.flags, OFB_PART_OF_ORDERS) && v.current_order.type == Order.OT_GOTO_DEPOT) {
+		if (BitOps.HASBIT(v.current_order.flags, Order.OFB_HALT_IN_DEPOT) && !BitOps.HASBIT(v.current_order.flags, OFB_PART_OF_ORDERS) && v.current_order.type == Order.OT_GOTO_DEPOT) {
 			// we keep the vehicle in the depot since the user ordered it to stay
 			v.leave_depot_instantly = false;
 		} else {
@@ -1405,8 +1406,8 @@ public class Vehicle implements IPoolItem
 			Train::Train_Tick,
 			RoadVeh_Tick,
 			Ship::Ship_Tick,
-			Aircraft_Tick,
-			EffectVehicle_Tick,
+			AirCraft::Aircraft_Tick,
+			Vehicle::EffectVehicle_Tick,
 			DisasterVehicle_Tick,
 	};
 
@@ -1494,8 +1495,8 @@ public class Vehicle implements IPoolItem
 	 */
 	boolean CanRefitTo(EngineID engine_type, CargoID cid_to)
 	{
-		CargoID cid = _global_cargo_id[GameOptions._opt_ptr.landscape][cid_to];
-		return BitOps.HASBIT(_engine_info[engine_type].refit_mask, cid) != 0;
+		CargoID cid = Global._global_cargo_id[GameOptions._opt_ptr.landscape][cid_to.id];
+		return BitOps.HASBIT(Global._engine_info[engine_type.id].refit_mask, cid.id);
 	}
 
 	static void DoDrawVehicle(final Vehicle v)

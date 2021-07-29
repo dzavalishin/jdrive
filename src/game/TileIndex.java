@@ -524,6 +524,7 @@ public class TileIndex implements Comparable<TileIndex>{
 	public void clrBit_m5(int i) {		Global._m[tile].m5 = BitOps.RETCLRBIT(Global._m[tile].m5, i);	}
 	public void setBit_m5(int i) {		Global._m[tile].m5 = BitOps.RETSETBIT(Global._m[tile].m5, i);	}
 
+	// TODO must be in Mutable only!
 	public TileIndex TILE_MASK() {
 		tile = TILE_MASK(tile);
 		return this;

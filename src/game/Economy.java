@@ -45,7 +45,7 @@ public class Economy
 	public static final int SCORE_MAX = 1000; 	// The max score that can be in the performance history
 	//  the scores together of public static final int SCORE_info is allowed to be more!
 
-	class ScoreInfo {
+	static class ScoreInfo {
 		int id;			// Unique ID of the score
 		int needed;			// How much you need to get the perfect score
 		int score;			// How much score it will give
@@ -80,7 +80,7 @@ public class Economy
 
 	//int _score_part[MAX_PLAYERS][NUM_SCORE];
 
-	void UpdatePlayerHouse(Player p, int score)
+	static void UpdatePlayerHouse(Player p, int score)
 	{
 		byte val;
 		TileIndex tile = p.location_of_house;
@@ -108,7 +108,7 @@ public class Economy
 		if (val <= tile.getMap().m5)
 			return;
 
-		int ti = tile.getTile();
+		//int ti = tile.getTile();
 
 		tile.iadd(0, 0).getMap().m5 =   val;
 		tile.iadd(0, 1).getMap().m5 = ++val;
@@ -121,25 +121,25 @@ public class Economy
 		tile.iadd(1, 1).MarkTileDirtyByTile();
 	}
 
-	long CalculateCompanyValue(final Player p)
+	static long CalculateCompanyValue(final Player p)
 	{
 		PlayerID owner = p.index;
 		long value;
 
 		{
 			//Station st;
-			int num = 0;
+			int [] num = {0};
 
 			//FOR_ALL_STATIONS(st)
 			Station.forEach( (ii,st) ->
 			{
 				if (st.xy != null && st.owner == owner) {
 					int facil = st.facilities;
-					do num += (facil&1); while ((facil >>= 1) > 0);
+					do num[0] += (facil&1); while ((facil >>= 1) > 0);
 				}
 			});
 
-			value = num * Global._price.station_value * 25;
+			value = num[0] * Global._price.station_value * 25;
 		}
 
 		{
@@ -181,9 +181,12 @@ public class Economy
 			int num = 0;
 
 			//FOR_ALL_VEHICLES(v) 
-			Vehicle.forEach( (v) ->
+			//Vehicle.forEach( (v) ->
+			Iterator<Vehicle> ii = Vehicle.getIterator();
+			while(ii.hasNext())
 			{
-				if (v.owner != owner)
+				Vehicle v = ii.next();
+				if (v.owner.id != owner)
 					continue;
 				if ((v.type == Vehicle.VEH_Train && v.IsFrontEngine()) ||
 						v.type == Vehicle.VEH_Road ||
@@ -195,7 +198,7 @@ public class Economy
 							min_profit = v.profit_last_year;
 					}
 				}
-			});
+			}
 
 			_score_part[owner][SCORE_VEHICLES] = num;
 			if (min_profit > 0)
@@ -204,7 +207,7 @@ public class Economy
 
 		/* Count stations */
 		{
-			int num = 0;
+			int [] num = { 0 };
 			//Station st;
 
 			//FOR_ALL_STATIONS(st)
@@ -212,10 +215,10 @@ public class Economy
 			{
 				if (st.xy != null && st.owner.id == owner) {
 					int facil = st.facilities;
-					do { num += facil&1; } while (0 != (facil>>=1) );
+					do { num[0] += facil&1; } while (0 != (facil>>=1) );
 				}
 			});
-			_score_part[owner][SCORE_STATIONS] = num;
+			_score_part[owner][SCORE_STATIONS] = num[0];
 		}
 
 		/* Generate statistics depending on recent income statistics */
@@ -229,11 +232,13 @@ public class Economy
 			if (numec != 0) {
 				min_income = 0x7FFFFFFF;
 				max_income = 0;
-				pee = p.old_economy;
+				//pee = p.old_economy;
+				int peei = 0;
 				do {
+					pee  = p.old_economy[peei++];
 					min_income = Integer.min(min_income, pee.income + pee.expenses);
 					max_income = Integer.max(max_income, pee.income + pee.expenses);
-					++pee;
+					//++pee;
 				} while (--numec > 0);
 
 				if (min_income > 0)
@@ -251,12 +256,14 @@ public class Economy
 
 			numec = Math.min(p.num_valid_stat_ent, 4);
 			if (numec != 0) {
-				pee = p.old_economy;
+				//pee = p.old_economy;
+				int peei = 0;
 				total_delivered = 0;
 				do {
+					pee  = p.old_economy[peei++];
 					total_delivered += pee.delivered_cargo;
-					++pee;
-				} while (--numec);
+					//++pee;
+				} while (--numec > 0);
 
 				_score_part[owner][SCORE_DELIVERED] = total_delivered;
 			}
@@ -266,7 +273,7 @@ public class Economy
 		{
 			int cargo = p.cargo_types;
 			int num = 0;
-			do num += cargo&1; while (cargo>>=1);
+			do num += cargo&1; while ((cargo>>=1) != 0);
 			_score_part[owner][SCORE_CARGO] = num;
 			if (update)
 				p.cargo_types = 0;
@@ -485,14 +492,14 @@ public class Economy
 
 		switch (p.quarters_of_bankrupcy) {
 		case 2:
-			NewsItem.AddNewsItem( (StringID)(owner + 16),
+			NewsItem.AddNewsItem( new StringID(owner.id + 16),
 					NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 			break;
 		case 3: {
 			/* XXX - In multiplayer, should we ask other players if it wants to take
 			          over when it is a human company? -- TrueLight */
 			if (owner.IS_HUMAN_PLAYER()) {
-				NewsItem.AddNewsItem( (StringID)(owner + 16),
+				NewsItem.AddNewsItem( new StringID(owner.id + 16),
 						NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 				break;
 			}
@@ -510,7 +517,7 @@ public class Economy
 		}
 		case 4: {
 			// Close everything the owner has open
-			Window.DeletePlayerWindows(owner);
+			Player.DeletePlayerWindows(owner);
 
 			//			Show bankrupt news
 			Global.SetDParam(0, p.name_1);
@@ -547,7 +554,7 @@ public class Economy
 
 				// Convert everything the player owns to NO_OWNER
 				p.money64 = p.player_money = 100000000;
-				ChangeOwnershipOfPlayerItems(owner, Owner.OWNER_SPECTATOR);
+				ChangeOwnershipOfPlayerItems(owner, PlayerID.get(Owner.OWNER_SPECTATOR));
 				// Register the player as not-active
 				p.is_active = false;
 
@@ -866,7 +873,7 @@ public class Economy
 			1000000, // build_industry
 	};
 
-	static byte price_base_multiplier[] = new byte[NUM_PRICES];
+	static byte price_base_multiplier[] = new byte[Global.NUM_PRICES];
 
 	/**
 	 * Reset changes to the price base multipliers.
@@ -897,13 +904,13 @@ public class Economy
 	{
 		int i;
 
-		assert(_price.length == Global.NUM_PRICES);
+		assert(Global._price.length == Global.NUM_PRICES);
 
 		for(i=0; i!=NUM_PRICES; i++) 
 		{
 			int price = _price_base[i];
 			if (_price_category[i] != 0) {
-				int mod = _price_category[i] == 1 ? _opt.diff.vehicle_costs : _opt.diff.construction_cost;
+				int mod = _price_category[i] == 1 ? GameOptions._opt.diff.vehicle_costs : GameOptions._opt.diff.construction_cost;
 				if (mod < 1) {
 					price = price * 3 >> 2;
 				} else if (mod > 1) {
@@ -933,7 +940,7 @@ public class Economy
 		Pair tp;
 
 		/* if mode is false, use the singular form */
-		Global.SetDParam(0, Global._cargoc.names_s[s.cargo_type] + (mode ? 0 : 32));
+		Global.SetDParam(0, Global._cargoc.names_s[s.cargo_type].id + (mode ? 0 : 32));
 
 		if (s.age < 12) {
 			if (s.cargo_type != AcceptedCargo.CT_PASSENGERS && s.cargo_type != AcceptedCargo.CT_MAIL) {
@@ -1164,7 +1171,7 @@ public class Economy
 					//goto add_subsidy;
 					if (!CheckSubsidyDuplicate(s)) {
 						s.age = 0;
-						pair = SetupSubsidyDecodeParam(s, 0);
+						pair = SetupSubsidyDecodeParam(s, false);
 						NewsItem.AddNewsItem(Str.STR_2030_SERVICE_SUBSIDY_OFFERED, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 						modified = true;
 						break;
@@ -1179,7 +1186,7 @@ public class Economy
 					//add_subsidy:
 					if (!CheckSubsidyDuplicate(s)) {
 						s.age = 0;
-						pair = SetupSubsidyDecodeParam(s, 0);
+						pair = SetupSubsidyDecodeParam(s, false);
 						NewsItem.AddNewsItem(Str.STR_2030_SERVICE_SUBSIDY_OFFERED, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 						modified = true;
 						break;
@@ -1225,7 +1232,7 @@ public class Economy
 			SlObject(&_subsidies[index], _subsidies_desc);
 	} */
 
-	int GetTransportedGoodsIncome(int num_pieces, int dist, byte transit_days, byte cargo_type)
+	static int GetTransportedGoodsIncome(int num_pieces, int dist, int transit_days, int cargo_type)
 	{
 		int cargo = cargo_type;
 		int f;
@@ -1255,30 +1262,31 @@ public class Economy
 
 	static void DeliverGoodsToIndustry(TileIndex xy, byte cargo_type, int num_pieces)
 	{
-		Industry ind, best;
-		int t, u;
+		Industry [] best = { null };
+		int [] u = { Global._patches.station_spread + 8 };
 
 		/* Check if there's an industry close to the station that accepts
 		 * the cargo */
-		best = null;
-		u = Global._patches.station_spread + 8;
+		//best = null;
+		//u = ;
 		//FOR_ALL_INDUSTRIES(ind)
 		Industry.forEach( (ind) ->
 		{
+			int t;
 			if (ind.xy != null && (cargo_type == ind.accepts_cargo[0] || cargo_type
 					== ind.accepts_cargo[1] || cargo_type == ind.accepts_cargo[2]) &&
 					ind.produced_cargo[0] != AcceptedCargo.CT_INVALID &&
 					ind.produced_cargo[0] != cargo_type &&
-					(t = Map.DistanceManhattan(ind.xy, xy)) < 2 * u) {
-				u = t;
-				best = ind;
+					(t = Map.DistanceManhattan(ind.xy, xy)) < 2 * u[0]) {
+				u[0] = t;
+				best[0] = ind;
 			}
 		});
 
 		/* Found one? */
 		if (best != null) {
-			best.was_cargo_delivered = true;
-			best.cargo_waiting[0] = Math.min(best.cargo_waiting[0] + num_pieces, 0xFFFF);
+			best[0].was_cargo_delivered = true;
+			best[0].cargo_waiting[0] = Math.min(best[0].cargo_waiting[0] + num_pieces, 0xFFFF);
 		}
 	}
 
@@ -1308,11 +1316,11 @@ public class Economy
 
 				/* Check distance from source */
 				if (cargo_type == AcceptedCargo.CT_PASSENGERS || cargo_type == AcceptedCargo.CT_MAIL) {
-					xy = GetTown(s.from).xy;
+					xy = Town.GetTown(s.from).xy;
 				} else {
-					xy = (GetIndustry(s.from)).xy;
+					xy = (Industry.GetIndustry(s.from)).xy;
 				}
-				if (DistanceMax(xy, from.xy) > 9)
+				if (Map.DistanceMax(xy, from.xy) > 9)
 					continue;
 
 				/* Check distance from dest */
@@ -1331,14 +1339,14 @@ public class Economy
 				s.to = to.index;
 
 				/* Add a news item */
-				pair = SetupSubsidyDecodeParam(s, 0);
+				pair = SetupSubsidyDecodeParam(s, false);
 				Global.InjectDParam(2);
 
 				p = Global._current_player.GetPlayer();
 				Global.SetDParam(0, p.name_1);
 				Global.SetDParam(1, p.name_2);
 				NewsItem.AddNewsItem(
-						Str.STR_2031_SERVICE_SUBSIDY_AWARDED + _opt.diff.subsidy_multiplier,
+						Str.STR_2031_SERVICE_SUBSIDY_AWARDED + GameOptions._opt.diff.subsidy_multiplier,
 						NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0),
 						pair.a, pair.b);
 
@@ -1349,7 +1357,7 @@ public class Economy
 		return false;
 	}
 
-	static int DeliverGoods(int num_pieces, byte cargo_type, int source, int dest, byte days_in_transit)
+	static int DeliverGoods(int num_pieces, byte cargo_type, int source, int dest, int days_in_transit)
 	{
 		boolean subsidised;
 		Station s_from, s_to;
@@ -1408,11 +1416,11 @@ public class Economy
 	 * v = vehicle to load, u = GetFirstInChain(v)
 	 */
 	static boolean LoadWait(final Vehicle v, final Vehicle u) {
-		final Vehicle w;
+		Vehicle w;
 		//final Vehicle x;
 		boolean has_any_cargo = false;
 
-		if (!(u.current_order.flags & Order.OF_FULL_LOAD)) return false;
+		if (0==(u.current_order.flags & Order.OF_FULL_LOAD)) return false;
 
 		for (w = u; w != null; w = w.next) {
 			if (w.cargo_count != 0) {
@@ -1594,7 +1602,7 @@ public class Economy
 			int feeder_profit_share;
 
 			if (v.cargo_count == 0)
-				v.TriggerVehicle(VEHICLE_TRIGGER_NEW_CARGO);
+				v.TriggerVehicle(Engine.VEHICLE_TRIGGER_NEW_CARGO);
 
 			/* Skip loading this vehicle if another train/vehicle is already handling
 			 * the same cargo type at this station */
@@ -1645,7 +1653,7 @@ public class Economy
 		v.load_unload_time_rem = unloading_time;
 
 		if (completely_empty) {
-			v.TriggerVehicle(VEHICLE_TRIGGER_EMPTY);
+			v.TriggerVehicle(Engine.VEHICLE_TRIGGER_EMPTY);
 		}
 
 		if (result != 0) {
@@ -1723,7 +1731,7 @@ public class Economy
 
 		p.is_active = false;
 
-		DeletePlayerWindows(pi);
+		Window.DeletePlayerWindows(pi);
 		RebuildVehicleLists();	//Updates the open windows to add the newly acquired vehicles to the lists
 	}
 

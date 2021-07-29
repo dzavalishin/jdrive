@@ -305,7 +305,7 @@ public class TrainCmd extends TrainTables
 
 	//extern int _traininfo_vehicle_pitch;
 
-	void DrawTrainEngine(int x, int y, EngineID engine, int image_ormod)
+	static void DrawTrainEngine(int x, int y, EngineID engine, int image_ormod)
 	{
 		final RailVehicleInfo rvi = RailVehInfo(engine);
 
