@@ -74,6 +74,8 @@ s/DeleteWindowById(/Window.DeleteWindowById(/g
 
 s/IsTileType(tile\w*,/tile.IsTileType(/g
 s/GetTileOwner\(\w*tile\w*\)/tile.GetTileOwner()/g
+s/TileX(tile)/tile.TileX()/g
+s/TileY(tile)/tile.TileY()/g
 
 s/MAX_PLAYERS/Global.MAX_PLAYERS/g
 s/SetDParam/Global.SetDParam/g

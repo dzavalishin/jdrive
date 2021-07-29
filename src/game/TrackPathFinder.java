@@ -136,9 +136,10 @@ public class TrackPathFinder extends Pathfind
 
 
 
-	void TPFMode1(TileIndex tile, int direction)
+	void TPFMode1(TileIndex tilep, int direction)
 	{
 		TrackPathFinder tpf = this;
+		MutableTileIndex tile = new MutableTileIndex(tilep); 
 
 		int bits;
 		int i;
@@ -150,9 +151,9 @@ public class TrackPathFinder extends Pathfind
 					BitOps.GB(tile.getMap().m5, 2, 2) != tpf.tracktype) {
 				return;
 			}
-			tile = SkipToEndOfTunnel(tpf, tile, direction);
+			tile = new MutableTileIndex( SkipToEndOfTunnel(tpf, tile, direction) );
 		}
-		tile += TileOffsByDir(direction);
+		tile.madd( TileIndex.TileOffsByDir(direction) );
 
 		/* Check in case of rail if the owner is the same */
 		if (tpf.tracktype == Global.TRANSPORT_RAIL) {
@@ -160,7 +161,7 @@ public class TrackPathFinder extends Pathfind
 				if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE))
 					/* Check if we are on a bridge (middle parts don't have an owner */
 					if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) || (tile.getMap().m5 & 0xC0) != 0xC0)
-						if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) || (_m[tile_org].m5 & 0xC0) != 0xC0)
+						if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) || (tile_org.getMap().m5 & 0xC0) != 0xC0)
 							if (tile_org.GetTileOwner() != tile.GetTileOwner())
 								return;
 		}
@@ -181,7 +182,7 @@ public class TrackPathFinder extends Pathfind
 					i = BitOps.FIND_FIRST_BIT(bits);
 					bits = BitOps.KILL_FIRST_BIT(bits);
 
-					tpf.the_dir = (_otherdir_mask[direction] & (byte)(1 << i)) ? (i+8) : i;
+					tpf.the_dir = (_otherdir_mask[direction] & (byte)(1 << i)) != 0 ? (i+8) : i;
 					rd = tpf.rd;
 
 					{
@@ -214,7 +215,7 @@ public class TrackPathFinder extends Pathfind
 		if (tpf.hasbit_13)
 			return;
 
-		tile = tile_org;
+		tile = new MutableTileIndex( tile_org );
 		direction ^= 2;
 
 		bits = GetTileTrackStatus(tile, tpf.tracktype);
@@ -234,9 +235,15 @@ public class TrackPathFinder extends Pathfind
 
 			tpf.the_dir = (_otherdir_mask[direction] & (byte)(1 << i)) != 0 ? (i+8) : i;
 			rd = tpf.rd;
-			if (TPFSetTileBit(tpf, tile, tpf.the_dir) &&
-					!tpf.enum_proc.enumerate(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, tpf.rd.pft_var6) ) {
-				tpf.TPFMode1(tile, _tpf_new_direction[tpf.the_dir]);
+			if (TPFSetTileBit(tpf, tile, tpf.the_dir) ) 
+			{
+				int [] iptr = { tpf.rd.pft_var6 };
+				boolean ret = tpf.enum_proc.enumerate(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, iptr);
+				tpf.rd.pft_var6 = iptr[0];
+				
+				if(!ret ) {
+					tpf.TPFMode1(tile, _tpf_new_direction[tpf.the_dir]);
+				}
 			}
 			tpf.rd = rd;
 		} while (bits != 0);
@@ -257,7 +264,7 @@ public class TrackPathFinder extends Pathfind
 		/* XXX: Mode 2 is currently only used for ships, why is this code here? */
 		if (tpf.tracktype == Global.TRANSPORT_RAIL) {
 			if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE)) {
-				owner = tile.GetTileOwner();
+				owner = tile.GetTileOwner().id;
 				/* Check if we are on the middle of a bridge (has no owner) */
 				if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && (tile.getMap().m5 & 0xC0) == 0xC0)
 					owner = -1;
@@ -286,13 +293,16 @@ public class TrackPathFinder extends Pathfind
 		if (bits == 0)
 			return;
 
-		assert(TileX(tile) != MapMaxX() && TileY(tile) != MapMaxY());
+		assert(tile.TileX() != Global.MapMaxX() && tile.TileY() != Global.MapMaxY());
 
 		if ( (bits & (bits - 1)) == 0 ) {
 			/* only one direction */
 			i = 0;
-			while (!(bits&1))
-				i++, bits>>=1;
+			while (0==(bits&1))
+			{
+				i++;
+				bits>>=1;
+			}
 
 			rd = tpf.rd;
 			goto continue_here;
@@ -300,7 +310,7 @@ public class TrackPathFinder extends Pathfind
 		/* several directions */
 		i=0;
 		do {
-			if (!(bits & 1)) continue;
+			if (0==(bits & 1)) continue;
 			rd = tpf.rd;
 
 			// Change direction 4 times only
@@ -315,8 +325,8 @@ public class TrackPathFinder extends Pathfind
 			continue_here:;
 			tpf.the_dir = BitOps.HASBIT(_otherdir_mask[direction],i) ? (i+8) : i;
 
-			if (!tpf.enum_proc(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, null)) {
-				TPFMode2(tpf, tile, _tpf_new_direction[tpf.the_dir]);
+			if (!tpf.enum_proc.enumerate(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, null)) {
+				tpf.TPFMode2( tile, _tpf_new_direction[tpf.the_dir]);
 			}
 
 			tpf.rd = rd;
