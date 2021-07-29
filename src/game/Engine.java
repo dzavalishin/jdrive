@@ -1007,7 +1007,7 @@ public class Engine extends EngineTables {
 		}
 	}
 
-	void EnginesMonthlyLoop()
+	static void EnginesMonthlyLoop()
 	{
 		if (Global._cur_year < 130) {
 			for (int i = 0 ; i < _engines.length; i++) 

@@ -2,6 +2,8 @@ package game.util;
 
 import game.SpriteID;
 import game.Str;
+import game.struct.DrawTownTileStruct;
+import game.struct.HousetypeYear;
 
 public class TownTables 
 extends Str // just import strings 
@@ -2242,18 +2244,20 @@ extends Str // just import strings
 	static {	assert _house_more_flags.length == HOUSE_MAX;	}
 }
 
-
+/*
 class HousetypeYear {
-	int min,max;
+	public int min,max;
 
 	public HousetypeYear(int min, int max) {
 		this.min = min;
 		this.max = max;
 
 	}
-} 
+} */
 
-class DrawTownTileStruct {
+
+/*
+ class DrawTownTileStruct {
 	//SpriteID sprite_1;
 	//SpriteID sprite_2;
 	int sprite_1;
@@ -2276,7 +2280,7 @@ class DrawTownTileStruct {
 	 * @param dz the virtual height of the sprite
 	 * @param p set to 1 if a lift is present
 	 * @see DrawTownTileStruct
-	 */
+	 * /
 
 	public DrawTownTileStruct(int s1, int s2, int sx, int sy, int w, int h, int dz, int p) {
 		// {s1, s2, sx, sy, w - 1, h - 1, dz, p}
@@ -2292,3 +2296,8 @@ class DrawTownTileStruct {
 	}	
 
 }
+*/
+
+
+
+

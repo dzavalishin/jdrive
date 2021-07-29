@@ -190,7 +190,7 @@ public class Station implements IPoolItem
 
 
 	// Update the virtual coords needed to draw the station sign for all stations.
-	void UpdateAllStationVirtCoord()
+	static void UpdateAllStationVirtCoord()
 	{
 		_station_pool.forEach( (i,st) ->
 		{

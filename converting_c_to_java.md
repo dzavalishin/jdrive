@@ -70,3 +70,6 @@ tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 0, 4, new_ground);
 Integer. and Long. have operations needed
 
 
+* и одним движением брови уничтожил вю мою кунсткамеру
+
+ allocations - draw lists / semi/automatic variables and per-draw allocator

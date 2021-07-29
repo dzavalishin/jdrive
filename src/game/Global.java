@@ -492,9 +492,9 @@ public class Global {
 		/* yeah, increse day counter and call various daily loops */
 		Global._date++;
 
-		TextMessageDailyLoop();
+		TextEffect.TextMessageDailyLoop();
 
-		DisasterDailyLoop();
+		// TODO DisasterDailyLoop();
 		WayPoint.WaypointsDailyLoop();
 
 		if (Global._game_mode != GameModes.GM_MENU) {
@@ -510,16 +510,18 @@ public class Global {
 
 		/* yes, call various monthly loops */
 		if (Global._game_mode != GameModes.GM_MENU) {
+			/* TODO
 			if (BitOps.HASBIT(Global._autosave_months[_opt.autosave], Global._cur_month)) {
 				Global._do_autosave = true;
 				RedrawAutosave();
-			}
+			}*/
 
-			Player.PlayersMonthlyLoop();
+			Economy.PlayersMonthlyLoop();
 			Engine.EnginesMonthlyLoop();
 			Town.TownsMonthlyLoop();
 			Industry.IndustryMonthlyLoop();
-			Station._global_station_sort_dirty();
+			//Station._global_station_sort_dirty();
+			Station._global_station_sort_dirty = true;
 			/*#ifdef ENABLE_NETWORK
 			if (_network_server)
 				NetworkServerMonthlyLoop();

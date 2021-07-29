@@ -266,7 +266,7 @@ public class mAirport
 	}
 
 	//the main procedure, does the checks and runs the process.
-	void MunicipalAirport(Town tn)
+	public static void MunicipalAirport(Town tn)
 	{
 		//Station st;
 		TileIndex tl; 

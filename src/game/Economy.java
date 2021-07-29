@@ -1679,7 +1679,7 @@ public class Economy
 		return result;
 	}
 
-	void PlayersMonthlyLoop()
+	static void PlayersMonthlyLoop()
 	{
 		PlayersGenStatistics();
 		if (Global._patches.inflation && Global._cur_year < Global.MAX_YEAR_END)
