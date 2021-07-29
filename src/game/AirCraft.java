@@ -18,16 +18,16 @@ public class AirCraft {
 
 	static void AircraftNextAirportPos_and_Order(Vehicle v);
 	static int GetAircraftFlyingAltitude(Vehicle v);
-	*/
-	
+	 */
+
 	static final /*SpriteID*/ int _aircraft_sprite[] = {
-		0x0EB5, 0x0EBD, 0x0EC5, 0x0ECD,
-		0x0ED5, 0x0EDD, 0x0E9D, 0x0EA5,
-		0x0EAD, 0x0EE5, 0x0F05, 0x0F0D,
-		0x0F15, 0x0F1D, 0x0F25, 0x0F2D,
-		0x0EED, 0x0EF5, 0x0EFD, 0x0F35,
-		0x0E9D, 0x0EA5, 0x0EAD, 0x0EB5,
-		0x0EBD, 0x0EC5
+			0x0EB5, 0x0EBD, 0x0EC5, 0x0ECD,
+			0x0ED5, 0x0EDD, 0x0E9D, 0x0EA5,
+			0x0EAD, 0x0EE5, 0x0F05, 0x0F0D,
+			0x0F15, 0x0F1D, 0x0F25, 0x0F2D,
+			0x0EED, 0x0EF5, 0x0EFD, 0x0F35,
+			0x0E9D, 0x0EA5, 0x0EAD, 0x0EB5,
+			0x0EBD, 0x0EC5
 	};
 
 	/* Find the nearest hangar to v
@@ -52,8 +52,8 @@ public class AirCraft {
 						!Global._cheats.no_jetcrash.value)
 					continue;
 
-				distance = DistanceSquare(v.tile, st.airport_tile);
-				if (distance < best || index == INVALID_STATION) {
+				distance = Map.DistanceSquare(v.tile, st.airport_tile);
+				if (distance < best || index == Station.INVALID_STATION) {
 					best = distance;
 					index = st.index;
 				}
@@ -80,7 +80,7 @@ public class AirCraft {
 
 		return false;
 	}
-	*/
+	 */
 
 	int GetAircraftImage(final Vehicle v, byte direction)
 	{
@@ -127,7 +127,9 @@ public class AirCraft {
 	static int CmdBuildAircraft(int x, int y, int flags, int p1, int p2)
 	{
 		int value;
-		Vehicle vl[3], *v, *u, *w;
+		//Vehicle vl[3], *v, *u, *w;
+		Vehicle v, u, w;
+		Vehicle [] vl  = new Vehicle[3];
 		UnitID unit_num;
 		TileIndex tile = TileVirtXY(x, y);
 		final AircraftVehicleInfo avi;
@@ -166,7 +168,7 @@ public class AirCraft {
 			v.owner = u.owner = Global._current_player;
 
 			v.tile = tile;
-//			u.tile = 0;
+			//			u.tile = 0;
 
 			x = TileX(tile) * 16 + 5;
 			y = TileY(tile) * 16 + 3;
@@ -178,7 +180,7 @@ public class AirCraft {
 			v.z_pos = u.z_pos + 1;
 
 			v.x_offs = v.y_offs = -1;
-//			u.delta_x = u.delta_y = 0;
+			//			u.delta_x = u.delta_y = 0;
 
 			v.sprite_width = v.sprite_height = 2;
 			v.z_height = 5;
@@ -190,7 +192,7 @@ public class AirCraft {
 			u.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_UNCLICKABLE | Vehicle.VS_DISASTER;
 
 			v.spritenum = avi.image_index;
-//			v.cargo_count = u.number_of_pieces = 0;
+			//			v.cargo_count = u.number_of_pieces = 0;
 
 			v.cargo_cap = avi.passenger_capacity;
 			u.cargo_cap = avi.mail_capacity;
@@ -199,12 +201,12 @@ public class AirCraft {
 			u.cargo_type = AcceptedCargo.CT_MAIL;
 
 			v.string_id = Str.STR_SV_AIRCRAFT_NAME;
-//			v.next_order_param = v.next_order = 0;
+			//			v.next_order_param = v.next_order = 0;
 
-//			v.load_unload_time_rem = 0;
-//			v.progress = 0;
+			//			v.load_unload_time_rem = 0;
+			//			v.progress = 0;
 			v.last_station_visited = INVALID_STATION;
-//			v.destination_coords = 0;
+			//			v.destination_coords = 0;
 
 			v.max_speed = avi.max_speed;
 			v.acceleration = avi.acceleration;
@@ -231,7 +233,7 @@ public class AirCraft {
 			 * of all depots, it is simple */
 			{
 				final Station  st = Station.GetStation(tile.getMap().m2);
-				final AirportFTAClass* apc = GetAirport(st.airport_type);
+				final AirportFTAClass apc = GetAirport(st.airport_type);
 				int i;
 
 				for (i = 0; i < apc.nof_depots; i++) {
@@ -301,7 +303,7 @@ public class AirCraft {
 		// 0x20 - hangar large airport (32)
 		// 0x41 - hangar small airport (65)
 		return tile.IsTileType( TileTypes.MP_STATION) &&
-					(tile.getMap().m5 == 32 || tile.getMap().m5 == 65 || tile.getMap().m5 == 86);
+				(tile.getMap().m5 == 32 || tile.getMap().m5 == 65 || tile.getMap().m5 == 86);
 	}
 
 	static boolean CheckStoppedInHangar(final Vehicle  v)
@@ -404,7 +406,7 @@ public class AirCraft {
 		if (v.current_order.type == Order.OT_GOTO_DEPOT && p2 == 0) {
 			if (flags & Cmd.DC_EXEC) {
 				if (v.current_order.flags & Order.OF_UNLOAD) v.cur_order_index++;
-				
+
 				v.current_order.type = Order.OT_DUMMY;
 				v.current_order.flags = 0;
 				InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
@@ -436,7 +438,7 @@ public class AirCraft {
 				v.current_order.station = next_airport_index;
 				InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 				if (BitOps.HASBIT(p2, 17) || (p2 == 0 && v.air.state == FLYING && !next_airport_has_hangar)) {
-				// the aircraft is now heading for a different hangar than the next in the orders
+					// the aircraft is now heading for a different hangar than the next in the orders
 					AircraftNextAirportPos_and_Order(v);
 					v.air.targetairport = next_airport_index;
 				}
@@ -499,20 +501,20 @@ public class AirCraft {
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_AIRCRAFT_RUN);
 
 		switch (new_cid) {
-			case AcceptedCargo.CT_PASSENGERS:
-				pass = avi.passenger_capacity;
-				break;
-			case AcceptedCargo.CT_MAIL:
-				pass = avi.passenger_capacity + avi.mail_capacity;
-				break;
-			case AcceptedCargo.CT_GOODS:
-				pass = avi.passenger_capacity + avi.mail_capacity;
-				pass /= 2;
-				break;
-			default:
-				pass = avi.passenger_capacity + avi.mail_capacity;
-				pass /= 4;
-				break;
+		case AcceptedCargo.CT_PASSENGERS:
+			pass = avi.passenger_capacity;
+			break;
+		case AcceptedCargo.CT_MAIL:
+			pass = avi.passenger_capacity + avi.mail_capacity;
+			break;
+		case AcceptedCargo.CT_GOODS:
+			pass = avi.passenger_capacity + avi.mail_capacity;
+			pass /= 2;
+			break;
+		default:
+			pass = avi.passenger_capacity + avi.mail_capacity;
+			pass /= 4;
+			break;
 		}
 		_aircraft_refit_capacity = pass;
 
@@ -555,8 +557,8 @@ public class AirCraft {
 
 		// only goto depot if the target airport has terminals (eg. it is airport)
 		if (st.xy != null && st.airport_tile != null && GetAirport(st.airport_type).terminals != null) {
-//			printf("targetairport = %d, st.index = %d\n", v.air.targetairport, st.index);
-//			v.air.targetairport = st.index;
+			//			printf("targetairport = %d, st.index = %d\n", v.air.targetairport, st.index);
+			//			v.air.targetairport = st.index;
 			v.current_order.type = Order.OT_GOTO_DEPOT;
 			v.current_order.flags = Order.OF_NON_STOP;
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
@@ -596,7 +598,7 @@ public class AirCraft {
 
 	void AircraftYearlyLoop()
 	{
-//		Vehicle v;
+		//		Vehicle v;
 
 		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
@@ -722,7 +724,7 @@ public class AirCraft {
 			u.vehstatus |= Vehicle.VS_HIDDEN;
 			u.cur_speed = 0;
 		}
-		
+
 
 		SetAircraftPosition(v, v.x_pos, v.y_pos, v.z_pos);
 		Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile);
@@ -741,7 +743,7 @@ public class AirCraft {
 		int spd = v.acceleration * 2;
 		byte t;
 		int new_speed;
-		
+
 		new_speed = v.max_speed * Global._patches.aircraft_speed_coeff;
 
 		// Don't fo faster than max
@@ -790,11 +792,11 @@ public class AirCraft {
 	{
 		int queue_adjust;
 		int maxz;
-		
+
 		queue_adjust = 0;
 		if(v.queue_item != null)
 			queue_adjust = 32 * v.queue_item.queue.getPos(v.queue_item.queue, v)-1;
-		
+
 		maxz = 162;
 		if(v.max_speed > 37 * Global._patches.aircraft_speed_coeff) {
 			maxz = 171;
@@ -810,8 +812,8 @@ public class AirCraft {
 	boolean GetNewAircraftPos(Vehicle v, GetNewVehiclePosResult gp, int tilesMoved)
 	{
 		static final int8 _delta_coord[16] = {
-			-1,-1,-1, 0, 1, 1, 1, 0, /* x */
-			-1, 0, 1, 1, 1, 0,-1,-1, /* y */
+				-1,-1,-1, 0, 1, 1, 1, 0, /* x */
+				-1, 0, 1, 1, 1, 0,-1,-1, /* y */
 		};
 
 		int x = v.x_pos + _delta_coord[v.direction] * tilesMoved;
@@ -981,7 +983,7 @@ public class AirCraft {
 		// All helicopters other than one in front stay in line
 		if(v.queue_item != null) {
 			if(v.air.state == FLYING && v.subtype == 0
-				&& v.queue_item.queue.getPos(v.queue_item.queue, v) != 1) {
+					&& v.queue_item.queue.getPos(v.queue_item.queue, v) != 1) {
 				if(dist < desired_dist) {
 					v.cur_speed = 0;
 					v.air.desired_speed = 0;
@@ -991,7 +993,7 @@ public class AirCraft {
 
 		// Slow down if above desired speed
 		if(v.air.state == FLYING && v.cur_speed > v.air.desired_speed)
-				v.cur_speed--;
+			v.cur_speed--;
 
 		// Need exact position?
 		if (!(amd.flag & AMED_EXACTPOS) && dist <= (amd.flag & AMED_SLOWTURN ? 8 : 4))
@@ -1036,7 +1038,7 @@ public class AirCraft {
 				v.direction = newdir;
 			} else {
 				v.cur_speed >>= 1;
-				v.direction = newdir;
+		v.direction = newdir;
 			}
 		}
 
@@ -1109,7 +1111,7 @@ public class AirCraft {
 	}
 
 	static final int _crashed_aircraft_moddir[] = {
-		-1,0,0,1
+			-1,0,0,1
 	};
 
 	static void HandleCrashedAircraft(Vehicle v)
@@ -1138,10 +1140,10 @@ public class AirCraft {
 				SetAircraftPosition(v, v.x_pos, v.y_pos, v.z_pos);
 				r = Hal.Random();
 				CreateEffectVehicleRel(v,
-					BitOps.GB(r, 0, 4) + 4,
-					BitOps.GB(r, 4, 4) + 4,
-					BitOps.GB(r, 8, 4),
-					EV_EXPLOSION_SMALL);
+						BitOps.GB(r, 0, 4) + 4,
+						BitOps.GB(r, 4, 4) + 4,
+						BitOps.GB(r, 8, 4),
+						EV_EXPLOSION_SMALL);
 			}
 		} else if (v.air.crashed_counter >= 10000) {
 			// remove rubble of crashed airplane
@@ -1177,16 +1179,16 @@ public class AirCraft {
 		int8 y;
 	} */
 	Point [] smoke_pos = {
-		new Point(  5,  5 ),
-		new Point(  6,  0 ),
-		new Point(  5, -5 ),
-		new Point(  0, -6 ),
-		new Point( -5, -5 ),
-		new Point( -6,  0 ),
-		new Point( -5,  5 ),
-		new Point(  0,  6 )
+			new Point(  5,  5 ),
+			new Point(  6,  0 ),
+			new Point(  5, -5 ),
+			new Point(  0, -6 ),
+			new Point( -5, -5 ),
+			new Point( -6,  0 ),
+			new Point( -5,  5 ),
+			new Point(  0,  6 )
 	};
-	
+
 	static void HandleAircraftSmoke(Vehicle v)
 	{
 
@@ -1200,11 +1202,11 @@ public class AirCraft {
 
 		if ((v.tick_counter & 0x1F) == 0) {
 			CreateEffectVehicleRel(v,
-				smoke_pos[v.direction].x,
-				smoke_pos[v.direction].y,
-				2,
-				EV_SMOKE
-			);
+					smoke_pos[v.direction].x,
+					smoke_pos[v.direction].y,
+					2,
+					EV_SMOKE
+					);
 		}
 	}
 
@@ -1222,9 +1224,9 @@ public class AirCraft {
 
 		if (v.current_order.type == Order.OT_GOTO_DEPOT &&
 				(v.current_order.flags & (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED)) == (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED) &&
-	 			!VehicleNeedsService(v)) {
-				v.cur_order_index++;
-			}
+				!VehicleNeedsService(v)) {
+			v.cur_order_index++;
+		}
 
 		if (v.cur_order_index >= v.num_orders) v.cur_order_index = 0;
 
@@ -1302,7 +1304,7 @@ public class AirCraft {
 
 		v.cargo_count = 0;
 		v.next.cargo_count = 0,
-		st = Station.GetStation(v.air.targetairport);
+				st = Station.GetStation(v.air.targetairport);
 		if (st.airport_tile == 0) {
 			newsitem = Str.STR_PLANE_CRASH_OUT_OF_FUEL;
 		} else {
@@ -1313,8 +1315,8 @@ public class AirCraft {
 		Global.SetDParam(1, st.index);
 		NewsItem.AddNewsItem(newsitem,
 				NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ACCIDENT, 0),
-			v.index,
-			0);
+				v.index,
+				0);
 
 		//SndPlayVehicleFx(SND_12_EXPLOSION, v);
 	}
@@ -1364,10 +1366,10 @@ public class AirCraft {
 			// show newsitem of celebrating citizens
 			flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 			NewsItem.AddNewsItem(
-				Str.STR_A033_CITIZENS_CELEBRATE_FIRST,
-				flags,
-				v.index,
-				0);
+					Str.STR_A033_CITIZENS_CELEBRATE_FIRST,
+					flags,
+					v.index,
+					0);
 		}
 
 		old_order = v.current_order;
@@ -1377,7 +1379,7 @@ public class AirCraft {
 		if (old_order.type == Order.OT_GOTO_STATION &&
 				v.current_order.station == v.last_station_visited) {
 			v.current_order.flags =
-				(old_order.flags & (Order.OF_FULL_LOAD | Order.OF_UNLOAD)) | Order.OF_NON_STOP;
+					(old_order.flags & (Order.OF_FULL_LOAD | Order.OF_UNLOAD)) | Order.OF_NON_STOP;
 		}
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_AIRCRAFT_INC);
@@ -1418,11 +1420,11 @@ public class AirCraft {
 				if (v.owner == Global._local_player) {
 					Global.SetDParam(0, v.unitnumber);
 					NewsItem.AddValidatedNewsItem(
-						Str.STR_A014_AIRCRAFT_IS_WAITING_IN,
-						NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0),
-						v.index,
-						0,
-						AirCraft::ValidateAircraftInHangar);
+							Str.STR_A014_AIRCRAFT_IS_WAITING_IN,
+							NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0),
+							v.index,
+							0,
+							AirCraft::ValidateAircraftInHangar);
 				}
 			}
 		}
@@ -1567,21 +1569,21 @@ public class AirCraft {
 		// --. start moving
 
 		switch (v.current_order.type) {
-			case Order.OT_GOTO_STATION: // ready to fly to another airport
-				// airplane goto state takeoff, helicopter to helitakeoff
-				v.air.state = (v.subtype != 0) ? TAKEOFF : HELITAKEOFF;
-				break;
-			case Order.OT_GOTO_DEPOT:   // visit hangar for serivicing, sale, etc.
-				if (v.current_order.station == v.air.targetairport) {
-					v.air.state = HANGAR;
-				} else {
-					v.air.state = (v.subtype != 0) ? TAKEOFF : HELITAKEOFF;
-				}
-				break;
-			default:  // orders have been deleted (no orders), goto depot and don't bother us
-				v.current_order.type = Order.OT_NOTHING;
-				v.current_order.flags = 0;
+		case Order.OT_GOTO_STATION: // ready to fly to another airport
+			// airplane goto state takeoff, helicopter to helitakeoff
+			v.air.state = (v.subtype != 0) ? TAKEOFF : HELITAKEOFF;
+			break;
+		case Order.OT_GOTO_DEPOT:   // visit hangar for serivicing, sale, etc.
+			if (v.current_order.station == v.air.targetairport) {
 				v.air.state = HANGAR;
+			} else {
+				v.air.state = (v.subtype != 0) ? TAKEOFF : HELITAKEOFF;
+			}
+			break;
+		default:  // orders have been deleted (no orders), goto depot and don't bother us
+			v.current_order.type = Order.OT_NOTHING;
+			v.current_order.flags = 0;
+			v.air.state = HANGAR;
 		}
 
 		AirportMove(v, Airport);
@@ -1621,8 +1623,8 @@ public class AirCraft {
 
 		// check if the aircraft needs to be replaced or renewed and send it to a hangar if needed
 		if (v.owner == Global._local_player && (
-					EngineHasReplacement(p, v.engine_type) ||
-					(p.engine_renew && v.age - v.max_age > p.engine_renew_months * 30)
+				EngineHasReplacement(p, v.engine_type) ||
+				(p.engine_renew && v.age - v.max_age > p.engine_renew_months * 30)
 				)) {
 			Global._current_player = Global._local_player;
 			Cmd.DoCommandP(v.tile, v.index, 1, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
@@ -1749,7 +1751,7 @@ public class AirCraft {
 		if (v.current_order.type != Order.OT_GOTO_DEPOT && v.owner == Global._local_player) {
 			// only the vehicle owner needs to calculate the rest (locally)
 			if (EngineHasReplacement(p, v.engine_type) ||
-				(p.engine_renew && v.age - v.max_age > (p.engine_renew_months * 30))) {
+					(p.engine_renew && v.age - v.max_age > (p.engine_renew_months * 30))) {
 				// send the aircraft to the hangar at next airport (bit 17 set)
 				Global._current_player = Global._local_player;
 				Cmd.DoCommandP(v.tile, v.index, 1 << 16, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
@@ -1799,25 +1801,25 @@ public class AirCraft {
 	}
 
 	static final AircraftStateHandler [] _aircraft_state_handlers = {
-		AirCraft::AircraftEventHandler_General,				// TO_ALL         =  0
-		AirCraft::AircraftEventHandler_InHangar,			// HANGAR         =  1
-		AirCraft::AircraftEventHandler_AtTerminal,		// TERM1          =  2
-		AirCraft::AircraftEventHandler_AtTerminal,		// TERM2          =  3
-		AirCraft::AircraftEventHandler_AtTerminal,		// TERM3          =  4
-		AirCraft::AircraftEventHandler_AtTerminal,		// TERM4          =  5
-		AirCraft::AircraftEventHandler_AtTerminal,		// TERM5          =  6
-		AirCraft::AircraftEventHandler_AtTerminal,		// TERM6          =  7
-		AirCraft::AircraftEventHandler_AtTerminal,		// HELIPAD1       =  8
-		AirCraft::AircraftEventHandler_AtTerminal,		// HELIPAD2       =  9
-		AirCraft::AircraftEventHandler_TakeOff,				// TAKEOFF        = 10
-		AirCraft::AircraftEventHandler_StartTakeOff,	// STARTTAKEOFF   = 11
-		AirCraft::AircraftEventHandler_EndTakeOff,		// ENDTAKEOFF     = 12
-		AirCraft::AircraftEventHandler_HeliTakeOff,		// HELITAKEOFF    = 13
-		AirCraft::AircraftEventHandler_Flying,				// FLYING         = 14
-		AirCraft::AircraftEventHandler_Landing,				// LANDING        = 15
-		AirCraft::AircraftEventHandler_EndLanding,		// ENDLANDING     = 16
-		AirCraft::AircraftEventHandler_HeliLanding,		// HELILANDING    = 17
-		AirCraft::AircraftEventHandler_HeliEndLanding,// HELIENDLANDING = 18
+			AirCraft::AircraftEventHandler_General,				// TO_ALL         =  0
+			AirCraft::AircraftEventHandler_InHangar,			// HANGAR         =  1
+			AirCraft::AircraftEventHandler_AtTerminal,		// TERM1          =  2
+			AirCraft::AircraftEventHandler_AtTerminal,		// TERM2          =  3
+			AirCraft::AircraftEventHandler_AtTerminal,		// TERM3          =  4
+			AirCraft::AircraftEventHandler_AtTerminal,		// TERM4          =  5
+			AirCraft::AircraftEventHandler_AtTerminal,		// TERM5          =  6
+			AirCraft::AircraftEventHandler_AtTerminal,		// TERM6          =  7
+			AirCraft::AircraftEventHandler_AtTerminal,		// HELIPAD1       =  8
+			AirCraft::AircraftEventHandler_AtTerminal,		// HELIPAD2       =  9
+			AirCraft::AircraftEventHandler_TakeOff,				// TAKEOFF        = 10
+			AirCraft::AircraftEventHandler_StartTakeOff,	// STARTTAKEOFF   = 11
+			AirCraft::AircraftEventHandler_EndTakeOff,		// ENDTAKEOFF     = 12
+			AirCraft::AircraftEventHandler_HeliTakeOff,		// HELITAKEOFF    = 13
+			AirCraft::AircraftEventHandler_Flying,				// FLYING         = 14
+			AirCraft::AircraftEventHandler_Landing,				// LANDING        = 15
+			AirCraft::AircraftEventHandler_EndLanding,		// ENDLANDING     = 16
+			AirCraft::AircraftEventHandler_HeliLanding,		// HELILANDING    = 17
+			AirCraft::AircraftEventHandler_HeliEndLanding,// HELIENDLANDING = 18
 	};
 
 	static void AirportClearBlock(final Vehicle  v, final AirportFTAClass Airport)
@@ -1994,7 +1996,7 @@ public class AirCraft {
 			looks	at the corresponding terminals of that group. If no free ones are found, other
 			possible groups are checked	(in this case group 1, since that is after group 0). If that
 			fails, then attempt fails and plane waits
-		*/
+		 */
 		if (Airport.terminals[0] > 1) {
 			st = Station.GetStation(v.air.targetairport);
 			temp = Airport.layout[v.air.pos].next_in_chain;
@@ -2045,8 +2047,8 @@ public class AirCraft {
 
 	static boolean AirportFindFreeHelipad(Vehicle v, final AirportFTAClass Airport)
 	{
-	  Station st;
-	  AirportFTA *temp;
+		Station st;
+		AirportFTA *temp;
 
 		// if an airport doesn't have helipads, use terminals
 		if (Airport.helipads == null) return AirportFindFreeTerminal(v, Airport);
@@ -2164,8 +2166,8 @@ public class AirCraft {
 		}
 
 		FOR_ALL_VEHICLES(v_oldstyle) {
-		// airplane has another vehicle with subtype 4 (shadow), helicopter also has 3 (rotor)
-		// skip those
+			// airplane has another vehicle with subtype 4 (shadow), helicopter also has 3 (rotor)
+			// skip those
 			if (v_oldstyle.type == Vehicle.VEH_Aircraft && v_oldstyle.subtype <= 2) {
 				// airplane in terminal stopped doesn't hurt anyone, so goto next
 				if (v_oldstyle.vehstatus & Vehicle.VS_STOPPED && v_oldstyle.u.air.state == 0) {
@@ -2204,7 +2206,7 @@ public class AirCraft {
 				if (v.air.targetairport == st.index) {	// if heading to this airport
 					/*	update position of airplane. If plane is not flying, landing, or taking off
 							you cannot delete airport, so it doesn't matter
-					*/
+					 */
 					if (v.air.state >= FLYING) {	// circle around
 						v.air.pos = v.air.previous_pos = ap.entry_point;
 						v.air.state = FLYING;
@@ -2231,33 +2233,33 @@ public class AirCraft {
 		});
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/* $Id: aircraft_gui.c 3346 2005-12-27 16:37:50Z peter1138 $ */
 
 
@@ -2421,7 +2423,7 @@ public class AirCraft {
 				if (sel_eng != INVALID_ENGINE) {
 					WP(w,buildtrain_d).rename_engine = sel_eng;
 					ShowQueryString(GetCustomEngineName(sel_eng),
-						Str.STR_A039_RENAME_AIRCRAFT_TYPE, 31, 160, w.window_class, w.window_number);
+							Str.STR_A039_RENAME_AIRCRAFT_TYPE, 31, 160, w.window_class, w.window_number);
 				}
 			} break;
 			}
@@ -2437,7 +2439,7 @@ public class AirCraft {
 			if (e.edittext.str[0] != '\0') {
 				Global._cmd_text = e.edittext.str;
 				Cmd.DoCommandP(0, WP(w, buildtrain_d).rename_engine, 0, null,
-					Cmd.CMD_RENAME_ENGINE | Cmd.CMD_MSG(Str.STR_A03A_CAN_T_RENAME_AIRCRAFT_TYPE));
+						Cmd.CMD_RENAME_ENGINE | Cmd.CMD_MSG(Str.STR_A03A_CAN_T_RENAME_AIRCRAFT_TYPE));
 			}
 		} break;
 
@@ -2449,24 +2451,24 @@ public class AirCraft {
 	}
 
 	static final Widget _new_aircraft_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   239,     0,    13, Str.STR_A005_NEW_AIRCRAFT,		Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(     Window.WWT_MATRIX, Window.RESIZE_BOTTOM,    14,     0,   227,    14,   109, 0x401,										Str.STR_A025_AIRCRAFT_SELECTION_LIST),
-	new Widget(  Window.WWT_SCROLLBAR, Window.RESIZE_BOTTOM,    14,   228,   239,    14,   109, 0x0,											Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
-	new Widget(     Window.WWT_IMGBTN,     Window.RESIZE_TB,    14,     0,   239,   110,   161, 0x0,											Str.STR_NULL),
-	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,     0,   114,   162,   173, Str.STR_A006_BUILD_AIRCRAFT,	Str.STR_A026_BUILD_THE_HIGHLIGHTED_AIRCRAFT),
-	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   115,   227,   162,   173, Str.STR_A037_RENAME,					Str.STR_A038_RENAME_AIRCRAFT_TYPE),
-	new Widget(  Window.WWT_RESIZEBOX,     Window.RESIZE_TB,    14,   228,   239,   162,   173, 0x0,											Str.STR_Window.RESIZE_BUTTON),
-	//new Widget(   WIDGETS_END),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   239,     0,    13, Str.STR_A005_NEW_AIRCRAFT,		Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(     Window.WWT_MATRIX, Window.RESIZE_BOTTOM,    14,     0,   227,    14,   109, 0x401,										Str.STR_A025_AIRCRAFT_SELECTION_LIST),
+			new Widget(  Window.WWT_SCROLLBAR, Window.RESIZE_BOTTOM,    14,   228,   239,    14,   109, 0x0,											Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+			new Widget(     Window.WWT_IMGBTN,     Window.RESIZE_TB,    14,     0,   239,   110,   161, 0x0,											Str.STR_NULL),
+			new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,     0,   114,   162,   173, Str.STR_A006_BUILD_AIRCRAFT,	Str.STR_A026_BUILD_THE_HIGHLIGHTED_AIRCRAFT),
+			new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   115,   227,   162,   173, Str.STR_A037_RENAME,					Str.STR_A038_RENAME_AIRCRAFT_TYPE),
+			new Widget(  Window.WWT_RESIZEBOX,     Window.RESIZE_TB,    14,   228,   239,   162,   173, 0x0,											Str.STR_RESIZE_BUTTON),
+			//new Widget(   WIDGETS_END),
 	};
 
 	static final WindowDesc _new_aircraft_desc = new WindowDesc(
-		-1, -1, 240, 174,
-		Window.WC_BUILD_VEHICLE,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
-		_new_aircraft_widgets,
-		AirCraft::NewAircraftWndProc
-	);
+			-1, -1, 240, 174,
+			Window.WC_BUILD_VEHICLE,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
+			_new_aircraft_widgets,
+			AirCraft::NewAircraftWndProc
+			);
 
 	static void ShowBuildAircraftWindow(TileIndex tile)
 	{
@@ -2529,28 +2531,28 @@ public class AirCraft {
 					if (Cmd.DoCommandP(v.tile, v.index, w.as_refit_d().cargo, null, Cmd.CMD_REFIT_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A042_CAN_T_REFIT_AIRCRAFT)))
 						DeleteWindow(w);
 				}
-			  break;
+				break;
 			}
 			break;
 		}
 	}
 
 	static final Widget _aircraft_refit_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,				Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   239,     0,    13, Str.STR_A03C_REFIT,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   239,    14,   145, 0x0,							Str.STR_A03E_SELECT_TYPE_OF_CARGO_FOR},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   239,   146,   167, 0x0,							Str.STR_NULL},
-	{ Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,   239,   168,   179, Str.STR_A03D_REFIT_AIRCRAFT, Str.STR_A03F_REFIT_AIRCRAFT_TO_CARRY},
-	{   WIDGETS_END},
+			new Widget(    Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,				Str.STR_018B_CLOSE_WINDOW),
+			new Widget(     Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   239,     0,    13, Str.STR_A03C_REFIT,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(      Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   239,    14,   145, 0x0,							Str.STR_A03E_SELECT_TYPE_OF_CARGO_FOR),
+			new Widget(      Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   239,   146,   167, 0x0,							Str.STR_NULL),
+			new Widget(  Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,   239,   168,   179, Str.STR_A03D_REFIT_AIRCRAFT, Str.STR_A03F_REFIT_AIRCRAFT_TO_CARRY),
+			//{   WIDGETS_END},
 	};
 
-	static final WindowDesc _aircraft_refit_desc = {
-		-1,-1, 240, 180,
-		Window.WC_VEHICLE_REFIT,Window.WC_VEHICLE_VIEW,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
-		_aircraft_refit_widgets,
-		AircraftRefitWndProc
-	};
+	static final WindowDesc _aircraft_refit_desc = new WindowDesc(
+			-1,-1, 240, 180,
+			Window.WC_VEHICLE_REFIT,Window.WC_VEHICLE_VIEW,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
+			_aircraft_refit_widgets,
+			AirCraft::AircraftRefitWndProc
+	);
 
 	static void ShowAircraftRefitWindow(final Vehicle  v)
 	{
@@ -2669,8 +2671,8 @@ public class AirCraft {
 				goto do_change_service_int;
 			case 6: /* decrease int */
 				mod = _ctrl_pressed?- 5 : -10;
-	do_change_service_int:
-				v = Vehicle.GetVehicle(w.window_number);
+				do_change_service_int:
+					v = Vehicle.GetVehicle(w.window_number);
 
 				mod = GetServiceIntervalClamped(mod + v.service_interval);
 				if (mod == v.service_interval) return;
@@ -2689,7 +2691,7 @@ public class AirCraft {
 			if (e.edittext.str[0] != '\0') {
 				Global._cmd_text = e.edittext.str;
 				Cmd.DoCommandP(0, w.window_number, 0, null,
-					Cmd.CMD_NAME_VEHICLE | Cmd.CMD_MSG(Str.STR_A031_CAN_T_NAME_AIRCRAFT));
+						Cmd.CMD_NAME_VEHICLE | Cmd.CMD_MSG(Str.STR_A031_CAN_T_NAME_AIRCRAFT));
 			}
 			break;
 		}
@@ -2697,24 +2699,24 @@ public class AirCraft {
 
 
 	static final Widget _aircraft_details_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,					Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   349,     0,    13, Str.STR_A00C_DETAILS,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{ Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   350,   389,     0,    13, Str.STR_01AA_NAME,			Str.STR_A032_NAME_AIRCRAFT},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   389,    14,    55, 0x0,								Str.STR_NULL},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   389,    56,   101, 0x0,								Str.STR_NULL},
-	{ Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    10,   102,   107, Str.STR_0188,					Str.STR_884D_INCREASE_SERVICING_INTERVAL},
-	{ Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    10,   108,   113, Str.STR_0189,					Str.STR_884E_DECREASE_SERVICING_INTERVAL},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    11,   389,   102,   113, 0x0,								Str.STR_NULL},
-	{   WIDGETS_END},
+			new Widget(    Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,					Str.STR_018B_CLOSE_WINDOW),
+			new Widget(     Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   349,     0,    13, Str.STR_A00C_DETAILS,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   350,   389,     0,    13, Str.STR_01AA_NAME,			Str.STR_A032_NAME_AIRCRAFT),
+			new Widget(      Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   389,    14,    55, 0x0,								Str.STR_NULL),
+			new Widget(      Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   389,    56,   101, 0x0,								Str.STR_NULL),
+			new Widget(  Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    10,   102,   107, Str.STR_0188,					Str.STR_884D_INCREASE_SERVICING_INTERVAL),
+			new Widget(  Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    10,   108,   113, Str.STR_0189,					Str.STR_884E_DECREASE_SERVICING_INTERVAL),
+			new Widget(      Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    11,   389,   102,   113, 0x0,								Str.STR_NULL),
+			//{   WIDGETS_END},
 	};
 
-	static final WindowDesc _aircraft_details_desc = {
-		-1,-1, 390, 114,
-		Window.WC_VEHICLE_DETAILS,Window.WC_VEHICLE_VIEW,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
-		_aircraft_details_widgets,
-		AircraftDetailsWndProc
-	};
+	static final WindowDesc _aircraft_details_desc = new WindowDesc(
+			-1,-1, 390, 114,
+			Window.WC_VEHICLE_DETAILS,Window.WC_VEHICLE_VIEW,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
+			_aircraft_details_widgets,
+			AirCraft::AircraftDetailsWndProc
+	);
 
 
 	static void ShowAircraftDetailsWindow(final Vehicle  v)
@@ -2729,30 +2731,30 @@ public class AirCraft {
 		w = AllocateWindowDesc(&_aircraft_details_desc);
 		w.window_number = veh;
 		w.caption_color = v.owner;
-//		w.vscroll.cap = 6;
-//		w.traindetails_d.tab = 0;
+		//		w.vscroll.cap = 6;
+		//		w.traindetails_d.tab = 0;
 	}
 
 
 	static final Widget _aircraft_view_widgets[] = {
-	{ Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,  14,   0,  10,   0,  13, Str.STR_00C5, Str.STR_018B_CLOSE_WINDOW },
-	{ Window.WWT_CAPTION,    Window.RESIZE_RIGHT, 14,  11, 237,   0,  13, Str.STR_A00A, Str.STR_018C_WINDOW_TITLE_DRAG_THIS },
-	{ Window.WWT_STICKYBOX,  Window.RESIZE_LR,    14, 238, 249,   0,  13, 0x0,      Str.STR_STICKY_BUTTON },
-	{ Window.WWT_IMGBTN,     Window.RESIZE_RB,    14,   0, 231,  14, 103, 0x0,      Str.STR_NULL },
-	{ Window.WWT_6,          Window.RESIZE_RB,    14,   2, 229,  16, 101, 0x0,      Str.STR_NULL },
-	{ Window.WWT_PUSHIMGBTN, Window.RESIZE_RTB,   14,   0, 237, 104, 115, 0x0,      Str.STR_A027_CURRENT_AIRCRAFT_ACTION },
-	{ Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  14,  31, 0x2AB,    Str.STR_A029_CENTER_MAIN_VIEW_ON_AIRCRAFT },
-	{ Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  32,  49, 0x2AF,    Str.STR_A02A_SEND_AIRCRAFT_TO_HANGAR },
-	{ Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  50,  67, 0x2B4,    Str.STR_A03B_REFIT_AIRCRAFT_TO_CARRY },
-	{ Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  68,  85, 0x2B2,    Str.STR_A028_SHOW_AIRCRAFT_S_ORDERS },
-	{ Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  86, 103, 0x2B3,    Str.STR_A02B_SHOW_AIRCRAFT_DETAILS },
-	{ Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  32,  49, Sprite.SPR_CLONE_AIRCRAFT,      Str.STR_CLONE_AIRCRAFT_INFO },
-	{ Window.WWT_PANEL,      Window.RESIZE_LRB,   14, 232, 249, 104, 103, 0x0,      Str.STR_NULL },
-	{ Window.WWT_RESIZEBOX,  Window.RESIZE_LRTB,  14, 238, 249, 104, 115, 0x0,      Str.STR_NULL },
-	{ WIDGETS_END }
+			new Widget(  Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,  14,   0,  10,   0,  13, Str.STR_00C5, Str.STR_018B_CLOSE_WINDOW ),
+			new Widget(  Window.WWT_CAPTION,    Window.RESIZE_RIGHT, 14,  11, 237,   0,  13, Str.STR_A00A, Str.STR_018C_WINDOW_TITLE_DRAG_THIS ),
+			new Widget(  Window.WWT_STICKYBOX,  Window.RESIZE_LR,    14, 238, 249,   0,  13, 0x0,      Str.STR_STICKY_BUTTON ),
+			new Widget(  Window.WWT_IMGBTN,     Window.RESIZE_RB,    14,   0, 231,  14, 103, 0x0,      Str.STR_NULL ),
+			new Widget(  Window.WWT_6,          Window.RESIZE_RB,    14,   2, 229,  16, 101, 0x0,      Str.STR_NULL ),
+			new Widget(  Window.WWT_PUSHIMGBTN, Window.RESIZE_RTB,   14,   0, 237, 104, 115, 0x0,      Str.STR_A027_CURRENT_AIRCRAFT_ACTION ),
+			new Widget(  Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  14,  31, 0x2AB,    Str.STR_A029_CENTER_MAIN_VIEW_ON_AIRCRAFT ),
+			new Widget(  Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  32,  49, 0x2AF,    Str.STR_A02A_SEND_AIRCRAFT_TO_HANGAR ),
+			new Widget(  Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  50,  67, 0x2B4,    Str.STR_A03B_REFIT_AIRCRAFT_TO_CARRY ),
+			new Widget(  Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  68,  85, 0x2B2,    Str.STR_A028_SHOW_AIRCRAFT_S_ORDERS ),
+			new Widget(  Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  86, 103, 0x2B3,    Str.STR_A02B_SHOW_AIRCRAFT_DETAILS ),
+			new Widget(  Window.WWT_PUSHIMGBTN, Window.RESIZE_LR,    14, 232, 249,  32,  49, Sprite.SPR_CLONE_AIRCRAFT,      Str.STR_CLONE_AIRCRAFT_INFO ),
+			new Widget(  Window.WWT_PANEL,      Window.RESIZE_LRB,   14, 232, 249, 104, 103, 0x0,      Str.STR_NULL ),
+			new Widget(  Window.WWT_RESIZEBOX,  Window.RESIZE_LRTB,  14, 238, 249, 104, 115, 0x0,      Str.STR_NULL ),
+			//{ WIDGETS_END }
 	};
 
-	
+
 
 	static void AircraftViewWndProc(Window w, WindowEvent e)
 	{
@@ -2870,13 +2872,13 @@ public class AirCraft {
 	}
 
 
-	static final WindowDesc _aircraft_view_desc = {
-		-1,-1, 250, 116,
-		Window.WC_VEHICLE_VIEW ,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
-		_aircraft_view_widgets,
-		AircraftViewWndProc
-	};
+	static final WindowDesc _aircraft_view_desc = new WindowDesc(
+			-1,-1, 250, 116,
+			Window.WC_VEHICLE_VIEW ,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
+			_aircraft_view_widgets,
+			AirCraft::AircraftViewWndProc
+	);
 
 
 	void ShowAircraftViewWindow(final Vehicle  v)
@@ -2899,7 +2901,7 @@ public class AirCraft {
 
 		/* setup disabled buttons */
 		w.disabled_state =
-			IsTileOwner(tile, Global._local_player) ? 0 : ((1<<4) | (1<<7) | (1<<8));
+				IsTileOwner(tile, Global._local_player) ? 0 : ((1<<4) | (1<<7) | (1<<8));
 
 		/* determine amount of items for scroller */
 		num = 0;
@@ -3024,8 +3026,8 @@ public class AirCraft {
 		if (v == null || v.type != Vehicle.VEH_Aircraft) return;
 
 		Cmd.DoCommandP(w.window_number, v.index, _ctrl_pressed ? 1 : 0,
-			CcCloneAircraft, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT)
-		);
+				CcCloneAircraft, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT)
+				);
 
 		ResetObjectToPlace();
 	}
@@ -3047,31 +3049,31 @@ public class AirCraft {
 
 		case WindowEvents.WE_CLICK:
 			switch(e.click.widget) {
-				case 5: /* click aircraft */
-					AircraftDepotClickAircraft(w, e.click.pt.x, e.click.pt.y);
-					break;
+			case 5: /* click aircraft */
+				AircraftDepotClickAircraft(w, e.click.pt.x, e.click.pt.y);
+				break;
 
-				case 7: /* show build aircraft window */
+			case 7: /* show build aircraft window */
+				ResetObjectToPlace();
+				ShowBuildAircraftWindow(w.window_number);
+				break;
+
+			case 8: /* clone button */
+				InvalidateWidget(w, 8);
+				TOGGLEBIT(w.click_state, 8);
+
+				if (BitOps.HASBIT(w.click_state, 8)) {
+					_place_clicked_vehicle = null;
+					SetObjectToPlaceWnd(Sprite.SPR_CURSOR_CLONE, VHM_RECT, w);
+				} else {
 					ResetObjectToPlace();
-					ShowBuildAircraftWindow(w.window_number);
-					break;
+				}
+				break;
 
-				case 8: /* clone button */
-					InvalidateWidget(w, 8);
-					TOGGLEBIT(w.click_state, 8);
-
-					if (BitOps.HASBIT(w.click_state, 8)) {
-						_place_clicked_vehicle = null;
-						SetObjectToPlaceWnd(Sprite.SPR_CURSOR_CLONE, VHM_RECT, w);
-					} else {
-						ResetObjectToPlace();
-					}
-					break;
-
-				case 9: /* scroll to tile */
-					ResetObjectToPlace();
-					ScrollMainWindowToTile(w.window_number);
-					break;
+			case 9: /* scroll to tile */
+				ResetObjectToPlace();
+				ScrollMainWindowToTile(w.window_number);
+				break;
 			}
 			break;
 
@@ -3147,28 +3149,28 @@ public class AirCraft {
 	}
 
 	static final Widget _aircraft_depot_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,									Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   318,     0,    13, Str.STR_A002_AIRCRAFT_HANGAR,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   319,   330,     0,    13, 0x0,											Str.STR_STICKY_BUTTON},
-	{      Window.WWT_PANEL,    Window.RESIZE_LRB,    14,   296,   318,    14,    13, 0x0,													Str.STR_NULL},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    14,   296,   318,    14,    61, 0x2A9,										Str.STR_A023_DRAG_AIRCRAFT_TO_HERE_TO},
+			{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,									Str.STR_018B_CLOSE_WINDOW},
+			{    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   318,     0,    13, Str.STR_A002_AIRCRAFT_HANGAR,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
+			{  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   319,   330,     0,    13, 0x0,											Str.STR_STICKY_BUTTON},
+			{      Window.WWT_PANEL,    Window.RESIZE_LRB,    14,   296,   318,    14,    13, 0x0,													Str.STR_NULL},
+			{     Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    14,   296,   318,    14,    61, 0x2A9,										Str.STR_A023_DRAG_AIRCRAFT_TO_HERE_TO},
 
-	{     Window.WWT_MATRIX,     Window.RESIZE_RB,    14,     0,   295,    14,    61, 0x204,										Str.STR_A021_AIRCRAFT_CLICK_ON_AIRCRAFT},
-	{  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   319,   330,    14,    61, 0x0,											Str.STR_0190_SCROLL_BAR_SCROLLS_LIST},
-	{ Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,     0,   105,    62,    73, Str.STR_A003_NEW_AIRCRAFT,		Str.STR_A022_BUILD_NEW_AIRCRAFT},
-	{Window.WWT_NODISTXTBTN,     Window.RESIZE_TB,    14,   106,   212,    62,    73, Str.STR_CLONE_AIRCRAFT,		Str.STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW},
-	{ Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   213,   318,    62,    73, Str.STR_00E4_LOCATION,				Str.STR_A024_CENTER_MAIN_VIEW_ON_HANGAR},
-	{      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,   319,   318,    62,    73, 0x0,													Str.STR_NULL},
-	{  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   319,   330,    62,    73, 0x0,											Str.STR_Window.RESIZE_BUTTON},
-	{   WIDGETS_END},
+			{     Window.WWT_MATRIX,     Window.RESIZE_RB,    14,     0,   295,    14,    61, 0x204,										Str.STR_A021_AIRCRAFT_CLICK_ON_AIRCRAFT},
+			{  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   319,   330,    14,    61, 0x0,											Str.STR_0190_SCROLL_BAR_SCROLLS_LIST},
+			{ Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,     0,   105,    62,    73, Str.STR_A003_NEW_AIRCRAFT,		Str.STR_A022_BUILD_NEW_AIRCRAFT},
+			{Window.WWT_NODISTXTBTN,     Window.RESIZE_TB,    14,   106,   212,    62,    73, Str.STR_CLONE_AIRCRAFT,		Str.STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW},
+			{ Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   213,   318,    62,    73, Str.STR_00E4_LOCATION,				Str.STR_A024_CENTER_MAIN_VIEW_ON_HANGAR},
+			{      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,   319,   318,    62,    73, 0x0,													Str.STR_NULL},
+			{  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   319,   330,    62,    73, 0x0,											Str.STR_Window.RESIZE_BUTTON},
+			{   WIDGETS_END},
 	};
 
 	static final WindowDesc _aircraft_depot_desc = {
-		-1, -1, 331, 74,
-		Window.WC_VEHICLE_DEPOT,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
-		_aircraft_depot_widgets,
-		AircraftDepotWndProc
+			-1, -1, 331, 74,
+			Window.WC_VEHICLE_DEPOT,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
+			_aircraft_depot_widgets,
+			AircraftDepotWndProc
 	};
 
 
@@ -3218,35 +3220,35 @@ public class AirCraft {
 
 
 	static final Widget _player_aircraft_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,							Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   247,     0,    13, Str.STR_A009_AIRCRAFT,			Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   248,   259,     0,    13, 0x0,                   Str.STR_STICKY_BUTTON),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    80,    14,    25, Str.SRT_SORT_BY,						Str.STR_SORT_ORDER_TIP),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    81,   235,    14,    25, 0x0,										Str.STR_SORT_CRITERIA_TIP),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   236,   247,    14,    25, Str.STR_0225,							Str.STR_SORT_CRITERIA_TIP),
-	new Widget(      Window.WWT_PANEL,  Window.RESIZE_RIGHT,    14,   248,   259,    14,    25, 0x0,										Str.STR_NULL),
-	new Widget(     Window.WWT_MATRIX,     Window.RESIZE_RB,    14,     0,   247,    26,   169, 0x401,									Str.STR_A01F_AIRCRAFT_CLICK_ON_AIRCRAFT),
-	new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   248,   259,    26,   169, 0x0,										Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
-	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,     0,   124,   170,   181, Str.STR_A003_NEW_AIRCRAFT,	Str.STR_A020_BUILD_NEW_AIRCRAFT_REQUIRES),
-	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   125,   247,   170,   181, Str.STR_REPLACE_VEHICLES,						Str.STR_REPLACE_HELP),
-	new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,   248,   247,   170,   181, 0x0,											Str.STR_NULL),
-	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   248,   259,   170,   181, 0x0,											Str.STR_Window.RESIZE_BUTTON),
-	//new Widget(   WIDGETS_END),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,							Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   247,     0,    13, Str.STR_A009_AIRCRAFT,			Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   248,   259,     0,    13, 0x0,                   Str.STR_STICKY_BUTTON),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    80,    14,    25, Str.SRT_SORT_BY,						Str.STR_SORT_ORDER_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    81,   235,    14,    25, 0x0,										Str.STR_SORT_CRITERIA_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   236,   247,    14,    25, Str.STR_0225,							Str.STR_SORT_CRITERIA_TIP),
+			new Widget(      Window.WWT_PANEL,  Window.RESIZE_RIGHT,    14,   248,   259,    14,    25, 0x0,										Str.STR_NULL),
+			new Widget(     Window.WWT_MATRIX,     Window.RESIZE_RB,    14,     0,   247,    26,   169, 0x401,									Str.STR_A01F_AIRCRAFT_CLICK_ON_AIRCRAFT),
+			new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   248,   259,    26,   169, 0x0,										Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+			new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,     0,   124,   170,   181, Str.STR_A003_NEW_AIRCRAFT,	Str.STR_A020_BUILD_NEW_AIRCRAFT_REQUIRES),
+			new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   125,   247,   170,   181, Str.STR_REPLACE_VEHICLES,						Str.STR_REPLACE_HELP),
+			new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,   248,   247,   170,   181, 0x0,											Str.STR_NULL),
+			new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   248,   259,   170,   181, 0x0,											Str.STR_Window.RESIZE_BUTTON),
+			//new Widget(   WIDGETS_END),
 	};
 
 	static final Widget _other_player_aircraft_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,							Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   247,     0,    13, Str.STR_A009_AIRCRAFT,			Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   248,   259,     0,    13, 0x0,                   Str.STR_STICKY_BUTTON),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    80,    14,    25, Str.SRT_SORT_BY,						Str.STR_SORT_ORDER_TIP),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    81,   235,    14,    25, 0x0,										Str.STR_SORT_CRITERIA_TIP),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   236,   247,    14,    25, Str.STR_0225,							Str.STR_SORT_CRITERIA_TIP),
-	new Widget(      Window.WWT_PANEL,  Window.RESIZE_RIGHT,    14,   248,   259,    14,    25, 0x0,										Str.STR_NULL),
-	new Widget(     Window.WWT_MATRIX,     Window.RESIZE_RB,    14,     0,   247,    26,   169, 0x401,									Str.STR_A01F_AIRCRAFT_CLICK_ON_AIRCRAFT),
-	new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   248,   259,    26,   169, 0x0,										Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
-	new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,     0,   247,   170,   181, 0x0,											Str.STR_NULL),
-	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   248,   259,   170,   181, 0x0,											Str.STR_Window.RESIZE_BUTTON),
-	//new Widget(   WIDGETS_END),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,							Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   247,     0,    13, Str.STR_A009_AIRCRAFT,			Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   248,   259,     0,    13, 0x0,                   Str.STR_STICKY_BUTTON),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    80,    14,    25, Str.SRT_SORT_BY,						Str.STR_SORT_ORDER_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    81,   235,    14,    25, 0x0,										Str.STR_SORT_CRITERIA_TIP),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   236,   247,    14,    25, Str.STR_0225,							Str.STR_SORT_CRITERIA_TIP),
+			new Widget(      Window.WWT_PANEL,  Window.RESIZE_RIGHT,    14,   248,   259,    14,    25, 0x0,										Str.STR_NULL),
+			new Widget(     Window.WWT_MATRIX,     Window.RESIZE_RB,    14,     0,   247,    26,   169, 0x401,									Str.STR_A01F_AIRCRAFT_CLICK_ON_AIRCRAFT),
+			new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   248,   259,    26,   169, 0x0,										Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+			new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,     0,   247,   170,   181, 0x0,											Str.STR_NULL),
+			new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   248,   259,   170,   181, 0x0,											Str.STR_Window.RESIZE_BUTTON),
+			//new Widget(   WIDGETS_END),
 	};
 
 	static void PlayerAircraftWndProc(Window w, WindowEvent e)
@@ -3323,7 +3325,7 @@ public class AirCraft {
 
 				y += PLY_WND_PRC__SIZE_OF_ROW_BIG;
 			}
-			}	break;
+		}	break;
 
 		case WindowEvents.WE_CLICK: {
 			switch(e.click.widget) {
@@ -3416,7 +3418,7 @@ public class AirCraft {
 		case WindowEvents.WE_TICK: /* resort the list every 20 seconds orso (10 days) */
 			if (--vl.resort_timer == 0) {
 				DEBUG_misc( 1, "Periodic resort aircraft list player %d station %d",
-					owner, station);
+						owner, station);
 				vl.resort_timer = DAY_TICKS * PERIODIC_RESORT_DAYS;
 				vl.flags |= VL_RESORT;
 				w.SetWindowDirty();
@@ -3432,20 +3434,20 @@ public class AirCraft {
 	}
 
 	static final WindowDesc _player_aircraft_desc = new WindowDesc(
-		-1, -1, 260, 182,
-		Window.WC_AIRCRAFT_LIST,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
-		_player_aircraft_widgets,
-		AirCraft::PlayerAircraftWndProc
-	);
+			-1, -1, 260, 182,
+			Window.WC_AIRCRAFT_LIST,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
+			_player_aircraft_widgets,
+			AirCraft::PlayerAircraftWndProc
+			);
 
 	static final WindowDesc _other_player_aircraft_desc = new WindowDesc(
-		-1, -1, 260, 182,
-		Window.WC_AIRCRAFT_LIST,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
-		_other_player_aircraft_widgets,
-		AirCraft::PlayerAircraftWndProc
-	);
+			-1, -1, 260, 182,
+			Window.WC_AIRCRAFT_LIST,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
+			_other_player_aircraft_widgets,
+			AirCraft::PlayerAircraftWndProc
+			);
 
 	void ShowPlayerAircraft(PlayerID player, StationID station)
 	{
@@ -3464,8 +3466,8 @@ public class AirCraft {
 			w.resize.step_height = PLY_WND_PRC__SIZE_OF_ROW_BIG;
 		}
 	}
-	
-	
+
+
 }
 
 
