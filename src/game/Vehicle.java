@@ -2367,7 +2367,7 @@ public class Vehicle implements IPoolItem
 			total_cost += cost;
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				w = GetVehicle(_new_vehicle_id);
+				w = GetVehicle(Global._new_vehicle_id);
 
 				if (v.type != VEH_Road) { // road vehicles can't be refitted
 					if (v.cargo_type != w.cargo_type) {
@@ -2382,7 +2382,7 @@ public class Vehicle implements IPoolItem
 				} else {
 					// this is a front engine or not a train. It need orders
 					w_front = w;
-					Cmd.DoCommand(x, y, (v.index << 16) | w.index, p2 & 1 ? CO_SHARE : CO_COPY, flags, CMD_CLONE_ORDER);
+					Cmd.DoCommand(x, y, (v.index << 16) | w.index, (p2 & 1) != 0 ? Order.CO_SHARE : Order.CO_COPY, flags, Cmd.CMD_CLONE_ORDER);
 				}
 				w_rear = w;	// trains needs to know the last car in the train, so they can add more in next loop
 			}
@@ -2472,7 +2472,7 @@ public class Vehicle implements IPoolItem
 				Cmd.DoCommand(0, 0, (INVALID_VEHICLE << 16) | old_v.index, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 			} else {
 				// copy/clone the orders
-				Cmd.DoCommand(0, 0, (old_v.index << 16) | new_v.index, old_v.IsOrderListShared() ? CO_SHARE : CO_COPY, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
+				Cmd.DoCommand(0, 0, (old_v.index << 16) | new_v.index, old_v.IsOrderListShared() ? Order.CO_SHARE : Order.CO_COPY, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
 				new_v.cur_order_index = old_v.cur_order_index;
 				VehicleGui.ChangeVehicleViewWindow(old_v, new_v);
 				new_v.profit_this_year = old_v.profit_this_year;
@@ -2684,8 +2684,8 @@ public class Vehicle implements IPoolItem
 		if (str == null) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			StringID old_str = v.string_id;
-			v.string_id = str;
+			StringID old_str = new StringID( v.string_id );
+			v.string_id = str.id;
 			Global.DeleteName(old_str);
 			ResortVehicleLists();
 			Hal.MarkWholeScreenDirty();
@@ -2765,7 +2765,7 @@ public class Vehicle implements IPoolItem
 		return (byte) ((dir+((dirdiff&7)<5?1:-1)) & 7);
 	}
 
-	Trackdir GetVehicleTrackdir()
+	/* Trackdir */ int GetVehicleTrackdir()
 	{
 		final Vehicle  v = this;
 		

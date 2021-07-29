@@ -1540,7 +1540,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	}
 
 
-	Industry CreateNewIndustry(TileIndex tile, int type)
+	static Industry CreateNewIndustry(TileIndex tile, int type)
 	{
 		final Town t;
 		final IndustryTileTable it;
