@@ -1127,7 +1127,7 @@ public class Engine extends EngineTables {
 	 * engine = index of the engine to check
 	 * type   = the type the engine should be of (Vehicle.VEH_xxx)
 	 */
-	boolean IsEngineBuildable(int engine, byte type)
+	static boolean IsEngineBuildable(int engine, int type)
 	{
 		final Engine e;
 

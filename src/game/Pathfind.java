@@ -20,7 +20,7 @@ public abstract class Pathfind extends TrackPathFinderTables
 	 *  0  0 y7 y6 y5 y4 y3 y2 y1 y0 x4 x3 x2 x1 x0  0
 	 *  0  0  0  0 y5 y4 y3 y2 y1 y0 x4 x3 x2 x1 x0  0
 	 */
-	//#define PATHFIND_HASH_TILE(tile) (TileX(tile) & 0x1F) + ((TileY(tile) & 0x1F) << 5)
+	//#define PATHFIND_HASH_TILE(tile) (tile.TileX() & 0x1F) + ((tile.TileY() & 0x1F) << 5)
 
 
 

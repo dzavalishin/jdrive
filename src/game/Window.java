@@ -2047,6 +2047,11 @@ public class Window extends WindowConstants
 		}
 	}
 
+	static void InvalidateWindow(int cls, AbstractID id)
+	{
+		InvalidateWindow(cls, id.id);
+	}
+	
 	static void InvalidateWindow(int cls, int number)
 	{
 		//final Window  w;

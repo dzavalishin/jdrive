@@ -15,12 +15,12 @@ public class Vehicle implements IPoolItem
 	/* A lot of code calls for the invalidation of the status bar, which is widget 5.
 	 * Best is to have a virtual value for it when it needs to change again */
 	static public final int STATUS_BAR = 5;
-	
+
 	//private static int GEN_HASH(int x, int y) { return (((x & 0x1F80)>>7) + ((y & 0xFC0))); }
 	//static VehicleID _vehicle_position_hash[] = new VehicleID[0x1000];
 
-	byte type;	// type, ie roadven,train,ship,aircraft,special
-	byte subtype;     // subtype (Filled with values from EffectVehicles or TrainSubTypes)
+	int type;	// type, ie roadven,train,ship,aircraft,special
+	int subtype;     // subtype (Filled with values from EffectVehicles or TrainSubTypes)
 
 	//VehicleID index;	// NOSAVE: Index in vehicle array
 	public int index;	// NOSAVE: Index in vehicle array
@@ -293,7 +293,7 @@ public class Vehicle implements IPoolItem
 	private static int CMD_REFIT_VEH(int x)	{ return _veh_refit_proc_table[ x - VEH_Train]; }
 
 
-	
+
 	public static final int VRF_REVERSING = 0;
 
 	// used to calculate if train is going up or down
@@ -455,6 +455,12 @@ public class Vehicle implements IPoolItem
 		return count;		
 	}
 
+	
+	public void DeleteVehicleChain()
+	{
+		DeleteVehicleChain(this);
+	}
+	
 	static void DeleteVehicleChain(Vehicle v)
 	{
 		do {
@@ -1382,7 +1388,7 @@ public class Vehicle implements IPoolItem
 	{
 		Vehicle v = this;
 		// we need to set v.leave_depot_instantly as we have no control of it's contents at this time
-		if (BitOps.HASBIT(v.current_order.flags, Order.OFB_HALT_IN_DEPOT) && !BitOps.HASBIT(v.current_order.flags, OFB_PART_OF_ORDERS) && v.current_order.type == Order.OT_GOTO_DEPOT) {
+		if (BitOps.HASBIT(v.current_order.flags, Order.OFB_HALT_IN_DEPOT) && !BitOps.HASBIT(v.current_order.flags, Order.OFB_PART_OF_ORDERS) && v.current_order.type == Order.OT_GOTO_DEPOT) {
 			// we keep the vehicle in the depot since the user ordered it to stay
 			v.leave_depot_instantly = false;
 		} else {
@@ -1531,15 +1537,15 @@ public class Vehicle implements IPoolItem
 					//veh = _vehicle_position_hash[(x + y) & 0xFFFF];
 					veh = _hash.get(x, y);
 					//while(veh.id != INVALID_VEHICLE) {
-						v = GetVehicle(veh);
+					v = GetVehicle(veh);
 
-						if (0 != (v.vehstatus & VS_HIDDEN) &&
-								dpi.left <= v.right_coord &&
-								dpi.top <= v.bottom_coord &&
-								dpi.left + dpi.width >= v.left_coord &&
-								dpi.top + dpi.height >= v.top_coord) {
-							DoDrawVehicle(v);
-						}
+					if (0 != (v.vehstatus & VS_HIDDEN) &&
+							dpi.left <= v.right_coord &&
+							dpi.top <= v.bottom_coord &&
+							dpi.left + dpi.width >= v.left_coord &&
+							dpi.top + dpi.height >= v.top_coord) {
+						DoDrawVehicle(v);
+					}
 					//	veh = v.next_hash;
 					//}
 
@@ -2210,7 +2216,7 @@ public class Vehicle implements IPoolItem
 	void DecreaseVehicleValue()
 	{
 		value -= value >> 8;
-		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, index);
+				Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, index);
 	}
 
 	static final int _breakdown_chance[] = {
@@ -2662,7 +2668,7 @@ public class Vehicle implements IPoolItem
 
 		if (stopped) v.vehstatus &= ~VS_STOPPED;
 		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
-		
+
 		return 0;
 	}
 
@@ -2768,7 +2774,7 @@ public class Vehicle implements IPoolItem
 	/* Trackdir */ int GetVehicleTrackdir()
 	{
 		final Vehicle  v = this;
-		
+
 		if( 0 != (v.vehstatus & VS_CRASHED)) return Trackdir.INVALID_TRACKDIR;
 
 		switch(v.type)
@@ -3075,7 +3081,7 @@ public class Vehicle implements IPoolItem
 	public void setIndex(int index) {
 		this.index = index;		
 	}
-	
+
 	public Iterator<Order> getOrdersIterator() 
 	{
 		return new Iterator<Order>() 
@@ -3092,7 +3098,7 @@ public class Vehicle implements IPoolItem
 				curr = curr.next;
 				return ret;
 			}
-			
+
 		};
 	}
 

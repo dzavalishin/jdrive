@@ -2,7 +2,7 @@ package game;
 import game.util.BitOps;
 
 //Finite sTate mAchine -. FTA
-public class AirportFTAClass 
+public class AirportFTAClass extends Airport // bring in constants
 {
 	int nofelements;							// number of positions the airport consists of
 	final byte terminals[];
@@ -21,19 +21,6 @@ public class AirportFTAClass
 	public static final int MAX_TERMINALS = 6;
 	public static final int MAX_HELIPADS  = 2;
 
-	// Airport types
-	public static final int AT_SMALL = 0;
-	public static final int AT_LARGE = 1;
-	public static final int AT_HELIPORT = 2;
-	public static final int AT_METROPOLITAN = 3;
-	public static final int AT_INTERNATIONAL = 4;
-	public static final int AT_OILRIG = 15;
-
-	// do not change unless you change v.subtype too. This aligns perfectly with its current setting
-
-	public static final int AIRCRAFT_ONLY = 0;
-	public static final int ALL = 1;
-	public static final int HELICOPTERS_ONLY = 2;
 
 	
 	
