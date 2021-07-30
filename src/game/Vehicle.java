@@ -145,7 +145,7 @@ public class Vehicle implements IPoolItem
 
 	private Vehicle InitializeVehicle()
 	{
-		int index = index;
+		int indexc = index;
 
 
 
@@ -249,7 +249,7 @@ public class Vehicle implements IPoolItem
 
 		air.desired_speed = 1;
 
-		index = index;
+		index = indexc;
 	}
 
 
@@ -346,7 +346,7 @@ public class Vehicle implements IPoolItem
 			}
 
 			Player.SubtractMoneyFromPlayer((int)tax);
-			Player._yearly_expenses_type = old_expenses_type;
+			Player._yearly_expenses_type = (byte) old_expenses_type;
 		}
 		return;
 	}
@@ -354,7 +354,7 @@ public class Vehicle implements IPoolItem
 
 	void VehicleServiceInDepot()
 	{
-		if (tile.GetTileOwner().owner == Owner.OWNER_TOWN) 
+		if (tile.GetTileOwner().id == Owner.OWNER_TOWN) 
 			MA_Tax(value);
 
 		date_of_last_service = Global._date;
@@ -892,10 +892,10 @@ public class Vehicle implements IPoolItem
 		if( 0 != (vehstatus & VS_CRASHED) )
 			return false; /* Crashed vehicles don't need service anymore */
 
-		if (Player.GetPlayer(owner).engine_replacement[engine_type.id].id != INVALID_ENGINE)
+		if (Player.GetPlayer(owner).engine_replacement[engine_type.id] != INVALID_ENGINE)
 			return true; /* Vehicle is due to be replaced */
 
-		if (Global._patches.no_servicing_if_no_breakdowns && Global._opt.diff.vehicle_breakdowns == 0)
+		if (Global._patches.no_servicing_if_no_breakdowns && GameOptions._opt.diff.vehicle_breakdowns == 0)
 			return false;
 
 		return Global._patches.servint_ispercent ?
@@ -1105,7 +1105,8 @@ public class Vehicle implements IPoolItem
 
 		if (skip_vehicles[0].id < (_vehicle_pool.total_items() - offset)) 
 		{	// make sure the offset in the array is not larger than the array itself
-			FOR_ALL_VEHICLES_FROM(v, offset + skip_vehicles[0]) {
+			FOR_ALL_VEHICLES_FROM(v, offset + skip_vehicles[0]) 
+			{
 				skip_vehicles[0].id++;
 				if (v.type == 0)
 				{
@@ -2625,7 +2626,7 @@ public class Vehicle implements IPoolItem
 			if(mAirport.MA_VehicleServesMS(v) > 0) 
 			{
 				for(i =  1; i <= mAirport.MA_VehicleServesMS(v) ; i++) {
-					st = Station.GetStation(mAirport.MA_Find_MS_InVehicleOrders(v, i));
+					st = Station.GetStation(mAirport.MA_Find_MS_InVehicleOrders(v, i).id);
 					if(!mAirport.MA_WithinVehicleQuota(st)) {
 						Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 						return Cmd.CMD_ERROR;
@@ -2647,7 +2648,7 @@ public class Vehicle implements IPoolItem
 			w = v;
 			while (v.rail.shortest_platform[0]*16 < v.rail.cached_total_length) {
 				// the train is too long. We will remove cars one by one from the start of the train until it's short enough
-				while (w != null && !(RailVehInfo(w.engine_type).flags&RVI_WAGON) ) {
+				while (w != null && 0==(Engine.RailVehInfo(w.engine_type.id).flags & Engine.RVI_WAGON) ) {
 					w = w.GetNextVehicle();
 				}
 				if (w == null) {
@@ -2775,34 +2776,36 @@ public class Vehicle implements IPoolItem
 	{
 		final Vehicle  v = this;
 
-		if( 0 != (v.vehstatus & VS_CRASHED)) return Trackdir.INVALID_TRACKDIR;
+		if( 0 != (v.vehstatus & VS_CRASHED)) 
+			return Rail.INVALID_TRACKDIR;
+			//return Trackdir.INVALID_TRACKDIR;
 
 		switch(v.type)
 		{
 		case VEH_Train:
 			if (v.rail.track == 0x80) /* We'll assume the train is facing outwards */
-				return DiagdirToDiagTrackdir(GetDepotDirection(v.tile, Global.TRANSPORT_RAIL)); /* Train in depot */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_RAIL)); /* Train in depot */
 
 			if (v.rail.track == 0x40) /* train in tunnel, so just use his direction and assume a diagonal track */
-				return DiagdirToDiagTrackdir((v.direction >> 1) & 3);
+				return Rail.DiagdirToDiagTrackdir((v.direction >> 1) & 3);
 
-			return TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.rail.track),v.direction);
+			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.rail.track),v.direction);
 
 		case VEH_Ship:
 			if (v.ship.state == 0x80)  /* Inside a depot? */
 				/* We'll assume the ship is facing outwards */
-				return DiagdirToDiagTrackdir(GetDepotDirection(v.tile, Global.TRANSPORT_WATER)); /* Ship in depot */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_WATER)); /* Ship in depot */
 
-			return TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.ship.state),v.direction);
+			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.ship.state),v.direction);
 
 		case VEH_Road:
 			if (v.road.state == 254) /* We'll assume the road vehicle is facing outwards */
-				return DiagdirToDiagTrackdir(GetDepotDirection(v.tile, Global.TRANSPORT_ROAD)); /* Road vehicle in depot */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_ROAD)); /* Road vehicle in depot */
 
 			if (v.tile.IsRoadStationTile()) /* We'll assume the road vehicle is facing outwards */
-				return DiagdirToDiagTrackdir(GetRoadStationDir(v.tile)); /* Road vehicle in a station */
+				return Rail.DiagdirToDiagTrackdir(GetRoadStationDir(v.tile)); /* Road vehicle in a station */
 
-			return DiagdirToDiagTrackdir((v.direction >> 1) & 3);
+			return Rail.DiagdirToDiagTrackdir((v.direction >> 1) & 3);
 
 			/* case VEH_Aircraft: case VEH_Special: case VEH_Disaster: */
 		default: return 0xFF;
@@ -2821,9 +2824,9 @@ public class Vehicle implements IPoolItem
 		 * we cannot enter the tile at all. In that case, don't call
 		 * leave_tile. */
 		if (0 == (result & 8) && old_tile != tile) {
-			VehicleLeaveTileProc proc = Landscape._tile_type_procs[old_tile.GetTileType().ordinal()].vehicle_leave_tile_proc;
+			TileVehicleInterface proc = Landscape._tile_type_procs[old_tile.GetTileType().ordinal()].vehicle_leave_tile_proc;
 			if (proc != null)
-				proc.accept(this, old_tile, x, y);
+				proc.apply(this, old_tile, x, y);
 		}
 		return result;
 	}
@@ -2898,7 +2901,7 @@ public class Vehicle implements IPoolItem
 
 		/* If we have a shared order-list, don't delete the list, but just
 		    remove our pointer */
-		if (IsOrderListShared()) {
+		if (Order.IsOrderListShared(this)) {
 			final Vehicle u = this;
 
 			orders = null;
@@ -3001,7 +3004,7 @@ public class Vehicle implements IPoolItem
 	void BackupVehicleOrders(final Vehicle v, BackuppedOrders bak)
 	{
 		/* Save general info */
-		bak.orderindex       = v.cur_order_index;
+		bak.orderindex       = OrderID.get(v.cur_order_index);
 		bak.service_interval = v.service_interval;
 
 		/* Safe custom string, if any */
@@ -3013,9 +3016,9 @@ public class Vehicle implements IPoolItem
 
 		/* If we have shared orders, store it on a special way */
 		if (v.IsOrderListShared()) {
-			final Vehicle u = (v.next_shared) ? v.next_shared : v.prev_shared;
+			final Vehicle u = (v.next_shared != null) ? v.next_shared : v.prev_shared;
 
-			bak.clone = u.index;
+			bak.clone = VehicleID.get( u.index );
 		} else {
 			/* Else copy the orders */
 			//Order dest;
@@ -3023,7 +3026,7 @@ public class Vehicle implements IPoolItem
 			//dest = bak.order;
 
 			/* We do not have shared orders */
-			bak.clone = INVALID_VEHICLE;
+			bak.clone = VehicleID.getInvalid();
 
 			/* Copy the orders */
 			//FOR_VEHICLE_ORDERS(v, order) 
@@ -3034,11 +3037,18 @@ public class Vehicle implements IPoolItem
 				bak.order.add(order);
 			}
 			/* End the list with an Order.OT_NOTHING */
-			dest.type = Order.OT_NOTHING;
-			dest.next = null;
+			//dest.type = Order.OT_NOTHING;
+			//dest.next = null;
+			Order empty_order = new Order();
+			empty_order.type = Order.OT_NOTHING;
+			empty_order.next = null;
+			bak.order.add(empty_order);
 		}
 	}
 
+	private boolean IsOrderListShared() {
+		return Order.IsOrderListShared(this);
+	}
 	/**
 	 *
 	 * Restore vehicle orders that are backupped via BackupVehicleOrders
@@ -3051,12 +3061,12 @@ public class Vehicle implements IPoolItem
 		/* If we have a custom name, process that */
 		if (bak.name != null) {
 			Global._cmd_text = bak.name;
-			Cmd.DoCommandP(0, v.index, 0, null, Cmd.CMD_NAME_VEHICLE);
+			Cmd.DoCommandP(null, v.index, 0, null, Cmd.CMD_NAME_VEHICLE);
 		}
 
 		/* If we had shared orders, recover that */
-		if (bak.clone != INVALID_VEHICLE) {
-			Cmd.DoCommandP(0, v.index | (bak.clone << 16), 0, null, Cmd.CMD_CLONE_ORDER);
+		if (bak.clone.id != INVALID_VEHICLE) {
+			Cmd.DoCommandP(null, v.index | (bak.clone.id << 16), 0, null, Cmd.CMD_CLONE_ORDER);
 			return;
 		}
 

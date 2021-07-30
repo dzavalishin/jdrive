@@ -94,9 +94,9 @@ public class WayPoint implements IPoolItem
 		return _waypoint_pool.total_items();
 	}
 
-	private  boolean IsWaypointIndex(int index)
+	public static boolean IsWaypointIndex(int index)
 	{
-		return index < GetWaypointPoolSize();
+		return (index > 0) && (index < GetWaypointPoolSize());
 	}
 
 	//#define FOR_ALL_WAYPOINTS_FROM(wp, start) for (wp = GetWaypoint(start); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null)

@@ -510,7 +510,7 @@ public class TileIndex implements Comparable<TileIndex>{
 	public static int TILE_MASK(int x) { return (x & Global._map_tile_mask); }
 	public static void TILE_ASSERT(int x) { assert TILE_MASK(x) == x; }
 	
-	public void TILE_ASSERT() { assert TILE_MASK(id) == id; }
+	public void TILE_ASSERT() { assert TILE_MASK(tile) == tile; }
 
 
 	public void clrBit_m1(int i) {		Global._m[tile].m1 = BitOps.RETCLRBIT(Global._m[tile].m1, i);	}

@@ -83,7 +83,7 @@ static int _rail_types_list[] = {
 		//INVALID_STRING_ID
 };
 
-void RebuildVehicleLists()
+static void RebuildVehicleLists()
 {
 	//Window w;
 	//for (w = _windows; w != _last_window; ++w)

@@ -397,7 +397,7 @@ public class Player
 
 	static boolean CheckTileOwnership(TileIndex tile)
 	{
-		PlayerID owner = PlayerID.get( tile.GetTileOwner() );
+		PlayerID owner = PlayerID.get( tile.GetTileOwner().id );
 
 		assert(owner.id <= Owner.OWNER_WATER);
 
@@ -674,7 +674,7 @@ public class Player
 	static void StartupPlayers()
 	{
 		// The AI starts like in the setting with +2 month max
-		_next_competitor_start = GameOptions._opt.diff.competitor_start_time * 90 * Global.DAY_TICKS + RandomRange(60 * Global.DAY_TICKS) + 1;
+		_next_competitor_start = GameOptions._opt.diff.competitor_start_time * 90 * Global.DAY_TICKS + Hal.RandomRange(60 * Global.DAY_TICKS) + 1;
 	}
 
 	private static void MaybeStartNewPlayer()
@@ -691,13 +691,13 @@ public class Player
 
 		// when there's a lot of computers in game, the probability that a new one starts is lower
 		if (n < (int)GameOptions._opt.diff.max_no_competitors)
-			if (n < (Global._network_server ? Hal.InteractiveRandomRange(GameOptions._opt.diff.max_no_competitors + 2) : RandomRange(GameOptions._opt.diff.max_no_competitors + 2)) )
+			if (n < (Global._network_server ? Hal.InteractiveRandomRange(GameOptions._opt.diff.max_no_competitors + 2) : Hal.RandomRange(GameOptions._opt.diff.max_no_competitors + 2)) )
 				// Send a command to all clients to start  up a new AI. Works fine for Multiplayer and SinglePlayer 
 				Cmd.DoCommandP(new TileIndex(0), 1, 0, null, Cmd.CMD_PLAYER_CTRL);
 
 		// The next AI starts like the difficulty setting said, with +2 month max
 		_next_competitor_start = GameOptions._opt.diff.competitor_start_time * 90 * Global.DAY_TICKS + 1;
-		_next_competitor_start += Global._network_server ? Hal.InteractiveRandomRange(60 * Global.DAY_TICKS) : RandomRange(60 * Global.DAY_TICKS);
+		_next_competitor_start += Global._network_server ? Hal.InteractiveRandomRange(60 * Global.DAY_TICKS) : Hal.RandomRange(60 * Global.DAY_TICKS);
 	}
 
 	static void InitializePlayers()
@@ -781,10 +781,10 @@ public class Player
 		Window.DeleteWindowById(Window.WC_COMPANY, pi.id);
 		Window.DeleteWindowById(Window.WC_FINANCES, pi.id);
 		Window.DeleteWindowById(Window.WC_STATION_LIST, pi.id);
-		Window.DeleteWindowById(Window.WC_TRAINS_LIST,   (INVALID_STATION << 16) | pi.id);
-		Window.DeleteWindowById(Window.WC_ROADVEH_LIST,  (INVALID_STATION << 16) | pi.id);
-		Window.DeleteWindowById(Window.WC_SHIPS_LIST,    (INVALID_STATION << 16) | pi.id);
-		Window.DeleteWindowById(Window.WC_AIRCRAFT_LIST, (INVALID_STATION << 16) | pi.id);
+		Window.DeleteWindowById(Window.WC_TRAINS_LIST,   (Station.INVALID_STATION << 16) | pi.id);
+		Window.DeleteWindowById(Window.WC_ROADVEH_LIST,  (Station.INVALID_STATION << 16) | pi.id);
+		Window.DeleteWindowById(Window.WC_SHIPS_LIST,    (Station.INVALID_STATION << 16) | pi.id);
+		Window.DeleteWindowById(Window.WC_AIRCRAFT_LIST, (Station.INVALID_STATION << 16) | pi.id);
 		Window.DeleteWindowById(Window.WC_BUY_COMPANY, pi.id);
 	}
 
@@ -799,8 +799,8 @@ public class Player
 
 			if (e.type == Vehicle.VEH_Train &&
 					(BitOps.HASBIT(e.player_avail, p.id) || e.intro_date <= Global._date) &&
-					!(RailVehInfo(i).flags & RVI_WAGON)) {
-				assert(e.railtype < RAILTYPE_END);
+					0==(Engine.RailVehInfo(i).flags & Engine.RVI_WAGON)) {
+				assert(e.railtype < Rail.RAILTYPE_END);
 				rt = BitOps.RETSETBIT(rt, e.railtype);
 			}
 		}
@@ -905,7 +905,8 @@ public class Player
 					return Cmd.CMD_ERROR;
 
 				// make sure that we do not replace a plane with a helicopter or vise versa
-				if (Engine.GetEngine(new_engine_type).type == Vehicle.VEH_Aircraft && HASBIT(AircraftVehInfo(old_engine_type).subtype, 0) != HASBIT(AircraftVehInfo(new_engine_type).subtype, 0))
+				if (Engine.GetEngine(new_engine_type).type == Vehicle.VEH_Aircraft 
+						&& BitOps.HASBIT(Engine.AircraftVehInfo(old_engine_type.id).subtype, 0) != BitOps.HASBIT(Engine.AircraftVehInfo(new_engine_type.id).subtype, 0))
 					return Cmd.CMD_ERROR;
 
 				// make sure that the player can actually buy the new engine
@@ -1074,7 +1075,7 @@ public class Player
 				NewsItem.AddNewsItem( new StringID(p.index.id + 16*3), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 
 				/* Remove the company */
-				Economy.ChangeOwnershipOfPlayerItems(p.index, Owner.OWNER_SPECTATOR);
+				Economy.ChangeOwnershipOfPlayerItems(p.index, PlayerID.get(Owner.OWNER_SPECTATOR));
 				p.money64 = p.player_money = 100000000; // XXX - wtf?
 				p.is_active = false;
 			}

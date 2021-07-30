@@ -1,7 +1,6 @@
 package game;
 
-// TODO KILL ALL ID classes
-@Deprecated
+
 public abstract class AbstractID {
 	public int id;
 	

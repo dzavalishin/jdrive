@@ -235,8 +235,8 @@ public class Order implements IPoolItem {
 	static int CmdInsertOrder(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
-		VehicleID veh   = new VehicleID( BitOps.GB(p1,  0, 16) );
-		OrderID sel_ord = new OrderID( BitOps.GB(p1, 16, 16) );
+		VehicleID veh   = VehicleID.get( BitOps.GB(p1,  0, 16) );
+		OrderID sel_ord = OrderID.get( BitOps.GB(p1, 16, 16) );
 		Order new_order = UnpackOrder(p2);
 
 		if (!veh.IsVehicleIndex()) return Cmd.CMD_ERROR;
@@ -253,11 +253,11 @@ public class Order implements IPoolItem {
 				st = Station.GetStation(new_order.station);
 
 				if (!st.IsValidStation() ||
-					(st.airport_type != AirportFTAClass.AT_OILRIG && !(st.IsBuoy()) && !CheckOwnership(st.owner) && !MA_OwnerHandler(st.owner)))
+					(st.airport_type != AirportFTAClass.AT_OILRIG && !(st.IsBuoy()) && !CheckOwnership(st.owner) && !mAirport.MA_OwnerHandler(st.owner)))
 					return Cmd.CMD_ERROR;
 
 				//MA checks
-				if(Global._patches.allow_municipal_airports && !MA_WithinVehicleQuota(Station.GetStation(new_order.station))) {
+				if(Global._patches.allow_municipal_airports && !mAirport.MA_WithinVehicleQuota(Station.GetStation(new_order.station))) {
 					Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 					return Cmd.CMD_ERROR;
 				//End MA checks
@@ -323,9 +323,9 @@ public class Order implements IPoolItem {
 					st = Station.GetStation(new_order.station);
 
 					if (!st.IsValidStation() ||
-							(st.airport_type != AirportFTAClass.AT_OILRIG && !CheckOwnership(st.owner)) ||
+							(st.airport_type != AirportFTAClass.AT_OILRIG && !Player.CheckOwnership(st.owner)) ||
 							0 == (st.facilities & Station.FACIL_AIRPORT) ||
-							GetAirport(st.airport_type).nof_depots == 0) {
+							Airport.GetAirport(st.airport_type).nof_depots == 0) {
 						return Cmd.CMD_ERROR;
 					}
 				} else {
@@ -334,20 +334,20 @@ public class Order implements IPoolItem {
 					if (!Depot.IsDepotIndex(new_order.station)) return Cmd.CMD_ERROR;
 					dp = Depot.GetDepot(new_order.station);
 
-					if (!dp.IsValidDepot() || !CheckOwnership(GetTileOwner(dp.xy)))
+					if (!dp.IsValidDepot() || !Player.CheckOwnership(dp.xy.GetTileOwner()))
 						return Cmd.CMD_ERROR;
 
 					switch (v.type) {
 						case Vehicle.VEH_Train:
-							if (!IsTileDepotType(dp.xy, Global.TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
+							if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
 							break;
 
 						case Vehicle.VEH_Road:
-							if (!IsTileDepotType(dp.xy, Global.TRANSPORT_ROAD)) return Cmd.CMD_ERROR;
+							if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_ROAD)) return Cmd.CMD_ERROR;
 							break;
 
 						case Vehicle.VEH_Ship:
-							if (!IsTileDepotType(dp.xy, Global.TRANSPORT_WATER)) return Cmd.CMD_ERROR;
+							if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_WATER)) return Cmd.CMD_ERROR;
 							break;
 
 						default: return Cmd.CMD_ERROR;
@@ -380,7 +380,7 @@ public class Order implements IPoolItem {
 				if (!WayPoint.IsWaypointIndex(new_order.station)) return Cmd.CMD_ERROR;
 				wp = WayPoint.GetWaypoint(new_order.station);
 
-				if (!CheckOwnership(wp.xy.GetTileOwner())) return Cmd.CMD_ERROR;
+				if (!Player.CheckOwnership(wp.xy.GetTileOwner())) return Cmd.CMD_ERROR;
 
 				/* Order flags can be any of the following for waypoints:
 				 * [non-stop]
@@ -410,7 +410,7 @@ public class Order implements IPoolItem {
 
 		/* For ships, make sure that the station is not too far away from the
 		 * previous destination, for human players with new pathfinding disabled */
-		if (v.type == Vehicle.VEH_Ship && IS_HUMAN_PLAYER(v.owner) &&
+		if (v.type == Vehicle.VEH_Ship && v.owner.IS_HUMAN_PLAYER() &&
 			sel_ord.id != 0 && v.GetVehicleOrder(sel_ord.id - 1).type == OT_GOTO_STATION
 			&& !Global._patches.new_pathfinding_all) {
 
@@ -466,21 +466,21 @@ public class Order implements IPoolItem {
 
 				/* If there is added an order before the current one, we need
 				to update the selected Order */
-				if (sel_ord.id <= u.cur_order_index.id) {
-					int cur = u.cur_order_index.id + 1;
+				if (sel_ord.id <= u.cur_order_index) {
+					int cur = u.cur_order_index + 1;
 					/* Check if we don't go out of bound */
 					if (cur < u.num_orders)
-						u.cur_order_index = new OrderID( cur );
+						u.cur_order_index = cur;// OrderID.get( cur );
 				}
 				/* Update any possible open window of the Vehicle */
 				u.InvalidateVehicleOrder();
-				if (u.type == Vehicle.VEH_Train) u.u.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
+				if (u.type == Vehicle.VEH_Train) u.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
 
 				u = u.next_shared;
 			}
 
 			/* Make sure to rebuild the whole list */
-			RebuildVehicleLists();
+			VehicleGui.RebuildVehicleLists();
 		}
 
 		return 0;
@@ -495,7 +495,7 @@ public class Order implements IPoolItem {
 		if (0 != (flags & Cmd.DC_EXEC)) {
 			dst.DeleteVehicleOrders();
 			dst.InvalidateVehicleOrder();
-			RebuildVehicleLists();
+			VehicleGui.RebuildVehicleLists();
 		}
 		return 0;
 	}
@@ -508,11 +508,11 @@ public class Order implements IPoolItem {
 	static int CmdDeleteOrder(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v, u;
-		VehicleID veh_id = new VehicleID( p1 );
-		OrderID sel_ord = new OrderID( p2 );
+		VehicleID veh_id = VehicleID.get( p1 );
+		OrderID sel_ord = OrderID.get( p2 );
 		Order order;
 
-		if (!IsVehicleIndex(veh_id)) return Cmd.CMD_ERROR;
+		if (!Vehicle.IsVehicleIndex(veh_id.id)) return Cmd.CMD_ERROR;
 		v = Vehicle.GetVehicle(veh_id);
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
@@ -548,7 +548,7 @@ public class Order implements IPoolItem {
 				 */
 				if(v.queue_item != null)
 				{
-					v.queue_item.queue.del(v.queue_item.queue, v);
+					v.queue_item.queue.del(v);
 				}
 			}
 
@@ -566,8 +566,8 @@ public class Order implements IPoolItem {
 					}
 				}
 
-				if (sel_ord.id < u.cur_order_index.id)
-					u.cur_order_index.id--;
+				if (sel_ord.id < u.cur_order_index)
+					u.cur_order_index--;
 
 				/* If we removed the last order, make sure the shared vehicles
 				 * also set their orders to null */
@@ -577,7 +577,7 @@ public class Order implements IPoolItem {
 
 				/* NON-stop flag is misused to see if a train is in a station that is
 				 * on his order list or not */
-				if (sel_ord == u.cur_order_index && u.current_order.type == OT_LOADING &&
+				if (sel_ord.id == u.cur_order_index && u.current_order.type == OT_LOADING &&
 						BitOps.HASBIT(u.current_order.flags, OFB_NON_STOP)) {
 					u.current_order.flags = 0;
 				}
@@ -588,7 +588,7 @@ public class Order implements IPoolItem {
 				u = u.next_shared;
 			}
 
-			RebuildVehicleLists();
+			VehicleGui.RebuildVehicleLists();
 		}
 
 		return 0;
@@ -610,21 +610,21 @@ public class Order implements IPoolItem {
 
 		if (0 != (flags & Cmd.DC_EXEC)) {
 			/* Goto next Order*/
-			OrderID b = new OrderID( v.cur_order_index.id + 1 ); 
+			OrderID b = OrderID.get( v.cur_order_index + 1 ); 
 			if (b.id >= v.num_orders) b = null;
 
-			v.cur_order_index = b;
+			v.cur_order_index = b.id;
 
-			if (v.type == Vehicle.VEH_Train) v.u.rail.days_since_order_progr = 0;
+			if (v.type == Vehicle.VEH_Train) v.rail.days_since_order_progr = 0;
 
-			if (v.type == Vehicle.VEH_Road) ClearSlot(v, v.u.road.slot);
+			if (v.type == Vehicle.VEH_Road) RoadVeh.ClearSlot(v, v.road.slot);
 
 			/* NON-stop flag is misused to see if a train is in a station that is
 			 * on his order list or not */
 			if (v.current_order.type == OT_LOADING && BitOps.HASBIT(v.current_order.flags, OFB_NON_STOP))
 				v.current_order.flags = 0;
 
-			if (v.type == Vehicle.VEH_Train) v.u.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
+			if (v.type == Vehicle.VEH_Train) v.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
 			v.InvalidateVehicleOrder();
 		}
 
@@ -1080,7 +1080,7 @@ public class Order implements IPoolItem {
 	 * @return Returns the vehicle who has the same order
 	 *
 	 */
-	boolean IsOrderListShared(final Vehicle v)
+	static boolean IsOrderListShared(final Vehicle v)
 	{
 		return v.next_shared != null || v.prev_shared != null;
 	}
@@ -1118,7 +1118,7 @@ public class Order implements IPoolItem {
 		_order_pool.CleanPool();
 		_order_pool.AddBlockToPool();
 
-		_backup_orders_tile = 0;
+		Global._backup_orders_tile = null;
 	}
 
 	
