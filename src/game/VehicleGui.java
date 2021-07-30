@@ -126,8 +126,8 @@ static SortStruct [] _vehicle_sort;
 
 void BuildVehicleList(vehiclelist_d  vl, int type, PlayerID owner, StationID station)
 {
-	int subtype = (type != Vehicle.VEH_Aircraft) ? Train_Front : 2;
-	int n = 0;
+	int subtype = (type != Vehicle.VEH_Aircraft) ? Vehicle.Train_Front : 2;
+	int n[] = {0};
 	int i;
 
 	if (0 ==(vl.flags & Vehicle.VL_REBUILD)) return;
@@ -160,9 +160,9 @@ void BuildVehicleList(vehiclelist_d  vl, int type, PlayerID owner, StationID sta
 				{
 					final Order order = voi.next();
 					if (order.type == Order.OT_GOTO_STATION && order.station == station.id) {
-						_vehicle_sort[n].index = v.index;
-						_vehicle_sort[n].owner = v.owner.id;
-						++n;
+						_vehicle_sort[n[0]].index = v.index;
+						_vehicle_sort[n[0]].owner = v.owner.id;
+						++n[0];
 						break;
 					}
 				}
@@ -176,22 +176,22 @@ void BuildVehicleList(vehiclelist_d  vl, int type, PlayerID owner, StationID sta
 			if (v.type == type && v.owner == owner && (
 					(type == Vehicle.VEH_Train && v.IsFrontEngine()) ||
 					(type != Vehicle.VEH_Train && v.subtype <= subtype))) {
-				_vehicle_sort[n].index = v.index;
-				_vehicle_sort[n].owner = v.owner.id;
-				++n;
+				_vehicle_sort[n[0]].index = v.index;
+				_vehicle_sort[n[0]].owner = v.owner.id;
+				++n[0];
 			}
 		});
 	}
 
 	//free(vl.sort_list);
 	//vl.sort_list = malloc(n * sizeof(vl.sort_list[0]));
-	vl.sort_list = new SortStruct[n];
+	vl.sort_list = new SortStruct[n[0]];
 	
-	if (n != 0 && vl.sort_list == null)
+	if (n[0] != 0 && vl.sort_list == null)
 		Global.error("Could not allocate memory for the vehicle-sorting-list");
-	vl.list_length = n;
+	vl.list_length = n[0];
 
-	for (i = 0; i < n; ++i) vl.sort_list[i] = _vehicle_sort[i];
+	for (i = 0; i < n[0]; ++i) vl.sort_list[i] = _vehicle_sort[i];
 
 	vl.flags &= ~Vehicle.VL_REBUILD;
 	vl.flags |= Vehicle.VL_RESORT;
@@ -215,7 +215,7 @@ void SortVehicleList(vehiclelist_d vl)
 /* General Vehicle GUI based procedures that are independent of vehicle types */
 void InitializeVehiclesGuiList()
 {
-	_railtype_selected_in_replace_gui = RAILTYPE_RAIL;
+	_railtype_selected_in_replace_gui = Train.RAILTYPE_RAIL;
 }
 
 // draw the vehicle profit button in the vehicle list window.
@@ -263,7 +263,7 @@ CargoID DrawVehicleRefitWindow(final Vehicle v, int sel)
 	//CargoID cid, cargo = AcceptedCargo.CT_INVALID;
 	int cid, cargo = AcceptedCargo.CT_INVALID;
 	int y = 25;
-	final Vehicle  u;
+	Vehicle  u;
 
 	/* Check if vehicle has custom refit or normal ones, and get its bitmasked value.
 	 * If its a train, 'or' this with the refit masks of the wagons. Now just 'and'
@@ -301,6 +301,15 @@ CargoID DrawVehicleRefitWindow(final Vehicle v, int sel)
 // ENGINE_AVAILABLE is used in ReplaceVehicleWndProc
 //#define ENGINE_AVAILABLE ((e.flags & 1 && BitOps.HASBIT(info.climates, GameOptions._opt.landscape)) || BitOps.HASBIT(e.player_avail, Global._local_player))
 
+boolean ENGINE_IS_AVAILABLE()
+{
+	
+((e.flags & 1 && BitOps.HASBIT(info.climates, GameOptions._opt.landscape)) || BitOps.HASBIT(e.player_avail, Global._local_player))
+
+
+}
+
+
 /*  if show_outdated is selected, it do not sort psudo engines properly but it draws all engines
  *	if used compined with show_cars set to false, it will work as intended. Replace window do it like that
  *  this was a big hack even before show_outdated was added. Stupid newgrf :p										*/
@@ -328,7 +337,7 @@ static void train_engine_drawing_loop(int [] x, int [] y, int [] pos, int []sel,
 
 
 		colour = sel[0] == 0 ? 0xC : 0x10;
-		if (!(ENGINE_AVAILABLE && show_outdated && EngineGui.RailVehInfo(i).power && e.railtype == railtype)) {
+		if (!(ENGINE_IS_AVAILABLE() && show_outdated && EngineGui.RailVehInfo(i).power && e.railtype == railtype)) {
 			if (e.railtype != railtype || !(rvi.flags & RVI_WAGON) != is_engine ||
 					!BitOps.HASBIT(e.player_avail, Global._local_player.id))
 				continue;
