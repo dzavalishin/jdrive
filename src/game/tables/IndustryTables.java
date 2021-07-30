@@ -129,7 +129,7 @@ public class IndustryTables
 		};
 	
 
-	static final /* StringID */ int _industry_close_strings[] = {
+	protected static final /* StringID */ int _industry_close_strings[] = {
 			Str.STR_4832_ANNOUNCES_IMMINENT_CLOSURE,
 			Str.STR_4832_ANNOUNCES_IMMINENT_CLOSURE,
 			Str.STR_4833_SUPPLY_PROBLEMS_CAUSE_TO,
@@ -183,7 +183,7 @@ public class IndustryTables
 	//}
 
 
-	static final /*IndustryType*/ int _industry_close_mode[] = {
+	protected static final /*IndustryType*/ int _industry_close_mode[] = {
 		/* COAL_MINE */         INDUSTRY_PRODUCTION,
 		/* POWER_STATION */     INDUSTRY_NOT_CLOSABLE,
 		/* SAWMILL */           INDUSTRY_CLOSABLE,
@@ -1351,13 +1351,13 @@ public class IndustryTables
 	};
 	//#undef MK
 
-	public final int _industry_type_costs[] = {
+	public final static int _industry_type_costs[] = {
 		210, 30,   28, 200,  31, 240,  26,  26,  27, 250, 205, 220, 193,  26,
 		28,  208,  19, 213, 220, 225, 218, 199,  14,  26, 250, 17,  195,  26,
 		187, 193,  17,  20, 192,  22, 203, 213, 210
 	};
 
-	public final byte _build_industry_types[][] = {
+	public final static byte _build_industry_types[][] = {
 		{ 1,  2, 4,  6, 8, 0, 3, 5,  9, 11, 18 },
 		{ 1, 14, 4, 13, 7, 0, 3, 9, 11, 15 },
 		{ 25, 13, 4, 23, 22, 11, 17, 10, 24, 19, 20, 21 },

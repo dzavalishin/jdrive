@@ -293,7 +293,7 @@ public class TileIndex implements Comparable<TileIndex>{
 	//  INVALID_TILE, because the y is wrapped. This is needed in
 	//  for example, farmland. When the tile is not wrapped,
 	//  the result will be tile + TileDiffXY(addx, addy)
-	int TileAddWrap(TileIndex tile, int addx, int addy)
+	static int TileAddWrap(TileIndex tile, int addx, int addy)
 	{
 		int x = tile.TileX() + addx;
 		int y = tile.TileY() + addy;
@@ -305,6 +305,10 @@ public class TileIndex implements Comparable<TileIndex>{
 		return INVALID_TILE.getTile();
 	}
 
+	TileIndex TileAddWrap(int addx, int addy)
+	{
+		return new TileIndex(TileAddWrap(this, addx, addy));
+	}
 
 
 	final static TileIndexDiffC _tileoffs_by_dir[] = {

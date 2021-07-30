@@ -1,7 +1,6 @@
 package game;
 
 import game.Widget;
-import game.Window.WindowEvent;
 
 /** Struct containing information about a single bridge type
  */
@@ -28,7 +27,7 @@ public class Bridge
 
 	static BridgeData  _bridgedata;
 
-	void CcBuildBridge(boolean success, TileIndex tile, int p1, int p2)
+	static void CcBuildBridge(boolean success, TileIndex tile, int p1, int p2)
 	{
 		// TODO if (success) SndPlayTileFx(SoundFx.SND_27_BLACKSMITH_ANVIL, tile);
 	}
@@ -36,8 +35,8 @@ public class Bridge
 	static void BuildBridge(Window w, int i)
 	{
 		w.DeleteWindow();
-		Cmd.DoCommandP(_bridgedata.end_tile, _bridgedata.start_tile,
-			_bridgedata.indexes[i] | (_bridgedata.type << 8), CcBuildBridge,
+		Cmd.DoCommandP(_bridgedata.end_tile, _bridgedata.start_tile.tile,
+			_bridgedata.indexes[i] | (_bridgedata.type << 8), Bridge::CcBuildBridge,
 			Cmd.CMD_BUILD_BRIDGE | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_5015_CAN_T_BUILD_BRIDGE_HERE));
 	}
 
@@ -54,7 +53,7 @@ public class Bridge
 
 				Global.SetDParam(2, _bridgedata.costs[i + w.vscroll.pos]);
 				Global.SetDParam(1, (b.speed >> 4) * 10);
-				Global.SetDParam(0, b.material);
+				Global.SetDParam(0, b.material.id);
 				Gfx.DrawSprite(b.sprite.id, 3, 15 + i * 22);
 
 				Gfx.DrawString(44, 15 + i * 22 , Str.STR_500D, 0);
@@ -123,11 +122,11 @@ public class Bridge
 
 		Window.DeleteWindowById(Window.WC_BUILD_BRIDGE, 0);
 
-		_bridgedata.type = bridge_type;
+		_bridgedata.type = (byte) bridge_type;
 		_bridgedata.start_tile = start;
 		_bridgedata.end_tile = end;
 
-		errmsg = INVALID_STRING_ID;
+		errmsg = Str.INVALID_STRING_ID;
 
 		// only query bridge building possibility once, result is the same for all bridges!
 		// returns CMD_ERROR on failure, and price on success
@@ -151,8 +150,8 @@ public class Bridge
 					final Bridge b = _bridge[bridge_type];
 					// bridge is accepted, add to list
 					// add to terraforming & bulldozing costs the cost of the bridge itself (not computed with DC_QUERY_COST)
-					_bridgedata.costs[j] = ret + (((long)tot_bridgedata_len * _price.build_bridge * b.price) >> 8);
-					_bridgedata.indexes[j] = bridge_type;
+					_bridgedata.costs[j] = ret + (((long)tot_bridgedata_len * Global._price.build_bridge * b.price) >> 8);
+					_bridgedata.indexes[j] = (byte) bridge_type;
 					j++;
 				}
 			}
