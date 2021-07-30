@@ -21,9 +21,9 @@ public class MiscGui {
 			StringID str;
 			int i;
 
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
-			lid = WP(w,void_d).data;
+			lid = w.as_void_d().data;
 
 			Global.SetDParam(0, lid.td.dparam[0]);
 			DrawStringCentered(140, 16, lid.td.str, 13);
@@ -96,25 +96,25 @@ public class MiscGui {
 	//{    WIDGETS_END},
 	};
 
-	static final WindowDesc _land_info_desc = {
+	static final WindowDesc _land_info_desc = new WindowDesc(
 		-1, -1, 280, 93,
 		Window.WC_LAND_INFO,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_land_info_widgets,
-		LandInfoWndProc
-	};
+		MiscGui::LandInfoWndProc
+	);
 
 	static void Place_LandInfo(TileIndex tile)
 	{
 		Player p;
 		static LandInfoData lid;
 		Window w;
-		int64 old_money;
+		long old_money;
 
 		Window.DeleteWindowById(Window.WC_LAND_INFO, 0);
 
-		w = AllocateWindowDesc(&_land_info_desc);
-		WP(w,void_d).data = &lid;
+		w = AllocateWindowDesc(_land_info_desc);
+		w.as_void_d().data = &lid;
 
 		lid.tile = tile;
 		lid.town = ClosestTownFromTile(tile, Global._patches.dist_local_authority);
@@ -133,7 +133,7 @@ public class MiscGui {
 		GetAcceptedCargo(tile, lid.ac);
 		GetTileDesc(tile, &lid.td);
 
-		#if defined(_DEBUG)
+		//#if defined(_DEBUG)
 			DEBUG(misc, 0) ("TILE: %#x (%i,%i)", tile, tile.TileX(), tile.TileY());
 			DEBUG(misc, 0) ("TILE: %d ", tile);
 			DEBUG(misc, 0) ("_type_height = %#x", tile.getMap().type_height);
@@ -142,7 +142,7 @@ public class MiscGui {
 			DEBUG(misc, 0) ("m3           = %#x", tile.getMap().m3);
 			DEBUG(misc, 0) ("m4           = %#x", tile.getMap().m4);
 			DEBUG(misc, 0) ("m5           = %#x", tile.getMap().m5);
-		#endif
+		//#endif
 	}
 
 	void PlaceLandBlockInfo()
@@ -155,7 +155,7 @@ public class MiscGui {
 		}
 	}
 
-	static final char *credits[] = {
+	static final String credits[] = {
 		/*************************************************************************
 		 *                      maximum length of string which fits in window   -^*/
 		"Original design by Chris Sawyer",
@@ -241,16 +241,16 @@ public class MiscGui {
 	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   419,     0,    13, Str.STR_015B_OPENTTD,	Str.STR_NULL),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   419,    14,   271, 0x0,								Str.STR_NULL),
 	new Widget(      Window.WWT_FRAME,   Window.RESIZE_NONE,    14,     5,   414,    40,   245, Str.STR_NULL,					Str.STR_NULL),
-	{    WIDGETS_END},
+	//{    WIDGETS_END},
 	};
 
-	static final WindowDesc _about_desc = {
+	static final WindowDesc _about_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 420, 272,
 		Window.WC_GAME_OPTIONS,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_about_widgets,
-		AboutWindowProc
-	};
+		MiscGui::AboutWindowProc
+	);
 
 
 	void ShowAboutWindow()
@@ -265,7 +265,7 @@ public class MiscGui {
 		0x655,0x663,0x678,0x62B,0x647,0x639,0x64E,0x632,0x67F,0x68D,0x69B,0x6A9,
 		0x6AF,0x6D2,0x6D9,0x6C4,0x6CB,0x6B6,0x6BD,0x6E0,
 		0x72E,0x734,0x74A,0x74F,0x76B,0x78F,0x788,0x77B,0x75F,0x774,0x720,0x797,
-		0x79E,0x7A5 | PALETTE_TO_GREEN,0x7AC | PALETTE_TO_RED,0x7B3,0x7BA,0x7C1 | PALETTE_TO_RED,0x7C8 | PALETTE_TO_PALE_GREEN,0x7CF | PALETTE_TO_YELLOW,0x7D6 | PALETTE_TO_RED
+		0x79E,0x7A5 | Sprite.PALETTE_TO_GREEN,0x7AC | Sprite.PALETTE_TO_RED,0x7B3,0x7BA,0x7C1 | Sprite.PALETTE_TO_RED,0x7C8 | Sprite.PALETTE_TO_PALE_GREEN,0x7CF | Sprite.PALETTE_TO_YELLOW,0x7D6 | Sprite.PALETTE_TO_RED
 	};
 
 	static void BuildTreesWndProc(Window w, WindowEvent e)
@@ -355,58 +355,58 @@ public class MiscGui {
 	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,				Str.STR_018B_CLOSE_WINDOW),
 	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   142,     0,    13, Str.STR_2802_TREES,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   142,    14,   170, 0x0,							Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,    16,    61, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,    16,    61, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,    16,    61, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,    16,    61, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,    63,   108, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,    63,   108, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,    63,   108, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,    63,   108, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,   110,   155, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,   110,   155, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,   110,   155, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,   110,   155, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,    16,    61, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,    16,    61, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,    16,    61, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,    16,    61, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,    63,   108, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,    63,   108, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,    63,   108, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,    63,   108, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,   110,   155, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,   110,   155, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,   110,   155, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,   110,   155, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   2,   140,   157,   168, Str.STR_TREES_RANDOM_TYPE, Str.STR_TREES_RANDOM_TYPE_TIP),
-	{    WIDGETS_END},
+	//{    WIDGETS_END},
 	};
 
-	static final WindowDesc _build_trees_desc = {
+	static final WindowDesc _build_trees_desc = new WindowDesc(
 		497, 22, 143, 171,
 		Window.WC_BUILD_TREES, Window.WC_SCEN_LAND_GEN,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_build_trees_widgets,
-		BuildTreesWndProc
-	};
+		MiscGui::BuildTreesWndProc
+	);
 
 	static final Widget _build_trees_scen_widgets[] = {
 	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,				Str.STR_018B_CLOSE_WINDOW),
 	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   142,     0,    13, Str.STR_2802_TREES,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   142,    14,   183, 0x0,							Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,    16,    61, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,    16,    61, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,    16,    61, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,    16,    61, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,    63,   108, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,    63,   108, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,    63,   108, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,    63,   108, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,   110,   155, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,   110,   155, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,   110,   155, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,   110,   155, 0x0,							Str.STR_280D_SELEAcceptedCargo.CT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,    16,    61, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,    16,    61, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,    16,    61, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,    16,    61, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,    63,   108, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,    63,   108, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,    63,   108, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,    63,   108, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     2,    35,   110,   155, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    37,    70,   110,   155, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,   110,   155, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,   110,   155, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   140,   157,   168, Str.STR_TREES_RANDOM_TYPE,	Str.STR_TREES_RANDOM_TYPE_TIP),
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   140,   170,   181, Str.STR_028A_RANDOM_TREES,	Str.STR_028B_PLANT_TREES_RANDOMLY_OVER),
-	{    WIDGETS_END},
+	//{    WIDGETS_END},
 	};
 
-	static final WindowDesc _build_trees_scen_desc = {
+	static final WindowDesc _build_trees_scen_desc = new WindowDesc(
 		-1, -1, 143, 184,
 		Window.WC_BUILD_TREES,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_build_trees_scen_widgets,
-		BuildTreesWndProc
-	};
+		MiscGui::BuildTreesWndProc
+	);
 
 
 	void ShowBuildTreesToolbar()
@@ -419,7 +419,7 @@ public class MiscGui {
 		AllocateWindowDescFront(&_build_trees_scen_desc, 0);
 	}
 
-	static int _errmsg_decode_params[20];
+	static int [] _errmsg_decode_params = new int[20];
 	static StringID _errmsg_message_1, _errmsg_message_2;
 	static int _errmsg_duration;
 
@@ -428,14 +428,14 @@ public class MiscGui {
 	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     4,     0,    10,     0,    13, Str.STR_00C5,					Str.STR_018B_CLOSE_WINDOW),
 	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     4,    11,   239,     0,    13, Str.STR_00B2_MESSAGE,	Str.STR_NULL),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     4,     0,   239,    14,    45, 0x0,								Str.STR_NULL),
-	{    WIDGETS_END},
+	//{    WIDGETS_END},
 	};
 
 	static final Widget _errmsg_face_widgets[] = {
 	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     4,     0,    10,     0,    13, Str.STR_00C5,							Str.STR_018B_CLOSE_WINDOW),
 	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     4,    11,   333,     0,    13, Str.STR_00B3_MESSAGE_FROM,	Str.STR_NULL),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     4,     0,   333,    14,   136, 0x0,										Str.STR_NULL),
-	{   WIDGETS_END},
+	//{   WIDGETS_END},
 	};
 
 	static void ErrmsgWndProc(Window w, WindowEvent e)
@@ -590,7 +590,7 @@ public class MiscGui {
 
 	static final Widget _tooltips_widgets[] = {
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   199,     0,    31, 0x0, Str.STR_NULL),
-	{   WIDGETS_END},
+	//{   WIDGETS_END},
 	};
 
 
@@ -739,7 +739,7 @@ public class MiscGui {
 		if (num < w.hscroll.pos) w.hscroll.pos = num;
 	}
 
-	static void DelChar(Textbuf *tb)
+	static void DelChar(Textbuf tb)
 	{
 		tb.width -= GetCharacterWidth((byte)tb.buf[tb.caretpos]);
 		memmove(tb.buf + tb.caretpos, tb.buf + tb.caretpos + 1, tb.length - tb.caretpos);
@@ -753,7 +753,7 @@ public class MiscGui {
 	 * @param delmode Type of deletion, either @WKC_BACKSPACE or @WKC_DELETE
 	 * @return Return true on successfull change of Textbuf, or false otherwise
 	 */
-	boolean DeleteTextBufferChar(Textbuf *tb, int delmode)
+	boolean DeleteTextBufferChar(Textbuf tb, int delmode)
 	{
 		if (delmode == WKC_BACKSPACE && tb.caretpos != 0) {
 			tb.caretpos--;
@@ -773,7 +773,7 @@ public class MiscGui {
 	 * Delete every character in the textbuffer
 	 * @param tb @Textbuf buffer to be emptied
 	 */
-	void DeleteTextBufferAll(Textbuf *tb)
+	void DeleteTextBufferAll(Textbuf tb)
 	{
 		memset(tb.buf, 0, tb.maxlength);
 		tb.length = tb.width = 0;
@@ -787,7 +787,7 @@ public class MiscGui {
 	 * @param key Character to be inserted
 	 * @return Return true on successfull change of Textbuf, or false otherwise
 	 */
-	boolean InsertTextBufferChar(Textbuf *tb, byte key)
+	boolean InsertTextBufferChar(Textbuf tb, byte key)
 	{
 		final byte charwidth = GetCharacterWidth(key);
 		if (tb.length < tb.maxlength && (tb.maxwidth == 0 || tb.width + charwidth <= tb.maxwidth)) {
@@ -810,7 +810,7 @@ public class MiscGui {
 	 * @param navmode Direction in which navigation occurs @WKC_LEFT, @WKC_RIGHT, @WKC_END, @WKC_HOME
 	 * @return Return true on successfull change of Textbuf, or false otherwise
 	 */
-	boolean MoveTextBufferPos(Textbuf *tb, int navmode)
+	boolean MoveTextBufferPos(Textbuf tb, int navmode)
 	{
 		switch (navmode) {
 		case WKC_LEFT:
@@ -846,7 +846,7 @@ public class MiscGui {
 	 * Useful when copying in a larger amount of text at once
 	 * @param tb @Textbuf type which length is calculated
 	 */
-	void UpdateTextBufferSize(Textbuf *tb)
+	void UpdateTextBufferSize(Textbuf tb)
 	{
 		final char* buf;
 
@@ -896,7 +896,7 @@ public class MiscGui {
 		return 0;
 	}
 
-	boolean HandleCaret(Textbuf *tb)
+	boolean HandleCaret(Textbuf tb)
 	{
 		/* caret changed? */
 		boolean b = !!(_caret_timer & 0x20);
@@ -1011,16 +1011,16 @@ public class MiscGui {
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     0,   129,    30,    41, Str.STR_012E_CANCEL,	Str.STR_NULL),
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   130,   259,    30,    41, Str.STR_012F_OK,			Str.STR_NULL),
 	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   257,    16,    27, 0x0,							Str.STR_NULL),
-	{   WIDGETS_END},
+	//{   WIDGETS_END},
 	};
 
-	static final WindowDesc _query_string_desc = {
+	static final WindowDesc _query_string_desc = new WindowDesc(
 		190, 219, 260, 42,
 		Window.WC_QUERY_STRING,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_query_string_widgets,
 		QueryStringWndProc
-	};
+	);
 
 	static char _edit_str_buf[64];
 	static char _orig_str_buf[lengthof(_edit_str_buf)];
@@ -1069,7 +1069,7 @@ public class MiscGui {
 	new Widget(          Window.WWT_6,     Window.RESIZE_RB,    14,     2,   243,    50,   291, 0x0,								Str.STR_400A_LIST_OF_DRIVES_DIRECTORIES),
 	new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   245,   256,    60,   281, 0x0,								Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
 	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   245,   256,   282,   293, 0x0,								Str.STR_Window.RESIZE_BUTTON),
-	{   WIDGETS_END},
+	//{   WIDGETS_END},
 	};
 
 	static final Widget _load_dialog_2_widgets[] = {
@@ -1083,7 +1083,7 @@ public class MiscGui {
 	new Widget(          Window.WWT_6,     Window.RESIZE_RB,    14,     2,   243,    50,   291, 0x0,										Str.STR_400A_LIST_OF_DRIVES_DIRECTORIES),
 	new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   245,   256,    60,   281, 0x0,										Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
 	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   245,   256,   282,   293, 0x0,										Str.STR_Window.RESIZE_BUTTON),
-	{   WIDGETS_END},
+	//{   WIDGETS_END},
 	};
 
 	static final Widget _save_dialog_widgets[] = {
@@ -1101,7 +1101,7 @@ public class MiscGui {
 	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,     0,   127,   308,   319, Str.STR_4003_DELETE,		Str.STR_400C_DELETE_THE_CURRENTLY_SELECTED),
 	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   128,   244,   308,   319, Str.STR_4002_SAVE,			Str.STR_400D_SAVE_THE_CURRENT_GAME_USING),
 	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   245,   256,   308,   319, 0x0,								Str.STR_Window.RESIZE_BUTTON),
-	{   WIDGETS_END},
+	//{   WIDGETS_END},
 	};
 
 	static final Widget _save_dialog_scen_widgets[] = {
@@ -1119,7 +1119,7 @@ public class MiscGui {
 	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,     0,   127,   308,   319, Str.STR_4003_DELETE,				Str.STR_400C_DELETE_THE_CURRENTLY_SELECTED),
 	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   128,   244,   308,   319, Str.STR_4002_SAVE,					Str.STR_400D_SAVE_THE_CURRENT_GAME_USING),
 	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   245,   256,   308,   319, 0x0,										Str.STR_Window.RESIZE_BUTTON),
-	{   WIDGETS_END},
+	//{   WIDGETS_END},
 	};
 
 
@@ -1374,43 +1374,43 @@ public class MiscGui {
 		}
 	}
 
-	static final WindowDesc _load_dialog_desc = {
+	static final WindowDesc _load_dialog_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 257, 294,
 		Window.WC_SAVELOAD,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
 		_load_dialog_1_widgets,
-		SaveLoadDlgWndProc,
-	};
+		MiscGui::SaveLoadDlgWndProc,
+	);
 
-	static final WindowDesc _load_dialog_scen_desc = {
+	static final WindowDesc _load_dialog_scen_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 257, 294,
 		Window.WC_SAVELOAD,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
 		_load_dialog_2_widgets,
-		SaveLoadDlgWndProc,
-	};
+		MiscGui::SaveLoadDlgWndProc,
+	);
 
-	static final WindowDesc _save_dialog_desc = {
+	static final WindowDesc _save_dialog_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 257, 320,
 		Window.WC_SAVELOAD,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
 		_save_dialog_widgets,
-		SaveLoadDlgWndProc,
-	};
+		MiscGui::SaveLoadDlgWndProc,
+	);
 
-	static final WindowDesc _save_dialog_scen_desc = {
+	static final WindowDesc _save_dialog_scen_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 257, 320,
 		Window.WC_SAVELOAD,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
 		_save_dialog_scen_widgets,
-		SaveLoadDlgWndProc,
-	};
+		MiscGui::SaveLoadDlgWndProc,
+	);
 
-	static final WindowDesc * final _saveload_dialogs[] = {
-		&_load_dialog_desc,
-		&_load_dialog_scen_desc,
-		&_save_dialog_desc,
-		&_save_dialog_scen_desc,
+	static final WindowDesc  final _saveload_dialogs[] = {
+		_load_dialog_desc,
+		_load_dialog_scen_desc,
+		_save_dialog_desc,
+		_save_dialog_scen_desc,
 	};
 
 	void ShowSaveLoadDialog(int mode)
@@ -1467,7 +1467,7 @@ public class MiscGui {
 	new Widget(          Window.WWT_6,     Window.RESIZE_RB,     7,     2,   243,    28,   317, 0x0,								Str.STR_400F_SELEAcceptedCargo.CT_SCENARIO_GREEN_PRE),
 	new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,     7,   245,   256,    26,   307, 0x0,								Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
 	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,     7,   245,   256,   308,   319, 0x0,								Str.STR_Window.RESIZE_BUTTON),
-	{   WIDGETS_END},
+	//{   WIDGETS_END},
 	};
 
 	static void SelectScenarioWndProc(Window  w, WindowEvent  e)
@@ -1580,13 +1580,13 @@ public class MiscGui {
 		}
 	}
 
-	static final WindowDesc _select_scenario_desc = {
+	static final WindowDesc _select_scenario_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 257, 320,
 		Window.WC_SAVELOAD,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
 		_select_scenario_widgets,
 		SelectScenarioWndProc
-	};
+	);
 
 	void AskForNewGameToStart()
 	{
@@ -1726,7 +1726,7 @@ public class MiscGui {
 	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   399,     0,    13, Str.STR_CHEATS,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   399,    14,   159, 0x0,					Str.STR_NULL),
 	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   399,    14,   159, 0x0,					Str.STR_CHEATS_TIP),
-	{   WIDGETS_END},
+	//{   WIDGETS_END},
 	};
 
 	extern void DrawPlayerIcon(int p, int x, int y);
@@ -1857,13 +1857,13 @@ public class MiscGui {
 		}
 	}
 
-	static final WindowDesc _cheats_desc = {
+	static final WindowDesc _cheats_desc = new WindowDesc(
 		240, 22, 400, 160,
 		Window.WC_CHEATS,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 		_cheat_widgets,
-		CheatsWndProc
-	};
+		MiscGui::CheatsWndProc
+	);
 
 
 	void ShowCheatWindow()
