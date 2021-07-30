@@ -125,7 +125,7 @@ public class Road
 	 * @param p1 road piece flags
 	 * @param p2 unused
 	 */
-	int CmdRemoveRoad(int x, int y, int flags, int p1, int p2)
+	public static int CmdRemoveRoad(int x, int y, int flags, int p1, int p2)
 	{
 		// cost for removing inner/edge -roads
 		static final int road_remove_cost[] = {50, 18};
@@ -347,7 +347,7 @@ public class Road
 	 * @param p1 road piece flags
 	 * @param p2 the town that is building the road (0 if not applicable)
 	 */
-	int CmdBuildRoad(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuildRoad(int x, int y, int flags, int p1, int p2)
 	{
 		TileInfo ti = new TileInfo();
 		int cost;
@@ -511,7 +511,7 @@ public class Road
 	 * - p2 = (bit 1) - end tile starts in the 2nd half of tile (p2 & 2)
 	 * - p2 = (bit 2) - direction: 0 = along x-axis, 1 = along y-axis (p2 & 4)
 	 */
-	int CmdBuildLongRoad(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuildLongRoad(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex start_tile, end_tile, tile;
 		int cost, ret;
@@ -566,7 +566,7 @@ public class Road
 	 * - p2 = (bit 1) - end tile starts in the 2nd half of tile (p2 & 2)
 	 * - p2 = (bit 2) - direction: 0 = along x-axis, 1 = along y-axis (p2 & 4)
 	 */
-	int CmdRemoveLongRoad(int x, int y, int flags, int p1, int p2)
+	public static int CmdRemoveLongRoad(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex start_tile, end_tile, tile;
 		int cost, ret;
@@ -620,7 +620,7 @@ public class Road
 	 * @todo When checking for the tile slope,
 	 * distingush between "Flat land required" and "land sloped in wrong direction"
 	 */
-	int CmdBuildRoadDepot(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuildRoadDepot(int x, int y, int flags, int p1, int p2)
 	{
 		TileInfo ti = new TileInfo();
 		int cost;
@@ -1192,7 +1192,7 @@ public class Road
 		}
 	}
 
-	void InitializeRoad()
+	public static void InitializeRoad()
 	{
 		Global._last_built_road_depot_tile = 0;
 	}

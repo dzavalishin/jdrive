@@ -1742,7 +1742,7 @@ public class Economy
 	 * @param p1 player to buy the shares from
 	 * @param p2 unused
 	 */
-	int CmdBuyShareInCompany(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuyShareInCompany(int x, int y, int flags, int p1, int p2)
 	{
 		// TODO CmdBuyShareInCompany
 		return Cmd.CMD_ERROR;
@@ -1791,7 +1791,7 @@ public class Economy
 	 * @param p1 player to sell the shares from
 	 * @param p2 unused
 	 */
-	int CmdSellShareInCompany(int x, int y, int flags, int p1, int p2)
+	public static int CmdSellShareInCompany(int x, int y, int flags, int p1, int p2)
 	{
 		return Cmd.CMD_ERROR;
 		/*
@@ -1829,7 +1829,7 @@ public class Economy
 	 * @param p1 player/company to buy up
 	 * @param p2 unused
 	 */
-	int CmdBuyCompany(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuyCompany(int x, int y, int flags, int p1, int p2)
 	{
 		Player p;
 

@@ -195,7 +195,7 @@ public class SignStruct implements IPoolItem
 	 * @param p1 unused
 	 * @param p2 unused
 	 */
-	int CmdPlaceSign(int x, int y, int flags, int p1, int p2)
+	public static int CmdPlaceSign(int x, int y, int flags, int p1, int p2)
 	{
 		SignStruct ss;
 

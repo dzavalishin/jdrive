@@ -1041,7 +1041,7 @@ public class Engine extends EngineTables {
 	 * @param p1 engine ID to rename
 	 * @param p2 unused
 	 */
-	int CmdRenameEngine(int x, int y, int flags, int p1, int p2)
+	public static int CmdRenameEngine(int x, int y, int flags, int p1, int p2)
 	{
 		StringID str;
 

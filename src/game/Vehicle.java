@@ -2696,7 +2696,7 @@ public class Vehicle implements IPoolItem
 	 * @param p1 vehicle ID to name
 	 * @param p2 unused
 	 */
-	int CmdNameVehicle(int x, int y, int flags, int p1, int p2)
+	public static int CmdNameVehicle(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 

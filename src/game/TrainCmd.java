@@ -416,7 +416,7 @@ public class TrainCmd extends TrainTables
 		}
 	}
 
-	static int CmdBuildRailWagon(EngineID engine, TileIndex tile, int flags)
+	public static int CmdBuildRailWagon(EngineID engine, TileIndex tile, int flags)
 	{
 		int value;
 		final RailVehicleInfo rvi;
@@ -573,7 +573,7 @@ public class TrainCmd extends TrainTables
 	 * @param p1 engine type id
 	 * @param p2 bit 0 prevents any free cars from being added to the train
 	 */
-	int CmdBuildRailVehicle(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuildRailVehicle(int x, int y, int flags, int p1, int p2)
 	{
 		final RailVehicleInfo rvi;
 		int value;
@@ -609,7 +609,7 @@ public class TrainCmd extends TrainTables
 		num_vehicles += CountArticulatedParts(rvi, p1);
 
 		if (!(flags & Cmd.DC_QUERY_COST)) {
-			Vehicle vl[12]; // Allow for upto 10 artic parts and dual-heads
+			Vehicle [] vl = new Vehicle[12]; // Allow for upto 10 artic parts and dual-heads
 			if (!AllocateVehicles(vl, num_vehicles) || IsOrderPoolFull())
 				return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
@@ -828,11 +828,11 @@ public class TrainCmd extends TrainTables
 	 * - p1 (bit 16 - 31) what wagon to put the source wagon AFTER, XXX - INVALID_VEHICLE to make a new line
 	 * @param p2 (bit 0) move all vehicles following the source vehicle
 	 */
-	int CmdMoveRailVehicle(int x, int y, int flags, int p1, int p2)
+	public static int CmdMoveRailVehicle(int x, int y, int flags, int p1, int p2)
 	{
 		VehicleID s = BitOps.GB(p1, 0, 16);
 		VehicleID d = BitOps.GB(p1, 16, 16);
-		Vehicle src, *dst, *src_head, *dst_head;
+		Vehicle src, dst, src_head, dst_head;
 
 		if (!Vehicle.IsVehicleIndex(s)) return Cmd.CMD_ERROR;
 
@@ -885,7 +885,7 @@ public class TrainCmd extends TrainTables
 
 		if (src.IsTrainEngine() && dst_head != null) {
 			/* we need to make sure that we didn't place it between a pair of multiheaded engines */
-			Vehicle u, *engine = null;
+			Vehicle u, engine = null;
 
 			for(u = dst_head; u != null; u = u.next) {
 				if (u.IsTrainEngine() && u.IsMultiheaded() && u.rail.other_multiheaded_part != null) {
@@ -1005,7 +1005,7 @@ public class TrainCmd extends TrainTables
 
 			if (BitOps.HASBIT(p2, 0) && src_head != null && src_head != src) {
 				/* if we stole a rear multiheaded engine, we better give it back to the front end */
-				Vehicle engine = null, *u;
+				Vehicle engine = null, u;
 				for (u = src_head; u != null; u = u.next) {
 					if (u.IsMultiheaded()) {
 						if (u.IsTrainEngine()) {
@@ -1070,7 +1070,7 @@ public class TrainCmd extends TrainTables
 	 * @param p1 train to start/stop
 	 * @param p2 unused
 	 */
-	int CmdStartStopTrain(int x, int y, int flags, int p1, int p2)
+	public static int CmdStartStopTrain(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 
@@ -1099,9 +1099,9 @@ public class TrainCmd extends TrainTables
 	 * - p2 = 2: when selling attached locos, rearrange all vehicles after it to separate lines;
 	 *           all wagons of the same type will go on the same line. Used by the AI currently
 	 */
-	int CmdSellRailWagon(int x, int y, int flags, int p1, int p2)
+	public static int CmdSellRailWagon(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v, *tmp, *first;
+		Vehicle v, tmp, first;
 		Vehicle new_f = null;
 		int cost = 0;
 
@@ -1109,11 +1109,11 @@ public class TrainCmd extends TrainTables
 
 		v = Vehicle.GetVehicle(p1);
 
-		if (v.type != Vehicle.VEH_Train || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
+		if (v.type != Vehicle.VEH_Train || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		while (v.IsArticulatedPart()) v = GetPrevVehicleInChain(v);
+		while (v.IsArticulatedPart()) v = v.GetPrevVehicleInChain();
 		first = v.GetFirstVehicleInChain();
 
 		// make sure the vehicle is stopped in the depot
@@ -1554,7 +1554,7 @@ public class TrainCmd extends TrainTables
 	 * @param p1 train to reverse
 	 * @param p2 unused
 	 */
-	int CmdReverseTrainDirection(int x, int y, int flags, int p1, int p2)
+	public static int CmdReverseTrainDirection(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 
@@ -1588,7 +1588,7 @@ public class TrainCmd extends TrainTables
 	 * @param p1 train to ignore the red signal
 	 * @param p2 unused
 	 */
-	int CmdForceTrainProceed(int x, int y, int flags, int p1, int p2)
+	public static int CmdForceTrainProceed(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 
@@ -1608,7 +1608,7 @@ public class TrainCmd extends TrainTables
 	 * @param p1 vehicle ID of the train to refit
 	 * @param p2 the new cargo type to refit to (p2 & 0xFF)
 	 */
-	int CmdRefitRailVehicle(int x, int y, int flags, int p1, int p2)
+	public static int CmdRefitRailVehicle(int x, int y, int flags, int p1, int p2)
 	{
 		//CargoID new_cid = BitOps.GB(p2, 0, 8);
 		int new_cid = BitOps.GB(p2, 0, 8);
@@ -1715,7 +1715,7 @@ public class TrainCmd extends TrainTables
 		boolean reverse;
 	} TrainFindDepotData;
 
-	static boolean NtpCallbFindDepot(TileIndex tile, TrainFindDepotData *tfdd, int track, int length)
+	static boolean NtpCallbFindDepot(TileIndex tile, TrainFindDepotData tfdd, int track, int length)
 	{
 		if (tile.IsTileType( TileTypes.MP_RAILWAY) && tile.IsTileOwner( tfdd.owner)) {
 			if ((tile.getMap().m5 & ~0x3) == 0xC0) {
@@ -1791,7 +1791,7 @@ public class TrainCmd extends TrainTables
 	 * @param p1 train to send to the depot
 	 * @param p2 unused
 	 */
-	int CmdSendTrainToDepot(int x, int y, int flags, int p1, int p2)
+	public static int CmdSendTrainToDepot(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		TrainFindDepotData tfdd;
@@ -1841,7 +1841,7 @@ public class TrainCmd extends TrainTables
 	 * @param p1 vehicle ID that is being service-interval-changed
 	 * @param p2 new service interval
 	 */
-	int CmdChangeTrainServiceInt(int x, int y, int flags, int p1, int p2)
+	public static int CmdChangeTrainServiceInt(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		int serv_int = GetServiceIntervalClamped(p2); /* Double check the service interval from the user-input */
@@ -1939,15 +1939,15 @@ public class TrainCmd extends TrainTables
 
 		switch (Engine.GetEngine(engtype).railtype) {
 		case RAILTYPE_RAIL:
-			SndPlayVehicleFx(sfx[RailVehInfo(engtype).engclass], v);
+			//SndPlayVehicleFx(sfx[RailVehInfo(engtype).engclass], v);
 			break;
 
 		case RAILTYPE_MONO:
-			SndPlayVehicleFx(SND_47_MAGLEV_2, v);
+			//SndPlayVehicleFx(SND_47_MAGLEV_2, v);
 			break;
 
 		case RAILTYPE_MAGLEV:
-			SndPlayVehicleFx(SND_41_MAGLEV, v);
+			//SndPlayVehicleFx(SND_41_MAGLEV, v);
 			break;
 		}
 	}

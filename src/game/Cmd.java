@@ -177,7 +177,7 @@ public class Cmd {
 	static boolean CmdFailed(int res)
 	{
 		// lower 16bits are the StringID of the possible error
-		return res <= (CMD_ERROR | Str.INVALID_STRING_ID);
+		return res <= (CMD_ERROR | Str.INVALID_STRING_ID.id);
 	}
 
 
@@ -185,22 +185,22 @@ public class Cmd {
 
 	/* The master command table */
 	static final Command [] _command_proc_table = {
-			new Command(CmdBuildRailroadTrack,                  0), /*   0 */
-			new Command(CmdRemoveRailroadTrack,                 0), /*   1 */
-			new Command(CmdBuildSingleRail,                     0), /*   2 */
-			new Command(CmdRemoveSingleRail,                    0), /*   3 */
-			new Command(CmdLandscapeClear,                      0), /*   4 */
+			new Command(Rail::CmdBuildRailroadTrack,                  0), /*   0 */
+			new Command(Rail::CmdRemoveRailroadTrack,                 0), /*   1 */
+			new Command(Rail::CmdBuildSingleRail,                     0), /*   2 */
+			new Command(Rail::CmdRemoveSingleRail,                    0), /*   3 */
+			new Command(Landscape::CmdLandscapeClear,                      0), /*   4 */
 			new Command(CmdBuildBridge,                         0), /*   5 */
-			new Command(CmdBuildRailroadStation,                0), /*   6 */
-			new Command(CmdBuildTrainDepot,                     0), /*   7 */
-			new Command(CmdBuildSingleSignal,                   0), /*   8 */
-			new Command(CmdRemoveSingleSignal,                  0), /*   9 */
+			new Command(Station::CmdBuildRailroadStation,                0), /*   6 */
+			new Command(Rail::CmdBuildTrainDepot,                     0), /*   7 */
+			new Command(Rail::CmdBuildSingleSignal,                   0), /*   8 */
+			new Command(Rail::CmdRemoveSingleSignal,                  0), /*   9 */
 			new Command(Clear::CmdTerraformLand,                       0), /*  10 */
 			new Command(Clear::CmdPurchaseLandArea,                    0), /*  11 */
 			new Command(Clear::CmdSellLandArea,                        0), /*  12 */
 			new Command(CmdBuildTunnel,                         0), /*  13 */
-			new Command(CmdRemoveFromRailroadStation,           0), /*  14 */
-			new Command(CmdConvertRail,                         0), /*  15 */
+			new Command(Station::CmdRemoveFromRailroadStation,           0), /*  14 */
+			new Command(Rail::CmdConvertRail,                         0), /*  15 */
 			new Command(WayPoint::CmdBuildTrainWaypoint,                  0), /*  16 */
 			new Command(WayPoint::CmdRenameWaypoint,                      0), /*  17 */
 			new Command(WayPoint::CmdRemoveTrainWaypoint,                 0), /*  18 */
@@ -208,34 +208,34 @@ public class Cmd {
 			new Command(null,                                   0), /*  20 */
 			new Command(Station::CmdBuildRoadStop,                       0), /*  21 */
 			new Command(null,                                   0), /*  22 */
-			new Command(CmdBuildLongRoad,                       0), /*  23 */
-			new Command(CmdRemoveLongRoad,                      0), /*  24 */
-			new Command(CmdBuildRoad,                           0), /*  25 */
-			new Command(CmdRemoveRoad,                          0), /*  26 */
-			new Command(CmdBuildRoadDepot,                      0), /*  27 */
+			new Command(Road::CmdBuildLongRoad,                       0), /*  23 */
+			new Command(Road::CmdRemoveLongRoad,                      0), /*  24 */
+			new Command(Road::CmdBuildRoad,                           0), /*  25 */
+			new Command(Road::CmdRemoveRoad,                          0), /*  26 */
+			new Command(Road::CmdBuildRoadDepot,                      0), /*  27 */
 			new Command(null,                                   0), /*  28 */
 			new Command(Station::CmdBuildAirport,                        0), /*  29 */
 			new Command(Station::CmdBuildDock,                           0), /*  30 */
-			new Command(Station::CmdBuildShipDepot,                      0), /*  31 */
+			new Command(Ship::CmdBuildShipDepot,                      0), /*  31 */
 			new Command(Station::CmdBuildBuoy,                           0), /*  32 */
 			new Command(Tree::CmdPlantTree,                           0), /*  33 */
-			new Command(CmdBuildRailVehicle,                    0), /*  34 */
-			new Command(CmdMoveRailVehicle,                     0), /*  35 */
-			new Command(CmdStartStopTrain,                      0), /*  36 */
+			new Command(TrainCmd::CmdBuildRailVehicle,                    0), /*  34 */
+			new Command(TrainCmd::CmdMoveRailVehicle,                     0), /*  35 */
+			new Command(TrainCmd::CmdStartStopTrain,                      0), /*  36 */
 			new Command(null,                                   0), /*  37 */
-			new Command(CmdSellRailWagon,                       0), /*  38 */
-			new Command(CmdSendTrainToDepot,                    0), /*  39 */
-			new Command(CmdForceTrainProceed,                   0), /*  40 */
-			new Command(CmdReverseTrainDirection,               0), /*  41 */
+			new Command(TrainCmd::CmdSellRailWagon,                       0), /*  38 */
+			new Command(TrainCmd::CmdSendTrainToDepot,                    0), /*  39 */
+			new Command(TrainCmd::CmdForceTrainProceed,                   0), /*  40 */
+			new Command(TrainCmd::CmdReverseTrainDirection,               0), /*  41 */
 
 			new Command(Order::CmdModifyOrder,                         0), /*  42 */
 			new Command(Order::CmdSkipOrder,                           0), /*  43 */
 			new Command(Order::CmdDeleteOrder,                         0), /*  44 */
 			new Command(Order::CmdInsertOrder,                         0), /*  45 */
 
-			new Command(CmdChangeTrainServiceInt,               0), /*  46 */
+			new Command(TrainCmd::CmdChangeTrainServiceInt,               0), /*  46 */
 
-			new Command(CmdBuildIndustry,                       0), /*  47 */
+			new Command(Industry::CmdBuildIndustry,                       0), /*  47 */
 			new Command(CmdBuildCompanyHQ,                      0), /*  48 */
 			new Command(MiscCmd::CmdSetPlayerFace,                       0), /*  49 */
 			new Command(MiscCmd::CmdSetPlayerColor,                      0), /*  50 */
@@ -243,10 +243,10 @@ public class Cmd {
 			new Command(MiscCmd::CmdIncreaseLoan,                        0), /*  51 */
 			new Command(MiscCmd::CmdDecreaseLoan,                        0), /*  52 */
 
-			new Command(CmdWantEnginePreview,                   0), /*  53 */
+			new Command(Engine::CmdWantEnginePreview,                   0), /*  53 */
 
-			new Command(CmdNameVehicle,                         0), /*  54 */
-			new Command(CmdRenameEngine,                        0), /*  55 */
+			new Command(Vehicle::CmdNameVehicle,                         0), /*  54 */
+			new Command(Engine::CmdRenameEngine,                        0), /*  55 */
 
 			new Command(MiscCmd::CmdChangeCompanyName,                   0), /*  56 */
 			new Command(MiscCmd::CmdChangePresidentName,                 0), /*  57 */
@@ -261,8 +261,8 @@ public class Cmd {
 			new Command(AirCraft::CmdChangeAircraftServiceInt,            0), /*  63 */
 			new Command(AirCraft::CmdRefitAircraft,                       0), /*  64 */
 
-			new Command(CmdPlaceSign,                           0), /*  65 */
-			new Command(CmdRenameSign,                          0), /*  66 */
+			new Command(SignStruct::CmdPlaceSign,                           0), /*  65 */
+			new Command(SignStruct::CmdRenameSign,                          0), /*  66 */
 
 			new Command(CmdBuildRoadVeh,                        0), /*  67 */
 			new Command(CmdStartStopRoadVeh,                    0), /*  68 */
@@ -273,9 +273,9 @@ public class Cmd {
 
 			new Command(MiscCmd::CmdPause,                      Cmd.CMD_SERVER), /*  73 */
 
-			new Command(CmdBuyShareInCompany,                   0), /*  74 */
-			new Command(CmdSellShareInCompany,                  0), /*  75 */
-			new Command(CmdBuyCompany,                          0), /*  76 */
+			new Command(Economy::CmdBuyShareInCompany,                   0), /*  74 */
+			new Command(Economy::CmdSellShareInCompany,                  0), /*  75 */
+			new Command(Economy::CmdBuyCompany,                          0), /*  76 */
 
 			new Command(Town::CmdBuildTown,                 Cmd.CMD_OFFLINE), /*  77 */
 			new Command(null,                                   0), /*  78 */
@@ -309,22 +309,22 @@ public class Cmd {
 			new Command(null,                                   0), /* 101 */
 
 			new Command(MiscCmd::CmdMoneyCheat,                Cmd.CMD_OFFLINE), /* 102 */
-			new Command(CmdBuildCanal,                          0), /* 103 */
-			new Command(CmdPlayerCtrl,                          0), /* 104 */
+			new Command(Ship::CmdBuildCanal,                          0), /* 103 */
+			new Command(Player::CmdPlayerCtrl,                          0), /* 104 */
 
 			new Command(Clear::CmdLevelLand,                           0), /* 105 */
 
-			new Command(CmdRefitRailVehicle,                    0), /* 106 */
-			new Command(CmdRestoreOrderIndex,                   0), /* 107 */
-			new Command(CmdBuildLock,                           0), /* 108 */
+			new Command(TrainCmd::CmdRefitRailVehicle,                    0), /* 106 */
+			new Command(Order::CmdRestoreOrderIndex,                   0), /* 107 */
+			new Command(Rail::CmdBuildLock,                           0), /* 108 */
 			new Command(null,                                   0), /* 109 */
-			new Command(CmdBuildSignalTrack,                    0), /* 110 */
-			new Command(CmdRemoveSignalTrack,                   0), /* 111 */
+			new Command(Rail::CmdBuildSignalTrack,                    0), /* 110 */
+			new Command(Rail::CmdRemoveSignalTrack,                   0), /* 111 */
 			new Command(null,                                   0), /* 112 */
 			new Command(MiscCmd::CmdGiveMoney,                           0), /* 113 */
 			new Command(CmdChangePatchSetting,         Cmd.CMD_SERVER), /* 114 */
-			new Command(CmdReplaceVehicle,                      0), /* 115 */
-			new Command(CmdCloneVehicle,						 0), /* 116 */
+			new Command(Player::CmdReplaceVehicle,                      0), /* 115 */
+			new Command(Vehicle::CmdCloneVehicle,						 0) /* 116 */
 	};
 
 	/* This function range-checks a cmd, and checks if the cmd is not null */

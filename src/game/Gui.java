@@ -1593,7 +1593,7 @@ public class Gui
 				_generating_world = false;
 
 				if (t == null) {
-					ShowErrorMessage(Str.STR_NO_SPACE_FOR_TOWN, Str.STR_CANNOT_GENERATE_TOWN, 0, 0);
+					Global.ShowErrorMessage(Str.STR_NO_SPACE_FOR_TOWN, Str.STR_CANNOT_GENERATE_TOWN, 0, 0);
 				} else {
 					ScrollMainWindowToTile(t.xy);
 				}
@@ -1606,7 +1606,7 @@ public class Gui
 				_generating_world = true;
 				_game_mode = GameModes.GM_NORMAL; // little hack to avoid towns of the same size
 				if (!GenerateTowns()) {
-					ShowErrorMessage(Str.STR_NO_SPACE_FOR_TOWN, Str.STR_CANNOT_GENERATE_TOWN, 0, 0);
+					Global.ShowErrorMessage(Str.STR_NO_SPACE_FOR_TOWN, Str.STR_CANNOT_GENERATE_TOWN, 0, 0);
 				}
 				_generating_world = false;
 
@@ -1825,7 +1825,7 @@ public class Gui
 			type = _industry_type_to_place;
 			if (!AnyTownExists()) {
 				Global.SetDParam(0, type + Str.STR_4802_COAL_MINE);
-				ShowErrorMessage(Str.STR_0286_MUST_BUILD_TOWN_FIRST,Str.STR_0285_CAN_T_BUILD_HERE,e.place.pt.x, e.place.pt.y);
+				Global.ShowErrorMessage(Str.STR_0286_MUST_BUILD_TOWN_FIRST,Str.STR_0285_CAN_T_BUILD_HERE,e.place.pt.x, e.place.pt.y);
 				return;
 			}
 
@@ -1834,7 +1834,7 @@ public class Gui
 			Global._ignore_restrictions = true;
 			if (!TryBuildIndustry(e.place.tile,type)) {
 				SetDParam(0, type + Str.STR_4802_COAL_MINE);
-				ShowErrorMessage(_error_message, Str.STR_0285_CAN_T_BUILD_HERE, e.place.pt.x, e.place.pt.y);
+				Global.ShowErrorMessage(_error_message, Str.STR_0285_CAN_T_BUILD_HERE, e.place.pt.x, e.place.pt.y);
 			}
 			Global._ignore_restrictions = false;
 			Global._generating_world = false;

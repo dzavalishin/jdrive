@@ -1497,7 +1497,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	 * @param p1 industry type @see build_industry.h and @see industry.h
 	 * @param p2 unused
 	 */
-	int CmdBuildIndustry(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuildIndustry(int x, int y, int flags, int p1, int p2)
 	{
 		final Town t;
 		Industry i;

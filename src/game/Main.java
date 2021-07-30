@@ -465,9 +465,9 @@ public class Main {
 	{/* TODO
 		if (b) {
 			SetDParamStr(0, _screenshot_name);
-			ShowErrorMessage(INVALID_STRING_ID, Str.STR_031B_SCREENSHOT_SUCCESSFULLY, 0, 0);
+			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_031B_SCREENSHOT_SUCCESSFULLY, 0, 0);
 		} else {
-			ShowErrorMessage(INVALID_STRING_ID, Str.STR_031C_SCREENSHOT_FAILED, 0, 0);
+			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_031C_SCREENSHOT_FAILED, 0, 0);
 		}
 		*/
 	}
@@ -546,7 +546,7 @@ public class Main {
 		// invalid type
 		if (_file_to_saveload.mode == SL_INVALID) {
 			Global.error("Savegame is obsolete or invalid format: %s\n", _file_to_saveload.name);
-			ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			Global._game_mode = GameModes.GM_MENU;
 			return;
 		}
@@ -562,7 +562,7 @@ public class Main {
 		// Load game
 		if (SaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode) != SL_OK) {
 			LoadIntroGame();
-			ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 		}
 
 		GameOptions._opt_ptr = GameOptions._opt;
@@ -659,7 +659,7 @@ public class Main {
 
 			if (!SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GM_NORMAL)) {
 				LoadIntroGame();
-				ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+				Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			} else {
 				Global._local_player = 0;
 				DoCommandP(0, 0, 0, null, CMD_PAUSE); // decrease pause counter (was increased from opening load dialog)
@@ -688,7 +688,7 @@ public class Main {
 				// delete all stations owned by a player
 				Station.DeleteAllPlayerStations();
 			} else {
-				ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+				Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			}
 			break;
 		}
@@ -700,7 +700,7 @@ public class Main {
 
 		case SM_SAVE: /* Save game */
 			if (SaveOrLoad(_file_to_saveload.name, SL_SAVE) != SL_OK) {
-				ShowErrorMessage(INVALID_STRING_ID, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
+				Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
 			} else {
 				Window.DeleteWindowById(Window.WC_SAVELOAD, 0);
 			}
@@ -715,7 +715,7 @@ public class Main {
 		}
 
 		if (_switch_mode_errorstr != INVALID_STRING_ID)
-			ShowErrorMessage(INVALID_STRING_ID,_switch_mode_errorstr,0,0);
+			Global.ShowErrorMessage(INVALID_STRING_ID,_switch_mode_errorstr,0,0);
 	}
 
 
@@ -792,7 +792,7 @@ public class Main {
 
 		Global.DEBUG_misc( 2, "Autosaving to %s", buf);
 		if (SaveOrLoad(buf, SL_SAVE) != SL_OK)
-			ShowErrorMessage(INVALID_STRING_ID, Str.STR_AUTOSAVE_FAILED, 0, 0);
+			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_AUTOSAVE_FAILED, 0, 0);
 	}
 
 	static void ScrollMainViewport(int x, int y)

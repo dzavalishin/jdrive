@@ -1462,7 +1462,7 @@ public class Rail extends RailTables {
 	 * Stub for the unified signal builder/remover
 	 * @see CmdSignalTrackHelper
 	 */
-	int CmdBuildSignalTrack(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuildSignalTrack(int x, int y, int flags, int p1, int p2)
 	{
 		return CmdSignalTrackHelper(x, y, flags, p1, p2);
 	}
@@ -1511,7 +1511,7 @@ public class Rail extends RailTables {
 	 * Stub for the unified signal builder/remover
 	 * @see CmdSignalTrackHelper
 	 */
-	int CmdRemoveSignalTrack(int x, int y, int flags, int p1, int p2)
+	public static int CmdRemoveSignalTrack(int x, int y, int flags, int p1, int p2)
 	{
 		return CmdSignalTrackHelper(x, y, flags, p1, BitOps.RETSETBIT(p2, 0));
 	}
@@ -1544,7 +1544,7 @@ public class Rail extends RailTables {
 	 * @param p1 start tile of drag
 	 * @param p2 new railtype to convert to
 	 */
-	int CmdConvertRail(int ex, int ey, int flags, int p1, int p2)
+	public static int CmdConvertRail(int ex, int ey, int flags, int p1, int p2)
 	{
 		int ret, cost, money;
 		int sx, sy, x, y;
