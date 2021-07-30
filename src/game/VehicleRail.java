@@ -21,7 +21,7 @@ public class VehicleRail extends VehicleChild {
 	 * bit     6 = disable visual effect.
 	 * bit     7 = disable powered wagons.
 	 */
-	byte cached_vis_effect;
+	int cached_vis_effect;
 
 	// NOSAVE: for wagon override - id of the first engine in train
 	// 0xffff == not in train

@@ -89,7 +89,7 @@ public class AirCraft {
 	}
 	 */
 
-	int GetAircraftImage(final Vehicle v, byte direction)
+	public static int GetAircraftImage(final Vehicle v, int direction)
 	{
 		int spritenum = v.spritenum;
 
@@ -2310,7 +2310,7 @@ public class AirCraft {
 	 * @param x,y location where to draw the info
 	 * @param engine_number the engine of which to draw the info of
 	 */
-	void DrawAircraftPurchaseInfo(int x, int y, EngineID engine_number)
+	public static void DrawAircraftPurchaseInfo(int x, int y, EngineID engine_number)
 	{
 		final AircraftVehicleInfo avi = Engine.AircraftVehInfo(engine_number.id);
 		final Engine  e = Engine.GetEngine(engine_number);

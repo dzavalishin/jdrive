@@ -1468,7 +1468,7 @@ public class Economy
 		return false;
 	}
 
-	int LoadUnloadVehicle(Vehicle v)
+	static int LoadUnloadVehicle(Vehicle v)
 	{
 		StationID original_cargo_source = StationID.get( v.cargo_source );
 		int profit = 0;

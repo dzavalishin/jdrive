@@ -1,3 +1,4 @@
+#if 0
 /* $Id: train_cmd.h 2701 2005-07-24 14:12:37Z tron $ */
 
 static const SpriteID _engine_sprite_base[] = {

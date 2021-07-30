@@ -39,6 +39,14 @@ public class Sprite extends Sprites {
 		// TODO UnloadSpriteGroup stub
 		
 	}
+
+	public static int PLAYER_SPRITE_COLOR(PlayerID player) {
+		return  (Global._player_colors[player.id] + 0x307) << PALETTE_SPRITE_START;
+	}
+
+	public static int SPRITE_PALETTE(int color) {
+		return color | PALETTE_MODIFIER_COLOR;
+	}
 }
 
 // User should decide by object type

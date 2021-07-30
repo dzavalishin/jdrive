@@ -198,6 +198,7 @@ public class Global {
 	public static Point _tile_fract_coords; // TODO to ViewPort?
 	public static String _screenshot_name;
 	public static byte _vehicle_design_names;
+	public static int _get_z_hint;
 	
 	// Available aircraft types
 	public static int _avail_aircraft = 0; // TODO who assigns?

@@ -249,11 +249,11 @@ public class Order implements IPoolItem {
 			case OT_GOTO_STATION: {
 				final Station st;
 
-				if (!IsStationIndex(new_order.station)) return Cmd.CMD_ERROR;
+				if (!Station.IsStationIndex(new_order.station)) return Cmd.CMD_ERROR;
 				st = Station.GetStation(new_order.station);
 
 				if (!st.IsValidStation() ||
-					(st.airport_type != AirportFTAClass.AT_OILRIG && !(st.IsBuoy()) && !CheckOwnership(st.owner) && !mAirport.MA_OwnerHandler(st.owner)))
+					(st.airport_type != AirportFTAClass.AT_OILRIG && !(st.IsBuoy()) && !Player.CheckOwnership(st.owner) && !mAirport.MA_OwnerHandler(st.owner)))
 					return Cmd.CMD_ERROR;
 
 				//MA checks
@@ -657,8 +657,8 @@ public class Order implements IPoolItem {
 	{
 		Vehicle v;
 		Order order;
-		OrderID sel_ord = new OrderID(BitOps.GB(p1, 16, 16)); // XXX - automatically truncated to 8 bits.
-		VehicleID veh   = new VehicleID( BitOps.GB(p1,  0, 16) );
+		OrderID sel_ord = OrderID.get(BitOps.GB(p1, 16, 16)); // XXX - automatically truncated to 8 bits.
+		VehicleID veh   = VehicleID.get( BitOps.GB(p1,  0, 16) );
 
 		if (!veh.IsVehicleIndex()) return Cmd.CMD_ERROR;
 		if (p2 != OFB_FULL_LOAD && p2 != OFB_UNLOAD && p2 != OFB_NON_STOP && p2 != OFB_TRANSFER) return Cmd.CMD_ERROR;
@@ -699,7 +699,7 @@ public class Order implements IPoolItem {
 				Vehicle u = v.GetFirstVehicleFromSharedList();
 				while (u != null) {
 					/* toggle u.current_order "Full load" flag if it changed */
-					if (sel_ord == u.cur_order_index &&
+					if (sel_ord.id == u.cur_order_index &&
 							BitOps.HASBIT(u.current_order.flags, OFB_FULL_LOAD) != BitOps.HASBIT(order.flags, OFB_FULL_LOAD))
 						u.current_order.flags = BitOps.RETTOGGLEBIT(u.current_order.flags, OFB_FULL_LOAD);
 					u.InvalidateVehicleOrder();
@@ -720,8 +720,8 @@ public class Order implements IPoolItem {
 	static int CmdCloneOrder(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle dst;
-		VehicleID veh_src = new VehicleID( BitOps.GB(p1, 16, 16) );
-		VehicleID veh_dst = new VehicleID( BitOps.GB(p1,  0, 16) );
+		VehicleID veh_src = VehicleID.get( BitOps.GB(p1, 16, 16) );
+		VehicleID veh_dst = VehicleID.get( BitOps.GB(p1,  0, 16) );
 
 		//MA Vars;
 		Station st;
@@ -735,12 +735,12 @@ public class Order implements IPoolItem {
 		if (dst.type == 0 || !Player.CheckOwnership(dst.owner)) return Cmd.CMD_ERROR;
 
 		//MA checks
-		if(MA_VehicleServesMS(Vehicle.GetVehicle(veh_src)) > 0) 
+		if(mAirport.MA_VehicleServesMS(Vehicle.GetVehicle(veh_src)) > 0) 
 		{
-			for(i =  1; i <= MA_VehicleServesMS(GetVehicle(veh_src)) ; i++) 
+			for(i =  1; i <= mAirport.MA_VehicleServesMS(Vehicle.GetVehicle(veh_src)) ; i++) 
 			{
-				st = GetStation(MA_Find_MS_InVehicleOrders(Vehicle.GetVehicle(veh_src), i));
-				if(!MA_WithinVehicleQuota(st)) 
+				st = Station.GetStation(mAirport.MA_Find_MS_InVehicleOrders(Vehicle.GetVehicle(veh_src), i).id);
+				if(!mAirport.MA_WithinVehicleQuota(st)) 
 				{ 
 					Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 					return Cmd.CMD_ERROR;
@@ -795,7 +795,7 @@ public class Order implements IPoolItem {
 					src.InvalidateVehicleOrder();
 
 					RebuildVehicleLists();
-					if (dst.type == Vehicle.VEH_Train) dst.u.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
+					if (dst.type == Vehicle.VEH_Train) dst.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
 				}
 			} break;
 
@@ -863,8 +863,8 @@ public class Order implements IPoolItem {
 
 					dst.InvalidateVehicleOrder();
 
-					RebuildVehicleLists();
-					if (dst.type == Vehicle.VEH_Train) dst.u.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
+					VehicleGui.RebuildVehicleLists();
+					if (dst.type == Vehicle.VEH_Train) dst.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
 				}
 			} break;
 
@@ -893,7 +893,7 @@ public class Order implements IPoolItem {
 	static int CmdRestoreOrderIndex(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
-		OrderID cur_ord = new OrderID( BitOps.GB(p2,  0, 16) );
+		OrderID cur_ord = OrderID.get( BitOps.GB(p2,  0, 16) );
 		int serv_int = BitOps.GB(p2, 16, 16);
 
 		if (!Vehicle.IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
@@ -904,7 +904,7 @@ public class Order implements IPoolItem {
 		if (serv_int != GetServiceIntervalClamped(serv_int) || cur_ord.id >= v.num_orders) return Cmd.CMD_ERROR;
 
 		if (0 != (flags & Cmd.DC_EXEC)) {
-			v.cur_order_index = cur_ord;
+			v.cur_order_index = cur_ord.id;
 			v.service_interval = serv_int;
 		}
 

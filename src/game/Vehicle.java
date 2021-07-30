@@ -157,7 +157,8 @@ public class Vehicle implements IPoolItem
 		next = null;
 		depot_list  = null;
 
-		string_id = null;
+		//string_id = null;
+		string_id = 0;
 
 		unitnumber = null;
 		owner = null;
@@ -816,6 +817,19 @@ public class Vehicle implements IPoolItem
 		return _vehicle_pool.pool.values().iterator();
 	}
 
+	private static Iterator<Vehicle> getIteratorFrom(int id) {
+		Iterator<Vehicle> ii = getIterator();
+		
+		while( ii.hasNext() )
+		{
+			Vehicle v = ii.next();
+			if( v.index == id )
+				return ii;
+		}
+		
+		return null;
+	}
+	
 
 
 	//public static final int INVALID_COORD = (-0x8000);
@@ -1030,12 +1044,12 @@ public class Vehicle implements IPoolItem
 			v.first = null;
 			if (v.type != 0) {
 				switch (v.type) {
-				case VEH_Train: v.cur_image = GetTrainImage(v, v.direction); break;
+				case VEH_Train: v.cur_image = TrainCmd.GetTrainImage(v, v.direction); break;
 				case VEH_Road: v.cur_image = GetRoadVehImage(v, v.direction); break;
-				case VEH_Ship: v.cur_image = GetShipImage(v, v.direction); break;
+				case VEH_Ship: v.cur_image = Ship.GetShipImage(v, v.direction); break;
 				case VEH_Aircraft:
 					if (v.subtype == 0 || v.subtype == 2) {
-						v.cur_image = GetAircraftImage(v, v.direction);
+						v.cur_image = AirCraft.GetAircraftImage(v, v.direction);
 						if (v.next != null) v.next.cur_image = v.cur_image;
 					}
 					break;
@@ -1046,7 +1060,7 @@ public class Vehicle implements IPoolItem
 				v.VehiclePositionChanged();
 
 				if (v.type == VEH_Train && (v.IsFrontEngine() || v.IsFreeWagon()))
-					TrainConsistChanged(v);
+					TrainCmd.TrainConsistChanged(v);
 			}
 		});
 	}
@@ -1100,13 +1114,16 @@ public class Vehicle implements IPoolItem
 	{
 		/* See note by ForceAllocateSpecialVehicle() why we skip the
 		 * first blocks */
-		Vehicle v;
 		final int offset = (1 << VEHICLES_POOL_BLOCK_SIZE_BITS) * BLOCKS_FOR_SPECIAL_VEHICLES;
 
 		if (skip_vehicles[0].id < (_vehicle_pool.total_items() - offset)) 
 		{	// make sure the offset in the array is not larger than the array itself
-			FOR_ALL_VEHICLES_FROM(v, offset + skip_vehicles[0]) 
+			//FOR_ALL_VEHICLES_FROM(v, offset + skip_vehicles[0])
+			Iterator<Vehicle> ii = getIteratorFrom(offset + skip_vehicles[0].id);
+			while(ii.hasNext())
 			{
+				Vehicle v = ii.next();
+				
 				skip_vehicles[0].id++;
 				if (v.type == 0)
 				{
@@ -3046,7 +3063,7 @@ public class Vehicle implements IPoolItem
 		}
 	}
 
-	private boolean IsOrderListShared() {
+	public boolean IsOrderListShared() {
 		return Order.IsOrderListShared(this);
 	}
 	/**
@@ -3116,6 +3133,9 @@ public class Vehicle implements IPoolItem
 	public void TriggerVehicle(int trigger)
 	{
 		VehicleGui.TriggerVehicle(this, trigger);
+	}
+	public TileIndex GetStationTileForVehicle(Station st) {
+		return Station.GetStationTileForVehicle(this, st);
 	}
 
 	/*

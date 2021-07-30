@@ -1,6 +1,7 @@
 package game.tables;
 
 import game.Engine;
+import game.struct.RailtypeSlowdownParams;
 
 public class TrainTables 
 {
@@ -145,6 +146,7 @@ public class TrainTables
 	};
 
 
+	/*
 	static class RailtypeSlowdownParams 
 	{
 		int small_turn; 
@@ -158,14 +160,14 @@ public class TrainTables
 			z_up = k;
 			z_down = l;
 		}
-	}
+	}*/
 
-	static final RailtypeSlowdownParams _railtype_slowdown[] = {
+	protected static final RailtypeSlowdownParams _railtype_slowdown[] = {
 			// normal accel
 			new RailtypeSlowdownParams(256/4, 256/2, 256/4, 2), // normal
 			new RailtypeSlowdownParams(256/4, 256/2, 256/4, 2), // monorail
 			new RailtypeSlowdownParams(0,     256/2, 256/4, 2), // maglev
-	}
+	};
 
 
 	public static final int _breakdown_speeds[] = {
@@ -193,11 +195,72 @@ public class TrainTables
 
 	protected static class VehicleAtSignalData {
 		//TileIndex tile;
-		int tile;
-		int direction;
+		public int tile;
+		public int direction;
 	} 
 
 
+	
+	
+	static final /*SpriteID*/ int _engine_sprite_base[] = {
+			0x0B59, 0x0B61, 0x0B69, 0x0BE1, 0x0B71, 0x0B75, 0x0B7D, 0x0B7D,
+			0x0B85, 0x0B85, 0x0B8D, 0x0B8D, 0x0BC9, 0x0BD1, 0x0BD9, 0x0BE9,
+			0x0BED, 0x0BED, 0x0BF5, 0x0BF9, 0x0B79, 0x0B9D, 0x0B9D, 0x0B95,
+			0x0B95, 0x0BA5, 0x0BA9, 0x0BA9, 0x0BC1, 0x0BC5, 0x0BB1, 0x0BB9,
+			0x0BB9, 0x0AAD, 0x0AB1, 0x0AB5, 0x0AB9, 0x0ABD, 0x0AC1, 0x0AC9,
+			0x0ACD, 0x0AD5, 0x0AD1, 0x0AD9, 0x0AC5, 0x0AD1, 0x0AD5, 0x0AF9,
+			0x0AFD, 0x0B05, 0x0AB9, 0x0AC1, 0x0AC9, 0x0AD1, 0x0AD9, 0x0AE1,
+			0x0AE5, 0x0AE9, 0x0AF1, 0x0AF9, 0x0B0D, 0x0B11, 0x0B15, 0x0B19,
+			0x0B1D, 0x0B21, 0x0B29, 0x0B2D, 0x0B35, 0x0B31, 0x0B39, 0x0B25,
+			0x0B31, 0x0B35,
+			};
+
+			/* For how many directions do we have sprites? (8 or 4; if 4, the other 4
+			 * directions are symmetric. */
+			static final byte _engine_sprite_and[] = {
+			7, 7, 7, 7, 3, 3, 7, 7,
+			7, 7, 7, 7, 7, 7, 7, 3,
+			7, 7, 3, 7, 3, 7, 7, 7,
+			7, 3, 7, 7, 3, 3, 7, 7,
+			7, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3,
+			};
+
+			/* Non-zero for multihead trains. */
+			static final byte _engine_sprite_add[] = {
+			0, 0, 0, 0, 0, 0, 0, 4,
+			0, 4, 0, 4, 0, 0, 0, 0,
+			0, 4, 0, 0, 0, 0, 4, 0,
+			4, 0, 0, 4, 0, 0, 0, 0,
+			4, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0,
+			};
+
+
+			static final byte _wagon_full_adder[] = {
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 44, 0, 0, 0, 0, 24,
+				24, 24, 24, 0, 0, 32, 32, 0,
+				4, 4, 4, 4, 4, 4, 4, 0,
+				0, 4, 4, 4, 0, 44, 0, 0,
+				0, 0, 24, 24, 24, 24, 0, 0,
+				32, 32
+			};
+	
+	
+	
+	
 }
 
 

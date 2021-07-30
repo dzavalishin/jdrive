@@ -24,6 +24,10 @@ public class EngineID extends AbstractID {
 		}
 		return old;
 	}
+
+	public static EngineID getInvalid() {
+		return get(Engine.INVALID_ENGINE);
+	}
 	
 	
 }
