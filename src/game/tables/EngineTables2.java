@@ -470,7 +470,7 @@ public class EngineTables2
 	
 	/* subtype: &1: regular aircraft (else chopper); &2: crashes easily on small airports */
 	/* sfx from somewhere around SND_45_PLANE_CRASHING are toyland plane-sounds */
-	final AircraftVehicleInfo orig_aircraft_vehicle_info[] = {
+	public final static AircraftVehicleInfo orig_aircraft_vehicle_info[] = {
 			// image_index         sfx                         acceleration
 			// |   base_cost       |                           |   max_speed
 			// |   |    running_cost                           |   |    mail_capacity

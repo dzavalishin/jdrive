@@ -73,3 +73,9 @@ Integer. and Long. have operations needed
 * и одним движением брови уничтожил вю мою кунсткамеру
 
  allocations - draw lists / semi/automatic variables and per-draw allocator
+
+
+* boolean value used as int - is boolean->int value standard?
+
+* int used as boolean
+

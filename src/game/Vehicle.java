@@ -63,21 +63,21 @@ public class Vehicle implements IPoolItem
 
 	int max_speed;	// maximum speed
 	int cur_speed;	// current speed
-	byte subspeed;		// fractional speed
+	int subspeed;		// fractional speed
 	int acceleration; // used by train & aircraft
 	int progress;
 
-	byte vehstatus;		// Status
+	int vehstatus;		// Status
 	int last_station_visited;
 
-	byte cargo_type;	// type of cargo this vehicle is carrying
-	byte cargo_days; // how many days have the pieces been in transit
+	int cargo_type;	// type of cargo this vehicle is carrying
+	int cargo_days; // how many days have the pieces been in transit
 	int cargo_source;// source of cargo
 	int cargo_cap;	// total capacity
 	int cargo_count;// how many pieces are used
 
-	byte day_counter; // increased by one for each day
-	byte tick_counter;// increased by one for each tick
+	int day_counter; // increased by one for each day
+	int tick_counter;// increased by one for each tick
 
 	/* Begin Order-stuff */
 	Order current_order;     //! The current order (+ status, like: loading)
@@ -1153,7 +1153,7 @@ public class Vehicle implements IPoolItem
 	 * @param num number of vehicles to allocate room for
 	 *	returns true if there is room to allocate all the vehicles
 	 */
-	boolean AllocateVehicles(Vehicle[] vl, int num)
+	static boolean AllocateVehicles(Vehicle[] vl, int num)
 	{
 		int i;
 		Vehicle v;
@@ -1517,7 +1517,7 @@ public class Vehicle implements IPoolItem
 	 * @param cid_to check refit to this cargo-type
 	 * @return true if it is possible, false otherwise
 	 */
-	boolean CanRefitTo(EngineID engine_type, CargoID cid_to)
+	static boolean CanRefitTo(EngineID engine_type, CargoID cid_to)
 	{
 		CargoID cid = Global._global_cargo_id[GameOptions._opt_ptr.landscape][cid_to.id];
 		return BitOps.HASBIT(Global._engine_info[engine_type.id].refit_mask, cid.id);

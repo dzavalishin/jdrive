@@ -1,4 +1,5 @@
 package game;
+import game.tables.EngineTables2;
 import game.util.BitOps;
 import game.util.GameDate;
 import game.util.YearMonthDay;
@@ -96,8 +97,8 @@ public class AirCraft {
 		if (is_custom_sprite(spritenum)) {
 			int sprite = GetCustomVehicleSprite(v, direction);
 
-			if (sprite) return sprite;
-			spritenum = orig_aircraft_vehicle_info[v.engine_type - AIRCRAFT_ENGINES_INDEX].image_index;
+			if (sprite != 0) return sprite;
+			spritenum = EngineTables2.orig_aircraft_vehicle_info[v.engine_type.id - Global.AIRCRAFT_ENGINES_INDEX].image_index;
 		}
 		return direction + _aircraft_sprite[spritenum];
 	}
@@ -155,12 +156,12 @@ public class AirCraft {
 
 		avi = Engine.AircraftVehInfo(p1);
 		// allocate 2 or 3 vehicle structs, depending on type
-		if (!AllocateVehicles(vl, (avi.subtype & 1) == 0 ? 3 : 2) ||
+		if (!Vehicle.AllocateVehicles(vl, (avi.subtype & 1) == 0 ? 3 : 2) ||
 				Order.IsOrderPoolFull()) {
 			return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 		}
 
-		unit_num = GetFreeUnitNumber(Vehicle.VEH_Aircraft);
+		unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Aircraft);
 		if (unit_num.id > Global._patches.max_aircraft.id)
 			return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
@@ -297,7 +298,7 @@ public class AirCraft {
 			}
 
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
-			RebuildVehicleLists();
+			VehicleGui.RebuildVehicleLists();
 			Window.InvalidateWindow(Window.WC_COMPANY, v.owner.id);
 			if (Player.IsLocalPlayer())
 				Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, Vehicle.VEH_Aircraft); //updates the replace Aircraft window
@@ -329,7 +330,7 @@ public class AirCraft {
 	static void DoDeleteAircraft(Vehicle v)
 	{
 		Window.DeleteWindowById(Window.WC_VEHICLE_VIEW, v.index);
-		Vehicle.RebuildVehicleLists();
+		VehicleGui.RebuildVehicleLists();
 		Window.InvalidateWindow(Window.WC_COMPANY, v.owner.id);
 		v.DeleteVehicleChain();
 		Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
@@ -380,7 +381,7 @@ public class AirCraft {
 		if (v.type != Vehicle.VEH_Aircraft || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		if (Global._patches.allow_municipal_airports 
-				&& MA_VehicleIsAtMunicipalAirport(v) 
+				&& mAirport.MA_VehicleIsAtMunicipalAirport(v) 
 				&& 0==(v.vehstatus & Vehicle.VS_STOPPED)) 
 			return Cmd.return_cmd_error(Str.STR_MA_CANT_STOP_AT_MUNICIPAL);
 
@@ -441,7 +442,7 @@ public class AirCraft {
 				next_airport_has_hangar = false;
 				if (station.id == Station.INVALID_STATION) return Cmd.CMD_ERROR;
 				st = Station.GetStation(station.id);
-				next_airport_index = station;
+				next_airport_index = station.id;
 
 			}
 
@@ -449,7 +450,7 @@ public class AirCraft {
 				v.current_order.type = Order.OT_GOTO_DEPOT;
 				v.current_order.flags = BitOps.HASBIT(p2, 16) ? 0 : Order.OF_NON_STOP | Order.OF_FULL_LOAD;
 				v.current_order.station = next_airport_index;
-				InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 				if (BitOps.HASBIT(p2, 17) || (p2 == 0 && v.air.state == Airport.FLYING && !next_airport_has_hangar)) {
 					// the aircraft is now heading for a different hangar than the next in the orders
 					AircraftNextAirportPos_and_Order(v);
@@ -469,7 +470,7 @@ public class AirCraft {
 	static int CmdChangeAircraftServiceInt(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
-		int serv_int = GetServiceIntervalClamped(p2); /* Double check the service interval from the user-input */
+		int serv_int = Depot.GetServiceIntervalClamped(p2); /* Double check the service interval from the user-input */
 
 		if (serv_int != p2 || !Vehicle.IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
 
@@ -503,13 +504,13 @@ public class AirCraft {
 
 		v = Vehicle.GetVehicle(p1);
 
-		if (v.type != Vehicle.VEH_Aircraft || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
+		if (v.type != Vehicle.VEH_Aircraft || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 		if (!CheckStoppedInHangar(v)) return Cmd.return_cmd_error(Str.STR_A01B_AIRCRAFT_MUST_BE_STOPPED);
 
-		avi = AircraftVehInfo(v.engine_type);
+		avi = Engine.AircraftVehInfo(v.engine_type);
 
 		/* Check cargo */
-		if (new_cid > NUM_CARGO || !CanRefitTo(v.engine_type, new_cid)) return Cmd.CMD_ERROR;
+		if (new_cid.id > AcceptedCargo.NUM_CARGO || !Vehicle.CanRefitTo(v.engine_type, new_cid)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_AIRCRAFT_RUN);
 
@@ -529,22 +530,22 @@ public class AirCraft {
 			pass /= 4;
 			break;
 		}
-		_aircraft_refit_capacity = pass;
+		Global._aircraft_refit_capacity = pass;
 
 		cost = 0;
-		if (v.owner.IS_HUMAN_PLAYER() && new_cid != v.cargo_type) {
+		if (v.owner.IS_HUMAN_PLAYER() && new_cid.id != v.cargo_type) {
 			cost = Global._price.aircraft_base >> 7;
 		}
 
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			Vehicle u;
 			v.cargo_cap = pass;
 
 			u = v.next;
-			mail = (new_cid != AcceptedCargo.CT_PASSENGERS) ? 0 : avi.mail_capacity;
+			mail = (new_cid.id != AcceptedCargo.CT_PASSENGERS) ? 0 : avi.mail_capacity;
 			u.cargo_cap = mail;
 			v.cargo_count = u.cargo_count = 0;
-			v.cargo_type = new_cid;
+			v.cargo_type = new_cid.id;
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 		}
 
@@ -590,20 +591,20 @@ public class AirCraft {
 
 		if ((++v.day_counter & 7) == 0) v.DecreaseVehicleValue();
 
-		Order.CheckOrders(v.index, OC_INIT);
+		Order.CheckOrders(v.index, Order.OC_INIT);
 
 		v.CheckVehicleBreakdown();
 		v.AgeVehicle();
 		CheckIfAircraftNeedsService(v);
 
-		if (v.vehstatus & Vehicle.VS_STOPPED) return;
+		if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
 
-		cost = AircraftVehInfo(v.engine_type).running_cost * Global._price.aircraft_running / 364;
+		cost = Engine.AircraftVehInfo(v.engine_type.id).running_cost * Global._price.aircraft_running / 364;
 
 		v.profit_this_year -= cost >> 8;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_AIRCRAFT_RUN);
-		Plater.SubtractMoneyFromPlayerFract(v.owner, cost);
+		Player.SubtractMoneyFromPlayerFract(v.owner, cost);
 
 		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 		Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
@@ -693,16 +694,16 @@ public class AirCraft {
 
 		v.cur_image = GetAircraftImage(v, v.direction);
 
-		BeginVehicleMove(v);
-		VehiclePositionChanged(v);
-		EndVehicleMove(v);
+		v.BeginVehicleMove();
+		v.VehiclePositionChanged();
+		v.EndVehicleMove();
 
 		u = v.next;
 
-		yt = y - ((v.z_pos-GetSlopeZ(x, y-1)) >> 3);
+		yt = y - ((v.z_pos-Landscape.GetSlopeZ(x, y-1)) >> 3);
 		u.x_pos = x;
 		u.y_pos = yt;
-		u.z_pos = GetSlopeZ(x,yt);
+		u.z_pos = Landscape.GetSlopeZ(x,yt);
 		u.cur_image = v.cur_image;
 
 		u.BeginVehicleMove();
@@ -766,18 +767,18 @@ public class AirCraft {
 
 		//spd = v.cur_speed + v.acceleration;
 		v.subspeed = (byte) ((t=v.subspeed) + (int)spd);
-		spd = Math.min( v.cur_speed + (spd >> 8) + (v.subspeed < t), new_speed);
+		spd = Math.min( v.cur_speed + (spd >> 8) + ((v.subspeed < t) ? 1 : 0), new_speed);
 
 		// adjust speed for broken vehicles
-		if(v.vehstatus&Vehicle.VS_AIRCRAFT_BROKEN) spd = Math.min(spd, v.max_speed / 3 * Global._patches.aircraft_speed_coeff);
+		if( 0 != (v.vehstatus&Vehicle.VS_AIRCRAFT_BROKEN)) spd = Math.min(spd, v.max_speed / 3 * Global._patches.aircraft_speed_coeff);
 
-		if(v.air.state == FLYING && v.subtype == 0 && v.air.desired_speed == 0) {
+		if(v.air.state == Airport.FLYING && v.subtype == 0 && v.air.desired_speed == 0) {
 			if(spd > 0)
 				spd = 0;
 		}
 
 		// If landing, do not speed up!
-		if((v.air.state == LANDING || v.air.state == ENDLANDING) && spd > 15 * Global._patches.aircraft_speed_coeff)
+		if((v.air.state == Airport.LANDING || v.air.state == Airport.ENDLANDING) && spd > 15 * Global._patches.aircraft_speed_coeff)
 			spd = Math.min(v.cur_speed, spd);
 
 		//updates statusbar only if speed have changed to save CPU time
@@ -876,11 +877,11 @@ public class AirCraft {
 			// Make sure the rotors don't rotate too fast
 			if (u.cur_speed > 32) {
 				v.cur_speed = 0;
-				if (--u.cur_speed == 32) SndPlayVehicleFx(SND_18_HELICOPTER, v);
+				//if (--u.cur_speed == 32) SndPlayVehicleFx(SND_18_HELICOPTER, v);
 			} else {
 				u.cur_speed = 32;
 				if (UpdateAircraftSpeed(v) >= 1) {
-					v.tile = 0;
+					v.tile = null;
 
 					// Reached altitude?
 					if (v.z_pos >= 184) {
@@ -896,11 +897,11 @@ public class AirCraft {
 		// Helicopter landing.
 		if (amd.flag & AMED_HELI_LOWER) {
 			if (UpdateAircraftSpeed(v) >= 1) {
-				if (st.airport_tile == 0) {
+				if (st.airport_tile == null) {
 					// FIXME - AircraftController . if station no longer exists, do not land
 					// helicopter will circle until sign disappears, then go to next order
 					// * what to do when it is the only order left, right now it just stays in 1 place
-					v.air.state = FLYING;
+					v.air.state = Airport.FLYING;
 					AircraftNextAirportPos_and_Order(v);
 					return false;
 				}
@@ -938,7 +939,7 @@ public class AirCraft {
 		}
 
 		// If target airport is VERY busy (queue larger than 5), always add to queue
-		if(st.airport_queue.size > 5  && v.air.state == FLYING) {
+		if(st.airport_queue.size > 5  && v.air.state == Airport.FLYING) {
 			// If it's already in the queue, don't re-add it
 			// Otherwise, add it to queue - but don't add helicopters!
 			// otherwise, helicopters will be part of the queue and can't land separately!
@@ -949,33 +950,33 @@ public class AirCraft {
 		}
 
 		// If the aircraft is flying and is within range of an airport, add it to the queue
-		if(dist < 1000 && v.air.state == FLYING) {
+		if(dist < 1000 && v.air.state == Airport.FLYING) {
 			// If it's already in the queue, don't re-add it
 			// Otherwise, add it to queue - but don't add helicopters!
 			// otherwise, helicopters will be part of the queue and can't land separately!
 			if(v.queue_item == null && Global._patches.aircraft_queueing == true && v.subtype != 0) {
 				// Add to queue
-				st.airport_queue.push(st.airport_queue, v);
+				st.airport_queue.push(v);
 			}
 		}
 
 		// Calculate desired distance
 		if(v.subtype != 0) {
 			if(v.queue_item != null)
-				desired_dist = v.queue_item.queue.getPos(v.queue_item.queue, v) * 250;
+				desired_dist = v.queue_item.queue.getPos(v) * 250;
 			else
 				desired_dist = st.airport_queue.size * 250;
 		} else {
 			// Helicopters
 			if(v.queue_item != null)
-				desired_dist = v.queue_item.queue.getPos(v.queue_item.queue, v) * 75;
+				desired_dist = v.queue_item.queue.getPos( v) * 75;
 			else
 				desired_dist = st.helicopter_queue.size * 75;
 		}
 
 		// Add helicopters to their own queue, if in range of airport
-		if(dist < 1000 && v.air.state == FLYING && v.subtype == 0 && v.queue_item == null) {
-			st.helicopter_queue.push(st.helicopter_queue, v);
+		if(dist < 1000 && v.air.state == Airport.FLYING && v.subtype == 0 && v.queue_item == null) {
+			st.helicopter_queue.push(v);
 		}
 
 		// Try to reach desired distance
@@ -985,7 +986,7 @@ public class AirCraft {
 		} else {
 			if(dist < desired_dist && v.queue_item != null) {
 				// Too close, slow down, but only if not near end of queue
-				if(v.queue_item.queue.getPos(v.queue_item.queue, v) > 2)
+				if(v.queue_item.queue.getPos(v) > 2)
 					v.air.desired_speed = Math.min(v.max_speed * Global._patches.aircraft_speed_coeff, 15 * Global._patches.aircraft_speed_coeff);
 				else
 					v.air.desired_speed = v.air.desired_speed = Math.min(v.max_speed * Global._patches.aircraft_speed_coeff, 36 * Global._patches.aircraft_speed_coeff);
@@ -997,8 +998,8 @@ public class AirCraft {
 
 		// All helicopters other than one in front stay in line
 		if(v.queue_item != null) {
-			if(v.air.state == FLYING && v.subtype == 0
-					&& v.queue_item.queue.getPos(v.queue_item.queue, v) != 1) {
+			if(v.air.state == Airport.FLYING && v.subtype == 0
+					&& v.queue_item.queue.getPos(v) != 1) {
 				if(dist < desired_dist) {
 					v.cur_speed = 0;
 					v.air.desired_speed = 0;
@@ -1007,7 +1008,7 @@ public class AirCraft {
 		}
 
 		// Slow down if above desired speed
-		if(v.air.state == FLYING && v.cur_speed > v.air.desired_speed)
+		if(v.air.state == Airport.FLYING && v.cur_speed > v.air.desired_speed)
 			v.cur_speed--;
 
 		// Need exact position?
@@ -1075,7 +1076,7 @@ public class AirCraft {
 
 		if (amd.flag & AMED_LAND) {
 			if (st.airport_tile == 0) {
-				v.air.state = FLYING;
+				v.air.state = Airport.FLYING;
 				AircraftNextAirportPos_and_Order(v);
 				// get aircraft back on running altitude
 				SetAircraftPosition(v, gp.x, gp.y, GetAircraftFlyingAltitude(v));
@@ -1168,8 +1169,8 @@ public class AirCraft {
 			// but they all share the same number
 			CLRBITS(st.airport_flags, RUNWAY_IN_block);
 
-			BeginVehicleMove(v);
-			EndVehicleMove(v);
+			v.BeginVehicleMove();
+			v.EndVehicleMove();
 
 			DoDeleteAircraft(v);
 		}
@@ -1264,7 +1265,7 @@ public class AirCraft {
 		v.current_order = *order;
 
 		// orders are changed in flight, ensure going to the right station
-		if (order.type == Order.OT_GOTO_STATION && v.air.state == FLYING) {
+		if (order.type == Order.OT_GOTO_STATION && v.air.state == Airport.FLYING) {
 			AircraftNextAirportPos_and_Order(v);
 			v.air.targetairport = order.station;
 		}
@@ -1548,7 +1549,7 @@ public class AirCraft {
 			}
 		} else { // Else prepare for launch.
 			// airplane goto state takeoff, helicopter to helitakeoff
-			v.air.state = (v.subtype != 0) ? TAKEOFF : HELITAKEOFF;
+			v.air.state = (v.subtype != 0) ? Airport.TAKEOFF : Airport.HELITAKEOFF;
 		}
 		AircraftLeaveHangar(v);
 		AirportMove(v, Airport);
@@ -1565,7 +1566,7 @@ public class AirCraft {
 			if (Global._patches.serviceathelipad) {
 				if (v.subtype == 0 && Airport.helipads != null) {
 					// an exerpt of ServiceAircraft, without the invisibility stuff
-					v.date_of_last_service = _date;
+					v.date_of_last_service = Global._date;
 					v.breakdowns_since_last_service = 0;
 					v.reliability = GetEngine(v.engine_type).reliability;
 					Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
@@ -1587,19 +1588,19 @@ public class AirCraft {
 		switch (v.current_order.type) {
 		case Order.OT_GOTO_STATION: // ready to fly to another airport
 			// airplane goto state takeoff, helicopter to helitakeoff
-			v.air.state = (v.subtype != 0) ? TAKEOFF : HELITAKEOFF;
+			v.air.state = (v.subtype != 0) ? Airport.TAKEOFF : Airport.HELITAKEOFF;
 			break;
 		case Order.OT_GOTO_DEPOT:   // visit hangar for serivicing, sale, etc.
 			if (v.current_order.station == v.air.targetairport) {
-				v.air.state = HANGAR;
+				v.air.state = Airport.HANGAR;
 			} else {
-				v.air.state = (v.subtype != 0) ? TAKEOFF : HELITAKEOFF;
+				v.air.state = (v.subtype != 0) ? Airport.TAKEOFF : Airport.HELITAKEOFF;
 			}
 			break;
 		default:  // orders have been deleted (no orders), goto depot and don't bother us
 			v.current_order.type = Order.OT_NOTHING;
 			v.current_order.flags = 0;
-			v.air.state = HANGAR;
+			v.air.state = Airport.HANGAR;
 		}
 
 		AirportMove(v, Airport);
@@ -1613,18 +1614,18 @@ public class AirCraft {
 
 	static void AircraftEventHandler_TakeOff(Vehicle v, final AirportFTAClass Airport) {
 		PlayAircraftSound(v); // play takeoffsound for airplanes
-		v.air.state = STARTTAKEOFF;
+		v.air.state = Airport.STARTTAKEOFF;
 	}
 
 	static void AircraftEventHandler_StartTakeOff(Vehicle v, final AirportFTAClass Airport)
 	{
 		v.sprite_width = v.sprite_height = 24; // ??? no idea what this is
-		v.air.state = ENDTAKEOFF;
+		v.air.state = Airport.ENDTAKEOFF;
 	}
 
 	static void AircraftEventHandler_EndTakeOff(Vehicle v, final AirportFTAClass Airport)
 	{
-		v.air.state = FLYING;
+		v.air.state = Airport.FLYING;
 		// get the next position to go to, differs per airport
 		AircraftNextAirportPos_and_Order(v);
 	}
@@ -1633,7 +1634,7 @@ public class AirCraft {
 	{
 		final Player  p = Player.GetPlayer(v.owner);
 		v.sprite_width = v.sprite_height = 24; // ??? no idea what this is
-		v.air.state = FLYING;
+		v.air.state = Airport.FLYING;
 		// get the next position to go to, differs per airport
 		AircraftNextAirportPos_and_Order(v);
 
@@ -1876,7 +1877,7 @@ public class AirCraft {
 		if (current.heading == v.air.state) {
 			prev_pos = (byte) v.air.pos; // location could be changed in state, so save it before-hand
 			_aircraft_state_handlers[v.air.state].accept(v, Airport);
-			if (v.air.state != FLYING) v.air.previous_pos = prev_pos;
+			if (v.air.state != Airport.FLYING) v.air.previous_pos = prev_pos;
 			return true;
 		}
 
@@ -1893,7 +1894,7 @@ public class AirCraft {
 		// there are more choices to choose from, choose the one that
 		// matches our heading
 		do {
-			if (v.air.state == current.heading || current.heading == TO_ALL) {
+			if (v.air.state == current.heading || current.heading == Airport.TO_ALL) {
 				if (AirportSetBlocks(v, current, Airport)) {
 					v.air.pos = current.next_position;
 				} // move to next position
@@ -2193,7 +2194,7 @@ public class AirCraft {
 			// skip those
 			if (v_oldstyle.type == Vehicle.VEH_Aircraft && v_oldstyle.subtype <= 2) {
 				// airplane in terminal stopped doesn't hurt anyone, so goto next
-				if (v_oldstyle.vehstatus & Vehicle.VS_STOPPED && v_oldstyle.u.air.state == 0) {
+				if (v_oldstyle.vehstatus & Vehicle.VS_STOPPED && v_oldstyle.air.state == 0) {
 					v_oldstyle.u.air.state = HANGAR;
 					continue;
 				}
@@ -2599,7 +2600,7 @@ public class AirCraft {
 	static void AircraftDetailsWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			final Vehicle v = Vehicle.GetVehicle(w.window_number);
 
 			w.disabled_state = v.owner == Global._local_player ? 0 : (1 << 2);
@@ -3006,7 +3007,7 @@ public class AirCraft {
 
 		pos = (row + w.vscroll.pos) * w.hscroll.cap + xt;
 
-		tile = w.window_number;
+		tile = w.window_number.n;
 		//FOR_ALL_VEHICLES(v)
 		ii = Vehicle.getIterator();
 		while(ii.hasNext())
@@ -3030,7 +3031,7 @@ public class AirCraft {
 		int mode = GetVehicleFromAircraftDepotWndPt(w, x, y, v);
 
 		// share / copy orders
-		if (_thd.place_mode && mode <= 0) {
+		if (Global._thd.place_mode && mode <= 0) {
 			_place_clicked_vehicle = v[0];
 			return;
 		}
@@ -3303,7 +3304,7 @@ public class AirCraft {
 	{
 		StationID station = BitOps.GB(w.window_number, 16, 16);
 		PlayerID owner = BitOps.GB(w.window_number, 0, 8);
-		vehiclelist_d *vl = &WP(w, vehiclelist_d);
+		vehiclelist_d vl = WP(w, vehiclelist_d);
 
 		switch(e.event) {
 		case WindowEvents.WE_PAINT: {
