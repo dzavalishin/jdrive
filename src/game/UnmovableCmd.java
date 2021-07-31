@@ -1,24 +1,12 @@
 package game;
 
-public class UnmovableCmd {
-	/* $Id: unmovable_cmd.c 3066 2005-10-19 14:49:46Z tron $ */
+import java.util.Iterator;
 
+import game.struct.DrawTileUnmovableStruct;
+import game.tables.UnmovableTables;
+import game.util.BitOps;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+public class UnmovableCmd extends UnmovableTables {
 
 	/** Destroy a HQ.
 	 * During normal gameplay you can only implicitely destroy a HQ when you are
@@ -28,37 +16,40 @@ public class UnmovableCmd {
 	 */
 	int DestroyCompanyHQ(TileIndex tile, int flags)
 	{
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
 		Player p;
 
-		Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
-
 		/* Find player that has HQ flooded, and reset their location_of_house */
-		if (Global._current_player == Owner.OWNER_WATER) {
+		if (Global._current_player.id == Owner.OWNER_WATER) {
 			boolean dodelete = false;
 
-			FOR_ALL_PLAYERS(p) {
-				if (p.location_of_house == tile) {
+			//FOR_ALL_PLAYERS(p)
+			Iterator<Player> ii = Player.getIterator();
+			while(ii.hasNext())
+			{
+				Player pp = ii.next();
+				if (pp.location_of_house == tile) {
 					dodelete = true;
 					break;
 				}
 			}
 			if (!dodelete) return Cmd.CMD_ERROR;
 		} else /* Destruction was initiated by player */
-			p = GetPlayer(Global._current_player);
+			p = Player.GetPlayer(Global._current_player);
 
-			if (p.location_of_house == 0) return Cmd.CMD_ERROR;
+		if (p.location_of_house == null) return Cmd.CMD_ERROR;
 
-			if (flags & Cmd.DC_EXEC) {
-				DoClearSquare(p.location_of_house + TileDiffXY(0, 0));
-				DoClearSquare(p.location_of_house + TileDiffXY(0, 1));
-				DoClearSquare(p.location_of_house + TileDiffXY(1, 0));
-				DoClearSquare(p.location_of_house + TileDiffXY(1, 1));
-				p.location_of_house = 0; // reset HQ position
-				Window.InvalidateWindow(Window.WC_COMPANY, (int)p.index);
-			}
+		if(0 != (flags & Cmd.DC_EXEC)) {
+			Landscape.DoClearSquare(p.location_of_house.iadd(0, 0));
+			Landscape.DoClearSquare(p.location_of_house.iadd(0, 1));
+			Landscape.DoClearSquare(p.location_of_house.iadd(1, 0));
+			Landscape.DoClearSquare(p.location_of_house.iadd(1, 1));
+			p.location_of_house = null; // reset HQ position
+			Window.InvalidateWindow(Window.WC_COMPANY, p.index);
+		}
 
 		// cost of relocating company is 1% of company value
-			return CalculateCompanyValue(p) / 100;
+		return Economy.CalculateCompanyValue(p) / 100;
 	}
 
 	/** Build or relocate the HQ. This depends if the HQ is already built or not
@@ -66,33 +57,33 @@ public class UnmovableCmd {
 	 * @param p1 unused
 	 * @param p2 unused
 	 */
-	extern int CheckFlatLandBelow(TileIndex tile, int w, int h, int flags, int invalid_dirs, int *);
+	//extern int CheckFlatLandBelow(TileIndex tile, int w, int h, int flags, int invalid_dirs, int *);
 	int CmdBuildCompanyHQ(int x, int y, int flags, int p1, int p2)
 	{
-		TileIndex tile = TileVirtXY(x, y);
-		Player p = GetPlayer(Global._current_player);
+		TileIndex tile = TileIndex.TileVirtXY(x, y);
+		Player p = Player.GetPlayer(Global._current_player);
 		int cost;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
 
 		cost = CheckFlatLandBelow(tile, 2, 2, flags, 0, null);
-		if (CmdFailed(cost)) return Cmd.CMD_ERROR;
+		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
 
 		if (p.location_of_house != 0) { /* Moving HQ */
 			int ret = DestroyCompanyHQ(p.location_of_house, flags);
-			if (CmdFailed(ret)) return Cmd.CMD_ERROR;
+			if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
 			cost += ret;
 		}
 
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			int score = UpdateCompanyRatingAndValue(p, false);
 
 			p.location_of_house = tile;
 
-			ModifyTile(tile + TileDiffXY(0, 0), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOwner.OWNER_CURRENT | TileTypes.MP_MAP5, 0x80);
-			ModifyTile(tile + TileDiffXY(0, 1), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOwner.OWNER_CURRENT | TileTypes.MP_MAP5, 0x81);
-			ModifyTile(tile + TileDiffXY(1, 0), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOwner.OWNER_CURRENT | TileTypes.MP_MAP5, 0x82);
-			ModifyTile(tile + TileDiffXY(1, 1), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOwner.OWNER_CURRENT | TileTypes.MP_MAP5, 0x83);
+			Landscape.ModifyTile(tile.iadd(0, 0), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x80);
+			Landscape.ModifyTile(tile.iadd(0, 1), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x81);
+			Landscape.ModifyTile(tile.iadd(1, 0), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x82);
+			Landscape.ModifyTile(tile.iadd(1, 1), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x83);
 			UpdatePlayerHouse(p, score);
 			Window.InvalidateWindow(Window.WC_COMPANY, (int)p.index);
 		}
@@ -100,92 +91,89 @@ public class UnmovableCmd {
 		return cost;
 	}
 
-	class DrawTileUnmovableStruct {
-		int image;
-		byte subcoord_x;
-		byte subcoord_y;
-		byte width;
-		byte height;
-		byte z_size;
-		byte unused;
-	} DrawTileUnmovableStruct;
-
-
 
 	static void DrawTile_Unmovable(TileInfo ti)
 	{
 		int image, ormod;
 
-		if (!(ti.map5 & 0x80)) {
+		if (0==(ti.map5 & 0x80)) 
+		{
 			if (ti.map5 == 2) {
 
 				// statue
 				DrawGroundSprite(Sprite.SPR_STATUE_GROUND);
 
-				image = PLAYER_SPRITE_COLOR(GetTileOwner(ti.tile));
+				image = PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner());
 				image += PALETTE_MODIFIER_COLOR | Sprite.SPR_STATUE_COMPANY;
 				if (_displayGameOptions._opt & DO_TRANS_BUILDINGS)
 					MAKE_TRANSPARENT(image);
-				AddSortableSpriteToDraw(image, ti.x, ti.y, 16, 16, 25, ti.z);
+				ViewPort.AddSortableSpriteToDraw(image, ti.x, ti.y, 16, 16, 25, ti.z);
 			} else if (ti.map5 == 3) {
 
 				// "owned by" sign
 				DrawClearLandTile(ti, 0);
 
-				AddSortableSpriteToDraw(
-					PLAYER_SPRITE_COLOR(GetTileOwner(ti.tile)) + PALETTE_MODIFIER_COLOR + Sprite.SPR_BOUGHT_LAND,
-					ti.x+8, ti.y+8,
-					1, 1,
-					10,
-					GetSlopeZ(ti.x+8, ti.y+8)
-				);
+				ViewPort.AddSortableSpriteToDraw(
+						PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner()) + PALETTE_MODIFIER_COLOR + Sprite.SPR_BOUGHT_LAND,
+						ti.x+8, ti.y+8,
+						1, 1,
+						10,
+						Landscape.GetSlopeZ(ti.x+8, ti.y+8)
+						);
 			} else {
 				// lighthouse or transmitter
 
-				final DrawTileUnmovableStruct *dtus;
+				DrawTileUnmovableStruct dtus;
 
 				if (ti.tileh) DrawFoundation(ti, ti.tileh);
 				DrawClearLandTile(ti, 2);
 
-				dtus = &_draw_tile_unmovable_data[ti.map5];
+				dtus = _draw_tile_unmovable_data[ti.map5];
 
 				image = dtus.image;
 				if (_displayGameOptions._opt & DO_TRANS_BUILDINGS)
 					MAKE_TRANSPARENT(image);
 
-				AddSortableSpriteToDraw(image,
-					ti.x | dtus.subcoord_x,
-					ti.y | dtus.subcoord_y,
-					dtus.width, dtus.height,
-					dtus.z_size, ti.z);
+				ViewPort.AddSortableSpriteToDraw(image,
+						ti.x | dtus.subcoord_x,
+						ti.y | dtus.subcoord_y,
+						dtus.width, dtus.height,
+						dtus.z_size, ti.z);
 			}
 		} else {
-			final DrawTileSeqStruct *dtss;
-			final DrawTileSprites *t;
+			final DrawTileSeqStruct dtss;
+			final DrawTileSprites t;
 
 			if (ti.tileh) DrawFoundation(ti, ti.tileh);
 
-			ormod = PLAYER_SPRITE_COLOR(GetTileOwner(ti.tile));
+			ormod = PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner());
 
-			t = &_unmovable_display_datas[ti.map5 & 0x7F];
+			t = _unmovable_display_datas[ti.map5 & 0x7F];
 			DrawGroundSprite(t.ground_sprite | ormod);
 
-			foreach_draw_tile_seq(dtss, t.seq) {
-				image = dtss.image;
+			// #define foreach_draw_tile_seq(idx, list) for (idx = list; ((byte) idx->delta_x) != 0x80; idx++)
+			//foreach_draw_tile_seq(dtss, t.seq)
+			int pos;
+			//for (dtss = t.seq; ((byte) dtss->delta_x) != 0x80; dtss++)
+			for(pos = 0; ((byte) t.seq[pos].delta_x) != 0x80; pos++)
+			{
+				//image = dtss.image;
+				image = t.seq[pos].image;
+				dtss = t.seq[pos];
 				if (_displayGameOptions._opt & DO_TRANS_BUILDINGS) {
 					MAKE_TRANSPARENT(image);
 				} else {
 					image |= ormod;
 				}
-				AddSortableSpriteToDraw(image, ti.x + dtss.delta_x, ti.y + dtss.delta_y,
-					dtss.width, dtss.height, dtss.unk, ti.z + dtss.delta_z);
+				ViewPort.AddSortableSpriteToDraw(image, ti.x + dtss.delta_x, ti.y + dtss.delta_y,
+						dtss.width, dtss.height, dtss.unk, ti.z + dtss.delta_z);
 			}
 		}
 	}
 
 	static int GetSlopeZ_Unmovable(final TileInfo  ti)
 	{
-		return GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
+		return Landscape.GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
 	}
 
 	static int GetSlopeTileh_Unmovable(final TileInfo ti)
@@ -197,33 +185,34 @@ public class UnmovableCmd {
 	{
 		byte m5 = tile.getMap().m5;
 
-		if (m5 & 0x80) {
-			if (Global._current_player == Owner.OWNER_WATER) return DestroyCompanyHQ(tile, Cmd.DC_EXEC);
-			return_cmd_error(Str.STR_5804_COMPANY_HEADQUARTERS_IN);
+		if(0 != (m5 & 0x80)) {
+			if (Global._current_player.id == Owner.OWNER_WATER) return DestroyCompanyHQ(tile, Cmd.DC_EXEC);
+			return Cmd.return_cmd_error(Str.STR_5804_COMPANY_HEADQUARTERS_IN);
 		}
 
 		if (m5 == 3) // company owned land
-			return DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_SELL_LAND_AREA);
+			return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_SELL_LAND_AREA);
 
 		// checks if you're allowed to remove unmovable things
-		if (Global._game_mode != GameModes.GM_EDITOR && Global._current_player != Owner.OWNER_WATER && ((flags & Cmd.DC_AUTO || !_cheats.magic_bulldozer.value)) )
-			return_cmd_error(Str.STR_5800_OBJEAcceptedCargo.CT_IN_THE_WAY);
+		if (Global._game_mode != GameModes.GM_EDITOR && Global._current_player.id != Owner.OWNER_WATER && ((flags & Cmd.DC_AUTO || !_cheats.magic_bulldozer.value)) )
+			return Cmd.return_cmd_error(Str.STR_5800_OBJECT_IN_THE_WAY);
 
-		if (flags & Cmd.DC_EXEC) {
-			DoClearSquare(tile);
+		if(0 != (flags & Cmd.DC_EXEC)) {
+			Landscape.DoClearSquare(tile);
 		}
 
 		return 0;
 	}
 
-	static void GetAcceptedCargo_Unmovable(TileIndex tile, AcceptedCargo ac)
+	static AcceptedCargo GetAcceptedCargo_Unmovable(TileIndex tile)
 	{
+		AcceptedCargo ac = new AcceptedCargo();
 		byte m5 = tile.getMap().m5;
 		int level; // HQ level (depends on company performance) in the range 1..5.
 
-		if (!(m5 & 0x80)) {
+		if (0==(m5 & 0x80)) {
 			/* not used */
-			return;
+			return ac;
 		}
 
 		/* HQ accepts passenger and mail; but we have to divide the values
@@ -233,29 +222,33 @@ public class UnmovableCmd {
 
 		// Top town building generates 10, so to make HQ interesting, the top
 		// type makes 20.
-		ac[AcceptedCargo.CT_PASSENGERS] = Math.max(1, level);
+		ac.ct[AcceptedCargo.CT_PASSENGERS] = Math.max(1, level);
 
 		// Top town building generates 4, HQ can make up to 8. The
 		// proportion passengers:mail is different because such a huge
 		// commercial building generates unusually high amount of mail
 		// correspondence per physical visitor.
-		ac[AcceptedCargo.CT_MAIL] = Math.max(1, level / 2);
+		ac.ct[AcceptedCargo.CT_MAIL] = Math.max(1, level / 2);
+
+		return ac;
 	}
 
-	static final StringID _unmovable_tile_str[] = {
-		Str.STR_5803_COMPANY_HEADQUARTERS,
-		Str.STR_5801_TRANSMITTER,
-		Str.STR_5802_LIGHTHOUSE,
-		Str.STR_2016_STATUE,
-		Str.STR_5805_COMPANY_OWNED_LAND,
+	static final /*StringID*/ int _unmovable_tile_str[] = {
+			Str.STR_5803_COMPANY_HEADQUARTERS,
+			Str.STR_5801_TRANSMITTER,
+			Str.STR_5802_LIGHTHOUSE,
+			Str.STR_2016_STATUE,
+			Str.STR_5805_COMPANY_OWNED_LAND,
 	};
 
-	static void GetTileDesc_Unmovable(TileIndex tile, TileDesc *td)
+	static TileDesc GetTileDesc_Unmovable(TileIndex tile)
 	{
+		TileDesc td = new TileDesc();
 		int i = tile.getMap().m5;
-		if (i & 0x80) i = -1;
+		if(0 != (i & 0x80)) i = -1;
 		td.str = _unmovable_tile_str[i + 1];
-		td.owner = GetTileOwner(tile);
+		td.owner = tile.GetTileOwner().id;
+		return td;
 	}
 
 	static void AnimateTile_Unmovable(TileIndex tile)
@@ -269,7 +262,7 @@ public class UnmovableCmd {
 		int level; // HQ level (depends on company performance) in the range 1..5.
 		int r;
 
-		if (!(m5 & 0x80)) {
+		if (0==(m5 & 0x80)) {
 			/* not used */
 			return;
 		}
@@ -299,23 +292,23 @@ public class UnmovableCmd {
 	}
 
 
-	static int GetTileTrackStatus_Unmovable(TileIndex tile, TransportType mode)
+	static int GetTileTrackStatus_Unmovable(TileIndex tile, /*TransportType*/ int mode)
 	{
 		return 0;
 	}
 
 	static void ClickTile_Unmovable(TileIndex tile)
 	{
-		if (tile.getMap().m5 & 0x80) {
-			ShowPlayerCompany(GetTileOwner(tile));
+		if(0 != (tile.getMap().m5 & 0x80)) {
+			ShowPlayerCompany(tile.GetTileOwner());
 		}
 	}
 
 	static final TileIndexDiffC _tile_add[] = {
-		{ 1,  0},
-		{ 0,  1},
-		{-1,  0},
-		{ 0, -1}
+			new TileIndexDiffC( 1,  0),
+			new TileIndexDiffC( 0,  1),
+			new TileIndexDiffC(-1,  0),
+			new TileIndexDiffC( 0, -1)
 	};
 
 	/* checks, if a radio tower is within a 9x9 tile square around tile */
@@ -324,9 +317,9 @@ public class UnmovableCmd {
 		TileIndex tile_s = tile - TileDiffXY(4, 4);
 
 		BEGIN_TILE_LOOP(tile, 9, 9, tile_s)
-			// already a radio tower here?
-			if (tile.IsTileType( TileTypes.MP_UNMOVABLE) && tile.getMap().m5 == 0)
-				return false;
+		// already a radio tower here?
+		if (tile.IsTileType( TileTypes.MP_UNMOVABLE) && tile.getMap().m5 == 0)
+			return false;
 		END_TILE_LOOP(tile, 9, 9, tile_s)
 		return true;
 	}
@@ -337,83 +330,90 @@ public class UnmovableCmd {
 		TileIndex tile;
 		int r;
 		int dir;
-		int h;
+		IntContainer h;
 
 		if (GameOptions._opt.landscape == Landscape.LT_CANDY)
 			return;
 
 		/* add radio tower */
-		i = ScaleByMapSize(1000);
-		j = ScaleByMapSize(40); // maximum number of radio towers on the map
+		i = Map.ScaleByMapSize(1000);
+		j = Map.ScaleByMapSize(40); // maximum number of radio towers on the map
 		do {
-			tile = RandomTile();
-			if (tile.IsTileType( TileTypes.MP_CLEAR) && GetTileSlope(tile, &h) == 0 && h >= 32) {
+			tile = Hal.RandomTile();
+			if (tile.IsTileType( TileTypes.MP_CLEAR) && GetTileSlope(tile, h) == 0 && h.v >= 32) {
 				if(!checkRadioTowerNearby(tile))
 					continue;
-				SetTileType(tile, TileTypes.MP_UNMOVABLE);
+				tile.SetTileType(TileTypes.MP_UNMOVABLE);
 				tile.getMap().m5 = 0;
-				SetTileOwner(tile, Owner.OWNER_NONE);
+				tile.SetTileOwner(Owner.OWNER_NONE);
 				if (--j == 0)
 					break;
 			}
-		} while (--i);
+		} while (--i > 0);
 
 		if (GameOptions._opt.landscape == Landscape.LT_DESERT)
 			return;
 
 		/* add lighthouses */
-		i = ScaleByMapSize1D((Hal.Random() & 3) + 7);
+		i = Map.ScaleByMapSize1D((Hal.Random() & 3) + 7);
 		do {
-	restart:
+			//restart:
 			r = Hal.Random();
 			dir = r >> 30;
-			r %= (dir == 0 || dir == 2) ? MapMaxY() : MapMaxX();
-			tile =
-				(dir == 0) ? TileXY(0, r)         : 0 + // left
-				(dir == 1) ? TileXY(r, 0)         : 0 + // top
-				(dir == 2) ? TileXY(MapMaxX(), r) : 0 + // right
-				(dir == 3) ? TileXY(r, MapMaxY()) : 0;  // bottom
+			r %= (dir == 0 || dir == 2) ? Global.MapMaxY() : Global.MapMaxX();
+			int itile =
+					(dir == 0) ? TileIndex.TileXY(0, r).tile   : 0 + // left
+							((dir == 1) ? TileIndex.TileXY(r, 0).tile : 0 + // top
+									((dir == 2) ? TileIndex.TileXY(Global.MapMaxX(), r).tile : 0 + // right
+											((dir == 3) ? TileIndex.TileXY(r, Global.MapMaxY()).tile : 0)));  // bottom
+			tile = new TileIndex(itile);
 			j = 20;
 			do {
 				if (--j == 0)
-					goto restart;
-				tile = TILE_MASK(tile + ToTileIndexDiff(_tile_add[dir]));
-			} while (!(tile.IsTileType( TileTypes.MP_CLEAR) && GetTileSlope(tile, &h) == 0 && h <= 16));
+				{
+					//goto restart;
+					continue;
+				}
+				tile = tile.iadd( TileIndex.ToTileIndexDiff(_tile_add[dir]) );
+				tile.TILE_MASK();
+				
+			} while (!(tile.IsTileType( TileTypes.MP_CLEAR) && tile.GetTileSlope(h) == 0 && h.v <= 16));
 
-			assert(tile == TILE_MASK(tile));
+			tile.TILE_ASSERT();
 
-			SetTileType(tile, TileTypes.MP_UNMOVABLE);
+			tile.SetTileType(TileTypes.MP_UNMOVABLE);
 			tile.getMap().m5 = 1;
-			SetTileOwner(tile, Owner.OWNER_NONE);
-		} while (--i);
+			tile.SetTileOwner(Owner.OWNER_NONE);
+			--i;
+		} while (i > 0);
 	}
 
 	static void ChangeTileOwner_Unmovable(TileIndex tile, PlayerID old_player, PlayerID new_player)
 	{
-		if (!IsTileOwner(tile, old_player)) return;
+		if (!tile.IsTileOwner(old_player)) return;
 
-		if (tile.getMap().m5 == 3 && new_player != Owner.OWNER_SPECTATOR) {
-			SetTileOwner(tile, new_player);
+		if (tile.getMap().m5 == 3 && new_player.id != Owner.OWNER_SPECTATOR) {
+			tile.SetTileOwner(new_player);
 		} else {
 			DoClearSquare(tile);
 		}
 	}
 
-	final TileTypeProcs _tile_type_unmovable_procs = {
-		DrawTile_Unmovable,             /* draw_tile_proc */
-		GetSlopeZ_Unmovable,            /* get_slope_z_proc */
-		ClearTile_Unmovable,            /* clear_tile_proc */
-		GetAcceptedCargo_Unmovable,     /* get_accepted_cargo_proc */
-		GetTileDesc_Unmovable,          /* get_tile_desc_proc */
-		GetTileTrackStatus_Unmovable,   /* get_tile_track_status_proc */
-		ClickTile_Unmovable,            /* click_tile_proc */
-		AnimateTile_Unmovable,          /* animate_tile_proc */
-		TileLoop_Unmovable,             /* tile_loop_clear */
-		ChangeTileOwner_Unmovable,      /* change_tile_owner_clear */
-		null,                           /* get_produced_cargo_proc */
-		null,                           /* vehicle_enter_tile_proc */
-		null,                           /* vehicle_leave_tile_proc */
-		GetSlopeTileh_Unmovable,        /* get_slope_tileh_proc */
-	};
+	final TileTypeProcs _tile_type_unmovable_procs = new TileTypeProcs(
+			UnmovableCmd::DrawTile_Unmovable,             /* draw_tile_proc */
+			UnmovableCmd::GetSlopeZ_Unmovable,            /* get_slope_z_proc */
+			UnmovableCmd::ClearTile_Unmovable,            /* clear_tile_proc */
+			UnmovableCmd::GetAcceptedCargo_Unmovable,     /* get_accepted_cargo_proc */
+			UnmovableCmd::GetTileDesc_Unmovable,          /* get_tile_desc_proc */
+			UnmovableCmd::GetTileTrackStatus_Unmovable,   /* get_tile_track_status_proc */
+			UnmovableCmd::ClickTile_Unmovable,            /* click_tile_proc */
+			UnmovableCmd::AnimateTile_Unmovable,          /* animate_tile_proc */
+			UnmovableCmd::TileLoop_Unmovable,             /* tile_loop_clear */
+			UnmovableCmd::ChangeTileOwner_Unmovable,      /* change_tile_owner_clear */
+			null,                           /* get_produced_cargo_proc */
+			null,                           /* vehicle_enter_tile_proc */
+			null,                           /* vehicle_leave_tile_proc */
+			UnmovableCmd::GetSlopeTileh_Unmovable        /* get_slope_tileh_proc */
+			);
 
 }

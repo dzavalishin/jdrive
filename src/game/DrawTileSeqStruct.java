@@ -6,12 +6,31 @@ package game;
 
 public class DrawTileSeqStruct 
 {
-	byte delta_x; // 0x80 is sequence terminator
-	byte delta_y;
-	byte delta_z;
-	byte width,height;
-	byte unk; // 'depth', just z-size; TODO: rename
-	int  image;
+	public int delta_x; // 0x80 is sequence terminator
+	public int delta_y;
+	public int delta_z;
+	public int width;
+	public int height;
+	public int unk; // 'depth', just z-size; TODO: rename
+	public int image;
+
+	public DrawTileSeqStruct(
+			int delta_x, // 0x80 is sequence terminator
+			int delta_y,
+			int delta_z,
+			int width,
+			int height,
+			int unk, // 'depth', just z-size, TODO: rename
+			int image
+			) {
+		this.delta_x = delta_x;
+		this.delta_y = delta_y;
+		this.delta_z = delta_z;
+		this.width = width;
+		this.height = height;
+		this.unk = unk;
+		this.image = image;
+	}
 }
 
 // see also DrawTileSprites
