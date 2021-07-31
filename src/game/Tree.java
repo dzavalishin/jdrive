@@ -83,7 +83,7 @@ public class Tree {
 		} while (--i > 0);
 	}
 
-	void PlaceTreesRandomly()
+	static void PlaceTreesRandomly()
 	{
 		int i;
 

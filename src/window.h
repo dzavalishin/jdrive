@@ -237,6 +237,7 @@ enum {
 };
 #endif
 
+#if 0
 typedef struct Textbuf {
 	char *buf;                  /* buffer in which text is saved */
 	uint16 maxlength, maxwidth; /* the maximum size of the buffer. Maxwidth specifies screensize in pixels */
@@ -253,6 +254,7 @@ typedef struct querystr_d {
 	Textbuf text;
 	const char* orig;
 } querystr_d;
+#endif
 
 //#define WP(ptr,str) (*(str*)(ptr)->custom)
 // querystr_d is the largest struct that comes in w->custom

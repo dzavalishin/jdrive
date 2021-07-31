@@ -228,6 +228,11 @@ public class TextEffect
 		);
 	}
 
+	static void AddTextEffect(int msg, int x, int y, int duration)
+	{
+		AddTextEffect(new StringID( msg ), x, y, duration);
+	}
+	
 	static void AddTextEffect(StringID msg, int x, int y, int duration)
 	{
 		TextEffect te;

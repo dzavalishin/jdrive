@@ -33,11 +33,11 @@ public class Strings extends StringTable
 	// special string constants
 	//enum SpecialStrings {
 
-		// special strings for town names. the town name is generated dynamically on request.
-		public static final int SPECSTR_TOWNNAME_START = 0x20C0;
-		public static final int SPECSTR_TOWNNAME_ENGLISH = SPECSTR_TOWNNAME_START;
-		public static final int SPECSTR_TOWNNAME_RUSSIAN = SPECSTR_TOWNNAME_START+1;
-		/*
+	// special strings for town names. the town name is generated dynamically on request.
+	public static final int SPECSTR_TOWNNAME_START = 0x20C0;
+	public static final int SPECSTR_TOWNNAME_ENGLISH = SPECSTR_TOWNNAME_START;
+	public static final int SPECSTR_TOWNNAME_RUSSIAN = SPECSTR_TOWNNAME_START+1;
+	/*
 		public static final int SPECSTR_TOWNNAME_FRENCH;
 		public static final int SPECSTR_TOWNNAME_GERMAN;
 		public static final int SPECSTR_TOWNNAME_AMERICAN;
@@ -56,40 +56,40 @@ public class Strings extends StringTable
 		public static final int SPECSTR_TOWNNAME_SWISS;
 		public static final int SPECSTR_TOWNNAME_DANISH;
 		public static final int SPECSTR_TOWNNAME_LAST = SPECSTR_TOWNNAME_DANISH;
-		*/
-		public static final int SPECSTR_TOWNNAME_LAST = SPECSTR_TOWNNAME_RUSSIAN;
+	 */
+	public static final int SPECSTR_TOWNNAME_LAST = SPECSTR_TOWNNAME_RUSSIAN;
 
-		// special strings for player names on the form "TownName transport".
-		public static final int SPECSTR_PLAYERNAME_START = 0x70EA;
-		public static final int SPECSTR_PLAYERNAME_ENGLISH = SPECSTR_PLAYERNAME_START;
-		public static final int SPECSTR_PLAYERNAME_FRENCH = SPECSTR_PLAYERNAME_START+1;
-		public static final int SPECSTR_PLAYERNAME_GERMAN = SPECSTR_PLAYERNAME_START+2;
-		public static final int SPECSTR_PLAYERNAME_AMERICAN = SPECSTR_PLAYERNAME_START+3;
-		public static final int SPECSTR_PLAYERNAME_LATIN = SPECSTR_PLAYERNAME_START+4;
-		public static final int SPECSTR_PLAYERNAME_SILLY = SPECSTR_PLAYERNAME_START+5;
-		public static final int SPECSTR_PLAYERNAME_LAST = SPECSTR_PLAYERNAME_SILLY;
+	// special strings for player names on the form "TownName transport".
+	public static final int SPECSTR_PLAYERNAME_START = 0x70EA;
+	public static final int SPECSTR_PLAYERNAME_ENGLISH = SPECSTR_PLAYERNAME_START;
+	public static final int SPECSTR_PLAYERNAME_FRENCH = SPECSTR_PLAYERNAME_START+1;
+	public static final int SPECSTR_PLAYERNAME_GERMAN = SPECSTR_PLAYERNAME_START+2;
+	public static final int SPECSTR_PLAYERNAME_AMERICAN = SPECSTR_PLAYERNAME_START+3;
+	public static final int SPECSTR_PLAYERNAME_LATIN = SPECSTR_PLAYERNAME_START+4;
+	public static final int SPECSTR_PLAYERNAME_SILLY = SPECSTR_PLAYERNAME_START+5;
+	public static final int SPECSTR_PLAYERNAME_LAST = SPECSTR_PLAYERNAME_SILLY;
 
-		public static final int SPECSTR_ANDCO_NAME = 0x70E6;
-		public static final int SPECSTR_PRESIDENT_NAME = 0x70E7;
-		public static final int SPECSTR_SONGNAME = 0x70E8;
+	public static final int SPECSTR_ANDCO_NAME = 0x70E6;
+	public static final int SPECSTR_PRESIDENT_NAME = 0x70E7;
+	public static final int SPECSTR_SONGNAME = 0x70E8;
 
-		// reserve 32 strings for the *.lng files
-		public static final int SPECSTR_LANGUAGE_START = 0x7100;
-		public static final int SPECSTR_LANGUAGE_END = 0x711f;
+	// reserve 32 strings for the *.lng files
+	public static final int SPECSTR_LANGUAGE_START = 0x7100;
+	public static final int SPECSTR_LANGUAGE_END = 0x711f;
 
-		// reserve 32 strings for various screen resolutions
-		public static final int SPECSTR_RESOLUTION_START = 0x7120;
-		public static final int SPECSTR_RESOLUTION_END = 0x713f;
+	// reserve 32 strings for various screen resolutions
+	public static final int SPECSTR_RESOLUTION_START = 0x7120;
+	public static final int SPECSTR_RESOLUTION_END = 0x713f;
 
-		// reserve 32 strings for screenshot formats
-		public static final int SPECSTR_SCREENSHOT_START = 0x7140;
-		public static final int SPECSTR_SCREENSHOT_END = 0x715F;
+	// reserve 32 strings for screenshot formats
+	public static final int SPECSTR_SCREENSHOT_START = 0x7140;
+	public static final int SPECSTR_SCREENSHOT_END = 0x715F;
 
-		// Used to implement SetDParamStr
-		public static final int STR_SPEC_DYNSTRING = 0xF800;
-		public static final int STR_SPEC_USERSTRING = 0xF808;
-	
-	
+	// Used to implement SetDParamStr
+	public static final int STR_SPEC_DYNSTRING = 0xF800;
+	public static final int STR_SPEC_USERSTRING = 0xF808;
+
+
 	// TODO fix me
 	//private char **_langpack_offs;
 	//private LanguagePack *_langpack;
@@ -230,7 +230,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	{
 		return _langpack_offs[_langtab_start[string >> 11] + (string & 0x7FF)];
 	}*/
-	
+
 	// The highest 8 bits of string contain the "case index".
 	// These 8 bits will only be set when FormatString wants to print
 	// the string in a different case. No one else except FormatString
@@ -284,7 +284,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	{
 		return GetStringWithArgs(string.id, Global._decode_parameters);
 	}
-	
+
 	public static String GetString(int string)
 	{
 		return GetStringWithArgs(string, Global._decode_parameters);
@@ -1280,6 +1280,21 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		 */
 	}
 
+	public static String InlineString(StringID string) {
+		char[] buf = new char[3];
+		buf[0] = 0x81;
+		buf[1] = (char) (string.id & 0xFF);
+		buf[2] = (char) (string.id >> 8);
+		return String.valueOf(buf);
+	}
+
+	public static String InlineString(int string) {
+		char[] buf = new char[3];
+		buf[0] = 0x81;
+		buf[1] = (char) (string & 0xFF);
+		buf[2] = (char) (string >> 8);
+		return String.valueOf(buf);
+	}
 
 
 }
@@ -1342,5 +1357,5 @@ class LanguagePack {
 class YearMonthDay {
 	int year, month, day;
 } 
-*/
+ */
 

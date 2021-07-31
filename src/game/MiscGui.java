@@ -1,10 +1,13 @@
 package game;
 
 import game.struct.LandInfoData;
+import game.struct.Textbuf;
 import game.struct.FiosItem;
 
 import game.util.BitOps;
+import game.util.GameDate;
 import game.util.Strings;
+import game.util.YearMonthDay;
 
 public class MiscGui {
 
@@ -29,7 +32,7 @@ public class MiscGui {
 
 			Global.SetDParam(0, Str.STR_01A6_N_A);
 			if (lid.td.owner != Owner.OWNER_NONE && lid.td.owner != Owner.OWNER_WATER)
-				Player.GetNameOfOwner(lid.td.owner, lid.tile);
+				Player.GetNameOfOwner(PlayerID.get(lid.td.owner), lid.tile);
 			Gfx.DrawStringCentered(140, 27, Str.STR_01A7_OWNER, 0);
 
 			str = Str.STR_01A4_COST_TO_CLEAR_N_A;
@@ -39,10 +42,10 @@ public class MiscGui {
 			}
 			Gfx.DrawStringCentered(140, 38, str, 0);
 
-			_userstring = String.format("0x%.4X", lid.tile);
+			Strings._userstring = String.format("0x%.4X", lid.tile);
 			Global.SetDParam(0, lid.tile.TileX());
 			Global.SetDParam(1, lid.tile.TileY());
-			Global.SetDParam(2, Str.STR_SPEC_USERSTRING);
+			Global.SetDParam(2, Strings.STR_SPEC_USERSTRING);
 			Gfx.DrawStringCentered(140, 49, Str.STR_LANDINFO_COORDS, 0);
 
 			Global.SetDParam(0, Str.STR_01A9_NONE);
@@ -74,12 +77,12 @@ public class MiscGui {
 						if (lid.ac.ct[i] < 8) {
 							int [] argv = new int[2];
 							argv[0] = lid.ac.ct[i];
-							argv[1] = _cargoc.names_s[i];
+							argv[1] = Global._cargoc.names_s[i].id;
 							//p = Global.GetStringWithArgs(p, Str.STR_01D1_8, argv);
 							sb.append(Strings.GetStringWithArgs( Str.STR_01D1_8, argv));
 						} else {
-							//p = Global.GetString(p, _cargoc.names_s[i]);
-							sb.append(Global.GetString( _cargoc.names_s[i]));
+							//p = Global.GetString(p, Global._cargoc.names_s[i]);
+							sb.append(Global.GetString( Global._cargoc.names_s[i]));
 						}
 					}
 				}
@@ -155,7 +158,7 @@ public class MiscGui {
 		if (Hal._cursor.sprite.id == Sprite.SPR_CURSOR_QUERY) {
 			ViewPort.ResetObjectToPlace();
 		} else {
-			_place_proc = Place_LandInfo;
+			Global._place_proc = MiscGui::Place_LandInfo;
 			ViewPort.SetObjectToPlace(Sprite.SPR_CURSOR_QUERY, 1, 1, 0);
 		}
 	}
@@ -282,36 +285,36 @@ public class MiscGui {
 
 			w.DrawWindowWidgets();
 
-			WP(w,tree_d).base = i = _tree_base_by_landscape[GameOptions._opt.landscape];
-			WP(w,tree_d).count = count = _tree_count_by_landscape[GameOptions._opt.landscape];
+			w.as_tree_d().base = i = _tree_base_by_landscape[GameOptions._opt.landscape];
+			w.as_tree_d().count = count = _tree_count_by_landscape[GameOptions._opt.landscape];
 
 			x = 18;
 			y = 54;
 			do {
 				Gfx.DrawSprite(_tree_sprites[i], x, y);
 				x += 35;
-				if (!(++i & 3)) {
+				if (0==(++i & 3)) {
 					x -= 35 * 4;
 					y += 47;
 				}
-			} while (--count);
+			} while (--count > 0);
 		} break;
 
-		case WindowEvents.WE_CLICK: {
-			int wid = e.click.widget;
+		case WE_CLICK: {
+			int wid = e.widget;
 
 			switch (wid) {
 			case 0:
-				ResetObjectToPlace();
+				ViewPort.ResetObjectToPlace();
 				break;
 
 			case 3: case 4: case 5: case 6:
 			case 7: case 8: case 9: case 10:
 			case 11:case 12: case 13: case 14:
-				if (wid - 3 >= WP(w,tree_d).count) break;
+				if (wid - 3 >= w.as_tree_d().count) break;
 
 				if (HandlePlacePushButton(w, wid, Sprite.SPR_CURSOR_TREE, 1, null))
-					_tree_to_plant = WP(w,tree_d).base + wid - 3;
+					_tree_to_plant = w.as_tree_d().base + wid - 3;
 				break;
 
 			case 15: // tree of random type.
@@ -322,34 +325,34 @@ public class MiscGui {
 			case 16: /* place trees randomly over the landscape*/
 				w.click_state |= 1 << 16;
 				w.flags4 |= 5 << WF_TIMEOUT_SHL;
-				SndPlayFx(SND_15_BEEP);
-				PlaceTreesRandomly();
-				MarkWholeScreenDirty();
+				//SndPlayFx(SND_15_BEEP);
+				Tree.PlaceTreesRandomly();
+				Hal.MarkWholeScreenDirty();
 				break;
 			}
 		} break;
 
-		case WindowEvents.WE_PLACE_OBJ:
-			VpStartPlaceSizing(e.place.tile, VPM_X_AND_Y_LIMITED);
+		case WE_PLACE_OBJ:
+			VpStartPlaceSizing(e.tile, VPM_X_AND_Y_LIMITED);
 			VpSetPlaceSizingLimit(20);
 			break;
 
-		case WindowEvents.WE_PLACE_DRAG:
-			VpSelectTilesWithMethod(e.place.pt.x, e.place.pt.y, e.place.userdata);
+		case WE_PLACE_DRAG:
+			VpSelectTilesWithMethod(e.pt.x, e.pt.y, e.userdata);
 			return;
 
-		case WindowEvents.WE_PLACE_MOUSEUP:
-			if (e.click.pt.x != -1) {
-				DoCommandP(e.place.tile, _tree_to_plant, e.place.starttile, null,
+		case WE_PLACE_MOUSEUP:
+			if (e.pt.x != -1) {
+				Cmd.DoCommandP(e.tile, _tree_to_plant, e.starttile.tile, null,
 						Cmd.CMD_PLANT_TREE | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_2805_CAN_T_PLANT_TREE_HERE));
 			}
 			break;
 
-		case WindowEvents.WE_TIMEOUT:
-			UnclickSomeWindowButtons(w, 1<<16);
+		case WE_TIMEOUT:
+			w.UnclickSomeWindowButtons(1<<16);
 			break;
 
-		case WindowEvents.WE_ABORT_PLACE_OBJ:
+		case WE_ABORT_PLACE_OBJ:
 			w.click_state = 0;
 			w.SetWindowDirty();
 			break;
@@ -446,58 +449,58 @@ public class MiscGui {
 	static void ErrmsgWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 			COPY_IN_DPARAM(0, _errmsg_decode_params, lengthof(_errmsg_decode_params));
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 			COPY_IN_DPARAM(0, _errmsg_decode_params, lengthof(_errmsg_decode_params));
 			if (!IsWindowOfPrototype(w, _errmsg_face_widgets)) {
 				Gfx.DrawStringMultiCenter(
 						120,
-						(_errmsg_message_1 == INVALID_STRING_ID ? 25 : 15),
-						_errmsg_message_2,
+						(_errmsg_message_1 == Str.INVALID_STRING_ID ? 25 : 15),
+						_errmsg_message_2.id,
 						238);
-				if (_errmsg_message_1 != INVALID_STRING_ID)
+				if (_errmsg_message_1 != Str.INVALID_STRING_ID)
 					Gfx.DrawStringMultiCenter(
 							120,
 							30,
-							_errmsg_message_1,
+							_errmsg_message_1.id,
 							238);
 			} else {
-				final Player  p = GetPlayer(GetDParamX(_errmsg_decode_params,2));
+				final Player p = Player.GetPlayer(Global.GetDParamX(_errmsg_decode_params,2));
 				DrawPlayerFace(p.face, p.player_color, 2, 16);
 
 				Gfx.DrawStringMultiCenter(
 						214,
-						(_errmsg_message_1 == INVALID_STRING_ID ? 65 : 45),
-						_errmsg_message_2,
+						(_errmsg_message_1 == Str.INVALID_STRING_ID ? 65 : 45),
+						_errmsg_message_2.id,
 						238);
-				if (_errmsg_message_1 != INVALID_STRING_ID)
+				if (_errmsg_message_1 != Str.INVALID_STRING_ID)
 					Gfx.DrawStringMultiCenter(
 							214,
 							90,
-							_errmsg_message_1,
+							_errmsg_message_1.id,
 							238);
 			}
 			break;
 
-		case WindowEvents.WE_MOUSELOOP:
-			if (_right_button_down) DeleteWindow(w);
+		case WE_MOUSELOOP:
+			if (_right_button_down) w.DeleteWindow();
 			break;
 
-		case WindowEvents.WE_4:
-			if (--_errmsg_duration == 0) DeleteWindow(w);
+		case WE_4:
+			if (--_errmsg_duration == 0) w.DeleteWindow();
 			break;
 
-		case WindowEvents.WE_DESTROY:
+		case WE_DESTROY:
 			SetRedErrorSquare(0);
-			_switch_mode_errorstr = INVALID_STRING_ID;
+			_switch_mode_errorstr = Str.INVALID_STRING_ID;
 			break;
 
-		case WindowEvents.WE_KEYPRESS:
-			if (e.keypress.keycode == WKC_SPACE) {
+		case WE_KEYPRESS:
+			if (e.keycode == Window.WKC_SPACE) {
 				// Don't continue.
-				e.keypress.cont = false;
-				DeleteWindow(w);
+				e.cont = false;
+				w.DeleteWindow();
 			}
 			break;
 		}
@@ -506,17 +509,17 @@ public class MiscGui {
 	void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
 	{
 		Window w;
-		ViewPort *vp;
+		ViewPort vp;
 		Point pt;
 
 		Window.DeleteWindowById(Window.WC_ERRMSG, 0);
 
 		//assert(msg_2);
-		if (msg_2 == 0) msg_2 = Str.STR_EMPTY;
+		if (msg_2.id == 0) msg_2 = new StringID( Str.STR_EMPTY );
 
 		_errmsg_message_1 = msg_1;
 		_errmsg_message_2 = msg_2;
-		COPY_OUT_DPARAM(_errmsg_decode_params, 0, lengthof(_errmsg_decode_params));
+		Global.COPY_OUT_DPARAM(_errmsg_decode_params, 0, lengthof(_errmsg_decode_params));
 		_errmsg_duration = Global._patches.errmsg_duration;
 		if (!_errmsg_duration)
 			return;
@@ -561,20 +564,22 @@ public class MiscGui {
 
 	void ShowEstimatedCostOrIncome(int cost, int x, int y)
 	{
-		StringID msg = Str.STR_0805_ESTIMATED_COST;
+		//StringID 
+		int msg = Str.STR_0805_ESTIMATED_COST;
 
 		if (cost < 0) {
 			cost = -cost;
 			msg = Str.STR_0807_ESTIMATED_INCOME;
 		}
 		Global.SetDParam(0, cost);
-		ShowErrorMessage(INVALID_STRING_ID, msg, x, y);
+		ShowErrorMessage(Str.INVALID_STRING_ID, new StringID(msg), x, y);
 	}
 
 	void ShowCostOrIncomeAnimation(int x, int y, int z, int cost)
 	{
-		StringID msg;
-		Point pt = RemapCoords(x,y,z);
+		//StringID 
+		int msg;
+		Point pt = Point.RemapCoords(x,y,z);
 
 		msg = Str.STR_0801_COST;
 		if (cost < 0) {
@@ -582,15 +587,15 @@ public class MiscGui {
 			msg = Str.STR_0803_INCOME;
 		}
 		Global.SetDParam(0, cost);
-		AddTextEffect(msg, pt.x, pt.y, 0x250);
+		TextEffect.AddTextEffect(msg, pt.x, pt.y, 0x250);
 	}
 
 	void ShowFeederIncomeAnimation(int x, int y, int z, int cost)
 	{
-		Point pt = RemapCoords(x,y,z);
+		Point pt = Point.RemapCoords(x,y,z);
 
 		Global.SetDParam(0, cost);
-		AddTextEffect(Str.STR_FEEDER, pt.x, pt.y, 0x250);
+		TextEffect.AddTextEffect(Str.STR_FEEDER, pt.x, pt.y, 0x250);
 	}
 
 	static final Widget _tooltips_widgets[] = {
@@ -602,10 +607,10 @@ public class MiscGui {
 	static void TooltipsWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 			Gfx.GfxFillRect(0, 0, w.width - 1, w.height - 1, 0);
 			Gfx.GfxFillRect(1, 1, w.width - 2, w.height - 2, 0x44);
-			Gfx.DrawStringMultiCenter((w.width >> 1), (w.height >> 1) - 5, WP(w,tooltips_d).string_id, 197);
+			Gfx.DrawStringMultiCenter((w.width >> 1), (w.height >> 1) - 5, w.as_tooltips_d().string_id, 197);
 			break;
 
 		case WindowEvents.WE_MOUSELOOP:
@@ -625,7 +630,7 @@ public class MiscGui {
 
 		w = FindWindowById(Window.WC_TOOLTIPS, 0);
 		if (w != null) {
-			if (WP(w,tooltips_d).string_id == string_id)
+			if (w.as_tooltips_d().string_id == string_id)
 				return;
 			DeleteWindow(w);
 		}
@@ -651,7 +656,7 @@ public class MiscGui {
 		if (x > (_screen.width - right)) x = _screen.width - right;
 
 		w = AllocateWindow(x, y, right, bottom, TooltipsWndProc, Window.WC_TOOLTIPS, _tooltips_widgets);
-		WP(w,tooltips_d).string_id = string_id;
+		w.as_tooltips_d().string_id = string_id;
 		w.flags4 &= ~WF_WHITE_BORDER_MASK;
 		w.widget[0].right = right;
 		w.widget[0].bottom = bottom;
@@ -661,43 +666,59 @@ public class MiscGui {
 	static void DrawStationCoverageText(final AcceptedCargo accepts,
 			int str_x, int str_y, int mask)
 	{
-		char *b = _userstring;
+		//char *b = Strings._userstring;
+		StringBuilder sb = new StringBuilder();
 		int i;
 
-		b = InlineString(b, Str.STR_000D_ACCEPTS);
+		//b = InlineString(b, Str.STR_000D_ACCEPTS);
+		sb.append( Strings.InlineString(Str.STR_000D_ACCEPTS) );
 
-		for (i = 0; i != NUM_CARGO; i++, mask >>= 1) {
-			if (accepts[i] >= 8 && mask & 1) {
-				b = InlineString(b, _cargoc.names_s[i]);
-				*b++ = ',';
-				*b++ = ' ';
+		for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
+			if (accepts.ct[i] >= 8 && 0 != (mask & 1) ) {
+				//b = InlineString(b, Global._cargoc.names_s[i]);
+				sb.append( Strings.InlineString( Global._cargoc.names_s[i] );
+				//*b++ = ',';
+				//*b++ = ' ';
+				sb.append( ", " );
 			}
+			mask >>= 1;
 		}
 
-		if (b == _userstring[3]) {
+		/*
+		if (b == Strings._userstring[3]) {
 			b = InlineString(b, Str.STR_00D0_NOTHING);
 			*b++ = '\0';
 		} else {
 			b[-2] = '\0';
-		}
+		}*/
 
-		DrawStringMultiLine(str_x, str_y, Str.STR_SPEC_USERSTRING, 144);
+		String curr = sb.toString();
+
+		if( curr.length() == 3)
+		{
+			sb.append(Strings.InlineString(Str.STR_00D0_NOTHING));
+			Strings._userstring = sb.toString();
+		}
+		else
+			Strings._userstring = curr.substring(0, curr.length()-2);
+		
+		Gfx.DrawStringMultiLine(str_x, str_y, new StringID( Strings.STR_SPEC_USERSTRING ), 144);
 	}
 
 	void DrawStationCoverageAreaText(int sx, int sy, int mask, int rad) {
-		int x = _thd.pos.x;
-		int y = _thd.pos.y;
+		int x = ViewPort._thd.pos.x;
+		int y = ViewPort._thd.pos.y;
 		AcceptedCargo accepts;
 		if (x != -1) {
-			GetAcceptanceAroundTiles(accepts, TileVirtXY(x, y), _thd.size.x / 16, _thd.size.y / 16 , rad);
+			GetAcceptanceAroundTiles(accepts, TileIndex.TileVirtXY(x, y), ViewPort._thd.size.x / 16, ViewPort._thd.size.y / 16 , rad);
 			DrawStationCoverageText(accepts, sx, sy, mask);
 		}
 	}
 
 	void CheckRedrawStationCoverage(final Window  w)
 	{
-		if (_thd.dirty & 1) {
-			_thd.dirty &= ~1;
+		if(0 != (ViewPort._thd.dirty & 1)) {
+			ViewPort._thd.dirty &= ~1;
 			w.SetWindowDirty();
 		}
 	}
@@ -746,8 +767,9 @@ public class MiscGui {
 
 	static void DelChar(Textbuf tb)
 	{
-		tb.width -= GetCharacterWidth((byte)tb.buf[tb.caretpos]);
-		memmove(tb.buf + tb.caretpos, tb.buf + tb.caretpos + 1, tb.length - tb.caretpos);
+		tb.width -= Gfx.GetCharacterWidth((byte)tb.buf[tb.caretpos]);
+		//memmove(tb.buf + tb.caretpos, tb.buf + tb.caretpos + 1, tb.length - tb.caretpos);
+		System.arraycopy(tb.buf, tb.caretpos + 1, tb.buf, tb.caretpos, tb.length - tb.caretpos);
 		tb.length--;
 	}
 
@@ -755,18 +777,18 @@ public class MiscGui {
 	 * Delete a character from a textbuffer, either with 'Delete' or 'Backspace'
 	 * The character is delete from the position the caret is at
 	 * @param tb @Textbuf type to be changed
-	 * @param delmode Type of deletion, either @WKC_BACKSPACE or @WKC_DELETE
+	 * @param delmode Type of deletion, either @Window.WKC_BACKSPACE or @Window.WKC_DELETE
 	 * @return Return true on successfull change of Textbuf, or false otherwise
 	 */
 	boolean DeleteTextBufferChar(Textbuf tb, int delmode)
 	{
-		if (delmode == WKC_BACKSPACE && tb.caretpos != 0) {
+		if (delmode == Window.WKC_BACKSPACE && tb.caretpos != 0) {
 			tb.caretpos--;
-			tb.caretxoffs -= GetCharacterWidth((byte)tb.buf[tb.caretpos]);
+			tb.caretxoffs -= Gfx.GetCharacterWidth((byte)tb.buf[tb.caretpos]);
 
 			DelChar(tb);
 			return true;
-		} else if (delmode == WKC_DELETE && tb.caretpos < tb.length) {
+		} else if (delmode == Window.WKC_DELETE && tb.caretpos < tb.length) {
 			DelChar(tb);
 			return true;
 		}
@@ -780,7 +802,8 @@ public class MiscGui {
 	 */
 	void DeleteTextBufferAll(Textbuf tb)
 	{
-		memset(tb.buf, 0, tb.maxlength);
+		//memset(tb.buf, 0, tb.maxlength);
+		tb.buf[0] = 0;
 		tb.length = tb.width = 0;
 		tb.caretpos = tb.caretxoffs = 0;
 	}
@@ -792,11 +815,12 @@ public class MiscGui {
 	 * @param key Character to be inserted
 	 * @return Return true on successfull change of Textbuf, or false otherwise
 	 */
-	boolean InsertTextBufferChar(Textbuf tb, byte key)
+	boolean InsertTextBufferChar(Textbuf tb, char key)
 	{
-		final byte charwidth = GetCharacterWidth(key);
+		final int charwidth = Gfx.GetCharacterWidth(key);
 		if (tb.length < tb.maxlength && (tb.maxwidth == 0 || tb.width + charwidth <= tb.maxwidth)) {
-			memmove(tb.buf + tb.caretpos + 1, tb.buf + tb.caretpos, (tb.length - tb.caretpos) + 1);
+			//memmove(tb.buf + tb.caretpos + 1, tb.buf + tb.caretpos, (tb.length - tb.caretpos) + 1);
+			System.arraycopy(tb.buf, tb.caretpos, tb.buf, tb.caretpos + 1, (tb.length - tb.caretpos) + 1);
 			tb.buf[tb.caretpos] = key;
 			tb.length++;
 			tb.width += charwidth;
@@ -812,31 +836,31 @@ public class MiscGui {
 	 * Handle text navigation with arrow keys left/right.
 	 * This defines where the caret will blink and the next characer interaction will occur
 	 * @param tb @Textbuf type where navigation occurs
-	 * @param navmode Direction in which navigation occurs @WKC_LEFT, @WKC_RIGHT, @WKC_END, @WKC_HOME
+	 * @param navmode Direction in which navigation occurs @Window.WKC_LEFT, @Window.WKC_RIGHT, @Window.WKC_END, @Window.WKC_HOME
 	 * @return Return true on successfull change of Textbuf, or false otherwise
 	 */
 	boolean MoveTextBufferPos(Textbuf tb, int navmode)
 	{
 		switch (navmode) {
-		case WKC_LEFT:
+		case Window.WKC_LEFT:
 			if (tb.caretpos != 0) {
 				tb.caretpos--;
-				tb.caretxoffs -= GetCharacterWidth((byte)tb.buf[tb.caretpos]);
+				tb.caretxoffs -= Gfx.GetCharacterWidth((byte)tb.buf[tb.caretpos]);
 				return true;
 			}
 			break;
-		case WKC_RIGHT:
+		case Window.WKC_RIGHT:
 			if (tb.caretpos < tb.length) {
-				tb.caretxoffs += GetCharacterWidth((byte)tb.buf[tb.caretpos]);
+				tb.caretxoffs += Gfx.GetCharacterWidth((byte)tb.buf[tb.caretpos]);
 				tb.caretpos++;
 				return true;
 			}
 			break;
-		case WKC_HOME:
+		case Window.WKC_HOME:
 			tb.caretpos = 0;
 			tb.caretxoffs = 0;
 			return true;
-		case WKC_END:
+		case Window.WKC_END:
 			tb.caretpos = tb.length;
 			tb.caretxoffs = tb.width;
 			return true;
@@ -853,14 +877,15 @@ public class MiscGui {
 	 */
 	void UpdateTextBufferSize(Textbuf tb)
 	{
-		final char* buf;
+		//final char* buf;
+		int bp = 0;
 
 		tb.length = 0;
 		tb.width = 0;
 
-		for (buf = tb.buf; *buf != '\0' && tb.length <= tb.maxlength; buf++) {
+		for (; tb.buf[bp] != '\0' && tb.length <= tb.maxlength; bp++) {
 			tb.length++;
-			tb.width += GetCharacterWidth((byte)*buf);
+			tb.width += Gfx.GetCharacterWidth(tb.buf[bp]);
 		}
 
 		tb.caretpos = tb.length;
@@ -869,24 +894,24 @@ public class MiscGui {
 
 	int HandleEditBoxKey(Window w, int wid, WindowEvent we)
 	{
-		we.keypress.cont = false;
+		we.cont = false;
 
 		switch (we.keypress.keycode) {
-		case WKC_ESC: return 2;
-		case WKC_RETURN: case WKC_NUM_ENTER: return 1;
-		case (WKC_CTRL | 'V'):
+		case Window.WKC_ESC: return 2;
+		case Window.WKC_RETURN: case Window.WKC_NUM_ENTER: return 1;
+		case (Window.WKC_CTRL | 'V'):
 			if (InsertTextBufferClipboard(w.as_querystr_d().text))
 				InvalidateWidget(w, wid);
 		break;
-		case (WKC_CTRL | 'U'):
+		case (Window.WKC_CTRL | 'U'):
 			DeleteTextBufferAll(w.as_querystr_d().text);
 		InvalidateWidget(w, wid);
 		break;
-		case WKC_BACKSPACE: case WKC_DELETE:
+		case Window.WKC_BACKSPACE: case Window.WKC_DELETE:
 			if (DeleteTextBufferChar(w.as_querystr_d().text, we.keypress.keycode))
 				InvalidateWidget(w, wid);
 			break;
-		case WKC_LEFT: case WKC_RIGHT: case WKC_END: case WKC_HOME:
+		case Window.WKC_LEFT: case Window.WKC_RIGHT: case Window.WKC_END: case Window.WKC_HOME:
 			if (MoveTextBufferPos(w.as_querystr_d().text, we.keypress.keycode))
 				InvalidateWidget(w, wid);
 			break;
@@ -915,7 +940,7 @@ public class MiscGui {
 
 	void HandleEditBox(Window w, int wid)
 	{
-		if (HandleCaret(w.as_querystr_d().text)) InvalidateWidget(w, wid);
+		if (HandleCaret(w.as_querystr_d().text)) w.InvalidateWidget(wid);
 	}
 
 	void DrawEditBox(Window w, int wid)
@@ -924,7 +949,7 @@ public class MiscGui {
 		final Textbuf tb = w.as_querystr_d().text;
 
 		Gfx.GfxFillRect(wi.left+1, wi.top+1, wi.right-1, wi.bottom-1, 215);
-		Gfx.DoDrawString(tb.buf, wi.left+2, wi.top+1, 8);
+		Gfx.DoDrawString( String.valueOf( tb.buf ), wi.left+2, wi.top+1, 8);
 		if (tb.caret)
 			Gfx.DoDrawString("_", wi.left + 2 + tb.caretxoffs, wi.top + 1, 12);
 	}
@@ -934,9 +959,9 @@ public class MiscGui {
 		if (w.as_querystr_d().orig != null &&
 				(w.as_querystr_d().text.buf.equals(w.as_querystr_d().orig)) ) 
 		{
-			Window.DeleteWindow(w);
+			w.DeleteWindow();
 		} else {
-			String buf = w.as_querystr_d().text.buf;
+			char[] buf = w.as_querystr_d().text.buf;
 			WindowClass wnd_class = w.as_querystr_d().wnd_class;
 			WindowNumber wnd_num = w.as_querystr_d().wnd_num;
 			Window parent;
@@ -944,14 +969,14 @@ public class MiscGui {
 			// Mask the edit-box as closed, so we don't send out a CANCEL
 			closed[0] = true;
 
-			Window.DeleteWindow(w);
+			w.DeleteWindow();
 
 			parent = Window.FindWindowById(wnd_class, wnd_num);
 			if (parent != null) {
 				WindowEvent e = new WindowEvent();
 				e.event = WindowEvents.WE_ON_EDIT_TEXT;
-				e.edittext.str = buf;
-				parent.wndproc(parent, e);
+				e.str = String.valueOf( buf );
+				parent.wndproc.accept(parent, e);
 			}
 		}
 	}
@@ -1056,10 +1081,10 @@ public class MiscGui {
 		_edit_str_buf = Global.GetString(str);
 		//_edit_str_buf[realmaxlen] = '\0';
 
-		if (maxlen & 0x1000) {
+		if(0 != (maxlen & 0x1000)) {
 			w.as_querystr_d().orig = null;
 		} else {
-			strcpy(_orig_str_buf, _edit_str_buf);
+			_orig_str_buf = _edit_str_buf;
 			w.as_querystr_d().orig = _orig_str_buf;
 		}
 
@@ -1070,7 +1095,7 @@ public class MiscGui {
 		w.as_querystr_d().text.caret = false;
 		w.as_querystr_d().text.maxlength = realmaxlen - 1;
 		w.as_querystr_d().text.maxwidth = maxwidth;
-		w.as_querystr_d().text.buf = _edit_str_buf;
+		w.as_querystr_d().text.buf = _edit_str_buf.toCharArray();
 		UpdateTextBufferSize(w.as_querystr_d().text);
 	}
 
@@ -1204,12 +1229,12 @@ public class MiscGui {
 	{
 		/* Check if we are not a specatator who wants to generate a name..
 		    Let's use the name of player #0 for now. */
-		final Player  p = GetPlayer(Global._local_player < Global.MAX_PLAYERS ? Global._local_player : 0);
+		final Player  p = Player.GetPlayer(Global._local_player.id < Global.MAX_PLAYERS ? Global._local_player.id : 0);
 
 		Global.SetDParam(0, p.name_1);
 		Global.SetDParam(1, p.name_2);
-		Global.SetDParam(2, _date);
-		Global.GetString(_edit_str_buf, Str.STR_4004);
+		Global.SetDParam(2, Global._date);
+		_edit_str_buf = Global.GetString(Str.STR_4004);
 	}
 
 	//extern void StartupEngines();
@@ -1343,7 +1368,7 @@ public class MiscGui {
 			HandleEditBox(w, 10);
 			break;
 		case WindowEvents.WE_KEYPRESS:
-			if (e.keypress.keycode == WKC_ESC) {
+			if (e.keypress.keycode == Window.WKC_ESC) {
 				DeleteWindow(w);
 				return;
 			}
@@ -1356,7 +1381,7 @@ public class MiscGui {
 		case WindowEvents.WE_TIMEOUT:
 			if (BitOps.HASBIT(w.click_state, 11)) { // Delete button clicked 
 				if (!FiosDelete(w.as_querystr_d().text.buf)) {
-					ShowErrorMessage(INVALID_STRING_ID, Str.STR_4008_UNABLE_TO_DELETE_FILE, 0, 0);
+					ShowErrorMessage(Str.INVALID_STRING_ID, Str.STR_4008_UNABLE_TO_DELETE_FILE, 0, 0);
 				}
 				w.SetWindowDirty();
 				BuildFileList();
@@ -1375,7 +1400,7 @@ public class MiscGui {
 		case WindowEvents.WE_DESTROY:
 			// pause is only used in single-player, non-editor mode, non menu mode
 			if(!_networking && (Global._game_mode != GameModes.GM_EDITOR) && (Global._game_mode != GameModes.GM_MENU))
-				DoCommandP(0, 0, 0, null, Cmd.CMD_PAUSE);
+				Cmd.DoCommandP(0, 0, 0, null, Cmd.CMD_PAUSE);
 			FiosFreeSavegameList();
 			_no_scroll = BitOps.RETCLRBIT(_no_scroll, SCROLL_SAVE);
 			break;
@@ -1404,7 +1429,7 @@ public class MiscGui {
 			Window.WC_SAVELOAD,0,
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
 			_load_dialog_1_widgets,
-			MiscGui::SaveLoadDlgWndProc,
+			MiscGui::SaveLoadDlgWndProc
 			);
 
 	static final WindowDesc _load_dialog_scen_desc = new WindowDesc(
@@ -1412,7 +1437,7 @@ public class MiscGui {
 			Window.WC_SAVELOAD,0,
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
 			_load_dialog_2_widgets,
-			MiscGui::SaveLoadDlgWndProc,
+			MiscGui::SaveLoadDlgWndProc
 			);
 
 	static final WindowDesc _save_dialog_desc = new WindowDesc(
@@ -1420,7 +1445,7 @@ public class MiscGui {
 			Window.WC_SAVELOAD,0,
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
 			_save_dialog_widgets,
-			MiscGui::SaveLoadDlgWndProc,
+			MiscGui::SaveLoadDlgWndProc
 			);
 
 	static final WindowDesc _save_dialog_scen_desc = new WindowDesc(
@@ -1428,7 +1453,7 @@ public class MiscGui {
 			Window.WC_SAVELOAD,0,
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
 			_save_dialog_scen_widgets,
-			MiscGui::SaveLoadDlgWndProc,
+			MiscGui::SaveLoadDlgWndProc
 			);
 
 	static final WindowDesc  final _saveload_dialogs[] = {
@@ -1469,29 +1494,29 @@ public class MiscGui {
 		// pause is only used in single-player, non-editor mode, non-menu mode. It
 		// will be unpaused in the WindowEvents.WE_DESTROY event handler.
 		if (Global._game_mode != GameModes.GM_MENU && !_networking && Global._game_mode != GameModes.GM_EDITOR) {
-			DoCommandP(0, 1, 0, null, Cmd.CMD_PAUSE);
+			Cmd.DoCommandP(0, 1, 0, null, Cmd.CMD_PAUSE);
 		}
 
 		BuildFileList();
 
-		ResetObjectToPlace();
+		ViewPort.ResetObjectToPlace();
 	}
 
 	void RedrawAutosave()
 	{
-		SetWindowDirty(FindWindowById(Window.WC_STATUS_BAR, 0));
+		Window.FindWindowById(Window.WC_STATUS_BAR, 0).SetWindowDirty();
 	}
 
 	static final Widget _select_scenario_widgets[] = {
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,						Str.STR_018B_CLOSE_WINDOW),
-			new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,     7,    11,   256,     0,    13, Str.STR_400E_SELEAcceptedCargo.CT_NEW_GAME_TYPE, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,     7,    11,   256,     0,    13, Str.STR_400E_SELECT_NEW_GAME_TYPE, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 			new Widget(     Window.WWT_IMGBTN,  Window.RESIZE_RIGHT,     7,     0,   256,    14,    25, 0x0,								Str.STR_NULL),
 			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,     7,     0,   127,    14,    25, Str.STR_SORT_BY_NAME,		Str.STR_SORT_ORDER_TIP),
 			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,     7,   128,   256,    14,    25, Str.STR_SORT_BY_DATE,		Str.STR_SORT_ORDER_TIP),
 			new Widget(     Window.WWT_IMGBTN,     Window.RESIZE_RB,     7,     0,   244,    26,   319, 0x0,								Str.STR_NULL),
-			new Widget(          Window.WWT_6,     Window.RESIZE_RB,     7,     2,   243,    28,   317, 0x0,								Str.STR_400F_SELEAcceptedCargo.CT_SCENARIO_GREEN_PRE),
+			new Widget(          Window.WWT_6,     Window.RESIZE_RB,     7,     2,   243,    28,   317, 0x0,								Str.STR_400F_SELECT_SCENARIO_GREEN_PRE),
 			new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,     7,   245,   256,    26,   307, 0x0,								Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
-			new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,     7,   245,   256,   308,   319, 0x0,								Str.STR_Window.RESIZE_BUTTON),
+			new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,     7,   245,   256,   308,   319, 0x0,								Str.STR_RESIZE_BUTTON),
 			//{   WIDGETS_END},
 	};
 
@@ -1500,7 +1525,7 @@ public class MiscGui {
 		final int list_start = 45;
 
 		switch (e.event) {
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 		{
 			int y,pos;
 			final FiosItem item;
@@ -1532,8 +1557,8 @@ public class MiscGui {
 		}
 		break;
 
-		case WindowEvents.WE_CLICK:
-			switch(e.click.widget) {
+		case WE_CLICK:
+			switch(e.widget) {
 			case 3: /* Sort scenario names by name */
 				_savegame_sort_order = (_savegame_sort_order == SORT_BY_NAME) ?
 						SORT_BY_NAME | SORT_DESCENDING : SORT_BY_NAME;
@@ -1549,11 +1574,11 @@ public class MiscGui {
 				break;
 
 			case 6: /* Click the listbox */
-				if (e.click.pt.y < list_start)
-					GenRandomNewGame(Hal.Random(), InteractiveHal.Random());
+				if (e.pt.y < list_start)
+					GenRandomNewGame(Hal.Random(), Hal.InteractiveRandom());
 				else {
 					String name;
-					int y = (e.click.pt.y - list_start) / 10;
+					int y = (e.pt.y - list_start) / 10;
 					final FiosItem file;
 
 					if (y < 0 || (y += w.vscroll.pos) >= w.vscroll.count)
@@ -1571,17 +1596,17 @@ public class MiscGui {
 				}
 				break;
 			}
-		case WindowEvents.WE_DESTROY:
+		case WE_DESTROY:
 			break;
 
-		case WindowEvents.WE_RESIZE: {
+		case WE_RESIZE: {
 			/* Widget 3 and 4 have to go with halve speed, make it so obiwan */
-			int diff = e.sizing.diff.x / 2;
-			w.widget[3].right += diff;
-			w.widget[4].left  += diff;
-			w.widget[4].right += e.sizing.diff.x;
+			int diff = e.diff.x / 2;
+			w.widget.get(3).right += diff;
+			w.widget.get(4).left  += diff;
+			w.widget.get(4).right += e.diff.x;
 
-			w.vscroll.cap += e.sizing.diff.y / 10;
+			w.vscroll.cap += e.diff.y / 10;
 		} break;
 		}
 	}
@@ -1620,7 +1645,7 @@ public class MiscGui {
 		Window.DeleteWindowById(Window.WC_QUERY_STRING, 0);
 		Window.DeleteWindowById(Window.WC_SAVELOAD, 0);
 
-		_saveload_mode = SLD_NEW_GAME;
+		Global._saveload_mode = SLD_NEW_GAME;
 		BuildFileList();
 
 		w = Window.AllocateWindowDesc(_select_scenario_desc);
@@ -1632,8 +1657,8 @@ public class MiscGui {
 
 	static int ClickMoneyCheat(int p1, int p2)
 	{
-		DoCommandP(0, -10000000, 0, null, Cmd.CMD_MONEY_CHEAT);
-		return true;
+		Cmd.DoCommandP(null, -10000000, 0, null, Cmd.CMD_MONEY_CHEAT);
+		return 1; //true;
 	}
 
 	// p1 player to set to, p2 is -1 or +1 (down/up)
@@ -1642,13 +1667,13 @@ public class MiscGui {
 		while (p1 >= 0 && p1 < Global.MAX_PLAYERS) {
 			if (_players[p1].is_active) {
 				Global._local_player = p1;
-				MarkWholeScreenDirty();
-				return Global._local_player;
+				Hal.MarkWholeScreenDirty();
+				return Global._local_player.id;
 			}
 			p1 += p2;
 		}
 
-		return Global._local_player;
+		return Global._local_player.id;
 	}
 
 	// p1 -1 or +1 (down/up)
@@ -1656,9 +1681,9 @@ public class MiscGui {
 	{
 		if (p1 == -1) p1 = 3;
 		if (p1 ==  4) p1 = 0;
-		GameOptions._opt.landscape = p1;
+		GameOptions._opt.landscape = (byte) p1;
 		GfxLoadSprites();
-		MarkWholeScreenDirty();
+		Hal.MarkWholeScreenDirty();
 		return GameOptions._opt.landscape;
 	}
 
@@ -1668,14 +1693,14 @@ public class MiscGui {
 	static int ClickChangeDateCheat(int p1, int p2)
 	{
 		YearMonthDay ymd = new YearMonthDay();
-		GameDate.ConvertDayToYMD(ymd, _date);
+		GameDate.ConvertDayToYMD(ymd, Global._date);
 
-		if ((ymd.year == 0 && p2 == -1) || (ymd.year == 170 && p2 == 1)) return _cur_year;
+		if ((ymd.year == 0 && p2 == -1) || (ymd.year == 170 && p2 == 1)) return Global._cur_year;
 
-		GameDate.SetDate(ConvertYMDToDay(_cur_year + p2, ymd.month, ymd.day));
+		Global.SetDate(GameDate.ConvertYMDToDay(Global._cur_year + p2, ymd.month, ymd.day));
 		EnginesMonthlyLoop();
-		Window.SetWindowDirty(FindWindowById(Window.WC_STATUS_BAR, 0));
-		return _cur_year;
+		Window.SetWindowDirty(Window.FindWindowById(Window.WC_STATUS_BAR, 0));
+		return Global._cur_year;
 	}
 
 	//typedef int CheckButtonClick(int, int);

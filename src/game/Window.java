@@ -184,6 +184,8 @@ public class Window extends WindowConstants
 	void_d as_void_d() { return (void_d) custom; }
 	vp_d as_vp_d() { return (vp_d) custom; }
 	vp2_d as_vp2_d() { return (vp2_d) custom; }
+	public as_querystr_d as_querystr_d() { return (as_querystr_d) custom; }
+
 
 	// -----------------------------------
 
@@ -383,7 +385,7 @@ public class Window extends WindowConstants
 
 	void SetWindowDirty()
 	{
-		Global.hal.SetDirtyBlocks(left, top, left + width, top + height);
+		Hal.SetDirtyBlocks(left, top, left + width, top + height);
 	}
 
 	/*
@@ -2912,6 +2914,7 @@ public class Window extends WindowConstants
 		ViewPort.DrawWindowViewport(this);
 		
 	}
+
 
 
 
