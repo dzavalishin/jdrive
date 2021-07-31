@@ -491,7 +491,7 @@ public class Clear extends ClearTables {
 
 
 
-	static void DrawClearLandTile(final TileInfo ti, byte set)
+	static void DrawClearLandTile(final TileInfo ti, int set)
 	{
 		ViewPort.DrawGroundSprite(Sprite.SPR_FLAT_BARE_LAND + Landscape._tileh_to_sprite[ti.tileh] + set * 19);
 	}

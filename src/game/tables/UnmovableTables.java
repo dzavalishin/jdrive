@@ -12,7 +12,7 @@ public class UnmovableTables
 
 	private static DrawTileSeqStruct TILE_SEQ_END() { return new DrawTileSeqStruct(0x80, 0, 0, 0, 0, 0, 0);  }
 
-	static final DrawTileUnmovableStruct _draw_tile_unmovable_data[] = {
+	protected static final DrawTileUnmovableStruct _draw_tile_unmovable_data[] = {
 			new DrawTileUnmovableStruct(0xA29, 7,7, 2,2, 70, 0),
 			new DrawTileUnmovableStruct(0xA2A, 4,4, 7,7, 61, 0),
 	};
@@ -107,7 +107,7 @@ public class UnmovableTables
 		TILE_SEQ_END()
 	};
 
-	static final DrawTileSprites _unmovable_display_datas[] = {
+	protected static final DrawTileSprites _unmovable_display_datas[] = {
 		new DrawTileSprites( 0xA2B | Sprite.PALETTE_MODIFIER_COLOR, _unmovable_display_datas_0 ),
 		new DrawTileSprites( 0xA2C | Sprite.PALETTE_MODIFIER_COLOR, _unmovable_display_datas_1 ),
 		new DrawTileSprites( 0xA2D | Sprite.PALETTE_MODIFIER_COLOR, _unmovable_display_datas_2 ),

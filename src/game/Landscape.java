@@ -209,7 +209,7 @@ public class Landscape extends GenLandTable
 		return south || other;
 	}
 
-	void DrawFoundation(TileInfo ti, int f)
+	static void DrawFoundation(TileInfo ti, int f)
 	{
 		int sprite_base = Sprite.SPR_SLOPES_BASE-14;
 
