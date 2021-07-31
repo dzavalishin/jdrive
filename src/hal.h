@@ -44,7 +44,7 @@ enum DriverType {
 
 extern void GameLoop(void);
 
-
+/*
 // Deals with finding savegames
 typedef struct {
 	byte type;
@@ -52,7 +52,7 @@ typedef struct {
 	char title[64];
 	char name[256-12-64];
 } FiosItem;
-
+*/
 enum {
 	FIOS_TYPE_DRIVE = 0,
 	FIOS_TYPE_PARENT = 1,
