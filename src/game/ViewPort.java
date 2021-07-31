@@ -1525,7 +1525,7 @@ public class ViewPort
 
 		if (top >= vp.virtual_height) return;
 
-		Global.hal.SetDirtyBlocks(
+		Hal.SetDirtyBlocks(
 				(left >> vp.zoom) + vp.left,
 				(top >> vp.zoom) + vp.top,
 				(right >> vp.zoom) + vp.left,
@@ -1654,7 +1654,7 @@ public class ViewPort
 						y < t.sign.top + 12 &&
 						x >= t.sign.left &&
 						x < t.sign.left + t.sign.width_1) {
-					Town.ShowTownViewWindow(t.index);
+					TownGui.ShowTownViewWindow(t.index);
 					return true;
 				}
 			}
@@ -1672,7 +1672,7 @@ public class ViewPort
 						y < t.sign.top + 24 &&
 						x >= t.sign.left &&
 						x < t.sign.left + t.sign.width_1 * 2) {
-					Town.ShowTownViewWindow(t.index);
+					TownGui.ShowTownViewWindow(t.index);
 					return true;
 				}
 			}
@@ -1690,7 +1690,7 @@ public class ViewPort
 						y < t.sign.top + 24 &&
 						x >= t.sign.left &&
 						x < t.sign.left + t.sign.width_2 * 4) {
-					Town.ShowTownViewWindow(t.index);
+					TownGui.ShowTownViewWindow(t.index);
 					return true;
 				}
 			}
@@ -1720,7 +1720,7 @@ public class ViewPort
 						y < st.sign.top + 12 &&
 						x >= st.sign.left &&
 						x < st.sign.left + st.sign.width_1) {
-					Station.ShowStationViewWindow(st.index);
+					StationGui.ShowStationViewWindow(st.index);
 					return true;
 				}
 			}
@@ -1932,11 +1932,11 @@ public class ViewPort
 		if (CheckClickOnWaypoint(vp, x, y)) return;
 		CheckClickOnLandscape(vp, x, y);
 
-		v = CheckClickOnVehicle(vp, x, y);
+		v = Vehicle.CheckClickOnVehicle(vp, x, y);
 		if (v != null) _on_vehicle_click_proc[v.type - 0x10].accept(v);
 	}
 
-	Vehicle CheckMouseOverVehicle()
+	static Vehicle CheckMouseOverVehicle()
 	{
 		final Window  w;
 		final ViewPort  vp;
@@ -1948,7 +1948,7 @@ public class ViewPort
 		if (w == null) return null;
 
 		vp = w.IsPtInWindowViewport(x, y);
-		return (vp != null) ? CheckClickOnVehicle(vp, x, y) : null;
+		return (vp != null) ? Vehicle.CheckClickOnVehicle(vp, x, y) : null;
 	}
 
 

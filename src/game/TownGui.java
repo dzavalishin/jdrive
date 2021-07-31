@@ -354,7 +354,7 @@ public abstract class TownGui extends Town
 			TownGui::TownViewWndProc
 			);
 
-	void ShowTownViewWindow(int town)
+	static void ShowTownViewWindow(int town)
 	{
 		Window w;
 

@@ -2196,7 +2196,7 @@ public class Vehicle implements IPoolItem
 		_effect_tick_procs[v.subtype].accept(v);
 	}
 
-	Vehicle CheckClickOnVehicle(final ViewPort vp, int x, int y)
+	static Vehicle CheckClickOnVehicle(final ViewPort vp, int x, int y)
 	{
 		Vehicle found = null; //, v;
 		int dist, best_dist = (int)-1;

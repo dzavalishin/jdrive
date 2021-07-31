@@ -124,7 +124,7 @@ public class VehicleGui {
 
 	static SortStruct [] _vehicle_sort;
 
-	void BuildVehicleList(vehiclelist_d  vl, int type, PlayerID owner, StationID station)
+	static void BuildVehicleList(vehiclelist_d  vl, int type, /*PlayerID*/ int owner, /*StationID*/ int station)
 	{
 		int subtype = (type != Vehicle.VEH_Aircraft) ? Vehicle.Train_Front : 2;
 		int n[] = {0};
@@ -141,7 +141,7 @@ public class VehicleGui {
 		Global.DEBUG_misc(1, "Building vehicle list for player %d station %d...",
 				owner, station);
 
-		if (station.id != Station.INVALID_STATION) {
+		if (station != Station.INVALID_STATION) {
 			//final Vehicle v;
 			//FOR_ALL_VEHICLES(v)
 			Iterator<Vehicle> it = Vehicle.getIterator();
@@ -159,7 +159,7 @@ public class VehicleGui {
 					while(voi.hasNext())
 					{
 						final Order order = voi.next();
-						if (order.type == Order.OT_GOTO_STATION && order.station == station.id) {
+						if (order.type == Order.OT_GOTO_STATION && order.station == station) {
 							_vehicle_sort[n[0]].index = v.index;
 							_vehicle_sort[n[0]].owner = v.owner.id;
 							++n[0];
@@ -197,7 +197,7 @@ public class VehicleGui {
 		vl.flags |= Vehicle.VL_RESORT;
 	}
 
-	void SortVehicleList(vehiclelist_d vl)
+	static void SortVehicleList(vehiclelist_d vl)
 	{
 		if (0 == (vl.flags & Vehicle.VL_RESORT)) return;
 

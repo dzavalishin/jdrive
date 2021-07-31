@@ -371,7 +371,7 @@ static byte AirportBlockToString(int block)
 }
 	 */
 
-	final AirportFTAClass GetAirport(final byte airport_type)
+	final AirportFTAClass GetAirport(final int airport_type)
 	{
 		AirportFTAClass Airport = null;
 		//FIXME -- AircraftNextAirportPos_and_Order . Needs something nicer, don't like this code
