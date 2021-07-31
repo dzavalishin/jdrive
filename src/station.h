@@ -135,7 +135,7 @@ TileIndex GetStationTileForVehicle(const Vehicle *v, const Station *st);
 void ShowStationViewWindow(StationID station);
 void UpdateAllStationVirtCoord(void);
 
-VARDEF SortStruct *_station_sort;
+//VARDEF SortStruct *_station_sort;
 
 //extern MemoryPool _station_pool;
 
@@ -190,8 +190,8 @@ static inline uint16 GetRoadStopPoolSize(void)
 /* End of stuff for ROADSTOPS */
 
 
-VARDEF bool _station_sort_dirty[MAX_PLAYERS];
-VARDEF bool _global_station_sort_dirty;
+//VARDEF bool _station_sort_dirty[MAX_PLAYERS];
+//VARDEF bool _global_station_sort_dirty;
 
 void GetProductionAroundTiles(AcceptedCargo produced, TileIndex tile, int w, int h, int rad);
 void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile, int w, int h, int rad);

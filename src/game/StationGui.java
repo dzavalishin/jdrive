@@ -1,5 +1,7 @@
 package game;
 
+import java.util.Arrays;
+
 import game.util.BitOps;
 import game.util.Strings;
 
@@ -49,7 +51,7 @@ public class StationGui extends Station  // to get finalants
 
 		x -= acceptance / 8;
 
-		Gfx.DrawString(x + 1, y, _cargoc.names_short[type], 0x10);
+		Gfx.DrawString(x + 1, y, Global._cargoc.names_short[type], 0x10);
 
 		/* draw green/red ratings bar */
 		Gfx.GfxFillRect(x + 1, y + 8, x + 7, y + 8, 0xB8);
@@ -80,48 +82,64 @@ public class StationGui extends Station  // to get finalants
 		return buf1.compareTo(buf2);
 	}
 
+	private static SortStruct [] _station_sort;
+	private static boolean [] _station_sort_dirty = new boolean[Global.MAX_PLAYERS];
+	private static boolean _global_station_sort_dirty;
+
+	
 	static void GlobalSortStationList()
 	{
 		//final Station st;
-		int n = 0;
+		int [] n = {0};
 		int [] i;
 
 		// reset #-of stations to 0 because ++ is used for value-assignment
-		memset(_num_station_sort, 0, sizeof(_num_station_sort));
-
+		//memset(_num_station_sort, 0, sizeof(_num_station_sort));
+		for( int si = 0; si < _num_station_sort.length; si++ )
+			_num_station_sort[si] = 0;
+				
 		/* Create array for sorting */
 		//_station_sort = realloc(_station_sort, GetStationPoolSize() * sizeof(_station_sort[0]));
 		_station_sort = new SortStruct[GetStationPoolSize()];
 		if (_station_sort == null)
-			error("Could not allocate memory for the station-sorting-list");
+			Global.error("Could not allocate memory for the station-sorting-list");
 
 		//FOR_ALL_STATIONS(st)
 		Station.forEach( (st) ->
 		{
-			if (st.xy != null && st.owner != Owner.OWNER_NONE) {
-				_station_sort[n].index = st.index;
-				_station_sort[n++].owner = st.owner;
-				_num_station_sort[st.owner]++; // add number of stations of player
+			if (st.xy != null && st.owner.id != Owner.OWNER_NONE) {
+				_station_sort[n[0]].index = st.index;
+				_station_sort[n[0]].owner = st.owner.id;
+				n[0]++;
+				_num_station_sort[st.owner.id]++; // add number of stations of player
 			}
 		});
 
 		// create cumulative station-ownership
 		// stations are stored as a cummulative index, eg 25, 41, 43. This means
 		// Player0: 25; Player1: (41-25) 16; Player2: (43-41) 2
-		for (i = &_num_station_sort[1]; i != endof(_num_station_sort); i++) {
-			*i += *(i - 1);
+		//for (i = &_num_station_sort[1]; i != endof(_num_station_sort); i++) {
+		//	*i += *(i - 1);
+		//}
+		for (int si = 1; si < _num_station_sort.length; si++) {
+			_num_station_sort[si] += _num_station_sort[si-1];
 		}
-
-		qsort(_station_sort, n, sizeof(_station_sort[0]), GeneralOwnerSorter); // sort by owner
+		
+		//qsort(_station_sort, n, sizeof(_station_sort[0]), GeneralOwnerSorter); // sort by owner
+		Arrays.sort(_station_sort, new GeneralOwnerSorter());
 
 		// since indexes are messed up after adding/removing a station, mark all lists dirty
-		memset(_station_sort_dirty, true, sizeof(_station_sort_dirty));
+		for (int si = 0; si < _station_sort_dirty.length; si++) {
+			_station_sort_dirty[si] = true;
+		}
+		//memset(_station_sort_dirty, true, sizeof(_station_sort_dirty));
+
 		_global_station_sort_dirty = false;
 
 		Global.DEBUG_misc( 1, "Resorting global station list...");
 	}
 
-	static void MakeSortedStationList(PlayerID owner)
+	static void MakeSortedStationList(int owner)
 	{
 		SortStruct firstelement;
 		int n = 0;
@@ -336,11 +354,11 @@ public class StationGui extends Station  // to get finalants
 
 		w.disabled_state = st.owner == Global._local_player ? 0 : (1 << 9);
 
-		if (!(st.facilities & FACIL_TRAIN)) SETBIT(w.disabled_state,  10);
-		if (!(st.facilities & FACIL_TRUCK_STOP) &&
-				!(st.facilities & FACIL_BUS_STOP)) SETBIT(w.disabled_state, 11);
-		if (!(st.facilities & FACIL_AIRPORT)) SETBIT(w.disabled_state, 12);
-		if (!(st.facilities & FACIL_DOCK)) SETBIT(w.disabled_state, 13);
+		if (0==(st.facilities & FACIL_TRAIN)) 		w.disabled_state = BitOps.RETSETBIT(w.disabled_state,  10);
+		if (0==(st.facilities & FACIL_TRUCK_STOP) &&
+				0==(st.facilities & FACIL_BUS_STOP))  w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 11);
+		if (0==(st.facilities & FACIL_AIRPORT))       w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 12);
+		if (0==(st.facilities & FACIL_DOCK))          w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 13);
 
 		Global.SetDParam(0, st.index);
 		Global.SetDParam(1, st.facilities);
@@ -370,7 +388,7 @@ public class StationGui extends Station  // to get finalants
 				int cur_x = x;
 				num = Math.min(num, 23);
 				do {
-					Gfx.DrawSprite(_cargoc.sprites[i], cur_x, y);
+					Gfx.DrawSprite(Global._cargoc.sprites[i], cur_x, y);
 					cur_x += 10;
 				} while (--num > 0);
 			}
@@ -378,56 +396,61 @@ public class StationGui extends Station  // to get finalants
 			if ( st.goods[i].enroute_from == station_id) {
 				if (--pos < 0) {
 					Global.SetDParam(1, waiting);
-					Global.SetDParam(0, _cargoc.names_long[i]);
-					DrawStringRightAligned(x + 234, y, Str.STR_0009, 0);
+					Global.SetDParam(0, Global._cargoc.names_long[i]);
+					Gfx.DrawStringRightAligned(x + 234, y, Str.STR_0009, 0);
 					y += 10;
 				}
 			} else {
 				/* enroute */
 				if (--pos < 0) {
 					Global.SetDParam(1, waiting);
-					Global.SetDParam(0, _cargoc.names_long[i]);
-					DrawStringRightAligned(x + 234, y, Str.STR_000A_EN_ROUTE_FROM, 0);
+					Global.SetDParam(0, Global._cargoc.names_long[i]);
+					Gfx.DrawStringRightAligned(x + 234, y, Str.STR_000A_EN_ROUTE_FROM, 0);
 					y += 10;
 				}
 
 				if (pos > -5 && --pos < 0) {
 					Global.SetDParam(0, st.goods[i].enroute_from);
-					DrawStringRightAligned(x + 234, y, Str.STR_000B, 0);
+					Gfx.DrawStringRightAligned(x + 234, y, Str.STR_000B, 0);
 					y += 10;
 				}
 			}
 		} while (pos > -5 && ++i != AcceptedCargo.NUM_CARGO);
 
-		if (IsWindowOfPrototype(w, _station_view_widgets)) {
-			char *b = _userstring;
+		if (Window.IsWindowOfPrototype( w, _station_view_widgets)) {
+			//char *b = _userstring;
+			StringBuilder sb = new StringBuilder();
+			
+			sb.append( Strings.InlineString(Str.STR_000C_ACCEPTS) );
 
-			b = InlineString(b, Str.STR_000C_ACCEPTS);
-
+			boolean nonempty = false;
 			for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
-				if (b >= endof(_userstring) - 5 - 1) break;
-				if (st.goods[i].waiting_acceptance & 0x8000) {
-					b = InlineString(b, _cargoc.names_s[i]);
-					*b++ = ',';
-					*b++ = ' ';
+				//if (b >= endof(_userstring) - 5 - 1) break;
+				if( 0 != (st.goods[i].waiting_acceptance & 0x8000) ) 
+				{
+					sb.append( Strings.InlineString( Global._cargoc.names_s[i]) );
+					//*b++ = ',';
+					//*b++ = ' ';
+					sb.append( ", " );
+					nonempty = true;
 				}
 			}
 
-			if (b == &_userstring[3]) {
-				b = InlineString(b, Str.STR_00D0_NOTHING);
-				*b++ = '\0';
+			if (nonempty) {				
+				Strings._userstring = sb.toString();
+				Strings._userstring = Strings._userstring.substring(0, Strings._userstring.length()-2 );
 			} else {
-				b[-2] = '\0';
+				Strings._userstring = Strings.InlineString(Str.STR_000C_ACCEPTS) + InlineString(b, Str.STR_00D0_NOTHING);
 			}
 
-			DrawStringMultiLine(2, 67, Str.STR_SPEC_USERSTRING, 245);
+			Gfx.DrawStringMultiLine(2, 67, Strings.STR_SPEC_USERSTRING, 245);
 		} else {
 			Gfx.DrawString(2, 67, Str.STR_3034_LOCAL_RATING_OF_TRANSPORT, 0);
 
 			y = 77;
 			for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
 				if (st.goods[i].enroute_from != INVALID_STATION) {
-					Global.SetDParam(0, _cargoc.names_s[i]);
+					Global.SetDParam(0, Global._cargoc.names_s[i].id);
 					Global.SetDParam(2, st.goods[i].rating * 101 >> 8);
 					Global.SetDParam(1, Str.STR_3035_APPALLING + (st.goods[i].rating >> 5));
 					Gfx.DrawString(8, y, Str.STR_303D, 0);
@@ -467,35 +490,35 @@ public class StationGui extends Station  // to get finalants
 				break;
 
 			case 9: {
-				Global.SetDParam(0, w.window_number);
-				ShowQueryString(Str.STR_STATION, Str.STR_3030_RENAME_STATION_LOADING, 31, 180, w.window_class, w.window_number);
+				Global.SetDParam(0, w.window_number.n);
+				MiscGui.ShowQueryString(Str.STR_STATION, Str.STR_3030_RENAME_STATION_LOADING, 31, 180, w.window_class, w.window_number);
 			} break;
 
 			case 10: { /* Show a list of scheduled trains to this station */
-				final Station st = Station.GetStation(w.window_number);
-				ShowPlayerTrains(st.owner, w.window_number);
+				final Station st = Station.GetStation(w.window_number.n);
+				ShowPlayerTrains(st.owner, w.window_number.n);
 				break;
 			}
 
 			case 11: { /* Show a list of scheduled road-vehicles to this station */
-				final Station st = Station.GetStation(w.window_number);
-				ShowPlayerRoadVehicles(st.owner, w.window_number);
+				final Station st = Station.GetStation(w.window_number.n);
+				ShowPlayerRoadVehicles(st.owner, w.window_number.n);
 				break;
 			}
 
 			case 12: { /* Show a list of scheduled aircraft to this station */
-				final Station st = Station.GetStation(w.window_number);
+				final Station st = Station.GetStation(w.window_number.n);
 				/* Since oilrigs have no owners, show the scheduled aircraft of current player */
-				PlayerID owner = (st.owner == Owner.OWNER_NONE) ? Global._current_player : st.owner;
-				ShowPlayerAircraft(owner, w.window_number);
+				PlayerID owner = (st.owner.id == Owner.OWNER_NONE) ? Global._current_player : st.owner;
+				ShowPlayerAircraft(owner, w.window_number.n);
 				break;
 			}
 
 			case 13: { /* Show a list of scheduled ships to this station */
-				final Station st = Station.GetStation(w.window_number);
+				final Station st = Station.GetStation(w.window_number.n);
 				/* Since oilrigs/bouys have no owners, show the scheduled ships of current player */
 				PlayerID owner = (st.owner == Owner.OWNER_NONE) ? Global._current_player : st.owner;
-				ShowPlayerShips(owner, w.window_number);
+				Ship.ShowPlayerShips(owner, w.window_number.n);
 				break;
 			}
 			}
