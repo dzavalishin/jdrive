@@ -1,21 +1,33 @@
 package game;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 import game.util.BitOps;
+import game.util.Strings;
 
 // extends to have finalants too
 public abstract class TownGui extends Town 
 {
 
+	// used to get a sorted list of the towns
+	static int _num_town_sort;
+
+	//static char _bufcache[64];
+	//static int _last_town_idx;
+	//static int[] _town_sort;
+	static Integer[] _town_sort;
+
 
 	static final Widget _town_authority_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5,				Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    13,    11,   316,     0,    13, Str.STR_2022_LOCAL_AUTHORITY, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   316,    14,   105, 0x0,							Str.STR_NULL),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   306,   106,   157, 0x0,							Str.STR_2043_LIST_OF_THINGS_TO_DO_AT),
-	new Widget(  Window.WWT_SCROLLBAR,   Window.RESIZE_NONE,    13,   305,   316,   106,   157, 0x0,							Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   316,   158,   209, 0x0,							Str.STR_NULL),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,     0,   316,   210,   221, Str.STR_2042_DO_IT,	Str.STR_2044_CARRY_OUT_THE_HIGHLIGHTED),
-	//new Widget(   WIDGETS_END},
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5,				Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    13,    11,   316,     0,    13, Str.STR_2022_LOCAL_AUTHORITY, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   316,    14,   105, 0x0,							Str.STR_NULL),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   306,   106,   157, 0x0,							Str.STR_2043_LIST_OF_THINGS_TO_DO_AT),
+			new Widget(  Window.WWT_SCROLLBAR,   Window.RESIZE_NONE,    13,   305,   316,   106,   157, 0x0,							Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   316,   158,   209, 0x0,							Str.STR_NULL),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,     0,   316,   210,   221, Str.STR_2042_DO_IT,	Str.STR_2044_CARRY_OUT_THE_HIGHLIGHTED),
+			//new Widget(   WIDGETS_END},
 	};
 
 	//extern final byte _town_action_costs[8];
@@ -27,7 +39,7 @@ public abstract class TownGui extends Town
 	 * @param *t the town that is queried
 	 * @return bitmasked value of enabled actions
 	 */
-	int GetMaskOfTownActions(int [] nump, PlayerID pid, final Town t)
+	static int GetMaskOfTownActions(int [] nump, PlayerID pid, final Town t)
 	{
 		int avail, ref;
 		int num = 0;
@@ -51,18 +63,18 @@ public abstract class TownGui extends Town
 			avail = Player.GetPlayer(pid).player_money + Global._price.station_value * 200;
 			ref = Global._price.build_industry >> 8;
 
-			for (i = 0; i != _town_action_costs.length; i++, avail_buttons >>= 1) {
-				if (BitOps.HASBIT(avail_buttons, 0) && avail >= _town_action_costs[i] * ref) {
-					buttons = BitOps.RETSETBIT(buttons, i);
-					num++;
+				for (i = 0; i != _town_action_costs.length; i++, avail_buttons >>= 1) {
+					if (BitOps.HASBIT(avail_buttons, 0) && avail >= _town_action_costs[i] * ref) {
+						buttons = BitOps.RETSETBIT(buttons, i);
+						num++;
+					}
 				}
-			}
 
-			/* Disable build statue if already built */
-			if (BitOps.HASBIT(t.statues, pid.id)) {
-				buttons = BitOps.RETCLRBIT(buttons, 4);
-				num--;
-			}
+				/* Disable build statue if already built */
+				if (BitOps.HASBIT(t.statues, pid.id)) {
+					buttons = BitOps.RETCLRBIT(buttons, 4);
+					num--;
+				}
 
 		}
 
@@ -124,23 +136,23 @@ public abstract class TownGui extends Town
 
 						r = t.ratings[p.index.id];
 						str = Str.STR_3035_APPALLING; // Apalling
-						
+
 						if( r > RATING_APPALLING) {
 							str++;
-						if(r > RATING_VERYPOOR) {											// Very Poor
-							str++;
-						if(r > RATING_POOR) {												// Poor
-							str++;
-						if( r > RATING_MEDIOCRE) {											// Mediocore
-							str++;						
-						if(r > RATING_GOOD) {											// Good
-							str++;						
-						if(r > RATING_VERYGOOD) {											// Very Good
-							str++;
-						if(r <= RATING_EXCELLENT) 											// Excellent
-							str++;														// Outstanding
-						}}}}}}
-						
+							if(r > RATING_VERYPOOR) {											// Very Poor
+								str++;
+								if(r > RATING_POOR) {												// Poor
+									str++;
+									if( r > RATING_MEDIOCRE) {											// Mediocore
+										str++;						
+										if(r > RATING_GOOD) {											// Good
+											str++;						
+											if(r > RATING_VERYGOOD) {											// Very Good
+												str++;
+												if(r <= RATING_EXCELLENT) 											// Excellent
+													str++;														// Outstanding
+											}}}}}}
+
 						Global.SetDParam(4, str);
 						if (t.exclusivity.id == p.index.id) // red icon for player with exclusive rights
 							Gfx.DrawSprite(Sprite.SPR_BLOT | Sprite.PALETTE_TO_RED, 18, y);
@@ -213,12 +225,12 @@ public abstract class TownGui extends Town
 	}
 
 	static final WindowDesc _town_authority_desc = new WindowDesc(
-		-1, -1, 317, 222,
-		Window.WC_TOWN_AUTHORITY,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
-		_town_authority_widgets,
-		TownGui::TownAuthorityWndProc
-	);
+			-1, -1, 317, 222,
+			Window.WC_TOWN_AUTHORITY,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
+			_town_authority_widgets,
+			TownGui::TownAuthorityWndProc
+			);
 
 	static void ShowTownAuthorityWindow(int town)
 	{
@@ -260,26 +272,26 @@ public abstract class TownGui extends Town
 
 		case WE_CLICK:
 			switch (e.widget) {
-				case 6: /* scroll to location */
-					ScrollMainWindowToTile(t.xy);
-					break;
+			case 6: /* scroll to location */
+				ViewPort.ScrollMainWindowToTile(t.xy);
+				break;
 
-				case 7: /* town authority */
-					ShowTownAuthorityWindow(w.window_number.n);
-					break;
+			case 7: /* town authority */
+				ShowTownAuthorityWindow(w.window_number.n);
+				break;
 
-				case 8: /* rename */
-					Global.SetDParam(0, w.window_number.n);
-					ShowQueryString(Str.STR_TOWN, Str.STR_2007_RENAME_TOWN, 31, 130, w.window_class, w.window_number);
-					break;
+			case 8: /* rename */
+				Global.SetDParam(0, w.window_number.n);
+				MiscGui.ShowQueryString(Str.STR_TOWN, Str.STR_2007_RENAME_TOWN, 31, 130, w.window_class, w.window_number);
+				break;
 
-				case 9: /* expand town */
-					t.ExpandTown();
-					break;
+			case 9: /* expand town */
+				t.ExpandTown();
+				break;
 
-				case 10: /* delete town */
-					t.DeleteTown();
-					break;
+			case 10: /* delete town */
+				t.DeleteTown();
+				break;
 			case 11:
 				mAirport.MA_EditorAddAirport(t);
 				Console.IConsolePrintF(100100100, "it works");
@@ -290,7 +302,7 @@ public abstract class TownGui extends Town
 			if (e.str.length() != 0) {
 				Global._cmd_text = e.str;
 				Cmd.DoCommandP(null, w.window_number.n, 0, null,
-					Cmd.CMD_RENAME_TOWN | Cmd.CMD_MSG(Str.STR_2008_CAN_T_RENAME_TOWN));
+						Cmd.CMD_RENAME_TOWN | Cmd.CMD_MSG(Str.STR_2008_CAN_T_RENAME_TOWN));
 			}
 			break;
 		}
@@ -298,49 +310,49 @@ public abstract class TownGui extends Town
 
 
 	static final Widget _town_view_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5, Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    13,    11,   247,     0,    13, Str.STR_2005, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,    13,   248,   259,     0,    13, 0x0,      Str.STR_STICKY_BUTTON),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   259,    14,   105, 0x0,      Str.STR_NULL),
-	new Widget(          Window.WWT_6,   Window.RESIZE_NONE,    13,     2,   257,    16,   103, 0x0,      Str.STR_NULL),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   259,   106,   137, 0x0,      Str.STR_NULL),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,     0,    85,   138,   149, Str.STR_00E4_LOCATION,				Str.STR_200B_CENTER_THE_MAIN_VIEW_ON),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,    86,   171,   138,   149, Str.STR_2020_LOCAL_AUTHORITY,Str.STR_2021_SHOW_INFORMATION_ON_LOCAL),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,   172,   259,   138,   149, Str.STR_0130_RENAME,					Str.STR_200C_CHANGE_TOWN_NAME),
-	//{   WIDGETS_END},
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5, Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    13,    11,   247,     0,    13, Str.STR_2005, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,    13,   248,   259,     0,    13, 0x0,      Str.STR_STICKY_BUTTON),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   259,    14,   105, 0x0,      Str.STR_NULL),
+			new Widget(          Window.WWT_6,   Window.RESIZE_NONE,    13,     2,   257,    16,   103, 0x0,      Str.STR_NULL),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   259,   106,   137, 0x0,      Str.STR_NULL),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,     0,    85,   138,   149, Str.STR_00E4_LOCATION,				Str.STR_200B_CENTER_THE_MAIN_VIEW_ON),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,    86,   171,   138,   149, Str.STR_2020_LOCAL_AUTHORITY,Str.STR_2021_SHOW_INFORMATION_ON_LOCAL),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,   172,   259,   138,   149, Str.STR_0130_RENAME,					Str.STR_200C_CHANGE_TOWN_NAME),
+			//{   WIDGETS_END},
 	};
 
 	static final WindowDesc _town_view_desc = new WindowDesc(
-		-1, -1, 260, 150,
-		Window.WC_TOWN_VIEW,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON,
-		_town_view_widgets,
-		TownGui::TownViewWndProc
-	);
+			-1, -1, 260, 150,
+			Window.WC_TOWN_VIEW,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON,
+			_town_view_widgets,
+			TownGui::TownViewWndProc
+			);
 
 	static final Widget _town_view_scen_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5,					Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    13,    11,   172,     0,    13, Str.STR_2005,					Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,    13,   248,   259,     0,    13, 0x0,               Str.STR_STICKY_BUTTON),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   259,    14,   105, 0x0,								Str.STR_NULL),
-	new Widget(          Window.WWT_6,   Window.RESIZE_NONE,    13,     2,   257,    16,   103, 0x0,								Str.STR_NULL),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   259,   106,   137, 0x0,								Str.STR_NULL),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,     0,    85,   138,   149, Str.STR_00E4_LOCATION,	Str.STR_200B_CENTER_THE_MAIN_VIEW_ON),
-	new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,								Str.STR_NULL),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,   173,   247,     0,    13, Str.STR_0130_RENAME,		Str.STR_200C_CHANGE_TOWN_NAME),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,    86,   171,   138,   149, Str.STR_023C_EXPAND,		Str.STR_023B_INCREASE_SIZE_OF_TOWN),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,   172,   243,   138,   149, Str.STR_0290_DELETE,		Str.STR_0291_DELETE_THIS_TOWN_COMPLETELY),
-	new Widget( Window.WWT_PUSHTXTBTN,	Window.RESIZE_NONE,	13,	  244,	 259,	138,   149,		  Str.STR_PLANE,		Str.STR_MA_AIRPORT_BUTTON_TOOLTIP),	 								
-	//{   WIDGETS_END},
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5,					Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    13,    11,   172,     0,    13, Str.STR_2005,					Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,    13,   248,   259,     0,    13, 0x0,               Str.STR_STICKY_BUTTON),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   259,    14,   105, 0x0,								Str.STR_NULL),
+			new Widget(          Window.WWT_6,   Window.RESIZE_NONE,    13,     2,   257,    16,   103, 0x0,								Str.STR_NULL),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    13,     0,   259,   106,   137, 0x0,								Str.STR_NULL),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,     0,    85,   138,   149, Str.STR_00E4_LOCATION,	Str.STR_200B_CENTER_THE_MAIN_VIEW_ON),
+			new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,								Str.STR_NULL),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,   173,   247,     0,    13, Str.STR_0130_RENAME,		Str.STR_200C_CHANGE_TOWN_NAME),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,    86,   171,   138,   149, Str.STR_023C_EXPAND,		Str.STR_023B_INCREASE_SIZE_OF_TOWN),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,   172,   243,   138,   149, Str.STR_0290_DELETE,		Str.STR_0291_DELETE_THIS_TOWN_COMPLETELY),
+			new Widget( Window.WWT_PUSHTXTBTN,	Window.RESIZE_NONE,	13,	  244,	 259,	138,   149,		  Str.STR_PLANE,		Str.STR_MA_AIRPORT_BUTTON_TOOLTIP),	 								
+			//{   WIDGETS_END},
 	};
 
 	static final WindowDesc _town_view_scen_desc = new WindowDesc(
-		-1, -1, 260, 150,
-		Window.WC_TOWN_VIEW,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON,
-		_town_view_scen_widgets,
-		TownGui::TownViewWndProc
-	);
+			-1, -1, 260, 150,
+			Window.WC_TOWN_VIEW,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON,
+			_town_view_scen_widgets,
+			TownGui::TownViewWndProc
+			);
 
 	void ShowTownViewWindow(int town)
 	{
@@ -353,65 +365,57 @@ public abstract class TownGui extends Town
 		}
 
 		if (w != null) {
-			w.flags4 |= WF_DISABLE_VP_SCROLL;
+			w.flags4 |= Window.WF_DISABLE_VP_SCROLL;
 			ViewPort.AssignWindowViewport(w, 3, 17, 0xFE, 0x56, GetTown(town).xy.tile, 1);
 		}
 	}
 
 	static final Widget _town_directory_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    13,    11,   195,     0,    13, Str.STR_2000_TOWNS,					Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,    13,   196,   207,     0,    13, 0x0,										Str.STR_STICKY_BUTTON),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,     0,    98,    14,    25, Str.STR_SORT_BY_NAME,				Str.STR_SORT_ORDER_TIP),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,    99,   195,    14,    25, Str.STR_SORT_BY_POPULATION,	Str.STR_SORT_ORDER_TIP),
-	new Widget(     Window.WWT_IMGBTN, Window.RESIZE_BOTTOM,    13,     0,   195,    26,   189, 0x0,										Str.STR_200A_TOWN_NAMES_CLICK_ON_NAME),
-	new Widget(  Window.WWT_SCROLLBAR, Window.RESIZE_BOTTOM,    13,   196,   207,    14,   189, 0x0,										Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
-	new Widget(    Window.WWT_PANEL,   	Window.RESIZE_TB,    	13,  		0,   195,    190,  201, 0x0,				Str.STR_NULL),
-	new Widget(  Window.WWT_RESIZEBOX,     Window.RESIZE_TB,    13,   196,   207,   190,   201, 0x0,										Str.STR_Window.RESIZE_BUTTON),
-	//{   WIDGETS_END},
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    13,    11,   195,     0,    13, Str.STR_2000_TOWNS,					Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,    13,   196,   207,     0,    13, 0x0,										Str.STR_STICKY_BUTTON),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,     0,    98,    14,    25, Str.STR_SORT_BY_NAME,				Str.STR_SORT_ORDER_TIP),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,    99,   195,    14,    25, Str.STR_SORT_BY_POPULATION,	Str.STR_SORT_ORDER_TIP),
+			new Widget(     Window.WWT_IMGBTN, Window.RESIZE_BOTTOM,    13,     0,   195,    26,   189, 0x0,										Str.STR_200A_TOWN_NAMES_CLICK_ON_NAME),
+			new Widget(  Window.WWT_SCROLLBAR, Window.RESIZE_BOTTOM,    13,   196,   207,    14,   189, 0x0,										Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+			new Widget(    Window.WWT_PANEL,   	Window.RESIZE_TB,    	13,  		0,   195,    190,  201, 0x0,				Str.STR_NULL),
+			new Widget(  Window.WWT_RESIZEBOX,     Window.RESIZE_TB,    13,   196,   207,   190,   201, 0x0,										Str.STR_RESIZE_BUTTON),
+			//{   WIDGETS_END},
 	};
 
 
-	// used to get a sorted list of the towns
-	static int _num_town_sort;
 
-	static char _bufcache[64];
-	static int _last_town_idx;
-	static int[] _town_sort;
+	static class TownNameSorter implements Comparator<Integer> {
+		public int compare(Integer a, Integer b) 
+		{
+			//char buf1[64];
+			//int val;
+			int r;
+			int [] argv = new int[1];
 
-	static int  TownNameSorter(final void *a, final void *b)
-	{
-		char buf1[64];
-		int val;
-		int r;
-		int argv[1];
+			argv[0] = a;
+			String buf1 = Strings.GetStringWithArgs(Str.STR_TOWN, argv);
 
-		argv[0] = *(final int*)a;
-		Global.GetStringWithArgs(buf1, Str.STR_TOWN, argv);
+			argv[0] = b;
+			String buf2 = Strings.GetStringWithArgs(Str.STR_TOWN, argv);
 
-		/* If 'b' is the same town as in the last round, use the cached value
-		 *  We do this to speed stuff up ('b' is called with the same value a lot of
-		*  times after eachother) */
-		val = *(final int*)b;
-		if (val != _last_town_idx) {
-			_last_town_idx = val;
-			argv[0] = val;
-			Global.GetStringWithArgs(_bufcache, Str.STR_TOWN, argv);
+			r = buf1.compareTo(buf2);
+			if(0 != (_town_sort_order & 1)) r = -r;
+			return r;
 		}
-
-		r = strcmp(buf1, _bufcache);
-		if (_town_sort_order & 1) r = -r;
-		return r;
 	}
 
-	static int  TownPopSorter(final void *a, final void *b)
-	{
-		final Town ta = GetTown(*(final int*)a);
-		final Town tb = GetTown(*(final int*)b);
-		int r = ta.population - tb.population;
-		if (_town_sort_order & 1) r = -r;
-		return r;
+
+	static class TownPopSorter implements Comparator<Integer> {
+		public int compare(Integer a, Integer b) {
+			final Town ta = GetTown(a);
+			final Town tb = GetTown(b);
+			int r = ta.population - tb.population;
+			if(0 !=  (_town_sort_order & 1)) r = -r;
+			return r;
+		}
 	}
+
 
 	static void MakeSortedTownList()
 	{
@@ -420,7 +424,7 @@ public abstract class TownGui extends Town
 
 		/* Create array for sorting */
 		//_town_sort = realloc(_town_sort, GetTownPoolSize() * sizeof(_town_sort[0]));
-		_town_sort = new int[GetTownPoolSize()];
+		_town_sort = new Integer[GetTownPoolSize()];
 		if (_town_sort == null)
 			Global.error("Could not allocate memory for the town-sorting-list");
 
@@ -432,10 +436,12 @@ public abstract class TownGui extends Town
 
 		_num_town_sort = n;
 
-		_last_town_idx = 0; // used for "cache"
-		qsort(_town_sort, n, sizeof(_town_sort[0]), _town_sort_order & 2 ? TownPopSorter : TownNameSorter);
+		//_last_town_idx = 0; // used for "cache"
+		//qsort(_town_sort, n, sizeof(_town_sort[0]), _town_sort_order & 2 ? TownPopSorter : TownNameSorter);
+		Comparator<Integer> sorter = (0 != (_town_sort_order & 2)) ? new TownPopSorter() : new TownNameSorter();
+		Arrays.sort(_town_sort, sorter );
 
-		DEBUG_misc( 1, "Resorting Towns list...");
+		Global.DEBUG_misc( 1, "Resorting Towns list...");
 	}
 
 
@@ -451,7 +457,7 @@ public abstract class TownGui extends Town
 			SetVScrollCount(w, _num_town_sort);
 
 			w.DrawWindowWidgets();
-			Gfx.DoDrawString((_town_sort_order & 1) != 0 ? DOWNARROW : UPARROW, (_town_sort_order <= 1) ? 88 : 187, 15, 0x10);
+			Gfx.DoDrawString((_town_sort_order & 1) != 0 ? Gfx.DOWNARROW : Gfx.UPARROW, (_town_sort_order <= 1) ? 88 : 187, 15, 0x10);
 
 			{
 				final Town t;
@@ -504,7 +510,7 @@ public abstract class TownGui extends Town
 					final Town t = GetTown(_town_sort[id_v]);
 					assert(t.xy != null);
 
-					ScrollMainWindowToTile(t.xy);
+					ViewPort.ScrollMainWindowToTile(t.xy);
 				}
 			}	break;
 			}
@@ -521,12 +527,12 @@ public abstract class TownGui extends Town
 	}
 
 	static final WindowDesc _town_directory_desc = new WindowDesc(
-		-1, -1, 208, 202,
-		Window.WC_TOWN_DIRECTORY,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
-		_town_directory_widgets,
-		TownGui::TownDirectoryWndProc
-	);
+			-1, -1, 208, 202,
+			Window.WC_TOWN_DIRECTORY,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
+			_town_directory_widgets,
+			TownGui::TownDirectoryWndProc
+			);
 
 
 	void ShowTownDirectory()
@@ -539,7 +545,7 @@ public abstract class TownGui extends Town
 			w.resize.height = w.height - 10 * 6; // minimum of 10 items in the list, each item 10 high
 		}
 	}
-	
-	
-	
+
+
+
 }

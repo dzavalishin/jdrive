@@ -466,6 +466,9 @@ public class Global {
 		return Strings.GetString(string);
 	}
 
+	static Town _cleared_town = null;
+	static int _cleared_town_rating;
+
 
 
 

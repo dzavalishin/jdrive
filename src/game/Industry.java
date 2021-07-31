@@ -2360,7 +2360,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			break;
 			case 6:
 				i = GetIndustry(w.window_number);
-				ScrollMainWindowToTile(i.xy + TileDiffXY(1, 1));
+				ViewPort.ScrollMainWindowToTile(i.xy + TileDiffXY(1, 1));
 				break;
 			}
 		}
@@ -2633,7 +2633,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				p = y + w.vscroll.pos;
 				if (p < _industry_sort.length) {
 					c = GetIndustry(_industry_sort[p]);
-					ScrollMainWindowToTile(c.xy);
+					ViewPort.ScrollMainWindowToTile(c.xy);
 				}
 			} break;
 			}

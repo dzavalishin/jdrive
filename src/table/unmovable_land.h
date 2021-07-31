@@ -1,3 +1,4 @@
+#if 0
 /* $Id: unmovable_land.h 2702 2005-07-24 15:56:31Z celestar $ */
 
 #define TILE_SEQ_END() { 0x80, 0, 0, 0, 0, 0, 0 }

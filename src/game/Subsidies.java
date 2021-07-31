@@ -106,7 +106,7 @@ public class Subsidies {
 			} else {
 				xy = GetIndustry(offs).xy;
 			}
-			ScrollMainWindowToTile(xy);
+			ViewPort.ScrollMainWindowToTile(xy);
 		}
 		 */
 	}

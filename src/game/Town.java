@@ -272,6 +272,10 @@ public class Town extends TownTables implements IPoolItem
 
 	// Local
 	private static int _grow_town_result;
+	protected static int _town_sort_order;
+	protected static boolean _town_sort_dirty;
+	private static int _cur_town_iter;
+	private static int _cur_town_ctr;
 
 
 
@@ -287,13 +291,6 @@ public class Town extends TownTables implements IPoolItem
 			Town::TownDrawHouseLift
 	};
 
-	protected static int _town_sort_order;
-	protected static boolean _town_sort_dirty;
-	private static int _cleared_town_rating;
-	private static int _cur_town_iter;
-	private static Town _cleared_town = null;
-
-	private static int _cur_town_ctr;
 
 
 	static void DrawTile_Town(TileInfo ti)
@@ -568,8 +565,8 @@ public class Town extends TownTables implements IPoolItem
 		cost = Global._price.remove_house * _housetype_remove_cost[house] >> 8;
 
 			rating = _housetype_remove_ratingmod[house];
-			_cleared_town_rating += rating;
-			_cleared_town = t = GetTown(tile.getMap().m2);
+			Global._cleared_town_rating += rating;
+			Global._cleared_town = t = GetTown(tile.getMap().m2);
 
 			if (Global._current_player.id < Global.MAX_PLAYERS) {
 				if (rating > t.ratings[Global._current_player.id] 
@@ -1322,7 +1319,7 @@ public class Town extends TownTables implements IPoolItem
 	static int CmdBuildTown(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
-		TileInfo ti;
+		TileInfo ti = new TileInfo();
 		Town t;
 		int [] townnameparts = { 0 };
 
@@ -1940,7 +1937,7 @@ public class Town extends TownTables implements IPoolItem
 	public void TownActionBuildStatue( /*Town t,*/ int action)
 	{
 		TileIndex tile = xy;
-		final TileIndexDiffC p;
+		//final TileIndexDiffC p;
 
 		statues = BitOps.RETSETBIT(statues, Global._current_player.id);
 
@@ -2031,7 +2028,7 @@ public class Town extends TownTables implements IPoolItem
 
 		t = GetTown(p1);
 
-		if (!BitOps.HASBIT(GetMaskOfTownActions(null, Global._current_player, t), p2)) return Cmd.CMD_ERROR;
+		if (!BitOps.HASBIT(TownGui.GetMaskOfTownActions(null, Global._current_player, t), p2)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 
@@ -2055,7 +2052,7 @@ public class Town extends TownTables implements IPoolItem
 
 	static void UpdateTownGrowRate(Town t)
 	{
-		int n;
+		
 		//Station st;
 		int m;
 		//Player p;
@@ -2069,13 +2066,13 @@ public class Town extends TownTables implements IPoolItem
 			}
 		});
 
-		n = 0;
+		int [] n = { 0 };
 		//FOR_ALL_STATIONS(st) 
 		Station.forEach( (st) ->
 		{
 			if (Map.DistanceSquare(st.xy, t.xy) <= t.radius[0]) {
 				if (st.time_since_load <= 20 || st.time_since_unload <= 20) {
-					n++;
+					n[0]++;
 					if (st.owner.id < Global.MAX_PLAYERS && t.ratings[st.owner.id] <= 1000-12)
 						t.ratings[st.owner.id] += 12;
 				} else {
@@ -2088,14 +2085,14 @@ public class Town extends TownTables implements IPoolItem
 		t.flags12 &= ~1;
 
 		if (t.fund_buildings_months != 0) {
-			m = _grow_count_values1[Math.min(n, 5)];
+			m = _grow_count_values1[Math.min(n[0], 5)];
 			t.fund_buildings_months--;
-		} else if (n == 0) {
+		} else if (n[0] == 0) {
 			m = 160;
 			if (!BitOps.CHANCE16(1, 12))
 				return;
 		} else {
-			m = _grow_count_values2[Math.min(n, 5) - 1];
+			m = _grow_count_values2[Math.min(n[0], 5) - 1];
 		}
 
 		if (GameOptions._opt.landscape == Landscape.LT_HILLY) {
@@ -2167,8 +2164,8 @@ public class Town extends TownTables implements IPoolItem
 	static Town ClosestTownFromTile(TileIndex tile, int threshold)
 	{
 		//Town t;
-		int dist, best = threshold;
-		Town best_town = null;
+		int [] best = { threshold };
+		Town [] best_town = { null };
 
 		// XXX - Fix this so for a given tiletype the owner of the type is in the same variable
 		if (tile.IsTileType( TileTypes.MP_HOUSE) || (
@@ -2181,15 +2178,15 @@ public class Town extends TownTables implements IPoolItem
 		Town.forEach( (t) ->
 		{
 			if (t.xy != null) {
-				dist = Map.DistanceManhattan(tile, t.xy);
-				if (dist < best) {
-					best = dist;
-					best_town = t;
+				int dist = Map.DistanceManhattan(tile, t.xy);
+				if (dist < best[0]) {
+					best[0] = dist;
+					best_town[0] = t;
 				}
 			}
 		});
 
-		return best_town;
+		return best_town[0];
 	}
 
 	static void ChangeTownRating(Town t, int add, int max)
