@@ -572,7 +572,16 @@ public class Global {
 	}
 
 
-
+	void SetDate(int date)
+	{
+		YearMonthDay ymd = new YearMonthDay();
+		GameDate.ConvertDayToYMD(ymd, _date = date);
+		_cur_year = ymd.year;
+		_cur_month = ymd.month;
+	/*#ifdef ENABLE_NETWORK
+		_network_last_advertise_date = 0;
+	#endif /* ENABLE_NETWORK */
+	}
 
 
 

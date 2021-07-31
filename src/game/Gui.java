@@ -1094,7 +1094,7 @@ public class Gui
 			w.HandleButtonClick(6);
 			w.InvalidateWidget(5);
 
-			if (Global._date > MinDate) SetDate(ConvertYMDToDay(Global._cur_year - 1, 0, 1));
+			if (Global._date > MinDate) Global.SetDate(ConvertYMDToDay(Global._cur_year - 1, 0, 1));
 		}
 		_left_button_clicked = false;
 	}
@@ -1106,7 +1106,7 @@ public class Gui
 			w.HandleButtonClick(7);
 			w.InvalidateWidget(5);
 
-			if (Global._date < MaxDate) SetDate(ConvertYMDToDay(Global._cur_year + 1, 0, 1));
+			if (Global._date < MaxDate) Global.SetDate(ConvertYMDToDay(Global._cur_year + 1, 0, 1));
 		}
 		_left_button_clicked = false;
 	}

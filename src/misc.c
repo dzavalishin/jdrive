@@ -74,7 +74,7 @@ uint InteractiveRandomRange(uint max)
 {
 	return GB(InteractiveRandom(), 0, 16) * max >> 16;
 }
-*/
+
 void SetDate(uint date)
 {
 	YearMonthDay ymd;
@@ -85,6 +85,7 @@ void SetDate(uint date)
 	_network_last_advertise_date = 0;
 #endif /* ENABLE_NETWORK */
 }
+*/
 
 void InitializeVehicles(void);
 void InitializeWaypoints(void);

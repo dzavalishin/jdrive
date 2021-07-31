@@ -1057,7 +1057,7 @@ private static void show_cargo(ctype) {
 		w.vscroll2.cap = w.vscroll.cap;   // these two are always the same
 	}
 
-	void InitializeGUI()
+	static void InitializeGUI()
 	{
 		//memset(&_sorting, 0, sizeof(_sorting));
 	}

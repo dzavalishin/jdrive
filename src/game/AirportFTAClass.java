@@ -55,7 +55,7 @@ public class AirportFTAClass extends Airport // bring in constants
 
 
 
-	void InitializeAirports()
+	static void InitializeAirports()
 	{
 		// country airport
 		CountryAirport = new AirportFTAClass(
@@ -120,7 +120,7 @@ public class AirportFTAClass extends Airport // bring in constants
 		Oilrig = Heliport;  // exactly the same structure for heliport/oilrig, so share state machine
 	}
 
-	void UnInitializeAirports()
+	static void UnInitializeAirports()
 	{
 		CountryAirport.AirportFTAClass_Destructor();
 		CityAirport.AirportFTAClass_Destructor();

@@ -70,7 +70,7 @@ public class GenerateWorld {
 		{
 			int starting = ConvertIntDate(Global._patches.starting_date);
 			if ( starting == -1) starting = 10958;
-			SetDate(starting);
+			Global.SetDate(starting);
 		}
 
 		InitializeVehicles();

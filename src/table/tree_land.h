@@ -1,5 +1,6 @@
-/* $Id: tree_land.h 3196 2005-11-16 12:01:46Z tron $ */
+#if 0
 
+/* $Id: tree_land.h 3196 2005-11-16 12:01:46Z tron $ */
 #ifndef TREE_LAND_H
 #define TREE_LAND_H
 

@@ -111,11 +111,11 @@ public class MiscGui {
 			_land_info_widgets,
 			MiscGui::LandInfoWndProc
 			);
-	/*
+
 	static void Place_LandInfo(TileIndex tile)
 	{
 		Player p;
-		static LandInfoData lid  = new LandInfoData();
+		LandInfoData lid = new LandInfoData();
 		Window w;
 		long old_money;
 
@@ -125,26 +125,27 @@ public class MiscGui {
 		w.as_void_d().data = lid;
 
 		lid.tile = tile;
-		lid.town = ClosestTownFromTile(tile, Global._patches.dist_local_authority);
+		lid.town = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 
-		p = Player.GetPlayer(Global._local_player < Global.MAX_PLAYERS ? Global._local_player : 0);
+		p = Player.GetPlayer(Global._local_player.id < Global.MAX_PLAYERS ? Global._local_player.id : 0);
 
 		old_money = p.money64;
 		p.money64 = p.player_money = 0x7fffffff;
 		lid.costclear = Cmd.DoCommandByTile(tile, 0, 0, 0, Cmd.CMD_LANDSCAPE_CLEAR);
 		p.money64 = old_money;
-		UpdatePlayerMoney32(p);
+		p.UpdatePlayerMoney32();
 
 		// Becuase build_date is not set yet in every TileDesc, we make sure it is empty
 		lid.td.build_date = 0;
 
-		GetAcceptedCargo(tile, lid.ac);
-		GetTileDesc(tile, lid.td);
+		lid.ac = Landscape.GetAcceptedCargo(tile);
+		lid.td = Landscape.GetTileDesc(tile);
 
 		//#if defined(_DEBUG)
 		Global.DEBUG_misc( 0, "TILE: %#x (%i,%i)", tile, tile.TileX(), tile.TileY());
 		Global.DEBUG_misc( 0, "TILE: %d ", tile);
-		Global.DEBUG_misc( 0, "_type_height = %#x", tile.getMap().type_height);
+		Global.DEBUG_misc( 0, "type         = %#x", tile.getMap().type);
+		Global.DEBUG_misc( 0, "height       = %#x", tile.getMap().height);
 		Global.DEBUG_misc( 0, "m1           = %#x", tile.getMap().m1);
 		Global.DEBUG_misc( 0, "m2           = %#x", tile.getMap().m2);
 		Global.DEBUG_misc( 0, "m3           = %#x", tile.getMap().m3);
@@ -152,7 +153,7 @@ public class MiscGui {
 		Global.DEBUG_misc( 0, "m5           = %#x", tile.getMap().m5);
 		//#endif
 	}
-	*/
+
 	void PlaceLandBlockInfo()
 	{
 		if (Hal._cursor.sprite.id == Sprite.SPR_CURSOR_QUERY) {
@@ -285,8 +286,8 @@ public class MiscGui {
 
 			w.DrawWindowWidgets();
 
-			w.as_tree_d().base = i = _tree_base_by_landscape[GameOptions._opt.landscape];
-			w.as_tree_d().count = count = _tree_count_by_landscape[GameOptions._opt.landscape];
+			w.as_tree_d().base = i = Tree._tree_base_by_landscape[GameOptions._opt.landscape];
+			w.as_tree_d().count = count = Tree._tree_count_by_landscape[GameOptions._opt.landscape];
 
 			x = 18;
 			y = 54;
@@ -1698,8 +1699,8 @@ public class MiscGui {
 		if ((ymd.year == 0 && p2 == -1) || (ymd.year == 170 && p2 == 1)) return Global._cur_year;
 
 		Global.SetDate(GameDate.ConvertYMDToDay(Global._cur_year + p2, ymd.month, ymd.day));
-		EnginesMonthlyLoop();
-		Window.SetWindowDirty(Window.FindWindowById(Window.WC_STATUS_BAR, 0));
+		Engine.EnginesMonthlyLoop();
+		Window.FindWindowById(Window.WC_STATUS_BAR, 0).SetWindowDirty();
 		return Global._cur_year;
 	}
 
@@ -1770,7 +1771,7 @@ public class MiscGui {
 			//{   WIDGETS_END},
 	};
 
-	extern void DrawPlayerIcon(int p, int x, int y);
+	//extern void DrawPlayerIcon(int p, int x, int y);
 
 	static void CheatsWndProc(Window w, WindowEvent e)
 	{

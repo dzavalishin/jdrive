@@ -1,7 +1,8 @@
 package game;
+import game.tables.TreeTables;
 import game.util.BitOps;
 
-public class Tree {
+public class Tree  extends TreeTables {
 
 	private static byte _trees_tick_ctr; // TODO usage?
 	

@@ -1,4 +1,5 @@
 package game;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -6,6 +7,7 @@ import java.io.RandomAccessFile;
 import game.ai.Ai;
 import game.util.BitOps;
 import game.util.FileIO;
+import game.util.wcustom.vp_d;
 
 public class Main {
 
@@ -183,7 +185,7 @@ public class Main {
 		Gui.SetupColorsAndInitialWindow();
 
 		// Generate a world.
-		filename = String.format( "%sopntitle.dat",  _path.data_dir );
+		filename = String.format( "%sopntitle.dat",  Global._path.data_dir );
 		if (SaveOrLoad(filename, SL_LOAD) != SL_OK) 
 		{
 			/*#if defined SECOND_DATA_DIR
@@ -219,7 +221,7 @@ public class Main {
 
 		Global._game_mode = GameModes.GM_MENU;
 		Global._switch_mode = SwitchModes.SM_MENU;
-		Global._switch_mode_errorstr = INVALID_STRING_ID;
+		Global._switch_mode_errorstr = Str.INVALID_STRING_ID;
 		Global._dedicated_forks = false;
 		dedicated = false;
 		Global._config_file = null;
@@ -274,7 +276,7 @@ public class Main {
 					Global._switch_mode = SwitchModes.SM_NEWGAME;
 				break;
 			case 'G':
-				_random_seeds[0][0] = Integer.parseInt(mgo.opt);
+				Global._random_seeds[0][0] = Integer.parseInt(mgo.opt);
 				break;
 			case 'p': {
 				int netp = Integer.parseInt(mgo.opt);
@@ -327,7 +329,7 @@ public class Main {
 		InitializeScreenshotFormats();
 
 		// initialize airport state machines
-		InitializeAirports();
+		AirportFTAClass.InitializeAirports();
 
 		/* initialize all variables that are allocated dynamically */
 		InitializeDynamicVariables();
@@ -363,7 +365,7 @@ public class Main {
 
 		// initialize the ingame console
 		Console.IConsoleInit();
-		Gui.InitializeGUI();
+		VehicleGui.InitializeGUI();
 		Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
 		GenerateWorld.GenerateWorld(1, 64, 64); // Make the viewport initialization happy
@@ -410,7 +412,7 @@ public class Main {
 		SaveToHighScore();
 
 		// uninitialize airport state machines
-		UnInitializeAirports();
+		AirportFTAClass.UnInitializeAirports();
 
 		/* uninitialize variables that are allocated dynamic */
 		UnInitializeDynamicVariables();
@@ -497,11 +499,11 @@ public class Main {
 			Global._local_player = PlayerID.get( Owner.OWNER_SPECTATOR);
 		} else {
 			// Create a single player
-			DoStartupNewPlayer(false);
+			Player.DoStartupNewPlayer(false);
 
 			Global._local_player = PlayerID.get(0); 
 			Global._current_player = Global._local_player;
-			Cmd.DoCommandP(0, (Global._patches.autorenew ? (1 << 15) : 0 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
+			Cmd.DoCommandP(null, (Global._patches.autorenew ? (1 << 15) : 0 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 		}
 
 		Global.hal.MarkWholeScreenDirty();
@@ -562,18 +564,18 @@ public class Main {
 		// Load game
 		if (SaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode) != SL_OK) {
 			LoadIntroGame();
-			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+			Global.ShowErrorMessage(Str.INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 		}
 
 		GameOptions._opt_ptr = GameOptions._opt;
 		//memcpy(&_opt_ptr.diff, &_opt_newgame.diff, sizeof(GameDifficulty));
-		_opt_ptr.diff = _opt_newgame.diff.makeClone();
+		GameOptions._opt_ptr.diff = GameOptions._opt_newgame.diff.makeClone();
 		GameOptions._opt.diff_level = GameOptions._opt_newgame.diff_level;
 
 		// Inititalize data
-		StartupPlayers();
-		StartupEngines();
-		StartupDisasters();
+		Player.StartupPlayers();
+		Engine.StartupEngines();
+		// TODO StartupDisasters();
 
 		Global._local_player = null;
 		Global._current_player = Global._local_player;
@@ -661,8 +663,8 @@ public class Main {
 				LoadIntroGame();
 				Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			} else {
-				Global._local_player = 0;
-				DoCommandP(0, 0, 0, null, CMD_PAUSE); // decrease pause counter (was increased from opening load dialog)
+				Global._local_player = null;
+				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE); // decrease pause counter (was increased from opening load dialog)
 				/*
 				if (_network_server)
 					snprintf(_network_game_info.map_name, NETWORK_NAME_LENGTH, "%s (Loaded game)", _file_to_saveload.title);
@@ -673,7 +675,8 @@ public class Main {
 
 		case SM_LOAD_SCENARIO: { /* Load scenario from scenario editor */
 			if (SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GameModes.GM_EDITOR)) {
-				PlayerID i;
+				//PlayerID 
+				int i;
 
 				GameOptions._opt_ptr = GameOptions._opt;
 
@@ -681,14 +684,14 @@ public class Main {
 				Global._generating_world = true;
 				// delete all players.
 				for (i = 0; i != Global.MAX_PLAYERS; i++) {
-					ChangeOwnershipOfPlayerItems(i, Owner.OWNER_SPECTATOR);
+					Economy.ChangeOwnershipOfPlayerItems( PlayerID.get(i), PlayerID.get(Owner.OWNER_SPECTATOR));
 					Global._players[i].is_active = false;
 				}
 				Global._generating_world = false;
 				// delete all stations owned by a player
 				Station.DeleteAllPlayerStations();
 			} else {
-				Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+				Global.ShowErrorMessage(Str.INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			}
 			break;
 		}
@@ -700,7 +703,7 @@ public class Main {
 
 		case SM_SAVE: /* Save game */
 			if (SaveOrLoad(_file_to_saveload.name, SL_SAVE) != SL_OK) {
-				Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
+				Global.ShowErrorMessage(Str.INVALID_STRING_ID, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
 			} else {
 				Window.DeleteWindowById(Window.WC_SAVELOAD, 0);
 			}
@@ -714,8 +717,8 @@ public class Main {
 			break;
 		}
 
-		if (_switch_mode_errorstr != INVALID_STRING_ID)
-			Global.ShowErrorMessage(INVALID_STRING_ID,_switch_mode_errorstr,0,0);
+		if (Global._switch_mode_errorstr != Str.INVALID_STRING_ID)
+			Global.ShowErrorMessage(Str.INVALID_STRING_ID,Global._switch_mode_errorstr,0,0);
 	}
 
 
@@ -773,20 +776,26 @@ public class Main {
 		if (Global._patches.keep_all_autosave && Global._local_player.id != Owner.OWNER_SPECTATOR) {
 			final Player p = Global._local_player.GetPlayer();
 			String s;
-			sprintf(buf, "%s%s", _path.autosave_dir, PATHSEP);
-
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
-			Global.SetDParam(2, _date);
-			s = GetString(buf + strlen(_path.autosave_dir) + strlen(PATHSEP), Str.STR_4004);
-			strcpy(s, ".sav");
-		} else { /* generate a savegame name and number according to _patches.max_num_autosaves */
-			sprintf(buf, "%s%sautosave%d.sav", _path.autosave_dir, PATHSEP, _autosave_ctr);
+			Global.SetDParam(2, Global._date);
+			//s = GetString(buf + strlen(_path.autosave_dir) + strlen(PATHSEP), Str.STR_4004);
+			//strcpy(s, ".sav");
+			s = Global.GetString(Str.STR_4004);
 
-			_autosave_ctr++;
-			if (_autosave_ctr >= Global._patches.max_num_autosaves) {
+			
+			//sprintf(buf, "%s%s", Global._path.autosave_dir, PATHSEP);
+			buf = String.format("%s%s%s.sav", Global._path.autosave_dir, File.pathSeparator, s);
+
+			
+		} else { /* generate a savegame name and number according to _patches.max_num_autosaves */
+			//sprintf(buf, "%s%sautosave%d.sav", _path.autosave_dir, PATHSEP, _autosave_ctr);
+			buf = String.format("%s%sautosave%d.sav", Global._path.autosave_dir, File.pathSeparator, Global._autosave_ctr);
+
+			Global._autosave_ctr++;
+			if (Global._autosave_ctr >= Global._patches.max_num_autosaves) {
 				// we reached the limit for numbers of autosaves. We will start over
-				_autosave_ctr = 0;
+				Global._autosave_ctr = 0;
 			}
 		}
 
@@ -801,8 +810,8 @@ public class Main {
 			Window w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 			assert(w != null);
 
-			WP(w,vp_d).scrollpos_x += x << w.viewport.zoom;
-			WP(w,vp_d).scrollpos_y += y << w.viewport.zoom;
+			w.as_vp_d().scrollpos_x += x << w.viewport.zoom;
+			w.as_vp_d().scrollpos_y += y << w.viewport.zoom;
 		}
 	}
 
@@ -1050,7 +1059,7 @@ public class Main {
 		GfxInit.GfxLoadSprites();
 
 		// Update current year
-		SetDate(_date);
+		Global.SetDate(Global._date);
 
 		// reinit the landscape variables (landscape might have changed)
 		InitializeLandscapeVariables(true);
@@ -1085,8 +1094,8 @@ public class Main {
 
 		w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 
-		//WP(w,vp_d).scrollpos_x = _saved_scrollpos_x;
-		//WP(w,vp_d).scrollpos_y = _saved_scrollpos_y;
+		//w.as_vp_d().scrollpos_x = _saved_scrollpos_x;
+		//w.as_vp_d().scrollpos_y = _saved_scrollpos_y;
 
 		((vp_d)w.custom).scrollpos_x = _saved_scrollpos_x;
 		((vp_d)w.custom).scrollpos_y = _saved_scrollpos_y;
@@ -1109,7 +1118,7 @@ public class Main {
 		// 1 exeption: network-games. Those can have 0 players
 		//   But this exeption is not true for network_servers!
 		if (!Global._players[0].is_active && (!_networking || (_networking && _network_server)))
-			DoStartupNewPlayer(false);
+			Player.DoStartupNewPlayer(false);
 
 		DoZoomInOutWindow(ZOOM_NONE, w); // update button status
 		Global.hal.MarkWholeScreenDirty();
@@ -1239,8 +1248,8 @@ public class Main {
 		}
 		*/
 		//FOR_ALL_PLAYERS(p) 
-		for( Player p: Global._players )
-			p.avail_railtypes = GetPlayerRailtypes(p.index);
+		for( Player pp: Global._players )
+			pp.avail_railtypes = Player.GetPlayerRailtypes(p.index);
 
 		return true;
 	}
