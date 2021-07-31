@@ -1860,7 +1860,7 @@ public class TrainCmd extends TrainTables
 		return 0;
 	}
 
-	void OnTick_Train()
+	static void OnTick_Train()
 	{
 		_age_cargo_skip_counter = (_age_cargo_skip_counter == 0) ? 184 : (_age_cargo_skip_counter - 1);
 	}

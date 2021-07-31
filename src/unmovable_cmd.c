@@ -1,3 +1,5 @@
+#if 0
+
 /* $Id: unmovable_cmd.c 3066 2005-10-19 14:49:46Z tron $ */
 
 #include "stdafx.h"

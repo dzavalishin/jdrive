@@ -31,15 +31,15 @@ public class Landscape extends GenLandTable
 		_tile_type_unmovable_procs;*/
 
 	static final TileTypeProcs _tile_type_procs[] = {
-		_tile_type_clear_procs,
-		_tile_type_rail_procs,
-		_tile_type_road_procs,
+		Clear._tile_type_clear_procs,
+		Rail._tile_type_rail_procs,
+		Road._tile_type_road_procs,
 		Town._tile_type_town_procs,
 		Tree._tile_type_trees_procs,
 		Station._tile_type_station_procs,
 		_tile_type_water_procs,
 		_tile_type_dummy_procs,
-		_tile_type_industry_procs,
+		Industry._tile_type_industry_procs,
 		_tile_type_tunnelbridge_procs,
 		_tile_type_unmovable_procs,
 	};
@@ -413,7 +413,7 @@ public class Landscape extends GenLandTable
 		int tile;
 		int count;
 
-		tile = Global._cur_tileloop_tile;
+		tile = Global._cur_tileloop_tile.tile;
 
 		assert( (tile & ~TILELOOP_ASSERTMASK) == 0);
 		count = (Global.MapSizeX() / TILELOOP_SIZE) * (Global.MapSizeY() / TILELOOP_SIZE);
@@ -435,7 +435,7 @@ public class Landscape extends GenLandTable
 		tile += 9;
 		if(0 != (tile & TILELOOP_CHKMASK) )
 			tile = (tile + Global.MapSizeX()) & TILELOOP_ASSERTMASK;
-		Global._cur_tileloop_tile = tile;
+		Global._cur_tileloop_tile = new TileIndex(tile);
 	}
 
 	static void InitializeLandscape()
@@ -495,9 +495,10 @@ public class Landscape extends GenLandTable
 		int y;
 		int w;
 		int h;
-		static final Sprite template;
 		
-		static final byte[] p;
+		final Sprite template;		
+		final byte[] p;
+		
 		int pi = 0; // p index
 		//TileIndex tile;
 		//Tile tile;
@@ -717,7 +718,7 @@ public class Landscape extends GenLandTable
 		Industry.OnTick_Industry();
 
 		Player.OnTick_Players();
-		OnTick_Train();
+		TrainCmd.OnTick_Train();
 	}
 
 	static TileIndex AdjustTileCoordRandomly(TileIndex a, byte rng)

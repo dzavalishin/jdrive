@@ -849,7 +849,7 @@ public class Clear extends ClearTables {
 		GameOptions._opt.snow_line = (byte) (Global._patches.snow_line_height * 8);
 	}
 
-	final TileTypeProcs _tile_type_clear_procs = new TileTypeProcs(
+	final static TileTypeProcs _tile_type_clear_procs = new TileTypeProcs(
 		Clear::DrawTile_Clear,						/* draw_tile_proc */
 		Clear::GetSlopeZ_Clear,					/* get_slope_z_proc */
 		Clear::ClearTile_Clear,					/* clear_tile_proc */

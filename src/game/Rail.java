@@ -2707,7 +2707,7 @@ public class Rail extends RailTables {
 		Global._last_built_train_depot_tile = 0;
 	}
 
-	final TileTypeProcs _tile_type_rail_procs = new TileTypeProcs(
+	final static TileTypeProcs _tile_type_rail_procs = new TileTypeProcs(
 			Rail::DrawTile_Track,						/* draw_tile_proc */
 			Rail::GetSlopeZ_Track,					/* get_slope_z_proc */
 			Rail::ClearTile_Track,					/* clear_tile_proc */

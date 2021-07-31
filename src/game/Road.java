@@ -1197,7 +1197,7 @@ public class Road
 		Global._last_built_road_depot_tile = 0;
 	}
 
-	final TileTypeProcs _tile_type_road_procs = new TileTypeProcs(
+	final static TileTypeProcs _tile_type_road_procs = new TileTypeProcs(
 		Road::DrawTile_Road,						/* draw_tile_proc */
 		Road::GetSlopeZ_Road,						/* get_slope_z_proc */
 		Road::ClearTile_Road,						/* clear_tile_proc */

@@ -1091,7 +1091,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		}
 	}
 
-	void OnTick_Industry()
+	static void OnTick_Industry()
 	{
 		//Industry i;
 
@@ -1894,7 +1894,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		_industry_sort_dirty = true;
 	}
 
-	final TileTypeProcs _tile_type_industry_procs = new TileTypeProcs(
+	final static TileTypeProcs _tile_type_industry_procs = new TileTypeProcs(
 			Industry::DrawTile_Industry,					/* draw_tile_proc */
 			Industry::GetSlopeZ_Industry,					/* get_slope_z_proc */
 			Industry::ClearTile_Industry,					/* clear_tile_proc */
