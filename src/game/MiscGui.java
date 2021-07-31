@@ -4,6 +4,7 @@ import game.struct.LandInfoData;
 import game.struct.FiosItem;
 
 import game.util.BitOps;
+import game.util.Strings;
 
 public class MiscGui {
 
@@ -15,12 +16,13 @@ public class MiscGui {
 	{
 		if (e.event == WindowEvents.WE_PAINT) {
 			final LandInfoData lid;
-			StringID str;
+			//StringID 
+			int str;
 			int i;
 
 			w.DrawWindowWidgets();
 
-			lid = w.as_void_d().data;
+			lid = (LandInfoData) w.as_void_d().data;
 
 			Global.SetDParam(0, lid.td.dparam[0]);
 			Gfx.DrawStringCentered(140, 16, lid.td.str, 13);
@@ -59,7 +61,7 @@ public class MiscGui {
 				sb.append(Global.GetString(Str.STR_01CE_CARGO_ACCEPTED));
 
 				for (i = 0; i < AcceptedCargo.NUM_CARGO; ++i) {
-					if (lid.ac[i] > 0) {
+					if (lid.ac.ct[i] > 0) {
 						// Add a comma between each item.
 						if (found) {
 							//*p++ = ',';
@@ -69,20 +71,20 @@ public class MiscGui {
 						found = true;
 
 						// If the accepted value is less than 8, show it in 1/8:ths
-						if (lid.ac[i] < 8) {
-							int argv[2];
-							argv[0] = lid.ac[i];
+						if (lid.ac.ct[i] < 8) {
+							int [] argv = new int[2];
+							argv[0] = lid.ac.ct[i];
 							argv[1] = _cargoc.names_s[i];
 							//p = Global.GetStringWithArgs(p, Str.STR_01D1_8, argv);
-							sb.append(Strings.GetStringWithArgs(p, Str.STR_01D1_8, argv));
+							sb.append(Strings.GetStringWithArgs( Str.STR_01D1_8, argv));
 						} else {
 							//p = Global.GetString(p, _cargoc.names_s[i]);
-							sb.append(Global.GetString(p, _cargoc.names_s[i]));
+							sb.append(Global.GetString( _cargoc.names_s[i]));
 						}
 					}
 				}
 
-				if (found) Gfx.DrawStringMultiCenter(140, 76, BindCString(sb.toString()o), 276);
+				if (found) Gfx.DrawStringMultiCenter(140, 76, Strings.BindCString(sb.toString()), 276);
 			}
 
 			if (lid.td.build_date != 0) {
@@ -150,8 +152,8 @@ public class MiscGui {
 	*/
 	void PlaceLandBlockInfo()
 	{
-		if (Hal._cursor.sprite == Sprite.SPR_CURSOR_QUERY) {
-			ResetObjectToPlace();
+		if (Hal._cursor.sprite.id == Sprite.SPR_CURSOR_QUERY) {
+			ViewPort.ResetObjectToPlace();
 		} else {
 			_place_proc = Place_LandInfo;
 			ViewPort.SetObjectToPlace(Sprite.SPR_CURSOR_QUERY, 1, 1, 0);
@@ -203,23 +205,23 @@ public class MiscGui {
 	static void AboutWindowProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_CREATE: /* Set up window counter and start position of scroller */
+		case WE_CREATE: /* Set up window counter and start position of scroller */
 			w.as_scroller_d().counter = 0;
 			w.as_scroller_d().height = w.height - 40;
 			break;
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			int i;
 			int y = w.as_scroller_d().height;
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			// Show original copyright and revision version
 			Gfx.DrawStringCentered(210, 17, Str.STR_00B6_ORIGINAL_COPYRIGHT, 0);
 			Gfx.DrawStringCentered(210, 17 + 10, Str.STR_00B7_VERSION, 0);
 
 			// Show all scrolling credits
-			for (i = 0; i < lengthof(credits); i++) {
+			for (i = 0; i < credits.length; i++) {
 				if (y >= 50 && y < (w.height - 40)) {
-					Gfx.DoGfx.DrawString(credits[i], 10, y, 0x10);
+					Gfx.DoDrawString(credits[i], 10, y, 0x10);
 				}
 				y += 10;
 			}
@@ -227,10 +229,10 @@ public class MiscGui {
 			// If the last text has scrolled start anew from the start
 			if (y < 50) w.as_scroller_d().height = w.height - 40;
 
-			Gfx.DoGfx.DrawStringCentered(210, w.height - 25, "Website: http://www.openttd.org", 16);
+			Gfx.DoDrawStringCentered(210, w.height - 25, "Website: http://www.openttd.org", 16);
 			Gfx.DrawStringCentered(210, w.height - 15, Str.STR_00BA_COPYRIGHT_OPENTTD, 0);
 		}	break;
-		case WindowEvents.WE_MOUSELOOP: /* Timer to scroll the text and adjust the new top */
+		case WE_MOUSELOOP: /* Timer to scroll the text and adjust the new top */
 			if (w.as_scroller_d().counter++ % 3 == 0) {
 				w.as_scroller_d().height--;
 				w.SetWindowDirty();
@@ -274,11 +276,11 @@ public class MiscGui {
 	static void BuildTreesWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			int x,y;
 			int i, count;
 
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			WP(w,tree_d).base = i = _tree_base_by_landscape[GameOptions._opt.landscape];
 			WP(w,tree_d).count = count = _tree_count_by_landscape[GameOptions._opt.landscape];

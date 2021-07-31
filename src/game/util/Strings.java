@@ -235,7 +235,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	// These 8 bits will only be set when FormatString wants to print
 	// the string in a different case. No one else except FormatString
 	// should set those bits.
-	static String GetStringWithArgs(int string, Object ... argv )
+	public static String GetStringWithArgs(int string, Object ... argv )
 	{
 		//StringBuilder buffr = new StringBuilder();
 		int index = BitOps.GB(string,  0, 11);
@@ -295,7 +295,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	// The duration of the bound string is valid only until the next GetString,
 	// so be careful.
 	//static StringID BindCString(final String str)
-	static int BindCString(final String str)
+	public static int BindCString(final String str)
 	{
 		int idx = (++_bind_index) & (NUM_BOUND_STRINGS - 1);
 		_bound_strings[idx] = str;
