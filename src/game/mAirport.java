@@ -317,7 +317,7 @@ public class mAirport
 	}
 
 	// same as above but isnt as stringent
-	void MA_EditorAddAirport(Town tn)
+	static void MA_EditorAddAirport(Town tn)
 	{
 		//Station st;
 		TileIndex tl;

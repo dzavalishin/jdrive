@@ -287,8 +287,8 @@ public class Town extends TownTables implements IPoolItem
 			Town::TownDrawHouseLift
 	};
 
-	private static int _town_sort_order;
-	private static boolean _town_sort_dirty;
+	protected static int _town_sort_order;
+	protected static boolean _town_sort_dirty;
 	private static int _cleared_town_rating;
 	private static int _cur_town_iter;
 	private static Town _cleared_town = null;

@@ -135,7 +135,7 @@ enum {
 */
 bool CheckforTownRating(TileIndex tile, uint32 flags, Town *t, byte type);
 
-VARDEF uint16 *_town_sort;
+//VARDEF uint16 *_town_sort;
 
 extern MemoryPool _town_pool;
 
