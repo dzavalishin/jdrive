@@ -101,8 +101,8 @@ typedef struct {
 	char name[32];
 } BackuppedOrders;
 */
-VARDEF TileIndex _backup_orders_tile;
-VARDEF BackuppedOrders _backup_orders_data[1];
+//VARDEF TileIndex _backup_orders_tile;
+//VARDEF BackuppedOrders _backup_orders_data[1];
 
 //extern MemoryPool _order_pool;
 

@@ -1272,8 +1272,9 @@ public class Vehicle implements IPoolItem
 		_hash.clear();
 	}
 
-	Vehicle GetLastVehicleInChain(Vehicle v)
+	public Vehicle GetLastVehicleInChain()	
 	{
+		Vehicle v = this;
 		while (v.next != null) v = v.next;
 		return v;
 	}
@@ -3071,7 +3072,7 @@ public class Vehicle implements IPoolItem
 	 * Restore vehicle orders that are backupped via BackupVehicleOrders
 	 *
 	 */
-	void RestoreVehicleOrders(final Vehicle  v, final BackuppedOrders bak)
+	static void RestoreVehicleOrders(final Vehicle  v, final BackuppedOrders bak)
 	{
 		//int i;
 

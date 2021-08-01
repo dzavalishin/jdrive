@@ -129,6 +129,8 @@ public class Global {
 	public static int 			_aircraft_refit_capacity;
 	public static int 			_cmd_build_rail_veh_score;
 
+	public static TileIndex _backup_orders_tile;
+	public static BackuppedOrders [] _backup_orders_data = new BackuppedOrders[1];
 
 	/* Access Vehicle Data */
 	//#include "table/engines.h"
