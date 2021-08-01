@@ -5,6 +5,7 @@ import java.util.Comparator;
 import game.struct.FindRoadToChooseData;
 import game.struct.OvertakeData;
 import game.struct.RoadFindDepotData;
+import game.struct.RoadVehFindData;
 import game.tables.RoadVehCmdTables;
 
 import game.util.BitOps;
@@ -16,15 +17,15 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	//void ShowRoadVehViewWindow(Vehicle v);
 
 
-	int GetRoadVehImage(final Vehicle v, byte direction)
+	static int GetRoadVehImage(final Vehicle v, int direction)
 	{
 		int img = v.spritenum;
 		int image;
 
-		if (is_custom_sprite(img)) {
+		if (Sprite.is_custom_sprite(img)) {
 			image = GetCustomVehicleSprite(v, direction);
-			if (image) return image;
-			img = orig_road_vehicle_info[v.engine_type - ROAD_ENGINES_INDEX].image_index;
+			if (image != 0) return image;
+			img = orig_road_vehicle_info[v.engine_type - Global.ROAD_ENGINES_INDEX].image_index;
 		}
 
 		image = direction + _roadveh_images[img];
@@ -35,9 +36,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	void DrawRoadVehEngine(int x, int y, EngineID engine, int image_ormod)
 	{
-		int spritenum = RoadVehInfo(engine).image_index;
+		int spritenum = Engine.RoadVehInfo(engine.id).image_index;
 
-		if (is_custom_sprite(spritenum)) {
+		if (Sprite.is_custom_sprite(spritenum)) {
 			int sprite = GetCustomVehicleIcon(engine, 6);
 
 			if (sprite) {
@@ -51,7 +52,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	int EstimateRoadVehCost(EngineID engine_type)
 	{
-		return ((Global._price.roadveh_base >> 3) * RoadVehInfo(engine_type).base_cost) >> 5;
+		return ((Global._price.roadveh_base >> 3) * Engine.RoadVehInfo(engine_type.id).base_cost) >> 5;
 	}
 
 	/** Build a road vehicle.
@@ -67,7 +68,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		Engine e;
 
-		if (!IsEngineBuildable(p1, Vehicle.VEH_Road)) return Cmd.CMD_ERROR;
+		if (!Engine.IsEngineBuildable(p1, Vehicle.VEH_Road)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
@@ -104,7 +105,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			v.z_height = 6;
 
 			v.road.state = 254;
-			v.vehstatus = VS_HIDDEN|VS_STOPPED|VS_DEFPAL;
+			v.vehstatus = Vehicle.VS_HIDDEN|Vehicle.VS_STOPPED|Vehicle.VS_DEFPAL;
 
 			v.spritenum = rvi.image_index;
 			v.cargo_type = rvi.cargo_type;
@@ -173,7 +174,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (v.type != Vehicle.VEH_Road || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		if (flags & Cmd.DC_EXEC) {
-			v.vehstatus ^= VS_STOPPED;
+			v.vehstatus ^= Vehicle.VS_STOPPED;
 			InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile);
 		}
@@ -181,7 +182,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		return 0;
 	}
 
-	void ClearSlot(Vehicle v, RoadStop rs)
+	static void ClearSlot(Vehicle v, RoadStop rs)
 	{
 		Global.DEBUG_ms( 3, "Multistop: Clearing slot %d at 0x%x", v.road.slotindex, rs.xy);
 		v.road.slot = null;
@@ -204,13 +205,13 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		if (!IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
 
-		v = GetVehicle(p1);
+		v = Vehicle.GetVehicle(p1);
 
 		if (v.type != Vehicle.VEH_Road || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		if (!IsTileDepotType(v.tile, TRANSPORT_ROAD) || v.road.state != 254 || !(v.vehstatus&VS_STOPPED))
+		if (!IsTileDepotType(v.tile, TRANSPORT_ROAD) || v.road.state != 254 || !(v.vehstatus&Vehicle.VS_STOPPED))
 			return_cmd_error(Str.STR_9013_MUST_BE_STOPPED_INSIDE);
 
 		if (flags & Cmd.DC_EXEC) {
@@ -232,11 +233,11 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	static boolean EnumRoadSignalFindDepot(TileIndex tile, RoadFindDepotData rfdd, int track, int length, Object state)
 	{
-		tile += TileOffsByDir(_road_pf_directions[track]);
+		tile = tile.iadd( TileIndex.TileOffsByDir(_road_pf_directions[track]) );
 
 		if (tile.IsTileType( TileTypes.MP_STREET) &&
 				BitOps.GB(tile.getMap().m5, 4, 4) == 2 &&
-				IsTileOwner(tile, rfdd.owner)) {
+						tile.IsTileOwner(rfdd.owner)) {
 
 			if (length < rfdd.best_length) {
 				rfdd.best_length = length;
@@ -256,7 +257,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (Global._patches.new_pathfinding_all) {
 			NPFFoundTargetData ftd;
 			/* See where we are now */
-			Trackdir trackdir = GetVehicleTrackdir(v);
+			/*Trackdir*/ int trackdir = v.GetVehicleTrackdir();
 
 			ftd = NPFRouteToDepotBreadthFirst(v.tile, trackdir, TRANSPORT_ROAD, v.owner, INVALID_RAILTYPE);
 			if (ftd.best_bird_dist == 0)
@@ -266,7 +267,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			/* We do not search in two directions here, why should we? We can't reverse right now can we? */
 		} else {
 			RoadFindDepotData rfdd = new RoadFindDepotData();
-			rfdd.owner = v.owner;
+			rfdd.owner = v.owner.id;
 			rfdd.best_length = (int)-1;
 
 			/* search in all directions */
@@ -276,7 +277,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			if (rfdd.best_length == (int)-1)
 				return null;
 
-			return GetDepotByTile(rfdd.tile);
+			return Depot.GetDepotByTile(rfdd.tile);
 		}
 	}
 
@@ -296,17 +297,17 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		if (v.type != Vehicle.VEH_Road || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (v.vehstatus & VS_CRASHED) return Cmd.CMD_ERROR;
+		if (v.vehstatus & Vehicle.VS_CRASHED) return Cmd.CMD_ERROR;
 
 		/* If the current orders are already goto-depot */
-		if (v.current_order.type == OT_GOTO_DEPOT) {
+		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
 			if (flags & Cmd.DC_EXEC) {
 				/* If the orders to 'goto depot' are in the orders list (forced servicing),
 				 * then skip to the next order; effectively cancelling this forced service */
 				if (BitOps.HASBIT(v.current_order.flags, OFB_PART_OF_ORDERS))
 					v.cur_order_index++;
 
-				v.current_order.type = OT_DUMMY;
+				v.current_order.type = Order.OT_DUMMY;
 				v.current_order.flags = 0;
 				InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			}
@@ -317,8 +318,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (dep == null) return_cmd_error(Str.STR_9019_UNABLE_TO_FIND_LOCAL_DEPOT);
 
 		if (flags & Cmd.DC_EXEC) {
-			v.current_order.type = OT_GOTO_DEPOT;
-			v.current_order.flags = OF_NON_STOP | OF_HALandscape.LT_IN_DEPOT;
+			v.current_order.type = Order.OT_GOTO_DEPOT;
+			v.current_order.flags = Order.OF_NON_STOP | Order.OF_HALT_IN_DEPOT;
 			v.current_order.station = dep.index;
 			v.dest_tile = dep.xy;
 			InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
@@ -342,7 +343,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		if (v.type != Vehicle.VEH_Road || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (v.vehstatus & (VS_HIDDEN|VS_STOPPED) ||
+		if (v.vehstatus & (Vehicle.VS_HIDDEN|Vehicle.VS_STOPPED) ||
 				v.road.crashed_ctr != 0 ||
 				v.breakdown_ctr != 0 ||
 				v.road.overtaking != 0 ||
@@ -385,7 +386,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	static void MarkRoadVehDirty(Vehicle v)
 	{
 		v.cur_image = GetRoadVehImage(v, v.direction);
-		MarkAllViewportsDirty(v.left_coord, v.top_coord, v.right_coord + 1, v.bottom_coord + 1);
+		ViewPort.MarkAllViewportsDirty(v.left_coord, v.top_coord, v.right_coord + 1, v.bottom_coord + 1);
 	}
 
 	static void UpdateRoadVehDeltaXY(Vehicle v)
@@ -393,19 +394,19 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		int x = _delta_xy_table[v.direction];
 		v.x_offs        = BitOps.GB(x,  0, 8);
 		v.y_offs        = BitOps.GB(x,  8, 8);
-		v.sprite_width  = BitOps.GB(x, 16, 8);
-		v.sprite_height = BitOps.GB(x, 24, 8);
+		v.sprite_width  = (byte) BitOps.GB(x, 16, 8);
+		v.sprite_height = (byte) BitOps.GB(x, 24, 8);
 	}
 
 	static void ClearCrashedStation(Vehicle v)
 	{
-		RoadStop *rs = GetRoadStopByTile(v.tile, GetRoadStopType(v.tile));
+		RoadStop rs = GetRoadStopByTile(v.tile, GetRoadStopType(v.tile));
 
 		// mark station as not busy
-		CLRBIT(rs.status, 7);
+		rs.status = BitOps.RETCLRBIT(rs.status, 7);
 
 		// free parking bay
-		SETBIT(rs.status, BitOps.HASBIT(v.road.state, 1) ? 1 : 0);
+		rs.status = BitOps.RETSETBIT(rs.status, BitOps.HASBIT(v.road.state, 1) ? 1 : 0);
 	}
 
 	static void RoadVehDelete(Vehicle v)
@@ -416,14 +417,14 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		RebuildVehicleLists();
 		Window.InvalidateWindow(Window.WC_COMPANY, v.owner);
 
-		if (IsTileType(v.tile, TileTypes.MP_STATION))
+		if (v.tile.IsTileType(TileTypes.MP_STATION))
 			ClearCrashedStation(v);
 
-		BeginVehicleMove(v);
-		EndVehicleMove(v);
+		v.BeginVehicleMove();
+		v.EndVehicleMove();
 
 		ClearSlot(v, v.road.slot);
-		DeleteVehicle(v);
+		Vehicle.DeleteVehicle(v);
 	}
 
 	static byte SetRoadVehPosition(Vehicle v, int x, int y)
@@ -432,20 +433,19 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		// need this hint so it returns the right z coordinate on bridges.
 		_get_z_hint = v.z_pos;
-		new_z = GetSlopeZ(v.x_pos=x, v.y_pos=y);
+		new_z = Landscape.GetSlopeZ(v.x_pos=x, v.y_pos=y);
 		_get_z_hint = 0;
 
 		old_z = v.z_pos;
 		v.z_pos = new_z;
 
-		VehiclePositionChanged(v);
-		EndVehicleMove(v);
+		v.VehiclePositionChanged();
+		v.EndVehicleMove();
 		return old_z;
 	}
 
 	static void RoadVehSetRandomDirection(Vehicle v)
 	{
-		static final int8 _turn_prob[4] = { -1, 0, 0, 1 };
 		int r = Hal.Random();
 		v.direction = (v.direction+_turn_prob[r&3])&7;
 		BeginVehicleMove(v);
@@ -467,7 +467,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		}
 	}
 
-	static void *EnumCheckRoadVehCrashTrain(Vehicle v, Vehicle u)
+	static void EnumCheckRoadVehCrashTrain(Vehicle v, Vehicle u)
 	{
 		if (v.type != Vehicle.VEH_Train ||
 				Math.abs(v.z_pos - u.z_pos) > 6 ||
@@ -482,7 +482,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		int pass;
 
 		v.road.crashed_ctr++;
-		v.vehstatus |= VS_CRASHED;
+		v.vehstatus |= Vehicle.VS_CRASHED;
 
 		InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 
@@ -492,15 +492,15 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		v.cargo_count = 0;
 		Global.SetDParam(0, pass);
 
-		AddNewsItem(
+		NewsItem.AddNewsItem(
 				(pass == 1) ?
 						Str.STR_9031_ROAD_VEHICLE_CRASH_DRIVER : Str.STR_9032_ROAD_VEHICLE_CRASH_DIE,
-						NEWS_FLAGS(NM_THIN, NF_VIEWPORT|NF_VEHICLE, NT_ACCIDENT, 0),
+						NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ACCIDENT, 0),
 						v.index,
 						0);
 
-		ModifyStationRatingAround(v.tile, v.owner, -160, 22);
-		SndPlayVehicleFx(SND_12_EXPLOSION, v);
+		Station.ModifyStationRatingAround(v.tile, v.owner, -160, 22);
+		//SndPlayVehicleFx(SND_12_EXPLOSION, v);
 	}
 
 	static void RoadVehCheckTrainCrash(Vehicle v)
@@ -513,10 +513,10 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		tile = v.tile;
 
 		// Make sure it's a road/rail crossing
-		if (!tile.IsTileType( TileTypes.MP_STREET) || !IsLevelCrossing(tile))
+		if (!tile.IsTileType( TileTypes.MP_STREET) || !tile.IsLevelCrossing())
 			return;
 
-		if (VehicleFromPos(tile, v, (VehicleFromPosProc*)EnumCheckRoadVehCrashTrain) != null)
+		if (VehicleFromPos(tile, v, (VehicleFromPosProc)EnumCheckRoadVehCrashTrain) != null)
 			RoadVehCrash(v);
 	}
 
@@ -532,10 +532,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
-			SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?
-					SND_0F_VEHICLE_BREAKDOWN : SND_35_COMEDY_BREAKDOWN, v);
+			//SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?					SND_0F_VEHICLE_BREAKDOWN : SND_35_COMEDY_BREAKDOWN, v);
 
-			if (!(v.vehstatus & VS_HIDDEN)) {
+			if (!(v.vehstatus & Vehicle.VS_HIDDEN)) {
 				Vehicle u = CreateEffectVehicleRel(v, 4, 4, 5, EV_BREAKDOWN_SMOKE);
 				if (u)
 					u.special.unk0 = v.breakdown_delay * 2;
@@ -555,28 +554,28 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		final Order order;
 		final Station st;
 
-		if (v.current_order.type >= OT_GOTO_DEPOT && v.current_order.type <= OT_LEAVESTATION) {
+		if (v.current_order.type >= Order.OT_GOTO_DEPOT && v.current_order.type <= Order.OT_LEAVESTATION) {
 			// Let a depot order in the orderlist interrupt.
-			if (v.current_order.type != OT_GOTO_DEPOT ||
-					!(v.current_order.flags & OF_UNLOAD))
+			if (v.current_order.type != Order.OT_GOTO_DEPOT ||
+					!(v.current_order.flags & Order.OF_UNLOAD))
 				return;
 		}
 
-		if (v.current_order.type == OT_GOTO_DEPOT &&
-				(v.current_order.flags & (OF_PART_OF_ORDERS | OF_SERVICE_IF_NEEDED)) == (OF_PART_OF_ORDERS | OF_SERVICE_IF_NEEDED) &&
-				!VehicleNeedsService(v)) {
+		if (v.current_order.type == Order.OT_GOTO_DEPOT &&
+				(v.current_order.flags & (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED)) == (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED) &&
+				!v.VehicleNeedsService()) {
 			v.cur_order_index++;
 		}
 
 		if (v.cur_order_index >= v.num_orders)
 			v.cur_order_index = 0;
 
-		order = GetVehicleOrder(v, v.cur_order_index);
+		order = v.GetVehicleOrder(v.cur_order_index);
 
 		if (order == null) {
-			v.current_order.type = OT_NOTHING;
+			v.current_order.type = Order.OT_NOTHING;
 			v.current_order.flags = 0;
-			v.dest_tile = 0;
+			v.dest_tile = null;
 			return;
 		}
 
@@ -589,7 +588,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		v.dest_tile = 0;
 
-		if (order.type == OT_GOTO_STATION) {
+		if (order.type == Order.OT_GOTO_STATION) {
 			if (order.station == v.last_station_visited)
 				v.last_station_visited = INVALID_STATION;
 			st = Station.GetStation(order.station);
@@ -597,49 +596,49 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			{
 				int mindist = 0xFFFFFFFF;
 				RoadStopType type;
-				RoadStop *rs;
+				RoadStop rs;
 
-				type = (v.cargo_type == AcceptedCargo.CT_PASSENGERS) ? RS_BUS : RS_TRUCK;
+				type = (v.cargo_type == AcceptedCargo.CT_PASSENGERS) ? RoadStopType.RS_BUS : RoadStopType.RS_TRUCK;
 				rs = GetPrimaryRoadStop(st, type);
 
 				if (rs == null) {
 					//There is no stop left at the station, so don't even TRY to go there
 					v.cur_order_index++;
-					InvalidateVehicleOrder(v);
+					v.InvalidateVehicleOrder();
 
 					return;
 				}
 
 				for (rs = GetPrimaryRoadStop(st, type); rs != null; rs = rs.next) {
-					if (DistanceManhattan(v.tile, rs.xy) < mindist) {
+					if (Map.DistanceManhattan(v.tile, rs.xy) < mindist) {
 						v.dest_tile = rs.xy;
 					}
 				}
 
 			}
-		} else if (order.type == OT_GOTO_DEPOT) {
-			v.dest_tile = GetDepot(order.station).xy;
+		} else if (order.type == Order.OT_GOTO_DEPOT) {
+			v.dest_tile = Depot.GetDepot(order.station).xy;
 		}
 
-		InvalidateVehicleOrder(v);
+		v.InvalidateVehicleOrder();
 	}
 
 	static void HandleRoadVehLoading(Vehicle v)
 	{
-		if (v.current_order.type == OT_NOTHING)
+		if (v.current_order.type == Order.OT_NOTHING)
 			return;
 
-		if (v.current_order.type != OT_DUMMY) {
-			if (v.current_order.type != OT_LOADING)
+		if (v.current_order.type != Order.OT_DUMMY) {
+			if (v.current_order.type != Order.OT_LOADING)
 				return;
 
-			if (--v.load_unload_time_rem)
+			if (--v.load_unload_time_rem > 0)
 				return;
 
-			if (v.current_order.flags & OF_FULL_LOAD && CanFillVehicle(v)) {
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVehicle.VEH_INC);
-				if (LoadUnloadVehicle(v)) {
-					Window.InvalidateWindow(Window.WC_ROADVehicle.VEH_LIST, v.owner);
+			if (0 != (v.current_order.flags & Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
+				Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_INC);
+				if (v.LoadUnloadVehicle()) {
+					Window.InvalidateWindow(Window.WC_ROADVEH_LIST, v.owner);
 					MarkRoadVehDirty(v);
 				}
 				return;
@@ -647,15 +646,15 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 			{
 				Order b = v.current_order;
-				v.current_order.type = OT_LEAVESTATION;
+				v.current_order.type = Order.OT_LEAVESTATION;
 				v.current_order.flags = 0;
-				if (!(b.flags & OF_NON_STOP))
+				if (0==(b.flags & Order.OF_NON_STOP))
 					return;
 			}
 		}
 
 		v.cur_order_index++;
-		InvalidateVehicleOrder(v);
+		v.InvalidateVehicleOrder();
 	}
 
 	static void StartRoadVehSound(Vehicle v)
@@ -668,11 +667,6 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		 */
 	}
 
-	class RoadVehFindData {
-		int x,y;
-		Vehicle veh;
-		byte dir;
-	} RoadVehFindData;
 
 	static Object EnumCheckRoadVehClose(Vehicle v, RoadVehFindData rvf)
 	{
@@ -706,7 +700,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		rvf.y = y;
 		rvf.dir = dir;
 		rvf.veh = v;
-		u = VehicleFromPos(TileVirtXY(x, y), rvf, (VehicleFromPosProc*)EnumCheckRoadVehClose);
+		u = VehicleFromPos(TileIndex.TileVirtXY(x, y), rvf, (VehicleFromPosProc)EnumCheckRoadVehClose);
 
 		// This code protects a roadvehicle from being blocked for ever
 		//  If more than 1480 / 74 days a road vehicle is blocked, it will
@@ -727,13 +721,13 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	{
 		if (v.cargo_type == AcceptedCargo.CT_PASSENGERS) {
 			/* Check if station was ever visited before */
-			if (!(st.had_vehicle_of_type & HVOT_BUS)) {
+			if (!(st.had_vehicle_of_type & Station.HVOT_BUS)) {
 				int flags;
 
-				st.had_vehicle_of_type |= HVOT_BUS;
+				st.had_vehicle_of_type |= Station.HVOT_BUS;
 				Global.SetDParam(0, st.index);
-				flags = (v.owner == Global._local_player) ? NEWS_FLAGS(NM_THIN, NF_VIEWPORT|NF_VEHICLE, NT_ARRIVAL_PLAYER, 0) : NEWS_FLAGS(NM_THIN, NF_VIEWPORT|NF_VEHICLE, NT_ARRIVAL_OTHER, 0);
-				AddNewsItem(
+				flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+				NewsItem.AddNewsItem(
 						Str.STR_902F_CITIZENS_CELEBRATE_FIRST,
 						flags,
 						v.index,
@@ -741,13 +735,13 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			}
 		} else {
 			/* Check if station was ever visited before */
-			if (!(st.had_vehicle_of_type & HVOT_TRUCK)) {
+			if (0==(st.had_vehicle_of_type & Station.HVOT_TRUCK)) {
 				int flags;
 
-				st.had_vehicle_of_type |= HVOT_TRUCK;
+				st.had_vehicle_of_type |= Station.HVOT_TRUCK;
 				Global.SetDParam(0, st.index);
-				flags = (v.owner == Global._local_player) ? NEWS_FLAGS(NM_THIN, NF_VIEWPORT|NF_VEHICLE, NT_ARRIVAL_PLAYER, 0) : NEWS_FLAGS(NM_THIN, NF_VIEWPORT|NF_VEHICLE, NT_ARRIVAL_OTHER, 0);
-				AddNewsItem(
+				flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+				NewsItem.AddNewsItem(
 						Str.STR_9030_CITIZENS_CELEBRATE_FIRST,
 						flags,
 						v.index,
@@ -772,7 +766,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		}
 
 		// Decrease somewhat when turning
-		if (!(v.direction&1))
+		if (0==(v.direction&1))
 			spd = spd * 3 >> 2;
 
 			if (spd == 0)
@@ -833,14 +827,14 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	static void RoadVehCheckOvertake(Vehicle v, Vehicle u)
 	{
-		OvertakeData od;
+		OvertakeData od = new OvertakeData();
 		byte tt;
 
 		od.v = v;
 		od.u = u;
 
 		if (u.max_speed >= v.max_speed &&
-				!(u.vehstatus&VS_STOPPED) &&
+				0==(u.vehstatus&Vehicle.VS_STOPPED) &&
 				u.cur_speed != 0)
 			return;
 
@@ -862,14 +856,14 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		od.tilebits = tt;
 
 		od.tile = v.tile;
-		if (FindRoadVehToOvertake(&od))
+		if (FindRoadVehToOvertake(od))
 			return;
 
-		od.tile = v.tile + TileOffsByDir(v.direction >> 1);
-		if (FindRoadVehToOvertake(&od))
+		od.tile = v.tile.iadd( TileIndex.TileOffsByDir(v.direction >> 1) );
+		if (FindRoadVehToOvertake(od))
 			return;
 
-		if (od.cur_speed == 0 || od.vehstatus&VS_STOPPED) {
+		if (od.cur_speed == 0 || od.vehstatus&Vehicle.VS_STOPPED) {
 			v.road.overtaking_ctr = 0x11;
 			v.road.overtaking = 0x10;
 		} else {
@@ -903,9 +897,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		do {
 			if (b & 1)
 				num++;
-		} while (b >>= 1);
+		} while (b >>= 1 != 0);
 
-		num = RandomRange(num);
+		num = Hal.RandomRange(num);
 
 		for(i=0; !((bits & 1) && ((int)--num) < 0); bits>>=1,i++);
 		return i;
@@ -924,11 +918,12 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		return false;
 	}
 
+	//#define return_track(x) {best_track = x; goto found_best_track; }
+
 	// Returns direction to choose
 	// or -1 if the direction is currently blocked
 	static int RoadFindPathToDest(Vehicle v, TileIndex tile, int enterdir)
 	{
-		#define return_track(x) {best_track = x; goto found_best_track; }
 
 		int signal;
 		int bitmask;
@@ -1127,13 +1122,13 @@ static void RoadVehController(Vehicle v)
 	}
 
 	// exit if vehicle is stopped
-	if (v.vehstatus & VS_STOPPED)
+	if (v.vehstatus & Vehicle.VS_STOPPED)
 		return;
 
 	ProcessRoadVehOrder(v);
 	HandleRoadVehLoading(v);
 
-	if (v.current_order.type == OT_LOADING)
+	if (v.current_order.type == Order.OT_LOADING)
 		return;
 
 	if (v.road.state == 254) {
@@ -1162,7 +1157,7 @@ static void RoadVehController(Vehicle v)
 
 		BeginVehicleMove(v);
 
-		v.vehstatus &= ~VS_HIDDEN;
+		v.vehstatus &= ~Vehicle.VS_HIDDEN;
 		v.road.state = rd2;
 		v.road.frame = 6;
 
@@ -1352,8 +1347,8 @@ static void RoadVehController(Vehicle v)
 
 		st = Station.GetStation(_m[v.tile].m2);
 
-		if (v.current_order.type != OT_LEAVESTATION &&
-				v.current_order.type != OT_GOTO_DEPOT) {
+		if (v.current_order.type != Order.OT_LEAVESTATION &&
+				v.current_order.type != Order.OT_GOTO_DEPOT) {
 			Order old_order;
 
 			*b &= ~0x80;
@@ -1363,13 +1358,13 @@ static void RoadVehController(Vehicle v)
 			RoadVehArrivesAt(v, st);
 
 			old_order = v.current_order;
-			v.current_order.type = OT_LOADING;
+			v.current_order.type = Order.OT_LOADING;
 			v.current_order.flags = 0;
 
-			if (old_order.type == OT_GOTO_STATION &&
+			if (old_order.type == Order.OT_GOTO_STATION &&
 					v.current_order.station == v.last_station_visited) {
 				v.current_order.flags =
-						(old_order.flags & (OF_FULL_LOAD | OF_UNLOAD | OF_TRANSFER)) | OF_NON_STOP;
+						(old_order.flags & (Order.OF_FULL_LOAD | Order.OF_UNLOAD | Order.OF_TRANSFER)) | Order.OF_NON_STOP;
 			}
 
 			Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVehicle.VEH_INC);
@@ -1381,12 +1376,12 @@ static void RoadVehController(Vehicle v)
 			return;
 		}
 
-		if (v.current_order.type != OT_GOTO_DEPOT) {
+		if (v.current_order.type != Order.OT_GOTO_DEPOT) {
 			if (*b&0x80) {
 				v.cur_speed = 0;
 				return;
 			}
-			v.current_order.type = OT_NOTHING;
+			v.current_order.type = Order.OT_NOTHING;
 			v.current_order.flags = 0;
 		}
 		*b |= 0x80;
@@ -1398,7 +1393,7 @@ static void RoadVehController(Vehicle v)
 			//we have arrived at the wrong station
 			//XXX The question is .. what to do? Actually we shouldn't be here
 			//but I guess we need to clear the slot
-			DEBUG(ms, 1) ("Multistop: Wrong station, force a slot clearing. Vehicle %d at 0x%x, should go to 0x%x of station %d (%x), destination 0x%x", v.unitnumber, v.tile, v.road.slot.xy, st.index, st.xy, v.dest_tile);
+			Global.DEBUG_ms( 1, "Multistop: Wrong station, force a slot clearing. Vehicle %d at 0x%x, should go to 0x%x of station %d (%x), destination 0x%x", v.unitnumber, v.tile, v.road.slot.xy, st.index, st.xy, v.dest_tile);
 			ClearSlot(v, v.road.slot);
 		}
 
@@ -1424,7 +1419,7 @@ static void RoadVehController(Vehicle v)
 void RoadVehEnterDepot(Vehicle v)
 {
 	v.road.state = 254;
-	v.vehstatus |= VS_HIDDEN;
+	v.vehstatus |= Vehicle.VS_HIDDEN;
 
 	Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
@@ -1432,20 +1427,20 @@ void RoadVehEnterDepot(Vehicle v)
 
 	TriggerVehicle(v, VEHICLE_TRIGGER_DEPOT);
 
-	if (v.current_order.type == OT_GOTO_DEPOT) {
+	if (v.current_order.type == Order.OT_GOTO_DEPOT) {
 		Order t;
 
 		Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
 		t = v.current_order;
-		v.current_order.type = OT_DUMMY;
+		v.current_order.type = Order.OT_DUMMY;
 		v.current_order.flags = 0;
 
 		// Part of the orderlist?
 		if (BitOps.HASBIT(t.flags, OFB_PART_OF_ORDERS)) {
 			v.cur_order_index++;
 		} else if (BitOps.HASBIT(t.flags, OFB_HALandscape.LT_IN_DEPOT)) {
-			v.vehstatus |= VS_STOPPED;
+			v.vehstatus |= Vehicle.VS_STOPPED;
 			if (v.owner == Global._local_player) {
 				Global.SetDParam(0, v.unitnumber);
 				AddNewsItem(
@@ -1485,7 +1480,7 @@ static void CheckIfRoadVehNeedsService(Vehicle v)
 	if (!VehicleNeedsService(v))
 		return;
 
-	if (v.vehstatus & VS_STOPPED)
+	if (v.vehstatus & Vehicle.VS_STOPPED)
 		return;
 
 	if (Global._patches.gotodepot && VehicleHasDepotOrders(v))
@@ -1493,8 +1488,8 @@ static void CheckIfRoadVehNeedsService(Vehicle v)
 
 	// Don't interfere with a depot visit scheduled by the user, or a
 	// depot visit by the order list.
-	if (v.current_order.type == OT_GOTO_DEPOT &&
-			(v.current_order.flags & (OF_HALandscape.LT_IN_DEPOT | OF_PART_OF_ORDERS)) != 0)
+	if (v.current_order.type == Order.OT_GOTO_DEPOT &&
+			(v.current_order.flags & (Order.OF_HALT_IN_DEPOT | Order.OF_PART_OF_ORDERS)) != 0)
 		return;
 
 	//If we already got a slot at a stop, use that FIRST, and go to a depot later
@@ -1504,21 +1499,21 @@ static void CheckIfRoadVehNeedsService(Vehicle v)
 	depot = FindClosestRoadDepot(v);
 
 	if (depot == null || DistanceManhattan(v.tile, depot.xy) > 12) {
-		if (v.current_order.type == OT_GOTO_DEPOT) {
-			v.current_order.type = OT_DUMMY;
+		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
+			v.current_order.type = Order.OT_DUMMY;
 			v.current_order.flags = 0;
 			InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 		}
 		return;
 	}
 
-	if (v.current_order.type == OT_GOTO_DEPOT &&
-			v.current_order.flags & OF_NON_STOP &&
+	if (v.current_order.type == Order.OT_GOTO_DEPOT &&
+			v.current_order.flags & Order.OF_NON_STOP &&
 			!BitOps.CHANCE16(1,20))
 		return;
 
-	v.current_order.type = OT_GOTO_DEPOT;
-	v.current_order.flags = OF_NON_STOP;
+	v.current_order.type = Order.OT_GOTO_DEPOT;
+	v.current_order.flags = Order.OF_NON_STOP;
 	v.current_order.station = depot.index;
 	v.dest_tile = depot.xy;
 	InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
@@ -1536,18 +1531,18 @@ void OnNewDay_RoadVeh(Vehicle v)
 	Station st;
 
 	if ((++v.day_counter & 7) == 0)
-		DecreaseVehicleValue(v);
+		v.DecreaseVehicleValue();
 
 	if (v.road.unk2 == 0)
-		CheckVehicleBreakdown(v);
+		v.CheckVehicleBreakdown();
 
-	AgeVehicle(v);
+	v.AgeVehicle();
 	CheckIfRoadVehNeedsService(v);
 
 	CheckOrders(v.index, OC_INIT);
 
 	/* update destination */
-	if (v.current_order.type == OT_GOTO_STATION && !(v.vehstatus & VS_CRASHED)) {
+	if (v.current_order.type == Order.OT_GOTO_STATION && !(v.vehstatus & Vehicle.VS_CRASHED)) {
 		RoadStopType type = (v.cargo_type == AcceptedCargo.CT_PASSENGERS) ? RS_BUS : RS_TRUCK;
 
 		st = Station.GetStation(v.current_order.station);
@@ -1564,7 +1559,7 @@ void OnNewDay_RoadVeh(Vehicle v)
 			int mindist = 12, dist; // 12 is threshold distance.
 
 			//first we need to find out how far our stations are away.
-			DEBUG(ms, 2) ("Multistop: Attempting to obtain a slot for vehicle %d at station %d (0x%x)", v.unitnumber, st.index, st.xy);
+			Global.DEBUG_ms( 2, "Multistop: Attempting to obtain a slot for vehicle %d at station %d (0x%x)", v.unitnumber, st.index, st.xy);
 			for(; rs != null; rs = rs.next) {
 				// Only consider those with at least a free slot.
 				if (!(rs.slot[0] == INVALID_SLOT || rs.slot[1] == INVALID_SLOT))
@@ -1614,17 +1609,17 @@ void OnNewDay_RoadVeh(Vehicle v)
 				v.dest_tile = best_stop.xy;
 				v.road.slot_age = -5;
 				v.road.slotindex = slot;
-				DEBUG(ms, 1) ("Multistop: Slot %d at 0x%x assigned to vehicle %d (0x%x)", slot, best_stop.xy, v.unitnumber, v.tile);
+				Global.DEBUG_ms( 1, "Multistop: Slot %d at 0x%x assigned to vehicle %d (0x%x)", slot, best_stop.xy, v.unitnumber, v.tile);
 			} else if (first_stop) {
 				//now we couldn't assign a slot for one reason or another.
 				//so we just go towards the first station
-				DEBUG(ms, 1) ("Multistop: No free slot found for vehicle %d, going to default station", v.unitnumber);
+				Global.DEBUG_ms( 1, "Multistop: No free slot found for vehicle %d, going to default station", v.unitnumber);
 				v.dest_tile = first_stop.xy;
 			}
 		}
 	}
 
-	if (v.vehstatus & VS_STOPPED)
+	if (v.vehstatus & Vehicle.VS_STOPPED)
 		return;
 
 	cost = RoadVehInfo(v.engine_type).running_cost * Global._price.roadveh_running / 364;
@@ -1641,15 +1636,17 @@ void OnNewDay_RoadVeh(Vehicle v)
 
 void RoadVehiclesYearlyLoop()
 {
-	Vehicle v;
+	//Vehicle v;
 
-	FOR_ALL_VEHICLES(v) {
+	//FOR_ALL_VEHICLES(v)
+	Vehicle.forEach( (v) ->
+	{
 		if (v.type == Vehicle.VEH_Road) {
 			v.profit_last_year = v.profit_this_year;
 			v.profit_this_year = 0;
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 		}
-	}
+	});
 }
 
 }

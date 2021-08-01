@@ -285,6 +285,12 @@ public class Global {
 			debug( s, arg );
 	}
 
+	public static void DEBUG_ms( int level, String s, Object ... arg )
+	{
+		if( level >= _debug_ms_level )
+			debug( s, arg );
+	}
+
 	public static void DEBUG_misc( int level, String s, Object ... arg )
 	{
 		if( level >= _debug_misc_level )

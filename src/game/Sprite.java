@@ -47,6 +47,10 @@ public class Sprite extends Sprites {
 	public static int SPRITE_PALETTE(int color) {
 		return color | PALETTE_MODIFIER_COLOR;
 	}
+	
+	public static boolean is_custom_sprite(int x) { return x >= 0xFD; }
+	public static boolean IS_CUSTOM_FIRSTHEAD_SPRITE(int x)  { return (x == 0xFD); }
+	public static boolean IS_CUSTOM_SECONDHEAD_SPRITE(int x)  { return (x == 0xFE);	 }
 }
 
 // User should decide by object type

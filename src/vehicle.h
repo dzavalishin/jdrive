@@ -253,7 +253,7 @@ struct Vehicle {
 		VehicleShip ship;
 	} u;
 };
-*/
+* /
 #define is_custom_sprite(x) (x >= 0xFD)
 #define IS_CUSTOM_FIRSTHEAD_SPRITE(x) (x == 0xFD)
 #define IS_CUSTOM_SECONDHEAD_SPRITE(x) (x == 0xFE)
