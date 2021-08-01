@@ -51,6 +51,11 @@ public class Sprite extends Sprites {
 	public static boolean is_custom_sprite(int x) { return x >= 0xFD; }
 	public static boolean IS_CUSTOM_FIRSTHEAD_SPRITE(int x)  { return (x == 0xFD); }
 	public static boolean IS_CUSTOM_SECONDHEAD_SPRITE(int x)  { return (x == 0xFE);	 }
+
+	public static int RET_MAKE_TRANSPARENT(int image) 
+	{
+		return (image & SPRITE_MASK) | PALETTE_TO_TRANSPARENT;		
+	}
 }
 
 // User should decide by object type

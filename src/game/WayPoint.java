@@ -550,7 +550,7 @@ private void WaypointPoolNewBlock(int start_item)
 		final RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
 		int ormod, img;
 
-		ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(_local_player));
+		ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player));
 
 		x += 33;
 		y += 17;

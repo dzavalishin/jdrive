@@ -3435,7 +3435,7 @@ public class TrainCmd extends TrainTables
 		return  (v.rail.track == 0x80 && (v.vehstatus | Vehicle.VS_STOPPED));
 	}
 
-	void TrainEnterDepot(Vehicle v, TileIndex tile)
+	static void TrainEnterDepot(Vehicle v, TileIndex tile)
 	{
 		SetSignalsOnBothDir(tile, _depot_track_ind[BitOps.GB(tile.getMap().m5, 0, 2)]);
 

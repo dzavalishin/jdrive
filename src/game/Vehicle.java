@@ -964,7 +964,7 @@ public class Vehicle implements IPoolItem
 		return Correct_Z(tile.GetTileSlope(null));
 	}
 
-	public static boolean EnsureNoVehicleZ(TileIndex tile, byte z)
+	public static boolean EnsureNoVehicleZ(TileIndex tile, int z)
 	{
 		TileInfo ti = new TileInfo();
 

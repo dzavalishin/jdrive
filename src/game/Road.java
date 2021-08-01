@@ -482,7 +482,7 @@ public class Road
 		return cost;
 	}
 
-	int DoConvertStreetRail(TileIndex tile, int totype, boolean exec)
+	static int DoConvertStreetRail(TileIndex tile, int totype, boolean exec)
 	{
 		// not a railroad crossing?
 		if (!tile.IsLevelCrossing()) return Cmd.CMD_ERROR;

@@ -1124,6 +1124,6 @@ enum PaletteSprites {
 };
 #undef PALETTE_RECOLOR_SPRITE
 
-#define MAKE_TRANSPARENT(img) (img = (img & SPRITE_MASK) | PALETTE_TO_TRANSPARENT)
+//#define MAKE_TRANSPARENT(img) (img = (img & SPRITE_MASK) | PALETTE_TO_TRANSPARENT)
 
 #endif /* SPRITES_H */

@@ -1,7 +1,9 @@
 package game.tables;
 
 import game.RailtypeInfo;
+import game.Sprite;
 import game.Str;
+import game.Tile;
 import game.util.Sprites;
 
 public class RailTables {
@@ -376,8 +378,8 @@ public class RailTables {
 	//final DiagDirection _trackdir_to_exitdir[] = 
 	protected static final int _trackdir_to_exitdir[] = 
 		{
-				DIAGDIR_NE,DIAGDIR_SE,DIAGDIR_NE,DIAGDIR_SE,DIAGDIR_SW,DIAGDIR_SE, DIAGDIR_NE,DIAGDIR_NE,
-				DIAGDIR_SW,DIAGDIR_NW,DIAGDIR_NW,DIAGDIR_SW,DIAGDIR_NW,DIAGDIR_NE,
+				Tile.DIAGDIR_NE,Tile.DIAGDIR_SE,Tile.DIAGDIR_NE,Tile.DIAGDIR_SE,Tile.DIAGDIR_SW,Tile.DIAGDIR_SE, Tile.DIAGDIR_NE,Tile.DIAGDIR_NE,
+				Tile.DIAGDIR_SW,Tile.DIAGDIR_NW,Tile.DIAGDIR_NW,Tile.DIAGDIR_SW,Tile.DIAGDIR_NW,Tile.DIAGDIR_NE,
 		}; 
 
 	//final Trackdir _track_exitdir_to_trackdir[][DIAGDIR_END] = 
@@ -422,7 +424,7 @@ public class RailTables {
 	//final DiagDirection _reverse_diagdir[] = 
 	protected static final int _reverse_diagdir[] = 
 		{
-				DIAGDIR_SW, DIAGDIR_NW, DIAGDIR_NE, DIAGDIR_SE
+				Tile.DIAGDIR_SW, Tile.DIAGDIR_NW, Tile.DIAGDIR_NE, Tile.DIAGDIR_SE
 		};
 
 	//final Trackdir _reverse_trackdir[] = 
@@ -746,6 +748,89 @@ public class RailTables {
 
 
 
+	
+	public static class DrawTrackSeqStruct {
+		public DrawTrackSeqStruct(int x) {
+			 image = x;
+			 subcoord_x = subcoord_y =
+			 width = height = 0;
+		}
+		
+		public DrawTrackSeqStruct(int a, int b, int c, int d, int e) {
+			 image = a;
+			 subcoord_x = b;
+			 subcoord_y = c;
+			 width = d;
+			 height = e;
+		}
+
+		//SpriteID
+		public int image;
+		public int subcoord_x;
+		public int subcoord_y;
+		public int width;
+		public int height;
+	}
+
+	//#define TILE_SEQ_BEGIN(x) { x, 0, 0, 0, 0 },
+	//#define TILE_SEQ_LINE(a, b, c, d, e) { a, b, c, d, e },
+	//#define TILE_SEQ_END() { 0, 0, 0, 0, 0 }
+
+	private static DrawTrackSeqStruct TILE_SEQ_BEGIN(int x) { return new DrawTrackSeqStruct(x); }
+	private static DrawTrackSeqStruct TILE_SEQ_END() { return new DrawTrackSeqStruct(0); }
+	private static DrawTrackSeqStruct TILE_SEQ_LINE(int a, int b, int c, int d, int e) { return new DrawTrackSeqStruct(a, b, c, d, e); }
+	
+	static final DrawTrackSeqStruct _track_depot_layout_table_0[] = {
+		TILE_SEQ_BEGIN(0xF8D),
+		TILE_SEQ_LINE(0x42B | Sprite.PALETTE_MODIFIER_COLOR, 2, 13, 13, 1),
+		TILE_SEQ_END(),
+	};
+
+	static final DrawTrackSeqStruct _track_depot_layout_table_1[] = {
+		TILE_SEQ_BEGIN(0x3F3 | Sprite.PALETTE_MODIFIER_COLOR),
+		TILE_SEQ_LINE(0x427 | Sprite.PALETTE_MODIFIER_COLOR, 2, 2, 1, 13),
+		TILE_SEQ_LINE(0x428 | Sprite.PALETTE_MODIFIER_COLOR, 13, 2, 1, 13),
+		TILE_SEQ_END(),
+	};
+
+	static final DrawTrackSeqStruct _track_depot_layout_table_2[] = {
+		TILE_SEQ_BEGIN(0x3F4 | Sprite.PALETTE_MODIFIER_COLOR),
+		TILE_SEQ_LINE(0x429 | Sprite.PALETTE_MODIFIER_COLOR, 2, 2, 13, 1),
+		TILE_SEQ_LINE(0x42A | Sprite.PALETTE_MODIFIER_COLOR, 2, 13, 13, 1),
+		TILE_SEQ_END(),
+	};
+
+	static final DrawTrackSeqStruct _track_depot_layout_table_3[] = {
+		TILE_SEQ_BEGIN(0xF8D),
+		TILE_SEQ_LINE(0x42C | Sprite.PALETTE_MODIFIER_COLOR, 13, 2, 1, 13),
+		TILE_SEQ_END(),
+	};
+
+	static final DrawTrackSeqStruct _track_waypoint_table_0[] = {
+		TILE_SEQ_BEGIN(0x3F4 | Sprite.PALETTE_MODIFIER_COLOR),
+		TILE_SEQ_LINE(Sprite.PALETTE_MODIFIER_COLOR | Sprite.SPR_WAYPOINT_X_1,  0,  0,  16,  5),
+		TILE_SEQ_LINE(Sprite.PALETTE_MODIFIER_COLOR | Sprite.SPR_WAYPOINT_X_2,  0, 11,  16,  5),
+		TILE_SEQ_END(),
+	};
+
+	static final DrawTrackSeqStruct _track_waypoint_table_1[] = {
+		TILE_SEQ_BEGIN(0x3F3 | Sprite.PALETTE_MODIFIER_COLOR),
+		TILE_SEQ_LINE(Sprite.PALETTE_MODIFIER_COLOR | Sprite.SPR_WAYPOINT_Y_1,   0,  0, 5, 16),
+		TILE_SEQ_LINE(Sprite.PALETTE_MODIFIER_COLOR | Sprite.SPR_WAYPOINT_Y_2,  11,  0, 5, 16),
+		TILE_SEQ_END(),
+	};
+
+
+	protected static final DrawTrackSeqStruct[] _track_depot_layout_table[] = {
+		_track_depot_layout_table_0,
+		_track_depot_layout_table_1,
+		_track_depot_layout_table_2,
+		_track_depot_layout_table_3,
+
+		_track_waypoint_table_0,
+		_track_waypoint_table_1,
+	};
+	
 
 
 
