@@ -115,7 +115,7 @@ public class WayPoint implements IPoolItem
 	 * @param tile Tile of WayPoint
 	 * @return WayPoint
 	 */
-	private static WayPoint GetWaypointByTile(TileIndex tile)
+	pblic static WayPoint GetWaypointByTile(TileIndex tile)
 	{
 		assert(tile.IsTileType( TileTypes.MP_RAILWAY) && IsRailWaypoint(tile));
 		return GetWaypoint(tile.getMap().m2);

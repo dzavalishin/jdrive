@@ -635,7 +635,7 @@ public class MiscGui {
 		}
 	}
 
-	void GuiShowTooltips(/*StringID*/ int string_id)
+	static void GuiShowTooltips(/*StringID*/ int string_id)
 	{
 		//char buffer[512];
 		Window w;
