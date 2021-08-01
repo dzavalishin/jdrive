@@ -97,7 +97,7 @@ public class Strings extends StringTable
 	//private int _langtab_start[32]; // Offset into langpack offs
 
 	//private final StringID _cargo_string_list[NUM_LANDSCAPE][NUM_CARGO] = {
-	private final int _cargo_string_list[][] = {
+	private final static int _cargo_string_list[][] = {
 			{ /* LT_NORMAL */
 				STR_PASSENGERS,
 				STR_TONS,
@@ -305,7 +305,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	// This function is used to "bind" a C string to a OpenTTD dparam slot.
 	static void SetDParamStr(int n, final String str)
 	{
-		Global.SetDParam(n, BindCString(str).id);
+		Global.SetDParam(n, BindCString(str));
 	}
 
 
@@ -389,7 +389,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	private static String FormatYmdString(int number)
 	{
-		final String src;
+		//final String src;
 		YearMonthDay ymd = new YearMonthDay();
 		StringBuilder buff = new StringBuilder();
 
@@ -407,7 +407,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	private static String FormatMonthAndYear(int number)
 	{
-		String src;
+		//String src;
 		YearMonthDay ymd = new YearMonthDay();
 		StringBuilder buff = new StringBuilder();
 
@@ -596,7 +596,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		return b.substring(mypos, mypos+mylen-1);
 	}
 
-	private static String FormatString(final String pstr, Object ... arg, int casei)
+	//private static String FormatString(final String pstr, Object ... arg, int casei)
+	private static String FormatString(final String pstr, Object [] arg, int casei)
 	{
 		byte b;
 		final Object[] arg_orig = arg;
@@ -624,10 +625,10 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				buff.append( GetStringWithArgs(READ_LE_int(str-2), argv));
 				break;
 			case 0x82: // {DATE_LONG}
-				buff.append( FormatYmdString(buff, Getint(arg[argc++])) );
+				buff.append( FormatYmdString( Getint(arg[argc++])) );
 				break;
 			case 0x83: // {DATE_SHORT}
-				buff.append( FormatMonthAndYear(buff, Getint(arg[argc++])) );
+				buff.append( FormatMonthAndYear(Getint(arg[argc++])) );
 				break;
 			case 0x84: {// {VELOCITY}
 				int value = Getint(arg[argc++]);
@@ -644,7 +645,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			case 0x85:
 				switch ((int)str[stri++]) {
 				case 0: /* {CURRCOMPACT} */
-					buff.append( FormatGenericCurrency(_currency, Getint(arg[argc++]), true) );
+					buff.append( FormatGenericCurrency(Global._currency, Getint(arg[argc++]), true) );
 					break;
 				case 2: /* {REV} */
 					buff.append( _openttd_revision );
@@ -653,8 +654,9 @@ private  final int *GetArgvPtr(final int **argv, int n)
 					// Short description of cargotypes. Layout:
 					// 8-bit = cargo type
 					// 16-bit = cargo count
-					StringID cargo_str = _cargo_string_list[GameOptions._opt_ptr.landscape][Getint(arg[argc++])];
-					int multiplier = (cargo_str.id == Str.STR_LITERS) ? 1000 : 1;
+					//StringID 
+					int cargo_str = _cargo_string_list[GameOptions._opt_ptr.landscape][Getint(arg[argc++])];
+					int multiplier = (cargo_str == Str.STR_LITERS) ? 1000 : 1;
 					// liquid type of cargo is multiplied by 100 to get correct amount
 					buff.append( FormatCommaNumber(Getint(arg[argc++]) * multiplier) );
 					buff.append( " " );
@@ -716,7 +718,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 					int args[] = new int[2];
 
 					// industry not valid anymore?
-					if (i.xy == 0)
+					if (i.xy == null)
 						break;
 
 					// First print the town name and the industry type name
@@ -839,7 +841,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				int [] temp = new int[2];
 				WayPoint wp = WayPoint.GetWaypoint(Getint(arg[argc++]));
 				StringID str;
-				if (wp.string != STR_NULL) {
+				if (wp.string.id != STR_NULL) {
 					str = wp.string;
 				} else {
 					temp[0] = wp.town_index;
@@ -866,7 +868,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				final Town t = Town.GetTown(Getint(arg[argc++]));
 				int temp[] = new int[1];
 
-				assert(t.xy != 0);
+				assert(t.xy != null);
 
 				temp[0] = t.townnameparts;
 				buff.append( GetStringWithArgs( t.townnametype, temp) );
@@ -889,7 +891,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				// <0x9E> <NUM CASES> <CASE1> <LEN1> <STRING1> <CASE2> <LEN2> <STRING2> <CASE3> <LEN3> <STRING3> <STRINGDEFAULT>
 				// Each LEN is printed using 2 bytes in big endian order.
 				int num = (byte)str[stri++];
-				while (num) {
+				while (num != 0) {
 					if ((byte)str[0] == casei) {
 						// Found the case, adjust str pointer and continue
 						str += 3;
@@ -1052,7 +1054,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		return buff.toString();
 	}
 
-	private final String _song_names[] = {
+	private final static String _song_names[] = {
 			"Tycoon DELUXE Theme",
 			"Easy Driver",
 			"Little Red Diesel",

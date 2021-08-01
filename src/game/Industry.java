@@ -16,10 +16,10 @@ import game.tables.IndustrySpec;
 
 public class Industry extends IndustryTables implements IPoolItem {
 
-	TileIndex xy;
+	public TileIndex xy;
 	byte width; /* swapped order of w/h with town */
 	byte height;
-	Town town;
+	public Town town;
 
 	byte produced_cargo[];
 	int cargo_waiting[];
@@ -36,7 +36,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	int counter;
 
-	int type;
+	public int type;
 	byte owner;
 	byte color_map;
 	byte last_prod_year;

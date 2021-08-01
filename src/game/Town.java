@@ -21,8 +21,8 @@ public class Town extends TownTables implements IPoolItem
 	int population;
 
 	// Town name
-	int townnametype;
-	int townnameparts;
+	public int townnametype;
+	public int townnameparts;
 
 	// NOSAVE: Location of name sign, UpdateTownVirtCoord updates this.
 	ViewportSign sign;
@@ -77,7 +77,7 @@ public class Town extends TownTables implements IPoolItem
 	byte road_build_months;
 
 	// Index in town array
-	int index;
+	public int index;
 
 	// NOSAVE: UpdateTownRadius updates this given the house count.
 	int radius[];
@@ -2140,7 +2140,7 @@ public class Town extends TownTables implements IPoolItem
 		});
 	}
 
-	boolean CheckIfAuthorityAllows(TileIndex tile)
+	static boolean CheckIfAuthorityAllows(TileIndex tile)
 	{
 		Town t;
 

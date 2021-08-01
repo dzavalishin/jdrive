@@ -1,5 +1,7 @@
 package game;
 
+import game.tables.EngineTables;
+
 public class StationSpec 
 {
 	int grfid; ///< ID of GRF file station belongs to.
@@ -37,6 +39,6 @@ public class StationSpec
 	 * Used for obtaining the sprite offset of custom sprites, and for
 	 * evaluating callbacks.
 	 */
-	SpriteGroup *spritegroup[NUM_GLOBAL_CID];
+	SpriteGroup [] spritegroup = new SpriteGroup[EngineTables.NUM_GLOBAL_CID];
 
 }
