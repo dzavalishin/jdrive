@@ -48,7 +48,7 @@ public class Pbs {
 	public static final int NUM_SSD_STACK = 32;// max amount of blocks to check recursively
 	//};
 
-	public static final int _TRACKDIR_BIT_MASK = TrackdirBits.TRACKDIR_BIT_MASK.ordinal();//  (0x3F3F),
+	public static final int _TRACKDIR_BIT_MASK = Rail.TRACKDIR_BIT_MASK;//  (0x3F3F),
 
 	//void PBSReserveTrack(TileIndex tile, Track track);
 	/**<
@@ -279,34 +279,34 @@ public class Pbs {
 			tile.MarkTileDirtyByTile();
 	}
 
-	void PBSClearPath(TileIndex tile, Trackdir trackdir, TileIndex end_tile, Trackdir end_trackdir) {
+	void PBSClearPath(TileIndex tile, /*Trackdir*/ int trackdir, TileIndex end_tile, /*Trackdir*/ int end_trackdir) {
 		int res;
 		FindLengthOfTunnelResult flotr;
 		
 		assert(tile.IsValidTile());
-		assert(IsValidTrackdir(trackdir));
+		assert(Rail.IsValidTrackdir(trackdir));
 
 		do {
-			PBSClearTrack(tile, RailtypeInfo.TrackdirToTrack(trackdir));
+			PBSClearTrack(tile, Rail.TrackdirToTrack(trackdir));
 
-			if (tile == end_tile && RailtypeInfo.TrackdirToTrack(trackdir) == RailtypeInfo.TrackdirToTrack(end_trackdir))
+			if (tile == end_tile && Rail.TrackdirToTrack(trackdir) == Rail.TrackdirToTrack(end_trackdir))
 				return;
 
 			if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) &&
 					BitOps.GB(tile.getMap().m5, 4, 4) == 0 &&
-					BitOps.GB(tile.getMap().m5, 0, 2) == Trackdir.TrackdirToExitdir(trackdir)) {
+					BitOps.GB(tile.getMap().m5, 0, 2) == Rail.TrackdirToExitdir(trackdir)) {
 				// this is a tunnel
-				flotr = FindLengthOfTunnel(tile, Trackdir.TrackdirToExitdir(trackdir));
+				flotr = FindLengthOfTunnel(tile, Rail.TrackdirToExitdir(trackdir));
 
 				tile = flotr.tile;
 			} else {
-				byte exitdir = Trackdir.TrackdirToExitdir(trackdir);
-				tile = AddTileIndexDiffCWrap(tile, TileIndex.TileIndexDiffCByDir(exitdir));
+				int exitdir = Rail.TrackdirToExitdir(trackdir);
+				tile = TileIndex.AddTileIndexDiffCWrap(tile, TileIndex.TileIndexDiffCByDir(exitdir));
 			}
 
 			res = PBSTileReserved(tile);
 			res |= res << 8;
-			res &= TrackdirReachesTrackdirs(trackdir);
+			res &= Rail.TrackdirReachesTrackdirs(trackdir);
 			trackdir = BitOps.FindFirstBit2x64(res);
 
 		} while (res != 0);
@@ -315,7 +315,7 @@ public class Pbs {
 	static boolean PBSIsPbsSignal(TileIndex tile, /*Trackdir*/ int trackdir)
 	{
 		assert(tile.IsValidTile());
-		assert(IsValidTrackdir(trackdir));
+		assert(Rail.IsValidTrackdir(trackdir));
 
 		if (!Global._patches.new_pathfinding_all)
 			return false;
@@ -323,13 +323,13 @@ public class Pbs {
 		if (!tile.IsTileType( TileTypes.MP_RAILWAY))
 			return false;
 
-		if (GetRailTileType(tile) != RAIL_TYPE_SIGNALS)
+		if (Rail.GetRailTileType(tile) != Rail.RAIL_TYPE_SIGNALS)
 			return false;
 
-		if (!HasSignalOnTrackdir(tile, trackdir))
+		if (!Rail.HasSignalOnTrackdir(tile, trackdir))
 			return false;
 
-		if (GetSignalType(tile, RailtypeInfo.TrackdirToTrack(trackdir)) == 4)
+		if (Rail.GetSignalType(tile, Rail.TrackdirToTrack(trackdir)) == 4)
 			return true;
 		else
 			return false;
@@ -344,17 +344,20 @@ public class Pbs {
 	} 
 
 	// This function stores the signals inside the SetSignalsDataPbs struct, passed as callback to FollowTrack() in the PBSIsPbsSegment() function below
-	static boolean SetSignalsEnumProcPBS(int itile, SetSignalsDataPbs ssd, int trackdir, int length, Object state)
+	//static boolean SetSignalsEnumProcPBS(TileIndex tile, SetSignalsDataPbs ssd, int trackdir, int length, int[] state)
+	static boolean SetSignalsEnumProcPBS(TileIndex tile, Object o, int trackdir, int length, int[] state)
 	{
-		TileIndex tile = new TileIndex(itile);
+		SetSignalsDataPbs ssd = (SetSignalsDataPbs) o;
+		//TileIndex tile = new TileIndex(itile);
+		int itile = tile.tile;
 		// the tile has signals?
 		if (tile.IsTileType( TileTypes.MP_RAILWAY)) 
 		{
-			if (HasSignalOnTrack(tile, RailtypeInfo.TrackdirToTrack(trackdir))) {
+			if (Rail.HasSignalOnTrack(tile, Rail.TrackdirToTrack(trackdir))) {
 
 					if (ssd.cur != NUM_SSD_ENTRY) {
 						ssd.tile[ssd.cur] = tile; // remember the tile index
-						ssd.bit[ssd.cur] = RailtypeInfo.TrackdirToTrack(trackdir); // and the controlling bit number
+						ssd.bit[ssd.cur] = (byte) Rail.TrackdirToTrack(trackdir); // and the controlling bit number
 						ssd.cur++;
 					}
 					return true;
@@ -372,17 +375,17 @@ public class Pbs {
 	 * @return True when the depot is inside a pbs block
 	 */
 
-	boolean PBSIsPbsSegment(TileIndex tilep, Trackdir trackdir)
+	boolean PBSIsPbsSegment(TileIndex tilep, /*Trackdir*/ int trackdir)
 	//boolean PBSIsPbsSegment(int tilep, Trackdir trackdir)
 	{
 		SetSignalsDataPbs ssd = new SetSignalsDataPbs();
 		boolean result = PBSIsPbsSignal(tilep, trackdir);
-		DiagDirection direction = Trackdir.TrackdirToExitdir(trackdir);//GetDepotDirection(tile,TRANSPORT_RAIL);
+		/*DiagDirection*/ int direction = Rail.TrackdirToExitdir(trackdir);//GetDepotDirection(tile,TRANSPORT_RAIL);
 		int i;
 
 		ssd.cur = 0;
 
-		FollowTrack(tilep, 0xC000 | Global.TRANSPORT_RAIL, direction, (TPFEnumProc)SetSignalsEnumProcPBS, null, ssd);
+		Pathfind.FollowTrack(tilep, 0xC000 | Global.TRANSPORT_RAIL, direction, (TPFEnumProc)Pbs::SetSignalsEnumProcPBS, null, ssd);
 		
 		for(i=0; i!=ssd.cur; i++) {
 			TileIndex tile = ssd.tile[i];

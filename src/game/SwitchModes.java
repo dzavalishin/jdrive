@@ -1,6 +1,17 @@
 package game;
 
 public enum SwitchModes {
+	SM_NONE,
+	SM_NEWGAME,
+	SM_EDITOR,
+	SM_LOAD,
+	SM_MENU,
+	SM_SAVE,
+	SM_GENRANDLAND,
+	SM_LOAD_SCENARIO,
+	SM_START_SCENARIO,
+
+	/*
 	SM_NONE = 0,
 	SM_NEWGAME = 1,
 	SM_EDITOR = 2,
@@ -10,4 +21,5 @@ public enum SwitchModes {
 	SM_GENRANDLAND = 6,
 	SM_LOAD_SCENARIO = 9,
 	SM_START_SCENARIO = 10,
+	*/
 }

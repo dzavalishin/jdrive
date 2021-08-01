@@ -86,7 +86,7 @@ public abstract class Pathfind extends TrackPathFinderTables
 
 
 
-	static void FollowTrack(TileIndex tile, int flags, byte direction, TPFEnumProc enum_proc, TPFAfterProc after_proc, Object data)
+	static void FollowTrack(TileIndex tile, int flags, int direction, TPFEnumProc enum_proc, TPFAfterProc after_proc, Object data)
 	{
 		TrackPathFinder tpf = new TrackPathFinder();
 

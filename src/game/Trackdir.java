@@ -1,5 +1,5 @@
 package game;
-
+/*
 public enum Trackdir {
 	
 	TRACKDIR_DIAG1_NE ( 0),
@@ -78,3 +78,5 @@ public enum Trackdir {
 	}
 	
 }
+
+*/

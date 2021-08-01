@@ -168,7 +168,7 @@ public class TrackPathFinder extends Pathfind
 
 		tpf.rd.cur_length++;
 
-		bits = GetTileTrackStatus(tile, tpf.tracktype);
+		bits = Landscape.GetTileTrackStatus(tile, tpf.tracktype);
 
 		if ((byte)bits != tpf.var2) {
 			bits &= _tpfmode1_and[direction];
@@ -218,7 +218,7 @@ public class TrackPathFinder extends Pathfind
 		tile = new MutableTileIndex( tile_org );
 		direction ^= 2;
 
-		bits = GetTileTrackStatus(tile, tpf.tracktype);
+		bits = Landscape.GetTileTrackStatus(tile, tpf.tracktype);
 		bits |= (bits >> 8);
 
 		if ( (byte)bits != tpf.var2) {
@@ -274,7 +274,7 @@ public class TrackPathFinder extends Pathfind
 		// This addition will sometimes overflow by a single tile.
 		// The use of TILE_MASK here makes sure that we still point at a valid
 		// tile, and then this tile will be in the sentinel row/col, so GetTileTrackStatus will fail.
-		tile = TILE_MASK(tile + TileOffsByDir(direction));
+		tile = TILE_MASK(tile + TileIndex.TileOffsByDir(direction));
 
 		/* Check in case of rail if the owner is the same */
 		if (tpf.tracktype == Global.TRANSPORT_RAIL) {
@@ -288,7 +288,7 @@ public class TrackPathFinder extends Pathfind
 		if (++tpf.rd.cur_length > 50)
 			return;
 
-		bits = GetTileTrackStatus(tile, tpf.tracktype);
+		bits = Landscape.GetTileTrackStatus(tile, tpf.tracktype);
 		bits = (byte)((bits | (bits >> 8)) & _bits_mask[direction]);
 		if (bits == 0)
 			return;
