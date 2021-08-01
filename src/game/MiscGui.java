@@ -706,7 +706,7 @@ public class MiscGui {
 		Gfx.DrawStringMultiLine(str_x, str_y, new StringID( Strings.STR_SPEC_USERSTRING ), 144);
 	}
 
-	void DrawStationCoverageAreaText(int sx, int sy, int mask, int rad) {
+	static void DrawStationCoverageAreaText(int sx, int sy, int mask, int rad) {
 		int x = ViewPort._thd.pos.x;
 		int y = ViewPort._thd.pos.y;
 		AcceptedCargo accepts;
@@ -716,7 +716,7 @@ public class MiscGui {
 		}
 	}
 
-	void CheckRedrawStationCoverage(final Window  w)
+	static void CheckRedrawStationCoverage(final Window  w)
 	{
 		if(0 != (ViewPort._thd.dirty & 1)) {
 			ViewPort._thd.dirty &= ~1;

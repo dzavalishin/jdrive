@@ -30,7 +30,7 @@ public class Gui
 
 
 	/* main_gui.c */
-	public static byte _station_show_coverage;
+	public static int _station_show_coverage;
 	//PlaceProc *_place_proc;
 
 

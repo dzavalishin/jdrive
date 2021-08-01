@@ -40,7 +40,7 @@ public class AirportFTAClass extends Airport // bring in constants
 	 * Bit 0 means the small airport is buildable, etc.
 	 * @todo set availability of airports by year, instead of airplane
 	 */
-	int GetValidAirports()	{
+	static int GetValidAirports()	{
 		int bytemask = Global._avail_aircraft; /// sets the first 3 bytes, 0 - 2, @see AdjustAvailAircraft()
 
 		// 1980-1-1 is -. 21915
