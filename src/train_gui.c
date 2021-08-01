@@ -1,3 +1,5 @@
+#if 0
+
 /* $Id: train_gui.c 3351 2005-12-28 09:40:26Z peter1138 $ */
 
 #include "stdafx.h"
