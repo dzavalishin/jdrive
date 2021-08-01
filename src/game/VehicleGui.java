@@ -13,7 +13,7 @@ public class VehicleGui {
 
 
 
-	Sorting _sorting;
+	static Sorting _sorting;
 
 	static int _internal_name_sorter_id; // internal StringID for default vehicle-names
 	static int _last_vehicle_idx;        // cached index to hopefully speed up name-sorting
@@ -63,7 +63,7 @@ public class VehicleGui {
 			new VehicleMaxSpeedSorter()
 	};
 
-	final int _vehicle_sort_listing[] = {
+	final static int _vehicle_sort_listing[] = {
 			Str.STR_SORT_BY_UNSORTED,
 			Str.STR_SORT_BY_NUMBER,
 			Str.STR_SORT_BY_DROPDOWN_NAME,
@@ -219,7 +219,7 @@ public class VehicleGui {
 	}
 
 	// draw the vehicle profit button in the vehicle list window.
-	void DrawVehicleProfitButton(final Vehicle v, int x, int y)
+	static void DrawVehicleProfitButton(final Vehicle v, int x, int y)
 	{
 		int ormod;
 
@@ -257,7 +257,7 @@ private static void show_cargo(ctype) {
 	 * @param sel selected refit cargo-type in the window
 	 * @return the cargo type that is hightlighted, AcceptedCargo.CT_INVALID if none
 	 */
-	CargoID DrawVehicleRefitWindow(final Vehicle v, int sel)
+	static CargoID DrawVehicleRefitWindow(final Vehicle v, int sel)
 	{
 		int cmask;
 		//CargoID cid, cargo = AcceptedCargo.CT_INVALID;
@@ -1027,7 +1027,7 @@ private static void show_cargo(ctype) {
 			);
 
 
-	void ShowReplaceVehicleWindow(byte vehicletype)
+	static void ShowReplaceVehicleWindow(int vehicletype)
 	{
 		Window w;
 

@@ -3019,7 +3019,7 @@ public class Vehicle implements IPoolItem
 	 *  without loosing the order-list
 	 *
 	 */
-	void BackupVehicleOrders(final Vehicle v, BackuppedOrders bak)
+	static void BackupVehicleOrders(final Vehicle v, BackuppedOrders bak)
 	{
 		/* Save general info */
 		bak.orderindex       = OrderID.get(v.cur_order_index);

@@ -2403,9 +2403,14 @@ public class ViewPort
 		return false;
 	}
 
-	void SetObjectToPlaceWnd(CursorID icon, int mode, Window w)
+	static void SetObjectToPlaceWnd(CursorID icon, int mode, Window w)
 	{
 		SetObjectToPlace(icon, mode, w.window_class, w.window_number);
+	}
+	
+	static void SetObjectToPlaceWnd(int icon, int mode, Window w)
+	{
+		SetObjectToPlace(icon, mode, w.window_class.v, w.window_number.n);
 	}
 
 	//#include "table/animcursors.h"

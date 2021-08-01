@@ -160,7 +160,7 @@ public class TrainGui
 		ShowTrainViewWindow(v);
 	}
 
-	static void CcCloneTrain(boolean success, int tile, int p1, int p2)
+	static void CcCloneTrain(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) ShowTrainViewWindow(Vehicle.GetVehicle(Global._new_train_id));
 	}
@@ -184,7 +184,7 @@ public class TrainGui
 
 			if (BitOps.IS_INT_INSIDE(--pos[0], -show_max, 0)) {
 				Gfx.DrawString(x[0] + 59, y[0] + 2, Engine.GetCustomEngineName(i), sel[0] == 0 ? 0xC : 0x10);
-				DrawTrainEngine(x[0] + 29, y[0] + 6, i,
+				TrainCmd.DrawTrainEngine(x[0] + 29, y[0] + 6, EngineID.get(i),
 					Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 				y[0] += 14;
 			}
@@ -212,7 +212,7 @@ public class TrainGui
 					    && BitOps.HASBIT(ee.player_avail, Global._local_player.id))
 						count++;
 				}
-				SetVScrollCount(w, count);
+				MiscGui.SetVScrollCount(w, count);
 			}
 
 			Global.SetDParam(0, w.as_buildtrain_d().railtype + Str.STR_881C_NEW_RAIL_VEHICLES);
@@ -353,23 +353,23 @@ public class TrainGui
 		return (len * 29) / 8;
 	}
 
-	static void DrawTrainImage(final Vehicle v, int x, int y, int count, int skip, VehicleID selection)
+	static void DrawTrainImage(Vehicle v, int x, int y, int count, int skip, VehicleID selection)
 	{
 		int dx = 0;
 		count *= 8;
 
 		do {
 			if (--skip < 0) {
-				int image = GetTrainImage(v, 6);
+				int image = TrainCmd.GetTrainImage(v, 6);
 				int ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner));
 				int width = v.rail.cached_veh_length;
 
 				if (dx + width <= count) {
 					if(0 != (v.vehstatus & Vehicle.VS_CRASHED))
 						ormod = Sprite.PALETTE_CRASH;
-					Gfx.DrawSprite(image | ormod, x + 14 + WagonLengthToPixels(dx), y + 6 + (is_custom_sprite(Engine.RailVehInfo(v.engine_type.id).image_index) ? _traininfo_vehicle_pitch : 0));
+					Gfx.DrawSprite(image | ormod, x + 14 + WagonLengthToPixels(dx), y + 6 + (Sprite.is_custom_sprite(Engine.RailVehInfo(v.engine_type.id).image_index) ? _traininfo_vehicle_pitch : 0));
 					if (v.index == selection.id)
-						Gfx.DrawFrameRect(x - 1 + WagonLengthToPixels(dx), y - 1, x + WagonLengthToPixels(dx + width) - 1, y + 12, 15, FR_BORDERONLY);
+						Gfx.DrawFrameRect(x - 1 + WagonLengthToPixels(dx), y - 1, x + WagonLengthToPixels(dx + width) - 1, y + 12, 15, Window.FR_BORDERONLY);
 				}
 				dx += width;
 			}
@@ -395,8 +395,11 @@ public class TrainGui
 		num = 0;
 		hnum = 8;
 		//FOR_ALL_VEHICLES(v)
-		Vehicle.forEach( (v) ->
+		//Vehicle.forEach( (v) ->
+		Iterator<Vehicle> ii = Vehicle.getIterator();
+		while(ii.hasNext())
 		{
+			Vehicle v = ii.next();
 			if (v.type == Vehicle.VEH_Train &&
 				  (v.IsFrontEngine() || v.IsFreeWagon()) &&
 					v.tile == tile &&
@@ -407,7 +410,7 @@ public class TrainGui
 					hnum = Math.max(hnum, v.rail.cached_total_length);
 				}
 			}
-		});
+		}
 
 		/* Always have 1 empty row, so people can change the setting of the train */
 		num++;
@@ -428,8 +431,11 @@ public class TrainGui
 
 		// draw all trains
 		//FOR_ALL_VEHICLES(v) 
-		Vehicle.forEach( (v) ->
+		//Vehicle.forEach( (v) ->
+		ii = Vehicle.getIterator();
+		while(ii.hasNext())
 		{
+			Vehicle v = ii.next();
 			if (v.type == Vehicle.VEH_Train && v.IsFrontEngine() &&
 					v.tile == tile && v.rail.track == 0x80 &&
 					--num < 0 && num >= -w.vscroll.cap) {
@@ -447,12 +453,15 @@ public class TrainGui
 
 				y += 14;
 			}
-		});
+		}
 
 		// draw all remaining vehicles
 		//FOR_ALL_VEHICLES(v) 
-		Vehicle.forEach( (v) ->
+		//Vehicle.forEach( (v) ->
+		ii = Vehicle.getIterator();
+		while(ii.hasNext())
 		{
+			Vehicle v = ii.next();
 			if (v.type == Vehicle.VEH_Train && v.IsFreeWagon() &&
 					v.tile == tile && v.rail.track == 0x80 &&
 					--num < 0 && num >= -w.vscroll.cap) {
@@ -467,7 +476,7 @@ public class TrainGui
 				Gfx.DrawStringRightAligned(w.widget.get(6).right - 1, y + 4, Str.STR_TINY_BLACK, 0);	//Draw the counter
 				y += 14;
 			}
-		});
+		}
 	}
 
 	
@@ -614,7 +623,7 @@ public class TrainGui
 		mode = GetVehicleFromTrainDepotWndPt(w, x, y, gdvp);
 
 		// share / copy orders
-		if (ViewPort._thd.place_mode != 0 && mode <= 0) { _place_clicked_vehicle = gdvp.head; return; }
+		if (ViewPort._thd.place_mode != 0 && mode <= 0) { Global._place_clicked_vehicle = gdvp.head; return; }
 
 		v = gdvp.wagon;
 
@@ -627,7 +636,7 @@ public class TrainGui
 				TrainDepotMoveVehicle(v, sel, gdvp.head);
 			} else if (v != null) {
 				w.as_traindepot_d().sel = VehicleID.get(v.index);
-				ViewPort.SetObjectToPlaceWnd( Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner)) + GetTrainImage(v, 6), 4, w);
+				ViewPort.SetObjectToPlaceWnd( Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner)) + TrainCmd.GetTrainImage(v, 6), 4, w);
 				w.SetWindowDirty();
 			}
 			break;
@@ -648,7 +657,7 @@ public class TrainGui
 	 * @param *v is the original vehicle to clone
 	 * @param *w is the window of the depot where the clone is build
 	 */
-	static void HandleCloneVehClick(final Vehicle  v, final Window  w)
+	static void HandleCloneVehClick(Vehicle  v, final Window  w)
 	{
 		if (v == null || v.type != Vehicle.VEH_Train) return;
 
@@ -659,7 +668,7 @@ public class TrainGui
 			if (!v.IsFrontEngine()) return;
 		}
 
-		Cmd.DoCommandP(w.window_number, v.index, Global._ctrl_pressed ? 1 : 0, TrainGui::CcCloneTrain,
+		Cmd.DoCommandP( TileIndex.get( w.window_number.n ), v.index, Global._ctrl_pressed ? 1 : 0, TrainGui::CcCloneTrain,
 			Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_882B_CAN_T_BUILD_RAILROAD_VEHICLE)
 		);
 
@@ -668,7 +677,7 @@ public class TrainGui
 
 	static void ClonePlaceObj(TileIndex tile, final Window  w)
 	{
-		Vehicle  v = CheckMouseOverVehicle();
+		Vehicle  v = ViewPort.CheckMouseOverVehicle();
 
 		if (v != null) HandleCloneVehClick(v, w);
 	}
@@ -759,7 +768,7 @@ public class TrainGui
 					Cmd.DoCommandP(v.tile, v.index, sell_cmd, null, Cmd.CMD_SELL_RAIL_WAGON | Cmd.CMD_MSG(Str.STR_8839_CAN_T_SELL_RAILROAD_VEHICLE));
 				} else {
 					Global._backup_orders_tile = v.tile;
-					BackupVehicleOrders(v, Global._backup_orders_data);
+					Vehicle.BackupVehicleOrders(v, Global._backup_orders_data[0]);
 					if (!Cmd.DoCommandP(v.tile, v.index, sell_cmd, null, Cmd.CMD_SELL_RAIL_WAGON | Cmd.CMD_MSG(Str.STR_8839_CAN_T_SELL_RAILROAD_VEHICLE)))
 						Global._backup_orders_tile = null;
 				}
@@ -828,7 +837,7 @@ public class TrainGui
 	);
 
 
-	void ShowTrainDepotWindow(TileIndex tile)
+	static void ShowTrainDepotWindow(TileIndex tile)
 	{
 		Window w;
 
@@ -859,14 +868,14 @@ public class TrainGui
 			Gfx.DrawString(1, 15, Str.STR_983F_SELECT_CARGO_TYPE_TO_CARRY, 0);
 
 			/* TODO: Support for custom GRFSpecial-specified refitting! --pasky */
-			w.as_refit_d().cargo = DrawVehicleRefitWindow(v, w.as_refit_d().sel);
+			w.as_refit_d().cargo = VehicleGui.DrawVehicleRefitWindow(v, w.as_refit_d().sel).id;
 
 			if (w.as_refit_d().cargo != AcceptedCargo.CT_INVALID) {
 				int cost = Cmd.DoCommandByTile(v.tile, v.index, w.as_refit_d().cargo, Cmd.DC_QUERY_COST, Cmd.CMD_REFIT_RAIL_VEHICLE);
 				if (!Cmd.CmdFailed(cost)) {
 					Global.SetDParam(2, cost);
 					Global.SetDParam(0, Global._cargoc.names_long[w.as_refit_d().cargo].id);
-					Global.SetDParam(1, _returned_refit_amount);
+					Global.SetDParam(1, Global._returned_refit_amount);
 					Gfx.DrawString(1, 137, Str.STR_9840_NEW_CAPACITY_COST_OF_REFIT, 0);
 				}
 			}
@@ -914,8 +923,8 @@ public class TrainGui
 	{
 		Window w;
 		Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, v.index);
-		Global._alloc_wnd_parent_num = v.index;
-		w = Window.AllocateWindowDesc(_rail_vehicle_refit_desc);
+		//Global._alloc_wnd_parent_num = v.index;
+		w = Window.AllocateWindowDesc(_rail_vehicle_refit_desc, v.index);
 		w.window_number = new WindowNumber(v.index);
 		w.caption_color = (byte) v.owner.id;
 		w.as_refit_d().sel = -1;
@@ -993,7 +1002,7 @@ public class TrainGui
 				} break;
 
 				case Order.OT_GOTO_DEPOT: {
-					Depot dep = GetDepot(v.current_order.station);
+					Depot dep = Depot.GetDepot(v.current_order.station);
 					Global.SetDParam(0, dep.town_index);
 					str = Str.STR_HEADING_FOR_TRAIN_DEPOT + psp;
 					Global.SetDParam(1, v.rail.last_speed * 10 >> 4);
@@ -1023,7 +1032,7 @@ public class TrainGui
 
 			/* draw the flag plus orders */
 			Gfx.DrawSprite(0 != (v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.widget.get(5).top + 1);
-			Gfx.DrawStringCenteredTruncated(w.widget.get(5).left + 8, w.widget.get(5).right, w.widget.get(5).top + 1, str, 0);
+			Gfx.DrawStringCenteredTruncated(w.widget.get(5).left + 8, w.widget.get(5).right, w.widget.get(5).top + 1, new StringID(str), 0);
 			w.DrawWindowViewport();
 		}	break;
 
@@ -1288,7 +1297,7 @@ public class TrainGui
 			final Vehicle v;
 			switch (e.widget) {
 			case 2: /* name train */
-				v = Vehicle.GetVehicle(w.window_number);
+				v = Vehicle.GetVehicle(w.window_number.n);
 				Global.SetDParam(0, v.unitnumber.id);
 				MiscGui.ShowQueryString(v.string_id, Str.STR_8865_NAME_TRAIN, 31, 150, w.window_class, w.window_number);
 				break;
@@ -1391,8 +1400,8 @@ public class TrainGui
 		Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, veh);
 		Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, veh);
 
-		Window._alloc_wnd_parent_num = veh;
-		w = Window.AllocateWindowDesc(_train_details_desc);
+		//Window._alloc_wnd_parent_num = veh;
+		w = Window.AllocateWindowDesc(_train_details_desc, veh);
 
 		w.window_number = new WindowNumber( veh );
 		w.caption_color = (byte) v.owner.id;
@@ -1447,13 +1456,13 @@ public class TrainGui
 			int max;
 			int i;
 
-			BuildVehicleList(vl, Vehicle.VEH_Train, owner, station);
-			SortVehicleList(vl);
+			VehicleGui.BuildVehicleList(vl, Vehicle.VEH_Train, owner, station);
+			VehicleGui.SortVehicleList(vl);
 
-			SetVScrollCount(w, vl.list_length);
+			MiscGui.SetVScrollCount(w, vl.list_length);
 
 			// disable 'Sort By' tooltip on Unsorted sorting criteria
-			if (vl.sort_type == SORT_BY_UNSORTED)
+			if (vl.sort_type == VehicleGui.SORT_BY_UNSORTED)
 				w.disabled_state |= (1 << 3);
 
 			/* draw the widgets */
@@ -1474,9 +1483,9 @@ public class TrainGui
 				w.DrawWindowWidgets();
 			}
 			/* draw sorting criteria string */
-			Gfx.DrawString(85, 15, _vehicle_sort_listing[vl.sort_type], 0x10);
+			Gfx.DrawString(85, 15, VehicleGui._vehicle_sort_listing[vl.sort_type], 0x10);
 			/* draw arrow pointing up/down for ascending/descending sorting */
-			Gfx.DoDrawString(vl.flags & VL_DESC ? DOWNARROW : UPARROW, 69, 15, 0x10);
+			Gfx.DoDrawString(0 != (vl.flags & Vehicle.VL_DESC) ? Gfx.DOWNARROW : Gfx.UPARROW, 69, 15, 0x10);
 
 			max = Math.min(w.vscroll.pos + w.vscroll.cap, vl.list_length);
 			for (i = w.vscroll.pos; i < max; ++i) {
@@ -1484,13 +1493,13 @@ public class TrainGui
 				//StringID 
 				int str;
 
-				assert(v.type == Vehicle.VEH_Train && v.owner == owner);
+				assert(v.type == Vehicle.VEH_Train && v.owner.id == owner);
 
-				DrawTrainImage(v, x + 21, y + 6, w.hscroll.cap, 0, Vehicle.INVALID_VEHICLE);
-				DrawVehicleProfitButton(v, x, y + 13);
+				DrawTrainImage(v, x + 21, y + 6, w.hscroll.cap, 0, VehicleID.getInvalid());
+				VehicleGui.DrawVehicleProfitButton(v, x, y + 13);
 
 				Global.SetDParam(0, v.unitnumber.id);
-				if (IsTileDepotType(v.tile, TRANSPORT_RAIL) && (v.vehstatus & Vehicle.VS_HIDDEN))
+				if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_RAIL) && 0 != (v.vehstatus & Vehicle.VS_HIDDEN))
 					str = Str.STR_021F;
 				else
 					str = v.age > v.max_age - 366 ? Str.STR_00E3 : Str.STR_00E2;
@@ -1513,14 +1522,14 @@ public class TrainGui
 		case WE_CLICK: {
 			switch(e.widget) {
 			case 3: /* Flip sorting method ascending/descending */
-				vl.flags ^= VL_DESC;
-				vl.flags |= VL_RESORT;
-				_sorting.train.order = !!(vl.flags & VL_DESC);
+				vl.flags ^= Vehicle.VL_DESC;
+				vl.flags |= Vehicle.VL_RESORT;
+				VehicleGui._sorting.train.order = !!(vl.flags & Vehicle.VL_DESC);
 				w.SetWindowDirty();
 				break;
 
 			case 4: case 5:/* Select sorting criteria dropdown menu */
-				ShowDropDownMenu(w, _vehicle_sort_listing, vl.sort_type, 5, 0, 0);
+				Window.ShowDropDownMenu(w, VehicleGui._vehicle_sort_listing, vl.sort_type, 5, 0, 0);
 				return;
 
 			case 7: { /* Matrix to show vehicles */
@@ -1546,27 +1555,28 @@ public class TrainGui
 			case 9: { /* Build new Vehicle */
 				TileIndex tile;
 
-				if (!IsWindowOfPrototype(w, _player_trains_widgets))
+				if (!Window.IsWindowOfPrototype(w, _player_trains_widgets))
 					break;
 
-				tile = _last_built_train_depot_tile;
+				tile = Depot._last_built_train_depot_tile;
 				do {
-					if (IsTileDepotType(tile, TRANSPORT_RAIL) && tile.IsTileOwner(Global._local_player)) {
+					if (Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL) && tile.IsTileOwner(Global._local_player)) {
 						ShowTrainDepotWindow(tile);
 						ShowBuildTrainWindow(tile);
 						return;
 					}
 
-					tile = TILE_MASK(tile + 1);
-				} while(tile != _last_built_train_depot_tile);
+					tile = tile.iadd(1);
+					tile.TILE_MASK();
+				} while(tile != Depot._last_built_train_depot_tile);
 
-				ShowBuildTrainWindow(0);
+				ShowBuildTrainWindow(null);
 			} break;
 			case 10: {
-				if (!IsWindowOfPrototype(w, _player_trains_widgets))
+				if (!Window.IsWindowOfPrototype(w, _player_trains_widgets))
 					break;
 
-				ShowReplaceVehicleWindow(Vehicle.VEH_Train);
+				VehicleGui.ShowReplaceVehicleWindow(Vehicle.VEH_Train);
 				break;
 	 		}
 
@@ -1576,12 +1586,12 @@ public class TrainGui
 		case WE_DROPDOWN_SELECT: /* we have selected a dropdown item in the list */
 			if (vl.sort_type != e.index) {
 				// value has changed . resort
-				vl.flags |= VL_RESORT;
+				vl.flags |= Vehicle.VL_RESORT;
 				vl.sort_type = e.index;
-				_sorting.train.criteria = vl.sort_type;
+				VehicleGui._sorting.train.criteria = vl.sort_type;
 
 				// enable 'Sort By' if a sorter criteria is chosen
-				if (vl.sort_type != SORT_BY_UNSORTED)
+				if (vl.sort_type != VehicleGui.SORT_BY_UNSORTED)
 					w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 3);
 			}
 			w.SetWindowDirty();
@@ -1589,9 +1599,9 @@ public class TrainGui
 
 		case WE_CREATE: /* set up resort timer */
 			vl.sort_list = null;
-			vl.flags = VL_REBUILD | (_sorting.train.order << (VL_DESC - 1));
-			vl.sort_type = _sorting.train.criteria;
-			vl.resort_timer = Global.DAY_TICKS * PERIODIC_RESORT_DAYS;
+			vl.flags = Vehicle.VL_REBUILD | (VehicleGui._sorting.train.order << (Vehicle.VL_DESC - 1));
+			vl.sort_type = VehicleGui._sorting.train.criteria;
+			vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
 			break;
 
 		case WE_DESTROY:
@@ -1602,8 +1612,8 @@ public class TrainGui
 			if (--vl.resort_timer == 0) {
 				Global.DEBUG_misc(1, "Periodic resort trains list player %d station %d",
 					owner, station);
-				vl.resort_timer = Global.DAY_TICKS * PERIODIC_RESORT_DAYS;
-				vl.flags |= VL_RESORT;
+				vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
+				vl.flags |= Vehicle.VL_RESORT;
 				w.SetWindowDirty();
 			}
 			break;

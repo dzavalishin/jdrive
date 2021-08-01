@@ -2591,8 +2591,8 @@ public class AirCraft {
 
 		Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, v.index);
 
-		Global._alloc_wnd_parent_num = v.index;
-		w = Window.AllocateWindowDesc(_aircraft_refit_desc);
+		//Global._alloc_wnd_parent_num = v.index;
+		w = Window.AllocateWindowDesc(_aircraft_refit_desc, v.index);
 		w.window_number = v.index;
 		w.caption_color = v.owner;
 		w.as_refit_d().sel = -1;
@@ -2768,8 +2768,8 @@ public class AirCraft {
 		Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, veh);
 		Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, veh);
 
-		_alloc_wnd_parent_num = veh;
-		w = AllocateWindowDesc(_aircraft_details_desc);
+		//_alloc_wnd_parent_num = veh;
+		w = AllocateWindowDesc(_aircraft_details_desc, veh);
 		w.window_number = veh;
 		w.caption_color = v.owner;
 		//		w.vscroll.cap = 6;

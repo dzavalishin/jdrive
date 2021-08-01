@@ -611,6 +611,7 @@ public class TileIndex implements Comparable<TileIndex>{
 	{
 		TileIndex ni = new TileIndex(this);
 		ni.tile += diff;
+		// TODO tile mask?
 		return ni;
 	}
 

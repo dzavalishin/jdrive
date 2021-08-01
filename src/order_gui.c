@@ -1,3 +1,5 @@
+#if 0
+
 /* $Id: order_gui.c 3325 2005-12-21 01:14:01Z Darkvater $ */
 
 #include "stdafx.h"
