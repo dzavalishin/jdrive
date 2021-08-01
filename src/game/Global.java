@@ -73,6 +73,17 @@ public class Global {
 	public static final boolean AYSTAR_DEBUG = true;
 	public static final int NPF_TILE_LENGTH = 100;
 
+	/* In certain windows you navigate with the arrow keys. Do not scroll the
+	 * gameview when here. Bitencoded variable that only allows scrolling if all
+	 * elements are zero */
+	//enum {
+	public static final int SCROLL_CON =  0;
+	public static final int SCROLL_EDIT = 1;
+	public static final int SCROLL_SAVE = 2;
+	public static final int SCROLL_CHAT = 4;
+	//};
+	
+	
 	static public Hal hal = new JavaHal();
 	static public Patches _patches = new Patches();
 
@@ -199,6 +210,9 @@ public class Global {
 	public static String _screenshot_name;
 	public static byte _vehicle_design_names;
 	public static int _get_z_hint;
+	public static Town _cleared_town = null;
+	public static int _cleared_town_rating;
+	public static int _caret_timer;
 	
 	// Available aircraft types
 	public static int _avail_aircraft = 0; // TODO who assigns?
@@ -472,8 +486,6 @@ public class Global {
 		return Strings.GetString(string);
 	}
 
-	static Town _cleared_town = null;
-	static int _cleared_town_rating;
 
 
 

@@ -136,9 +136,11 @@ public class Window extends WindowConstants
 		{
 			if( _windows.get(i) == startw )
 			{
+				final int ci = i;
+				
 				return new Iterator<Window>() {
 
-					int curw = i;
+					int curw = ci;
 					
 					@Override
 					public boolean hasNext() {
@@ -323,7 +325,7 @@ public class Window extends WindowConstants
 				return; /* exit if clicked outside of widgets */
 
 			if (w.widget.get(e.widget).tooltips != 0) {
-				GuiShowTooltips(w.widget.get(e.widget).tooltips);
+				MiscGui.GuiShowTooltips(w.widget.get(e.widget).tooltips);
 				return;
 			}
 		}
@@ -776,7 +778,7 @@ public class Window extends WindowConstants
 	 */
 	static Window AllocateWindow(
 			int x, int y, int width, int height,
-			BiConsumer<Window,WindowEvent> proc, WindowClass cls, final Widget[] widget)
+			BiConsumer<Window,WindowEvent> proc, /*WindowClass*/ int cls, final Widget[] widget)
 	{
 		Window w = new Window();
 
@@ -825,7 +827,7 @@ public class Window extends WindowConstants
 
 		// Set up window properties
 		//memset(w, 0, sizeof(Window));
-		w.window_class = cls;
+		w.window_class = new WindowClass( cls );
 		w.flags4 = WF_WHITE_BORDER_MASK; // just opened windows have a white border
 		w.caption_color = (byte) 0xFF;
 		w.left = x;
@@ -2913,6 +2915,16 @@ public class Window extends WindowConstants
 	public void DrawWindowViewport() {
 		ViewPort.DrawWindowViewport(this);
 		
+	}
+
+	public static Window getMain() {
+		for(Window w : Window._windows )
+		{
+			if(w.window_class.v == Window.WC_MAIN_WINDOW)
+				return w;
+		}
+		assert false;
+		return null;
 	}
 
 

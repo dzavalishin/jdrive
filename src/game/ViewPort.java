@@ -1738,7 +1738,7 @@ public class ViewPort
 						y < st.sign.top + 24 &&
 						x >= st.sign.left &&
 						x < st.sign.left + st.sign.width_1 * 2) {
-					Station.ShowStationViewWindow(st.index);
+					StationGui.ShowStationViewWindow(st.index);
 					return true;
 				}
 			}
@@ -1756,7 +1756,7 @@ public class ViewPort
 						y < st.sign.top + 24 &&
 						x >= st.sign.left &&
 						x < st.sign.left + st.sign.width_2 * 4) {
-					Station.ShowStationViewWindow(st.index);
+					StationGui.ShowStationViewWindow(st.index);
 					return true;
 				}
 			}
@@ -1785,7 +1785,7 @@ public class ViewPort
 						y < ss.sign.top + 12 &&
 						x >= ss.sign.left &&
 						x < ss.sign.left + ss.sign.width_1) {
-					SignStruct.ShowRenameSignWindow(ss);
+					Gui.ShowRenameSignWindow(ss);
 					return true;
 				}
 			}
@@ -1803,7 +1803,7 @@ public class ViewPort
 						y < ss.sign.top + 24 &&
 						x >= ss.sign.left &&
 						x < ss.sign.left + ss.sign.width_1 * 2) {
-					SignStruct.ShowRenameSignWindow(ss);
+					Gui.ShowRenameSignWindow(ss);
 					return true;
 				}
 			}
@@ -1821,7 +1821,7 @@ public class ViewPort
 						y < ss.sign.top + 24 &&
 						x >= ss.sign.left &&
 						x < ss.sign.left + ss.sign.width_2 * 4) {
-					SignStruct.ShowRenameSignWindow(ss);
+					Gui.ShowRenameSignWindow(ss);
 					return true;
 				}
 			}
@@ -1850,7 +1850,7 @@ public class ViewPort
 						y < wp.sign.top + 12 &&
 						x >= wp.sign.left &&
 						x < wp.sign.left + wp.sign.width_1) {
-					ShowRenameWaypointWindow(wp);
+					Gui.ShowRenameWaypointWindow(wp);
 					return true;
 				}
 			}
@@ -1868,7 +1868,7 @@ public class ViewPort
 						y < wp.sign.top + 24 &&
 						x >= wp.sign.left &&
 						x < wp.sign.left + wp.sign.width_1 * 2) {
-					ShowRenameWaypointWindow(wp);
+					Gui.ShowRenameWaypointWindow(wp);
 					return true;
 				}
 			}
@@ -1885,7 +1885,7 @@ public class ViewPort
 						y < wp.sign.top + 24 &&
 						x >= wp.sign.left &&
 						x < wp.sign.left + wp.sign.width_2 * 4) {
-					ShowRenameWaypointWindow(wp);
+					Gui.ShowRenameWaypointWindow(wp);
 					return true;
 				}
 			}
@@ -2138,7 +2138,7 @@ public class ViewPort
 		Window._special_mouse_mode = Window.WSM_SIZING;
 	}
 
-	void VpSetPlaceSizingLimit(int limit)
+	static void VpSetPlaceSizingLimit(int limit)
 	{
 		_thd.sizelimit = limit;
 	}

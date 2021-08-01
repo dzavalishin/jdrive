@@ -555,11 +555,11 @@ public class StationGui extends Station  // to get finalants
 		StationGui::StationViewWndProc
 	);
 
-	void ShowStationViewWindow(StationID station)
+	static void ShowStationViewWindow(/*StationID*/ int station)
 	{
 		Window w;
 
-		w = Window.AllocateWindowDescFront(_station_view_desc, station.id);
+		w = Window.AllocateWindowDescFront(_station_view_desc, station);
 		if (w != null) {
 			PlayerID owner = Station.GetStation(w.window_number.n).owner;
 			if (owner.id != Owner.OWNER_NONE) w.caption_color = (byte) owner.id;
