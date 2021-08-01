@@ -707,7 +707,7 @@ public class TrainCmd extends TrainTables
 	/* Check if all the wagons of the given train are in a depot, returns the
 	 * number of cars (including loco) then. If not, sets the error message to
 	 * Str.STR_881A_TRAINS_CAN_ONLY_BE_ALTERED and returns -1 */
-	int CheckTrainStoppedInDepot(final Vehicle v)
+	static int CheckTrainStoppedInDepot(final Vehicle v)
 	{
 		int count;
 		TileIndex tile = v.tile;
@@ -3524,7 +3524,7 @@ public class TrainCmd extends TrainTables
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 	}
 
-	int GetTrainRunningCost(final Vehicle v)
+	static int GetTrainRunningCost(final Vehicle v)
 	{
 		int cost = 0;
 

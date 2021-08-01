@@ -1356,6 +1356,14 @@ public class Player
 		return BitOps.HASBIT(GetPlayer(Global._current_player).avail_railtypes, rail);
 	}
 
+
+	/** Finds out if a Player has a certain railtype available
+	  */
+	public boolean HasRailtypeAvail(int railtype) 
+	{
+			return BitOps.HASBIT(avail_railtypes, railtype);
+	}
+
 	
 	/*
 // Save/load of players

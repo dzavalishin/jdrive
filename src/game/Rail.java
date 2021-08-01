@@ -4351,6 +4351,21 @@ static  byte SignalOnTrack(Track track) {
 		return Global.INVALID_TRANSPORT;
 	}
 
+	
+
+	/** Returns the "best" railtype a player can build.
+	  * As the AI doesn't know what the BEST one is, we
+	  * have our own priority list here. When adding
+	  * new railtypes, modify this function
+	  * @param p the player "in action"
+	  * @return The "best" railtype a player has available
+	  */
+	public static /*RailType*/ int GetBestRailtype(Player p) {
+			if (p.HasRailtypeAvail(RAILTYPE_MAGLEV)) return RAILTYPE_MAGLEV;
+			if (p.HasRailtypeAvail(RAILTYPE_MONO)) return RAILTYPE_MONO;
+			return RAILTYPE_RAIL;
+	}
+
 	/**
 	 * Returns a pointer to the Railtype information for a given railtype
 	 * @param railtype the rail type which the information is requested for

@@ -3045,7 +3045,7 @@ public class AirCraft {
 			if (v != null) {
 				w.as_traindepot_d().sel = v.index;
 				w.SetWindowDirty();
-				SetObjectToPlaceWnd( SPRITE_PALETTE(PLAYER_SPRITE_COLOR(v.owner)) + GetAircraftImage(v, 6), 4, w);
+				ViewPort.SetObjectToPlaceWnd( SPRITE_PALETTE(PLAYER_SPRITE_COLOR(v.owner)) + GetAircraftImage(v, 6), 4, w);
 			}
 			break;
 
@@ -3111,7 +3111,7 @@ public class AirCraft {
 
 				if (BitOps.HASBIT(w.click_state, 8)) {
 					Global._place_clicked_vehicle = null;
-					SetObjectToPlaceWnd(Sprite.SPR_CURSOR_CLONE, VHM_RECT, w);
+					ViewPort.SetObjectToPlaceWnd(Sprite.SPR_CURSOR_CLONE, VHM_RECT, w);
 				} else {
 					ViewPort.ResetObjectToPlace();
 				}

@@ -232,7 +232,7 @@ void DeletePlayerWindows(PlayerID pi);
 byte GetPlayerRailtypes(PlayerID p);
 
 /** Finds out if a Player has a certain railtype available
-  */
+  * /
 static inline bool HasRailtypeAvail(const Player *p, RailType Railtype)
 {
 	return HASBIT(p->avail_railtypes, Railtype);
@@ -247,7 +247,7 @@ static inline bool HasRailtypeAvail(const Player *p, RailType Railtype)
   * new railtypes, modify this function
   * @param p the player "in action"
   * @return The "best" railtype a player has available
-  */
+  * /
 static inline RailType GetBestRailtype(const Player* p)
 {
 	if (HasRailtypeAvail(p, RAILTYPE_MAGLEV)) return RAILTYPE_MAGLEV;

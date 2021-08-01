@@ -323,7 +323,7 @@ VARDEF byte _make_screenshot;
 VARDEF char *_newgrf_files[32];
 
 
-VARDEF Vehicle *_place_clicked_vehicle;
+//VARDEF Vehicle *_place_clicked_vehicle;
 
 VARDEF char _ini_videodriver[16], _ini_musicdriver[16], _ini_sounddriver[16];
 
