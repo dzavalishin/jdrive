@@ -2,7 +2,9 @@ package game;
 
 import java.util.Iterator;
 import java.util.function.Consumer;
+
 import game.util.BitOps;
+import game.util.GameDate;
 
 public class Gui
 {
@@ -52,12 +54,12 @@ public class Gui
 		// XXX: these are not done
 		switch (Global._game_mode) {
 		case GM_MENU:
-			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
+			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, new WindowClass(Window.WC_MAIN_WINDOW), null);
 			ViewPort.AssignWindowViewport( w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
 			ShowSelectGameWindow();
 			break;
 		case GM_NORMAL:
-			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
+			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, new WindowClass(Window.WC_MAIN_WINDOW), null);
 			ViewPort.AssignWindowViewport(w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
 
 			ShowVitalWindows();
@@ -68,7 +70,7 @@ public class Gui
 
 			break;
 		case GM_EDITOR:
-			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
+			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, new WindowClass(Window.WC_MAIN_WINDOW), null);
 			ViewPort.AssignWindowViewport(w, 0, 0, width, height, 0, 0);
 
 			w = Window.AllocateWindowDesc(_toolb_scen_desc,0);
@@ -126,17 +128,19 @@ public class Gui
 		//final char *b = e.edittext.str;
 		int id;
 
-		_Cmd.CMD_text = b;
+		Global._cmd_text = e.str;
 
 		id = _rename_id;
 
 		switch (_rename_what) {
 		case 0: /* Rename a s sign, if string is empty, delete sign */
-			Cmd.DoCommandP(0, id, 0, null, Cmd.CMD_RENAME_SIGN | Cmd.CMD_MSG(Str.STR_280C_CAN_T_CHANGE_SIGN_NAME));
+			Cmd.DoCommandP(null, id, 0, null, Cmd.CMD_RENAME_SIGN | Cmd.CMD_MSG(Str.STR_280C_CAN_T_CHANGE_SIGN_NAME));
 			break;
 		case 1: /* Rename a waypoint */
-			if (*b == '\0') return;
-			Cmd.DoCommandP(0, id, 0, null, Cmd.CMD_RENAME_WAYPOINT | Cmd.CMD_MSG(Str.STR_CANT_CHANGE_WAYPOINT_NAME));
+			//if (*b == '\0') return;
+			if( e.str == null || e.str.length() == 0)
+				return;
+			Cmd.DoCommandP(null, id, 0, null, Cmd.CMD_RENAME_WAYPOINT | Cmd.CMD_MSG(Str.STR_CANT_CHANGE_WAYPOINT_NAME));
 			break;
 	/* #ifdef ENABLE_NETWORK
 		case 2: // Speak to.. 
@@ -194,11 +198,11 @@ public class Gui
 		w.SetWindowDirty();
 
 		if(0 != (w.click_state & mask)) {
-			ResetObjectToPlace();
+			ViewPort.ResetObjectToPlace();
 			return false;
 		}
 
-		SetObjectToPlace(cursor, mode, w.window_class, w.window_number);
+		ViewPort.SetObjectToPlace(cursor, mode, w.window_class.v, w.window_number.n);
 		w.click_state |= mask;
 		Global._place_proc = placeproc;
 		return true;
@@ -219,7 +223,7 @@ public class Gui
 	{
 		if (Global._networking && !Global._network_server) return; // only server can pause the game
 
-		if (Cmd.DoCommandP(0, Global._pause ? 0 : 1, 0, null, Cmd.CMD_PAUSE)) {
+		if (Cmd.DoCommandP(null, Global._pause ? 0 : 1, 0, null, Cmd.CMD_PAUSE)) {
 			// TODO SndPlayFx(SND_15_BEEP);
 		}
 	}
@@ -281,7 +285,7 @@ public class Gui
 
 	static void MenuClickTown(int index)
 	{
-		ShowTownDirectory();
+		TownGui.ShowTownDirectory();
 	}
 
 	static void MenuClickScenMap(int index)
@@ -301,12 +305,12 @@ public class Gui
 
 	static void MenuClickStations(int index)
 	{
-		ShowPlayerStations(index);
+		StationGui.ShowPlayerStations(index);
 	}
 
 	static void MenuClickFinances(int index)
 	{
-		ShowPlayerFinances(index);
+		PlayerGui.ShowPlayerFinances(index);
 	}
 
 	/*#ifdef ENABLE_NETWORK
@@ -431,7 +435,7 @@ public class Gui
 	{
 		_rename_id = ss.index;
 		_rename_what = 0;
-		ShowQueryString(ss.str, Str.STR_280B_EDIT_SIGN_TEXT, 30, 180, 1, 0);
+		MiscGui.ShowQueryString(ss.str, Str.STR_280B_EDIT_SIGN_TEXT, 30, 180, 1, 0);
 	}
 
 	void ShowRenameWaypointWindow(final WayPoint wp)
@@ -454,9 +458,9 @@ public class Gui
 	static void SelectSignTool()
 	{
 		if (Hal._cursor.sprite.id == Sprite.SPR_CURSOR_SIGN) {
-			ResetObjectToPlace();
+			ViewPort.ResetObjectToPlace();
 		} else {
-			SetObjectToPlace(Sprite.SPR_CURSOR_SIGN, 1, 1, 0);
+			ViewPort.SetObjectToPlace(Sprite.SPR_CURSOR_SIGN, 1, 1, 0);
 			Global._place_proc = SignStruct::PlaceProc_Sign;
 		}
 	}
@@ -464,8 +468,8 @@ public class Gui
 	static void MenuClickForest(int index)
 	{
 		switch (index) {
-			case 0: ShowTerraformToolbar();  break;
-			case 1: ShowBuildTreesToolbar(); break;
+			case 0: Terraform.ShowTerraformToolbar();  break;
+			case 1: MiscGui.ShowBuildTreesToolbar(); break;
 			case 2: SelectSignTool();        break;
 		}
 	}
@@ -478,9 +482,9 @@ public class Gui
 	static void MenuClickNewspaper(int index)
 	{
 		switch (index) {
-			case 0: ShowLastNewsMessage(); break;
-			case 1: ShowMessageOptions();  break;
-			case 2: ShowMessageHistory();  break;
+			case 0: NewsItem.ShowLastNewsMessage(); break;
+			case 1: NewsItem.ShowMessageOptions();  break;
+			case 2: NewsItem.ShowMessageHistory();  break;
 		}
 	}
 
@@ -574,7 +578,7 @@ public class Gui
 			}
 
 		case WE_POPUPMENU_SELECT: {
-			int index = GetMenuItemIndex(w, e.pt.x, e.pt.y);
+			int index = Window.GetMenuItemIndex(w, e.pt.x, e.pt.y);
 			int action_id;
 
 
@@ -593,7 +597,7 @@ public class Gui
 			}
 
 		case WE_POPUPMENU_OVER: {
-			int index = GetMenuItemIndex(w, e.pt.x, e.pt.y);
+			int index = Window.GetMenuItemIndex(w, e.pt.x, e.pt.y);
 
 			if (index == -1 || index == w.as_menu_d().sel_index) return;
 
@@ -735,7 +739,7 @@ public class Gui
 
 			if (index < 0) {
 				Window w2 = Window.FindWindowById(Window.WC_MAIN_TOOLBAR,0);
-				if (GetWidgetFromPos(w2, e.pt.x - w2.left, e.pt.y - w2.top) == w.as_menu_d().main_button)
+				if (w2.GetWidgetFromPos(e.pt.x - w2.left, e.pt.y - w2.top) == w.as_menu_d().main_button)
 					index = w.as_menu_d().sel_index;
 			}
 
@@ -750,11 +754,11 @@ public class Gui
 		case WE_POPUPMENU_OVER: {
 			int index;
 			UpdatePlayerMenuHeight(w);
-			index = GetMenuItemIndex(w, e.pt.x, e.pt.y);
+			index = Window.GetMenuItemIndex(w, e.pt.x, e.pt.y);
 
 			// We have a new entry at the top of the list of menu 9 when networking
 			//  so keep that in count
-			if (_networking && w.as_menu_d().main_button == 9) {
+			if (Global._networking && w.as_menu_d().main_button == 9) {
 				if (index > 0) index = GetPlayerIndexFromMenu(index - 1) + 1;
 			} else {
 				index = GetPlayerIndexFromMenu(index);
@@ -763,7 +767,7 @@ public class Gui
 			if (index == -1 || index == w.as_menu_d().sel_index) return;
 
 			w.as_menu_d().sel_index = index;
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 			return;
 			}
 		}
@@ -1025,7 +1029,7 @@ public class Gui
 		final Player p = Player.GetPlayer(Global._local_player);
 		Window w2;
 		w2 = PopupMainToolbMenu(w, 457, 19, Str.STR_1015_RAILROAD_CONSTRUCTION, RAILTYPE_END, ~p.avail_railtypes);
-		WP(w2,menu_d).sel_index = _last_built_railtype;
+		w2.as_menu_d().sel_index = _last_built_railtype;
 	}
 
 	static void ToolbarBuildRoadClick(Window w)
@@ -1094,9 +1098,9 @@ public class Gui
 			w.HandleButtonClick(6);
 			w.InvalidateWidget(5);
 
-			if (Global._date > MinDate) Global.SetDate(ConvertYMDToDay(Global._cur_year - 1, 0, 1));
+			if (Global._date > MinDate) Global.SetDate(GameDate.ConvertYMDToDay(Global._cur_year - 1, 0, 1));
 		}
-		_left_button_clicked = false;
+		Window._left_button_clicked = false;
 	}
 
 	static void ToolbarScenDateForward(Window w)
@@ -1106,9 +1110,9 @@ public class Gui
 			w.HandleButtonClick(7);
 			w.InvalidateWidget(5);
 
-			if (Global._date < MaxDate) Global.SetDate(ConvertYMDToDay(Global._cur_year + 1, 0, 1));
+			if (Global._date < MaxDate) Global.SetDate(GameDate.ConvertYMDToDay(Global._cur_year + 1, 0, 1));
 		}
-		_left_button_clicked = false;
+		Window._left_button_clicked = false;
 	}
 
 	static void ToolbarScenMapTownDir(Window w)
@@ -1145,9 +1149,9 @@ public class Gui
 			if ((in && vp.zoom == 0) || (!in && vp.zoom == 2))
 				return;
 
-			pt = GetTileZoomCenterWindow(in,w);
+			pt = ViewPort.GetTileZoomCenterWindow(in,w);
 			if (pt.x != -1) {
-				ScrollWindowTo(pt.x, pt.y, w);
+				ViewPort.ScrollWindowTo(pt.x, pt.y, w);
 
 				DoZoomInOutWindow(in ? ZOOM_IN : ZOOM_OUT, w);
 			}
@@ -1366,7 +1370,7 @@ public class Gui
 	// and changed OnButtonClick to include the widget as well in the function decleration. Post 0.4.0 - Darkvater
 	static void EditorTerraformClick_Dynamite(Window w)
 	{
-		HandlePlacePushButton(w, 4, Sprite.ANIMCURSOR_DEMOLISH, 1, Gui::PlaceProc_DemolishArea);
+		HandlePlacePushButton(w, 4, Sprite.ANIMCURSOR_DEMOLISH, 1, Terraform::PlaceProc_DemolishArea);
 	}
 
 	static void EditorTerraformClick_LowerBigLand(Window w)
@@ -1381,7 +1385,7 @@ public class Gui
 
 	static void EditorTerraformClick_LevelLand(Window w)
 	{
-		HandlePlacePushButton(w, 7, Sprite.SPR_CURSOR_LEVEL_LAND, 2, Gui::PlaceProc_LevelLand);
+		HandlePlacePushButton(w, 7, Sprite.SPR_CURSOR_LEVEL_LAND, 2, Terraform::PlaceProc_LevelLand);
 	}
 
 	static void EditorTerraformClick_WaterArea(Window w)
@@ -1476,8 +1480,8 @@ public class Gui
 				_editor_terraform_button_proc[e.widget - 4].accept(w);
 				break;
 			case 12: case 13: { /* Increase/Decrease terraform size */
-				int size = (e.click.widget == 12) ? 1 : -1;
-				HandleButtonClick(w, e.click.widget);
+				int size = (e.widget == 12) ? 1 : -1;
+				HandleButtonClick(w, e.widget);
 				size += _terraform_size;
 
 				if (!IS_INT_INSIDE(size, 1, 8 + 1))	return;
@@ -1501,15 +1505,15 @@ public class Gui
 			UnclickSomeWindowButtons(w, ~(1<<4 | 1<<5 | 1<<6 | 1<<7 | 1<<8 | 1<<9 | 1<<10 | 1<<11));
 			break;
 		case WindowEvents.WE_PLACE_OBJ:
-			_place_proc(e.place.tile);
+			_place_proc(e.tile);
 			break;
 		case WindowEvents.WE_PLACE_DRAG:
-			VpSelectTilesWithMethod(e.place.pt.x, e.place.pt.y, e.place.userdata & 0xF);
+			VpSelectTilesWithMethod(e.pt.x, e.pt.y, e.userdata & 0xF);
 			break;
 
 		case WindowEvents.WE_PLACE_MOUSEUP:
-			if (e.click.pt.x != -1) {
-				if ((e.place.userdata & 0xF) == VPM_X_AND_Y) // dragged actions
+			if (e.pt.x != -1) {
+				if ((e.userdata & 0xF) == VPM_X_AND_Y) // dragged actions
 					GUIPlaceProcDragXY(e);
 			}
 			break;
@@ -1542,17 +1546,17 @@ public class Gui
 		ShowEditorTerraformToolBar();
 	}
 
-	void CcBuildTown(boolean success, TileIndex tile, int p1, int p2)
+	static void CcBuildTown(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			//SndPlayTileFx(SND_1F_SPLAT, tile);
-			ResetObjectToPlace();
+			ViewPort.ResetObjectToPlace();
 		}
 	}
 
 	static void PlaceProc_Town(TileIndex tile)
 	{
-		Cmd.DoCommandP(tile, 0, 0, CcBuildTown, Cmd.CMD_BUILD_TOWN | Cmd.CMD_MSG(Str.STR_0236_CAN_T_BUILD_TOWN_HERE));
+		Cmd.DoCommandP(tile, 0, 0, Gui::CcBuildTown, Cmd.CMD_BUILD_TOWN | Cmd.CMD_MSG(Str.STR_0236_CAN_T_BUILD_TOWN_HERE));
 	}
 
 
@@ -1582,54 +1586,54 @@ public class Gui
 		case WE_CLICK:
 			switch (e.widget) {
 			case 4: /* new town */
-				HandlePlacePushButton(w, 4, Sprite.SPR_CURSOR_TOWN, 1, PlaceProc_Town);
+				HandlePlacePushButton(w, 4, Sprite.SPR_CURSOR_TOWN, 1, Gui::PlaceProc_Town);
 				break;
 			case 5: {/* random town */
 				Town t;
 
-				HandleButtonClick(w, 5);
-				_generating_world = true;
-				t = CreateRandomTown(20);
-				_generating_world = false;
+				w.HandleButtonClick(5);
+				Global._generating_world = true;
+				t = Town.CreateRandomTown(20);
+				Global._generating_world = false;
 
 				if (t == null) {
 					Global.ShowErrorMessage(Str.STR_NO_SPACE_FOR_TOWN, Str.STR_CANNOT_GENERATE_TOWN, 0, 0);
 				} else {
-					ScrollMainWindowToTile(t.xy);
+					ViewPort.ScrollMainWindowToTile(t.xy);
 				}
 
 				break;
 			}
 			case 6: {/* many random towns */
-				HandleButtonClick(w, 6);
+				w.HandleButtonClick(6);
 
-				_generating_world = true;
-				_game_mode = GameModes.GM_NORMAL; // little hack to avoid towns of the same size
-				if (!GenerateTowns()) {
+				Global._generating_world = true;
+				Global._game_mode = GameModes.GM_NORMAL; // little hack to avoid towns of the same size
+				if (!Town.GenerateTowns()) {
 					Global.ShowErrorMessage(Str.STR_NO_SPACE_FOR_TOWN, Str.STR_CANNOT_GENERATE_TOWN, 0, 0);
 				}
-				_generating_world = false;
+				Global._generating_world = false;
 
-				_game_mode = GameModes.GM_EDITOR;
+				Global._game_mode = GameModes.GM_EDITOR;
 				break;
 			}
 
 			case 7: case 8: case 9:
-				_new_town_size = e.click.widget - 7;
-				SetWindowDirty(w);
+				_new_town_size = e.widget - 7;
+				w.SetWindowDirty();
 				break;
 			}
 			break;
 
-		case WindowEvents.WE_TIMEOUT:
-			UnclickSomeWindowButtons(w, 1<<5 | 1<<6);
+		case WE_TIMEOUT:
+			w.UnclickSomeWindowButtons(1<<5 | 1<<6);
 			break;
-		case WindowEvents.WE_PLACE_OBJ:
-			_place_proc(e.place.tile);
+		case WE_PLACE_OBJ:
+			Global._place_proc.accept(e.tile);
 			break;
-		case WindowEvents.WE_ABORT_PLACE_OBJ:
+		case WE_ABORT_PLACE_OBJ:
 			w.click_state = 0;
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 			break;
 		}
 	}
@@ -1763,17 +1767,17 @@ public class Gui
 
 		n = 100;
 		do {
-			if (CreateNewIndustry(AdjustTileCoordRandomly(tile, 1), type)) return true;
+			if (null != Industry.CreateNewIndustry(Landscape.AdjustTileCoordRandomly(tile, 1), type)) return true;
 		} while (--n > 0);
 
 		n = 200;
 		do {
-			if (CreateNewIndustry(AdjustTileCoordRandomly(tile, 2), type)) return true;
+			if (null != Industry.CreateNewIndustry(Landscape.AdjustTileCoordRandomly(tile, 2), type)) return true;
 		} while (--n > 0);
 
 		n = 700;
 		do {
-			if (CreateNewIndustry(AdjustTileCoordRandomly(tile, 4), type)) return true;
+			if (null != Industry.CreateNewIndustry(Landscape.AdjustTileCoordRandomly(tile, 4), type)) return true;
 		} while (--n > 0);
 
 		return false;
@@ -1809,13 +1813,13 @@ public class Gui
 				}
 
 				Global._generating_world = true;
-				GenerateIndustries();
+				Industry.GenerateIndustries();
 				Global._generating_world = false;
 			}
 
-			if ((button=e.click.widget) >= 4) {
+			if ((button=e.widget) >= 4) {
 				if (HandlePlacePushButton(w, button, Sprite.SPR_CURSOR_INDUSTRY, 1, null))
-					_industry_type_to_place = _industry_type_list[_opt.landscape][button - 4];
+					_industry_type_to_place = _industry_type_list[GameOptions._opt.landscape][button - 4];
 			}
 			break;
 		case WE_PLACE_OBJ: {
@@ -1825,16 +1829,16 @@ public class Gui
 			type = _industry_type_to_place;
 			if (!AnyTownExists()) {
 				Global.SetDParam(0, type + Str.STR_4802_COAL_MINE);
-				Global.ShowErrorMessage(Str.STR_0286_MUST_BUILD_TOWN_FIRST,Str.STR_0285_CAN_T_BUILD_HERE,e.place.pt.x, e.place.pt.y);
+				Global.ShowErrorMessage(Str.STR_0286_MUST_BUILD_TOWN_FIRST,Str.STR_0285_CAN_T_BUILD_HERE,e.pt.x, e.pt.y);
 				return;
 			}
 
 			Global._current_player = OWNER_NONE;
 			Global._generating_world = true;
 			Global._ignore_restrictions = true;
-			if (!TryBuildIndustry(e.place.tile,type)) {
+			if (!TryBuildIndustry(e.tile,type)) {
 				SetDParam(0, type + Str.STR_4802_COAL_MINE);
-				Global.ShowErrorMessage(_error_message, Str.STR_0285_CAN_T_BUILD_HERE, e.place.pt.x, e.place.pt.y);
+				Global.ShowErrorMessage(_error_message, Str.STR_0285_CAN_T_BUILD_HERE, e.pt.x, e.pt.y);
 			}
 			Global._ignore_restrictions = false;
 			Global._generating_world = false;
@@ -1976,14 +1980,14 @@ public class Gui
 		}
 
 		case WE_CLICK: {
-			if (_game_mode != GameModes.GM_MENU && !BitOps.HASBIT(w.disabled_state, e.click.widget))
-				_toolbar_button_procs[e.click.widget].accept(w);
+			if (_game_mode != GameModes.GM_MENU && !BitOps.HASBIT(w.disabled_state, e.widget))
+				_toolbar_button_procs[e.widget].accept(w);
 		} break;
 
 		case WindowEvents.WE_KEYPRESS: {
 			PlayerID local = (Global._local_player != Owner.OWNER_SPECTATOR) ? _local_player : 0;
 
-			switch (e.keypress.keycode) {
+			switch (e.keycode) {
 			case Window.WKC_F1: case Window.WKC_PAUSE:
 				ToolbarPauseClick(w);
 				break;
@@ -2017,11 +2021,11 @@ public class Gui
 			case 'L': ShowTerraformToolbar(); break;
 			default: return;
 			}
-			e.keypress.cont = false;
+			e.cont = false;
 		} break;
 
 		case WE_PLACE_OBJ: {
-			Global._place_proc(e.place.tile);
+			Global._place_proc(e.tile);
 		} break;
 
 		case WE_ABORT_PLACE_OBJ: {
@@ -2195,11 +2199,11 @@ public class Gui
 
 		case WindowEvents.WE_CLICK: {
 			if (Global._game_mode == GameModes.GM_MENU) return;
-			_scen_toolbar_button_procs[e.click.widget].accept(w);
+			_scen_toolbar_button_procs[e.widget].accept(w);
 		} break;
 
 		case WindowEvents.WE_KEYPRESS:
-			switch (e.keypress.keycode) {
+			switch (e.keycode) {
 			case Window.WKC_F1: ToolbarPauseClick(w); break;
 			case Window.WKC_F2: ShowGameOptions(); break;
 			case Window.WKC_F3: MenuClickSaveLoad(0); break;
@@ -2218,12 +2222,12 @@ public class Gui
 			break;
 
 		case WindowEvents.WE_PLACE_OBJ: {
-			_place_proc(e.place.tile);
+			Global._place_proc.accept(e.tile);
 		} break;
 
 		case WindowEvents.WE_ABORT_PLACE_OBJ: {
 			w.click_state &= ~(1<<25);
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 		} break;
 
 		case WindowEvents.WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
@@ -2261,7 +2265,7 @@ public class Gui
 		StringID str;
 		//final char *s;
 		//char *d;
-		DrawPixelInfo tmp_dpi, *old_dpi;
+		DrawPixelInfo tmp_dpi, old_dpi;
 		int x;
 		char buffer[256];
 
@@ -2303,13 +2307,13 @@ public class Gui
 	static void StatusBarWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT: {
-			final Player p = (Global._local_player == Owner.OWNER_SPECTATOR) ? null : GetPlayer(_local_player);
+		case WE_PAINT: {
+			final Player p = (Global._local_player.id == Owner.OWNER_SPECTATOR) ? null : Player.GetPlayer(Global._local_player);
 
 			w.DrawWindowWidgets();
-			Global.SetDParam(0, _date);
+			Global.SetDParam(0, Global._date);
 			Gfx.DrawStringCentered(
-				70, 1, (_pause || _patches.status_long_date) ? Str.STR_00AF : Str.STR_00AE, 0
+				70, 1, (Global._pause || Global._patches.status_long_date) ? Str.STR_00AF : Str.STR_00AE, 0
 			);
 
 			if (p != null) {
@@ -2319,54 +2323,54 @@ public class Gui
 			}
 
 			// Draw status bar
-			if (w.message.msg) { // true when saving is active
-				DrawStringCentered(320, 1, Str.STR_SAVING_GAME, 0);
-			} else if (_do_autosave) {
-				DrawStringCentered(320, 1,	Str.STR_032F_AUTOSAVE, 0);
-			} else if (_pause) {
-				DrawStringCentered(320, 1,	Str.STR_0319_PAUSED, 0);
-			} else if (w.as_def_d().data_1 > -1280 && FindWindowById(WC_NEWS_WINDOW,0) == null && _statusbar_news_item.string_id != 0) {
+			if (0 != w.message.msg) { // true when saving is active
+				Gfx.DrawStringCentered(320, 1, Str.STR_SAVING_GAME, 0);
+			} else if (Global._do_autosave) {
+				Gfx.DrawStringCentered(320, 1,	Str.STR_032F_AUTOSAVE, 0);
+			} else if (Global._pause) {
+				Gfx.DrawStringCentered(320, 1,	Str.STR_0319_PAUSED, 0);
+			} else if (w.as_def_d().data_1 > -1280 && Window.FindWindowById(Window.WC_NEWS_WINDOW,0) == null && Global._statusbar_news_item.string_id != null) {
 				// Draw the scrolling news text
-				if (!DrawScrollingStatusText(_statusbar_news_item, w.as_def_d().data_1))
+				if (!DrawScrollingStatusText(Global._statusbar_news_item, w.as_def_d().data_1))
 					w.as_def_d().data_1 = -1280;
 			} else {
 				if (p != null) {
 					// This is the default text
-					SetDParam(0, p.name_1);
-					SetDParam(1, p.name_2);
-					DrawStringCentered(320, 1,	Str.STR_02BA, 0);
+					Global.SetDParam(0, p.name_1);
+					Global.SetDParam(1, p.name_2);
+					Gfx.DrawStringCentered(320, 1,	Str.STR_02BA, 0);
 				}
 			}
 
-			if (WP(w, def_d).data_2 > 0) Gfx.DrawSprite(Sprite.SPR_BLOT | PALETTE_TO_RED, 489, 2);
+			if (w.as_def_d().data_2 > 0) Gfx.DrawSprite(Sprite.SPR_BLOT | Sprite.PALETTE_TO_RED, 489, 2);
 		} break;
 
-		case WindowEvents.WE_MESSAGE:
-			w.message.msg = e.message.msg;
-			SetWindowDirty(w);
+		case WE_MESSAGE:
+			w.message.msg = e.msg;
+			w.SetWindowDirty();
 			break;
 
-		case WindowEvents.WE_CLICK:
-			switch (e.click.widget) {
-				case 1: ShowLastNewsMessage(); break;
-				case 2: if (_local_player != OWNER_SPECTATOR) ShowPlayerFinances(_local_player); break;
-				default: ResetObjectToPlace();
+		case WE_CLICK:
+			switch (e.widget) {
+				case 1: NewsItem.ShowLastNewsMessage(); break;
+				case 2: if (Global._local_player.id != Owner.OWNER_SPECTATOR) Players.ShowPlayerFinances(Global._local_player); break;
+				default: ViewPort.ResetObjectToPlace();
 			}
 			break;
 
 		case WindowEvents.WE_TICK: {
-			if (_pause) return;
+			if (Global._pause) return;
 
-			if (WP(w, def_d).data_1 > -1280) { /* Scrolling text */
-				WP(w, def_d).data_1 -= 2;
-				InvalidateWidget(w, 1);
+			if (w.as_def_d().data_1 > -1280) { /* Scrolling text */
+				w.as_def_d().data_1 -= 2;
+				Window.InvalidateWidget(w, 1);
 			}
 
-			if (WP(w, def_d).data_2 > 0) { /* Red blot to show there are new unread newsmessages */
-				WP(w, def_d).data_2 -= 2;
-			} else if (WP(w, def_d).data_2 < 0) {
-				WP(w, def_d).data_2 = 0;
-				InvalidateWidget(w, 1);
+			if (w.as_def_d().data_2 > 0) { /* Red blot to show there are new unread newsmessages */
+				w.as_def_d().data_2 -= 2;
+			} else if (w.as_def_d().data_2 < 0) {
+				w.as_def_d().data_2 = 0;
+				Window.InvalidateWidget(w, 1);
 			}
 
 			break;
@@ -2431,12 +2435,12 @@ public class Gui
 
 		case WE_KEYPRESS:
 			if (e.keycode == Window.WKC_BACKQUOTE) {
-				IConsoleSwitch();
-				e.keypress.cont = false;
+				Console.IConsoleSwitch();
+				e.cont = false;
 				break;
 			}
 
-			switch (e.keypress.keycode) {
+			switch (e.keycode) {
 				case 'Q' | Window.WKC_CTRL:
 				case 'Q' | Window.WKC_META:
 					AskExitGame();
@@ -2445,13 +2449,13 @@ public class Gui
 
 			if (Global._game_mode == GameModes.GM_MENU) break;
 
-			switch (e.keypress.keycode) {
+			switch (e.keycode) {
 				case 'C':
 				case 'Z': {
 					Point pt = GetTileBelowCursor();
 					if (pt.x != -1) {
 						ScrollMainWindowTo(pt.x, pt.y);
-						if (e.keypress.keycode == 'Z') MaxZoomIn();
+						if (e.keycode == 'Z') MaxZoomIn();
 					}
 					break;
 				}
@@ -2492,7 +2496,7 @@ public class Gui
 
 				default: return;
 			}
-			e.keypress.cont = false;
+			e.cont = false;
 			break;
 		}
 	}

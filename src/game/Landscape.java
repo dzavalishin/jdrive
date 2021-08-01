@@ -721,7 +721,7 @@ public class Landscape extends GenLandTable
 		TrainCmd.OnTick_Train();
 	}
 
-	static TileIndex AdjustTileCoordRandomly(TileIndex a, byte rng)
+	static TileIndex AdjustTileCoordRandomly(TileIndex a, int rng)
 	{
 		int rn = rng;
 		int r = Global.Random();

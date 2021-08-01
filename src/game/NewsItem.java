@@ -654,7 +654,7 @@ public class NewsItem {
 		}
 	}
 
-	void ShowLastNewsMessage()
+	static void ShowLastNewsMessage()
 	{
 		if (_forced_news == INVALID_NEWS) {
 			ShowNewsMessage(_current_news);
@@ -818,7 +818,7 @@ public class NewsItem {
 			NewsItem::MessageHistoryWndProc
 			);
 
-	void ShowMessageHistory()
+	static void ShowMessageHistory()
 	{
 		Window w;
 
@@ -1018,7 +1018,7 @@ public class NewsItem {
 			NewsItem::MessageOptionsWndProc
 			);
 
-	void ShowMessageOptions()
+	static void ShowMessageOptions()
 	{
 		Window.DeleteWindowById(Window.WC_GAME_OPTIONS, 0);
 		Window.AllocateWindowDesc(_message_options_desc, 0);

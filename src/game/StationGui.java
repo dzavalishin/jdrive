@@ -284,11 +284,11 @@ public class StationGui extends Station  // to get finalants
 	);
 
 
-	void ShowPlayerStations(PlayerID player)
+	static void ShowPlayerStations(/*PlayerID*/ int player)
 	{
 		Window w;
 
-		w = Window.AllocateWindowDescFront(_player_stations_desc, player.id);
+		w = Window.AllocateWindowDescFront(_player_stations_desc, player);
 		if (w != null) {
 			w.caption_color = (byte)w.window_number.n;
 			w.vscroll.cap = 12;

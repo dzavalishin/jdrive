@@ -581,7 +581,7 @@ public class Global {
 	}
 
 
-	void SetDate(int date)
+	static void SetDate(int date)
 	{
 		YearMonthDay ymd = new YearMonthDay();
 		GameDate.ConvertDayToYMD(ymd, _date = date);

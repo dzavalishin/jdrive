@@ -418,7 +418,7 @@ public class MiscGui {
 			);
 
 
-	void ShowBuildTreesToolbar()
+	static void ShowBuildTreesToolbar()
 	{
 		Window.AllocateWindowDescFront(_build_trees_desc, 0);
 	}

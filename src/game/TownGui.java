@@ -535,7 +535,7 @@ public abstract class TownGui extends Town
 			);
 
 
-	void ShowTownDirectory()
+	static void ShowTownDirectory()
 	{
 		Window  w = Window.AllocateWindowDescFront(_town_directory_desc, 0);
 

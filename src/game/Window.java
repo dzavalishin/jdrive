@@ -2022,7 +2022,7 @@ public class Window extends WindowConstants
 	}
 
 
-	int GetMenuItemIndex(final Window w, int x, int y)
+	static int GetMenuItemIndex(final Window w, int x, int y)
 	{
 		if ((x -= w.left) >= 0 && x < w.width && (y -= w.top + 1) >= 0) {
 			y /= 10;

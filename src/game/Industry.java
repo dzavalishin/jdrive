@@ -1635,7 +1635,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		}
 	}
 
-	void GenerateIndustries()
+	static void GenerateIndustries()
 	{
 		int i = 0;
 		final byte [] b = _industry_create_table[GameOptions._opt.landscape];
