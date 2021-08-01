@@ -115,7 +115,7 @@ public class WayPoint implements IPoolItem
 	 * @param tile Tile of WayPoint
 	 * @return WayPoint
 	 */
-	pblic static WayPoint GetWaypointByTile(TileIndex tile)
+	public static WayPoint GetWaypointByTile(TileIndex tile)
 	{
 		assert(tile.IsTileType( TileTypes.MP_RAILWAY) && IsRailWaypoint(tile));
 		return GetWaypoint(tile.getMap().m2);
@@ -143,7 +143,7 @@ private void WaypointPoolNewBlock(int start_item)
 	/* Create a new WayPoint */
 	private static WayPoint AllocateWaypoint()
 	{
-		WayPoint ret = null;
+		WayPoint [] ret = {null};
 
 		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
 		_waypoint_pool.forEach((i,wp) ->
@@ -155,11 +155,11 @@ private void WaypointPoolNewBlock(int start_item)
 				wp.clear();
 				wp.index = index;
 
-				ret = wp;
+				ret[0] = wp;
 			}
 		});
 
-		if( ret != null ) return ret;
+		if( ret[0] != null ) return ret[0];
 		
 		/* Check if we can add a block to the pool */
 		if (_waypoint_pool.AddBlockToPool())
@@ -209,14 +209,17 @@ private void WaypointPoolNewBlock(int start_item)
 		town_index = Town.ClosestTownFromTile(xy, (int)-1).index;
 
 		//memset(used_waypoint, 0, sizeof(used_waypoint));
-		used_waypoint.clear();
+		//used_waypoint.clear();
 		/* Find an unused WayPoint number belonging to this town */
 		//for (local_wp = GetWaypoint(0); local_wp != null; local_wp = (local_wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(local_wp.index + 1) : null) 
 		_waypoint_pool.forEach((ii,local_wp) ->
 		{
 			if (this == local_wp)
-				continue;
-
+			{
+				//continue;
+				return;
+			}
+			
 			if (local_wp.xy != null && local_wp.string.id == Str.STR_NULL && local_wp.town_index == town_index)
 				used_waypoint[local_wp.town_cn] = true;
 		});
@@ -235,8 +238,11 @@ private void WaypointPoolNewBlock(int start_item)
 		int thres = 8, cur_dist;
 
 		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
-		_waypoint_pool.forEach((i,wp) ->
+		//_waypoint_pool.forEach((i,wp) ->
+		Iterator<WayPoint> ii = getIterator();
+		while(ii.hasNext())
 		{
+			WayPoint wp = ii.next();
 			if ( (0 != wp.deleted) && (null != wp.xy) ) {
 				cur_dist = Map.DistanceManhattan(tile, wp.xy);
 				if (cur_dist < thres) {
@@ -244,7 +250,7 @@ private void WaypointPoolNewBlock(int start_item)
 					best = wp;
 				}
 			}
-		});
+		}
 
 		return best;
 	}
@@ -257,7 +263,8 @@ private void WaypointPoolNewBlock(int start_item)
 	{
 		//WayPoint wp;
 
-		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
+		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null)
+		/* TODO UpdateAllWaypointCustomGraphics
 		_waypoint_pool.forEach((ix,wp) ->
 		{
 			int i;
@@ -273,6 +280,7 @@ private void WaypointPoolNewBlock(int start_item)
 				}
 			}
 		});
+		*/
 	}
 
 	/** Convert existing rail to WayPoint. Eg build a WayPoint station over
@@ -294,11 +302,22 @@ private void WaypointPoolNewBlock(int start_item)
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		/* if custom gfx are used, make sure it is within bounds */
-		if (p1 >= GetNumCustomStations(STAT_CLASS_WAYP)) return Cmd.CMD_ERROR;
+		// TODO if (p1 >= GetNumCustomStations(STAT_CLASS_WAYP)) return Cmd.CMD_ERROR;
 
-		if (!tile.IsTileType(TileTypes.MP_RAILWAY) || ((dir = 0, tile.getMap().m5 != 1) && (dir = 1, _tile.getMap().m5 != 2)))
+		//if (!tile.IsTileType(TileTypes.MP_RAILWAY) || ((dir = 0, tile.getMap().m5 != 1) && (dir = 1, tile.getMap().m5 != 2)))
+		//	return Cmd.return_cmd_error(Str.STR_1005_NO_SUITABLE_RAILROAD_TRACK);
+
+		if (!tile.IsTileType(TileTypes.MP_RAILWAY))
 			return Cmd.return_cmd_error(Str.STR_1005_NO_SUITABLE_RAILROAD_TRACK);
 
+		if(tile.getMap().m5 == 1)
+			dir = 0;
+		else if(tile.getMap().m5 == 2)
+			dir = 1;
+		else
+			return Cmd.return_cmd_error(Str.STR_1005_NO_SUITABLE_RAILROAD_TRACK);
+		
+		
 		if (!tile.CheckTileOwnership())
 			return Cmd.CMD_ERROR;
 
@@ -306,7 +325,7 @@ private void WaypointPoolNewBlock(int start_item)
 
 		tileh = tile.GetTileSlope(null);
 		if (tileh != 0) {
-			if (!Global._patches.build_on_slopes || IsSteepTileh(tileh) || !(tileh & (0x3 << dir)) || !(tileh & ~(0x3 << dir)))
+			if (!Global._patches.build_on_slopes ||  TileIndex.IsSteepTileh(tileh) || 0==(tileh & (0x3 << dir)) || 0==(tileh & ~(0x3 << dir)))
 				return Cmd.return_cmd_error(Str.STR_0007_FLAT_LAND_REQUIRED);
 		}
 
@@ -317,24 +336,25 @@ private void WaypointPoolNewBlock(int start_item)
 			if (wp == null) return Cmd.CMD_ERROR;
 
 			wp.town_index = 0;
-			wp.string = Str.STR_NULL;
+			wp.string = new StringID(Str.STR_NULL);
 			wp.town_cn = 0;
 		}
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			final StationSpec spec = null;
-			boolean reserved = PBSTileReserved(tile) != 0;
-			Landscape.ModifyTile(tile, MP_MAP2 | MP_MAP5, wp.index, RAIL_TYPE_WAYPOINT | dir);
+			boolean reserved = Pbs.PBSTileReserved(tile) != 0;
+			Landscape.ModifyTile(tile, TileTypes.MP_MAP2 | TileTypes.MP_MAP5, wp.index, RAIL_TYPE_WAYPOINT | dir);
 
-			if (BitOps.GB(p1, 0, 8) < GetNumCustomStations(STAT_CLASS_WAYP))
-				spec = GetCustomStation(STAT_CLASS_WAYP, BitOps.GB(p1, 0, 8));
+			// TODO GetCustomStation
+			//if (BitOps.GB(p1, 0, 8) < Station.GetNumCustomStations(STAT_CLASS_WAYP))
+			//	spec = Station.GetCustomStation(STAT_CLASS_WAYP, BitOps.GB(p1, 0, 8));
 
 			if (spec != null) {
 				//SETBIT(Global._m[tile.getTile()].m3, 4);
 				tile.setBit_m3(4);
-				wp.stat_id = BitOps.GB(p1, 0, 8);
+				wp.stat_id = (byte) BitOps.GB(p1, 0, 8);
 				wp.grfid = spec.grfid;
-				wp.localidx = spec.localidx;
+				wp.localidx = (byte) spec.localidx;
 			} else {
 				// Specified custom graphics do not exist, so use default.
 				//CLRBIT(Global._m[tile.getTile()].m3, 4);
@@ -347,7 +367,7 @@ private void WaypointPoolNewBlock(int start_item)
 			if (reserved) {
 				Pbs.PBSReserveTrack(tile, dir);
 			} else {
-				PBSClearTrack(tile, dir);
+				Pbs.PBSClearTrack(tile, dir);
 			}
 
 			wp.deleted = 0;
@@ -361,7 +381,7 @@ private void WaypointPoolNewBlock(int start_item)
 			wp.RedrawWaypointSign();
 		}
 
-		return _price.build_train_depot;
+		return Global._price.build_train_depot;
 	}
 
 	/* Internal handler to delete a WayPoint */
@@ -373,7 +393,7 @@ private void WaypointPoolNewBlock(int start_item)
 
 		order.type = Order.OT_GOTO_WAYPOINT;
 		order.station = index;
-		DeleteDestinationFromVehicleOrder(order);
+		Order.DeleteDestinationFromVehicleOrder(order);
 
 		if (string.id != Str.STR_NULL)
 			Global.DeleteName(string);
@@ -408,7 +428,7 @@ private void WaypointPoolNewBlock(int start_item)
 		WayPoint wp;
 
 		/* Make sure it's a WayPoint */
-		if (!tile.§IsTileType(MP_RAILWAY) || !IsRailWaypoint(tile))
+		if (!tile.IsTileType(TileTypes.MP_RAILWAY) || !IsRailWaypoint(tile))
 			return Cmd.CMD_ERROR;
 
 		if (!tile.CheckTileOwnership() && !(Global._current_player.id == Owner.OWNER_WATER))
@@ -423,22 +443,22 @@ private void WaypointPoolNewBlock(int start_item)
 			wp = GetWaypointByTile(tile);
 
 			wp.deleted = 30; // let it live for this many days before we do the actual deletion.
-			RedrawWaypointSign(wp);
+			wp.RedrawWaypointSign();
 
 			if (justremove) {
-				boolean reserved = PBSTileReserved(tile) != 0;
-				Landscape.ModifyTile(tile, MP_MAP2_CLEAR | MP_MAP5, 1<<direction);
+				boolean reserved = Pbs.PBSTileReserved(tile) != 0;
+				Landscape.ModifyTile(tile, TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP5, 1<<direction);
 				//CLRBIT(_m[tile].m3, 4);
 				tile.clrBit_m3(4);
 				tile.getMap().m4 = 0;
 				if (reserved) {
-					PBSReserveTrack(tile, direction);
+					Pbs.PBSReserveTrack(tile, direction);
 				} else {
-					PBSClearTrack(tile, direction);
+					Pbs.PBSClearTrack(tile, direction);
 				}
 			} else {
 				Landscape.DoClearSquare(tile);
-				SetSignalsOnBothDir(tile, direction);
+				Rail.SetSignalsOnBothDir(tile, direction);
 			}
 		}
 
@@ -482,7 +502,7 @@ private void WaypointPoolNewBlock(int start_item)
 				wp.string = str;
 				wp.town_cn = 0;
 
-				UpdateWaypointSign(wp);
+				wp.UpdateWaypointSign();
 				Hal.MarkWholeScreenDirty();
 			} else {
 				Global.DeleteName(str);
@@ -509,7 +529,7 @@ private void WaypointPoolNewBlock(int start_item)
 
 		stat.train_tile = stat.xy = wp.xy;
 		stat.town = Town.GetTown(wp.town_index);
-		stat.string_id = wp.string.id == Str.STR_NULL ? /* FIXME? */ 0 : wp.string;
+		stat.string_id = wp.string.id == Str.STR_NULL ? /* FIXME? */ 0 : wp.string.id;
 		stat.build_date = wp.build_date;
 		stat.class_id = 6;
 		stat.stat_id = wp.stat_id;
@@ -527,22 +547,22 @@ private void WaypointPoolNewBlock(int start_item)
 		int relocation;
 		final DrawTileSprites cust;
 		//final DrawTileSeqStruct seq;
-		final RailtypeInfo rti = GetRailTypeInfo(railtype);
+		final RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
 		int ormod, img;
 
-		ormod = SPRITE_PALETTE(PLAYER_SPRITE_COLOR(_local_player));
+		ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(_local_player));
 
 		x += 33;
 		y += 17;
 
-		stat = GetCustomStation(STAT_CLASS_WAYP, stat_id);
-		if (stat == null) {
+		// TODO stat = GetCustomStation(STAT_CLASS_WAYP, stat_id);
+		//if (stat == null) {
 			// stat is null for default waypoints and when WayPoint graphics are
 			// not loaded.
-			DrawDefaultWaypointSprite(x, y, railtype);
+			Rail.DrawDefaultWaypointSprite(x, y, railtype);
 			return;
-		}
-
+		//}
+		/*
 		relocation = GetCustomStationRelocation(stat, null, 1);
 		// emulate station tile - open with building
 		// add 1 to get the other direction
@@ -565,6 +585,7 @@ private void WaypointPoolNewBlock(int start_item)
 			int image = seq.image + relocation;
 			Gfx.DrawSprite((image & Sprite.SPRITE_MASK) | ormod, x + pt.x, y + pt.y);
 		}
+		*/
 	}
 	
 	
@@ -625,7 +646,7 @@ static final SaveLoad _waypoint_desc[] = {
 			wp = GetWaypoint(index);
 			SlObject(wp, _waypoint_desc);
 		}
-	}*/
+	}
 
 	ChunkHandler chandler = new ChunkHandler( "CHKP", ChunkHandler.CH_ARRAY | ChunkHandler.CH_LAST ) {
 		
@@ -652,7 +673,7 @@ static final SaveLoad _waypoint_desc[] = {
 	final ChunkHandler _waypoint_chunk_handlers[] = {
 			chandler
 	};
-
+	*/
 
 
 }

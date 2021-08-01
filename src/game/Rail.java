@@ -2079,7 +2079,7 @@ public class Rail extends RailTables {
 		}
 	}
 
-	void DrawDefaultWaypointSprite(int x, int y, /*RailType*/ int railtype)
+	static void DrawDefaultWaypointSprite(int x, int y, /*RailType*/ int railtype)
 	{
 		final DrawTrackSeqStruct dtss = _track_depot_layout_table[4];
 		final RailtypeInfo rti = GetRailTypeInfo(railtype);

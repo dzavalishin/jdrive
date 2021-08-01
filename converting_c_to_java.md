@@ -4,7 +4,7 @@
 
 byte -> int
 
-clever use of ,
+* clever use of ,
 
 ```
 ( bonus += 10, age > 10 ) ||
@@ -13,8 +13,27 @@ clever use of ,
 ( bonus += 100, true )
 ```
 
+* idiotic use of ,
 
-simple pointers -> one el arrays
+```
+		//if (!tile.IsTileType(TileTypes.MP_RAILWAY) || ((dir = 0, tile.getMap().m5 != 1) && (dir = 1, _tile.getMap().m5 != 2)))
+		//	return Cmd.return_cmd_error(Str.STR_1005_NO_SUITABLE_RAILROAD_TRACK);
+
+		if (!tile.IsTileType(TileTypes.MP_RAILWAY))
+			return Cmd.return_cmd_error(Str.STR_1005_NO_SUITABLE_RAILROAD_TRACK);
+
+		if(tile.getMap().m5 == 1)
+			dir = 0;
+		else if(_tile.getMap().m5 == 2)
+			dir = 1;
+		else
+			return Cmd.return_cmd_error(Str.STR_1005_NO_SUITABLE_RAILROAD_TRACK);
+
+```
+
+
+
+* simple pointers -> one el arrays
 
 ```
 modify( int[] x )

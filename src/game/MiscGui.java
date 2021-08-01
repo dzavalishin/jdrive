@@ -1255,9 +1255,9 @@ public class MiscGui {
 
 	//extern void StartupEngines();
 
-	/*
 	static void SaveLoadDlgWndProc(Window w, WindowEvent e)
 	{
+		/*
 		static FiosItem o_dir;
 
 		switch (e.event) {
@@ -1437,8 +1437,8 @@ public class MiscGui {
 			w.vscroll.cap += e.sizing.diff.y / 10;
 		} break;
 		}
-	}
 	*/
+	}
 	
 	static final WindowDesc _load_dialog_desc = new WindowDesc(
 			Window.WDP_CENTER, Window.WDP_CENTER, 257, 294,

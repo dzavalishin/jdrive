@@ -128,10 +128,10 @@ public class Pbs {
 		0xFFFF, 0xFFFF, 0xFFFF, 0x3F3F, 0x3F3F, 0x3F3F, 0x3F3F, 0xFFFF
 	};
 
-	void PBSReserveTrack(TileIndex tile, Track track) 
+	static void PBSReserveTrack(TileIndex tile, /*Track*/ int track) 
 	{
 		assert(tile.IsValidTile());
-		assert(track.ordinal() <= 5);
+		assert(track <= 5);
 		
 		switch (tile.GetTileType()) 
 		{
@@ -144,15 +144,15 @@ public class Pbs {
 					int encrt = BitOps.GB(tile.getMap().m4, 4, 4); // get current encoded info (see comments at top of file)
 
 					if (encrt == 0) // nothing reserved before
-						encrt = track.ordinal() + 1;
-					else if (encrt == (track.ordinal()^1) + 1) // opposite track reserved before
+						encrt = track + 1;
+					else if (encrt == (track^1) + 1) // opposite track reserved before
 						encrt |= 8;
 
 					tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 4, 4, encrt);
 				}
 				break;
 			case MP_TUNNELBRIDGE:
-				tile.getMap().m4 |= (1 << track.ordinal()) & 3;
+				tile.getMap().m4 |= (1 << track) & 3;
 				break;
 			case MP_STATION:
 				tile.getMap().m3 = BitOps.RETSETBIT(tile.getMap().m3, 6);
@@ -235,10 +235,10 @@ public class Pbs {
 		}
 	}
 
-	void PBSClearTrack(TileIndex tile, Track track) 
+	static void PBSClearTrack(TileIndex tile, /*Track*/int track) 
 	{
 		assert(tile.IsValidTile());
-		assert(track.ordinal() <= 5);
+		assert(track <= 5);
 		
 		switch (tile.GetTileType()) 
 		{
@@ -250,18 +250,18 @@ public class Pbs {
 					// normal rail track
 					int encrt = BitOps.GB(tile.getMap().m4, 4, 4);
 
-					if (encrt == track.ordinal() + 1)
+					if (encrt == track + 1)
 						encrt = 0;
-					else if (encrt == track.ordinal() + 1 + 8)
-						encrt = (track.ordinal()^1) + 1;
-					else if (encrt == (track.ordinal()^1) + 1 + 8)
+					else if (encrt == track + 1 + 8)
+						encrt = (track^1) + 1;
+					else if (encrt == (track^1) + 1 + 8)
 						encrt &= 7;
 
 					tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 4, 4, encrt);
 				}
 				break;
 			case MP_TUNNELBRIDGE:
-				tile.getMap().m4 &= ~((1 << track.ordinal()) & 3);
+				tile.getMap().m4 &= ~((1 << track) & 3);
 				break;
 			case MP_STATION:
 				tile.getMap().m3 = BitOps.RETCLRBIT(tile.getMap().m3, 6);
