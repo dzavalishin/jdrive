@@ -1,3 +1,4 @@
+#if 0
 /* $Id: tunnelbridge_cmd.c 3308 2005-12-15 17:55:59Z tron $ */
 
 /** @file tunnelbridge_cmd.c
