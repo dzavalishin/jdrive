@@ -1268,14 +1268,18 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	}
 
 
-	static void GetAcceptedCargo_TunnelBridge(TileIndex tile, AcceptedCargo ac)
+	static AcceptedCargo GetAcceptedCargo_TunnelBridge(TileIndex tile)
 	{
+		AcceptedCargo ac = new AcceptedCargo();
+		return ac;
 		/* not used */
 	}
 
 
-	static void GetTileDesc_TunnelBridge(TileIndex tile, TileDesc *td)
+	static TileDesc GetTileDesc_TunnelBridge(TileIndex tile)
 	{
+		TileDesc td = new TileDesc();
+		
 		if ((tile.getMap().m5 & 0x80) == 0) {
 			td.str =
 					(BitOps.GB(tile.getMap().m5, 2, 2) == 0) ? Str.STR_5017_RAILROAD_TUNNEL : Str.STR_5018_ROAD_TUNNEL;
@@ -1283,13 +1287,14 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			td.str = _bridge_tile_str[BitOps.GB(tile.getMap().m5, 1, 2) << 4 | BitOps.GB(tile.getMap().m2, 4, 4)];
 
 			/* scan to the end of the bridge, that's where the owner is stored */
-			if (tile.getMap().m5 & 0x40) {
-				TileIndexDiff delta = BitOps.GB(tile.getMap().m5, 0, 1) ? TileIndex.TileDiffXY(0, -1) : TileIndex.TileDiffXY(-1, 0);
+			if(0 != (tile.getMap().m5 & 0x40)) {
+				TileIndexDiff delta = BitOps.GB(tile.getMap().m5, 0, 1) != 0 ? TileIndex.TileDiffXY(0, -1) : TileIndex.TileDiffXY(-1, 0);
 
-				do tile += delta; while (tile.getMap().m5 & 0x40);
+				do tile = tile.iadd( delta ); while (0 != (tile.getMap().m5 & 0x40));
 			}
 		}
-		td.owner = GetTileOwner(tile);
+		td.owner = tile.GetTileOwner().id;
+		return td;
 	}
 
 
@@ -1301,21 +1306,21 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	static void TileLoop_TunnelBridge(TileIndex tile)
 	{
 		if (GameOptions._opt.landscape == Landscape.LT_HILLY) {
-			if (GetTileZ(tile) > GameOptions._opt.snow_line) {
-				if (!(tile.getMap().m4 & 0x80)) {
+			if (tile.GetTileZ() > GameOptions._opt.snow_line) {
+				if (0==(tile.getMap().m4 & 0x80)) {
 					tile.getMap().m4 |= 0x80;
-					MarkTileDirtyByTile(tile);
+					tile.MarkTileDirtyByTile();
 				}
 			} else {
-				if (tile.getMap().m4 & 0x80) {
+				if(0 != (tile.getMap().m4 & 0x80)) {
 					tile.getMap().m4 &= ~0x80;
-					MarkTileDirtyByTile(tile);
+					tile.MarkTileDirtyByTile();
 				}
 			}
 		} else if (GameOptions._opt.landscape == Landscape.LT_DESERT) {
-			if (GetMapExtraBits(tile) == 1 && !(tile.getMap().m4&0x80)) {
+			if (tile.GetMapExtraBits() == 1 && 0==(tile.getMap().m4&0x80)) {
 				tile.getMap().m4 |= 0x80;
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 			}
 		}
 
@@ -1409,7 +1414,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 		if (BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
 			z = GetSlopeZ(x, y) - v.z_pos;
-			if (myMath.abs(z) > 2)
+			if (Math.abs(z) > 2)
 				return 8;
 
 			if (v.type == Vehicle.VEH_Train) {
@@ -1419,17 +1424,17 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				vdir = v.direction >> 1;
 
 				if (v.rail.track != 0x40 && dir == vdir) {
-					if (IsFrontEngine(v) && fc == _tunnel_fractcoord_1[dir]) {
+					if (v.IsFrontEngine() && fc == _tunnel_fractcoord_1[dir]) {
 						if (v.spritenum < 4)
 							//SndPlayVehicleFx(SND_05_TRAIN_THROUGH_TUNNEL, v);
 						return 0;
 					}
 					if (fc == _tunnel_fractcoord_2[dir]) {
 						if (v.next == null)
-							PBSClearTrack(v.tile, FIND_FIRST_BIT(v.u.rail.track));
+							Pbs.PBSClearTrack(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track));
 						v.tile = tile;
 						v.rail.track = 0x40;
-						v.vehstatus |= VS_HIDDEN;
+						v.vehstatus |= Vehicle.VS_HIDDEN;
 						return 4;
 					}
 				}
@@ -1437,9 +1442,9 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				if (dir == (vdir^2) && fc == _tunnel_fractcoord_3[dir] && z == 0) {
 					/* We're at the tunnel exit ?? */
 					v.tile = tile;
-					v.u.rail.track = _exit_tunnel_track[dir];
-					assert(v.u.rail.track);
-					v.vehstatus &= ~VS_HIDDEN;
+					v.rail.track = (byte) _exit_tunnel_track[dir];
+					assert(v.rail.track != 0);
+					v.vehstatus &= ~Vehicle.VS_HIDDEN;
 					return 4;
 				}
 			} else if (v.type == Vehicle.VEH_Road) {
@@ -1448,13 +1453,13 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				vdir = v.direction >> 1;
 
 				// Enter tunnel?
-				if (v.u.road.state != 0xFF && dir == vdir) {
+				if (v.road.state != 0xFF && dir == vdir) {
 					if (fc == _tunnel_fractcoord_4[dir] ||
 							fc == _tunnel_fractcoord_5[dir]) {
 
 						v.tile = tile;
-						v.u.road.state = 0xFF;
-						v.vehstatus |= VS_HIDDEN;
+						v.road.state = 0xFF;
+						v.vehstatus |= Vehicle.VS_HIDDEN;
 						return 4;
 					} else {
 						return 0;
@@ -1467,9 +1472,9 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 						fc == _tunnel_fractcoord_7[dir]) &&
 						z == 0) {
 					v.tile = tile;
-					v.u.road.state = _road_exit_tunnel_state[dir];
-					v.u.road.frame = _road_exit_tunnel_frame[dir];
-					v.vehstatus &= ~VS_HIDDEN;
+					v.road.state = _road_exit_tunnel_state[dir];
+					v.road.frame = _road_exit_tunnel_frame[dir];
+					v.vehstatus &= ~Vehicle.VS_HIDDEN;
 					return 4;
 				}
 			}
@@ -1479,7 +1484,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 				if (tile.GetTileSlope(h) != 0)
 					h.v += 8; // Compensate for possible foundation
-				if (!(tile.getMap().m5 & 0x40) || // start/end tile of bridge
+				if (0==(tile.getMap().m5 & 0x40) || // start/end tile of bridge
 						Math.abs(h.v - v.z_pos) > 2) { // high above the ground . on the bridge
 					/* modify speed of vehicle */
 					int spd = _bridge[GetBridgeType(tile)].speed;

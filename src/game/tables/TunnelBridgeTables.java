@@ -69,7 +69,7 @@ public class TunnelBridgeTables {
 	
 
 	//static final StringID _bridge_tile_str[(MAX_BRIDGES + 3) + (MAX_BRIDGES + 3)] = {
-	static final /*StringID*/int _bridge_tile_str[] = {
+	protected static final /*StringID*/int _bridge_tile_str[] = {
 			Str.STR_501F_WOODEN_RAIL_BRIDGE,
 			Str.STR_5020_CONCRETE_RAIL_BRIDGE,
 			Str.STR_501C_STEEL_GIRDER_RAIL_BRIDGE,
