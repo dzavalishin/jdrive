@@ -681,6 +681,10 @@ public class TileIndex implements Comparable<TileIndex>{
 		return Landscape.GetTileTrackStatus(this, mode);
 	}
 
+	public static TileIndex TILE_ADDXY(TileIndex tile, int i, int j) {		
+		return tile.iadd(i, j);
+	}
+
 
 }
 

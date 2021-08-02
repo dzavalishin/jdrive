@@ -1,3 +1,5 @@
+#if 0
+
 /* $Id: water_land.h 2781 2005-08-01 16:31:19Z ludde $ */
 
 typedef struct WaterDrawTileStruct {
