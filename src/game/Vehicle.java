@@ -988,7 +988,7 @@ public class Vehicle implements IPoolItem
 		return (Vehicle) VehicleFromPos(tile, ti, Vehicle::EnsureNoVehicleProcZ);
 	}
 
-	public static Vehicle FindVehicleBetween(TileIndex from, TileIndex to, byte z)
+	public static Vehicle FindVehicleBetween(TileIndex from, TileIndex to, int z)
 	{
 		int x1 = from.TileX();
 		int y1 = from.TileY();

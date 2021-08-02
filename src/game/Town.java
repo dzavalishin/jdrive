@@ -2226,7 +2226,7 @@ public class Town extends TownTables implements IPoolItem
 			{ 96, 384, 768},	// Hostile
 	};
 
-	static boolean CheckforTownRating(TileIndex tile, int flags, Town t, byte type)
+	static boolean CheckforTownRating(TileIndex tile, int flags, Town t, int type)
 	{
 		int modemod;
 

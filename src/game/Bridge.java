@@ -15,7 +15,7 @@ public class Bridge
 	public /*PalSpriteID*/ int sprite;  ///< the sprite which is used in the GUI (possibly with a recolor sprite)
 	public /*StringID*/ int material;   ///< the string that contains the bridge description
 	//PalSpriteID **sprite_table; ///< table of sprites for drawing the bridge
-	public PalSpriteID [][] sprite_table; ///< table of sprites for drawing the bridge
+	public /*PalSpriteID*/ int [][] sprite_table; ///< table of sprites for drawing the bridge
 	public int  flags;          ///< bit 0 set: disable drawing of far pillars.
 
 	static public final int MAX_BRIDGES = 13;
@@ -27,7 +27,7 @@ public class Bridge
 
 	static BridgeData  _bridgedata;
 
-	public Bridge(int i, int j, int k, int l, int m, int n, int str, PalSpriteID[][] object, int o) {
+	public Bridge(int i, int j, int k, int l, int m, int n, int str, int[][] object, int o) {
 		avail_year = i;
 		min_length = j;
 		max_length = k;

@@ -679,7 +679,7 @@ public class TunnelBridgeTables {
 		0x0,
 	};
 
-	static final int[] _bridge_sprite_table_2[] = {
+	public static final int[] _bridge_sprite_table_2[] = {
 		_bridge_sprite_table_2_0,
 		_bridge_sprite_table_2_0,
 		_bridge_sprite_table_2_0,
@@ -689,7 +689,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_2_1,
 	};
 
-	static final int[] _bridge_sprite_table_4[] = {
+	public static final int[] _bridge_sprite_table_4[] = {
 		_bridge_sprite_table_4_0,
 		_bridge_sprite_table_4_1,
 		_bridge_sprite_table_4_2,
@@ -699,7 +699,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_4_6,
 	};
 
-	static final int[] _bridge_sprite_table_5[] = {
+	public static final int[] _bridge_sprite_table_5[] = {
 		_bridge_sprite_table_5_0,
 		_bridge_sprite_table_5_1,
 		_bridge_sprite_table_5_2,
@@ -709,7 +709,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_5_6,
 	};
 
-	static final int[] _bridge_sprite_table_3[] = {
+	public static final int[] _bridge_sprite_table_3[] = {
 		_bridge_sprite_table_3_0,
 		_bridge_sprite_table_3_1,
 		_bridge_sprite_table_3_2,
@@ -719,7 +719,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_3_6,
 	};
 
-	static final int[] _bridge_sprite_table_6[] = {
+	public static final int[] _bridge_sprite_table_6[] = {
 		_bridge_sprite_table_6_0,
 		_bridge_sprite_table_6_1,
 		_bridge_sprite_table_6_2,
@@ -729,7 +729,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_6_3,
 	};
 
-	static final int[] _bridge_sprite_table_7[] = {
+	public static final int[] _bridge_sprite_table_7[] = {
 		_bridge_sprite_table_7_0,
 		_bridge_sprite_table_7_1,
 		_bridge_sprite_table_7_2,
@@ -739,7 +739,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_7_3,
 	};
 
-	static final int[] _bridge_sprite_table_8[] = {
+	public static final int[] _bridge_sprite_table_8[] = {
 		_bridge_sprite_table_8_0,
 		_bridge_sprite_table_8_1,
 		_bridge_sprite_table_8_2,
@@ -749,7 +749,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_8_3,
 	};
 
-	static final int[] _bridge_sprite_table_0[] = {
+	public static final int[] _bridge_sprite_table_0[] = {
 		_bridge_sprite_table_0_0,
 		_bridge_sprite_table_0_0,
 		_bridge_sprite_table_0_0,
@@ -759,7 +759,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_0_1,
 	};
 
-	static final int[] _bridge_sprite_table_1[] = {
+	public static final int[] _bridge_sprite_table_1[] = {
 		_bridge_sprite_table_1_0,
 		_bridge_sprite_table_1_0,
 		_bridge_sprite_table_1_0,
@@ -769,7 +769,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_1_1,
 	};
 
-	static final int[] _bridge_sprite_table_9[] = {
+	public static final int[] _bridge_sprite_table_9[] = {
 		_bridge_sprite_table_9_0,
 		_bridge_sprite_table_9_0,
 		_bridge_sprite_table_9_0,
@@ -779,7 +779,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_4_6,
 	};
 
-	static final int[] _bridge_sprite_table_10[] = {
+	public static final int[] _bridge_sprite_table_10[] = {
 		_bridge_sprite_table_10_0,
 		_bridge_sprite_table_10_1,
 		_bridge_sprite_table_10_2,
@@ -789,7 +789,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_4_6,
 	};
 
-	static final int[] _bridge_sprite_table_11[] = {
+	public static final int[] _bridge_sprite_table_11[] = {
 		_bridge_sprite_table_11_0,
 		_bridge_sprite_table_11_1,
 		_bridge_sprite_table_11_2,
@@ -799,7 +799,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_5_6,
 	};
 
-	static final int [][] _bridge_sprite_table_12 = {
+	public static final int [][] _bridge_sprite_table_12 = {
 		_bridge_sprite_table_12_0,
 		_bridge_sprite_table_12_1,
 		_bridge_sprite_table_12_2,
@@ -809,7 +809,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_3_6,
 	};
 
-	static final int [][][] _bridge_sprite_table = {
+	public static final int [][][] _bridge_sprite_table = {
 		_bridge_sprite_table_0,
 		_bridge_sprite_table_1,
 		_bridge_sprite_table_2,
@@ -825,7 +825,7 @@ public class TunnelBridgeTables {
 		_bridge_sprite_table_12
 	};
 
-	static final int [][] _bridge_poles_table = {
+	public static final int [][] _bridge_poles_table = {
 		_bridge_sprite_table_0_poles,
 		_bridge_sprite_table_1_poles,
 		_bridge_sprite_table_2_poles,
