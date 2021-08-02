@@ -456,12 +456,12 @@ public class Vehicle implements IPoolItem
 		return count;		
 	}
 
-	
+
 	public void DeleteVehicleChain()
 	{
 		DeleteVehicleChain(this);
 	}
-	
+
 	static void DeleteVehicleChain(Vehicle v)
 	{
 		do {
@@ -823,17 +823,17 @@ public class Vehicle implements IPoolItem
 
 	private static Iterator<Vehicle> getIteratorFrom(int id) {
 		Iterator<Vehicle> ii = getIterator();
-		
+
 		while( ii.hasNext() )
 		{
 			Vehicle v = ii.next();
 			if( v.index == id )
 				return ii;
 		}
-		
+
 		return null;
 	}
-	
+
 
 
 	//public static final int INVALID_COORD = (-0x8000);
@@ -1127,7 +1127,7 @@ public class Vehicle implements IPoolItem
 			while(ii.hasNext())
 			{
 				Vehicle v = ii.next();
-				
+
 				skip_vehicles[0].id++;
 				if (v.type == 0)
 				{
@@ -2801,7 +2801,7 @@ public class Vehicle implements IPoolItem
 
 		if( 0 != (v.vehstatus & VS_CRASHED)) 
 			return Rail.INVALID_TRACKDIR;
-			//return Trackdir.INVALID_TRACKDIR;
+		//return Trackdir.INVALID_TRACKDIR;
 
 		switch(v.type)
 		{
@@ -3142,6 +3142,18 @@ public class Vehicle implements IPoolItem
 	}
 	public TileIndex GetStationTileForVehicle(Station st) {
 		return Station.GetStationTileForVehicle(this, st);
+	}
+
+	public void forEachWagon(Consumer<Vehicle> c) 
+	{
+		Vehicle v = GetFirstVehicleInChain();
+
+		while(v != null) 
+		{ 
+			c.accept(v); 
+			v = v.next;  
+		}
+
 	}
 
 	/*

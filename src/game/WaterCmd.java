@@ -226,26 +226,43 @@ public class WaterCmd extends WaterTables
 		if (Global._game_mode != GameModes.GM_EDITOR && (sx != x && sy != y)) return Cmd.CMD_ERROR;
 
 		cost = 0;
-		BEGIN_TILE_LOOP(tile, size_x, size_y, TileXY(sx, sy)) {
+		int err = 0;
+		//BEGIN_TILE_LOOP(tile, size_x, size_y, TileXY(sx, sy)) 
+		TileIndex.forAll( size_x, size_y, TileIndex.TileXY(sx, sy), (tile) ->
+		{
 			ret = 0;
-			if (GetTileSlope(tile, null) != 0) return Cmd.return_cmd_error(Str.STR_0007_FLAT_LAND_REQUIRED);
+			if (tile.GetTileSlope(null) != 0)
+			{
+				err = Cmd.return_cmd_error(Str.STR_0007_FLAT_LAND_REQUIRED);
+				return true;
+			}
 
 				// can't make water of water!
 				if (tile.IsTileType( TileTypes.MP_WATER)) {
 					Global._error_message = Str.STR_1007_ALREADY_BUILT;
 				} else {
 					/* is middle piece of a bridge? */
-					if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && tile.getMap().m5 & 0x40) { /* build under bridge */
-						if (tile.getMap().m5 & 0x20) // transport route under bridge
-							return Cmd.return_cmd_error(Str.STR_5800_OBJECT_IN_THE_WAY);
+					if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && 0 != (tile.getMap().m5 & 0x40) ) { /* build under bridge */
+						if(0 != (tile.getMap().m5 & 0x20)) // transport route under bridge
+						{
+							err = Cmd.return_cmd_error(Str.STR_5800_OBJECT_IN_THE_WAY);
+							return true;
+						}
 
-						if (tile.getMap().m5 & 0x18) // already water under bridge
-							return Cmd.return_cmd_error(Str.STR_1007_ALREADY_BUILT);
+						if(0 != (tile.getMap().m5 & 0x18)) // already water under bridge
+						{
+							err = Cmd.return_cmd_error(Str.STR_1007_ALREADY_BUILT);
+							return true;
+						}
 					/* no bridge? then try to clear it. */
 					} else
 						ret = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 
-					if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
+					if (Cmd.CmdFailed(ret))
+					{
+						err = Cmd.CMD_ERROR;
+						return true;
+					}
 					cost += ret;
 
 					/* execute modifications */
@@ -261,9 +278,13 @@ public class WaterCmd extends WaterTables
 					}
 
 					cost += Global._price.clear_water;
+					
+					return false;
 				}
-		} END_TILE_LOOP(tile, size_x, size_y, 0);
+		}); // END_TILE_LOOP(tile, size_x, size_y, 0);
 
+		if( err != 0  ) return err;
+		
 		return (cost == 0) ? Cmd.CMD_ERROR : cost;
 	}
 
@@ -482,8 +503,10 @@ public class WaterCmd extends WaterTables
 		return ti.tileh;
 	}
 
-	static void GetAcceptedCargo_Water(TileIndex tile, AcceptedCargo ac)
+	static AcceptedCargo GetAcceptedCargo_Water(TileIndex tile)
 	{
+		AcceptedCargo ac = new AcceptedCargo();
+		return ac;
 		/* not used */
 	}
 
@@ -602,29 +625,32 @@ public class WaterCmd extends WaterTables
 
 				v.vehstatus |= Vehicle.VS_CRASHED;
 				v.road.crashed_ctr = 2000;	// max 2220, disappear pretty fast
-				RebuildVehicleLists();
+				VehicleGui.RebuildVehicleLists();
 			} else if (v.type == Vehicle.VEH_Train) {
 				Vehicle  u;
 
-				v = GetFirstVehicleInChain(v);
+				v = v.GetFirstVehicleInChain();
 				u = v;
-				if (IsFrontEngine(v)) pass = 4; // driver
+				if (v.IsFrontEngine()) pass = 4; // driver
 
 				// crash all wagons, and count passangers
-				BEGIN_ENUM_WAGONS(v)
-					if (v.cargo_type == AcceptedCargo.CT_PASSENGERS) pass += v.cargo_count;
-					v.vehstatus |= Vehicle.VS_CRASHED;
-				END_ENUM_WAGONS(v)
+				//BEGIN_ENUM_WAGONS(v)
+				v.forEachWagon( (vw) -> 
+				{
+					if (vw.cargo_type == AcceptedCargo.CT_PASSENGERS) pass += vw.cargo_count;
+					vw.vehstatus |= Vehicle.VS_CRASHED;
+				});
+				//END_ENUM_WAGONS(v)
 
 				v = u;
 				v.rail.crash_anim_pos = 4000; // max 4440, disappear pretty fast
-				RebuildVehicleLists();
+				VehicleGui.RebuildVehicleLists();
 			} else {
 				return;
 			}
 
 			InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
-			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile);
+			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 
 			Global.SetDParam(0, pass);
 			NewsItem.AddNewsItem(Str.STR_B006_FLOOD_VEHICLE_DESTROYED,
@@ -636,20 +662,21 @@ public class WaterCmd extends WaterTables
 		}
 	}
 
+	private static final TileIndexDiffC _tile_loop_offs_array[][] = {
+			// tile to mod																shore?				shore?
+			{new TileIndexDiffC(-1,  0), new TileIndexDiffC(0, 0), new TileIndexDiffC(0, 1), new TileIndexDiffC(-1,  0), new TileIndexDiffC(-1,  1)},
+			{new TileIndexDiffC( 0,  1), new TileIndexDiffC(0, 1), new TileIndexDiffC(1, 1), new TileIndexDiffC( 0,  2), new TileIndexDiffC( 1,  2)},
+			{new TileIndexDiffC( 1,  0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 1), new TileIndexDiffC( 2,  0), new TileIndexDiffC( 2,  1)},
+			{new TileIndexDiffC( 0, -1), new TileIndexDiffC(0, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC( 0, -1), new TileIndexDiffC( 1, -1)}
+		};
+	
 	// called from tunnelbridge_cmd
 	void TileLoop_Water(TileIndex tile)
 	{
 		int i;
-		static final TileIndexDiffC _tile_loop_offs_array[][5] = {
-			// tile to mod																shore?				shore?
-			{{-1,  0}, {0, 0}, {0, 1}, {-1,  0}, {-1,  1}},
-			{{ 0,  1}, {0, 1}, {1, 1}, { 0,  2}, { 1,  2}},
-			{{ 1,  0}, {1, 0}, {1, 1}, { 2,  0}, { 2,  1}},
-			{{ 0, -1}, {0, 0}, {1, 0}, { 0, -1}, { 1, -1}}
-		};
 
-		if (BitOps.IS_INT_INSIDE(tile.TileX(), 1, MapSizeX() - 3 + 1) &&
-				BitOps.IS_INT_INSIDE(tile.TileY(), 1, MapSizeY() - 3 + 1)) {
+		if (BitOps.IS_INT_INSIDE(tile.TileX(), 1, Global.MapSizeX() - 3 + 1) &&
+				BitOps.IS_INT_INSIDE(tile.TileY(), 1, Global.MapSizeY() - 3 + 1)) {
 			for (i = 0; i != lengthof(_tile_loop_offs_array); i++) {
 				TileLoopWaterHelper(tile, _tile_loop_offs_array[i]);
 			}
@@ -659,18 +686,18 @@ public class WaterCmd extends WaterTables
 		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 		// edges
-		if (tile.TileX() == 0 && BitOps.IS_INT_INSIDE(tile.TileY(), 1, MapSizeY() - 3 + 1)) //NE
+		if (tile.TileX() == 0 && BitOps.IS_INT_INSIDE(tile.TileY(), 1, Global.MapSizeY() - 3 + 1)) //NE
 			TileLoopWaterHelper(tile, _tile_loop_offs_array[2]);
 
-		if (tile.TileX() == MapSizeX() - 2 && BitOps.IS_INT_INSIDE(tile.TileY(), 1, MapSizeY() - 3 + 1)) { //SW
+		if (tile.TileX() == Global.MapSizeX() - 2 && BitOps.IS_INT_INSIDE(tile.TileY(), 1, Global.MapSizeY() - 3 + 1)) { //SW
 			TileLoopWaterHelper(tile, _tile_loop_offs_array[0]);
 		}
 
-		if (tile.TileY() == 0 && BitOps.IS_INT_INSIDE(tile.TileX(), 1, MapSizeX() - 3 + 1)) { //NW
+		if (tile.TileY() == 0 && BitOps.IS_INT_INSIDE(tile.TileX(), 1, Global.MapSizeX() - 3 + 1)) { //NW
 			TileLoopWaterHelper(tile, _tile_loop_offs_array[1]);
 		}
 
-		if (tile.TileY() == MapSizeY() - 2 && BitOps.IS_INT_INSIDE(tile.TileX(), 1, MapSizeX() - 3 + 1)) { //SE
+		if (tile.TileY() == Global.MapSizeY() - 2 && BitOps.IS_INT_INSIDE(tile.TileX(), 1, Global.MapSizeX() - 3 + 1)) { //SE
 			TileLoopWaterHelper(tile, _tile_loop_offs_array[3]);
 		}
 	}

@@ -93,6 +93,16 @@ public class TileIndex implements Comparable<TileIndex>{
 
 
 
+	/**
+	 * Iterate over a tiles rectangle.
+	 * 
+	 * TODO Rename to forEach
+	 * 
+	 * @param w - rectangle width
+	 * @param h - height
+	 * @param tile - start pos
+	 * @param c - code to run for each tile, breaks loop if returns true
+	 */
 	public static void forAll( int w, int h, TileIndex tile, Function<TileIndex,Boolean> c )
 	{
 		forAll( w, h, tile.getTile(), c );		
