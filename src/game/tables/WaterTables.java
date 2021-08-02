@@ -8,14 +8,14 @@ public class WaterTables
 	/* $Id: water_land.h 2781 2005-08-01 16:31:19Z ludde $ */
 
 	public static class WaterDrawTileStruct {
-		int delta_x;
-		int delta_y;
-		int delta_z;
-		int width;
-		int height;
-		int unk;
+		public int delta_x;
+		public int delta_y;
+		public int delta_z;
+		public int width;
+		public int height;
+		public int unk;
 		//SpriteID 
-		int image;
+		public int image;
 
 		public WaterDrawTileStruct(int i, int j, int k, int l, int m, int n, int img) {
 			delta_x = i;
@@ -40,7 +40,7 @@ public class WaterTables
 
 	static public final  WaterDrawTileStruct _shipdepot_display_seq_2[] = {
 			BEGIN(0xFDD),
-			new WaterDrawTileStruct( 0,  0, 0, 16, 1, 0x14, 0xFEA },
+			new WaterDrawTileStruct( 0,  0, 0, 16, 1, 0x14, 0xFEA ),
 			new WaterDrawTileStruct( 0, 15, 0, 16, 1, 0x14, 0xFE6 | Sprite.PALETTE_MODIFIER_COLOR ),
 			END(0)
 };
@@ -58,7 +58,7 @@ static public final  WaterDrawTileStruct _shipdepot_display_seq_4[] = {
 		END(0)
 };
 
-static public final  WaterDrawTileStruct* public final  _shipdepot_display_seq[] = {
+static public final  WaterDrawTileStruct []  _shipdepot_display_seq[] = {
 		_shipdepot_display_seq_1,
 		_shipdepot_display_seq_2,
 		_shipdepot_display_seq_3,
@@ -66,90 +66,90 @@ static public final  WaterDrawTileStruct* public final  _shipdepot_display_seq[]
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_0[] = {
-		BEGIN(SPR_CANALS_BASE + 6),
-		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 0 + 1 },
-		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 4 + 1 },
+		BEGIN(Sprite.SPR_CANALS_BASE + 6),
+		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 0 + 1 ),
+		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 4 + 1 ),
 		END(0)
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_1[] = {
-		BEGIN(SPR_CANALS_BASE + 5),
-		new WaterDrawTileStruct(   0, 0, 0, 1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 0 ),
-		new WaterDrawTileStruct( 0xF, 0, 0, 1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 4 ),
+		BEGIN(Sprite.SPR_CANALS_BASE + 5),
+		new WaterDrawTileStruct(   0, 0, 0, 1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 0 ),
+		new WaterDrawTileStruct( 0xF, 0, 0, 1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 4 ),
 		END(0)
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_2[] = {
-		BEGIN(SPR_CANALS_BASE + 7),
-		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 0 + 2 },
-		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 4 + 2 },
+		BEGIN(Sprite.SPR_CANALS_BASE + 7),
+		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 0 + 2 ),
+		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 4 + 2 ),
 		END(0)
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_3[] = {
-		BEGIN(SPR_CANALS_BASE + 8),
-		new WaterDrawTileStruct(   0, 0, 0, 1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 0 + 3 ),
-		new WaterDrawTileStruct( 0xF, 0, 0, 1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 4 + 3 ),
+		BEGIN(Sprite.SPR_CANALS_BASE + 8),
+		new WaterDrawTileStruct(   0, 0, 0, 1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 0 + 3 ),
+		new WaterDrawTileStruct( 0xF, 0, 0, 1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 4 + 3 ),
 		END(0)
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_0b[] = {
 		BEGIN(0xFDD),
-		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 8 + 1 },
-		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 12 + 1 },
+		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 8 + 1 ),
+		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 12 + 1 ),
 		END(0)
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_1b[] = {
 		BEGIN(0xFDD),
-		new WaterDrawTileStruct(   0, 0, 0, 0x1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 8 ),
-		new WaterDrawTileStruct( 0xF, 0, 0, 0x1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 12 ),
+		new WaterDrawTileStruct(   0, 0, 0, 0x1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 8 ),
+		new WaterDrawTileStruct( 0xF, 0, 0, 0x1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 12 ),
 		END(0)
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_2b[] = {
 		BEGIN(0xFDD),
-		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 8 + 2 ),
-		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 12 + 2 ),
+		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 8 + 2 ),
+		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 12 + 2 ),
 		END(0)
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_3b[] = {
 		BEGIN(0xFDD),
-		new WaterDrawTileStruct(   0, 0, 0, 1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 8 + 3 ),
-		new WaterDrawTileStruct( 0xF, 0, 0, 1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 12 + 3 ),
+		new WaterDrawTileStruct(   0, 0, 0, 1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 8 + 3 ),
+		new WaterDrawTileStruct( 0xF, 0, 0, 1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 12 + 3 ),
 		END(0)
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_0t[] = {
 		BEGIN(0xFDD),
-		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 16 + 1 ),
-		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 20 + 1 ),
+		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 16 + 1 ),
+		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 20 + 1 ),
 		END(8)
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_1t[] = {
 		BEGIN(0xFDD),
-		new WaterDrawTileStruct(   0, 0, 0, 0x1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 16 ),
-		new WaterDrawTileStruct( 0xF, 0, 0, 0x1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 20 ),
+		new WaterDrawTileStruct(   0, 0, 0, 0x1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 16 ),
+		new WaterDrawTileStruct( 0xF, 0, 0, 0x1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 20 ),
 		END(8)
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_2t[] = {
 		BEGIN(0xFDD),
-		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 16 + 2 },
-		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, SPR_CANALS_BASE + 9 + 20 + 2 },
+		new WaterDrawTileStruct(  0,    0, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 16 + 2 ),
+		new WaterDrawTileStruct(  0,  0xF, 0, 0x10, 1, 0x14, Sprite.SPR_CANALS_BASE + 9 + 20 + 2 ),
 		END(8)
 };
 
 static public final  WaterDrawTileStruct _shiplift_display_seq_3t[] = {
 		BEGIN(0xFDD),
-		new WaterDrawTileStruct(   0, 0, 0, 1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 16 + 3 ),
-		new WaterDrawTileStruct( 0xF, 0, 0, 1, 0x10, 0x14, SPR_CANALS_BASE + 9 + 20 + 3 ),
+		new WaterDrawTileStruct(   0, 0, 0, 1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 16 + 3 ),
+		new WaterDrawTileStruct( 0xF, 0, 0, 1, 0x10, 0x14, Sprite.SPR_CANALS_BASE + 9 + 20 + 3 ),
 		END(8)
 };
 
-static public final  WaterDrawTileStruct* public final  _shiplift_display_seq[] = {
+static public final  WaterDrawTileStruct [] _shiplift_display_seq[] = {
 		_shiplift_display_seq_0,
 		_shiplift_display_seq_1,
 		_shiplift_display_seq_2,

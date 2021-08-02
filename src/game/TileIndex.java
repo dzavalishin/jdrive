@@ -685,6 +685,10 @@ public class TileIndex implements Comparable<TileIndex>{
 		return tile.iadd(i, j);
 	}
 
+	public static TileIndex TILE_ADD(TileIndex tile, TileIndexDiff diff) {
+		return tile.iadd(diff);
+	}
+
 
 }
 

@@ -1,12 +1,13 @@
 package game;
 
+import game.tables.WaterTables;
 import game.util.BitOps;
 
 public class WaterCmd extends WaterTables
 {
 
 
-	final /*SpriteID*/ int _water_shore_sprites[] = {
+	final static /*SpriteID*/ int _water_shore_sprites[] = {
 		0,
 		Sprite.SPR_SHORE_TILEH_1,
 		Sprite.SPR_SHORE_TILEH_2,
@@ -54,11 +55,11 @@ public class WaterCmd extends WaterTables
 		tile = TileIndex.TileVirtXY(x, y);
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
-		tile2 = tile + (p1!=0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0));
+		tile2 = tile.iadd( (p1!=0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0)) );
 		if (!tile2.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
 		if (!IsClearWaterTile(tile) || !IsClearWaterTile(tile2))
-			return Cmd.return_cmd_error(Str.STR_3801_MUST_BE_BUILandscape.LT_ON_WATER);
+			return Cmd.return_cmd_error(Str.STR_3801_MUST_BE_BUILT_ON_WATER);
 
 		ret = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
@@ -100,7 +101,7 @@ public class WaterCmd extends WaterTables
 		if (!tile.EnsureNoVehicle())
 			return Cmd.CMD_ERROR;
 
-		tile2 = tile + ((tile.getMap().m5 & 2) ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0));
+		tile2 = tile.iadd(((tile.getMap().m5 & 2) != 0) ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0));
 
 		if (!tile2.EnsureNoVehicle())
 			return Cmd.CMD_ERROR;
@@ -127,21 +128,21 @@ public class WaterCmd extends WaterTables
 		ret = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
 
-		delta = TileIndex.TileOffsByDir(dir);
+		delta = TileIndex.TileOffsByDir(dir).diff;
 		// lower tile
-		ret = Cmd.DoCommandByTile(tile - delta, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+		ret = Cmd.DoCommandByTile(tile.isub(delta), 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
-		if (TileIndex.GetTileSlope(tile - delta, null)) return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
+		if (tile.isub(delta).GetTileSlope(null) != 0) return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 
 		// upper tile
-		ret = Cmd.DoCommandByTile(tile + delta, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+		ret = Cmd.DoCommandByTile(tile.iadd(delta), 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
-		if (TileIndex.GetTileSlope(tile + delta, null)) return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
+		if (tile.iadd(delta).GetTileSlope(null) != 0) return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 
 		if(0 != (flags & Cmd.DC_EXEC) ) {
 			Landscape.ModifyTile(tile, TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x10 + dir);
-			Landscape.ModifyTile(tile - delta, TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x14 + dir);
-			Landscape.ModifyTile(tile + delta, TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x18 + dir);
+			Landscape.ModifyTile(tile.isub(delta), TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x14 + dir);
+			Landscape.ModifyTile(tile.iadd(delta), TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x18 + dir);
 		}
 
 		return Global._price.clear_water * 22 >> 3;
@@ -152,13 +153,13 @@ public class WaterCmd extends WaterTables
 		TileIndexDiff delta = TileIndex.TileOffsByDir(BitOps.GB(tile.getMap().m5, 0, 2));
 
 		// make sure no vehicle is on the tile.
-		if (!tile.EnsureNoVehicle() || !EnsureNoVehicle(tile + delta) || !EnsureNoVehicle(tile - delta))
+		if (!tile.EnsureNoVehicle() || !tile.iadd(delta).EnsureNoVehicle() || !tile.isub(delta).EnsureNoVehicle())
 			return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC) ) {
 			Landscape.DoClearSquare(tile);
-			Landscape.DoClearSquare(tile + delta);
-			Landscape.DoClearSquare(tile - delta);
+			Landscape.DoClearSquare(tile.iadd(delta));
+			Landscape.DoClearSquare(tile.isub(delta));
 		}
 
 		return Global._price.clear_water * 2;
@@ -166,10 +167,10 @@ public class WaterCmd extends WaterTables
 
 	static void MarkTilesAroundDirty(TileIndex tile)
 	{
-		MarkTileDirtyByTile(TileIndex.TILE_ADDXY(tile, 0, 1));
-		MarkTileDirtyByTile(TileIndex.TILE_ADDXY(tile, 0, -1));
-		MarkTileDirtyByTile(TileIndex.TILE_ADDXY(tile, 1, 0));
-		MarkTileDirtyByTile(TileIndex.TILE_ADDXY(tile, -1, 0));
+		TileIndex.TILE_ADDXY(tile, 0, 1).MarkTileDirtyByTile();
+		TileIndex.TILE_ADDXY(tile, 0, -1).MarkTileDirtyByTile();
+		TileIndex.TILE_ADDXY(tile, 1, 0).MarkTileDirtyByTile();
+		TileIndex.TILE_ADDXY(tile, -1, 0).MarkTileDirtyByTile();
 	}
 
 	static final byte _shiplift_dirs[] = {0, 0, 0, 2, 0, 0, 1, 0, 0, 3, 0, 0, 0};
@@ -207,8 +208,9 @@ public class WaterCmd extends WaterTables
 
 		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 
-		sx = TileX(p1);
-		sy = TileY(p1);
+		TileIndex pp1 = new TileIndex(p1);
+		sx = pp1.TileX();
+		sy = pp1.TileY();
 		/* x,y are in pixel-coordinates, transform to tile-coordinates
 		 * to be able to use the BEGIN_TILE_LOOP() macro */
 		x >>= 4; y >>= 4;
@@ -267,9 +269,9 @@ public class WaterCmd extends WaterTables
 
 	
 	static final TileIndexDiffC _shiplift_tomiddle_offs[] = {
-			{ 0,  0}, {0,  0}, { 0, 0}, {0,  0}, // middle
-			{-1,  0}, {0,  1}, { 1, 0}, {0, -1}, // lower
-			{ 1,  0}, {0, -1}, {-1, 0}, {0,  1}, // upper
+			new TileIndexDiffC( 0,  0), new TileIndexDiffC(0,  0), new TileIndexDiffC( 0, 0), new TileIndexDiffC(0,  0), // middle
+			new TileIndexDiffC(-1,  0), new TileIndexDiffC(0,  1), new TileIndexDiffC( 1, 0), new TileIndexDiffC(0, -1), // lower
+			new TileIndexDiffC( 1,  0), new TileIndexDiffC(0, -1), new TileIndexDiffC(-1, 0), new TileIndexDiffC(0,  1), // upper
 		};
 	
 	static int ClearTile_Water(TileIndex tile, byte flags)
@@ -279,7 +281,7 @@ public class WaterCmd extends WaterTables
 
 		if (m5 <= 1) { // water and shore
 			// Allow building on water? It's ok to build on shores.
-			if (flags & Cmd.DC_NO_WATER && m5 != 1)
+			if ((0 !=(flags & Cmd.DC_NO_WATER)) && m5 != 1)
 				return Cmd.return_cmd_error(Str.STR_3807_CAN_T_BUILD_ON_WATER);
 
 			// Make sure no vehicle is on the tile
@@ -287,22 +289,22 @@ public class WaterCmd extends WaterTables
 				return Cmd.CMD_ERROR;
 
 			// Make sure it's not an edge tile.
-			if (0==(BitOps.IS_INT_INSIDE(tile.TileX(), 1, MapMaxX() - 1) &&
-					BitOps.IS_INT_INSIDE(tile.TileY(), 1, MapMaxY() - 1)))
+			if ( (BitOps.IS_INT_INSIDE(tile.TileX(), 1, Global.MapMaxX() - 1) &&
+					BitOps.IS_INT_INSIDE(tile.TileY(), 1, Global.MapMaxY() - 1)) )
 				return Cmd.return_cmd_error(Str.STR_0002_TOO_CLOSE_TO_EDGE_OF_MAP);
 
 			if (m5 == 0) {
-				if (flags & Cmd.DC_EXEC)
+				if(0 != (flags & Cmd.DC_EXEC) )
 					Landscape.DoClearSquare(tile);
 				return Global._price.clear_water;
 			} else if (m5 == 1) {
 				slope = tile.GetTileSlope(null);
 				if (slope == 8 || slope == 4 || slope == 2 || slope == 1) {
-					if (flags & Cmd.DC_EXEC)
+					if(0 != (flags & Cmd.DC_EXEC) )
 						Landscape.DoClearSquare(tile);
 					return Global._price.clear_water;
 				}
-				if (flags & Cmd.DC_EXEC)
+				if(0 != (flags & Cmd.DC_EXEC) )
 					Landscape.DoClearSquare(tile);
 				return Global._price.purchase_land;
 			} else
@@ -315,16 +317,16 @@ public class WaterCmd extends WaterTables
 			// don't allow water to delete it.
 			if (Global._current_player.id == Owner.OWNER_WATER) return Cmd.CMD_ERROR;
 			// move to the middle tile..
-			return RemoveShiplift(tile + ToTileIndexDiff(_shiplift_tomiddle_offs[m5 & 0xF]), flags);
+			return RemoveShiplift(tile.iadd( TileIndex.ToTileIndexDiff(_shiplift_tomiddle_offs[m5 & 0xF])), flags) ;
 		} else {
 			// ship depot
 			if(0 != (flags & Cmd.DC_AUTO) )return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 
 			switch ((int)m5) {
 				case 0x80: break;
-				case 0x81: tile -= TileIndex.TileDiffXY(1, 0); break;
+				case 0x81: tile = tile.isub(TileIndex.TileDiffXY(1, 0)); break;
 				case 0x82: break;
-				case 0x83: tile -= TileIndex.TileDiffXY(0, 1); break;
+				case 0x83: tile = tile.isub(TileIndex.TileDiffXY(0, 1)); break;
 				default:   return Cmd.CMD_ERROR;
 			}
 
@@ -398,22 +400,30 @@ public class WaterCmd extends WaterTables
 
 
 
-	static void DrawWaterStuff(final TileInfo ti, final WaterDrawTileStruct wdts,
+	static void DrawWaterStuff(final TileInfo ti, final WaterDrawTileStruct[] wdtsa,
 		int palette, int base
 	)
 	{
 		int image;
 
-		ViewPort.DrawGroundSprite(wdts++.image);
+		int i = 0;
+		
+		ViewPort.DrawGroundSprite(wdtsa[i++].image);
 
-		for (; wdts.delta_x != 0x80; wdts++) {
+		for (; ; ) 
+		{
+			WaterDrawTileStruct wdts = wdtsa[i++];
+			
+			if(wdts.delta_x == 0x80)
+				break;
+			
 			image =	wdts.image + base;
-			if (Global._display_opt & Global.DO_TRANS_BUILDINGS) {
+			if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS)) {
 				image = Sprite.RET_MAKE_TRANSPARENT(image);
 			} else {
 				image |= palette;
 			}
-			AddSortableSpriteToDraw(image, ti.x + wdts.delta_x, ti.y + wdts.delta_y, wdts.width, wdts.height, wdts.unk, ti.z + wdts.delta_z);
+			ViewPort.AddSortableSpriteToDraw(image, ti.x + wdts.delta_x, ti.y + wdts.delta_y, wdts.width, wdts.height, wdts.unk, ti.z + wdts.delta_z);
 		}
 	}
 
@@ -435,30 +445,36 @@ public class WaterCmd extends WaterTables
 
 		// draw shiplift
 		if ((ti.map5 & 0xF0) == 0x10) {
-			final WaterDrawTileStruct t = _shiplift_display_seq[ti.map5 & 0xF];
+			final WaterDrawTileStruct[] t = _shiplift_display_seq[ti.map5 & 0xF];
 			DrawWaterStuff(ti, t, 0, ti.z > t[3].delta_y ? 24 : 0);
 			return;
 		}
 
-		DrawWaterStuff(ti, _shipdepot_display_seq[ti.map5 & 0x7F], PLAYER_SPRITE_COLOR(GetTileOwner(ti.tile)), 0);
+		DrawWaterStuff(ti, _shipdepot_display_seq[ti.map5 & 0x7F], Sprite.PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner()), 0);
 	}
 
 	void DrawShipDepotSprite(int x, int y, int image)
 	{
-		final WaterDrawTileStruct wdts = _shipdepot_display_seq[image];
+		final WaterDrawTileStruct[] wdtsa = _shipdepot_display_seq[image];
 
-		Gfx.DrawSprite(wdts++.image, x, y);
+		int i = 0;
+		Gfx.DrawSprite(wdtsa[i++].image, x, y);
 
-		for (; wdts.delta_x != 0x80; wdts++) {
-			Point pt = RemapCoords(wdts.delta_x, wdts.delta_y, wdts.delta_z);
-			Gfx.DrawSprite(wdts.image + PLAYER_SPRITE_COLOR(Global._local_player), x + pt.x, y + pt.y);
+		for (;;) 
+		{
+			final WaterDrawTileStruct wdts = wdtsa[i++];
+			
+			if(wdts.delta_x == 0x80) break;
+			
+			Point pt = Point.RemapCoords(wdts.delta_x, wdts.delta_y, wdts.delta_z);
+			Gfx.DrawSprite(wdts.image + Sprite.PLAYER_SPRITE_COLOR(Global._local_player), x + pt.x, y + pt.y);
 		}
 	}
 
 
 	static int GetSlopeZ_Water(final TileInfo  ti)
 	{
-		return GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
+		return Landscape.GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
 	}
 
 	static int GetSlopeTileh_Water(final TileInfo ti)
@@ -471,7 +487,7 @@ public class WaterCmd extends WaterTables
 		/* not used */
 	}
 
-	static void GetTileDesc_Water(TileIndex tile, TileDesc *td)
+	static void GetTileDesc_Water(TileIndex tile, TileDesc td)
 	{
 		if (tile.getMap().m5 == 0 && TilePixelHeight(tile) == 0)
 			td.str = Str.STR_3804_WATER;
@@ -484,7 +500,7 @@ public class WaterCmd extends WaterTables
 		else
 			td.str = Str.STR_3806_SHIP_DEPOT;
 
-		td.owner = GetTileOwner(tile);
+		td.owner = tile.GetTileOwner().id;
 	}
 
 	static void AnimateTile_Water(TileIndex tile)
@@ -492,25 +508,25 @@ public class WaterCmd extends WaterTables
 		/* not used */
 	}
 
-	static void TileLoopWaterHelper(TileIndex tile, final TileIndexDiffC *offs)
+	static void TileLoopWaterHelper(TileIndex tile, final TileIndexDiffC[] offs)
 	{
-		TileIndex target = TILE_ADD(tile, ToTileIndexDiff(offs[0]));
+		TileIndex target = TileIndex.TILE_ADD(tile, TileIndex.ToTileIndexDiff(offs[0]));
 
 		// type of this tile mustn't be water already.
-		if (IsTileType(target, TileTypes.MP_WATER)) return;
+		if (target.IsTileType(TileTypes.MP_WATER)) return;
 
-		if (TileHeight(TILE_ADD(tile, ToTileIndexDiff(offs[1]))) != 0 ||
-				TileHeight(TILE_ADD(tile, ToTileIndexDiff(offs[2]))) != 0) {
+		if (TileIndex.TILE_ADD(tile, TileIndex.ToTileIndexDiff(offs[1])).TileHeight() != 0 ||
+				TileIndex.TILE_ADD(tile, TileIndex.ToTileIndexDiff(offs[2])).TileHeight() != 0) {
 			return;
 		}
 
-		if (TileHeight(TILE_ADD(tile, ToTileIndexDiff(offs[3]))) != 0 ||
-				TileHeight(TILE_ADD(tile, ToTileIndexDiff(offs[4]))) != 0) {
+		if (TileIndex.TILE_ADD(tile, TileIndex.ToTileIndexDiff(offs[3])).TileHeight() != 0 ||
+				TileIndex.TILE_ADD(tile, TileIndex.ToTileIndexDiff(offs[4])).TileHeight() != 0) {
 			// make coast..
-			switch (GetTileType(target)) {
-				case TileTypes.MP_RAILWAY: {
-					int slope = GetTileSlope(target, null);
-					byte tracks = BitOps.GB(_m[target].m5, 0, 6);
+			switch (target.GetTileType()) {
+				case MP_RAILWAY: {
+					int slope = target.GetTileSlope(null);
+					byte tracks = BitOps.GB(target.getMap().m5, 0, 6);
 					if (0==(
 							(slope == 1 && tracks == 0x20) ||
 							(slope == 2 && tracks == 0x04) ||
@@ -520,9 +536,9 @@ public class WaterCmd extends WaterTables
 				}
 				/* FALLTHROUGH */
 
-				case TileTypes.MP_CLEAR:
-				case TileTypes.MP_TREES:
-					Global._current_player = Owner.OWNER_WATER;
+				case MP_CLEAR:
+				case MP_TREES:
+					Global._current_player = PlayerID.get( Owner.OWNER_WATER );
 					if (!Cmd.CmdFailed(Cmd.DoCommandByTile(target, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR))) {
 						Landscape.ModifyTile(
 							target,
@@ -533,11 +549,11 @@ public class WaterCmd extends WaterTables
 					}
 					break;
 
-				case TileTypes.MP_TUNNELBRIDGE:
+				case MP_TUNNELBRIDGE:
 					// Middle part of bridge with clear land below?
-					if ((_m[target].m5 & 0xF8) == 0xC0) {
-						_m[target].m5 |= 0x08;
-						MarkTileDirtyByTile(tile);
+					if ((target.getMap().m5 & 0xF8) == 0xC0) {
+						target.getMap().m5 |= 0x08;
+						tile.MarkTileDirtyByTile();
 					}
 					break;
 
@@ -545,8 +561,8 @@ public class WaterCmd extends WaterTables
 					break;
 			}
 		} else {
-			if (IsTileType(target, TileTypes.MP_TUNNELBRIDGE)) {
-				byte m5 = _m[target].m5;
+			if (target.IsTileType(TileTypes.MP_TUNNELBRIDGE)) {
+				byte m5 = target.getMap().m5;
 				if ((m5 & 0xF8) == 0xC8 || (m5 & 0xF8) == 0xF0)
 					return;
 
@@ -556,7 +572,7 @@ public class WaterCmd extends WaterTables
 				}
 			}
 
-			Global._current_player = Owner.OWNER_WATER;
+			Global._current_player = PlayerID.get( Owner.OWNER_WATER );
 			{
 				Vehicle v = FindVehicleOnTileZ(target, 0);
 				if (v != null) FloodVehicle(v);
@@ -585,7 +601,7 @@ public class WaterCmd extends WaterTables
 					pass += v.cargo_count;
 
 				v.vehstatus |= Vehicle.VS_CRASHED;
-				v.u.road.crashed_ctr = 2000;	// max 2220, disappear pretty fast
+				v.road.crashed_ctr = 2000;	// max 2220, disappear pretty fast
 				RebuildVehicleLists();
 			} else if (v.type == Vehicle.VEH_Train) {
 				Vehicle  u;
@@ -601,7 +617,7 @@ public class WaterCmd extends WaterTables
 				END_ENUM_WAGONS(v)
 
 				v = u;
-				v.u.rail.crash_anim_pos = 4000; // max 4440, disappear pretty fast
+				v.rail.crash_anim_pos = 4000; // max 4440, disappear pretty fast
 				RebuildVehicleLists();
 			} else {
 				return;
@@ -640,7 +656,7 @@ public class WaterCmd extends WaterTables
 		}
 		// Global._current_player can be changed by TileLoopWaterHelper.. reset it back
 		//   here
-		Global._current_player = Owner.OWNER_NONE;
+		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 		// edges
 		if (tile.TileX() == 0 && BitOps.IS_INT_INSIDE(tile.TileY(), 1, MapSizeY() - 3 + 1)) //NE
@@ -701,7 +717,7 @@ public class WaterCmd extends WaterTables
 		byte m5 = (byte) (tile.getMap().m5 - 0x80);
 
 		if (BitOps.IS_INT_INSIDE(m5, 0, 3+1)) {
-			if (m5 & 1)
+			if(0 != (m5 & 1))
 				tile += (m5 == 1) ? TileIndex.TileDiffXY(-1, 0) : TileIndex.TileDiffXY(0, -1);
 			ShowShipDepotWindow(tile);
 		}
@@ -729,20 +745,20 @@ public class WaterCmd extends WaterTables
 	}
 
 	final TileTypeProcs _tile_type_water_procs = new TileTypeProcs(
-		DrawTile_Water,						/* draw_tile_proc */
-		GetSlopeZ_Water,					/* get_slope_z_proc */
-		ClearTile_Water,					/* clear_tile_proc */
-		GetAcceptedCargo_Water,		/* get_accepted_cargo_proc */
-		GetTileDesc_Water,				/* get_tile_desc_proc */
-		GetTileTrackStatus_Water,	/* get_tile_track_status_proc */
-		ClickTile_Water,					/* click_tile_proc */
-		AnimateTile_Water,				/* animate_tile_proc */
-		TileLoop_Water,						/* tile_loop_clear */
-		ChangeTileOwner_Water,		/* change_tile_owner_clear */
+		WaterCmd::DrawTile_Water,						/* draw_tile_proc */
+		WaterCmd::GetSlopeZ_Water,					/* get_slope_z_proc */
+		WaterCmd::ClearTile_Water,					/* clear_tile_proc */
+		WaterCmd::GetAcceptedCargo_Water,		/* get_accepted_cargo_proc */
+		WaterCmd::GetTileDesc_Water,				/* get_tile_desc_proc */
+		WaterCmd::GetTileTrackStatus_Water,	/* get_tile_track_status_proc */
+		WaterCmd::ClickTile_Water,					/* click_tile_proc */
+		WaterCmd::AnimateTile_Water,				/* animate_tile_proc */
+		WaterCmd::TileLoop_Water,						/* tile_loop_clear */
+		WaterCmd::ChangeTileOwner_Water,		/* change_tile_owner_clear */
 		null,											/* get_produced_cargo_proc */
-		VehicleEnter_Water,				/* vehicle_enter_tile_proc */
+		WaterCmd::VehicleEnter_Water,				/* vehicle_enter_tile_proc */
 		null,											/* vehicle_leave_tile_proc */
-		GetSlopeTileh_Water,			/* get_slope_tileh_proc */
+		WaterCmd::GetSlopeTileh_Water			/* get_slope_tileh_proc */
 	);
 	
 	
