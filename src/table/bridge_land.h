@@ -1,3 +1,4 @@
+#if 0
 /* $Id: bridge_land.h 3118 2005-11-02 13:06:07Z tron $ */
 
 /** @file bridge_land.h This file contains all the sprites for bridges

@@ -93,7 +93,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				- direction X: tiles 0, 12
 				- direction Y: tiles 0,  9
 			 */
-			if ((direction ? 0x201 : 0x1001) & (1 << tileh)) return 0;
+			if(0 != (((direction != 0) ? 0x201 : 0x1001) & (1 << tileh))) return 0;
 
 			// disallow certain start tiles to avoid certain crooked bridges
 			if (tileh == 2) return Cmd.CMD_ERROR;
@@ -137,11 +137,11 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 	boolean CheckBridge_Stuff(byte bridge_type, int bridge_len)
 	{
-		final Bridge b = &_bridge[bridge_type];
+		final Bridge b = _bridge[bridge_type];
 		int max; // max possible length of a bridge (with patch 100)
 
-		if (bridge_type >= MAX_BRIDGES) return false;
-		if (b.avail_year > _cur_year) return false;
+		if (bridge_type >= Bridge.MAX_BRIDGES) return false;
+		if (b.avail_year > Global._cur_year) return false;
 
 		max = b.max_length;
 		if (max >= 16 && Global._patches.longbridges) max = 100;
@@ -159,7 +159,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	int CmdBuildBridge(int x, int y, int flags, int p1, int p2)
 	{
 		int bridge_type;
-		byte rail_or_road, railtype, m5;
+		int rail_or_road, railtype, m5;
 		int sx,sy;
 		TileInfo ti_start = new TileInfo(); /* OPT: only 2 of those are ever used */
 		TileInfo ti_end = new TileInfo(); /* OPT: only 2 of those are ever used */
@@ -177,7 +177,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		bridge_type = BitOps.GB(p2, 0, 8);
 		railtype    = BitOps.GB(p2, 8, 8);
 
-		if (p1 > MapSize()) return Cmd.CMD_ERROR;
+		if (p1 > Global.MapSize()) return Cmd.CMD_ERROR;
 
 		// type of bridge
 		if (BitOps.HASBIT(railtype, 7)) { // bit 15 of original p2 param
@@ -402,15 +402,15 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	static boolean DoCheckTunnelInWay(TileIndex tile, int z, int dir)
 	{
 		TileIndexDiff delta = TileOffsByDir(dir);
-		TileInfo ti;
+		TileInfo ti = new TileInfo();
 
 		do {
 			tile -= delta;
-			FindLandscapeHeightByTile(&ti, tile);
+			Landscape.FindLandscapeHeightByTile(ti, tile);
 		} while (z < ti.z);
 
 		if (z == ti.z &&
-				ti.type == TileTypes.MP_TUNNELBRIDGE &&
+				ti.type == TileTypes.MP_TUNNELBRIDGE.ordinal() &&
 				BitOps.GB(ti.map5, 4, 4) == 0 &&
 				BitOps.GB(ti.map5, 0, 2) == dir) {
 			Global._error_message = Str.STR_5003_ANOTHER_TUNNEL_IN_THE_WAY;
@@ -439,7 +439,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		TileInfo ti = new TileInfo();
 		int z;
 
-		if ((int)x > MapMaxX() * 16 - 1 || (int)y > MapMaxY() * 16 - 1)
+		if ((int)x > Global.MapMaxX() * 16 - 1 || (int)y > Global.MapMaxY() * 16 - 1)
 			return Cmd.CMD_ERROR;
 
 		/* check if valid, and make sure that (x,y) is smaller than (x2,y2) */
@@ -464,12 +464,12 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 		cost = 0;
 
-		FindLandscapeHeight(&ti, x2, y2);
+		Landscape.FindLandscapeHeight(ti, x2, y2);
 		end_tile = ti.tile;
 		z = ti.z;
 
 		if (exc_tile != 3) {
-			if ((direction ? 9U : 12U) != ti.tileh)
+			if ((direction ? 9 : 12) != ti.tileh)
 				return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 			ret = DoCommandByTile(ti.tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 			if (CmdFailed(ret)) return Cmd.CMD_ERROR;
@@ -482,7 +482,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 			if (x2 == x && y2 == y) break;
 
-			FindLandscapeHeight(&ti, x2, y2);
+			Landscape.FindLandscapeHeight(&ti, x2, y2);
 			if (ti.z <= z) return Cmd.CMD_ERROR;
 
 			if (!_cheats.crossing_tunnels.value && !CheckTunnelInWay(ti.tile, z))
@@ -494,7 +494,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			if (cost >= 400000000) cost = 400000000;
 		}
 
-		FindLandscapeHeight(&ti, x2, y2);
+		Landscape.FindLandscapeHeight(&ti, x2, y2);
 		if (ti.z != z) return Cmd.CMD_ERROR;
 
 		if (exc_tile != 1) {
@@ -551,7 +551,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		_build_tunnel_endtile = 0;
 		excavated_tile = 0;
 
-		FindLandscapeHeight(&tiorg, x, y);
+		Landscape.FindLandscapeHeight(tiorg, x, y);
 
 		if (!EnsureNoVehicle(tiorg.tile))
 			return Cmd.CMD_ERROR;
@@ -567,7 +567,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		do {
 			x += _build_tunnel_coord_mod[direction];
 			y += _build_tunnel_coord_mod[direction+1];
-			FindLandscapeHeight(&ti, x, y);
+			Landscape.FindLandscapeHeight(ti, x, y);
 		} while (z != ti.z);
 		_build_tunnel_endtile = ti.tile;
 
@@ -585,7 +585,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 	TileIndex CheckTunnelBusy(TileIndex tile, int []length)
 	{
-		int z = GetTileZ(tile);
+		int z = tile.GetTileZ();
 		byte m5 = tile.getMap().m5;
 		int delta = TileOffsByDir(m5 & 3);
 		int len = 0;
@@ -617,45 +617,44 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	{
 		Town t;
 		TileIndex endtile;
-		int length;
-		static final byte _updsignals_tunnel_dir[4] = { 5, 7, 1, 3};
+		int [] length = {0};
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		// in scenario editor you can always destroy tunnels
-		if (Global._game_mode != GameModes.GM_EDITOR && !CheckTileOwnership(tile)) {
-			if (!(Global._patches.extra_dynamite || _cheats.magic_bulldozer.value) || !IsTileOwner(tile, Owner.OWNER_TOWN))
+		if (Global._game_mode != GameModes.GM_EDITOR && !Player.CheckTileOwnership(tile)) {
+			if (!(Global._patches.extra_dynamite || Global._cheats.magic_bulldozer.value) || !tile.IsTileOwner(Owner.OWNER_TOWN))
 				return Cmd.CMD_ERROR;
 		}
 
-		endtile = CheckTunnelBusy(tile, &length);
-		if (endtile == INVALID_TILE) return Cmd.CMD_ERROR;
+		endtile = CheckTunnelBusy(tile, length);
+		if (endtile == TileIndex.INVALID_TILE) return Cmd.CMD_ERROR;
 
-		_build_tunnel_endtile = endtile;
+		Global._build_tunnel_endtile = endtile;
 
-		t = ClosestTownFromTile(tile, (int)-1); //needed for town rating penalty
+		t = Town.ClosestTownFromTile(tile, (int)-1); //needed for town rating penalty
 		// check if you're allowed to remove the tunnel owned by a town
 		// removal allowal depends on difficulty settings
-		if (IsTileOwner(tile, Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR) {
+		if (tile.IsTileOwner(Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR) {
 			if (!CheckforTownRating(tile, flags, t, TUNNELBRIDGE_REMOVE)) {
 				Global.SetDParam(0, t.index);
 				return Cmd.return_cmd_error(Str.STR_2009_LOCAL_AUTHORITY_REFUSES);
 			}
 		}
 
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			// We first need to request the direction before calling DoClearSquare
 			//  else the direction is always 0.. dah!! ;)
-			byte tile_dir = BitOps.GB(tile.getMap().m5, 0, 2);
-			byte endtile_dir = BitOps.GB(_m[endtile].m5, 0, 2);
-			DoClearSquare(tile);
-			DoClearSquare(endtile);
-			UpdateSignalsOnSegment(tile, _updsignals_tunnel_dir[tile_dir]);
-			UpdateSignalsOnSegment(endtile, _updsignals_tunnel_dir[endtile_dir]);
-			if (IsTileOwner(tile, Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR)
-				ChangeTownRating(t, RATING_TUNNEL_BRIDGE_DOWN_STEP, RATING_TUNNEL_BRIDGE_MINIMUM);
+			int tile_dir = BitOps.GB(tile.getMap().m5, 0, 2);
+			int endtile_dir = BitOps.GB(endtile.getMap().m5, 0, 2);
+			Landscape.DoClearSquare(tile);
+			Landscape.DoClearSquare(endtile);
+			Rail.UpdateSignalsOnSegment(tile, _updsignals_tunnel_dir[tile_dir]);
+			Rail.UpdateSignalsOnSegment(endtile, _updsignals_tunnel_dir[endtile_dir]);
+			if (tile.IsTileOwner(Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR)
+				Town.ChangeTownRating(t, RATING_TUNNEL_BRIDGE_DOWN_STEP, RATING_TUNNEL_BRIDGE_MINIMUM);
 		}
-		return Global._price.clear_tunnel * (length + 1);
+		return Global._price.clear_tunnel * (length[0] + 1);
 	}
 
 	static TileIndex FindEdgesOfBridge(TileIndex tile, TileIndex endtile)
@@ -667,7 +666,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		for(;;) {
 			if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && (tile.getMap().m5 & 0xE0) == 0x80)
 				break;
-			tile += direction ? TileDiffXY(0, -1) : TileDiffXY(-1, 0);
+			tile += direction ? TileIndex.TileDiffXY(0, -1) : TileIndex.TileDiffXY(-1, 0);
 		}
 
 		start = tile;
@@ -676,7 +675,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		for(;;) {
 			if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && (tile.getMap().m5 & 0xE0) == 0xA0)
 				break;
-			tile += direction ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
+			tile += direction ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 		}
 
 		*endtile = tile;
@@ -700,15 +699,15 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			int cost;
 
 			// check if we own the tile below the bridge..
-			if (Global._current_player != Owner.OWNER_WATER && (!CheckTileOwnership(tile) || !EnsureNoVehicleZ(tile, TilePixelHeight(tile))))
+			if (Global._current_player.id != Owner.OWNER_WATER && (!Player.CheckTileOwnership(tile) || !EnsureNoVehicleZ(tile, TilePixelHeight(tile))))
 				return Cmd.CMD_ERROR;
 
 			cost = (tile.getMap().m5 & 8) ? Global._price.remove_road * 2 : Global._price.remove_rail;
 
-			if (flags & Cmd.DC_EXEC) {
-				tile.getMap().m5 = tile.getMap().m5 & ~0x38;
-				SetTileOwner(tile, Owner.OWNER_NONE);
-				MarkTileDirtyByTile(tile);
+			if(0 != (flags & Cmd.DC_EXEC)) {
+				tile.getMap().m5 = (byte) (tile.getMap().m5 & ~0x38);
+				tile.SetTileOwner(Owner.OWNER_NONE);
+				tile.MarkTileDirtyByTile();
 			}
 			return cost;
 
@@ -721,8 +720,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			cost = Global._price.clear_water;
 			if (flags & Cmd.DC_EXEC) {
 				tile.getMap().m5 = tile.getMap().m5 & ~0x38;
-				SetTileOwner(tile, Owner.OWNER_NONE);
-				MarkTileDirtyByTile(tile);
+				tile.SetTileOwner(Owner.OWNER_NONE);
+				tile.MarkTileDirtyByTile();
 			}
 			return cost;
 		}
@@ -730,19 +729,19 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		tile = FindEdgesOfBridge(tile, endtile);
 
 		// floods, scenario editor can always destroy bridges
-		if (Global._current_player != Owner.OWNER_WATER && Global._game_mode != GameModes.GM_EDITOR && !CheckTileOwnership(tile)) {
-			if (!(Global._patches.extra_dynamite || _cheats.magic_bulldozer.value) || !IsTileOwner(tile, Owner.OWNER_TOWN))
+		if (Global._current_player.id != Owner.OWNER_WATER && Global._game_mode != GameModes.GM_EDITOR && !Player.CheckTileOwnership(tile)) {
+			if (!(Global._patches.extra_dynamite || Global._cheats.magic_bulldozer.value) || !tile.IsTileOwner(Owner.OWNER_TOWN))
 				return Cmd.CMD_ERROR;
 		}
 
-		if (!EnsureNoVehicle(tile) || !EnsureNoVehicle(endtile)) return Cmd.CMD_ERROR;
+		if (!tile.EnsureNoVehicle() || !EnsureNoVehicle(endtile)) return Cmd.CMD_ERROR;
 
 		/*	Make sure there's no vehicle on the bridge
 			Omit tile and endtile, since these are already checked, thus solving the problem
 			of bridges over water, or higher bridges, where z is not increased, eg level bridge
 		 */
-		tile		+= direction ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
-		endtile	-= direction ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
+		tile		+= direction ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
+		endtile	-= direction ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 		/* Bridges on slopes might have their Z-value offset..correct this */
 		v = FindVehicleBetween(tile, endtile, TilePixelHeight(tile) + 8 + GetCorrectTileHeight(tile));
 		if (v != null) {
@@ -751,14 +750,14 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		}
 
 		/* Put the tiles back to start/end position */
-		tile		-= direction ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
-		endtile	+= direction ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
+		tile		-= direction ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
+		endtile	+= direction ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 
 
 		t = ClosestTownFromTile(tile, (int)-1); //needed for town rating penalty
 		// check if you're allowed to remove the bridge owned by a town.
 		// removal allowal depends on difficulty settings
-		if (IsTileOwner(tile, Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR) {
+		if (tile.IsTileOwner(Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR) {
 			if (!CheckforTownRating(tile, flags, t, TUNNELBRIDGE_REMOVE))
 				return Cmd.CMD_ERROR;
 		}
@@ -771,7 +770,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 			//checks if the owner is town then decrease town rating by RATING_TUNNEL_BRIDGE_DOWN_STEP until
 			// you have a "Poor" (0) town rating
-			if (IsTileOwner(tile, Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR)
+			if (tile.IsTileOwner(Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR)
 				ChangeTownRating(t, RATING_TUNNEL_BRIDGE_DOWN_STEP, RATING_TUNNEL_BRIDGE_MINIMUM);
 
 			do {
@@ -786,7 +785,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 						{
 							//goto clear_it;
 							DoClearSquare(c);
-							c += direction ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
+							c += direction ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 							continue;
 						}
 						new_data = (GetTileSlope(c, null) == 0) ? 0x6000 : 0x6001;
@@ -805,7 +804,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					//clear_it:;
 					DoClearSquare(c);
 				}
-				c += direction ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
+				c += direction ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 			} while (c <= endtile);
 
 			SetSignalsOnBothDir(tile, direction);
@@ -905,7 +904,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					MarkTileDirtyByTile(tile);
 				}
 				cost += Global._price.build_rail >> 1;
-	tile += BitOps.GB(tile.getMap().m5, 0, 1) ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
+	tile += BitOps.GB(tile.getMap().m5, 0, 1) ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 			} while (tile <= endtile);
 
 			return cost;
@@ -921,7 +920,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		TileIndex tile = ti.tile;
 
 		// find the end tile of the bridge.
-		delta = BitOps.GB(tile.getMap().m5, 0, 1) ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
+		delta = BitOps.GB(tile.getMap().m5, 0, 1) ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 		do {
 			assert((tile.getMap().m5 & 0xC0) == 0xC0);	// bridge and middle part
 			tile += delta;
@@ -1312,7 +1311,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 			/* scan to the end of the bridge, that's where the owner is stored */
 			if (tile.getMap().m5 & 0x40) {
-				TileIndexDiff delta = BitOps.GB(tile.getMap().m5, 0, 1) ? TileDiffXY(0, -1) : TileDiffXY(-1, 0);
+				TileIndexDiff delta = BitOps.GB(tile.getMap().m5, 0, 1) ? TileIndex.TileDiffXY(0, -1) : TileIndex.TileDiffXY(-1, 0);
 
 				do tile += delta; while (tile.getMap().m5 & 0x40);
 			}
@@ -1407,10 +1406,10 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 	static void ChangeTileOwner_TunnelBridge(TileIndex tile, PlayerID old_player, PlayerID new_player)
 	{
-		if (!IsTileOwner(tile, old_player)) return;
+		if (!tile.IsTileOwner(old_player)) return;
 
 		if (new_player != Owner.OWNER_SPECTATOR) {
-			SetTileOwner(tile, new_player);
+			tile.SetTileOwner(new_player);
 		}	else {
 			if ((tile.getMap().m5 & 0xC0) == 0xC0) {
 				// the stuff BELOW the middle part is owned by the deleted player.
@@ -1419,7 +1418,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					tile.getMap().m5 &= ~(1 << 5 | 1 << 4 | 1 << 3); // no transport route under bridge anymore..
 				} else {
 					// for road, change the owner of the road to local authority
-					SetTileOwner(tile, Owner.OWNER_NONE);
+					tile.SetTileOwner(Owner.OWNER_NONE);
 				}
 			} else {
 				DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
@@ -1428,18 +1427,6 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	}
 
 
-	static final byte _tunnel_fractcoord_1[4] = {0x8E,0x18,0x81,0xE8};
-	static final byte _tunnel_fractcoord_2[4] = {0x81,0x98,0x87,0x38};
-	static final byte _tunnel_fractcoord_3[4] = {0x82,0x88,0x86,0x48};
-	static final byte _exit_tunnel_track[4] = {1,2,1,2};
-
-	static final byte _road_exit_tunnel_state[4] = {8, 9, 0, 1};
-	static final byte _road_exit_tunnel_frame[4] = {2, 7, 9, 4};
-
-	static final byte _tunnel_fractcoord_4[4] = {0x52, 0x85, 0x98, 0x29};
-	static final byte _tunnel_fractcoord_5[4] = {0x92, 0x89, 0x58, 0x25};
-	static final byte _tunnel_fractcoord_6[4] = {0x92, 0x89, 0x56, 0x45};
-	static final byte _tunnel_fractcoord_7[4] = {0x52, 0x85, 0x96, 0x49};
 
 	static int VehicleEnter_TunnelBridge(Vehicle v, TileIndex tile, int x, int y)
 	{
@@ -1533,14 +1520,17 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 	TileIndex GetVehicleOutOfTunnelTile(final Vehicle v)
 	{
-		TileIndex tile;
-		TileIndexDiff delta = (v.direction & 2) ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
-		byte z = v.z_pos;
+		TileIndexDiff delta = (v.direction & 2) != 0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
+		int z = v.z_pos;
 
-		for (tile = v.tile;; tile += delta) {
+		MutableTileIndex tile = new MutableTileIndex(v.tile);
+
+		for (;; tile.madd(delta) ) {
 			if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(tile.getMap().m5, 4, 4) == 0 &&
-					GetTileZ(tile) == z)
+					tile.GetTileZ() == z)
 				break;
+			
+			assert tile.IsValidTile();
 		}
 		return tile;
 	}

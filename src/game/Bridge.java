@@ -7,16 +7,16 @@ import game.Widget;
 
 public class Bridge 
 {
-	byte avail_year;     ///< the year in which the bridge becomes available
-	byte min_length;     ///< the minimum length of the bridge (not counting start and end tile)
-	byte max_length;     ///< the maximum length of the bridge (not counting start and end tile)
-	int price;        ///< the relative price of the bridge
-	int speed;        ///< maximum travel speed
-	PalSpriteID sprite;  ///< the sprite which is used in the GUI (possibly with a recolor sprite)
-	StringID material;   ///< the string that contains the bridge description
+	public int avail_year;     ///< the year in which the bridge becomes available
+	public int  min_length;     ///< the minimum length of the bridge (not counting start and end tile)
+	public int  max_length;     ///< the maximum length of the bridge (not counting start and end tile)
+	public int price;        ///< the relative price of the bridge
+	public int speed;        ///< maximum travel speed
+	public /*PalSpriteID*/ int sprite;  ///< the sprite which is used in the GUI (possibly with a recolor sprite)
+	public /*StringID*/ int material;   ///< the string that contains the bridge description
 	//PalSpriteID **sprite_table; ///< table of sprites for drawing the bridge
-	PalSpriteID [][] sprite_table; ///< table of sprites for drawing the bridge
-	byte flags;          ///< bit 0 set: disable drawing of far pillars.
+	public PalSpriteID [][] sprite_table; ///< table of sprites for drawing the bridge
+	public int  flags;          ///< bit 0 set: disable drawing of far pillars.
 
 	static public final int MAX_BRIDGES = 13;
 
@@ -26,6 +26,18 @@ public class Bridge
 
 
 	static BridgeData  _bridgedata;
+
+	public Bridge(int i, int j, int k, int l, int m, int n, int str, PalSpriteID[][] object, int o) {
+		avail_year = i;
+		min_length = j;
+		max_length = k;
+		price = l;     
+		speed = m;     
+		sprite = n;  
+		material = str;
+		sprite_table = object;
+		flags = o;       
+	}
 
 	static void CcBuildBridge(boolean success, TileIndex tile, int p1, int p2)
 	{
@@ -53,8 +65,8 @@ public class Bridge
 
 				Global.SetDParam(2, _bridgedata.costs[i + w.vscroll.pos]);
 				Global.SetDParam(1, (b.speed >> 4) * 10);
-				Global.SetDParam(0, b.material.id);
-				Gfx.DrawSprite(b.sprite.id, 3, 15 + i * 22);
+				Global.SetDParam(0, b.material);
+				Gfx.DrawSprite(b.sprite, 3, 15 + i * 22);
 
 				Gfx.DrawString(44, 15 + i * 22 , Str.STR_500D, 0);
 			}
@@ -109,7 +121,7 @@ public class Bridge
 		-1, -1, 200, 102,
 		Window.WC_BUILD_BRIDGE,Window.WC_BUILD_TOOLBAR,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
-		Bridge::_build_road_bridge_widgets,
+		_build_road_bridge_widgets,
 		Bridge::BuildBridgeWndProc
 	);
 
