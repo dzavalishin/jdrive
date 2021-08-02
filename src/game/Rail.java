@@ -1819,7 +1819,7 @@ public class Rail extends RailTables {
 	{
 		if(0 != (image & Sprites.PALETTE_MODIFIER_COLOR)) image |= _drawtile_track_palette;
 		image += offset;
-		if (Global._displayGameOptions._opt & DO_TRANS_BUILDINGS) image = Sprite.RET_MAKE_TRANSPARENT(image);
+		if (Global._display_opt & DO_TRANS_BUILDINGS) image = Sprite.RET_MAKE_TRANSPARENT(image);
 		ViewPort.AddSortableSpriteToDraw(image, ti.x + x, ti.y + y, xsize, ysize, zsize, ti.z + z);
 	}
 
@@ -1928,7 +1928,7 @@ public class Rail extends RailTables {
 
 			DrawTrackBits(ti, m5 & TRACK_BIT_MASK, earth, snow, false);
 
-			if (Global._displayGameOptions._opt & DO_FULL_DETAIL) {
+			if (Global._display_opt & DO_FULL_DETAIL) {
 				_detailed_track_proc[ti.tile.getMap().m2 & RAIL_MAP2LO_GROUND_MASK].accept(ti);
 			}
 

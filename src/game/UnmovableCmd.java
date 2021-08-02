@@ -105,8 +105,8 @@ public class UnmovableCmd extends UnmovableTables {
 
 				image = PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner());
 				image += PALETTE_MODIFIER_COLOR | Sprite.SPR_STATUE_COMPANY;
-				if (_displayGameOptions._opt & DO_TRANS_BUILDINGS)
-					MAKE_TRANSPARENT(image);
+				if (Global._display_opt & Global.DO_TRANS_BUILDINGS)
+					image = Sprite.RET_MAKE_TRANSPARENT(image);
 				ViewPort.AddSortableSpriteToDraw(image, ti.x, ti.y, 16, 16, 25, ti.z);
 			} else if (ti.map5 == 3) {
 
@@ -131,8 +131,8 @@ public class UnmovableCmd extends UnmovableTables {
 				dtus = _draw_tile_unmovable_data[ti.map5];
 
 				image = dtus.image;
-				if (_displayGameOptions._opt & DO_TRANS_BUILDINGS)
-					MAKE_TRANSPARENT(image);
+				if (Global._display_opt & Global.DO_TRANS_BUILDINGS)
+					image = Sprite.RET_MAKE_TRANSPARENT(image);
 
 				ViewPort.AddSortableSpriteToDraw(image,
 						ti.x | dtus.subcoord_x,
@@ -160,8 +160,8 @@ public class UnmovableCmd extends UnmovableTables {
 				//image = dtss.image;
 				image = t.seq[pos].image;
 				dtss = t.seq[pos];
-				if (_displayGameOptions._opt & DO_TRANS_BUILDINGS) {
-					MAKE_TRANSPARENT(image);
+				if (Global._display_opt & Global.DO_TRANS_BUILDINGS) {
+					image = Sprite.RET_MAKE_TRANSPARENT(image);
 				} else {
 					image |= ormod;
 				}

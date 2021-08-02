@@ -294,7 +294,7 @@ public class Tree  extends TreeTables {
 
 		StartSpriteCombine();
 
-		if (!(_displayGameOptions._opt & DO_TRANS_BUILDINGS) || !Global._patches.invisible_trees) {
+		if (!(Global._display_opt & Global.DO_TRANS_BUILDINGS) || !Global._patches.invisible_trees) {
 			TreeListEnt [] te = new TreeListEnt[4];
 			int i;
 
@@ -302,7 +302,7 @@ public class Tree  extends TreeTables {
 			i = (ti.map5 >> 6) + 1;
 			do {
 				int image = s[0] + (--i == 0 ? BitOps.GB(ti.map5, 0, 3) : 3);
-				if (_displayGameOptions._opt & DO_TRANS_BUILDINGS) 
+				if (Global._display_opt & Global.DO_TRANS_BUILDINGS) 
 					image = Sprite.RET_MAKE_TRANSPARENT(image);
 				te[i].image = image;
 				te[i].x = d.x;

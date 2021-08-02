@@ -440,7 +440,7 @@ public class RailTables {
 
 
 
-	protected static final byte _track_sloped_sprites[] = {
+	public static final byte _track_sloped_sprites[] = {
 			14, 15, 22, 13,
 			0, 21, 17, 12,
 			23,  0, 18, 20,

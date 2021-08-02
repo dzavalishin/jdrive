@@ -1609,7 +1609,7 @@ public class AirCraft {
 
 	static void AircraftEventHandler_General(Vehicle v, final AirportFTAClass Airport)
 	{
-		Global.Global.DEBUG_misc( 0, "OK, you shouldn't be here, check your Airport Scheme!");
+		Global.DEBUG_misc( 0, "OK, you shouldn't be here, check your Airport Scheme!");
 		assert false;
 	}
 
@@ -1869,7 +1869,7 @@ public class AirCraft {
 
 		// error handling
 		if (v.air.pos >= Airport.nofelements) {
-			Global.Global.DEBUG_misc( 0, "position %d is not valid for current airport. Max position is %d", v.air.pos, Airport.nofelements-1);
+			Global.DEBUG_misc( 0, "position %d is not valid for current airport. Max position is %d", v.air.pos, Airport.nofelements-1);
 			assert(v.air.pos < Airport.nofelements);
 		}
 

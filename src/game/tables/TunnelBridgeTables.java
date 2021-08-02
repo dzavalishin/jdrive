@@ -56,6 +56,57 @@ public class TunnelBridgeTables {
 
 	
 	
+	static final int _build_tunnel_coord_mod[] = { -16, 0, 16, 0, -16 };
+	static final byte _build_tunnel_tileh[] = {3, 9, 12, 6};
+	
+	
+	public static final byte _tileh_bits[][] = {
+			{2,1,8,4,  16,11,0,9},
+			{1,8,4,2,  11,16,9,0},
+			{4,8,1,2,  16,11,0,9},
+			{2,4,8,1,  11,16,9,0},
+	};
+	
+
+	//static final StringID _bridge_tile_str[(MAX_BRIDGES + 3) + (MAX_BRIDGES + 3)] = {
+	static final /*StringID*/int _bridge_tile_str[] = {
+			Str.STR_501F_WOODEN_RAIL_BRIDGE,
+			Str.STR_5020_CONCRETE_RAIL_BRIDGE,
+			Str.STR_501C_STEEL_GIRDER_RAIL_BRIDGE,
+			Str.STR_501E_REINFORCED_CONCRETE_SUSPENSION,
+			Str.STR_501B_STEEL_SUSPENSION_RAIL_BRIDGE,
+			Str.STR_501B_STEEL_SUSPENSION_RAIL_BRIDGE,
+			Str.STR_501D_STEEL_CANTILEVER_RAIL_BRIDGE,
+			Str.STR_501D_STEEL_CANTILEVER_RAIL_BRIDGE,
+			Str.STR_501D_STEEL_CANTILEVER_RAIL_BRIDGE,
+			Str.STR_501C_STEEL_GIRDER_RAIL_BRIDGE,
+			Str.STR_5027_TUBULAR_RAIL_BRIDGE,
+			Str.STR_5027_TUBULAR_RAIL_BRIDGE,
+			Str.STR_5027_TUBULAR_RAIL_BRIDGE,
+			0,0,0,
+
+			Str.STR_5025_WOODEN_ROAD_BRIDGE,
+			Str.STR_5026_CONCRETE_ROAD_BRIDGE,
+			Str.STR_5022_STEEL_GIRDER_ROAD_BRIDGE,
+			Str.STR_5024_REINFORCED_CONCRETE_SUSPENSION,
+			Str.STR_5021_STEEL_SUSPENSION_ROAD_BRIDGE,
+			Str.STR_5021_STEEL_SUSPENSION_ROAD_BRIDGE,
+			Str.STR_5023_STEEL_CANTILEVER_ROAD_BRIDGE,
+			Str.STR_5023_STEEL_CANTILEVER_ROAD_BRIDGE,
+			Str.STR_5023_STEEL_CANTILEVER_ROAD_BRIDGE,
+			Str.STR_5022_STEEL_GIRDER_ROAD_BRIDGE,
+			Str.STR_5028_TUBULAR_ROAD_BRIDGE,
+			Str.STR_5028_TUBULAR_ROAD_BRIDGE,
+			Str.STR_5028_TUBULAR_ROAD_BRIDGE,
+			0,0,0,
+	};
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -93,7 +144,7 @@ public class TunnelBridgeTables {
 	  * </ul>
 	  */
 
-	static final /*SpriteID*/ int _bridge_land_below[] = {
+	protected static final /*SpriteID*/ int _bridge_land_below[] = {
 		Sprite.SPR_FLAT_GRASS_TILE, Sprite.SPR_FLAT_WATER_TILE, Sprite.SPR_FLAT_SNOWY_TILE, Sprite.SPR_FLAT_WATER_TILE
 	};
 

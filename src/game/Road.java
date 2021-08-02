@@ -750,7 +750,7 @@ public class Road
 		return 0;
 	}
 
-	final byte _road_sloped_sprites[] = {
+	final static byte _road_sloped_sprites[] = {
 		0,  0,  2,  0,
 		0,  1,  0,  0,
 		3,  0,  0,  0,
@@ -796,14 +796,14 @@ public class Road
 			image -= 19;
 		}
 
-		DrawGroundSprite(image);
+		ViewPort.DrawGroundSprite(image);
 
 		// Return if full detail is disabled, or we are zoomed fully out.
 		if (!(Global._display_opt & DO_FULL_DETAIL) || _cur_dpi.zoom == 2) return;
 
 		if (ground_type >= 6) {
 			// Road works
-			DrawGroundSprite(BitOps.HASBIT(road, 4) ? Sprite.SPR_EXCAVATION_X : Sprite.SPR_EXCAVATION_Y);
+			ViewPort.DrawGroundSprite(BitOps.HASBIT(road, 4) ? Sprite.SPR_EXCAVATION_X : Sprite.SPR_EXCAVATION_Y);
 			return;
 		}
 
@@ -846,16 +846,16 @@ public class Road
 				if (m2 > 1) image += 4;
 			}
 
-			DrawGroundSprite(image);
+			ViewPort.DrawGroundSprite(image);
 
 			if (_debug_pbs_level >= 1) {
 				byte pbs = PBSTileReserved(ti.tile);
-				if (pbs & TRACK_BIT_DIAG1) DrawGroundSprite(0x3ED | PALETTE_CRASH);
-				if (pbs & TRACK_BIT_DIAG2) DrawGroundSprite(0x3EE | PALETTE_CRASH);
-				if (pbs & TRACK_BIT_UPPER) DrawGroundSprite(0x3EF | PALETTE_CRASH);
-				if (pbs & TRACK_BIT_LOWER) DrawGroundSprite(0x3F0 | PALETTE_CRASH);
-				if (pbs & TRACK_BIT_LEFT)  DrawGroundSprite(0x3F2 | PALETTE_CRASH);
-				if (pbs & TRACK_BIT_RIGHT) DrawGroundSprite(0x3F1 | PALETTE_CRASH);
+				if (pbs & TRACK_BIT_DIAG1) (0x3ED | PALETTE_CRASH);
+				if (pbs & TRACK_BIT_DIAG2) ViewPort.DrawGroundSprite(0x3EE | PALETTE_CRASH);
+				if (pbs & TRACK_BIT_UPPER) ViewPort.DrawGroundSprite(0x3EF | PALETTE_CRASH);
+				if (pbs & TRACK_BIT_LOWER) ViewPort.DrawGroundSprite(0x3F0 | PALETTE_CRASH);
+				if (pbs & TRACK_BIT_LEFT)  ViewPort.DrawGroundSprite(0x3F2 | PALETTE_CRASH);
+				if (pbs & TRACK_BIT_RIGHT) ViewPort.DrawGroundSprite(0x3F1 | PALETTE_CRASH);
 			}
 
 		} else {
@@ -872,7 +872,7 @@ public class Road
 
 			drss = _road_display_datas[ti.map5 & 0xF];
 
-			DrawGroundSprite(drss++.image);
+			ViewPort.DrawGroundSprite(drss++.image);
 
 			for (; drss.image != 0; drss++) {
 				int image = drss.image;
@@ -880,7 +880,7 @@ public class Road
 				if (image & PALETTE_MODIFIER_COLOR)
 					image |= ormod;
 				if (Global._display_opt & DO_TRANS_BUILDINGS) // show transparent depots
-					MAKE_TRANSPARENT(image);
+					image = Sprite.RET_MAKE_TRANSPARENT(image);
 
 				ViewPort.AddSortableSpriteToDraw(image, ti.x | drss.subcoord_x,
 					ti.y | drss.subcoord_y, drss.width, drss.height, 0x14, ti.z);

@@ -309,7 +309,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			if (image & Sprite.PALETTE_MODIFIER_COLOR && (image & Sprite.PALETTE_SPRITE_MASK) == 0)
 				image |= ormod;
 
-			if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS)) MAKE_TRANSPARENT(image);
+			if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS)) image = Sprite.RET_MAKE_TRANSPARENT(image);
 
 			ViewPort.AddSortableSpriteToDraw(image,
 					ti.x + dits.subtile_x,
