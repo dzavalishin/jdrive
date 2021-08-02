@@ -1906,7 +1906,7 @@ public class ViewPort
 	static void SafeShowTrainViewWindow(final Vehicle v)
 	{
 		if (!v.IsFrontEngine()) v = v.GetFirstVehicleInChain();
-		Train.ShowTrainViewWindow(v);
+		TrainGui.ShowTrainViewWindow(v);
 	}
 
 	static void Nop(final Vehicle v) {}

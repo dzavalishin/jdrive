@@ -1327,7 +1327,7 @@ public class Station implements IPoolItem
 		st.train_tile = tile;
 	}
 
-	private boolean TileBelongsToRailStation(TileIndex tile) {
+	public boolean TileBelongsToRailStation(TileIndex tile) {
 		return tile.IsTileType(TileTypes.MP_STATION) && tile.getMap().m2 == this.index && tile.getMap().m5 < 8;
 	}
 

@@ -2191,8 +2191,9 @@ public class Vehicle implements IPoolItem
 	}
 
 	//Vehicle CreateEffectVehicleRel(final Vehicle v, int x, int y, int z, EffectVehicle type)
-	Vehicle CreateEffectVehicleRel(final Vehicle v, int x, int y, int z, int type)
+	Vehicle CreateEffectVehicleRel(int x, int y, int z, int type)
 	{
+		final Vehicle v = this;
 		return CreateEffectVehicle(v.x_pos + x, v.y_pos + y, v.z_pos + z, type);
 	}
 

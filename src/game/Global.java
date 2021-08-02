@@ -338,6 +338,12 @@ public class Global {
 			debug( s, arg );
 	}
 
+	public static void DEBUG_pbs( int level, String s, Object ... arg )
+	{
+		if( level >= _debug_pbs_level )
+			debug( s, arg );
+	}
+
 	public static void DEBUG_ntp( int level, String s, Object ... arg )
 	{
 		if( level >= _debug_ntp_level )

@@ -3,6 +3,7 @@ package game;
 import java.util.Iterator;
 
 import game.struct.RailtypeSlowdownParams;
+import game.struct.TrainCollideChecker;
 import game.tables.EngineTables2;
 import game.tables.TrainTables;
 import game.util.BitOps;
@@ -132,7 +133,7 @@ public class TrainCmd extends TrainTables
 	//new acceleration
 	static int GetTrainAcceleration(Vehicle v, int mode)
 	{
-		final Vehicle u;
+		Vehicle u;
 		int num = 0;	//number of vehicles, change this into the number of axles later
 		int power = 0;
 		int mass = 0;
@@ -295,9 +296,12 @@ public class TrainCmd extends TrainTables
 		int base;
 
 		if (Sprite.is_custom_sprite(img)) {
+			/* TODO is_custom_sprite(img)
 			base = GetCustomVehicleSprite(v, direction + 4 * (Sprite.IS_CUSTOM_SECONDHEAD_SPRITE(img) ? 1 : 0 ) );
 			if (base != 0) return base;
 			img = EngineTables2.orig_rail_vehicle_info[v.engine_type.id].image_index;
+			 */
+			assert false;
 		}
 
 		base = _engine_sprite_base[img] + ((direction + _engine_sprite_add[img]) & _engine_sprite_and[img]);
@@ -316,24 +320,30 @@ public class TrainCmd extends TrainTables
 		int image = 0;
 
 		if (Sprite.is_custom_sprite(img)) {
+			/* TODO custom
 			image = GetCustomVehicleIcon(engine, 6);
 			if (image == 0) {
 				img = EngineTables2.orig_rail_vehicle_info[engine.id].image_index;
 			} else {
 				y += _traininfo_vehicle_pitch;
-			}
+			} */
+			assert false;
 		}
+
 		if (image == 0) {
 			image = (6 & _engine_sprite_and[img]) + _engine_sprite_base[img];
 		}
 
-		if (rvi.flags & Engine.RVI_MULTIHEAD) {
+		if(0 != (rvi.flags & Engine.RVI_MULTIHEAD) ) {
 			Gfx.DrawSprite(image | image_ormod, x - 14, y);
 			x += 15;
 			image = 0;
 			if (Sprite.is_custom_sprite(img)) {
+				assert false;
+				/* TODO custom
 				image = GetCustomVehicleIcon(engine, 2);
 				if (image == 0) img = EngineTables2.orig_rail_vehicle_info[engine.id].image_index;
+				 */
 			}
 			if (image == 0) {
 				image =
@@ -352,7 +362,7 @@ public class TrainCmd extends TrainTables
 		if (!BitOps.HASBIT(rvi.callbackmask, CBM_ARTIC_ENGINE)) return 0;
 
 		for (i = 1; i < 10; i++) {
-			callback = GetCallBackResult(CBID_ARTIC_ENGINE + (i << 8), engine_type, null);
+			callback = Engine.GetCallBackResult(CBID_ARTIC_ENGINE + (i << 8), engine_type, null);
 			if (callback == CALLBACK_FAILED || callback == 0xFF) break;
 		}
 
@@ -361,7 +371,7 @@ public class TrainCmd extends TrainTables
 
 	static void AddArticulatedParts(final RailVehicleInfo rvi, Vehicle [] vl)
 	{
-		final RailVehicleInfo rvi_artic;
+		RailVehicleInfo rvi_artic;
 		int engine_type;
 		Vehicle v = vl[0];
 		Vehicle u = v;
@@ -373,7 +383,7 @@ public class TrainCmd extends TrainTables
 			return;
 
 		for (i = 1; i < 10; i++) {
-			callback = GetCallBackResult(CBID_ARTIC_ENGINE + (i << 8), v.engine_type, null);
+			callback = Engine.GetCallBackResult(CBID_ARTIC_ENGINE + (i << 8), v.engine_type, null);
 			if (callback == CALLBACK_FAILED || callback == 0xFF)
 				return;
 
@@ -405,7 +415,7 @@ public class TrainCmd extends TrainTables
 			u.cargo_cap = rvi_artic.capacity;
 			u.max_speed = 0;
 			u.max_age = 0;
-			u.engine_type = engine_type;
+			u.engine_type = EngineID.get( engine_type );
 			u.value = 0;
 			u.type = Vehicle.VEH_Train;
 			u.subtype = 0;
@@ -440,7 +450,7 @@ public class TrainCmd extends TrainTables
 					return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 				if(0 != (flags & Cmd.DC_EXEC)) {
-					Vehicle u, w;
+					Vehicle u;
 					int dir;
 
 					v = vl[0];
@@ -644,7 +654,7 @@ public class TrainCmd extends TrainTables
 				v.last_station_visited = Station.INVALID_STATION;
 				v.dest_tile = null;
 
-				v.engine_type = p1;
+				v.engine_type = EngineID.get( p1 );
 
 				v.reliability = e.reliability;
 				v.reliability_spd_dec = e.reliability_spd_dec;
@@ -652,8 +662,8 @@ public class TrainCmd extends TrainTables
 
 				v.string_id = Str.STR_SV_TRAIN_NAME;
 				v.rail.railtype = e.railtype;
-				Global._new_train_id = v.index;
-				Global._new_vehicle_id = v.index;
+				Global._new_train_id = VehicleID.get( v.index );
+				Global._new_vehicle_id = VehicleID.get( v.index );
 
 				v.service_interval = Global._patches.servint_trains;
 				v.date_of_last_service = Global._date;
@@ -692,7 +702,7 @@ public class TrainCmd extends TrainTables
 				}
 
 				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, tile.tile);
-				RebuildVehicleLists();
+				VehicleGui.RebuildVehicleLists();
 				Window.InvalidateWindow(Window.WC_COMPANY, v.owner.id);
 				if (Player.IsLocalPlayer()) {
 					Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, Vehicle.VEH_Train); // updates the replace Train window
@@ -708,7 +718,7 @@ public class TrainCmd extends TrainTables
 	/* Check if all the wagons of the given train are in a depot, returns the
 	 * number of cars (including loco) then. If not, sets the error message to
 	 * Str.STR_881A_TRAINS_CAN_ONLY_BE_ALTERED and returns -1 */
-	static int CheckTrainStoppedInDepot(final Vehicle v)
+	static int CheckTrainStoppedInDepot(Vehicle v)
 	{
 		int count;
 		TileIndex tile = v.tile;
@@ -814,7 +824,7 @@ public class TrainCmd extends TrainTables
 			if (!v.IsMultiheaded() || !v.IsTrainEngine()) continue;
 
 			/* make sure that there are no free cars before next engine */
-			for(u = v; u.next != null && !IsTrainEngine(u.next); u = u.next);
+			for(u = v; u.next != null && !u.next.IsTrainEngine(); u = u.next);
 
 			if (u == v.rail.other_multiheaded_part) continue;
 			AddWagonToConsist(v.rail.other_multiheaded_part, u);
@@ -844,7 +854,7 @@ public class TrainCmd extends TrainTables
 		if (src.type != Vehicle.VEH_Train) return Cmd.CMD_ERROR;
 
 		// if nothing is selected as destination, try and find a matching vehicle to drag to.
-		if (d == INVALID_VEHICLE) {
+		if (d == Vehicle.INVALID_VEHICLE) {
 			dst = null;
 			if (!src.IsTrainEngine()) dst = FindGoodVehiclePos(src);
 		} else {
@@ -918,7 +928,7 @@ public class TrainCmd extends TrainTables
 			int num = CheckTrainStoppedInDepot(dst_head);
 			if (num < 0) return Cmd.CMD_ERROR;
 
-			if (num > (Global._patches.mammoth_trains ? 100 : 9) && IsFrontEngine(dst_head))
+			if (num > (Global._patches.mammoth_trains ? 100 : 9) && dst_head.IsFrontEngine())
 				return Cmd.return_cmd_error(Str.STR_8819_TRAIN_TOO_LONG);
 
 			assert(dst_head.tile == src_head.tile);
@@ -1030,7 +1040,7 @@ public class TrainCmd extends TrainTables
 			 * To do this, CmdMoveRailVehicle must be called once more
 			 * we can't loop forever here because next time we reach this line we will have a front engine */
 			if (src_head != null && !src_head.IsFrontEngine() && src_head.IsTrainEngine()) {
-				CmdMoveRailVehicle(x, y, flags, src_head.index | (INVALID_VEHICLE << 16), 1);
+				CmdMoveRailVehicle(x, y, flags, src_head.index | (Vehicle.INVALID_VEHICLE << 16), 1);
 				src_head = null;	// don't do anything more to this train since the new call will do it
 			}
 
@@ -1086,7 +1096,7 @@ public class TrainCmd extends TrainTables
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			v.rail.days_since_order_progr = 0;
 			v.vehstatus ^= Vehicle.VS_STOPPED;
-			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 		}
 		return 0;
@@ -1174,7 +1184,7 @@ public class TrainCmd extends TrainTables
 						new_f.orders = first.orders;
 						new_f.num_orders = first.num_orders;
 						first.orders = null; // XXX - to not to delete the orders */
-						if (Player.IsLocalPlayer()) ShowTrainViewWindow(new_f);
+						if (Player.IsLocalPlayer()) TrainGui.ShowTrainViewWindow(new_f);
 					}
 				}
 			}
@@ -1205,10 +1215,10 @@ public class TrainCmd extends TrainTables
 				 * up on a new line to be added to the newly built loco. Replace it is.
 				 * Totally braindead cause building a new engine adds all loco-less
 				 * engines to its train anyways */
-				if (p2 == 2 && BitOps.HASBIT(ori_subtype, Train_Front)) {
+				if (p2 == 2 && BitOps.HASBIT(ori_subtype, Vehicle.Train_Front)) {
 					for (v = first; v != null; v = tmp) {
 						tmp = v.GetNextVehicle();
-						DoCommandByTile(v.tile, v.index | INVALID_VEHICLE << 16, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
+						Cmd.DoCommandByTile(v.tile, v.index | Vehicle.INVALID_VEHICLE << 16, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 					}
 				}
 			}
@@ -1246,7 +1256,7 @@ public class TrainCmd extends TrainTables
 			}
 
 			/* 3. If it is still a valid train after selling, update its acceleration and cached values */
-			if ((flags & Cmd.DC_EXEC) && first != null) {
+			if (0 != (flags & Cmd.DC_EXEC) && first != null) {
 				NormaliseTrainConsist(first);
 				TrainConsistChanged(first);
 				if (first.IsFrontEngine())
@@ -1284,8 +1294,10 @@ public class TrainCmd extends TrainTables
 		int old = v.rail.last_speed;
 		if (spd != old) {
 			v.rail.last_speed = spd;
-			if (Global._patches.vehicle_speed || !old != !spd)
-				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+			boolean bold = old == 0;
+			boolean bspd = spd == 0;
+			if (Global._patches.vehicle_speed || bold != bspd)
+				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 		}
 	}
 
@@ -1320,6 +1332,7 @@ public class TrainCmd extends TrainTables
 	static void ReverseTrainSwapVeh(Vehicle v, int l, int r)
 	{
 		Vehicle a, b;
+		int t;
 
 		/* locate vehicles to swap */
 		for (a = v; l != 0; l--) a = a.next;
@@ -1334,32 +1347,46 @@ public class TrainCmd extends TrainTables
 			}
 
 			/* swap variables */
-			swap_byte(&a.rail.track, &b.rail.track);
-			swap_byte(&a.direction, &b.direction);
+			//swap_byte(&a.rail.track, &b.rail.track);
+			//swap_byte(&a.direction, &b.direction);
+			t = a.rail.track;
+			a.rail.track = b.rail.track;
+			b.rail.track = (byte) t;
+
+			t = a.direction;
+			a.direction = b.direction;
+			a.direction = t;
 
 			/* toggle direction */
-			if (!(a.rail.track & 0x80)) a.direction ^= 4;
-			if (!(b.rail.track & 0x80)) b.direction ^= 4;
+			if (0==(a.rail.track & 0x80)) a.direction ^= 4;
+			if (0==(b.rail.track & 0x80)) b.direction ^= 4;
 
 			/* swap more variables */
-			swap_int(&a.x_pos, &b.x_pos);
-			swap_int(&a.y_pos, &b.y_pos);
-			swap_tile(&a.tile, &b.tile);
-			swap_int(&a.z_pos, &b.z_pos);
+			//swap_int(&a.x_pos, &b.x_pos);
+			//swap_int(&a.y_pos, &b.y_pos);
+			//swap_tile(&a.tile, &b.tile);
+			//swap_int(&a.z_pos, &b.z_pos);
 
-			SwapTrainFlags(&a.rail.flags, &b.rail.flags);
+			t= a.x_pos; a.x_pos = b.x_pos; b.x_pos = t; 
+			t= a.y_pos; a.y_pos = b.y_pos; b.y_pos = t;
+			t= a.z_pos; a.z_pos = b.z_pos; b.z_pos = t;
+
+			TileIndex ttile = a.tile; a.tile = b.tile; b.tile = ttile;
+
+			//SwapTrainFlags(&a.rail.flags, &b.rail.flags);
+			SwapTrainFlags(a.rail, b.rail);
 
 			/* update other vars */
 			UpdateVarsAfterSwap(a);
 			UpdateVarsAfterSwap(b);
 
-			VehicleEnterTile(a, a.tile, a.x_pos, a.y_pos);
-			VehicleEnterTile(b, b.tile, b.x_pos, b.y_pos);
+			a.VehicleEnterTile(a.tile, a.x_pos, a.y_pos);
+			b.VehicleEnterTile(b.tile, b.x_pos, b.y_pos);
 		} else {
-			if (!(a.rail.track & 0x80)) a.direction ^= 4;
+			if (0==(a.rail.track & 0x80)) a.direction ^= 4;
 			UpdateVarsAfterSwap(a);
 
-			VehicleEnterTile(a, a.tile, a.x_pos, a.y_pos);
+			a.VehicleEnterTile(a.tile, a.x_pos, a.y_pos);
 		}
 	}
 
@@ -1430,17 +1457,22 @@ public class TrainCmd extends TrainTables
 
 	static TileIndex GetVehicleTileOutOfTunnel(final Vehicle  v, boolean reverse)
 	{
-		TileIndex tile;
 		int direction = (!reverse) ? Rail.DirToDiagdir(v.direction) : Rail.ReverseDiagdir(v.direction >> 1);
 		TileIndexDiff delta = TileIndex.TileOffsByDir(direction);
 
 		if (v.rail.track != 0x40) return v.tile;
 
-		for (tile = v.tile;; tile += delta) {
+		MutableTileIndex tile = new MutableTileIndex(v.tile);
+
+		for (;; tile.madd(delta) ) 
+		{
 			if (tile.IsTunnelTile() && BitOps.GB(tile.getMap().m5, 0, 2) != direction 
 					&& tile.GetTileZ() == v.z_pos)
 				break;
+			// TODO assert not out of map
+			assert tile.IsValidTile();
 		}
+
 		return tile;
 	}
 
@@ -1457,18 +1489,18 @@ public class TrainCmd extends TrainTables
 
 		u = v.GetLastVehicleInChain();
 		tile = Vehicle.GetVehicleTileOutOfTunnel(u, false);
-		trackdir = Rail.ReverseTrackdir(Vehicle.GetVehicleTrackdir(u));
+		trackdir = Rail.ReverseTrackdir(u.GetVehicleTrackdir());
 
-		if (Pbs.PBSTileReserved(tile) & (1 << Rail.TrackdirToTrack(trackdir))) {
+		if(0 != (Pbs.PBSTileReserved(tile) & (1 << Rail.TrackdirToTrack(trackdir)))) {
 			NPFFindStationOrTileData fstd = new NPFFindStationOrTileData();
 			NPFFoundTargetData ftd;
 
-			NPFFillWithOrderData(fstd, v);
+			Npf.NPFFillWithOrderData(fstd, v);
 
 			tile = Vehicle.GetVehicleTileOutOfTunnel(u, true);
 
 			Global.DEBUG_pbs(2, "pbs: (%i) choose reverse (RV), tile:%x, trackdir:%i",v.unitnumber,  u.tile, trackdir);
-			ftd = NPFRouteToStationOrTile(tile, trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, PBS_MODE_ANY);
+			ftd = Npf.NPFRouteToStationOrTile(tile, trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_ANY);
 
 			if (ftd.best_trackdir == 0xFF) {
 				Global.DEBUG_pbs(0, "pbs: (%i) no nodes encountered (RV)", v.unitnumber);
@@ -1477,8 +1509,8 @@ public class TrainCmd extends TrainTables
 			}
 
 			// we found a way out of the pbs block
-			if (NPFGetFlag(ftd.node, NPF_FLAG_PBS_EXIT)) {
-				if (NPFGetFlag(ftd.node, NPF_FLAG_PBS_BLOCKED)) {
+			if (Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_EXIT)) {
+				if (Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_BLOCKED)) {
 					v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_REVERSING);
 					return;
 				}
@@ -1489,50 +1521,51 @@ public class TrainCmd extends TrainTables
 		}
 
 		tile = Vehicle.GetVehicleTileOutOfTunnel(v, false);
-		trackdir = Vehicle.GetVehicleTrackdir(v);
+		trackdir = v.GetVehicleTrackdir();
 
-		if (v.rail.pbs_status == PBS_STAT_HAS_PATH) 
+		if (v.rail.pbs_status == Pbs.PBS_STAT_HAS_PATH) 
 		{
-			TileIndex tile = AddTileIndexDiffCWrap(v.tile, TileIndexDiffCByDir(TrackdirToExitdir(trackdir)));
+			TileIndex tile = AddTileIndexDiffCWrap(v.tile, TileIndexDiffCByDir(Rail.TrackdirToExitdir(trackdir)));
 
 			int ts;
-			assert(tile != INVALID_TILE);
+			assert(tile != TileIndex.INVALID_TILE);
 
-			ts = GetTileTrackStatus(tile, TRANSPORT_RAIL);
-			ts &= TrackdirReachesTrackdirs(trackdir);
+			ts = GetTileTrackStatus(tile, Global.TRANSPORT_RAIL);
+			ts &= Rail.TrackdirReachesTrackdirs(trackdir);
 
-			assert(ts != 0 && KillFirstBit2x64(ts) == 0);
+			assert(ts != 0 && BitOps.KillFirstBit2x64(ts) == 0);
 
-			trackdir = FindFirstBit2x64(ts);
-			PBSClearPath(tile, trackdir, pbs_end_tile, pbs_end_trackdir);
-			v.rail.pbs_status = PBS_STAT_NONE;
+			trackdir = BitOps.FindFirstBit2x64(ts);
+			Pbs.PBSClearPath(tile, trackdir, pbs_end_tile, pbs_end_trackdir);
+			v.rail.pbs_status = Pbs.PBS_STAT_NONE;
 
-		} else if (PBSTileReserved(tile) & (1 << TrackdirToTrack(trackdir))) 
+		} else if(0 != (Pbs.PBSTileReserved(tile) & (1 << Rail.TrackdirToTrack(trackdir)))) 
 		{
-			PBSClearPath(tile, trackdir, pbs_end_tile, pbs_end_trackdir);
+			Pbs.PBSClearPath(tile, trackdir, pbs_end_tile, pbs_end_trackdir);
 			if (v.rail.track != 0x40)
-				PBSReserveTrack(tile, trackdir & 7);
+				Pbs.PBSReserveTrack(tile, trackdir & 7);
 		};
 
-		if (IsTileDepotType(v.tile, TRANSPORT_RAIL))
-			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile);
+		if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_RAIL))
+			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 
 
 		/* Check if we were approaching a rail/road-crossing */
 		{
-			TileIndex tile = v.tile;
+			MutableTileIndex mtile = new MutableTileIndex( v.tile );
 			int t;
 			/* Determine the diagonal direction in which we will exit this tile */
 			t = v.direction >> 1;
 
-		if (!(v.direction & 1) && v.rail.track != _state_dir_table[t]) {
+		if (0==(v.direction & 1) && v.rail.track != _state_dir_table[t]) 
+		{
 			t = (t - 1) & 3;
 		}
 		/* Calculate next tile */
-		tile += TileOffsByDir(t);
+		mtile.madd( TileIndex.TileOffsByDir(t) );
 
 		/* Check if the train left a rail/road-crossing */
-		DisableTrainCrossing(tile);
+		DisableTrainCrossing(mtile);
 		}
 
 		// count number of vehicles
@@ -1548,8 +1581,8 @@ public class TrainCmd extends TrainTables
 
 		AdvanceWagons(v, false);
 
-		if (IsTileDepotType(v.tile, TRANSPORT_RAIL))
-			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile);
+		if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_RAIL))
+			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 
 		v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_REVERSING);
 	}
@@ -1640,22 +1673,24 @@ public class TrainCmd extends TrainTables
 			/* XXX: We also refit all the attached wagons en-masse if they
 			 * can be refitted. This is how TTDPatch does it.  TODO: Have
 			 * some nice [Refit] button near each wagon. --pasky */
-			if (!CanRefitTo(v.engine_type, new_cid)) continue;
+			if (!Vehicle.CanRefitTo(v.engine_type, CargoID.get(new_cid) )) continue;
 
 			if (v.cargo_cap != 0) {
-				final RailVehicleInfo rvi = RailVehInfo(v.engine_type);
+				final RailVehicleInfo rvi = Engine.RailVehInfo(v.engine_type.id);
 				int amount = CALLBACK_FAILED;
 
 				if (BitOps.HASBIT(rvi.callbackmask, CBM_REFIT_CAP)) {
 					/* Check the 'refit capacity' callback */
-					CargoID temp_cid = v.cargo_type;
+					//CargoID 
+					int temp_cid = v.cargo_type;
 					v.cargo_type = new_cid;
-					amount = GetCallBackResult(CBID_REFIT_CAP, v.engine_type, v);
+					amount = Engine.GetCallBackResult(CBID_REFIT_CAP, v.engine_type, v);
 					v.cargo_type = temp_cid;
 				}
 
 				if (amount == CALLBACK_FAILED) { // callback failed or not used, use default
-					CargoID old_cid = rvi.cargo_type;
+					//CargoID 
+					int old_cid = rvi.cargo_type;
 					/* normally, the capacity depends on the cargo type, a rail vehicle
 					 * can carry twice as much mail/goods as normal cargo,
 					 * and four times as much passengers */
@@ -1692,19 +1727,19 @@ public class TrainCmd extends TrainTables
 						cost += Global._price.build_railvehicle >> 8;
 
 		num += amount;
-		if (flags & Cmd.DC_EXEC) 
+		if(0 != (flags & Cmd.DC_EXEC) ) 
 		{
 			v.cargo_count = 0;
 			v.cargo_type = new_cid;
 			v.cargo_cap = amount;
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
-			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile);
+			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 		}
 				}
 			}
 		} while ( (v=v.next) != null );
 
-		_returned_refit_amount = num;
+		Global._returned_refit_amount = num;
 
 		return cost;
 	}
@@ -1758,11 +1793,11 @@ public class TrainCmd extends TrainTables
 		if (Global._patches.new_pathfinding_all) {
 			NPFFoundTargetData ftd;
 			Vehicle  last = v.GetLastVehicleInChain();
-			Trackdir trackdir = Vehicle.GetVehicleTrackdir(v);
-			Trackdir trackdir_rev = ReverseTrackdir(Vehicle.GetVehicleTrackdir(last));
+			/*Trackdir*/ int trackdir = v.GetVehicleTrackdir();
+			/*Trackdir*/ int trackdir_rev = Rail.ReverseTrackdir(last.GetVehicleTrackdir());
 
 			assert (trackdir != INVALID_TRACKDIR);
-			ftd = NPFRouteToDepotBreadthFirstTwoWay(v.tile, trackdir, last.tile, trackdir_rev, TRANSPORT_RAIL, v.owner, v.rail.railtype, NPF_INFINITE_PENALTY);
+			ftd = NPFRouteToDepotBreadthFirstTwoWay(v.tile, trackdir, last.tile, trackdir_rev, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, NPF_INFINITE_PENALTY);
 			if (ftd.best_bird_dist == 0) {
 				/* Found target */
 				tfdd.tile = ftd.node.tile;
@@ -1770,20 +1805,20 @@ public class TrainCmd extends TrainTables
 				 * number by this. It might not be completely what we want, but it will
 				 * work for now :-) We can possibly change this when the old pathfinder
 				 * is removed. */
-				tfdd.best_length = ftd.best_path_dist / NPF_TILE_LENGTH;
-				if (NPFGetFlag(ftd.node, NPF_FLAG_REVERSE))
+				tfdd.best_length = ftd.best_path_dist / Npf.NPF_TILE_LENGTH;
+				if (Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_REVERSE))
 					tfdd.reverse = true;
 			}
 		} else {
 			// search in the forward direction first.
 			i = v.direction >> 1;
-		if (!(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
+		if (0==(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
 		NewTrainPathfind(tile, 0, i, (NTPEnumProc)NtpCallbFindDepot, tfdd);
 		if (tfdd.best_length == (int)-1){
 			tfdd.reverse = true;
 			// search in backwards direction
 			i = (v.direction^4) >> 1;
-			if (!(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
+			if (0==(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
 			NewTrainPathfind(tile, 0, i, (NTPEnumProc)NtpCallbFindDepot, tfdd);
 		}
 		}
@@ -1818,7 +1853,7 @@ public class TrainCmd extends TrainTables
 
 				v.current_order.type = Order.OT_DUMMY;
 				v.current_order.flags = 0;
-				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 			}
 			return 0;
 		}
@@ -1827,15 +1862,15 @@ public class TrainCmd extends TrainTables
 		if (tfdd.best_length == (int)-1)
 			return Cmd.return_cmd_error(Str.STR_883A_UNABLE_TO_FIND_ROUTE_TO);
 
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			v.dest_tile = tfdd.tile;
 			v.current_order.type = Order.OT_GOTO_DEPOT;
 			v.current_order.flags = Order.OF_NON_STOP | Order.OF_FULL_LOAD;
-			v.current_order.station = GetDepotByTile(tfdd.tile).index;
-			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+			v.current_order.station = Depot.GetDepotByTile(tfdd.tile).index;
+			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 			/* If there is no depot in front, reverse automatically */
 			if (tfdd.reverse)
-				DoCommandByTile(v.tile, v.index, 0, Cmd.DC_EXEC, Cmd.CMD_REVERSE_TRAIN_DIRECTION);
+				Cmd.DoCommandByTile(v.tile, v.index, 0, Cmd.DC_EXEC, Cmd.CMD_REVERSE_TRAIN_DIRECTION);
 		}
 
 		return 0;
@@ -1855,9 +1890,9 @@ public class TrainCmd extends TrainTables
 
 		v = Vehicle.GetVehicle(p1);
 
-		if (v.type != Vehicle.VEH_Train || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
+		if (v.type != Vehicle.VEH_Train || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			v.service_interval = serv_int;
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_DETAILS, v.index, 8);
 		}
@@ -1871,7 +1906,7 @@ public class TrainCmd extends TrainTables
 	}
 
 
-	static void HandleLocomotiveSmokeCloud(final Vehicle  v)
+	static void HandleLocomotiveSmokeCloud(Vehicle  v)
 	{
 		final Vehicle  u;
 
@@ -1900,12 +1935,12 @@ public class TrainCmd extends TrainTables
 			}
 
 			// No smoke in depots or tunnels
-			if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_RAIL) || IsTunnelTile(v.tile))
+			if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_RAIL) || v.tile.IsTunnelTile())
 				continue;
 
 			if (effect_type == 0) {
 				// Use default effect type for engine class.
-				effect_type = RailVehInfo(engtype).engclass;
+				effect_type = Engine.RailVehInfo(engtype.id).engclass;
 			} else {
 				effect_type--;
 			}
@@ -1917,21 +1952,21 @@ public class TrainCmd extends TrainTables
 			case 0:
 				// steam smoke.
 				if (BitOps.GB(v.tick_counter, 0, 4) == 0) {
-					CreateEffectVehicleRel(v, x, y, 10, EV_STEAM_SMOKE);
+					v.CreateEffectVehicleRel(x, y, 10, Vehicle.EV_STEAM_SMOKE);
 				}
 				break;
 
 			case 1:
 				// diesel smoke
 				if (u.cur_speed <= 40 && BitOps.CHANCE16(15, 128)) {
-					CreateEffectVehicleRel(v, 0, 0, 10, EV_DIESEL_SMOKE);
+					v.CreateEffectVehicleRel( 0, 0, 10, Vehicle.EV_DIESEL_SMOKE);
 				}
 				break;
 
 			case 2:
 				// blue spark
 				if (BitOps.GB(v.tick_counter, 0, 2) == 0 && BitOps.CHANCE16(1, 45)) {
-					CreateEffectVehicleRel(v, 0, 0, 10, EV_ELECTRIC_SPARK);
+					v.CreateEffectVehicleRel(0, 0, 10, Vehicle.EV_ELECTRIC_SPARK);
 				}
 				break;
 			}
@@ -2007,14 +2042,14 @@ public class TrainCmd extends TrainTables
 
 				if(0 != (Pbs.PBSTileUnavail(v.tile) & (1 << trackdir)) ) return true;
 
-				NPFFillWithOrderData(fstd, v);
+				Npf.NPFFillWithOrderData(fstd, v);
 
 				Global.DEBUG_pbs(2, "pbs: (%i) choose depot (DP), tile:%x, trackdir:%i",v.unitnumber,  v.tile, trackdir);
-				ftd = NPFRouteToStationOrTile(v.tile, trackdir, fstd, TRANSPORT_RAIL, v.owner, v.rail.railtype, PBS_MODE_GREEN);
+				ftd = Npf.NPFRouteToStationOrTile(v.tile, trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_GREEN);
 
 				// we found a way out of the pbs block
-				if (NPFGetFlag(ftd.node, NPF_FLAG_PBS_EXIT)) {
-					if (NPFGetFlag(ftd.node, NPF_FLAG_PBS_BLOCKED) || NPFGetFlag(ftd.node, NPF_FLAG_PBS_RED)) {
+				if (Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_EXIT)) {
+					if (Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_BLOCKED) || Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_RED)) {
 						return true;
 					} else {
 						v.rail.pbs_end_tile = ftd.node.tile;
@@ -2025,7 +2060,7 @@ public class TrainCmd extends TrainTables
 				}
 			}
 
-			if (UpdateSignalsOnSegment(v.tile, v.direction)) {
+			if (Rail.UpdateSignalsOnSegment(v.tile, v.direction)) {
 				Window.InvalidateWindowClasses(Window.WC_TRAINS_LIST);
 				return true;
 			}
@@ -2060,7 +2095,7 @@ public class TrainCmd extends TrainTables
 		StationID station_index; // station index we're heading for
 		int best_bird_dist;
 		int best_track_dist;
-		byte best_track;
+		int best_track;
 	}
 
 	static boolean NtpCallbFindStation(TileIndex tile, TrainTrackFollowerData ttfd, int track, int length)
@@ -2082,7 +2117,7 @@ public class TrainCmd extends TrainTables
 			int dist;
 
 			// didn't find station, keep track of the best path so far.
-			dist = DistanceManhattan(tile, ttfd.dest_coords);
+			dist = Map.DistanceManhattan(tile, ttfd.dest_coords);
 			if (dist < ttfd.best_bird_dist) {
 				ttfd.best_bird_dist = dist;
 				ttfd.best_track = track;
@@ -2107,7 +2142,7 @@ public class TrainCmd extends TrainTables
 
 
 	/* choose a track */
-	static byte ChooseTrainTrack(Vehicle v, TileIndex tile, int enterdir, /*TrackdirBits*/ int trackdirbits)
+	static int ChooseTrainTrack(Vehicle v, TileIndex tile, int enterdir, /*TrackdirBits*/ int trackdirbits)
 	{
 		TrainTrackFollowerData fd = new TrainTrackFollowerData();
 		int best_track;
@@ -2125,36 +2160,36 @@ public class TrainCmd extends TrainTables
 		if (Global._patches.new_pathfinding_all) { /* Use a new pathfinding for everything */
 			NPFFindStationOrTileData fstd = new NPFFindStationOrTileData();
 			NPFFoundTargetData ftd;
-			Trackdir trackdir;
+			/*Trackdir*/ int trackdir;
 			int pbs_tracks;
 
-			NPFFillWithOrderData(fstd, v);
+			Npf.NPFFillWithOrderData(fstd, v);
 			/* The enterdir for the new tile, is the exitdir for the old tile */
 			trackdir = Vehicle.GetVehicleTrackdir(v);
 			assert(trackdir != 0xff);
 
-			pbs_tracks = PBSTileReserved(tile);
+			pbs_tracks = Pbs.PBSTileReserved(tile);
 			pbs_tracks |= pbs_tracks << 8;
-			pbs_tracks &= TrackdirReachesTrackdirs(trackdir);
-			if (pbs_tracks || (v.rail.pbs_status == PBS_STAT_NEED_PATH)) {
+			pbs_tracks &= Rail.TrackdirReachesTrackdirs(trackdir);
+			if (pbs_tracks || (v.rail.pbs_status == Pbs.PBS_STAT_NEED_PATH)) {
 				Global.DEBUG_pbs(2, "pbs: (%i) choosefromblock, tile_org:%x tile_dst:%x  trackdir:%i  pbs_tracks:%i",v.unitnumber, tile,tile - TileOffsByDir(enterdir), trackdir, pbs_tracks);
 				// clear the currently planned path
-				if (v.rail.pbs_status != PBS_STAT_NEED_PATH) PBSClearPath(tile, FindFirstBit2x64(pbs_tracks), v.rail.pbs_end_tile, v.rail.pbs_end_trackdir);
+				if (v.rail.pbs_status != Pbs.PBS_STAT_NEED_PATH) Pbs.PBSClearPath(tile, BitOps.FindFirstBit2x64(pbs_tracks), v.rail.pbs_end_tile, v.rail.pbs_end_trackdir);
 
 				// try to find a route to a green exit signal
-				ftd = NPFRouteToStationOrTile(tile - TileOffsByDir(enterdir), trackdir, fstd, TRANSPORT_RAIL, v.owner, v.rail.railtype, PBS_MODE_ANY);
+				ftd = Npf.NPFRouteToStationOrTile(tile - TileOffsByDir(enterdir), trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_ANY);
 
 				v.rail.pbs_end_tile = ftd.node.tile;
 				v.rail.pbs_end_trackdir = ftd.node.direction;
 
 			} else
-				ftd = NPFRouteToStationOrTile(tile - TileOffsByDir(enterdir), trackdir, fstd, TRANSPORT_RAIL, v.owner, v.rail.railtype, PBS_MODE_NONE);
+				ftd = Npf.NPFRouteToStationOrTile(tile - TileOffsByDir(enterdir), trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_NONE);
 
 			if (ftd.best_trackdir == 0xff) {
 				/* We are already at our target. Just do something */
 				//TODO: maybe display error?
 				//TODO: go straight ahead if possible?
-				best_track = FIND_FIRST_BIT(trackdirbits);
+				best_track = BitOps.FIND_FIRST_BIT(trackdirbits);
 			} else {
 				/* If ftd.best_bird_dist is 0, we found our target and ftd.best_trackdir contains
 			the direction we need to take to get there, if ftd.best_bird_dist is not 0,
@@ -2176,7 +2211,7 @@ public class TrainCmd extends TrainTables
 
 			if (fd.best_track == 0xff) {
 				// blaha
-				best_track = FIND_FIRST_BIT(trackdirbits);
+				best_track = BitOps.FIND_FIRST_BIT(trackdirbits);
 			} else {
 				best_track = fd.best_track & 7;
 			}
@@ -2192,7 +2227,7 @@ public class TrainCmd extends TrainTables
 	}
 
 
-	private static boolean CheckReverseTrain_helper(int i, int best_track, int best_bird_dist, int best_track_dist, TrainTrackFollowerData fd)
+	private static boolean CheckReverseTrain_helper(int i, int best_track, int best_bird_dist, int best_track_dist, TrainTrackFollowerData fd, Vehicle v)
 	{
 		if (best_track != -1) {
 			if (best_bird_dist != 0) {
@@ -2223,6 +2258,7 @@ public class TrainCmd extends TrainTables
 
 			return true;
 		}
+		return true;
 	}
 
 
@@ -2236,8 +2272,8 @@ public class TrainCmd extends TrainTables
 		int reverse, reverse_best;
 
 		if (GameOptions._opt.diff.line_reverse_mode != 0 ||
-				v.rail.track & 0xC0 ||
-				!(v.direction & 1))
+				0 != (v.rail.track & 0xC0) ||
+				0 == (v.direction & 1))
 			return false;
 
 		FillWithStationData(fd, v);
@@ -2245,33 +2281,33 @@ public class TrainCmd extends TrainTables
 		best_track = -1;
 		reverse_best = reverse = 0;
 
-		assert(v.rail.track);
+		assert(v.rail.track != 0);
 
-		i = _search_directions[FIND_FIRST_BIT(v.rail.track)][v.direction>>1];
+		i = _search_directions[BitOps.FIND_FIRST_BIT(v.rail.track)][v.direction>>1];
 
 		if (Global._patches.new_pathfinding_all) { /* Use a new pathfinding for everything */
 			NPFFindStationOrTileData fstd = new NPFFindStationOrTileData();
 			NPFFoundTargetData ftd;
-			byte trackdir, trackdir_rev;
+			int trackdir, trackdir_rev;
 			Vehicle  last = v.GetLastVehicleInChain();
 
-			NPFFillWithOrderData(fstd, v);
+			Npf.NPFFillWithOrderData(fstd, v);
 
-			trackdir = Vehicle.GetVehicleTrackdir(v);
-			trackdir_rev = ReverseTrackdir(Vehicle.GetVehicleTrackdir(last));
+			trackdir = v.GetVehicleTrackdir();
+			trackdir_rev = Rail.ReverseTrackdir(last.GetVehicleTrackdir());
 			assert(trackdir != 0xff);
 			assert(trackdir_rev != 0xff);
 
-			ftd = NPFRouteToStationOrTileTwoWay(v.tile, trackdir, last.tile, trackdir_rev, fstd, TRANSPORT_RAIL, v.owner, v.rail.railtype, PBS_MODE_NONE);
+			ftd = NPFRouteToStationOrTileTwoWay(v.tile, trackdir, last.tile, trackdir_rev, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_NONE);
 
 			if (ftd.best_bird_dist != 0) {
 				/* We didn't find anything, just keep on going straight ahead */
-				reverse_best = false;
+				reverse_best = 0; //false;
 			} else {
-				if (NPFGetFlag(ftd.node, NPF_FLAG_REVERSE))
-					reverse_best = true;
+				if (Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_REVERSE))
+					reverse_best = 1; //true;
 				else
-					reverse_best = false;
+					reverse_best = 0; //false;
 			}
 		} else {
 			while(true) {
@@ -2307,7 +2343,7 @@ public class TrainCmd extends TrainTables
 				if (_pick_track_table[best_track] == (v.direction & 3)) r -= 80;
 				if (r <= 127) goto bad;
 			} */
-				if( CheckReverseTrain_helper(i, best_track, best_bird_dist, best_track_dist, fd ) )
+				if( CheckReverseTrain_helper(i, best_track, best_bird_dist, best_track_dist, fd, v ) )
 				{
 					//good:;
 					best_track = i;
@@ -2335,7 +2371,7 @@ public class TrainCmd extends TrainTables
 				v.current_order.type <= Order.OT_LEAVESTATION) {
 			// Let a depot order in the orderlist interrupt.
 			if (v.current_order.type != Order.OT_GOTO_DEPOT ||
-					!(v.current_order.flags & Order.OF_UNLOAD))
+					0==(v.current_order.flags & Order.OF_UNLOAD))
 				return false;
 		}
 
@@ -2352,22 +2388,22 @@ public class TrainCmd extends TrainTables
 
 		// check if we've reached a non-stop station while TTDPatch nonstop is enabled..
 		if (Global._patches.new_nonstop &&
-				v.current_order.flags & Order.OF_NON_STOP &&
+				0 != (v.current_order.flags & Order.OF_NON_STOP) &&
 				v.tile.IsTileType( TileTypes.MP_STATION) &&
-				v.current_order.station == _m[v.tile].m2) {
+				v.current_order.station == v.tile.getMap().m2) {
 			v.cur_order_index++;
 		}
 
 		// Get the current order
 		if (v.cur_order_index >= v.num_orders) v.cur_order_index = 0;
 
-		order = Vehicle.GetVehicleOrder(v, v.cur_order_index);
+		order = v.GetVehicleOrder(v.cur_order_index);
 
 		// If no order, do nothing.
 		if (order == null) {
 			v.current_order.type = Order.OT_NOTHING;
 			v.current_order.flags = 0;
-			v.dest_tile = 0;
+			v.dest_tile = null;
 			return false;
 		}
 
@@ -2378,9 +2414,9 @@ public class TrainCmd extends TrainTables
 			return false;
 
 		// Otherwise set it, and determine the destination tile.
-		v.current_order = *order;
+		v.current_order = new Order( order );
 
-		v.dest_tile = 0;
+		v.dest_tile = null;
 
 		// store the station length if no shorter station was visited this order round
 		if (v.cur_order_index == 0) {
@@ -2392,10 +2428,10 @@ public class TrainCmd extends TrainTables
 			v.rail.shortest_platform[1] = 255;
 		}
 
-		if (v.last_station_visited != INVALID_STATION) {
+		if (v.last_station_visited != Station.INVALID_STATION) {
 			Station st = Station.GetStation(v.last_station_visited);
-			if (TileBelongsToRailStation(st, v.tile)) {
-				byte length = GetStationPlatforms(st, v.tile);
+			if (st.TileBelongsToRailStation(v.tile)) {
+				int length = Station.GetStationPlatforms(st, v.tile);
 
 				if (length < v.rail.shortest_platform[1]) {
 					v.rail.shortest_platform[1] = length;
@@ -2407,23 +2443,23 @@ public class TrainCmd extends TrainTables
 		switch (order.type) {
 		case Order.OT_GOTO_STATION:
 			if (order.station == v.last_station_visited)
-				v.last_station_visited = INVALID_STATION;
+				v.last_station_visited = Station.INVALID_STATION;
 			v.dest_tile = Station.GetStation(order.station).xy;
 			result = CheckReverseTrain(v);
 			break;
 
 		case Order.OT_GOTO_DEPOT:
-			v.dest_tile = GetDepot(order.station).xy;
+			v.dest_tile = Depot.GetDepot(order.station).xy;
 			result = CheckReverseTrain(v);
 			break;
 
 		case Order.OT_GOTO_WAYPOINT:
-			v.dest_tile = GetWaypoint(order.station).xy;
+			v.dest_tile = WayPoint.GetWaypoint(order.station).xy;
 			result = CheckReverseTrain(v);
 			break;
 		}
 
-		InvalidateVehicleOrder(v);
+		v.InvalidateVehicleOrder();
 
 		return result;
 	}
@@ -2432,7 +2468,7 @@ public class TrainCmd extends TrainTables
 	{
 		do {
 			v.cur_image = GetTrainImage(v, v.direction);
-			MarkAllViewportsDirty(v.left_coord, v.top_coord, v.right_coord + 1, v.bottom_coord + 1);
+			ViewPort.MarkAllViewportsDirty(v.left_coord, v.top_coord, v.right_coord + 1, v.bottom_coord + 1);
 		} while ((v = v.next) != null);
 	}
 
@@ -2450,15 +2486,15 @@ public class TrainCmd extends TrainTables
 
 			if (--v.load_unload_time_rem != 0) return;
 
-			if (v.current_order.flags & Order.OF_FULL_LOAD && v.CanFillVehicle()) {
+			if (0 != (v.current_order.flags & Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
 				v.rail.days_since_order_progr = 0; /* Prevent a train lost message for full loading trains */
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_INC);
-				if (LoadUnloadVehicle(v)) {
+				if (Economy.LoadUnloadVehicle(v) != 0) {
 					Window.InvalidateWindow(Window.WC_TRAINS_LIST, v.owner);
 					MarkTrainDirty(v);
 
 					// need to update acceleration and cached values since the goods on the train changed.
-					TrainCargoChanged(v);
+					Train.TrainCargoChanged(v);
 					UpdateTrainAcceleration(v);
 				}
 				return;
@@ -2472,13 +2508,13 @@ public class TrainCmd extends TrainTables
 				v.current_order.flags = 0;
 
 				// If this was not the final order, don't remove it from the list.
-				if (!(b.flags & Order.OF_NON_STOP)) return;
+				if (0==(b.flags & Order.OF_NON_STOP)) return;
 			}
 		}
 
 		v.rail.days_since_order_progr = 0;
 		v.cur_order_index++;
-		InvalidateVehicleOrder(v);
+		v.InvalidateVehicleOrder();
 	}
 
 	static int UpdateTrainSpeed(Vehicle v)
@@ -2516,15 +2552,15 @@ public class TrainCmd extends TrainTables
 				return (spd >> 8);
 	}
 
-	static void TrainEnterStation(Vehicle v, StationID station)
+	static void TrainEnterStation(Vehicle v, /*StationID*/ int station)
 	{
 		Station st;
 		int flags;
 
-		v.last_station_visited = station.id;
+		v.last_station_visited = station;
 
 		/* check if a train ever visited this station before */
-		st = Station.GetStation(station.id);
+		st = Station.GetStation(station);
 		if (0 == (st.had_vehicle_of_type & Station.HVOT_TRAIN)) {
 			st.had_vehicle_of_type |= Station.HVOT_TRAIN;
 			Global.SetDParam(0, st.index);
@@ -2538,7 +2574,7 @@ public class TrainCmd extends TrainTables
 
 		// Did we reach the final destination?
 		if (v.current_order.type == Order.OT_GOTO_STATION &&
-				v.current_order.station == station.id) {
+				v.current_order.station == station) {
 			// Yeah, keep the load/unload flags
 			// Non Stop now means if the order should be increased.
 			v.current_order.type = Order.OT_LOADING;
@@ -2558,7 +2594,7 @@ public class TrainCmd extends TrainTables
 			Train.TrainCargoChanged(v);
 			UpdateTrainAcceleration(v);
 		}
-		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 	}
 
 	static int AfterSetTrainPos(Vehicle v, boolean new_tile)
@@ -2685,7 +2721,7 @@ public class TrainCmd extends TrainTables
 	}
 
 	/* Modify the speed of the vehicle due to a change in altitude */
-	static void AffectSpeedByZChange(Vehicle v, byte old_z)
+	static void AffectSpeedByZChange(Vehicle v, int old_z)
 	{
 		final RailtypeSlowdownParams rsp;
 		if (old_z == v.z_pos || Global._patches.realistic_acceleration) return;
@@ -2705,15 +2741,11 @@ public class TrainCmd extends TrainTables
 	{
 		if (tile.IsTileType( TileTypes.MP_RAILWAY) && (tile.getMap().m5 & 0xC0) == 0x40) {
 			int i = BitOps.FindFirstBit2x64((tile.getMap().m5 + (tile.getMap().m5 << 8)) & _reachable_tracks[dir]);
-			UpdateSignalsOnSegment(tile, _otherside_signal_directions[i]);
+			Rail.UpdateSignalsOnSegment(tile, _otherside_signal_directions[i]);
 		}
 	}
 
 
-	class TrainCollideChecker {
-		final Vehicle v;
-		final Vehicle v_skip;
-	}
 
 	static Object FindTrainCollideEnum(Vehicle v, Object data)
 	{
@@ -2748,10 +2780,10 @@ public class TrainCmd extends TrainTables
 		} while ( (v=v.next) != null);
 		//END_ENUM_WAGONS(v)
 
-		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, u.index, STATUS_BAR);
+		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, u.index, Vehicle.STATUS_BAR);
 	}
 
-	static int CountPassengersInTrain(final Vehicle  v)
+	static int CountPassengersInTrain(Vehicle  v)
 	{
 		int num = 0;
 		//BEGIN_ENUM_WAGONS(v)
@@ -2829,228 +2861,352 @@ public class TrainCmd extends TrainTables
 		return null;
 	}
 
+
+
+
+
+
+
+	private static void red_light(Vehicle v) 
+	{
+		/* We're in front of a red signal ?? */
+		/* find the first set bit in ts. need to do it in 2 steps, since
+		 * FIND_FIRST_BIT only handles 6 bits at a time. */
+		int i = FindFirstBit2x64(ts);
+
+		if (!(_m[gp.new_tile].m3 & SignalAgainstTrackdir(i))) {
+			v.cur_speed = 0;
+			v.subspeed = 0;
+			v.progress = 255-100;
+			if (++v.load_unload_time_rem < Global._patches.wait_oneway_signal * 20)
+				return true;
+		} else if (_m[gp.new_tile].m3 & SignalAlongTrackdir(i)){
+			v.cur_speed = 0;
+			v.subspeed = 0;
+			v.progress = 255-10;
+			if (++v.load_unload_time_rem < Global._patches.wait_twoway_signal * 73) 
+			{
+				TileIndex o_tile = gp.new_tile + TileOffsByDir(enterdir);
+				VehicleAtSignalData vasd = new VehicleAtSignalData();
+				vasd.tile = o_tile;
+				vasd.direction = dir ^ 4;
+
+				/* check if a train is waiting on the other side */
+				if (VehicleFromPos(o_tile, vasd, CheckVehicleAtSignal) == null)
+					return true;
+			}
+		}
+
+		v.load_unload_time_rem = 0;
+		v.cur_speed = 0;
+		v.subspeed = 0;
+		ReverseTrainDirection(v);
+		return false;
+	}
+
+
+
+	private static void invalid_rail(Vehicle v)
+	{
+		/* We've reached end of line?? */
+		if (prev != null) Global.error("!Disconnecting train");
+		//goto reverse_train_direction;
+		v.load_unload_time_rem = 0;
+		v.cur_speed = 0;
+		v.subspeed = 0;
+		ReverseTrainDirection(v);
+	}
+
+
+
+
+
 	static void TrainController(Vehicle v)
 	{
 		Vehicle prev;
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		int r, tracks,ts;
-		int i, enterdir, newdir, dir;
+		int i, enterdir, /*newdir,*/ dir;
 		byte chosen_dir;
 		byte chosen_track;
-		byte old_z;
+		//byte old_z;
 
 		/* For every vehicle after and including the given vehicle */
-		for (prev = GetPrevVehicleInChain(v); v != null; prev = v, v = v.next) {
+		for (prev = v.GetPrevVehicleInChain(); v != null; prev = v, v = v.next) 
+		{
 			v.BeginVehicleMove();
 
-			if (v.rail.track != 0x40) {
-				/* Not inside tunnel */
-				if (GetNewVehiclePos(v, gp)) {
-					/* Staying in the old tile */
-					if (v.rail.track == 0x80) {
-						/* inside depot */
-						gp.x = v.x_pos;
-						gp.y = v.y_pos;
-					} else {
-						/* is not inside depot */
-
-						if ((prev == null) && (!TrainCheckIfLineEnds(v)))
-							return;
-
-						r = VehicleEnterTile(v, gp.new_tile, gp.x, gp.y);
-						if (r & 0x8) {
-							//debug("%x & 0x8", r);
-							goto invalid_rail;
-						}
-						if (r & 0x2) {
-							TrainEnterStation(v, r >> 8);
-							return;
-						}
-
-						if (v.current_order.type == Order.OT_LEAVESTATION) {
-							v.current_order.type = Order.OT_NOTHING;
-							v.current_order.flags = 0;
-							Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
-						}
-					}
-				} else {
-					/* A new tile is about to be entered. */
-
-					byte bits;
-					/* Determine what direction we're entering the new tile from */
-					dir = GetNewVehicleDirectionByTile(gp.new_tile, gp.old_tile);
-					enterdir = dir >> 1;
-		assert(enterdir==0 || enterdir==1 || enterdir==2 || enterdir==3);
-
-		/* Get the status of the tracks in the new tile and mask
-		 * away the bits that aren't reachable. */
-		ts = GetTileTrackStatus(gp.new_tile, TRANSPORT_RAIL) & _reachable_tracks[enterdir];
-
-		/* Combine the from & to directions.
-		 * Now, the lower byte contains the track status, and the byte at bit 16 contains
-		 * the signal status. */
-		tracks = ts|(ts >> 8);
-		bits = tracks & 0xFF;
-		if (Global._patches.new_pathfinding_all && Global._patches.forbid_90_deg && prev == null)
-			/* We allow wagons to make 90 deg turns, because forbid_90_deg
-			 * can be switched on halfway a turn */
-			bits &= ~TrackCrossesTracks(FIND_FIRST_BIT(v.rail.track));
-
-		if ( bits == 0) {
-			//debug("%x == 0", bits);
-			goto invalid_rail;
-		}
-
-		/* Check if the new tile contrains tracks that are compatible
-		 * with the current train, if not, bail out. */
-		if (!CheckCompatibleRail(v, gp.new_tile)) {
-			//debug("!CheckCompatibleRail(%p, %x)", v, gp.new_tile);
-			goto invalid_rail;
-		}
-
-		if (prev == null) {
-			byte trackdir;
-			/* Currently the locomotive is active. Determine which one of the
-			 * available tracks to choose */
-			chosen_track = 1 << ChooseTrainTrack(v, gp.new_tile, enterdir, bits);
-			assert(chosen_track & tracks);
-
-			trackdir = TrackEnterdirToTrackdir(FIND_FIRST_BIT(chosen_track), enterdir);
-			assert(trackdir != 0xff);
-
-			if (PBSIsPbsSignal(gp.new_tile,trackdir) && PBSIsPbsSegment(gp.new_tile,trackdir)) {
-				// encountered a pbs signal, and possible a pbs block
-				Global.DEBUG_pbs(3, "pbs: (%i) arrive AT signal, tile:%x  pbs_stat:%i",v.unitnumber, gp.new_tile, v.rail.pbs_status);
-
-				if (v.rail.pbs_status == PBS_STAT_NONE) {
-					// we havent planned a path already, so try to find one now
-					NPFFindStationOrTileData fstd;
-					NPFFoundTargetData ftd;
-
-					NPFFillWithOrderData(&fstd, v);
-
-					Global.DEBUG_pbs(2, "pbs: (%i) choose signal (TC), tile:%x, trackdir:%i",v.unitnumber,  gp.new_tile, trackdir);
-					ftd = NPFRouteToStationOrTile(gp.new_tile, trackdir, &fstd, TRANSPORT_RAIL, v.owner, v.rail.railtype, PBS_MODE_GREEN);
-
-					if (v.rail.force_proceed != 0)
-						goto green_light;
-
-					if (ftd.best_trackdir == 0xFF)
-						goto red_light;
-
-					// we found a way out of the pbs block
-					if (NPFGetFlag(&ftd.node, NPF_FLAG_PBS_EXIT)) {
-						if (NPFGetFlag(&ftd.node, NPF_FLAG_PBS_BLOCKED) || NPFGetFlag(&ftd.node, NPF_FLAG_PBS_RED))
-							goto red_light;
-						else {
-							v.rail.pbs_end_tile = ftd.node.tile;
-							v.rail.pbs_end_trackdir = ftd.node.direction;
-							goto green_light;
-						}
-
-					};
-
-				} else {
-					// we have already planned a path through this pbs block
-					// on entering the block, we reset our status
-					v.rail.pbs_status = PBS_STAT_NONE;
-					goto green_light;
-				};
-				Global.DEBUG_pbs(3, "pbs: (%i) no green light found, or was no pbs-block",v.unitnumber);
-			};
-
-			/* Check if it's a red signal and that force proceed is not clicked. */
-			if ( (tracks>>16)&chosen_track && v.rail.force_proceed == 0) goto red_light;
-		} else {
-
-			/* The wagon is active, simply follow the prev vehicle. */
-			chosen_track = (byte)(_matching_tracks[GetDirectionToVehicle(prev, gp.x, gp.y)] & bits);
-		}
-		green_light:
-			if (v.next == null)
-				PBSClearTrack(gp.old_tile, FIND_FIRST_BIT(v.rail.track));
-
-		/* make sure chosen track is a valid track */
-		assert(chosen_track==1 || chosen_track==2 || chosen_track==4 || chosen_track==8 || chosen_track==16 || chosen_track==32);
-
-		/* Update XY to reflect the entrance to the new tile, and select the direction to use */
-		{
-			final byte *b = _initial_tile_subcoord[FIND_FIRST_BIT(chosen_track)][enterdir];
-			gp.x = (gp.x & ~0xF) | b[0];
-			gp.y = (gp.y & ~0xF) | b[1];
-			chosen_dir = b[2];
-		}
-
-		/* Call the landscape function and tell it that the vehicle entered the tile */
-		r = VehicleEnterTile(v, gp.new_tile, gp.x, gp.y);
-		if (r&0x8){
-			//debug("%x & 0x8", r);
-			goto invalid_rail;
-		}
-
-		if (v.IsFrontEngine()) v.load_unload_time_rem = 0;
-
-		if (!(r&0x4)) {
-			v.tile = gp.new_tile;
-			v.rail.track = chosen_track;
-			assert(v.rail.track);
-		}
-
-		if (v.IsFrontEngine())
-			TrainMovedChangeSignals(gp.new_tile, enterdir);
-
-		/* Signals can only change when the first
-		 * (above) or the last vehicle moves. */
-		if (v.next == null)
-			TrainMovedChangeSignals(gp.old_tile, (enterdir) ^ 2);
-
-		if (prev == null) {
-			AffectSpeedByDirChange(v, chosen_dir);
-		}
-
-		v.direction = chosen_dir;
-				}
-			} else {
-				/* in tunnel */
-				GetNewVehiclePos(v, &gp);
+			if (v.rail.track == 0x40)
+			{
+				// in tunnel 
+				v.GetNewVehiclePos(gp);
 
 				// Check if to exit the tunnel...
 				if (!IsTunnelTile(gp.new_tile) ||
-						!(VehicleEnterTile(v, gp.new_tile, gp.x, gp.y)&0x4) ) {
+						0==(v.VehicleEnterTile(gp.new_tile, gp.x, gp.y)&0x4) ) {
 					v.x_pos = gp.x;
 					v.y_pos = gp.y;
 					v.VehiclePositionChanged();
 					continue;
 				}
 			}
+			update_image_and_delta(v);
+			continue;
 
-			/* update image of train, as well as delta XY */
-			newdir = GetNewVehicleDirection(v, gp.x, gp.y);
+
+
+
+			/* Not inside tunnel */
+			if (v.GetNewVehiclePos(gp)) 
+			{
+				/* Staying in the old tile */
+				if (v.rail.track == 0x80) 
+				{
+					/* inside depot */
+					gp.x = v.x_pos;
+					gp.y = v.y_pos;
+				} 
+				else 
+				{
+					/* is not inside depot */
+
+					if ((prev == null) && (!TrainCheckIfLineEnds(v)))
+						return;
+
+					r = v.VehicleEnterTile(gp.new_tile, gp.x, gp.y);
+					if(0 != (r & 0x8)) {
+						//debug("%x & 0x8", r);
+						//goto invalid_rail;
+						invalid_rail(v);
+						return;
+					}
+					if(0 != (r & 0x2)) {
+						TrainEnterStation(v, r >> 8);
+						return;
+					}
+
+					if (v.current_order.type == Order.OT_LEAVESTATION) {
+						v.current_order.type = Order.OT_NOTHING;
+						v.current_order.flags = 0;
+						Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
+					}
+				}
+				update_image_and_delta(v);
+				continue;
+			} 
+
+
+			/* A new tile is about to be entered. */
+
+			byte bits;
+			/* Determine what direction we're entering the new tile from */
+			dir = GetNewVehicleDirectionByTile(gp.new_tile, gp.old_tile);
+			enterdir = dir >> 1;
+			assert(enterdir==0 || enterdir==1 || enterdir==2 || enterdir==3);
+
+			/* Get the status of the tracks in the new tile and mask
+			 * away the bits that aren't reachable. */
+			ts = GetTileTrackStatus(gp.new_tile, Global.TRANSPORT_RAIL) & _reachable_tracks[enterdir];
+
+			/* Combine the from & to directions.
+			 * Now, the lower byte contains the track status, and the byte at bit 16 contains
+			 * the signal status. */
+			tracks = ts|(ts >> 8);
+			bits = tracks & 0xFF;
+			if (Global._patches.new_pathfinding_all && Global._patches.forbid_90_deg && prev == null)
+				/* We allow wagons to make 90 deg turns, because forbid_90_deg
+				 * can be switched on halfway a turn */
+				bits &= ~TrackCrossesTracks(BitOps.FIND_FIRST_BIT(v.rail.track));
+
+			if ( bits == 0) {
+				//debug("%x == 0", bits);
+				//goto invalid_rail;
+				invalid_rail(v);
+				return;
+			}
+
+			/* Check if the new tile contrains tracks that are compatible
+			 * with the current train, if not, bail out. */
+			if (!CheckCompatibleRail(v, gp.new_tile)) {
+				//debug("!CheckCompatibleRail(%p, %x)", v, gp.new_tile);
+				//goto invalid_rail;
+				invalid_rail(v);
+				return;
+			}
+
+			if (prev == null) {
+				byte trackdir;
+				/* Currently the locomotive is active. Determine which one of the
+				 * available tracks to choose */
+				chosen_track = (byte) (1 << ChooseTrainTrack(v, gp.new_tile, enterdir, bits));
+				assert 0 != (chosen_track & tracks);
+
+				trackdir = TrackEnterdirToTrackdir(BitOps.FIND_FIRST_BIT(chosen_track), enterdir);
+				assert(trackdir != 0xff);
+
+				if (Pbs.PBSIsPbsSignal(gp.new_tile,trackdir) && Pbs.PBSIsPbsSegment(gp.new_tile,trackdir)) {
+					// encountered a pbs signal, and possible a pbs block
+					Global.DEBUG_pbs(3, "pbs: (%i) arrive AT signal, tile:%x  pbs_stat:%i",v.unitnumber, gp.new_tile, v.rail.pbs_status);
+
+					if (v.rail.pbs_status == Pbs.PBS_STAT_NONE) {
+						// we havent planned a path already, so try to find one now
+						NPFFindStationOrTileData fstd = new NPFFindStationOrTileData();
+						NPFFoundTargetData ftd;
+
+						Npf.NPFFillWithOrderData(fstd, v);
+
+						Global.DEBUG_pbs(2, "pbs: (%i) choose signal (TC), tile:%x, trackdir:%i",v.unitnumber,  gp.new_tile, trackdir);
+						ftd = Npf.NPFRouteToStationOrTile(gp.new_tile, trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, PBS_MODE_GREEN);
+
+						if (v.rail.force_proceed != 0)
+						{
+							//goto green_light;
+							if( green_light() ) return;
+							continue;
+						}
+
+						if (ftd.best_trackdir == 0xFF)
+						{
+							//goto red_light;
+							red_light(v);
+							return;
+						}
+
+						// we found a way out of the pbs block
+						if (Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_EXIT)) {
+							if (Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_BLOCKED) || Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_RED))
+							{
+								//goto red_light;
+								red_light(v);
+								return;
+							}
+							else {
+								v.rail.pbs_end_tile = ftd.node.tile;
+								v.rail.pbs_end_trackdir = ftd.node.direction;
+
+									//goto green_light;
+									if( green_light() ) return;
+									continue;
+
+							}
+
+						};
+
+					} else {
+						// we have already planned a path through this pbs block
+						// on entering the block, we reset our status
+						v.rail.pbs_status = Pbs.PBS_STAT_NONE;
+						//goto green_light;
+						if( green_light(v) ) return;
+						continue;
+					};
+					Global.DEBUG_pbs(3, "pbs: (%i) no green light found, or was no pbs-block",v.unitnumber);
+				};
+
+				/* Check if it's a red signal and that force proceed is not clicked. */
+				if ( (tracks>>16)&chosen_track && v.rail.force_proceed == 0)
+				{
+					//goto red_light;
+					red_light(v);
+					return;
+				}
+			} else {
+
+				/* The wagon is active, simply follow the prev vehicle. */
+				chosen_track = (byte)(_matching_tracks[GetDirectionToVehicle(prev, gp.x, gp.y)] & bits);
+			}
+
+			//green_light:
+			if( green_light(v) ) return;
+			continue;
+			/*
+				if (v.next == null)
+					PBSClearTrack(gp.old_tile, FIND_FIRST_BIT(v.rail.track));
+
+			// make sure chosen track is a valid track 
+			assert(chosen_track==1 || chosen_track==2 || chosen_track==4 || chosen_track==8 || chosen_track==16 || chosen_track==32);
+
+			// Update XY to reflect the entrance to the new tile, and select the direction to use 
+			{
+				final byte [] b = _initial_tile_subcoord[FIND_FIRST_BIT(chosen_track)][enterdir];
+				gp.x = (gp.x & ~0xF) | b[0];
+				gp.y = (gp.y & ~0xF) | b[1];
+				chosen_dir = b[2];
+			}
+
+			// Call the landscape function and tell it that the vehicle entered the tile 
+			r = v.VehicleEnterTile(gp.new_tile, gp.x, gp.y);
+			if (r&0x8){
+				//debug("%x & 0x8", r);
+				//goto invalid_rail;
+				invalid_rail(v);
+				return;
+			}
+
+			if (v.IsFrontEngine()) v.load_unload_time_rem = 0;
+
+			if (0==(r&0x4)) {
+				v.tile = gp.new_tile;
+				v.rail.track = chosen_track;
+				assert 0 != (v.rail.track);
+			}
+
+			if (v.IsFrontEngine())
+				TrainMovedChangeSignals(gp.new_tile, enterdir);
+
+			//* Signals can only change when the first
+			// * (above) or the last vehicle moves. 
+			if (v.next == null)
+				TrainMovedChangeSignals(gp.old_tile, (enterdir) ^ 2);
+
+			if (prev == null) {
+				AffectSpeedByDirChange(v, chosen_dir);
+			}
+
+			v.direction = chosen_dir;
+
+
+			update_image_and_delta(v);
+			*/
+			
+			/*{
+			// update image of train, as well as delta XY 
+			int newdir = GetNewVehicleDirection(v, gp.x, gp.y);
 			UpdateTrainDeltaXY(v, newdir);
 			v.cur_image = GetTrainImage(v, newdir);
 
 			v.x_pos = gp.x;
 			v.y_pos = gp.y;
 
-			/* update the Z position of the vehicle */
-			old_z = AfterSetTrainPos(v, (gp.new_tile != gp.old_tile));
+			// update the Z position of the vehicle 
+			int old_z = AfterSetTrainPos(v, (gp.new_tile != gp.old_tile));
 
 			if (prev == null) {
-				/* This is the first vehicle in the train */
+				// This is the first vehicle in the train 
 				AffectSpeedByZChange(v, old_z);
 			}
+			}*/
 		}
 		return;
 
+		/*
 		invalid_rail:
-			/* We've reached end of line?? */
-			if (prev != null) error("!Disconnecting train");
-		goto reverse_train_direction;
+		// We've reached end of line?? 
+		if (prev != null) Global.error("!Disconnecting train");
+		//goto reverse_train_direction;
+		v.load_unload_time_rem = 0;
+		v.cur_speed = 0;
+		v.subspeed = 0;
+		ReverseTrainDirection(v);
+		return;
+		 */
 
-		red_light: {
-			/* We're in front of a red signal ?? */
-			/* find the first set bit in ts. need to do it in 2 steps, since
-			 * FIND_FIRST_BIT only handles 6 bits at a time. */
+		//red_light: 
+		/*	
+		{
+			// We're in front of a red signal ?? 
+			// find the first set bit in ts. need to do it in 2 steps, since
+			// FIND_FIRST_BIT only handles 6 bits at a time. 
 			i = FindFirstBit2x64(ts);
 
 			if (!(_m[gp.new_tile].m3 & SignalAgainstTrackdir(i))) {
@@ -3069,18 +3225,93 @@ public class TrainCmd extends TrainTables
 					vasd.tile = o_tile;
 					vasd.direction = dir ^ 4;
 
-					/* check if a train is waiting on the other side */
+					// check if a train is waiting on the other side 
 					if (VehicleFromPos(o_tile, &vasd, CheckVehicleAtSignal) == null)
 						return;
 				}
 			}
 		}
 
-		reverse_train_direction:
-			v.load_unload_time_rem = 0;
+		if( red_light() ) return;
+		//reverse_train_direction:
+		v.load_unload_time_rem = 0;
 		v.cur_speed = 0;
 		v.subspeed = 0;
 		ReverseTrainDirection(v);
+		 */
+	}
+
+	private static boolean green_light(Vehicle v) 
+	{
+		if (v.next == null)
+			PBSClearTrack(gp.old_tile, FIND_FIRST_BIT(v.rail.track));
+
+	// make sure chosen track is a valid track 
+	assert(chosen_track==1 || chosen_track==2 || chosen_track==4 || chosen_track==8 || chosen_track==16 || chosen_track==32);
+
+	// Update XY to reflect the entrance to the new tile, and select the direction to use 
+	{
+		final byte [] b = _initial_tile_subcoord[FIND_FIRST_BIT(chosen_track)][enterdir];
+		gp.x = (gp.x & ~0xF) | b[0];
+		gp.y = (gp.y & ~0xF) | b[1];
+		chosen_dir = b[2];
+	}
+
+	// Call the landscape function and tell it that the vehicle entered the tile 
+	r = v.VehicleEnterTile(gp.new_tile, gp.x, gp.y);
+	if (r&0x8){
+		//debug("%x & 0x8", r);
+		//goto invalid_rail;
+		invalid_rail(v);
+		return true;
+	}
+
+	if (v.IsFrontEngine()) v.load_unload_time_rem = 0;
+
+	if (0==(r&0x4)) {
+		v.tile = gp.new_tile;
+		v.rail.track = chosen_track;
+		assert 0 != (v.rail.track);
+	}
+
+	if (v.IsFrontEngine())
+		TrainMovedChangeSignals(gp.new_tile, enterdir);
+
+	//* Signals can only change when the first
+	// * (above) or the last vehicle moves. 
+	if (v.next == null)
+		TrainMovedChangeSignals(gp.old_tile, (enterdir) ^ 2);
+
+	if (prev == null) {
+		AffectSpeedByDirChange(v, chosen_dir);
+	}
+
+	v.direction = chosen_dir;
+
+
+	update_image_and_delta(v);
+	return false;
+	}
+
+	private static void update_image_and_delta(Vehicle v) 
+	{
+
+		// update image of train, as well as delta XY 
+		int newdir = GetNewVehicleDirection(v, gp.x, gp.y);
+		UpdateTrainDeltaXY(v, newdir);
+		v.cur_image = GetTrainImage(v, newdir);
+
+		v.x_pos = gp.x;
+		v.y_pos = gp.y;
+
+		// update the Z position of the vehicle 
+		int old_z = AfterSetTrainPos(v, (gp.new_tile != gp.old_tile));
+
+		if (prev == null) {
+			// This is the first vehicle in the train 
+			AffectSpeedByZChange(v, old_z);
+		}
+
 	}
 
 	//extern TileIndex CheckTunnelBusy(TileIndex tile, int *length);
@@ -3178,7 +3409,7 @@ public class TrainCmd extends TrainTables
 		Vehicle u;
 
 		if (state == 4 && v.rail.track != 0x40) {
-			CreateEffectVehicleRel(v, 4, 4, 8, EV_EXPLOSION_LARGE);
+			CreateEffectVehicleRel(v, 4, 4, 8, Vehicle.EV_EXPLOSION_LARGE);
 		}
 
 		if (state <= 200 && BitOps.CHANCE16R(1, 7, r)) {
@@ -3193,7 +3424,7 @@ public class TrainCmd extends TrainTables
 							BitOps.GB(r,  8, 3) + 2,
 							BitOps.GB(r, 16, 3) + 2,
 							BitOps.GB(r,  0, 3) + 5,
-							EV_EXPLOSION_SMALL);
+							Vehicle.EV_EXPLOSION_SMALL);
 					break;
 				}
 			} while ( (u=u.next) != null);
@@ -3224,7 +3455,7 @@ public class TrainCmd extends TrainTables
 			//SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?			SND_10_TRAIN_BREAKDOWN : SND_3A_COMEDY_BREAKDOWN_2, v);
 
 			if (!(v.vehstatus & Vehicle.VS_HIDDEN)) {
-				Vehicle u = CreateEffectVehicleRel(v, 4, 4, 5, EV_BREAKDOWN_SMOKE);
+				Vehicle u = CreateEffectVehicleRel(v, 4, 4, 5, Vehicle.EV_BREAKDOWN_SMOKE);
 				if (u != null) u.special.unk0 = v.breakdown_delay * 2;
 			}
 		}
@@ -3539,7 +3770,7 @@ public class TrainCmd extends TrainTables
 				 * schedule? */
 				v.current_order.type = Order.OT_DUMMY;
 				v.current_order.flags = 0;
-				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 			}
 			return;
 		}
@@ -3555,7 +3786,7 @@ public class TrainCmd extends TrainTables
 		v.current_order.flags = Order.OF_NON_STOP;
 		v.current_order.station = depot.index;
 		v.dest_tile = tfdd.tile;
-		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 	}
 
 	static int GetTrainRunningCost(final Vehicle v)
@@ -3573,8 +3804,6 @@ public class TrainCmd extends TrainTables
 
 	void OnNewDay_Train(Vehicle v)
 	{
-		TileIndex tile;
-
 		if ((++v.day_counter & 7) == 0)
 			v.DecreaseVehicleValue();
 
@@ -3585,9 +3814,9 @@ public class TrainCmd extends TrainTables
 			CheckIfTrainNeedsService(v);
 
 			// check if train hasn't advanced in its order list for a set number of days
-			if (Global._patches.lost_train_days && v.num_orders && !(v.vehstatus & (Vehicle.VS_STOPPED | Vehicle.VS_CRASHED) ) && ++v.rail.days_since_order_progr >= Global._patches.lost_train_days && v.owner == Global._local_player) {
+			if (Global._patches.lost_train_days != 0 && v.num_orders != 0 && 0==(v.vehstatus & (Vehicle.VS_STOPPED | Vehicle.VS_CRASHED) ) && ++v.rail.days_since_order_progr >= Global._patches.lost_train_days && v.owner == Global._local_player) {
 				v.rail.days_since_order_progr = 0;
-				Global.SetDParam(0, v.unitnumber);
+				Global.SetDParam(0, v.unitnumber.id);
 				NewsItem.AddNewsItem(
 						Str.STR_TRAIN_IS_LOST,
 						NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0),
@@ -3595,12 +3824,15 @@ public class TrainCmd extends TrainTables
 						0);
 			}
 
-			Order.CheckOrders(v.index, OC_INIT);
+			Order.CheckOrders(v.index, Order.OC_INIT);
 
 			/* update destination */
-			if (v.current_order.type == Order.OT_GOTO_STATION &&
-					(tile = Station.GetStation(v.current_order.station).train_tile) != 0) {
-				v.dest_tile = tile;
+			if (v.current_order.type == Order.OT_GOTO_STATION)
+			{
+				TileIndex tile = Station.GetStation(v.current_order.station).train_tile;
+
+				if(tile != null)
+					v.dest_tile = tile;
 			}
 
 			if ((v.vehstatus & Vehicle.VS_STOPPED) == 0) {

@@ -35,7 +35,7 @@ public class VehicleRail extends VehicleChild {
 
 	byte pbs_status;
 	TileIndex pbs_end_tile;
-	Trackdir pbs_end_trackdir;
+	/*Trackdir*/ int pbs_end_trackdir;
 
 	/**
 	 * stuff to figure out how long a train should be. Used by autoreplace
@@ -43,7 +43,7 @@ public class VehicleRail extends VehicleChild {
 	 * last byte is the shortest station reached this round though the orders. It can be invalidated by
 	 *   skip station and alike by setting it to 0. That way we will ensure that a complete loop is used to find the shortest station
 	 */
-	byte [] shortest_platform = new byte[2];
+	int [] shortest_platform = new int[2];
 
 	// Link between the two ends of a multiheaded engine
 	Vehicle other_multiheaded_part;
