@@ -1,5 +1,6 @@
 package game;
 
+import game.struct.FindLengthOfTunnelResult;
 import game.struct.HashLink;
 import game.struct.StackedItem;
 import game.tables.TrackPathFinderTables;
@@ -24,7 +25,8 @@ public class NewTrackPathFinder extends Pathfind
 	StackedItem [] stack = new StackedItem[256]; // priority queue of stacked items
 
 	int [] hash_head = new int[0x400]; // hash heads. 0 means unused. 0xFFFC = length, 0x3 = dir
-	TileIndex [] hash_tile = new TileIndex[0x400]; // tiles. or links.
+	//TileIndex [] hash_tile = new TileIndex[0x400]; // tiles. or links.
+	int [] hash_tile = new int[0x400]; // tiles. or links.
 
 	HashLink[] links = new HashLink[0x400]; // hash links
 
@@ -91,7 +93,7 @@ public class NewTrackPathFinder extends Pathfind
 			// find the one corresponding to the tile, if it exists.
 			// otherwise make a new link
 
-			int offs = tpf.hash_tile[hash];
+			int offs = tpf.hash_tile[hash].tile;
 			do {
 				link = NTP_GET_LINK_PTR(tpf, offs);
 				if (tile == link.tile && (int)(link.typelength & 0x3) == dir) {
@@ -137,14 +139,14 @@ public class NewTrackPathFinder extends Pathfind
 		NewTrackPathFinder tpf = this;
 		
 		int hash,head,offs;
-		HashLink *link;
+		HashLink link;
 
 		hash = PATHFIND_HASH_TILE(tile);
 		head=tpf.hash_head[hash];
-		assert(head);
+		assert(head != 0);
 
 		if (head != 0xffff) {
-			assert( tpf.hash_tile[hash] == tile && (head & 3) == dir);
+			assert( tpf.hash_tile[hash] == tile.tile && (head & 3) == dir);
 			assert( (head >> 2) <= length);
 			return length == (head >> 2);
 		}
@@ -175,7 +177,7 @@ public class NewTrackPathFinder extends Pathfind
 		TrackBits bits, allbits;
 		int track;
 		TileIndex tile_org;
-		StackedItem si;
+		StackedItem si = new StackedItem();
 		FindLengthOfTunnelResult flotr;
 		int estimation;
 

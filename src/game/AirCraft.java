@@ -269,8 +269,8 @@ public class AirCraft {
 
 			v.cur_image = u.cur_image = 0xEA0;
 
-			v.random_bits = Hal.VehicleRandomBits();
-			u.random_bits = Hal.VehicleRandomBits();
+			v.random_bits = Vehicle.VehicleRandomBits();
+			u.random_bits = Vehicle.VehicleRandomBits();
 
 			v.VehiclePositionChanged();
 			u.VehiclePositionChanged();
@@ -293,7 +293,7 @@ public class AirCraft {
 				w.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_UNCLICKABLE;
 				w.subtype = 6;
 				w.cur_image = Sprite.SPR_ROTOR_STOPPED;
-				w.random_bits = Hal.VehicleRandomBits();
+				w.random_bits = Vehicle.VehicleRandomBits();
 				w.VehiclePositionChanged();
 			}
 

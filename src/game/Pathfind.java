@@ -117,7 +117,7 @@ public abstract class Pathfind extends TrackPathFinderTables
 		} else {
 			/* clear the hash_heads */
 			//memset(tpf.hash_head, 0, sizeof(tpf.hash_head));
-			tpf.hash_head.clear();
+			//tpf.hash_head.clear();
 			tpf.TPFMode1(tile, direction);
 		}
 
@@ -161,7 +161,7 @@ public abstract class Pathfind extends TrackPathFinderTables
 	// new pathfinder for trains. better and faster.
 	static void NewTrainPathfind(TileIndex tile, TileIndex dest, byte direction, NTPEnumProc enum_proc, Object data)
 	{
-		NewTrackPathFinder tpf;
+		NewTrackPathFinder tpf = new NewTrackPathFinder();
 
 		tpf.dest = dest;
 		tpf.userdata = data;
@@ -173,7 +173,8 @@ public abstract class Pathfind extends TrackPathFinderTables
 		tpf.num_links_left = tpf.links.length;
 		
 		//memset(tpf.hash_head, 0, sizeof(tpf.hash_head));
-		tpf.hash_head.clear();
+		//tpf.hash_head.clear();
+		//tpf.hash_head = new int[0x400]; // hash heads. 0 means unused. 0xFFFC = length, 0x3 = dir
 
 		tpf.NTPEnum(tile, direction);
 	}

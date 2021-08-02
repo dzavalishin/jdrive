@@ -471,6 +471,10 @@ public class Vehicle implements IPoolItem
 		} while (v != null);
 	}
 
+	void DeleteVehicle()
+	{
+		DeleteVehicle(this);
+	}
 	static void DeleteVehicle(Vehicle v)
 	{
 		Vehicle u;

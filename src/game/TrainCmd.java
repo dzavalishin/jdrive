@@ -3,6 +3,7 @@ package game;
 import java.util.Iterator;
 
 import game.struct.RailtypeSlowdownParams;
+import game.tables.EngineTables2;
 import game.tables.TrainTables;
 import game.util.BitOps;
 
@@ -59,7 +60,7 @@ public class TrainCmd extends TrainTables
 
 				// check if its a powered wagon
 				u.rail.flags = BitOps.RETCLRBIT(u.rail.flags, Vehicle.VRF_POWEREDWAGON);
-				if ((rvi_v.pow_wag_power != 0) && 0 != (rvi_u.flags & Engine.RVI_WAGON) && UsesWagonOverride(u)) {
+				if ((rvi_v.pow_wag_power != 0) && 0 != (rvi_u.flags & Engine.RVI_WAGON) && Engine.UsesWagonOverride(u)) {
 					if (BitOps.HASBIT(rvi_u.callbackmask, CBM_WAGON_POWER)) {
 						int callback = Engine.GetCallBackResult(CBID_WAGON_POWER,  u.engine_type, u);
 
@@ -76,13 +77,13 @@ public class TrainCmd extends TrainTables
 
 				// max speed is the minimum of the speed limits of all vehicles in the consist
 				if (0 != (rvi_u.flags & Engine.RVI_WAGON) || Global._patches.wagon_speed_limits)
-					if (rvi_u.max_speed != 0 && !UsesWagonOverride(u))
+					if (rvi_u.max_speed != 0 && !Engine.UsesWagonOverride(u))
 						max_speed = Math.min(rvi_u.max_speed, max_speed);
 			}
 
 			// check the vehicle length (callback)
 			veh_len = CALLBACK_FAILED;
-			if (BitOps.HASBIT(rvi_u.callbackmask, CBM_Vehicle.VEH_LENGTH))
+			if (BitOps.HASBIT(rvi_u.callbackmask, CBM_VEH_LENGTH))
 				veh_len = Engine.GetCallBackResult(CBID_VEH_LENGTH,  u.engine_type, u);
 			if (veh_len == CALLBACK_FAILED)
 				veh_len = rvi_u.shorten_factor;
@@ -293,10 +294,10 @@ public class TrainCmd extends TrainTables
 		int img = v.spritenum;
 		int base;
 
-		if (is_custom_sprite(img)) {
-			base = GetCustomVehicleSprite(v, direction + 4 * IS_CUSTOM_SECONDHEAD_SPRITE(img));
+		if (Sprite.is_custom_sprite(img)) {
+			base = GetCustomVehicleSprite(v, direction + 4 * (Sprite.IS_CUSTOM_SECONDHEAD_SPRITE(img) ? 1 : 0 ) );
 			if (base != 0) return base;
-			img = orig_rail_vehicle_info[v.engine_type].image_index;
+			img = EngineTables2.orig_rail_vehicle_info[v.engine_type.id].image_index;
 		}
 
 		base = _engine_sprite_base[img] + ((direction + _engine_sprite_add[img]) & _engine_sprite_and[img]);
@@ -309,15 +310,15 @@ public class TrainCmd extends TrainTables
 
 	static void DrawTrainEngine(int x, int y, EngineID engine, int image_ormod)
 	{
-		final RailVehicleInfo rvi = RailVehInfo(engine);
+		final RailVehicleInfo rvi = Engine.RailVehInfo(engine.id);
 
 		int img = rvi.image_index;
 		int image = 0;
 
-		if (is_custom_sprite(img)) {
+		if (Sprite.is_custom_sprite(img)) {
 			image = GetCustomVehicleIcon(engine, 6);
 			if (image == 0) {
-				img = orig_rail_vehicle_info[engine].image_index;
+				img = EngineTables2.orig_rail_vehicle_info[engine.id].image_index;
 			} else {
 				y += _traininfo_vehicle_pitch;
 			}
@@ -330,9 +331,9 @@ public class TrainCmd extends TrainTables
 			Gfx.DrawSprite(image | image_ormod, x - 14, y);
 			x += 15;
 			image = 0;
-			if (is_custom_sprite(img)) {
+			if (Sprite.is_custom_sprite(img)) {
 				image = GetCustomVehicleIcon(engine, 2);
-				if (image == 0) img = orig_rail_vehicle_info[engine].image_index;
+				if (image == 0) img = EngineTables2.orig_rail_vehicle_info[engine.id].image_index;
 			}
 			if (image == 0) {
 				image =
@@ -381,7 +382,7 @@ public class TrainCmd extends TrainTables
 
 			engine_type = BitOps.GB(callback, 0, 7);
 			flip_image = BitOps.HASBIT(callback, 7);
-			rvi_artic = RailVehInfo(engine_type);
+			rvi_artic = Engine.RailVehInfo(engine_type);
 
 			// get common values from first engine
 			u.direction = v.direction;
@@ -410,9 +411,9 @@ public class TrainCmd extends TrainTables
 			u.subtype = 0;
 			u.SetArticulatedPart();
 			u.cur_image = 0xAC2;
-			u.random_bits = VehicleRandomBits();
+			u.random_bits = Vehicle.VehicleRandomBits();
 
-			u.VehiclePositionChanged());
+			u.VehiclePositionChanged();
 		}
 	}
 
@@ -424,13 +425,13 @@ public class TrainCmd extends TrainTables
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		rvi = RailVehInfo(engine);
+		rvi = Engine.RailVehInfo(engine.id);
 		value = (rvi.base_cost * Global._price.build_railwagon) >> 8;
 
 			num_vehicles = 1 + CountArticulatedParts(rvi, engine);
 
-			if (!(flags & Cmd.DC_QUERY_COST)) {
-				Vehicle vl = new Vehicle[11]; // Allow for wagon and upto 10 artic parts.
+			if (0==(flags & Cmd.DC_QUERY_COST)) {
+				Vehicle [] vl = new Vehicle[11]; // Allow for wagon and upto 10 artic parts.
 				Vehicle  v;
 				int x;
 				int y;
@@ -438,7 +439,7 @@ public class TrainCmd extends TrainTables
 				if (!Vehicle.AllocateVehicles(vl, num_vehicles))
 					return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
-				if (flags & Cmd.DC_EXEC) {
+				if(0 != (flags & Cmd.DC_EXEC)) {
 					Vehicle u, w;
 					int dir;
 
@@ -455,7 +456,7 @@ public class TrainCmd extends TrainTables
 
 						if (w.type == Vehicle.VEH_Train && w.tile == tile &&
 								w.IsFreeWagon() && w.engine_type == engine) {
-							u = GetLastVehicleInChain(w);
+							u = w.GetLastVehicleInChain();
 							break;
 						}
 					}
@@ -467,15 +468,15 @@ public class TrainCmd extends TrainTables
 					v.direction = dir * 2 + 1;
 					v.tile = tile;
 
-					x = TileX(tile) * TILE_SIZE | _vehicle_initial_x_fract[dir];
-					y = TileY(tile) * TILE_SIZE | _vehicle_initial_y_fract[dir];
+					x = tile.TileX() * TileInfo.TILE_SIZE | _vehicle_initial_x_fract[dir];
+					y = tile.TileY() * TileInfo.TILE_SIZE | _vehicle_initial_y_fract[dir];
 
 					v.x_pos = x;
 					v.y_pos = y;
 					v.z_pos = Landscape.GetSlopeZ(x,y);
 					v.owner = Global._current_player;
 					v.z_height = 6;
-					v.rail.track = 0x80;
+					v.rail.track = (byte) 0x80;
 					v.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_DEFPAL;
 
 					v.subtype = 0;
@@ -491,22 +492,22 @@ public class TrainCmd extends TrainTables
 					v.value = value;
 					//			v.day_counter = 0;
 
-					v.rail.railtype = GetEngine(engine).railtype;
+					v.rail.railtype = Engine.GetEngine(engine).railtype;
 
-					v.build_year = _cur_year;
+					v.build_year = (byte) Global._cur_year;
 					v.type = Vehicle.VEH_Train;
 					v.cur_image = 0xAC2;
-					v.random_bits = VehicleRandomBits();
+					v.random_bits = Vehicle.VehicleRandomBits();
 
 					AddArticulatedParts(rvi, vl);
 
-					_new_wagon_id = v.index;
-					_new_vehicle_id = v.index;
+					Global._new_wagon_id = VehicleID.get(v.index);
+					Global._new_vehicle_id = VehicleID.get(v.index);
 
 					v.VehiclePositionChanged();
 					TrainConsistChanged(v.GetFirstVehicleInChain());
 
-					Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile);
+					Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 				}
 			}
 
@@ -526,7 +527,7 @@ public class TrainCmd extends TrainTables
 			if (v.type == Vehicle.VEH_Train && v.IsFreeWagon() &&
 					v.tile == u.tile &&
 					v.rail.track == 0x80) {
-				if (Cmd.CmdFailed(Cmd.DoCommandByTile(0, v.index | (u.index << 16), 1, Cmd.DC_EXEC,
+				if (Cmd.CmdFailed(Cmd.DoCommandByTile(null, v.index | (u.index << 16), 1, Cmd.DC_EXEC,
 						Cmd.CMD_MOVE_RAIL_VEHICLE)))
 					break;
 			}
@@ -540,7 +541,7 @@ public class TrainCmd extends TrainTables
 		return (rvi.base_cost * (Global._price.build_railvehicle >> 3)) >> 5;
 	}
 
-	void AddRearEngineToMultiheadedTrain(Vehicle v, Vehicle u, boolean building)
+	static void AddRearEngineToMultiheadedTrain(Vehicle v, Vehicle u, boolean building)
 	{
 		u.direction = v.direction;
 		u.owner = v.owner;
@@ -549,11 +550,11 @@ public class TrainCmd extends TrainTables
 		u.y_pos = v.y_pos;
 		u.z_pos = v.z_pos;
 		u.z_height = 6;
-		u.rail.track = 0x80;
+		u.rail.track = (byte) 0x80;
 		u.vehstatus = v.vehstatus & ~Vehicle.VS_STOPPED;
 		u.subtype = 0;
 		u.SetMultiheaded();
-		u.spritenum = v.spritenum + 1;
+		u.spritenum = (byte) (v.spritenum + 1);
 		u.cargo_type = v.cargo_type;
 		u.cargo_cap = v.cargo_cap;
 		u.rail.railtype = v.rail.railtype;
@@ -564,7 +565,7 @@ public class TrainCmd extends TrainTables
 			u.value = v.value;
 			u.type = Vehicle.VEH_Train;
 			u.cur_image = 0xAC2;
-			u.random_bits = VehicleRandomBits();
+			u.random_bits = Vehicle.VehicleRandomBits();
 			u.VehiclePositionChanged();
 	}
 
@@ -580,46 +581,46 @@ public class TrainCmd extends TrainTables
 		Vehicle v;
 		UnitID unit_num;
 		Engine e;
-		TileIndex tile = TileVirtXY(x, y);
+		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		int num_vehicles;
 
 		/* Check if the engine-type is valid (for the player) */
-		if (!IsEngineBuildable(p1, Vehicle.VEH_Train)) return Cmd.CMD_ERROR;
+		if (!Engine.IsEngineBuildable(p1, Vehicle.VEH_Train)) return Cmd.CMD_ERROR;
 
 		/* Check if the train is actually being built in a depot belonging
 		 * to the player. Doesn't matter if only the cost is queried */
-		if (!(flags & Cmd.DC_QUERY_COST)) {
-			if (!IsTileDepotType(tile, TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
+		if (0==(flags & Cmd.DC_QUERY_COST)) {
+			if (!Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
 			if (!tile.IsTileOwner( Global._current_player)) return Cmd.CMD_ERROR;
 		}
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		rvi = RailVehInfo(p1);
-		e = GetEngine(p1);
+		rvi = Engine.RailVehInfo(p1);
+		e = Engine.GetEngine(p1);
 
 		/* Check if depot and new engine uses the same kind of tracks */
-		if (!IsCompatibleRail(e.railtype, GetRailType(tile))) return Cmd.CMD_ERROR;
+		if (!Rail.IsCompatibleRail(e.railtype, Rail.GetRailType(tile))) return Cmd.CMD_ERROR;
 
-		if (rvi.flags & Engine.RVI_WAGON) return CmdBuildRailWagon(p1, tile, flags);
+		if(0 != (rvi.flags & Engine.RVI_WAGON)) return CmdBuildRailWagon(EngineID.get(p1), tile, flags);
 
 		value = EstimateTrainCost(rvi);
 
-		num_vehicles = (rvi.flags & Engine.RVI_MULTIHEAD) ? 2 : 1;
-		num_vehicles += CountArticulatedParts(rvi, p1);
+		num_vehicles = (rvi.flags & Engine.RVI_MULTIHEAD) != 0 ? 2 : 1;
+		num_vehicles += CountArticulatedParts(rvi, EngineID.get(p1));
 
-		if (!(flags & Cmd.DC_QUERY_COST)) {
+		if (0==(flags & Cmd.DC_QUERY_COST)) {
 			Vehicle [] vl = new Vehicle[12]; // Allow for upto 10 artic parts and dual-heads
-			if (!AllocateVehicles(vl, num_vehicles) || IsOrderPoolFull())
+			if (!Vehicle.AllocateVehicles(vl, num_vehicles) ) //|| IsOrderPoolFull())
 				return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 			v = vl[0];
 
-			unit_num = GetFreeUnitNumber(Vehicle.VEH_Train);
-			if (unit_num > Global._patches.max_trains)
+			unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Train);
+			if (unit_num.id > Global._patches.max_trains.id)
 				return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
-			if (flags & Cmd.DC_EXEC) {
+			if(0 != (flags & Cmd.DC_EXEC)) {
 				int dir;
 
 				v.unitnumber = unit_num;
@@ -633,15 +634,15 @@ public class TrainCmd extends TrainTables
 				v.y_pos = (y |= _vehicle_initial_y_fract[dir]);
 				v.z_pos = Landscape.GetSlopeZ(x,y);
 				v.z_height = 6;
-				v.rail.track = 0x80;
+				v.rail.track = (byte) 0x80;
 				v.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_STOPPED | Vehicle.VS_DEFPAL;
 				v.spritenum = rvi.image_index;
 				v.cargo_type = rvi.cargo_type;
 				v.cargo_cap = rvi.capacity;
 				v.max_speed = rvi.max_speed;
 				v.value = value;
-				v.last_station_visited = INVALID_STATION;
-				v.dest_tile = 0;
+				v.last_station_visited = Station.INVALID_STATION;
+				v.dest_tile = null;
 
 				v.engine_type = p1;
 
@@ -651,26 +652,26 @@ public class TrainCmd extends TrainTables
 
 				v.string_id = Str.STR_SV_TRAIN_NAME;
 				v.rail.railtype = e.railtype;
-				_new_train_id = v.index;
-				_new_vehicle_id = v.index;
+				Global._new_train_id = v.index;
+				Global._new_vehicle_id = v.index;
 
 				v.service_interval = Global._patches.servint_trains;
-				v.date_of_last_service = _date;
-				v.build_year = _cur_year;
+				v.date_of_last_service = Global._date;
+				v.build_year = (byte) Global._cur_year;
 				v.type = Vehicle.VEH_Train;
 				v.cur_image = 0xAC2;
-				v.random_bits = VehicleRandomBits();
+				v.random_bits = Vehicle.VehicleRandomBits();
 
 				v.subtype = 0;
-				SetFrontEngine(v);
-				SetTrainEngine(v);
+				v.SetFrontEngine();
+				v.SetTrainEngine();
 
-				v.rail.shortest_platform[0] = 255;
+				v.rail.shortest_platform[0] = (byte) 255;
 				v.rail.shortest_platform[1] = 0;
 
 				v.VehiclePositionChanged();
 
-				if (rvi.flags & Engine.RVI_MULTIHEAD) {
+				if( 0 != (rvi.flags & Engine.RVI_MULTIHEAD)) {
 					v.SetMultiheaded();
 					AddRearEngineToMultiheadedTrain(vl[0], vl[1], true);
 					/* Now we need to link the front and rear engines together
@@ -690,15 +691,15 @@ public class TrainCmd extends TrainTables
 					NormalizeTrainVehInDepot(v);
 				}
 
-				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, tile);
+				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, tile.tile);
 				RebuildVehicleLists();
-				Window.InvalidateWindow(Window.WC_COMPANY, v.owner);
-				if (IsLocalPlayer()) {
+				Window.InvalidateWindow(Window.WC_COMPANY, v.owner.id);
+				if (Player.IsLocalPlayer()) {
 					Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, Vehicle.VEH_Train); // updates the replace Train window
 				}
 			}
 		}
-		_cmd_build_rail_veh_score = _railveh_score[p1];
+		Global._cmd_build_rail_veh_score = _railveh_score[p1];
 
 		return value;
 	}
@@ -722,7 +723,7 @@ public class TrainCmd extends TrainTables
 		for (; v != null; v = v.next) {
 			count++;
 			if (v.rail.track != 0x80 || v.tile != tile ||
-					(v.IsFrontEngine() && !(v.vehstatus & Vehicle.VS_STOPPED))) {
+					(v.IsFrontEngine() && 0==(v.vehstatus & Vehicle.VS_STOPPED))) {
 				Global._error_message = Str.STR_881A_TRAINS_CAN_ONLY_BE_ALTERED;
 				return -1;
 			}
@@ -793,8 +794,8 @@ public class TrainCmd extends TrainTables
 
 		v.next = dest.next;
 		dest.next = v;
-		ClearFreeWagon(v);
-		ClearFrontEngine(v);
+		v.ClearFreeWagon();
+		v.ClearFrontEngine();
 	}
 
 	/*
@@ -830,8 +831,10 @@ public class TrainCmd extends TrainTables
 	 */
 	public static int CmdMoveRailVehicle(int x, int y, int flags, int p1, int p2)
 	{
-		VehicleID s = BitOps.GB(p1, 0, 16);
-		VehicleID d = BitOps.GB(p1, 16, 16);
+		//VehicleID 
+		int s = BitOps.GB(p1, 0, 16);
+		//VehicleID 
+		int d = BitOps.GB(p1, 16, 16);
 		Vehicle src, dst, src_head, dst_head;
 
 		if (!Vehicle.IsVehicleIndex(s)) return Cmd.CMD_ERROR;
@@ -849,32 +852,32 @@ public class TrainCmd extends TrainTables
 		}
 
 		// if an articulated part is being handled, deal with its parent vehicle
-		while (IsArticulatedPart(src)) src = GetPrevVehicleInChain(src);
+		while (src.IsArticulatedPart()) src = src.GetPrevVehicleInChain();
 		if (dst != null) {
-			while (IsArticulatedPart(dst)) dst = GetPrevVehicleInChain(dst);
+			while (dst.IsArticulatedPart()) dst = dst.GetPrevVehicleInChain();
 		}
 
 		// don't move the same vehicle..
 		if (src == dst) return 0;
 
 		/* the player must be the owner */
-		if (!CheckOwnership(src.owner) || (dst != null && !CheckOwnership(dst.owner)))
+		if (!Player.CheckOwnership(src.owner) || (dst != null && !Player.CheckOwnership(dst.owner)))
 			return Cmd.CMD_ERROR;
 
 		/* locate the head of the two chains */
-		src_head = GetFirstVehicleInChain(src);
+		src_head = src.GetFirstVehicleInChain();
 		dst_head = null;
 		if (dst != null) {
-			dst_head = GetFirstVehicleInChain(dst);
+			dst_head = dst.GetFirstVehicleInChain();
 			// Now deal with articulated part of destination wagon
 			dst = dst.GetLastEnginePart();
 		}
 
-		if (dst != null && IsMultiheaded(dst) && !IsTrainEngine(dst) && IsTrainWagon(src)) {
+		if (dst != null && dst.IsMultiheaded() && !dst.IsTrainEngine() && dst.IsTrainWagon()) {
 			/* We are moving a wagon to the rear part of a multiheaded engine */
 			if (dst.next == null) {
 				/* It's the last one, so we will add the wagon just before the rear engine */
-				dst = GetPrevVehicleInChain(dst);
+				dst = dst.GetPrevVehicleInChain();
 				// if dst is null, it means that dst got a rear multiheaded engine as first engine. We can't use that
 				if (dst == null) return Cmd.CMD_ERROR;
 			} else {
@@ -904,7 +907,7 @@ public class TrainCmd extends TrainTables
 			}
 		}
 
-		if (IsMultiheaded(src) && !src.IsTrainEngine()) return Cmd.return_cmd_error(Str.STR_REAR_ENGINE_FOLLOW_FRONT_ERROR);
+		if (src.IsMultiheaded() && !src.IsTrainEngine()) return Cmd.return_cmd_error(Str.STR_REAR_ENGINE_FOLLOW_FRONT_ERROR);
 
 		/* check if all vehicles in the source train are stopped inside a depot */
 		if (CheckTrainStoppedInDepot(src_head) < 0) return Cmd.CMD_ERROR;
@@ -926,17 +929,17 @@ public class TrainCmd extends TrainTables
 
 		// moving a loco to a new line?, then we need to assign a unitnumber.
 		if (dst == null && !src.IsFrontEngine() && src.IsTrainEngine()) {
-			UnitID unit_num = GetFreeUnitNumber(Vehicle.VEH_Train);
-			if (unit_num > Global._patches.max_trains)
+			UnitID unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Train);
+			if (unit_num.id > Global._patches.max_trains.id)
 				return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
-			if (flags & Cmd.DC_EXEC)
+			if(0 != (flags & Cmd.DC_EXEC))
 				src.unitnumber = unit_num;
 		}
 
 
 		/* do it? */
-		if (flags & Cmd.DC_EXEC) {
+		if(0 !=  (flags & Cmd.DC_EXEC)) {
 			/* clear the .first cache */
 			{
 				Vehicle u;
@@ -985,7 +988,7 @@ public class TrainCmd extends TrainTables
 
 				src.ClearFrontEngine();
 				src.ClearFreeWagon();
-				src.unitnumber = 0; // doesn't occupy a unitnumber anymore.
+				src.unitnumber = null; // doesn't occupy a unitnumber anymore.
 
 				// link in the wagon(s) in the chain.
 				{
@@ -1026,15 +1029,15 @@ public class TrainCmd extends TrainTables
 			/* If there is an engine behind first_engine we moved away, it should become new first_engine
 			 * To do this, CmdMoveRailVehicle must be called once more
 			 * we can't loop forever here because next time we reach this line we will have a front engine */
-			if (src_head != null && !IsFrontEngine(src_head) && IsTrainEngine(src_head)) {
+			if (src_head != null && !src_head.IsFrontEngine() && src_head.IsTrainEngine()) {
 				CmdMoveRailVehicle(x, y, flags, src_head.index | (INVALID_VEHICLE << 16), 1);
 				src_head = null;	// don't do anything more to this train since the new call will do it
 			}
 
-			if (src_head) {
+			if (src_head != null) {
 				NormaliseTrainConsist(src_head);
 				TrainConsistChanged(src_head);
-				if (IsFrontEngine(src_head)) {
+				if (src_head.IsFrontEngine()) {
 					UpdateTrainAcceleration(src_head);
 					Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, src_head.index);
 					/* Update the refit button and window */
@@ -1042,13 +1045,13 @@ public class TrainCmd extends TrainTables
 					Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, src_head.index, 12);
 				}
 				/* Update the depot window */
-				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, src_head.tile);
+				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, src_head.tile.tile);
 			};
 
-			if (dst_head) {
+			if (dst_head != null) {
 				NormaliseTrainConsist(dst_head);
 				TrainConsistChanged(dst_head);
-				if (IsFrontEngine(dst_head)) {
+				if (dst_head.IsFrontEngine()) {
 					UpdateTrainAcceleration(dst_head);
 					Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, dst_head.index);
 					/* Update the refit button and window */
@@ -1056,10 +1059,10 @@ public class TrainCmd extends TrainTables
 					Window.InvalidateWindow(Window.WC_VEHICLE_REFIT, dst_head.index);
 				}
 				/* Update the depot window */
-				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, dst_head.tile);
+				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, dst_head.tile.tile);
 			}
 
-			RebuildVehicleLists();
+			VehicleGui.RebuildVehicleLists();
 		}
 
 		return 0;
@@ -1078,13 +1081,13 @@ public class TrainCmd extends TrainTables
 
 		v = Vehicle.GetVehicle(p1);
 
-		if (v.type != Vehicle.VEH_Train || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
+		if (v.type != Vehicle.VEH_Train || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			v.rail.days_since_order_progr = 0;
 			v.vehstatus ^= Vehicle.VS_STOPPED;
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
-			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile);
+			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 		}
 		return 0;
 	}
@@ -1121,21 +1124,21 @@ public class TrainCmd extends TrainTables
 
 		if (v.IsMultiheaded() && !v.IsTrainEngine()) return Cmd.return_cmd_error(Str.STR_REAR_ENGINE_FOLLOW_FRONT_ERROR);
 
-		if (flags & Cmd.DC_EXEC) {
-			if (v == first && IsFrontEngine(first)) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
+			if (v == first && first.IsFrontEngine()) {
 				Window.DeleteWindowById(Window.WC_VEHICLE_VIEW, first.index);
 			}
-			if (IsLocalPlayer() && (p1 == 1 || !(RailVehInfo(v.engine_type).flags & Engine.RVI_WAGON))) {
+			if (Player.IsLocalPlayer() && (p1 == 1 || 0==(Engine.RailVehInfo(v.engine_type.id).flags & Engine.RVI_WAGON))) {
 				Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, Vehicle.VEH_Train);
 			}
-			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, first.tile);
-			RebuildVehicleLists();
+			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, first.tile.tile);
+			VehicleGui.RebuildVehicleLists();
 		}
 
 		switch (p2) {
 		case 0: case 2: { /* Delete given wagon */
 			boolean switch_engine = false;    // update second wagon to engine?
-			byte ori_subtype = v.subtype; // backup subtype of deleted wagon in case DeleteVehicle() changes
+			int ori_subtype = v.subtype; // backup subtype of deleted wagon in case DeleteVehicle() changes
 
 			/* 1. Delete the engine, if it is dualheaded also delete the matching
 			 * rear engine of the loco (from the point of deletion onwards) */
@@ -1144,16 +1147,16 @@ public class TrainCmd extends TrainTables
 
 			if (rear != null) {
 				cost -= rear.value;
-				if (flags & Cmd.DC_EXEC) {
+				if(0 != (flags & Cmd.DC_EXEC)) {
 					UnlinkWagon(rear, first);
-					DeleteVehicle(rear);
+					Vehicle.DeleteVehicle(rear);
 				}
 			}
 
 			/* 2. We are selling the first engine, some special action might be required
 			 * here, so take attention */
-			if ((flags & Cmd.DC_EXEC) && v == first) {
-				new_f = GetNextVehicle(first);
+			if ((flags & Cmd.DC_EXEC) != 0 && v == first) {
+				new_f = first.GetNextVehicle();
 
 				/* 2.1 If the first wagon is sold, update the first. pointers to null */
 				for (tmp = first; tmp != null; tmp = tmp.next) tmp.first = null;
@@ -1162,7 +1165,7 @@ public class TrainCmd extends TrainTables
 				 * if the second wagon (which will be first) is an engine. If it is one,
 				 * promote it as a new train, retaining the unitnumber, orders */
 				if (new_f != null) {
-					if (IsTrainEngine(new_f)) {
+					if (new_f.IsTrainEngine()) {
 						switch_engine = true;
 						/* Copy important data from the front engine */
 						new_f.unitnumber = first.unitnumber;
@@ -1171,26 +1174,26 @@ public class TrainCmd extends TrainTables
 						new_f.orders = first.orders;
 						new_f.num_orders = first.num_orders;
 						first.orders = null; // XXX - to not to delete the orders */
-						if (IsLocalPlayer()) ShowTrainViewWindow(new_f);
+						if (Player.IsLocalPlayer()) ShowTrainViewWindow(new_f);
 					}
 				}
 			}
 
 			/* 3. Delete the requested wagon */
 			cost -= v.value;
-			if (flags & Cmd.DC_EXEC) {
+			if(0 != (flags & Cmd.DC_EXEC)) {
 				first = UnlinkWagon(v, first);
-				v.DeleteVehicle();
+				Vehicle.DeleteVehicle(v);
 
 				/* 4 If the second wagon was an engine, update it to front_engine
 				 * which UnlinkWagon() has changed to TS_Free_Car */
-				if (switch_engine) SetFrontEngine(first);
+				if (switch_engine) first.SetFrontEngine();
 
 				/* 5. If the train still exists, update its acceleration, window, etc. */
 				if (first != null) {
 					NormaliseTrainConsist(first);
 					TrainConsistChanged(first);
-					if (IsFrontEngine(first)) {
+					if (first.IsFrontEngine()) {
 						Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, first.index);
 						Window.InvalidateWindow(Window.WC_VEHICLE_REFIT, first.index);
 						UpdateTrainAcceleration(first);
@@ -1224,9 +1227,9 @@ public class TrainCmd extends TrainTables
 
 						if (rear != null) {
 							cost -= rear.value;
-							if (flags & Cmd.DC_EXEC) {
+							if(0 != (flags & Cmd.DC_EXEC)) {
 								first = UnlinkWagon(rear, first);
-								DeleteVehicle(rear);
+								Vehicle.DeleteVehicle(rear);
 							}
 						}
 					} else if (v.rail.other_multiheaded_part != null) {
@@ -1236,7 +1239,7 @@ public class TrainCmd extends TrainTables
 				}
 
 				cost -= v.value;
-				if (flags & Cmd.DC_EXEC) {
+				if(0 != (flags & Cmd.DC_EXEC)) {
 					first = UnlinkWagon(v, first);
 					v.DeleteVehicle();
 				}
@@ -1246,7 +1249,7 @@ public class TrainCmd extends TrainTables
 			if ((flags & Cmd.DC_EXEC) && first != null) {
 				NormaliseTrainConsist(first);
 				TrainConsistChanged(first);
-				if (IsFrontEngine(first))
+				if (first.IsFrontEngine())
 					UpdateTrainAcceleration(first);
 				Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, first.index);
 				Window.InvalidateWindow(Window.WC_VEHICLE_REFIT, first.index);
@@ -1263,8 +1266,8 @@ public class TrainCmd extends TrainTables
 
 		v.x_offs        = BitOps.GB(x,  0, 8);
 		v.y_offs        = BitOps.GB(x,  8, 8);
-		v.sprite_width  = BitOps.GB(x, 16, 8);
-		v.sprite_height = BitOps.GB(x, 24, 8);
+		v.sprite_width  = (byte) BitOps.GB(x, 16, 8);
+		v.sprite_height = (byte) BitOps.GB(x, 24, 8);
 	}
 
 	static void UpdateVarsAfterSwap(Vehicle v)
@@ -1273,7 +1276,7 @@ public class TrainCmd extends TrainTables
 		v.cur_image = GetTrainImage(v, v.direction);
 		v.BeginVehicleMove();
 		v.VehiclePositionChanged();
-		EndVehicleMove(v);
+		v.EndVehicleMove();
 	}
 
 	static void SetLastSpeed(Vehicle  v, int spd)
@@ -1428,7 +1431,7 @@ public class TrainCmd extends TrainTables
 	static TileIndex GetVehicleTileOutOfTunnel(final Vehicle  v, boolean reverse)
 	{
 		TileIndex tile;
-		byte direction = (!reverse) ? DirToDiagdir(v.direction) : ReverseDiagdir(v.direction >> 1);
+		int direction = (!reverse) ? Rail.DirToDiagdir(v.direction) : Rail.ReverseDiagdir(v.direction >> 1);
 		TileIndexDiff delta = TileIndex.TileOffsByDir(direction);
 
 		if (v.rail.track != 0x40) return v.tile;
@@ -1446,15 +1449,17 @@ public class TrainCmd extends TrainTables
 		int l = 0, r = -1;
 		Vehicle u;
 		TileIndex tile;
-		Trackdir trackdir;
+		//Trackdir 
+		int trackdir;
 		TileIndex pbs_end_tile = v.rail.pbs_end_tile; // these may be changed, and we may need
-		Trackdir pbs_end_trackdir = v.rail.pbs_end_trackdir; // the old values, so cache them
+		//Trackdir 
+		int pbs_end_trackdir = v.rail.pbs_end_trackdir; // the old values, so cache them
 
 		u = v.GetLastVehicleInChain();
 		tile = Vehicle.GetVehicleTileOutOfTunnel(u, false);
-		trackdir = ReverseTrackdir(Vehicle.GetVehicleTrackdir(u));
+		trackdir = Rail.ReverseTrackdir(Vehicle.GetVehicleTrackdir(u));
 
-		if (PBSTileReserved(tile) & (1 << TrackdirToTrack(trackdir))) {
+		if (Pbs.PBSTileReserved(tile) & (1 << Rail.TrackdirToTrack(trackdir))) {
 			NPFFindStationOrTileData fstd = new NPFFindStationOrTileData();
 			NPFFoundTargetData ftd;
 
@@ -1562,7 +1567,7 @@ public class TrainCmd extends TrainTables
 
 		v = Vehicle.GetVehicle(p1);
 
-		if (v.type != Vehicle.VEH_Train || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
+		if (v.type != Vehicle.VEH_Train || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		Global._error_message = Str.STR_EMPTY;
 
@@ -1571,7 +1576,7 @@ public class TrainCmd extends TrainTables
 
 		if (v.rail.crash_anim_pos != 0 || v.breakdown_ctr != 0) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) {
+		if( 0 !=  (flags & Cmd.DC_EXEC)) {
 			if (Global._patches.realistic_acceleration && v.cur_speed != 0) {
 				v.rail.flags = BitOps.RETTOGGLEBIT(v.rail.flags, Vehicle.VRF_REVERSING);
 			} else {
@@ -1596,9 +1601,9 @@ public class TrainCmd extends TrainTables
 
 		v = Vehicle.GetVehicle(p1);
 
-		if (v.type != Vehicle.VEH_Train || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
+		if (v.type != Vehicle.VEH_Train || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) v.rail.force_proceed = 0x50;
+		if(0 != (flags & Cmd.DC_EXEC)) v.rail.force_proceed = 0x50;
 
 		return 0;
 	}
@@ -1620,11 +1625,11 @@ public class TrainCmd extends TrainTables
 
 		v = Vehicle.GetVehicle(p1);
 
-		if (v.type != Vehicle.VEH_Train || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
+		if (v.type != Vehicle.VEH_Train || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 		if (CheckTrainStoppedInDepot(v) < 0) return Cmd.return_cmd_error(Str.STR_TRAIN_MUST_BE_STOPPED);
 
 		/* Check cargo */
-		if (new_cid > NUM_CARGO) return Cmd.CMD_ERROR;
+		if (new_cid > AcceptedCargo.NUM_CARGO) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_RUN);
 
@@ -1713,7 +1718,7 @@ public class TrainCmd extends TrainTables
 		 * This value is unused when new depot finding and NPF are both disabled
 		 */
 		boolean reverse;
-	} TrainFindDepotData;
+	} 
 
 	static boolean NtpCallbFindDepot(TileIndex tile, TrainFindDepotData tfdd, int track, int length)
 	{
@@ -1733,16 +1738,16 @@ public class TrainCmd extends TrainTables
 	static TrainFindDepotData FindClosestTrainDepot(Vehicle v)
 	{
 		int i;
-		TrainFindDepotData tfdd;
+		TrainFindDepotData tfdd = new TrainFindDepotData();
 		TileIndex tile = v.tile;
 
-		assert(!(v.vehstatus & Vehicle.VS_CRASHED));
+		assert(0 == (v.vehstatus & Vehicle.VS_CRASHED));
 
 		tfdd.owner = v.owner;
 		tfdd.best_length = (int)-1;
 		tfdd.reverse = false;
 
-		if (IsTileDepotType(tile, TRANSPORT_RAIL)){
+		if (tile.IsTileDepotType(Global.TRANSPORT_RAIL)){
 			tfdd.tile = tile;
 			tfdd.best_length = 0;
 			return tfdd;
@@ -1766,20 +1771,20 @@ public class TrainCmd extends TrainTables
 				 * work for now :-) We can possibly change this when the old pathfinder
 				 * is removed. */
 				tfdd.best_length = ftd.best_path_dist / NPF_TILE_LENGTH;
-				if (NPFGetFlag(&ftd.node, NPF_FLAG_REVERSE))
+				if (NPFGetFlag(ftd.node, NPF_FLAG_REVERSE))
 					tfdd.reverse = true;
 			}
 		} else {
 			// search in the forward direction first.
 			i = v.direction >> 1;
 		if (!(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
-		NewTrainPathfind(tile, 0, i, (NTPEnumProc*)NtpCallbFindDepot, &tfdd);
+		NewTrainPathfind(tile, 0, i, (NTPEnumProc)NtpCallbFindDepot, tfdd);
 		if (tfdd.best_length == (int)-1){
 			tfdd.reverse = true;
 			// search in backwards direction
 			i = (v.direction^4) >> 1;
 			if (!(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
-			NewTrainPathfind(tile, 0, i, (NTPEnumProc*)NtpCallbFindDepot, &tfdd);
+			NewTrainPathfind(tile, 0, i, (NTPEnumProc)NtpCallbFindDepot, tfdd);
 		}
 		}
 
@@ -1800,13 +1805,13 @@ public class TrainCmd extends TrainTables
 
 		v = Vehicle.GetVehicle(p1);
 
-		if (v.type != Vehicle.VEH_Train || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
+		if (v.type != Vehicle.VEH_Train || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (v.vehstatus & Vehicle.VS_CRASHED) return Cmd.CMD_ERROR;
+		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) return Cmd.CMD_ERROR;
 
 		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
-			if (flags & Cmd.DC_EXEC) {
-				if (BitOps.HASBIT(v.current_order.flags, OFB_PART_OF_ORDERS)) {
+			if(0 != (flags & Cmd.DC_EXEC)) {
+				if (BitOps.HASBIT(v.current_order.flags, Order.OFB_PART_OF_ORDERS)) {
 					v.rail.days_since_order_progr = 0;
 					v.cur_order_index++;
 				}
@@ -1862,7 +1867,7 @@ public class TrainCmd extends TrainTables
 
 	static void OnTick_Train()
 	{
-		_age_cargo_skip_counter = (_age_cargo_skip_counter == 0) ? 184 : (_age_cargo_skip_counter - 1);
+		Global._age_cargo_skip_counter = (Global._age_cargo_skip_counter == 0) ? 184 : (Global._age_cargo_skip_counter - 1);
 	}
 
 
@@ -1885,16 +1890,17 @@ public class TrainCmd extends TrainTables
 			int x, y;
 
 			// no smoke?
-			if ((RailVehInfo(engtype).flags & Engine.RVI_WAGON && effect_type == 0) ||
+			if ( (0 != (Engine.RailVehInfo(engtype.id).flags & Engine.RVI_WAGON) && effect_type == 0) ||
 					disable_effect ||
-					GetEngine(engtype).railtype > RAILTYPE_RAIL ||
-					v.vehstatus & Vehicle.VS_HIDDEN ||
-					v.rail.track & 0xC0) {
+					Engine.GetEngine(engtype).railtype > RAILTYPE_RAIL ||
+					0 != (v.vehstatus & Vehicle.VS_HIDDEN) ||
+					0 != (v.rail.track & 0xC0) 
+					) {
 				continue;
 			}
 
 			// No smoke in depots or tunnels
-			if (IsTileDepotType(v.tile, TRANSPORT_RAIL) || IsTunnelTile(v.tile))
+			if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_RAIL) || IsTunnelTile(v.tile))
 				continue;
 
 			if (effect_type == 0) {
@@ -1952,6 +1958,30 @@ public class TrainCmd extends TrainTables
 		}
 	}
 
+
+	static boolean CheckTrainStayInDepot_green(Vehicle v)
+	{
+		v.VehicleServiceInDepot();
+		Window.InvalidateWindowClasses(Window.WC_TRAINS_LIST);
+		TrainPlayLeaveStationSound(v);
+
+		v.rail.track = 1;
+		if(0 != (v.direction & 2)) v.rail.track = 2;
+
+		v.vehstatus &= ~Vehicle.VS_HIDDEN;
+		v.cur_speed = 0;
+
+		UpdateTrainDeltaXY(v, v.direction);
+		v.cur_image = GetTrainImage(v, v.direction);
+		v.VehiclePositionChanged();
+		Rail.UpdateSignalsOnSegment(v.tile, v.direction);
+		UpdateTrainAcceleration(v);
+		Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
+
+		return false;
+
+	}
+
 	static boolean CheckTrainStayInDepot(Vehicle v)
 	{
 		Vehicle u;
@@ -1962,7 +1992,7 @@ public class TrainCmd extends TrainTables
 		}
 
 		if (v.rail.force_proceed == 0) {
-			Trackdir trackdir = Vehicle.GetVehicleTrackdir(v);
+			/*Trackdir*/ int trackdir = v.GetVehicleTrackdir();
 
 			if (++v.load_unload_time_rem < 37) {
 				Window.InvalidateWindowClasses(Window.WC_TRAINS_LIST);
@@ -1971,25 +2001,26 @@ public class TrainCmd extends TrainTables
 
 			v.load_unload_time_rem = 0;
 
-			if (PBSIsPbsSegment(v.tile, trackdir)) {
-				NPFFindStationOrTileData fstd;
+			if (Pbs.PBSIsPbsSegment(v.tile, trackdir)) {
+				NPFFindStationOrTileData fstd = new NPFFindStationOrTileData();
 				NPFFoundTargetData ftd;
 
-				if (PBSTileUnavail(v.tile) & (1 << trackdir)) return true;
+				if(0 != (Pbs.PBSTileUnavail(v.tile) & (1 << trackdir)) ) return true;
 
-				NPFFillWithOrderData(&fstd, v);
+				NPFFillWithOrderData(fstd, v);
 
 				Global.DEBUG_pbs(2, "pbs: (%i) choose depot (DP), tile:%x, trackdir:%i",v.unitnumber,  v.tile, trackdir);
-				ftd = NPFRouteToStationOrTile(v.tile, trackdir, &fstd, TRANSPORT_RAIL, v.owner, v.rail.railtype, PBS_MODE_GREEN);
+				ftd = NPFRouteToStationOrTile(v.tile, trackdir, fstd, TRANSPORT_RAIL, v.owner, v.rail.railtype, PBS_MODE_GREEN);
 
 				// we found a way out of the pbs block
-				if (NPFGetFlag(&ftd.node, NPF_FLAG_PBS_EXIT)) {
-					if (NPFGetFlag(&ftd.node, NPF_FLAG_PBS_BLOCKED) || NPFGetFlag(&ftd.node, NPF_FLAG_PBS_RED)) {
+				if (NPFGetFlag(ftd.node, NPF_FLAG_PBS_EXIT)) {
+					if (NPFGetFlag(ftd.node, NPF_FLAG_PBS_BLOCKED) || NPFGetFlag(ftd.node, NPF_FLAG_PBS_RED)) {
 						return true;
 					} else {
 						v.rail.pbs_end_tile = ftd.node.tile;
 						v.rail.pbs_end_trackdir = ftd.node.direction;
-						goto green;
+						//goto green;
+						return CheckTrainStayInDepot_green(v);
 					}
 				}
 			}
@@ -1999,6 +2030,7 @@ public class TrainCmd extends TrainTables
 				return true;
 			}
 		}
+		/*
 		green:
 			v.VehicleServiceInDepot();
 		Window.InvalidateWindowClasses(Window.WC_TRAINS_LIST);
@@ -2018,6 +2050,8 @@ public class TrainCmd extends TrainTables
 		Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile);
 
 		return false;
+		 */
+		return CheckTrainStayInDepot_green(v);
 	}
 
 	/* Check for station tiles */
@@ -2036,7 +2070,7 @@ public class TrainCmd extends TrainTables
 			return false;
 
 		// did we reach the final station?
-		if ((ttfd.station_index == INVALID_STATION && tile == ttfd.dest_coords) ||
+		if ((ttfd.station_index.id == Station.INVALID_STATION && tile == ttfd.dest_coords) ||
 				(tile.IsTileType( TileTypes.MP_STATION) && BitOps.IS_INT_INSIDE(tile.getMap().m5, 0, 8) && tile.getMap().m2 == ttfd.station_index)) {
 			/* We do not check for dest_coords if we have a station_index,
 			 * because in that case the dest_coords are just an
@@ -2073,7 +2107,7 @@ public class TrainCmd extends TrainTables
 
 
 	/* choose a track */
-	static byte ChooseTrainTrack(Vehicle v, TileIndex tile, int enterdir, TrackdirBits trackdirbits)
+	static byte ChooseTrainTrack(Vehicle v, TileIndex tile, int enterdir, /*TrackdirBits*/ int trackdirbits)
 	{
 		TrainTrackFollowerData fd = new TrainTrackFollowerData();
 		int best_track;
@@ -2085,8 +2119,8 @@ public class TrainCmd extends TrainTables
 		assert( (trackdirbits & ~0x3F) == 0);
 
 		/* quick return in case only one possible track is available */
-		if (KILL_FIRST_BIT(trackdirbits) == 0)
-			return FIND_FIRST_BIT(trackdirbits);
+		if (BitOps.KILL_FIRST_BIT(trackdirbits) == 0)
+			return BitOps.FIND_FIRST_BIT(trackdirbits);
 
 		if (Global._patches.new_pathfinding_all) { /* Use a new pathfinding for everything */
 			NPFFindStationOrTileData fstd = new NPFFindStationOrTileData();
@@ -2228,7 +2262,7 @@ public class TrainCmd extends TrainTables
 			assert(trackdir != 0xff);
 			assert(trackdir_rev != 0xff);
 
-			ftd = NPFRouteToStationOrTileTwoWay(v.tile, trackdir, last.tile, trackdir_rev, &fstd, TRANSPORT_RAIL, v.owner, v.rail.railtype, PBS_MODE_NONE);
+			ftd = NPFRouteToStationOrTileTwoWay(v.tile, trackdir, last.tile, trackdir_rev, fstd, TRANSPORT_RAIL, v.owner, v.rail.railtype, PBS_MODE_NONE);
 
 			if (ftd.best_bird_dist != 0) {
 				/* We didn't find anything, just keep on going straight ahead */
@@ -2244,7 +2278,7 @@ public class TrainCmd extends TrainTables
 				fd.best_bird_dist = (int)-1;
 				fd.best_track_dist = (int)-1;
 
-				NewTrainPathfind(v.tile, v.dest_tile, reverse ^ i, (NTPEnumProc*)NtpCallbFindStation, fd);
+				NewTrainPathfind(v.tile, v.dest_tile, reverse ^ i, (NTPEnumProc)NtpCallbFindStation, fd);
 
 				/* if (best_track != -1) {
 				if (best_bird_dist != 0) {
@@ -2411,12 +2445,12 @@ public class TrainCmd extends TrainTables
 			if (mode) return;
 
 			// don't mark the train as lost if we're loading on the final station.
-			if (v.current_order.flags & Order.OF_NON_STOP)
+			if(0 != (v.current_order.flags & Order.OF_NON_STOP) )
 				v.rail.days_since_order_progr = 0;
 
-			if (--v.load_unload_time_rem) return;
+			if (--v.load_unload_time_rem != 0) return;
 
-			if (v.current_order.flags & Order.OF_FULL_LOAD && CanFillVehicle(v)) {
+			if (v.current_order.flags & Order.OF_FULL_LOAD && v.CanFillVehicle()) {
 				v.rail.days_since_order_progr = 0; /* Prevent a train lost message for full loading trains */
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_INC);
 				if (LoadUnloadVehicle(v)) {
@@ -3437,7 +3471,7 @@ public class TrainCmd extends TrainTables
 
 	static void TrainEnterDepot(Vehicle v, TileIndex tile)
 	{
-		SetSignalsOnBothDir(tile, _depot_track_ind[BitOps.GB(tile.getMap().m5, 0, 2)]);
+		Rail.SetSignalsOnBothDir(tile, _depot_track_ind[BitOps.GB(tile.getMap().m5, 0, 2)]);
 
 		if (!v.IsFrontEngine()) v = v.GetFirstVehicleInChain();
 
@@ -3459,10 +3493,10 @@ public class TrainCmd extends TrainTables
 			v.current_order.type = Order.OT_DUMMY;
 			v.current_order.flags = 0;
 
-			if (BitOps.HASBIT(t.flags, OFB_PART_OF_ORDERS)) { // Part of the orderlist?
+			if (BitOps.HASBIT(t.flags, Order.OFB_PART_OF_ORDERS)) { // Part of the orderlist?
 				v.rail.days_since_order_progr = 0;
 				v.cur_order_index++;
-			} else if (BitOps.HASBIT(t.flags, OFB_HALandscape.LT_IN_DEPOT)) { // User initiated?
+			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) { // User initiated?
 				v.vehstatus |= Vehicle.VS_STOPPED;
 				if (v.owner == Global._local_player) {
 					Global.SetDParam(0, v.unitnumber);
@@ -3483,11 +3517,11 @@ public class TrainCmd extends TrainTables
 		final Depot  depot;
 		TrainFindDepotData tfdd;
 
-		if (PBSTileReserved(v.tile) & v.rail.track)     return;
-		if (v.rail.pbs_status == PBS_STAT_HAS_PATH)      return;
+		if(0 != (Pbs.PBSTileReserved(v.tile) & v.rail.track) )     return;
+		if (v.rail.pbs_status == Pbs.PBS_STAT_HAS_PATH)      return;
 		if (Global._patches.servint_trains == 0)                   return;
 		if (!v.VehicleNeedsService())                        return;
-		if (v.vehstatus & Vehicle.VS_STOPPED)                      return;
+		if(0 != (v.vehstatus & Vehicle.VS_STOPPED))                      return;
 		if (Global._patches.gotodepot && v.VehicleHasDepotOrders()) return;
 
 		// Don't interfere with a depot visit scheduled by the user, or a
@@ -3529,8 +3563,8 @@ public class TrainCmd extends TrainTables
 		int cost = 0;
 
 		do {
-			final RailVehicleInfo rvi = RailVehInfo(v.engine_type);
-			if (rvi.running_cost_base)
+			final RailVehicleInfo rvi = Engine.RailVehInfo(v.engine_type.id);
+			if (rvi.running_cost_base != 0)
 				cost += rvi.running_cost_base * Global._price.running_rail[rvi.engclass];
 		} while ( (v=v.next) != null );
 
@@ -3616,7 +3650,7 @@ public class TrainCmd extends TrainTables
 
 	void InitializeTrains()
 	{
-		_age_cargo_skip_counter = 1;
+		Global._age_cargo_skip_counter = 1;
 	}
 
 }

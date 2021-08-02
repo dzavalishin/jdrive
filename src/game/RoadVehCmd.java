@@ -144,7 +144,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 			v.type = Vehicle.VEH_Road;
 			v.cur_image = 0xC15;
-			v.random_bits = VehicleRandomBits();
+			v.random_bits = Vehicle.VehicleRandomBits();
 
 			VehiclePositionChanged(v);
 

@@ -2389,7 +2389,7 @@ public class Rail extends RailTables {
 	}
 
 
-	static boolean UpdateSignalsOnSegment(TileIndex tile, byte direction)
+	static boolean UpdateSignalsOnSegment(TileIndex tile, int direction)
 	{
 		SetSignalsData ssd = new SetSignalsData();
 		int result = -1;

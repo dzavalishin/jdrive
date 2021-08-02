@@ -208,7 +208,7 @@ public class Pbs {
 		}
 	}
 
-	int PBSTileUnavail(TileIndex tile) {
+	static int PBSTileUnavail(TileIndex tile) {
 		assert(tile.IsValidTile());
 		switch (tile.GetTileType()) {
 			case MP_RAILWAY:
@@ -375,7 +375,7 @@ public class Pbs {
 	 * @return True when the depot is inside a pbs block
 	 */
 
-	boolean PBSIsPbsSegment(TileIndex tilep, /*Trackdir*/ int trackdir)
+	static boolean PBSIsPbsSegment(TileIndex tilep, /*Trackdir*/ int trackdir)
 	//boolean PBSIsPbsSegment(int tilep, Trackdir trackdir)
 	{
 		SetSignalsDataPbs ssd = new SetSignalsDataPbs();

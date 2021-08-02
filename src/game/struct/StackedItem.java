@@ -3,12 +3,11 @@ package game.struct;
 import game.TileIndex;
 
 public class StackedItem {
-	TileIndex tile;
-	int cur_length; // This is the current length to this tile.
-	int priority; // This is the current length + estimated length to the goal.
-	int track;
-	int depth;
-	int state;
-	int first_track;
-
+	public TileIndex tile;
+	public int cur_length; // This is the current length to this tile.
+	public int priority; // This is the current length + estimated length to the goal.
+	public int track;
+	public int depth;
+	public int state;
+	public int first_track;
 }

@@ -316,7 +316,7 @@ public class EngineTables2
 	private static final int W = EngineTables.RVI_WAGON;
 	
 	//final RailVehicleInfo orig_rail_vehicle_info[NUM_TRAIN_ENGINES] = {
-	final RailVehicleInfo orig_rail_vehicle_info[] = {
+	public final static RailVehicleInfo orig_rail_vehicle_info[] = {
 			// image_index  max_speed (kph)      running_cost_base                 callbackmask    shortened factor
 			// |  flags     |        power (hp)  |    running_cost_class           |   powered wagons power
 			// |  |    base_cost     |    weight      |    capacity                |   |   powered wagons weight

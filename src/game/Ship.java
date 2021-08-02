@@ -931,7 +931,7 @@ public class Ship {
 			v.build_year = (byte) Global._cur_year;
 			v.cur_image = 0x0E5E;
 			v.type = Vehicle.VEH_Ship;
-			v.random_bits = Hal.VehicleRandomBits();
+			v.random_bits = Vehicle.VehicleRandomBits();
 
 			v.VehiclePositionChanged();
 
