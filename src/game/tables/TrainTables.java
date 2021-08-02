@@ -193,7 +193,7 @@ public class TrainTables
 		}; */
 
 
-	protected static class VehicleAtSignalData {
+	public static class VehicleAtSignalData {
 		//TileIndex tile;
 		public int tile;
 		public int direction;

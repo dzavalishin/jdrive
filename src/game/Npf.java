@@ -151,9 +151,9 @@ public class Npf {
 	 * @param trackdir The (track)direction in which you want to look.
 	 * @param enginetype The type of the engine for which we are checking this.
 	 */
-	static boolean IsEndOfLine(TileIndex tile, Trackdir trackdir, /* RailType */ int enginetype)
+	static boolean IsEndOfLine(TileIndex tile, /*Trackdir*/ int trackdir, /* RailType */ int enginetype)
 	{
-		byte exitdir = trackdir.TrackdirToExitdir();
+		int exitdir = Rail.TrackdirToExitdir(trackdir);
 		TileIndex dst_tile;
 		int ts;
 
@@ -403,7 +403,7 @@ public class Npf {
 	static void NPFFillTrackdirChoice(AyStarNode  current, OpenListNode  parent)
 	{
 		if (parent.path.parent == null) {
-			Trackdir trackdir = Trackdir.fromInt(current.direction);
+			/*Trackdir*/ int trackdir = Trackdir.fromInt(current.direction);
 			/* This is a first order decision, so we'd better save the
 			 * direction we chose */
 			current.user_data[NPF_TRACKDIR_CHOICE] = trackdir;
@@ -497,7 +497,7 @@ public class Npf {
 	{
 		//TileIndex tile = current.tile;
 		int cost = 0;
-		Trackdir trackdir = (Trackdir)current.direction;
+		/*Trackdir*/ int trackdir = (Trackdir)current.direction;
 
 		cost = _trackdir_length[trackdir]; /* Should be different for diagonal tracks */
 
@@ -557,7 +557,7 @@ public class Npf {
 	static int NPFRailPathCost(AyStar  as, AyStarNode  current, OpenListNode  parent)
 	{
 		TileIndex tile = current.tile;
-		Trackdir trackdir = (Trackdir)current.direction;
+		/*Trackdir*/ int trackdir = (Trackdir)current.direction;
 		int cost = 0;
 		/* HACK: We create a OpenListNode manualy, so we can call EndNodeCheck */
 		OpenListNode new_node;
@@ -804,7 +804,7 @@ public class Npf {
 	 * copy AyStarNode.user_data[NPF_NODE_FLAGS] from the parent */
 	static void NPFFollowTrack(AyStar  aystar, OpenListNode  current)
 	{
-		Trackdir src_trackdir = (Trackdir)current.path.node.direction;
+		/*Trackdir*/ int src_trackdir = (/*Trackdir*/ int)current.path.node.direction;
 		TileIndex src_tile = current.path.node.tile;
 		DiagDirection src_exitdir = TrackdirToExitdir(src_trackdir);
 		FindLengthOfTunnelResult flotr;
@@ -924,7 +924,7 @@ public class Npf {
 		/* Enumerate possible track */
 		while (trackdirbits != 0) 
 		{
-			Trackdir dst_trackdir;
+			/*Trackdir*/ int dst_trackdir;
 			dst_trackdir =  FindFirstBit2x64(trackdirbits);
 			trackdirbits = KillFirstBit2x64(trackdirbits);
 			DEBUG_npf( 5, "Expanded into trackdir: %d, remaining trackdirs: %#x", dst_trackdir, trackdirbits);
@@ -1027,7 +1027,7 @@ public class Npf {
 	}
 
 	//NPFFoundTargetData NPFRouteToStationOrTileTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, NPFFindStationOrTileData  target, TransportType type, Owner owner, /* RailType */ int railtype, byte pbs_mode)
-	NPFFoundTargetData NPFRouteToStationOrTileTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, NPFFindStationOrTileData  target, int type, Owner owner, /* RailType */ int railtype, byte pbs_mode)
+	NPFFoundTargetData NPFRouteToStationOrTileTwoWay(TileIndex tile1, /*Trackdir*/ int trackdir1, TileIndex tile2, /*Trackdir*/ int trackdir2, NPFFindStationOrTileData  target, int type, Owner owner, /* RailType */ int railtype, byte pbs_mode)
 	{
 		AyStarNode start1;
 		AyStarNode start2;
@@ -1044,15 +1044,15 @@ public class Npf {
 		return NPFRouteInternal(&start1, (IsValidTile(tile2) ? &start2 : null), target, NPFFindStationOrTile, NPFCalcStationOrTileHeuristic, type, owner, railtype, 0, pbs_mode);
 	}
 
-	NPFFoundTargetData NPFRouteToStationOrTile(TileIndex tile, Trackdir trackdir, NPFFindStationOrTileData  target, /*TransportType*/ int type, Owner owner, /* RailType */ int railtype, byte pbs_mode)
+	NPFFoundTargetData NPFRouteToStationOrTile(TileIndex tile, /*Trackdir*/ int trackdir, NPFFindStationOrTileData  target, /*TransportType*/ int type, Owner owner, /* RailType */ int railtype, byte pbs_mode)
 	{
-		return NPFRouteToStationOrTileTwoWay(tile, trackdir, INVALID_TILE, 0, target, type, owner, railtype, pbs_mode);
+		return NPFRouteToStationOrTileTwoWay(tile, trackdir, TileIndex.INVALID_TILE, 0, target, type, owner, railtype, pbs_mode);
 	}
 
-	NPFFoundTargetData NPFRouteToDepotBreadthFirstTwoWay(TileIndex tile1, Trackdir trackdir1, TileIndex tile2, Trackdir trackdir2, /*TransportType*/ int type, Owner owner, /* RailType */ int railtype, int reverse_penalty)
+	NPFFoundTargetData NPFRouteToDepotBreadthFirstTwoWay(TileIndex tile1, /*Trackdir*/ int trackdir1, TileIndex tile2, /*Trackdir*/ int trackdir2, /*TransportType*/ int type, Owner owner, /* RailType */ int railtype, int reverse_penalty)
 	{
-		AyStarNode start1;
-		AyStarNode start2;
+		AyStarNode start1 = new AyStarNode();
+		AyStarNode start2 = new AyStarNode();
 
 		start1.tile = tile1;
 		start2.tile = tile2;
@@ -1065,15 +1065,15 @@ public class Npf {
 
 		/* perform a breadth first search. Target is null,
 		 * since we are just looking for any depot...*/
-		return NPFRouteInternal(&start1, (IsValidTile(tile2) ? &start2 : null), null, NPFFindDepot, NPFCalcZero, type, owner, railtype, reverse_penalty, PBS_MODE_NONE);
+		return NPFRouteInternal(start1, (IsValidTile(tile2) ? start2 : null), null, NPFFindDepot, NPFCalcZero, type, owner, railtype, reverse_penalty, PBS_MODE_NONE);
 	}
 
-	NPFFoundTargetData NPFRouteToDepotBreadthFirst(TileIndex tile, Trackdir trackdir, /*TransportType*/ int type, Owner owner, /* RailType */ int railtype)
+	NPFFoundTargetData NPFRouteToDepotBreadthFirst(TileIndex tile, /*Trackdir*/ int trackdir, /*TransportType*/ int type, Owner owner, /* RailType */ int railtype)
 	{
 		return NPFRouteToDepotBreadthFirstTwoWay(tile, trackdir, INVALID_TILE, 0, type, owner, railtype, 0);
 	}
 
-	NPFFoundTargetData NPFRouteToDepotTrialError(TileIndex tile, Trackdir trackdir, /*TransportType*/ int type, Owner owner, /* RailType */ int railtype)
+	NPFFoundTargetData NPFRouteToDepotTrialError(TileIndex tile, /*Trackdir*/ int trackdir, /*TransportType*/ int type, Owner owner, /* RailType */ int railtype)
 	{
 		/* Okay, what we're gonna do. First, we look at all depots, calculate
 		 * the manhatten distance to get to each depot. We then sort them by

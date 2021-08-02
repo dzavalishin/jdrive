@@ -279,7 +279,7 @@ public class Pbs {
 			tile.MarkTileDirtyByTile();
 	}
 
-	void PBSClearPath(TileIndex tile, /*Trackdir*/ int trackdir, TileIndex end_tile, /*Trackdir*/ int end_trackdir) {
+	static void PBSClearPath(TileIndex tile, /*Trackdir*/ int trackdir, TileIndex end_tile, /*Trackdir*/ int end_trackdir) {
 		int res;
 		FindLengthOfTunnelResult flotr;
 		
