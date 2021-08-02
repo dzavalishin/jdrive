@@ -325,8 +325,8 @@ public class Landscape extends GenLandTable
 		// make sure sx,sy are smaller than ex,ey
 		sx = pi1.TileX() * 16;
 		sy = pi1.TileY() * 16;
-		if (ex < sx) intswap(ex, sx);
-		if (ey < sy) intswap(ey, sy);
+		if (ex < sx) { int t = sx; sx = ex; ex = t; } // intswap(ex, sx);
+		if (ey < sy) { int t = sy; sy = ey; ey = t; } // intswap(ey, sy);
 
 		money = Cmd.GetAvailableMoneyForCommand();
 		cost = 0;

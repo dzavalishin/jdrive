@@ -2541,7 +2541,7 @@ public class Station implements IPoolItem
 						y &= 0xF;
 
 						dir = v.direction & 6;
-						if (dir & 2) intswap(x,y);
+						if (dir & 2) { int t = x; x = y; y = t; } // intswap(x,y);
 						if (y == 8) {
 							if (dir != 2 && dir != 4) x = ~x & 0xF;
 							if (x == 12) return 2 | (station_id << 8); // enter Station 

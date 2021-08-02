@@ -200,13 +200,13 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			if (y == sy) return Cmd.return_cmd_error(Str.STR_5008_CANNOT_START_AND_END_ON);
 			direction = 1;
 			if (y > sy) {
-				intswap(y,sy);
-				intswap(x,sx);
+				{ int t = sy; sy = y; y = t; } // intswap(y,sy);
+				{ int t = sx; sx = x; x = t; } // intswap(x,sx);
 			}
 		} else if (y == sy) {
 			if (x > sx) {
-				intswap(y,sy);
-				intswap(x,sx);
+				{ int t = sy; sy = y; y = t; } // intswap(y,sy);
+				{ int t = sx; sx = x; x = t; } // intswap(x,sx);
 			}
 		} else {
 			return Cmd.return_cmd_error(Str.STR_500A_START_AND_END_MUST_BE_IN);
@@ -453,14 +453,14 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				return Cmd.return_cmd_error(Str.STR_5008_CANNOT_START_AND_END_ON);
 			direction++;
 			if (y > y2) {
-				intswap(y,y2);
-				intswap(x,x2);
+				{ int t = y; y = y2; y2 = t; } // intswap(y,y2);
+				{ int t = x; x = x2; x2 = t; } // intswap(x,x2);
 				exc_tile|=2;
 			}
 		} else if (y == y2) {
 			if (x > x2) {
-				intswap(y,y2);
-				intswap(x,x2);
+				{ int t = y; y = y2; y2 = t; } // intswap(y,y2);
+				{ int t = x; x = x2; x2 = t; } // intswap(x,x2);
 				exc_tile|=2;
 			}
 		} else
@@ -835,7 +835,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		return Cmd.CMD_ERROR;
 	}
 
-	int DoConvertTunnelBridgeRail(TileIndex tile, int totype, boolean exec)
+	public static int DoConvertTunnelBridgeRail(TileIndex tile, int totype, boolean exec)
 	{
 		TileIndex [] end2 = { null };// = new TileIndex();
 		TileIndex end1;// = new TileIndex();

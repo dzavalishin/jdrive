@@ -978,7 +978,7 @@ public class Vehicle implements IPoolItem
 		return VehicleFromPos(tile, ti, Vehicle::EnsureNoVehicleProcZ) == null;
 	}
 
-	public static Vehicle FindVehicleOnTileZ(TileIndex tile, byte z)
+	public static Vehicle FindVehicleOnTileZ(TileIndex tile, int z)
 	{
 		TileInfo ti = new TileInfo();
 

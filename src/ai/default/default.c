@@ -1543,7 +1543,7 @@ static bool AiCheckTrackResources(TileIndex tile, const AiDefaultBlockData *p, b
 
 		w = GB(p->attr, 1, 3);
 		h = GB(p->attr, 4, 3);
-		if (p->attr & 1) uintswap(w, h);
+		if (p->attr & 1) { int t = w; w = h; h = t; } // uintswap(w, h);
 
 
 		if (_patches.modified_catchment) {

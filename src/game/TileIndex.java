@@ -210,6 +210,10 @@ public class TileIndex implements Comparable<TileIndex>{
 		return Global._m[tile];
 	}
 
+	public Tile M()
+	{
+		return Global._m[tile];
+	}
 
 
 	int TileX()
@@ -699,6 +703,14 @@ public class TileIndex implements Comparable<TileIndex>{
 		return tile.iadd(diff);
 	}
 
+	public static TileIndex TILE_ADD(TileIndex tile, int diff) {
+		return tile.iadd(diff);
+	}
+
+	public boolean IsRailWaypoint() {
+		return WayPoint.IsRailWaypoint(this);
+	}
+	
 
 }
 

@@ -35,8 +35,8 @@ public class Terraform {
 
 		if (Global._game_mode != GameModes.GM_EDITOR) return;
 
-		if (ex < sx) intswap(ex, sx);
-		if (ey < sy) intswap(ey, sy);
+		if (ex < sx) { int t = sx; sx = ex; ex = t; } // intswap(ex, sx);
+		if (ey < sy) { int t = sy; sy = ey; ey = t; } // intswap(ey, sy);
 		size_x = (ex - sx) + 1;
 		size_y = (ey - sy) + 1;
 
@@ -66,8 +66,8 @@ public class Terraform {
 
 		if (Global._game_mode != GameModes.GM_EDITOR) return;
 
-		if (ex < sx) intswap(ex, sx);
-		if (ey < sy) intswap(ey, sy);
+		if (ex < sx) { int t = sx; sx = ex; ex = t; } // intswap(ex, sx);
+		if (ey < sy) { int t = sy; sy = ey; ey = t; } // intswap(ey, sy);
 		size_x = (ex - sx) + 1;
 		size_y = (ey - sy) + 1;
 

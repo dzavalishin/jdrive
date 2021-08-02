@@ -88,9 +88,9 @@ public abstract class AyStar
 	 * what where looking for, and user_data can contain just about
 	 * everything */
 	// TODO resurrect
-	//void *user_path;
-	//void *user_target;
-	//int user_data[10];
+	//Object user_path;
+	Object user_target;
+	int [] user_data = new int[10];
 
 	// [dz] can be some superclass or interface of NPFFoundTargetData? 
 	NPFFoundTargetData user_path;

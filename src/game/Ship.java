@@ -16,9 +16,9 @@ public class Ship {
 
 	static void DrawShipEngine(int x, int y, EngineID engine, int image_ormod)
 	{
-		int spritenum = EngineGui.ShipVehInfo(engine).image_index;
-
-		if (is_custom_sprite(spritenum)) {
+		int spritenum = EngineGui.ShipVehInfo(engine.id).image_index;
+		// TODO custom spr
+		/*if (is_custom_sprite(spritenum)) {
 			int sprite = GetCustomVehicleIcon(engine, 6);
 
 			if (sprite != 0) {
@@ -26,7 +26,7 @@ public class Ship {
 				return;
 			}
 			spritenum = orig_ship_vehicle_info[engine.id - Global.SHIP_ENGINES_INDEX].image_index;
-		}
+		}*/
 		Gfx.DrawSprite((6 + _ship_sprites[spritenum]) | image_ormod, x, y);
 	}
 
@@ -34,49 +34,50 @@ public class Ship {
 	{
 		int spritenum = v.spritenum;
 
+		/* TODO custom
 		if (is_custom_sprite(spritenum)) {
 			int sprite = GetCustomVehicleSprite(v, direction);
 
 			if (sprite != 0) return sprite;
 			spritenum = orig_ship_vehicle_info[v.engine_type.id - Global.SHIP_ENGINES_INDEX].image_index;
-		}
+		} */
 		return _ship_sprites[spritenum] + direction;
 	}
 
 	static final Depot  FindClosestShipDepot(final Vehicle  v)
 	{
 		//final Depot  depot;
-		final Depot  best_depot = null;
-		int dist;
-		int best_dist = (int)-1;
-		TileIndex tile;
+		Depot [] best_depot = { null };
+		//int dist;
+		int [] best_dist = { -1 };
+		//TileIndex tile;
 		TileIndex tile2 = v.tile;
 
 		if (Global._patches.new_pathfinding_all) 
 		{
 			NPFFoundTargetData ftd;
-			int trackdir = v.GetVehicleTrackdir().ordinal();
-			ftd = Npf.NPFRouteToDepotTrialError(v.tile, trackdir, Global.TRANSPORT_WATER, v.owner, INVALID_RAILTYPE);
+			int trackdir = v.GetVehicleTrackdir();
+			ftd = Npf.NPFRouteToDepotTrialError(v.tile, trackdir, Global.TRANSPORT_WATER, v.owner, Rail.INVALID_RAILTYPE);
 			if (ftd.best_bird_dist == 0) {
-				best_depot = Depot.GetDepotByTile(ftd.node.tile); /* Found target */
+				best_depot[0] = Depot.GetDepotByTile(ftd.node.tile); /* Found target */
 			} else {
-				best_depot = null; /* Did not find target */
+				best_depot[0] = null; /* Did not find target */
 			}
 		} else {
 			//FOR_ALL_DEPOTS(depot)
 			Depot.forEach( (depot) ->
 			{
-				tile = depot.xy;
+				TileIndex tile = depot.xy;
 				if (depot.IsValidDepot() && tile.IsTileDepotType(Global.TRANSPORT_WATER) && tile.IsTileOwner(v.owner)) {
-					dist = Map.DistanceManhattan(tile, tile2);
-					if (dist < best_dist) {
-						best_dist = dist;
-						best_depot = depot;
+					int dist = Map.DistanceManhattan(tile, tile2);
+					if (dist < best_dist[0]) {
+						best_dist[0] = dist;
+						best_depot[0] = depot;
 					}
 				}
 			});
 		}
-		return best_depot;
+		return best_depot[0];
 	}
 
 	static void CheckIfShipNeedsService(Vehicle v)
@@ -108,7 +109,7 @@ public class Ship {
 		v.current_order.flags = Order.OF_NON_STOP;
 		v.current_order.station = depot.index;
 		v.dest_tile = depot.xy;
-		InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 	}
 
 	void OnNewDay_Ship(Vehicle v)
@@ -122,7 +123,7 @@ public class Ship {
 		v.AgeVehicle();
 		CheckIfShipNeedsService(v);
 
-		Order.CheckOrders(v.index, OC_INIT);
+		Order.CheckOrders(v.index, Order.OC_INIT);
 
 		if( 0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
 
@@ -152,7 +153,7 @@ public class Ship {
 			//SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?				SND_10_TRAIN_BREAKDOWN : SND_3A_COMEDY_BREAKDOWN_2, v);
 
 			if (0 ==(v.vehstatus & Vehicle.VS_HIDDEN)) {
-				Vehicle u = CreateEffectVehicleRel(v, 4, 4, 5, EV_BREAKDOWN_SMOKE);
+				Vehicle u = v.CreateEffectVehicleRel(4, 4, 5, Vehicle.EV_BREAKDOWN_SMOKE);
 				if (u != null) u.special.unk0 = v.breakdown_delay * 2;
 			}
 		}
@@ -256,7 +257,7 @@ public class Ship {
 
 			if (0 != (v.current_order.flags & Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_INC);
-				if (v.LoadUnloadVehicle()) {
+				if (Economy.LoadUnloadVehicle(v)!=0) {
 					Window.InvalidateWindow(Window.WC_SHIPS_LIST, v.owner.id);
 					MarkShipDirty(v);
 				}
@@ -325,10 +326,11 @@ public class Ship {
 		d = 0 != (tile.getMap().m5&2) ? 1 : 0;
 
 		// Check first side
-		if (_ship_sometracks[d] & GetTileShipTrackStatus(TILE_ADD(tile, ToTileIndexDiff(_ship_leave_depot_offs[d])))) {
+		TileIndex tile_ADD = TileIndex.TILE_ADD(tile, TileIndex.ToTileIndexDiff(_ship_leave_depot_offs[d]));
+		if(0 != (_ship_sometracks[d] & GetTileShipTrackStatus(tile_ADD))) {
 			m = (d==0) ? 0x101 : 0x207;
 		// Check second side
-		} else if (_ship_sometracks[d+2] & GetTileShipTrackStatus(TILE_ADD(tile, -2 * ToTileIndexDiff(_ship_leave_depot_offs[d])))) {
+		} else if(0 != (_ship_sometracks[d+2] & GetTileShipTrackStatus(TileIndex.TILE_ADD(tile, -2 * TileIndex.ToTileIndexDiff(_ship_leave_depot_offs[d]).diff ) )) ) {
 			m = (d==0) ? 0x105 : 0x203;
 		} else {
 			return;
@@ -370,9 +372,9 @@ public class Ship {
 		return (t < v.progress);
 	}
 
-	int EstimateShipCost(EngineID engine_type)
+	static int EstimateShipCost(/*EngineID*/ int engine_type)
 	{
-		return EngineGui.ShipVehInfo(engine_type.id).base_cost * (Global._price.ship_base>>3)>>5;
+		return EngineGui.ShipVehInfo(engine_type).base_cost * (Global._price.ship_base>>3)>>5;
 	}
 
 	static void ShipEnterDepot(Vehicle v)
@@ -423,7 +425,7 @@ public class Ship {
 			st.had_vehicle_of_type |= Station.HVOT_SHIP;
 
 			Global.SetDParam(0, st.index);
-			flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+			flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 			NewsItem.AddNewsItem(
 				Str.STR_9833_CITIZENS_CELEBRATE_FIRST,
 				flags,
@@ -433,8 +435,10 @@ public class Ship {
 	}
 
 	// TODO state unused?
-	static boolean ShipTrackFollower(TileIndex tile, PathFindShip pfs, int track, int length, byte []state)
+	static boolean ShipTrackFollower(TileIndex tile, Object o, int track, int length, int []state)
 	{
+		PathFindShip pfs = (PathFindShip) o;
+		
 		// Found dest?
 		if (tile == pfs.dest_coords) {
 			pfs.best_bird_dist = 0;
@@ -506,7 +510,7 @@ public class Ship {
 			pfs.best_length = (int)-1;
 
 			//FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], (TPFEnumProc*)ShipTrackFollower, null, &pfs);
-			FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], ShipTrackFollower, null, pfs);
+			Pathfind.FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], Ship::ShipTrackFollower, null, pfs);
 
 			if( TryTrack(best_track, i, pfs, ship_dir, best_length, best_bird_dist) )
 			{
@@ -531,20 +535,20 @@ public class Ship {
 			NPFFindStationOrTileData fstd = new NPFFindStationOrTileData();
 			NPFFoundTargetData ftd;
 			//TileIndex src_tile = TILE_ADD(tile, TileIndex.TileOffsByDir(RailtypeInfo.ReverseDiagdir(enterdir)));
-			TileIndex src_tile = tile.iadd(TileIndex.TileOffsByDir(RailtypeInfo.ReverseDiagdir(enterdir)));
-			int trackdir = v.GetVehicleTrackdir().ordinal();
+			TileIndex src_tile = tile.iadd(TileIndex.TileOffsByDir(Rail.ReverseDiagdir(enterdir)));
+			int trackdir = v.GetVehicleTrackdir();
 			assert (trackdir != 0xFF); /* Check that we are not in a Depot */
 
 			Npf.NPFFillWithOrderData(fstd, v);
 
-			ftd = Npf.NPFRouteToStationOrTile(src_tile, trackdir, fstd, Global.TRANSPORT_WATER, v.owner, INVALID_RAILTYPE, PBS_MODE_NONE);
+			ftd = Npf.NPFRouteToStationOrTile(src_tile, trackdir, fstd, Global.TRANSPORT_WATER, v.owner, Rail.INVALID_RAILTYPE, Pbs.PBS_MODE_NONE);
 
-			if (ftd.best_trackdir.ordinal() != 0xff) {
+			if (ftd.best_trackdir != 0xff) {
 				/* If ftd.best_bird_dist is 0, we found our target and ftd.best_trackdir contains
 				the direction we need to take to get there, if ftd.best_bird_dist is not 0,
 				we did not find our target, but ftd.best_trackdir contains the direction leading
 				to the tile closest to our target. */
-				return ftd.best_trackdir.ordinal() & 7; /* TODO: Wrapper function? */
+				return ftd.best_trackdir & 7; /* TODO: Wrapper function? */
 			} else {
 				return -1; /* Already at target, reverse? */
 			}
@@ -559,9 +563,9 @@ public class Ship {
 			tot_dist = (int)-1;
 
 			/* Let's find out how far it would be if we would reverse first */
-			b = GetTileShipTrackStatus(tile2) & _ship_sometracks[RailtypeInfo.ReverseDiagdir(enterdir)] & v.ship.state;
+			b = GetTileShipTrackStatus(tile2) & _ship_sometracks[Rail.ReverseDiagdir(enterdir)] & v.ship.state;
 			if (b != 0) {
-				dist = FindShipTrack(v, tile2, RailtypeInfo.ReverseDiagdir(enterdir), b, tile, track);
+				dist = FindShipTrack(v, tile2, Rail.ReverseDiagdir(enterdir), b, tile, track);
 				if (dist != (int)-1)
 					tot_dist = dist + 1;
 			}
@@ -597,7 +601,7 @@ public class Ship {
 
 	static int GetAvailShipTracks(TileIndex tile, int dir)
 	{
-		int r = GetTileTrackStatus(tile, Global.TRANSPORT_WATER);
+		int r = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_WATER);
 		return (byte) ((r | r >> 8)) & _ship_sometracks[dir];
 	}
 
@@ -638,7 +642,7 @@ public class Ship {
 
 	static void ShipController(Vehicle v)
 	{
-		GetNewVehiclePosResult gp;
+		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		int r;
 		//final byte *b;
 		int dir,track,tracks;
@@ -713,14 +717,14 @@ public class Ship {
 
 								/* Process station in the orderlist. */
 								st = Station.GetStation(v.current_order.station);
-								if (st.facilities & FACIL_DOCK) { /* ugly, ugly workaround for problem with ships able to drop off cargo at wrong stations */
+								if(0 != (st.facilities & Station.FACIL_DOCK)) { /* ugly, ugly workaround for problem with ships able to drop off cargo at wrong stations */
 									v.current_order.type = Order.OT_LOADING;
 									v.current_order.flags &= Order.OF_FULL_LOAD | Order.OF_UNLOAD;
 									v.current_order.flags |= Order.OF_NON_STOP;
 									ShipArrivesAt(v, st);
 
 									Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_INC);
-									if (v.LoadUnloadVehicle()) {
+									if (0 != Economy.LoadUnloadVehicle(v)) {
 										Window.InvalidateWindow(Window.WC_SHIPS_LIST, v.owner);
 										MarkShipDirty(v);
 									}
@@ -869,7 +873,7 @@ public class Ship {
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		Engine e;
 
-		if (!IsEngineBuildable(p1, Vehicle.VEH_Ship)) return Cmd.CMD_ERROR;
+		if (!Engine.IsEngineBuildable(p1, Vehicle.VEH_Ship)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
@@ -936,7 +940,7 @@ public class Ship {
 			v.VehiclePositionChanged();
 
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.getTile());
-			RebuildVehicleLists();
+			VehicleGui.RebuildVehicleLists();
 			Window.InvalidateWindow(Window.WC_COMPANY, v.owner.id);
 			if (Player.IsLocalPlayer())
 				Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, Vehicle.VEH_Ship); // updates the replace Ship window
@@ -967,7 +971,7 @@ public class Ship {
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.getTile());
-			RebuildVehicleLists();
+			VehicleGui.RebuildVehicleLists();
 			Window.InvalidateWindow(Window.WC_COMPANY, v.owner.id);
 			Window.DeleteWindowById(Window.WC_VEHICLE_VIEW, v.index);
 			Vehicle.DeleteVehicle(v);
@@ -1059,7 +1063,7 @@ public class Ship {
 	static int CmdChangeShipServiceInt(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
-		int serv_int = GetServiceIntervalClamped(p2); /* Double check the service interval from the user-input */
+		int serv_int = Depot.GetServiceIntervalClamped(p2); /* Double check the service interval from the user-input */
 
 		if (serv_int != p2 || !Vehicle.IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
 
@@ -1085,32 +1089,32 @@ public class Ship {
 	{
 		Vehicle v;
 		int cost;
-		CargoID new_cid = new CargoID(p2 & 0xFF); //gets the cargo number
+		CargoID new_cid = CargoID.get(p2 & 0xFF); //gets the cargo number
 
 		if (!Vehicle.IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
 
 		v = Vehicle.GetVehicle(p1);
 
-		if (v.type != Vehicle.VEH_Ship || !CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
+		if (v.type != Vehicle.VEH_Ship || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (!IsTileDepotType(v.tile, Global.TRANSPORT_WATER) || !(v.vehstatus&Vehicle.VS_STOPPED) || v.ship.state != 0x80)
+		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER) || 0==(v.vehstatus&Vehicle.VS_STOPPED) || v.ship.state != 0x80)
 				return Cmd.return_cmd_error(Str.STR_980B_SHIP_MUST_BE_STOPPED_IN);
 
 
 		/* Check cargo */
-		if (!ShipVehInfo(v.engine_type).refittable) return Cmd.CMD_ERROR;
-		if (new_cid > NUM_CARGO || !CanRefitTo(v.engine_type, new_cid)) return Cmd.CMD_ERROR;
+		if (0==Engine.ShipVehInfo(v.engine_type.id).refittable) return Cmd.CMD_ERROR;
+		if (new_cid.id > AcceptedCargo.NUM_CARGO || !Vehicle.CanRefitTo(v.engine_type, new_cid)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);
 
 		cost = 0;
-		if (v.owner.IS_HUMAN_PLAYER() && new_cid != v.cargo_type) {
+		if (v.owner.IS_HUMAN_PLAYER() && new_cid.id != v.cargo_type) {
 			cost = Global._price.ship_base >> 7;
 		}
 
 		if(0!= (flags & Cmd.DC_EXEC)) {
 			v.cargo_count = 0;
-			v.cargo_type = new_cid;
+			v.cargo_type = new_cid.id;
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 		}
 

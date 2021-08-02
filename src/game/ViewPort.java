@@ -417,6 +417,11 @@ public class ViewPort
 		vd.tile_list.add(ts);
 	}
 
+	static void DrawGroundSprite( SpriteID image)
+	{
+		DrawGroundSprite(image.id);		
+	}
+	
 	static void DrawGroundSprite(int image)
 	{
 		if (_offset_ground_sprites) {

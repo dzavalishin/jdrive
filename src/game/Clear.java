@@ -348,8 +348,8 @@ public class Clear extends ClearTables {
 		// make sure sx,sy are smaller than ex,ey
 		sx = p1.TileX();
 		sy = p1.TileY();
-		if (ex < sx) intswap(ex, sx);
-		if (ey < sy) intswap(ey, sy);
+		if (ex < sx) { int t = sx; sx = ex; ex = t; } // intswap(ex, sx);
+		if (ey < sy) { int t = sy; sy = ey; ey = t; } // intswap(ey, sy);
 		tile = TileIndex.TileXY(sx, sy);
 
 		int size_x = ex-sx+1;

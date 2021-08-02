@@ -145,8 +145,8 @@ public class Tree  extends TreeTables {
 		sx = tp2.TileX();
 		sy = tp2.TileY();
 		ex /= 16; ey /= 16;
-		if (ex < sx) intswap(ex, sx);
-		if (ey < sy) intswap(ey, sy);
+		if (ex < sx) { int t = sx; sx = ex; ex = t; } // intswap(ex, sx);
+		if (ey < sy) { int t = sy; sy = ey; ey = t; } // intswap(ey, sy);
 
 		cost = 0; // total cost
 
