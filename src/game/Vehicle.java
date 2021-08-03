@@ -108,7 +108,7 @@ public class Vehicle implements IPoolItem
 	int reliability;
 	int reliability_spd_dec;
 	byte breakdown_ctr;
-	byte breakdown_delay;
+	int breakdown_delay;
 	byte breakdowns_since_last_service;
 	byte breakdown_chance;
 	byte build_year;
@@ -2772,7 +2772,7 @@ public class Vehicle implements IPoolItem
 			2, 3, 4,
 	};
 
-	int GetDirectionTowards(final Vehicle v, int x, int y)
+	static int GetDirectionTowards(final Vehicle v, int x, int y)
 	{
 		int dirdiff, dir;
 		int i = 0;
