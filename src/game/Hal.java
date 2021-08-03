@@ -248,8 +248,13 @@ void SortResolutions(int count)
 	public static void ShowInfo(String help) {
 		System.err.println(help);
 	}
+	
 	public static int RandomRange(int max) {
 		return Math.abs( BitOps.GB(Random(), 0, 16) * max >> 16 );
+	}
+
+	public static TileIndex RandomTile() {
+		return TileIndex.RandomTile();
 	}
 
 

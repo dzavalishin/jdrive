@@ -14,26 +14,26 @@ public class DisasterCmd extends DisasterTables
 		if (!tile.EnsureNoVehicle()) return;
 
 		switch (tile.GetTileType()) {
-			case MP_RAILWAY:
-				if (tile.GetTileOwner().IS_HUMAN_PLAYER() && !tile.IsRailWaypoint()) 
-					Landscape.DoClearSquare(tile);
-				break;
-
-			case MP_HOUSE: {
-				PlayerID p = Global._current_player;
-				Global._current_player = Owner.OWNER_NONE;
-				Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
-				Global._current_player = p;
-				break;
-			}
-
-			case MP_TREES:
-			case MP_CLEAR:
+		case MP_RAILWAY:
+			if (tile.GetTileOwner().IS_HUMAN_PLAYER() && !tile.IsRailWaypoint()) 
 				Landscape.DoClearSquare(tile);
-				break;
+			break;
 
-			default:
-				break;
+		case MP_HOUSE: {
+			PlayerID p = Global._current_player;
+			Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
+			Global._current_player = p;
+			break;
+		}
+
+		case MP_TREES:
+		case MP_CLEAR:
+			Landscape.DoClearSquare(tile);
+			break;
+
+		default:
+			break;
 		}
 	}
 
@@ -61,7 +61,7 @@ public class DisasterCmd extends DisasterTables
 		v.sprite_width = 2;
 		v.sprite_height = 2;
 		v.z_height = 5;
-		v.owner = Owner.OWNER_NONE;
+		v.owner = PlayerID.get(Owner.OWNER_NONE);
 		v.vehstatus = Vehicle.VS_UNCLICKABLE;
 		v.disaster.image_override = 0;
 		v.current_order.type = Order.OT_NOTHING;
@@ -120,7 +120,7 @@ public class DisasterCmd extends DisasterTables
 
 	static void DisasterTick_Zeppeliner(Vehicle v)
 	{
-		GetNewVehiclePosResult gp;
+		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		Station st;
 		int x,y;
 		int z;
@@ -132,7 +132,7 @@ public class DisasterCmd extends DisasterTables
 			if(0 != (v.tick_counter&1) )
 				return;
 
-			v.GetNewVehiclePos( gp);
+			v.GetNewVehiclePos(gp);
 
 			SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
 
@@ -158,8 +158,8 @@ public class DisasterCmd extends DisasterTables
 					Global.SetDParam(0, tile.getMap().m2);
 					NewsItem.AddNewsItem(Str.STR_B000_ZEPPELIN_DISASTER_AT,
 							NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ACCIDENT, 0),
-						v.index,
-						0);
+							v.index,
+							0);
 				}
 			}
 			if (v.y_pos >= ((int)Global.MapSizeY() + 9) * 16 - 1)
@@ -204,10 +204,10 @@ public class DisasterCmd extends DisasterTables
 				int r = Hal.Random();
 
 				v.CreateEffectVehicleRel(
-					BitOps.GB(r, 0, 4) - 7,
-					BitOps.GB(r, 4, 4) - 7,
-					BitOps.GB(r, 8, 3) + 5,
-					Vehicle.EV_EXPLOSION_SMALL);
+						BitOps.GB(r, 0, 4) - 7,
+						BitOps.GB(r, 4, 4) - 7,
+						BitOps.GB(r, 8, 3) + 5,
+						Vehicle.EV_EXPLOSION_SMALL);
 			}
 		} else if (v.age == 350) {
 			v.current_order.station = 3;
@@ -230,14 +230,14 @@ public class DisasterCmd extends DisasterTables
 	static void DisasterTick_UFO(Vehicle v)
 	{
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
-		
+
 		int dist;
 		int z;
 
-		v.disaster.image_override = (++v.tick_counter & 8) ? Sprite.SPR_UFO_SMALL_SCOUT_DARKER : Sprite.SPR_UFO_SMALL_SCOUT;
+		v.disaster.image_override = 0 != (++v.tick_counter & 8) ? Sprite.SPR_UFO_SMALL_SCOUT_DARKER : Sprite.SPR_UFO_SMALL_SCOUT;
 
 		if (v.current_order.station == 0) {
-	// fly around randomly
+			// fly around randomly
 			int x = v.dest_tile.TileX() * 16;
 			int y = v.dest_tile.TileY() * 16;
 			if (Math.abs(x - v.x_pos) + Math.abs(y - v.y_pos) >= 16) {
@@ -252,14 +252,14 @@ public class DisasterCmd extends DisasterTables
 			}
 			v.current_order.station = 1;
 
-			
+
 			//FOR_ALL_VEHICLES(u)
 			Iterator<Vehicle> ii = Vehicle.getIterator();
 			while(ii.hasNext())
 			{
 				Vehicle u = ii.next();
 				if (u.type == Vehicle.VEH_Road && u.owner.IS_HUMAN_PLAYER()) {
-					v.dest_tile = u.index;
+					v.dest_tile = TileIndex.get( u.index );
 					v.age = 0;
 					return;
 				}
@@ -267,7 +267,7 @@ public class DisasterCmd extends DisasterTables
 
 			DeleteDisasterVeh(v);
 		} else {
-	// target a vehicle
+			// target a vehicle
 			Vehicle u = Vehicle.GetVehicle(v.dest_tile.tile);
 			if (u.type != Vehicle.VEH_Road) {
 				DeleteDisasterVeh(v);
@@ -276,7 +276,7 @@ public class DisasterCmd extends DisasterTables
 
 			dist = Math.abs(v.x_pos - u.x_pos) + Math.abs(v.y_pos - u.y_pos);
 
-			if (dist < 16 && !(u.vehstatus&Vehicle.VS_HIDDEN) && u.breakdown_ctr==0) {
+			if (dist < 16 && 0==(u.vehstatus&Vehicle.VS_HIDDEN) && u.breakdown_ctr==0) {
 				u.breakdown_ctr = 3;
 				u.breakdown_delay = 140;
 			}
@@ -296,12 +296,12 @@ public class DisasterCmd extends DisasterTables
 
 					NewsItem.AddNewsItem(Str.STR_B001_ROAD_VEHICLE_DESTROYED,
 							NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ACCIDENT, 0),
-						u.index,
-						0);
+							u.index,
+							0);
 				}
 			}
 
-	// destroy?
+			// destroy?
 			if (v.age > 50) {
 				v.CreateEffectVehicleRel(0, 7, 8, Vehicle.EV_EXPLOSION_LARGE);
 				//SndPlayVehicleFx(SND_12_EXPLOSION, v);
@@ -312,9 +312,11 @@ public class DisasterCmd extends DisasterTables
 
 	static void DestructIndustry(Industry i)
 	{
-		TileIndex tile;
 
-		for (tile = 0; tile != Global.MapSize(); tile++) {
+		for (int t = 0; t != Global.MapSize(); t++) 
+		{
+			TileIndex tile = TileIndex.get(t);
+
 			if (tile.IsTileType( TileTypes.MP_INDUSTRY) && tile.getMap().m2 == i.index) {
 				tile.getMap().m1 = 0;
 				tile.MarkTileDirtyByTile();
@@ -329,7 +331,7 @@ public class DisasterCmd extends DisasterTables
 
 		v.tick_counter++;
 		v.disaster.image_override =
-			(v.current_order.station == 1 && v.tick_counter & 4) ? Sprite.SPR_F_15_FIRING : 0;
+				(v.current_order.station == 1 && 0 != (v.tick_counter & 4)) ? Sprite.SPR_F_15_FIRING : 0;
 
 		v.GetNewVehiclePos( gp);
 		SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
@@ -347,10 +349,10 @@ public class DisasterCmd extends DisasterTables
 				int r = Hal.Random();
 
 				Vehicle.CreateEffectVehicleAbove(
-					BitOps.GB(r,  0, 6) + x,
-					BitOps.GB(r,  6, 6) + y,
-					BitOps.GB(r, 12, 4),
-					Vehicle.EV_EXPLOSION_SMALL);
+						BitOps.GB(r,  0, 6) + x,
+						BitOps.GB(r,  6, 6) + y,
+						BitOps.GB(r, 12, 4),
+						Vehicle.EV_EXPLOSION_SMALL);
 
 				if (++v.age >= 55)
 					v.current_order.station = 3;
@@ -366,7 +368,7 @@ public class DisasterCmd extends DisasterTables
 				DestructIndustry(i);
 
 				Global.SetDParam(0, i.town.index);
-				NewsItem.AddNewsItem(Str.STR_B002_OIL_REFINERY_EXPLOSION, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy, 0);
+				NewsItem.AddNewsItem(Str.STR_B002_OIL_REFINERY_EXPLOSION, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTile(), 0);
 				//SndPlayTileFx(SND_12_EXPLOSION, i.xy);
 			}
 		} else if (v.current_order.station == 0) {
@@ -396,13 +398,13 @@ public class DisasterCmd extends DisasterTables
 	// Helicopter which destroys a factory
 	static void DisasterTick_3(Vehicle v)
 	{
-		GetNewVehiclePosResult gp;
+		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 
 		v.tick_counter++;
 		v.disaster.image_override =
-			(v.current_order.station == 1 && v.tick_counter & 4) ? Sprite.SPR_AH_64A_FIRING : 0;
+				(v.current_order.station == 1 && 0 != (v.tick_counter & 4)) ? Sprite.SPR_AH_64A_FIRING : 0;
 
-		v.GetNewVehiclePos( gp);
+		v.GetNewVehiclePos(gp);
 		SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
 
 		if (gp.x > (int)Global.MapSizeX() * 16 + 9*16 - 1) {
@@ -418,10 +420,10 @@ public class DisasterCmd extends DisasterTables
 				int r = Hal.Random();
 
 				Vehicle.CreateEffectVehicleAbove(
-					BitOps.GB(r,  0, 6) + x,
-					BitOps.GB(r,  6, 6) + y,
-					BitOps.GB(r, 12, 4),
-					Vehicle.EV_EXPLOSION_SMALL);
+						BitOps.GB(r,  0, 6) + x,
+						BitOps.GB(r,  6, 6) + y,
+						BitOps.GB(r, 12, 4),
+						Vehicle.EV_EXPLOSION_SMALL);
 
 				if (++v.age >= 55)
 					v.current_order.station = 3;
@@ -437,7 +439,7 @@ public class DisasterCmd extends DisasterTables
 				DestructIndustry(i);
 
 				Global.SetDParam(0, i.town.index);
-				NewsItem.AddNewsItem(Str.STR_B003_FACTORY_DESTROYED_IN_SUSPICIOUS, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy, 0);
+				NewsItem.AddNewsItem(Str.STR_B003_FACTORY_DESTROYED_IN_SUSPICIOUS, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTile(), 0);
 				//SndPlayTileFx(SND_12_EXPLOSION, i.xy);
 			}
 		} else if (v.current_order.station == 0) {
@@ -481,7 +483,7 @@ public class DisasterCmd extends DisasterTables
 	// Will be shot down by a plane
 	static void DisasterTick_4(Vehicle v)
 	{
-		GetNewVehiclePosResult gp;
+		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		int z;
 		Vehicle w;
 		Town t;
@@ -496,7 +498,7 @@ public class DisasterCmd extends DisasterTables
 			if (Math.abs(v.x_pos - x) + Math.abs(v.y_pos - y) >= 8) {
 				v.direction = Vehicle.GetDirectionTowards(v, x, y);
 
-				v.GetNewVehiclePos( gp);
+				v.GetNewVehiclePos(gp);
 				SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
 				return;
 			}
@@ -524,8 +526,8 @@ public class DisasterCmd extends DisasterTables
 			Global.SetDParam(0, t.index);
 			NewsItem.AddNewsItem(Str.STR_B004_UFO_LANDS_NEAR,
 					NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ACCIDENT, 0),
-				v.tile,
-				0);
+					v.tile.getTile(),
+					0);
 
 			Vehicle u = Vehicle.ForceAllocateSpecialVehicle();
 			if (u == null) {
@@ -565,7 +567,8 @@ public class DisasterCmd extends DisasterTables
 				if (tile.IsTileType( TileTypes.MP_RAILWAY) &&
 						(tile.getMap().m5 & ~3) != 0xC0 && tile.GetTileOwner().IS_HUMAN_PLAYER())
 					break;
-				tile = TILE_MASK(tile+1);
+				tile = tile.iadd(1);
+				tile.TILE_MASK();
 			} while (tile != tile_org);
 			v.dest_tile = tile;
 			v.age = 0;
@@ -576,7 +579,7 @@ public class DisasterCmd extends DisasterTables
 	// The plane which will shoot down the UFO
 	static void DisasterTick_4b(Vehicle v)
 	{
-		GetNewVehiclePosResult gp;
+		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		Vehicle u;
 		int i;
 
@@ -604,24 +607,28 @@ public class DisasterCmd extends DisasterTables
 			for(i=0; i!=80; i++) {
 				int r = Hal.Random();
 				Vehicle.CreateEffectVehicleAbove(
-					BitOps.GB(r, 0, 6) + v.x_pos - 32,
-					BitOps.GB(r, 5, 6) + v.y_pos - 32,
-					0,
-					Vehicle.EV_EXPLOSION_SMALL);
+						BitOps.GB(r, 0, 6) + v.x_pos - 32,
+						BitOps.GB(r, 5, 6) + v.y_pos - 32,
+						0,
+						Vehicle.EV_EXPLOSION_SMALL);
 			}
 
-			BEGIN_TILE_LOOP(tile, 6, 6, v.tile - TileDiffXY(3, 3))
-				tile = TILE_MASK(tile);
+			//BEGIN_TILE_LOOP(tile, 6, 6, v.tile - TileDiffXY(3, 3))
+			TileIndex.forAll(6, 6, v.tile.isub(TileIndex.TileDiffXY(3, 3)), (tile) ->
+			{
+				tile.TILE_MASK();
 				DisasterClearSquare(tile);
-			END_TILE_LOOP(tile, 6, 6, v.tile - TileDiffXY(3, 3))
+				return false;
+			});
+			//END_TILE_LOOP(tile, 6, 6, v.tile - TileDiffXY(3, 3))
 		}
 	}
 
 	// Submarine handler
 	static void DisasterTick_5_and_6(Vehicle v)
 	{
-		int r;
-		GetNewVehiclePosResult gp;
+
+		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		TileIndex tile;
 
 		v.tick_counter++;
@@ -637,16 +644,19 @@ public class DisasterCmd extends DisasterTables
 		if (0==(v.tick_counter&1))
 			return;
 
-		tile = v.tile + TileOffsByDir(v.direction >> 1);
-		if (tile.IsValidTile() &&
-				(r=GetTileTrackStatus(tile,TRANSPORT_WATER),(byte)(r+(r >> 8)) == 0x3F) &&
-				!BitOps.CHANCE16(1,90)) {
-			v.GetNewVehiclePos( gp);
-			SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
-			return;
+		tile = v.tile.iadd( TileIndex.TileOffsByDir(v.direction >> 1) );
+		if (tile.IsValidTile() ) 
+		{
+			int r=Landscape.GetTileTrackStatus(tile,Global.TRANSPORT_WATER);
+			if( ((byte)(r+(r >> 8)) == 0x3F) && !BitOps.CHANCE16(1,90)) 
+			{
+				v.GetNewVehiclePos(gp);
+				SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
+				return;
+			}
 		}
 
-		v.direction = (v.direction + (BitOps.GB(Hal.Random(), 0, 1) ? 2 : -2)) & 7;
+		v.direction = (v.direction + (BitOps.GB(Hal.Random(), 0, 1)!=0 ? 2 : -2) ) & 7;
 	}
 
 
@@ -666,7 +676,7 @@ public class DisasterCmd extends DisasterTables
 
 	void DisasterVehicle_Tick(Vehicle v)
 	{
-		_disastervehicle_tick_procs[v.subtype](v);
+		_disastervehicle_tick_procs[v.subtype].accept(v);
 	}
 
 
@@ -687,7 +697,8 @@ public class DisasterCmd extends DisasterTables
 
 		/* Pick a random place, unless we find
 		    a small airport */
-		x = TileX(Hal.Random()) * 16 + 8;
+		TileIndex tile = new TileIndex(Hal.Random());
+		x = tile.TileX() * 16 + 8;
 
 		//FOR_ALL_STATIONS(st)
 		Iterator<Station> ii = Station.getIterator();
@@ -696,7 +707,8 @@ public class DisasterCmd extends DisasterTables
 			Station st = ii.next();
 			if (st.xy != null && st.airport_tile != null &&
 					st.airport_type <= 1 &&
-							st.owner.IS_HUMAN_PLAYER()) {
+					st.owner.IS_HUMAN_PLAYER()) 
+			{
 				x = (st.xy.TileX() + 2) * 16;
 				break;
 			}
@@ -721,7 +733,8 @@ public class DisasterCmd extends DisasterTables
 		if (v == null)
 			return;
 
-		x = TileX(Hal.Random()) * 16 + 8;
+		TileIndex tile = new TileIndex(Hal.Random());
+		x = tile.TileX() * 16 + 8;
 
 		InitializeDisasterVehicle(v, x, 0, 135, 3, 2);
 		v.dest_tile = TileIndex.TileXY(Global.MapSizeX() / 2, Global.MapSizeY() / 2);
@@ -828,7 +841,8 @@ public class DisasterCmd extends DisasterTables
 
 		if (v == null) return;
 
-		x = TileX(Hal.Random()) * 16 + 8;
+		TileIndex tile = new TileIndex(Hal.Random());
+		x = tile.TileX() * 16 + 8;
 
 		y = Global.MapMaxX() * 16 - 1;
 		InitializeDisasterVehicle(v, x, y, 135, 7, 9);
@@ -850,16 +864,15 @@ public class DisasterCmd extends DisasterTables
 		Vehicle v = Vehicle.ForceAllocateSpecialVehicle();
 		int x,y;
 		byte dir;
-		int r;
 
 		if (v == null) return;
 
-		r = Hal.Random();
-		x = TileX(r) * 16 + 8;
+		TileIndex r = new TileIndex(Hal.Random());
+		x = r.TileX() * 16 + 8;
 
 		y = 8;
 		dir = 3;
-		if(0 != (r & 0x80000000)) { y = Global.MapMaxX() * 16 - 8 - 1; dir = 7; }
+		if(0 != (r.getTile() & 0x80000000)) { y = Global.MapMaxX() * 16 - 8 - 1; dir = 7; }
 		InitializeDisasterVehicle(v, x, y, 0, dir,13);
 		v.age = 0;
 	}
@@ -870,16 +883,15 @@ public class DisasterCmd extends DisasterTables
 		Vehicle v = Vehicle.ForceAllocateSpecialVehicle();
 		int x,y;
 		byte dir;
-		int r;
 
 		if (v == null) return;
 
-		r = Hal.Random();
-		x = TileX(r) * 16 + 8;
+		TileIndex r = new TileIndex(Hal.Random());
+		x = r.TileX() * 16 + 8;
 
 		y = 8;
 		dir = 3;
-		if(0 != (r & 0x80000000)) { y = Global.MapMaxX() * 16 - 8 - 1; dir = 7; }
+		if(0 != (r.getTile() & 0x80000000)) { y = Global.MapMaxX() * 16 - 8 - 1; dir = 7; }
 		InitializeDisasterVehicle(v, x, y, 0, dir,14);
 		v.age = 0;
 	}
@@ -899,7 +911,7 @@ public class DisasterCmd extends DisasterTables
 
 					Global.SetDParam(0, i.town.index);
 					NewsItem.AddNewsItem(Str.STR_B005_COAL_MINE_SUBSIDENCE_LEAVES,
-							NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy + TileDiffXY(1, 1), 0);
+							NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.iadd(1, 1).getTile(), 0);
 
 					{
 						TileIndex tile = i.xy;
@@ -968,8 +980,8 @@ public class DisasterCmd extends DisasterTables
 	{
 		ResetDisasterDelay();
 	}
-	
-	
+
+
 }
 
 //typedef void DisasterVehicleTickProc(Vehicle v);
