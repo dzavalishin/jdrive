@@ -1,3 +1,4 @@
+#if 0
 /* $Id: settings_gui.c 3323 2005-12-20 21:24:50Z Darkvater $ */
 
 #include "stdafx.h"
