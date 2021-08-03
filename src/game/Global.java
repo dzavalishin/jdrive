@@ -511,7 +511,7 @@ public class Global {
 			return;
 		}
 
-		Vehicle.RunVehicleDayProc(Global._date_fract);
+		Misc.RunVehicleDayProc(Global._date_fract);
 
 		/* increase day, and check if a new day is there? */
 		Global._tick_counter++;
@@ -568,9 +568,9 @@ public class Global {
 		/* yes, call various yearly loops */
 
 		Player.PlayersYearlyLoop();
-		Train.TrainsYearlyLoop();
-		RoadVehiclesYearlyLoop();
-		AircraftYearlyLoop();
+		TrainCmd.TrainsYearlyLoop();
+		RoadVehCmd.RoadVehiclesYearlyLoop();
+		AirCraft.AircraftYearlyLoop();
 		Ship.ShipsYearlyLoop();
 		/*#ifdef ENABLE_NETWORK
 		if (_network_server)
@@ -579,7 +579,7 @@ public class Global {
 
 		/* check if we reached end of the game (31 dec 2050) */
 		if (Global._cur_year == Global._patches.ending_date - Global.MAX_YEAR_BEGIN_REAL) {
-			ShowEndGameChart();
+			PlayerGui.ShowEndGameChart();
 			/* check if we reached 2090 (MAX_YEAR_END_REAL), that's the maximum year. */
 		} else if (Global._cur_year == (Global.MAX_YEAR_END + 1)) {
 			//Vehicle v;
@@ -593,11 +593,11 @@ public class Global {
 
 			/* Because the _date wraps here, and text-messages expire by game-days, we have to clean out
 			 *  all of them if the date is set back, else those messages will hang for ever */
-			InitTextMessage();
+			TextEffect.InitTextMessage();
 		}
 
 		if (Global._patches.auto_euro)
-			CheckSwitchToEuro();
+			Currency.CheckSwitchToEuro();
 
 		/* XXX: check if year 2050 was reached */
 	}

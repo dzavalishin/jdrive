@@ -56,7 +56,7 @@ public class Currency {
 	}
 
 
-	void CheckSwitchToEuro()
+	static void CheckSwitchToEuro()
 	{
 		if (CurrencySpec._currency_specs[GameOptions._opt.currency].to_euro != CF_NOEURO &&
 				CurrencySpec._currency_specs[GameOptions._opt.currency].to_euro != CF_ISEURO &&

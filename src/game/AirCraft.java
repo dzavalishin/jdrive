@@ -610,7 +610,7 @@ public class AirCraft {
 		Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
 	}
 
-	void AircraftYearlyLoop()
+	static void AircraftYearlyLoop()
 	{
 		//		Vehicle v;
 

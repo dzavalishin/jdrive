@@ -1667,7 +1667,7 @@ class RoadDriveEntry {
 	}
 
 
-	void RoadVehiclesYearlyLoop()
+	static void RoadVehiclesYearlyLoop()
 	{
 		//Vehicle v;
 
