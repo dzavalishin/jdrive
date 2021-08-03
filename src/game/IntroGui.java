@@ -31,58 +31,59 @@ public class IntroGui
 	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12, 168, 325, 177, 188, Str.STR_0304_QUIT,          Str.STR_0305_QUIT_OPENTTD),
 	};
 
-	extern void HandleOnEditText(WindowEvent e);
-	extern void HandleOnEditTextCancel();
+	//extern void HandleOnEditText(WindowEvent e);
+	//extern void HandleOnEditTextCancel();
 
-	static inline void CreateScenario() {_switch_mode = SM_EDITOR;}
+	//static  void CreateScenario() {_switch_mode = SM_EDITOR;}
 
-	static inline void SetNewLandscapeType(byte landscape)
+	static void SetNewLandscapeType(int landscape)
 	{
-		GameOptions._opt_newgame.landscape = landscape;
-		InvalidateWindowClasses(Window.WC_SELEAcceptedCargo.CT_GAME);
+		GameOptions._opt_newgame.landscape = (byte) landscape;
+		Window.InvalidateWindowClasses(Window.WC_SELECT_GAME);
 	}
+
+	static final int mapsizes[] = {Str.STR_64, Str.STR_128, Str.STR_256, Str.STR_512, Str.STR_1024, Str.STR_2048, Str.INVALID_STRING_ID.id };
 
 	static void SelectGameWndProc(Window w, WindowEvent e)
 	{
 		/* We do +/- 6 for the map_xy because 64 is 2^6, but it is the lowest available element */
-		static final StringID mapsizes[] = {Str.STR_64, Str.STR_128, Str.STR_256, Str.STR_512, Str.STR_1024, Str.STR_2048, INVALID_STRING_ID};
 
 		switch (e.event) {
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 			w.click_state = (w.click_state & ~(1 << 14) & ~(0xF << 6)) | (1 << (GameOptions._opt_newgame.landscape + 6)) | (1 << 14);
 			Global.SetDParam(0, Str.STR_6801_EASY + GameOptions._opt_newgame.diff_level);
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
-			DrawStringRightAligned(216, 121, Str.STR_MAPSIZE, 0);
-			DrawString(223, 121, mapsizes[Global._patches.map_x - 6], 0x10);
-			DrawString(270, 121, Str.STR_BY, 0);
-			DrawString(283, 121, mapsizes[Global._patches.map_y - 6], 0x10);
+			Gfx.DrawStringRightAligned(216, 121, Str.STR_MAPSIZE, 0);
+			Gfx.DrawString(223, 121, mapsizes[Global._patches.map_x - 6], 0x10);
+			Gfx.DrawString(270, 121, Str.STR_BY, 0);
+			Gfx.DrawString(283, 121, mapsizes[Global._patches.map_y - 6], 0x10);
 			break;
 
-		case WindowEvents.WE_CLICK:
-			switch (e.click.widget) {
+		case WE_CLICK:
+			switch (e.widget) {
 			case 2: AskForNewGameToStart(); break;
 			case 3: ShowSaveLoadDialog(SLD_LOAD_GAME); break;
 			case 4: CreateScenario(); break;
 			case 5: ShowSaveLoadDialog(SLD_LOAD_SCENARIO); break;
 			case 6: case 7: case 8: case 9:
-				SetNewLandscapeType(e.click.widget - 6);
+				SetNewLandscapeType(e.widget - 6);
 				break;
 			case 10: case 11: /* Mapsize X */
-				ShowDropDownMenu(w, mapsizes, Global._patches.map_x - 6, 11, 0, 0);
+				Window.ShowDropDownMenu(w, mapsizes, Global._patches.map_x - 6, 11, 0, 0);
 				break;
 			case 12: case 13: /* Mapsize Y */
-				ShowDropDownMenu(w, mapsizes, Global._patches.map_y - 6, 13, 0, 0);
+				Window.ShowDropDownMenu(w, mapsizes, Global._patches.map_y - 6, 13, 0, 0);
 				break;
 			case 15:
-	#ifdef ENABLE_NETWORK
+	/*#ifdef ENABLE_NETWORK
 				if (!_network_available) {
 					ShowErrorMessage(INVALID_STRING_ID, Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
 				} else
 					ShowNetworkGameWindow();
-	#else
-				ShowErrorMessage(INVALID_STRING_ID ,Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
-	#endif
+	#else*/
+				Global.ShowErrorMessage(Str.INVALID_STRING_ID.id , Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
+	//#endif
 				break;
 			case 16: ShowGameOptions(); break;
 			case 17: ShowGameDifficulty(); break;
@@ -91,45 +92,45 @@ public class IntroGui
 			}
 			break;
 
-		case WindowEvents.WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
-		case WindowEvents.WE_ON_EDIT_TEXT_CANCEL: HandleOnEditTextCancel(); break;
+		case WE_ON_EDIT_TEXT: Gui.HandleOnEditText(e); break;
+		case WE_ON_EDIT_TEXT_CANCEL: Gui.HandleOnEditTextCancel(); break;
 
-		case WindowEvents.WE_DROPDOWN_SELECT: /* Mapsize selection */
-			switch (e.dropdown.button) {
-				case 11: Global._patches.map_x = e.dropdown.index + 6; break;
-				case 13: Global._patches.map_y = e.dropdown.index + 6; break;
+		case WE_DROPDOWN_SELECT: /* Mapsize selection */
+			switch (e.button) {
+				case 11: Global._patches.map_x = e.index + 6; break;
+				case 13: Global._patches.map_y = e.index + 6; break;
 			}
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 			break;
 		}
 
 	}
 
-	static final WindowDesc _select_game_desc = {
+	static final WindowDesc _select_game_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 336, 197,
-		Window.WC_SELEAcceptedCargo.CT_GAME,0,
+		Window.WC_SELECT_GAME,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 		_select_game_widgets,
-		SelectGameWndProc
-	};
+		IntroGui::SelectGameWndProc
+	);
 
 	void ShowSelectGameWindow()
 	{
-		AllocateWindowDesc(&_select_game_desc);
+		Window.AllocateWindowDesc(_select_game_desc);
 	}
 
 	void GenRandomNewGame(int rnd1, int rnd2)
 	{
-		_random_seeds[0][0] = rnd1;
-		_random_seeds[0][1] = rnd2;
+		Global._random_seeds[0][0] = rnd1;
+		Global._random_seeds[0][1] = rnd2;
 
 		SwitchMode(SM_NEWGAME);
 	}
 
 	void StartScenarioEditor(int rnd1, int rnd2)
 	{
-		_random_seeds[0][0] = rnd1;
-		_random_seeds[0][1] = rnd2;
+		Global._random_seeds[0][0] = rnd1;
+		Global._random_seeds[0][1] = rnd2;
 
 		SwitchMode(SM_START_SCENARIO);
 	}
@@ -140,61 +141,46 @@ public class IntroGui
 	new Widget(   Window.WWT_IMGBTN, Window.RESIZE_NONE,  4,   0, 179,  14,  91, 0x0,           Str.STR_NULL),
 	new Widget(  Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12,  25,  84,  72,  83, Str.STR_00C9_NO,   Str.STR_NULL),
 	new Widget(  Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12,  95, 154,  72,  83, Str.STR_00C8_YES,  Str.STR_NULL),
-	{  WIDGETS_END },
 	};
 
 	static void AskAbandonGameWndProc(Window  w, WindowEvent  e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT:
-			DrawWindowWidgets(w);
-	#if defined(_WIN32)
-			Global.SetDParam(0, Str.STR_0133_WINDOWS);
-	#elif defined(__APPLE__)
-			Global.SetDParam(0, Str.STR_0135_OSX);
-	#elif defined(__BEOS__)
-			Global.SetDParam(0, Str.STR_OSNAME_BEOS);
-	#elif defined(__MORPHOS__)
-			Global.SetDParam(0, Str.STR_OSNAME_MORPHOS);
-	#elif defined(__AMIGA__)
-			Global.SetDParam(0, Str.STR_OSNAME_AMIGAOS);
-	#elif defined(__OS2__)
-			Global.SetDParam(0, Str.STR_OSNAME_OS2);
-	#else
-			Global.SetDParam(0, Str.STR_0134_UNIX);
-	#endif
+		case WE_PAINT:
+			w.DrawWindowWidgets();
+			Global.SetDParam(0, Str.STR_0134_UNIX); // TODO name me 
 			Gfx.DrawStringMultiCenter(90, 38, Str.STR_00CA_ARE_YOU_SURE_YOU_WANT_TO, 178);
 			return;
 
-		case WindowEvents.WE_CLICK:
-			switch (e.click.widget) {
-				case 3: DeleteWindow(w);   break;
-				case 4: _exit_game = true; break;
+		case WE_CLICK:
+			switch (e.widget) {
+				case 3: w.DeleteWindow();   break;
+				case 4: Global._exit_game = true; break;
 			}
 			break;
 
-		case WindowEvents.WE_KEYPRESS: /* Exit game on pressing 'Enter' */
-			switch (e.keypress.keycode) {
-				case WKC_RETURN:
-				case WKC_NUM_ENTER:
-					_exit_game = true;
+		case WE_KEYPRESS: /* Exit game on pressing 'Enter' */
+			switch (e.keycode) {
+				case Window.WKC_RETURN:
+				case Window.WKC_NUM_ENTER:
+					Global._exit_game = true;
 					break;
 			}
 			break;
 		}
 	}
 
-	static final WindowDesc _ask_abandon_game_desc = {
+	static final WindowDesc _ask_abandon_game_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 180, 92,
 		Window.WC_ASK_ABANDON_GAME,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS,
 		_ask_abandon_game_widgets,
-		AskAbandonGameWndProc
-	};
+		IntroGui::AskAbandonGameWndProc
+	);
 
-	void AskExitGame()
+	static void AskExitGame()
 	{
-		AllocateWindowDescFront(&_ask_abandon_game_desc, 0);
+		Window.AllocateWindowDescFront(_ask_abandon_game_desc, 0);
 	}
 
 
@@ -204,14 +190,13 @@ public class IntroGui
 	new Widget(   Window.WWT_IMGBTN, Window.RESIZE_NONE,  4,   0, 179,  14,  91, 0x0,                Str.STR_NULL),
 	new Widget(  Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12,  25,  84,  72,  83, Str.STR_00C9_NO,        Str.STR_NULL),
 	new Widget(  Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12,  95, 154,  72,  83, Str.STR_00C8_YES,       Str.STR_NULL),
-	{  WIDGETS_END },
 	};
 
 	static void AskQuitGameWndProc(Window  w, WindowEvent  e)
 	{
 		switch (e.event) {
-			case WindowEvents.WE_PAINT:
-				DrawWindowWidgets(w);
+			case WE_PAINT:
+				w.DrawWindowWidgets();
 				Gfx.DrawStringMultiCenter(
 					90, 38,
 					Global._game_mode != GameModes.GM_EDITOR ?
@@ -220,31 +205,31 @@ public class IntroGui
 				);
 				break;
 
-			case WindowEvents.WE_CLICK:
-				switch (e.click.widget) {
-					case 3: DeleteWindow(w);        break;
-					case 4: _switch_mode = SM_MENU; break;
+			case WE_CLICK:
+				switch (e.widget) {
+					case 3: w.DeleteWindow();        break;
+					case 4: Global._switch_mode = SM_MENU; break;
 				}
 				break;
 
-			case WindowEvents.WE_KEYPRESS: /* Return to main menu on pressing 'Enter' */
-				if (e.keypress.keycode == WKC_RETURN) _switch_mode = SM_MENU;
+			case WE_KEYPRESS: /* Return to main menu on pressing 'Enter' */
+				if (e.keycode == Window.WKC_RETURN) Global._switch_mode = SM_MENU;
 				break;
 		}
 	}
 
-	static final WindowDesc _ask_quit_game_desc = {
+	static final WindowDesc _ask_quit_game_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 180, 92,
 		Window.WC_QUIT_GAME,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS,
 		_ask_quit_game_widgets,
-		AskQuitGameWndProc
-	};
+		IntroGui::AskQuitGameWndProc
+	);
 
 
 	void AskExitToGameMenu()
 	{
-		AllocateWindowDescFront(&_ask_quit_game_desc, 0);
+		Window.AllocateWindowDescFront(_ask_quit_game_desc, 0);
 	}
 
 }

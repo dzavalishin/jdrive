@@ -110,7 +110,7 @@ public class Gui
 	//extern void GenerateIndustries();
 	//extern boolean GenerateTowns();
 
-	void HandleOnEditTextCancel()
+	static void HandleOnEditTextCancel()
 	{
 		switch (_rename_what) {
 		/*
@@ -123,7 +123,7 @@ public class Gui
 		}
 	}
 
-	void HandleOnEditText(WindowEvent e)
+	static void HandleOnEditText(WindowEvent e)
 	{
 		//final char *b = e.edittext.str;
 		int id;
