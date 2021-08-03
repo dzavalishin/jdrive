@@ -602,7 +602,7 @@ public class Order implements IPoolItem {
 	static int CmdSkipOrder(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
-		VehicleID veh_id = p1;
+		VehicleID veh_id = VehicleID.get( p1 );
 
 		if (!veh_id.IsVehicleIndex()) return Cmd.CMD_ERROR;
 		v = Vehicle.GetVehicle(veh_id);
@@ -617,7 +617,7 @@ public class Order implements IPoolItem {
 
 			if (v.type == Vehicle.VEH_Train) v.rail.days_since_order_progr = 0;
 
-			if (v.type == Vehicle.VEH_Road) RoadVeh.ClearSlot(v, v.road.slot);
+			if (v.type == Vehicle.VEH_Road) RoadVehCmd.ClearSlot(v, v.road.slot);
 
 			/* NON-stop flag is misused to see if a train is in a station that is
 			 * on his order list or not */
@@ -794,7 +794,7 @@ public class Order implements IPoolItem {
 					dst.InvalidateVehicleOrder();
 					src.InvalidateVehicleOrder();
 
-					RebuildVehicleLists();
+					VehicleGui.RebuildVehicleLists();
 					if (dst.type == Vehicle.VEH_Train) dst.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
 				}
 			} break;
@@ -901,7 +901,7 @@ public class Order implements IPoolItem {
 		v = Vehicle.GetVehicle(p1);
 		/* Check the vehicle type and ownership, and if the service interval and order are in range */
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
-		if (serv_int != GetServiceIntervalClamped(serv_int) || cur_ord.id >= v.num_orders) return Cmd.CMD_ERROR;
+		if (serv_int != Depot.GetServiceIntervalClamped(serv_int) || cur_ord.id >= v.num_orders) return Cmd.CMD_ERROR;
 
 		if (0 != (flags & Cmd.DC_EXEC)) {
 			v.cur_order_index = cur_ord.id;
@@ -937,7 +937,7 @@ public class Order implements IPoolItem {
 		if (v.owner == Global._local_player && v.day_counter % 20 == 0) {
 			int n_st, problem_type = -1;
 			//final Order order;
-			final Station st;
+			Station st;
 			int message = 0;
 
 			/* Check the order list */
@@ -1021,7 +1021,7 @@ public class Order implements IPoolItem {
 	{
 		//Vehicle v;
 		//Order order;
-		boolean need_invalidate;
+		boolean [] need_invalidate = {false};
 
 		/* Go through all vehicles */
 		//FOR_ALL_VEHICLES(v)
@@ -1040,11 +1040,11 @@ public class Order implements IPoolItem {
 				/* Mark the order as DUMMY */
 				v.current_order.type = OT_DUMMY;
 				v.current_order.flags = 0;
-				Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index.id);
+				Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 			}
 
 			/* Clear the order from the order-list */
-			need_invalidate = false;
+			need_invalidate[0] = false;
 			//FOR_VEHICLE_ORDERS(v, order)
 			v.forEachOrder( (order) ->
 			{
@@ -1058,17 +1058,17 @@ public class Order implements IPoolItem {
 						 */
 						if(v.queue_item != null)
 						{
-							v.queue_item.queue.del(v.queue_item.queue, v);
+							v.queue_item.queue.del(v);
 						}
 					}
 
-					need_invalidate = true;
+					need_invalidate[0] = true;
 				}
 			});
 
 			/* Only invalidate once, and if needed */
-			if (need_invalidate)
-				Window.InvalidateWindow(Window.WC_VEHICLE_ORDERS, v.index.id);
+			if (need_invalidate[0])
+				Window.InvalidateWindow(Window.WC_VEHICLE_ORDERS, v.index);
 		});
 	}
 
@@ -1146,7 +1146,7 @@ public class Order implements IPoolItem {
 	@Deprecated
 	static Order UnpackOrder(int packed)
 	{
-		Order order;
+		Order order = new Order();
 		order.type    = BitOps.GB(packed,  0,  8);
 		order.flags   = BitOps.GB(packed,  8,  8);
 		order.station = BitOps.GB(packed, 16, 16);

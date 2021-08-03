@@ -29,6 +29,10 @@ public class VehicleID extends AbstractID {
 	{
 		return get(-1);
 	}
+
+	public boolean IsVehicleIndex() {
+		return Vehicle.IsVehicleIndex(this.id);
+	}
 	
 	
 }
