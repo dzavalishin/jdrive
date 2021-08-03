@@ -773,7 +773,7 @@ public class MiscGui {
 		if (num < w.vscroll.pos) w.vscroll.pos = num;
 	}
 
-	void SetVScroll2Count(Window w, int num)
+	static void SetVScroll2Count(Window w, int num)
 	{
 		w.vscroll2.count = num;
 		num -= w.vscroll2.cap;

@@ -86,6 +86,6 @@ public class RoadVehCmdTables
 		};
 
 	
-	static final int _turn_prob[] = { -1, 0, 0, 1 };
+	protected static final int _turn_prob[] = { -1, 0, 0, 1 };
 	
 }

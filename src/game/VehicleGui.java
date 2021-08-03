@@ -173,7 +173,7 @@ public class VehicleGui {
 			//FOR_ALL_VEHICLES(v)
 			Vehicle.forEach( (v) ->
 			{
-				if (v.type == type && v.owner == owner && (
+				if (v.type == type && v.owner.id == owner && (
 						(type == Vehicle.VEH_Train && v.IsFrontEngine()) ||
 						(type != Vehicle.VEH_Train && v.subtype <= subtype))) {
 					_vehicle_sort[n[0]].index = v.index;
@@ -349,7 +349,7 @@ private static void show_cargo(ctype) {
 			if (BitOps.IS_INT_INSIDE(--pos[0], -lines_drawn, 0)) {
 				Gfx.DrawString(x[0] + 59, y[0] + 2, Engine.GetCustomEngineName(i), colour);
 				// show_outdated is true only for left side, which is where we show old replacements
-				DrawTrainEngine(x[0] + 29, y[0] + 6, i, (_player_num_engines[i] == 0 && show_outdated) ?
+				TrainCmd.DrawTrainEngine(x[0] + 29, y[0] + 6, i, (_player_num_engines[i] == 0 && show_outdated) ?
 						Sprite.PALETTE_CRASH : Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 				if ( show_outdated ) {
 					Global.SetDParam(0, _player_num_engines[i]);
@@ -438,7 +438,7 @@ private static void show_cargo(ctype) {
 
 		case Vehicle.VEH_Ship: {
 			int num = Global.NUM_SHIP_ENGINES;
-			final Engine  e; // = GetEngine(Global.SHIP_ENGINES_INDEX);
+			Engine  e; // = GetEngine(Global.SHIP_ENGINES_INDEX);
 			byte cargo, refittable;
 			engine_id = Global.SHIP_ENGINES_INDEX;
 
@@ -587,7 +587,7 @@ private static void show_cargo(ctype) {
 					if (_player_num_engines[engine_id] > 0 || p.EngineHasReplacement(EngineID.get( engine_id ))) {
 						if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.cap, 0)) {
 							Gfx.DrawString(x[0]+59, y[0]+2, Engine.GetCustomEngineName(engine_id), sel0[0]==0 ? 0xC : 0x10);
-							DrawRoadVehEngine(x[0]+29, y[0]+6, engine_id, 
+							RoadVehCmd.DrawRoadVehEngine(x[0]+29, y[0]+6, engine_id, 
 									_player_num_engines[engine_id] > 0 ? Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
 							Global.SetDParam(0, _player_num_engines[engine_id]);
 							Gfx.DrawStringRightAligned(213, y[0]+5, Str.STR_TINY_BLACK, 0);
@@ -599,7 +599,7 @@ private static void show_cargo(ctype) {
 					if (EngineGui.RoadVehInfo(engine_id).cargo_type == cargo && BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
 						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.cap, 0) && EngineGui.RoadVehInfo(engine_id).cargo_type == cargo) {
 							Gfx.DrawString(x2[0]+59, y2[0]+2, Engine.GetCustomEngineName(engine_id), sel1[0]==0 ? 0xC : 0x10);
-							DrawRoadVehEngine(x2[0]+29, y2[0]+6, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+							RoadVehCmd.DrawRoadVehEngine(x2[0]+29, y2[0]+6, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 							y2[0] += 14;
 						}
 						sel1[0]--;
@@ -663,14 +663,14 @@ private static void show_cargo(ctype) {
 				byte subtype = EngineGui.AircraftVehInfo(selected_id0[0]).subtype;
 
 				do {
-					final Engine  e = Engine.GetEngine(engine_id);
+					final Engine  e = Engine.GetEngine(eid);//engine_id);
 					EngineID engine_id = EngineID.get( eid );
 
 					if (_player_num_engines[engine_id.id] > 0 || p.EngineHasReplacement(engine_id)) {
 						if (sel0[0] == 0) selected_id0[0] = engine_id.id;
 						if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.cap, 0)) {
 							Gfx.DrawString(x[0]+62, y[0]+7, Engine.GetCustomEngineName(engine_id.id), sel0[0]==0 ? 0xC : 0x10);
-							DrawAircraftEngine(x[0]+29, y[0]+10, engine_id, _player_num_engines[engine_id.id] > 0 ? Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
+							AirCraft.DrawAircraftEngine(x[0]+29, y[0]+10, engine_id, _player_num_engines[engine_id.id] > 0 ? Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
 							Global.SetDParam(0, _player_num_engines[engine_id.id]);
 							Gfx.DrawStringRightAligned(213, y[0]+15, Str.STR_TINY_BLACK, 0);
 							y[0] += 24;
@@ -682,7 +682,7 @@ private static void show_cargo(ctype) {
 						if (sel1[0] == 0) selected_id1[0] = engine_id.id;
 						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.cap, 0)) {
 							Gfx.DrawString(x2[0]+62, y2[0]+7, Engine.GetCustomEngineName(engine_id.id), sel1[0]==0 ? 0xC : 0x10);
-							DrawAircraftEngine(x2[0]+29, y2[0]+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+							AirCraft.DrawAircraftEngine(x2[0]+29, y2[0]+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 							y2[0] += 24;
 						}
 						sel1[0]--;
@@ -852,9 +852,9 @@ private static void show_cargo(ctype) {
 
 			case Vehicle.VEH_Road: {
 				if (selected_id[0] != Engine.INVALID_ENGINE_ID) {
-					DrawRoadVehPurchaseInfo(2, 15 + (14 * w.vscroll.cap), selected_id[0]);
+					RoadVehGui.DrawRoadVehPurchaseInfo(2, 15 + (14 * w.vscroll.cap), selected_id[0]);
 					if (selected_id[1] != Engine.INVALID_ENGINE_ID) {
-						DrawRoadVehPurchaseInfo(2 + 228, 15 + (14 * w.vscroll.cap), selected_id[1]);
+						RoadVehGui.DrawRoadVehPurchaseInfo(2 + 228, 15 + (14 * w.vscroll.cap), selected_id[1]);
 					}
 				}
 				break;
