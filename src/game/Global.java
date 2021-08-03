@@ -613,7 +613,16 @@ public class Global {
 		_network_last_advertise_date = 0;
 	#endif /* ENABLE_NETWORK */
 	}
+	
+	void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
+	{
+		MiscGui.ShowErrorMessage( msg_1, msg_2, x, y);
+	}
 
+	void ShowErrorMessage(int msg_1, int msg_2, int x, int y)
+	{
+		MiscGui.ShowErrorMessage( new StringID(msg_1), new StringID(msg_2), x, y);
+	}
 
 
 

@@ -62,9 +62,9 @@ public class IntroGui
 
 		case WE_CLICK:
 			switch (e.widget) {
-			case 2: AskForNewGameToStart(); break;
+			case 2: MiscGui.AskForNewGameToStart(); break;
 			case 3: ShowSaveLoadDialog(SLD_LOAD_GAME); break;
-			case 4: CreateScenario(); break;
+			case 4: /* TODO CreateScenario(); */ break;
 			case 5: ShowSaveLoadDialog(SLD_LOAD_SCENARIO); break;
 			case 6: case 7: case 8: case 9:
 				SetNewLandscapeType(e.widget - 6);
@@ -85,9 +85,9 @@ public class IntroGui
 				Global.ShowErrorMessage(Str.INVALID_STRING_ID.id , Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
 	//#endif
 				break;
-			case 16: ShowGameOptions(); break;
-			case 17: ShowGameDifficulty(); break;
-			case 18: ShowPatchesSelection(); break;
+			case 16: SettingsGui.ShowGameOptions(); break;
+			case 17: SettingsGui.ShowGameDifficulty(); break;
+			case 18: SettingsGui.ShowPatchesSelection(); break;
 			case 19: AskExitGame(); break;
 			}
 			break;

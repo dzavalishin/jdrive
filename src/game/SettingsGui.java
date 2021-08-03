@@ -269,10 +269,10 @@ public class SettingsGui extends SettingsTables
 			);
 
 
-	void ShowGameOptions()
+	static void ShowGameOptions()
 	{
 		Window.DeleteWindowById(Window.WC_GAME_OPTIONS, 0);
-		AllocateWindowDesc(&_game_options_desc);
+		Window.AllocateWindowDesc(_game_options_desc);
 	}
 
 
@@ -501,13 +501,13 @@ public class SettingsGui extends SettingsTables
 			GameDifficultyWndProc
 	};
 
-	void ShowGameDifficulty()
+	static void ShowGameDifficulty()
 	{
 		Window.DeleteWindowById(Window.WC_GAME_OPTIONS, 0);
 		/* Copy current settings (ingame or in intro) to temporary holding place
 		 * change that when setting stuff, copy back on clicking 'OK' */
 		memcpy(&_opt_mod_temp, GameOptions._opt_ptr, sizeof(GameOptions));
-		AllocateWindowDesc(&_game_difficulty_desc);
+		Window.AllocateWindowDesc(_game_difficulty_desc);
 	}
 
 	// virtual PositionMainToolbar function, calls the right one.
@@ -981,7 +981,7 @@ public class SettingsGui extends SettingsTables
 			SettingsGui::PatchesSelectionWndProc
 	);
 
-	void ShowPatchesSelection()
+	static void ShowPatchesSelection()
 	{
 		Window.DeleteWindowById(Window.WC_GAME_OPTIONS, 0);
 		Window.AllocateWindowDesc(_patches_selection_desc);

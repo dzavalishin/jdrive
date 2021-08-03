@@ -515,7 +515,7 @@ public class MiscGui {
 		}
 	}
 
-	void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
+	static void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
 	{
 		Window w;
 		ViewPort vp = null;
@@ -1662,7 +1662,7 @@ public class MiscGui {
 			MiscGui::SelectScenarioWndProc
 			);
 
-	void AskForNewGameToStart()
+	static void AskForNewGameToStart()
 	{
 		Window w;
 
