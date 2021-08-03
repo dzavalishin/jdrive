@@ -517,7 +517,7 @@ enum SpecialStrings {
 };
 */
 typedef void PlaceProc(TileIndex tile);
-
+/*
 enum {
 	SORT_ASCENDING  = 0,
 	SORT_DESCENDING = 1,
@@ -526,7 +526,7 @@ enum {
 };
 
 VARDEF byte _savegame_sort_order;
-
+*/
 //#define INVALID_STRING_ID 0xFFFF
 
 //enum {

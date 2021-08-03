@@ -36,19 +36,19 @@ public class BitOps {
 	//static  uint minu(uint a, uint b) { if (a <= b) return a; return b; }
 	//static  uint maxu(uint a, uint b) { if (a >= b) return a; return b; }
 
-	
+
 	public static long minu(int a, int b) 
 	{ 
 		long la = Integer.toUnsignedLong(a); long lb = Integer.toUnsignedLong(b); 
 		if (la <= lb) return la; return lb; 
 	}
-	
+
 	public static long maxu(int a, int b) 
 	{ 
 		long la = Integer.toUnsignedLong(a); long lb = Integer.toUnsignedLong(b); 
 		if (la >= lb) return la; return lb; 
 	}
-	
+
 	static public int clamp(int a, int min, int max)
 	{
 		if (a <= min) return min;
@@ -205,7 +205,7 @@ public class BitOps {
 		return Integer.compareUnsigned(a-min, max-min) < 0;
 		//return ((uint)((a)-(min)) < (uint)((max)-(min)))
 	}
-	
+
 	public static boolean IS_INT_INSIDE(int a, int min, int max)
 	{
 		return Integer.compareUnsigned(a-min, max-min) < 0;
@@ -214,7 +214,7 @@ public class BitOps {
 
 	public static boolean CHANCE16(int a, int b) { return Integer.compareUnsigned( Hal.Random(), (65536 * a) / b ) <= 0; }
 	//static void CHANCE16R(a,b,r) ((uint16)(r=Random()) <= (uint16)((65536 * a) / b))
-	
+
 	public static boolean CHANCE16I(int a, int b, int v) { return Integer.compareUnsigned( v, (65536 * a) / b ) <= 0; }
 
 
@@ -258,13 +258,13 @@ public class BitOps {
 	 * @note Assumes a byte has 8 bits
 	 */
 	//static void ROL(x, n) ((x) << (n) | (x) >> (sizeof(x) * 8 - (n)))
-	
+
 	//static void ROR(x, n) ((x) >> (n) | (x) << (sizeof(x) * 8 - (n)))
 	public static int ROR(int x, int n)
 	{
 		return (x >>> n) | (x << (Integer.BYTES * 8 - n));		
 	}
-	
+
 	/**
 	 * Return the smallest multiple of n equal or greater than x
 	 * @note n must be a power of 2
@@ -290,7 +290,18 @@ public class BitOps {
 		long prod = Math.abs( ((long)a) * ((long)b) );
 		return (int) (prod >>> shift);
 	}
-	
+
+	/** Only allow valid ascii-function codes. Filter special codes like BELL and
+	 * so on [we need a special filter here later]
+	 * @param key character to be checked
+	 * @return true or false depending if the character is printable/valid or not */
+	// XXX This filter stops certain crashes, but may be too restrictive.
+	public static boolean IsValidAsciiChar(byte key) {
+		return (key >= ' ' && key < 127) || (key >= 160 &&
+				key != 0xAA && key != 0xAC && key != 0xAD && key != 0xAF &&
+				key != 0xB5 && key != 0xB6 && key != 0xB7 && key != 0xB9);
+	}
+
 	/*
 	static  int BIGMULSS(int a, int b, int shift) {
 		return (int)(((long)(a) * (long)(b)) >> (shift));
@@ -304,5 +315,5 @@ public class BitOps {
 	static  long BIGMULS(int a, int b) {
 		return (int)(((long)(a) * (long)(b)));
 	}	
-	*/
+	 */
 }

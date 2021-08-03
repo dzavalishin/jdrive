@@ -281,7 +281,7 @@ public class Console {
 		{ // filter out unprintable characters
 			char *i;
 			for (i = _iconsole_buffer[ICON_BUFFER]; *i != '\0'; i++)
-				if (!IsValidAsciiChar((byte)*i)) *i = ' ';
+				if (!BitOps.IsValidAsciiChar((byte)*i)) *i = ' ';
 		}
 
 		memmove(&_iconsole_cbuffer[0], &_iconsole_cbuffer[1], sizeof(_iconsole_cbuffer[0]) * ICON_BUFFER);
@@ -938,7 +938,7 @@ public class Console {
 		if (cmdstr[0] == '#') return; // comments
 
 		for (cmdptr = cmdstr; *cmdptr != '\0'; cmdptr++) {
-			if (!IsValidAsciiChar(*cmdptr)) {
+			if (!BitOps.IsValidAsciiChar(*cmdptr)) {
 				IConsoleError("command contains malformed characters, aborting");
 				IConsolePrintF(_icolour_err, "ERROR: command was: '%s'", cmdstr);
 				return;
@@ -1139,7 +1139,7 @@ public class Console {
 				}
 				break;
 			default:
-				if (IsValidAsciiChar(e.keypress.ascii)) {
+				if (BitOps.IsValidAsciiChar(e.keypress.ascii)) {
 					_iconsole_scroll = ICON_BUFFER;
 					InsertTextBufferChar(&_iconsole_cmdline, e.keypress.ascii);
 					IConsoleResetHistoryPos();

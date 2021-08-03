@@ -13,7 +13,15 @@ public class MiscGui {
 
 	private static boolean _fios_path_changed;
 	private static boolean _savegame_sort_dirty;
+	private static int _savegame_sort_order;
 
+	private static final int SORT_ASCENDING  = 0;
+	private static final int SORT_DESCENDING = 1;
+	private static final int SORT_BY_DATE    = 0;
+	private static final int SORT_BY_NAME    = 2;
+
+
+	
 
 	static void LandInfoWndProc(Window w, WindowEvent e)
 	{
@@ -493,7 +501,7 @@ public class MiscGui {
 			break;
 
 		case WE_DESTROY:
-			SetRedErrorSquare(0);
+			ViewPort.SetRedErrorSquare(null);
 			Global._switch_mode_errorstr = Str.INVALID_STRING_ID;
 			break;
 
@@ -796,7 +804,7 @@ public class MiscGui {
 	 * @param delmode Type of deletion, either @Window.WKC_BACKSPACE or @Window.WKC_DELETE
 	 * @return Return true on successfull change of Textbuf, or false otherwise
 	 */
-	boolean DeleteTextBufferChar(Textbuf tb, int delmode)
+	static boolean DeleteTextBufferChar(Textbuf tb, int delmode)
 	{
 		if (delmode == Window.WKC_BACKSPACE && tb.caretpos != 0) {
 			tb.caretpos--;
@@ -816,7 +824,7 @@ public class MiscGui {
 	 * Delete every character in the textbuffer
 	 * @param tb @Textbuf buffer to be emptied
 	 */
-	void DeleteTextBufferAll(Textbuf tb)
+	static void DeleteTextBufferAll(Textbuf tb)
 	{
 		//memset(tb.buf, 0, tb.maxlength);
 		tb.buf[0] = 0;
@@ -831,7 +839,7 @@ public class MiscGui {
 	 * @param key Character to be inserted
 	 * @return Return true on successfull change of Textbuf, or false otherwise
 	 */
-	boolean InsertTextBufferChar(Textbuf tb, char key)
+	static boolean InsertTextBufferChar(Textbuf tb, char key)
 	{
 		final int charwidth = Gfx.GetCharacterWidth(key);
 		if (tb.length < tb.maxlength && (tb.maxwidth == 0 || tb.width + charwidth <= tb.maxwidth)) {
@@ -855,7 +863,7 @@ public class MiscGui {
 	 * @param navmode Direction in which navigation occurs @Window.WKC_LEFT, @Window.WKC_RIGHT, @Window.WKC_END, @Window.WKC_HOME
 	 * @return Return true on successfull change of Textbuf, or false otherwise
 	 */
-	boolean MoveTextBufferPos(Textbuf tb, int navmode)
+	static boolean MoveTextBufferPos(Textbuf tb, int navmode)
 	{
 		switch (navmode) {
 		case Window.WKC_LEFT:
@@ -932,7 +940,7 @@ public class MiscGui {
 				w.InvalidateWidget(wid);
 			break;
 		default:
-			if (IsValidAsciiChar(we.ascii)) {
+			if (BitOps.IsValidAsciiChar(we.ascii)) {
 				if (InsertTextBufferChar(w.as_querystr_d().text, (char) we.ascii))
 					w.InvalidateWidget(wid);
 			} else // key wasn't caught
@@ -1002,8 +1010,8 @@ public class MiscGui {
 		boolean [] closed = { false };
 		switch (e.event) {
 		case WE_CREATE:
-			Global._no_scroll = BitOps.RETSETBIT(Global._no_scroll, SCROLL_EDIT);
-			closed = false;
+			Global._no_scroll = BitOps.RETSETBIT(Global._no_scroll, Global.SCROLL_EDIT);
+			closed[0] = false;
 			break;
 
 		case WE_PAINT:
@@ -1181,7 +1189,7 @@ public class MiscGui {
 
 
 	// Colors for fios types
-	final byte _fios_colors[] = {13, 9, 9, 6, 5, 6, 5};
+	final static byte _fios_colors[] = {13, 9, 9, 6, 5, 6, 5};
 
 	void BuildFileList()
 	{
@@ -1472,7 +1480,7 @@ public class MiscGui {
 			MiscGui::SaveLoadDlgWndProc
 			);
 
-	static final WindowDesc  final _saveload_dialogs[] = {
+	static final WindowDesc _saveload_dialogs[] = {
 			_load_dialog_desc,
 			_load_dialog_scen_desc,
 			_save_dialog_desc,
@@ -1502,15 +1510,15 @@ public class MiscGui {
 		w.resize.height = w.height - 14 * 10; // Minimum of 10 items
 		w.click_state = BitOps.RETSETBIT(w.click_state, 7);
 		w.as_querystr_d().text.caret = false;
-		w.as_querystr_d().text.maxlength = lengthof(_edit_str_buf) - 1;
+		w.as_querystr_d().text.maxlength = _edit_str_buf.length() - 1;
 		w.as_querystr_d().text.maxwidth = 240;
-		w.as_querystr_d().text.buf = _edit_str_buf;
+		w.as_querystr_d().text.buf = _edit_str_buf.toCharArray();
 		UpdateTextBufferSize(w.as_querystr_d().text);
 
 		// pause is only used in single-player, non-editor mode, non-menu mode. It
 		// will be unpaused in the WindowEvents.WE_DESTROY event handler.
-		if (Global._game_mode != GameModes.GM_MENU && !_networking && Global._game_mode != GameModes.GM_EDITOR) {
-			Cmd.DoCommandP(0, 1, 0, null, Cmd.CMD_PAUSE);
+		if (Global._game_mode != GameModes.GM_MENU && !Global._networking && Global._game_mode != GameModes.GM_EDITOR) {
+			Cmd.DoCommandP(null, 1, 0, null, Cmd.CMD_PAUSE);
 		}
 
 		BuildFileList();
@@ -1555,8 +1563,8 @@ public class MiscGui {
 
 			w.DrawWindowWidgets();
 			Gfx.DoDrawString(
-					_savegame_sort_order & SORT_DESCENDING ? DOWNARROW : UPARROW,
-							_savegame_sort_order & SORT_BY_NAME ? w.widget.get(3).right - 9 : w.widget.get(4).right - 9,
+					0 != (_savegame_sort_order & SORT_DESCENDING) ? Gfx.DOWNARROW : Gfx.UPARROW,
+							0 != (_savegame_sort_order & SORT_BY_NAME) ? w.widget.get(3).right - 9 : w.widget.get(4).right - 9,
 									15, 16
 					);
 			Gfx.DrawString(4, 32, Str.STR_4010_GENERATE_RANDOM_NEW_GAME, 9);
@@ -1627,7 +1635,7 @@ public class MiscGui {
 		}
 	}
 
-	void SetFiosType(final byte fiostype)
+	void SetFiosType(final int fiostype)
 	{
 		switch (fiostype) {
 		case FIOS_TYPE_FILE:

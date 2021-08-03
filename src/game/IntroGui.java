@@ -1,0 +1,250 @@
+package game;
+
+public class IntroGui 
+{
+
+
+	//extern void SwitchMode(int new_mode);
+
+	static final Widget _select_game_widgets[] = {
+	new Widget(    Window.WWT_CAPTION, Window.RESIZE_NONE, 13,   0, 335,   0,  13, Str.STR_0307_OPENTTD,       Str.STR_NULL),
+	new Widget(     Window.WWT_IMGBTN, Window.RESIZE_NONE, 13,   0, 335,  14, 196, Str.STR_NULL,               Str.STR_NULL),
+	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12,  10, 167,  22,  33, Str.STR_0140_NEW_GAME,      Str.STR_02FB_START_A_NEW_GAME),
+	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12, 168, 325,  22,  33, Str.STR_0141_LOAD_GAME,     Str.STR_02FC_LOAD_A_SAVED_GAME),
+	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12,  10, 167,  40,  51, Str.STR_0220_CREATE_SCENARIO,Str.STR_02FE_CREATE_A_CUSTOMIZED_GAME),
+	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12, 168, 325,  40,  51, Str.STR_029A_PLAY_SCENARIO, Str.STR_0303_START_A_NEW_GAME_USING),
+	new Widget(    Window.WWT_PANEL_2, Window.RESIZE_NONE, 12,  10,  86,  59, 113, 0x1312,                 Str.STR_030E_SELECT_TEMPERATE_LANDSCAPE),
+	new Widget(    Window.WWT_PANEL_2, Window.RESIZE_NONE, 12,  90, 166,  59, 113, 0x1314,                 Str.STR_030F_SELECT_SUB_ARCTIC_LANDSCAPE),
+	new Widget(    Window.WWT_PANEL_2, Window.RESIZE_NONE, 12, 170, 246,  59, 113, 0x1316,                 Str.STR_0310_SELECT_SUB_TROPICAL_LANDSCAPE),
+	new Widget(    Window.WWT_PANEL_2, Window.RESIZE_NONE, 12, 250, 326,  59, 113, 0x1318,                 Str.STR_0311_SELECT_TOYLAND_LANDSCAPE),
+
+	new Widget(      Window.WWT_PANEL, Window.RESIZE_NONE, 12, 219, 254, 120, 131, Str.STR_NULL,               Str.STR_NULL),
+	new Widget(    Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12, 255, 266, 120, 131, Str.STR_0225,               Str.STR_NULL),
+	new Widget(      Window.WWT_PANEL, Window.RESIZE_NONE, 12, 279, 314, 120, 131, Str.STR_NULL,               Str.STR_NULL),
+	new Widget(    Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12, 315, 326, 120, 131, Str.STR_0225,               Str.STR_NULL),
+
+	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12,  10, 167, 138, 149, Str.STR_SINGLE_PLAYER,      Str.STR_02FF_SELECT_SINGLE_PLAYER_GAME),
+	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12, 168, 325, 138, 149, Str.STR_MULTIPLAYER,        Str.STR_0300_SELECT_MULTIPLAYER_GAME),
+	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12,  10, 167, 159, 170, Str.STR_0148_GAME_OPTIONS,  Str.STR_0301_DISPLAY_GAME_OPTIONS),
+	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12, 168, 325, 159, 170, Str.STR_01FE_DIFFICULTY,    Str.STR_0302_DISPLAY_DIFFICULTY_OPTIONS),
+	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12,  10, 167, 177, 188, Str.STR_CONFIG_PATCHES,     Str.STR_CONFIG_PATCHES_TIP),
+	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12, 168, 325, 177, 188, Str.STR_0304_QUIT,          Str.STR_0305_QUIT_OPENTTD),
+	};
+
+	extern void HandleOnEditText(WindowEvent e);
+	extern void HandleOnEditTextCancel();
+
+	static inline void CreateScenario() {_switch_mode = SM_EDITOR;}
+
+	static inline void SetNewLandscapeType(byte landscape)
+	{
+		GameOptions._opt_newgame.landscape = landscape;
+		InvalidateWindowClasses(Window.WC_SELEAcceptedCargo.CT_GAME);
+	}
+
+	static void SelectGameWndProc(Window w, WindowEvent e)
+	{
+		/* We do +/- 6 for the map_xy because 64 is 2^6, but it is the lowest available element */
+		static final StringID mapsizes[] = {Str.STR_64, Str.STR_128, Str.STR_256, Str.STR_512, Str.STR_1024, Str.STR_2048, INVALID_STRING_ID};
+
+		switch (e.event) {
+		case WindowEvents.WE_PAINT:
+			w.click_state = (w.click_state & ~(1 << 14) & ~(0xF << 6)) | (1 << (GameOptions._opt_newgame.landscape + 6)) | (1 << 14);
+			Global.SetDParam(0, Str.STR_6801_EASY + GameOptions._opt_newgame.diff_level);
+			DrawWindowWidgets(w);
+
+			DrawStringRightAligned(216, 121, Str.STR_MAPSIZE, 0);
+			DrawString(223, 121, mapsizes[Global._patches.map_x - 6], 0x10);
+			DrawString(270, 121, Str.STR_BY, 0);
+			DrawString(283, 121, mapsizes[Global._patches.map_y - 6], 0x10);
+			break;
+
+		case WindowEvents.WE_CLICK:
+			switch (e.click.widget) {
+			case 2: AskForNewGameToStart(); break;
+			case 3: ShowSaveLoadDialog(SLD_LOAD_GAME); break;
+			case 4: CreateScenario(); break;
+			case 5: ShowSaveLoadDialog(SLD_LOAD_SCENARIO); break;
+			case 6: case 7: case 8: case 9:
+				SetNewLandscapeType(e.click.widget - 6);
+				break;
+			case 10: case 11: /* Mapsize X */
+				ShowDropDownMenu(w, mapsizes, Global._patches.map_x - 6, 11, 0, 0);
+				break;
+			case 12: case 13: /* Mapsize Y */
+				ShowDropDownMenu(w, mapsizes, Global._patches.map_y - 6, 13, 0, 0);
+				break;
+			case 15:
+	#ifdef ENABLE_NETWORK
+				if (!_network_available) {
+					ShowErrorMessage(INVALID_STRING_ID, Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
+				} else
+					ShowNetworkGameWindow();
+	#else
+				ShowErrorMessage(INVALID_STRING_ID ,Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
+	#endif
+				break;
+			case 16: ShowGameOptions(); break;
+			case 17: ShowGameDifficulty(); break;
+			case 18: ShowPatchesSelection(); break;
+			case 19: AskExitGame(); break;
+			}
+			break;
+
+		case WindowEvents.WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
+		case WindowEvents.WE_ON_EDIT_TEXT_CANCEL: HandleOnEditTextCancel(); break;
+
+		case WindowEvents.WE_DROPDOWN_SELECT: /* Mapsize selection */
+			switch (e.dropdown.button) {
+				case 11: Global._patches.map_x = e.dropdown.index + 6; break;
+				case 13: Global._patches.map_y = e.dropdown.index + 6; break;
+			}
+			SetWindowDirty(w);
+			break;
+		}
+
+	}
+
+	static final WindowDesc _select_game_desc = {
+		Window.WDP_CENTER, Window.WDP_CENTER, 336, 197,
+		Window.WC_SELEAcceptedCargo.CT_GAME,0,
+		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
+		_select_game_widgets,
+		SelectGameWndProc
+	};
+
+	void ShowSelectGameWindow()
+	{
+		AllocateWindowDesc(&_select_game_desc);
+	}
+
+	void GenRandomNewGame(int rnd1, int rnd2)
+	{
+		_random_seeds[0][0] = rnd1;
+		_random_seeds[0][1] = rnd2;
+
+		SwitchMode(SM_NEWGAME);
+	}
+
+	void StartScenarioEditor(int rnd1, int rnd2)
+	{
+		_random_seeds[0][0] = rnd1;
+		_random_seeds[0][1] = rnd2;
+
+		SwitchMode(SM_START_SCENARIO);
+	}
+
+	static final Widget _ask_abandon_game_widgets[] = {
+	new Widget( Window.WWT_CLOSEBOX, Window.RESIZE_NONE,  4,   0,  10,   0,  13, Str.STR_00C5,      Str.STR_018B_CLOSE_WINDOW),
+	new Widget(  Window.WWT_CAPTION, Window.RESIZE_NONE,  4,  11, 179,   0,  13, Str.STR_00C7_QUIT, Str.STR_NULL),
+	new Widget(   Window.WWT_IMGBTN, Window.RESIZE_NONE,  4,   0, 179,  14,  91, 0x0,           Str.STR_NULL),
+	new Widget(  Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12,  25,  84,  72,  83, Str.STR_00C9_NO,   Str.STR_NULL),
+	new Widget(  Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12,  95, 154,  72,  83, Str.STR_00C8_YES,  Str.STR_NULL),
+	{  WIDGETS_END },
+	};
+
+	static void AskAbandonGameWndProc(Window  w, WindowEvent  e)
+	{
+		switch (e.event) {
+		case WindowEvents.WE_PAINT:
+			DrawWindowWidgets(w);
+	#if defined(_WIN32)
+			Global.SetDParam(0, Str.STR_0133_WINDOWS);
+	#elif defined(__APPLE__)
+			Global.SetDParam(0, Str.STR_0135_OSX);
+	#elif defined(__BEOS__)
+			Global.SetDParam(0, Str.STR_OSNAME_BEOS);
+	#elif defined(__MORPHOS__)
+			Global.SetDParam(0, Str.STR_OSNAME_MORPHOS);
+	#elif defined(__AMIGA__)
+			Global.SetDParam(0, Str.STR_OSNAME_AMIGAOS);
+	#elif defined(__OS2__)
+			Global.SetDParam(0, Str.STR_OSNAME_OS2);
+	#else
+			Global.SetDParam(0, Str.STR_0134_UNIX);
+	#endif
+			Gfx.DrawStringMultiCenter(90, 38, Str.STR_00CA_ARE_YOU_SURE_YOU_WANT_TO, 178);
+			return;
+
+		case WindowEvents.WE_CLICK:
+			switch (e.click.widget) {
+				case 3: DeleteWindow(w);   break;
+				case 4: _exit_game = true; break;
+			}
+			break;
+
+		case WindowEvents.WE_KEYPRESS: /* Exit game on pressing 'Enter' */
+			switch (e.keypress.keycode) {
+				case WKC_RETURN:
+				case WKC_NUM_ENTER:
+					_exit_game = true;
+					break;
+			}
+			break;
+		}
+	}
+
+	static final WindowDesc _ask_abandon_game_desc = {
+		Window.WDP_CENTER, Window.WDP_CENTER, 180, 92,
+		Window.WC_ASK_ABANDON_GAME,0,
+		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS,
+		_ask_abandon_game_widgets,
+		AskAbandonGameWndProc
+	};
+
+	void AskExitGame()
+	{
+		AllocateWindowDescFront(&_ask_abandon_game_desc, 0);
+	}
+
+
+	static final Widget _ask_quit_game_widgets[] = {
+	new Widget( Window.WWT_CLOSEBOX, Window.RESIZE_NONE,  4,   0,  10,   0,  13, Str.STR_00C5,           Str.STR_018B_CLOSE_WINDOW),
+	new Widget(  Window.WWT_CAPTION, Window.RESIZE_NONE,  4,  11, 179,   0,  13, Str.STR_0161_QUIT_GAME, Str.STR_NULL),
+	new Widget(   Window.WWT_IMGBTN, Window.RESIZE_NONE,  4,   0, 179,  14,  91, 0x0,                Str.STR_NULL),
+	new Widget(  Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12,  25,  84,  72,  83, Str.STR_00C9_NO,        Str.STR_NULL),
+	new Widget(  Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12,  95, 154,  72,  83, Str.STR_00C8_YES,       Str.STR_NULL),
+	{  WIDGETS_END },
+	};
+
+	static void AskQuitGameWndProc(Window  w, WindowEvent  e)
+	{
+		switch (e.event) {
+			case WindowEvents.WE_PAINT:
+				DrawWindowWidgets(w);
+				Gfx.DrawStringMultiCenter(
+					90, 38,
+					Global._game_mode != GameModes.GM_EDITOR ?
+						Str.STR_0160_ARE_YOU_SURE_YOU_WANT_TO : Str.STR_029B_ARE_YOU_SURE_YOU_WANT_TO,
+					178
+				);
+				break;
+
+			case WindowEvents.WE_CLICK:
+				switch (e.click.widget) {
+					case 3: DeleteWindow(w);        break;
+					case 4: _switch_mode = SM_MENU; break;
+				}
+				break;
+
+			case WindowEvents.WE_KEYPRESS: /* Return to main menu on pressing 'Enter' */
+				if (e.keypress.keycode == WKC_RETURN) _switch_mode = SM_MENU;
+				break;
+		}
+	}
+
+	static final WindowDesc _ask_quit_game_desc = {
+		Window.WDP_CENTER, Window.WDP_CENTER, 180, 92,
+		Window.WC_QUIT_GAME,0,
+		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_UNCLICK_BUTTONS,
+		_ask_quit_game_widgets,
+		AskQuitGameWndProc
+	};
+
+
+	void AskExitToGameMenu()
+	{
+		AllocateWindowDescFront(&_ask_quit_game_desc, 0);
+	}
+
+}
