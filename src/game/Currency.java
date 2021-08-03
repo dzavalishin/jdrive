@@ -5,7 +5,7 @@ public class Currency {
 	public static final int CF_NOEURO = 0;
 	public static final int CF_ISEURO = 1;
 	
-	final int _currency_string_list[] = {
+	final static int _currency_string_list[] = {
 		Str.STR_CURR_GBP,
 		Str.STR_CURR_USD,
 		Str.STR_CURR_EUR,

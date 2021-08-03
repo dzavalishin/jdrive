@@ -216,6 +216,7 @@ public class Global {
 	public static int _cleared_town_rating;
 	public static int _caret_timer;
 	public static Vehicle _place_clicked_vehicle;
+	public static int _num_resolutions = 1; // TODO _num_resolutions
 	
 	// Available aircraft types
 	public static int _avail_aircraft = 0; // TODO who assigns?
