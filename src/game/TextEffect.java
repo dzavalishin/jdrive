@@ -1,5 +1,7 @@
 package game;
 
+import game.struct.TextMessage;
+
 public class TextEffect 
 {
 
@@ -119,14 +121,14 @@ public class TextEffect
 					_cursor.draw_pos.x <= _textmessage_box_left + _textmessage_width &&
 					_cursor.draw_pos.y + _cursor.draw_size.y >= Hal._screen.height - _textmessage_box_bottom - _textmessage_box_y &&
 					_cursor.draw_pos.y <= Hal._screen.height - _textmessage_box_bottom) {
-					UndrawMouseCursor();
+					Gfx.UndrawMouseCursor();
 				}
 			}
 
 			_textmessage_visible = false;
 			// Put our 'shot' back to the screen
 			memcpy_pitch(
-					Hal._screen.dst_ptr + _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * _screen.pitch,
+					Hal._screen.dst_ptr + _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch,
 				_textmessage_backup,
 				_textmessage_width, _textmessage_box_y, _textmessage_width, Hal._screen.pitch);
 
@@ -205,10 +207,10 @@ public class TextEffect
 			if (_text_message_list[i].message == null) continue;
 
 			j++;
-			GfxFillRect(_textmessage_box_left, Hal._screen.height-_textmessage_box_bottom-j*13-2, _textmessage_box_left+_textmessage_width - 1, Hal._screen.height-_textmessage_box_bottom-j*13+10, /* black, but with some alpha */ 0x322 | Sprite.USE_COLORTABLE);
+			Gfx.GfxFillRect(_textmessage_box_left, Hal._screen.height-_textmessage_box_bottom-j*13-2, _textmessage_box_left+_textmessage_width - 1, Hal._screen.height-_textmessage_box_bottom-j*13+10, /* black, but with some alpha */ 0x322 | Sprite.USE_COLORTABLE);
 
-			DoDrawString(_text_message_list[i].message, _textmessage_box_left + 2, Hal._screen.height - _textmessage_box_bottom - j * 13 - 1, 0x10);
-			DoDrawString(_text_message_list[i].message, _textmessage_box_left + 3, Hal._screen.height - _textmessage_box_bottom - j * 13, _text_message_list[i].color);
+			Gfx.DoDrawString(_text_message_list[i].message, _textmessage_box_left + 2, Hal._screen.height - _textmessage_box_bottom - j * 13 - 1, 0x10);
+			Gfx.DoDrawString(_text_message_list[i].message, _textmessage_box_left + 3, Hal._screen.height - _textmessage_box_bottom - j * 13, _text_message_list[i].color);
 		}
 
 		// Make sure the data is updated next flush
@@ -220,7 +222,7 @@ public class TextEffect
 
 	private void MarkTextEffectAreaDirty()
 	{
-		MarkAllViewportsDirty(
+		ViewPort.MarkAllViewportsDirty(
 			x,
 			y - 1,
 			(right - x)*2 + x + 1,
@@ -235,11 +237,11 @@ public class TextEffect
 	
 	static void AddTextEffect(StringID msg, int x, int y, int duration)
 	{
-		TextEffect te;
+		TextEffect te = new TextEffect();
 		int w;
 		String buffer;
 
-		if (Global._game_mode == Global.GM_MENU)
+		if (Global._game_mode == GameModes.GM_MENU)
 			return;
 
 		/*
@@ -257,15 +259,15 @@ public class TextEffect
 		te.duration = duration;
 		te.y = y - 5;
 		te.bottom = y + 5;
-		te.params_1 = GetDParam(0);
-		te.params_2 = GetDParam(4);
+		te.params_1 = (int) Global.GetDParam(0);
+		te.params_2 = (int) Global.GetDParam(4);
 
-		buffer = GetString(msg);
-		w = GetStringWidth(buffer);
+		buffer = Global.GetString(msg);
+		w = Gfx.GetStringWidth(buffer);
 
 		te.x = x - (w >> 1);
 		te.right = x + (w >> 1) - 1;
-		MarkTextEffectAreaDirty(te);
+		te.MarkTextEffectAreaDirty();
 	}
 
 	private void MoveTextEffect()
@@ -320,7 +322,7 @@ public class TextEffect
 						dpi.left + dpi.width <= te.x ||
 						dpi.top + dpi.height <= te.y)
 							continue;
-				AddStringToDraw(te.x, te.y, te.string_id, te.params_1, te.params_2, 0);
+				ViewPort.AddStringToDraw(te.x, te.y, te.string_id, te.params_1, te.params_2, 0);
 			}
 		} else if (dpi.zoom == 1) {
 			//for (te = _text_effect_list; te != endof(_text_effect_list); te++) 
@@ -335,7 +337,7 @@ public class TextEffect
 						(dpi.left + dpi.width) <= te.x ||
 						(dpi.top + dpi.height) <= te.y)
 							continue;
-				AddStringToDraw(te.x, te.y, (StringID)(te.string_id-1), te.params_1, te.params_2, 0);
+				ViewPort.AddStringToDraw(te.x, te.y, new StringID(te.string_id.id-1), te.params_1, te.params_2, 0);
 			}
 
 		}
@@ -356,7 +358,7 @@ public class TextEffect
 				/* and clear last item */
 				//endof(_animated_tile_list)[-1] = 0;
 				_animated_tile_list[_animated_tile_list.length-1] = null;
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 				return;
 			}
 		}
@@ -372,7 +374,7 @@ public class TextEffect
 		{
 			if (tile == _animated_tile_list[i] || _animated_tile_list[i] == null) {
 				_animated_tile_list[i] = tile;
-				MarkTileDirtyByTile(tile);
+				tile.MarkTileDirtyByTile();
 				return true;
 			}
 		}
@@ -382,12 +384,11 @@ public class TextEffect
 
 	static void AnimateAnimatedTiles()
 	{
-		//final TileIndex ti;
 
 		//for (ti = _animated_tile_list; ti != endof(_animated_tile_list) && ti != null; ti++) {
 		for( TileIndex ti : _animated_tile_list)
-			AnimateTile(ti);
-		}
+			Landscape.AnimateTile(ti);
+		
 	}
 
 	static void InitializeAnimatedTiles()
@@ -395,6 +396,7 @@ public class TextEffect
 		//memset(_animated_tile_list, 0, sizeof(_animated_tile_list));
 	}
 
+	/*
 	static void SaveLoad_ANIT()
 	{
 		// In pre version 6, we has 16bit per tile, now we have 32bit per tile, convert it ;)
@@ -413,12 +415,4 @@ public class TextEffect
 	
 }
 
-
-
-class TextMessage 
-{
-	String message;
-	int color;
-	int end_date;
-}
 
