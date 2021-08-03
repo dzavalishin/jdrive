@@ -327,7 +327,7 @@ public class Vehicle implements IPoolItem
 		if(Global._patches.allow_municipal_airports) {
 			double tax = (income / 100.0) * 20; //_patches.municipal_airports_tax;
 
-			ShowCostOrIncomeAnimation(x_pos ,y_pos ,z_pos - 13, tax);
+			MiscGui.ShowCostOrIncomeAnimation(x_pos ,y_pos ,z_pos - 13, (int)tax);
 
 			switch(type) {
 
@@ -1432,12 +1432,12 @@ public class Vehicle implements IPoolItem
 	}
 
 	static ConsumerOfVehicle[] _vehicle_tick_procs = {
-			Train::Train_Tick,
-			RoadVeh_Tick,
+			TrainCmd::Train_Tick,
+			RoadVehCmd::RoadVeh_Tick,
 			Ship::Ship_Tick,
 			AirCraft::Aircraft_Tick,
 			Vehicle::EffectVehicle_Tick,
-			DisasterVehicle_Tick,
+			Vehicle::DisasterVehicle_Tick,
 	};
 
 	void CallVehicleTicks()
@@ -3098,15 +3098,17 @@ public class Vehicle implements IPoolItem
 		    in network the commands are queued before send, the second insert always
 		    fails in test mode. By bypassing the test-mode, that no longer is a problem. */
 		//for (i = 0; bak.order[i].type != Order.OT_NOTHING; i++)
+		int i = 0;
 		for( Order bo : bak.order)
 		{
 			//if (!Cmd.DoCommandP(0, v.index + (i << 16), PackOrder(bak.order[i]), null, CMD_INSERT_ORDER | CMD_NO_TEST_IF_IN_NETWORK))
-			if (!Cmd.DoCommandP(0, v.index + (i << 16), PackOrder(bo), null, Cmd.CMD_INSERT_ORDER | Cmd.CMD_NO_TEST_IF_IN_NETWORK))
+			if (!Cmd.DoCommandP(null, v.index + (i << 16), Order.PackOrder(bo), null, Cmd.CMD_INSERT_ORDER | Cmd.CMD_NO_TEST_IF_IN_NETWORK))
 				break;
+			i++;
 		}
 
 		/* Restore vehicle order-index and service interval */
-		Cmd.DoCommandP(0, v.index, bak.orderindex | (bak.service_interval << 16) , null, Cmd.CMD_RESTORE_ORDER_INDEX);
+		Cmd.DoCommandP(null, v.index, bak.orderindex.id | (bak.service_interval << 16) , null, Cmd.CMD_RESTORE_ORDER_INDEX);
 	}
 
 
@@ -3138,8 +3140,9 @@ public class Vehicle implements IPoolItem
 	//public void TriggerVehicle(VehicleTrigger trigger)
 	public void TriggerVehicle(int trigger)
 	{
-		VehicleGui.TriggerVehicle(this, trigger);
+		Engine.TriggerVehicle(this, trigger);
 	}
+	
 	public TileIndex GetStationTileForVehicle(Station st) {
 		return Station.GetStationTileForVehicle(this, st);
 	}

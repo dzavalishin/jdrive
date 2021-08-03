@@ -591,7 +591,7 @@ public class MiscGui {
 		ShowErrorMessage(Str.INVALID_STRING_ID, new StringID(msg), x, y);
 	}
 
-	void ShowCostOrIncomeAnimation(int x, int y, int z, int cost)
+	static void ShowCostOrIncomeAnimation(int x, int y, int z, int cost)
 	{
 		//StringID 
 		int msg;
