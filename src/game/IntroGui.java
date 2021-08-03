@@ -124,7 +124,7 @@ public class IntroGui
 		Global._random_seeds[0][0] = rnd1;
 		Global._random_seeds[0][1] = rnd2;
 
-		SwitchMode(SM_NEWGAME);
+		Main.SwitchMode(SwitchModes.SM_NEWGAME);
 	}
 
 	void StartScenarioEditor(int rnd1, int rnd2)
@@ -132,7 +132,7 @@ public class IntroGui
 		Global._random_seeds[0][0] = rnd1;
 		Global._random_seeds[0][1] = rnd2;
 
-		SwitchMode(SM_START_SCENARIO);
+		Main.SwitchMode(SwitchModes.SM_START_SCENARIO);
 	}
 
 	static final Widget _ask_abandon_game_widgets[] = {
@@ -208,12 +208,12 @@ public class IntroGui
 			case WE_CLICK:
 				switch (e.widget) {
 					case 3: w.DeleteWindow();        break;
-					case 4: Global._switch_mode = SM_MENU; break;
+					case 4: Global._switch_mode = SwitchModes.SM_MENU; break;
 				}
 				break;
 
 			case WE_KEYPRESS: /* Return to main menu on pressing 'Enter' */
-				if (e.keycode == Window.WKC_RETURN) Global._switch_mode = SM_MENU;
+				if (e.keycode == Window.WKC_RETURN) Global._switch_mode = SwitchModes.SM_MENU;
 				break;
 		}
 	}
