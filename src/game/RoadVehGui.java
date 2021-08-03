@@ -2,6 +2,7 @@ package game;
 
 import game.util.GameDate;
 import game.util.YearMonthDay;
+import game.util.wcustom.vehiclelist_d;
 
 import java.util.Iterator;
 
@@ -216,7 +217,7 @@ public class RoadVehGui
 		w.caption_color = (byte) v.owner.id;
 	}
 
-	void CcCloneRoadVeh(boolean success, int tile, int p1, int p2)
+	static void CcCloneRoadVeh(boolean success, int tile, int p1, int p2)
 	{
 		if (success) ShowRoadVehViewWindow(Vehicle.GetVehicle(Global._new_roadveh_id));
 	}
@@ -358,12 +359,12 @@ public class RoadVehGui
 		RoadVehGui::RoadVehViewWndProc
 	);
 
-	void ShowRoadVehViewWindow(final Vehicle  v)
+	static void ShowRoadVehViewWindow(final Vehicle  v)
 	{
-		Window  w = Window.AllocateWindowDescFront(&_roadveh_view_desc, v.index);
+		Window  w = Window.AllocateWindowDescFront(_roadveh_view_desc, v.index);
 
 		if (w != null) {
-			w.caption_color = v.owner;
+			w.caption_color = (byte) v.owner.id;
 			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number.n | (1 << 31), 0);
 		}
 	}
@@ -378,13 +379,13 @@ public class RoadVehGui
 		{
 			int count = 0;
 			int num = Global.NUM_ROAD_ENGINES;
-			final Engine  e = Engine.GetEngine(ROAD_ENGINES_INDEX);
-
+			int i = 0;
 			do {
-				if (BitOps.HASBIT(e.player_avail, Global._local_player))
+				final Engine e = Engine.GetEngine(Global.ROAD_ENGINES_INDEX + i++);
+				if (BitOps.HASBIT(e.player_avail, Global._local_player.id))
 					count++;
-			} while (++e,--num);
-			SetVScrollCount(w, count);
+			} while (--num > 0);
+			MiscGui.SetVScrollCount(w, count);
 		}
 
 		w.DrawWindowWidgets();
@@ -402,7 +403,7 @@ public class RoadVehGui
 			int selected_id = Engine.INVALID_ENGINE;
 
 			do {
-				if (BitOps.HASBIT(e.player_avail, Global._local_player)) {
+				if (BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
 					if (sel==0) selected_id = engine_id;
 					if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.cap, 0)) {
 						Gfx.DrawString(x+59, y+2, GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
@@ -420,7 +421,7 @@ public class RoadVehGui
 		}
 	}
 
-	void CcBuildRoadVeh(boolean success, TileIndex tile, int p1, int p2)
+	static void CcBuildRoadVeh(boolean success, TileIndex tile, int p1, int p2)
 	{
 		final Vehicle  v;
 
@@ -540,7 +541,7 @@ public class RoadVehGui
 		int num,x,y;
 		Depot depot;
 
-		tile = w.window_number.n;
+		tile = TileIndex.get( w.window_number.n );
 
 		/* setup disabled buttons */
 		w.disabled_state =
@@ -555,7 +556,7 @@ public class RoadVehGui
 				num++;
 		});
 
-		SetVScrollCount(w, (num + w.hscroll.cap - 1) / w.hscroll.cap);
+		MiscGui.SetVScrollCount(w, (num + w.hscroll.cap - 1) / w.hscroll.cap);
 
 		/* locate the depot struct */
 		depot = Depot.GetDepotByTile(tile);
@@ -578,7 +579,7 @@ public class RoadVehGui
 				Global.SetDParam(0, v.unitnumber.id);
 				Gfx.DrawString(x, y+2, (int)(v.max_age-366) >= v.age ? Str.STR_00E2 : Str.STR_00E3, 0);
 
-				Gfx.DrawSprite((v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_Vehicle.VEH_STOPPED : Sprite.SPR_FLAG_Vehicle.VEH_RUNNING, x + 16, y);
+				Gfx.DrawSprite((v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x + 16, y);
 
 				if ((x+=56) == 2 + 56 * w.hscroll.cap) {
 					x = 2;
@@ -633,19 +634,19 @@ public class RoadVehGui
 		if (mode > 0) return;
 
 		// share / copy orders
-		if (_thd.place_mode && mode <= 0) { Global._place_clicked_vehicle = v; return; }
+		if (_thd.place_mode && mode <= 0) { Global._place_clicked_vehicle = v[0]; return; }
 
 		switch (mode) {
 		case 0: // start dragging of vehicle
 			if (v[0] != null) {
-				w.as_traindepot_d().sel = v[0].index;
+				w.as_traindepot_d().sel = VehicleID.get( v[0].index );
 				w.SetWindowDirty();
 				SetObjectToPlaceWnd( Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner)) + GetRoadVehImage(v, 6), 4, w);
 			}
 			break;
 
 		case -1: // show info window
-			ShowRoadVehViewWindow(v);
+			ShowRoadVehViewWindow(v[0]);
 			break;
 
 		case -2: // click start/stop flag
@@ -667,7 +668,7 @@ public class RoadVehGui
 	{
 		if (v == null || v.type != Vehicle.VEH_Road) return;
 
-		Cmd.DoCommandP(w.window_number.n, v.index, Global._ctrl_pressed ? 1 : 0, CcCloneRoadVeh,
+		Cmd.DoCommandP(w.window_number.n, v.index, Global._ctrl_pressed ? 1 : 0, RoadVehGui::CcCloneRoadVeh,
 			Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_9009_CAN_T_BUILD_ROAD_VEHICLE)
 		);
 
@@ -701,11 +702,11 @@ public class RoadVehGui
 
 			case 8: /* clone button */
 				w.InvalidateWidget( 8);
-					TOGGLEBIT(w.click_state, 8);
+				w.click_state = BitOps.RETTOGGLEBIT(w.click_state, 8);
 
 					if (BitOps.HASBIT(w.click_state, 8)) {
 						Global._place_clicked_vehicle = null;
-						SetObjectToPlaceWnd(Sprite.SPR_CURSOR_CLONE, VHM_RECT, w);
+						ViewPort.SetObjectToPlaceWnd(Sprite.SPR_CURSOR_CLONE, VHM_RECT, w);
 					} else {
 						ViewPort.ResetObjectToPlace();
 					}
@@ -723,7 +724,7 @@ public class RoadVehGui
 		} break;
 
 		case WE_ABORT_PLACE_OBJ: {
-			CLRBIT(w.click_state, 8);
+			w.click_state = BitOps.RETCLRBIT(w.click_state, 8);
 			w.InvalidateWidget( 8);
 		} break;
 
@@ -751,10 +752,10 @@ public class RoadVehGui
 				w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
 				w.SetWindowDirty();
 
-				if (GetVehicleFromRoadDepotWndPt(w, e.dragdrop.pt.x, e.dragdrop.pt.y, v) == 0 &&
+				if (GetVehicleFromRoadDepotWndPt(w, e.pt.x, e.pt.y, v) == 0 &&
 						v != null &&
 						sel == v.index) {
-					ShowRoadVehViewWindow(v);
+					ShowRoadVehViewWindow(v[0]);
 				}
 			} break;
 
@@ -817,19 +818,19 @@ public class RoadVehGui
 		RoadVehGui::RoadDepotWndProc
 	);
 
-	void ShowRoadDepotWindow(TileIndex tile)
+	static void ShowRoadDepotWindow(TileIndex tile)
 	{
 		Window w;
 
 		w = Window.AllocateWindowDescFront(_road_depot_desc, tile.tile);
 		if (w!=null) {
-			w.caption_color = GetTileOwner(w.window_number.n);
+			w.caption_color = (byte) TileIndex.get(w.window_number.n).GetTileOwner().id;
 			w.hscroll.cap = 5;
 			w.vscroll.cap = 3;
 			w.resize.step_width = 56;
 			w.resize.step_height = 14;
 			w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
-			_backup_orders_tile = 0;
+			Global._backup_orders_tile = null;
 		}
 	}
 
@@ -847,27 +848,29 @@ public class RoadVehGui
 	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,     0,   124,   208,   219, Str.STR_8815_NEW_VEHICLES,		Str.STR_901B_BUILD_NEW_ROAD_VEHICLES),
 	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   125,   247,   208,   219, Str.STR_REPLACE_VEHICLES,    Str.STR_REPLACE_HELP),
 	new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,   248,   247,   208,   219, 0x0,											Str.STR_NULL),
-	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   248,   259,   208,   219, 0x0,											Str.STR_Window.RESIZE_BUTTON),
+	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   248,   259,   208,   219, 0x0,											Str.STR_RESIZE_BUTTON),
 	};
 
 	static final Widget _other_player_roadveh_widgets[] = {
 	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW),
 	new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   247,     0,    13, Str.STR_9001_ROAD_VEHICLES,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 	new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   248,   259,     0,    13, 0x0,                     Str.STR_STICKY_BUTTON),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    80,    14,    25, SRT_SORT_BY,							Str.STR_SORT_ORDER_TIP),
+	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    80,    14,    25, Str.SRT_SORT_BY,							Str.STR_SORT_ORDER_TIP),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    81,   235,    14,    25, 0x0,											Str.STR_SORT_CRITERIA_TIP),
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   236,   247,    14,    25, Str.STR_0225,								Str.STR_SORT_CRITERIA_TIP),
 	new Widget(      Window.WWT_PANEL,  Window.RESIZE_RIGHT,    14,   248,   259,    14,    25, 0x0,											Str.STR_NULL),
 	new Widget(     Window.WWT_MATRIX,     Window.RESIZE_RB,    14,     0,   247,    26,   207, 0x701,										Str.STR_901A_ROAD_VEHICLES_CLICK_ON),
 	new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   248,   259,    26,   207, 0x0,											Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
 	new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,     0,   247,   208,   219, 0x0,											Str.STR_NULL),
-	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   248,   259,   208,   219, 0x0,											Str.STR_Window.RESIZE_BUTTON),
+	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   248,   259,   208,   219, 0x0,											Str.STR_RESIZE_BUTTON),
 	};
 
 	static void PlayerRoadVehWndProc(Window w, WindowEvent e)
 	{
-		StationID station = BitOps.GB(w.window_number.n, 16, 16);
-		PlayerID owner = BitOps.GB(w.window_number.n, 0, 8);
+		//StationID 
+		int station = BitOps.GB(w.window_number.n, 16, 16);
+		//PlayerID 
+		int owner = BitOps.GB(w.window_number.n, 0, 8);
 		vehiclelist_d vl = w.as_vehiclelist_d();
 
 		switch(e.event) {
@@ -877,10 +880,10 @@ public class RoadVehGui
 			int max;
 			int i;
 
-			BuildVehicleList(vl, Vehicle.VEH_Road, owner, station);
-			SortVehicleList(vl);
+			VehicleGui.BuildVehicleList(vl, Vehicle.VEH_Road, owner, station);
+			VehicleGui.SortVehicleList(vl);
 
-			SetVScrollCount(w, vl.list_length);
+			MiscGui.SetVScrollCount(w, vl.list_length);
 
 			// disable 'Sort By' tooltip on Unsorted sorting criteria
 			if (vl.sort_type == SORT_BY_UNSORTED)
@@ -888,8 +891,8 @@ public class RoadVehGui
 
 			/* draw the widgets */
 			{
-				final Player p = GetPlayer(owner);
-				if (station == INVALID_STATION) {
+				final Player p = Player.GetPlayer(owner);
+				if (station == Station.INVALID_STATION) {
 					/* Company Name -- (###) Road vehicles */
 					Global.SetDParam(0, p.name_1);
 					Global.SetDParam(1, p.name_2);
@@ -906,7 +909,7 @@ public class RoadVehGui
 			/* draw sorting criteria string */
 			Gfx.DrawString(85, 15, _vehicle_sort_listing[vl.sort_type], 0x10);
 			/* draw arrow pointing up/down for ascending/descending sorting */
-			Gfx.DoDrawString(vl.flags & Vehicle.VL_DESC ? Gfx.DOWNARROW : Gfx.UPARROW, 69, 15, 0x10);
+			Gfx.DoDrawString(0 != (vl.flags & Vehicle.VL_DESC) ? Gfx.DOWNARROW : Gfx.UPARROW, 69, 15, 0x10);
 
 			max = Math.min(w.vscroll.pos + w.vscroll.cap, vl.list_length);
 			for (i = w.vscroll.pos; i < max; ++i) {
@@ -914,13 +917,13 @@ public class RoadVehGui
 				//StringID 
 				int str;
 
-				assert(v.type == Vehicle.VEH_Road && v.owner == owner);
+				assert(v.type == Vehicle.VEH_Road && v.owner.id == owner);
 
 				DrawRoadVehImage(v, x + 22, y + 6, Vehicle.INVALID_VEHICLE);
 				DrawVehicleProfitButton(v, x, y + 13);
 
-				Global.SetDParam(0, v.unitnumber);
-				if (Depot/IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) && (v.vehstatus & Vehicle.VS_HIDDEN))
+				Global.SetDParam(0, v.unitnumber.id);
+				if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) && (v.vehstatus & Vehicle.VS_HIDDEN))
 					str = Str.STR_021F;
 				else
 					str = v.age > v.max_age - 366 ? Str.STR_00E3 : Str.STR_00E2;
@@ -965,7 +968,7 @@ public class RoadVehGui
 
 					v	= Vehicle.GetVehicle(vl.sort_list[id_v].index);
 
-					assert(v.type == Vehicle.VEH_Road && v.owner == owner);
+					assert(v.type == Vehicle.VEH_Road && v.owner.id == owner);
 
 					ShowRoadVehViewWindow(v);
 				}
@@ -974,10 +977,10 @@ public class RoadVehGui
 			case 9: { /* Build new Vehicle */
 				TileIndex tile;
 
-				if (!w.IsWindowOfPrototype( _player_roadveh_widgets))
+				if (!Window.IsWindowOfPrototype(w, _player_roadveh_widgets))
 					break;
 
-				tile = _last_built_road_depot_tile;
+				tile = Depot._last_built_road_depot_tile;
 				do {
 					if (Depot.IsTileDepotType(tile, Global.TRANSPORT_ROAD) && tile.IsTileOwner( Global._local_player)) {
 						ShowRoadDepotWindow(tile);
@@ -985,13 +988,14 @@ public class RoadVehGui
 						return;
 					}
 
-					tile = TILE_MASK(tile + 1);
-				} while(tile != _last_built_road_depot_tile);
+					tile = tile.iadd(1);
+					tile.TILE_MASK();
+				} while(tile != Depot._last_built_road_depot_tile);
 
-				ShowBuildRoadVehWindow(0);
+				ShowBuildRoadVehWindow(null);
 			} break;
 			case 10: {
-				if (!w.IsWindowOfPrototype( _player_roadveh_widgets))
+				if (!Window.IsWindowOfPrototype( w, _player_roadveh_widgets))
 					break;
 
 				VehicleGui.ShowReplaceVehicleWindow(Vehicle.VEH_Road);
@@ -1009,7 +1013,7 @@ public class RoadVehGui
 
 				// enable 'Sort By' if a sorter criteria is chosen
 				if (vl.sort_type != SORT_BY_UNSORTED)
-					CLRBIT(w.disabled_state, 3);
+					w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 3);
 			}
 			w.SetWindowDirty();
 			break;
@@ -1018,7 +1022,7 @@ public class RoadVehGui
 			vl.sort_list = null;
 			vl.flags = Vehicle.VL_REBUILD | (_sorting.roadveh.order << (Vehicle.VL_DESC - 1));
 			vl.sort_type = _sorting.roadveh.criteria;
-			vl.resort_timer = DAY_TICKS * PERIODIC_RESORT_DAYS;
+			vl.resort_timer = Global.DAY_TICKS * PERIODIC_RESORT_DAYS;
 			break;
 
 		case WE_DESTROY:
@@ -1029,7 +1033,7 @@ public class RoadVehGui
 			if (--vl.resort_timer == 0) {
 				Global.DEBUG_misc(1, "Periodic resort road vehicles list player %d station %d",
 					owner, station);
-				vl.resort_timer = DAY_TICKS * PERIODIC_RESORT_DAYS;
+				vl.resort_timer = Global.DAY_TICKS * PERIODIC_RESORT_DAYS;
 				vl.flags |= Vehicle.VL_RESORT;
 				w.SetWindowDirty();
 			}

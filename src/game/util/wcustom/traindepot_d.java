@@ -1,7 +1,6 @@
 package game.util.wcustom;
 
-import game.VehicleID;
-
 public class  traindepot_d extends AbstractWinCustom {
-	public VehicleID sel;
+	//public VehicleID sel;
+	public int sel;
 }
