@@ -56,7 +56,7 @@ public class RoadVehGui
 	{
 		int image = GetRoadVehImage(v, 6);
 		int ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner));
-		if (v.vehstatus & Vehicle.VS_CRASHED) ormod = Sprite.PALETTE_CRASH;
+		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) ormod = Sprite.PALETTE_CRASH;
 		Gfx.DrawSprite(image | ormod, x + 14, y + 6);
 
 		if (v.index == selection) {
@@ -240,7 +240,7 @@ public class RoadVehGui
 				str = Str.STR_8863_CRASHED;
 			} else if (v.breakdown_ctr == 1) {
 				str = Str.STR_885C_BROKEN_DOWN;
-			} else if (v.vehstatus & Vehicle.VS_STOPPED) {
+			} else if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) {
 				str = Str.STR_8861_STOPPED;
 			} else {
 				switch (v.current_order.type) {
@@ -273,8 +273,8 @@ public class RoadVehGui
 			}
 
 			/* draw the flag plus orders */
-			Gfx.DrawSprite( 0 != (v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.widget.get(5].top + 1);
-			DrawStringCenteredTruncated(w.widget.get(5).left + 8, w.widget.get(5).right, w.widget.get(5).top + 1, str, 0);
+			Gfx.DrawSprite( 0 != (v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.widget.get(5).top + 1);
+			Gfx.DrawStringCenteredTruncated(w.widget.get(5).left + 8, w.widget.get(5).right, w.widget.get(5).top + 1, new StringID(str), 0);
 			w.DrawWindowViewport();
 		} break;
 
@@ -289,7 +289,7 @@ public class RoadVehGui
 				ViewPort.ScrollMainWindowTo(v.x_pos, v.y_pos);
 				break;
 			case 7: /* goto hangar */
-				Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_SEND_ROADVehicle.VEH_TO_DEPOT | Cmd.CMD_MSG(Str.STR_9018_CAN_T_SEND_VEHICLE_TO_DEPOT));
+				Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_SEND_ROADVEH_TO_DEPOT | Cmd.CMD_MSG(Str.STR_9018_CAN_T_SEND_VEHICLE_TO_DEPOT));
 				break;
 			case 8: /* turn around */
 				Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_TURN_ROADVEH | Cmd.CMD_MSG(Str.STR_9033_CAN_T_MAKE_VEHICLE_TURN));
@@ -302,7 +302,7 @@ public class RoadVehGui
 				break;
 			case 11: {
 				/* clone vehicle */
-				Cmd.DoCommandP(v.tile, v.index, Global._ctrl_pressed ? 1 : 0, CcCloneRoadVeh, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_9009_CAN_T_BUILD_ROAD_VEHICLE));
+				Cmd.DoCommandP(v.tile, v.index, Global._ctrl_pressed ? 1 : 0, RoadVehGui::CcCloneRoadVeh, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_9009_CAN_T_BUILD_ROAD_VEHICLE));
 				} break;
 			}
 		} break;
@@ -324,7 +324,7 @@ public class RoadVehGui
 				Vehicle v;
 				int h;
 				v = Vehicle.GetVehicle(w.window_number.n);
-				h = Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) && (v.vehstatus&Vehicle.VS_STOPPED) ? (1<< 7) : (1 << 11);
+				h = (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) && 0 != (v.vehstatus&Vehicle.VS_STOPPED)) ? (1<< 7) : (1 << 11);
 				if (h != w.hidden_state) {
 					w.hidden_state = h;
 					w.SetWindowDirty();
@@ -360,11 +360,11 @@ public class RoadVehGui
 
 	void ShowRoadVehViewWindow(final Vehicle  v)
 	{
-		Window  w = AllocateWindowDescFront(&_roadveh_view_desc, v.index);
+		Window  w = Window.AllocateWindowDescFront(&_roadveh_view_desc, v.index);
 
 		if (w != null) {
 			w.caption_color = v.owner;
-			AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number.n | (1 << 31), 0);
+			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number.n | (1 << 31), 0);
 		}
 	}
 
@@ -391,7 +391,7 @@ public class RoadVehGui
 
 		{
 			int num = Global.NUM_ROAD_ENGINES;
-			final Engine  e = Engine.GetEngine(ROAD_ENGINES_INDEX);
+			final Engine  e = Engine.GetEngine(Global.ROAD_ENGINES_INDEX);
 			int x = 1;
 			int y = 15;
 			int sel = w.as_buildtrain_d().sel_index;
@@ -454,7 +454,7 @@ public class RoadVehGui
 			case 5: { /* build */
 				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
 				if (sel_eng.id != Engine.INVALID_ENGINE)
-					Cmd.DoCommandP(w.window_number.n, sel_eng, 0, RoadVehGui::CcBuildRoadVeh, Cmd.CMD_BUILD_ROAD_VEH | Cmd.CMD_MSG(Str.STR_9009_CAN_T_BUILD_ROAD_VEHICLE));
+					Cmd.DoCommandP(w.window_number.n, sel_eng.id, 0, RoadVehGui::CcBuildRoadVeh, Cmd.CMD_BUILD_ROAD_VEH | Cmd.CMD_MSG(Str.STR_9009_CAN_T_BUILD_ROAD_VEHICLE));
 			} break;
 
 			case 6: { /* rename */
@@ -558,7 +558,7 @@ public class RoadVehGui
 		SetVScrollCount(w, (num + w.hscroll.cap - 1) / w.hscroll.cap);
 
 		/* locate the depot struct */
-		depot = GetDepotByTile(tile);
+		depot = Depot.GetDepotByTile(tile);
 		assert(depot != null);
 
 		Global.SetDParam(0, depot.town_index);
