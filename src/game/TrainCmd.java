@@ -3806,7 +3806,7 @@ public class TrainCmd extends TrainTables
 		return cost;
 	}
 
-	void OnNewDay_Train(Vehicle v)
+	public static void OnNewDay_Train(Vehicle v)
 	{
 		if ((++v.day_counter & 7) == 0)
 			v.DecreaseVehicleValue();

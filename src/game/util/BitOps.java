@@ -274,12 +274,29 @@ public class BitOps {
 		return (x + n - 1) & ~(n - 1); 
 	}
 
+	/* orig impl below
 	// TODO check me
 	public static int FindFirstBit(int a) {
 		//return Integer.numberOfTrailingZeros(a)+1;
 		return 32-Integer.numberOfLeadingZeros(a);
-	}
+	} */
 
+	int FindFirstBit(int value)
+	{
+		// This is much faster than the one that was before here.
+		//  Created by Darkvater.. blame him if it is wrong ;)
+		// Btw, the macro FINDFIRSTBIT is better to use when your value is
+		//  not more than 128.
+		byte i = 0;
+		if(0!=(value & 0xffff0000)) { value >>= 16; i += 16; }
+		if(0!=(value & 0x0000ff00)) { value >>= 8;  i += 8; }
+		if(0!=(value & 0x000000f0)) { value >>= 4;  i += 4; }
+		if(0!=(value & 0x0000000c)) { value >>= 2;  i += 2; }
+		if(0!=(value & 0x00000002)) { i += 1; }
+		return i;
+	}
+	
+	
 	public static int FindFirstBit(long a) {
 		//return Integer.numberOfTrailingZeros(a)+1;
 		return 32-Long.numberOfLeadingZeros(a);
@@ -302,6 +319,8 @@ public class BitOps {
 				key != 0xB5 && key != 0xB6 && key != 0xB7 && key != 0xB9);
 	}
 
+	
+	
 	/*
 	static  int BIGMULSS(int a, int b, int shift) {
 		return (int)(((long)(a) * (long)(b)) >> (shift));

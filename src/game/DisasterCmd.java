@@ -680,7 +680,7 @@ public class DisasterCmd extends DisasterTables
 	}
 
 
-	void OnNewDay_DisasterVehicle(Vehicle v)
+	public static void OnNewDay_DisasterVehicle(Vehicle v)
 	{
 		// not used
 	}

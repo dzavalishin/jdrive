@@ -1,3 +1,5 @@
+#if 0
+
 /* $Id: landscape_const.h 2701 2005-07-24 14:12:37Z tron $ */
 
 static const LandscapePredefVar _landscape_predef_var[4] = {

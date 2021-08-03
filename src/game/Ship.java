@@ -112,7 +112,7 @@ public class Ship {
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 	}
 
-	void OnNewDay_Ship(Vehicle v)
+	public static void OnNewDay_Ship(Vehicle v)
 	{
 		int cost;
 

@@ -764,7 +764,7 @@ public class Vehicle implements IPoolItem
 		}
 	}; 
 
-	private final static MemoryPool<Vehicle> _vehicle_pool = new MemoryPool<Vehicle>(factory);
+	final static MemoryPool<Vehicle> _vehicle_pool = new MemoryPool<Vehicle>(factory);
 	private final static VehicleHash _hash = new VehicleHash(); 
 
 	private void UpdateVehiclePosHash(int x, int y) { _hash.put(x,y, this); }

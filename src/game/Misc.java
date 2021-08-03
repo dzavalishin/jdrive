@@ -1,98 +1,67 @@
 package game;
 
-public class Misc {
+import java.util.function.Consumer;
 
-	//extern void StartupEconomy();
+import game.tables.MiscTables;
 
-	char _name_array[512][32];
+public class Misc extends MiscTables 
+{
 
-	#ifndef MERSENNE_TWISTER
-
-	/*
-	int Random()
-	{
-
-	int s;
-	int t;
-
-	//#ifdef RANDOM_DEBUG
-	//	if (_networking && (DEREF_CLIENT(0).status != STATUS_INACTIVE || !_network_server))
-	//		printf("Random [%d/%d] %s:%d\n",_frame_counter, Global._current_player, file, line);
-	//#endif
-
-		s = _random_seeds[0][0];
-		t = _random_seeds[0][1];
-		_random_seeds[0][0] = s + ROR(t ^ 0x1234567F, 7) + 1;
-		return _random_seeds[0][1] = ROR(s, 3) - 1;
-	}
-	#endif // MERSENNE_TWISTER
-	*/
+	//char _name_array[512][32];
 
 
-
-
-
-
-	class LandscapePredefVar {
-		StringID names[NUM_CARGO];
-		byte weights[NUM_CARGO];
-		StringID sprites[NUM_CARGO];
-
-		int initial_cargo_payment[NUM_CARGO];
-		byte transit_days_table_1[NUM_CARGO];
-		byte transit_days_table_2[NUM_CARGO];
-
-		byte railwagon_by_cargo[3][NUM_CARGO];
-
-		byte road_veh_by_cargo_start[NUM_CARGO];
-		byte road_veh_by_cargo_count[NUM_CARGO];
-	} 
-
+	static final int NUM_CARGO = AcceptedCargo.NUM_CARGO;
 
 
 
 	// Calculate finalants that depend on the landscape type.
 	void InitializeLandscapeVariables(boolean only_finalants)
 	{
-		final LandscapePredefVar *lpd;
+		final LandscapePredefVar lpd;
 		int i;
-		StringID str;
+		//StringID 
+		int str;
 
-		lpd = &_landscape_predef_var[GameOptions._opt.landscape];
+		lpd = _landscape_predef_var[GameOptions._opt.landscape];
 
-		memcpy(_cargoc.ai_railwagon, lpd.railwagon_by_cargo, sizeof(lpd.railwagon_by_cargo));
-		memcpy(_cargoc.ai_roadveh_start, lpd.road_veh_by_cargo_start,sizeof(lpd.road_veh_by_cargo_start));
-		memcpy(_cargoc.ai_roadveh_count, lpd.road_veh_by_cargo_count,sizeof(lpd.road_veh_by_cargo_count));
+		//memcpy(Global._cargoc.ai_railwagon, lpd.railwagon_by_cargo, sizeof(lpd.railwagon_by_cargo));
+		//System.arraycopy(lpd.railwagon_by_cargo, 0, Global._cargoc.ai_railwagon, 0, );
+		//memcpy(Global._cargoc.ai_roadveh_start, lpd.road_veh_by_cargo_start,sizeof(lpd.road_veh_by_cargo_start));
+		//memcpy(Global._cargoc.ai_roadveh_count, lpd.road_veh_by_cargo_count,sizeof(lpd.road_veh_by_cargo_count));
 
+		Global._cargoc.ai_railwagon = lpd.railwagon_by_cargo; // TODO real copy?
+		Global._cargoc.ai_roadveh_start = lpd.road_veh_by_cargo_start;
+		Global._cargoc.ai_roadveh_count = lpd.road_veh_by_cargo_count;
+		
 		for(i=0; i!=NUM_CARGO; i++) {
-			_cargoc.sprites[i] = lpd.sprites[i];
+			Global._cargoc.sprites[i] = lpd.sprites[i];
 
 			str = lpd.names[i];
-			_cargoc.names_s[i] = str;
-			_cargoc.names_long[i] = (str += 0x40);
-			_cargoc.names_short[i] = (str += 0x20);
-			_cargoc.weights[i] = lpd.weights[i];
+			Global._cargoc.names_s[i] = str;
+			Global._cargoc.names_long[i] = (str += 0x40);
+			Global._cargoc.names_short[i] = (str += 0x20);
+			Global._cargoc.weights[i] = lpd.weights[i];
 
 			if (!only_finalants) {
-				_cargo_payment_rates[i] = lpd.initial_cargo_payment[i];
-				_cargo_payment_rates_frac[i] = 0;
+				Global._cargo_payment_rates[i] = lpd.initial_cargo_payment[i];
+				Global._cargo_payment_rates_frac[i] = 0;
 			}
 
-			_cargoc.transit_days_1[i] = lpd.transit_days_table_1[i];
-			_cargoc.transit_days_2[i] = lpd.transit_days_table_2[i];
+			Global._cargoc.transit_days_1[i] = lpd.transit_days_table_1[i];
+			Global._cargoc.transit_days_2[i] = lpd.transit_days_table_2[i];
 		}
 	}
 
+	static void OnNewDay_EffectVehicle(Vehicle v) { /* empty */ }
 
-	typedef void OnNewVehicleDayProc(Vehicle v);
 
-	static OnNewVehicleDayProc * _on_new_vehicle_day_proc[] = {
-		OnNewDay_Train,
-		OnNewDay_RoadVeh,
-		OnNewDay_Ship,
-		OnNewDay_Aircraft,
-		OnNewDay_EffectVehicle,
-		OnNewDay_DisasterVehicle,
+	static OnNewVehicleDayProc  _on_new_vehicle_day_proc[] = {
+		TrainCmd::OnNewDay_Train,
+		RoadVehCmd::OnNewDay_RoadVeh,
+		Ship::OnNewDay_Ship,
+		AirCraft::OnNewDay_Aircraft,
+		Misc::OnNewDay_EffectVehicle,
+		DisasterCmd::OnNewDay_DisasterVehicle,
 	};
 
 
@@ -110,35 +79,21 @@ public class Misc {
 	 */
 	static void RunVehicleDayProc(int daytick)
 	{
-		int i, total = _vehicle_pool.total_items;
+		int i, total = Vehicle._vehicle_pool.total_items();
 
-		for (i = daytick; i < total; i += DAY_TICKS) {
-			Vehicle v = GetVehicle(i);
+		for (i = daytick; i < total; i += Global.DAY_TICKS) {
+			Vehicle v = Vehicle.GetVehicle(i);
 			if (v.type != 0)
-				_on_new_vehicle_day_proc[v.type - 0x10](v);
+				_on_new_vehicle_day_proc[v.type - 0x10].accept(v);
 		}
 	}
 
-	int FindFirstBit(int value)
-	{
-		// This is much faster than the one that was before here.
-		//  Created by Darkvater.. blame him if it is wrong ;)
-		// Btw, the macro FINDFIRSTBIT is better to use when your value is
-		//  not more than 128.
-		byte i = 0;
-		if (value & 0xffff0000) { value >>= 16; i += 16; }
-		if (value & 0x0000ff00) { value >>= 8;  i += 8; }
-		if (value & 0x000000f0) { value >>= 4;  i += 4; }
-		if (value & 0x0000000c) { value >>= 2;  i += 2; }
-		if (value & 0x00000002) { i += 1; }
-		return i;
-	}
 
 	//!We're writing an own sort algorithm here, as
 	//!qsort isn't stable
 	//!Since the number of elements will be low, a
 	//!simple bubble sort will have to do :)
-
+	/*
 	void bubblesort(void *base, size_t nmemb, size_t size, int(*compar)(final void *, final void *))
 	{
 		int i,k;
@@ -163,7 +118,7 @@ public class Misc {
 		free(buffer);
 		buffer = null;
 	}
-
+	*/
 	
 	/*
 	
@@ -539,3 +494,11 @@ public class Misc {
 	*/
 	
 }
+
+
+//typedef void OnNewVehicleDayProc(Vehicle v);
+
+@FunctionalInterface
+interface OnNewVehicleDayProc extends Consumer<Vehicle> {}
+
+

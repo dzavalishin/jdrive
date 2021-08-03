@@ -583,7 +583,7 @@ public class AirCraft {
 		}
 	}
 
-	void OnNewDay_Aircraft(Vehicle v)
+	public static void OnNewDay_Aircraft(Vehicle v)
 	{
 		int cost;
 

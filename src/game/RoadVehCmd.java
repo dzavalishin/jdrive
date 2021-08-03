@@ -1558,7 +1558,7 @@ class RoadDriveEntry {
 		}
 	}
 
-	void OnNewDay_RoadVeh(Vehicle v)
+	public static void OnNewDay_RoadVeh(Vehicle v)
 	{
 		int cost;
 		Station st;
