@@ -3,28 +3,6 @@ package game;
 public class SettingsGui 
 {
 
-	/* $Id: settings_gui.c 3323 2005-12-20 21:24:50Z Darkvater $ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	static int _difficulty_click_a;
 	static int _difficulty_click_b;
 	static byte _difficulty_timeout;
@@ -32,13 +10,13 @@ public class SettingsGui
 	static final StringID _distances_dropdown[] = {
 		Str.STR_0139_IMPERIAL_MILES,
 		Str.STR_013A_METRIC_KILOMETERS,
-		INVALID_STRING_ID
+		Str.INVALID_STRING_ID.id
 	};
 
 	static final StringID _driveside_dropdown[] = {
 		Str.STR_02E9_DRIVE_ON_LEFT,
 		Str.STR_02EA_DRIVE_ON_RIGHT,
-		INVALID_STRING_ID
+		Str.INVALID_STRING_ID.id
 	};
 
 	static final StringID _autosave_dropdown[] = {
@@ -47,13 +25,13 @@ public class SettingsGui
 		Str.STR_02F8_EVERY_3_MONTHS,
 		Str.STR_02F9_EVERY_6_MONTHS,
 		Str.STR_02FA_EVERY_12_MONTHS,
-		INVALID_STRING_ID,
+		Str.INVALID_STRING_ID.id,
 	};
 
 	static final StringID _designnames_dropdown[] = {
 		Str.STR_02BE_DEFAULT,
 		Str.STR_02BF_CUSTOM,
-		INVALID_STRING_ID
+		Str.INVALID_STRING_ID.id
 	};
 
 	static StringID *BuildDynamicDropdown(StringID base, int num)
@@ -61,7 +39,7 @@ public class SettingsGui
 		static StringID buf[32 + 1];
 		StringID *p = buf;
 		while (--num>=0) *p++ = base++;
-		*p = INVALID_STRING_ID;
+		*p = Str.INVALID_STRING_ID.id;
 		return buf;
 	}
 
@@ -566,14 +544,14 @@ public class SettingsGui
 
 	static int AiNew_PatchActive_Warning(int p1)
 	{
-		if (p1 == 1) ShowErrorMessage(INVALID_STRING_ID, TETileTypes.MP_AI_ACTIVATED, 0, 0);
+		if (p1 == 1) ShowErrorMessage(Str.INVALID_STRING_ID.id, TETileTypes.MP_AI_ACTIVATED, 0, 0);
 		return 0;
 	}
 
 	static int Ai_In_Multiplayer_Warning(int p1)
 	{
 		if (p1 == 1) {
-			ShowErrorMessage(INVALID_STRING_ID, TETileTypes.MP_AI_MULTIPLAYER, 0, 0);
+			ShowErrorMessage(Str.INVALID_STRING_ID.id, TETileTypes.MP_AI_MULTIPLAYER, 0, 0);
 			Global._patches.ainew_active = true;
 		}
 		return 0;
@@ -624,7 +602,7 @@ public class SettingsGui
 		}
 
 		if (!warning)
-			ShowErrorMessage(INVALID_STRING_ID, Str.STR_CONFIG_PATCHES_SERVICE_INTERVAL_INCOMPATIBLE, 0, 0);
+			ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.STR_CONFIG_PATCHES_SERVICE_INTERVAL_INCOMPATIBLE, 0, 0);
 
 		return InValidateDetailsWindow(0);
 	}
