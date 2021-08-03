@@ -2,27 +2,23 @@ package game;
 
 public class Misc {
 
-	extern void StartupEconomy();
+	//extern void StartupEconomy();
 
 	char _name_array[512][32];
 
 	#ifndef MERSENNE_TWISTER
 
-	#ifdef RANDOM_DEBUG
-
-	int DoHal.Random(int line, final char *file)
-	#else // RANDOM_DEBUG
-	int Hal.Random()
-	#endif // RANDOM_DEBUG
+	/*
+	int Random()
 	{
 
 	int s;
 	int t;
 
-	#ifdef RANDOM_DEBUG
-		if (_networking && (DEREF_CLIENT(0).status != STATUS_INACTIVE || !_network_server))
-			printf("Random [%d/%d] %s:%d\n",_frame_counter, Global._current_player, file, line);
-	#endif
+	//#ifdef RANDOM_DEBUG
+	//	if (_networking && (DEREF_CLIENT(0).status != STATUS_INACTIVE || !_network_server))
+	//		printf("Random [%d/%d] %s:%d\n",_frame_counter, Global._current_player, file, line);
+	//#endif
 
 		s = _random_seeds[0][0];
 		t = _random_seeds[0][1];
@@ -30,44 +26,10 @@ public class Misc {
 		return _random_seeds[0][1] = ROR(s, 3) - 1;
 	}
 	#endif // MERSENNE_TWISTER
-
-	#if defined(RANDOM_DEBUG) && !defined(MERSENNE_TWISTER)
-	int DoRandomRange(int max, int line, final char *file)
-	{
-		return BitOps.GB(DoHal.Random(line, file), 0, 16) * max >> 16;
-	}
-	#else
-	int RandomRange(int max)
-	{
-		return BitOps.GB(Hal.Random(), 0, 16) * max >> 16;
-	}
-	#endif
-
-	/*
-	int InteractiveHal.Random()
-	{
-		int t = _random_seeds[1][1];
-		int s = _random_seeds[1][0];
-		_random_seeds[1][0] = s + ROR(t ^ 0x1234567F, 7) + 1;
-		return _random_seeds[1][1] = ROR(s, 3) - 1;
-	}
-
-	int InteractiveRandomRange(int max)
-	{
-		return BitOps.GB(InteractiveHal.Random(), 0, 16) * max >> 16;
-	}
-
-	void SetDate(int date)
-	{
-		YearMonthDay ymd;
-		ConvertDayToYMD(&ymd, _date = date);
-		_cur_year = ymd.year;
-		_cur_month = ymd.month;
-	#ifdef ENABLE_NETWORK
-		_network_last_advertise_date = 0;
-	#endif /* ENABLE_NETWORK */
-	}
 	*/
+
+
+
 
 
 
@@ -84,7 +46,7 @@ public class Misc {
 
 		byte road_veh_by_cargo_start[NUM_CARGO];
 		byte road_veh_by_cargo_count[NUM_CARGO];
-	} LandscapePredefVar;
+	} 
 
 
 
@@ -122,13 +84,6 @@ public class Misc {
 	}
 
 
-	void OnNewDay_Train(Vehicle v);
-	void OnNewDay_RoadVeh(Vehicle v);
-	void OnNewDay_Aircraft(Vehicle v);
-	void OnNewDay_Ship(Vehicle v);
-	static void OnNewDay_EffectVehicle(Vehicle v) { /* empty */ }
-	void OnNewDay_DisasterVehicle(Vehicle v);
-
 	typedef void OnNewVehicleDayProc(Vehicle v);
 
 	static OnNewVehicleDayProc * _on_new_vehicle_day_proc[] = {
@@ -140,21 +95,6 @@ public class Misc {
 		OnNewDay_DisasterVehicle,
 	};
 
-	void EnginesDailyLoop();
-	void DisasterDailyLoop();
-	void PlayersMonthlyLoop();
-	void EnginesMonthlyLoop();
-	void TownsMonthlyLoop();
-	void IndustryMonthlyLoop();
-	void StationMonthlyLoop();
-
-	void PlayersYearlyLoop();
-	void TrainsYearlyLoop();
-	void RoadVehiclesYearlyLoop();
-	void AircraftYearlyLoop();
-	void ShipsYearlyLoop();
-
-	void WaypointsDailyLoop();
 
 
 	static final int _autosave_months[] = {
@@ -179,103 +119,6 @@ public class Misc {
 		}
 	}
 
-	/*
-	void IncreaseDate()
-	{
-		YearMonthDay ymd;
-
-		if (Global._game_mode == GameModes.GM_MENU) {
-			_tick_counter++;
-			return;
-		}
-
-		RunVehicleDayProc(_date_fract);
-
-		// increase day, and check if a new day is there? 
-		_tick_counter++;
-
-		_date_fract++;
-		if (_date_fract < (DAY_TICKS*Global._patches.day_length))
-			return;
-		_date_fract = 0;
-
-		// yeah, increse day counter and call various daily loops 
-		_date++;
-
-		TextMessageDailyLoop();
-
-		DisasterDailyLoop();
-		WaypointsDailyLoop();
-
-		if (Global._game_mode != GameModes.GM_MENU) {
-			InvalidateWindowWidget(Window.WC_STATUS_BAR, 0, 0);
-			EnginesDailyLoop();
-		}
-
-		// check if we entered a new month? 
-		ConvertDayToYMD(&ymd, _date);
-		if ((byte)ymd.month == _cur_month)
-			return;
-		_cur_month = ymd.month;
-
-		// yes, call various monthly loops 
-		if (Global._game_mode != GameModes.GM_MENU) {
-			if (BitOps.HASBIT(_autosave_months[GameOptions._opt.autosave], _cur_month)) {
-				_do_autosave = true;
-				RedrawAutosave();
-			}
-
-			PlayersMonthlyLoop();
-			EnginesMonthlyLoop();
-			TownsMonthlyLoop();
-			IndustryMonthlyLoop();
-			StationMonthlyLoop();
-	#ifdef ENABLE_NETWORK
-			if (_network_server)
-				NetworkServerMonthlyLoop();
-	#endif //* ENABLE_NETWORK 
-		}
-
-		//* check if we entered a new year? 
-		if ((byte)ymd.year == _cur_year)
-			return;
-		_cur_year = ymd.year;
-
-		//* yes, call various yearly loops 
-
-		PlayersYearlyLoop();
-		TrainsYearlyLoop();
-		RoadVehiclesYearlyLoop();
-		AircraftYearlyLoop();
-		ShipsYearlyLoop();
-	#ifdef ENABLE_NETWORK
-		if (_network_server)
-			NetworkServerYearlyLoop();
-	#endif // ENABLE_NETWORK 
-
-		/// check if we reached end of the game (31 dec 2050) 
-		if (_cur_year == Global._patches.ending_date - MAX_YEAR_BEGIN_REAL) {
-				ShowEndGameChart();
-		// check if we reached 2090 (MAX_YEAR_END_REAL), that's the maximum year. 
-		} else if (_cur_year == (MAX_YEAR_END + 1)) {
-			Vehicle v;
-			_cur_year = MAX_YEAR_END;
-			_date = 62093;
-			FOR_ALL_VEHICLES(v) {
-				v.date_of_last_service -= 365; // 1 year is 365 days long
-			}
-
-			//* Because the _date wraps here, and text-messages expire by game-days, we have to clean out
-			//*  all of them if the date is set back, else those messages will hang for ever 
-			InitTextMessage();
-		}
-
-		if (Global._patches.auto_euro)
-			CheckSwitchToEuro();
-
-		// XXX: check if year 2050 was reached 
-	}
-	*/
 	int FindFirstBit(int value)
 	{
 		// This is much faster than the one that was before here.
@@ -321,6 +164,9 @@ public class Misc {
 		buffer = null;
 	}
 
+	
+	/*
+	
 	static void Save_NAME()
 	{
 		int i;
@@ -499,7 +345,7 @@ public class Misc {
 			int j;
 
 			SlArray(buf, lengthof(buf),
-				/* In those versions the m2 was 8 bits */
+				// In those versions the m2 was 8 bits 
 				CheckSavegameVersion(5) ? SLE_FILE_U8 | SLE_VAR_U16 : SLE_UINT16
 			);
 			for (j = 0; j != lengthof(buf); j++) _m[i++].m2 = buf[j];
@@ -690,6 +536,6 @@ public class Misc {
 		{ 'OPTS', SaveLoad_OPTS, SaveLoad_OPTS, CH_RIFF},
 		{ 'CHTS', Save_CHTS, Load_CHTS, CH_RIFF | CH_LAST}
 	};
-	
+	*/
 	
 }
