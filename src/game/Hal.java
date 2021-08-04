@@ -227,7 +227,8 @@ void SortResolutions(int count)
 	public abstract void ShowOSErrorBox(String buf);
 	
 	public static int Random() {		
-		return (int) (Math.random() * Integer.MAX_VALUE);
+		//return Math.random() * Integer.MAX_VALUE;
+		return (int) (Math.random() * 0xFFFF);
 	}
 
 

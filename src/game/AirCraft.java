@@ -53,7 +53,7 @@ public class AirCraft {
 		Station.forEach( (st) ->
 		{
 			if (st.owner == v.owner && 0 != (st.facilities & Station.FACIL_AIRPORT) &&
-					Airport.GetAirport(st.airport_type).nof_depots > 0) {
+					AirportFTAClass.GetAirport(st.airport_type).nof_depots() > 0) {
 				int distance;
 
 				// don't crash the plane if we know it can't land at the airport
@@ -95,29 +95,32 @@ public class AirCraft {
 	{
 		int spritenum = v.spritenum;
 
-		if (is_custom_sprite(spritenum)) {
-			int sprite = GetCustomVehicleSprite(v, direction);
+		// TODO custom
+		/*
+		if (Sprite.is_custom_sprite(spritenum)) {
+			int sprite = Engine.GetCustomVehicleSprite(v, direction);
 
 			if (sprite != 0) return sprite;
 			spritenum = EngineTables2.orig_aircraft_vehicle_info[v.engine_type.id - Global.AIRCRAFT_ENGINES_INDEX].image_index;
-		}
+		} */
 		return direction + _aircraft_sprite[spritenum];
 	}
 
-	void DrawAircraftEngine(int x, int y, EngineID engine, int image_ormod)
+	static void DrawAircraftEngine(int x, int y, EngineID engine, int image_ormod)
 	{
 		int spritenum = Engine.AircraftVehInfo(engine.id).image_index;
 		int sprite = (6 + _aircraft_sprite[spritenum]);
 
-		if (is_custom_sprite(spritenum)) {
+		/** TODO custom
+		if (Sprite.is_custom_sprite(spritenum)) {
 			sprite = GetCustomVehicleIcon(engine, 6);
-			if (!sprite)
-				spritenum = orig_aircraft_vehicle_info[engine - AIRCRAFT_ENGINES_INDEX].image_index;
-		}
+			if (0==sprite)
+				spritenum = orig_aircraft_vehicle_info[engine - Global.AIRCRAFT_ENGINES_INDEX].image_index;
+		}*/
 
 		Gfx.DrawSprite(sprite | image_ormod, x, y);
 
-		if ((AircraftVehInfo(engine).subtype & 1) == 0) {
+		if ((Engine.AircraftVehInfo(engine.id).subtype & 1) == 0) {
 			Gfx.DrawSprite(Sprite.SPR_ROTOR_STOPPED, x, y - 5);
 		}
 	}
@@ -241,7 +244,7 @@ public class AirCraft {
 			 * of all depots, it is simple */
 			{
 				final Station  st = Station.GetStation(tile.getMap().m2);
-				final AirportFTAClass apc = Airport.GetAirport(st.airport_type);
+				final AirportFTAClass apc = AirportFTAClass.GetAirport(st.airport_type);
 				int i;
 
 				int nof_depots = apc.airport_depots.length;
@@ -432,7 +435,7 @@ public class AirCraft {
 			final Station st = Station.GetStation(next_airport_index);
 			// If an airport doesn't have terminals (so no landing space for airports),
 			// it surely doesn't have any hangars
-			if (!st.IsValidStation() || st.airport_tile == null || Airport.GetAirport(st.airport_type).nof_depots == 0) {
+			if (!st.IsValidStation() || st.airport_tile == null || AirportFTAClass.GetAirport(st.airport_type).nof_depots() == 0) {
 				StationID station;
 
 				if (p2 != 0) return Cmd.CMD_ERROR;
@@ -570,7 +573,7 @@ public class AirCraft {
 		st = Station.GetStation(v.current_order.station);
 
 		// only goto depot if the target airport has terminals (eg. it is airport)
-		if (st.xy != null && st.airport_tile != null && Airport.GetAirport(st.airport_type).terminals != null) {
+		if (st.xy != null && st.airport_tile != null && AirportFTAClass.GetAirport(st.airport_type).terminals != null) {
 			//			printf("targetairport = %d, st.index = %d\n", v.air.targetairport, st.index);
 			//			v.air.targetairport = st.index;
 			v.current_order.type = Order.OT_GOTO_DEPOT;
@@ -790,7 +793,7 @@ public class AirCraft {
 
 		if (0==(v.direction & 1)) spd = spd * 3 / 4;
 
-		if (spd == 0) return false;
+		if (spd == 0) return 0; //false;
 
 		if ((int)++spd == 0)
 			return 1; //true;
@@ -829,7 +832,7 @@ public class AirCraft {
 	};
 	
 	/* returns true if staying in the same tile */
-	boolean GetNewAircraftPos(Vehicle v, GetNewVehiclePosResult gp, int tilesMoved)
+	static boolean GetNewAircraftPos(Vehicle v, GetNewVehiclePosResult gp, int tilesMoved)
 	{
 
 		int x = v.x_pos + _delta_coord[v.direction] * tilesMoved;
@@ -867,11 +870,11 @@ public class AirCraft {
 		}
 
 		// get airport moving data
-		assert(v.air.pos < Airport.GetAirport(st.airport_type).nofelements);
+		assert(v.air.pos < AirportFTAClass.GetAirport(st.airport_type).nofelements);
 		amd = _airport_moving_datas[st.airport_type][v.air.pos];
 
 		// Helicopter raise
-		if (amd.flag & AirportMovingData.AMED_HELI_RAISE) {
+		if(0 != (amd.flag & AirportMovingData.AMED_HELI_RAISE)) {
 			u = v.next.next;
 
 			// Make sure the rotors don't rotate too fast
@@ -895,7 +898,7 @@ public class AirCraft {
 		}
 
 		// Helicopter landing.
-		if (amd.flag & AirportMovingData.AMED_HELI_LOWER) {
+		if(0 != (amd.flag & AirportMovingData.AMED_HELI_LOWER)) {
 			if (UpdateAircraftSpeed(v) >= 1) {
 				if (st.airport_tile == null) {
 					// FIXME - AircraftController . if station no longer exists, do not land
@@ -930,11 +933,11 @@ public class AirCraft {
 		}
 
 		// Get distance from destination pos to current pos.
-		dist = myabs(x + amd.x - v.x_pos) +  myabs(y + amd.y - v.y_pos);
+		dist = Math.abs(x + amd.x - v.x_pos) +  Math.abs(y + amd.y - v.y_pos);
 
 		// Clear queues when there's no patch
 		if(Global._patches.aircraft_queueing == false && v.queue_item != null) {
-			v.queue_item.queue.del(v.queue_item.queue, v);
+			v.queue_item.queue.del(v);
 			v.z_pos = GetAircraftFlyingAltitude(v);		
 		}
 
@@ -945,7 +948,7 @@ public class AirCraft {
 			// otherwise, helicopters will be part of the queue and can't land separately!
 			if(!(v.queue_item != null) && (Global._patches.aircraft_queueing == true && v.subtype != 0)) {
 				// Add to queue
-				assert(st.airport_queue.push(st.airport_queue, v));
+				assert(st.airport_queue.push(v));
 			}
 		}
 
@@ -980,7 +983,7 @@ public class AirCraft {
 		}
 
 		// Try to reach desired distance
-		if(myabs(desired_dist - dist) < 10) {
+		if(Math.abs(desired_dist - dist) < 10) {
 			// At or close to desired distance, maintain a good cruising speed
 			v.air.desired_speed = Math.min(v.max_speed * Global._patches.aircraft_speed_coeff, 36 * Global._patches.aircraft_speed_coeff);
 		} else {
@@ -1012,7 +1015,7 @@ public class AirCraft {
 			v.cur_speed--;
 
 		// Need exact position?
-		if (!(amd.flag & AirportMovingData.AMED_EXACTPOS) && dist <= (amd.flag & AirportMovingData.AMED_SLOWTURN ? 8 : 4))
+		if (0==(amd.flag & AirportMovingData.AMED_EXACTPOS) && dist <= (((amd.flag & AirportMovingData.AMED_SLOWTURN) != 0) ? 8 : 4))
 			return true;
 
 		// At final pos?
@@ -1020,7 +1023,7 @@ public class AirCraft {
 			if (v.cur_speed > 12) v.cur_speed = 12;
 
 			// Change direction smoothly to final direction.
-			dirdiff = amd.direction - v.direction;
+			dirdiff = (byte) (amd.direction - v.direction);
 			// if distance is 0, and plane points in right direction, no point in calling
 			// UpdateAircraftSpeed(). So do it only afterwards
 			if (dirdiff == 0) {
@@ -1038,7 +1041,7 @@ public class AirCraft {
 			return false;
 		}
 
-		if (!(amd.flag & AirportMovingData.AMED_NOSPDCLAMP) && v.cur_speed > 12) v.cur_speed = 12;
+		if (0==(amd.flag & AirportMovingData.AMED_NOSPDCLAMP) && v.cur_speed > 12) v.cur_speed = 12;
 
 		tilesMoved = UpdateAircraftSpeed(v);
 		if(tilesMoved < 1)
@@ -1047,9 +1050,9 @@ public class AirCraft {
 		if (v.load_unload_time_rem != 0) v.load_unload_time_rem--;
 
 		// Turn. Do it slowly if in the air.
-		newdir = GetDirectionTowards(v, x + amd.x, y + amd.y);
+		newdir = (byte) Vehicle.GetDirectionTowards(v, x + amd.x, y + amd.y);
 		if (newdir != v.direction) {
-			if (amd.flag & AirportMovingData.AMED_SLOWTURN) {
+			if(0 != (amd.flag & AirportMovingData.AMED_SLOWTURN)) {
 				if (v.load_unload_time_rem == 0) v.load_unload_time_rem = 8;
 				v.direction = newdir;
 			} else {
@@ -1063,19 +1066,20 @@ public class AirCraft {
 		v.tile = gp.new_tile;
 
 		// If vehicle is in the air, use tile coordinate 0.
-		if (amd.flag & (AirportMovingData.AMED_TAKEOFF | AirportMovingData.AMED_SLOWTURN | AirportMovingData.AMED_LAND)) v.tile = 0;
+		if(0 != (amd.flag & (AirportMovingData.AMED_TAKEOFF | AirportMovingData.AMED_SLOWTURN | AirportMovingData.AMED_LAND))) 
+			v.tile = null;
 
 		// Adjust Z for land or takeoff?
 		z = v.z_pos;
 
-		if (amd.flag & AirportMovingData.AMED_TAKEOFF) {
+		if(0 != (amd.flag & AirportMovingData.AMED_TAKEOFF)) {
 			z += 2;
 			maxz = GetAircraftFlyingAltitude(v);
 			if (z > maxz) z = maxz;
 		}
 
-		if (amd.flag & AirportMovingData.AMED_LAND) {
-			if (st.airport_tile == 0) {
+		if(0 != (amd.flag & AirportMovingData.AMED_LAND)) {
+			if (st.airport_tile == null) {
 				v.air.state = Airport.FLYING;
 				AircraftNextAirportPos_and_Order(v);
 				// get aircraft back on running altitude
@@ -1096,7 +1100,7 @@ public class AirCraft {
 		}
 
 		// We've landed. Decrase speed when we're reaching end of runway.
-		if (amd.flag & AirportMovingData.AMED_BRAKE) {
+		if(0 != (amd.flag & AirportMovingData.AMED_BRAKE)) {
 			curz = Landscape.GetSlopeZ(x, y) + 1;
 
 			if (z > curz) {
@@ -1151,15 +1155,17 @@ public class AirCraft {
 		}
 
 		if (v.air.crashed_counter < 650) {
-			if (BitOps.CHANCE16R(1,32,r)) {
+			if (BitOps.CHANCE16(1,32)) 
+			{
+				r = Hal.Random();
 				v.direction = (v.direction + _crashed_aircraft_moddir[BitOps.GB(r, 16, 2)]) & 7;
 				SetAircraftPosition(v, v.x_pos, v.y_pos, v.z_pos);
 				r = Hal.Random();
-				CreateEffectVehicleRel(v,
+				v.CreateEffectVehicleRel(
 						BitOps.GB(r, 0, 4) + 4,
 						BitOps.GB(r, 4, 4) + 4,
 						BitOps.GB(r, 8, 4),
-						EV_EXPLOSION_SMALL);
+						Vehicle.EV_EXPLOSION_SMALL);
 			}
 		} else if (v.air.crashed_counter >= 10000) {
 			// remove rubble of crashed airplane
@@ -1194,7 +1200,7 @@ public class AirCraft {
 		int8 x;
 		int8 y;
 	} */
-	Point [] smoke_pos = {
+	static Point [] smoke_pos = {
 			new Point(  5,  5 ),
 			new Point(  6,  0 ),
 			new Point(  5, -5 ),
@@ -1217,11 +1223,11 @@ public class AirCraft {
 		}
 
 		if ((v.tick_counter & 0x1F) == 0) {
-			CreateEffectVehicleRel(v,
+			v.CreateEffectVehicleRel(
 					smoke_pos[v.direction].x,
 					smoke_pos[v.direction].y,
 					2,
-					EV_SMOKE
+					Vehicle.EV_SMOKE
 					);
 		}
 	}
@@ -1234,19 +1240,19 @@ public class AirCraft {
 		if (v.current_order.type == Order.OT_GOTO_DEPOT ||
 				v.current_order.type == Order.OT_LOADING) {
 			if (v.current_order.type != Order.OT_GOTO_DEPOT ||
-					!(v.current_order.flags & Order.OF_UNLOAD))
+					0==(v.current_order.flags & Order.OF_UNLOAD))
 				return;
 		}
 
 		if (v.current_order.type == Order.OT_GOTO_DEPOT &&
 				(v.current_order.flags & (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED)) == (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED) &&
-				!VehicleNeedsService(v)) {
+				!v.VehicleNeedsService()) {
 			v.cur_order_index++;
 		}
 
 		if (v.cur_order_index >= v.num_orders) v.cur_order_index = 0;
 
-		order = Vehicle.GetVehicleOrder(v, v.cur_order_index);
+		order = v.GetVehicleOrder(v.cur_order_index);
 
 		if (order == null) {
 			v.current_order.type = Order.OT_NOTHING;
@@ -1254,7 +1260,7 @@ public class AirCraft {
 			return;
 		}
 
-		if (order.type == Order.OT_DUMMY && !CheckForValidOrders(v))
+		if (order.type == Order.OT_DUMMY && !v.CheckForValidOrders())
 			CrashAirplane(v);
 
 		if (order.type    == v.current_order.type   &&
@@ -1262,7 +1268,7 @@ public class AirCraft {
 				order.station == v.current_order.station)
 			return;
 
-		v.current_order = *order;
+		v.current_order = new Order( order );
 
 		// orders are changed in flight, ensure going to the right station
 		if (order.type == Order.OT_GOTO_STATION && v.air.state == Airport.FLYING) {
@@ -1270,9 +1276,9 @@ public class AirCraft {
 			v.air.targetairport = order.station;
 		}
 
-		InvalidateVehicleOrder(v);
+		v.InvalidateVehicleOrder();
 
-		InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
+		Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
 	}
 
 	static void HandleAircraftLoading(Vehicle v, int mode)
@@ -1284,7 +1290,7 @@ public class AirCraft {
 			if (mode != 0) return;
 			if (--v.load_unload_time_rem != 0) return;
 
-			if (v.current_order.flags & Order.OF_FULL_LOAD && CanFillVehicle(v)) {
+			if ( (v.current_order.flags & Order.OF_FULL_LOAD) != 0 && v.CanFillVehicle()) {
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_AIRCRAFT_INC);
 				Economy.LoadUnloadVehicle(v);
 				return;
@@ -1311,7 +1317,7 @@ public class AirCraft {
 		v.vehstatus |= Vehicle.VS_CRASHED;
 		v.air.crashed_counter = 0;
 
-		CreateEffectVehicleRel(v, 4, 4, 8, EV_EXPLOSION_LARGE);
+		v.CreateEffectVehicleRel(4, 4, 8, Vehicle.EV_EXPLOSION_LARGE);
 
 		Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
@@ -1349,7 +1355,9 @@ public class AirCraft {
 
 		//FIXME -- MaybeCrashAirplane . increase crashing chances of very modern airplanes on smaller than AT_METROPOLITAN airports
 		prob = 0x10000 / 1500;
-		if (st.airport_type == Airport.AT_SMALL && (Engine.AircraftVehInfo(v.engine_type.id).subtype & 2) && !Global._cheats.no_jetcrash.value) {
+		if (st.airport_type == Airport.AT_SMALL 
+				&& (0 !=(Engine.AircraftVehInfo(v.engine_type.id).subtype & 2)) 
+				&& !Global._cheats.no_jetcrash.value) {
 			prob = 0x10000 / 20;
 		}
 
@@ -1420,7 +1428,7 @@ public class AirCraft {
 		ServiceAircraft(v);
 		Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
 
-		TriggerVehicle(v, VEHICLE_TRIGGER_DEPOT);
+		v.TriggerVehicle(Engine.VEHICLE_TRIGGER_DEPOT);
 
 		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
@@ -1471,7 +1479,7 @@ public class AirCraft {
 			v.air.targetairport = v.current_order.station;
 
 		st = Station.GetStation(v.air.targetairport);
-		airport = Airport.GetAirport(st.airport_type);
+		airport = AirportFTAClass.GetAirport(st.airport_type);
 		v.air.pos = v.air.previous_pos = airport.entry_point;
 	}
 
@@ -1550,22 +1558,22 @@ public class AirCraft {
 			}
 		} else { // Else prepare for launch.
 			// airplane goto state takeoff, helicopter to helitakeoff
-			v.air.state = (v.subtype != 0) ? Airport.TAKEOFF : Airport.HELITAKEOFF;
+			v.air.state = (v.subtype != 0) ? game.Airport.TAKEOFF : game.Airport.HELITAKEOFF;
 		}
 		AircraftLeaveHangar(v);
 		AirportMove(v, Airport);
 	}
 
 	// At one of the Airport's Terminals
-	static void AircraftEventHandler_AtTerminal(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_AtTerminal(Vehicle v, final AirportFTAClass airport)
 	{
 		// if we just arrived, execute EnterTerminal first
 		if (v.air.previous_pos != v.air.pos) {
-			AircraftEventHandler_EnterTerminal(v, Airport);
+			AircraftEventHandler_EnterTerminal(v, airport);
 			// on an airport with helipads, a helicopter will always land there
 			// and get serviced at the same time - patch setting
 			if (Global._patches.serviceathelipad) {
-				if (v.subtype == 0 && Airport.helipads != null) {
+				if (v.subtype == 0 && airport.helipads != null) {
 					// an exerpt of ServiceAircraft, without the invisibility stuff
 					v.date_of_last_service = Global._date;
 					v.breakdowns_since_last_service = 0;
@@ -1579,7 +1587,7 @@ public class AirCraft {
 		if (v.current_order.type == Order.OT_NOTHING) return;
 
 		// if the block of the next position is busy, stay put
-		if (AirportHasBlock(v, Airport.layout[v.air.pos], Airport)) {
+		if (AirportHasBlock(v, airport.layout[v.air.pos], airport)) {
 			return;
 		}
 
@@ -1604,7 +1612,7 @@ public class AirCraft {
 			v.air.state = Airport.HANGAR;
 		}
 
-		AirportMove(v, Airport);
+		AirportMove(v, airport);
 	}
 
 	static void AircraftEventHandler_General(Vehicle v, final AirportFTAClass Airport)
@@ -1613,25 +1621,25 @@ public class AirCraft {
 		assert false;
 	}
 
-	static void AircraftEventHandler_TakeOff(Vehicle v, final AirportFTAClass Airport) {
+	static void AircraftEventHandler_TakeOff(Vehicle v, final AirportFTAClass airport) {
 		PlayAircraftSound(v); // play takeoffsound for airplanes
 		v.air.state = Airport.STARTTAKEOFF;
 	}
 
-	static void AircraftEventHandler_StartTakeOff(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_StartTakeOff(Vehicle v, final AirportFTAClass airport)
 	{
 		v.sprite_width = v.sprite_height = 24; // ??? no idea what this is
 		v.air.state = Airport.ENDTAKEOFF;
 	}
 
-	static void AircraftEventHandler_EndTakeOff(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_EndTakeOff(Vehicle v, final AirportFTAClass airport)
 	{
 		v.air.state = Airport.FLYING;
 		// get the next position to go to, differs per airport
 		AircraftNextAirportPos_and_Order(v);
 	}
 
-	static void AircraftEventHandler_HeliTakeOff(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_HeliTakeOff(Vehicle v, final AirportFTAClass airport)
 	{
 		final Player  p = Player.GetPlayer(v.owner);
 		v.sprite_width = v.sprite_height = 24; // ??? no idea what this is
@@ -1691,12 +1699,12 @@ public class AirCraft {
 					// Otherwise, helicopters will be part of the queue and can't land separately!
 					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing == true && v.subtype != 0)) {
 						// Add to queue
-						assert(st.airport_queue.push(st.airport_queue, v));
+						assert(st.airport_queue.push(v));
 					}
 
 					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing == true && v.subtype == 0)) {
 						// Add to queue
-						assert(st.helicopter_queue.push(st.helicopter_queue, v));
+						assert(st.helicopter_queue.push(v));
 					}
 					// save speed before, since if AirportHasBlock is false, it resets them to 0
 					// we don't want that for plane in air
@@ -1906,7 +1914,7 @@ public class AirCraft {
 
 		Global.DEBUG_misc( 0, "Cannot move further on Airport...! pos:%d state:%d", v.air.pos, v.air.state);
 		Global.DEBUG_misc( 0, "Airport entry point: %d, Vehicle: %d", Airport.entry_point, v.index);
-		assert(0);
+		assert false;
 		return false;
 	}
 
@@ -1983,7 +1991,7 @@ public class AirCraft {
 			if (!BitOps.HASBIT(st.airport_flags, i)) {
 				// TERMINAL# HELIPAD#
 				v.air.state = i + Airport.TERM1; // start moving to that terminal/helipad
-				SETBIT(st.airport_flags, i); // occupy terminal/helipad
+				st.airport_flags = BitOps.RETSETBIT(st.airport_flags, i); // occupy terminal/helipad
 				return true;
 			}
 		}
@@ -2140,7 +2148,7 @@ public class AirCraft {
 		// pass the right airport structure to the functions
 		// DEREF_STATION gets target airport (Station st), its type is passed to GetAirport
 		// that returns the correct layout depending on type
-		AirportGoToNextPosition(v, Airport.GetAirport(Station.GetStation(v.air.targetairport).airport_type));
+		AirportGoToNextPosition(v, AirportFTAClass.GetAirport(Station.GetStation(v.air.targetairport).airport_type));
 	}
 
 	static void Aircraft_Tick(Vehicle v)
@@ -2195,17 +2203,17 @@ public class AirCraft {
 			// skip those
 			if (v_oldstyle.type == Vehicle.VEH_Aircraft && v_oldstyle.subtype <= 2) {
 				// airplane in terminal stopped doesn't hurt anyone, so goto next
-				if (v_oldstyle.vehstatus & Vehicle.VS_STOPPED && v_oldstyle.air.state == 0) {
-					v_oldstyle.u.air.state = HANGAR;
+				if ((0 !=(v_oldstyle.vehstatus & Vehicle.VS_STOPPED)) && v_oldstyle.air.state == 0) {
+					v_oldstyle.air.state = Airport.HANGAR;
 					continue;
 				}
 
 				AircraftLeaveHangar(v_oldstyle); // make airplane visible if it was in a depot for example
 				v_oldstyle.vehstatus &= ~Vehicle.VS_STOPPED; // make airplane moving
-				v_oldstyle.u.air.state = FLYING;
+				v_oldstyle.air.state = Airport.FLYING;
 				AircraftNextAirportPos_and_Order(v_oldstyle); // move it to the entry point of the airport
 				v_oldstyle.GetNewVehiclePos(gp); // get the position of the plane (to be used for setting)
-				v_oldstyle.tile = 0; // aircraft in air is tile=0
+				v_oldstyle.tile = null; // aircraft in air is tile=0
 
 				// correct speed of helicopter-rotors
 				if (v_oldstyle.subtype == 0) v_oldstyle.next.next.cur_speed = 32;
@@ -2223,7 +2231,7 @@ public class AirCraft {
 		int takeofftype;
 		int cnt;
 		// only 1 station is updated per function call, so it is enough to get entry_point once
-		final AirportFTAClass ap = Airport.GetAirport(st.airport_type);
+		final AirportFTAClass ap = AirportFTAClass.GetAirport(st.airport_type);
 		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
@@ -2348,32 +2356,38 @@ public class AirCraft {
 		y += 10;
 	}
 
+	
 	static void DrawAircraftImage(final Vehicle v, int x, int y, VehicleID selection)
 	{
+		DrawAircraftImage(v, x, y,  selection.id );
+	}
+
+	static void DrawAircraftImage(final Vehicle v, int x, int y, int selection)
+	{
 		int image = GetAircraftImage(v, 6);
-		int ormod = SPRITE_PALETTE(PLAYER_SPRITE_COLOR(v.owner));
-		if (v.vehstatus & Vehicle.VS_CRASHED) ormod = PALETTE_CRASH;
+		int ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner));
+		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) ormod = Sprite.PALETTE_CRASH;
 		Gfx.DrawSprite(image | ormod, x + 25, y + 10);
 		if (v.subtype == 0) Gfx.DrawSprite(Sprite.SPR_ROTOR_STOPPED, x + 25, y + 5);
-		if (v.index == selection.id) {
-			Gfx.DrawFrameRect(x - 1, y - 1, x + 58, y + 21, 0xF, FR_BORDERONLY);
+		if (v.index == selection) {
+			Gfx.DrawFrameRect(x - 1, y - 1, x + 58, y + 21, 0xF, Window.FR_BORDERONLY);
 		}
 	}
 
-	void CcBuildAircraft(boolean success, TileIndex tile, int p1, int p2)
+	static void CcBuildAircraft(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			final Vehicle  v = Vehicle.GetVehicle(Global._new_aircraft_id);
 
 			if (v.tile == Global._backup_orders_tile) {
 				Global._backup_orders_tile = null;
-				Vehicle.RestoreVehicleOrders(v, Global._backup_orders_data);
+				Vehicle.RestoreVehicleOrders(v, Global._backup_orders_data[0]);
 			}
 			ShowAircraftViewWindow(v);
 		}
 	}
 
-	void CcCloneAircraft(boolean success, int tile, int p1, int p2)
+	static void CcCloneAircraft(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) ShowAircraftViewWindow(Vehicle.GetVehicle(Global._new_aircraft_id));
 	}
@@ -2394,7 +2408,7 @@ public class AirCraft {
 					final Engine e = Engine.GetEngine(ei++);
 					if (BitOps.HASBIT(e.player_avail, Global._local_player.id)) count++;
 				} while (--num > 0);
-				SetVScrollCount(w, count);
+				MiscGui.SetVScrollCount(w, count);
 			}
 
 			w.DrawWindowWidgets();
@@ -2408,15 +2422,16 @@ public class AirCraft {
 				int sel = w.as_buildtrain_d().sel_index;
 				int pos = w.vscroll.pos;
 				/*EngineID*/ int engine_id = Global.AIRCRAFT_ENGINES_INDEX;
-				EngineID selected_id = Global.INVALID_ENGINE;
+				//EngineID 
+				int selected_id = Engine.INVALID_ENGINE;
 
 				do {
 					final Engine e = Engine.GetEngine(ei++);
-					if (BitOps.HASBIT(e.player_avail, Global._local_player)) {
+					if (BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
 						if (sel==0) selected_id = engine_id;
 						if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.cap, 0)) {
-							Gfx.DrawString(x+62, y+7, GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
-							DrawAircraftEngine(x+29, y+10, engine_id, SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)));
+							Gfx.DrawString(x+62, y+7, Engine.GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
+							DrawAircraftEngine(x+29, y+10, EngineID.get(engine_id), Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 							y += 24;
 						}
 						sel--;
@@ -2425,10 +2440,10 @@ public class AirCraft {
 					//++e;
 				} while (--num > 0);
 
-				w.as_buildtrain_d().sel_engine = selected_id;
+				w.as_buildtrain_d().sel_engine = EngineID.get( selected_id );
 
-				if (selected_id != INVALID_ENGINE) {
-					DrawAircraftPurchaseInfo(2, w.widget[4].top + 1, selected_id);
+				if (selected_id != Engine.INVALID_ENGINE) {
+					DrawAircraftPurchaseInfo(2, w.widget.get(4).top + 1, EngineID.get(selected_id) );
 				}
 			}
 		} break;
@@ -2438,23 +2453,23 @@ public class AirCraft {
 			case 2: { /* listbox */
 				int i = (we.pt.y - 14) / 24;
 				if (i < w.vscroll.cap) {
-					w.as_buildtrain_d().sel_index = i + w.vscroll.pos;
+					w.as_buildtrain_d().sel_index = (byte) (i + w.vscroll.pos);
 					w.SetWindowDirty();
 				}
 			} break;
 
 			case 5: { /* build */
 				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
-				if (sel_eng != INVALID_ENGINE)
-					Cmd.DoCommandP(w.window_number, sel_eng, 0, CcBuildAircraft, Cmd.CMD_BUILD_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT));
+				if(sel_eng.id != Engine.INVALID_ENGINE) 
+					Cmd.DoCommandP(TileIndex.get(w.window_number.n), sel_eng.id, 0, AirCraft::CcBuildAircraft, Cmd.CMD_BUILD_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT));
 			} break;
 
 			case 6:	{ /* rename */
 				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
-				if (sel_eng != INVALID_ENGINE) {
+				if (sel_eng.id != Engine.INVALID_ENGINE) {
 					w.as_buildtrain_d().rename_engine = sel_eng;
-					ShowQueryString(GetCustomEngineName(sel_eng),
-							Str.STR_A039_RENAME_AIRCRAFT_TYPE, 31, 160, w.window_class, w.window_number);
+					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng.id),
+							new StringID(Str.STR_A039_RENAME_AIRCRAFT_TYPE), 31, 160, w.window_class, w.window_number);
 				}
 			} break;
 			}
@@ -2469,14 +2484,14 @@ public class AirCraft {
 		case WE_ON_EDIT_TEXT: {
 			if (we.str != null) {
 				Global._cmd_text = we.str;
-				Cmd.DoCommandP(null, w.as_buildtrain_d().rename_engine, 0, null,
+				Cmd.DoCommandP(null, w.as_buildtrain_d().rename_engine.id, 0, null,
 						Cmd.CMD_RENAME_ENGINE | Cmd.CMD_MSG(Str.STR_A03A_CAN_T_RENAME_AIRCRAFT_TYPE));
 			}
 		} break;
 
-		case WindowEvents.WE_RESIZE:
-			w.vscroll.cap += e.sizing.diff.y / 24;
-			w.widget[2].unkA = (w.vscroll.cap << 8) + 1;
+		case WE_RESIZE:
+			w.vscroll.cap += we.diff.y / 24;
+			w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
 			break;
 		}
 	}
@@ -2534,33 +2549,33 @@ public class AirCraft {
 			Gfx.DrawString(1, 15, Str.STR_A040_SELECT_CARGO_TYPE_TO_CARRY, 0);
 
 			/* TODO: Support for custom GRFSpecial-specified refitting! --pasky */
-			w.as_refit_d().cargo = DrawVehicleRefitWindow(v, w.as_refit_d().sel);
+			w.as_refit_d().cargo = VehicleGui.DrawVehicleRefitWindow(v, w.as_refit_d().sel).id;
 
 			if (w.as_refit_d().cargo != AcceptedCargo.CT_INVALID) {
-				int cost = DoCommandByTile(v.tile, v.index, w.as_refit_d().cargo, Cmd.DC_QUERY_COST, Cmd.CMD_REFIT_AIRCRAFT);
-				if (!CmdFailed(cost)) {
+				int cost = Cmd.DoCommandByTile(v.tile, v.index, w.as_refit_d().cargo, Cmd.DC_QUERY_COST, Cmd.CMD_REFIT_AIRCRAFT);
+				if (!Cmd.CmdFailed(cost)) {
 					Global.SetDParam(2, cost);
-					Global.SetDParam(0, _cargoc.names_long[w.as_refit_d().cargo]);
-					Global.SetDParam(1, _aircraft_refit_capacity);
+					Global.SetDParam(0, Global._cargoc.names_long[w.as_refit_d().cargo]);
+					Global.SetDParam(1, Global._aircraft_refit_capacity);
 					Gfx.DrawString(1, 147, Str.STR_A041_NEW_CAPACITY_COST_OF_REFIT, 0);
 				}
 			}
 		}	break;
 
-		case WindowEvents.WE_CLICK:
-			switch(e.click.widget) {
+		case WE_CLICK:
+			switch(e.widget) {
 			case 2: { /* listbox */
-				int y = e.click.pt.y - 25;
+				int y = e.pt.y - 25;
 				if (y >= 0) {
 					w.as_refit_d().sel = y / 10;
-					SetWindowDirty(w);
+					w.SetWindowDirty();
 				}
 			} break;
 			case 4: /* refit button */
 				if (w.as_refit_d().cargo != AcceptedCargo.CT_INVALID) {
-					final Vehicle v = Vehicle.GetVehicle(w.window_number);
+					final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
 					if (Cmd.DoCommandP(v.tile, v.index, w.as_refit_d().cargo, null, Cmd.CMD_REFIT_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A042_CAN_T_REFIT_AIRCRAFT)))
-						DeleteWindow(w);
+						w.DeleteWindow();
 				}
 				break;
 			}
@@ -2593,8 +2608,8 @@ public class AirCraft {
 
 		//Global._alloc_wnd_parent_num = v.index;
 		w = Window.AllocateWindowDesc(_aircraft_refit_desc, v.index);
-		w.window_number = v.index;
-		w.caption_color = v.owner;
+		w.window_number = new WindowNumber( v.index );
+		w.caption_color = (byte) v.owner.id;
 		w.as_refit_d().sel = -1;
 	}
 
@@ -2602,14 +2617,14 @@ public class AirCraft {
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Vehicle v = Vehicle.GetVehicle(w.window_number);
+			final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
 
 			w.disabled_state = v.owner == Global._local_player ? 0 : (1 << 2);
-			if (!Global._patches.servint_aircraft) // disable service-scroller when interval is set to disabled
+			if (0==Global._patches.servint_aircraft) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
 			Global.SetDParam(0, v.string_id);
-			Global.SetDParam(1, v.unitnumber);
+			Global.SetDParam(1, v.unitnumber.id);
 			w.DrawWindowWidgets();
 
 			/* Draw running cost */
@@ -2620,7 +2635,7 @@ public class AirCraft {
 
 				Global.SetDParam(0, (v.age + 365 < v.max_age) ? Str.STR_AGE : Str.STR_AGE_RED);
 				Global.SetDParam(2, v.max_age / 366);
-				Global.SetDParam(3, Global._price.aircraft_running * AircraftVehInfo(v.engine_type).running_cost >> 8);
+				Global.SetDParam(3, Global._price.aircraft_running * Engine.AircraftVehInfo(v.engine_type.id).running_cost >> 8);
 				Gfx.DrawString(2, 15, Str.STR_A00D_AGE_RUNNING_COST_YR, 0);
 			}
 
@@ -2651,7 +2666,7 @@ public class AirCraft {
 				Gfx.DrawString(13, 103, Global._patches.servint_ispercent?Str.STR_SERVICING_INTERVAL_PERCENT:Str.STR_883C_SERVICING_INTERVAL_DAYS, 0);
 			}
 
-			DrawAircraftImage(v, 3, 57, Vehicle.INVALID_VEHICLE);
+			DrawAircraftImage(v, 3, 57, VehicleID.getInvalid() );
 
 			{
 				final Vehicle u;
@@ -2659,16 +2674,16 @@ public class AirCraft {
 
 				do {
 					if (v.subtype <= 2) {
-						Global.SetDParam(0, GetCustomEngineName(v.engine_type));
+						Global.SetDParam(0, Engine.GetCustomEngineName(v.engine_type.id).id);
 						Global.SetDParam(1, 1920 + v.build_year);
 						Global.SetDParam(2, v.value);
-						Gfx.DrawString(60, y, Str.STR_A011_BUILandscape.LT_VALUE, 0);
+						Gfx.DrawString(60, y, Str.STR_A011_BUILT_VALUE, 0);
 						y += 10;
 
-						Global.SetDParam(0, _cargoc.names_long[v.cargo_type]);
+						Global.SetDParam(0, Global._cargoc.names_long[v.cargo_type]);
 						Global.SetDParam(1, v.cargo_cap);
 						u = v.next;
-						Global.SetDParam(2, _cargoc.names_long[u.cargo_type]);
+						Global.SetDParam(2, Global._cargoc.names_long[u.cargo_type]);
 						Global.SetDParam(3, u.cargo_cap);
 						Gfx.DrawString(60, y, (u.cargo_cap != 0) ? Str.STR_A019_CAPACITY : Str.STR_A01A_CAPACITY, 0);
 						y += 14;
@@ -2688,14 +2703,14 @@ public class AirCraft {
 			}
 		} break;
 
-		case WindowEvents.WE_CLICK: {
+		case WE_CLICK: {
 			int mod;
 			final Vehicle v;
 			switch (e.widget) {
 			case 2: /* rename */
-				v = Vehicle.GetVehicle(w.window_number);
-				Global.SetDParam(0, v.unitnumber);
-				ShowQueryString(v.string_id, Str.STR_A030_NAME_AIRCRAFT, 31, 150, w.window_class, w.window_number);
+				v = Vehicle.GetVehicle(w.window_number.n);
+				Global.SetDParam(0, v.unitnumber.id);
+				MiscGui.ShowQueryString( new StringID(v.string_id), new StringID(Str.STR_A030_NAME_AIRCRAFT), 31, 150, w.window_class, w.window_number);
 				break;
 			/*	
 			case 5: // increase int 
@@ -2713,9 +2728,9 @@ public class AirCraft {
 				else
 					mod = Global._ctrl_pressed? -5 : -10;
 				
-				v = Vehicle.GetVehicle(w.window_number);
+				v = Vehicle.GetVehicle(w.window_number.n);
 
-				mod = GetServiceIntervalClamped(mod + v.service_interval);
+				mod = Depot.GetServiceIntervalClamped(mod + v.service_interval);
 				if (mod == v.service_interval) return;
 
 				Cmd.DoCommandP(v.tile, v.index, mod, null, Cmd.CMD_CHANGE_AIRCRAFT_SERVICE_INT | Cmd.CMD_MSG(Str.STR_018A_CAN_T_CHANGE_SERVICING));
@@ -2723,15 +2738,15 @@ public class AirCraft {
 			}
 		} break;
 
-		case WindowEvents.WE_4:
-			if (FindWindowById(Window.WC_VEHICLE_VIEW, w.window_number) == null)
-				DeleteWindow(w);
+		case WE_4:
+			if (Window.FindWindowById(Window.WC_VEHICLE_VIEW, w.window_number.n) == null)
+				w.DeleteWindow();
 			break;
 
-		case WindowEvents.WE_ON_EDIT_TEXT:
-			if (e.edittext.str[0] != '\0') {
-				Global._cmd_text = e.edittext.str;
-				Cmd.DoCommandP(0, w.window_number, 0, null,
+		case WE_ON_EDIT_TEXT:
+			if (e.str != null) {
+				Global._cmd_text = e.str;
+				Cmd.DoCommandP(null, w.window_number.n, 0, null,
 						Cmd.CMD_NAME_VEHICLE | Cmd.CMD_MSG(Str.STR_A031_CAN_T_NAME_AIRCRAFT));
 			}
 			break;
@@ -2769,9 +2784,9 @@ public class AirCraft {
 		Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, veh);
 
 		//_alloc_wnd_parent_num = veh;
-		w = AllocateWindowDesc(_aircraft_details_desc, veh);
-		w.window_number = veh;
-		w.caption_color = v.owner;
+		w = Window.AllocateWindowDesc(_aircraft_details_desc, veh);
+		w.window_number = new WindowNumber( veh );
+		w.caption_color = (byte) v.owner.id;
 		//		w.vscroll.cap = 6;
 		//		w.traindetails_d.tab = 0;
 	}
@@ -2855,19 +2870,19 @@ public class AirCraft {
 
 			/* draw the flag plus orders */
 			Gfx.DrawSprite((0 != (v.vehstatus & Vehicle.VS_STOPPED)) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.widget.get(5).top + 1);
-			Gfx.DrawStringCenteredTruncated(w.widget.get(5).left + 8, w.widget.get(5).right, w.widget.get(5).top + 1, str, 0);
+			Gfx.DrawStringCenteredTruncated(w.widget.get(5).left + 8, w.widget.get(5).right, w.widget.get(5).top + 1, new StringID(str), 0);
 			w.DrawWindowViewport();
 		} break;
 
-		case WindowEvents.WE_CLICK: {
-			final Vehicle  v = Vehicle.GetVehicle(w.window_number);
+		case WE_CLICK: {
+			final Vehicle  v = Vehicle.GetVehicle(w.window_number.n);
 
-			switch (e.click.widget) {
+			switch (e.widget) {
 			case 5: /* start stop */
 				Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_START_STOP_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A016_CAN_T_STOP_START_AIRCRAFT));
 				break;
 			case 6: /* center main view */
-				ScrollMainWindowTo(v.x_pos, v.y_pos);
+				ViewPort.ScrollMainWindowTo(v.x_pos, v.y_pos);
 				break;
 			case 7: /* goto hangar */
 				Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_MSG(Str.STR_A012_CAN_T_SEND_AIRCRAFT_TO));
@@ -2876,38 +2891,38 @@ public class AirCraft {
 				ShowAircraftRefitWindow(v);
 				break;
 			case 9: /* show orders */
-				ShowOrdersWindow(v);
+				OrderGui.ShowOrdersWindow(v);
 				break;
 			case 10: /* show details */
 				ShowAircraftDetailsWindow(v);
 				break;
 			case 11:
 				/* clone vehicle */
-				Cmd.DoCommandP(v.tile, v.index, _ctrl_pressed ? 1 : 0, CcCloneAircraft, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT));
+				Cmd.DoCommandP(v.tile, v.index, Global._ctrl_pressed ? 1 : 0, AirCraft::CcCloneAircraft, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT));
 				break;
 			}
 		} break;
 
-		case WindowEvents.WE_RESIZE:
-			w.viewport.width  += e.sizing.diff.x;
-			w.viewport.height += e.sizing.diff.y;
-			w.viewport.virtual_width  += e.sizing.diff.x;
-			w.viewport.virtual_height += e.sizing.diff.y;
+		case WE_RESIZE:
+			w.viewport.width  += e.diff.x;
+			w.viewport.height += e.diff.y;
+			w.viewport.virtual_width  += e.diff.x;
+			w.viewport.virtual_height += e.diff.y;
 			break;
 
-		case WindowEvents.WE_DESTROY:
-			Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, w.window_number);
-			Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, w.window_number);
-			Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, w.window_number);
+		case WE_DESTROY:
+			Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, w.window_number.n);
+			Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, w.window_number.n);
+			Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, w.window_number.n);
 			break;
 
-		case WindowEvents.WE_MOUSELOOP: {
-			final Vehicle  v = Vehicle.GetVehicle(w.window_number);
+		case WE_MOUSELOOP: {
+			final Vehicle  v = Vehicle.GetVehicle(w.window_number.n);
 			int h = CheckStoppedInHangar(v) ? (1 << 7) : (1 << 11);
 
 			if (h != w.hidden_state) {
 				w.hidden_state = h;
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 			}
 		} break;
 		}
@@ -2923,7 +2938,7 @@ public class AirCraft {
 	);
 
 
-	void ShowAircraftViewWindow(final Vehicle  v)
+	static void ShowAircraftViewWindow(final Vehicle  v)
 	{
 		Window  w = Window.AllocateWindowDescFront(_aircraft_view_desc, v.index);
 
@@ -2957,7 +2972,8 @@ public class AirCraft {
 				num++;
 			}
 		});
-		SetVScrollCount(w, (num + w.hscroll.cap - 1) / w.hscroll.cap);
+		
+		MiscGui.SetVScrollCount(w, (num + w.hscroll.cap - 1) / w.hscroll.cap);
 
 		Global.SetDParam(0, tile.getMap().m2);
 		w.DrawWindowWidgets();
@@ -2975,7 +2991,7 @@ public class AirCraft {
 					v.tile == tile &&
 					--num < 0 && num >= -w.vscroll.cap * w.hscroll.cap) {
 
-				DrawAircraftImage(v, x+12, y, w.as_traindepot_d().sel);
+				DrawAircraftImage(v, x+12, y, VehicleID.get( w.as_traindepot_d().sel ) );
 
 				Global.SetDParam(0, v.unitnumber.id);
 				Gfx.DrawString(x, y+2, (int)(v.max_age-366) >= v.age ? Str.STR_00E2 : Str.STR_00E3, 0);
@@ -3032,8 +3048,8 @@ public class AirCraft {
 		int mode = GetVehicleFromAircraftDepotWndPt(w, x, y, v);
 
 		// share / copy orders
-		if (Global._thd.place_mode && mode <= 0) {
-			_place_clicked_vehicle = v[0];
+		if (ViewPort._thd.place_mode != 0 && mode <= 0) {
+			Global._place_clicked_vehicle = v[0];
 			return;
 		}
 
@@ -3042,19 +3058,19 @@ public class AirCraft {
 			return;
 
 		case 0: // start dragging of vehicle
-			if (v != null) {
-				w.as_traindepot_d().sel = v.index;
+			if (v[0] != null) {
+				w.as_traindepot_d().sel = v[0].index;
 				w.SetWindowDirty();
-				ViewPort.SetObjectToPlaceWnd( SPRITE_PALETTE(PLAYER_SPRITE_COLOR(v.owner)) + GetAircraftImage(v, 6), 4, w);
+				ViewPort.SetObjectToPlaceWnd( Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v[0].owner)) + GetAircraftImage(v[0], 6), 4, w);
 			}
 			break;
 
 		case -1: // show info window
-			ShowAircraftViewWindow(v);
+			ShowAircraftViewWindow(v[0]);
 			break;
 
 		case -2: // click start/stop flag
-			Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_START_STOP_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A016_CAN_T_STOP_START_AIRCRAFT));
+			Cmd.DoCommandP(v[0].tile, v[0].index, 0, null, Cmd.CMD_START_STOP_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A016_CAN_T_STOP_START_AIRCRAFT));
 			break;
 
 		default:
@@ -3072,11 +3088,11 @@ public class AirCraft {
 	{
 		if (v == null || v.type != Vehicle.VEH_Aircraft) return;
 
-		Cmd.DoCommandP(w.window_number, v.index, Global._ctrl_pressed ? 1 : 0,
-				CcCloneAircraft, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT)
+		Cmd.DoCommandP(TileIndex.get(w.window_number.n), v.index, Global._ctrl_pressed ? 1 : 0,
+				AirCraft::CcCloneAircraft, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT)
 				);
 
-		ResetObjectToPlace();
+		ViewPort.ResetObjectToPlace();
 	}
 
 	static void ClonePlaceObj(TileIndex tile, final Window  w)
@@ -3111,7 +3127,7 @@ public class AirCraft {
 
 				if (BitOps.HASBIT(w.click_state, 8)) {
 					Global._place_clicked_vehicle = null;
-					ViewPort.SetObjectToPlaceWnd(Sprite.SPR_CURSOR_CLONE, VHM_RECT, w);
+					ViewPort.SetObjectToPlaceWnd(Sprite.SPR_CURSOR_CLONE, ViewPort.VHM_RECT, w);
 				} else {
 					ViewPort.ResetObjectToPlace();
 				}
@@ -3119,45 +3135,46 @@ public class AirCraft {
 
 			case 9: /* scroll to tile */
 				ViewPort.ResetObjectToPlace();
-				ScrollMainWindowToTile(w.window_number);
+				ViewPort.ScrollMainWindowToTile( TileIndex.get( w.window_number.n ) );
 				break;
 			}
 			break;
 
-		case WindowEvents.WE_PLACE_OBJ: {
-			ClonePlaceObj(e.place.tile, w);
+		case WE_PLACE_OBJ: {
+			ClonePlaceObj(e.tile, w);
 		} break;
 
-		case WindowEvents.WE_ABORT_PLACE_OBJ: {
-			CLRBIT(w.click_state, 8);
-			InvalidateWidget(w, 8);
+		case WE_ABORT_PLACE_OBJ: {
+			w.click_state = BitOps.RETCLRBIT(w.click_state, 8);
+			w.InvalidateWidget(8);
 		} break;
 
 		// check if a vehicle in a depot was clicked..
-		case WindowEvents.WE_MOUSELOOP: {
-			final Vehicle  v = _place_clicked_vehicle;
+		case WE_MOUSELOOP: {
+			final Vehicle  v = Global._place_clicked_vehicle;
 
 			// since OTTD checks all open depot windows, we will make sure that it triggers the one with a clicked clone button
 			if (v != null && BitOps.HASBIT(w.click_state, 8)) {
-				_place_clicked_vehicle = null;
+				Global._place_clicked_vehicle = null;
 				HandleCloneVehClick(v, w);
 			}
 		} break;
 
-		case WindowEvents.WE_DESTROY:
-			Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, w.window_number);
+		case WE_DESTROY:
+			Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, w.window_number.n);
 			break;
 
-		case WindowEvents.WE_DRAGDROP:
-			switch(e.click.widget) {
+		case WE_DRAGDROP:
+			switch(e.widget) {
 			case 5: {
 				Vehicle [] vp = { null };
-				VehicleID sel = w.as_traindepot_d().sel;
+				//VehicleID 
+				int sel = w.as_traindepot_d().sel;
 
 				w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
 				w.SetWindowDirty();
 
-				if (GetVehicleFromAircraftDepotWndPt(w, e.dragdrop.pt.x, e.dragdrop.pt.y, vp) == 0 &&
+				if (GetVehicleFromAircraftDepotWndPt(w, e.pt.x, e.pt.y, vp) == 0 &&
 						vp[0] != null &&
 						sel == vp[0].index) 
 				{
@@ -3170,28 +3187,28 @@ public class AirCraft {
 						w.as_traindepot_d().sel != Vehicle.INVALID_VEHICLE)	{
 					Vehicle v;
 
-					HandleButtonClick(w, 4);
+					w.HandleButtonClick( 4);
 
 					v = Vehicle.GetVehicle(w.as_traindepot_d().sel);
 					w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
 
-					_backup_orders_tile = v.tile;
-					BackupVehicleOrders(v, _backup_orders_data);
+					Global._backup_orders_tile = v.tile;
+					Vehicle.BackupVehicleOrders(v, Global._backup_orders_data[0]);
 
 					if (!Cmd.DoCommandP(v.tile, v.index, 0, null,  Cmd.CMD_SELL_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A01C_CAN_T_SELL_AIRCRAFT)))
-						_backup_orders_tile = 0;
+						Global._backup_orders_tile = null;
 				}
 				break;
 			default:
 				w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 			}
 			break;
 
-		case WindowEvents.WE_RESIZE:
-			w.vscroll.cap += e.sizing.diff.y / 24;
-			w.hscroll.cap += e.sizing.diff.x / 74;
-			w.widget[5].unkA = (w.vscroll.cap << 8) + w.hscroll.cap;
+		case WE_RESIZE:
+			w.vscroll.cap += e.diff.y / 24;
+			w.hscroll.cap += e.diff.x / 74;
+			w.widget.get(5).unkA = (w.vscroll.cap << 8) + w.hscroll.cap;
 			break;
 		}
 	}
@@ -3234,7 +3251,7 @@ public class AirCraft {
 			w.resize.step_width = 74;
 			w.resize.step_height = 24;
 			w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
-			_backup_orders_tile = 0;
+			Global._backup_orders_tile = null;
 		}
 	}
 
@@ -3320,45 +3337,46 @@ public class AirCraft {
 			VehicleGui.BuildVehicleList(vl, Vehicle.VEH_Aircraft, owner, station);
 			VehicleGui.SortVehicleList(vl);
 
-			SetVScrollCount(w, vl.list_length);
+			MiscGui.SetVScrollCount(w, vl.list_length);
 
 			// disable 'Sort By' tooltip on Unsorted sorting criteria
-			if (vl.sort_type == SORT_BY_UNSORTED) w.disabled_state |= (1 << 3);
+			if (vl.sort_type == VehicleGui.SORT_BY_UNSORTED) w.disabled_state |= (1 << 3);
 
 			/* draw the widgets */
 			{
 				final Player p = Player.GetPlayer(owner);
-				if (station == INVALID_STATION) {
+				if (station == Station.INVALID_STATION) {
 					/* Company Name -- (###) Aircraft */
 					Global.SetDParam(0, p.name_1);
 					Global.SetDParam(1, p.name_2);
 					Global.SetDParam(2, w.vscroll.count);
-					w.widget[1].unkA = Str.STR_A009_AIRCRAFT;
+					w.widget.get(1).unkA = Str.STR_A009_AIRCRAFT;
 				} else {
 					/* Station Name -- (###) Aircraft */
 					Global.SetDParam(0, station);
 					Global.SetDParam(1, w.vscroll.count);
-					w.widget[1].unkA = Str.STR_SCHEDULED_AIRCRAFT;
+					w.widget.get(1).unkA = Str.STR_SCHEDULED_AIRCRAFT;
 				}
 				w.DrawWindowWidgets();
 			}
 			/* draw sorting criteria string */
-			Gfx.DrawString(85, 15, _vehicle_sort_listing[vl.sort_type], 0x10);
+			Gfx.DrawString(85, 15, VehicleGui._vehicle_sort_listing[vl.sort_type], 0x10);
 			/* draw arrow pointing up/down for ascending/descending sorting */
-			Gfx.DoDrawString(vl.flags & VL_DESC ? DOWNARROW : UPARROW, 69, 15, 0x10);
+			Gfx.DoDrawString( (vl.flags & Vehicle.VL_DESC) != 0 ? Gfx.DOWNARROW : Gfx.UPARROW, 69, 15, 0x10);
 
 			max = Math.min(w.vscroll.pos + w.vscroll.cap, vl.list_length);
 			for (i = w.vscroll.pos; i < max; ++i) {
 				Vehicle v = Vehicle.GetVehicle(vl.sort_list[i].index);
-				StringID str;
+				//StringID 
+				int str;
 
 				assert(v.type == Vehicle.VEH_Aircraft && v.subtype <= 2);
 
 				DrawAircraftImage(v, x + 19, y + 6, Vehicle.INVALID_VEHICLE);
-				DrawVehicleProfitButton(v, x, y + 13);
+				VehicleGui.DrawVehicleProfitButton(v, x, y + 13);
 
-				Global.SetDParam(0, v.unitnumber);
-				if (IsAircraftHangarTile(v.tile) && (v.vehstatus & Vehicle.VS_HIDDEN)) {
+				Global.SetDParam(0, v.unitnumber.id);
+				if (IsAircraftHangarTile(v.tile) && 0 != (v.vehstatus & Vehicle.VS_HIDDEN)) {
 					str = Str.STR_021F;
 				} else {
 					str = v.age > v.max_age - 366 ? Str.STR_00E3 : Str.STR_00E2;
@@ -3380,21 +3398,21 @@ public class AirCraft {
 			}
 		}	break;
 
-		case WindowEvents.WE_CLICK: {
-			switch(e.click.widget) {
+		case WE_CLICK: {
+			switch(e.widget) {
 			case 3: /* Flip sorting method ascending/descending */
-				vl.flags ^= VL_DESC;
-				vl.flags |= VL_RESORT;
-				VehicleGui._sorting.aircraft.order = !!(vl.flags & VL_DESC);
+				vl.flags ^= Vehicle.VL_DESC;
+				vl.flags |= Vehicle.VL_RESORT;
+				VehicleGui._sorting.aircraft.order = 0 != (vl.flags & Vehicle.VL_DESC);
 				w.SetWindowDirty();
 				break;
 
 			case 4: case 5:/* Select sorting criteria dropdown menu */
-				w.ShowDropDownMenu( _vehicle_sort_listing, vl.sort_type, 5, 0, 0);
+				Window.ShowDropDownMenu(w, VehicleGui._vehicle_sort_listing, vl.sort_type, 5, 0, 0);
 				return;
 
 			case 7: { /* Matrix to show vehicles */
-				int id_v = (e.click.pt.y - PLY_WND_PRC__OFFSET_TOP_WIDGET) / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
+				int id_v = (e.pt.y - VehicleGui.PLY_WND_PRC__OFFSET_TOP_WIDGET) / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
 
 				if (id_v >= w.vscroll.cap) return; // click out of bounds
 
@@ -3416,72 +3434,73 @@ public class AirCraft {
 			case 9: { /* Build new Vehicle */
 				TileIndex tile;
 
-				if (!IsWindowOfPrototype(w, _player_aircraft_widgets))
+				if (!Window.IsWindowOfPrototype(w, _player_aircraft_widgets))
 					break;
 
-				tile = _last_built_aircraft_depot_tile;
+				tile = Depot._last_built_aircraft_depot_tile;
 				do {
-					if (IsAircraftHangarTile(tile) && IsTileOwner(tile, Global._local_player)) {
+					if (IsAircraftHangarTile(tile) && tile.IsTileOwner(Global._local_player)) {
 						ShowAircraftDepotWindow(tile);
 						ShowBuildAircraftWindow(tile);
 						return;
 					}
 
-					tile = TILE_MASK(tile + 1);
-				} while(tile != _last_built_aircraft_depot_tile);
+					tile = tile.iadd(1);
+					tile.TILE_MASK();
+				} while(tile != Depot._last_built_aircraft_depot_tile);
 
-				ShowBuildAircraftWindow(0);
+				ShowBuildAircraftWindow(null);
 			} break;
 
 			case 10:
-				if (!IsWindowOfPrototype(w, _player_aircraft_widgets))
+				if (!Window.IsWindowOfPrototype(w, _player_aircraft_widgets))
 					break;
 
-				ShowReplaceVehicleWindow(Vehicle.VEH_Aircraft);
+				VehicleGui.ShowReplaceVehicleWindow(Vehicle.VEH_Aircraft);
 				break;
 
 			}
 		}	break;
 
-		case WindowEvents.WE_DROPDOWN_SELECT: /* we have selected a dropdown item in the list */
-			if (vl.sort_type != e.dropdown.index) {
+		case WE_DROPDOWN_SELECT: /* we have selected a dropdown item in the list */
+			if (vl.sort_type != e.index) {
 				// value has changed . resort
-				vl.flags |= VL_RESORT;
-				vl.sort_type = e.dropdown.index;
+				vl.flags |= Vehicle.VL_RESORT;
+				vl.sort_type = (byte) e.index;
 				VehicleGui._sorting.aircraft.criteria = vl.sort_type;
 
 				// enable 'Sort By' if a sorter criteria is chosen
-				if (vl.sort_type != SORT_BY_UNSORTED) 
+				if (vl.sort_type != VehicleGui.SORT_BY_UNSORTED) 
 					w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 3);
 			}
 			w.SetWindowDirty();
 			break;
 
-		case WindowEvents.WE_CREATE: /* set up resort timer */
+		case WE_CREATE: /* set up resort timer */
 			vl.sort_list = null;
-			vl.flags = VL_REBUILD | (VehicleGui._sorting.aircraft.order << (VL_DESC - 1));
-			vl.sort_type = VehicleGui._sorting.aircraft.criteria;
-			vl.resort_timer = DAY_TICKS * PERIODIC_RESORT_DAYS;
+			vl.flags = Vehicle.VL_REBUILD | ((VehicleGui._sorting.aircraft.order ? 1 : 0) << (Vehicle.VL_DESC - 1));
+			vl.sort_type = (byte) VehicleGui._sorting.aircraft.criteria;
+			vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
 			break;
 
-		case WindowEvents.WE_DESTROY:
-			free(vl.sort_list);
+		case WE_DESTROY:
+			//free(vl.sort_list);
 			break;
 
-		case WindowEvents.WE_TICK: /* resort the list every 20 seconds orso (10 days) */
+		case WE_TICK: /* resort the list every 20 seconds orso (10 days) */
 			if (--vl.resort_timer == 0) {
 				Global.DEBUG_misc( 1, "Periodic resort aircraft list player %d station %d",
 						owner, station);
-				vl.resort_timer = DAY_TICKS * PERIODIC_RESORT_DAYS;
-				vl.flags |= VL_RESORT;
+				vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
+				vl.flags |= Vehicle.VL_RESORT;
 				w.SetWindowDirty();
 			}
 			break;
 
-		case WindowEvents.WE_RESIZE:
+		case WE_RESIZE:
 			/* Update the scroll + matrix */
-			w.vscroll.cap += e.sizing.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
-			w.widget[7].unkA = (w.vscroll.cap << 8) + 1;
+			w.vscroll.cap += e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
+			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
 			break;
 		}
 	}
