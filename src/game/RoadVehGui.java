@@ -35,7 +35,7 @@ public class RoadVehGui
 		y += 10;
 
 		/* Cargo type + capacity */
-		Global.SetDParam(0, Global._cargoc.names_long[rvi.cargo_type].id);
+		Global.SetDParam(0, Global._cargoc.names_long[rvi.cargo_type]);
 		Global.SetDParam(1, rvi.capacity);
 		Global.SetDParam(2, Str.STR_EMPTY);
 		Gfx.DrawString(x, y, Str.STR_PURCHASE_INFO_CAPACITY, 0);
@@ -55,13 +55,13 @@ public class RoadVehGui
 
 	static void DrawRoadVehImage(final Vehicle v, int x, int y, /*VehicleID*/ int selection)
 	{
-		int image = GetRoadVehImage(v, 6);
+		int image = RoadVehCmd.GetRoadVehImage(v, 6);
 		int ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner));
 		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) ormod = Sprite.PALETTE_CRASH;
 		Gfx.DrawSprite(image | ormod, x + 14, y + 6);
 
 		if (v.index == selection) {
-			Gfx.DrawFrameRect(x - 1, y - 1, x + 28, y + 12, 15, FR_BORDERONLY);
+			Gfx.DrawFrameRect(x - 1, y - 1, x + 28, y + 12, 15, Window.FR_BORDERONLY);
 		}
 	}
 
@@ -122,12 +122,12 @@ public class RoadVehGui
 
 			DrawRoadVehImage(v, 3, 57, Vehicle.INVALID_VEHICLE);
 
-			Global.SetDParam(0, GetCustomEngineName(v.engine_type.id));
+			Global.SetDParam(0, Engine.GetCustomEngineName(v.engine_type.id).id);
 			Global.SetDParam(1, 1920 + v.build_year);
 			Global.SetDParam(2, v.value);
 			Gfx.DrawString(34, 57, Str.STR_9011_BUILT_VALUE, 0);
 
-			Global.SetDParam(0, Global._cargoc.names_long[v.cargo_type].id);
+			Global.SetDParam(0, Global._cargoc.names_long[v.cargo_type]);
 			Global.SetDParam(1, v.cargo_cap);
 			Gfx.DrawString(34, 67, Str.STR_9012_CAPACITY, 0);
 
@@ -148,7 +148,7 @@ public class RoadVehGui
 			case 2: /* rename */
 				v = Vehicle.GetVehicle(w.window_number.n);
 				Global.SetDParam(0, v.unitnumber.id);
-				ShowQueryString(v.string_id, Str.STR_902C_NAME_ROAD_VEHICLE, 31, 150, w.window_class, w.window_number.n);
+				MiscGui.ShowQueryString( new StringID(v.string_id), new StringID(Str.STR_902C_NAME_ROAD_VEHICLE), 31, 150, w.window_class, w.window_number);
 				break;
 
 			case 5: /* increase int */
@@ -217,7 +217,7 @@ public class RoadVehGui
 		w.caption_color = (byte) v.owner.id;
 	}
 
-	static void CcCloneRoadVeh(boolean success, int tile, int p1, int p2)
+	static void CcCloneRoadVeh(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) ShowRoadVehViewWindow(Vehicle.GetVehicle(Global._new_roadveh_id));
 	}
@@ -296,7 +296,7 @@ public class RoadVehGui
 				Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_TURN_ROADVEH | Cmd.CMD_MSG(Str.STR_9033_CAN_T_MAKE_VEHICLE_TURN));
 				break;
 			case 9: /* show orders */
-				ShowOrdersWindow(v);
+				OrderGui.ShowOrdersWindow(v);
 				break;
 			case 10: /* show details */
 				ShowRoadVehDetailsWindow(v);
@@ -392,7 +392,6 @@ public class RoadVehGui
 
 		{
 			int num = Global.NUM_ROAD_ENGINES;
-			final Engine  e = Engine.GetEngine(Global.ROAD_ENGINES_INDEX);
 			int x = 1;
 			int y = 15;
 			int sel = w.as_buildtrain_d().sel_index;
@@ -401,18 +400,22 @@ public class RoadVehGui
 			int engine_id = Global.ROAD_ENGINES_INDEX;
 			//EngineID 
 			int selected_id = Engine.INVALID_ENGINE;
-
+			int ei = 0;
 			do {
+				final Engine  e = Engine.GetEngine(Global.ROAD_ENGINES_INDEX + ei++ );
+
 				if (BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
 					if (sel==0) selected_id = engine_id;
 					if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.cap, 0)) {
-						Gfx.DrawString(x+59, y+2, GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
-						DrawRoadVehEngine(x+29, y+6, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+						Gfx.DrawString(x+59, y+2, Engine.GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
+						RoadVehCmd.DrawRoadVehEngine(x+29, y+6, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 						y += 14;
 					}
 					sel--;
 				}
-			} while (++engine_id, ++e,--num);
+				ei++;
+				++engine_id;
+			} while (--num > 0);
 
 			w.as_buildtrain_d().sel_engine = selected_id;
 			if (selected_id != Engine.INVALID_ENGINE) {
@@ -447,30 +450,32 @@ public class RoadVehGui
 			case 2: { /* listbox */
 				int i = (e.pt.y - 14) / 14;
 				if (i < w.vscroll.cap) {
-					w.as_buildtrain_d().sel_index = i + w.vscroll.pos;
+					w.as_buildtrain_d().sel_index = (byte) (i + w.vscroll.pos);
 					w.SetWindowDirty();
 				}
 			} break;
 
 			case 5: { /* build */
-				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
-				if (sel_eng.id != Engine.INVALID_ENGINE)
-					Cmd.DoCommandP(w.window_number.n, sel_eng.id, 0, RoadVehGui::CcBuildRoadVeh, Cmd.CMD_BUILD_ROAD_VEH | Cmd.CMD_MSG(Str.STR_9009_CAN_T_BUILD_ROAD_VEHICLE));
+				//EngineID 
+				int sel_eng = w.as_buildtrain_d().sel_engine;
+				if (sel_eng != Engine.INVALID_ENGINE)
+					Cmd.DoCommandP( TileIndex.get( w.window_number.n ), sel_eng, 0, RoadVehGui::CcBuildRoadVeh, Cmd.CMD_BUILD_ROAD_VEH | Cmd.CMD_MSG(Str.STR_9009_CAN_T_BUILD_ROAD_VEHICLE));
 			} break;
 
 			case 6: { /* rename */
-				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
-				if (sel_eng.id != Engine.INVALID_ENGINE) {
+				//EngineID 
+				int sel_eng = w.as_buildtrain_d().sel_engine;
+				if (sel_eng != Engine.INVALID_ENGINE) {
 					w.as_buildtrain_d().rename_engine = sel_eng;
-					ShowQueryString(GetCustomEngineName(sel_eng),
-						Str.STR_9036_RENAME_ROAD_VEHICLE_TYPE, 31, 160, w.window_class, w.window_number.n);
+					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng),
+						new StringID( Str.STR_9036_RENAME_ROAD_VEHICLE_TYPE ), 31, 160, w.window_class, w.window_number);
 				}
 			}	break;
 			}
 			break;
 
 		case WE_4:
-			if (w.window_number.n != 0 && !Window.FindWindowById(Window.WC_VEHICLE_DEPOT, w.window_number.n)) {
+			if (w.window_number.n != 0 && null == Window.FindWindowById(Window.WC_VEHICLE_DEPOT, w.window_number.n)) {
 				w.DeleteWindow();
 			}
 			break;
@@ -478,7 +483,7 @@ public class RoadVehGui
 		case WE_ON_EDIT_TEXT:
 			if (e.str != null) {
 				Global._cmd_text = e.str;
-				Cmd.DoCommandP(null, w.as_buildtrain_d().rename_engine.id, 0, null,
+				Cmd.DoCommandP(null, w.as_buildtrain_d().rename_engine, 0, null,
 					Cmd.CMD_RENAME_ENGINE | Cmd.CMD_MSG(Str.STR_9037_CAN_T_RENAME_ROAD_VEHICLE));
 			}
 			break;
@@ -538,7 +543,7 @@ public class RoadVehGui
 	{
 		TileIndex tile;
 		//Vehicle v;
-		int num,x,y;
+		int x,y;
 		Depot depot;
 
 		tile = TileIndex.get( w.window_number.n );
@@ -548,15 +553,15 @@ public class RoadVehGui
 			tile.IsTileOwner( Global._local_player) ? 0 : ((1<<4) | (1<<7) | (1<<8));
 
 		/* determine amount of items for scroller */
-		num = 0;
+		int [] num = {0};
 		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
 			if (v.type == Vehicle.VEH_Road && v.road.state == 254 && v.tile == tile)
-				num++;
+				num[0]++;
 		});
 
-		MiscGui.SetVScrollCount(w, (num + w.hscroll.cap - 1) / w.hscroll.cap);
+		MiscGui.SetVScrollCount(w, (num[0] + w.hscroll.cap - 1) / w.hscroll.cap);
 
 		/* locate the depot struct */
 		depot = Depot.GetDepotByTile(tile);
@@ -567,26 +572,30 @@ public class RoadVehGui
 
 		x = 2;
 		y = 15;
-		num = w.vscroll.pos * w.hscroll.cap;
+		num[0] = w.vscroll.pos * w.hscroll.cap;
 
 		//FOR_ALL_VEHICLES(v) 
-		Vehicle.forEach( (v) ->
+		//Vehicle.forEach( (v) ->
+		Iterator<Vehicle> ii = Vehicle.getIterator();
+		while(ii.hasNext())
 		{
+			Vehicle v = ii.next();
+			
 			if (v.type == Vehicle.VEH_Road && v.road.state == 254 && v.tile == tile &&
-					--num < 0 && num >=	-w.vscroll.cap * w.hscroll.cap) {
-				DrawRoadVehImage(v, x+24, y, w.as_traindepot_d().sel.id);
+					--num[0] < 0 && num[0] >=	-w.vscroll.cap * w.hscroll.cap) {
+				DrawRoadVehImage(v, x+24, y, w.as_traindepot_d().sel);
 
 				Global.SetDParam(0, v.unitnumber.id);
 				Gfx.DrawString(x, y+2, (int)(v.max_age-366) >= v.age ? Str.STR_00E2 : Str.STR_00E3, 0);
 
-				Gfx.DrawSprite((v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x + 16, y);
+				Gfx.DrawSprite((v.vehstatus & Vehicle.VS_STOPPED)!=0 ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x + 16, y);
 
 				if ((x+=56) == 2 + 56 * w.hscroll.cap) {
 					x = 2;
 					y += 14;
 				}
 			}
-		});
+		}
 	}
 
 	static int GetVehicleFromRoadDepotWndPt(final Window w, int x, int y, Vehicle []veh)
@@ -634,14 +643,14 @@ public class RoadVehGui
 		if (mode > 0) return;
 
 		// share / copy orders
-		if (_thd.place_mode && mode <= 0) { Global._place_clicked_vehicle = v[0]; return; }
+		if (ViewPort._thd.place_mode != 0 && mode <= 0) { Global._place_clicked_vehicle = v[0]; return; }
 
 		switch (mode) {
 		case 0: // start dragging of vehicle
 			if (v[0] != null) {
-				w.as_traindepot_d().sel = VehicleID.get( v[0].index );
+				w.as_traindepot_d().sel = v[0].index;
 				w.SetWindowDirty();
-				SetObjectToPlaceWnd( Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner)) + GetRoadVehImage(v, 6), 4, w);
+				ViewPort.SetObjectToPlaceWnd( Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v[0].owner)) + RoadVehCmd.GetRoadVehImage(v[0], 6), 4, w);
 			}
 			break;
 
@@ -668,7 +677,7 @@ public class RoadVehGui
 	{
 		if (v == null || v.type != Vehicle.VEH_Road) return;
 
-		Cmd.DoCommandP(w.window_number.n, v.index, Global._ctrl_pressed ? 1 : 0, RoadVehGui::CcCloneRoadVeh,
+		Cmd.DoCommandP( TileIndex.get( w.window_number.n ), v.index, Global._ctrl_pressed ? 1 : 0, RoadVehGui::CcCloneRoadVeh,
 			Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_9009_CAN_T_BUILD_ROAD_VEHICLE)
 		);
 
@@ -677,7 +686,7 @@ public class RoadVehGui
 
 	static void ClonePlaceObj(TileIndex tile, final Window  w)
 	{
-		final Vehicle  v = CheckMouseOverVehicle();
+		final Vehicle  v = ViewPort.CheckMouseOverVehicle();
 
 		if (v != null) HandleCloneVehClick(v, w);
 	}
@@ -697,7 +706,7 @@ public class RoadVehGui
 
 			case 7:
 				ViewPort.ResetObjectToPlace();
-				ShowBuildRoadVehWindow(w.window_number.n);
+				ShowBuildRoadVehWindow( TileIndex.get( w.window_number.n ) );
 				break;
 
 			case 8: /* clone button */
@@ -706,7 +715,7 @@ public class RoadVehGui
 
 					if (BitOps.HASBIT(w.click_state, 8)) {
 						Global._place_clicked_vehicle = null;
-						ViewPort.SetObjectToPlaceWnd(Sprite.SPR_CURSOR_CLONE, VHM_RECT, w);
+						ViewPort.SetObjectToPlaceWnd(Sprite.SPR_CURSOR_CLONE, ViewPort.VHM_RECT, w);
 					} else {
 						ViewPort.ResetObjectToPlace();
 					}
@@ -714,7 +723,7 @@ public class RoadVehGui
 
 				case 9: /* scroll to tile */
 					ViewPort.ResetObjectToPlace();
-					ViewPort.ScrollMainWindowToTile(w.window_number.n);
+					ViewPort.ScrollMainWindowToTile( TileIndex.get(  w.window_number.n ) );
 						break;
 			}
 		} break;
@@ -747,14 +756,15 @@ public class RoadVehGui
 			switch(e.widget) {
 			case 5: {
 				Vehicle [] v = {null};
-				VehicleID sel = w.as_traindepot_d().sel;
+				//VehicleID 
+				int sel = w.as_traindepot_d().sel;
 
 				w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
 				w.SetWindowDirty();
 
 				if (GetVehicleFromRoadDepotWndPt(w, e.pt.x, e.pt.y, v) == 0 &&
 						v != null &&
-						sel == v.index) {
+						sel == v[0].index) {
 					ShowRoadVehViewWindow(v[0]);
 				}
 			} break;
@@ -886,7 +896,7 @@ public class RoadVehGui
 			MiscGui.SetVScrollCount(w, vl.list_length);
 
 			// disable 'Sort By' tooltip on Unsorted sorting criteria
-			if (vl.sort_type == SORT_BY_UNSORTED)
+			if (vl.sort_type == VehicleGui.SORT_BY_UNSORTED)
 				w.disabled_state |= (1 << 3);
 
 			/* draw the widgets */
@@ -907,7 +917,7 @@ public class RoadVehGui
 				w.DrawWindowWidgets();
 			}
 			/* draw sorting criteria string */
-			Gfx.DrawString(85, 15, _vehicle_sort_listing[vl.sort_type], 0x10);
+			Gfx.DrawString(85, 15, VehicleGui._vehicle_sort_listing[vl.sort_type], 0x10);
 			/* draw arrow pointing up/down for ascending/descending sorting */
 			Gfx.DoDrawString(0 != (vl.flags & Vehicle.VL_DESC) ? Gfx.DOWNARROW : Gfx.UPARROW, 69, 15, 0x10);
 
@@ -920,10 +930,10 @@ public class RoadVehGui
 				assert(v.type == Vehicle.VEH_Road && v.owner.id == owner);
 
 				DrawRoadVehImage(v, x + 22, y + 6, Vehicle.INVALID_VEHICLE);
-				DrawVehicleProfitButton(v, x, y + 13);
+				VehicleGui.DrawVehicleProfitButton(v, x, y + 13);
 
 				Global.SetDParam(0, v.unitnumber.id);
-				if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) && (v.vehstatus & Vehicle.VS_HIDDEN))
+				if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) && 0!=(v.vehstatus & Vehicle.VS_HIDDEN))
 					str = Str.STR_021F;
 				else
 					str = v.age > v.max_age - 366 ? Str.STR_00E3 : Str.STR_00E2;
@@ -947,12 +957,12 @@ public class RoadVehGui
 			case 3: /* Flip sorting method ascending/descending */
 				vl.flags ^= Vehicle.VL_DESC;
 				vl.flags |= Vehicle.VL_RESORT;
-				VehicleGui._sorting.roadveh.order = !!(vl.flags & Vehicle.VL_DESC);
+				VehicleGui._sorting.roadveh.order = 0 != (vl.flags & Vehicle.VL_DESC);
 				w.SetWindowDirty();
 				break;
 
 			case 4: case 5:/* Select sorting criteria dropdown menu */
-				w.ShowDropDownMenu( _vehicle_sort_listing, vl.sort_type, 5, 0, 0);
+				Window.ShowDropDownMenu( w, VehicleGui._vehicle_sort_listing, vl.sort_type, 5, 0, 0);
 				return;
 			case 7: { /* Matrix to show vehicles */
 				int id_v = (e.pt.y - VehicleGui.PLY_WND_PRC__OFFSET_TOP_WIDGET) / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL;
@@ -1008,11 +1018,11 @@ public class RoadVehGui
 			if (vl.sort_type != e.index) {
 				// value has changed . resort
 				vl.flags |= Vehicle.VL_RESORT;
-				vl.sort_type = e.index;
+				vl.sort_type = (byte) e.index;
 				VehicleGui._sorting.roadveh.criteria = vl.sort_type;
 
 				// enable 'Sort By' if a sorter criteria is chosen
-				if (vl.sort_type != SORT_BY_UNSORTED)
+				if (vl.sort_type != VehicleGui.SORT_BY_UNSORTED)
 					w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 3);
 			}
 			w.SetWindowDirty();
@@ -1020,9 +1030,9 @@ public class RoadVehGui
 
 		case WE_CREATE: /* set up resort timer */
 			vl.sort_list = null;
-			vl.flags = Vehicle.VL_REBUILD | (VehicleGui._sorting.roadveh.order << (Vehicle.VL_DESC - 1));
-			vl.sort_type = VehicleGui._sorting.roadveh.criteria;
-			vl.resort_timer = Global.DAY_TICKS * PERIODIC_RESORT_DAYS;
+			vl.flags = Vehicle.VL_REBUILD | ((VehicleGui._sorting.roadveh.order ? 1 : 0) << (Vehicle.VL_DESC - 1));
+			vl.sort_type = (byte) VehicleGui._sorting.roadveh.criteria;
+			vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
 			break;
 
 		case WE_DESTROY:
@@ -1033,7 +1043,7 @@ public class RoadVehGui
 			if (--vl.resort_timer == 0) {
 				Global.DEBUG_misc(1, "Periodic resort road vehicles list player %d station %d",
 					owner, station);
-				vl.resort_timer = Global.DAY_TICKS * PERIODIC_RESORT_DAYS;
+				vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
 				vl.flags |= Vehicle.VL_RESORT;
 				w.SetWindowDirty();
 			}
