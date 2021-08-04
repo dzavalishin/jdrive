@@ -399,7 +399,7 @@ public class UnmovableCmd extends UnmovableTables {
 		}
 	}
 
-	final TileTypeProcs _tile_type_unmovable_procs = new TileTypeProcs(
+	final static TileTypeProcs _tile_type_unmovable_procs = new TileTypeProcs(
 			UnmovableCmd::DrawTile_Unmovable,             /* draw_tile_proc */
 			UnmovableCmd::GetSlopeZ_Unmovable,            /* get_slope_z_proc */
 			UnmovableCmd::ClearTile_Unmovable,            /* clear_tile_proc */

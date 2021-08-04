@@ -483,12 +483,12 @@ public class Player
 		bad_town_name:;
 
 		if (president_name_1 == Strings.SPECSTR_PRESIDENT_NAME) {
-			str = Strings.SPECSTR_ANDCO_NAME;
+			str = new StringID( Strings.SPECSTR_ANDCO_NAME );
 			strp = president_name_2;
 			GenerateCompanyName_set_name(p, t, str, strp);
 			return;
 		} else {
-			str = Strings.SPECSTR_ANDCO_NAME;
+			str = new StringID( Strings.SPECSTR_ANDCO_NAME );
 			strp = Hal.Random();
 			goto verify_name;
 		}
@@ -764,7 +764,7 @@ public class Player
 		}
 
 		if (Global._patches.show_finances && Global._local_player.id != Owner.OWNER_SPECTATOR) {
-			ShowPlayerFinances(Global._local_player);
+			PlayerGui.ShowPlayerFinances(Global._local_player);
 			Player p = GetPlayer(Global._local_player);
 
 			/* TODO sound

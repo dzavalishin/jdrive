@@ -37,11 +37,11 @@ public class Landscape extends GenLandTable
 		Town._tile_type_town_procs,
 		Tree._tile_type_trees_procs,
 		Station._tile_type_station_procs,
-		_tile_type_water_procs,
-		_tile_type_dummy_procs,
+		WaterCmd._tile_type_water_procs,
+		DummyLand._tile_type_dummy_procs,
 		Industry._tile_type_industry_procs,
-		_tile_type_tunnelbridge_procs,
-		_tile_type_unmovable_procs,
+		TunnelBridgeCmd._tile_type_tunnelbridge_procs,
+		UnmovableCmd._tile_type_unmovable_procs,
 	};
 	 
 	/* landscape slope => sprite */
@@ -183,10 +183,9 @@ public class Landscape extends GenLandTable
 
 	public static int GetSlopeZ(int x,  int y)
 	{
-		TileInfo ti;
-
+		TileInfo ti = new TileInfo();
+		
 		FindLandscapeHeight(ti, x, y);
-
 		return _tile_type_procs[ti.type].get_slope_z_proc.apply(ti);
 	}
 
@@ -213,7 +212,8 @@ public class Landscape extends GenLandTable
 	{
 		int sprite_base = Sprite.SPR_SLOPES_BASE-14;
 
-		TileInfo ti2;
+		TileInfo ti2 = new TileInfo();
+		
 		FindLandscapeHeight(ti2, ti.x, ti.y - 1);
 		if (hasFoundation(ti2, true)) sprite_base += 22;		// foundation in NW direction
 		FindLandscapeHeight(ti2, ti.x - 1, ti.y);
@@ -471,7 +471,7 @@ public class Landscape extends GenLandTable
 
 	static void ConvertGroundTilesIntoWaterTiles()
 	{
-		IntContainer h;
+		IntContainer h = new IntContainer();
 
 		for (int ti = 0; ti < Global.MapSize(); ++ti) 
 		{

@@ -1513,7 +1513,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		return tile;
 	}
 
-	final TileTypeProcs _tile_type_tunnelbridge_procs = new TileTypeProcs(
+	final static TileTypeProcs _tile_type_tunnelbridge_procs = new TileTypeProcs(
 			TunnelBridgeCmd::DrawTile_TunnelBridge,					/* draw_tile_proc */
 			TunnelBridgeCmd::GetSlopeZ_TunnelBridge,					/* get_slope_z_proc */
 			TunnelBridgeCmd::ClearTile_TunnelBridge,					/* clear_tile_proc */

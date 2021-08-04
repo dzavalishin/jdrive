@@ -775,7 +775,7 @@ public class WaterCmd extends WaterTables
 		Depot._last_built_ship_depot_tile = null;
 	}
 
-	final TileTypeProcs _tile_type_water_procs = new TileTypeProcs(
+	final static TileTypeProcs _tile_type_water_procs = new TileTypeProcs(
 		WaterCmd::DrawTile_Water,						/* draw_tile_proc */
 		WaterCmd::GetSlopeZ_Water,					/* get_slope_z_proc */
 		WaterCmd::ClearTile_Water,					/* clear_tile_proc */

@@ -66,7 +66,7 @@ public class DummyLand {
 		return 0;
 	}
 
-	final TileTypeProcs _tile_type_dummy_procs = new TileTypeProcs(
+	final static TileTypeProcs _tile_type_dummy_procs = new TileTypeProcs(
 		DummyLand::DrawTile_Dummy,						/* draw_tile_proc */
 		DummyLand::GetSlopeZ_Dummy,					/* get_slope_z_proc */
 		DummyLand::ClearTile_Dummy,					/* clear_tile_proc */
