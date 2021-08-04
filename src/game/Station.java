@@ -421,20 +421,20 @@ public class Station implements IPoolItem
 		// show a message to report that the acceptance was changed?
 		if (show_msg && owner == Global._local_player && 0 != facilities) {
 			int accept=0, reject=0; /* these contain two string ids each */
-			final StringID[] str = _cargoc.names_s;
+			final int[] str = Global._cargoc.names_s;
 
 			int si = 0;
 			do {
-				if (new_acc & 1) {
+				if(0 != (new_acc & 1)) {
 					if(0 ==(old_acc & 1)) accept = (accept << 16) | str[si];
 				} else {
-					if(old_acc & 1) reject = (reject << 16) | str[si];
+					if(0 !=(old_acc & 1)) reject = (reject << 16) | str[si];
 				}
 				si++;
 			} while ((new_acc>>=1) != (old_acc>>=1));
 
-			ShowRejectOrAcceptNews(st, accept, Str.STR_3040_NOW_ACCEPTS);
-			ShowRejectOrAcceptNews(st, reject, Str.STR_303E_NO_LONGER_ACCEPTS);
+			ShowRejectOrAcceptNews(accept, new StringID(Str.STR_3040_NOW_ACCEPTS));
+			ShowRejectOrAcceptNews(reject, new StringID(Str.STR_303E_NO_LONGER_ACCEPTS));
 		}
 
 		// redraw the station view since acceptance changed
@@ -1131,8 +1131,8 @@ public class Station implements IPoolItem
 		tile_org = TileIndex.TileVirtXY(x, y);
 
 		/* Does the authority allow this? */
-		if (0 == (flags & Cmd.DC_NO_TOWN_RATING) && !CheckIfAuthorityAllows(tile_org)) return Cmd.CMD_ERROR;
-		if (!ValParamRailtype(p2 & 0xF)) return Cmd.CMD_ERROR;
+		if (0 == (flags & Cmd.DC_NO_TOWN_RATING) && !Town.CheckIfAuthorityAllows(tile_org)) return Cmd.CMD_ERROR;
+		if (!Player.ValParamRailtype(p2 & 0xF)) return Cmd.CMD_ERROR;
 
 		/* unpack parameters */
 		direction = p1 & 1;
@@ -1223,9 +1223,9 @@ public class Station implements IPoolItem
 
 			tile_delta = direction != 0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 
-			statspec = (p2 & 0x10) != 0 ? GetCustomStation(STAT_CLASS_DFLT, p2 >> 8) : null;
+			statspec = (p2 & 0x10) != 0 ? GetCustomStation(Station.STAT_CLASS_DFLT, p2 >> 8) : null;
 			byte [] layout_ptr = new byte[numtracks * plat_len];
-			Station.GetStationLayout(layout_ptr, numtracks, plat_len, statspec);
+			GetStationLayout(layout_ptr, numtracks, plat_len, statspec);
 
 			int lpi = 0; // layout_ptr index
 
@@ -1245,7 +1245,7 @@ public class Station implements IPoolItem
 
 					tile.madd( tile_delta );
 				} while (--w > 0);
-				tile_org += tile_delta ^ TileIndex.TileDiffXY(1, 1); // perpendicular to tile_delta
+				tile_org = tile_org.iadd( tile_delta.diff ^ TileIndex.TileDiffXY(1, 1).diff ); // perpendicular to tile_delta
 			} while (--numtracks > 0);
 
 			st.UpdateStationVirtCoordDirty();
@@ -1295,7 +1295,7 @@ public class Station implements IPoolItem
 				if( restart ) continue;
 
 				// check the upper side, y = constant, x changes
-				for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(i, 0));) {
+				for (i = 0; !st.TileBelongsToRailStation(tile.iadd(i, 0));) {
 					// the left side is unused?
 					if (++i == w) {
 						tile.madd(0, 1);
@@ -1307,7 +1307,7 @@ public class Station implements IPoolItem
 				if( restart ) continue;
 
 				// check the lower side, y = constant, x changes
-				for (i = 0; !TileBelongsToRailStation(st, tile + TileDiffXY(i, h - 1));) {
+				for (i = 0; !st.TileBelongsToRailStation(tile.iadd(i, h - 1));) {
 					// the left side is unused?
 					if (++i == w) {
 						h--;
@@ -1428,7 +1428,7 @@ public class Station implements IPoolItem
 
 			if ((dsg.variable >> 6) == 0) {
 				/* General property */
-				value = GetDeterministicSpriteValue(dsg.variable);
+				value = Sprite.GetDeterministicSpriteValue(dsg.variable);
 
 			} else {
 				if (st == null) {

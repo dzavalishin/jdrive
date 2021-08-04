@@ -1,3 +1,4 @@
+#if 0
 /* $Id: sprite.c 3044 2005-10-14 20:10:12Z peter1138 $ */
 
 #include "stdafx.h"

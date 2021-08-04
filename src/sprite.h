@@ -90,10 +90,11 @@ typedef struct DeterministicSpriteGroup {
 	SpriteGroup *default_group;
 } DeterministicSpriteGroup;
 
-typedef enum RandomizedSpriteGroupCompareMode {
+/*typedef enum RandomizedSpriteGroupCompareMode {
 	RSG_CMP_ANY,
 	RSG_CMP_ALL,
 } RandomizedSpriteGroupCompareMode;
+*/
 
 typedef struct RandomizedSpriteGroup {
 	// Take this object:

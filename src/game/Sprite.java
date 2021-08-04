@@ -24,7 +24,14 @@ public class Sprite extends Sprites {
 		width = x_offs = y_offs = 0;
 		data = null;	
 	}
-	
+
+
+	//typedef enum RandomizedSpriteGroupCompareMode {
+	//public static final int RSG_CMP_ANY = 0;
+	//public static final int RSG_CMP_ALL = 1;
+	//} RandomizedSpriteGroupCompareMode;
+
+
 	// It is natural to have it here
 	public static Sprite GetSprite(SpriteID sprite)
 	{
@@ -37,7 +44,7 @@ public class Sprite extends Sprites {
 
 	public static void UnloadSpriteGroup(SpriteGroup group) {
 		// TODO UnloadSpriteGroup stub
-		
+
 	}
 
 	public static int PLAYER_SPRITE_COLOR(PlayerID player) {
@@ -47,7 +54,7 @@ public class Sprite extends Sprites {
 	public static int SPRITE_PALETTE(int color) {
 		return color | PALETTE_MODIFIER_COLOR;
 	}
-	
+
 	public static boolean is_custom_sprite(int x) { return x >= 0xFD; }
 	public static boolean IS_CUSTOM_FIRSTHEAD_SPRITE(int x)  { return (x == 0xFD); }
 	public static boolean IS_CUSTOM_SECONDHEAD_SPRITE(int x)  { return (x == 0xFE);	 }
@@ -56,6 +63,178 @@ public class Sprite extends Sprites {
 	{
 		return (image & SPRITE_MASK) | PALETTE_TO_TRANSPARENT;		
 	}
+
+
+
+
+
+
+
+	static SpriteGroup EvalDeterministicSpriteGroup(final DeterministicSpriteGroup dsg, int value)
+	{
+		int i;
+
+		value >>= dsg.shift_num; // This should bring us to the byte range.
+		value &= dsg.and_mask;
+
+		if (dsg.operation != DeterministicSpriteGroupOperation.DSG_OP_NONE)
+			value +=  dsg.add_val;
+
+		switch (dsg.operation) {
+		case DSG_OP_DIV:
+			value /=  dsg.divmod_val;
+			break;
+		case DSG_OP_MOD:
+			value %=  dsg.divmod_val;
+			break;
+		case DSG_OP_NONE:
+			break;
+		}
+
+		for (i = 0; i < dsg.num_ranges; i++) {
+			DeterministicSpriteGroupRange range = dsg.ranges[i];
+
+			if (range.low <= value && value <= range.high)
+				return range.group;
+		}
+
+		return dsg.default_group;
+	}
+
+	static int GetDeterministicSpriteValue(byte var)
+	{
+		switch (var) {
+		case 0x00:
+			return Global._date;
+		case 0x01:
+			return Global._cur_year;
+		case 0x02:
+			return Global._cur_month;
+		case 0x03:
+			return GameOptions._opt.landscape;
+		case 0x09:
+			return Global._date_fract;
+		case 0x0A:
+			return Global._tick_counter;
+		case 0x0C:
+			/* If we got here, it means there was no callback or
+			 * callbacks aren't supported on our callpath. */
+			return 0;
+		default:
+			return -1;
+		}
+	}
+
+	static SpriteGroup [] EvalRandomizedSpriteGroup(final RandomizedSpriteGroup rsg, byte random_bits)
+	{
+		int mask;
+		int index;
+
+		/* Noone likes mangling with bits, but you don't get around it here.
+		 * Sorry. --pasky */
+		// rsg.num_groups is always power of 2
+		mask = (rsg.num_groups - 1) << rsg.lowest_randbit;
+		index = (random_bits & mask) >> rsg.lowest_randbit;
+		assert(index < rsg.num_groups);
+		return rsg.groups[index];
+	}
+
+	static int RandomizedSpriteGroupTriggeredBits(final RandomizedSpriteGroup rsg,
+			int triggers, byte [] waiting_triggers)
+	{
+		int match = rsg.triggers & (waiting_triggers[0] | triggers);
+		boolean res;
+
+		if (rsg.cmp_mode == RandomizedSpriteGroupCompareMode.RSG_CMP_ANY) {
+			res = (match != 0);
+		} else { /* RSG_CTileTypes.MP_ALL */
+			res = (match == rsg.triggers);
+		}
+
+		if (!res) {
+			waiting_triggers[0] |= triggers;
+			return 0;
+		}
+
+		waiting_triggers[0] &= ~match;
+
+		return (rsg.num_groups - 1) << rsg.lowest_randbit;
+	}
+
+	/**
+	 * Traverse a sprite group and release its and its child's memory.
+	 * A group is only released if its reference count is zero.
+	 * We pass a pointer to a pointer so that the original reference can be set to null.
+	 * @param group_ptr Pointer to sprite group reference.
+	 */
+	static void UnloadSpriteGroup(SpriteGroup [][]group_ptr)
+	{
+		/*
+		SpriteGroup []group;
+		int i;
+
+		assert(group_ptr != null);
+		assert(group_ptr[0] != null);
+
+		group = *group_ptr;
+		 *group_ptr = null; // Remove this reference.
+
+		group.ref_count--;
+		if (group.ref_count > 0) {
+			Global.DEBUG_grf( 6, "UnloadSpriteGroup: Group at `%p' (type %d) has %d reference(s) left.", group, group.type, group.ref_count);
+			return; // Still some references left, so don't clear up.
+		}
+
+		Global.DEBUG_grf( 6, "UnloadSpriteGroup: Releasing group at `%p'.", group);
+		switch (group.type) {
+			case SGT_REAL:
+			{
+				RealSpriteGroup *rsg = &group.g.real;
+				for (i = 0; i < rsg.loading_count; i++) {
+					if (rsg.loading[i] != null) UnloadSpriteGroup(&rsg.loading[i]);
+				}
+				for (i = 0; i < rsg.loaded_count; i++) {
+					if (rsg.loaded[i] != null) UnloadSpriteGroup(&rsg.loaded[i]);
+				}
+				free(group);
+				return;
+			}
+
+			case SGT_DETERMINISTIC:
+			{
+				DeterministicSpriteGroup *dsg = &group.g.determ;
+				for (i = 0; i < group.g.determ.num_ranges; i++) {
+					if (dsg.ranges[i].group != null) UnloadSpriteGroup(&dsg.ranges[i].group);
+				}
+				if (dsg.default_group != null) UnloadSpriteGroup(&dsg.default_group);
+				free(group.g.determ.ranges);
+				free(group);
+				return;
+			}
+
+			case SGT_RANDOMIZED:
+			{
+				for (i = 0; i < group.g.random.num_groups; i++) {
+					if (group.g.random.groups[i] != null) UnloadSpriteGroup(&group.g.random.groups[i]);
+				}
+				free(group.g.random.groups);
+				free(group);
+				return;
+			}
+
+			case SGT_CALLBACK:
+			case SGT_RESULT:
+				free(group);
+				return;
+		}
+
+		Global.DEBUG_grf( 1, "Unable to remove unknown sprite group type `0x%x'.", group.type);
+		 */
+	}
+
+
+
+
 }
 
 // User should decide by object type
