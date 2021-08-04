@@ -1090,7 +1090,7 @@ public class MiscGui {
 	//static char _orig_str_buf[lengthof(_edit_str_buf)];
 	private static String _orig_str_buf;
 
-	void ShowQueryString(StringID str, StringID caption, int maxlen, int maxwidth, WindowClass window_class, WindowNumber window_number)
+	static void ShowQueryString(StringID str, StringID caption, int maxlen, int maxwidth, WindowClass window_class, WindowNumber window_number)
 	{
 		Window w;
 		int realmaxlen = maxlen & ~0x1000;

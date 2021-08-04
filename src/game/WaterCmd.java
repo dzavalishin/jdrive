@@ -74,7 +74,7 @@ public class WaterCmd extends WaterTables
 
 		if(0 != (flags & Cmd.DC_EXEC) ) {
 			depot.xy = tile;
-			Global._last_built_ship_depot_tile = tile;
+			Depot._last_built_ship_depot_tile = tile;
 			depot.town_index = Town.ClosestTownFromTile(tile, (int)-1).index;
 
 			Landscape.ModifyTile(tile,
@@ -771,7 +771,7 @@ public class WaterCmd extends WaterTables
 
 	void InitializeDock()
 	{
-		Global._last_built_ship_depot_tile = null;
+		Depot._last_built_ship_depot_tile = null;
 	}
 
 	final TileTypeProcs _tile_type_water_procs = new TileTypeProcs(

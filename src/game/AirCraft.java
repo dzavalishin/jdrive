@@ -3253,9 +3253,9 @@ public class AirCraft {
 			Order order = oi.next();
 			String ss = String.valueOf(0xAF); //"\xAF"
 			if (sel == 0) {
-				Global._stringwidth_base = 0xE0;
+				Gfx._stringwidth_base = 0xE0;
 				Gfx.DoDrawString( ss, x-6, y, 16);
-				Global._stringwidth_base = 0;
+				Gfx._stringwidth_base = 0;
 			}
 			sel--;
 
@@ -3385,7 +3385,7 @@ public class AirCraft {
 			case 3: /* Flip sorting method ascending/descending */
 				vl.flags ^= VL_DESC;
 				vl.flags |= VL_RESORT;
-				_sorting.aircraft.order = !!(vl.flags & VL_DESC);
+				VehicleGui._sorting.aircraft.order = !!(vl.flags & VL_DESC);
 				w.SetWindowDirty();
 				break;
 
@@ -3448,7 +3448,7 @@ public class AirCraft {
 				// value has changed . resort
 				vl.flags |= VL_RESORT;
 				vl.sort_type = e.dropdown.index;
-				_sorting.aircraft.criteria = vl.sort_type;
+				VehicleGui._sorting.aircraft.criteria = vl.sort_type;
 
 				// enable 'Sort By' if a sorter criteria is chosen
 				if (vl.sort_type != SORT_BY_UNSORTED) 
@@ -3459,8 +3459,8 @@ public class AirCraft {
 
 		case WindowEvents.WE_CREATE: /* set up resort timer */
 			vl.sort_list = null;
-			vl.flags = VL_REBUILD | (_sorting.aircraft.order << (VL_DESC - 1));
-			vl.sort_type = _sorting.aircraft.criteria;
+			vl.flags = VL_REBUILD | (VehicleGui._sorting.aircraft.order << (VL_DESC - 1));
+			vl.sort_type = VehicleGui._sorting.aircraft.criteria;
 			vl.resort_timer = DAY_TICKS * PERIODIC_RESORT_DAYS;
 			break;
 

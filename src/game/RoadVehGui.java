@@ -947,7 +947,7 @@ public class RoadVehGui
 			case 3: /* Flip sorting method ascending/descending */
 				vl.flags ^= Vehicle.VL_DESC;
 				vl.flags |= Vehicle.VL_RESORT;
-				_sorting.roadveh.order = !!(vl.flags & Vehicle.VL_DESC);
+				VehicleGui._sorting.roadveh.order = !!(vl.flags & Vehicle.VL_DESC);
 				w.SetWindowDirty();
 				break;
 
@@ -1009,7 +1009,7 @@ public class RoadVehGui
 				// value has changed . resort
 				vl.flags |= Vehicle.VL_RESORT;
 				vl.sort_type = e.index;
-				_sorting.roadveh.criteria = vl.sort_type;
+				VehicleGui._sorting.roadveh.criteria = vl.sort_type;
 
 				// enable 'Sort By' if a sorter criteria is chosen
 				if (vl.sort_type != SORT_BY_UNSORTED)
@@ -1020,8 +1020,8 @@ public class RoadVehGui
 
 		case WE_CREATE: /* set up resort timer */
 			vl.sort_list = null;
-			vl.flags = Vehicle.VL_REBUILD | (_sorting.roadveh.order << (Vehicle.VL_DESC - 1));
-			vl.sort_type = _sorting.roadveh.criteria;
+			vl.flags = Vehicle.VL_REBUILD | (VehicleGui._sorting.roadveh.order << (Vehicle.VL_DESC - 1));
+			vl.sort_type = VehicleGui._sorting.roadveh.criteria;
 			vl.resort_timer = Global.DAY_TICKS * PERIODIC_RESORT_DAYS;
 			break;
 

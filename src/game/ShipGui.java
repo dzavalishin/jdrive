@@ -6,6 +6,7 @@ import game.util.BitOps;
 import game.util.GameDate;
 import game.util.Strings;
 import game.util.YearMonthDay;
+import game.util.wcustom.vehiclelist_d;
 
 public class ShipGui 
 {
@@ -30,7 +31,7 @@ public class ShipGui
 		/* Cargo type + capacity */
 		Global.SetDParam(0, Global._cargoc.names_long[svi.cargo_type]);
 		Global.SetDParam(1, svi.capacity);
-		Global.SetDParam(2, svi.refittable ? Str.STR_9842_REFITTABLE : Str.STR_EMPTY);
+		Global.SetDParam(2, svi.refittable!=0 ? Str.STR_9842_REFITTABLE : Str.STR_EMPTY);
 		Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_CAPACITY, 0);
 		y += 10;
 
@@ -55,7 +56,7 @@ public class ShipGui
 
 	static void DrawShipImage(final Vehicle v, int x, int y, /*VehicleID*/ int selection)
 	{
-		int image = GetShipImage(v, 6);
+		int image = Ship.GetShipImage(v, 6);
 		int ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner));
 		Gfx.DrawSprite(image | ormod, x + 32, y + 10);
 
@@ -77,7 +78,7 @@ public class ShipGui
 			Gfx.DrawString(1, 15, Str.STR_983F_SELECT_CARGO_TYPE_TO_CARRY, 0);
 
 			/* TODO: Support for custom GRFSpecial-specified refitting! --pasky */
-			w.as_refit_d().cargo = DrawVehicleRefitWindow(v, w.as_refit_d().sel);;
+			w.as_refit_d().cargo = VehicleGui.DrawVehicleRefitWindow(v, w.as_refit_d().sel).id;
 
 			if (w.as_refit_d().cargo != AcceptedCargo.CT_INVALID) {
 				int cost = Cmd.DoCommandByTile(v.tile, v.index, w.as_refit_d().cargo, Cmd.DC_QUERY_COST, Cmd.CMD_REFIT_SHIP);
@@ -199,7 +200,7 @@ public class ShipGui
 			DrawShipImage(v, 3, 57, Vehicle.INVALID_VEHICLE);
 
 			Global.SetDParam(1, 1920 + v.build_year);
-			Global.SetDParam(0, GetCustomEngineName(v.engine_type));
+			Global.SetDParam(0, Engine.GetCustomEngineName(v.engine_type.id).id);
 			Global.SetDParam(2, v.value);
 			Gfx.DrawString(74, 57, Str.STR_9816_BUILT_VALUE, 0);
 
@@ -224,14 +225,15 @@ public class ShipGui
 			case 2: /* rename */
 				v = Vehicle.GetVehicle(w.window_number.n);
 				Global.SetDParam(0, v.unitnumber.id);
-				ShowQueryString(v.string_id, Str.STR_9831_NAME_SHIP, 31, 150, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID(v.string_id), new StringID(Str.STR_9831_NAME_SHIP), 31, 150, w.window_class, w.window_number);
 				break;
 			case 5: /* increase int */
-				mod = Global._ctrl_pressed? 5 : 10;
-				goto do_change_service_int;
 			case 6: /* decrease int */
-				mod = Global._ctrl_pressed?- 5 : -10;
-				do_change_service_int:
+				if( e.widget == 6)
+					mod = Global._ctrl_pressed?- 5 : -10;
+				else // 5
+					mod = Global._ctrl_pressed? 5 : 10;
+
 					v = Vehicle.GetVehicle(w.window_number.n);
 
 				mod = Depot.GetServiceIntervalClamped(mod + v.service_interval);
@@ -299,7 +301,7 @@ public class ShipGui
 		v = Vehicle.GetVehicle(Global._new_ship_id);
 		if (v.tile == Global._backup_orders_tile) {
 			Global._backup_orders_tile = null;
-			RestoreVehicleOrders(v, Global._backup_orders_data);
+			Vehicle.RestoreVehicleOrders(v, Global._backup_orders_data[0]);
 		}
 		ShowShipViewWindow(v);
 	}
@@ -332,7 +334,6 @@ public class ShipGui
 
 			{
 				int num = Global.NUM_SHIP_ENGINES;
-				final Engine  e = Engine.GetEngine(Global.SHIP_ENGINES_INDEX);
 				int x = 2;
 				int y = 15;
 				int sel = w.as_buildtrain_d().sel_index;
@@ -341,18 +342,21 @@ public class ShipGui
 				int engine_id = Global.SHIP_ENGINES_INDEX;
 				//EngineID 
 				int selected_id = Engine.INVALID_ENGINE;
-
+				int ei = 0;
 				do {
+					final Engine  e = Engine.GetEngine(Global.SHIP_ENGINES_INDEX + ei++);
 					if (BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
 						if (sel==0) selected_id = engine_id;
-						if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.cap, 0)) {
-							Gfx.DrawString(x+75, y+7, GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
+						if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.cap, 0)) 
+						{
+							Gfx.DrawString(x+75, y+7, Engine.GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
 							DrawShipEngine(x+35, y+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 							y += 24;
 						}
 						sel--;
 					}
-				} while (++engine_id, ++e,--num);
+					++engine_id;
+				} while (--num > 0);
 
 				w.as_buildtrain_d().sel_engine = selected_id;
 
@@ -891,7 +895,7 @@ public class ShipGui
 			ShipGui::ShipDepotWndProc
 	);
 
-	void ShowShipDepotWindow(TileIndex tile)
+	static void ShowShipDepotWindow(TileIndex tile)
 	{
 		Window  w = Window.AllocateWindowDescFront(_ship_depot_desc,tile);
 
@@ -975,8 +979,10 @@ public class ShipGui
 
 	static void PlayerShipsWndProc(Window w, WindowEvent e)
 	{
-		StationID station = BitOps.GB(w.window_number, 16, 16);
-		PlayerID owner = BitOps.GB(w.window_number, 0, 8);
+		//StationID 
+		int station = BitOps.GB(w.window_number.n, 16, 16);
+		//PlayerID 
+		int owner = BitOps.GB(w.window_number.n, 0, 8);
 		vehiclelist_d vl = w.as_vehiclelist_d();
 
 		switch(e.event) {
@@ -986,19 +992,19 @@ public class ShipGui
 			int max;
 			int i;
 
-			BuildVehicleList(vl, Vehicle.VEH_Ship, owner, station);
-			SortVehicleList(vl);
+			VehicleGui.BuildVehicleList(vl, Vehicle.VEH_Ship, owner, station);
+			VehicleGui.SortVehicleList(vl);
 
-			SetVScrollCount(w, vl.list_length);
+			MiscGui.SetVScrollCount(w, vl.list_length);
 
 			// disable 'Sort By' tooltip on Unsorted sorting criteria
-			if (vl.sort_type == SORT_BY_UNSORTED)
+			if (vl.sort_type == VehicleGui.SORT_BY_UNSORTED)
 				w.disabled_state |= (1 << 3);
 
 			/* draw the widgets */
 			{
 				final Player p = Player.GetPlayer(owner);
-				if (station.id == Station.INVALID_STATION) {
+				if (station == Station.INVALID_STATION) {
 					/* Company Name -- (###) Trains */
 					Global.SetDParam(0, p.name_1);
 					Global.SetDParam(1, p.name_2);
@@ -1006,16 +1012,16 @@ public class ShipGui
 					w.widget.get(1).unkA = Str.STR_9805_SHIPS;
 				} else {
 					/* Station Name -- (###) Trains */
-					Global.SetDParam(0, station.id);
+					Global.SetDParam(0, station);
 					Global.SetDParam(1, w.vscroll.count);
 					w.widget.get(1).unkA = Str.STR_SCHEDULED_SHIPS;
 				}
 				w.DrawWindowWidgets();
 			}
 			/* draw sorting criteria string */
-			Gfx.DrawString(85, 15, _vehicle_sort_listing[vl.sort_type], 0x10);
+			Gfx.DrawString(85, 15, VehicleGui._vehicle_sort_listing[vl.sort_type], 0x10);
 			/* draw arrow pointing up/down for ascending/descending sorting */
-			Gfx.DoDrawString(vl.flags & Vehicle.VL_DESC ? Gfx.DOWNARROW : Gfx.UPARROW, 69, 15, 0x10);
+			Gfx.DoDrawString( (vl.flags & Vehicle.VL_DESC) != 0 ? Gfx.DOWNARROW : Gfx.UPARROW, 69, 15, 0x10);
 
 			max = Math.min(w.vscroll.pos + w.vscroll.cap, vl.list_length);
 			for (i = w.vscroll.pos; i < max; ++i) {
@@ -1026,9 +1032,9 @@ public class ShipGui
 				assert(v.type == Vehicle.VEH_Ship);
 
 				DrawShipImage(v, x + 19, y + 6, Vehicle.INVALID_VEHICLE);
-				DrawVehicleProfitButton(v, x, y + 13);
+				VehicleGui.DrawVehicleProfitButton(v, x, y + 13);
 
-				Global.SetDParam(0, v.unitnumber);
+				Global.SetDParam(0, v.unitnumber.id);
 				if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER) && (v.vehstatus & Vehicle.VS_HIDDEN))
 					str = Str.STR_021F;
 				else
@@ -1055,11 +1061,11 @@ public class ShipGui
 			case 3: /* Flip sorting method ascending/descending */
 				vl.flags ^= Vehicle.VL_DESC;
 				vl.flags |= Vehicle.VL_RESORT;
-				_sorting.ship.order = !!(vl.flags & Vehicle.VL_DESC);
+				VehicleGui._sorting.ship.order = 0 !=(vl.flags & Vehicle.VL_DESC);
 				w.SetWindowDirty();
 				break;
 			case 4: case 5:/* Select sorting criteria dropdown menu */
-				ShowDropDownMenu(w, _vehicle_sort_listing, vl.sort_type, 5, 0, 0);
+				Window.ShowDropDownMenu(w, VehicleGui._vehicle_sort_listing, vl.sort_type, 5, 0, 0);
 				return;
 			case 7: { /* Matrix to show vehicles */
 				int id_v = (e.pt.y - VehicleGui.PLY_WND_PRC__OFFSET_TOP_WIDGET) / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
@@ -1084,67 +1090,69 @@ public class ShipGui
 			case 9: { /* Build new Vehicle */
 			TileIndex tile;
 
-			if (!IsWindowOfPrototype(w, _player_ships_widgets)) break;
+			if (!Window.IsWindowOfPrototype(w, _player_ships_widgets)) break;
 
-			tile = _last_built_ship_depot_tile;
+			tile = Depot._last_built_ship_depot_tile;
 			do {
-				if (IsTileDepotType(tile, TRANSPORT_WATER) && IsTileOwner(tile, Global._local_player)) {
+				if (Depot.IsTileDepotType(tile, Global.TRANSPORT_WATER) && tile.IsTileOwner(Global._local_player)) 
+				{
 					ShowShipDepotWindow(tile);
 					ShowBuildShipWindow(tile);
 					return;
 				}
 
-				tile = TILE_MASK(tile + 1);
-			} while(tile != _last_built_ship_depot_tile);
+				tile = tile.iadd(1);
+				tile.TILE_MASK();
+			} while(tile != Depot._last_built_ship_depot_tile);
 
-			ShowBuildShipWindow(0);
+			ShowBuildShipWindow(null);
 		} break;
 
 		case 10: {
-			if (!IsWindowOfPrototype(w, _player_ships_widgets)) break;
+			if (!Window.IsWindowOfPrototype(w, _player_ships_widgets)) break;
 
-			ShowReplaceVehicleWindow(Vehicle.VEH_Ship);
+			VehicleGui.ShowReplaceVehicleWindow(Vehicle.VEH_Ship);
 			break;
 		}
 	}
 	}	break;
 
-	case WindowEvents.WE_DROPDOWN_SELECT: /* we have selected a dropdown item in the list */
-				if (vl.sort_type != e.dropdown.index) {
+	case WE_DROPDOWN_SELECT: /* we have selected a dropdown item in the list */
+				if (vl.sort_type != e.index) {
 					// value has changed . resort
 					vl.flags |= Vehicle.VL_RESORT;
-					vl.sort_type = e.dropdown.index;
-					_sorting.ship.criteria = vl.sort_type;
+					vl.sort_type = (byte) e.index;
+					VehicleGui._sorting.ship.criteria = vl.sort_type;
 
 					// enable 'Sort By' if a sorter criteria is chosen
-					if (vl.sort_type != SORT_BY_UNSORTED)
-						CLRBIT(w.disabled_state, 3);
+					if (vl.sort_type != VehicleGui.SORT_BY_UNSORTED)
+						w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 3);
 				}
 				w.SetWindowDirty();
 				break;
 
-			case WindowEvents.WE_CREATE: /* set up resort timer */
+			case WE_CREATE: /* set up resort timer */
 				vl.sort_list = null;
-				vl.flags = Vehicle.VL_REBUILD | (_sorting.ship.order << (Vehicle.VL_DESC - 1));
-				vl.sort_type = _sorting.ship.criteria;
-				vl.resort_timer = DAY_TICKS * PERIODIC_RESORT_DAYS;
+				vl.flags = Vehicle.VL_REBUILD | ( (VehicleGui._sorting.ship.order ? 1 : 0) << (Vehicle.VL_DESC - 1));
+				vl.sort_type = (byte) VehicleGui._sorting.ship.criteria;
+				vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
 				break;
 
-			case WindowEvents.WE_DESTROY:
-				free(vl.sort_list);
+			case WE_DESTROY:
+				//free(vl.sort_list);
 				break;
 
-			case WindowEvents.WE_TICK: /* resort the list every 20 seconds orso (10 days) */
+			case WE_TICK: /* resort the list every 20 seconds orso (10 days) */
 				if (--vl.resort_timer == 0) {
 					Global.DEBUG_misc( 1, "Periodic resort ships list player %d station %d",
 							owner, station);
-					vl.resort_timer = DAY_TICKS * PERIODIC_RESORT_DAYS;
+					vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
 					vl.flags |= Vehicle.VL_RESORT;
 					w.SetWindowDirty();
 				}
 				break;
 
-			case WindowEvents.WE_RESIZE:
+			case WE_RESIZE:
 				/* Update the scroll + matrix */
 				w.vscroll.cap += e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
 				w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
