@@ -114,8 +114,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		 *	start-tile:	X 2,1 Y 2,4 (2 was disabled before)
 		 *	end-tile:		X 8,4 Y 8,1 (8 was disabled before)
 		 */
-		if ((tileh == 1 && is_start_tile != (boolean)direction) ||
-				(tileh == 4 && is_start_tile == (boolean)direction)) {
+		if ((tileh == 1 && is_start_tile != BitOps.i2b(direction) ) ||
+				(tileh == 4 && is_start_tile == BitOps.i2b(direction) )) {
 			return Cmd.CMD_ERROR;
 		}
 
@@ -136,7 +136,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		return Math.abs(x2 + y2 - x1 - y1) - 1;
 	}
 
-	boolean CheckBridge_Stuff(byte bridge_type, int bridge_len)
+	boolean CheckBridge_Stuff(int bridge_type, int bridge_len)
 	{
 		final Bridge b = _bridge[bridge_type];
 		int max; // max possible length of a bridge (with patch 100)
@@ -160,7 +160,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	int CmdBuildBridge(int x, int y, int flags, int p1, int p2)
 	{
 		int bridge_type;
-		int rail_or_road, railtype, m5;
+		int rail_or_road, railtype;
 		int sx,sy;
 		TileInfo ti_start = new TileInfo(); /* OPT: only 2 of those are ever used */
 		TileInfo ti_end = new TileInfo(); /* OPT: only 2 of those are ever used */
@@ -171,6 +171,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		int i;
 		int cost, terraformcost, ret;
 		boolean allow_on_slopes;
+		
+		int m5 = 0; // [dz] = 0? Originally non inited
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
@@ -217,20 +219,20 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		if (!CheckBridge_Stuff(bridge_type, bridge_len)) return Cmd.return_cmd_error(Str.STR_5015_CAN_T_BUILD_BRIDGE_HERE);
 
 		/* retrieve landscape height and ensure it's on land */
-		FindLandscapeHeight(ti_end, sx, sy);
-		FindLandscapeHeight(ti_start, x, y);
+		Landscape.FindLandscapeHeight(ti_end, sx, sy);
+		Landscape.FindLandscapeHeight(ti_start, x, y);
 		if (
-				((ti_end.type == TileTypes.MP_WATER) && ti_end.map5 == 0) ||
-				((ti_start.type == TileTypes.MP_WATER) && ti_start.map5 == 0)
+				((ti_end.type == TileTypes.MP_WATER.ordinal()) && ti_end.map5 == 0) ||
+				((ti_start.type == TileTypes.MP_WATER.ordinal()) && ti_start.map5 == 0)
 				)
 			return Cmd.return_cmd_error(Str.STR_02A0_ENDS_OF_BRIDGE_MUST_BOTH);
 
-		if (BRIDGE_FULL_LEVELED_FOUNDATION & (1 << ti_start.tileh)) {
+		if(0 != (BRIDGE_FULL_LEVELED_FOUNDATION & (1 << ti_start.tileh)) ) {
 			ti_start.z += 8;
 			ti_start.tileh = 0;
 		}
 
-		if (BRIDGE_FULL_LEVELED_FOUNDATION & (1 << ti_end.tileh)) {
+		if(0 != (BRIDGE_FULL_LEVELED_FOUNDATION & (1 << ti_end.tileh)) ) {
 			ti_end.z += 8;
 			ti_end.tileh = 0;
 		}
@@ -240,49 +242,49 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 
 		// Towns are not allowed to use bridges on slopes.
-		allow_on_slopes = (!_is_old_ai_player
-				&& Global._current_player != Owner.OWNER_TOWN && Global._patches.build_on_slopes);
+		allow_on_slopes = (!Global._is_old_ai_player
+				&& Global._current_player.id != Owner.OWNER_TOWN && Global._patches.build_on_slopes);
 
 		/* Try and clear the start landscape */
 
-		if (CmdFailed(ret = DoCommandByTile(ti_start.tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR)))
+		if (Cmd.CmdFailed(ret = Cmd.DoCommandByTile(ti_start.tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR)))
 			return Cmd.CMD_ERROR;
 		cost = ret;
 
 		// true - bridge-start-tile, false - bridge-end-tile
 		terraformcost = CheckBridgeSlope(direction, ti_start.tileh, true);
-		if (CmdFailed(terraformcost) || (terraformcost && !allow_on_slopes))
+		if (Cmd.CmdFailed(terraformcost) || ( (terraformcost!=0) && !allow_on_slopes))
 			return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 		cost += terraformcost;
 
 		/* Try and clear the end landscape */
 
-		ret = DoCommandByTile(ti_end.tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
-		if (CmdFailed(ret)) return Cmd.CMD_ERROR;
+		ret = Cmd.DoCommandByTile(ti_end.tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+		if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
 		cost += ret;
 
 		// false - end tile slope check
 		terraformcost = CheckBridgeSlope(direction, ti_end.tileh, false);
-		if (CmdFailed(terraformcost) || (terraformcost && !allow_on_slopes))
+		if (Cmd.CmdFailed(terraformcost) || ( (terraformcost != 0) && !allow_on_slopes))
 			return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 		cost += terraformcost;
 
 
 		/* do the drill? */
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			/* build the start tile */
-			ModifyTile(ti_start.tile,
+			Landscape.ModifyTile(ti_start.tile,
 					TileTypes.MP_SETTYPE(TileTypes.MP_TUNNELBRIDGE) |
-					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAPOwner.OWNER_CURRENT | TileTypes.MP_MAP5,
+					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 					(bridge_type << 4), /* map2 */
 					railtype, /* map3_lo */
 					0x80 | direction | rail_or_road /* map5 */
 					);
 
 			/* build the end tile */
-			ModifyTile(ti_end.tile,
+			Landscape.ModifyTile(ti_end.tile,
 					TileTypes.MP_SETTYPE(TileTypes.MP_TUNNELBRIDGE) |
-					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAPOwner.OWNER_CURRENT | TileTypes.MP_MAP5,
+					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 					(bridge_type << 4), /* map2 */
 					railtype, /* map3_lo */
 					0x80 | 0x20 | direction | rail_or_road /* map5 */
@@ -290,7 +292,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		}
 
 		// position of middle part of the odd bridge (larger than MAX(i) otherwise)
-		odd_middle_part = (bridge_len % 2) ? (bridge_len / 2) : bridge_len;
+		odd_middle_part = (0 !=(bridge_len % 2)) ? (bridge_len / 2) : bridge_len;
 
 		for (i = 0; i != bridge_len; i++) {
 			if (direction != 0) {
@@ -299,30 +301,30 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				x += 16;
 			}
 
-			FindLandscapeHeight(ti, x, y);
+			Landscape.FindLandscapeHeight(ti, x, y);
 
 			Global._error_message = Str.STR_5009_LEVEL_LAND_OR_WATER_REQUIRED;
 			if (ti.tileh != 0 && ti.z >= ti_start.z) return Cmd.CMD_ERROR;
 
 			// Find ship below
-			if (ti.type == TileTypes.MP_WATER && !EnsureNoVehicle(ti.tile)) {
+			if (ti.type == TileTypes.MP_WATER.ordinal() && !ti.tile.EnsureNoVehicle()) {
 				Global._error_message = Str.STR_980E_SHIP_IN_THE_WAY;
 				return Cmd.CMD_ERROR;
 			}
 
 			boolean not_valid_below = false;
 			do {
-				if (ti.type == TileTypes.MP_WATER) {
+				if (ti.type == TileTypes.MP_WATER.ordinal()) {
 					if (ti.map5 > 1) { not_valid_below = true; break; } //goto not_valid_below;
 					m5 = 0xC8;
-				} else if (ti.type == TileTypes.MP_RAILWAY) {
+				} else if (ti.type == TileTypes.MP_RAILWAY.ordinal()) {
 					if (direction == 0) {
 						if (ti.map5 != 2) { not_valid_below = true; break; } //goto not_valid_below;
 					} else {
 						if (ti.map5 != 1) { not_valid_below = true; break; } //goto not_valid_below;
 					}
 					m5 = 0xE0;
-				} else if (ti.type == TileTypes.MP_STREET) {
+				} else if (ti.type == TileTypes.MP_STREET.ordinal()) {
 					if (direction == 0) {
 						if (ti.map5 != 5) { not_valid_below = true; break; } //goto not_valid_below;
 					} else {
@@ -338,16 +340,16 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			if(not_valid_below)
 			{
 				/* try and clear the middle landscape */
-				ret = DoCommandByTile(ti.tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
-				if (CmdFailed(ret)) return Cmd.CMD_ERROR;
+				ret = Cmd.DoCommandByTile(ti.tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+				if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
 				cost += ret;
 				m5 = 0xC0;
 			}
 
 			/* do middle part of bridge */
-			if (flags & Cmd.DC_EXEC) {
+			if(0 != (flags & Cmd.DC_EXEC) ) {
 				ti.tile.getMap().m5 = (byte)(m5 | direction | rail_or_road);
-				SetTileType(ti.tile, TileTypes.MP_TUNNELBRIDGE);
+				ti.tile.SetTileType(TileTypes.MP_TUNNELBRIDGE);
 
 				//bridges pieces sequence (middle parts)
 				// bridge len 1: 0
@@ -371,31 +373,31 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					// generate #2 and #3 in turns [i%2==0], after the middle of odd bridge
 					// this sequence swaps [... XOR (i>odd_middle_part)],
 					// for even bridges XOR does not apply as odd_middle_part==bridge_len
-					m5 = 2 + ((i % 2 == 0) ^ (i > odd_middle_part));
+					m5 = 2 + (BitOps.b2i(i % 2 == 0) ^ BitOps.b2i(i > odd_middle_part));
 				}
 
 				ti.tile.getMap().m2 = (bridge_type << 4) | m5;
-				ti.tile.getMap().m3 = BitOps.RETSB(ti.tile.getMap().m3, 4, 4, railtype);
+				ti.tile.getMap().m3 = (byte) BitOps.RETSB(ti.tile.getMap().m3, 4, 4, railtype);
 
-				MarkTileDirtyByTile(ti.tile);
+				ti.tile.MarkTileDirtyByTile();
 			}
 		}
 
-		SetSignalsOnBothDir(ti_start.tile, (direction & 1) ? 1 : 0);
+		Rail.SetSignalsOnBothDir(ti_start.tile, (0 !=(direction & 1)) ? 1 : 0);
 
 		/*	for human player that builds the bridge he gets a selection to choose from bridges (Cmd.DC_QUERY_COST)
 			It's unnecessary to execute this command every time for every bridge. So it is done only
 			and cost is computed in "bridge_gui.c". For AI, Towns this has to be of course calculated
 		 */
-		if (!(flags & Cmd.DC_QUERY_COST)) {
+		if (0==(flags & Cmd.DC_QUERY_COST)) {
 			final Bridge b = _bridge[bridge_type];
 
 			bridge_len += 2;	// begin and end tiles/ramps
 
-			if (Global._current_player < Global.MAX_PLAYERS && !_is_old_ai_player)
+			if (Global._current_player.id < Global.MAX_PLAYERS && !Global._is_old_ai_player)
 				bridge_len = CalcBridgeLenCostFactor(bridge_len);
 
-			cost += ((int64)bridge_len * Global._price.build_bridge * b.price) >> 8;
+			cost += ((long)bridge_len * Global._price.build_bridge * b.price) >> 8;
 		}
 
 		return cost;
@@ -424,7 +426,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		return true;
 	}
 
-	boolean CheckTunnelInWay(TileIndex tile, int z)
+	static boolean CheckTunnelInWay(TileIndex tile, int z)
 	{
 		return DoCheckTunnelInWay(tile,z,0) &&
 				DoCheckTunnelInWay(tile,z,1) &&
@@ -489,7 +491,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			Landscape.FindLandscapeHeight(ti, x2, y2);
 			if (ti.z <= z) return Cmd.CMD_ERROR;
 
-			if (!Global._cheats.crossing_tunnels.value && !CheckTunnelInWay(ti.tile, z))
+			if (!Global._cheats.crossing_tunnels.value && !TunnelBridgeCmd.CheckTunnelInWay(ti.tile, z))
 				return Cmd.CMD_ERROR;
 
 			cost += Global._price.build_tunnel;
@@ -550,12 +552,12 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		_build_tunnel_railtype = BitOps.GB(p1, 0, 8);
 		_build_tunnel_bh       = BitOps.GB(p1, 8, 8);
 
-		_build_tunnel_endtile = 0;
-		excavated_tile = 0;
+		Global._build_tunnel_endtile = null;
+		excavated_tile = null;
 
 		Landscape.FindLandscapeHeight(tiorg, x, y);
 
-		if (!EnsureNoVehicle(tiorg.tile))
+		if (!tiorg.tile.EnsureNoVehicle())
 			return Cmd.CMD_ERROR;
 
 		if (!(direction=0, tiorg.tileh == 12) &&
@@ -571,18 +573,18 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			y += _build_tunnel_coord_mod[direction+1];
 			Landscape.FindLandscapeHeight(ti, x, y);
 		} while (z != ti.z);
-		_build_tunnel_endtile = ti.tile;
+		Global._build_tunnel_endtile = ti.tile;
 
 
-		if (!EnsureNoVehicle(ti.tile)) return Cmd.CMD_ERROR;
+		if (!ti.tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
 		if (ti.tileh != _build_tunnel_tileh[direction]) {
-			if (CmdFailed(DoCommandByTile(ti.tile, ti.tileh & ~_build_tunnel_tileh[direction], 0, flags, Cmd.CMD_TERRAFORM_LAND)))
+			if (Cmd.CmdFailed(Cmd.DoCommandByTile(ti.tile, ti.tileh & ~_build_tunnel_tileh[direction], 0, flags, Cmd.CMD_TERRAFORM_LAND)))
 				return Cmd.return_cmd_error(Str.STR_5005_UNABLE_TO_EXCAVATE_LAND);
 			excavated_tile = 1;
 		}
 
-		return DoBuildTunnel(x, y, tiorg.x, tiorg.y, flags, excavated_tile);
+		return DoBuildTunnel(x, y, tiorg.x, tiorg.y, flags, excavated_tile.tile);
 	}
 
 	static TileIndex CheckTunnelBusy(TileIndex tile, int []length)
@@ -752,8 +754,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		}
 
 		/* Put the tiles back to start/end position */
-		tile		-= direction ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
-		endtile	+= direction ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
+		tile	= tile.isub( (0 != direction) ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
+		endtile[0]	= endtile[0].iadd( (0 != direction) ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
 
 
 		t = Town.ClosestTownFromTile(tile, (int)-1); //needed for town rating penalty
@@ -907,7 +909,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					tile.MarkTileDirtyByTile();
 				}
 				cost += Global._price.build_rail >> 1;
-				tile = tile.iadd( BitOps.GB(tile.getMap().m5, 0, 1)!=0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
+	tile = tile.iadd( BitOps.GB(tile.getMap().m5, 0, 1)!=0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
 			} while (tile.getTile() <= end2[0].getTile());
 
 			return cost;
@@ -927,7 +929,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		do {
 			assert((tile.getMap().m5 & 0xC0) == 0xC0);	// bridge and middle part
 			tile.madd( delta );
-			
+
 			assert tile.IsValidTile();
 		} while (0 != (tile.getMap().m5 & 0x40));	// while bridge middle parts
 
@@ -974,7 +976,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			front_height = ti.z + ((ti.tileh & p[0])!=0?8:0);
 			back_height = ti.z + ((ti.tileh & p[1])!=0?8:0);
 
-			if (IsSteepTileh(ti.tileh)) {
+			if (TileIndex.IsSteepTileh(ti.tileh)) {
 				if (0==(ti.tileh & p[2])) front_height += 8;
 				if (0==(ti.tileh & p[3])) back_height += 8;
 			}
@@ -1104,17 +1106,17 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					if (image != 1 || ti.tileh == 0)
 						ViewPort.DrawGroundSprite(_bridge_land_below[image] + Landscape._tileh_to_sprite[ti.tileh]);
 					else
-						ViewPort.DrawGroundSprite(_water_shore_sprites[ti.tileh]);
+						ViewPort.DrawGroundSprite(WaterCmd._water_shore_sprites[ti.tileh]);
 
 					// draw canal water?
-					if( (0 != (ti.map5 & 8)) && ti.z != 0) DrawCanalWater(ti.tile);
+					if( (0 != (ti.map5 & 8)) && ti.z != 0) WaterCmd.DrawCanalWater(ti.tile);
 				} else {
 					// draw transport route under bridge
 
 					// draw foundation?
-					if (ti.tileh) {
+					if(0 != (ti.tileh) ) {
 						int f = _bridge_foundations[ti.map5&1][ti.tileh];
-						if (f) Landscape.DrawFoundation(ti, f);
+						if(0 != f) Landscape.DrawFoundation(ti, f);
 					}
 
 					if (0==(image&1)) {
@@ -1122,8 +1124,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 						// railway
 						image = Sprite.SPR_RAIL_TRACK_Y + (ti.map5 & 1);
 						if (ti.tileh != 0) image = Sprite.SPR_RAIL_TRACK_Y + RailTables._track_sloped_sprites[ti.tileh - 1];
-						image += rti.total_offset;
-						if (ice) image += rti.snow_offset;
+						image += rti.total_offset.id;
+						if (ice) image += rti.snow_offset.id;
 					} else {
 						// road
 						image = Sprite.SPR_ROAD_Y + (ti.map5 & 1);
@@ -1139,35 +1141,37 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				/*  base_offset needs to be 0 due to the structure of the sprite table see table/bridge_land.h */
 				assert( (base_offset & 0x03) == 0x00);
 				// get bridge sprites
-				b = GetBridgeSpriteTable(GetBridgeType(ti.tile), GetBridgePiece(ti.tile)) + base_offset;
+				//b = GetBridgeSpriteTable(GetBridgeType(ti.tile), GetBridgePiece(ti.tile)) + base_offset;
+				b = GetBridgeSpriteTable(GetBridgeType(ti.tile), GetBridgePiece(ti.tile)); // + base_offset;
+				int boff = base_offset;
 
 				z = GetBridgeHeight(ti) + 5;
 
 				// draw rail or road component
-				image = b[0];
+				image = b[0+boff];
 				if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS)) image = Sprite.RET_MAKE_TRANSPARENT(image);
-				AddSortableSpriteToDraw(image, ti.x, ti.y, (0 !=(ti.map5&1))?11:16, (0 !=(ti.map5&1))?16:11, 1, z);
+				ViewPort.AddSortableSpriteToDraw(image, ti.x, ti.y, (0 !=(ti.map5&1))?11:16, (0 !=(ti.map5&1))?16:11, 1, z);
 
 				x = ti.x;
 				y = ti.y;
-				image = b[1];
+				image = b[1+boff];
 				if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS)) image = Sprite.RET_MAKE_TRANSPARENT(image);
 
 				// draw roof, the component of the bridge which is logically between the vehicle and the camera
 				if(0 != (ti.map5&1) ) {
 					x += 12;
-					if(0 != (image & SPRITE_MASK)) AddSortableSpriteToDraw(image, x,y, 1, 16, 0x28, z);
+					if(0 != (image & Sprite.SPRITE_MASK)) ViewPort.AddSortableSpriteToDraw(image, x,y, 1, 16, 0x28, z);
 				} else {
 					y += 12;
-					if(0 != (image & SPRITE_MASK)) AddSortableSpriteToDraw(image, x,y, 16, 1, 0x28, z);
+					if(0 != (image & Sprite.SPRITE_MASK)) ViewPort.AddSortableSpriteToDraw(image, x,y, 16, 1, 0x28, z);
 				}
 
 				if (ti.z + 5 == z ) {
 					// draw poles below for small bridges
-					image = b[2];
-					if (image) {
+					image = b[2+boff];
+					if(0 != image) {
 						if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS)) image = Sprite.RET_MAKE_TRANSPARENT(image);
-						DrawGroundSpriteAt(image, x, y, z);
+						ViewPort.DrawGroundSpriteAt(image, x, y, z);
 					}
 				} else if (Global._patches.bridge_pillars) {
 					// draw pillars below for high bridges
@@ -1178,12 +1182,12 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 		if (Global._debug_pbs_level >= 1) {
 			int pbs = Pbs.PBSTileReserved(ti.tile);
-			if(0 != (pbs & TRACK_BIT_DIAG1)) ViewPort.DrawGroundSprite(0x3ED | PALETTE_CRASH);
-			if(0 != (pbs & TRACK_BIT_DIAG2)) ViewPort.DrawGroundSprite(0x3EE | PALETTE_CRASH);
-			if(0 != (pbs & TRACK_BIT_UPPER)) ViewPort.DrawGroundSprite(0x3EF | PALETTE_CRASH);
-			if(0 != (pbs & TRACK_BIT_LOWER)) ViewPort.DrawGroundSprite(0x3F0 | PALETTE_CRASH);
-			if(0 != (pbs & TRACK_BIT_LEFT))  ViewPort.DrawGroundSprite(0x3F2 | PALETTE_CRASH);
-			if(0 != (pbs & TRACK_BIT_RIGHT)) ViewPort.DrawGroundSprite(0x3F1 | PALETTE_CRASH);
+			if(0 != (pbs & Rail.TRACK_BIT_DIAG1)) ViewPort.DrawGroundSprite(0x3ED | Sprite.PALETTE_CRASH);
+			if(0 != (pbs & Rail.TRACK_BIT_DIAG2)) ViewPort.DrawGroundSprite(0x3EE | Sprite.PALETTE_CRASH);
+			if(0 != (pbs & Rail.TRACK_BIT_UPPER)) ViewPort.DrawGroundSprite(0x3EF | Sprite.PALETTE_CRASH);
+			if(0 != (pbs & Rail.TRACK_BIT_LOWER)) ViewPort.DrawGroundSprite(0x3F0 | Sprite.PALETTE_CRASH);
+			if(0 != (pbs & Rail.TRACK_BIT_LEFT))  ViewPort.DrawGroundSprite(0x3F2 | Sprite.PALETTE_CRASH);
+			if(0 != (pbs & Rail.TRACK_BIT_RIGHT)) ViewPort.DrawGroundSprite(0x3F1 | Sprite.PALETTE_CRASH);
 		}
 	}
 
@@ -1195,7 +1199,10 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		int tileh = ti.tileh;
 
 		// swap directions if Y tunnel/bridge to let the code handle the X case only.
-		if(0 != (ti.map5 & 1)) intswap(x,y);
+		if(0 != (ti.map5 & 1)) 
+		{
+			int t = x; x = y; y = t; //intswap(x,y);
+		}
 
 		// to the side of the tunnel/bridge?
 		if (BitOps.IS_INT_INSIDE(y, 5, 10+1)) {
@@ -1227,7 +1234,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					if (tileh != 0) z += 8;
 
 					// keep the same elevation because we're on the bridge?
-					if (_get_z_hint >= z + 8) return _get_z_hint;
+					if (Global._get_z_hint >= z + 8) return Global._get_z_hint;
 
 					// actually on the bridge, but not yet in the shared area.
 					if (!BitOps.IS_INT_INSIDE(x, 5, 10 + 1)) return GetBridgeHeight(ti) + 8;
@@ -1279,7 +1286,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	static TileDesc GetTileDesc_TunnelBridge(TileIndex tile)
 	{
 		TileDesc td = new TileDesc();
-		
+
 		if ((tile.getMap().m5 & 0x80) == 0) {
 			td.str =
 					(BitOps.GB(tile.getMap().m5, 2, 2) == 0) ? Str.STR_5017_RAILROAD_TUNNEL : Str.STR_5018_ROAD_TUNNEL;
@@ -1325,7 +1332,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		}
 
 		// if it's a bridge with water below, call tileloop_water on it.
-		if ((tile.getMap().m5 & 0xF8) == 0xC8) TileLoop_Water(tile);
+		if ((tile.getMap().m5 & 0xF8) == 0xC8) WaterCmd.TileLoop_Water(tile);
 	}
 
 	static void ClickTile_TunnelBridge(TileIndex tile)
@@ -1413,7 +1420,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		int fc;
 
 		if (BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
-			z = GetSlopeZ(x, y) - v.z_pos;
+			z = Landscape.GetSlopeZ(x, y) - v.z_pos;
 			if (Math.abs(z) > 2)
 				return 8;
 
@@ -1427,7 +1434,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					if (v.IsFrontEngine() && fc == _tunnel_fractcoord_1[dir]) {
 						if (v.spritenum < 4)
 							//SndPlayVehicleFx(SND_05_TRAIN_THROUGH_TUNNEL, v);
-						return 0;
+							return 0;
 					}
 					if (fc == _tunnel_fractcoord_2[dir]) {
 						if (v.next == null)
@@ -1479,7 +1486,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				}
 			}
 		} else if(0 != (tile.getMap().m5 & 0x80)) {
-			if (v.type == Vehicle.VEH_Road || (v.type == Vehicle.VEH_Train && IsFrontEngine(v))) {
+			if (v.type == Vehicle.VEH_Road || (v.type == Vehicle.VEH_Train && v.IsFrontEngine())) 
+			{
 				IntContainer h = new IntContainer();
 
 				if (tile.GetTileSlope(h) != 0)

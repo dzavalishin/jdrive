@@ -56,8 +56,8 @@ public class TunnelBridgeTables {
 
 	
 	
-	static final int _build_tunnel_coord_mod[] = { -16, 0, 16, 0, -16 };
-	static final byte _build_tunnel_tileh[] = {3, 9, 12, 6};
+	public static final int _build_tunnel_coord_mod[] = { -16, 0, 16, 0, -16 };
+	public static final byte _build_tunnel_tileh[] = {3, 9, 12, 6};
 	
 	
 	public static final byte _tileh_bits[][] = {

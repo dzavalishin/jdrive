@@ -324,6 +324,14 @@ public class BitOps {
 				key != 0xB5 && key != 0xB6 && key != 0xB7 && key != 0xB9);
 	}
 
+	public static boolean i2b(int i) {
+		return i != 0;
+	}
+
+	public static int b2i(boolean b) {
+		return b ? 1 : 0;
+	}
+
 	
 	
 	/*
