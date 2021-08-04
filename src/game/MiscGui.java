@@ -614,7 +614,7 @@ public class MiscGui {
 		TextEffect.AddTextEffect(msg, pt.x, pt.y, 0x250);
 	}
 
-	void ShowFeederIncomeAnimation(int x, int y, int z, int cost)
+	static void ShowFeederIncomeAnimation(int x, int y, int z, int cost)
 	{
 		Point pt = Point.RemapCoords(x,y,z);
 

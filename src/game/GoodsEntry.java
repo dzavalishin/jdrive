@@ -1,3 +1,5 @@
+package game; // TODO move
+
 public class GoodsEntry
 {
 
@@ -5,7 +7,7 @@ public class GoodsEntry
 	byte days_since_pickup;
 	byte rating;
 	int enroute_from;
-	byte enroute_time;
+	int enroute_time;
 	byte last_speed;
 	byte last_age;
 	int feeder_profit;

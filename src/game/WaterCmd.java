@@ -202,7 +202,6 @@ public class WaterCmd extends WaterTables
 	 */
 	int CmdBuildCanal(int x, int y, int flags, int p1, int p2)
 	{
-		int ret, cost;
 		int size_x, size_y;
 		int sx, sy;
 
@@ -225,15 +224,15 @@ public class WaterCmd extends WaterTables
 		/* Outside the editor you can only drag canals, and not areas */
 		if (Global._game_mode != GameModes.GM_EDITOR && (sx != x && sy != y)) return Cmd.CMD_ERROR;
 
-		cost = 0;
-		int err = 0;
+		int [] cost = {0};
+		int [] err = {0};
 		//BEGIN_TILE_LOOP(tile, size_x, size_y, TileXY(sx, sy)) 
 		TileIndex.forAll( size_x, size_y, TileIndex.TileXY(sx, sy), (tile) ->
 		{
-			ret = 0;
+			int ret = 0;
 			if (tile.GetTileSlope(null) != 0)
 			{
-				err = Cmd.return_cmd_error(Str.STR_0007_FLAT_LAND_REQUIRED);
+				err[0] = Cmd.return_cmd_error(Str.STR_0007_FLAT_LAND_REQUIRED);
 				return true;
 			}
 
@@ -245,13 +244,13 @@ public class WaterCmd extends WaterTables
 					if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && 0 != (tile.getMap().m5 & 0x40) ) { /* build under bridge */
 						if(0 != (tile.getMap().m5 & 0x20)) // transport route under bridge
 						{
-							err = Cmd.return_cmd_error(Str.STR_5800_OBJECT_IN_THE_WAY);
+							err[0] = Cmd.return_cmd_error(Str.STR_5800_OBJECT_IN_THE_WAY);
 							return true;
 						}
 
 						if(0 != (tile.getMap().m5 & 0x18)) // already water under bridge
 						{
-							err = Cmd.return_cmd_error(Str.STR_1007_ALREADY_BUILT);
+							err[0] = Cmd.return_cmd_error(Str.STR_1007_ALREADY_BUILT);
 							return true;
 						}
 					/* no bridge? then try to clear it. */
@@ -260,10 +259,10 @@ public class WaterCmd extends WaterTables
 
 					if (Cmd.CmdFailed(ret))
 					{
-						err = Cmd.CMD_ERROR;
+						err[0] = Cmd.CMD_ERROR;
 						return true;
 					}
-					cost += ret;
+					cost[0] += ret;
 
 					/* execute modifications */
 					if(0 != (flags & Cmd.DC_EXEC) ) {
@@ -277,15 +276,15 @@ public class WaterCmd extends WaterTables
 						MarkTilesAroundDirty(tile);
 					}
 
-					cost += Global._price.clear_water;
+					cost[0] += Global._price.clear_water;
 					
 					return false;
 				}
 		}); // END_TILE_LOOP(tile, size_x, size_y, 0);
 
-		if( err != 0  ) return err;
+		if( err[0] != 0  ) return err[0];
 		
-		return (cost == 0) ? Cmd.CMD_ERROR : cost;
+		return (cost[0] == 0) ? Cmd.CMD_ERROR : cost[0];
 	}
 
 	
@@ -554,7 +553,7 @@ public class WaterCmd extends WaterTables
 				case MP_RAILWAY: {
 					int slope = target.GetTileSlope(null);
 					int tracks = BitOps.GB(target.getMap().m5, 0, 6);
-					if (0==(
+					if (!(
 							(slope == 1 && tracks == 0x20) ||
 							(slope == 2 && tracks == 0x04) ||
 							(slope == 4 && tracks == 0x10) ||
@@ -620,12 +619,12 @@ public class WaterCmd extends WaterTables
 	static void FloodVehicle(Vehicle v)
 	{
 		if (0==(v.vehstatus & Vehicle.VS_CRASHED)) {
-			int pass = 0;
+			int[] pass = {0};
 
 			if (v.type == Vehicle.VEH_Road) {	// flood bus/truck
-				pass = 1;	// driver
+				pass[0] = 1;	// driver
 				if (v.cargo_type == AcceptedCargo.CT_PASSENGERS)
-					pass += v.cargo_count;
+					pass[0] += v.cargo_count;
 
 				v.vehstatus |= Vehicle.VS_CRASHED;
 				v.road.crashed_ctr = 2000;	// max 2220, disappear pretty fast
@@ -635,13 +634,13 @@ public class WaterCmd extends WaterTables
 
 				v = v.GetFirstVehicleInChain();
 				u = v;
-				if (v.IsFrontEngine()) pass = 4; // driver
+				if (v.IsFrontEngine()) pass[0] = 4; // driver
 
 				// crash all wagons, and count passangers
 				//BEGIN_ENUM_WAGONS(v)
 				v.forEachWagon( (vw) -> 
 				{
-					if (vw.cargo_type == AcceptedCargo.CT_PASSENGERS) pass += vw.cargo_count;
+					if (vw.cargo_type == AcceptedCargo.CT_PASSENGERS) pass[0] += vw.cargo_count;
 					vw.vehstatus |= Vehicle.VS_CRASHED;
 				});
 				//END_ENUM_WAGONS(v)
@@ -656,7 +655,7 @@ public class WaterCmd extends WaterTables
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, AirCraft.STATUS_BAR);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 
-			Global.SetDParam(0, pass);
+			Global.SetDParam(0, pass[0]);
 			NewsItem.AddNewsItem(Str.STR_B006_FLOOD_VEHICLE_DESTROYED,
 					NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ACCIDENT, 0),
 				v.index,

@@ -1011,7 +1011,7 @@ public class Economy
 			Window.InvalidateWindow(Window.WC_SUBSIDIES_LIST, 0);
 	}
 
-	class FoundRoute {
+	static class FoundRoute {
 		int distance;
 		int cargo;
 		Object from;
@@ -1260,7 +1260,7 @@ public class Economy
 		return BitOps.BIGMULSS(dist * f * num_pieces, Global._cargo_payment_rates[cargo], 21);
 	}
 
-	static void DeliverGoodsToIndustry(TileIndex xy, byte cargo_type, int num_pieces)
+	static void DeliverGoodsToIndustry(TileIndex xy, int cargo_type, int num_pieces)
 	{
 		Industry [] best = { null };
 		int [] u = { Global._patches.station_spread + 8 };
@@ -1290,7 +1290,7 @@ public class Economy
 		}
 	}
 
-	static boolean CheckSubsidised(Station from, Station to, byte cargo_type)
+	static boolean CheckSubsidised(Station from, Station to, int cargo_type)
 	{
 		//Subsidy s;
 		TileIndex xy;
@@ -1357,7 +1357,7 @@ public class Economy
 		return false;
 	}
 
-	static int DeliverGoods(int num_pieces, byte cargo_type, int source, int dest, int days_in_transit)
+	static int DeliverGoods(int num_pieces, int cargo_type, int source, int dest, int days_in_transit)
 	{
 		boolean subsidised;
 		Station s_from, s_to;
@@ -1639,7 +1639,7 @@ public class Economy
 		v = u;
 
 		if (v_profit_total > 0)
-			ShowFeederIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, v_profit_total);
+			MiscGui.ShowFeederIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, v_profit_total);
 
 		if (v.type == Vehicle.VEH_Train) {
 			// Each platform tile is worth 2 rail vehicles.
