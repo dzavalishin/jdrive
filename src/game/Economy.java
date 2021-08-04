@@ -993,7 +993,7 @@ public class Economy
 		}
 	}
 
-	void DeleteSubsidyWithStation(int index)
+	static void DeleteSubsidyWithStation(int index)
 	{
 		boolean dirty = false;
 

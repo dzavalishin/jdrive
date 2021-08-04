@@ -675,7 +675,7 @@ public class WaterCmd extends WaterTables
 		};
 	
 	// called from tunnelbridge_cmd
-	void TileLoop_Water(TileIndex tile)
+	static void TileLoop_Water(TileIndex tile)
 	{
 		int i;
 

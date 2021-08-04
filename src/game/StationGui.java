@@ -83,7 +83,7 @@ public class StationGui extends Station  // to get finalants
 	}
 
 	private static SortStruct [] _station_sort;
-	private static boolean [] _station_sort_dirty = new boolean[Global.MAX_PLAYERS];
+	static boolean [] _station_sort_dirty = new boolean[Global.MAX_PLAYERS];
 	private static boolean _global_station_sort_dirty;
 
 	

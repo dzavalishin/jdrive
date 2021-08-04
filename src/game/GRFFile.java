@@ -46,7 +46,7 @@ public class GRFFile
 
 
 
-	static int _custom_sprites_base;
+	static int _custom_sprites_base = Integer.MAX_VALUE; // [dz] added MAX_VALUE for checkis for image id below it work
 	static int _skip_sprites; // XXX
 	static int _file_index; // XXX
 	//static  int _traininfo_vehicle_pitch;

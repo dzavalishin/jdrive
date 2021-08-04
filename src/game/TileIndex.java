@@ -642,6 +642,21 @@ public class TileIndex implements Comparable<TileIndex>{
 		ni.tile += (y * Global.MapSizeX()) + x;
 		return ni;
 	}
+	
+	/**
+	 * Immutable sub - steps back with given x and y 
+	 * @param x
+	 * @param y
+	 * @return returns modified TileIndex, original one is not changed
+	 */
+	public TileIndex isub(int x, int y)
+	{
+		TileIndex ni = new TileIndex(this);
+		ni.tile -= (y * Global.MapSizeX()) + x;
+		return ni;
+	}
+	
+	
 	public boolean IsTileDepotType(int transportType) {
 		return Depot.IsTileDepotType(this, transportType);
 	}

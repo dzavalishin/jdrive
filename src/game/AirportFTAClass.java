@@ -2,6 +2,7 @@ package game;
 import game.util.BitOps;
 
 //Finite sTate mAchine -. FTA
+// TODO Make Airport child of AirportFTAClass or move static methods
 public class AirportFTAClass extends Airport // bring in constants
 {
 	int nofelements;							// number of positions the airport consists of
@@ -51,6 +52,9 @@ public class AirportFTAClass extends Airport // bring in constants
 	}
 
 
+	public int nof_depots() {
+		return airport_depots.length;
+	}
 
 
 
@@ -371,7 +375,7 @@ static byte AirportBlockToString(int block)
 }
 	 */
 
-	final AirportFTAClass GetAirport(final int airport_type)
+	final static AirportFTAClass GetAirport(final int airport_type)
 	{
 		AirportFTAClass Airport = null;
 		//FIXME -- AircraftNextAirportPos_and_Order . Needs something nicer, don't like this code
@@ -391,6 +395,12 @@ static byte AirportBlockToString(int block)
 		}
 		return Airport;
 	}
+
+
+
+
+
+
 
 
 

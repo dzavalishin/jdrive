@@ -2216,7 +2216,7 @@ public class AirCraft {
 		}
 	}
 
-	void UpdateAirplanesOnNewStation(Station st)
+	static void UpdateAirplanesOnNewStation(Station st)
 	{
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		//Vehicle v;
@@ -3222,7 +3222,7 @@ public class AirCraft {
 	);
 
 
-	void ShowAircraftDepotWindow(TileIndex tile)
+	static void ShowAircraftDepotWindow(TileIndex tile)
 	{
 		Window w;
 
