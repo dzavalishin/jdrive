@@ -598,7 +598,7 @@ public class OrderGui {
 		OrderGui::OrdersWndProc
 	);
 
-	void ShowOrdersWindow(final Vehicle  v)
+	static void ShowOrdersWindow(final Vehicle  v)
 	{
 		Window w;
 		//VehicleID

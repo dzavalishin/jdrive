@@ -1,5 +1,10 @@
 package game;
 
+import java.util.Iterator;
+
+import game.util.BitOps;
+import game.util.GameDate;
+import game.util.Strings;
 import game.util.YearMonthDay;
 
 public class ShipGui 
@@ -10,7 +15,7 @@ public class ShipGui
 	 * @param x,y location where to draw the info
 	 * @param engine_number the engine of which to draw the info of
 	 */
-	void DrawShipPurchaseInfo(int x, int y, EngineID engine_number)
+	static void DrawShipPurchaseInfo(int x, int y, /*EngineID*/ int engine_number)
 	{
 		YearMonthDay ymd = new YearMonthDay();
 		final ShipVehicleInfo svi = Engine.ShipVehInfo(engine_number);
@@ -23,7 +28,7 @@ public class ShipGui
 		y += 10;
 
 		/* Cargo type + capacity */
-		Global.SetDParam(0, _cargoc.names_long[svi.cargo_type]);
+		Global.SetDParam(0, Global._cargoc.names_long[svi.cargo_type]);
 		Global.SetDParam(1, svi.capacity);
 		Global.SetDParam(2, svi.refittable ? Str.STR_9842_REFITTABLE : Str.STR_EMPTY);
 		Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_CAPACITY, 0);
@@ -35,8 +40,8 @@ public class ShipGui
 		y += 10;
 
 		/* Design date - Life length */
-		e = GetEngine(engine_number);
-		ConvertDayToYMD(ymd, e.intro_date);
+		e = Engine.GetEngine(engine_number);
+		GameDate.ConvertDayToYMD(ymd, e.intro_date);
 		Global.SetDParam(0, ymd.year + 1920);
 		Global.SetDParam(1, e.lifelength);
 		Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_DESIGNED_LIFE, 0);
@@ -48,14 +53,14 @@ public class ShipGui
 		y += 10;
 	}
 
-	static void DrawShipImage(final Vehicle v, int x, int y, VehicleID selection)
+	static void DrawShipImage(final Vehicle v, int x, int y, /*VehicleID*/ int selection)
 	{
 		int image = GetShipImage(v, 6);
-		int ormod = Sprite.SPRITE_PALETTE(PLAYER_SPRITE_COLOR(v.owner));
+		int ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner));
 		Gfx.DrawSprite(image | ormod, x + 32, y + 10);
 
 		if (v.index == selection) {
-			Gfx.DrawFrameRect(x - 5, y - 1, x + 67, y + 21, 15, FR_BORDERONLY);
+			Gfx.DrawFrameRect(x - 5, y - 1, x + 67, y + 21, 15, Window.FR_BORDERONLY);
 		}
 	}
 
@@ -63,22 +68,22 @@ public class ShipGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Vehicle v = Vehicle.GetVehicle(w.window_number);
+			final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
 
 			Global.SetDParam(0, v.string_id);
-			Global.SetDParam(1, v.unitnumber);
+			Global.SetDParam(1, v.unitnumber.id);
 			w.DrawWindowWidgets();
 
-			Gfx.DrawString(1, 15, Str.STR_983F_SELEAcceptedCargo.CT_CARGO_TYPE_TO_CARRY, 0);
+			Gfx.DrawString(1, 15, Str.STR_983F_SELECT_CARGO_TYPE_TO_CARRY, 0);
 
 			/* TODO: Support for custom GRFSpecial-specified refitting! --pasky */
-			w.as_refit_d().cargo = DrawVehicleRefitWindow(v, WP(w, refit_d).sel);;
+			w.as_refit_d().cargo = DrawVehicleRefitWindow(v, w.as_refit_d().sel);;
 
 			if (w.as_refit_d().cargo != AcceptedCargo.CT_INVALID) {
 				int cost = Cmd.DoCommandByTile(v.tile, v.index, w.as_refit_d().cargo, Cmd.DC_QUERY_COST, Cmd.CMD_REFIT_SHIP);
 				if (!Cmd.CmdFailed(cost)) {
 					Global.SetDParam(2, cost);
-					Global.SetDParam(0, _cargoc.names_long[w.as_refit_d().cargo]);
+					Global.SetDParam(0, Global._cargoc.names_long[w.as_refit_d().cargo]);
 					Global.SetDParam(1, v.cargo_cap);
 					Gfx.DrawString(1, 137, Str.STR_9840_NEW_CAPACITY_COST_OF_REFIT, 0);
 				}
@@ -96,9 +101,9 @@ public class ShipGui
 			} break;
 			case 4: /* refit button */
 				if (w.as_refit_d().cargo != AcceptedCargo.CT_INVALID) {
-					final Vehicle v = Vehicle.GetVehicle(w.window_number);
+					final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
 					if (Cmd.DoCommandP(v.tile, v.index, w.as_refit_d().cargo, null, Cmd.CMD_REFIT_SHIP | Cmd.CMD_MSG(Str.STR_9841_CAN_T_REFIT_SHIP)))
-						DeleteWindow(w);
+						w.DeleteWindow();
 				}
 				break;
 			}
@@ -110,10 +115,9 @@ public class ShipGui
 	static final Widget _ship_refit_widgets[] = {
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,						Str.STR_018B_CLOSE_WINDOW),
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   239,     0,    13, Str.STR_983B_REFIT,			Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   239,    14,   135, 0x0,									Str.STR_983D_SELEAcceptedCargo.CT_TYPE_OF_CARGO_FOR),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   239,    14,   135, 0x0,									Str.STR_983D_SELECT_TYPE_OF_CARGO_FOR),
 			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   239,   136,   157, 0x0,									Str.STR_NULL),
 			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,   239,   158,   169, Str.STR_983C_REFIT_SHIP,	Str.STR_983E_REFIT_SHIP_TO_CARRY_HIGHLIGHTED),
-			{   WIDGETS_END},
 	};
 
 	static final WindowDesc _ship_refit_desc = new WindowDesc(
@@ -121,7 +125,7 @@ public class ShipGui
 			Window.WC_VEHICLE_REFIT,Window.WC_VEHICLE_VIEW,
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 			_ship_refit_widgets,
-			ShipRefitWndProc,
+			ShipGui::ShipRefitWndProc
 	);
 
 	static void ShowShipRefitWindow(final Vehicle  v)
@@ -130,10 +134,10 @@ public class ShipGui
 
 		Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, v.index);
 
-		_alloc_wnd_parent_num = v.index;
-		w = Window.AllocateWindowDesc(_ship_refit_desc);
-		w.window_number = v.index;
-		w.caption_color = v.owner;
+		//_alloc_wnd_parent_num = v.index;
+		w = Window.AllocateWindowDesc(_ship_refit_desc,v.index);
+		w.window_number = new WindowNumber( v.index );
+		w.caption_color = (byte) v.owner.id;
 		w.as_refit_d().sel = -1;
 	}
 
@@ -141,16 +145,16 @@ public class ShipGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Vehicle v = Vehicle.GetVehicle(w.window_number);
+			final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
 			//StringID 
 			int str;
 
 			w.disabled_state = v.owner == Global._local_player ? 0 : (1 << 2);
-			if (!Global._patches.servint_ships) // disable service-scroller when interval is set to disabled
+			if (0==Global._patches.servint_ships) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
 			Global.SetDParam(0, v.string_id);
-			Global.SetDParam(1, v.unitnumber);
+			Global.SetDParam(1, v.unitnumber.id);
 			w.DrawWindowWidgets();
 
 			/* Draw running cost */
@@ -161,7 +165,7 @@ public class ShipGui
 
 				Global.SetDParam(0, (v.age + 365 < v.max_age) ? Str.STR_AGE : Str.STR_AGE_RED);
 				Global.SetDParam(2, v.max_age / 366);
-				Global.SetDParam(3, Engine.ShipVehInfo(v.engine_type).running_cost * Global._price.ship_running >> 8);
+				Global.SetDParam(3, Engine.ShipVehInfo(v.engine_type.id).running_cost * Global._price.ship_running >> 8);
 				Gfx.DrawString(2, 15, Str.STR_9812_AGE_RUNNING_COST_YR, 0);
 			}
 
@@ -192,14 +196,14 @@ public class ShipGui
 				Gfx.DrawString(13, 90, Global._patches.servint_ispercent?Str.STR_SERVICING_INTERVAL_PERCENT:Str.STR_883C_SERVICING_INTERVAL_DAYS, 0);
 			}
 
-			DrawShipImage(v, 3, 57, INVALID_VEHICLE);
+			DrawShipImage(v, 3, 57, Vehicle.INVALID_VEHICLE);
 
 			Global.SetDParam(1, 1920 + v.build_year);
 			Global.SetDParam(0, GetCustomEngineName(v.engine_type));
 			Global.SetDParam(2, v.value);
-			Gfx.DrawString(74, 57, Str.STR_9816_BUILandscape.LT_VALUE, 0);
+			Gfx.DrawString(74, 57, Str.STR_9816_BUILT_VALUE, 0);
 
-			Global.SetDParam(0, _cargoc.names_long[v.cargo_type]);
+			Global.SetDParam(0, Global._cargoc.names_long[v.cargo_type]);
 			Global.SetDParam(1, v.cargo_cap);
 			Gfx.DrawString(74, 67, Str.STR_9817_CAPACITY, 0);
 
@@ -218,8 +222,8 @@ public class ShipGui
 			final Vehicle v;
 			switch (e.widget) {
 			case 2: /* rename */
-				v = Vehicle.GetVehicle(w.window_number);
-				Global.SetDParam(0, v.unitnumber);
+				v = Vehicle.GetVehicle(w.window_number.n);
+				Global.SetDParam(0, v.unitnumber.id);
 				ShowQueryString(v.string_id, Str.STR_9831_NAME_SHIP, 31, 150, w.window_class, w.window_number);
 				break;
 			case 5: /* increase int */
@@ -228,9 +232,9 @@ public class ShipGui
 			case 6: /* decrease int */
 				mod = Global._ctrl_pressed?- 5 : -10;
 				do_change_service_int:
-					v = Vehicle.GetVehicle(w.window_number);
+					v = Vehicle.GetVehicle(w.window_number.n);
 
-				mod = GetServiceIntervalClamped(mod + v.service_interval);
+				mod = Depot.GetServiceIntervalClamped(mod + v.service_interval);
 				if (mod == v.service_interval) return;
 
 				Cmd.DoCommandP(v.tile, v.index, mod, null, Cmd.CMD_CHANGE_SHIP_SERVICE_INT | Cmd.CMD_MSG(Str.STR_018A_CAN_T_CHANGE_SERVICING));
@@ -240,13 +244,13 @@ public class ShipGui
 
 		case WE_4:
 			if (Window.FindWindowById(Window.WC_VEHICLE_VIEW, w.window_number.n) == null)
-				DeleteWindow(w);
+				w.DeleteWindow();
 			break;
 
 		case WE_ON_EDIT_TEXT:
-			if (e.edittext.str[0] != '\0') {
-				Global._cmd_text = e.edittext.str;
-				Cmd.DoCommandP(0, w.window_number, 0, null,
+			if (e.str != null) {
+				Global._cmd_text = e.str;
+				Cmd.DoCommandP(null, w.window_number.n, 0, null,
 						Cmd.CMD_NAME_VEHICLE | Cmd.CMD_MSG(Str.STR_9832_CAN_T_NAME_SHIP));
 			}
 			break;
@@ -270,7 +274,7 @@ public class ShipGui
 			Window.WC_VEHICLE_DETAILS,Window.WC_VEHICLE_VIEW,
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 			_ship_details_widgets,
-			ShipDetailsWndProc
+			ShipGui::ShipDetailsWndProc
 	);
 
 	static void ShowShipDetailsWindow(final Vehicle  v)
@@ -283,97 +287,100 @@ public class ShipGui
 		Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, veh);
 		//_alloc_wnd_parent_num = veh;
 		w = Window.AllocateWindowDesc(_ship_details_desc, veh);
-		w.window_number = veh;
-		w.caption_color = v.owner;
+		w.window_number = new WindowNumber( veh );
+		w.caption_color = (byte) v.owner.id;
 	}
 
-	void CcBuildShip(boolean success, TileIndex tile, int p1, int p2)
+	static void CcBuildShip(boolean success, TileIndex tile, int p1, int p2)
 	{
 		final Vehicle  v;
 		if (!success) return;
 
-		v = Vehicle.GetVehicle(_new_ship_id);
-		if (v.tile == _backup_orders_tile) {
-			_backup_orders_tile = 0;
-			RestoreVehicleOrders(v, _backup_orders_data);
+		v = Vehicle.GetVehicle(Global._new_ship_id);
+		if (v.tile == Global._backup_orders_tile) {
+			Global._backup_orders_tile = null;
+			RestoreVehicleOrders(v, Global._backup_orders_data);
 		}
 		ShowShipViewWindow(v);
 	}
 
-	void CcCloneShip(boolean success, int tile, int p1, int p2)
+	static void CcCloneShip(boolean success, TileIndex tile, int p1, int p2)
 	{
-		if (success) ShowShipViewWindow(Vehicle.GetVehicle(_new_ship_id));
+		if (success) ShowShipViewWindow(Vehicle.GetVehicle(Global._new_ship_id));
 	}
 
-	static void NewShipWndProc(Window w, WindowEvent e)
+	static void NewShipWndProc(Window w, WindowEvent we)
 	{
-		switch (e.event) {
-		case WindowEvents.WE_PAINT:
-			if (w.window_number == 0) w.disabled_state = 1 << 5;
+		switch (we.event) {
+		case WE_PAINT:
+			if (w.window_number.n == 0) w.disabled_state = 1 << 5;
 
 			// Setup scroll count
 			{
 				int count = 0;
 				int num = Global.NUM_SHIP_ENGINES;
-				final Engine  e = GetEngine(SHIP_ENGINES_INDEX);
+				int i = 0;
 
 				do {
-					if (BitOps.HASBIT(e.player_avail, Global._local_player)) count++;
-				} while (++e,--num);
-				SetVScrollCount(w, count);
+					final Engine e = Engine.GetEngine(Global.SHIP_ENGINES_INDEX + i++);
+					if (BitOps.HASBIT(e.player_avail, Global._local_player.id)) count++;
+				} while (--num > 0);
+				MiscGui.SetVScrollCount(w, count);
 			}
 
 			w.DrawWindowWidgets();
 
 			{
 				int num = Global.NUM_SHIP_ENGINES;
-				final Engine  e = GetEngine(SHIP_ENGINES_INDEX);
+				final Engine  e = Engine.GetEngine(Global.SHIP_ENGINES_INDEX);
 				int x = 2;
 				int y = 15;
-				int sel = WP(w,buildtrain_d).sel_index;
+				int sel = w.as_buildtrain_d().sel_index;
 				int pos = w.vscroll.pos;
-				EngineID engine_id = SHIP_ENGINES_INDEX;
-				EngineID selected_id = INVALID_ENGINE;
+				//EngineID 
+				int engine_id = Global.SHIP_ENGINES_INDEX;
+				//EngineID 
+				int selected_id = Engine.INVALID_ENGINE;
 
 				do {
-					if (BitOps.HASBIT(e.player_avail, Global._local_player)) {
+					if (BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
 						if (sel==0) selected_id = engine_id;
 						if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.cap, 0)) {
 							Gfx.DrawString(x+75, y+7, GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
-							DrawShipEngine(x+35, y+10, engine_id, Sprite.SPRITE_PALETTE(PLAYER_SPRITE_COLOR(Global._local_player)));
+							DrawShipEngine(x+35, y+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 							y += 24;
 						}
 						sel--;
 					}
 				} while (++engine_id, ++e,--num);
 
-				WP(w,buildtrain_d).sel_engine = selected_id;
+				w.as_buildtrain_d().sel_engine = selected_id;
 
-				if (selected_id != INVALID_ENGINE) {
-					DrawShipPurchaseInfo(2, w.widget[4].top + 1, selected_id);
+				if (selected_id != Engine.INVALID_ENGINE) {
+					DrawShipPurchaseInfo(2, w.widget.get(4).top + 1, selected_id);
 				}
 			}
 			break;
 
-		case WindowEvents.WE_CLICK:
-			switch(e.widget) {
+		case WE_CLICK:
+			switch(we.widget) {
 			case 2: { /* listbox */
-				int i = (e.pt.y - 14) / 24;
+				int i = (we.pt.y - 14) / 24;
 				if (i < w.vscroll.cap) {
-					WP(w,buildtrain_d).sel_index = i + w.vscroll.pos;
+					w.as_buildtrain_d().sel_index = (byte) (i + w.vscroll.pos);
 					w.SetWindowDirty();
 				}
 			} break;
 			case 5: { /* build */
-				EngineID sel_eng = WP(w,buildtrain_d).sel_engine;
-				if (sel_eng != INVALID_ENGINE)
-					Cmd.DoCommandP(w.window_number, sel_eng, 0, CcBuildShip, Cmd.CMD_BUILD_SHIP | Cmd.CMD_MSG(Str.STR_980D_CAN_T_BUILD_SHIP));
+				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
+				if (sel_eng.id != Engine.INVALID_ENGINE)
+					Cmd.DoCommandP( TileIndex.get( w.window_number.n ), sel_eng.id, 0, ShipGui::CcBuildShip, Cmd.CMD_BUILD_SHIP | Cmd.CMD_MSG(Str.STR_980D_CAN_T_BUILD_SHIP));
 			} break;
 
 			case 6:	{ /* rename */
-				EngineID sel_eng = WP(w,buildtrain_d).sel_engine;
-				if (sel_eng != INVALID_ENGINE) {
-					WP(w,buildtrain_d).rename_engine = sel_eng;
+				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
+				if (sel_eng.id != Engine.INVALID_ENGINE) {
+					w.as_buildtrain_d().rename_engine = sel_eng;
 					ShowQueryString(GetCustomEngineName(sel_eng),
 							Str.STR_9838_RENAME_SHIP_TYPE, 31, 160, w.window_class, w.window_number);
 				}
@@ -381,23 +388,23 @@ public class ShipGui
 			}
 			break;
 
-		case WindowEvents.WE_4:
-			if (w.window_number != 0 && !FindWindowById(Window.WC_VEHICLE_DEPOT, w.window_number)) {
-				DeleteWindow(w);
+		case WE_4:
+			if (w.window_number != null && null != Window.FindWindowById(Window.WC_VEHICLE_DEPOT, w.window_number.n)) {
+				w.DeleteWindow();
 			}
 			break;
 
-		case WindowEvents.WE_ON_EDIT_TEXT:
-			if (e.edittext.str[0] != '\0') {
-				Global._cmd_text = e.edittext.str;
-				Cmd.DoCommandP(0, WP(w, buildtrain_d).rename_engine, 0, null,
+		case WE_ON_EDIT_TEXT:
+			if (we.str != null) {
+				Global._cmd_text = we.str;
+				Cmd.DoCommandP(null, w.as_buildtrain_d().rename_engine.id, 0, null,
 						Cmd.CMD_RENAME_ENGINE | Cmd.CMD_MSG(Str.STR_9839_CAN_T_RENAME_SHIP_TYPE));
 			}
 			break;
 
-		case WindowEvents.WE_RESIZE:
-			w.vscroll.cap += e.sizing.diff.y / 24;
-			w.widget[2].unkA = (w.vscroll.cap << 8) + 1;
+		case WE_RESIZE:
+			w.vscroll.cap += we.diff.y / 24;
+			w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
 			break;
 
 		}
@@ -419,7 +426,7 @@ public class ShipGui
 			Window.WC_BUILD_VEHICLE,0,
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_RESIZABLE,
 			_new_ship_widgets,
-			NewShipWndProc
+			ShipGui::NewShipWndProc
 	);
 
 
@@ -430,16 +437,16 @@ public class ShipGui
 		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.tile);
 
 		w = Window.AllocateWindowDesc(_new_ship_desc);
-		w.window_number = tile;
+		w.window_number = new WindowNumber( tile.tile );
 		w.vscroll.cap = 4;
-		w.widget[2].unkA = (w.vscroll.cap << 8) + 1;
+		w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
 
 		w.resize.step_height = 24;
 
-		if (tile != 0) {
-			w.caption_color = GetTileOwner(tile);
+		if (tile != null) {
+			w.caption_color = (byte) tile.GetTileOwner().id;
 		} else {
-			w.caption_color = Global._local_player;
+			w.caption_color = (byte) Global._local_player.id;
 		}
 
 	}
@@ -448,15 +455,16 @@ public class ShipGui
 	static void ShipViewWndProc(Window w, WindowEvent e) {
 		switch(e.event) {
 		case WE_PAINT: {
-			Vehicle v = Vehicle.GetVehicle(w.window_number);
+			Vehicle v = Vehicle.GetVehicle(w.window_number.n);
 			int disabled = 1<<8;
-			StringID str;
+			//StringID 
+			int str;
 
 			// Possible to refit?
-			if (Engine.ShipVehInfo(v.engine_type).refittable &&
-					v.vehstatus&VS_STOPPED &&
-					v.u.ship.state == 0x80 &&
-					IsTileDepotType(v.tile, TRANSPORT_WATER))
+			if (Engine.ShipVehInfo(v.engine_type.id).refittable != 0 &&
+					(v.vehstatus&Vehicle.VS_STOPPED) != 0 &&
+					v.ship.state == 0x80 &&
+					Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER))
 				disabled = 0;
 
 			if (v.owner != Global._local_player)
@@ -465,36 +473,37 @@ public class ShipGui
 
 			/* draw widgets & caption */
 			Global.SetDParam(0, v.string_id);
-			Global.SetDParam(1, v.unitnumber);
+			Global.SetDParam(1, v.unitnumber.id);
 			w.DrawWindowWidgets();
 
 			if (v.breakdown_ctr == 1) {
 				str = Str.STR_885C_BROKEN_DOWN;
-			} else if (v.vehstatus & VS_STOPPED) {
+			} else if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) {
 				str = Str.STR_8861_STOPPED;
 			} else {
+				int vehicle_speed = Global._patches.vehicle_speed ? 1 : 0;
 				switch (v.current_order.type) {
-				case OT_GOTO_STATION: {
+				case Order.OT_GOTO_STATION: {
 					Global.SetDParam(0, v.current_order.station);
 					Global.SetDParam(1, v.cur_speed * 10 >> 5);
-					str = Str.STR_HEADING_FOR_STATION + Global._patches.vehicle_speed;
+					str = Str.STR_HEADING_FOR_STATION + vehicle_speed;
 				} break;
 
-				case OT_GOTO_DEPOT: {
-					Depot depot = GetDepot(v.current_order.station);
+				case Order.OT_GOTO_DEPOT: {
+					Depot depot = Depot.GetDepot(v.current_order.station);
 					Global.SetDParam(0, depot.town_index);
 					Global.SetDParam(1, v.cur_speed * 10 >> 5);
-					str = Str.STR_HEADING_FOR_SHIP_DEPOT + Global._patches.vehicle_speed;
+					str = Str.STR_HEADING_FOR_SHIP_DEPOT + vehicle_speed;
 				} break;
 
-				case OT_LOADING:
-				case OT_LEAVESTATION:
+				case Order.OT_LOADING:
+				case Order.OT_LEAVESTATION:
 					str = Str.STR_882F_LOADING_UNLOADING;
 					break;
 
 				default:
 					if (v.num_orders == 0) {
-						str = Str.STR_NO_ORDERS + Global._patches.vehicle_speed;
+						str = Str.STR_NO_ORDERS + vehicle_speed;
 						Global.SetDParam(0, v.cur_speed * 10 >> 5);
 					} else
 						str = Str.STR_EMPTY;
@@ -503,20 +512,20 @@ public class ShipGui
 			}
 
 			/* draw the flag plus orders */
-			Gfx.DrawSprite(v.vehstatus & VS_STOPPED ? Sprite.SPR_FLAG_Vehicle.VEH_STOPPED : Sprite.SPR_FLAG_Vehicle.VEH_RUNNING, 2, w.widget[5].top + 1);
-			DrawStringCenteredTruncated(w.widget[5].left + 8, w.widget[5].right, w.widget[5].top + 1, str, 0);
-			DrawWindowViewport(w);
+			Gfx.DrawSprite((v.vehstatus & Vehicle.VS_STOPPED) != 0 ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.widget.get(5).top + 1);
+			Gfx.DrawStringCenteredTruncated(w.widget.get(5).left + 8, w.widget.get(5).right, w.widget.get(5).top + 1, new StringID(str), 0);
+			ViewPort.DrawWindowViewport(w);
 		} break;
 
-		case WindowEvents.WE_CLICK: {
-			final Vehicle  v = Vehicle.GetVehicle(w.window_number);
+		case WE_CLICK: {
+			final Vehicle  v = Vehicle.GetVehicle(w.window_number.n);
 
 			switch (e.widget) {
 			case 5: /* start stop */
 				Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_START_STOP_SHIP | Cmd.CMD_MSG(Str.STR_9818_CAN_T_STOP_START_SHIP));
 				break;
 			case 6: /* center main view */
-				ScrollMainWindowTo(v.x_pos, v.y_pos);
+				ViewPort.ScrollMainWindowTo(v.x_pos, v.y_pos);
 				break;
 			case 7: /* goto hangar */
 				Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_SEND_SHIP_TO_DEPOT | Cmd.CMD_MSG(Str.STR_9819_CAN_T_SEND_SHIP_TO_DEPOT));
@@ -525,37 +534,37 @@ public class ShipGui
 				ShowShipRefitWindow(v);
 				break;
 			case 9: /* show orders */
-				ShowOrdersWindow(v);
+				OrderGui.ShowOrdersWindow(v);
 				break;
 			case 10: /* show details */
 				ShowShipDetailsWindow(v);
 				break;
 			case 11: {
 				/* clone vehicle */
-				Cmd.DoCommandP(v.tile, v.index, Global._ctrl_pressed ? 1 : 0, CcCloneShip, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_980D_CAN_T_BUILD_SHIP));
+				Cmd.DoCommandP(v.tile, v.index, Global._ctrl_pressed ? 1 : 0, ShipGui::CcCloneShip, Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_980D_CAN_T_BUILD_SHIP));
 			} break;
 			}
 		} break;
 
-		case WindowEvents.WE_RESIZE:
-			w.viewport.width  += e.sizing.diff.x;
-			w.viewport.height += e.sizing.diff.y;
-			w.viewport.virtual_width  += e.sizing.diff.x;
-			w.viewport.virtual_height += e.sizing.diff.y;
+		case WE_RESIZE:
+			w.viewport.width  += e.diff.x;
+			w.viewport.height += e.diff.y;
+			w.viewport.virtual_width  += e.diff.x;
+			w.viewport.virtual_height += e.diff.y;
 			break;
 
-		case WindowEvents.WE_DESTROY:
-			Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, w.window_number);
-			Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, w.window_number);
-			Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, w.window_number);
+		case WE_DESTROY:
+			Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, w.window_number.n);
+			Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, w.window_number.n);
+			Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, w.window_number.n);
 			break;
 
-		case WindowEvents.WE_MOUSELOOP:
+		case WE_MOUSELOOP:
 		{
 			Vehicle v;
 			int h;
-			v = Vehicle.GetVehicle(w.window_number);
-			h = IsTileDepotType(v.tile, TRANSPORT_WATER) && v.vehstatus & VS_HIDDEN ? (1<< 7) : (1 << 11);
+			v = Vehicle.GetVehicle(w.window_number.n);
+			h = IsTileDepotType(v.tile, Global.TRANSPORT_WATER) && v.vehstatus & Vehicle.VS_HIDDEN ? (1<< 7) : (1 << 11);
 			if (h != w.hidden_state) {
 				w.hidden_state = h;
 				w.SetWindowDirty();
@@ -586,42 +595,45 @@ public class ShipGui
 			Window.WC_VEHICLE_VIEW,0,
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 			_ship_view_widgets,
-			ShipViewWndProc
+			ShipGui::ShipViewWndProc
 	);
 
-	void ShowShipViewWindow(final Vehicle  v)
+	static void ShowShipViewWindow(final Vehicle  v)
 	{
 		Window  w = Window.AllocateWindowDescFront(_ship_view_desc, v.index);
 
 		if (w != null) {
-			w.caption_color = v.owner;
-			AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number | (1 << 31), 0);
+			w.caption_color = (byte) v.owner.id;
+			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number.n | (1 << 31), 0);
 		}
 	}
 
 	static void DrawShipDepotWindow(Window w)
 	{
 		TileIndex tile;
-		Vehicle v;
+		//Vehicle v;
 		int num,x,y;
 		Depot depot;
 
-		tile = w.window_number;
+		tile = TileIndex.get( w.window_number.n );
 
 		/* setup disabled buttons */
 		w.disabled_state =
-				IsTileOwner(tile, Global._local_player) ? 0 : ((1 << 4) | (1 << 7));
+				tile.IsTileOwner(Global._local_player) ? 0 : ((1 << 4) | (1 << 7));
 
 		/* determine amount of items for scroller */
 		num = 0;
-		FOR_ALL_VEHICLES(v) {
-			if (v.type == Vehicle.VEH_Ship && v.u.ship.state == 0x80 && v.tile == tile)
+		//FOR_ALL_VEHICLES(v)
+		Vehicle.forEach( (v) ->
+		{
+			if (v.type == Vehicle.VEH_Ship && v.ship.state == 0x80 && v.tile == tile)
 				num++;
-		}
+		});
+		
 		SetVScrollCount(w, (num + w.hscroll.cap - 1) / w.hscroll.cap);
 
 		/* locate the depot struct */
-		depot = GetDepotByTile(tile);
+		depot = Depot.GetDepotByTile(tile);
 		assert(depot != null);
 
 		Global.SetDParam(0, depot.town_index);
@@ -631,29 +643,30 @@ public class ShipGui
 		y = 15;
 		num = w.vscroll.pos * w.hscroll.cap;
 
-		FOR_ALL_VEHICLES(v) {
-			if (v.type == Vehicle.VEH_Ship && v.u.ship.state == 0x80 && v.tile == tile &&
+		//FOR_ALL_VEHICLES(v)
+		Vehicle.forEach( (v) ->
+		{
+			if (v.type == Vehicle.VEH_Ship && v.ship.state == 0x80 && v.tile == tile &&
 					--num < 0 && num >= -w.vscroll.cap * w.hscroll.cap) {
 				DrawShipImage(v, x+19, y, w.as_traindepot_d().sel);
 
-				Global.SetDParam(0, v.unitnumber);
+				Global.SetDParam(0, v.unitnumber.id);
 				Gfx.DrawString(x, y+2, (int)(v.max_age-366) >= v.age ? Str.STR_00E2 : Str.STR_00E3, 0);
 
-				Gfx.DrawSprite((v.vehstatus & VS_STOPPED) ? Sprite.SPR_FLAG_Vehicle.VEH_STOPPED : Sprite.SPR_FLAG_Vehicle.VEH_RUNNING, x, y + 9);
+				Gfx.DrawSprite((v.vehstatus & Vehicle.VS_STOPPED)!=0 ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x, y + 9);
 
 				if ((x+=90) == 2 + 90 * w.hscroll.cap) {
 					x = 2;
 					y += 24;
 				}
 			}
-		}
+		});
 	}
 
-	static int GetVehicleFromShipDepotWndPt(final Window w, int x, int y, Vehicle veh)
+	static int GetVehicleFromShipDepotWndPt(final Window w, int x, int y, Vehicle [] veh)
 	{
 		int xt,row,xm,ym;
-		TileIndex tile;
-		Vehicle v;
+		//Vehicle v;
 		int pos;
 
 		xt = x / 90;
@@ -668,11 +681,15 @@ public class ShipGui
 
 		pos = (row + w.vscroll.pos) * w.hscroll.cap + xt;
 
-		tile = w.window_number;
-		FOR_ALL_VEHICLES(v) {
-			if (v.type == Vehicle.VEH_Ship && v.vehstatus & VS_HIDDEN && v.tile == tile &&
+		TileIndex tile = TileIndex.get( w.window_number.n );
+		//FOR_ALL_VEHICLES(v)
+		Iterator<Vehicle> ii = Vehicle.getIterator();
+		while(ii.hasNext())
+		{
+			Vehicle v = ii.next();
+			if (v.type == Vehicle.VEH_Ship && 0 != (v.vehstatus & Vehicle.VS_HIDDEN) && v.tile == tile &&
 					--pos < 0) {
-				*veh = v;
+				veh[0] = v;
 				if (xm >= 19) return 0;
 				if (ym <= 10) return -1; /* show window */
 				return -2; /* start stop */
@@ -689,7 +706,7 @@ public class ShipGui
 		int mode = GetVehicleFromShipDepotWndPt(w, x, y, &v);
 
 		// share / copy orders
-		if (_thd.place_mode && mode <= 0) { _place_clicked_vehicle = v; return; }
+		if (_thd.place_mode && mode <= 0) { Global._place_clicked_vehicle = v; return; }
 
 		switch (mode) {
 		case 1: // invalid
@@ -699,7 +716,7 @@ public class ShipGui
 			if (v != null) {
 				w.as_traindepot_d().sel = v.index;
 				w.SetWindowDirty();
-				SetObjectToPlaceWnd( Sprite.SPRITE_PALETTE(PLAYER_SPRITE_COLOR(v.owner)) +
+				SetObjectToPlaceWnd( Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner)) +
 						GetShipImage(v, 6), 4, w);
 			}
 			break;
@@ -713,7 +730,8 @@ public class ShipGui
 			break;
 
 		default:
-			NOT_REACHED();
+			///NOT_REACHED();
+			assert false;
 		}
 	}
 
@@ -726,16 +744,16 @@ public class ShipGui
 	{
 		if (v == null || v.type != Vehicle.VEH_Ship) return;
 
-		Cmd.DoCommandP(w.window_number, v.index, Global._ctrl_pressed ? 1 : 0, CcCloneShip,
+		Cmd.DoCommandP(w.window_number, v.index, Global._ctrl_pressed ? 1 : 0, ShipGui::CcCloneShip,
 				Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_980D_CAN_T_BUILD_SHIP)
 				);
 
-		ResetObjectToPlace();
+		ViewPort.ResetObjectToPlace();
 	}
 
 	static void ClonePlaceObj(TileIndex tile, final Window  w)
 	{
-		final Vehicle  v = CheckMouseOverVehicle();
+		final Vehicle  v = ViewPort.CheckMouseOverVehicle();
 
 		if (v != null) HandleCloneVehClick(v, w);
 	}
@@ -743,107 +761,108 @@ public class ShipGui
 	static void ShipDepotWndProc(Window  w, WindowEvent  e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 			DrawShipDepotWindow(w);
 			break;
 
-		case WindowEvents.WE_CLICK:
+		case WE_CLICK:
 			switch(e.widget) {
 			case 5:
 				ShipDepotClick(w, e.pt.x, e.pt.y);
 				break;
 
 			case 7:
-				ResetObjectToPlace();
-				ShowBuildShipWindow(w.window_number);
+				ViewPort.ResetObjectToPlace();
+				ShowBuildShipWindow(w.window_number.n);
 				break;
 
 			case 8: /* clone button */
-				InvalidateWidget(w, 8);
-				TOGGLEBIT(w.click_state, 8);
+				w.InvalidateWidget( 8);
+				w.click_state = BitOps.RETTOGGLEBIT(w.click_state, 8);
 
 				if (BitOps.HASBIT(w.click_state, 8)) {
-					_place_clicked_vehicle = null;
+					Global._place_clicked_vehicle = null;
 					SetObjectToPlaceWnd(Sprite.SPR_CURSOR_CLONE, VHM_RECT, w);
 				} else {
-					ResetObjectToPlace();
+					ViewPort.ResetObjectToPlace();
 				}
 				break;
 
 			case 9: /* scroll to tile */
-				ResetObjectToPlace();
-				ScrollMainWindowToTile(w.window_number);
+				ViewPort.ResetObjectToPlace();
+				ViewPort.ScrollMainWindowToTile(w.window_number);
 				break;
 			}
 			break;
 
-		case WindowEvents.WE_PLACE_OBJ: {
+		case WE_PLACE_OBJ: {
 			ClonePlaceObj(w.window_number, w);
 		} break;
 
-		case WindowEvents.WE_ABORT_PLACE_OBJ: {
-			CLRBIT(w.click_state, 8);
-			InvalidateWidget(w, 8);
+		case WE_ABORT_PLACE_OBJ: {
+			w.click_state = BitOps.RETCLRBIT(w.click_state, 8);
+			w.InvalidateWidget( 8);
 		} break;
 
 		// check if a vehicle in a depot was clicked..
-		case WindowEvents.WE_MOUSELOOP: {
-			final Vehicle  v = _place_clicked_vehicle;
+		case WE_MOUSELOOP: {
+			final Vehicle  v = Global._place_clicked_vehicle;
 
 			// since OTTD checks all open depot windows, we will make sure that it triggers the one with a clicked clone button
 			if (v != null && BitOps.HASBIT(w.click_state, 8)) {
-				_place_clicked_vehicle = null;
+				Global._place_clicked_vehicle = null;
 				HandleCloneVehClick(v, w);
 			}
 		} break;
 
-		case WindowEvents.WE_DESTROY:
-			Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, w.window_number);
+		case WE_DESTROY:
+			Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, w.window_number.n);
 			break;
 
-		case WindowEvents.WE_DRAGDROP:
+		case WE_DRAGDROP:
 			switch(e.widget) {
 			case 5: {
-				Vehicle v;
-				VehicleID sel = w.as_traindepot_d().sel;
+				Vehicle[] v = {null};
+				//VehicleID 
+				int sel = w.as_traindepot_d().sel;
 
-				w.as_traindepot_d().sel = INVALID_VEHICLE;
+				w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
 				w.SetWindowDirty();
 
-				if (GetVehicleFromShipDepotWndPt(w, e.dragdrop.pt.x, e.dragdrop.pt.y, &v) == 0 &&
+				if (GetVehicleFromShipDepotWndPt(w, e.pt.x, e.pt.y, v) == 0 &&
 						v != null &&
-						sel == v.index) {
-					ShowShipViewWindow(v);
+						sel == v[0].index) {
+					ShowShipViewWindow(v[0]);
 				}
 			} break;
 
 			case 4:
 				if (!BitOps.HASBIT(w.disabled_state, 4) &&
-						w.as_traindepot_d().sel != INVALID_VEHICLE)	{
+						w.as_traindepot_d().sel != Vehicle.INVALID_VEHICLE)	{
 					Vehicle v;
 
-					HandleButtonClick(w, 4);
+					w.HandleButtonClick( 4);
 
 					v = Vehicle.GetVehicle(w.as_traindepot_d().sel);
-					w.as_traindepot_d().sel = INVALID_VEHICLE;
+					w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
 
-					_backup_orders_tile = v.tile;
-					BackupVehicleOrders(v, _backup_orders_data);
+					Global._backup_orders_tile = v.tile;
+					BackupVehicleOrders(v, Global._backup_orders_data);
 
 					if (!Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_SELL_SHIP | Cmd.CMD_MSG(Str.STR_980C_CAN_T_SELL_SHIP)))
-						_backup_orders_tile = 0;
+						Global._backup_orders_tile = null;
 				}
 				break;
 			default:
-				w.as_traindepot_d().sel = INVALID_VEHICLE;
+				w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
 				w.SetWindowDirty();
 			}
 			break;
 
-		case WindowEvents.WE_RESIZE:
-			w.vscroll.cap += e.sizing.diff.y / 24;
-			w.hscroll.cap += e.sizing.diff.x / 90;
-			w.widget[5].unkA = (w.vscroll.cap << 8) + w.hscroll.cap;
+		case WE_RESIZE:
+			w.vscroll.cap += e.diff.y / 24;
+			w.hscroll.cap += e.diff.x / 90;
+			w.widget.get(5).unkA = (w.vscroll.cap << 8) + w.hscroll.cap;
 			break;
 		}
 	}
@@ -869,7 +888,7 @@ public class ShipGui
 			Window.WC_VEHICLE_DEPOT,0,
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 			_ship_depot_widgets,
-			ShipDepotWndProc
+			ShipGui::ShipDepotWndProc
 	);
 
 	void ShowShipDepotWindow(TileIndex tile)
@@ -877,34 +896,40 @@ public class ShipGui
 		Window  w = Window.AllocateWindowDescFront(_ship_depot_desc,tile);
 
 		if (w != null) {
-			w.caption_color = GetTileOwner(w.window_number);
+			w.caption_color = (byte) TileIndex.get(w.window_number.n).GetTileOwner().id;
 			w.vscroll.cap = 2;
 			w.hscroll.cap = 3;
 			w.resize.step_width = 90;
 			w.resize.step_height = 24;
-			w.as_traindepot_d().sel = INVALID_VEHICLE;
-			_backup_orders_tile = 0;
+			w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
+			Global._backup_orders_tile = null;
 		}
 	}
 
 
 	static void DrawSmallOrderList(final Vehicle  v, int x, int y)
 	{
-		final Order order;
+		//final Order order;
 		int sel, i = 0;
 
 		sel = v.cur_order_index;
 
-		FOR_VEHICLE_ORDERS(v, order) {
+		//FOR_VEHICLE_ORDERS(v, order) 
+		//v.forEachOrder( (order) ->
+		Iterator<Order> ii = v.getOrdersIterator();
+		while(ii.hasNext())
+		{
+			Order order = ii.next();
 			if (sel == 0) {
-				_stringwidth_base = 0xE0;
-				Gfx.DoDrawString("\xAF", x - 6, y, 16);
-				_stringwidth_base = 0;
+				Gfx._stringwidth_base = 0xE0;
+				//Gfx.DoDrawString("\xAF", x - 6, y, 16);
+				Gfx.DoDrawString( String.valueOf((char)0xAF), x - 6, y, 16);
+				Gfx._stringwidth_base = 0;
 			}
 			sel--;
 
-			if (order.type == OT_GOTO_STATION) {
-				if (!IsBuoy(Station.GetStation(order.station))){
+			if (order.type == Order.OT_GOTO_STATION) {
+				if (!Station.GetStation(order.station).IsBuoy()){
 					Global.SetDParam(0, order.station);
 					Gfx.DrawString(x, y, Str.STR_A036, 0);
 
@@ -913,6 +938,8 @@ public class ShipGui
 				}
 			}
 		}
+		
+		
 	}
 
 
@@ -953,9 +980,9 @@ public class ShipGui
 		vehiclelist_d vl = w.as_vehiclelist_d();
 
 		switch(e.event) {
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			int x = 2;
-			int y = PLY_WND_PRC__OFFSET_TOP_WIDGET;
+			int y = VehicleGui.PLY_WND_PRC__OFFSET_TOP_WIDGET;
 			int max;
 			int i;
 
@@ -970,38 +997,39 @@ public class ShipGui
 
 			/* draw the widgets */
 			{
-				final Player p = GetPlayer(owner);
-				if (station == INVALID_STATION) {
+				final Player p = Player.GetPlayer(owner);
+				if (station.id == Station.INVALID_STATION) {
 					/* Company Name -- (###) Trains */
 					Global.SetDParam(0, p.name_1);
 					Global.SetDParam(1, p.name_2);
 					Global.SetDParam(2, w.vscroll.count);
-					w.widget[1].unkA = Str.STR_9805_SHIPS;
+					w.widget.get(1).unkA = Str.STR_9805_SHIPS;
 				} else {
 					/* Station Name -- (###) Trains */
-					Global.SetDParam(0, station);
+					Global.SetDParam(0, station.id);
 					Global.SetDParam(1, w.vscroll.count);
-					w.widget[1].unkA = Str.STR_SCHEDULED_SHIPS;
+					w.widget.get(1).unkA = Str.STR_SCHEDULED_SHIPS;
 				}
 				w.DrawWindowWidgets();
 			}
 			/* draw sorting criteria string */
 			Gfx.DrawString(85, 15, _vehicle_sort_listing[vl.sort_type], 0x10);
 			/* draw arrow pointing up/down for ascending/descending sorting */
-			Gfx.DoDrawString(vl.flags & VL_DESC ? DOWNARROW : UPARROW, 69, 15, 0x10);
+			Gfx.DoDrawString(vl.flags & Vehicle.VL_DESC ? Gfx.DOWNARROW : Gfx.UPARROW, 69, 15, 0x10);
 
 			max = Math.min(w.vscroll.pos + w.vscroll.cap, vl.list_length);
 			for (i = w.vscroll.pos; i < max; ++i) {
 				Vehicle v = Vehicle.GetVehicle(vl.sort_list[i].index);
-				StringID str;
+				//StringID 
+				int str;
 
 				assert(v.type == Vehicle.VEH_Ship);
 
-				DrawShipImage(v, x + 19, y + 6, INVALID_VEHICLE);
+				DrawShipImage(v, x + 19, y + 6, Vehicle.INVALID_VEHICLE);
 				DrawVehicleProfitButton(v, x, y + 13);
 
 				Global.SetDParam(0, v.unitnumber);
-				if (IsTileDepotType(v.tile, TRANSPORT_WATER) && (v.vehstatus & VS_HIDDEN))
+				if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER) && (v.vehstatus & Vehicle.VS_HIDDEN))
 					str = Str.STR_021F;
 				else
 					str = v.age > v.max_age - 366 ? Str.STR_00E3 : Str.STR_00E2;
@@ -1018,23 +1046,23 @@ public class ShipGui
 
 					DrawSmallOrderList(v, x + 138, y);
 
-					y += PLY_WND_PRC__SIZE_OF_ROW_BIG;
+					y += VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
 			}
 		}	break;
 
-		case WindowEvents.WE_CLICK: {
+		case WE_CLICK: {
 			switch(e.widget) {
 			case 3: /* Flip sorting method ascending/descending */
-				vl.flags ^= VL_DESC;
-				vl.flags |= VL_RESORT;
-				_sorting.ship.order = !!(vl.flags & VL_DESC);
+				vl.flags ^= Vehicle.VL_DESC;
+				vl.flags |= Vehicle.VL_RESORT;
+				_sorting.ship.order = !!(vl.flags & Vehicle.VL_DESC);
 				w.SetWindowDirty();
 				break;
 			case 4: case 5:/* Select sorting criteria dropdown menu */
 				ShowDropDownMenu(w, _vehicle_sort_listing, vl.sort_type, 5, 0, 0);
 				return;
 			case 7: { /* Matrix to show vehicles */
-				int id_v = (e.pt.y - PLY_WND_PRC__OFFSET_TOP_WIDGET) / PLY_WND_PRC__SIZE_OF_ROW_BIG;
+				int id_v = (e.pt.y - VehicleGui.PLY_WND_PRC__OFFSET_TOP_WIDGET) / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
 
 				if (id_v >= w.vscroll.cap) return; // click out of bounds
 
@@ -1084,7 +1112,7 @@ public class ShipGui
 	case WindowEvents.WE_DROPDOWN_SELECT: /* we have selected a dropdown item in the list */
 				if (vl.sort_type != e.dropdown.index) {
 					// value has changed . resort
-					vl.flags |= VL_RESORT;
+					vl.flags |= Vehicle.VL_RESORT;
 					vl.sort_type = e.dropdown.index;
 					_sorting.ship.criteria = vl.sort_type;
 
@@ -1097,7 +1125,7 @@ public class ShipGui
 
 			case WindowEvents.WE_CREATE: /* set up resort timer */
 				vl.sort_list = null;
-				vl.flags = VL_REBUILD | (_sorting.ship.order << (VL_DESC - 1));
+				vl.flags = Vehicle.VL_REBUILD | (_sorting.ship.order << (Vehicle.VL_DESC - 1));
 				vl.sort_type = _sorting.ship.criteria;
 				vl.resort_timer = DAY_TICKS * PERIODIC_RESORT_DAYS;
 				break;
@@ -1111,15 +1139,15 @@ public class ShipGui
 					Global.DEBUG_misc( 1, "Periodic resort ships list player %d station %d",
 							owner, station);
 					vl.resort_timer = DAY_TICKS * PERIODIC_RESORT_DAYS;
-					vl.flags |= VL_RESORT;
+					vl.flags |= Vehicle.VL_RESORT;
 					w.SetWindowDirty();
 				}
 				break;
 
 			case WindowEvents.WE_RESIZE:
 				/* Update the scroll + matrix */
-				w.vscroll.cap += e.sizing.diff.y / PLY_WND_PRC__SIZE_OF_ROW_BIG;
-				w.widget[7].unkA = (w.vscroll.cap << 8) + 1;
+				w.vscroll.cap += e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
+				w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
 				break;
 			}
 			}
@@ -1129,7 +1157,7 @@ public class ShipGui
 					Window.WC_SHIPS_LIST,0,
 					WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 					_player_ships_widgets,
-					PlayerShipsWndProc
+					ShipGui::PlayerShipsWndProc
 			);
 
 			static final WindowDesc _other_player_ships_desc = new WindowDesc(
@@ -1137,7 +1165,7 @@ public class ShipGui
 					Window.WC_SHIPS_LIST,0,
 					WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 					_other_player_ships_widgets,
-					PlayerShipsWndProc
+					ShipGui::PlayerShipsWndProc
 			);
 
 
@@ -1146,15 +1174,15 @@ public class ShipGui
 				Window w;
 
 				if (player == Global._local_player) {
-					w = Window.AllocateWindowDescFront(_player_ships_desc, (station << 16) | player);
+					w = Window.AllocateWindowDescFront(_player_ships_desc, (station.id << 16) | player.id);
 				} else  {
-					w = Window.AllocateWindowDescFront(_other_player_ships_desc, (station << 16) | player);
+					w = Window.AllocateWindowDescFront(_other_player_ships_desc, (station.id << 16) | player.id);
 				}
 				if (w != null) {
-					w.caption_color = w.window_number;
+					w.caption_color = (byte) w.window_number.n;
 					w.vscroll.cap = 4;
-					w.widget[7].unkA = (w.vscroll.cap << 8) + 1;
-					w.resize.step_height = PLY_WND_PRC__SIZE_OF_ROW_BIG;
+					w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
+					w.resize.step_height = VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
 				}
 			}
 
