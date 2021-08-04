@@ -14,9 +14,9 @@ public class Ship {
 		return (byte) (r | r >> 8);
 	}
 
-	static void DrawShipEngine(int x, int y, EngineID engine, int image_ormod)
+	static void DrawShipEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
 	{
-		int spritenum = EngineGui.ShipVehInfo(engine.id).image_index;
+		int spritenum = EngineGui.ShipVehInfo(engine).image_index;
 		// TODO custom spr
 		/*if (is_custom_sprite(spritenum)) {
 			int sprite = GetCustomVehicleIcon(engine, 6);
