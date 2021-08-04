@@ -15,7 +15,7 @@ typedef enum {
 
 /* Station layout for given dimensions - it is a two-dimensional array
  * where index is computed as (x * platforms) + platform. */
-typedef byte *StationLayout;
+//typedef byte *StationLayout;
 #if 0
 typedef struct stationspec {
 	uint32 grfid; ///< ID of GRF file station belongs to.

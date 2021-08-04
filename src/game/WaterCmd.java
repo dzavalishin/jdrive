@@ -473,7 +473,7 @@ public class WaterCmd extends WaterTables
 		DrawWaterStuff(ti, _shipdepot_display_seq[ti.map5 & 0x7F], Sprite.PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner()), 0);
 	}
 
-	void DrawShipDepotSprite(int x, int y, int image)
+	static void DrawShipDepotSprite(int x, int y, int image)
 	{
 		final WaterDrawTileStruct[] wdtsa = _shipdepot_display_seq[image];
 

@@ -1,3 +1,5 @@
+#if 0
+
 /* $Id: disaster_cmd.c 3216 2005-11-17 23:05:59Z Darkvater $ */
 
 #include "stdafx.h"
