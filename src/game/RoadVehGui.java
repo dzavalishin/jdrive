@@ -16,7 +16,7 @@ public class RoadVehGui
 	 * @param x,y location where to draw the info
 	 * @param engine_number the engine of which to draw the info of
 	 */
-	void DrawRoadVehPurchaseInfo(int x, int y, /*EngineID*/ int engine_number)
+	static void DrawRoadVehPurchaseInfo(int x, int y, /*EngineID*/ int engine_number)
 	{
 		final RoadVehicleInfo rvi = Engine.RoadVehInfo(engine_number);
 		final Engine  e = Engine.GetEngine(engine_number);

@@ -110,7 +110,7 @@ public abstract class Hal
 		return true;
 	}
 
-	void SetCursorSprite(CursorID cursor)
+	static void SetCursorSprite(CursorID cursor)
 	{
 		CursorVars cv =_cursor;
 		Sprite p;
@@ -186,9 +186,12 @@ public abstract class Hal
 
 	static boolean ChangeResInGame(int w, int h)
 	{
+		/*
 		return
 				(_screen.width == w && _screen.height == h) ||
 				change_resolution(w, h);
+		*/
+		return false;
 	}
 
 	void ToggleFullScreen(boolean fs) {toggle_fullscreen(fs);}
@@ -210,7 +213,7 @@ void SortResolutions(int count)
 		// Get the color for DrawString-subroutines which matches the color
 		//  of the player
 		if (player.id == Owner.OWNER_SPECTATOR || player.id == Owner.OWNER_SPECTATOR - 1) return 1;
-		return (_color_list[Global._player_colors[player.id]].window_color_1b) | IS_PALETTE_COLOR;
+		return (Global._color_list[Global._player_colors[player.id]].window_color_1b) | Gfx.IS_PALETTE_COLOR;
 	}
 
 	

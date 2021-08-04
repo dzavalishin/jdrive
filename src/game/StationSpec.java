@@ -1,5 +1,6 @@
 package game;
 
+import game.enums.StationClassID;
 import game.tables.EngineTables;
 
 public class StationSpec 

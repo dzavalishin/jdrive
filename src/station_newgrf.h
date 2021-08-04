@@ -7,6 +7,7 @@
 
 #include "engine.h"
 
+/*
 typedef enum {
 	STAT_CLASS_DFLT,     ///< Default station class.
 	STAT_CLASS_WAYP,     ///< Waypoint class.

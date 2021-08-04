@@ -280,6 +280,7 @@ public class WaterCmd extends WaterTables
 					
 					return false;
 				}
+			return false;
 		}); // END_TILE_LOOP(tile, size_x, size_y, 0);
 
 		if( err[0] != 0  ) return err[0];
