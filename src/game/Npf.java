@@ -1069,7 +1069,7 @@ public class Npf {
 		return NPFRouteInternal(start1, (IsValidTile(tile2) ? start2 : null), null, NPFFindDepot, NPFCalcZero, type, owner, railtype, reverse_penalty, PBS_MODE_NONE);
 	}
 
-	NPFFoundTargetData NPFRouteToDepotBreadthFirst(TileIndex tile, /*Trackdir*/ int trackdir, /*TransportType*/ int type, Owner owner, /* RailType */ int railtype)
+	static NPFFoundTargetData NPFRouteToDepotBreadthFirst(TileIndex tile, /*Trackdir*/ int trackdir, /*TransportType*/ int type, PlayerID owner, /* RailType */ int railtype)
 	{
 		return NPFRouteToDepotBreadthFirstTwoWay(tile, trackdir, INVALID_TILE, 0, type, owner, railtype, 0);
 	}
