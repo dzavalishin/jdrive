@@ -1,3 +1,5 @@
+#if 0
+
 /* $Id: ship_gui.c 3350 2005-12-28 09:29:00Z peter1138 $ */
 
 #include "stdafx.h"
