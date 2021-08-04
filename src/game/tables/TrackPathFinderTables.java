@@ -33,7 +33,7 @@ public class TrackPathFinderTables
 	
 	public static final int _tpfmode1_and[] = { 0x1009, 0x16, 0x520, 0x2A00 };
 	
-
+	// TODO Why here?! _ffb_64
 	public static final byte _ffb_64[] = {
 	0,0,1,0,2,0,1,0,
 	3,0,1,0,2,0,1,0,

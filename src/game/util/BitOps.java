@@ -1,6 +1,7 @@
 package game.util;
 
 import game.IntContainer;
+import game.tables.TrackPathFinderTables;
 import game.Hal;
 
 // macros.h stuff
@@ -160,11 +161,11 @@ public class BitOps {
 	 * left. Ie, 10110100 returns 2, 00000001 returns 0, etc. When x == 0 returns
 	 * 0.
 	 */
-	//static void FIND_FIRST_BIT(x) _ffb_64[(x)]
+	public static int FIND_FIRST_BIT(int x) { return TrackPathFinderTables._ffb_64[(x)]; }
 	/* Returns x with the first bit that is not zero, counted from the left, set
 	 * to zero. So, 10110100 returns 10110000, 00000001 returns 00000000, etc.
 	 */
-	//static void KILL_FIRST_BIT(x) _ffb_64[(x)+64]
+	public static int KILL_FIRST_BIT(int x) { return TrackPathFinderTables._ffb_64[(x)+64]; }
 	/*
 	static  int FindFirstBit2x64(int value)
 	{
