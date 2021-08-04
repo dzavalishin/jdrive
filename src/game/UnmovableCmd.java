@@ -17,7 +17,7 @@ public class UnmovableCmd extends UnmovableTables {
 	static int DestroyCompanyHQ(TileIndex tile, int flags)
 	{
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
-		Player p;
+		Player p = null;
 
 		/* Find player that has HQ flooded, and reset their location_of_house */
 		if (Global._current_player.id == Owner.OWNER_WATER) {
@@ -48,8 +48,10 @@ public class UnmovableCmd extends UnmovableTables {
 			Window.InvalidateWindow(Window.WC_COMPANY, p.index);
 		}
 
+		assert p != null;
+
 		// cost of relocating company is 1% of company value
-		return Economy.CalculateCompanyValue(p) / 100;
+		return (int) (Economy.CalculateCompanyValue(p) / 100);
 	}
 
 	/** Build or relocate the HQ. This depends if the HQ is already built or not
@@ -103,9 +105,9 @@ public class UnmovableCmd extends UnmovableTables {
 				// statue
 				ViewPort.DrawGroundSprite(Sprite.SPR_STATUE_GROUND);
 
-				image = PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner());
-				image += PALETTE_MODIFIER_COLOR | Sprite.SPR_STATUE_COMPANY;
-				if (Global._display_opt & Global.DO_TRANS_BUILDINGS)
+				image = Sprite.PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner());
+				image += Sprite.PALETTE_MODIFIER_COLOR | Sprite.SPR_STATUE_COMPANY;
+				if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS) )
 					image = Sprite.RET_MAKE_TRANSPARENT(image);
 				ViewPort.AddSortableSpriteToDraw(image, ti.x, ti.y, 16, 16, 25, ti.z);
 			} else if (ti.map5 == 3) {
@@ -114,7 +116,7 @@ public class UnmovableCmd extends UnmovableTables {
 				Clear.DrawClearLandTile(ti, 0);
 
 				ViewPort.AddSortableSpriteToDraw(
-						PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner()) + PALETTE_MODIFIER_COLOR + Sprite.SPR_BOUGHT_LAND,
+						Sprite.PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner()) + Sprite.PALETTE_MODIFIER_COLOR + Sprite.SPR_BOUGHT_LAND,
 						ti.x+8, ti.y+8,
 						1, 1,
 						10,
@@ -125,13 +127,13 @@ public class UnmovableCmd extends UnmovableTables {
 
 				DrawTileUnmovableStruct dtus;
 
-				if (ti.tileh) Landscape.DrawFoundation(ti, ti.tileh);
+				if (ti.tileh != 0) Landscape.DrawFoundation(ti, ti.tileh);
 				Clear.DrawClearLandTile(ti, 2);
 
 				dtus = _draw_tile_unmovable_data[ti.map5];
 
 				image = dtus.image;
-				if (Global._display_opt & Global.DO_TRANS_BUILDINGS)
+				if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS) )
 					image = Sprite.RET_MAKE_TRANSPARENT(image);
 
 				ViewPort.AddSortableSpriteToDraw(image,
@@ -141,12 +143,12 @@ public class UnmovableCmd extends UnmovableTables {
 						dtus.z_size, ti.z);
 			}
 		} else {
-			final DrawTileSeqStruct dtss;
+			DrawTileSeqStruct dtss;
 			final DrawTileSprites t;
 
 			if(0 != (ti.tileh)) Landscape.DrawFoundation(ti, ti.tileh);
 
-			ormod = PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner());
+			ormod = Sprite.PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner());
 
 			t = _unmovable_display_datas[ti.map5 & 0x7F];
 			ViewPort.DrawGroundSprite(t.ground_sprite | ormod);
@@ -160,7 +162,7 @@ public class UnmovableCmd extends UnmovableTables {
 				//image = dtss.image;
 				image = t.seq[pos].image;
 				dtss = t.seq[pos];
-				if (Global._display_opt & Global.DO_TRANS_BUILDINGS) {
+				if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS) ) {
 					image = Sprite.RET_MAKE_TRANSPARENT(image);
 				} else {
 					image |= ormod;
@@ -194,7 +196,7 @@ public class UnmovableCmd extends UnmovableTables {
 			return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_SELL_LAND_AREA);
 
 		// checks if you're allowed to remove unmovable things
-		if (Global._game_mode != GameModes.GM_EDITOR && Global._current_player.id != Owner.OWNER_WATER && ((flags & Cmd.DC_AUTO || !_cheats.magic_bulldozer.value)) )
+		if (Global._game_mode != GameModes.GM_EDITOR && Global._current_player.id != Owner.OWNER_WATER && ((flags & Cmd.DC_AUTO || !Global._cheats.magic_bulldozer.value)) )
 			return Cmd.return_cmd_error(Str.STR_5800_OBJECT_IN_THE_WAY);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -277,7 +279,7 @@ public class UnmovableCmd extends UnmovableTables {
 		// Top town buildings generate 250, so the top HQ type makes 256.
 		if (BitOps.GB(r, 0, 8) < (256 / 4 / (6 - level))) {
 			int amt = BitOps.GB(r, 0, 8) / 8 / 4 + 1;
-			if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
+			if (Global._economy.fluct <= 0) amt = (amt + 1) >> 1;
 			Station.MoveGoodsToStation(tile, 2, 2, AcceptedCargo.CT_PASSENGERS, amt);
 		}
 
@@ -286,7 +288,7 @@ public class UnmovableCmd extends UnmovableTables {
 		// equations.
 		if (BitOps.GB(r, 8, 8) < (196 / 4 / (6 - level))) {
 			int amt = BitOps.GB(r, 8, 8) / 8 / 4 + 1;
-			if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
+			if (Global._economy.fluct <= 0) amt = (amt + 1) >> 1;
 			Station.MoveGoodsToStation(tile, 2, 2, AcceptedCargo.CT_MAIL, amt);
 		}
 	}
@@ -300,7 +302,7 @@ public class UnmovableCmd extends UnmovableTables {
 	static void ClickTile_Unmovable(TileIndex tile)
 	{
 		if(0 != (tile.getMap().m5 & 0x80)) {
-			ShowPlayerCompany(tile.GetTileOwner());
+			PLayerGui.ShowPlayerCompany(tile.GetTileOwner());
 		}
 	}
 
@@ -312,16 +314,24 @@ public class UnmovableCmd extends UnmovableTables {
 	};
 
 	/* checks, if a radio tower is within a 9x9 tile square around tile */
-	static boolean checkRadioTowerNearby(TileIndex tile)
+	static boolean checkRadioTowerNearby(TileIndex itile)
 	{
-		TileIndex tile_s = tile.isub( TileIndex.TileDiffXY(4, 4) );
+		TileIndex tile_s = itile.isub( TileIndex.TileDiffXY(4, 4) );
 
-		BEGIN_TILE_LOOP(tile, 9, 9, tile_s)
+		boolean [] ret = {true};
+		//BEGIN_TILE_LOOP(tile, 9, 9, tile_s)
 		// already a radio tower here?
-		if (tile.IsTileType( TileTypes.MP_UNMOVABLE) && tile.getMap().m5 == 0)
+		TileIndex.forAll(9, 9, tile_s, (tile) ->
+		{
+			if (tile.IsTileType( TileTypes.MP_UNMOVABLE) && tile.getMap().m5 == 0)
+			{
+				ret[0] = false;
+				return true; // break
+			}
 			return false;
-		END_TILE_LOOP(tile, 9, 9, tile_s)
-		return true;
+		});
+		//END_TILE_LOOP(tile, 9, 9, tile_s)
+		return ret[0];
 	}
 
 	void GenerateUnmovables()
@@ -330,7 +340,7 @@ public class UnmovableCmd extends UnmovableTables {
 		TileIndex tile;
 		int r;
 		int dir;
-		IntContainer h;
+		IntContainer h = new IntContainer();
 
 		if (GameOptions._opt.landscape == Landscape.LT_CANDY)
 			return;
@@ -376,7 +386,7 @@ public class UnmovableCmd extends UnmovableTables {
 				}
 				tile = tile.iadd( TileIndex.ToTileIndexDiff(_tile_add[dir]) );
 				tile.TILE_MASK();
-				
+
 			} while (!(tile.IsTileType( TileTypes.MP_CLEAR) && tile.GetTileSlope(h) == 0 && h.v <= 16));
 
 			tile.TILE_ASSERT();
