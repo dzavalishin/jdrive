@@ -1504,7 +1504,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		return 0;
 	}
 
-	TileIndex GetVehicleOutOfTunnelTile(final Vehicle v)
+	static TileIndex GetVehicleOutOfTunnelTile(final Vehicle v)
 	{
 		TileIndexDiff delta = (v.direction & 2) != 0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 		int z = v.z_pos;

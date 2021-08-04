@@ -13,6 +13,7 @@ import game.util.BitOps;
 public class RoadVehCmd extends RoadVehCmdTables {
 
 
+	public static final int STATUS_BAR = AirCraft.STATUS_BAR;
 
 	//void ShowRoadVehViewWindow(Vehicle v);
 
@@ -177,7 +178,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		if (0 !=(flags & Cmd.DC_EXEC)) {
 			v.vehstatus ^= Vehicle.VS_STOPPED;
-			InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 		}
 
@@ -213,7 +214,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) || v.road.state != 254 || !(v.vehstatus&Vehicle.VS_STOPPED))
+		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) || v.road.state != 254 || 0==(v.vehstatus&Vehicle.VS_STOPPED))
 			return Cmd.return_cmd_error(Str.STR_9013_MUST_BE_STOPPED_INSIDE);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -255,7 +256,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		TileIndex tile = v.tile;
 		int i;
 
-		if (v.road.state == 255) tile = GetVehicleOutOfTunnelTile(v);
+		if (v.road.state == 255) tile = TunnelBridgeCmd.GetVehicleOutOfTunnelTile(v);
 
 		if (Global._patches.new_pathfinding_all) {
 			NPFFoundTargetData ftd;
@@ -300,11 +301,11 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		if (v.type != Vehicle.VEH_Road || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (v.vehstatus & Vehicle.VS_CRASHED) return Cmd.CMD_ERROR;
+		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) return Cmd.CMD_ERROR;
 
 		/* If the current orders are already goto-depot */
 		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
-			if (flags & Cmd.DC_EXEC) {
+			if(0 != (flags & Cmd.DC_EXEC)) {
 				/* If the orders to 'goto depot' are in the orders list (forced servicing),
 				 * then skip to the next order; effectively cancelling this forced service */
 				if (BitOps.HASBIT(v.current_order.flags, Order.OFB_PART_OF_ORDERS))
@@ -312,7 +313,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 				v.current_order.type = Order.OT_DUMMY;
 				v.current_order.flags = 0;
-				InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			}
 			return 0;
 		}
@@ -320,12 +321,12 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		dep = FindClosestRoadDepot(v);
 		if (dep == null) return Cmd.return_cmd_error(Str.STR_9019_UNABLE_TO_FIND_LOCAL_DEPOT);
 
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			v.current_order.type = Order.OT_GOTO_DEPOT;
 			v.current_order.flags = Order.OF_NON_STOP | Order.OF_HALT_IN_DEPOT;
 			v.current_order.station = dep.index;
 			v.dest_tile = dep.xy;
-			InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 		}
 
 		return 0;
@@ -928,7 +929,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		return false;
 	}
 
-	private static int return_track(int best_track) 
+	private static int return_track(int best_track, int signal) 
 	{
 		if (BitOps.HASBIT(signal, best_track))
 			return -1;
@@ -986,26 +987,26 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		bitmask &= _road_veh_fp_ax_and[enterdir];
 		if (bitmask == 0) {
 			/* No reachable tracks, so we'll reverse */
-			return_track(_road_reverse_table[enterdir]);
+			return return_track(_road_reverse_table[enterdir],signal);
 		}
 
 		if (v.road.reverse_ctr != 0) {
 			/* What happens here?? */
 			v.road.reverse_ctr = 0;
 			if (v.tile != tile) {
-				return return_track(_road_reverse_table[enterdir]);
+				return return_track(_road_reverse_table[enterdir],signal);
 			}
 		}
 
 		desttile = v.dest_tile;
 		if (desttile == null) {
 			// Pick a random track
-			return return_track(PickRandomBit(bitmask));
+			return return_track(PickRandomBit(bitmask),signal);
 		}
 
 		// Only one track to choose between?
 		if (!(BitOps.KillFirstBit2x64(bitmask))) {
-			return return_track(BitOps.FindFirstBit2x64(bitmask));
+			return return_track(BitOps.FindFirstBit2x64(bitmask),signal);
 		}
 
 		if (Global._patches.new_pathfinding_all) {
@@ -1022,13 +1023,13 @@ public class RoadVehCmd extends RoadVehCmdTables {
 				/* We are already at our target. Just do something */
 				//TODO: maybe display error?
 				//TODO: go straight ahead if possible?
-				return return_track(BitOps.FindFirstBit2x64(bitmask));
+				return return_track(BitOps.FindFirstBit2x64(bitmask),signal);
 			} else {
 				/* If ftd.best_bird_dist is 0, we found our target and ftd.best_trackdir contains
 			the direction we need to take to get there, if ftd.best_bird_dist is not 0,
 			we did not find our target, but ftd.best_trackdir contains the direction leading
 			to the tile closest to our target. */
-				return return_track(ftd.best_trackdir);
+				return return_track(ftd.best_trackdir,signal);
 			}
 		} else {
 			if (desttile.IsTileType(TileTypes.MP_STREET)) {
@@ -1045,7 +1046,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 						/* If we are already in front of the
 						 * station/depot and we can get in from here,
 						 * we enter */
-						return return_track(BitOps.FindFirstBit2x64(bitmask&_road_pf_table_3[m5&3]));
+						return return_track(BitOps.FindFirstBit2x64(bitmask&_road_pf_table_3[m5&3]),signal);
 					}
 				}
 			} else if (desttile.IsTileType(TileTypes.MP_STATION)) {
@@ -1057,12 +1058,12 @@ public class RoadVehCmd extends RoadVehCmdTables {
 					/* When we are heading for a depot or station, we just
 					 * pretend we are heading for the tile in front, we'll
 					 * see from there */
-					desttile += TileIndex.TileOffsByDir(m5 & 3);
+					desttile = desttile.iadd( TileIndex.TileOffsByDir(m5 & 3) );
 					if( desttile == tile && 0 != (bitmask&_road_pf_table_3[m5&3]) ) {
 						/* If we are already in front of the
 						 * station/depot and we can get in from here,
 						 * we enter */
-						return return_track(BitOps.FindFirstBit2x64(bitmask&_road_pf_table_3[m5&3]));
+						return return_track(BitOps.FindFirstBit2x64(bitmask&_road_pf_table_3[m5&3]),signal);
 					}
 				}
 			}
@@ -1468,7 +1469,7 @@ class RoadDriveEntry {
 
 		v.VehicleServiceInDepot();
 
-		Vehicle.TriggerVehicle(v, VEHICLE_TRIGGER_DEPOT);
+		v.TriggerVehicle(Engine.VEHICLE_TRIGGER_DEPOT);
 
 		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
 			Order t;
