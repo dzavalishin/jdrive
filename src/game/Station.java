@@ -1068,19 +1068,27 @@ public class Station implements IPoolItem
 		return true;
 	}
 
-	/* TODO 
-	private static  byte *CreateSingle(byte *layout, int n)
+ 
+	private static  byte [] CreateSingle(byte [] layout, int n)
 	{
 		int i = n;
-		do *layout++ = 0; while (--i);
+		int li = 0;
+		do {
+			layout[li++] = 0;
+			} 
+		while (--i > 0);
 		layout[((n-1) >> 1)-n] = 2;
 		return layout;
 	}
 
-	private static  byte *CreateMulti(byte *layout, int n, byte b)
+	private static byte [] CreateMulti(byte [] layout, int n, int b)
 	{
 		int i = n;
-		do *layout++ = b; while (--i);
+		int li = 0;
+		do { 
+			layout[li++] = (byte) b; 
+		}while (--i > 0);
+		
 		if (n > 4) {
 			layout[0-n] = 0;
 			layout[n-1-n] = 0;
@@ -1088,21 +1096,23 @@ public class Station implements IPoolItem
 		return layout;
 	}
 
-	private static void GetStationLayout(byte *layout, int numtracks, int plat_len, final  StationSpec *spec)
+	private static void GetStationLayout(byte [] layout, int numtracks, int plat_len, final  StationSpec spec)
 	{
 		if (spec != null && spec.lengths >= plat_len &&
 				spec.platforms[plat_len - 1] >= numtracks &&
-				spec.layouts[plat_len - 1][numtracks - 1]) {
+				null != spec.layouts[plat_len - 1][numtracks - 1]) {
+			
 			// Custom layout defined, follow it. 
-			memcpy(layout, spec.layouts[plat_len - 1][numtracks - 1],
-				plat_len * numtracks);
+			//memcpy(layout, spec.layouts[plat_len - 1][numtracks - 1], plat_len * numtracks);
+			
+			System.arraycopy(spec.layouts[plat_len - 1][numtracks - 1], 0, layout, 0, plat_len * numtracks);
 			return;
 		}
 
 		if (plat_len == 1) {
 			CreateSingle(layout, numtracks);
 		} else {
-			if (numtracks & 1) layout = CreateSingle(layout, plat_len);
+			if(0 != (numtracks & 1)) layout = CreateSingle(layout, plat_len);
 			numtracks >>= 1;
 
 			while (--numtracks >= 0) {
@@ -1111,7 +1121,7 @@ public class Station implements IPoolItem
 			}
 		}
 	}
-	 */
+	 
 
 	/** Build railroad station
 	 * @param x,y starting position of station dragging/placement

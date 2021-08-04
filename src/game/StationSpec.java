@@ -32,7 +32,13 @@ public class StationSpec
 
 	byte lengths;
 	byte []platforms;
-	StationLayout [][] layouts;
+	
+	/* Station layout for given dimensions - it is a two-dimensional array
+	 * where index is computed as (x * platforms) + platform. */
+	//typedef byte *StationLayout;
+	
+	//StationLayout [][] layouts;
+	byte [][][] layouts;
 
 	/**
 	 * NUM_GLOBAL_CID sprite groups.
