@@ -1,6 +1,6 @@
 package game.util.wcustom;
 
-import game.StringID;
+
 import game.WindowClass;
 import game.WindowNumber;
 
@@ -12,7 +12,8 @@ public class dropdown_d extends AbstractWinCustom  {
 	public int parent_button;
 	public int num_items;
 	public int selected_index;
-	public StringID items[];
+	//public StringID items[];
+	public int items[];
 	public int click_delay;
 	public boolean drag_mode;
 } ;

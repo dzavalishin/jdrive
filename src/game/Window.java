@@ -108,17 +108,17 @@ public class Window extends WindowConstants
 
 
 	// -----------------------------------
-	
-	
+
+
 	//enum SpecialMouseMode {
 	public static final int WSM_NONE = 0;
 	public static final int WSM_DRAGDROP = 1;
 	public static final int WSM_SIZING = 2;
 	public static final int WSM_PRESIZE = 3;
 	//};
-	
 
-	
+
+
 	public static Iterator<Window> getIterator() {
 		return _windows.iterator();
 	}
@@ -137,11 +137,11 @@ public class Window extends WindowConstants
 			if( _windows.get(i) == startw )
 			{
 				final int ci = i;
-				
+
 				return new Iterator<Window>() {
 
 					int curw = ci;
-					
+
 					@Override
 					public boolean hasNext() {
 						return _windows.get(curw) != null;
@@ -151,12 +151,12 @@ public class Window extends WindowConstants
 					public Window next() {
 						return _windows.get(curw++);
 					}
-					
+
 				};
-				
+
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -488,7 +488,9 @@ public class Window extends WindowConstants
 			dp.left = left - w.left;
 			dp.top = top - w.top;
 			dp.pitch = Hal._screen.pitch;
-			dp.dst_ptr = Hal._screen.dst_ptr + top * Hal._screen.pitch + left;
+			//dp.dst_ptr = Hal._screen.dst_ptr + top * Hal._screen.pitch + left;
+			dp.dst_ptr = Hal._screen.dst_ptr;
+			dp.dst_ptr_shift = top * Hal._screen.pitch + left;
 			dp.zoom = 0;
 			w.CallWindowEventNP(WindowEvents.WE_PAINT);
 		}
@@ -520,7 +522,10 @@ public class Window extends WindowConstants
 
 		//if (w == null) return;
 
-		if (ViewPort._thd.place_mode != 0 && ViewPort._thd.window_class == window_class && ViewPort._thd.window_number == window_number) {
+		if (ViewPort._thd.place_mode != 0 
+				&& ViewPort._thd.window_class == window_class.v 
+				&& ViewPort._thd.window_number == window_number.n) 
+		{
 			ViewPort.ResetObjectToPlace();
 		}
 
@@ -871,7 +876,7 @@ public class Window extends WindowConstants
 		x = w.left;
 		if (x > Hal._screen.width - width) x = Hal._screen.width - width - 20;
 
-		return AllocateWindow(x + 10, w.top + 10, width, height, proc, cls, widget);
+		return AllocateWindow(x + 10, w.top + 10, width, height, proc, cls.v, widget);
 	}
 
 
@@ -1035,7 +1040,7 @@ public class Window extends WindowConstants
 		pt.x = _awap_r.left;
 		pt.y = _awap_r.top;
 		return pt;
-		*/
+		 */
 	}
 
 	Window AllocateWindowAutoPlace(
@@ -1046,7 +1051,7 @@ public class Window extends WindowConstants
 			final Widget[] widget) {
 
 		Point pt = GetAutoPlacePosition(width, height);
-		return AllocateWindow(pt.x, pt.y, width, height, proc, cls, widget);
+		return AllocateWindow(pt.x, pt.y, width, height, proc, cls.v, widget);
 	}
 	/**
 	 * 
@@ -1064,12 +1069,12 @@ public class Window extends WindowConstants
 		return w;
 	}
 
-	
+
 	public static Window AllocateWindowDesc(WindowDesc desc)
 	{
 		return AllocateWindowDesc(desc, 0 );
 	}
-	
+
 	/**
 	 * 
 	 * @param desc
@@ -1125,7 +1130,7 @@ public class Window extends WindowConstants
 			}
 		}
 
-		w = AllocateWindow(pt.x, pt.y, desc.width, desc.height, desc.proc, desc.cls, desc.widgets);
+		w = AllocateWindow(pt.x, pt.y, desc.width, desc.height, desc.proc, desc.cls.v, desc.widgets);
 		w.desc_flags = desc.flags;
 		return w;
 	}
@@ -1742,20 +1747,15 @@ public class Window extends WindowConstants
 	{
 		Window u;
 
-		if (w.window_class.v == WC_MAIN_WINDOW ||
-				w.IsVitalWindow() ||
-				w.window_class.v == WC_TOOLTIPS ||
-				w.window_class.v == WC_DROPDOWN_MENU) {
+		if( w.isTopMostWindow() )
 			return w;
-		}
 
-		for (u = w; ++u != _last_window;) {
-			if (u.window_class.v == WC_MAIN_WINDOW ||
-					w.IsVitalWindow() ||
-					u.window_class.v == WC_TOOLTIPS ||
-					u.window_class.v == WC_DROPDOWN_MENU) {
+
+		for (u = w; ++u != _last_window;) 
+		{
+			if( u.isTopMostWindow() )
 				continue;
-			}
+		
 
 			if (w.left + w.width <= u.left ||
 					u.left + u.width <= w.left ||
@@ -1769,6 +1769,15 @@ public class Window extends WindowConstants
 
 		return w;
 	}
+
+	private boolean isTopMostWindow() {
+		Window w = this;
+		return w.window_class.v == WC_MAIN_WINDOW ||
+				w.IsVitalWindow() ||
+				w.window_class.v == WC_TOOLTIPS ||
+				w.window_class.v == WC_DROPDOWN_MENU;
+	}
+
 
 	/** Send a message from one window to another. The receiving window is found by
 	 * @param w @see Window pointer pointing to the other window
@@ -2055,7 +2064,7 @@ public class Window extends WindowConstants
 	{
 		InvalidateWindow(cls, id.id);
 	}
-	
+
 	static void InvalidateWindow(int cls, int number)
 	{
 		//final Window  w;
@@ -2447,9 +2456,10 @@ public class Window extends WindowConstants
 		/* fall through */
 
 		case WWT_5: {
-			StringID str = new StringID(wi.unkA);
+			//StringID 
+			int str = wi.unkA;
 
-			if ((wi.type&WWT_MASK) == WWT_4 && clicked) str.id++;
+			if ((wi.type&WWT_MASK) == WWT_4 && clicked) str++;
 
 			Gfx.DrawStringCentered(((r.left + r.right + 1) >> 1) + clickshift, ((r.top + r.bottom + 1) >> 1) - 5 + clickshift, str, 0);
 			//DrawStringCentered((r.left + r.right+1)>>1, ((r.top+r.bottom + 1)>>1) - 5, str, 0);
@@ -2739,7 +2749,7 @@ public class Window extends WindowConstants
 			return - 1;
 
 		item = (byte) (y / 10);
-		if (item >= w.as_dropdown_d().num_items || (BitOps.HASBIT(w.as_dropdown_d().disabled_state, item) && !BitOps.HASBIT(w.as_dropdown_d().hidden_state, item)) || w.as_dropdown_d().items[item].id == 0)
+		if (item >= w.as_dropdown_d().num_items || (BitOps.HASBIT(w.as_dropdown_d().disabled_state, item) && !BitOps.HASBIT(w.as_dropdown_d().hidden_state, item)) || w.as_dropdown_d().items[item] == 0)
 			return - 1;
 
 		// Skip hidden items -- +1 for each hidden item before the clicked item.
@@ -2763,12 +2773,12 @@ public class Window extends WindowConstants
 			y = 2;
 			sel = w.as_dropdown_d().selected_index;
 
-			for (i = 0; w.as_dropdown_d().items[i] != Global.INVALID_STRING_ID; i++) {
+			for (i = 0; w.as_dropdown_d().items[i] != Global.INVALID_STRING_ID.id; i++) {
 				if (BitOps.HASBIT(w.as_dropdown_d().hidden_state, i)) {
 					sel--;
 					continue;
 				}
-				if (w.as_dropdown_d().items[i].id != 0) {
+				if (w.as_dropdown_d().items[i] != 0) {
 					if (sel == 0) Gfx.GfxFillRect(x + 1, y, x + w.width - 4, y + 9, 0);
 					Gfx.DrawString(x + 2, y, w.as_dropdown_d().items[i], sel == 0 ? 12 : 16);
 
@@ -2878,12 +2888,12 @@ public class Window extends WindowConstants
 		}
 
 		final Widget wi_prev = w.widget.get(button-1);
-		
+
 		w2 = AllocateWindow(
-//				w.left + wi[-1].left + 1,
+				//				w.left + wi[-1].left + 1,
 				w.left + wi_prev.left + 1,
 				w.top + wi.bottom + 2,
-//				wi.right - wi[-1].left + 1,
+				//				wi.right - wi[-1].left + 1,
 				wi.right - wi_prev.left + 1,
 				i * 10 + 4,
 				Window::DropdownMenuWndProc,
@@ -2891,7 +2901,7 @@ public class Window extends WindowConstants
 				_dropdown_menu_widgets);
 
 		w2.widget.get(0).color = wi.color;
-//		w2.widget.get(0).right = wi.right - wi[-1].left;
+		//		w2.widget.get(0).right = wi.right - wi[-1].left;
 		w2.widget.get(0).right = wi.right - wi_prev.left;
 		w2.widget.get(0).bottom = i * 10 + 3;
 
@@ -2911,10 +2921,10 @@ public class Window extends WindowConstants
 		w2.as_dropdown_d().click_delay = 0;
 		w2.as_dropdown_d().drag_mode = true;
 	}
-	
+
 	public void DrawWindowViewport() {
 		ViewPort.DrawWindowViewport(this);
-		
+
 	}
 
 	public static Window getMain() {

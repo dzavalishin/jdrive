@@ -1391,7 +1391,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			if (i.xy == null) {
 				int index = i.index;
 
-				if (i.index > Global._total_industries) Global._total_industries = i.index;
+				if (i.index > _total_industries) _total_industries = i.index;
 
 				//memset(i, 0, sizeof(*i));
 				i.clear();
@@ -1872,8 +1872,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 		/* 3% chance that we start a new industry */
 		if (BitOps.CHANCE16(3, 100)) {
 			MaybeNewIndustry(Hal.Random());
-		} else if (!Global._patches.smooth_economy && Global._total_industries > 0) {
-			Industry i = GetIndustry(Hal.RandomRange(Global._total_industries));
+		} else if (!Global._patches.smooth_economy && _total_industries > 0) {
+			Industry i = GetIndustry(Hal.RandomRange(_total_industries));
 			if (i.xy != null) ChangeIndustryProduction(i);
 		}
 
@@ -1890,7 +1890,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		_industry_pool.CleanPool();
 		_industry_pool.AddBlockToPool();
 
-		Global._total_industries = 0;
+		_total_industries = 0;
 		_industry_sort_dirty = true;
 	}
 
@@ -2458,6 +2458,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	private static boolean _industry_sort_dirty = true;
 	static int _industry_sort_order;
 	private static Industry[] _industry_sort = null;
+	public static int _total_industries = 0;
 
 
 	private class IndustryComparator implements Comparator<Industry> {

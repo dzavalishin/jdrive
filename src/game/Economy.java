@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import game.ai.Ai;
 import game.util.BitOps;
+import game.util.Prices;
 
 public class Economy 
 {
@@ -15,9 +16,9 @@ public class Economy
 	// Economy fluctuation status
 	int fluct;
 	// Interest
-	byte interest_rate;
-	byte infl_amount;
-	byte infl_amount_pr;
+	int interest_rate;
+	int infl_amount;
+	int infl_amount_pr;
 
 
 
@@ -404,8 +405,11 @@ public class Economy
 			}
 
 			//FOR_ALL_VEHICLES(v)
-			Vehicle.forEach( (v) ->
+			//Vehicle.forEach( (v) ->
+			Iterator<Vehicle> vii = Vehicle.getIterator();
+			while(vii.hasNext())
 			{
+				Vehicle v = vii.next();
 				if (v.owner == old_player && BitOps.IS_INT_INSIDE(v.type, Vehicle.VEH_Train, Vehicle.VEH_Aircraft+1) ) 
 				{
 					if (new_player.id == Owner.OWNER_SPECTATOR) {
@@ -425,14 +429,14 @@ public class Economy
 							v.unitnumber = UnitID.get( ++num_aircraft );
 					}
 				}
-			});
+			}
 		}
 
 		// Change ownership of tiles
 		{
 			MutableTileIndex tile = new MutableTileIndex( TileIndex.get(0) );
 			do {
-				tile.ChangeTileOwner( old_player, new_player);
+				Landscape.ChangeTileOwner( tile, old_player.id, new_player.id);
 			} while (tile.madd(1).tile < Global.MapSize());
 		}
 
@@ -571,10 +575,10 @@ public class Economy
 	{
 		Player p;
 
-		w.DrawNewsBorder();
+		NewsItem.DrawNewsBorder(w);
 
 		p = Player.GetPlayer(w.as_news_d().ni.string_id.id & 15);
-		DrawPlayerFace(p.face, p.player_color, 2, 23);
+		Player.DrawPlayerFace(p.face, p.player_color, 2, 23);
 		Gfx.GfxFillRect(3, 23, 3+91, 23+118, 0x323 | Sprite.USE_COLORTABLE);
 
 		Global.SetDParam(0, p.president_name_1);
@@ -658,7 +662,11 @@ public class Economy
 			Global.COPY_IN_DPARAM(2,ni.params, 2);
 			Global.SetDParam(4, p.name_1);
 			Global.SetDParam(5, p.name_2);
-			Global.COPY_IN_DPARAM(6,ni.params + 2, 1);
+			
+			//Global.COPY_IN_DPARAM(6,ni.params + 2, 1);
+			System.arraycopy(ni.params, 2, Global._decode_parameters, 6, 1 );
+			
+			
 			return Str.STR_02B6;
 		case 3:
 			Global.SetDParam(0, Str.STR_705C_BANKRUPT);
@@ -904,9 +912,9 @@ public class Economy
 	{
 		int i;
 
-		assert(Global._price.length == Global.NUM_PRICES);
+		//assert(Global._price.length == Global.NUM_PRICES);
 
-		for(i=0; i!=NUM_PRICES; i++) 
+		for(i=0; i!= Prices.NUM_PRICES; i++) 
 		{
 			int price = _price_base[i];
 			if (_price_category[i] != 0) {
@@ -922,25 +930,26 @@ public class Economy
 			} else {
 				price >>= 8 - price_base_multiplier[i];
 			}
-			((int*)&Global._price)[i] = price;
-			_price_frac[i] = 0;
+			//((int*)&Global._price)[i] = price;
+			Global._price.setPrice(i, price);
+			Global._price_frac[i] = 0;
 		}
 
-		Global._economy.interest_rate = _opt.diff.initial_interest;
-		Global._economy.infl_amount = _opt.diff.initial_interest;
-		Global._economy.infl_amount_pr = max(0, _opt.diff.initial_interest - 1);
-		Global._economy.max_loan_unround = Global._economy.max_loan = _opt.diff.max_loan * 1000;
-		Global._economy.fluct = GB(Hal.Random(), 0, 8) + 168;
+		Global._economy.interest_rate = GameOptions._opt.diff.initial_interest;
+		Global._economy.infl_amount = GameOptions._opt.diff.initial_interest;
+		Global._economy.infl_amount_pr = Math.max(0, GameOptions._opt.diff.initial_interest - 1);
+		Global._economy.max_loan_unround = Global._economy.max_loan = GameOptions._opt.diff.max_loan * 1000;
+		Global._economy.fluct = BitOps.GB(Hal.Random(), 0, 8) + 168;
 	}
 
 	static Pair SetupSubsidyDecodeParam(Subsidy s, boolean mode)
 	{
 		TileIndex tile;
 		TileIndex tile2;
-		Pair tp;
+		Pair tp = new Pair();
 
 		/* if mode is false, use the singular form */
-		Global.SetDParam(0, Global._cargoc.names_s[s.cargo_type].id + (mode ? 0 : 32));
+		Global.SetDParam(0, Global._cargoc.names_s[s.cargo_type] + (mode ? 0 : 32));
 
 		if (s.age < 12) {
 			if (s.cargo_type != AcceptedCargo.CT_PASSENGERS && s.cargo_type != AcceptedCargo.CT_MAIL) {
@@ -1667,19 +1676,19 @@ public class Economy
 				if (Station.GetStation(last_visited).owner.id == Owner.OWNER_TOWN 
 						&& Station.GetStation(original_cargo_source.id).owner.id == Owner.OWNER_TOWN)
 
-					MA_Tax(profit*2, v);
+					v.MA_Tax(profit*2);
 
 				else if (Station.GetStation(last_visited).owner.id == Owner.OWNER_TOWN 
 						|| Station.GetStation(original_cargo_source.id).owner.id == Owner.OWNER_TOWN)
 
-					MA_Tax(profit, v);
+					v.MA_Tax(profit);
 
 				v.profit_this_year += profit;
 				Player.SubtractMoneyFromPlayer(-profit);
 
 				// if (Player.IsLocalPlayer()) SndPlayVehicleFx(SND_14_CASHTILL, v);
 
-				ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, -profit);
+				MiscGui.ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, -profit);
 			}
 		}
 
@@ -1731,8 +1740,8 @@ public class Economy
 
 		p.is_active = false;
 
-		Window.DeletePlayerWindows(pi);
-		RebuildVehicleLists();	//Updates the open windows to add the newly acquired vehicles to the lists
+		Player.DeletePlayerWindows( PlayerID.get(pi) );
+		VehicleGui.RebuildVehicleLists();	//Updates the open windows to add the newly acquired vehicles to the lists
 	}
 
 	//extern int GetAmountOwnedBy(Player p, byte owner);
