@@ -1398,6 +1398,23 @@ public class Station implements IPoolItem
 		return len - 1;
 	}
 
+	/*
+	static boolean TileBelongsToRailStation(final Station st, TileIndex tile)
+	{
+		return tile.IsTileType(TileTypes.MP_STATION) 
+				&& tile.M().m2 == st.index && tile.M().m5 < 8;
+	}*/
+
+
+	/* Get's the direction the station exit points towards. Ie, returns 0 for a
+	 * station with the exit NE. */
+	static int GetRoadStationDir(TileIndex tile)
+	{
+		assert(tile.IsRoadStationTile());
+		return (tile.M().m5 - 0x43) & 3;
+	}	
+	
+	
 	private static RealSpriteGroup ResolveStationSpriteGroup(final SpriteGroup spg, final  Station st)
 	{
 		switch (spg.type) {

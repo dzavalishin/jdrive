@@ -3,6 +3,7 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.tables.EngineTables;
 import game.util.BitOps;
 import game.util.VehicleHash;
 
@@ -143,7 +144,7 @@ public class Vehicle implements IPoolItem
 	//abstract Vehicle ForceAllocateSpecialVehicle();
 
 
-	private Vehicle InitializeVehicle()
+	private void InitializeVehicle()
 	{
 		int indexc = index;
 
@@ -872,14 +873,14 @@ public class Vehicle implements IPoolItem
 	};
 
 
-	/*
-	enum {
-		// max vehicles: 64000 (512 * 125) 
-		VEHICLES_POOL_BLOCK_SIZE_BITS = 9,       // In bits, so (1 << 9) == 512 
-		VEHICLES_POOL_MAX_BLOCKS      = 125,
 
-		BLOCKS_FOR_SPECIAL_VEHICLES   = 2, //! Blocks needed for special vehicles
-	};*/
+	//enum {
+	// max vehicles: 64000 (512 * 125) 
+	public static final int VEHICLES_POOL_BLOCK_SIZE_BITS = 9;       // In bits, so (1 << 9) == 512 
+	public static final int VEHICLES_POOL_MAX_BLOCKS      = 125;
+
+	public static final int BLOCKS_FOR_SPECIAL_VEHICLES   = 2; //! Blocks needed for special vehicles
+	//};*/
 
 	/**
 	 * Called if a new block is added to the vehicle-pool
@@ -994,7 +995,7 @@ public class Vehicle implements IPoolItem
 		int y1 = from.TileY();
 		int x2 = to.TileX();
 		int y2 = to.TileY();
-		Vehicle ret = null;
+		Vehicle [] ret = {null};
 
 		/* Make sure x1 < x2 or y1 < y2 */
 		if (x1 > x2 || y1 > y2) {
@@ -1004,18 +1005,22 @@ public class Vehicle implements IPoolItem
 			//intswap(x1,x2);
 			//intswap(y1,y2);
 		}
+		int fx1 = x1;
+		int fx2 = x2;
+		int fy1 = y1;
+		int fy2 = y2;
 		//FOR_ALL_VEHICLES(veh)
 		_vehicle_pool.forEach( (ii,veh) ->
 		{
 			if ((veh.type == VEH_Train || veh.type == VEH_Road) && (z==0xFF || veh.z_pos == z)) {
-				if ((veh.x_pos>>4) >= x1 && (veh.x_pos>>4) <= x2 &&
-						(veh.y_pos>>4) >= y1 && (veh.y_pos>>4) <= y2) {
-					ret = veh;
+				if ((veh.x_pos>>4) >= fx1 && (veh.x_pos>>4) <= fx2 &&
+						(veh.y_pos>>4) >= fy1 && (veh.y_pos>>4) <= fy2) {
+					ret[0] = veh;
 				}
 			}
 		});
 
-		return ret;
+		return ret[0];
 	}
 
 	/*
@@ -1049,7 +1054,7 @@ public class Vehicle implements IPoolItem
 			if (v.type != 0) {
 				switch (v.type) {
 				case VEH_Train: v.cur_image = TrainCmd.GetTrainImage(v, v.direction); break;
-				case VEH_Road: v.cur_image = GetRoadVehImage(v, v.direction); break;
+				case VEH_Road: v.cur_image = RoadVehCmd.GetRoadVehImage(v, v.direction); break;
 				case VEH_Ship: v.cur_image = Ship.GetShipImage(v, v.direction); break;
 				case VEH_Aircraft:
 					if (v.subtype == 0 || v.subtype == 2) {
@@ -1087,7 +1092,7 @@ public class Vehicle implements IPoolItem
 		 * BLOCKS_FOR_SPECIAL_VEHICLES times block_size vehicles that may only
 		 * be used for special vehicles.. should work nicely :) */
 
-		Vehicle ret = null;
+		Vehicle [] ret = {null};
 
 		//FOR_ALL_VEHICLES(v)
 		_vehicle_pool.forEach( (ii,v) ->
@@ -1099,11 +1104,11 @@ public class Vehicle implements IPoolItem
 			if (v.type == 0)
 			{
 				v.InitializeVehicle();
-				ret = v;
+				ret[0] = v;
 			}
 		});
 
-		return ret;
+		return ret[0];
 	}
 
 	/*
@@ -1291,15 +1296,15 @@ public class Vehicle implements IPoolItem
 	 */
 	static Vehicle GetPrevVehicleInChain_bruteforce(final Vehicle v)
 	{
-		Vehicle ret = null;
+		Vehicle [] ret = {null};
 
 		//FOR_ALL_VEHICLES(u)
 		_vehicle_pool.forEach( (ii,u) ->
 		{
-			if (u.type == VEH_Train && u.next == v) ret = u;
+			if (u.type == VEH_Train && u.next == v) ret[0] = u;
 		});
 
-		return ret;
+		return ret[0];
 	}
 
 	/** Find the previous vehicle in a chain, by using the v.first cache.
@@ -1437,7 +1442,7 @@ public class Vehicle implements IPoolItem
 			Ship::Ship_Tick,
 			AirCraft::Aircraft_Tick,
 			Vehicle::EffectVehicle_Tick,
-			Vehicle::DisasterVehicle_Tick,
+			DisasterCmd::DisasterVehicle_Tick,
 	};
 
 	void CallVehicleTicks()
@@ -1450,7 +1455,7 @@ public class Vehicle implements IPoolItem
 		_vehicle_pool.forEach( (ii,v) ->
 		{
 			if (v.type != 0) {
-				_vehicle_tick_procs[v.type - 0x10].apply(v);
+				_vehicle_tick_procs[v.type - 0x10].accept(v);
 			}
 		});
 
@@ -1524,8 +1529,9 @@ public class Vehicle implements IPoolItem
 	 */
 	static boolean CanRefitTo(EngineID engine_type, CargoID cid_to)
 	{
-		CargoID cid = Global._global_cargo_id[GameOptions._opt_ptr.landscape][cid_to.id];
-		return BitOps.HASBIT(Global._engine_info[engine_type.id].refit_mask, cid.id);
+		//CargoID 
+		int cid = EngineTables._global_cargo_id[GameOptions._opt_ptr.landscape][cid_to.id];
+		return BitOps.HASBIT(Global._engine_info[engine_type.id].refit_mask, cid);
 	}
 
 	static void DoDrawVehicle(final Vehicle v)
@@ -1535,7 +1541,7 @@ public class Vehicle implements IPoolItem
 		if(0!=(v.vehstatus & VS_DISASTER)) {
 			image = Sprite.RET_MAKE_TRANSPARENT(image);
 		} else if( 0 != (v.vehstatus & VS_DEFPAL) ) {
-			image |= (0!=(v.vehstatus & VS_CRASHED)) ? Sprite.PALETTE_CRASH : SPRITE_PALETTE(PLAYER_SPRITE_COLOR(v.owner));
+			image |= (0!=(v.vehstatus & VS_CRASHED)) ? Sprite.PALETTE_CRASH : Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner));
 		}
 
 		ViewPort.AddSortableSpriteToDraw(image, v.x_pos + v.x_offs, v.y_pos + v.y_offs,
@@ -1822,7 +1828,7 @@ public class Vehicle implements IPoolItem
 		v.special.unk2 = 0;
 	}
 
-	class BulldozerMovement {
+	static class BulldozerMovement {
 		int direction;
 		int image;
 		int duration;
@@ -2063,7 +2069,7 @@ public class Vehicle implements IPoolItem
 		 *  multiplayer!! (that is: in ToyLand)
 		 */
 		int et;
-		final BubbleMovement b;
+		BubbleMovement b;
 
 		v.progress++;
 		if ((v.progress & 3) != 0)
@@ -2204,8 +2210,8 @@ public class Vehicle implements IPoolItem
 
 	static Vehicle CheckClickOnVehicle(final ViewPort vp, int x, int y)
 	{
-		Vehicle found = null; //, v;
-		int dist, best_dist = (int)-1;
+		Vehicle [] found = {null}; //, v;
+		int [] best_dist = {(int)-1};
 
 		if ( (int)(x -= vp.left) >= (int)vp.width ||
 				(int)(y -= vp.top) >= (int)vp.height)
@@ -2214,26 +2220,29 @@ public class Vehicle implements IPoolItem
 		x = (x << vp.zoom) + vp.virtual_left;
 		y = (y << vp.zoom) + vp.virtual_top;
 
+		int fx = x;
+		int fy = y;
+
 		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
 			if (v.type != 0 && (v.vehstatus & (VS_HIDDEN|VS_UNCLICKABLE)) == 0 &&
-					x >= v.left_coord && x <= v.right_coord &&
-					y >= v.top_coord && y <= v.bottom_coord) {
+					fx >= v.left_coord && fx <= v.right_coord &&
+					fy >= v.top_coord && fy <= v.bottom_coord) {
 
-				dist = Math.max(
-						/*myabs*/ Math.abs( ((v.left_coord + v.right_coord)>>1) - x ),
-						Math.abs( ((v.top_coord + v.bottom_coord)>>1) - y )
+				int dist = Math.max(
+						/*myabs*/ Math.abs( ((v.left_coord + v.right_coord)>>1) - fx ),
+						Math.abs( ((v.top_coord + v.bottom_coord)>>1) - fy )
 						);
 
-				if (dist < best_dist) {
-					found = v;
-					best_dist = dist;
+				if (dist < best_dist[0]) {
+					found[0] = v;
+					best_dist[0] = dist;
 				}
 			}
 		});
 
-		return found;
+		return found[0];
 	}
 
 
@@ -2472,7 +2481,7 @@ public class Vehicle implements IPoolItem
 		final UnitID cached_unitnumber = old_v.unitnumber;
 		boolean new_front = false;
 		Vehicle new_v = null;
-		String vehicle_name;
+		String vehicle_name = null;
 
 		new_engine_type = p.EngineReplacement(old_v.engine_type);
 		if (new_engine_type.id == INVALID_ENGINE) new_engine_type = old_v.engine_type;
@@ -2688,7 +2697,7 @@ public class Vehicle implements IPoolItem
 			}
 		}
 
-		if (Player.IsLocalPlayer()) ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
+		if (Player.IsLocalPlayer()) MiscGui.ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
 
 		if (stopped) v.vehstatus &= ~VS_STOPPED;
 		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
@@ -2717,7 +2726,7 @@ public class Vehicle implements IPoolItem
 			StringID old_str = new StringID( v.string_id );
 			v.string_id = str.id;
 			Global.DeleteName(old_str);
-			ResortVehicleLists();
+			VehicleGui.ResortVehicleLists();
 			Hal.MarkWholeScreenDirty();
 		} else {
 			Global.DeleteName(str);
@@ -2826,7 +2835,7 @@ public class Vehicle implements IPoolItem
 				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_ROAD)); /* Road vehicle in depot */
 
 			if (v.tile.IsRoadStationTile()) /* We'll assume the road vehicle is facing outwards */
-				return Rail.DiagdirToDiagTrackdir(GetRoadStationDir(v.tile)); /* Road vehicle in a station */
+				return Rail.DiagdirToDiagTrackdir(Station.GetRoadStationDir(v.tile)); /* Road vehicle in a station */
 
 			return Rail.DiagdirToDiagTrackdir((v.direction >> 1) & 3);
 
@@ -2925,7 +2934,7 @@ public class Vehicle implements IPoolItem
 		/* If we have a shared order-list, don't delete the list, but just
 		    remove our pointer */
 		if (Order.IsOrderListShared(this)) {
-			final Vehicle u = this;
+			Vehicle u = this;
 
 			orders = null;
 			num_orders = 0;
@@ -3053,7 +3062,7 @@ public class Vehicle implements IPoolItem
 
 			/* Copy the orders */
 			//FOR_VEHICLE_ORDERS(v, order) 
-			for(Order order = orders; order != null; order = order.next )
+			for(Order order = v.orders; order != null; order = order.next )
 			{
 				//*dest = *order;
 				//dest++;
@@ -3142,7 +3151,7 @@ public class Vehicle implements IPoolItem
 	{
 		Engine.TriggerVehicle(this, trigger);
 	}
-	
+
 	public TileIndex GetStationTileForVehicle(Station st) {
 		return Station.GetStationTileForVehicle(this, st);
 	}

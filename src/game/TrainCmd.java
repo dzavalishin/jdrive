@@ -3493,8 +3493,8 @@ public class TrainCmd extends TrainTables
 			v.vehstatus &= ~Vehicle.VS_TRAIN_SLOWING;
 		}
 
-		if (v.rail.track & 0x40) return true; // exit if inside a tunnel
-		if (v.rail.track & 0x80) return true; // exit if inside a depot
+		if(0 != (v.rail.track & 0x40)) return true; // exit if inside a tunnel
+		if(0 != (v.rail.track & 0x80)) return true; // exit if inside a depot
 
 		tile = v.tile;
 
@@ -3676,9 +3676,9 @@ public class TrainCmd extends TrainTables
 	}
 
 
-	void Train_Tick(Vehicle v)
+	static void Train_Tick(Vehicle v)
 	{
-		if (_age_cargo_skip_counter == 0 && v.cargo_days != 0xff)
+		if (Global._age_cargo_skip_counter == 0 && v.cargo_days != 0xff)
 			v.cargo_days++;
 
 		v.tick_counter++;

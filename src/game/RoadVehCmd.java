@@ -1497,7 +1497,7 @@ class RoadDriveEntry {
 			v.cargo_days++;
 	}
 
-	void RoadVeh_Tick(Vehicle v)
+	static void RoadVeh_Tick(Vehicle v)
 	{
 		AgeRoadVehCargo(v);
 		RoadVehController(v);

@@ -674,7 +674,7 @@ public class DisasterCmd extends DisasterTables
 	};
 
 
-	void DisasterVehicle_Tick(Vehicle v)
+	public static void DisasterVehicle_Tick(Vehicle v)
 	{
 		_disastervehicle_tick_procs[v.subtype].accept(v);
 	}

@@ -103,7 +103,7 @@ public class VehicleGui {
 		}
 	}
 
-	void ResortVehicleLists()
+	static void ResortVehicleLists()
 	{
 		//Window w;
 		//for (w = _windows; w != _last_window; ++w)
