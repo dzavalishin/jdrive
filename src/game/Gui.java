@@ -87,7 +87,7 @@ public class Gui
 	private static void setupColors() 
 	{
 		for (int i = 0; i != 16; i++) {
-			final byte[] b = Sprite.GetNonSprite(0x307 + i);
+			final byte[] b = SpriteCache.GetNonSprite(0x307 + i);
 
 			assert(b != null);
 			Global._color_list[i] = *(final ColorList*)(b + 0xC6);

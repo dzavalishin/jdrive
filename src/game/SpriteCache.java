@@ -465,12 +465,20 @@ public class SpriteCache {
 		return GetRawSprite(sprite);
 	}
 
-	/*
+	
+	// TODO do we need it?
 	static byte[] GetNonSpriteData(SpriteID sprite)
 	{
-		return GetRawSprite(sprite);
-	}*/
+		DataCarrier dc = (DataCarrier) GetRawSprite(sprite);
+		return dc.data;
+	}
 
+	static byte[] GetNonSprite(int sprite)
+	{
+		DataCarrier dc = (DataCarrier) GetRawSprite(sprite);
+		return dc.data;
+	}
+	
 	
 	static void GfxInitSpriteMem()
 	{

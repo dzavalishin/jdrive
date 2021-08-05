@@ -2,6 +2,9 @@ package game.util;
 
 import game.IntContainer;
 import game.tables.TrackPathFinderTables;
+
+import java.util.Arrays;
+
 import game.Hal;
 
 // macros.h stuff
@@ -330,6 +333,15 @@ public class BitOps {
 
 	public static int b2i(boolean b) {
 		return b ? 1 : 0;
+	}
+
+	public static byte[] subArray(byte[] in, int start) {		
+		return Arrays.copyOfRange(in, start, in.length);
+	}
+
+	public static int READ_LE_UINT16(byte[] b, int shift) 
+	{
+		return (0xFF & (int)b[0+shift]) + (0xFF & (int)b[1+shift]) << 8;
 	}
 
 	

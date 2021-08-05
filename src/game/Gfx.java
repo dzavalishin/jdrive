@@ -199,7 +199,7 @@ public class Gfx {
 				} while (--bottom > 0);
 			} else {
 				/* use colortable mode */
-				final byte[] ctab = GetNonSprite(color & Sprite.COLORTABLE_MASK) + 1;
+				final byte[] ctab = SpriteCache.GetNonSprite(color & Sprite.COLORTABLE_MASK) + 1;
 
 				do {
 					int i;
@@ -761,10 +761,10 @@ public class Gfx {
 	static void DrawSprite(int img, int x, int y)
 	{
 		if( 0 != (img & Sprite.PALETTE_MODIFIER_COLOR) ) {
-			_color_remap_ptr = GetNonSprite(BitOps.GB(img, Sprite.PALETTE_SPRITE_START, Sprite.PALETTE_SPRITE_WIDTH)) + 1;
-			GfxMainBlitter(GetSprite(img & Sprite.SPRITE_MASK), x, y, 1);
+			_color_remap_ptr = BitOps.subArray( SpriteCache.GetNonSprite(BitOps.GB(img, Sprite.PALETTE_SPRITE_START, Sprite.PALETTE_SPRITE_WIDTH)), 1);
+			GfxMainBlitter(SpriteCache.GetSprite(img & Sprite.SPRITE_MASK), x, y, 1);
 		} else if(0 != (img & Sprite.PALETTE_MODIFIER_TRANSPARENT)) {
-			_color_remap_ptr = GetNonSprite(BitOps.GB(img, Sprite.PALETTE_SPRITE_START, Sprite.PALETTE_SPRITE_WIDTH)) + 1;
+			_color_remap_ptr = BitOps.subArray( SpriteCache.GetNonSprite(BitOps.GB(img, Sprite.PALETTE_SPRITE_START, Sprite.PALETTE_SPRITE_WIDTH)), 1);
 			GfxMainBlitter(Sprite.GetSprite(img & Sprite.SPRITE_MASK), x, y, 2);
 		} else {
 			GfxMainBlitter(Sprite.GetSprite(img & Sprite.SPRITE_MASK), x, y, 0);
@@ -790,34 +790,47 @@ public class Gfx {
 
 	private static void GfxBlitTileZoomIn(BlitterParams bp)
 	{
-		final byte[] src_o = bp.sprite;
+		final byte[] src_o_data = bp.sprite;
+		int src_o_shift = 0; // start index to access, replace src_o_data += x with src_o_shift += x 
 		//final byte* src;
-		final byte[] src;
+		final byte[] src_data;
+		int src_shift = 0;
+		
 		int num, skip;
 		byte done;
 		///* Pixel */ byte  *dst;
-		/* Pixel */ byte  dst;
+		/* Pixel */ byte []  dst_data;
+		int dst_shift = 0;
+		
 		//final byte* ctab;
 		final byte[] ctab;
 
 		if(0 != (bp.mode & 1) ) {
-			src_o += READ_LE_UINT16(src_o + bp.start_y * 2);
+			src_o_shift += BitOps.READ_LE_UINT16(src_o_data, bp.start_y * 2);
 
 			do {
 				do {
-					done = src_o[0];
+					done = src_o_data[src_o_shift];
 					num = done & 0x7F;
-					skip = src_o[1];
-					src = src_o + 2;
-					src_o += num + 2;
+					skip = src_o_data[src_o_shift+1];
+					//src = src_o + 2;
+					src_data = src_o_data;
+					src_shift = src_o_shift + 2;
+					
+					//src_o += num + 2;
+					src_o_shift += num + 2;
 
-					dst = bp.dst;
+					dst_data = bp.dst_mem;
+					dst_shift = 0;
 
 					if ( (skip -= bp.start_x) > 0) {
-						dst += skip;
+						//dst += skip;
+						dst_shift += skip;
 					} else {
-						src -= skip;
+						//src -= skip;
+						src_shift -= skip;
 						num += skip;
+						
 						if (num <= 0) continue;
 						skip = 0;
 					}
@@ -831,32 +844,33 @@ public class Gfx {
 					ctab = _color_remap_ptr;
 
 					for (; num >= 4; num -=4) {
-						dst[3] = ctab[src[3]];
-						dst[2] = ctab[src[2]];
-						dst[1] = ctab[src[1]];
-						dst[0] = ctab[src[0]];
-						dst += 4;
-						src += 4;
+						dst_data[3+dst_shift] = ctab[src_data[3+src_shift]];
+						dst_data[2+dst_shift] = ctab[src_data[2+src_shift]];
+						dst_data[1+dst_shift] = ctab[src_data[1+src_shift]];
+						dst_data[0+dst_shift] = ctab[src_data[0+src_shift]];
+						dst_shift += 4;
+						src_shift += 4;
 					}
 					for (; num != 0; num--) 
-						dst_mem[dst++] = ctab[src_mem[src++]];
-				} while (!(done & 0x80));
+						dst_data[dst_shift++] = ctab[src_data[src_shift++]];
+				} while (0==(done & 0x80));
 
-				bp.dst += bp.pitch;
+				//bp.dst += bp.pitch;
+				bp.dst_offset += bp.pitch;
 			} while (--bp.height != 0);
-		} else if (bp.mode & 2) {
-			src_o += READ_LE_UINT16(src_o + bp.start_y * 2);
+		} else if(0 != (bp.mode & 2) ) {
+			src_o_shift += BitOps.READ_LE_UINT16(src_o_data, bp.start_y * 2);
 			do {
 				do {
-					done = src_o[0];
+					done = src_o_data[0+src_o_shift];
 					num = done & 0x7F;
-					skip = src_o[1];
-					src_o += num + 2;
+					skip = src_o_data[1+src_o_shift];
+					src_o_shift += num + 2;
 
-					dst = bp.dst;
+					dst_data = bp.dst_mem;
 
 					if ( (skip -= bp.start_x) > 0) {
-						dst += skip;
+						dst_shift += skip;
 					} else {
 						num += skip;
 						if (num <= 0) continue;
@@ -872,29 +886,33 @@ public class Gfx {
 					ctab = _color_remap_ptr;
 					for (; num != 0; num--) {
 						//*dst = ctab[*dst];
-						dst[0] = ctab[dst[0]]; // TODO displacement
-						dst++;
+						dst_data[0+dst_shift] = ctab[dst_data[0+dst_shift]]; // TODO displacement
+						dst_shift++;
 					}
-				} while (!(done & 0x80));
+				} while (0==(done & 0x80));
 
-				bp.dst += bp.pitch;
+				bp.dst_offset += bp.pitch;
 			} while (--bp.height != 0);
 		} else {
-			src_o += READ_LE_UINT16(src_o + bp.start_y * 2);
+			src_o_shift += BitOps.READ_LE_UINT16(src_o_data, bp.start_y * 2);
 			do {
 				do {
-					done = src_o[0];
+					done = src_o_data[0+src_o_shift];
 					num = done & 0x7F;
-					skip = src_o[1];
-					src = src_o + 2;
-					src_o += num + 2;
+					skip = src_o_data[1+src_o_shift];
+					
+					src_data = src_o_data;
+					src_shift = src_o_shift + 2;
+					
+					src_o_shift += num + 2;
 
-					dst = bp.dst;
+					dst_data = bp.dst_mem;
+					dst_shift = bp.dst_offset;
 
 					if ( (skip -= bp.start_x) > 0) {
-						dst += skip;
+						dst_shift += skip;
 					} else {
-						src -= skip;
+						src_shift -= skip;
 						num += skip;
 						if (num <= 0) continue;
 						skip = 0;
@@ -916,20 +934,25 @@ public class Gfx {
 						} while (--num != 0);
 					}
 					#else*/
-						memcpy(dst, src, num);
+						//memcpy(dst, src, num);
+						System.arraycopy(src_data, 0, dst_data, 0, num);
 					//#endif
-				} while (!(done & 0x80));
+				} while (0==(done & 0x80));
 
-				bp.dst += bp.pitch;
+				bp.dst_offset += bp.pitch;
 			} while (--bp.height != 0);
 		}
 	}
 
 	private static void GfxBlitZoomInUncomp(BlitterParams bp)
 	{
-		final byte [] src = bp.sprite;
+		final byte [] src_data = bp.sprite;
+		int src_shift = 0;
 		///* Pixel */ byte  *dst = bp.dst;
-		/* Pixel */ byte  []dst = bp.dst;
+		/* Pixel */ 
+		byte  []dst_data = bp.dst_mem;
+		int dst_shift = bp.dst_offset;
+		
 		int height = bp.height;
 		int width = bp.width;
 		int i;
@@ -937,29 +960,29 @@ public class Gfx {
 		assert(height > 0);
 		assert(width > 0);
 
-		if (bp.mode & 1) {
-			if (bp.info & 1) {
+		if(0 != (bp.mode & 1) ) {
+			if(0 != (bp.info & 1) ) {
 				final byte []ctab = _color_remap_ptr;
 
 				do {
 					for (i = 0; i != width; i++) {
-						byte b = ctab[src[i]];
+						byte b = ctab[src_data[i+src_shift]];
 
-						if (b != 0) dst[i] = b;
+						if (b != 0) dst_data[i+dst_shift] = b;
 					}
-					src += bp.width_org;
-					dst += bp.pitch;
+					src_shift += bp.width_org;
+					dst_shift += bp.pitch;
 				} while (--height != 0);
 			}
-		} else if (bp.mode & 2) {
-			if (bp.info & 1) {
+		} else if(0 != (bp.mode & 2) ) {
+			if(0 != (bp.info & 1) ) {
 				final byte [] ctab = _color_remap_ptr;
 
 				do {
 					for (i = 0; i != width; i++)
-						if (src[i] != 0) dst[i] = ctab[dst[i]];
-					src += bp.width_org;
-					dst += bp.pitch;
+						if (src_data[i+src_shift] != 0) dst_data[i+dst_shift] = ctab[dst_data[i+dst_shift]];
+					src_shift += bp.width_org;
+					dst_shift += bp.pitch;
 				} while (--height != 0);
 			}
 		} else {
