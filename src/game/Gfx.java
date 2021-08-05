@@ -1539,7 +1539,7 @@ public class Gfx {
 		y += sprite.y_offs;
 		bp.width_org = bp.width = sprite.width;
 		bp.height_org = bp.height = sprite.height;
-		info = sprite.info;
+		info = (byte) sprite.info;
 		bp.info = info;
 		bp.sprite_org = bp.sprite = sprite.data;
 		bp.dst = dpi.dst_ptr;
@@ -1549,7 +1549,7 @@ public class Gfx {
 		assert(bp.height > 0);
 		assert(bp.width > 0);
 
-		if (info & 8) {
+		if(0 != (info & 8) ) {
 			/* tile blit */
 			start_y = 0;
 

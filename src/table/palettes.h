@@ -1,3 +1,5 @@
+#if 0
+
 /* $Id: palettes.h 2701 2005-07-24 14:12:37Z tron $ */
 
 #define M(r, g, b) { r, g, b }
