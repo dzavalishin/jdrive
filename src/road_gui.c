@@ -1,3 +1,4 @@
+# if 0
 /* $Id: road_gui.c 3298 2005-12-14 06:28:48Z tron $ */
 
 #include "stdafx.h"
