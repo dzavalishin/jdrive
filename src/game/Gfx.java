@@ -1,5 +1,8 @@
 package game;
 
+import java.util.function.Consumer;
+
+import game.Gfx.BlitterParams;
 import game.util.BitOps;
 
 public class Gfx {
@@ -36,9 +39,9 @@ public class Gfx {
 
 
 
-	static byte []_cursor_backup = new byte[64 * 64];
+	static byte [] _cursor_backup = new byte[64 * 64];
 	//static Rect _invalid_rect;
-	static final byte []_color_remap_ptr;
+	static byte [] _color_remap_ptr;
 	static byte [] _string_colorremap = new byte[3];
 
 	static final int DIRTY_BYTES_PER_LINE = (Global.MAX_SCREEN_WIDTH / 64);
@@ -199,7 +202,7 @@ public class Gfx {
 				} while (--bottom > 0);
 			} else {
 				/* use colortable mode */
-				final byte[] ctab = SpriteCache.GetNonSprite(color & Sprite.COLORTABLE_MASK) + 1;
+				final byte[] ctab = BitOps.subArray( SpriteCache.GetNonSprite(color & Sprite.COLORTABLE_MASK), 1 );
 
 				do {
 					int i;
@@ -397,14 +400,14 @@ public class Gfx {
 	/* returns right coordinate */
 	static int DrawString(int x, int y, StringID str, int color)
 	{
-		DrawString(x, y, str.id, color);
+		return DrawString(x, y, str.id, color);
 	}
 
 	static int DrawStringTruncated(int x, int y, StringID str, int color, int maxw)
 	{
 		//char buffer[512];
 		//TruncateStringID(str, buffer, maxw);
-		String buffer = TruncateStringID(str, maxw);
+		String buffer = TruncateStringID(str, maxw, null);
 		return DoDrawString(buffer, x, y, color);
 	}
 
@@ -429,7 +432,7 @@ public class Gfx {
 		//char buffer[512];
 
 		//TruncateStringID(str, buffer, maxw);
-		String buffer = TruncateStringID(str, maxw);
+		String buffer = TruncateStringID(str, maxw, null);
 		DoDrawString(buffer, x - GetStringWidth(buffer), y, color);
 	}
 
@@ -637,10 +640,10 @@ public class Gfx {
 
 	static void DrawFrameRect(int left, int top, int right, int bottom, int ctab, int flags)
 	{
-		byte color_2 = Global._color_list[ctab].window_color_1a;
-		byte color_interior = Global._color_list[ctab].window_color_bga;
-		byte color_3 = Global._color_list[ctab].window_color_bgb;
-		byte color = Global._color_list[ctab].window_color_2;
+		int color_2 = Global._color_list[ctab].window_color_1a;
+		int color_interior = Global._color_list[ctab].window_color_bga;
+		int color_3 = Global._color_list[ctab].window_color_bgb;
+		int color = Global._color_list[ctab].window_color_2;
 
 		if (0 ==(flags & 0x8)) {
 			if (0==(flags & 0x20)) {
@@ -679,7 +682,7 @@ public class Gfx {
 		int sp = 0;
 		char sc[] = string.toCharArray();
 
-		color = real_color & 0xFF;
+		color = (byte) (real_color & 0xFF);
 
 		if (color != 0xFE) {
 			if (x >= dpi.left + dpi.width ||
@@ -690,9 +693,9 @@ public class Gfx {
 
 			if (color != 0xFF) {
 				switch_color:;
-				if (real_color & IS_PALETTE_COLOR) {
+				if(0 != (real_color & IS_PALETTE_COLOR) ) {
 					_string_colorremap[1] = color;
-					_string_colorremap[2] = 215;
+					_string_colorremap[2] = (byte) 215;
 				} else {
 					_string_colorremap[1] = _string_colormap[color].text;
 					_string_colorremap[2] = _string_colormap[color].shadow;
@@ -773,8 +776,8 @@ public class Gfx {
 
 	class BlitterParams {
 		int start_x, start_y;
-		final byte[] sprite;
-		final byte[] sprite_org;
+		byte[] sprite;
+		byte[] sprite_org;
 
 		///* Pixel */ byte  *dst;
 		int[]  dst_mem;
@@ -935,7 +938,7 @@ public class Gfx {
 					}
 					#else*/
 						//memcpy(dst, src, num);
-						System.arraycopy(src_data, 0, dst_data, 0, num);
+						System.arraycopy(src_data, src_shift, dst_data, dst_shift, num);
 					//#endif
 				} while (0==(done & 0x80));
 
@@ -986,34 +989,35 @@ public class Gfx {
 				} while (--height != 0);
 			}
 		} else {
-			if (!(bp.info & 1)) {
+			if (0==(bp.info & 1)) {
 				do {
-					memcpy(dst, src, width);
-					src += bp.width_org;
-					dst += bp.pitch;
+					//memcpy(dst, src, width);
+					System.arraycopy(src_data, src_shift, dst_data, dst_shift, width);
+					src_shift += bp.width_org;
+					dst_shift += bp.pitch;
 				} while (--height != 0);
 			} else {
 				do {
 					int n = width;
 
 					for (; n >= 4; n -= 4) {
-						if (src[0] != 0) dst[0] = src[0];
-						if (src[1] != 0) dst[1] = src[1];
-						if (src[2] != 0) dst[2] = src[2];
-						if (src[3] != 0) dst[3] = src[3];
+						if (src_data[0+src_shift] != 0) dst_data[0+dst_shift] = src_data[0+src_shift];
+						if (src_data[1+src_shift] != 0) dst_data[1+dst_shift] = src_data[1+src_shift];
+						if (src_data[2+src_shift] != 0) dst_data[2+dst_shift] = src_data[2+src_shift];
+						if (src_data[3+src_shift] != 0) dst_data[3+dst_shift] = src_data[3+src_shift];
 
-						dst += 4;
-						src += 4;
+						dst_shift += 4;
+						src_shift += 4;
 					}
 
 					for (; n != 0; n--) {
-						if (src[0] != 0) dst[0] = src[0];
-						src++;
-						dst++;
+						if (src_data[0+src_shift] != 0) dst_data[0+dst_shift] = src_data[0+src_shift];
+						src_shift++;
+						dst_shift++;
 					}
 
-					src += bp.width_org - width;
-					dst += bp.pitch - width;
+					src_shift += bp.width_org - width;
+					dst_shift += bp.pitch - width;
 				} while (--height != 0);
 			}
 		}
@@ -1815,12 +1819,14 @@ public class Gfx {
 
 	static void ScreenSizeChanged()
 	{
+		/* TODO ScreenSizeChanged()
 		// check the dirty rect
 		if (_invalid_rect.right >= Hal._screen.width) _invalid_rect.right = Hal._screen.width;
 		if (_invalid_rect.bottom >= Hal._screen.height) _invalid_rect.bottom = Hal._screen.height;
 
 		// screen size changed and the old bitmap is invalid now, so we don't want to undraw it
 		Hal._cursor.visible = false;
+		*/
 	}
 
 	static void UndrawMouseCursor()
@@ -1828,11 +1834,18 @@ public class Gfx {
 		if (Hal._cursor.visible) {
 			Hal._cursor.visible = false;
 			memcpy_pitch(
-					Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
+					//Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
+					Hal._screen.dst_ptr,					
 					_cursor_backup,
-					Hal._cursor.draw_size.x, Hal._cursor.draw_size.y, Hal._cursor.draw_size.x, Hal._screen.pitch);
+					
+					Hal._cursor.draw_size.x, 
+					Hal._cursor.draw_size.y,
+					
+					//Hal._cursor.draw_size.x, 
+					Hal._cursor.draw_size.x + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch, 
+					Hal._screen.pitch);
 
-			Global.hal._video_driver.make_dirty(Hal._cursor.draw_pos.x, Hal._cursor.draw_pos.y, Hal._cursor.draw_size.x, Hal._cursor.draw_size.y);
+			Global.hal.make_dirty(Hal._cursor.draw_pos.x, Hal._cursor.draw_pos.y, Hal._cursor.draw_size.x, Hal._cursor.draw_size.y);
 		}
 	}
 
@@ -1876,14 +1889,21 @@ public class Gfx {
 		// Make backup of stuff below cursor
 		memcpy_pitch(
 				_cursor_backup,
-				Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
-				Hal._cursor.draw_size.x, Hal._cursor.draw_size.y, Hal._screen.pitch, Hal._cursor.draw_size.x);
+				//Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
+				Hal._screen.dst_ptr,
+				
+				Hal._cursor.draw_size.x, 
+				Hal._cursor.draw_size.y, 
+				Hal._screen.pitch, 
+				//Hal._cursor.draw_size.x
+				Hal._cursor.draw_size.x + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch
+				);
 
 		// Draw cursor on screen
 		Hal._cur_dpi = Hal._screen;
-		DrawSprite(Hal._cursor.sprite, Hal._cursor.pos.x, Hal._cursor.pos.y);
+		DrawSprite(Hal._cursor.sprite.id, Hal._cursor.pos.x, Hal._cursor.pos.y);
 
-		Global.hal._video_driver.make_dirty(Hal._cursor.draw_pos.x, Hal._cursor.draw_pos.y, Hal._cursor.draw_size.x, Hal._cursor.draw_size.y);
+		Global.hal.make_dirty(Hal._cursor.draw_pos.x, Hal._cursor.draw_pos.y, Hal._cursor.draw_size.x, Hal._cursor.draw_size.y);
 
 		Hal._cursor.visible = true;
 		Hal._cursor.dirty = false;
@@ -1914,16 +1934,16 @@ public class Gfx {
 				UndrawMouseCursor();
 			}
 		}
-		UndrawTextMessage();
+		TextEffect.UndrawTextMessage();
 
 		/* #if defined(_DEBUG)
 		if (_dbg_screen_rect)
 			DbgScreenRect(left, top, right, bottom);
 		else
 	#endif */
-		DrawOverlappedWindowForAll(left, top, right, bottom);
-
-		Global.hal._video_driver.make_dirty(left, top, right - left, bottom - top);
+		
+		Window.DrawOverlappedWindowForAll(left, top, right, bottom);
+		Global.hal.make_dirty(left, top, right - left, bottom - top);
 	}
 
 	static void DrawDirtyBlocks()

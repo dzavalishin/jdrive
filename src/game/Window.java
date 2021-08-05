@@ -419,7 +419,7 @@ public class Window extends WindowConstants
 	}
 	 */
 
-	void DrawOverlappedWindowForAll(int left, int top, int right, int bottom)
+	static void DrawOverlappedWindowForAll(int left, int top, int right, int bottom)
 	{
 		//Window w;
 		DrawPixelInfo bk = new DrawPixelInfo();
