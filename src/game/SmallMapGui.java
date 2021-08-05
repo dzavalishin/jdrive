@@ -1,5 +1,8 @@
 package game;
 
+import java.util.function.Function;
+
+import game.util.BitOps;
 import game.tables.SmallMapGuiTables;
 
 public class SmallMapGui extends SmallMapGuiTables
@@ -21,7 +24,7 @@ public class SmallMapGui extends SmallMapGuiTables
 	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   358,   379,   280,   301, Sprite.SPR_IMG_TOWN,            Str.STR_0197_TOGGLE_TOWN_NAMES_ON_OFF),
 	new Widget(    Window.WWT_IMGBTN,    Window.RESIZE_RTB,    13,     0,   357,   258,   301, 0x0,                     Str.STR_NULL),
 	new Widget(     Window.WWT_PANEL,    Window.RESIZE_RTB,    13,     0,   433,   302,   313, 0x0,                     Str.STR_NULL),
-	new Widget( Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    13,   434,   445,   302,   313, 0x0,                     Str.STR_Window.RESIZE_BUTTON),
+	new Widget( Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    13,   434,   445,   302,   313, 0x0,                     Str.STR_RESIZE_BUTTON),
 
 	};
 
@@ -30,63 +33,13 @@ public class SmallMapGui extends SmallMapGuiTables
 
 
 
-	class AndOr {
-		int mor;
-		int mand;
-	} AndOr;
 
-	static inline int ApplyMask(int colour, final AndOr* mask)
+	static  int ApplyMask(int colour, final AndOr mask)
 	{
 		return (colour & mask.mand) | mask.mor;
 	}
 
 
-	static final AndOr _smallmap_contours_andor[] = {
-		{MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)},
-		{MKCOLOR(0x000A0A00),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)},
-		{MKCOLOR(0x98989898),MKCOLOR(0x00000000)},
-		{MKCOLOR(0xCACACACA),MKCOLOR(0x00000000)},
-		{MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)},
-		{MKCOLOR(0xB5B5B5B5),MKCOLOR(0x00000000)},
-		{MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)},
-		{MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x000A0A00),MKCOLOR(0xFF0000FF)},
-	};
-
-	static final AndOr _smallmap_vehicles_andor[] = {
-		{MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)},
-		{MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)},
-		{MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0xCACACACA),MKCOLOR(0x00000000)},
-		{MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)},
-		{MKCOLOR(0xB5B5B5B5),MKCOLOR(0x00000000)},
-		{MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)},
-		{MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)},
-	};
-
-	static final AndOr _smallmap_vegetation_andor[] = {
-		{MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)},
-		{MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00575700),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0xCACACACA),MKCOLOR(0x00000000)},
-		{MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)},
-		{MKCOLOR(0xB5B5B5B5),MKCOLOR(0x00000000)},
-		{MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)},
-		{MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)},
-		{MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)},
-	};
-
-	typedef int GetSmallMapPixels(TileIndex tile); // typedef callthrough function
 
 	/**
 	 * Draws one column of the small map in a certain mode onto the screen buffer. This
@@ -101,38 +54,40 @@ public class SmallMapGui extends SmallMapGuiTables
 	 * @param proc Pointer to the colour function
 	 * @see GetSmallMapPixels(TileIndex)
 	 */
-	static void DrawSmallMapStuff(Pixel *dst, int xc, int yc, int pitch, int reps, int mask, GetSmallMapPixels *proc)
+	static void DrawSmallMapStuff(Pixel dst, int xc, int yc, int pitch, int reps, int mask, GetSmallMapPixels proc)
 	{
-		Pixel *dst_ptr_end = _screen.dst_ptr + _screen.width * _screen.height - _screen.width;
+		Pixel dst_ptr_end = Hal._screen.dst_ptr + Hal._screen.width * Hal._screen.height - Hal._screen.width;
 
 		do {
 			// check if the tile (xc,yc) is within the map range
-			if (xc < MapMaxX() && yc < MapMaxY()) {
+			if (xc < Global.MapMaxX() && yc < Global.MapMaxY()) {
 				// check if the dst pointer points to a pixel inside the screen buffer
-				if (dst > _screen.dst_ptr && dst < dst_ptr_end)
-					WRITE_PIXELS_OR(dst, proc(TileXY(xc, yc)) & mask);
+				if (dst > Hal._screen.dst_ptr && dst < dst_ptr_end)
+					WRITE_PIXELS_OR(dst, proc.apply(TileIndex.TileXY(xc, yc)) & mask);
 			}
 		// switch to next tile in the column
-		} while (xc++, yc++, dst += pitch, --reps != 0);
+			xc++; yc++; dst += pitch;
+		} while (--reps != 0);
 	}
 
 
-	static inline TileType GetEffectiveTileType(TileIndex tile)
+	static  TileTypes GetEffectiveTileType(TileIndex tile)
 	{
-		TileType t = GetTileType(tile);
+		TileTypes tt = tile.GetTileType();
 
-		if (t == TileTypes.MP_TUNNELBRIDGE) {
-			t = tile.getMap().m5;
+		if (tt == TileTypes.MP_TUNNELBRIDGE) {
+			int t = tile.getMap().m5;
 			if ((t & 0x80) == 0) t >>= 1;
 			if ((t & 6) == 0) {
-				t = TileTypes.MP_RAILWAY;
+				t = TileTypes.MP_RAILWAY.ordinal();
 			} else if ((t & 6) == 2) {
-				t = TileTypes.MP_STREET;
+				t = TileTypes.MP_STREET.ordinal();
 			} else {
-				t = TileTypes.MP_WATER;
+				t = TileTypes.MP_WATER.ordinal();
 			}
+			return TileTypes.values[t];
 		}
-		return t;
+		return tt;
 	}
 
 	/**
@@ -140,12 +95,12 @@ public class SmallMapGui extends SmallMapGuiTables
 	 * @param tile The tile of which we would like to get the color.
 	 * @return The color of tile in the small map in mode "Contour"
 	 */
-	static inline int GetSmallMapContoursPixels(TileIndex tile)
+	static  int GetSmallMapContoursPixels(TileIndex tile)
 	{
-		TileType t = GetEffectiveTileType(tile);
+		TileTypes t = GetEffectiveTileType(tile);
 
 		return
-			ApplyMask(_map_height_bits[TileHeight(tile)], &_smallmap_contours_andor[t]);
+			ApplyMask(_map_height_bits[tile.TileHeight()], _smallmap_contours_andor[t.ordinal()]);
 	}
 
 	/**
@@ -154,38 +109,13 @@ public class SmallMapGui extends SmallMapGuiTables
 	 * @param t The tile of which we would like to get the color.
 	 * @return The color of tile in the small map in mode "Vehicles"
 	 */
-	static inline int GetSmallMapVehiclesPixels(TileIndex tile)
+	static  int GetSmallMapVehiclesPixels(TileIndex tile)
 	{
-		TileType t = GetEffectiveTileType(tile);
+		TileTypes t = GetEffectiveTileType(tile);
 
-		return ApplyMask(MKCOLOR(0x54545454), &_smallmap_vehicles_andor[t]);
+		return ApplyMask(MKCOLOR(0x54545454), _smallmap_vehicles_andor[t.ordinal()]);
 	}
 
-	/* Industry colours... a total of 175 gfx - XXX - increase if more industries */
-	static final byte _industry_smallmap_colors[175] = {
-		215,215,215,215,215,215,215,184,
-		184,184,184,194,194,194,194,194,
-		 86, 86,191,191,191,191,191,191,
-		152,152,152,152,152,152,152,152,
-		152, 48, 48, 48, 48, 48, 48,174,
-		174,174,174,174,174,174,174, 10,
-		 10, 10, 10, 10, 10, 10, 10, 10,
-		 10, 10, 15, 15, 55, 55, 55, 55,
-		 10, 10, 10, 10, 10, 10, 10, 10,
-		194,194,194,194,194,194,194,194,
-		194,194,194,194,194,194,194,194,
-		194, 15, 15,184,184,184,184,184,
-		184,184,184,184, 55, 55, 55, 55,
-		 55, 55, 55, 55, 55, 55, 55, 55,
-		 55, 55, 55, 55, 86, 39, 37, 37,
-		208,174,174,174,174,194,194,194,
-		194, 48, 48,174,174,174,174, 39,
-		 39, 55,208,208,208,208, 10, 10,
-		 10, 10, 10, 10, 37, 37, 37, 37,
-		 37, 37, 37, 37,184,184,184,184,
-		152,152,152,152,194,194,194, 15,
-		 15, 15, 15, 15, 15, 15, 15,
-	};
 
 	/**
 	 * Return the color a tile would be displayed with in the small map in mode "Industries".
@@ -193,16 +123,16 @@ public class SmallMapGui extends SmallMapGuiTables
 	 * @param tile The tile of which we would like to get the color.
 	 * @return The color of tile in the small map in mode "Industries"
 	 */
-	static inline int GetSmallMapIndustriesPixels(TileIndex tile)
+	static  int GetSmallMapIndustriesPixels(TileIndex tile)
 	{
-		TileType t = GetEffectiveTileType(tile);
+		TileTypes t = GetEffectiveTileType(tile);
 
 		if (t == TileTypes.MP_INDUSTRY) {
-			byte color = _industry_smallmap_colors[tile.getMap().m5];
+			int color = _industry_smallmap_colors[tile.getMap().m5];
 			return color + (color << 8) + (color << 16) + (color << 24);
 		}
 
-		return ApplyMask(MKCOLOR(0x54545454), &_smallmap_vehicles_andor[t]);
+		return ApplyMask(MKCOLOR(0x54545454), _smallmap_vehicles_andor[t.ordinal()]);
 	}
 
 	/**
@@ -211,9 +141,9 @@ public class SmallMapGui extends SmallMapGuiTables
 	 * @param t The tile of which we would like to get the color.
 	 * @return The color of tile  in the small map in mode "Routes"
 	 */
-	static inline int GetSmallMapRoutesPixels(TileIndex tile)
+	static  int GetSmallMapRoutesPixels(TileIndex tile)
 	{
-		TileType t = GetEffectiveTileType(tile);
+		TileTypes t = GetEffectiveTileType(tile);
 		int bits;
 
 		if (t == TileTypes.MP_STATION) {
@@ -233,39 +163,25 @@ public class SmallMapGui extends SmallMapGuiTables
 	}
 
 
-	static final int _vegetation_clear_bits[4 + 7] = {
-		MKCOLOR(0x37373737), ///< bare land
-		MKCOLOR(0x37373737), ///< 1/3 grass
-		MKCOLOR(0x37373737), ///< 2/3 grass
-		MKCOLOR(0x54545454), ///< full grass
 
-		MKCOLOR(0x52525252), ///< rough land
-		MKCOLOR(0x0A0A0A0A), ///< rocks
-		MKCOLOR(0x25252525), ///< fields
-		MKCOLOR(0x98989898), ///< snow
-		MKCOLOR(0xC2C2C2C2), ///< desert
-		MKCOLOR(0x54545454), ///< unused
-		MKCOLOR(0x54545454), ///< unused
-	};
-
-	static inline int GetSmallMapVegetationPixels(TileIndex tile)
+	static  int GetSmallMapVegetationPixels(TileIndex tile)
 	{
-		TileType t = GetEffectiveTileType(tile);
+		TileTypes t = GetEffectiveTileType(tile);
 		int i;
 		int bits;
 
 		switch (t) {
-			case TileTypes.MP_CLEAR:
+			case MP_CLEAR:
 				i = (tile.getMap().m5 & 0x1F) - 4;
 				if (i >= 0) i >>= 2;
 				bits = _vegetation_clear_bits[i + 4];
 				break;
 
-			case TileTypes.MP_INDUSTRY:
-				bits = IS_BYTE_INSIDE(tile.getMap().m5, 0x10, 0x12) ? MKCOLOR(0xD0D0D0D0) : MKCOLOR(0xB5B5B5B5);
+			case MP_INDUSTRY:
+				bits = BitOps.IS_BYTE_INSIDE(tile.getMap().m5, 0x10, 0x12) ? MKCOLOR(0xD0D0D0D0) : MKCOLOR(0xB5B5B5B5);
 				break;
 
-			case TileTypes.MP_TREES:
+			case MP_TREES:
 				if ((tile.getMap().m2 & 0x30) == 0x20)
 					bits = (GameOptions._opt.landscape == Landscape.LT_HILLY) ? MKCOLOR(0x98575798) : MKCOLOR(0xC25757C2);
 				else
@@ -273,7 +189,7 @@ public class SmallMapGui extends SmallMapGuiTables
 				break;
 
 			default:
-				bits = ApplyMask(MKCOLOR(0x54545454), &_smallmap_vehicles_andor[t]);
+				bits = ApplyMask(MKCOLOR(0x54545454), _smallmap_vehicles_andor[t.ordinal()]);
 				break;
 		}
 
@@ -281,7 +197,7 @@ public class SmallMapGui extends SmallMapGuiTables
 	}
 
 
-	static int _owner_colors[256];
+	private static final int[] _owner_colors = new int[256];
 
 	/**
 	 * Return the color a tile would be displayed with in the small map in mode "Owner".
@@ -289,48 +205,34 @@ public class SmallMapGui extends SmallMapGuiTables
 	 * @param t The tile of which we would like to get the color.
 	 * @return The color of tile in the small map in mode "Owner"
 	 */
-	static inline int GetSmallMapOwnerPixels(TileIndex tile)
+	static  int GetSmallMapOwnerPixels(TileIndex tile)
 	{
-		Owner o;
+		int o;
 
-		switch (GetTileType(tile)) {
-			case TileTypes.MP_INDUSTRY: o = Owner.OWNER_SPECTATOR;    break;
-			case TileTypes.MP_HOUSE:    o = Owner.OWNER_TOWN;         break;
-			default:          o = GetTileOwner(tile); break;
+		switch (tile.GetTileType()) {
+			case MP_INDUSTRY: o = Owner.OWNER_SPECTATOR;    break;
+			case MP_HOUSE:    o = Owner.OWNER_TOWN;         break;
+			default:          o = tile.GetTileOwner().id; break;
 		}
 
 		return _owner_colors[o];
 	}
 
 
-	static final int _smallmap_mask_left[3] = {
-		MKCOLOR(0xFF000000),
-		MKCOLOR(0xFFFF0000),
-		MKCOLOR(0xFFFFFF00),
-	};
-
-	static final int _smallmap_mask_right[] = {
-		MKCOLOR(0x000000FF),
-		MKCOLOR(0x0000FFFF),
-		MKCOLOR(0x00FFFFFF),
-	};
 
 	/* each tile has 4 x pixels and 1 y pixel */
 
-	static GetSmallMapPixels *_smallmap_draw_procs[] = {
-		GetSmallMapContoursPixels,
-		GetSmallMapVehiclesPixels,
-		GetSmallMapIndustriesPixels,
-		GetSmallMapRoutesPixels,
-		GetSmallMapVegetationPixels,
-		GetSmallMapOwnerPixels,
+	static GetSmallMapPixels _smallmap_draw_procs[] = {
+		SmallMapGui::GetSmallMapContoursPixels,
+		SmallMapGui::GetSmallMapVehiclesPixels,
+		SmallMapGui::GetSmallMapIndustriesPixels,
+		SmallMapGui::GetSmallMapRoutesPixels,
+		SmallMapGui::GetSmallMapVegetationPixels,
+		SmallMapGui::GetSmallMapOwnerPixels,
 	};
 
-	static final byte _vehicle_type_colors[6] = {
-		184, 191, 152, 15, 215, 184
-	};
 
-	static inline int dup_byte32(byte b) {
+	static  int dup_byte32(byte b) {
 		return b + (b << 8) + (b << 16) + (b << 24);
 	}
 
@@ -360,24 +262,24 @@ public class SmallMapGui extends SmallMapGuiTables
 	 * @param type type of map requested (vegetation, owners, routes, etc)
 	 * @param show_towns true if the town names should be displayed, false if not.
 	 */
-	static void DrawSmallMap(DrawPixelInfo *dpi, Window w, int type, boolean show_towns)
+	static void DrawSmallMap(DrawPixelInfo dpi, Window w, int type, boolean show_towns)
 	{
-		DrawPixelInfo *old_dpi;
+		DrawPixelInfo old_dpi;
 		int dx,dy, x, y, x2, y2;
-		Pixel *ptr;
+		Pixel ptr;
 		int tile_x;
 		int tile_y;
-		ViewPort *vp;
+		ViewPort vp;
 
-		old_dpi = _cur_dpi;
-		_cur_dpi = dpi;
+		old_dpi = Hal._cur_dpi;
+		Hal._cur_dpi = dpi;
 
 		/* clear it */
 		Gfx.GfxFillRect(dpi.left, dpi.top, dpi.left + dpi.width - 1, dpi.top + dpi.height - 1, 0);
 
 		/* setup owner table */
 		if (type == 5) {
-			final Player  p;
+			//final Player  p;
 
 			/* fill with some special colors */
 			_owner_colors[Owner.OWNER_TOWN] = MKCOLOR(0xB4B4B4B4);
@@ -386,17 +288,19 @@ public class SmallMapGui extends SmallMapGuiTables
 			_owner_colors[Owner.OWNER_SPECTATOR] = MKCOLOR(0x20202020); /* industry */
 
 			/* now fill with the player colors */
-			FOR_ALL_PLAYERS(p) {
+			//FOR_ALL_PLAYERS(p)
+			Player.forEach( (p) ->
+			{
 				if (p.is_active)
 					_owner_colors[p.index] =
-						dup_byte32(GetNonSprite(775 + p.player_color)[0xCB]); // XXX - magic pixel
-			}
+						dup_byte32(SpriteCache.GetNonSprite(775 + p.player_color)[0xCB]); // XXX - magic pixel
+			});
 		}
 
-		tile_x = WP(w,smallmap_d).scroll_x / 16;
-		tile_y = WP(w,smallmap_d).scroll_y / 16;
+		tile_x = w.as_smallmap_d().scroll_x / 16;
+		tile_y = w.as_smallmap_d().scroll_y / 16;
 
-		dx = dpi.left + WP(w,smallmap_d).subscroll;
+		dx = dpi.left + w.as_smallmap_d().subscroll;
 		tile_x -= dx / 4;
 		tile_y += dx / 4;
 		dx &= 3;
@@ -473,9 +377,9 @@ public class SmallMapGui extends SmallMapGuiTables
 				if (v.type != 0 && v.type != Vehicle.VEH_Special &&
 						(v.vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) == 0) {
 					// Remap into flat coordinates.
-					Point pt = RemapCoords(
-						(v.x_pos - WP(w,smallmap_d).scroll_x) / 16,
-						(v.y_pos - WP(w,smallmap_d).scroll_y) / 16,
+					Point pt = Point.RemapCoords(
+						(v.x_pos - w.as_smallmap_d().scroll_x) / 16,
+						(v.y_pos - w.as_smallmap_d().scroll_y) / 16,
 						0);
 					x = pt.x;
 					y = pt.y;
@@ -488,7 +392,7 @@ public class SmallMapGui extends SmallMapGuiTables
 					skip = false;
 
 					// Offset X coordinate
-					x -= WP(w,smallmap_d).subscroll + 3 + dpi.left;
+					x -= w.as_smallmap_d().subscroll + 3 + dpi.left;
 
 					if (x < 0) {
 						// if x+1 is 0, that means we're on the very left edge,
@@ -521,11 +425,11 @@ public class SmallMapGui extends SmallMapGuiTables
 			FOR_ALL_TOWNS(t) {
 				if (t.xy != 0) {
 					// Remap the town coordinate
-					Point pt = RemapCoords(
+					Point pt = Point.RemapCoords(
 						(int)(TileX(t.xy) * 16 - WP(w, smallmap_d).scroll_x) / 16,
 						(int)(TileY(t.xy) * 16 - WP(w, smallmap_d).scroll_y) / 16,
 						0);
-					x = pt.x - WP(w,smallmap_d).subscroll + 3 - (t.sign.width_2 >> 1);
+					x = pt.x - w.as_smallmap_d().subscroll + 3 - (t.sign.width_2 >> 1);
 					y = pt.y;
 
 					// Check if the town sign is within bounds
@@ -535,7 +439,7 @@ public class SmallMapGui extends SmallMapGuiTables
 							y < dpi.top + dpi.height) {
 						// And draw it.
 						Global.SetDParam(0, t.index);
-						DrawString(x, y, Str.STR_2056, 12);
+						Gfx.DrawString(x, y, Str.STR_2056, 12);
 					}
 				}
 			}
@@ -546,7 +450,7 @@ public class SmallMapGui extends SmallMapGuiTables
 			Point pt;
 
 			// Find main viewport.
-			vp = FindWindowById(Window.WC_MAIN_WINDOW,0).viewport;
+			vp = Window.FindWindowById(Window.WC_MAIN_WINDOW,0).viewport;
 
 			pt = RemapCoords(WP(w, smallmap_d).scroll_x, WP(w, smallmap_d).scroll_y, 0);
 
@@ -557,8 +461,8 @@ public class SmallMapGui extends SmallMapGuiTables
 			x /= 16;
 			y /= 16;
 
-			x -= WP(w,smallmap_d).subscroll;
-			x2 -= WP(w,smallmap_d).subscroll;
+			x -= w.as_smallmap_d().subscroll;
+			x2 -= w.as_smallmap_d().subscroll;
 
 			DrawVertMapIndicator(x, y, x, y2);
 			DrawVertMapIndicator(x2, y, x2, y2);
@@ -566,61 +470,64 @@ public class SmallMapGui extends SmallMapGuiTables
 			DrawHorizMapIndicator(x, y, x2, y);
 			DrawHorizMapIndicator(x, y2, x2, y2);
 		}
-		_cur_dpi = old_dpi;
+		Hal._cur_dpi = old_dpi;
 	}
 
 	static void SmallMapWindowProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT: {
-			final int *tbl;
+		case WE_PAINT: {
+			final int []tbl_mem;
+			int tbl_shift = 0;
 			int x,y,y_org;
-			DrawPixelInfo new_dpi;
+			DrawPixelInfo new_dpi = new DrawPixelInfo();
 
 			/* draw the window */
 			Global.SetDParam(0, Str.STR_00E5_CONTOURS + _smallmap_type);
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			/* draw the legend */
-			tbl = _legend_table[(_smallmap_type != 2) ? _smallmap_type : (GameOptions._opt.landscape + IND_OFFS)];
+			tbl_mem = _legend_table[(_smallmap_type != 2) ? _smallmap_type : (GameOptions._opt.landscape + IND_OFFS)];
+			tbl_shif = 0;
+			
 			x = 4;
 			y_org = w.height - 43 - 11;
 			y = y_org;
 			while (true) {
 				Gfx.GfxFillRect(x, y+1, x+8, y + 5, 0);
-				Gfx.GfxFillRect(x+1, y+2, x+7, y + 4, (byte)tbl[0]);
-				DrawString(x+11, y, tbl[1], 0);
+				Gfx.GfxFillRect(x+1, y+2, x+7, y + 4, (byte)tbl_mem[0+tbl_shift]);
+				Gfx.DrawString(x+11, y, tbl_mem[1+tbl_shift], 0);
 
-				tbl += 2;
+				tbl_shift += 2;
 				y += 6;
 
-				if (tbl[0] == 0xFFFF) {
+				if (tbl_mem[0+tbl_shift] == 0xFFFF) {
 					break;
-				} else if (tbl[0] & 0x100) {
+				} else if (0 != (tbl_mem[0+tbl_shift] & 0x100) ) {
 					x += 123;
 					y = y_org;
 				}
 			}
 
-			if (!FillDrawPixelInfo(&new_dpi, null, 3, 17, w.width - 28 + 22, w.height - 64 - 11))
+			if (!FillDrawPixelInfo(new_dpi, null, 3, 17, w.width - 28 + 22, w.height - 64 - 11))
 				return;
 
-			DrawSmallMap(&new_dpi, w, _smallmap_type, _smallmap_show_towns);
+			DrawSmallMap(new_dpi, w, _smallmap_type, _smallmap_show_towns);
 		} break;
 
-		case WindowEvents.WE_CLICK:
-			switch (e.click.widget) {
+		case WE_CLICK:
+			switch (e.widget) {
 			case 4: {/* Main wnd */
 				Window w2;
 				Point pt;
 
 				_left_button_clicked = false;
 
-				w2 = FindWindowById(Window.WC_MAIN_WINDOW, 0);
+				w2 = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 
-				pt = RemapCoords(WP(w,smallmap_d).scroll_x, WP(w,smallmap_d).scroll_y, 0);
-				WP(w2,vp_d).scrollpos_x = pt.x + ((Hal._cursor.pos.x - w.left + 2) << 4) - (w2.viewport.virtual_width >> 1);
-				WP(w2,vp_d).scrollpos_y = pt.y + ((Hal._cursor.pos.y - w.top - 16) << 4) - (w2.viewport.virtual_height >> 1);
+				pt = Point.RemapCoords(w.as_smallmap_d().scroll_x, w.as_smallmap_d().scroll_y, 0);
+				w2.as_vp_d().scrollpos_x = pt.x + ((Hal._cursor.pos.x - w.left + 2) << 4) - (w2.viewport.virtual_width >> 1);
+				w2.as_vp_d().scrollpos_y = pt.y + ((Hal._cursor.pos.y - w.top - 16) << 4) - (w2.viewport.virtual_height >> 1);
 			} break;
 
 			case 5: /* Show land contours */
@@ -630,67 +537,67 @@ public class SmallMapGui extends SmallMapGuiTables
 			case 9: /* Show vegetation */
 			case 10: /* Show land owners */
 				w.click_state &= ~(1<<5|1<<6|1<<7|1<<8|1<<9|1<<10);
-				w.click_state |= 1 << e.click.widget;
-				_smallmap_type = e.click.widget - 5;
+				w.click_state |= 1 << e.widget;
+				_smallmap_type = e.widget - 5;
 
-				SetWindowDirty(w);
-				SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
+				//SndPlayFx(SND_15_BEEP);
 				break;
 
 			case 12: /* toggle town names */
 				w.click_state ^= (1 << 12);
-				_smallmap_show_towns = (w.click_state >> 12) & 1;
-				SetWindowDirty(w);
-				SndPlayFx(SND_15_BEEP);
+				_smallmap_show_towns = BitOps.i2b( (w.click_state >> 12) & 1 );
+				w.SetWindowDirty();
+				//SndPlayFx(SND_15_BEEP);
 				break;
 			}
 			break;
 
-		case WindowEvents.WE_RCLICK:
-			if (e.click.widget == 4) {
-				if (_scrolling_viewport)
+		case WE_RCLICK:
+			if (e.widget == 4) {
+				if (Window._scrolling_viewport)
 					return;
-				_scrolling_viewport = true;
+				Window._scrolling_viewport = true;
 				Hal._cursor.delta.x = 0;
 				Hal._cursor.delta.y = 0;
 			}
 			break;
 
-		case WindowEvents.WE_MOUSELOOP:
+		case WE_MOUSELOOP:
 			/* update the window every now and then */
 			if ((++w.vscroll.pos & 0x1F) == 0)
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 			break;
 		}
 	}
 
-	static final WindowDesc _smallmap_desc = {
+	static final WindowDesc _smallmap_desc = new WindowDesc(
 		-1,-1, 446, 314,
 		Window.WC_SMALLMAP,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 		_smallmap_widgets,
-		SmallMapWindowProc
-	};
+		SmallMapGui::SmallMapWindowProc
+	);
 
 	void ShowSmallMap()
 	{
 		Window w;
-		ViewPort *vp;
+		ViewPort vp;
 		int x,y;
 
-		w = AllocateWindowDescFront(&_smallmap_desc, 0);
-		if (w) {
-			w.click_state = ((1<<5) << _smallmap_type) | (_smallmap_show_towns << 12);
+		w = Window.AllocateWindowDescFront(_smallmap_desc, 0);
+		if (w != null) {
+			w.click_state = ((1<<5) << _smallmap_type) | (BitOps.b2i(_smallmap_show_towns) << 12);
 			w.resize.width = 350;
 			w.resize.height = 250;
 
-			vp = FindWindowById(Window.WC_MAIN_WINDOW, 0).viewport;
+			vp = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0).viewport;
 
 			x =  (((vp.virtual_width - (220*32)) / 2) + vp.virtual_left) / 4;
 			y = ((((vp.virtual_height- (120*32)) / 2) + vp.virtual_top ) / 2) - 32;
-			WP(w,smallmap_d).scroll_x = (y-x) & ~0xF;
-			WP(w,smallmap_d).scroll_y = (x+y) & ~0xF;
-			WP(w,smallmap_d).subscroll = 0;
+			w.as_smallmap_d().scroll_x = (y-x) & ~0xF;
+			w.as_smallmap_d().scroll_y = (x+y) & ~0xF;
+			w.as_smallmap_d().subscroll = 0;
 		}
 	}
 
@@ -707,95 +614,101 @@ public class SmallMapGui extends SmallMapGuiTables
 	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   172,   298,   234,   255, Str.STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN,Str.STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN_TT),
 	new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,   299,   299,   234,   255, 0x0,				Str.STR_NULL),
 	new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,     0,   287,   256,   267, 0x0,				Str.STR_NULL),
-	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   288,   299,   256,   267, 0x0,				Str.STR_Window.RESIZE_BUTTON),
+	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   288,   299,   256,   267, 0x0,				Str.STR_RESIZE_BUTTON),
 	
 	};
 
 	static void ExtraViewPortWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_CREATE: /* Disable zoom in button */
+		case WE_CREATE: /* Disable zoom in button */
 			w.disabled_state = (1 << 5);
 			break;
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 			// set the number in the title bar
-			Global.SetDParam(0, (w.window_number+1));
+			Global.SetDParam(0, (w.window_number.n+1));
 
-			DrawWindowWidgets(w);
-			DrawWindowViewport(w);
+			w.DrawWindowWidgets();
+			w.DrawWindowViewport();
 			break;
 
-		case WindowEvents.WE_CLICK: {
-			switch (e.click.widget) {
+		case WE_CLICK: {
+			switch (e.widget) {
 			case 5: /* zoom in */
-				DoZoomInOutWindow(ZOOM_IN, w);
+				Gui.DoZoomInOutWindow(Gui.ZOOM_IN, w);
 				break;
 			case 6: /* zoom out */
-				DoZoomInOutWindow(ZOOM_OUT, w);
+				Gui.DoZoomInOutWindow(Gui.ZOOM_OUT, w);
 				break;
 			case 7: { /* location button (move main view to same spot as this view) 'Paste Location' */
-				Window w2 = FindWindowById(Window.WC_MAIN_WINDOW, 0);
-				int x = WP(w, vp_d).scrollpos_x; // Where is the main looking at
-				int y = WP(w, vp_d).scrollpos_y;
+				Window w2 = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+				int x = w.as_vp_d().scrollpos_x; // Where is the main looking at
+				int y = w.as_vp_d().scrollpos_y;
 
 				// set this view to same location. Based on the center, adjusting for zoom
-				WP(w2, vp_d).scrollpos_x =  x - (w2.viewport.virtual_width -  w.viewport.virtual_width) / 2;
-				WP(w2, vp_d).scrollpos_y =  y - (w2.viewport.virtual_height - w.viewport.virtual_height) / 2;
+				w2.as_vp_d().scrollpos_x =  x - (w2.viewport.virtual_width -  w.viewport.virtual_width) / 2;
+				w2.as_vp_d().scrollpos_y =  y - (w2.viewport.virtual_height - w.viewport.virtual_height) / 2;
 			} break;
 			case 8: { /* inverse location button (move this view to same spot as main view) 'Copy Location' */
-				final Window  w2 = FindWindowById(Window.WC_MAIN_WINDOW, 0);
-				int x = WP(w2, final vp_d).scrollpos_x;
-				int y = WP(w2, final vp_d).scrollpos_y;
+				final Window  w2 = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+				int x = w2.as_vp_d().scrollpos_x;
+				int y = w2.as_vp_d().scrollpos_y;
 
-				WP(w, vp_d).scrollpos_x =  x + (w2.viewport.virtual_width -  w.viewport.virtual_width) / 2;
-				WP(w, vp_d).scrollpos_y =  y + (w2.viewport.virtual_height - w.viewport.virtual_height) / 2;
+				w.as_vp_d().scrollpos_x =  x + (w2.viewport.virtual_width -  w.viewport.virtual_width) / 2;
+				w.as_vp_d().scrollpos_y =  y + (w2.viewport.virtual_height - w.viewport.virtual_height) / 2;
 			} break;
 			}
 		} break;
 
-		case WindowEvents.WE_RESIZE:
-			w.viewport.width  += e.sizing.diff.x;
-			w.viewport.height += e.sizing.diff.y;
+		case WE_RESIZE:
+			w.viewport.width  += e.diff.x;
+			w.viewport.height += e.diff.y;
 
-			w.viewport.virtual_width  += e.sizing.diff.x;
-			w.viewport.virtual_height += e.sizing.diff.y;
+			w.viewport.virtual_width  += e.diff.x;
+			w.viewport.virtual_height += e.diff.y;
 			break;
 		}
 	}
 
-	static final WindowDesc _extra_view_port_desc = {
+	static final WindowDesc _extra_view_port_desc = new WindowDesc(
 		-1,-1, 300, 268,
 		Window.WC_EXTRA_VIEW_PORT,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 		_extra_view_port_widgets,
-		ExtraViewPortWndProc
-	};
+		SmallMapGui::ExtraViewPortWndProc
+	);
 
 	void ShowExtraViewPortWindow()
 	{
-		Window w, *v;
+		Window w, v;
 		int i = 0;
 
 		// find next free window number for extra viewport
-		while (FindWindowById(Window.WC_EXTRA_VIEW_PORT, i) ) {
+		while (null != Window.FindWindowById(Window.WC_EXTRA_VIEW_PORT, i) ) {
 			i++;
 		}
 
-		w = AllocateWindowDescFront(&_extra_view_port_desc, i);
-		if (w) {
+		w = Window.AllocateWindowDescFront(_extra_view_port_desc, i);
+		if (null != w) {
 			int x, y;
 			// the main window with the main view
-			v = FindWindowById(Window.WC_MAIN_WINDOW, 0);
+			v = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 			// New viewport start ats (zero,zero)
-			AssignWindowViewport(w, 3, 17, 294, 214, 0 , 0);
+			ViewPort.AssignWindowViewport(w, 3, 17, 294, 214, 0 , 0);
 
 			// center on same place as main window (zoom is maximum, no adjustment needed)
-			x = WP(v, vp_d).scrollpos_x;
-			y = WP(v, vp_d).scrollpos_y;
-			WP(w, vp_d).scrollpos_x = x + (v.viewport.virtual_width  - (294)) / 2;
-			WP(w, vp_d).scrollpos_y = y + (v.viewport.virtual_height - (214)) / 2;
+			x = w.as_vp_d().scrollpos_x;
+			y = w.as_vp_d().scrollpos_y;
+			w.as_vp_d().scrollpos_x = x + (v.viewport.virtual_width  - (294)) / 2;
+			w.as_vp_d().scrollpos_y = y + (v.viewport.virtual_height - (214)) / 2;
 		}
 	}
 	
 	
 }
+
+
+//typedef int GetSmallMapPixels(TileIndex tile); // typedef callthrough function
+
+@FunctionalInterface
+interface GetSmallMapPixels extends Function<TileIndex, Integer> {}

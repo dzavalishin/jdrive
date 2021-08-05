@@ -1,207 +1,190 @@
 package game;
 
+import game.util.BitOps;
+import game.util.Sprites;
+
 public class RoadGui 
 {
-
-	/* $Id: road_gui.c 3298 2005-12-14 06:28:48Z tron $ */
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	//needed for catchments
 
 
 
-	static void ShowBusStationPicker();
-	static void ShowTruckStationPicker();
-	static void ShowRoadDepotPicker();
-
 	static boolean _remove_button_clicked;
-
 	static byte _place_road_flag;
 
 	static byte _road_depot_orientation;
 	static byte _road_station_picker_orientation;
 
-	void CcPlaySound1D(boolean success, TileIndex tile, int p1, int p2)
+	static void CcPlaySound1D(boolean success, TileIndex tile, int p1, int p2)
 	{
-		if (success) SndPlayTileFx(SND_1F_SPLAT, tile);
+		//if (success) SndPlayTileFx(SND_1F_SPLAT, tile);
 	}
 
 	static void PlaceRoad_NE(TileIndex tile)
 	{
-		_place_road_flag = (_tile_fract_coords.y >= 8) + 4;
-		VpStartPlaceSizing(tile, VPM_FIX_X);
+		_place_road_flag = (byte) ((BitOps.b2i( Global._tile_fract_coords.y >= 8) ) + 4);
+		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_FIX_X);
 	}
 
 	static void PlaceRoad_NW(TileIndex tile)
 	{
-		_place_road_flag = (_tile_fract_coords.x >= 8) + 0;
-		VpStartPlaceSizing(tile, VPM_FIX_Y);
+		_place_road_flag = (byte) (BitOps.b2i(Global._tile_fract_coords.x >= 8) + 0);
+		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_FIX_Y);
 	}
 
 	static void PlaceRoad_Bridge(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, VPM_X_OR_Y);
+		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_X_OR_Y);
 	}
 
 
-	void CcBuildRoadTunnel(boolean success, TileIndex tile, int p1, int p2)
+	static void CcBuildRoadTunnel(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
-			SndPlayTileFx(SND_20_SPLAT_2, tile);
-			ResetObjectToPlace();
+			//SndPlayTileFx(SND_20_SPLAT_2, tile);
+			ViewPort.ResetObjectToPlace();
 		} else {
-			SetRedErrorSquare(_build_tunnel_endtile);
+			ViewPort.SetRedErrorSquare(Global._build_tunnel_endtile);
 		}
 	}
 
 	static void PlaceRoad_Tunnel(TileIndex tile)
 	{
-		DoCommandP(tile, 0x200, 0, CcBuildRoadTunnel, Cmd.CMD_BUILD_TUNNEL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_5016_CAN_T_BUILD_TUNNEL_HERE));
+		Cmd.DoCommandP(tile, 0x200, 0, RoadGui::CcBuildRoadTunnel, Cmd.CMD_BUILD_TUNNEL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_5016_CAN_T_BUILD_TUNNEL_HERE));
 	}
 
+	static final byte _roadbits_by_dir[] = {2,1,8,4};
 	static void BuildRoadOutsideStation(TileIndex tile, int direction)
 	{
-		static final byte _roadbits_by_dir[4] = {2,1,8,4};
-		tile += TileOffsByDir(direction);
+		tile = tile.iadd( TileIndex.TileOffsByDir(direction) );
 		// if there is a roadpiece just outside of the station entrance, build a connecting route
-		if (tile.IsTileType( TileTypes.MP_STREET) && !(tile.getMap().m5 & 0x20)) {
-			DoCommandP(tile, _roadbits_by_dir[direction], 0, null, Cmd.CMD_BUILD_ROAD);
+		if (tile.IsTileType( TileTypes.MP_STREET) && 0==(tile.getMap().m5 & 0x20)) {
+			Cmd.DoCommandP(tile, _roadbits_by_dir[direction], 0, null, Cmd.CMD_BUILD_ROAD);
 		}
 	}
 
-	void CcRoadDepot(boolean success, TileIndex tile, int p1, int p2)
+	private static void CcRoadDepot(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
-			SndPlayTileFx(SND_1F_SPLAT, tile);
-			ResetObjectToPlace();
+			//SndPlayTileFx(SND_1F_SPLAT, tile);
+			ViewPort.ResetObjectToPlace();
 			BuildRoadOutsideStation(tile, (int)p1);
 		}
 	}
 
 	static void PlaceRoad_Depot(TileIndex tile)
 	{
-		DoCommandP(tile, _road_depot_orientation, 0, CcRoadDepot, Cmd.CMD_BUILD_ROAD_DEPOT | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1807_CAN_T_BUILD_ROAD_VEHICLE));
+		Cmd.DoCommandP(tile, _road_depot_orientation, 0, RoadGui::CcRoadDepot, Cmd.CMD_BUILD_ROAD_DEPOT | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1807_CAN_T_BUILD_ROAD_VEHICLE));
 	}
 
 	static void PlaceRoad_BusStation(TileIndex tile)
 	{
-		DoCommandP(tile, _road_station_picker_orientation, RS_BUS, CcRoadDepot, Cmd.CMD_BUILD_ROAD_STOP | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1808_CAN_T_BUILD_BUS_STATION));
+		Cmd.DoCommandP(tile, _road_station_picker_orientation, RoadStopType.RS_BUS.ordinal(), RoadGui::CcRoadDepot, Cmd.CMD_BUILD_ROAD_STOP | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1808_CAN_T_BUILD_BUS_STATION));
 	}
 
 	static void PlaceRoad_TruckStation(TileIndex tile)
 	{
-		DoCommandP(tile, _road_station_picker_orientation, RS_TRUCK, CcRoadDepot, Cmd.CMD_BUILD_ROAD_STOP | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1809_CAN_T_BUILD_TRUCK_STATION));
+		Cmd.DoCommandP(tile, _road_station_picker_orientation, RoadStopType.RS_TRUCK.ordinal(), RoadGui::CcRoadDepot, Cmd.CMD_BUILD_ROAD_STOP | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1809_CAN_T_BUILD_TRUCK_STATION));
 	}
 
 	static void PlaceRoad_DemolishArea(TileIndex tile)
 	{
-		VpStartPlaceSizing(tile, 4);
+		ViewPort.VpStartPlaceSizing(tile, 4);
 	}
 
-	typedef void OnButtonClick(Window w);
+	//typedef void OnButtonClick(Window w);
 
 	static void BuildRoadClick_NE(Window w)
 	{
-		HandlePlacePushButton(w, 3, Sprite.SPR_CURSOR_ROAD_NESW, 1, PlaceRoad_NE);
+		Gui.HandlePlacePushButton(w, 3, Sprite.SPR_CURSOR_ROAD_NESW, 1, RoadGui::PlaceRoad_NE);
 	}
 
 	static void BuildRoadClick_NW(Window w)
 	{
-		HandlePlacePushButton(w, 4, Sprite.SPR_CURSOR_ROAD_NWSE, 1, PlaceRoad_NW);
+		Gui.HandlePlacePushButton(w, 4, Sprite.SPR_CURSOR_ROAD_NWSE, 1, RoadGui::PlaceRoad_NW);
 	}
 
 
 	static void BuildRoadClick_Demolish(Window w)
 	{
-		HandlePlacePushButton(w, 5, ANIMCURSOR_DEMOLISH, 1, PlaceRoad_DemolishArea);
+		Gui.HandlePlacePushButton(w, 5, Sprites.ANIMCURSOR_DEMOLISH, 1, RoadGui::PlaceRoad_DemolishArea);
 	}
 
 	static void BuildRoadClick_Depot(Window w)
 	{
 		if (Global._game_mode == GameModes.GM_EDITOR) return;
-		if (HandlePlacePushButton(w, 6, Sprite.SPR_CURSOR_ROAD_DEPOT, 1, PlaceRoad_Depot)) ShowRoadDepotPicker();
+		if (Gui.HandlePlacePushButton(w, 6, Sprite.SPR_CURSOR_ROAD_DEPOT, 1, RoadGui::PlaceRoad_Depot)) ShowRoadDepotPicker();
 	}
 
 	static void BuildRoadClick_BusStation(Window w)
 	{
 		if (Global._game_mode == GameModes.GM_EDITOR) return;
-		if (HandlePlacePushButton(w, 7, Sprite.SPR_CURSOR_BUS_STATION, 1, PlaceRoad_BusStation)) ShowBusStationPicker();
+		if (Gui.HandlePlacePushButton(w, 7, Sprite.SPR_CURSOR_BUS_STATION, 1, RoadGui::PlaceRoad_BusStation)) ShowBusStationPicker();
 	}
 
 	static void BuildRoadClick_TruckStation(Window w)
 	{
 		if (Global._game_mode == GameModes.GM_EDITOR) return;
-		if (HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_TRUCK_STATION, 1, PlaceRoad_TruckStation)) ShowTruckStationPicker();
+		if (Gui.HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_TRUCK_STATION, 1, RoadGui::PlaceRoad_TruckStation)) ShowTruckStationPicker();
 	}
 
 	static void BuildRoadClick_Bridge(Window w)
 	{
-		HandlePlacePushButton(w, 9, Sprite.SPR_CURSOR_BRIDGE, 1, PlaceRoad_Bridge);
+		Gui.HandlePlacePushButton(w, 9, Sprite.SPR_CURSOR_BRIDGE, 1, RoadGui::PlaceRoad_Bridge);
 	}
 
 	static void BuildRoadClick_Tunnel(Window w)
 	{
-		HandlePlacePushButton(w, 10, Sprite.SPR_CURSOR_ROAD_TUNNEL, 3, PlaceRoad_Tunnel);
+		Gui.HandlePlacePushButton(w, 10, Sprite.SPR_CURSOR_ROAD_TUNNEL, 3, RoadGui::PlaceRoad_Tunnel);
 	}
 
 	static void BuildRoadClick_Remove(Window w)
 	{
 		if (BitOps.HASBIT(w.disabled_state, 11)) return;
-		SetWindowDirty(w);
-		SndPlayFx(SND_15_BEEP);
-		TOGGLEBIT(w.click_state, 11);
-		SetSelectionRed(BitOps.HASBIT(w.click_state, 11) != 0);
+		w.SetWindowDirty();
+		//SndPlayFx(SND_15_BEEP);
+		w.click_state = BitOps.RETTOGGLEBIT(w.click_state, 11);
+		ViewPort.SetSelectionRed(BitOps.HASBIT(w.click_state, 11) != false);
 	}
 
 	static void BuildRoadClick_Landscaping(Window w)
 	{
-		ShowTerraformToolbar();
+		Terraform.ShowTerraformToolbar();
 	}
 
-	static OnButtonClick* final _build_road_button_proc[] = {
-		BuildRoadClick_NE,
-		BuildRoadClick_NW,
-		BuildRoadClick_Demolish,
-		BuildRoadClick_Depot,
-		BuildRoadClick_BusStation,
-		BuildRoadClick_TruckStation,
-		BuildRoadClick_Bridge,
-		BuildRoadClick_Tunnel,
-		BuildRoadClick_Remove,
-		BuildRoadClick_Landscaping,
+	static final OnButtonClick _build_road_button_proc[] = {
+		RoadGui::BuildRoadClick_NE,
+		RoadGui::BuildRoadClick_NW,
+		RoadGui::BuildRoadClick_Demolish,
+		RoadGui::BuildRoadClick_Depot,
+		RoadGui::BuildRoadClick_BusStation,
+		RoadGui::BuildRoadClick_TruckStation,
+		RoadGui::BuildRoadClick_Bridge,
+		RoadGui::BuildRoadClick_Tunnel,
+		RoadGui::BuildRoadClick_Remove,
+		RoadGui::BuildRoadClick_Landscaping,
 	};
 
 	static void BuildRoadToolbWndProc(Window  w, WindowEvent  e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 			w.disabled_state &= ~(1 << 11);
-			if (!(w.click_state & ((1<<3)|(1<<4)))) {
+			if (0==(w.click_state & ((1<<3)|(1<<4)))) {
 				w.disabled_state |= (1 << 11);
 				w.click_state &= ~(1<<11);
 			}
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 			break;
 
-		case WindowEvents.WE_CLICK: {
-			if (e.click.widget >= 3) _build_road_button_proc[e.click.widget - 3](w);
+		case WE_CLICK: {
+			if (e.widget >= 3) _build_road_button_proc[e.widget - 3].accept(w);
 		}	break;
 
-		case WindowEvents.WE_KEYPRESS:
-			switch (e.keypress.keycode) {
+		case WE_KEYPRESS:
+			switch (e.keycode) {
 				case '1': BuildRoadClick_NE(w);           break;
 				case '2': BuildRoadClick_NW(w);           break;
 				case '3': BuildRoadClick_Demolish(w);     break;
@@ -214,73 +197,73 @@ public class RoadGui
 				case 'L': BuildRoadClick_Landscaping(w);  break;
 				default: return;
 			}
-			MarkTileDirty(_thd.pos.x, _thd.pos.y); // redraw tile selection
-			e.keypress.cont = false;
+			ViewPort.MarkTileDirty(ViewPort._thd.pos.x, ViewPort._thd.pos.y); // redraw tile selection
+			e.cont = false;
 			break;
 
-		case WindowEvents.WE_PLACE_OBJ:
+		case WE_PLACE_OBJ:
 			_remove_button_clicked = (w.click_state & (1 << 11)) != 0;
-			_place_proc(e.place.tile);
+			Global._place_proc.accept(e.tile);
 			break;
 
-		case WindowEvents.WE_ABORT_PLACE_OBJ:
-			UnclickWindowButtons(w);
-			SetWindowDirty(w);
+		case WE_ABORT_PLACE_OBJ:
+			w.UnclickWindowButtons();
+			w.SetWindowDirty();
 
-			w = FindWindowById(Window.WC_BUS_STATION, 0);
-			if (w != null) WP(w,def_d).close = true;
-			w = FindWindowById(Window.WC_TRUCK_STATION, 0);
-			if (w != null) WP(w,def_d).close = true;
-			w = FindWindowById(Window.WC_BUILD_DEPOT, 0);
-			if (w != null) WP(w,def_d).close = true;
+			w = Window.FindWindowById(Window.WC_BUS_STATION, 0);
+			if (w != null) w.as_def_d().close = true;
+			w = Window.FindWindowById(Window.WC_TRUCK_STATION, 0);
+			if (w != null) w.as_def_d().close = true;
+			w = Window.FindWindowById(Window.WC_BUILD_DEPOT, 0);
+			if (w != null) w.as_def_d().close = true;
 			break;
 
-		case WindowEvents.WE_PLACE_DRAG: {
+		case WE_PLACE_DRAG: {
 			int sel_method;
-			if (e.place.userdata == 1) {
-				sel_method = VPM_FIX_X;
-				_place_road_flag = (_place_road_flag&~2) | ((e.place.pt.y&8)>>2);
-			} else if (e.place.userdata == 2) {
-				sel_method = VPM_FIX_Y;
-				_place_road_flag = (_place_road_flag&~2) | ((e.place.pt.x&8)>>2);
-			} else if (e.place.userdata == 4) {
-				sel_method = VPM_X_AND_Y;
+			if (e.userdata == 1) {
+				sel_method = ViewPort.VPM_FIX_X;
+				_place_road_flag = (byte) ((_place_road_flag&~2) | ((e.pt.y&8)>>2));
+			} else if (e.userdata == 2) {
+				sel_method = ViewPort.VPM_FIX_Y;
+				_place_road_flag = (byte) ((_place_road_flag&~2) | ((e.pt.x&8)>>2));
+			} else if (e.userdata == 4) {
+				sel_method = ViewPort.VPM_X_AND_Y;
 			} else {
-				sel_method = VPM_X_OR_Y;
+				sel_method = ViewPort.VPM_X_OR_Y;
 			}
 
-			VpSelectTilesWithMethod(e.place.pt.x, e.place.pt.y, sel_method);
+			ViewPort.VpSelectTilesWithMethod(e.pt.x, e.pt.y, sel_method);
 			return;
 		}
 
-		case WindowEvents.WE_PLACE_MOUSEUP:
-			if (e.place.pt.x != -1) {
-				TileIndex start_tile = e.place.starttile;
-				TileIndex end_tile = e.place.tile;
+		case WE_PLACE_MOUSEUP:
+			if (e.pt.x != -1) {
+				TileIndex start_tile = e.starttile;
+				TileIndex end_tile = e.tile;
 
-				if (e.place.userdata == 0) {
-					ResetObjectToPlace();
-					ShowBuildBridgeWindow(start_tile, end_tile, 0x80);
-				} else if (e.place.userdata != 4) {
-					DoCommandP(end_tile, start_tile, _place_road_flag, CcPlaySound1D,
+				if (e.userdata == 0) {
+					ViewPort.ResetObjectToPlace();
+					Bridge.ShowBuildBridgeWindow(start_tile, end_tile, 0x80);
+				} else if (e.userdata != 4) {
+					Cmd.DoCommandP(end_tile, start_tile.tile, _place_road_flag, null/*CcPlaySound1D*/,
 						_remove_button_clicked ?
 						Cmd.CMD_REMOVE_LONG_ROAD | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1805_CAN_T_REMOVE_ROAD_FROM) :
 						Cmd.CMD_BUILD_LONG_ROAD | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1804_CAN_T_BUILD_ROAD_HERE));
 				} else {
-					DoCommandP(end_tile, start_tile, _place_road_flag, CcPlaySound10, Cmd.CMD_CLEAR_AREA | Cmd.CMD_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
+					Cmd.DoCommandP(end_tile, start_tile.tile, _place_road_flag, null/*CcPlaySound10*/, Cmd.CMD_CLEAR_AREA | Cmd.CMD_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
 				}
 			}
 			break;
 
-		case WindowEvents.WE_PLACE_PRESIZE: {
-			TileIndex tile = e.place.tile;
+		case WE_PLACE_PRESIZE: {
+			TileIndex tile = e.tile;
 
-			DoCommandByTile(tile, 0x200, 0, Cmd.DC_AUTO, Cmd.CMD_BUILD_TUNNEL);
-			VpSetPresizeRange(tile, _build_tunnel_endtile==0?tile:_build_tunnel_endtile);
+			Cmd.DoCommandByTile(tile, 0x200, 0, Cmd.DC_AUTO, Cmd.CMD_BUILD_TUNNEL);
+			ViewPort.VpSetPresizeRange(tile, Global._build_tunnel_endtile==null?tile:Global._build_tunnel_endtile);
 			break;
 		}
 
-		case WindowEvents.WE_DESTROY:
+		case WE_DESTROY:
 			if (Global._patches.link_terraform_toolbar) Window.DeleteWindowById(Window.WC_SCEN_LAND_GEN, 0);
 			break;
 		}
@@ -301,23 +284,22 @@ public class RoadGui
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   174,   195,    14,    35, Sprite.SPR_IMG_ROAD_TUNNEL,		Str.STR_1810_BUILD_ROAD_TUNNEL),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   196,   217,    14,    35, Sprite.SPR_IMG_REMOVE, 				Str.STR_1811_TOGGLE_BUILD_REMOVE_FOR),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   218,   239,    14,    35, Sprite.SPR_IMG_LANDSCAPING, Str.STR_LANDSCAPING_TOOLBAR_TIP),
-	{   WIDGETS_END},
 	};
 
-	static final WindowDesc _build_road_desc = {
+	static final WindowDesc _build_road_desc = new WindowDesc(
 		640-240, 22, 240, 36,
 		Window.WC_BUILD_TOOLBAR,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STICKY_BUTTON,
 		_build_road_widgets,
-		BuildRoadToolbWndProc
-	};
+		RoadGui::BuildRoadToolbWndProc
+	);
 
 	void ShowBuildRoadToolbar()
 	{
-		if (Global._current_player == Owner.OWNER_SPECTATOR) return;
+		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
 		Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);
-		AllocateWindowDesc(&_build_road_desc);
-		if (Global._patches.link_terraform_toolbar) ShowTerraformToolbar();
+		Window.AllocateWindowDesc(_build_road_desc);
+		if (Global._patches.link_terraform_toolbar) Terraform.ShowTerraformToolbar();
 	}
 
 	static final Widget _build_road_scen_widgets[] = {
@@ -335,51 +317,51 @@ public class RoadGui
 	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,   108,   129,    14,    35, 0x97D,			Str.STR_1810_BUILD_ROAD_TUNNEL),
 	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,   130,   151,    14,    35, 0x2CA,			Str.STR_1811_TOGGLE_BUILD_REMOVE_FOR),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   152,   173,    14,    35, Sprite.SPR_IMG_LANDSCAPING, Str.STR_LANDSCAPING_TOOLBAR_TIP),
-	{   WIDGETS_END},
+
 	};
 
-	static final WindowDesc _build_road_scen_desc = {
+	static final WindowDesc _build_road_scen_desc = new WindowDesc(
 		-1, -1, 174, 36,
 		Window.WC_SCEN_BUILD_ROAD,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STICKY_BUTTON,
 		_build_road_scen_widgets,
-		BuildRoadToolbWndProc
-	};
+		RoadGui::BuildRoadToolbWndProc
+	);
 
 	void ShowBuildRoadScenToolbar()
 	{
-		AllocateWindowDescFront(&_build_road_scen_desc, 0);
+		Window.AllocateWindowDescFront(_build_road_scen_desc, 0);
 	}
 
 	static void BuildRoadDepotWndProc(Window  w, WindowEvent  e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 			w.click_state = (1<<3) << _road_depot_orientation;
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
-			DrawRoadDepotSprite(70, 17, 0);
-			DrawRoadDepotSprite(70, 69, 1);
-			DrawRoadDepotSprite( 2, 69, 2);
-			DrawRoadDepotSprite( 2, 17, 3);
+			Road.DrawRoadDepotSprite(70, 17, 0);
+			Road.DrawRoadDepotSprite(70, 69, 1);
+			Road.DrawRoadDepotSprite( 2, 69, 2);
+			Road.DrawRoadDepotSprite( 2, 17, 3);
 			break;
 
-		case WindowEvents.WE_CLICK: {
-			switch (e.click.widget) {
+		case WE_CLICK: {
+			switch (e.widget) {
 			case 3: case 4: case 5: case 6:
-				_road_depot_orientation = e.click.widget - 3;
-				SndPlayFx(SND_15_BEEP);
-				SetWindowDirty(w);
+				_road_depot_orientation = (byte) (e.widget - 3);
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
 				break;
 			}
 		}	break;
 
-		case WindowEvents.WE_MOUSELOOP:
-			if (WP(w,def_d).close) DeleteWindow(w);
+		case WE_MOUSELOOP:
+			if (w.as_def_d().close) w.DeleteWindow();
 			break;
 
-		case WindowEvents.WE_DESTROY:
-			if (!WP(w,def_d).close) ResetObjectToPlace();
+		case WE_DESTROY:
+			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
 			break;
 		}
 	}
@@ -388,84 +370,83 @@ public class RoadGui
 	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,Str.STR_018B_CLOSE_WINDOW),
 	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   139,     0,    13, Str.STR_1806_ROAD_DEPOT_ORIENTATION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   139,    14,   121, 0x0,			Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    17,    66, 0x0,			Str.STR_1813_SELEAcceptedCargo.CT_ROAD_VEHICLE_DEPOT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    69,   118, 0x0,			Str.STR_1813_SELEAcceptedCargo.CT_ROAD_VEHICLE_DEPOT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    69,   118, 0x0,			Str.STR_1813_SELEAcceptedCargo.CT_ROAD_VEHICLE_DEPOT),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    17,    66, 0x0,			Str.STR_1813_SELEAcceptedCargo.CT_ROAD_VEHICLE_DEPOT),
-	{   WIDGETS_END},
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    17,    66, 0x0,			Str.STR_1813_SELECT_ROAD_VEHICLE_DEPOT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    69,   118, 0x0,			Str.STR_1813_SELECT_ROAD_VEHICLE_DEPOT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    69,   118, 0x0,			Str.STR_1813_SELECT_ROAD_VEHICLE_DEPOT),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    17,    66, 0x0,			Str.STR_1813_SELECT_ROAD_VEHICLE_DEPOT),
 	};
 
-	static final WindowDesc _build_road_depot_desc = {
+	static final WindowDesc _build_road_depot_desc = new WindowDesc(
 		-1,-1, 140, 122,
 		Window.WC_BUILD_DEPOT,Window.WC_BUILD_TOOLBAR,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_build_road_depot_widgets,
-		BuildRoadDepotWndProc
-	};
+		RoadGui::BuildRoadDepotWndProc
+	);
 
 	static void ShowRoadDepotPicker()
 	{
-		AllocateWindowDesc(&_build_road_depot_desc);
+		Window.AllocateWindowDesc(_build_road_depot_desc);
 	}
 
 	static void RoadStationPickerWndProc(Window w, WindowEvent e)
 	{
 		switch(e.event) {
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			int image;
 
-			if (WP(w,def_d).close) return;
+			if (w.as_def_d().close) return;
 
 			w.click_state = ((1<<3) << _road_station_picker_orientation)	|
-											 ((1<<7) << _station_show_coverage);
-			DrawWindowWidgets(w);
+											 ((1<<7) << Gui._station_show_coverage);
+			w.DrawWindowWidgets();
 
-			if (_station_show_coverage) {
-				int rad = Global._patches.modified_catchment ? CA_TRUCK /* = CA_BUS */ : 4;
-				SetTileSelectBigSize(-rad, -rad, 2 * rad, 2 * rad);
+			if (Gui._station_show_coverage!=0) {
+				int rad = Global._patches.modified_catchment ? Station.CA_TRUCK /* = CA_BUS */ : 4;
+				ViewPort.SetTileSelectBigSize(-rad, -rad, 2 * rad, 2 * rad);
 			} else
-				SetTileSelectSize(1, 1);
+				ViewPort.SetTileSelectSize(1, 1);
 
-			image = (w.window_class == Window.WC_BUS_STATION) ? 0x47 : 0x43;
+			image = (w.window_class.v == Window.WC_BUS_STATION) ? 0x47 : 0x43;
 
-			StationPickerGfx.DrawSprite(103, 35, 0, image);
-			StationPickerGfx.DrawSprite(103, 85, 0, image+1);
-			StationPickerGfx.DrawSprite(35, 85, 0, image+2);
-			StationPickerGfx.DrawSprite(35, 35, 0, image+3);
+			Station.StationPickerDrawSprite(103, 35, 0, image);
+			Station.StationPickerDrawSprite(103, 85, 0, image+1);
+			Station.StationPickerDrawSprite(35, 85, 0, image+2);
+			Station.StationPickerDrawSprite(35, 35, 0, image+3);
 
-			DrawStringCentered(70, 120, Str.STR_3066_COVERAGE_AREA_HIGHLIGHT, 0);
-			DrawStationCoverageAreaText(2, 146,
-				((w.window_class == Window.WC_BUS_STATION) ? (1<<AcceptedCargo.CT_PASSENGERS) : ~(1<<AcceptedCargo.CT_PASSENGERS)),
+			Gfx.DrawStringCentered(70, 120, Str.STR_3066_COVERAGE_AREA_HIGHLIGHT, 0);
+			MiscGui.DrawStationCoverageAreaText(2, 146,
+				((w.window_class.v == Window.WC_BUS_STATION) ? (1<<AcceptedCargo.CT_PASSENGERS) : ~(1<<AcceptedCargo.CT_PASSENGERS)),
 				3);
 
 		} break;
 
-		case WindowEvents.WE_CLICK: {
-			switch (e.click.widget) {
+		case WE_CLICK: {
+			switch (e.widget) {
 			case 3: case 4: case 5: case 6:
-				_road_station_picker_orientation = e.click.widget - 3;
-				SndPlayFx(SND_15_BEEP);
-				SetWindowDirty(w);
+				_road_station_picker_orientation = (byte) (e.widget - 3);
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
 				break;
 			case 7: case 8:
-				_station_show_coverage = e.click.widget - 7;
-				SndPlayFx(SND_15_BEEP);
-				SetWindowDirty(w);
+				Gui._station_show_coverage = e.widget - 7;
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
 				break;
 			}
 		} break;
 
-		case WindowEvents.WE_MOUSELOOP: {
-			if (WP(w,def_d).close) {
-				DeleteWindow(w);
+		case WE_MOUSELOOP: {
+			if (w.as_def_d().close) {
+				w.DeleteWindow();
 				return;
 			}
 
-			CheckRedrawStationCoverage(w);
+			MiscGui.CheckRedrawStationCoverage(w);
 		} break;
 
-		case WindowEvents.WE_DESTROY:
-			if (!WP(w,def_d).close) ResetObjectToPlace();
+		case WE_DESTROY:
+			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
 			break;
 		}
 	}
@@ -474,52 +455,50 @@ public class RoadGui
 	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,		Str.STR_018B_CLOSE_WINDOW),
 	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   139,     0,    13, Str.STR_3042_BUS_STATION_ORIENTATION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   139,    14,   176, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    17,    66, 0x0,					Str.STR_3051_SELEAcceptedCargo.CT_BUS_STATION_ORIENTATION),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    69,   118, 0x0,					Str.STR_3051_SELEAcceptedCargo.CT_BUS_STATION_ORIENTATION),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    69,   118, 0x0,					Str.STR_3051_SELEAcceptedCargo.CT_BUS_STATION_ORIENTATION),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    17,    66, 0x0,					Str.STR_3051_SELEAcceptedCargo.CT_BUS_STATION_ORIENTATION),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    17,    66, 0x0,					Str.STR_3051_SELECT_BUS_STATION_ORIENTATION),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    69,   118, 0x0,					Str.STR_3051_SELECT_BUS_STATION_ORIENTATION),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    69,   118, 0x0,					Str.STR_3051_SELECT_BUS_STATION_ORIENTATION),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    17,    66, 0x0,					Str.STR_3051_SELECT_BUS_STATION_ORIENTATION),
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    10,    69,   133,   144, Str.STR_02DB_OFF,Str.STR_3065_DON_T_HIGHLIGHT_COVERAGE),
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    70,   129,   133,   144, Str.STR_02DA_ON,	Str.STR_3064_HIGHLIGHT_COVERAGE_AREA),
-	{   WIDGETS_END},
 	};
 
-	static final WindowDesc _bus_station_picker_desc = {
+	static final WindowDesc _bus_station_picker_desc = new WindowDesc(
 		-1,-1, 140, 177,
 		Window.WC_BUS_STATION,Window.WC_BUILD_TOOLBAR,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_bus_station_picker_widgets,
-		RoadStationPickerWndProc
-	};
+		RoadGui::RoadStationPickerWndProc
+	);
 
 	static void ShowBusStationPicker()
 	{
-		AllocateWindowDesc(&_bus_station_picker_desc);
+		Window.AllocateWindowDesc(_bus_station_picker_desc);
 	}
 
 	static final Widget _truck_station_picker_widgets[] = {
 	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,		Str.STR_018B_CLOSE_WINDOW),
 	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   139,     0,    13, Str.STR_3043_TRUCK_STATION_ORIENT, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   139,    14,   176, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    17,    66, 0x0,					Str.STR_3052_SELEAcceptedCargo.CT_TRUCK_LOADING_BAY),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    69,   118, 0x0,					Str.STR_3052_SELEAcceptedCargo.CT_TRUCK_LOADING_BAY),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    69,   118, 0x0,					Str.STR_3052_SELEAcceptedCargo.CT_TRUCK_LOADING_BAY),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    17,    66, 0x0,					Str.STR_3052_SELEAcceptedCargo.CT_TRUCK_LOADING_BAY),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    17,    66, 0x0,					Str.STR_3052_SELECT_TRUCK_LOADING_BAY),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    71,   136,    69,   118, 0x0,					Str.STR_3052_SELECT_TRUCK_LOADING_BAY),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    69,   118, 0x0,					Str.STR_3052_SELECT_TRUCK_LOADING_BAY),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,    68,    17,    66, 0x0,					Str.STR_3052_SELECT_TRUCK_LOADING_BAY),
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    10,    69,   133,   144, Str.STR_02DB_OFF, Str.STR_3065_DON_T_HIGHLIGHT_COVERAGE),
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    70,   129,   133,   144, Str.STR_02DA_ON,	Str.STR_3064_HIGHLIGHT_COVERAGE_AREA),
-	{   WIDGETS_END},
 	};
 
-	static final WindowDesc _truck_station_picker_desc = {
+	static final WindowDesc _truck_station_picker_desc = new WindowDesc(
 		-1,-1, 140, 177,
 		Window.WC_TRUCK_STATION,Window.WC_BUILD_TOOLBAR,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_truck_station_picker_widgets,
-		RoadStationPickerWndProc
-	};
+		RoadGui::RoadStationPickerWndProc
+	);
 
 	static void ShowTruckStationPicker()
 	{
-		AllocateWindowDesc(&_truck_station_picker_desc);
+		Window.AllocateWindowDesc(_truck_station_picker_desc);
 	}
 
 	void InitializeRoadGui()

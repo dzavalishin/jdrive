@@ -888,7 +888,7 @@ public class Road
 		}
 	}
 
-	void DrawRoadDepotSprite(int x, int y, int image)
+	static void DrawRoadDepotSprite(int x, int y, int image)
 	{
 		int ormod;
 		final DrawRoadSeqStruct dtss;
