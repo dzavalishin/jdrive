@@ -25,7 +25,7 @@ public class Npf {
 	 * For now, this is just a Very Big Penalty, we might actually implement
 	 * this in a nicer way :-)
 	 */
-	private static final int NPF_INFINITE_PENALTY = 1000 * NPF_TILE_LENGTH;
+	public static final int NPF_INFINITE_PENALTY = 1000 * NPF_TILE_LENGTH;
 
 
 	//enum { /* Indices into AyStar.userdata[] */
@@ -986,11 +986,11 @@ public class Npf {
 			_npf_aystar.BeforeExit = null;
 
 		/* Initialize Start Node(s) */
-		start1.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
+		start1.user_data[NPF_TRACKDIR_CHOICE] = Rail.Rail.INVALID_TRACKDIR;
 		start1.user_data[NPF_NODE_FLAGS] = 0;
 		_npf_aystar.addstart(_npf_aystar, start1, 0);
 		if (start2) {
-			start2.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
+			start2.user_data[NPF_TRACKDIR_CHOICE] = Rail.Rail.INVALID_TRACKDIR;
 			start2.user_data[NPF_NODE_FLAGS] = 0;
 			NPFSetFlag(start2, NPF_FLAG_REVERSE, true);
 			_npf_aystar.addstart(_npf_aystar, start2, reverse_penalty);
@@ -999,7 +999,7 @@ public class Npf {
 		/* Initialize result */
 		result.best_bird_dist = (int)-1;
 		result.best_path_dist = (int)-1;
-		result.best_trackdir = Rail.INVALID_TRACKDIR;
+		result.best_trackdir = Rail.Rail.INVALID_TRACKDIR;
 		_npf_aystar.user_path = result;
 
 		/* Initialize target */
@@ -1037,10 +1037,10 @@ public class Npf {
 		start2.tile = tile2;
 		/* We set this in case the target is also the start tile, we will just
 		 * return a not found then */
-		start1.user_data[NPF_TRACKDIR_CHOICE] = INVALID_TRACKDIR;
+		start1.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 		start1.direction = trackdir1;
 		start2.direction = trackdir2;
-		start2.user_data[NPF_TRACKDIR_CHOICE] = INVALID_TRACKDIR;
+		start2.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 
 		return NPFRouteInternal(start1, (IsValidTile(tile2) ? start2 : null), target, NPFFindStationOrTile, NPFCalcStationOrTileHeuristic, type, owner, railtype, 0, pbs_mode);
 	}
@@ -1050,7 +1050,7 @@ public class Npf {
 		return NPFRouteToStationOrTileTwoWay(tile, trackdir, TileIndex.INVALID_TILE, 0, target, type, owner, railtype, pbs_mode);
 	}
 
-	NPFFoundTargetData NPFRouteToDepotBreadthFirstTwoWay(TileIndex tile1, /*Trackdir*/ int trackdir1, TileIndex tile2, /*Trackdir*/ int trackdir2, /*TransportType*/ int type, PlayerID owner, /* RailType */ int railtype, int reverse_penalty)
+	static NPFFoundTargetData NPFRouteToDepotBreadthFirstTwoWay(TileIndex tile1, /*Trackdir*/ int trackdir1, TileIndex tile2, /*Trackdir*/ int trackdir2, /*TransportType*/ int type, PlayerID owner, /* RailType */ int railtype, int reverse_penalty)
 	{
 		AyStarNode start1 = new AyStarNode();
 		AyStarNode start2 = new AyStarNode();
@@ -1059,10 +1059,10 @@ public class Npf {
 		start2.tile = tile2;
 		/* We set this in case the target is also the start tile, we will just
 		 * return a not found then */
-		start1.user_data[NPF_TRACKDIR_CHOICE] = INVALID_TRACKDIR;
+		start1.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 		start1.direction = trackdir1;
 		start2.direction = trackdir2;
-		start2.user_data[NPF_TRACKDIR_CHOICE] = INVALID_TRACKDIR;
+		start2.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 
 		/* perform a breadth first search. Target is null,
 		 * since we are just looking for any depot...*/
@@ -1089,7 +1089,7 @@ public class Npf {
 		NPFFoundTargetData best_result;
 		NPFFoundTargetData result;
 		NPFFindStationOrTileData target;
-		AyStarNode start;
+		AyStarNode start = new AyStarNode();
 		Depot  current;
 		Depot depot;
 
@@ -1151,14 +1151,14 @@ public class Npf {
 			/* Initialize Start Node */
 			/* We set this in case the target is also the start tile, we will just
 			 * return a not found then */
-			start.user_data[NPF_TRACKDIR_CHOICE] = INVALID_TRACKDIR;
+			start.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 			start.user_data[NPF_NODE_FLAGS] = 0;
-			_npf_aystar.addstart(&_npf_aystar, &start, 0);
+			_npf_aystar.addstart(_npf_aystar, start, 0);
 
 			/* Initialize result */
 			result.best_bird_dist = (int)-1;
 			result.best_path_dist = (int)-1;
-			result.best_trackdir = INVALID_TRACKDIR;
+			result.best_trackdir = Rail.INVALID_TRACKDIR;
 
 			/* Initialize target */
 			target.dest_coords = current.xy;

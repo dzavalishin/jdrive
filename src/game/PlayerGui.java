@@ -881,7 +881,7 @@ public class PlayerGui
 
 	/* Show the endgame victory screen in 2050. Update the new highscore
 	 * if it was high enough */
-	void ShowEndGameChart()
+	static void ShowEndGameChart()
 	{
 		Window w;
 

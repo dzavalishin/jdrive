@@ -1128,7 +1128,7 @@ class RoadDriveEntry {
 		Point rd;
 		int x,y;
 		Station st;
-		//int rr;
+		int r1;
 		Vehicle u;
 
 		// decrease counters
@@ -1247,7 +1247,7 @@ class RoadDriveEntry {
 			int r;
 			int newdir;
 			//final RoadDriveEntry rdp;
-			final Point[] rdp;
+			Point[] rdp;
 
 			if (dir == -1) {
 				v.cur_speed = 0;
@@ -1275,8 +1275,8 @@ class RoadDriveEntry {
 				if (RoadVehFindCloseTo(v, x, y, newdir=RoadVehGetSlidingDirection(v, x, y)) != null)
 					return;
 
-				int rr = v.VehicleEnterTile( tile, x, y);
-				if(0 != (rr & 8)) {
+				r = v.VehicleEnterTile( tile, x, y);
+				if(0 != (r & 8)) {
 					if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE)) {
 						v.cur_speed = 0;
 						return;
@@ -1445,13 +1445,13 @@ class RoadDriveEntry {
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 		}
 
-		int rr = v.VehicleEnterTile( v.tile, x, y);
-		if(0!= (rr & 8)) {
+		r1 = v.VehicleEnterTile( v.tile, x, y);
+		if(0!= (r1 & 8)) {
 			v.cur_speed = 0;
 			return;
 		}
 
-		if ((rr & 4) == 0) {
+		if ((r1 & 4) == 0) {
 			v.road.frame++;
 		}
 

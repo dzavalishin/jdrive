@@ -100,7 +100,7 @@ public class RoadVehCmdTables
 	
 	
 	
-	static class RoadDriveEntry extends Point 
+	public static class RoadDriveEntry extends Point 
 	{
 		public RoadDriveEntry(int i, int j) 
 		{
@@ -1121,7 +1121,7 @@ public class RoadVehCmdTables
 		new RoadDriveEntry(0x81,0)
 	};
 
-	static final RoadDriveEntry  _road_drive_data[][] = {
+	protected static final RoadDriveEntry  _road_drive_data[][] = {
 		_roadveh_drive_data_0,
 		_roadveh_drive_data_1,
 		_roadveh_drive_data_2,

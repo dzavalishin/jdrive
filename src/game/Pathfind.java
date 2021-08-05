@@ -159,7 +159,7 @@ public abstract class Pathfind extends TrackPathFinderTables
 
 
 	// new pathfinder for trains. better and faster.
-	static void NewTrainPathfind(TileIndex tile, TileIndex dest, byte direction, NTPEnumProc enum_proc, Object data)
+	static void NewTrainPathfind(TileIndex tile, TileIndex dest, int direction, NTPEnumProc enum_proc, Object data)
 	{
 		NewTrackPathFinder tpf = new NewTrackPathFinder();
 

@@ -289,7 +289,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		dits = _industry_draw_tile_data[(ti.map5 << 2) | BitOps.GB(ti.tile.getMap().m1, 0, 2)];
 
 		image = dits.sprite_1;
-		if (image & Sprite.PALETTE_MODIFIER_COLOR && (image & Sprite.PALETTE_SPRITE_MASK) == 0)
+		if( (0 != (image & Sprite.PALETTE_MODIFIER_COLOR)) && (image & Sprite.PALETTE_SPRITE_MASK) == 0)
 			image |= ormod;
 
 		z = (byte) ti.z;
@@ -306,7 +306,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		/* Add industry on top of the ground? */
 		image = dits.sprite_2;
 		if (image != 0) {
-			if (image & Sprite.PALETTE_MODIFIER_COLOR && (image & Sprite.PALETTE_SPRITE_MASK) == 0)
+			if( (0 != (image & Sprite.PALETTE_MODIFIER_COLOR)) && (image & Sprite.PALETTE_SPRITE_MASK) == 0)
 				image |= ormod;
 
 			if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS)) image = Sprite.RET_MAKE_TRANSPARENT(image);
@@ -385,7 +385,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				!Global._cheats.magic_bulldozer.value) ||
 				(Global._current_player.id == Owner.OWNER_WATER && i.type == IT_OIL_RIG) ) {
 			Global.SetDParam(0, Str.STR_4802_COAL_MINE + i.type);
-			return Cmd.return Cmd.return_cmd_error(Str.STR_4800_IN_THE_WAY);
+			return Cmd.return_cmd_error(Str.STR_4800_IN_THE_WAY);
 		}
 
 		if( 0!= (flags & Cmd.DC_EXEC)) DeleteIndustry(i);
@@ -555,7 +555,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				if (m == 4 && (m=0,++n) == 32+1 && (n=30,b)) {
 					tile.getMap().m1 = 0x83;
 					tile.getMap().m5 = 29;
-					tile.TextEffect.DeleteAnimatedTile();
+					TextEffect.DeleteAnimatedTile(tile);
 				} else {
 					tile.getMap().m1 = BitOps.RETSB(tile.getMap().m1, 0, 2, m);
 					tile.getMap().m5 = (byte) n;
@@ -607,7 +607,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	{
 		TileInfo ti = new TileInfo();
 		Landscape.FindLandscapeHeight(ti, tile.TileX() * 16, tile.TileY() * 16);
-		CreateEffectVehicle(ti.x + 15, ti.y + 14, ti.z + 59 + (ti.tileh != 0 ? 8 : 0), EV_CHIMNEY_SMOKE);
+		Vehicle.CreateEffectVehicle(ti.x + 15, ti.y + 14, ti.z + 59 + (ti.tileh != 0 ? 8 : 0), Vehicle.EV_CHIMNEY_SMOKE);
 	}
 
 	static void MakeIndustryTileBigger(TileIndex tile, int size)
@@ -666,11 +666,11 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		dir = Hal.Random() & 3;
 
-		v = CreateEffectVehicleAbove(
+		v = Vehicle.CreateEffectVehicleAbove(
 				tile.TileX() * 16 + _tileloop_ind_case_161[dir + 0],
 				tile.TileY() * 16 + _tileloop_ind_case_161[dir + 4],
 				_tileloop_ind_case_161[dir + 8],
-				EV_BUBBLE
+				Vehicle.EV_BUBBLE
 				);
 
 		if (v != null) v.special.unk2 = dir;
@@ -754,7 +754,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			break;
 
 		case 49:
-			CreateEffectVehicleAbove(tile.TileX() * 16 + 6, tile.TileY() * 16 + 6, 43, EV_SMOKE);
+			CreateEffectVehicleAbove(tile.TileX() * 16 + 6, tile.TileY() * 16 + 6, 43, Vehicle.EV_SMOKE);
 			break;
 
 
@@ -1431,7 +1431,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		}
 
 		i.town = t;
-		i.owner = owner;
+		i.owner = (byte) owner;
 
 		r = Hal.Random();
 		i.color_map = (byte) BitOps.GB(r, 8, 4);
@@ -1503,9 +1503,12 @@ public class Industry extends IndustryTables implements IPoolItem {
 		Industry i;
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		int num;
-		final IndustryTileTable [][] itt;
-		final IndustryTileTable [] it;
-		final IndustrySpec [] spec;
+		//final IndustryTileTable [][] itt;
+		final IndustryTileTable [] itt;
+		//final IndustryTileTable [] it;
+		final IndustryTileTable  it;
+		//final IndustrySpec [] spec;
+		final IndustrySpec  spec;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 
@@ -1515,7 +1518,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		 * Unfortunately we have no easy way of checking, except for looping the table */
 		{
 			//final byte* i;
-			int i;
+			int i1;
 			boolean found = false;
 
 			/* for (
@@ -1523,9 +1526,9 @@ public class Industry extends IndustryTables implements IPoolItem {
 					i != endof(_build_industry_types[GameOptions._opt_ptr.landscape]); 
 					i++) */
 			byte [] array = _build_industry_types[GameOptions._opt_ptr.landscape];
-			for( i = 0; i < array.length; i++ )
+			for( i1 = 0; i1 < array.length; i1++ )
 			{
-				if (array[i] == p1) {
+				if (array[i1] == p1) {
 					found = true;
 					break;
 				}
@@ -2009,7 +2012,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		switch(e.event) {
 		case WE_PAINT:
 			w.DrawWindowWidgets();
-			if (_thd.place_mode == 1 && _thd.window_class == Window.WC_BUILD_INDUSTRY) {
+			if (ViewPort._thd.place_mode == 1 && ViewPort._thd.window_class == Window.WC_BUILD_INDUSTRY) {
 				int ind_type = _build_industry_types[GameOptions._opt_ptr.landscape][w.as_def_d().data_1];
 
 				Global.SetDParam(0, (Global._price.build_industry >> 5) * _industry_type_costs[ind_type]);
@@ -2020,7 +2023,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		case WE_CLICK: {
 			int wid = e.widget;
 			if (wid >= 3) {
-				if (HandlePlacePushButton(w, wid, Sprite.SPR_CURSOR_INDUSTRY, 1, null))
+				if (Gui.HandlePlacePushButton(w, wid, Sprite.SPR_CURSOR_INDUSTRY, 1, null))
 					w.as_def_d().data_1 = wid - 3;
 			}
 		} break;
@@ -2247,10 +2250,14 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	void ShowBuildIndustryWindow()
 	{
-		AllocateWindowDescFront(_industry_window_desc[Global._patches.build_rawmaterial_ind][GameOptions._opt_ptr.landscape],0);
+		Window.AllocateWindowDescFront(_industry_window_desc[Global._patches.build_rawmaterial_ind][GameOptions._opt_ptr.landscape],0);
 	}
 
-	//#define NEED_ALTERB	((Global._game_mode == GameModes.GM_EDITOR || _cheats.setup_prod.value) && (i.accepts_cargo[0] == AcceptedCargo.CT_INVALID || i.accepts_cargo[0] == AcceptedCargo.CT_VALUABLES))
+	private static boolean NEED_ALTERB(Industry i) 
+	{ 
+		return 	(Global._game_mode == GameModes.GM_EDITOR || Global._cheats.setup_prod.value) 
+				&& (i.accepts_cargo[0] == AcceptedCargo.CT_INVALID || i.accepts_cargo[0] == AcceptedCargo.CT_VALUABLES);
+	}
 
 	static void IndustryViewWndProc(Window w, WindowEvent e)
 	{
@@ -2269,13 +2276,13 @@ public class Industry extends IndustryTables implements IPoolItem {
 			w.DrawWindowWidgets();
 
 			if (i.accepts_cargo[0] != AcceptedCargo.CT_INVALID) {
-				Global.SetDParam(0, Global._cargoc.names_s[i.accepts_cargo[0]].id);
+				Global.SetDParam(0, Global._cargoc.names_s[i.accepts_cargo[0]]);
 				str = Str.STR_4827_REQUIRES;
 				if (i.accepts_cargo[1] != AcceptedCargo.CT_INVALID) {
-					Global.SetDParam(1, Global._cargoc.names_s[i.accepts_cargo[1]].id);
+					Global.SetDParam(1, Global._cargoc.names_s[i.accepts_cargo[1]]);
 					str++;
 					if (i.accepts_cargo[2] != AcceptedCargo.CT_INVALID) {
-						Global.SetDParam(2, Global._cargoc.names_s[i.accepts_cargo[2]].id);
+						Global.SetDParam(2, Global._cargoc.names_s[i.accepts_cargo[2]]);
 						str++;
 					}
 				}
@@ -2285,31 +2292,31 @@ public class Industry extends IndustryTables implements IPoolItem {
 			if (i.produced_cargo[0] != AcceptedCargo.CT_INVALID) {
 				Gfx.DrawString(2, 117, Str.STR_482A_PRODUCTION_LAST_MONTH, 0);
 
-				Global.SetDParam(0, _cargoc.names_long[i.produced_cargo[0]]);
+				Global.SetDParam(0, Global._cargoc.names_long[i.produced_cargo[0]]);
 				Global.SetDParam(1, i.total_production[0]);
 
 				Global.SetDParam(2, i.pct_transported[0] * 100 >> 8);
-				Gfx.DrawString(4 + (NEED_ALTERB ? 30 : 0), 127, Str.STR_482B_TRANSPORTED, 0);
+				Gfx.DrawString(4 + (NEED_ALTERB(i) ? 30 : 0), 127, Str.STR_482B_TRANSPORTED, 0);
 				// Let's put out those buttons..
-				if (NEED_ALTERB)
+				if (NEED_ALTERB(i))
 					DrawArrowButtons(5, 127, (w.as_vp2_d().data_2 == 1 ? w.as_vp2_d().data_3 : 0));
 
 				if (i.produced_cargo[1] != AcceptedCargo.CT_INVALID) {
-					Global.SetDParam(0, _cargoc.names_long[i.produced_cargo[1]]);
+					Global.SetDParam(0, Global._cargoc.names_long[i.produced_cargo[1]]);
 					Global.SetDParam(1, i.total_production[1]);
 					Global.SetDParam(2, i.pct_transported[1] * 100 >> 8);
-					Gfx.DrawString(4 + (NEED_ALTERB ? 30 : 0), 137, Str.STR_482B_TRANSPORTED, 0);
+					Gfx.DrawString(4 + (NEED_ALTERB(i) ? 30 : 0), 137, Str.STR_482B_TRANSPORTED, 0);
 					// Let's put out those buttons..
-					if (NEED_ALTERB)
+					if (NEED_ALTERB(i))
 						DrawArrowButtons(5, 137, (w.as_vp2_d().data_2 == 2 ? w.as_vp2_d().data_3 : 0));
 				}
 			}
 
-			DrawWindowViewport(w);
+			w.DrawWindowViewport();
 		}
 		break;
 
-		case WindowEvents.WE_CLICK: {
+		case WE_CLICK: {
 			Industry i;
 
 			switch(e.widget) {
@@ -2318,10 +2325,10 @@ public class Industry extends IndustryTables implements IPoolItem {
 				int x;
 				byte b;
 
-				i = GetIndustry(w.window_number);
+				i = GetIndustry(w.window_number.n);
 
 				// We should work if needed..
-				if (!NEED_ALTERB)
+				if (!NEED_ALTERB(i))
 					return;
 
 				x = e.pt.x;
@@ -2336,9 +2343,9 @@ public class Industry extends IndustryTables implements IPoolItem {
 								i.production_rate[line] = 4;
 						} else {
 							// increase
-							b = i.production_rate[line] * 2;
+							b = (byte) (i.production_rate[line] * 2);
 							if (i.production_rate[line] >= 128)
-								b=255;
+								b=(byte) 255;
 							i.production_rate[line] = b;
 						}
 						UpdateIndustryProduction(i);
@@ -2350,7 +2357,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 						// clicked the text
 						w.as_vp2_d().data_1 = line;
 						Global.SetDParam(0, i.production_rate[line] * 8);
-						ShowQueryString(Str.STR_CONFIG_PATCHES_INT32,
+						MiscGui.ShowQueryString(Str.STR_CONFIG_PATCHES_INT32,
 								Str.STR_CONFIG_GAME_PRODUCTION,
 								10, 100, w.window_class,
 								w.window_number);
@@ -2359,27 +2366,27 @@ public class Industry extends IndustryTables implements IPoolItem {
 			}
 			break;
 			case 6:
-				i = GetIndustry(w.window_number);
-				ViewPort.ScrollMainWindowToTile(i.xy + TileDiffXY(1, 1));
+				i = GetIndustry(w.window_number.n);
+				ViewPort.ScrollMainWindowToTile(i.xy.iadd(1, 1));
 				break;
 			}
 		}
 		break;
-		case WindowEvents.WE_TIMEOUT:
+		case WE_TIMEOUT:
 			w.as_vp2_d().data_2 = 0;
 			w.as_vp2_d().data_3 = 0;
 			w.SetWindowDirty();
 			break;
 
-		case WindowEvents.WE_ON_EDIT_TEXT:
+		case WE_ON_EDIT_TEXT:
 			if (e.str != null) {
 				Industry i;
 				int val;
 				int line;
 
-				i = GetIndustry(w.window_number);
+				i = GetIndustry(w.window_number.n);
 				line = w.as_vp2_d().data_1;
-				val = atoi(e.edittext.str);
+				val = Integer.parseInt(e.str);
 				if (!BitOps.IS_INT_INSIDE(val, 32, 2040)) {
 					if (val < 32) val = 32;
 					else val = 2040;
@@ -2432,7 +2439,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			w.as_vp2_d().data_2 = 0;
 			w.as_vp2_d().data_3 = 0;
 			i = GetIndustry(w.window_number.n);
-			w.AssignWindowViewport( 3, 17, 0xFE, 0x56, i.xy + TileIndex.TileDiffXY(1, 1), 1);
+			w.AssignWindowViewport( 3, 17, 0xFE, 0x56, i.xy.iadd(1, 1), 1);
 		}
 	}
 
@@ -2565,7 +2572,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			SetVScrollCount(w, _industry_sort.length);
 
 			w.DrawWindowWidgets();
-			Gfx.DrawString(0 != (_industry_sort_order & 1) ? DOWNARROW : UPARROW, _indicator_positions[_industry_sort_order>>1], 15, 0x10);
+			Gfx.DrawString(0 != (_industry_sort_order & 1) ? Gfx.DOWNARROW : Gfx.UPARROW, _indicator_positions[_industry_sort_order>>1], 15, 0x10);
 
 			p = w.vscroll.pos;
 			n = 0;

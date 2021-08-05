@@ -9,7 +9,8 @@ package game;
  *
  */
 public class Point implements Comparable<Point> {
-	int x,y;
+	public int x;
+	public int y;
 
 	public Point(int i, int j) {
 		x = i;

@@ -11,6 +11,8 @@ import game.util.BitOps;
 public class TunnelBridgeCmd extends TunnelBridgeTables
 {
 
+	static int _build_tunnel_bh;
+	static int _build_tunnel_railtype;
 
 
 
@@ -434,8 +436,6 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				DoCheckTunnelInWay(tile,z,3);
 	}
 
-	static byte _build_tunnel_bh;
-	static byte _build_tunnel_railtype;
 
 	static int DoBuildTunnel(int x, int y, int x2, int y2, int flags, int exc_tile)
 	{
@@ -547,7 +547,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		if (p1 != 0x200 && !ValParamRailtype(p1)) return Cmd.CMD_ERROR;
+		if (p1 != 0x200 && !Player.ValParamRailtype(p1)) return Cmd.CMD_ERROR;
 
 		_build_tunnel_railtype = BitOps.GB(p1, 0, 8);
 		_build_tunnel_bh       = BitOps.GB(p1, 8, 8);
