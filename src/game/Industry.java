@@ -2313,7 +2313,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	void ShowBuildIndustryWindow()
 	{
-		Window.AllocateWindowDescFront(_industry_window_desc[Global._patches.build_rawmaterial_ind][GameOptions._opt_ptr.landscape],0);
+		Window.AllocateWindowDescFront(_industry_window_desc[BitOps.b2i(Global._patches.build_rawmaterial_ind)][GameOptions._opt_ptr.landscape],0);
 	}
 
 	private static boolean NEED_ALTERB(Industry i) 
@@ -2362,7 +2362,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				Gfx.DrawString(4 + (NEED_ALTERB(i) ? 30 : 0), 127, Str.STR_482B_TRANSPORTED, 0);
 				// Let's put out those buttons..
 				if (NEED_ALTERB(i))
-					DrawArrowButtons(5, 127, (w.as_vp2_d().data_2 == 1 ? w.as_vp2_d().data_3 : 0));
+					SettingsGui.DrawArrowButtons(5, 127, (w.as_vp2_d().data_2 == 1 ? w.as_vp2_d().data_3 : 0));
 
 				if (i.produced_cargo[1] != AcceptedCargo.CT_INVALID) {
 					Global.SetDParam(0, Global._cargoc.names_long[i.produced_cargo[1]]);
@@ -2371,7 +2371,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					Gfx.DrawString(4 + (NEED_ALTERB(i) ? 30 : 0), 137, Str.STR_482B_TRANSPORTED, 0);
 					// Let's put out those buttons..
 					if (NEED_ALTERB(i))
-						DrawArrowButtons(5, 137, (w.as_vp2_d().data_2 == 2 ? w.as_vp2_d().data_3 : 0));
+						SettingsGui.DrawArrowButtons(5, 137, (w.as_vp2_d().data_2 == 2 ? w.as_vp2_d().data_3 : 0));
 				}
 			}
 
@@ -2396,7 +2396,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 				x = e.pt.x;
 				line = (e.pt.y - 127) / 10;
-				if (e.pt.y >= 127 && BitOps.IS_INT_INSIDE(line, 0, 2) && i.produced_cargo[line]) {
+				if (e.pt.y >= 127 && BitOps.IS_INT_INSIDE(line, 0, 2) && 0 != i.produced_cargo[line]) {
 					if (BitOps.IS_INT_INSIDE(x, 5, 25) ) {
 						// clicked buttons
 						if (x < 15) {
@@ -2413,15 +2413,15 @@ public class Industry extends IndustryTables implements IPoolItem {
 						}
 						UpdateIndustryProduction(i);
 						w.SetWindowDirty();
-						w.flags4 |= 5 << WF_TIMEOUT_SHL;
-						w.as_vp2_d().data_2 = line+1;
-						w.as_vp2_d().data_3 = (x < 15 ? 1 : 2);
+						w.flags4 |= 5 << Window.WF_TIMEOUT_SHL;
+						w.as_vp2_d().data_2 = (byte) (line+1);
+						w.as_vp2_d().data_3 = (byte) (x < 15 ? 1 : 2);
 					} else if (BitOps.IS_INT_INSIDE(x, 34, 160)) {
 						// clicked the text
-						w.as_vp2_d().data_1 = line;
+						w.as_vp2_d().data_1 = (byte) line;
 						Global.SetDParam(0, i.production_rate[line] * 8);
-						MiscGui.ShowQueryString(Str.STR_CONFIG_PATCHES_INT32,
-								Str.STR_CONFIG_GAME_PRODUCTION,
+						MiscGui.ShowQueryString( new StringID( Str.STR_CONFIG_PATCHES_INT32 ),
+								new StringID( Str.STR_CONFIG_GAME_PRODUCTION ),
 								10, 100, w.window_class,
 								w.window_number);
 					}
@@ -2502,7 +2502,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			w.as_vp2_d().data_2 = 0;
 			w.as_vp2_d().data_3 = 0;
 			i = GetIndustry(w.window_number.n);
-			w.AssignWindowViewport( 3, 17, 0xFE, 0x56, i.xy.iadd(1, 1), 1);
+			ViewPort.AssignWindowViewport( w, 3, 17, 0xFE, 0x56, i.xy.iadd(1, 1).tile, 1);
 		}
 	}
 
@@ -2531,7 +2531,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	public static int _total_industries = 0;
 
 
-	private class IndustryComparator implements Comparator<Industry> {
+	private static class IndustryComparator implements Comparator<Industry> {
 		public int compare(Industry i, Industry j) 
 		{
 			int val;
@@ -2632,10 +2632,10 @@ public class Industry extends IndustryTables implements IPoolItem {
 				MakeSortedIndustryList();
 			}
 
-			SetVScrollCount(w, _industry_sort.length);
+			MiscGui.SetVScrollCount(w, _industry_sort.length);
 
 			w.DrawWindowWidgets();
-			Gfx.DrawString(0 != (_industry_sort_order & 1) ? Gfx.DOWNARROW : Gfx.UPARROW, _indicator_positions[_industry_sort_order>>1], 15, 0x10);
+			Gfx.DoDrawString(0 != (_industry_sort_order & 1) ? Gfx.DOWNARROW : Gfx.UPARROW, _indicator_positions[_industry_sort_order>>1], 15, 0x10);
 
 			p = w.vscroll.pos;
 			n = 0;
@@ -2646,11 +2646,11 @@ public class Industry extends IndustryTables implements IPoolItem {
 				i = _industry_sort[p];
 				Global.SetDParam(0, i.index);
 				if (i.produced_cargo[0] != AcceptedCargo.CT_INVALID) {
-					Global.SetDParam(1, Global._cargoc.names_long[i.produced_cargo[0]].id);
+					Global.SetDParam(1, Global._cargoc.names_long[i.produced_cargo[0]]);
 					Global.SetDParam(2, i.total_production[0]);
 
 					if (i.produced_cargo[1] != AcceptedCargo.CT_INVALID) {
-						Global.SetDParam(3, Global._cargoc.names_long[i.produced_cargo[1]].id);
+						Global.SetDParam(3, Global._cargoc.names_long[i.produced_cargo[1]]);
 						Global.SetDParam(4, i.total_production[1]);
 						Global.SetDParam(5, i.pct_transported[0] * 100 >> 8);
 						Global.SetDParam(6, i.pct_transported[1] * 100 >> 8);
@@ -2703,7 +2703,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 					return;
 				p = y + w.vscroll.pos;
 				if (p < _industry_sort.length) {
-					c = GetIndustry(_industry_sort[p]);
+					//c = Industry.GetIndustry(_industry_sort[p]);
+					c = _industry_sort[p];
 					ViewPort.ScrollMainWindowToTile(c.xy);
 				}
 			} break;

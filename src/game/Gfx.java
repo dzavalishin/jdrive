@@ -94,7 +94,7 @@ public class Gfx {
 		if (xo == 0 && yo == 0) return;
 
 		if (Hal._cursor.visible) UndrawMouseCursor();
-		UndrawTextMessage();
+		TextEffect.UndrawTextMessage();
 
 		p = Hal._screen.pitch;
 
@@ -191,7 +191,7 @@ public class Gfx {
 		//dst = dpi.dst_ptr + top * dpi.pitch + left;
 		dst = top * dpi.pitch + left;
 
-		if (0==(color & PALETTE_MODIFIER_GREYOUT)) {
+		if (0==(color & Sprite.PALETTE_MODIFIER_GREYOUT)) {
 			if (0==(color & Sprite.USE_COLORTABLE)) {
 				do {
 					memset(dpi.dst_ptr, dst, color, right);
@@ -199,7 +199,7 @@ public class Gfx {
 				} while (--bottom > 0);
 			} else {
 				/* use colortable mode */
-				final byte[] ctab = GetNonSprite(color & COLORTABLE_MASK) + 1;
+				final byte[] ctab = GetNonSprite(color & Sprite.COLORTABLE_MASK) + 1;
 
 				do {
 					int i;
@@ -800,7 +800,7 @@ public class Gfx {
 		//final byte* ctab;
 		final byte[] ctab;
 
-		if (bp.mode & 1) {
+		if(0 != (bp.mode & 1) ) {
 			src_o += READ_LE_UINT16(src_o + bp.start_y * 2);
 
 			do {
@@ -871,7 +871,8 @@ public class Gfx {
 
 					ctab = _color_remap_ptr;
 					for (; num != 0; num--) {
-						*dst = ctab[*dst];
+						//*dst = ctab[*dst];
+						dst[0] = ctab[dst[0]]; // TODO displacement
 						dst++;
 					}
 				} while (!(done & 0x80));
@@ -952,7 +953,7 @@ public class Gfx {
 			}
 		} else if (bp.mode & 2) {
 			if (bp.info & 1) {
-				final byte *ctab = _color_remap_ptr;
+				final byte [] ctab = _color_remap_ptr;
 
 				do {
 					for (i = 0; i != width; i++)
@@ -1563,7 +1564,7 @@ public class Gfx {
 					if (bp.width <= 0) return;
 				}
 
-				zf_tile[dpi.zoom](&bp);
+				zf_tile[dpi.zoom].apply(bp); // TODO apply?
 		} else {
 			bp.sprite += bp.width * (bp.height & ~zoom_mask);
 			bp.height &= zoom_mask;
@@ -1600,7 +1601,7 @@ public class Gfx {
 					if (bp.width <= 0) return;
 				}
 
-				zf_uncomp[dpi.zoom](&bp);
+				zf_uncomp[dpi.zoom].apply(bp);
 		}
 	}
 
@@ -1633,61 +1634,81 @@ public class Gfx {
 		int i;
 		int j;
 
-		d = &_cur_palette[217];
-		memcpy(old_val, d, c * sizeof(*old_val));
+		d = _cur_palette[217];
+		memcpy(old_val, d, c * sizeof(old_val));
 
 		// Dark blue water
 		s = (_opt.landscape == LT_CANDY) ? ev.ac : ev.a;
 		j = EXTR(320, 5);
 		for (i = 0; i != 5; i++) {
-			*d++ = s[j];
+			//*d++ = s[j];
+			d[i] = s[j];
 			j++;
 			if (j == 5) j = 0;
 		}
+		// TODO d += 4!
 
 		// Glittery water
 		s = (_opt.landscape == LT_CANDY) ? ev.bc : ev.b;
 		j = EXTR(128, 15);
 		for (i = 0; i != 5; i++) {
-			*d++ = s[j];
+			//*d++ = s[j];
+			d[i] = s[j];
 			j += 3;
 			if (j >= 15) j -= 15;
 		}
+		// TODO d += 4
 
 		s = ev.e;
 		j = EXTR2(512, 5);
 		for (i = 0; i != 5; i++) {
-			*d++ = s[j];
+			//*d++ = s[j];
+			d[i] = s[j];
 			j++;
 			if (j == 5) j = 0;
 		}
+		// TODO d += 4
 
 		// Oil refinery fire animation
 		s = ev.oil_ref;
 		j = EXTR2(512, 7);
 		for (i = 0; i != 7; i++) {
-			*d++ = s[j];
+			//*d++ = s[j];
+			d[i] = s[j];
 			j++;
 			if (j == 7) j = 0;
 		}
+		// TODO d += 4
 
 		// Radio tower blinking
 		{
 			byte i = (_timer_counter >> 1) & 0x7F;
 			byte v;
 
+			/*
 			(v = 255, i < 0x3f) ||
 			(v = 128, i < 0x4A || i >= 0x75) ||
 			(v = 20);
+			*/
+			if(i >= 0x3f)		v = 255;
+			else if(i >= 0x4A && i < 0x75)	v = 128;
+			else v = 20;
+			
+			
 			d.r = v;
 			d.g = 0;
 			d.b = 0;
 			d++;
 
 			i ^= 0x40;
-			(v = 255, i < 0x3f) ||
+			
+			/*(v = 255, i < 0x3f) ||
 			(v = 128, i < 0x4A || i >= 0x75) ||
-			(v = 20);
+			(v = 20);*/
+			if(i >= 0x3f)		v = 255;
+			else if(i >= 0x4A && i < 0x75)	v = 128;
+			else v = 20;
+			
 			d.r = v;
 			d.g = 0;
 			d.b = 0;
@@ -1698,10 +1719,12 @@ public class Gfx {
 		s = ev.lighthouse;
 		j = EXTR(256, 4);
 		for (i = 0; i != 4; i++) {
-			*d++ = s[j];
+			//*d++ = s[j];
+			d[i] = s[j];
 			j++;
 			if (j == 4) j = 0;
 		}
+		// TODO d += 4
 
 		// Animate water for old DOS graphics
 		if (_use_dos_palette) {
@@ -1709,22 +1732,26 @@ public class Gfx {
 			s = (_opt.landscape == LT_CANDY) ? ev.ac : ev.a;
 			j = EXTR(320, 5);
 			for (i = 0; i != 5; i++) {
-				*d++ = s[j];
+				//*d++ = s[j];
+				d[i] = s[j];
 				j++;
 				if (j == 5) j = 0;
 			}
+			// TODO d += 4
 
 			// Glittery water DOS
 			s = (_opt.landscape == LT_CANDY) ? ev.bc : ev.b;
 			j = EXTR(128, 15);
 			for (i = 0; i != 5; i++) {
-				*d++ = s[j];
+				//*d++ = s[j];
+				d[i] = s[j];
 				j += 3;
 				if (j >= 15) j -= 15;
 			}
+			// TODO d += 4
 		}
 
-		if (memcmp(old_val, &_cur_palette[217], c * sizeof(*old_val)) != 0) {
+		if (memcmp(old_val, _cur_palette[217], c * sizeof(old_val[0])) != 0) {
 			if (_pal_first_dirty > 217) _pal_first_dirty = 217;
 			if (_pal_last_dirty < 217 + c) _pal_last_dirty = 217 + c;
 		}
@@ -1878,17 +1905,19 @@ public class Gfx {
 
 	static void DrawDirtyBlocks()
 	{
-		byte *b = _dirty_blocks;
+		byte []b = _dirty_blocks;
 		final int w = BitOps.ALIGN(Hal._screen.width, 64);
 		final int h = BitOps.ALIGN(Hal._screen.height, 8);
 		int x;
 		int y;
 
+		int bp = 0;
+		
 		y = 0;
 		do {
 			x = 0;
 			do {
-				if (*b != 0) {
+				if (b[bp] != 0) {
 					int left;
 					int top;
 					int right = x + 64;
@@ -1943,7 +1972,7 @@ public class Gfx {
 					}
 
 				}
-			} while (b++, (x += 64) != w);
+			} while (bp++, (x += 64) != w);
 		} while (b += -(w >> 6) + DIRTY_BYTES_PER_LINE, (y += 8) != h);
 
 		_invalid_rect.left = w;

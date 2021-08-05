@@ -22,211 +22,61 @@ Gfx.java:737: error: illegal start of expression
 Gfx.java:737: error: not a statement
 				goto switch_color;
 				     ^
-Gfx.java:874: error: illegal start of expression
-						*dst = ctab[*dst];
-						^
-Gfx.java:874: error: illegal start of expression
-						*dst = ctab[*dst];
-						            ^
-Gfx.java:955: error: <identifier> expected
-				final byte *ctab = _color_remap_ptr;
-				          ^
-Gfx.java:1566: error: not a statement
-				zf_tile[dpi.zoom](&bp);
-				       ^
-Gfx.java:1566: error: ';' expected
-				zf_tile[dpi.zoom](&bp);
-				                 ^
-Gfx.java:1566: error: not a statement
-				zf_tile[dpi.zoom](&bp);
-				                   ^
-Gfx.java:1566: error: ';' expected
-				zf_tile[dpi.zoom](&bp);
-				                     ^
-Gfx.java:1603: error: not a statement
-				zf_uncomp[dpi.zoom](&bp);
-				         ^
-Gfx.java:1603: error: ';' expected
-				zf_uncomp[dpi.zoom](&bp);
-				                   ^
-Gfx.java:1603: error: not a statement
-				zf_uncomp[dpi.zoom](&bp);
-				                     ^
-Gfx.java:1603: error: ';' expected
-				zf_uncomp[dpi.zoom](&bp);
-				                       ^
-Gfx.java:1636: error: illegal start of expression
-		d = &_cur_palette[217];
-		    ^
-Gfx.java:1637: error: illegal start of expression
-		memcpy(old_val, d, c * sizeof(*old_val));
-		                              ^
-Gfx.java:1643: error: illegal start of expression
-			*d++ = s[j];
-			^
-Gfx.java:1652: error: illegal start of expression
-			*d++ = s[j];
-			^
-Gfx.java:1660: error: illegal start of expression
-			*d++ = s[j];
-			^
-Gfx.java:1669: error: illegal start of expression
-			*d++ = s[j];
-			^
-Gfx.java:1679: error: ')' expected
-			(v = 255, i < 0x3f) ||
-			        ^
-Gfx.java:1679: error: not a statement
-			(v = 255, i < 0x3f) ||
-			^
-Gfx.java:1679: error: illegal start of type
-			(v = 255, i < 0x3f) ||
-			              ^
-Gfx.java:1679: error: not a statement
-			(v = 255, i < 0x3f) ||
-			            ^
-Gfx.java:1679: error: ';' expected
-			(v = 255, i < 0x3f) ||
-			                  ^
-Gfx.java:1679: error: illegal start of expression
-			(v = 255, i < 0x3f) ||
-			                    ^
-Gfx.java:1679: error: ';' expected
-			(v = 255, i < 0x3f) ||
-			                      ^
-Gfx.java:1680: error: ';' expected
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			        ^
-Gfx.java:1680: error: illegal start of type
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			              ^
-Gfx.java:1680: error: not a statement
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			            ^
-Gfx.java:1680: error: ';' expected
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			                  ^
-Gfx.java:1680: error: not a statement
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			                        ^
-Gfx.java:1680: error: ';' expected
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			                               ^
-Gfx.java:1681: error: ';' expected
-			(v = 20);
-			       ^
-Gfx.java:1688: error: ')' expected
-			(v = 255, i < 0x3f) ||
-			        ^
-Gfx.java:1688: error: not a statement
-			(v = 255, i < 0x3f) ||
-			^
-Gfx.java:1688: error: illegal start of type
-			(v = 255, i < 0x3f) ||
-			              ^
-Gfx.java:1688: error: not a statement
-			(v = 255, i < 0x3f) ||
-			            ^
-Gfx.java:1688: error: ';' expected
-			(v = 255, i < 0x3f) ||
-			                  ^
-Gfx.java:1688: error: illegal start of expression
-			(v = 255, i < 0x3f) ||
-			                    ^
-Gfx.java:1688: error: ';' expected
-			(v = 255, i < 0x3f) ||
-			                      ^
-Gfx.java:1689: error: ';' expected
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			        ^
-Gfx.java:1689: error: illegal start of type
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			              ^
-Gfx.java:1689: error: not a statement
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			            ^
-Gfx.java:1689: error: ';' expected
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			                  ^
-Gfx.java:1689: error: not a statement
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			                        ^
-Gfx.java:1689: error: ';' expected
-			(v = 128, i < 0x4A || i >= 0x75) ||
-			                               ^
-Gfx.java:1690: error: ';' expected
-			(v = 20);
-			       ^
-Gfx.java:1701: error: illegal start of expression
-			*d++ = s[j];
-			^
-Gfx.java:1712: error: illegal start of expression
-				*d++ = s[j];
-				^
-Gfx.java:1721: error: illegal start of expression
-				*d++ = s[j];
-				^
-Gfx.java:1727: error: illegal start of expression
+Gfx.java:1754: error: illegal start of expression
 		if (memcmp(old_val, &_cur_palette[217], c * sizeof(*old_val)) != 0) {
 		                    ^
-Gfx.java:1727: error: illegal start of expression
+Gfx.java:1754: error: illegal start of expression
 		if (memcmp(old_val, &_cur_palette[217], c * sizeof(*old_val)) != 0) {
 		                                                   ^
-Gfx.java:1881: error: not a statement
-		byte *b = _dirty_blocks;
-		^
-Gfx.java:1881: error: ';' expected
-		byte *b = _dirty_blocks;
-		    ^
-Gfx.java:1891: error: illegal start of expression
+Gfx.java:1918: error: illegal start of expression
 				if (*b != 0) {
 				    ^
-Gfx.java:1896: error: not a statement
+Gfx.java:1923: error: not a statement
 					byte *p = b;
 					^
-Gfx.java:1896: error: ';' expected
+Gfx.java:1923: error: ';' expected
 					byte *p = b;
 					    ^
-Gfx.java:1901: error: illegal start of expression
+Gfx.java:1928: error: illegal start of expression
 						*p = 0;
 						^
-Gfx.java:1904: error: illegal start of expression
+Gfx.java:1931: error: illegal start of expression
 					} while (bottom != h && *p != 0);
 					                        ^
-Gfx.java:1912: error: not a statement
+Gfx.java:1939: error: not a statement
 						byte *p2 = ++p;
 						^
-Gfx.java:1912: error: ';' expected
+Gfx.java:1939: error: ';' expected
 						byte *p2 = ++p;
 						    ^
-Gfx.java:1916: error: illegal start of expression
+Gfx.java:1943: error: illegal start of expression
 							if (!*p2) goto no_more_coalesc;
 							     ^
-Gfx.java:1916: error: illegal start of expression
+Gfx.java:1943: error: illegal start of expression
 							if (!*p2) goto no_more_coalesc;
 							          ^
-Gfx.java:1916: error: not a statement
+Gfx.java:1943: error: not a statement
 							if (!*p2) goto no_more_coalesc;
 							               ^
-Gfx.java:1927: error: illegal start of expression
+Gfx.java:1954: error: illegal start of expression
 							*p2 = 0;
 							^
-Gfx.java:1946: error: ')' expected
+Gfx.java:1973: error: ')' expected
 			} while (b++, (x += 64) != w);
 			            ^
-Gfx.java:1946: error: not a statement
+Gfx.java:1973: error: not a statement
 			} while (b++, (x += 64) != w);
 			                        ^
-Gfx.java:1946: error: ';' expected
+Gfx.java:1973: error: ';' expected
 			} while (b++, (x += 64) != w);
 			                            ^
-Gfx.java:1947: error: ')' expected
+Gfx.java:1974: error: ')' expected
 		} while (b += -(w >> 6) + DIRTY_BYTES_PER_LINE, (y += 8) != h);
 		                                              ^
-Gfx.java:1947: error: not a statement
+Gfx.java:1974: error: not a statement
 		} while (b += -(w >> 6) + DIRTY_BYTES_PER_LINE, (y += 8) != h);
 		                                                         ^
-Gfx.java:1947: error: ';' expected
+Gfx.java:1974: error: ';' expected
 		} while (b += -(w >> 6) + DIRTY_BYTES_PER_LINE, (y += 8) != h);
 		                                                             ^
-77 errors
+27 errors

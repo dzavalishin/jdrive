@@ -1129,7 +1129,7 @@ public class SettingsGui extends SettingsTables
 	}
 
 	/* state: 0 = none clicked, 0x01 = first clicked, 0x02 = second clicked */
-	void DrawArrowButtons(int x, int y, int state)
+	static void DrawArrowButtons(int x, int y, int state)
 	{
 		Gfx.DrawFrameRect(x, y+1, x+9, y+9, 3, (state & 0x01) ? FR_LOWERED : 0);
 		Gfx.DrawFrameRect(x+10, y+1, x+19, y+9, 3, (state & 0x02) ? FR_LOWERED : 0);
