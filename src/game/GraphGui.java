@@ -261,17 +261,17 @@ public class GraphGui
 	}
 
 	static final Widget _graph_legend_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5, Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   249,     0,    13, Str.STR_704E_KEY_TO_COMPANY_GRAPHS, Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   249,    14,   113, 0x0,Str.STR_NULL},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    16,    27, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    28,    39, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    40,    51, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    52,    63, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    64,    75, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    76,    87, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    88,    99, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,   100,   111, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5, Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   249,     0,    13, Str.STR_704E_KEY_TO_COMPANY_GRAPHS, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   249,    14,   113, 0x0,Str.STR_NULL),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    16,    27, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    28,    39, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    40,    51, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    52,    63, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    64,    75, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    76,    87, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,    88,    99, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   247,   100,   111, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
 	{   WIDGETS_END},
 	};
 
@@ -369,10 +369,10 @@ public class GraphGui
 	}
 
 	static final Widget _operating_profit_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,												Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   525,     0,    13, Str.STR_7025_OPERATING_PROFIT_GRAPH, Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{ Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   526,   575,     0,    13, Str.STR_704C_KEY,										Str.STR_704D_SHOW_KEY_TO_GRAPHS},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   575,    14,   173, 0x0,															Str.STR_NULL},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,												Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   525,     0,    13, Str.STR_7025_OPERATING_PROFIT_GRAPH, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   526,   575,     0,    13, Str.STR_704C_KEY,										Str.STR_704D_SHOW_KEY_TO_GRAPHS),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   575,    14,   173, 0x0,															Str.STR_NULL),
 	{   WIDGETS_END},
 	};
 
@@ -444,10 +444,10 @@ public class GraphGui
 	}
 
 	static final Widget _income_graph_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,							Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   525,     0,    13, Str.STR_7022_INCOME_GRAPH, Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{ Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   526,   575,     0,    13, Str.STR_704C_KEY,					Str.STR_704D_SHOW_KEY_TO_GRAPHS},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   575,    14,   141, 0x0,										Str.STR_NULL},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,							Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   525,     0,    13, Str.STR_7022_INCOME_GRAPH, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   526,   575,     0,    13, Str.STR_704C_KEY,					Str.STR_704D_SHOW_KEY_TO_GRAPHS),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   575,    14,   141, 0x0,										Str.STR_NULL),
 	{   WIDGETS_END},
 	};
 
@@ -517,10 +517,10 @@ public class GraphGui
 	}
 
 	static final Widget _delivered_cargo_graph_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,													Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   525,     0,    13, Str.STR_7050_UNITS_OF_CARGO_DELIVERED, Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{ Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   526,   575,     0,    13, Str.STR_704C_KEY,											Str.STR_704D_SHOW_KEY_TO_GRAPHS},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   575,    14,   141, 0x0,																Str.STR_NULL},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,													Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   525,     0,    13, Str.STR_7050_UNITS_OF_CARGO_DELIVERED, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   526,   575,     0,    13, Str.STR_704C_KEY,											Str.STR_704D_SHOW_KEY_TO_GRAPHS),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   575,    14,   141, 0x0,																Str.STR_NULL),
 	{   WIDGETS_END},
 	};
 
@@ -592,11 +592,11 @@ public class GraphGui
 	}
 
 	static final Widget _performance_history_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,															Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   475,     0,    13, Str.STR_7051_COMPANY_PERFORMANCE_RATINGS,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{ Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   526,   575,     0,    13, Str.STR_704C_KEY,													Str.STR_704D_SHOW_KEY_TO_GRAPHS},
-	{ Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   476,   525,     0,    13, Str.STR_PERFORMANCE_DETAIL_KEY,						Str.STR_704D_SHOW_KEY_TO_GRAPHS},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   575,    14,   237, 0x0,																		Str.STR_NULL},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,															Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   475,     0,    13, Str.STR_7051_COMPANY_PERFORMANCE_RATINGS,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   526,   575,     0,    13, Str.STR_704C_KEY,													Str.STR_704D_SHOW_KEY_TO_GRAPHS),
+	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   476,   525,     0,    13, Str.STR_PERFORMANCE_DETAIL_KEY,						Str.STR_704D_SHOW_KEY_TO_GRAPHS),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   575,    14,   237, 0x0,																		Str.STR_NULL),
 	{   WIDGETS_END},
 	};
 
@@ -666,10 +666,10 @@ public class GraphGui
 	}
 
 	static final Widget _company_value_graph_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   525,     0,    13, Str.STR_7052_COMPANY_VALUES,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{ Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   526,   575,     0,    13, Str.STR_704C_KEY,						Str.STR_704D_SHOW_KEY_TO_GRAPHS},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   575,    14,   237, 0x0,											Str.STR_NULL},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   525,     0,    13, Str.STR_7052_COMPANY_VALUES,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   526,   575,     0,    13, Str.STR_704C_KEY,						Str.STR_704D_SHOW_KEY_TO_GRAPHS),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   575,    14,   237, 0x0,											Str.STR_NULL),
 	{   WIDGETS_END},
 	};
 
@@ -758,21 +758,21 @@ public class GraphGui
 	}
 
 	static final Widget _cargo_payment_rates_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,											Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   567,     0,    13, Str.STR_7061_CARGO_PAYMENT_RATES,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   567,    14,   141, 0x0,														Str.STR_NULL},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    24,    31, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    32,    39, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    40,    47, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    48,    55, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    56,    63, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    64,    71, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    72,    79, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    80,    87, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    88,    95, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    96,   103, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,   104,   111, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
-	{      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,   112,   119, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,											Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   567,     0,    13, Str.STR_7061_CARGO_PAYMENT_RATES,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   567,    14,   141, 0x0,														Str.STR_NULL),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    24,    31, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    32,    39, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    40,    47, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    48,    55, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    56,    63, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    64,    71, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    72,    79, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    80,    87, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    88,    95, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,    96,   103, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,   104,   111, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
+	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    12,   493,   562,   112,   119, 0x0,														Str.STR_7064_TOGGLE_GRAPH_FOR_CARGO),
 	{   WIDGETS_END},
 	};
 
@@ -861,9 +861,9 @@ public class GraphGui
 
 
 	static final Widget _company_league_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,											Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   399,     0,    13, Str.STR_7053_COMPANY_LEAGUE_TABLE,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   399,    14,    96, 0x0,														Str.STR_NULL},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,											Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   399,     0,    13, Str.STR_7053_COMPANY_LEAGUE_TABLE,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   399,    14,    96, 0x0,														Str.STR_NULL),
 	{   WIDGETS_END},
 	};
 
@@ -1061,29 +1061,29 @@ public class GraphGui
 	}
 
 	static final Widget _performance_rating_detail_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   298,     0,    13, Str.STR_PERFORMANCE_DETAIL,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,    14,    27, 0x0,											Str.STR_NULL},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   298,     0,    13, Str.STR_PERFORMANCE_DETAIL,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,    14,    27, 0x0,											Str.STR_NULL),
 
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,    28,    47, 0x0,Str.STR_PERFORMANCE_DETAIL_VEHICLES_TIP},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,    48,    67, 0x0,Str.STR_PERFORMANCE_DETAIL_STATIONS_TIP},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,    68,    87, 0x0,Str.STR_PERFORMANCE_DETAIL_MIN_PROFIT_TIP},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,    88,   107, 0x0,Str.STR_PERFORMANCE_DETAIL_MIN_INCOME_TIP},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   108,   127, 0x0,Str.STR_PERFORMANCE_DETAIL_MAX_INCOME_TIP},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   128,   147, 0x0,Str.STR_PERFORMANCE_DETAIL_DELIVERED_TIP},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   148,   167, 0x0,Str.STR_PERFORMANCE_DETAIL_CARGO_TIP},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   168,   187, 0x0,Str.STR_PERFORMANCE_DETAIL_MONEY_TIP},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   188,   207, 0x0,Str.STR_PERFORMANCE_DETAIL_LOAN_TIP},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   208,   227, 0x0,Str.STR_PERFORMANCE_DETAIL_TOTAL_TIP},
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,    28,    47, 0x0,Str.STR_PERFORMANCE_DETAIL_VEHICLES_TIP),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,    48,    67, 0x0,Str.STR_PERFORMANCE_DETAIL_STATIONS_TIP),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,    68,    87, 0x0,Str.STR_PERFORMANCE_DETAIL_MIN_PROFIT_TIP),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,    88,   107, 0x0,Str.STR_PERFORMANCE_DETAIL_MIN_INCOME_TIP),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   108,   127, 0x0,Str.STR_PERFORMANCE_DETAIL_MAX_INCOME_TIP),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   128,   147, 0x0,Str.STR_PERFORMANCE_DETAIL_DELIVERED_TIP),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   148,   167, 0x0,Str.STR_PERFORMANCE_DETAIL_CARGO_TIP),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   168,   187, 0x0,Str.STR_PERFORMANCE_DETAIL_MONEY_TIP),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   188,   207, 0x0,Str.STR_PERFORMANCE_DETAIL_LOAN_TIP),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   298,   208,   227, 0x0,Str.STR_PERFORMANCE_DETAIL_TOTAL_TIP),
 
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,    38,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    39,    75,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    76,   112,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   113,   149,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   150,   186,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   187,   223,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   224,   260,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
-	{     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   261,   297,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY},
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,    38,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    39,    75,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    76,   112,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   113,   149,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   150,   186,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   187,   223,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   224,   260,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
+	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   261,   297,    14,    26, 0x0,Str.STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY),
 	{   WIDGETS_END},
 	};
 
@@ -1214,12 +1214,12 @@ public class GraphGui
 	}
 
 	static final Widget _sign_list_widget[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,									Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   345,     0,    13, Str.STR_SIGN_LIST_CAPTION,		Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   346,   357,     0,    13, 0x0,											Str.STR_STICKY_BUTTON},
-	{      Window.WWT_PANEL,     Window.RESIZE_RB,    14,     0,   345,    14,   137, 0x0,											Str.STR_NULL},
-	{  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   346,   357,    14,   125, 0x0,											Str.STR_0190_SCROLL_BAR_SCROLLS_LIST},
-	{  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   346,   357,   126,   137, 0x0,											Str.STR_Window.RESIZE_BUTTON},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,									Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   345,     0,    13, Str.STR_SIGN_LIST_CAPTION,		Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   346,   357,     0,    13, 0x0,											Str.STR_STICKY_BUTTON),
+	new Widget(      Window.WWT_PANEL,     Window.RESIZE_RB,    14,     0,   345,    14,   137, 0x0,											Str.STR_NULL),
+	new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   346,   357,    14,   125, 0x0,											Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   346,   357,   126,   137, 0x0,											Str.STR_Window.RESIZE_BUTTON),
 	{   WIDGETS_END},
 	};
 

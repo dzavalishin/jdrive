@@ -1,46 +1,28 @@
 package game;
 
-public class SmallMapGui 
+import game.tables.SmallMapGuiTables;
+
+public class SmallMapGui extends SmallMapGuiTables
 {
 
-	/* $Id: smallmap_gui.c 3270 2005-12-07 15:48:52Z peter1138 $ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	static final Widget _smallmap_widgets[] = {
-	{  Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5,                Str.STR_018B_CLOSE_WINDOW},
-	{   Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    13,    11,   433,     0,    13, Str.STR_00B0_MAP,            Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{ Window.WWT_STICKYBOX,     Window.RESIZE_LR,    13,   434,   445,     0,    13, 0x0,                     Str.STR_STICKY_BUTTON},
-	{    Window.WWT_IMGBTN,     Window.RESIZE_RB,    13,     0,   445,    14,   257, 0x0,                     Str.STR_NULL},
-	{         Window.WWT_6,     Window.RESIZE_RB,    13,     2,   443,    16,   255, 0x0,                     Str.STR_NULL},
-	{    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   380,   401,   258,   279, Sprite.SPR_IMG_SHOW_COUNTOURS,  Str.STR_0191_SHOW_LAND_CONTOURS_ON_MAP},
-	{    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   402,   423,   258,   279, Sprite.SPR_IMG_SHOW_VEHICLES,   Str.STR_0192_SHOW_VEHICLES_ON_MAP},
-	{    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   424,   445,   258,   279, Sprite.SPR_IMG_INDUSTRY,        Str.STR_0193_SHOW_INDUSTRIES_ON_MAP},
-	{    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   380,   401,   280,   301, Sprite.SPR_IMG_SHOW_ROUTES,     Str.STR_0194_SHOW_TRANSPORT_ROUTES_ON},
-	{    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   402,   423,   280,   301, Sprite.SPR_IMG_PLANTTREES,      Str.STR_0195_SHOW_VEGETATION_ON_MAP},
-	{    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   424,   445,   280,   301, Sprite.SPR_IMG_COMPANY_GENERAL, Str.STR_0196_SHOW_LAND_OWNERS_ON_MAP},
-	{    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   358,   379,   258,   279, 0x0,                     Str.STR_NULL},
-	{    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   358,   379,   280,   301, Sprite.SPR_IMG_TOWN,            Str.STR_0197_TOGGLE_TOWN_NAMES_ON_OFF},
-	{    Window.WWT_IMGBTN,    Window.RESIZE_RTB,    13,     0,   357,   258,   301, 0x0,                     Str.STR_NULL},
-	{     Window.WWT_PANEL,    Window.RESIZE_RTB,    13,     0,   433,   302,   313, 0x0,                     Str.STR_NULL},
-	{ Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    13,   434,   445,   302,   313, 0x0,                     Str.STR_Window.RESIZE_BUTTON},
-	{  WIDGETS_END},
+	new Widget(  Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5,                Str.STR_018B_CLOSE_WINDOW),
+	new Widget(   Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    13,    11,   433,     0,    13, Str.STR_00B0_MAP,            Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget( Window.WWT_STICKYBOX,     Window.RESIZE_LR,    13,   434,   445,     0,    13, 0x0,                     Str.STR_STICKY_BUTTON),
+	new Widget(    Window.WWT_IMGBTN,     Window.RESIZE_RB,    13,     0,   445,    14,   257, 0x0,                     Str.STR_NULL),
+	new Widget(         Window.WWT_6,     Window.RESIZE_RB,    13,     2,   443,    16,   255, 0x0,                     Str.STR_NULL),
+	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   380,   401,   258,   279, Sprite.SPR_IMG_SHOW_COUNTOURS,  Str.STR_0191_SHOW_LAND_CONTOURS_ON_MAP),
+	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   402,   423,   258,   279, Sprite.SPR_IMG_SHOW_VEHICLES,   Str.STR_0192_SHOW_VEHICLES_ON_MAP),
+	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   424,   445,   258,   279, Sprite.SPR_IMG_INDUSTRY,        Str.STR_0193_SHOW_INDUSTRIES_ON_MAP),
+	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   380,   401,   280,   301, Sprite.SPR_IMG_SHOW_ROUTES,     Str.STR_0194_SHOW_TRANSPORT_ROUTES_ON),
+	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   402,   423,   280,   301, Sprite.SPR_IMG_PLANTTREES,      Str.STR_0195_SHOW_VEGETATION_ON_MAP),
+	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   424,   445,   280,   301, Sprite.SPR_IMG_COMPANY_GENERAL, Str.STR_0196_SHOW_LAND_OWNERS_ON_MAP),
+	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   358,   379,   258,   279, 0x0,                     Str.STR_NULL),
+	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   358,   379,   280,   301, Sprite.SPR_IMG_TOWN,            Str.STR_0197_TOGGLE_TOWN_NAMES_ON_OFF),
+	new Widget(    Window.WWT_IMGBTN,    Window.RESIZE_RTB,    13,     0,   357,   258,   301, 0x0,                     Str.STR_NULL),
+	new Widget(     Window.WWT_PANEL,    Window.RESIZE_RTB,    13,     0,   433,   302,   313, 0x0,                     Str.STR_NULL),
+	new Widget( Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    13,   434,   445,   302,   313, 0x0,                     Str.STR_Window.RESIZE_BUTTON),
+
 	};
 
 	static int _smallmap_type;
@@ -926,19 +908,19 @@ public class SmallMapGui
 
 	/* Extra ViewPort Window Stuff */
 	static final Widget _extra_view_port_widgets[] = {
-	{   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,	Str.STR_018B_CLOSE_WINDOW},
-	{    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   287,     0,    13, Str.STR_EXTRA_VIEW_PORT_TITLE,				Str.STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   288,   299,     0,    13, 0x0,       Str.STR_STICKY_BUTTON},
-	{      Window.WWT_PANEL,     Window.RESIZE_RB,    14,     0,   299,    14,   233, 0x0,				Str.STR_NULL},
-	{          Window.WWT_6,     Window.RESIZE_RB,    14,     2,   297,    16,   231, 0x0,				Str.STR_NULL},
-	{      Window.WWT_PANEL,     Window.RESIZE_TB,    14,     0,    21,   234,   255, 0x2DF,			Str.STR_017F_ZOOM_THE_VIEW_IN},
-	{      Window.WWT_PANEL,     Window.RESIZE_TB,    14,    22,    43,   234,   255, 0x2E0,			Str.STR_0180_ZOOM_THE_VIEW_OUT},
-	{ Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,    44,   171,   234,   255, Str.STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW,Str.STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT},
-	{ Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   172,   298,   234,   255, Str.STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN,Str.STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN_TT},
-	{      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,   299,   299,   234,   255, 0x0,				Str.STR_NULL},
-	{      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,     0,   287,   256,   267, 0x0,				Str.STR_NULL},
-	{  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   288,   299,   256,   267, 0x0,				Str.STR_Window.RESIZE_BUTTON},
-	{   WIDGETS_END},
+	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,	Str.STR_018B_CLOSE_WINDOW),
+	new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   287,     0,    13, Str.STR_EXTRA_VIEW_PORT_TITLE,				Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+	new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   288,   299,     0,    13, 0x0,       Str.STR_STICKY_BUTTON),
+	new Widget(      Window.WWT_PANEL,     Window.RESIZE_RB,    14,     0,   299,    14,   233, 0x0,				Str.STR_NULL),
+	new Widget(          Window.WWT_6,     Window.RESIZE_RB,    14,     2,   297,    16,   231, 0x0,				Str.STR_NULL),
+	new Widget(      Window.WWT_PANEL,     Window.RESIZE_TB,    14,     0,    21,   234,   255, 0x2DF,			Str.STR_017F_ZOOM_THE_VIEW_IN),
+	new Widget(      Window.WWT_PANEL,     Window.RESIZE_TB,    14,    22,    43,   234,   255, 0x2E0,			Str.STR_0180_ZOOM_THE_VIEW_OUT),
+	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,    44,   171,   234,   255, Str.STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW,Str.STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT),
+	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   172,   298,   234,   255, Str.STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN,Str.STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN_TT),
+	new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,   299,   299,   234,   255, 0x0,				Str.STR_NULL),
+	new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,     0,   287,   256,   267, 0x0,				Str.STR_NULL),
+	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   288,   299,   256,   267, 0x0,				Str.STR_Window.RESIZE_BUTTON),
+	
 	};
 
 	static void ExtraViewPortWndProc(Window w, WindowEvent e)
