@@ -45,7 +45,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 	int index;
 
 
-	public Industry() {
+	private void clear() 
+	{
 		produced_cargo = new byte[2];
 		cargo_waiting = new int[2];
 		production_rate = new byte[2];
@@ -55,6 +56,25 @@ public class Industry extends IndustryTables implements IPoolItem {
 		pct_transported = new byte[2];
 		total_production = new int[2];
 		total_transported = new int[2];
+
+		xy = null;
+		town = null;
+		was_cargo_delivered = false;
+
+		width = 0;
+		height = 0;
+		prod_level = 0;
+		counter = 0;
+		type = 0;
+		owner = 0;
+		color_map = 0;
+		last_prod_year = 0;
+		index = 0;
+
+	}
+
+	public Industry() {
+		clear();
 	}
 
 
@@ -547,16 +567,44 @@ public class Industry extends IndustryTables implements IPoolItem {
 			break;
 
 		case 30: case 31: case 32:
-			if ((Global._tick_counter & 7) == 0) {
+			if ((Global._tick_counter & 7) == 0) 
+			{
 				boolean b = BitOps.CHANCE16(1,7);
 				m = tile.getMap().m1;
 				m = (m & 3) + 1;
 				n = tile.getMap().m5;
+				/*
 				if (m == 4 && (m=0,++n) == 32+1 && (n=30,b)) {
 					tile.getMap().m1 = 0x83;
 					tile.getMap().m5 = 29;
 					TextEffect.DeleteAnimatedTile(tile);
 				} else {
+					tile.getMap().m1 = BitOps.RETSB(tile.getMap().m1, 0, 2, m);
+					tile.getMap().m5 = (byte) n;
+					tile.MarkTileDirtyByTile();
+				}
+				 */
+
+				boolean doelse = true;
+
+				if (m == 4)
+				{
+					m=0;
+					if(++n == 32+1)
+					{
+						n=30;
+						if(b)
+						{
+							tile.getMap().m1 = 0x83;
+							tile.getMap().m5 = 29;
+							TextEffect.DeleteAnimatedTile(tile);
+							doelse = false;
+						}							
+					}					
+				}
+
+				if(doelse)
+				{
 					tile.getMap().m1 = BitOps.RETSB(tile.getMap().m1, 0, 2, m);
 					tile.getMap().m5 = (byte) n;
 					tile.MarkTileDirtyByTile();
@@ -634,7 +682,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			break;
 
 		case 24:
-			if (tile.iadd(0, 1).getMap().m5 == 24) BuildOilRig(tile);
+			if (tile.iadd(0, 1).getMap().m5 == 24) Station.BuildOilRig(tile);
 			break;
 
 		case 143:
@@ -708,7 +756,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		case 0x1A:
 		case 0x1B:
 		case 0x1C:
-			TileLoop_Water(tile);
+			WaterCmd.TileLoop_Water(tile);
 			break;
 
 		case 0:
@@ -754,7 +802,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			break;
 
 		case 49:
-			CreateEffectVehicleAbove(tile.TileX() * 16 + 6, tile.TileY() * 16 + 6, 43, Vehicle.EV_SMOKE);
+			Vehicle.CreateEffectVehicleAbove(tile.TileX() * 16 + 6, tile.TileY() * 16 + 6, 43, Vehicle.EV_SMOKE);
 			break;
 
 
@@ -819,15 +867,15 @@ public class Industry extends IndustryTables implements IPoolItem {
 					Landscape.DoClearSquare(tile_cur);
 				}
 			} else if (tile_cur.IsTileType( TileTypes.MP_STATION) && tile_cur.getMap().m5 == 0x4B) {
-				DeleteOilRig(tile_cur);
-				return false;
+				Station.DeleteOilRig(tile_cur);
 			}
+			return false;
 		});
 		//END_TILE_LOOP(tile_cur, i.width, i.height, i.xy);
 
 		i.xy = null;
 		_industry_sort_dirty = true;
-		DeleteSubsidyWithIndustry(i.index);
+		Economy.DeleteSubsidyWithIndustry(i.index);
 		Window.DeleteWindowById(Window.WC_INDUSTRY_VIEW, i.index);
 		Window.InvalidateWindow(Window.WC_INDUSTRY_DIRECTORY, 0);
 	}
@@ -936,6 +984,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		type = ((r & 0xE0) | 0xF);
 		type2 = BitOps.GB(r, 8, 8) * 9 >> 8;
 
+		final int ftype = type;
 		/* make field */
 		//BEGIN_TILE_LOOP(cur_tile, size_x, size_y, tile)
 		TileIndex.forAll(size_x, size_y, tile, (cur_tile1) ->
@@ -947,7 +996,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 						TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5,
 						type2,			/* map3_lo */
 						Owner.OWNER_NONE,	/* map_owner */
-						type);			/* map5 */
+						ftype);			/* map5 */
 			}
 			return false;
 		});
@@ -1066,8 +1115,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	static void ProduceIndustryGoods(Industry i)
 	{
-		int r;
-		int num;
+		//int r;
+		//int num;
 
 		/* play a sound? */
 		if ((i.counter & 0x3F) == 0) {
@@ -1137,7 +1186,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	/* Oil Rig and Oil Refinery */
 	static boolean CheckNewIndustry_Oil(TileIndex tile, int type)
 	{
-		if (Global._game_mode == GameModes.GM_EDITOR && Global._ignore_restrictions) return true;
+		if (Global._game_mode == GameModes.GM_EDITOR && Gui._ignore_restrictions) return true;
 		if (Global._game_mode == GameModes.GM_EDITOR && type != IT_OIL_RIG)   return true;
 		if (Map.DistanceFromEdge(tile.iadd(1, 1)) < 16)   return true;
 
@@ -1265,13 +1314,18 @@ public class Industry extends IndustryTables implements IPoolItem {
 			16, 16, 16, 16, 16, 16, 16,
 	};
 
-	static boolean CheckIfIndustryTilesAreFree(TileIndex tile, final IndustryTileTable it, int type, final Town tt)
+	static boolean CheckIfIndustryTilesAreFree(TileIndex tile, final IndustryTileTable [] itt, int type, final Town tt)
 	{
 		TileInfo ti = new TileInfo();
 
 		Global._error_message = Str.STR_0239_SITE_UNSUITABLE;
 
-		do {
+		for(final IndustryTileTable it : itt) 
+		{
+			// TODO kill me and end table markers in tables
+			if(it.ti.x == -0x80)
+				break;
+
 			TileIndex cur_tile = tile.iadd( TileIndex.ToTileIndexDiff(it.ti) );
 
 			if (!cur_tile.IsValidTile()) {
@@ -1290,7 +1344,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					if (ti.type != TileTypes.MP_WATER.ordinal() || ti.map5 != 0) return false;
 				} else {
 					if (ti.type == TileTypes.MP_WATER.ordinal() && ti.map5 == 0) return false;
-					if (IsSteepTileh(ti.tileh))
+					if (TileIndex.IsSteepTileh(ti.tileh))
 						return false;
 
 					if (ti.tileh != 0) {
@@ -1336,7 +1390,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					}
 				}
 			}
-		} while ((++it).ti.x != -0x80);
+		}// while ((++it).ti.x != -0x80);
 
 		return true;
 	}
@@ -1387,7 +1441,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		while(ii.hasNext())
 		{
 			Industry i = ii.next();
-			
+
 			if (i.xy == null) {
 				int index = i.index;
 
@@ -1405,7 +1459,9 @@ public class Industry extends IndustryTables implements IPoolItem {
 		return _industry_pool.AddBlockToPool() ? AllocateIndustry() : null;
 	}
 
-	static void DoCreateNewIndustry(Industry  i, TileIndex tile, int type, final IndustryTileTable it, final Town t, int owner)
+
+
+	static void DoCreateNewIndustry(Industry  i, TileIndex tile, int type, final IndustryTileTable [] itt, final Town t, int owner)
 	{
 		final IndustrySpec spec;
 		int r;
@@ -1455,7 +1511,13 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		i.prod_level = 0x10;
 
-		do {
+		//do
+		for(final IndustryTileTable it : itt)
+		{
+			// TODO kill me and markers
+			if(it.ti.x == -0x80)
+				break;
+			
 			TileIndex cur_tile = tile.iadd( TileIndex.ToTileIndexDiff(it.ti) );
 
 			if (it.map5 != 0xFF) {
@@ -1473,7 +1535,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				cur_tile.getMap().m2 = i.index;
 				cur_tile.getMap().m1 = Global._generating_world ? 0x1E : 0; /* maturity */
 			}
-		} while ((++it).ti.x != -0x80);
+		} // while ((++it).ti.x != -0x80);
 
 		i.width++;
 		i.height++;
@@ -1503,10 +1565,10 @@ public class Industry extends IndustryTables implements IPoolItem {
 		Industry i;
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		int num;
-		//final IndustryTileTable [][] itt;
-		final IndustryTileTable [] itt;
-		//final IndustryTileTable [] it;
-		final IndustryTileTable  it;
+		final IndustryTileTable [][] itt;
+		//final IndustryTileTable [] itt;
+		IndustryTileTable [] it;
+		//final IndustryTileTable  it;
 		//final IndustrySpec [] spec;
 		final IndustrySpec  spec;
 
@@ -1553,7 +1615,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 		t = CheckMultipleIndustryInTown(tile, p1);
 		if (t == null) return Cmd.CMD_ERROR;
 
-		num = spec.num_table;
+		//num = spec.num_table;
+		num = spec.table.length;
 		itt = spec.table;
 
 		do {
@@ -1575,7 +1638,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	static Industry CreateNewIndustry(TileIndex tile, int type)
 	{
 		final Town t;
-		final IndustryTileTable it;
+		final IndustryTileTable [] it;
 		Industry i;
 
 		final IndustrySpec spec;
@@ -1590,7 +1653,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		if (t == null) return null;
 
 		/* pick a random layout */
-		it = spec.table[Hal.RandomRange(spec.num_table)];
+		it = spec.table[Hal.RandomRange(spec.table.length)];
 
 		if (!CheckIfIndustryTilesAreFree(tile, it, type, t)) return null;
 		if (!CheckIfTooCloseToIndustry(tile, type)) return null;
@@ -1690,12 +1753,12 @@ public class Industry extends IndustryTables implements IPoolItem {
 				mag = Math.abs(percent);
 				if (mag >= 10) {
 					Global.SetDParam(2, mag);
-					Global.SetDParam(0, Global._cargoc.names_s[i.produced_cargo[j]].id);
+					Global.SetDParam(0, Global._cargoc.names_s[i.produced_cargo[j]]);
 					Global.SetDParam(1, i.index);
 					NewsItem.AddNewsItem(
 							percent >= 0 ? Str.STR_INDUSTRY_PROD_GOUP : Str.STR_INDUSTRY_PROD_GODOWN,
 									NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ECONOMY, 0),
-									i.xy.iadd(1, 1), 0
+									i.xy.iadd(1, 1).tile, 0
 							);
 				}
 			}
@@ -1708,7 +1771,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			NewsItem.AddNewsItem(
 					_industry_close_strings[i.type],
 					NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ECONOMY, 0),
-					i.xy.iadd(1, 1), 0
+					i.xy.iadd(1, 1).tile, 0
 					);
 		}
 	}
@@ -1789,7 +1852,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		NewsItem.AddNewsItem(
 				(type != IT_FOREST) ?
 						Str.STR_482D_NEW_UNDER_CONSTRUCTION : Str.STR_482E_NEW_BEING_PLANTED_NEAR,
-						NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ECONOMY,0), i.xy, 0
+						NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ECONOMY,0), i.xy.tile, 0
 				);
 	}
 
@@ -1856,7 +1919,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		if (str != Str.STR_NULL) {
 			Global.SetDParam(0, i.index);
-			NewsItem.AddNewsItem(str, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ECONOMY, 0), i.xy.iadd(1, 1), 0);
+			NewsItem.AddNewsItem(str, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ECONOMY, 0), i.xy.iadd(1, 1).tile, 0);
 		}
 	}
 

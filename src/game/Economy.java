@@ -989,7 +989,7 @@ public class Economy
 		return tp;
 	}
 
-	void DeleteSubsidyWithIndustry(int index)
+	static void DeleteSubsidyWithIndustry(int index)
 	{
 		for(int i = 0; i < _subsidies.length; i++) 
 		{

@@ -1792,7 +1792,7 @@ public class Gui
 	};
 
 	static int _industry_type_to_place;
-	boolean _ignore_restrictions;
+	static boolean _ignore_restrictions = false;
 
 	static void ScenEditIndustryWndProc(Window w, WindowEvent e)
 	{
