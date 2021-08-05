@@ -114,7 +114,7 @@ public class IntroGui
 		IntroGui::SelectGameWndProc
 	);
 
-	void ShowSelectGameWindow()
+	static void ShowSelectGameWindow()
 	{
 		Window.AllocateWindowDesc(_select_game_desc);
 	}
@@ -227,7 +227,7 @@ public class IntroGui
 	);
 
 
-	void AskExitToGameMenu()
+	static void AskExitToGameMenu()
 	{
 		Window.AllocateWindowDescFront(_ask_quit_game_desc, 0);
 	}

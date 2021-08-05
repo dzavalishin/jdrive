@@ -202,7 +202,7 @@ public class PlayerGui
 			_other_player_finances_desc, _other_player_finances_small_desc,
 	};
 
-	static void DoShowPlayerFinances(PlayerID player, boolean show_small, boolean show_stickied)
+	static void DoShowPlayerFinances(/*PlayerID*/ int player, boolean show_small, boolean show_stickied)
 	{
 		Window w;
 		int mode;
@@ -218,7 +218,7 @@ public class PlayerGui
 		}
 	}
 
-	void ShowPlayerFinances(PlayerID player)
+	static void ShowPlayerFinances(/*PlayerID*/ int player)
 	{
 		DoShowPlayerFinances(player, false, false);
 	}
@@ -668,11 +668,11 @@ public class PlayerGui
 			PlayerGui::PlayerCompanyWndProc
 	);
 
-	void ShowPlayerCompany(PlayerID player)
+	static void ShowPlayerCompany(/*PlayerID*/ int player)
 	{
 		Window  w;
 
-		w = Window.AllocateWindowDescFront(player == Global._local_player ? _my_player_company_desc : _other_player_company_desc, player);
+		w = Window.AllocateWindowDescFront( (player == Global._local_player.id) ? _my_player_company_desc : _other_player_company_desc, player);
 		if (w != null) w.caption_color = (byte) w.window_number.n;
 	}
 

@@ -3,9 +3,11 @@ package game;
 import java.util.function.Consumer;
 
 import game.Gfx.BlitterParams;
+import game.tables.PaletteTabs;
 import game.util.BitOps;
 
-public class Gfx {
+public class Gfx extends PaletteTabs 
+{
 
 	static boolean _dbg_screen_rect;
 

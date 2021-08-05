@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 public class Terraform {
 
 
-	void CcTerraform(boolean success, TileIndex tile, int p1, int p2)
+	static void CcTerraform(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			// TODO SndPlayTileFx(SND_1F_SPLAT, tile);

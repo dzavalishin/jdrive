@@ -270,7 +270,7 @@ public class MiscGui {
 			);
 
 
-	void ShowAboutWindow()
+	static void ShowAboutWindow()
 	{
 		Window.DeleteWindowById(Window.WC_GAME_OPTIONS, 0);
 		Window.AllocateWindowDesc(_about_desc);
@@ -431,7 +431,7 @@ public class MiscGui {
 		Window.AllocateWindowDescFront(_build_trees_desc, 0);
 	}
 
-	void ShowBuildTreesScenToolbar()
+	static void ShowBuildTreesScenToolbar()
 	{
 		Window.AllocateWindowDescFront(_build_trees_scen_desc, 0);
 	}

@@ -2311,7 +2311,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			},
 	};
 
-	void ShowBuildIndustryWindow()
+	static void ShowBuildIndustryWindow()
 	{
 		Window.AllocateWindowDescFront(_industry_window_desc[BitOps.b2i(Global._patches.build_rawmaterial_ind)][GameOptions._opt_ptr.landscape],0);
 	}
@@ -2733,7 +2733,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 
 
-	void ShowIndustryDirectory()
+	static void ShowIndustryDirectory()
 	{
 		/* Industry List */
 		Window w = Window.AllocateWindowDescFront(_industry_directory_desc, 0);

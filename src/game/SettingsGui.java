@@ -1108,7 +1108,7 @@ public class SettingsGui extends SettingsTables
 			SettingsGui::NewgrfWndProc
 	);
 
-	void ShowNewgrf()
+	static void ShowNewgrf()
 	{
 		/*
 		final GRFFile* c;

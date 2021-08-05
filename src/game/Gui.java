@@ -54,23 +54,27 @@ public class Gui
 		// XXX: these are not done
 		switch (Global._game_mode) {
 		case GM_MENU:
-			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, new WindowClass(Window.WC_MAIN_WINDOW), null);
+			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
 			ViewPort.AssignWindowViewport( w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
-			ShowSelectGameWindow();
+			IntroGui.ShowSelectGameWindow();
 			break;
+			
 		case GM_NORMAL:
-			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, new WindowClass(Window.WC_MAIN_WINDOW), null);
+			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
 			ViewPort.AssignWindowViewport(w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
 
 			ShowVitalWindows();
 
+			/* TODO Net
 			// Bring joining GUI to front till the client is really joined 
 			if (Global._networking && !Global._network_server)
 				ShowJoinStatusWindowAfterJoin();
-
+			*/
+			
 			break;
+			
 		case GM_EDITOR:
-			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, new WindowClass(Window.WC_MAIN_WINDOW), null);
+			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
 			ViewPort.AssignWindowViewport(w, 0, 0, width, height, 0, 0);
 
 			w = Window.AllocateWindowDesc(_toolb_scen_desc,0);
@@ -79,6 +83,7 @@ public class Gui
 
 			w.PositionMainToolbar(w); // already WC_MAIN_TOOLBAR passed (&_toolb_scen_desc)
 			break;
+
 		default:
 			assert false;
 		}
@@ -90,7 +95,9 @@ public class Gui
 			final byte[] b = SpriteCache.GetNonSprite(0x307 + i);
 
 			assert(b != null);
-			Global._color_list[i] = *(final ColorList*)(b + 0xC6);
+			//Global._color_list[i] = *(final ColorList*)(b + 0xC6);
+			
+			Global._color_list[i] = new ColorList( BitOps.subArray(b, 0xC6) );
 		}
 	}
 
@@ -238,10 +245,10 @@ public class Gui
 	static void MenuClickSettings(int index)
 	{
 		switch (index) {
-			case 0: ShowGameOptions();      return;
-			case 1: ShowGameDifficulty();   return;
-			case 2: ShowPatchesSelection(); return;
-			case 3: ShowNewgrf();           return;
+			case 0: SettingsGui.ShowGameOptions();      return;
+			case 1: SettingsGui.ShowGameDifficulty();   return;
+			case 2: SettingsGui.ShowPatchesSelection(); return;
+			case 3: SettingsGui.ShowNewgrf();           return;
 
 			case  5: Global._display_opt ^= Global.DO_SHOW_TOWN_NAMES;    break;
 			case  6: Global._display_opt ^= Global.DO_SHOW_STATION_NAMES; break;
@@ -261,15 +268,15 @@ public class Gui
 			switch (index) {
 				//case 0: ShowSaveLoadDialog(SLD_SAVE_SCENARIO); break;
 				//case 1: ShowSaveLoadDialog(SLD_LOAD_SCENARIO); break;
-				case 2: AskExitToGameMenu();                   break;
-				case 4: AskExitGame();                         break;
+				case 2: IntroGui.AskExitToGameMenu();                   break;
+				case 4: IntroGui.AskExitGame();                         break;
 			}
 		} else {
 			switch (index) {
 				//case 0: ShowSaveLoadDialog(SLD_SAVE_GAME); break;
 				//case 1: ShowSaveLoadDialog(SLD_LOAD_GAME); break;
-				case 2: AskExitToGameMenu();               break;
-				case 3: AskExitGame();                     break;
+				case 2: IntroGui.AskExitToGameMenu();               break;
+				case 3: IntroGui.AskExitGame();                     break;
 			}
 		}
 	}
@@ -277,9 +284,9 @@ public class Gui
 	static void MenuClickMap(int index)
 	{
 		switch (index) {
-			case 0: ShowSmallMap();            break;
-			case 1: ShowExtraViewPortWindow(); break;
-			case 2: ShowSignList();            break;
+			case 0: Gui.ShowSmallMap();            break;
+			case 1: Gui.ShowExtraViewPortWindow(); break;
+			case 2: Gui.ShowSignList();            break;
 		}
 	}
 
@@ -300,7 +307,7 @@ public class Gui
 
 	static void MenuClickSubsidies(int index)
 	{
-		ShowSubsidiesList();
+		Subsidies.ShowSubsidiesList();
 	}
 
 	static void MenuClickStations(int index)
@@ -325,7 +332,7 @@ public class Gui
 	#endif /* ENABLE_NETWORK */
 		} else {
 			if (Global._networking) index--;
-			ShowPlayerCompany(index);
+			PlayerGui.ShowPlayerCompany(index);
 		}
 	}
 
@@ -353,19 +360,19 @@ public class Gui
 	static void MenuClickIndustry(int index)
 	{
 		switch (index) {
-			case 0: ShowIndustryDirectory();   break;
-			case 1: ShowBuildIndustryWindow(); break;
+			case 0: Industry.ShowIndustryDirectory();   break;
+			case 1: Industry.ShowBuildIndustryWindow(); break;
 		}
 	}
 
 	static void MenuClickShowTrains(int index)
 	{
-		ShowPlayerTrains(index, Station.INVALID_STATION);
+		TrainGui.ShowPlayerTrains(index, Station.INVALID_STATION);
 	}
 
 	static void MenuClickShowRoad(int index)
 	{
-		ShowPlayerRoadVehicles(index, Station.INVALID_STATION);
+		RoadVehGui.ShowPlayerRoadVehicles(index, Station.INVALID_STATION);
 	}
 
 	static void MenuClickShowShips(int index)
@@ -396,7 +403,7 @@ public class Gui
 
 	static void MenuClickBuildAir(int index)
 	{
-		ShowBuildAirToolbar();
+		AirportGui.ShowBuildAirToolbar();
 	}
 
 	/*#ifdef ENABLE_NETWORK
@@ -435,7 +442,7 @@ public class Gui
 	{
 		_rename_id = ss.index;
 		_rename_what = 0;
-		MiscGui.ShowQueryString(ss.str, Str.STR_280B_EDIT_SIGN_TEXT, 30, 180, 1, 0);
+		MiscGui.ShowQueryString(ss.str, new StringID( Str.STR_280B_EDIT_SIGN_TEXT ), 30, 180, 1, 0);
 	}
 
 	static void ShowRenameWaypointWindow(final WayPoint wp)
@@ -452,7 +459,7 @@ public class Gui
 		_rename_id = id;
 		_rename_what = 1;
 		Global.SetDParam(0, id);
-		ShowQueryString(Str.STR_WAYPOINT_RAW, Str.STR_EDIT_WAYPOINT_NAME, 30, 180, 1, 0);
+		MiscGui.ShowQueryString(Str.STR_WAYPOINT_RAW, Str.STR_EDIT_WAYPOINT_NAME, 30, 180, 1, 0);
 	}
 
 	static void SelectSignTool()
@@ -492,10 +499,10 @@ public class Gui
 	{
 		switch (index) {
 			case 0: PlaceLandBlockInfo(); break;
-			case 2: IConsoleSwitch();     break;
+			case 2: Console.IConsoleSwitch();     break;
 			case 3: _make_screenshot = 1; break;
 			case 4: _make_screenshot = 2; break;
-			case 5: ShowAboutWindow();    break;
+			case 5: MiscGui.ShowAboutWindow();    break;
 		}
 	}
 
@@ -561,8 +568,8 @@ public class Gui
 			do {
 				if (sel== 0) Gfx.GfxFillRect(x, y, x + eo, y+9, 0);
 				color = (byte) ((sel == 0) ? 0xC : 0x10);
-				if (HASBIT(w.as_menu_d().disabled_items, (string - WP(w, menu_d).string_id))) color = 0xE;
-				DrawString(x + 2, y, string + (chk & 1), color);
+				if (BitOps.HASBIT(w.as_menu_d().disabled_items, (string.id - w.as_menu_d().string_id.id))) color = 0xE;
+				Gfx.DrawString(x + 2, y, string.id + (chk & 1), color);
 				y += 10;
 				string += inc;
 				chk >>= 1;
@@ -700,7 +707,7 @@ public class Gui
 						Gfx.GfxFillRect(x, y, x + 238, y + 9, 0);
 					}
 
-					DrawPlayerIcon(p.index, x + 2, y + 1);
+					GraphGui.DrawPlayerIcon(p.index, x + 2, y + 1);
 
 					Global.SetDParam(0, p.name_1);
 					Global.SetDParam(1, p.name_2);
@@ -783,7 +790,7 @@ public class Gui
 
 		Window.DeleteWindowById(Window.WC_TOOLBAR_MENU, 0);
 
-		w = Window.AllocateWindow(x, 0x16, 0xA0, item_count * 10 + 2, Gui::MenuWndProc, new WindowClass(Window.WC_TOOLBAR_MENU), _menu_widgets);
+		w = Window.AllocateWindow(x, 0x16, 0xA0, item_count * 10 + 2, Gui::MenuWndProc, Window.WC_TOOLBAR_MENU, _menu_widgets);
 		w.widget.get(0).bottom = item_count * 10 + 1;
 		w.flags4 &= ~Window.WF_WHITE_BORDER_MASK;
 
@@ -791,7 +798,7 @@ public class Gui
 		w.as_menu_d().sel_index = 0;
 		w.as_menu_d().main_button = main_button;
 		w.as_menu_d().action_id = (0 != (main_button >> 8)) ? (main_button >> 8) : main_button;
-		w.as_menu_d().string_id = base_string;
+		w.as_menu_d().string_id = new StringID( base_string );
 		w.as_menu_d().checked_items = 0;
 		w.as_menu_d().disabled_items = disabled_mask;
 
@@ -810,7 +817,7 @@ public class Gui
 		w.InvalidateWidget(main_button);
 
 		Window.DeleteWindowById(Window.WC_TOOLBAR_MENU, 0);
-		w = Window.AllocateWindow(x, 0x16, 0xF1, 0x52, Gui::PlayerMenuWndProc, new WindowClass(Window.WC_TOOLBAR_MENU), _player_menu_widgets);
+		w = Window.AllocateWindow(x, 0x16, 0xF1, 0x52, Gui::PlayerMenuWndProc, Window.WC_TOOLBAR_MENU, _player_menu_widgets);
 		w.flags4 &= ~Window.WF_WHITE_BORDER_MASK;
 		w.as_menu_d().item_count = 0;
 		w.as_menu_d().sel_index = (Global._local_player.id != Owner.OWNER_SPECTATOR) ? Global._local_player.id : GetPlayerIndexFromMenu(0);
@@ -1028,7 +1035,7 @@ public class Gui
 	{
 		final Player p = Player.GetPlayer(Global._local_player);
 		Window w2;
-		w2 = PopupMainToolbMenu(w, 457, 19, Str.STR_1015_RAILROAD_CONSTRUCTION, RAILTYPE_END, ~p.avail_railtypes);
+		w2 = PopupMainToolbMenu(w, 457, 19, Str.STR_1015_RAILROAD_CONSTRUCTION, Rail.RAILTYPE_END, ~p.avail_railtypes);
 		w2.as_menu_d().sel_index = _last_built_railtype;
 	}
 
@@ -1205,7 +1212,7 @@ public class Gui
 					ResetLandscape();
 				} else { // make random landscape
 					//SndPlayFx(SND_15_BEEP);
-					Global._switch_mode = GameModes.SM_GENRANDLAND;
+					Global._switch_mode = SwitchModes.SM_GENRANDLAND;
 				}
 				break;
 			}
@@ -1238,14 +1245,14 @@ public class Gui
 	static void CommonRaiseLowerBigLand(TileIndex tile, int mode)
 	{
 		int sizex, sizey;
-		int h;
+		int [] h = { Integer.MAX_VALUE };
 
 		Global._error_message_2 = mode != 0 ? Str.STR_0808_CAN_T_RAISE_LAND_HERE : Str.STR_0809_CAN_T_LOWER_LAND_HERE;
 
 		Global._generating_world = true; // used to create green terraformed land
 
 		if (_terraform_size == 1) {
-			Cmd.DoCommandP(tile, 8, (int)mode, CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(_error_message_2));
+			Cmd.DoCommandP(tile, 8, (int)mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Global._error_message_2));
 		} else {
 			// TODO SndPlayTileFx(SND_1F_SPLAT, tile);
 
@@ -1258,20 +1265,20 @@ public class Gui
 
 			if (mode != 0) {
 				/* Raise land */
-				h = 15; // XXX - max height
+				h[0] = 15; // XXX - max height
 				//BEGIN_TILE_LOOP(tile2, sizex, sizey, tile) 
 				TileIndex.forAll( sizex, sizey, tile, (tile2) ->
 				{
-					h = Math.min(h, tile2.TileHeight());
+					h[0] = Math.min(h, tile2.TileHeight());
 					return false;
 				});// END_TILE_LOOP(tile2, sizex, sizey, tile)
 			} else {
 				/* Lower land */
-				h = 0;
+				h[0] = 0;
 				//BEGIN_TILE_LOOP(tile2, sizex, sizey, tile) 
 				TileIndex.forAll( sizex, sizey, tile, (tile2) ->
 				{
-					h = Math.max(h, tile2.TileHeight());
+					h[0] = Math.max(h, tile2.TileHeight());
 					return false;
 				}); //END_TILE_LOOP(tile2, sizex, sizey, tile)
 			}
@@ -1279,7 +1286,7 @@ public class Gui
 			//BEGIN_TILE_LOOP(tile2, sizex, sizey, tile) 
 			TileIndex.forAll( sizex, sizey, tile, (tile2) ->
 			{
-				if (tile2.TileHeight() == h) {
+				if (tile2.TileHeight() == h[0]) {
 					Cmd.DoCommandP(tile2, 8, (int)mode, null, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO);
 				}
 				return false;
@@ -1481,46 +1488,48 @@ public class Gui
 				break;
 			case 12: case 13: { /* Increase/Decrease terraform size */
 				int size = (e.widget == 12) ? 1 : -1;
-				HandleButtonClick(w, e.widget);
+				w.HandleButtonClick(e.widget);
 				size += _terraform_size;
 
-				if (!IS_INT_INSIDE(size, 1, 8 + 1))	return;
-				_terraform_size = size;
+				if (!BitOps.IS_INT_INSIDE(size, 1, 8 + 1))	return;
+				_terraform_size = (byte) size;
 
 				//SndPlayFx(SND_15_BEEP);
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 			} break;
 			case 14: /* gen random land */
-				HandleButtonClick(w, 14);
+				w.HandleButtonClick(14);
 				AskResetLandscape(0);
 				break;
 			case 15: /* reset landscape */
-				HandleButtonClick(w,15);
+				w.HandleButtonClick(15);
 				AskResetLandscape(1);
 				break;
 			}
 			break;
 
-		case WindowEvents.WE_TIMEOUT:
-			UnclickSomeWindowButtons(w, ~(1<<4 | 1<<5 | 1<<6 | 1<<7 | 1<<8 | 1<<9 | 1<<10 | 1<<11));
+		case WE_TIMEOUT:
+			w.UnclickSomeWindowButtons( ~(1<<4 | 1<<5 | 1<<6 | 1<<7 | 1<<8 | 1<<9 | 1<<10 | 1<<11));
 			break;
-		case WindowEvents.WE_PLACE_OBJ:
-			_place_proc(e.tile);
+			
+		case WE_PLACE_OBJ:
+			Global._place_proc.accept(e.tile);
 			break;
-		case WindowEvents.WE_PLACE_DRAG:
-			VpSelectTilesWithMethod(e.pt.x, e.pt.y, e.userdata & 0xF);
+			
+		case WE_PLACE_DRAG:
+			ViewPort.VpSelectTilesWithMethod(e.pt.x, e.pt.y, e.userdata & 0xF);
 			break;
 
-		case WindowEvents.WE_PLACE_MOUSEUP:
+		case WE_PLACE_MOUSEUP:
 			if (e.pt.x != -1) {
-				if ((e.userdata & 0xF) == VPM_X_AND_Y) // dragged actions
-					GUIPlaceProcDragXY(e);
+				if ((e.userdata & 0xF) == ViewPort.VPM_X_AND_Y) // dragged actions
+					Terraform.GUIPlaceProcDragXY(e);
 			}
 			break;
 
-		case WindowEvents.WE_ABORT_PLACE_OBJ:
+		case WE_ABORT_PLACE_OBJ:
 			w.click_state = 0;
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 			break;
 		}
 	}
@@ -1619,7 +1628,7 @@ public class Gui
 			}
 
 			case 7: case 8: case 9:
-				_new_town_size = e.widget - 7;
+				Global._new_town_size = e.widget - 7;
 				w.SetWindowDirty();
 				break;
 			}
@@ -1833,14 +1842,14 @@ public class Gui
 				return;
 			}
 
-			Global._current_player = OWNER_NONE;
+			Global._current_player = PlayerID.get( Owner.OWNER_NONE );
 			Global._generating_world = true;
-			Global._ignore_restrictions = true;
+			Gui._ignore_restrictions = true;
 			if (!TryBuildIndustry(e.tile,type)) {
-				SetDParam(0, type + Str.STR_4802_COAL_MINE);
-				Global.ShowErrorMessage(_error_message, Str.STR_0285_CAN_T_BUILD_HERE, e.pt.x, e.pt.y);
+				Global.SetDParam(0, type + Str.STR_4802_COAL_MINE);
+				Global.ShowErrorMessage(Global._error_message, Str.STR_0285_CAN_T_BUILD_HERE, e.pt.x, e.pt.y);
 			}
-			Global._ignore_restrictions = false;
+			Gui._ignore_restrictions = false;
 			Global._generating_world = false;
 			break;
 		}
@@ -1912,7 +1921,7 @@ public class Gui
 	{
 		w.HandleButtonClick(15);
 		//SndPlayFx(SND_15_BEEP);
-		ShowBuildTreesScenToolbar();
+		MiscGui.ShowBuildTreesScenToolbar();
 	}
 
 	static void ToolbarScenPlaceSign(Window w)
@@ -1966,10 +1975,10 @@ public class Gui
 
 			// Draw brown-red toolbar bg.
 			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB2);
-			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB4 | PALETTE_MODIFIER_GREYOUT);
+			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB4 | Sprite.PALETTE_MODIFIER_GREYOUT);
 
 			// if spectator, disable things
-			if (Global._current_player == Owner.OWNER_SPECTATOR){
+			if (Global._current_player.id == Owner.OWNER_SPECTATOR){
 				w.disabled_state |= (1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23);
 			} else {
 				w.disabled_state &= ~((1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23));
@@ -1980,12 +1989,12 @@ public class Gui
 		}
 
 		case WE_CLICK: {
-			if (_game_mode != GameModes.GM_MENU && !BitOps.HASBIT(w.disabled_state, e.widget))
+			if (Global._game_mode != GameModes.GM_MENU && !BitOps.HASBIT(w.disabled_state, e.widget))
 				_toolbar_button_procs[e.widget].accept(w);
 		} break;
 
-		case WindowEvents.WE_KEYPRESS: {
-			PlayerID local = (Global._local_player != Owner.OWNER_SPECTATOR) ? _local_player : 0;
+		case WE_KEYPRESS: {
+			PlayerID local = (Global._local_player.id != Owner.OWNER_SPECTATOR) ? Global._local_player : 0;
 
 			switch (e.keycode) {
 			case Window.WKC_F1: case Window.WKC_PAUSE:
@@ -2025,23 +2034,23 @@ public class Gui
 		} break;
 
 		case WE_PLACE_OBJ: {
-			Global._place_proc(e.tile);
+			Global._place_proc.accept(e.tile);
 		} break;
 
 		case WE_ABORT_PLACE_OBJ: {
 			w.click_state &= ~(1<<25);
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 		} break;
 
 		case WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
 
 		case WE_MOUSELOOP:
-			if (((w.click_state) & 1) != (int)!!_pause) {
+			if (((w.click_state) & 1) != (int)!!Global._pause) {
 				w.click_state ^= (1 << 0);
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 			}
 
-			if (((w.click_state >> 1) & 1) != (int)!!_fast_forward) {
+			if (((w.click_state >> 1) & 1) != (int)!!Global._fast_forward) {
 				w.click_state ^= (1 << 1);
 				w.SetWindowDirty();
 			}
@@ -2169,40 +2178,40 @@ public class Gui
 	static void ScenEditToolbarWndProc(Window w, WindowEvent e)
 	{
 		switch(e.event) {
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 			/* XXX look for better place for these */
-			if (_date <= MinDate) {
-				SETBIT(w.disabled_state, 6);
+			if (Global._date <= MinDate) {
+				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 6);
 			} else {
-				CLRBIT(w.disabled_state, 6);
+				w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 6);
 			}
-			if (_date >= MaxDate) {
-				SETBIT(w.disabled_state, 7);
+			if (Global._date >= MaxDate) {
+				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 7);
 			} else {
-				CLRBIT(w.disabled_state, 7);
+				w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 7);
 			}
 
 			// Draw brown-red toolbar bg.
 			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB2);
-			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB4 | PALETTE_MODIFIER_GREYOUT);
+			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB4 | Sprite.PALETTE_MODIFIER_GREYOUT);
 
 			w.DrawWindowWidgets();
 
-			Global.SetDParam(0, _date);
+			Global.SetDParam(0, Global._date);
 			Gfx.DrawStringCentered(298, 6, Str.STR_00AF, 0);
 
-			Global.SetDParam(0, _date);
+			Global.SetDParam(0, Global._date);
 			Gfx.DrawStringCentered(161, 1, Str.STR_0221_OPENTTD, 0);
 			Gfx.DrawStringCentered(161, 11,Str.STR_0222_SCENARIO_EDITOR, 0);
 
 			break;
 
-		case WindowEvents.WE_CLICK: {
+		case WE_CLICK: {
 			if (Global._game_mode == GameModes.GM_MENU) return;
 			_scen_toolbar_button_procs[e.widget].accept(w);
 		} break;
 
-		case WindowEvents.WE_KEYPRESS:
+		case WE_KEYPRESS:
 			switch (e.keycode) {
 			case Window.WKC_F1: ToolbarPauseClick(w); break;
 			case Window.WKC_F2: ShowGameOptions(); break;
@@ -2221,26 +2230,26 @@ public class Gui
 			}
 			break;
 
-		case WindowEvents.WE_PLACE_OBJ: {
+		case WE_PLACE_OBJ: {
 			Global._place_proc.accept(e.tile);
 		} break;
 
-		case WindowEvents.WE_ABORT_PLACE_OBJ: {
+		case WE_ABORT_PLACE_OBJ: {
 			w.click_state &= ~(1<<25);
 			w.SetWindowDirty();
 		} break;
 
-		case WindowEvents.WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
+		case WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
 
-		case WindowEvents.WE_MOUSELOOP:
+		case WE_MOUSELOOP:
 			if (((w.click_state) & 1) != (int)!!_pause) {
 				w.click_state ^= (1 << 0);
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 			}
 
 			if (((w.click_state >> 1) & 1) != (int)!!_fast_forward) {
 				w.click_state ^= (1 << 1);
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 			}
 			break;
 
@@ -2272,11 +2281,11 @@ public class Gui
 		if (ni.display_mode == 3) {
 			str = _get_news_string_callback[ni.callback](ni);
 		} else {
-			COPY_IN_DPARAM(0, ni.params, lengthof(ni.params));
+			Global.COPY_IN_DPARAM(0, ni.params, ni.params.length);
 			str = ni.string_id;
 		}
 
-		buf = GetString(str);
+		buf = Global.GetString(str);
 
 		s = buf;
 		d = buffer;
@@ -2353,24 +2362,24 @@ public class Gui
 		case WE_CLICK:
 			switch (e.widget) {
 				case 1: NewsItem.ShowLastNewsMessage(); break;
-				case 2: if (Global._local_player.id != Owner.OWNER_SPECTATOR) Players.ShowPlayerFinances(Global._local_player); break;
+				case 2: if (Global._local_player.id != Owner.OWNER_SPECTATOR) PlayerGui.ShowPlayerFinances(Global._local_player); break;
 				default: ViewPort.ResetObjectToPlace();
 			}
 			break;
 
-		case WindowEvents.WE_TICK: {
+		case WE_TICK: {
 			if (Global._pause) return;
 
 			if (w.as_def_d().data_1 > -1280) { /* Scrolling text */
 				w.as_def_d().data_1 -= 2;
-				Window.InvalidateWidget(w, 1);
+				w.InvalidateWidget(1);
 			}
 
 			if (w.as_def_d().data_2 > 0) { /* Red blot to show there are new unread newsmessages */
 				w.as_def_d().data_2 -= 2;
 			} else if (w.as_def_d().data_2 < 0) {
 				w.as_def_d().data_2 = 0;
-				Window.InvalidateWidget(w, 1);
+				w.InvalidateWidget(1);
 			}
 
 			break;
@@ -2443,7 +2452,7 @@ public class Gui
 			switch (e.keycode) {
 				case 'Q' | Window.WKC_CTRL:
 				case 'Q' | Window.WKC_META:
-					AskExitGame();
+					IntroGui.AskExitGame();
 					break;
 			}
 
@@ -2452,15 +2461,15 @@ public class Gui
 			switch (e.keycode) {
 				case 'C':
 				case 'Z': {
-					Point pt = GetTileBelowCursor();
+					Point pt = ViewPort.GetTileBelowCursor();
 					if (pt.x != -1) {
-						ScrollMainWindowTo(pt.x, pt.y);
+						ViewPort.ScrollMainWindowTo(pt.x, pt.y);
 						if (e.keycode == 'Z') MaxZoomIn();
 					}
 					break;
 				}
 
-				case Window.WKC_ESC: ResetObjectToPlace(); break;
+				case Window.WKC_ESC: ViewPort.ResetObjectToPlace(); break;
 				case Window.WKC_DELETE: Window.DeleteNonVitalWindows(); break;
 				case Window.WKC_DELETE | Window.WKC_SHIFT: Window.DeleteAllNonVitalWindows(); break;
 				case 'R' | Window.WKC_CTRL: Hal.MarkWholeScreenDirty(); break;
@@ -2484,7 +2493,7 @@ public class Gui
 	#endif */
 
 				case 'X':
-					Global._display_opt ^= DO_TRANS_BUILDINGS;
+					Global._display_opt ^= Global.DO_TRANS_BUILDINGS;
 					Hal.MarkWholeScreenDirty();
 					break;
 
@@ -2582,7 +2591,7 @@ public class Gui
 		Global._cur_resolution[0] = Hal._screen.width;
 		Global._cur_resolution[1] = Hal._screen.height;
 		Window.RelocateAllWindows(Hal._screen.width, Hal._screen.height);
-		ScreenSizeChanged();
+		Gfx.ScreenSizeChanged();
 		Hal.MarkWholeScreenDirty();
 	}
 	

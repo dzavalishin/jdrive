@@ -106,6 +106,8 @@ public class Global {
 	public static int _map_tile_mask;
 	public static int _map_size;
 
+	public static int[] _cur_resolution = new int[2];
+
 	public static int [][] _random_seeds = new int[2][2];
 
 	public static ColorList [] _color_list = new ColorList[16];
@@ -614,12 +616,12 @@ public class Global {
 	#endif /* ENABLE_NETWORK */
 	}
 	
-	void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
+	static void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
 	{
 		MiscGui.ShowErrorMessage( msg_1, msg_2, x, y);
 	}
 
-	void ShowErrorMessage(int msg_1, int msg_2, int x, int y)
+	static void ShowErrorMessage(int msg_1, int msg_2, int x, int y)
 	{
 		MiscGui.ShowErrorMessage( new StringID(msg_1), new StringID(msg_2), x, y);
 	}

@@ -207,7 +207,7 @@ public class Subsidies {
 			);
 
 
-	void ShowSubsidiesList()
+	static void ShowSubsidiesList()
 	{
 		Window.AllocateWindowDescFront(_subsidies_list_desc, 0);
 	}

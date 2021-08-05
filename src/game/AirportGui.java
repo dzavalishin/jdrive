@@ -120,7 +120,7 @@ public class AirportGui
 		AirportGui::BuildAirToolbWndProc
 	);
 
-	void ShowBuildAirToolbar()
+	static void ShowBuildAirToolbar()
 	{
 		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
 		Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);

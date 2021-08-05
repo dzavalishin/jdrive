@@ -1643,17 +1643,17 @@ public class TrainGui
 		TrainGui::PlayerTrainsWndProc
 	);
 
-	void ShowPlayerTrains(PlayerID player, StationID station)
+	static void ShowPlayerTrains(/*PlayerID*/ int player, /*StationID*/int station)
 	{
 		Window w;
 
-		if (player == Global._local_player) {
-			w = Window.AllocateWindowDescFront(_player_trains_desc, (station.id << 16) | player);
+		if (player == Global._local_player.id) {
+			w = Window.AllocateWindowDescFront(_player_trains_desc, (station << 16) | player);
 		} else {
-			w = Window.AllocateWindowDescFront(_other_player_trains_desc, (station.id << 16) | player);
+			w = Window.AllocateWindowDescFront(_other_player_trains_desc, (station << 16) | player);
 		}
 		if (null != w) {
-			w.caption_color = player;
+			w.caption_color = (byte) player;
 			w.hscroll.cap = 10;
 			w.vscroll.cap = 7; // maximum number of vehicles shown
 			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;

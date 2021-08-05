@@ -1074,17 +1074,18 @@ public class RoadVehGui
 	);
 
 
-	void ShowPlayerRoadVehicles(PlayerID player, StationID station)
+	//void ShowPlayerRoadVehicles(PlayerID player, StationID station)
+	static void ShowPlayerRoadVehicles(int player, int station)
 	{
 		Window w;
 
-		if ( player == Global._local_player) {
-			w = Window.AllocateWindowDescFront(_player_roadveh_desc, (station.id << 16) | player.id);
+		if ( player == Global._local_player.id) {
+			w = Window.AllocateWindowDescFront(_player_roadveh_desc, (station<< 16) | player);
 		} else  {
-			w = Window.AllocateWindowDescFront(_other_player_roadveh_desc, (station.id << 16) | player.id);
+			w = Window.AllocateWindowDescFront(_other_player_roadveh_desc, (station<< 16) | player);
 		}
 		if (w != null) {
-			w.caption_color = (byte) player.id;
+			w.caption_color = (byte) player;
 			w.vscroll.cap = 7; // maximum number of vehicles shown
 			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
 			w.resize.step_height = VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL;
