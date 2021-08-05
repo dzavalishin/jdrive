@@ -1,6 +1,7 @@
 package game.tables;
 
 import game.Str;
+import game.util.BitOps;
 
 public class SmallMapGuiTables 
 {
@@ -137,6 +138,160 @@ public class SmallMapGuiTables
 		0x20,Str.STR_0129_INDUSTRIES,
 		 0xFFFF // MKEND()
 	};
+
 	
+	
+	
+	
+	
+	
+	
+	//enum { IND_OFFS = 6 };
+	public static final int IND_OFFS = 6;
+	
+
+	static final int  _legend_table[][] = {
+		_legend_land_contours,
+		_legend_vehicles,
+		null,
+		_legend_routes,
+		_legend_vegetation,
+		_legend_land_owners,
+
+		_legend_industries_normal,
+		_legend_industries_hilly,
+		_legend_industries_desert,
+		_legend_industries_candy
+	};
+
+	
+	
+	
+	//#if defined(TTD_ALIGNMENT_4)
+		static  void WRITE_PIXELS(Pixel d, int val)
+		{
+	/*#	if defined(TTD_BIG_ENDIAN)
+			d[0] = BitOps.GB(val, 24, 8);
+			d[1] = BitOps.GB(val, 16, 8);
+			d[2] = BitOps.GB(val,  8, 8);
+			d[3] = BitOps.GB(val,  0, 8);
+	#	elif defined(TTD_LITTLE_ENDIAN) */
+			d[0] = BitOps.GB(val,  0, 8);
+			d[1] = BitOps.GB(val,  8, 8);
+			d[2] = BitOps.GB(val, 16, 8);
+			d[3] = BitOps.GB(val, 24, 8);
+	//#	endif
+		}
+
+	/* need to use OR, otherwise we will overwrite the wrong pixels at the edges :( */
+		static  void WRITE_PIXELS_OR(Pixel d, int val)
+		{
+	/*#	if defined(TTD_BIG_ENDIAN)
+			d[0] |= BitOps.GB(val, 24, 8);
+			d[1] |= BitOps.GB(val, 16, 8);
+			d[2] |= BitOps.GB(val,  8, 8);
+			d[3] |= BitOps.GB(val,  0, 8);
+	#	elif defined(TTD_LITTLE_ENDIAN) */
+			d[0] |= BitOps.GB(val,  0, 8);
+			d[1] |= BitOps.GB(val,  8, 8);
+			d[2] |= BitOps.GB(val, 16, 8);
+			d[3] |= BitOps.GB(val, 24, 8);
+	//#	endif
+		}
+/*		
+	#else
+	#	define WRITE_PIXELS(dst, val)		*(int*)(dst) = (val);
+	#	define WRITE_PIXELS_OR(dst,val)	*(int*)(dst) |= (val);
+	#endif
+*/
+	/*
+	#if defined(TTD_BIG_ENDIAN)
+	#	define MKCOLOR(x) BSWAP32(x)
+	#elif defined(TTD_LITTLE_ENDIAN)
+	#	define MKCOLOR(x) (x)
+	#endif
+	*/
+	static int MKCOLOR(int x) { return (x); }
+	
+	/* Height encodings; 16 levels XXX - needs updating for more/finer heights! */
+	static final int _map_height_bits[] = {
+		MKCOLOR(0x5A5A5A5A),
+		MKCOLOR(0x5A5B5A5B),
+		MKCOLOR(0x5B5B5B5B),
+		MKCOLOR(0x5B5C5B5C),
+		MKCOLOR(0x5C5C5C5C),
+		MKCOLOR(0x5C5D5C5D),
+		MKCOLOR(0x5D5D5D5D),
+		MKCOLOR(0x5D5E5D5E),
+		MKCOLOR(0x5E5E5E5E),
+		MKCOLOR(0x5E5F5E5F),
+		MKCOLOR(0x5F5F5F5F),
+		MKCOLOR(0x5F1F5F1F),
+		MKCOLOR(0x1F1F1F1F),
+		MKCOLOR(0x1F271F27),
+		MKCOLOR(0x27272727),
+		MKCOLOR(0x27272727),
+	};
+	
+
+	
+	
+	
+	
+	static class AndOr {
+		int mor;
+		int mand;
+
+		public AndOr(int o, int a) {
+			mor = o;
+			mand = a;
+		}
+	}
+	
+
+	static final AndOr _smallmap_contours_andor[] = {
+		new AndOr(MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)),
+		new AndOr(MKCOLOR(0x000A0A00),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)),
+		new AndOr(MKCOLOR(0x98989898),MKCOLOR(0x00000000)),
+		new AndOr(MKCOLOR(0xCACACACA),MKCOLOR(0x00000000)),
+		new AndOr(MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)),
+		new AndOr(MKCOLOR(0xB5B5B5B5),MKCOLOR(0x00000000)),
+		new AndOr(MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)),
+		new AndOr(MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x000A0A00),MKCOLOR(0xFF0000FF)),
+	};
+
+	static final AndOr _smallmap_vehicles_andor[] = {
+		new AndOr(MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)),
+		new AndOr(MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)),
+		new AndOr(MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0xCACACACA),MKCOLOR(0x00000000)),
+		new AndOr(MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)),
+		new AndOr(MKCOLOR(0xB5B5B5B5),MKCOLOR(0x00000000)),
+		new AndOr(MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)),
+		new AndOr(MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)),
+	};
+
+	static final AndOr _smallmap_vegetation_andor[] = {
+		new AndOr(MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)),
+		new AndOr(MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00575700),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0xCACACACA),MKCOLOR(0x00000000)),
+		new AndOr(MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)),
+		new AndOr(MKCOLOR(0xB5B5B5B5),MKCOLOR(0x00000000)),
+		new AndOr(MKCOLOR(0x00000000),MKCOLOR(0xFFFFFFFF)),
+		new AndOr(MKCOLOR(0x00B5B500),MKCOLOR(0xFF0000FF)),
+		new AndOr(MKCOLOR(0x00D7D700),MKCOLOR(0xFF0000FF)),
+	};
 	
 }
