@@ -1,9 +1,11 @@
 package game;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 import game.Gfx.BlitterParams;
 import game.tables.PaletteTabs;
+import game.util.ArrayPtr;
 import game.util.BitOps;
 import game.util.Colour;
 import game.util.Pixel;
@@ -730,7 +732,7 @@ public class Gfx extends PaletteTabs
 		int height_org;
 		int pitch;
 		byte info;
-		
+
 		BlitterParams(Pixel screen)
 		{
 			dst = new Pixel(screen);
@@ -740,7 +742,7 @@ public class Gfx extends PaletteTabs
 		{
 			dst = new Pixel(screen, shift);
 		}
-	
+
 	} 
 
 	private static void GfxBlitTileZoomIn(BlitterParams bp)
@@ -749,7 +751,7 @@ public class Gfx extends PaletteTabs
 		//int src_o_shift = 0; // start index to access, replace src_o_data += x with src_o_shift += x 
 		//final byte* src;
 		Pixel src_o = new Pixel(bp.sprite);
-		
+
 		//final byte[] src_data;
 		//int src_shift = 0;
 
@@ -792,7 +794,7 @@ public class Gfx extends PaletteTabs
 						//src -= skip;
 						//src_shift -= skip;
 						src.madd(-skip);
-						
+
 						num += skip;
 
 						if (num <= 0) continue;
@@ -813,13 +815,13 @@ public class Gfx extends PaletteTabs
 						dst_data[2+dst_shift] = ctab[src_data[2+src_shift]];
 						dst_data[1+dst_shift] = ctab[src_data[1+src_shift]];
 						dst_data[0+dst_shift] = ctab[src_data[0+src_shift]];
-						*/
+						 */
 						dst.w( 3, ctab[src.r(3)] );
 						dst.w( 2, ctab[src.r(2)] );
 						dst.w( 1, ctab[src.r(1)] );
 						dst.w( 0, ctab[src.r(0)] );
-						
-						
+
+
 						//dst_shift += 4;
 						//src_shift += 4;
 						src.madd(4);
@@ -837,14 +839,14 @@ public class Gfx extends PaletteTabs
 				//bp.dst += bp.pitch;
 				//bp.dst_offset += bp.pitch;
 				bp.dst.madd( bp.pitch );
-				
+
 			} while (--bp.height != 0);
 		} 
 		else if(0 != (bp.mode & 2) ) 
 		{
 			//src_o_shift += BitOps.READ_LE_UINT16(src_o_data, bp.start_y * 2);
 			src_o.madd( BitOps.READ_LE_UINT16(src_o.getMem(), bp.start_y * 2) );
-			
+
 			do {
 				do {
 					//done = src_o_data[0+src_o_shift];
@@ -885,7 +887,7 @@ public class Gfx extends PaletteTabs
 
 				//bp.dst_offset += bp.pitch;
 				bp.dst.madd(bp.pitch);
-				
+
 			} while (--bp.height != 0);
 		} else {
 			//src_o_shift += BitOps.READ_LE_UINT16(src_o_data, bp.start_y * 2);
@@ -901,13 +903,13 @@ public class Gfx extends PaletteTabs
 					//src_data = src_o_data;
 					//src_shift = src_o_shift + 2;
 					Pixel src = new Pixel( src_o, 2 );
-					
+
 					//src_o_shift += num + 2;
 					src_o.madd( num + 2 );
 
 					//dst_data = bp.dst_mem;
 					//dst_shift = bp.dst_offset;
-					
+
 					Pixel dst = new Pixel(bp.dst);
 
 					if ( (skip -= bp.start_x) > 0) {
@@ -955,7 +957,7 @@ public class Gfx extends PaletteTabs
 		//int src_shift = 0;
 		Pixel src = new Pixel(bp.sprite); 
 		///* Pixel */ byte  *dst = bp.dst;
-		
+
 		/* Pixel */ 
 		//byte  []dst_data = bp.dst_mem;
 		//int dst_shift = bp.dst_offset;
@@ -1023,12 +1025,12 @@ public class Gfx extends PaletteTabs
 						if (src_data[1+src_shift] != 0) dst_data[1+dst_shift] = src_data[1+src_shift];
 						if (src_data[2+src_shift] != 0) dst_data[2+dst_shift] = src_data[2+src_shift];
 						if (src_data[3+src_shift] != 0) dst_data[3+dst_shift] = src_data[3+src_shift];
-						*/
+						 */
 						if( src.r(0) != 0 ) dst.w(0, src.r(0));
 						if( src.r(1) != 0 ) dst.w(1, src.r(1));
 						if( src.r(2) != 0 ) dst.w(2, src.r(2));
 						if( src.r(3) != 0 ) dst.w(3, src.r(3));
-						
+
 						//dst_shift += 4;
 						//src_shift += 4;
 						src.madd(4);
@@ -1618,12 +1620,12 @@ public class Gfx extends PaletteTabs
 			bp.start_x = start_x;
 			bp.dst.madd( x >> dpi.zoom );
 
-				if ( (x = x + bp.width - dpi.width) > 0) {
-					bp.width -= x;
-					if (bp.width <= 0) return;
-				}
+			if ( (x = x + bp.width - dpi.width) > 0) {
+				bp.width -= x;
+				if (bp.width <= 0) return;
+			}
 
-				zf_tile[dpi.zoom].accept(bp); // TODO apply?
+			zf_tile[dpi.zoom].accept(bp); // TODO apply?
 		} else {
 			bp.sprite.madd( bp.width * (bp.height & ~zoom_mask) );
 			bp.height &= zoom_mask;
@@ -1655,12 +1657,12 @@ public class Gfx extends PaletteTabs
 			}
 			bp.dst.madd( x >> dpi.zoom );
 
-				if (bp.width > dpi.width - x) {
-					bp.width = dpi.width - x;
-					if (bp.width <= 0) return;
-				}
+			if (bp.width > dpi.width - x) {
+				bp.width = dpi.width - x;
+				if (bp.width <= 0) return;
+			}
 
-				zf_uncomp[dpi.zoom].accept(bp);
+			zf_uncomp[dpi.zoom].accept(bp);
 		}
 	}
 
@@ -1686,7 +1688,6 @@ public class Gfx extends PaletteTabs
 	static void DoPaletteAnimations()
 	{
 		final Colour [] s;
-		Colour d;
 		/* Amount of colors to be rotated.
 		 * A few more for the DOS palette, because the water colors are
 		 * 245-254 for DOS and 217-226 for Windows.  */
@@ -1696,49 +1697,49 @@ public class Gfx extends PaletteTabs
 		int i;
 		int j;
 
+		//Colour d;
 		//d = _cur_palette[217];
 		//memcpy(old_val, d, c * sizeof(old_val));
+		ArrayPtr<Colour> d = new ArrayPtr<Colour>( _cur_palette, 217 );  
 
 		System.arraycopy(_cur_palette, 217, old_val, 0, c);
-		
+
 		// Dark blue water
 		s = (GameOptions._opt.landscape == Landscape.LT_CANDY) ? ev.ac : ev.a;
 		j = EXTR(320, 5);
 		for (i = 0; i != 5; i++) {
 			//*d++ = s[j];
-			d[i] = s[j];
+			d.wpp(s[j]);
 			j++;
 			if (j == 5) j = 0;
 		}
-		// TODO d += 4!
 
 		// Glittery water
 		s = (GameOptions._opt.landscape == Landscape.LT_CANDY) ? ev.bc : ev.b;
 		j = EXTR(128, 15);
 		for (i = 0; i != 5; i++) {
 			//*d++ = s[j];
-			d[i] = s[j];
+			d.wpp(s[j]);
 			j += 3;
 			if (j >= 15) j -= 15;
 		}
-		// TODO d += 4
 
 		s = ev.e;
 		j = EXTR2(512, 5);
 		for (i = 0; i != 5; i++) {
 			//*d++ = s[j];
-			d[i] = s[j];
+			//d[i] = s[j];
+			d.wpp(s[j] );
 			j++;
 			if (j == 5) j = 0;
 		}
-		// TODO d += 4
 
 		// Oil refinery fire animation
 		s = ev.oil_ref;
 		j = EXTR2(512, 7);
 		for (i = 0; i != 7; i++) {
 			//*d++ = s[j];
-			d[i] = s[j];
+			d.wpp(s[j]);
 			j++;
 			if (j == 7) j = 0;
 		}
@@ -1746,8 +1747,10 @@ public class Gfx extends PaletteTabs
 
 		// Radio tower blinking
 		{
-			byte i = (Global._timer_counter >> 1) & 0x7F;
-			byte v;
+			//byte 
+			i = (Global._timer_counter >> 1) & 0x7F;
+			//byte 
+			int v;
 
 			/*
 			(v = 255, i < 0x3f) ||
@@ -1758,11 +1761,11 @@ public class Gfx extends PaletteTabs
 			else if(i >= 0x4A && i < 0x75)	v = 128;
 			else v = 20;
 
-
-			d.r = v;
+			/*d.r = v;
 			d.g = 0;
 			d.b = 0;
-			d++;
+			d++;*/
+			d.wpp( new Colour(v, 0, 0) );
 
 			i ^= 0x40;
 
@@ -1773,10 +1776,11 @@ public class Gfx extends PaletteTabs
 			else if(i >= 0x4A && i < 0x75)	v = 128;
 			else v = 20;
 
-			d.r = v;
+			/*d.r = v;
 			d.g = 0;
 			d.b = 0;
-			d++;
+			d++;*/
+			d.wpp( new Colour(v, 0, 0) );
 		}
 
 		// Handle lighthouse and stadium animation
@@ -1784,11 +1788,10 @@ public class Gfx extends PaletteTabs
 		j = EXTR(256, 4);
 		for (i = 0; i != 4; i++) {
 			//*d++ = s[j];
-			d[i] = s[j];
+			d.wpp(s[j]);
 			j++;
 			if (j == 4) j = 0;
 		}
-		// TODO d += 4
 
 		/* TODO // Animate water for old DOS graphics
 		if (Global._use_dos_palette) {
@@ -1815,7 +1818,10 @@ public class Gfx extends PaletteTabs
 			// TODO d += 4
 		} */
 
-		if (memcmp(old_val, _cur_palette[217], c * sizeof(old_val[0])) != 0) {
+		//Arrays.compare(null, null)
+
+		if (memcmp(old_val, _cur_palette+217, c * sizeof(old_val[0])) != 0) 
+		{
 			if (_pal_first_dirty > 217) _pal_first_dirty = 217;
 			if (_pal_last_dirty < 217 + c) _pal_last_dirty = 217 + c;
 		}
@@ -1833,17 +1839,17 @@ public class Gfx extends PaletteTabs
 		// 2 equals space.
 		for (i = 2; i != 226; i++) {
 			//*b++ = i != 97 && (i < 99 || i > 113) && i != 116 && i != 117 && (i < 123 || i > 129) && (i < 151 || i > 153) && i != 155 ? GetSprite(i).width : 0;
-			_stringwidth_table[bp++] = i != 97 && (i < 99 || i > 113) && i != 116 && i != 117 && (i < 123 || i > 129) && (i < 151 || i > 153) && i != 155 ? GetSprite(i).width : 0;
+			_stringwidth_table[bp++] = (byte) (i != 97 && (i < 99 || i > 113) && i != 116 && i != 117 && (i < 123 || i > 129) && (i < 151 || i > 153) && i != 155 ? SpriteCache.GetSprite(i).width : 0);
 		}
 
 		for (i = 226; i != 450; i++) {
 			//*b++ = i != 321 && (i < 323 || i > 353) && i != 367 && (i < 375 || i > 377) && i != 379 ? GetSprite(i).width + 1 : 0;
-			_stringwidth_table[bp++] = i != 321 && (i < 323 || i > 353) && i != 367 && (i < 375 || i > 377) && i != 379 ? GetSprite(i).width + 1 : 0;
+			_stringwidth_table[bp++] = (byte) (i != 321 && (i < 323 || i > 353) && i != 367 && (i < 375 || i > 377) && i != 379 ? SpriteCache.GetSprite(i).width + 1 : 0);
 		}
 
 		for (i = 450; i != 674; i++) {
 			//*b++ = (i < 545 || i > 577) && i != 585 && i != 587 && i != 588 && (i < 590 || i > 597) && (i < 599 || i > 601) && i != 603 && i != 633 && i != 665 ? GetSprite(i).width + 1 : 0;
-			_stringwidth_table[bp++] = (i < 545 || i > 577) && i != 585 && i != 587 && i != 588 && (i < 590 || i > 597) && (i < 599 || i > 601) && i != 603 && i != 633 && i != 665 ? GetSprite(i).width + 1 : 0;
+			_stringwidth_table[bp++] = (byte) ((i < 545 || i > 577) && i != 585 && i != 587 && i != 588 && (i < 590 || i > 597) && (i < 599 || i > 601) && i != 603 && i != 633 && i != 665 ? SpriteCache.GetSprite(i).width + 1 : 0);
 		}
 	}
 
@@ -1858,8 +1864,8 @@ public class Gfx extends PaletteTabs
 	{
 		/* TODO ScreenSizeChanged()
 		// check the dirty rect
-		if (_invalid_rect.right >= Hal._screen.width) _invalid_rect.right = Hal._screen.width;
-		if (_invalid_rect.bottom >= Hal._screen.height) _invalid_rect.bottom = Hal._screen.height;
+		if (Hal._invalid_rect.right >= Hal._screen.width) Hal._invalid_rect.right = Hal._screen.width;
+		if (Hal._invalid_rect.bottom >= Hal._screen.height) Hal._invalid_rect.bottom = Hal._screen.height;
 
 		// screen size changed and the old bitmap is invalid now, so we don't want to undraw it
 		Hal._cursor.visible = false;
@@ -1872,15 +1878,19 @@ public class Gfx extends PaletteTabs
 			Hal._cursor.visible = false;
 			memcpy_pitch(
 					//Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
-					Hal._screen.dst_ptr,					
+					Hal._screen.dst_ptr.getMem(),					
 					_cursor_backup,
 
 					Hal._cursor.draw_size.x, 
 					Hal._cursor.draw_size.y,
 
 					//Hal._cursor.draw_size.x, 
-					Hal._cursor.draw_size.x + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch, 
-					Hal._screen.pitch);
+					Hal._cursor.draw_size.x, 
+					Hal._screen.pitch,
+
+					Hal._screen.dst_ptr.getDisplacement() + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
+					0
+					);
 
 			Global.hal.make_dirty(Hal._cursor.draw_pos.x, Hal._cursor.draw_pos.y, Hal._cursor.draw_size.x, Hal._cursor.draw_size.y);
 		}
@@ -1921,19 +1931,21 @@ public class Gfx extends PaletteTabs
 		Hal._cursor.draw_pos.y = y;
 		Hal._cursor.draw_size.y = h;
 
-		assert(w * h < (int)sizeof(_cursor_backup));
+		assert(w * h < _cursor_backup.length);
 
 		// Make backup of stuff below cursor
 		memcpy_pitch(
 				_cursor_backup,
 				//Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
-				Hal._screen.dst_ptr,
+				Hal._screen.dst_ptr.getMem(),
 
 				Hal._cursor.draw_size.x, 
 				Hal._cursor.draw_size.y, 
 				Hal._screen.pitch, 
-				//Hal._cursor.draw_size.x
-				Hal._cursor.draw_size.x + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch
+				Hal._cursor.draw_size.x,
+
+				0,
+				Hal._screen.dst_ptr.getDisplacement()+ Hal._cursor.draw_size.x + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch
 				);
 
 		// Draw cursor on screen
@@ -1985,80 +1997,111 @@ public class Gfx extends PaletteTabs
 
 	static void DrawDirtyBlocks()
 	{
-		byte []b = _dirty_blocks;
-		final int w = BitOps.ALIGN(Hal._screen.width, 64);
-		final int h = BitOps.ALIGN(Hal._screen.height, 8);
+		//byte []b = _dirty_blocks;
+		//int bp = 0;
+		Pixel b = new Pixel(_dirty_blocks);
+
+		final int w0 = BitOps.ALIGN(Hal._screen.width, 64);
+		final int h0 = BitOps.ALIGN(Hal._screen.height, 8);
 		int x;
 		int y;
 
-		int bp = 0;
 
 		y = 0;
 		do {
 			x = 0;
 			do {
-				if (b[bp] != 0) {
+				if (b.r(0) != 0) {
 					int left;
 					int top;
 					int right = x + 64;
 					int bottom = y;
-					byte *p = b;
+					//byte *p = b;
+					//ArrayPtr<Byte> p = new ArrayPtr<Byte>(b);
+					Pixel p = new Pixel(b);
 					int h2;
 
 					// First try coalescing downwards
 					do {
-						*p = 0;
-						p += DIRTY_BYTES_PER_LINE;
+						//*p = 0;
+						p.w(0, (byte) 0);
+
+						//p += DIRTY_BYTES_PER_LINE;
+						p.madd(DIRTY_BYTES_PER_LINE);
+
 						bottom += 8;
-					} while (bottom != h && *p != 0);
+					} 
+					while (bottom != h0 && p.r(0) != 0);
+					//while (bottom != h && *p != 0);
 
 					// Try coalescing to the right too.
 					h2 = (bottom - y) >> 3;
 					assert(h2 > 0);
 					p = b;
 
-					while (right != w) {
-						byte *p2 = ++p;
-						int h = h2;
+					while (right != w0) {
+						//byte *p2 = ++p;
+						p.madd(1);
+						Pixel p2 = new Pixel(p);
+
+						int h3 = h2;
 						// Check if a full line of dirty flags is set.
+						boolean no_more_coalesc = false;
 						do {
-							if (!*p2) goto no_more_coalesc;
-							p2 += DIRTY_BYTES_PER_LINE;
-						} while (--h != 0);
+							//if (!*p2) goto no_more_coalesc;
+							if (0==p2.r(0))
+							{	
+								//goto no_more_coalesc;
+								no_more_coalesc = true;
+								break;
+							}
+							//p2 += DIRTY_BYTES_PER_LINE;
+							p2.madd(DIRTY_BYTES_PER_LINE);
+						} while (--h3 != 0);
 
-						// Wohoo, can combine it one step to the right!
-						// Do that, and clear the bits.
-						right += 64;
+						if(no_more_coalesc)
+							break;
+						{
+							// Wohoo, can combine it one step to the right!
+							// Do that, and clear the bits.
+							right += 64;
 
-						h = h2;
-						p2 = p;
-						do {
-							*p2 = 0;
-							p2 += DIRTY_BYTES_PER_LINE;
-						} while (--h != 0);
+							h3 = h2;
+							p2 = p;
+							do {
+								//*p2 = 0;
+								p2.w(0, (byte) 0);
+								//p2 += DIRTY_BYTES_PER_LINE;
+								p2.madd( DIRTY_BYTES_PER_LINE );
+							} while (--h3 != 0);
+						}
 					}
-					no_more_coalesc:
+					//no_more_coalesc:
 
 						left = x;
 					top = y;
 
-					if (left   < _invalid_rect.left  ) left   = _invalid_rect.left;
-					if (top    < _invalid_rect.top   ) top    = _invalid_rect.top;
-					if (right  > _invalid_rect.right ) right  = _invalid_rect.right;
-					if (bottom > _invalid_rect.bottom) bottom = _invalid_rect.bottom;
+					if (left   < Hal._invalid_rect.left  ) left   = Hal._invalid_rect.left;
+					if (top    < Hal._invalid_rect.top   ) top    = Hal._invalid_rect.top;
+					if (right  > Hal._invalid_rect.right ) right  = Hal._invalid_rect.right;
+					if (bottom > Hal._invalid_rect.bottom) bottom = Hal._invalid_rect.bottom;
 
 					if (left < right && top < bottom) {
 						RedrawScreenRect(left, top, right, bottom);
 					}
 
 				}
-			} while (bp++, (x += 64) != w);
-		} while (b += -(w >> 6) + DIRTY_BYTES_PER_LINE, (y += 8) != h);
+				//bp++;
+				b.madd(1);
+			} while ((x += 64) != w0);
+			//b += -(w0 >> 6) + DIRTY_BYTES_PER_LINE;
+			b.madd( -(w0 >> 6) + DIRTY_BYTES_PER_LINE );
+		} while ((y += 8) != h0);
 
-		_invalid_rect.left = w;
-		_invalid_rect.top = h;
-		_invalid_rect.right = 0;
-		_invalid_rect.bottom = 0;
+		Hal._invalid_rect.left = w0;
+		Hal._invalid_rect.top = h0;
+		Hal._invalid_rect.right = 0;
+		Hal._invalid_rect.bottom = 0;
 	}
 
 	/*
@@ -2075,10 +2118,10 @@ public class Gfx extends PaletteTabs
 
 		if (left >= right || top >= bottom) return;
 
-		if (left   < _invalid_rect.left  ) _invalid_rect.left   = left;
-		if (top    < _invalid_rect.top   ) _invalid_rect.top    = top;
-		if (right  > _invalid_rect.right ) _invalid_rect.right  = right;
-		if (bottom > _invalid_rect.bottom) _invalid_rect.bottom = bottom;
+		if (left   < Hal._invalid_rect.left  ) Hal._invalid_rect.left   = left;
+		if (top    < Hal._invalid_rect.top   ) Hal._invalid_rect.top    = top;
+		if (right  > Hal._invalid_rect.right ) Hal._invalid_rect.right  = right;
+		if (bottom > Hal._invalid_rect.bottom) Hal._invalid_rect.bottom = bottom;
 
 		left >>= 6;
 		top  >>= 3;
@@ -2280,61 +2323,61 @@ class DrawStringStateMachine
 
 		while(true) // for goto check_bounds: replacement 
 		{
-		//check_bounds:
+			//check_bounds:
 			if (y + 19 <= dpi.top || dpi.top + dpi.height <= y) {
 				//skip_char:;
 				skipChar();
 			}
 
-		for(;;) {
-			c = sc[sp++]; //*string++;
-			//skip_cont:;
-			if (c == 0) {
-				Gfx._stringwidth_out = base;
-				return x;
-			}
-			if (c >= Gfx.ASCII_LETTERSTART) {
-				if (x >= dpi.left + dpi.width)
-				{
-					//goto skip_char;
-					skipChar();
-					continue;
+			for(;;) {
+				c = sc[sp++]; //*string++;
+				//skip_cont:;
+				if (c == 0) {
+					Gfx._stringwidth_out = base;
+					return x;
 				}
-				if (x + 26 >= dpi.left) {
-					Gfx.GfxMainBlitter(SpriteCache.GetSprite(base + 2 + c - Gfx.ASCII_LETTERSTART), x, y, 1);
-				}
-				x += Gfx.GetCharacterWidth(base + c);
-			} else if (c == Gfx.ASCII_NL) { // newline = {}
-				x = xo;
-				y += 10;
-				if (base != 0) {
-					y -= 4;
-					if (base != 0xE0)
-						y += 12;
-				}
-				//goto check_bounds;
-				break;
+				if (c >= Gfx.ASCII_LETTERSTART) {
+					if (x >= dpi.left + dpi.width)
+					{
+						//goto skip_char;
+						skipChar();
+						continue;
+					}
+					if (x + 26 >= dpi.left) {
+						Gfx.GfxMainBlitter(SpriteCache.GetSprite(base + 2 + c - Gfx.ASCII_LETTERSTART), x, y, 1);
+					}
+					x += Gfx.GetCharacterWidth(base + c);
+				} else if (c == Gfx.ASCII_NL) { // newline = {}
+					x = xo;
+					y += 10;
+					if (base != 0) {
+						y -= 4;
+						if (base != 0xE0)
+							y += 12;
+					}
+					//goto check_bounds;
+					break;
 
-			} else if (c >= Gfx.ASCII_COLORSTART) { // change color?
-				color = (byte)(c - Gfx.ASCII_COLORSTART);
-				switchColor();
-				//goto switch_color;
-				//goto check_bounds;
-				break;
-			} else if (c == Gfx.ASCII_SETX) { // {SETX}
-				x = xo + (byte)sc[sp++]; //*string++;
-			} else if (c == Gfx.ASCII_SETXY) {// {SETXY}
-				x = xo + (byte)sc[sp++]; // *string++;
-				y = yo + (byte)sc[sp++]; // *string++;
-			} else if (c == Gfx.ASCII_TINYFONT) { // {TINYFONT}
-				base = 0xE0;
-			} else if (c == Gfx.ASCII_BIGFONT) { // {BIGFONT}
-				base = 0x1C0;
-			} else {
-				Global.error("Unknown string command character %d\n", c);
+				} else if (c >= Gfx.ASCII_COLORSTART) { // change color?
+					color = (byte)(c - Gfx.ASCII_COLORSTART);
+					switchColor();
+					//goto switch_color;
+					//goto check_bounds;
+					break;
+				} else if (c == Gfx.ASCII_SETX) { // {SETX}
+					x = xo + (byte)sc[sp++]; //*string++;
+				} else if (c == Gfx.ASCII_SETXY) {// {SETXY}
+					x = xo + (byte)sc[sp++]; // *string++;
+					y = yo + (byte)sc[sp++]; // *string++;
+				} else if (c == Gfx.ASCII_TINYFONT) { // {TINYFONT}
+					base = 0xE0;
+				} else if (c == Gfx.ASCII_BIGFONT) { // {BIGFONT}
+					base = 0x1C0;
+				} else {
+					Global.error("Unknown string command character %d\n", c);
+				}
 			}
-		}
-		// break from loop above leads to check_bounds label
+			// break from loop above leads to check_bounds label
 		}
 	}
 
@@ -2371,7 +2414,7 @@ class Colour {
 	byte g;
 	byte b;
 } 
-*/
+ */
 
 //typedef void (*BlitZoomFunc)(BlitterParams bp);
 @FunctionalInterface

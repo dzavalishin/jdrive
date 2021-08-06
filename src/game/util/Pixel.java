@@ -106,9 +106,8 @@ public class Pixel
 	}
 	
 	
-	public byte[] getMem() {
-		return mem;
-	}
+	public byte[] getMem() 			{		return mem;		}
+	public int getDisplacement() 	{		return displ;	}
 
 	public void copyFrom(Pixel src, int num) 
 	{
