@@ -1687,7 +1687,7 @@ public class Gfx extends PaletteTabs
 
 	static void DoPaletteAnimations()
 	{
-		final Colour [] s;
+		Colour [] s;
 		/* Amount of colors to be rotated.
 		 * A few more for the DOS palette, because the water colors are
 		 * 245-254 for DOS and 217-226 for Windows.  */
@@ -1819,8 +1819,12 @@ public class Gfx extends PaletteTabs
 		} */
 
 		//Arrays.compare(null, null)
-
-		if (memcmp(old_val, _cur_palette+217, c * sizeof(old_val[0])) != 0) 
+		//BitOps.memcmp()
+		//int cmp = Arrays<Colour>.compare(old_val, 0, c, _cur_palette, 217, 217+c);
+		boolean cmp = Arrays.equals(old_val, 0, c, _cur_palette, 217, 217+c);
+		
+		//if (memcmp(old_val, _cur_palette+217, c * sizeof(old_val[0])) != 0) 
+		if (cmp) 
 		{
 			if (_pal_first_dirty > 217) _pal_first_dirty = 217;
 			if (_pal_last_dirty < 217 + c) _pal_last_dirty = 217 + c;
