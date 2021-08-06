@@ -951,12 +951,15 @@ public class Gfx extends PaletteTabs
 
 	private static void GfxBlitZoomInUncomp(BlitterParams bp)
 	{
-		final byte [] src_data = bp.sprite;
-		int src_shift = 0;
+		//final byte [] src_data = bp.sprite;
+		//int src_shift = 0;
+		Pixel src = new Pixel(bp.sprite); 
 		///* Pixel */ byte  *dst = bp.dst;
+		
 		/* Pixel */ 
-		byte  []dst_data = bp.dst_mem;
-		int dst_shift = bp.dst_offset;
+		//byte  []dst_data = bp.dst_mem;
+		//int dst_shift = bp.dst_offset;
+		Pixel dst = new Pixel(bp.dst);
 
 		int height = bp.height;
 		int width = bp.width;
@@ -971,12 +974,16 @@ public class Gfx extends PaletteTabs
 
 				do {
 					for (i = 0; i != width; i++) {
-						byte b = ctab[src_data[i+src_shift]];
+						//byte b = ctab[src_data[i+src_shift]];
+						byte b = ctab[src.r(i)];
 
-						if (b != 0) dst_data[i+dst_shift] = b;
+						//if (b != 0) dst_data[i+dst_shift] = b;
+						if (b != 0) dst.w(i, b);
 					}
-					src_shift += bp.width_org;
-					dst_shift += bp.pitch;
+					//src_shift += bp.width_org;
+					//dst_shift += bp.pitch;
+					src.madd(bp.width_org);
+					dst.madd(bp.pitch);
 				} while (--height != 0);
 			}
 		} else if(0 != (bp.mode & 2) ) {
@@ -985,41 +992,62 @@ public class Gfx extends PaletteTabs
 
 				do {
 					for (i = 0; i != width; i++)
-						if (src_data[i+src_shift] != 0) dst_data[i+dst_shift] = ctab[dst_data[i+dst_shift]];
-					src_shift += bp.width_org;
-					dst_shift += bp.pitch;
+					{
+						//if (src_data[i+src_shift] != 0) dst_data[i+dst_shift] = ctab[dst_data[i+dst_shift]];
+						if (src.r(i) != 0) dst.w(i, ctab[dst.r(i)]);
+					}
+					//src_shift += bp.width_org;
+					//dst_shift += bp.pitch;
+					src.madd(bp.width_org);
+					dst.madd(bp.pitch);
 				} while (--height != 0);
 			}
 		} else {
 			if (0==(bp.info & 1)) {
 				do {
 					//memcpy(dst, src, width);
-					System.arraycopy(src_data, src_shift, dst_data, dst_shift, width);
-					src_shift += bp.width_org;
-					dst_shift += bp.pitch;
+					//System.arraycopy(src_data, src_shift, dst_data, dst_shift, width);
+					dst.copyFrom( src, width);
+					//src_shift += bp.width_org;
+					//dst_shift += bp.pitch;
+					src.madd(bp.width_org);
+					dst.madd(bp.pitch);
 				} while (--height != 0);
 			} else {
 				do {
 					int n = width;
 
 					for (; n >= 4; n -= 4) {
+						/*
 						if (src_data[0+src_shift] != 0) dst_data[0+dst_shift] = src_data[0+src_shift];
 						if (src_data[1+src_shift] != 0) dst_data[1+dst_shift] = src_data[1+src_shift];
 						if (src_data[2+src_shift] != 0) dst_data[2+dst_shift] = src_data[2+src_shift];
 						if (src_data[3+src_shift] != 0) dst_data[3+dst_shift] = src_data[3+src_shift];
-
-						dst_shift += 4;
-						src_shift += 4;
+						*/
+						if( src.r(0) != 0 ) dst.w(0, src.r(0));
+						if( src.r(1) != 0 ) dst.w(1, src.r(1));
+						if( src.r(2) != 0 ) dst.w(2, src.r(2));
+						if( src.r(3) != 0 ) dst.w(3, src.r(3));
+						
+						//dst_shift += 4;
+						//src_shift += 4;
+						src.madd(4);
+						dst.madd(4);
 					}
 
 					for (; n != 0; n--) {
-						if (src_data[0+src_shift] != 0) dst_data[0+dst_shift] = src_data[0+src_shift];
-						src_shift++;
-						dst_shift++;
+						//if (src_data[0+src_shift] != 0) dst_data[0+dst_shift] = src_data[0+src_shift];
+						if( src.r(0) != 0 ) dst.w(0, src.r(0));
+						//src_shift++;
+						//dst_shift++;
+						src.madd(1);
+						dst.madd(1);
 					}
 
-					src_shift += bp.width_org - width;
-					dst_shift += bp.pitch - width;
+					//src_shift += bp.width_org - width;
+					//dst_shift += bp.pitch - width;
+					src.madd(bp.width_org - width);
+					dst.madd(bp.pitch - width);
 				} while (--height != 0);
 			}
 		}
