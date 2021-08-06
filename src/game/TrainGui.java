@@ -57,7 +57,7 @@ public class TrainGui
 		Global.SetDParam(0, Str.STR_8838_N_A);
 		Global.SetDParam(2, Str.STR_EMPTY);
 		if (rvi.capacity != 0) {
-			Global.SetDParam(0, Global._cargoc.names_long[rvi.cargo_type].id);
+			Global.SetDParam(0, Global._cargoc.names_long[rvi.cargo_type]);
 			Global.SetDParam(1, rvi.capacity << multihead);
 			Global.SetDParam(2, Str.STR_9842_REFITTABLE);
 		}
@@ -98,7 +98,7 @@ public class TrainGui
 		y += 10;
 
 		/* Cargo type + capacity */
-		Global.SetDParam(0, Global._cargoc.names_long[rvi.cargo_type].id);
+		Global.SetDParam(0, Global._cargoc.names_long[rvi.cargo_type]);
 		Global.SetDParam(1, rvi.capacity);
 		Global.SetDParam(2, refittable ? Str.STR_9842_REFITTABLE : Str.STR_EMPTY);
 		Gfx.DrawString(x, y, Str.STR_PURCHASE_INFO_CAPACITY, 0);
@@ -235,7 +235,7 @@ public class TrainGui
 				engine_drawing_loop(x, y, pos, sel, selected_id, railtype, w.vscroll.cap, true); // True engines
 				engine_drawing_loop(x, y, pos, sel, selected_id, railtype, w.vscroll.cap, false); // Feeble wagons
 
-				w.as_buildtrain_d().sel_engine = EngineID.get( selected_id[0] );
+				w.as_buildtrain_d().sel_engine = selected_id[0];
 
 				if (selected_id[0] != Engine.INVALID_ENGINE) {
 					final RailVehicleInfo rvi = Engine.RailVehInfo(selected_id[0]);
@@ -261,17 +261,19 @@ public class TrainGui
 				}
 			} break;
 			case 5: {
-				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
-				if (sel_eng.id != Engine.INVALID_ENGINE)
-					Cmd.DoCommandP(TileIndex.get(w.window_number.n), sel_eng.id, 0, 
-							0 != (Engine.RailVehInfo(sel_eng.id).flags & Engine.RVI_WAGON) ? TrainGui::CcBuildWagon : TrainGui::CcBuildLoco, Cmd.CMD_BUILD_RAIL_VEHICLE | Cmd.CMD_MSG(Str.STR_882B_CAN_T_BUILD_RAILROAD_VEHICLE));
+				//EngineID 
+				int sel_eng = w.as_buildtrain_d().sel_engine;
+				if (sel_eng != Engine.INVALID_ENGINE)
+					Cmd.DoCommandP(TileIndex.get(w.window_number.n), sel_eng, 0, 
+							0 != (Engine.RailVehInfo(sel_eng).flags & Engine.RVI_WAGON) ? TrainGui::CcBuildWagon : TrainGui::CcBuildLoco, Cmd.CMD_BUILD_RAIL_VEHICLE | Cmd.CMD_MSG(Str.STR_882B_CAN_T_BUILD_RAILROAD_VEHICLE));
 			}	break;
 			case 6: { /* rename */
-				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
-				if (sel_eng.id != Engine.INVALID_ENGINE) {
+				//EngineID 
+				int sel_eng = w.as_buildtrain_d().sel_engine;
+				if (sel_eng != Engine.INVALID_ENGINE) {
 					w.as_buildtrain_d().rename_engine = sel_eng;
-					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng.id),
-						Str.STR_886A_RENAME_TRAIN_VEHICLE_TYPE, 31, 160, w.window_class, w.window_number);
+					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng),
+						new StringID( Str.STR_886A_RENAME_TRAIN_VEHICLE_TYPE ), 31, 160, w.window_class, w.window_number);
 				}
 			} break;
 			}
@@ -286,7 +288,7 @@ public class TrainGui
 		case WE_ON_EDIT_TEXT: {
 			if (e.str != null) {
 				Global._cmd_text = e.str;
-				Cmd.DoCommandP(null, w.as_buildtrain_d().rename_engine.id, 0, null,
+				Cmd.DoCommandP(null, w.as_buildtrain_d().rename_engine, 0, null,
 					Cmd.CMD_RENAME_ENGINE | Cmd.CMD_MSG(Str.STR_886B_CAN_T_RENAME_TRAIN_VEHICLE));
 			}
 		} break;
@@ -439,7 +441,7 @@ public class TrainGui
 			if (v.type == Vehicle.VEH_Train && v.IsFrontEngine() &&
 					v.tile == tile && v.rail.track == 0x80 &&
 					--num < 0 && num >= -w.vscroll.cap) {
-				DrawTrainImage(v, x+21, y, w.hscroll.cap, w.hscroll.pos, w.as_traindepot_d().sel);
+				DrawTrainImage(v, x+21, y, w.hscroll.cap, w.hscroll.pos, VehicleID.get( w.as_traindepot_d().sel ));
 				/* Draw the train number */
 				Global.SetDParam(0, v.unitnumber.id);
 				Gfx.DrawString(x, y, (v.max_age - 366 < v.age) ? Str.STR_00E3 : Str.STR_00E2, 0);
@@ -465,7 +467,7 @@ public class TrainGui
 			if (v.type == Vehicle.VEH_Train && v.IsFreeWagon() &&
 					v.tile == tile && v.rail.track == 0x80 &&
 					--num < 0 && num >= -w.vscroll.cap) {
-				DrawTrainImage(v, x+50, y, w.hscroll.cap - 1, 0, w.as_traindepot_d().sel);
+				DrawTrainImage(v, x+50, y, w.hscroll.cap - 1, 0, VehicleID.get( w.as_traindepot_d().sel) );
 				Gfx.DrawString(x, y+2, Str.STR_8816, 0);
 
 				/*Draw the train counter */
@@ -629,13 +631,13 @@ public class TrainGui
 
 		switch(mode) {
 		case 0: { // start dragging of vehicle
-			VehicleID sel = w.as_traindepot_d().sel;
+			VehicleID sel = VehicleID.get( w.as_traindepot_d().sel );
 
 			if (sel.id != Vehicle.INVALID_VEHICLE) {
-				w.as_traindepot_d().sel = VehicleID.getInvalid();
+				w.as_traindepot_d().sel = VehicleID.getInvalid().id;
 				TrainDepotMoveVehicle(v, sel, gdvp.head);
 			} else if (v != null) {
-				w.as_traindepot_d().sel = VehicleID.get(v.index);
+				w.as_traindepot_d().sel = VehicleID.get(v.index).id;
 				ViewPort.SetObjectToPlaceWnd( Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner)) + TrainCmd.GetTrainImage(v, 6), 4, w);
 				w.SetWindowDirty();
 			}
@@ -752,12 +754,12 @@ public class TrainGui
 				if(0 != (w.disabled_state & (1 << e.widget)) )
 					return;
 
-				if(w.as_traindepot_d().sel.id == Vehicle.INVALID_VEHICLE)
+				if(w.as_traindepot_d().sel == Vehicle.INVALID_VEHICLE)
 					return;
 
 				v = Vehicle.GetVehicle(w.as_traindepot_d().sel);
 
-				w.as_traindepot_d().sel = VehicleID.getInvalid();
+				w.as_traindepot_d().sel = VehicleID.getInvalid().id;
 				w.SetWindowDirty();
 
 				w.HandleButtonClick(e.widget);
@@ -776,9 +778,9 @@ public class TrainGui
 
 			case 6: {
 					GetDepotVehiclePtData gdvp = new GetDepotVehiclePtData();
-					VehicleID sel = w.as_traindepot_d().sel;
+					VehicleID sel = VehicleID.get( w.as_traindepot_d().sel );
 
-					w.as_traindepot_d().sel = VehicleID.getInvalid();
+					w.as_traindepot_d().sel = VehicleID.getInvalid().id;
 					w.SetWindowDirty();
 
 					if (GetVehicleFromTrainDepotWndPt(w, e.pt.x, e.pt.y, gdvp) == 0 &&
@@ -792,7 +794,7 @@ public class TrainGui
 				} break;
 
 			default:
-				w.as_traindepot_d().sel = VehicleID.getInvalid();
+				w.as_traindepot_d().sel = VehicleID.getInvalid().id;
 				w.SetWindowDirty();
 				break;
 			}
@@ -850,7 +852,7 @@ public class TrainGui
 			w.hscroll.cap = 10;
 			w.resize.step_width = 29;
 			w.resize.step_height = 14;
-			w.as_traindepot_d().sel = VehicleID.getInvalid();
+			w.as_traindepot_d().sel = VehicleID.getInvalid().id;
 			Global._backup_orders_tile = null;
 		}
 	}
@@ -874,7 +876,7 @@ public class TrainGui
 				int cost = Cmd.DoCommandByTile(v.tile, v.index, w.as_refit_d().cargo, Cmd.DC_QUERY_COST, Cmd.CMD_REFIT_RAIL_VEHICLE);
 				if (!Cmd.CmdFailed(cost)) {
 					Global.SetDParam(2, cost);
-					Global.SetDParam(0, Global._cargoc.names_long[w.as_refit_d().cargo].id);
+					Global.SetDParam(0, Global._cargoc.names_long[w.as_refit_d().cargo]);
 					Global.SetDParam(1, Global._returned_refit_amount);
 					Gfx.DrawString(1, 137, Str.STR_9840_NEW_CAPACITY_COST_OF_REFIT, 0);
 				}
@@ -955,7 +957,7 @@ public class TrainGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Vehicle v, u;
+			Vehicle v, u;
 			//StringID 
 			int str;
 
@@ -1158,7 +1160,7 @@ public class TrainGui
 	static void TrainDetailsCapacityTab(final Vehicle v, int x, int y)
 	{
 		if (v.cargo_cap != 0) {
-			Global.SetDParam(0, Global._cargoc.names_long[v.cargo_type].id);
+			Global.SetDParam(0, Global._cargoc.names_long[v.cargo_type]);
 			Global.SetDParam(1, v.cargo_cap);
 			Gfx.DrawString(x, y, Str.STR_013F_CAPACITY, 0);
 		}
@@ -1299,7 +1301,7 @@ public class TrainGui
 			case 2: /* name train */
 				v = Vehicle.GetVehicle(w.window_number.n);
 				Global.SetDParam(0, v.unitnumber.id);
-				MiscGui.ShowQueryString(v.string_id, Str.STR_8865_NAME_TRAIN, 31, 150, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID( v.string_id ), new StringID( Str.STR_8865_NAME_TRAIN ), 31, 150, w.window_class, w.window_number);
 				break;
 			/*	
 			case 6:	// inc serv interval 
@@ -1524,7 +1526,7 @@ public class TrainGui
 			case 3: /* Flip sorting method ascending/descending */
 				vl.flags ^= Vehicle.VL_DESC;
 				vl.flags |= Vehicle.VL_RESORT;
-				VehicleGui._sorting.train.order = !!(vl.flags & Vehicle.VL_DESC);
+				VehicleGui._sorting.train.order = 0 != (vl.flags & Vehicle.VL_DESC);
 				w.SetWindowDirty();
 				break;
 
@@ -1587,7 +1589,7 @@ public class TrainGui
 			if (vl.sort_type != e.index) {
 				// value has changed . resort
 				vl.flags |= Vehicle.VL_RESORT;
-				vl.sort_type = e.index;
+				vl.sort_type = (byte) e.index;
 				VehicleGui._sorting.train.criteria = vl.sort_type;
 
 				// enable 'Sort By' if a sorter criteria is chosen
@@ -1599,8 +1601,8 @@ public class TrainGui
 
 		case WE_CREATE: /* set up resort timer */
 			vl.sort_list = null;
-			vl.flags = Vehicle.VL_REBUILD | (VehicleGui._sorting.train.order << (Vehicle.VL_DESC - 1));
-			vl.sort_type = VehicleGui._sorting.train.criteria;
+			vl.flags = Vehicle.VL_REBUILD | ( BitOps.b2i( VehicleGui._sorting.train.order ) << (Vehicle.VL_DESC - 1));
+			vl.sort_type = (byte) VehicleGui._sorting.train.criteria;
 			vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
 			break;
 

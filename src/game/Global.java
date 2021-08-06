@@ -10,6 +10,7 @@ import game.util.Paths;
 import game.util.Prices;
 import game.util.Strings;
 import game.util.YearMonthDay;
+import game.Cheat.Cheats;
 import game.tables.CargoConst;
 import game.util.BitOps;
 
@@ -29,6 +30,7 @@ public class Global {
 	public static boolean _is_old_ai_player = false;
 
 	public static Economy _economy = new Economy();
+	public static final Cheats  _cheats = Cheat.cs;
 
 	public static Consumer<TileIndex> _place_proc;
 
@@ -427,7 +429,6 @@ public class Global {
 
 	private static int next_name_id = 0;
 	private static Map<Integer,String> _name_array = new HashMap<Integer,String>();
-
 
 
 

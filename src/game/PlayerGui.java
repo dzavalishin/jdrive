@@ -702,7 +702,7 @@ public class PlayerGui
 				w.DeleteWindow();
 				break;
 			case 4: {
-				Cmd.DoCommandP(null, w.window_number, 0, null, Cmd.CMD_BUY_COMPANY | Cmd.CMD_MSG(Str.STR_7060_CAN_T_BUY_COMPANY));
+				Cmd.DoCommandP(null, w.window_number.n, 0, null, Cmd.CMD_BUY_COMPANY | Cmd.CMD_MSG(Str.STR_7060_CAN_T_BUY_COMPANY));
 				break;
 			}
 			}

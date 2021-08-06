@@ -2,14 +2,44 @@ package game;
 
 public class Cheat {
 	boolean been_used;	// has this cheat been used before?
-	byte value;			// active?
+	//byte value;			// active?
+	boolean value;			// active?
 
 	public Cheat() {
 		been_used = false;	
-		value = 0;			
+		value = false;			
 	}
 
+	static class Cheats {
+		Cheat magic_bulldozer;		// dynamite industries, unmovables
+		Cheat switch_player;			// change to another player
+		Cheat money;							// get rich
+		Cheat crossing_tunnels;		// allow tunnels that cross each other
+		Cheat build_in_pause;			// build while in pause mode
+		Cheat no_jetcrash;				// no jet will crash on small airports anymore
+		Cheat switch_climate;
+		Cheat change_date;				//changes date ingame
+		Cheat setup_prod;				//setup raw-material production in game
+		Cheat day_length;				// change day length
 
+		public Cheats() {
+
+		magic_bulldozer = new Cheat();		// dynamite industries, unmovables
+		switch_player = new Cheat();			// change to another player
+		money = new Cheat();							// get rich
+		crossing_tunnels = new Cheat();		// allow tunnels that cross each other
+		build_in_pause = new Cheat();			// build while in pause mode
+		no_jetcrash = new Cheat();				// no jet will crash on small airports anymore
+		switch_climate = new Cheat();
+		change_date = new Cheat();				//changes date ingame
+		setup_prod = new Cheat();				//setup raw-material production in game
+		day_length = new Cheat();				// change day length
+		}	
+	} 	
+
+	static Cheats cs = new Cheats(); 
+	
+	/*
 	public static Cheat magic_bulldozer;		// dynamite industries, unmovables
 	public static Cheat switch_player;			// change to another player
 	public static Cheat money;					// get rich
@@ -20,18 +50,20 @@ public class Cheat {
 	public static Cheat change_date;			//changes date ingame
 	public static Cheat setup_prod;				//setup raw-material production in game
 	public static Cheat day_length;				// change day length
+	*/
 	
-	private static Cheat [] _cheats = {
-			magic_bulldozer,
-			switch_player,	
-			money,			
-			crossing_tunnels,
-			build_in_pause,	
-			no_jetcrash,		
-			switch_climate,
-			change_date,		
-			setup_prod,		
-			day_length,		
+	
+	static final Cheat [] _cheats = {
+			cs.magic_bulldozer,
+			cs.switch_player,	
+			cs.money,			
+			cs.crossing_tunnels,
+			cs.build_in_pause,	
+			cs.no_jetcrash,		
+			cs.switch_climate,
+			cs.change_date,		
+			cs.setup_prod,		
+			cs.day_length,
 	};
 
 	
