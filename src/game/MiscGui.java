@@ -21,7 +21,7 @@ public class MiscGui {
 	private static final int SORT_BY_NAME    = 2;
 
 
-	
+
 
 	static void LandInfoWndProc(Window w, WindowEvent e)
 	{
@@ -85,7 +85,7 @@ public class MiscGui {
 						if (lid.ac.ct[i] < 8) {
 							int [] argv = new int[2];
 							argv[0] = lid.ac.ct[i];
-							argv[1] = Global._cargoc.names_s[i].id;
+							argv[1] = Global._cargoc.names_s[i];
 							//p = Global.GetStringWithArgs(p, Str.STR_01D1_8, argv);
 							sb.append(Strings.GetStringWithArgs( Str.STR_01D1_8, argv));
 						} else {
@@ -476,7 +476,7 @@ public class MiscGui {
 							238);
 			} else {
 				final Player p = Player.GetPlayer(Global.GetDParamX(_errmsg_decode_params,2));
-				DrawPlayerFace(p.face, p.player_color, 2, 16);
+				Player.DrawPlayerFace(p.face, p.player_color, 2, 16);
 
 				Gfx.DrawStringMultiCenter(
 						214,
@@ -519,7 +519,7 @@ public class MiscGui {
 	{
 		Window w;
 		ViewPort vp = null;
-		Point pt;
+		Point pt = new Point(0, 0);
 
 		Window.DeleteWindowById(Window.WC_ERRMSG, 0);
 
@@ -537,7 +537,7 @@ public class MiscGui {
 
 			if ( (x|y) != 0) {
 				pt = Point.RemapCoords2(x, y);
-				
+
 				//for(w=Window._windows; w.window_class != Window.WC_MAIN_WINDOW; w++) {}
 				/*
 				for(Window w : Window._windows )
@@ -548,11 +548,11 @@ public class MiscGui {
 						break;
 					}
 				}
-				*/
+				 */
 				vp = Window.getMain().viewport;
-				
+
 				assert vp != null;
-				
+
 				// move x pos to opposite corner
 				pt.x = ((pt.x - vp.virtual_left) >> vp.zoom) + vp.left;
 				pt.x = (pt.x < (Hal._screen.width >> 1)) ? Hal._screen.width - 260 : 20;
@@ -563,7 +563,7 @@ public class MiscGui {
 
 			} else {
 				pt.x = (Hal._screen.width - 240) >> 1;
-		pt.y = (Hal._screen.height - 46) >> 1;
+						pt.y = (Hal._screen.height - 46) >> 1;
 			}
 			w = Window.AllocateWindow(pt.x, pt.y, 240, 46, MiscGui::ErrmsgWndProc, Window.WC_ERRMSG, _errmsg_widgets);
 		} else {
@@ -711,7 +711,7 @@ public class MiscGui {
 		/*
 		if (b == Strings._userstring[3]) {
 			b = InlineString(b, Str.STR_00D0_NOTHING);
-			*b++ = '\0';
+		 *b++ = '\0';
 		} else {
 			b[-2] = '\0';
 		}*/
@@ -725,14 +725,14 @@ public class MiscGui {
 		}
 		else
 			Strings._userstring = curr.substring(0, curr.length()-2);
-		
+
 		Gfx.DrawStringMultiLine(str_x, str_y, new StringID( Strings.STR_SPEC_USERSTRING ), 144);
 	}
 
 	static void DrawStationCoverageAreaText(int sx, int sy, int mask, int rad) {
 		int x = ViewPort._thd.pos.x;
 		int y = ViewPort._thd.pos.y;
-		AcceptedCargo accepts;
+		AcceptedCargo accepts = new AcceptedCargo();
 		if (x != -1) {
 			Station.GetAcceptanceAroundTiles(accepts, TileIndex.TileVirtXY(x, y), ViewPort._thd.size.x / 16, ViewPort._thd.size.y / 16 , rad);
 			DrawStationCoverageText(accepts, sx, sy, mask);
@@ -899,7 +899,7 @@ public class MiscGui {
 	 * Useful when copying in a larger amount of text at once
 	 * @param tb @Textbuf type which length is calculated
 	 */
-	void UpdateTextBufferSize(Textbuf tb)
+	static void UpdateTextBufferSize(Textbuf tb)
 	{
 		//final char* buf;
 		int bp = 0;
@@ -924,7 +924,7 @@ public class MiscGui {
 		case Window.WKC_ESC: return 2;
 		case Window.WKC_RETURN: case Window.WKC_NUM_ENTER: return 1;
 		case (Window.WKC_CTRL | 'V'):
-			if (InsertTextBufferClipboard(w.as_querystr_d().text))
+			if (Hal.InsertTextBufferClipboard(w.as_querystr_d().text))
 				w.InvalidateWidget(wid);
 		break;
 		case (Window.WKC_CTRL | 'U'):
@@ -1191,21 +1191,23 @@ public class MiscGui {
 	// Colors for fios types
 	final static byte _fios_colors[] = {13, 9, 9, 6, 5, 6, 5};
 
-	void BuildFileList()
+	static void BuildFileList()
 	{
+		/* TODO BuildFileList()
 		_fios_path_changed = true;
 		FiosFreeSavegameList();
-		switch (_saveload_mode) {
+		switch (Global._saveload_mode) {
 		case SLD_NEW_GAME:
 		case SLD_LOAD_SCENARIO:
 		case SLD_SAVE_SCENARIO:
-			_fios_list = FiosGetScenarioList(_fios_num, _saveload_mode);
+			_fios_list = FiosGetScenarioList(_fios_num, Global._saveload_mode);
 			break;
 
 		default:
-			_fios_list = FiosGetSavegameList(_fios_num, _saveload_mode);
+			_fios_list = FiosGetSavegameList(_fios_num, Global._saveload_mode);
 			break;
 		}
+		*/
 	}
 	/*
 	static void DrawFiosTexts(int maxw)
@@ -1223,19 +1225,20 @@ public class MiscGui {
 		Gfx.DrawString(2, 37, str, 0);
 		Gfx.DoDrawStringTruncated(path, 2, 27, 16, maxw);
 	}
-	*/
-	
+	 */
+
 	static void MakeSortedSaveGameList()
 	{
+		/* TODO MakeSortedSaveGameList()
 		int sort_start = 0;
 		int sort_end = 0;
 		int s_amount;
 		int i;
 
-		/*	Directories are always above the files (FIOS_TYPE_DIR)
-		 *	Drives (A:\ (windows only) are always under the files (FIOS_TYPE_DRIVE)
-		 *	Only sort savegames/scenarios, not directories
-		 */
+		// *	Directories are always above the files (FIOS_TYPE_DIR)
+		// *	Drives (A:\ (windows only) are always under the files (FIOS_TYPE_DRIVE)
+		// *	Only sort savegames/scenarios, not directories
+		// *
 		for (i = 0; i < _fios_num; i++) {
 			switch (_fios_list[i].type) {
 			case FIOS_TYPE_DIR:    sort_start++; break;
@@ -1247,6 +1250,7 @@ public class MiscGui {
 		s_amount = _fios_num - sort_start - sort_end;
 		if (s_amount > 0)
 			qsort(_fios_list + sort_start, s_amount, sizeof(FiosItem), compare_FiosItems);
+		*/
 	}
 
 	static void GenerateFileName()
@@ -1271,7 +1275,7 @@ public class MiscGui {
 		switch (e.event) {
 		case WindowEvents.WE_CREATE: { // Set up OPENTTD button 
 			o_dir.type = FIOS_TYPE_DIRECT;
-			switch (_saveload_mode) {
+			switch (Global._saveload_mode) {
 			case SLD_SAVE_GAME:
 			case SLD_LOAD_GAME:
 				//ttd_strlcpy(&o_dir.name[0], _path.save_dir, sizeof(o_dir.name));
@@ -1321,7 +1325,7 @@ public class MiscGui {
 				if (y >= w.vscroll.cap * 10 + w.widget.get(7).top + 1) break;
 			}
 
-			if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) {
+			if (Global._saveload_mode == SLD_SAVE_GAME || Global._saveload_mode == SLD_SAVE_SCENARIO) {
 				DrawEditBox(w, 10);
 			}
 			break;
@@ -1359,7 +1363,7 @@ public class MiscGui {
 
 				name = FiosBrowseTo(file);
 				if (name != null) {
-					if (_saveload_mode == SLD_LOAD_GAME || _saveload_mode == SLD_LOAD_SCENARIO) {
+					if (Global._saveload_mode == SLD_LOAD_GAME || Global._saveload_mode == SLD_LOAD_SCENARIO) {
 						_switch_mode = (Global._game_mode == GameModes.GM_EDITOR) ? SM_LOAD_SCENARIO : SM_LOAD;
 
 						SetFiosType(file.type);
@@ -1397,7 +1401,7 @@ public class MiscGui {
 				return;
 			}
 
-			if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) {
+			if (Global._saveload_mode == SLD_SAVE_GAME || Global._saveload_mode == SLD_SAVE_SCENARIO) {
 				if (HandleEditBoxKey(w, 10, e) == 1) // Press Enter 
 					HandleButtonClick(w, 12);
 			}
@@ -1409,7 +1413,7 @@ public class MiscGui {
 				}
 				w.SetWindowDirty();
 				BuildFileList();
-				if (_saveload_mode == SLD_SAVE_GAME) {
+				if (Global._saveload_mode == SLD_SAVE_GAME) {
 					GenerateFileName(); // Reset file name to current date 
 					UpdateTextBufferSize(w.as_querystr_d().text);
 				}
@@ -1436,7 +1440,7 @@ public class MiscGui {
 			w.widget.get(3].right += e.sizing.diff.x;
 
 			// Same for widget 11 and 12 in save-dialog 
-			if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) {
+			if (Global._saveload_mode == SLD_SAVE_GAME || Global._saveload_mode == SLD_SAVE_SCENARIO) {
 				w.widget.get(11].right += diff;
 				w.widget.get(12].left  += diff;
 				w.widget.get(12].right += e.sizing.diff.x;
@@ -1445,9 +1449,9 @@ public class MiscGui {
 			w.vscroll.cap += e.sizing.diff.y / 10;
 		} break;
 		}
-	*/
+		 */
 	}
-	
+
 	static final WindowDesc _load_dialog_desc = new WindowDesc(
 			Window.WDP_CENTER, Window.WDP_CENTER, 257, 294,
 			Window.WC_SAVELOAD,0,
@@ -1496,11 +1500,11 @@ public class MiscGui {
 		Window.DeleteWindowById(Window.WC_SAVELOAD, 0);
 
 		Global._saveload_mode = mode;
-		Global._no_scroll = BitOps.RETSETBIT(Global._no_scroll, SCROLL_SAVE);
+		Global._no_scroll = BitOps.RETSETBIT(Global._no_scroll, Global.SCROLL_SAVE);
 
 		switch (mode) {
-		case SLD_SAVE_GAME:     GenerateFileName(); break;
-		case SLD_SAVE_SCENARIO: strcpy(_edit_str_buf, "UNNAMED"); break;
+		case Global.SLD_SAVE_GAME:     GenerateFileName(); break;
+		case Global.SLD_SAVE_SCENARIO: _edit_str_buf = "UNNAMED"; break;
 		}
 
 		w = Window.AllocateWindowDesc(_saveload_dialogs[mode]);
@@ -1559,7 +1563,8 @@ public class MiscGui {
 				MakeSortedSaveGameList();
 			}
 
-			SetVScrollCount(w, _fios_num);
+			// TODO SetVScrollCount(w, _fios_num);
+			SetVScrollCount(w, 0);
 
 			w.DrawWindowWidgets();
 			Gfx.DoDrawString(
@@ -1571,13 +1576,14 @@ public class MiscGui {
 
 			y = list_start;
 			pos = w.vscroll.pos;
+			/* TODO SelectScenarioWndProc
 			while (pos < _fios_num) {
 				item = _fios_list + pos;
 				Gfx.DoDrawString(item.title, 4, y, _fios_colors[item.type]);
 				pos++;
 				y += 10;
 				if (y >= w.vscroll.cap * 10 + list_start) break;
-			}
+			} */
 		}
 		break;
 
@@ -1599,8 +1605,9 @@ public class MiscGui {
 
 			case 6: /* Click the listbox */
 				if (e.pt.y < list_start)
-					GenRandomNewGame(Hal.Random(), Hal.InteractiveRandom());
+					IntroGui.GenRandomNewGame(Hal.Random(), Hal.InteractiveRandom());
 				else {
+					/* TODO click
 					String name;
 					int y = (e.pt.y - list_start) / 10;
 					final FiosItem file;
@@ -1616,7 +1623,7 @@ public class MiscGui {
 						_file_to_saveload.name = name;
 						Window.DeleteWindow(w);
 						StartScenarioEditor(Hal.Random(), InteractiveHal.Random());
-					}
+					} */
 				}
 				break;
 			}
@@ -1637,6 +1644,7 @@ public class MiscGui {
 
 	void SetFiosType(final int fiostype)
 	{
+		/* TODO SetFiosType
 		switch (fiostype) {
 		case FIOS_TYPE_FILE:
 		case FIOS_TYPE_SCENARIO:
@@ -1651,7 +1659,7 @@ public class MiscGui {
 		default:
 			_file_to_saveload.mode = SL_INVALID;
 			break;
-		}
+		} */
 	}
 
 	static final WindowDesc _select_scenario_desc = new WindowDesc(
@@ -1669,7 +1677,7 @@ public class MiscGui {
 		Window.DeleteWindowById(Window.WC_QUERY_STRING, 0);
 		Window.DeleteWindowById(Window.WC_SAVELOAD, 0);
 
-		Global._saveload_mode = SLD_NEW_GAME;
+		Global._saveload_mode = Global.SLD_NEW_GAME;
 		BuildFileList();
 
 		w = Window.AllocateWindowDesc(_select_scenario_desc);
@@ -1690,7 +1698,7 @@ public class MiscGui {
 	{
 		while (p1 >= 0 && p1 < Global.MAX_PLAYERS) {
 			if (Player._players[p1].is_active) {
-				Global._local_player = p1;
+				Global._local_player = PlayerID.get( p1 );
 				Hal.MarkWholeScreenDirty();
 				return Global._local_player.id;
 			}

@@ -1,5 +1,6 @@
 package game;
 
+import game.struct.Textbuf;
 import game.util.AnimCursor;
 import game.util.BitOps;
 import game.util.Pixel;
@@ -267,6 +268,11 @@ void SortResolutions(int count)
 
 	public static TileIndex RandomTile() {
 		return TileIndex.RandomTile();
+	}
+	
+	public static boolean InsertTextBufferClipboard(Textbuf text) {
+		Global.error("InsertTextBufferClipboard");
+		return false;
 	}
 
 

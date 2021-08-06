@@ -93,7 +93,7 @@ public class Player
 
 
 	//#define MAX_PLAYERS 8
-	private static Player [] _players = new Player[Global.MAX_PLAYERS];
+	static Player [] _players = new Player[Global.MAX_PLAYERS];
 	// NOSAVE: can be determined from player structs
 	private static byte [] _player_colors = new byte[Global.MAX_PLAYERS];
 
@@ -764,7 +764,7 @@ public class Player
 		}
 
 		if (Global._patches.show_finances && Global._local_player.id != Owner.OWNER_SPECTATOR) {
-			PlayerGui.ShowPlayerFinances(Global._local_player);
+			PlayerGui.ShowPlayerFinances(Global._local_player.id);
 			Player p = GetPlayer(Global._local_player);
 
 			/* TODO sound

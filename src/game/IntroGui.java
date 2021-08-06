@@ -119,7 +119,7 @@ public class IntroGui
 		Window.AllocateWindowDesc(_select_game_desc);
 	}
 
-	void GenRandomNewGame(int rnd1, int rnd2)
+	static void GenRandomNewGame(int rnd1, int rnd2)
 	{
 		Global._random_seeds[0][0] = rnd1;
 		Global._random_seeds[0][1] = rnd2;

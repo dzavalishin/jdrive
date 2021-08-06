@@ -7,6 +7,7 @@ import java.util.ListIterator;
 import java.util.function.BiConsumer;
 
 import game.util.BitOps;
+import game.util.Pixel;
 import game.util.WindowConstants;
 import game.util.wcustom.*;
 import game.WindowClass;
@@ -436,7 +437,7 @@ public class Window extends WindowConstants
 		}
 	}
 
-	void DrawOverlappedWindow(Window w, int left, int top, int right, int bottom)
+	static void DrawOverlappedWindow(Window w, int left, int top, int right, int bottom)
 	{
 		//final Window  v = w;
 		int x, wi, wie;
@@ -490,8 +491,7 @@ public class Window extends WindowConstants
 			dp.top = top - w.top;
 			dp.pitch = Hal._screen.pitch;
 			//dp.dst_ptr = Hal._screen.dst_ptr + top * Hal._screen.pitch + left;
-			dp.dst_ptr = Hal._screen.dst_ptr;
-			dp.dst_ptr_shift = top * Hal._screen.pitch + left;
+			dp.dst_ptr = new Pixel( Hal._screen.dst_ptr, top * Hal._screen.pitch + left );
 			dp.zoom = 0;
 			w.CallWindowEventNP(WindowEvents.WE_PAINT);
 		}

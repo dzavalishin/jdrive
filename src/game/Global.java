@@ -82,6 +82,11 @@ public class Global {
 	public static final int SCROLL_SAVE = 2;
 	public static final int SCROLL_CHAT = 4;
 	//};
+	public static final int SLD_LOAD_GAME = 0;
+	public static final int SLD_LOAD_SCENARIO = 1;
+	public static final int SLD_SAVE_GAME = 2;
+	public static final int SLD_SAVE_SCENARIO = 3;
+	public static final int SLD_NEW_GAME = 4;
 	
 	
 	static public Hal hal = new JavaHal();
@@ -89,6 +94,7 @@ public class Global {
 
 	public static GameModes _game_mode;
 	public static boolean _exit_game = false;
+	public static int _saveload_mode;
 
 	public static boolean _fullscreen;
 	public static boolean _double_size;
@@ -120,6 +126,7 @@ public class Global {
 	public static int _error_message;
 	public static int _error_message_2;
 	public static int _additional_cash_required;
+	public static StringID _switch_mode_errorstr;
 
 	// NOSAVE: Return values from various commands.
 	public static VehicleID 	_new_train_id;

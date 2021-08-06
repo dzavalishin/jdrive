@@ -99,10 +99,10 @@ public class Terraform {
 
 		switch (we.userdata >> 4) {
 		case Gui.GUI_PlaceProc_DemolishArea >> 4:
-			Cmd.DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_CLEAR_AREA | Cmd.CMD_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
+			Cmd.DoCommandP(end_tile, start_tile.tile, 0, Gui::CcPlaySound10, Cmd.CMD_CLEAR_AREA | Cmd.CMD_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
 			break;
 		case Gui.GUI_PlaceProc_LevelArea >> 4:
-			Cmd.DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_LEVEL_LAND | Cmd.CMD_AUTO);
+			Cmd.DoCommandP(end_tile, start_tile.tile, 0, Gui::CcPlaySound10, Cmd.CMD_LEVEL_LAND | Cmd.CMD_AUTO);
 			break;
 		case Gui.GUI_PlaceProc_RockyArea >> 4:
 			GenerateRockyArea(end_tile, start_tile);
