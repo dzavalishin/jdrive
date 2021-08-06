@@ -58,7 +58,7 @@ public class Terraform {
 	static void GenerateRockyArea(TileIndex end, TileIndex start)
 	{
 		int size_x, size_y;
-		boolean success = false;
+		//boolean success = false;
 		int sx = start.TileX();
 		int sy = start.TileY();
 		int ex = end.TileX();
@@ -76,7 +76,7 @@ public class Terraform {
 		{
 			if (tile.IsTileType(TileTypes.MP_CLEAR) || tile.IsTileType( TileTypes.MP_TREES)) {
 				Landscape.ModifyTile(tile,TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) | TileTypes.MP_MAP5, (tile.getMap().m5 & ~0x1C) | 0xB);
-				success = true;
+				//success = true;
 			}
 			return false;
 		}); // END_TILE_LOOP(tile, size_x, size_y, 0);
@@ -99,10 +99,10 @@ public class Terraform {
 
 		switch (we.userdata >> 4) {
 		case Gui.GUI_PlaceProc_DemolishArea >> 4:
-			Cmd.DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_CLEAR_AREA | Cmd_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
+			Cmd.DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_CLEAR_AREA | Cmd.CMD_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
 			break;
 		case Gui.GUI_PlaceProc_LevelArea >> 4:
-			Cmd.DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_LEVEL_LAND | Cmd_AUTO);
+			Cmd.DoCommandP(end_tile, start_tile, 0, Gui::CcPlaySound10, Cmd.CMD_LEVEL_LAND | Cmd.CMD_AUTO);
 			break;
 		case Gui.GUI_PlaceProc_RockyArea >> 4:
 			GenerateRockyArea(end_tile, start_tile);
@@ -111,7 +111,7 @@ public class Terraform {
 			GenerateDesertArea(end_tile, start_tile);
 			break;
 		case Gui.GUI_PlaceProc_WaterArea >> 4:
-			Cmd.DoCommandP(end_tile, start_tile, 0, CcBuildCanal, Cmd.CMD_BUILD_CANAL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_CANT_BUILD_CANALS));
+			Cmd.DoCommandP(end_tile, start_tile.tile, 0, DockGui::CcBuildCanal, Cmd.CMD_BUILD_CANAL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_CANT_BUILD_CANALS));
 			break;
 		default: return false;
 		}
@@ -175,17 +175,17 @@ public class Terraform {
 
 	static void TerraformClick_BuyLand(Window w)
 	{
-		Gui.HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_BUY_LAND, 1, ::PlaceProc_BuyLand);
+		Gui.HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_BUY_LAND, 1, Rail::PlaceProc_BuyLand);
 	}
 
 	static void TerraformClick_Trees(Window w)
 	{
-		if (HandlePlacePushButton(w, 9, Sprite.SPR_CURSOR_MOUSE, 1, Terraform::PlaceProc_PlantTree)) ShowBuildTreesToolbar();
+		if (Gui.HandlePlacePushButton(w, 9, Sprite.SPR_CURSOR_MOUSE, 1, Terraform::PlaceProc_PlantTree)) MiscGui.ShowBuildTreesToolbar();
 	}
 
 	static void TerraformClick_PlaceSign(Window w)
 	{
-		Gui.HandlePlacePushButton(w, 10, Sprite.SPR_CURSOR_SIGN, 1, ::PlaceProc_Sign);
+		Gui.HandlePlacePushButton(w, 10, Sprite.SPR_CURSOR_SIGN, 1, SignStruct::PlaceProc_Sign);
 	}
 
 	static final ButtonProc  _terraform_button_proc[] = {

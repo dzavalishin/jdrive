@@ -2254,7 +2254,7 @@ public class Rail extends RailTables {
 	}
 
 	/* Struct to parse data from VehicleFromPos to SignalVehicleCheckProc */
-	class SignalVehicleCheckStruct {
+	static class SignalVehicleCheckStruct {
 		TileIndex tile;
 		int track;
 	}
@@ -2268,7 +2268,7 @@ public class Rail extends RailTables {
 
 		/* Find the tile outside the tunnel, for signalling */
 		if (v.rail.track == 0x40) {
-			tile = v.GetVehicleOutOfTunnelTile();
+			tile = TunnelBridgeCmd.GetVehicleOutOfTunnelTile(v);
 		} else {
 			tile = v.tile;
 		}
@@ -2299,7 +2299,7 @@ public class Rail extends RailTables {
 			// because VehicleFromPos will not find the vihicle otherwise
 			int direction = BitOps.GB(tile.getMap().m5, 0, 2);
 			FindLengthOfTunnelResult flotr;
-			flotr = FindLengthOfTunnel(tile, direction);
+			flotr = Pathfind.FindLengthOfTunnel(tile, direction);
 			dest.track = 1 << (direction & 1); // get the trackbit the vehicle would have if it has not entered the tunnel yet (ie is still visible)
 
 			// check for a vehicle with that trackdir on the start tile of the tunnel
@@ -3038,7 +3038,7 @@ public class Rail extends RailTables {
 				Cmd.CMD_BUILD_TUNNEL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_5016_CAN_T_BUILD_TUNNEL_HERE));
 	}
 
-	void PlaceProc_BuyLand(TileIndex tile)
+	static void PlaceProc_BuyLand(TileIndex tile)
 	{
 		Cmd.DoCommandP(tile, 0, 0, null /*CcPlaySound1E*/, Cmd.CMD_PURCHASE_LAND_AREA | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_5806_CAN_T_PURCHASE_THIS_LAND));
 	}
@@ -3478,7 +3478,7 @@ public class Rail extends RailTables {
 					ViewPort.SetTileSelectSize(x, y);
 			}
 
-			rad = (Global._patches.modified_catchment) ? CA_TRAIN : 4;
+			rad = (Global._patches.modified_catchment) ? Station.CA_TRAIN : 4;
 
 			if (Gui._station_show_coverage != 0)
 				ViewPort.SetTileSelectBigSize(-rad, -rad, 2 * rad, 2 * rad);

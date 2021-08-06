@@ -220,7 +220,7 @@ public class Gui
 		return HandlePlacePushButton(w, widget, cursor.id, mode, placeproc);
 	}
 
-	void CcPlaySound10(boolean success, TileIndex tile, int p1, int p2)
+	static void CcPlaySound10(boolean success, TileIndex tile, int p1, int p2)
 	{
 		//if (success) SndPlayTileFx(SND_12_EXPLOSION, tile);
 	}

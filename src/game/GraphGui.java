@@ -802,7 +802,7 @@ public class GraphGui
 		return SmallMapGuiTables._performance_titles[Math.min(value, 1000) >> 6];
 	}
 
-	class PerfHistComp implements Comparator<Player>
+	static class PerfHistComp implements Comparator<Player>
 	{
 		public int  compare(Player p1, Player p2)
 		{

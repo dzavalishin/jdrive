@@ -1,3 +1,5 @@
+#if 0 
+
 /* $Id: road_land.h 2702 2005-07-24 15:56:31Z celestar $ */
 
 #define TILE_SEQ_BEGIN(x) { x, 0, 0, 0, 0 },
