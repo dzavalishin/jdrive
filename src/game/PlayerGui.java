@@ -11,13 +11,15 @@ public class PlayerGui
 	static void DrawPlayerEconomyStats(final Player p, byte mode)
 	{
 		int x,y,i,j,year;
-		final long (*tbl)[13];
+		//final long (*tbl)[13];
+		final long [][] tbl;
 		long sum, cost;
-		StringID str;
+		//StringID 
+		int str;
 
 		if (0==(mode & 1)) { // normal sized economics window (mode&1) is minimized status
 			/* draw categories */
-			Gfx.DrawStringCenterUnderline(61, 15, Str.STR_700F_EXPENDITURE_INCOME, 0);
+			Gfx.DrawStringCenterUnderline(61, 15, new StringID(Str.STR_700F_EXPENDITURE_INCOME), 0);
 			for(i=0; i!=13; i++)
 				Gfx.DrawString(2, 27 + i*10, Str.STR_7011_CONSTRUCTION + i, 0);
 			Gfx.DrawStringRightAligned(111, 27 + 10*13 + 2, Str.STR_7020_TOTAL, 0);
@@ -26,15 +28,17 @@ public class PlayerGui
 			year = Global._cur_year - 2;
 			j = 3;
 			x = 215;
-			tbl = p.yearly_expenses + 2;
+			//tbl = p.yearly_expenses + 2;
+			tbl = p.yearly_expenses;
+			int tbl_p = 2;
 			do {
 				if (year >= p.inaugurated_year) {
 					Global.SetDParam(0, year + 1920);
-					Gfx.DrawStringCenterUnderline(x-17, 15, Str.STR_7010, 0);
+					Gfx.DrawStringCenterUnderline(x-17, 15, new StringID( Str.STR_7010 ), 0);
 					sum = 0;
 					for(i=0; i!=13; i++) {
 						/* draw one row in the price column */
-						cost = (*tbl)[i];
+						cost = tbl[tbl_p][i];
 						if (cost != 0) {
 							sum += cost;
 
@@ -54,7 +58,8 @@ public class PlayerGui
 					x += 95;
 				}
 				year++;
-				tbl--;
+				//tbl--;
+				tbl_p--;
 			} while (--j != 0);
 
 			y = 171;
@@ -129,14 +134,14 @@ public class PlayerGui
 	{
 		switch(e.event) {
 		case WE_PAINT: {
-			PlayerID player = w.window_number;
+			PlayerID player = PlayerID.get( w.window_number.n );
 			final Player  p = Player.GetPlayer(player);
 
 			w.disabled_state = p.current_loan != 0 ? 0 : (1 << 7);
 
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
-			Global.SetDParam(2, GetPlayerNameString(player, 3));
+			Global.SetDParam(2, Player.GetPlayerNameString(player, 3));
 			Global.SetDParam(4, 10000);
 			w.DrawWindowWidgets();
 
@@ -147,18 +152,18 @@ public class PlayerGui
 			switch(e.widget) {
 			case 2: {/* toggle size */
 				byte mode = (byte)w.as_def_d().data_1;
-				boolean stickied = !!(w.flags4 & Window.WF_STICKY);
-				PlayerID player = w.window_number;
+				boolean stickied = 0 !=(w.flags4 & Window.WF_STICKY);
+				PlayerID player = PlayerID.get( w.window_number.n );
 				w.DeleteWindow();
-				DoShowPlayerFinances(player, !BitOps.HASBIT(mode, 0), stickied);
+				DoShowPlayerFinances(player.id, !BitOps.HASBIT(mode, 0), stickied);
 			} break;
 
 			case 6: /* increase loan */
-				Cmd.DoCommandP(0, 0, _ctrl_pressed, null, Cmd.CMD_INCREASE_LOAN | Cmd.CMD_MSG(Str.STR_702C_CAN_T_BORROW_ANY_MORE_MONEY));
+				Cmd.DoCommandP(null, 0, Global._ctrl_pressed ? 1 : 0, null, Cmd.CMD_INCREASE_LOAN | Cmd.CMD_MSG(Str.STR_702C_CAN_T_BORROW_ANY_MORE_MONEY));
 				break;
 
 			case 7: /* repay loan */
-				Cmd.DoCommandP(0, 0, _ctrl_pressed, null, Cmd.CMD_DECREASE_LOAN | Cmd.CMD_MSG(Str.STR_702F_CAN_T_REPAY_LOAN));
+				Cmd.DoCommandP(null, 0, Global._ctrl_pressed ? 1 : 0, null, Cmd.CMD_DECREASE_LOAN | Cmd.CMD_MSG(Str.STR_702F_CAN_T_REPAY_LOAN));
 				break;
 			}
 			break;
@@ -171,7 +176,7 @@ public class PlayerGui
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON,
 			_player_finances_widgets,
 			PlayerGui::PlayerFinancesWndProc
-	);
+			);
 
 	static final WindowDesc _player_finances_small_desc = new WindowDesc(
 			-1,-1, 280, 60,
@@ -179,7 +184,7 @@ public class PlayerGui
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON,
 			_player_finances_small_widgets,
 			PlayerGui::PlayerFinancesWndProc
-	);
+			);
 
 	static final WindowDesc _other_player_finances_desc = new WindowDesc(
 			-1,-1, 407, 204,
@@ -187,7 +192,7 @@ public class PlayerGui
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON,
 			_other_player_finances_widgets,
 			PlayerGui::PlayerFinancesWndProc
-	);
+			);
 
 	static final WindowDesc _other_player_finances_small_desc = new WindowDesc(
 			-1,-1, 280, 48,
@@ -195,7 +200,7 @@ public class PlayerGui
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON,
 			_other_player_finances_small_widgets,
 			PlayerGui::PlayerFinancesWndProc
-	);
+			);
 
 	static final WindowDesc desc_table[] = {
 			_player_finances_desc, _player_finances_small_desc,
@@ -207,7 +212,7 @@ public class PlayerGui
 		Window w;
 		int mode;
 
-		mode = BitOps.b2i(player.id != Global._local_player.id) * 2 + BitOps.b2i(show_small);
+		mode = BitOps.b2i(player != Global._local_player.id) * 2 + BitOps.b2i(show_small);
 		w = Window.AllocateWindowDescFront(desc_table[mode], player);
 		if (w != null) {
 			w.caption_color = (byte) w.window_number.n;
@@ -298,7 +303,7 @@ public class PlayerGui
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 			_select_player_color_widgets,
 			PlayerGui::SelectPlayerColorWndProc
-	);
+			);
 
 	static void SelectPlayerFaceWndProc(Window w, WindowEvent e)
 	{
@@ -350,7 +355,7 @@ public class PlayerGui
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 			_select_player_face_widgets,
 			PlayerGui::SelectPlayerFaceWndProc
-	);
+			);
 
 	static final Widget _my_player_company_widgets[] = {
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,                Str.STR_018B_CLOSE_WINDOW),
@@ -396,7 +401,7 @@ public class PlayerGui
 			new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,    14,     0,   355,    32,    43, 0x0,                     Str.STR_NULL),
 			new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,    14,     0,   355,    32,    43, 0x0,                     Str.STR_NULL),
 			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   266,   355,   138,   149, Str.STR_COMPANY_PASSWORD,    Str.STR_COMPANY_PASSWORD_TOOLTIP),
-			
+
 	};
 
 	static void DrawPlayerVehiclesAmount(PlayerID player)
@@ -454,7 +459,7 @@ public class PlayerGui
 		}
 	}
 
-	int GetAmountOwnedBy(final Player p, PlayerID owner)
+	static int GetAmountOwnedBy(final Player p, PlayerID owner)
 	{
 		return BitOps.b2i(p.share_owners[0] == owner) +
 				BitOps.b2i(p.share_owners[1] == owner) +
@@ -464,10 +469,14 @@ public class PlayerGui
 
 	static void DrawCompanyOwnerText(final Player p)
 	{
-		final Player  p2;
 		int num = -1;
 
-		FOR_ALL_PLAYERS(p2) {
+		//FOR_ALL_PLAYERS(p2)
+		Iterator<Player> ii = Player.getIterator();
+		while(ii.hasNext())
+		{
+			final Player p2 = ii.next();
+
 			int amt = GetAmountOwnedBy(p, p2.index);
 			if (amt != 0) {
 				num++;
@@ -491,31 +500,38 @@ public class PlayerGui
 			int dis = 0;
 
 			if (!Window.IsWindowOfPrototype(w, _other_player_company_widgets)) {
-				w.AssignWidgetToWindow(w, (p.location_of_house != 0) ? _my_player_company_bh_widgets : _my_player_company_widgets);
+				Widget[] ww = (p.location_of_house != null) ? _my_player_company_bh_widgets : _my_player_company_widgets;
+				w.AssignWidgetToWindow( ww );
 
-				if (!Global._networking) SETBIT(w.hidden_state, 11); // hide company-password widget
+				if (!Global._networking) 
+					w.hidden_state = BitOps.RETSETBIT(w.hidden_state, 11); // hide company-password widget
 			} else {
-				if (p.location_of_house == 0) SETBIT(dis, 7);
+				if (p.location_of_house == null) 
+					dis = BitOps.RETSETBIT(dis, 7);
 
 				if (Global._patches.allow_shares) { /* shares are allowed */
 					/* If all shares are owned by someone (none by nobody), disable buy button */
-					if (GetAmountOwnedBy(p, Owner.OWNER_SPECTATOR) == 0) SETBIT(dis, 9);
+					if (GetAmountOwnedBy(p, PlayerID.get(Owner.OWNER_SPECTATOR) ) == 0) 
+						dis = BitOps.RETSETBIT(dis, 9);
 
 					/* Only 25% left to buy. If the player is human, disable buying it up.. TODO issues! */
-					if (GetAmountOwnedBy(p, Owner.OWNER_SPECTATOR) == 1 && !p.is_ai) SETBIT(dis, 9);
+					if (GetAmountOwnedBy(p, PlayerID.get(Owner.OWNER_SPECTATOR) ) == 1 && 0==p.is_ai) 
+						dis = BitOps.RETSETBIT(dis, 9);
 
 					/* If the player doesn't own any shares, disable sell button */
-					if (GetAmountOwnedBy(p, Global._local_player) == 0) SETBIT(dis, 10);
+					if (GetAmountOwnedBy(p, Global._local_player) == 0) 
+						dis = BitOps.RETSETBIT(dis, 10);
 
 					/* Spectators cannot do anything of course */
-					if (Global._local_player == Owner.OWNER_SPECTATOR) dis |= (1 << 9) | (1 << 10);
+					if (Global._local_player.id == Owner.OWNER_SPECTATOR) 
+						dis |= (1 << 9) | (1 << 10);
 				} else /* shares are not allowed, disable buy/sell buttons */
 					dis |= (1 << 9) | (1 << 10);
 			}
 
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
-			Global.SetDParam(2, Player.GetPlayerNameString((byte)w.window_number, 3));
+			Global.SetDParam(2, Player.GetPlayerNameString( PlayerID.get( w.window_number.n ), 3));
 
 			w.disabled_state = dis;
 			w.DrawWindowWidgets();
@@ -523,7 +539,7 @@ public class PlayerGui
 			Global.SetDParam(0, p.inaugurated_year + 1920);
 			Gfx.DrawString(110, 25, Str.STR_7038_INAUGURATED, 0);
 
-			DrawPlayerVehiclesAmount(w.window_number);
+			DrawPlayerVehiclesAmount( PlayerID.get(w.window_number.n) );
 
 			Gfx.DrawString(110,48, Str.STR_7006_COLOR_SCHEME, 0);
 			// Draw company-colour bus (0xC19)
@@ -535,7 +551,7 @@ public class PlayerGui
 			Global.SetDParam(1, p.president_name_2);
 			Gfx.DrawStringMultiCenter(48, 141, Str.STR_7037_PRESIDENT, 94);
 
-			Global.SetDParam64(0, CalculateCompanyValue(p));
+			Global.SetDParam64(0, Economy.CalculateCompanyValue(p) );
 			Gfx.DrawString(110, 114, Str.STR_7076_COMPANY_VALUE, 0);
 
 			DrawCompanyOwnerText(p);
@@ -564,14 +580,14 @@ public class PlayerGui
 				final Player  p = Player.GetPlayer(w.window_number.n);
 				w.as_def_d().byte_1 = 0;
 				Global.SetDParam(0, p.president_name_2);
-				MiscGui.ShowQueryString(p.president_name_1, Str.STR_700B_PRESIDENT_S_NAME, 31, 94, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID( p.president_name_1 ), new StringID( Str.STR_700B_PRESIDENT_S_NAME ), 31, 94, w.window_class, w.window_number);
 			} break;
 
 			case 6: {/* change company name */
 				Player p = Player.GetPlayer(w.window_number.n);
 				w.as_def_d().byte_1 = 1;
 				Global.SetDParam(0, p.name_2);
-				MiscGui.ShowQueryString(p.name_1, Str.STR_700A_COMPANY_NAME, 31, 150, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID(p.name_1), new StringID(Str.STR_700A_COMPANY_NAME), 31, 150, w.window_class, w.window_number);
 			} break;
 
 			case 7: {/* build hq */
@@ -591,11 +607,11 @@ public class PlayerGui
 				ViewPort.SetTileSelectSize(2, 2);
 				break;
 			case 9: /* buy 25% */
-				Cmd.DoCommandP(null, w.window_number, 0, null, Cmd.CMD_BUY_SHARE_IN_COMPANY | Cmd.CMD_MSG(Str.STR_707B_CAN_T_BUY_25_SHARE_IN_THIS));
+				Cmd.DoCommandP(null, w.window_number.n, 0, null, Cmd.CMD_BUY_SHARE_IN_COMPANY | Cmd.CMD_MSG(Str.STR_707B_CAN_T_BUY_25_SHARE_IN_THIS));
 				break;
 
 			case 10: /* sell 25% */
-				Cmd.DoCommandP(null, w.window_number, 0, null, Cmd.CMD_SELL_SHARE_IN_COMPANY | Cmd.CMD_MSG(Str.STR_707C_CAN_T_SELL_25_SHARE_IN));
+				Cmd.DoCommandP(null, w.window_number.n, 0, null, Cmd.CMD_SELL_SHARE_IN_COMPANY | Cmd.CMD_MSG(Str.STR_707C_CAN_T_SELL_25_SHARE_IN));
 				break;
 			case 11: { /* Password protect company */
 				/*#ifdef ENABLE_NETWORK
@@ -627,18 +643,18 @@ public class PlayerGui
 			break;
 
 		case WE_ON_EDIT_TEXT: {
-			char *b = e.str;
+			String b = e.str;
 
 			// empty string is allowed for password
-			if (*b == '\0' && w.as_def_d().byte_1 != 2) return;
+			if ( (b == null || b.length() == 0) && w.as_def_d().byte_1 != 2) return;
 
 			Global._cmd_text = b;
 			switch (w.as_def_d().byte_1) {
 			case 0: /* Change president name */
-				Cmd.DoCommandP(0, 0, 0, null, Cmd.CMD_CHANGE_PRESIDENT_NAME | Cmd.CMD_MSG(Str.STR_700D_CAN_T_CHANGE_PRESIDENT));
+				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_CHANGE_PRESIDENT_NAME | Cmd.CMD_MSG(Str.STR_700D_CAN_T_CHANGE_PRESIDENT));
 				break;
 			case 1: /* Change company name */
-				Cmd.DoCommandP(0, 0, 0, null, Cmd.CMD_CHANGE_COMPANY_NAME | Cmd.CMD_MSG(Str.STR_700C_CAN_T_CHANGE_COMPANY_NAME));
+				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_CHANGE_COMPANY_NAME | Cmd.CMD_MSG(Str.STR_700C_CAN_T_CHANGE_COMPANY_NAME));
 				break;
 				/*#ifdef ENABLE_NETWORK
 			case 2: // Change company password 
@@ -658,7 +674,7 @@ public class PlayerGui
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 			_my_player_company_widgets,
 			PlayerGui::PlayerCompanyWndProc
-	);
+			);
 
 	static final WindowDesc _other_player_company_desc = new WindowDesc(
 			-1,-1, 360, 170,
@@ -666,7 +682,7 @@ public class PlayerGui
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 			_other_player_company_widgets,
 			PlayerGui::PlayerCompanyWndProc
-	);
+			);
 
 	static void ShowPlayerCompany(/*PlayerID*/ int player)
 	{
@@ -716,7 +732,7 @@ public class PlayerGui
 			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     5,     0,   333,    14,   136, 0x0,										Str.STR_NULL),
 			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,     5,   148,   207,   117,   128, Str.STR_00C9_NO,						Str.STR_NULL),
 			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,     5,   218,   277,   117,   128, Str.STR_00C8_YES,					Str.STR_NULL),
-	
+
 	};
 
 	static final WindowDesc _buy_company_desc = new WindowDesc(
@@ -725,7 +741,7 @@ public class PlayerGui
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 			_buy_company_widgets,
 			PlayerGui::BuyCompanyWndProc
-	);
+			);
 
 
 	void ShowBuyCompanyDialog(int player)
@@ -764,7 +780,14 @@ public class PlayerGui
 			final Player p = Player.GetPlayer(Global._local_player);
 			int x, y;
 
-			SetupHighScoreEndWindow(w, &x, &y);
+			{
+				int [] xp = {0};
+				int [] yp = {0};
+
+				SetupHighScoreEndWindow(w, xp, yp);
+				x = xp[0];
+				y = yp[0];
+			}
 
 			/* We need to get performance from last year because the image is shown
 			 * at the start of the new year when these things have already been copied */
@@ -773,12 +796,12 @@ public class PlayerGui
 				Global.SetDParam(1, p.president_name_2);
 				Global.SetDParam(2, p.name_1);
 				Global.SetDParam(3, p.name_2);
-				Global.SetDParam(4, EndGameGetPerformanceTitleFromValue(p.old_economy[0].performance_history));
+				Global.SetDParam(4, Player.EndGameGetPerformanceTitleFromValue(p.old_economy[0].performance_history));
 				Gfx.DrawStringMultiCenter(x + (640 / 2), y + 107, Str.STR_021C_OF_ACHIEVES_STATUS, 640);
 			} else {
 				Global.SetDParam(0, p.name_1);
 				Global.SetDParam(1, p.name_2);
-				Global.SetDParam(2, EndGameGetPerformanceTitleFromValue(p.old_economy[0].performance_history));
+				Global.SetDParam(2, Player.EndGameGetPerformanceTitleFromValue(p.old_economy[0].performance_history));
 				Gfx.DrawStringMultiCenter(x + (640 / 2), y + 157, Str.STR_021B_ACHIEVES_STATUS, 640);
 			}
 		} break;
@@ -786,8 +809,8 @@ public class PlayerGui
 			w.DeleteWindow();
 			break;
 		case WE_DESTROY: /* Show the highscore window when this one is closed */
-			if (!Global._networking) Cmd.DoCommandP(0, 0, 0, null, Cmd.CMD_PAUSE); // unpause
-			ShowHighscoreTable(w.window_number, w.as_highscore_d().rank);
+			if (!Global._networking) Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE); // unpause
+			ShowHighscoreTable(w.window_number.n, w.as_highscore_d().rank);
 			break;
 		}
 	}
@@ -796,30 +819,37 @@ public class PlayerGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final HighScore *hs = _highscore_table[w.window_number];
+			// TODO final HighScore hs = _highscore_table[w.window_number.n];
 			int x, y;
 			byte i;
 
-			SetupHighScoreEndWindow(w, &x, &y);
+			{
+				int [] xp = {0};
+				int [] yp = {0};
+
+				SetupHighScoreEndWindow(w, xp, yp);
+				x = xp[0];
+				y = yp[0];
+			}
 
 			Global.SetDParam(0, Global._patches.ending_date);
 			Global.SetDParam(1, w.window_number.n + Str.STR_6801_EASY);
 			Gfx.DrawStringMultiCenter(x + (640 / 2), y + 62, !Global._networking ? Str.STR_0211_TOP_COMPANIES_WHO_REACHED : Str.STR_TOP_COMPANIES_NETWORK_GAME, 500);
 
-			/* Draw Highscore peepz */
+			/* TODO Draw Highscore peepz 
 			for (i = 0; i < lengthof(_highscore_table[0]); i++) {
 				Global.SetDParam(0, i + 1);
 				Gfx.DrawString(x + 40, y + 140 + (i * 55), Str.STR_0212, 0x10);
 
 				if (hs[i].company[0] != '\0') {
-					int colour = (w.as_highscore_d().rank == (int8)i) ? 0x3 : 0x10; // draw new highscore in red
+					int colour = (w.as_highscore_d().rank == (int)i) ? 0x3 : 0x10; // draw new highscore in red
 
 					Gfx.DoDrawString(hs[i].company, x + 71, y + 140 + (i * 55), colour);
 					Global.SetDParam(0, hs[i].title);
 					Global.SetDParam(1, hs[i].score);
 					Gfx.DrawString(x + 71, y + 160 + (i * 55), Str.STR_HIGHSCORE_STATS, colour);
 				}
-			}
+			}*/
 		} break;
 
 		case WE_CLICK: /* Onclick to close window, and in destroy event handle the rest */
@@ -827,7 +857,7 @@ public class PlayerGui
 			break;
 
 		case WE_DESTROY: /* Get back all the hidden windows */
-			if (Global._game_mode != GameModes.GM_MENU) ShowVitalWindows();
+			if (Global._game_mode != GameModes.GM_MENU) Gui.ShowVitalWindows();
 
 			if (!Global._networking) Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE); // unpause
 			break;
@@ -835,89 +865,89 @@ public class PlayerGui
 	}
 
 	static final Widget _highscore_widgets[] = {
-			{      Window.WWT_PANEL, Window.RESIZE_NONE, 16, 0, 640, 0, 480, 0x0, Str.STR_NULL},
+			new Widget(      Window.WWT_PANEL, Window.RESIZE_NONE, 16, 0, 640, 0, 480, 0x0, Str.STR_NULL),
 
-	);
+	};
 
-	static final WindowDesc _highscore_desc = new WindowDesc(
-			0, 0, 641, 481,
-			Window.WC_HIGHSCORE,0,
-			0,
-			_highscore_widgets,
-			PlayerGui::HighScoreWndProc
-	);
+			static final WindowDesc _highscore_desc = new WindowDesc(
+					0, 0, 641, 481,
+					Window.WC_HIGHSCORE,0,
+					0,
+					_highscore_widgets,
+					PlayerGui::HighScoreWndProc
+					);
 
-	static final WindowDesc _endgame_desc = new WindowDesc(
-			0, 0, 641, 481,
-			Window.WC_ENDSCREEN,0,
-			0,
-			_highscore_widgets,
-			PlayerGui::EndGameWndProc
-	);
+			static final WindowDesc _endgame_desc = new WindowDesc(
+					0, 0, 641, 481,
+					Window.WC_ENDSCREEN,0,
+					0,
+					_highscore_widgets,
+					PlayerGui::EndGameWndProc
+					);
 
-	/* Show the highscore table for a given difficulty. When called from
-	 * endgame ranking is set to the top5 element that was newly added
-	 * and is thus highlighted */
-	void ShowHighscoreTable(int difficulty, int ranking)
-	{
-		Window w;
+			/* Show the highscore table for a given difficulty. When called from
+			 * endgame ranking is set to the top5 element that was newly added
+			 * and is thus highlighted */
+			static void ShowHighscoreTable(int difficulty, int ranking)
+			{
+				Window w;
 
-		// pause game to show the chart
-		if (!Global._networking) Cmd.DoCommandP(0, 1, 0, null, Cmd.CMD_PAUSE);
+				// pause game to show the chart
+				if (!Global._networking) Cmd.DoCommandP(null, 1, 0, null, Cmd.CMD_PAUSE);
 
-		/* Close all always on-top windows to get a clean screen */
-		if (Global._game_mode != GameModes.GM_MENU) HideVitalWindows();
+				/* Close all always on-top windows to get a clean screen */
+				if (Global._game_mode != GameModes.GM_MENU) Window.HideVitalWindows();
 
-		Window.DeleteWindowByClass(Window.WC_HIGHSCORE);
-		w = Window.AllocateWindowDesc(_highscore_desc);
+				Window.DeleteWindowByClass(Window.WC_HIGHSCORE);
+				w = Window.AllocateWindowDesc(_highscore_desc);
 
-		if (w != null) {
-			Hal.MarkWholeScreenDirty();
-			w.window_number = difficulty; // show highscore chart for difficulty...
-			w.as_highscore_d().background_img = Sprite.SPR_HIGHSCORE_CHART_BEGIN; // which background to show
-			w.as_highscore_d().rank = ranking;
-		}
-	}
-
-	/* Show the endgame victory screen in 2050. Update the new highscore
-	 * if it was high enough */
-	static void ShowEndGameChart()
-	{
-		Window w;
-
-		/* Dedicated server doesn't need the highscore window */
-		if (Global._network_dedicated) return;
-		/* Pause in single-player to have a look at the highscore at your own leisure */
-		if (!Global._networking) Cmd.DoCommandP(null, 1, 0, null, Cmd.CMD_PAUSE);
-
-		HideVitalWindows();
-		Window.DeleteWindowByClass(Window.WC_ENDSCREEN);
-		w = Window.AllocateWindowDesc(_endgame_desc);
-
-		if (w != null) {
-			Hal.MarkWholeScreenDirty();
-
-			w.as_highscore_d().background_img = Sprite.SPR_TYCOON_IMG1_BEGIN;
-
-			if (Global._local_player.id != Owner.OWNER_SPECTATOR) {
-				final Player p = Player.GetPlayer(Global._local_player);
-				if (p.old_economy[0].performance_history == SCORE_MAX)
-					w.as_highscore_d().background_img = Sprite.SPR_TYCOON_IMG2_BEGIN;
+				if (w != null) {
+					Hal.MarkWholeScreenDirty();
+					w.window_number = new WindowNumber( difficulty ); // show highscore chart for difficulty...
+					w.as_highscore_d().background_img = Sprite.SPR_HIGHSCORE_CHART_BEGIN; // which background to show
+					w.as_highscore_d().rank = ranking;
+				}
 			}
 
-			/* In a network game show the endscores of the custom difficulty 'network' which is the last one
-			 * as well as generate a TOP5 of that game, and not an all-time top5. */
-			if (Global._networking) {
-				w.window_number = lengthof(_highscore_table) - 1;
-				w.as_highscore_d().rank = SaveHighScoreValueNetwork();
-			} else {
-				// in single player _local player is always valid
-				final Player p = Player.GetPlayer(Global._local_player);
-				w.window_number = GameOptions._opt.diff_level;
-				w.as_highscore_d().rank = SaveHighScoreValue(p);
+			/* Show the endgame victory screen in 2050. Update the new highscore
+			 * if it was high enough */
+			static void ShowEndGameChart()
+			{
+				Window w;
+
+				/* Dedicated server doesn't need the highscore window */
+				if (Global._network_dedicated) return;
+				/* Pause in single-player to have a look at the highscore at your own leisure */
+				if (!Global._networking) Cmd.DoCommandP(null, 1, 0, null, Cmd.CMD_PAUSE);
+
+				Window.HideVitalWindows();
+				Window.DeleteWindowByClass(Window.WC_ENDSCREEN);
+				w = Window.AllocateWindowDesc(_endgame_desc);
+
+				if (w != null) {
+					Hal.MarkWholeScreenDirty();
+
+					w.as_highscore_d().background_img = Sprite.SPR_TYCOON_IMG1_BEGIN;
+
+					if (Global._local_player.id != Owner.OWNER_SPECTATOR) {
+						final Player p = Player.GetPlayer(Global._local_player);
+						if (p.old_economy[0].performance_history == Economy.SCORE_MAX)
+							w.as_highscore_d().background_img = Sprite.SPR_TYCOON_IMG2_BEGIN;
+					}
+
+					/* TODO In a network game show the endscores of the custom difficulty 'network' which is the last one
+					 * as well as generate a TOP5 of that game, and not an all-time top5. 
+					if (Global._networking) {
+						w.window_number = lengthof(_highscore_table) - 1;
+						w.as_highscore_d().rank = SaveHighScoreValueNetwork();
+					} else {
+						// in single player _local player is always valid
+						final Player p = Player.GetPlayer(Global._local_player);
+						w.window_number = GameOptions._opt.diff_level;
+						w.as_highscore_d().rank = SaveHighScoreValue(p);
+					}*/
+				}
 			}
-		}
+
+
 	}
-
-
-}
