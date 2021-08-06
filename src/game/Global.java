@@ -185,6 +185,7 @@ public class Global {
 
 	public static int _tick_counter;
 	public static int _frame_counter;
+	public static int _timer_counter;
 
 	public static Paths _path = new Paths();
 

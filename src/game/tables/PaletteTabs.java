@@ -169,7 +169,7 @@ public class PaletteTabs
 
 	//#define GET_PALETTE(x) _palettes[x]
 
-	static class ExtraPaletteValues {
+	public static class ExtraPaletteValues {
 		/*
 		Colour a[15];  // dark blue water
 		Colour ac[15]; // dark blue water Toyland
@@ -180,13 +180,13 @@ public class PaletteTabs
 		Colour bc[45]; // glittery water Toyland
 		 */
 
-		Colour a[];  // dark blue water
-		Colour ac[]; // dark blue water Toyland
-		Colour lighthouse[]; // lighthouse & stadium
-		Colour oil_ref[];    // oil refinery
-		Colour e[];  // ???
-		Colour b[];  // glittery water
-		Colour bc[]; // glittery water Toyland
+		public Colour a[];  // dark blue water
+		public Colour ac[]; // dark blue water Toyland
+		public Colour lighthouse[]; // lighthouse & stadium
+		public Colour oil_ref[];    // oil refinery
+		public Colour e[];  // ???
+		public Colour b[];  // glittery water
+		public Colour bc[]; // glittery water Toyland
 
 		public ExtraPaletteValues() {
 			a = _a;

@@ -712,12 +712,16 @@ public class Gfx extends PaletteTabs
 
 	class BlitterParams {
 		int start_x, start_y;
-		byte[] sprite;
-		byte[] sprite_org;
+		//byte[] sprite;
+		Pixel sprite;
+		//byte[] sprite_org;
+		Pixel sprite_org;
 
 		///* Pixel */ byte  *dst;
-		int[]  dst_mem;
-		int  dst_offset;
+		//int[]  dst_mem;
+		//int  dst_offset;
+
+		Pixel dst;
 
 		int mode;
 		int width, height;
@@ -725,6 +729,17 @@ public class Gfx extends PaletteTabs
 		int height_org;
 		int pitch;
 		byte info;
+		
+		BlitterParams(Pixel screen)
+		{
+			dst = new Pixel(screen);
+		}
+
+		BlitterParams(Pixel screen, int shift)
+		{
+			dst = new Pixel(screen, shift);
+		}
+	
 	} 
 
 	private static void GfxBlitTileZoomIn(BlitterParams bp)
@@ -1457,12 +1472,12 @@ public class Gfx extends PaletteTabs
 				//Gfx::GfxBlitZoomOutUncomp
 		};
 
-	private static void GfxMainBlitter(final Sprite  sprite, int x, int y, int mode)
+	static void GfxMainBlitter(final Sprite  sprite, int x, int y, int mode)
 	{
 		final DrawPixelInfo  dpi = Hal._cur_dpi;
 		int start_x, start_y;
 		byte info;
-		BlitterParams bp;
+		BlitterParams bp = new BlitterParams(dpi.dst_ptr);
 
 		// TODO Fix Zoom
 		dpi.zoom = 0;
@@ -1477,8 +1492,10 @@ public class Gfx extends PaletteTabs
 		bp.height_org = bp.height = sprite.height;
 		info = (byte) sprite.info;
 		bp.info = info;
-		bp.sprite_org = bp.sprite = sprite.data;
-		bp.dst = dpi.dst_ptr;
+		//bp.sprite_org = bp.sprite = sprite.data;
+		bp.sprite_org = new Pixel( sprite.data );
+		bp.sprite = new Pixel( sprite.data );
+		//bp.dst = dpi.dst_ptr;
 		bp.mode = mode;
 		bp.pitch = dpi.pitch;
 
@@ -1502,7 +1519,7 @@ public class Gfx extends PaletteTabs
 				start_y -= y;
 				y = 0;
 			} else {
-				bp.dst += bp.pitch * (y >> dpi.zoom);
+				bp.dst.madd( bp.pitch * (y >> dpi.zoom) );
 			}
 			bp.start_y = start_y;
 
@@ -1520,16 +1537,16 @@ public class Gfx extends PaletteTabs
 				x = 0;
 			}
 			bp.start_x = start_x;
-			bp.dst += x >> dpi.zoom;
+			bp.dst.madd( x >> dpi.zoom );
 
 				if ( (x = x + bp.width - dpi.width) > 0) {
 					bp.width -= x;
 					if (bp.width <= 0) return;
 				}
 
-				zf_tile[dpi.zoom].apply(bp); // TODO apply?
+				zf_tile[dpi.zoom].accept(bp); // TODO apply?
 		} else {
-			bp.sprite += bp.width * (bp.height & ~zoom_mask);
+			bp.sprite.madd( bp.width * (bp.height & ~zoom_mask) );
 			bp.height &= zoom_mask;
 			if (bp.height == 0) return;
 
@@ -1538,10 +1555,10 @@ public class Gfx extends PaletteTabs
 			if ( (y -= dpi.top) < 0) {
 				bp.height += y;
 				if (bp.height <= 0) return;
-				bp.sprite -= bp.width * y;
+				bp.sprite.madd( - (bp.width * y) );
 				y = 0;
 			} else {
-				bp.dst += bp.pitch * (y >> dpi.zoom);
+				bp.dst.madd( bp.pitch * (y >> dpi.zoom) );
 			}
 
 			if (bp.height > dpi.height - y) {
@@ -1554,17 +1571,17 @@ public class Gfx extends PaletteTabs
 			if ( (x -= dpi.left) < 0) {
 				bp.width += x;
 				if (bp.width <= 0) return;
-				bp.sprite -= x;
+				bp.sprite.madd( -x );
 				x = 0;
 			}
-			bp.dst += x >> dpi.zoom;
+			bp.dst.madd( x >> dpi.zoom );
 
 				if (bp.width > dpi.width - x) {
 					bp.width = dpi.width - x;
 					if (bp.width <= 0) return;
 				}
 
-				zf_uncomp[dpi.zoom].apply(bp);
+				zf_uncomp[dpi.zoom].accept(bp);
 		}
 	}
 
@@ -1584,24 +1601,29 @@ public class Gfx extends PaletteTabs
 	//#define EXTR(p, q) (((int)(_timer_counter * (p)) * (q)) >> 16)
 	//#define EXTR2(p, q) (((int)(~_timer_counter * (p)) * (q)) >> 16)
 
+	static int EXTR(int p, int q) { return (((int)(Global._timer_counter * p) * q) >> 16); }
+	static int EXTR2(int p, int q) { return (((int)(~Global._timer_counter * p) * q) >> 16); }
+
 	static void DoPaletteAnimations()
 	{
-		final Colour s;
+		final Colour [] s;
 		Colour d;
 		/* Amount of colors to be rotated.
 		 * A few more for the DOS palette, because the water colors are
 		 * 245-254 for DOS and 217-226 for Windows.  */
 		final ExtraPaletteValues ev = _extra_palette_values;
-		int c = _use_dos_palette ? 38 : 28;
+		int c = Global._use_dos_palette ? 38 : 28;
 		Colour [] old_val = new Colour[38]; // max(38, 28)
 		int i;
 		int j;
 
-		d = _cur_palette[217];
-		memcpy(old_val, d, c * sizeof(old_val));
+		//d = _cur_palette[217];
+		//memcpy(old_val, d, c * sizeof(old_val));
 
+		System.arraycopy(_cur_palette, 217, old_val, 0, c);
+		
 		// Dark blue water
-		s = (_opt.landscape == LT_CANDY) ? ev.ac : ev.a;
+		s = (GameOptions._opt.landscape == Landscape.LT_CANDY) ? ev.ac : ev.a;
 		j = EXTR(320, 5);
 		for (i = 0; i != 5; i++) {
 			//*d++ = s[j];
@@ -1612,7 +1634,7 @@ public class Gfx extends PaletteTabs
 		// TODO d += 4!
 
 		// Glittery water
-		s = (_opt.landscape == LT_CANDY) ? ev.bc : ev.b;
+		s = (GameOptions._opt.landscape == Landscape.LT_CANDY) ? ev.bc : ev.b;
 		j = EXTR(128, 15);
 		for (i = 0; i != 5; i++) {
 			//*d++ = s[j];
@@ -1645,7 +1667,7 @@ public class Gfx extends PaletteTabs
 
 		// Radio tower blinking
 		{
-			byte i = (_timer_counter >> 1) & 0x7F;
+			byte i = (Global._timer_counter >> 1) & 0x7F;
 			byte v;
 
 			/*
@@ -1689,10 +1711,10 @@ public class Gfx extends PaletteTabs
 		}
 		// TODO d += 4
 
-		// Animate water for old DOS graphics
-		if (_use_dos_palette) {
+		/* TODO // Animate water for old DOS graphics
+		if (Global._use_dos_palette) {
 			// Dark blue water DOS
-			s = (_opt.landscape == LT_CANDY) ? ev.ac : ev.a;
+			s = (GameOptions._opt.landscape == LT_CANDY) ? ev.ac : ev.a;
 			j = EXTR(320, 5);
 			for (i = 0; i != 5; i++) {
 				//*d++ = s[j];
@@ -1703,7 +1725,7 @@ public class Gfx extends PaletteTabs
 			// TODO d += 4
 
 			// Glittery water DOS
-			s = (_opt.landscape == LT_CANDY) ? ev.bc : ev.b;
+			s = (GameOptions._opt.landscape == LT_CANDY) ? ev.bc : ev.b;
 			j = EXTR(128, 15);
 			for (i = 0; i != 5; i++) {
 				//*d++ = s[j];
@@ -1712,7 +1734,7 @@ public class Gfx extends PaletteTabs
 				if (j >= 15) j -= 15;
 			}
 			// TODO d += 4
-		}
+		} */
 
 		if (memcmp(old_val, _cur_palette[217], c * sizeof(old_val[0])) != 0) {
 			if (_pal_first_dirty > 217) _pal_first_dirty = 217;
@@ -2158,12 +2180,11 @@ class DrawStringStateMachine
 
 		me.color = (byte) (real_color & 0xFF);
 
-		return me.draw();
+		return me.draw(x,y);
 	}
 
-	private int draw() {
+	private int draw(int x, int y) {
 		char c;
-
 
 		if (color != 0xFE) {
 			if (x >= dpi.left + dpi.width ||
@@ -2190,10 +2211,10 @@ class DrawStringStateMachine
 			c = sc[sp++]; //*string++;
 			//skip_cont:;
 			if (c == 0) {
-				_stringwidth_out = base;
+				Gfx._stringwidth_out = base;
 				return x;
 			}
-			if (c >= ASCII_LETTERSTART) {
+			if (c >= Gfx.ASCII_LETTERSTART) {
 				if (x >= dpi.left + dpi.width)
 				{
 					//goto skip_char;
@@ -2201,10 +2222,10 @@ class DrawStringStateMachine
 					continue;
 				}
 				if (x + 26 >= dpi.left) {
-					GfxMainBlitter(GetSprite(base + 2 + c - ASCII_LETTERSTART), x, y, 1);
+					Gfx.GfxMainBlitter(SpriteCache.GetSprite(base + 2 + c - Gfx.ASCII_LETTERSTART), x, y, 1);
 				}
-				x += GetCharacterWidth(base + c);
-			} else if (c == ASCII_NL) { // newline = {}
+				x += Gfx.GetCharacterWidth(base + c);
+			} else if (c == Gfx.ASCII_NL) { // newline = {}
 				x = xo;
 				y += 10;
 				if (base != 0) {
@@ -2215,20 +2236,20 @@ class DrawStringStateMachine
 				//goto check_bounds;
 				break;
 
-			} else if (c >= ASCII_COLORSTART) { // change color?
-				color = (byte)(c - ASCII_COLORSTART);
+			} else if (c >= Gfx.ASCII_COLORSTART) { // change color?
+				color = (byte)(c - Gfx.ASCII_COLORSTART);
 				switchColor();
 				//goto switch_color;
 				//goto check_bounds;
 				break;
-			} else if (c == ASCII_SETX) { // {SETX}
+			} else if (c == Gfx.ASCII_SETX) { // {SETX}
 				x = xo + (byte)sc[sp++]; //*string++;
-			} else if (c == ASCII_SETXY) {// {SETXY}
+			} else if (c == Gfx.ASCII_SETXY) {// {SETXY}
 				x = xo + (byte)sc[sp++]; // *string++;
 				y = yo + (byte)sc[sp++]; // *string++;
-			} else if (c == ASCII_TINYFONT) { // {TINYFONT}
+			} else if (c == Gfx.ASCII_TINYFONT) { // {TINYFONT}
 				base = 0xE0;
-			} else if (c == ASCII_BIGFONT) { // {BIGFONT}
+			} else if (c == Gfx.ASCII_BIGFONT) { // {BIGFONT}
 				base = 0x1C0;
 			} else {
 				Global.error("Unknown string command character %d\n", c);
