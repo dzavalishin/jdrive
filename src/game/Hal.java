@@ -2,6 +2,7 @@ package game;
 
 import game.util.AnimCursor;
 import game.util.BitOps;
+import game.util.Pixel;
 
 public abstract class Hal
 {
@@ -268,8 +269,10 @@ void SortResolutions(int count)
 
 class DrawPixelInfo {
 	//Pixel dst_ptr;
-	int [] dst_ptr; // image buffer - (green << 24) | (red << 16) | blue
-	int dst_ptr_shift; // add to dst_ptr index when accessing [dz] to work around absence of pointers
+	//int [] dst_ptr; // image buffer - (green << 24) | (red << 16) | blue
+	//int dst_ptr_shift; // add to dst_ptr index when accessing [dz] to work around absence of pointers
+
+	Pixel dst_ptr; // Smart pointer
 	
 	int left, top, width, height;
 	int pitch;

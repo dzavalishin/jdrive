@@ -1,30 +1,32 @@
 package game;
 
+import java.util.Iterator;
 import java.util.function.Function;
 
 import game.util.BitOps;
+import game.util.Pixel;
 import game.tables.SmallMapGuiTables;
 
 public class SmallMapGui extends SmallMapGuiTables
 {
 
 	static final Widget _smallmap_widgets[] = {
-	new Widget(  Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5,                Str.STR_018B_CLOSE_WINDOW),
-	new Widget(   Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    13,    11,   433,     0,    13, Str.STR_00B0_MAP,            Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget( Window.WWT_STICKYBOX,     Window.RESIZE_LR,    13,   434,   445,     0,    13, 0x0,                     Str.STR_STICKY_BUTTON),
-	new Widget(    Window.WWT_IMGBTN,     Window.RESIZE_RB,    13,     0,   445,    14,   257, 0x0,                     Str.STR_NULL),
-	new Widget(         Window.WWT_6,     Window.RESIZE_RB,    13,     2,   443,    16,   255, 0x0,                     Str.STR_NULL),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   380,   401,   258,   279, Sprite.SPR_IMG_SHOW_COUNTOURS,  Str.STR_0191_SHOW_LAND_CONTOURS_ON_MAP),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   402,   423,   258,   279, Sprite.SPR_IMG_SHOW_VEHICLES,   Str.STR_0192_SHOW_VEHICLES_ON_MAP),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   424,   445,   258,   279, Sprite.SPR_IMG_INDUSTRY,        Str.STR_0193_SHOW_INDUSTRIES_ON_MAP),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   380,   401,   280,   301, Sprite.SPR_IMG_SHOW_ROUTES,     Str.STR_0194_SHOW_TRANSPORT_ROUTES_ON),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   402,   423,   280,   301, Sprite.SPR_IMG_PLANTTREES,      Str.STR_0195_SHOW_VEGETATION_ON_MAP),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   424,   445,   280,   301, Sprite.SPR_IMG_COMPANY_GENERAL, Str.STR_0196_SHOW_LAND_OWNERS_ON_MAP),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   358,   379,   258,   279, 0x0,                     Str.STR_NULL),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   358,   379,   280,   301, Sprite.SPR_IMG_TOWN,            Str.STR_0197_TOGGLE_TOWN_NAMES_ON_OFF),
-	new Widget(    Window.WWT_IMGBTN,    Window.RESIZE_RTB,    13,     0,   357,   258,   301, 0x0,                     Str.STR_NULL),
-	new Widget(     Window.WWT_PANEL,    Window.RESIZE_RTB,    13,     0,   433,   302,   313, 0x0,                     Str.STR_NULL),
-	new Widget( Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    13,   434,   445,   302,   313, 0x0,                     Str.STR_RESIZE_BUTTON),
+			new Widget(  Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    13,     0,    10,     0,    13, Str.STR_00C5,                Str.STR_018B_CLOSE_WINDOW),
+			new Widget(   Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    13,    11,   433,     0,    13, Str.STR_00B0_MAP,            Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget( Window.WWT_STICKYBOX,     Window.RESIZE_LR,    13,   434,   445,     0,    13, 0x0,                     Str.STR_STICKY_BUTTON),
+			new Widget(    Window.WWT_IMGBTN,     Window.RESIZE_RB,    13,     0,   445,    14,   257, 0x0,                     Str.STR_NULL),
+			new Widget(         Window.WWT_6,     Window.RESIZE_RB,    13,     2,   443,    16,   255, 0x0,                     Str.STR_NULL),
+			new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   380,   401,   258,   279, Sprite.SPR_IMG_SHOW_COUNTOURS,  Str.STR_0191_SHOW_LAND_CONTOURS_ON_MAP),
+			new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   402,   423,   258,   279, Sprite.SPR_IMG_SHOW_VEHICLES,   Str.STR_0192_SHOW_VEHICLES_ON_MAP),
+			new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   424,   445,   258,   279, Sprite.SPR_IMG_INDUSTRY,        Str.STR_0193_SHOW_INDUSTRIES_ON_MAP),
+			new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   380,   401,   280,   301, Sprite.SPR_IMG_SHOW_ROUTES,     Str.STR_0194_SHOW_TRANSPORT_ROUTES_ON),
+			new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   402,   423,   280,   301, Sprite.SPR_IMG_PLANTTREES,      Str.STR_0195_SHOW_VEGETATION_ON_MAP),
+			new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   424,   445,   280,   301, Sprite.SPR_IMG_COMPANY_GENERAL, Str.STR_0196_SHOW_LAND_OWNERS_ON_MAP),
+			new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   358,   379,   258,   279, 0x0,                     Str.STR_NULL),
+			new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_LRTB,    13,   358,   379,   280,   301, Sprite.SPR_IMG_TOWN,            Str.STR_0197_TOGGLE_TOWN_NAMES_ON_OFF),
+			new Widget(    Window.WWT_IMGBTN,    Window.RESIZE_RTB,    13,     0,   357,   258,   301, 0x0,                     Str.STR_NULL),
+			new Widget(     Window.WWT_PANEL,    Window.RESIZE_RTB,    13,     0,   433,   302,   313, 0x0,                     Str.STR_NULL),
+			new Widget( Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    13,   434,   445,   302,   313, 0x0,                     Str.STR_RESIZE_BUTTON),
 
 	};
 
@@ -54,19 +56,23 @@ public class SmallMapGui extends SmallMapGuiTables
 	 * @param proc Pointer to the colour function
 	 * @see GetSmallMapPixels(TileIndex)
 	 */
-	static void DrawSmallMapStuff(Pixel dst, int xc, int yc, int pitch, int reps, int mask, GetSmallMapPixels proc)
+	static void DrawSmallMapStuff(Pixel idst, int xc, int yc, int pitch, int reps, int mask, GetSmallMapPixels proc)
 	{
-		Pixel dst_ptr_end = Hal._screen.dst_ptr + Hal._screen.width * Hal._screen.height - Hal._screen.width;
+		Pixel dst = new Pixel(idst);
+		//Pixel dst_ptr_end = Hal._screen.dst_ptr + Hal._screen.width * Hal._screen.height - Hal._screen.width;
+		Pixel dst_ptr_end = new Pixel( Hal._screen.dst_ptr );
+		dst_ptr_end.shift(Hal._screen.width * Hal._screen.height - Hal._screen.width); 
 
 		do {
 			// check if the tile (xc,yc) is within the map range
 			if (xc < Global.MapMaxX() && yc < Global.MapMaxY()) {
 				// check if the dst pointer points to a pixel inside the screen buffer
-				if (dst > Hal._screen.dst_ptr && dst < dst_ptr_end)
-					WRITE_PIXELS_OR(dst, proc.apply(TileIndex.TileXY(xc, yc)) & mask);
+				//if (dst > Hal._screen.dst_ptr && dst < dst_ptr_end)
+				if (dst.inside( Hal._screen.dst_ptr, dst_ptr_end) )
+					dst.WRITE_PIXELS_OR(proc.apply(TileIndex.TileXY(xc, yc)) & mask);
 			}
-		// switch to next tile in the column
-			xc++; yc++; dst += pitch;
+			// switch to next tile in the column
+			xc++; yc++; dst.madd( pitch );
 		} while (--reps != 0);
 	}
 
@@ -78,14 +84,14 @@ public class SmallMapGui extends SmallMapGuiTables
 		if (tt == TileTypes.MP_TUNNELBRIDGE) {
 			int t = tile.getMap().m5;
 			if ((t & 0x80) == 0) t >>= 1;
-			if ((t & 6) == 0) {
-				t = TileTypes.MP_RAILWAY.ordinal();
-			} else if ((t & 6) == 2) {
-				t = TileTypes.MP_STREET.ordinal();
-			} else {
-				t = TileTypes.MP_WATER.ordinal();
-			}
-			return TileTypes.values[t];
+				if ((t & 6) == 0) {
+					t = TileTypes.MP_RAILWAY.ordinal();
+				} else if ((t & 6) == 2) {
+					t = TileTypes.MP_STREET.ordinal();
+				} else {
+					t = TileTypes.MP_WATER.ordinal();
+				}
+				return TileTypes.values[t];
 		}
 		return tt;
 	}
@@ -100,7 +106,7 @@ public class SmallMapGui extends SmallMapGuiTables
 		TileTypes t = GetEffectiveTileType(tile);
 
 		return
-			ApplyMask(_map_height_bits[tile.TileHeight()], _smallmap_contours_andor[t.ordinal()]);
+				ApplyMask(_map_height_bits[tile.TileHeight()], _smallmap_contours_andor[t.ordinal()]);
 	}
 
 	/**
@@ -157,7 +163,7 @@ public class SmallMapGui extends SmallMapGuiTables
 			(bits = MKCOLOR(0xFFFFFFFF), true);					// all others
 		} else {
 			// ground color
-			bits = ApplyMask(MKCOLOR(0x54545454), &_smallmap_contours_andor[t]);
+			bits = ApplyMask(MKCOLOR(0x54545454), _smallmap_contours_andor[t.ordinal()]);
 		}
 		return bits;
 	}
@@ -171,11 +177,11 @@ public class SmallMapGui extends SmallMapGuiTables
 		int bits;
 
 		switch (t) {
-			case MP_CLEAR:
-				i = (tile.getMap().m5 & 0x1F) - 4;
-				if (i >= 0) i >>= 2;
-				bits = _vegetation_clear_bits[i + 4];
-				break;
+		case MP_CLEAR:
+			i = (tile.getMap().m5 & 0x1F) - 4;
+			if (i >= 0) i >>= 2;
+			bits = _vegetation_clear_bits[i + 4];
+			break;
 
 			case MP_INDUSTRY:
 				bits = BitOps.IS_BYTE_INSIDE(tile.getMap().m5, 0x10, 0x12) ? MKCOLOR(0xD0D0D0D0) : MKCOLOR(0xB5B5B5B5);
@@ -210,9 +216,9 @@ public class SmallMapGui extends SmallMapGuiTables
 		int o;
 
 		switch (tile.GetTileType()) {
-			case MP_INDUSTRY: o = Owner.OWNER_SPECTATOR;    break;
-			case MP_HOUSE:    o = Owner.OWNER_TOWN;         break;
-			default:          o = tile.GetTileOwner().id; break;
+		case MP_INDUSTRY: o = Owner.OWNER_SPECTATOR;    break;
+		case MP_HOUSE:    o = Owner.OWNER_TOWN;         break;
+		default:          o = tile.GetTileOwner().id; break;
 		}
 
 		return _owner_colors[o];
@@ -223,12 +229,12 @@ public class SmallMapGui extends SmallMapGuiTables
 	/* each tile has 4 x pixels and 1 y pixel */
 
 	static GetSmallMapPixels _smallmap_draw_procs[] = {
-		SmallMapGui::GetSmallMapContoursPixels,
-		SmallMapGui::GetSmallMapVehiclesPixels,
-		SmallMapGui::GetSmallMapIndustriesPixels,
-		SmallMapGui::GetSmallMapRoutesPixels,
-		SmallMapGui::GetSmallMapVegetationPixels,
-		SmallMapGui::GetSmallMapOwnerPixels,
+			SmallMapGui::GetSmallMapContoursPixels,
+			SmallMapGui::GetSmallMapVehiclesPixels,
+			SmallMapGui::GetSmallMapIndustriesPixels,
+			SmallMapGui::GetSmallMapRoutesPixels,
+			SmallMapGui::GetSmallMapVegetationPixels,
+			SmallMapGui::GetSmallMapOwnerPixels,
 	};
 
 
@@ -265,12 +271,13 @@ public class SmallMapGui extends SmallMapGuiTables
 	static void DrawSmallMap(DrawPixelInfo dpi, Window w, int type, boolean show_towns)
 	{
 		DrawPixelInfo old_dpi;
-		int dx,dy, x, y, x2, y2;
 		Pixel ptr;
 		int tile_x;
 		int tile_y;
 		ViewPort vp;
 
+
+		
 		old_dpi = Hal._cur_dpi;
 		Hal._cur_dpi = dpi;
 
@@ -292,13 +299,15 @@ public class SmallMapGui extends SmallMapGuiTables
 			Player.forEach( (p) ->
 			{
 				if (p.is_active)
-					_owner_colors[p.index] =
-						dup_byte32(SpriteCache.GetNonSprite(775 + p.player_color)[0xCB]); // XXX - magic pixel
+					_owner_colors[p.index.id] =
+					dup_byte32(SpriteCache.GetNonSprite(775 + p.player_color)[0xCB]); // XXX - magic pixel
 			});
 		}
 
 		tile_x = w.as_smallmap_d().scroll_x / 16;
 		tile_y = w.as_smallmap_d().scroll_y / 16;
+
+		int dx, dy, x, y;
 
 		dx = dpi.left + w.as_smallmap_d().subscroll;
 		tile_x -= dx / 4;
@@ -309,7 +318,7 @@ public class SmallMapGui extends SmallMapGuiTables
 		tile_x += dy / 2;
 		tile_y += dy / 2;
 
-		if (dy & 1) {
+		if(0 != (dy & 1)) {
 			tile_x++;
 			dx += 2;
 			if (dx > 3) {
@@ -319,130 +328,96 @@ public class SmallMapGui extends SmallMapGuiTables
 			}
 		}
 
-		ptr = dpi.dst_ptr - dx - 4;
+		ptr = new Pixel( dpi.dst_ptr,  - dx - 4 );
 		x = - dx - 4;
 		y = 0;
 
-		for(;;) {
-			int mask;
-			int reps;
-			int t;
-
-			mask = 0xFFFFFFFF;
-
-			/* distance from left edge */
-			if (x < 0) {
-				if (x < -3) goto skip_column;
-				/* mask to use at the left edge */
-				mask = _smallmap_mask_left[x + 3];
-			}
-
-			/* distance from right edge */
-			t = dpi.width - x;
-			if (t < 4) {
-				if (t <= 0)
-					break; /* exit loop */
-				/* mask to use at the right edge */
-				mask &= _smallmap_mask_right[t - 1];
-			}
-
-			/* number of lines */
-			reps = (dpi.height - y + 1) / 2;
-			if (reps > 0) {
-//				assert(ptr >= dpi.dst_ptr);
-				DrawSmallMapStuff(ptr, tile_x, tile_y, dpi.pitch*2, reps, mask, _smallmap_draw_procs[type]);
-			}
-
-	skip_column:
-			if (y == 0) {
-				tile_y++;
-				y++;
-				ptr += dpi.pitch;
-			} else {
-				tile_x--;
-				y--;
-				ptr -= dpi.pitch;
-			}
-			ptr += 2;
-			x += 2;
-		}
+		small_map_draw_helper(x, y, dpi, ptr, tile_x, tile_y, type);
 
 		/* draw vehicles? */
 		if (type == 0 || type == 1) {
-			Vehicle v;
-			boolean skip;
-			byte color;
+			//Vehicle v;
+			//boolean skip;
+			//byte color;
 
-			FOR_ALL_VEHICLES(v) {
+			//FOR_ALL_VEHICLES(v)
+			//Vehicle.forEach( (v) ->
+			Iterator<Vehicle> ii = Vehicle.getIterator();
+			while(ii.hasNext())
+			{
+				Vehicle v = ii.next();
+				
 				if (v.type != 0 && v.type != Vehicle.VEH_Special &&
-						(v.vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) == 0) {
+						(v.vehstatus & (Vehicle.VS_HIDDEN | Vehicle.VS_UNCLICKABLE)) == 0) {
 					// Remap into flat coordinates.
 					Point pt = Point.RemapCoords(
-						(v.x_pos - w.as_smallmap_d().scroll_x) / 16,
-						(v.y_pos - w.as_smallmap_d().scroll_y) / 16,
-						0);
-					x = pt.x;
-					y = pt.y;
+							(v.x_pos - w.as_smallmap_d().scroll_x) / 16,
+							(v.y_pos - w.as_smallmap_d().scroll_y) / 16,
+							0);
+					int x1 = pt.x;
+					int y1 = pt.y;
 
 					// Check if y is out of bounds?
-					y -= dpi.top;
-					if (!BitOps.IS_INT_INSIDE(y, 0, dpi.height)) continue;
+					y1 -= dpi.top;
+					if (!BitOps.IS_INT_INSIDE(y1, 0, dpi.height)) continue;
 
 					// Default is to draw both pixels.
-					skip = false;
+					boolean skip = false;
 
 					// Offset X coordinate
-					x -= w.as_smallmap_d().subscroll + 3 + dpi.left;
+					x1 -= w.as_smallmap_d().subscroll + 3 + dpi.left;
 
-					if (x < 0) {
+					if (x1 < 0) {
 						// if x+1 is 0, that means we're on the very left edge,
 						//  and should thus only draw a single pixel
-						if (++x != 0)
+						if (++x1 != 0)
 							continue;
 						skip = true;
-					} else if (x >= dpi.width - 1) {
+					} else if (x1 >= dpi.width - 1) {
 						// Check if we're at the very right edge, and if so draw only a single pixel
-						if (x != dpi.width - 1)
+						if (x1 != dpi.width - 1)
 							continue;
 						skip = true;
 					}
 
 					// Calculate pointer to pixel and the color
-					ptr = dpi.dst_ptr + y * dpi.pitch + x;
-					color = (type == 1) ? _vehicle_type_colors[v.type-0x10] : 0xF;
+					Pixel lptr = new Pixel( dpi.dst_ptr, y * dpi.pitch + x );
+					byte lcolor = (byte) ((type == 1) ? _vehicle_type_colors[v.type-0x10] : 0xF);
 
 					// And draw either one or two pixels depending on clipping
-					ptr[0] = color;
+					lptr.w(0, lcolor);
 					if (!skip)
-						ptr[1] = color;
+						lptr.w(1, lcolor);
 				}
 			}
 		}
 
 		if (show_towns) {
-			final Town t;
+			//final Town t;
 
-			FOR_ALL_TOWNS(t) {
-				if (t.xy != 0) {
+			//FOR_ALL_TOWNS(t)
+			Town.forEach( (t) ->
+			{
+				if (t.xy != null) {
 					// Remap the town coordinate
 					Point pt = Point.RemapCoords(
-						(int)(TileX(t.xy) * 16 - WP(w, smallmap_d).scroll_x) / 16,
-						(int)(TileY(t.xy) * 16 - WP(w, smallmap_d).scroll_y) / 16,
-						0);
-					x = pt.x - w.as_smallmap_d().subscroll + 3 - (t.sign.width_2 >> 1);
-					y = pt.y;
+							(int)(t.xy.TileX() * 16 - w.as_smallmap_d().scroll_x) / 16,
+							(int)(t.xy.TileY() * 16 - w.as_smallmap_d().scroll_y) / 16,
+							0);
+					int x1 = pt.x - w.as_smallmap_d().subscroll + 3 - (t.sign.width_2 >> 1);
+					int y1 = pt.y;
 
 					// Check if the town sign is within bounds
-					if (x + t.sign.width_2 > dpi.left &&
-							x < dpi.left + dpi.width &&
-							y + 6 > dpi.top &&
-							y < dpi.top + dpi.height) {
+					if (x1 + t.sign.width_2 > dpi.left &&
+							x1 < dpi.left + dpi.width &&
+							y1 + 6 > dpi.top &&
+							y1 < dpi.top + dpi.height) {
 						// And draw it.
 						Global.SetDParam(0, t.index);
-						Gfx.DrawString(x, y, Str.STR_2056, 12);
+						Gfx.DrawString(x1, y1, Str.STR_2056, 12);
 					}
 				}
-			}
+			});
 		}
 
 		// Draw map indicators
@@ -452,26 +427,84 @@ public class SmallMapGui extends SmallMapGuiTables
 			// Find main viewport.
 			vp = Window.FindWindowById(Window.WC_MAIN_WINDOW,0).viewport;
 
-			pt = RemapCoords(WP(w, smallmap_d).scroll_x, WP(w, smallmap_d).scroll_y, 0);
+			pt = Point.RemapCoords(w.as_smallmap_d().scroll_x, w.as_smallmap_d().scroll_y, 0);
 
-			x = vp.virtual_left - pt.x;
-			y = vp.virtual_top - pt.y;
-			x2 = (x + vp.virtual_width) / 16;
-			y2 = (y + vp.virtual_height) / 16;
-			x /= 16;
-			y /= 16;
+			int x1 = vp.virtual_left - pt.x;
+			int y1 = vp.virtual_top - pt.y;
+			int x2 = (x1 + vp.virtual_width) / 16;
+			int y2 = (y1 + vp.virtual_height) / 16;
+			x1 /= 16;
+			y1 /= 16;
 
-			x -= w.as_smallmap_d().subscroll;
+			x1 -= w.as_smallmap_d().subscroll;
 			x2 -= w.as_smallmap_d().subscroll;
 
-			DrawVertMapIndicator(x, y, x, y2);
-			DrawVertMapIndicator(x2, y, x2, y2);
+			DrawVertMapIndicator(x1, y1, x1, y2);
+			DrawVertMapIndicator(x2, y1, x2, y2);
 
-			DrawHorizMapIndicator(x, y, x2, y);
-			DrawHorizMapIndicator(x, y2, x2, y2);
+			DrawHorizMapIndicator(x1, y1, x2, y1);
+			DrawHorizMapIndicator(x1, y2, x2, y2);
 		}
 		Hal._cur_dpi = old_dpi;
 	}
+
+	private static void small_map_draw_helper(int x, int y, DrawPixelInfo dpi, Pixel ptr, int tile_x, int tile_y, int type)
+	{
+		for(;;) {
+			int mask;
+			int reps;
+			int t;
+
+			mask = 0xFFFFFFFF;
+
+			do { // goto replacement
+				/* distance from left edge */
+				if (x < 0) {
+					if (x < -3) {
+						//goto skip_column;
+						break; // out of do
+					}
+
+					/* mask to use at the left edge */
+					mask = _smallmap_mask_left[x + 3];
+				}
+
+				/* distance from right edge */
+				t = dpi.width - x;
+				if (t < 4) {
+					if (t <= 0)
+					{
+						//break; /* exit loop */
+						return; // can't break out of 2 loops
+					}
+					/* mask to use at the right edge */
+					mask &= _smallmap_mask_right[t - 1];
+				}
+
+				/* number of lines */
+				reps = (dpi.height - y + 1) / 2;
+				if (reps > 0) {
+					//				assert(ptr >= dpi.dst_ptr);
+					DrawSmallMapStuff(ptr, tile_x, tile_y, dpi.pitch*2, reps, mask, _smallmap_draw_procs[type]);
+				}
+			} while(false); // goto / break target
+			//skip_column:
+			if (y == 0) {
+				tile_y++;
+				y++;
+				ptr.madd( dpi.pitch );
+			} else {
+				tile_x--;
+				y--;
+				ptr.madd( -dpi.pitch );
+			}
+			ptr.madd( 2 );
+			x += 2;
+		}
+
+	}
+
+
 
 	static void SmallMapWindowProc(Window w, WindowEvent e)
 	{
@@ -488,8 +521,8 @@ public class SmallMapGui extends SmallMapGuiTables
 
 			/* draw the legend */
 			tbl_mem = _legend_table[(_smallmap_type != 2) ? _smallmap_type : (GameOptions._opt.landscape + IND_OFFS)];
-			tbl_shif = 0;
-			
+			tbl_shift = 0;
+
 			x = 4;
 			y_org = w.height - 43 - 11;
 			y = y_org;
@@ -509,7 +542,7 @@ public class SmallMapGui extends SmallMapGuiTables
 				}
 			}
 
-			if (!FillDrawPixelInfo(new_dpi, null, 3, 17, w.width - 28 + 22, w.height - 64 - 11))
+			if (!Gfx.FillDrawPixelInfo(new_dpi, null, 3, 17, w.width - 28 + 22, w.height - 64 - 11))
 				return;
 
 			DrawSmallMap(new_dpi, w, _smallmap_type, _smallmap_show_towns);
@@ -521,7 +554,7 @@ public class SmallMapGui extends SmallMapGuiTables
 				Window w2;
 				Point pt;
 
-				_left_button_clicked = false;
+				Window._left_button_clicked = false;
 
 				w2 = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 
@@ -572,12 +605,12 @@ public class SmallMapGui extends SmallMapGuiTables
 	}
 
 	static final WindowDesc _smallmap_desc = new WindowDesc(
-		-1,-1, 446, 314,
-		Window.WC_SMALLMAP,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
-		_smallmap_widgets,
-		SmallMapGui::SmallMapWindowProc
-	);
+			-1,-1, 446, 314,
+			Window.WC_SMALLMAP,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
+			_smallmap_widgets,
+			SmallMapGui::SmallMapWindowProc
+			);
 
 	void ShowSmallMap()
 	{
@@ -603,19 +636,19 @@ public class SmallMapGui extends SmallMapGuiTables
 
 	/* Extra ViewPort Window Stuff */
 	static final Widget _extra_view_port_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,	Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   287,     0,    13, Str.STR_EXTRA_VIEW_PORT_TITLE,				Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   288,   299,     0,    13, 0x0,       Str.STR_STICKY_BUTTON),
-	new Widget(      Window.WWT_PANEL,     Window.RESIZE_RB,    14,     0,   299,    14,   233, 0x0,				Str.STR_NULL),
-	new Widget(          Window.WWT_6,     Window.RESIZE_RB,    14,     2,   297,    16,   231, 0x0,				Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,     Window.RESIZE_TB,    14,     0,    21,   234,   255, 0x2DF,			Str.STR_017F_ZOOM_THE_VIEW_IN),
-	new Widget(      Window.WWT_PANEL,     Window.RESIZE_TB,    14,    22,    43,   234,   255, 0x2E0,			Str.STR_0180_ZOOM_THE_VIEW_OUT),
-	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,    44,   171,   234,   255, Str.STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW,Str.STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT),
-	new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   172,   298,   234,   255, Str.STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN,Str.STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN_TT),
-	new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,   299,   299,   234,   255, 0x0,				Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,     0,   287,   256,   267, 0x0,				Str.STR_NULL),
-	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   288,   299,   256,   267, 0x0,				Str.STR_RESIZE_BUTTON),
-	
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,	Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   287,     0,    13, Str.STR_EXTRA_VIEW_PORT_TITLE,				Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   288,   299,     0,    13, 0x0,       Str.STR_STICKY_BUTTON),
+			new Widget(      Window.WWT_PANEL,     Window.RESIZE_RB,    14,     0,   299,    14,   233, 0x0,				Str.STR_NULL),
+			new Widget(          Window.WWT_6,     Window.RESIZE_RB,    14,     2,   297,    16,   231, 0x0,				Str.STR_NULL),
+			new Widget(      Window.WWT_PANEL,     Window.RESIZE_TB,    14,     0,    21,   234,   255, 0x2DF,			Str.STR_017F_ZOOM_THE_VIEW_IN),
+			new Widget(      Window.WWT_PANEL,     Window.RESIZE_TB,    14,    22,    43,   234,   255, 0x2E0,			Str.STR_0180_ZOOM_THE_VIEW_OUT),
+			new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,    44,   171,   234,   255, Str.STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW,Str.STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT),
+			new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   172,   298,   234,   255, Str.STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN,Str.STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN_TT),
+			new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,   299,   299,   234,   255, 0x0,				Str.STR_NULL),
+			new Widget(      Window.WWT_PANEL,    Window.RESIZE_RTB,    14,     0,   287,   256,   267, 0x0,				Str.STR_NULL),
+			new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   288,   299,   256,   267, 0x0,				Str.STR_RESIZE_BUTTON),
+
 	};
 
 	static void ExtraViewPortWndProc(Window w, WindowEvent e)
@@ -671,12 +704,12 @@ public class SmallMapGui extends SmallMapGuiTables
 	}
 
 	static final WindowDesc _extra_view_port_desc = new WindowDesc(
-		-1,-1, 300, 268,
-		Window.WC_EXTRA_VIEW_PORT,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
-		_extra_view_port_widgets,
-		SmallMapGui::ExtraViewPortWndProc
-	);
+			-1,-1, 300, 268,
+			Window.WC_EXTRA_VIEW_PORT,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
+			_extra_view_port_widgets,
+			SmallMapGui::ExtraViewPortWndProc
+			);
 
 	void ShowExtraViewPortWindow()
 	{
@@ -703,8 +736,8 @@ public class SmallMapGui extends SmallMapGuiTables
 			w.as_vp_d().scrollpos_y = y + (v.viewport.virtual_height - (214)) / 2;
 		}
 	}
-	
-	
+
+
 }
 
 

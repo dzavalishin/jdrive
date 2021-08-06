@@ -2,6 +2,7 @@ package game.tables;
 
 import game.Str;
 import game.util.BitOps;
+import game.util.Pixel;
 
 public class SmallMapGuiTables 
 {
@@ -168,6 +169,7 @@ public class SmallMapGuiTables
 
 
 	//#if defined(TTD_ALIGNMENT_4)
+	@Deprecated
 	static  void WRITE_PIXELS(Pixel d, int val)
 	{
 		/*#	if defined(TTD_BIG_ENDIAN)
@@ -176,14 +178,15 @@ public class SmallMapGuiTables
 			d[2] = BitOps.GB(val,  8, 8);
 			d[3] = BitOps.GB(val,  0, 8);
 	#	elif defined(TTD_LITTLE_ENDIAN) */
-		d[0] = BitOps.GB(val,  0, 8);
-		d[1] = BitOps.GB(val,  8, 8);
-		d[2] = BitOps.GB(val, 16, 8);
-		d[3] = BitOps.GB(val, 24, 8);
+		d.w(0, (byte) BitOps.GB(val,  0, 8) );
+		d.w(1, (byte) BitOps.GB(val,  8, 8) );
+		d.w(2, (byte) BitOps.GB(val, 16, 8) );
+		d.w(3, (byte) BitOps.GB(val, 24, 8) );
 		//#	endif
 	}
 
 	/* need to use OR, otherwise we will overwrite the wrong pixels at the edges :( */
+	@Deprecated
 	static  void WRITE_PIXELS_OR(Pixel d, int val)
 	{
 		/*#	if defined(TTD_BIG_ENDIAN)
@@ -192,10 +195,10 @@ public class SmallMapGuiTables
 			d[2] |= BitOps.GB(val,  8, 8);
 			d[3] |= BitOps.GB(val,  0, 8);
 	#	elif defined(TTD_LITTLE_ENDIAN) */
-		d[0] |= BitOps.GB(val,  0, 8);
-		d[1] |= BitOps.GB(val,  8, 8);
-		d[2] |= BitOps.GB(val, 16, 8);
-		d[3] |= BitOps.GB(val, 24, 8);
+		d.wor(0, BitOps.GB(val,  0, 8) );
+		d.wor(1, BitOps.GB(val,  8, 8) );
+		d.wor(2, BitOps.GB(val, 16, 8) );
+		d.wor(3, BitOps.GB(val, 24, 8) );
 		//#	endif
 	}
 	/*		
