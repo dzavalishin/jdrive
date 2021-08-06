@@ -1460,7 +1460,7 @@ class RoadDriveEntry {
 		RoadZPosAffectSpeed(v, SetRoadVehPosition(v, x, y));
 	}
 
-	void RoadVehEnterDepot(Vehicle v)
+	static void RoadVehEnterDepot(Vehicle v)
 	{
 		v.road.state = 254;
 		v.vehstatus |= Vehicle.VS_HIDDEN;

@@ -52,6 +52,17 @@ public class ArrayPtr<ItemType> {
 		{
 			return read( shift );
 		}
+
+		/**
+		 * read ++ - read item at current position and increment pointer.
+		 * @param v
+		 */
+		public ItemType rpp() {
+			ItemType r = read(0);
+			displ++;			
+			return r;
+		}
+		
 		
 		public ArrayPtr( ItemType [] start ) {
 			mem = start;
