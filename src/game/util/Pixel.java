@@ -1,6 +1,13 @@
 package game.util;
 
-// smart pointer to the video memory
+/**
+ * Smart pointer to the video memory
+ * 
+ * Maintains displacement from memory start.
+ * 
+ * @author dz
+ *
+ */
 
 public class Pixel 
 {
@@ -15,6 +22,11 @@ public class Pixel
 		mem[ displ + shift ] = b;
 	}
 	
+	/**
+	 * Write a pixel to this video ptr
+	 * @param shift from current ptr pos
+	 * @param b data to write
+	 */
 	public void w( int shift, byte b )
 	{
 		write(shift,b);
@@ -86,6 +98,11 @@ public class Pixel
 		assert( mem == to.mem );		
 		
 		return displ >= from.displ && displ <= to.displ;
+	}
+	
+	public void memset(byte color, int right) {
+		for( int i = displ; i < displ+right; i++ )
+			mem[i] = color;		
 	}
 	
 	

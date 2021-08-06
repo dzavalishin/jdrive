@@ -206,9 +206,9 @@ public class PaletteTabs
 	//#undef M
 
 	// Color table for colors in lang files (e.g. {BLACK})
-	static class StringColor {
-		int text;
-		int shadow;
+	public static class StringColor {
+		public int text;
+		public int shadow;
 
 		public StringColor(int i, int j) {
 			text = i;

@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import game.Gfx.BlitterParams;
 import game.tables.PaletteTabs;
 import game.util.BitOps;
+import game.util.Pixel;
 
 public class Gfx extends PaletteTabs 
 {
@@ -31,7 +32,7 @@ public class Gfx extends PaletteTabs
 
 	//static void GfxMainBlitter(final Sprite *sprite, int x, int y, int mode);
 
-	private static final int ASCII_LETTERSTART = 32;
+	static final int ASCII_LETTERSTART = 32;
 	public static int _stringwidth_base = 0;
 	//VARDEF byte _stringwidth_table[0x2A0];
 	private static byte [] _stringwidth_table = new byte[0x2A0];
@@ -171,8 +172,8 @@ public class Gfx extends PaletteTabs
 	static void GfxFillRect(int left, int top, int right, int bottom, int color)
 	{
 		final DrawPixelInfo  dpi = Hal._cur_dpi;
-		///* Pixel */ byte  *dst;
-		int dst; // index
+		Pixel dst;
+		//int dst; // index
 		final int otop = top;
 		final int oleft = left;
 
@@ -193,14 +194,16 @@ public class Gfx extends PaletteTabs
 		bottom -= top;
 		assert(bottom > 0);
 
-		//dst = dpi.dst_ptr + top * dpi.pitch + left;
-		dst = top * dpi.pitch + left;
+		dst = new Pixel( dpi.dst_ptr,  top * dpi.pitch + left );
+		//dst = top * dpi.pitch + left;
 
 		if (0==(color & Sprite.PALETTE_MODIFIER_GREYOUT)) {
 			if (0==(color & Sprite.USE_COLORTABLE)) {
 				do {
-					memset(dpi.dst_ptr, dst, color, right);
-					dst += dpi.pitch;
+					//memset(dpi.dst_ptr, dst, color, right);
+					dst.memset( (byte)color, right );
+					//dst += dpi.pitch;
+					dst.madd( dpi.pitch );
 				} while (--bottom > 0);
 			} else {
 				/* use colortable mode */
@@ -209,17 +212,22 @@ public class Gfx extends PaletteTabs
 				do {
 					int i;
 					for (i = 0; i != right; i++) 
-						dpi.dst_ptr[dst+i] = ctab[i%ctab.length]; //ctab[dst+i];
-					dst += dpi.pitch;
+						//dpi.dst_ptr[dst+i] = ctab[i%ctab.length]; //ctab[dst+i];
+						dst.w(i, ctab[i%ctab.length]); //ctab[dst+i];
+					dst.madd( dpi.pitch );
 				} while (--bottom > 0);
 			}
 		} else {
 			byte bo =(byte) ((oleft - left + dpi.left + otop - top + dpi.top) & 1);
 			do {
 				int i;
-				for (i = (bo ^= 1); i < right; i += 2) 
-					dpi.dst_ptr[dst+i] = (byte)color;
-				dst += dpi.pitch;
+				for (i = (bo ^= 1); i < right; i += 2)
+				{
+					//dpi.dst_ptr[dst+i] = (byte)color;
+					dst.w( i, (byte)color );
+				}
+
+				dst.madd( dpi.pitch );
 			} while (--bottom > 0);
 		}
 	}
@@ -229,7 +237,7 @@ public class Gfx extends PaletteTabs
 		final DrawPixelInfo  dpi = Hal._cur_dpi;
 		if ((x-=dpi.left) < 0 || x>=dpi.width || (y-=dpi.top)<0 || y>=dpi.height)
 			return;
-		dpi.dst_ptr[y * dpi.pitch + x] = color;
+		dpi.dst_ptr.w( y * dpi.pitch + x,  (byte) color );
 	}
 
 	static void GfxDrawLine(int x, int y, int x2, int y2, int color)
@@ -676,84 +684,10 @@ public class Gfx extends PaletteTabs
 
 	static int DoDrawString(final String string, int x, int y, int real_color)
 	{
-		DrawPixelInfo dpi = Hal._cur_dpi;
-		int base = _stringwidth_base;
-		char c;
-		byte color;
-		int xo = x, yo = y;
-		int sp = 0;
-		char sc[] = string.toCharArray();
+		return DrawStringStateMachine.DoDrawString(string, x, y, real_color);
 
-		color = (byte) (real_color & 0xFF);
-
-		if (color != 0xFE) {
-			if (x >= dpi.left + dpi.width ||
-					x + Hal._screen.width*2 <= dpi.left ||
-					y >= dpi.top + dpi.height ||
-					y + Hal._screen.height <= dpi.top)
-				return x;
-
-			if (color != 0xFF) {
-				switch_color:;
-				if(0 != (real_color & IS_PALETTE_COLOR) ) {
-					_string_colorremap[1] = color;
-					_string_colorremap[2] = (byte) 215;
-				} else {
-					_string_colorremap[1] = _string_colormap[color].text;
-					_string_colorremap[2] = _string_colormap[color].shadow;
-				}
-				_color_remap_ptr = _string_colorremap;
-			}
-		}
-
-		check_bounds:
-			if (y + 19 <= dpi.top || dpi.top + dpi.height <= y) {
-				skip_char:;
-				for(;;) {
-					c = sc[sp++]; //*string++;
-					if (c < ASCII_LETTERSTART) goto skip_cont;
-				}
-			}
-
-		for(;;) {
-			c = sc[sp++]; //*string++;
-			skip_cont:;
-			if (c == 0) {
-				_stringwidth_out = base;
-				return x;
-			}
-			if (c >= ASCII_LETTERSTART) {
-				if (x >= dpi.left + dpi.width) goto skip_char;
-				if (x + 26 >= dpi.left) {
-					GfxMainBlitter(GetSprite(base + 2 + c - ASCII_LETTERSTART), x, y, 1);
-				}
-				x += GetCharacterWidth(base + c);
-			} else if (c == ASCII_NL) { // newline = {}
-				x = xo;
-				y += 10;
-				if (base != 0) {
-					y -= 4;
-					if (base != 0xE0)
-						y += 12;
-				}
-				goto check_bounds;
-			} else if (c >= ASCII_COLORSTART) { // change color?
-				color = (byte)(c - ASCII_COLORSTART);
-				goto switch_color;
-			} else if (c == ASCII_SETX) { // {SETX}
-				x = xo + (byte)sc[sp++]; //*string++;
-			} else if (c == ASCII_SETXY) {// {SETXY}
-				x = xo + (byte)sc[sp++]; // *string++;
-				y = yo + (byte)sc[sp++]; // *string++;
-			} else if (c == ASCII_TINYFONT) { // {TINYFONT}
-				base = 0xE0;
-			} else if (c == ASCII_BIGFONT) { // {BIGFONT}
-				base = 0x1C0;
-			} else {
-				Global.error("Unknown string command character %d\n", c);
-			}
-		}
 	}
+
 
 	static int DoDrawStringTruncated(final String str, int x, int y, int color, int maxw)
 	{
@@ -800,13 +734,13 @@ public class Gfx extends PaletteTabs
 		//final byte* src;
 		final byte[] src_data;
 		int src_shift = 0;
-		
+
 		int num, skip;
 		byte done;
 		///* Pixel */ byte  *dst;
 		/* Pixel */ byte []  dst_data;
 		int dst_shift = 0;
-		
+
 		//final byte* ctab;
 		final byte[] ctab;
 
@@ -821,7 +755,7 @@ public class Gfx extends PaletteTabs
 					//src = src_o + 2;
 					src_data = src_o_data;
 					src_shift = src_o_shift + 2;
-					
+
 					//src_o += num + 2;
 					src_o_shift += num + 2;
 
@@ -835,7 +769,7 @@ public class Gfx extends PaletteTabs
 						//src -= skip;
 						src_shift -= skip;
 						num += skip;
-						
+
 						if (num <= 0) continue;
 						skip = 0;
 					}
@@ -905,10 +839,10 @@ public class Gfx extends PaletteTabs
 					done = src_o_data[0+src_o_shift];
 					num = done & 0x7F;
 					skip = src_o_data[1+src_o_shift];
-					
+
 					src_data = src_o_data;
 					src_shift = src_o_shift + 2;
-					
+
 					src_o_shift += num + 2;
 
 					dst_data = bp.dst_mem;
@@ -933,14 +867,14 @@ public class Gfx extends PaletteTabs
 					if (num & 2) { *(int*)dst = *(int*)src; dst += 2; src += 2; }
 					if (num >>= 2) {
 						do {
-							*(int*)dst = *(int*)src;
+					 *(int*)dst = *(int*)src;
 							dst += 4;
 							src += 4;
 						} while (--num != 0);
 					}
 					#else*/
-						//memcpy(dst, src, num);
-						System.arraycopy(src_data, src_shift, dst_data, dst_shift, num);
+					//memcpy(dst, src, num);
+					System.arraycopy(src_data, src_shift, dst_data, dst_shift, num);
 					//#endif
 				} while (0==(done & 0x80));
 
@@ -957,7 +891,7 @@ public class Gfx extends PaletteTabs
 		/* Pixel */ 
 		byte  []dst_data = bp.dst_mem;
 		int dst_shift = bp.dst_offset;
-		
+
 		int height = bp.height;
 		int width = bp.width;
 		int i;
@@ -1072,7 +1006,7 @@ public class Gfx extends PaletteTabs
 					ctab = _color_remap_ptr;
 					num = (num + 1) >> 1;
 						for (; num != 0; num--) {
-							*dst = ctab[*src];
+	 *dst = ctab[*src];
 							dst++;
 							src += 2;
 						}
@@ -1118,7 +1052,7 @@ public class Gfx extends PaletteTabs
 					ctab = _color_remap_ptr;
 					num = (num + 1) >> 1;
 						for (; num != 0; num--) {
-							*dst = ctab[*dst];
+	 *dst = ctab[*dst];
 							dst++;
 						}
 				} while (!(done & 0x80));
@@ -1166,7 +1100,7 @@ public class Gfx extends PaletteTabs
 					num = (num + 1) >> 1;
 
 						for (; num != 0; num--) {
-							*dst = *src;
+	 *dst = *src;
 							dst++;
 							src += 2;
 						}
@@ -1286,7 +1220,7 @@ public class Gfx extends PaletteTabs
 					ctab = _color_remap_ptr;
 					num = (num + 3) >> 2;
 						for (; num != 0; num--) {
-							*dst = ctab[*src];
+	 *dst = ctab[*src];
 							dst++;
 							src += 4;
 						}
@@ -1351,7 +1285,7 @@ public class Gfx extends PaletteTabs
 					ctab = _color_remap_ptr;
 					num = (num + 3) >> 2;
 						for (; num != 0; num--) {
-							*dst = ctab[*dst];
+	 *dst = ctab[*dst];
 							dst++;
 						}
 
@@ -1420,7 +1354,7 @@ public class Gfx extends PaletteTabs
 					num = (num + 3) >> 2;
 
 						for (; num != 0; num--) {
-							*dst = *src;
+	 *dst = *src;
 							dst++;
 							src += 4;
 						}
@@ -1498,15 +1432,15 @@ public class Gfx extends PaletteTabs
 			}
 		}
 	}
-	*/
+	 */
 	//typedef void (*BlitZoomFunc)(BlitterParams bp);
 
 	static final BlitZoomFunc zf_tile[] =
 		{
-			Gfx::GfxBlitTileZoomIn,
-			Gfx::GfxBlitTileZoomIn,
-			Gfx::GfxBlitTileZoomIn,
-			
+				Gfx::GfxBlitTileZoomIn,
+				Gfx::GfxBlitTileZoomIn,
+				Gfx::GfxBlitTileZoomIn,
+
 				//Gfx::GfxBlitTileZoomIn,
 				//Gfx::GfxBlitTileZoomMedium,
 				//Gfx::GfxBlitTileZoomOut
@@ -1514,9 +1448,9 @@ public class Gfx extends PaletteTabs
 
 	static final BlitZoomFunc zf_uncomp[] =
 		{
-			Gfx::GfxBlitZoomInUncomp,
-			Gfx::GfxBlitZoomInUncomp,
-			Gfx::GfxBlitZoomInUncomp,
+				Gfx::GfxBlitZoomInUncomp,
+				Gfx::GfxBlitZoomInUncomp,
+				Gfx::GfxBlitZoomInUncomp,
 
 				//Gfx::GfxBlitZoomInUncomp,
 				//Gfx::GfxBlitZoomMediumUncomp,
@@ -1529,10 +1463,10 @@ public class Gfx extends PaletteTabs
 		int start_x, start_y;
 		byte info;
 		BlitterParams bp;
-		
+
 		// TODO Fix Zoom
 		dpi.zoom = 0;
-		
+
 		int zoom_mask = ~((1 << dpi.zoom) - 1);
 
 
@@ -1718,26 +1652,26 @@ public class Gfx extends PaletteTabs
 			(v = 255, i < 0x3f) ||
 			(v = 128, i < 0x4A || i >= 0x75) ||
 			(v = 20);
-			*/
+			 */
 			if(i >= 0x3f)		v = 255;
 			else if(i >= 0x4A && i < 0x75)	v = 128;
 			else v = 20;
-			
-			
+
+
 			d.r = v;
 			d.g = 0;
 			d.b = 0;
 			d++;
 
 			i ^= 0x40;
-			
+
 			/*(v = 255, i < 0x3f) ||
 			(v = 128, i < 0x4A || i >= 0x75) ||
 			(v = 20);*/
 			if(i >= 0x3f)		v = 255;
 			else if(i >= 0x4A && i < 0x75)	v = 128;
 			else v = 20;
-			
+
 			d.r = v;
 			d.g = 0;
 			d.b = 0;
@@ -1828,7 +1762,7 @@ public class Gfx extends PaletteTabs
 
 		// screen size changed and the old bitmap is invalid now, so we don't want to undraw it
 		Hal._cursor.visible = false;
-		*/
+		 */
 	}
 
 	static void UndrawMouseCursor()
@@ -1839,10 +1773,10 @@ public class Gfx extends PaletteTabs
 					//Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
 					Hal._screen.dst_ptr,					
 					_cursor_backup,
-					
+
 					Hal._cursor.draw_size.x, 
 					Hal._cursor.draw_size.y,
-					
+
 					//Hal._cursor.draw_size.x, 
 					Hal._cursor.draw_size.x + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch, 
 					Hal._screen.pitch);
@@ -1893,7 +1827,7 @@ public class Gfx extends PaletteTabs
 				_cursor_backup,
 				//Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
 				Hal._screen.dst_ptr,
-				
+
 				Hal._cursor.draw_size.x, 
 				Hal._cursor.draw_size.y, 
 				Hal._screen.pitch, 
@@ -1943,7 +1877,7 @@ public class Gfx extends PaletteTabs
 			DbgScreenRect(left, top, right, bottom);
 		else
 	#endif */
-		
+
 		Window.DrawOverlappedWindowForAll(left, top, right, bottom);
 		Global.hal.make_dirty(left, top, right - left, bottom - top);
 	}
@@ -1957,7 +1891,7 @@ public class Gfx extends PaletteTabs
 		int y;
 
 		int bp = 0;
-		
+
 		y = 0;
 		do {
 			x = 0;
@@ -2200,6 +2134,136 @@ public class Gfx extends PaletteTabs
 }
 
 
+class DrawStringStateMachine
+{
+	private DrawPixelInfo dpi = Hal._cur_dpi;
+	private int base = Gfx._stringwidth_base;
+	private int sp = 0; // string pointer
+	private byte color;
+
+	private final char sc[];
+	private final int xo, yo;
+	private final int real_color;
+
+
+	public DrawStringStateMachine(String string, int x, int y, int real_color) {
+		this.real_color = real_color;
+		sc = string.toCharArray();
+		xo = x;
+		yo = y;
+	}
+
+	public static int DoDrawString(String string, int x, int y, int real_color) {
+		DrawStringStateMachine me = new DrawStringStateMachine(string, x, y, real_color);
+
+		me.color = (byte) (real_color & 0xFF);
+
+		return me.draw();
+	}
+
+	private int draw() {
+		char c;
+
+
+		if (color != 0xFE) {
+			if (x >= dpi.left + dpi.width ||
+					x + Hal._screen.width*2 <= dpi.left ||
+					y >= dpi.top + dpi.height ||
+					y + Hal._screen.height <= dpi.top)
+				return x;
+
+			if (color != 0xFF) {
+				//switch_color:;
+				switchColor();
+			}
+		}
+
+		while(true) // for goto check_bounds: replacement 
+		{
+		//check_bounds:
+			if (y + 19 <= dpi.top || dpi.top + dpi.height <= y) {
+				//skip_char:;
+				skipChar();
+			}
+
+		for(;;) {
+			c = sc[sp++]; //*string++;
+			//skip_cont:;
+			if (c == 0) {
+				_stringwidth_out = base;
+				return x;
+			}
+			if (c >= ASCII_LETTERSTART) {
+				if (x >= dpi.left + dpi.width)
+				{
+					//goto skip_char;
+					skipChar();
+					continue;
+				}
+				if (x + 26 >= dpi.left) {
+					GfxMainBlitter(GetSprite(base + 2 + c - ASCII_LETTERSTART), x, y, 1);
+				}
+				x += GetCharacterWidth(base + c);
+			} else if (c == ASCII_NL) { // newline = {}
+				x = xo;
+				y += 10;
+				if (base != 0) {
+					y -= 4;
+					if (base != 0xE0)
+						y += 12;
+				}
+				//goto check_bounds;
+				break;
+
+			} else if (c >= ASCII_COLORSTART) { // change color?
+				color = (byte)(c - ASCII_COLORSTART);
+				switchColor();
+				//goto switch_color;
+				//goto check_bounds;
+				break;
+			} else if (c == ASCII_SETX) { // {SETX}
+				x = xo + (byte)sc[sp++]; //*string++;
+			} else if (c == ASCII_SETXY) {// {SETXY}
+				x = xo + (byte)sc[sp++]; // *string++;
+				y = yo + (byte)sc[sp++]; // *string++;
+			} else if (c == ASCII_TINYFONT) { // {TINYFONT}
+				base = 0xE0;
+			} else if (c == ASCII_BIGFONT) { // {BIGFONT}
+				base = 0x1C0;
+			} else {
+				Global.error("Unknown string command character %d\n", c);
+			}
+		}
+		// break from loop above leads to check_bounds label
+		}
+	}
+
+	private void skipChar()
+	{
+		for(;;) {
+			char c = sc[sp++]; //*string++;
+			if (c < Gfx.ASCII_LETTERSTART)
+			{
+				//goto skip_cont;
+				sp--;
+				// fall through
+			}
+		}
+	}
+
+	private void switchColor()
+	{
+		if(0 != (real_color & Gfx.IS_PALETTE_COLOR) ) {
+			Gfx._string_colorremap[1] = color;
+			Gfx._string_colorremap[2] = (byte) 215;
+		} else {
+			Gfx._string_colorremap[1] = (byte) Gfx._string_colormap[color].text;
+			Gfx._string_colorremap[2] = (byte) Gfx._string_colormap[color].shadow;
+		}
+		Gfx._color_remap_ptr = Gfx._string_colorremap;
+	}
+
+}
 
 
 class Colour {
