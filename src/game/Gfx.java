@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import game.Gfx.BlitterParams;
 import game.tables.PaletteTabs;
 import game.util.BitOps;
+import game.util.Colour;
 import game.util.Pixel;
 
 public class Gfx extends PaletteTabs 
@@ -710,7 +711,7 @@ public class Gfx extends PaletteTabs
 		}
 	}
 
-	class BlitterParams {
+	static public class BlitterParams {
 		int start_x, start_y;
 		//byte[] sprite;
 		Pixel sprite;
@@ -744,45 +745,54 @@ public class Gfx extends PaletteTabs
 
 	private static void GfxBlitTileZoomIn(BlitterParams bp)
 	{
-		final byte[] src_o_data = bp.sprite;
-		int src_o_shift = 0; // start index to access, replace src_o_data += x with src_o_shift += x 
+		//final byte[] src_o_data = bp.sprite;
+		//int src_o_shift = 0; // start index to access, replace src_o_data += x with src_o_shift += x 
 		//final byte* src;
-		final byte[] src_data;
-		int src_shift = 0;
+		Pixel src_o = new Pixel(bp.sprite);
+		
+		//final byte[] src_data;
+		//int src_shift = 0;
 
 		int num, skip;
 		byte done;
 		///* Pixel */ byte  *dst;
-		/* Pixel */ byte []  dst_data;
-		int dst_shift = 0;
+		///* Pixel */ byte []  dst_data;
+		//int dst_shift = 0;
 
 		//final byte* ctab;
-		final byte[] ctab;
+		//final byte[] ctab;
 
 		if(0 != (bp.mode & 1) ) {
-			src_o_shift += BitOps.READ_LE_UINT16(src_o_data, bp.start_y * 2);
+			//src_o_shift += BitOps.READ_LE_UINT16(src_o_data, bp.start_y * 2);
+			src_o.madd( BitOps.READ_LE_UINT16(src_o.getMem(), bp.start_y * 2) );
 
 			do {
 				do {
-					done = src_o_data[src_o_shift];
+					done = src_o.read(0); // src_o_data[src_o_shift];
 					num = done & 0x7F;
-					skip = src_o_data[src_o_shift+1];
+					skip = src_o.read(1); // src_o_data[src_o_shift+1];
 					//src = src_o + 2;
-					src_data = src_o_data;
-					src_shift = src_o_shift + 2;
+					//src_data = src_o_data;
+					//src_shift = src_o_shift + 2;
+					Pixel src = new Pixel( src_o, 2 );
 
 					//src_o += num + 2;
-					src_o_shift += num + 2;
+					//src_o_shift += num + 2;
+					src_o.madd( num + 2 );
 
-					dst_data = bp.dst_mem;
-					dst_shift = 0;
+					//dst_data = bp.dst_mem;
+					//dst_shift = 0;
+					Pixel dst = new Pixel(bp.dst);
 
 					if ( (skip -= bp.start_x) > 0) {
 						//dst += skip;
-						dst_shift += skip;
+						//dst_shift += skip;
+						dst.madd(skip);
 					} else {
 						//src -= skip;
-						src_shift -= skip;
+						//src_shift -= skip;
+						src.madd(-skip);
+						
 						num += skip;
 
 						if (num <= 0) continue;
@@ -795,36 +805,62 @@ public class Gfx extends PaletteTabs
 						if (num <= 0) continue;
 					}
 
-					ctab = _color_remap_ptr;
+					final byte[] ctab = _color_remap_ptr;
 
 					for (; num >= 4; num -=4) {
+						/*
 						dst_data[3+dst_shift] = ctab[src_data[3+src_shift]];
 						dst_data[2+dst_shift] = ctab[src_data[2+src_shift]];
 						dst_data[1+dst_shift] = ctab[src_data[1+src_shift]];
 						dst_data[0+dst_shift] = ctab[src_data[0+src_shift]];
-						dst_shift += 4;
-						src_shift += 4;
+						*/
+						dst.w( 3, ctab[src.r(3)] );
+						dst.w( 2, ctab[src.r(2)] );
+						dst.w( 1, ctab[src.r(1)] );
+						dst.w( 0, ctab[src.r(0)] );
+						
+						
+						//dst_shift += 4;
+						//src_shift += 4;
+						src.madd(4);
+						dst.madd(4);
 					}
-					for (; num != 0; num--) 
-						dst_data[dst_shift++] = ctab[src_data[src_shift++]];
+					for (; num != 0; num--)
+					{
+						//dst_data[dst_shift++] = ctab[src_data[src_shift++]];
+						dst.w( 0, ctab[src.r(0)] );
+						src.madd(1);
+						dst.madd(1);
+					}
 				} while (0==(done & 0x80));
 
 				//bp.dst += bp.pitch;
-				bp.dst_offset += bp.pitch;
+				//bp.dst_offset += bp.pitch;
+				bp.dst.madd( bp.pitch );
+				
 			} while (--bp.height != 0);
-		} else if(0 != (bp.mode & 2) ) {
-			src_o_shift += BitOps.READ_LE_UINT16(src_o_data, bp.start_y * 2);
+		} 
+		else if(0 != (bp.mode & 2) ) 
+		{
+			//src_o_shift += BitOps.READ_LE_UINT16(src_o_data, bp.start_y * 2);
+			src_o.madd( BitOps.READ_LE_UINT16(src_o.getMem(), bp.start_y * 2) );
+			
 			do {
 				do {
-					done = src_o_data[0+src_o_shift];
+					//done = src_o_data[0+src_o_shift];
+					done = src_o.r(0);
 					num = done & 0x7F;
-					skip = src_o_data[1+src_o_shift];
-					src_o_shift += num + 2;
+					//skip = src_o_data[1+src_o_shift];
+					skip = src_o.r(1);
+					//src_o_shift += num + 2;
+					src_o.madd(2);
 
-					dst_data = bp.dst_mem;
+					//dst_data = bp.dst_mem;
+					Pixel dst = new Pixel( bp.dst );
 
 					if ( (skip -= bp.start_x) > 0) {
-						dst_shift += skip;
+						//dst_shift += skip;
+						dst.madd(skip);
 					} else {
 						num += skip;
 						if (num <= 0) continue;
@@ -837,36 +873,49 @@ public class Gfx extends PaletteTabs
 						if (num <= 0) continue;
 					}
 
-					ctab = _color_remap_ptr;
+					final byte[] ctab = _color_remap_ptr;
 					for (; num != 0; num--) {
 						//*dst = ctab[*dst];
-						dst_data[0+dst_shift] = ctab[dst_data[0+dst_shift]]; // TODO displacement
-						dst_shift++;
+						//dst_data[0+dst_shift] = ctab[dst_data[0+dst_shift]]; // TODO displacement
+						dst.w( 0, ctab[dst.r(0)] );
+						//dst_shift++;
+						dst.madd(1);
 					}
 				} while (0==(done & 0x80));
 
-				bp.dst_offset += bp.pitch;
+				//bp.dst_offset += bp.pitch;
+				bp.dst.madd(bp.pitch);
+				
 			} while (--bp.height != 0);
 		} else {
-			src_o_shift += BitOps.READ_LE_UINT16(src_o_data, bp.start_y * 2);
+			//src_o_shift += BitOps.READ_LE_UINT16(src_o_data, bp.start_y * 2);
+			src_o.madd( BitOps.READ_LE_UINT16(src_o.getMem(), bp.start_y * 2) );
 			do {
 				do {
-					done = src_o_data[0+src_o_shift];
+					//done = src_o_data[0+src_o_shift];
+					done = src_o.r(0);
 					num = done & 0x7F;
-					skip = src_o_data[1+src_o_shift];
+					//skip = src_o_data[1+src_o_shift];
+					skip = src_o.r(1);
 
-					src_data = src_o_data;
-					src_shift = src_o_shift + 2;
+					//src_data = src_o_data;
+					//src_shift = src_o_shift + 2;
+					Pixel src = new Pixel( src_o, 2 );
+					
+					//src_o_shift += num + 2;
+					src_o.madd( num + 2 );
 
-					src_o_shift += num + 2;
-
-					dst_data = bp.dst_mem;
-					dst_shift = bp.dst_offset;
+					//dst_data = bp.dst_mem;
+					//dst_shift = bp.dst_offset;
+					
+					Pixel dst = new Pixel(bp.dst);
 
 					if ( (skip -= bp.start_x) > 0) {
-						dst_shift += skip;
+						//dst_shift += skip;
+						dst.madd(skip);
 					} else {
-						src_shift -= skip;
+						//src_shift -= skip;
+						src.madd(-skip);
 						num += skip;
 						if (num <= 0) continue;
 						skip = 0;
@@ -889,11 +938,13 @@ public class Gfx extends PaletteTabs
 					}
 					#else*/
 					//memcpy(dst, src, num);
-					System.arraycopy(src_data, src_shift, dst_data, dst_shift, num);
+					//System.arraycopy(src_data, src_shift, dst_data, dst_shift, num);
+					dst.copyFrom(src, num);
 					//#endif
 				} while (0==(done & 0x80));
 
-				bp.dst_offset += bp.pitch;
+				//bp.dst_offset += bp.pitch;
+				bp.dst.madd(bp.pitch);
 			} while (--bp.height != 0);
 		}
 	}
@@ -2286,13 +2337,13 @@ class DrawStringStateMachine
 
 }
 
-
+/*
 class Colour {
 	byte r;
 	byte g;
 	byte b;
 } 
-
+*/
 
 //typedef void (*BlitZoomFunc)(BlitterParams bp);
 @FunctionalInterface

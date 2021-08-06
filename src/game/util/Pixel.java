@@ -106,5 +106,15 @@ public class Pixel
 	}
 	
 	
+	public byte[] getMem() {
+		return mem;
+	}
+
+	public void copyFrom(Pixel src, int num) 
+	{
+		System.arraycopy(src.mem, src.displ, mem, displ, num);		
+	}
+	
+	
 	
 }
