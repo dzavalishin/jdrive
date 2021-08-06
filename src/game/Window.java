@@ -36,6 +36,7 @@ public class Window extends WindowConstants
 	//byte custom[WINDOW_CUSTOM_SIZE];
 	//byte custom[];
 	AbstractWinCustom custom;
+	public int[] custom_array = new int[2]; // TODO replace it all wit subclasses
 
 	BiConsumer<Window,WindowEvent> wndproc;
 

@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 import game.tables.SmallMapGuiTables;
+import game.util.ArrayPtr;
 import game.util.BitOps;
 
 public class GraphGui 
@@ -48,13 +49,18 @@ public class GraphGui
 		int color;
 		int right, bottom;
 		int num_x, num_dataset;
-		final long *row_ptr, *col_ptr;
 		long mx;
 		int adj_height;
 		long y_scaling, tmp;
 		long value;
 		long cur_val;
 		int sel;
+
+		//final long []row_ptr;
+		//final long []col_ptr;
+
+		ArrayPtr<Long> row_ptr;
+		ArrayPtr<Long> col_ptr;
 
 		/* the colors and cost array of GraphDrawer must accomodate
 		 * both values for cargo and players. So if any are higher, quit */
@@ -99,7 +105,14 @@ public class GraphGui
 		num_dataset = gw.num_dataset;
 		assert(num_dataset > 0);
 
-		row_ptr = gw.cost[0];
+		 //return Arrays.stream(array).filter(Objects::nonNull).mapToLong(Long::longValue).toArray();
+	
+		//Arrays.stream(gw.cost[0]).mapToObj( (lv) -> new Long(lv) ).toArray();
+		Long[] la = (Long[]) Arrays.stream(gw.cost[0]).mapToObj( (lv) -> Long.valueOf(lv) ).toArray();
+		
+		//row_ptr = new ArrayPtr<Long>( gw.cost[0] );
+		row_ptr = new ArrayPtr<Long>( la );
+		
 		mx = 0;
 		/* bit selection for the showing of various players, base max element
 		 * on to-be shown player-information. This way the graph can scale */
@@ -108,14 +121,18 @@ public class GraphGui
 			if (0==(sel&1)) {
 				num_x = gw.num_on_x_axis;
 				assert(num_x > 0);
-				col_ptr = row_ptr;
-				do {
-					if (*col_ptr != INVALID_VALUE) {
-						mx = max64(mx, myabs64(*col_ptr));
+				col_ptr = new ArrayPtr<Long>( row_ptr );
+				do 
+				{
+					if (col_ptr.r() != INVALID_VALUE) {
+						mx = Math.max(mx, Math.abs(col_ptr.r()));
 					}
-				} while (col_ptr++, --num_x);
+					col_ptr.inc();					
+				} while (--num_x > 0);
 			}
-		} while (sel>>=1, row_ptr+=24, --num_dataset);
+			sel>>=1;
+			row_ptr.madd(24);
+		} while ( --num_dataset > 0 );
 
 		/* setup scaling */
 		y_scaling = INVALID_VALUE;
@@ -176,19 +193,23 @@ public class GraphGui
 
 			/* draw lines and dots */
 			i = 0;
-			row_ptr = gw.cost[0];
+			{
+				Long[] la1 = (Long[]) Arrays.stream(gw.cost[0]).mapToObj( (lv) -> Long.valueOf(lv) ).toArray();
+
+			row_ptr = new ArrayPtr<Long>( la1 ); // gw.cost[0];
+			}
 			sel = gw.sel; // show only selected lines. GraphDrawer qw.sel set in Graph-Legend (_legend_excludebits)
 			do {
 				if (0==(sel & 1)) {
 					x = gw.left + 55;
 					j = gw.num_on_x_axis;assert(j>0);
-					col_ptr = row_ptr;
+					col_ptr = new ArrayPtr<Long>( row_ptr );
 					color = gw.colors[i];
 					old_y = old_x = INVALID_VALUE;
 					do {
-						cur_val = *col_ptr++;
+						cur_val = col_ptr.rpp();
 						if (cur_val != INVALID_VALUE) {
-							y = adj_height - BIGMULSS64(cur_val, y_scaling >> 1, 31) + gw.top;
+							y = (int) (adj_height - BitOps.BIGMULSS64(cur_val, y_scaling >> 1, 31) + gw.top);
 
 							Gfx.GfxFillRect(x-1, y-1, x+1, y+1, color);
 							if (old_x != INVALID_VALUE)
@@ -199,9 +220,13 @@ public class GraphGui
 						} else {
 							old_x = INVALID_VALUE;
 						}
-					} while (x+=22,--j);
+						x+=22;
+					} while (--j > 0);
 				}
-			} while (sel>>=1,row_ptr+=24, ++i < gw.num_dataset);
+
+				sel>>=1;
+				row_ptr.madd(24);
+			} while ( ++i < gw.num_dataset);
 	}
 
 	/****************/
@@ -422,8 +447,12 @@ public class GraphGui
 
 			numd = 0;
 			//FOR_ALL_PLAYERS(p) 
-			Player.forEach((p) ->
+			//Player.forEach((p) ->
+			Iterator<Player> ii = Player.getIterator();
+			while(ii.hasNext())
 			{
+				Player p = ii.next();
+				
 				if (p.is_active) {
 					gd.colors[numd] = (byte) Global._color_list[p.player_color].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
@@ -432,7 +461,7 @@ public class GraphGui
 					}
 				}
 				numd++;
-			});
+			}
 
 			gd.num_dataset = numd;
 
@@ -496,8 +525,11 @@ public class GraphGui
 
 			numd = 0;
 			//FOR_ALL_PLAYERS(p) 
-			Player.forEach((p) ->
+			Iterator<Player> ii = Player.getIterator();
+			while(ii.hasNext())
 			{
+				Player p = ii.next();
+				
 				if (p.is_active) {
 					gd.colors[numd] = (byte) Global._color_list[p.player_color].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
@@ -506,7 +538,7 @@ public class GraphGui
 					}
 				}
 				numd++;
-			});
+			}
 
 			gd.num_dataset = numd;
 
@@ -570,8 +602,11 @@ public class GraphGui
 
 			numd = 0;
 			//FOR_ALL_PLAYERS(p) 
-			Player.forEach((p) ->
+			Iterator<Player> ii = Player.getIterator();
+			while(ii.hasNext())
 			{
+				Player p = ii.next();
+				
 				if (p.is_active) {
 					gd.colors[numd] = (byte) Global._color_list[p.player_color].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
@@ -580,7 +615,7 @@ public class GraphGui
 					}
 				}
 				numd++;
-			});
+			}
 
 			gd.num_dataset = numd;
 
@@ -647,8 +682,11 @@ public class GraphGui
 
 			numd = 0;
 			//FOR_ALL_PLAYERS(p) 
-			Player.forEach((p) ->
+			Iterator<Player> ii = Player.getIterator();
+			while(ii.hasNext())
 			{
+				Player p = ii.next();
+				
 				if (p.is_active) {
 					gd.colors[numd] = (byte) Global._color_list[p.player_color].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
@@ -657,7 +695,7 @@ public class GraphGui
 					}
 				}
 				numd++;
-			});
+			}
 
 			gd.num_dataset = numd;
 
@@ -1026,8 +1064,8 @@ public class GraphGui
 					Economy.UpdateCompanyRatingAndValue(p2, false);
 			});
 
-			w.custom[0] = Global.DAY_TICKS;
-			w.custom[1] = 5;
+			w.custom_array[0] = Global.DAY_TICKS;
+			w.custom_array[1] = 5;
 
 			w.click_state = 1 << 13;
 
@@ -1037,11 +1075,11 @@ public class GraphGui
 		case WE_TICK:
 		{
 			// Update the player score every 5 days
-			if (--w.custom[0] == 0) {
-				w.custom[0] = Global.DAY_TICKS;
-				if (--w.custom[1] == 0) {
+			if (--w.custom_array[0] == 0) {
+				w.custom_array[0] = Global.DAY_TICKS;
+				if (--w.custom_array[1] == 0) {
 					//Player p2;
-					w.custom[1] = 5;
+					w.custom_array[1] = 5;
 
 					//FOR_ALL_PLAYERS(p2)
 					// Skip if player is not active
@@ -1104,7 +1142,7 @@ public class GraphGui
 	//static char _bufcache[64];
 	//static int _last_sign_idx;
 
-	class SignNameSorter implements Comparator<Integer>
+	static class SignNameSorter implements Comparator<Integer>
 	{
 		public int  compare(Integer cmp1, Integer cmp2)	
 		{

@@ -542,7 +542,7 @@ public class SmallMapGui extends SmallMapGuiTables
 				}
 			}
 
-			if (!Gfx.FillDrawPixelInfo(new_dpi, null, 3, 17, w.width - 28 + 22, w.height - 64 - 11))
+			if (!Hal.FillDrawPixelInfo(new_dpi, null, 3, 17, w.width - 28 + 22, w.height - 64 - 11))
 				return;
 
 			DrawSmallMap(new_dpi, w, _smallmap_type, _smallmap_show_towns);

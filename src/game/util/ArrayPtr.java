@@ -17,6 +17,9 @@ public class ArrayPtr<ItemType> {
 		
 		public void madd( int add ) { displ += add; }
 		public void shift( int add ) { displ += add; }
+
+		public void inc() { displ++; }
+		public void dec() { displ--; }
 		
 		public void write( int shift, ItemType b )
 		{
@@ -51,6 +54,10 @@ public class ArrayPtr<ItemType> {
 		public ItemType r( int shift )
 		{
 			return read( shift );
+		}
+
+		public ItemType r() {
+			return read(0);
 		}
 
 		/**

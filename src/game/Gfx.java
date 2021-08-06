@@ -2108,10 +2108,10 @@ public class Gfx extends PaletteTabs
 		Hal._invalid_rect.bottom = 0;
 	}
 
-	/*
+	
 	void SetDirtyBlocks(int left, int top, int right, int bottom)
 	{
-		byte *b;
+		//byte *b;
 		int width;
 		int height;
 
@@ -2130,7 +2130,7 @@ public class Gfx extends PaletteTabs
 		left >>= 6;
 		top  >>= 3;
 
-		b = _dirty_blocks + top * DIRTY_BYTES_PER_LINE + left;
+		Pixel b = new Pixel( _dirty_blocks, top * DIRTY_BYTES_PER_LINE + left );
 
 		width  = ((right  - 1) >> 6) - left + 1;
 		height = ((bottom - 1) >> 3) - top  + 1;
@@ -2140,9 +2140,15 @@ public class Gfx extends PaletteTabs
 		do {
 			int i = width;
 
-			do b[--i] = 0xFF; while (i);
+			do
+			{
+				//b[--i] = 0xFF; 
+				b.w( --i, (byte) 0xFF ); 
+			}
+			while (i > 0);
 
-			b += DIRTY_BYTES_PER_LINE;
+			//b += DIRTY_BYTES_PER_LINE;
+			b.madd( DIRTY_BYTES_PER_LINE );
 		} while (--height != 0);
 	}
 
@@ -2151,7 +2157,7 @@ public class Gfx extends PaletteTabs
 		SetDirtyBlocks(0, 0, Hal._screen.width, Hal._screen.height);
 	}
 
-	boolean FillDrawPixelInfo(DrawPixelInfo  n, final DrawPixelInfo  o, int left, int top, int width, int height)
+	boolean FillDrawPixelInfo(DrawPixelInfo  n, DrawPixelInfo  o, int left, int top, int width, int height)
 	{
 		int t;
 
@@ -2184,7 +2190,8 @@ public class Gfx extends PaletteTabs
 			top = 0;
 		}
 
-		n.dst_ptr = o.dst_ptr + left + top * (n.pitch = o.pitch);
+		//n.dst_ptr = o.dst_ptr + left + top * (n.pitch = o.pitch);
+		n.dst_ptr = new Pixel( o.dst_ptr, left + top * (n.pitch = o.pitch) );
 
 		if ((t=height + top - o.height) > 0) {
 			height -= t;
@@ -2197,12 +2204,12 @@ public class Gfx extends PaletteTabs
 
 	static void SetCursorSprite(CursorID cursor)
 	{
-		CursorVars *cv = &_cursor;
-		final Sprite *p;
+		CursorVars cv = Hal._cursor;
+		final Sprite p;
 
 		if (cv.sprite == cursor) return;
 
-		p = GetSprite(cursor & SPRITE_MASK);
+		p = SpriteCache.GetSprite(cursor.id & Sprite.SPRITE_MASK);
 		cv.sprite = cursor;
 		cv.size.y = p.height;
 		cv.size.x = p.width;
@@ -2212,10 +2219,11 @@ public class Gfx extends PaletteTabs
 		cv.dirty = true;
 	}
 
+	/* Now in Hal and rewritten
 	static void SwitchAnimatedCursor()
 	{
-		CursorVars *cv = &_cursor;
-		final CursorID *cur = cv.animate_cur;
+		CursorVars cv = Hal._cursor;
+		final CursorID cur = cv.animate_cur;
 		CursorID sprite;
 
 		// ANIM_CURSOR_END is 0xFFFF in table/animcursors.h
@@ -2277,7 +2285,7 @@ public class Gfx extends PaletteTabs
 		if (player == OWNER_SPECTATOR || player == OWNER_SPECTATOR - 1) return 1;
 		return (_color_list[_player_colors[player]].window_color_1b) | IS_PALETTE_COLOR;
 	}
-	 */	
+	*/
 
 }
 

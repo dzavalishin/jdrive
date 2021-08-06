@@ -72,7 +72,7 @@ public abstract class Hal
 		SetDirtyBlocks(0, 0, _screen.width, _screen.height);
 	}
 
-	boolean FillDrawPixelInfo(DrawPixelInfo n,  DrawPixelInfo o, int left, int top, int width, int height)
+	static boolean FillDrawPixelInfo(DrawPixelInfo n,  DrawPixelInfo o, int left, int top, int width, int height)
 	{
 		int t;
 
