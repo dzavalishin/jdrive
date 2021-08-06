@@ -50,8 +50,12 @@ public class AirCraft {
 		StationID index = StationID.getInvalid();
 
 		//FOR_ALL_STATIONS(st)
-		Station.forEach( (st) ->
+		//Station.forEach( (st) ->
+		Iterator<Station> ii = Station.getIterator();
+		while(ii.hasNext())
 		{
+			Station st = ii.next();
+			
 			if (st.owner == v.owner && 0 != (st.facilities & Station.FACIL_AIRPORT) &&
 					AirportFTAClass.GetAirport(st.airport_type).nof_depots() > 0) {
 				int distance;
@@ -67,7 +71,7 @@ public class AirCraft {
 					index.id = st.index;
 				}
 			}
-		});
+		}
 		return index;
 	}
 
@@ -432,7 +436,7 @@ public class AirCraft {
 			boolean next_airport_has_hangar = true;
 			/* XXX - I don't think p2 is any valid station cause all calls use either 0, 1, or 1<<16!!!!!!!!! */
 			/*StationID*/ int next_airport_index = (BitOps.HASBIT(p2, 17)) ? p2 : v.air.targetairport;
-			final Station st = Station.GetStation(next_airport_index);
+			Station st = Station.GetStation(next_airport_index);
 			// If an airport doesn't have terminals (so no landing space for airports),
 			// it surely doesn't have any hangars
 			if (!st.IsValidStation() || st.airport_tile == null || AirportFTAClass.GetAirport(st.airport_type).nof_depots() == 0) {
@@ -1768,7 +1772,7 @@ public class AirCraft {
 		v.air.pos = Airport.layout[v.air.pos].next_position;
 	}
 
-	static void AircraftEventHandler_Landing(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_Landing(Vehicle v, final AirportFTAClass airport)
 	{
 		final Player  p = Player.GetPlayer(v.owner);
 		AircraftLandAirplane(v);  // maybe crash airplane
@@ -1786,23 +1790,23 @@ public class AirCraft {
 		}
 	}
 
-	static void AircraftEventHandler_HeliLanding(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_HeliLanding(Vehicle v, final AirportFTAClass airport)
 	{
 		AircraftLand(v); // helicopters don't crash
 		v.air.state = Airport.HELIENDLANDING;
 	}
 
-	static void AircraftEventHandler_EndLanding(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_EndLanding(Vehicle v, final AirportFTAClass airport)
 	{
 		// next block busy, don't do a thing, just wait
-		if (AirportHasBlock(v, Airport.layout[v.air.pos], Airport)) return;
+		if (AirportHasBlock(v, airport.layout[v.air.pos], airport)) return;
 
 		// if going to terminal (Order.OT_GOTO_STATION) choose one
 		// 1. in case all terminals are busy AirportFindFreeTerminal() returns false or
 		// 2. not going for terminal (but depot, no order),
 		// -. get out of the way to the hangar.
 		if (v.current_order.type == Order.OT_GOTO_STATION) {
-			if (AirportFindFreeTerminal(v, Airport)) return;
+			if (AirportFindFreeTerminal(v, airport)) return;
 		}
 		v.air.state = Airport.HANGAR;
 
@@ -2228,8 +2232,8 @@ public class AirCraft {
 	{
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		//Vehicle v;
-		int takeofftype;
-		int cnt;
+		//int takeofftype;
+		//int cnt;
 		// only 1 station is updated per function call, so it is enough to get entry_point once
 		final AirportFTAClass ap = AirportFTAClass.GetAirport(st.airport_type);
 		//FOR_ALL_VEHICLES(v)
@@ -2250,10 +2254,10 @@ public class AirCraft {
 						SetAircraftPosition(v, gp.x, gp.y, GetAircraftFlyingAltitude(v));
 					} else {
 						assert(v.air.state == Airport.ENDTAKEOFF || v.air.state == Airport.HELITAKEOFF);
-						takeofftype = (v.subtype == 0) ? Airport.HELITAKEOFF : Airport.ENDTAKEOFF;
+						int takeofftype = (v.subtype == 0) ? Airport.HELITAKEOFF : Airport.ENDTAKEOFF;
 						// search in airportdata for that heading
 						// easiest to do, since this doesn't happen a lot
-						for (cnt = 0; cnt < ap.nofelements; cnt++) 
+						for (int cnt = 0; cnt < ap.nofelements; cnt++) 
 						{
 							if (ap.layout[cnt].heading == takeofftype) {
 								v.air.pos = ap.layout[cnt].position;
@@ -2440,7 +2444,7 @@ public class AirCraft {
 					//++e;
 				} while (--num > 0);
 
-				w.as_buildtrain_d().sel_engine = EngineID.get( selected_id );
+				w.as_buildtrain_d().sel_engine =selected_id;
 
 				if (selected_id != Engine.INVALID_ENGINE) {
 					DrawAircraftPurchaseInfo(2, w.widget.get(4).top + 1, EngineID.get(selected_id) );
@@ -2459,16 +2463,18 @@ public class AirCraft {
 			} break;
 
 			case 5: { /* build */
-				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
-				if(sel_eng.id != Engine.INVALID_ENGINE) 
-					Cmd.DoCommandP(TileIndex.get(w.window_number.n), sel_eng.id, 0, AirCraft::CcBuildAircraft, Cmd.CMD_BUILD_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT));
+				//EngineID 
+				int sel_eng = w.as_buildtrain_d().sel_engine;
+				if(sel_eng != Engine.INVALID_ENGINE) 
+					Cmd.DoCommandP(TileIndex.get(w.window_number.n), sel_eng, 0, AirCraft::CcBuildAircraft, Cmd.CMD_BUILD_AIRCRAFT | Cmd.CMD_MSG(Str.STR_A008_CAN_T_BUILD_AIRCRAFT));
 			} break;
 
 			case 6:	{ /* rename */
-				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
-				if (sel_eng.id != Engine.INVALID_ENGINE) {
+				//EngineID 
+				int sel_eng = w.as_buildtrain_d().sel_engine;
+				if (sel_eng != Engine.INVALID_ENGINE) {
 					w.as_buildtrain_d().rename_engine = sel_eng;
-					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng.id),
+					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng),
 							new StringID(Str.STR_A039_RENAME_AIRCRAFT_TYPE), 31, 160, w.window_class, w.window_number);
 				}
 			} break;
@@ -2484,7 +2490,7 @@ public class AirCraft {
 		case WE_ON_EDIT_TEXT: {
 			if (we.str != null) {
 				Global._cmd_text = we.str;
-				Cmd.DoCommandP(null, w.as_buildtrain_d().rename_engine.id, 0, null,
+				Cmd.DoCommandP(null, w.as_buildtrain_d().rename_engine, 0, null,
 						Cmd.CMD_RENAME_ENGINE | Cmd.CMD_MSG(Str.STR_A03A_CAN_T_RENAME_AIRCRAFT_TYPE));
 			}
 		} break;
@@ -2617,7 +2623,7 @@ public class AirCraft {
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+			Vehicle v = Vehicle.GetVehicle(w.window_number.n);
 
 			w.disabled_state = v.owner == Global._local_player ? 0 : (1 << 2);
 			if (0==Global._patches.servint_aircraft) // disable service-scroller when interval is set to disabled
@@ -2669,7 +2675,7 @@ public class AirCraft {
 			DrawAircraftImage(v, 3, 57, VehicleID.getInvalid() );
 
 			{
-				final Vehicle u;
+				Vehicle u;
 				int y = 57;
 
 				do {
@@ -2963,15 +2969,18 @@ public class AirCraft {
 		/* determine amount of items for scroller */
 		num = 0;
 		//FOR_ALL_VEHICLES(v)
-		Vehicle.forEach( (v) ->
+		Iterator<Vehicle> ii = Vehicle.getIterator();
+		while(ii.hasNext())
 		{
+			Vehicle v = ii.next();
+			
 			if (v.type == Vehicle.VEH_Aircraft &&
 					v.subtype <= 2 &&
 					0 != (v.vehstatus & Vehicle.VS_HIDDEN) &&
 					v.tile == tile) {
 				num++;
 			}
-		});
+		}
 		
 		MiscGui.SetVScrollCount(w, (num + w.hscroll.cap - 1) / w.hscroll.cap);
 
@@ -2983,8 +2992,12 @@ public class AirCraft {
 		num = w.vscroll.pos * w.hscroll.cap;
 
 		//FOR_ALL_VEHICLES(v) 
-		Vehicle.forEach( (v) ->
+		//Vehicle.forEach( (v) ->
+		Iterator<Vehicle> ii1 = Vehicle.getIterator();
+		while(ii1.hasNext())
 		{
+			Vehicle v = ii1.next();
+			
 			if (v.type == Vehicle.VEH_Aircraft &&
 					v.subtype <= 2 &&
 					0 != (v.vehstatus&Vehicle.VS_HIDDEN) &&
@@ -3003,7 +3016,7 @@ public class AirCraft {
 					y += 24;
 				}
 			}
-		});
+		}
 	}
 
 	static int GetVehicleFromAircraftDepotWndPt(final Window w, int x, int y, Vehicle[] veh) 
@@ -3521,14 +3534,19 @@ public class AirCraft {
 			AirCraft::PlayerAircraftWndProc
 			);
 
-	void ShowPlayerAircraft(PlayerID player, StationID station)
+	static void ShowPlayerAircraft(PlayerID player, StationID station)
+	{
+		ShowPlayerAircraft(player.id, station.id);
+	}
+	
+	static void ShowPlayerAircraft(int player, int station)
 	{
 		Window w;
 
-		if (player == Global._local_player) {
-			w = Window.AllocateWindowDescFront(_player_aircraft_desc, (station.id << 16) | player.id);
+		if (player == Global._local_player.id) {
+			w = Window.AllocateWindowDescFront(_player_aircraft_desc, (station << 16) | player);
 		} else  {
-			w = Window.AllocateWindowDescFront(_other_player_aircraft_desc, (station.id << 16) | player.id);
+			w = Window.AllocateWindowDescFront(_other_player_aircraft_desc, (station << 16) | player);
 		}
 
 		if (w != null) {

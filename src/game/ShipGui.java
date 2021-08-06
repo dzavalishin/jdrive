@@ -358,7 +358,7 @@ public class ShipGui
 					++engine_id;
 				} while (--num > 0);
 
-				w.as_buildtrain_d().sel_engine = EngineID.get( selected_id );
+				w.as_buildtrain_d().sel_engine = selected_id;
 
 				if (selected_id != Engine.INVALID_ENGINE) {
 					DrawShipPurchaseInfo(2, w.widget.get(4).top + 1, selected_id);
@@ -376,16 +376,18 @@ public class ShipGui
 				}
 			} break;
 			case 5: { /* build */
-				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
-				if (sel_eng.id != Engine.INVALID_ENGINE)
-					Cmd.DoCommandP( TileIndex.get( w.window_number.n ), sel_eng.id, 0, ShipGui::CcBuildShip, Cmd.CMD_BUILD_SHIP | Cmd.CMD_MSG(Str.STR_980D_CAN_T_BUILD_SHIP));
+				//EngineID 
+				int sel_eng = w.as_buildtrain_d().sel_engine;
+				if (sel_eng != Engine.INVALID_ENGINE)
+					Cmd.DoCommandP( TileIndex.get( w.window_number.n ), sel_eng, 0, ShipGui::CcBuildShip, Cmd.CMD_BUILD_SHIP | Cmd.CMD_MSG(Str.STR_980D_CAN_T_BUILD_SHIP));
 			} break;
 
 			case 6:	{ /* rename */
-				EngineID sel_eng = w.as_buildtrain_d().sel_engine;
-				if (sel_eng.id != Engine.INVALID_ENGINE) {
+				//EngineID 
+				int sel_eng = w.as_buildtrain_d().sel_engine;
+				if (sel_eng != Engine.INVALID_ENGINE) {
 					w.as_buildtrain_d().rename_engine = sel_eng;
-					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng.id),
+					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng),
 							new StringID( Str.STR_9838_RENAME_SHIP_TYPE ), 31, 160, w.window_class, w.window_number);
 				}
 			}	break;
@@ -401,7 +403,7 @@ public class ShipGui
 		case WE_ON_EDIT_TEXT:
 			if (we.str != null) {
 				Global._cmd_text = we.str;
-				Cmd.DoCommandP(null, w.as_buildtrain_d().rename_engine.id, 0, null,
+				Cmd.DoCommandP(null, w.as_buildtrain_d().rename_engine, 0, null,
 						Cmd.CMD_RENAME_ENGINE | Cmd.CMD_MSG(Str.STR_9839_CAN_T_RENAME_SHIP_TYPE));
 			}
 			break;
@@ -1176,7 +1178,7 @@ public class ShipGui
 			);
 
 
-			void ShowPlayerShips(PlayerID player, StationID station)
+			static void ShowPlayerShips(PlayerID player, StationID station)
 			{
 				Window w;
 

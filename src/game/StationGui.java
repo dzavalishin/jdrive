@@ -175,7 +175,7 @@ public class StationGui extends Station  // to get finalants
 			// stations are stored as a cummulative index, eg 25, 41, 43. This means
 			// Player0: 25; Player1: (41-25) 16; Player2: (43-41) 2 stations
 			i = (owner == 0) ? 0 : _num_station_sort[owner - 1];
-			SetVScrollCount(w, _num_station_sort[owner] - i);
+			MiscGui.SetVScrollCount(w, _num_station_sort[owner] - i);
 
 			/* draw widgets, with player's name in the caption */
 			{
@@ -204,7 +204,7 @@ public class StationGui extends Station  // to get finalants
 					int j;
 					int x;
 
-					assert(st.xy && st.owner == owner);
+					assert(st.xy != null && st.owner.id == owner);
 
 					Global.SetDParam(0, st.index);
 					Global.SetDParam(1, st.facilities);
@@ -235,7 +235,7 @@ public class StationGui extends Station  // to get finalants
 				id_v += w.vscroll.pos;
 
 				{
-					final PlayerID owner = w.window_number.n;
+					final PlayerID owner = PlayerID.get( w.window_number.n );
 					final Station  st;
 
 					id_v += (owner.id == 0) ? 0 : _num_station_sort[owner.id - 1]; // first element in list
@@ -350,7 +350,7 @@ public class StationGui extends Station  // to get finalants
 				if (st.goods[i].enroute_from != station_id) num++;
 			}
 		}
-		SetVScrollCount(w, num);
+		MiscGui.SetVScrollCount(w, num);
 
 		w.disabled_state = st.owner == Global._local_player ? 0 : (1 << 9);
 
@@ -440,17 +440,17 @@ public class StationGui extends Station  // to get finalants
 				Strings._userstring = sb.toString();
 				Strings._userstring = Strings._userstring.substring(0, Strings._userstring.length()-2 );
 			} else {
-				Strings._userstring = Strings.InlineString(Str.STR_000C_ACCEPTS) + InlineString(b, Str.STR_00D0_NOTHING);
+				Strings._userstring = Strings.InlineString(Str.STR_000C_ACCEPTS) + Strings.InlineString(Str.STR_00D0_NOTHING);
 			}
 
-			Gfx.DrawStringMultiLine(2, 67, Strings.STR_SPEC_USERSTRING, 245);
+			Gfx.DrawStringMultiLine(2, 67, new StringID( Strings.STR_SPEC_USERSTRING ), 245);
 		} else {
 			Gfx.DrawString(2, 67, Str.STR_3034_LOCAL_RATING_OF_TRANSPORT, 0);
 
 			y = 77;
 			for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
 				if (st.goods[i].enroute_from != INVALID_STATION) {
-					Global.SetDParam(0, Global._cargoc.names_s[i].id);
+					Global.SetDParam(0, Global._cargoc.names_s[i]);
 					Global.SetDParam(2, st.goods[i].rating * 101 >> 8);
 					Global.SetDParam(1, Str.STR_3035_APPALLING + (st.goods[i].rating >> 5));
 					Gfx.DrawString(8, y, Str.STR_303D, 0);
@@ -491,18 +491,18 @@ public class StationGui extends Station  // to get finalants
 
 			case 9: {
 				Global.SetDParam(0, w.window_number.n);
-				MiscGui.ShowQueryString(Str.STR_STATION, Str.STR_3030_RENAME_STATION_LOADING, 31, 180, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID( Str.STR_STATION ), new StringID( Str.STR_3030_RENAME_STATION_LOADING ), 31, 180, w.window_class, w.window_number);
 			} break;
 
 			case 10: { /* Show a list of scheduled trains to this station */
 				final Station st = Station.GetStation(w.window_number.n);
-				ShowPlayerTrains(st.owner, w.window_number.n);
+				TrainGui.ShowPlayerTrains(st.owner.id, w.window_number.n);
 				break;
 			}
 
 			case 11: { /* Show a list of scheduled road-vehicles to this station */
 				final Station st = Station.GetStation(w.window_number.n);
-				ShowPlayerRoadVehicles(st.owner, w.window_number.n);
+				RoadVehGui.ShowPlayerRoadVehicles(st.owner.id, w.window_number.n);
 				break;
 			}
 
@@ -510,15 +510,15 @@ public class StationGui extends Station  // to get finalants
 				final Station st = Station.GetStation(w.window_number.n);
 				/* Since oilrigs have no owners, show the scheduled aircraft of current player */
 				PlayerID owner = (st.owner.id == Owner.OWNER_NONE) ? Global._current_player : st.owner;
-				ShowPlayerAircraft(owner, w.window_number.n);
+				AirCraft.ShowPlayerAircraft(owner.id, w.window_number.n);
 				break;
 			}
 
 			case 13: { /* Show a list of scheduled ships to this station */
 				final Station st = Station.GetStation(w.window_number.n);
 				/* Since oilrigs/bouys have no owners, show the scheduled ships of current player */
-				PlayerID owner = (st.owner == Owner.OWNER_NONE) ? Global._current_player : st.owner;
-				Ship.ShowPlayerShips(owner, w.window_number.n);
+				PlayerID owner = (st.owner.id == Owner.OWNER_NONE) ? Global._current_player : st.owner;
+				ShipGui.ShowPlayerShips(owner, StationID.get( w.window_number.n ) );
 				break;
 			}
 			}
