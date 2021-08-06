@@ -26,7 +26,7 @@ public abstract class Hal
 
 	static void SetDirtyBlocks(int left, int top, int right, int bottom)
 	{
-		byte b[];
+		//byte b[];
 		int width;
 		int height;
 
@@ -45,7 +45,8 @@ public abstract class Hal
 		left >>= 6;
 		top  >>= 3;
 
-		b = _dirty_blocks + top * DIRTY_BYTES_PER_LINE + left;
+		//b = _dirty_blocks + top * DIRTY_BYTES_PER_LINE + left;
+		Pixel b = new Pixel( Gfx._dirty_blocks, top * Gfx.DIRTY_BYTES_PER_LINE + left);
 
 		width  = ((right  - 1) >> 6) - left + 1;
 		height = ((bottom - 1) >> 3) - top  + 1;
@@ -55,9 +56,13 @@ public abstract class Hal
 		do {
 			int i = width;
 
-			do { b[--i] = (byte) 0xFF; } while (i);
+			do { 
+				//b[--i] = (byte) 0xFF; 
+				b.w( --i, (byte) 0xFF ); 
+				} while (i > 0);
 
-			b += DIRTY_BYTES_PER_LINE;
+			//b += Gfx.DIRTY_BYTES_PER_LINE;
+			b.madd( Gfx.DIRTY_BYTES_PER_LINE );
 		} while (--height != 0);
 	}
 
@@ -100,7 +105,9 @@ public abstract class Hal
 			top = 0;
 		}
 
-		n.dst_ptr = o.dst_ptr + left + top * (n.pitch = o.pitch);
+		n.pitch = o.pitch;
+		//n.dst_ptr = o.dst_ptr + left + top * o.pitch;
+		n.dst_ptr = new Pixel(o.dst_ptr, left + top * o.pitch);
 
 		if ((t=height + top - o.height) > 0) {
 			height -= t;
