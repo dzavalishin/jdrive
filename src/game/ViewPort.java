@@ -533,12 +533,12 @@ public class ViewPort
 		if (vd.combine_sprites == 1) vd.combine_sprites = 2;
 	}
 
-	void StartSpriteCombine()
+	static void StartSpriteCombine()
 	{
 		_cur_vd.combine_sprites = 1;
 	}
 
-	void EndSpriteCombine()
+	static void EndSpriteCombine()
 	{
 		_cur_vd.combine_sprites = 0;
 	}

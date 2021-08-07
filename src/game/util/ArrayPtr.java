@@ -1,5 +1,7 @@
 package game.util;
 
+import java.util.Arrays;
+
 /**
  * Smart pointer to any array
  * 
@@ -144,6 +146,15 @@ public class ArrayPtr<ItemType> {
 		public void copyFrom(ArrayPtr<ItemType> src, int num) 
 		{
 			System.arraycopy(src.mem, src.displ, mem, displ, num);		
+		}
+		
+		// TODO toLongArray 		Long[] la = (Long[]) Arrays.stream(gw.cost[0]).mapToObj( (lv) -> Long.valueOf(lv) ).toArray();
+
+		
+		public static Integer[] toIntegerArray(int [] iia) 
+		{
+			Integer[] ia = (Integer[]) Arrays.stream(iia).mapToObj( (iv) -> Integer.valueOf(iv) ).toArray();
+			return ia;
 		}
 		
 		

@@ -1,6 +1,8 @@
 package game;
 import game.tables.TreeTables;
+import game.util.ArrayPtr;
 import game.util.BitOps;
+import game.util.wcustom.news_d;
 
 public class Tree  extends TreeTables {
 
@@ -246,70 +248,75 @@ public class Tree  extends TreeTables {
 	static void DrawTile_Trees(TileInfo ti)
 	{
 		int m2;
-		//final int *s;
-		final TreePos d;
-		byte z;
+		int z;
+
+		//final int [] s;
+		//final TreePos d;
+		//final Point [] d;
 
 		m2 = ti.tile.getMap().m2;
 
 		if ((m2 & 0x30) == 0) {
-			DrawClearLandTile(ti, 3);
+			Clear.DrawClearLandTile(ti, 3);
 		} else if ((m2 & 0x30) == 0x20) {
-			ViewPort.DrawGroundSprite(_tree_sprites_1[m2 >> 6] + _tileh_to_sprite[ti.tileh]);
+			ViewPort.DrawGroundSprite(_tree_sprites_1[m2 >> 6] + Landscape._tileh_to_sprite[ti.tileh]);
 		} else {
-			DrawHillyLandTile(ti);
+			Clear.DrawHillyLandTile(ti);
 		}
 
-		DrawClearLandFence(ti);
+		Clear.DrawClearLandFence(ti);
 
 		z = ti.z;
 		if (ti.tileh != 0) {
 			z += 4;
-			if (IsSteepTileh(ti.tileh))
+			if (TileIndex.IsSteepTileh(ti.tileh))
 				z += 4;
 		}
-
+		ArrayPtr<Point> d;
+		ArrayPtr<Integer> s;
 		{
 			int tmp = ti.x;
 			int index;
 
-			tmp = ROR(tmp, 2);
+			tmp = BitOps.ROR(tmp, 2);
 			tmp -= ti.y;
-			tmp = ROR(tmp, 3);
+			tmp = BitOps.ROR(tmp, 3);
 			tmp -= ti.x;
-			tmp = ROR(tmp, 1);
+			tmp = BitOps.ROR(tmp, 1);
 			tmp += ti.y;
 
-			d = _tree_layout_xy[BitOps.GB(tmp, 4, 2)];
+			d = new ArrayPtr<Point>( _tree_layout_xy[BitOps.GB(tmp, 4, 2)] );
 
-			index = BitOps.GB(tmp, 6, 2) + (_m[ti.tile].m3 << 2);
+			index = BitOps.GB(tmp, 6, 2) + (ti.tile.M().m3 << 2);
 
 			/* different tree styles above one of the grounds */
 			if ((m2 & 0xB0) == 0xA0 && index >= 48 && index < 80)
 				index += 164 - 48;
 
-			assert(index < lengthof(_tree_layout_sprite));
-			s = _tree_layout_sprite[index];
+			assert(index < _tree_layout_sprite.length);
+			int[] sp = _tree_layout_sprite[index];
+			Integer[] ia = ArrayPtr.toIntegerArray(sp);
+			s = new ArrayPtr<Integer>(ia);
 		}
 
-		StartSpriteCombine();
+		ViewPort.StartSpriteCombine();
 
-		if (!(Global._display_opt & Global.DO_TRANS_BUILDINGS) || !Global._patches.invisible_trees) {
+		if (0==(Global._display_opt & Global.DO_TRANS_BUILDINGS) || !Global._patches.invisible_trees) {
 			TreeListEnt [] te = new TreeListEnt[4];
 			int i;
 
 			/* put the trees to draw in a list */
 			i = (ti.map5 >> 6) + 1;
 			do {
-				int image = s[0] + (--i == 0 ? BitOps.GB(ti.map5, 0, 3) : 3);
-				if (Global._display_opt & Global.DO_TRANS_BUILDINGS) 
+				int image = s.r() + (--i == 0 ? BitOps.GB(ti.map5, 0, 3) : 3);
+				if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS) ) 
 					image = Sprite.RET_MAKE_TRANSPARENT(image);
 				te[i].image = image;
-				te[i].x = d.x;
-				te[i].y = d.y;
-				s++;
-				d++;
-			} while (i);
+				te[i].x = (byte) d.r().x;
+				te[i].y = (byte) d.r().y;
+				s.inc();;
+				d.inc();
+			} while (i >0 );
 
 			/* draw them in a sorted way */
 			for(;;) {
@@ -322,7 +329,7 @@ public class Tree  extends TreeTables {
 						min = (byte) (te[i].x + te[i].y);
 						tep = te[i];
 					}
-				} while (i);
+				} while (i > 0);
 
 				if (tep == null) break;
 
@@ -331,13 +338,13 @@ public class Tree  extends TreeTables {
 			}
 		}
 
-		EndSpriteCombine();
+		ViewPort.EndSpriteCombine();
 	}
 
 
 	static int GetSlopeZ_Trees(final TileInfo  ti)
 	{
-		return GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
+		return Landscape.GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
 	}
 
 	static int GetSlopeTileh_Trees(final TileInfo  ti)
@@ -376,7 +383,7 @@ public class Tree  extends TreeTables {
 		//StringID str;
 		int str;
 
-		td.owner = (byte) tile.GetTileOwner().owner;
+		td.owner = (byte) tile.GetTileOwner().id;
 
 		b = tile.getMap().m3;
 		//(str=Str.STR_2810_CACTUS_PLANTS, b==0x1B) ||
@@ -490,7 +497,7 @@ public class Tree  extends TreeTables {
 			TileLoopTreesAlps(tile);
 		}
 
-		TileLoopClearHelper(tile);
+		Clear.TileLoopClearHelper(tile);
 
 		/* increase counter */
 		tile.getMap().m2 = BitOps.RETAB(tile.getMap().m2, 0, 4, 1);
@@ -518,7 +525,7 @@ public class Tree  extends TreeTables {
 					byte m3 = tile.getMap().m3;
 
 					//tile += TileIndex.ToTileIndexDiff(_tileloop_trees_dir[Hal.Random() & 7]);
-					tile.add( TileIndex.ToTileIndexDiff(_tileloop_trees_dir[Hal.Random() & 7]) );
+					tile = tile.iadd( TileIndex.ToTileIndexDiff(_tileloop_trees_dir[Hal.Random() & 7]) );
 
 					if (!tile.IsTileType( TileTypes.MP_CLEAR)) return;
 
