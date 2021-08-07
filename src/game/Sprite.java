@@ -129,7 +129,8 @@ public class Sprite extends Sprites {
 		}
 	}
 
-	static SpriteGroup [] EvalRandomizedSpriteGroup(final RandomizedSpriteGroup rsg, byte random_bits)
+	//static SpriteGroup [] EvalRandomizedSpriteGroup(final RandomizedSpriteGroup rsg, byte random_bits)
+	static SpriteGroup EvalRandomizedSpriteGroup(final RandomizedSpriteGroup rsg, byte random_bits)
 	{
 		int mask;
 		int index;
@@ -350,7 +351,8 @@ class RandomizedSpriteGroup extends SpriteGroup {
 	byte num_groups; // must be power of 2
 
 	// Take the group with appropriate index:
-	SpriteGroup [][]groups;
+	//SpriteGroup [][]groups;
+	SpriteGroup []groups;
 }
 
 class CallbackResultSpriteGroup extends SpriteGroup {

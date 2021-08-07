@@ -3,7 +3,6 @@ package game;
 import game.struct.DrawEngineInfo;
 import game.tables.EngineTables;
 import game.util.BitOps;
-import game.util.Prices;
 import game.util.Strings;
 
 import java.util.Iterator;
@@ -23,8 +22,12 @@ public class Engine extends EngineTables {
 	byte player_avail;
 
 	// type, ie Vehicle.VEH_Road, Vehicle.VEH_Train, etc. Same as in vehicle.h
-	byte type;				
+	byte type;
 
+	private int index; // [dz] index in array				
+
+	
+	
 	static public final int INVALID_ENGINE  = Vehicle.INVALID_ENGINE;
 	static public final EngineID INVALID_ENGINE_ID  = new EngineID( Vehicle.INVALID_ENGINE );
 
@@ -187,6 +190,8 @@ public class Engine extends EngineTables {
 
 			int r;
 
+			e.index = i;
+			
 			e.age = 0;
 			e.railtype = ei.railtype;
 			e.flags = 0;
@@ -377,7 +382,7 @@ public class Engine extends EngineTables {
 
 	static final SpriteGroup ResolveVehicleSpriteGroup(
 			final SpriteGroup spritegroup,
-			final Vehicle veh, int callback_info, 
+			Vehicle veh, int callback_info, 
 			resolve_callback resolve_func)
 	{
 		if (spritegroup == null)
@@ -427,7 +432,7 @@ public class Engine extends EngineTables {
 
 				if (dsg.variable == 0x40 || dsg.variable == 0x41) {
 					if (veh.type == Vehicle.VEH_Train) {
-						final Vehicle u = veh.GetFirstVehicleInChain();
+						Vehicle u = veh.GetFirstVehicleInChain();
 						byte chain_before = 0, chain_after = 0;
 
 						while (u != veh) {
@@ -535,7 +540,7 @@ public class Engine extends EngineTables {
 				}
 			}
 
-			target = value != -1 ? EvalDeterministicSpriteGroup(dsg, value) : dsg.default_group;
+			target = value != -1 ? Sprite.EvalDeterministicSpriteGroup(dsg, value) : dsg.default_group;
 			//debug("Resolved variable %x: %d, %p", dsg.variable, value, callback);
 			return resolve_func.apply(target, veh, callback_info, resolve_func);
 		}
@@ -556,7 +561,7 @@ public class Engine extends EngineTables {
 					veh = veh.GetFirstVehicleInChain();
 			}
 
-			return resolve_func.apply(EvalRandomizedSpriteGroup(rsg, veh.random_bits), veh, callback_info, resolve_func);
+			return resolve_func.apply(Sprite.EvalRandomizedSpriteGroup(rsg, veh.random_bits), veh, callback_info, resolve_func);
 		}
 
 		default:
@@ -567,7 +572,7 @@ public class Engine extends EngineTables {
 
 	static final SpriteGroup GetVehicleSpriteGroup(EngineID engine, final Vehicle v)
 	{
-		final SpriteGroup group;
+		SpriteGroup group;
 		byte cargo = GC_PURCHASE;
 
 		if (v != null) {
@@ -588,7 +593,7 @@ public class Engine extends EngineTables {
 
 	static int GetCustomEngineSprite(EngineID engine, final Vehicle v, byte direction)
 	{
-		final SpriteGroup group;
+		SpriteGroup group;
 		final RealSpriteGroup rsg;
 		byte cargo = GC_PURCHASE;
 		byte loaded = 0;
@@ -608,12 +613,12 @@ public class Engine extends EngineTables {
 		}
 
 		group = GetVehicleSpriteGroup(engine, v);
-		group = ResolveVehicleSpriteGroup(group, v, 0, (resolve_callback) ResolveVehicleSpriteGroup);
+		group = ResolveVehicleSpriteGroup(group, v, 0, (resolve_callback) Engine::ResolveVehicleSpriteGroup);
 
 		if (group == null && cargo != GC_DEFAULT) {
 			// This group is empty but perhaps there'll be a default one.
 			group = ResolveVehicleSpriteGroup(engine_custom_sprites[engine.id][GC_DEFAULT], v, 0,
-					(resolve_callback) ResolveVehicleSpriteGroup);
+					(resolve_callback) Engine::ResolveVehicleSpriteGroup);
 		}
 
 		if (group == null)
@@ -675,7 +680,7 @@ public class Engine extends EngineTables {
 	 */
 	static int GetCallBackResult(int callback_info, EngineID engine, final Vehicle v)
 	{
-		final SpriteGroup group;
+		SpriteGroup group;
 		byte cargo = GC_DEFAULT;
 
 		if (v != null)
@@ -689,12 +694,12 @@ public class Engine extends EngineTables {
 			if (overset != null) group = overset;
 		}
 
-		group = ResolveVehicleSpriteGroup(group, v, callback_info, (resolve_callback) ResolveVehicleSpriteGroup);
+		group = ResolveVehicleSpriteGroup(group, v, callback_info, (resolve_callback) Engine::ResolveVehicleSpriteGroup);
 
 		if (group == null && cargo != GC_DEFAULT) {
 			// This group is empty but perhaps there'll be a default one.
 			group = ResolveVehicleSpriteGroup(engine_custom_sprites[engine.id][GC_DEFAULT], v, callback_info,
-					(resolve_callback) ResolveVehicleSpriteGroup);
+					(resolve_callback) Engine::ResolveVehicleSpriteGroup);
 		}
 
 		if (group == null || group.type != SpriteGroupType.SGT_CALLBACK)
@@ -716,12 +721,16 @@ public class Engine extends EngineTables {
 		if (spritegroup == null)
 			return null;
 
-		if (spritegroup.type == SpriteGroupType.SGT_RANDOMIZED) {
-			_vsg_bits_to_reseed |= RandomizedSpriteGroupTriggeredBits(
+		if (spritegroup.type == SpriteGroupType.SGT_RANDOMIZED) 
+		{
+			byte[] trigPtr = {veh.waiting_triggers};
+			
+			_vsg_bits_to_reseed |= Sprite.RandomizedSpriteGroupTriggeredBits(
 					(RandomizedSpriteGroup)spritegroup,
 					_vsg_random_triggers,
-					veh.waiting_triggers
+					trigPtr
 					);
+			veh.waiting_triggers = trigPtr[0];
 		}
 
 		return ResolveVehicleSpriteGroup(spritegroup, veh, callback_info, resolve_func);
@@ -730,19 +739,19 @@ public class Engine extends EngineTables {
 	//static void DoTriggerVehicle(Vehicle veh, VehicleTrigger trigger, byte base_random_bits, boolean first)
 	static void DoTriggerVehicle(Vehicle veh, int trigger, int base_random_bits, boolean first)
 	{
-		final SpriteGroup group;
+		SpriteGroup group;
 		final RealSpriteGroup rsg;
 		byte new_random_bits;
 
 		_vsg_random_triggers = trigger;
 		_vsg_bits_to_reseed = 0;
 		group = TriggerVehicleSpriteGroup(GetVehicleSpriteGroup(veh.engine_type, veh), veh, 0,
-				(resolve_callback) TriggerVehicleSpriteGroup);
+				(resolve_callback) Engine::TriggerVehicleSpriteGroup);
 
 		if (group == null && veh.cargo_type != GC_DEFAULT) {
 			// This group turned out to be empty but perhaps there'll be a default one.
 			group = TriggerVehicleSpriteGroup(engine_custom_sprites[veh.engine_type.id][GC_DEFAULT], veh, 0,
-					(resolve_callback) TriggerVehicleSpriteGroup);
+					(resolve_callback) Engine::TriggerVehicleSpriteGroup);
 		}
 
 		if (group == null)
@@ -834,7 +843,7 @@ public class Engine extends EngineTables {
 	{
 		Player p = Player.GetPlayer(player);
 
-		assert(e.railtype < RAILTYPE_END);
+		assert(e.railtype < Rail.RAILTYPE_END);
 		e.player_avail = BitOps.RETSETBIT(e.player_avail, player.id);
 		p.avail_railtypes = BitOps.RETSETBIT(p.avail_railtypes, e.railtype);
 
@@ -856,14 +865,18 @@ public class Engine extends EngineTables {
 			best_hist = -1;
 			best_player = Owner.OWNER_SPECTATOR;
 			//FOR_ALL_PLAYERS(p)
-			Player.forEach( (p) ->
+			//Player.forEach( (p) ->
+			Iterator<Player> ii = Player.getIterator();
+			while(ii.hasNext())
 			{
+				Player p = ii.next();
+				
 				if (p.is_active && p.block_preview == 0 && !BitOps.HASBIT(mask, p.index.id) &&
 						p.old_economy[0].performance_history > best_hist) {
 					best_hist = p.old_economy[0].performance_history;
 					best_player = p.index.id;
 				}
-			});
+			}
 
 			if (best_player == Owner.OWNER_SPECTATOR) return Owner.OWNER_SPECTATOR;
 
@@ -884,7 +897,7 @@ public class Engine extends EngineTables {
 
 			if(0 != (e.flags & ENGINE_INTRODUCING)) {
 				if(0 !=  (e.flags & ENGINE_PREVIEWING)) {
-					if (e.preview_player != 0xFF && !--e.preview_wait) {
+					if (e.preview_player != 0xFF && 0 == --e.preview_wait) {
 						e.flags &= ~ENGINE_PREVIEWING;
 						Window.DeleteWindowById(Window.WC_ENGINE_PREVIEW, i);
 						e.preview_player++;
@@ -945,14 +958,18 @@ public class Engine extends EngineTables {
 	{
 		//Vehicle v;
 		//Player p;
-		EngineID index = e - _engines;
+		//EngineID 
+		//int index = e - Global._engines;
+		int index = e.index;
 
 		// In case the player didn't build the vehicle during the intro period,
 		// prevent that player from getting future intro periods for a while.
 		if(0 != (e.flags & ENGINE_INTRODUCING)) {
 			//FOR_ALL_PLAYERS(p)
-			Player.forEach( (p) ->
+			Iterator<Player> ii = Player.getIterator();
+			while(ii.hasNext())
 			{
+				Player p = ii.next();
 				int block_preview = p.block_preview;
 
 				if (!BitOps.HASBIT(e.player_avail, p.index.id)) continue;
@@ -967,14 +984,14 @@ public class Engine extends EngineTables {
 					Vehicle v = it.next();
 					if (v.type == Vehicle.VEH_Train || v.type == Vehicle.VEH_Road || v.type == Vehicle.VEH_Ship ||
 							(v.type == Vehicle.VEH_Aircraft && v.subtype <= 2)) {
-						if (v.owner == p.index && v.engine_type == index) {
+						if (v.owner == p.index && v.engine_type.id == index) {
 							/* The user did prove me wrong, so restore old value */
 							p.block_preview = (byte) block_preview;
 							break;
 						}
 					}
 				}
-			});
+			}
 		}
 
 		e.flags = (byte) ((e.flags & ~ENGINE_INTRODUCING) | ENGINE_AVAILABLE);
@@ -992,19 +1009,19 @@ public class Engine extends EngineTables {
 		Player.forEach( (p) ->
 		{
 			if (p.is_active) {
-				assert(e.railtype < RAILTYPE_END);
+				assert(e.railtype < Rail.RAILTYPE_END);
 				p.avail_railtypes = BitOps.RETSETBIT(p.avail_railtypes, e.railtype);
 			}
 		});
 
-		if (index.id < Global.NUM_TRAIN_ENGINES) {
-			NewsItem.AddNewsItem(index.id, NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_NEW_VEHICLES, NewsItem.DNC_TRAINAVAIL), 0, 0);
-		} else if (index.id < Global.NUM_TRAIN_ENGINES + Global.NUM_ROAD_ENGINES) {
-			NewsItem.AddNewsItem(index.id, NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_NEW_VEHICLES, NewsItem.DNC_ROADAVAIL), 0, 0);
-		} else if (index.id < Global.NUM_TRAIN_ENGINES + Global.NUM_ROAD_ENGINES + Global.NUM_SHIP_ENGINES) {
-			NewsItem.AddNewsItem(index.id, NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_NEW_VEHICLES, NewsItem.DNC_SHIPAVAIL), 0, 0);
+		if (index < Global.NUM_TRAIN_ENGINES) {
+			NewsItem.AddNewsItem(index, NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_NEW_VEHICLES, NewsItem.DNC_TRAINAVAIL), 0, 0);
+		} else if (index < Global.NUM_TRAIN_ENGINES + Global.NUM_ROAD_ENGINES) {
+			NewsItem.AddNewsItem(index, NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_NEW_VEHICLES, NewsItem.DNC_ROADAVAIL), 0, 0);
+		} else if (index < Global.NUM_TRAIN_ENGINES + Global.NUM_ROAD_ENGINES + Global.NUM_SHIP_ENGINES) {
+			NewsItem.AddNewsItem(index, NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_NEW_VEHICLES, NewsItem.DNC_SHIPAVAIL), 0, 0);
 		} else {
-			NewsItem.AddNewsItem(index.id, NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_NEW_VEHICLES, NewsItem.DNC_AIRCRAFTAVAIL), 0, 0);
+			NewsItem.AddNewsItem(index, NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_NEW_VEHICLES, NewsItem.DNC_AIRCRAFTAVAIL), 0, 0);
 		}
 	}
 
@@ -1226,7 +1243,7 @@ public class Engine extends EngineTables {
 
 	static final DrawEngineInfo _draw_engine_list[] = {
 			new DrawEngineInfo( TrainCmd::DrawTrainEngine, Engine::DrawTrainEngineInfo ),
-			new DrawEngineInfo( Engine::DrawRoadVehEngine, Engine::DrawRoadVehEngineInfo ),
+			new DrawEngineInfo( RoadVehCmd::DrawRoadVehEngine, Engine::DrawRoadVehEngineInfo ),
 			new DrawEngineInfo( Ship::DrawShipEngine, Engine::DrawShipEngineInfo ),
 			new DrawEngineInfo( AirCraft::DrawAircraftEngine, Engine::DrawAircraftEngineInfo ),
 	};
@@ -1237,7 +1254,7 @@ public class Engine extends EngineTables {
 		case WE_PAINT: {
 			//EngineID engine = w.window_number;
 			int engine = w.window_number.n;
-			final DrawEngineInfo dei;
+			DrawEngineInfo dei;
 			int width;
 
 			w.DrawWindowWidgets();
@@ -1295,9 +1312,9 @@ public class Engine extends EngineTables {
 		w.window_number = new WindowNumber( engine );
 	}
 
-	static void DrawTrainEngineInfo(EngineID engine, int x, int y, int maxw)
+	static void DrawTrainEngineInfo(int engine, int x, int y, int maxw)
 	{
-		final RailVehicleInfo rvi = RailVehInfo(engine.id);
+		final RailVehicleInfo rvi = RailVehInfo(engine);
 		int multihead = 0 != (rvi.flags & RVI_MULTIHEAD) ? 1 : 0;
 
 		Global.SetDParam(0, (Global._price.build_railvehicle >> 3) * rvi.base_cost >> 5);
@@ -1308,7 +1325,7 @@ public class Engine extends EngineTables {
 		Global.SetDParam(4, rvi.running_cost_base * Global._price.running_rail[rvi.engclass] >> 8 << multihead);
 
 		if (rvi.capacity != 0) {
-			Global.SetDParam(5, Global._cargoc.names_long[rvi.cargo_type].id);
+			Global.SetDParam(5, Global._cargoc.names_long[rvi.cargo_type]);
 			Global.SetDParam(6, rvi.capacity << multihead);
 		} else {
 			Global.SetDParam(5, Str.STR_8838_N_A);
@@ -1331,9 +1348,9 @@ public class Engine extends EngineTables {
 		Global.SetDParam(0, GetCustomEngineName(engine.id).id);
 		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_885A, w.width - 2);
 
-		DrawTrainEngine(w.width >> 1, 88, engine, 0);
+		TrainCmd.DrawTrainEngine(w.width >> 1, 88, engine.id, 0);
 		Gfx.GfxFillRect(25, 56, w.width - 56, 112, 0x323 | Sprite.USE_COLORTABLE);
-		DrawTrainEngineInfo(engine, w.width >> 1, 129, w.width - 52);
+		DrawTrainEngineInfo(engine.id, w.width >> 1, 129, w.width - 52);
 	}
 
 	//StringID GetNewsStringNewTrainAvail(final NewsItem ni)
@@ -1347,9 +1364,9 @@ public class Engine extends EngineTables {
 		return Str.STR_02B6;
 	}
 
-	static void DrawAircraftEngineInfo(EngineID engine, int x, int y, int maxw)
+	static void DrawAircraftEngineInfo(int engine, int x, int y, int maxw)
 	{
-		final AircraftVehicleInfo avi = AircraftVehInfo(engine.id);
+		final AircraftVehicleInfo avi = AircraftVehInfo(engine);
 		Global.SetDParam(0, (Global._price.aircraft_base >> 3) * avi.base_cost >> 5);
 		Global.SetDParam(1, avi.max_speed << 3);
 		Global.SetDParam(2, avi.passenger_capacity);
@@ -1374,9 +1391,9 @@ public class Engine extends EngineTables {
 		Global.SetDParam(0, GetCustomEngineName(engine).id);
 		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_A02D, w.width - 2);
 
-		DrawAircraftEngine(w.width >> 1, 93, engine, 0);
+		AirCraft.DrawAircraftEngine(w.width >> 1, 93, engine, 0);
 		Gfx.GfxFillRect(25, 56, w.width - 56, 110, 0x323 | Sprite.USE_COLORTABLE);
-		DrawAircraftEngineInfo( EngineID.get( engine ), w.width >> 1, 131, w.width - 52);
+		DrawAircraftEngineInfo( engine, w.width >> 1, 131, w.width - 52);
 	}
 
 	static int GetNewsStringNewAircraftAvail(final NewsItem ni)
@@ -1388,16 +1405,16 @@ public class Engine extends EngineTables {
 		return Str.STR_02B6;
 	}
 
-	static void DrawRoadVehEngineInfo(EngineID engine, int x, int y, int maxw)
+	static void DrawRoadVehEngineInfo(int engine, int x, int y, int maxw)
 	{
-		final RoadVehicleInfo rvi = RoadVehInfo(engine.id);
+		final RoadVehicleInfo rvi = RoadVehInfo(engine);
 
 		Global.SetDParam(0, (Global._price.roadveh_base >> 3) * rvi.base_cost >> 5);
 		Global.SetDParam(1, rvi.max_speed * 10 >> 5);
 		Global.SetDParam(2, rvi.running_cost * Global._price.roadveh_running >> 8);
 
 		Global.SetDParam(4, rvi.capacity);
-		Global.SetDParam(3, Global._cargoc.names_long[rvi.cargo_type].id );
+		Global.SetDParam(3, Global._cargoc.names_long[rvi.cargo_type] );
 
 		Gfx.DrawStringMultiCenter(x, y, Str.STR_902A_COST_SPEED_RUNNING_COST, maxw);
 	}
@@ -1413,12 +1430,12 @@ public class Engine extends EngineTables {
 		Gfx.DrawStringMultiCenter(w.width >> 1, 20, Str.STR_9028_NEW_ROAD_VEHICLE_NOW_AVAILABLE, w.width - 2);
 		Gfx.GfxFillRect(25, 56, w.width - 25, w.height - 2, 10);
 
-		 Global.SetDParam(0, GetCustomEngineName(engine).id);
+		Global.SetDParam(0, GetCustomEngineName(engine).id);
 		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_9029, w.width - 2);
 
-		DrawRoadVehEngine(w.width >> 1, 88, engine, 0);
+		RoadVehCmd.DrawRoadVehEngine(w.width >> 1, 88, engine, 0);
 		Gfx.GfxFillRect(25, 56, w.width - 56, 112, 0x323 | Sprite.USE_COLORTABLE);
-		DrawRoadVehEngineInfo( EngineID.get( engine ), w.width >> 1, 129, w.width - 52);
+		DrawRoadVehEngineInfo( engine, w.width >> 1, 129, w.width - 52);
 	}
 
 	static /*StringID*/ int GetNewsStringNewRoadVehAvail(final NewsItem ni)
@@ -1430,12 +1447,12 @@ public class Engine extends EngineTables {
 		return Str.STR_02B6;
 	}
 
-	static void DrawShipEngineInfo(EngineID engine, int x, int y, int maxw)
+	static void DrawShipEngineInfo(int engine, int x, int y, int maxw)
 	{
-		final ShipVehicleInfo svi = ShipVehInfo(engine.id);
+		final ShipVehicleInfo svi = ShipVehInfo(engine);
 		Global.SetDParam(0, svi.base_cost * (Global._price.ship_base >> 3) >> 5);
 		Global.SetDParam(1, svi.max_speed * 10 >> 5);
-		Global.SetDParam(2, Global._cargoc.names_long[svi.cargo_type].id);
+		Global.SetDParam(2, Global._cargoc.names_long[svi.cargo_type]);
 		Global.SetDParam(3, svi.capacity);
 		Global.SetDParam(4, svi.running_cost * Global._price.ship_running >> 8);
 		Gfx.DrawStringMultiCenter(x, y, Str.STR_982E_COST_MAX_SPEED_CAPACITY, maxw);
@@ -1456,9 +1473,9 @@ public class Engine extends EngineTables {
 		Global.SetDParam(0, GetCustomEngineName(engine).id);
 		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_982D, w.width - 2);
 
-		Ship.DrawShipEngine(w.width >> 1, 93, EngineID.get(engine), 0);
+		Ship.DrawShipEngine(w.width >> 1, 93, engine, 0);
 		Gfx.GfxFillRect(25, 56, w.width - 56, 110, 0x323 | Sprite.USE_COLORTABLE);
-		DrawShipEngineInfo( EngineID.get(engine), w.width >> 1, 131, w.width - 52);
+		DrawShipEngineInfo( engine, w.width >> 1, 131, w.width - 52);
 	}
 
 	static int GetNewsStringNewShipAvail(final NewsItem ni)

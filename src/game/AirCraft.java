@@ -110,9 +110,9 @@ public class AirCraft {
 		return direction + _aircraft_sprite[spritenum];
 	}
 
-	static void DrawAircraftEngine(int x, int y, EngineID engine, int image_ormod)
+	static void DrawAircraftEngine(int x, int y, int engine, int image_ormod)
 	{
-		int spritenum = Engine.AircraftVehInfo(engine.id).image_index;
+		int spritenum = Engine.AircraftVehInfo(engine).image_index;
 		int sprite = (6 + _aircraft_sprite[spritenum]);
 
 		/** TODO custom

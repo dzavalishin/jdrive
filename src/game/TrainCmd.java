@@ -312,9 +312,9 @@ public class TrainCmd extends TrainTables
 
 	//extern int _traininfo_vehicle_pitch;
 
-	static void DrawTrainEngine(int x, int y, EngineID engine, int image_ormod)
+	static void DrawTrainEngine(int x, int y, /*EngineID*/int engine, int image_ormod)
 	{
-		final RailVehicleInfo rvi = Engine.RailVehInfo(engine.id);
+		final RailVehicleInfo rvi = Engine.RailVehInfo(engine);
 
 		int img = rvi.image_index;
 		int image = 0;
