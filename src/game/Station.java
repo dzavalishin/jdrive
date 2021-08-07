@@ -1,6 +1,7 @@
 package game;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -11,8 +12,10 @@ public class Station implements IPoolItem
 {
 
 	TileIndex xy;
-	RoadStop bus_stops; //TODO use ArrayList for stops fields!
-	RoadStop truck_stops;
+	
+	List<RoadStop> bus_stops; 
+	List<RoadStop> truck_stops;
+	
 	TileIndex train_tile;
 	TileIndex airport_tile;
 	TileIndex dock_tile;
@@ -343,7 +346,7 @@ public class Station implements IPoolItem
 	private void UpdateStationAcceptance(boolean show_msg)
 	{
 		int old_acc, new_acc;
-		RoadStop cur_rs;
+		//RoadStop cur_rs;
 		int i;
 		ottd_Rectangle rect = new ottd_Rectangle();
 		int rad;
@@ -378,11 +381,13 @@ public class Station implements IPoolItem
 
 		if (dock_tile != null) rect.MergePoint( dock_tile);
 
-		for (cur_rs = bus_stops; cur_rs != null; cur_rs = cur_rs.next) {
+		//for (cur_rs = bus_stops; cur_rs != null; cur_rs = cur_rs.next) {
+		for (RoadStop cur_rs : bus_stops) {
 			rect.MergePoint( cur_rs.xy);
 		}
 
-		for (cur_rs = truck_stops; cur_rs != null; cur_rs = cur_rs.next) {
+		//for (cur_rs = truck_stops; cur_rs != null; cur_rs = cur_rs.next) {
+		for (RoadStop cur_rs : truck_stops) {
 			rect.MergePoint( cur_rs.xy);
 		}
 
@@ -615,9 +620,9 @@ public class Station implements IPoolItem
 		case Vehicle.VEH_Ship:			return st.dock_tile;
 		case Vehicle.VEH_Road:
 			if (v.cargo_type == AcceptedCargo.CT_PASSENGERS) {
-				return (st.bus_stops != null) ? st.bus_stops.xy : null;
+				return (st.bus_stops != null) ? st.bus_stops.get(0).xy : null;
 			} else {
-				return (st.truck_stops != null) ? st.truck_stops.xy : null;
+				return (st.truck_stops != null) ? st.truck_stops.get(0).xy : null;
 			}
 		default:
 			assert(false);
@@ -1486,8 +1491,8 @@ public class Station implements IPoolItem
 						switch (dsg.variable - 0x70) {
 						case 0x80: value = st.facilities;             break;
 						case 0x81: value = st.airport_type;           break;
-						case 0x82: value = st.truck_stops.status;    break;
-						case 0x83: value = st.bus_stops.status;      break;
+						case 0x82: value = st.truck_stops.get(0).status;    break; // TODO why just use stop 0?
+						case 0x83: value = st.bus_stops.get(0).status;      break;
 						case 0x86: value = st.airport_flags & 0xFFFF; break;
 						case 0x87: value = st.airport_flags & 0xFF;   break;
 						case 0x8A: value = st.build_date;             break;
@@ -1628,7 +1633,7 @@ public class Station implements IPoolItem
 		Station st;
 		RoadStop road_stop;
 		RoadStop currstop = new RoadStop();
-		RoadStop prev = new RoadStop();
+		RoadStop prev = null; //new RoadStop();
 		TileIndex tile;
 		int cost;
 		boolean type = p2 != 0 ;
@@ -1670,7 +1675,7 @@ public class Station implements IPoolItem
 			if (!CheckStationSpreadOut(st, tile, 1, 1))
 				return Cmd.CMD_ERROR;
 
-			Station.FindRoadStationSpot(type, st, currstop, prev);
+			//FindRoadStationSpot(type, st, currstop, prev);
 		} else {
 			Town t;
 
@@ -1679,7 +1684,7 @@ public class Station implements IPoolItem
 
 			st.town = t = Town.ClosestTownFromTile(tile, (int)-1);
 
-			Station.FindRoadStationSpot(type, st, currstop, prev);
+			//FindRoadStationSpot(type, st, currstop, prev);
 
 			if (Global._current_player.id < Global.MAX_PLAYERS && 0 != (flags&Cmd.DC_EXEC))
 				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global._current_player.id);
@@ -1698,7 +1703,7 @@ public class Station implements IPoolItem
 			currstop = new RoadStop( road_stop );
 
 			//initialize an empty station
-			RoadStop.InitializeRoadStop(road_stop, prev, tile, st.index);
+			RoadStop.InitializeRoadStop(road_stop, /*prev,*/ tile, st.index);
 			currstop.type = type ? 1 : 0;
 			if (0==st.facilities) st.xy = tile;
 			st.facilities |= (type) ? FACIL_TRUCK_STOP : FACIL_BUS_STOP;
@@ -1726,7 +1731,7 @@ public class Station implements IPoolItem
 	// Remove a bus station TODO use ArrayList for stops fields!
 	private static int RemoveRoadStop(Station st, int flags, TileIndex tile)
 	{
-		RoadStop primary_stop;
+		List<RoadStop> primary_stop;
 		RoadStop cur_stop;
 		boolean is_truck = tile.getMap().m5 < 0x47;
 
@@ -1759,20 +1764,21 @@ public class Station implements IPoolItem
 			}
 
 			cur_stop.used = false;
-			if (cur_stop.prev != null) cur_stop.prev.next = cur_stop.next;
-			if (cur_stop.next != null) cur_stop.next.prev = cur_stop.prev;
+			assert primary_stop.remove(cur_stop);
+			//if (cur_stop.prev != null) cur_stop.prev.next = cur_stop.next;
+			//if (cur_stop.next != null) cur_stop.next.prev = cur_stop.prev;
 
 			//we only had one stop left
-			if (cur_stop.next == null && cur_stop.prev == null) {
+			//if (cur_stop.next == null && cur_stop.prev == null)
+			if(primary_stop.isEmpty())
+			{
 				//so we remove ALL stops
 				//*primary_stop = null;
-				if(is_truck)
-					st.truck_stops = null;
-				else
-					st.bus_stops = null;
+				//if(is_truck)					st.truck_stops = null;
+				//else					st.bus_stops = null;
 
 				st.facilities &= (is_truck) ? ~FACIL_TRUCK_STOP : ~FACIL_BUS_STOP;
-			} else if (cur_stop == primary_stop) {
+			} /*else if (cur_stop == primary_stop) {
 				//removed the first stop in the list
 				//need to set the primary element to the next stop
 				//*primary_stop = (*primary_stop).next;
@@ -1780,7 +1786,7 @@ public class Station implements IPoolItem
 					st.truck_stops = st.truck_stops.next;
 				else
 					st.bus_stops = st.bus_stops.next;
-			}
+			} */
 
 			st.UpdateStationVirtCoordDirty();
 			st.DeleteStationIfEmpty();
@@ -2720,10 +2726,12 @@ public class Station implements IPoolItem
 
 	private static void CheckOrphanedSlots(final  Station st, RoadStopType rst)
 	{
-		RoadStop rs;
+		//RoadStop rs;
 		int k;
 
-		for (rs = RoadStop.GetPrimaryRoadStop(st, rst); rs != null; rs = rs.next) {
+		//for (rs = RoadStop.GetPrimaryRoadStop(st, rst); rs != null; rs = rs.next) 
+		for(RoadStop rs : RoadStop.GetPrimaryRoadStop(st, rst)) 
+		{
 			for (k = 0; k < RoadStop.NUM_SLOTS; k++) {
 				if (rs.slot[k] != INVALID_SLOT) {
 					final  Vehicle v = Vehicle.GetVehicle(rs.slot[k]);

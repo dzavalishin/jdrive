@@ -1,6 +1,7 @@
 package game;
 
 import java.util.Comparator;
+import java.util.List;
 
 import game.struct.FindRoadToChooseData;
 import game.struct.OvertakeData;
@@ -601,12 +602,11 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			{
 				int mindist = 0xFFFFFFFF;
 				RoadStopType type;
-				RoadStop rs;
 
 				type = (v.cargo_type == AcceptedCargo.CT_PASSENGERS) ? RoadStopType.RS_BUS : RoadStopType.RS_TRUCK;
-				rs = RoadStop.GetPrimaryRoadStop(st, type);
+				List<RoadStop> rsl = RoadStop.GetPrimaryRoadStop(st, type);
 
-				if (rs == null) {
+				if (rsl == null || rsl.size() == 0) {
 					//There is no stop left at the station, so don't even TRY to go there
 					v.cur_order_index++;
 					v.InvalidateVehicleOrder();
@@ -614,10 +614,11 @@ public class RoadVehCmd extends RoadVehCmdTables {
 					return;
 				}
 
-				for (rs = RoadStop.GetPrimaryRoadStop(st, type); rs != null; rs = rs.next) {
-					if (Map.DistanceManhattan(v.tile, rs.xy) < mindist) {
+				//for (rsl = RoadStop.GetPrimaryRoadStop(st, type); rsl != null; rsl = rsl.next) 
+				for(RoadStop rs : RoadStop.GetPrimaryRoadStop(st, type)) 
+				{
+					if (Map.DistanceManhattan(v.tile, rs.xy) < mindist) 
 						v.dest_tile = rs.xy;
-					}
 				}
 
 			}
@@ -969,11 +970,12 @@ public class RoadVehCmd extends RoadVehCmdTables {
 				/* Our station */
 				final Station  st = Station.GetStation(tile.getMap().m2);
 				byte val = tile.getMap().m5;
+				// TODO why .get(0) is ok?
 				if (v.cargo_type != AcceptedCargo.CT_PASSENGERS) {
-					if (BitOps.IS_INT_INSIDE(val, 0x43, 0x47) && (Global._patches.roadveh_queue || 0!=(st.truck_stops.status&3)))
+					if (BitOps.IS_INT_INSIDE(val, 0x43, 0x47) && (Global._patches.roadveh_queue || 0!=(st.truck_stops.get(0).status&3)))
 						bitmask |= _road_veh_fp_ax_or[(val-0x43)&3];
 				} else {
-					if (BitOps.IS_INT_INSIDE(val, 0x47, 0x4B) && (Global._patches.roadveh_queue || 0!=(st.bus_stops.status&3)))
+					if (BitOps.IS_INT_INSIDE(val, 0x47, 0x4B) && (Global._patches.roadveh_queue || 0!=(st.bus_stops.get(0).status&3)))
 						bitmask |= _road_veh_fp_ax_or[(val-0x47)&3];
 				}
 			}
@@ -1597,14 +1599,16 @@ class RoadDriveEntry {
 
 			//We do not have a slot, so make one
 			if (v.road.slot == null) {
-				RoadStop rs = RoadStop.GetPrimaryRoadStop(st, type);
-				RoadStop first_stop = rs;
+				List<RoadStop> rsl = RoadStop.GetPrimaryRoadStop(st, type);
+				RoadStop first_stop = rsl.get(0);
 				RoadStop best_stop = null;
 				int mindist = 12, dist; // 12 is threshold distance.
 
 				//first we need to find out how far our stations are away.
 				Global.DEBUG_ms( 2, "Multistop: Attempting to obtain a slot for vehicle %d at station %d (0x%x)", v.unitnumber, st.index, st.xy);
-				for(; rs != null; rs = rs.next) {
+				//for(; rs != null; rs = rs.next)
+				for( RoadStop rs : rsl )
+				{
 					// Only consider those with at least a free slot.
 					if (!(rs.slot[0] == Station.INVALID_SLOT || rs.slot[1] == Station.INVALID_SLOT))
 						continue;

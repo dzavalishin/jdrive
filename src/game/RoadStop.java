@@ -1,6 +1,7 @@
 package game;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class RoadStop implements IPoolItem
@@ -14,8 +15,8 @@ public class RoadStop implements IPoolItem
 	//StationID station;
 	int station;
 	int type;
-	RoadStop next;
-	RoadStop prev;
+	//RoadStop next;
+	//RoadStop prev;
 
 	public static final int INVALID_STATION = -1; //0xFFFF;
 	public static final int INVALID_SLOT = -1; //0xFFFF;
@@ -31,7 +32,7 @@ public class RoadStop implements IPoolItem
 		slot = new int[NUM_SLOTS];
 		station = 0;
 		type = 0;
-		prev = next = null;
+		//prev = next = null;
 	}
 
 	public RoadStop() {
@@ -47,7 +48,7 @@ public class RoadStop implements IPoolItem
 		slot = new int[NUM_SLOTS];
 		station = src.station;
 		type = src.type;
-		prev = next = null;
+		//prev = next = null;
 	}
 	
 	@Override
@@ -91,18 +92,18 @@ public class RoadStop implements IPoolItem
 	}
 
 	//static void InitializeRoadStop(RoadStop road_stop, RoadStop previous, TileIndex tile, StationID index)
-	static void InitializeRoadStop(RoadStop road_stop, RoadStop previous, TileIndex tile, int sindex)
+	static void InitializeRoadStop(RoadStop road_stop, /*RoadStop previous,*/ TileIndex tile, int sindex)
 	{
 		road_stop.xy = tile;
 		road_stop.used = true;
 		road_stop.status = 3; //stop is free
 		road_stop.slot[0] = road_stop.slot[1] = INVALID_SLOT;
-		road_stop.next = null;
-		road_stop.prev = previous;
+		//road_stop.next = null;
+		//road_stop.prev = previous;
 		road_stop.station = sindex;
 	}
 
-	static RoadStop GetPrimaryRoadStop(final Station st, RoadStopType type)
+	static List<RoadStop> GetPrimaryRoadStop(final Station st, RoadStopType type)
 	{
 		switch (type) {
 			case RS_BUS:   return st.bus_stops;
@@ -116,24 +117,29 @@ public class RoadStop implements IPoolItem
 	static RoadStop GetRoadStopByTile(TileIndex tile, RoadStopType type)
 	{
 		final Station st = Station.GetStation(tile.getMap().m2);
-		RoadStop rs;
+		//RoadStop rs;
 
-		for (rs = GetPrimaryRoadStop(st, type); rs.xy != tile; rs = rs.next) {
-			assert(rs.next != null);
+		//for (rs = GetPrimaryRoadStop(st, type); rs.xy != tile; rs = rs.next) 
+		//	assert(rs.next != null);
+		
+		for(RoadStop rs : GetPrimaryRoadStop(st, type))
+		{
+			if(rs.xy.getTile() == tile.getTile())
+				return rs;
 		}
 
-		return rs;
+		return null;
 	}
 
 	static int GetNumRoadStops(final Station st, RoadStopType type)
 	{
-		int num = 0;
-		RoadStop rs;
+		//int num = 0;
+		//RoadStop rs;
 
 		assert(st != null);
-		for (rs = GetPrimaryRoadStop(st, type); rs != null; rs = rs.next) num++;
+		//for (rs = GetPrimaryRoadStop(st, type); rs != null; rs = rs.next) num++;
 
-		return num;
+		return GetPrimaryRoadStop(st, type).size();
 	}
 
 	static RoadStop AllocateRoadStop()
