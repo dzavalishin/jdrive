@@ -1,6 +1,7 @@
 package game;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 import game.util.BitOps;
 import game.util.Strings;
@@ -66,27 +67,30 @@ public class StationGui extends Station  // to get finalants
 	//static char _bufcache[64];
 	//static int _last_station_idx;
 
-	static int  StationNameSorter(SortStruct a, SortStruct b)
+	static class StationNameSorter implements Comparator<SortStruct>
 	{
-		//char buf1[64];
-		int [] argv = new int[1];
-		//final SortStruct *cmp1 = (final SortStruct*)a;
-		//final SortStruct *cmp2 = (final SortStruct*)b;
+		public int compare(SortStruct a, SortStruct b)
+		{
+			//char buf1[64];
+			int [] argv = new int[1];
+			//final SortStruct *cmp1 = (final SortStruct*)a;
+			//final SortStruct *cmp2 = (final SortStruct*)b;
 
-		argv[0] = a.index;
-		String buf1 = Strings.GetStringWithArgs(Str.STR_STATION, argv);
+			argv[0] = a.index;
+			String buf1 = Strings.GetStringWithArgs(Str.STR_STATION, argv);
 
-		argv[0] = b.index;
-		String buf2 = Strings.GetStringWithArgs(Str.STR_STATION, argv);
+			argv[0] = b.index;
+			String buf2 = Strings.GetStringWithArgs(Str.STR_STATION, argv);
 
-		return buf1.compareTo(buf2);
+			return buf1.compareTo(buf2);
+		}
 	}
 
 	private static SortStruct [] _station_sort;
 	static boolean [] _station_sort_dirty = new boolean[Global.MAX_PLAYERS];
 	private static boolean _global_station_sort_dirty;
 
-	
+
 	static void GlobalSortStationList()
 	{
 		//final Station st;
@@ -97,7 +101,7 @@ public class StationGui extends Station  // to get finalants
 		//memset(_num_station_sort, 0, sizeof(_num_station_sort));
 		for( int si = 0; si < _num_station_sort.length; si++ )
 			_num_station_sort[si] = 0;
-				
+
 		/* Create array for sorting */
 		//_station_sort = realloc(_station_sort, GetStationPoolSize() * sizeof(_station_sort[0]));
 		_station_sort = new SortStruct[GetStationPoolSize()];
@@ -124,7 +128,7 @@ public class StationGui extends Station  // to get finalants
 		for (int si = 1; si < _num_station_sort.length; si++) {
 			_num_station_sort[si] += _num_station_sort[si-1];
 		}
-		
+
 		//qsort(_station_sort, n, sizeof(_station_sort[0]), GeneralOwnerSorter); // sort by owner
 		Arrays.sort(_station_sort, new GeneralOwnerSorter());
 
@@ -141,19 +145,22 @@ public class StationGui extends Station  // to get finalants
 
 	static void MakeSortedStationList(int owner)
 	{
+		/*
 		SortStruct firstelement;
 		int n = 0;
 
 		if (owner == 0) { // first element starts at 0th element and has n elements as described above
-			firstelement = &_station_sort[0];
+			firstelement = _station_sort[0];
 			n = _num_station_sort[0];
 		} else { // nth element starts at the end of the previous one, and has n elements as described above
-			firstelement = &_station_sort[_num_station_sort[owner - 1]];
+			firstelement = _station_sort[_num_station_sort[owner - 1]];
 			n = _num_station_sort[owner] - _num_station_sort[owner - 1];
 		}
 
-		_last_station_idx = 0; // used for "cache" in namesorting
+		//_last_station_idx = 0; // used for "cache" in namesorting
 		qsort(firstelement, n, sizeof(_station_sort[0]), StationNameSorter); // sort by name
+		 */
+		Arrays.sort( _station_sort, new StationNameSorter() );
 
 		_station_sort_dirty[owner] = false;
 
@@ -267,21 +274,21 @@ public class StationGui extends Station  // to get finalants
 	}
 
 	static final Widget _player_stations_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,									Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   345,     0,    13, Str.STR_3048_STATIONS,				Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   346,   357,     0,    13, 0x0,											Str.STR_STICKY_BUTTON),
-	new Widget(      Window.WWT_PANEL,     Window.RESIZE_RB,    14,     0,   345,    14,   137, 0x0,											Str.STR_3057_STATION_NAMES_CLICK_ON),
-	new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   346,   357,    14,   125, 0x0,											Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
-	new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   346,   357,   126,   137, 0x0,											Str.STR_RESIZE_BUTTON),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,									Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,  Window.RESIZE_RIGHT,    14,    11,   345,     0,    13, Str.STR_3048_STATIONS,				Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,     Window.RESIZE_LR,    14,   346,   357,     0,    13, 0x0,											Str.STR_STICKY_BUTTON),
+			new Widget(      Window.WWT_PANEL,     Window.RESIZE_RB,    14,     0,   345,    14,   137, 0x0,											Str.STR_3057_STATION_NAMES_CLICK_ON),
+			new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   346,   357,    14,   125, 0x0,											Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+			new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   346,   357,   126,   137, 0x0,											Str.STR_RESIZE_BUTTON),
 	};
 
 	static final WindowDesc _player_stations_desc = new WindowDesc(
-		-1, -1, 358, 138,
-		Window.WC_STATION_LIST,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
-		_player_stations_widgets,
-		StationGui::PlayerStationsWndProc
-	);
+			-1, -1, 358, 138,
+			Window.WC_STATION_LIST,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
+			_player_stations_widgets,
+			StationGui::PlayerStationsWndProc
+			);
 
 
 	static void ShowPlayerStations(/*PlayerID*/ int player)
@@ -298,37 +305,37 @@ public class StationGui extends Station  // to get finalants
 	}
 
 	static final Widget _station_view_expanded_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,		Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   236,     0,    13, Str.STR_300A_0,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,    14,   237,   248,     0,    13, 0x0,         Str.STR_STICKY_BUTTON),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   236,    14,    65, 0x0,					Str.STR_NULL),
-	new Widget(  Window.WWT_SCROLLBAR,   Window.RESIZE_NONE,    14,   237,   248,    14,    65, 0x0,					Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
-	new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   248,    66,   197, 0x0,					Str.STR_NULL),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    63,   198,   209, Str.STR_00E4_LOCATION,	Str.STR_3053_CENTER_MAIN_VIEW_ON_STATION),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,    64,   128,   198,   209, Str.STR_3033_ACCEPTS,	Str.STR_3056_SHOW_LIST_OF_ACCEPTED_CARGO),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   129,   192,   198,   209, Str.STR_0130_RENAME,		Str.STR_3055_CHANGE_NAME_OF_STATION),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   193,   206,   198,   209, Str.STR_TRAIN, Str.STR_SCHEDULED_TRAINS_TIP ),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   207,   220,   198,   209, Str.STR_LORRY, Str.STR_SCHEDULED_ROAD_VEHICLES_TIP ),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   221,   234,   198,   209, Str.STR_PLANE, Str.STR_SCHEDULED_AIRCRAFT_TIP ),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   235,   248,   198,   209, Str.STR_SHIP, Str.STR_SCHEDULED_SHIPS_TIP ),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,		Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   236,     0,    13, Str.STR_300A_0,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,    14,   237,   248,     0,    13, 0x0,         Str.STR_STICKY_BUTTON),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   236,    14,    65, 0x0,					Str.STR_NULL),
+			new Widget(  Window.WWT_SCROLLBAR,   Window.RESIZE_NONE,    14,   237,   248,    14,    65, 0x0,					Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+			new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   248,    66,   197, 0x0,					Str.STR_NULL),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    63,   198,   209, Str.STR_00E4_LOCATION,	Str.STR_3053_CENTER_MAIN_VIEW_ON_STATION),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,    64,   128,   198,   209, Str.STR_3033_ACCEPTS,	Str.STR_3056_SHOW_LIST_OF_ACCEPTED_CARGO),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   129,   192,   198,   209, Str.STR_0130_RENAME,		Str.STR_3055_CHANGE_NAME_OF_STATION),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   193,   206,   198,   209, Str.STR_TRAIN, Str.STR_SCHEDULED_TRAINS_TIP ),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   207,   220,   198,   209, Str.STR_LORRY, Str.STR_SCHEDULED_ROAD_VEHICLES_TIP ),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   221,   234,   198,   209, Str.STR_PLANE, Str.STR_SCHEDULED_AIRCRAFT_TIP ),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   235,   248,   198,   209, Str.STR_SHIP, Str.STR_SCHEDULED_SHIPS_TIP ),
 	};
 
 	static final Widget _station_view_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,		Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   236,     0,    13, Str.STR_300A_0,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,    14,   237,   248,     0,    13, 0x0,         Str.STR_STICKY_BUTTON),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   236,    14,    65, 0x0,					Str.STR_NULL),
-	new Widget(  Window.WWT_SCROLLBAR,   Window.RESIZE_NONE,    14,   237,   248,    14,    65, 0x0,					Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   248,    66,    97, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    63,    98,   109, Str.STR_00E4_LOCATION,	Str.STR_3053_CENTER_MAIN_VIEW_ON_STATION),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,    64,   128,    98,   109, Str.STR_3032_RATINGS,	Str.STR_3054_SHOW_STATION_RATINGS),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   129,   192,    98,   109, Str.STR_0130_RENAME,		Str.STR_3055_CHANGE_NAME_OF_STATION),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   193,   206,    98,   109, Str.STR_TRAIN, Str.STR_SCHEDULED_TRAINS_TIP ),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   207,   220,    98,   109, Str.STR_LORRY, Str.STR_SCHEDULED_ROAD_VEHICLES_TIP ),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   221,   234,    98,   109, Str.STR_PLANE, Str.STR_SCHEDULED_AIRCRAFT_TIP ),
-	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   235,   248,    98,   109, Str.STR_SHIP, Str.STR_SCHEDULED_SHIPS_TIP ),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,		Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   236,     0,    13, Str.STR_300A_0,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,    14,   237,   248,     0,    13, 0x0,         Str.STR_STICKY_BUTTON),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   236,    14,    65, 0x0,					Str.STR_NULL),
+			new Widget(  Window.WWT_SCROLLBAR,   Window.RESIZE_NONE,    14,   237,   248,    14,    65, 0x0,					Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
+			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   248,    66,    97, 0x0,					Str.STR_NULL),
+			new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,     0,    63,    98,   109, Str.STR_00E4_LOCATION,	Str.STR_3053_CENTER_MAIN_VIEW_ON_STATION),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,    64,   128,    98,   109, Str.STR_3032_RATINGS,	Str.STR_3054_SHOW_STATION_RATINGS),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   129,   192,    98,   109, Str.STR_0130_RENAME,		Str.STR_3055_CHANGE_NAME_OF_STATION),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   193,   206,    98,   109, Str.STR_TRAIN, Str.STR_SCHEDULED_TRAINS_TIP ),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   207,   220,    98,   109, Str.STR_LORRY, Str.STR_SCHEDULED_ROAD_VEHICLES_TIP ),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   221,   234,    98,   109, Str.STR_PLANE, Str.STR_SCHEDULED_AIRCRAFT_TIP ),
+			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    14,   235,   248,    98,   109, Str.STR_SHIP, Str.STR_SCHEDULED_SHIPS_TIP ),
 	};
 
 	static void DrawStationViewWindow(Window w)
@@ -420,7 +427,7 @@ public class StationGui extends Station  // to get finalants
 		if (Window.IsWindowOfPrototype( w, _station_view_widgets)) {
 			//char *b = _userstring;
 			StringBuilder sb = new StringBuilder();
-			
+
 			sb.append( Strings.InlineString(Str.STR_000C_ACCEPTS) );
 
 			boolean nonempty = false;
@@ -528,14 +535,14 @@ public class StationGui extends Station  // to get finalants
 			if (e.str != null) {
 				Global._cmd_text = e.str;
 				Cmd.DoCommandP(null, w.window_number.n, 0, null,
-					Cmd.CMD_RENAME_STATION | Cmd.CMD_MSG(Str.STR_3031_CAN_T_RENAME_STATION));
+						Cmd.CMD_RENAME_STATION | Cmd.CMD_MSG(Str.STR_3031_CAN_T_RENAME_STATION));
 			}
 			break;
 
 		case WE_DESTROY: {
 			//WindowNumber 
 			int wno =
-				(w.window_number.n << 16) | Station.GetStation(w.window_number.n).owner.id;
+					(w.window_number.n << 16) | Station.GetStation(w.window_number.n).owner.id;
 
 			Window.DeleteWindowById(Window.WC_TRAINS_LIST, wno);
 			Window.DeleteWindowById(Window.WC_ROADVEH_LIST, wno);
@@ -548,12 +555,12 @@ public class StationGui extends Station  // to get finalants
 
 
 	static final WindowDesc _station_view_desc = new WindowDesc(
-		-1, -1, 249, 110,
-		Window.WC_STATION_VIEW,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON,
-		_station_view_widgets,
-		StationGui::StationViewWndProc
-	);
+			-1, -1, 249, 110,
+			Window.WC_STATION_VIEW,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON,
+			_station_view_widgets,
+			StationGui::StationViewWndProc
+			);
 
 	static void ShowStationViewWindow(/*StationID*/ int station)
 	{
@@ -566,6 +573,6 @@ public class StationGui extends Station  // to get finalants
 			w.vscroll.cap = 5;
 		}
 	}
-	
-	
+
+
 }
