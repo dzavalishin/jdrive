@@ -612,7 +612,7 @@ public class SmallMapGui extends SmallMapGuiTables
 			SmallMapGui::SmallMapWindowProc
 			);
 
-	void ShowSmallMap()
+	static void ShowSmallMap()
 	{
 		Window w;
 		ViewPort vp;
@@ -711,7 +711,7 @@ public class SmallMapGui extends SmallMapGuiTables
 			SmallMapGui::ExtraViewPortWndProc
 			);
 
-	void ShowExtraViewPortWindow()
+	static void ShowExtraViewPortWindow()
 	{
 		Window w, v;
 		int i = 0;

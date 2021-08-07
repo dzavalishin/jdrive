@@ -412,7 +412,7 @@ public class GraphGui
 			);
 
 
-	void ShowOperatingProfitGraph()
+	static void ShowOperatingProfitGraph()
 	{
 		if (null != Window.AllocateWindowDescFront(_operating_profit_desc, 0)) {
 			Window.InvalidateWindow(Window.WC_GRAPH_LEGEND, 0);
@@ -491,7 +491,7 @@ public class GraphGui
 			GraphGui::IncomeGraphWndProc
 			);
 
-	void ShowIncomeGraph()
+	static void ShowIncomeGraph()
 	{
 		if (null != Window.AllocateWindowDescFront(_income_graph_desc, 0)) {
 			Window.InvalidateWindow(Window.WC_GRAPH_LEGEND, 0);
@@ -568,7 +568,7 @@ public class GraphGui
 			GraphGui::DeliveredCargoGraphWndProc
 			);
 
-	void ShowDeliveredCargoGraph()
+	static void ShowDeliveredCargoGraph()
 	{
 		if (null != Window.AllocateWindowDescFront(_delivered_cargo_graph_desc, 0)) {
 			Window.InvalidateWindow(Window.WC_GRAPH_LEGEND, 0);
@@ -648,7 +648,7 @@ public class GraphGui
 			GraphGui::PerformanceHistoryWndProc
 			);
 
-	void ShowPerformanceHistoryGraph()
+	static void ShowPerformanceHistoryGraph()
 	{
 		if (null != Window.AllocateWindowDescFront(_performance_history_desc, 0)) {
 			Window.InvalidateWindow(Window.WC_GRAPH_LEGEND, 0);
@@ -725,7 +725,7 @@ public class GraphGui
 			GraphGui::CompanyValueGraphWndProc
 			);
 
-	void ShowCompanyValueGraph()
+	static void ShowCompanyValueGraph()
 	{
 		if (null == Window.AllocateWindowDescFront(_company_value_graph_desc, 0)) {
 			Window.InvalidateWindow(Window.WC_GRAPH_LEGEND, 0);
@@ -828,7 +828,7 @@ public class GraphGui
 			);
 
 
-	void ShowCargoPaymentRates()
+	static void ShowCargoPaymentRates()
 	{
 		Window.AllocateWindowDescFront(_cargo_payment_rates_desc, 0);
 	}
@@ -904,7 +904,7 @@ public class GraphGui
 			GraphGui::CompanyLeagueWndProc
 			);
 
-	void ShowCompanyLeagueTable()
+	static void ShowCompanyLeagueTable()
 	{
 		Window.AllocateWindowDescFront(_company_league_desc,0);
 	}
@@ -1273,7 +1273,7 @@ public class GraphGui
 			);
 
 
-	void ShowSignList()
+	static void ShowSignList()
 	{
 		Window w;
 

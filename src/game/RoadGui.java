@@ -294,7 +294,7 @@ public class RoadGui
 		RoadGui::BuildRoadToolbWndProc
 	);
 
-	void ShowBuildRoadToolbar()
+	static void ShowBuildRoadToolbar()
 	{
 		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
 		Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);

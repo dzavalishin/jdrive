@@ -284,9 +284,9 @@ public class Gui
 	static void MenuClickMap(int index)
 	{
 		switch (index) {
-			case 0: Gui.ShowSmallMap();            break;
-			case 1: Gui.ShowExtraViewPortWindow(); break;
-			case 2: Gui.ShowSignList();            break;
+			case 0: SmallMapGui.ShowSmallMap();            break;
+			case 1: SmallMapGui.ShowExtraViewPortWindow(); break;
+			case 2: GraphGui.ShowSignList();            break;
 		}
 	}
 
@@ -298,10 +298,10 @@ public class Gui
 	static void MenuClickScenMap(int index)
 	{
 		switch (index) {
-			case 0: ShowSmallMap();            break;
-			case 1: ShowExtraViewPortWindow(); break;
-			case 2: ShowSignList();            break;
-			case 3: ShowTownDirectory();       break;
+			case 0: SmallMapGui.ShowSmallMap();            break;
+			case 1: SmallMapGui.ShowExtraViewPortWindow(); break;
+			case 2: GraphGui.ShowSignList();            break;
+			case 3: TownGui.ShowTownDirectory();       break;
 		}
 	}
 
@@ -340,20 +340,20 @@ public class Gui
 	static void MenuClickGraphs(int index)
 	{
 		switch (index) {
-			case 0: ShowOperatingProfitGraph();    break;
-			case 1: ShowIncomeGraph();             break;
-			case 2: ShowDeliveredCargoGraph();     break;
-			case 3: ShowPerformanceHistoryGraph(); break;
-			case 4: ShowCompanyValueGraph();       break;
-			case 5: ShowCargoPaymentRates();       break;
+			case 0: GraphGui.ShowOperatingProfitGraph();    break;
+			case 1: GraphGui.ShowIncomeGraph();             break;
+			case 2: GraphGui.ShowDeliveredCargoGraph();     break;
+			case 3: GraphGui.ShowPerformanceHistoryGraph(); break;
+			case 4: GraphGui.ShowCompanyValueGraph();       break;
+			case 5: GraphGui.ShowCargoPaymentRates();       break;
 		}
 	}
 
 	static void MenuClickLeague(int index)
 	{
 		switch (index) {
-			case 0: ShowCompanyLeagueTable();      break;
-			case 1: ShowPerformanceRatingDetail(); break;
+			case 0: GraphGui.ShowCompanyLeagueTable();      break;
+			case 1: GraphGui.ShowPerformanceRatingDetail(); break;
 		}
 	}
 
@@ -377,23 +377,23 @@ public class Gui
 
 	static void MenuClickShowShips(int index)
 	{
-		ShowPlayerShips(index, Station.INVALID_STATION);
+		ShipGui.ShowPlayerShips(index, Station.INVALID_STATION);
 	}
 
 	static void MenuClickShowAir(int index)
 	{
-		ShowPlayerAircraft(index, Station.INVALID_STATION);
+		AirCraft.ShowPlayerAircraft(index, Station.INVALID_STATION);
 	}
 
 	static void MenuClickBuildRail(int index)
 	{
 		_last_built_railtype = RailType.values[index];
-		ShowBuildRailToolbar(_last_built_railtype, -1);
+		Rail.ShowBuildRailToolbar(_last_built_railtype, -1);
 	}
 
 	static void MenuClickBuildRoad(int index)
 	{
-		ShowBuildRoadToolbar();
+		RoadGui.ShowBuildRoadToolbar();
 	}
 
 	static void MenuClickBuildWater(int index)

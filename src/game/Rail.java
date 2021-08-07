@@ -3405,7 +3405,7 @@ public class Rail extends RailTables {
 		w.widget.get(RTW_BUILD_TUNNEL).unkA = rti.gui_sprites.build_tunnel.id;
 	}
 
-	void ShowBuildRailToolbar(/*RailType*/ int railtype, int button)
+	static void ShowBuildRailToolbar(/*RailType*/ int railtype, int button)
 	{
 		Window w;
 
