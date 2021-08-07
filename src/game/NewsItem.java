@@ -307,7 +307,7 @@ public class NewsItem {
 			case 0: {
 				NewsItem ni = w.as_news_d().ni;
 				if( 0 != (ni.flags & NF_VEHICLE) ) {
-					Vehicle v = Vehicle.GetVehicle(ni.data_a);
+					Vehicle v = Vehicle.GetVehicle(ni.data_a.tile);
 					ViewPort.ScrollMainWindowTo(v.x_pos, v.y_pos);
 				} else if( 0 != (ni.flags & NF_TILE)) {
 					if (!ViewPort.ScrollMainWindowToTile(ni.data_a) && ni.data_b != null)
@@ -326,10 +326,15 @@ public class NewsItem {
 			break;
 
 		case WE_MESSAGE: /* The chatbar has notified us that is was either created or closed */
-			switch (e.msg) {
+			/*switch (e.msg) {
 			case WindowEvents.WE_CREATE.ordinal(): w.message.msg = e.wparam; break;
 			case WindowEvents.WE_DESTROY.ordinal(): w.message.msg = 0; break;
-			}
+			}*/
+			if( e.msg == WindowEvents.WE_CREATE.ordinal() )
+				w.message.msg = e.wparam; 
+			if( e.msg == WindowEvents.WE_DESTROY.ordinal() )
+				w.message.msg = 0;
+			
 			break;
 
 		case WE_TICK: { /* Scroll up newsmessages from the bottom in steps of 4 pixels */
@@ -766,7 +771,7 @@ public class NewsItem {
 				int p, q;
 
 
-				if(false)
+				/*if(false)
 				{
 					// === DEBUG code only
 					for (p = 0; p < _total_news; p++) {
@@ -777,7 +782,7 @@ public class NewsItem {
 						Global.error("%i\t%i\t%s\n", p, ni.date, s);
 					}
 					//printf("=========================\n");
-				}
+				}*/
 
 				p = y + w.vscroll.pos;
 				if (p > _total_news - 1) break;
