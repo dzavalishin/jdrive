@@ -103,7 +103,7 @@ public abstract class TownGui extends Town
 			int [] numact = {0};
 			int buttons = GetMaskOfTownActions(numact, Global._local_player, t);
 
-			SetVScrollCount(w, numact[0] + 1);
+			MiscGui.SetVScrollCount(w, numact[0] + 1);
 
 			if (w.as_def_d().data_1 != -1 && !BitOps.HASBIT(buttons, w.as_def_d().data_1))
 				w.as_def_d().data_1 = -1;
@@ -111,11 +111,11 @@ public abstract class TownGui extends Town
 			w.disabled_state = (w.as_def_d().data_1 == -1) ? (1 << 6) : 0;
 
 			{
-				int y;
+				//int y;
 				//final Player  p;
-				int r;
 				//StringID 
-				int str;
+				//int r;
+				//int str;
 
 				Global.SetDParam(0, w.window_number.n);
 				w.DrawWindowWidgets();
@@ -123,19 +123,19 @@ public abstract class TownGui extends Town
 				Gfx.DrawString(2, 15, Str.STR_2023_TRANSPORT_COMPANY_RATINGS, 0);
 
 				// Draw list of players
-				y = 25;
+				int y[] = {25};
 				//FOR_ALL_PLAYERS(p)
 				Player.forEach( (p) ->
 				{
 					if (p.is_active && (BitOps.HASBIT(t.have_ratings, p.index.id) || t.exclusivity.id == p.index.id)) {
-						DrawPlayerIcon(p.index, 2, y);
+						GraphGui.DrawPlayerIcon(p.index.id, 2, y[0]);
 
 						Global.SetDParam(0, p.name_1);
 						Global.SetDParam(1, p.name_2);
 						Global.SetDParam(2, Player.GetPlayerNameString(p.index, 3));
 
-						r = t.ratings[p.index.id];
-						str = Str.STR_3035_APPALLING; // Apalling
+						int r = t.ratings[p.index.id];
+						int str = Str.STR_3035_APPALLING; // Apalling
 
 						if( r > RATING_APPALLING) {
 							str++;
@@ -155,10 +155,10 @@ public abstract class TownGui extends Town
 
 						Global.SetDParam(4, str);
 						if (t.exclusivity.id == p.index.id) // red icon for player with exclusive rights
-							Gfx.DrawSprite(Sprite.SPR_BLOT | Sprite.PALETTE_TO_RED, 18, y);
+							Gfx.DrawSprite(Sprite.SPR_BLOT | Sprite.PALETTE_TO_RED, 18, y[0]);
 
-						Gfx.DrawString(28, y, Str.STR_2024, 0);
-						y += 10;
+						Gfx.DrawString(28, y[0], Str.STR_2024, 0);
+						y[0] += 10;
 					}
 				});
 			}
@@ -189,7 +189,7 @@ public abstract class TownGui extends Town
 				if (i != -1) {
 					Global.SetDParam(1, (Global._price.build_industry >> 8) * _town_action_costs[i]);
 					Global.SetDParam(0, Str.STR_2046_SMALL_ADVERTISING_CAMPAIGN + i);
-					Gfx.DrawStringMultiLine(2, 159, Str.STR_204D_INITIATE_A_SMALL_LOCAL + i, 313);
+					Gfx.DrawStringMultiLine(2, 159, new StringID(Str.STR_204D_INITIATE_A_SMALL_LOCAL + i), 313);
 				}
 			}
 
@@ -212,7 +212,7 @@ public abstract class TownGui extends Town
 			}
 
 			case 6: { /* carry out the action */
-				Cmd.DoCommandP(GetTown(w.window_number.n).xy, w.window_number, w.as_def_d().data_1, null, Cmd.CMD_DO_TOWN_ACTION | Cmd.CMD_MSG(Str.STR_00B4_CAN_T_DO_THIS));
+				Cmd.DoCommandP(GetTown(w.window_number.n).xy, w.window_number.n, w.as_def_d().data_1, null, Cmd.CMD_DO_TOWN_ACTION | Cmd.CMD_MSG(Str.STR_00B4_CAN_T_DO_THIS));
 				break;
 			}
 			}
@@ -282,7 +282,7 @@ public abstract class TownGui extends Town
 
 			case 8: /* rename */
 				Global.SetDParam(0, w.window_number.n);
-				MiscGui.ShowQueryString(Str.STR_TOWN, Str.STR_2007_RENAME_TOWN, 31, 130, w.window_class, w.window_number);
+				MiscGui.ShowQueryString(Str.STR_TOWN, Str.STR_2007_RENAME_TOWN, 31, 130, w.window_class.v, w.window_number.n);
 				break;
 
 			case 9: /* expand town */
@@ -420,7 +420,7 @@ public abstract class TownGui extends Town
 	static void MakeSortedTownList()
 	{
 		//final Town t;
-		int n = 0;
+		int [] n = {0};
 
 		/* Create array for sorting */
 		//_town_sort = realloc(_town_sort, GetTownPoolSize() * sizeof(_town_sort[0]));
@@ -431,10 +431,10 @@ public abstract class TownGui extends Town
 		//FOR_ALL_TOWNS(t)
 		Town.forEach( (t) ->
 		{
-			if (t.xy != null) _town_sort[n++] = t.index;
+			if (t.xy != null) _town_sort[n[0]++] = t.index;
 		});
 
-		_num_town_sort = n;
+		_num_town_sort = n[0];
 
 		//_last_town_idx = 0; // used for "cache"
 		//qsort(_town_sort, n, sizeof(_town_sort[0]), _town_sort_order & 2 ? TownPopSorter : TownNameSorter);
@@ -454,13 +454,13 @@ public abstract class TownGui extends Town
 				MakeSortedTownList();
 			}
 
-			SetVScrollCount(w, _num_town_sort);
+			MiscGui.SetVScrollCount(w, _num_town_sort);
 
 			w.DrawWindowWidgets();
 			Gfx.DoDrawString((_town_sort_order & 1) != 0 ? Gfx.DOWNARROW : Gfx.UPARROW, (_town_sort_order <= 1) ? 88 : 187, 15, 0x10);
 
 			{
-				final Town t;
+				Town t;
 				int n = 0;
 				int i = w.vscroll.pos;
 				int y = 28;

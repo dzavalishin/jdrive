@@ -43,7 +43,7 @@ public class TextEffect
 	static void AddTextMessage(int color, int duration, final String message, Object ... args)
 	{
 		String buf;
-		int length;
+		//int length;
 		int i;
 
 		buf = String.format(message, args);
@@ -53,7 +53,7 @@ public class TextEffect
 		if ((color & 0xFF) == 0xC9) color = 0x1CA;
 
 		/* Cut the message till it fits inside the chatbox */
-		length = buf.length();
+		//length = buf.length();
 		//while (GetStringWidth(buf) > _textmessage_width - 9) 
 		//	buf[--length] = '\0';
 

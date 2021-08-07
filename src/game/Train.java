@@ -1,6 +1,7 @@
 package game;
 
 import game.tables.TrainTables;
+import game.util.BitOps;
 
 public class Train extends TrainTables 
 {
@@ -16,19 +17,19 @@ public class Train extends TrainTables
 		int weight = 0;
 
 		for (u = v; u != null; u = u.next) {
-			final RailVehicleInfo rvi = RailVehInfo(u.engine_type);
+			final RailVehicleInfo rvi = Engine.RailVehInfo(u.engine_type.id);
 			int vweight = 0;
 
-			vweight += (_cargoc.weights[u.cargo_type] * u.cargo_count) / 16;
+			vweight += (Global._cargoc.weights[u.cargo_type] * u.cargo_count) / 16;
 
 			// Vehicle weight is not added for articulated parts.
-			if (!IsArticulatedPart(u)) {
+			if (!u.IsArticulatedPart()) {
 				// vehicle weight is the sum of the weight of the vehicle and the weight of its cargo
 				vweight += rvi.weight;
 
 				// powered wagons have extra weight added
-				if (BitOps.HASBIT(u.rail.flags, VRF_POWEREDWAGON))
-					vweight += RailVehInfo(v.engine_type).pow_wag_weight;
+				if (BitOps.HASBIT(u.rail.flags, Vehicle.VRF_POWEREDWAGON))
+					vweight += Engine.RailVehInfo(v.engine_type.id).pow_wag_weight;
 			}
 
 			// consist weight is the sum of the weight of all vehicles in the consist
