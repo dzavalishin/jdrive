@@ -124,7 +124,7 @@ public class AirCraft {
 
 		Gfx.DrawSprite(sprite | image_ormod, x, y);
 
-		if ((Engine.AircraftVehInfo(engine.id).subtype & 1) == 0) {
+		if ((Engine.AircraftVehInfo(engine).subtype & 1) == 0) {
 			Gfx.DrawSprite(Sprite.SPR_ROTOR_STOPPED, x, y - 5);
 		}
 	}
@@ -2435,7 +2435,7 @@ public class AirCraft {
 						if (sel==0) selected_id = engine_id;
 						if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.cap, 0)) {
 							Gfx.DrawString(x+62, y+7, Engine.GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
-							DrawAircraftEngine(x+29, y+10, EngineID.get(engine_id), Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+							DrawAircraftEngine(x+29, y+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 							y += 24;
 						}
 						sel--;

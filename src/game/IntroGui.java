@@ -63,9 +63,9 @@ public class IntroGui
 		case WE_CLICK:
 			switch (e.widget) {
 			case 2: MiscGui.AskForNewGameToStart(); break;
-			case 3: ShowSaveLoadDialog(SLD_LOAD_GAME); break;
+			// TODO case 3: ShowSaveLoadDialog(SLD_LOAD_GAME); break;
 			case 4: /* TODO CreateScenario(); */ break;
-			case 5: ShowSaveLoadDialog(SLD_LOAD_SCENARIO); break;
+			// TODO case 5: ShowSaveLoadDialog(SLD_LOAD_SCENARIO); break;
 			case 6: case 7: case 8: case 9:
 				SetNewLandscapeType(e.widget - 6);
 				break;
