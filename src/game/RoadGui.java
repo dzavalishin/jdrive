@@ -328,7 +328,7 @@ public class RoadGui
 		RoadGui::BuildRoadToolbWndProc
 	);
 
-	void ShowBuildRoadScenToolbar()
+	static void ShowBuildRoadScenToolbar()
 	{
 		Window.AllocateWindowDescFront(_build_road_scen_desc, 0);
 	}

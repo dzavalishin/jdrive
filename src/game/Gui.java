@@ -42,7 +42,7 @@ public class Gui
 
 	static void SetupColorsAndInitialWindow()
 	{
-		int i;
+		//int i;
 		Window w;
 		int width,height;
 
@@ -81,7 +81,7 @@ public class Gui
 			w.disabled_state = 1 << 9;
 			w.flags4 = BitOps.RETCLRBITS(w.flags4, Window.WF_WHITE_BORDER_MASK);
 
-			w.PositionMainToolbar(w); // already WC_MAIN_TOOLBAR passed (&_toolb_scen_desc)
+			Window.PositionMainToolbar(w); // already WC_MAIN_TOOLBAR passed (&_toolb_scen_desc)
 			break;
 
 		default:
@@ -387,7 +387,7 @@ public class Gui
 
 	static void MenuClickBuildRail(int index)
 	{
-		_last_built_railtype = RailType.values[index];
+		_last_built_railtype = index; //RailType.values[index];
 		Rail.ShowBuildRailToolbar(_last_built_railtype, -1);
 	}
 
@@ -398,7 +398,7 @@ public class Gui
 
 	static void MenuClickBuildWater(int index)
 	{
-		ShowBuildDocksToolbar();
+		DockGui.ShowBuildDocksToolbar();
 	}
 
 	static void MenuClickBuildAir(int index)
@@ -442,7 +442,7 @@ public class Gui
 	{
 		_rename_id = ss.index;
 		_rename_what = 0;
-		MiscGui.ShowQueryString(ss.str, new StringID( Str.STR_280B_EDIT_SIGN_TEXT ), 30, 180, 1, 0);
+		MiscGui.ShowQueryString(ss.str, new StringID( Str.STR_280B_EDIT_SIGN_TEXT ), 30, 180, new WindowClass(1) , new WindowNumber(0) );
 	}
 
 	static void ShowRenameWaypointWindow(final WayPoint wp)
@@ -459,7 +459,7 @@ public class Gui
 		_rename_id = id;
 		_rename_what = 1;
 		Global.SetDParam(0, id);
-		MiscGui.ShowQueryString(Str.STR_WAYPOINT_RAW, Str.STR_EDIT_WAYPOINT_NAME, 30, 180, 1, 0);
+		MiscGui.ShowQueryString(new StringID( Str.STR_WAYPOINT_RAW), new StringID( Str.STR_EDIT_WAYPOINT_NAME), 30, 180, 1, 0);
 	}
 
 	static void SelectSignTool()
@@ -498,10 +498,10 @@ public class Gui
 	static void MenuClickHelp(int index)
 	{
 		switch (index) {
-			case 0: PlaceLandBlockInfo(); break;
+			case 0: MiscGui.PlaceLandBlockInfo(); break;
 			case 2: Console.IConsoleSwitch();     break;
-			case 3: _make_screenshot = 1; break;
-			case 4: _make_screenshot = 2; break;
+			case 3: Global._make_screenshot = 1; break;
+			case 4: Global._make_screenshot = 2; break;
 			case 5: MiscGui.ShowAboutWindow();    break;
 		}
 	}
@@ -546,7 +546,8 @@ public class Gui
 			int count,sel;
 			int x,y;
 			int chk;
-			StringID string;
+			//StringID 
+			int string;
 			int eo;
 			int inc;
 			byte color;
@@ -556,7 +557,7 @@ public class Gui
 			count = w.as_menu_d().item_count;
 			sel = w.as_menu_d().sel_index;
 			chk = w.as_menu_d().checked_items;
-			string = w.as_menu_d().string_id;
+			string = w.as_menu_d().string_id.id;
 
 			x = 1;
 			y = 1;
@@ -568,8 +569,8 @@ public class Gui
 			do {
 				if (sel== 0) Gfx.GfxFillRect(x, y, x + eo, y+9, 0);
 				color = (byte) ((sel == 0) ? 0xC : 0x10);
-				if (BitOps.HASBIT(w.as_menu_d().disabled_items, (string.id - w.as_menu_d().string_id.id))) color = 0xE;
-				Gfx.DrawString(x + 2, y, string.id + (chk & 1), color);
+				if (BitOps.HASBIT(w.as_menu_d().disabled_items, (string - w.as_menu_d().string_id.id))) color = 0xE;
+				Gfx.DrawString(x + 2, y, string + (chk & 1), color);
 				y += 10;
 				string += inc;
 				chk >>= 1;
@@ -707,7 +708,7 @@ public class Gui
 						Gfx.GfxFillRect(x, y, x + 238, y + 9, 0);
 					}
 
-					GraphGui.DrawPlayerIcon(p.index, x + 2, y + 1);
+					GraphGui.DrawPlayerIcon(p.index.id, x + 2, y + 1);
 
 					Global.SetDParam(0, p.name_1);
 					Global.SetDParam(1, p.name_2);
@@ -733,7 +734,7 @@ public class Gui
 			}
 
 		case WE_POPUPMENU_SELECT: {
-			int index = w.GetMenuItemIndex(w, e.pt.x, e.pt.y);
+			int index = Window.GetMenuItemIndex(w, e.pt.x, e.pt.y);
 			int action_id = w.as_menu_d().action_id;
 
 			// We have a new entry at the top of the list of menu 9 when networking
@@ -802,7 +803,7 @@ public class Gui
 		w.as_menu_d().checked_items = 0;
 		w.as_menu_d().disabled_items = disabled_mask;
 
-		Global._popup_menu_active = true;
+		Window._popup_menu_active = true;
 
 		// TODO SndPlayFx(SND_15_BEEP);
 
@@ -833,7 +834,7 @@ public class Gui
 		w.as_menu_d().main_button = main_button;
 		w.as_menu_d().checked_items = gray;
 		w.as_menu_d().disabled_items = 0;
-		Global._popup_menu_active = true;
+		Window._popup_menu_active = true;
 		//SndPlayFx(SND_15_BEEP);
 		return w;
 	}
@@ -1269,7 +1270,7 @@ public class Gui
 				//BEGIN_TILE_LOOP(tile2, sizex, sizey, tile) 
 				TileIndex.forAll( sizex, sizey, tile, (tile2) ->
 				{
-					h[0] = Math.min(h, tile2.TileHeight());
+					h[0] = Math.min(h[0], tile2.TileHeight());
 					return false;
 				});// END_TILE_LOOP(tile2, sizex, sizey, tile)
 			} else {
@@ -1278,7 +1279,7 @@ public class Gui
 				//BEGIN_TILE_LOOP(tile2, sizex, sizey, tile) 
 				TileIndex.forAll( sizex, sizey, tile, (tile2) ->
 				{
-					h[0] = Math.max(h, tile2.TileHeight());
+					h[0] = Math.max(h[0], tile2.TileHeight());
 					return false;
 				}); //END_TILE_LOOP(tile2, sizex, sizey, tile)
 			}
@@ -1914,7 +1915,7 @@ public class Gui
 	{
 		w.HandleButtonClick(14);
 		//SndPlayFx(SND_15_BEEP);
-		ShowBuildRoadScenToolbar();
+		RoadGui.ShowBuildRoadScenToolbar();
 	}
 
 	static void ToolbarScenPlantTrees(Window w)
@@ -1994,40 +1995,41 @@ public class Gui
 		} break;
 
 		case WE_KEYPRESS: {
-			PlayerID local = (Global._local_player.id != Owner.OWNER_SPECTATOR) ? Global._local_player : 0;
+			//PlayerID 
+			int local = (Global._local_player.id != Owner.OWNER_SPECTATOR) ? Global._local_player.id : 0;
 
 			switch (e.keycode) {
 			case Window.WKC_F1: case Window.WKC_PAUSE:
 				ToolbarPauseClick(w);
 				break;
-			case Window.WKC_F2: ShowGameOptions(); break;
+			case Window.WKC_F2: SettingsGui.ShowGameOptions(); break;
 			case Window.WKC_F3: MenuClickSaveLoad(0); break;
-			case Window.WKC_F4: ShowSmallMap(); break;
-			case Window.WKC_F5: ShowTownDirectory(); break;
-			case Window.WKC_F6: ShowSubsidiesList(); break;
-			case Window.WKC_F7: ShowPlayerStations(local); break;
-			case Window.WKC_F8: ShowPlayerFinances(local); break;
-			case Window.WKC_F9: ShowPlayerCompany(local); break;
-			case Window.WKC_F10:ShowOperatingProfitGraph(); break;
-			case Window.WKC_F11: ShowCompanyLeagueTable(); break;
-			case Window.WKC_F12: ShowBuildIndustryWindow(); break;
-			case Window.WKC_SHIFT | Window.WKC_F1: ShowPlayerTrains(local, Station.INVALID_STATION); break;
-			case Window.WKC_SHIFT | Window.WKC_F2: ShowPlayerRoadVehicles(local, Station.INVALID_STATION); break;
-			case Window.WKC_SHIFT | Window.WKC_F3: ShowPlayerShips(local, Station.INVALID_STATION); break;
-			case Window.WKC_SHIFT | Window.WKC_F4: ShowPlayerAircraft(local, Station.INVALID_STATION); break;
+			case Window.WKC_F4: SmallMapGui.ShowSmallMap(); break;
+			case Window.WKC_F5: TownGui.ShowTownDirectory(); break;
+			case Window.WKC_F6: Subsidies.ShowSubsidiesList(); break;
+			case Window.WKC_F7: StationGui.ShowPlayerStations(local); break;
+			case Window.WKC_F8: PlayerGui.ShowPlayerFinances(local); break;
+			case Window.WKC_F9: PlayerGui.ShowPlayerCompany(local); break;
+			case Window.WKC_F10:GraphGui.ShowOperatingProfitGraph(); break;
+			case Window.WKC_F11: GraphGui.ShowCompanyLeagueTable(); break;
+			case Window.WKC_F12: Industry.ShowBuildIndustryWindow(); break;
+			case Window.WKC_SHIFT | Window.WKC_F1: TrainGui.ShowPlayerTrains(local, Station.INVALID_STATION); break;
+			case Window.WKC_SHIFT | Window.WKC_F2: RoadVehGui.ShowPlayerRoadVehicles(local, Station.INVALID_STATION); break;
+			case Window.WKC_SHIFT | Window.WKC_F3: ShipGui.ShowPlayerShips(local, Station.INVALID_STATION); break;
+			case Window.WKC_SHIFT | Window.WKC_F4: AirCraft.ShowPlayerAircraft(local, Station.INVALID_STATION); break;
 			case Window.WKC_SHIFT | Window.WKC_F5: ToolbarZoomInClick(w); break;
 			case Window.WKC_SHIFT | Window.WKC_F6: ToolbarZoomOutClick(w); break;
-			case Window.WKC_SHIFT | Window.WKC_F7: ShowBuildRailToolbar(_last_built_railtype,-1); break;
-			case Window.WKC_SHIFT | Window.WKC_F8: ShowBuildRoadToolbar(); break;
-			case Window.WKC_SHIFT | Window.WKC_F9: ShowBuildDocksToolbar(); break;
-			case Window.WKC_SHIFT | Window.WKC_F10:ShowBuildAirToolbar(); break;
-			case Window.WKC_SHIFT | Window.WKC_F11: ShowBuildTreesToolbar(); break;
-			case Window.WKC_SHIFT | Window.WKC_F12: ShowMusicWindow(); break;
-			case Window.WKC_CTRL  | 'S': _make_screenshot = 1; break;
-			case Window.WKC_CTRL  | 'G': _make_screenshot = 2; break;
-			case Window.WKC_CTRL | Window.WKC_ALT | 'C': if (!_networking) ShowCheatWindow(); break;
-			case 'A': ShowBuildRailToolbar(_last_built_railtype, 4); break; /* Invoke Autorail */
-			case 'L': ShowTerraformToolbar(); break;
+			case Window.WKC_SHIFT | Window.WKC_F7: Rail.ShowBuildRailToolbar(_last_built_railtype,-1); break;
+			case Window.WKC_SHIFT | Window.WKC_F8: RoadGui.ShowBuildRoadToolbar(); break;
+			case Window.WKC_SHIFT | Window.WKC_F9: DockGui.ShowBuildDocksToolbar(); break;
+			case Window.WKC_SHIFT | Window.WKC_F10:AirportGui.ShowBuildAirToolbar(); break;
+			case Window.WKC_SHIFT | Window.WKC_F11: MiscGui.ShowBuildTreesToolbar(); break;
+			// TODO case Window.WKC_SHIFT | Window.WKC_F12: ShowMusicWindow(); break;
+			case Window.WKC_CTRL  | 'S': Global._make_screenshot = 1; break;
+			case Window.WKC_CTRL  | 'G': Global._make_screenshot = 2; break;
+			// TODO case Window.WKC_CTRL | Window.WKC_ALT | 'C': if (!_networking) ShowCheatWindow(); break;
+			case 'A': Rail.ShowBuildRailToolbar(_last_built_railtype, 4); break; /* Invoke Autorail */
+			case 'L': Terraform.ShowTerraformToolbar(); break;
 			default: return;
 			}
 			e.cont = false;
@@ -2045,12 +2047,12 @@ public class Gui
 		case WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
 
 		case WE_MOUSELOOP:
-			if (((w.click_state) & 1) != (int)!!Global._pause) {
+			if (  (((w.click_state) & 1) != 0) != Global._pause) {
 				w.click_state ^= (1 << 0);
 				w.SetWindowDirty();
 			}
 
-			if (((w.click_state >> 1) & 1) != (int)!!Global._fast_forward) {
+			if ( (((w.click_state >> 1) & 1) != 0) != Global._fast_forward) {
 				w.click_state ^= (1 << 1);
 				w.SetWindowDirty();
 			}
@@ -2214,7 +2216,7 @@ public class Gui
 		case WE_KEYPRESS:
 			switch (e.keycode) {
 			case Window.WKC_F1: ToolbarPauseClick(w); break;
-			case Window.WKC_F2: ShowGameOptions(); break;
+			case Window.WKC_F2: SettingsGui.ShowGameOptions(); break;
 			case Window.WKC_F3: MenuClickSaveLoad(0); break;
 			case Window.WKC_F4: ToolbarScenGenLand(w); break;
 			case Window.WKC_F5: ToolbarScenGenTown(w); break;
@@ -2222,10 +2224,10 @@ public class Gui
 			case Window.WKC_F7: ToolbarScenBuildRoad(w); break;
 			case Window.WKC_F8: ToolbarScenPlantTrees(w); break;
 			case Window.WKC_F9: ToolbarScenPlaceSign(w); break;
-			case Window.WKC_F10: ShowMusicWindow(); break;
-			case Window.WKC_F11: PlaceLandBlockInfo(); break;
-			case Window.WKC_CTRL | 'S': _make_screenshot = 1; break;
-			case Window.WKC_CTRL | 'G': _make_screenshot = 2; break;
+			// TODO case Window.WKC_F10: ShowMusicWindow(); break;
+			case Window.WKC_F11: MiscGui.PlaceLandBlockInfo(); break;
+			case Window.WKC_CTRL | 'S': Global._make_screenshot = 1; break;
+			case Window.WKC_CTRL | 'G': Global._make_screenshot = 2; break;
 			case 'L': ShowEditorTerraformToolBar(); break;
 			}
 			break;
@@ -2242,12 +2244,12 @@ public class Gui
 		case WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
 
 		case WE_MOUSELOOP:
-			if (((w.click_state) & 1) != (int)!!_pause) {
+			if ( (((w.click_state) & 1) != 0) != Global._pause) {
 				w.click_state ^= (1 << 0);
 				w.SetWindowDirty();
 			}
 
-			if (((w.click_state >> 1) & 1) != (int)!!_fast_forward) {
+			if( (((w.click_state >> 1) & 1) != 0) != Global._fast_forward) {
 				w.click_state ^= (1 << 1);
 				w.SetWindowDirty();
 			}
@@ -2270,45 +2272,48 @@ public class Gui
 	static boolean DrawScrollingStatusText(final NewsItem ni, int pos)
 	{
 		//char buf[512];
-		String buf;
 		StringID str;
 		//final char *s;
 		//char *d;
-		DrawPixelInfo tmp_dpi, old_dpi;
+		DrawPixelInfo tmp_dpi = new DrawPixelInfo();
+		DrawPixelInfo old_dpi;
 		int x;
-		char buffer[256];
+		//char buffer[256];
 
 		if (ni.display_mode == 3) {
-			str = _get_news_string_callback[ni.callback](ni);
+			str = new StringID( NewsItem._get_news_string_callback[ni.callback].apply(ni) );
 		} else {
 			Global.COPY_IN_DPARAM(0, ni.params, ni.params.length);
 			str = ni.string_id;
 		}
 
-		buf = Global.GetString(str);
+		String buf = Global.GetString(str);
 
-		s = buf;
-		d = buffer;
+		char [] s = buf.toCharArray();
+		char [] d = new char[256];
 
-		for (;; s++) {
-			if (*s == '\0') {
-				*d = '\0';
+		int sp = 0;
+		int dp = 0;
+		
+		for (;; sp++) {
+			if (s[sp] == '\0') {
+				d[dp] = '\0';
 				break;
-			} else if (*s == 0x0D) {
-				d[0] = d[1] = d[2] = d[3] = ' ';
-				d += 4;
-			} else if ((byte)*s >= ' ' && ((byte)*s < 0x88 || (byte)*s >= 0x99)) {
-				*d++ = *s;
+			} else if (s[sp] == 0x0D) {
+				d[dp+0] = d[dp+1] = d[dp+2] = d[dp+3] = ' ';
+				dp += 4;
+			} else if ((byte)s[sp] >= ' ' && ((byte)s[sp] < 0x88 || (byte)s[sp] >= 0x99)) {
+				d[dp++] = s[sp];
 			}
 		}
 
-		if (!FillDrawPixelInfo(&tmp_dpi, null, 141, 1, 358, 11)) return true;
+		if (!Gfx.FillDrawPixelInfo(tmp_dpi, null, 141, 1, 358, 11)) return true;
 
-		old_dpi = _cur_dpi;
-		_cur_dpi = &tmp_dpi;
+		old_dpi = Hal._cur_dpi;
+		Hal._cur_dpi = tmp_dpi;
 
-		x = DoDrawString(buffer, pos, 0, 13);
-		_cur_dpi = old_dpi;
+		x = Gfx.DoDrawString( new String( d ), pos, 0, 13);
+		Hal._cur_dpi = old_dpi;
 
 		return x > 0;
 	}
@@ -2362,7 +2367,7 @@ public class Gui
 		case WE_CLICK:
 			switch (e.widget) {
 				case 1: NewsItem.ShowLastNewsMessage(); break;
-				case 2: if (Global._local_player.id != Owner.OWNER_SPECTATOR) PlayerGui.ShowPlayerFinances(Global._local_player); break;
+				case 2: if (Global._local_player.id != Owner.OWNER_SPECTATOR) PlayerGui.ShowPlayerFinances(Global._local_player.id); break;
 				default: ViewPort.ResetObjectToPlace();
 			}
 			break;

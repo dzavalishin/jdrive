@@ -199,7 +199,7 @@ public class DockGui
 		DockGui::BuildDocksToolbWndProc
 	);
 
-	void ShowBuildDocksToolbar()
+	static void ShowBuildDocksToolbar()
 	{
 		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
 		Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);

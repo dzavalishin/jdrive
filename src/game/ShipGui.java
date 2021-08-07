@@ -1177,15 +1177,19 @@ public class ShipGui
 					ShipGui::PlayerShipsWndProc
 			);
 
-
 			static void ShowPlayerShips(PlayerID player, StationID station)
+			{
+				ShowPlayerShips( player.id, station.id);
+			}
+
+			static void ShowPlayerShips(int player, int station)
 			{
 				Window w;
 
-				if (player == Global._local_player) {
-					w = Window.AllocateWindowDescFront(_player_ships_desc, (station.id << 16) | player.id);
+				if (player == Global._local_player.id) {
+					w = Window.AllocateWindowDescFront(_player_ships_desc, (station<< 16) | player);
 				} else  {
-					w = Window.AllocateWindowDescFront(_other_player_ships_desc, (station.id << 16) | player.id);
+					w = Window.AllocateWindowDescFront(_other_player_ships_desc, (station<< 16) | player);
 				}
 				if (w != null) {
 					w.caption_color = (byte) w.window_number.n;

@@ -2157,7 +2157,7 @@ public class Gfx extends PaletteTabs
 		SetDirtyBlocks(0, 0, Hal._screen.width, Hal._screen.height);
 	}
 
-	boolean FillDrawPixelInfo(DrawPixelInfo  n, DrawPixelInfo  o, int left, int top, int width, int height)
+	static boolean FillDrawPixelInfo(DrawPixelInfo  n, DrawPixelInfo  o, int left, int top, int width, int height)
 	{
 		int t;
 

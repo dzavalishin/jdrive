@@ -162,7 +162,7 @@ public class MiscGui {
 		//#endif
 	}
 
-	void PlaceLandBlockInfo()
+	static void PlaceLandBlockInfo()
 	{
 		if (Hal._cursor.sprite.id == Sprite.SPR_CURSOR_QUERY) {
 			ViewPort.ResetObjectToPlace();
@@ -1090,6 +1090,11 @@ public class MiscGui {
 	//static char _orig_str_buf[lengthof(_edit_str_buf)];
 	private static String _orig_str_buf;
 
+	static void ShowQueryString(StringID str, StringID caption, int maxlen, int maxwidth, int window_class, int window_number)
+	{
+		ShowQueryString( str, caption, maxlen, maxwidth, new WindowClass( window_class ), new WindowNumber(window_number) );
+	}	
+
 	static void ShowQueryString(StringID str, StringID caption, int maxlen, int maxwidth, WindowClass window_class, WindowNumber window_number)
 	{
 		Window w;
@@ -1207,7 +1212,7 @@ public class MiscGui {
 			_fios_list = FiosGetSavegameList(_fios_num, Global._saveload_mode);
 			break;
 		}
-		*/
+		 */
 	}
 	/*
 	static void DrawFiosTexts(int maxw)
@@ -1250,7 +1255,7 @@ public class MiscGui {
 		s_amount = _fios_num - sort_start - sort_end;
 		if (s_amount > 0)
 			qsort(_fios_list + sort_start, s_amount, sizeof(FiosItem), compare_FiosItems);
-		*/
+		 */
 	}
 
 	static void GenerateFileName()
