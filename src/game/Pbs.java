@@ -296,7 +296,7 @@ public class Pbs {
 					BitOps.GB(tile.getMap().m5, 4, 4) == 0 &&
 					BitOps.GB(tile.getMap().m5, 0, 2) == Rail.TrackdirToExitdir(trackdir)) {
 				// this is a tunnel
-				flotr = FindLengthOfTunnel(tile, Rail.TrackdirToExitdir(trackdir));
+				flotr = Pathfind.FindLengthOfTunnel(tile, Rail.TrackdirToExitdir(trackdir));
 
 				tile = flotr.tile;
 			} else {
@@ -335,7 +335,7 @@ public class Pbs {
 			return false;
 	}
 
-	class SetSignalsDataPbs {
+	static class SetSignalsDataPbs {
 		int cur;
 
 		// these are used to keep track of the signals.
@@ -349,7 +349,7 @@ public class Pbs {
 	{
 		SetSignalsDataPbs ssd = (SetSignalsDataPbs) o;
 		//TileIndex tile = new TileIndex(itile);
-		int itile = tile.tile;
+		//int itile = tile.tile;
 		// the tile has signals?
 		if (tile.IsTileType( TileTypes.MP_RAILWAY)) 
 		{

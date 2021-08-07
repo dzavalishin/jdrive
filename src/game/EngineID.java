@@ -5,13 +5,14 @@ import java.util.Map;
 
 public class EngineID extends AbstractID {
 
-	public EngineID(int i) {
-		id = i;
+	private EngineID(int i) {
+		super(i);
 	}
 
+	/*
 	public EngineID() {
 		id = -1;
-	}
+	}*/
 
 	private static Map<Integer,EngineID> ids = new HashMap<Integer,EngineID>();
 	public static EngineID get(int player) 

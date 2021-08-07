@@ -7,7 +7,8 @@ package game;
  **/
 public class SaveLoad {
 		byte cmd;             /// the action to take with the saved/loaded type, All types need different action
-		VarType type;         /// type of the variable to be saved, int
+		//VarType type;         /// type of the variable to be saved, int
+		int type;         /// type of the variable to be saved, int
 		int offset;        /// offset of this variable in the struct (max offset is 65536)
 		int length;        /// (conditional) length of the variable (eg. arrays) (max array size is 65536 elements)
 		int version_from;  /// save/load the variable starting from this savegame version

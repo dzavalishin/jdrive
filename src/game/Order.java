@@ -325,7 +325,7 @@ public class Order implements IPoolItem {
 					if (!st.IsValidStation() ||
 							(st.airport_type != AirportFTAClass.AT_OILRIG && !Player.CheckOwnership(st.owner)) ||
 							0 == (st.facilities & Station.FACIL_AIRPORT) ||
-							Airport.GetAirport(st.airport_type).nof_depots == 0) {
+							AirportFTAClass.GetAirport(st.airport_type).nof_depots() == 0) {
 						return Cmd.CMD_ERROR;
 					}
 				} else {

@@ -90,6 +90,7 @@ public class Global {
 	public static final int SLD_SAVE_SCENARIO = 3;
 	public static final int SLD_NEW_GAME = 4;
 	
+	public static final int GAME_DIFFICULTY_NUM = 18;
 	
 	static public Hal hal = new JavaHal();
 	static public Patches _patches = new Patches();
@@ -252,7 +253,7 @@ public class Global {
 	public static String _config_file;
 	public static boolean _dedicated_forks;
 	public static SwitchModes _switch_mode;
-	public static boolean _pause = false;
+	public static int _pause = 0; // [dz] must be it - stacked pause 
 	public static byte _display_opt;
 	public static boolean _do_autosave;
 	public static boolean _use_dos_palette = false;

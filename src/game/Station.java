@@ -1242,7 +1242,8 @@ public class Station implements IPoolItem
 
 			tile_delta = direction != 0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 
-			statspec = (p2 & 0x10) != 0 ? GetCustomStation(Station.STAT_CLASS_DFLT, p2 >> 8) : null;
+			// TODO statspec = (p2 & 0x10) != 0 ? GetCustomStation(Station.STAT_CLASS_DFLT, p2 >> 8) : null;
+			statspec = null;
 			byte [] layout_ptr = new byte[numtracks * plat_len];
 			GetStationLayout(layout_ptr, numtracks, plat_len, statspec);
 
@@ -1669,7 +1670,7 @@ public class Station implements IPoolItem
 			if (!CheckStationSpreadOut(st, tile, 1, 1))
 				return Cmd.CMD_ERROR;
 
-			FindRoadStationSpot(type, st, currstop, prev);
+			Station.FindRoadStationSpot(type, st, currstop, prev);
 		} else {
 			Town t;
 
@@ -1678,7 +1679,7 @@ public class Station implements IPoolItem
 
 			st.town = t = Town.ClosestTownFromTile(tile, (int)-1);
 
-			FindRoadStationSpot(type, st, currstop, prev);
+			Station.FindRoadStationSpot(type, st, currstop, prev);
 
 			if (Global._current_player.id < Global.MAX_PLAYERS && 0 != (flags&Cmd.DC_EXEC))
 				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global._current_player.id);

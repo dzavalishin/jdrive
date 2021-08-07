@@ -188,9 +188,9 @@ public class MiscCmd {
 	 */
 	static int CmdPause(int x, int y, int flags, int p1, int p2)
 	{
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC) ) {
 			Global._pause += (p1 == 1) ? 1 : -1;
-			if (Global._pause == (byte)-1) _pause = 0;
+			if (Global._pause == (byte)-1) Global._pause = 0;
 			Window.InvalidateWindow(Window.WC_STATUS_BAR, 0);
 			Window.InvalidateWindow(Window.WC_MAIN_TOOLBAR, 0);
 		}
@@ -235,7 +235,7 @@ public class MiscCmd {
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			/* Add money to player */
 			PlayerID old_cp = Global._current_player;
-			Global._current_player = p2;
+			Global._current_player = PlayerID.get( p2 );
 			Player.SubtractMoneyFromPlayer(-amount);
 			Global._current_player = old_cp;
 		}
@@ -255,7 +255,7 @@ public class MiscCmd {
 	 */
 	static int CmdChangeDifficultyLevel(int x, int y, int flags, int p1, int p2)
 	{
-		if (p1 != (int)-1L && ((int)p1 >= GAME_DIFFICULTY_NUM || (int)p1 < 0)) return Cmd.CMD_ERROR;
+		if (p1 != (int)-1L && ((int)p1 >= Global.GAME_DIFFICULTY_NUM || (int)p1 < 0)) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			if (p1 != (int)-1L) {
@@ -268,7 +268,7 @@ public class MiscCmd {
 			 * Use this instead of just dirtying the window because we need to load in
 			 * the new difficulty settings */
 			if (Global._networking && !Global._network_server && Window.FindWindowById(Window.WC_GAME_OPTIONS, 0) != null)
-				ShowGameDifficulty();
+				SettingsGui.ShowGameDifficulty();
 		}
 		return 0;
 	}

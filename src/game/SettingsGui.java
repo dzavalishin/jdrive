@@ -316,7 +316,7 @@ public class SettingsGui extends SettingsTables
 
 		gm_opt.diff_level = mode;
 		if (mode != 3) { // not custom
-			for (i = 0; i != GAME_DIFFICULTY_NUM; i++)
+			for (i = 0; i != Global.GAME_DIFFICULTY_NUM; i++)
 				((int*)&gm_opt.diff)[i] = _default_game_diff[mode][i];
 		}
 		*/
