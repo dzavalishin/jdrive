@@ -163,7 +163,7 @@ public class SignStruct implements IPoolItem
 	 */
 	static SignStruct AllocateSign()
 	{
-		SignStruct ret = null;
+		SignStruct [] ret = {null};
  
 		_sign_pool.forEach( (i,ss) ->
 		{
@@ -174,11 +174,11 @@ public class SignStruct implements IPoolItem
 				ss.clear();
 				ss.index = index;
 
-				ret = ss;
+				ret[0] = ss;
 			}
 		});
 
-		if( ret != null ) return ret;
+		if( ret[0] != null ) return ret[0];
 		
 		/* Check if we can add a block to the pool */
 		if(_sign_pool.AddBlockToPool())
@@ -201,18 +201,18 @@ public class SignStruct implements IPoolItem
 
 		/* Try to locate a new sign */
 		ss = AllocateSign();
-		if (ss == null) return_cmd_error(Str.STR_2808_TOO_MANY_SIGNS);
+		if (ss == null) return Cmd.return_cmd_error(Str.STR_2808_TOO_MANY_SIGNS);
 
 		/* When we execute, really make the sign */
-		if (flags & Cmd.DC_EXEC) {
-			ss.str = Str.STR_280A_SIGN;
+		if(0 != (flags & Cmd.DC_EXEC) ) {
+			ss.str = new StringID(Str.STR_280A_SIGN);
 			ss.x = x;
 			ss.y = y;
 			ss.owner = Global._current_player; // owner of the sign; just eyecandy
 			ss.z = (byte) Landscape.GetSlopeZ(x,y);
 			ss.UpdateSignVirtCoords();
 			ss.MarkSignDirty();
-			InvalidateWindow(WC_SIGN_LIST, 0);
+			Window.InvalidateWindow(Window.WC_SIGN_LIST, 0);
 			_sign_sort_dirty = true;
 			_new_sign_struct = ss;
 		}
@@ -233,12 +233,12 @@ public class SignStruct implements IPoolItem
 
 		/* If _cmd_text 0 means the new text for the sign is non-empty.
 		 * So rename the sign. If it is empty, it has no name, so delete it */
-		if (_cmd_text != null) {
+		if (Global._cmd_text != null) {
 			/* Create the name */
-			StringID str = Global.AllocateName(_cmd_text, 0);
+			StringID str = Global.AllocateName(Global._cmd_text, 0);
 			if (str == null) return Cmd.CMD_ERROR;
 
-			if (flags & Cmd.DC_EXEC) {
+			if(0 != (flags & Cmd.DC_EXEC) ) {
 				SignStruct ss = GetSign(p1);
 
 				/* Delete the old name */
@@ -283,8 +283,8 @@ public class SignStruct implements IPoolItem
 	static void CcPlaceSign(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
-			ShowRenameSignWindow(_new_sign_struct);
-			ResetObjectToPlace();
+			Gui.ShowRenameSignWindow(_new_sign_struct);
+			ViewPort.ResetObjectToPlace();
 		}
 	}
 
@@ -296,7 +296,7 @@ public class SignStruct implements IPoolItem
 	 */
 	static void PlaceProc_Sign(TileIndex tile)
 	{
-		Cmd.DoCommandP(tile, 0, 0, CcPlaceSign, Cmd.CMD_PLACE_SIGN | CMD_MSG(Str.STR_2809_CAN_T_PLACE_SIGN_HERE));
+		Cmd.DoCommandP(tile, 0, 0, SignStruct::CcPlaceSign, Cmd.CMD_PLACE_SIGN | Cmd.CMD_MSG(Str.STR_2809_CAN_T_PLACE_SIGN_HERE));
 	}
 
 	/**

@@ -58,5 +58,32 @@ public class VehicleRail extends VehicleChild {
 	// used to store if a wagon is powered or not
 	static public final int VRF_POWEREDWAGON = 3;
 
+	@Override
+	void clear() 
+	{
+		last_speed= 		
+		crash_anim_pos = 
+		days_since_order_progr = 
+		cached_max_speed = 
+		cached_power =     
+		cached_veh_length = 
+		cached_total_length = 
+		cached_weight =      
+		cached_veh_weight =  
+		cached_vis_effect = 0;
+
+
+		track =
+		force_proceed =
+		railtype =
+		flags =
+		pbs_status = 0;
+		
+		pbs_end_tile = null;
+		shortest_platform = new int[2];
+		other_multiheaded_part = null;
+		first_engine = null;
+	}
+
 
 }

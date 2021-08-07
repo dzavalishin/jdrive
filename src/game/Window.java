@@ -1932,8 +1932,8 @@ public class Window extends WindowConstants
 						// query button and place sign button work in pause mode
 						Hal._cursor.sprite.id != Sprite.SPR_CURSOR_QUERY &&
 						Hal._cursor.sprite.id != Sprite.SPR_CURSOR_SIGN &&
-						Global._pause &&
-						0 == Global._cheats.build_in_pause.value) {
+						Global._pause != 0 &&
+						!Global._cheats.build_in_pause.value) {
 					return;
 				}
 

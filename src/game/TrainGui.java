@@ -184,7 +184,7 @@ public class TrainGui
 
 			if (BitOps.IS_INT_INSIDE(--pos[0], -show_max, 0)) {
 				Gfx.DrawString(x[0] + 59, y[0] + 2, Engine.GetCustomEngineName(i), sel[0] == 0 ? 0xC : 0x10);
-				TrainCmd.DrawTrainEngine(x[0] + 29, y[0] + 6, EngineID.get(i),
+				TrainCmd.DrawTrainEngine(x[0] + 29, y[0] + 6, i,
 					Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 				y[0] += 14;
 			}

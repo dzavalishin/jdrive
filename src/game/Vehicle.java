@@ -175,7 +175,7 @@ public class Vehicle implements IPoolItem
 		sprite_width = sprite_height = z_height = 0;
 		x_offs=y_offs = 0;
 
-		engine_type = new EngineID(0);
+		engine_type = EngineID.get(0); // TODO correct?
 
 		// for randomized variational spritegroups
 		// bitmask used to resolve them; parts of it get reseeded when triggers
@@ -2121,7 +2121,7 @@ public class Vehicle implements IPoolItem
 				TextEffect.AddAnimatedTile(tile);
 		}
 
-		v.engine_type = new EngineID(et);
+		v.engine_type = EngineID.get(et);
 		b = _bubble_movement[v.spritenum - 1][et];
 
 		v.x_pos += b.x;
