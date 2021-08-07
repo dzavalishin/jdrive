@@ -196,7 +196,9 @@ public class UnmovableCmd extends UnmovableTables {
 			return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_SELL_LAND_AREA);
 
 		// checks if you're allowed to remove unmovable things
-		if (Global._game_mode != GameModes.GM_EDITOR && Global._current_player.id != Owner.OWNER_WATER && ((flags & Cmd.DC_AUTO || !Global._cheats.magic_bulldozer.value)) )
+		if (Global._game_mode != GameModes.GM_EDITOR 
+				&& Global._current_player.id != Owner.OWNER_WATER 
+				&& ((flags & Cmd.DC_AUTO) != 0 || !Global._cheats.magic_bulldozer.value) )
 			return Cmd.return_cmd_error(Str.STR_5800_OBJECT_IN_THE_WAY);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -302,7 +304,7 @@ public class UnmovableCmd extends UnmovableTables {
 	static void ClickTile_Unmovable(TileIndex tile)
 	{
 		if(0 != (tile.getMap().m5 & 0x80)) {
-			PLayerGui.ShowPlayerCompany(tile.GetTileOwner());
+			PlayerGui.ShowPlayerCompany(tile.GetTileOwner().id);
 		}
 	}
 
