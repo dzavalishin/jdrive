@@ -196,14 +196,14 @@ public class Depot implements IPoolItem
 	 */
 	static Depot GetDepotByTile(TileIndex tile)
 	{
-		Depot ret = null;
+		Depot [] ret = {null};
 		_depot_pool.forEach( (i,depot) ->
 		{
 			if (depot.xy == tile)
-				ret = depot;
+				ret[0] = depot;
 		});
 
-		return ret;
+		return ret[0];
 	}
 
 	/**
@@ -212,7 +212,7 @@ public class Depot implements IPoolItem
 	static Depot AllocateDepot()
 	{
 		//Depot *depot;
-		Depot ret = null;
+		Depot [] ret = {null};
 
 		//FOR_ALL_DEPOTS(depot) {
 		_depot_pool.forEach( (i,depot) ->
@@ -223,11 +223,11 @@ public class Depot implements IPoolItem
 				//memset(depot, 0, sizeof(Depot));
 				depot.index = index;
 
-				ret = depot;
+				ret[0] = depot;
 			}
 		});
 
-		if( ret != null) return ret;
+		if( ret[0] != null) return ret[0];
 		
 		/* Check if we can add a block to the pool */
 		if (_depot_pool.AddBlockToPool())
@@ -247,7 +247,7 @@ public class Depot implements IPoolItem
 	 */
 	static void DoDeleteDepot(TileIndex tile)
 	{
-		Order order;
+		Order order = new Order();
 		Depot depot;
 
 		/* Get the depot */
@@ -260,9 +260,9 @@ public class Depot implements IPoolItem
 		depot.xy = null;
 
 		/* Clear the depot from all order-lists */
-		order.type    = OT_GOTO_DEPOT;
+		order.type    = Order.OT_GOTO_DEPOT;
 		order.station = depot.index;
-		DeleteDestinationFromVehicleOrder(order);
+		Order.DeleteDestinationFromVehicleOrder(order);
 
 		/* Delete the depot-window */
 		Window.DeleteWindowById(Window.WC_VEHICLE_DEPOT, tile.tile);
