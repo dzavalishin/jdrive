@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import game.util.AnimCursor;
 import game.util.AutoRail;
 import game.util.BitOps;
+import game.util.Pixel;
 
 /**
  * 
@@ -125,7 +126,7 @@ public class ViewPort
 	static void AssignWindowViewport(Window w, int x, int y,
 			int width, int height, int follow_flags, int zoom)
 	{
-		ViewPort vp;
+		ViewPort vp = null;
 		Point pt;
 		int bit = 1;
 		//for (vp = _viewports, bit = 1; ; vp++, bit <<= 1) 
@@ -314,7 +315,6 @@ public class ViewPort
 	static Point TranslateXYToTileCoord(final ViewPort vp, int x, int y)
 	{
 		int z;
-		Point pt;
 		int a,b;
 
 		if ( (int)(x -= vp.left) >= (int)vp.width ||
@@ -338,8 +338,10 @@ public class ViewPort
 		z = Landscape.GetSlopeZ(a+z, b+z) >> 1;
 		z = Landscape.GetSlopeZ(a+z, b+z) >> 1;
 
-		pt.x = a+z;
-		pt.y = b+z;
+		Point pt = new Point( a+z, b+z );
+
+		//pt.x = a+z;
+		//pt.y = b+z;
 
 		if ((int)pt.x >= Global.MapMaxX() * 16 || (int)pt.y >= Global.MapMaxY() * 16) {
 			pt.x = pt.y = -1;
@@ -355,14 +357,14 @@ public class ViewPort
 	{
 		Window w;
 		ViewPort vp;
-		Point pt;
 
 		if ( (w = Window.FindWindowFromPt(x, y)) != null &&
 				(vp = w.IsPtInWindowViewport(x, y)) != null)
 			return TranslateXYToTileCoord(vp, zoom_x, zoom_y);
 
-		pt.y = pt.x = -1;
-		return pt;
+		//Point pt = ;
+		//pt.y = pt.x = -1;
+		return new Point(-1, -1);
 	}
 
 	static Point GetTileBelowCursor()
@@ -846,8 +848,12 @@ public class ViewPort
 
 		if (dpi.zoom < 1) {
 			//FOR_ALL_TOWNS(t) 
-			Town.forEach( (t) ->
+			//Town.forEach( (t) ->
+			Iterator<Town> ii = Town.getIterator();
+			while(ii.hasNext())
 			{
+				Town t = ii.next();
+				
 				if (t.xy != null &&
 						bottom > t.sign.top &&
 						top < t.sign.top + 12 &&
@@ -858,14 +864,18 @@ public class ViewPort
 							Global._patches.population_in_label ? Str.STR_TOWN_LABEL_POP : Str.STR_TOWN_LABEL,
 									t.index, t.population, 0);
 				}
-			});
+			}
 		} else if (dpi.zoom == 1) {
 			right += 2;
 			bottom += 2;
 
 			//FOR_ALL_TOWNS(t) 
-			Town.forEach( (t) ->
+			//Town.forEach( (t) ->
+			Iterator<Town> ii = Town.getIterator();
+			while(ii.hasNext())
 			{
+				Town t = ii.next();
+				
 				if (t.xy != null &&
 						bottom > t.sign.top &&
 						top < t.sign.top + 24 &&
@@ -876,15 +886,19 @@ public class ViewPort
 							Global._patches.population_in_label ? Str.STR_TOWN_LABEL_POP : Str.STR_TOWN_LABEL,
 									t.index, t.population, 0);
 				}
-			});
+			}
 		} else {
 			right += 4;
 			bottom += 5;
 
 			assert(dpi.zoom == 2);
 			//FOR_ALL_TOWNS(t) 
-			Town.forEach( (t) ->
+			//Town.forEach( (t) ->
+			Iterator<Town> ii = Town.getIterator();
+			while(ii.hasNext())
 			{
+				Town t = ii.next();
+				
 				if (t.xy != null &&
 						bottom > t.sign.top &&
 						top < t.sign.top + 24 &&
@@ -894,7 +908,7 @@ public class ViewPort
 					ViewPort.AddStringToDraw(t.sign.left + 5, t.sign.top + 1, Str.STR_TOWN_LABEL_TINY_BLACK, t.index, 0, 0);
 					ViewPort.AddStringToDraw(t.sign.left + 1, t.sign.top - 3, Str.STR_TOWN_LABEL_TINY_WHITE, t.index, 0, 0);
 				}
-			});
+			}
 		}
 	}
 
@@ -902,7 +916,7 @@ public class ViewPort
 	{
 		int left, top, right, bottom;
 		//Station st;
-		StringSpriteToDraw sstd;
+		//StringSpriteToDraw sstd;
 
 		if (0 == (Global._display_opt & Global.DO_SHOW_STATION_NAMES) || Global._game_mode == GameModes.GM_MENU)
 			return;
@@ -922,7 +936,7 @@ public class ViewPort
 						right > st.sign.left &&
 						left < st.sign.left + st.sign.width_1) {
 
-					sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
+					StringSpriteToDraw sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
 					if (sstd != null) {
 						sstd.color = (st.owner.id == Owner.OWNER_NONE || st.owner.id == Owner.OWNER_TOWN || 0==st.facilities) ? 0xE : Global._player_colors[st.owner.id];
 						sstd.width = st.sign.width_1;
@@ -942,7 +956,7 @@ public class ViewPort
 						right > st.sign.left &&
 						left < st.sign.left + st.sign.width_1*2) {
 
-					sstd=(StringSpriteToDraw) AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
+					StringSpriteToDraw sstd=(StringSpriteToDraw) AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
 					if (sstd != null) {
 						sstd.color = (st.owner.id == Owner.OWNER_NONE || st.owner.id == Owner.OWNER_TOWN || 0==st.facilities) ? 0xE : Global._player_colors[st.owner.id];
 						sstd.width = st.sign.width_1;
@@ -965,7 +979,7 @@ public class ViewPort
 						right > st.sign.left &&
 						left < st.sign.left + st.sign.width_2*4) {
 
-					sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_STATION_SIGN_TINY, st.index, st.facilities, 0);
+					StringSpriteToDraw sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_STATION_SIGN_TINY, st.index, st.facilities, 0);
 					if (sstd != null) {
 						sstd.color = (st.owner.id == Owner.OWNER_NONE || st.owner.id == Owner.OWNER_TOWN || 0 == st.facilities) ? 0xE : Global._player_colors[st.owner.id];
 						sstd.width = st.sign.width_2 | 0x8000;
@@ -979,7 +993,7 @@ public class ViewPort
 	{
 		//SignStruct ss;
 		int left, top, right, bottom;
-		StringSpriteToDraw sstd;
+		//StringSpriteToDraw sstd;
 
 		if (0 == (Global._display_opt & Global.DO_SHOW_SIGNS))
 			return;
@@ -999,7 +1013,7 @@ public class ViewPort
 						right > ss.sign.left &&
 						left < ss.sign.left + ss.sign.width_1) {
 
-					sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2806), ss.str.id, 0, 0);
+					StringSpriteToDraw sstd = AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2806), ss.str.id, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_1;
 						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
@@ -1018,7 +1032,7 @@ public class ViewPort
 						right > ss.sign.left &&
 						left < ss.sign.left + ss.sign.width_1*2) {
 
-					sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2806), ss.str.id, 0, 0);
+					StringSpriteToDraw sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2806), ss.str.id, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_1;
 						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
@@ -1038,7 +1052,7 @@ public class ViewPort
 						right > ss.sign.left &&
 						left < ss.sign.left + ss.sign.width_2*4) {
 
-					sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2002), ss.str.id, 0, 0);
+					StringSpriteToDraw sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2002), ss.str.id, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_2 | 0x8000;
 						sstd.color = (ss.owner.id==Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
@@ -1053,7 +1067,7 @@ public class ViewPort
 		//Waypoint wp;
 
 		int left, top, right, bottom;
-		StringSpriteToDraw sstd;
+		//StringSpriteToDraw sstd;
 
 		if (0 == (Global._display_opt & Global.DO_WAYPOINTS))
 			return;
@@ -1073,7 +1087,7 @@ public class ViewPort
 						right > wp.sign.left &&
 						left < wp.sign.left + wp.sign.width_1) {
 
-					sstd = ViewPort.AddStringToDraw(wp.sign.left + 1, wp.sign.top + 1, Str.STR_WAYPOINT_VIEWPORT, wp.index, 0, 0);
+					StringSpriteToDraw sstd = ViewPort.AddStringToDraw(wp.sign.left + 1, wp.sign.top + 1, Str.STR_WAYPOINT_VIEWPORT, wp.index, 0, 0);
 					if (sstd != null) {
 						sstd.width = wp.sign.width_1;
 						sstd.color = (wp.deleted != 0 ? 0xE : 11);
@@ -1092,7 +1106,7 @@ public class ViewPort
 						right > wp.sign.left &&
 						left < wp.sign.left + wp.sign.width_1*2) {
 
-					sstd = ViewPort.AddStringToDraw(wp.sign.left + 1, wp.sign.top + 1, Str.STR_WAYPOINT_VIEWPORT, wp.index, 0, 0);
+					StringSpriteToDraw sstd = ViewPort.AddStringToDraw(wp.sign.left + 1, wp.sign.top + 1, Str.STR_WAYPOINT_VIEWPORT, wp.index, 0, 0);
 					if (sstd != null) {
 						sstd.width = wp.sign.width_1;
 						sstd.color = (wp.deleted != 0 ? 0xE : 11);
@@ -1112,7 +1126,7 @@ public class ViewPort
 						right > wp.sign.left &&
 						left < wp.sign.left + wp.sign.width_2*4) {
 
-					sstd = ViewPort.AddStringToDraw(wp.sign.left + 1, wp.sign.top + 1, Str.STR_WAYPOINT_VIEWPORT_TINY, wp.index, 0, 0);
+					StringSpriteToDraw sstd = ViewPort.AddStringToDraw(wp.sign.left + 1, wp.sign.top + 1, Str.STR_WAYPOINT_VIEWPORT_TINY, wp.index, 0, 0);
 					if (sstd != null) {
 						sstd.width = wp.sign.width_2 | 0x8000;
 						sstd.color = (wp.deleted != 0 ? 0xE : 11);
@@ -1357,9 +1371,11 @@ public class ViewPort
 		x = ((vd.dpi.left - (vp.virtual_left&mask)) >> vp.zoom) + vp.left;
 		y = ((vd.dpi.top - (vp.virtual_top&mask)) >> vp.zoom) + vp.top;
 
-		vd.dpi.dst_ptr = old_dpi.dst_ptr;
-		vd.dpi.dst_ptr_shift =  x - old_dpi.left + (y - old_dpi.top) * old_dpi.pitch;
+		//vd.dpi.dst_ptr = old_dpi.dst_ptr;
+		//vd.dpi.dst_ptr_shift =  x - old_dpi.left + (y - old_dpi.top) * old_dpi.pitch;
 
+		vd.dpi.dst_ptr = new Pixel(old_dpi.dst_ptr, x - old_dpi.left + (y - old_dpi.top) * old_dpi.pitch );
+		
 		//vd.parent_list = parent_list;
 		//vd.eof_parent_list = endof(parent_list);
 		//vd.spritelist_mem = mem;
@@ -1908,9 +1924,10 @@ public class ViewPort
 	}
 
 
-	static void SafeShowTrainViewWindow(final Vehicle v)
+	static void SafeShowTrainViewWindow(Vehicle v)
 	{
-		if (!v.IsFrontEngine()) v = v.GetFirstVehicleInChain();
+		if (!v.IsFrontEngine()) 
+			v = v.GetFirstVehicleInChain();
 		TrainGui.ShowTrainViewWindow(v);
 	}
 
@@ -1919,8 +1936,8 @@ public class ViewPort
 
 	static OnVehicleClickProc _on_vehicle_click_proc[] = {
 			ViewPort::SafeShowTrainViewWindow,
-			::ShowRoadVehViewWindow,
-			Ship::ShowShipViewWindow,
+			RoadVehGui::ShowRoadVehViewWindow,
+			ShipGui::ShowShipViewWindow,
 			AirCraft::ShowAircraftViewWindow,
 			ViewPort::Nop, // Special vehicles
 			ViewPort::Nop  // Disaster vehicles
@@ -2361,7 +2378,7 @@ public class ViewPort
 	static boolean VpHandlePlaceSizingDrag()
 	{
 		Window w;
-		WindowEvent e;
+		WindowEvent e = new WindowEvent();
 
 		if (Window._special_mouse_mode != Window.WSM_SIZING) return true;
 

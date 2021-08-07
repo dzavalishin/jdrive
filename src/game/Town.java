@@ -865,7 +865,7 @@ public class Town extends TownTables implements IPoolItem
 
 			// Reached a tunnel? Then continue at the other side of it.
 			if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && (tile.getMap().m5& ~3) == 4) {
-				FindLengthOfTunnelResult flotr = FindLengthOfTunnel(tile, BitOps.GB(tile.getMap().m5, 0, 2));
+				FindLengthOfTunnelResult flotr = Pathfind.FindLengthOfTunnel(tile, BitOps.GB(tile.getMap().m5, 0, 2));
 				tile_ptr[0] = flotr.tile;
 				return;
 			}
@@ -957,10 +957,10 @@ public class Town extends TownTables implements IPoolItem
 		// Quit if it selecting an appropiate bridge type fails a large number of times.
 		j = 22;
 		{
-			int bridge_len = GetBridgeLength(tile, tmptile);
+			int bridge_len = TunnelBridgeCmd.GetBridgeLength(tile, tmptile);
 			do {
 				int bridge_type = Hal.RandomRange(Bridge.MAX_BRIDGES - 1);
-				if (CheckBridge_Stuff(bridge_type, bridge_len)) {
+				if (TunnelBridgeCmd.CheckBridge_Stuff(bridge_type, bridge_len)) {
 					if (!Cmd.CmdFailed(Cmd.DoCommandByTile(tile, tmptile.tile, 0x8000 + bridge_type, Cmd.DC_EXEC | Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE)))
 						_grow_town_result = -1;
 

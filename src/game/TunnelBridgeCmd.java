@@ -128,7 +128,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		return Cmd.CMD_ERROR;
 	}
 
-	int GetBridgeLength(TileIndex begin, TileIndex end)
+	static int GetBridgeLength(TileIndex begin, TileIndex end)
 	{
 		int x1 = begin.TileX();
 		int y1 = begin.TileY();
@@ -138,7 +138,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		return Math.abs(x2 + y2 - x1 - y1) - 1;
 	}
 
-	boolean CheckBridge_Stuff(int bridge_type, int bridge_len)
+	static boolean CheckBridge_Stuff(int bridge_type, int bridge_len)
 	{
 		final Bridge b = _bridge[bridge_type];
 		int max; // max possible length of a bridge (with patch 100)
