@@ -908,7 +908,7 @@ public class Economy
 		price_base_multiplier[price] = factor;
 	}
 
-	void StartupEconomy()
+	static void StartupEconomy()
 	{
 		int i;
 

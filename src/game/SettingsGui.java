@@ -299,12 +299,13 @@ public class SettingsGui extends SettingsTables
 			new GameSettingData(  0,   2,  1, Str.STR_6839_PERMISSIVE),
 	};
 
+	/*
 	static  boolean GetBitAndShift(int *b)
 	{
 		int x = *b;
 		*b >>= 1;
 				return BitOps.HASBIT(x, 0);
-	}
+	}*/
 
 
 	void SetDifficultyLevel(int mode, GameOptions gm_opt)
@@ -336,7 +337,7 @@ public class SettingsGui extends SettingsTables
 	static void GameDifficultyWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_CREATE: /* Setup disabled buttons when creating window */
+		case WE_CREATE: /* Setup disabled buttons when creating window */
 			// disable all other difficulty buttons during gameplay except for 'custom'
 			w.disabled_state = (Global._game_mode != GameModes.GM_NORMAL) ? 0 : (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6);
 
@@ -348,7 +349,7 @@ public class SettingsGui extends SettingsTables
 					w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 10); // Disable save-button in multiplayer (and if client)
 			}
 			break;
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			int click_a, click_b, disabled;
 			int i;
 			int y, value;
@@ -362,7 +363,7 @@ public class SettingsGui extends SettingsTables
 			/* XXX - Disabled buttons in normal gameplay. Bitshifted for each button to see if
 			 * that bit is set. If it is set, the button is disabled */
 			disabled = (Global._game_mode == GameModes.GM_NORMAL) ? DIFF_INGAME_DISABLED_BUTTONS : 0;
-
+			/* TODO GAME_DIFFICULTY
 			y = GAMEDIFF_WND_TOP_OFFSET;
 			for (i = 0; i != GAME_DIFFICULTY_NUM; i++) {
 				Gfx.DrawFrameRect( 5, y,  5 + 8, y + 8, 3, GetBitAndShift(&click_a) ? (1 << 5) : 0);
@@ -383,10 +384,10 @@ public class SettingsGui extends SettingsTables
 				Gfx.DrawString(30, y, Str.STR_6805_MAXIMUM_NO_COMPETITORS + i, 0);
 
 				y += GAMEDIFF_WND_ROWSIZE + 2; // space items apart a bit
-			}
+			} */
 		} break;
 
-		case WindowEvents.WE_CLICK:
+		case WE_CLICK:
 			switch (e.widget) {
 			case 8: { /* Difficulty settings widget, decode click */
 				final GameSettingData info;
@@ -401,6 +402,7 @@ public class SettingsGui extends SettingsTables
 				x = e.pt.x - 5;
 				if (!BitOps.IS_INT_INSIDE(x, 0, 21)) // Button area
 					return;
+				/* TODO
 
 				y = e.pt.y - GAMEDIFF_WND_TOP_OFFSET;
 				if (y < 0)
@@ -419,7 +421,6 @@ public class SettingsGui extends SettingsTables
 
 				_difficulty_timeout = 5;
 
-				/* TODO
 				
 				val = ((int*)&_opt_mod_temp.diff)[btn];
 
@@ -442,11 +443,11 @@ public class SettingsGui extends SettingsTables
 			}	break;
 			case 3: case 4: case 5: case 6: /* Easy / Medium / Hard / Custom */
 				// temporarily change difficulty level
-				SetDifficultyLevel(e.widget - 3, &_opt_mod_temp);
+				// TODO SetDifficultyLevel(e.widget - 3, &_opt_mod_temp);
 				w.SetWindowDirty();
 				break;
 			case 7: /* Highscore Table */
-				ShowHighscoreTable(_opt_mod_temp.diff_level, -1);
+				// TODO ShowHighscoreTable(_opt_mod_temp.diff_level, -1);
 				break;
 			case 10: { /* Save button - save changes */
 				int btn, val;
@@ -457,22 +458,22 @@ public class SettingsGui extends SettingsTables
 					if (val != ((int*)&_opt_ptr.diff)[btn])
 						Cmd.DoCommandP(0, btn, val, null, Cmd.CMD_CHANGE_DIFFICULTY_LEVEL);
 				} */
-				Cmd.DoCommandP(0, -1, _opt_mod_temp.diff_level, null, Cmd.CMD_CHANGE_DIFFICULTY_LEVEL);
-				DeleteWindow(w);
+				// TODO Cmd.DoCommandP(null, -1, _opt_mod_temp.diff_level, null, Cmd.CMD_CHANGE_DIFFICULTY_LEVEL);
+				w.DeleteWindow();
 				// If we are in the editor, we should reload the economy.
 				//  This way when you load a game, the max loan and interest rate
 				//  are loaded correctly.
 				if (Global._game_mode == GameModes.GM_EDITOR)
-					StartupEconomy();
+					Economy.StartupEconomy();
 				break;
 			}
 			case 11: /* Cancel button - close window, abandon changes */
-				DeleteWindow(w);
+				w.DeleteWindow();
 				break;
 			} break;
 
-		case WindowEvents.WE_MOUSELOOP: /* Handle the visual 'clicking' of the buttons */
-			if (_difficulty_timeout != 0 && !--_difficulty_timeout) {
+		case WE_MOUSELOOP: /* Handle the visual 'clicking' of the buttons */
+			if (_difficulty_timeout != 0 && 0 == --_difficulty_timeout) {
 				_difficulty_click_a = 0;
 				_difficulty_click_b = 0;
 				w.SetWindowDirty();
