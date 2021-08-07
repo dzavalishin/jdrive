@@ -63,12 +63,13 @@ public class SettingsTables
 
 
 
-	typedef int PatchButtonClick(int);
-
+	//typedef int PatchButtonClick(int);
+	/*
 	class PatchEntry {
 		byte type;                    // type of selector
 		byte flags;                   // selector flags
-		/*StringID*/ int str;                 // string with descriptive text
+		//StringID 
+	int str;                 // string with descriptive text
 		char console_name[40];        // the name this patch has in console
 		void* variable;               // pointer to the variable
 		int min, max;               // range for spinbox setting
@@ -212,6 +213,6 @@ public class SettingsTables
 			{Global._patches_economy,			lengthof(Global._patches_economy) },
 			{Global._patches_ai,						lengthof(Global._patches_ai) },
 	};
-
+	*/
 
 }
