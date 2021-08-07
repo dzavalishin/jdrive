@@ -617,7 +617,7 @@ public class PlayerGui
 				/*#ifdef ENABLE_NETWORK
 				if (!IsWindowOfPrototype(w, _other_player_company_widgets)) {
 					w.as_def_d().byte_1 = 2;
-					ShowQueryString(BindCString(_network_player_info[Global._local_player].password),
+					ShowQueryString(Strings.BindCString(_network_player_info[Global._local_player].password),
 							Str.STR_SET_COMPANY_PASSWORD, sizeof(_network_player_info[Global._local_player].password), 250, w.window_class, w.window_number);
 				}
 				#endif */

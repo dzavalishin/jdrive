@@ -14,6 +14,9 @@ public class SettingsGui extends SettingsTables
 	static int _difficulty_click_b;
 	static byte _difficulty_timeout;
 
+	static final int DIFF_INGAME_DISABLED_BUTTONS  = 0x383E;
+
+	private static CurrencySpec _custom_currency() { return CurrencySpec._currency_specs[23]; }
 
 	static int [] BuildDynamicDropdown(/*StringID*/ int base, int num)
 	{
@@ -98,7 +101,7 @@ public class SettingsGui extends SettingsTables
 		case WE_CLICK:
 			switch (e.widget) {
 			case 4: case 5: /* Setup currencies dropdown */
-				Window.ShowDropDownMenu(w, Currency._currency_string_list, GameOptions._opt_ptr.currency, 5, Global._game_mode == GameModes.GM_MENU ? 0 : ~GetMaskOfAllowedCurrencies(), 0);
+				Window.ShowDropDownMenu(w, Currency._currency_string_list, GameOptions._opt_ptr.currency, 5, Global._game_mode == GameModes.GM_MENU ? 0 : ~Currency.GetMaskOfAllowedCurrencies(), 0);
 				return;
 			case 7: case 8: /* Setup distance unit dropdown */
 				Window.ShowDropDownMenu(w, _distances_dropdown, GameOptions._opt_ptr.kilometers ? 1 : 0, 8, 0, 0);
@@ -365,7 +368,7 @@ public class SettingsGui extends SettingsTables
 				Gfx.DrawFrameRect( 5, y,  5 + 8, y + 8, 3, GetBitAndShift(&click_a) ? (1 << 5) : 0);
 				Gfx.DrawFrameRect(15, y, 15 + 8, y + 8, 3, GetBitAndShift(&click_b) ? (1 << 5) : 0);
 				if (GetBitAndShift(&disabled) || (Global._networking && !Global._network_server)) {
-					int color = PALETTE_MODIFIER_GREYOUT | Global._color_list[3].unk2;
+					int color = Sprite.PALETTE_MODIFIER_GREYOUT | Global._color_list[3].unk2;
 					Gfx.GfxFillRect( 6, y + 1,  6 + 8, y + 8, color);
 					Gfx.GfxFillRect(16, y + 1, 16 + 8, y + 8, color);
 				}
@@ -386,7 +389,7 @@ public class SettingsGui extends SettingsTables
 		case WindowEvents.WE_CLICK:
 			switch (e.widget) {
 			case 8: { /* Difficulty settings widget, decode click */
-				final GameSettingData *info;
+				final GameSettingData info;
 				int x, y;
 				int btn, dis;
 				int val;
@@ -416,6 +419,8 @@ public class SettingsGui extends SettingsTables
 
 				_difficulty_timeout = 5;
 
+				/* TODO
+				
 				val = ((int*)&_opt_mod_temp.diff)[btn];
 
 				info = &_game_setting_info[btn]; // get information about the difficulty setting
@@ -432,6 +437,7 @@ public class SettingsGui extends SettingsTables
 				// save value in temporary variable
 				((int*)&_opt_mod_temp.diff)[btn] = val;
 				SetDifficultyLevel(3, &_opt_mod_temp); // set difficulty level to custom
+				*/
 				w.SetWindowDirty();
 			}	break;
 			case 3: case 4: case 5: case 6: /* Easy / Medium / Hard / Custom */
@@ -444,12 +450,13 @@ public class SettingsGui extends SettingsTables
 				break;
 			case 10: { /* Save button - save changes */
 				int btn, val;
+				/* TODO difficuilty
 				for (btn = 0; btn != GAME_DIFFICULTY_NUM; btn++) {
 					val = ((int*)&_opt_mod_temp.diff)[btn];
 					// if setting has changed, change it
 					if (val != ((int*)&_opt_ptr.diff)[btn])
 						Cmd.DoCommandP(0, btn, val, null, Cmd.CMD_CHANGE_DIFFICULTY_LEVEL);
-				}
+				} */
 				Cmd.DoCommandP(0, -1, _opt_mod_temp.diff_level, null, Cmd.CMD_CHANGE_DIFFICULTY_LEVEL);
 				DeleteWindow(w);
 				// If we are in the editor, we should reload the economy.
@@ -489,43 +496,43 @@ public class SettingsGui extends SettingsTables
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    10,     0,   369,   263,   278, 0x0,												Str.STR_NULL),
 			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,     3,   105,   185,   265,   276, Str.STR_OPTIONS_SAVE_CHANGES,	Str.STR_NULL),
 			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,     3,   186,   266,   265,   276, Str.STR_012E_CANCEL,						Str.STR_NULL),
-			{   WIDGETS_END},
+
 	};
 
-	static final WindowDesc _game_difficulty_desc = {
+	static final WindowDesc _game_difficulty_desc = new WindowDesc(
 			Window.WDP_CENTER, Window.WDP_CENTER, 370, 279,
 			Window.WC_GAME_OPTIONS,0,
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 			_game_difficulty_widgets,
-			GameDifficultyWndProc
-	};
+			SettingsGui::GameDifficultyWndProc
+	);
 
 	static void ShowGameDifficulty()
 	{
 		Window.DeleteWindowById(Window.WC_GAME_OPTIONS, 0);
 		/* Copy current settings (ingame or in intro) to temporary holding place
 		 * change that when setting stuff, copy back on clicking 'OK' */
-		memcpy(&_opt_mod_temp, GameOptions._opt_ptr, sizeof(GameOptions));
+		// TODO memcpy(&_opt_mod_temp, GameOptions._opt_ptr, sizeof(GameOptions));
 		Window.AllocateWindowDesc(_game_difficulty_desc);
 	}
 
 	// virtual PositionMainToolbar function, calls the right one.
 	static int v_PositionMainToolbar(int p1)
 	{
-		if (Global._game_mode != GameModes.GM_MENU) PositionMainToolbar(null);
+		if (Global._game_mode != GameModes.GM_MENU) Window.PositionMainToolbar(null);
 		return 0;
 	}
 
 	static int AiNew_PatchActive_Warning(int p1)
 	{
-		if (p1 == 1) ShowErrorMessage(Str.INVALID_STRING_ID.id, TETileTypes.MP_AI_ACTIVATED, 0, 0);
+		if (p1 == 1) Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.TEMP_AI_ACTIVATED, 0, 0);
 		return 0;
 	}
 
 	static int Ai_In_Multiplayer_Warning(int p1)
 	{
 		if (p1 == 1) {
-			ShowErrorMessage(Str.INVALID_STRING_ID.id, TETileTypes.MP_AI_MULTIPLAYER, 0, 0);
+			Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.TEMP_AI_MULTIPLAYER, 0, 0);
 			Global._patches.ainew_active = true;
 		}
 		return 0;
@@ -585,19 +592,20 @@ public class SettingsGui extends SettingsTables
 
 	static int EngineRenewUpdate(int p1)
 	{
-		Cmd.DoCommandP(0, 0, Global._patches.autorenew, null, Cmd.CMD_REPLACE_VEHICLE);
+		Cmd.DoCommandP(null, 0, BitOps.b2i( Global._patches.autorenew ), null, Cmd.CMD_REPLACE_VEHICLE);
 		return 0;
 	}
 
 	static int EngineRenewMonthsUpdate(int p1)
 	{
-		Cmd.DoCommandP(0, 1, Global._patches.autorenew_months, null, Cmd.CMD_REPLACE_VEHICLE);
+		Cmd.DoCommandP(null, 1, Global._patches.autorenew_months, null, Cmd.CMD_REPLACE_VEHICLE);
 		return 0;
 	}
 
 	static int EngineRenewMoneyUpdate(int p1)
 	{
-		Cmd.DoCommandP(0, 2, Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
+		// TODO (int)?
+		Cmd.DoCommandP(null, 2, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 		return 0;
 	}
 
@@ -718,7 +726,7 @@ public class SettingsGui extends SettingsTables
 
 		case WE_CLICK:
 			switch(e.widget) {
-			case 3: {
+			case 3: /* TODO {
 				int x,y;
 				int btn;
 				final PatchPage *page;
@@ -754,8 +762,8 @@ public class SettingsGui extends SettingsTables
 					case PE_INT32:
 					case PE_CURRENCY:
 						// don't allow too fast scrolling
-						if ((w.flags4 & WF_TIMEOUT_MASK) > 2 << WF_TIMEOUT_SHL) {
-							_left_button_clicked = false;
+						if ((w.flags4 & Window.WF_TIMEOUT_MASK) > 2 << Window.WF_TIMEOUT_SHL) {
+							Global._left_button_clicked = false;
 							return;
 						}
 
@@ -778,7 +786,7 @@ public class SettingsGui extends SettingsTables
 
 						if (val != oval) {
 							w.as_def_d().data_2 = btn * 2 + 1 + ((x>=10) ? 1 : 0);
-							w.flags4 |= 5 << WF_TIMEOUT_SHL;
+							w.flags4 |= 5 << Window.WF_TIMEOUT_SHL;
 							_left_button_clicked = false;
 						}
 						break;
@@ -807,13 +815,13 @@ public class SettingsGui extends SettingsTables
 				}
 
 				break;
-			}
+			} */
 			case 4: case 5: case 6: case 7: case 8: case 9:
 				w.as_def_d().data_1 = e.widget - 4;
 				Window.DeleteWindowById(Window.WC_QUERY_STRING, 0);
 				w.SetWindowDirty();
 				break;
-			}
+			} 
 			break;
 
 		case WE_TIMEOUT:
@@ -822,7 +830,8 @@ public class SettingsGui extends SettingsTables
 			break;
 
 		case WE_ON_EDIT_TEXT: {
-			if (*e.edittext.str) {
+			if (e.str != null) {
+				/*
 				final PatchPage page = Global._patches_page[w.as_def_d().data_1];
 				final PatchEntry pe = page.entries[w.as_def_d().data_3];
 				int val;
@@ -834,11 +843,15 @@ public class SettingsGui extends SettingsTables
 				} else {
 					// Else we do
 					Cmd.DoCommandP( null, (byte)w.as_def_d().data_1 + ((byte)w.as_def_d().data_3 << 8), val, null, Cmd.CMD_CHANGE_PATCH_SETTING);
-				}
+				} */
 				w.SetWindowDirty();
 
+				/* TODO
 				if (pe.click_proc != null) // call callback function
-					pe.click_proc(*(int*)pe.variable);
+					pe.click_proc(pe);
+					//pe.click_proc(*(int*)pe.variable);
+					 * 
+					 */
 			}
 			break;
 		}
@@ -859,13 +872,14 @@ public class SettingsGui extends SettingsTables
 	 */
 	int CmdChangePatchSetting(int x, int y, int flags, int p1, int p2)
 	{
+		/* TODO
 		byte pcat = (byte) BitOps.GB(p1, 0, 8);
 		byte pel  = (byte) BitOps.GB(p1, 8, 8);
 
 		if (pcat >= lengthof(Global._patches_page)) return Cmd.CMD_ERROR;
 		if (pel >= Global._patches_page[pcat].num) return Cmd.CMD_ERROR;
 
-		if (flags & Cmd.DC_EXEC) {
+		if(0 != (flags & Cmd.DC_EXEC)) {
 			final PatchEntry pe = Global._patches_page[pcat].entries[pel];
 			WritePE(pe, (int)p2);
 
@@ -873,6 +887,8 @@ public class SettingsGui extends SettingsTables
 		}
 
 		return 0;
+		*/
+		return Cmd.CMD_ERROR;
 	}
 
 	/*
@@ -955,7 +971,7 @@ public class SettingsGui extends SettingsTables
 
 		IConsolePrintF(_icolour_warn, "Current value for '%s' is: '%s'", name, value);
 		*/
-		IConsolePrintF(_icolour_warn, "Not impl- "); // TODO
+		Console.IConsolePrintF(Console._icolour_warn, "Not impl- "); // TODO
 	}
 
 	static final Widget _patches_selection_widgets[] = {
@@ -1076,7 +1092,7 @@ public class SettingsGui extends SettingsTables
 		}
 			 */
 		case WE_DESTROY:
-			_sel_grffile = null;
+			// TODO _sel_grffile = null;
 			Window.DeleteWindowById(Window.WC_QUERY_STRING, 0);
 			break;
 		}
@@ -1130,8 +1146,8 @@ public class SettingsGui extends SettingsTables
 	/* state: 0 = none clicked, 0x01 = first clicked, 0x02 = second clicked */
 	static void DrawArrowButtons(int x, int y, int state)
 	{
-		Gfx.DrawFrameRect(x, y+1, x+9, y+9, 3, (state & 0x01) ? Window.FR_LOWERED : 0);
-		Gfx.DrawFrameRect(x+10, y+1, x+19, y+9, 3, (state & 0x02) ? Window.FR_LOWERED : 0);
+		Gfx.DrawFrameRect(x, y+1, x+9, y+9, 3, (state & 0x01) != 0 ? Window.FR_LOWERED : 0);
+		Gfx.DrawFrameRect(x+10, y+1, x+19, y+9, 3, (state & 0x02) != 0 ? Window.FR_LOWERED : 0);
 		Gfx.DrawStringCentered(x+5, y+1, Str.STR_6819, 0);
 		Gfx.DrawStringCentered(x+15, y+1, Str.STR_681A, 0);
 	}
@@ -1156,33 +1172,33 @@ public class SettingsGui extends SettingsTables
 			i++;
 
 			// separator
-			Gfx.DrawFrameRect(10, y+1, 29, y+9, 0, ((clk >> (i*2)) & 0x03) ? Window.FR_LOWERED : 0);
+			Gfx.DrawFrameRect(10, y+1, 29, y+9, 0, ((clk >> (i*2)) & 0x03) != 0 ? Window.FR_LOWERED : 0);
 			x = Gfx.DrawString(x, y + 1, Str.STR_CURRENCY_SEPARATOR, 0);
-			Gfx.DoDrawString(_str_separator, x + 4, y + 1, 6);
+			Gfx.DoDrawString( String.valueOf( _str_separator ), x + 4, y + 1, 6);
 			x = 35;
 			y+=12;
 			i++;
 
 			// prefix
-			Gfx.DrawFrameRect(10, y+1, 29, y+9, 0, ((clk >> (i*2)) & 0x03) ? Window.FR_LOWERED : 0);
+			Gfx.DrawFrameRect(10, y+1, 29, y+9, 0, ((clk >> (i*2)) & 0x03) != 0 ? Window.FR_LOWERED : 0);
 			x = Gfx.DrawString(x, y + 1, Str.STR_CURRENCY_PREFIX, 0);
-			Gfx.DoDrawString(_custom_currency.prefix, x + 4, y + 1, 6);
+			Gfx.DoDrawString(_custom_currency().prefix, x + 4, y + 1, 6);
 			x = 35;
 			y+=12;
 			i++;
 
 			// suffix
-			Gfx.DrawFrameRect(10, y+1, 29, y+9, 0, ((clk >> (i*2)) & 0x03) ? Window.FR_LOWERED : 0);
+			Gfx.DrawFrameRect(10, y+1, 29, y+9, 0, ((clk >> (i*2)) & 0x03) != 0 ? Window.FR_LOWERED : 0);
 			x = Gfx.DrawString(x, y + 1, Str.STR_CURRENCY_SUFFIX, 0);
-			Gfx.DoDrawString(_custom_currency.suffix, x + 4, y + 1, 6);
+			Gfx.DoDrawString(_custom_currency().suffix, x + 4, y + 1, 6);
 			x = 35;
 			y+=12;
 			i++;
 
 			// switch to euro
 			DrawArrowButtons(10, y, (clk >> (i*2)) & 0x03);
-			Global.SetDParam(0, _custom_currency.to_euro);
-			Gfx.DrawString(x, y + 1, (_custom_currency.to_euro != CF_NOEURO) ? Str.STR_CURRENCY_SWITCH_TO_EURO : Str.STR_CURRENCY_SWITCH_TO_EURO_NEVER, 0);
+			Global.SetDParam(0, (int) _custom_currency().to_euro);
+			Gfx.DrawString(x, y + 1, (_custom_currency().to_euro != Currency.CF_NOEURO) ? Str.STR_CURRENCY_SWITCH_TO_EURO : Str.STR_CURRENCY_SWITCH_TO_EURO_NEVER, 0);
 			x = 35;
 			y+=12;
 			i++;
@@ -1193,7 +1209,7 @@ public class SettingsGui extends SettingsTables
 			Gfx.DrawString(x, y + 1, Str.STR_CURRENCY_PREVIEW, 0);
 		} break;
 
-		case WindowEvents.WE_CLICK: {
+		case WE_CLICK: {
 			boolean edittext = false;
 			int line = (e.pt.y - 20)/12;
 			int len = 0;
@@ -1204,14 +1220,14 @@ public class SettingsGui extends SettingsTables
 			case 0: // rate
 				if ( BitOps.IS_INT_INSIDE(x, 10, 30) ) { // clicked buttons
 					if (x < 20) {
-						if (_custom_currency.rate > 1) _custom_currency.rate--;
+						if (_custom_currency().rate > 1) _custom_currency().rate--;
 						w.as_def_d().data_1 =  (1 << (line * 2 + 0));
 					} else {
-						if (_custom_currency.rate < 5000) _custom_currency.rate++;
+						if (_custom_currency().rate < 5000) _custom_currency().rate++;
 						w.as_def_d().data_1 =  (1 << (line * 2 + 1));
 					}
 				} else { // enter text
-					Global.SetDParam(0, _custom_currency.rate);
+					Global.SetDParam(0, _custom_currency().rate);
 					str = Str.STR_CONFIG_PATCHES_INT32;
 					len = 4;
 					edittext = true;
@@ -1220,37 +1236,37 @@ public class SettingsGui extends SettingsTables
 			case 1: // separator
 				if ( BitOps.IS_INT_INSIDE(x, 10, 30) )  // clicked button
 					w.as_def_d().data_1 =  (1 << (line * 2 + 1));
-				str = BindCString(_str_separator);
+				str = Strings.BindCString( String.valueOf( _str_separator ) );
 				len = 1;
 				edittext = true;
 				break;
 			case 2: // prefix
 				if ( BitOps.IS_INT_INSIDE(x, 10, 30) )  // clicked button
 					w.as_def_d().data_1 =  (1 << (line * 2 + 1));
-				str = BindCString(_custom_currency.prefix);
+				str = Strings.BindCString(_custom_currency().prefix);
 				len = 12;
 				edittext = true;
 				break;
 			case 3: // suffix
 				if ( BitOps.IS_INT_INSIDE(x, 10, 30) )  // clicked button
 					w.as_def_d().data_1 =  (1 << (line * 2 + 1));
-				str = BindCString(_custom_currency.suffix);
+				str = Strings.BindCString(_custom_currency().suffix);
 				len = 12;
 				edittext = true;
 				break;
 			case 4: // to euro
 				if ( BitOps.IS_INT_INSIDE(x, 10, 30) ) { // clicked buttons
 					if (x < 20) {
-						_custom_currency.to_euro = (_custom_currency.to_euro <= 2000) ?
-								CF_NOEURO : _custom_currency.to_euro - 1;
+						_custom_currency().to_euro = (_custom_currency().to_euro <= 2000) ?
+								Currency.CF_NOEURO : _custom_currency().to_euro - 1;
 						w.as_def_d().data_1 = (1 << (line * 2 + 0));
 					} else {
-						_custom_currency.to_euro =
-								clamp(_custom_currency.to_euro + 1, 2000, MAX_YEAR_END_REAL);
+						_custom_currency().to_euro =
+								BitOps.clamp((int)_custom_currency().to_euro + 1, 2000, Global.MAX_YEAR_END_REAL);
 						w.as_def_d().data_1 = (1 << (line * 2 + 1));
 					}
 				} else { // enter text
-					Global.SetDParam(0, _custom_currency.to_euro);
+					Global.SetDParam(0, (int)_custom_currency().to_euro);
 					str = Str.STR_CONFIG_PATCHES_INT32;
 					len = 4;
 					edittext = true;
@@ -1260,47 +1276,47 @@ public class SettingsGui extends SettingsTables
 
 			if (edittext) {
 				w.as_def_d().data_2 = line;
-				ShowQueryString(
-						str,
-						Str.STR_CURRENCY_CHANGE_PARAMETER,
+				MiscGui.ShowQueryString(
+						new StringID( str ),
+						new StringID( Str.STR_CURRENCY_CHANGE_PARAMETER ),
 						len + 1, // maximum number of characters OR
 						250, // characters up to this width pixels, whichever is satisfied first
 						w.window_class,
 						w.window_number);
 			}
 
-			w.flags4 |= 5 << WF_TIMEOUT_SHL;
+			w.flags4 |= 5 << Window.WF_TIMEOUT_SHL;
 			w.SetWindowDirty();
 		} break;
 
-		case WindowEvents.WE_ON_EDIT_TEXT: {
+		case WE_ON_EDIT_TEXT: {
 			int val;
 			final char [] b = e.str.toCharArray();
 			switch (w.as_def_d().data_2) {
 			case 0: /* Exchange rate */
-				val = atoi(b);
-				val = clamp(val, 1, 5000);
-				_custom_currency.rate = val;
+				val = Integer.parseInt(e.str);
+				val = BitOps.clamp(val, 1, 5000);
+				_custom_currency().rate = val;
 				break;
 
 			case 1: /* Thousands seperator */
-				_custom_currency.separator = (b[0] == '\0') ? ' ' : b[0];
+				_custom_currency().separator = (b[0] == '\0') ? ' ' : b[0];
 				_str_separator = b;
 				break;
 
 			case 2: /* Currency prefix */
-				_custom_currency.prefix = b;
+				_custom_currency().prefix = e.str;
 				break;
 
 			case 3: /* Currency suffix */
-				_custom_currency.suffix = b;
+				_custom_currency().suffix = e.str;
 				break;
 
 			case 4: /* Year to switch to euro */
-				val = Integer.parseInt(b);
+				val = Integer.parseInt(e.str);
 				val = BitOps.clamp(val, 1999, Global.MAX_YEAR_END_REAL);
 				if (val == 1999) val = 0;
-				_custom_currency.to_euro = val;
+				_custom_currency().to_euro = val;
 				break;
 			}
 			Hal.MarkWholeScreenDirty();
@@ -1308,12 +1324,12 @@ public class SettingsGui extends SettingsTables
 
 		} break;
 
-		case WindowEvents.WE_TIMEOUT:
+		case WE_TIMEOUT:
 			w.as_def_d().data_1 = 0;
 			w.SetWindowDirty();
 			break;
 
-		case WindowEvents.WE_DESTROY:
+		case WE_DESTROY:
 			Window.DeleteWindowById(Window.WC_QUERY_STRING, 0);
 			Hal.MarkWholeScreenDirty();
 			break;
@@ -1337,7 +1353,7 @@ public class SettingsGui extends SettingsTables
 
 	static void ShowCustCurrency()
 	{
-		_str_separator[0] = _custom_currency.separator;
+		_str_separator[0] = _custom_currency().separator;
 		_str_separator[1] = '\0';
 
 		Window.DeleteWindowById(Window.WC_CUSTOM_CURRENCY, 0);

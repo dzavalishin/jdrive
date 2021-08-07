@@ -39,7 +39,7 @@ public class Currency {
 
 
 	// get a mask of the allowed currencies depending on the year
-	int GetMaskOfAllowedCurrencies()
+	static int GetMaskOfAllowedCurrencies()
 	{
 		int mask = 0;
 		int i;
