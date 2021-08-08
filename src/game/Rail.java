@@ -2801,7 +2801,7 @@ public class Rail extends RailTables {
 		return 0;
 	}
 
-	void InitializeRail()
+	static void InitializeRail()
 	{
 		Depot._last_built_train_depot_tile = null;
 	}
@@ -3854,7 +3854,7 @@ public class Rail extends RailTables {
 
 
 
-	void InitializeRailGui()
+	static void InitializeRailGui()
 	{
 		_build_depot_direction = 3;
 		_railstation.numtracks = 1;

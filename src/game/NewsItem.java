@@ -204,7 +204,7 @@ public class NewsItem {
 
 
 
-	void InitNewsItemStructs()
+	static void InitNewsItemStructs()
 	{
 		//memset(_news_items, 0, sizeof(_news_items));
 		_current_news = INVALID_NEWS;

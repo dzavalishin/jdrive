@@ -114,7 +114,7 @@ public class Tree  extends TreeTables {
 		}
 	}
 
-	void GenerateTrees()
+	static void GenerateTrees()
 	{
 		int i;
 
@@ -658,7 +658,7 @@ public class Tree  extends TreeTables {
 		/* not used */
 	}
 
-	void InitializeTrees()
+	static void InitializeTrees()
 	{
 		_trees_tick_ctr = 0;
 	}

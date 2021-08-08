@@ -770,7 +770,7 @@ public class WaterCmd extends WaterTables
 		return 0;
 	}
 
-	void InitializeDock()
+	static void InitializeDock()
 	{
 		Depot._last_built_ship_depot_tile = null;
 	}

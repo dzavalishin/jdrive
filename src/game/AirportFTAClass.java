@@ -1,4 +1,5 @@
 package game;
+import game.tables.AirCraftTables;
 import game.util.BitOps;
 
 //Finite sTate mAchine -. FTA
@@ -7,6 +8,7 @@ public class AirportFTAClass extends Airport // bring in constants
 {
 	int nofelements;							// number of positions the airport consists of
 	final byte terminals[];
+	//final int terminals[];
 	final byte helipads[];
 	int entry_point;							// when an airplane arrives at this airport, enter it at position entry_point
 	int acc_planes;							// accept airplanes or helicopters or both
@@ -64,48 +66,48 @@ public class AirportFTAClass extends Airport // bring in constants
 		// country airport
 		CountryAirport = new AirportFTAClass(
 				//CountryAirport,
-				AirportFTAbuildup._airport_terminal_country,
+				AirCraftTables._airport_terminal_country,
 				null,
 				16,
 				ALL,
-				AirportFTAbuildup._airport_fta_country,
-				AirportFTAbuildup._airport_depots_country
+				AirCraftTables._airport_fta_country,
+				AirCraftTables._airport_depots_country
 				//_airport_depots_country.length
 				);
 
 		// city airport
 		CityAirport = new AirportFTAClass(
 				//CityAirport,
-				AirportFTAbuildup._airport_terminal_city,
+				AirCraftTables._airport_terminal_city,
 				null,
 				19,
 				ALL,
-				AirportFTAbuildup._airport_fta_city,
-				AirportFTAbuildup._airport_depots_city
+				AirCraftTables._airport_fta_city,
+				AirCraftTables._airport_depots_city
 				//lengthof(_airport_depots_city)
 				);
 
 		// metropolitan airport
 		MetropolitanAirport = new AirportFTAClass(
 				//MetropolitanAirport,
-				AirportFTAbuildup._airport_terminal_metropolitan,
+				AirCraftTables._airport_terminal_metropolitan,
 				null,
 				20,
 				ALL,
-				AirportFTAbuildup._airport_fta_metropolitan,
-				AirportFTAbuildup._airport_depots_metropolitan
+				AirCraftTables._airport_fta_metropolitan,
+				AirCraftTables._airport_depots_metropolitan
 				//lengthof(_airport_depots_metropolitan)
 				);
 
 		// international airport
 		InternationalAirport = new AirportFTAClass(
 				//InternationalAirport,
-				AirportFTAbuildup._airport_terminal_international,
-				AirportFTAbuildup._airport_helipad_international,
+				AirCraftTables._airport_terminal_international,
+				AirCraftTables._airport_helipad_international,
 				37,
 				ALL,
-				AirportFTAbuildup._airport_fta_international,
-				AirportFTAbuildup._airport_depots_international
+				AirCraftTables._airport_fta_international,
+				AirCraftTables._airport_depots_international
 				//lengthof(_airport_depots_international)
 				);
 
@@ -113,10 +115,10 @@ public class AirportFTAClass extends Airport // bring in constants
 		Heliport = new AirportFTAClass(
 				//Heliport,
 				null,
-				AirportFTAbuildup._airport_helipad_heliport_oilrig,
+				AirCraftTables._airport_helipad_heliport_oilrig,
 				7,
 				HELICOPTERS_ONLY,
-				AirportFTAbuildup._airport_fta_heliport_oilrig,
+				AirCraftTables._airport_fta_heliport_oilrig,
 				null
 				//0
 				);
@@ -136,6 +138,7 @@ public class AirportFTAClass extends Airport // bring in constants
 	private AirportFTAClass(
 			//AirportFTAClass Airport,
 			final byte terminals[], final byte helipads[],
+			//final int terminals[], final byte helipads[],
 			final int entry_point, final int acc_planes,
 			final AirportFTAbuildup FA[],
 			final TileIndexDiffC depots[] ) //, final byte nof_depots)

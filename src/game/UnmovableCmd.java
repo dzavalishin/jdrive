@@ -336,7 +336,7 @@ public class UnmovableCmd extends UnmovableTables {
 		return ret[0];
 	}
 
-	void GenerateUnmovables()
+	static void GenerateUnmovables()
 	{
 		int i,j;
 		TileIndex tile;

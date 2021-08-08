@@ -1113,7 +1113,7 @@ public class Order implements IPoolItem {
 	}
 	
 	
-	void InitializeOrders()
+	static void InitializeOrders()
 	{
 		_order_pool.CleanPool();
 		_order_pool.AddBlockToPool();

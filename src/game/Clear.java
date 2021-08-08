@@ -770,7 +770,7 @@ public class Clear extends ClearTables {
 		tile.MarkTileDirtyByTile();
 	}
 
-	void GenerateClearTile()
+	static void GenerateClearTile()
 	{
 		int i;
 		TileIndex tile;
@@ -844,7 +844,7 @@ public class Clear extends ClearTables {
 		return;
 	}
 
-	void InitializeClearLand()
+	static void InitializeClearLand()
 	{
 		GameOptions._opt.snow_line = (byte) (Global._patches.snow_line_height * 8);
 	}

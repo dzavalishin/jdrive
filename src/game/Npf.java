@@ -1182,7 +1182,7 @@ public class Npf {
 		return best_result;
 	}
 
-	void InitializeNPF()
+	static void InitializeNPF()
 	{
 		AyStar.init_AyStar(_npf_aystar, Npf::NPFHash, NPF_HASH_SIZE);
 		_npf_aystar.loops_per_tick = 0;

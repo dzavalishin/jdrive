@@ -268,7 +268,7 @@ void AyStarMain_AddStartNode(AyStar *aystar, AyStarNode *start_node, uint g) {
 		TileX(start_node->tile), TileY(start_node->tile), start_node->direction);
 #endif
 	AyStarMain_OpenList_Add(aystar, NULL, start_node, 0, g);
-}*/
+}* /
 
 void init_AyStar(AyStar* aystar, Hash_HashProc hash, uint num_buckets) {
 	// Allocated the Hash for the OpenList and ClosedList

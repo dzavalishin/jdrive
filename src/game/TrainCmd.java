@@ -3893,7 +3893,7 @@ public class TrainCmd extends TrainTables
 	}
 
 
-	void InitializeTrains()
+	static void InitializeTrains()
 	{
 		Global._age_cargo_skip_counter = 1;
 	}

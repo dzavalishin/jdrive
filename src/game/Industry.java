@@ -1951,7 +1951,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	}
 
 
-	void InitializeIndustries()
+	static void InitializeIndustries()
 	{
 		_industry_pool.CleanPool();
 		_industry_pool.AddBlockToPool();

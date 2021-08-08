@@ -14,7 +14,8 @@ public class AirCraftTables extends AirConstants
 	//this may be changed later when airports are moved to external file
 	static public final TileIndexDiffC _airport_depots_country[] = { new TileIndexDiffC(3, 0) };
 
-	static public final int  _airport_terminal_country[] = {1, 2};
+	//static public final int  _airport_terminal_country[] = {1, 2};
+	static public final byte  _airport_terminal_country[] = {1, 2};
 	
 	static public final AirportFTAbuildup _airport_fta_country[] = {
 			new AirportFTAbuildup( 0,HANGAR,NOTHING_block,1),
@@ -202,11 +203,11 @@ public class AirCraftTables extends AirConstants
 	};
 
 	static public final AirportMovingData [][] _airport_moving_datas = {
-			_airport_moving_data_country,				// Country Airfield (small) 4x3
-			_airport_moving_data_town,					// City Airport (large) 6x6
-			_airport_moving_data_heliport,			// Heliport
-			_airport_moving_data_metropolitan,	// Metropolitain Airport (large) - 2 runways
-			_airport_moving_data_international,	// International Airport (xlarge) - 2 runways
+			AirportMovingData._airport_moving_data_country,				// Country Airfield (small) 4x3
+			AirportMovingData._airport_moving_data_town,					// City Airport (large) 6x6
+			AirportMovingData._airport_moving_data_heliport,			// Heliport
+			AirportMovingData._airport_moving_data_metropolitan,	// Metropolitain Airport (large) - 2 runways
+			AirportMovingData._airport_moving_data_international,	// International Airport (xlarge) - 2 runways
 			null,
 			null,
 			null,
@@ -217,7 +218,7 @@ public class AirCraftTables extends AirConstants
 			null,
 			null,
 			null,
-			_airport_moving_data_oilrig					// Oilrig
+			AirportMovingData._airport_moving_data_oilrig					// Oilrig
 	};
 
 

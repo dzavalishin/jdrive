@@ -112,7 +112,7 @@ public class Gui
 
 	static byte _terraform_size = 1;
 	static /* RailType */ int _last_built_railtype;
-	//extern void GenerateWorld(int mode, int size_x, int size_y);
+	//extern void doGenerateWorld(int mode, int size_x, int size_y);
 
 	//extern void GenerateIndustries();
 	//extern boolean GenerateTowns();
@@ -1171,7 +1171,7 @@ public class Gui
 		Global._random_seeds[0][0] = Hal.InteractiveRandom();
 		Global._random_seeds[0][1] = Hal.InteractiveRandom();
 
-		GenerateWorld.GenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
+		GenerateWorld.doGenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
 		Hal.MarkWholeScreenDirty();
 	}
 

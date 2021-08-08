@@ -976,7 +976,7 @@ public class DisasterCmd extends DisasterTables
 		if (GameOptions._opt.diff.disasters != 0) DoDisaster();
 	}
 
-	void StartupDisasters()
+	static void StartupDisasters()
 	{
 		ResetDisasterDelay();
 	}

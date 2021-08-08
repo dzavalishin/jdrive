@@ -434,6 +434,10 @@ public class Global {
 
 
 
+	public static void InitializeNameMgr()
+	{
+		_name_array = new HashMap<Integer,String>();
+	}
 
 
 

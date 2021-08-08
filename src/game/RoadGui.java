@@ -501,7 +501,7 @@ public class RoadGui
 		Window.AllocateWindowDesc(_truck_station_picker_desc);
 	}
 
-	void InitializeRoadGui()
+	static void InitializeRoadGui()
 	{
 		_road_depot_orientation = 3;
 		_road_station_picker_orientation = 3;

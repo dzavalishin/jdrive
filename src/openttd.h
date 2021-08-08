@@ -198,7 +198,7 @@ typedef struct Prices {
 	int32 build_industry;
 } Prices;
 */
-#define GAME_DIFFICULTY_NUM 18
+//#define GAME_DIFFICULTY_NUM 18
 /*
 typedef struct GameDifficulty {
 	int max_no_competitors;

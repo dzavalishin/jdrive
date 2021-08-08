@@ -2,7 +2,7 @@ package game;
 
 import game.tables.AirConstants;
 
-// TODO is it ok?
+// TODO move FTAClass here
 public abstract class Airport extends AirConstants 
 {
 

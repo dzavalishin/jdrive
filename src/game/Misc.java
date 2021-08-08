@@ -15,7 +15,7 @@ public class Misc extends MiscTables
 
 
 	// Calculate finalants that depend on the landscape type.
-	void InitializeLandscapeVariables(boolean only_finalants)
+	static void InitializeLandscapeVariables(boolean only_finalants)
 	{
 		final LandscapePredefVar lpd;
 		int i;

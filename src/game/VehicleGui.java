@@ -213,7 +213,7 @@ public class VehicleGui {
 
 
 	/* General Vehicle GUI based procedures that are independent of vehicle types */
-	void InitializeVehiclesGuiList()
+	static void InitializeVehiclesGuiList()
 	{
 		_railtype_selected_in_replace_gui = Train.RAILTYPE_RAIL;
 	}

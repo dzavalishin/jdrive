@@ -192,7 +192,7 @@ public class Main {
 			sprintf(filename, "%sopntitle.dat",  _path.second_data_dir);
 			if (SaveOrLoad(filename, SL_LOAD) != SL_OK)
 	#endif*/
-			GenerateWorld.GenerateWorld(1, 64, 64); // if failed loading, make empty world.
+			GenerateWorld.doGenerateWorld(1, 64, 64); // if failed loading, make empty world.
 		}
 
 		Global._pause = false;
@@ -368,7 +368,7 @@ public class Main {
 		VehicleGui.InitializeGUI();
 		Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
-		GenerateWorld.GenerateWorld(1, 64, 64); // Make the viewport initialization happy
+		GenerateWorld.doGenerateWorld(1, 64, 64); // Make the viewport initialization happy
 		/*
 		if ((network) && (_network_available)) {
 			if (network_conn != null) {
@@ -492,7 +492,7 @@ public class Main {
 		Gui.SetupColorsAndInitialWindow();
 
 		// Randomize world
-		GenerateWorld.GenerateWorld(0, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
+		GenerateWorld.doGenerateWorld(0, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
 
 		// In a dedicated server, the server does not play
 		if (Global._network_dedicated) {
@@ -527,7 +527,7 @@ public class Main {
 		Gui.SetupColorsAndInitialWindow();
 
 		// Startup the game system
-		GenerateWorld.GenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
+		GenerateWorld.doGenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
 
 		Global._local_player = PlayerID.get(Owner.OWNER_NONE);
 		Global.hal.MarkWholeScreenDirty();
@@ -710,7 +710,7 @@ public class Main {
 			break;
 
 		case SM_GENRANDLAND: /* Generate random land within scenario editor */
-			GenerateWorld.GenerateWorld(2, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
+			GenerateWorld.doGenerateWorld(2, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
 			// XXX: set date
 			Global._local_player = PlayerID.get( Owner.OWNER_NONE );
 			Global.hal.MarkWholeScreenDirty();

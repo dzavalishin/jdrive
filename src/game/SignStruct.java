@@ -304,7 +304,7 @@ public class SignStruct implements IPoolItem
 	 * Initialize the signs
 	 *
 	 */
-	void InitializeSigns()
+	static void InitializeSigns()
 	{
 		_sign_pool.CleanPool();
 		_sign_pool.AddBlockToPool();

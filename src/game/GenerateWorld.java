@@ -1,53 +1,55 @@
 package game;
 
+import game.ai.Ai;
+import game.util.GameDate;
 
 public class GenerateWorld {
 
 
-	static void GenerateWorld(int mode, int size_x, int size_y)
+	static void doGenerateWorld(int mode, int size_x, int size_y)
 	{
 		int i;
 
 		// Make sure everything is done via OWNER_NONE
-		Global._current_player = OWNER_NONE;
+		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 		Global._generating_world = true;
 		InitializeGame(size_x, size_y);
-		SetObjectToPlace(SPR_CURSOR_ZZZ, 0, 0, 0);
+		ViewPort.SetObjectToPlace(Sprite.SPR_CURSOR_ZZZ, 0, 0, 0);
 
 		// Must start economy early because of the costs.
-		StartupEconomy();
+		Economy.StartupEconomy();
 
 		// Don't generate landscape items when in the scenario editor.
 		if (mode == 1) {
 			// empty world in scenario editor
-			ConvertGroundTilesIntoWaterTiles();
+			Landscape.ConvertGroundTilesIntoWaterTiles();
 		} else {
-			GenerateLandscape();
-			GenerateClearTile();
+			Landscape.GenerateLandscape();
+			Clear.GenerateClearTile();
 
 			// only generate towns, tree and industries in newgame mode.
 			if (mode == 0) {
-				GenerateTowns();
-				GenerateTrees();
-				GenerateIndustries();
-				GenerateUnmovables();
+				Town.GenerateTowns();
+				Tree.GenerateTrees();
+				Industry.GenerateIndustries();
+				UnmovableCmd.GenerateUnmovables();
 			}
 		}
 
 		// These are probably pointless when inside the scenario editor.
-		StartupPlayers();
-		StartupEngines();
-		StartupDisasters();
-		_generating_world = false;
+		Player.StartupPlayers();
+		Engine.StartupEngines();
+		DisasterCmd.StartupDisasters();
+		Global._generating_world = false;
 
 		// No need to run the tile loop in the scenario editor.
 		if (mode != 1) {
 			for(i=0x500; i!=0; i--)
-				RunTileLoop();
+				Landscape.RunTileLoop();
 		}
 
-		ResetObjectToPlace();
+		ViewPort.ResetObjectToPlace();
 
 	}
 	
@@ -55,73 +57,74 @@ public class GenerateWorld {
 	
 	static void InitializeGame(int size_x, int size_y)
 	{
-		AllocateMap(size_x, size_y);
+		Map.AllocateMap(size_x, size_y);
 
-		AddTypeToEngines(); // make sure all engines have a type
+		Engine.AddTypeToEngines(); // make sure all engines have a type
 
-		SetObjectToPlace(SPR_CURSOR_ZZZ, 0, 0, 0);
+		ViewPort.SetObjectToPlace(Sprite.SPR_CURSOR_ZZZ, 0, 0, 0);
 
-		Global._pause = false;
-		Global._fast_forward = 0;
+		Global._pause = 0;
+		Global._fast_forward = false;
 		Global._tick_counter = 0;
 		Global._date_fract = 0;
-		Global._cur_tileloop_tile = 0;
+		Global._cur_tileloop_tile = null;
 
 		{
-			int starting = ConvertIntDate(Global._patches.starting_date);
+			int starting = GameDate.ConvertIntDate(Global._patches.starting_date);
 			if ( starting == -1) starting = 10958;
 			Global.SetDate(starting);
 		}
 
-		InitializeVehicles();
-		InitializeWaypoints();
-		InitializeDepot();
-		InitializeOrders();
+		Vehicle.InitializeVehicles();
+		WayPoint.InitializeWaypoints();
+		Depot.InitializeDepot();
+		Order.InitializeOrders();
 
-		InitNewsItemStructs();
-		InitializeLandscape();
-		InitializeClearLand();
-		InitializeRail();
-		InitializeRailGui();
-		InitializeRoad();
-		InitializeRoadGui();
-		InitializeAirportGui();
-		InitializeDock();
-		InitializeDockGui();
-		InitializeTowns();
-		InitializeTrees();
-		InitializeSigns();
-		InitializeStations();
-		InitializeIndustries();
+		NewsItem.InitNewsItemStructs();
+		Landscape.InitializeLandscape();
+		Clear.InitializeClearLand();
+		Rail.InitializeRail();
+		Rail.InitializeRailGui();
+		Road.InitializeRoad();
+		RoadGui.InitializeRoadGui();
+		AirportGui.InitializeAirportGui();
+		WaterCmd.InitializeDock();
+		DockGui.InitializeDockGui();
+		Town.InitializeTowns();
+		Tree.InitializeTrees();
+		SignStruct.InitializeSigns();
+		Station.InitializeStations();
+		Industry.InitializeIndustries();
 
-		InitializeNameMgr();
-		InitializeVehiclesGuiList();
-		InitializeTrains();
-		InitializeNPF();
+		Global.InitializeNameMgr();
+		VehicleGui.InitializeVehiclesGuiList();
+		TrainCmd.InitializeTrains();
+		Npf.InitializeNPF();
 
-		AI_Initialize();
-		InitializePlayers();
+		Ai.AI_Initialize();
+		Player.InitializePlayers();
 		InitializeCheats();
 
-		InitTextEffects();
-		InitTextMessage();
-		InitializeAnimatedTiles();
+		TextEffect.InitTextEffects();
+		TextEffect.InitTextMessage();
+		TextEffect.InitializeAnimatedTiles();
 
-		InitializeLandscapeVariables(false);
+		Misc.InitializeLandscapeVariables(false);
 
-		ResetObjectToPlace();
+		ViewPort.ResetObjectToPlace();
 	}
 	
 	static void InitializeCheats()
 	{
-		memset(_cheats, 0, sizeof(Cheats));
+		// TODO memset(_cheats, 0, sizeof(Cheats));
 	}
 
 
+	/* Global
 	static void InitializeNameMgr()
 	{
-		memset(_name_array, 0, sizeof(_name_array));
-	}
+		// TODO memset(_name_array, 0, sizeof(_name_array));
+	}*/
 	
 	
 }
