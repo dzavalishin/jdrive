@@ -41,14 +41,14 @@ public class Npf {
 	//}
 
 	//enum /* NPFNodeFlag */ int  { /* Flags for AyStarNode.userdata[NPF_NODE_FLAGS]. Use NPFGetBit() and NPFGetBit() to use them. */
-	public static final int NPF_FLAG_SEEN_SIGNAL; /* Used to mark that a signal was seen on the way; for rail only */
-	public static final int NPF_FLAG_REVERSE; /* Used to mark that this node was reached from the second start node; if applicable */
-	public static final int NPF_FLAG_LAST_SIGNAL_RED; /* Used to mark that the last signal on this path was red */
-	public static final int NPF_FLAG_PBS_EXIT; /* Used to mark tracks inside a pbs block; for rail only; for the end node; this is set when the path found goes through a pbs block */
-	public static final int NPF_FLAG_PBS_BLOCKED; /* Used to mark that this path crosses another pbs path */
-	public static final int NPF_FLAG_PBS_RED; /* Used to mark that this path goes through a red exit-pbs signal */
-	public static final int NPF_FLAG_PBS_CHOICE; /* Used to mark that the train has had a choice on this path */
-	public static final int NPF_FLAG_PBS_TARGET_SEEN; /* Used to mark that a target tile has been passed on this path */
+	public static final int NPF_FLAG_SEEN_SIGNAL = 0; /* Used to mark that a signal was seen on the way; for rail only */
+	public static final int NPF_FLAG_REVERSE = 1; /* Used to mark that this node was reached from the second start node; if applicable */
+	public static final int NPF_FLAG_LAST_SIGNAL_RED = 2; /* Used to mark that the last signal on this path was red */
+	public static final int NPF_FLAG_PBS_EXIT = 3; /* Used to mark tracks inside a pbs block; for rail only; for the end node; this is set when the path found goes through a pbs block */
+	public static final int NPF_FLAG_PBS_BLOCKED = 4; /* Used to mark that this path crosses another pbs path */
+	public static final int NPF_FLAG_PBS_RED = 5; /* Used to mark that this path goes through a red exit-pbs signal */
+	public static final int NPF_FLAG_PBS_CHOICE = 6; /* Used to mark that the train has had a choice on this path */
+	public static final int NPF_FLAG_PBS_TARGET_SEEN = 7; /* Used to mark that a target tile has been passed on this path */
 	//} ;
 
 
@@ -236,7 +236,7 @@ public class Npf {
 		return ((((part1 << NPF_HASH_HALFBITS) | part2)) + (NPF_HASH_SIZE * key2 / Rail.TRACKDIR_END)) % NPF_HASH_SIZE;
 	}
 
-	static int NPFCalcZero(AyStar  as, AyStarNode  current, OpenListNode  parent)
+	static int NPFCalcZero(AyStar as, AyStarNode  current, OpenListNode  parent)
 	{
 		return 0;
 	}
@@ -561,7 +561,7 @@ public class Npf {
 		/*Trackdir*/ int trackdir = current.direction;
 		int cost = 0;
 		/* HACK: We create a OpenListNode manualy, so we can call EndNodeCheck */
-		OpenListNode new_node;
+		OpenListNode new_node = new OpenListNode();
 
 		/* Determine base length */
 		switch (tile.GetTileType()) {
@@ -649,7 +649,7 @@ public class Npf {
 		/* HACK: We create a new_node here so we can call EndNodeCheck. Ugly as hell
 		 * of course... */
 		new_node.path.node = new AyStarNode(current);
-		if (as.EndNodeCheck(new_node) == AyStar.AYSTAR_FOUND_END_NODE && NPFGetFlag(current, NPF_FLAG_LAST_SIGNAL_RED))
+		if (as.EndNodeCheck.apply(as,new_node) == AyStar.AYSTAR_FOUND_END_NODE && NPFGetFlag(current, NPF_FLAG_LAST_SIGNAL_RED))
 			cost += Global._patches.npf_rail_lastred_penalty;
 
 		/* Check for slope */
@@ -667,7 +667,7 @@ public class Npf {
 			/* Penalise any depot tile that is not the last tile in the path. This
 			 * _should_ penalise every occurence of reversing in a depot (and only
 			 * that) */
-			if (as.EndNodeCheck(new_node) != AyStar.AYSTAR_FOUND_END_NODE)
+			if (as.EndNodeCheck.apply(as,new_node) != AyStar.AYSTAR_FOUND_END_NODE)
 				cost += Global._patches.npf_rail_depot_reverse_penalty;
 
 			/* Do we treat this depot as a pbs signal? */
@@ -818,7 +818,7 @@ public class Npf {
 		aystar.num_neighbours = 0;
 		Global.DEBUG_npf( 4, "Expanding: (%d, %d, %d) [%d]", src_tile.TileX(), src_tile.TileY(), src_trackdir, src_tile);
 
-		aystar.EndNodeCheck(current);
+		aystar.EndNodeCheck.apply(aystar,current);
 
 		/* Find dest tile */
 		if (src_tile.IsTileType(TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(src_tile.getMap().m5, 4, 4) == 0 &&
@@ -991,12 +991,12 @@ public class Npf {
 		/* Initialize Start Node(s) */
 		start1.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 		start1.user_data[NPF_NODE_FLAGS] = 0;
-		_npf_aystar.addstart(_npf_aystar, start1, 0);
+		_npf_aystar.addstart.apply(_npf_aystar, start1, 0);
 		if (start2!=null) {
 			start2.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 			start2.user_data[NPF_NODE_FLAGS] = 0;
 			NPFSetFlag(start2, NPF_FLAG_REVERSE, true);
-			_npf_aystar.addstart(_npf_aystar, start2, reverse_penalty);
+			_npf_aystar.addstart.apply(_npf_aystar, start2, reverse_penalty);
 		}
 
 		/* Initialize result */
@@ -1015,7 +1015,7 @@ public class Npf {
 		_npf_aystar.user_data[NPF_PBS_MODE] = pbs_mode;
 
 		/* GO! */
-		r = AyStarMain_Main(_npf_aystar);
+		r = AyStar.AyStarMain_Main(_npf_aystar);
 		assert(r != AyStar.AYSTAR_STILL_BUSY);
 
 		if (result.best_bird_dist != 0) {
@@ -1089,14 +1089,14 @@ public class Npf {
 		 */
 		TTDQueue<Depot> depots = new TTDQueueImpl<Depot>();
 		int r;
-		NPFFoundTargetData best_result;
+		NPFFoundTargetData best_result = new NPFFoundTargetData();
 		NPFFoundTargetData result = new NPFFoundTargetData();
 		NPFFindStationOrTileData target = new NPFFindStationOrTileData();
 		AyStarNode start = new AyStarNode();
 		Depot  current;
 		//Depot depot;
 
-		init_InsSort(depots);
+		//init_InsSort(depots);
 		/* Okay, let's find all depots that we can use first */
 		//FOR_ALL_DEPOTS(depot)
 		Depot.forEach( (depot) ->
@@ -1150,7 +1150,7 @@ public class Npf {
 			 * depot's manhattan distance. HACK: We call DistanceManhattan
 			 * again, we should probably modify the queue to give us that
 			 * value... */
-			if ( Map.DistanceManhattan(tile, current.xy.tile * NPF_TILE_LENGTH) > best_result.best_path_dist)
+			if ( Map.DistanceManhattan(tile, TileIndex.get(current.xy.tile * NPF_TILE_LENGTH) ) > best_result.best_path_dist)
 				break;
 
 			/* Initialize Start Node */
@@ -1158,7 +1158,7 @@ public class Npf {
 			 * return a not found then */
 			start.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 			start.user_data[NPF_NODE_FLAGS] = 0;
-			_npf_aystar.addstart(_npf_aystar, start, 0);
+			_npf_aystar.addstart.apply(_npf_aystar, start, 0);
 
 			/* Initialize result */
 			result.best_bird_dist = (int)-1;
@@ -1184,7 +1184,7 @@ public class Npf {
 
 	void InitializeNPF()
 	{
-		init_AyStar(_npf_aystar, NPFHash, NPF_HASH_SIZE);
+		AyStar.init_AyStar(_npf_aystar, Npf::NPFHash, NPF_HASH_SIZE);
 		_npf_aystar.loops_per_tick = 0;
 		_npf_aystar.max_path_cost = 0;
 		//_npf_aystar.max_search_nodes = 0;

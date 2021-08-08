@@ -94,16 +94,16 @@ public class AyStar
 		neighbours = new AyStarNode[12];
 	}
 
-	void init_AyStar(AyStar aystar, Hash_HashProc hash, int num_buckets) {
+	static void init_AyStar(AyStar aystar, Hash_HashProc hash, int num_buckets) {
 		// Allocated the Hash for the OpenList and ClosedList
-		init_Hash(aystar.OpenListHash, hash, num_buckets);
-		init_Hash(aystar.ClosedListHash, hash, num_buckets);
+		// TODO init_Hash(aystar.OpenListHash, hash, num_buckets);
+		// TODO init_Hash(aystar.ClosedListHash, hash, num_buckets);
 
 		// Set up our sorting queue
 		//  BinaryHeap allocates a block of 1024 nodes
 		//  When that one gets full it reserves an other one, till this number
 		//  That is why it can stay this high
-		init_BinaryHeap(aystar.OpenListQueue, 102400);
+		//init_BinaryHeap(aystar.OpenListQueue, 102400); // TODO kill init_BinaryHeap?
 
 		aystar.addstart	= AyStar::AyStarMain_AddStartNode;
 		aystar.main		= AyStar::AyStarMain_Main;
@@ -208,7 +208,7 @@ public class AyStar
 		if (AyStarMain_ClosedList_IsInList(aystar, current) != null) return AYSTAR_DONE;
 
 		// Calculate the G-value for this node
-		new_g = aystar.CalculateG(aystar, current, parent);
+		new_g = aystar.CalculateG.apply(aystar, current, parent);
 		// If the value was INVALID_NODE, we don't do anything with this node
 		if (new_g == AYSTAR_INVALID_NODE) return AYSTAR_DONE;
 
@@ -219,7 +219,7 @@ public class AyStar
 		if (aystar.max_path_cost != 0 && (int)new_g > aystar.max_path_cost) return AYSTAR_DONE;
 
 		// Calculate the h-value
-		new_h = aystar.CalculateH(aystar, current, parent);
+		new_h = aystar.CalculateH.apply(aystar, current, parent);
 		// There should not be given any error-code..
 		assert(new_h >= 0);
 
@@ -272,10 +272,10 @@ public class AyStar
 		if (current == null) return AYSTAR_EMPTY_OPENLIST;
 
 		// Check for end node and if found, return that code
-		if (aystar.EndNodeCheck(aystar, current) == AYSTAR_FOUND_END_NODE) {
+		if (aystar.EndNodeCheck.apply(aystar, current) == AYSTAR_FOUND_END_NODE) {
 			if (aystar.FoundEndNode != null)
-				aystar.FoundEndNode(aystar, current);
-			free(current);
+				aystar.FoundEndNode.apply(aystar, current);
+			//free(current);
 			return AYSTAR_FOUND_END_NODE;
 		}
 
@@ -283,12 +283,12 @@ public class AyStar
 		AyStarMain_ClosedList_Add(aystar, current.path);
 
 		// Load the neighbours
-		aystar.GetNeighbours(aystar, current);
+		aystar.GetNeighbours.apply(aystar, current);
 
 		// Go through all neighbours
 		for (i=0;i<aystar.num_neighbours;i++) {
 			// Check and add them to the OpenList if needed
-			r = aystar.checktile(aystar, aystar.neighbours[i], current);
+			r = aystar.checktile.apply(aystar, aystar.neighbours[i], current);
 		}
 
 		// Free the node
@@ -350,7 +350,7 @@ public class AyStar
 		int r, i = 0;
 		// Loop through the OpenList
 		//  Quit if result is no AYSTAR_STILL_BUSY or is more than loops_per_tick
-		while ((r = aystar.loop(aystar)) == AYSTAR_STILL_BUSY && (aystar.loops_per_tick == 0 || ++i < aystar.loops_per_tick)) { }
+		while ((r = aystar.loop.apply(aystar)) == AYSTAR_STILL_BUSY && (aystar.loops_per_tick == 0 || ++i < aystar.loops_per_tick)) { }
 		/*#ifdef AYSTAR_DEBUG
 		if (r == AYSTAR_FOUND_END_NODE)
 			printf("[AyStar] Found path!\n");
@@ -361,11 +361,11 @@ public class AyStar
 	#endif*/
 
 		if (aystar.BeforeExit != null)
-			aystar.BeforeExit(aystar);
+			aystar.BeforeExit.apply(aystar);
 
 		if (r != AYSTAR_STILL_BUSY)
 			// We're done, clean up 
-			aystar.clear(aystar);
+			aystar.clear.apply(aystar);
 
 		// Check result-value
 		if (r == AYSTAR_FOUND_END_NODE) return AYSTAR_FOUND_END_NODE;
@@ -505,5 +505,10 @@ interface AyStar_Clear {
 	void apply(AyStar aystar);
 }
 
+//typedef uint Hash_HashProc(uint key1, uint key2);
+@FunctionalInterface
+interface Hash_HashProc {
+	int apply(int key1, int key2);
+}
 
 
