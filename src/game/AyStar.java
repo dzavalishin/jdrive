@@ -19,14 +19,14 @@ public abstract class AyStar
 	 * afterwards (except for user_data and user_path)! (free and init again to change them) */
 
 	/* These should point to the application specific routines that do the
-	 * actual work 
-		AyStar_CalculateG* CalculateG;
-		AyStar_CalculateH* CalculateH;
-		AyStar_GetNeighbours* GetNeighbours;
-		AyStar_EndNodeCheck* EndNodeCheck;
-		AyStar_FoundEndNode* FoundEndNode;
-		AyStar_BeforeExit* BeforeExit;
-	 */
+	 * actual work */ 
+	AyStar_CalculateG CalculateG;
+	AyStar_CalculateH CalculateH;
+	AyStar_GetNeighbours GetNeighbours;
+	AyStar_EndNodeCheck EndNodeCheck;
+	AyStar_FoundEndNode FoundEndNode;
+	AyStar_BeforeExit BeforeExit;
+
 
 	/*
 	 * This function is called to calculate the G-value for AyStar Algorithm.
@@ -34,7 +34,11 @@ public abstract class AyStar
 	 *	AYSTAR_INVALID_NODE : indicates an item is not valid (e.g.: unwalkable)
 	 *	Any value >= 0 : the g-value for this tile
 	 */
-	abstract int CalculateG(AyStarNode current, OpenListNode parent);
+	//abstract int CalculateG(AyStarNode current, OpenListNode parent);
+	@FunctionalInterface
+	interface AyStar_CalculateG {
+		int apply(AyStar as, AyStarNode current, OpenListNode parent);
+	}
 
 	/*
 	 * This function is called to calculate the H-value for AyStar Algorithm.
@@ -43,14 +47,19 @@ public abstract class AyStar
 	 *  return values can be:
 	 *	Any value >= 0 : the h-value for this tile
 	 */
-	abstract int CalculateH(AyStarNode current, OpenListNode parent);
-
+	@FunctionalInterface
+	interface AyStar_CalculateH {
+		int apply(AyStar as, AyStarNode current, OpenListNode parent);
+	}
 	/*
 	 * This function request the tiles around the current tile and put them in tiles_around
 	 *  tiles_around is never resetted, so if you are not using directions, just leave it alone.
 	 * Warning: never add more tiles_around than memory allocated for it.
 	 */
-	abstract  void GetNeighbours(OpenListNode current);
+	@FunctionalInterface
+	interface AyStar_GetNeighbours {
+		void apply(AyStar as, OpenListNode current);
+	}
 
 	/*
 	 * This function is called to check if the end-tile is found
@@ -66,19 +75,27 @@ public abstract class AyStar
 	 * don't try to enter the file tile with a 90-degree curve. So please, leave
 	 * this an OpenListNode, it works just fine -- TrueLight
 	 */
-	abstract int EndNodeCheck(OpenListNode current);
-
+	@FunctionalInterface
+	interface AyStar_EndNodeCheck {
+		int apply(AyStar as, OpenListNode current);
+	}
+	
 	/*
 	 * If the End Node is found, this function is called.
 	 *  It can do, for example, calculate the route and put that in an array
 	 */
-	abstract void FoundEndNode(OpenListNode current);
-
+	@FunctionalInterface
+	interface AyStar_FoundEndNode {
+		void apply(AyStar as, OpenListNode current);
+	}
+	
 	/*
 	 * Is called when aystar ends it pathfinding, but before cleanup.
 	 */
-	abstract void BeforeExit();
-
+	@FunctionalInterface
+	interface AyStar_BeforeExit {
+	void apply(AyStar as);
+	}
 
 
 	/* These are completely untouched by AyStar, they can be accesed by
@@ -94,7 +111,7 @@ public abstract class AyStar
 
 	// [dz] can be some superclass or interface of NPFFoundTargetData? 
 	NPFFoundTargetData user_path;
-	
+
 	/* How many loops are there called before AyStarMain_Main gives
 	 * control back to the caller. 0 = until done */
 	byte loops_per_tick;
@@ -107,7 +124,7 @@ public abstract class AyStar
 	/* These should be filled with the neighbours of a tile by
 	 * GetNeighbours */
 	AyStarNode neighbours[];
-	byte num_neighbours;
+	int num_neighbours;
 
 	/* These will contain the methods for manipulating the AyStar. Only
 	 * main() should be called externally * /

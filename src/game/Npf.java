@@ -113,7 +113,7 @@ public class Npf {
 	/* The cost of each trackdir. A diagonal piece is the full NPF_TILE_LENGTH,
 	 * the shorter piece is sqrt(2)/2*NPF_TILE_LENGTH =~ 0.7071
 	 */
-	static final int NPF_STRAIGHT_LENGTH = (int)(NPF_TILE_LENGTH * STRAIGHT_TRACK_LENGTH);
+	static final int NPF_STRAIGHT_LENGTH = (int)(NPF_TILE_LENGTH * Map.STRAIGHT_TRACK_LENGTH);
 
 	//static final int _trackdir_length[TRACKDIR_END] = 
 	static final int _trackdir_length[] = 
@@ -143,7 +143,7 @@ public class Npf {
 
 		/* Don't factor out NPF_TILE_LENGTH below, this will round values and lose
 		 * precision */
-		return diagTracks * NPF_TILE_LENGTH + straightTracks * NPF_TILE_LENGTH * STRAIGHT_TRACK_LENGTH;
+		return diagTracks * NPF_TILE_LENGTH + straightTracks * NPF_TILE_LENGTH * Map.STRAIGHT_TRACK_LENGTH;
 	}
 
 	/**
@@ -165,11 +165,11 @@ public class Npf {
 		}
 
 		/* Cannot go through the back of a depot */
-		if (tile.IsTileDepotType(Global.TRANSPORT_RAIL) && (exitdir != tile.GetDepotDirection(Global.TRANSPORT_RAIL)))
+		if (tile.IsTileDepotType(Global.TRANSPORT_RAIL) && (exitdir != Depot.GetDepotDirection(tile,Global.TRANSPORT_RAIL)))
 			return true;
 
 		/* Calculate next tile */
-		dst_tile = tile + TileIndex.TileOffsByDir(exitdir);
+		dst_tile = tile.iadd( TileIndex.TileOffsByDir(exitdir) );
 		// determine the track status on the next tile.
 		ts = dst_tile.GetTileTrackStatus(Global.TRANSPORT_RAIL) & Rail.TrackdirReachesTrackdirs(trackdir);
 
@@ -245,9 +245,9 @@ public class Npf {
 	 * for this we assume the station is a rectangle,
 	 * as defined by its top tile (st.train_tile) and its width/height (st.trainst_w, st.trainst_h)
 	 */
-	static TileIndex CalcClosestStationTile(StationID station, TileIndex tile)
+	static TileIndex CalcClosestStationTile(/*StationID*/ int station, TileIndex tile)
 	{
-		final Station  st = Station.GetStation(station.id);
+		final Station  st = Station.GetStation(station);
 
 		int minx = st.train_tile.TileX();  // topmost corner of station
 		int miny = st.train_tile.TileY();
@@ -302,7 +302,7 @@ public class Npf {
 			PathNode curr;
 			PathNode prev;
 			TileIndex start = TileIndex.INVALID_TILE;
-			byte trackdir = 0;
+			int trackdir = 0;
 
 			parent.node = ftd.node;
 			parent.parent = ftd.path;
@@ -313,8 +313,8 @@ public class Npf {
 				if (!NPFGetFlag(curr.node, NPF_FLAG_PBS_EXIT) || eol_end) {
 					/* check for already reserved track on this path, if they clash with what we
 					   currently trying to reserve, we have a self-crossing path :-( */
-					if ((Pbs.PBSTileUnavail(curr.node.tile) & (1 << curr.node.direction))
-							&& !(Pbs.PBSTileReserved(curr.node.tile) & (1 << (curr.node.direction & 7)))
+					if ( 0 != (Pbs.PBSTileUnavail(curr.node.tile) & (1 << curr.node.direction))
+							&& 0==(Pbs.PBSTileReserved(curr.node.tile) & (1 << (curr.node.direction & 7)))
 							&& (start != TileIndex.INVALID_TILE)) {
 						/* It's actually quite bad if this happens, it means the pathfinder
 						 * found a path that is intersecting with itself, which is a very bad
@@ -428,7 +428,7 @@ public class Npf {
 			/* We just popped out if this tunnel, since were
 			 * facing the tunnel exit */
 			FindLengthOfTunnelResult flotr;
-			flotr = FindLengthOfTunnel(tile, Rail.ReverseDiagdir(exitdir));
+			flotr = Pathfind.FindLengthOfTunnel(tile, Rail.ReverseDiagdir(exitdir));
 			return flotr.length * NPF_TILE_LENGTH;
 			//TODO: Penalty for tunnels?
 		} else {
@@ -440,7 +440,7 @@ public class Npf {
 
 	static int NPFSlopeCost(AyStarNode  current)
 	{
-		TileIndex next = current.tile + TileIndex.TileOffsByDir(Rail.TrackdirToExitdir(current.direction));
+		TileIndex next = current.tile.iadd( TileIndex.TileOffsByDir(Rail.TrackdirToExitdir(current.direction)) );
 		int x,y;
 		int z1,z2;
 
@@ -502,7 +502,7 @@ public class Npf {
 
 		cost = _trackdir_length[trackdir]; /* Should be different for diagonal tracks */
 
-		if (IsBuoyTile(current.tile) && Rail.IsDiagonalTrackdir(trackdir))
+		if (current.tile.IsBuoyTile() && Rail.IsDiagonalTrackdir(trackdir))
 			cost += Global._patches.npf_buoy_penalty; /* A small penalty for going over buoys */
 
 		if (current.direction != Rail.NextTrackdir(parent.path.node.direction))
@@ -598,7 +598,7 @@ public class Npf {
 		if ((as.user_data[NPF_PBS_MODE] != Pbs.PBS_MODE_NONE) 
 				&& !(NPFGetFlag(current, NPF_FLAG_PBS_EXIT)) 
 				&& !(NPFGetFlag(current, NPF_FLAG_PBS_BLOCKED)) 
-				&& (Pbs.PBSTileUnavail(tile) & (1<<trackdir))) 
+				&& 0 != (Pbs.PBSTileUnavail(tile) & (1<<trackdir))) 
 		{
 			NPFSetFlag(current, NPF_FLAG_PBS_BLOCKED, true);
 		};
@@ -649,7 +649,7 @@ public class Npf {
 		/* HACK: We create a new_node here so we can call EndNodeCheck. Ugly as hell
 		 * of course... */
 		new_node.path.node = new AyStarNode(current);
-		if (as.EndNodeCheck(as, new_node) == AyStar.AYSTAR_FOUND_END_NODE && NPFGetFlag(current, NPF_FLAG_LAST_SIGNAL_RED))
+		if (as.EndNodeCheck(new_node) == AyStar.AYSTAR_FOUND_END_NODE && NPFGetFlag(current, NPF_FLAG_LAST_SIGNAL_RED))
 			cost += Global._patches.npf_rail_lastred_penalty;
 
 		/* Check for slope */
@@ -667,7 +667,7 @@ public class Npf {
 			/* Penalise any depot tile that is not the last tile in the path. This
 			 * _should_ penalise every occurence of reversing in a depot (and only
 			 * that) */
-			if (as.EndNodeCheck(as, new_node) != AyStar.AYSTAR_FOUND_END_NODE)
+			if (as.EndNodeCheck(new_node) != AyStar.AYSTAR_FOUND_END_NODE)
 				cost += Global._patches.npf_rail_depot_reverse_penalty;
 
 			/* Do we treat this depot as a pbs signal? */
@@ -751,7 +751,7 @@ public class Npf {
 	 * @todo           This function should be used in other places than just NPF,
 	 *                 maybe moved to another file too.
 	 */
-	static boolean VehicleMayEnterTile(Owner owner, TileIndex tile, /*DiagDirection*/ int enterdir)
+	static boolean VehicleMayEnterTile(PlayerID owner, TileIndex tile, /*DiagDirection*/ int enterdir)
 	{
 		if (
 				tile.IsTileType( TileTypes.MP_RAILWAY) /* Rail tile (also rail depot) */
@@ -778,7 +778,7 @@ public class Npf {
 				if ((tile.getMap().m5 & 0xC6) == 0xC0 && BitOps.GB(tile.getMap().m5, 0, 1) == (enterdir & 0x1)) {
 					/* on the middle part of a railway bridge: find bridge ending */
 					while (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && !((tile.getMap().m5 & 0xC6) == 0x80)) {
-						tile += TileIndex.TileOffsByDir(BitOps.GB(tile.getMap().m5, 0, 1));
+						tile = tile.iadd( TileIndex.TileOffsByDir(BitOps.GB(tile.getMap().m5, 0, 1)) );
 					}
 				}
 				/* if we were on a railway middle part, we are now at a railway bridge ending */
@@ -818,7 +818,7 @@ public class Npf {
 		aystar.num_neighbours = 0;
 		Global.DEBUG_npf( 4, "Expanding: (%d, %d, %d) [%d]", src_tile.TileX(), src_tile.TileY(), src_trackdir, src_tile);
 
-		aystar.EndNodeCheck(aystar, current);
+		aystar.EndNodeCheck(current);
 
 		/* Find dest tile */
 		if (src_tile.IsTileType(TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(src_tile.getMap().m5, 4, 4) == 0 &&
@@ -826,7 +826,7 @@ public class Npf {
 			/* This is a tunnel. We know this tunnel is our type,
 			 * otherwise we wouldn't have got here. It is also facing us,
 			 * so we should skip it's body */
-			flotr = FindLengthOfTunnel(src_tile, src_exitdir);
+			flotr = Pathfind.FindLengthOfTunnel(src_tile, src_exitdir);
 			dst_tile = flotr.tile;
 		} else {
 			if (type != Global.TRANSPORT_WATER && (src_tile.IsRoadStationTile() || src_tile.IsTileDepotType(type)))
@@ -838,7 +838,7 @@ public class Npf {
 				/*DiagDirection*/ int exitdir;
 				/* Find out the exit direction first */
 				if (src_tile.IsRoadStationTile())
-					exitdir = GetRoadStationDir(src_tile);
+					exitdir = Station.GetRoadStationDir(src_tile);
 				else /* Train or road depot. Direction is stored the same for both, in map5 */
 					exitdir = Depot.GetDepotDirection(src_tile, type);
 
@@ -875,13 +875,13 @@ public class Npf {
 
 		/* check correct rail type (mono, maglev, etc) */
 		if (type == Global.TRANSPORT_RAIL) {
-			/* RailType */ int dst_type = dst_tile.GetTileRailType(src_trackdir);
+			/* RailType */ int dst_type = Rail.GetTileRailType( dst_tile, src_trackdir);
 			if (!Rail.IsCompatibleRail(aystar.user_data[NPF_RAILTYPE], dst_type))
 				return;
 		}
 
 		/* Check the owner of the tile */
-		if (!VehicleMayEnterTile(aystar.user_data[NPF_OWNER], dst_tile, Rail.TrackdirToExitdir(src_trackdir))) {
+		if (!VehicleMayEnterTile( PlayerID.get( aystar.user_data[NPF_OWNER] ), dst_tile, Rail.TrackdirToExitdir(src_trackdir))) {
 			return;
 		}
 
@@ -891,7 +891,7 @@ public class Npf {
 			/* Road stations and road and train depots return 0 on GTTS, so we have to do this by hand... */
 			/*DiagDirection*/ int exitdir;
 			if (dst_tile.IsRoadStationTile())
-				exitdir = dst_tile.GetRoadStationDir();
+				exitdir = Station.GetRoadStationDir(dst_tile);
 			else /* Road or train depot */
 				exitdir = Depot.GetDepotDirection(dst_tile, type);
 			/* Find the trackdirs that are available for a depot or station with this
@@ -916,7 +916,7 @@ public class Npf {
 
 		/* When looking for 'any' route, ie when already inside a pbs block, discard all tracks that would cross
 		   other reserved tracks, so we *always* will find a valid route if there is one */
-		if (!(NPFGetFlag(current.path.node, NPF_FLAG_PBS_EXIT)) && (aystar.user_data[NPF_PBS_MODE] == PBS_MODE_ANY))
+		if (!(NPFGetFlag(current.path.node, NPF_FLAG_PBS_EXIT)) && (aystar.user_data[NPF_PBS_MODE] == Pbs.PBS_MODE_ANY))
 			trackdirbits &= ~Pbs.PBSTileUnavail(dst_tile);
 
 		Global.DEBUG_npf(6,"After filtering: (%d, %d), possible trackdirs: %#x", dst_tile.TileX(), dst_tile.TileY(), trackdirbits);
@@ -961,7 +961,10 @@ public class Npf {
 	 * search by specifiying CalcZero as our heuristic.
 	 */
 	//static NPFFoundTargetData NPFRouteInternal(AyStarNode  start1, AyStarNode  start2, NPFFindStationOrTileData  target, AyStar_EndNodeCheck target_proc, AyStar_CalculateH heuristic_proc, TransportType type, Owner owner, /* RailType */ int railtype, int reverse_penalty, byte pbs_mode)
-	static NPFFoundTargetData NPFRouteInternal(AyStarNode  start1, AyStarNode  start2, NPFFindStationOrTileData  target, AyStar_EndNodeCheck target_proc, AyStar_CalculateH heuristic_proc, int type, Owner owner, /* RailType */ int railtype, int reverse_penalty, byte pbs_mode)
+	static NPFFoundTargetData NPFRouteInternal(
+			AyStarNode  start1, AyStarNode  start2, NPFFindStationOrTileData  target, 
+			AyStar_EndNodeCheck target_proc, AyStar_CalculateH heuristic_proc, int type, 
+			PlayerID owner, /* RailType */ int railtype, int reverse_penalty, byte pbs_mode)
 	{
 		int r;
 		NPFFoundTargetData result = new NPFFoundTargetData();
@@ -969,28 +972,28 @@ public class Npf {
 		/* Initialize procs */
 		_npf_aystar.CalculateH = heuristic_proc;
 		_npf_aystar.EndNodeCheck = target_proc;
-		_npf_aystar.FoundEndNode = NPFSaveTargetData;
-		_npf_aystar.GetNeighbours = NPFFollowTrack;
+		_npf_aystar.FoundEndNode = Npf::NPFSaveTargetData;
+		_npf_aystar.GetNeighbours = Npf::NPFFollowTrack;
 		if (type == Global.TRANSPORT_RAIL)
-			_npf_aystar.CalculateG = NPFRailPathCost;
+			_npf_aystar.CalculateG = Npf::NPFRailPathCost;
 		else if (type == Global.TRANSPORT_ROAD)
-			_npf_aystar.CalculateG = NPFRoadPathCost;
+			_npf_aystar.CalculateG = Npf::NPFRoadPathCost;
 		else if (type == Global.TRANSPORT_WATER)
-			_npf_aystar.CalculateG = NPFWaterPathCost;
+			_npf_aystar.CalculateG = Npf::NPFWaterPathCost;
 		else
-			assert(0);
+			assert false;
 
 		if (pbs_mode != Pbs.PBS_MODE_NONE)
-			_npf_aystar.BeforeExit = NPFReservePBSPath;
+			_npf_aystar.BeforeExit = Npf::NPFReservePBSPath;
 		else
 			_npf_aystar.BeforeExit = null;
 
 		/* Initialize Start Node(s) */
-		start1.user_data[NPF_TRACKDIR_CHOICE] = Rail.Rail.INVALID_TRACKDIR;
+		start1.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 		start1.user_data[NPF_NODE_FLAGS] = 0;
 		_npf_aystar.addstart(_npf_aystar, start1, 0);
 		if (start2) {
-			start2.user_data[NPF_TRACKDIR_CHOICE] = Rail.Rail.INVALID_TRACKDIR;
+			start2.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 			start2.user_data[NPF_NODE_FLAGS] = 0;
 			NPFSetFlag(start2, NPF_FLAG_REVERSE, true);
 			_npf_aystar.addstart(_npf_aystar, start2, reverse_penalty);
@@ -999,7 +1002,7 @@ public class Npf {
 		/* Initialize result */
 		result.best_bird_dist = (int)-1;
 		result.best_path_dist = (int)-1;
-		result.best_trackdir = Rail.Rail.INVALID_TRACKDIR;
+		result.best_trackdir = Rail.INVALID_TRACKDIR;
 		_npf_aystar.user_path = result;
 
 		/* Initialize target */

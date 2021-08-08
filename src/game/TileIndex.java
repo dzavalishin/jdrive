@@ -725,6 +725,10 @@ public class TileIndex implements Comparable<TileIndex>{
 	public boolean IsRailWaypoint() {
 		return WayPoint.IsRailWaypoint(this);
 	}
+
+	public int GetRailTileType() {
+		return Rail.GetRailTileType(this);
+	}
 	
 
 }

@@ -152,17 +152,17 @@ public class Bridge
 			int tot_bridgedata_len;	// total length of bridge
 
 			// get absolute bridge length
-			bridge_len = GetBridgeLength(start, end);
+			bridge_len = TunnelBridgeCmd.GetBridgeLength(start, end);
 			tot_bridgedata_len = bridge_len + 2;
 
-			tot_bridgedata_len = CalcBridgeLenCostFactor(tot_bridgedata_len);
+			tot_bridgedata_len = TunnelBridgeCmd.CalcBridgeLenCostFactor(tot_bridgedata_len);
 
 			for (bridge_type = 0; bridge_type != MAX_BRIDGES; bridge_type++) {	// loop for all bridgetypes
-				if (CheckBridge_Stuff(bridge_type, bridge_len)) {
+				if (TunnelBridgeCmd.CheckBridge_Stuff(bridge_type, bridge_len)) {
 					final Bridge b = _bridge[bridge_type];
 					// bridge is accepted, add to list
 					// add to terraforming & bulldozing costs the cost of the bridge itself (not computed with DC_QUERY_COST)
-					_bridgedata.costs[j] = ret + (((long)tot_bridgedata_len * Global._price.build_bridge * b.price) >> 8);
+					_bridgedata.costs[j] = (int) (ret + (((long)tot_bridgedata_len * Global._price.build_bridge * b.price) >> 8));
 					_bridgedata.indexes[j] = (byte) bridge_type;
 					j++;
 				}
@@ -176,7 +176,7 @@ public class Bridge
 			w.vscroll.cap = 4;
 			w.vscroll.count = (byte)j;
 		} else {
-			Global.ShowErrorMessage(errmsg, Str.STR_5015_CAN_T_BUILD_BRIDGE_HERE, end.TileX() * 16, end.TileY() * 16);
+			Global.ShowErrorMessage(errmsg, new StringID(Str.STR_5015_CAN_T_BUILD_BRIDGE_HERE), end.TileX() * 16, end.TileY() * 16);
 		}
 	}
 
