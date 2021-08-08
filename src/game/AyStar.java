@@ -1,6 +1,6 @@
 package game;
 
-public abstract class AyStar 
+public class AyStar 
 {
 
 
@@ -68,13 +68,14 @@ public abstract class AyStar
 	AyStar_CheckTile checktile;
 
 
+	/*
 	abstract void addstart(AyStarNode start_node, int g);
 	abstract int main();
 	abstract int loop();
 	abstract int checktile(AyStarNode current, OpenListNode parent);
 	abstract void free();
 	abstract void clear();
-
+	*/
 
 	/* These will contain the open and closed lists */
 
