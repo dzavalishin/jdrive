@@ -1087,7 +1087,7 @@ public class Npf {
 		 * always find the closest depot. It will probably be most efficient
 		 * for ships, since the heuristic will not be to far off then. I hope.
 		 */
-		TTDQueue<Depot> depots;
+		TTDQueue<Depot> depots = new TTDQueueImpl<Depot>();
 		int r;
 		NPFFoundTargetData best_result;
 		NPFFoundTargetData result = new NPFFoundTargetData();
