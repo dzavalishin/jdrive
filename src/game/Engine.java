@@ -29,7 +29,7 @@ public class Engine extends EngineTables {
 	
 	
 	static public final int INVALID_ENGINE  = Vehicle.INVALID_ENGINE;
-	static public final EngineID INVALID_ENGINE_ID  = new EngineID( Vehicle.INVALID_ENGINE );
+	static public final EngineID INVALID_ENGINE_ID  = EngineID.get( Vehicle.INVALID_ENGINE );
 
 
 

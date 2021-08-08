@@ -780,7 +780,7 @@ public class Clear extends ClearTables {
 		do {
 			tile = TileIndex.RandomTile();
 			if (tile.IsTileType( TileTypes.MP_CLEAR)) 
-				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 2, 1);
+				tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 2, 1);
 		} while (--i > 0);
 
 		/* add grey squares */

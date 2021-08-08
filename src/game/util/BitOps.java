@@ -164,13 +164,13 @@ public class BitOps {
 	 * left. Ie, 10110100 returns 2, 00000001 returns 0, etc. When x == 0 returns
 	 * 0.
 	 */
-	public static int FIND_FIRST_BIT(int x) { return TrackPathFinderTables._ffb_64[(x)]; }
+	public static int FIND_FIRST_BIT(int x) { return TrackPathFinderTables._ffb_64[(x & 0xFF)]; }
 	/* Returns x with the first bit that is not zero, counted from the left, set
 	 * to zero. So, 10110100 returns 10110000, 00000001 returns 00000000, etc.
 	 */
-	public static int KILL_FIRST_BIT(int x) { return TrackPathFinderTables._ffb_64[(x)+64]; }
-	/*
-	static  int FindFirstBit2x64(int value)
+	public static int KILL_FIRST_BIT(int x) { return TrackPathFinderTables._ffb_64[(x & 0xFF)+64]; }
+	
+	public static  int FindFirstBit2x64(int value)
 	{
 
 	//	int i = 0;
@@ -191,7 +191,7 @@ public class BitOps {
 	}
 
 
-	static  int KillFirstBit2x64(int value)
+	public static  int KillFirstBit2x64(int value)
 	{
 		if (GB(value, 0, 8) == 0) {
 			return KILL_FIRST_BIT(GB(value, 8, 6)) << 8;
@@ -199,7 +199,7 @@ public class BitOps {
 			return value & (KILL_FIRST_BIT(GB(value, 0, 6)) | 0x3F00);
 		}
 	}
-	 */
+
 	/* [min,max), strictly less than */
 	//static void IS_BYTE_INSIDE(a,min,max) ((byte)((a)-(min)) < (byte)((max)-(min)))
 	//IS_BYTE_INSIDE(a,min,max)
