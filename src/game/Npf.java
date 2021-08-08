@@ -964,7 +964,7 @@ public class Npf {
 	static NPFFoundTargetData NPFRouteInternal(
 			AyStarNode  start1, AyStarNode  start2, NPFFindStationOrTileData  target, 
 			AyStar_EndNodeCheck target_proc, AyStar_CalculateH heuristic_proc, int type, 
-			PlayerID owner, /* RailType */ int railtype, int reverse_penalty, byte pbs_mode)
+			PlayerID owner, /* RailType */ int railtype, int reverse_penalty, int pbs_mode)
 	{
 		int r;
 		NPFFoundTargetData result = new NPFFoundTargetData();
@@ -992,7 +992,7 @@ public class Npf {
 		start1.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 		start1.user_data[NPF_NODE_FLAGS] = 0;
 		_npf_aystar.addstart(_npf_aystar, start1, 0);
-		if (start2) {
+		if (start2!=null) {
 			start2.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 			start2.user_data[NPF_NODE_FLAGS] = 0;
 			NPFSetFlag(start2, NPF_FLAG_REVERSE, true);
@@ -1010,7 +1010,7 @@ public class Npf {
 
 		/* Initialize user_data */
 		_npf_aystar.user_data[NPF_TYPE] = type;
-		_npf_aystar.user_data[NPF_OWNER] = owner;
+		_npf_aystar.user_data[NPF_OWNER] = owner.id;
 		_npf_aystar.user_data[NPF_RAILTYPE] = railtype;
 		_npf_aystar.user_data[NPF_PBS_MODE] = pbs_mode;
 
@@ -1019,7 +1019,7 @@ public class Npf {
 		assert(r != AyStar.AYSTAR_STILL_BUSY);
 
 		if (result.best_bird_dist != 0) {
-			if (target) {
+			if (target!=null) {
 				Global.DEBUG_misc( 1, "NPF: Could not find route to 0x%x from 0x%x.", target.dest_coords, start1.tile);
 			} else {
 				/* Assumption: target == null, so we are looking for a depot */
@@ -1045,7 +1045,7 @@ public class Npf {
 		start2.direction = trackdir2;
 		start2.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
 
-		return NPFRouteInternal(start1, (IsValidTile(tile2) ? start2 : null), target, NPFFindStationOrTile, NPFCalcStationOrTileHeuristic, type, owner, railtype, 0, pbs_mode);
+		return NPFRouteInternal(start1, (tile2.IsValidTile() ? start2 : null), target, Npf::NPFFindStationOrTile, Npf::NPFCalcStationOrTileHeuristic, type, owner, railtype, 0, pbs_mode);
 	}
 
 	static NPFFoundTargetData NPFRouteToStationOrTile(TileIndex tile, /*Trackdir*/ int trackdir, NPFFindStationOrTileData  target, /*TransportType*/ int type, PlayerID owner, /* RailType */ int railtype, int pbs_mode)
@@ -1069,12 +1069,12 @@ public class Npf {
 
 		/* perform a breadth first search. Target is null,
 		 * since we are just looking for any depot...*/
-		return NPFRouteInternal(start1, (IsValidTile(tile2) ? start2 : null), null, NPFFindDepot, NPFCalcZero, type, owner, railtype, reverse_penalty, PBS_MODE_NONE);
+		return NPFRouteInternal(start1, (tile2.IsValidTile() ? start2 : null), null, Npf::NPFFindDepot, Npf::NPFCalcZero, type, owner, railtype, reverse_penalty, Pbs.PBS_MODE_NONE);
 	}
 
 	static NPFFoundTargetData NPFRouteToDepotBreadthFirst(TileIndex tile, /*Trackdir*/ int trackdir, /*TransportType*/ int type, PlayerID owner, /* RailType */ int railtype)
 	{
-		return NPFRouteToDepotBreadthFirstTwoWay(tile, trackdir, INVALID_TILE, 0, type, owner, railtype, 0);
+		return NPFRouteToDepotBreadthFirstTwoWay(tile, trackdir, TileIndex.INVALID_TILE, 0, type, owner, railtype, 0);
 	}
 
 	static NPFFoundTargetData NPFRouteToDepotTrialError(TileIndex tile, /*Trackdir*/ int trackdir, /*TransportType*/ int type, PlayerID owner, /* RailType */ int railtype)
@@ -1087,68 +1087,70 @@ public class Npf {
 		 * always find the closest depot. It will probably be most efficient
 		 * for ships, since the heuristic will not be to far off then. I hope.
 		 */
-		Queue depots;
+		TTDQueue<Depot> depots;
 		int r;
 		NPFFoundTargetData best_result;
-		NPFFoundTargetData result;
-		NPFFindStationOrTileData target;
+		NPFFoundTargetData result = new NPFFoundTargetData();
+		NPFFindStationOrTileData target = new NPFFindStationOrTileData();
 		AyStarNode start = new AyStarNode();
 		Depot  current;
-		Depot depot;
+		//Depot depot;
 
-		init_InsSort(&depots);
+		init_InsSort(depots);
 		/* Okay, let's find all depots that we can use first */
-		FOR_ALL_DEPOTS(depot) {
+		//FOR_ALL_DEPOTS(depot)
+		Depot.forEach( (depot) ->
+		{
 			/* Check if this is really a valid depot, it is of the needed type and
 			 * owner */
-			if (IsValidDepot(depot) && IsTileDepotType(depot.xy, type) && IsTileOwner(depot.xy, owner))
+			if (depot.IsValidDepot() && Depot.IsTileDepotType(depot.xy, type) && depot.xy.IsTileOwner(owner))
 				/* If so, let's add it to the queue, sorted by distance */
-				depots.push(&depots, depot, DistanceManhattan(tile, depot.xy));
-		}
+				depots.push(depot, Map.DistanceManhattan(tile, depot.xy));
+		});
 
 		/* Now, let's initialise the aystar */
 
 		/* Initialize procs */
-		_npf_aystar.CalculateH = NPFCalcStationOrTileHeuristic;
-		_npf_aystar.EndNodeCheck = NPFFindStationOrTile;
-		_npf_aystar.FoundEndNode = NPFSaveTargetData;
-		_npf_aystar.GetNeighbours = NPFFollowTrack;
+		_npf_aystar.CalculateH = Npf::NPFCalcStationOrTileHeuristic;
+		_npf_aystar.EndNodeCheck = Npf::NPFFindStationOrTile;
+		_npf_aystar.FoundEndNode = Npf::NPFSaveTargetData;
+		_npf_aystar.GetNeighbours = Npf::NPFFollowTrack;
 		if (type == Global.TRANSPORT_RAIL)
-			_npf_aystar.CalculateG = NPFRailPathCost;
+			_npf_aystar.CalculateG = Npf::NPFRailPathCost;
 		else if (type == Global.TRANSPORT_ROAD)
-			_npf_aystar.CalculateG = NPFRoadPathCost;
+			_npf_aystar.CalculateG = Npf::NPFRoadPathCost;
 		else if (type == Global.TRANSPORT_WATER)
-			_npf_aystar.CalculateG = NPFWaterPathCost;
+			_npf_aystar.CalculateG = Npf::NPFWaterPathCost;
 		else
-			assert(0);
+			assert false;
 
 		_npf_aystar.BeforeExit = null;
 
 		/* Initialize target */
 		target.station_index = -1; /* We will initialize dest_coords inside the loop below */
-		_npf_aystar.user_target = &target;
+		_npf_aystar.user_target = target;
 
 		/* Initialize user_data */
 		_npf_aystar.user_data[NPF_TYPE] = type;
-		_npf_aystar.user_data[NPF_OWNER] = owner;
-		_npf_aystar.user_data[NPF_PBS_MODE] = PBS_MODE_NONE;
+		_npf_aystar.user_data[NPF_OWNER] = owner.id;
+		_npf_aystar.user_data[NPF_PBS_MODE] = Pbs.PBS_MODE_NONE;
 
 		/* Initialize Start Node */
 		start.tile = tile;
 		start.direction = trackdir; /* We will initialize user_data inside the loop below */
 
 		/* Initialize Result */
-		_npf_aystar.user_path = &result;
+		_npf_aystar.user_path = result;
 		best_result.best_path_dist = (int)-1;
 		best_result.best_bird_dist = (int)-1;
 
 		/* Just iterate the depots in order of increasing distance */
-		while ((current = depots.pop(&depots))) {
+		while( (current = depots.pop()) != null ) {
 			/* Check to see if we already have a path shorter than this
 			 * depot's manhattan distance. HACK: We call DistanceManhattan
 			 * again, we should probably modify the queue to give us that
 			 * value... */
-			if ( DistanceManhattan(tile, current.xy * NPF_TILE_LENGTH) > best_result.best_path_dist)
+			if ( Map.DistanceManhattan(tile, current.xy.tile * NPF_TILE_LENGTH) > best_result.best_path_dist)
 				break;
 
 			/* Initialize Start Node */
@@ -1167,7 +1169,7 @@ public class Npf {
 			target.dest_coords = current.xy;
 
 			/* GO! */
-			r = AyStarMain_Main(&_npf_aystar);
+			r = AyStar.AyStarMain_Main(_npf_aystar);
 			assert(r != AyStar.AYSTAR_STILL_BUSY);
 
 			/* This depot is closer */

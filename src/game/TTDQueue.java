@@ -1,13 +1,14 @@
 package game;
 
-public abstract class TTDQueue {
+public abstract class TTDQueue<ItemType> 
+{
 
-	public abstract void push(OpenListNode new_node, int f);
+	public abstract void push(ItemType new_node, int f);
 
-	public abstract OpenListNode pop();
+	public abstract ItemType pop();
 
 	public abstract void clear(boolean b);
 
-	public abstract void del(OpenListNode check, int i);
+	public abstract void del(ItemType check, int i);
 
 }
