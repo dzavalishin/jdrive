@@ -540,10 +540,12 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	 */
 	int CmdBuildTunnel(int x, int y, int flags, int p1, int p2)
 	{
-		TileInfo ti, tiorg;
+		TileInfo ti = new TileInfo();
+		TileInfo tiorg = new TileInfo();
 		int direction;
 		int z;
-		TileIndex excavated_tile;
+		//TileIndex 
+		int excavated_tile = 0;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
@@ -553,18 +555,32 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		_build_tunnel_bh       = BitOps.GB(p1, 8, 8);
 
 		Global._build_tunnel_endtile = null;
-		excavated_tile = null;
+		//excavated_tile = null;
 
 		Landscape.FindLandscapeHeight(tiorg, x, y);
 
 		if (!tiorg.tile.EnsureNoVehicle())
 			return Cmd.CMD_ERROR;
 
-		if (!(direction=0, tiorg.tileh == 12) &&
+		/*
+		if (
+				!(direction=0, tiorg.tileh == 12) &&
 				!(direction++, tiorg.tileh ==  6) &&
 				!(direction++, tiorg.tileh ==  3) &&
 				!(direction++, tiorg.tileh ==  9)) {
 			return Cmd.return_cmd_error(Str.STR_500B_SITE_UNSUITABLE_FOR_TUNNEL);
+		} */
+		direction=0;
+		if(tiorg.tileh != 12) {
+			direction++;
+			if(tiorg.tileh != 6) {
+				direction++;
+				if(tiorg.tileh != 3) {
+					direction++;
+					if(tiorg.tileh != 3) 
+						return Cmd.return_cmd_error(Str.STR_500B_SITE_UNSUITABLE_FOR_TUNNEL);
+				}
+			}			
 		}
 
 		z = tiorg.z;
@@ -584,7 +600,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			excavated_tile = 1;
 		}
 
-		return DoBuildTunnel(x, y, tiorg.x, tiorg.y, flags, excavated_tile.tile);
+		return DoBuildTunnel(x, y, tiorg.x, tiorg.y, flags, excavated_tile);
 	}
 
 	static TileIndex CheckTunnelBusy(TileIndex tile, int []length)

@@ -261,7 +261,7 @@ static const AirportMovingData _airport_moving_data_oilrig[9] = {
 	{ 70,  9,AMED_NOSPDCLAMP | AMED_SLOWTURN,0},	// 8 - circle #4 (south)
 };
 */
-
+#if 0
 ///////////////////////////////////////////////////////////////////////
 /////**********Movement Machine on Airports*********************///////
 // first element of depots array tells us how many depots there are (to know size of array)

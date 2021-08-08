@@ -1,4 +1,5 @@
 package game;
+import game.tables.AirCraftTables;
 import game.tables.EngineTables2;
 import game.util.BitOps;
 import game.util.GameDate;
@@ -9,7 +10,7 @@ import java.util.Iterator;
 import java.util.function.BiConsumer;
 
 
-public class AirCraft {
+public class AirCraft extends AirCraftTables {
 
 
 	
