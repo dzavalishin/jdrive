@@ -670,7 +670,7 @@ public class Town extends TownTables implements IPoolItem
 
 			t = GetTown(i);
 
-			if (t.xy != null) TownTickHandler(t);
+			if(t != null && t.xy != null) TownTickHandler(t);
 		}
 	}
 

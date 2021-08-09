@@ -1565,10 +1565,14 @@ public class Vehicle implements IPoolItem
 				for(;;) {
 					//veh = _vehicle_position_hash[(x + y) & 0xFFFF];
 					veh = _hash.get(x, y);
-					//while(veh.id != INVALID_VEHICLE) {
+					//while(veh.id != INVALID_VEHICLE) 
+					if( veh != null )
+					{
 					v = GetVehicle(veh);
+					// TODO XXX we keep one veh per hash point! Fix!
 
-					if (0 != (v.vehstatus & VS_HIDDEN) &&
+					if( v != null &&
+							0 != (v.vehstatus & VS_HIDDEN) &&
 							dpi.left <= v.right_coord &&
 							dpi.top <= v.bottom_coord &&
 							dpi.left + dpi.width >= v.left_coord &&
@@ -1576,7 +1580,7 @@ public class Vehicle implements IPoolItem
 						DoDrawVehicle(v);
 					}
 					//	veh = v.next_hash;
-					//}
+					}
 
 					if (x == x2)
 						break;

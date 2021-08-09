@@ -147,7 +147,7 @@ public class ViewPort
 			vp = new ViewPort();
 			_viewports.add(vp);
 		}
-		
+
 		assert vp != null;
 		//Global._active_viewports |= bit;
 
@@ -183,7 +183,7 @@ public class ViewPort
 		vp.virtual_top = 0;//pt.y;
 	}
 
-	static Point _vp_move_offs;
+	static Point _vp_move_offs = new Point(0, 0);
 
 	static void DoSetViewportPosition(Window startw, int left, int top, int width, int height)
 	{
@@ -432,7 +432,7 @@ public class ViewPort
 	{
 		DrawGroundSprite(image.id);		
 	}
-	
+
 	static void DrawGroundSprite(int image)
 	{
 		if (_offset_ground_sprites) {
@@ -466,7 +466,7 @@ public class ViewPort
 
 		ParentSpriteToDraw last_parent = vd.parent_list.get( vd.parent_list.size() - 1 );
 		AddChildSpriteScreen(image, pt.x - last_parent.left, pt.y - last_parent.top);
-		
+
 		//AddChildSpriteScreen(image, pt.x - vd.parent_list[-1].left, pt.y - vd.parent_list[-1].top);
 	}
 
@@ -589,7 +589,7 @@ public class ViewPort
 	{
 		return AddStringToDraw( x,  y, string.id, params_1, params_2, params_3);
 	}
-	
+
 	/* Returns a StringSpriteToDraw - [dz] was Object / was void **/
 	static StringSpriteToDraw AddStringToDraw(int x, int y, /*StringID*/ int string, int params_1, int params_2, int params_3)
 	{
@@ -603,7 +603,7 @@ public class ViewPort
 		}
 		ss = (StringSpriteToDraw*)vd.spritelist_mem;
 		vd.spritelist_mem += sizeof(StringSpriteToDraw);
-		*/
+		 */
 		ss = new StringSpriteToDraw();
 
 		ss.string = string;
@@ -862,7 +862,7 @@ public class ViewPort
 			while(ii.hasNext())
 			{
 				Town t = ii.next();
-				
+
 				if (t.xy != null &&
 						bottom > t.sign.top &&
 						top < t.sign.top + 12 &&
@@ -884,7 +884,7 @@ public class ViewPort
 			while(ii.hasNext())
 			{
 				Town t = ii.next();
-				
+
 				if (t.xy != null &&
 						bottom > t.sign.top &&
 						top < t.sign.top + 24 &&
@@ -907,7 +907,7 @@ public class ViewPort
 			while(ii.hasNext())
 			{
 				Town t = ii.next();
-				
+
 				if (t.xy != null &&
 						bottom > t.sign.top &&
 						top < t.sign.top + 24 &&
@@ -1318,61 +1318,61 @@ public class ViewPort
 		dp.zoom = 0;
 
 		dp.left >>= zoom;
-		dp.top >>= zoom;
-		dp.width >>= zoom;
-		dp.height >>= zoom;
+						dp.top >>= zoom;
+						dp.width >>= zoom;
+						dp.height >>= zoom;
 
-		//do 
-		for( StringSpriteToDraw ss : ssl )
-		{
-			if (ss.width != 0) {
-				int x = (ss.x >> zoom) - 1;
-				int y = (ss.y >> zoom) - 1;
-				int bottom = y + 11;
-				int w = ss.width;
+						//do 
+						for( StringSpriteToDraw ss : ssl )
+						{
+							if (ss.width != 0) {
+								int x = (ss.x >> zoom) - 1;
+								int y = (ss.y >> zoom) - 1;
+								int bottom = y + 11;
+								int w = ss.width;
 
-				if( 0 != (w & 0x8000) ) {
-					w &= ~0x8000;
-					y--;
-					bottom -= 6;
-					w -= 3;
-				}
+								if( 0 != (w & 0x8000) ) {
+									w &= ~0x8000;
+									y--;
+									bottom -= 6;
+									w -= 3;
+								}
 
-				/* Draw the rectangle if 'tranparent station signs' is off,
-				 * or if we are drawing a general text sign (Str.STR_2806) */
-				if (0 == (Global._display_opt & Global.DO_TRANS_SIGNS) || ss.string == Str.STR_2806)
-					Gfx.DrawFrameRect(
-							x, y, x + w, bottom, ss.color,
-							(Global._display_opt & Global.DO_TRANS_BUILDINGS) != 0 ? Window.FR_TRANSPARENT | Window.FR_NOBORDER : 0
-							);
-			}
+								/* Draw the rectangle if 'tranparent station signs' is off,
+								 * or if we are drawing a general text sign (Str.STR_2806) */
+								if (0 == (Global._display_opt & Global.DO_TRANS_SIGNS) || ss.string == Str.STR_2806)
+									Gfx.DrawFrameRect(
+											x, y, x + w, bottom, ss.color,
+											(Global._display_opt & Global.DO_TRANS_BUILDINGS) != 0 ? Window.FR_TRANSPARENT | Window.FR_NOBORDER : 0
+											);
+							}
 
-			Global.SetDParam(0, ss.params[0]);
-			Global.SetDParam(1, ss.params[1]);
-			Global.SetDParam(2, ss.params[2]);
-			/* if we didn't draw a rectangle, or if transparant building is on,
-			 * draw the text in the color the rectangle would have */
-			if ((
-					(Global._display_opt & Global.DO_TRANS_BUILDINGS)!=0 ||
-					((Global._display_opt & Global.DO_TRANS_SIGNS) != 0 && ss.string != Str.STR_2806)
-					) && ss.width != 0) {
-				/* Real colors need the IS_PALETTE_COLOR flag
-				 * otherwise colors from _string_colormap are assumed. */
-				Gfx.DrawString(
-						ss.x >> zoom, (ss.y >> zoom) - ((ss.width & 0x8000) != 0 ? 2 : 0),
-						ss.string, (Global._color_list[ss.color].window_color_bgb | Gfx.IS_PALETTE_COLOR)
-						);
-			} else {
-				Gfx.DrawString(
-						ss.x >> zoom, (ss.y >> zoom) - ((ss.width & 0x8000) != 0 ? 2 : 0),
-						ss.string, 16
-						);
-			}
+							Global.SetDParam(0, ss.params[0]);
+							Global.SetDParam(1, ss.params[1]);
+							Global.SetDParam(2, ss.params[2]);
+							/* if we didn't draw a rectangle, or if transparant building is on,
+							 * draw the text in the color the rectangle would have */
+							if ((
+									(Global._display_opt & Global.DO_TRANS_BUILDINGS)!=0 ||
+									((Global._display_opt & Global.DO_TRANS_SIGNS) != 0 && ss.string != Str.STR_2806)
+									) && ss.width != 0) {
+								/* Real colors need the IS_PALETTE_COLOR flag
+								 * otherwise colors from _string_colormap are assumed. */
+								Gfx.DrawString(
+										ss.x >> zoom, (ss.y >> zoom) - ((ss.width & 0x8000) != 0 ? 2 : 0),
+										ss.string, (Global._color_list[ss.color].window_color_bgb | Gfx.IS_PALETTE_COLOR)
+										);
+							} else {
+								Gfx.DrawString(
+										ss.x >> zoom, (ss.y >> zoom) - ((ss.width & 0x8000) != 0 ? 2 : 0),
+										ss.string, 16
+										);
+							}
 
-			//	ss = ss.next;
-		}// while (ss != null);
+							//	ss = ss.next;
+						}// while (ss != null);
 
-		Hal._cur_dpi = dpi;
+						Hal._cur_dpi = dpi;
 	}
 
 	static void ViewportDoDraw(final ViewPort vp, int left, int top, int right, int bottom)
@@ -1411,7 +1411,7 @@ public class ViewPort
 		//vd.dpi.dst_ptr_shift =  x - old_dpi.left + (y - old_dpi.top) * old_dpi.pitch;
 
 		vd.dpi.dst_ptr = new Pixel(old_dpi.dst_ptr, x - old_dpi.left + (y - old_dpi.top) * old_dpi.pitch );
-		
+
 		//vd.parent_list = parent_list;
 		//vd.eof_parent_list = endof(parent_list);
 		//vd.spritelist_mem = mem;
@@ -1444,11 +1444,14 @@ public class ViewPort
 		/* null terminate parent sprite list */
 		//[dz] TODO !!! *vd.parent_list = null;
 
-		ParentSpriteToDraw[] parents = (ParentSpriteToDraw[]) vd.parent_list.toArray();
-		
-		ViewportSortParentSprites(parents);
-		ViewportDrawParentSprites(parents);
+		Object[] array = vd.parent_list.toArray();
+		if(array.length > 0)
+		{
+			ParentSpriteToDraw[] parents = (ParentSpriteToDraw[]) array;
 
+			ViewportSortParentSprites(parents);
+			ViewportDrawParentSprites(parents);
+		}
 		//if (vd.first_string != null) ViewportDrawStrings(vd.dpi, vd.first_string);
 		ViewportDrawStrings(vd.dpi, vd.string_list);
 
@@ -1696,7 +1699,7 @@ public class ViewPort
 
 		if (0 == (Global._display_opt & Global.DO_SHOW_TOWN_NAMES)) return false;
 
-		 
+
 		if (vp.zoom < 1) {
 			x = x - vp.left + vp.virtual_left;
 			y = y - vp.top + vp.virtual_top;
@@ -1762,7 +1765,7 @@ public class ViewPort
 
 		if (0 == (Global._display_opt & Global.DO_SHOW_STATION_NAMES)) return false;
 
-		
+
 		if (vp.zoom < 1) {
 			x = x - vp.left + vp.virtual_left;
 			y = y - vp.top + vp.virtual_top;
@@ -2128,7 +2131,7 @@ public class ViewPort
 
 				if (x1 >= x2) /* intswap(x1,x2);*/ { int t = x1; x1 = x2; x2 = t; }
 				if (y1 >= y2) /* intswap(y1,y2);*/ { int t = y1; y1 = y2; y2 = t; }
-				
+
 				_thd.new_pos.x = x1;
 				_thd.new_pos.y = y1;
 				_thd.new_size.x = x2 - x1 + 16;
@@ -2465,7 +2468,7 @@ public class ViewPort
 	{
 		SetObjectToPlace(icon, mode, w.window_class, w.window_number);
 	}
-	
+
 	static void SetObjectToPlaceWnd(int icon, int mode, Window w)
 	{
 		SetObjectToPlace(icon, mode, w.window_class.v, w.window_number.n);

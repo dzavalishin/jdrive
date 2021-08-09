@@ -52,7 +52,7 @@ public class Gfx extends PaletteTabs
 
 	static final int DIRTY_BYTES_PER_LINE = (Global.MAX_SCREEN_WIDTH / 64);
 	// TODO [dz] 32* ?
-	static byte [] _dirty_blocks = new byte[1 * DIRTY_BYTES_PER_LINE * Global.MAX_SCREEN_HEIGHT / 8];
+	static byte [] _dirty_blocks = new byte[4 * DIRTY_BYTES_PER_LINE * Global.MAX_SCREEN_HEIGHT / 8];
 
 
 	/* 
