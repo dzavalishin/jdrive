@@ -307,7 +307,7 @@ public class Global {
 		String buf = String.format(s, arg);
 
 		error( "dbg: %s\n", buf);
-		Console.IConsoleDebug(buf);
+		// TODO Console.IConsoleDebug(buf);
 	}
 
 	// instead of DEBUG(ai, 0)( printf args)
@@ -433,11 +433,6 @@ public class Global {
 	private static Map<Integer,String> _name_array = new HashMap<Integer,String>();
 
 
-
-	public static void InitializeNameMgr()
-	{
-		_name_array = new HashMap<Integer,String>();
-	}
 
 
 

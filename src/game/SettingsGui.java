@@ -972,7 +972,7 @@ public class SettingsGui extends SettingsTables
 
 		IConsolePrintF(_icolour_warn, "Current value for '%s' is: '%s'", name, value);
 		*/
-		Console.IConsolePrintF(Console._icolour_warn, "Not impl- "); // TODO
+		// TODO Console.IConsolePrintF(Console._icolour_warn, "Not impl- "); // TODO
 	}
 
 	static final Widget _patches_selection_widgets[] = {

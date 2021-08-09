@@ -499,7 +499,7 @@ public class Gui
 	{
 		switch (index) {
 			case 0: MiscGui.PlaceLandBlockInfo(); break;
-			case 2: Console.IConsoleSwitch();     break;
+			// TODO case 2: Console.IConsoleSwitch();     break;
 			case 3: Global._make_screenshot = 1; break;
 			case 4: Global._make_screenshot = 2; break;
 			case 5: MiscGui.ShowAboutWindow();    break;
@@ -2449,7 +2449,7 @@ public class Gui
 
 		case WE_KEYPRESS:
 			if (e.keycode == Window.WKC_BACKQUOTE) {
-				Console.IConsoleSwitch();
+				// TODO Console.IConsoleSwitch();
 				e.cont = false;
 				break;
 			}

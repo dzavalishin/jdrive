@@ -1,6 +1,8 @@
 package game;
 
 import java.io.FileWriter;
+
+import game.struct.Textbuf;
 import game.util.BitOps;
 
 public class Console {
@@ -55,27 +57,27 @@ public class Console {
 
 	static void IConsoleClearCommand()
 	{
-		_iconsole_cmdline.buf = new String();
+		_iconsole_cmdline.buf = new char[256]; // String();
 		_iconsole_cmdline.length = 0;
 		_iconsole_cmdline.width = 0;
 		_iconsole_cmdline.caretpos = 0;
 		_iconsole_cmdline.caretxoffs = 0;
-		SetWindowDirty(_iconsole_win);
+		_iconsole_win.SetWindowDirty();
 	}
 
 	static  void IConsoleResetHistoryPos() {_iconsole_historypos = ICON_HISTORY_SIZE - 1;}
 
 
 	static final Widget _iconsole_window_widgets[] = {
-			new Widget( WIDGETS_END )
+			//new Widget( WIDGETS_END )
 	};
 
 	static final WindowDesc _iconsole_window_desc = new WindowDesc(
 			0, 0, 2, 2,
-			WC_CONSOLE, 0,
-			WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
+			Window.WC_CONSOLE, 0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 			_iconsole_window_widgets,
-			windowProc,
+			Console::windowProc
 	);
 
 	static void IConsoleInit()
@@ -176,7 +178,7 @@ public class Console {
 		default: break;
 		}
 
-		MarkWholeScreenDirty();
+		Hal.MarkWholeScreenDirty();
 	}
 
 	static void IConsoleSwitch()
@@ -197,7 +199,7 @@ public class Console {
 			break;
 		}
 
-		MarkWholeScreenDirty();
+		Hal.MarkWholeScreenDirty();
 	}
 
 	static void IConsoleClose() {if (_iconsole_mode == ICONSOLE_OPENED) IConsoleSwitch();}

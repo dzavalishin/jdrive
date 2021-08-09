@@ -180,8 +180,7 @@ public class TextEffect
 		// First undraw if needed
 		UndrawTextMessage();
 
-		if (Console._iconsole_mode == IConsoleModes.ICONSOLE_FULL)
-			return;
+		// TODO if (Console._iconsole_mode == IConsoleModes.ICONSOLE_FULL)			return;
 
 		/* Check if we have anything to draw at all */
 		has_message = false;

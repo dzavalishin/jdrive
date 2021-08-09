@@ -294,7 +294,7 @@ public abstract class TownGui extends Town
 				break;
 			case 11:
 				mAirport.MA_EditorAddAirport(t);
-				Console.IConsolePrintF(100100100, "it works");
+				// TODO Console.IConsolePrintF(100100100, "it works");
 			}
 			break;
 

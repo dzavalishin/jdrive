@@ -822,9 +822,9 @@ public class Order implements IPoolItem {
 						if (order.type == OT_GOTO_STATION) {
 							final Station st1 = Station.GetStation(order.station);
 							if (dst.cargo_type == AcceptedCargo.CT_PASSENGERS) {
-								if (st1.bus_stops != null) required_dst = st1.bus_stops.xy;
+								if (st1.bus_stops != null) required_dst = st1.bus_stops.get(0).xy; // TODO why first?
 							} else {
-								if (st1.truck_stops != null) required_dst = st1.truck_stops.xy;
+								if (st1.truck_stops != null) required_dst = st1.truck_stops.get(0).xy;
 							}
 							/* This station has not the correct road-bay, so we can't copy! */
 							if (required_dst == TileIndex.INVALID_TILE)

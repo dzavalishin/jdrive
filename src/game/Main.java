@@ -365,9 +365,9 @@ public class Main {
 			SettingsGui.SetDifficultyLevel(0, GameOptions._opt_newgame);
 
 		// initialize the ingame console
-		Console.IConsoleInit();
+		// TODO Console.IConsoleInit();
 		VehicleGui.InitializeGUI();
-		Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
+		// TODO Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
 		GenerateWorld.doGenerateWorld(1, 64, 64); // Make the viewport initialization happy
 		/*
@@ -393,7 +393,7 @@ public class Main {
 		Global.hal.main_loop();
 
 		// TODO WaitTillSaved();
-		Console.IConsoleFree();
+		// TODO Console.IConsoleFree();
 
 		/*
 		if (_network_available) {

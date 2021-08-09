@@ -52,7 +52,7 @@ public class TrackPathFinder extends Pathfind
 		if (tpf.disable_tile_hash)
 			return true;
 
-		hash = PATHFIND_HASH_TILE(tile);
+		hash = Pathfind.PATHFIND_HASH_TILE(tile);
 
 		val = tpf.hash_head[hash];
 
@@ -177,7 +177,7 @@ public class TrackPathFinder extends Pathfind
 		bits &= 0xBF;
 
 		if (bits != 0) {
-			if (!tpf.disable_tile_hash || (tpf.rd.cur_length <= 64 && (KILL_FIRST_BIT(bits) == 0 || ++tpf.rd.depth <= 7))) {
+			if (!tpf.disable_tile_hash || (tpf.rd.cur_length <= 64 && (BitOps.KILL_FIRST_BIT(bits) == 0 || ++tpf.rd.depth <= 7))) {
 				do {
 					i = BitOps.FIND_FIRST_BIT(bits);
 					bits = BitOps.KILL_FIRST_BIT(bits);

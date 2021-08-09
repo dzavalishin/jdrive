@@ -1153,7 +1153,7 @@ public class Window extends WindowConstants
 
 	public static void InitWindowSystem()
 	{
-		Console.IConsoleClose();
+		// TODO Console.IConsoleClose();
 
 		//memset(&_windows, 0, sizeof(_windows));
 		//_last_window = _windows;
@@ -2215,7 +2215,7 @@ public class Window extends WindowConstants
 				continue; // don't modify top,left
 			}
 
-			Console.IConsoleResize();
+			// TODO Console.IConsoleResize();
 
 			if (w.window_class.v == WC_MAIN_TOOLBAR) {
 				top = w.top;

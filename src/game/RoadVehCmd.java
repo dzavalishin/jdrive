@@ -1007,7 +1007,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		}
 
 		// Only one track to choose between?
-		if (!(BitOps.KillFirstBit2x64(bitmask))) {
+		if (0==(BitOps.KillFirstBit2x64(bitmask))) {
 			return return_track(BitOps.FindFirstBit2x64(bitmask),signal);
 		}
 

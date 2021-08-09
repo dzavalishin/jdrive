@@ -22,6 +22,11 @@ public abstract class Pathfind extends TrackPathFinderTables
 	 */
 	//#define PATHFIND_HASH_TILE(tile) (tile.TileX() & 0x1F) + ((tile.TileY() & 0x1F) << 5)
 
+	static int PATHFIND_HASH_TILE(TileIndex tile) 
+	{ 
+		return (tile.TileX() & 0x1F) + ((tile.TileY() & 0x1F) << 5); 
+	}
+
 
 
 
