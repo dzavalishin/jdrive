@@ -631,7 +631,7 @@ public class NewsItem {
 		}
 	}
 
-	void NewsLoop()
+	static void NewsLoop()
 	{
 		// no news item yet
 		if (_total_news == 0) return;

@@ -248,8 +248,8 @@ void SortResolutions(int count)
 	{
 		int t = Global._random_seeds[1][1];
 		int s = Global._random_seeds[1][0];
-		Global._random_seeds[1][0] = s + BitOps.ROR(t ^ 0x1234567F, 7) + 1;
-		return Global._random_seeds[1][1] = BitOps.ROR(s, 3) - 1;
+		Global._random_seeds[1][0] = s + BitOps.ROR32(t ^ 0x1234567F, 7) + 1;
+		return Global._random_seeds[1][1] = BitOps.ROR32(s, 3) - 1;
 	}
 
 	static int InteractiveRandomRange(int max)

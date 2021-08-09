@@ -282,6 +282,11 @@ public class BitOps {
 		return 0xFFFF & ((x >>> n) | (x << (2 * 8 - n)));		
 	}
 
+	public static int ROR32(int x, int n)
+	{
+		return (x >>> n) | (x << (4 * 8 - n));		
+	}
+
 	/**
 	 * Return the smallest multiple of n equal or greater than x
 	 * @note n must be a power of 2

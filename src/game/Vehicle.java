@@ -1445,7 +1445,7 @@ public class Vehicle implements IPoolItem
 			DisasterCmd::DisasterVehicle_Tick,
 	};
 
-	void CallVehicleTicks()
+	static void CallVehicleTicks()
 	{
 		//Vehicle v;
 

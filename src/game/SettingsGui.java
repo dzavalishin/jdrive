@@ -308,7 +308,7 @@ public class SettingsGui extends SettingsTables
 	}*/
 
 
-	void SetDifficultyLevel(int mode, GameOptions gm_opt)
+	static void SetDifficultyLevel(int mode, GameOptions gm_opt)
 	{
 		/* TODO diff level
 		int i;

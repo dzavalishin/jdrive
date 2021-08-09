@@ -5,9 +5,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import game.ai.Ai;
-import game.util.BitOps;
 import game.util.FileIO;
-import game.util.wcustom.vp_d;
+import game.util.Strings;
 
 public class Main {
 
@@ -19,7 +18,8 @@ public class Main {
 	 * caused by the user, i.e. missing files or fatal configuration errors.
 	 * Post-0.4.0 since Celestar doesn't want this in SVN before. --pasky */
 
-	void  error( String  s, Object ... args)
+	
+	static void  error( String  s, Object ... args)
 	{
 		String buf = String.format(s, args);
 
@@ -186,7 +186,7 @@ public class Main {
 
 		// Generate a world.
 		filename = String.format( "%sopntitle.dat",  Global._path.data_dir );
-		if (SaveOrLoad(filename, SL_LOAD) != SL_OK) 
+		// TODO if (SaveOrLoad(filename, SL_LOAD) != SL_OK) 
 		{
 			/*#if defined SECOND_DATA_DIR
 			sprintf(filename, "%sopntitle.dat",  _path.second_data_dir);
@@ -195,9 +195,9 @@ public class Main {
 			GenerateWorld.doGenerateWorld(1, 64, 64); // if failed loading, make empty world.
 		}
 
-		Global._pause = false;
+		Global._pause = 0;
 		Global._local_player = null;
-		Global.hal.MarkWholeScreenDirty();
+		Hal.MarkWholeScreenDirty();
 
 		// Play main theme
 		// TODO if (_music_driver.is_song_playing()) ResetMusic();
@@ -207,17 +207,17 @@ public class Main {
 	public static void main(String[] argv) 
 	{
 		int argc = argv.length;
-		MyGetOptData mgo = new MyGetOptData();
+		//MyGetOptData mgo = new MyGetOptData();
 		int i;
 		boolean network = false;
-		String network_conn = null;
-		final String optformat;
-		String musicdriver, sounddriver, videodriver;
+		//String network_conn = null;
+		//final String optformat;
+		//String musicdriver, sounddriver, videodriver;
 		int resolution[] = {0,0};
 		int startdate = -1;
 		boolean dedicated = false;
 
-		musicdriver = sounddriver = videodriver = null;
+		//musicdriver = sounddriver = videodriver = null;
 
 		Global._game_mode = GameModes.GM_MENU;
 		Global._switch_mode = SwitchModes.SM_MENU;
@@ -231,11 +231,12 @@ public class Main {
 		//   a ':' behind it means: it need a param (e.g.: -m<driver>)
 		//   a '::' behind it means: it can optional have a param (e.g.: -d<debug>)
 		//#if !defined(__MORPHOS__) && !defined(__AMIGA__) && !defined(WIN32)
-		optformat = "bm:s:v:hDfn::eit:d::r:g::G:p:c:";
+		//optformat = "bm:s:v:hDfn::eit:d::r:g::G:p:c:";
 		//#else
 		//optformat = "bm:s:v:hDn::eit:d::r:g::G:p:c:"; // no fork option
 		//#endif
 
+		/*
 		mgo.MyGetOptInit( argv, optformat);
 		
 		while ((i = mgo.MyGetOpt()) != -1) {
@@ -293,14 +294,14 @@ public class Main {
 				return;
 			}
 		}
-
+		*/
 		if (Ai._ai.network_client && !network) {
 			Ai._ai.network_client = false;
 			Global.DEBUG_ai( 0, "[AI] Can't enable network-AI, because '-n' is not used\n");
 		}
 
 		DeterminePaths();
-		CheckExternalFiles();
+		// GfxInit.CheckExternalFiles();
 
 		//#if defined(UNIX) && !defined(__MORPHOS__)
 		// We must fork here, or we'll end up without some resources we need (like sockets)
@@ -308,9 +309,9 @@ public class Main {
 		//	DedicatedFork();
 		//#endif
 
-		LoadFromConfig();
-		CheckConfig();
-		LoadFromHighScore();
+		// TODO LoadFromConfig();
+		// TODO CheckConfig();
+		// TODO LoadFromHighScore();
 
 		// override config?
 		// TODO if (musicdriver[0]) ttd_strlcpy(_ini_musicdriver, musicdriver, sizeof(_ini_musicdriver));
@@ -323,10 +324,10 @@ public class Main {
 			Global._dedicated_forks = false;
 
 		// enumerate language files
-		InitializeLanguagePacks();
+		Strings.InitializeLanguagePacks();
 
 		// initialize screenshot formats
-		InitializeScreenshotFormats();
+		// TODO InitializeScreenshotFormats();
 
 		// initialize airport state machines
 		AirportFTAClass.InitializeAirports();
@@ -352,7 +353,7 @@ public class Main {
 		// TODO LoadDriver(SOUND_DRIVER, _ini_sounddriver);
 		// TODO LoadDriver(MUSIC_DRIVER, _ini_musicdriver);
 		// TODO LoadDriver(VIDEO_DRIVER, _ini_videodriver); // load video last, to prevent an empty window while sound and music loads
-		_savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
+		// TODO _savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 
 		// initialize network-core
 		// TODO NetworkStartUp();
@@ -361,7 +362,7 @@ public class Main {
 
 		/* XXX - ugly hack, if diff_level is 9, it means we got no setting from the config file */
 		if (GameOptions._opt_newgame.diff_level == 9)
-			SetDifficultyLevel(0, GameOptions._opt_newgame);
+			SettingsGui.SetDifficultyLevel(0, GameOptions._opt_newgame);
 
 		// initialize the ingame console
 		Console.IConsoleInit();
@@ -391,7 +392,7 @@ public class Main {
 		 */
 		Global.hal.main_loop();
 
-		WaitTillSaved();
+		// TODO WaitTillSaved();
 		Console.IConsoleFree();
 
 		/*
@@ -408,8 +409,8 @@ public class Main {
 		//_music_driver.stop(); TODO return
 		//_sound_driver.stop(); TODO return
 
-		SaveToConfig();
-		SaveToHighScore();
+		// TODO SaveToConfig();
+		// TODO SaveToHighScore();
 
 		// uninitialize airport state machines
 		AirportFTAClass.UnInitializeAirports();
@@ -543,6 +544,7 @@ public class Main {
 	 */
 	static void StartScenario()
 	{
+		/*
 		Global._game_mode = GameModes.GM_NORMAL;
 
 		// invalid type
@@ -582,10 +584,13 @@ public class Main {
 		DoCommandP(0, (Global._patches.autorenew ? 1 << 15 : 0 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
 
 		Global.hal.MarkWholeScreenDirty();
+		*/
 	}
 
-	boolean SafeSaveOrLoad(final String filename, int mode, GameModes newgm)
+	static boolean SafeSaveOrLoad(final String filename, int mode, GameModes newgm)
 	{
+		return false;
+		/*
 		GameModes ogm = Global._game_mode;
 		int r;
 
@@ -604,6 +609,7 @@ public class Main {
 		} else {
 			return true;
 		}
+		*/
 	}
 
 	static void SwitchMode(SwitchModes new_mode)
@@ -659,9 +665,9 @@ public class Main {
 		case SM_LOAD: { /* Load game, Play Scenario */
 			GameOptions._opt_ptr = GameOptions._opt;
 
-			if (!SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GM_NORMAL)) {
+			if (!SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GameModes.GM_NORMAL)) {
 				LoadIntroGame();
-				Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+				Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			} else {
 				Global._local_player = null;
 				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE); // decrease pause counter (was increased from opening load dialog)
@@ -691,7 +697,7 @@ public class Main {
 				// delete all stations owned by a player
 				Station.DeleteAllPlayerStations();
 			} else {
-				Global.ShowErrorMessage(Str.INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+				Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			}
 			break;
 		}
@@ -701,12 +707,13 @@ public class Main {
 			LoadIntroGame();
 			break;
 
-		case SM_SAVE: /* Save game */
+		case SM_SAVE: /* TODO Save game */
+			/*
 			if (SaveOrLoad(_file_to_saveload.name, SL_SAVE) != SL_OK) {
-				Global.ShowErrorMessage(Str.INVALID_STRING_ID, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
+				Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
 			} else {
 				Window.DeleteWindowById(Window.WC_SAVELOAD, 0);
-			}
+			}*/
 			break;
 
 		case SM_GENRANDLAND: /* Generate random land within scenario editor */
@@ -726,45 +733,46 @@ public class Main {
 	// The state must not be changed from anywhere
 	// but here.
 	// That check is enforced in DoCommand.
-	void StateGameLoop()
+	static void StateGameLoop()
 	{
 		// dont execute the state loop during pause
-		if (Global._pause) return;
+		if (Global._pause != 0) return;
 
 		// _frame_counter is increased somewhere else when in network-mode
 		//  Sidenote: _frame_counter is ONLY used for _savedump in non-MP-games
 		//    Should that not be deleted? If so, the next 2 lines can also be deleted
 		if (!Global._networking) Global._frame_counter++;
 
+		/* TODO dump
 		if (_savedump_path[0] && (int)_frame_counter >= _savedump_first && (int)(_frame_counter -_savedump_first) % _savedump_freq == 0 ) {
 			String buf;
 			buf = String.format( "%s%.5d.sav", Global._savedump_path, Global._frame_counter);
 			SaveOrLoad(buf, SL_SAVE);
 			if ((int)Global._frame_counter >= _savedump_last) exit(1);
-		}
+		} */
 
 		if (Global._game_mode == GameModes.GM_EDITOR) {
-			RunTileLoop();
-			CallVehicleTicks();
-			CallLandscapeTick();
-			CallWindowTickEvent();
-			NewsLoop();
+			Landscape.RunTileLoop();
+			Vehicle.CallVehicleTicks();
+			Landscape.CallLandscapeTick();
+			Window.CallWindowTickEvent();
+			NewsItem.NewsLoop();
 		} else {
 			// All these actions has to be done from OWNER_NONE
 			//  for multiplayer compatibility
-			Player p = Global._current_player;
-			Global._current_player = Owner.OWNER_NONE;
+			PlayerID p =  Global._current_player;
+			Global._current_player = PlayerID.get( Owner.OWNER_NONE );
 
-			AnimateAnimatedTiles();
-			IncreaseDate();
-			RunTileLoop();
-			CallVehicleTicks();
-			CallLandscapeTick();
+			TextEffect.AnimateAnimatedTiles();
+			Global.IncreaseDate();
+			Landscape.RunTileLoop();
+			Vehicle.CallVehicleTicks();
+			Landscape.CallLandscapeTick();
 
-			AI_RunGameLoop();
+			// TODO Ai.AI_RunGameLoop();
 
-			CallWindowTickEvent();
-			NewsLoop();
+			Window.CallWindowTickEvent();
+			NewsItem.NewsLoop();
 			Global._current_player = p;
 		}
 	}
@@ -790,18 +798,22 @@ public class Main {
 			
 		} else { /* generate a savegame name and number according to _patches.max_num_autosaves */
 			//sprintf(buf, "%s%sautosave%d.sav", _path.autosave_dir, PATHSEP, _autosave_ctr);
-			buf = String.format("%s%sautosave%d.sav", Global._path.autosave_dir, File.pathSeparator, Global._autosave_ctr);
+			// TODO buf = String.format("%s%sautosave%d.sav", Global._path.autosave_dir, File.pathSeparator, Global._autosave_ctr);
 
+			/* TODO
 			Global._autosave_ctr++;
 			if (Global._autosave_ctr >= Global._patches.max_num_autosaves) {
 				// we reached the limit for numbers of autosaves. We will start over
 				Global._autosave_ctr = 0;
-			}
+			
+			}*/
 		}
 
+		/* TODO
 		Global.DEBUG_misc( 2, "Autosaving to %s", buf);
 		if (SaveOrLoad(buf, SL_SAVE) != SL_OK)
 			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_AUTOSAVE_FAILED, 0, 0);
+		*/
 	}
 
 	static void ScrollMainViewport(int x, int y)
@@ -839,7 +851,7 @@ public class Main {
 	{
 		if (Global._dirkeys != 0 && 0 == Global._no_scroll) {
 			int factor = Global._shift_pressed ? 50 : 10;
-			ScrollMainViewport(scrollamt[Global._dirkeys][0] * factor, scrollamt[_dirkeys][1] * factor);
+			ScrollMainViewport(scrollamt[Global._dirkeys][0] * factor, scrollamt[Global._dirkeys][1] * factor);
 		}
 	}
 
@@ -855,13 +867,13 @@ public class Main {
 		if (Global._do_autosave) {
 			Global._do_autosave = false;
 			DoAutosave();
-			RedrawAutosave();
+			// TODO RedrawAutosave();
 		}
 
 		// handle scrolling of the main window
-		if (_dirkeys) HandleKeyScrolling();
+		if (0 != Global._dirkeys) HandleKeyScrolling();
 
-		// make a screenshot?
+		/* TODO // make a screenshot?
 		if ((m=_make_screenshot) != 0) {
 			_make_screenshot = 0;
 			switch(m) {
@@ -873,7 +885,7 @@ public class Main {
 				ShowScreenshotResult(MakeWorldScreenshot(-(int)MapMaxX() * TILE_PIXELS, 0, (MapMaxX() + MapMaxY()) * TILE_PIXELS, (MapMaxX() + MapMaxY()) * TILE_PIXELS >> 1, 0));
 				break;
 			}
-		}
+		} */
 
 		// switch game mode?
 		if ((m=Global._switch_mode) != SwitchModes.SM_NONE) {
@@ -882,17 +894,17 @@ public class Main {
 		}
 
 		//IncreaseSpriteLRU();
-		InteractiveRandom();
+		Hal.InteractiveRandom();
 
-		if (_scroller_click_timeout > 3) {
-			_scroller_click_timeout -= 3;
+		if (Window._scroller_click_timeout > 3) {
+			Window._scroller_click_timeout -= 3;
 		} else {
-			_scroller_click_timeout = 0;
+			Window._scroller_click_timeout = 0;
 		}
 
-		_caret_timer += 3;
-		_timer_counter += 8;
-		CursorTick();
+		Global._caret_timer += 3;
+		Global._timer_counter += 8;
+		Hal.CursorTick();
 
 		/* #ifdef ENABLE_NETWORK
 		// Check for UDP stuff
@@ -914,13 +926,13 @@ public class Main {
 		StateGameLoop();
 		//#endif /* ENABLE_NETWORK */
 
-		if (!Global._pause && _display_opt & DO_FULL_ANIMATION) DoPaletteAnimations();
+		if (0 == Global._pause && 0 != (Global._display_opt & Global.DO_FULL_ANIMATION) ) Gfx.DoPaletteAnimations();
 
-		if (!Global._pause || _cheats.build_in_pause.value) MoveAllTextEffects();
+		if (0 == Global._pause || Global._cheats.build_in_pause.value) TextEffect.MoveAllTextEffects();
 
-		InputLoop();
+		Window.InputLoop();
 
-		MusicLoop();
+		// TODO MusicLoop();
 	}
 
 	void BeforeSaveGame()
@@ -928,9 +940,9 @@ public class Main {
 		final Window w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 
 		if (w != null) {
-			_saved_scrollpos_x = ((vp_d)w.custom).scrollpos_x;
-			_saved_scrollpos_y = ((vp_d)w.custom).scrollpos_y;
-			_saved_scrollpos_zoom = w.viewport.zoom;
+			// TODO Global._saved_scrollpos_x = ((vp_d)w.custom).scrollpos_x;
+			//_saved_scrollpos_y = ((vp_d)w.custom).scrollpos_y;
+			//_saved_scrollpos_zoom = w.viewport.zoom;
 		}
 	}
 
@@ -1062,28 +1074,29 @@ public class Main {
 		Global.SetDate(Global._date);
 
 		// reinit the landscape variables (landscape might have changed)
-		InitializeLandscapeVariables(true);
+		Misc.InitializeLandscapeVariables(true);
 
 		// Update all vehicles
-		AfterLoadVehicles();
+		Vehicle.AfterLoadVehicles();
 
 		// FIXME KILLME Update all waypoints
-		if (CheckSavegameVersion(12)) FixOldWaypoints();
+		// TODO if (CheckSavegameVersion(12)) FixOldWaypoints();
 
-		UpdateAllWaypointSigns();
+		WayPoint.UpdateAllWaypointSigns();
 
 		// FIXME KILLME in version 2.2 of the savegame, we have new airports
-		if (CheckSavegameVersionOldStyle(2, 2)) UpdateOldAircraft();
+		// TODO if (CheckSavegameVersionOldStyle(2, 2)) UpdateOldAircraft();
 
 		// FIXME KILLME ?
-		UpdateAllStationVirtCoord();
+		Station.UpdateAllStationVirtCoord();
 
 		// Setup town coords
-		AfterLoadTown();
-		UpdateAllSignVirtCoords();
+		Town.AfterLoadTown();
+		SignStruct.UpdateAllSignVirtCoords();
 
 		// make sure there is a town in the game
-		if (Global._game_mode == GameModes.GM_NORMAL && !ClosestTownFromTile(0, (int)-1)) {
+		if (Global._game_mode == GameModes.GM_NORMAL && null == Town.ClosestTownFromTile(TileIndex.get(0), (int)-1)) 
+		{
 			Global._error_message = Str.STR_NO_TOWN_IN_SCENARIO;
 			return false;
 		}
@@ -1097,18 +1110,18 @@ public class Main {
 		//w.as_vp_d().scrollpos_x = _saved_scrollpos_x;
 		//w.as_vp_d().scrollpos_y = _saved_scrollpos_y;
 
-		((vp_d)w.custom).scrollpos_x = _saved_scrollpos_x;
-		((vp_d)w.custom).scrollpos_y = _saved_scrollpos_y;
+		// TODO ((vp_d)w.custom).scrollpos_x = Global._saved_scrollpos_x;
+		// TODO ((vp_d)w.custom).scrollpos_y = Global._saved_scrollpos_y;
 
 		vp = w.viewport;
-		vp.zoom = _saved_scrollpos_zoom;
+		// TODO vp.zoom = _saved_scrollpos_zoom;
 		vp.virtual_width = vp.width << vp.zoom;
 		vp.virtual_height = vp.height << vp.zoom;
 
 		// // FIXME KILLME 
 		// in version 4.1 of the savegame, is_active was introduced to determine
 		// if a player does exist, rather then checking name_1
-		if (CheckSavegameVersionOldStyle(4, 1)) CheckIsPlayerActive();
+		// TODO if (CheckSavegameVersionOldStyle(4, 1)) CheckIsPlayerActive();
 
 		// the void tiles on the southern border used to belong to a wrong class (pre 4.3).
 		//if (CheckSavegameVersionOldStyle(4, 3)) UpdateVoidTiles();
@@ -1117,11 +1130,11 @@ public class Main {
 		//  a player does not exist yet. So create one here.
 		// 1 exeption: network-games. Those can have 0 players
 		//   But this exeption is not true for network_servers!
-		if (!Global._players[0].is_active && (!_networking || (_networking && _network_server)))
+		if (!Global._players[0].is_active && (!Global._networking || (Global._networking && Global._network_server)))
 			Player.DoStartupNewPlayer(false);
 
-		DoZoomInOutWindow(ZOOM_NONE, w); // update button status
-		Global.hal.MarkWholeScreenDirty();
+		Gui.DoZoomInOutWindow(Gui.ZOOM_NONE, w); // update button status
+		Hal.MarkWholeScreenDirty();
 
 		// // FIXME KILLME In 5.1, Oilrigs have been moved (again)
 		//if (CheckSavegameVersionOldStyle(5, 1)) UpdateOilRig();
@@ -1249,18 +1262,58 @@ public class Main {
 		*/
 		//FOR_ALL_PLAYERS(p) 
 		for( Player pp: Global._players )
-			pp.avail_railtypes = Player.GetPlayerRailtypes(p.index);
+			pp.avail_railtypes = Player.GetPlayerRailtypes(pp.index);
 
 		return true;
 	}
 
 
+	
+	static void DeterminePaths()
+	{
+		//String s;
+		//String cfg;
+
+		String cwd = null;
+		try {
+			cwd = new java.io.File(".").getCanonicalPath();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			error(e.toString());
+		}
+		String slcwd = File.pathSeparator + cwd;
+		
+		Global._path.personal_dir = Global._path.game_data_dir = slcwd;
+
+
+		Global._path.save_dir = slcwd+"save";
+		Global._path.autosave_dir = Global._path.save_dir + File.pathSeparator +  "autosave";
+		Global._path.scenario_dir = slcwd+"scenario";
+		Global._path.gm_dir = slcwd+"gm"+ File.pathSeparator;
+		Global._path.data_dir = slcwd+"data"+ File.pathSeparator;
+		Global._path.lang_dir = slcwd+"lang"+ File.pathSeparator;
+
+		if (Global._config_file == null)
+			Global._config_file =  Global._path.personal_dir + "openttd.cfg";
+
+		/* TODO paths
+		_highscore_file = str_fmt("%shs.dat", _path.personal_dir);
+		_log_file = str_fmt("%sopenttd.log", _path.personal_dir);
+
+		// make (auto)save and scenario folder
+		CreateDirectory(_path.save_dir, NULL);
+		CreateDirectory(_path.autosave_dir, NULL);
+		CreateDirectory(_path.scenario_dir, NULL);
+		*/
+	}
+	
 
 }
 
 
 
-
+/*
 class MyGetOptData 
 {
 	String opt;
@@ -1355,7 +1408,7 @@ class MyGetOptData
 	}
 
 }
-
+*/
 
 
 //Deals with the type of the savegame, independent of extension

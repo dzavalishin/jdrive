@@ -1202,7 +1202,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	}
 
 	// make a list of the available language packs. put the data in _dynlang struct.
-	static void InitializeLanguagePacks()
+	public static void InitializeLanguagePacks()
 	{
 		/* TODO XXX 
 

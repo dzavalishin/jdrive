@@ -2322,6 +2322,17 @@ public class Town extends TownTables implements IPoolItem
 	}
 
 
+	static void AfterLoadTown()
+	{
+		Town.forEach( (t) ->
+		{
+			if (t.xy != null) {
+				UpdateTownRadius(t);
+				UpdateTownVirtCoord(t);
+			}
+		});
+		_town_sort_dirty = true;
+	}
 
 	/*
 	// Save and load of towns.
@@ -2425,17 +2436,6 @@ public class Town extends TownTables implements IPoolItem
 			_cur_town_ctr = 0;
 	}
 
-	void AfterLoadTown()
-	{
-		Town t;
-		FOR_ALL_TOWNS(t) {
-			if (t.xy != 0) {
-				UpdateTownRadius(t);
-				UpdateTownVirtCoord(t);
-			}
-		}
-		_town_sort_dirty = true;
-	}
 
 
 	final ChunkHandler _town_chunk_handlers[] = {

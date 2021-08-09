@@ -1959,7 +1959,7 @@ public class Window extends WindowConstants
 		}
 	}
 
-	void InputLoop()
+	static void InputLoop()
 	{
 		int click;
 		int mousewheel;

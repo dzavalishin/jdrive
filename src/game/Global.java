@@ -519,7 +519,7 @@ public class Global {
 
 
 
-	void IncreaseDate()
+	static void IncreaseDate()
 	{
 		YearMonthDay ymd = new YearMonthDay();
 

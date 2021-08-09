@@ -255,6 +255,12 @@ class BitOpsTest {
 	}
 
 	@Test
+	void testROR32() {
+		//System.err.println(String.format("ROR %x", BitOps.ROR8(0x01,1)));
+		assertEquals(BitOps.ROR32(0x01,1), 0x80000000);
+	}
+
+	@Test
 	void testALIGN() {
 		assertEquals(BitOps.ALIGN(0x012,0x10), 0x20);
 		assertEquals(BitOps.ALIGN(12,10), 20);
