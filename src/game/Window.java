@@ -22,7 +22,7 @@ public class Window extends WindowConstants
 	int width, height;
 
 	Scrollbar hscroll, vscroll, vscroll2;
-	ResizeInfo resize;
+	ResizeInfo resize; // = new ResizeInfo();
 
 	byte caption_color;
 
@@ -66,7 +66,7 @@ public class Window extends WindowConstants
 
 		//List<Widget> 
 		widget =  new ArrayList<Widget>();
-
+		resize = new ResizeInfo();
 	}	
 
 

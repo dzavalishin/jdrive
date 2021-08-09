@@ -141,6 +141,13 @@ public class ViewPort
 			bit <<= 1;
 		}
 
+		// TODO [dz] is it ok? Do we need viewports container at all?
+		if( vp == null)
+		{
+			vp = new ViewPort();
+			_viewports.add(vp);
+		}
+		
 		assert vp != null;
 		//Global._active_viewports |= bit;
 

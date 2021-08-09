@@ -71,9 +71,9 @@ public class SpriteCache {
 	private static Sprite ReadSprite(int id)
 	{
 		int num;
-		byte type;
+		int type; // treated as unsigned, thus int
 
-		Global.DEBUG_spritecache( 9, "load sprite %d", id);
+		//Global.DEBUG_spritecache( 9, "load sprite %d", id);
 
 		if (_sprite_file_pos[id] == 0 && id != 0) {
 			Global.error(
@@ -86,7 +86,7 @@ public class SpriteCache {
 		FileIO.FioSeekToFile(_sprite_file_pos[id]);
 
 		num  = FileIO.FioReadWord();
-		type = (byte) FileIO.FioReadByte();
+		type = FileIO.FioReadByte();
 		if (type == 0xFF) {
 			//byte[] dest = new byte[num]; // AllocSprite(num);
 
