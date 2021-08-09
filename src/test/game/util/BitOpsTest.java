@@ -152,7 +152,8 @@ class BitOpsTest {
 
 	@Test
 	void testKILL_FIRST_BIT() {
-		fail("Not yet implemented");
+		assertEquals(BitOps.KILL_FIRST_BIT(0x20), 0); // TODO bits 6 & 7?
+		assertEquals(BitOps.KILL_FIRST_BIT(0x22), 2); // TODO bits 6 & 7?
 	}
 
 	@Test
@@ -160,7 +161,7 @@ class BitOpsTest {
 		fail("Not yet implemented");
 		//System.err.println(BitOps.FindFirstBit2x64(0x80));
 		assertEquals(BitOps.FindFirstBit2x64(0x1), 0 );
-		assertEquals(BitOps.FindFirstBit2x64(0x8000), 0 );
+		assertEquals(BitOps.FindFirstBit2x64(0x80), 7 ); // TODO which bits must work?
 	}
 
 	@Test
@@ -170,12 +171,14 @@ class BitOpsTest {
 
 	@Test
 	void testIS_BYTE_INSIDE() {
-		fail("Not yet implemented");
+		assertTrue(BitOps.IS_BYTE_INSIDE(1, 0, 5) );
+		assertFalse(BitOps.IS_BYTE_INSIDE(10, 0, 5) );
 	}
 
 	@Test
 	void testIS_INT_INSIDE() {
-		fail("Not yet implemented");
+		assertTrue(BitOps.IS_INT_INSIDE(1, 0, 5) );
+		assertFalse(BitOps.IS_INT_INSIDE(10, 0, 5) );
 	}
 
 	@Test
@@ -195,12 +198,14 @@ class BitOpsTest {
 
 	@Test
 	void testMyabs() {
-		fail("Not yet implemented");
+		assertEquals(BitOps.myabs(-5), 5);
+		assertEquals(BitOps.myabs(5), 5);
 	}
 
 	@Test
 	void testMyabs64() {
-		fail("Not yet implemented");
+		assertEquals(BitOps.myabs64(-5l), 5l);
+		assertEquals(BitOps.myabs64(5l), 5l);
 	}
 
 	@Test
@@ -215,12 +220,49 @@ class BitOpsTest {
 
 	@Test
 	void testFindFirstBitInt() {
-		fail("Not yet implemented");
+		assertEquals(BitOps.FindFirstBit(0x01), 0);
+		assertEquals(BitOps.FindFirstBit(0x02), 1);
+		assertEquals(BitOps.FindFirstBit(0x04), 2);
+		assertEquals(BitOps.FindFirstBit(0x08), 3);
+		assertEquals(BitOps.FindFirstBit(0x10), 4);
+		assertEquals(BitOps.FindFirstBit(0x20), 5);
+		assertEquals(BitOps.FindFirstBit(0x40), 6);
+		assertEquals(BitOps.FindFirstBit(0x80), 7);
+
+		assertEquals(BitOps.FindFirstBit(0x03), 1);
+		assertEquals(BitOps.FindFirstBit(0x05), 2);
+		assertEquals(BitOps.FindFirstBit(0x09), 3);
+		assertEquals(BitOps.FindFirstBit(0x11), 4);
+		assertEquals(BitOps.FindFirstBit(0x21), 5);
+		assertEquals(BitOps.FindFirstBit(0x41), 6);
+		assertEquals(BitOps.FindFirstBit(0x82), 7);
 	}
 
 	@Test
 	void testFindFirstBitLong() {
-		fail("Not yet implemented");
+		//System.err.print("FindFirstBit: "+					BitOps.FindFirstBit(0x02l) );
+		
+		assertEquals(BitOps.FindFirstBit(0x01l), 0);
+		assertEquals(BitOps.FindFirstBit(0x02l), 1);
+		assertEquals(BitOps.FindFirstBit(0x04l), 2);
+		assertEquals(BitOps.FindFirstBit(0x08l), 3);
+		assertEquals(BitOps.FindFirstBit(0x10l), 4);
+		assertEquals(BitOps.FindFirstBit(0x20l), 5);
+		assertEquals(BitOps.FindFirstBit(0x40l), 6);
+		assertEquals(BitOps.FindFirstBit(0x80l), 7);
+
+		assertEquals(BitOps.FindFirstBit(0x03l), 1);
+		assertEquals(BitOps.FindFirstBit(0x05l), 2);
+		assertEquals(BitOps.FindFirstBit(0x09l), 3);
+		assertEquals(BitOps.FindFirstBit(0x11l), 4);
+		assertEquals(BitOps.FindFirstBit(0x21l), 5);
+		assertEquals(BitOps.FindFirstBit(0x41l), 6);
+		assertEquals(BitOps.FindFirstBit(0x82l), 7);
+
+		assertEquals(BitOps.FindFirstBit(0x100l), 8);
+		assertEquals(BitOps.FindFirstBit(0x1000l), 12);
+		assertEquals(BitOps.FindFirstBit(0x10000l), 16);
+		assertEquals(BitOps.FindFirstBit(0x100000l), 20);
 	}
 
 	@Test

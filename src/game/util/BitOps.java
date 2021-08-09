@@ -293,7 +293,7 @@ public class BitOps {
 		return 32-Integer.numberOfLeadingZeros(a);
 	} */
 
-	int FindFirstBit(int value)
+	public static int FindFirstBit(int value)
 	{
 		// This is much faster than the one that was before here.
 		//  Created by Darkvater.. blame him if it is wrong ;)
@@ -311,7 +311,8 @@ public class BitOps {
 	
 	public static int FindFirstBit(long a) {
 		//return Integer.numberOfTrailingZeros(a)+1;
-		return 32-Long.numberOfLeadingZeros(a);
+		//return 31-Long.numberOfLeadingZeros(a);
+		return 63-Long.numberOfLeadingZeros(a);
 	}
 
 	public static int BIGMULUS(int a, int b, int shift) 
