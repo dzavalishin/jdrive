@@ -2,6 +2,7 @@ package game;
 
 import game.struct.DrawEngineInfo;
 import game.tables.EngineTables;
+import game.tables.EngineTables2;
 import game.util.BitOps;
 import game.util.Strings;
 
@@ -193,6 +194,10 @@ public class Engine extends EngineTables {
 		for (int i = 0; i < Engine._engines.length; i++ ) 
 		{
 			final Engine e = Engine._engines[i];
+			
+			// TODO XXX must make copy!
+			_engine_info[i] = EngineTables2.orig_engine_info[i];
+			
 			final EngineInfo ei= _engine_info[i];
 
 			int r;

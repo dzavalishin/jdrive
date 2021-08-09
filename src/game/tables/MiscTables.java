@@ -64,7 +64,7 @@ public class MiscTables
 
 	private static int[] nw = { 1, 16, 4, 16, 3, 8, 16, 16, 16, 16, 2, 0, };
 
-	private static int[] ns = {	0x10C9, 0x10CA, 0x10CB, 0x10CC, 0x10CD, 0x10CE, 0x10CF, 0x10D0, 0x10D1, 0x10D2, 0x10D3, };
+	private static int[] ns = {	0x10C9, 0x10CA, 0x10CB, 0x10CC, 0x10CD, 0x10CE, 0x10CF, 0x10D0, 0x10D1, 0x10D2, 0x10D3, 0 }; // TODO [dz] for some reason there was just 10 sprites and code wants 11th one
 
 	private static int[] nicp = {	3185, 5916, 4550, 4437, 4322, 6144, 4778, 5005, 5120, 5688, 7509, 5688 };
 

@@ -310,16 +310,21 @@ public class SettingsGui extends SettingsTables
 
 	static void SetDifficultyLevel(int mode, GameOptions gm_opt)
 	{
-		/* TODO diff level
+
 		int i;
 		assert(mode <= 3);
 
-		gm_opt.diff_level = mode;
+		gm_opt.diff_level = (byte) mode;
 		if (mode != 3) { // not custom
+			/*
 			for (i = 0; i != Global.GAME_DIFFICULTY_NUM; i++)
-				((int*)&gm_opt.diff)[i] = _default_game_diff[mode][i];
+			{
+				//((int*)&gm_opt.diff)[i] = _default_game_diff[mode][i];
+			}
+			*/
+			gm_opt.diff = _default_game_diff[mode];
 		}
-		*/
+
 	}
 
 	//extern void StartupEconomy();
@@ -443,7 +448,7 @@ public class SettingsGui extends SettingsTables
 			}	break;
 			case 3: case 4: case 5: case 6: /* Easy / Medium / Hard / Custom */
 				// temporarily change difficulty level
-				// TODO SetDifficultyLevel(e.widget - 3, &_opt_mod_temp);
+				SetDifficultyLevel(e.widget - 3, _opt_mod_temp);
 				w.SetWindowDirty();
 				break;
 			case 7: /* Highscore Table */

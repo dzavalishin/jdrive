@@ -52,7 +52,7 @@ public class EngineTables2
 	private static final int S = 4;
 	private static final int Y = 8;
 
-	final EngineInfo orig_engine_info[] = {
+	public final static EngineInfo orig_engine_info[] = {
 			new EngineInit(  1827,  20,  15,  30, R, T      ), /*   0 Kirby Paul Tank (Steam) */
 			new EngineInit( 12784,  20,  22,  30, R,   A|S  ), /*   1 MJS 250 (Diesel) */
 			new EngineInit(  9497,  20,  20,  50, R,       Y), /*   2 Ploddyphut Choo-Choo */

@@ -1,5 +1,6 @@
 package game.tables;
 
+import game.GameDifficulty;
 import game.Str;
 
 public class SettingsTables 
@@ -52,15 +53,21 @@ public class SettingsTables
 	P: Train reversing (0 = end of line + stations, 1 = end of line)
 	Q: disasters
 	R: area restructuring (0 = permissive, 2 = hostile)
-	 */
-	protected static final int _default_game_diff[][] = { /*
-	 A, B, C, D,   E, F, G, H, I, J, K, L, M, N, O, P, Q, R*/
+	 * /
+	protected static final int _default_game_diff[][] = { 
+	 // A, B, C, D,   E, F, G, H, I, J, K, L, M, N, O, P, Q, R
 			{2, 2, 1, 3, 300, 2, 0, 2, 0, 1, 2, 0, 1, 0, 0, 0, 0, 0},	//easy
 			{4, 1, 1, 2, 150, 3, 1, 3, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1},	//medium
 			{7, 0, 2, 2, 100, 4, 1, 3, 2, 2, 0, 2, 3, 2, 1, 1, 1, 2},	//hard
-	};
+	}; */
 
 
+	public static final GameDifficulty _default_game_diff[] = { /*
+			 A, B, C, D,   E, F, G, H, I, J, K, L, M, N, O, P, Q, R*/
+		new GameDifficulty( 2, 2, 1, 3, 300, 2, 0, 2, 0, 1, 2, 0, 1, 0, 0, 0, 0, 0 ),	//easy
+		new GameDifficulty( 4, 1, 1, 2, 150, 3, 1, 3, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1 ),	//medium
+		new GameDifficulty( 7, 0, 2, 2, 100, 4, 1, 3, 2, 2, 0, 2, 3, 2, 1, 1, 1, 2 ),	//hard
+			};
 
 
 	//typedef int PatchButtonClick(int);
