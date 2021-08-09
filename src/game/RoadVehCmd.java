@@ -64,7 +64,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 * @param p1 bus/truck type being built (engine)
 	 * @param p2 unused
 	 */
-	int CmdBuildRoadVeh(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildRoadVeh(int x, int y, int flags, int p1, int p2)
 	{
 		int cost;
 		Vehicle v;
@@ -167,7 +167,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 * @param p1 road vehicle ID to start/stop
 	 * @param p2 unused
 	 */
-	int CmdStartStopRoadVeh(int x, int y, int flags, int p1, int p2)
+	static int CmdStartStopRoadVeh(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 
@@ -203,7 +203,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 * @param p1 vehicle ID to be sold
 	 * @param p2 unused
 	 */
-	int CmdSellRoadVeh(int x, int y, int flags, int p1, int p2)
+	static int CmdSellRoadVeh(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 
@@ -291,7 +291,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 * @param p1 vehicle ID to send to the depot
 	 * @param p2 unused
 	 */
-	int CmdSendRoadVehToDepot(int x, int y, int flags, int p1, int p2)
+	static int CmdSendRoadVehToDepot(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		final Depot dep;
@@ -338,7 +338,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 * @param p1 vehicle ID to turn
 	 * @param p2 unused
 	 */
-	int CmdTurnRoadVeh(int x, int y, int flags, int p1, int p2)
+	static int CmdTurnRoadVeh(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 
@@ -368,7 +368,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 * @param p1 vehicle ID that is being service-interval-changed
 	 * @param p2 new service interval
 	 */
-	int CmdChangeRoadVehServiceInt(int x, int y, int flags, int p1, int p2)
+	static int CmdChangeRoadVehServiceInt(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
 		int serv_int = Depot.GetServiceIntervalClamped(p2); /* Double check the service interval from the user-input */

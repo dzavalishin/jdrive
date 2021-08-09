@@ -586,7 +586,7 @@ public class Rail extends RailTables {
 	 * @param p1 railtype of being built piece (normal, mono, maglev)
 	 * @param p2 rail track to build
 	 */
-	int CmdBuildSingleRail(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildSingleRail(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile;
 		int tileh;
@@ -713,7 +713,7 @@ public class Rail extends RailTables {
 	 * @param p1 unused
 	 * @param p2 rail orientation
 	 */
-	int CmdRemoveSingleRail(int x, int y, int flags, int p1, int p2)
+	static int CmdRemoveSingleRail(int x, int y, int flags, int p1, int p2)
 	{
 		/* Track */ int  track = p2;
 		/*TrackBits*/ int  trackbit;
@@ -938,7 +938,7 @@ public class Rail extends RailTables {
 	 * Stub for the unified rail builder/remover
 	 * @see CmdRailTrackHelper
 	 */
-	int CmdBuildRailroadTrack(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildRailroadTrack(int x, int y, int flags, int p1, int p2)
 	{
 		return CmdRailTrackHelper(x, y, flags, p1, BitOps.RETCLRBIT(p2, 7));
 	}
@@ -947,7 +947,7 @@ public class Rail extends RailTables {
 	 * Stub for the unified rail builder/remover
 	 * @see CmdRailTrackHelper
 	 */
-	int CmdRemoveRailroadTrack(int x, int y, int flags, int p1, int p2)
+	static int CmdRemoveRailroadTrack(int x, int y, int flags, int p1, int p2)
 	{
 		return CmdRailTrackHelper(x, y, flags, p1, BitOps.RETSETBIT(p2, 7));
 	}
@@ -960,7 +960,7 @@ public class Rail extends RailTables {
 	 * @todo When checking for the tile slope,
 	 * distingush between "Flat land required" and "land sloped in wrong direction"
 	 */
-	int CmdBuildTrainDepot(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildTrainDepot(int x, int y, int flags, int p1, int p2)
 	{
 		Depot d;
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
@@ -1033,7 +1033,7 @@ public class Rail extends RailTables {
 	+  * @param p2 used for CmdBuildManySignals() to copy direction of first signal
 	+  * TODO: p2 should be replaced by two bits for "along" and "against" the track.
 	+  */
-	int CmdBuildSingleSignal(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildSingleSignal(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		boolean semaphore;
@@ -1491,7 +1491,7 @@ public class Rail extends RailTables {
 	 * @param x,y coordinates where signal is being deleted from
 	 * @param p1 track to remove signal from (Track enum)
 	 */
-	int CmdRemoveSingleSignal(int x, int y, int flags, int p1, int p2)
+	static int CmdRemoveSingleSignal(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		/* Track */ int  track = (p1 & 0x7);

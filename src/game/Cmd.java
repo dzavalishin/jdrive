@@ -190,7 +190,7 @@ public class Cmd {
 			new Command(Rail::CmdBuildSingleRail,                     0), /*   2 */
 			new Command(Rail::CmdRemoveSingleRail,                    0), /*   3 */
 			new Command(Landscape::CmdLandscapeClear,                      0), /*   4 */
-			new Command(CmdBuildBridge,                         0), /*   5 */
+			new Command(TunnelBridgeCmd::CmdBuildBridge,                         0), /*   5 */
 			new Command(Station::CmdBuildRailroadStation,                0), /*   6 */
 			new Command(Rail::CmdBuildTrainDepot,                     0), /*   7 */
 			new Command(Rail::CmdBuildSingleSignal,                   0), /*   8 */
@@ -198,7 +198,7 @@ public class Cmd {
 			new Command(Clear::CmdTerraformLand,                       0), /*  10 */
 			new Command(Clear::CmdPurchaseLandArea,                    0), /*  11 */
 			new Command(Clear::CmdSellLandArea,                        0), /*  12 */
-			new Command(CmdBuildTunnel,                         0), /*  13 */
+			new Command(TunnelBridgeCmd::CmdBuildTunnel,                         0), /*  13 */
 			new Command(Station::CmdRemoveFromRailroadStation,           0), /*  14 */
 			new Command(Rail::CmdConvertRail,                         0), /*  15 */
 			new Command(WayPoint::CmdBuildTrainWaypoint,                  0), /*  16 */
@@ -216,7 +216,7 @@ public class Cmd {
 			new Command(null,                                   0), /*  28 */
 			new Command(Station::CmdBuildAirport,                        0), /*  29 */
 			new Command(Station::CmdBuildDock,                           0), /*  30 */
-			new Command(Ship::CmdBuildShipDepot,                      0), /*  31 */
+			new Command(WaterCmd::CmdBuildShipDepot,                      0), /*  31 */
 			new Command(Station::CmdBuildBuoy,                           0), /*  32 */
 			new Command(Tree::CmdPlantTree,                           0), /*  33 */
 			new Command(TrainCmd::CmdBuildRailVehicle,                    0), /*  34 */
@@ -236,7 +236,7 @@ public class Cmd {
 			new Command(TrainCmd::CmdChangeTrainServiceInt,               0), /*  46 */
 
 			new Command(Industry::CmdBuildIndustry,                       0), /*  47 */
-			new Command(CmdBuildCompanyHQ,                      0), /*  48 */
+			new Command(UnmovableCmd::CmdBuildCompanyHQ,                      0), /*  48 */
 			new Command(MiscCmd::CmdSetPlayerFace,                       0), /*  49 */
 			new Command(MiscCmd::CmdSetPlayerColor,                      0), /*  50 */
 
@@ -264,12 +264,12 @@ public class Cmd {
 			new Command(SignStruct::CmdPlaceSign,                           0), /*  65 */
 			new Command(SignStruct::CmdRenameSign,                          0), /*  66 */
 
-			new Command(CmdBuildRoadVeh,                        0), /*  67 */
-			new Command(CmdStartStopRoadVeh,                    0), /*  68 */
-			new Command(CmdSellRoadVeh,                         0), /*  69 */
-			new Command(CmdSendRoadVehToDepot,                  0), /*  70 */
-			new Command(CmdTurnRoadVeh,                         0), /*  71 */
-			new Command(CmdChangeRoadVehServiceInt,             0), /*  72 */
+			new Command(RoadVehCmd::CmdBuildRoadVeh,                        0), /*  67 */
+			new Command(RoadVehCmd::CmdStartStopRoadVeh,                    0), /*  68 */
+			new Command(RoadVehCmd::CmdSellRoadVeh,                         0), /*  69 */
+			new Command(RoadVehCmd::CmdSendRoadVehToDepot,                  0), /*  70 */
+			new Command(RoadVehCmd::CmdTurnRoadVeh,                         0), /*  71 */
+			new Command(RoadVehCmd::CmdChangeRoadVehServiceInt,             0), /*  72 */
 
 			new Command(MiscCmd::CmdPause,                      Cmd.CMD_SERVER), /*  73 */
 
@@ -283,7 +283,7 @@ public class Cmd {
 			new Command(Town::CmdRenameTown,                 Cmd.CMD_SERVER), /*  80 */
 			new Command(Town::CmdDoTownAction,                        0), /*  81 */
 
-			new Command(CmdSetRoadDriveSide,           Cmd.CMD_SERVER), /*  82 */
+			new Command(SettingsGui::CmdSetRoadDriveSide,           Cmd.CMD_SERVER), /*  82 */
 			new Command(null,                                   0), /*  83 */
 			new Command(null,                                   0), /*  84 */
 			new Command(MiscCmd::CmdChangeDifficultyLevel,      Cmd.CMD_SERVER), /*  85 */
@@ -309,20 +309,20 @@ public class Cmd {
 			new Command(null,                                   0), /* 101 */
 
 			new Command(MiscCmd::CmdMoneyCheat,                Cmd.CMD_OFFLINE), /* 102 */
-			new Command(Ship::CmdBuildCanal,                          0), /* 103 */
+			new Command(WaterCmd::CmdBuildCanal,                          0), /* 103 */
 			new Command(Player::CmdPlayerCtrl,                          0), /* 104 */
 
 			new Command(Clear::CmdLevelLand,                           0), /* 105 */
 
 			new Command(TrainCmd::CmdRefitRailVehicle,                    0), /* 106 */
 			new Command(Order::CmdRestoreOrderIndex,                   0), /* 107 */
-			new Command(Rail::CmdBuildLock,                           0), /* 108 */
+			new Command(WaterCmd::CmdBuildLock,                           0), /* 108 */
 			new Command(null,                                   0), /* 109 */
 			new Command(Rail::CmdBuildSignalTrack,                    0), /* 110 */
 			new Command(Rail::CmdRemoveSignalTrack,                   0), /* 111 */
 			new Command(null,                                   0), /* 112 */
 			new Command(MiscCmd::CmdGiveMoney,                           0), /* 113 */
-			new Command(CmdChangePatchSetting,         Cmd.CMD_SERVER), /* 114 */
+			new Command(SettingsGui::CmdChangePatchSetting,         Cmd.CMD_SERVER), /* 114 */
 			new Command(Player::CmdReplaceVehicle,                      0), /* 115 */
 			new Command(Vehicle::CmdCloneVehicle,						 0) /* 116 */
 	};
@@ -493,7 +493,7 @@ public class Cmd {
 		_docommand_recursive = 1;
 
 		// cost estimation only?
-		if (Global._shift_pressed && Player.IsLocalPlayer() && !(cmd & (Cmd.CMD_NETWORK_COMMAND | Cmd.CMD_SHOW_NO_ERROR))) 
+		if (Global._shift_pressed && Player.IsLocalPlayer() && 0==(cmd & (Cmd.CMD_NETWORK_COMMAND | Cmd.CMD_SHOW_NO_ERROR))) 
 		{
 			// estimate the cost.
 			res = proc.exec(x, y, flags, p1, p2);
@@ -501,7 +501,7 @@ public class Cmd {
 				if(0 != (res & 0xFFFF) ) Global._error_message = res & 0xFFFF;
 				Global.ShowErrorMessage(Global._error_message, Global._error_message_2, x, y);
 			} else {
-				ShowEstimatedCostOrIncome(res, x, y);
+				MiscGui.ShowEstimatedCostOrIncome(res, x, y);
 			}
 
 			_docommand_recursive = 0;
@@ -572,7 +572,7 @@ public class Cmd {
 
 		// If notest is on, it means the result of the test can be different than
 		//   the real command.. so ignore the test
-		if (!notest && !((cmd & Cmd.CMD_NO_TEST_IF_IN_NETWORK) && _networking)) {
+		if (!notest && !(0!=(cmd & Cmd.CMD_NO_TEST_IF_IN_NETWORK) && Global._networking)) {
 			assert(res == res2); // sanity check
 		} else {
 			if (CmdFailed(res2)) {
@@ -597,7 +597,7 @@ public class Cmd {
 
 		if (Player.IsLocalPlayer() && Global._game_mode != GameModes.GM_EDITOR) {
 			if (res2 != 0)
-				ShowCostOrIncomeAnimation(x, y, Landscape.GetSlopeZ(x, y), res2);
+				MiscGui.ShowCostOrIncomeAnimation(x, y, Landscape.GetSlopeZ(x, y), res2);
 			if (Global._additional_cash_required != 0) {
 				Global.SetDParam(0, Global._additional_cash_required);
 				Global.ShowErrorMessage(Str.STR_0003_NOT_ENOUGH_CASH_REQUIRES, Global._error_message_2, x,y);
@@ -616,9 +616,10 @@ public class Cmd {
 		_docommand_recursive = 0;
 
 		if (null != callback) callback.accept(true, tile, p1, p2);
-		Global._cmd_text = null;
-		return true;
-
+		{
+			Global._cmd_text = null;
+			return true;
+		}
 		//show_error:
 		// show error message if the command fails?
 		if (Player.IsLocalPlayer() && Global._error_message_2 != 0)
@@ -648,7 +649,7 @@ public class Cmd {
 interface CommandProc {
 	int exec(int x, int y, int flags, int p1, int p2);
 }
-*/
+ */
 
 class Command 
 {

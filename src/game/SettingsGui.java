@@ -209,7 +209,7 @@ public class SettingsGui extends SettingsTables
 	 * @param p1 the side of the road; 0 = left side and 1 = right side
 	 * @param p2 unused
 	 */
-	int CmdSetRoadDriveSide(int x, int y, int flags, int p1, int p2)
+	static int CmdSetRoadDriveSide(int x, int y, int flags, int p1, int p2)
 	{
 		/* Check boundaries and you can only change this if NO vehicles have been built yet,
 		 * except in the intro-menu where of course it's always possible to do so. */
@@ -871,7 +871,7 @@ public class SettingsGui extends SettingsTables
 	 * @todo check that the new value is a valid one. Awful lot of work, but since only
 	 * the server is allowed to do this, we trust it on this one :)
 	 */
-	int CmdChangePatchSetting(int x, int y, int flags, int p1, int p2)
+	static int CmdChangePatchSetting(int x, int y, int flags, int p1, int p2)
 	{
 		/* TODO
 		byte pcat = (byte) BitOps.GB(p1, 0, 8);

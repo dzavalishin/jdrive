@@ -586,7 +586,7 @@ public class MiscGui {
 	}
 
 
-	void ShowEstimatedCostOrIncome(int cost, int x, int y)
+	static void ShowEstimatedCostOrIncome(int cost, int x, int y)
 	{
 		//StringID 
 		int msg = Str.STR_0805_ESTIMATED_COST;

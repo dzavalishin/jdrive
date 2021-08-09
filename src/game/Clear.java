@@ -10,7 +10,7 @@ public class Clear extends ClearTables {
 		byte height;
 	} 
 
-	class TerraformerState {
+	static class TerraformerState {
 		int [] height = new int[4];
 		int flags;
 
@@ -27,30 +27,41 @@ public class Clear extends ClearTables {
 
 	static int TerraformAllowTileProcess(TerraformerState ts, TileIndex tile)
 	{
-		MutableTileIndex t;
-		int count;
+		//MutableTileIndex t;
+		//int count;
 
 		if (tile.TileX() == Global.MapMaxX() || tile.TileY() == Global.MapMaxY()) 
 			return -1;
 
+		/*
 		t = new MutableTileIndex( ts.tile_table );
 		for (count = ts.tile_table_count; count != 0; count--) {
 			if (t == tile) return 0;
 			t.madd(1);
-		}
+		}*/
 
+		for( int i = 0; i < ts.tile_table_count; i++ )
+		{
+			TileIndex t = ts.tile_table[i];
+			if (t.getTile() == tile.getTile()) return 0;
+		}
+		
 		return 1;
 	}
 
 	static int TerraformGetHeightOfTile(TerraformerState ts, TileIndex tile)
 	{
+		/*
 		TerraformerHeightMod mod = ts.modheight;
 		int count;
 
 		for (count = ts.modheight_count; count != 0;  mod++) {
 			if (mod.tile == tile) return mod.height;
 			count--;
-		}
+		}*/
+		// TODO check modheight_count?
+		for(TerraformerHeightMod mod : ts.modheight )
+			if (mod.tile == tile) return mod.height;
 
 		return tile.TileHeight();
 	}
@@ -185,11 +196,13 @@ public class Clear extends ClearTables {
 
 		{
 			int direction = ts.direction, r;
-			final TileIndexDiffC ttm;
+			//final TileIndexDiffC ttm;
 
 
-			for(ttm = _terraform_tilepos; ttm != endof(_terraform_tilepos); ttm++) {
-				tile += ToTileIndexDiff(*ttm);
+			//for(ttm = _terraform_tilepos; ttm != endof(_terraform_tilepos); ttm++)
+			for(final TileIndexDiffC ttm : _terraform_tilepos )
+			{
+				tile = tile.iadd( TileIndex.ToTileIndexDiff(ttm) );
 
 				r = TerraformGetHeightOfTile(ts, tile);
 				if (r != height && r-direction != height && r+direction != height) {
@@ -275,7 +288,7 @@ public class Clear extends ClearTables {
 				t = TerraformGetHeightOfTile(ts, tilei.iadd( TileIndex.TileDiffXY(0, 1)));
 				if (t <= z) z = t;
 
-				if (!tile.CheckTunnelInWay(z * 8)) {
+				if (!TunnelBridgeCmd.CheckTunnelInWay(tile, z * 8)) {
 					return Cmd.return_cmd_error(Str.STR_1002_EXCAVATION_WOULD_DAMAGE);
 					
 				//ti.madd(1);
@@ -286,12 +299,17 @@ public class Clear extends ClearTables {
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			/* Clear the landscape at the tiles */
 			{
+				/*
 				int count;
 				MutableTileIndex ti = new MutableTileIndex(ts.tile_table);
 				for (count = ts.tile_table_count; count != 0; count--) {
 					Cmd.DoCommandByTile(ti, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 					ti.madd(1);
 				}
+				*/
+				
+				for( TileIndex ti : ts.tile_table )
+					Cmd.DoCommandByTile(ti, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 			}
 
 			/* change the height */
@@ -299,7 +317,7 @@ public class Clear extends ClearTables {
 				int count = ts.modheight_count;
 				//TerraformerHeightMod mod;
 				//mod = ts.modheight;
-				for (int i; i < count; i++) {
+				for (int i = 0; i < count; i++) {
 					TileIndex til = ts.modheight[i].tile;
 
 					til.SetTileHeight( ts.modheight[i].height);
@@ -332,7 +350,9 @@ public class Clear extends ClearTables {
 		int sx, sy;
 		int h;
 		TileIndex tile;
-		int ret, cost, money;
+		//int ret, cost, money;
+		int [] cost = {0};
+		int [] money = {0};
 
 		if (pp1 > Global.MapSize()) return Cmd.CMD_ERROR;
 
@@ -355,22 +375,22 @@ public class Clear extends ClearTables {
 		int size_x = ex-sx+1;
 		int size_y = ey-sy+1;
 
-		money = Cmd.GetAvailableMoneyForCommand();
-		cost = 0;
+		money[0] = Cmd.GetAvailableMoneyForCommand();
+		cost[0] = 0;
 
 		//BEGIN_TILE_LOOP(tile2, size_x, size_y, tile) 
 		TileIndex.forAll( size_x, size_y, tile, (tile2) ->
 		{
 			int curh = tile2.TileHeight();
 			while (curh != h) {
-				ret = Cmd.DoCommandByTile(tile2, 8, (curh > h) ? 0 : 1, flags & ~Cmd.DC_EXEC, Cmd.CMD_TERRAFORM_LAND);
+				int ret = Cmd.DoCommandByTile(tile2, 8, (curh > h) ? 0 : 1, flags & ~Cmd.DC_EXEC, Cmd.CMD_TERRAFORM_LAND);
 				if (Cmd.CmdFailed(ret)) break;
-				cost += ret;
+				cost[0] += ret;
 
 				if(0 != (flags & Cmd.DC_EXEC)) {
-					if ((money -= ret) < 0) {
+					if ((money[0] -= ret) < 0) {
 						Global._additional_cash_required = ret;
-						cost = cost - ret;
+						cost[0] = cost[0] - ret;
 						return true;
 					}
 					Cmd.DoCommandByTile(tile2, 8, (curh > h) ? 0 : 1, flags, Cmd.CMD_TERRAFORM_LAND);
@@ -381,7 +401,7 @@ public class Clear extends ClearTables {
 			return false;
 		}); //END_TILE_LOOP(tile2, size_x, size_y, tile)
 
-		return (cost == 0) ? Cmd.CMD_ERROR : cost;
+		return (cost[0] == 0) ? Cmd.CMD_ERROR : cost[0];
 	}
 
 	/** Purchase a land area. Actually you only purchase one tile, so
@@ -409,8 +429,8 @@ public class Clear extends ClearTables {
 		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			ModifyTile(tile,
-				TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOwner.OWNER_CURRENT | TileTypes.MP_MAP5,
+			Landscape.ModifyTile(tile,
+				TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 				3 /* map5 */
 				);
 		}
@@ -592,9 +612,9 @@ public class Clear extends ClearTables {
 				break;
 		}
 
-		switch (GetTileType(TILE_ADDXY(tile, 1, 0))) {
-			case TileTypes.MP_CLEAR:
-				neighbour = (BitOps.GB(_m[TILE_ADDXY(tile, 1, 0)].m5, 0, 5) == 15);
+		switch (tile.iadd(1, 0).GetTileType()) {
+			case MP_CLEAR:
+				neighbour = (BitOps.GB(tile.iadd(1, 0).M().m5, 0, 5) == 15);
 				break;
 
 			default:
@@ -614,9 +634,9 @@ public class Clear extends ClearTables {
 			}
 		}
 
-		switch (GetTileType(TILE_ADDXY(tile, 0, 1))) {
-			case TileTypes.MP_CLEAR:
-				neighbour = (BitOps.GB(_m[TILE_ADDXY(tile, 0, 1)].m5, 0, 5) == 15);
+		switch (tile.iadd(0, 1).GetTileType()) {
+			case MP_CLEAR:
+				neighbour = (BitOps.GB(tile.iadd(0, 1).M().m5, 0, 5) == 15);
 				break;
 
 			default:
@@ -796,7 +816,7 @@ public class Clear extends ClearTables {
 					tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 2, 2);
 					do {
 						if (--j == 0) goto get_out;
-						tile_new = tile + TileOffsByDir(BitOps.GB(Hal.Random(), 0, 2));
+						tile_new = tile.iadd( TileIndex.TileOffsByDir(BitOps.GB(Hal.Random(), 0, 2)) );
 					} while (!tile.IsTileType( TileTypes.MP_CLEAR));
 					tile = tile_new;
 				}
@@ -835,7 +855,7 @@ public class Clear extends ClearTables {
 		int i = BitOps.GB(tile.getMap().m5, 2, 3);
 		if (i == 0) i = BitOps.GB(tile.getMap().m5, 0, 2) + 8;
 		td.str = _clear_land_str[i - 1];
-		td.owner = (byte) tile.GetTileOwner().owner;
+		td.owner = (byte) tile.GetTileOwner().id;
 		return td;
 	}
 

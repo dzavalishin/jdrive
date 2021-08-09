@@ -41,7 +41,7 @@ public class WaterCmd extends WaterTables
 	 * @param p1 depot direction (0 == X or 1 == Y)
 	 * @param p2 unused
 	 */
-	int CmdBuildShipDepot(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildShipDepot(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile, tile2;
 
@@ -180,7 +180,7 @@ public class WaterCmd extends WaterTables
 	 * @param p1 unused
 	 * @param p2 unused
 	 */
-	int CmdBuildLock(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildLock(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		int tileh;
@@ -200,7 +200,7 @@ public class WaterCmd extends WaterTables
 	 * @param p1 start tile of stretch-dragging
 	 * @param p2 unused
 	 */
-	int CmdBuildCanal(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildCanal(int x, int y, int flags, int p1, int p2)
 	{
 		int size_x, size_y;
 		int sx, sy;

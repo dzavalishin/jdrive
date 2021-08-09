@@ -159,7 +159,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	 * - p2 = (bit 0- 7) - bridge type (hi bh)
 	 * - p2 = (bit 8-..) - rail type. bit15 ((x>>8)&0x80) means road bridge.
 	 */
-	int CmdBuildBridge(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildBridge(int x, int y, int flags, int p1, int p2)
 	{
 		int bridge_type;
 		int rail_or_road, railtype;
@@ -538,7 +538,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	 * @param p1 railtype, 0x200 for road tunnel
 	 * @param p2 unused
 	 */
-	int CmdBuildTunnel(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildTunnel(int x, int y, int flags, int p1, int p2)
 	{
 		TileInfo ti = new TileInfo();
 		TileInfo tiorg = new TileInfo();

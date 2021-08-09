@@ -929,7 +929,7 @@ public class Engine extends EngineTables {
 	 * @param p1 engine-prototype offered
 	 * @param p2 unused
 	 */
-	int CmdWantEnginePreview(int x, int y, int flags, int p1, int p2)
+	static int CmdWantEnginePreview(int x, int y, int flags, int p1, int p2)
 	{
 		Engine e;
 		if (!Engine.IsEngineIndex(p1)) return Cmd.CMD_ERROR;

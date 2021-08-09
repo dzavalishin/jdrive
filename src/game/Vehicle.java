@@ -2352,7 +2352,7 @@ public class Vehicle implements IPoolItem
 	 * @param p1 the original vehicle's index
 	 * @param p2 1 = shared orders, else copied orders
 	 */
-	int CmdCloneVehicle(int x, int y, int flags, int p1, int p2)
+	static int CmdCloneVehicle(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v_front, v;
 		Vehicle w_front, w, w_rear;

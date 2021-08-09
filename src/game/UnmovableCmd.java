@@ -60,7 +60,7 @@ public class UnmovableCmd extends UnmovableTables {
 	 * @param p2 unused
 	 */
 	//extern int CheckFlatLandBelow(TileIndex tile, int w, int h, int flags, int invalid_dirs, int *);
-	int CmdBuildCompanyHQ(int x, int y, int flags, int p1, int p2)
+	static int CmdBuildCompanyHQ(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		Player p = Player.GetPlayer(Global._current_player);
