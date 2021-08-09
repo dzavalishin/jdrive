@@ -171,11 +171,18 @@ public class Engine extends EngineTables {
 		Engine [] e = Engine._engines;
 		int i = 0;
 
+		for( i = 0; i < _engines.length; i++ )
+			e[i] = new Engine();
+		
+		i = 0;
 		do e[i].type = Vehicle.VEH_Train;    while (++i < Global.ROAD_ENGINES_INDEX);
 		do e[i].type = Vehicle.VEH_Road;     while (++i < Global.SHIP_ENGINES_INDEX);
 		do e[i].type = Vehicle.VEH_Ship;     while (++i < Global.AIRCRAFT_ENGINES_INDEX);
 		do e[i].type = Vehicle.VEH_Aircraft; while (++i < Global.TOTAL_NUM_ENGINES);
-		do e[i].type = Vehicle.VEH_Special;  while (++i < _engines.length);
+		if( i < _engines.length )
+		{
+			do e[i].type = Vehicle.VEH_Special;  while (++i < _engines.length);
+		}
 	}
 
 	static void StartupEngines()

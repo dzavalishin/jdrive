@@ -1682,8 +1682,8 @@ public class Gfx extends PaletteTabs
 	//#define EXTR(p, q) (((int)(_timer_counter * (p)) * (q)) >> 16)
 	//#define EXTR2(p, q) (((int)(~_timer_counter * (p)) * (q)) >> 16)
 
-	static int EXTR(int p, int q) { return (((int)(Global._timer_counter * p) * q) >> 16); }
-	static int EXTR2(int p, int q) { return (((int)(~Global._timer_counter * p) * q) >> 16); }
+	static int EXTR(int p, int q) { return ( (((int)((Global._timer_counter ) * p) * q) >>> 16) ) % q; }
+	static int EXTR2(int p, int q) { return ( (((int)(((~Global._timer_counter) ) * p) * q) >>> 16) ) % q; }
 
 	static void DoPaletteAnimations()
 	{

@@ -28,19 +28,23 @@ public class SpriteCache {
 
 	private static boolean ReadSpriteHeaderSkipData() {
 		int num = FileIO.FioReadWord();
-		byte type;
+		int type; // treat as unsigned, thus int
 
 		if (num == 0)
 			return false;
 
-		type = (byte) FileIO.FioReadByte();
+		type = FileIO.FioReadByte();
 		if (type == 0xFF) {
+			//Global.debug("nonspr %d", num);
 			FileIO.FioSkipBytes(num);
 			return true;
 		}
 
 		FileIO.FioSkipBytes(7);
 		num -= 8;
+
+		//Global.debug("spr %d", num);
+
 		if (num == 0)
 			return true;
 

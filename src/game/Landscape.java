@@ -440,11 +440,15 @@ public class Landscape extends GenLandTable
 
 	static void InitializeLandscape()
 	{
-		int map_size;
+		int map_size = Global.MapSize();
 		int i;
 
-		map_size = Global.MapSize();
-		for (i = 0; i < map_size; i++) {
+		Global._m = new Tile[map_size];
+		
+		for (i = 0; i < map_size; i++) 
+		{
+			Global._m[i] = new Tile();
+			
 			Global._m[i].type        = TileTypes.MP_CLEAR.ordinal();
 			Global._m[i].height      = 0;
 			Global._m[i].m1          = Owner.OWNER_NONE;

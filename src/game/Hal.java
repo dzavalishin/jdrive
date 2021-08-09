@@ -304,8 +304,12 @@ class DrawPixelInfo {
 }
 
 class CursorVars {
-	Point pos, size, offs, delta;
-	Point draw_pos, draw_size;
+	Point pos = new Point(0, 0); 
+	Point size = new Point(0, 0); 
+	Point offs = new Point(0, 0); 
+	Point delta = new Point(0, 0);
+	Point draw_pos = new Point(0, 0); 
+	Point draw_size = new Point(0, 0);
 	CursorID sprite;
 
 	int wheel; // mouse wheel movement

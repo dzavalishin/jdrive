@@ -290,8 +290,10 @@ public class FileIO {
 		BufferedRandomAccessFile f = FioFOpenFile(filename);
 
 		if (f == null)
+		{
 			Global.error(String.format("Cannot open file '%s'", filename));
-
+			System.exit(33);
+		}
 		FioCloseFile(slot); // if file was opened before, close it
 		handles[slot] = f;
 		FioSeekToFile(slot << 24);

@@ -22,7 +22,7 @@ public class Economy
 
 
 
-	class Subsidy {
+	static class Subsidy {
 		int cargo_type;
 		int age;
 		int from;

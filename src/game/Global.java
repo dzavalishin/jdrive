@@ -168,7 +168,7 @@ public class Global {
 
 	public static final int NUM_PRICES = 49;
 
-	public static Prices _price;
+	public static Prices _price = new Prices();
 	public static int [] _price_frac = new int[NUM_PRICES];
 
 	public static int []_cargo_payment_rates = new int[AcceptedCargo.NUM_CARGO];
@@ -199,7 +199,7 @@ public class Global {
 
 	public static Paths _path = new Paths();
 
-	public static Tile _m[];
+	public static Tile _m[]; // = new Tile[1024*1024]; // TODO map size
 
 	// keybd
 	public static int _pressed_key; // Low 8 bits = ASCII, High 16 bits = keycode

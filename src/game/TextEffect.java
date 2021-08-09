@@ -94,7 +94,9 @@ public class TextEffect
 	{
 		int i;
 
-		for (i = 0; i < MAX_CHAT_MESSAGES; i++) {
+		for (i = 0; i < MAX_CHAT_MESSAGES; i++) 
+		{
+			_text_message_list[i] = new TextMessage();
 			_text_message_list[i].message = null;
 		}
 
@@ -295,9 +297,9 @@ public class TextEffect
 
 	static void InitTextEffects()
 	{
-		//TextEffect te;
+		for( int i = 0; i < _text_effect_list.length; i++)
+			_text_effect_list[i] = new TextEffect();
 
-		//for (te = _text_effect_list; te != endof(_text_effect_list); te++) 
 		for( TextEffect te : _text_effect_list) 
 		{
 			te.string_id = Global.INVALID_STRING_ID;

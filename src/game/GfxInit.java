@@ -10,7 +10,7 @@ public class GfxInit extends LandscapeSprites
 		{ 
 				"TRG1R.GRF",
 				"TRGIR.GRF",
-				// TODO "nsignalsw.grf",
+				"nsignalsw.grf",
 				null
 		};
 

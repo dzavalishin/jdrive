@@ -707,6 +707,7 @@ public class Player
 
 		for(i = 0; i != Global.MAX_PLAYERS; i++)
 		{
+			_players[i] = new Player();
 			_players[i].index=PlayerID.get(i);
 		}
 		_cur_player_tick_index = 0;

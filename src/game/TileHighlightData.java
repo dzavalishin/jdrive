@@ -2,16 +2,17 @@ package game;
 
 public class TileHighlightData {
 
-	Point size;
-	Point outersize;
-	Point pos;
-	Point offs;
+	Point size = new Point(0, 0);
+	Point outersize = new Point(0, 0);
+	Point pos = new Point(0, 0);
+	Point offs = new Point(0, 0);
 
-	Point new_pos;
-	Point new_size;
-	Point new_outersize;
+	Point new_pos = new Point(0, 0);
+	Point new_size = new Point(0, 0);
+	Point new_outersize = new Point(0, 0);
 
-	Point selend, selstart;
+	Point selend = new Point(0, 0);
+	Point selstart = new Point(0, 0);
 
 	int dirty;
 	int sizelimit;

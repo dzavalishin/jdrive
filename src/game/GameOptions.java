@@ -7,17 +7,17 @@ public class GameOptions
 	public byte currency;
 	public boolean kilometers;
 	public byte town_name;
-	public byte landscape;
+	public byte landscape = Landscape.LT_NORMAL;
 	public byte snow_line;
 	public byte autosave;
 	public byte road_side;
 
 	/* These are the options for the current game
 	 * either ingame, or loaded. Also used for networking games */
-	public static GameOptions _opt;
+	public static GameOptions _opt = new GameOptions(); // TODO must be set up!
 
 	/* These are the default options for a new game */
-	public static GameOptions _opt_newgame;
+	public static GameOptions _opt_newgame = new GameOptions(); // TODO must be set up!
 
 	// Pointer to one of the two _opt OR _opt_newgame structs
 	public static GameOptions _opt_ptr;

@@ -2284,6 +2284,9 @@ public class Town extends TownTables implements IPoolItem
 		//memset(_subsidies, 0, sizeof(_subsidies));
 		Economy._subsidies = new Subsidy[Global.MAX_PLAYERS];
 
+		for(int i = 0; i < Global.MAX_PLAYERS; i++)
+			Economy._subsidies[i] = new Subsidy();
+		
 		//for (s=_subsidies; s != endof(_subsidies); s++)
 		for( Subsidy s : Economy._subsidies)
 			s.cargo_type = AcceptedCargo.CT_INVALID;
