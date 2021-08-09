@@ -4,10 +4,12 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import game.util.Pixel;
+
 class JavaHal extends Hal
 {
 	MainWindow mw = null;
-	private int[] screen;
+	private byte[] screen;
 	
 	@Override
 	public void start_video(String parm) 
@@ -54,9 +56,10 @@ class JavaHal extends Hal
 		frame.add(mw);
 		frame.setVisible(true);
 
-		screen = new int[2048*2048]; // TODO scr size!
+		//screen = new int[2048*2048]; // TODO scr size!
+		screen = new byte[2048*2048*4]; // TODO scr size!
 		
-		_screen.dst_ptr = screen;
+		_screen.dst_ptr = new Pixel( screen );
 	}
 
 	@Override

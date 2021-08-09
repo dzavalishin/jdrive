@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.ColorModel;
 import java.awt.image.MemoryImageSource;
 
 import javax.swing.JFrame;
@@ -26,7 +27,7 @@ public class MainWindow extends JPanel implements ActionListener{
 
 	private Timer timer = new Timer(TICK_TIME, this);	
 	private JFrame frame;
-	private int[] screen;
+	private byte[] screen;
 
 
 /*
@@ -38,10 +39,10 @@ public class MainWindow extends JPanel implements ActionListener{
 		defaultMessageFont = new java.awt.Font(java.awt.Font.SERIF, java.awt.Font.PLAIN, 20 );
 	}
 */
-	public MainWindow(JFrame frame, int[] screen) 
+	public MainWindow(JFrame frame, byte[] screen2) 
 	{
 		this.frame = frame;
-		this.screen = screen;
+		this.screen = screen2;
 		
 
 
@@ -212,8 +213,9 @@ public class MainWindow extends JPanel implements ActionListener{
 
 		final int width = 1280;
 		final int height = 1024;
+		ColorModel cm = ColorModel.getRGBdefault();
 		//final int[] pixels = new int[width * height]; // 0xAARRGGBB
-		MemoryImageSource source = new MemoryImageSource(width, height, screen, 0, width);
+		MemoryImageSource source = new MemoryImageSource(width, height, cm, screen, 0, width);
 		source.setAnimated(true);
 		source.setFullBufferUpdates(true);
 		Image image = Toolkit.getDefaultToolkit().createImage(source);
