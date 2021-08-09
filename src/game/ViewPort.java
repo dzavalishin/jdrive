@@ -2573,7 +2573,7 @@ class ParentSpriteToDraw {
 
 
 class ViewportDrawer {
-	DrawPixelInfo dpi;
+	DrawPixelInfo dpi = new DrawPixelInfo();
 
 	//byte *spritelist_mem;
 	//final byte *eof_spritelist_mem;

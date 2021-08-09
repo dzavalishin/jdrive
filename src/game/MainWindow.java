@@ -1,7 +1,6 @@
 package game;
 
 
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -23,6 +22,8 @@ public class MainWindow extends JPanel implements ActionListener{
 	public static final int TICK_TIME = 20;
 	public static final int TICKS_PER_SECOND = 1000 / TICK_TIME;
 
+	public static final int WIDTH = 1280;
+	public static final int HEIGHT = 1024;
 
 
 	private Timer timer = new Timer(TICK_TIME, this);	
@@ -211,11 +212,9 @@ public class MainWindow extends JPanel implements ActionListener{
 
 		//TODO DebugDisplay.paint(g);
 
-		final int width = 1280;
-		final int height = 1024;
 		ColorModel cm = ColorModel.getRGBdefault();
 		//final int[] pixels = new int[width * height]; // 0xAARRGGBB
-		MemoryImageSource source = new MemoryImageSource(width, height, cm, screen, 0, width);
+		MemoryImageSource source = new MemoryImageSource(WIDTH, HEIGHT, cm, screen, 0, WIDTH);
 		source.setAnimated(true);
 		source.setFullBufferUpdates(true);
 		Image image = Toolkit.getDefaultToolkit().createImage(source);

@@ -60,6 +60,13 @@ class JavaHal extends Hal
 		screen = new byte[2048*2048*4]; // TODO scr size!
 		
 		_screen.dst_ptr = new Pixel( screen );
+		_screen.height = MainWindow.HEIGHT;
+		_screen.width = MainWindow.WIDTH;
+		_screen.pitch = MainWindow.WIDTH * 4;
+		_screen.left = 0;
+		_screen.top = 0;
+		_screen.zoom = 0;
+		
 	}
 
 	@Override

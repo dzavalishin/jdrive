@@ -40,7 +40,7 @@ public class VehicleHash
 	}
 
 	public VehicleID get(Point point) {
-		return new VehicleID( map.get(point) );
+		return VehicleID.get( map.get(point) );
 	}
 	
 	public void clear()

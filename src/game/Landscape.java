@@ -74,7 +74,10 @@ public class Landscape extends GenLandTable
 		ti.x = x;
 		ti.y = y;
 
-		if (x >= Global.MapMaxX() * 16 - 1 || y >= Global.MapMaxY() * 16 - 1) {
+		if (
+				x < 0 || y < 0 ||
+				x >= Global.MapMaxX() * 16 - 1 || y >= Global.MapMaxY() * 16 - 1) 
+		{
 			ti.tileh = 0;
 			ti.type = TileTypes.MP_VOID.ordinal();
 			ti.tile = null;

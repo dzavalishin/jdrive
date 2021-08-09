@@ -323,6 +323,8 @@ public class Main {
 		if (Global._dedicated_forks && !dedicated)
 			Global._dedicated_forks = false;
 
+		Global.hal.start_video("");
+		
 		// enumerate language files
 		Strings.InitializeLanguagePacks();
 
