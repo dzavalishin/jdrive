@@ -19,7 +19,7 @@ public class FileIO {
 	public static final int SEEK_CUR = 1;
 
 	//byte *buffer, *buffer_end;
-	static long pos;
+	//static long pos;
 	//FILE *cur_fh;
 	//FILE *handles[32];
 	//byte buffer_start[512];
@@ -37,16 +37,25 @@ public class FileIO {
 	public static long FioGetPos()
 	{
 		//return _fio.pos + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
-		return pos;// + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
+		//return pos;// + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
+		try {
+			return cur_fh.getFilePointer();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(33);
+			return -1;
+		}
 	}
 
 	public static void FioSeekTo(long ppos, int mode)
 	{
-		if (mode == SEEK_CUR) pos += FioGetPos();
+		if (mode == SEEK_CUR) ppos += FioGetPos();
 		//_fio.buffer = _fio.buffer_end = _fio.buffer_start + FIO_BUFFER_SIZE;
 		//fseek(_fio.cur_fh, (_fio.pos=pos), SEEK_SET);
 		try {
-			cur_fh.seek(pos=ppos);
+			//cur_fh.seek(pos=ppos);
+			cur_fh.seek(ppos);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -57,11 +66,11 @@ public class FileIO {
 	// Seek to a file and a position
 	public static void FioSeekToFile(long ppos)
 	{
-		assert pos > 0;
+		//assert pos > 0;
 		BufferedRandomAccessFile f = handles[(int) (ppos >> 24)];
 		assert(f != null);
 		cur_fh = f;
-		FioSeekTo(pos & 0xFFFFFF, SEEK_SET);
+		FioSeekTo(ppos & 0xFFFFFF, SEEK_SET);
 	}
 
 	// Use int to prevent signed conversion to int in caller
@@ -79,6 +88,7 @@ public class FileIO {
 		int d = 0;
 		try {
 			d = cur_fh.read();
+			//pos++;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -92,6 +102,7 @@ public class FileIO {
 	public static void FioSkipBytes(int n)
 	{
 		cur_fh.skip(n);
+		//pos += n;
 		/*
 		for(;;) {
 			//int m = min(_fio.buffer_end - _fio.buffer, n);
@@ -119,7 +130,7 @@ public class FileIO {
 	public static byte[] FioReadBlock(int size)
 	{
 		FioSeekTo(FioGetPos(), SEEK_SET);
-		pos += size;
+		//pos += size;
 		//fread(ptr, 1, size, _fio.cur_fh);
 		//return cur_fh.readNBytes(size);
 

@@ -79,7 +79,7 @@ public class GfxInit extends LandscapeSprites
 
 		FileIO.FioOpenFile(file_index, filename);
 
-		Global.DEBUG_spritecache( 2,"Reading grf-file ``%s''", filename);
+		Global.DEBUG_spritecache( 2,"Reading grf-file ``%s'', start index %d", filename, load_index);
 
 		while (SpriteCache.LoadNextSprite(load_index, (byte) file_index)) {
 			load_index++;
@@ -115,7 +115,7 @@ public class GfxInit extends LandscapeSprites
 				SpriteCache.SkipSprites(end);
 			} else { // load sprites and use indexes from start to end
 				do {
-					//Global.DEBUG_grf(0, "load spr %d", start );
+					Global.DEBUG_grf(0, "load spr %d", start );
 					boolean b = SpriteCache.LoadNextSprite(start, (byte)file_index);
 					assert(b);
 				} while (++start <= end);
