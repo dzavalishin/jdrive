@@ -266,15 +266,20 @@ public class BitOps {
 	 */
 
 	/**
-	 * ROtate x Left/Right by n (must be >= 0)
+	 * Rotate x Left/Right by n (must be >= 0)
 	 * @note Assumes a byte has 8 bits
 	 */
 	//static void ROL(x, n) ((x) << (n) | (x) >> (sizeof(x) * 8 - (n)))
 
 	//static void ROR(x, n) ((x) >> (n) | (x) << (sizeof(x) * 8 - (n)))
-	public static int ROR(int x, int n)
+	public static int ROR8(int x, int n)
 	{
-		return (x >>> n) | (x << (Integer.BYTES * 8 - n));		
+		return 0xFF & ((x >>> n) | (x << (1 * 8 - n)));		
+	}
+
+	public static int ROR16(int x, int n)
+	{
+		return 0xFFFF & ((x >>> n) | (x << (2 * 8 - n)));		
 	}
 
 	/**

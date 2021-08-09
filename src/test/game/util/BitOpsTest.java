@@ -47,22 +47,24 @@ class BitOpsTest {
 
 	@Test
 	void testMax64() {
-		fail("Not yet implemented");
+		assertEquals(BitOps.max64(33l, 44l), 44l );
 	}
 
 	@Test
 	void testMinu() {
-		fail("Not yet implemented");
+		assertEquals(BitOps.minu(-33, -44), Integer.toUnsignedLong(-44) );
 	}
 
 	@Test
 	void testMaxu() {
-		fail("Not yet implemented");
+		assertEquals(BitOps.maxu(-33, -44), Integer.toUnsignedLong(-33) );
 	}
 
 	@Test
 	void testClamp() {
-		fail("Not yet implemented");
+		assertEquals( BitOps.clamp(0, 2, 5), 2 );
+		assertEquals( BitOps.clamp(100, 2, 5), 5 );
+		assertEquals( BitOps.clamp(3, 2, 5), 3 );
 	}
 
 	@Test
@@ -183,17 +185,49 @@ class BitOpsTest {
 
 	@Test
 	void testCHANCE16() {
-		fail("Not yet implemented");
+		// test randomness
+		boolean vPrev = BitOps.CHANCE16(1, 10);
+		for( int i = 0; i < 100; i++)
+		{
+			boolean v = BitOps.CHANCE16(1, 10);
+			if( v != vPrev )
+			{
+				assertTrue(true);				
+				return;
+			}
+			vPrev = v;
+		}
+		fail();
 	}
 
 	@Test
 	void testCHANCE16R() {
-		fail("Not yet implemented");
+		// test callability
+		int [] r = { -1 };
+
+		// test randomness
+		boolean vPrev = BitOps.CHANCE16(1, 10);
+		for( int i = 0; i < 100; i++)
+		{
+			boolean v = BitOps.CHANCE16R(1, 10, r);
+			assertTrue(r[0] > 0);
+			//System.err.println(String.format("CHANCE16R %x", r[0] ) );
+
+			if( v != vPrev )
+			{
+				assertTrue(true);				
+				return;
+			}
+			vPrev = v;
+		}
+		fail();
+	
 	}
 
 	@Test
 	void testCHANCE16I() {
-		fail("Not yet implemented");
+		// test callability
+		boolean v = BitOps.CHANCE16I(1, 10, 5);
 	}
 
 	@Test
@@ -209,13 +243,21 @@ class BitOpsTest {
 	}
 
 	@Test
-	void testROR() {
-		assertEquals(BitOps.ROR(0x01,1), 0x80);
+	void testROR8() {
+		//System.err.println(String.format("ROR %x", BitOps.ROR8(0x01,1)));
+		assertEquals(BitOps.ROR8(0x01,1), 0x80);
+	}
+
+	@Test
+	void testROR16() {
+		//System.err.println(String.format("ROR %x", BitOps.ROR8(0x01,1)));
+		assertEquals(BitOps.ROR16(0x01,1), 0x8000);
 	}
 
 	@Test
 	void testALIGN() {
-		fail("Not yet implemented");
+		assertEquals(BitOps.ALIGN(0x012,0x10), 0x20);
+		assertEquals(BitOps.ALIGN(12,10), 20);
 	}
 
 	@Test
@@ -305,8 +347,11 @@ class BitOpsTest {
 	}
 
 	@Test
-	void testSubArray() {
-		fail("Not yet implemented");
+	void testSubArray() 
+	{
+		byte [] a = {1, 2, 3, 4, 5 };
+		byte [] sub = { 3, 4, 5};
+		assertArrayEquals( sub, BitOps.subArray( a , 2) );
 	}
 
 	@Test
