@@ -257,14 +257,15 @@ public class AirportFTAClass extends Airport // bring in constants
 	static void AirportBuildAutomata(AirportFTAClass Airport, final AirportFTAbuildup[] FA)
 	{
 		AirportFTA []FAutomata;
-		AirportFTA current;
 		int internalcounter, i;
 		FAutomata = new AirportFTA[ Airport.nofelements];
 		Airport.layout = FAutomata;
 		internalcounter = 0;
 
 		for (i = 0; i < Airport.nofelements; i++) {
-			current = Airport.layout[i];
+			AirportFTA current = new AirportFTA();
+			//current = Airport.layout[i];
+			Airport.layout[i] = current;
 			current.position = FA[internalcounter].position;
 			current.heading  = FA[internalcounter].heading;
 			current.block    = FA[internalcounter].block;

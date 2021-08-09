@@ -295,7 +295,9 @@ public class ViewPort
 				if (i >= 0) height -= i;
 
 				// Window wnext = w.getNextWindow?
-				if (height > 0) DoSetViewportPosition(w + 1, left, top, width, height);
+				//if (height > 0) DoSetViewportPosition(w + 1, left, top, width, height);
+				// TODO DoSetViewportPosition starts from next window
+				if (height > 0) DoSetViewportPosition(w, left, top, width, height);
 			}
 	}
 
@@ -928,8 +930,11 @@ public class ViewPort
 
 		if (dpi.zoom < 1) {
 			//FOR_ALL_STATIONS(st) 
-			Station.forEach( (st) ->
+			//Station.forEach( (st) ->
+			Iterator<Station> ii = Station.getIterator();
+			while(ii.hasNext())
 			{
+				Station st = ii.next();
 				if (st.xy != null &&
 						bottom > st.sign.top &&
 						top < st.sign.top + 12 &&
@@ -942,14 +947,18 @@ public class ViewPort
 						sstd.width = st.sign.width_1;
 					}
 				}
-			});
+			}
 		} else if (dpi.zoom == 1) {
 			right += 2;
 			bottom += 2;
 
 			//FOR_ALL_STATIONS(st) 
-			Station.forEach( (st) ->
+			//Station.forEach( (st) ->
+			Iterator<Station> ii = Station.getIterator();
+			while(ii.hasNext())
 			{
+				Station st = ii.next();
+
 				if (st.xy != null &&
 						bottom > st.sign.top &&
 						top < st.sign.top + 24 &&
@@ -962,7 +971,7 @@ public class ViewPort
 						sstd.width = st.sign.width_1;
 					}
 				}
-			});
+			}
 
 		} else {
 			assert(dpi.zoom == 2);
@@ -971,8 +980,11 @@ public class ViewPort
 			bottom += 5;
 
 			//FOR_ALL_STATIONS(st) 
-			Station.forEach( (st) ->
+			//Station.forEach( (st) ->
+			Iterator<Station> ii = Station.getIterator();
+			while(ii.hasNext())
 			{
+				Station st = ii.next();
 				if (st.xy != null &&
 						bottom > st.sign.top &&
 						top < st.sign.top + 24 &&
@@ -985,7 +997,7 @@ public class ViewPort
 						sstd.width = st.sign.width_2 | 0x8000;
 					}
 				}
-			});
+			}
 		}
 	}
 
@@ -1005,8 +1017,12 @@ public class ViewPort
 
 		if (dpi.zoom < 1) {
 			//FOR_ALL_SIGNS(ss)
-			SignStruct.forEach( (ss) ->
+			//SignStruct.forEach( (ss) ->
+			Iterator<SignStruct> ii = SignStruct.getIterator();
+			while(ii.hasNext())
 			{
+				SignStruct ss = ii.next();
+
 				if (ss.str != null &&
 						bottom > ss.sign.top &&
 						top < ss.sign.top + 12 &&
@@ -1019,13 +1035,16 @@ public class ViewPort
 						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
 					}
 				}
-			});
+			}
 		} else if (dpi.zoom == 1) {
 			right += 2;
 			bottom += 2;
 			//FOR_ALL_SIGNS(ss) 			
-			SignStruct.forEach( (ss) ->
+			Iterator<SignStruct> ii = SignStruct.getIterator();
+			while(ii.hasNext())
 			{
+				SignStruct ss = ii.next();
+
 				if (ss.str != null &&
 						bottom > ss.sign.top &&
 						top < ss.sign.top + 24 &&
@@ -1038,14 +1057,17 @@ public class ViewPort
 						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
 					}
 				}
-			});
+			}
 		} else {
 			right += 4;
 			bottom += 5;
 
 			//FOR_ALL_SIGNS(ss) 
-			SignStruct.forEach( (ss) ->
+			Iterator<SignStruct> ii = SignStruct.getIterator();
+			while(ii.hasNext())
 			{
+				SignStruct ss = ii.next();
+
 				if (ss.str != null &&
 						bottom > ss.sign.top &&
 						top < ss.sign.top + 24 &&
@@ -1058,7 +1080,7 @@ public class ViewPort
 						sstd.color = (ss.owner.id==Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
 					}
 				}
-			});
+			}
 		}
 	}
 
@@ -1079,8 +1101,11 @@ public class ViewPort
 
 		if (dpi.zoom < 1) {
 			//FOR_ALL_WAYPOINTS(wp) 
-			WayPoint.forEach( (wp) ->
+			//WayPoint.forEach( (wp) ->
+			Iterator<WayPoint> ii = WayPoint.getIterator();
+			while(ii.hasNext())
 			{
+				WayPoint wp = ii.next();
 				if (wp.xy != null &&
 						bottom > wp.sign.top &&
 						top < wp.sign.top + 12 &&
@@ -1093,13 +1118,15 @@ public class ViewPort
 						sstd.color = (wp.deleted != 0 ? 0xE : 11);
 					}
 				}
-			});
+			}
 		} else if (dpi.zoom == 1) {
 			right += 2;
 			bottom += 2;
 			//FOR_ALL_WAYPOINTS(wp) 
-			WayPoint.forEach( (wp) ->
+			Iterator<WayPoint> ii = WayPoint.getIterator();
+			while(ii.hasNext())
 			{
+				WayPoint wp = ii.next();
 				if (wp.xy != null &&
 						bottom > wp.sign.top &&
 						top < wp.sign.top + 24 &&
@@ -1112,14 +1139,16 @@ public class ViewPort
 						sstd.color = (wp.deleted != 0 ? 0xE : 11);
 					}
 				}
-			});
+			}
 		} else {
 			right += 4;
 			bottom += 5;
 
 			//FOR_ALL_WAYPOINTS(wp) 
-			WayPoint.forEach( (wp) ->
+			Iterator<WayPoint> ii = WayPoint.getIterator();
+			while(ii.hasNext())
 			{
+				WayPoint wp = ii.next();
 				if (wp.xy != null &&
 						bottom > wp.sign.top &&
 						top < wp.sign.top + 24 &&
@@ -1132,7 +1161,7 @@ public class ViewPort
 						sstd.color = (wp.deleted != 0 ? 0xE : 11);
 					}
 				}
-			});
+			}
 		}
 	}
 
@@ -2479,6 +2508,10 @@ public class ViewPort
 	static void ResetObjectToPlace()
 	{
 		SetObjectToPlace(Sprite.SPR_CURSOR_MOUSE, 0, 0, 0);
+	}
+
+	public static void clearViewPorts() {
+		_viewports.clear();		
 	}
 
 

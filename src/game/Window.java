@@ -1159,7 +1159,8 @@ public class Window extends WindowConstants
 		//_last_window = _windows;
 		//memset(_viewports, 0, sizeof(_viewports));
 		//_active_viewports = 0;
-		ViewPort._viewports.clear();
+		//ViewPort._viewports.clear();
+		ViewPort.clearViewPorts();
 		Global._no_scroll = 0;
 	}
 
