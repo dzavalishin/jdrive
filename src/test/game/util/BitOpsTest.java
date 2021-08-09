@@ -210,7 +210,7 @@ class BitOpsTest {
 
 	@Test
 	void testROR() {
-		fail("Not yet implemented");
+		assertEquals(BitOps.ROR(0x01,1), 0x80);
 	}
 
 	@Test
@@ -267,12 +267,29 @@ class BitOpsTest {
 
 	@Test
 	void testBIGMULUS() {
-		fail("Not yet implemented");
+		assertEquals(BitOps.BIGMULUS(1000000, 2, 1), 1000000 );
 	}
 
 	@Test
 	void testIsValidAsciiChar() {
-		fail("Not yet implemented");
+		assertTrue(BitOps.IsValidAsciiChar((byte) ' '));
+		assertTrue(BitOps.IsValidAsciiChar((byte) 'a'));
+		assertTrue(BitOps.IsValidAsciiChar((byte) 'z'));
+		assertTrue(BitOps.IsValidAsciiChar((byte) 'A'));
+		assertTrue(BitOps.IsValidAsciiChar((byte) 'Z'));
+		assertTrue(BitOps.IsValidAsciiChar((byte) '0'));
+		assertTrue(BitOps.IsValidAsciiChar((byte) '9'));
+		assertTrue(BitOps.IsValidAsciiChar((byte) 0xff));
+
+		assertFalse(BitOps.IsValidAsciiChar((byte) 0xAA));
+		assertFalse(BitOps.IsValidAsciiChar((byte) 0xAC));
+		assertFalse(BitOps.IsValidAsciiChar((byte) 0xAD));
+		assertFalse(BitOps.IsValidAsciiChar((byte) 0xAF));
+
+		assertFalse(BitOps.IsValidAsciiChar((byte) 0xB5));
+		assertFalse(BitOps.IsValidAsciiChar((byte) 0xB6));
+		assertFalse(BitOps.IsValidAsciiChar((byte) 0xB7));
+		assertFalse(BitOps.IsValidAsciiChar((byte) 0xB9));
 	}
 
 	@Test

@@ -326,7 +326,9 @@ public class BitOps {
 	 * @param key character to be checked
 	 * @return true or false depending if the character is printable/valid or not */
 	// XXX This filter stops certain crashes, but may be too restrictive.
-	public static boolean IsValidAsciiChar(byte key) {
+	public static boolean IsValidAsciiChar(byte bkey) 
+	{
+		int key = bkey & 0xFF; // unsigned
 		return (key >= ' ' && key < 127) || (key >= 160 &&
 				key != 0xAA && key != 0xAC && key != 0xAD && key != 0xAF &&
 				key != 0xB5 && key != 0xB6 && key != 0xB7 && key != 0xB9);
