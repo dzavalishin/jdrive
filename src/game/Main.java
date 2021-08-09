@@ -1282,17 +1282,20 @@ public class Main {
 			e.printStackTrace();
 			error(e.toString());
 		}
-		String slcwd = File.pathSeparator + cwd;
+		
+		Global.printf("Start in '%s'", cwd);
+		
+		String slcwd = cwd + File.separator;
 		
 		Global._path.personal_dir = Global._path.game_data_dir = slcwd;
 
 
 		Global._path.save_dir = slcwd+"save";
-		Global._path.autosave_dir = Global._path.save_dir + File.pathSeparator +  "autosave";
+		Global._path.autosave_dir = Global._path.save_dir + File.separator +  "autosave";
 		Global._path.scenario_dir = slcwd+"scenario";
-		Global._path.gm_dir = slcwd+"gm"+ File.pathSeparator;
-		Global._path.data_dir = slcwd+"data"+ File.pathSeparator;
-		Global._path.lang_dir = slcwd+"lang"+ File.pathSeparator;
+		Global._path.gm_dir = slcwd+"gm"+ File.separator;
+		Global._path.data_dir = slcwd+"resources"+ File.separator;
+		Global._path.lang_dir = slcwd+"lang"+ File.separator;
 
 		if (Global._config_file == null)
 			Global._config_file =  Global._path.personal_dir + "openttd.cfg";

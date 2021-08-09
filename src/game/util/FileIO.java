@@ -28,7 +28,7 @@ public class FileIO {
 	//BufferedInputStream bis = new BufferedInputStream(fis);
 
 	static BufferedRandomAccessFile cur_fh;
-	static BufferedRandomAccessFile handles[];// = new BufferedInputStream[32];
+	static BufferedRandomAccessFile handles[] = new BufferedRandomAccessFile[32];
 
 
 	//static FileIO _fio = this;
@@ -91,6 +91,8 @@ public class FileIO {
 
 	public static void FioSkipBytes(int n)
 	{
+		cur_fh.skip(n);
+		/*
 		for(;;) {
 			//int m = min(_fio.buffer_end - _fio.buffer, n);
 			//_fio.buffer += m;
@@ -98,7 +100,7 @@ public class FileIO {
 			if (n <= 0) break;
 			FioReadByte(); // TODO faster
 			n--;
-		}
+		}*/
 	}
 
 
@@ -219,7 +221,7 @@ public class FileIO {
 			f = new BufferedRandomAccessFile(buf,"r", 10240 );
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			//e.printStackTrace();
+			e.printStackTrace();
 			return null;
 		}
 

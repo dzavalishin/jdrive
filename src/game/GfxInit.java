@@ -10,14 +10,14 @@ public class GfxInit extends LandscapeSprites
 		{ 
 				"TRG1R.GRF",
 				"TRGIR.GRF",
-				"nsignalsw.grf",
+				// TODO "nsignalsw.grf",
 				null
 		};
 
 	static String[] files_landscape = 
 		{ 
 			"TRGC.GRF",
-			"TRGH.GRF",
+			"TRGHR.GRF", // TODO "TRGH.GRF",
 			"TRGT.GRF",
 				null
 		};
@@ -87,7 +87,7 @@ public class GfxInit extends LandscapeSprites
 				Global.error("Too many sprites. Recompile with higher MAX_SPRITES value or remove some custom GRF files.");
 			}
 		}
-		Global.DEBUG_spritecache( 2,"Currently %i sprites are loaded", load_index);
+		Global.DEBUG_spritecache( 2,"Currently %d sprites are loaded", load_index);
 
 		return load_index - load_index_org;
 	}
@@ -107,12 +107,15 @@ public class GfxInit extends LandscapeSprites
 		while(true)
 		{
 			int start = index_tbl[i++];
+			if( start == END ) break;
 			int end = index_tbl[i++];
 
+			
 			if (start == SKIP) { // skip sprites (amount in second var)
 				SpriteCache.SkipSprites(end);
 			} else { // load sprites and use indexes from start to end
 				do {
+					//Global.DEBUG_grf(0, "load spr %d", start );
 					boolean b = SpriteCache.LoadNextSprite(start, (byte)file_index);
 					assert(b);
 				} while (++start <= end);

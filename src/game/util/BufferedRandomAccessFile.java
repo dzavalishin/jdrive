@@ -208,4 +208,16 @@ public class BufferedRandomAccessFile extends RandomAccessFile
             invalidate();
         }
     }
+    
+    
+    void skip(int bytes)
+    {
+    	try {
+			seek(getFilePointer() + bytes);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(33);
+		}
+    }
 }
