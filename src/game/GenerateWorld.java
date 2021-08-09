@@ -67,7 +67,7 @@ public class GenerateWorld {
 		Global._fast_forward = false;
 		Global._tick_counter = 0;
 		Global._date_fract = 0;
-		Global._cur_tileloop_tile = null;
+		Global._cur_tileloop_tile = 0;
 
 		{
 			int starting = GameDate.ConvertIntDate(Global._patches.starting_date);

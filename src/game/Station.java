@@ -2907,7 +2907,7 @@ public class Station implements IPoolItem
 		if (++_station_tick_ctr == GetStationPoolSize()) _station_tick_ctr = 0;
 
 		st = GetStation(i);
-		if (st.xy != null) StationHandleBigTick(st);
+		if (st != null && st.xy != null) StationHandleBigTick(st);
 
 		//FOR_ALL_STATIONS(st)
 		_station_pool.forEach( (ii,sst) ->

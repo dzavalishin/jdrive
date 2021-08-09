@@ -186,9 +186,23 @@ public class Window extends WindowConstants
 	tree_d as_tree_d() { return (tree_d) custom; }
 	vehiclelist_d as_vehiclelist_d() { return (vehiclelist_d) custom; }
 	void_d as_void_d() { return (void_d) custom; }
-	vp_d as_vp_d() { return (vp_d) custom; }
-	vp2_d as_vp2_d() { return (vp2_d) custom; }
-	public as_querystr_d as_querystr_d() { return (as_querystr_d) custom; }
+	vp_d as_vp_d() 
+	{ 
+		if(custom==null) custom = new vp_d(); 
+		return (vp_d) custom; 
+	}
+	
+	vp2_d as_vp2_d() 
+	{
+		if(custom==null) custom = new vp2_d(); 
+		return (vp2_d) custom; 
+	}
+	
+	public as_querystr_d as_querystr_d() 
+	{
+		if(custom==null) custom = new as_querystr_d(); 
+		return (as_querystr_d) custom; 
+	}
 
 
 	// -----------------------------------
@@ -1311,8 +1325,9 @@ public class Window extends WindowConstants
 		if (w != null) {
 			// send an event in client coordinates.
 			e.event = WindowEvents.WE_MOUSEOVER;
-			e.pt.x = Hal._cursor.pos.x - w.left;
-			e.pt.y = Hal._cursor.pos.y - w.top;
+			//e.pt.x = Hal._cursor.pos.x - w.left;
+			//e.pt.y = Hal._cursor.pos.y - w.top;
+			e.pt = new Point( Hal._cursor.pos.x - w.left, Hal._cursor.pos.y - w.top );
 			if (w.widget != null) {
 				e.widget = w.GetWidgetFromPos(e.pt.x, e.pt.y);
 			}

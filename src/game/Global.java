@@ -236,7 +236,7 @@ public class Global {
 	public static int _avail_aircraft = 0; // TODO who assigns?
 
 	// Position in tile loop
-	public static TileIndex _cur_tileloop_tile = null;
+	public static int _cur_tileloop_tile = 0;
 	//public static int _cur_tileloop_tile;
 
 	// Also save scrollpos_x, scrollpos_y and zoom

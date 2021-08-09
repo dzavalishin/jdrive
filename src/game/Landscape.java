@@ -413,7 +413,7 @@ public class Landscape extends GenLandTable
 		int tile;
 		int count;
 
-		tile = Global._cur_tileloop_tile.tile;
+		tile = Global._cur_tileloop_tile;
 
 		assert( (tile & ~TILELOOP_ASSERTMASK) == 0);
 		count = (Global.MapSizeX() / TILELOOP_SIZE) * (Global.MapSizeY() / TILELOOP_SIZE);
@@ -435,7 +435,7 @@ public class Landscape extends GenLandTable
 		tile += 9;
 		if(0 != (tile & TILELOOP_CHKMASK) )
 			tile = (tile + Global.MapSizeX()) & TILELOOP_ASSERTMASK;
-		Global._cur_tileloop_tile = new TileIndex(tile);
+		Global._cur_tileloop_tile = tile;
 	}
 
 	static void InitializeLandscape()

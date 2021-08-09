@@ -1,6 +1,7 @@
 package game;
 
 import game.struct.TextMessage;
+import game.util.Pixel;
 
 public class TextEffect 
 {
@@ -129,11 +130,17 @@ public class TextEffect
 
 			_textmessage_visible = false;
 			// Put our 'shot' back to the screen
+			/*
 			memcpy_pitch(
 					Hal._screen.dst_ptr + _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch,
 				_textmessage_backup,
 				_textmessage_width, _textmessage_box_y, _textmessage_width, Hal._screen.pitch);
-
+			*/
+			Gfx.memcpy_pitch(
+				new Pixel(Hal._screen.dst_ptr, _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch ),	
+				new Pixel(_textmessage_backup),
+				_textmessage_width, _textmessage_box_y, _textmessage_width, Hal._screen.pitch);
+				
 			// And make sure it is updated next time
 			Global.hal.make_dirty(_textmessage_box_left, Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y, _textmessage_width, _textmessage_box_y);
 
@@ -194,11 +201,17 @@ public class TextEffect
 		if (!has_message) return;
 
 		// Make a copy of the screen as it is before painting (for undraw)
+		/*
 		memcpy_pitch(
 			_textmessage_backup,
 			Hal._screen.dst_ptr + _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch,
 			_textmessage_width, _textmessage_box_y, Hal._screen.pitch, _textmessage_width);
-
+		*/
+		Gfx.memcpy_pitch(
+				new Pixel(_textmessage_backup),
+				new Pixel(Hal._screen.dst_ptr, _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch),
+				_textmessage_width, _textmessage_box_y, Hal._screen.pitch, _textmessage_width);
+		
 		// Switch to _screen painting
 		Hal._cur_dpi = Hal._screen;
 
@@ -388,7 +401,8 @@ public class TextEffect
 
 		//for (ti = _animated_tile_list; ti != endof(_animated_tile_list) && ti != null; ti++) {
 		for( TileIndex ti : _animated_tile_list)
-			Landscape.AnimateTile(ti);
+			if( ti != null)
+				Landscape.AnimateTile(ti);
 		
 	}
 

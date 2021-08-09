@@ -51,7 +51,8 @@ public class Gfx extends PaletteTabs
 	static byte [] _string_colorremap = new byte[3];
 
 	static final int DIRTY_BYTES_PER_LINE = (Global.MAX_SCREEN_WIDTH / 64);
-	static byte [] _dirty_blocks = new byte[DIRTY_BYTES_PER_LINE * Global.MAX_SCREEN_HEIGHT / 8];
+	// TODO [dz] 32* ?
+	static byte [] _dirty_blocks = new byte[1 * DIRTY_BYTES_PER_LINE * Global.MAX_SCREEN_HEIGHT / 8];
 
 
 	/* 
@@ -90,6 +91,28 @@ public class Gfx extends PaletteTabs
 		}
 	}
 
+	static void memcpy_pitch(
+			Pixel d, Pixel s, 
+			int w, int h, 
+			int spitch, int dpitch
+			)
+	{
+		//byte *dp = (byte*)d;
+		//byte *sp = (byte*)s;
+		//int sp = 0;
+		//int dp = 0;
+
+		assert(h >= 0);
+		for (; h != 0; --h) {
+			//memcpy(dp, sp, w);
+			//System.arraycopy(s, sp, d, dp, w);
+			d.copyFrom(s, w);
+
+			d.madd( dpitch );
+			s.madd( spitch ); 
+		}
+	}
+	
 
 	static void GfxScroll(int left, int top, int width, int height, int xo, int yo)
 	{
