@@ -8,7 +8,8 @@ import game.util.BitOps;
 // return same TileIndex for each TileIndex.tile
 // same with Mutable
 
-public class TileIndex implements Comparable<TileIndex>{
+public class TileIndex implements Comparable<TileIndex>
+{
 	protected int tile;
 
 
@@ -20,7 +21,7 @@ public class TileIndex implements Comparable<TileIndex>{
 	public TileIndex(int x, int y)
 	{
 		tile = (y * Global.MapSizeX()) + x;
-		assert( tile > 0 );
+		assert( tile >= 0 );
 		// TODO assert < max
 	}
 
@@ -53,8 +54,8 @@ public class TileIndex implements Comparable<TileIndex>{
 	{
 		return new TileIndex(id);
 	}
+
 	public static TileIndex getInvalid() {
-		// TODO Auto-generated method stub
 		return get(-1);
 	}
 
@@ -63,7 +64,7 @@ public class TileIndex implements Comparable<TileIndex>{
 		this.tile = tile;
 	}
 
-	public static TileIndex INVALID_TILE = new TileIndex(-1);
+	public static TileIndex INVALID_TILE = getInvalid(); //new TileIndex(-1);
 
 	@Override
 	public boolean equals(Object obj) {
@@ -409,7 +410,7 @@ public class TileIndex implements Comparable<TileIndex>{
 	static int TileHeight(int index)
 	{
 		assert(index < Global.MapSize());
-		assert(index > 0);
+		assert(index >= 0); 
 		return Global._m[index].height;
 	}
 
@@ -663,7 +664,7 @@ public class TileIndex implements Comparable<TileIndex>{
 
 	public boolean IsValidTile() 
 	{
-		return (tile < Global.MapSizeX() * Global.MapMaxY() && TileX() != Global.MapMaxX());
+		return (tile >=0) && (tile < Global.MapSizeX() * Global.MapMaxY() && TileX() != Global.MapMaxX());
 	}
 
 
@@ -690,6 +691,24 @@ public class TileIndex implements Comparable<TileIndex>{
 	//} Direction;
 
 
+	
+	// -----------------------------------------------
+	// Ex-macros
+	// -----------------------------------------------
+	
+	public static TileIndex TILE_ADDXY(TileIndex tile, int i, int j) {		
+		return tile.iadd(i, j);
+	}
+
+	public static TileIndex TILE_ADD(TileIndex tile, TileIndexDiff diff) {
+		return tile.iadd(diff);
+	}
+
+	public static TileIndex TILE_ADD(TileIndex tile, int diff) {
+		return tile.iadd(diff);
+	}
+	
+	
 	// -----------------------------------------------
 	// Delegates
 	// -----------------------------------------------
@@ -708,18 +727,6 @@ public class TileIndex implements Comparable<TileIndex>{
 	
 	public int GetTileTrackStatus(int mode) {
 		return Landscape.GetTileTrackStatus(this, mode);
-	}
-
-	public static TileIndex TILE_ADDXY(TileIndex tile, int i, int j) {		
-		return tile.iadd(i, j);
-	}
-
-	public static TileIndex TILE_ADD(TileIndex tile, TileIndexDiff diff) {
-		return tile.iadd(diff);
-	}
-
-	public static TileIndex TILE_ADD(TileIndex tile, int diff) {
-		return tile.iadd(diff);
 	}
 
 	public boolean IsRailWaypoint() {

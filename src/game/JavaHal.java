@@ -73,7 +73,7 @@ class JavaHal extends Hal
 		_screen.dst_ptr = new Pixel( screen );
 		_screen.height = MainWindow.HEIGHT;
 		_screen.width = MainWindow.WIDTH;
-		_screen.pitch = MainWindow.WIDTH * 4;
+		_screen.pitch = MainWindow.WIDTH * 3;
 		_screen.left = 0;
 		_screen.top = 0;
 		_screen.zoom = 0;
