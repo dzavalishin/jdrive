@@ -11,7 +11,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 
 import javax.swing.JFrame;
@@ -104,7 +106,7 @@ public class MainWindow extends JPanel implements ActionListener
 			{
 				int x = e.getX(); 
 				int y = e.getY();
-				
+
 				if (Hal._cursor.fix_at) {
 					int dx = x - Hal._cursor.pos.x;
 					int dy = y - Hal._cursor.pos.y;
@@ -122,7 +124,7 @@ public class MainWindow extends JPanel implements ActionListener
 						}
 						ClientToScreen(hwnd, &pt);
 						SetCursorPos(pt.x, pt.y);
-						*/
+						 */
 					}
 				} else {
 					Hal._cursor.delta.x += x - Hal._cursor.pos.x;
@@ -267,19 +269,19 @@ public class MainWindow extends JPanel implements ActionListener
 
 	}
 
-/* TODO keys
- * 
- * 	AM(VK_NUMPAD0,VK_NUMPAD9, WKC_NUM_0, WKC_NUM_9),
+	/* TODO keys
+	 * 
+	 * 	AM(VK_NUMPAD0,VK_NUMPAD9, WKC_NUM_0, WKC_NUM_9),
 	AS(VK_DIVIDE,			WKC_NUM_DIV),
 	AS(VK_MULTIPLY,		WKC_NUM_MUL),
 	AS(VK_SUBTRACT,		WKC_NUM_MINUS),
 	AS(VK_ADD,				WKC_NUM_PLUS),
 	AS(VK_DECIMAL,		WKC_NUM_DECIMAL)
 
- * 
+	 * 
 	AM(VK_PRIOR,VK_DOWN, WKC_PAGEUP, WKC_DOWN),
- * 
- */
+	 * 
+	 */
 
 
 
@@ -290,7 +292,7 @@ public class MainWindow extends JPanel implements ActionListener
 	public void paint(Graphics g) 
 	{
 		//Dimension d = getSize();
-		g.setColor(Color.black);
+		g.setColor(Color.darkGray);
 		//setBackground(Color.black);
 		//g.clearRect(0, 0, frame.getWidth(), frame.getHeight());
 		g.fillRect(0, 0, WIDTH, HEIGHT);
@@ -357,10 +359,21 @@ public class MainWindow extends JPanel implements ActionListener
 		for(int i = 0; i < 100; i++)
 			screen[5000+i+startX] = (byte) 0xFF;
 		startX++;
-		*/
-		
+		 */
+		BufferedImage image;
+		makePalette();
+
 		//BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
-		BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_BYTE_INDEXED);
+		if(icm!=null)
+			image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_BYTE_INDEXED, icm);
+		else
+			image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_BYTE_INDEXED);
+
+		//ColorModel cm = image.getColorModel();
+		//IndexColorModel icm = (IndexColorModel) cm;
+
+
+
 		image.setData(Raster.createRaster(image.getSampleModel(), new DataBufferByte(screen, screen.length), new java.awt.Point(0,0) ) );
 
 		g.drawImage(image, 0, 0, getBackground(), null);
@@ -397,7 +410,33 @@ public class MainWindow extends JPanel implements ActionListener
 		frame.repaint();
 	}
 
-
+	static final int PALETTE_SIZE = 256;
+	private static IndexColorModel icm = null; 
+	public void makePalette()
+	{
+		byte[] rp = new byte[PALETTE_SIZE];
+		byte[] gp = new byte[PALETTE_SIZE];
+		byte[] bp = new byte[PALETTE_SIZE];
+		byte[] ap = new byte[PALETTE_SIZE];
+		/*
+		java.util.Arrays.fill(ap, (byte) 255);
+		java.util.Arrays.fill(rp, (byte) 255);
+		java.util.Arrays.fill(gp, (byte) 255);
+		java.util.Arrays.fill(bp, (byte) 255);
+		//transparent
+		rp[0] = gp[0] = bp[0] = ap[0] = 0;
+		*/
+		
+		for(int i = 0; i < PALETTE_SIZE; i++)
+		{
+			ap[i] = (byte) 0xFF;
+			rp[i] = Gfx._cur_palette[i].r;
+			gp[i] = Gfx._cur_palette[i].g;
+			bp[i] = Gfx._cur_palette[i].b;
+		}
+				
+		icm = new IndexColorModel(8, PALETTE_SIZE, rp, gp, bp, ap);
+	}
 
 
 
