@@ -1,7 +1,10 @@
 package game;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import game.util.Pixel;
@@ -42,22 +45,30 @@ class JavaHal extends Hal
 		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		//frame.setUndecorated(true);
 		//frame.setSize(600, 400);
+
+		//screen = new int[2048*2048]; // TODO scr size!
+		screen = new byte[2048*2048*4]; // TODO scr size!
 		
 		mw = new MainWindow(frame,screen);
 		
 		//frame.setSize(mw.getMapSizeX(), mw.getMapSizeY());
-		frame.setSize(1280, 1024);
+		frame.setSize(1280+30, 1024);
 		
 		Dimension maximumSize = new Dimension(2560, 850);
 		frame.setMaximumSize(maximumSize);
 			
 		//frame.setIconImages(icons);
+		frame.setLayout(new FlowLayout(FlowLayout.LEADING));
+		//frame.add(new JLabel("--------------------"));
 		
 		frame.add(mw);
-		frame.setVisible(true);
+		//frame.add(new JLabel("--------------------"));
 
-		//screen = new int[2048*2048]; // TODO scr size!
-		screen = new byte[2048*2048*4]; // TODO scr size!
+		//mw.setSize(MainWindow.WIDTH, MainWindow.HEIGHT);
+		//mw.setMinimumSize(new Dimension(MainWindow.WIDTH, MainWindow.HEIGHT));
+		//mw.setMaximumSize(new Dimension(MainWindow.WIDTH, MainWindow.HEIGHT));
+
+		frame.setVisible(true);
 		
 		_screen.dst_ptr = new Pixel( screen );
 		_screen.height = MainWindow.HEIGHT;
@@ -143,8 +154,11 @@ class JavaHal extends Hal
 				Main.GameLoop();
 				_cursor.delta.x = _cursor.delta.y = 0;
 
-				//if (Global._force_full_redraw)					MarkWholeScreenDirty();
+				if (Global._force_full_redraw)					
+					MarkWholeScreenDirty();
 
+				mw.flush();
+				
 				//GdiFlush();
 				//_screen.dst_ptr = _wnd.buffer_bits;
 				Window.UpdateWindows();

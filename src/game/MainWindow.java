@@ -1,15 +1,28 @@
 package game;
 
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BandedSampleModel;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.ComponentSampleModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
 import java.awt.image.MemoryImageSource;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.awt.image.WritableRenderedImage;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -46,9 +59,9 @@ public class MainWindow extends JPanel implements ActionListener{
 		this.screen = screen2;
 		
 
-
-		
-
+		//setSize(WIDTH, HEIGHT);
+		//setMinimumSize(new Dimension(WIDTH, HEIGHT));
+		//setMaximumSize(new Dimension(WIDTH, HEIGHT));
 
 
 		frame.addKeyListener(new KeyListener() {		
@@ -66,8 +79,16 @@ public class MainWindow extends JPanel implements ActionListener{
 	}
 
 
+	@Override
+	public int getHeight() {
+		return HEIGHT;
+	}
 
-
+	@Override
+	public int getWidth() {
+		return WIDTH;
+	}
+	
 	private void processKey(KeyEvent e, boolean pressed) 
 	{
 		switch(e.getKeyCode())
@@ -207,22 +228,77 @@ public class MainWindow extends JPanel implements ActionListener{
 	public void paint(Graphics g) 
 	{
 		//Dimension d = getSize();
-
-		g.clearRect(0, 0, frame.getWidth(), frame.getHeight());
+		g.setColor(Color.black);
+		//setBackground(Color.black);
+		//g.clearRect(0, 0, frame.getWidth(), frame.getHeight());
+		g.fillRect(0, 0, WIDTH, HEIGHT);
 
 		//TODO DebugDisplay.paint(g);
-
+		/*
 		ColorModel cm = ColorModel.getRGBdefault();
 		//final int[] pixels = new int[width * height]; // 0xAARRGGBB
 		MemoryImageSource source = new MemoryImageSource(WIDTH, HEIGHT, cm, screen, 0, WIDTH);
-		source.setAnimated(true);
-		source.setFullBufferUpdates(true);
+		//source.setAnimated(true);
+		//source.setFullBufferUpdates(true);
 		Image image = Toolkit.getDefaultToolkit().createImage(source);
 		image.setAccelerationPriority(1f);
+		//System.err.print( image.getWidth(null)+" " );
+		source.newPixels();
+		//source.
 		
 		g.drawImage(image, 0, 0, getBackground(), null);
-	}
+		source.newPixels();
+		*/
 
+		  
+	    //BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
+		
+	    //image.setRGB(0, 0, WIDTH, HEIGHT, screen, 0, WIDTH);
+	    
+		
+		
+		
+		
+		
+		/*
+		
+		DataBuffer db = new DataBufferByte(screen, screen.length);
+		//WritableRaster wr = Raster.createBandedRaster(TICKS_PER_SECOND, WIDTH, WIDTH, HEIGHT, getLocation());
+		
+		
+		int [] off = {0,1,2,3};
+		/*ComponentSampleModel sm = new ComponentSampleModel(DataBuffer.TYPE_BYTE, WIDTH, HEIGHT,
+                4, // int pixelStride,
+                WIDTH*4, // int scanlineStride,
+                off//int[] bandOffsets
+                );* /
+				
+		//WritableRaster wr = WritableRaster.createRaster(sm, db, null);
+		//WritableRaster wr = new WritableRaster(sm, db, null);
+		WritableRaster	wr = Raster.createInterleavedRaster(db, WIDTH, HEIGHT,
+				WIDTH*4, //int scanlineStride, 
+				4, //int pixelStride, 
+				off, //int[] bandOffsets, 
+				null //Point location
+				);
+		
+
+		
+		ColorModel cm = new ComponentColorModel(
+				ColorSpace.getInstance(ColorSpace.CS_sRGB), false, false, 
+				Transparency.OPAQUE, DataBuffer.TYPE_BYTE );
+		
+		BufferedImage image = new BufferedImage(cm, wr, false, null);
+
+		*/
+
+		
+		BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
+		image.setData(Raster.createRaster(image.getSampleModel(), new DataBufferByte(screen, screen.length), new java.awt.Point(0,0) ) );
+
+		g.drawImage(image, 0, 0, getBackground(), null);
+
+	}
 
 
 
@@ -242,6 +318,13 @@ public class MainWindow extends JPanel implements ActionListener{
 
 
 		//processTimerStop();
+	}
+
+
+
+
+	public void flush() {
+		repaint();		
 	}
 
 
