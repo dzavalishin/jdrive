@@ -811,16 +811,26 @@ public class Clear extends ClearTables {
 			if (tile.IsTileType( TileTypes.MP_CLEAR)) {
 				int j = BitOps.GB(r, 16, 4) + 5;
 				for(;;) {
-					TileIndex tile_new;
+					TileIndex tile_new = null;
 
 					tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 2, 2);
+					boolean getOut = false;
 					do {
-						if (--j == 0) goto get_out;
+						if (--j == 0)
+						{
+							//goto get_out;
+							getOut = true;
+							break;
+						}
 						tile_new = tile.iadd( TileIndex.TileOffsByDir(BitOps.GB(Hal.Random(), 0, 2)) );
 					} while (!tile.IsTileType( TileTypes.MP_CLEAR));
+					
+					if(getOut) break;
+					
+					assert tile_new != null;
 					tile = tile_new;
 				}
-	get_out:;
+	//get_out:;
 			}
 		} while (--i > 0);
 	}
