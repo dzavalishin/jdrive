@@ -163,7 +163,7 @@ class JavaHal extends Hal
 				//_screen.dst_ptr = _wnd.buffer_bits;
 				Window.UpdateWindows();
 				
-				// TODO CheckPaletteAnim();
+				checkPaletteAnim();
 				
 			/*} else {
 				Sleep(1);
@@ -173,6 +173,14 @@ class JavaHal extends Hal
 				DrawMouseCursor();
 			}*/
 		}
+	}
+
+	private void checkPaletteAnim() 
+	{
+		if (Gfx._pal_last_dirty == -1)
+			return;
+
+		mw.flush();
 	}
 
 	@Override

@@ -361,7 +361,12 @@ public class MainWindow extends JPanel implements ActionListener
 		startX++;
 		 */
 		BufferedImage image;
-		makePalette();
+		
+		if(Gfx._pal_last_dirty != -1)
+		{
+			makePalette();
+			Gfx._pal_last_dirty = -1;
+		}
 
 		//BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
 		if(icm!=null)
