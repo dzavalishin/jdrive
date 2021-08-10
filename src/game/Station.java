@@ -2371,7 +2371,7 @@ public class Station implements IPoolItem
 		if(0 != (image & Sprite.PALETTE_MODIFIER_COLOR)) image |= image_or_modificator;
 
 		// For custom sprites, there's no railtype-based pitching.
-		offset = (image & Sprite.SPRITE_MASK) < GRFFile._custom_sprites_base ? rti.total_offset : railtype;
+		offset = (image & Sprite.SPRITE_MASK) < GRFFile._custom_sprites_base ? rti.total_offset.id : railtype;
 		image += offset;
 
 		// station_land array has been increased from 82 elements to 114

@@ -101,7 +101,8 @@ class JavaHal extends Hal
 
 		while(true) {
 			try {
-				Thread.sleep(100); // TODO 10 fps?
+				//Thread.sleep(100); // TODO 10 fps?
+				Thread.sleep(10); // TODO 10 fps?
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

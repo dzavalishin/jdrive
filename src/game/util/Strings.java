@@ -1209,7 +1209,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		langpack_offs = new String[tot_count]; 
 
 		// Fill offsets
-		byte[] s = BitOps.subArray(lang_pack_bytes, 0x9d);		
+		byte[] s = BitOps.subArray(lang_pack_bytes, 0x9c); //0x9d);		
 		int sp = 0;
 		for (i = 0; i != tot_count; i++) {
 			int len = s[sp++];
@@ -1222,7 +1222,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			}
 			//langpack_offs[i] = new String( s, sp, len );
 			langpack_offs[i] = BitOps.stringFromBytes( s, sp, len );
-			//Global.debug("s = '%s'", langpack_offs[i] );
+			Global.debug("s = '%s'", langpack_offs[i] );
 			sp += len;
 		}
 

@@ -23,7 +23,9 @@ public class Window extends WindowConstants
 	int left, top;
 	int width, height;
 
-	Scrollbar hscroll, vscroll, vscroll2;
+	Scrollbar hscroll;
+	Scrollbar vscroll;
+	Scrollbar vscroll2;
 	ResizeInfo resize; // = new ResizeInfo();
 
 	byte caption_color;
@@ -52,9 +54,10 @@ public class Window extends WindowConstants
 		window_class = 0;
 		window_number = 0;
 
-		hscroll  = null;
-		vscroll  = null;
-		vscroll2 = null;
+		hscroll  = new Scrollbar();
+		vscroll  = new Scrollbar();
+		vscroll2 = new Scrollbar();
+		
 		resize = null;
 
 
@@ -168,26 +171,58 @@ public class Window extends WindowConstants
 
 	// -----------------------------------
 
-	def_d as_def_d() { return (def_d) custom; }
-	buildtrain_d as_buildtrain_d() { return (buildtrain_d) custom; }
-	dropdown_d as_dropdown_d() { return (dropdown_d) custom; }
-	facesel_d as_facesel_d() { return (facesel_d) custom; }
+	def_d as_def_d() {
+		if(custom==null) custom = new def_d(); 
+		return (def_d) custom; 
+		}
+	
+	buildtrain_d as_buildtrain_d() { 
+		if(custom==null) custom = new def_d(); 
+		return (buildtrain_d) custom; 
+		}
+	
+	dropdown_d as_dropdown_d() { 
+		if(custom==null) custom = new dropdown_d(); 
+		return (dropdown_d) custom; 
+		}
+	
+	facesel_d as_facesel_d() { 
+		if(custom==null) custom = new facesel_d(); 
+		return (facesel_d) custom; 
+	}
+	
 	highscore_d as_highscore_d() { return (highscore_d) custom; }
+	
 	menu_d as_menu_d() { return (menu_d) custom; }
+	
 	message_d as_message_d() { return (message_d) custom; }
+	
 	news_d as_news_d() { return (news_d) custom; }
+	
 	order_d as_order_d() { return (order_d) custom; }
+	
 	plstations_d as_plstations_d() { return (plstations_d) custom; }
+	
 	refit_d as_refit_d() { return (refit_d) custom; }
+	
 	replaceveh_d as_replaceveh_d() { return (replaceveh_d) custom; }
+	
 	scroller_d as_scroller_d() { return (scroller_d) custom; }
+	
 	smallmap_d as_smallmap_d() { return (smallmap_d) custom; }
+	
 	tooltips_d as_tooltips_d() { return (tooltips_d) custom; }
+	
 	traindepot_d as_traindepot_d() { return (traindepot_d) custom; }
+	
 	traindetails_d as_traindetails_d() { return (traindetails_d) custom; }
+	
 	tree_d as_tree_d() { return (tree_d) custom; }
+	
 	vehiclelist_d as_vehiclelist_d() { return (vehiclelist_d) custom; }
+	
 	void_d as_void_d() { return (void_d) custom; }
+	
 	vp_d as_vp_d() 
 	{ 
 		if(custom==null) custom = new vp_d(); 
@@ -596,7 +631,9 @@ public class Window extends WindowConstants
 
 	static void DeleteWindowById(int cls, int number)
 	{
-		FindWindowById(cls, number).DeleteWindow();
+		Window w = FindWindowById(cls, number);
+		if( w != null )
+			w.DeleteWindow();
 	}
 
 	static void DeleteWindowByClass(int cls)
@@ -2005,6 +2042,8 @@ public class Window extends WindowConstants
 		}
 
 		MouseLoop(click, mousewheel);
+
+		_left_button_clicked = false; // TODO [dz] ok? Or who resets it?
 	}
 
 

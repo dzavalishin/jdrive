@@ -2427,10 +2427,11 @@ class DrawStringStateMachine
 	{
 		for(;;) {
 			char c = sc[sp++]; //*string++;
-			if (c < Gfx.ASCII_LETTERSTART)
+			if (c < Gfx.ASCII_LETTERSTART || sp >= sc.length)
 			{
 				//goto skip_cont;
 				sp--;
+				return;
 				// fall through
 			}
 		}

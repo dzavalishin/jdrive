@@ -615,11 +615,14 @@ public class Cmd {
 
 		_docommand_recursive = 0;
 
-		if (null != callback) callback.accept(true, tile, p1, p2);
+		if (null != callback) 
+			callback.accept(true, tile, p1, p2);
+		
 		{
 			Global._cmd_text = null;
 			return true;
 		}
+		/*
 		//show_error:
 		// show error message if the command fails?
 		if (Player.IsLocalPlayer() && Global._error_message_2 != 0)
@@ -631,6 +634,7 @@ public class Cmd {
 		if (null != callback) callback.accept(false, tile, p1, p2);
 		Global._cmd_text = null;
 		return false;
+		*/
 	}
 
 	public static int return_cmd_error(int errcode) {

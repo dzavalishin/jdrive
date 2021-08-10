@@ -386,7 +386,8 @@ public class Global {
 		return s[n];
 	}
 
-	public static Object[] _decode_parameters = new Object[20];
+	//public static Object[] _decode_parameters = new Object[20];
+	public static int[] _decode_parameters = new int[20];
 
 
 	public static void SetDParam(int n, int v)
