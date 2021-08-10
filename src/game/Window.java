@@ -1980,7 +1980,7 @@ public class Window extends WindowConstants
 			}
 
 			if (click == 1) {
-				Global.DEBUG_misc( 2, "cursor: 0x%X (%d)", Hal._cursor.sprite, Hal._cursor.sprite);
+				Global.DEBUG_misc( 2, "cursor: 0x%X (%d)", Hal._cursor.sprite.id, Hal._cursor.sprite.id);
 				if (ViewPort._thd.place_mode != 0 &&
 						// query button and place sign button work in pause mode
 						Hal._cursor.sprite.id != Sprite.SPR_CURSOR_QUERY &&

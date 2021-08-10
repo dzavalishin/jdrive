@@ -334,12 +334,12 @@ public class ViewPort
 		x = ((x << vp.zoom) + vp.virtual_left) >> 2;
 		y = ((y << vp.zoom) + vp.virtual_top) >> 1;
 
-		/*#if !defined(NEW_ROTATION)
+		//#if !defined(NEW_ROTATION)
 		a = y-x;
 		b = y+x;
-	#else*/
-		a = x+y;
-		b = x-y;
+	//#else*/
+		//a = x+y;
+		//b = x-y;
 		//#endif
 		z = Landscape.GetSlopeZ(a, b) >> 1;
 		z = Landscape.GetSlopeZ(a+z, b+z) >> 1;

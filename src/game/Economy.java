@@ -1172,6 +1172,8 @@ public class Economy
 			n = 1000;
 			do {
 				FindSubsidyPassengerRoute(fr);
+				if(fr.to == null) continue; // [dz] hack
+				
 				if (fr.distance <= 70) {
 					s.cargo_type = AcceptedCargo.CT_PASSENGERS;
 					s.from = ((Town)fr.from).index;

@@ -60,8 +60,14 @@ public class Clear extends ClearTables {
 			count--;
 		}*/
 		// TODO check modheight_count?
+		int i = 0;
 		for(TerraformerHeightMod mod : ts.modheight )
+		{
+			if( i++ >= ts.modheight_count)
+				break;
+			
 			if (mod.tile == tile) return mod.height;
+		}
 
 		return tile.TileHeight();
 	}

@@ -87,7 +87,7 @@ public class Town extends TownTables implements IPoolItem
 	{
 		xy = null;
 		sign = new ViewportSign();
-		unwanted = null;
+		unwanted = new int[Global.MAX_PLAYERS];
 		exclusivity = null;
 		radius = null;
 		population = 0;
@@ -2076,6 +2076,8 @@ public class Town extends TownTables implements IPoolItem
 		//FOR_ALL_STATIONS(st) 
 		Station.forEach( (st) ->
 		{
+			if( st.getXy() == null ) return;
+			
 			if (Map.DistanceSquare(st.getXy(), t.xy) <= t.radius[0]) {
 				if (st.time_since_load <= 20 || st.time_since_unload <= 20) {
 					n[0]++;

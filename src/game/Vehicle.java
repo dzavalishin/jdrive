@@ -1200,8 +1200,9 @@ public class Vehicle implements IPoolItem
 			for (;;) {
 				//VehicleID veh = _vehicle_position_hash[(x + y) & 0xFFFF];
 				VehicleID veh = _hash.get(x, y);
+				// TODO XXX must be veh list - more than one per coords
 				//while (veh.id != INVALID_VEHICLE) {
-				if (veh.id != INVALID_VEHICLE) {
+				if (veh != null && veh.id != INVALID_VEHICLE) {
 					Vehicle v = GetVehicle(veh);
 					Object a;
 

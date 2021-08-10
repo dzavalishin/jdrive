@@ -89,6 +89,8 @@ public class Player
 		money64 = engine_renew_money = president_name_2 = face = 0;
 
 		engine_renew = renew_keep_length = false;
+		
+		cur_economy = new PlayerEconomyEntry();
 	}
 
 
