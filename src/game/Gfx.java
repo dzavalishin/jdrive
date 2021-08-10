@@ -69,6 +69,7 @@ public class Gfx extends PaletteTabs
 		}
 	}*/
 
+	/*
 	static void memcpy_pitch(
 			byte[] d, byte []s, 
 			int w, int h, 
@@ -89,7 +90,7 @@ public class Gfx extends PaletteTabs
 			dp += dpitch;
 			sp += spitch;
 		}
-	}
+	}*/
 
 	static void memcpy_pitch(
 			Pixel d, Pixel s, 
@@ -1923,18 +1924,15 @@ public class Gfx extends PaletteTabs
 			Hal._cursor.visible = false;
 			memcpy_pitch(
 					//Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
-					Hal._screen.dst_ptr.getMem(),					
-					_cursor_backup,
+					new Pixel(Hal._screen.dst_ptr, Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch ),					
+					new Pixel(_cursor_backup),
 
 					Hal._cursor.draw_size.x, 
 					Hal._cursor.draw_size.y,
 
 					//Hal._cursor.draw_size.x, 
 					Hal._cursor.draw_size.x, 
-					Hal._screen.pitch,
-
-					Hal._screen.dst_ptr.getDisplacement() + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
-					0
+					Hal._screen.pitch
 					);
 
 			Global.hal.make_dirty(Hal._cursor.draw_pos.x, Hal._cursor.draw_pos.y, Hal._cursor.draw_size.x, Hal._cursor.draw_size.y);
@@ -1981,17 +1979,14 @@ public class Gfx extends PaletteTabs
 		// TODO Wrong memcpy_pitch, replace 
 		//Make backup of stuff below cursor
 		memcpy_pitch(
-				_cursor_backup,
+				new Pixel( _cursor_backup ),
 				//Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
-				Hal._screen.dst_ptr.getMem(),
+				new Pixel( Hal._screen.dst_ptr, Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch ),
 
 				Hal._cursor.draw_size.x, 
 				Hal._cursor.draw_size.y, 
 				Hal._screen.pitch, 
-				Hal._cursor.draw_size.x,
-
-				0,
-				Hal._screen.dst_ptr.getDisplacement()+ Hal._cursor.draw_size.x + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch
+				Hal._cursor.draw_size.x
 				);
 
 		//Global.debug("cursor @%d.%d", Hal._cursor.pos.x, Hal._cursor.pos.y);		
