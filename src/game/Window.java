@@ -677,7 +677,7 @@ public class Window extends WindowConstants
 		}		
 
 		//Global.debug("i %d wi %d", i, wi);
-		assert i > wi;
+		// TODO assert i > wi;
 
 		// insert w above i
 		_windows.remove(this); // all windows moved a step down

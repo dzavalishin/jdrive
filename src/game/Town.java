@@ -185,6 +185,12 @@ public class Town extends TownTables implements IPoolItem
 		this.index = index;
 	}
 
+	public TileIndex getXy() {
+		return xy;
+	}
+
+
+
 	/**
 	 * Check if a Town really exists.
 	 */
@@ -2070,7 +2076,7 @@ public class Town extends TownTables implements IPoolItem
 		//FOR_ALL_STATIONS(st) 
 		Station.forEach( (st) ->
 		{
-			if (Map.DistanceSquare(st.xy, t.xy) <= t.radius[0]) {
+			if (Map.DistanceSquare(st.getXy(), t.xy) <= t.radius[0]) {
 				if (st.time_since_load <= 20 || st.time_since_unload <= 20) {
 					n[0]++;
 					if (st.owner.id < Global.MAX_PLAYERS && t.ratings[st.owner.id] <= 1000-12)

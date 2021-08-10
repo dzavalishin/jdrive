@@ -115,7 +115,7 @@ public class GfxInit extends LandscapeSprites
 				SpriteCache.SkipSprites(end);
 			} else { // load sprites and use indexes from start to end
 				do {
-					Global.DEBUG_grf(0, "load spr %d", start );
+					//Global.DEBUG_grf(0, "load spr %d", start );
 					boolean b = SpriteCache.LoadNextSprite(start, (byte)file_index);
 					assert(b);
 				} while (++start <= end);

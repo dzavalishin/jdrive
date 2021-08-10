@@ -212,7 +212,7 @@ public abstract class TownGui extends Town
 			}
 
 			case 6: { /* carry out the action */
-				Cmd.DoCommandP(GetTown(w.window_number.n).xy, w.window_number.n, w.as_def_d().data_1, null, Cmd.CMD_DO_TOWN_ACTION | Cmd.CMD_MSG(Str.STR_00B4_CAN_T_DO_THIS));
+				Cmd.DoCommandP(GetTown(w.window_number.n).getXy(), w.window_number.n, w.as_def_d().data_1, null, Cmd.CMD_DO_TOWN_ACTION | Cmd.CMD_MSG(Str.STR_00B4_CAN_T_DO_THIS));
 				break;
 			}
 			}
@@ -273,7 +273,7 @@ public abstract class TownGui extends Town
 		case WE_CLICK:
 			switch (e.widget) {
 			case 6: /* scroll to location */
-				ViewPort.ScrollMainWindowToTile(t.xy);
+				ViewPort.ScrollMainWindowToTile(t.getXy());
 				break;
 
 			case 7: /* town authority */
@@ -366,7 +366,7 @@ public abstract class TownGui extends Town
 
 		if (w != null) {
 			w.flags4 |= Window.WF_DISABLE_VP_SCROLL;
-			ViewPort.AssignWindowViewport(w, 3, 17, 0xFE, 0x56, GetTown(town).xy.tile, 1);
+			ViewPort.AssignWindowViewport(w, 3, 17, 0xFE, 0x56, GetTown(town).getXy().tile, 1);
 		}
 	}
 
@@ -431,7 +431,7 @@ public abstract class TownGui extends Town
 		//FOR_ALL_TOWNS(t)
 		Town.forEach( (t) ->
 		{
-			if (t.xy != null) _town_sort[n[0]++] = t.index;
+			if (t.getXy() != null) _town_sort[n[0]++] = t.index;
 		});
 
 		_num_town_sort = n[0];
@@ -468,7 +468,7 @@ public abstract class TownGui extends Town
 				while (i < _num_town_sort) {
 					t = GetTown(_town_sort[i]);
 
-					assert(t.xy != null);
+					assert(t.getXy() != null);
 
 					Global.SetDParam(0, t.index);
 					Global.SetDParam(1, t.population);
@@ -508,9 +508,9 @@ public abstract class TownGui extends Town
 
 				{
 					final Town t = GetTown(_town_sort[id_v]);
-					assert(t.xy != null);
+					assert(t.getXy() != null);
 
-					ViewPort.ScrollMainWindowToTile(t.xy);
+					ViewPort.ScrollMainWindowToTile(t.getXy());
 				}
 			}	break;
 			}

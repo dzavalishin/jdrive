@@ -863,7 +863,7 @@ public class ViewPort
 			{
 				Town t = ii.next();
 
-				if (t.xy != null &&
+				if (t.getXy() != null &&
 						bottom > t.sign.top &&
 						top < t.sign.top + 12 &&
 						right > t.sign.left &&
@@ -885,7 +885,7 @@ public class ViewPort
 			{
 				Town t = ii.next();
 
-				if (t.xy != null &&
+				if (t.getXy() != null &&
 						bottom > t.sign.top &&
 						top < t.sign.top + 24 &&
 						right > t.sign.left &&
@@ -908,7 +908,7 @@ public class ViewPort
 			{
 				Town t = ii.next();
 
-				if (t.xy != null &&
+				if (t.getXy() != null &&
 						bottom > t.sign.top &&
 						top < t.sign.top + 24 &&
 						right > t.sign.left &&
@@ -942,7 +942,7 @@ public class ViewPort
 			while(ii.hasNext())
 			{
 				Station st = ii.next();
-				if (st.xy != null &&
+				if (st.getXy() != null &&
 						bottom > st.sign.top &&
 						top < st.sign.top + 12 &&
 						right > st.sign.left &&
@@ -966,7 +966,7 @@ public class ViewPort
 			{
 				Station st = ii.next();
 
-				if (st.xy != null &&
+				if (st.getXy() != null &&
 						bottom > st.sign.top &&
 						top < st.sign.top + 24 &&
 						right > st.sign.left &&
@@ -992,7 +992,7 @@ public class ViewPort
 			while(ii.hasNext())
 			{
 				Station st = ii.next();
-				if (st.xy != null &&
+				if (st.getXy() != null &&
 						bottom > st.sign.top &&
 						top < st.sign.top + 24 &&
 						right > st.sign.left &&
@@ -1709,7 +1709,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				Town t = i.next();
-				if (t.xy != null &&
+				if (t.getXy() != null &&
 						y >= t.sign.top &&
 						y < t.sign.top + 12 &&
 						x >= t.sign.left &&
@@ -1727,7 +1727,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				Town t = i.next();
-				if (t.xy != null &&
+				if (t.getXy() != null &&
 						y >= t.sign.top &&
 						y < t.sign.top + 24 &&
 						x >= t.sign.left &&
@@ -1745,7 +1745,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				Town t = i.next();
-				if (t.xy != null &&
+				if (t.getXy() != null &&
 						y >= t.sign.top &&
 						y < t.sign.top + 24 &&
 						x >= t.sign.left &&
@@ -1775,7 +1775,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				Station st = i.next();
-				if (st.xy != null &&
+				if (st.getXy() != null &&
 						y >= st.sign.top &&
 						y < st.sign.top + 12 &&
 						x >= st.sign.left &&
@@ -1793,7 +1793,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				Station st = i.next();
-				if (st.xy != null &&
+				if (st.getXy() != null &&
 						y >= st.sign.top &&
 						y < st.sign.top + 24 &&
 						x >= st.sign.left &&
@@ -1811,7 +1811,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				Station st = i.next();
-				if (st.xy != null &&
+				if (st.getXy() != null &&
 						y >= st.sign.top &&
 						y < st.sign.top + 24 &&
 						x >= st.sign.left &&

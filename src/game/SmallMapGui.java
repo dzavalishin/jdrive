@@ -398,11 +398,11 @@ public class SmallMapGui extends SmallMapGuiTables
 			//FOR_ALL_TOWNS(t)
 			Town.forEach( (t) ->
 			{
-				if (t.xy != null) {
+				if (t.getXy() != null) {
 					// Remap the town coordinate
 					Point pt = Point.RemapCoords(
-							(int)(t.xy.TileX() * 16 - w.as_smallmap_d().scroll_x) / 16,
-							(int)(t.xy.TileY() * 16 - w.as_smallmap_d().scroll_y) / 16,
+							(int)(t.getXy().TileX() * 16 - w.as_smallmap_d().scroll_x) / 16,
+							(int)(t.getXy().TileY() * 16 - w.as_smallmap_d().scroll_y) / 16,
 							0);
 					int x1 = pt.x - w.as_smallmap_d().subscroll + 3 - (t.sign.width_2 >> 1);
 					int y1 = pt.y;

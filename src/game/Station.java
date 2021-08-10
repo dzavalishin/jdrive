@@ -100,6 +100,12 @@ public class Station implements IPoolItem
 
 
 
+	public TileIndex getXy() {
+		return xy;
+	}
+
+
+
 	//TODO private static final StationID CHECK_STATIONS_ERR = StationID.getInvalid();
 	private static final Station CHECK_STATIONS_ERR = null; 
 
@@ -477,7 +483,7 @@ public class Station implements IPoolItem
 	/**
 	 * Get the pointer to the station with index 'index'
 	 */
-	static Station GetStation(int index)
+	public static Station GetStation(int index)
 	{
 		return _station_pool.GetItemFromPool(index);
 	}
@@ -794,7 +800,7 @@ public class Station implements IPoolItem
 		}
 
 		/* check close enough to town to get central as name? */
-		if (Map.DistanceMax(tile,t.xy) < 8) {
+		if (Map.DistanceMax(tile,t.getXy()) < 8) {
 			found = M(Str.STR_SV_STNAME);
 			if (BitOps.HASBIT(free_names[0], M(Str.STR_SV_STNAME)))
 			{
@@ -836,7 +842,7 @@ public class Station implements IPoolItem
 
 		/* check elevation compared to Town */
 		z = tile.GetTileZ();
-		z2 = t.xy.GetTileZ();
+		z2 = t.getXy().GetTileZ();
 		if (z < z2) {
 			found = M(Str.STR_SV_STNAME_VALLEY);
 			if (BitOps.HASBIT(free_names[0], M(Str.STR_SV_STNAME_VALLEY))) 
@@ -859,8 +865,8 @@ public class Station implements IPoolItem
 		{
 
 			free_names[0] &= _direction_and_table[
-			                                      ((tile.TileX() < t.xy.TileX()) ? 1 : 0) +
-			                                      (((tile.TileY() < t.xy.TileY()) ? 1 : 0) * 2)];
+			                                      ((tile.TileX() < t.getXy().TileX()) ? 1 : 0) +
+			                                      (((tile.TileY() < t.getXy().TileY()) ? 1 : 0) * 2)];
 		}
 
 		tmp = free_names[0] & ((1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<6)|(1<<7)|(1<<12)|(1<<26)|(1<<27)|(1<<28)|(1<<29)|(1<<30));

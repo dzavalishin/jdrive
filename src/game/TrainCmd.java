@@ -2448,7 +2448,7 @@ public class TrainCmd extends TrainTables
 		case Order.OT_GOTO_STATION:
 			if (order.station == v.last_station_visited)
 				v.last_station_visited = Station.INVALID_STATION;
-			v.dest_tile = Station.GetStation(order.station).xy;
+			v.dest_tile = Station.GetStation(order.station).getXy();
 			result = CheckReverseTrain(v);
 			break;
 

@@ -705,11 +705,11 @@ public class DisasterCmd extends DisasterTables
 		while(ii.hasNext())
 		{
 			Station st = ii.next();
-			if (st.xy != null && st.airport_tile != null &&
+			if (st.getXy() != null && st.airport_tile != null &&
 					st.airport_type <= 1 &&
 					st.owner.IS_HUMAN_PLAYER()) 
 			{
-				x = (st.xy.TileX() + 2) * 16;
+				x = (st.getXy().TileX() + 2) * 16;
 				break;
 			}
 		}

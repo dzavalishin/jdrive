@@ -18,6 +18,7 @@ import game.*;
 public class Strings extends StringTable
 {
 
+	static DynamicLanguages _dynlang = new DynamicLanguages();
 
 	public static String _userstring;
 
@@ -91,10 +92,10 @@ public class Strings extends StringTable
 
 
 	// TODO fix me
-	//private char **_langpack_offs;
-	//private LanguagePack *_langpack;
-	//private int _langtab_num[32]; // Offset into langpack offs
-	//private int _langtab_start[32]; // Offset into langpack offs
+	private static String []_langpack_offs;
+	private static LanguagePack _langpack;
+	private static int [] _langtab_num = new int [32]; // Offset into langpack offs
+	private static int [] _langtab_start = new int[32]; // Offset into langpack offs
 
 	//private final StringID _cargo_string_list[NUM_LANDSCAPE][NUM_CARGO] = {
 	private final static int _cargo_string_list[][] = {
@@ -222,7 +223,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	//private static String StringGetStringPtr(StringID string)
 	private static String StringGetStringPtr(int string)
 	{
-		return _langpack_offs[_langtab_start[string.id >> 11] + (string.id & 0x7FF)];
+		return _langpack_offs[_langtab_start[string>> 11] + (string & 0x7FF)];
 	}
 
 	/* TODO rewrite
@@ -557,24 +558,30 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		}
 	}
 
-	/*
-	private static String ParseStringChoice(String b, int form, String dst, int *dstlen)
+
+	//private static String ParseStringChoice(String src, int form, int [] dstlen)
+	private static String ParseStringChoice(String src, int form)
 	{
+		char [] ca = src.toCharArray();
+		int cap = 0;
+
 		//<NUM> {Length of each string} {each string}
-		int n = (byte)*b++;
+		int n = (byte)ca[cap++];
 		int pos,i, mylen=0,mypos=0;
 		for(i=pos=0; i!=n; i++) {
-			int len = (byte)*b++;
+			int len = (byte)ca[cap++];
 			if (i == form) {
 				mypos = pos;
 				mylen = len;
 			}
 			pos += len;
 		}
-	 *dstlen = mylen;
-		memcpy(dst, b + mypos, mylen);
-		return b + pos;
-	}*/
+		//if( dstlen != null ) dstlen[0] = mylen;
+		//memcpy(dst, b + mypos, mylen);
+		//return b + pos;
+
+		return new String( ca, mypos, mylen );
+	}
 
 
 	private static String ExtractChoice(String b, int[]skip, int form)
@@ -600,7 +607,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	private static String FormatString(final String pstr, Object [] arg, int casei)
 	{
 		byte b;
-		final Object[] arg_orig = arg;
+		//final Object[] arg_orig = arg;
 		int modifier = 0;
 		StringBuilder buff = new StringBuilder();
 		int argc = 0;
@@ -608,7 +615,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		int stri = 0;
 		char[] str = pstr.toCharArray();
 
-		while ((b = (byte) str[stri++]) != '\0') {
+		while ((b = (byte) str[stri++]) != '\0' && stri < str.length) {
 			switch ((int)b) {
 			case 0x1: // {SETX}
 				buff.append( b );
@@ -622,7 +629,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 			case 0x81: // {STRINL}
 				stri += 2;
-				buff.append( GetStringWithArgs(READ_LE_int(str-2), argv));
+				// TODO buff.append( GetStringWithArgs(READ_LE_int(str-2), argv));
+				buff.append( "??" );
 				break;
 			case 0x82: // {DATE_LONG}
 				buff.append( FormatYmdString( Getint(arg[argc++])) );
@@ -645,7 +653,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			case 0x85:
 				switch ((int)str[stri++]) {
 				case 0: /* {CURRCOMPACT} */
-					buff.append( FormatGenericCurrency(Global._currency, Getint(arg[argc++]), true) );
+					// TODO buff.append( FormatGenericCurrency(Global._currency, Getint(arg[argc++]), true) );
+					buff.append( "$$$" ); argc++;
 					break;
 				case 2: /* {REV} */
 					buff.append( _openttd_revision );
@@ -664,7 +673,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				} break;
 				case 4: {/* {CURRCOMPACT64} */
 					// 64 bit compact currency-unit
-					buff.append( FormatGenericCurrency(_currency, Getlong(arg[argc++]), true) );
+					//buff.append( FormatGenericCurrency(_currency, Getlong(arg[argc++]), true) );
+					buff.append( "$$$" ); argc++;
 					break;
 				}
 				case 5: { /* {STRING1} */
@@ -702,7 +712,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				case 9: { /* {STRING5} */
 					// String that consumes FIVE arguments
 					int sstr = modifier + Getint(arg[argc++]);
-					buff.append( GetStringWithArgs(sstr, GetArgvPtr(&argv, 5)));
+					buff.append( GetStringWithArgs(sstr, GetArgvPtr(arg, argc, 5)));
 					argc += 5;
 					modifier = 0;
 					break;
@@ -715,7 +725,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 				case 11: { /* {INDUSTRY} */
 					Industry i = Industry.GetIndustry(Getint(arg[argc++]));
-					int args[] = new int[2];
+					Integer args[] = new Integer[2];
 
 					// industry not valid anymore?
 					if (i.xy == null)
@@ -778,8 +788,11 @@ private  final int *GetArgvPtr(final int **argv, int n)
 					// Layout now is:
 					//   8bit   - cargo type
 					//   16-bit - cargo count
-					StringID cargo_str = _cargoc.names_long[Getint(arg[argc++])];
-					buff.append( GetStringWithArgs(cargo_str, arg[argc++]) );
+					//StringID
+					{
+						int cargo_str = Global._cargoc.names_long[Getint(arg[argc++])];
+						buff.append( GetStringWithArgs(cargo_str, arg[argc++]) );
+					}
 					break;
 				}
 
@@ -822,10 +835,12 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				break;
 
 			case 0x8D: { // {P}
-				int v = argv_orig[(byte)str[stri++]]; // contains the number that determines plural
-				int [] len = { 0 };
-				str = ParseStringChoice(str, DeterminePluralForm(v), buff, len);
-				buff += len[0];
+				//int v = argv_orig[(byte)str[stri++]]; // contains the number that determines plural
+				int v = (Integer)arg[(byte)str[stri++]]; // contains the number that determines plural
+				//int [] len = { 0 };
+				//str = ParseStringChoice(str, DeterminePluralForm(v), buff, len);
+				//buff += len[0];
+				buff.append(ParseStringChoice( new String( str ), DeterminePluralForm(v)));
 				break;
 			}
 
@@ -834,41 +849,43 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				break;
 
 			case 0x8F: // {CURRENCY}
-				buff.append( FormatGenericCurrency(_currency, Getint(arg[argc++]), false) );
+				// TODO buff.append( FormatGenericCurrency(_currency, Getint(arg[argc++]), false) );
+				buff.append( "$$$" );
 				break;
 
 			case 0x99: { // {WAYPOINT}
 				int [] temp = new int[2];
 				WayPoint wp = WayPoint.GetWaypoint(Getint(arg[argc++]));
-				StringID str;
+				int sstr;
+				//StringID str;
 				if (wp.string.id != STR_NULL) {
-					str = wp.string;
+					sstr = wp.string.id;
 				} else {
 					temp[0] = wp.town_index;
 					temp[1] = wp.town_cn + 1;
-					str = wp.town_cn == 0 ? STR_WAYPOINTNAME_CITY : STR_WAYPOINTNAME_CITY_SERIAL;
+					sstr = wp.town_cn == 0 ? STR_WAYPOINTNAME_CITY : STR_WAYPOINTNAME_CITY_SERIAL;
 				}
-				buff.append( GetStringWithArgs(str, temp) );
+				buff.append( GetStringWithArgs(sstr, temp) );
 			} break;
 
 			case 0x9A: { // {STATION}
 				final Station st = Station.GetStation(Getint(arg[argc++]));
-				int [] temp = new int[2];
+				Integer [] temp = new Integer[2];
 
-				if (st.xy == null) { // station doesn't exist anymore
+				if (st.getXy() == null) { // station doesn't exist anymore
 					buff.append( GetStringWithArgs(STR_UNKNOWN_DESTINATION ) );
 					break;
 				}
 				temp[0] = st.town.townnametype;
 				temp[1] = st.town.townnameparts;
-				buff = GetStringWithArgs(buff, st.string_id, temp);
+				buff.append( GetStringWithArgs(st.string_id, (Object[])temp) );
 				break;
 			}
 			case 0x9B: { // {TOWN}
 				final Town t = Town.GetTown(Getint(arg[argc++]));
 				int temp[] = new int[1];
 
-				assert(t.xy != null);
+				assert(t.getXy() != null);
 
 				temp[0] = t.townnameparts;
 				buff.append( GetStringWithArgs( t.townnametype, temp) );
@@ -876,7 +893,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			}
 
 			case 0x9C: { // {CURRENCY64}
-				buff.append( FormatGenericCurrency(_currency, Getlong(arg[argc++]), false) );
+				//buff.append( FormatGenericCurrency(_currency, Getlong(arg[argc++]), false) );
+				buff.append( "$$$" ); argc++;
 				break;
 			}
 
@@ -894,11 +912,11 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				while (num != 0) {
 					if ((byte)str[0] == casei) {
 						// Found the case, adjust str pointer and continue
-						str += 3;
+						stri += 3;
 						break;
 					}
 					// Otherwise skip to the next case
-					str += 3 + (str[1] << 8) + str[2];
+					stri += 3 + (str[1] << 8) + str[2];
 					num--;
 				}
 				break;
@@ -1104,20 +1122,23 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 		// language name?
 		if (BitOps.IS_INT_INSIDE(ind, (SPECSTR_LANGUAGE_START - 0x70E4), (SPECSTR_LANGUAGE_END - 0x70E4) + 1)) {
-			int i = ind - (SPECSTR_LANGUAGE_START - 0x70E4);
-			return i == _dynlang.curr ? _langpack.own_name : _dynlang.ent[i].name;
+			//int i = ind - (SPECSTR_LANGUAGE_START - 0x70E4);
+			// TODO return i == _dynlang.curr ? _langpack.own_name : _dynlang.ent[i].name;
+			return "English";
 		}
 
 		// resolution size?
 		if (BitOps.IS_INT_INSIDE(ind, (SPECSTR_RESOLUTION_START - 0x70E4), (SPECSTR_RESOLUTION_END - 0x70E4) + 1)) {
-			int i = ind - (SPECSTR_RESOLUTION_START - 0x70E4);
-			return String.format("%dx%d", _resolutions[i][0], _resolutions[i][1]);
+			//int i = ind - (SPECSTR_RESOLUTION_START - 0x70E4);
+			// TODO return String.format("%dx%d", _resolutions[i][0], _resolutions[i][1]);
+			return String.format("1024x768");
 		}
 
 		// screenshot format name?
 		if (BitOps.IS_INT_INSIDE(ind, (SPECSTR_SCREENSHOT_START - 0x70E4), (SPECSTR_SCREENSHOT_END - 0x70E4) + 1)) {
-			int i = ind - (SPECSTR_SCREENSHOT_START - 0x70E4);
-			return GetScreenshotFormatDesc(i);
+			//int i = ind - (SPECSTR_SCREENSHOT_START - 0x70E4);
+			// TODO return GetScreenshotFormatDesc(i);
+			return "PNG";
 		}
 
 		assert false;
@@ -1151,29 +1172,31 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	static boolean ReadLanguagePack(int lang_index)
 	{
-		return false; 
-		/* TODO XXX 
 
 		int tot_count, i;
-		LanguagePack lang_pack;
-		size_t len;
-		char [][]langpack_offs;
-		String s;
+		LanguagePack lang_pack = new LanguagePack();
+		//int len;
+		//char [][]langpack_offs;
+		String []langpack_offs;
 
-		String lang = String.format("%s%s", Global._path.lang_dir, _dynlang.ent[lang_index].file);
-		byte lang_pack_bytes = Main.ReadFileToMem(lang, 100000);
+		String lang = String.format("%s%s", Global._path.lang_dir, _dynlang.file[lang_index]);
+		byte[] lang_pack_bytes = Main.ReadFileToMem(lang, 100000);
 		if (lang_pack_bytes == null) return false;
 
-
-		if (lang_pack_bytes.length < sizeof(LanguagePack) ||
+		/* TODO 
+		if ( //lang_pack_bytes.length < sizeof(LanguagePack) ||
 				lang_pack.ident != BitOps.TO_LE32(LANGUAGE_PACK_IDENT) ||
 				lang_pack.version != BitOps.TO_LE32(LANGUAGE_PACK_VERSION)) {
 			return false;
-		}
+		} */
 
+		lang_pack.name = BitOps.stringFromBytes(lang_pack_bytes, 8, 32 );
+		lang_pack.own_name = BitOps.stringFromBytes(lang_pack_bytes, 40, 32 );
 
 		tot_count = 0;
 		for (i = 0; i != 32; i++) {
+			int off = BitOps.READ_LE_UINT16(lang_pack_bytes, 88+i*2);
+			lang_pack.offsets[i] = off;
 			int num = lang_pack.offsets[i];
 			_langtab_start[i] = tot_count;
 			_langtab_num[i] = num;
@@ -1183,27 +1206,41 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		// Allocate offsets
 		//langpack_offs = malloc(tot_count * sizeof(*langpack_offs));
 
+		langpack_offs = new String[tot_count]; 
+
 		// Fill offsets
-		s = lang_pack.data;
+		byte[] s = BitOps.subArray(lang_pack_bytes, 0x9d);		
+		int sp = 0;
 		for (i = 0; i != tot_count; i++) {
-			len = (byte)*s;
-		 *s++ = '\0'; // zero terminate the string before.
-			if (len >= 0xC0) len = ((len & 0x3F) << 8) + (byte)*s++;
-			langpack_offs[i] = s;
-			s += len;
+			int len = s[sp++];
+			len &= 0xFF;
+			//*s++ = '\0'; // zero terminate the string before.
+			if (len >= 0xC0)
+			{ 
+				int lo = s[sp++];
+				len = ((len & 0x3F) << 8) + (lo & 0xFF);
+			}
+			//langpack_offs[i] = new String( s, sp, len );
+			langpack_offs[i] = BitOps.stringFromBytes( s, sp, len );
+			//Global.debug("s = '%s'", langpack_offs[i] );
+			sp += len;
 		}
 
 		_langpack = lang_pack;
 		_langpack_offs = langpack_offs;
-		_dynlang.curr_file = _dynlang.ent[lang_index].file;
+		_dynlang.curr_file = _dynlang.file[lang_index];
 		_dynlang.curr = lang_index;
 		return true;
-		 */
+
 	}
+
+	private static String [] __elng =  {"english.lng "};
 
 	// make a list of the available language packs. put the data in _dynlang struct.
 	public static void InitializeLanguagePacks()
 	{
+		_dynlang.file = __elng ;
+		ReadLanguagePack(0);
 		/* TODO XXX 
 
 		DynamicLanguages dl = &_dynlang;
@@ -1312,21 +1349,21 @@ class LanguagePack {
 	String own_name;	// the localized name of this language	
 	String isocode;	// the ISO code for the language (not country code)
 
-	int offsets[];	// the offsets
+	int offsets[] = new int[32];	// the offsets
 	byte plural_form;		// how to compute plural forms
 
 	byte data[];
 
 	/* Orig C struct is
-	int ident;
-	int version;			// 32-bits of auto generated version info which is basically a hash of strings.h
-	char name[32];			// the international name of this language
-	char own_name[32];	// the localized name of this language
-	char isocode[16];	// the ISO code for the language (not country code)
-	int offsets[32];	// the offsets
-	byte plural_form;		// how to compute plural forms
-	byte pad[3];				// pad header to be a multiple of 4
-	char data[VARARRAY_SIZE];
+	int32 ident;
+	int32 version;				// +4 32-bits of auto generated version info which is basically a hash of strings.h
+	char name[32];				// +8 the international name of this language
+	char own_name[32];			// +40 the localized name of this language
+	char isocode[16];			// +72 the ISO code for the language (not country code)
+	int16 offsets[32];			// +88 the offsets
+	byte plural_form;			// +152 how to compute plural forms
+	byte pad[3];				// +153 pad header to be a multiple of 4
+	char data[VARARRAY_SIZE];	// +156
 	 */
 
 

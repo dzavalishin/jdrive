@@ -1372,7 +1372,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 							return false;
 						}
 					} else if (type == IT_TOY_SHOP) {
-						if (Map.DistanceMax(tt.xy, cur_tile) > 9) return false;
+						if (Map.DistanceMax(tt.getXy(), cur_tile) > 9) return false;
 						if (ti.type != TileTypes.MP_HOUSE.ordinal()) {
 							//goto do_clear;
 							if (Cmd.CmdFailed(Cmd.DoCommandByTile(cur_tile, 0, 0, Cmd.DC_AUTO, Cmd.CMD_LANDSCAPE_CLEAR)))

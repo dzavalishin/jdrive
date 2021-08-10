@@ -578,7 +578,7 @@ public class AirCraft extends AirCraftTables {
 		st = Station.GetStation(v.current_order.station);
 
 		// only goto depot if the target airport has terminals (eg. it is airport)
-		if (st.xy != null && st.airport_tile != null && AirportFTAClass.GetAirport(st.airport_type).terminals != null) {
+		if (st.getXy() != null && st.airport_tile != null && AirportFTAClass.GetAirport(st.airport_type).terminals != null) {
 			//			printf("targetairport = %d, st.index = %d\n", v.air.targetairport, st.index);
 			//			v.air.targetairport = st.index;
 			v.current_order.type = Order.OT_GOTO_DEPOT;
@@ -868,7 +868,7 @@ public class AirCraft extends AirCraftTables {
 		{
 			TileIndex tile = st.airport_tile;
 
-			if (tile == null) tile = st.xy;
+			if (tile == null) tile = st.getXy();
 			// xy of destination
 			x = tile.TileX() * 16;
 			y = tile.TileY() * 16;

@@ -363,10 +363,7 @@ public class MainWindow extends JPanel implements ActionListener
 		BufferedImage image;
 		
 		if(Gfx._pal_last_dirty != -1)
-		{
 			makePalette();
-			Gfx._pal_last_dirty = -1;
-		}
 
 		//BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
 		if(icm!=null)
@@ -432,6 +429,8 @@ public class MainWindow extends JPanel implements ActionListener
 		rp[0] = gp[0] = bp[0] = ap[0] = 0;
 		*/
 		
+		if(Gfx._cur_palette == null || Gfx._cur_palette[0] == null) return;
+		
 		for(int i = 0; i < PALETTE_SIZE; i++)
 		{
 			ap[i] = (byte) 0xFF;
@@ -441,6 +440,7 @@ public class MainWindow extends JPanel implements ActionListener
 		}
 				
 		icm = new IndexColorModel(8, PALETTE_SIZE, rp, gp, bp, ap);
+		Gfx._pal_last_dirty = -1;
 	}
 
 

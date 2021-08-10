@@ -15,9 +15,9 @@ public class Subsidies {
 		int offs = s.from;
 
 		if (s.age >= 12) {
-			xy = Station.GetStation(offs).xy;
+			xy = Station.GetStation(offs).getXy();
 		} else if (s.cargo_type == AcceptedCargo.CT_PASSENGERS || s.cargo_type == AcceptedCargo.CT_MAIL) {
-			xy = Town.GetTown(offs).xy;
+			xy = Town.GetTown(offs).getXy();
 		} else {
 			xy = Industry.GetIndustry(offs).xy;
 
@@ -26,9 +26,9 @@ public class Subsidies {
 			// otherwise determine to coordinate for subsidy and scroll to it 
 			offs = s.to;
 			if (s.age >= 12) {
-				xy = Station.GetStation(offs).xy;
+				xy = Station.GetStation(offs).getXy();
 			} else if (s.cargo_type == AcceptedCargo.CT_PASSENGERS || s.cargo_type == AcceptedCargo.CT_MAIL || s.cargo_type == AcceptedCargo.CT_GOODS || s.cargo_type == AcceptedCargo.CT_FOOD) {
-				xy = Town.GetTown(offs).xy;
+				xy = Town.GetTown(offs).getXy();
 			} else {
 				xy = Industry.GetIndustry(offs).xy;
 			}

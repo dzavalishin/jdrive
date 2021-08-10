@@ -111,7 +111,7 @@ public class StationGui extends Station  // to get finalants
 		//FOR_ALL_STATIONS(st)
 		Station.forEach( (st) ->
 		{
-			if (st.xy != null && st.owner.id != Owner.OWNER_NONE) {
+			if (st.getXy() != null && st.owner.id != Owner.OWNER_NONE) {
 				_station_sort[n[0]].index = st.index;
 				_station_sort[n[0]].owner = st.owner.id;
 				n[0]++;
@@ -211,7 +211,7 @@ public class StationGui extends Station  // to get finalants
 					int j;
 					int x;
 
-					assert(st.xy != null && st.owner.id == owner);
+					assert(st.getXy() != null && st.owner.id == owner);
 
 					Global.SetDParam(0, st.index);
 					Global.SetDParam(1, st.facilities);
@@ -251,9 +251,9 @@ public class StationGui extends Station  // to get finalants
 
 					st = Station.GetStation(_station_sort[id_v].index);
 
-					assert(st.xy != null && st.owner == owner);
+					assert(st.getXy() != null && st.owner == owner);
 
-					ViewPort.ScrollMainWindowToTile(st.xy);
+					ViewPort.ScrollMainWindowToTile(st.getXy());
 				}
 			} break;
 			}
@@ -478,7 +478,7 @@ public class StationGui extends Station  // to get finalants
 		case WE_CLICK:
 			switch (e.widget) {
 			case 7:
-				ViewPort.ScrollMainWindowToTile(Station.GetStation(w.window_number.n).xy);
+				ViewPort.ScrollMainWindowToTile(Station.GetStation(w.window_number.n).getXy());
 				break;
 
 			case 8:

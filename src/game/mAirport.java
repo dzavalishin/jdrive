@@ -86,7 +86,7 @@ public class mAirport
 			if(st.IsValidStation() 
 				&& st.owner.id == Owner.OWNER_TOWN
 				&& st.town == tn) { 
-					Cmd.DoCommandByTile(st.xy, 0, 0, Cmd.DC_EXEC,Cmd.CMD_LANDSCAPE_CLEAR);
+					Cmd.DoCommandByTile(st.getXy(), 0, 0, Cmd.DC_EXEC,Cmd.CMD_LANDSCAPE_CLEAR);
 					tn.ExpandTown(); //this just builds over the gap thats left
 			}
 		});
@@ -243,7 +243,7 @@ public class mAirport
 
 		for(radius = MA_MIN_DISTANCE_FROM_TOWN; (radius <= MA_MAX_DISTANCE_FROM_TOWN); radius++) {
 			for(angle = 0; (angle <= 360); angle++) {		
-				if(MA_CheckCandidate(CircularPos(radius, angle, tn.xy), tn)) return CircularPos(radius, angle, tn.xy);
+				if(MA_CheckCandidate(CircularPos(radius, angle, tn.getXy()), tn)) return CircularPos(radius, angle, tn.getXy());
 			}//angle
 		}//radius
 		return TileIndex.getInvalid();

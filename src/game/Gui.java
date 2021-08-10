@@ -1609,7 +1609,7 @@ public class Gui
 				if (t == null) {
 					Global.ShowErrorMessage(Str.STR_NO_SPACE_FOR_TOWN, Str.STR_CANNOT_GENERATE_TOWN, 0, 0);
 				} else {
-					ViewPort.ScrollMainWindowToTile(t.xy);
+					ViewPort.ScrollMainWindowToTile(t.getXy());
 				}
 
 				break;
@@ -1762,7 +1762,7 @@ public class Gui
 		while(ii.hasNext())
 		{
 			final Town t = ii.next();
-			if (t.xy != null) return true;
+			if (t.getXy() != null) return true;
 		}
 		return false;
 	}

@@ -2116,7 +2116,7 @@ public class Gfx extends PaletteTabs
 					if (bottom > Hal._invalid_rect.bottom) bottom = Hal._invalid_rect.bottom;
 
 					if (left < right && top < bottom) {
-						Global.debug("dirty paint l %4d t %3d r %4d b %3d",left, top, right, bottom);
+						//Global.debug("dirty paint l %4d t %3d r %4d b %3d",left, top, right, bottom);
 						RedrawScreenRect(left, top, right, bottom);
 					}
 
@@ -2153,7 +2153,7 @@ public class Gfx extends PaletteTabs
 		if (right  > Hal._invalid_rect.right ) Hal._invalid_rect.right  = right;
 		if (bottom > Hal._invalid_rect.bottom) Hal._invalid_rect.bottom = bottom;
 
-		Global.debug("dirty add   l %4d t %3d r %4d b %3d",left, top, right, bottom);
+		//Global.debug("dirty add   l %4d t %3d r %4d b %3d",left, top, right, bottom);
 
 		left >>= 6;
 		top  >>= 3;
@@ -2323,7 +2323,7 @@ class DrawStringStateMachine
 	private DrawPixelInfo dpi = Hal._cur_dpi;
 	private int base = Gfx._stringwidth_base;
 	private int sp = 0; // string pointer
-	private byte color;
+	private int color;
 
 	private final char sc[];
 	private final int xo, yo;
@@ -2348,6 +2348,8 @@ class DrawStringStateMachine
 	private int draw(int x, int y) {
 		char c;
 
+		color &= 0xFF;
+		
 		if (color != 0xFE) {
 			if (x >= dpi.left + dpi.width ||
 					x + Hal._screen.width*2 <= dpi.left ||
@@ -2372,7 +2374,7 @@ class DrawStringStateMachine
 			for(;;) {
 				c = sc[sp++]; //*string++;
 				//skip_cont:;
-				if (c == 0) {
+				if (c == 0 || sp >= sc.length) {
 					Gfx._stringwidth_out = base;
 					return x;
 				}
@@ -2437,9 +2439,11 @@ class DrawStringStateMachine
 	private void switchColor()
 	{
 		if(0 != (real_color & Gfx.IS_PALETTE_COLOR) ) {
-			Gfx._string_colorremap[1] = color;
+			Gfx._string_colorremap[1] = (byte) color;
 			Gfx._string_colorremap[2] = (byte) 215;
 		} else {
+			// TODO XXX hack
+			color &= 0xF;
 			Gfx._string_colorremap[1] = (byte) Gfx._string_colormap[color].text;
 			Gfx._string_colorremap[2] = (byte) Gfx._string_colormap[color].shadow;
 		}

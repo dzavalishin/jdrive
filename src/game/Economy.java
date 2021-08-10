@@ -134,7 +134,7 @@ public class Economy
 			//FOR_ALL_STATIONS(st)
 			Station.forEach( (ii,st) ->
 			{
-				if (st.xy != null && st.owner == owner) {
+				if (st.getXy() != null && st.owner == owner) {
 					int facil = st.facilities;
 					do num[0] += (facil&1); while ((facil >>= 1) > 0);
 				}
@@ -214,7 +214,7 @@ public class Economy
 			//FOR_ALL_STATIONS(st)
 			Station.forEach( (ii,st) ->
 			{
-				if (st.xy != null && st.owner.id == owner) {
+				if (st.getXy() != null && st.owner.id == owner) {
 					int facil = st.facilities;
 					do { num[0] += facil&1; } while (0 != (facil>>=1) );
 				}
@@ -697,7 +697,7 @@ public class Economy
 		//FOR_ALL_STATIONS(st)
 		Station.forEach( (ii,st) ->
 		{
-			if (st.xy != null) {
+			if (st.getXy() != null) {
 				Global._current_player = st.owner; // TODO kill global
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
 				Player.SubtractMoneyFromPlayer(Global._price.station_value >> 1);
@@ -964,23 +964,23 @@ public class Economy
 				} else {
 					Global.SetDParam(4, Str.STR_TOWN);
 					Global.SetDParam(5, s.to);
-					tile2 = Town.GetTown(s.to).xy;
+					tile2 = Town.GetTown(s.to).getXy();
 				}
 			} else {
 				Global.SetDParam(1, Str.STR_TOWN);
 				Global.SetDParam(2, s.from);
-				tile = Town.GetTown(s.from).xy;
+				tile = Town.GetTown(s.from).getXy();
 
 				Global.SetDParam(4, Str.STR_TOWN);
 				Global.SetDParam(5, s.to);
-				tile2 = Town.GetTown(s.to).xy;
+				tile2 = Town.GetTown(s.to).getXy();
 			}
 		} else {
 			Global.SetDParam(1, s.from);
-			tile = Station.GetStation(s.from).xy;
+			tile = Station.GetStation(s.from).getXy();
 
 			Global.SetDParam(2, s.to);
-			tile2 = Station.GetStation(s.to).xy;
+			tile2 = Station.GetStation(s.to).getXy();
 		}
 
 		tp.a = tile.tile;
@@ -1034,14 +1034,14 @@ public class Economy
 		fr.distance = (int)-1;
 
 		fr.from = from = Town.GetTown(Hal.RandomRange(Town._total_towns));
-		if (from.xy == null || from.population < 400)
+		if (from.getXy() == null || from.population < 400)
 			return;
 
 		fr.to = to = Town.GetTown(Hal.RandomRange(Town._total_towns));
-		if (from==to || to.xy == null || to.population < 400 || to.pct_pass_transported > 42)
+		if (from==to || to.getXy() == null || to.population < 400 || to.pct_pass_transported > 42)
 			return;
 
-		fr.distance = Map.DistanceManhattan(from.xy, to.xy);
+		fr.distance = Map.DistanceManhattan(from.getXy(), to.getXy());
 	}
 
 	static void FindSubsidyCargoRoute(FoundRoute fr)
@@ -1080,9 +1080,9 @@ public class Economy
 			Town t = Town.GetTown(Hal.RandomRange(Town._total_towns));
 
 			// Only want big towns
-			if (t.xy == null || t.population < 900)
+			if (t.getXy() == null || t.population < 900)
 				return;
-			fr.distance = Map.DistanceManhattan(i.xy, t.xy);
+			fr.distance = Map.DistanceManhattan(i.xy, t.getXy());
 			fr.to = t;
 		} else {
 			// The destination is an industry
@@ -1325,21 +1325,21 @@ public class Economy
 
 				/* Check distance from source */
 				if (cargo_type == AcceptedCargo.CT_PASSENGERS || cargo_type == AcceptedCargo.CT_MAIL) {
-					xy = Town.GetTown(s.from).xy;
+					xy = Town.GetTown(s.from).getXy();
 				} else {
 					xy = (Industry.GetIndustry(s.from)).xy;
 				}
-				if (Map.DistanceMax(xy, from.xy) > 9)
+				if (Map.DistanceMax(xy, from.getXy()) > 9)
 					continue;
 
 				/* Check distance from dest */
 				if (cargo_type == AcceptedCargo.CT_PASSENGERS || cargo_type == AcceptedCargo.CT_MAIL || cargo_type == AcceptedCargo.CT_GOODS || cargo_type == AcceptedCargo.CT_FOOD) {
-					xy = Town.GetTown(s.to).xy;
+					xy = Town.GetTown(s.to).getXy();
 				} else {
 					xy = (Industry.GetIndustry(s.to)).xy;
 				}
 
-				if (Map.DistanceMax(xy, to.xy) > 9)
+				if (Map.DistanceMax(xy, to.getXy()) > 9)
 					continue;
 
 				/* Found a subsidy, change the values to indicate that it's in use */
@@ -1393,10 +1393,10 @@ public class Economy
 		if (cargo_type == AcceptedCargo.CT_WATER)  s_to.town.new_act_water += num_pieces;
 
 		// Give the goods to the industry.
-		DeliverGoodsToIndustry(s_to.xy, cargo_type, num_pieces);
+		DeliverGoodsToIndustry(s_to.getXy(), cargo_type, num_pieces);
 
 		// Determine profit
-		profit = GetTransportedGoodsIncome(num_pieces, Map.DistanceManhattan(s_from.xy, s_to.xy), days_in_transit, cargo_type);
+		profit = GetTransportedGoodsIncome(num_pieces, Map.DistanceManhattan(s_from.getXy(), s_to.getXy()), days_in_transit, cargo_type);
 
 
 		// Modify profit if a subsidy is in effect
@@ -1552,13 +1552,13 @@ public class Economy
 					if(v.type == Vehicle.VEH_Aircraft) {
 						v_profit = GetTransportedGoodsIncome(
 								v.cargo_count,
-								Map.DistanceManhattan(Station.GetStation(v.cargo_source).xy, Station.GetStation(last_visited).xy),
+								Map.DistanceManhattan(Station.GetStation(v.cargo_source).getXy(), Station.GetStation(last_visited).getXy()),
 								v.cargo_days * Global._patches.aircraft_speed_coeff,
 								v.cargo_type) * 3 / 2;
 					} else {
 						v_profit = GetTransportedGoodsIncome(
 								v.cargo_count,
-								Map.DistanceManhattan(Station.GetStation(v.cargo_source).xy, Station.GetStation(last_visited).xy),
+								Map.DistanceManhattan(Station.GetStation(v.cargo_source).getXy(), Station.GetStation(last_visited).getXy()),
 								v.cargo_days,
 								v.cargo_type) * 3 / 2;
 					}

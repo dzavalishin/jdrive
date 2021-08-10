@@ -410,7 +410,7 @@ public class OrderGui {
 					TileIndex xy = null;
 					switch (ord.type) {
 					case Order.OT_GOTO_STATION:			/* station order */
-						xy = Station.GetStation(ord.station).xy ;
+						xy = Station.GetStation(ord.station).getXy() ;
 						break;
 					case Order.OT_GOTO_DEPOT:				/* goto depot order */
 						xy = Depot.GetDepot(ord.station).xy;

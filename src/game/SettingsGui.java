@@ -551,7 +551,7 @@ public class SettingsGui extends SettingsTables
 		//FOR_ALL_TOWNS(t)
 		Town.forEach( (t) ->
 		{
-			if (t.xy != null) Town.UpdateTownVirtCoord(t);
+			if (t.getXy() != null) Town.UpdateTownVirtCoord(t);
 		});
 		return 0;
 	}

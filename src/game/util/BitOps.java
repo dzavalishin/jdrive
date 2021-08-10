@@ -3,6 +3,7 @@ package game.util;
 import game.IntContainer;
 import game.tables.TrackPathFinderTables;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import game.Hal;
@@ -361,6 +362,10 @@ public class BitOps {
 		int hi = (int)b[1+shift];
 		int lo = (int)b[0+shift];
 		return (0xFF & lo) + ((0xFF & hi) << 8);
+	}
+
+	public static String stringFromBytes(byte[] b, int start, int len) {
+		return new String( b, start, len, StandardCharsets.ISO_8859_1 );
 	}
 
 	

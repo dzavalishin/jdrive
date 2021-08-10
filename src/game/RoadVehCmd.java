@@ -1439,7 +1439,7 @@ class RoadDriveEntry {
 				//we have arrived at the wrong station
 				//XXX The question is .. what to do? Actually we shouldn't be here
 				//but I guess we need to clear the slot
-				Global.DEBUG_ms( 1, "Multistop: Wrong station, force a slot clearing. Vehicle %d at 0x%x, should go to 0x%x of station %d (%x), destination 0x%x", v.unitnumber, v.tile, v.road.slot.xy, st.index, st.xy, v.dest_tile);
+				Global.DEBUG_ms( 1, "Multistop: Wrong station, force a slot clearing. Vehicle %d at 0x%x, should go to 0x%x of station %d (%x), destination 0x%x", v.unitnumber, v.tile, v.road.slot.xy, st.index, st.getXy(), v.dest_tile);
 				ClearSlot(v, v.road.slot);
 			}
 
@@ -1605,7 +1605,7 @@ class RoadDriveEntry {
 				int mindist = 12, dist; // 12 is threshold distance.
 
 				//first we need to find out how far our stations are away.
-				Global.DEBUG_ms( 2, "Multistop: Attempting to obtain a slot for vehicle %d at station %d (0x%x)", v.unitnumber, st.index, st.xy);
+				Global.DEBUG_ms( 2, "Multistop: Attempting to obtain a slot for vehicle %d at station %d (0x%x)", v.unitnumber, st.index, st.getXy());
 				//for(; rs != null; rs = rs.next)
 				for( RoadStop rs : rsl )
 				{

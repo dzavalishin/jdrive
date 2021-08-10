@@ -1081,7 +1081,7 @@ public class Road extends RoadTables
 
 				// Show an animation to indicate road work
 				if (t.road_build_months != 0 &&
-						!(Map.DistanceManhattan(t.xy, tile) >= 8 && grp == 0) &&
+						!(Map.DistanceManhattan(t.getXy(), tile) >= 8 && grp == 0) &&
 						(tile.getMap().m5==5 || tile.getMap().m5==10)) {
 					if (tile.GetTileSlope(null) == 0 && tile.EnsureNoVehicle() && BitOps.CHANCE16(1,20)) {
 						tile.getMap().m4 |= (BitOps.GB(tile.getMap().m4, 4, 3) <=  2 ? 7 : 6) << 4;

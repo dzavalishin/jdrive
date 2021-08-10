@@ -279,7 +279,7 @@ public class Global {
 
 	public static void error(String s, Object ... arg) {
 		String buf = String.format(s, arg);
-		System.err.print(buf);		
+		System.err.println(buf);		
 	}
 
 	public static final StringID  INVALID_STRING_ID = new StringID(0xFFFF);
@@ -302,7 +302,7 @@ public class Global {
 
 
 
-	static void debug(String s, Object ... arg)
+	public static void debug(String s, Object ... arg)
 	{
 		String buf = String.format(s, arg);
 

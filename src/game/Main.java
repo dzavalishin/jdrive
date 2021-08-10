@@ -37,7 +37,7 @@ public class Main {
 	}
 
 
-	byte [] ReadFileToMem( String filename, int maxsize)
+	public static byte [] ReadFileToMem( String filename, int maxsize)
 	{
 		byte [] buf = new byte[maxsize];
 		if( buf == null )
@@ -1302,7 +1302,8 @@ public class Main {
 		Global._path.scenario_dir = slcwd+"scenario";
 		Global._path.gm_dir = slcwd+"gm"+ File.separator;
 		Global._path.data_dir = slcwd+"resources"+ File.separator;
-		Global._path.lang_dir = slcwd+"lang"+ File.separator;
+		//Global._path.lang_dir = slcwd+"lang"+ File.separator;
+		Global._path.lang_dir = slcwd+"resources"+ File.separator;
 
 		if (Global._config_file == null)
 			Global._config_file =  Global._path.personal_dir + "openttd.cfg";

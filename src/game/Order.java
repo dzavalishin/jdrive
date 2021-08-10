@@ -415,8 +415,8 @@ public class Order implements IPoolItem {
 			&& !Global._patches.new_pathfinding_all) {
 
 			int dist = Map.DistanceManhattan(
-					Station.GetStation(v.GetVehicleOrder(sel_ord.id - 1).station).xy,
-					Station.GetStation(new_order.station).xy // XXX type != OT_GOTO_STATION?
+					Station.GetStation(v.GetVehicleOrder(sel_ord.id - 1).station).getXy(),
+					Station.GetStation(new_order.station).getXy()
 			);
 			if (dist >= 130)
 				return Cmd.return_cmd_error(Str.STR_0210_TOO_FAR_FROM_PREVIOUS_DESTINATIO);
