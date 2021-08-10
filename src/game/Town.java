@@ -86,14 +86,14 @@ public class Town extends TownTables implements IPoolItem
 	private void clear()
 	{
 		xy = null;
-		sign = null;
+		sign = new ViewportSign();
 		unwanted = null;
 		exclusivity = null;
 		radius = null;
 		population = 0;
 		townnametype = 0;
 		townnameparts = 0;
-		ratings = null;
+		ratings = new int[Global.MAX_PLAYERS];
 
 		exclusive_counter = max_pass = max_mail = new_max_pass =
 				new_max_mail = act_pass = act_mail = new_act_pass =

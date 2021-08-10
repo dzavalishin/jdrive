@@ -577,7 +577,19 @@ public class TileIndex implements Comparable<TileIndex>
 
 
 	static TileIndex RandomTileSeed(int r) { return new TileIndex( TILE_MASK(r) ); }
-	static TileIndex RandomTile() { return new TileIndex(Hal.Random()); }
+	static TileIndex RandomTile() 
+	{
+		while(true)
+		{
+		 TileIndex t = new TileIndex(
+				 Hal.Random() % Global.MapMaxX(),
+				 Hal.Random() % Global.MapMaxY()
+				 );
+		 
+		 if( t.IsValidTile())
+			 return t;		 
+		}		
+	}
 
 
 

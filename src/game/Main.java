@@ -500,7 +500,8 @@ public class Main {
 		Gui.SetupColorsAndInitialWindow();
 
 		// Randomize world
-		GenerateWorld.doGenerateWorld(0, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
+		// TODO world size GenerateWorld.doGenerateWorld(0, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
+		GenerateWorld.doGenerateWorld(0, 64, 64);
 
 		// In a dedicated server, the server does not play
 		if (Global._network_dedicated) {
@@ -514,7 +515,7 @@ public class Main {
 			Cmd.DoCommandP(null, (Global._patches.autorenew ? (1 << 15) : 0 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 		}
 
-		Global.hal.MarkWholeScreenDirty();
+		Hal.MarkWholeScreenDirty();
 	}
 
 	static void MakeNewEditorWorld()
@@ -538,7 +539,7 @@ public class Main {
 		GenerateWorld.doGenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
 
 		Global._local_player = PlayerID.get(Owner.OWNER_NONE);
-		Global.hal.MarkWholeScreenDirty();
+		Hal.MarkWholeScreenDirty();
 	}
 
 	//void StartupPlayers();
@@ -727,7 +728,7 @@ public class Main {
 			GenerateWorld.doGenerateWorld(2, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
 			// XXX: set date
 			Global._local_player = PlayerID.get( Owner.OWNER_NONE );
-			Global.hal.MarkWholeScreenDirty();
+			Hal.MarkWholeScreenDirty();
 			break;
 		}
 

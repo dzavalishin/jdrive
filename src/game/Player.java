@@ -798,9 +798,11 @@ public class Player
 		for (i = 0; i != Global.TOTAL_NUM_ENGINES; i++) {
 			final Engine e = Engine.GetEngine(i);
 
+			//final RailVehicleInfo info = Engine.RailVehInfo(i);
 			if (e.type == Vehicle.VEH_Train &&
 					(BitOps.HASBIT(e.player_avail, p.id) || e.intro_date <= Global._date) &&
-					0==(Engine.RailVehInfo(i).flags & Engine.RVI_WAGON)) {
+					0==(Engine.RailVehInfo(i).flags & Engine.RVI_WAGON)) 
+			{
 				assert(e.railtype < Rail.RAILTYPE_END);
 				rt = BitOps.RETSETBIT(rt, e.railtype);
 			}

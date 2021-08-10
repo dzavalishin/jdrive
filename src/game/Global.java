@@ -109,9 +109,9 @@ public class Global {
 	public static int _fullscreen_bpp;
 
 
-	public static int _map_log_x;
-	public static int _map_size_x;
-	public static int _map_size_y;
+	public static int _map_log_x = 6;
+	public static int _map_size_x = 64; // TODO XXX who inits it?
+	public static int _map_size_y = 64; // TODO XXX who inits it?
 	public static int _map_tile_mask;
 	public static int _map_size;
 
@@ -387,7 +387,7 @@ public class Global {
 	}
 
 	//public static Object[] _decode_parameters = new Object[20];
-	public static int[] _decode_parameters = new int[20];
+	public static Integer[] _decode_parameters = new Integer[20];
 
 
 	public static void SetDParam(int n, int v)

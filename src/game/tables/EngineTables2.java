@@ -443,7 +443,7 @@ public class EngineTables2
 	//#undef M
 
 	//final ShipVehicleInfo orig_ship_vehicle_info[NUM_SHIP_ENGINES] = {
-	final ShipVehicleInfo orig_ship_vehicle_info[] = {
+	public final static ShipVehicleInfo orig_ship_vehicle_info[] = {
 			// image_index  cargo_type     cargo_amount                 refittable
 			// |  base_cost |              |    running_cost            |
 			// |  |    max_speed           |    |    sfx                |
@@ -530,7 +530,7 @@ public class EngineTables2
 	
 	/* I hope I got the cargo types right, figuring out which is which for which
 	 * climate is a bitch */
-	final RoadVehicleInfo orig_road_vehicle_info[] = {
+	public static final RoadVehicleInfo orig_road_vehicle_info[] = {
 			// image_index       sfx                                 max_speed
 			// |    base_cost    |                                   |   capacity
 			// |    |    running_cost                                |   |  cargo_type

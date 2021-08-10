@@ -1708,7 +1708,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		do {
 			PlaceInitialIndustry(b[i+1], b[i+0]);
 			i += 2;
-		} while( i < b.length);
+		} while( i < b.length-1);
 		//while ( (b+=2)[0] != 0);
 	}
 

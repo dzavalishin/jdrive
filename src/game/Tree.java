@@ -240,7 +240,7 @@ public class Tree  extends TreeTables {
 		return (cost == 0) ? Cmd.CMD_ERROR : cost;
 	}
 
-	class TreeListEnt {
+	static class TreeListEnt {
 		int image;
 		byte x,y;
 	} 
@@ -278,11 +278,11 @@ public class Tree  extends TreeTables {
 			int tmp = ti.x;
 			int index;
 
-			tmp = BitOps.ROR(tmp, 2);
+			tmp = BitOps.ROR16(tmp, 2);
 			tmp -= ti.y;
-			tmp = BitOps.ROR(tmp, 3);
+			tmp = BitOps.ROR16(tmp, 3);
 			tmp -= ti.x;
-			tmp = BitOps.ROR(tmp, 1);
+			tmp = BitOps.ROR16(tmp, 1);
 			tmp += ti.y;
 
 			d = new ArrayPtr<Point>( _tree_layout_xy[BitOps.GB(tmp, 4, 2)] );
@@ -311,6 +311,7 @@ public class Tree  extends TreeTables {
 				int image = s.r() + (--i == 0 ? BitOps.GB(ti.map5, 0, 3) : 3);
 				if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS) ) 
 					image = Sprite.RET_MAKE_TRANSPARENT(image);
+				te[i] = new TreeListEnt();
 				te[i].image = image;
 				te[i].x = (byte) d.r().x;
 				te[i].y = (byte) d.r().y;

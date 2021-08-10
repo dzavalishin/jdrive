@@ -365,7 +365,14 @@ public class BitOps {
 	}
 
 	public static String stringFromBytes(byte[] b, int start, int len) {
-		return new String( b, start, len, StandardCharsets.ISO_8859_1 );
+		//return new String( b, start, len, StandardCharsets.ISO_8859_1 );
+		char [] ca = new char[len];
+		
+		// Verbatim!
+		for( int i = 0; i < len; i++)
+			ca[i] = (char) b[i+start];
+		
+		return new String( ca );
 	}
 
 	

@@ -1,5 +1,6 @@
 package game;
 
+import game.tables.EngineTables2;
 import game.util.FileIO;
 import game.util.LandscapeSprites;
 import game.util.Sprites;
@@ -403,6 +404,41 @@ public class GfxInit extends LandscapeSprites
 		load_index = Sprites.SPR_OPENTTD_BASE + OPENTTD_SPRITES_COUNT;
 
 		// TODO LoadNewGRF(load_index, i);
+		
+		// [dz] wrong place, but it was in LoadNewGRF for some reason. 
+		
+		//memcpy(&_engine_info, &orig_engine_info, sizeof(orig_engine_info));
+		//memcpy(&_rail_vehicle_info, &orig_rail_vehicle_info, sizeof(orig_rail_vehicle_info));
+		//memcpy(&_ship_vehicle_info, &orig_ship_vehicle_info, sizeof(orig_ship_vehicle_info));
+		//memcpy(&_aircraft_vehicle_info, &orig_aircraft_vehicle_info, sizeof(orig_aircraft_vehicle_info));
+		//memcpy(&_road_vehicle_info, &orig_road_vehicle_info, sizeof(orig_road_vehicle_info));
+
+		// TODO make deep copy??
+		
+		//Global._engine_info =  EngineTables2.orig_engine_info;
+		
+		//for( EngineInfo ei : EngineTables2.orig_engine_info )
+		
+		System.arraycopy(
+				EngineTables2.orig_engine_info, 0, 
+				Global._engine_info, 0, Global._engine_info.length );
+
+		System.arraycopy(
+				EngineTables2.orig_rail_vehicle_info , 0, 
+				Global._rail_vehicle_info, 0, Global._rail_vehicle_info.length );
+
+		System.arraycopy(
+				EngineTables2.orig_ship_vehicle_info, 0, 
+				Global._ship_vehicle_info, 0, Global._ship_vehicle_info.length );
+
+		System.arraycopy(
+				EngineTables2.orig_aircraft_vehicle_info, 0, 
+				Global._aircraft_vehicle_info, 0, Global._aircraft_vehicle_info.length );
+
+		System.arraycopy(
+				EngineTables2.orig_road_vehicle_info, 0, 
+				Global._road_vehicle_info, 0, Global._road_vehicle_info.length );
+		
 	}
 
 

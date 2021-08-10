@@ -60,37 +60,37 @@ public class Engine extends EngineTables {
 
 
 
-
+	/* in global!
 	static EngineInfo 			[] _engine_info = new EngineInfo[Global.TOTAL_NUM_ENGINES];
 	static RailVehicleInfo 		[] _rail_vehicle_info = new RailVehicleInfo[Global.NUM_TRAIN_ENGINES];
 	static ShipVehicleInfo 		[] _ship_vehicle_info = new ShipVehicleInfo[Global.NUM_SHIP_ENGINES];
 	static AircraftVehicleInfo 	[] _aircraft_vehicle_info = new AircraftVehicleInfo[Global.NUM_AIRCRAFT_ENGINES];
 	static RoadVehicleInfo 		[] _road_vehicle_info = new RoadVehicleInfo [Global.NUM_ROAD_ENGINES];
-
+	*/
 	
 	
 	static  final RailVehicleInfo  RailVehInfo(int e)
 	{
-		assert(e < _rail_vehicle_info.length);
-		return _rail_vehicle_info[e];
+		assert(e < Global._rail_vehicle_info.length);
+		return Global._rail_vehicle_info[e];
 	}
 
 	static  final ShipVehicleInfo  ShipVehInfo(int e ) //EngineID e)
 	{
-		assert(e >= Global.SHIP_ENGINES_INDEX && e < Global.SHIP_ENGINES_INDEX + _ship_vehicle_info.length);
-		return _ship_vehicle_info[e - Global.SHIP_ENGINES_INDEX];
+		assert(e >= Global.SHIP_ENGINES_INDEX && e < Global.SHIP_ENGINES_INDEX + Global._ship_vehicle_info.length);
+		return Global._ship_vehicle_info[e - Global.SHIP_ENGINES_INDEX];
 	}
 
 	static  final AircraftVehicleInfo  AircraftVehInfo(int e)
 	{
-		assert(e >= Global.AIRCRAFT_ENGINES_INDEX && e < Global.AIRCRAFT_ENGINES_INDEX + _aircraft_vehicle_info.length);
-		return _aircraft_vehicle_info[e - Global.AIRCRAFT_ENGINES_INDEX];
+		assert(e >= Global.AIRCRAFT_ENGINES_INDEX && e < Global.AIRCRAFT_ENGINES_INDEX + Global._aircraft_vehicle_info.length);
+		return Global._aircraft_vehicle_info[e - Global.AIRCRAFT_ENGINES_INDEX];
 	}
 
 	static  final RoadVehicleInfo  RoadVehInfo(int e)
 	{
-		assert(e >= Global.ROAD_ENGINES_INDEX && e < Global.ROAD_ENGINES_INDEX + _road_vehicle_info.length);
-		return _road_vehicle_info[e - Global.ROAD_ENGINES_INDEX];
+		assert(e >= Global.ROAD_ENGINES_INDEX && e < Global.ROAD_ENGINES_INDEX + Global._road_vehicle_info.length);
+		return Global._road_vehicle_info[e - Global.ROAD_ENGINES_INDEX];
 	}
 
 
@@ -196,9 +196,9 @@ public class Engine extends EngineTables {
 			final Engine e = Engine._engines[i];
 			
 			// TODO XXX must make copy!
-			_engine_info[i] = EngineTables2.orig_engine_info[i];
+			Global._engine_info[i] = EngineTables2.orig_engine_info[i];
 			
-			final EngineInfo ei= _engine_info[i];
+			final EngineInfo ei= Global._engine_info[i];
 
 			int r;
 
@@ -1265,7 +1265,7 @@ public class Engine extends EngineTables {
 		switch (e.event) {
 		case WE_PAINT: {
 			//EngineID engine = w.window_number;
-			int engine = w.window_number.n;
+			int engine = w.window_number;
 			DrawEngineInfo dei;
 			int width;
 
@@ -1298,7 +1298,7 @@ public class Engine extends EngineTables {
 				break;
 
 			case 4:
-				Cmd.DoCommandP( null, w.window_number.n, 0, null, Cmd.CMD_WANT_ENGINE_PREVIEW );
+				Cmd.DoCommandP( null, w.window_number, 0, null, Cmd.CMD_WANT_ENGINE_PREVIEW );
 				w.DeleteWindow();
 				break;
 			}
@@ -1321,7 +1321,7 @@ public class Engine extends EngineTables {
 		Window w;
 
 		w = Window.AllocateWindowDesc(_engine_preview_desc,0);
-		w.window_number = new WindowNumber( engine );
+		w.window_number = engine;
 	}
 
 	static void DrawTrainEngineInfo(int engine, int x, int y, int maxw)

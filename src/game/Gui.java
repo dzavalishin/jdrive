@@ -2337,7 +2337,7 @@ public class Gui
 			}
 
 			// Draw status bar
-			if (0 != w.message.msg) { // true when saving is active
+			if (w.message != null && 0 != w.message.msg) { // true when saving is active
 				Gfx.DrawStringCentered(320, 1, Str.STR_SAVING_GAME, 0);
 			} else if (Global._do_autosave) {
 				Gfx.DrawStringCentered(320, 1,	Str.STR_032F_AUTOSAVE, 0);

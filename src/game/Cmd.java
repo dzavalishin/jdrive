@@ -436,13 +436,18 @@ public class Cmd {
 		CommandProc proc;
 		int flags;
 		boolean notest;
+		int x = 0;
+		int y = 0;
 
-		int x = tile.TileX() * 16;
-		int y = tile.TileY() * 16;
-
+		if( tile != null)
+		{
+			x = tile.TileX() * 16;
+			y = tile.TileY() * 16;
+		}
+		
 		/* Do not even think about executing out-of-bounds tile-commands */
 		//if (tile.getTile() > Global.MapSize()) 
-		if (!tile.IsValidTile()) 
+		if (tile != null && !tile.IsValidTile()) 
 		{
 			Global._cmd_text = null;
 			return false;
@@ -617,7 +622,7 @@ public class Cmd {
 
 		if (null != callback) 
 			callback.accept(true, tile, p1, p2);
-		
+
 		{
 			Global._cmd_text = null;
 			return true;
@@ -634,7 +639,7 @@ public class Cmd {
 		if (null != callback) callback.accept(false, tile, p1, p2);
 		Global._cmd_text = null;
 		return false;
-		*/
+		 */
 	}
 
 	public static int return_cmd_error(int errcode) {

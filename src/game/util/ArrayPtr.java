@@ -153,7 +153,10 @@ public class ArrayPtr<ItemType> {
 		
 		public static Integer[] toIntegerArray(int [] iia) 
 		{
-			Integer[] ia = (Integer[]) Arrays.stream(iia).mapToObj( (iv) -> Integer.valueOf(iv) ).toArray();
+			//Integer[] ia = (Integer[]) Arrays.stream(iia).mapToObj( (iv) -> Integer.valueOf(iv) ).toArray();
+			Integer[] ia = new Integer[iia.length];
+			for( int i = 0; i < iia.length; i++)
+				ia[i] = iia[i];
 			return ia;
 		}
 		
