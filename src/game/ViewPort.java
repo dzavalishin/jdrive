@@ -1585,7 +1585,7 @@ public class ViewPort
 
 		if (top >= vp.virtual_height) return;
 
-		Hal.SetDirtyBlocks(
+		Gfx.SetDirtyBlocks(
 				(left >> vp.zoom) + vp.left,
 				(top >> vp.zoom) + vp.top,
 				(right >> vp.zoom) + vp.left,

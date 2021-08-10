@@ -348,7 +348,7 @@ public class NewsItem {
 			diff = Math.abs(w.top - y);
 			w.top = y;
 
-			Hal.SetDirtyBlocks(w.left, w.top - diff, w.left + w.width, w.top + w.height);
+			Gfx.SetDirtyBlocks(w.left, w.top - diff, w.left + w.width, w.top + w.height);
 		} break;
 		}
 	}

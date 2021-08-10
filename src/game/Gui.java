@@ -230,7 +230,7 @@ public class Gui
 	{
 		if (Global._networking && !Global._network_server) return; // only server can pause the game
 
-		if (Cmd.DoCommandP(null, Global._pause ? 0 : 1, 0, null, Cmd.CMD_PAUSE)) {
+		if (Cmd.DoCommandP(null, Global._pause != 0 ? 0 : 1, 0, null, Cmd.CMD_PAUSE)) {
 			// TODO SndPlayFx(SND_15_BEEP);
 		}
 	}
@@ -2047,7 +2047,7 @@ public class Gui
 		case WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
 
 		case WE_MOUSELOOP:
-			if (  (((w.click_state) & 1) != 0) != Global._pause) {
+			if (  ((w.click_state) & 1) != Global._pause) {
 				w.click_state ^= (1 << 0);
 				w.SetWindowDirty();
 			}
@@ -2244,7 +2244,7 @@ public class Gui
 		case WE_ON_EDIT_TEXT: HandleOnEditText(e); break;
 
 		case WE_MOUSELOOP:
-			if ( (((w.click_state) & 1) != 0) != Global._pause) {
+			if ( ((w.click_state) & 1) != Global._pause) {
 				w.click_state ^= (1 << 0);
 				w.SetWindowDirty();
 			}
@@ -2327,7 +2327,7 @@ public class Gui
 			w.DrawWindowWidgets();
 			Global.SetDParam(0, Global._date);
 			Gfx.DrawStringCentered(
-				70, 1, (Global._pause || Global._patches.status_long_date) ? Str.STR_00AF : Str.STR_00AE, 0
+				70, 1, (Global._pause != 0 || Global._patches.status_long_date) ? Str.STR_00AF : Str.STR_00AE, 0
 			);
 
 			if (p != null) {
@@ -2341,7 +2341,7 @@ public class Gui
 				Gfx.DrawStringCentered(320, 1, Str.STR_SAVING_GAME, 0);
 			} else if (Global._do_autosave) {
 				Gfx.DrawStringCentered(320, 1,	Str.STR_032F_AUTOSAVE, 0);
-			} else if (Global._pause) {
+			} else if (Global._pause != 0) {
 				Gfx.DrawStringCentered(320, 1,	Str.STR_0319_PAUSED, 0);
 			} else if (w.as_def_d().data_1 > -1280 && Window.FindWindowById(Window.WC_NEWS_WINDOW,0) == null && Global._statusbar_news_item.string_id != null) {
 				// Draw the scrolling news text
@@ -2373,7 +2373,7 @@ public class Gui
 			break;
 
 		case WE_TICK: {
-			if (Global._pause) return;
+			if (Global._pause != 0) return;
 
 			if (w.as_def_d().data_1 > -1280) { /* Scrolling text */
 				w.as_def_d().data_1 -= 2;

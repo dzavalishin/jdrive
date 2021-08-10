@@ -1976,7 +1976,7 @@ public class Gfx extends PaletteTabs
 				Hal._screen.dst_ptr.getDisplacement()+ Hal._cursor.draw_size.x + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch
 				);
 
-		Global.debug("cursor @%d.%d", Hal._cursor.pos.x, Hal._cursor.pos.y);		
+		//Global.debug("cursor @%d.%d", Hal._cursor.pos.x, Hal._cursor.pos.y);		
 		// Draw cursor on screen
 		Hal._cur_dpi = Hal._screen;
 		DrawSprite(Hal._cursor.sprite.id, Hal._cursor.pos.x, Hal._cursor.pos.y);
@@ -2066,7 +2066,7 @@ public class Gfx extends PaletteTabs
 					// Try coalescing to the right too.
 					h2 = (bottom - y) >> 3;
 					assert(h2 > 0);
-					p = b;
+					p = new Pixel(b);
 
 					while (right != w0) {
 						//byte *p2 = ++p;
@@ -2096,7 +2096,7 @@ public class Gfx extends PaletteTabs
 							right += 64;
 
 							h3 = h2;
-							p2 = p;
+							p2 = new Pixel( p );
 							do {
 								//*p2 = 0;
 								p2.w(0, (byte) 0);
@@ -2116,6 +2116,7 @@ public class Gfx extends PaletteTabs
 					if (bottom > Hal._invalid_rect.bottom) bottom = Hal._invalid_rect.bottom;
 
 					if (left < right && top < bottom) {
+						Global.debug("dirty paint l %4d t %3d r %4d b %3d",left, top, right, bottom);
 						RedrawScreenRect(left, top, right, bottom);
 					}
 
@@ -2134,7 +2135,7 @@ public class Gfx extends PaletteTabs
 	}
 
 	
-	void SetDirtyBlocks(int left, int top, int right, int bottom)
+	static void SetDirtyBlocks(int left, int top, int right, int bottom)
 	{
 		//byte *b;
 		int width;
@@ -2151,6 +2152,8 @@ public class Gfx extends PaletteTabs
 		if (top    < Hal._invalid_rect.top   ) Hal._invalid_rect.top    = top;
 		if (right  > Hal._invalid_rect.right ) Hal._invalid_rect.right  = right;
 		if (bottom > Hal._invalid_rect.bottom) Hal._invalid_rect.bottom = bottom;
+
+		Global.debug("dirty add   l %4d t %3d r %4d b %3d",left, top, right, bottom);
 
 		left >>= 6;
 		top  >>= 3;

@@ -403,7 +403,7 @@ public class Window extends WindowConstants
 
 	void SetWindowDirty()
 	{
-		Hal.SetDirtyBlocks(left, top, left + width, top + height);
+		Gfx.SetDirtyBlocks(left, top, left + width, top + height);
 	}
 
 	/*
@@ -524,7 +524,7 @@ public class Window extends WindowConstants
 	void SetWindowDirty(final Window  w)
 	{
 		if (w == null) return;
-		Global.hal.SetDirtyBlocks(w.left, w.top, w.left + w.width, w.top + w.height);
+		Gfx.SetDirtyBlocks(w.left, w.top, w.left + w.width, w.top + w.height);
 	}
 	 */
 	void DeleteWindow()
@@ -2103,7 +2103,7 @@ public class Window extends WindowConstants
 		/* Don't redraw the window if the widget is invisible or of no-type */
 		if (wi.type == WWT_EMPTY || BitOps.HASBIT(hidden_state, widget_index)) return;
 
-		Global.hal.SetDirtyBlocks(left + wi.left, top + wi.top, left + wi.right + 1, top + wi.bottom + 1);
+		Gfx.SetDirtyBlocks(left + wi.left, top + wi.top, left + wi.right + 1, top + wi.bottom + 1);
 	}
 
 	static void InvalidateWindowWidget(WindowClass cls, WindowNumber number, int widget_index)
@@ -2215,7 +2215,7 @@ public class Window extends WindowConstants
 		case 2:  w.left = Hal._screen.width - w.width; break;
 		default: w.left = 0;
 		}
-		Global.hal.SetDirtyBlocks(0, 0, Hal._screen.width, w.height); // invalidate the whole top part
+		Gfx.SetDirtyBlocks(0, 0, Hal._screen.width, w.height); // invalidate the whole top part
 		return w.left;
 	}
 
@@ -2716,8 +2716,9 @@ public class Window extends WindowConstants
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, FR_BORDERONLY);
 			Gfx.DrawFrameRect(r.left+1, r.top+1, r.right-1, r.bottom-1, wi.color, (caption_color == 0xFF) ? FR_LOWERED | FR_DARKENED : FR_LOWERED | FR_DARKENED | FR_BORDERONLY);
 
-			if (caption_color != 0xFF) {
-				Gfx.GfxFillRect(r.left+2, r.top+2, r.right-2, r.bottom-2, Global._color_list[Global._player_colors[caption_color]].window_color_1b);
+			if ( (caption_color & 0xFF) != 0xFF) {
+				byte pc = Global._player_colors[caption_color];
+				Gfx.GfxFillRect(r.left+2, r.top+2, r.right-2, r.bottom-2, Global._color_list[pc].window_color_1b);
 			}
 
 			Gfx.DrawStringCentered( (r.left+r.right+1)>>1, r.top+2, new StringID( wi.unkA ), 0x84);

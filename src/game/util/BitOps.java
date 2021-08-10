@@ -358,7 +358,9 @@ public class BitOps {
 
 	public static int READ_LE_UINT16(byte[] b, int shift) 
 	{
-		return (0xFF & (int)b[0+shift]) + (0xFF & (int)b[1+shift]) << 8;
+		int hi = (int)b[1+shift];
+		int lo = (int)b[0+shift];
+		return (0xFF & lo) + ((0xFF & hi) << 8);
 	}
 
 	

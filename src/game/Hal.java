@@ -24,7 +24,7 @@ public abstract class Hal
 
 	//HalVideoDriver _video_driver;
 
-
+	/*
 	static void SetDirtyBlocks(int left, int top, int right, int bottom)
 	{
 		//byte b[];
@@ -66,11 +66,11 @@ public abstract class Hal
 			b.madd( Gfx.DIRTY_BYTES_PER_LINE );
 		} while (--height != 0);
 	}
-
+	*/
 
 	static void MarkWholeScreenDirty()
 	{
-		SetDirtyBlocks(0, 0, _screen.width, _screen.height);
+		Gfx.SetDirtyBlocks(0, 0, _screen.width, _screen.height);
 	}
 
 	static boolean FillDrawPixelInfo(DrawPixelInfo n,  DrawPixelInfo o, int left, int top, int width, int height)
