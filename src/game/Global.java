@@ -221,7 +221,7 @@ public class Global {
 	// etc
 	// Skip aging of cargo?
 	public static int _age_cargo_skip_counter;
-	public static Point _tile_fract_coords; // TODO to ViewPort?
+	public static Point _tile_fract_coords = new Point(0,0); // TODO to ViewPort?
 	public static String _screenshot_name;
 	public static byte _vehicle_design_names;
 	public static int _get_z_hint;

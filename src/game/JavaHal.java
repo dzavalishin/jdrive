@@ -13,7 +13,7 @@ class JavaHal extends Hal
 {
 	MainWindow mw = null;
 	private static byte[] screen; // TODO static
-	
+
 	@Override
 	public void start_video(String parm) 
 	{
@@ -37,30 +37,30 @@ class JavaHal extends Hal
 
                 super.paint(g);
             }
-            */
-        };
-		
+			 */
+		};
+
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		//frame.setUndecorated(true);
 		//frame.setSize(600, 400);
 
 		//screen = new int[2048*2048]; // TODO scr size!
 		screen = new byte[2048*2048*4]; // TODO scr size!
-		
+
 		mw = new MainWindow(frame,screen);
-		
+
 		//frame.setSize(mw.getMapSizeX(), mw.getMapSizeY());
 		frame.setSize(1280+30, 1024);
-		
+
 		Dimension maximumSize = new Dimension(2560, 850);
 		frame.setMaximumSize(maximumSize);
-			
+
 		//frame.setIconImages(icons);
 		frame.setLayout(new FlowLayout(FlowLayout.LEADING));
 		//frame.add(new JLabel("--------------------"));
-		
+
 		frame.add(mw);
 		//frame.add(new JLabel("--------------------"));
 
@@ -69,9 +69,9 @@ class JavaHal extends Hal
 		//mw.setMaximumSize(new Dimension(MainWindow.WIDTH, MainWindow.HEIGHT));
 
 		frame.setVisible(true);
-		
+
 		mw.updateLocation();
-		
+
 		_screen.dst_ptr = new Pixel( screen );
 		_screen.height = MainWindow.HEIGHT;
 		_screen.width = MainWindow.WIDTH;
@@ -80,7 +80,7 @@ class JavaHal extends Hal
 		_screen.left = 0;
 		_screen.top = 0;
 		_screen.zoom = 0;
-		
+
 	}
 
 	@Override
@@ -153,21 +153,31 @@ class JavaHal extends Hal
 							(GetAsyncKeyState(VK_DOWN) < 0 ? 8 : 0);
 				} else
 					_dirkeys = 0;
-				*/
+			 */
+			//try {
 				Main.GameLoop();
-				_cursor.delta.x = _cursor.delta.y = 0;
+			/*} catch (Throwable e) {
+				e.printStackTrace();
+			}*/
 
-				// TODO return me if (Global._force_full_redraw)					
-					MarkWholeScreenDirty();
+			_cursor.delta.x = _cursor.delta.y = 0;
 
-				mw.flush();
-				
-				//GdiFlush();
-				//_screen.dst_ptr = _wnd.buffer_bits;
+			// TODO return me 
+			if (Global._force_full_redraw)					
+				MarkWholeScreenDirty();
+
+			mw.flush();
+
+			//GdiFlush();
+			//_screen.dst_ptr = _wnd.buffer_bits;
+			//try {
 				Window.UpdateWindows();
-				
-				checkPaletteAnim();
-				
+			/*} catch (Throwable e) {
+				e.printStackTrace();
+			}*/
+
+			checkPaletteAnim();
+
 			/*} else {
 				Sleep(1);
 				GdiFlush();

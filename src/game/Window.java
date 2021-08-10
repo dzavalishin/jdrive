@@ -304,7 +304,7 @@ public class Window extends WindowConstants
 
 
 	// delta between mouse cursor and upper left corner of dragged window
-	static Point _drag_delta;
+	static Point _drag_delta = new Point(0, 0);
 
 	void HandleButtonClick(int widget)
 	{

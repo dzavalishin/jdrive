@@ -62,6 +62,11 @@ public class IntroGui
 			Gfx.DrawString(283, 121, mapsizes[0], 0x10);
 			break;
 
+		case WE_KEYPRESS:
+			if( e.keycode == Window.WKC_RETURN )
+				MiscGui.AskForNewGameToStart(); 
+			break;
+			
 		case WE_CLICK:
 			switch (e.widget) {
 			case 2: MiscGui.AskForNewGameToStart(); break;
@@ -189,7 +194,7 @@ public class IntroGui
 	static final Widget _ask_quit_game_widgets[] = {
 	new Widget( Window.WWT_CLOSEBOX, Window.RESIZE_NONE,  4,   0,  10,   0,  13, Str.STR_00C5,           Str.STR_018B_CLOSE_WINDOW),
 	new Widget(  Window.WWT_CAPTION, Window.RESIZE_NONE,  4,  11, 179,   0,  13, Str.STR_0161_QUIT_GAME, Str.STR_NULL),
-	new Widget(   Window.WWT_IMGBTN, Window.RESIZE_NONE,  4,   0, 179,  14,  91, 0x0,                Str.STR_NULL),
+	new Widget(   Window.WWT_IMGBTN, Window.RESIZE_NONE,  4,   0, 179,  14,  91, 0x0,                	 Str.STR_NULL),
 	new Widget(  Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12,  25,  84,  72,  83, Str.STR_00C9_NO,        Str.STR_NULL),
 	new Widget(  Window.WWT_TEXTBTN, Window.RESIZE_NONE, 12,  95, 154,  72,  83, Str.STR_00C8_YES,       Str.STR_NULL),
 	};

@@ -197,7 +197,7 @@ public class TrainGui
 		switch(e.event) {
 		case WE_PAINT:
 
-			if (w.window_number == null)
+			if (w.window_number == 0) // [dz] was null - ok with 0?
 				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 5);
 
 			{
@@ -264,7 +264,7 @@ public class TrainGui
 				//EngineID 
 				int sel_eng = w.as_buildtrain_d().sel_engine;
 				if (sel_eng != Engine.INVALID_ENGINE)
-					Cmd.DoCommandP(TileIndex.get(w.window_number.n), sel_eng, 0, 
+					Cmd.DoCommandP(TileIndex.get(w.window_number), sel_eng, 0, 
 							0 != (Engine.RailVehInfo(sel_eng).flags & Engine.RVI_WAGON) ? TrainGui::CcBuildWagon : TrainGui::CcBuildLoco, Cmd.CMD_BUILD_RAIL_VEHICLE | Cmd.CMD_MSG(Str.STR_882B_CAN_T_BUILD_RAILROAD_VEHICLE));
 			}	break;
 			case 6: { /* rename */
@@ -280,7 +280,7 @@ public class TrainGui
 		} break;
 
 		case WE_4:
-			if (w.window_number.n != 0 && null == Window.FindWindowById(Window.WC_VEHICLE_DEPOT, w.window_number.n)) {
+			if (w.window_number != 0 && null == Window.FindWindowById(Window.WC_VEHICLE_DEPOT, w.window_number)) {
 				w.DeleteWindow();
 			}
 			break;
@@ -330,7 +330,7 @@ public class TrainGui
 		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.tile);
 
 		w = Window.AllocateWindowDesc(_new_rail_vehicle_desc);
-		w.window_number = new WindowNumber( tile.tile );
+		w.window_number = tile.tile;
 		w.vscroll.cap = 8;
 		w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
 
@@ -387,7 +387,7 @@ public class TrainGui
 		int num,x,y,i, hnum;
 		Depot depot;
 
-		TileIndex tile = new TileIndex( w.window_number.n );
+		TileIndex tile = new TileIndex( w.window_number );
 
 		/* setup disabled buttons */
 		w.disabled_state =
@@ -531,7 +531,7 @@ public class TrainGui
 			Vehicle v = ii.next();
 			if (v.type == Vehicle.VEH_Train &&
 					v.IsFrontEngine() &&
-					v.tile.tile == w.window_number.n &&
+					v.tile.tile == w.window_number &&
 					v.rail.track == 0x80 &&
 					--row < 0) {
 						skip = w.hscroll.pos;
@@ -550,7 +550,7 @@ public class TrainGui
 			Vehicle v = ii.next();
 			if (v.type == Vehicle.VEH_Train &&
 					v.IsFreeWagon() &&
-					v.tile.tile == w.window_number.n &&
+					v.tile.tile == w.window_number &&
 					v.rail.track == 0x80 &&
 					--row < 0)
 			{
@@ -670,7 +670,7 @@ public class TrainGui
 			if (!v.IsFrontEngine()) return;
 		}
 
-		Cmd.DoCommandP( TileIndex.get( w.window_number.n ), v.index, Global._ctrl_pressed ? 1 : 0, TrainGui::CcCloneTrain,
+		Cmd.DoCommandP( TileIndex.get( w.window_number ), v.index, Global._ctrl_pressed ? 1 : 0, TrainGui::CcCloneTrain,
 			Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_882B_CAN_T_BUILD_RAILROAD_VEHICLE)
 		);
 
@@ -695,11 +695,11 @@ public class TrainGui
 			switch(e.widget) {
 			case 8:
 				ViewPort.ResetObjectToPlace();
-				ShowBuildTrainWindow(TileIndex.get(w.window_number.n));
+				ShowBuildTrainWindow(TileIndex.get(w.window_number));
 				break;
 			case 10:
 				ViewPort.ResetObjectToPlace();
-				ViewPort.ScrollMainWindowToTile(new TileIndex(w.window_number.n) );
+				ViewPort.ScrollMainWindowToTile(new TileIndex(w.window_number) );
 				break;
 			case 6:
 				TrainDepotClickTrain(w, e.pt.x, e.pt.y);
@@ -741,7 +741,7 @@ public class TrainGui
 
 
 		case WE_DESTROY:
-			Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, w.window_number.n);
+			Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, w.window_number);
 			break;
 
 		case WE_DRAGDROP: {
@@ -845,7 +845,7 @@ public class TrainGui
 
 		w = Window.AllocateWindowDescFront(_train_depot_desc, tile.tile);
 		if (null != w) {
-			TileIndex wt = TileIndex.get(w.window_number.n);
+			TileIndex wt = TileIndex.get(w.window_number);
 		
 			w.caption_color = (byte) wt.GetTileOwner().id;
 			w.vscroll.cap = 6;
@@ -861,7 +861,7 @@ public class TrainGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+			final Vehicle v = Vehicle.GetVehicle(w.window_number);
 
 			Global.SetDParam(0, v.string_id);
 			Global.SetDParam(1, v.unitnumber.id);
@@ -894,7 +894,7 @@ public class TrainGui
 			} break;
 			case 4: /* refit button */
 				if (w.as_refit_d().cargo != AcceptedCargo.CT_INVALID) {
-					final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+					final Vehicle v = Vehicle.GetVehicle(w.window_number);
 					if (Cmd.DoCommandP(v.tile, v.index, w.as_refit_d().cargo, null, Cmd.CMD_REFIT_RAIL_VEHICLE | Cmd.CMD_MSG(Str.STR_RAIL_CAN_T_REFIT_VEHICLE)))
 						w.DeleteWindow();
 				}
@@ -927,7 +927,7 @@ public class TrainGui
 		Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, v.index);
 		//Global._alloc_wnd_parent_num = v.index;
 		w = Window.AllocateWindowDesc(_rail_vehicle_refit_desc, v.index);
-		w.window_number = new WindowNumber(v.index);
+		w.window_number = v.index;
 		w.caption_color = (byte) v.owner.id;
 		w.as_refit_d().sel = -1;
 	}
@@ -961,7 +961,7 @@ public class TrainGui
 			//StringID 
 			int str;
 
-			v = Vehicle.GetVehicle(w.window_number.n);
+			v = Vehicle.GetVehicle(w.window_number);
 
 			w.disabled_state = (v.owner == Global._local_player) ? 0 : 0x380;
 
@@ -1040,7 +1040,7 @@ public class TrainGui
 
 		case WE_CLICK: {
 			int wid = e.widget;
-			Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+			Vehicle v = Vehicle.GetVehicle(w.window_number);
 
 			switch(wid) {
 			case 5: /* start/stop train */
@@ -1082,16 +1082,16 @@ public class TrainGui
 			break;
 
 		case WE_DESTROY:
-			Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, w.window_number.n);
-			Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, w.window_number.n);
-			Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, w.window_number.n);
+			Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, w.window_number);
+			Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, w.window_number);
+			Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, w.window_number);
 			break;
 
 		case WE_MOUSELOOP: {
 			Vehicle v;
 			int h;
 
-			v = Vehicle.GetVehicle(w.window_number.n);
+			v = Vehicle.GetVehicle(w.window_number);
 			assert(v.type == Vehicle.VEH_Train);
 			h = TrainCmd.CheckTrainStoppedInDepot(v) >= 0 ? (1 << 9)| (1 << 7) : (1 << 12) | (1 << 13);
 			if (h != w.hidden_state) {
@@ -1118,7 +1118,7 @@ public class TrainGui
 
 		if (w != null) {
 			w.caption_color = (byte) v.owner.id;
-			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x66, w.window_number.n | (1 << 31), 0);
+			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x66, w.window_number | (1 << 31), 0);
 		}
 	}
 
@@ -1188,7 +1188,7 @@ public class TrainGui
 		// TOD it's clear! if (det_tab == 3)	// reset tot_cargo array to 0 values
 		//	memset(tot_cargo, 0, sizeof(tot_cargo));
 
-		u = v = Vehicle.GetVehicle(w.window_number.n);
+		u = v = Vehicle.GetVehicle(w.window_number);
 		do {
 			if (det_tab != 3)
 				num++;
@@ -1299,7 +1299,7 @@ public class TrainGui
 			final Vehicle v;
 			switch (e.widget) {
 			case 2: /* name train */
-				v = Vehicle.GetVehicle(w.window_number.n);
+				v = Vehicle.GetVehicle(w.window_number);
 				Global.SetDParam(0, v.unitnumber.id);
 				MiscGui.ShowQueryString( new StringID( v.string_id ), new StringID( Str.STR_8865_NAME_TRAIN ), 31, 150, w.window_class, w.window_number);
 				break;
@@ -1327,7 +1327,7 @@ public class TrainGui
 				else // 7
 					mod = Global._ctrl_pressed? -5 : -10;
 				
-				v = Vehicle.GetVehicle(w.window_number.n);
+				v = Vehicle.GetVehicle(w.window_number);
 
 				mod = Depot.GetServiceIntervalClamped(mod + v.service_interval);
 				if (mod == v.service_interval) return;
@@ -1352,14 +1352,14 @@ public class TrainGui
 		} break;
 
 		case WE_4:
-			if (Window.FindWindowById(Window.WC_VEHICLE_VIEW, w.window_number.n) == null)
+			if (Window.FindWindowById(Window.WC_VEHICLE_VIEW, w.window_number) == null)
 				w.DeleteWindow();
 			break;
 
 		case WE_ON_EDIT_TEXT:
 			if (e.str != null) {
 				Global._cmd_text = e.str;
-				Cmd.DoCommandP(null, w.window_number.n, 0, null,
+				Cmd.DoCommandP(null, w.window_number, 0, null,
 					Cmd.CMD_NAME_VEHICLE | Cmd.CMD_MSG(Str.STR_8866_CAN_T_NAME_TRAIN));
 			}
 			break;
@@ -1405,7 +1405,7 @@ public class TrainGui
 		//Window._alloc_wnd_parent_num = veh;
 		w = Window.AllocateWindowDesc(_train_details_desc, veh);
 
-		w.window_number = new WindowNumber( veh );
+		w.window_number = veh;
 		w.caption_color = (byte) v.owner.id;
 		w.vscroll.cap = 6;
 		w.as_traindetails_d().tab = 0;
@@ -1446,9 +1446,9 @@ public class TrainGui
 	static void PlayerTrainsWndProc(Window w, WindowEvent e)
 	{
 		//StationID 
-		int station = BitOps.GB(w.window_number.n, 16, 16);
+		int station = BitOps.GB(w.window_number, 16, 16);
 		//PlayerID 
-		int owner = BitOps.GB(w.window_number.n, 0, 8);
+		int owner = BitOps.GB(w.window_number, 0, 8);
 		vehiclelist_d vl = w.as_vehiclelist_d();
 
 		switch(e.event) {

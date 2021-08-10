@@ -2598,7 +2598,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		/* Create array for sorting */
 		//_industry_sort = realloc(_industry_sort, GetIndustryPoolSize() * sizeof(_industry_sort[0]));
-		_industry_sort = (Industry[]) _industry_pool.pool.values().toArray();
+		_industry_sort = (Industry[]) _industry_pool.pool.values().toArray(Industry[]::new);
 
 		if (_industry_sort == null)
 			Global.error("Could not allocate memory for the industry-sorting-list");

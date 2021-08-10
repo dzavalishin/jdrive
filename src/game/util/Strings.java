@@ -615,10 +615,10 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		int stri = 0;
 		char[] str = pstr.toCharArray();
 
-		while ((b = (byte) str[stri++]) != '\0' && stri < str.length) {
+		while ( stri < str.length && (b = (byte) str[stri++]) != '\0') {
 			switch ((int)b) {
 			case 0x1: // {SETX}
-				buff.append( b );
+				buff.append( (char)b );
 				buff.append( str[stri++] );
 				break;
 			case 0x2: // {SETXY}
