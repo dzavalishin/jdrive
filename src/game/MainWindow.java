@@ -102,7 +102,7 @@ public class MainWindow extends JPanel implements ActionListener
 			@Override
 			public void mouseMoved(MouseEvent e) 
 			{
-				int x = e.getX();
+				int x = e.getX(); 
 				int y = e.getY();
 				
 				if (Hal._cursor.fix_at) {
@@ -285,7 +285,7 @@ public class MainWindow extends JPanel implements ActionListener
 
 
 
-
+	static int startX = 0;
 
 	public void paint(Graphics g) 
 	{
@@ -353,9 +353,14 @@ public class MainWindow extends JPanel implements ActionListener
 		BufferedImage image = new BufferedImage(cm, wr, false, null);
 
 		 */
-
-
-		BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
+		/*
+		for(int i = 0; i < 100; i++)
+			screen[5000+i+startX] = (byte) 0xFF;
+		startX++;
+		*/
+		
+		//BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
+		BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_BYTE_INDEXED);
 		image.setData(Raster.createRaster(image.getSampleModel(), new DataBufferByte(screen, screen.length), new java.awt.Point(0,0) ) );
 
 		g.drawImage(image, 0, 0, getBackground(), null);
@@ -377,7 +382,8 @@ public class MainWindow extends JPanel implements ActionListener
 		//if( Math.random() < 0.05 ) RandomImageParticle.emitGlassJunkForTile(s.getOverlay(), 100, 200, 100);
 
 
-		repaint();
+		//repaint();
+		//frame.repaint();
 
 
 		//processTimerStop();
@@ -388,6 +394,7 @@ public class MainWindow extends JPanel implements ActionListener
 
 	public void flush() {
 		repaint();		
+		frame.repaint();
 	}
 
 

@@ -1960,7 +1960,8 @@ public class Gfx extends PaletteTabs
 
 		assert(w * h < _cursor_backup.length);
 
-		// Make backup of stuff below cursor
+		// TODO Wrong memcpy_pitch, replace 
+		//Make backup of stuff below cursor
 		memcpy_pitch(
 				_cursor_backup,
 				//Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
@@ -1975,6 +1976,7 @@ public class Gfx extends PaletteTabs
 				Hal._screen.dst_ptr.getDisplacement()+ Hal._cursor.draw_size.x + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch
 				);
 
+		Global.debug("cursor @%d.%d", Hal._cursor.pos.x, Hal._cursor.pos.y);		
 		// Draw cursor on screen
 		Hal._cur_dpi = Hal._screen;
 		DrawSprite(Hal._cursor.sprite.id, Hal._cursor.pos.x, Hal._cursor.pos.y);

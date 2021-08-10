@@ -12,7 +12,7 @@ import game.util.Pixel;
 class JavaHal extends Hal
 {
 	MainWindow mw = null;
-	private byte[] screen;
+	private static byte[] screen; // TODO static
 	
 	@Override
 	public void start_video(String parm) 
@@ -73,7 +73,8 @@ class JavaHal extends Hal
 		_screen.dst_ptr = new Pixel( screen );
 		_screen.height = MainWindow.HEIGHT;
 		_screen.width = MainWindow.WIDTH;
-		_screen.pitch = MainWindow.WIDTH * 3;
+		//_screen.pitch = MainWindow.WIDTH * 3;
+		_screen.pitch = MainWindow.WIDTH * 1;
 		_screen.left = 0;
 		_screen.top = 0;
 		_screen.zoom = 0;
@@ -88,8 +89,7 @@ class JavaHal extends Hal
 
 	@Override
 	public void make_dirty(int left, int top, int width, int height) {
-		// TODO Auto-generated method stub
-
+		mw.repaint(left, top, width, height);
 	}
 
 	@Override
@@ -154,7 +154,7 @@ class JavaHal extends Hal
 				Main.GameLoop();
 				_cursor.delta.x = _cursor.delta.y = 0;
 
-				if (Global._force_full_redraw)					
+				// TODO return me if (Global._force_full_redraw)					
 					MarkWholeScreenDirty();
 
 				mw.flush();
