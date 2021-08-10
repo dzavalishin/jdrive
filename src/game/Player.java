@@ -462,36 +462,38 @@ public class Player
 
 		t = Town.ClosestTownFromTile(tile, (int)-1);
 
-		if (!BitOps.IS_INT_INSIDE(t.townnametype, Strings.SPECSTR_TOWNNAME_START, Strings.SPECSTR_TOWNNAME_LAST+1)) 
+		if (BitOps.IS_INT_INSIDE(t.townnametype, Strings.SPECSTR_TOWNNAME_START, Strings.SPECSTR_TOWNNAME_LAST+1)) 
 		{
-			goto bad_town_name;
+			str = new StringID( t.townnametype - Strings.SPECSTR_TOWNNAME_START + Strings.SPECSTR_PLAYERNAME_START );
+			strp = t.townnameparts;
+
+			//verify_name:;
+
+			if( GenerateCompanyName_verify_name(str, strp) )
+			{
+				GenerateCompanyName_set_name(p, t, str, strp);
+				return;
+			}
 		}
-		
-		str = new StringID( t.townnametype - Strings.SPECSTR_TOWNNAME_START + Strings.SPECSTR_PLAYERNAME_START );
-		strp = t.townnameparts;
 
-		verify_name:;
-
-		if( !GenerateCompanyName_verify_name(str, strp) )
+		while(true)
 		{
-			goto bad_town_name;
+			if (president_name_1 == Strings.SPECSTR_PRESIDENT_NAME) {
+				str = new StringID( Strings.SPECSTR_ANDCO_NAME );
+				strp = president_name_2;
+				GenerateCompanyName_set_name(p, t, str, strp);
+				return;
+			} else {
+				str = new StringID( Strings.SPECSTR_ANDCO_NAME );
+				strp = Hal.Random();
+				if( GenerateCompanyName_verify_name(str, strp) )
+				{
+					GenerateCompanyName_set_name(p, t, str, strp);
+					return;
+				}
+			}
 		}
 
-		GenerateCompanyName_set_name(p, t, str, strp);
-		return;
-
-		bad_town_name:;
-
-		if (president_name_1 == Strings.SPECSTR_PRESIDENT_NAME) {
-			str = new StringID( Strings.SPECSTR_ANDCO_NAME );
-			strp = president_name_2;
-			GenerateCompanyName_set_name(p, t, str, strp);
-			return;
-		} else {
-			str = new StringID( Strings.SPECSTR_ANDCO_NAME );
-			strp = Hal.Random();
-			goto verify_name;
-		}
 	}
 
 
@@ -587,7 +589,7 @@ public class Player
 			if (buffer.length() >= 32 || Gfx.GetStringWidth(buffer) >= 94)
 				continue;
 			boolean restart = false;
-			
+
 			//FOR_ALL_PLAYERS(pp)
 			//Player.forEach( (pp) ->
 			Iterator<Player> ii = Player.getIterator();
@@ -604,7 +606,7 @@ public class Player
 					}
 				}
 			}
-			
+
 			if( restart ) continue;
 			return;
 		}
@@ -752,14 +754,14 @@ public class Player
 			{
 				//memmove(p.yearly_expenses[1], p.yearly_expenses[0], sizeof(p.yearly_expenses) - sizeof(p.yearly_expenses[0]));
 				//memset(p.yearly_expenses[0], 0, sizeof(p.yearly_expenses[0]));
-				
+
 				System.arraycopy(
 						p.yearly_expenses, 0, 
 						p.yearly_expenses, 1, 
 						p.yearly_expenses.length - 1);
-				
+
 				p.yearly_expenses[0] = new long[13]; // TODO 3? 
-				
+
 				Window.InvalidateWindow(Window.WC_FINANCES, p.index.id);
 			}
 		}
@@ -1352,7 +1354,7 @@ public class Player
 			p.accept(i.next());
 	}
 
-	
+
 	/* Validate functions for rail building */
 	static boolean ValParamRailtype(int rail) 
 	{ 
@@ -1361,13 +1363,13 @@ public class Player
 
 
 	/** Finds out if a Player has a certain railtype available
-	  */
+	 */
 	public boolean HasRailtypeAvail(int railtype) 
 	{
-			return BitOps.HASBIT(avail_railtypes, railtype);
+		return BitOps.HASBIT(avail_railtypes, railtype);
 	}
 
-	
+
 	/*
 // Save/load of players
 static final SaveLoad _player_desc[] = {
