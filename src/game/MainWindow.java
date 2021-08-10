@@ -3,6 +3,7 @@ package game;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -35,7 +36,7 @@ public class MainWindow extends JPanel implements ActionListener
 	private Timer timer = new Timer(TICK_TIME, this);	
 	private JFrame frame;
 	private byte[] screen;
-
+	private Point myLocation;
 
 	/*
 	public static final java.awt.Font bigMessageFont;
@@ -51,6 +52,7 @@ public class MainWindow extends JPanel implements ActionListener
 		this.frame = frame;
 		this.screen = screen2;
 
+		myLocation = getLocation();
 
 		//setSize(WIDTH, HEIGHT);
 		//setMinimumSize(new Dimension(WIDTH, HEIGHT));
@@ -58,6 +60,7 @@ public class MainWindow extends JPanel implements ActionListener
 
 
 		frame.addKeyListener(new KeyListener() {		
+		//this.addKeyListener(new KeyListener() {		
 			@Override
 			public void keyTyped(KeyEvent e) { }
 
@@ -69,7 +72,9 @@ public class MainWindow extends JPanel implements ActionListener
 		});
 
 
-		frame.addMouseListener( new MouseListener() {
+		frame.addMouseListener( new MouseListener() 
+		//this.addMouseListener( new MouseListener() 
+		{
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -99,13 +104,20 @@ public class MainWindow extends JPanel implements ActionListener
 
 		});
 
-		frame.addMouseMotionListener( new MouseMotionListener() {
+		frame.addMouseMotionListener( new MouseMotionListener() 
+		//this.addMouseMotionListener( new MouseMotionListener() 
+		{
 
 			@Override
 			public void mouseMoved(MouseEvent e) 
 			{
 				int x = e.getX(); 
 				int y = e.getY();
+				
+				
+				// TODO hack
+				x -= 10; //myLocation.x;
+				y -= 30; //myLocation.y;
 
 				if (Hal._cursor.fix_at) {
 					int dx = x - Hal._cursor.pos.x;
@@ -147,6 +159,11 @@ public class MainWindow extends JPanel implements ActionListener
 	}
 
 
+	public void updateLocation()
+	{
+		myLocation = getLocation();
+	}
+	
 	@Override
 	public int getHeight() {
 		return HEIGHT;

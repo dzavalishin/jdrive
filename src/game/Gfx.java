@@ -522,7 +522,7 @@ public class Gfx extends PaletteTabs
 		int num = 0;
 		int base = _stringwidth_base;
 		int w;
-		String last_space;
+		int last_space;
 		char c;
 
 		char sc[] = str.toCharArray();
@@ -530,22 +530,25 @@ public class Gfx extends PaletteTabs
 
 		for(;;) {
 			w = 0;
-			last_space = null;
+			last_space = 0;
 
 			for(;;) {
+				if (sp >= sc.length) 
+					return num + (base << 16);
+				
 				c = sc[sp++]; // *str++;
-				if (c == ASCII_LETTERSTART) last_space = str;
+				if (c == ASCII_LETTERSTART) last_space = sp;
 
 				if (c >= ASCII_LETTERSTART) {
 					w += GetCharacterWidth(base + (byte)c);
 					if (w > maxw) {
-						str = last_space;
-						if (str == null)
+						sp = last_space;
+						if(sp >= sc.length || sc[sp] == 0)   // (str == null)
 							return num + (base << 16);
 						break;
 					}
 				} else {
-					if (c == 0) return num + (base << 16);
+					if (sp >= sc.length || c == 0) return num + (base << 16);
 					if (c == ASCII_NL) break;
 
 					if (c == ASCII_SETX) sp++;
@@ -557,6 +560,7 @@ public class Gfx extends PaletteTabs
 
 			num++;
 			//str[-1] = '\0'; TODO why?
+			sc[sp-1] = 0;
 		}
 	}
 
@@ -592,6 +596,9 @@ public class Gfx extends PaletteTabs
 			_stringwidth_base = _stringwidth_out;
 
 			for(;;) {
+				if(sp >= sc.length)
+					return;
+				
 				c = sc[sp++]; // *src++;
 				if (c == 0) {
 					y += mt;
@@ -1890,6 +1897,9 @@ public class Gfx extends PaletteTabs
 
 	static int GetCharacterWidth(int key)
 	{
+		// TODO XXX
+		if( ! (key >= ASCII_LETTERSTART && key - ASCII_LETTERSTART < _stringwidth_table.length))
+			return 15; // TEMP! to prevent assert
 		assert(key >= ASCII_LETTERSTART && key - ASCII_LETTERSTART < _stringwidth_table.length);
 		return _stringwidth_table[key - ASCII_LETTERSTART];
 	}

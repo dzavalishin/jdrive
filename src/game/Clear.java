@@ -5,7 +5,7 @@ import game.util.BitOps;
 // clear_cmd.c
 public class Clear extends ClearTables {
 
-	class TerraformerHeightMod {
+	static class TerraformerHeightMod {
 		TileIndex tile;
 		byte height;
 	} 
@@ -195,6 +195,7 @@ public class Clear extends ClearTables {
 			count--;
 		}
 
+		ts.modheight[i] = new TerraformerHeightMod();
 		ts.modheight[i].tile = tile;
 		ts.modheight[i].height = (byte)height;
 

@@ -215,7 +215,7 @@ public class PlayerGui
 		mode = BitOps.b2i(player != Global._local_player.id) * 2 + BitOps.b2i(show_small);
 		w = Window.AllocateWindowDescFront(desc_table[mode], player);
 		if (w != null) {
-			w.caption_color = (byte) w.window_number.n;
+			w.caption_color = (byte) w.window_number;
 			w.as_def_d().data_1 = mode;
 			if (show_stickied) {
 				w.flags4 |= Window.WF_STICKY;

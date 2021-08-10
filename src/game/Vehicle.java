@@ -162,7 +162,7 @@ public class Vehicle implements IPoolItem
 		string_id = 0;
 
 		unitnumber = null;
-		owner = null;
+		owner = PlayerID.get(-1); // TODO value?
 
 		tile = null;	
 		dest_tile = null;
@@ -254,7 +254,9 @@ public class Vehicle implements IPoolItem
 		index = indexc;
 	}
 
-
+	public Vehicle() {
+		InitializeVehicle();
+	}
 
 
 	public static final int VEH_Train = 0x10;
@@ -1569,18 +1571,18 @@ public class Vehicle implements IPoolItem
 					//while(veh.id != INVALID_VEHICLE) 
 					if( veh != null )
 					{
-					v = GetVehicle(veh);
-					// TODO XXX we keep one veh per hash point! Fix!
+						v = GetVehicle(veh);
+						// TODO XXX we keep one veh per hash point! Fix!
 
-					if( v != null &&
-							0 != (v.vehstatus & VS_HIDDEN) &&
-							dpi.left <= v.right_coord &&
-							dpi.top <= v.bottom_coord &&
-							dpi.left + dpi.width >= v.left_coord &&
-							dpi.top + dpi.height >= v.top_coord) {
-						DoDrawVehicle(v);
-					}
-					//	veh = v.next_hash;
+						if( v != null &&
+								0 != (v.vehstatus & VS_HIDDEN) &&
+								dpi.left <= v.right_coord &&
+								dpi.top <= v.bottom_coord &&
+								dpi.left + dpi.width >= v.left_coord &&
+								dpi.top + dpi.height >= v.top_coord) {
+							DoDrawVehicle(v);
+						}
+						//	veh = v.next_hash;
 					}
 
 					if (x == x2)

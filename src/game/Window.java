@@ -193,13 +193,19 @@ public class Window extends WindowConstants
 	
 	highscore_d as_highscore_d() { return (highscore_d) custom; }
 	
-	menu_d as_menu_d() { return (menu_d) custom; }
+	menu_d as_menu_d() { 
+		if(custom==null) custom = new menu_d(); 
+		return (menu_d) custom; 
+		}
 	
 	message_d as_message_d() { return (message_d) custom; }
 	
 	news_d as_news_d() { return (news_d) custom; }
 	
-	order_d as_order_d() { return (order_d) custom; }
+	order_d as_order_d() { 
+		if(custom==null) custom = new order_d(); 
+		return (order_d) custom; 
+		}
 	
 	plstations_d as_plstations_d() { return (plstations_d) custom; }
 	
@@ -930,7 +936,7 @@ public class Window extends WindowConstants
 
 
 
-	static SizeRect _awap_r;
+	static SizeRect _awap_r = new SizeRect();
 
 	static boolean IsGoodAutoPlace1(int left, int top)
 	{

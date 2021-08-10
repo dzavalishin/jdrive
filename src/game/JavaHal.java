@@ -70,6 +70,8 @@ class JavaHal extends Hal
 
 		frame.setVisible(true);
 		
+		mw.updateLocation();
+		
 		_screen.dst_ptr = new Pixel( screen );
 		_screen.height = MainWindow.HEIGHT;
 		_screen.width = MainWindow.WIDTH;
