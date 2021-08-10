@@ -986,8 +986,8 @@ public class MiscGui {
 			w.DeleteWindow();
 		} else {
 			char[] buf = w.as_querystr_d().text.buf;
-			WindowClass wnd_class = w.as_querystr_d().wnd_class;
-			WindowNumber wnd_num = w.as_querystr_d().wnd_num;
+			int wnd_class = w.as_querystr_d().wnd_class;
+			int wnd_num = w.as_querystr_d().wnd_num;
 			Window parent;
 
 			// Mask the edit-box as closed, so we don't send out a CANCEL
@@ -1092,16 +1092,16 @@ public class MiscGui {
 
 	static void ShowQueryString(int str, int caption, int maxlen, int maxwidth, int window_class, int window_number)
 	{
-		ShowQueryString( new StringID(str), new StringID(caption), maxlen, maxwidth, new WindowClass( window_class ), new WindowNumber(window_number) );
+		ShowQueryString( new StringID(str), new StringID(caption), maxlen, maxwidth, window_class, window_number );
 	}	
 
 	
-	static void ShowQueryString(StringID str, StringID caption, int maxlen, int maxwidth, int window_class, int window_number)
+	/*static void ShowQueryString(StringID str, StringID caption, int maxlen, int maxwidth, int window_class, int window_number)
 	{
 		ShowQueryString( str, caption, maxlen, maxwidth, new WindowClass( window_class ), new WindowNumber(window_number) );
-	}	
+	}*/	
 
-	static void ShowQueryString(StringID str, StringID caption, int maxlen, int maxwidth, WindowClass window_class, WindowNumber window_number)
+	static void ShowQueryString(StringID str, StringID caption, int maxlen, int maxwidth, int window_class, int window_number)
 	{
 		Window w;
 		int realmaxlen = maxlen & ~0x1000;

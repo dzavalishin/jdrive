@@ -209,7 +209,7 @@ public class Gui
 			return false;
 		}
 
-		ViewPort.SetObjectToPlace(cursor, mode, w.window_class.v, w.window_number.n);
+		ViewPort.SetObjectToPlace(cursor, mode, w.window_class, w.window_number);
 		w.click_state |= mask;
 		Global._place_proc = placeproc;
 		return true;
@@ -442,7 +442,7 @@ public class Gui
 	{
 		_rename_id = ss.index;
 		_rename_what = 0;
-		MiscGui.ShowQueryString(ss.str, new StringID( Str.STR_280B_EDIT_SIGN_TEXT ), 30, 180, new WindowClass(1) , new WindowNumber(0) );
+		MiscGui.ShowQueryString(ss.str, new StringID( Str.STR_280B_EDIT_SIGN_TEXT ), 30, 180, 1 , 0 );
 	}
 
 	static void ShowRenameWaypointWindow(final WayPoint wp)
@@ -985,13 +985,13 @@ public class Gui
 		{
 			Window wt = null;
 
-			switch (w.window_class.v) {
+			switch (w.window_class) {
 				case Window.WC_MAIN_WINDOW:
 					wt = Window.FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
 					break;
 
 				case Window.WC_EXTRA_VIEW_PORT:
-					wt = Window.FindWindowById(Window.WC_EXTRA_VIEW_PORT, w.window_number.n);
+					wt = Window.FindWindowById(Window.WC_EXTRA_VIEW_PORT, w.window_number);
 					button = 5;
 					break;
 			}
@@ -1187,7 +1187,7 @@ public class Gui
 	// Ask first to reset landscape or to make a random landscape
 	static void AskResetLandscapeWndProc(Window w, WindowEvent e)
 	{
-		int mode = w.window_number.n;
+		int mode = w.window_number;
 
 		switch (e.event) {
 		case WE_PAINT:

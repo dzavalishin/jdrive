@@ -99,7 +99,7 @@ public abstract class TownGui extends Town
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Town t = GetTown(w.window_number.n);
+			final Town t = GetTown(w.window_number);
 			int [] numact = {0};
 			int buttons = GetMaskOfTownActions(numact, Global._local_player, t);
 
@@ -117,7 +117,7 @@ public abstract class TownGui extends Town
 				//int r;
 				//int str;
 
-				Global.SetDParam(0, w.window_number.n);
+				Global.SetDParam(0, w.window_number);
 				w.DrawWindowWidgets();
 
 				Gfx.DrawString(2, 15, Str.STR_2023_TRANSPORT_COMPANY_RATINGS, 0);
@@ -198,7 +198,7 @@ public abstract class TownGui extends Town
 		case WE_CLICK:
 			switch (e.widget) {
 			case 3: { /* listbox */
-				final Town t = GetTown(w.window_number.n);
+				final Town t = GetTown(w.window_number);
 				int y = (e.pt.y - 0x6B) / 10;
 
 				if (!BitOps.IS_INT_INSIDE(y, 0, 5)) return;
@@ -212,7 +212,7 @@ public abstract class TownGui extends Town
 			}
 
 			case 6: { /* carry out the action */
-				Cmd.DoCommandP(GetTown(w.window_number.n).getXy(), w.window_number.n, w.as_def_d().data_1, null, Cmd.CMD_DO_TOWN_ACTION | Cmd.CMD_MSG(Str.STR_00B4_CAN_T_DO_THIS));
+				Cmd.DoCommandP(GetTown(w.window_number).getXy(), w.window_number, w.as_def_d().data_1, null, Cmd.CMD_DO_TOWN_ACTION | Cmd.CMD_MSG(Str.STR_00B4_CAN_T_DO_THIS));
 				break;
 			}
 			}
@@ -244,7 +244,7 @@ public abstract class TownGui extends Town
 
 	static void TownViewWndProc(Window w, WindowEvent e)
 	{
-		Town t = GetTown(w.window_number.n);
+		Town t = GetTown(w.window_number);
 
 		switch (e.event) {
 		case WE_PAINT:
@@ -277,12 +277,12 @@ public abstract class TownGui extends Town
 				break;
 
 			case 7: /* town authority */
-				ShowTownAuthorityWindow(w.window_number.n);
+				ShowTownAuthorityWindow(w.window_number);
 				break;
 
 			case 8: /* rename */
-				Global.SetDParam(0, w.window_number.n);
-				MiscGui.ShowQueryString(Str.STR_TOWN, Str.STR_2007_RENAME_TOWN, 31, 130, w.window_class.v, w.window_number.n);
+				Global.SetDParam(0, w.window_number);
+				MiscGui.ShowQueryString(Str.STR_TOWN, Str.STR_2007_RENAME_TOWN, 31, 130, w.window_class, w.window_number);
 				break;
 
 			case 9: /* expand town */
@@ -301,7 +301,7 @@ public abstract class TownGui extends Town
 		case WE_ON_EDIT_TEXT:
 			if (e.str.length() != 0) {
 				Global._cmd_text = e.str;
-				Cmd.DoCommandP(null, w.window_number.n, 0, null,
+				Cmd.DoCommandP(null, w.window_number, 0, null,
 						Cmd.CMD_RENAME_TOWN | Cmd.CMD_MSG(Str.STR_2008_CAN_T_RENAME_TOWN));
 			}
 			break;

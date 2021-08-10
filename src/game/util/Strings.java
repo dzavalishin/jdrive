@@ -923,7 +923,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			}
 
 			default:
-				buff.append( b );
+				buff.append( (char)b );
 			}
 		}
 

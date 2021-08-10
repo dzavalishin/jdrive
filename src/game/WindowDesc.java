@@ -4,8 +4,8 @@ import java.util.function.BiConsumer;
 
 public class WindowDesc {
 	int 			left, top, width, height;
-	WindowClass 	cls;
-	WindowClass 	parent_cls;
+	int 	cls;
+	int 	parent_cls;
 	int 			flags;
 	Widget []		widgets;
 	//WindowProc *proc;
@@ -38,8 +38,8 @@ public class WindowDesc {
 		this.top = top;
 		this.width = width;
 		this.height = height;
-		this.cls = new WindowClass( cls );
-		this.parent_cls = new WindowClass( parent_cls );
+		this.cls = cls;
+		this.parent_cls =  parent_cls;
 		this.flags = flags;
 		this.widgets = widgets;
 		this.proc = proc;

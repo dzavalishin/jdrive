@@ -10,13 +10,15 @@ import game.util.BitOps;
 import game.util.Pixel;
 import game.util.WindowConstants;
 import game.util.wcustom.*;
-import game.WindowClass;
+//import game.WindowClass;
 
 public class Window extends WindowConstants
 {
 	int flags4;
-	WindowClass window_class;
-	WindowNumber window_number;
+	//WindowClass window_class;
+	//WindowNumber window_number;
+	int window_class;
+	int window_number;
 
 	int left, top;
 	int width, height;
@@ -47,8 +49,8 @@ public class Window extends WindowConstants
 		click_state = disabled_state = hidden_state = 0;
 		desc_flags = 0;
 
-		window_class = null;
-		window_number = null;
+		window_class = 0;
+		window_number = 0;
 
 		hscroll  = null;
 		vscroll  = null;
@@ -529,8 +531,8 @@ public class Window extends WindowConstants
 	 */
 	void DeleteWindow()
 	{
-		WindowClass wc;
-		WindowNumber wn;
+		int wc;
+		int wn;
 		ViewPort vp;
 		//Window v;
 		//int count;
@@ -538,8 +540,8 @@ public class Window extends WindowConstants
 		//if (w == null) return;
 
 		if (ViewPort._thd.place_mode != 0 
-				&& ViewPort._thd.window_class == window_class.v 
-				&& ViewPort._thd.window_number == window_number.n) 
+				&& ViewPort._thd.window_class == window_class 
+				&& ViewPort._thd.window_number == window_number) 
 		{
 			ViewPort.ResetObjectToPlace();
 		}
@@ -569,7 +571,8 @@ public class Window extends WindowConstants
 		_windows.remove(w);
 	}
 
-	static Window FindWindowById(WindowClass cls, WindowNumber number)
+	/*
+	static Window FindWindowById(int cls, int number)
 	{
 		//Window w;
 
@@ -578,32 +581,24 @@ public class Window extends WindowConstants
 		}
 
 		return null;
-	}
+	}*/
 
 	static Window FindWindowById(int cls, int number)
 	{
 		for (Window w : _windows) {
-			if (w.window_class.v == cls && w.window_number.n == number) 
+			if (w.window_class == cls && w.window_number == number) 
 				return w;
 		}
 
 		return null;
 	}
 
-	static void DeleteWindowById(WindowClass cls, WindowNumber number)
-	{
-		FindWindowById(cls, number).DeleteWindow();
-	}
 
 	static void DeleteWindowById(int cls, int number)
 	{
 		FindWindowById(cls, number).DeleteWindow();
 	}
 
-	static void DeleteWindowByClass(WindowClass cls)
-	{
-		DeleteWindowByClass(cls.v);
-	}
 	static void DeleteWindowByClass(int cls)
 	{
 
@@ -611,7 +606,7 @@ public class Window extends WindowConstants
 		{
 			Window w = _windows.get(i);
 
-			if (w.window_class.v == cls) {
+			if (w.window_class == cls) {
 				w.DeleteWindow();
 				i = 0;
 			} else {
@@ -620,7 +615,8 @@ public class Window extends WindowConstants
 		}
 	}
 
-	static Window BringWindowToFrontById(WindowClass cls, WindowNumber number)
+	/*
+	static Window BringWindowToFrontById(int cls, int number)
 	{
 		Window w = FindWindowById(cls, number);
 
@@ -631,7 +627,7 @@ public class Window extends WindowConstants
 		}
 
 		return w;
-	}
+	}*/
 
 	static Window BringWindowToFrontById(int cls, int number)
 	{
@@ -648,8 +644,8 @@ public class Window extends WindowConstants
 
 	public boolean IsVitalWindow()
 	{
-		WindowClass wc = window_class;
-		return (wc.v == WC_MAIN_TOOLBAR || wc.v == WC_STATUS_BAR || wc.v == WC_NEWS_WINDOW || wc.v == WC_SEND_NETWORK_MSG);
+		int wc = window_class;
+		return (wc == WC_MAIN_TOOLBAR || wc == WC_STATUS_BAR || wc == WC_NEWS_WINDOW || wc == WC_SEND_NETWORK_MSG);
 	}
 
 	/** On clicking on a window, make it the frontmost window of all. However
@@ -722,7 +718,7 @@ public class Window extends WindowConstants
 		//Window w;
 
 		/*for (w = _windows; w < endof(_windows); w++) {
-			if (w.window_class.v != WC_MAIN_WINDOW && !IsVitalWindow(w) && !(w.flags4 & WF_STICKY)) {
+			if (w.window_class != WC_MAIN_WINDOW && !IsVitalWindow(w) && !(w.flags4 & WF_STICKY)) {
 				return w;
 			}
 		}*/
@@ -741,7 +737,7 @@ public class Window extends WindowConstants
 
 		for (Window w : _windows) {
 			//assert(w < _last_window);
-			if (w.window_class.v != WC_MAIN_WINDOW && !w.IsVitalWindow()) 
+			if (w.window_class != WC_MAIN_WINDOW && !w.IsVitalWindow()) 
 				return w;
 		}
 		assert false;
@@ -848,7 +844,7 @@ public class Window extends WindowConstants
 
 		// Set up window properties
 		//memset(w, 0, sizeof(Window));
-		w.window_class = new WindowClass( cls );
+		w.window_class = cls;
 		w.flags4 = WF_WHITE_BORDER_MASK; // just opened windows have a white border
 		w.caption_color = (byte) 0xFF;
 		w.left = x;
@@ -873,12 +869,12 @@ public class Window extends WindowConstants
 	}
 
 	Window AllocateWindowAutoPlace2(
-			WindowClass exist_class,
-			WindowNumber exist_num,
+			int exist_class,
+			int exist_num,
 			int width,
 			int height,
 			BiConsumer<Window,WindowEvent> proc,
-			WindowClass cls,
+			int cls,
 			final Widget[] widget)
 	{
 		Window w;
@@ -892,7 +888,7 @@ public class Window extends WindowConstants
 		x = w.left;
 		if (x > Hal._screen.width - width) x = Hal._screen.width - width - 20;
 
-		return AllocateWindow(x + 10, w.top + 10, width, height, proc, cls.v, widget);
+		return AllocateWindow(x + 10, w.top + 10, width, height, proc, cls, widget);
 	}
 
 
@@ -914,7 +910,7 @@ public class Window extends WindowConstants
 
 		// Make sure it is not obscured by any window.
 		for (Window w : _windows) {
-			if (w.window_class.v == WC_MAIN_WINDOW) continue;
+			if (w.window_class == WC_MAIN_WINDOW) continue;
 
 			if (right > w.left &&
 					w.left + w.width > left &&
@@ -944,7 +940,7 @@ public class Window extends WindowConstants
 
 		// Make sure it is not obscured by any window.
 		for (Window w : _windows) {
-			if (w.window_class.v == WC_MAIN_WINDOW) continue;
+			if (w.window_class == WC_MAIN_WINDOW) continue;
 
 			if (left + width > w.left &&
 					w.left + w.width > left &&
@@ -974,7 +970,7 @@ public class Window extends WindowConstants
 		}
 
 		for (Window w : _windows) {
-			if (w.window_class.v == WC_MAIN_WINDOW) continue;
+			if (w.window_class == WC_MAIN_WINDOW) continue;
 			/*
 			if (IsGoodAutoPlace1(w.left+w.width+2,w.top)) goto ok_pos;
 			if (IsGoodAutoPlace1(w.left-   width-2,w.top)) goto ok_pos;
@@ -1004,7 +1000,7 @@ public class Window extends WindowConstants
 		}
 
 		for (Window w : _windows) {
-			if (w.window_class.v == WC_MAIN_WINDOW) continue;
+			if (w.window_class == WC_MAIN_WINDOW) continue;
 
 			/*
 			if (IsGoodAutoPlace2(w.left+w.width+2,w.top)) goto ok_pos;
@@ -1063,11 +1059,11 @@ public class Window extends WindowConstants
 			int width,
 			int height,
 			BiConsumer<Window,WindowEvent> proc,
-			WindowClass cls,
+			int cls,
 			final Widget[] widget) {
 
 		Point pt = GetAutoPlacePosition(width, height);
-		return AllocateWindow(pt.x, pt.y, width, height, proc, cls.v, widget);
+		return AllocateWindow(pt.x, pt.y, width, height, proc, cls, widget);
 	}
 	/**
 	 * 
@@ -1079,9 +1075,9 @@ public class Window extends WindowConstants
 	{
 		Window w;
 
-		if (BringWindowToFrontById(desc.cls.v, value) != null) return null;
+		if (BringWindowToFrontById(desc.cls, value) != null) return null;
 		w = AllocateWindowDesc(desc,0);
-		w.window_number = new WindowNumber(value);
+		w.window_number = value;
 		return w;
 	}
 
@@ -1113,10 +1109,10 @@ public class Window extends WindowConstants
 		//	if (pt.x > _screen.width + 10 - desc.width)
 		//		pt.x = (_screen.width + 10 - desc.width) - 20;
 		//	pt.y = w.top + 10;
-		if (desc.parent_cls.v != WC_MAIN_WINDOW && parentWindowNum != 0)
-			w = FindWindowById(desc.parent_cls.v, parentWindowNum);
+		if (desc.parent_cls != WC_MAIN_WINDOW && parentWindowNum != 0)
+			w = FindWindowById(desc.parent_cls, parentWindowNum);
 
-		if (desc.parent_cls.v != WC_MAIN_WINDOW && 
+		if (desc.parent_cls != WC_MAIN_WINDOW && 
 				parentWindowNum != 0 && w != null &&
 				w.left < _screen.width-20 && 
 				w.left > -60 && w.top < _screen.height-20) 
@@ -1125,7 +1121,7 @@ public class Window extends WindowConstants
 			if (pt.x > _screen.width + 10 - desc.width)
 				pt.x = (_screen.width + 10 - desc.width) - 20;
 			pt.y = w.top + 10;
-		} else if (desc.cls.v == WC_BUILD_TOOLBAR) { // open Build Toolbars aligned
+		} else if (desc.cls == WC_BUILD_TOOLBAR) { // open Build Toolbars aligned
 			/* Override the position if a toolbar is opened according to the place of the maintoolbar
 			 * The main toolbar (WC_MAIN_TOOLBAR) is 640px in width */
 			switch (Global._patches.toolbar_pos) {
@@ -1146,7 +1142,7 @@ public class Window extends WindowConstants
 			}
 		}
 
-		w = AllocateWindow(pt.x, pt.y, desc.width, desc.height, desc.proc, desc.cls.v, desc.widgets);
+		w = AllocateWindow(pt.x, pt.y, desc.width, desc.height, desc.proc, desc.cls, desc.widgets);
 		w.desc_flags = desc.flags;
 		return w;
 	}
@@ -1682,7 +1678,7 @@ public class Window extends WindowConstants
 			dy = Hal._cursor.delta.y;
 		}
 
-		if (w.window_class.v != WC_SMALLMAP) {
+		if (w.window_class != WC_SMALLMAP) {
 			vp = w.IsPtInWindowViewport(Hal._cursor.pos.x, Hal._cursor.pos.y);
 			if (vp == null)
 				//goto stop_capt;
@@ -1793,10 +1789,10 @@ public class Window extends WindowConstants
 
 	private boolean isTopMostWindow() {
 		Window w = this;
-		return w.window_class.v == WC_MAIN_WINDOW ||
+		return w.window_class == WC_MAIN_WINDOW ||
 				w.IsVitalWindow() ||
-				w.window_class.v == WC_TOOLTIPS ||
-				w.window_class.v == WC_DROPDOWN_MENU;
+				w.window_class == WC_TOOLTIPS ||
+				w.window_class == WC_DROPDOWN_MENU;
 	}
 
 
@@ -1825,7 +1821,7 @@ public class Window extends WindowConstants
 	 * @param wparam Specifies additional message-specific information
 	 * @param lparam Specifies additional message-specific information
 	 */
-	static void SendWindowMessage(WindowClass wnd_class, WindowNumber wnd_num, int msg, int wparam, int lparam)
+	static void SendWindowMessage(int wnd_class, int wnd_num, int msg, int wparam, int lparam)
 	{
 		Window w = FindWindowById(wnd_class, wnd_num);
 		if (w != null) SendWindowMessageW(w, msg, wparam, lparam);
@@ -1860,10 +1856,10 @@ public class Window extends WindowConstants
 				Window w = _windows.get(i);
 				// if a query window is open, only call the event for certain window types
 				if (query_open &&
-						w.window_class.v != WC_QUERY_STRING &&
-						w.window_class.v != WC_SEND_NETWORK_MSG &&
-						w.window_class.v != WC_CONSOLE &&
-						w.window_class.v != WC_SAVELOAD) {
+						w.window_class != WC_QUERY_STRING &&
+						w.window_class != WC_SEND_NETWORK_MSG &&
+						w.window_class != WC_CONSOLE &&
+						w.window_class != WC_SAVELOAD) {
 					continue;
 				}
 				w.wndproc.accept(w, we);
@@ -1940,8 +1936,8 @@ public class Window extends WindowConstants
 			// only allow zooming in-out in main window, or in viewports
 			if (mousewheel != 0 &&
 					(0 == (w.flags4 & WF_DISABLE_VP_SCROLL)) && (
-							w.window_class.v == WC_MAIN_WINDOW ||
-							w.window_class.v == WC_EXTRA_VIEW_PORT
+							w.window_class == WC_MAIN_WINDOW ||
+							w.window_class == WC_EXTRA_VIEW_PORT
 							)) {
 				Gui.ZoomInOrOutToCursorWindow(mousewheel < 0,w);
 			}
@@ -2071,7 +2067,7 @@ public class Window extends WindowConstants
 		return -1;
 	}
 
-	static void InvalidateWindow(WindowClass cls, WindowNumber number)
+	static void InvalidateWindow(int cls, int number)
 	{
 		//final Window  w;
 
@@ -2086,15 +2082,16 @@ public class Window extends WindowConstants
 		InvalidateWindow(cls, id.id);
 	}
 
+	/*
 	static void InvalidateWindow(int cls, int number)
 	{
 		//final Window  w;
 
 		for (Window w : _windows) {
-			if (w.window_class.v == cls && w.window_number.n == number) 
+			if (w.window_class == cls && w.window_number == number) 
 				w.SetWindowDirty();
 		}
-	}
+	}*/
 
 	void InvalidateWidget(int widget_index)
 	{
@@ -2106,7 +2103,17 @@ public class Window extends WindowConstants
 		Gfx.SetDirtyBlocks(left + wi.left, top + wi.top, left + wi.right + 1, top + wi.bottom + 1);
 	}
 
-	static void InvalidateWindowWidget(WindowClass cls, WindowNumber number, int widget_index)
+	/*
+	static void InvalidateWindowWidget(int cls, int number, int widget_index)
+	{
+		for (Window w : _windows) {
+			if (w.window_class == cls && w.window_number == number) {
+				w.InvalidateWidget(widget_index);
+			}
+		}
+	}*/
+
+	static void InvalidateWindowWidget(int cls, int number, int widget_index)
 	{
 		for (Window w : _windows) {
 			if (w.window_class == cls && w.window_number == number) {
@@ -2115,30 +2122,22 @@ public class Window extends WindowConstants
 		}
 	}
 
-	static void InvalidateWindowWidget(int cls, int number, int widget_index)
-	{
-		for (Window w : _windows) {
-			if (w.window_class.v == cls && w.window_number.n == number) {
-				w.InvalidateWidget(widget_index);
-			}
-		}
-	}
-
-	static void InvalidateWindowClasses(WindowClass cls)
+	/*
+	static void InvalidateWindowClasses(int cls)
 	{
 		//final Window  w;
 
 		for (Window w : _windows) {
 			if (w.window_class == cls) w.SetWindowDirty();
 		}
-	}
+	}*/
 
 	static void InvalidateWindowClasses(int cls)
 	{
 		//final Window  w;
 
 		for (Window w : _windows) {
-			if (w.window_class.v == cls) w.SetWindowDirty();
+			if (w.window_class == cls) w.SetWindowDirty();
 		}
 	}
 
@@ -2157,12 +2156,12 @@ public class Window extends WindowConstants
 		for (int i = 0; i < _windows.size();) 
 		{
 			Window w = _windows.get(i);
-			if (w.window_class.v != WC_MAIN_WINDOW &&
-					w.window_class.v != WC_SELECT_GAME &&
-					w.window_class.v != WC_MAIN_TOOLBAR &&
-					w.window_class.v != WC_STATUS_BAR &&
-					w.window_class.v != WC_TOOLBAR_MENU &&
-					w.window_class.v != WC_TOOLTIPS &&
+			if (w.window_class != WC_MAIN_WINDOW &&
+					w.window_class != WC_SELECT_GAME &&
+					w.window_class != WC_MAIN_TOOLBAR &&
+					w.window_class != WC_STATUS_BAR &&
+					w.window_class != WC_TOOLBAR_MENU &&
+					w.window_class != WC_TOOLTIPS &&
 					(w.flags4 & WF_STICKY) == 0) { // do not delete windows which are 'pinned'
 				w.DeleteWindow();
 				i = 0;
@@ -2207,7 +2206,7 @@ public class Window extends WindowConstants
 	{
 		Global.DEBUG_misc( 1, "Repositioning Main Toolbar...");
 
-		if (w == null || w.window_class.v != WC_MAIN_TOOLBAR)
+		if (w == null || w.window_class != WC_MAIN_TOOLBAR)
 			w = FindWindowById(WC_MAIN_TOOLBAR, 0);
 
 		switch (Global._patches.toolbar_pos) {
@@ -2226,7 +2225,7 @@ public class Window extends WindowConstants
 		for (Window w : _windows) {
 			int left, top;
 
-			if (w.window_class.v == WC_MAIN_WINDOW) {
+			if (w.window_class == WC_MAIN_WINDOW) {
 				ViewPort vp = w.viewport;
 				vp.width = w.width = neww;
 				vp.height = w.height = newh;
@@ -2237,19 +2236,19 @@ public class Window extends WindowConstants
 
 			// TODO Console.IConsoleResize();
 
-			if (w.window_class.v == WC_MAIN_TOOLBAR) {
+			if (w.window_class == WC_MAIN_TOOLBAR) {
 				top = w.top;
 				left = PositionMainToolbar(w); // changes toolbar orientation
-			} else if (w.window_class.v == WC_SELECT_GAME || w.window_class.v == WC_GAME_OPTIONS || w.window_class.v == WC_NETWORK_WINDOW){
+			} else if (w.window_class == WC_SELECT_GAME || w.window_class == WC_GAME_OPTIONS || w.window_class == WC_NETWORK_WINDOW){
 				top = (newh - w.height) >> 1;
 				left = (neww - w.width) >> 1;
-			} else if (w.window_class.v == WC_NEWS_WINDOW) {
+			} else if (w.window_class == WC_NEWS_WINDOW) {
 				top = newh - w.height;
 				left = (neww - w.width) >> 1;
-			} else if (w.window_class.v == WC_STATUS_BAR) {
+			} else if (w.window_class == WC_STATUS_BAR) {
 				top = newh - w.height;
 				left = (neww - w.width) >> 1;
-			} else if (w.window_class.v == WC_SEND_NETWORK_MSG) {
+			} else if (w.window_class == WC_SEND_NETWORK_MSG) {
 				top = (newh - 26); // 26 = height of status bar + height of chat bar
 				left = (neww - w.width) >> 1;
 			} else {
@@ -2876,8 +2875,8 @@ public class Window extends WindowConstants
 	//void ShowDropDownMenu(Window w, final StringID []strings, int selected, int button, int disabled_mask, int hidden_mask)
 	static void ShowDropDownMenu(Window w, final int []strings, int selected, int button, int disabled_mask, int hidden_mask)
 	{
-		WindowNumber num;
-		WindowClass cls;
+		int num;
+		int cls;
 		int i;
 		final Widget wi;
 		Window w2;
@@ -2952,7 +2951,7 @@ public class Window extends WindowConstants
 	public static Window getMain() {
 		for(Window w : Window._windows )
 		{
-			if(w.window_class.v == Window.WC_MAIN_WINDOW)
+			if(w.window_class == Window.WC_MAIN_WINDOW)
 				return w;
 		}
 		assert false;

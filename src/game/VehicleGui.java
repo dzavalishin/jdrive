@@ -92,7 +92,7 @@ public class VehicleGui {
 		{
 			Window w = it.next();
 
-			switch (w.window_class.v) {
+			switch (w.window_class) {
 			case Window.WC_TRAINS_LIST: case Window.WC_ROADVEH_LIST:
 			case Window.WC_SHIPS_LIST:  case Window.WC_AIRCRAFT_LIST:
 				w.as_vehiclelist_d().flags |= Vehicle.VL_REBUILD;
@@ -112,7 +112,7 @@ public class VehicleGui {
 		{
 			Window w = it.next();
 
-			switch (w.window_class.v) {
+			switch (w.window_class) {
 			case Window.WC_TRAINS_LIST: case Window.WC_ROADVEH_LIST:
 			case Window.WC_SHIPS_LIST:  case Window.WC_AIRCRAFT_LIST:
 				w.as_vehiclelist_d().flags |= Vehicle.VL_RESORT;
@@ -349,7 +349,7 @@ private static void show_cargo(ctype) {
 			if (BitOps.IS_INT_INSIDE(--pos[0], -lines_drawn, 0)) {
 				Gfx.DrawString(x[0] + 59, y[0] + 2, Engine.GetCustomEngineName(i), colour);
 				// show_outdated is true only for left side, which is where we show old replacements
-				TrainCmd.DrawTrainEngine(x[0] + 29, y[0] + 6, EngineID.get(i), (_player_num_engines[i] == 0 && show_outdated) ?
+				TrainCmd.DrawTrainEngine(x[0] + 29, y[0] + 6, i, (_player_num_engines[i] == 0 && show_outdated) ?
 						Sprite.PALETTE_CRASH : Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 				if ( show_outdated ) {
 					Global.SetDParam(0, _player_num_engines[i]);
@@ -671,7 +671,7 @@ private static void show_cargo(ctype) {
 						if (sel0[0] == 0) selected_id0[0] = engine_id.id;
 						if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.cap, 0)) {
 							Gfx.DrawString(x[0]+62, y[0]+7, Engine.GetCustomEngineName(engine_id.id), sel0[0]==0 ? 0xC : 0x10);
-							AirCraft.DrawAircraftEngine(x[0]+29, y[0]+10, engine_id, _player_num_engines[engine_id.id] > 0 ? Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
+							AirCraft.DrawAircraftEngine(x[0]+29, y[0]+10, engine_id.id, _player_num_engines[engine_id.id] > 0 ? Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
 							Global.SetDParam(0, _player_num_engines[engine_id.id]);
 							Gfx.DrawStringRightAligned(213, y[0]+15, Str.STR_TINY_BLACK, 0);
 							y[0] += 24;
@@ -683,7 +683,7 @@ private static void show_cargo(ctype) {
 						if (sel1[0] == 0) selected_id1[0] = engine_id.id;
 						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.cap, 0)) {
 							Gfx.DrawString(x2[0]+62, y2[0]+7, Engine.GetCustomEngineName(engine_id.id), sel1[0]==0 ? 0xC : 0x10);
-							AirCraft.DrawAircraftEngine(x2[0]+29, y2[0]+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+							AirCraft.DrawAircraftEngine(x2[0]+29, y2[0]+10, engine_id.id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 							y2[0] += 24;
 						}
 						sel1[0]--;
@@ -1080,25 +1080,25 @@ private static void show_cargo(ctype) {
 
 		w = Window.FindWindowById(Window.WC_VEHICLE_VIEW, from_v.index);
 		if (w != null) {
-			w.window_number = new WindowNumber( to_v.index );
+			w.window_number = to_v.index;
 			w.as_vp_d().follow_vehicle = to_v.index;
 			w.SetWindowDirty();
 
 			w = Window.FindWindowById(Window.WC_VEHICLE_ORDERS, from_v.index);
 			if (w != null) {
-				w.window_number = new WindowNumber( to_v.index );
+				w.window_number =  to_v.index;
 				w.SetWindowDirty();
 			}
 
 			w = Window.FindWindowById(Window.WC_VEHICLE_REFIT, from_v.index);
 			if (w != null) {
-				w.window_number = new WindowNumber( to_v.index );
+				w.window_number = to_v.index;
 				w.SetWindowDirty();
 			}
 
 			w = Window.FindWindowById(Window.WC_VEHICLE_DETAILS, from_v.index);
 			if (w != null) {
-				w.window_number = new WindowNumber( to_v.index );
+				w.window_number = to_v.index;
 				w.SetWindowDirty();
 			}
 		}

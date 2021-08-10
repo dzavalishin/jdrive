@@ -1,5 +1,5 @@
 package game;
-
+/*
 public class WindowClass {
 
 	public WindowClass(int cls) {
@@ -8,3 +8,4 @@ public class WindowClass {
 
 	int v;
 }
+*/

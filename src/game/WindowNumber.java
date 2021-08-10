@@ -1,5 +1,5 @@
 package game;
-
+/*
 public class WindowNumber {
 
 	public WindowNumber(int value) {
@@ -8,3 +8,4 @@ public class WindowNumber {
 
 	int n;
 }
+*/

@@ -2334,8 +2334,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 			//StringID 
 			int str;
 
-			i = GetIndustry(w.window_number.n);
-			Global.SetDParam(0, w.window_number.n);
+			i = GetIndustry(w.window_number);
+			Global.SetDParam(0, w.window_number);
 			w.DrawWindowWidgets();
 
 			if (i.accepts_cargo[0] != AcceptedCargo.CT_INVALID) {
@@ -2388,7 +2388,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				int x;
 				byte b;
 
-				i = GetIndustry(w.window_number.n);
+				i = GetIndustry(w.window_number);
 
 				// We should work if needed..
 				if (!NEED_ALTERB(i))
@@ -2429,7 +2429,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			}
 			break;
 			case 6:
-				i = GetIndustry(w.window_number.n);
+				i = GetIndustry(w.window_number);
 				ViewPort.ScrollMainWindowToTile(i.xy.iadd(1, 1));
 				break;
 			}
@@ -2447,7 +2447,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				int val;
 				int line;
 
-				i = GetIndustry(w.window_number.n);
+				i = GetIndustry(w.window_number);
 				line = w.as_vp2_d().data_1;
 				val = Integer.parseInt(e.str);
 				if (!BitOps.IS_INT_INSIDE(val, 32, 2040)) {
@@ -2501,7 +2501,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			w.as_vp2_d().data_1 = 0;
 			w.as_vp2_d().data_2 = 0;
 			w.as_vp2_d().data_3 = 0;
-			i = GetIndustry(w.window_number.n);
+			i = GetIndustry(w.window_number);
 			ViewPort.AssignWindowViewport( w, 3, 17, 0xFE, 0x56, i.xy.iadd(1, 1).tile, 1);
 		}
 	}

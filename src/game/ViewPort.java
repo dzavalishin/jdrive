@@ -2466,20 +2466,21 @@ public class ViewPort
 
 	static void SetObjectToPlaceWnd(CursorID icon, int mode, Window w)
 	{
-		SetObjectToPlace(icon, mode, w.window_class, w.window_number);
+		SetObjectToPlace(icon.id, mode, w.window_class, w.window_number);
 	}
 
 	static void SetObjectToPlaceWnd(int icon, int mode, Window w)
 	{
-		SetObjectToPlace(icon, mode, w.window_class.v, w.window_number.n);
+		SetObjectToPlace(icon, mode, w.window_class, w.window_number);
 	}
 
 	//#include "table/animcursors.h"
 
+	/*
 	static void SetObjectToPlace(CursorID icon, int mode, WindowClass window_class, WindowNumber window_num)
 	{
 		SetObjectToPlace( icon.id,  mode,  window_class.v,  window_num.n);
-	}
+	}*/
 	static void SetObjectToPlace(int icon, int mode, int window_class, int window_num)
 	{
 		Window w;
