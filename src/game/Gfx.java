@@ -1002,7 +1002,13 @@ public class Gfx extends PaletteTabs
 				do {
 					for (i = 0; i != width; i++) {
 						//byte b = ctab[src_data[i+src_shift]];
-						byte b = ctab[src.r(i)];
+						final int c = src.r(i) & 0xFF;
+						byte b;
+						// TODO XXX hack 
+						if( c > ctab.length)
+							b = (byte) c;
+						else
+							b = ctab[c];
 
 						//if (b != 0) dst_data[i+dst_shift] = b;
 						if (b != 0) dst.w(i, b);
@@ -2341,7 +2347,7 @@ class DrawStringStateMachine
 
 	public static int DoDrawString(String string, int x, int y, int real_color) {
 		DrawStringStateMachine me = new DrawStringStateMachine(string, x, y, real_color);
-
+		Global.debug("DoDrawString '%s'", string);
 		me.color = (byte) (real_color & 0xFF);
 
 		return me.draw(x,y);
@@ -2389,7 +2395,8 @@ class DrawStringStateMachine
 						continue;
 					}
 					if (x + 26 >= dpi.left) {
-						Gfx.GfxMainBlitter(SpriteCache.GetSprite(base + 2 + c - Gfx.ASCII_LETTERSTART), x, y, 1);
+						final int glyph = base + 2 + c - Gfx.ASCII_LETTERSTART;
+						Gfx.GfxMainBlitter(SpriteCache.GetSprite(glyph), x, y, 1);
 					}
 					x += Gfx.GetCharacterWidth(base + c);
 				} else if (c == Gfx.ASCII_NL) { // newline = {}
@@ -2419,7 +2426,7 @@ class DrawStringStateMachine
 				} else if (c == Gfx.ASCII_BIGFONT) { // {BIGFONT}
 					base = 0x1C0;
 				} else {
-					Global.error("Unknown string command character %d\n", c);
+					Global.error("Unknown string command character %d ('%c')\n",(int)c, c);
 				}
 			}
 			// break from loop above leads to check_bounds label

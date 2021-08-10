@@ -79,9 +79,9 @@ public class Misc extends MiscTables
 	 */
 	static void RunVehicleDayProc(int daytick)
 	{
-		int i, total = Vehicle._vehicle_pool.total_items();
+		int total = Vehicle._vehicle_pool.total_items();
 
-		for (i = daytick; i < total; i += Global.DAY_TICKS) {
+		for (int i = daytick; i < total; i += Global.DAY_TICKS) {
 			Vehicle v = Vehicle.GetVehicle(i);
 			if (v.type != 0)
 				_on_new_vehicle_day_proc[v.type - 0x10].accept(v);

@@ -370,7 +370,11 @@ public class BitOps {
 		
 		// Verbatim!
 		for( int i = 0; i < len; i++)
-			ca[i] = (char) b[i+start];
+		{
+			int c = b[i+start];
+			c &= 0xFF;
+			ca[i] = (char) c;
+		}
 		
 		return new String( ca );
 	}

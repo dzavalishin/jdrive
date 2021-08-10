@@ -471,7 +471,10 @@ public class WaterCmd extends WaterTables
 			return;
 		}
 
-		DrawWaterStuff(ti, _shipdepot_display_seq[ti.map5 & 0x7F], Sprite.PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner()), 0);
+		// [dz] added array size check, overflows
+		final int nSeq = ti.map5 & 0x7F;
+		if( nSeq < _shipdepot_display_seq.length)
+			DrawWaterStuff(ti, _shipdepot_display_seq[nSeq], Sprite.PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner()), 0);
 	}
 
 	static void DrawShipDepotSprite(int x, int y, int image)

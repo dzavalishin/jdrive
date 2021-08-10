@@ -17,7 +17,8 @@ public class MemoryPool<CType extends IPoolItem>
 {
     Map<Integer,CType> pool = new HashMap<>();
     IPoolItemFactory<CType> ctor;
-    private static int lastIndex = 1;
+    //private static int lastIndex = 1;
+    private static int lastIndex = 0;
 
 
     public MemoryPool(IPoolItemFactory<CType> ctor) {
@@ -28,7 +29,7 @@ public class MemoryPool<CType extends IPoolItem>
     public void CleanPool()
     {
         pool.clear();
-        lastIndex = 1;
+        lastIndex = 0;
     }
 
     public CType GetItemFromPool(int index)
