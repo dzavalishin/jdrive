@@ -676,6 +676,7 @@ public class Window extends WindowConstants
 				break;
 		}		
 
+		//Global.debug("i %d wi %d", i, wi);
 		assert i > wi;
 
 		// insert w above i
@@ -1767,7 +1768,7 @@ public class Window extends WindowConstants
 		if( w.isTopMostWindow() )
 			return w;
 
-
+		/* TODO XXX Rewrite
 		for (u = w; ++u != _last_window;) 
 		{
 			if( u.isTopMostWindow() )
@@ -1783,8 +1784,11 @@ public class Window extends WindowConstants
 
 			return w.BringWindowToFront();
 		}
-
-		return w;
+		*/
+		// TODO XXX Remove - hacked in!
+		return w.BringWindowToFront();
+				
+		//return w;
 	}
 
 	private boolean isTopMostWindow() {

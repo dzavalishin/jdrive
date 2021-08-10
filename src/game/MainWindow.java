@@ -2,27 +2,17 @@ package game;
 
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.image.BandedSampleModel;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.ComponentSampleModel;
-import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
-import java.awt.image.MemoryImageSource;
 import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
-import java.awt.image.WritableRenderedImage;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -30,7 +20,8 @@ import javax.swing.Timer;
 
 
 
-public class MainWindow extends JPanel implements ActionListener{
+public class MainWindow extends JPanel implements ActionListener
+{
 
 	public static final int TICK_TIME = 20;
 	public static final int TICKS_PER_SECOND = 1000 / TICK_TIME;
@@ -44,7 +35,7 @@ public class MainWindow extends JPanel implements ActionListener{
 	private byte[] screen;
 
 
-/*
+	/*
 	public static final java.awt.Font bigMessageFont;
 	public static final java.awt.Font defaultMessageFont;
 
@@ -52,12 +43,12 @@ public class MainWindow extends JPanel implements ActionListener{
 		bigMessageFont = new java.awt.Font(java.awt.Font.SERIF, java.awt.Font.PLAIN, 48);
 		defaultMessageFont = new java.awt.Font(java.awt.Font.SERIF, java.awt.Font.PLAIN, 20 );
 	}
-*/
+	 */
 	public MainWindow(JFrame frame, byte[] screen2) 
 	{
 		this.frame = frame;
 		this.screen = screen2;
-		
+
 
 		//setSize(WIDTH, HEIGHT);
 		//setMinimumSize(new Dimension(WIDTH, HEIGHT));
@@ -75,6 +66,81 @@ public class MainWindow extends JPanel implements ActionListener{
 			public void keyPressed(KeyEvent e) { processKey(e, true); }
 		});
 
+
+		frame.addMouseListener( new MouseListener() {
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_down = false;
+				if( e.getButton() == MouseEvent.BUTTON2 ) Window._right_button_down = false;								
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_down = true;
+				if( e.getButton() == MouseEvent.BUTTON2 ) Window._right_button_down = true;								
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_clicked = true;
+				if( e.getButton() == MouseEvent.BUTTON2 ) Window._right_button_clicked = true;				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+			}
+
+		});
+
+		frame.addMouseMotionListener( new MouseMotionListener() {
+
+			@Override
+			public void mouseMoved(MouseEvent e) 
+			{
+				int x = e.getX();
+				int y = e.getY();
+				
+				if (Hal._cursor.fix_at) {
+					int dx = x - Hal._cursor.pos.x;
+					int dy = y - Hal._cursor.pos.y;
+					if (dx != 0 || dy != 0) {
+						Hal._cursor.delta.x += dx;
+						Hal._cursor.delta.y += dy;
+
+						/* TODO set cursor pos
+						pt.x = _cursor.pos.x;
+						pt.y = _cursor.pos.y;
+
+						if (_wnd.double_size) {
+							pt.x *= 2;
+							pt.y *= 2;
+						}
+						ClientToScreen(hwnd, &pt);
+						SetCursorPos(pt.x, pt.y);
+						*/
+					}
+				} else {
+					Hal._cursor.delta.x += x - Hal._cursor.pos.x;
+					Hal._cursor.delta.y += y - Hal._cursor.pos.y;
+					Hal._cursor.pos.x = x;
+					Hal._cursor.pos.y = y;
+					Hal._cursor.dirty = true;
+				}
+
+			}
+
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
 		timer.start();
 	}
 
@@ -88,9 +154,20 @@ public class MainWindow extends JPanel implements ActionListener{
 	public int getWidth() {
 		return WIDTH;
 	}
-	
+
 	private void processKey(KeyEvent e, boolean pressed) 
 	{
+		Global._ctrl_pressed = (e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0; // _wnd.has_focus && GetAsyncKeyState(VK_CONTROL)<0;
+		Global._shift_pressed = (e.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK) != 0;
+		Gfx._dbg_screen_rect = (e.getModifiersEx() & KeyEvent.META_DOWN_MASK) != 0;// _wnd.has_focus && GetAsyncKeyState(VK_CAPITAL)<0;
+
+		Global._dirkeys = (byte)
+				(((e.getKeyCode() == KeyEvent.VK_LEFT) ? 1 : 0) +
+						((e.getKeyCode() == KeyEvent.VK_UP)  ? 2 : 0) +
+						((e.getKeyCode() == KeyEvent.VK_RIGHT)  ? 4 : 0) +
+						((e.getKeyCode() == KeyEvent.VK_DOWN)  ? 8 : 0));
+
+
 		switch(e.getKeyCode())
 		{
 		case KeyEvent.VK_SHIFT: 
@@ -125,45 +202,41 @@ public class MainWindow extends JPanel implements ActionListener{
 
 			case KeyEvent.VK_F9: LevelData.currentLevel = 0; restartLevel();     break;
 			case KeyEvent.VK_F12:   s.setWinFlag();			break;
-			*/
+			 */
 			}
 
 			return;
 		}
 
+		{
+			int c = e.getKeyCode();
+			if( c > KeyEvent.VK_A && c < KeyEvent.VK_Z )
+			{
+				Global._pressed_key = c - KeyEvent.VK_A + 'A';
+				return;
+			}
+
+			if( c > KeyEvent.VK_0 && c < KeyEvent.VK_9 )
+			{
+				Global._pressed_key = c - KeyEvent.VK_0 + '0';
+				return;
+			}
+		}
 
 		// Just key press
 		switch(e.getKeyCode())
 		{
-		case KeyEvent.VK_RIGHT:
 		case KeyEvent.VK_D:
-			//if(canControl) ego.setXSpeed( 1 ); 
 			break;
 
-		case KeyEvent.VK_LEFT:
 		case KeyEvent.VK_A:
-			//if(canControl) ego.setXSpeed( -1 ); 
 			break;
 
-		case KeyEvent.VK_SPACE:
-			//if(canControl) ego.shootBullet(); 
-			break;
-
-		case KeyEvent.VK_ENTER:
-			//if(canControl) egoAction();
-			break;
-
-		case KeyEvent.VK_R:
-			//if(canControl) ego.shootMissile();
-			break;
-
-		case KeyEvent.VK_G:
-			//if(canControl) ego.shootBFG();
-			break;
-
-		case KeyEvent.VK_B:
-			//if(canControl) ego.dropBomb();
-			break;
+		case KeyEvent.VK_SPACE:		Global._pressed_key = Window.WKC_SPACE;	break;
+		case KeyEvent.VK_BACK_SPACE:			Global._pressed_key = Window.WKC_BACKSPACE;	break;
+		case KeyEvent.VK_INSERT: Global._pressed_key = Window.WKC_INSERT;	break;
+		case KeyEvent.VK_DELETE: Global._pressed_key = Window.WKC_DELETE;	break;
+		case KeyEvent.VK_ENTER: Global._pressed_key = Window.WKC_RETURN;	break;
 
 		case KeyEvent.VK_OPEN_BRACKET:
 			break;
@@ -171,53 +244,42 @@ public class MainWindow extends JPanel implements ActionListener{
 		case KeyEvent.VK_CLOSE_BRACKET:
 			break;
 
-		case KeyEvent.VK_P:
-			break;
+		case KeyEvent.VK_TAB: Global._pressed_key = Window.WKC_TAB;	break;
+		case KeyEvent.VK_PAUSE: Global._pressed_key = Window.WKC_PAUSE;	break;
 
-		case KeyEvent.VK_ESCAPE:
-			break;
+		case KeyEvent.VK_ESCAPE: Global._pressed_key = Window.WKC_ESC;	break;
 
-		case KeyEvent.VK_F1:
-			break;
+		case KeyEvent.VK_F1:	Global._pressed_key = Window.WKC_F1;	break;
+		case KeyEvent.VK_F2:	Global._pressed_key = Window.WKC_F2;	break;
+		case KeyEvent.VK_F3:	Global._pressed_key = Window.WKC_F3;	break;
+		case KeyEvent.VK_F4:	Global._pressed_key = Window.WKC_F4;	break;
+		case KeyEvent.VK_F5:	Global._pressed_key = Window.WKC_F5;	break;
+		case KeyEvent.VK_F6:	Global._pressed_key = Window.WKC_F6;	break;
+		case KeyEvent.VK_F7:	Global._pressed_key = Window.WKC_F7;	break;
+		case KeyEvent.VK_F8:	Global._pressed_key = Window.WKC_F8;	break;
+		case KeyEvent.VK_F9:	Global._pressed_key = Window.WKC_F9;	break;
+		case KeyEvent.VK_F10:	Global._pressed_key = Window.WKC_F10;	break;
+		case KeyEvent.VK_F11:	Global._pressed_key = Window.WKC_F11;	break;
+		case KeyEvent.VK_F12:	Global._pressed_key = Window.WKC_F11;	break;
 
-		case KeyEvent.VK_PAUSE:
-		case KeyEvent.VK_F2:
-			break;
-
-		case KeyEvent.VK_F3:
-			break;
-
-		case KeyEvent.VK_F9:
-			break;
-
-		case KeyEvent.VK_F11:
-			/*
-			if( (e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK) != 0 )
-				LevelData.currentLevel -= 10;
-			else
-				LevelData.currentLevel--;
-			if( LevelData.currentLevel < 0 )
-				LevelData.currentLevel = 0;
-			restartLevel();
-			*/     
-			break;
-
-		case KeyEvent.VK_F12:
-			/*
-			if( (e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK) != 0 )
-				LevelData.currentLevel += 10;
-			else
-				LevelData.currentLevel++;
-			//if( LevelData.currentLevel < 0 )				LevelData.currentLevel = 0;
-			restartLevel();
-			*/     
-			break;
 
 		}
 
 	}
 
+/* TODO keys
+ * 
+ * 	AM(VK_NUMPAD0,VK_NUMPAD9, WKC_NUM_0, WKC_NUM_9),
+	AS(VK_DIVIDE,			WKC_NUM_DIV),
+	AS(VK_MULTIPLY,		WKC_NUM_MUL),
+	AS(VK_SUBTRACT,		WKC_NUM_MINUS),
+	AS(VK_ADD,				WKC_NUM_PLUS),
+	AS(VK_DECIMAL,		WKC_NUM_DECIMAL)
 
+ * 
+	AM(VK_PRIOR,VK_DOWN, WKC_PAGEUP, WKC_DOWN),
+ * 
+ */
 
 
 
@@ -245,34 +307,34 @@ public class MainWindow extends JPanel implements ActionListener{
 		//System.err.print( image.getWidth(null)+" " );
 		source.newPixels();
 		//source.
-		
+
 		g.drawImage(image, 0, 0, getBackground(), null);
 		source.newPixels();
-		*/
+		 */
 
-		  
-	    //BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
-		
-	    //image.setRGB(0, 0, WIDTH, HEIGHT, screen, 0, WIDTH);
-	    
-		
-		
-		
-		
-		
+
+		//BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
+
+		//image.setRGB(0, 0, WIDTH, HEIGHT, screen, 0, WIDTH);
+
+
+
+
+
+
 		/*
-		
+
 		DataBuffer db = new DataBufferByte(screen, screen.length);
 		//WritableRaster wr = Raster.createBandedRaster(TICKS_PER_SECOND, WIDTH, WIDTH, HEIGHT, getLocation());
-		
-		
+
+
 		int [] off = {0,1,2,3};
 		/*ComponentSampleModel sm = new ComponentSampleModel(DataBuffer.TYPE_BYTE, WIDTH, HEIGHT,
                 4, // int pixelStride,
                 WIDTH*4, // int scanlineStride,
                 off//int[] bandOffsets
                 );* /
-				
+
 		//WritableRaster wr = WritableRaster.createRaster(sm, db, null);
 		//WritableRaster wr = new WritableRaster(sm, db, null);
 		WritableRaster	wr = Raster.createInterleavedRaster(db, WIDTH, HEIGHT,
@@ -281,22 +343,23 @@ public class MainWindow extends JPanel implements ActionListener{
 				off, //int[] bandOffsets, 
 				null //Point location
 				);
-		
 
-		
+
+
 		ColorModel cm = new ComponentColorModel(
 				ColorSpace.getInstance(ColorSpace.CS_sRGB), false, false, 
 				Transparency.OPAQUE, DataBuffer.TYPE_BYTE );
-		
+
 		BufferedImage image = new BufferedImage(cm, wr, false, null);
 
-		*/
+		 */
 
-		
+
 		BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
 		image.setData(Raster.createRaster(image.getSampleModel(), new DataBufferByte(screen, screen.length), new java.awt.Point(0,0) ) );
 
 		g.drawImage(image, 0, 0, getBackground(), null);
+		//System.err.print( image.getWidth(null)+" " );
 
 	}
 

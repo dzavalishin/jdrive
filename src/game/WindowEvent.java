@@ -9,7 +9,7 @@ public class WindowEvent {
 
 	//int 
 	WindowEvents event;
-	Point pt;
+	Point pt = new Point(0, 0);
 
 	// click, dragdrop, mouseover
 	int widget;
