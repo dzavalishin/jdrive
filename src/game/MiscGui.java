@@ -908,7 +908,8 @@ public class MiscGui {
 		tb.length = 0;
 		tb.width = 0;
 
-		for (; tb.buf[bp] != '\0' && tb.length <= tb.maxlength; bp++) {
+		for (; bp < tb.buf.length && tb.buf[bp] != '\0' && tb.length <= tb.maxlength; bp++) 
+		{
 			tb.length++;
 			tb.width += Gfx.GetCharacterWidth(tb.buf[bp]);
 		}
@@ -1599,6 +1600,11 @@ public class MiscGui {
 		}
 		break;
 
+		case WE_KEYPRESS:
+			if(e.keycode == Window.WKC_RETURN)
+				IntroGui.GenRandomNewGame(Hal.Random(), Hal.InteractiveRandom());
+			break;
+			
 		case WE_CLICK:
 			switch(e.widget) {
 			case 3: /* Sort scenario names by name */

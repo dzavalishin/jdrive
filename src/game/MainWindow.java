@@ -164,103 +164,66 @@ public class MainWindow extends JPanel implements ActionListener
 						((e.getKeyCode() == KeyEvent.VK_DOWN)  ? 8 : 0));
 
 
-		switch(e.getKeyCode())
-		{
-		case KeyEvent.VK_SHIFT: 
-			//setFastMode(pressed); 
-			break;
-
-		case KeyEvent.VK_UP:
-		case KeyEvent.VK_W:
-			//ego.goUp(pressed);
-			break;
-
-		case KeyEvent.VK_DOWN:
-		case KeyEvent.VK_S:
-			//ego.goDown(pressed);
-			break;
-
-		}
-
 		if(!pressed) return;
 
-		if( (e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0 )
-		{
-			switch(e.getKeyCode())
-			{
-			/*
-			case KeyEvent.VK_W: ego.giveAllWeapon();   break;
-
-			case KeyEvent.VK_F1: DebugDisplay.togglePaintHitBox();   break;
-			case KeyEvent.VK_F2: DebugDisplay.togglePaintTileMesh(); break;
-			case KeyEvent.VK_F3: DebugDisplay.togglePaintPath();     break;
-			case KeyEvent.VK_F4: debugDark = !debugDark;     break;
-
-			case KeyEvent.VK_F9: LevelData.currentLevel = 0; restartLevel();     break;
-			case KeyEvent.VK_F12:   s.setWinFlag();			break;
-			 */
-			}
-
-			return;
-		}
+		int fKey = 0; // func
+		int aKey = 0; // ascii
 
 		{
 			int c = e.getKeyCode();
 			if( c > KeyEvent.VK_A && c < KeyEvent.VK_Z )
 			{
-				Global._pressed_key = c - KeyEvent.VK_A + 'A';
+				aKey = c - KeyEvent.VK_A + 'A';
 				return;
 			}
 
 			if( c > KeyEvent.VK_0 && c < KeyEvent.VK_9 )
 			{
-				Global._pressed_key = c - KeyEvent.VK_0 + '0';
+				aKey = c - KeyEvent.VK_0 + '0';
 				return;
 			}
 		}
 
-		// Just key press
+		
+		
 		switch(e.getKeyCode())
 		{
-		case KeyEvent.VK_D:
-			break;
 
-		case KeyEvent.VK_A:
-			break;
+		case KeyEvent.VK_SPACE:		fKey = Window.WKC_SPACE;	break;
+		case KeyEvent.VK_BACK_SPACE:fKey = Window.WKC_BACKSPACE;	break;
+		case KeyEvent.VK_INSERT:    fKey = Window.WKC_INSERT;	break;
+		case KeyEvent.VK_DELETE:    fKey = Window.WKC_DELETE;	break;
+		case KeyEvent.VK_ENTER:     fKey = Window.WKC_RETURN;	break;
 
-		case KeyEvent.VK_SPACE:		Global._pressed_key = Window.WKC_SPACE;	break;
-		case KeyEvent.VK_BACK_SPACE:			Global._pressed_key = Window.WKC_BACKSPACE;	break;
-		case KeyEvent.VK_INSERT: Global._pressed_key = Window.WKC_INSERT;	break;
-		case KeyEvent.VK_DELETE: Global._pressed_key = Window.WKC_DELETE;	break;
-		case KeyEvent.VK_ENTER: Global._pressed_key = Window.WKC_RETURN;	break;
+		case KeyEvent.VK_TAB:       fKey = Window.WKC_TAB;	break;
+		case KeyEvent.VK_PAUSE:     fKey = Window.WKC_PAUSE;	break;
 
-		case KeyEvent.VK_OPEN_BRACKET:
-			break;
+		case KeyEvent.VK_ESCAPE:    fKey = Window.WKC_ESC;	break;
 
-		case KeyEvent.VK_CLOSE_BRACKET:
-			break;
-
-		case KeyEvent.VK_TAB: Global._pressed_key = Window.WKC_TAB;	break;
-		case KeyEvent.VK_PAUSE: Global._pressed_key = Window.WKC_PAUSE;	break;
-
-		case KeyEvent.VK_ESCAPE: Global._pressed_key = Window.WKC_ESC;	break;
-
-		case KeyEvent.VK_F1:	Global._pressed_key = Window.WKC_F1;	break;
-		case KeyEvent.VK_F2:	Global._pressed_key = Window.WKC_F2;	break;
-		case KeyEvent.VK_F3:	Global._pressed_key = Window.WKC_F3;	break;
-		case KeyEvent.VK_F4:	Global._pressed_key = Window.WKC_F4;	break;
-		case KeyEvent.VK_F5:	Global._pressed_key = Window.WKC_F5;	break;
-		case KeyEvent.VK_F6:	Global._pressed_key = Window.WKC_F6;	break;
-		case KeyEvent.VK_F7:	Global._pressed_key = Window.WKC_F7;	break;
-		case KeyEvent.VK_F8:	Global._pressed_key = Window.WKC_F8;	break;
-		case KeyEvent.VK_F9:	Global._pressed_key = Window.WKC_F9;	break;
-		case KeyEvent.VK_F10:	Global._pressed_key = Window.WKC_F10;	break;
-		case KeyEvent.VK_F11:	Global._pressed_key = Window.WKC_F11;	break;
-		case KeyEvent.VK_F12:	Global._pressed_key = Window.WKC_F11;	break;
-
+		case KeyEvent.VK_F1:	fKey = Window.WKC_F1;	break;
+		case KeyEvent.VK_F2:	fKey = Window.WKC_F2;	break;
+		case KeyEvent.VK_F3:	fKey = Window.WKC_F3;	break;
+		case KeyEvent.VK_F4:	fKey = Window.WKC_F4;	break;
+		case KeyEvent.VK_F5:	fKey = Window.WKC_F5;	break;
+		case KeyEvent.VK_F6:	fKey = Window.WKC_F6;	break;
+		case KeyEvent.VK_F7:	fKey = Window.WKC_F7;	break;
+		case KeyEvent.VK_F8:	fKey = Window.WKC_F8;	break;
+		case KeyEvent.VK_F9:	fKey = Window.WKC_F9;	break;
+		case KeyEvent.VK_F10:	fKey = Window.WKC_F10;	break;
+		case KeyEvent.VK_F11:	fKey = Window.WKC_F11;	break;
+		case KeyEvent.VK_F12:	fKey = Window.WKC_F11;	break;
 
 		}
 
+		
+		int shifts = 0;
+		
+		if(0 != (e.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK)) shifts |= Window.WKC_SHIFT;
+		if(0 != (e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK))  shifts |= Window.WKC_CTRL;
+		if(0 != (e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK))   shifts |= Window.WKC_ALT;
+
+		Global._pressed_key = fKey << 16 | (aKey & 0xFFFF) | shifts;
+		
 	}
 
 	/* TODO keys
@@ -388,14 +351,10 @@ public class MainWindow extends JPanel implements ActionListener
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-		//if( Math.random() < 0.05 ) RandomImageParticle.emitGlassJunkForTile(s.getOverlay(), 100, 200, 100);
-
-
+		flush(); // TODO kill me
 		//repaint();
 		//frame.repaint();
 
-
-		//processTimerStop();
 	}
 
 

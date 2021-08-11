@@ -108,8 +108,7 @@ public class GraphGui
 		 //return Arrays.stream(array).filter(Objects::nonNull).mapToLong(Long::longValue).toArray();
 	
 		//Arrays.stream(gw.cost[0]).mapToObj( (lv) -> new Long(lv) ).toArray();
-		Long[] la = (Long[]) Arrays.stream(gw.cost[0]).mapToObj( (lv) -> Long.valueOf(lv) ).toArray();
-		
+		Long[] la = ArrayPtr.toLongArray(gw.cost[0]);
 		//row_ptr = new ArrayPtr<Long>( gw.cost[0] );
 		row_ptr = new ArrayPtr<Long>( la );
 		
@@ -194,9 +193,9 @@ public class GraphGui
 			/* draw lines and dots */
 			i = 0;
 			{
-				Long[] la1 = (Long[]) Arrays.stream(gw.cost[0]).mapToObj( (lv) -> Long.valueOf(lv) ).toArray();
-
-			row_ptr = new ArrayPtr<Long>( la1 ); // gw.cost[0];
+				//Long[] la1 = (Long[]) Arrays.stream(gw.cost[0]).mapToObj( (lv) -> Long.valueOf(lv) ).toArray();
+				Long[] la1 = ArrayPtr.toLongArray(gw.cost[0]);
+				row_ptr = new ArrayPtr<Long>( la1 ); // gw.cost[0];
 			}
 			sel = gw.sel; // show only selected lines. GraphDrawer qw.sel set in Graph-Legend (_legend_excludebits)
 			do {

@@ -57,7 +57,7 @@ public class Window extends WindowConstants
 		hscroll  = new Scrollbar();
 		vscroll  = new Scrollbar();
 		vscroll2 = new Scrollbar();
-		
+
 		resize = null;
 
 
@@ -174,109 +174,109 @@ public class Window extends WindowConstants
 	def_d as_def_d() {
 		if(custom==null) custom = new def_d(); 
 		return (def_d) custom; 
-		}
-	
+	}
+
 	buildtrain_d as_buildtrain_d() { 
 		if(custom==null) custom = new def_d(); 
 		return (buildtrain_d) custom; 
-		}
-	
+	}
+
 	dropdown_d as_dropdown_d() { 
 		if(custom==null) custom = new dropdown_d(); 
 		return (dropdown_d) custom; 
-		}
-	
+	}
+
 	facesel_d as_facesel_d() { 
 		if(custom==null) custom = new facesel_d(); 
 		return (facesel_d) custom; 
 	}
-	
+
 	highscore_d as_highscore_d() { return (highscore_d) custom; }
-	
+
 	menu_d as_menu_d() { 
 		if(custom==null) custom = new menu_d(); 
 		return (menu_d) custom; 
-		}
-	
+	}
+
 	message_d as_message_d() { 
 		if(custom==null) custom = new message_d(); 
 		return (message_d) custom; 
-		}
-	
+	}
+
 	news_d as_news_d() { 
 		if(custom==null) custom = new news_d(); 
 		return (news_d) custom; 
-		}
-	
+	}
+
 	order_d as_order_d() { 
 		if(custom==null) custom = new order_d(); 
 		return (order_d) custom; 
-		}
-	
+	}
+
 	plstations_d as_plstations_d() { 
 		if(custom==null) custom = new plstations_d(); 
 		return (plstations_d) custom; 
-		}
-	
+	}
+
 	refit_d as_refit_d() { 
 		if(custom==null) custom = new refit_d(); 
 		return (refit_d) custom; 
-		}
-	
+	}
+
 	replaceveh_d as_replaceveh_d() { 
 		if(custom==null) custom = new replaceveh_d(); 
 		return (replaceveh_d) custom; 
-		}
-	
+	}
+
 	scroller_d as_scroller_d() { 
 		if(custom==null) custom = new scroller_d(); 
 		return (scroller_d) custom; 
-		}
-	
+	}
+
 	smallmap_d as_smallmap_d() { 
 		if(custom==null) custom = new smallmap_d(); 
 		return (smallmap_d) custom; 
-		}
-	
+	}
+
 	tooltips_d as_tooltips_d() { 
 		if(custom==null) custom = new tooltips_d(); 
 		return (tooltips_d) custom; 
-		}
-	
+	}
+
 	traindepot_d as_traindepot_d() { 
 		if(custom==null) custom = new traindepot_d(); 
 		return (traindepot_d) custom; 
-		}
-	
+	}
+
 	traindetails_d as_traindetails_d() { 
 		if(custom==null) custom = new traindetails_d(); 
 		return (traindetails_d) custom; 
-		}
-	
+	}
+
 	tree_d as_tree_d() { 
 		if(custom==null) custom = new tree_d(); 
 		return (tree_d) custom; 
-		}
-	
+	}
+
 	vehiclelist_d as_vehiclelist_d() { 
 		if(custom==null) custom = new vehiclelist_d(); 
 		return (vehiclelist_d) custom; 
-		}
-	
+	}
+
 	void_d as_void_d() { return (void_d) custom; }
-	
+
 	vp_d as_vp_d() 
 	{ 
 		if(custom==null) custom = new vp_d(); 
 		return (vp_d) custom; 
 	}
-	
+
 	vp2_d as_vp2_d() 
 	{
 		if(custom==null) custom = new vp2_d(); 
 		return (vp2_d) custom; 
 	}
-	
+
 	public as_querystr_d as_querystr_d() 
 	{
 		if(custom==null) custom = new as_querystr_d(); 
@@ -1278,7 +1278,7 @@ public class Window extends WindowConstants
 	{
 		// Fight concurrent mod
 		ArrayList<Window> wcopy = new ArrayList<Window>(_windows);
-		
+
 		//ListIterator<Window> i = _windows.listIterator(_windows.size());
 		ListIterator<Window> i = wcopy.listIterator(_windows.size());
 
@@ -1852,7 +1852,7 @@ public class Window extends WindowConstants
 		{
 			if( u.isTopMostWindow() )
 				continue;
-		
+
 
 			if (w.left + w.width <= u.left ||
 					u.left + u.width <= w.left ||
@@ -1863,10 +1863,10 @@ public class Window extends WindowConstants
 
 			return w.BringWindowToFront();
 		}
-		*/
+		 */
 		// TODO XXX Remove - hacked in!
 		return w.BringWindowToFront();
-				
+
 		//return w;
 	}
 

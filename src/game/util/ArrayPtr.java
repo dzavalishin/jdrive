@@ -159,6 +159,9 @@ public class ArrayPtr<ItemType> {
 				ia[i] = iia[i];
 			return ia;
 		}
+		public static Long[] toLongArray(long[] li) {
+			return Arrays.stream(li).mapToObj( (lv) -> Long.valueOf(lv) ).toArray(Long[]::new);
+		}
 		
 		
 

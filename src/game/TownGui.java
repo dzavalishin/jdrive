@@ -391,13 +391,13 @@ public abstract class TownGui extends Town
 			//char buf1[64];
 			//int val;
 			int r;
-			int [] argv = new int[1];
+			Integer [] argv = new Integer[1];
 
 			argv[0] = a;
-			String buf1 = Strings.GetStringWithArgs(Str.STR_TOWN, argv);
+			String buf1 = Strings.GetStringWithArgs(Str.STR_TOWN, (Object[])argv);
 
 			argv[0] = b;
-			String buf2 = Strings.GetStringWithArgs(Str.STR_TOWN, argv);
+			String buf2 = Strings.GetStringWithArgs(Str.STR_TOWN, (Object[])argv);
 
 			r = buf1.compareTo(buf2);
 			if(0 != (_town_sort_order & 1)) r = -r;
