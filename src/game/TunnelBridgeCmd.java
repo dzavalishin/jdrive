@@ -22,7 +22,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	//extern void DrawCanalWater(TileIndex tile);
 
 
-	static final Bridge [] _bridge = new Bridge[Bridge.MAX_BRIDGES];
+	//static final Bridge [] _bridge = new Bridge[Bridge.MAX_BRIDGES];
 
 
 	// calculate the price factor for building a long bridge.
@@ -52,7 +52,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 	static  final /*PalSpriteID*/ int [] GetBridgeSpriteTable(int index, int table)
 	{
-		final Bridge bridge = _bridge[index];
+		final Bridge bridge = Bridge._bridge[index];
 		assert(table < 7);
 		if (bridge.sprite_table == null || bridge.sprite_table[table] == null) {
 			return _bridge_sprite_table[index][table];
@@ -140,7 +140,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 	static boolean CheckBridge_Stuff(int bridge_type, int bridge_len)
 	{
-		final Bridge b = _bridge[bridge_type];
+		final Bridge b = Bridge._bridge[bridge_type];
 		int max; // max possible length of a bridge (with patch 100)
 
 		if (bridge_type >= Bridge.MAX_BRIDGES) return false;
@@ -392,7 +392,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			and cost is computed in "bridge_gui.c". For AI, Towns this has to be of course calculated
 		 */
 		if (0==(flags & Cmd.DC_QUERY_COST)) {
-			final Bridge b = _bridge[bridge_type];
+			final Bridge b = Bridge._bridge[bridge_type];
 
 			bridge_len += 2;	// begin and end tiles/ramps
 
@@ -1529,7 +1529,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				if (0==(tile.getMap().m5 & 0x40) || // start/end tile of bridge
 						Math.abs(h.v - v.z_pos) > 2) { // high above the ground . on the bridge
 					/* modify speed of vehicle */
-					int spd = _bridge[GetBridgeType(tile)].speed;
+					int spd = Bridge._bridge[GetBridgeType(tile)].speed;
 					if (v.type == Vehicle.VEH_Road) spd *= 2;
 					if (spd < v.cur_speed) v.cur_speed = spd;
 				}

@@ -1,7 +1,5 @@
 package game;
 
-import game.Widget;
-
 /** Struct containing information about a single bridge type
  */
 
@@ -21,11 +19,11 @@ public class Bridge
 	static public final int MAX_BRIDGES = 13;
 
 	
-	final static Bridge orig_bridge[] = new Bridge[MAX_BRIDGES];
+	//final static Bridge orig_bridge[] = new Bridge[MAX_BRIDGES];
 	static Bridge _bridge[] = new Bridge[MAX_BRIDGES];
 
 
-	static BridgeData  _bridgedata;
+	static BridgeData  _bridgedata = new BridgeData();
 
 	public Bridge(int i, int j, int k, int l, int m, int n, int str, int[][] object, int o) {
 		avail_year = i;

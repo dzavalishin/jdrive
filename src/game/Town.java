@@ -1409,7 +1409,7 @@ public class Town extends TownTables implements IPoolItem
 		int n = Map.ScaleByMapSize(_num_initial_towns[GameOptions._opt.diff.number_towns] + (Hal.Random() & 7));
 
 		do {
-			if (CreateRandomTown(20) != null) 	//try 20 times for the first loop
+			if (CreateRandomTown(40) != null) 	// TODO was 20 -- try 20 times for the first loop
 				num++;
 		} while (--n > 0);
 

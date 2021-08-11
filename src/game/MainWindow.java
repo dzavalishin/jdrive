@@ -65,10 +65,10 @@ public class MainWindow extends JPanel implements ActionListener
 			public void keyTyped(KeyEvent e) { }
 
 			@Override
-			public void keyReleased(KeyEvent e) { processKey(e, false); }
+			public void keyReleased(KeyEvent e) { processKey(e, false); e.consume(); }
 
 			@Override
-			public void keyPressed(KeyEvent e) { processKey(e, true); }
+			public void keyPressed(KeyEvent e) { processKey(e, true); e.consume(); }
 		});
 
 
@@ -80,18 +80,21 @@ public class MainWindow extends JPanel implements ActionListener
 			public void mouseReleased(MouseEvent e) {
 				if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_down = false;
 				if( e.getButton() == MouseEvent.BUTTON2 ) Window._right_button_down = false;								
+				e.consume();
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
 				if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_down = true;
 				if( e.getButton() == MouseEvent.BUTTON2 ) Window._right_button_down = true;								
+				e.consume();
 			}
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_clicked = true;
-				if( e.getButton() == MouseEvent.BUTTON2 ) Window._right_button_clicked = true;				
+				if( e.getButton() == MouseEvent.BUTTON2 ) Window._right_button_clicked = true;
+				e.consume();
 			}
 
 			@Override
@@ -114,44 +117,18 @@ public class MainWindow extends JPanel implements ActionListener
 				int x = e.getX(); 
 				int y = e.getY();
 				
-				
-				// TODO hack
-				x -= 10; //myLocation.x;
-				y -= 30; //myLocation.y;
-
-				if (Hal._cursor.fix_at) {
-					int dx = x - Hal._cursor.pos.x;
-					int dy = y - Hal._cursor.pos.y;
-					if (dx != 0 || dy != 0) {
-						Hal._cursor.delta.x += dx;
-						Hal._cursor.delta.y += dy;
-
-						/* TODO set cursor pos
-						pt.x = _cursor.pos.x;
-						pt.y = _cursor.pos.y;
-
-						if (_wnd.double_size) {
-							pt.x *= 2;
-							pt.y *= 2;
-						}
-						ClientToScreen(hwnd, &pt);
-						SetCursorPos(pt.x, pt.y);
-						 */
-					}
-				} else {
-					Hal._cursor.delta.x += x - Hal._cursor.pos.x;
-					Hal._cursor.delta.y += y - Hal._cursor.pos.y;
-					Hal._cursor.pos.x = x;
-					Hal._cursor.pos.y = y;
-					Hal._cursor.dirty = true;
-				}
+				e.consume();				
+				processMouse(x, y);
 
 			}
 
 			@Override
 			public void mouseDragged(MouseEvent e) {
-				// TODO Auto-generated method stub
-
+				int x = e.getX(); 
+				int y = e.getY();
+				
+				e.consume();				
+				processMouse(x, y);
 			}
 		});
 
@@ -458,6 +435,40 @@ public class MainWindow extends JPanel implements ActionListener
 				
 		icm = new IndexColorModel(8, PALETTE_SIZE, rp, gp, bp, ap);
 		Gfx._pal_last_dirty = -1;
+	}
+
+
+	private void processMouse(int x, int y) {
+		// TODO hack
+		x -= 10; //myLocation.x;
+		y -= 30; //myLocation.y;
+
+		if (Hal._cursor.fix_at) {
+			int dx = x - Hal._cursor.pos.x;
+			int dy = y - Hal._cursor.pos.y;
+			if (dx != 0 || dy != 0) {
+				Hal._cursor.delta.x += dx;
+				Hal._cursor.delta.y += dy;
+
+				/* TODO set cursor pos
+				pt.x = _cursor.pos.x;
+				pt.y = _cursor.pos.y;
+
+				if (_wnd.double_size) {
+					pt.x *= 2;
+					pt.y *= 2;
+				}
+				ClientToScreen(hwnd, &pt);
+				SetCursorPos(pt.x, pt.y);
+				 */
+			}
+		} else {
+			Hal._cursor.delta.x += x - Hal._cursor.pos.x;
+			Hal._cursor.delta.y += y - Hal._cursor.pos.y;
+			Hal._cursor.pos.x = x;
+			Hal._cursor.pos.y = y;
+			Hal._cursor.dirty = true;
+		}
 	}
 
 

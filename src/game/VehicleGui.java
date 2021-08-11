@@ -13,7 +13,7 @@ public class VehicleGui {
 
 
 
-	static Sorting _sorting;
+	static Sorting _sorting = new Sorting();
 
 	static int _internal_name_sorter_id; // internal StringID for default vehicle-names
 	static int _last_vehicle_idx;        // cached index to hopefully speed up name-sorting
@@ -403,7 +403,7 @@ private static void show_cargo(ctype) {
 		case Vehicle.VEH_Road: {
 			int num = Global.NUM_ROAD_ENGINES;
 			//final Engine  e = GetEngine(Global.ROAD_ENGINES_INDEX);
-			byte cargo;
+			int cargo;
 			engine_id = Global.ROAD_ENGINES_INDEX;
 
 			do {
@@ -576,7 +576,7 @@ private static void show_cargo(ctype) {
 		case Vehicle.VEH_Road: {
 			int num = Global.NUM_ROAD_ENGINES;
 			int engine_id = Global.ROAD_ENGINES_INDEX;
-			byte cargo;
+			int cargo;
 
 			if (selected_id0[0] >= Global.ROAD_ENGINES_INDEX && selected_id0[0] < Global.SHIP_ENGINES_INDEX) {
 				cargo = EngineGui.RoadVehInfo(selected_id0[0]).cargo_type;
@@ -1121,10 +1121,10 @@ class Listing {
 }
 
 class Sorting {
-	Listing aircraft;
-	Listing roadveh;
-	Listing ship;
-	Listing train;
+	Listing aircraft = new Listing();
+	Listing roadveh  = new Listing();
+	Listing ship     = new Listing();
+	Listing train    = new Listing();
 } 
 
 

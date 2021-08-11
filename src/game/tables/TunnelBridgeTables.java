@@ -6,7 +6,7 @@ import game.Str;
 
 public class TunnelBridgeTables {
 
-	protected final Bridge orig_bridge[] = {
+	public static final Bridge orig_bridge[] = {
 			/*
 				   year of availablity
 				   |  minimum length
