@@ -464,7 +464,7 @@ public class Player
 
 		t = Town.ClosestTownFromTile(tile, (int)-1);
 
-		if (BitOps.IS_INT_INSIDE(t.townnametype, Strings.SPECSTR_TOWNNAME_START, Strings.SPECSTR_TOWNNAME_LAST+1)) 
+		if( t != null && BitOps.IS_INT_INSIDE(t.townnametype, Strings.SPECSTR_TOWNNAME_START, Strings.SPECSTR_TOWNNAME_LAST+1)) 
 		{
 			str = new StringID( t.townnametype - Strings.SPECSTR_TOWNNAME_START + Strings.SPECSTR_PLAYERNAME_START );
 			strp = t.townnameparts;

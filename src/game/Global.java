@@ -369,19 +369,19 @@ public class Global {
 	
 	
 	public static int Random() {
-		return hal.Random();
+		return Hal.Random();
 	}
 
 
 
 	@Deprecated
-	public static void SetDParamX(int []s, int n, int v)
+	public static void SetDParamX(Integer []s, int n, int v)
 	{
 		s[n] = v;
 	}
 
 	@Deprecated
-	public static int GetDParamX(int []s, int n)
+	public static int GetDParamX(Integer []s, int n)
 	{
 		return s[n];
 	}

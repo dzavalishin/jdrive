@@ -307,7 +307,6 @@ public class Clear extends ClearTables {
 			/* Clear the landscape at the tiles */
 			{
 				/*
-				int count;
 				MutableTileIndex ti = new MutableTileIndex(ts.tile_table);
 				for (count = ts.tile_table_count; count != 0; count--) {
 					Cmd.DoCommandByTile(ti, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
@@ -315,8 +314,13 @@ public class Clear extends ClearTables {
 				}
 				*/
 				
+				int count = 0;
 				for( TileIndex ti : ts.tile_table )
+				{
+					if( count++ >= ts.tile_table_count )
+						break;
 					Cmd.DoCommandByTile(ti, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+				}
 			}
 
 			/* change the height */

@@ -7,7 +7,7 @@ public class OrderGui {
 
 	static int OrderGetSel(final Window  w)
 	{
-		final Vehicle  v = Vehicle.GetVehicle(w.window_number.n);
+		final Vehicle  v = Vehicle.GetVehicle(w.window_number);
 		int num = w.as_order_d().sel;
 
 		return (num >= 0 && num < v.num_orders) ? num : v.num_orders;
@@ -41,7 +41,7 @@ public class OrderGui {
 		boolean shared_orders;
 		byte color;
 
-		v = Vehicle.GetVehicle(w.window_number.n);
+		v = Vehicle.GetVehicle(w.window_number);
 
 		w.disabled_state = (v.owner == Global._local_player) ? 0 : (
 			1 << 4 |   //skip
@@ -394,7 +394,7 @@ public class OrderGui {
 			break;
 
 		case WE_CLICK: {
-			Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+			Vehicle v = Vehicle.GetVehicle(w.window_number);
 			switch(e.widget) {
 			case 2: { /* orders list */
 				int sel;
@@ -460,7 +460,7 @@ public class OrderGui {
 		} break;
 
 		case WE_KEYPRESS: {
-			Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+			Vehicle v = Vehicle.GetVehicle(w.window_number);
 			int i;
 
 			for(i = 0; i < _order_keycodes.length; i++) {
@@ -477,7 +477,7 @@ public class OrderGui {
 		}
 
 		case WE_RCLICK: {
-			final Vehicle  v = Vehicle.GetVehicle(w.window_number.n);
+			final Vehicle  v = Vehicle.GetVehicle(w.window_number);
 			int s = OrderGetSel(w);
 
 			if (e.widget != 8) break;
@@ -489,12 +489,12 @@ public class OrderGui {
 		} break;
 
 		case WE_4: {
-			if (Window.FindWindowById(Window.WC_VEHICLE_VIEW, w.window_number.n) == null)
+			if (Window.FindWindowById(Window.WC_VEHICLE_VIEW, w.window_number) == null)
 				w.DeleteWindow();
 		} break;
 
 		case WE_PLACE_OBJ: {
-			OrdersPlaceObj(Vehicle.GetVehicle(w.window_number.n), e.tile, w);
+			OrdersPlaceObj(Vehicle.GetVehicle(w.window_number), e.tile, w);
 		} break;
 
 		case WE_ABORT_PLACE_OBJ: {
@@ -515,13 +515,15 @@ public class OrderGui {
 			 */
 			if (v != null && BitOps.HASBIT(w.click_state, 7)) {
 				Global._place_clicked_vehicle = null;
-				HandleOrderVehClick(Vehicle.GetVehicle(w.window_number.n), v, w);
+				HandleOrderVehClick(Vehicle.GetVehicle(w.window_number), v, w);
 			}
 		} break;
 
 		case WE_RESIZE:
 			/* Update the scroll + matrix */
 			w.vscroll.cap = (w.widget.get(2).bottom - w.widget.get(2).top) / 10;
+			break;
+		default:
 			break;
 		}
 
@@ -616,7 +618,7 @@ public class OrderGui {
 		}
 
 		if (w != null) {
-			w.window_number = new WindowNumber(veh);
+			w.window_number = veh;
 			w.caption_color = (byte) v.owner.id;
 			w.vscroll.cap = 6;
 			w.resize.step_height = 10;

@@ -62,7 +62,7 @@ public class Landscape extends GenLandTable
 		IntContainer ic = new IntContainer();
 		
 		ti.tile = tile;
-		ti.map5 = tile.getMap().m5;
+		ti.map5 = 0xFF & tile.getMap().m5;
 		ti.type = tile.GetTileType().ordinal();
 		ti.tileh = tile.GetTileSlope( ic );
 		ti.z = ic.v;

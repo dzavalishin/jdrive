@@ -2744,7 +2744,7 @@ public class Vehicle implements IPoolItem
 
 
 
-	static Rect _old_vehicle_coords;
+	static Rect _old_vehicle_coords = new Rect();
 
 	public void BeginVehicleMove() {
 		_old_vehicle_coords.left = left_coord;

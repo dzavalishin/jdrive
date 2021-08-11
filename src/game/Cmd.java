@@ -515,7 +515,7 @@ public class Cmd {
 		}
 
 
-		if ((0 == (cmd & Cmd.CMD_NO_TEST_IF_IN_NETWORK)) && Global._networking) {
+		if( !( (0 != (cmd & Cmd.CMD_NO_TEST_IF_IN_NETWORK)) && Global._networking) ) {
 			// first test if the command can be executed.
 			res = proc.exec(x,y, flags, p1, p2);
 			if (CmdFailed(res)) {

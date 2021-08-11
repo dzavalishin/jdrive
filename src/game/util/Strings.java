@@ -566,10 +566,10 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		int cap = 0;
 
 		//<NUM> {Length of each string} {each string}
-		int n = (byte)ca[cap++];
+		int n = 0xFF & ca[cap++];
 		int pos,i, mylen=0,mypos=0;
 		for(i=pos=0; i!=n; i++) {
-			int len = (byte)ca[cap++];
+			int len = 0xFF & ca[cap++];
 			if (i == form) {
 				mypos = pos;
 				mylen = len;
@@ -645,11 +645,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				int value = Getint(arg[argc++]);
 				if (GameOptions._opt_ptr.kilometers) value = value * 1648 >> 10;
 			buff.append( FormatCommaNumber(value) );
-			if (GameOptions._opt_ptr.kilometers) {
-				buff.append( " km/h" );
-			} else {
-				buff.append( " mph" );
-			}
+			if (GameOptions._opt_ptr.kilometers) {	buff.append( " km/h" );	} 
+			else {	buff.append( " mph" );	}
 			break;
 			}
 			// 0x85 is used as escape character..
@@ -665,8 +662,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				case 3: { /* {SHORTCARGO} */
 					// Short description of cargotypes. Layout:
 					// 8-bit = cargo type
-					// 16-bit = cargo count
-					//StringID 
+					// 16-bit = cargo count 
 					int cargo_str = _cargo_string_list[GameOptions._opt_ptr.landscape][Getint(arg[argc++])];
 					int multiplier = (cargo_str == Str.STR_LITERS) ? 1000 : 1;
 					// liquid type of cargo is multiplied by 100 to get correct amount
@@ -677,7 +673,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				case 4: {/* {CURRCOMPACT64} */
 					// 64 bit compact currency-unit
 					//buff.append( FormatGenericCurrency(_currency, Getlong(arg[argc++]), true) );
-					buff.append( "$$$" ); argc++;
+					buff.append( "$$$" ); argc+=2;
 					break;
 				}
 				case 5: { /* {STRING1} */
@@ -754,7 +750,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				case 13: { // {G 0 Der Die Das}
 					/*
 				//final byte* s = (final byte*)GetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
-				final String s = StringGetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
+				final String s = StringGetStringPtr(arg[(byte)str[stri++]]); // contains the string that determines gender.
 				int len;
 				int gender = 0;
 				if (s != null && s[0] == 0x87) gender = s[1];
@@ -764,10 +760,10 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 					/*
 							//final byte* s = (final byte*)GetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
-							final String s = StringGetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
+							final String s = StringGetStringPtr(arg[(byte)str[stri++]]); // contains the string that determines gender.
 
 							byte argindex = (byte)str[stri++];
-							Object arg = argv_orig[argindex];
+							Object arg = arg[argindex];
 							//byte[] s = (byte [])GetStringPtr(arg);
 							String s = StringGetStringPtr(arg);
 
@@ -775,9 +771,10 @@ private  final int *GetArgvPtr(final int **argv, int n)
 							if (s != null && s[0] == 0x87) gender = s[1];
 
 							int[]skip = { 0 };
-							buff.append( ExtractChoice( str, skip, gender)
+							buff.append( ExtractChoice( str, skip, gender);
 							str = str.substring(skip[0] );
 					 */
+					stri+=2;
 					buff.append( " !!fixCase13!! " );
 					break;
 				}
@@ -822,7 +819,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				int acnt = arg.length - argc;
 				Object [] acopy = new Object[acnt];
 				System.arraycopy(arg, argc, acopy, 0, acnt);
-				argc += acnt; // TODO wrong, must get used count from GetStringWithArgs 
+				//argc += acnt; // TODO wrong, must get used count from GetStringWithArgs 
 				buff.append( GetStringWithArgs(sstri, acopy) );
 				modifier = 0;
 				break;
@@ -843,7 +840,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				//int [] len = { 0 };
 				//str = ParseStringChoice(str, DeterminePluralForm(v), buff, len);
 				//buff += len[0];
-				buff.append(ParseStringChoice( new String( str ), DeterminePluralForm(v)));
+				buff.append(ParseStringChoice( new String( str, stri, str.length-stri ), DeterminePluralForm(v)));
 				break;
 			}
 
@@ -853,7 +850,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 			case 0x8F: // {CURRENCY}
 				// TODO buff.append( FormatGenericCurrency(_currency, Getint(arg[argc++]), false) );
-				buff.append( "$$$" );
+				buff.append( Getint(arg[argc++]) + "$" ); //argc++;
 				break;
 
 			case 0x99: { // {WAYPOINT}
@@ -895,9 +892,9 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				break;
 			}
 
-			case 0x9C: { // {CURRENCY64}
+			case 0x9C: { // TODO {CURRENCY64}
 				//buff.append( FormatGenericCurrency(_currency, Getlong(arg[argc++]), false) );
-				buff.append( "$$$" ); argc++;
+				buff.append( Getint(arg[argc++]) + "$" ); //argc++;
 				break;
 			}
 
@@ -1225,7 +1222,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			}
 			//langpack_offs[i] = new String( s, sp, len );
 			langpack_offs[i] = BitOps.stringFromBytes( s, sp, len );
-			Global.debug("s = '%s'", langpack_offs[i] );
+			//Global.debug("s = '%s'", langpack_offs[i] );
 			sp += len;
 		}
 

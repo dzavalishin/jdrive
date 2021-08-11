@@ -98,3 +98,11 @@ Integer. and Long. have operations needed
 
 * int used as boolean
 
+
+* java decl does not create object itself = bunch of null ptr accesses
+
+
+* unsigned problems - negatives where they'r not assumed to be and vice versa
+
+a lot of 16 bit integers in original game, all become unsigneds when load from data files
+

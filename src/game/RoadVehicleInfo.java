@@ -1,28 +1,26 @@
 package game;
 
 public class RoadVehicleInfo {
-	byte image_index;
-	byte base_cost;
-	byte running_cost;
-	byte sfx;
-	byte max_speed;
-	byte capacity;
-	byte cargo_type;
+	int image_index;
+	int base_cost;
+	int running_cost;
+	int sfx;
+	int max_speed;
+	int capacity;
+	int cargo_type;
 
 	public RoadVehicleInfo(
 			int i, int j, int k, 
 			int snd, int l, int m, 
 			int ct) 
 	{
-
-		 image_index = (byte) i;
-		 base_cost = (byte) j;
-		 running_cost = (byte) k;
-		 sfx = (byte) snd;
-		 max_speed = (byte) l;
-		 capacity = (byte) m;
-		 cargo_type = (byte) ct;
-		
+		 image_index = i;
+		 base_cost = j;
+		 running_cost = k;
+		 sfx = snd;
+		 max_speed = l;
+		 capacity = m;
+		 cargo_type = ct;		
 	}
 	
 }

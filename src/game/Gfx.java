@@ -669,8 +669,9 @@ public class Gfx extends PaletteTabs
 		int base = _stringwidth_base;
 		int strp = 0;
 		char [] ca = str.toCharArray();
-		for (c = ca[strp]; /*c != '\0' &&*/ strp < ca.length; c = ca[strp++]) 
+		for (; /*c != '\0' &&*/ strp < ca.length; strp++) 
 		{
+			c = ca[strp];
 			c &= 0xFF; // [dz] ok?
 			if (c >= ASCII_LETTERSTART) {
 				w += GetCharacterWidth(base + c);
@@ -2385,13 +2386,15 @@ class DrawStringStateMachine
 			}
 
 			for(;;) {
-				c = sc[sp++]; //*string++;
-				c &= 0xFF; // [dz] ok?
 				//skip_cont:;
-				if (c == 0 || sp >= sc.length) {
+				if (sp >= sc.length) {
 					Gfx._stringwidth_out = base;
 					return x;
 				}
+
+				c = sc[sp++]; //*string++;
+				c &= 0xFF; // [dz] ok?
+				
 				if (c >= Gfx.ASCII_LETTERSTART) {
 					if (x >= dpi.left + dpi.width)
 					{
@@ -2441,6 +2444,11 @@ class DrawStringStateMachine
 	private void skipChar()
 	{
 		for(;;) {
+			if( sp >= sc.length )
+			{
+				//sp--; // [dz] TODO ok?
+				return;
+			}
 			char c = sc[sp++]; //*string++;
 			if (c < Gfx.ASCII_LETTERSTART || sp >= sc.length)
 			{

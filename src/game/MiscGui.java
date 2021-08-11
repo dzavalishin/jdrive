@@ -436,7 +436,7 @@ public class MiscGui {
 		Window.AllocateWindowDescFront(_build_trees_scen_desc, 0);
 	}
 
-	static int [] _errmsg_decode_params = new int[20];
+	static Integer [] _errmsg_decode_params = new Integer[20];
 	static StringID _errmsg_message_1, _errmsg_message_2;
 	static int _errmsg_duration;
 
@@ -611,6 +611,7 @@ public class MiscGui {
 			msg = Str.STR_0803_INCOME;
 		}
 		Global.SetDParam(0, cost);
+		Global.SetDParam(4, 0); // [dz] code below wants it
 		TextEffect.AddTextEffect(msg, pt.x, pt.y, 0x250);
 	}
 

@@ -569,7 +569,7 @@ public class NewsItem {
 		int item = (_forced_news == INVALID_NEWS) ? _current_news : _forced_news;
 		NewsItem ni;
 
-		if (item >= MAX_NEWS) return true;
+		if (item >= MAX_NEWS || item < 0) return true;
 		ni = _news_items[item];
 
 		// Ticker message
