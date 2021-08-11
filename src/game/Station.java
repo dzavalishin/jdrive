@@ -1889,10 +1889,14 @@ public class Station extends StationTables implements IPoolItem
 		/* Check if local auth refuses a new airport */
 		{
 			int [] num = {0};
-			//FOR_ALL_STATIONS(st) 
+ 
 			_station_pool.forEach( (i,st) ->
 			{
-				if (st.owner.id != Owner.OWNER_TOWN && st.xy != null && st.town == t && 0 != (st.facilities&FACIL_AIRPORT) && st.airport_type != AirportFTAClass.AT_OILRIG)
+				if ( (st.owner == null || st.owner.id != Owner.OWNER_TOWN) 
+						&& st.xy != null 
+						&& st.town == t 
+						&& 0 != (st.facilities&FACIL_AIRPORT) 
+						&& st.airport_type != AirportFTAClass.AT_OILRIG)
 					num[0]++;
 			});
 			if (num[0] >= 2 && Global._current_player.id != Owner.OWNER_TOWN) {

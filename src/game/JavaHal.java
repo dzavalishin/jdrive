@@ -161,6 +161,8 @@ class JavaHal extends Hal
 			}*/
 
 			_cursor.delta.x = _cursor.delta.y = 0;
+			Window._left_button_clicked = false;
+			Window._right_button_clicked = false;
 
 			// TODO return me 
 			if (Global._force_full_redraw)					

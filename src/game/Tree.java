@@ -93,7 +93,8 @@ public class Tree  extends TreeTables {
 		i = Map.ScaleByMapSize(1000);
 		do {
 			int r = Hal.Random();
-			TileIndex tile = TileIndex.RandomTileSeed(r);
+			//TileIndex tile = TileIndex.RandomTileSeed(r);
+			TileIndex tile = TileIndex.RandomTile();
 			/* Only on clear tiles, and NOT on farm-tiles or rocks */
 			if (tile.IsTileType( TileTypes.MP_CLEAR) && (tile.getMap().m5 & 0x1F) != 0x0F && (tile.getMap().m5 & 0x1C) != 8) {
 				PlaceTree(tile, r, 0);
@@ -321,13 +322,13 @@ public class Tree  extends TreeTables {
 
 			/* draw them in a sorted way */
 			for(;;) {
-				byte min = (byte) 0xFF;
+				int min = 0xFF;
 				TreeListEnt tep = null;
 
 				i = (ti.map5 >> 6) + 1;
 				do {
 					if (te[--i].image != 0 && te[i].x + te[i].y < min) {
-						min = (byte) (te[i].x + te[i].y);
+						min = (te[i].x + te[i].y);
 						tep = te[i];
 					}
 				} while (i > 0);

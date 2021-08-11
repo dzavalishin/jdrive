@@ -576,7 +576,12 @@ public class TileIndex implements Comparable<TileIndex>
 	}
 
 
-	static TileIndex RandomTileSeed(int r) { return new TileIndex( TILE_MASK(r) ); }
+	// TODO use code below
+	static TileIndex RandomTileSeed(int r) 
+	{ 
+		return new TileIndex( TILE_MASK(r) ); 
+	}
+
 	static TileIndex RandomTile() 
 	{
 		while(true)
