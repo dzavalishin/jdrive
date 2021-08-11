@@ -645,6 +645,13 @@ public class Gfx extends PaletteTabs
 			_stringwidth_base = _stringwidth_out;
 
 			for(;;) {
+				if( sp >= sc.length) {
+					y += mt;
+					if (--num < 0) {
+						_stringwidth_base = 0;
+						return;
+					}
+				}
 				c = sc[sp++]; // *src++;
 				if (c == 0) {
 					y += mt;
@@ -850,11 +857,10 @@ public class Gfx extends PaletteTabs
 						dst_data[1+dst_shift] = ctab[src_data[1+src_shift]];
 						dst_data[0+dst_shift] = ctab[src_data[0+src_shift]];
 						 */
-						dst.w( 3, ctab[src.r(3)] );
-						dst.w( 2, ctab[src.r(2)] );
-						dst.w( 1, ctab[src.r(1)] );
-						dst.w( 0, ctab[src.r(0)] );
-
+						dst.w( 3, ctab[0xFF & src.r(3)] );
+						dst.w( 2, ctab[0xFF & src.r(2)] );
+						dst.w( 1, ctab[0xFF & src.r(1)] );
+						dst.w( 0, ctab[0xFF & src.r(0)] );
 
 						//dst_shift += 4;
 						//src_shift += 4;
@@ -864,7 +870,7 @@ public class Gfx extends PaletteTabs
 					for (; num != 0; num--)
 					{
 						//dst_data[dst_shift++] = ctab[src_data[src_shift++]];
-						dst.w( 0, ctab[src.r(0)] );
+						dst.w( 0, ctab[0xFF & src.r(0)] );
 						src.madd(1);
 						dst.madd(1);
 					}

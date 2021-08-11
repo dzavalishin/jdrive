@@ -6,9 +6,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import game.ai.Ai;
+import game.tables.StationTables;
 import game.util.BitOps;
 
-public class Station implements IPoolItem
+public class Station extends StationTables implements IPoolItem
 {
 
 	TileIndex xy;
@@ -2331,8 +2332,8 @@ public class Station implements IPoolItem
 	{
 		int image_or_modificator;
 		int image;
-		final  DrawTileSeqStruct dtss;
-		final  DrawTileSprites t = null;
+		
+		DrawTileSprites t = null;
 		/* RailType */ int railtype = BitOps.GB(ti.tile.M().m3, 0, 4);
 		final  RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
 		//SpriteID 
@@ -2365,7 +2366,8 @@ public class Station implements IPoolItem
 			}
 		} */
 
-		if (t == null) t = Global._station_display_datas[ti.map5];
+		if (t == null) 
+			t = _station_display_datas[ti.map5];
 
 		image = t.ground_sprite;
 		if(0 != (image & Sprite.PALETTE_MODIFIER_COLOR)) image |= image_or_modificator;
@@ -2392,7 +2394,7 @@ public class Station implements IPoolItem
 		//for (dtss = t.seq; ((byte) dtss.delta_x) != 0x80; dtss++)
 		for (int ssi = 0; ssi < t.seq.length; ssi++)
 		{
-			dtss = t.seq[ssi];
+			final DrawTileSeqStruct dtss = t.seq[ssi];
 			
 			if(((byte) dtss.delta_x) == 0x80)
 				break;
@@ -2416,7 +2418,7 @@ public class Station implements IPoolItem
 	public static void StationPickerDrawSprite(int x, int y, /* RailType */ int railtype, int image)
 	{
 		int ormod, img;
-		final  DrawTileSeqStruct dtss;
+		//DrawTileSeqStruct dtss;
 		final  DrawTileSprites t;
 		final  RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
 
@@ -2426,14 +2428,26 @@ public class Station implements IPoolItem
 
 		img = t.ground_sprite;
 		if(0 != (img & Sprite.PALETTE_MODIFIER_COLOR)) img |= ormod;
-		Gfx.DrawSprite(img + rti.total_offset, x, y);
+		Gfx.DrawSprite(img + rti.total_offset.id, x, y);
 
-		//foreach_draw_tile_seq(dtss, t.seq) 
+		/*(/foreach_draw_tile_seq(dtss, t.seq) 
 		for (dtss = t.seq; ((byte) dtss.delta_x) != 0x80; dtss++)
 		{
 			Point pt = Point.RemapCoords(dtss.delta_x, dtss.delta_y, dtss.delta_z);
 			Gfx.DrawSprite((dtss.image | ormod) + rti.total_offset, x + pt.x, y + pt.y);
+		}*/
+
+		for (int ssp = 0; ssp < t.seq.length ; ssp++)
+		{
+			final DrawTileSeqStruct dtss = t.seq[ssp];
+					
+			if( ((byte) dtss.delta_x) == 0x80)  
+				break;
+			
+			Point pt = Point.RemapCoords(dtss.delta_x, dtss.delta_y, dtss.delta_z);
+			Gfx.DrawSprite((dtss.image | ormod) + rti.total_offset.id, x + pt.x, y + pt.y);
 		}
+	
 	}
 
 	private static int GetSlopeZ_Station(final  TileInfo  ti)
