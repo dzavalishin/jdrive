@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import game.struct.RailtypeSlowdownParams;
 import game.struct.TrainCollideChecker;
-import game.tables.EngineTables2;
 import game.tables.TrainTables;
 import game.util.BitOps;
 
@@ -1301,33 +1300,34 @@ public class TrainCmd extends TrainTables
 		}
 	}
 
-	/* TODO
-	static void SwapTrainFlags(byte *swap_flag1, byte *swap_flag2)
+
+	static void SwapTrainFlags(VehicleRail rail1, VehicleRail rail2)
+	//byte *swap_flag1, byte *swap_flag2)
 	{
 		byte flag1, flag2;
 
-		flag1 = *swap_flag1;
-		flag2 = *swap_flag2;
+		flag1 = rail1.flags; //*swap_flag1;
+		flag2 = rail2.flags;
 
 		// Clear the flags 
-		CLRBIT(*swap_flag1, Vehicle.VRF_GOINGUP);
-		CLRBIT(*swap_flag1, Vehicle.VRF_GOINGDOWN);
-		CLRBIT(*swap_flag2, Vehicle.VRF_GOINGUP);
-		CLRBIT(*swap_flag2, Vehicle.VRF_GOINGDOWN);
+		rail1.flags = BitOps.RETCLRBIT(rail1.flags, Vehicle.VRF_GOINGUP);
+		rail1.flags = BitOps.RETCLRBIT(rail1.flags, Vehicle.VRF_GOINGDOWN);
+		rail2.flags = BitOps.RETCLRBIT(rail2.flags, Vehicle.VRF_GOINGUP);
+		rail2.flags = BitOps.RETCLRBIT(rail2.flags, Vehicle.VRF_GOINGDOWN);
 
 		// Reverse the rail-flags (if needed) 
 	if (BitOps.HASBIT(flag1, Vehicle.VRF_GOINGUP)) {
-		SETBIT(*swap_flag2, Vehicle.VRF_GOINGDOWN);
+		rail2.flags = BitOps.RETSETBIT(rail2.flags, Vehicle.VRF_GOINGDOWN);
 	} else if (BitOps.HASBIT(flag1, Vehicle.VRF_GOINGDOWN)) {
-		SETBIT(*swap_flag2, Vehicle.VRF_GOINGUP);
+		rail2.flags = BitOps.RETSETBIT(rail2.flags, Vehicle.VRF_GOINGUP);
 	}
 	if (BitOps.HASBIT(flag2, Vehicle.VRF_GOINGUP)) {
-		SETBIT(*swap_flag1, Vehicle.VRF_GOINGDOWN);
+		rail1.flags = BitOps.RETSETBIT(rail1.flags, Vehicle.VRF_GOINGDOWN);
 	} else if (BitOps.HASBIT(flag2, Vehicle.VRF_GOINGDOWN)) {
-		SETBIT(*swap_flag1, Vehicle.VRF_GOINGUP);
+		rail1.flags = BitOps.RETSETBIT(rail1.flags, Vehicle.VRF_GOINGUP);
 	}
 }
-	 */
+
 
 	static void ReverseTrainSwapVeh(Vehicle v, int l, int r)
 	{
@@ -2934,7 +2934,7 @@ public class TrainCmd extends TrainTables
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		int r, tracks,ts;
 		int i, enterdir, /*newdir,*/ dir;
-		byte chosen_dir;
+		byte chosen_dir = 0; // TODO [dz] logic lost? Does not get value
 		byte chosen_track;
 		//byte old_z;
 
@@ -2958,7 +2958,7 @@ public class TrainCmd extends TrainTables
 				}
 			}
 			update_image_and_delta(v,gp,prev);
-			continue;
+			//continue; // TODO [dz] check logic against orig code, this 'continue' kills code below
 
 
 

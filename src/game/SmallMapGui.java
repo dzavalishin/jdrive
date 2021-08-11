@@ -84,14 +84,14 @@ public class SmallMapGui extends SmallMapGuiTables
 		if (tt == TileTypes.MP_TUNNELBRIDGE) {
 			int t = tile.getMap().m5;
 			if ((t & 0x80) == 0) t >>= 1;
-				if ((t & 6) == 0) {
-					t = TileTypes.MP_RAILWAY.ordinal();
-				} else if ((t & 6) == 2) {
-					t = TileTypes.MP_STREET.ordinal();
-				} else {
-					t = TileTypes.MP_WATER.ordinal();
-				}
-				return TileTypes.values[t];
+			if ((t & 6) == 0) {
+				t = TileTypes.MP_RAILWAY.ordinal();
+			} else if ((t & 6) == 2) {
+				t = TileTypes.MP_STREET.ordinal();
+			} else {
+				t = TileTypes.MP_WATER.ordinal();
+			}
+			return TileTypes.values[t];
 		}
 		return tt;
 	}
@@ -154,6 +154,7 @@ public class SmallMapGui extends SmallMapGuiTables
 
 		if (t == TileTypes.MP_STATION) {
 			byte m5 = tile.getMap().m5;
+			/*
 			(bits = MKCOLOR(0x56565656), m5 < 8) ||			//   8 - railroad station (green)
 			(bits = MKCOLOR(0xB8B8B8B8), m5 < 0x43) ||	//  67 - airport (red)
 			(bits = MKCOLOR(0xC2C2C2C2), m5 < 0x47) ||	//  71 - truck loading bay (orange)
@@ -161,6 +162,16 @@ public class SmallMapGui extends SmallMapGuiTables
 			(bits = MKCOLOR(0x98989898), m5 < 0x53) ||	//  83 - docks (blue)
 			(bits = MKCOLOR(0xB8B8B8B8), m5 < 0x73) ||	// 115 - airport (red) (new airports)
 			(bits = MKCOLOR(0xFFFFFFFF), true);					// all others
+			 */
+
+			if( m5 < 8 ) bits = MKCOLOR(0x56565656);
+			else if( m5 < 0x43 ) bits = MKCOLOR(0xB8B8B8B8);
+			else if( m5 < 0x47 ) bits = MKCOLOR(0xC2C2C2C2);
+			else if( m5 < 0x4B ) bits = MKCOLOR(0xBFBFBFBF);
+			else if( m5 < 0x53 ) bits = MKCOLOR(0x98989898);
+			else if( m5 < 0x73 ) bits = MKCOLOR(0xB8B8B8B8);
+			else bits = MKCOLOR(0xFFFFFFFF);
+
 		} else {
 			// ground color
 			bits = ApplyMask(MKCOLOR(0x54545454), _smallmap_contours_andor[t.ordinal()]);
@@ -277,7 +288,7 @@ public class SmallMapGui extends SmallMapGuiTables
 		ViewPort vp;
 
 
-		
+
 		old_dpi = Hal._cur_dpi;
 		Hal._cur_dpi = dpi;
 
@@ -346,7 +357,7 @@ public class SmallMapGui extends SmallMapGuiTables
 			while(ii.hasNext())
 			{
 				Vehicle v = ii.next();
-				
+
 				if (v.type != 0 && v.type != Vehicle.VEH_Special &&
 						(v.vehstatus & (Vehicle.VS_HIDDEN | Vehicle.VS_UNCLICKABLE)) == 0) {
 					// Remap into flat coordinates.
@@ -601,6 +612,8 @@ public class SmallMapGui extends SmallMapGuiTables
 			if ((++w.vscroll.pos & 0x1F) == 0)
 				w.SetWindowDirty();
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -659,7 +672,7 @@ public class SmallMapGui extends SmallMapGuiTables
 			break;
 		case WE_PAINT:
 			// set the number in the title bar
-			Global.SetDParam(0, (w.window_number.n+1));
+			Global.SetDParam(0, (w.window_number+1));
 
 			w.DrawWindowWidgets();
 			w.DrawWindowViewport();
@@ -699,6 +712,8 @@ public class SmallMapGui extends SmallMapGuiTables
 
 			w.viewport.virtual_width  += e.diff.x;
 			w.viewport.virtual_height += e.diff.y;
+			break;
+		default:
 			break;
 		}
 	}

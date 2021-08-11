@@ -134,7 +134,7 @@ public class PlayerGui
 	{
 		switch(e.event) {
 		case WE_PAINT: {
-			PlayerID player = PlayerID.get( w.window_number.n );
+			PlayerID player = PlayerID.get( w.window_number );
 			final Player  p = Player.GetPlayer(player);
 
 			w.disabled_state = p.current_loan != 0 ? 0 : (1 << 7);
@@ -153,7 +153,7 @@ public class PlayerGui
 			case 2: {/* toggle size */
 				byte mode = (byte)w.as_def_d().data_1;
 				boolean stickied = 0 !=(w.flags4 & Window.WF_STICKY);
-				PlayerID player = PlayerID.get( w.window_number.n );
+				PlayerID player = PlayerID.get( w.window_number );
 				w.DeleteWindow();
 				DoShowPlayerFinances(player.id, !BitOps.HASBIT(mode, 0), stickied);
 			} break;
@@ -166,6 +166,9 @@ public class PlayerGui
 				Cmd.DoCommandP(null, 0, Global._ctrl_pressed ? 1 : 0, null, Cmd.CMD_DECREASE_LOAN | Cmd.CMD_MSG(Str.STR_702F_CAN_T_REPAY_LOAN));
 				break;
 			}
+			break;
+			
+		default:
 			break;
 		}
 	}
@@ -286,6 +289,9 @@ public class PlayerGui
 				}
 			}
 			break;
+			
+		default:
+			break;
 		}
 	}
 
@@ -312,7 +318,7 @@ public class PlayerGui
 			Player p;
 			w.click_state = (w.click_state & ~(1<<5|1<<6)) | ((1<<5) << w.as_facesel_d().gender);
 			w.DrawWindowWidgets();
-			p = Player.GetPlayer(w.window_number.n);
+			p = Player.GetPlayer(w.window_number);
 			Player.DrawPlayerFace(w.as_facesel_d().face, p.player_color, 2, 16);
 		} break;
 
@@ -333,6 +339,9 @@ public class PlayerGui
 				w.SetWindowDirty();
 				break;
 			}
+			break;
+			
+		default:
 			break;
 		}
 	}
@@ -496,7 +505,7 @@ public class PlayerGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Player  p = Player.GetPlayer(w.window_number.n);
+			final Player  p = Player.GetPlayer(w.window_number);
 			int dis = 0;
 
 			if (!Window.IsWindowOfPrototype(w, _other_player_company_widgets)) {
@@ -531,7 +540,7 @@ public class PlayerGui
 
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
-			Global.SetDParam(2, Player.GetPlayerNameString( PlayerID.get( w.window_number.n ), 3));
+			Global.SetDParam(2, Player.GetPlayerNameString( PlayerID.get( w.window_number ), 3));
 
 			w.disabled_state = dis;
 			w.DrawWindowWidgets();
@@ -539,7 +548,7 @@ public class PlayerGui
 			Global.SetDParam(0, p.inaugurated_year + 1920);
 			Gfx.DrawString(110, 25, Str.STR_7038_INAUGURATED, 0);
 
-			DrawPlayerVehiclesAmount( PlayerID.get(w.window_number.n) );
+			DrawPlayerVehiclesAmount( PlayerID.get(w.window_number) );
 
 			Gfx.DrawString(110,48, Str.STR_7006_COLOR_SCHEME, 0);
 			// Draw company-colour bus (0xC19)
@@ -560,40 +569,40 @@ public class PlayerGui
 		case WE_CLICK:
 			switch (e.widget) {
 			case 3: { /* select face */
-				Window wf = Window.AllocateWindowDescFront(_select_player_face_desc, w.window_number.n);
+				Window wf = Window.AllocateWindowDescFront(_select_player_face_desc, w.window_number);
 				if (wf != null) {
-					wf.caption_color = (byte) w.window_number.n;
-					wf.as_facesel_d().face = Player.GetPlayer(wf.window_number.n).face;
+					wf.caption_color = (byte) w.window_number;
+					wf.as_facesel_d().face = Player.GetPlayer(wf.window_number).face;
 					wf.as_facesel_d().gender = 0;
 				}
 			} break;
 
 			case 4: {/* change color */
-				Window wf = Window.AllocateWindowDescFront(_select_player_color_desc,w.window_number.n);
+				Window wf = Window.AllocateWindowDescFront(_select_player_color_desc,w.window_number);
 				if (wf != null) {
-					wf.caption_color = (byte) wf.window_number.n;
+					wf.caption_color = (byte) wf.window_number;
 					wf.vscroll.cap = 8;
 				}
 			} break;
 
 			case 5: {/* change president name */
-				final Player  p = Player.GetPlayer(w.window_number.n);
+				final Player  p = Player.GetPlayer(w.window_number);
 				w.as_def_d().byte_1 = 0;
 				Global.SetDParam(0, p.president_name_2);
 				MiscGui.ShowQueryString( new StringID( p.president_name_1 ), new StringID( Str.STR_700B_PRESIDENT_S_NAME ), 31, 94, w.window_class, w.window_number);
 			} break;
 
 			case 6: {/* change company name */
-				Player p = Player.GetPlayer(w.window_number.n);
+				Player p = Player.GetPlayer(w.window_number);
 				w.as_def_d().byte_1 = 1;
 				Global.SetDParam(0, p.name_2);
 				MiscGui.ShowQueryString( new StringID(p.name_1), new StringID(Str.STR_700A_COMPANY_NAME), 31, 150, w.window_class, w.window_number);
 			} break;
 
 			case 7: {/* build hq */
-				TileIndex tile = Player.GetPlayer(w.window_number.n).location_of_house;
+				TileIndex tile = Player.GetPlayer(w.window_number).location_of_house;
 				if (tile == null) {
-					if ((byte)w.window_number.n != Global._local_player.id)
+					if ((byte)w.window_number != Global._local_player.id)
 						return;
 					ViewPort.SetObjectToPlaceWnd(Sprite.SPR_CURSOR_HQ, 1, w);
 					ViewPort.SetTileSelectSize(2, 2);
@@ -607,11 +616,11 @@ public class PlayerGui
 				ViewPort.SetTileSelectSize(2, 2);
 				break;
 			case 9: /* buy 25% */
-				Cmd.DoCommandP(null, w.window_number.n, 0, null, Cmd.CMD_BUY_SHARE_IN_COMPANY | Cmd.CMD_MSG(Str.STR_707B_CAN_T_BUY_25_SHARE_IN_THIS));
+				Cmd.DoCommandP(null, w.window_number, 0, null, Cmd.CMD_BUY_SHARE_IN_COMPANY | Cmd.CMD_MSG(Str.STR_707B_CAN_T_BUY_25_SHARE_IN_THIS));
 				break;
 
 			case 10: /* sell 25% */
-				Cmd.DoCommandP(null, w.window_number.n, 0, null, Cmd.CMD_SELL_SHARE_IN_COMPANY | Cmd.CMD_MSG(Str.STR_707C_CAN_T_SELL_25_SHARE_IN));
+				Cmd.DoCommandP(null, w.window_number, 0, null, Cmd.CMD_SELL_SHARE_IN_COMPANY | Cmd.CMD_MSG(Str.STR_707C_CAN_T_SELL_25_SHARE_IN));
 				break;
 			case 11: { /* Password protect company */
 				/*#ifdef ENABLE_NETWORK
@@ -638,8 +647,8 @@ public class PlayerGui
 
 
 		case WE_DESTROY:
-			Window.DeleteWindowById(Window.WC_PLAYER_COLOR, w.window_number.n);
-			Window.DeleteWindowById(Window.WC_PLAYER_FACE, w.window_number.n);
+			Window.DeleteWindowById(Window.WC_PLAYER_COLOR, w.window_number);
+			Window.DeleteWindowById(Window.WC_PLAYER_FACE, w.window_number);
 			break;
 
 		case WE_ON_EDIT_TEXT: {
@@ -663,6 +672,9 @@ public class PlayerGui
 				#endif */
 			}
 		} break;
+		
+		default:
+			break;
 
 		}
 	}
@@ -689,7 +701,7 @@ public class PlayerGui
 		Window  w;
 
 		w = Window.AllocateWindowDescFront( (player == Global._local_player.id) ? _my_player_company_desc : _other_player_company_desc, player);
-		if (w != null) w.caption_color = (byte) w.window_number.n;
+		if (w != null) w.caption_color = (byte) w.window_number;
 	}
 
 
@@ -698,7 +710,7 @@ public class PlayerGui
 	{
 		switch(e.event) {
 		case WE_PAINT: {
-			Player p = Player.GetPlayer(w.window_number.n);
+			Player p = Player.GetPlayer(w.window_number);
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
 			w.DrawWindowWidgets();
@@ -718,10 +730,13 @@ public class PlayerGui
 				w.DeleteWindow();
 				break;
 			case 4: {
-				Cmd.DoCommandP(null, w.window_number.n, 0, null, Cmd.CMD_BUY_COMPANY | Cmd.CMD_MSG(Str.STR_7060_CAN_T_BUY_COMPANY));
+				Cmd.DoCommandP(null, w.window_number, 0, null, Cmd.CMD_BUY_COMPANY | Cmd.CMD_MSG(Str.STR_7060_CAN_T_BUY_COMPANY));
 				break;
 			}
 			}
+			break;
+			
+		default:
 			break;
 		}
 	}
@@ -810,7 +825,10 @@ public class PlayerGui
 			break;
 		case WE_DESTROY: /* Show the highscore window when this one is closed */
 			if (!Global._networking) Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE); // unpause
-			ShowHighscoreTable(w.window_number.n, w.as_highscore_d().rank);
+			ShowHighscoreTable(w.window_number, w.as_highscore_d().rank);
+			break;
+			
+		default:
 			break;
 		}
 	}
@@ -819,9 +837,9 @@ public class PlayerGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			// TODO final HighScore hs = _highscore_table[w.window_number.n];
+			// TODO final HighScore hs = _highscore_table[w.window_number];
 			int x, y;
-			byte i;
+			//byte i;
 
 			{
 				int [] xp = {0};
@@ -833,7 +851,7 @@ public class PlayerGui
 			}
 
 			Global.SetDParam(0, Global._patches.ending_date);
-			Global.SetDParam(1, w.window_number.n + Str.STR_6801_EASY);
+			Global.SetDParam(1, w.window_number + Str.STR_6801_EASY);
 			Gfx.DrawStringMultiCenter(x + (640 / 2), y + 62, !Global._networking ? Str.STR_0211_TOP_COMPANIES_WHO_REACHED : Str.STR_TOP_COMPANIES_NETWORK_GAME, 500);
 
 			/* TODO Draw Highscore peepz 
@@ -860,6 +878,9 @@ public class PlayerGui
 			if (Global._game_mode != GameModes.GM_MENU) Gui.ShowVitalWindows();
 
 			if (!Global._networking) Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE); // unpause
+			break;
+			
+		default:
 			break;
 		}
 	}
@@ -903,7 +924,7 @@ public class PlayerGui
 
 				if (w != null) {
 					Hal.MarkWholeScreenDirty();
-					w.window_number = new WindowNumber( difficulty ); // show highscore chart for difficulty...
+					w.window_number = difficulty; // show highscore chart for difficulty...
 					w.as_highscore_d().background_img = Sprite.SPR_HIGHSCORE_CHART_BEGIN; // which background to show
 					w.as_highscore_d().rank = ranking;
 				}

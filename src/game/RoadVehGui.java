@@ -69,7 +69,7 @@ public class RoadVehGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+			final Vehicle v = Vehicle.GetVehicle(w.window_number);
 			//StringID 
 			int str;
 
@@ -146,7 +146,7 @@ public class RoadVehGui
 			final Vehicle v;
 			switch (e.widget) {
 			case 2: /* rename */
-				v = Vehicle.GetVehicle(w.window_number.n);
+				v = Vehicle.GetVehicle(w.window_number);
 				Global.SetDParam(0, v.unitnumber.id);
 				MiscGui.ShowQueryString( new StringID(v.string_id), new StringID(Str.STR_902C_NAME_ROAD_VEHICLE), 31, 150, w.window_class, w.window_number);
 				break;
@@ -158,7 +158,7 @@ public class RoadVehGui
 				else // 5
 					mod = Global._ctrl_pressed? 5 : 10;
 				
-				v = Vehicle.GetVehicle(w.window_number.n);
+				v = Vehicle.GetVehicle(w.window_number);
 
 				mod = Depot.GetServiceIntervalClamped(mod + v.service_interval);
 				if (mod == v.service_interval) return;
@@ -169,17 +169,19 @@ public class RoadVehGui
 		} break;
 
 		case WE_4:
-			if (Window.FindWindowById(Window.WC_VEHICLE_VIEW, w.window_number.n) == null)
+			if (Window.FindWindowById(Window.WC_VEHICLE_VIEW, w.window_number) == null)
 				w.DeleteWindow();
 			break;
 
 		case WE_ON_EDIT_TEXT: {
 			if (e.str != null) {
 				Global._cmd_text = e.str;
-				Cmd.DoCommandP(null, w.window_number.n, 0, null,
+				Cmd.DoCommandP(null, w.window_number, 0, null,
 					Cmd.CMD_NAME_VEHICLE | Cmd.CMD_MSG(Str.STR_902D_CAN_T_NAME_ROAD_VEHICLE));
 			}
 		} break;
+		default:
+			break;
 
 		}
 	}
@@ -213,7 +215,7 @@ public class RoadVehGui
 		Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, veh);
 		//_alloc_wnd_parent_num = veh;
 		w = Window.AllocateWindowDesc(_roadveh_details_desc, veh);
-		w.window_number = new WindowNumber(veh);
+		w.window_number = veh;
 		w.caption_color = (byte) v.owner.id;
 	}
 
@@ -226,7 +228,7 @@ public class RoadVehGui
 	{
 		switch(e.event) {
 		case WE_PAINT: {
-			Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+			Vehicle v = Vehicle.GetVehicle(w.window_number);
 			//StringID 
 			int str;
 
@@ -280,7 +282,7 @@ public class RoadVehGui
 		} break;
 
 		case WE_CLICK: {
-			final Vehicle  v = Vehicle.GetVehicle(w.window_number.n);
+			final Vehicle  v = Vehicle.GetVehicle(w.window_number);
 
 			switch (e.widget) {
 			case 5: /* start stop */
@@ -316,21 +318,23 @@ public class RoadVehGui
 			break;
 
 		case WE_DESTROY:
-			Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, w.window_number.n);
-			Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, w.window_number.n);
+			Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, w.window_number);
+			Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, w.window_number);
 			break;
 
 		case WE_MOUSELOOP:
 			{
 				Vehicle v;
 				int h;
-				v = Vehicle.GetVehicle(w.window_number.n);
+				v = Vehicle.GetVehicle(w.window_number);
 				h = (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) && 0 != (v.vehstatus&Vehicle.VS_STOPPED)) ? (1<< 7) : (1 << 11);
 				if (h != w.hidden_state) {
 					w.hidden_state = h;
 					w.SetWindowDirty();
 				}
 			}
+		default:
+			break;
 		}
 	}
 
@@ -365,14 +369,14 @@ public class RoadVehGui
 
 		if (w != null) {
 			w.caption_color = (byte) v.owner.id;
-			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number.n | (1 << 31), 0);
+			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number | (1 << 31), 0);
 		}
 	}
 
 
 	static void DrawNewRoadVehWindow(Window w)
 	{
-		if (w.window_number.n == 0)
+		if (w.window_number == 0)
 			w.disabled_state = 1 << 5;
 
 		// setup scroller
@@ -459,7 +463,7 @@ public class RoadVehGui
 				//EngineID 
 				int sel_eng = w.as_buildtrain_d().sel_engine;
 				if (sel_eng != Engine.INVALID_ENGINE)
-					Cmd.DoCommandP( TileIndex.get( w.window_number.n ), sel_eng, 0, RoadVehGui::CcBuildRoadVeh, Cmd.CMD_BUILD_ROAD_VEH | Cmd.CMD_MSG(Str.STR_9009_CAN_T_BUILD_ROAD_VEHICLE));
+					Cmd.DoCommandP( TileIndex.get( w.window_number ), sel_eng, 0, RoadVehGui::CcBuildRoadVeh, Cmd.CMD_BUILD_ROAD_VEH | Cmd.CMD_MSG(Str.STR_9009_CAN_T_BUILD_ROAD_VEHICLE));
 			} break;
 
 			case 6: { /* rename */
@@ -475,7 +479,7 @@ public class RoadVehGui
 			break;
 
 		case WE_4:
-			if (w.window_number.n != 0 && null == Window.FindWindowById(Window.WC_VEHICLE_DEPOT, w.window_number.n)) {
+			if (w.window_number != 0 && null == Window.FindWindowById(Window.WC_VEHICLE_DEPOT, w.window_number)) {
 				w.DeleteWindow();
 			}
 			break;
@@ -495,6 +499,8 @@ public class RoadVehGui
 			w.vscroll.cap += e.diff.y / 14;
 			w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
 		} break;
+		default:
+			break;
 
 		}
 	}
@@ -525,7 +531,7 @@ public class RoadVehGui
 		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.tile);
 
 		w = Window.AllocateWindowDesc(_new_road_veh_desc);
-		w.window_number = new WindowNumber(tile.tile);
+		w.window_number = tile.tile;
 		w.vscroll.cap = 8;
 		w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
 
@@ -546,7 +552,7 @@ public class RoadVehGui
 		int x,y;
 		Depot depot;
 
-		tile = TileIndex.get( w.window_number.n );
+		tile = TileIndex.get( w.window_number );
 
 		/* setup disabled buttons */
 		w.disabled_state =
@@ -616,7 +622,7 @@ public class RoadVehGui
 
 		pos = (row + w.vscroll.pos) * w.hscroll.cap + xt;
 
-		tile = TileIndex.get( w.window_number.n );
+		tile = TileIndex.get( w.window_number );
 		//FOR_ALL_VEHICLES(v)
 		Iterator<Vehicle> ii = Vehicle.getIterator();
 		while(ii.hasNext())
@@ -677,7 +683,7 @@ public class RoadVehGui
 	{
 		if (v == null || v.type != Vehicle.VEH_Road) return;
 
-		Cmd.DoCommandP( TileIndex.get( w.window_number.n ), v.index, Global._ctrl_pressed ? 1 : 0, RoadVehGui::CcCloneRoadVeh,
+		Cmd.DoCommandP( TileIndex.get( w.window_number ), v.index, Global._ctrl_pressed ? 1 : 0, RoadVehGui::CcCloneRoadVeh,
 			Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_9009_CAN_T_BUILD_ROAD_VEHICLE)
 		);
 
@@ -706,7 +712,7 @@ public class RoadVehGui
 
 			case 7:
 				ViewPort.ResetObjectToPlace();
-				ShowBuildRoadVehWindow( TileIndex.get( w.window_number.n ) );
+				ShowBuildRoadVehWindow( TileIndex.get( w.window_number ) );
 				break;
 
 			case 8: /* clone button */
@@ -723,7 +729,7 @@ public class RoadVehGui
 
 				case 9: /* scroll to tile */
 					ViewPort.ResetObjectToPlace();
-					ViewPort.ScrollMainWindowToTile( TileIndex.get(  w.window_number.n ) );
+					ViewPort.ScrollMainWindowToTile( TileIndex.get(  w.window_number ) );
 						break;
 			}
 		} break;
@@ -749,7 +755,7 @@ public class RoadVehGui
 		} break;
 
 		case WE_DESTROY:
-			Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, w.window_number.n);
+			Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, w.window_number);
 			break;
 
 		case WE_DRAGDROP:
@@ -799,6 +805,8 @@ public class RoadVehGui
 			w.widget.get(5).unkA = (w.vscroll.cap << 8) + w.hscroll.cap;
 
 		} break;
+		default:
+			break;
 
 		}
 
@@ -834,7 +842,7 @@ public class RoadVehGui
 
 		w = Window.AllocateWindowDescFront(_road_depot_desc, tile.tile);
 		if (w!=null) {
-			w.caption_color = (byte) TileIndex.get(w.window_number.n).GetTileOwner().id;
+			w.caption_color = (byte) TileIndex.get(w.window_number).GetTileOwner().id;
 			w.hscroll.cap = 5;
 			w.vscroll.cap = 3;
 			w.resize.step_width = 56;
@@ -878,9 +886,9 @@ public class RoadVehGui
 	static void PlayerRoadVehWndProc(Window w, WindowEvent e)
 	{
 		//StationID 
-		int station = BitOps.GB(w.window_number.n, 16, 16);
+		int station = BitOps.GB(w.window_number, 16, 16);
 		//PlayerID 
-		int owner = BitOps.GB(w.window_number.n, 0, 8);
+		int owner = BitOps.GB(w.window_number, 0, 8);
 		vehiclelist_d vl = w.as_vehiclelist_d();
 
 		switch(e.event) {
@@ -1053,6 +1061,8 @@ public class RoadVehGui
 			/* Update the scroll + matrix */
 			w.vscroll.cap += e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL;
 			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
+			break;
+		default:
 			break;
 		}
 	}

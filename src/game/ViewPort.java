@@ -1210,6 +1210,7 @@ public class ViewPort
 		int pp = 0;
 		while ( true ) 
 		{
+			if(pp >= psd.length) break;
 			ParentSpriteToDraw  ps = psd[pp];
 			if(ps == null)
 				break;
@@ -1223,6 +1224,7 @@ public class ViewPort
 				while (true) 
 				{
 					pp2++;
+					if( pp2 >= psd.length) break;
 					ParentSpriteToDraw  ps2 = psd[pp2];
 					if(ps2 == null)
 						break;
@@ -1285,7 +1287,7 @@ public class ViewPort
 	static void ViewportDrawParentSprites(ParentSpriteToDraw psd[])
 	{
 		//for (; *psd != null; psd++) 
-		for(int pp = 0; true; pp++ )
+		for(int pp = 0; pp < psd.length; pp++ )
 		{
 			//final ParentSpriteToDraw  ps = *psd;
 			final ParentSpriteToDraw  ps = psd[pp];
@@ -1444,10 +1446,10 @@ public class ViewPort
 		/* null terminate parent sprite list */
 		//[dz] TODO !!! *vd.parent_list = null;
 
-		Object[] array = vd.parent_list.toArray();
-		if(array.length > 0)
+		ParentSpriteToDraw[] parents = vd.parent_list.toArray(ParentSpriteToDraw[]::new);
+		if(parents.length > 0)
 		{
-			ParentSpriteToDraw[] parents = (ParentSpriteToDraw[]) array;
+			//ParentSpriteToDraw[] parents = (ParentSpriteToDraw[]) array;
 
 			ViewportSortParentSprites(parents);
 			ViewportDrawParentSprites(parents);

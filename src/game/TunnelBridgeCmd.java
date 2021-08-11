@@ -1006,16 +1006,34 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 	static int GetBridgeFoundation(int tileh, int direction)
 	{
-		int i;
+		//int i;
 		// normal level sloped building (7, 11, 13, 14)
 		if(0 != (BRIDGE_FULL_LEVELED_FOUNDATION & (1 << tileh)) )
 			return tileh;
 
+		/*
 		// inclined sloped building
 		if (	((i=0, tileh == 1) || (i+=2, tileh == 2) || (i+=2, tileh == 4) || (i+=2, tileh == 8)) &&
 				( direction == 0 || (i++, direction == 1)) )
 			return i + 15;
-
+		*/
+		int i = 0;
+		switch(direction)
+		{
+		case 1: i++;
+		case 0: break;
+		
+		default: return 0;
+		}
+		
+		switch(tileh)
+		{
+			case 8: i+=2; // fall
+			case 4:  i+=2; // fall
+			case 2:  i+=2; // fall
+			case 1:  return i;			
+		}
+		
 		return 0;
 	}
 

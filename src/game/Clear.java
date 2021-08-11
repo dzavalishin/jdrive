@@ -143,7 +143,7 @@ public class Clear extends ClearTables {
 		}
 
 		if (ts.tile_table_count >= 625) return -1;
-		ts.tile_table[ts.tile_table_count++] = tile;
+		ts.tile_table[ts.tile_table_count++] = new TileIndex( tile );
 
 		return 0;
 	}
@@ -234,7 +234,7 @@ public class Clear extends ClearTables {
 		int direction;
 
 		TerraformerHeightMod [] modheight_data = new TerraformerHeightMod[576];
-		TileIndex[] tile_table_data = new TileIndex[625];
+		//TileIndex[] tile_table_data = new TileIndex[625];
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
@@ -246,7 +246,7 @@ public class Clear extends ClearTables {
 		ts.modheight_count = ts.tile_table_count = 0;
 		ts.cost = 0;
 		ts.modheight = modheight_data;
-		ts.tile_table = tile_table_data;
+		ts.tile_table = new TileIndex[625]; // tile_table_data;
 
 		tile = TileIndex.TileVirtXY(x, y);
 

@@ -415,14 +415,14 @@ public class Global {
 		System.arraycopy(_decode_parameters, amount, _decode_parameters, 0, _decode_parameters.length - amount);
 	}
 
-	public static void COPY_IN_DPARAM(int offs, int [] src, int num) 
+	public static void COPY_IN_DPARAM(int offs, Integer [] src, int num) 
 	{
 		//memcpy(_decode_parameters + offs, src, sizeof(uint32) * (num))
 
 		System.arraycopy(src, 0, _decode_parameters, offs, num );
 	}
 
-	public static void COPY_OUT_DPARAM(int [] dst, int offs, int num) 
+	public static void COPY_OUT_DPARAM(Integer [] dst, int offs, int num) 
 	{
 		//memcpy(dst,_decode_parameters + offs, sizeof(uint32) * (num))
 		System.arraycopy( _decode_parameters, offs, dst, 0, num  );

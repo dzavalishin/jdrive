@@ -1285,7 +1285,7 @@ public class Engine extends EngineTables {
 				dei = _draw_engine_list[0];
 			else if(engine < Global.NUM_TRAIN_ENGINES + Global.NUM_ROAD_ENGINES)
 				dei = _draw_engine_list[1];
-			if(engine < Global.NUM_TRAIN_ENGINES + Global.NUM_ROAD_ENGINES + Global.NUM_SHIP_ENGINES)
+			else if(engine < Global.NUM_TRAIN_ENGINES + Global.NUM_ROAD_ENGINES + Global.NUM_SHIP_ENGINES)
 				dei = _draw_engine_list[2];
 			else
 				dei = _draw_engine_list[3];

@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import game.util.BitOps;
 import game.util.GameDate;
-import game.util.Strings;
 import game.util.YearMonthDay;
 import game.util.wcustom.vehiclelist_d;
 
@@ -69,7 +68,7 @@ public class ShipGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+			final Vehicle v = Vehicle.GetVehicle(w.window_number);
 
 			Global.SetDParam(0, v.string_id);
 			Global.SetDParam(1, v.unitnumber.id);
@@ -102,12 +101,14 @@ public class ShipGui
 			} break;
 			case 4: /* refit button */
 				if (w.as_refit_d().cargo != AcceptedCargo.CT_INVALID) {
-					final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+					final Vehicle v = Vehicle.GetVehicle(w.window_number);
 					if (Cmd.DoCommandP(v.tile, v.index, w.as_refit_d().cargo, null, Cmd.CMD_REFIT_SHIP | Cmd.CMD_MSG(Str.STR_9841_CAN_T_REFIT_SHIP)))
 						w.DeleteWindow();
 				}
 				break;
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -137,7 +138,7 @@ public class ShipGui
 
 		//_alloc_wnd_parent_num = v.index;
 		w = Window.AllocateWindowDesc(_ship_refit_desc,v.index);
-		w.window_number = new WindowNumber( v.index );
+		w.window_number = v.index;
 		w.caption_color = (byte) v.owner.id;
 		w.as_refit_d().sel = -1;
 	}
@@ -146,7 +147,7 @@ public class ShipGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+			final Vehicle v = Vehicle.GetVehicle(w.window_number);
 			//StringID 
 			int str;
 
@@ -223,7 +224,7 @@ public class ShipGui
 			final Vehicle v;
 			switch (e.widget) {
 			case 2: /* rename */
-				v = Vehicle.GetVehicle(w.window_number.n);
+				v = Vehicle.GetVehicle(w.window_number);
 				Global.SetDParam(0, v.unitnumber.id);
 				MiscGui.ShowQueryString( new StringID(v.string_id), new StringID(Str.STR_9831_NAME_SHIP), 31, 150, w.window_class, w.window_number);
 				break;
@@ -234,7 +235,7 @@ public class ShipGui
 				else // 5
 					mod = Global._ctrl_pressed? 5 : 10;
 
-					v = Vehicle.GetVehicle(w.window_number.n);
+					v = Vehicle.GetVehicle(w.window_number);
 
 				mod = Depot.GetServiceIntervalClamped(mod + v.service_interval);
 				if (mod == v.service_interval) return;
@@ -245,16 +246,18 @@ public class ShipGui
 		} break;
 
 		case WE_4:
-			if (Window.FindWindowById(Window.WC_VEHICLE_VIEW, w.window_number.n) == null)
+			if (Window.FindWindowById(Window.WC_VEHICLE_VIEW, w.window_number) == null)
 				w.DeleteWindow();
 			break;
 
 		case WE_ON_EDIT_TEXT:
 			if (e.str != null) {
 				Global._cmd_text = e.str;
-				Cmd.DoCommandP(null, w.window_number.n, 0, null,
+				Cmd.DoCommandP(null, w.window_number, 0, null,
 						Cmd.CMD_NAME_VEHICLE | Cmd.CMD_MSG(Str.STR_9832_CAN_T_NAME_SHIP));
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -289,7 +292,7 @@ public class ShipGui
 		Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, veh);
 		//_alloc_wnd_parent_num = veh;
 		w = Window.AllocateWindowDesc(_ship_details_desc, veh);
-		w.window_number = new WindowNumber( veh );
+		w.window_number = veh;
 		w.caption_color = (byte) v.owner.id;
 	}
 
@@ -315,7 +318,7 @@ public class ShipGui
 	{
 		switch (we.event) {
 		case WE_PAINT:
-			if (w.window_number.n == 0) w.disabled_state = 1 << 5;
+			if (w.window_number == 0) w.disabled_state = 1 << 5;
 
 			// Setup scroll count
 			{
@@ -379,7 +382,7 @@ public class ShipGui
 				//EngineID 
 				int sel_eng = w.as_buildtrain_d().sel_engine;
 				if (sel_eng != Engine.INVALID_ENGINE)
-					Cmd.DoCommandP( TileIndex.get( w.window_number.n ), sel_eng, 0, ShipGui::CcBuildShip, Cmd.CMD_BUILD_SHIP | Cmd.CMD_MSG(Str.STR_980D_CAN_T_BUILD_SHIP));
+					Cmd.DoCommandP( TileIndex.get( w.window_number ), sel_eng, 0, ShipGui::CcBuildShip, Cmd.CMD_BUILD_SHIP | Cmd.CMD_MSG(Str.STR_980D_CAN_T_BUILD_SHIP));
 			} break;
 
 			case 6:	{ /* rename */
@@ -395,7 +398,8 @@ public class ShipGui
 			break;
 
 		case WE_4:
-			if (w.window_number != null && null != Window.FindWindowById(Window.WC_VEHICLE_DEPOT, w.window_number.n)) {
+			if (null != Window.FindWindowById(Window.WC_VEHICLE_DEPOT, w.window_number)) 
+			{
 				w.DeleteWindow();
 			}
 			break;
@@ -411,6 +415,8 @@ public class ShipGui
 		case WE_RESIZE:
 			w.vscroll.cap += we.diff.y / 24;
 			w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
+			break;
+		default:
 			break;
 
 		}
@@ -443,7 +449,7 @@ public class ShipGui
 		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.tile);
 
 		w = Window.AllocateWindowDesc(_new_ship_desc);
-		w.window_number = new WindowNumber( tile.tile );
+		w.window_number = tile.tile;
 		w.vscroll.cap = 4;
 		w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
 
@@ -461,7 +467,7 @@ public class ShipGui
 	static void ShipViewWndProc(Window w, WindowEvent e) {
 		switch(e.event) {
 		case WE_PAINT: {
-			Vehicle v = Vehicle.GetVehicle(w.window_number.n);
+			Vehicle v = Vehicle.GetVehicle(w.window_number);
 			int disabled = 1<<8;
 			//StringID 
 			int str;
@@ -524,7 +530,7 @@ public class ShipGui
 		} break;
 
 		case WE_CLICK: {
-			final Vehicle  v = Vehicle.GetVehicle(w.window_number.n);
+			final Vehicle  v = Vehicle.GetVehicle(w.window_number);
 
 			switch (e.widget) {
 			case 5: /* start stop */
@@ -560,22 +566,24 @@ public class ShipGui
 			break;
 
 		case WE_DESTROY:
-			Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, w.window_number.n);
-			Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, w.window_number.n);
-			Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, w.window_number.n);
+			Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, w.window_number);
+			Window.DeleteWindowById(Window.WC_VEHICLE_REFIT, w.window_number);
+			Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, w.window_number);
 			break;
 
 		case WE_MOUSELOOP:
 		{
 			Vehicle v;
 			int h;
-			v = Vehicle.GetVehicle(w.window_number.n);
+			v = Vehicle.GetVehicle(w.window_number);
 			h = Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER) && 0 != (v.vehstatus & Vehicle.VS_HIDDEN) ? (1<< 7) : (1 << 11);
 			if (h != w.hidden_state) {
 				w.hidden_state = h;
 				w.SetWindowDirty();
 			}
 		}
+		default:
+			break;
 		}
 	}
 
@@ -610,7 +618,7 @@ public class ShipGui
 
 		if (w != null) {
 			w.caption_color = (byte) v.owner.id;
-			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number.n | (1 << 31), 0);
+			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number | (1 << 31), 0);
 		}
 	}
 
@@ -619,7 +627,7 @@ public class ShipGui
 		TileIndex tile;
 		Depot depot;
 
-		tile = TileIndex.get( w.window_number.n );
+		tile = TileIndex.get( w.window_number );
 
 		/* setup disabled buttons */
 		w.disabled_state =
@@ -685,7 +693,7 @@ public class ShipGui
 
 		pos = (row + w.vscroll.pos) * w.hscroll.cap + xt;
 
-		TileIndex tile = TileIndex.get( w.window_number.n );
+		TileIndex tile = TileIndex.get( w.window_number );
 		//FOR_ALL_VEHICLES(v)
 		Iterator<Vehicle> ii = Vehicle.getIterator();
 		while(ii.hasNext())
@@ -749,7 +757,7 @@ public class ShipGui
 	{
 		if (v == null || v.type != Vehicle.VEH_Ship) return;
 
-		Cmd.DoCommandP( TileIndex.get( w.window_number.n ), v.index, Global._ctrl_pressed ? 1 : 0, ShipGui::CcCloneShip,
+		Cmd.DoCommandP( TileIndex.get( w.window_number ), v.index, Global._ctrl_pressed ? 1 : 0, ShipGui::CcCloneShip,
 				Cmd.CMD_CLONE_VEHICLE | Cmd.CMD_MSG(Str.STR_980D_CAN_T_BUILD_SHIP)
 				);
 
@@ -778,7 +786,7 @@ public class ShipGui
 
 			case 7:
 				ViewPort.ResetObjectToPlace();
-				ShowBuildShipWindow( TileIndex.get(  w.window_number.n ) );
+				ShowBuildShipWindow( TileIndex.get(  w.window_number ) );
 				break;
 
 			case 8: /* clone button */
@@ -795,13 +803,13 @@ public class ShipGui
 
 			case 9: /* scroll to tile */
 				ViewPort.ResetObjectToPlace();
-				ViewPort.ScrollMainWindowToTile( TileIndex.get( w.window_number.n ) );
+				ViewPort.ScrollMainWindowToTile( TileIndex.get( w.window_number ) );
 				break;
 			}
 			break;
 
 		case WE_PLACE_OBJ: {
-			ClonePlaceObj( TileIndex.get(  w.window_number.n ), w);
+			ClonePlaceObj( TileIndex.get(  w.window_number ), w);
 		} break;
 
 		case WE_ABORT_PLACE_OBJ: {
@@ -821,7 +829,7 @@ public class ShipGui
 		} break;
 
 		case WE_DESTROY:
-			Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, w.window_number.n);
+			Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, w.window_number);
 			break;
 
 		case WE_DRAGDROP:
@@ -869,6 +877,8 @@ public class ShipGui
 			w.hscroll.cap += e.diff.x / 90;
 			w.widget.get(5).unkA = (w.vscroll.cap << 8) + w.hscroll.cap;
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -901,7 +911,7 @@ public class ShipGui
 		Window  w = Window.AllocateWindowDescFront(_ship_depot_desc,tile.tile);
 
 		if (w != null) {
-			w.caption_color = (byte) TileIndex.get(w.window_number.n).GetTileOwner().id;
+			w.caption_color = (byte) TileIndex.get(w.window_number).GetTileOwner().id;
 			w.vscroll.cap = 2;
 			w.hscroll.cap = 3;
 			w.resize.step_width = 90;
@@ -981,9 +991,9 @@ public class ShipGui
 	static void PlayerShipsWndProc(Window w, WindowEvent e)
 	{
 		//StationID 
-		int station = BitOps.GB(w.window_number.n, 16, 16);
+		int station = BitOps.GB(w.window_number, 16, 16);
 		//PlayerID 
-		int owner = BitOps.GB(w.window_number.n, 0, 8);
+		int owner = BitOps.GB(w.window_number, 0, 8);
 		vehiclelist_d vl = w.as_vehiclelist_d();
 
 		switch(e.event) {
@@ -1158,6 +1168,8 @@ public class ShipGui
 				w.vscroll.cap += e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
 				w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
 				break;
+		default:
+			break;
 			}
 			}
 
@@ -1192,7 +1204,7 @@ public class ShipGui
 					w = Window.AllocateWindowDescFront(_other_player_ships_desc, (station<< 16) | player);
 				}
 				if (w != null) {
-					w.caption_color = (byte) w.window_number.n;
+					w.caption_color = (byte) w.window_number;
 					w.vscroll.cap = 4;
 					w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
 					w.resize.step_height = VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;

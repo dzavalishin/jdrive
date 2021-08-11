@@ -266,6 +266,8 @@ public class RoadGui
 		case WE_DESTROY:
 			if (Global._patches.link_terraform_toolbar) Window.DeleteWindowById(Window.WC_SCEN_LAND_GEN, 0);
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -363,6 +365,8 @@ public class RoadGui
 		case WE_DESTROY:
 			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -407,7 +411,7 @@ public class RoadGui
 			} else
 				ViewPort.SetTileSelectSize(1, 1);
 
-			image = (w.window_class.v == Window.WC_BUS_STATION) ? 0x47 : 0x43;
+			image = (w.window_class == Window.WC_BUS_STATION) ? 0x47 : 0x43;
 
 			Station.StationPickerDrawSprite(103, 35, 0, image);
 			Station.StationPickerDrawSprite(103, 85, 0, image+1);
@@ -416,7 +420,7 @@ public class RoadGui
 
 			Gfx.DrawStringCentered(70, 120, Str.STR_3066_COVERAGE_AREA_HIGHLIGHT, 0);
 			MiscGui.DrawStationCoverageAreaText(2, 146,
-				((w.window_class.v == Window.WC_BUS_STATION) ? (1<<AcceptedCargo.CT_PASSENGERS) : ~(1<<AcceptedCargo.CT_PASSENGERS)),
+				((w.window_class == Window.WC_BUS_STATION) ? (1<<AcceptedCargo.CT_PASSENGERS) : ~(1<<AcceptedCargo.CT_PASSENGERS)),
 				3);
 
 		} break;
@@ -447,6 +451,8 @@ public class RoadGui
 
 		case WE_DESTROY:
 			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
+			break;
+		default:
 			break;
 		}
 	}

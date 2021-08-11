@@ -2352,7 +2352,7 @@ class DrawStringStateMachine
 
 	public static int DoDrawString(String string, int x, int y, int real_color) {
 		DrawStringStateMachine me = new DrawStringStateMachine(string, x, y, real_color);
-		Global.debug("DoDrawString '%s'", string);
+		//Global.debug("DoDrawString '%s'", string);
 		me.color = (byte) (real_color & 0xFF);
 
 		return me.draw(x,y);

@@ -95,7 +95,7 @@ public class StationGui extends Station  // to get finalants
 	{
 		//final Station st;
 		int [] n = {0};
-		int [] i;
+		//int [] i;
 
 		// reset #-of stations to 0 because ++ is used for value-assignment
 		//memset(_num_station_sort, 0, sizeof(_num_station_sort));
@@ -172,7 +172,7 @@ public class StationGui extends Station  // to get finalants
 		switch (e.event) {
 		case WE_PAINT: {
 			//final PlayerID 
-			int owner = w.window_number.n;
+			int owner = w.window_number;
 			int i;
 
 			// resort station window if stations have been added/removed
@@ -242,7 +242,7 @@ public class StationGui extends Station  // to get finalants
 				id_v += w.vscroll.pos;
 
 				{
-					final PlayerID owner = PlayerID.get( w.window_number.n );
+					final PlayerID owner = PlayerID.get( w.window_number );
 					final Station  st;
 
 					id_v += (owner.id == 0) ? 0 : _num_station_sort[owner.id - 1]; // first element in list
@@ -269,6 +269,8 @@ public class StationGui extends Station  // to get finalants
 
 		case WE_RESIZE:
 			w.vscroll.cap += e.diff.y / 10;
+			break;
+		default:
 			break;
 		}
 	}
@@ -297,7 +299,7 @@ public class StationGui extends Station  // to get finalants
 
 		w = Window.AllocateWindowDescFront(_player_stations_desc, player);
 		if (w != null) {
-			w.caption_color = (byte)w.window_number.n;
+			w.caption_color = (byte)w.window_number;
 			w.vscroll.cap = 12;
 			w.resize.step_height = 10;
 			w.resize.height = w.height - 10 * 7; // minimum if 5 in the list
@@ -341,7 +343,7 @@ public class StationGui extends Station  // to get finalants
 	static void DrawStationViewWindow(Window w)
 	{
 		//StationID 
-		int station_id = w.window_number.n;
+		int station_id = w.window_number;
 		final Station  st = Station.GetStation(station_id);
 		int i;
 		int num;
@@ -478,7 +480,7 @@ public class StationGui extends Station  // to get finalants
 		case WE_CLICK:
 			switch (e.widget) {
 			case 7:
-				ViewPort.ScrollMainWindowToTile(Station.GetStation(w.window_number.n).getXy());
+				ViewPort.ScrollMainWindowToTile(Station.GetStation(w.window_number).getXy());
 				break;
 
 			case 8:
@@ -497,35 +499,35 @@ public class StationGui extends Station  // to get finalants
 				break;
 
 			case 9: {
-				Global.SetDParam(0, w.window_number.n);
+				Global.SetDParam(0, w.window_number);
 				MiscGui.ShowQueryString( new StringID( Str.STR_STATION ), new StringID( Str.STR_3030_RENAME_STATION_LOADING ), 31, 180, w.window_class, w.window_number);
 			} break;
 
 			case 10: { /* Show a list of scheduled trains to this station */
-				final Station st = Station.GetStation(w.window_number.n);
-				TrainGui.ShowPlayerTrains(st.owner.id, w.window_number.n);
+				final Station st = Station.GetStation(w.window_number);
+				TrainGui.ShowPlayerTrains(st.owner.id, w.window_number);
 				break;
 			}
 
 			case 11: { /* Show a list of scheduled road-vehicles to this station */
-				final Station st = Station.GetStation(w.window_number.n);
-				RoadVehGui.ShowPlayerRoadVehicles(st.owner.id, w.window_number.n);
+				final Station st = Station.GetStation(w.window_number);
+				RoadVehGui.ShowPlayerRoadVehicles(st.owner.id, w.window_number);
 				break;
 			}
 
 			case 12: { /* Show a list of scheduled aircraft to this station */
-				final Station st = Station.GetStation(w.window_number.n);
+				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs have no owners, show the scheduled aircraft of current player */
 				PlayerID owner = (st.owner.id == Owner.OWNER_NONE) ? Global._current_player : st.owner;
-				AirCraft.ShowPlayerAircraft(owner.id, w.window_number.n);
+				AirCraft.ShowPlayerAircraft(owner.id, w.window_number);
 				break;
 			}
 
 			case 13: { /* Show a list of scheduled ships to this station */
-				final Station st = Station.GetStation(w.window_number.n);
+				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs/bouys have no owners, show the scheduled ships of current player */
 				PlayerID owner = (st.owner.id == Owner.OWNER_NONE) ? Global._current_player : st.owner;
-				ShipGui.ShowPlayerShips(owner, StationID.get( w.window_number.n ) );
+				ShipGui.ShowPlayerShips(owner, StationID.get( w.window_number ) );
 				break;
 			}
 			}
@@ -534,7 +536,7 @@ public class StationGui extends Station  // to get finalants
 		case WE_ON_EDIT_TEXT:
 			if (e.str != null) {
 				Global._cmd_text = e.str;
-				Cmd.DoCommandP(null, w.window_number.n, 0, null,
+				Cmd.DoCommandP(null, w.window_number, 0, null,
 						Cmd.CMD_RENAME_STATION | Cmd.CMD_MSG(Str.STR_3031_CAN_T_RENAME_STATION));
 			}
 			break;
@@ -542,7 +544,7 @@ public class StationGui extends Station  // to get finalants
 		case WE_DESTROY: {
 			//WindowNumber 
 			int wno =
-					(w.window_number.n << 16) | Station.GetStation(w.window_number.n).owner.id;
+					(w.window_number << 16) | Station.GetStation(w.window_number).owner.id;
 
 			Window.DeleteWindowById(Window.WC_TRAINS_LIST, wno);
 			Window.DeleteWindowById(Window.WC_ROADVEH_LIST, wno);
@@ -550,6 +552,8 @@ public class StationGui extends Station  // to get finalants
 			Window.DeleteWindowById(Window.WC_AIRCRAFT_LIST, wno);
 			break;
 		}
+		default:
+			break;
 		}
 	}
 
@@ -568,7 +572,7 @@ public class StationGui extends Station  // to get finalants
 
 		w = Window.AllocateWindowDescFront(_station_view_desc, station);
 		if (w != null) {
-			PlayerID owner = Station.GetStation(w.window_number.n).owner;
+			PlayerID owner = Station.GetStation(w.window_number).owner;
 			if (owner.id != Owner.OWNER_NONE) w.caption_color = (byte) owner.id;
 			w.vscroll.cap = 5;
 		}

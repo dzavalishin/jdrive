@@ -20,7 +20,7 @@ public class NewsItem {
 	TileIndex data_a;
 	TileIndex data_b;
 
-	int params[];// = new int[10];
+	Integer[] params;// = new int[10];
 
 	/* The validation functions for news items get called immediately
 	 * before the news are supposed to be shown. If this funcion returns
@@ -49,7 +49,7 @@ public class NewsItem {
 		callback = src.callback;
 		data_a = src.data_a; 
 		data_b = src.data_b;
-		int params[] = src.params;
+		params = src.params;
 		isValid = src.isValid;
 	}
 
@@ -60,7 +60,7 @@ public class NewsItem {
 		date = 0;
 		flags = display_mode = type = callback = 0;
 		data_a = data_b = null;
-		int params[] = new int[10];
+		params = new Integer[10];
 		isValid = null;
 	}
 
@@ -159,7 +159,7 @@ public class NewsItem {
 		_latest_news = increaseIndex(_latest_news);
 
 		// overwrite oldest news entry
-		if (_oldest_news == _latest_news && _news_items[_oldest_news].string_id != null)
+		if (_oldest_news == _latest_news && _news_items[_oldest_news] != null && _news_items[_oldest_news].string_id != null)
 			_oldest_news = increaseIndex(_oldest_news); // but make sure we're not overflowing here
 
 		_news_items[_latest_news] = new NewsItem(); // just make new one
