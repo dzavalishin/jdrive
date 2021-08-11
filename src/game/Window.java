@@ -191,7 +191,10 @@ public class Window extends WindowConstants
 		return (facesel_d) custom; 
 	}
 
-	highscore_d as_highscore_d() { return (highscore_d) custom; }
+	highscore_d as_highscore_d() { 
+		if(custom==null) custom = new highscore_d(); 
+		return (highscore_d) custom; 
+		}
 
 	menu_d as_menu_d() { 
 		if(custom==null) custom = new menu_d(); 
@@ -263,7 +266,10 @@ public class Window extends WindowConstants
 		return (vehiclelist_d) custom; 
 	}
 
-	void_d as_void_d() { return (void_d) custom; }
+	void_d as_void_d() { 
+		if(custom==null) custom = new void_d(); 
+		return (void_d) custom; 
+		}
 
 	vp_d as_vp_d() 
 	{ 
@@ -2879,7 +2885,7 @@ public class Window extends WindowConstants
 			y = 2;
 			sel = w.as_dropdown_d().selected_index;
 
-			for (i = 0; w.as_dropdown_d().items[i] != Global.INVALID_STRING_ID.id; i++) {
+			for (i = 0; i < w.as_dropdown_d().items.length && w.as_dropdown_d().items[i] != Global.INVALID_STRING_ID.id; i++) {
 				if (BitOps.HASBIT(w.as_dropdown_d().hidden_state, i)) {
 					sel--;
 					continue;
@@ -2979,7 +2985,8 @@ public class Window extends WindowConstants
 		w.InvalidateWidget(button);
 
 		//for (i = 0; strings[i] != Global.INVALID_STRING_ID; i++) {}
-		for (i = 0; strings[i] != Global.INVALID_STRING_ID.id; i++) {}
+		for (i = 0; i < strings.length && strings[i] != Global.INVALID_STRING_ID.id; i++) 
+		{}
 		if (i == 0) return;
 
 		wi = w.widget.get(button);

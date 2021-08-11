@@ -282,6 +282,12 @@ public class Global {
 		System.err.println(buf);		
 	}
 
+	public static void fail(String s, Object ... arg) {
+		String buf = String.format(s, arg);
+		System.err.println(buf);
+		System.exit(33);
+	}
+
 	public static final StringID  INVALID_STRING_ID = new StringID(0xFFFF);
 
 

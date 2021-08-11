@@ -307,6 +307,13 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		/* Retrieve pointer to the draw industry tile struct */
 		final int ii = (ti.map5 << 2) | BitOps.GB(ti.tile.getMap().m1, 0, 2);
+		
+		if(ii >= _industry_draw_tile_data.length )
+		{
+			Global.error("DrawTile_Industry m5 too big %d @%d.%d", ii, ti.x, ti.y );
+			return;
+		}
+		
 		dits = _industry_draw_tile_data[ii];
 
 		image = dits.sprite_1;
@@ -1532,7 +1539,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				Cmd.DoCommandByTile(cur_tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 
 				cur_tile.SetTileType(TileTypes.MP_INDUSTRY);
-				cur_tile.getMap().m5 = it.map5;
+				cur_tile.getMap().m5 = (byte) it.map5;
 				cur_tile.getMap().m2 = i.index;
 				cur_tile.getMap().m1 = Global._generating_world ? 0x1E : 0; /* maturity */
 			}
@@ -1941,7 +1948,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			MaybeNewIndustry(Hal.Random());
 		} else if (!Global._patches.smooth_economy && _total_industries > 0) {
 			Industry i = GetIndustry(Hal.RandomRange(_total_industries));
-			if (i.xy != null) ChangeIndustryProduction(i);
+			if (i != null && i.xy != null) ChangeIndustryProduction(i);
 		}
 
 		Global._current_player = old_player;
@@ -2594,25 +2601,13 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	static void MakeSortedIndustryList()
 	{
-		Industry i;
-		int n = 0;
-
+		_industry_sort_dirty = false;
 		/* Create array for sorting */
-		//_industry_sort = realloc(_industry_sort, GetIndustryPoolSize() * sizeof(_industry_sort[0]));
-		_industry_sort = (Industry[]) _industry_pool.pool.values().toArray(Industry[]::new);
+		_industry_sort = _industry_pool.pool.values().toArray(Industry[]::new);
 
 		if (_industry_sort == null)
-			Global.error("Could not allocate memory for the industry-sorting-list");
+			Global.fail("Could not allocate memory for the industry-sorting-list");
 
-		/*
-		FOR_ALL_INDUSTRIES(i) 
-		{
-			if(i.xy)
-				_industry_sort[n++] = i.index;
-		}*/
-		//_last_industry_idx = 0xFFFF; // used for "cache"
-
-		//qsort(_industry_sort, n, sizeof(_industry_sort[0]), GeneralIndustrySorter);
 		Arrays.sort(_industry_sort, new IndustryComparator());
 
 		Global.DEBUG_misc( 1, "Resorting Industries list...");
@@ -2629,7 +2624,6 @@ public class Industry extends IndustryTables implements IPoolItem {
 			Industry i;
 
 			if (_industry_sort_dirty) {
-				_industry_sort_dirty = false;
 				MakeSortedIndustryList();
 			}
 
@@ -2718,6 +2712,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		case WE_RESIZE:
 			w.vscroll.cap += e.diff.y / 10;
+			break;
+		default:
 			break;
 		}
 	}

@@ -177,7 +177,7 @@ public class Town extends TownTables implements IPoolItem
 		@Override
 		public Town createObject() { return new Town(); }
 	};
-	private static MemoryPool<Town> _town_pool = new MemoryPool<Town>(factory);
+	static MemoryPool<Town> _town_pool = new MemoryPool<Town>(factory);
 
 
 	@Override
@@ -2172,7 +2172,7 @@ public class Town extends TownTables implements IPoolItem
 	static Town ClosestTownFromTile(TileIndex tile, int threshold)
 	{
 		//Town t;
-		int [] best = { threshold };
+		int [] best = { threshold >= 0 ? threshold : Integer.MAX_VALUE };
 		Town [] best_town = { null };
 
 		// XXX - Fix this so for a given tiletype the owner of the type is in the same variable

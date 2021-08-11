@@ -18,7 +18,7 @@ public class TrackPathFinder extends Pathfind
 
 	Object userdata;
 
-	RememberData rd;
+	RememberData rd = new RememberData();
 
 	int the_dir;
 

@@ -35,7 +35,8 @@ public class MiscGui {
 
 			lid = (LandInfoData) w.as_void_d().data;
 
-			Global.SetDParam(0, lid.td.dparam[0]);
+			if(lid.td.dparam[0] != null) Global.SetDParam(0, lid.td.dparam[0]);
+			else Global.SetDParam(0, 0);
 			Gfx.DrawStringCentered(140, 16, lid.td.str, 13);
 
 			Global.SetDParam(0, Str.STR_01A6_N_A);
@@ -50,7 +51,7 @@ public class MiscGui {
 			}
 			Gfx.DrawStringCentered(140, 38, str, 0);
 
-			Strings._userstring = String.format("0x%.4X", lid.tile);
+			Strings._userstring = String.format("0x%X", lid.tile.getTile());
 			Global.SetDParam(0, lid.tile.TileX());
 			Global.SetDParam(1, lid.tile.TileY());
 			Global.SetDParam(2, Strings.STR_SPEC_USERSTRING);
@@ -150,15 +151,15 @@ public class MiscGui {
 		lid.td = Landscape.GetTileDesc(tile);
 
 		//#if defined(_DEBUG)
-		Global.DEBUG_misc( 0, "TILE: %#x (%i,%i)", tile, tile.TileX(), tile.TileY());
-		Global.DEBUG_misc( 0, "TILE: %d ", tile);
-		Global.DEBUG_misc( 0, "type         = %#x", tile.getMap().type);
-		Global.DEBUG_misc( 0, "height       = %#x", tile.getMap().height);
-		Global.DEBUG_misc( 0, "m1           = %#x", tile.getMap().m1);
-		Global.DEBUG_misc( 0, "m2           = %#x", tile.getMap().m2);
-		Global.DEBUG_misc( 0, "m3           = %#x", tile.getMap().m3);
-		Global.DEBUG_misc( 0, "m4           = %#x", tile.getMap().m4);
-		Global.DEBUG_misc( 0, "m5           = %#x", tile.getMap().m5);
+		Global.DEBUG_misc( 0, "TILE: %x (%d,%d)", tile.hashCode(), tile.TileX(), tile.TileY());
+		Global.DEBUG_misc( 0, "TILE: %x ", tile.hashCode());
+		Global.DEBUG_misc( 0, "type         = %x", tile.getMap().type);
+		Global.DEBUG_misc( 0, "height       = %d", tile.getMap().height);
+		Global.DEBUG_misc( 0, "m1           = %x", tile.getMap().m1);
+		Global.DEBUG_misc( 0, "m2           = %x", tile.getMap().m2);
+		Global.DEBUG_misc( 0, "m3           = %x", tile.getMap().m3);
+		Global.DEBUG_misc( 0, "m4           = %x", tile.getMap().m4);
+		Global.DEBUG_misc( 0, "m5           = %x", tile.getMap().m5);
 		//#endif
 	}
 

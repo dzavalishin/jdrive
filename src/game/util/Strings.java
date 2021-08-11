@@ -873,7 +873,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				final Station st = Station.GetStation(Getint(arg[argc++]));
 				Integer [] temp = new Integer[2];
 
-				if (st.getXy() == null) { // station doesn't exist anymore
+				if (st == null || st.getXy() == null) { // station doesn't exist anymore
 					buff.append( GetStringWithArgs(STR_UNKNOWN_DESTINATION ) );
 					break;
 				}

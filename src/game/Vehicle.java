@@ -44,13 +44,13 @@ public class Vehicle implements IPoolItem
 	int z_pos;		// Was byte, changed for aircraft queueing
 	int direction;		// facing
 
-	byte spritenum; // currently displayed sprite index
+	int spritenum; // currently displayed sprite index
 	// 0xfd == custom sprite, 0xfe == custom second head sprite
 	// 0xff == reserved for another custom sprite
 	int cur_image; // sprite number for this vehicle
-	byte sprite_width;// width of vehicle sprite
-	byte sprite_height;// height of vehicle sprite
-	byte z_height;		// z-height of vehicle sprite
+	int sprite_width;// width of vehicle sprite
+	int sprite_height;// height of vehicle sprite
+	int z_height;		// z-height of vehicle sprite
 	int x_offs;			// x offset for vehicle sprite
 	int y_offs;			// y offset for vehicle sprite
 

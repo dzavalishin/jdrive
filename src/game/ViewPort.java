@@ -2076,6 +2076,11 @@ public class ViewPort
 
 	static boolean ScrollMainWindowToTile(TileIndex tile)
 	{
+		if(tile == null)
+		{
+			Global.error("null tile in ScrollMainWindowToTile");
+			return false;
+		}
 		return ScrollMainWindowTo(tile.TileX() * 16 + 8, tile.TileY() * 16 + 8);
 	}
 
