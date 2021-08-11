@@ -263,7 +263,7 @@ public class Engine extends EngineTables {
 	}
 
 	static class WagonOverrides {
-		int overrides_count;
+		int overrides_count = 0;
 		WagonOverride [] overrides;
 	}
 
@@ -330,6 +330,11 @@ public class Engine extends EngineTables {
 
 		for (engine = 0; engine < Global.TOTAL_NUM_ENGINES; engine++) 
 		{
+			if( _engine_wagon_overrides[engine] == null )
+			{
+				_engine_wagon_overrides[engine] = new WagonOverrides();
+				continue;
+			}
 			wos = _engine_wagon_overrides[engine];
 			for (i = 0; i < wos.overrides_count; i++) {
 				wo = wos.overrides[i];
@@ -831,7 +836,7 @@ public class Engine extends EngineTables {
 		_engine_custom_names[engine.id] = name;
 	}
 
-	void UnloadCustomEngineNames()
+	static void UnloadCustomEngineNames()
 	{
 		//char **i;
 		for (int i = 0; i < _engine_custom_names.length; i++) {

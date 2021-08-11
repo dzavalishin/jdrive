@@ -115,7 +115,7 @@ public class GRFFile
 	{
 		GRFFile file;
 
-		for (file = _first_grffile; file != NULL; file = file.next) {
+		for (file = _first_grffile; file != null; file = file.next) {
 			if (file.grfid == grfid) break;
 		}
 		return file;
@@ -125,7 +125,7 @@ public class GRFFile
 	{
 		GRFFile file;
 
-		for (file = _first_grffile; file != NULL; file = file.next) {
+		for (file = _first_grffile; file != null; file = file.next) {
 			if (strcmp(file.filename, filename) == 0) break;
 		}
 		return file;
@@ -151,8 +151,8 @@ public class GRFFile
 
 	static boolean RailVehicleChangeInfo(int engine, int numinfo, int prop, DataLoader bufp, int len)
 	{
-		EngineInfo ei = _engine_info[engine];
-		RailVehicleInfo rvi = _rail_vehicle_info[engine];
+		EngineInfo ei = Global._engine_info[engine];
+		RailVehicleInfo rvi = Global._rail_vehicle_info[engine];
 		// byte *buf = *bufp;
 		int i;
 		boolean ret = false;
@@ -796,7 +796,7 @@ public class GRFFile
 							dts.ground_sprite = ground_sprite;
 						}
 
-						dts.seq = NULL;
+						dts.seq = null;
 						//while (buf < *bufp + len)
 						//while (bufp.isNotEmpty())
 						while (bufp.has(len))
@@ -844,7 +844,7 @@ public class GRFFile
 							continue;
 						}
 
-						dts.seq = NULL;
+						dts.seq = null;
 						while (1) {
 							DrawTileSeqStruct dtss;
 
@@ -916,7 +916,7 @@ public class GRFFile
 						if (number > stat.platforms[l]) {
 							stat.layouts[l] = realloc(stat.layouts[l],
 							                               number * sizeof(**stat.layouts));
-							// We expect NULL being 0 here, but C99 guarantees that.
+							// We expect null being 0 here, but C99 guarantees that.
 							memset(stat.layouts[l] + stat.platforms[l], 0,
 							       (number - stat.platforms[l]) * sizeof(**stat.layouts));
 
@@ -1027,16 +1027,16 @@ public class GRFFile
 					byte numtables = bufp.grf_load_byte();
 					byte table, sprite;
 
-					if (bridge.sprite_table == NULL) {
-						/* Allocate memory for sprite table pointers and set to NULL */
+					if (bridge.sprite_table == null) {
+						/* Allocate memory for sprite table pointers and set to null */
 						bridge.sprite_table = malloc(7 * sizeof(*bridge.sprite_table));
 						for (table = 0; table < 7; table++)
-							bridge.sprite_table[table] = NULL;
+							bridge.sprite_table[table] = null;
 					}
 
 					for (table = tableid; table < tableid + numtables; table++) {
 						if (table < 7) {
-							if (bridge.sprite_table[table] == NULL) {
+							if (bridge.sprite_table[table] == null) {
 								bridge.sprite_table[table] = malloc(32 * sizeof(**bridge.sprite_table));
 							}
 
@@ -1098,9 +1098,9 @@ public class GRFFile
 			/* GSF_SHIP */     ShipVehicleChangeInfo,
 			/* GSF_AIRCRAFT */ AircraftVehicleChangeInfo,
 			/* GSF_STATION */  StationChangeInfo,
-			/* GSF_CANAL */    NULL,
+			/* GSF_CANAL */    null,
 			/* GSF_BRIDGE */   BridgeChangeInfo,
-			/* GSF_TOWNHOUSE */NULL,
+			/* GSF_TOWNHOUSE */null,
 			/* GSF_GLOBALVAR */GlobalVarChangeInfo,
 		};
 	
@@ -1128,7 +1128,7 @@ public class GRFFile
 		byte numprops;
 		byte numinfo;
 		byte engine;
-		EngineInfo ei = NULL;
+		EngineInfo ei = null;
 
 		if (len == 1) {
 			Global.DEBUG_grf( 8, "Silently ignoring one-byte special sprite 0x00.");
@@ -1144,7 +1144,7 @@ public class GRFFile
 		Global.DEBUG_grf( 6, "VehicleChangeInfo: Feature %d, %d properties, to apply to %d+%d",
 		               feature, numprops, engine, numinfo);
 
-		if (feature >= lengthof(handler) || handler[feature] == NULL) {
+		if (feature >= lengthof(handler) || handler[feature] == null) {
 			grfmsg(GMS_WARN, "VehicleChangeInfo: Unsupported feature %d, skipping.", feature);
 			return;
 		}
@@ -1246,7 +1246,7 @@ public class GRFFile
 	 * @param value The value that was used to represent this callback result
 	 * @return A spritegroup representing that callback result
 	 */
-	static SpriteGroup* NewCallBackResultSpriteGroup(int value)
+	static SpriteGroup NewCallBackResultSpriteGroup(int value)
 	{
 		SpriteGroup group = new SpriteGroup(); //calloc(1, sizeof(*group));
 
@@ -1312,7 +1312,7 @@ public class GRFFile
 		_cur_grffile.spriteset_numents = num_ents;
 
 		Global.DEBUG_grf( 7, 
-			"New sprite set at %d of type %d, "
+			"New sprite set at %d of type %d, "+
 			"consisting of %d sets with %d views each (total %d)",
 			_cur_spriteid, feature, num_sets, num_ents, num_sets * num_ents
 		);
@@ -1361,9 +1361,9 @@ public class GRFFile
 		if (setid >= _cur_grffile.spritegroups_count) {
 			// Allocate memory for new sprite group references.
 			_cur_grffile.spritegroups = realloc(_cur_grffile.spritegroups, (setid + 1) * sizeof(*_cur_grffile.spritegroups));
-			// Initialise new space to NULL
+			// Initialise new space to null
 			for (; _cur_grffile.spritegroups_count < (setid + 1); _cur_grffile.spritegroups_count++)
-				_cur_grffile.spritegroups[_cur_grffile.spritegroups_count] = NULL;
+				_cur_grffile.spritegroups[_cur_grffile.spritegroups_count] = null;
 		}
 
 		if (numloaded == 0x81 || numloaded == 0x82) {
@@ -1411,9 +1411,9 @@ public class GRFFile
 				if (HASBIT(groupid, 15)) {
 					dg.ranges[i].group = NewCallBackResultSpriteGroup(groupid);
 					dg.ranges[i].group.ref_count++;
-				} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
+				} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
 					grfmsg(GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
-					dg.ranges[i].group = NULL;
+					dg.ranges[i].group = null;
 				} else {
 					dg.ranges[i].group = _cur_grffile.spritegroups[groupid];
 					dg.ranges[i].group.ref_count++;
@@ -1427,15 +1427,15 @@ public class GRFFile
 			if (HASBIT(groupid, 15)) {
 				dg.default_group = NewCallBackResultSpriteGroup(groupid);
 				dg.default_group.ref_count++;
-			} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
+			} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
 				grfmsg(GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
-				dg.default_group = NULL;
+				dg.default_group = null;
 			} else {
 				dg.default_group = _cur_grffile.spritegroups[groupid];
 			dg.default_group.ref_count++;
 			}
 
-			if (_cur_grffile.spritegroups[setid] != NULL)
+			if (_cur_grffile.spritegroups[setid] != null)
 				UnloadSpriteGroup(&_cur_grffile.spritegroups[setid]);
 			_cur_grffile.spritegroups[setid] = group;
 			group.ref_count++;
@@ -1476,16 +1476,16 @@ public class GRFFile
 				if (HASBIT(groupid, 15)) {
 					rg.groups[i] = NewCallBackResultSpriteGroup(groupid);
 					rg.groups[i].ref_count++;
-				} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
+				} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
 					grfmsg(GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
-					rg.groups[i] = NULL;
+					rg.groups[i] = null;
 				} else {
 					rg.groups[i] = _cur_grffile.spritegroups[groupid];
 					rg.groups[i].ref_count++;
 				}
 			}
 
-			if (_cur_grffile.spritegroups[setid] != NULL)
+			if (_cur_grffile.spritegroups[setid] != null)
 				UnloadSpriteGroup(&_cur_grffile.spritegroups[setid]);
 			_cur_grffile.spritegroups[setid] = group;
 			group.ref_count++;
@@ -1555,7 +1555,7 @@ public class GRFFile
 			Global.DEBUG_grf( 8, "NewSpriteGroup: + rg.loading[%i] = %u (subset %u)", i, rg.loading[i].g.result.result, spriteset_id);
 		}
 
-		if (_cur_grffile.spritegroups[setid] != NULL)
+		if (_cur_grffile.spritegroups[setid] != null)
 			UnloadSpriteGroup(&_cur_grffile.spritegroups[setid]);
 		_cur_grffile.spritegroups[setid] = group;
 		group.ref_count++;
@@ -1612,14 +1612,14 @@ public class GRFFile
 			for (i = 0; i < idcount; i++) 
 			{
 				byte stid = buf[3 + i];
-				StationSpec stat = &_cur_grffile.stations[stid];
+				StationSpec stat = _cur_grffile.stations[stid];
 				byte *bp = &buf[4 + idcount];
 
 				for (c = 0; c < cidcount; c++) {
 					byte ctype = grf_load_byte(&bp);
 					int groupid = grf_load_word(&bp);
 
-					if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
+					if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
 						grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.",
 						       groupid, _cur_grffile.spritegroups_count);
 						return;
@@ -1639,7 +1639,7 @@ public class GRFFile
 				byte *bp = buf + 4 + idcount + cidcount * 3;
 				int groupid = grf_load_word(&bp);
 
-				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
+				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
 					grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.",
 					       groupid, _cur_grffile.spritegroups_count);
 					return;
@@ -1711,7 +1711,7 @@ public class GRFFile
 
 				Global.DEBUG_grf( 8, "VehicleMapSpriteGroup: * [%d] Cargo type %x, group id %x", c, ctype, groupid);
 
-				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
+				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
 					grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.", groupid, _cur_grffile.spritegroups_count);
 					return;
 				}
@@ -1738,7 +1738,7 @@ public class GRFFile
 				byte engine = buf[3 + i] + _vehshifts[feature];
 
 				// Don't tell me you don't love duplicated code!
-				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == NULL) {
+				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
 					grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.", groupid, _cur_grffile.spritegroups_count);
 					return;
 				}
@@ -1918,7 +1918,7 @@ public class GRFFile
 				param_val = _opt.road_side << 4;
 				break;
 			case 0x88: {  /* see if specified GRFID is active */
-				param_val = (GetFileByGRFID(cond_val) != NULL);
+				param_val = (GetFileByGRFID(cond_val) != null);
 			}	break;
 
 			case 0x8B: { /* TTDPatch version */
@@ -2305,7 +2305,7 @@ public class GRFFile
 			GRFFile file = GetFileByGRFID(grfid);
 
 			/* Unset activation flag */
-			if (file != NULL) {
+			if (file != null) {
 				grfmsg(GMS_NOTICE, "GRFInhibit: Deactivating file ``%s''", file.filename);
 				file.flags &= 0xFFFE;
 			}
@@ -2361,16 +2361,16 @@ public class GRFFile
 		int i;
 
 		// Bail out if no spritegroups were defined.
-		if (file.spritegroups == NULL)
+		if (file.spritegroups == null)
 			return;
 
 		DEBUG(grf, 6)("ReleaseSpriteGroups: Releasing for `%s'.", file.filename);
 		for (i = 0; i < file.spritegroups_count; i++) {
-			if (file.spritegroups[i] != NULL)
+			if (file.spritegroups[i] != null)
 				UnloadSpriteGroup(&file.spritegroups[i]);
 		}
 		free(file.spritegroups);
-		file.spritegroups = NULL;
+		file.spritegroups = null;
 		file.spritegroups_count = 0;
 	}
 
@@ -2380,7 +2380,7 @@ public class GRFFile
 		int i;
 		CargoID c;
 
-		for (file = _first_grffile; file != NULL; file = file.next) {
+		for (file = _first_grffile; file != null; file = file.next) {
 			for (i = 0; i < lengthof(file.stations); i++) {
 				if (file.stations[i].grfid != file.grfid) continue;
 
@@ -2388,7 +2388,7 @@ public class GRFFile
 
 				// Release this stations sprite groups.
 				for (c = 0; c < NUM_GLOBAL_CID; c++) {
-					if (file.stations[i].spritegroup[c] != NULL)
+					if (file.stations[i].spritegroup[c] != null)
 						UnloadSpriteGroup(&file.stations[i].spritegroup[c]);
 				}
 			}
@@ -2408,41 +2408,47 @@ public class GRFFile
 	static void ResetNewGRFData()
 	{
 		int i;
-
+		/*
 		// Copy/reset original engine info data
 		memcpy(&_engine_info, &orig_engine_info, sizeof(orig_engine_info));
 		memcpy(&_rail_vehicle_info, &orig_rail_vehicle_info, sizeof(orig_rail_vehicle_info));
 		memcpy(&_ship_vehicle_info, &orig_ship_vehicle_info, sizeof(orig_ship_vehicle_info));
 		memcpy(&_aircraft_vehicle_info, &orig_aircraft_vehicle_info, sizeof(orig_aircraft_vehicle_info));
 		memcpy(&_road_vehicle_info, &orig_road_vehicle_info, sizeof(orig_road_vehicle_info));
-
+		*/
+		
 		// Copy/reset original bridge info data
+		/*
 		// First, free sprite table data
 		for (i = 0; i < MAX_BRIDGES; i++) {
-			if (_bridge[i].sprite_table != NULL) {
+			if (_bridge[i].sprite_table != null) {
 				byte j;
 				for (j = 0; j < 7; j++)
 					free(_bridge[i].sprite_table[j]);
 				free(_bridge[i].sprite_table);
 			}
-		}
-		memcpy(&_bridge, &orig_bridge, sizeof(_bridge));
+		}*/
+		
+		//memcpy(&_bridge, &orig_bridge, sizeof(_bridge));
 
+		System.arraycopy( Bridge.orig_bridge, 0, Bridge._bridge, 0, Bridge._bridge.length );  
+				
 		// Reset refit/cargo class data
-		memset(&cargo_allowed, 0, sizeof(cargo_allowed));
-		memset(&cargo_disallowed, 0, sizeof(cargo_disallowed));
+		// TODO memset(&cargo_allowed, 0, sizeof(cargo_allowed));
+		// TODO memset(&cargo_disallowed, 0, sizeof(cargo_disallowed));
 
+		
 		// Unload sprite group data
-		UnloadWagonOverrides();
-		UnloadCustomEngineSprites();
-		UnloadCustomEngineNames();
+		Engine.UnloadWagonOverrides();
+		Engine.UnloadCustomEngineSprites();
+		Engine.UnloadCustomEngineNames();
 
 		// Reset price base data
-		ResetPriceBaseMultipliers();
+		Economy.ResetPriceBaseMultipliers();
 
 		// Reset station classes
-		ResetStationClasses();
-		ResetCustomStations();
+		// TODO StationNewgrf.ResetStationClasses();
+		// TODO ResetCustomStations();
 	}
 
 	
@@ -2452,22 +2458,22 @@ static void InitNewGRFFile(final String  filename, int sprite_offset)
 	GRFFile newfile;
 
 	newfile = GetFileByFilename(filename);
-	if (newfile != NULL) {
+	if (newfile != null) {
 		/* We already loaded it once. */
 		newfile.sprite_offset = sprite_offset;
 		_cur_grffile = newfile;
 		return;
 	}
 
-	newfile = calloc(1, sizeof(*newfile));
+	newfile = new GRFFile();// calloc(1, sizeof(*newfile));
 
-	if (newfile == NULL)
+	if (newfile == null)
 		error ("Out of memory");
 
 	newfile.filename = strdup(filename);
 	newfile.sprite_offset = sprite_offset;
 
-	if (_first_grffile == NULL) {
+	if (_first_grffile == null) {
 		_cur_grffile = newfile;
 		_first_grffile = newfile;
 	} else {
@@ -2542,14 +2548,14 @@ static void CalculateRefitMasks()
 			/* 0x0C */ GRFComment,
 			/* 0x0D */ ParamSet,
 			/* 0x0E */ GRFInhibit,
-			/* 0x0F */ NULL, // TODO implement
-			/* 0x10 */ NULL  // TODO implement
+			/* 0x0F */ null, // TODO implement
+			/* 0x10 */ null  // TODO implement
 		};
 
 		byte* buf = malloc(num);
 		byte action;
 
-		if (buf == NULL) error("DecodeSpecialSprite: Could not allocate memory");
+		if (buf == null) error("DecodeSpecialSprite: Could not allocate memory");
 
 		FioReadBlock(buf, num);
 		action = buf[0];
@@ -2558,7 +2564,7 @@ static void CalculateRefitMasks()
 			Global.DEBUG_grf( 7, "Skipping unknown action 0x%02X", action);
 		} else if (!HASBIT(action_mask, action)) {
 			Global.DEBUG_grf( 7, "Skipping action 0x%02X in stage %d", action, stage);
-		} else if (handlers[action] == NULL) {
+		} else if (handlers[action] == null) {
 			Global.DEBUG_grf( 7, "Skipping unsupported Action 0x%02X", action);
 		} else {
 			Global.DEBUG_grf( 7, "Handling action 0x%02X in stage %d", action, stage);
@@ -2583,7 +2589,7 @@ static void CalculateRefitMasks()
 		 * processed once at initialization.  */
 		if (stage != 0) {
 			_cur_grffile = GetFileByFilename(filename);
-			if (_cur_grffile == NULL) error("File ``%s'' lost in cache.\n", filename);
+			if (_cur_grffile == null) error("File ``%s'' lost in cache.\n", filename);
 			if (!(_cur_grffile.flags & 0x0001)) return;
 		}
 
@@ -2669,7 +2675,7 @@ static void CalculateRefitMasks()
 
 			_cur_stage = stage;
 			_cur_spriteid = load_index;
-			for (j = 0; j != lengthof(_newgrf_files) && _newgrf_files[j] != NULL; j++) {
+			for (j = 0; j != lengthof(_newgrf_files) && _newgrf_files[j] != null; j++) {
 				if (!FiosCheckFileExists(_newgrf_files[j])) {
 					// TODO: usrerror()
 					error("NewGRF file missing: %s", _newgrf_files[j]);

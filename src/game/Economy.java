@@ -886,7 +886,7 @@ public class Economy
 	/**
 	 * Reset changes to the price base multipliers.
 	 */
-	void ResetPriceBaseMultipliers()
+	static void ResetPriceBaseMultipliers()
 	{
 		int i;
 

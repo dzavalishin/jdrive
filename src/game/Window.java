@@ -198,34 +198,70 @@ public class Window extends WindowConstants
 		return (menu_d) custom; 
 		}
 	
-	message_d as_message_d() { return (message_d) custom; }
+	message_d as_message_d() { 
+		if(custom==null) custom = new message_d(); 
+		return (message_d) custom; 
+		}
 	
-	news_d as_news_d() { return (news_d) custom; }
+	news_d as_news_d() { 
+		if(custom==null) custom = new news_d(); 
+		return (news_d) custom; 
+		}
 	
 	order_d as_order_d() { 
 		if(custom==null) custom = new order_d(); 
 		return (order_d) custom; 
 		}
 	
-	plstations_d as_plstations_d() { return (plstations_d) custom; }
+	plstations_d as_plstations_d() { 
+		if(custom==null) custom = new plstations_d(); 
+		return (plstations_d) custom; 
+		}
 	
-	refit_d as_refit_d() { return (refit_d) custom; }
+	refit_d as_refit_d() { 
+		if(custom==null) custom = new refit_d(); 
+		return (refit_d) custom; 
+		}
 	
-	replaceveh_d as_replaceveh_d() { return (replaceveh_d) custom; }
+	replaceveh_d as_replaceveh_d() { 
+		if(custom==null) custom = new replaceveh_d(); 
+		return (replaceveh_d) custom; 
+		}
 	
-	scroller_d as_scroller_d() { return (scroller_d) custom; }
+	scroller_d as_scroller_d() { 
+		if(custom==null) custom = new scroller_d(); 
+		return (scroller_d) custom; 
+		}
 	
-	smallmap_d as_smallmap_d() { return (smallmap_d) custom; }
+	smallmap_d as_smallmap_d() { 
+		if(custom==null) custom = new smallmap_d(); 
+		return (smallmap_d) custom; 
+		}
 	
-	tooltips_d as_tooltips_d() { return (tooltips_d) custom; }
+	tooltips_d as_tooltips_d() { 
+		if(custom==null) custom = new tooltips_d(); 
+		return (tooltips_d) custom; 
+		}
 	
-	traindepot_d as_traindepot_d() { return (traindepot_d) custom; }
+	traindepot_d as_traindepot_d() { 
+		if(custom==null) custom = new traindepot_d(); 
+		return (traindepot_d) custom; 
+		}
 	
-	traindetails_d as_traindetails_d() { return (traindetails_d) custom; }
+	traindetails_d as_traindetails_d() { 
+		if(custom==null) custom = new traindetails_d(); 
+		return (traindetails_d) custom; 
+		}
 	
-	tree_d as_tree_d() { return (tree_d) custom; }
+	tree_d as_tree_d() { 
+		if(custom==null) custom = new tree_d(); 
+		return (tree_d) custom; 
+		}
 	
-	vehiclelist_d as_vehiclelist_d() { return (vehiclelist_d) custom; }
+	vehiclelist_d as_vehiclelist_d() { 
+		if(custom==null) custom = new vehiclelist_d(); 
+		return (vehiclelist_d) custom; 
+		}
 	
 	void_d as_void_d() { return (void_d) custom; }
 	

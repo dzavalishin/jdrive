@@ -283,12 +283,12 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	public static String GetString(StringID string)
 	{
-		return GetStringWithArgs(string.id, Global._decode_parameters);
+		return GetStringWithArgs(string.id, (Object[])Global._decode_parameters);
 	}
 
 	public static String GetString(int string)
 	{
-		return GetStringWithArgs(string, Global._decode_parameters);
+		return GetStringWithArgs(string, (Object[])Global._decode_parameters);
 	}
 
 
@@ -606,7 +606,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	//private static String FormatString(final String pstr, Object ... arg, int casei)
 	private static String FormatString(final String pstr, Object [] arg, int casei)
 	{
-		byte b;
+		//byte b;
+		char b;
 		//final Object[] arg_orig = arg;
 		int modifier = 0;
 		StringBuilder buff = new StringBuilder();
@@ -615,7 +616,9 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		int stri = 0;
 		char[] str = pstr.toCharArray();
 
-		while ( stri < str.length && (b = (byte) str[stri++]) != '\0') {
+		while ( stri < str.length && (b = (char) (0xFF & str[stri++])) != '\0') 
+		{
+			
 			switch ((int)b) {
 			case 0x1: // {SETX}
 				buff.append( (char)b );
@@ -883,7 +886,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			}
 			case 0x9B: { // {TOWN}
 				final Town t = Town.GetTown(Getint(arg[argc++]));
-				int temp[] = new int[1];
+				Integer[] temp = new Integer[1];
 
 				assert(t.getXy() != null);
 

@@ -403,8 +403,6 @@ public class GfxInit extends LandscapeSprites
 		LoadGrfIndexed("openttd.grf", _openttd_grf_indexes, i++);
 		load_index = Sprites.SPR_OPENTTD_BASE + OPENTTD_SPRITES_COUNT;
 
-		// TODO LoadNewGRF(load_index, i);
-		
 		// [dz] wrong place, but it was in LoadNewGRF for some reason. 
 		
 		//memcpy(&_engine_info, &orig_engine_info, sizeof(orig_engine_info));
@@ -438,6 +436,19 @@ public class GfxInit extends LandscapeSprites
 		System.arraycopy(
 				EngineTables2.orig_road_vehicle_info, 0, 
 				Global._road_vehicle_info, 0, Global._road_vehicle_info.length );
+
+		System.arraycopy( Bridge.orig_bridge, 0, Bridge._bridge, 0, Bridge._bridge.length );  
+		// Unload sprite group data
+		Engine.UnloadWagonOverrides();
+		Engine.UnloadCustomEngineSprites();
+		Engine.UnloadCustomEngineNames();
+
+		// Reset price base data
+		Economy.ResetPriceBaseMultipliers();
+
+		// TODO was called from LoadNewGRF 
+		//GRFFile.ResetNewGRFData();
+		// TODO LoadNewGRF(load_index, i);
 		
 	}
 

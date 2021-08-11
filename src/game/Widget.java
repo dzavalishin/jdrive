@@ -5,7 +5,7 @@ public class Widget {
 	byte resize_flag;
 	byte color;
 	int left, right, top, bottom;
-	int unkA;
+	int unkA; // TODO string id
 	//StringID tooltips;
 	int tooltips;
 
@@ -14,7 +14,7 @@ public class Widget {
 			int resize_flag,
 			int color,
 			int left, int right, int top, int bottom,
-			int unkA,
+			int unkA, 
 			//StringID tooltips
 			int tooltips
 			) {
