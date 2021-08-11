@@ -60,7 +60,7 @@ public class MainWindow extends JPanel implements ActionListener
 
 
 		frame.addKeyListener(new KeyListener() {		
-		//this.addKeyListener(new KeyListener() {		
+			//this.addKeyListener(new KeyListener() {		
 			@Override
 			public void keyTyped(KeyEvent e) { }
 
@@ -73,8 +73,8 @@ public class MainWindow extends JPanel implements ActionListener
 
 
 		frame.addMouseListener( new MouseListener() 
-		//this.addMouseListener( new MouseListener() 
-		{
+				//this.addMouseListener( new MouseListener() 
+				{
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -105,18 +105,18 @@ public class MainWindow extends JPanel implements ActionListener
 			public void mouseEntered(MouseEvent e) {
 			}
 
-		});
+				});
 
 		frame.addMouseMotionListener( new MouseMotionListener() 
-		//this.addMouseMotionListener( new MouseMotionListener() 
-		{
+				//this.addMouseMotionListener( new MouseMotionListener() 
+				{
 
 			@Override
 			public void mouseMoved(MouseEvent e) 
 			{
 				int x = e.getX(); 
 				int y = e.getY();
-				
+
 				e.consume();				
 				processMouse(x, y);
 
@@ -126,11 +126,11 @@ public class MainWindow extends JPanel implements ActionListener
 			public void mouseDragged(MouseEvent e) {
 				int x = e.getX(); 
 				int y = e.getY();
-				
+
 				e.consume();				
 				processMouse(x, y);
 			}
-		});
+				});
 
 		timer.start();
 	}
@@ -140,7 +140,7 @@ public class MainWindow extends JPanel implements ActionListener
 	{
 		myLocation = getLocation();
 	}
-	
+
 	@Override
 	public int getHeight() {
 		return HEIGHT;
@@ -169,61 +169,52 @@ public class MainWindow extends JPanel implements ActionListener
 		int fKey = 0; // func
 		int aKey = 0; // ascii
 
+		int c = e.getKeyChar(); 
+		if( c > ' ' && c < 'z' )
 		{
-			int c = e.getKeyCode();
-			if( c > KeyEvent.VK_A && c < KeyEvent.VK_Z )
-			{
-				aKey = c - KeyEvent.VK_A + 'A';
-				return;
-			}
+			aKey = c;
+		}
+		else
+		{
 
-			if( c > KeyEvent.VK_0 && c < KeyEvent.VK_9 )
+			switch(e.getKeyCode())
 			{
-				aKey = c - KeyEvent.VK_0 + '0';
-				return;
+
+			case KeyEvent.VK_SPACE:		fKey = Window.WKC_SPACE;	break;
+			case KeyEvent.VK_BACK_SPACE:fKey = Window.WKC_BACKSPACE;	break;
+			case KeyEvent.VK_INSERT:    fKey = Window.WKC_INSERT;	break;
+			case KeyEvent.VK_DELETE:    fKey = Window.WKC_DELETE;	break;
+			case KeyEvent.VK_ENTER:     fKey = Window.WKC_RETURN;	break;
+
+			case KeyEvent.VK_TAB:       fKey = Window.WKC_TAB;	break;
+			case KeyEvent.VK_PAUSE:     fKey = Window.WKC_PAUSE;	break;
+
+			case KeyEvent.VK_ESCAPE:    fKey = Window.WKC_ESC;	break;
+
+			case KeyEvent.VK_F1:	fKey = Window.WKC_F1;	break;
+			case KeyEvent.VK_F2:	fKey = Window.WKC_F2;	break;
+			case KeyEvent.VK_F3:	fKey = Window.WKC_F3;	break;
+			case KeyEvent.VK_F4:	fKey = Window.WKC_F4;	break;
+			case KeyEvent.VK_F5:	fKey = Window.WKC_F5;	break;
+			case KeyEvent.VK_F6:	fKey = Window.WKC_F6;	break;
+			case KeyEvent.VK_F7:	fKey = Window.WKC_F7;	break;
+			case KeyEvent.VK_F8:	fKey = Window.WKC_F8;	break;
+			case KeyEvent.VK_F9:	fKey = Window.WKC_F9;	break;
+			case KeyEvent.VK_F10:	fKey = Window.WKC_F10;	break;
+			case KeyEvent.VK_F11:	fKey = Window.WKC_F11;	break;
+			case KeyEvent.VK_F12:	fKey = Window.WKC_F11;	break;
+
 			}
 		}
 
-		
-		
-		switch(e.getKeyCode())
-		{
-
-		case KeyEvent.VK_SPACE:		fKey = Window.WKC_SPACE;	break;
-		case KeyEvent.VK_BACK_SPACE:fKey = Window.WKC_BACKSPACE;	break;
-		case KeyEvent.VK_INSERT:    fKey = Window.WKC_INSERT;	break;
-		case KeyEvent.VK_DELETE:    fKey = Window.WKC_DELETE;	break;
-		case KeyEvent.VK_ENTER:     fKey = Window.WKC_RETURN;	break;
-
-		case KeyEvent.VK_TAB:       fKey = Window.WKC_TAB;	break;
-		case KeyEvent.VK_PAUSE:     fKey = Window.WKC_PAUSE;	break;
-
-		case KeyEvent.VK_ESCAPE:    fKey = Window.WKC_ESC;	break;
-
-		case KeyEvent.VK_F1:	fKey = Window.WKC_F1;	break;
-		case KeyEvent.VK_F2:	fKey = Window.WKC_F2;	break;
-		case KeyEvent.VK_F3:	fKey = Window.WKC_F3;	break;
-		case KeyEvent.VK_F4:	fKey = Window.WKC_F4;	break;
-		case KeyEvent.VK_F5:	fKey = Window.WKC_F5;	break;
-		case KeyEvent.VK_F6:	fKey = Window.WKC_F6;	break;
-		case KeyEvent.VK_F7:	fKey = Window.WKC_F7;	break;
-		case KeyEvent.VK_F8:	fKey = Window.WKC_F8;	break;
-		case KeyEvent.VK_F9:	fKey = Window.WKC_F9;	break;
-		case KeyEvent.VK_F10:	fKey = Window.WKC_F10;	break;
-		case KeyEvent.VK_F11:	fKey = Window.WKC_F11;	break;
-		case KeyEvent.VK_F12:	fKey = Window.WKC_F11;	break;
-
-		}
-
-		
 		int shifts = 0;
-		
+
 		if(0 != (e.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK)) shifts |= Window.WKC_SHIFT;
 		if(0 != (e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK))  shifts |= Window.WKC_CTRL;
 		if(0 != (e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK))   shifts |= Window.WKC_ALT;
 
 		Global._pressed_key = fKey << 16 | (aKey & 0xFFFF) | shifts;
-		
+
 	}
 
 	/* TODO keys
@@ -318,7 +309,7 @@ public class MainWindow extends JPanel implements ActionListener
 		startX++;
 		 */
 		BufferedImage image;
-		
+
 		if(Gfx._pal_last_dirty != -1)
 			makePalette();
 
@@ -380,10 +371,10 @@ public class MainWindow extends JPanel implements ActionListener
 		java.util.Arrays.fill(bp, (byte) 255);
 		//transparent
 		rp[0] = gp[0] = bp[0] = ap[0] = 0;
-		*/
-		
+		 */
+
 		if(Gfx._cur_palette == null || Gfx._cur_palette[0] == null) return;
-		
+
 		for(int i = 0; i < PALETTE_SIZE; i++)
 		{
 			ap[i] = (byte) 0xFF;
@@ -391,7 +382,7 @@ public class MainWindow extends JPanel implements ActionListener
 			gp[i] = Gfx._cur_palette[i].g;
 			bp[i] = Gfx._cur_palette[i].b;
 		}
-				
+
 		icm = new IndexColorModel(8, PALETTE_SIZE, rp, gp, bp, ap);
 		Gfx._pal_last_dirty = -1;
 	}

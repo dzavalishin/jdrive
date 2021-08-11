@@ -512,6 +512,8 @@ public class MiscGui {
 				w.DeleteWindow();
 			}
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -640,6 +642,8 @@ public class MiscGui {
 
 		case WE_MOUSELOOP:
 			if (!Window._right_button_down) w.DeleteWindow();
+			break;
+		default:
 			break;
 		}
 	}
@@ -790,133 +794,10 @@ public class MiscGui {
 		if (num < w.hscroll.pos) w.hscroll.pos = num;
 	}
 
-	static void DelChar(Textbuf tb)
-	{
-		tb.width -= Gfx.GetCharacterWidth((byte)tb.buf[tb.caretpos]);
-		//memmove(tb.buf + tb.caretpos, tb.buf + tb.caretpos + 1, tb.length - tb.caretpos);
-		System.arraycopy(tb.buf, tb.caretpos + 1, tb.buf, tb.caretpos, tb.length - tb.caretpos);
-		tb.length--;
-	}
 
-	/**
-	 * Delete a character from a textbuffer, either with 'Delete' or 'Backspace'
-	 * The character is delete from the position the caret is at
-	 * @param tb @Textbuf type to be changed
-	 * @param delmode Type of deletion, either @Window.WKC_BACKSPACE or @Window.WKC_DELETE
-	 * @return Return true on successfull change of Textbuf, or false otherwise
-	 */
-	static boolean DeleteTextBufferChar(Textbuf tb, int delmode)
-	{
-		if (delmode == Window.WKC_BACKSPACE && tb.caretpos != 0) {
-			tb.caretpos--;
-			tb.caretxoffs -= Gfx.GetCharacterWidth((byte)tb.buf[tb.caretpos]);
 
-			DelChar(tb);
-			return true;
-		} else if (delmode == Window.WKC_DELETE && tb.caretpos < tb.length) {
-			DelChar(tb);
-			return true;
-		}
 
-		return false;
-	}
 
-	/**
-	 * Delete every character in the textbuffer
-	 * @param tb @Textbuf buffer to be emptied
-	 */
-	static void DeleteTextBufferAll(Textbuf tb)
-	{
-		//memset(tb.buf, 0, tb.maxlength);
-		tb.buf[0] = 0;
-		tb.length = tb.width = 0;
-		tb.caretpos = tb.caretxoffs = 0;
-	}
-
-	/**
-	 * Insert a character to a textbuffer. If maxlength is zero, we don't care about
-	 * the screenlength but only about the physical length of the string
-	 * @param tb @Textbuf type to be changed
-	 * @param key Character to be inserted
-	 * @return Return true on successfull change of Textbuf, or false otherwise
-	 */
-	static boolean InsertTextBufferChar(Textbuf tb, char key)
-	{
-		final int charwidth = Gfx.GetCharacterWidth(key);
-		if (tb.length < tb.maxlength && (tb.maxwidth == 0 || tb.width + charwidth <= tb.maxwidth)) {
-			//memmove(tb.buf + tb.caretpos + 1, tb.buf + tb.caretpos, (tb.length - tb.caretpos) + 1);
-			System.arraycopy(tb.buf, tb.caretpos, tb.buf, tb.caretpos + 1, (tb.length - tb.caretpos) + 1);
-			tb.buf[tb.caretpos] = key;
-			tb.length++;
-			tb.width += charwidth;
-
-			tb.caretpos++;
-			tb.caretxoffs += charwidth;
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Handle text navigation with arrow keys left/right.
-	 * This defines where the caret will blink and the next characer interaction will occur
-	 * @param tb @Textbuf type where navigation occurs
-	 * @param navmode Direction in which navigation occurs @Window.WKC_LEFT, @Window.WKC_RIGHT, @Window.WKC_END, @Window.WKC_HOME
-	 * @return Return true on successfull change of Textbuf, or false otherwise
-	 */
-	static boolean MoveTextBufferPos(Textbuf tb, int navmode)
-	{
-		switch (navmode) {
-		case Window.WKC_LEFT:
-			if (tb.caretpos != 0) {
-				tb.caretpos--;
-				tb.caretxoffs -= Gfx.GetCharacterWidth((byte)tb.buf[tb.caretpos]);
-				return true;
-			}
-			break;
-		case Window.WKC_RIGHT:
-			if (tb.caretpos < tb.length) {
-				tb.caretxoffs += Gfx.GetCharacterWidth((byte)tb.buf[tb.caretpos]);
-				tb.caretpos++;
-				return true;
-			}
-			break;
-		case Window.WKC_HOME:
-			tb.caretpos = 0;
-			tb.caretxoffs = 0;
-			return true;
-		case Window.WKC_END:
-			tb.caretpos = tb.length;
-			tb.caretxoffs = tb.width;
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Update @Textbuf type with its actual physical character and screenlength
-	 * Get the count of characters in the string as well as the width in pixels.
-	 * Useful when copying in a larger amount of text at once
-	 * @param tb @Textbuf type which length is calculated
-	 */
-	static void UpdateTextBufferSize(Textbuf tb)
-	{
-		//final char* buf;
-		int bp = 0;
-
-		tb.length = 0;
-		tb.width = 0;
-
-		for (; bp < tb.buf.length && tb.buf[bp] != '\0' && tb.length <= tb.maxlength; bp++) 
-		{
-			tb.length++;
-			tb.width += Gfx.GetCharacterWidth(tb.buf[bp]);
-		}
-
-		tb.caretpos = tb.length;
-		tb.caretxoffs = tb.width;
-	}
 
 	static int HandleEditBoxKey(Window w, int wid, WindowEvent we)
 	{
@@ -930,20 +811,20 @@ public class MiscGui {
 				w.InvalidateWidget(wid);
 		break;
 		case (Window.WKC_CTRL | 'U'):
-			DeleteTextBufferAll(w.as_querystr_d().text);
+			w.as_querystr_d().text.DeleteTextBufferAll();
 		w.InvalidateWidget(wid);
 		break;
 		case Window.WKC_BACKSPACE: case Window.WKC_DELETE:
-			if (DeleteTextBufferChar(w.as_querystr_d().text, we.keycode))
+			if (w.as_querystr_d().text.DeleteTextBufferChar(we.keycode))
 				w.InvalidateWidget(wid);
 			break;
 		case Window.WKC_LEFT: case Window.WKC_RIGHT: case Window.WKC_END: case Window.WKC_HOME:
-			if (MoveTextBufferPos(w.as_querystr_d().text, we.keycode))
+			if (w.as_querystr_d().text.MoveTextBufferPos(we.keycode))
 				w.InvalidateWidget(wid);
 			break;
 		default:
 			if (BitOps.IsValidAsciiChar(we.ascii)) {
-				if (InsertTextBufferChar(w.as_querystr_d().text, (char) we.ascii))
+				if (w.as_querystr_d().text.InsertTextBufferChar((char) we.ascii))
 					w.InvalidateWidget(wid);
 			} else // key wasn't caught
 				we.cont = true;
@@ -952,21 +833,11 @@ public class MiscGui {
 		return 0;
 	}
 
-	static boolean HandleCaret(Textbuf tb)
-	{
-		/* caret changed? */
-		boolean b = 0 != (Global._caret_timer & 0x20);
-
-		if (b != tb.caret) {
-			tb.caret = b;
-			return true;
-		}
-		return false;
-	}
 
 	static void HandleEditBox(Window w, int wid)
 	{
-		if (HandleCaret(w.as_querystr_d().text)) w.InvalidateWidget(wid);
+		if (w.as_querystr_d().text.HandleCaret()) 
+			w.InvalidateWidget(wid);
 	}
 
 	static void DrawEditBox(Window w, int wid)
@@ -975,19 +846,17 @@ public class MiscGui {
 		final Textbuf tb = w.as_querystr_d().text;
 
 		Gfx.GfxFillRect(wi.left+1, wi.top+1, wi.right-1, wi.bottom-1, 215);
-		Gfx.DoDrawString( String.valueOf( tb.buf ), wi.left+2, wi.top+1, 8);
-		if (tb.caret)
-			Gfx.DoDrawString("_", wi.left + 2 + tb.caretxoffs, wi.top + 1, 12);
+		tb.drawToWidget(wi);
 	}
 
 	private static void QueryStringWndProc_press_ok(Window w, boolean [] closed)
 	{
 		if (w.as_querystr_d().orig != null &&
-				(w.as_querystr_d().text.buf.equals(w.as_querystr_d().orig)) ) 
+				(w.as_querystr_d().text.getBuf().equals(w.as_querystr_d().orig)) ) 
 		{
 			w.DeleteWindow();
 		} else {
-			char[] buf = w.as_querystr_d().text.buf;
+			char[] buf = w.as_querystr_d().text.getBuf();
 			int wnd_class = w.as_querystr_d().wnd_class;
 			int wnd_num = w.as_querystr_d().wnd_num;
 			Window parent;
@@ -1129,11 +998,11 @@ public class MiscGui {
 		w.as_querystr_d().caption = caption;
 		w.as_querystr_d().wnd_class = window_class;
 		w.as_querystr_d().wnd_num = window_number;
-		w.as_querystr_d().text.caret = false;
+		w.as_querystr_d().text.setCaret(false);
 		w.as_querystr_d().text.maxlength = realmaxlen - 1;
 		w.as_querystr_d().text.maxwidth = maxwidth;
-		w.as_querystr_d().text.buf = _edit_str_buf.toCharArray();
-		UpdateTextBufferSize(w.as_querystr_d().text);
+		w.as_querystr_d().text.setText(_edit_str_buf);
+		w.as_querystr_d().text.UpdateTextBufferSize();
 	}
 
 	static final Widget _load_dialog_1_widgets[] = {
@@ -1526,11 +1395,11 @@ public class MiscGui {
 		w.resize.step_height = 10;
 		w.resize.height = w.height - 14 * 10; // Minimum of 10 items
 		w.click_state = BitOps.RETSETBIT(w.click_state, 7);
-		w.as_querystr_d().text.caret = false;
+		w.as_querystr_d().text.setCaret(false);
 		w.as_querystr_d().text.maxlength = _edit_str_buf.length() - 1;
 		w.as_querystr_d().text.maxwidth = 240;
-		w.as_querystr_d().text.buf = _edit_str_buf.toCharArray();
-		UpdateTextBufferSize(w.as_querystr_d().text);
+		w.as_querystr_d().text.setText(_edit_str_buf);
+		w.as_querystr_d().text.UpdateTextBufferSize();
 
 		// pause is only used in single-player, non-editor mode, non-menu mode. It
 		// will be unpaused in the WindowEvents.WE_DESTROY event handler.

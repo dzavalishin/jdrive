@@ -306,7 +306,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 		ormod = (ind.color_map + 0x307) << Sprite.PALETTE_SPRITE_START;
 
 		/* Retrieve pointer to the draw industry tile struct */
-		dits = _industry_draw_tile_data[(ti.map5 << 2) | BitOps.GB(ti.tile.getMap().m1, 0, 2)];
+		final int ii = (ti.map5 << 2) | BitOps.GB(ti.tile.getMap().m1, 0, 2);
+		dits = _industry_draw_tile_data[ii];
 
 		image = dits.sprite_1;
 		if( (0 != (image & Sprite.PALETTE_MODIFIER_COLOR)) && (image & Sprite.PALETTE_SPRITE_MASK) == 0)

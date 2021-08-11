@@ -57,11 +57,8 @@ public class Console {
 
 	static void IConsoleClearCommand()
 	{
-		_iconsole_cmdline.buf = new char[256]; // String();
-		_iconsole_cmdline.length = 0;
-		_iconsole_cmdline.width = 0;
-		_iconsole_cmdline.caretpos = 0;
-		_iconsole_cmdline.caretxoffs = 0;
+		_iconsole_cmdline.allocate(256); // String();
+		_iconsole_cmdline.DeleteTextBufferAll();
 		_iconsole_win.SetWindowDirty();
 	}
 

@@ -726,7 +726,7 @@ public class Gfx extends PaletteTabs
 		}
 	}
 
-	static int DoDrawString(final String string, int x, int y, int real_color)
+	public static int DoDrawString(final String string, int x, int y, int real_color)
 	{
 		return DrawStringStateMachine.DoDrawString(string, x, y, real_color);
 
@@ -1903,7 +1903,7 @@ public class Gfx extends PaletteTabs
 		}
 	}
 
-	static int GetCharacterWidth(int key)
+	public static int GetCharacterWidth(int key)
 	{
 		// TODO XXX
 		if( ! (key >= ASCII_LETTERSTART && key - ASCII_LETTERSTART < _stringwidth_table.length))
