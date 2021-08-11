@@ -121,6 +121,14 @@ public class FileIO {
 		return 0xFFFF & ((FioReadByte() << 8) | b);
 	}
 
+	public static int FioReadSignedWord()
+	{
+		int b = FioReadByte() & 0xFF;
+		int r = 0xFFFF & ((FioReadByte() << 8) | b);
+		if( 0 != (r & 0x8000) ) r |= 0xFFFF0000; // sign extend
+		return r;
+	}
+
 	public static int FioReadDword()
 	{
 		int b = 0xFFFF & FioReadWord();

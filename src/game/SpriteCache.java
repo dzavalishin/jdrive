@@ -111,8 +111,8 @@ public class SpriteCache {
 			sprite.info   = type;
 			sprite.height = (byte) ((id != 142) ? height : 10); // Compensate for a TTD bug
 			sprite.width  = width;
-			sprite.x_offs = FileIO.FioReadWord();
-			sprite.y_offs = FileIO.FioReadWord();
+			sprite.x_offs = FileIO.FioReadSignedWord();
+			sprite.y_offs = FileIO.FioReadSignedWord();
 
 			dest = sprite.data;
 			int di = 0;
@@ -451,12 +451,6 @@ public class SpriteCache {
 		if (p == null) p = ReadSprite(sprite);
 		return p;
 	}	
-	/* TODO cache
-	byte [] GetRawSprite(SpriteID sprite)
-	{
-		return ReadSprite(sprite.id).data;
-	}*/
-	
 
 	static Sprite GetSprite(SpriteID sprite)
 	{
@@ -485,28 +479,8 @@ public class SpriteCache {
 	
 	static void GfxInitSpriteMem()
 	{
-		/*
-		// initialize sprite cache heap
-		if (_spritecache_ptr == null) _spritecache_ptr = malloc(SPRITE_CACHE_SIZE);
-
-		// A big free block
-		_spritecache_ptr.size = (SPRITE_CACHE_SIZE - sizeof(MemBlock)) | S_FREE_MASK;
-		// Sentinel block (identified by size == 0)
-		NextBlock(_spritecache_ptr).size = 0;
-
-		memset(_sprite_ptr, 0, sizeof(_sprite_ptr));
-
-		_compact_cache_counter = 0;
-		*/
 	}
 	
-	
 
 }
 
-/*
-class MemBlock {
-	int size;
-	byte data[] = new byte[SpriteCache.VARARRAY_SIZE]; // VARARRAY_SIZE
-}
-*/

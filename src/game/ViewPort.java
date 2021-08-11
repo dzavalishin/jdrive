@@ -2544,7 +2544,7 @@ class StringSpriteToDraw {
 
 class TileSpriteToDraw {
 	int image;
-	TileSpriteToDraw next;
+	TileSpriteToDraw next; // TODO unused
 	int x;
 	int y;
 	int z;
