@@ -1374,7 +1374,7 @@ public class Town extends TownTables implements IPoolItem
 		do {
 			// Generate a tile index not too close from the edge
 			tile = Hal.RandomTile();
-			if (Map.DistanceFromEdge(tile) < 20)
+			if (Map.DistanceFromEdge(tile) < 5) // TODO [dz] was 20
 				continue;
 
 			// Make sure the tile is plain

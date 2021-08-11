@@ -1,5 +1,6 @@
 package game;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -13,10 +14,10 @@ public class Station extends StationTables implements IPoolItem
 {
 
 	TileIndex xy;
-	
+
 	List<RoadStop> bus_stops; 
 	List<RoadStop> truck_stops;
-	
+
 	TileIndex train_tile;
 	TileIndex airport_tile;
 	TileIndex dock_tile;
@@ -337,8 +338,11 @@ public class Station extends StationTables implements IPoolItem
 					int i;
 
 					ac = Landscape.GetAcceptedCargo(tile1);
-					for (i = 0; i < ac.ct.length; ++i) 
-						accepts.ct[i] += ac.ct[i];
+					if( ac != null)
+					{
+						for (i = 0; i < ac.ct.length; ++i) 
+							accepts.ct[i] += ac.ct[i];
+					}
 				}
 			}
 		}
@@ -1080,14 +1084,14 @@ public class Station extends StationTables implements IPoolItem
 		return true;
 	}
 
- 
+
 	private static  byte [] CreateSingle(byte [] layout, int n)
 	{
 		int i = n;
 		int li = 0;
 		do {
 			layout[li++] = 0;
-			} 
+		} 
 		while (--i > 0);
 		layout[((n-1) >> 1)-n] = 2;
 		return layout;
@@ -1100,7 +1104,7 @@ public class Station extends StationTables implements IPoolItem
 		do { 
 			layout[li++] = (byte) b; 
 		}while (--i > 0);
-		
+
 		if (n > 4) {
 			layout[0-n] = 0;
 			layout[n-1-n] = 0;
@@ -1113,10 +1117,10 @@ public class Station extends StationTables implements IPoolItem
 		if (spec != null && spec.lengths >= plat_len &&
 				spec.platforms[plat_len - 1] >= numtracks &&
 				null != spec.layouts[plat_len - 1][numtracks - 1]) {
-			
+
 			// Custom layout defined, follow it. 
 			//memcpy(layout, spec.layouts[plat_len - 1][numtracks - 1], plat_len * numtracks);
-			
+
 			System.arraycopy(spec.layouts[plat_len - 1][numtracks - 1], 0, layout, 0, plat_len * numtracks);
 			return;
 		}
@@ -1127,13 +1131,13 @@ public class Station extends StationTables implements IPoolItem
 			if(0 != (numtracks & 1)) layout = CreateSingle(layout, plat_len);
 			numtracks >>= 1;
 
-			while (--numtracks >= 0) {
-				layout = CreateMulti(layout, plat_len, 4);
-				layout = CreateMulti(layout, plat_len, 6);
-			}
+		while (--numtracks >= 0) {
+			layout = CreateMulti(layout, plat_len, 4);
+			layout = CreateMulti(layout, plat_len, 6);
+		}
 		}
 	}
-	 
+
 
 	/** Build railroad station
 	 * @param x,y starting position of station dragging/placement
@@ -1398,7 +1402,7 @@ public class Station extends StationTables implements IPoolItem
 		return Global._price.remove_rail_station;
 	}
 
-	
+
 	// determine the number of platforms for the station
 	public int GetStationPlatforms( TileIndex tile)
 	{
@@ -2332,7 +2336,7 @@ public class Station extends StationTables implements IPoolItem
 	{
 		int image_or_modificator;
 		int image;
-		
+
 		DrawTileSprites t = null;
 		/* RailType */ int railtype = BitOps.GB(ti.tile.M().m3, 0, 4);
 		final  RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
@@ -2395,10 +2399,10 @@ public class Station extends StationTables implements IPoolItem
 		for (int ssi = 0; ssi < t.seq.length; ssi++)
 		{
 			final DrawTileSeqStruct dtss = t.seq[ssi];
-			
+
 			if(((byte) dtss.delta_x) == 0x80)
 				break;
-			
+
 			image = dtss.image + relocation;
 			image += offset;
 			if(0 != (Global._display_opt & Global.DO_TRANS_BUILDINGS)) {
@@ -2440,14 +2444,14 @@ public class Station extends StationTables implements IPoolItem
 		for (int ssp = 0; ssp < t.seq.length ; ssp++)
 		{
 			final DrawTileSeqStruct dtss = t.seq[ssp];
-					
+
 			if( ((byte) dtss.delta_x) == 0x80)  
 				break;
-			
+
 			Point pt = Point.RemapCoords(dtss.delta_x, dtss.delta_y, dtss.delta_z);
 			Gfx.DrawSprite((dtss.image | ormod) + rti.total_offset.id, x + pt.x, y + pt.y);
 		}
-	
+
 	}
 
 	private static int GetSlopeZ_Station(final  TileInfo  ti)
@@ -3008,7 +3012,7 @@ public class Station extends StationTables implements IPoolItem
 		return 0;
 	}
 
-	
+
 	private static class SearchState
 	{
 		int rad = 0;
@@ -3035,6 +3039,7 @@ public class Station extends StationTables implements IPoolItem
 		final SearchState ss = new SearchState();
 
 		//memset(around, 0xff, sizeof(around));
+		Arrays.fill(around, INVALID_STATION);
 
 		if (Global._patches.modified_catchment) {
 			ss.w_prod = w;

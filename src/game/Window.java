@@ -1276,12 +1276,16 @@ public class Window extends WindowConstants
 
 	static void DecreaseWindowCounters()
 	{
-		//Window w;
-		ListIterator<Window> i = _windows.listIterator(_windows.size());
+		// Fight concurrent mod
+		ArrayList<Window> wcopy = new ArrayList<Window>(_windows);
+		
+		//ListIterator<Window> i = _windows.listIterator(_windows.size());
+		ListIterator<Window> i = wcopy.listIterator(_windows.size());
 
 		//for (w = _last_window; w != _windows;) {
 		//	--w;
-		while (i.hasPrevious()) {
+		while (i.hasPrevious()) 
+		{
 			Window w = i.previous();
 			// Unclick scrollbar buttons if they are pressed.
 			if (0 != (w.flags4 & (WF_SCROLL_DOWN | WF_SCROLL_UP))) {
