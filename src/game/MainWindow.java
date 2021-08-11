@@ -170,7 +170,7 @@ public class MainWindow extends JPanel implements ActionListener
 		int aKey = 0; // ascii
 
 		int c = e.getKeyChar(); 
-		if( c > ' ' && c < 'z' )
+		if( c >= ' ' && c <= 'z' )
 		{
 			aKey = c;
 		}
@@ -191,6 +191,12 @@ public class MainWindow extends JPanel implements ActionListener
 
 			case KeyEvent.VK_ESCAPE:    fKey = Window.WKC_ESC;	break;
 
+			case KeyEvent.VK_LEFT:      fKey = Window.WKC_LEFT;	break;
+			case KeyEvent.VK_RIGHT:     fKey = Window.WKC_RIGHT;	break;
+			case KeyEvent.VK_UP:        fKey = Window.WKC_UP;	break;
+			case KeyEvent.VK_DOWN:      fKey = Window.WKC_DOWN;	break;
+			
+			
 			case KeyEvent.VK_F1:	fKey = Window.WKC_F1;	break;
 			case KeyEvent.VK_F2:	fKey = Window.WKC_F2;	break;
 			case KeyEvent.VK_F3:	fKey = Window.WKC_F3;	break;

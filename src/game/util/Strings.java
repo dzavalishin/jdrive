@@ -380,7 +380,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				num = num % _divisor_table[i];
 			}
 			if ( (0 != (tot |= quot)) || (i == 9)) {
-				buff.append( '0' + quot );
+				buff.append( (char) ('0' + quot) );
 			}
 		}
 
@@ -417,6 +417,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		//for (src = GetStringPtr(STR_MONTH_JAN + ymd.month); (*buff++ = *src++) != '\0';) {}
 		buff.append( StringGetStringPtr(STR_MONTH_JAN + ymd.month) );
 		// TODO buff[-1] = ' ';
+		buff.append( "  " );
 		buff.append( FormatNoCommaNumber( ymd.year + Global.MAX_YEAR_BEGIN_REAL) );
 
 		return buff.toString();

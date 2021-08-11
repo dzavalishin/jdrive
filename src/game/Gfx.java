@@ -2400,6 +2400,11 @@ class DrawStringStateMachine
 
 				c = sc[sp++]; //*string++;
 				c &= 0xFF; // [dz] ok?
+
+				if (c == 0) {
+					Gfx._stringwidth_out = base;
+					return x;
+				}
 				
 				if (c >= Gfx.ASCII_LETTERSTART) {
 					if (x >= dpi.left + dpi.width)
