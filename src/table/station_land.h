@@ -1,3 +1,4 @@
+#if 0
 /* $Id: station_land.h 3289 2005-12-11 10:36:48Z tron $ */
 
 #define TILE_SEQ_END()	{ 0x80, 0, 0, 0, 0, 0, 0 }
