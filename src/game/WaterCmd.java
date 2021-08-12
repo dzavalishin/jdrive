@@ -297,7 +297,7 @@ public class WaterCmd extends WaterTables
 	
 	static int ClearTile_Water(TileIndex tile, byte flags)
 	{
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 		int slope;
 
 		if (m5 <= 1) { // water and shore
@@ -358,7 +358,7 @@ public class WaterCmd extends WaterTables
 	// return true if a tile is a water tile.
 	static boolean IsWateredTile(TileIndex tile)
 	{
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 
 		switch (tile.GetTileType()) {
 			case MP_WATER:
@@ -592,7 +592,7 @@ public class WaterCmd extends WaterTables
 			}
 		} else {
 			if (target.IsTileType(TileTypes.MP_TUNNELBRIDGE)) {
-				byte m5 = target.getMap().m5;
+				int m5 = target.getMap().m5;
 				if ((m5 & 0xF8) == 0xC8 || (m5 & 0xF8) == 0xF0)
 					return;
 
@@ -748,7 +748,7 @@ public class WaterCmd extends WaterTables
 
 	static void ClickTile_Water(TileIndex tile)
 	{
-		byte m5 = (byte) (tile.getMap().m5 - 0x80);
+		int m5 = 0xFF & (tile.getMap().m5 - 0x80);
 
 		if (BitOps.IS_INT_INSIDE(m5, 0, 3+1)) {
 			if(0 != (m5 & 1))

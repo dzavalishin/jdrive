@@ -185,7 +185,7 @@ public class UnmovableCmd extends UnmovableTables {
 
 	static int ClearTile_Unmovable(TileIndex tile, byte flags)
 	{
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 
 		if(0 != (m5 & 0x80)) {
 			if (Global._current_player.id == Owner.OWNER_WATER) return DestroyCompanyHQ(tile, Cmd.DC_EXEC);
@@ -211,7 +211,7 @@ public class UnmovableCmd extends UnmovableTables {
 	static AcceptedCargo GetAcceptedCargo_Unmovable(TileIndex tile)
 	{
 		AcceptedCargo ac = new AcceptedCargo();
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 		int level; // HQ level (depends on company performance) in the range 1..5.
 
 		if (0==(m5 & 0x80)) {
@@ -262,7 +262,7 @@ public class UnmovableCmd extends UnmovableTables {
 
 	static void TileLoop_Unmovable(TileIndex tile)
 	{
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 		int level; // HQ level (depends on company performance) in the range 1..5.
 		int r;
 

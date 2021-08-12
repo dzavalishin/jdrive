@@ -398,7 +398,7 @@ public class Landscape extends GenLandTable
 		}
 
 		if( 0 != (flags & TileTypes.MP_MAP5) ) {
-			tile.getMap().m5 = (byte) args[p++];
+			tile.getMap().m5 = 0xFF & args[p++];
 		}
 
 

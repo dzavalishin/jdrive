@@ -1644,7 +1644,7 @@ public class Station extends StationTables implements IPoolItem
 		Station st;
 		RoadStop road_stop;
 		RoadStop currstop = new RoadStop();
-		RoadStop prev = null; //new RoadStop();
+		//RoadStop prev = null; //new RoadStop();
 		TileIndex tile;
 		int cost;
 		boolean type = p2 != 0 ;
@@ -2478,14 +2478,13 @@ public class Station extends StationTables implements IPoolItem
 
 	private static TileDesc GetTileDesc_Station(TileIndex tile)
 	{
-		byte m5;
 		int str;
 		TileDesc td = new TileDesc();
 
 		td.owner = tile.GetTileOwner().id;
 		td.build_date = GetStation(tile.getMap().m2).build_date;
 
-		m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 
 		if(m5 < 8) 					str=Str.STR_305E_RAILROAD_STATION;
 		else if(m5==32 || m5==45) 	str=Str.STR_305F_AIRCRAFT_HANGAR; // hangars
@@ -2556,7 +2555,7 @@ public class Station extends StationTables implements IPoolItem
 
 	private static void AnimateTile_Station(TileIndex tile)
 	{
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 		//FIXME -- AnimateTile_Station . not nice code, lots of things double
 		// again hardcoded...was a quick hack
 
@@ -3265,7 +3264,7 @@ public class Station extends StationTables implements IPoolItem
 
 	private static int ClearTile_Station(TileIndex tile, int flags)
 	{
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 		Station st;
 
 		if( 0 != (flags & Cmd.DC_AUTO)) {

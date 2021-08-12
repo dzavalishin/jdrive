@@ -78,27 +78,9 @@ public class Industry extends IndustryTables implements IPoolItem {
 	}
 
 
-	//public static Industry GetIndustry(int offs) {	}
-
-
-
-
-
-	//enum {
-	/* Max industries: 64000 (8 * 8000) */
 	public static final int INDUSTRY_POOL_BLOCK_SIZE_BITS = 3;       /* In bits, so (1 << 3) == 8 */
 	public static final int INDUSTRY_POOL_MAX_BLOCKS      = 8000;
-	//};
 
-	/**
-	 * Called if a new block is added to the industry-pool
-	 * /
-	void IndustryPoolNewBlock(int start_item)
-	{
-		Industry i;
-
-		FOR_ALL_INDUSTRIES_FROM(i, start_item) i.index = start_item++;
-	}*/
 
 	private static  IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() {
 
@@ -109,9 +91,6 @@ public class Industry extends IndustryTables implements IPoolItem {
 	};
 	/* Initialize the industry-pool */
 	static MemoryPool<Industry> _industry_pool = new MemoryPool<Industry>(factory); 
-	//{ "Industry", INDUSTRY_POOL_MAX_BLOCKS, INDUSTRY_POOL_BLOCK_SIZE_BITS, sizeof(Industry), &IndustryPoolNewBlock, 0, 0, null };
-
-
 
 
 	@Override
@@ -156,54 +135,6 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	static byte _industry_sound_ctr;
 	static TileIndex _industry_sound_tile;
-
-	//void ShowIndustryViewWindow(int industry);
-	//void BuildOilRig(TileIndex tile);
-	//void DeleteOilRig(TileIndex tile);
-	/*
-	class DrawIndustryTileStruct {
-		int sprite_1;
-		int sprite_2;
-
-		byte subtile_x;
-		byte subtile_y;
-		byte width;
-		byte height;
-		byte dz;
-		byte proc;
-	}
-
-
-	class DrawIndustrySpec1Struct {
-		byte x;
-		byte image_1;
-		byte image_2;
-		byte image_3;
-	}
-
-	class DrawIndustrySpec4Struct {
-		byte image_1;
-		byte image_2;
-		byte image_3;
-	}
-	 */
-	/*class IndustryTileTable {
-		TileIndexDiffC ti;
-		byte map5;
-	}* /
-
-	class IndustrySpec {
-		final IndustryTileTable [][]table;
-		byte num_table;
-		byte a,b,c;
-		byte [] produced_cargo = new byte[2];
-		byte [] production_rate = new byte[2];
-		byte [] accepts_cargo = new byte[3];
-		byte check_proc;
-	} */
-
-
-
 
 
 
@@ -310,7 +241,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		
 		if(ii >= _industry_draw_tile_data.length )
 		{
-			Global.error("DrawTile_Industry m5 too big %d @%d.%d", ii, ti.x, ti.y );
+			Global.error("DrawTile_Industry m5(%d) too big %d @%d.%d", ti.map5, ii, ti.x/16, ti.y/16 );
 			return;
 		}
 		
@@ -370,7 +301,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	static AcceptedCargo GetAcceptedCargo_Industry(TileIndex tile)
 	{
 		AcceptedCargo ac = new AcceptedCargo();
-		int m5 = tile.getMap().m5;
+		int m5 = 0xFF & tile.getMap().m5;
 		/*CargoID*/ int a;
 
 		a = _industry_map5_accepts_1[m5];
@@ -436,7 +367,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		cw = Math.min(i.cargo_waiting[0], 255);
 		if (cw > _industry_min_cargo[i.type]/* && i.produced_cargo[0] != 0xFF*/) {
-			byte m5;
+			int m5;
 
 			i.cargo_waiting[0] -= cw;
 
@@ -447,7 +378,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 			am = Station.MoveGoodsToStation(i.xy, i.width, i.height, i.produced_cargo[0], cw);
 			i.last_mo_transported[0] += am;
-			if (am != 0 && (m5 = (byte) _industry_produce_map5[tile.getMap().m5]) != 0xFF) {
+			if (am != 0 && (m5 = 0xFF & _industry_produce_map5[tile.getMap().m5]) != 0xFF) {
 				tile.getMap().m1 = 0x80;
 				tile.getMap().m5 = m5;
 				tile.MarkTileDirtyByTile();
@@ -558,7 +489,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					}
 				}
 
-				tile.getMap().m3 = (byte) m;
+				tile.getMap().m3 = 0xFF & m;
 				tile.MarkTileDirtyByTile();
 			}
 			break;
@@ -568,8 +499,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			if ((Global._tick_counter & 3) == 0) {
 				m = tile.getMap().m5	+ 1;
 				if (m == 155+1) m = 148;
-				tile.getMap().m5 = (byte) m;
-
+				tile.getMap().m5 = 0xFF & m;
 				tile.MarkTileDirtyByTile();
 			}
 			break;
@@ -588,7 +518,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					TextEffect.DeleteAnimatedTile(tile);
 				} else {
 					tile.getMap().m1 = BitOps.RETSB(tile.getMap().m1, 0, 2, m);
-					tile.getMap().m5 = (byte) n;
+					tile.getMap().m5 = 0xFF & n;
 					tile.MarkTileDirtyByTile();
 				}
 				 */
@@ -614,7 +544,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				if(doelse)
 				{
 					tile.getMap().m1 = BitOps.RETSB(tile.getMap().m1, 0, 2, m);
-					tile.getMap().m5 = (byte) n;
+					tile.getMap().m5 = 0xFF & n;
 					tile.MarkTileDirtyByTile();
 				}
 			}
@@ -748,8 +678,13 @@ public class Industry extends IndustryTables implements IPoolItem {
 		if (Global._game_mode == GameModes.GM_EDITOR) return;
 
 		TransportIndustryGoods(tile);
-
-		n = (byte) _industry_map5_animation_next[tile.getMap().m5];
+		
+		int mm5 = 0xFF & tile.getMap().m5;
+		// TODO XXX HACK temp kill me
+		if(mm5 > _industry_map5_animation_next.length )
+			tile.getMap().m5 = mm5 = 0x18; // oilrig? just for fun
+		
+		n = (byte) _industry_map5_animation_next[mm5];
 		if (n != 255) {
 			tile.getMap().m1 = 0;
 			tile.getMap().m5 = n;
@@ -758,7 +693,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		}
 
 
-		switch ((int)tile.getMap().m5) {
+		switch (0xFF & (int)tile.getMap().m5) {
 		case 0x18: // coast line at oilrigs
 		case 0x19:
 		case 0x1A:
@@ -1522,7 +1457,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		//do
 		for(final IndustryTileTable it : itt)
 		{
-			// TODO kill me and markers
+			// TODO kill me and end of list markers in arrays
 			if(it.ti.x == -0x80)
 				break;
 			
@@ -1539,9 +1474,11 @@ public class Industry extends IndustryTables implements IPoolItem {
 				Cmd.DoCommandByTile(cur_tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 
 				cur_tile.SetTileType(TileTypes.MP_INDUSTRY);
-				cur_tile.getMap().m5 = (byte) it.map5;
+				cur_tile.getMap().m5 = 0xFF & it.map5;
 				cur_tile.getMap().m2 = i.index;
 				cur_tile.getMap().m1 = Global._generating_world ? 0x1E : 0; /* maturity */
+				
+				Global.printf("industry m5 = %x @%d.%d\n", cur_tile.getMap().m5, cur_tile.TileX(), cur_tile.TileY() );
 			}
 		} // while ((++it).ti.x != -0x80);
 

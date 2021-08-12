@@ -271,10 +271,10 @@ public class Window extends WindowConstants
 		return (void_d) custom; 
 		}
 
-	vp_d as_vp_d() 
+	vp2_d as_vp_d() 
 	{ 
-		if(custom==null) custom = new vp_d(); 
-		return (vp_d) custom; 
+		if(custom==null) custom = new vp2_d(); 
+		return (vp2_d) custom; 
 	}
 
 	vp2_d as_vp2_d() 
@@ -1778,8 +1778,10 @@ public class Window extends WindowConstants
 				return true;
 			}
 
-			((vp_d)w.custom).scrollpos_x += dx << vp.zoom;
-			((vp_d)w.custom).scrollpos_y += dy << vp.zoom;
+			//((vp2_d)w.custom).scrollpos_x += dx << vp.zoom;
+			//((vp2_d)w.custom).scrollpos_y += dy << vp.zoom;
+			w.as_vp2_d().scrollpos_x += dx << vp.zoom;
+			w.as_vp2_d().scrollpos_y += dy << vp.zoom;
 
 			Hal._cursor.delta.x = Hal._cursor.delta.y = 0;
 			return false;
@@ -1994,7 +1996,7 @@ public class Window extends WindowConstants
 				if (w == null || 0 != (w.flags4 & WF_DISABLE_VP_SCROLL) ) return;
 				vp = w.IsPtInWindowViewport(x, y);
 				if (vp != null) {
-					vp_d vpd = (vp_d)w.custom;
+					vp2_d vpd = w.as_vp2_d();
 					x -= vp.left;
 					y -= vp.top;
 					//here allows scrolling in both x and y axis

@@ -1403,7 +1403,7 @@ public class TrainCmd extends TrainTables
 				tile.IsLevelCrossing() &&
 				Vehicle.VehicleFromPos(tile, tile, TrainCmd::TestTrainOnCrossing) == null && // empty?
 				BitOps.GB(tile.getMap().m5, 2, 1) != 0) { // Lights on?
-			tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 1, 0); // Switch lights off
+			tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 0); // Switch lights off
 			tile.MarkTileDirtyByTile();
 		}
 	}
@@ -3571,7 +3571,7 @@ public class TrainCmd extends TrainTables
 					// make a rail/road crossing red
 					if (tile.IsTileType( TileTypes.MP_STREET) && tile.IsLevelCrossing()) {
 						if (BitOps.GB(tile.getMap().m5, 2, 1) == 0) {
-							tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
+							tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
 							//SndPlayVehicleFx(SND_0E_LEVEL_CROSSING, v);
 							tile.MarkTileDirtyByTile();
 						}

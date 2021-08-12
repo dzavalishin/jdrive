@@ -23,7 +23,7 @@ public class Road extends RoadTables
 	static boolean HasTileRoadAt(TileIndex tile, int i)
 	{
 		int mask;
-		byte b;
+		int b;
 
 		switch (tile.GetTileType()) {
 		case MP_STREET:
@@ -203,7 +203,7 @@ public class Road extends RoadTables
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				Town.ChangeTownRating(t, -road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
-				tile.getMap().m5 = (byte) (ti.map5 & 0xC7);
+				tile.getMap().m5 = ti.map5 & 0xC7;
 				tile.SetTileOwner( Owner.OWNER_NONE);
 				tile.MarkTileDirtyByTile();
 			}
@@ -514,7 +514,7 @@ public class Road extends RoadTables
 			if (ti.type != TileTypes.MP_STREET.ordinal()) {
 				tile.SetTileType( TileTypes.MP_STREET);
 				tile.getMap().m5 = 0;
-				tile.getMap().m2 = p2;
+				tile.getMap().m2 = 0xFF & p2;
 				tile.SetTileOwner( Global._current_player);
 			}
 
@@ -728,7 +728,7 @@ public class Road extends RoadTables
 	static int ClearTile_Road(TileIndex tile, byte flags)
 	{
 		int ret;
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 
 		if ( (m5 & 0xF0) == 0) {
 			byte b = (byte) (m5 & 0xF);
@@ -1119,7 +1119,7 @@ public class Road extends RoadTables
 			// Handle road work
 			//XXX undocumented
 
-			byte b = tile.getMap().m4;
+			int b = tile.getMap().m4;
 			//roadworks take place only
 			//keep roadworks running for 16 loops
 			//lower 4 bits of map3_hi store the counter now
@@ -1151,7 +1151,7 @@ public class Road extends RoadTables
 				return 0;
 			return 0 != (tile.getMap().m5 & 8) ? 0x101 : 0x202;
 		} else if  (mode == Global.TRANSPORT_ROAD) {
-			byte b = tile.getMap().m5;
+			int b = tile.getMap().m5;
 			if ((b & 0xF0) == 0) {
 				/* Ordinary road */
 				if (!_road_special_gettrackstatus && BitOps.GB(tile.getMap().m4, 4, 3) >= 6)
@@ -1208,7 +1208,7 @@ public class Road extends RoadTables
 			if (v.type == Vehicle.VEH_Train && BitOps.GB(tile.getMap().m5, 2, 1) == 0) {
 				/* train crossing a road */
 				//SndPlayVehicleFx(SND_0E_LEVEL_CROSSING, v);
-				tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
+				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
 				tile.MarkTileDirtyByTile();
 			}
 		} else if (BitOps.GB(tile.getMap().m5, 4, 4) == 2) {
@@ -1226,7 +1226,7 @@ public class Road extends RoadTables
 	{
 		if (tile.IsLevelCrossing() && v.type == Vehicle.VEH_Train && v.next == null) {
 			// Turn off level crossing lights
-			tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 1, 0);
+			tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 0);
 			tile.MarkTileDirtyByTile();
 		}
 		return 0; // TODO [dz] it was void, who uses ret val?
@@ -1247,7 +1247,7 @@ public class Road extends RoadTables
 			if (BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
 				tile.SetTileOwner(Owner.OWNER_NONE);
 			} else if (tile.IsLevelCrossing()) {
-				tile.getMap().m5 = (byte) (((tile.getMap().m5&8) != 0) ? 0x5 : 0xA);
+				tile.getMap().m5 = (((tile.getMap().m5&8) != 0) ? 0x5 : 0xA);
 				tile.SetTileOwner( tile.getMap().m3);
 				tile.getMap().m3 = 0;
 				tile.getMap().m4 &= 0x80;

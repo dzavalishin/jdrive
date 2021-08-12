@@ -16,9 +16,6 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	public static final int STATUS_BAR = AirCraft.STATUS_BAR;
 
-	//void ShowRoadVehViewWindow(Vehicle v);
-
-
 	static int GetRoadVehImage(final Vehicle v, int direction)
 	{
 		int img = v.spritenum;
@@ -951,7 +948,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		int best_track;
 		int best_dist, best_maxlen;
 		int i;
-		byte m5;
+		int m5;
 
 		{
 			int r;
@@ -969,7 +966,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			if (tile.IsTileOwner(Owner.OWNER_NONE) || tile.IsTileOwner(v.owner)) {
 				/* Our station */
 				final Station  st = Station.GetStation(tile.getMap().m2);
-				byte val = tile.getMap().m5;
+				int val = tile.getMap().m5;
 				// TODO why .get(0) is ok?
 				if (v.cargo_type != AcceptedCargo.CT_PASSENGERS) {
 					if (BitOps.IS_INT_INSIDE(val, 0x43, 0x47) && (Global._patches.roadveh_queue || 0!=(st.truck_stops.get(0).status&3)))

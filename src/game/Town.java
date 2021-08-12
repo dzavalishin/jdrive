@@ -308,7 +308,7 @@ public class Town extends TownTables implements IPoolItem
 		/* Retrieve pointer to the draw town tile struct */
 		{
 			/* this "randomizes" on the (up to) 4 variants of a building */
-			byte gfx   = ti.tile.getMap().m4;
+			int gfx   = ti.tile.getMap().m4;
 			byte stage = (byte) BitOps.GB(ti.tile.getMap().m3, 6, 2);
 			int variant;
 			variant  = ti.x >> 4;
@@ -393,7 +393,7 @@ public class Town extends TownTables implements IPoolItem
 				i = (Hal.Random() & 7) - 1;
 			} while (i < 0 || i == 1 || i * 6 == old);
 
-			tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 0, 6, i);
+			tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 0, 6, i);
 		}
 
 		a = BitOps.GB(tile.getMap().m1, 0, 7);
@@ -473,7 +473,7 @@ public class Town extends TownTables implements IPoolItem
 
 		if( 0!= (tile.getMap().m5 & 0x80)) return;
 
-		tile.getMap().m5 = (byte) BitOps.RETAB(tile.getMap().m5, 0, 3, 1);
+		tile.getMap().m5 = BitOps.RETAB(tile.getMap().m5, 0, 3, 1);
 		if (BitOps.GB(tile.getMap().m5, 0, 3) != 0) return;
 
 		tile.getMap().m3 = (byte) (tile.getMap().m3 + 0x40);
@@ -510,7 +510,7 @@ public class Town extends TownTables implements IPoolItem
 				BitOps.CHANCE16(1, 2) &&
 				TextEffect.AddAnimatedTile(tile)) 
 		{
-			tile.getMap().m5 = (byte) ((tile.getMap().m5 & 0x40) | 0x80);
+			tile.getMap().m5 = ((tile.getMap().m5 & 0x40) | 0x80);
 		}
 
 		t = GetTown(tile.getMap().m2);
@@ -594,7 +594,7 @@ public class Town extends TownTables implements IPoolItem
 	static AcceptedCargo GetAcceptedCargo_Town(TileIndex tile)
 	{
 		AcceptedCargo ac = new AcceptedCargo();
-		byte type = tile.getMap().m4;
+		int type = tile.getMap().m4;
 
 		ac.ct[AcceptedCargo.CT_PASSENGERS] = _housetype_cargo_passengers[type];
 		ac.ct[AcceptedCargo.CT_MAIL]       = _housetype_cargo_mail[type];

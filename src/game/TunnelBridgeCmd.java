@@ -350,7 +350,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 			/* do middle part of bridge */
 			if(0 != (flags & Cmd.DC_EXEC) ) {
-				ti.tile.getMap().m5 = (byte)(m5 | direction | rail_or_road);
+				ti.tile.getMap().m5 = 0xFF & (m5 | direction | rail_or_road);
 				ti.tile.SetTileType(TileTypes.MP_TUNNELBRIDGE);
 
 				//bridges pieces sequence (middle parts)
@@ -606,7 +606,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	static TileIndex CheckTunnelBusy(TileIndex tile, int []length)
 	{
 		int z = tile.GetTileZ();
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 		TileIndexDiff delta = TileIndex.TileOffsByDir(m5 & 3);
 		int len = 0;
 		TileIndex starttile = tile;
@@ -725,7 +725,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			cost = 0 != (tile.getMap().m5 & 8) ? Global._price.remove_road * 2 : Global._price.remove_rail;
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				tile.getMap().m5 = (byte) (tile.getMap().m5 & ~0x38);
+				tile.getMap().m5 = (tile.getMap().m5 & ~0x38);
 				tile.SetTileOwner(Owner.OWNER_NONE);
 				tile.MarkTileDirtyByTile();
 			}
@@ -739,7 +739,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			if (!Vehicle.EnsureNoVehicleZ(tile, tile.TilePixelHeight())) return Cmd.CMD_ERROR;
 			cost = Global._price.clear_water;
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				tile.getMap().m5 = (byte) (tile.getMap().m5 & ~0x38);
+				tile.getMap().m5 = (tile.getMap().m5 & ~0x38);
 				tile.SetTileOwner(Owner.OWNER_NONE);
 				tile.MarkTileDirtyByTile();
 			}
@@ -783,7 +783,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		}
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			byte m5;
+			int m5;
 			MutableTileIndex c = new MutableTileIndex( tile );
 			int new_data;
 			int pbs;
@@ -812,7 +812,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					}
 
 					c.SetTileType(TileTypes.values[ new_data >> 12]);
-					c.getMap().m5 = (byte)new_data;
+					c.getMap().m5 = 0xFF & new_data;
 					c.getMap().m2 = 0;
 					c.getMap().m4 &= 0x0F;
 					if (direction!=0 ? BitOps.HASBIT(pbs,0) : BitOps.HASBIT(pbs,1))
@@ -837,7 +837,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 	static int ClearTile_TunnelBridge(TileIndex tile, byte flags)
 	{
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 
 		if ((m5 & 0xF0) == 0) {
 			if(0 != (flags & Cmd.DC_AUTO)) 
@@ -1378,7 +1378,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	static int GetTileTrackStatus_TunnelBridge(TileIndex tile, /*TransportType*/ int mode)
 	{
 		int result;
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 
 		if ((m5 & 0xF0) == 0) {
 			/* This is a tunnel */

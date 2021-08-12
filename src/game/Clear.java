@@ -538,7 +538,7 @@ public class Clear extends ClearTables {
 
 	static void DrawClearLandFence(final TileInfo ti)
 	{
-		byte m4 = ti.tile.getMap().m4;
+		int m4 = ti.tile.getMap().m4;
 		byte z = (byte) ti.z;
 
 		if(0 != (ti.tileh & 2)) {
@@ -675,13 +675,13 @@ public class Clear extends ClearTables {
 	static void TileLoopClearAlps(TileIndex tile)
 	{
 		int k;
-		byte m5,tmp;
+		int m5,tmp;
 
 		/* distance from snow line, in steps of 8 */
 		k = tile.GetTileZ() - GameOptions._opt.snow_line;
 
-		m5  = (byte) (tile.getMap().m5 & 0x1C);
-		tmp = (byte) (tile.getMap().m5 & 3);
+		m5  = (tile.getMap().m5 & 0x1C);
+		tmp = (tile.getMap().m5 & 3);
 
 		if (k < -8) {
 			/* snow_m2_down */
@@ -694,7 +694,7 @@ public class Clear extends ClearTables {
 			if (m5 != 0x10) {
 				m5 = 0x10;
 			} else if (tmp != 0) {
-				m5 = (byte) ((tmp - 1) + 0x10);
+				m5 = 0xFF & ((tmp - 1) + 0x10);
 			} else
 				return;
 		} else if (k < 8) {
@@ -715,7 +715,7 @@ public class Clear extends ClearTables {
 			} else if (tmp != 2) {
 				m5 = 2;
 				if (tmp <= 2)
-					m5 = (byte) (tmp + 1);
+					m5 = 0xFF & (tmp + 1);
 				m5 += 0x10;
 			} else
 				return;
@@ -724,7 +724,7 @@ public class Clear extends ClearTables {
 			if (m5 != 0x10) {
 				m5 = 0x10;
 			} else if (tmp != 3) {
-				m5 = (byte) (tmp + 1 + 0x10);
+				m5 = 0xFF & (tmp + 1 + 0x10);
 			} else
 				return;
 		}
@@ -753,7 +753,7 @@ public class Clear extends ClearTables {
 
 	static void TileLoop_Clear(TileIndex tile)
 	{
-		byte m5,m3;
+		int m5,m3;
 
 		TileLoopClearHelper(tile);
 
@@ -811,7 +811,7 @@ public class Clear extends ClearTables {
 		do {
 			tile = TileIndex.RandomTile();
 			if (tile.IsTileType( TileTypes.MP_CLEAR)) 
-				tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 2, 1);
+				tile.getMap().m5 = 0xFF & BitOps.RETSB(tile.getMap().m5, 2, 2, 1);
 		} while (--i > 0);
 
 		/* add grey squares */
@@ -824,7 +824,7 @@ public class Clear extends ClearTables {
 				for(;;) {
 					TileIndex tile_new = null;
 
-					tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 2, 2);
+					tile.getMap().m5 = 0xFF & BitOps.RETSB(tile.getMap().m5, 2, 2, 2);
 					boolean getOut = false;
 					do {
 						if (--j == 0)

@@ -83,13 +83,13 @@ public class Economy
 
 	static void UpdatePlayerHouse(Player p, int score)
 	{
-		byte val;
+		int val;
 		TileIndex tile = p.location_of_house;
 
 		if (tile == null)
 			return;
 
-		val = (byte) 128;
+		val = 128;
 		if( score >= 170)
 		{
 			val+= 4;
