@@ -270,8 +270,8 @@ public class Road extends RoadTables
 					int pbs_track = Pbs.PBSTileReserved(tile);
 					Town.ChangeTownRating(t, -road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
 
-					Landscape.ModifyTile(tile,
-							TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |
+					Landscape.ModifyTile(tile, TileTypes.MP_RAILWAY,
+							//TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |
 							TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAP5,
 							tile.getMap().m4 & 0xF, /* map3_lo */
 							c											/* map5 */
@@ -427,8 +427,8 @@ public class Road extends RoadTables
 				if(0 != (flags & Cmd.DC_EXEC)) 
 				{
 					byte pbs_track = (byte) Pbs.PBSTileReserved(tile);
-					Landscape.ModifyTile(tile,
-							TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
+					Landscape.ModifyTile(tile, TileTypes.MP_STREET,
+							//TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
 							TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5,
 							p2,
 							Global._current_player.id, /* map3_lo */
@@ -464,7 +464,7 @@ public class Road extends RoadTables
 				/* all checked, can build road now! */
 				cost = Global._price.build_road * 2;
 				if(0 != (flags & Cmd.DC_EXEC) ) {
-					Landscape.ModifyTile(tile,
+					Landscape.ModifyTile(tile, TileTypes.MP_NOCHANGE,
 							TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 							(ti.map5 & 0xC7) | 0x28 // map5
 							);
@@ -701,8 +701,8 @@ public class Road extends RoadTables
 			dep.xy = tile;
 			dep.town_index = Town.ClosestTownFromTile(tile, (int)-1).index;
 
-			Landscape.ModifyTile(tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
+			Landscape.ModifyTile(tile, TileTypes.MP_STREET,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
 					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 					(p1 | 0x20) /* map5 */
 					);

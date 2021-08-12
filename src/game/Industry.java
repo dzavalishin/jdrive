@@ -934,8 +934,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 		{
 			TileIndex cur_tile = cur_tile1.TILE_MASK();
 			if (!IsBadFarmFieldTile2(cur_tile)) {
-				Landscape.ModifyTile(cur_tile,
-						TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) |
+				Landscape.ModifyTile(cur_tile, TileTypes.MP_CLEAR,
+						//TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) |
 						TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5,
 						type2,			/* map3_lo */
 						Owner.OWNER_NONE,	/* map_owner */

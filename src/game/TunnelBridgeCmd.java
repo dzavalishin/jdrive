@@ -275,8 +275,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		/* do the drill? */
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			/* build the start tile */
-			Landscape.ModifyTile(ti_start.tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_TUNNELBRIDGE) |
+			Landscape.ModifyTile(ti_start.tile, TileTypes.MP_TUNNELBRIDGE,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_TUNNELBRIDGE) |
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 					(bridge_type << 4), /* map2 */
 					railtype, /* map3_lo */
@@ -284,8 +284,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					);
 
 			/* build the end tile */
-			Landscape.ModifyTile(ti_end.tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_TUNNELBRIDGE) |
+			Landscape.ModifyTile(ti_end.tile, TileTypes.MP_TUNNELBRIDGE,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_TUNNELBRIDGE) |
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 					(bridge_type << 4), /* map2 */
 					railtype, /* map3_lo */
@@ -513,15 +513,15 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		}
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			Landscape.ModifyTile(ti.tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_TUNNELBRIDGE) |
+			Landscape.ModifyTile(ti.tile, TileTypes.MP_TUNNELBRIDGE,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_TUNNELBRIDGE) |
 					TileTypes.MP_MAP3LO | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 					_build_tunnel_railtype, /* map3lo */
 					((_build_tunnel_bh << 1) | 2) - direction /* map5 */
 					);
 
-			Landscape.ModifyTile(end_tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_TUNNELBRIDGE) |
+			Landscape.ModifyTile(end_tile, TileTypes.MP_TUNNELBRIDGE,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_TUNNELBRIDGE) |
 					TileTypes.MP_MAP3LO | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 					_build_tunnel_railtype, /* map3lo */
 					(_build_tunnel_bh << 1) | ((direction!=0) ? 3:0)/* map5 */

@@ -123,6 +123,7 @@ public class GraphGui
 				col_ptr = new ArrayPtr<Long>( row_ptr );
 				do 
 				{
+					if( !col_ptr.hasCurrent() ) break;
 					if (col_ptr.r() != INVALID_VALUE) {
 						mx = Math.max(mx, Math.abs(col_ptr.r()));
 					}
@@ -206,6 +207,7 @@ public class GraphGui
 					color = gw.colors[i];
 					old_y = old_x = INVALID_VALUE;
 					do {
+						if(!col_ptr.hasCurrent()) break;
 						cur_val = col_ptr.rpp();
 						if (cur_val != INVALID_VALUE) {
 							y = (int) (adj_height - BitOps.BIGMULSS64(cur_val, y_scaling >> 1, 31) + gw.top);

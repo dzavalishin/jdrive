@@ -77,13 +77,15 @@ public class WaterCmd extends WaterTables
 			Depot._last_built_ship_depot_tile = tile;
 			depot.town_index = Town.ClosestTownFromTile(tile, (int)-1).index;
 
-			Landscape.ModifyTile(tile,
-				TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR,
+			Landscape.ModifyTile(tile, TileTypes.MP_WATER,
+				//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+				TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR,
 				(0x80 + p1*2)
 			);
 
-			Landscape.ModifyTile(tile2,
-				TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR,
+			Landscape.ModifyTile(tile2, TileTypes.MP_WATER,
+				//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+				TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR,
 				(0x81 + p1*2)
 			);
 		}
@@ -111,8 +113,12 @@ public class WaterCmd extends WaterTables
 			Depot.DoDeleteDepot(tile);
 
 			/* Make the tiles water */
-			Landscape.ModifyTile(tile, TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0);
-			Landscape.ModifyTile(tile2, TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0);
+			Landscape.ModifyTile(tile, TileTypes.MP_WATER, 
+					//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+					TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0);
+			Landscape.ModifyTile(tile2, TileTypes.MP_WATER, 
+					//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+					TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0);
 		}
 
 		return Global._price.remove_ship_depot;
@@ -140,9 +146,15 @@ public class WaterCmd extends WaterTables
 		if (tile.iadd(delta).GetTileSlope(null) != 0) return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 
 		if(0 != (flags & Cmd.DC_EXEC) ) {
-			Landscape.ModifyTile(tile, TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x10 + dir);
-			Landscape.ModifyTile(tile.isub(delta), TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x14 + dir);
-			Landscape.ModifyTile(tile.iadd(delta), TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x18 + dir);
+			Landscape.ModifyTile(tile, TileTypes.MP_WATER,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+					TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x10 + dir);
+			Landscape.ModifyTile(tile.isub(delta), TileTypes.MP_WATER,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+					TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x14 + dir);
+			Landscape.ModifyTile(tile.iadd(delta), TileTypes.MP_WATER, 
+					//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+					TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x18 + dir);
 		}
 
 		return Global._price.clear_water * 22 >> 3;
@@ -268,9 +280,12 @@ public class WaterCmd extends WaterTables
 					if(0 != (flags & Cmd.DC_EXEC) ) {
 						if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE)) {
 							// change owner to Owner.OWNER_WATER and set land under bridge bit to water
-							Landscape.ModifyTile(tile, TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER, Owner.OWNER_WATER, tile.getMap().m5 | 0x08);
+							Landscape.ModifyTile(tile, TileTypes.MP_NOCHANGE,  
+									TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER, Owner.OWNER_WATER, tile.getMap().m5 | 0x08);
 						} else {
-							Landscape.ModifyTile(tile, TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0);
+							Landscape.ModifyTile(tile, TileTypes.MP_WATER,
+									//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+									TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0);
 						}
 						// mark the tiles around dirty too
 						MarkTilesAroundDirty(tile);
@@ -571,8 +586,9 @@ public class WaterCmd extends WaterTables
 					Global._current_player = PlayerID.get( Owner.OWNER_WATER );
 					if (!Cmd.CmdFailed(Cmd.DoCommandByTile(target, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR))) {
 						Landscape.ModifyTile(
-							target,
-							TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR |
+							target, TileTypes.MP_WATER,
+							//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+							TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR |
 								TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR,
 							Owner.OWNER_WATER, 1
 						);
@@ -597,7 +613,7 @@ public class WaterCmd extends WaterTables
 					return;
 
 				if ((m5 & 0xC0) == 0xC0) {
-					Landscape.ModifyTile(target, TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5, Owner.OWNER_WATER, (m5 & ~0x38) | 0x8);
+					Landscape.ModifyTile(target, TileTypes.MP_NOCHANGE, TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5, Owner.OWNER_WATER, (m5 & ~0x38) | 0x8);
 					return;
 				}
 			}
@@ -610,8 +626,9 @@ public class WaterCmd extends WaterTables
 
 			if (!Cmd.CmdFailed(Cmd.DoCommandByTile(target, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR))) {
 				Landscape.ModifyTile(
-					target,
-					TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR |
+					target, TileTypes.MP_WATER,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+					TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR |
 						TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR,
 					Owner.OWNER_WATER,
 					0

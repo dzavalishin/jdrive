@@ -82,10 +82,18 @@ public class UnmovableCmd extends UnmovableTables {
 
 			p.location_of_house = tile;
 
-			Landscape.ModifyTile(tile.iadd(0, 0), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x80);
-			Landscape.ModifyTile(tile.iadd(0, 1), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x81);
-			Landscape.ModifyTile(tile.iadd(1, 0), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x82);
-			Landscape.ModifyTile(tile.iadd(1, 1), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x83);
+			Landscape.ModifyTile(tile.iadd(0, 0), TileTypes.MP_UNMOVABLE, 
+					//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x80);
+			Landscape.ModifyTile(tile.iadd(0, 1), TileTypes.MP_UNMOVABLE, 
+					//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x81);
+			Landscape.ModifyTile(tile.iadd(1, 0), TileTypes.MP_UNMOVABLE, 
+					//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x82);
+			Landscape.ModifyTile(tile.iadd(1, 1), TileTypes.MP_UNMOVABLE, 
+					//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x83);
 			Economy.UpdatePlayerHouse(p, score);
 			Window.InvalidateWindow(Window.WC_COMPANY, (int)p.index.id);
 		}

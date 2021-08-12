@@ -440,8 +440,9 @@ public class Clear extends ClearTables {
 		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			Landscape.ModifyTile(tile,
-				TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
+			Landscape.ModifyTile(tile, TileTypes.MP_UNMOVABLE,
+				//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+				TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 				3 /* map5 */
 				);
 		}

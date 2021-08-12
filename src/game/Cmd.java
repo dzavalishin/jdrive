@@ -571,7 +571,7 @@ public class Cmd {
 			Player.GetPlayer(Global._current_player).last_build_coordinate = tile;
 
 		/* Actually try and execute the command. If no cost-type is given
-		 * use the finalruction one */
+		 * use the construction one */
 		Player._yearly_expenses_type = Player.EXPENSES_CONSTRUCTION;
 		res2 = proc.exec(x,y, flags|Cmd.DC_EXEC, p1, p2);
 

@@ -1318,7 +1318,9 @@ public class Gui
 			return;
 		}
 
-		Landscape.ModifyTile(tile, TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAP5, 1);
+		Landscape.ModifyTile(tile, TileTypes.MP_UNMOVABLE,
+				//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+				TileTypes.MP_MAP5, 1);
 		//SndPlayTileFx(SND_1F_SPLAT, tile);
 	}
 
@@ -1328,7 +1330,9 @@ public class Gui
 			return;
 		}
 
-		Landscape.ModifyTile(tile, TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAP5, 0);
+		Landscape.ModifyTile(tile, TileTypes.MP_UNMOVABLE,
+				//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+				TileTypes.MP_MAP5, 0);
 		//SndPlayTileFx(SND_1F_SPLAT, tile);
 	}
 

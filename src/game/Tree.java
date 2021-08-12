@@ -217,8 +217,8 @@ public class Tree  extends TreeTables {
 							if (treetype == -1) treetype = 27;
 						}
 
-						Landscape.ModifyTile(tile,
-								TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
+						Landscape.ModifyTile(tile, TileTypes.MP_TREES,
+								//TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
 								TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAP5,
 								m2, /* map2 */
 								treetype, /* map3lo */
@@ -600,8 +600,8 @@ public class Tree  extends TreeTables {
 					) 
 			{
 
-				Landscape.ModifyTile(tile,
-						TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
+				Landscape.ModifyTile(tile, TileTypes.MP_TREES,
+						//TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
 						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5,
 						(m == 4 ? 0x10 : 0),
 						tree,
@@ -633,8 +633,8 @@ public class Tree  extends TreeTables {
 					m2 = ((tile.getMap().m5 & 3) << 6) | 0x20;
 				}
 
-				Landscape.ModifyTile(tile,
-						TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
+				Landscape.ModifyTile(tile, TileTypes.MP_TREES,
+						//TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
 						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5,
 						m2,
 						tree,

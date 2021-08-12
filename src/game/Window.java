@@ -37,7 +37,7 @@ public class Window extends WindowConstants
 	List<Widget> widget;
 	int desc_flags;
 
-	WindowMessage message;
+	WindowMessage message;// = new WindowMessage(); // used 
 	//byte custom[WINDOW_CUSTOM_SIZE];
 	//byte custom[];
 	AbstractWinCustom custom;

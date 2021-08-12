@@ -769,12 +769,15 @@ enum TileTypes {
 	MP_VOID, // invisible tiles at the SW and SE border
 	MP_INDUSTRY,
 	MP_TUNNELBRIDGE,
-	MP_UNMOVABLE;
+	MP_UNMOVABLE,
+	
+	MP_NOCHANGE // used in modify tile func if we don't want to change type
+	;
 
 	static TileTypes[] values = values();
 
 
-	public static int MP_SETTYPE( TileTypes x ) { return  ((x.ordinal()+1) << 8); }
+	//public static int MP_SETTYPE( TileTypes x ) { return  ((x.ordinal()+1) << 8); }
 
 	public static final int MP_MAP2 = 1<<0;
 	public static final int MP_MAP3LO = 1<<1;

@@ -1624,8 +1624,9 @@ public class Town extends TownTables implements IPoolItem
 
 			assert(tile.IsTileType( TileTypes.MP_CLEAR));
 
-			Landscape.ModifyTile(tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | TileTypes.MP_MAP3HI | TileTypes.MP_MAP3LO | TileTypes.MP_MAP2 | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
+			Landscape.ModifyTile(tile, TileTypes.MP_HOUSE,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | 
+					TileTypes.MP_MAP3HI | TileTypes.MP_MAP3LO | TileTypes.MP_MAP2 | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
 					t.index,
 					m3lo,   /* map3_lo */
 					house,  /* map3_hi */
@@ -1637,8 +1638,9 @@ public class Town extends TownTables implements IPoolItem
 
 			if(0 != (eflags&0x18)) {
 				assert(tile.iadd(0, 1).IsTileType(TileTypes.MP_CLEAR));
-				Landscape.ModifyTile(tile.iadd(0, 1),
-						TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
+				Landscape.ModifyTile(tile.iadd(0, 1), TileTypes.MP_HOUSE,
+						//TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | 
+						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
 						t.index,
 						m3lo,			/* map3_lo */
 						++house,	/* map3_hi */
@@ -1649,8 +1651,9 @@ public class Town extends TownTables implements IPoolItem
 
 			if(0 != (eflags&0x14)) {
 				assert(tile.iadd(1, 0).IsTileType(TileTypes.MP_CLEAR));
-				Landscape.ModifyTile(tile.iadd(1, 0),
-						TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
+				Landscape.ModifyTile(tile.iadd(1, 0), TileTypes.MP_HOUSE,
+						//TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | 
+						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
 						t.index,
 						m3lo,			/* map3_lo */
 						++house,	/* map3_hi */
@@ -1661,8 +1664,9 @@ public class Town extends TownTables implements IPoolItem
 
 			if(0 != (eflags&0x10)) {
 				assert(tile.iadd(1, 1).IsTileType(TileTypes.MP_CLEAR));
-				Landscape.ModifyTile(tile.iadd(1, 1),
-						TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
+				Landscape.ModifyTile(tile.iadd(1, 1), TileTypes.MP_HOUSE,
+						//TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | 
+						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
 						t.index,
 						m3lo,			/* map3_lo */
 						++house,	/* map3_hi */
@@ -1911,7 +1915,9 @@ public class Town extends TownTables implements IPoolItem
 
 		if (Cmd.CmdFailed(r)) return false;
 
-		Landscape.ModifyTile(tile, TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
+		Landscape.ModifyTile(tile, TileTypes.MP_UNMOVABLE,
+				//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+				TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 				2 /* map5 */
 				);
 

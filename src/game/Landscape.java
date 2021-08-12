@@ -246,8 +246,8 @@ public class Landscape extends GenLandTable
 
 	static void DoClearSquare(TileIndex tile)
 	{
-		Landscape.ModifyTile(tile,
-				TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) |
+		Landscape.ModifyTile(tile, TileTypes.MP_CLEAR,
+				//TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) |
 				TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5,
 				Owner.OWNER_NONE, /* map_owner */
 				Global._generating_world ? 3 : 0 /* map5 */
@@ -364,14 +364,18 @@ public class Landscape extends GenLandTable
 
 
 	/* utility function used to modify a tile */
-	static void ModifyTile(TileIndex tile, int flags, int ... args)
+	static void ModifyTile(TileIndex tile, TileTypes type, int flags, int ... args)
 	{
 		int i;
 		int p = 0;
 
+		/*
 		if ((i = BitOps.GB(flags, 8, 4)) != 0) {
 			tile.SetTileType( TileTypes.values[(i - 1)] );
-		}
+		}*/
+		// TODO use Optional<TileTypes>
+		assert 0 == BitOps.GB(flags, 8, 4); // type was here
+		if(type != TileTypes.MP_NOCHANGE) tile.SetTileType( type );
 
 		if( 0 != (flags & (TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP2)) ) {
 			int x = 0;

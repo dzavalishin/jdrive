@@ -1003,8 +1003,8 @@ public class Rail extends RailTables {
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			if (Player.IsLocalPlayer()) Depot._last_built_train_depot_tile = tile;
 
-			Landscape.ModifyTile(tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |
+			Landscape.ModifyTile(tile, TileTypes.MP_RAILWAY,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |
 					TileTypes.MP_MAP3LO | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 					p1, /* map3_lo */
 					p2 | RAIL_TYPE_DEPOT_WAYPOINT /* map5 */
