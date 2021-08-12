@@ -32,7 +32,7 @@ public class Order implements IPoolItem {
 		
 	private void clean() 
 	{
-		type    = 0;
+		type    = OT_NOTHING;
 		flags   = 0;
 		station = Station.INVALID_STATION;
 		next = null;

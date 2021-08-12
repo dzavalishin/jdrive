@@ -66,7 +66,7 @@ public class Clear extends ClearTables {
 			if( i++ >= ts.modheight_count)
 				break;
 			
-			if (mod.tile == tile) return mod.height;
+			if (mod.tile.getTile() == tile.getTile()) return mod.height;
 		}
 
 		return tile.TileHeight();
@@ -81,7 +81,7 @@ public class Clear extends ClearTables {
 		if (count >= 625) return;
 
 		for(i = 0; i < count; i++) {
-			if (ts.tile_table[i] == tile) return;
+			if (ts.tile_table[i].equals(tile)) return;
 		}
 
 		ts.tile_table[ts.tile_table_count++] = tile;
@@ -190,7 +190,7 @@ public class Clear extends ClearTables {
 				ts.modheight_count++;
 				break;
 			}
-			if (ts.modheight[i].tile == tile) break;
+			if (ts.modheight[i].tile.equals(tile)) break;
 			//mod++;
 			count--;
 		}

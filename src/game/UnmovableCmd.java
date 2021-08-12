@@ -28,7 +28,7 @@ public class UnmovableCmd extends UnmovableTables {
 			while(ii.hasNext())
 			{
 				Player pp = ii.next();
-				if (pp.location_of_house == tile) {
+				if (pp.location_of_house.equals(tile)) {
 					dodelete = true;
 					break;
 				}

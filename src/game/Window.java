@@ -177,7 +177,7 @@ public class Window extends WindowConstants
 	}
 
 	buildtrain_d as_buildtrain_d() { 
-		if(custom==null) custom = new def_d(); 
+		if(custom==null) custom = new buildtrain_d(); 
 		return (buildtrain_d) custom; 
 	}
 

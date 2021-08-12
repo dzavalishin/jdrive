@@ -66,6 +66,12 @@ public class TileIndex implements Comparable<TileIndex>
 
 	public static TileIndex INVALID_TILE = getInvalid(); //new TileIndex(-1);
 
+	
+	
+	
+	
+	
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TileIndex) {
@@ -82,7 +88,10 @@ public class TileIndex implements Comparable<TileIndex>
 		return this.tile - o.tile;
 	}
 
-
+	@Override
+	public String toString() {
+		return String.format("%d.%d", getX(), getY() );
+	}
 
 
 
@@ -221,8 +230,18 @@ public class TileIndex implements Comparable<TileIndex>
 	{
 		return tile & Global.MapMaxX();
 	}
+	
+	int getX()
+	{
+		return tile & Global.MapMaxX();
+	}
 
 	int TileY()
+	{
+		return tile >> Global.MapLogX();
+	}
+
+	int getY()
 	{
 		return tile >> Global.MapLogX();
 	}

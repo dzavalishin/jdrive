@@ -129,7 +129,7 @@ public class TrainGui
 			Vehicle v = ii.next();
 		
 			if (v.type == Vehicle.VEH_Train && v.IsFrontEngine() &&
-					v.tile == tile &&
+					v.tile.equals(tile) &&
 					v.rail.track == 0x80) {
 				if (found != null) // must be exactly one.
 					return;
@@ -404,7 +404,7 @@ public class TrainGui
 			Vehicle v = ii.next();
 			if (v.type == Vehicle.VEH_Train &&
 				  (v.IsFrontEngine() || v.IsFreeWagon()) &&
-					v.tile == tile &&
+					v.tile.equals(tile) &&
 					v.rail.track == 0x80) {
 				num++;
 				// determine number of items in the X direction.
@@ -439,7 +439,7 @@ public class TrainGui
 		{
 			Vehicle v = ii.next();
 			if (v.type == Vehicle.VEH_Train && v.IsFrontEngine() &&
-					v.tile == tile && v.rail.track == 0x80 &&
+					v.tile.equals(tile) && v.rail.track == 0x80 &&
 					--num < 0 && num >= -w.vscroll.cap) {
 				DrawTrainImage(v, x+21, y, w.hscroll.cap, w.hscroll.pos, VehicleID.get( w.as_traindepot_d().sel ));
 				/* Draw the train number */
@@ -465,7 +465,7 @@ public class TrainGui
 		{
 			Vehicle v = ii.next();
 			if (v.type == Vehicle.VEH_Train && v.IsFreeWagon() &&
-					v.tile == tile && v.rail.track == 0x80 &&
+					v.tile.equals(tile) && v.rail.track == 0x80 &&
 					--num < 0 && num >= -w.vscroll.cap) {
 				DrawTrainImage(v, x+50, y, w.hscroll.cap - 1, 0, VehicleID.get( w.as_traindepot_d().sel) );
 				Gfx.DrawString(x, y+2, Str.STR_8816, 0);

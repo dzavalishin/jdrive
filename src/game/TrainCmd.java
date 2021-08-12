@@ -463,7 +463,7 @@ public class TrainCmd extends TrainTables
 					{
 						final Vehicle  w = it.next();
 
-						if (w.type == Vehicle.VEH_Train && w.tile == tile &&
+						if (w.type == Vehicle.VEH_Train && w.tile.equals(tile) &&
 								w.IsFreeWagon() && w.engine_type == engine) {
 							u = w.GetLastVehicleInChain();
 							break;
@@ -778,7 +778,7 @@ public class TrainCmd extends TrainTables
 		{
 			final Vehicle  dst = it.next();
 			if (dst.type == Vehicle.VEH_Train && dst.IsFreeWagon() &&
-					dst.tile == tile) {
+					dst.tile.equals(tile) ) {
 				// check so all vehicles in the line have the same engine.
 				Vehicle v = dst;
 

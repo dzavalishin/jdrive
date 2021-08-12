@@ -1051,17 +1051,17 @@ public class Station extends StationTables implements IPoolItem
 			}
 
 			// check if the new station adjoins the old station in either direction
-			if (curw == w && st.train_tile == tile.iadd(0, h)) {
+			if (curw == w && st.train_tile.equals( tile.iadd(0, h) ) ) {
 				// above
 				curh += h;
-			} else if (curw == w && st.train_tile == tile.iadd(0, -curh)) {
+			} else if (curw == w && st.train_tile.equals( tile.iadd(0, -curh) ) ) {
 				// below
 				tile.madd(0, -curh);
 				curh += h;
-			} else if (curh == h && st.train_tile == tile.iadd(w, 0)) {
+			} else if (curh == h && st.train_tile.equals( tile.iadd(w, 0) ) ) {
 				// to the left
 				curw += w;
-			} else if (curh == h && st.train_tile == tile.iadd(-curw, 0)) {
+			} else if (curh == h && st.train_tile.equals( tile.iadd(-curw, 0) ) ) {
 				// to the right
 				tile.madd(-curw, 0);
 				curw += w;

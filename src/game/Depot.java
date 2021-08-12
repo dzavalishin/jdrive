@@ -199,7 +199,7 @@ public class Depot implements IPoolItem
 		Depot [] ret = {null};
 		_depot_pool.forEach( (i,depot) ->
 		{
-			if (depot.xy == tile)
+			if (depot.xy.getTile() == tile.getTile())
 				ret[0] = depot;
 		});
 

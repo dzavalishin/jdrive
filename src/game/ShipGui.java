@@ -638,7 +638,7 @@ public class ShipGui
 		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
-			if (v.type == Vehicle.VEH_Ship && v.ship.state == 0x80 && v.tile == tile)
+			if(v.type == Vehicle.VEH_Ship && v.ship.state == 0x80 && v.tile.equals(tile))
 				num[0]++;
 		});
 		
@@ -658,7 +658,7 @@ public class ShipGui
 		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
-			if (v.type == Vehicle.VEH_Ship && v.ship.state == 0x80 && v.tile == tile &&
+			if (v.type == Vehicle.VEH_Ship && v.ship.state == 0x80 && v.tile.equals(tile) &&
 					--num[0] < 0 && num[0] >= -w.vscroll.cap * w.hscroll.cap) {
 				DrawShipImage(v, x[0]+19, y[0], w.as_traindepot_d().sel);
 
@@ -699,7 +699,7 @@ public class ShipGui
 		while(ii.hasNext())
 		{
 			Vehicle v = ii.next();
-			if (v.type == Vehicle.VEH_Ship && 0 != (v.vehstatus & Vehicle.VS_HIDDEN) && v.tile == tile &&
+			if (v.type == Vehicle.VEH_Ship && 0 != (v.vehstatus & Vehicle.VS_HIDDEN) && v.tile.equals(tile) &&
 					--pos < 0) {
 				veh[0] = v;
 				if (xm >= 19) return 0;

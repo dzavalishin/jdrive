@@ -304,6 +304,12 @@ public class Industry extends IndustryTables implements IPoolItem {
 		int m5 = 0xFF & tile.getMap().m5;
 		/*CargoID*/ int a;
 
+		if(m5 >= _industry_map5_accepts_1.length)
+		{
+			Global.error("m5 tpp big @%s", tile.toString() );
+			return ac;
+		}
+		
 		a = _industry_map5_accepts_1[m5];
 		if (a != AcceptedCargo.CT_INVALID) ac.ct[a] = (a == 0) ? 1 : 8;
 
@@ -2045,6 +2051,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 			w.click_state = 0;
 			w.SetWindowDirty();
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -2403,6 +2411,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 				UpdateIndustryProduction(i);
 				w.SetWindowDirty();
 			}
+		default:
+			break;
 		}
 	}
 
@@ -2479,7 +2489,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	private static class IndustryComparator implements Comparator<Industry> {
 		public int compare(Industry i, Industry j) 
 		{
-			int val;
+			//int val;
 			int r = 0;
 
 			switch (_industry_sort_order >> 1) {
