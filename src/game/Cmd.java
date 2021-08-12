@@ -342,6 +342,11 @@ public class Cmd {
 
 	static int DoCommandByTile(TileIndex tile, int p1, int p2, int flags, int procc)
 	{
+		if(null == tile)
+		{
+			Global.error("null tile in DoCommandByTile");
+			return Cmd.CMD_ERROR;
+		}
 		return DoCommand(tile.TileX() * 16, tile.TileY() * 16, p1, p2, flags, procc);
 	}
 

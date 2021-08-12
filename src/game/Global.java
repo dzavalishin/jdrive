@@ -12,18 +12,15 @@ import game.util.Strings;
 import game.util.YearMonthDay;
 import game.Cheat.Cheats;
 import game.tables.CargoConst;
-import game.util.BitOps;
 
-public class Global {
-
-	// TODO INIT 
+public class Global 
+{
 
 	public static final int MAX_PLAYERS = 8;
 	public static final int MAX_SCREEN_WIDTH = 2048;
 	public static final int MAX_SCREEN_HEIGHT = 1200;
 
 	public static Player[] _players = new Player[MAX_PLAYERS];
-	// NOSAVE: can be determined from player structs
 	public static byte [] _player_colors = new byte[MAX_PLAYERS];
 	public static PlayerID _current_player;
 	public static PlayerID _local_player;

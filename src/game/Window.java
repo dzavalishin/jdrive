@@ -807,7 +807,7 @@ public class Window extends WindowConstants
 				return w;
 			}
 		}*/
-		return null;  // in java we can't
+		return null;  // in java we can't run out
 	}
 
 	/** A window must be freed, and all are marked as important windows. Ease the
@@ -1282,7 +1282,7 @@ public class Window extends WindowConstants
 
 	static void DecreaseWindowCounters()
 	{
-		// Fight concurrent mod
+		// Fight concurrent modification
 		ArrayList<Window> wcopy = new ArrayList<Window>(_windows);
 
 		//ListIterator<Window> i = _windows.listIterator(_windows.size());
@@ -2806,7 +2806,7 @@ public class Window extends WindowConstants
 		case WWT_CAPTION: {
 			assert(r.bottom - r.top == 13); // XXX - to ensure the same sizes are used everywhere!
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, FR_BORDERONLY);
-			Gfx.DrawFrameRect(r.left+1, r.top+1, r.right-1, r.bottom-1, wi.color, (caption_color == 0xFF) ? FR_LOWERED | FR_DARKENED : FR_LOWERED | FR_DARKENED | FR_BORDERONLY);
+			Gfx.DrawFrameRect(r.left+1, r.top+1, r.right-1, r.bottom-1, wi.color, (caption_color == -1/*0xFF*/) ? FR_LOWERED | FR_DARKENED : FR_LOWERED | FR_DARKENED | FR_BORDERONLY);
 
 			if ( (caption_color & 0xFF) != 0xFF) {
 				byte pc = Global._player_colors[caption_color];

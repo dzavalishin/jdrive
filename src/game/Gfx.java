@@ -29,8 +29,8 @@ public class Gfx extends PaletteTabs
 
 	// XXX doesn't really belong here, but the only
 	// consumers always use it in conjunction with DoDrawString()
-	public static final String UPARROW   = String.valueOf(0x80); // "\x80";
-	public static final String DOWNARROW = String.valueOf(0xAA); // "\xAA";
+	public static final String UPARROW   = String.valueOf((char)0x80); // "\x80";
+	public static final String DOWNARROW = String.valueOf((char)0xAA); // "\xAA";
 
 
 	//static void GfxMainBlitter(final Sprite *sprite, int x, int y, int mode);
