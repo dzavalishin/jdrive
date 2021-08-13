@@ -28,7 +28,7 @@ public class Window extends WindowConstants
 	Scrollbar vscroll2;
 	ResizeInfo resize; // = new ResizeInfo();
 
-	byte caption_color;
+	int caption_color;
 
 	int click_state, disabled_state, hidden_state;
 
@@ -97,7 +97,7 @@ public class Window extends WindowConstants
 
 	static int _scrollbar_start_pos;
 	static int _scrollbar_size;
-	static byte _scroller_click_timeout;
+	static int _scroller_click_timeout;
 
 	/**
 	 * TODO Controlled fro Widget
@@ -110,7 +110,7 @@ public class Window extends WindowConstants
 	public static boolean _scrolling_viewport = false;
 	static boolean _popup_menu_active;
 
-	public static byte _special_mouse_mode;
+	public static int _special_mouse_mode;
 
 
 
@@ -934,7 +934,7 @@ public class Window extends WindowConstants
 		//memset(w, 0, sizeof(Window));
 		w.window_class = cls;
 		w.flags4 = WF_WHITE_BORDER_MASK; // just opened windows have a white border
-		w.caption_color = (byte) 0xFF;
+		w.caption_color = 0xFF;
 		w.left = x;
 		w.top = y;
 		w.width = width;
@@ -1932,7 +1932,7 @@ public class Window extends WindowConstants
 
 		// Setup event
 		we.event = WindowEvents.WE_KEYPRESS;
-		we.ascii = (byte) (key & 0xFF);
+		we.ascii =  (key & 0xFF);
 		we.keycode = key >> 16;
 			we.cont = true;
 
@@ -2504,7 +2504,7 @@ public class Window extends WindowConstants
 
 			if (_scroller_click_timeout == 0) {
 				_scroller_click_timeout = 6;
-				if ((byte)(sb.pos + sb.cap) < sb.count)
+				if ((sb.pos + sb.cap) < sb.count)
 					sb.pos++;
 			}
 			_left_button_clicked = false;
@@ -2859,7 +2859,7 @@ public class Window extends WindowConstants
 
 	static int GetDropdownItem(final Window w)
 	{
-		byte item, counter;
+		int item, counter;
 		int y;
 
 		if (w.GetWidgetFromPos(Hal._cursor.pos.x - w.left, Hal._cursor.pos.y - w.top) < 0)
@@ -2870,7 +2870,7 @@ public class Window extends WindowConstants
 		if (y < 0)
 			return - 1;
 
-		item = (byte) (y / 10);
+		item =  (y / 10);
 		if (item >= w.as_dropdown_d().num_items || (BitOps.HASBIT(w.as_dropdown_d().disabled_state, item) && !BitOps.HASBIT(w.as_dropdown_d().hidden_state, item)) || w.as_dropdown_d().items[item] == 0)
 			return - 1;
 
@@ -2958,7 +2958,7 @@ public class Window extends WindowConstants
 					if (item < 0) return;
 				}
 
-				w.as_dropdown_d().selected_index = (byte) item;
+				w.as_dropdown_d().selected_index =  item;
 				w.SetWindowDirty();
 			}
 		} break;
@@ -3035,10 +3035,10 @@ public class Window extends WindowConstants
 
 		w2.as_dropdown_d().parent_wnd_class = w.window_class;
 		w2.as_dropdown_d().parent_wnd_num = w.window_number;
-		w2.as_dropdown_d().parent_button = (byte) button;
+		w2.as_dropdown_d().parent_button =  button;
 
 		w2.as_dropdown_d().num_items = i;
-		w2.as_dropdown_d().selected_index = (byte) selected;
+		w2.as_dropdown_d().selected_index =  selected;
 		w2.as_dropdown_d().items = strings;
 
 		w2.as_dropdown_d().click_delay = 0;

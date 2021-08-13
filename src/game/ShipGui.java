@@ -139,7 +139,7 @@ public class ShipGui
 		//_alloc_wnd_parent_num = v.index;
 		w = Window.AllocateWindowDesc(_ship_refit_desc,v.index);
 		w.window_number = v.index;
-		w.caption_color = (byte) v.owner.id;
+		w.caption_color =  v.owner.id;
 		w.as_refit_d().sel = -1;
 	}
 
@@ -293,7 +293,7 @@ public class ShipGui
 		//_alloc_wnd_parent_num = veh;
 		w = Window.AllocateWindowDesc(_ship_details_desc, veh);
 		w.window_number = veh;
-		w.caption_color = (byte) v.owner.id;
+		w.caption_color =  v.owner.id;
 	}
 
 	static void CcBuildShip(boolean success, TileIndex tile, int p1, int p2)
@@ -374,7 +374,7 @@ public class ShipGui
 			case 2: { /* listbox */
 				int i = (we.pt.y - 14) / 24;
 				if (i < w.vscroll.cap) {
-					w.as_buildtrain_d().sel_index = (byte) (i + w.vscroll.pos);
+					w.as_buildtrain_d().sel_index =  (i + w.vscroll.pos);
 					w.SetWindowDirty();
 				}
 			} break;
@@ -456,9 +456,9 @@ public class ShipGui
 		w.resize.step_height = 24;
 
 		if (tile != null) {
-			w.caption_color = (byte) tile.GetTileOwner().id;
+			w.caption_color =  tile.GetTileOwner().id;
 		} else {
-			w.caption_color = (byte) Global._local_player.id;
+			w.caption_color =  Global._local_player.id;
 		}
 
 	}
@@ -617,7 +617,7 @@ public class ShipGui
 		Window  w = Window.AllocateWindowDescFront(_ship_view_desc, v.index);
 
 		if (w != null) {
-			w.caption_color = (byte) v.owner.id;
+			w.caption_color =  v.owner.id;
 			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number | (1 << 31), 0);
 		}
 	}
@@ -911,7 +911,7 @@ public class ShipGui
 		Window  w = Window.AllocateWindowDescFront(_ship_depot_desc,tile.tile);
 
 		if (w != null) {
-			w.caption_color = (byte) TileIndex.get(w.window_number).GetTileOwner().id;
+			w.caption_color =  TileIndex.get(w.window_number).GetTileOwner().id;
 			w.vscroll.cap = 2;
 			w.hscroll.cap = 3;
 			w.resize.step_width = 90;
@@ -1132,7 +1132,7 @@ public class ShipGui
 				if (vl.sort_type != e.index) {
 					// value has changed . resort
 					vl.flags |= Vehicle.VL_RESORT;
-					vl.sort_type = (byte) e.index;
+					vl.sort_type =  e.index;
 					VehicleGui._sorting.ship.criteria = vl.sort_type;
 
 					// enable 'Sort By' if a sorter criteria is chosen
@@ -1145,7 +1145,7 @@ public class ShipGui
 			case WE_CREATE: /* set up resort timer */
 				vl.sort_list = null;
 				vl.flags = Vehicle.VL_REBUILD | ( (VehicleGui._sorting.ship.order ? 1 : 0) << (Vehicle.VL_DESC - 1));
-				vl.sort_type = (byte) VehicleGui._sorting.ship.criteria;
+				vl.sort_type =  VehicleGui._sorting.ship.criteria;
 				vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
 				break;
 
@@ -1204,7 +1204,7 @@ public class ShipGui
 					w = Window.AllocateWindowDescFront(_other_player_ships_desc, (station<< 16) | player);
 				}
 				if (w != null) {
-					w.caption_color = (byte) w.window_number;
+					w.caption_color =  w.window_number;
 					w.vscroll.cap = 4;
 					w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
 					w.resize.step_height = VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;

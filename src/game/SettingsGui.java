@@ -160,7 +160,7 @@ public class SettingsGui extends SettingsTables
 			case 5: /* Currency */
 				if (e.index == 23)
 					ShowCustCurrency();
-				GameOptions._opt_ptr.currency = (byte) e.index;
+				GameOptions._opt_ptr.currency =  e.index;
 				Hal.MarkWholeScreenDirty();
 				break;
 			case 8: /* Distance units */
@@ -175,12 +175,12 @@ public class SettingsGui extends SettingsTables
 				break;
 			case 14: /* Town names */
 				if (Global._game_mode == GameModes.GM_MENU) {
-					GameOptions._opt_ptr.town_name = (byte) e.index;
+					GameOptions._opt_ptr.town_name =  e.index;
 					Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
 				}
 				break;
 			case 17: /* Autosave options */
-				GameOptions._opt_ptr.autosave = (byte) e.index;
+				GameOptions._opt_ptr.autosave =  e.index;
 				w.SetWindowDirty();
 				break;
 			case 24: /* Change interface language */
@@ -218,7 +218,7 @@ public class SettingsGui extends SettingsTables
 		if (p1 > 1 || (Global._game_mode != GameModes.GM_MENU && RoadVehiclesAreBuilt())) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC) ) {
-			GameOptions._opt_ptr.road_side = (byte) p1;
+			GameOptions._opt_ptr.road_side =  p1;
 			Window.InvalidateWindow(Window.WC_GAME_OPTIONS,0);
 		}
 		return 0;
@@ -316,7 +316,7 @@ public class SettingsGui extends SettingsTables
 		int i;
 		assert(mode <= 3);
 
-		gm_opt.diff_level = (byte) mode;
+		gm_opt.diff_level =  mode;
 		if (mode != 3) { // not custom
 			/*
 			for (i = 0; i != Global.GAME_DIFFICULTY_NUM; i++)

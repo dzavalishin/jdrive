@@ -116,24 +116,24 @@ public class Rail extends RailTables {
 	 * direction along with the trackdir.
 	 */
 	//extern final byte _signal_along_trackdir[TRACKDIR_END];
-	static  byte SignalAlongTrackdir(/*Trackdir*/ int trackdir) {return (byte) _signal_along_trackdir[trackdir];}
+	static  int SignalAlongTrackdir(/*Trackdir*/ int trackdir) {return  _signal_along_trackdir[trackdir];}
 
 	/**
 	 * Maps a trackdir to the bit that stores its status in the map arrays, in the
 	 * direction against the trackdir.
 	 */
-	static  byte SignalAgainstTrackdir(/*Trackdir*/ int trackdir) {
+	static  int SignalAgainstTrackdir(/*Trackdir*/ int trackdir) {
 		//extern final byte _signal_against_trackdir[TRACKDIR_END];
-		return (byte) _signal_against_trackdir[trackdir];
+		return  _signal_against_trackdir[trackdir];
 	}
 
 	/**
 	 * Maps a Track to the bits that store the status of the two signals that can
 	 * be present on the given track.
 	 */
-	static  byte SignalOnTrack(/* Track */ int  track) {
+	static  int SignalOnTrack(/* Track */ int  track) {
 		//extern final byte _signal_on_track[TRACK_END];
-		return (byte) _signal_on_track[track];
+		return  _signal_on_track[track];
 	}
 
 	/*
@@ -894,7 +894,7 @@ public class Rail extends RailTables {
 		int ret, total_cost = 0;
 		/* Track */ int  track = BitOps.GB(p2, 4, 3);
 		/*Trackdir*/ int trackdir;
-		byte mode = (byte) (BitOps.HASBIT(p2, 7) ? 1 : 0);
+		int mode =  (BitOps.HASBIT(p2, 7) ? 1 : 0);
 		/*RailType*/ int railtype = BitOps.GB(p2, 0, 4);
 
 		if (!Player.ValParamRailtype(railtype) || !ValParamTrackOrientation(track)) return Cmd.CMD_ERROR;
@@ -1100,7 +1100,7 @@ public class Rail extends RailTables {
 				tile.getMap().m5 |= RAIL_TYPE_SIGNALS; // change into signals
 				tile.getMap().m2 |= 0xF0;              // all signals are on
 				tile.getMap().m3 &= ~0xF0;          // no signals built by default
-				tile.getMap().m4 = (byte) ((semaphore ? 0x08 : 0) + pre_signal_type);
+				tile.getMap().m4 =  ((semaphore ? 0x08 : 0) + pre_signal_type);
 			}
 
 			if (p2 == 0) {
@@ -1111,7 +1111,7 @@ public class Rail extends RailTables {
 					if (pre_signal_cycle) {
 						// cycle between normal . pre . exit . combo . pbs ....
 						int type = ((GetSignalType(tile, track) + 1) % 5);
-						tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 0, 3, type);
+						tile.getMap().m4 =  BitOps.RETSB(tile.getMap().m4, 0, 3, type);
 					} else {
 						// cycle between two-way . one-way . one-way . ...
 						/* TODO: Rewrite switch into something more general */
@@ -1166,21 +1166,21 @@ public class Rail extends RailTables {
 	 * - p2 (bit 3)     - 0 = signals, 1 = semaphores
 	 * - p2 (bit 24-31) - user defined signals_density
 	 */
-	static int BuildAutoSignals(int x, int y, /*Trackdir*/ int trackdir, int flags, int p2, byte signals)
+	static int BuildAutoSignals(int x, int y, /*Trackdir*/ int trackdir, int flags, int p2, int signals)
 	{
-		byte signal_density = (byte) (p2 >> 24);
+		int signal_density =  (p2 >> 24);
 		int signal_ctr = signal_density * 2;
-		byte signal_dir = 0;	// direction in which signals are placed 1=forward  2=backward  3=twoway
+		int signal_dir = 0;	// direction in which signals are placed 1=forward  2=backward  3=twoway
 		int track_mode = 0;	// 128=bridge, 64=tunnel, 192=end of tunnel/bridge, 0=normal track
-		byte track_height = 0; // height of tunnel currently in
+		int track_height = 0; // height of tunnel currently in
 		int retr, total_cost = 0;
 		TileIndex tile = TileIndex.TileVirtXY/*TILE_FROM_XY*/(x, y);
 		int m5 = tile.getMap().m5;
 		int m3 = tile.getMap().m3;
-		byte semaphores = (byte) ((tile.getMap().m4 & ~3) != 0 ? 16 : 0);
+		int semaphores =  ((tile.getMap().m4 & ~3) != 0 ? 16 : 0);
 		int mode = p2 & 0x1;
 		int lx, ly;
-		byte dir;
+		int dir;
 
 
 		// remember start position and direction
@@ -1199,7 +1199,7 @@ public class Rail extends RailTables {
 		if (signal_dir == 0)
 			return Cmd.CMD_ERROR; // no signal on start tile to copy
 
-		semaphores = (byte) (HasSemaphores(tile, TrackdirToTrack(trackdir)) ? 16 : 0); // copy signal/semaphores style (independent of CTRL)
+		semaphores =  (HasSemaphores(tile, TrackdirToTrack(trackdir)) ? 16 : 0); // copy signal/semaphores style (independent of CTRL)
 
 		signals = 0;
 		lx = 0;
@@ -1240,7 +1240,7 @@ public class Rail extends RailTables {
 						&& (((m5 >> 2) & 3) == 0) ) {
 					// start of tunnel
 					track_mode = 64;
-					track_height = (byte) Landscape.GetSlopeZ(x+8, y+8);
+					track_height =  Landscape.GetSlopeZ(x+8, y+8);
 				};
 			};
 
@@ -1390,7 +1390,7 @@ public class Rail extends RailTables {
 	{
 		int ex, ey;
 		int ret, total_cost, signal_ctr;
-		byte signals;
+		int signals;
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		boolean error = true;
 
@@ -1428,7 +1428,7 @@ public class Rail extends RailTables {
 
 		// copy the signal-style of the first rail-piece if existing
 		if (GetRailTileType(tile) == RAIL_TYPE_SIGNALS && GetTrackBits(tile) != 0) { /* XXX: GetTrackBits check useless? */
-			signals = (byte) (tile.getMap().m3 & SignalOnTrack(track));
+			signals =  (tile.getMap().m3 & SignalOnTrack(track));
 			if (signals == 0) signals = SignalOnTrack(track); /* Can this actually occur? */
 
 			semaphores = (HasSemaphores(tile, track) ? 16 : 0); // copy signal/semaphores style (independent of CTRL)
@@ -1550,7 +1550,7 @@ public class Rail extends RailTables {
 
 		// change type.
 		if (exec) {
-			tile.getMap().m3 = (byte) BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
+			tile.getMap().m3 =  BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
 			tile.MarkTileDirtyByTile();
 		}
 
@@ -1637,7 +1637,7 @@ public class Rail extends RailTables {
 		return Global._price.remove_train_depot;
 	}
 
-	static int ClearTile_Track(TileIndex tile, byte flags)
+	static int ClearTile_Track(TileIndex tile, int flags)
 	{
 		int cost;
 		int ret;
@@ -1960,8 +1960,8 @@ public class Rail extends RailTables {
 	}
 
 
-	private static boolean HAS_SIGNAL(int x, int m23) { return 0 != (m23 & (byte)(0x1 << (x))); }
-	private static boolean ISON_SIGNAL(int x, int m23) { return 0 != (m23 & (byte)(0x10 << (x))); }
+	private static boolean HAS_SIGNAL(int x, int m23) { return 0 != (m23 & (0x1 << (x))); }
+	private static boolean ISON_SIGNAL(int x, int m23) { return 0 != (m23 & (0x10 << (x))); }
 
 	private static void MAYBE_DRAW_SIGNAL(TileInfo ti, int x, int y, int z, int m23)
 	{
@@ -1993,7 +1993,7 @@ public class Rail extends RailTables {
 				return;
 
 			{
-				byte m23 = (byte) ((ti.tile.getMap().m3 >> 4) | (ti.tile.getMap().m2 & 0xF0));
+				int m23 =  ((ti.tile.getMap().m3 >> 4) | (ti.tile.getMap().m2 & 0xF0));
 
 
 				if (0==(m5 & TRACK_BIT_DIAG2)) {
@@ -2025,7 +2025,7 @@ public class Rail extends RailTables {
 			}
 		} else {
 			/* draw depots / waypoints */
-			byte type = (byte) (m5 & 0x3F); // 0-3: depots, 4-5: waypoints
+			int type =  (m5 & 0x3F); // 0-3: depots, 4-5: waypoints
 
 			if (0==(m5 & (RAIL_TILE_TYPE_MASK&~RAIL_TYPE_SPECIAL)))
 				/* XXX: There used to be "return;" here, but since I could not find out
@@ -2037,7 +2037,7 @@ public class Rail extends RailTables {
 
 			if (WayPoint.IsRailWaypoint(ti.tile) && BitOps.HASBIT(ti.tile.getMap().m3, 4)) {
 				// look for customization
-				byte stat_id = WayPoint.GetWaypointByTile(ti.tile).stat_id;
+				int stat_id = WayPoint.GetWaypointByTile(ti.tile).stat_id;
 				final StationSpec stat = null; // TODO Station.GetCustomStation(STAT_CLASS_WAYP, stat_id);
 
 				/*if (stat != null) {
@@ -2211,7 +2211,7 @@ public class Rail extends RailTables {
 					// yes, add the signal to the list of signals
 					if (ssd.cur != NUM_SSD_ENTRY) {
 						ssd.tile[ssd.cur] = tile; // remember the tile index
-						ssd.bit[ssd.cur] = (byte) track; // and the controlling bit number
+						ssd.bit[ssd.cur] =  (byte) track; // and the controlling bit number
 						ssd.cur++;
 					}
 
@@ -2401,7 +2401,7 @@ public class Rail extends RailTables {
 		if (Global._patches.auto_pbs_placement && !(ssd.stop) && (ssd.has_pbssignal == 0xE) && !ssd.has_presignal && (ssd.presignal_exits == 0)) // 0xE means at least 2 pbs signals, and at least 1 entry and 1 exit, see comments ssd.has_pbssignal
 			for (i = 0; i != ssd.pbs_cur; i++) {
 				TileIndex tile = ssd.pbs_tile[i];
-				tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 0, 3, SIGTYPE_PBS);
+				tile.getMap().m4 = BitOps.RETSB(tile.getMap().m4, 0, 3, SIGTYPE_PBS);
 				tile.MarkTileDirtyByTile();
 			};
 
@@ -2650,7 +2650,7 @@ public class Rail extends RailTables {
 		
 		if (old_ground != new_ground) {
 			if( 0 != (tile.getMap().m5 & RAIL_TYPE_SPECIAL)) {
-				tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 0, 4, new_ground);
+				tile.getMap().m4 = BitOps.RETSB(tile.getMap().m4, 0, 4, new_ground);
 			} else {
 				tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 0, 4, new_ground);
 			}
@@ -2794,7 +2794,7 @@ public class Rail extends RailTables {
 				if (v.next == null)
 					Pbs.PBSClearTrack(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track));
 
-				v.rail.track = (byte) 0x80;
+				v.rail.track = 0x80;
 				v.vehstatus |= Vehicle.VS_HIDDEN; /* hide it */
 				v.direction ^= 4;
 
@@ -2810,7 +2810,7 @@ public class Rail extends RailTables {
 				/* leave the depot? */
 				if ((v=v.next) != null) {
 					v.vehstatus &= ~Vehicle.VS_HIDDEN;
-					v.rail.track = (byte) _depot_track_mask[dir];
+					v.rail.track =  _depot_track_mask[dir];
 					assert(v.rail.track != 0);
 				}
 			}
@@ -2857,12 +2857,12 @@ public class Rail extends RailTables {
 	//static RailType _cur_railtype;
 	static int _cur_railtype;
 
-	static boolean _remove_button_clicked;
-	static byte _build_depot_direction;
-	static byte _waypoint_count = 1;
-	static byte _cur_waypoint_type;
-	static byte _cur_signal_type;
-	static byte _cur_presig_type;
+	static boolean 	_remove_button_clicked;
+	static int		_build_depot_direction;
+	static int		_waypoint_count = 1;
+	static int		_cur_waypoint_type;
+	static int		_cur_signal_type;
+	static int		_cur_presig_type;
 	static boolean _cur_autosig_compl;
 
 	//static final StringID _presig_types_dropdown[] = 
@@ -2877,9 +2877,9 @@ public class Rail extends RailTables {
 		};
 
 	static class _Railstation {
-		byte orientation;
-		byte numtracks;
-		byte platlength;
+		int orientation;
+		int numtracks;
+		int platlength;
 		boolean dragdrop;
 	}
 
@@ -3010,7 +3010,7 @@ public class Rail extends RailTables {
 		int trackstat;
 		int i;
 
-		trackstat = (byte)tile.GetTileTrackStatus(Global.TRANSPORT_RAIL);
+		trackstat = tile.GetTileTrackStatus(Global.TRANSPORT_RAIL);
 
 		if(0 != ((trackstat & 0x30))) // N-S direction
 			trackstat = (Global._tile_fract_coords.x <= Global._tile_fract_coords.y) ? 0x20 : 0x10;
@@ -3193,7 +3193,7 @@ public class Rail extends RailTables {
 	static void HandleAutoSignalPlacement()
 	{
 		TileHighlightData thd = _thd;
-		byte trackstat = (byte) (thd.drawstyle & 0xF); // 0..5
+		int trackstat = (thd.drawstyle & 0xF); // 0..5
 
 		if (thd.drawstyle == ViewPort.HT_RECT) { // one tile case
 			GenericPlaceSignals(TileIndex.TileVirtXY(thd.selend.x, thd.selend.y));
@@ -3527,7 +3527,7 @@ public class Rail extends RailTables {
 			switch (e.widget) {
 			case 3:
 			case 4:
-				_railstation.orientation = (byte) (e.widget - 3);
+				_railstation.orientation =  (e.widget - 3);
 				//SndPlayFx(SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
@@ -3539,7 +3539,7 @@ public class Rail extends RailTables {
 			case 9:
 			case 10:
 			case 11:
-				_railstation.numtracks = (byte) ((e.widget - 5) + 1);
+				_railstation.numtracks =  ((e.widget - 5) + 1);
 				_railstation.dragdrop = false;
 				//SndPlayFx(SND_15_BEEP);
 				w.SetWindowDirty();
@@ -3552,7 +3552,7 @@ public class Rail extends RailTables {
 			case 16:
 			case 17:
 			case 18:
-				_railstation.platlength = (byte) ((e.widget - 12) + 1);
+				_railstation.platlength =  ((e.widget - 12) + 1);
 				_railstation.dragdrop = false;
 				//SndPlayFx(SND_15_BEEP);
 				w.SetWindowDirty();
@@ -3654,7 +3654,7 @@ public class Rail extends RailTables {
 			case 4:
 			case 5:
 			case 6:
-				_build_depot_direction = (byte) (e.widget - 3);
+				_build_depot_direction =  (e.widget - 3);
 				//SndPlayFx(SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
@@ -3717,7 +3717,7 @@ public class Rail extends RailTables {
 		case WE_CLICK: {
 			switch (e.widget) {
 			case 3: case 4: case 5: case 6: case 7:
-				_cur_waypoint_type = (byte) (e.widget - 3 + w.hscroll.pos);
+				_cur_waypoint_type =  (e.widget - 3 + w.hscroll.pos);
 				//SndPlayFx(SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
@@ -3801,7 +3801,7 @@ public class Rail extends RailTables {
 				break;
 			case 4: case 5: // select signal type
 				/* XXX TODO: take into account the scroll position for changing selected type */
-				_cur_signal_type = (byte) (e.widget - 4);
+				_cur_signal_type =  (e.widget - 4);
 				//SndPlayFx(SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
@@ -3831,7 +3831,7 @@ public class Rail extends RailTables {
 		}
 		break;
 		case WE_DROPDOWN_SELECT: // change presignal type
-			_cur_presig_type = (byte) e.index;
+			_cur_presig_type =  e.index;
 			w.SetWindowDirty();
 			break;
 

@@ -70,7 +70,7 @@ public class TrackPathFinderTables
 	};
 
 	
-	static final int _is_upwards_slope[] = {
+	protected static final int _is_upwards_slope[] = {
 			0, // no tileh
 			(1 << Rail.TRACKDIR_DIAG1_SW) | (1 << Rail.TRACKDIR_DIAG2_NW), // 1
 			(1 << Rail.TRACKDIR_DIAG1_SW) | (1 << Rail.TRACKDIR_DIAG2_SE), // 2
@@ -97,7 +97,7 @@ public class TrackPathFinderTables
 	// These has to be small cause the max length of a track
 	// is currently limited to 16384
 
-	static final byte _length_of_track[] = {
+	protected static final byte _length_of_track[] = {
 		DIAG_FACTOR,DIAG_FACTOR,STR_FACTOR,STR_FACTOR,STR_FACTOR,STR_FACTOR,0,0,
 		DIAG_FACTOR,DIAG_FACTOR,STR_FACTOR,STR_FACTOR,STR_FACTOR,STR_FACTOR,0,0
 	};

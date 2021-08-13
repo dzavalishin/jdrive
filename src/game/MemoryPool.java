@@ -18,7 +18,8 @@ public class MemoryPool<CType extends IPoolItem>
     Map<Integer,CType> pool = new HashMap<>();
     IPoolItemFactory<CType> ctor;
     //private static int lastIndex = 1;
-    private static int lastIndex = 0;
+    //private static int lastIndex = 0;
+    private int lastIndex = 0;
 
 
     public MemoryPool(IPoolItemFactory<CType> ctor) {

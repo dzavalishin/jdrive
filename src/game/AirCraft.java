@@ -273,7 +273,7 @@ public class AirCraft extends AirCraftTables {
 			v.service_interval = Global._patches.servint_aircraft;
 
 			v.date_of_last_service = Global._date;
-			v.build_year = u.build_year = (byte) Global._cur_year;
+			v.build_year = u.build_year =  Global._cur_year;
 
 			v.cur_image = u.cur_image = 0xEA0;
 
@@ -774,7 +774,7 @@ public class AirCraft extends AirCraftTables {
 		}
 
 		//spd = v.cur_speed + v.acceleration;
-		v.subspeed = (byte) ((t=v.subspeed) + (int)spd);
+		v.subspeed =  ((t=v.subspeed) + (int)spd);
 		spd = Math.min( v.cur_speed + (spd >> 8) + ((v.subspeed < t) ? 1 : 0), new_speed);
 
 		// adjust speed for broken vehicles
@@ -805,7 +805,7 @@ public class AirCraft extends AirCraftTables {
 
 
 		spd += v.progress;
-		v.progress = (byte)spd;
+		v.progress = spd;
 		return (spd >> 8);
 	}
 
@@ -855,7 +855,7 @@ public class AirCraft extends AirCraftTables {
 		Station st;
 		final AirportMovingData amd;
 		Vehicle u;
-		byte dirdiff,newdir;
+		int dirdiff,newdir;
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		int dist, desired_dist;
 		int x,y;
@@ -1028,7 +1028,7 @@ public class AirCraft extends AirCraftTables {
 			if (v.cur_speed > 12) v.cur_speed = 12;
 
 			// Change direction smoothly to final direction.
-			dirdiff = (byte) (amd.direction - v.direction);
+			dirdiff =  (amd.direction - v.direction);
 			// if distance is 0, and plane points in right direction, no point in calling
 			// UpdateAircraftSpeed(). So do it only afterwards
 			if (dirdiff == 0) {
@@ -1055,7 +1055,7 @@ public class AirCraft extends AirCraftTables {
 		if (v.load_unload_time_rem != 0) v.load_unload_time_rem--;
 
 		// Turn. Do it slowly if in the air.
-		newdir = (byte) Vehicle.GetDirectionTowards(v, x + amd.x, y + amd.y);
+		newdir =  Vehicle.GetDirectionTowards(v, x + amd.x, y + amd.y);
 		if (newdir != v.direction) {
 			if(0 != (amd.flag & AirportMovingData.AMED_SLOWTURN)) {
 				if (v.load_unload_time_rem == 0) v.load_unload_time_rem = 8;
@@ -1876,7 +1876,7 @@ public class AirCraft extends AirCraftTables {
 	static boolean AirportMove(Vehicle v, final AirportFTAClass airport)
 	{
 		AirportFTA current;
-		byte prev_pos;
+		int prev_pos;
 		boolean retval = false;
 
 
@@ -1889,7 +1889,7 @@ public class AirCraft extends AirCraftTables {
 		current = airport.layout[v.air.pos];
 		// we have arrived in an important state (eg terminal, hangar, etc.)
 		if (current.heading == v.air.state) {
-			prev_pos = (byte) v.air.pos; // location could be changed in state, so save it before-hand
+			prev_pos =  v.air.pos; // location could be changed in state, so save it before-hand
 			_aircraft_state_handlers[v.air.state].accept(v, airport);
 			if (v.air.state != AirConstants.FLYING) v.air.previous_pos = prev_pos;
 			return true;
@@ -2458,7 +2458,7 @@ public class AirCraft extends AirCraftTables {
 			case 2: { /* listbox */
 				int i = (we.pt.y - 14) / 24;
 				if (i < w.vscroll.cap) {
-					w.as_buildtrain_d().sel_index = (byte) (i + w.vscroll.pos);
+					w.as_buildtrain_d().sel_index =  (i + w.vscroll.pos);
 					w.SetWindowDirty();
 				}
 			} break;
@@ -2539,9 +2539,9 @@ public class AirCraft extends AirCraftTables {
 		w.resize.step_height = 24;
 
 		if (tile != null) {
-			w.caption_color = (byte) tile.GetTileOwner().id;
+			w.caption_color =  tile.GetTileOwner().id;
 		} else {
-			w.caption_color = (byte) Global._local_player.id;
+			w.caption_color =  Global._local_player.id;
 		}
 	}
 
@@ -2620,7 +2620,7 @@ public class AirCraft extends AirCraftTables {
 		//Global._alloc_wnd_parent_num = v.index;
 		w = Window.AllocateWindowDesc(_aircraft_refit_desc, v.index);
 		w.window_number = v.index;
-		w.caption_color = (byte) v.owner.id;
+		w.caption_color =  v.owner.id;
 		w.as_refit_d().sel = -1;
 	}
 
@@ -2799,7 +2799,7 @@ public class AirCraft extends AirCraftTables {
 		//_alloc_wnd_parent_num = veh;
 		w = Window.AllocateWindowDesc(_aircraft_details_desc, veh);
 		w.window_number = veh;
-		w.caption_color = (byte) v.owner.id;
+		w.caption_color =  v.owner.id;
 		//		w.vscroll.cap = 6;
 		//		w.traindetails_d.tab = 0;
 	}
@@ -2958,7 +2958,7 @@ public class AirCraft extends AirCraftTables {
 		Window  w = Window.AllocateWindowDescFront(_aircraft_view_desc, v.index);
 
 		if (w != null) {
-			w.caption_color = (byte) v.owner.id;
+			w.caption_color =  v.owner.id;
 			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number | (1 << 31), 0);
 		}
 	}
@@ -3269,7 +3269,7 @@ public class AirCraft extends AirCraftTables {
 
 		w = Window.AllocateWindowDescFront(_aircraft_depot_desc, tile.tile);
 		if (w != null) {
-			w.caption_color = (byte) tile.GetTileOwner().id;
+			w.caption_color =  tile.GetTileOwner().id;
 			w.vscroll.cap = 2;
 			w.hscroll.cap = 4;
 			w.resize.step_width = 74;
@@ -3490,7 +3490,7 @@ public class AirCraft extends AirCraftTables {
 			if (vl.sort_type != e.index) {
 				// value has changed . resort
 				vl.flags |= Vehicle.VL_RESORT;
-				vl.sort_type = (byte) e.index;
+				vl.sort_type =  e.index;
 				VehicleGui._sorting.aircraft.criteria = vl.sort_type;
 
 				// enable 'Sort By' if a sorter criteria is chosen
@@ -3503,7 +3503,7 @@ public class AirCraft extends AirCraftTables {
 		case WE_CREATE: /* set up resort timer */
 			vl.sort_list = null;
 			vl.flags = Vehicle.VL_REBUILD | ((VehicleGui._sorting.aircraft.order ? 1 : 0) << (Vehicle.VL_DESC - 1));
-			vl.sort_type = (byte) VehicleGui._sorting.aircraft.criteria;
+			vl.sort_type =  VehicleGui._sorting.aircraft.criteria;
 			vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
 			break;
 
@@ -3563,7 +3563,7 @@ public class AirCraft extends AirCraftTables {
 		}
 
 		if (w != null) {
-			w.caption_color = (byte) w.window_number;
+			w.caption_color =  w.window_number;
 			w.vscroll.cap = 4;
 			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
 			w.resize.step_height = VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;

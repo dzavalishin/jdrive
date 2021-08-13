@@ -1920,13 +1920,11 @@ public class Town extends TownTables implements IPoolItem
 			t.unwanted[Global._current_player.id] = 6;
 
 			// set all close by station ratings to 0
-			//FOR_ALL_STATIONS(st)
 			Station.forEach( (st) ->
 			{
 				if (st.town == t && st.owner == Global._current_player) {
-					int i;
-
-					for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) st.goods[i].rating = 0;
+					for (int i = 0; i != AcceptedCargo.NUM_CARGO; i++) 
+						st.goods[i].rating = 0;
 				}
 			});
 

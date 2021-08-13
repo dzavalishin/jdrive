@@ -117,7 +117,7 @@ public class NewsItem {
 	 */
 
 	static final int  MAX_NEWS = 30;
-	static final byte   INVALID_NEWS = (byte) 255;
+	static final byte   INVALID_NEWS = -1;
 
 	static NewsItem _news_items[] = new NewsItem[MAX_NEWS];
 	static int _current_news = INVALID_NEWS; // points to news item that should be shown next
@@ -168,15 +168,15 @@ public class NewsItem {
 		//memset(ni, 0, sizeof(*ni));
 
 		ni.string_id = new StringID( string );
-		ni.display_mode = (byte)flags;
-		ni.flags = (byte)(flags >> 8) | NF_NOEXPIRE;
+		ni.display_mode = flags;
+		ni.flags = (flags >> 8) | NF_NOEXPIRE;
 
 		// show this news message in color?
 		if (Global._date >= GameDate.ConvertIntDate(Global._patches.colored_news_date))
 			ni.flags |= NF_INCOLOR;
 
-		ni.type = (byte)(flags >> 16);
-		ni.callback = (byte)(flags >> 24);
+		ni.type = (flags >>> 16);
+		ni.callback = (flags >>> 24);
 		ni.data_a = new TileIndex( data_a );
 		ni.data_b = new TileIndex( data_b );
 		ni.date = Global._date;
@@ -393,15 +393,15 @@ public class NewsItem {
 		memset(ni, 0, sizeof(*ni));
 
 		ni.string_id = string;
-		ni.display_mode = (byte)flags;
-		ni.flags = (byte)(flags >> 8) | NF_NOEXPIRE;
+		ni.display_mode = flags;
+		ni.flags = (flags >> 8) | NF_NOEXPIRE;
 
 		// show this news message in color?
 		if (_date >= ConvertIntDate(Global._patches.colored_news_date))
 			ni.flags |= NF_INCOLOR;
 
-		ni.type = (byte)(flags >> 16);
-		ni.callback = (byte)(flags >> 24);
+		ni.type = (flags >> 16);
+		ni.callback = (flags >> 24);
 		ni.data_a = data_a;
 		ni.data_b = data_b;
 		ni.date = _date;
@@ -927,10 +927,10 @@ public class NewsItem {
 			case 2: /* Clicked on any of the fake widgets */
 				if (e.pt.x > 13 && e.pt.x < 89 && e.pt.y > 26 && e.pt.y < 146) {
 					int element = (e.pt.y - 26) / 12;
-					byte val = (byte) ((GetNewsDisplayValue(element) + 1) % 3);
+					byte val =  ((GetNewsDisplayValue(element) + 1) % 3);
 
 					SetMessageButtonStates(w, val, element);
-					SetNewsDisplayValue((byte) element, val);
+					SetNewsDisplayValue( element, val);
 
 					//w.as_def_d().data_1 |= (1 << element);
 					((def_d)w.custom).data_1 |= (1 << element);
@@ -950,10 +950,10 @@ public class NewsItem {
 				int wid = e.widget;
 				if (wid > 2 && wid < 23) {
 					int element = (wid - 3) / 2;
-					byte val = (byte) ((GetNewsDisplayValue(element) + (0 != (wid & 1) ? -1 : 1)) % 3);
+					byte val =  ((GetNewsDisplayValue(element) + (0 != (wid & 1) ? -1 : 1)) % 3);
 
 					SetMessageButtonStates(w, val, element);
-					SetNewsDisplayValue((byte)element, val);
+					SetNewsDisplayValue(element, val);
 					w.SetWindowDirty();
 				}
 			} break;

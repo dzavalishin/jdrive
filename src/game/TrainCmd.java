@@ -485,7 +485,7 @@ public class TrainCmd extends TrainTables
 					v.z_pos = Landscape.GetSlopeZ(x,y);
 					v.owner = Global._current_player;
 					v.z_height = 6;
-					v.rail.track = (byte) 0x80;
+					v.rail.track =  0x80;
 					v.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_DEFPAL;
 
 					v.subtype = 0;
@@ -503,7 +503,7 @@ public class TrainCmd extends TrainTables
 
 					v.rail.railtype = Engine.GetEngine(engine).railtype;
 
-					v.build_year = (byte) Global._cur_year;
+					v.build_year =  Global._cur_year;
 					v.type = Vehicle.VEH_Train;
 					v.cur_image = 0xAC2;
 					v.random_bits = Vehicle.VehicleRandomBits();
@@ -559,11 +559,11 @@ public class TrainCmd extends TrainTables
 		u.y_pos = v.y_pos;
 		u.z_pos = v.z_pos;
 		u.z_height = 6;
-		u.rail.track = (byte) 0x80;
+		u.rail.track =  0x80;
 		u.vehstatus = v.vehstatus & ~Vehicle.VS_STOPPED;
 		u.subtype = 0;
 		u.SetMultiheaded();
-		u.spritenum = (byte) (v.spritenum + 1);
+		u.spritenum =  (v.spritenum + 1);
 		u.cargo_type = v.cargo_type;
 		u.cargo_cap = v.cargo_cap;
 		u.rail.railtype = v.rail.railtype;
@@ -643,7 +643,7 @@ public class TrainCmd extends TrainTables
 				v.y_pos = (y |= _vehicle_initial_y_fract[dir]);
 				v.z_pos = Landscape.GetSlopeZ(x,y);
 				v.z_height = 6;
-				v.rail.track = (byte) 0x80;
+				v.rail.track =  0x80;
 				v.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_STOPPED | Vehicle.VS_DEFPAL;
 				v.spritenum = rvi.image_index;
 				v.cargo_type = rvi.cargo_type;
@@ -666,7 +666,7 @@ public class TrainCmd extends TrainTables
 
 				v.service_interval = Global._patches.servint_trains;
 				v.date_of_last_service = Global._date;
-				v.build_year = (byte) Global._cur_year;
+				v.build_year =  Global._cur_year;
 				v.type = Vehicle.VEH_Train;
 				v.cur_image = 0xAC2;
 				v.random_bits = Vehicle.VehicleRandomBits();
@@ -675,7 +675,7 @@ public class TrainCmd extends TrainTables
 				v.SetFrontEngine();
 				v.SetTrainEngine();
 
-				v.rail.shortest_platform[0] = (byte) 255;
+				v.rail.shortest_platform[0] =  255;
 				v.rail.shortest_platform[1] = 0;
 
 				v.VehiclePositionChanged();
@@ -1275,8 +1275,8 @@ public class TrainCmd extends TrainTables
 
 		v.x_offs        = BitOps.GB(x,  0, 8);
 		v.y_offs        = BitOps.GB(x,  8, 8);
-		v.sprite_width  = (byte) BitOps.GB(x, 16, 8);
-		v.sprite_height = (byte) BitOps.GB(x, 24, 8);
+		v.sprite_width  =  BitOps.GB(x, 16, 8);
+		v.sprite_height =  BitOps.GB(x, 24, 8);
 	}
 
 	static void UpdateVarsAfterSwap(Vehicle v)
@@ -1351,7 +1351,7 @@ public class TrainCmd extends TrainTables
 			//swap_byte(&a.direction, &b.direction);
 			t = a.rail.track;
 			a.rail.track = b.rail.track;
-			b.rail.track = (byte) t;
+			b.rail.track =  t;
 
 			t = a.direction;
 			a.direction = b.direction;
@@ -2541,7 +2541,7 @@ public class TrainCmd extends TrainTables
 		}
 
 		spd = v.subspeed + accel * 2;
-		v.subspeed = (byte)spd;
+		v.subspeed = spd;
 		{
 			int tempmax = v.max_speed;
 			if (v.cur_speed > v.max_speed)
@@ -2552,7 +2552,7 @@ public class TrainCmd extends TrainTables
 		if (0 == (v.direction & 1)) spd = spd * 3 >> 2;
 
 				spd += v.progress;
-				v.progress = (byte)spd;
+				v.progress = spd;
 				return (spd >> 8);
 	}
 
@@ -3019,7 +3019,7 @@ public class TrainCmd extends TrainTables
 			 * Now, the lower byte contains the track status, and the byte at bit 16 contains
 			 * the signal status. */
 			tracks = ts|(ts >> 8);
-			bits = (byte) (tracks & 0xFF);
+			bits =  (tracks & 0xFF);
 			if (Global._patches.new_pathfinding_all && Global._patches.forbid_90_deg && prev == null)
 				/* We allow wagons to make 90 deg turns, because forbid_90_deg
 				 * can be switched on halfway a turn */
@@ -3045,7 +3045,7 @@ public class TrainCmd extends TrainTables
 				int trackdir;
 				/* Currently the locomotive is active. Determine which one of the
 				 * available tracks to choose */
-				chosen_track = (byte) (1 << ChooseTrainTrack(v, gp.new_tile, enterdir, bits));
+				chosen_track =  (1 << ChooseTrainTrack(v, gp.new_tile, enterdir, bits));
 				assert 0 != (chosen_track & tracks);
 
 				trackdir = Rail.TrackEnterdirToTrackdir(BitOps.FIND_FIRST_BIT(chosen_track), enterdir);
@@ -3120,7 +3120,7 @@ public class TrainCmd extends TrainTables
 			} else {
 
 				/* The wagon is active, simply follow the prev vehicle. */
-				chosen_track = (byte)(_matching_tracks[GetDirectionToVehicle(prev, gp.x, gp.y)] & bits);
+				chosen_track = (_matching_tracks[GetDirectionToVehicle(prev, gp.x, gp.y)] & bits);
 			}
 
 			//green_light:

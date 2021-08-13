@@ -167,8 +167,8 @@ public class Station extends StationTables implements IPoolItem
 		bus_stops = new ArrayList<RoadStop>(); 
 		truck_stops = new ArrayList<RoadStop>();
 		had_vehicle_of_type = 0;
-		time_since_load = (byte) 255;
-		time_since_unload = (byte) 255;
+		time_since_load = 255;
+		time_since_unload = 255;
 		delete_ctr = 0;
 		facilities = 0;
 
@@ -183,9 +183,9 @@ public class Station extends StationTables implements IPoolItem
 			ge.waiting_acceptance = 0;
 			ge.days_since_pickup = 0;
 			ge.enroute_from = INVALID_STATION;
-			ge.rating = (byte) 175;
+			ge.rating = 175;
 			ge.last_speed = 0;
-			ge.last_age = (byte) 0xFF;
+			ge.last_age = 0xFF;
 			ge.feeder_profit = 0;
 		}
 
@@ -1112,7 +1112,7 @@ public class Station extends StationTables implements IPoolItem
 		int i = n;
 		int li = 0;
 		do { 
-			layout[li++] = (byte) b; 
+			layout[li++] =  (byte) b; 
 		}while (--i > 0);
 
 		if (n > 4) {
@@ -1617,7 +1617,7 @@ public class Station extends StationTables implements IPoolItem
 
 		if (exec) {
 			// change type.
-			tile.getMap().m3 = (byte) BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
+			tile.getMap().m3 =  BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
 			tile.MarkTileDirtyByTile();
 		}
 
@@ -1978,7 +1978,7 @@ public class Station extends StationTables implements IPoolItem
 			st.airport_tile = tile;
 			if (0 == st.facilities) st.xy = tile;
 			st.facilities |= FACIL_AIRPORT;
-			st.airport_type = (byte)p1;
+			st.airport_type = p1;
 			st.airport_flags = 0;
 
 			st.build_date = Global._date;
@@ -2411,7 +2411,7 @@ public class Station extends StationTables implements IPoolItem
 		ViewPort.DrawGroundSprite(image);
 
 		if (Global._debug_pbs_level >= 1) {
-			byte pbs = (byte) Pbs.PBSTileReserved(ti.tile);
+			int pbs =  Pbs.PBSTileReserved(ti.tile);
 			if(0 != (pbs & Rail.TRACK_BIT_DIAG1)) ViewPort.DrawGroundSprite(rti.base_sprites.single_y.id | Sprite.PALETTE_CRASH);
 			if(0 != (pbs & Rail.TRACK_BIT_DIAG2)) ViewPort.DrawGroundSprite(rti.base_sprites.single_x.id | Sprite.PALETTE_CRASH);
 			if(0 != (pbs & Rail.TRACK_BIT_UPPER)) ViewPort.DrawGroundSprite(rti.base_sprites.single_n.id | Sprite.PALETTE_CRASH);
@@ -2809,6 +2809,7 @@ public class Station extends StationTables implements IPoolItem
 	}
 
 	private static byte byte_inc_sat_RET(byte p) { byte b = (byte) (p + 1); if (b != 0) p = b; return p; }
+	private static int inc_sat_RET(int p) { int b = (p + 1); if (b != 0) p = b; return p; }
 
 	private static void UpdateStationRating(Station st)
 	{
@@ -2826,7 +2827,7 @@ public class Station extends StationTables implements IPoolItem
 		{
 			if (ge.enroute_from != INVALID_STATION) {
 				ge.enroute_time = byte_inc_sat_RET((byte) ge.enroute_time);
-				ge.days_since_pickup = byte_inc_sat_RET(ge.days_since_pickup);
+				ge.days_since_pickup = inc_sat_RET(ge.days_since_pickup);
 
 				rating = 0;
 
@@ -2837,7 +2838,7 @@ public class Station extends StationTables implements IPoolItem
 				}
 
 				{
-					byte age = ge.last_age;
+					int age = ge.last_age;
 					if(age < 3)
 					{
 						rating += 10;
@@ -2854,7 +2855,7 @@ public class Station extends StationTables implements IPoolItem
 					rating += 26;
 
 				{
-					byte days = ge.days_since_pickup;
+					int days = ge.days_since_pickup;
 					if (st.last_vehicle.id != INVALID_VEHICLE &&
 							Vehicle.GetVehicle(st.last_vehicle).type == Vehicle.VEH_Ship)
 						days >>= 2;
@@ -2972,20 +2973,16 @@ public class Station extends StationTables implements IPoolItem
 
 	public static void ModifyStationRatingAround(TileIndex tile, PlayerID owner, int amount, int radius)
 	{
-		//Station st;
-
-		//FOR_ALL_STATIONS(st) 
 		_station_pool.forEach( (ii,st) ->
 		{
 			if (st.xy != null && st.owner == owner &&
 					Map.DistanceManhattan(tile, st.xy) <= radius) {
-				int i;
 
-				for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
+				for (int i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
 					GoodsEntry ge = st.goods[i];
 
 					if (ge.enroute_from != INVALID_STATION) {
-						ge.rating = (byte) BitOps.clamp(ge.rating + amount, 0, 255);
+						ge.rating = BitOps.clamp(ge.rating + amount, 0, 255);
 					}
 				}
 			}
@@ -3056,7 +3053,7 @@ public class Station extends StationTables implements IPoolItem
 		//int i;
 		int moved;
 		int best_rating, best_rating2;
-		Station st1, st2;
+		//Station st1, st2;
 		int t;
 		//int rad=0;
 		int max_rad;
@@ -3160,7 +3157,9 @@ public class Station extends StationTables implements IPoolItem
 		}
 
 		/* several stations around, find the two with the highest rating */
-		st2 = st1 = null;
+		Station st1 = null;
+		Station st2 = null;
+
 		best_rating = best_rating2 = 0;
 
 		for( int i = 0; i != 8 && around[i] != INVALID_STATION; i++) {

@@ -6,7 +6,7 @@ import game.util.wcustom.news_d;
 
 public class Tree  extends TreeTables {
 
-	private static byte _trees_tick_ctr; // TODO usage?
+	private static int _trees_tick_ctr; // TODO usage?
 	
 	static int GetRandomTreeType(TileIndex tile, int seed)
 	{
@@ -243,7 +243,7 @@ public class Tree  extends TreeTables {
 
 	static class TreeListEnt {
 		int image;
-		byte x,y;
+		int x,y;
 	} 
 
 	static void DrawTile_Trees(TileInfo ti)
@@ -314,8 +314,8 @@ public class Tree  extends TreeTables {
 					image = Sprite.RET_MAKE_TRANSPARENT(image);
 				te[i] = new TreeListEnt();
 				te[i].image = image;
-				te[i].x = (byte) d.r().x;
-				te[i].y = (byte) d.r().y;
+				te[i].x =  d.r().x;
+				te[i].y =  d.r().y;
 				s.inc();;
 				d.inc();
 			} while (i >0 );
@@ -354,7 +354,7 @@ public class Tree  extends TreeTables {
 		return ti.tileh;
 	}
 
-	static int ClearTile_Trees(TileIndex tile, byte flags)
+	static int ClearTile_Trees(TileIndex tile, int flags)
 	{
 		int num;
 
@@ -385,7 +385,7 @@ public class Tree  extends TreeTables {
 		//StringID str;
 		int str;
 
-		td.owner = (byte) tile.GetTileOwner().id;
+		td.owner =  tile.GetTileOwner().id;
 
 		m3 = tile.getMap().m3;
 		//(str=Str.STR_2810_CACTUS_PLANTS, b==0x1B) ||
@@ -396,7 +396,7 @@ public class Tree  extends TreeTables {
 		if(m3!=0x1B) 
 		{
 			str=Str.STR_280F_RAINFOREST;
-			if( !BitOps.IS_BYTE_INSIDE(m3, (byte)0x14, (byte)(0x1A+1)))
+			if( !BitOps.IS_BYTE_INSIDE(m3, 0x14, (0x1A+1)))
 				str=Str.STR_280E_TREES;
 		}
 
@@ -420,7 +420,7 @@ public class Tree  extends TreeTables {
 			SND_48_DISTANT_BIRD
 		};*/
 
-		byte b = (byte) tile.GetMapExtraBits();
+		int b =  tile.GetMapExtraBits();
 
 		if (b == 2) {
 			//int r = Hal.Random();
@@ -438,13 +438,13 @@ public class Tree  extends TreeTables {
 
 	static void TileLoopTreesAlps(TileIndex tile)
 	{
-		byte tmp, m2;
+		int tmp, m2;
 		int k;
 
 		/* distance from snow line, in steps of 8 */
 		k = tile.GetTileZ() - GameOptions._opt.snow_line;
 
-		tmp = (byte) (tile.getMap().m2 & 0xF0);
+		tmp =  (tile.getMap().m2 & 0xF0);
 
 		if (k < -8) {
 			if ((tmp & 0x30) != 0x20) return;
@@ -456,7 +456,7 @@ public class Tree  extends TreeTables {
 			m2 = 0x60;// 1/2 snow
 			if (tmp == m2) return;
 		} else if (k == 8) {
-			m2 = (byte) 0xA0; // 3/4 snow
+			m2 =  0xA0; // 3/4 snow
 			if (tmp == m2) return;
 		} else {
 			if (tmp == 0xE0) {
@@ -466,7 +466,7 @@ public class Tree  extends TreeTables {
 				}
 				return;
 			} else {
-				m2 = (byte) 0xE0; // full snow
+				m2 =  0xE0; // full snow
 			}
 		}
 
@@ -564,7 +564,7 @@ public class Tree  extends TreeTables {
 				m5 = 3;
 				m2 = tile.getMap().m2;
 				if ((m2 & 0x30) != 0) { // on snow/desert or rough land
-					m5 = (byte) ((m2 >> 6) | 0x10);
+					m5 =  ((m2 >> 6) | 0x10);
 					if ((m2 & 0x30) != 0x20) // if not on snow/desert, then on rough land
 						m5 = 7;
 				}
@@ -583,7 +583,7 @@ public class Tree  extends TreeTables {
 	{
 		int r;
 		TileIndex tile;
-		byte m;
+		int m;
 		int tree;
 
 		/* place a tree at a random rainforest spot */
@@ -591,7 +591,7 @@ public class Tree  extends TreeTables {
 		{
 			r = Hal.Random();
 			tile = TileIndex.RandomTileSeed(r);
-			m = (byte) (tile.getMap().m5 & 0x1C);
+			m = tile.getMap().m5 & 0x1C;
 			if(
 					(tile.GetMapExtraBits() == 2) &&
 					tile.IsTileType(TileTypes.MP_CLEAR) &&
@@ -618,7 +618,7 @@ public class Tree  extends TreeTables {
 		tile = new TileIndex( TileIndex.TILE_MASK(r) ); // TODO use TileIndex random generator func?
 		if (tile.IsTileType(TileTypes.MP_CLEAR)) 
 		{
-			m = (byte) (tile.getMap().m5 & 0x1C);
+			m =  (tile.getMap().m5 & 0x1C);
 			if(
 					( m == 0 || m == 4 || m == 0x10) &&
 					(tree = GetRandomTreeType(tile, BitOps.GB(r, 24, 8))) >= 0) 

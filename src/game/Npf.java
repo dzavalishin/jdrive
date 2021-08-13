@@ -197,8 +197,8 @@ public class Npf {
 
 			/* Check for oneway signal against us */
 			if (dst_tile.IsTileType(TileTypes.MP_RAILWAY) && dst_tile.GetRailTileType() == Rail.RAIL_TYPE_SIGNALS) {
-				if (dst_tile.HasSignalOnTrackdir(ReverseTrackdir(BitOps.FindFirstBit2x64(ts))) 
-						&& !dst_tile.HasSignalOnTrackdir(BitOps.FindFirstBit2x64(ts)))
+				if (Rail.HasSignalOnTrackdir(dst_tile,Rail.ReverseTrackdir(BitOps.FindFirstBit2x64(ts))) 
+						&& !Rail.HasSignalOnTrackdir(dst_tile,BitOps.FindFirstBit2x64(ts)))
 					// if one way signal not pointing towards us, stop going in this direction.
 					return true;
 			}

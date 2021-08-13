@@ -29,10 +29,10 @@ public class Player
 	int current_loan;
 	long money64; // internal 64-bit version of the money. the 32-bit field will be clamped to plus minus 2 billion
 
-	byte player_color;
-	byte player_money_fraction;
-	byte avail_railtypes;
-	byte block_preview;
+	int player_color;
+	int player_money_fraction;
+	int avail_railtypes;
+	int block_preview;
 	PlayerID index;
 
 	int cargo_types; // which cargo types were transported the last year 
@@ -43,15 +43,15 @@ public class Player
 	PlayerID share_owners[];
 
 	int inaugurated_year;
-	byte num_valid_stat_ent;
+	int num_valid_stat_ent;
 
-	byte quarters_of_bankrupcy;
-	byte bankrupt_asked; // which players were asked about buying it?
+	int quarters_of_bankrupcy;
+	int bankrupt_asked; // which players were asked about buying it?
 	int bankrupt_timeout;
 	int bankrupt_value;
 
 	boolean is_active;
-	byte is_ai;
+	int is_ai;
 	PlayerAI ai = new PlayerAI();
 	PlayerAiNew ainew;
 
@@ -97,12 +97,12 @@ public class Player
 	//#define MAX_PLAYERS 8
 	static Player [] _players = new Player[Global.MAX_PLAYERS];
 	// NOSAVE: can be determined from player structs
-	private static byte [] _player_colors = new byte[Global.MAX_PLAYERS];
+	private static int [] _player_colors = new int[Global.MAX_PLAYERS];
 
 
 
-	static byte _yearly_expenses_type; // TODO fixme, use parameter where possible
-	public static void SET_EXPENSES_TYPE(int x) { _yearly_expenses_type = (byte) x; }
+	static int _yearly_expenses_type; // TODO fixme, use parameter where possible
+	public static void SET_EXPENSES_TYPE(int x) { _yearly_expenses_type = x; }
 
 	public static final int EXPENSES_CONSTRUCTION = 0;
 	public static final int EXPENSES_NEW_VEHICLES = 1;
@@ -156,7 +156,7 @@ public class Player
 
 	static void DrawPlayerFace(int face, int color, int x, int y)
 	{
-		byte flag = 0;
+		int flag = 0;
 
 		if ( (int)face < 0)
 			flag |= 1;
@@ -346,8 +346,8 @@ public class Player
 	public static void SubtractMoneyFromPlayerFract(PlayerID player, int cost)
 	{
 		Player p = GetPlayer(player);
-		byte m = p.player_money_fraction;
-		p.player_money_fraction = (byte) (m - (byte)cost);
+		int m = p.player_money_fraction;
+		p.player_money_fraction =  (m - cost);
 		cost >>= 8;
 		if (p.player_money_fraction > m)
 			cost++;
@@ -511,7 +511,7 @@ public class Player
 	private static byte GeneratePlayerColor()
 	{
 		byte [] colors = new byte [16];
-		byte pcolor, t2;
+		int pcolor, t2;
 		int i,j,n;
 		int r;
 		//Player p;

@@ -59,8 +59,8 @@ public class Vehicle implements IPoolItem
 	// for randomized variational spritegroups
 	// bitmask used to resolve them; parts of it get reseeded when triggers
 	// of corresponding spritegroups get matched
-	byte random_bits;
-	byte waiting_triggers; // triggers to be yet matched
+	int random_bits;
+	int waiting_triggers; // triggers to be yet matched
 
 	int max_speed;	// maximum speed
 	int cur_speed;	// current speed
@@ -108,11 +108,11 @@ public class Vehicle implements IPoolItem
 	int service_interval;
 	int reliability;
 	int reliability_spd_dec;
-	byte breakdown_ctr;
+	int breakdown_ctr;
 	int breakdown_delay;
-	byte breakdowns_since_last_service;
-	byte breakdown_chance;
-	byte build_year;
+	int breakdowns_since_last_service;
+	int breakdown_chance;
+	int build_year;
 
 	boolean leave_depot_instantly;	// NOSAVE: stores if the vehicle needs to leave the depot it just entered. Used by autoreplace
 
@@ -350,7 +350,7 @@ public class Vehicle implements IPoolItem
 			}
 
 			Player.SubtractMoneyFromPlayer((int)tax);
-			Player._yearly_expenses_type = (byte) old_expenses_type;
+			Player._yearly_expenses_type = old_expenses_type;
 		}
 		return;
 	}

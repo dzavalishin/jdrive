@@ -239,7 +239,8 @@ public class Order implements IPoolItem {
 		OrderID sel_ord = OrderID.get( BitOps.GB(p1, 16, 16) );
 		Order new_order = UnpackOrder(p2);
 
-		if (!veh.IsVehicleIndex()) return Cmd.CMD_ERROR;
+		if (!veh.IsVehicleIndex()) 
+			return Cmd.CMD_ERROR;
 		v = Vehicle.GetVehicle(veh);
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 

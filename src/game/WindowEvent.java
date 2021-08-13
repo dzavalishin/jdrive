@@ -34,7 +34,7 @@ public class WindowEvent {
 
 	// keypress
 	boolean cont;   // continue the search? (default true)
-	byte ascii;  // 8-bit ASCII-value of the key
+	int ascii;  // 8-bit ASCII-value of the key
 	int keycode;// untranslated key (including shift-state)
 
 	// message

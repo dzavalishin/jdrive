@@ -173,9 +173,9 @@ public abstract class Pathfind extends TrackPathFinderTables
 		tpf.enum_proc = enum_proc;
 		tpf.tracktype = 0;
 		tpf.maxlength = Math.min(Global._patches.pf_maxlength * 3, 10000);
-		tpf.nstack = 0;
-		tpf.new_link = tpf.links[0];
-		tpf.num_links_left = tpf.links.length;
+		//tpf.nstack = 0;
+		//tpf.new_link = tpf.links[0];
+		//tpf.num_links_left = tpf.links.length;
 		
 		//memset(tpf.hash_head, 0, sizeof(tpf.hash_head));
 		//tpf.hash_head.clear();

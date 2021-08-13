@@ -11,7 +11,7 @@ public class Ship {
 	static byte GetTileShipTrackStatus(TileIndex tile)
 	{
 		int r = tile.GetTileTrackStatus(Global.TRANSPORT_WATER);
-		return (byte) (r | r >> 8);
+		return  (r | r >> 8);
 	}
 
 	static void DrawShipEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
@@ -297,8 +297,8 @@ public class Ship {
 		int x = _delta_xy_table[dir];
 		v.x_offs        = BitOps.GB(x,  0, 8);
 		v.y_offs        = BitOps.GB(x,  8, 8);
-		v.sprite_width  = (byte) BitOps.GB(x, 16, 8);
-		v.sprite_height = (byte) BitOps.GB(x, 24, 8);
+		v.sprite_width  =  BitOps.GB(x, 16, 8);
+		v.sprite_height =  BitOps.GB(x, 24, 8);
 	}
 
 	static void RecalcShipStuff(Vehicle v)
@@ -336,7 +336,7 @@ public class Ship {
 			return;
 		}
 		v.direction    = BitOps.GB(m, 0, 8);
-		v.ship.state = (byte) BitOps.GB(m, 8, 8);
+		v.ship.state =  BitOps.GB(m, 8, 8);
 		v.vehstatus &= ~Vehicle.VS_HIDDEN;
 
 		v.cur_speed = 0;
@@ -365,9 +365,9 @@ public class Ship {
 		if (0 ==(v.direction & 1)) spd = spd * 3 / 4;
 
 		if (spd == 0) return false;
-		if ((byte)++spd == 0) return true;
+		if (++spd == 0) return true;
 
-		v.progress = (t = (byte) v.progress) - (byte)spd;
+		v.progress = (t =  v.progress) - spd;
 
 		return (t < v.progress);
 	}
@@ -379,7 +379,7 @@ public class Ship {
 
 	static void ShipEnterDepot(Vehicle v)
 	{
-		v.ship.state = (byte) 0x80;
+		v.ship.state =  0x80;
 		v.vehstatus |= Vehicle.VS_HIDDEN;
 		v.cur_speed = 0;
 		RecalcShipStuff(v);
@@ -495,7 +495,7 @@ public class Ship {
 		int best_bird_dist = 0;
 		int best_length    = 0;
 		//int r;
-		byte ship_dir = (byte) (v.direction & 3);
+		byte ship_dir =  (v.direction & 3);
 
 		pfs.dest_coords = v.dest_tile;
 		pfs.skiptile = skiptile;
@@ -602,7 +602,7 @@ public class Ship {
 	static int GetAvailShipTracks(TileIndex tile, int dir)
 	{
 		int r = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_WATER);
-		return (byte) ((r | r >> 8)) & _ship_sometracks[dir];
+		return  ((r | r >>> 8)) & _ship_sometracks[dir];
 	}
 
 	static final byte _ship_subcoord[][][] = {
@@ -785,7 +785,7 @@ public class Ship {
 
 			if (0 == (r&0x4)) {
 				v.tile = gp.new_tile;
-				v.ship.state = (byte) (1 << track);
+				v.ship.state =  (1 << track);
 			}
 
 			v.direction = b[2];
@@ -932,7 +932,7 @@ public class Ship {
 
 			v.service_interval = Global._patches.servint_ships;
 			v.date_of_last_service = Global._date;
-			v.build_year = (byte) Global._cur_year;
+			v.build_year =  Global._cur_year;
 			v.cur_image = 0x0E5E;
 			v.type = Vehicle.VEH_Ship;
 			v.random_bits = Vehicle.VehicleRandomBits();

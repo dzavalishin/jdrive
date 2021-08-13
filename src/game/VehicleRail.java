@@ -27,13 +27,13 @@ public class VehicleRail extends VehicleChild {
 	// 0xffff == not in train
 	EngineID first_engine;
 
-	byte track;
-	byte force_proceed;
-	byte railtype;
+	int track;
+	int force_proceed;
+	int railtype;
 
-	byte flags;
+	int flags;
 
-	byte pbs_status;
+	int pbs_status;
 	TileIndex pbs_end_tile;
 	/*Trackdir*/ int pbs_end_trackdir;
 
