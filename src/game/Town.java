@@ -119,55 +119,6 @@ public class Town extends TownTables implements IPoolItem
 		clear();
 	}
 
-	// These refer to the maximums, so Appalling is -1000 to -400
-	// MAXIMUM RATINGS BOUNDARIES
-	public static final int RATING_MINIMUM 		= -1000;
-	public static final int RATING_APPALLING 	= -400;
-	public static final int RATING_VERYPOOR 	= -200;
-	public static final int RATING_POOR 			= 0;
-	public static final int RATING_MEDIOCRE		= 200;
-	public static final int RATING_GOOD				= 400;
-	public static final int RATING_VERYGOOD		= 600;
-	public static final int RATING_EXCELLENT	= 800;
-	public static final int RATING_OUTSTANDING= 1000; 	// OUTSTANDING
-
-	public static final int RATING_MAXIMUM = RATING_OUTSTANDING;
-
-	// RATINGS AFFECTING NUMBERS
-	public static final int RATING_TREE_DOWN_STEP = -35;
-	public static final int RATING_TREE_MINIMUM = RATING_MINIMUM;
-	public static final int RATING_TREE_UP_STEP = 7;
-	public static final int RATING_TREE_MAXIMUM = 220;
-
-	public static final int RATING_TUNNEL_BRIDGE_DOWN_STEP = -250;
-	public static final int RATING_TUNNEL_BRIDGE_MINIMUM = 0;
-
-	public static final int RATING_INDUSTRY_DOWN_STEP = -1500;
-	public static final int RATING_INDUSTRY_MINIMUM = RATING_MINIMUM;
-
-	public static final int RATING_ROAD_DOWN_STEP = -50;
-	public static final int RATING_ROAD_MINIMUM = -100;
-	public static final int RATING_HOUSE_MINIMUM = RATING_MINIMUM;
-
-	public static final int RATING_BRIBE_UP_STEP = 200;
-	public static final int RATING_BRIBE_MAXIMUM = 800;
-	public static final int RATING_BRIBE_DOWN_TO = -50; 					// XXX SHOULD BE SOMETHING LOWER?
-
-
-	public static final int ROAD_REMOVE = 0;
-	public static final int UNMOVEABLE_REMOVE = 1;
-	public static final int TUNNELBRIDGE_REMOVE = 1;
-	public static final int INDUSTRY_REMOVE = 2;
-
-
-	public static final int HOUSE_TEMP_CHURCH    = 0x03;
-	public static final int HOUSE_STADIUM        = 0x14;
-	public static final int HOUSE_MODERN_STADIUM = 0x20;
-	public static final int HOUSE_ARCT_CHURCH    = 0x3c;
-	public static final int HOUSE_SNOW_CHURCH    = 0x3d;
-	public static final int HOUSE_TROP_CHURCH    = 0x53;
-	public static final int HOUSE_TOY_CHURCH     = 0x5b;
-
 
 
 
@@ -247,23 +198,6 @@ public class Town extends TownTables implements IPoolItem
 
 
 
-	/* Max towns: 64000 (8 * 8000) */
-	//TOWN_POOL_BLOCK_SIZE_BITS = 3,       /* In bits, so (1 << 3) == 8 */
-	//TOWN_POOL_MAX_BLOCKS      = 8000,
-
-	/**
-	 * Called if a new block is added to the town-pool
-	 * /
-	static void TownPoolNewBlock(int start_item)
-	{
-		Town t;
-
-		FOR_ALL_TOWNS_FROM(t, start_item)
-		t.index = start_item++;
-	}*/
-
-	/* Initialize the town-pool */
-	//MemoryPool _town_pool = { "Towns", TOWN_POOL_MAX_BLOCKS, TOWN_POOL_BLOCK_SIZE_BITS, sizeof(Town), &TownPoolNewBlock, 0, 0, null };
 
 
 	/* This is the base "normal" number of towns on the 8x8 map, when
@@ -414,7 +348,6 @@ public class Town extends TownTables implements IPoolItem
 
 	static boolean IsCloseToTown(TileIndex tile, int dist)
 	{
-		//FOR_ALL_TOWNS(t)
 		for(Iterator<Town> i = _town_pool.getIterator(); i.hasNext();)
 		{
 			final Town t = i.next();
@@ -424,38 +357,36 @@ public class Town extends TownTables implements IPoolItem
 		return false;
 	}
 
-	static void MarkTownSignDirty(Town t)
+	void MarkTownSignDirty()
 	{
 		ViewPort.MarkAllViewportsDirty(
-				t.sign.left-6,
-				t.sign.top-3,
-				t.sign.left+t.sign.width_1*4+12,
-				t.sign.top + 45
+				sign.left-6,
+				sign.top-3,
+				sign.left+sign.width_1*4+12,
+				sign.top + 45
 				);
 	}
 
-	static void UpdateTownVirtCoord(Town t)
+	public void UpdateTownVirtCoord()
 	{
-		Point pt;
+		MarkTownSignDirty();
 
-		MarkTownSignDirty(t);
+		Point pt = Point.RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
 
-		pt = Point.RemapCoords2(t.xy.TileX() * 16, t.xy.TileY() * 16);
+		Global.SetDParam(0, index);
+		Global.SetDParam(1, population);
 
-		Global.SetDParam(0, t.index);
-		Global.SetDParam(1, t.population);
-
-		ViewPort.UpdateViewportSignPos(t.sign, pt.x, pt.y - 24,
+		ViewPort.UpdateViewportSignPos(sign, pt.x, pt.y - 24,
 				Global._patches.population_in_label ? STR_TOWN_LABEL_POP : STR_TOWN_LABEL);
 
-		MarkTownSignDirty(t);
+		MarkTownSignDirty();
 	}
 
-	static void ChangePopulation(Town t, int mod)
+	void ChangePopulation(int mod)
 	{
-		t.population += mod;
-		Window.InvalidateWindow(Window.WC_TOWN_VIEW, t.index);
-		UpdateTownVirtCoord(t);
+		population += mod;
+		Window.InvalidateWindow(Window.WC_TOWN_VIEW, index);
+		UpdateTownVirtCoord();
 
 		if(0 != (_town_sort_order & 2)) _town_sort_dirty = true;
 	}
@@ -479,7 +410,7 @@ public class Town extends TownTables implements IPoolItem
 		tile.getMap().m3 = (byte) (tile.getMap().m3 + 0x40);
 
 		if ((tile.getMap().m3 & 0xC0) == 0xC0) {
-			ChangePopulation(GetTown(tile.getMap().m2), _housetype_population[tile.getMap().m4]);
+			GetTown(tile.getMap().m2).ChangePopulation(_housetype_population[tile.getMap().m4]);
 		}
 		tile.MarkTileDirtyByTile();
 	}
@@ -542,7 +473,7 @@ public class Town extends TownTables implements IPoolItem
 
 			Global._current_player = PlayerID.get( Owner.OWNER_TOWN );
 
-			ClearTownHouse(t, tile);
+			t.ClearTownHouse(tile);
 
 			// rebuild with another house?
 			if (BitOps.GB(r, 24, 8) >= 12) DoBuildTownHouse(t, tile);
@@ -585,7 +516,7 @@ public class Town extends TownTables implements IPoolItem
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				ChangeTownRating(t, -rating, RATING_HOUSE_MINIMUM);
-				ClearTownHouse(t, tile);
+				t.ClearTownHouse(tile);
 			}
 
 			return cost;
@@ -600,7 +531,7 @@ public class Town extends TownTables implements IPoolItem
 		ac.ct[AcceptedCargo.CT_MAIL]       = _housetype_cargo_mail[type];
 		ac.ct[AcceptedCargo.CT_GOODS]      = _housetype_cargo_goods[type];
 		ac.ct[AcceptedCargo.CT_FOOD]       = _housetype_cargo_food[type];
-		
+
 		return ac;
 	}
 
@@ -656,7 +587,7 @@ public class Town extends TownTables implements IPoolItem
 			t.grow_counter = (byte) i;
 		}
 
-		UpdateTownRadius(t);
+		t.UpdateTownRadius();
 	}
 
 	static void OnTick_Town()
@@ -1062,7 +993,7 @@ public class Town extends TownTables implements IPoolItem
 			new TileIndexDiffC( 0,  0)
 	};
 
-	
+
 	static boolean disableGrow = true;
 	// Grow the town
 	// Returns true if a house was built, or no if the build failed.
@@ -1073,9 +1004,9 @@ public class Town extends TownTables implements IPoolItem
 		TileInfo ti = new TileInfo();
 		PlayerID old_player;
 
-// TODO XXX TEMP debuf remove me now!
+		// TODO XXX TEMP debuf remove me now!
 		if(disableGrow) return false;
-		
+
 		// Current player is a town
 		old_player = Global._current_player;
 		Global._current_player.id = Owner.OWNER_TOWN;
@@ -1144,23 +1075,23 @@ public class Town extends TownTables implements IPoolItem
 			{121, 81,  0, 49, 36}, // 88
 	};
 
-	static void UpdateTownRadius(Town t)
+	void UpdateTownRadius()
 	{
 
-		if (t.num_houses < 92) {
-			t.radius = new int[5];			
-			System.arraycopy(_town_radius_data[t.num_houses / 4], 0, t.radius, 0, t.radius.length);
+		if (num_houses < 92) {
+			radius = new int[5];			
+			System.arraycopy(_town_radius_data[num_houses / 4], 0, radius, 0, radius.length);
 		} else {
-			int mass = t.num_houses / 8;
+			int mass = num_houses / 8;
 			// At least very roughly extrapolate. Empirical numbers dancing between
 			// overwhelming by cottages and skyscrapers outskirts.
-			t.radius[0] = mass * mass;
+			radius[0] = mass * mass;
 			// Actually we are proportional to sqrt() but that's right because
 			// we are covering an area.
-			t.radius[1] = mass * 7;
-			t.radius[2] = 0;
-			t.radius[3] = mass * 4;
-			t.radius[4] = mass * 3;
+			radius[1] = mass * 7;
+			radius[2] = 0;
+			radius[3] = mass * 4;
+			radius[4] = mass * 3;
 			//debug("%d (.%d): %d %d %d %d\n", t.num_houses, mass, t.radius[0], t.radius[1], t.radius[3], t.radius[4]);
 		}
 	}
@@ -1238,7 +1169,7 @@ public class Town extends TownTables implements IPoolItem
 		t.xy = tile;
 		t.num_houses = 0;
 		t.time_until_rebuild = 10;
-		UpdateTownRadius(t);
+		t.UpdateTownRadius();
 		t.flags12 = 0;
 		t.population = 0;
 		t.grow_counter = 0;
@@ -1271,7 +1202,7 @@ public class Town extends TownTables implements IPoolItem
 		t.townnametype = Strings.SPECSTR_TOWNNAME_START + GameOptions._opt.town_name;
 		t.townnameparts = townnameparts;
 
-		UpdateTownVirtCoord(t);
+		t.UpdateTownVirtCoord();
 		_town_sort_dirty = true;
 
 		x = (Hal.Random() & 0xF) + 8;
@@ -1279,7 +1210,7 @@ public class Town extends TownTables implements IPoolItem
 			x = Global._new_town_size * 16 + 3;
 
 		t.num_houses += x;
-		UpdateTownRadius(t);
+		t.UpdateTownRadius();
 
 		i = x * 4;
 		do {
@@ -1287,7 +1218,7 @@ public class Town extends TownTables implements IPoolItem
 		} while (--i > 0);
 
 		t.num_houses -= x;
-		UpdateTownRadius(t);
+		t.UpdateTownRadius();
 		t.UpdateTownMaxPass();
 	}
 
@@ -1620,7 +1551,7 @@ public class Town extends TownTables implements IPoolItem
 				if (BitOps.GB(r, 0, 8) >= 220) m3lo &= (r>>8);
 
 				if (m3lo == 0xC0)
-					ChangePopulation(t, _housetype_population[house]);
+					t.ChangePopulation(_housetype_population[house]);
 
 				// Initial value for map5.
 				m5 = BitOps.GB(r, 16, 6);
@@ -1706,7 +1637,7 @@ public class Town extends TownTables implements IPoolItem
 		TextEffect.DeleteAnimatedTile(tile);
 	}
 
-	static void ClearTownHouse(Town t, TileIndex tilep)
+	void ClearTownHouse(TileIndex tilep)
 	{
 		int house = tilep.getMap().m4;
 		int eflags;
@@ -1735,10 +1666,10 @@ public class Town extends TownTables implements IPoolItem
 		// Remove population from the town if the
 		// house is finished.
 		if ((~tile.getMap().m3 & 0xC0) == 0) {
-			ChangePopulation(t, -_housetype_population[house]);
+			ChangePopulation(-_housetype_population[house]);
 		}
 
-		t.num_houses--;
+		num_houses--;
 
 		// Clear flags for houses that only may exist once/town.
 		switch (house) {
@@ -1747,11 +1678,11 @@ public class Town extends TownTables implements IPoolItem
 		case HOUSE_SNOW_CHURCH:
 		case HOUSE_TROP_CHURCH:
 		case HOUSE_TOY_CHURCH:
-			t.flags12 &= ~TOWN_HAS_CHURCH;
+			flags12 &= ~TOWN_HAS_CHURCH;
 			break;
 		case HOUSE_STADIUM:
 		case HOUSE_MODERN_STADIUM:
-			t.flags12 &= ~TOWN_HAS_STADIUM;
+			flags12 &= ~TOWN_HAS_STADIUM;
 			break;
 		default:
 			break;
@@ -1786,7 +1717,7 @@ public class Town extends TownTables implements IPoolItem
 			Global.DeleteName(t.townnametype);
 			t.townnametype = str.id;
 
-			UpdateTownVirtCoord(t);
+			t.UpdateTownVirtCoord();
 			_town_sort_dirty = true;
 			Station.UpdateAllStationVirtCoord();
 			Hal.MarkWholeScreenDirty();
@@ -1855,13 +1786,13 @@ public class Town extends TownTables implements IPoolItem
 		/* The more houses, the faster we grow */
 		amount = Hal.RandomRange(t.num_houses / 10) + 3;
 		t.num_houses += amount;
-		UpdateTownRadius(t);
+		t.UpdateTownRadius();
 
 		n = amount * 10;
 		do GrowTown(t); while (--n > 0);
 
 		t.num_houses -= amount;
-		UpdateTownRadius(t);
+		t.UpdateTownRadius();
 
 		t.UpdateTownMaxPass();
 		Global._generating_world = false;
@@ -2068,7 +1999,7 @@ public class Town extends TownTables implements IPoolItem
 
 	static void UpdateTownGrowRate(Town t)
 	{
-		
+
 		//Station st;
 		int m;
 		//Player p;
@@ -2087,7 +2018,7 @@ public class Town extends TownTables implements IPoolItem
 		Station.forEach( (st) ->
 		{
 			if( st.getXy() == null ) return;
-			
+
 			if (Map.DistanceSquare(st.getXy(), t.xy) <= t.radius[0]) {
 				if (st.time_since_load <= 20 || st.time_since_unload <= 20) {
 					n[0]++;
@@ -2304,12 +2235,12 @@ public class Town extends TownTables implements IPoolItem
 
 		for(int i = 0; i < Global.MAX_PLAYERS; i++)
 			Subsidy._subsidies[i] = new Subsidy();
-		
+
 		/* ctor does
 		for( Subsidy s : Economy._subsidies)
 			s.markInvalid();
-		*/
-		
+		 */
+
 		_cur_town_ctr = 0;
 		_cur_town_iter = 0;
 		_total_towns = 0;
@@ -2349,8 +2280,8 @@ public class Town extends TownTables implements IPoolItem
 		Town.forEach( (t) ->
 		{
 			if (t.xy != null) {
-				UpdateTownRadius(t);
-				UpdateTownVirtCoord(t);
+				t.UpdateTownRadius();
+				t.UpdateTownVirtCoord();
 			}
 		});
 		_town_sort_dirty = true;

@@ -200,6 +200,8 @@ public class SettingsGui extends SettingsTables
 		case WE_DESTROY:
 			Window.DeleteWindowById(Window.WC_CUSTOM_CURRENCY, 0);
 			break;
+		default:
+			break;
 		}
 
 	}
@@ -484,6 +486,8 @@ public class SettingsGui extends SettingsTables
 				w.SetWindowDirty();
 			}
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -546,13 +550,7 @@ public class SettingsGui extends SettingsTables
 
 	static int PopulationInLabelActive(int p1)
 	{
-		//Town t;
-
-		//FOR_ALL_TOWNS(t)
-		Town.forEach( (t) ->
-		{
-			if (t.getXy() != null) Town.UpdateTownVirtCoord(t);
-		});
+		Town.forEach( (t) -> { if (t.getXy() != null) t.UpdateTownVirtCoord(); });
 		return 0;
 	}
 
@@ -865,6 +863,8 @@ public class SettingsGui extends SettingsTables
 		case WE_DESTROY:
 			Window.DeleteWindowById(Window.WC_QUERY_STRING, 0);
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -1100,6 +1100,8 @@ public class SettingsGui extends SettingsTables
 		case WE_DESTROY:
 			// TODO _sel_grffile = null;
 			Window.DeleteWindowById(Window.WC_QUERY_STRING, 0);
+			break;
+		default:
 			break;
 		}
 	}
@@ -1338,6 +1340,8 @@ public class SettingsGui extends SettingsTables
 		case WE_DESTROY:
 			Window.DeleteWindowById(Window.WC_QUERY_STRING, 0);
 			Hal.MarkWholeScreenDirty();
+			break;
+		default:
 			break;
 		}
 	}

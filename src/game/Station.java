@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import game.ai.Ai;
 import game.tables.StationTables;
 import game.util.BitOps;
 
@@ -2738,7 +2737,7 @@ public class Station extends StationTables implements IPoolItem
 		});
 
 		//Subsidies need removal as well
-		Economy.DeleteSubsidyWithStation(index);
+		Subsidy.DeleteSubsidyWithStation(index);
 
 		st.airport_queue.clear();
 		//free(st.airport_queue);

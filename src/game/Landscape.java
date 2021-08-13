@@ -6,18 +6,20 @@ import game.util.GenLandTable;
 public class Landscape extends GenLandTable
 {
 
+	private static final int PLAIN_TERRAIN_MAX = 8; // Orig valuie was 3
+	
 	/* Landscape types */
 	//enum {
-		public static final int LT_NORMAL = 0;
-		public static final int LT_HILLY = 1;
-		public static final int LT_DESERT = 2;
-		public static final int LT_CANDY = 3;
+	public static final int LT_NORMAL = 0;
+	public static final int LT_HILLY = 1;
+	public static final int LT_DESERT = 2;
+	public static final int LT_CANDY = 3;
 
-		public static final int NUM_LANDSCAPE = 4;
-	
-	
-	
-	 /*static final TileTypeProcs
+	public static final int NUM_LANDSCAPE = 4;
+
+
+
+	/*static final TileTypeProcs
 		_tile_type_clear_procs,
 		_tile_type_rail_procs,
 		_tile_type_road_procs,
@@ -31,19 +33,19 @@ public class Landscape extends GenLandTable
 		_tile_type_unmovable_procs;*/
 
 	static final TileTypeProcs _tile_type_procs[] = {
-		Clear._tile_type_clear_procs,
-		Rail._tile_type_rail_procs,
-		Road._tile_type_road_procs,
-		Town._tile_type_town_procs,
-		Tree._tile_type_trees_procs,
-		Station._tile_type_station_procs,
-		WaterCmd._tile_type_water_procs,
-		DummyLand._tile_type_dummy_procs,
-		Industry._tile_type_industry_procs,
-		TunnelBridgeCmd._tile_type_tunnelbridge_procs,
-		UnmovableCmd._tile_type_unmovable_procs,
+			Clear._tile_type_clear_procs,
+			Rail._tile_type_rail_procs,
+			Road._tile_type_road_procs,
+			Town._tile_type_town_procs,
+			Tree._tile_type_trees_procs,
+			Station._tile_type_station_procs,
+			WaterCmd._tile_type_water_procs,
+			DummyLand._tile_type_dummy_procs,
+			Industry._tile_type_industry_procs,
+			TunnelBridgeCmd._tile_type_tunnelbridge_procs,
+			UnmovableCmd._tile_type_unmovable_procs,
 	};
-	 
+
 	/* landscape slope => sprite */
 	public static final byte[] _tileh_to_sprite = {
 			0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,0,
@@ -58,9 +60,9 @@ public class Landscape extends GenLandTable
 	static void FindLandscapeHeightByTile(TileInfo ti, TileIndex tile)
 	{
 		assert(tile.getTile() < Global.MapSize());
-		
+
 		IntContainer ic = new IntContainer();
-		
+
 		ti.tile = tile;
 		ti.map5 = 0xFF & tile.getMap().m5;
 		ti.type = tile.GetTileType().ordinal();
@@ -187,7 +189,7 @@ public class Landscape extends GenLandTable
 	public static int GetSlopeZ(int x,  int y)
 	{
 		TileInfo ti = new TileInfo();
-		
+
 		FindLandscapeHeight(ti, x, y);
 		return _tile_type_procs[ti.type].get_slope_z_proc.apply(ti);
 	}
@@ -216,7 +218,7 @@ public class Landscape extends GenLandTable
 		int sprite_base = Sprite.SPR_SLOPES_BASE-14;
 
 		TileInfo ti2 = new TileInfo();
-		
+
 		FindLandscapeHeight(ti2, ti.x, ti.y - 1);
 		if (hasFoundation(ti2, true)) sprite_base += 22;		// foundation in NW direction
 		FindLandscapeHeight(ti2, ti.x - 1, ti.y);
@@ -451,11 +453,11 @@ public class Landscape extends GenLandTable
 		int i;
 
 		Global._m = new Tile[map_size];
-		
+
 		for (i = 0; i < map_size; i++) 
 		{
 			Global._m[i] = new Tile();
-			
+
 			Global._m[i].type        = TileTypes.MP_CLEAR.ordinal();
 			Global._m[i].height      = 0;
 			Global._m[i].m1          = Owner.OWNER_NONE;
@@ -506,10 +508,10 @@ public class Landscape extends GenLandTable
 		int y;
 		int w;
 		int h;
-		
+
 		final Sprite template;		
 		final byte[] p;
-		
+
 		int pi = 0; // p index
 		//TileIndex tile;
 		//Tile tile;
@@ -709,7 +711,7 @@ public class Landscape extends GenLandTable
 			for (i = Map.ScaleByMapSize((Hal.Random() & 0x7F) + 410); i != 0; --i)
 				GenerateTerrain(3, flag);
 		} else {
-			i = Map.ScaleByMapSize((Hal.Random() & 0x7F) + (3 - GameOptions._opt.diff.quantity_sea_lakes) * 256 + 100);
+			i = Map.ScaleByMapSize((Hal.Random() & 0x7F) + (PLAIN_TERRAIN_MAX - GameOptions._opt.diff.quantity_sea_lakes) * 256 + 100);
 			for (; i != 0; --i)
 				GenerateTerrain(GameOptions._opt.diff.terrain_type, 0);
 		}

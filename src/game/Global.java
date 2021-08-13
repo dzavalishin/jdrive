@@ -378,13 +378,13 @@ public class Global
 
 
 
-	@Deprecated
+	//@Deprecated
 	public static void SetDParamX(Integer []s, int n, int v)
 	{
 		s[n] = v;
 	}
 
-	@Deprecated
+	//@Deprecated
 	public static int GetDParamX(Integer []s, int n)
 	{
 		return s[n];
