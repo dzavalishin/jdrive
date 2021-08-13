@@ -379,7 +379,7 @@ public class Gfx extends PaletteTabs
 		char[] ca = sstr.toCharArray();
 		int cap = 0;
 
-		for (ddd_pos = cap; (c = ca[cap++]) != '\0' && cap < ca.length; ) 
+		for (ddd_pos = cap; cap < ca.length && (c = ca[cap++]) != '\0'; ) 
 		{
 			if (c >= ASCII_LETTERSTART) {
 				w += GetCharacterWidth(base + c);

@@ -240,41 +240,7 @@ public class RoadVehGui
 			Global.SetDParam(1, v.unitnumber.id);
 			w.DrawWindowWidgets();
 
-			if (v.road.crashed_ctr != 0) {
-				str = Str.STR_8863_CRASHED;
-			} else if (v.breakdown_ctr == 1) {
-				str = Str.STR_885C_BROKEN_DOWN;
-			} else if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) {
-				str = Str.STR_8861_STOPPED;
-			} else {
-				switch (v.current_order.type) {
-				case Order.OT_GOTO_STATION: {
-					Global.SetDParam(0, v.current_order.station);
-					Global.SetDParam(1, v.cur_speed * 10 >> 5);
-					str = Str.STR_HEADING_FOR_STATION + (Global._patches.vehicle_speed ? 1 : 0);
-				} break;
-
-				case Order.OT_GOTO_DEPOT: {
-					Depot depot = Depot.GetDepot(v.current_order.station);
-					Global.SetDParam(0, depot.town_index);
-					Global.SetDParam(1, v.cur_speed * 10 >> 5);
-					str = Str.STR_HEADING_FOR_ROAD_DEPOT + (Global._patches.vehicle_speed ? 1 : 0);
-				} break;
-
-				case Order.OT_LOADING:
-				case Order.OT_LEAVESTATION:
-					str = Str.STR_882F_LOADING_UNLOADING;
-					break;
-
-				default:
-					if (v.num_orders == 0) {
-						str = Str.STR_NO_ORDERS + (Global._patches.vehicle_speed ? 1 : 0);
-						Global.SetDParam(0, v.cur_speed * 10 >> 5);
-					} else
-						str = Str.STR_EMPTY;
-					break;
-				}
-			}
+			str = vehInfoString(v);
 
 			/* draw the flag plus orders */
 			Gfx.DrawSprite( 0 != (v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.widget.get(5).top + 1);
@@ -337,6 +303,49 @@ public class RoadVehGui
 		default:
 			break;
 		}
+	}
+
+	private static int vehInfoString(Vehicle v) {
+		int str;
+		if (v.road.crashed_ctr != 0) {
+			str = Str.STR_8863_CRASHED;
+		} else if (v.breakdown_ctr == 1) {
+			str = Str.STR_885C_BROKEN_DOWN;
+		} else if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) {
+			str = Str.STR_8861_STOPPED;
+		} else {
+			if (v.num_orders == 0) {
+				str = Str.STR_NO_ORDERS + (Global._patches.vehicle_speed ? 1 : 0);
+				Global.SetDParam(0, v.cur_speed * 10 >> 5);
+				return str;
+			}
+			int i = null == v.current_order ? -1 : v.current_order.type;
+			
+			switch (i) {
+			case Order.OT_GOTO_STATION: {
+				Global.SetDParam(0, v.current_order.station);
+				Global.SetDParam(1, v.cur_speed * 10 >> 5);
+				str = Str.STR_HEADING_FOR_STATION + (Global._patches.vehicle_speed ? 1 : 0);
+			} break;
+
+			case Order.OT_GOTO_DEPOT: {
+				Depot depot = Depot.GetDepot(v.current_order.station);
+				Global.SetDParam(0, depot.town_index);
+				Global.SetDParam(1, v.cur_speed * 10 >> 5);
+				str = Str.STR_HEADING_FOR_ROAD_DEPOT + (Global._patches.vehicle_speed ? 1 : 0);
+			} break;
+
+			case Order.OT_LOADING:
+			case Order.OT_LEAVESTATION:
+				str = Str.STR_882F_LOADING_UNLOADING;
+				break;
+
+			default:
+				str = Str.STR_EMPTY;
+				break;
+			}
+		}
+		return str;
 	}
 
 	static final Widget _roadveh_view_widgets[] = {

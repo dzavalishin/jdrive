@@ -600,7 +600,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			st = Station.GetStation(order.station);
 
 			{
-				int mindist = 0xFFFFFFFF;
+				int mindist = Integer.MAX_VALUE;
 				RoadStopType type;
 
 				type = (v.cargo_type == AcceptedCargo.CT_PASSENGERS) ? RoadStopType.RS_BUS : RoadStopType.RS_TRUCK;
@@ -760,7 +760,6 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	static boolean RoadVehAccelerate(Vehicle v)
 	{
 		int spd = v.cur_speed + 1 + ((v.road.overtaking != 0)?1:0);
-		int t;
 
 		// Clamp
 		spd = Math.min(spd, v.max_speed);
@@ -782,7 +781,10 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			if ((byte)++spd == 0)
 				return true;
 
-			v.progress = (t = v.progress) - (byte)spd;
+			//int t = 0xff & v.progress;
+			//v.progress = t - (0xff & spd);
+			int t = v.progress;
+			v.progress = t + spd;
 
 			return (t < v.progress);
 	}

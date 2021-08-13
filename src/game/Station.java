@@ -1655,7 +1655,7 @@ public class Station extends StationTables implements IPoolItem
 	{
 		Station st;
 		RoadStop road_stop;
-		RoadStop currstop = new RoadStop();
+		//RoadStop currstop = new RoadStop();
 		//RoadStop prev = null; //new RoadStop();
 		TileIndex tile;
 		int cost;
@@ -1724,11 +1724,12 @@ public class Station extends StationTables implements IPoolItem
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			//point to the correct item in the _busstops or _truckstops array
-			currstop = new RoadStop( road_stop );
+			//currstop = new RoadStop( road_stop );
 
 			//initialize an empty station
 			RoadStop.InitializeRoadStop(road_stop, /*prev,*/ tile, st.index);
-			currstop.type = type ? 1 : 0;
+			//currstop.type = type ? 1 : 0;
+			road_stop.type = type ? 1 : 0;
 			if (0==st.facilities) st.xy = tile;
 			st.facilities |= (type) ? FACIL_TRUCK_STOP : FACIL_BUS_STOP;
 			st.owner = Global._current_player;
@@ -1745,6 +1746,11 @@ public class Station extends StationTables implements IPoolItem
 					((type) ? 0x43 : 0x47) + p1 /* map5 parameter */
 					);
 
+			if( type )
+				st.truck_stops.add(road_stop);
+			else
+				st.bus_stops.add(road_stop);
+			
 			st.UpdateStationVirtCoordDirty();
 			st.UpdateStationAcceptance(false);
 			Window.InvalidateWindow(Window.WC_STATION_LIST, st.owner.id);
@@ -2899,7 +2905,7 @@ public class Station extends StationTables implements IPoolItem
 					int or = ge.rating; // old rating
 
 					// only modify rating in steps of -2, -1, 0, 1 or 2
-					ge.rating = (byte) (rating = or + BitOps.clamp(BitOps.clamp(rating, 0, 255) - or, -2, 2));
+					ge.rating = (rating = or + BitOps.clamp(BitOps.clamp(rating, 0, 255) - or, -2, 2));
 
 					// if rating is <= 64 and more than 200 items waiting, remove some random amount of goods from the station
 					if (rating <= 64 && waiting >= 200) {
@@ -2935,11 +2941,9 @@ public class Station extends StationTables implements IPoolItem
 	/* called for every station each tick */
 	private static void StationHandleSmallTick(Station st)
 	{
-		byte b;
-
 		if (st.facilities == 0) return;
 
-		b = (byte) (st.delete_ctr + 1);
+		int b = st.delete_ctr + 1;
 		if (b >= 185) b = 0;
 		st.delete_ctr = b;
 
@@ -3246,9 +3250,9 @@ public class Station extends StationTables implements IPoolItem
 			st.goods[j].waiting_acceptance = 0;
 			st.goods[j].days_since_pickup = 0;
 			st.goods[j].enroute_from = INVALID_STATION;
-			st.goods[j].rating = (byte) 175;
+			st.goods[j].rating = 175;
 			st.goods[j].last_speed = 0;
-			st.goods[j].last_age = (byte) 255;
+			st.goods[j].last_age = 255;
 		}
 
 		st.UpdateStationVirtCoordDirty();

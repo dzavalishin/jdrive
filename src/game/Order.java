@@ -611,10 +611,12 @@ public class Order implements IPoolItem {
 
 		if (0 != (flags & Cmd.DC_EXEC)) {
 			/* Goto next Order*/
-			OrderID b = OrderID.get( v.cur_order_index + 1 ); 
-			if (b.id >= v.num_orders) b = null;
-
-			v.cur_order_index = b.id;
+			//OrderID b = OrderID.get( v.cur_order_index + 1 ); 
+			//if (b.id >= v.num_orders) b = null;
+			//v.cur_order_index = b.id;
+			v.cur_order_index++;
+			if (v.cur_order_index >= v.num_orders) 
+				v.cur_order_index = 0;
 
 			if (v.type == Vehicle.VEH_Train) v.rail.days_since_order_progr = 0;
 

@@ -125,9 +125,6 @@ public class Vehicle implements IPoolItem
 	// Current position in a vehicle queue - can only belong to one queue at a time
 	VQueueItem queue_item;
 
-	/*
-	union {
-	} u; */
 
 	// TODO temp we create all of them, redo
 	VehicleRail rail = new VehicleRail();
@@ -138,10 +135,6 @@ public class Vehicle implements IPoolItem
 	VehicleShip ship = new VehicleShip();
 
 
-	//abstract Vehicle AllocateVehicle();
-	//abstract Vehicle[] AllocateVehicles(int num);
-	//abstract Vehicle ForceAllocateVehicle();
-	//abstract Vehicle ForceAllocateSpecialVehicle();
 
 
 	private void InitializeVehicle()
@@ -200,8 +193,8 @@ public class Vehicle implements IPoolItem
 		tick_counter = 0;// increased by one for each tick
 
 		/* Begin Order-stuff */
-		Order current_order;     //! The current order (+ status, like: loading)
-		OrderID cur_order_index; //! The index to the current order
+		current_order = new Order();     //! The current order (+ status, like: loading)
+		cur_order_index = 0; //! The index to the current order
 
 		orders = null;
 		num_orders = 0;      //! How many orders there are in the list 
