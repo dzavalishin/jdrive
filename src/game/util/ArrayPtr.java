@@ -163,6 +163,10 @@ public class ArrayPtr<ItemType> {
 			return Arrays.stream(li).mapToObj( (lv) -> Long.valueOf(lv) ).toArray(Long[]::new);
 		}
 		
+		public boolean hasCurrent() {			
+			return displ >= 0 && displ < mem.length;
+		}
+		
 		
 
 }

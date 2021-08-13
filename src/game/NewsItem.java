@@ -236,6 +236,7 @@ public class NewsItem {
 		switch (e.event) {
 		case WE_CREATE: { /* If chatbar is open at creation time, we need to go above it */
 			final Window w1 = Window.FindWindowById(Window.WC_SEND_NETWORK_MSG, 0);
+			w.message = new WindowMessage(); // [dz]
 			w.message.msg = (w1 != null) ? w1.height : 0;
 		} break;
 

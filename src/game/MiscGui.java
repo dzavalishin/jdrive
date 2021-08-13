@@ -84,7 +84,7 @@ public class MiscGui {
 
 						// If the accepted value is less than 8, show it in 1/8:ths
 						if (lid.ac.ct[i] < 8) {
-							int [] argv = new int[2];
+							Integer [] argv = new Integer[2];
 							argv[0] = lid.ac.ct[i];
 							argv[1] = Global._cargoc.names_s[i];
 							//p = Global.GetStringWithArgs(p, Str.STR_01D1_8, argv);

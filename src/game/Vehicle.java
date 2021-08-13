@@ -81,7 +81,7 @@ public class Vehicle implements IPoolItem
 	int tick_counter;// increased by one for each tick
 
 	/* Begin Order-stuff */
-	Order current_order;     //! The current order (+ status, like: loading)
+	Order current_order = new Order();     //! The current order (+ status, like: loading)
 	//OrderID cur_order_index; //! The index to the current order
 	int cur_order_index; //! The index to the current order
 
@@ -2779,7 +2779,7 @@ public class Vehicle implements IPoolItem
 		gp.y = y;
 		gp.old_tile = tile;
 		gp.new_tile = TileIndex.TileVirtXY(x, y);
-		return gp.old_tile == gp.new_tile;
+		return gp.old_tile.equals(gp.new_tile);
 	}
 
 	static final byte _new_direction_table[] = {

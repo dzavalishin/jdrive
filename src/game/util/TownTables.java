@@ -1,6 +1,5 @@
 package game.util;
 
-import game.SpriteID;
 import game.Str;
 import game.struct.DrawTownTileStruct;
 import game.struct.HousetypeYear;
@@ -12,6 +11,59 @@ extends Str // just import strings
 
 
 
+	
+	
+	
+	// These refer to the maximums, so Appalling is -1000 to -400
+	// MAXIMUM RATINGS BOUNDARIES
+	public static final int RATING_MINIMUM 		= -1000;
+	public static final int RATING_APPALLING 	= -400;
+	public static final int RATING_VERYPOOR 	= -200;
+	public static final int RATING_POOR 			= 0;
+	public static final int RATING_MEDIOCRE		= 200;
+	public static final int RATING_GOOD				= 400;
+	public static final int RATING_VERYGOOD		= 600;
+	public static final int RATING_EXCELLENT	= 800;
+	public static final int RATING_OUTSTANDING= 1000; 	// OUTSTANDING
+
+	public static final int RATING_MAXIMUM = RATING_OUTSTANDING;
+
+	// RATINGS AFFECTING NUMBERS
+	public static final int RATING_TREE_DOWN_STEP = -35;
+	public static final int RATING_TREE_MINIMUM = RATING_MINIMUM;
+	public static final int RATING_TREE_UP_STEP = 7;
+	public static final int RATING_TREE_MAXIMUM = 220;
+
+	public static final int RATING_TUNNEL_BRIDGE_DOWN_STEP = -250;
+	public static final int RATING_TUNNEL_BRIDGE_MINIMUM = 0;
+
+	public static final int RATING_INDUSTRY_DOWN_STEP = -1500;
+	public static final int RATING_INDUSTRY_MINIMUM = RATING_MINIMUM;
+
+	public static final int RATING_ROAD_DOWN_STEP = -50;
+	public static final int RATING_ROAD_MINIMUM = -100;
+	public static final int RATING_HOUSE_MINIMUM = RATING_MINIMUM;
+
+	public static final int RATING_BRIBE_UP_STEP = 200;
+	public static final int RATING_BRIBE_MAXIMUM = 800;
+	public static final int RATING_BRIBE_DOWN_TO = -50; 					// XXX SHOULD BE SOMETHING LOWER?
+
+
+	public static final int ROAD_REMOVE = 0;
+	public static final int UNMOVEABLE_REMOVE = 1;
+	public static final int TUNNELBRIDGE_REMOVE = 1;
+	public static final int INDUSTRY_REMOVE = 2;
+
+
+	public static final int HOUSE_TEMP_CHURCH    = 0x03;
+	public static final int HOUSE_STADIUM        = 0x14;
+	public static final int HOUSE_MODERN_STADIUM = 0x20;
+	public static final int HOUSE_ARCT_CHURCH    = 0x3c;
+	public static final int HOUSE_SNOW_CHURCH    = 0x3d;
+	public static final int HOUSE_TROP_CHURCH    = 0x53;
+	public static final int HOUSE_TOY_CHURCH     = 0x5b;
+
+	
 
 	/* $Id: town_land.h 3118 2005-11-02 13:06:07Z tron $ */
 

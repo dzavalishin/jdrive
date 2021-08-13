@@ -153,7 +153,7 @@ public class SmallMapGui extends SmallMapGuiTables
 		int bits;
 
 		if (t == TileTypes.MP_STATION) {
-			byte m5 = tile.getMap().m5;
+			int m5 = tile.getMap().m5;
 			/*
 			(bits = MKCOLOR(0x56565656), m5 < 8) ||			//   8 - railroad station (green)
 			(bits = MKCOLOR(0xB8B8B8B8), m5 < 0x43) ||	//  67 - airport (red)

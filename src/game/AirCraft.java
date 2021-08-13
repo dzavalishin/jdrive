@@ -1,4 +1,5 @@
 package game;
+import game.tables.AirConstants;
 import game.tables.AirCraftTables;
 import game.util.BitOps;
 import game.util.GameDate;
@@ -169,7 +170,7 @@ public class AirCraft extends AirCraftTables {
 		}
 
 		unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Aircraft);
-		if (unit_num.id > Global._patches.max_aircraft.id)
+		if (unit_num.id > Global._patches.max_aircraft)
 			return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -254,7 +255,7 @@ public class AirCraft extends AirCraftTables {
 				int nof_depots = apc.airport_depots.length;
 				
 				for (i = 0; i < /*apc.*/nof_depots; i++) {
-					if (st.airport_tile.iadd( TileIndex.ToTileIndexDiff(apc.airport_depots[i])) == tile) {
+					if( st.airport_tile.iadd( TileIndex.ToTileIndexDiff(apc.airport_depots[i])).equals(tile) ) {
 						assert(apc.layout[i].heading == Airport.HANGAR);
 						v.air.pos = apc.layout[i].position;
 						break;
@@ -1684,7 +1685,7 @@ public class AirCraft extends AirCraftTables {
 			// {32,FLYING,NOTHING_block,37}, {32,LANDING,N,33}, {32,HELILANDING,N,41},
 			// if it is an airplane, look for LANDING, for helicopter HELILANDING
 			// it is possible to choose from multiple landing runways, so loop until a free one is found
-			landingtype = (v.subtype != 0) ? Airport.LANDING : Airport.HELILANDING;
+			landingtype = (v.subtype != 0) ? AirConstants.LANDING : AirConstants.HELILANDING;
 			current = Airport.layout[v.air.pos].next_in_chain;
 			while (current != null) {
 				if (current.heading == landingtype) {
@@ -1768,7 +1769,7 @@ public class AirCraft extends AirCraftTables {
 				current = current.next_in_chain;
 			}
 		}
-		v.air.state = Airport.FLYING;
+		v.air.state = AirConstants.FLYING;
 		v.air.pos = Airport.layout[v.air.pos].next_position;
 	}
 
@@ -1827,7 +1828,7 @@ public class AirCraft extends AirCraftTables {
 		if (v.current_order.type == Order.OT_GOTO_STATION) {
 			if (AirportFindFreeHelipad(v, Airport)) return;
 		}
-		v.air.state = (Airport.terminals != null) ? Airport.HANGAR : Airport.HELITAKEOFF;
+		v.air.state = (Airport.terminals != null) ? AirConstants.HANGAR : AirConstants.HELITAKEOFF;
 	}
 
 	static final AircraftStateHandler [] _aircraft_state_handlers = {
@@ -1872,7 +1873,7 @@ public class AirCraft extends AirCraftTables {
 	}
 
 	// gets pos from vehicle and next orders
-	static boolean AirportMove(Vehicle v, final AirportFTAClass Airport)
+	static boolean AirportMove(Vehicle v, final AirportFTAClass airport)
 	{
 		AirportFTA current;
 		byte prev_pos;
@@ -1880,17 +1881,17 @@ public class AirCraft extends AirCraftTables {
 
 
 		// error handling
-		if (v.air.pos >= Airport.nofelements) {
-			Global.DEBUG_misc( 0, "position %d is not valid for current airport. Max position is %d", v.air.pos, Airport.nofelements-1);
-			assert(v.air.pos < Airport.nofelements);
+		if (v.air.pos >= airport.nofelements) {
+			Global.DEBUG_misc( 0, "position %d is not valid for current airport. Max position is %d", v.air.pos, airport.nofelements-1);
+			assert(v.air.pos < airport.nofelements);
 		}
 
-		current = Airport.layout[v.air.pos];
+		current = airport.layout[v.air.pos];
 		// we have arrived in an important state (eg terminal, hangar, etc.)
 		if (current.heading == v.air.state) {
 			prev_pos = (byte) v.air.pos; // location could be changed in state, so save it before-hand
-			_aircraft_state_handlers[v.air.state].accept(v, Airport);
-			if (v.air.state != Airport.FLYING) v.air.previous_pos = prev_pos;
+			_aircraft_state_handlers[v.air.state].accept(v, airport);
+			if (v.air.state != AirConstants.FLYING) v.air.previous_pos = prev_pos;
 			return true;
 		}
 
@@ -1898,7 +1899,7 @@ public class AirCraft extends AirCraftTables {
 
 		// there is only one choice to move to
 		if (current.next_in_chain == null) {
-			if (AirportSetBlocks(v, current, Airport)) {
+			if (AirportSetBlocks(v, current, airport)) {
 				v.air.pos = current.next_position;
 			} // move to next position
 			return retval;
@@ -1907,8 +1908,8 @@ public class AirCraft extends AirCraftTables {
 		// there are more choices to choose from, choose the one that
 		// matches our heading
 		do {
-			if (v.air.state == current.heading || current.heading == Airport.TO_ALL) {
-				if (AirportSetBlocks(v, current, Airport)) {
+			if (v.air.state == current.heading || current.heading == AirConstants.TO_ALL) {
+				if (AirportSetBlocks(v, current, airport)) {
 					v.air.pos = current.next_position;
 				} // move to next position
 				return retval;
@@ -1917,7 +1918,7 @@ public class AirCraft extends AirCraftTables {
 		} while (current != null);
 
 		Global.DEBUG_misc( 0, "Cannot move further on Airport...! pos:%d state:%d", v.air.pos, v.air.state);
-		Global.DEBUG_misc( 0, "Airport entry point: %d, Vehicle: %d", Airport.entry_point, v.index);
+		Global.DEBUG_misc( 0, "Airport entry point: %d, Vehicle: %d", airport.entry_point, v.index);
 		assert false;
 		return false;
 	}
@@ -1934,7 +1935,7 @@ public class AirCraft extends AirCraftTables {
 			int airport_flags = next.block;
 
 			// check additional possible extra blocks
-			if (current_pos != reference && current_pos.block != Airport.NOTHING_block) {
+			if (current_pos != reference && current_pos.block != AirConstants.NOTHING_block) {
 				airport_flags |= current_pos.block;
 			}
 
@@ -1981,7 +1982,7 @@ public class AirCraft extends AirCraftTables {
 				return false;
 			}
 
-			if (next.block != Airport.NOTHING_block) {
+			if (next.block != AirConstants.NOTHING_block) {
 				st.airport_flags = BitOps.RETSETBITS(st.airport_flags, airport_flags); // occupy next block
 			}
 		}
@@ -2499,6 +2500,8 @@ public class AirCraft extends AirCraftTables {
 			w.vscroll.cap += we.diff.y / 24;
 			w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -2585,6 +2588,8 @@ public class AirCraft extends AirCraftTables {
 				}
 				break;
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -2755,6 +2760,8 @@ public class AirCraft extends AirCraftTables {
 				Cmd.DoCommandP(null, w.window_number, 0, null,
 						Cmd.CMD_NAME_VEHICLE | Cmd.CMD_MSG(Str.STR_A031_CAN_T_NAME_AIRCRAFT));
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -2931,6 +2938,8 @@ public class AirCraft extends AirCraftTables {
 				w.SetWindowDirty();
 			}
 		} break;
+		default:
+			break;
 		}
 	}
 
@@ -2977,7 +2986,7 @@ public class AirCraft extends AirCraftTables {
 			if (v.type == Vehicle.VEH_Aircraft &&
 					v.subtype <= 2 &&
 					0 != (v.vehstatus & Vehicle.VS_HIDDEN) &&
-					v.tile == tile) {
+					v.tile.getTile() == tile.getTile() ) {
 				num++;
 			}
 		}
@@ -3001,7 +3010,7 @@ public class AirCraft extends AirCraftTables {
 			if (v.type == Vehicle.VEH_Aircraft &&
 					v.subtype <= 2 &&
 					0 != (v.vehstatus&Vehicle.VS_HIDDEN) &&
-					v.tile == tile &&
+					v.tile.getTile() == tile.getTile() &&
 					--num < 0 && num >= -w.vscroll.cap * w.hscroll.cap) {
 
 				DrawAircraftImage(v, x+12, y, VehicleID.get( w.as_traindepot_d().sel ) );
@@ -3222,6 +3231,8 @@ public class AirCraft extends AirCraftTables {
 			w.vscroll.cap += e.diff.y / 24;
 			w.hscroll.cap += e.diff.x / 74;
 			w.widget.get(5).unkA = (w.vscroll.cap << 8) + w.hscroll.cap;
+			break;
+		default:
 			break;
 		}
 	}
@@ -3514,6 +3525,8 @@ public class AirCraft extends AirCraftTables {
 			/* Update the scroll + matrix */
 			w.vscroll.cap += e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
 			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
+			break;
+		default:
 			break;
 		}
 	}

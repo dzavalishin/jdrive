@@ -2,6 +2,7 @@ package game;
 
 import game.util.GameDate;
 import game.util.YearMonthDay;
+import game.util.wcustom.buildtrain_d;
 import game.util.wcustom.vehiclelist_d;
 
 import java.util.Iterator;
@@ -394,6 +395,14 @@ public class RoadVehGui
 
 		w.DrawWindowWidgets();
 
+		/* // TODO XXX HACK
+		if(null != w.custom && !(w.custom instanceof buildtrain_d))
+		{
+			Global.error("retype custom from %s", w.custom.getClass().getName() );
+			w.custom = null;
+		}*/
+		
+
 		{
 			int num = Global.NUM_ROAD_ENGINES;
 			int x = 1;
@@ -417,7 +426,7 @@ public class RoadVehGui
 					}
 					sel--;
 				}
-				ei++;
+				//ei++;
 				++engine_id;
 			} while (--num > 0);
 
@@ -435,7 +444,7 @@ public class RoadVehGui
 		if (!success) return;
 
 		v = Vehicle.GetVehicle(Global._new_roadveh_id);
-		if (v.tile == Global._backup_orders_tile) {
+		if (v.tile.equals(Global._backup_orders_tile)) {
 			Global._backup_orders_tile = null;
 			Vehicle.RestoreVehicleOrders(v, Global._backup_orders_data[0]);
 		}
@@ -563,7 +572,7 @@ public class RoadVehGui
 		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
-			if (v.type == Vehicle.VEH_Road && v.road.state == 254 && v.tile == tile)
+			if (v.type == Vehicle.VEH_Road && v.road.state == 254 && v.tile.equals(tile))
 				num[0]++;
 		});
 
@@ -587,7 +596,7 @@ public class RoadVehGui
 		{
 			Vehicle v = ii.next();
 			
-			if (v.type == Vehicle.VEH_Road && v.road.state == 254 && v.tile == tile &&
+			if (v.type == Vehicle.VEH_Road && v.road.state == 254 && v.tile.equals(tile) &&
 					--num[0] < 0 && num[0] >=	-w.vscroll.cap * w.hscroll.cap) {
 				DrawRoadVehImage(v, x+24, y, w.as_traindepot_d().sel);
 
@@ -628,7 +637,7 @@ public class RoadVehGui
 		while(ii.hasNext())
 		{
 			Vehicle v = ii.next();
-			if (v.type == Vehicle.VEH_Road && v.road.state == 254 && v.tile == tile &&
+			if (v.type == Vehicle.VEH_Road && v.road.state == 254 && v.tile.equals(tile) &&
 					--pos < 0) {
 				veh[0] = v;
 				if (xm >= 24) return 0;

@@ -123,6 +123,7 @@ public class GraphGui
 				col_ptr = new ArrayPtr<Long>( row_ptr );
 				do 
 				{
+					if( !col_ptr.hasCurrent() ) break;
 					if (col_ptr.r() != INVALID_VALUE) {
 						mx = Math.max(mx, Math.abs(col_ptr.r()));
 					}
@@ -206,6 +207,7 @@ public class GraphGui
 					color = gw.colors[i];
 					old_y = old_x = INVALID_VALUE;
 					do {
+						if(!col_ptr.hasCurrent()) break;
 						cur_val = col_ptr.rpp();
 						if (cur_val != INVALID_VALUE) {
 							y = (int) (adj_height - BitOps.BIGMULSS64(cur_val, y_scaling >> 1, 31) + gw.top);
@@ -845,7 +847,9 @@ public class GraphGui
 		{
 			//final Player  p1 = *(final Player  final*)elem1;
 			//final Player  p2 = *(final Player  final*)elem2;
-
+			if( p1 == null ) return 1;
+			if( p2 == null ) return -1;
+			
 			return p2.old_economy[1].performance_history - p1.old_economy[1].performance_history;
 		}
 	}
@@ -871,13 +875,15 @@ public class GraphGui
 			//qsort((void*)plist, pl_num, sizeof(*plist), PerfHistComp);
 			Arrays.sort( plist, new PerfHistComp() );
 
-			for (i = 0; i != pl_num[0]; i++) {
+			for (i = 0; i != pl_num[0]; i++) 
+			{
 				Player p = plist[i];
 				Global.SetDParam(0, i + Str.STR_01AC_1ST);
 				Global.SetDParam(1, p.name_1);
 				Global.SetDParam(2, p.name_2);
 				Global.SetDParam(3, Player.GetPlayerNameString(p.index, 4));
-				Global.SetDParam(5, GetPerformanceTitleFromValue(p.old_economy[1].performance_history));
+				//Global.SetDParam(5, GetPerformanceTitleFromValue(p.old_economy[1].performance_history));
+				Global.SetDParam(5, GetPerformanceTitleFromValue(p.old_economy[0].performance_history));
 
 				Gfx.DrawString(2, 15 + i * 10, i == 0 ? Str.STR_7054 : Str.STR_7055, 0);
 				DrawPlayerIcon(p.index.id, 27, 16 + i * 10);

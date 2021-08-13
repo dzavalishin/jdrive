@@ -3,10 +3,11 @@ package game;
 import java.util.Iterator;
 
 import game.ai.Ai;
+import game.tables.EconomeTables;
 import game.util.BitOps;
 import game.util.Prices;
 
-public class Economy 
+public class Economy extends EconomeTables 
 {
 
 
@@ -20,14 +21,6 @@ public class Economy
 	int infl_amount;
 	int infl_amount_pr;
 
-
-
-	static class Subsidy {
-		int cargo_type;
-		int age;
-		int from;
-		int to;
-	} 
 
 
 	public static final int SCORE_VEHICLES = 0;
@@ -61,10 +54,6 @@ public class Economy
 	//static ScoreInfo _score_info[];
 	static int _score_part[][] = new int [Global.MAX_PLAYERS][NUM_SCORE];
 
-	public static Subsidy[] _subsidies = new Subsidy[Global.MAX_PLAYERS];
-
-
-
 	// Score info
 	static final ScoreInfo _score_info[] = {
 			new ScoreInfo( SCORE_VEHICLES,		120, 			100),
@@ -83,13 +72,13 @@ public class Economy
 
 	static void UpdatePlayerHouse(Player p, int score)
 	{
-		byte val;
+		int val;
 		TileIndex tile = p.location_of_house;
 
 		if (tile == null)
 			return;
 
-		val = (byte) 128;
+		val = 128;
 		if( score >= 170)
 		{
 			val+= 4;
@@ -336,13 +325,13 @@ public class Economy
 
 		if (new_player.id == Owner.OWNER_SPECTATOR) {
 
-			for (int i = 0; i < _subsidies.length; i++) 
+			for (int i = 0; i < Subsidy._subsidies.length; i++) 
 			{
-				Subsidy s = _subsidies[i];
+				Subsidy s = Subsidy._subsidies[i];
 
-				if (s.cargo_type != AcceptedCargo.CT_INVALID && s.age >= 12) {
+				if (s.isValid() && s.age >= 12) {
 					if (Station.GetStation(s.to).owner == old_player)
-						s.cargo_type = AcceptedCargo.CT_INVALID;
+						s.markInvalid();
 				}
 			}
 		}
@@ -819,67 +808,6 @@ public class Economy
 		}
 	}
 
-	static byte _price_category[] = {
-			0, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 1, 1, 1, 1, 1, 1,
-			2,
-	};
-
-	static final int _price_base[] = {
-			100,		// station_value
-			100,		// build_rail
-			95,			// build_road
-			65,			// build_signals
-			275,		// build_bridge
-			600,		// build_train_depot
-			500,		// build_road_depot
-			700,		// build_ship_depot
-			450,		// build_tunnel
-			200,		// train_station_track
-			180,		// train_station_length
-			600,		// build_airport
-			200,		// build_bus_station
-			200,		// build_truck_station
-			350,		// build_dock
-			400000,	// build_railvehicle
-			2000,		// build_railwagon
-			700000,	// aircraft_base
-			14000,	// roadveh_base
-			65000,	// ship_base
-			20,			// build_trees
-			250,		// terraform
-			20,			// clear_1
-			40,			// purchase_land
-			200,		// clear_2
-			500,		// clear_3
-			20,			// remove_trees
-			-70,		// remove_rail
-			10,			// remove_signals
-			50,			// clear_bridge
-			80,			// remove_train_depot
-			80,			// remove_road_depot
-			90,			// remove_ship_depot
-			30,			// clear_tunnel
-			10000,	// clear_water
-			50,			// remove_rail_station
-			30,			// remove_airport
-			50,			// remove_bus_station
-			50,			// remove_truck_station
-			55,			// remove_dock
-			1600,		// remove_house
-			40,			// remove_road
-			5600,		// running_rail[0] railroad
-			5200,		// running_rail[1] monorail
-			4800,		// running_rail[2] maglev
-			9600,		// aircraft_running
-			1600,		// roadveh_running
-			5600,		// ship_running
-			1000000, // build_industry
-	};
 
 	static byte price_base_multiplier[] = new byte[Global.NUM_PRICES];
 
@@ -942,90 +870,7 @@ public class Economy
 		Global._economy.fluct = BitOps.GB(Hal.Random(), 0, 8) + 168;
 	}
 
-	static Pair SetupSubsidyDecodeParam(Subsidy s, boolean mode)
-	{
-		TileIndex tile;
-		TileIndex tile2;
-		Pair tp = new Pair();
 
-		/* if mode is false, use the singular form */
-		Global.SetDParam(0, Global._cargoc.names_s[s.cargo_type] + (mode ? 0 : 32));
-
-		if (s.age < 12) {
-			if (s.cargo_type != AcceptedCargo.CT_PASSENGERS && s.cargo_type != AcceptedCargo.CT_MAIL) {
-				Global.SetDParam(1, Str.STR_INDUSTRY);
-				Global.SetDParam(2, s.from);
-				tile = Industry.GetIndustry(s.from).xy;
-
-				if (s.cargo_type != AcceptedCargo.CT_GOODS && s.cargo_type != AcceptedCargo.CT_FOOD) {
-					Global.SetDParam(4, Str.STR_INDUSTRY);
-					Global.SetDParam(5, s.to);
-					tile2 = Industry.GetIndustry(s.to).xy;
-				} else {
-					Global.SetDParam(4, Str.STR_TOWN);
-					Global.SetDParam(5, s.to);
-					tile2 = Town.GetTown(s.to).getXy();
-				}
-			} else {
-				Global.SetDParam(1, Str.STR_TOWN);
-				Global.SetDParam(2, s.from);
-				tile = Town.GetTown(s.from).getXy();
-
-				Global.SetDParam(4, Str.STR_TOWN);
-				Global.SetDParam(5, s.to);
-				tile2 = Town.GetTown(s.to).getXy();
-			}
-		} else {
-			Global.SetDParam(1, s.from);
-			tile = Station.GetStation(s.from).getXy();
-
-			Global.SetDParam(2, s.to);
-			tile2 = Station.GetStation(s.to).getXy();
-		}
-
-		tp.a = tile.tile;
-		tp.b = tile2.tile;
-
-		return tp;
-	}
-
-	static void DeleteSubsidyWithIndustry(int index)
-	{
-		for(int i = 0; i < _subsidies.length; i++) 
-		{
-			Subsidy s = _subsidies[i];
-			if (s.cargo_type != AcceptedCargo.CT_INVALID && s.age < 12 &&
-					s.cargo_type != AcceptedCargo.CT_PASSENGERS && s.cargo_type != AcceptedCargo.CT_MAIL &&
-					(index == s.from || (s.cargo_type!=AcceptedCargo.CT_GOODS && s.cargo_type!=AcceptedCargo.CT_FOOD && index==s.to))) {
-				s.cargo_type = AcceptedCargo.CT_INVALID;
-			}
-		}
-	}
-
-	static void DeleteSubsidyWithStation(int index)
-	{
-		boolean dirty = false;
-
-		for(int i = 0; i < _subsidies.length; i++) 
-		{
-			Subsidy s = _subsidies[i];
-			if (s.cargo_type != AcceptedCargo.CT_INVALID && s.age >= 12 &&
-					(s.from == index || s.to == index)) {
-				s.cargo_type = AcceptedCargo.CT_INVALID;
-				dirty = true;
-			}
-		}
-
-		if (dirty)
-			Window.InvalidateWindow(Window.WC_SUBSIDIES_LIST, 0);
-	}
-
-	static class FoundRoute {
-		int distance;
-		int cargo;
-		Object from;
-		Object to;
-	} 
 
 	static void FindSubsidyPassengerRoute(FoundRoute fr)
 	{
@@ -1050,7 +895,7 @@ public class Economy
 		int trans, total;
 		byte cargo;
 
-		fr.distance = (int)-1;
+		fr.distance = -1;
 
 		fr.from = i = Industry.GetIndustry(Hal.RandomRange(Industry._total_industries));
 		if (i.xy == null)
@@ -1099,24 +944,6 @@ public class Economy
 		}
 	}
 
-	static boolean CheckSubsidyDuplicate(Subsidy s)
-	{
-		for(int i = 0; i < _subsidies.length; i++) 
-		{
-			Subsidy ss = _subsidies[i];
-			if (s != ss &&
-					ss.from == s.from &&
-					ss.to == s.to &&
-					ss.cargo_type == s.cargo_type) 
-			{
-				s.cargo_type = AcceptedCargo.CT_INVALID;
-				return true;
-			}
-		}
-		return false;
-	}
-
-
 	static void SubsidyMonthlyHandler()
 	{
 		//Subsidy s;
@@ -1126,39 +953,18 @@ public class Economy
 		FoundRoute fr = new FoundRoute();
 		boolean modified = false;
 
-		for(int i = 0; i < _subsidies.length; i++) 
-		{
-			Subsidy s = _subsidies[i];
-			if (s.cargo_type == AcceptedCargo.CT_INVALID)
-				continue;
-
-			if (s.age == 12-1) {
-				pair = SetupSubsidyDecodeParam(s, true);
-				NewsItem.AddNewsItem(Str.STR_202E_OFFER_OF_SUBSIDY_EXPIRED, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
-				s.cargo_type = AcceptedCargo.CT_INVALID;
-				modified = true;
-			} else if (s.age == 2*12-1) {
-				Station st = Station.GetStation(s.to);
-				if (st.owner == Global._local_player) {
-					pair = SetupSubsidyDecodeParam(s, true);
-					NewsItem.AddNewsItem(Str.STR_202F_SUBSIDY_WITHDRAWN_SERVICE, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
-				}
-				s.cargo_type = AcceptedCargo.CT_INVALID;
-				modified = true;
-			} else {
-				s.age++;
-			}
-		}
-
+		for(Subsidy s : Subsidy._subsidies ) 
+			if( s.updateAge() ) modified = true;
+		
 		// 25% chance to go on
 		if (BitOps.CHANCE16(1,4)) 
 		{
 			// Find a free slot
 			//s = _subsidies;
 			int sp = 0;
-			while (_subsidies[sp].cargo_type != AcceptedCargo.CT_INVALID) 
+			while (Subsidy._subsidies[sp].isValid()) 
 			{
-				if (++sp >= _subsidies.length)
+				if (++sp >= Subsidy._subsidies.length)
 				{
 					//goto no_add;
 					if (modified)
@@ -1167,7 +973,7 @@ public class Economy
 				}
 			}
 
-			Subsidy s = _subsidies[sp];
+			Subsidy s = Subsidy._subsidies[sp];
 
 			n = 1000;
 			do {
@@ -1180,9 +986,9 @@ public class Economy
 					s.to = ((Town)fr.to).index;
 
 					//goto add_subsidy;
-					if (!CheckSubsidyDuplicate(s)) {
+					if (!Subsidy.CheckSubsidyDuplicate(s)) {
 						s.age = 0;
-						pair = SetupSubsidyDecodeParam(s, false);
+						pair = s.SetupSubsidyDecodeParam(false);
 						NewsItem.AddNewsItem(Str.STR_2030_SERVICE_SUBSIDY_OFFERED, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 						modified = true;
 						break;
@@ -1190,14 +996,14 @@ public class Economy
 					continue;
 				}
 				FindSubsidyCargoRoute(fr);
-				if (fr.distance <= 70) {
+				if (fr.distance <= 70 && fr.distance > 0) {
 					s.cargo_type = fr.cargo;
 					s.from = ((Industry)fr.from).index;
 					s.to = (fr.cargo == AcceptedCargo.CT_GOODS || fr.cargo == AcceptedCargo.CT_FOOD) ? ((Town)fr.to).index : ((Industry)fr.to).index;
 					//add_subsidy:
-					if (!CheckSubsidyDuplicate(s)) {
+					if (!Subsidy.CheckSubsidyDuplicate(s)) {
 						s.age = 0;
-						pair = SetupSubsidyDecodeParam(s, false);
+						pair = s.SetupSubsidyDecodeParam(false);
 						NewsItem.AddNewsItem(Str.STR_2030_SERVICE_SUBSIDY_OFFERED, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 						modified = true;
 						break;
@@ -1309,20 +1115,21 @@ public class Economy
 		Player p;
 
 		// check if there is an already existing subsidy that applies to us
-		for(int i = 0; i < _subsidies.length; i++) 
+		for(int i = 0; i < Subsidy._subsidies.length; i++) 
 		{
-			Subsidy s = _subsidies[i];
-			if (s.cargo_type == cargo_type &&
+			Subsidy s = Subsidy._subsidies[i];
+			/*if (s.cargo_type == cargo_type &&
 					s.age >= 12 &&
 					s.from == from.index &&
-					s.to == to.index)
+					s.to == to.index)*/
+			if( s.appliesTo(from,to,cargo_type))
 				return true;
 		}
 
 		/* check if there's a new subsidy that applies.. */
-		for(int i = 0; i < _subsidies.length; i++) 
+		for(int i = 0; i < Subsidy._subsidies.length; i++) 
 		{
-			Subsidy s = _subsidies[i];
+			Subsidy s = Subsidy._subsidies[i];
 			if (s.cargo_type == cargo_type && s.age < 12) {
 
 				/* Check distance from source */
@@ -1331,6 +1138,7 @@ public class Economy
 				} else {
 					xy = (Industry.GetIndustry(s.from)).xy;
 				}
+				//xy = s.getFromXy();
 				if (Map.DistanceMax(xy, from.getXy()) > 9)
 					continue;
 
@@ -1340,7 +1148,7 @@ public class Economy
 				} else {
 					xy = (Industry.GetIndustry(s.to)).xy;
 				}
-
+				//xy = s.getToXy();
 				if (Map.DistanceMax(xy, to.getXy()) > 9)
 					continue;
 
@@ -1350,7 +1158,7 @@ public class Economy
 				s.to = to.index;
 
 				/* Add a news item */
-				pair = SetupSubsidyDecodeParam(s, false);
+				pair = s.SetupSubsidyDecodeParam(false);
 				Global.InjectDParam(2);
 
 				p = Global._current_player.GetPlayer();

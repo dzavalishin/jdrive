@@ -463,7 +463,7 @@ public class TrainCmd extends TrainTables
 					{
 						final Vehicle  w = it.next();
 
-						if (w.type == Vehicle.VEH_Train && w.tile == tile &&
+						if (w.type == Vehicle.VEH_Train && w.tile.equals(tile) &&
 								w.IsFreeWagon() && w.engine_type == engine) {
 							u = w.GetLastVehicleInChain();
 							break;
@@ -534,7 +534,7 @@ public class TrainCmd extends TrainTables
 		{
 			final Vehicle  v = it.next();
 			if (v.type == Vehicle.VEH_Train && v.IsFreeWagon() &&
-					v.tile == u.tile &&
+					v.tile.equals(u.tile) &&
 					v.rail.track == 0x80) {
 				if (Cmd.CmdFailed(Cmd.DoCommandByTile(null, v.index | (u.index << 16), 1, Cmd.DC_EXEC,
 						Cmd.CMD_MOVE_RAIL_VEHICLE)))
@@ -626,7 +626,7 @@ public class TrainCmd extends TrainTables
 			v = vl[0];
 
 			unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Train);
-			if (unit_num.id > Global._patches.max_trains.id)
+			if (unit_num.id > Global._patches.max_trains)
 				return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
@@ -778,7 +778,7 @@ public class TrainCmd extends TrainTables
 		{
 			final Vehicle  dst = it.next();
 			if (dst.type == Vehicle.VEH_Train && dst.IsFreeWagon() &&
-					dst.tile == tile) {
+					dst.tile.equals(tile) ) {
 				// check so all vehicles in the line have the same engine.
 				Vehicle v = dst;
 
@@ -939,7 +939,7 @@ public class TrainCmd extends TrainTables
 		// moving a loco to a new line?, then we need to assign a unitnumber.
 		if (dst == null && !src.IsFrontEngine() && src.IsTrainEngine()) {
 			UnitID unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Train);
-			if (unit_num.id > Global._patches.max_trains.id)
+			if (unit_num.id > Global._patches.max_trains)
 				return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 			if(0 != (flags & Cmd.DC_EXEC))
@@ -1403,7 +1403,7 @@ public class TrainCmd extends TrainTables
 				tile.IsLevelCrossing() &&
 				Vehicle.VehicleFromPos(tile, tile, TrainCmd::TestTrainOnCrossing) == null && // empty?
 				BitOps.GB(tile.getMap().m5, 2, 1) != 0) { // Lights on?
-			tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 1, 0); // Switch lights off
+			tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 0); // Switch lights off
 			tile.MarkTileDirtyByTile();
 		}
 	}
@@ -2109,7 +2109,7 @@ public class TrainCmd extends TrainTables
 			return false;
 
 		// did we reach the final station?
-		if ((ttfd.station_index.id == Station.INVALID_STATION && tile == ttfd.dest_coords) ||
+		if ((ttfd.station_index.id == Station.INVALID_STATION && tile.equals(ttfd.dest_coords)) ||
 				(tile.IsTileType( TileTypes.MP_STATION) && BitOps.IS_INT_INSIDE(tile.getMap().m5, 0, 8) && tile.getMap().m2 == ttfd.station_index.id)) {
 			/* We do not check for dest_coords if we have a station_index,
 			 * because in that case the dest_coords are just an
@@ -2386,7 +2386,7 @@ public class TrainCmd extends TrainTables
 		}
 
 		// check if we've reached the waypoint?
-		if (v.current_order.type == Order.OT_GOTO_WAYPOINT && v.tile == v.dest_tile) {
+		if (v.current_order.type == Order.OT_GOTO_WAYPOINT && v.tile.equals(v.dest_tile)) {
 			v.cur_order_index++;
 		}
 
@@ -3371,7 +3371,7 @@ public class TrainCmd extends TrainTables
 		if (v.rail.track == 0x40) { // inside a tunnel
 			TileIndex endtile = TunnelBridgeCmd.CheckTunnelBusy(v.tile, null);
 
-			if (endtile == TileIndex.INVALID_TILE) // tunnel is busy (error returned)
+			if (!endtile.isValid()) // tunnel is busy (error returned)
 				return;
 
 			switch (v.direction) {
@@ -3571,7 +3571,7 @@ public class TrainCmd extends TrainTables
 					// make a rail/road crossing red
 					if (tile.IsTileType( TileTypes.MP_STREET) && tile.IsLevelCrossing()) {
 						if (BitOps.GB(tile.getMap().m5, 2, 1) == 0) {
-							tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
+							tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
 							//SndPlayVehicleFx(SND_0E_LEVEL_CROSSING, v);
 							tile.MarkTileDirtyByTile();
 						}

@@ -8,11 +8,18 @@ public class Tile {
 
 	int m1; // owner?
 	int m2;
-	byte m3;
-	byte m4;
-	byte m5;
-	byte extra;
 
+	//byte m3;
+	//byte m4;
+	//byte m5;
+	//byte extra;
+
+	// being bytes they're treated as negative too often
+	int m3;
+	int m4;
+	int m5;
+	int extra;
+	
 	// TODO use DiaginalDirections instead
 	public static final int DIAGDIR_NE  = 0;      /* Northeast, upper right on your monitor */
 	public static final int DIAGDIR_SE  = 1;

@@ -11,7 +11,7 @@ public class Road extends RoadTables
 
 
 
-	/* When true, GetTrackStatus for roads will treat roads under refinalruction
+	/* When true, GetTrackStatus for roads will treat roads under reconstruction
 	 * as normal roads instead of impassable. This is used when detecting whether
 	 * a road can be removed. This is of course ugly, but I don't know a better
 	 * solution just like that... */
@@ -23,7 +23,7 @@ public class Road extends RoadTables
 	static boolean HasTileRoadAt(TileIndex tile, int i)
 	{
 		int mask;
-		byte b;
+		int b;
 
 		switch (tile.GetTileType()) {
 		case MP_STREET:
@@ -203,7 +203,7 @@ public class Road extends RoadTables
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				Town.ChangeTownRating(t, -road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
-				tile.getMap().m5 = (byte) (ti.map5 & 0xC7);
+				tile.getMap().m5 = ti.map5 & 0xC7;
 				tile.SetTileOwner( Owner.OWNER_NONE);
 				tile.MarkTileDirtyByTile();
 			}
@@ -270,8 +270,8 @@ public class Road extends RoadTables
 					int pbs_track = Pbs.PBSTileReserved(tile);
 					Town.ChangeTownRating(t, -road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
 
-					Landscape.ModifyTile(tile,
-							TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |
+					Landscape.ModifyTile(tile, TileTypes.MP_RAILWAY,
+							//TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |
 							TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAP5,
 							tile.getMap().m4 & 0xF, /* map3_lo */
 							c											/* map5 */
@@ -385,7 +385,9 @@ public class Road extends RoadTables
 
 		/* Road pieces are max 4 bitset values (NE, NW, SE, SW) and town can only be non-zero
 		 * if a non-player is building the road */
-		if ((pieces >> 4) != 0 || (Global._current_player.id < Global.MAX_PLAYERS && p2 != 0) || !Town.IsTownIndex(p2)) 
+		if ((pieces >> 4) != 0 
+				|| (Global._current_player.id < Global.MAX_PLAYERS && p2 != 0) 
+				|| !Town.IsTownIndex(p2)) 
 			return Cmd.CMD_ERROR;
 
 		Landscape.FindLandscapeHeight(ti, x, y);
@@ -427,8 +429,8 @@ public class Road extends RoadTables
 				if(0 != (flags & Cmd.DC_EXEC)) 
 				{
 					byte pbs_track = (byte) Pbs.PBSTileReserved(tile);
-					Landscape.ModifyTile(tile,
-							TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
+					Landscape.ModifyTile(tile, TileTypes.MP_STREET,
+							//TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
 							TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5,
 							p2,
 							Global._current_player.id, /* map3_lo */
@@ -464,7 +466,7 @@ public class Road extends RoadTables
 				/* all checked, can build road now! */
 				cost = Global._price.build_road * 2;
 				if(0 != (flags & Cmd.DC_EXEC) ) {
-					Landscape.ModifyTile(tile,
+					Landscape.ModifyTile(tile, TileTypes.MP_NOCHANGE,
 							TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 							(ti.map5 & 0xC7) | 0x28 // map5
 							);
@@ -514,7 +516,7 @@ public class Road extends RoadTables
 			if (ti.type != TileTypes.MP_STREET.ordinal()) {
 				tile.SetTileType( TileTypes.MP_STREET);
 				tile.getMap().m5 = 0;
-				tile.getMap().m2 = p2;
+				tile.getMap().m2 = 0xFF & p2;
 				tile.SetTileOwner( Global._current_player);
 			}
 
@@ -547,12 +549,13 @@ public class Road extends RoadTables
 
 
 	/** Build a long piece of road.
-	 * @param x,y end tile of drag
+	 * @param x end tile of drag
+	 * @param y end tile of drag
 	 * @param p1 start tile of drag
-	 * @param p2 various bitstuffed elements
-	 * - p2 = (bit 0) - start tile starts in the 2nd half of tile (p2 & 1)
-	 * - p2 = (bit 1) - end tile starts in the 2nd half of tile (p2 & 2)
-	 * - p2 = (bit 2) - direction: 0 = along x-axis, 1 = along y-axis (p2 & 4)
+	 * @param p2 various bitstuffed elements <br>
+	 * - p2 = (bit 0) - start tile starts in the 2nd half of tile (p2 & 1) <br>
+	 * - p2 = (bit 1) - end tile starts in the 2nd half of tile (p2 & 2) <br>
+	 * - p2 = (bit 2) - direction: 0 = along x-axis, 1 = along y-axis (p2 & 4) <br>
 	 */
 	public static int CmdBuildLongRoad(int x, int y, int flags, int p1, int p2)
 	{
@@ -583,8 +586,8 @@ public class Road extends RoadTables
 		// Start tile is the small number.
 		for (;;) {
 			int bits = BitOps.HASBIT(p2, 2) ? ROAD_SE | ROAD_NW : ROAD_SW | ROAD_NE;
-			if (tile == end_tile && !BitOps.HASBIT(p2, 1)) bits &= ROAD_NW | ROAD_NE;
-			if (tile == start_tile && BitOps.HASBIT(p2, 0)) bits &= ROAD_SE | ROAD_SW;
+			if(tile.equals(end_tile) && !BitOps.HASBIT(p2, 1)) bits &= ROAD_NW | ROAD_NE;
+			if(tile.equals(start_tile) && BitOps.HASBIT(p2, 0)) bits &= ROAD_SE | ROAD_SW;
 
 			ret = Cmd.DoCommandByTile(tile, bits, 0, flags, Cmd.CMD_BUILD_ROAD);
 			if (Cmd.CmdFailed(ret)) {
@@ -593,7 +596,7 @@ public class Road extends RoadTables
 				cost += ret;
 			}
 
-			if (tile == end_tile) break;
+			if(tile.equals(end_tile)) break;
 
 			tile = tile.iadd( BitOps.HASBIT(p2, 2) ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
 		}
@@ -639,8 +642,8 @@ public class Road extends RoadTables
 		// Start tile is the small number.
 		for (;;) {
 			int bits = BitOps.HASBIT(p2, 2) ? ROAD_SE | ROAD_NW : ROAD_SW | ROAD_NE;
-			if (tile == end_tile && !BitOps.HASBIT(p2, 1)) bits &= ROAD_NW | ROAD_NE;
-			if (tile == start_tile && BitOps.HASBIT(p2, 0)) bits &= ROAD_SE | ROAD_SW;
+			if (tile.equals(end_tile) && !BitOps.HASBIT(p2, 1)) bits &= ROAD_NW | ROAD_NE;
+			if (tile.equals(start_tile) && BitOps.HASBIT(p2, 0)) bits &= ROAD_SE | ROAD_SW;
 
 			// try to remove the halves.
 			if (bits != 0) {
@@ -648,7 +651,7 @@ public class Road extends RoadTables
 				if (!Cmd.CmdFailed(ret)) cost += ret;
 			}
 
-			if (tile == end_tile) break;
+			if (tile.equals(end_tile)) break;
 
 			tile = tile.iadd( BitOps.HASBIT(p2, 2) ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
 		}
@@ -701,8 +704,8 @@ public class Road extends RoadTables
 			dep.xy = tile;
 			dep.town_index = Town.ClosestTownFromTile(tile, (int)-1).index;
 
-			Landscape.ModifyTile(tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
+			Landscape.ModifyTile(tile, TileTypes.MP_STREET,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
 					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 					(p1 | 0x20) /* map5 */
 					);
@@ -728,7 +731,7 @@ public class Road extends RoadTables
 	static int ClearTile_Road(TileIndex tile, byte flags)
 	{
 		int ret;
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 
 		if ( (m5 & 0xF0) == 0) {
 			byte b = (byte) (m5 & 0xF);
@@ -1119,7 +1122,7 @@ public class Road extends RoadTables
 			// Handle road work
 			//XXX undocumented
 
-			byte b = tile.getMap().m4;
+			int b = tile.getMap().m4;
 			//roadworks take place only
 			//keep roadworks running for 16 loops
 			//lower 4 bits of map3_hi store the counter now
@@ -1151,7 +1154,7 @@ public class Road extends RoadTables
 				return 0;
 			return 0 != (tile.getMap().m5 & 8) ? 0x101 : 0x202;
 		} else if  (mode == Global.TRANSPORT_ROAD) {
-			byte b = tile.getMap().m5;
+			int b = tile.getMap().m5;
 			if ((b & 0xF0) == 0) {
 				/* Ordinary road */
 				if (!_road_special_gettrackstatus && BitOps.GB(tile.getMap().m4, 4, 3) >= 6)
@@ -1208,7 +1211,7 @@ public class Road extends RoadTables
 			if (v.type == Vehicle.VEH_Train && BitOps.GB(tile.getMap().m5, 2, 1) == 0) {
 				/* train crossing a road */
 				//SndPlayVehicleFx(SND_0E_LEVEL_CROSSING, v);
-				tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
+				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
 				tile.MarkTileDirtyByTile();
 			}
 		} else if (BitOps.GB(tile.getMap().m5, 4, 4) == 2) {
@@ -1226,7 +1229,7 @@ public class Road extends RoadTables
 	{
 		if (tile.IsLevelCrossing() && v.type == Vehicle.VEH_Train && v.next == null) {
 			// Turn off level crossing lights
-			tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 2, 1, 0);
+			tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 0);
 			tile.MarkTileDirtyByTile();
 		}
 		return 0; // TODO [dz] it was void, who uses ret val?
@@ -1247,7 +1250,7 @@ public class Road extends RoadTables
 			if (BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
 				tile.SetTileOwner(Owner.OWNER_NONE);
 			} else if (tile.IsLevelCrossing()) {
-				tile.getMap().m5 = (byte) (((tile.getMap().m5&8) != 0) ? 0x5 : 0xA);
+				tile.getMap().m5 = (((tile.getMap().m5&8) != 0) ? 0x5 : 0xA);
 				tile.SetTileOwner( tile.getMap().m3);
 				tile.getMap().m3 = 0;
 				tile.getMap().m4 &= 0x80;

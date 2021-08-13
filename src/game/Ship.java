@@ -440,7 +440,7 @@ public class Ship {
 		PathFindShip pfs = (PathFindShip) o;
 		
 		// Found dest?
-		if (tile == pfs.dest_coords) {
+		if (tile.equals(pfs.dest_coords)) {
 			pfs.best_bird_dist = 0;
 			pfs.best_length = (int) BitOps.minu(pfs.best_length, length);
 			return true;
@@ -704,7 +704,7 @@ public class Ship {
 						v.InvalidateVehicleOrder();
 					} else {
 						/* Non-buoy orders really need to reach the tile */
-						if (v.dest_tile == gp.new_tile) {
+						if (v.dest_tile.equals(gp.new_tile)) {
 							if (v.current_order.type == Order.OT_GOTO_DEPOT) {
 								if ((gp.x&0xF)==8 && (gp.y&0xF)==8) {
 									ShipEnterDepot(v);
@@ -887,7 +887,7 @@ public class Ship {
 
 		v = Vehicle.AllocateVehicle(); // TODO can pass type or make subobject for ship
 		if (v == null || /* Order.IsOrderPoolFull() || */
-				(unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Ship)).id > Global._patches.max_ships.id)
+				(unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Ship)).id > Global._patches.max_ships)
 			return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 		if( 0 != (flags & Cmd.DC_EXEC)) {

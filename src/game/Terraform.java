@@ -75,7 +75,9 @@ public class Terraform {
 		TileIndex.forAll( size_x, size_y, TileIndex.TileXY(sx, sy), (tile) ->
 		{
 			if (tile.IsTileType(TileTypes.MP_CLEAR) || tile.IsTileType( TileTypes.MP_TREES)) {
-				Landscape.ModifyTile(tile,TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) | TileTypes.MP_MAP5, (tile.getMap().m5 & ~0x1C) | 0xB);
+				Landscape.ModifyTile(tile, TileTypes.MP_CLEAR,
+						//TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) | 
+						TileTypes.MP_MAP5, (tile.getMap().m5 & ~0x1C) | 0xB);
 				//success = true;
 			}
 			return false;

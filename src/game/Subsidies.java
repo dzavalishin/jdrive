@@ -1,17 +1,18 @@
 package game;
 
-import game.Economy.Subsidy;
 import game.util.GameDate;
 import game.util.YearMonthDay;
 
 public class Subsidies {
 
 
+	/*
 	private static void doHandleClick( Subsidy s )
 	{
 
 		TileIndex xy;
-		// determine from coordinate for subsidy and try to scroll to it 
+		// determine from coordinate for subsidy and try to scroll to it
+		/*
 		int offs = s.from;
 
 		if (s.age >= 12) {
@@ -21,21 +22,23 @@ public class Subsidies {
 		} else {
 			xy = Industry.GetIndustry(offs).xy;
 
-		}
+		}* /
+		xy = s.getFromXy();
 		if (!ViewPort.ScrollMainWindowToTile(xy)) {
 			// otherwise determine to coordinate for subsidy and scroll to it 
-			offs = s.to;
+			xy = s.getToXy();
+			/*offs = s.to;
 			if (s.age >= 12) {
 				xy = Station.GetStation(offs).getXy();
 			} else if (s.cargo_type == AcceptedCargo.CT_PASSENGERS || s.cargo_type == AcceptedCargo.CT_MAIL || s.cargo_type == AcceptedCargo.CT_GOODS || s.cargo_type == AcceptedCargo.CT_FOOD) {
 				xy = Town.GetTown(offs).getXy();
 			} else {
 				xy = Industry.GetIndustry(offs).xy;
-			}
+			}* /
 			ViewPort.ScrollMainWindowToTile(xy);
 		}
 
-	}
+	}*/
 
 	private static void HandleSubsidyClick(int y)
 	{
@@ -47,14 +50,14 @@ public class Subsidies {
 
 		num = 0;
 		//for (s = _subsidies; s != endof(_subsidies); s++)
-		for( Subsidy s : Economy._subsidies )
+		for( Subsidy s : Subsidy._subsidies )
 		{
-			if (s.cargo_type != AcceptedCargo.CT_INVALID && s.age < 12) {
+			if (s.isValid() && s.age < 12) {
 				y -= 10;
 				if (y < 0) 
 				{
 					//goto handle_click;
-					doHandleClick( s );
+					s.handleClick();
 					return;
 				}
 				num++;
@@ -70,13 +73,13 @@ public class Subsidies {
 		if (y < 0) return;
 
 		//for (s = _subsidies; s != endof(_subsidies); s++) 
-		for( Subsidy s : Economy._subsidies )
+		for( Subsidy s : Subsidy._subsidies )
 		{
 			if (s.cargo_type != AcceptedCargo.CT_INVALID && s.age >= 12) {
 				y -= 10;
 				if (y < 0) {
 					//goto handle_click;
-					doHandleClick( s );
+					s.handleClick();
 					return;
 				}
 			}
@@ -130,12 +133,12 @@ public class Subsidies {
 		num = 0;
 
 		//for (s = _subsidies; s != endof(_subsidies); s++) 
-		for( Subsidy s : Economy._subsidies )
+		for( Subsidy s : Subsidy._subsidies )
 		{
-			if (s.cargo_type != AcceptedCargo.CT_INVALID && s.age < 12) {
+			if (s.isValid() && s.age < 12) {
 				int x2;
 
-				Economy.SetupSubsidyDecodeParam(s, true);
+				s.SetupSubsidyDecodeParam(true);
 				x2 = Gfx.DrawString(x + 2, y, Str.STR_2027_FROM_TO, 0);
 
 				Global.SetDParam(0, Global._date - ymd.day + 384 - s.age * 32);
@@ -155,13 +158,13 @@ public class Subsidies {
 		num = 0;
 
 		//for (s = _subsidies; s != endof(_subsidies); s++) 
-		for( Subsidy s : Economy._subsidies )
+		for( Subsidy s : Subsidy._subsidies )
 		{
-			if (s.cargo_type != AcceptedCargo.CT_INVALID && s.age >= 12) {
+			if (s.isValid() && s.age >= 12) {
 				final Player  p;
 				int xt;
 
-				Economy.SetupSubsidyDecodeParam(s, true);
+				s.SetupSubsidyDecodeParam(true);
 
 				p = Player.GetPlayer(Station.GetStation(s.to).owner);
 				Global.SetDParam(3, p.name_1);

@@ -621,8 +621,8 @@ public class Rail extends RailTables {
 
 				if(0 != (flags & Cmd.DC_EXEC)) {
 					tile.SetTileOwner( Global._current_player);
-					tile.getMap().m3 = (byte) BitOps.RETSB(tile.getMap().m3, 0, 4, p1);
-					tile.getMap().m5 = (byte) ((m5 & 0xC7) | 0x20); // railroad under bridge
+					tile.getMap().m3 = BitOps.RETSB(tile.getMap().m3, 0, 4, p1);
+					tile.getMap().m5 = ((m5 & 0xC7) | 0x20); // railroad under bridge
 				}
 				break;
 
@@ -653,7 +653,7 @@ public class Rail extends RailTables {
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				tile.getMap().m2 &= ~RAIL_MAP2LO_GROUND_MASK; // Bare land
-				tile.getMap().m5 = (byte) (m5 | trackbit);
+				tile.getMap().m5 = 0xFF & (m5 | trackbit);
 			}
 			break;
 
@@ -667,10 +667,10 @@ public class Rail extends RailTables {
 					(track == TRACK_DIAG2 && m5 == 0x0A) // correct direction?
 					)) {
 				if(0 != (flags & Cmd.DC_EXEC)) {
-					tile.getMap().m3 = (byte) tile.GetTileOwner().id;
+					tile.getMap().m3 = 0xFF & tile.GetTileOwner().id;
 					tile.SetTileOwner( Global._current_player);
-					tile.getMap().m4 = (byte) p1;
-					tile.getMap().m5 = (byte) (0x10 | (track == TRACK_DIAG1 ? 0x08 : 0x00)); // level crossing
+					tile.getMap().m4 = 0xFF & p1;
+					tile.getMap().m5 = 0xFF & (0x10 | (track == TRACK_DIAG1 ? 0x08 : 0x00)); // level crossing
 				}
 				break;
 			}
@@ -692,8 +692,8 @@ public class Rail extends RailTables {
 				tile.SetTileType(TileTypes.MP_RAILWAY);
 				tile.SetTileOwner( Global._current_player);
 				tile.getMap().m2 = 0; // Bare land
-				tile.getMap().m3 = (byte) p1; // No signals, rail type
-				tile.getMap().m5 = (byte) trackbit;
+				tile.getMap().m3 = 0xFF & p1; // No signals, rail type
+				tile.getMap().m5 = 0xFF & trackbit;
 			}
 			break;
 		}
@@ -754,7 +754,7 @@ public class Rail extends RailTables {
 				return Global._price.remove_rail;
 
 			tile.SetTileOwner( Owner.OWNER_NONE);
-			tile.getMap().m5 = (byte) (tile.getMap().m5 & 0xC7);
+			tile.getMap().m5 = tile.getMap().m5 & 0xC7;
 			break;
 
 		case MP_STREET:
@@ -1003,8 +1003,8 @@ public class Rail extends RailTables {
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			if (Player.IsLocalPlayer()) Depot._last_built_train_depot_tile = tile;
 
-			Landscape.ModifyTile(tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |
+			Landscape.ModifyTile(tile, TileTypes.MP_RAILWAY,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |
 					TileTypes.MP_MAP3LO | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
 					p1, /* map3_lo */
 					p2 | RAIL_TYPE_DEPOT_WAYPOINT /* map5 */
@@ -1172,8 +1172,8 @@ public class Rail extends RailTables {
 		byte track_height = 0; // height of tunnel currently in
 		int retr, total_cost = 0;
 		TileIndex tile = TileIndex.TileVirtXY/*TILE_FROM_XY*/(x, y);
-		byte m5 = tile.getMap().m5;
-		byte m3 = tile.getMap().m3;
+		int m5 = tile.getMap().m5;
+		int m3 = tile.getMap().m3;
 		byte semaphores = (byte) ((tile.getMap().m4 & ~3) != 0 ? 16 : 0);
 		int mode = p2 & 0x1;
 		int lx, ly;
@@ -1515,7 +1515,7 @@ public class Rail extends RailTables {
 			if (BitOps.GB(tile.getMap().m3, 4, 4) == 0) 
 			{
 				tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 4, 4, 0);
-				tile.getMap().m5 = (byte) BitOps.RETSB(tile.getMap().m5, 6, 2, RAIL_TYPE_NORMAL >> 6); // XXX >> because the finalant is meant for direct application, not use with SB
+				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 6, 2, RAIL_TYPE_NORMAL >> 6); // XXX >> because the finalant is meant for direct application, not use with SB
 				tile.getMap().m4 = BitOps.RETCLRBIT(tile.getMap().m4, 3); // remove any possible semaphores
 			}
 
@@ -1638,9 +1638,8 @@ public class Rail extends RailTables {
 	{
 		int cost;
 		int ret;
-		byte m5;
 
-		m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 
 		if(0 != (flags & Cmd.DC_AUTO)) {
 			if(0 !=  (m5 & RAIL_TYPE_SPECIAL))
@@ -1969,13 +1968,13 @@ public class Rail extends RailTables {
 
 	static void DrawTile_Track(TileInfo ti)
 	{
-		byte m5;
+		int m5;
 		final RailtypeInfo rti = GetRailTypeInfo(GetRailType(ti.tile));
 		//PalSpriteID image;
 
 		_drawtile_track_palette = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner()));
 
-		m5 = (byte)ti.map5;
+		m5 = 0xFF & ti.map5;
 		if (0==(m5 & RAIL_TYPE_SPECIAL)) {
 			boolean earth = (ti.tile.getMap().m2 & RAIL_MAP2LO_GROUND_MASK) == RAIL_GROUND_BROWN;
 			boolean snow = (ti.tile.getMap().m2 & RAIL_MAP2LO_GROUND_MASK) == RAIL_GROUND_ICE_DESERT;
@@ -2644,13 +2643,13 @@ public class Rail extends RailTables {
 	//static int GetTileTrackStatus_Track(TileIndex tile, TransportType mode)
 	static int GetTileTrackStatus_Track(TileIndex tile, int mode)
 	{
-		byte m5, a;
+		int a;
 		int b;
 		int ret;
 
 		if (mode != Global.TRANSPORT_RAIL) return 0;
 
-		m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 
 		if (0==(m5 & RAIL_TYPE_SPECIAL)) {
 			ret = (m5 | (m5 << 8)) & 0x3F3F;
@@ -2679,7 +2678,7 @@ public class Rail extends RailTables {
 				if ((b & 0x10) == 0) ret |= 0x08200000;
 			}
 		} else if(0 != (m5 & 0x40)) {
-			m5 = _train_spec_tracks[m5 & 0x3F];
+			m5 = 0xFF & _train_spec_tracks[m5 & 0x3F];
 			ret = (m5 << 8) + m5;
 		} else
 			return 0;
@@ -2916,7 +2915,7 @@ public class Rail extends RailTables {
 
 	static void PlaceExtraDepotRail(TileIndex tile, int extra)
 	{
-		byte b = tile.getMap().m5;
+		int b = tile.getMap().m5;
 
 		if (BitOps.GB(b, 6, 2) != RAIL_TYPE_NORMAL >> 6) return;
 		if (0 == (b & (extra >> 8))) return;
@@ -3342,6 +3341,8 @@ public class Rail extends RailTables {
 		case WE_DESTROY:
 			if (Global._patches.link_terraform_toolbar) Window.DeleteWindowById(Window.WC_SCEN_LAND_GEN, 0);
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -3564,6 +3565,8 @@ public class Rail extends RailTables {
 		case WE_DESTROY:
 			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -3646,6 +3649,8 @@ public class Rail extends RailTables {
 		case WE_DESTROY:
 			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -3707,6 +3712,8 @@ public class Rail extends RailTables {
 
 		case WE_DESTROY:
 			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
+			break;
+		default:
 			break;
 		}
 	}
@@ -3818,6 +3825,8 @@ public class Rail extends RailTables {
 		case WE_DESTROY:
 			if (!w.as_def_d().close)
 				ViewPort.ResetObjectToPlace();
+			break;
+		default:
 			break;
 		}
 	}

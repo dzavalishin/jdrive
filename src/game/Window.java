@@ -37,7 +37,7 @@ public class Window extends WindowConstants
 	List<Widget> widget;
 	int desc_flags;
 
-	WindowMessage message;
+	WindowMessage message;// = new WindowMessage(); // used 
 	//byte custom[WINDOW_CUSTOM_SIZE];
 	//byte custom[];
 	AbstractWinCustom custom;
@@ -150,7 +150,10 @@ public class Window extends WindowConstants
 					int curw = ci;
 
 					@Override
-					public boolean hasNext() {
+					public boolean hasNext() 
+					{
+						if(curw >= _windows.size()) 
+							return false;
 						return _windows.get(curw) != null;
 					}
 
@@ -177,7 +180,7 @@ public class Window extends WindowConstants
 	}
 
 	buildtrain_d as_buildtrain_d() { 
-		if(custom==null) custom = new def_d(); 
+		if(custom==null) custom = new buildtrain_d(); 
 		return (buildtrain_d) custom; 
 	}
 
@@ -271,10 +274,10 @@ public class Window extends WindowConstants
 		return (void_d) custom; 
 		}
 
-	vp_d as_vp_d() 
+	vp2_d as_vp_d() 
 	{ 
-		if(custom==null) custom = new vp_d(); 
-		return (vp_d) custom; 
+		if(custom==null) custom = new vp2_d(); 
+		return (vp2_d) custom; 
 	}
 
 	vp2_d as_vp2_d() 
@@ -807,7 +810,7 @@ public class Window extends WindowConstants
 				return w;
 			}
 		}*/
-		return null;  // in java we can't
+		return null;  // in java we can't run out
 	}
 
 	/** A window must be freed, and all are marked as important windows. Ease the
@@ -1282,7 +1285,7 @@ public class Window extends WindowConstants
 
 	static void DecreaseWindowCounters()
 	{
-		// Fight concurrent mod
+		// Fight concurrent modification
 		ArrayList<Window> wcopy = new ArrayList<Window>(_windows);
 
 		//ListIterator<Window> i = _windows.listIterator(_windows.size());
@@ -1778,8 +1781,10 @@ public class Window extends WindowConstants
 				return true;
 			}
 
-			((vp_d)w.custom).scrollpos_x += dx << vp.zoom;
-			((vp_d)w.custom).scrollpos_y += dy << vp.zoom;
+			//((vp2_d)w.custom).scrollpos_x += dx << vp.zoom;
+			//((vp2_d)w.custom).scrollpos_y += dy << vp.zoom;
+			w.as_vp2_d().scrollpos_x += dx << vp.zoom;
+			w.as_vp2_d().scrollpos_y += dy << vp.zoom;
 
 			Hal._cursor.delta.x = Hal._cursor.delta.y = 0;
 			return false;
@@ -1965,7 +1970,8 @@ public class Window extends WindowConstants
 	//extern void UpdateTileSelection();
 	//extern boolean VpHandlePlaceSizingDrag();
 
-	private static final int  scrollspeed = 3;
+	private static final int  scrollspeed = 2;
+	private static final int  scroll_edge = 20;
 
 	static void MouseLoop(int click, int mousewheel)
 	{
@@ -1994,22 +2000,26 @@ public class Window extends WindowConstants
 				if (w == null || 0 != (w.flags4 & WF_DISABLE_VP_SCROLL) ) return;
 				vp = w.IsPtInWindowViewport(x, y);
 				if (vp != null) {
-					vp_d vpd = (vp_d)w.custom;
+					vp2_d vpd = w.as_vp2_d();
 					x -= vp.left;
 					y -= vp.top;
 					//here allows scrolling in both x and y axis
-					//#define scrollspeed 3
-					if (x - 15 < 0) {
-						vpd.scrollpos_x += (x - 15) * scrollspeed << vp.zoom;
-					} else if (15 - (vp.width - x) > 0) {
-						vpd.scrollpos_x += (15 - (vp.width - x)) * scrollspeed << vp.zoom;
+
+					if (x - scroll_edge < 0) {
+						vpd.scrollpos_x += (x - scroll_edge) * scrollspeed << vp.zoom;
+						//Global.printf("scroll left");
+					} else if (scroll_edge - (vp.width - x) > 0) {
+						vpd.scrollpos_x += (scroll_edge - (vp.width - x)) * scrollspeed << vp.zoom;
+						//Global.printf("scroll right");
 					}
-					if (y - 15 < 0) {
-						vpd.scrollpos_y += (y - 15) * scrollspeed << vp.zoom;
-					} else if (15 - (vp.height - y) > 0) {
-						vpd.scrollpos_y += (15 - (vp.height - y)) * scrollspeed << vp.zoom;
+					if (y - scroll_edge < 0) {
+						vpd.scrollpos_y += (y - scroll_edge) * scrollspeed << vp.zoom;
+						//Global.printf("scroll up");
+					} else if (scroll_edge - (vp.height - y) > 0) {
+						vpd.scrollpos_y += (scroll_edge - (vp.height - y)) * scrollspeed << vp.zoom;
+						//Global.printf("scroll dn");
 					}
-					//#undef scrollspeed
+
 				}
 			}
 			return;
@@ -2804,7 +2814,7 @@ public class Window extends WindowConstants
 		case WWT_CAPTION: {
 			assert(r.bottom - r.top == 13); // XXX - to ensure the same sizes are used everywhere!
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, FR_BORDERONLY);
-			Gfx.DrawFrameRect(r.left+1, r.top+1, r.right-1, r.bottom-1, wi.color, (caption_color == 0xFF) ? FR_LOWERED | FR_DARKENED : FR_LOWERED | FR_DARKENED | FR_BORDERONLY);
+			Gfx.DrawFrameRect(r.left+1, r.top+1, r.right-1, r.bottom-1, wi.color, (caption_color == -1/*0xFF*/) ? FR_LOWERED | FR_DARKENED : FR_LOWERED | FR_DARKENED | FR_BORDERONLY);
 
 			if ( (caption_color & 0xFF) != 0xFF) {
 				byte pc = Global._player_colors[caption_color];

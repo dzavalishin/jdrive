@@ -32,18 +32,18 @@ public class Tree  extends TreeTables {
 	static void PlaceTree(TileIndex tile, int r, int m5_or)
 	{
 		int tree = GetRandomTreeType(tile, BitOps.GB(r, 24, 8));
-		byte m5;
+		int m5;
 
 		if (tree >= 0) {
 			tile.SetTileType(TileTypes.MP_TREES);
 
-			m5 = (byte) BitOps.GB(r, 16, 8);
+			m5 = BitOps.GB(r, 16, 8);
 			if (BitOps.GB(m5, 0, 3) == 7) m5--; // there is no growth state 7
 
-			tile.getMap().m5 = (byte) (m5 & 0x07);	// growth state;
+			tile.getMap().m5 = (m5 & 0x07);	// growth state;
 			tile.getMap().m5 |=  m5 & 0xC0;	// amount of trees
 
-			tile.getMap().m3 = (byte) tree;		// set type of tree
+			tile.getMap().m3 = tree;		// set type of tree
 			tile.getMap().m4 = 0;		// no hedge
 
 			// above snowline?
@@ -217,8 +217,8 @@ public class Tree  extends TreeTables {
 							if (treetype == -1) treetype = 27;
 						}
 
-						Landscape.ModifyTile(tile,
-								TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
+						Landscape.ModifyTile(tile, TileTypes.MP_TREES,
+								//TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
 								TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAP5,
 								m2, /* map2 */
 								treetype, /* map3lo */
@@ -381,22 +381,22 @@ public class Tree  extends TreeTables {
 	static TileDesc GetTileDesc_Trees(TileIndex tile)
 	{
 		TileDesc td = new TileDesc();
-		byte b;
+		int m3;
 		//StringID str;
 		int str;
 
 		td.owner = (byte) tile.GetTileOwner().id;
 
-		b = tile.getMap().m3;
+		m3 = tile.getMap().m3;
 		//(str=Str.STR_2810_CACTUS_PLANTS, b==0x1B) ||
 		//(str=Str.STR_280F_RAINFOREST, IS_BYTE_INSIDE(b, 0x14, 0x1A+1)) ||
 		//(str=Str.STR_280E_TREES, true);
 
 		str=Str.STR_2810_CACTUS_PLANTS;
-		if(b!=0x1B) 
+		if(m3!=0x1B) 
 		{
 			str=Str.STR_280F_RAINFOREST;
-			if( !BitOps.IS_BYTE_INSIDE(b, (byte)0x14, (byte)(0x1A+1)))
+			if( !BitOps.IS_BYTE_INSIDE(m3, (byte)0x14, (byte)(0x1A+1)))
 				str=Str.STR_280E_TREES;
 		}
 
@@ -490,7 +490,7 @@ public class Tree  extends TreeTables {
 
 	static void TileLoop_Trees(TileIndex tile)
 	{
-		byte m5;
+		int m5;
 		int m2;
 
 		if (GameOptions._opt.landscape == Landscape.LT_DESERT) {
@@ -518,13 +518,13 @@ public class Tree  extends TreeTables {
 
 				case 1: /* add a tree */
 					if (m5 < 0xC0) {
-						m5 = (byte) ((m5 + 0x40) & ~7);
+						m5 = ((m5 + 0x40) & ~7);
 						break;
 					}
 					/* fall through */
 
 				case 2: { /* add a neighbouring tree */
-					byte m3 = tile.getMap().m3;
+					int m3 = tile.getMap().m3;
 
 					//tile += TileIndex.ToTileIndexDiff(_tileloop_trees_dir[Hal.Random() & 7]);
 					tile = tile.iadd( TileIndex.ToTileIndexDiff(_tileloop_trees_dir[Hal.Random() & 7]) );
@@ -556,7 +556,7 @@ public class Tree  extends TreeTables {
 			/* final stage of tree destruction */
 			if (BitOps.GB(m5, 6, 2) != 0) {
 				/* more than one tree, delete it? */
-				m5 = (byte) (((m5 - 6) - 0x40) + 3);
+				m5 = (((m5 - 6) - 0x40) + 3);
 			} else {
 				/* just one tree, change type into TileTypes.MP_CLEAR */
 				tile.SetTileType(TileTypes.MP_CLEAR);
@@ -600,8 +600,8 @@ public class Tree  extends TreeTables {
 					) 
 			{
 
-				Landscape.ModifyTile(tile,
-						TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
+				Landscape.ModifyTile(tile, TileTypes.MP_TREES,
+						//TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
 						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5,
 						(m == 4 ? 0x10 : 0),
 						tree,
@@ -633,8 +633,8 @@ public class Tree  extends TreeTables {
 					m2 = ((tile.getMap().m5 & 3) << 6) | 0x20;
 				}
 
-				Landscape.ModifyTile(tile,
-						TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
+				Landscape.ModifyTile(tile, TileTypes.MP_TREES,
+						//TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
 						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5,
 						m2,
 						tree,

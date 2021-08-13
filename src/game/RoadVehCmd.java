@@ -16,9 +16,6 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	public static final int STATUS_BAR = AirCraft.STATUS_BAR;
 
-	//void ShowRoadVehViewWindow(Vehicle v);
-
-
 	static int GetRoadVehImage(final Vehicle v, int direction)
 	{
 		int img = v.spritenum;
@@ -90,8 +87,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		/* find the first free roadveh id */
 		unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Road);
-		if (unit_num.id > Global._patches.max_roadveh.id)
-			return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
+		// TODO if (unit_num.id > Global._patches.max_roadveh.id)
+		//	return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 		if(0!= (flags & Cmd.DC_EXEC)) {
 			final RoadVehicleInfo rvi = Engine.RoadVehInfo(p1);
@@ -188,14 +185,17 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	static void ClearSlot(Vehicle v, RoadStop rs)
 	{
-		Global.DEBUG_ms( 3, "Multistop: Clearing slot %d at 0x%x", v.road.slotindex, rs.xy);
 		v.road.slot = null;
 		v.road.slot_age = 0;
 		if (rs != null) {
+			Global.DEBUG_ms( 3, "Multistop: Clearing slot %d at 0x%x", v.road.slotindex, rs.xy);
 			// check that the slot is indeed assigned to the same vehicle
 			assert(rs.slot[v.road.slotindex] == v.index);
 			rs.slot[v.road.slotindex] = Station.INVALID_SLOT;
 		}
+		else
+			Global.DEBUG_ms( 3, "Multistop: Clearing slot %d at (null)", v.road.slotindex);
+
 	}
 
 	/** Sell a road vehicle.
@@ -951,7 +951,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		int best_track;
 		int best_dist, best_maxlen;
 		int i;
-		byte m5;
+		int m5;
 
 		{
 			int r;
@@ -969,7 +969,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			if (tile.IsTileOwner(Owner.OWNER_NONE) || tile.IsTileOwner(v.owner)) {
 				/* Our station */
 				final Station  st = Station.GetStation(tile.getMap().m2);
-				byte val = tile.getMap().m5;
+				int val = tile.getMap().m5;
 				// TODO why .get(0) is ok?
 				if (v.cargo_type != AcceptedCargo.CT_PASSENGERS) {
 					if (BitOps.IS_INT_INSIDE(val, 0x43, 0x47) && (Global._patches.roadveh_queue || 0!=(st.truck_stops.get(0).status&3)))
@@ -1044,7 +1044,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 					 * pretend we are heading for the tile in front, we'll
 					 * see from there */
 					desttile = desttile.iadd(TileIndex.TileOffsByDir(m5 & 3));
-					if( desttile == tile && 0 != (bitmask&_road_pf_table_3[m5&3]) ) {
+					if( desttile.equals(tile) && 0 != (bitmask&_road_pf_table_3[m5&3]) ) {
 						/* If we are already in front of the
 						 * station/depot and we can get in from here,
 						 * we enter */
@@ -1061,7 +1061,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 					 * pretend we are heading for the tile in front, we'll
 					 * see from there */
 					desttile = desttile.iadd( TileIndex.TileOffsByDir(m5 & 3) );
-					if( desttile == tile && 0 != (bitmask&_road_pf_table_3[m5&3]) ) {
+					if( desttile.equals(tile) && 0 != (bitmask&_road_pf_table_3[m5&3]) ) {
 						/* If we are already in front of the
 						 * station/depot and we can get in from here,
 						 * we enter */
@@ -1588,7 +1588,10 @@ class RoadDriveEntry {
 		Order.CheckOrders(v.index, Order.OC_INIT);
 
 		/* update destination */
-		if (v.current_order.type == Order.OT_GOTO_STATION && 0==(v.vehstatus & Vehicle.VS_CRASHED)) {
+		if ( v.current_order != null
+				&& v.current_order.type == Order.OT_GOTO_STATION 
+				&& 0==(v.vehstatus & Vehicle.VS_CRASHED)) 
+		{
 			RoadStopType type = (v.cargo_type == AcceptedCargo.CT_PASSENGERS) ? RoadStopType.RS_BUS : RoadStopType.RS_TRUCK;
 
 			st = Station.GetStation(v.current_order.station);

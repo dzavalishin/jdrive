@@ -140,13 +140,13 @@ public class Cmd {
 
 
 	public static final int DC_EXEC = 1;
-	public static final int DC_AUTO = 2;								// don't allow building on structures
-	public static final int DC_QUERY_COST = 4;					// query cost only; don't build.
-	public static final int DC_NO_WATER = 8;						// don't allow building on water
+	public static final int DC_AUTO = 2;				// don't allow building on structures
+	public static final int DC_QUERY_COST = 4;			// query cost only; don't build.
+	public static final int DC_NO_WATER = 8;			// don't allow building on water
 	public static final int DC_NO_RAIL_OVERLAP = 0x10;	// don't allow overlap of rails (used in buildrail)
-	public static final int DC_AI_BUILDING = 0x20;			// special building rules for AI
-	public static final int DC_NO_TOWN_RATING = 0x40;		// town rating does not disallow you from building
-	public static final int DC_FORCETEST = 0x80;				// force test too.
+	public static final int DC_AI_BUILDING = 0x20;		// special building rules for AI
+	public static final int DC_NO_TOWN_RATING = 0x40;	// town rating does not disallow you from building
+	public static final int DC_FORCETEST = 0x80;		// force test too.
 
 	public static final int CMD_ERROR = ((int)0x80000000);
 
@@ -342,6 +342,11 @@ public class Cmd {
 
 	static int DoCommandByTile(TileIndex tile, int p1, int p2, int flags, int procc)
 	{
+		if(null == tile)
+		{
+			Global.error("null tile in DoCommandByTile");
+			return Cmd.CMD_ERROR;
+		}
 		return DoCommand(tile.TileX() * 16, tile.TileY() * 16, p1, p2, flags, procc);
 	}
 
@@ -571,7 +576,7 @@ public class Cmd {
 			Player.GetPlayer(Global._current_player).last_build_coordinate = tile;
 
 		/* Actually try and execute the command. If no cost-type is given
-		 * use the finalruction one */
+		 * use the construction one */
 		Player._yearly_expenses_type = Player.EXPENSES_CONSTRUCTION;
 		res2 = proc.exec(x,y, flags|Cmd.DC_EXEC, p1, p2);
 

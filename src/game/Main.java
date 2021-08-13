@@ -192,7 +192,7 @@ public class Main {
 			sprintf(filename, "%sopntitle.dat",  _path.second_data_dir);
 			if (SaveOrLoad(filename, SL_LOAD) != SL_OK)
 	#endif*/
-			GenerateWorld.doGenerateWorld(1, 64, 64); // if failed loading, make empty world.
+			GenerateWorld.doGenerateWorld(1, 256, 256); // if failed loading, make empty world.
 		}
 
 		Global._pause = 0;
@@ -371,7 +371,7 @@ public class Main {
 		VehicleGui.InitializeGUI();
 		// TODO Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
-		GenerateWorld.doGenerateWorld(1, 64, 64); // Make the viewport initialization happy
+		GenerateWorld.doGenerateWorld(1, 256, 256); // Make the viewport initialization happy
 		/*
 		if ((network) && (_network_available)) {
 			if (network_conn != null) {
@@ -500,8 +500,8 @@ public class Main {
 		Gui.SetupColorsAndInitialWindow();
 
 		// Randomize world
-		// TODO world size GenerateWorld.doGenerateWorld(0, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
-		GenerateWorld.doGenerateWorld(0, 64, 64);
+		GenerateWorld.doGenerateWorld(0, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
+		//GenerateWorld.doGenerateWorld(0, 64, 64);
 
 		// In a dedicated server, the server does not play
 		if (Global._network_dedicated) {

@@ -177,6 +177,7 @@ public class Textbuf
 		buf = new char[256]; // TODO size?
 		char[] src = str.toCharArray();		
 		System.arraycopy(src, 0, buf, 0, src.length);
+		UpdateTextBufferSize();
 	}
 
 

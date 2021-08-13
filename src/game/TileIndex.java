@@ -66,6 +66,12 @@ public class TileIndex implements Comparable<TileIndex>
 
 	public static TileIndex INVALID_TILE = getInvalid(); //new TileIndex(-1);
 
+	
+	
+	
+	
+	
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TileIndex) {
@@ -82,7 +88,10 @@ public class TileIndex implements Comparable<TileIndex>
 		return this.tile - o.tile;
 	}
 
-
+	@Override
+	public String toString() {
+		return String.format("%d.%d", getX(), getY() );
+	}
 
 
 
@@ -221,8 +230,18 @@ public class TileIndex implements Comparable<TileIndex>
 	{
 		return tile & Global.MapMaxX();
 	}
+	
+	int getX()
+	{
+		return tile & Global.MapMaxX();
+	}
 
 	int TileY()
+	{
+		return tile >> Global.MapLogX();
+	}
+
+	int getY()
 	{
 		return tile >> Global.MapLogX();
 	}
@@ -684,6 +703,10 @@ public class TileIndex implements Comparable<TileIndex>
 		return (tile >=0) && (tile < Global.MapSizeX() * Global.MapMaxY() && TileX() != Global.MapMaxX());
 	}
 
+	public boolean isValid() {
+		return IsValidTile();
+	}
+
 
 	/**
 	 * Returns whether the given tile is a level crossing.
@@ -753,6 +776,7 @@ public class TileIndex implements Comparable<TileIndex>
 	public int GetRailTileType() {
 		return Rail.GetRailTileType(this);
 	}
+
 	
 
 }
@@ -769,12 +793,15 @@ enum TileTypes {
 	MP_VOID, // invisible tiles at the SW and SE border
 	MP_INDUSTRY,
 	MP_TUNNELBRIDGE,
-	MP_UNMOVABLE;
+	MP_UNMOVABLE,
+	
+	MP_NOCHANGE // used in modify tile func if we don't want to change type
+	;
 
 	static TileTypes[] values = values();
 
 
-	public static int MP_SETTYPE( TileTypes x ) { return  ((x.ordinal()+1) << 8); }
+	//public static int MP_SETTYPE( TileTypes x ) { return  ((x.ordinal()+1) << 8); }
 
 	public static final int MP_MAP2 = 1<<0;
 	public static final int MP_MAP3LO = 1<<1;

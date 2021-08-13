@@ -28,7 +28,7 @@ public class UnmovableCmd extends UnmovableTables {
 			while(ii.hasNext())
 			{
 				Player pp = ii.next();
-				if (pp.location_of_house == tile) {
+				if (pp.location_of_house.equals(tile)) {
 					dodelete = true;
 					break;
 				}
@@ -82,10 +82,18 @@ public class UnmovableCmd extends UnmovableTables {
 
 			p.location_of_house = tile;
 
-			Landscape.ModifyTile(tile.iadd(0, 0), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x80);
-			Landscape.ModifyTile(tile.iadd(0, 1), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x81);
-			Landscape.ModifyTile(tile.iadd(1, 0), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x82);
-			Landscape.ModifyTile(tile.iadd(1, 1), TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x83);
+			Landscape.ModifyTile(tile.iadd(0, 0), TileTypes.MP_UNMOVABLE, 
+					//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x80);
+			Landscape.ModifyTile(tile.iadd(0, 1), TileTypes.MP_UNMOVABLE, 
+					//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x81);
+			Landscape.ModifyTile(tile.iadd(1, 0), TileTypes.MP_UNMOVABLE, 
+					//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x82);
+			Landscape.ModifyTile(tile.iadd(1, 1), TileTypes.MP_UNMOVABLE, 
+					//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
+					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x83);
 			Economy.UpdatePlayerHouse(p, score);
 			Window.InvalidateWindow(Window.WC_COMPANY, (int)p.index.id);
 		}
@@ -185,7 +193,7 @@ public class UnmovableCmd extends UnmovableTables {
 
 	static int ClearTile_Unmovable(TileIndex tile, byte flags)
 	{
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 
 		if(0 != (m5 & 0x80)) {
 			if (Global._current_player.id == Owner.OWNER_WATER) return DestroyCompanyHQ(tile, Cmd.DC_EXEC);
@@ -211,7 +219,7 @@ public class UnmovableCmd extends UnmovableTables {
 	static AcceptedCargo GetAcceptedCargo_Unmovable(TileIndex tile)
 	{
 		AcceptedCargo ac = new AcceptedCargo();
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 		int level; // HQ level (depends on company performance) in the range 1..5.
 
 		if (0==(m5 & 0x80)) {
@@ -262,7 +270,7 @@ public class UnmovableCmd extends UnmovableTables {
 
 	static void TileLoop_Unmovable(TileIndex tile)
 	{
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 		int level; // HQ level (depends on company performance) in the range 1..5.
 		int r;
 

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import game.ai.Ai;
 import game.tables.StationTables;
 import game.util.BitOps;
 
@@ -1051,17 +1050,17 @@ public class Station extends StationTables implements IPoolItem
 			}
 
 			// check if the new station adjoins the old station in either direction
-			if (curw == w && st.train_tile == tile.iadd(0, h)) {
+			if (curw == w && st.train_tile.equals( tile.iadd(0, h) ) ) {
 				// above
 				curh += h;
-			} else if (curw == w && st.train_tile == tile.iadd(0, -curh)) {
+			} else if (curw == w && st.train_tile.equals( tile.iadd(0, -curh) ) ) {
 				// below
 				tile.madd(0, -curh);
 				curh += h;
-			} else if (curh == h && st.train_tile == tile.iadd(w, 0)) {
+			} else if (curh == h && st.train_tile.equals( tile.iadd(w, 0) ) ) {
 				// to the left
 				curw += w;
-			} else if (curh == h && st.train_tile == tile.iadd(-curw, 0)) {
+			} else if (curh == h && st.train_tile.equals( tile.iadd(-curw, 0) ) ) {
 				// to the right
 				tile.madd(-curw, 0);
 				curw += w;
@@ -1270,8 +1269,9 @@ public class Station extends StationTables implements IPoolItem
 				int w = plat_len;
 				do {
 
-					Landscape.ModifyTile(tile,
-							TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
+					Landscape.ModifyTile(tile, TileTypes.MP_STATION,
+							//TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | 
+							TileTypes.MP_MAPOWNER_CURRENT |
 							TileTypes.MP_MAP2 | TileTypes.MP_MAP5 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI,
 							station_index.id, /* map2 parameter */
 							p2 & 0xFF,     /* map3lo parameter */
@@ -1644,7 +1644,7 @@ public class Station extends StationTables implements IPoolItem
 		Station st;
 		RoadStop road_stop;
 		RoadStop currstop = new RoadStop();
-		RoadStop prev = null; //new RoadStop();
+		//RoadStop prev = null; //new RoadStop();
 		TileIndex tile;
 		int cost;
 		boolean type = p2 != 0 ;
@@ -1722,8 +1722,9 @@ public class Station extends StationTables implements IPoolItem
 
 			st.build_date = Global._date;
 
-			Landscape.ModifyTile(tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
+			Landscape.ModifyTile(tile, TileTypes.MP_STATION,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | 
+					TileTypes.MP_MAPOWNER_CURRENT |
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP5 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR,
 					st.index,                       /* map2 parameter */
 					/* XXX - Truck stops have 0x43 _m[].m5 value + direction
@@ -1985,8 +1986,9 @@ public class Station extends StationTables implements IPoolItem
 				//BEGIN_TILE_LOOP(tile_cur,w,h,tile)
 				TileIndex.forAll(w, h, tile, (tile_cur) ->
 				{
-					Landscape.ModifyTile(tile_cur,
-							TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
+					Landscape.ModifyTile(tile_cur, TileTypes.MP_STATION,
+							//TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | 
+							TileTypes.MP_MAPOWNER_CURRENT |
 							TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAP5,
 							fst.index, b[bi[0]++]);
 					return false;
@@ -2095,8 +2097,8 @@ public class Station extends StationTables implements IPoolItem
 
 			st.build_date = Global._date;
 
-			Landscape.ModifyTile(ti.tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_STATION) |
+			Landscape.ModifyTile(ti.tile, TileTypes.MP_STATION,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_STATION) |
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5,
 					st.index,		/* map2 */
 					Owner.OWNER_NONE,		/* map_owner */
@@ -2155,8 +2157,8 @@ public class Station extends StationTables implements IPoolItem
 			st.facilities &= ~FACIL_DOCK;
 			st.had_vehicle_of_type &= ~HVOT_BUOY;
 
-			Landscape.ModifyTile(tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_WATER) |
+			Landscape.ModifyTile(tile, TileTypes.MP_WATER,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) |
 					TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR,
 					Owner.OWNER_WATER, /* map_owner */
 					0			/* map5 */
@@ -2281,15 +2283,18 @@ public class Station extends StationTables implements IPoolItem
 
 			st.build_date = Global._date;
 
-			Landscape.ModifyTile(tile,
-					TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
+			Landscape.ModifyTile(tile, TileTypes.MP_STATION,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | 
+					TileTypes.MP_MAPOWNER_CURRENT |
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR |
 					TileTypes.MP_MAP5,
 					st.index,
 					direction + 0x4C);
 
 			Landscape.ModifyTile(tile.iadd(TileIndex.TileOffsByDir(direction)),
-					TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | TileTypes.MP_MAPOWNER_CURRENT |
+					TileTypes.MP_STATION,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | 
+					TileTypes.MP_MAPOWNER_CURRENT |
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR |
 					TileTypes.MP_MAP5,
 					st.index,
@@ -2319,7 +2324,9 @@ public class Station extends StationTables implements IPoolItem
 			Landscape.DoClearSquare(tile1);
 
 			// convert the water tile to water.
-			Landscape.ModifyTile(tile2, TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0);
+			Landscape.ModifyTile(tile2, TileTypes.MP_WATER,
+					//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+					TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0);
 
 			st.dock_tile = null;
 			st.facilities &= ~FACIL_DOCK;
@@ -2478,14 +2485,13 @@ public class Station extends StationTables implements IPoolItem
 
 	private static TileDesc GetTileDesc_Station(TileIndex tile)
 	{
-		byte m5;
 		int str;
 		TileDesc td = new TileDesc();
 
 		td.owner = tile.GetTileOwner().id;
 		td.build_date = GetStation(tile.getMap().m2).build_date;
 
-		m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 
 		if(m5 < 8) 					str=Str.STR_305E_RAILROAD_STATION;
 		else if(m5==32 || m5==45) 	str=Str.STR_305F_AIRCRAFT_HANGAR; // hangars
@@ -2556,7 +2562,7 @@ public class Station extends StationTables implements IPoolItem
 
 	private static void AnimateTile_Station(TileIndex tile)
 	{
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 		//FIXME -- AnimateTile_Station . not nice code, lots of things double
 		// again hardcoded...was a quick hack
 
@@ -2731,7 +2737,7 @@ public class Station extends StationTables implements IPoolItem
 		});
 
 		//Subsidies need removal as well
-		Economy.DeleteSubsidyWithStation(index);
+		Subsidy.DeleteSubsidyWithStation(index);
 
 		st.airport_queue.clear();
 		//free(st.airport_queue);
@@ -3265,7 +3271,7 @@ public class Station extends StationTables implements IPoolItem
 
 	private static int ClearTile_Station(TileIndex tile, int flags)
 	{
-		byte m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 		Station st;
 
 		if( 0 != (flags & Cmd.DC_AUTO)) {

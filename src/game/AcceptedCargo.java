@@ -61,7 +61,7 @@ public class AcceptedCargo {
 
 	public static final int NUM_CARGO = 12;
 
-	public static final int CT_INVALID = 0xFF;
+	public static final int CT_INVALID = -1;
 
 
 }
