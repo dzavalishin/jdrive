@@ -251,6 +251,8 @@ public class MiscGui {
 				w.SetWindowDirty();
 			}
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -365,6 +367,8 @@ public class MiscGui {
 		case WE_ABORT_PLACE_OBJ:
 			w.click_state = 0;
 			w.SetWindowDirty();
+			break;
+		default:
 			break;
 		}
 	}
@@ -853,7 +857,7 @@ public class MiscGui {
 	private static void QueryStringWndProc_press_ok(Window w, boolean [] closed)
 	{
 		if (w.as_querystr_d().orig != null &&
-				(w.as_querystr_d().text.getBuf().equals(w.as_querystr_d().orig)) ) 
+				(w.as_querystr_d().text.getString().equals(w.as_querystr_d().orig)) ) 
 		{
 			w.DeleteWindow();
 		} else {
@@ -934,6 +938,8 @@ public class MiscGui {
 				}
 			}
 			Global._no_scroll = BitOps.RETCLRBIT(Global._no_scroll, Global.SCROLL_EDIT);
+			break;
+		default:
 			break;
 		}
 	}
@@ -1527,6 +1533,8 @@ public class MiscGui {
 
 			w.vscroll.cap += e.diff.y / 10;
 		} break;
+		default:
+			break;
 		}
 	}
 

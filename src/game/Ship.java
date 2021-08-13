@@ -8,10 +8,10 @@ public class Ship {
 
 	static public final int STATUS_BAR = Vehicle.STATUS_BAR;
 
-	static byte GetTileShipTrackStatus(TileIndex tile)
+	static int GetTileShipTrackStatus(TileIndex tile)
 	{
 		int r = tile.GetTileTrackStatus(Global.TRANSPORT_WATER);
-		return  (r | r >> 8);
+		return  (r | r >>> 8);
 	}
 
 	static void DrawShipEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
@@ -350,7 +350,7 @@ public class Ship {
 	static boolean ShipAccelerate(Vehicle v)
 	{
 		int spd;
-		byte t;
+		int t;
 
 		spd = Math.min(v.cur_speed + 1, v.max_speed);
 
@@ -465,7 +465,7 @@ public class Ship {
 
 	static final byte _pick_shiptrack_table[] = {1, 3, 2, 2, 0, 0};
 
-	private static final boolean TryTrack(int best_track, int i, PathFindShip pfs, byte ship_dir, int best_length, int best_bird_dist)
+	private static final boolean TryTrack(int best_track, int i, PathFindShip pfs, int ship_dir, int best_length, int best_bird_dist)
 	{
 		if (best_track >= 0) {
 			if (pfs.best_bird_dist != 0) {
@@ -495,7 +495,7 @@ public class Ship {
 		int best_bird_dist = 0;
 		int best_length    = 0;
 		//int r;
-		byte ship_dir =  (v.direction & 3);
+		int ship_dir =  (v.direction & 3);
 
 		pfs.dest_coords = v.dest_tile;
 		pfs.skiptile = skiptile;

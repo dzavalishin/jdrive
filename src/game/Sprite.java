@@ -130,7 +130,7 @@ public class Sprite extends Sprites {
 	}
 
 	//static SpriteGroup [] EvalRandomizedSpriteGroup(final RandomizedSpriteGroup rsg, byte random_bits)
-	static SpriteGroup EvalRandomizedSpriteGroup(final RandomizedSpriteGroup rsg, byte random_bits)
+	static SpriteGroup EvalRandomizedSpriteGroup(final RandomizedSpriteGroup rsg, int random_bits)
 	{
 		int mask;
 		int index;

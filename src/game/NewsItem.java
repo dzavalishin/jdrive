@@ -169,13 +169,13 @@ public class NewsItem {
 
 		ni.string_id = new StringID( string );
 		ni.display_mode = flags;
-		ni.flags = (flags >> 8) | NF_NOEXPIRE;
+		ni.flags = 0xFF & ((flags >> 8) | NF_NOEXPIRE);
 
 		// show this news message in color?
 		if (Global._date >= GameDate.ConvertIntDate(Global._patches.colored_news_date))
 			ni.flags |= NF_INCOLOR;
 
-		ni.type = (flags >>> 16);
+		ni.type = (flags >>> 16) & 0xFF;
 		ni.callback = (flags >>> 24);
 		ni.data_a = new TileIndex( data_a );
 		ni.data_b = new TileIndex( data_b );
@@ -351,6 +351,8 @@ public class NewsItem {
 
 			Gfx.SetDirtyBlocks(w.left, w.top - diff, w.left + w.width, w.top + w.height);
 		} break;
+		default:
+			break;
 		}
 	}
 
@@ -497,7 +499,7 @@ public class NewsItem {
 	 * @param item the item whose value is being set
 	 * @param val new value
 	 */
-	static  void SetNewsDisplayValue(byte item, byte val)
+	static  void SetNewsDisplayValue(int item, int val)
 	{
 		assert(item < 10 && val <= 2);
 		Global._news_display_opt = BitOps.RETSB(Global._news_display_opt, item * 2, 2, val);
@@ -803,6 +805,8 @@ public class NewsItem {
 		case WE_RESIZE:
 			w.vscroll.cap += e.diff.y / 12;
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -927,7 +931,7 @@ public class NewsItem {
 			case 2: /* Clicked on any of the fake widgets */
 				if (e.pt.x > 13 && e.pt.x < 89 && e.pt.y > 26 && e.pt.y < 146) {
 					int element = (e.pt.y - 26) / 12;
-					byte val =  ((GetNewsDisplayValue(element) + 1) % 3);
+					int val = (GetNewsDisplayValue(element) + 1) % 3;
 
 					SetMessageButtonStates(w, val, element);
 					SetNewsDisplayValue( element, val);
@@ -950,7 +954,7 @@ public class NewsItem {
 				int wid = e.widget;
 				if (wid > 2 && wid < 23) {
 					int element = (wid - 3) / 2;
-					byte val =  ((GetNewsDisplayValue(element) + (0 != (wid & 1) ? -1 : 1)) % 3);
+					int val = (GetNewsDisplayValue(element) + (0 != (wid & 1) ? -1 : 1)) % 3;
 
 					SetMessageButtonStates(w, val, element);
 					SetNewsDisplayValue(element, val);
@@ -969,6 +973,8 @@ public class NewsItem {
 		case WE_TIMEOUT: /* XXX - Hack to animate 'fake' buttons */
 			((def_d)w.custom).data_1 = 0;
 			w.SetWindowDirty();
+			break;
+		default:
 			break;
 
 		}

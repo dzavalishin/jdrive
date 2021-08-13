@@ -3052,7 +3052,7 @@ public class Station extends StationTables implements IPoolItem
 		//StationID st_index;
 		//int i;
 		int moved;
-		int best_rating, best_rating2;
+		//int best_rating, best_rating2;
 		//Station st1, st2;
 		int t;
 		//int rad=0;
@@ -3160,6 +3160,7 @@ public class Station extends StationTables implements IPoolItem
 		Station st1 = null;
 		Station st2 = null;
 
+		int best_rating, best_rating2;
 		best_rating = best_rating2 = 0;
 
 		for( int i = 0; i != 8 && around[i] != INVALID_STATION; i++) {

@@ -190,5 +190,10 @@ public class Textbuf
 		buf = new char[i];
 		
 	}
+
+
+	public String getString() {
+		return new String(buf);
+	}
 	
 }

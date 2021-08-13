@@ -1304,7 +1304,7 @@ public class TrainCmd extends TrainTables
 	static void SwapTrainFlags(VehicleRail rail1, VehicleRail rail2)
 	//byte *swap_flag1, byte *swap_flag2)
 	{
-		byte flag1, flag2;
+		int flag1, flag2;
 
 		flag1 = rail1.flags; //*swap_flag1;
 		flag2 = rail2.flags;
@@ -2712,7 +2712,7 @@ public class TrainCmd extends TrainTables
 
 
 	/* Modify the speed of the vehicle due to a turn */
-	static void AffectSpeedByDirChange(Vehicle v, byte new_dir)
+	static void AffectSpeedByDirChange(Vehicle v, int new_dir)
 	{
 		int diff;
 		final RailtypeSlowdownParams rsp;
@@ -2934,8 +2934,8 @@ public class TrainCmd extends TrainTables
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		int r, tracks,ts;
 		int i, enterdir, /*newdir,*/ dir;
-		byte chosen_dir = 0; // TODO [dz] logic lost? Does not get value
-		byte chosen_track;
+		int chosen_dir = 0; // TODO [dz] logic lost? Does not get value
+		int chosen_track;
 		//byte old_z;
 
 		/* For every vehicle after and including the given vehicle */
@@ -3005,7 +3005,7 @@ public class TrainCmd extends TrainTables
 
 			/* A new tile is about to be entered. */
 
-			byte bits;
+			int bits;
 			/* Determine what direction we're entering the new tile from */
 			dir = GetNewVehicleDirectionByTile(gp.new_tile, gp.old_tile);
 			enterdir = dir >> 1;
@@ -3248,7 +3248,7 @@ public class TrainCmd extends TrainTables
 		 */
 	}
 
-	private static boolean green_light(Vehicle v, GetNewVehiclePosResult gp, Vehicle prev, int enterdir, byte chosen_dir, byte chosen_track) 
+	private static boolean green_light(Vehicle v, GetNewVehiclePosResult gp, Vehicle prev, int enterdir, int chosen_dir, int chosen_track) 
 	{
 		if (v.next == null)
 			Pbs.PBSClearTrack(gp.old_tile, BitOps.FIND_FIRST_BIT(v.rail.track));

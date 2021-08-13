@@ -5,14 +5,14 @@ import game.tables.SettingsTables;
 public class GameOptions 
 {
 	public GameDifficulty diff = SettingsTables._default_game_diff[0]; // TODO must be set in some other way
-	public byte diff_level = 0;
-	public byte currency;
+	public int diff_level = 0;
+	public int currency;
 	public boolean kilometers;
-	public byte town_name;
-	public byte landscape = Landscape.LT_NORMAL;
-	public byte snow_line;
-	public byte autosave;
-	public byte road_side;
+	public int town_name;
+	public int landscape = Landscape.LT_NORMAL;
+	public int snow_line;
+	public int autosave;
+	public int road_side;
 
 	/* These are the options for the current game
 	 * either ingame, or loaded. Also used for networking games */

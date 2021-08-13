@@ -740,7 +740,7 @@ public class Engine extends EngineTables {
 
 		if (spritegroup.type == SpriteGroupType.SGT_RANDOMIZED) 
 		{
-			byte[] trigPtr = {veh.waiting_triggers};
+			byte[] trigPtr = {(byte) veh.waiting_triggers};
 			
 			_vsg_bits_to_reseed |= Sprite.RandomizedSpriteGroupTriggeredBits(
 					(RandomizedSpriteGroup)spritegroup,
