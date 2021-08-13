@@ -364,7 +364,7 @@ public class TextEffect
 		//for (ti = _animated_tile_list; ti != endof(_animated_tile_list); ti++) {
 		for(int i = 0 ; i < _animated_tile_list.length; i++)
 		{
-			if (tile == _animated_tile_list[i]) 
+			if (tile.equals(_animated_tile_list[i])) 
 			{
 				/* remove the hole */
 				//memmove(ti, ti + 1, endof(_animated_tile_list) - 1 - ti);
@@ -386,7 +386,7 @@ public class TextEffect
 		//for( TileIndex ti : _animated_tile_list)
 		for(int i = 0 ; i < _animated_tile_list.length; i++)
 		{
-			if (tile == _animated_tile_list[i] || _animated_tile_list[i] == null) {
+			if (tile.equals(_animated_tile_list[i]) || _animated_tile_list[i] == null) {
 				_animated_tile_list[i] = tile;
 				tile.MarkTileDirtyByTile();
 				return true;

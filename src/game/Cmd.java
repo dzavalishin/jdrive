@@ -140,13 +140,13 @@ public class Cmd {
 
 
 	public static final int DC_EXEC = 1;
-	public static final int DC_AUTO = 2;								// don't allow building on structures
-	public static final int DC_QUERY_COST = 4;					// query cost only; don't build.
-	public static final int DC_NO_WATER = 8;						// don't allow building on water
+	public static final int DC_AUTO = 2;				// don't allow building on structures
+	public static final int DC_QUERY_COST = 4;			// query cost only; don't build.
+	public static final int DC_NO_WATER = 8;			// don't allow building on water
 	public static final int DC_NO_RAIL_OVERLAP = 0x10;	// don't allow overlap of rails (used in buildrail)
-	public static final int DC_AI_BUILDING = 0x20;			// special building rules for AI
-	public static final int DC_NO_TOWN_RATING = 0x40;		// town rating does not disallow you from building
-	public static final int DC_FORCETEST = 0x80;				// force test too.
+	public static final int DC_AI_BUILDING = 0x20;		// special building rules for AI
+	public static final int DC_NO_TOWN_RATING = 0x40;	// town rating does not disallow you from building
+	public static final int DC_FORCETEST = 0x80;		// force test too.
 
 	public static final int CMD_ERROR = ((int)0x80000000);
 

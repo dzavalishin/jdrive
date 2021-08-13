@@ -703,6 +703,10 @@ public class TileIndex implements Comparable<TileIndex>
 		return (tile >=0) && (tile < Global.MapSizeX() * Global.MapMaxY() && TileX() != Global.MapMaxX());
 	}
 
+	public boolean isValid() {
+		return IsValidTile();
+	}
+
 
 	/**
 	 * Returns whether the given tile is a level crossing.
@@ -772,6 +776,7 @@ public class TileIndex implements Comparable<TileIndex>
 	public int GetRailTileType() {
 		return Rail.GetRailTileType(this);
 	}
+
 	
 
 }

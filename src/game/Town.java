@@ -195,7 +195,8 @@ public class Town extends TownTables implements IPoolItem
 	 */
 	public boolean IsValidTown()
 	{
-		return xy.getTile() != 0; /* XXX: Replace by INVALID_TILE someday */
+		//return xy.getTile() != 0; /* XXX: Replace by INVALID_TILE someday */
+		return xy.isValid();
 	}
 
 	/**
@@ -216,7 +217,7 @@ public class Town extends TownTables implements IPoolItem
 
 	static  boolean IsTownIndex(int index)
 	{
-		return index > 0 && index < GetTownPoolSize(); 
+		return index >= 0 && index < GetTownPoolSize(); 
 	}
 
 
@@ -1061,6 +1062,8 @@ public class Town extends TownTables implements IPoolItem
 			new TileIndexDiffC( 0,  0)
 	};
 
+	
+	static boolean disableGrow = true;
 	// Grow the town
 	// Returns true if a house was built, or no if the build failed.
 	static boolean GrowTown(Town t)
@@ -1070,12 +1073,14 @@ public class Town extends TownTables implements IPoolItem
 		TileInfo ti = new TileInfo();
 		PlayerID old_player;
 
-
+// TODO XXX TEMP debuf remove me now!
+		if(disableGrow) return false;
+		
 		// Current player is a town
 		old_player = Global._current_player;
 		Global._current_player.id = Owner.OWNER_TOWN;
 
-		// Find a road that we can base the finalruction on.
+		// Find a road that we can base the construction on.
 		tile = t.xy;
 		//for (ptr = _town_coord_mod; ptr != endof(_town_coord_mod); ++ptr) 
 		for(int i = 0; i < _town_coord_mod.length; i++)

@@ -2779,7 +2779,7 @@ public class Vehicle implements IPoolItem
 		gp.y = y;
 		gp.old_tile = tile;
 		gp.new_tile = TileIndex.TileVirtXY(x, y);
-		return gp.old_tile == gp.new_tile;
+		return gp.old_tile.equals(gp.new_tile);
 	}
 
 	static final byte _new_direction_table[] = {

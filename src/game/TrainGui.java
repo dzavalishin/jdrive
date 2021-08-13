@@ -153,7 +153,7 @@ public class TrainGui
 		if (!success) return;
 
 		v = Vehicle.GetVehicle(Global._new_train_id);
-		if (tile == Global._backup_orders_tile) {
+		if (tile.equals(Global._backup_orders_tile)) {
 			Global._backup_orders_tile = null;
 			Vehicle.RestoreVehicleOrders(v, Global._backup_orders_data[0]);
 		}

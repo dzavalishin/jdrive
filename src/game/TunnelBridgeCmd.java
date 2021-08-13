@@ -648,7 +648,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		}
 
 		endtile = CheckTunnelBusy(tile, length);
-		if (endtile == TileIndex.INVALID_TILE) return Cmd.CMD_ERROR;
+		if (!endtile.isValid()) return Cmd.CMD_ERROR;
 
 		Global._build_tunnel_endtile = endtile;
 
@@ -917,7 +917,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			cost = 0;
 			do {
 				if (exec) {
-					if (tile == starttile || tile == end2[0]) {
+					if (tile.equals(starttile) || tile.equals(end2[0])) {
 						tile.getMap().m3 = (byte) BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
 					} else {
 						tile.getMap().m3 = (byte) BitOps.RETSB(tile.getMap().m3, 4, 4, totype);

@@ -55,13 +55,13 @@ public class NewTrackPathFinder extends Pathfind
 
 		// never visited before?
 		if ((head=tpf.hash_head[hash]) == 0) {
-			tpf.hash_tile[hash] = tile;
+			tpf.hash_tile[hash] = tile.tile;
 			tpf.hash_head[hash] = dir | (length << 2);
 			return true;
 		}
 
 		if (head != 0xffff) {
-			if (tile == tpf.hash_tile[hash] && (head & 0x3) == dir) {
+			if (tile.equals(tpf.hash_tile[hash]) && (head & 0x3) == dir) {
 
 				// longer length
 				if (length >= (head >> 2)) return false;
@@ -96,7 +96,7 @@ public class NewTrackPathFinder extends Pathfind
 			int offs = tpf.hash_tile[hash].tile;
 			do {
 				link = NTP_GET_LINK_PTR(tpf, offs);
-				if (tile == link.tile && (int)(link.typelength & 0x3) == dir) {
+				if (tile.equals(link.tile) && (int)(link.typelength & 0x3) == dir) {
 					if (length >= (int)(link.typelength >> 2)) return false;
 					link.typelength = dir | (length << 2);
 					return true;
@@ -155,7 +155,7 @@ public class NewTrackPathFinder extends Pathfind
 		offs = tpf.hash_tile[hash];
 		for(;;) {
 			link = NTP_GET_LINK_PTR(tpf, offs);
-			if (tile == link.tile && (int)(link.typelength & 0x3) == dir) {
+			if (tile.equals(link.tile) && (int)(link.typelength & 0x3) == dir) {
 				assert( (int)(link.typelength >> 2) <= length);
 				return length == (int)(link.typelength >> 2);
 			}
@@ -337,7 +337,7 @@ public class NewTrackPathFinder extends Pathfind
 				direction = _tpf_new_direction[track];
 
 				// safety check if we're running around chasing our tail... (infinite loop)
-				if (tile == tile_org) {
+				if (tile.equals(tile_org)) {
 					bits = 0;
 					break;
 				}

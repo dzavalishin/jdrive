@@ -858,7 +858,7 @@ public class Npf {
 			}
 			/* This a normal tile, a bridge, a tunnel exit, etc. */
 			dst_tile = TileIndex.AddTileIndexDiffCWrap(src_tile, TileIndex.TileIndexDiffCByDir(Rail.TrackdirToExitdir(src_trackdir)));
-			if (dst_tile == TileIndex.INVALID_TILE) {
+			if (!dst_tile.isValid()) {
 				/* We reached the border of the map */
 				/* TODO Nicer control flow for this */
 				return;

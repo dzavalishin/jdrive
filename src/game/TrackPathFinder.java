@@ -65,7 +65,7 @@ public class TrackPathFinder extends Pathfind
 		} else if (0==(val & 0x8000)) {
 			/* single tile */
 
-			if (tile == tpf.hash_tile[hash]) {
+			if (tile.equals(tpf.hash_tile[hash])) {
 				/* found another bit for the same tile,
 				 * check if this bit is already set, if so, return false */
 				if(0!=(val & bits))
@@ -104,7 +104,7 @@ public class TrackPathFinder extends Pathfind
 			offs = tpf.hash_tile[hash];
 			do {
 				link = PATHFIND_GET_LINK_PTR(tpf, offs);
-				if (tile == link.tile) {
+				if (tile.equals(link.tile)) {
 					/* found the tile in the link list,
 					 * check if the bit was alrady set, if so return false to indicate that the
 					 * bit was already set */

@@ -302,7 +302,7 @@ public class ShipGui
 		if (!success) return;
 
 		v = Vehicle.GetVehicle(Global._new_ship_id);
-		if (v.tile == Global._backup_orders_tile) {
+		if (v.tile.equals(Global._backup_orders_tile)) {
 			Global._backup_orders_tile = null;
 			Vehicle.RestoreVehicleOrders(v, Global._backup_orders_data[0]);
 		}

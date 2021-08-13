@@ -1,7 +1,7 @@
 package game;
 
 class FoundRoute {
-	int distance;
+	int distance = 0;
 	int cargo;
 	Object from;
 	Object to;

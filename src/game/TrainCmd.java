@@ -534,7 +534,7 @@ public class TrainCmd extends TrainTables
 		{
 			final Vehicle  v = it.next();
 			if (v.type == Vehicle.VEH_Train && v.IsFreeWagon() &&
-					v.tile == u.tile &&
+					v.tile.equals(u.tile) &&
 					v.rail.track == 0x80) {
 				if (Cmd.CmdFailed(Cmd.DoCommandByTile(null, v.index | (u.index << 16), 1, Cmd.DC_EXEC,
 						Cmd.CMD_MOVE_RAIL_VEHICLE)))
@@ -2109,7 +2109,7 @@ public class TrainCmd extends TrainTables
 			return false;
 
 		// did we reach the final station?
-		if ((ttfd.station_index.id == Station.INVALID_STATION && tile == ttfd.dest_coords) ||
+		if ((ttfd.station_index.id == Station.INVALID_STATION && tile.equals(ttfd.dest_coords)) ||
 				(tile.IsTileType( TileTypes.MP_STATION) && BitOps.IS_INT_INSIDE(tile.getMap().m5, 0, 8) && tile.getMap().m2 == ttfd.station_index.id)) {
 			/* We do not check for dest_coords if we have a station_index,
 			 * because in that case the dest_coords are just an
@@ -2386,7 +2386,7 @@ public class TrainCmd extends TrainTables
 		}
 
 		// check if we've reached the waypoint?
-		if (v.current_order.type == Order.OT_GOTO_WAYPOINT && v.tile == v.dest_tile) {
+		if (v.current_order.type == Order.OT_GOTO_WAYPOINT && v.tile.equals(v.dest_tile)) {
 			v.cur_order_index++;
 		}
 
@@ -3371,7 +3371,7 @@ public class TrainCmd extends TrainTables
 		if (v.rail.track == 0x40) { // inside a tunnel
 			TileIndex endtile = TunnelBridgeCmd.CheckTunnelBusy(v.tile, null);
 
-			if (endtile == TileIndex.INVALID_TILE) // tunnel is busy (error returned)
+			if (!endtile.isValid()) // tunnel is busy (error returned)
 				return;
 
 			switch (v.direction) {

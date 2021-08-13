@@ -289,7 +289,7 @@ public class Pbs {
 		do {
 			PBSClearTrack(tile, Rail.TrackdirToTrack(trackdir));
 
-			if (tile == end_tile && Rail.TrackdirToTrack(trackdir) == Rail.TrackdirToTrack(end_trackdir))
+			if (tile.equals(end_tile) && Rail.TrackdirToTrack(trackdir) == Rail.TrackdirToTrack(end_trackdir))
 				return;
 
 			if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) &&

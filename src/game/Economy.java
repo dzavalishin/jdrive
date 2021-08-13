@@ -895,7 +895,7 @@ public class Economy extends EconomeTables
 		int trans, total;
 		byte cargo;
 
-		fr.distance = (int)-1;
+		fr.distance = -1;
 
 		fr.from = i = Industry.GetIndustry(Hal.RandomRange(Industry._total_industries));
 		if (i.xy == null)
@@ -996,7 +996,7 @@ public class Economy extends EconomeTables
 					continue;
 				}
 				FindSubsidyCargoRoute(fr);
-				if (fr.distance <= 70) {
+				if (fr.distance <= 70 && fr.distance > 0) {
 					s.cargo_type = fr.cargo;
 					s.from = ((Industry)fr.from).index;
 					s.to = (fr.cargo == AcceptedCargo.CT_GOODS || fr.cargo == AcceptedCargo.CT_FOOD) ? ((Town)fr.to).index : ((Industry)fr.to).index;

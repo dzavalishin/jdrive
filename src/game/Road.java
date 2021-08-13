@@ -11,7 +11,7 @@ public class Road extends RoadTables
 
 
 
-	/* When true, GetTrackStatus for roads will treat roads under refinalruction
+	/* When true, GetTrackStatus for roads will treat roads under reconstruction
 	 * as normal roads instead of impassable. This is used when detecting whether
 	 * a road can be removed. This is of course ugly, but I don't know a better
 	 * solution just like that... */
@@ -385,7 +385,9 @@ public class Road extends RoadTables
 
 		/* Road pieces are max 4 bitset values (NE, NW, SE, SW) and town can only be non-zero
 		 * if a non-player is building the road */
-		if ((pieces >> 4) != 0 || (Global._current_player.id < Global.MAX_PLAYERS && p2 != 0) || !Town.IsTownIndex(p2)) 
+		if ((pieces >> 4) != 0 
+				|| (Global._current_player.id < Global.MAX_PLAYERS && p2 != 0) 
+				|| !Town.IsTownIndex(p2)) 
 			return Cmd.CMD_ERROR;
 
 		Landscape.FindLandscapeHeight(ti, x, y);
@@ -547,12 +549,13 @@ public class Road extends RoadTables
 
 
 	/** Build a long piece of road.
-	 * @param x,y end tile of drag
+	 * @param x end tile of drag
+	 * @param y end tile of drag
 	 * @param p1 start tile of drag
-	 * @param p2 various bitstuffed elements
-	 * - p2 = (bit 0) - start tile starts in the 2nd half of tile (p2 & 1)
-	 * - p2 = (bit 1) - end tile starts in the 2nd half of tile (p2 & 2)
-	 * - p2 = (bit 2) - direction: 0 = along x-axis, 1 = along y-axis (p2 & 4)
+	 * @param p2 various bitstuffed elements <br>
+	 * - p2 = (bit 0) - start tile starts in the 2nd half of tile (p2 & 1) <br>
+	 * - p2 = (bit 1) - end tile starts in the 2nd half of tile (p2 & 2) <br>
+	 * - p2 = (bit 2) - direction: 0 = along x-axis, 1 = along y-axis (p2 & 4) <br>
 	 */
 	public static int CmdBuildLongRoad(int x, int y, int flags, int p1, int p2)
 	{
@@ -583,8 +586,8 @@ public class Road extends RoadTables
 		// Start tile is the small number.
 		for (;;) {
 			int bits = BitOps.HASBIT(p2, 2) ? ROAD_SE | ROAD_NW : ROAD_SW | ROAD_NE;
-			if (tile == end_tile && !BitOps.HASBIT(p2, 1)) bits &= ROAD_NW | ROAD_NE;
-			if (tile == start_tile && BitOps.HASBIT(p2, 0)) bits &= ROAD_SE | ROAD_SW;
+			if(tile.equals(end_tile) && !BitOps.HASBIT(p2, 1)) bits &= ROAD_NW | ROAD_NE;
+			if(tile.equals(start_tile) && BitOps.HASBIT(p2, 0)) bits &= ROAD_SE | ROAD_SW;
 
 			ret = Cmd.DoCommandByTile(tile, bits, 0, flags, Cmd.CMD_BUILD_ROAD);
 			if (Cmd.CmdFailed(ret)) {
@@ -593,7 +596,7 @@ public class Road extends RoadTables
 				cost += ret;
 			}
 
-			if (tile == end_tile) break;
+			if(tile.equals(end_tile)) break;
 
 			tile = tile.iadd( BitOps.HASBIT(p2, 2) ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
 		}
@@ -639,8 +642,8 @@ public class Road extends RoadTables
 		// Start tile is the small number.
 		for (;;) {
 			int bits = BitOps.HASBIT(p2, 2) ? ROAD_SE | ROAD_NW : ROAD_SW | ROAD_NE;
-			if (tile == end_tile && !BitOps.HASBIT(p2, 1)) bits &= ROAD_NW | ROAD_NE;
-			if (tile == start_tile && BitOps.HASBIT(p2, 0)) bits &= ROAD_SE | ROAD_SW;
+			if (tile.equals(end_tile) && !BitOps.HASBIT(p2, 1)) bits &= ROAD_NW | ROAD_NE;
+			if (tile.equals(start_tile) && BitOps.HASBIT(p2, 0)) bits &= ROAD_SE | ROAD_SW;
 
 			// try to remove the halves.
 			if (bits != 0) {
@@ -648,7 +651,7 @@ public class Road extends RoadTables
 				if (!Cmd.CmdFailed(ret)) cost += ret;
 			}
 
-			if (tile == end_tile) break;
+			if (tile.equals(end_tile)) break;
 
 			tile = tile.iadd( BitOps.HASBIT(p2, 2) ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
 		}
