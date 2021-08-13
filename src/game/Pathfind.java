@@ -100,8 +100,8 @@ public abstract class Pathfind extends TrackPathFinderTables
 		/* initialize path finder variables */
 		tpf.userdata = data;
 		tpf.enum_proc = enum_proc;
-		tpf.new_link = tpf.links[0];
-		tpf.num_links_left = tpf.links.length;
+		//tpf.new_link = tpf.links[0];
+		//tpf.num_links_left = tpf.links.length;
 
 		tpf.rd.cur_length = 0;
 		tpf.rd.depth = 0;

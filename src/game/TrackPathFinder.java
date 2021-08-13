@@ -1,7 +1,10 @@
 package game;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.RememberData;
@@ -14,8 +17,8 @@ public class TrackPathFinder extends Pathfind
 	// -------------------------------------------------
 	// Fields
 	// -------------------------------------------------
-	int num_links_left;
-	TrackPathFinderLink new_link;
+	//int num_links_left;
+	//TrackPathFinderLink new_link;
 
 	TPFEnumProc enum_proc;
 
@@ -34,7 +37,7 @@ public class TrackPathFinder extends Pathfind
 	//TileIndex [] hash_tile = new TileIndex[0x400]; /* stores the link index when multi link. */
 	//TrackPathFinderLink [] links = new TrackPathFinderLink[0x400]; /* hopefully, this is enough. */
 
-	static Map<Integer,TPFHashEnt> tileBits = new HashMap<Integer,TPFHashEnt>();
+	Map<Integer,TPFHashEnt> tileBits = new HashMap<Integer,TPFHashEnt>();
 
 	// -------------------------------------------------
 	// Class
@@ -55,7 +58,7 @@ public class TrackPathFinder extends Pathfind
 	// -------------------------------------------------
 
 
-	static boolean TPFSetTileBit(TrackPathFinder tpf, TileIndex tile, int dir)
+	boolean TPFSetTileBit(TrackPathFinder tpf, TileIndex tile, int dir)
 	{
 		int bits = 1 << dir;
 
@@ -84,6 +87,11 @@ public class TrackPathFinder extends Pathfind
 			e.bits |= bits;
 			return true;		
 		}
+	}
+
+	
+	public Iterator<TPFHashEnt> getIterator() {
+		return tileBits.values().iterator();
 	}
 
 
@@ -409,12 +417,19 @@ public class TrackPathFinder extends Pathfind
 	static TileIndex SkipToEndOfTunnel(TrackPathFinder tpf, TileIndex tile, int direction)
 	{
 		FindLengthOfTunnelResult flotr;
-		TPFSetTileBit(tpf, tile, 14);
+		tpf.TPFSetTileBit(tpf, tile, 14);
 		flotr = FindLengthOfTunnel(tile, direction);
 		tpf.rd.cur_length += flotr.length;
-		TPFSetTileBit(tpf, flotr.tile, 14);
+		tpf.TPFSetTileBit(tpf, flotr.tile, 14);
 		return flotr.tile;
 	}
+
+
+	public Set<Entry<Integer, TPFHashEnt>> entrySet() {
+		return tileBits.entrySet();
+	}
+
+
 
 
 	// -------------------------------------------------

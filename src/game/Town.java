@@ -994,7 +994,7 @@ public class Town extends TownTables implements IPoolItem
 	};
 
 
-	static boolean disableGrow = true;
+	//static boolean disableGrow = true;
 	// Grow the town
 	// Returns true if a house was built, or no if the build failed.
 	static boolean GrowTown(Town t)
@@ -1004,8 +1004,8 @@ public class Town extends TownTables implements IPoolItem
 		TileInfo ti = new TileInfo();
 		PlayerID old_player;
 
-		// TODO XXX TEMP debuf remove me now!
-		if(disableGrow) return false;
+		// TODO XXX TEMP debug remove me now!
+		//if(disableGrow) return false;
 
 		// Current player is a town
 		old_player = Global._current_player;

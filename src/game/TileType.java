@@ -1,6 +1,6 @@
 package game;
 
-@Deprecated
+//@Deprecated
 public class TileType {
 	int type;
 	

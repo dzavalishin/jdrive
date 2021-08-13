@@ -1,5 +1,6 @@
 package game;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +24,7 @@ public class Station extends StationTables implements IPoolItem
 	public Town town;
 	public int string_id;
 
-	ViewportSign sign;
+	ViewportSign sign; // = new ViewportSign();
 
 	int had_vehicle_of_type;
 
@@ -64,13 +65,13 @@ public class Station extends StationTables implements IPoolItem
 	private void clear()
 	{
 		xy= null;
-		bus_stops=null;
-		truck_stops=null;
+		bus_stops   = new ArrayList<RoadStop>();
+		truck_stops = new ArrayList<RoadStop>();
 		train_tile=airport_tile=dock_tile = null;
 		town = null;
 		string_id = 0;
 
-		sign= null;
+		sign = new ViewportSign();
 
 		had_vehicle_of_type = 0;
 
@@ -100,6 +101,10 @@ public class Station extends StationTables implements IPoolItem
 	}
 
 
+	public Station() {
+		clear();
+	}
+	
 
 	public TileIndex getXy() {
 		return xy;
@@ -108,7 +113,7 @@ public class Station extends StationTables implements IPoolItem
 
 
 	//TODO private static final StationID CHECK_STATIONS_ERR = StationID.getInvalid();
-	private static final Station CHECK_STATIONS_ERR = null; 
+	//private static final Station CHECK_STATIONS_ERR = null; 
 
 	// Determines what station to operate on in the
 	//  tick handler.
@@ -159,7 +164,8 @@ public class Station extends StationTables implements IPoolItem
 
 		xy = tile;
 		airport_tile = dock_tile = train_tile = null;
-		bus_stops = truck_stops = null;
+		bus_stops = new ArrayList<RoadStop>(); 
+		truck_stops = new ArrayList<RoadStop>();
 		had_vehicle_of_type = 0;
 		time_since_load = (byte) 255;
 		time_since_unload = (byte) 255;
@@ -168,7 +174,10 @@ public class Station extends StationTables implements IPoolItem
 
 		last_vehicle = VehicleID.getInvalid();
 
-		//for (ge = goods; ge != endof(goods); ge++) 
+		//for (ge = goods; ge != endof(goods); ge++)
+		for( int i = 0; i < goods.length; i++)
+			goods[i] = new GoodsEntry();
+		
 		for(GoodsEntry ge : goods)
 		{
 			ge.waiting_acceptance = 0;
@@ -571,8 +580,8 @@ public class Station extends StationTables implements IPoolItem
 	{
 		int ret = 0;
 
-		if (st.bus_stops != null)   ret = Math.max(ret, CA_BUS);
-		if (st.truck_stops != null) ret = Math.max(ret, CA_TRUCK);
+		if (!st.bus_stops.isEmpty())   ret = Math.max(ret, CA_BUS);
+		if (!st.truck_stops.isEmpty()) ret = Math.max(ret, CA_TRUCK);
 		if (st.train_tile != null) ret = Math.max(ret, CA_TRAIN);
 		if (st.dock_tile != null)  ret = Math.max(ret, CA_DOCK);
 
@@ -591,9 +600,10 @@ public class Station extends StationTables implements IPoolItem
 	}
 
 
-	private static Station  GetStationAround(TileIndex tile, int w, int h, /*StationID*/ int closest_station_i)
+	private static Station  GetStationAround(TileIndex tile, int w, int h, /*StationID*/ int closest_station_i, boolean [] canBuild)
 	{
 		int [] closest_station = {closest_station_i};
+		if(canBuild!= null) canBuild[0] = true;
 		// check around to see if there's any stations there
 		//BEGIN_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
 		TileIndex.forAll(w + 2, h + 2, tile.isub( TileIndex.TileDiffXY(1, 1) ).getTile(), (tile_cur) -> {
@@ -612,6 +622,7 @@ public class Station extends StationTables implements IPoolItem
 				} else if (closest_station[0] != t) {
 					Global._error_message = Str.STR_3006_ADJOINS_MORE_THAN_ONE_EXISTING;
 					//return null; //CHECK_STATIONS_ERR;
+					if(canBuild!= null) canBuild[0] = false;
 					closest_station[0] = INVALID_STATION;
 					return true; // break loop
 				}
@@ -1196,8 +1207,9 @@ public class Station extends StationTables implements IPoolItem
 		cost = ret + (numtracks * Global._price.train_station_track + Global._price.train_station_length) * plat_len;
 
 		// Make sure there are no similar stations around us.
-		st = GetStationAround(tile_org, w_org, h_org, est[0].id);
-		if (st == CHECK_STATIONS_ERR) return Cmd.CMD_ERROR;
+		boolean [] canBuild = {true};
+		st = GetStationAround(tile_org, w_org, h_org, est[0].id, canBuild);
+		if (!canBuild[0]) return Cmd.CMD_ERROR;
 
 		// See if there is a deleted station close to us.
 		if (st == null) {
@@ -1662,8 +1674,9 @@ public class Station extends StationTables implements IPoolItem
 		cost = CheckFlatLandBelow(tile, 1, 1, flags, 1 << p1, null);
 		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
 
-		st = GetStationAround(tile, 1, 1, StationID.getInvalid().id);
-		if (st == CHECK_STATIONS_ERR) return Cmd.CMD_ERROR;
+		boolean [] canBuild = {true};
+		st = GetStationAround(tile, 1, 1, StationID.getInvalid().id, canBuild);
+		if (!canBuild[0]) return Cmd.CMD_ERROR;
 
 		/* Find a station close to us */
 		if (st == null) {
@@ -1912,8 +1925,9 @@ public class Station extends StationTables implements IPoolItem
 		cost = CheckFlatLandBelow(tile, w, h, flags, 0, null);
 		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
 
-		Station st = GetStationAround(tile, w, h, StationID.getInvalid().id);
-		if (st == CHECK_STATIONS_ERR) return Cmd.CMD_ERROR;
+		boolean [] canBuild = {true};
+		Station st = GetStationAround(tile, w, h, StationID.getInvalid().id, canBuild);
+		if (!canBuild[0]) return Cmd.CMD_ERROR;
 
 		/* Find a station close to us */
 		if (st == null) {
@@ -2239,10 +2253,11 @@ public class Station extends StationTables implements IPoolItem
 			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
 
 		/* middle */
+		boolean [] canBuild = {true};
 		st = GetStationAround(
 				tile.iadd( TileIndex.ToTileIndexDiff(_dock_tileoffs_chkaround[direction]) ),
-				_dock_w_chk[direction], _dock_h_chk[direction], -1);
-		if (st == CHECK_STATIONS_ERR) return Cmd.CMD_ERROR;
+				_dock_w_chk[direction], _dock_h_chk[direction], -1, canBuild);
+		if (!canBuild[0]) return Cmd.CMD_ERROR;
 
 		/* Find a station close to us */
 		if (st == null) {
@@ -3214,8 +3229,8 @@ public class Station extends StationTables implements IPoolItem
 		st.airport_flags = 0;
 		st.airport_type = AirportFTAClass.AT_OILRIG;
 		st.xy = tile;
-		st.bus_stops = null;
-		st.truck_stops = null;
+		//st.bus_stops = new Array;
+		//st.truck_stops = null;
 		st.airport_tile = tile;
 		st.dock_tile = tile;
 		st.train_tile = null;

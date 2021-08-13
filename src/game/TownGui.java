@@ -221,6 +221,8 @@ public abstract class TownGui extends Town
 		case WE_4:
 			w.SetWindowDirty();
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -304,6 +306,8 @@ public abstract class TownGui extends Town
 				Cmd.DoCommandP(null, w.window_number, 0, null,
 						Cmd.CMD_RENAME_TOWN | Cmd.CMD_MSG(Str.STR_2008_CAN_T_RENAME_TOWN));
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -522,6 +526,8 @@ public abstract class TownGui extends Town
 
 		case WE_RESIZE:
 			w.vscroll.cap += e.diff.y / 10;
+			break;
+		default:
 			break;
 		}
 	}

@@ -1,9 +1,12 @@
 package game;
 
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import game.util.BitOps;
 import game.util.Sprites;
+import game.TrackPathFinder.TPFHashEnt;
 import game.ai.Ai;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.TrackPathFinderLink;
@@ -2327,43 +2330,59 @@ public class Rail extends RailTables {
 	static void SetSignalsAfterProc(TrackPathFinder tpf)
 	{
 		SetSignalsData ssd = (SetSignalsData) tpf.userdata;
-		TrackPathFinderLink link;
-		int offs;
-		int i;
+		//TrackPathFinderLink link;
+		//int offs;
+		//int i;
 
 		ssd.stop = false;
 
-		/* Go through all the PF tiles */
+		for( Entry<Integer, TPFHashEnt> e : tpf.entrySet() )
+		{
+			if (SignalVehicleCheck( TileIndex.get( e.getKey() ), e.getValue().bits )) 
+			{
+				ssd.stop = true;
+				return;
+			}			
+		}
+		
+		/*
+		for( Iterator<TPFHashEnt> ii = tpf.getIterator(); ii.hasNext(); )
+		{
+			TPFHashEnt item = ii.next();
+		}*/
+		
+		/*//Go through all the PF tiles 
 		for (i = 0; i < tpf.hash_head.length; i++) {
-			/* Empty hash item */
+			// Empty hash item 
 			if (tpf.hash_head[i] == 0) continue;
 
-			/* If 0x8000 is not set, there is only 1 item */
+			// If 0x8000 is not set, there is only 1 item 
 			if (0==(tpf.hash_head[i] & 0x8000)) {
-				/* Check if there is a vehicle on this tile */
+				// Check if there is a vehicle on this tile 
 				if (SignalVehicleCheck(tpf.hash_tile[i], tpf.hash_head[i])) {
 					ssd.stop = true;
 					return;
 				}
 			} else {
-				/* There are multiple items, where hash_tile points to the first item in the list */
+				// There are multiple items, where hash_tile points to the first item in the list 
 				offs = tpf.hash_tile[i].tile;
 				do {
 
 					//#define PATHFIND_GET_LINK_PTR(tpf, link_offs) (TrackPathFinderLink*)((byte*)tpf->links + (link_offs))
 
-					/* Find the next item */
+					// Find the next item 
 					//link = PATHFIND_GET_LINK_PTR(tpf, offs);
 					link = tpf.links[offs/4]; // TODO it generates offsets to 32 bit pointers?
-					/* Check if there is a vehicle on this tile */
+					// Check if there is a vehicle on this tile 
 					if (SignalVehicleCheck(link.tile, link.flags)) {
 						ssd.stop = true;
 						return;
 					}
-					/* Goto the next item */
+					//* Goto the next item 
 				} while ((offs=link.next) != 0xFFFF);
 			}
 		}
+		*/
 	}
 
 
