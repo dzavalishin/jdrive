@@ -824,7 +824,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		i.xy = null;
 		_industry_sort_dirty = true;
-		Economy.DeleteSubsidyWithIndustry(i.index);
+		Subsidy.DeleteSubsidyWithIndustry(i.index);
 		Window.DeleteWindowById(Window.WC_INDUSTRY_VIEW, i.index);
 		Window.InvalidateWindow(Window.WC_INDUSTRY_DIRECTORY, 0);
 	}

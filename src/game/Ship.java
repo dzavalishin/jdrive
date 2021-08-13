@@ -887,7 +887,7 @@ public class Ship {
 
 		v = Vehicle.AllocateVehicle(); // TODO can pass type or make subobject for ship
 		if (v == null || /* Order.IsOrderPoolFull() || */
-				(unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Ship)).id > Global._patches.max_ships.id)
+				(unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Ship)).id > Global._patches.max_ships)
 			return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 		if( 0 != (flags & Cmd.DC_EXEC)) {

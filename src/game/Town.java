@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import game.Economy.Subsidy;
 import game.struct.DrawTownTileStruct;
 import game.struct.FindLengthOfTunnelResult;
 import game.util.BitOps;
@@ -2296,15 +2295,16 @@ public class Town extends TownTables implements IPoolItem
 		_town_pool.AddBlockToPool();
 
 		//memset(_subsidies, 0, sizeof(_subsidies));
-		Economy._subsidies = new Subsidy[Global.MAX_PLAYERS];
+		Subsidy._subsidies = new Subsidy[Global.MAX_PLAYERS];
 
 		for(int i = 0; i < Global.MAX_PLAYERS; i++)
-			Economy._subsidies[i] = new Subsidy();
+			Subsidy._subsidies[i] = new Subsidy();
 		
-		//for (s=_subsidies; s != endof(_subsidies); s++)
+		/* ctor does
 		for( Subsidy s : Economy._subsidies)
-			s.cargo_type = AcceptedCargo.CT_INVALID;
-
+			s.markInvalid();
+		*/
+		
 		_cur_town_ctr = 0;
 		_cur_town_iter = 0;
 		_total_towns = 0;

@@ -4,6 +4,7 @@ import java.io.FileWriter;
 
 import game.struct.Textbuf;
 import game.util.BitOps;
+import game.util.Strings;
 
 public class Console {
 	// maximum length of a typed in command
@@ -34,8 +35,12 @@ public class Console {
 	public static final int ICON_MAX_ALIAS_LINES = 40;
 	public static final int ICON_TOKEN_COUNT = 20;
 
+	
+	
+	
 	// ** main console ** //
-	static ConsoleWindow _iconsole_win; // Pointer to console window
+	//static ConsoleWindow _iconsole_win; // Pointer to console window
+	static Window _iconsole_win; // Pointer to console window
 	static boolean _iconsole_inited;
 	static String[]_iconsole_buffer = new String[ICON_BUFFER + 1];
 	static int[] _iconsole_cbuffer = new int[ICON_BUFFER + 1];
@@ -89,7 +94,7 @@ public class Console {
 		_iconsole_scroll = ICON_BUFFER;
 		_iconsole_historypos = ICON_HISTORY_SIZE - 1;
 		_iconsole_inited = true;
-		_iconsole_mode = ICONSOLE_CLOSED;
+		_iconsole_mode = IConsoleModes.ICONSOLE_CLOSED;
 		_iconsole_win = null;
 
 		/*
@@ -98,13 +103,17 @@ public class Console {
 		#endif
 		*/
 
-		memset(_iconsole_history, 0, sizeof(_iconsole_history));
-		memset(_iconsole_buffer, 0, sizeof(_iconsole_buffer));
-		memset(_iconsole_cbuffer, 0, sizeof(_iconsole_cbuffer));
-		_iconsole_cmdline.buf = calloc(ICON_CMDLN_SIZE, sizeof(*_iconsole_cmdline.buf)); // create buffer and zero it
+		// TODO
+		//memset(_iconsole_history, 0, sizeof(_iconsole_history));
+		//memset(_iconsole_buffer, 0, sizeof(_iconsole_buffer));
+		//memset(_iconsole_cbuffer, 0, sizeof(_iconsole_cbuffer));
+		
+		
+		//_iconsole_cmdline.buf = calloc(ICON_CMDLN_SIZE, sizeof(*_iconsole_cmdline.buf)); // create buffer and zero it
+		//_iconsole_cmdline.buf = new char[ICON_CMDLN_SIZE]; 
 		_iconsole_cmdline.maxlength = ICON_CMDLN_SIZE - 1;
 
-		IConsolePrintF(13, "OpenTTD Game Console Revision 7 - %s", _openttd_revision);
+		IConsolePrintF(13, "OpenTTD Game Console Revision 7 - %s", Strings._openttd_revision);
 		IConsolePrint(12,  "------------------------------------");
 		IConsolePrint(12,  "use \"help\" for more information");
 		IConsolePrint(12,  "");
@@ -185,13 +194,13 @@ public class Console {
 			_iconsole_win = Window.AllocateWindowDesc(_iconsole_window_desc,0);
 			_iconsole_win.height = Hal._screen.height / 3;
 			_iconsole_win.width = Hal._screen.width;
-			_iconsole_mode = ICONSOLE_OPENED;
+			_iconsole_mode = IConsoleModes.ICONSOLE_OPENED;
 			Global._noscroll = BitOps.RETSETBIT(Global._no_scroll, SCROLL_CON); // override cursor arrows; the gamefield will not scroll
 			break;
 		case ICONSOLE_OPENED: case ICONSOLE_FULL:
 			DeleteWindowById(WC_CONSOLE, 0);
 			_iconsole_win = null;
-			_iconsole_mode = ICONSOLE_CLOSED;
+			_iconsole_mode = IConsoleModes.ICONSOLE_CLOSED;
 			CLRBIT(Global._no_scroll, SCROLL_CON);
 			break;
 		}
@@ -199,8 +208,8 @@ public class Console {
 		Hal.MarkWholeScreenDirty();
 	}
 
-	static void IConsoleClose() {if (_iconsole_mode == ICONSOLE_OPENED) IConsoleSwitch();}
-	static void IConsoleOpen()  {if (_iconsole_mode == ICONSOLE_CLOSED) IConsoleSwitch();}
+	static void IConsoleClose() {if (_iconsole_mode == IConsoleModes.ICONSOLE_OPENED) IConsoleSwitch();}
+	static void IConsoleOpen()  {if (_iconsole_mode == IConsoleModes.ICONSOLE_CLOSED) IConsoleSwitch();}
 
 	/**
 	 * Add the entered line into the history so you can look it back
@@ -238,9 +247,10 @@ public class Console {
 		_iconsole_historypos = i;
 		IConsoleClearCommand();
 		// copy history to 'command prompt / bash'
-		assert(_iconsole_history[i] != null && IS_INT_INSIDE(i, 0, ICON_HISTORY_SIZE));
-		ttd_strlcpy(_iconsole_cmdline.buf, _iconsole_history[i], _iconsole_cmdline.maxlength);
-		UpdateTextBufferSize(_iconsole_cmdline);
+		assert(_iconsole_history[i] != null && BitOps.IS_INT_INSIDE(i, 0, ICON_HISTORY_SIZE));
+		//ttd_strlcpy(_iconsole_cmdline.buf, _iconsole_history[i], _iconsole_cmdline.maxlength);
+		_iconsole_cmdline.setText(_iconsole_history[i]);
+		//UpdateTextBufferSize(_iconsole_cmdline);
 	}
 
 	/**
@@ -288,7 +298,7 @@ public class Console {
 
 		IConsoleWriteToLogFile(string);
 
-		if(_iconsole_win != null) _iconsole_win.§SetWindowDirty();
+		if(_iconsole_win != null) _iconsole_win.SetWindowDirty();
 	}
 
 	/**
@@ -347,21 +357,26 @@ public class Console {
 	 * @param *arg the string to be converted
 	 * @return Return true on success or false on failure
 	 */
-	static boolean GetArgumentInteger(int *value, final String arg)
+	static boolean GetArgumentInteger(int []value, final String arg)
 	{
-		char *endptr;
+		//char *endptr;
 
-		if (strcmp(arg, "on") == 0 || strcmp(arg, "true") == 0) {
-			*value = 1;
+		if (arg.equalsIgnoreCase("on") || arg.equalsIgnoreCase("true")) {
+			value[0] = 1;
 			return true;
 		}
-		if (strcmp(arg, "off") == 0 || strcmp(arg, "false") == 0) {
-			*value = 0;
+		if (arg.equalsIgnoreCase("off") || arg.equalsIgnoreCase("false")) {
+			value[0] = 0;
 			return true;
 		}
 
-		*value = strtoul(arg, &endptr, 0);
-		return arg != endptr;
+		try {
+		value[0] = Integer.parseInt(arg);//strtoul(arg, &endptr, 0);
+		} catch(NumberFormatException e)
+		{
+			return false;
+		}
+		return true;
 	}
 
 	// * ************************* * //
@@ -414,7 +429,7 @@ public class Console {
 		case ICONSOLE_HOOK_POST_ACTION:
 			proc = hooks.post;
 			break;
-		default: NOT_REACHED();
+		default: assert false; //NOT_REACHED();
 		}
 
 		return (proc == null) ? true : proc();
@@ -576,10 +591,11 @@ public class Console {
 	 */
 	static void IConsoleAliasExec(final IConsoleAlias alias, byte tokencount, String tokens[])
 	{
+		/*
 		final String cmdptr;
 		String aliases[ICON_MAX_ALIAS_LINES], aliasstream[ICON_MAX_STREAMSIZE];
 		int i;
-		uint a_index, astream_i;
+		int a_index, astream_i;
 
 		memset(&aliases, 0, sizeof(aliases));
 		memset(&aliasstream, 0, sizeof(aliasstream));
@@ -592,18 +608,18 @@ public class Console {
 			if (a_index >= lengthof(aliases) || astream_i >= lengthof(aliasstream)) break;
 
 			switch (*cmdptr) {
-			case '\'': /* ' will double for "" */
+			case '\'': // ' will double for "" 
 				aliasstream[astream_i++] = '"';
 				break;
-			case ';': /* Cmd seperator, start new command */
+			case ';': // Cmd seperator, start new command 
 				aliasstream[astream_i] = '\0';
 				aliases[++a_index] = &aliasstream[++astream_i];
 				cmdptr++;
 				break;
-			case '%': /* Some or all parameters */
+			case '%': // Some or all parameters 
 				cmdptr++;
 				switch (*cmdptr) {
-				case '+': { /* All parameters seperated: "[param 1]" "[param 2]" */
+				case '+': { // All parameters seperated: "[param 1]" "[param 2]" 
 					for (i = 0; i != tokencount; i++) {
 						aliasstream[astream_i++] = '"';
 						astream_i += IConsoleCopyInParams(&aliasstream[astream_i], tokens[i], astream_i);
@@ -611,7 +627,7 @@ public class Console {
 						aliasstream[astream_i++] = ' ';
 					}
 				} break;
-				case '!': { /* Merge the parameters to one: "[param 1] [param 2] [param 3...]" */
+				case '!': { // Merge the parameters to one: "[param 1] [param 2] [param 3...]" 
 					aliasstream[astream_i++] = '"';
 					for (i = 0; i != tokencount; i++) {
 						astream_i += IConsoleCopyInParams(&aliasstream[astream_i], tokens[i], astream_i);
@@ -620,7 +636,7 @@ public class Console {
 					aliasstream[astream_i++] = '"';
 
 				} break;
-				default: { /* One specific parameter: %A = [param 1] %B = [param 2] ... */
+				default: { // One specific parameter: %A = [param 1] %B = [param 2] ... 
 					int param = *cmdptr - 'A';
 
 					if (param < 0 || param >= tokencount) {
@@ -642,6 +658,7 @@ public class Console {
 		}
 
 		for (i = 0; i <= (int)a_index; i++) IConsoleCmdExec(aliases[i]); // execute each alias in turn
+		*/
 	}
 
 	/**
@@ -649,7 +666,7 @@ public class Console {
 	 * also need a 'size' value saying how long their string buffer is.
 	 * @param size the length of the string buffer
 	 * For more information see @IConsoleVarRegister()
-	 */
+	 * /
 	static void IConsoleVarStringRegister(final String name, void *addr, int size, final String help)
 	{
 		IConsoleVar var;
@@ -665,12 +682,12 @@ public class Console {
 	 * @param help the help string shown for the variable
 	 * @param type the type of the variable (simple atomic) so we know which values it can get
 	 */
-	static void IConsoleVarRegister(final String name, void *addr, IConsoleVarTypes type, final String help)
+	static void IConsoleVarRegister(final String name, Object addr, IConsoleVarTypes type, final String help)
 	{
-		String new_cmd = strdup(name);
-		IConsoleVar item_new = malloc(sizeof(IConsoleVar));
+		String new_cmd = name;
+		IConsoleVar item_new = new IConsoleVar(); //malloc(sizeof(IConsoleVar));
 
-		item_new.help = (help != null) ? strdup(help) : null;
+		item_new.help = help;
 
 		item_new.next = null;
 		item_new.name = new_cmd;
@@ -707,7 +724,8 @@ public class Console {
 	 */
 	static private void IConsoleVarSetValue(final IConsoleVar var, int value)
 	{
-		IConsoleHookHandle(&var.hook, ICONSOLE_HOOK_PRE_ACTION);
+		IConsoleHookHandle(var.hook, ICONSOLE_HOOK_PRE_ACTION);
+		/*
 		switch (var.type) {
 		case ICONSOLE_VAR_BOOLEAN:
 			*(boolean*)var.addr = (value != 0);
@@ -728,9 +746,9 @@ public class Console {
 			*(int32*)var.addr = (int32)value;
 			break;
 		default: NOT_REACHED();
-		}
+		}*/
 
-		IConsoleHookHandle(&var.hook, ICONSOLE_HOOK_POST_ACTION);
+		IConsoleHookHandle(var.hook, ICONSOLE_HOOK_POST_ACTION);
 		IConsoleVarPrintSetValue(var);
 	}
 
@@ -758,8 +776,9 @@ public class Console {
 	 */
 	static private int IConsoleVarGetValue(final IConsoleVar var)
 	{
-		int result = 0;
+		//int result = 0;
 
+		/*
 		switch (var.type) {
 		case ICONSOLE_VAR_BOOLEAN:
 			result = *(boolean*)var.addr;
@@ -780,8 +799,8 @@ public class Console {
 			result = *(int32*)var.addr;
 			break;
 		default: NOT_REACHED();
-		}
-		return result;
+		}*/
+		return var.asInteger();
 	}
 
 	/**
@@ -790,6 +809,7 @@ public class Console {
 	 */
 	static private String IConsoleVarGetStringValue(final IConsoleVar var)
 	{
+		/*
 		static char tempres[50];
 		String value = tempres;
 
@@ -817,8 +837,8 @@ public class Console {
 			break;
 		default: NOT_REACHED();
 		}
-
-		return value;
+		*/
+		return var.asString();
 	}
 
 	/**
@@ -870,7 +890,7 @@ public class Console {
 		}
 
 		/* Use of assignment sign is not mandatory but supported, so just 'ignore it appropiately' */
-		if (strcmp(tokenptr, "=") == 0) tokencount--;
+		if (tokenptr.equalsIgnoreCase("=")) tokencount--;
 
 		if (tokencount == 1) {
 			/* Some variables need really special handling, handle it in their callback procedure */
@@ -889,7 +909,7 @@ public class Console {
 			}
 
 			/* Increase or decrease the value by one. This of course can only happen to 'number' types */
-			if (strcmp(tokenptr, "++") == 0 && var.type != ICONSOLE_VAR_STRING) {
+			if (tokenptr.equalsIgnoreCase("++")) && var.type != ICONSOLE_VAR_STRING) {
 				IConsoleVarSetValue(var, IConsoleVarGetValue(var) + 1);
 				return;
 			}
@@ -928,13 +948,14 @@ public class Console {
 		IConsoleVar   var    = null;
 
 		final String cmdptr;
-		String tokens[ICON_TOKEN_COUNT], tokenstream[ICON_MAX_STREAMSIZE];
-		uint t_index, tstream_i;
+		String [] tokens = new String[ICON_TOKEN_COUNT];
+		String [] tokenstream = new String[ICON_MAX_STREAMSIZE];
+		int t_index, tstream_i;
 
 		boolean longtoken = false;
 		boolean foundtoken = false;
 
-		if (cmdstr[0] == '#') return; // comments
+		if (cmdstr.charAt(0) == '#') return; // comments
 
 		for (cmdptr = cmdstr; *cmdptr != '\0'; cmdptr++) {
 			if (!BitOps.IsValidAsciiChar(*cmdptr)) {
@@ -1031,9 +1052,9 @@ public class Console {
 			int i = _iconsole_scroll;
 			int max = (w.height / ICON_LINE_HEIGHT) - 1;
 			int delta = 0;
-			GfxFillRect(w.left, w.top, w.width, w.height - 1, 0);
+			Gfx.GfxFillRect(w.left, w.top, w.width, w.height - 1, 0);
 			while ((i > 0) && (i > _iconsole_scroll - max) && (_iconsole_buffer[i] != null)) {
-				DoDrawString(_iconsole_buffer[i], 5,
+				Gfx.DoDrawString(_iconsole_buffer[i], 5,
 						w.height - (_iconsole_scroll + 2 - i) * ICON_LINE_HEIGHT, _iconsole_cbuffer[i]);
 				i--;
 			}
@@ -1051,7 +1072,7 @@ public class Console {
 			break;
 		}
 		case WE_MOUSELOOP:
-			if (HandleCaret(&_iconsole_cmdline))
+			if (_iconsole_cmdline.HandleCaret())
 				SetWindowDirty(w);
 			break;
 		case WE_DESTROY:
@@ -1113,7 +1134,7 @@ public class Console {
 				MarkWholeScreenDirty();
 				break;
 			case (WKC_CTRL | 'V'):
-				if (InsertTextBufferClipboard(&_iconsole_cmdline)) {
+				if (InsertTextBufferClipboard(_iconsole_cmdline)) {
 					IConsoleResetHistoryPos();
 					SetWindowDirty(w);
 				}
@@ -1122,17 +1143,17 @@ public class Console {
 				IConsoleCmdExec("clear");
 			break;
 			case (WKC_CTRL | 'U'):
-				DeleteTextBufferAll(&_iconsole_cmdline);
+				_iconsole_cmdline.DeleteTextBufferAll();
 			SetWindowDirty(w);
 			break;
 			case WKC_BACKSPACE: case WKC_DELETE:
-				if (DeleteTextBufferChar(&_iconsole_cmdline, e.keypress.keycode)) {
+				if (_iconsole_cmdline.DeleteTextBufferChar(e.keypress.keycode)) {
 					IConsoleResetHistoryPos();
 					SetWindowDirty(w);
 				}
 				break;
 			case WKC_LEFT: case WKC_RIGHT: case WKC_END: case WKC_HOME:
-				if (MoveTextBufferPos(&_iconsole_cmdline, e.keypress.keycode)) {
+				if (_iconsole_cmdline.MoveTextBufferPos(e.keypress.keycode)) {
 					IConsoleResetHistoryPos();
 					SetWindowDirty(w);
 				}
@@ -1140,7 +1161,7 @@ public class Console {
 			default:
 				if (BitOps.IsValidAsciiChar(e.keypress.ascii)) {
 					_iconsole_scroll = ICON_BUFFER;
-					InsertTextBufferChar(&_iconsole_cmdline, e.keypress.ascii);
+					_iconsole_cmdline.InsertTextBufferChar(e.keypress.ascii);
 					IConsoleResetHistoryPos();
 					SetWindowDirty(w);
 				} else

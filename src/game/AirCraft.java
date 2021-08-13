@@ -170,7 +170,7 @@ public class AirCraft extends AirCraftTables {
 		}
 
 		unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Aircraft);
-		if (unit_num.id > Global._patches.max_aircraft.id)
+		if (unit_num.id > Global._patches.max_aircraft)
 			return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {

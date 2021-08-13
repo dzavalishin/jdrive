@@ -1970,7 +1970,8 @@ public class Window extends WindowConstants
 	//extern void UpdateTileSelection();
 	//extern boolean VpHandlePlaceSizingDrag();
 
-	private static final int  scrollspeed = 3;
+	private static final int  scrollspeed = 2;
+	private static final int  scroll_edge = 20;
 
 	static void MouseLoop(int click, int mousewheel)
 	{
@@ -2004,19 +2005,19 @@ public class Window extends WindowConstants
 					y -= vp.top;
 					//here allows scrolling in both x and y axis
 
-					if (x - 15 < 0) {
-						vpd.scrollpos_x += (x - 15) * scrollspeed << vp.zoom;
-						Global.printf("scroll left");
-					} else if (15 - (vp.width - x) > 0) {
-						vpd.scrollpos_x += (15 - (vp.width - x)) * scrollspeed << vp.zoom;
-						Global.printf("scroll right");
+					if (x - scroll_edge < 0) {
+						vpd.scrollpos_x += (x - scroll_edge) * scrollspeed << vp.zoom;
+						//Global.printf("scroll left");
+					} else if (scroll_edge - (vp.width - x) > 0) {
+						vpd.scrollpos_x += (scroll_edge - (vp.width - x)) * scrollspeed << vp.zoom;
+						//Global.printf("scroll right");
 					}
-					if (y - 15 < 0) {
-						vpd.scrollpos_y += (y - 15) * scrollspeed << vp.zoom;
-						Global.printf("scroll up");
-					} else if (15 - (vp.height - y) > 0) {
-						vpd.scrollpos_y += (15 - (vp.height - y)) * scrollspeed << vp.zoom;
-						Global.printf("scroll dn");
+					if (y - scroll_edge < 0) {
+						vpd.scrollpos_y += (y - scroll_edge) * scrollspeed << vp.zoom;
+						//Global.printf("scroll up");
+					} else if (scroll_edge - (vp.height - y) > 0) {
+						vpd.scrollpos_y += (scroll_edge - (vp.height - y)) * scrollspeed << vp.zoom;
+						//Global.printf("scroll dn");
 					}
 
 				}

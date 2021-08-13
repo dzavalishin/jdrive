@@ -28,7 +28,7 @@ public class Strings extends StringTable
 
 	//private String FormatString(String buff, final String str, final int *argv, int casei);
 
-	static final String _openttd_revision = "TODO generate revision";
+	public static final String _openttd_revision = "TODO generate revision";
 
 
 	// special string constants

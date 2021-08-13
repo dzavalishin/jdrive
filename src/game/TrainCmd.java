@@ -626,7 +626,7 @@ public class TrainCmd extends TrainTables
 			v = vl[0];
 
 			unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Train);
-			if (unit_num.id > Global._patches.max_trains.id)
+			if (unit_num.id > Global._patches.max_trains)
 				return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
@@ -939,7 +939,7 @@ public class TrainCmd extends TrainTables
 		// moving a loco to a new line?, then we need to assign a unitnumber.
 		if (dst == null && !src.IsFrontEngine() && src.IsTrainEngine()) {
 			UnitID unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Train);
-			if (unit_num.id > Global._patches.max_trains.id)
+			if (unit_num.id > Global._patches.max_trains)
 				return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 			if(0 != (flags & Cmd.DC_EXEC))

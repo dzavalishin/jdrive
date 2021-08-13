@@ -3,7 +3,7 @@ package game.struct;
 import game.StringID;
 
 public class CheatEntry {
-	public ce_type type;    // type of selector
+	//public ce_type type;    // type of selector
 	public int flags;		// selector flags
 	public StringID str; // string with descriptive text
 	public Object variable; // pointer to the variable
@@ -20,7 +20,7 @@ interface CheckButtonClick
 {
 	int click(int a, int b);
 }
-
+/*
 enum ce_type {
 	CE_BOOL = 0,
 	CE_UINT8 = 1,
@@ -30,3 +30,4 @@ enum ce_type {
 	CE_BYTE = 5,
 	CE_CLICK = 6,
 }
+*/
