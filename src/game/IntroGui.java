@@ -55,11 +55,11 @@ public class IntroGui
 			w.DrawWindowWidgets();
 
 			Gfx.DrawStringRightAligned(216, 121, Str.STR_MAPSIZE, 0);
-			// TODO Gfx.DrawString(223, 121, mapsizes[Global._patches.map_x - 6], 0x10);
-			Gfx.DrawString(223, 121, mapsizes[0], 0x10);
+			Gfx.DrawString(223, 121, mapsizes[Global._patches.map_x - 6], 0x10);
+			//Gfx.DrawString(223, 121, mapsizes[0], 0x10);
 			Gfx.DrawString(270, 121, Str.STR_BY, 0);
-			// TODO Gfx.DrawString(283, 121, mapsizes[Global._patches.map_y - 6], 0x10);
-			Gfx.DrawString(283, 121, mapsizes[0], 0x10);
+			Gfx.DrawString(283, 121, mapsizes[Global._patches.map_y - 6], 0x10);
+			//Gfx.DrawString(283, 121, mapsizes[0], 0x10);
 			break;
 
 		case WE_KEYPRESS:

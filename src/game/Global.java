@@ -106,9 +106,9 @@ public class Global
 	public static int _fullscreen_bpp;
 
 
-	public static int _map_log_x = 6;
-	public static int _map_size_x = 64; // TODO XXX who inits it?
-	public static int _map_size_y = 64; // TODO XXX who inits it?
+	public static int _map_log_x = 8; //6;
+	public static int _map_size_x = 256; // TODO XXX who inits it?
+	public static int _map_size_y = 256; // TODO XXX who inits it?
 	public static int _map_tile_mask;
 	public static int _map_size;
 
@@ -252,7 +252,7 @@ public class Global
 	public static boolean _dedicated_forks;
 	public static SwitchModes _switch_mode;
 	public static int _pause = 0; // [dz] must be it - stacked pause 
-	public static byte _display_opt;
+	public static byte _display_opt = (byte) 0xFF; // [dz] display all!
 	public static boolean _do_autosave;
 	public static boolean _use_dos_palette = false;
 
@@ -272,7 +272,7 @@ public class Global
 
 	public static void printf(String s, Object ... arg) {
 		String buf = String.format(s, arg);
-		System.out.print(buf);		
+		System.out.println(buf);		
 	}
 
 	public static void error(String s, Object ... arg) {

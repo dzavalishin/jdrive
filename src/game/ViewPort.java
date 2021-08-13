@@ -304,7 +304,11 @@ public class ViewPort
 				// Window wnext = w.getNextWindow?
 				//if (height > 0) DoSetViewportPosition(w + 1, left, top, width, height);
 				// TODO DoSetViewportPosition starts from next window
-				if (height > 0) DoSetViewportPosition(w, left, top, width, height);
+				if (height > 0)
+				{
+					DoSetViewportPosition(w, left, top, width, height);
+					Hal.MarkWholeScreenDirty(); // TODO [dz] added, was not here in C code, why? 
+				}
 			}
 	}
 

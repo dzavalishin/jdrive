@@ -26,7 +26,7 @@ public class Patches
 	boolean show_finances;			// show finances at end of year
 	boolean new_nonstop;				// ttdpatch compatible nonstop handling
 	boolean roadveh_queue;			// buggy road vehicle queueing
-	boolean autoscroll;				// scroll when moving mouse to the edge.
+	boolean autoscroll = true;				// scroll when moving mouse to the edge.
 	byte errmsg_duration;		// duration of error message
 	byte snow_line_height;	// a number 0-15 that configured snow line height
 	boolean bribe;							// enable bribing the local authority
@@ -91,8 +91,8 @@ public class Patches
 	byte wait_oneway_signal;	//waitingtime in days before a oneway signal
 	byte wait_twoway_signal;	//waitingtime in days before a twoway signal
 
-	int map_x; // Size of map
-	int map_y;
+	int map_x = 8; // Size of map
+	int map_y = 8;
 
 	byte drag_signals_density; // many signals density
 	boolean ainew_active;  // Is the new AI active?

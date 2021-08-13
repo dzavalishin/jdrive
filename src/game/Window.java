@@ -150,7 +150,10 @@ public class Window extends WindowConstants
 					int curw = ci;
 
 					@Override
-					public boolean hasNext() {
+					public boolean hasNext() 
+					{
+						if(curw >= _windows.size()) 
+							return false;
 						return _windows.get(curw) != null;
 					}
 
@@ -2000,18 +2003,22 @@ public class Window extends WindowConstants
 					x -= vp.left;
 					y -= vp.top;
 					//here allows scrolling in both x and y axis
-					//#define scrollspeed 3
+
 					if (x - 15 < 0) {
 						vpd.scrollpos_x += (x - 15) * scrollspeed << vp.zoom;
+						Global.printf("scroll left");
 					} else if (15 - (vp.width - x) > 0) {
 						vpd.scrollpos_x += (15 - (vp.width - x)) * scrollspeed << vp.zoom;
+						Global.printf("scroll right");
 					}
 					if (y - 15 < 0) {
 						vpd.scrollpos_y += (y - 15) * scrollspeed << vp.zoom;
+						Global.printf("scroll up");
 					} else if (15 - (vp.height - y) > 0) {
 						vpd.scrollpos_y += (15 - (vp.height - y)) * scrollspeed << vp.zoom;
+						Global.printf("scroll dn");
 					}
-					//#undef scrollspeed
+
 				}
 			}
 			return;
