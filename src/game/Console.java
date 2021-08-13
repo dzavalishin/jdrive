@@ -1,12 +1,14 @@
 package game;
 
 import java.io.FileWriter;
+import java.io.IOException;
 
 import game.struct.Textbuf;
 import game.util.BitOps;
 import game.util.Strings;
 
-public class Console {
+public class Console //extends ConsoleCmds 
+{
 	// maximum length of a typed in command
 	public static final int ICON_CMDLN_SIZE = 255;
 	// maximum length of a totally expanded command
@@ -117,7 +119,7 @@ public class Console {
 		IConsolePrint(12,  "------------------------------------");
 		IConsolePrint(12,  "use \"help\" for more information");
 		IConsolePrint(12,  "");
-		IConsoleStdLibRegister();
+		ConsoleCmds.IConsoleStdLibRegister();
 		IConsoleClearCommand();
 		IConsoleHistoryAdd("");
 	}
@@ -143,8 +145,13 @@ public class Console {
 			// if there is an console output file ... also print it there
 			//fwrite(string, strlen(string), 1, _iconsole_output_file);
 			//fwrite("\n", 1, 1, _iconsole_output_file);
-			_iconsole_output_file.write(string);
-			_iconsole_output_file.write("\n");
+			try {
+				_iconsole_output_file.write(string);
+				_iconsole_output_file.write("\n");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -153,7 +160,12 @@ public class Console {
 		if (_iconsole_output_file != null) 
 		{
 			IConsolePrintF(_icolour_def, "file output complete");
-			_iconsole_output_file.close();
+			try {
+				_iconsole_output_file.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			_iconsole_output_file = null;
 			return true;
 		}
@@ -195,13 +207,13 @@ public class Console {
 			_iconsole_win.height = Hal._screen.height / 3;
 			_iconsole_win.width = Hal._screen.width;
 			_iconsole_mode = IConsoleModes.ICONSOLE_OPENED;
-			Global._noscroll = BitOps.RETSETBIT(Global._no_scroll, SCROLL_CON); // override cursor arrows; the gamefield will not scroll
+			Global._no_scroll = BitOps.RETSETBIT(Global._no_scroll, Global.SCROLL_CON); // override cursor arrows; the gamefield will not scroll
 			break;
 		case ICONSOLE_OPENED: case ICONSOLE_FULL:
-			DeleteWindowById(WC_CONSOLE, 0);
+			Window.DeleteWindowById(Window.WC_CONSOLE, 0);
 			_iconsole_win = null;
 			_iconsole_mode = IConsoleModes.ICONSOLE_CLOSED;
-			CLRBIT(Global._no_scroll, SCROLL_CON);
+			Global._no_scroll = BitOps.RETCLRBIT(Global._no_scroll, Global.SCROLL_CON);
 			break;
 		}
 
@@ -220,7 +232,8 @@ public class Console {
 	{
 		//free(_iconsole_history[ICON_HISTORY_SIZE - 1]);
 
-		memmove(&_iconsole_history[1], &_iconsole_history[0], sizeof(_iconsole_history[0]) * (ICON_HISTORY_SIZE - 1));
+		//memmove(_iconsole_history[1], &_iconsole_history[0],				sizeof(_iconsole_history[0]) * (ICON_HISTORY_SIZE - 1));
+		System.arraycopy(_iconsole_history, 0, _iconsole_history, 1, ICON_HISTORY_SIZE - 1);
 		_iconsole_history[0] = new String(cmd);
 		IConsoleResetHistoryPos();
 	}
@@ -273,7 +286,7 @@ public class Console {
 		#endif
 		*/
 
-		if (_network_dedicated != 0) {
+		if (Global._network_dedicated) {
 			Global.error("%s\n", string);
 			IConsoleWriteToLogFile(string);
 			return;
@@ -284,16 +297,20 @@ public class Console {
 		/* move up all the strings in the buffer one place and do the same for colour
 		 * to accomodate for the new command/message */
 		//free(_iconsole_buffer[0]);
-		memmove(&_iconsole_buffer[0], &_iconsole_buffer[1], sizeof(_iconsole_buffer[0]) * ICON_BUFFER);
-		_iconsole_buffer[ICON_BUFFER] = strdup(string);
+		//memmove(&_iconsole_buffer[0], &_iconsole_buffer[1], sizeof(_iconsole_buffer[0]) * ICON_BUFFER);
+		System.arraycopy(_iconsole_buffer, 1, _iconsole_buffer, 0, ICON_BUFFER);
+		_iconsole_buffer[ICON_BUFFER] = string;
 
-		{ // filter out unprintable characters
+		/*{ // filter out unprintable characters
 			char *i;
 			for (i = _iconsole_buffer[ICON_BUFFER]; *i != '\0'; i++)
 				if (!BitOps.IsValidAsciiChar((byte)*i)) *i = ' ';
-		}
+			
+			for( int i = 0; i < )
+		}*/
 
-		memmove(&_iconsole_cbuffer[0], &_iconsole_cbuffer[1], sizeof(_iconsole_cbuffer[0]) * ICON_BUFFER);
+		//memmove(&_iconsole_cbuffer[0], &_iconsole_cbuffer[1], sizeof(_iconsole_cbuffer[0]) * ICON_BUFFER);
+		System.arraycopy(_iconsole_cbuffer, 1, _iconsole_cbuffer, 0, ICON_BUFFER);
 		_iconsole_cbuffer[ICON_BUFFER] = color_code;
 
 		IConsoleWriteToLogFile(string);
