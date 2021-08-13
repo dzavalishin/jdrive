@@ -1,5 +1,8 @@
 package game;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.RememberData;
 import game.struct.TrackPathFinderLink;
@@ -27,10 +30,20 @@ public class TrackPathFinder extends Pathfind
 	boolean disable_tile_hash;
 	boolean hasbit_13;
 
-	int [] hash_head = new int[0x400];
-	TileIndex [] hash_tile = new TileIndex[0x400]; /* stores the link index when multi link. */
+	//int [] hash_head = new int[0x400];
+	//TileIndex [] hash_tile = new TileIndex[0x400]; /* stores the link index when multi link. */
+	//TrackPathFinderLink [] links = new TrackPathFinderLink[0x400]; /* hopefully, this is enough. */
 
-	TrackPathFinderLink [] links = new TrackPathFinderLink[0x400]; /* hopefully, this is enough. */
+	static Map<Integer,TPFHashEnt> tileBits = new HashMap<Integer,TPFHashEnt>();
+
+	// -------------------------------------------------
+	// Class
+	// -------------------------------------------------
+
+	static class TPFHashEnt
+	{
+		int bits = 0;
+	}
 
 	// -------------------------------------------------
 	// Static data
@@ -42,6 +55,39 @@ public class TrackPathFinder extends Pathfind
 	// -------------------------------------------------
 
 
+	static boolean TPFSetTileBit(TrackPathFinder tpf, TileIndex tile, int dir)
+	{
+		int bits = 1 << dir;
+
+		if (tpf.disable_tile_hash)
+			return true;
+
+		TPFHashEnt e = tileBits.get(tile.getTile());
+		/* unused hash entry, set the appropriate bit in it and return true
+		 * to indicate that a bit was set. */
+		if( e == null )
+		{
+			e = new TPFHashEnt();
+			e.bits = bits;
+			tileBits.put(tile.getTile(), e);
+			return true;
+		}
+		else
+		{
+			/* found another bit for the same tile,
+			 * check if this bit is already set, if so, return false */
+			if(0!=(e.bits & bits))
+				return false;
+
+			/* otherwise set the bit and return true to indicate that the bit
+			 * was set */
+			e.bits |= bits;
+			return true;		
+		}
+	}
+
+
+	/*
 	// remember which tiles we have already visited so we don't visit them again.
 	static boolean TPFSetTileBit(TrackPathFinder tpf, TileIndex tile, int dir)
 	{
@@ -57,57 +103,57 @@ public class TrackPathFinder extends Pathfind
 		val = tpf.hash_head[hash];
 
 		if (val == 0) {
-			/* unused hash entry, set the appropriate bit in it and return true
-			 * to indicate that a bit was set. */
+			// unused hash entry, set the appropriate bit in it and return true
+			// to indicate that a bit was set. *
 			tpf.hash_head[hash] = bits;
 			tpf.hash_tile[hash] = tile;
 			return true;
 		} else if (0==(val & 0x8000)) {
-			/* single tile */
+			// single tile 
 
 			if (tile.equals(tpf.hash_tile[hash])) {
-				/* found another bit for the same tile,
-				 * check if this bit is already set, if so, return false */
+				//* found another bit for the same tile,
+				// * check if this bit is already set, if so, return false *
 				if(0!=(val & bits))
 					return false;
 
-				/* otherwise set the bit and return true to indicate that the bit
-				 * was set */
+				//* otherwise set the bit and return true to indicate that the bit
+				/ * was set *
 				tpf.hash_head[hash] = val | bits;
 				return true;
 			} else {
-				/* two tiles with the same hash, need to make a link */
+				//* two tiles with the same hash, need to make a link 
 
-				/* allocate a link. if out of links, handle this by returning
-				 * that a tile was already visisted. */
+				//* allocate a link. if out of links, handle this by returning
+				// * that a tile was already visisted. *
 				if (tpf.num_links_left == 0) {
 					return false;
 				}
 				tpf.num_links_left--;
 				link = tpf.new_link++;
 
-				/* move the data that was previously in the hash_??? variables
-				 * to the link struct, and let the hash variables point to the link */
+				//* move the data that was previously in the hash_??? variables
+				// * to the link struct, and let the hash variables point to the link 
 				link.tile = tpf.hash_tile[hash];
 				tpf.hash_tile[hash] = PATHFIND_GET_LINK_OFFS(tpf, link);
 
 				link.flags = tpf.hash_head[hash];
-				tpf.hash_head[hash] = 0xFFFF; /* multi link */
+				tpf.hash_head[hash] = 0xFFFF; // multi link 
 
 				link.next = 0xFFFF;
 			}
 		} else {
-			/* a linked list of many tiles,
-			 * find the one corresponding to the tile, if it exists.
-			 * otherwise make a new link */
+			//* a linked list of many tiles,
+			// * find the one corresponding to the tile, if it exists.
+			// * otherwise make a new link 
 
 			offs = tpf.hash_tile[hash];
 			do {
 				link = PATHFIND_GET_LINK_PTR(tpf, offs);
 				if (tile.equals(link.tile)) {
-					/* found the tile in the link list,
-					 * check if the bit was alrady set, if so return false to indicate that the
-					 * bit was already set */
+					//* found the tile in the link list,
+					// * check if the bit was alrady set, if so return false to indicate that the
+					// * bit was already set 
 					if(0!=(link.flags & bits))
 						return false;
 					link.flags |= bits;
@@ -116,23 +162,23 @@ public class TrackPathFinder extends Pathfind
 			} while ((offs=link.next) != 0xFFFF);
 		}
 
-		/* get here if we need to add a new link to link,
-		 * first, allocate a new link, in the same way as before */
+		//* get here if we need to add a new link to link,
+		// * first, allocate a new link, in the same way as before 
 		if (tpf.num_links_left == 0) {
 			return false;
 		}
 		tpf.num_links_left--;
 		new_link = tpf.new_link++;
 
-		/* then fill the link with the new info, and establish a ptr from the old
-		 * link to the new one */
+		//* then fill the link with the new info, and establish a ptr from the old
+		// * link to the new one *
 		new_link.tile = tile;
 		new_link.flags = bits;
 		new_link.next = 0xFFFF;
 
 		link.next = PATHFIND_GET_LINK_OFFS(tpf, new_link);
 		return true;
-	}
+	} */
 
 
 
@@ -240,7 +286,7 @@ public class TrackPathFinder extends Pathfind
 				int [] iptr = { tpf.rd.pft_var6 };
 				boolean ret = tpf.enum_proc.enumerate(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, iptr);
 				tpf.rd.pft_var6 = iptr[0];
-				
+
 				if(!ret ) {
 					tpf.TPFMode1(tile, _tpf_new_direction[tpf.the_dir]);
 				}
@@ -257,8 +303,8 @@ public class TrackPathFinder extends Pathfind
 		TrackPathFinder tpf = this;
 
 		int bits;
-		int i;
-		RememberData rd;
+		int i = 0;
+		RememberData rd = null;
 		int owner = -1;
 
 		/* XXX: Mode 2 is currently only used for ships, why is this code here? */
@@ -274,7 +320,9 @@ public class TrackPathFinder extends Pathfind
 		// This addition will sometimes overflow by a single tile.
 		// The use of TILE_MASK here makes sure that we still point at a valid
 		// tile, and then this tile will be in the sentinel row/col, so GetTileTrackStatus will fail.
-		tile = TILE_MASK(tile + TileIndex.TileOffsByDir(direction));
+		//tile = TILE_MASK(tile + TileIndex.TileOffsByDir(direction));
+		tile = tile.iadd(TileIndex.TileOffsByDir(direction));
+		tile.TILE_MASK();
 
 		/* Check in case of rail if the owner is the same */
 		if (tpf.tracktype == Global.TRANSPORT_RAIL) {
@@ -295,6 +343,8 @@ public class TrackPathFinder extends Pathfind
 
 		assert(tile.TileX() != Global.MapMaxX() && tile.TileY() != Global.MapMaxY());
 
+		boolean skipStart = false;
+
 		if ( (bits & (bits - 1)) == 0 ) {
 			/* only one direction */
 			i = 0;
@@ -305,24 +355,33 @@ public class TrackPathFinder extends Pathfind
 			}
 
 			rd = tpf.rd;
-			goto continue_here;
+			//goto continue_here;
+			skipStart = true;
 		}
 		/* several directions */
-		i=0;
+		if(!skipStart) i=0;
 		do {
-			if (0==(bits & 1)) continue;
-			rd = tpf.rd;
-
-			// Change direction 4 times only
-			if ((byte)i != tpf.rd.pft_var6) {
-				if(++tpf.rd.depth > 4) {
-					tpf.rd = rd;
-					return;
+			if( !skipStart )
+			{
+				if (0==(bits & 1))
+				{
+					++i;
+					continue;
 				}
-				tpf.rd.pft_var6 = (byte)i;
-			}
+				rd = tpf.rd;
 
-			continue_here:;
+				// Change direction 4 times only
+				if ((byte)i != tpf.rd.pft_var6) {
+					if(++tpf.rd.depth > 4) {
+						tpf.rd = rd;
+						return;
+					}
+					tpf.rd.pft_var6 = (byte)i;
+				}
+			}
+			//continue_here:;
+			skipStart = false;
+
 			tpf.the_dir = BitOps.HASBIT(_otherdir_mask[direction],i) ? (i+8) : i;
 
 			if (!tpf.enum_proc.enumerate(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, null)) {
@@ -330,7 +389,9 @@ public class TrackPathFinder extends Pathfind
 			}
 
 			tpf.rd = rd;
-		} while (++i, bits>>=1);
+			
+			++i;
+		} while ( (bits>>>=1) != 0);
 
 	}
 
