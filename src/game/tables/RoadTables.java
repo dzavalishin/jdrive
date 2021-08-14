@@ -7,29 +7,29 @@ public class RoadTables
 
 	public static class DrawRoadTileStruct {
 		public int image;
-		public byte subcoord_x;
-		public byte subcoord_y;
+		public int subcoord_x;
+		public int subcoord_y;
 
 		public DrawRoadTileStruct(int i, int j, int k) {
 			image = i;
-			subcoord_x = (byte) j;
-			subcoord_y = (byte) k;
+			subcoord_x =  j;
+			subcoord_y =  k;
 		}
 	} 
 
 	public static class DrawRoadSeqStruct {
 		public int image;
-		public byte subcoord_x;
-		public byte subcoord_y;
-		public byte width;
-		public byte height;
+		public int subcoord_x;
+		public int subcoord_y;
+		public int width;
+		public int height;
 
 		public DrawRoadSeqStruct(int x, int i, int j, int k, int l) {
 			image = x;
-			subcoord_x = (byte) i;
-			subcoord_y = (byte) j;
-			width = (byte) k;
-			height = (byte) l;
+			subcoord_x =  i;
+			subcoord_y =  j;
+			width =  k;
+			height =  l;
 		}
 
 	} 

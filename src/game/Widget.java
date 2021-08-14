@@ -1,9 +1,9 @@
 package game;
 
 public class Widget {
-	byte type;
-	byte resize_flag;
-	byte color;
+	int type;
+	int resize_flag;
+	int color;
 	public int left;
 	public int right;
 	public int top;
@@ -30,8 +30,8 @@ public class Widget {
 		this.unkA = unkA;
 		this.tooltips = tooltips;
 		
-		this.type = (byte) type;
-		this.resize_flag = (byte) resize_flag;
-		this.color = (byte) color;
+		this.type =  type;
+		this.resize_flag =  resize_flag;
+		this.color =  color;
 	}
 }

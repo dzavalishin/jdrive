@@ -165,7 +165,7 @@ public class UnmovableCmd extends UnmovableTables {
 			//foreach_draw_tile_seq(dtss, t.seq)
 			int pos;
 			//for (dtss = t.seq; ((byte) dtss->delta_x) != 0x80; dtss++)
-			for(pos = 0; pos < t.seq.length && ((byte) t.seq[pos].delta_x) != 0x80; pos++)
+			for(pos = 0; pos < t.seq.length && (t.seq[pos].delta_x != 0x80); pos++)
 			{
 				//image = dtss.image;
 				image = t.seq[pos].image;

@@ -2,5 +2,5 @@ package game;
 
 // Wrap for functional interface
 public class ProducedCargo {
-	byte[] cargo = new byte[2];
+	int[] cargo = new int[2];
 }

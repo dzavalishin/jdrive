@@ -893,7 +893,7 @@ public class Economy extends EconomeTables
 	{
 		Industry i;
 		int trans, total;
-		byte cargo;
+		int cargo;
 
 		fr.distance = -1;
 
@@ -1409,8 +1409,8 @@ public class Economy extends EconomeTables
 		if (u.type == Vehicle.VEH_Train) t = u.rail.cached_max_speed;
 
 		// if last speed is 0, we treat that as if no vehicle has ever visited the station.
-		ge.last_speed = (byte) (t < 255 ? t : 255);
-		ge.last_age = (byte) (Global._cur_year - v.build_year);
+		ge.last_speed =  (t < 255 ? t : 255);
+		ge.last_age =  (Global._cur_year - v.build_year);
 
 		// If there's goods waiting at the station, and the vehicle
 		//  has capacity for it, load it on the vehicle.

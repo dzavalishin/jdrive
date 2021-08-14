@@ -190,7 +190,7 @@ public class MiscCmd {
 	{
 		if(0 != (flags & Cmd.DC_EXEC) ) {
 			Global._pause += (p1 == 1) ? 1 : -1;
-			if (Global._pause == (byte)-1) Global._pause = 0;
+			if (Global._pause == -1) Global._pause = 0;
 			Window.InvalidateWindow(Window.WC_STATUS_BAR, 0);
 			Window.InvalidateWindow(Window.WC_MAIN_TOOLBAR, 0);
 		}

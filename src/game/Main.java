@@ -282,7 +282,7 @@ public class Main {
 			case 'p': {
 				int netp = Integer.parseInt(mgo.opt);
 				// Play as an other player in network games
-				if (BitOps.IS_INT_INSIDE(i, 1, Global.MAX_PLAYERS)) Global._network_playas = (byte) netp;
+				if (BitOps.IS_INT_INSIDE(i, 1, Global.MAX_PLAYERS)) Global._network_playas =  netp;
 				break;
 			}
 			case 'c':
@@ -988,7 +988,7 @@ public class Main {
 		Town* t;
 
 		FOR_ALL_TOWNS(t) {
-			if (t.xy != 0) t.exclusivity = (byte)-1;
+			if (t.xy != 0) t.exclusivity = -1;
 		}
 
 		/* FIXME old exclusive rights status is not being imported (stored in s.blocked_months_obsolete)

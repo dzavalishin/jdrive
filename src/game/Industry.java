@@ -17,29 +17,29 @@ import game.tables.IndustrySpec;
 public class Industry extends IndustryTables implements IPoolItem {
 
 	public TileIndex xy;
-	byte width; /* swapped order of w/h with town */
-	byte height;
+	int width; /* swapped order of w/h with town */
+	int height;
 	public Town town;
 
-	byte produced_cargo[];
+	int produced_cargo[];
 	int cargo_waiting[];
-	byte production_rate[];
-	byte accepts_cargo[];
+	int production_rate[];
+	int accepts_cargo[];
 
-	byte prod_level;
+	int prod_level;
 
 	int last_mo_production[];
 	int last_mo_transported[];
-	byte pct_transported[];
+	int pct_transported[];
 	int total_production[];
 	int total_transported[];
 
 	int counter;
 
 	public int type;
-	byte owner;
-	byte color_map;
-	byte last_prod_year;
+	int owner;
+	int color_map;
+	int last_prod_year;
 	boolean was_cargo_delivered;
 
 	int index;
@@ -47,13 +47,13 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	private void clear() 
 	{
-		produced_cargo = new byte[2];
+		produced_cargo = new int[2];
 		cargo_waiting = new int[2];
-		production_rate = new byte[2];
-		accepts_cargo = new byte[3];
+		production_rate = new int[2];
+		accepts_cargo = new int[3];
 		last_mo_production = new int[2];
 		last_mo_transported = new int[2];
-		pct_transported = new byte[2];
+		pct_transported = new int[2];
 		total_production = new int[2];
 		total_transported = new int[2];
 
@@ -133,7 +133,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 
 
-	static byte _industry_sound_ctr;
+	static int _industry_sound_ctr;
 	static TileIndex _industry_sound_tile;
 
 
@@ -167,7 +167,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		if(0 != (ti.tile.getMap().m1 & 0x80)) {
 			x = _industry_anim_offs[ti.tile.getMap().m3];
-			if ( (byte)x == 0xFF)
+			if (x == 0xFF)
 				x = 0;
 		}
 
@@ -229,7 +229,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	{
 		final Industry  ind;
 		final DrawIndustryTileStruct dits;
-		byte z;
+		int z;
 		int image, ormod;
 
 		/* Pointer to industry */
@@ -251,7 +251,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		if( (0 != (image & Sprite.PALETTE_MODIFIER_COLOR)) && (image & Sprite.PALETTE_SPRITE_MASK) == 0)
 			image |= ormod;
 
-		z = (byte) ti.z;
+		z =  ti.z;
 		/* Add bricks below the industry? */
 		if(0 != (ti.tileh & 0xF)) {
 			ViewPort.AddSortableSpriteToDraw(Sprite.SPR_FOUNDATION_BASE + (ti.tileh & 0xF), ti.x, ti.y, 16, 16, 7, z);
@@ -423,7 +423,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					m = 0;
 					TextEffect.DeleteAnimatedTile(tile);
 				}
-				tile.getMap().m3 = (byte) m;
+				tile.getMap().m3 =  m;
 
 				tile.MarkTileDirtyByTile();
 			}
@@ -441,7 +441,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					m = 0;
 					TextEffect.DeleteAnimatedTile(tile);
 				}
-				tile.getMap().m3 = (byte)m;
+				tile.getMap().m3 = m;
 
 				tile.MarkTileDirtyByTile();
 			}
@@ -455,7 +455,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					m = 0;
 					TextEffect.DeleteAnimatedTile(tile);
 				}
-				tile.getMap().m3 = (byte) m;
+				tile.getMap().m3 =  m;
 
 				tile.MarkTileDirtyByTile();
 			}
@@ -604,14 +604,14 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	static void MakeIndustryTileBigger(TileIndex tile, int size)
 	{
-		byte b = (byte)((size + (1<<2)) & (3<<2));
+		int b = ((size + (1<<2)) & (3<<2));
 
 		if (b != 0) {
 			tile.getMap().m1 = b | (size & 3);
 			return;
 		}
 
-		size = (byte) ((size + 1) & 3);
+		size =  ((size + 1) & 3);
 		if (size == 3) size |= 0x80;
 		tile.getMap().m1 = size | b;
 
@@ -668,8 +668,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 		if (v != null) v.special.unk2 = dir;
 	}
 
-	private static void SET_AND_ANIMATE(TileIndex tile, int a, int b)   { tile.getMap().m5 = (byte) a; tile.getMap().m1 = b; TextEffect.AddAnimatedTile(tile); }
-	private static void SET_AND_UNANIMATE(TileIndex tile, int a, int b) { tile.getMap().m5 = (byte) a; tile.getMap().m1 = b; TextEffect.DeleteAnimatedTile(tile); }
+	private static void SET_AND_ANIMATE(TileIndex tile, int a, int b)   { tile.getMap().m5 =  a; tile.getMap().m1 = b; TextEffect.AddAnimatedTile(tile); }
+	private static void SET_AND_UNANIMATE(TileIndex tile, int a, int b) { tile.getMap().m5 =  a; tile.getMap().m1 = b; TextEffect.DeleteAnimatedTile(tile); }
 
 
 	static void TileLoop_Industry(TileIndex tile)
@@ -864,7 +864,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	static void SetupFarmFieldFence(TileIndex itile, int size, int type, int direction)
 	{
-		byte or, and;
+		int or, and;
 
 		MutableTileIndex tile = new MutableTileIndex(itile);
 
@@ -874,16 +874,16 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 			if (tile.IsTileType( TileTypes.MP_CLEAR) || tile.IsTileType( TileTypes.MP_TREES)) {
 
-				or = (byte) type;
+				or = 0xFF & type;
 				if (or == 1 && BitOps.CHANCE16(1, 7)) or = 2;
 
 				or <<= 2;
-				and = (byte)~0x1C;
+				and = ~0x1C;
 				if (direction != 0) {
 					or <<= 3;
-					and = (byte)~0xE0;
+					and = ~0xE0;
 				}
-				tile.getMap().m4 = (byte) ((tile.getMap().m4 & and) | or);
+				tile.getMap().m4 =  ((tile.getMap().m4 & and) | or);
 			}
 
 			tile.madd( direction != 0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
@@ -1227,7 +1227,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		{
 			final Industry i = ii.next();
 			if (i.xy != null &&
-					i.type == (byte)type &&
+					i.type == type &&
 					i.town == t) {
 				Global._error_message = Str.STR_0287_ONLY_ONE_ALLOWED_PER_TOWN;
 				return null;
@@ -1430,15 +1430,15 @@ public class Industry extends IndustryTables implements IPoolItem {
 		i.production_rate[1] = spec.production_rate[1];
 
 		if (Global._patches.smooth_economy) {
-			i.production_rate[0] = (byte) Math.min((Hal.RandomRange(256) + 128) * i.production_rate[0] >> 8 , 255);
-			i.production_rate[1] = (byte) Math.min((Hal.RandomRange(256) + 128) * i.production_rate[1] >> 8 , 255);
+			i.production_rate[0] =  Math.min((Hal.RandomRange(256) + 128) * i.production_rate[0] >> 8 , 255);
+			i.production_rate[1] =  Math.min((Hal.RandomRange(256) + 128) * i.production_rate[1] >> 8 , 255);
 		}
 
 		i.town = t;
-		i.owner = (byte) owner;
+		i.owner =  owner;
 
 		r = Hal.Random();
-		i.color_map = (byte) BitOps.GB(r, 8, 4);
+		i.color_map =  BitOps.GB(r, 8, 4);
 		i.counter = BitOps.GB(r, 0, 12);
 		i.cargo_waiting[0] = 0;
 		i.cargo_waiting[1] = 0;
@@ -1451,7 +1451,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		i.total_transported[0] = 0;
 		i.total_transported[1] = 0;
 		i.was_cargo_delivered = false;
-		i.last_prod_year = (byte) Global._cur_year;
+		i.last_prod_year =  Global._cur_year;
 		i.total_production[0] = i.production_rate[0] * 8;
 		i.total_production[1] = i.production_rate[1] * 8;
 
@@ -1472,9 +1472,9 @@ public class Industry extends IndustryTables implements IPoolItem {
 				int size;
 
 				size = it.ti.x;
-				if (size > i.width) i.width = (byte) size;
+				if (size > i.width) i.width =  size;
 				size = it.ti.y;
-				if (size > i.height)i.height = (byte) size;
+				if (size > i.height)i.height =  size;
 
 				Cmd.DoCommandByTile(cur_tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 
@@ -1672,7 +1672,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			return;
 
 		case INDUSTRY_CLOSABLE:
-			if ((byte)(Global._cur_year - i.last_prod_year) < 5 || !BitOps.CHANCE16(1, 180))
+			if ((Global._cur_year - i.last_prod_year) < 5 || !BitOps.CHANCE16(1, 180))
 				closeit = false;
 			break;
 
@@ -1695,7 +1695,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				}
 
 				percent = inew * 100 / old - 100;
-				i.production_rate[j] = (byte) inew;
+				i.production_rate[j] =  inew;
 
 				if (inew >= _industry_spec[i.type].production_rate[j] / 4)
 					closeit = false;
@@ -1729,13 +1729,13 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	static void UpdateIndustryStatistics(Industry i)
 	{
-		byte pct;
+		int pct;
 
 		if (i.produced_cargo[0] != AcceptedCargo.CT_INVALID) {
 			pct = 0;
 			if (i.last_mo_production[0] != 0) {
-				i.last_prod_year = (byte) Global._cur_year;
-				pct = (byte) Math.min(i.last_mo_transported[0] * 256 / i.last_mo_production[0],255);
+				i.last_prod_year =  Global._cur_year;
+				pct =  Math.min(i.last_mo_transported[0] * 256 / i.last_mo_production[0],255);
 			}
 			i.pct_transported[0] = pct;
 
@@ -1749,8 +1749,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 		if (i.produced_cargo[1] != AcceptedCargo.CT_INVALID) {
 			pct = 0;
 			if (i.last_mo_production[1] != 0) {
-				i.last_prod_year = (byte) Global._cur_year;
-				pct = (byte) Math.min(i.last_mo_transported[1] * 256 / i.last_mo_production[1],255);
+				i.last_prod_year =  Global._cur_year;
+				pct =  Math.min(i.last_mo_transported[1] * 256 / i.last_mo_production[1],255);
 			}
 			i.pct_transported[1] = pct;
 
@@ -1833,12 +1833,12 @@ public class Industry extends IndustryTables implements IPoolItem {
 						b = i.production_rate[0] * 2;
 						if (i.production_rate[0] >= 128)
 							b = 0xFF;
-						i.production_rate[0] = (byte) b;
+						i.production_rate[0] =  b;
 
 						b = i.production_rate[1] * 2;
 						if (i.production_rate[1] >= 128)
 							b = 0xFF;
-						i.production_rate[1] = (byte) b;
+						i.production_rate[1] =  b;
 
 						str = _industry_prod_up_strings[type];
 					}
@@ -1849,8 +1849,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 						str = _industry_close_strings[type];
 					} else {
 						i.prod_level >>= 1;
-						i.production_rate[0] = (byte) ((i.production_rate[0] + 1) >> 1);
-						i.production_rate[1] = (byte) ((i.production_rate[1] + 1) >> 1);
+						i.production_rate[0] =  ((i.production_rate[0] + 1) >> 1);
+						i.production_rate[1] =  ((i.production_rate[1] + 1) >> 1);
 
 						str = _industry_prod_down_strings[type];
 					}
@@ -1860,7 +1860,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		case INDUSTRY_CLOSABLE:
 			/* maybe close */
-			if ( (byte)(Global._cur_year - i.last_prod_year) >= 5 && BitOps.CHANCE16(1,2)) {
+			if ( (Global._cur_year - i.last_prod_year) >= 5 && BitOps.CHANCE16(1,2)) {
 				i.prod_level = 0;
 				str = _industry_close_strings[type];
 			}
@@ -2338,7 +2338,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 			case 5: {
 				int line;
 				int x;
-				byte b;
+				int b;
 
 				i = GetIndustry(w.window_number);
 
@@ -2358,19 +2358,19 @@ public class Industry extends IndustryTables implements IPoolItem {
 								i.production_rate[line] = 4;
 						} else {
 							// increase
-							b = (byte) (i.production_rate[line] * 2);
+							b =  (i.production_rate[line] * 2);
 							if (i.production_rate[line] >= 128)
-								b=(byte) 255;
+								b= 255;
 							i.production_rate[line] = b;
 						}
 						UpdateIndustryProduction(i);
 						w.SetWindowDirty();
 						w.flags4 |= 5 << Window.WF_TIMEOUT_SHL;
-						w.as_vp2_d().data_2 = (byte) (line+1);
-						w.as_vp2_d().data_3 = (byte) (x < 15 ? 1 : 2);
+						w.as_vp2_d().data_2 =  (line+1);
+						w.as_vp2_d().data_3 =  (x < 15 ? 1 : 2);
 					} else if (BitOps.IS_INT_INSIDE(x, 34, 160)) {
 						// clicked the text
-						w.as_vp2_d().data_1 = (byte) line;
+						w.as_vp2_d().data_1 =  line;
 						Global.SetDParam(0, i.production_rate[line] * 8);
 						MiscGui.ShowQueryString( new StringID( Str.STR_CONFIG_PATCHES_INT32 ),
 								new StringID( Str.STR_CONFIG_GAME_PRODUCTION ),
@@ -2406,7 +2406,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 					if (val < 32) val = 32;
 					else val = 2040;
 				}
-				i.production_rate[line] = (byte)(val / 8);
+				i.production_rate[line] = (val / 8);
 				UpdateIndustryProduction(i);
 				w.SetWindowDirty();
 			}
@@ -2612,7 +2612,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 		case WE_CLICK:
 			switch(e.widget) {
 			case 3: {
-				_industry_sort_order = (byte) (_industry_sort_order==0 ? 1 : 0);
+				_industry_sort_order =  (_industry_sort_order==0 ? 1 : 0);
 				_industry_sort_dirty = true;
 				w.SetWindowDirty();
 			} break;

@@ -15,15 +15,15 @@ public class Engine extends EngineTables {
 	int reliability_spd_dec;
 	int reliability_start, reliability_max, reliability_final;
 	int duration_phase_1, duration_phase_2, duration_phase_3;
-	byte lifelength;
-	byte flags;
-	byte preview_player;
-	byte preview_wait;
-	byte railtype;
-	byte player_avail;
+	int lifelength;
+	int flags;
+	int preview_player;
+	int preview_wait;
+	int railtype;
+	int player_avail;
 
 	// type, ie Vehicle.VEH_Road, Vehicle.VEH_Train, etc. Same as in vehicle.h
-	byte type;
+	int type;
 
 	private int index; // [dz] index in array				
 
@@ -162,7 +162,7 @@ public class Engine extends EngineTables {
 			// time's up for this engine
 			// make it either available to all players (if never_expire_vehicles is enabled and if it was available earlier)
 			// or disable this engine completely
-			e.player_avail = (byte) ((Global._patches.never_expire_vehicles && e.player_avail != 0)? -1 : 0);
+			e.player_avail =  ((Global._patches.never_expire_vehicles && e.player_avail != 0)? -1 : 0);
 			e.reliability = e.reliability_final;
 		}
 	}
@@ -213,7 +213,7 @@ public class Engine extends EngineTables {
 			e.intro_date = BitOps.GB(r, 0, 9) + ei.base_intro;
 			if (e.intro_date <= Global._date) {
 				e.age = (Global._date - e.intro_date) >> 5;
-				e.player_avail = (byte)-1;
+				e.player_avail = -1;
 				e.flags |= ENGINE_AVAILABLE;
 			}
 
@@ -236,7 +236,7 @@ public class Engine extends EngineTables {
 				CalcEngineReliability(e);
 			}
 
-			e.lifelength = (byte) (ei.lifelength + Global._patches.extend_vehicle_life);
+			e.lifelength =  (ei.lifelength + Global._patches.extend_vehicle_life);
 
 			// prevent certain engines from ever appearing.
 			if (!BitOps.HASBIT(ei.climates, GameOptions._opt.landscape)) {
@@ -590,10 +590,10 @@ public class Engine extends EngineTables {
 	static final SpriteGroup GetVehicleSpriteGroup(EngineID engine, final Vehicle v)
 	{
 		SpriteGroup group;
-		byte cargo = GC_PURCHASE;
+		int cargo = GC_PURCHASE;
 
 		if (v != null) {
-			cargo = (byte) _global_cargo_id[GameOptions._opt.landscape][v.cargo_type];
+			cargo =  _global_cargo_id[GameOptions._opt.landscape][v.cargo_type];
 			assert(cargo != GC_INVALID);
 		}
 
@@ -612,8 +612,8 @@ public class Engine extends EngineTables {
 	{
 		SpriteGroup group;
 		final RealSpriteGroup rsg;
-		byte cargo = GC_PURCHASE;
-		byte loaded = 0;
+		int cargo = GC_PURCHASE;
+		int loaded = 0;
 		boolean in_motion = false;
 		int totalsets, spriteset;
 		int r;
@@ -621,11 +621,11 @@ public class Engine extends EngineTables {
 		if (v != null) {
 			int capacity = v.cargo_cap;
 
-			cargo = (byte) _global_cargo_id[GameOptions._opt.landscape][v.cargo_type];
+			cargo =  _global_cargo_id[GameOptions._opt.landscape][v.cargo_type];
 			assert(cargo != GC_INVALID);
 
 			if (capacity == 0) capacity = 1;
-			loaded = (byte) ((v.cargo_count * 100) / capacity);
+			loaded =  ((v.cargo_count * 100) / capacity);
 			in_motion = (v.cur_speed != 0);
 		}
 
@@ -698,10 +698,10 @@ public class Engine extends EngineTables {
 	static int GetCallBackResult(int callback_info, EngineID engine, final Vehicle v)
 	{
 		SpriteGroup group;
-		byte cargo = GC_DEFAULT;
+		int cargo = GC_DEFAULT;
 
 		if (v != null)
-			cargo = (byte) _global_cargo_id[GameOptions._opt.landscape][v.cargo_type];
+			cargo =  _global_cargo_id[GameOptions._opt.landscape][v.cargo_type];
 
 		group = engine_custom_sprites[engine.id][cargo];
 
@@ -864,7 +864,7 @@ public class Engine extends EngineTables {
 		e.player_avail = BitOps.RETSETBIT(e.player_avail, player.id);
 		p.avail_railtypes = BitOps.RETSETBIT(p.avail_railtypes, e.railtype);
 
-		e.preview_player = (byte) 0xFF;
+		e.preview_player =  0xFF;
 		Window.InvalidateWindowClasses(Window.WC_BUILD_VEHICLE);
 		Window.InvalidateWindowClasses(Window.WC_REPLACE_VEHICLE);
 	}
@@ -923,7 +923,7 @@ public class Engine extends EngineTables {
 					PlayerID best_player = PlayerID.get( GetBestPlayer(e.preview_player) );
 
 					if (best_player.id == Owner.OWNER_SPECTATOR) {
-						e.preview_player = (byte) 0xFF;
+						e.preview_player =  0xFF;
 						continue;
 					}
 
@@ -1003,7 +1003,7 @@ public class Engine extends EngineTables {
 							(v.type == Vehicle.VEH_Aircraft && v.subtype <= 2)) {
 						if (v.owner == p.index && v.engine_type.id == index) {
 							/* The user did prove me wrong, so restore old value */
-							p.block_preview = (byte) block_preview;
+							p.block_preview =  block_preview;
 							break;
 						}
 					}
@@ -1011,12 +1011,12 @@ public class Engine extends EngineTables {
 			}
 		}
 
-		e.flags = (byte) ((e.flags & ~ENGINE_INTRODUCING) | ENGINE_AVAILABLE);
+		e.flags =  ((e.flags & ~ENGINE_INTRODUCING) | ENGINE_AVAILABLE);
 		Window.InvalidateWindowClasses(Window.WC_BUILD_VEHICLE);
 		Window.InvalidateWindowClasses(Window.WC_REPLACE_VEHICLE);
 
 		// Now available for all players
-		e.player_avail = (byte)-1;
+		e.player_avail = -1;
 
 		// Do not introduce new rail wagons
 		if (IsWagon(index)) return;

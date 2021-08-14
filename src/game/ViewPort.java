@@ -331,10 +331,12 @@ public class ViewPort
 		int z;
 		int a,b;
 
-		if ( (int)(x -= vp.left) >= (int)vp.width ||
-				(int)(y -= vp.top) >= (int)vp.height) {
+		x -= vp.left;
+		y -= vp.top;
+		
+		if ( x >= vp.width || y >= vp.height
+				|| x < 0 || y < 0 )
 			return new Point(-1, -1);
-		}
 
 		x = ((x << vp.zoom) + vp.virtual_left) >> 2;
 		y = ((y << vp.zoom) + vp.virtual_top) >> 1;
@@ -357,7 +359,8 @@ public class ViewPort
 		//pt.x = a+z;
 		//pt.y = b+z;
 
-		if ((int)pt.x >= Global.MapMaxX() * 16 || (int)pt.y >= Global.MapMaxY() * 16) {
+		if (pt.x >= Global.MapMaxX() * 16 || pt.y >= Global.MapMaxY() * 16
+				|| pt.x < 0 || pt.y < 0) {
 			pt.x = pt.y = -1;
 		}
 
@@ -668,7 +671,7 @@ public class ViewPort
 	static void DrawSelectionSprite(int image, final TileInfo ti)
 	{
 		if (_added_tile_sprite && 0 == (_thd.drawstyle & HT_LINE)) { // draw on real ground
-			DrawGroundSpriteAt(image, ti.x, ti.y, (byte) (ti.z + 7));
+			DrawGroundSpriteAt(image, ti.x, ti.y,  (ti.z + 7));
 		} else { // draw on top of foundation
 			AddSortableSpriteToDraw(image, ti.x, ti.y, 0x10, 0x10, 1, ti.z + 7);
 		}

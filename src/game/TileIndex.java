@@ -257,7 +257,7 @@ public class TileIndex implements Comparable<TileIndex>
 	void SetMapExtraBits(int i)
 	{
 		//assert(tile < Global.MapSize());
-		Global._m[tile].extra = (byte) BitOps.RETSB(Global._m[tile].extra, 0, 2, i & 3);
+		Global._m[tile].extra =  BitOps.RETSB(Global._m[tile].extra, 0, 2, i & 3);
 	}
 
 	int GetMapExtraBits()
@@ -573,7 +573,7 @@ public class TileIndex implements Comparable<TileIndex>
 
 	public boolean IsTrainStationTile()
 	{
-		return IsTileType(TileTypes.MP_STATION) && BitOps.IS_BYTE_INSIDE(getMap().m5, (byte)0, (byte)8);
+		return IsTileType(TileTypes.MP_STATION) && BitOps.IS_BYTE_INSIDE(getMap().m5, 0, 8);
 	}
 
 	public boolean IsCompatibleTrainStationTile(TileIndex ref)

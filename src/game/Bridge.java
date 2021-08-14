@@ -132,7 +132,7 @@ public class Bridge
 
 		Window.DeleteWindowById(Window.WC_BUILD_BRIDGE, 0);
 
-		_bridgedata.type = (byte) bridge_type;
+		_bridgedata.type =  bridge_type;
 		_bridgedata.start_tile = start;
 		_bridgedata.end_tile = end;
 

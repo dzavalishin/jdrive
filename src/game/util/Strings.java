@@ -837,7 +837,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 			case 0x8D: { // {P}
 				//int v = argv_orig[(byte)str[stri++]]; // contains the number that determines plural
-				int v = (Integer)arg[(byte)str[stri++]]; // contains the number that determines plural
+				int v = (Integer)arg[0xFF & str[stri++]]; // contains the number that determines plural
 				//int [] len = { 0 };
 				//str = ParseStringChoice(str, DeterminePluralForm(v), buff, len);
 				//buff += len[0];

@@ -472,7 +472,7 @@ public class RoadVehGui
 			case 2: { /* listbox */
 				int i = (e.pt.y - 14) / 14;
 				if (i < w.vscroll.cap) {
-					w.as_buildtrain_d().sel_index = (byte) (i + w.vscroll.pos);
+					w.as_buildtrain_d().sel_index =  (i + w.vscroll.pos);
 					w.SetWindowDirty();
 				}
 			} break;

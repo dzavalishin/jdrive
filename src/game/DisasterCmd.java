@@ -648,7 +648,7 @@ public class DisasterCmd extends DisasterTables
 		if (tile.IsValidTile() ) 
 		{
 			int r=Landscape.GetTileTrackStatus(tile,Global.TRANSPORT_WATER);
-			if( ((byte)(r+(r >> 8)) == 0x3F) && !BitOps.CHANCE16(1,90)) 
+			if( (((r&0xFF) + (0xFF & (r >> 8))) == 0x3F) && !BitOps.CHANCE16(1,90)) 
 			{
 				v.GetNewVehiclePos(gp);
 				SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);

@@ -29,7 +29,6 @@ public class Tile {
 	public static final int INVALID_DIAGDIR = 0xFF;
 	
 	public byte get_type_height() {
-		// TODO Auto-generated method stub
 		return (byte) (((type << 4) & 0xF0) | (height & 0x0F));
 	}
 	

@@ -224,7 +224,7 @@ public class TrackPathFinder extends Pathfind
 
 		bits = Landscape.GetTileTrackStatus(tile, tpf.tracktype);
 
-		if ((byte)bits != tpf.var2) {
+		if (bits != tpf.var2) {
 			bits &= _tpfmode1_and[direction];
 			bits = bits | (bits>>8);
 		}
@@ -236,7 +236,7 @@ public class TrackPathFinder extends Pathfind
 					i = BitOps.FIND_FIRST_BIT(bits);
 					bits = BitOps.KILL_FIRST_BIT(bits);
 
-					tpf.the_dir = (_otherdir_mask[direction] & (byte)(1 << i)) != 0 ? (i+8) : i;
+					tpf.the_dir = (_otherdir_mask[direction] & (1 << i)) != 0 ? (i+8) : i;
 					rd = tpf.rd;
 
 					{
@@ -275,7 +275,7 @@ public class TrackPathFinder extends Pathfind
 		bits = Landscape.GetTileTrackStatus(tile, tpf.tracktype);
 		bits |= (bits >> 8);
 
-		if ( (byte)bits != tpf.var2) {
+		if ( (0xFF & bits) != tpf.var2) {
 			bits &= _bits_mask[direction];
 		}
 
@@ -287,7 +287,7 @@ public class TrackPathFinder extends Pathfind
 			i = BitOps.FIND_FIRST_BIT(bits);
 			bits = BitOps.KILL_FIRST_BIT(bits);
 
-			tpf.the_dir = (_otherdir_mask[direction] & (byte)(1 << i)) != 0 ? (i+8) : i;
+			tpf.the_dir = (_otherdir_mask[direction] & (1 << i)) != 0 ? (i+8) : i;
 			rd = tpf.rd;
 			if (TPFSetTileBit(tpf, tile, tpf.the_dir) ) 
 			{
@@ -345,7 +345,7 @@ public class TrackPathFinder extends Pathfind
 			return;
 
 		bits = Landscape.GetTileTrackStatus(tile, tpf.tracktype);
-		bits = (byte)((bits | (bits >> 8)) & _bits_mask[direction]);
+		bits = 0xFF & ((bits | (bits >> 8)) & _bits_mask[direction]);
 		if (bits == 0)
 			return;
 
@@ -384,7 +384,7 @@ public class TrackPathFinder extends Pathfind
 						tpf.rd = rd;
 						return;
 					}
-					tpf.rd.pft_var6 = (byte)i;
+					tpf.rd.pft_var6 = i;
 				}
 			}
 			//continue_here:;

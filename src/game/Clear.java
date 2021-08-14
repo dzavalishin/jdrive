@@ -7,7 +7,7 @@ public class Clear extends ClearTables {
 
 	static class TerraformerHeightMod {
 		TileIndex tile;
-		byte height;
+		int height;
 	} 
 
 	static class TerraformerState {
@@ -197,7 +197,7 @@ public class Clear extends ClearTables {
 
 		ts.modheight[i] = new TerraformerHeightMod();
 		ts.modheight[i].tile = tile;
-		ts.modheight[i].height = (byte)height;
+		ts.modheight[i].height = height;
 
 		ts.cost += Global._price.terraform;
 
@@ -540,7 +540,7 @@ public class Clear extends ClearTables {
 	static void DrawClearLandFence(final TileInfo ti)
 	{
 		int m4 = ti.tile.getMap().m4;
-		byte z = (byte) ti.z;
+		int z =  ti.z;
 
 		if(0 != (ti.tileh & 2)) {
 			z += 8;
@@ -636,12 +636,12 @@ public class Clear extends ClearTables {
 
 		if (BitOps.GB(tile.getMap().m4, 5, 3) == 0) {
 			if (self != neighbour) {
-				tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 5, 3, 3);
+				tile.getMap().m4 =  BitOps.RETSB(tile.getMap().m4, 5, 3, 3);
 				dirty = tile;
 			}
 		} else {
 			if (self == false && neighbour == false) {
-				tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 5, 3, 0);
+				tile.getMap().m4 =  BitOps.RETSB(tile.getMap().m4, 5, 3, 0);
 				dirty = tile;
 			}
 		}
@@ -658,12 +658,12 @@ public class Clear extends ClearTables {
 
 		if (BitOps.GB(tile.getMap().m4, 2, 3) == 0) {
 			if (self != neighbour) {
-				tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 2, 3, 3);
+				tile.getMap().m4 =  BitOps.RETSB(tile.getMap().m4, 2, 3, 3);
 				dirty = tile;
 			}
 		} else {
 			if (self == false && neighbour == false) {
-				tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 2, 3, 0);
+				tile.getMap().m4 =  BitOps.RETSB(tile.getMap().m4, 2, 3, 0);
 				dirty = tile;
 			}
 		}
@@ -705,7 +705,7 @@ public class Clear extends ClearTables {
 			} else if (tmp != 1) {
 				m5 = 1;
 				if (tmp != 0)
-					m5 = (byte) (tmp - 1);
+					m5 =  (tmp - 1);
 				m5 += 0x10;
 			} else
 				return;
@@ -779,7 +779,7 @@ public class Clear extends ClearTables {
 				}
 				/* did overflow, so continue */
 			} else {
-				m5 = (byte) ((BitOps.GB(Hal.Random(), 0, 8) > 21) ? 2 : 6);
+				m5 =  ((BitOps.GB(Hal.Random(), 0, 8) > 21) ? 2 : 6);
 			}
 			m5++;
 		} else if (Global._game_mode != GameModes.GM_EDITOR) {
@@ -791,7 +791,7 @@ public class Clear extends ClearTables {
 				return;
 			}
 			/* overflowed */
-			m3 = (byte) (tile.getMap().m3 + 1);
+			m3 =  (tile.getMap().m3 + 1);
 			assert( (m3 & 0xF) != 0);
 			if ( (m3 & 0xF) >= 9) /* NOTE: will not work properly if m3&0xF == 0xF */
 				m3 &= ~0xF;
@@ -877,7 +877,7 @@ public class Clear extends ClearTables {
 		int i = BitOps.GB(tile.getMap().m5, 2, 3);
 		if (i == 0) i = BitOps.GB(tile.getMap().m5, 0, 2) + 8;
 		td.str = _clear_land_str[i - 1];
-		td.owner = (byte) tile.GetTileOwner().id;
+		td.owner =  tile.GetTileOwner().id;
 		return td;
 	}
 

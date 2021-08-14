@@ -207,9 +207,9 @@ public class BitOps {
 
 	public static boolean IS_BYTE_INSIDE(int ia, int imin, int imax)
 	{
-		byte a = (byte) ia;
-		byte min = (byte) imin;
-		byte max = (byte) imax;
+		int a = 0xFF & ia;
+		int min = 0xFF & imin;
+		int max = 0xFF & imax;
 		
 		return Integer.compareUnsigned(a-min, max-min) < 0;
 		//return ((uint)((a)-(min)) < (uint)((max)-(min)))

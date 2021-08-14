@@ -148,7 +148,7 @@ public class Pbs {
 					else if (encrt == (track^1) + 1) // opposite track reserved before
 						encrt |= 8;
 
-					tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 4, 4, encrt);
+					tile.getMap().m4 =  BitOps.RETSB(tile.getMap().m4, 4, 4, encrt);
 				}
 				break;
 			case MP_TUNNELBRIDGE:
@@ -257,7 +257,7 @@ public class Pbs {
 					else if (encrt == (track^1) + 1 + 8)
 						encrt &= 7;
 
-					tile.getMap().m4 = (byte) BitOps.RETSB(tile.getMap().m4, 4, 4, encrt);
+					tile.getMap().m4 =  BitOps.RETSB(tile.getMap().m4, 4, 4, encrt);
 				}
 				break;
 			case MP_TUNNELBRIDGE:

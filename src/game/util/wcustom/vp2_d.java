@@ -5,7 +5,7 @@ public class vp2_d extends AbstractWinCustom {
 	public int follow_vehicle;
 	public int scrollpos_x;
 	public int scrollpos_y;
-	public byte data_1;
-	public byte data_2;
-	public byte data_3;
+	public int data_1;
+	public int data_2;
+	public int data_3;
 }

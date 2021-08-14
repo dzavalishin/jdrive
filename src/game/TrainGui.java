@@ -256,7 +256,7 @@ public class TrainGui
 			case 2: {
 				int i = (e.pt.y - 14) / 14;
 				if (i < w.vscroll.cap) {
-					w.as_buildtrain_d().sel_index = (byte) (i + w.vscroll.pos);
+					w.as_buildtrain_d().sel_index =  (i + w.vscroll.pos);
 					w.SetWindowDirty();
 				}
 			} break;
@@ -338,11 +338,11 @@ public class TrainGui
 		w.resize.height = w.height - 14 * 4; /* Minimum of 4 vehicles in the display */
 
 		if (tile != null) {
-			w.caption_color = (byte) tile.GetTileOwner().id;
-			w.as_buildtrain_d().railtype = (byte) BitOps.GB(tile.getMap().m3, 0, 4);
+			w.caption_color =  tile.GetTileOwner().id;
+			w.as_buildtrain_d().railtype =  BitOps.GB(tile.getMap().m3, 0, 4);
 		} else {
-			w.caption_color = (byte) Global._local_player.id;
-			w.as_buildtrain_d().railtype = (byte) Rail.GetBestRailtype(Player.GetPlayer(Global._local_player));
+			w.caption_color =  Global._local_player.id;
+			w.as_buildtrain_d().railtype =  Rail.GetBestRailtype(Player.GetPlayer(Global._local_player));
 		}
 	}
 
@@ -847,7 +847,7 @@ public class TrainGui
 		if (null != w) {
 			TileIndex wt = TileIndex.get(w.window_number);
 		
-			w.caption_color = (byte) wt.GetTileOwner().id;
+			w.caption_color =  wt.GetTileOwner().id;
 			w.vscroll.cap = 6;
 			w.hscroll.cap = 10;
 			w.resize.step_width = 29;
@@ -928,7 +928,7 @@ public class TrainGui
 		//Global._alloc_wnd_parent_num = v.index;
 		w = Window.AllocateWindowDesc(_rail_vehicle_refit_desc, v.index);
 		w.window_number = v.index;
-		w.caption_color = (byte) v.owner.id;
+		w.caption_color =  v.owner.id;
 		w.as_refit_d().sel = -1;
 	}
 
@@ -1117,7 +1117,7 @@ public class TrainGui
 		Window  w = Window.AllocateWindowDescFront(_train_view_desc,v.index);
 
 		if (w != null) {
-			w.caption_color = (byte) v.owner.id;
+			w.caption_color =  v.owner.id;
 			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x66, w.window_number | (1 << 31), 0);
 		}
 	}
@@ -1406,7 +1406,7 @@ public class TrainGui
 		w = Window.AllocateWindowDesc(_train_details_desc, veh);
 
 		w.window_number = veh;
-		w.caption_color = (byte) v.owner.id;
+		w.caption_color =  v.owner.id;
 		w.vscroll.cap = 6;
 		w.as_traindetails_d().tab = 0;
 	}
@@ -1589,7 +1589,7 @@ public class TrainGui
 			if (vl.sort_type != e.index) {
 				// value has changed . resort
 				vl.flags |= Vehicle.VL_RESORT;
-				vl.sort_type = (byte) e.index;
+				vl.sort_type =  e.index;
 				VehicleGui._sorting.train.criteria = vl.sort_type;
 
 				// enable 'Sort By' if a sorter criteria is chosen
@@ -1602,7 +1602,7 @@ public class TrainGui
 		case WE_CREATE: /* set up resort timer */
 			vl.sort_list = null;
 			vl.flags = Vehicle.VL_REBUILD | ( BitOps.b2i( VehicleGui._sorting.train.order ) << (Vehicle.VL_DESC - 1));
-			vl.sort_type = (byte) VehicleGui._sorting.train.criteria;
+			vl.sort_type =  VehicleGui._sorting.train.criteria;
 			vl.resort_timer = Global.DAY_TICKS * VehicleGui.PERIODIC_RESORT_DAYS;
 			break;
 
@@ -1655,7 +1655,7 @@ public class TrainGui
 			w = Window.AllocateWindowDescFront(_other_player_trains_desc, (station << 16) | player);
 		}
 		if (null != w) {
-			w.caption_color = (byte) player;
+			w.caption_color =  player;
 			w.hscroll.cap = 10;
 			w.vscroll.cap = 7; // maximum number of vehicles shown
 			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;

@@ -1,14 +1,14 @@
 package game;
 
 public class AircraftVehicleInfo {
-	byte image_index;
-	byte base_cost;
-	byte running_cost;
-	byte subtype;
-	byte sfx;
-	byte acceleration;
-	byte max_speed;
-	byte mail_capacity;
+	int image_index;
+	int base_cost;
+	int running_cost;
+	int subtype;
+	int sfx;
+	int acceleration;
+	int max_speed;
+	int mail_capacity;
 	int passenger_capacity;
 
 	public AircraftVehicleInfo(
@@ -16,14 +16,14 @@ public class AircraftVehicleInfo {
 			int l, int snd, int m, 
 			int n, int o, int p) {
 
-		image_index = (byte) i;
-		base_cost = (byte) j;
-		running_cost = (byte) k;
-		subtype = (byte) l;
-		sfx = (byte) snd;
-		acceleration = (byte) m;
-		max_speed = (byte) n;
-		mail_capacity = (byte) o;
+		image_index =  i;
+		base_cost =  j;
+		running_cost =  k;
+		subtype =  l;
+		sfx =  snd;
+		acceleration =  m;
+		max_speed =  n;
+		mail_capacity =  o;
 		passenger_capacity = p;
 
 	}

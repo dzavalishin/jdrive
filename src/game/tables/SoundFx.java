@@ -1,4 +1,4 @@
-package game;
+package game.tables;
 
 public enum SoundFx {
 	// [dz] added

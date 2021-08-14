@@ -642,11 +642,11 @@ class CarriageInfo extends EngineInfo
 	public CarriageInfo(int a, int b, int c, int d, int e, int f) 
 	{
 		base_intro = a;
-		unk2 = (byte) (b | 0x80);              ///< Carriages have the highest bit set in this one
-		lifelength = (byte) c;
-		base_life = (byte) d;
-		railtype = (byte) e;
-		climates = (byte) f;
+		unk2 =  (b | 0x80);              ///< Carriages have the highest bit set in this one
+		lifelength =  c;
+		base_life =  d;
+		railtype =  e;
+		climates =  f;
 		refit_mask = 0;
 
 	}
@@ -667,11 +667,11 @@ class EngineInit extends EngineInfo
 	public EngineInit(int a, int b, int c, int d, int e, int f) 
 	{
 		base_intro = a;
-		unk2 = (byte) b;              ///< Carriages have the highest bit set in this one
-		lifelength = (byte) c;
-		base_life = (byte) d;
-		railtype = (byte) e;
-		climates = (byte) f;
+		unk2 =  b;              ///< Carriages have the highest bit set in this one
+		lifelength =  c;
+		base_life =  d;
+		railtype =  e;
+		climates =  f;
 		refit_mask = 0;
 	}
 }

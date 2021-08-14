@@ -248,7 +248,7 @@ class DataCarrier extends Sprite
 	public DataCarrier(byte [] data) {
 		super();
 		this.data = data;
-		this.info = (byte) 0xFF;
+		this.info =  0xFF;
 	}
 }
 

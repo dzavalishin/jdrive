@@ -6,7 +6,7 @@ public class DockGui
 	//static void ShowBuildDockStationPicker();
 	//static void ShowBuildDocksDepotPicker();
 
-	static byte _ship_depot_direction;
+	static int _ship_depot_direction;
 
 	static void CcBuildDocks(boolean success, TileIndex tile, int p1, int p2)
 	{
@@ -304,7 +304,7 @@ public class DockGui
 			switch (e.widget) {
 			case 3:
 			case 4:
-				_ship_depot_direction = (byte) (e.widget - 3);
+				_ship_depot_direction =  (e.widget - 3);
 				//SndPlayFx(SND_15_BEEP);
 				UpdateDocksDirection();
 				w.SetWindowDirty();

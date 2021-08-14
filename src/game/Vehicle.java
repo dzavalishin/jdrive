@@ -1074,9 +1074,9 @@ public class Vehicle implements IPoolItem
 	 * Get a value for a vehicle's random_bits.
 	 * @return A random value from 0 to 255.
 	 */
-	public static byte VehicleRandomBits()
+	public static int VehicleRandomBits()
 	{
-		return (byte) BitOps.GB(Hal.Random(), 0, 8);
+		return  BitOps.GB(Hal.Random(), 0, 8);
 	}
 
 	public static Vehicle ForceAllocateSpecialVehicle()
@@ -2086,7 +2086,7 @@ public class Vehicle implements IPoolItem
 				return;
 			}
 			if (v.special.unk2 != 0) {
-				v.spritenum = (byte) (BitOps.GB(Hal.InteractiveRandom(), 0, 2) + 1);
+				v.spritenum =  (BitOps.GB(Hal.InteractiveRandom(), 0, 2) + 1);
 			} else {
 				v.spritenum = 6;
 			}
@@ -2173,7 +2173,7 @@ public class Vehicle implements IPoolItem
 		v = ForceAllocateSpecialVehicle();
 		if (v != null) {
 			v.type = VEH_Special;
-			v.subtype = (byte) type;
+			v.subtype =  type;
 			v.x_pos = x;
 			v.y_pos = y;
 			v.z_pos = z;
@@ -2286,7 +2286,7 @@ public class Vehicle implements IPoolItem
 		/* increase chance of failure */
 		chance = v.breakdown_chance + 1;
 		if (BitOps.CHANCE16I(1,25,r)) chance += 25;
-		v.breakdown_chance = (byte) Math.min(255, chance);
+		v.breakdown_chance =  Math.min(255, chance);
 
 		/* calculate reliability value to use in comparison */
 		rel = v.reliability;
@@ -2300,8 +2300,8 @@ public class Vehicle implements IPoolItem
 
 		/* check if to break down */
 		if (_breakdown_chance[(int)Math.min(rel, 0xffff) >> 10] <= v.breakdown_chance) {
-			v.breakdown_ctr    = (byte) (BitOps.GB(r, 16, 6) + 0x3F);
-			v.breakdown_delay  = (byte) (BitOps.GB(r, 24, 7) + 0x80);
+			v.breakdown_ctr    =  (BitOps.GB(r, 16, 6) + 0x3F);
+			v.breakdown_delay  =  (BitOps.GB(r, 24, 7) + 0x80);
 			v.breakdown_chance = 0;
 		}
 	}
@@ -2799,10 +2799,10 @@ public class Vehicle implements IPoolItem
 
 		dir = v.direction;
 
-		dirdiff = (byte) (_new_direction_table[i] - dir);
+		dirdiff =  (_new_direction_table[i] - dir);
 		if (dirdiff == 0)
 			return dir;
-		return (byte) ((dir+((dirdiff&7)<5?1:-1)) & 7);
+		return  ((dir+((dirdiff&7)<5?1:-1)) & 7);
 	}
 
 	/* Trackdir */ int GetVehicleTrackdir()

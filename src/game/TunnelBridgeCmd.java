@@ -379,7 +379,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				}
 
 				ti.tile.getMap().m2 = (bridge_type << 4) | m5;
-				ti.tile.getMap().m3 = (byte) BitOps.RETSB(ti.tile.getMap().m3, 4, 4, railtype);
+				ti.tile.getMap().m3 =  BitOps.RETSB(ti.tile.getMap().m3, 4, 4, railtype);
 
 				ti.tile.MarkTileDirtyByTile();
 			}
@@ -870,8 +870,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			if (end1 == TileIndex.INVALID_TILE) return Cmd.CMD_ERROR;
 
 			if (exec) {
-				tile.getMap().m3 = (byte) BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
-				end1.getMap().m3 = (byte) BitOps.RETSB(end1.getMap().m3, 0, 4, totype);
+				tile.getMap().m3 =  BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
+				end1.getMap().m3 =  BitOps.RETSB(end1.getMap().m3, 0, 4, totype);
 				tile.MarkTileDirtyByTile();
 				end1.MarkTileDirtyByTile();
 			}
@@ -886,7 +886,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			if (BitOps.GB(tile.getMap().m3, 0, 4) == totype) return Cmd.CMD_ERROR;
 			// change type.
 			if (exec) {
-				tile.getMap().m3 = (byte) BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
+				tile.getMap().m3 =  BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
 				tile.MarkTileDirtyByTile();
 			}
 			return Global._price.build_rail >> 1;
@@ -918,9 +918,9 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			do {
 				if (exec) {
 					if (tile.equals(starttile) || tile.equals(end2[0])) {
-						tile.getMap().m3 = (byte) BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
+						tile.getMap().m3 =  BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
 					} else {
-						tile.getMap().m3 = (byte) BitOps.RETSB(tile.getMap().m3, 4, 4, totype);
+						tile.getMap().m3 =  BitOps.RETSB(tile.getMap().m3, 4, 4, totype);
 					}
 					tile.MarkTileDirtyByTile();
 				}
@@ -1074,7 +1074,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			image += BitOps.GB(ti.map5, 0, 2) * 2;
 			ViewPort.DrawGroundSprite(image);
 
-			ViewPort.AddSortableSpriteToDraw(image+1, ti.x + 15, ti.y + 15, 1, 1, 8, (byte)ti.z);
+			ViewPort.AddSortableSpriteToDraw(image+1, ti.x + 15, ti.y + 15, 1, 1, 8, ti.z);
 			// draw bridge?
 		} else if(0 != (ti.map5 & 0x80)) {
 			//RailType
@@ -1483,7 +1483,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				if (dir == (vdir^2) && fc == _tunnel_fractcoord_3[dir] && z == 0) {
 					/* We're at the tunnel exit ?? */
 					v.tile = tile;
-					v.rail.track = (byte) _exit_tunnel_track[dir];
+					v.rail.track =  _exit_tunnel_track[dir];
 					assert(v.rail.track != 0);
 					v.vehstatus &= ~Vehicle.VS_HIDDEN;
 					return 4;

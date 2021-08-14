@@ -1609,7 +1609,7 @@ public class MiscGui {
 	{
 		if (p1 == -1) p1 = 3;
 		if (p1 ==  4) p1 = 0;
-		GameOptions._opt.landscape = (byte) p1;
+		GameOptions._opt.landscape =  p1;
 		GfxInit.GfxLoadSprites();
 		Hal.MarkWholeScreenDirty();
 		return GameOptions._opt.landscape;

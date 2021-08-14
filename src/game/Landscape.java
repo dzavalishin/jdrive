@@ -388,13 +388,13 @@ public class Landscape extends GenLandTable
 		if( 0 != (flags & (TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3LO)) ) {
 			int x = 0;
 			if( 0 != (flags & TileTypes.MP_MAP3LO) ) x = args[p++];
-			tile.getMap().m3 = (byte) x;
+			tile.getMap().m3 =  x;
 		}
 
 		if( 0 !=  (flags & (TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAP3HI)) ) {
 			int x = 0;
 			if( 0 !=  (flags & TileTypes.MP_MAP3HI) ) x = args[p++];
-			tile.getMap().m4 = (byte) x;
+			tile.getMap().m4 =  x;
 		}
 
 		if( 0 != (flags & (TileTypes.MP_MAPOWNER|TileTypes.MP_MAPOWNER_CURRENT)) ) {
@@ -515,7 +515,7 @@ public class Landscape extends GenLandTable
 		int pi = 0; // p index
 		//TileIndex tile;
 		//Tile tile;
-		byte direction;
+		int direction;
 
 		r = Hal.Random();
 		template = SpriteCache.GetSprite((((r >> 24) * _genterrain_tbl_1[type]) >> 8) + _genterrain_tbl_2[type] + 4845);
@@ -527,7 +527,7 @@ public class Landscape extends GenLandTable
 		if (x < 2 || y < 2)
 			return;
 
-		direction = (byte) BitOps.GB(r, 22, 2);
+		direction =  BitOps.GB(r, 22, 2);
 		if (0 != (direction & 1)) {
 			w = template.height;
 			h = template.width;

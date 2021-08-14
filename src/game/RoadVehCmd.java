@@ -141,7 +141,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			v.service_interval = Global._patches.servint_roadveh;
 
 			v.date_of_last_service = Global._date;
-			v.build_year = (byte) Global._cur_year;
+			v.build_year =  Global._cur_year;
 
 			v.type = Vehicle.VEH_Road;
 			v.cur_image = 0xC15;
@@ -399,8 +399,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		int x = _delta_xy_table[v.direction];
 		v.x_offs        = BitOps.GB(x,  0, 8);
 		v.y_offs        = BitOps.GB(x,  8, 8);
-		v.sprite_width  = (byte) BitOps.GB(x, 16, 8);
-		v.sprite_height = (byte) BitOps.GB(x, 24, 8);
+		v.sprite_width  =  BitOps.GB(x, 16, 8);
+		v.sprite_height =  BitOps.GB(x, 24, 8);
 	}
 
 	static void ClearCrashedStation(Vehicle v)
@@ -1308,7 +1308,7 @@ class RoadDriveEntry {
 
 			if (0==(r & 4)) {
 				v.tile = tile;
-				v.road.state = (byte)tmp;
+				v.road.state = tmp;
 				v.road.frame = 0;
 			}
 			if (newdir != v.direction) {

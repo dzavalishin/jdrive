@@ -573,7 +573,7 @@ public class StationGui extends Station  // to get finalants
 		w = Window.AllocateWindowDescFront(_station_view_desc, station);
 		if (w != null) {
 			PlayerID owner = Station.GetStation(w.window_number).owner;
-			if (owner.id != Owner.OWNER_NONE) w.caption_color = (byte) owner.id;
+			if (owner.id != Owner.OWNER_NONE) w.caption_color =  owner.id;
 			w.vscroll.cap = 5;
 		}
 	}

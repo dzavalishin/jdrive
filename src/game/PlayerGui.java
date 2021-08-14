@@ -602,7 +602,7 @@ public class PlayerGui
 			case 7: {/* build hq */
 				TileIndex tile = Player.GetPlayer(w.window_number).location_of_house;
 				if (tile == null) {
-					if ((byte)w.window_number != Global._local_player.id)
+					if (w.window_number != Global._local_player.id)
 						return;
 					ViewPort.SetObjectToPlaceWnd(Sprite.SPR_CURSOR_HQ, 1, w);
 					ViewPort.SetTileSelectSize(2, 2);

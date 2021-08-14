@@ -21,17 +21,17 @@ public class WayPoint implements IPoolItem
 	public int index;      ///< Index of WayPoint
 
 	public int town_index; ///< Town associated with the WayPoint
-	public byte town_cn;      ///< The Nth WayPoint for this town (consecutive number)
+	public int town_cn;      ///< The Nth WayPoint for this town (consecutive number)
 	public StringID string;   ///< If this is zero (i.e. no custom name), town + town_cn is used for naming
 
 	public ViewportSign sign; ///< Dimensions of sign (not saved)
 	public int build_date; ///< Date of construction
 
-	public byte stat_id;      ///< ID of WayPoint within the WayPoint class (not saved)
+	public int stat_id;      ///< ID of WayPoint within the WayPoint class (not saved)
 	public int grfid;      ///< ID of GRF file
-	public byte localidx;     ///< Index of station within GRF file
+	public int localidx;     ///< Index of station within GRF file
 
-	public byte deleted;      ///< Delete counter. If greater than 0 then it is decremented until it reaches 0; the WayPoint is then is deleted.
+	public int deleted;      ///< Delete counter. If greater than 0 then it is decremented until it reaches 0; the WayPoint is then is deleted.
 
 
 
@@ -228,7 +228,7 @@ private void WaypointPoolNewBlock(int start_item)
 		for (i = 0; used_waypoint[i] && i < MAX_WAYPOINTS_PER_TOWN; i++) {}
 
 		string = new StringID( Str.STR_NULL );
-		town_cn = (byte) i;
+		town_cn =  i;
 	}
 
 	/* Find a deleted WayPoint close to a tile. */
@@ -274,7 +274,7 @@ private void WaypointPoolNewBlock(int start_item)
 				for (i = 0; i < GetNumCustomStations(STAT_CLASS_WAYP); i++) {
 					final StationSpec spec = GetCustomStation(STAT_CLASS_WAYP, i);
 					if (spec != null && spec.grfid == wp.grfid && spec.localidx == wp.localidx) {
-						wp.stat_id = (byte) i;
+						wp.stat_id =  i;
 						break;
 					}
 				}
@@ -353,9 +353,9 @@ private void WaypointPoolNewBlock(int start_item)
 			if (spec != null) {
 				//SETBIT(Global._m[tile.getTile()].m3, 4);
 				tile.setBit_m3(4);
-				wp.stat_id = (byte) BitOps.GB(p1, 0, 8);
+				wp.stat_id =  BitOps.GB(p1, 0, 8);
 				wp.grfid = spec.grfid;
-				wp.localidx = (byte) spec.localidx;
+				wp.localidx =  spec.localidx;
 			} else {
 				// Specified custom graphics do not exist, so use default.
 				//CLRBIT(Global._m[tile.getTile()].m3, 4);
@@ -576,10 +576,10 @@ private void WaypointPoolNewBlock(int start_item)
 		Gfx.DrawSprite(img, x, y);
 
 		//foreach_draw_tile_seq(seq, cust.seq) 
-		//for (seq = cust.seq; ((byte) seq->delta_x) != 0x80; seq++)
+		//for (seq = cust.seq; ( seq->delta_x) != 0x80; seq++)
 		for( DrawTileSeqStruct seq : cust.seq )
 		{
-			if( ((byte) seq.delta_x) == 0x80 )
+			if( ( seq.delta_x) == 0x80 )
 				break;
 			
 			Point pt = Point.RemapCoords(seq.delta_x, seq.delta_y, seq.delta_z);

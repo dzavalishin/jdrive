@@ -27,16 +27,16 @@ public class Town extends TownTables implements IPoolItem
 	ViewportSign sign;
 
 	// Makes sure we don't build certain house types twice.
-	byte flags12;
+	int flags12;
 
 	// Which players have a statue?
-	byte statues;
+	int statues;
 
 	// Sort index in listings
-	byte sort_index_obsolete;
+	int sort_index_obsolete;
 
 	// Player ratings as well as a mask that determines which players have a rating.
-	byte have_ratings;
+	int have_ratings;
 	int unwanted[]; // how many months companies aren't wanted by towns (bribe)
 	PlayerID exclusivity;        // which player has exslusivity
 	int exclusive_counter;     // months till the exclusivity expires
@@ -53,8 +53,8 @@ public class Town extends TownTables implements IPoolItem
 	int new_act_mail;
 
 	// Amount of passengers that were transported.
-	byte pct_pass_transported;
-	byte pct_mail_transported;
+	int pct_pass_transported;
+	int pct_mail_transported;
 
 	// Amount of food and paper that was transported. Actually a bit mask would be enough.
 	int act_food;
@@ -63,17 +63,17 @@ public class Town extends TownTables implements IPoolItem
 	int new_act_water;
 
 	// Time until we rebuild a house.
-	byte time_until_rebuild;
+	int time_until_rebuild;
 
 	// When to grow town next time.
 	int grow_counter;
 	int growth_rate;
 
 	// Fund buildings program in action?
-	byte fund_buildings_months;
+	int fund_buildings_months;
 
 	// Fund road refinalruction in action?
-	byte road_build_months;
+	int road_build_months;
 
 	// Index in town array
 	public int index;
@@ -236,14 +236,14 @@ public class Town extends TownTables implements IPoolItem
 	static void DrawTile_Town(TileInfo ti)
 	{
 		final DrawTownTileStruct dcts;
-		byte z;
+		int z;
 		int image;
 
 		/* Retrieve pointer to the draw town tile struct */
 		{
 			/* this "randomizes" on the (up to) 4 variants of a building */
 			int gfx   = ti.tile.getMap().m4;
-			byte stage = (byte) BitOps.GB(ti.tile.getMap().m3, 6, 2);
+			int stage =  BitOps.GB(ti.tile.getMap().m3, 6, 2);
 			int variant;
 			variant  = ti.x >> 4;
 		variant ^= ti.x >> 6;
@@ -253,7 +253,7 @@ public class Town extends TownTables implements IPoolItem
 		dcts = _town_draw_tile_data[gfx << 4 | variant << 2 | stage];
 		}
 
-		z = (byte) ti.z;
+		z =  ti.z;
 
 		/* Add bricks below the house? */
 		if(0 != (ti.tileh)) {
@@ -407,7 +407,7 @@ public class Town extends TownTables implements IPoolItem
 		tile.getMap().m5 = BitOps.RETAB(tile.getMap().m5, 0, 3, 1);
 		if (BitOps.GB(tile.getMap().m5, 0, 3) != 0) return;
 
-		tile.getMap().m3 = (byte) (tile.getMap().m3 + 0x40);
+		tile.getMap().m3 = 0xFF & (tile.getMap().m3 + 0x40);
 
 		if ((tile.getMap().m3 & 0xC0) == 0xC0) {
 			GetTown(tile.getMap().m2).ChangePopulation(_housetype_population[tile.getMap().m4]);
@@ -469,7 +469,7 @@ public class Town extends TownTables implements IPoolItem
 		}
 
 		if ( 0 != (_house_more_flags[house] & 8) && 0 != (t.flags12 & 1) && --t.time_until_rebuild == 0) {
-			t.time_until_rebuild = (byte) (BitOps.GB(r, 16, 6) + 130);
+			t.time_until_rebuild =  (BitOps.GB(r, 16, 6) + 130);
 
 			Global._current_player = PlayerID.get( Owner.OWNER_TOWN );
 
@@ -584,7 +584,7 @@ public class Town extends TownTables implements IPoolItem
 					i = 0;
 				}
 			}
-			t.grow_counter = (byte) i;
+			t.grow_counter =  i;
 		}
 
 		t.UpdateTownRadius();
@@ -2050,7 +2050,7 @@ public class Town extends TownTables implements IPoolItem
 				return;
 		}
 
-		t.growth_rate = (byte) (m / (t.num_houses / 50 + 1));
+		t.growth_rate =  (m / (t.num_houses / 50 + 1));
 		if (m <= t.grow_counter)
 			t.grow_counter = m;
 
@@ -2060,7 +2060,7 @@ public class Town extends TownTables implements IPoolItem
 	static void UpdateTownAmounts(Town t)
 	{
 		// Using +1 here to prevent overflow and division by zero
-		t.pct_pass_transported = (byte) (t.new_act_pass * 256 / (t.new_max_pass + 1));
+		t.pct_pass_transported =  (t.new_act_pass * 256 / (t.new_max_pass + 1));
 
 		t.max_pass = t.new_max_pass; t.new_max_pass = 0;
 		t.act_pass = t.new_act_pass; t.new_act_pass = 0;
@@ -2068,7 +2068,7 @@ public class Town extends TownTables implements IPoolItem
 		t.act_water = t.new_act_water; t.new_act_water = 0;
 
 		// Using +1 here to prevent overflow and division by zero
-		t.pct_mail_transported = (byte) (t.new_act_mail * 256 / (t.new_max_mail + 1));
+		t.pct_mail_transported =  (t.new_act_mail * 256 / (t.new_max_mail + 1));
 		t.max_mail = t.new_max_mail; t.new_max_mail = 0;
 		t.act_mail = t.new_act_mail; t.new_act_mail = 0;
 

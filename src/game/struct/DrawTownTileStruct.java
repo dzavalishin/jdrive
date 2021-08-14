@@ -9,12 +9,12 @@ public class DrawTownTileStruct {
 	public int sprite_1;
 	public int sprite_2;
 
-	public byte subtile_x;
-	public byte subtile_y;
-	public byte width;
-	public byte height;
-	public byte dz;
-	public byte proc;
+	public int subtile_x;
+	public int subtile_y;
+	public int width;
+	public int height;
+	public int dz;
+	public int proc;
 
 	/** Writes the data into the Town Tile Drawing Struct
 	 * @param s1 The first sprite of the building, mostly the ground sprite
@@ -33,12 +33,12 @@ public class DrawTownTileStruct {
 		this.sprite_1 = s1;
 		this.sprite_2 = s2;
 
-		this.subtile_x = (byte) sx;
-		this.subtile_y = (byte) sy;
-		this.width = (byte) (w - 1);
-		this.height = (byte) (h - 1);
-		this.dz = (byte) dz;
-		this.proc = (byte) p;
+		this.subtile_x =  sx;
+		this.subtile_y =  sy;
+		this.width =  (w - 1);
+		this.height =  (h - 1);
+		this.dz =  dz;
+		this.proc =  p;
 	}	
 
 }
