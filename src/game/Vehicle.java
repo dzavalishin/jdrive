@@ -1114,21 +1114,22 @@ public class Vehicle implements IPoolItem
 	 * this feature is used by AllocateVehicles() since it need to allocate more than one and when
 	 * another block is added to _vehicle_pool, since we only do that when we know it's already full
 	 */
-	private static Vehicle AllocateSingleVehicle(VehicleID[] skip_vehicles)
+	//private static Vehicle AllocateSingleVehicle(VehicleID[] skip_vehicles)
+	private static Vehicle AllocateSingleVehicle(int [] skip_vehicles)
 	{
 		/* See note by ForceAllocateSpecialVehicle() why we skip the
 		 * first blocks */
 		final int offset = (1 << VEHICLES_POOL_BLOCK_SIZE_BITS) * BLOCKS_FOR_SPECIAL_VEHICLES;
 
-		if (skip_vehicles[0].id < (_vehicle_pool.total_items() - offset)) 
+		if (skip_vehicles[0] < (_vehicle_pool.total_items() - offset)) 
 		{	// make sure the offset in the array is not larger than the array itself
 			//FOR_ALL_VEHICLES_FROM(v, offset + skip_vehicles[0])
-			Iterator<Vehicle> ii = getIteratorFrom(offset + skip_vehicles[0].id);
+			Iterator<Vehicle> ii = getIteratorFrom(offset + skip_vehicles[0]);
 			while(ii.hasNext())
 			{
 				Vehicle v = ii.next();
 
-				skip_vehicles[0].id++;
+				skip_vehicles[0]++;
 				if (v.type == 0)
 				{
 					v.InitializeVehicle();
@@ -1147,7 +1148,7 @@ public class Vehicle implements IPoolItem
 
 	static Vehicle AllocateVehicle()
 	{
-		VehicleID[] counter = { VehicleID.get(0) }; // TODO not static?
+		int[] counter = { 0 }; // TODO not static?
 		return AllocateSingleVehicle(counter);
 	}
 
@@ -1161,7 +1162,7 @@ public class Vehicle implements IPoolItem
 	{
 		int i;
 		Vehicle v;
-		VehicleID[] counter = { VehicleID.get(0) };
+		int [] counter = { 0 };
 
 		for(i = 0; i != num; i++) {
 			v = AllocateSingleVehicle(counter);
@@ -2903,7 +2904,7 @@ public class Vehicle implements IPoolItem
 	public boolean CheckForValidOrders()
 	{
 		//final Order order;
-		boolean ok = false;
+		//boolean ok = false;
 
 		//FOR_VEHICLE_ORDERS(v, order)
 		/*

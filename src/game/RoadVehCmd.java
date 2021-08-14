@@ -784,7 +784,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			//int t = 0xff & v.progress;
 			//v.progress = t - (0xff & spd);
 			int t = v.progress;
-			v.progress = t + spd;
+			v.progress = t + spd; // TODO XXX [dz] changed to + - WHY?
 
 			return (t < v.progress);
 	}
@@ -1449,6 +1449,7 @@ class RoadDriveEntry {
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 		}
 
+		ViewPort.SetRedErrorSquare(v.tile);
 		r1 = v.VehicleEnterTile( v.tile, x, y);
 		if(0!= (r1 & 8)) {
 			v.cur_speed = 0;

@@ -3275,7 +3275,7 @@ public class Station extends StationTables implements IPoolItem
 
 	private static void ChangeTileOwner_Station(TileIndex tile, PlayerID old_player, PlayerID new_player)
 	{
-		if (!tile.IsTileOwner(new Owner(old_player.id))) return;
+		if (!tile.IsTileOwner(old_player)) return;
 
 		if (new_player.id != Owner.OWNER_SPECTATOR) {
 			Station st = GetStation(tile.getMap().m2);

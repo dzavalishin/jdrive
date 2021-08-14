@@ -189,6 +189,7 @@ public class ViewPort
 	{
 		//for (; w < _last_window; w++) 
 		Iterator<Window> ii = Window.getIterator( startw );
+		// TODO crashes! ii.next(); // caller func had w+1 as 1st param, so we skip one window
 		while(ii.hasNext())
 		{
 			Window w = ii.next();

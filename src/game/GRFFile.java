@@ -1,5 +1,7 @@
 package game;
 
+import game.util.BitOps;
+
 /* TTDPatch extended GRF format codec
  * (c) Petr Baudis 2004 (GPL'd)
  * Changes by Florian octo Forster are (c) by the OpenTTD development team.
@@ -90,16 +92,23 @@ public class GRFFile
 			"Fatal"
 		};
 
+	enum severity {
+		GMS_NOTICE,
+		GMS_WARN,
+		GMS_ERROR,
+		GMS_FATAL,
+	} 
+	
 
-	static void grfmsg(grfmsg_severity severity, String str, Object ... args)
+	static void grfmsg(severity severity, String str, Object ... args)
 	{
 		int export_severity = 0;
 		String buf;
 
 		buf = String.format(str, args);
 
-		export_severity = 2 - (severity == GMS_FATAL ? 2 : severity);
-		Global.DEBUG_grf( export_severity, "[%s][%s] %s", _cur_grffile->filename, severitystr[severity], buf);
+		export_severity = 2 - (severity == severity.GMS_FATAL ? 2 : severity);
+		Global.DEBUG_grf( export_severity, "[%s][%s] %s", _cur_grffile.filename, severitystr[severity], buf);
 	}
 
 	
@@ -126,7 +135,8 @@ public class GRFFile
 		GRFFile file;
 
 		for (file = _first_grffile; file != null; file = file.next) {
-			if (strcmp(file.filename, filename) == 0) break;
+			if( file.filename.equals(filename) ) 
+				break;
 		}
 		return file;
 	}
@@ -137,8 +147,8 @@ public class GRFFile
 
 	static void dewagonize(int condition, int engine)
 	{
-		EngineInfo *ei = &_engine_info[engine];
-		RailVehicleInfo *rvi = &_rail_vehicle_info[engine];
+		EngineInfo ei = Global._engine_info[engine];
+		RailVehicleInfo rvi = Global._rail_vehicle_info[engine];
 
 		if (condition != 0) {
 			ei.unk2 &= ~0x80;
@@ -149,12 +159,19 @@ public class GRFFile
 		}
 	}
 
+	static int [] cargo_allowed		= new int[Global.TOTAL_NUM_ENGINES];
+	static int [] cargo_disallowed	= new int[Global.TOTAL_NUM_ENGINES];
+	
+	
 	static boolean RailVehicleChangeInfo(int engine, int numinfo, int prop, DataLoader bufp, int len)
 	{
-		EngineInfo ei = Global._engine_info[engine];
-		RailVehicleInfo rvi = Global._rail_vehicle_info[engine];
+		//EngineInfo ei = Global._engine_info[engine];
+		//RailVehicleInfo rvi = Global._rail_vehicle_info[engine];
+		EngineInfo [] ei = Global._engine_info;
+		RailVehicleInfo [] rvi = Global._rail_vehicle_info;
 		// byte *buf = *bufp;
 		int i;
+		int e = engine;
 		boolean ret = false;
 
 		switch (prop) {
@@ -162,7 +179,7 @@ public class GRFFile
 				for (i = 0; i < numinfo; i++) {
 					byte tracktype = bufp.grf_load_byte();
 
-					ei[i].railtype = tracktype;
+					ei[e+i].railtype = tracktype;
 				}
 			} break;
 			case 0x08: { /* AI passenger service */
@@ -178,17 +195,17 @@ public class GRFFile
 					if (speed == 0xFFFF)
 						speed = 0;
 
-					rvi[i].max_speed = speed;
+					rvi[e+i].max_speed = speed;
 				}
 			} break;
 			case 0x0B: { /* Power */
 				for (i = 0; i < numinfo; i++) {
 					int power = bufp.grf_load_word();
 
-					if (rvi[i].flags & RVI_MULTIHEAD)
+					if(0 != (rvi[e+i].flags & Engine.RVI_MULTIHEAD) )
 						power /= 2;
 
-					rvi[i].power = power;
+					rvi[e+i].power = power;
 					dewagonize(power, engine + i);
 				}
 			} break;
@@ -196,7 +213,7 @@ public class GRFFile
 				for (i = 0; i < numinfo; i++) {
 					byte runcostfact = bufp.grf_load_byte();
 
-					rvi[i].running_cost_base = runcostfact;
+					rvi[e+i].running_cost_base = runcostfact;
 					dewagonize(runcostfact, engine + i);
 				}
 			} break;
@@ -205,9 +222,9 @@ public class GRFFile
 					int base = bufp.grf_load_dword();
 
 					switch (base) {
-						case 0x4C30: rvi[i].engclass = 0; break;
-						case 0x4C36: rvi[i].engclass = 1; break;
-						case 0x4C3C: rvi[i].engclass = 2; break;
+						case 0x4C30: rvi[e+i].engclass = 0; break;
+						case 0x4C36: rvi[e+i].engclass = 1; break;
+						case 0x4C3C: rvi[e+i].engclass = 2; break;
 					}
 					dewagonize(base, engine + i);
 				}
@@ -216,7 +233,7 @@ public class GRFFile
 				for (i = 0; i < numinfo; i++) {
 					byte spriteid = bufp.grf_load_byte();
 
-					rvi[i].image_index = spriteid;
+					rvi[e+i].image_index = spriteid;
 				}
 			} break;
 			case 0x13: { /* Dual-headed */
@@ -224,13 +241,13 @@ public class GRFFile
 					byte dual = bufp.grf_load_byte();
 
 					if (dual != 0) {
-						if (!(rvi[i].flags & RVI_MULTIHEAD)) // adjust power if needed
-							rvi[i].power /= 2;
-						rvi[i].flags |= RVI_MULTIHEAD;
+						if (0==(rvi[e+i].flags & Engine.RVI_MULTIHEAD)) // adjust power if needed
+							rvi[e+i].power /= 2;
+						rvi[e+i].flags |= Engine.RVI_MULTIHEAD;
 					} else {
-						if (rvi[i].flags & RVI_MULTIHEAD) // adjust power if needed
-							rvi[i].power *= 2;
-						rvi[i].flags &= ~RVI_MULTIHEAD;
+						if(0 != (rvi[e+i].flags & Engine.RVI_MULTIHEAD) ) // adjust power if needed
+							rvi[e+i].power *= 2;
+						rvi[e+i].flags &= ~Engine.RVI_MULTIHEAD;
 					}
 				}
 			} break;
@@ -238,28 +255,28 @@ public class GRFFile
 				for (i = 0; i < numinfo; i++) {
 					byte capacity = bufp.grf_load_byte();
 
-					rvi[i].capacity = capacity;
+					rvi[e+i].capacity = capacity;
 				}
 			} break;
 			case 0x15: { /* Cargo type */
 				for (i = 0; i < numinfo; i++) {
 					byte ctype = bufp.grf_load_byte();
 
-					rvi[i].cargo_type = ctype;
+					rvi[e+i].cargo_type = ctype;
 				}
 			} break;
 			case 0x16: { /* Weight */
 				for (i = 0; i < numinfo; i++) {
 					byte weight = bufp.grf_load_byte();
 
-					SB(rvi[i].weight, 0, 8, weight);
+					rvi[e+i].weight = BitOps.RETSB(rvi[e+i].weight, 0, 8, weight);
 				}
 			} break;
 			case 0x17: { /* Cost factor */
 				for (i = 0; i < numinfo; i++) {
 					byte cfactor = bufp.grf_load_byte();
 
-					rvi[i].base_cost = cfactor;
+					rvi[e+i].base_cost = cfactor;
 				}
 			} break;
 			case 0x18: { /* AI rank */
@@ -285,35 +302,35 @@ public class GRFFile
 					else
 						break;
 
-					rvi[i].engclass = engclass;
+					rvi[e+i].engclass = engclass;
 				}
 			} break;
 			case 0x1B: { /* Powered wagons power bonus */
 				for (i = 0; i < numinfo; i++) {
 					int wag_power = bufp.grf_load_word();
 
-					rvi[i].pow_wag_power = wag_power;
+					rvi[e+i].pow_wag_power = wag_power;
 				}
 			} break;
 			case 0x1D: { /* Refit cargo */
 				for (i = 0; i < numinfo; i++) {
 					int refit_mask = bufp.grf_load_dword();
 
-					_engine_info[engine + i].refit_mask = refit_mask;
+					Global._engine_info[engine + i].refit_mask = refit_mask;
 				}
 			} break;
 			case 0x1E: { /* Callback */
 				for (i = 0; i < numinfo; i++) {
 					byte callbacks = bufp.grf_load_byte();
 
-					rvi[i].callbackmask = callbacks;
+					rvi[e+i].callbackmask = callbacks;
 				}
 			} break;
 			case 0x21: { /* Shorter vehicle */
 				for (i = 0; i < numinfo; i++) {
 					byte shorten_factor = bufp.grf_load_byte();
 
-					rvi[i].shorten_factor = shorten_factor;
+					rvi[e+i].shorten_factor = shorten_factor;
 				}
 			} break;
 			case 0x22: { /* Visual effect */
@@ -321,14 +338,14 @@ public class GRFFile
 				for (i = 0; i < numinfo; i++) {
 					byte visual = bufp.grf_load_byte();
 
-					rvi[i].visual_effect = visual;
+					rvi[e+i].visual_effect = visual;
 				}
 			} break;
 			case 0x23: { /* Powered wagons weight bonus */
 				for (i = 0; i < numinfo; i++) {
 					byte wag_weight = bufp.grf_load_byte();
 
-					rvi[i].pow_wag_weight = wag_weight;
+					rvi[e+i].pow_wag_weight = wag_weight;
 				}
 			} break;
 			case 0x24: { /* High byte of vehicle weight */
@@ -336,9 +353,9 @@ public class GRFFile
 					byte weight = bufp.grf_load_byte();
 
 					if (weight > 4) {
-						grfmsg(GMS_NOTICE, "RailVehicleChangeInfo: Nonsensical weight of %d tons, ignoring.", weight << 8);
+						grfmsg(severity.GMS_NOTICE, "RailVehicleChangeInfo: Nonsensical weight of %d tons, ignoring.", weight << 8);
 					} else {
-						SB(rvi[i].weight, 8, 8, weight);
+						rvi[e+i].weight = BitOps.RETSB(rvi[e+i].weight, 8, 8, weight);
 					}
 				}
 			} break;
@@ -376,9 +393,11 @@ public class GRFFile
 
 	static boolean RoadVehicleChangeInfo(int engine, int numinfo, int prop, DataLoader bufp, int len)
 	{
-		RoadVehicleInfo rvi = _road_vehicle_info[engine];
+		//RoadVehicleInfo rvi = Global._road_vehicle_info[engine];
+		RoadVehicleInfo [] rvi = Global._road_vehicle_info;
 		// byte *buf = *bufp;
 		int i;
+		int e = engine;
 		boolean ret = false;
 
 		switch (prop) {
@@ -386,14 +405,14 @@ public class GRFFile
 				for (i = 0; i < numinfo; i++) {
 					byte speed = bufp.grf_load_byte();
 
-					rvi[i].max_speed = speed; // ?? units
+					rvi[e+i].max_speed = speed; // ?? units
 				}
 			} break;
 			case 0x09: { /* Running cost factor */
 				for (i = 0; i < numinfo; i++) {
 					byte runcost = bufp.grf_load_byte();
 
-					rvi[i].running_cost = runcost;
+					rvi[e+i].running_cost = runcost;
 				}
 			} break;
 			case 0x0A: { /* Running cost base */
@@ -408,37 +427,37 @@ public class GRFFile
 					byte spriteid = bufp.grf_load_byte();
 
 					if (spriteid == 0xFF)
-						spriteid = 0xFD; // cars have different custom id in the GRF file
+						spriteid = (byte) 0xFD; // cars have different custom id in the GRF file
 
-					rvi[i].image_index = spriteid;
+					rvi[e+i].image_index = spriteid;
 				}
 			} break;
 			case 0x0F: { /* Cargo capacity */
 				for (i = 0; i < numinfo; i++) {
 					int capacity = bufp.grf_load_byte();
 
-					rvi[i].capacity = capacity;
+					rvi[e+i].capacity = capacity;
 				}
 			} break;
 			case 0x10: { /* Cargo type */
 				for (i = 0; i < numinfo; i++) {
 					byte cargo = bufp.grf_load_byte();
 
-					rvi[i].cargo_type = cargo;
+					rvi[e+i].cargo_type = cargo;
 				}
 			} break;
 			case 0x11: { /* Cost factor */
 				for (i = 0; i < numinfo; i++) {
 					byte cost_factor = bufp.grf_load_byte();
 
-					rvi[i].base_cost = cost_factor; // ?? is it base_cost?
+					rvi[e+i].base_cost = cost_factor; // ?? is it base_cost?
 				}
 			} break;
 			case 0x12: { /* SFX */
 				for (i = 0; i < numinfo; i++) {
 					byte sfx = bufp.grf_load_byte();
 
-					rvi[i].sfx = sfx;
+					rvi[e+i].sfx = sfx;
 				}
 			} break;
 			case 0x13:      /* Power in 10hp */
@@ -456,17 +475,17 @@ public class GRFFile
 				for (i = 0; i < numinfo; i++) {
 					int refit_mask = bufp.grf_load_dword();
 
-					_engine_info[ROAD_ENGINES_INDEX + engine + i].refit_mask = refit_mask;
+					Global._engine_info[Global.ROAD_ENGINES_INDEX + engine + i].refit_mask = refit_mask;
 				}
 			} break;
 			case 0x1D: { /* Cargo classes allowed */
 				for (i = 0; i < numinfo; i++) {
-					cargo_allowed[ROAD_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
+					cargo_allowed[Global.ROAD_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x1E: { /* Cargo classes disallowed */
 				for (i = 0; i < numinfo; i++) {
-					cargo_disallowed[ROAD_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
+					cargo_disallowed[Global.ROAD_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x17:      /* Callback */
@@ -493,9 +512,10 @@ public class GRFFile
 
 	static boolean ShipVehicleChangeInfo(int engine, int numinfo, int prop, DataLoader bufp, int len)
 	{
-		ShipVehicleInfo *svi = &_ship_vehicle_info[engine];
+		ShipVehicleInfo [] svi = Global._ship_vehicle_info;
 		// byte *buf = *bufp;
 		int i;
+		int e = engine;
 		boolean ret = false;
 
 		//printf("e %x prop %x?\n", engine, prop);
@@ -505,30 +525,30 @@ public class GRFFile
 					byte spriteid = bufp.grf_load_byte();
 
 					if (spriteid == 0xFF)
-						spriteid = 0xFD; // ships have different custom id in the GRF file
+						spriteid = (byte) 0xFD; // ships have different custom id in the GRF file
 
-					svi[i].image_index = spriteid;
+					svi[e+i].image_index = spriteid;
 				}
 			}	break;
 			case 0x09: {	/* Refittable */
 				for (i = 0; i < numinfo; i++) {
 					byte refittable = bufp.grf_load_byte();
 
-					svi[i].refittable = refittable;
+					svi[e+i].refittable = refittable;
 				}
 			}	break;
 			case 0x0A: {	/* Cost factor */
 				for (i = 0; i < numinfo; i++) {
 					byte cost_factor = bufp.grf_load_byte();
 
-					svi[i].base_cost = cost_factor; // ?? is it base_cost?
+					svi[e+i].base_cost = cost_factor; // ?? is it base_cost?
 				}
 			}	break;
 			case 0x0B: {	/* Speed */
 				for (i = 0; i < numinfo; i++) {
 					byte speed = bufp.grf_load_byte();
 
-					svi[i].max_speed = speed; // ?? units
+					svi[e+i].max_speed = speed; // ?? units
 				}
 			}	break;
 			case 0x0C: { /* Cargo type */
@@ -536,51 +556,51 @@ public class GRFFile
 					byte cargo = bufp.grf_load_byte();
 
 					// XXX: Need to consult this with patchman yet.
-	if(0) {
+	if(false) {
 					// Documentation claims this is already the
 					// per-landscape cargo type id, but newships.grf
 					// assume otherwise.
 					cargo = local_cargo_id_ctype[cargo];
 	}
-					svi[i].cargo_type = cargo;
+					svi[e+i].cargo_type = cargo;
 				}
 			}	break;
 			case 0x0D: {	/* Cargo capacity */
 				for (i = 0; i < numinfo; i++) {
 					int capacity = bufp.grf_load_word();
 
-					svi[i].capacity = capacity;
+					svi[e+i].capacity = capacity;
 				}
 			}	break;
 			case 0x0F: {	/* Running cost factor */
 				for (i = 0; i < numinfo; i++) {
 					byte runcost = bufp.grf_load_byte();
 
-					svi[i].running_cost = runcost;
+					svi[e+i].running_cost = runcost;
 				}
 			} break;
 			case 0x10: {	/* SFX */
 				for (i = 0; i < numinfo; i++) {
 					byte sfx = bufp.grf_load_byte();
 
-					svi[i].sfx = sfx;
+					svi[e+i].sfx = sfx;
 				}
 			}	break;
 			case 0x11: {	/* Cargos available for refitting */
 				for (i = 0; i < numinfo; i++) {
 					int refit_mask = bufp.grf_load_dword();
 
-					_engine_info[SHIP_ENGINES_INDEX + engine + i].refit_mask = refit_mask;
+					Global._engine_info[Global.SHIP_ENGINES_INDEX + engine + i].refit_mask = refit_mask;
 				}
 			}	break;
 			case 0x18: { /* Cargo classes allowed */
 				for (i = 0; i < numinfo; i++) {
-					cargo_allowed[SHIP_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
+					cargo_allowed[Global.SHIP_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x19: { /* Cargo classes disallowed */
 				for (i = 0; i < numinfo; i++) {
-					cargo_disallowed[SHIP_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
+					cargo_disallowed[Global.SHIP_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x12: /* Callback */
@@ -623,8 +643,9 @@ public class GRFFile
 	
 	static boolean AircraftVehicleChangeInfo(int engine, int numinfo, int prop, DataLoader bufp, int len)
 	{
-		AircraftVehicleInfo avi = _aircraft_vehicle_info[engine];
+		AircraftVehicleInfo [] avi = Global._aircraft_vehicle_info;
 		// byte *buf = *bufp;
+		int e = engine;
 		int i;
 		boolean ret = false;
 
@@ -635,89 +656,89 @@ public class GRFFile
 					byte spriteid = bufp.grf_load_byte();
 
 					if (spriteid == 0xFF)
-						spriteid = 0xFD; // ships have different custom id in the GRF file
+						spriteid = (byte) 0xFD; // ships have different custom id in the GRF file
 
-					avi[i].image_index = spriteid;
+					avi[e+i].image_index = spriteid;
 				}
 			}	break;
 			case 0x09: {	/* Helicopter */
 				for (i = 0; i < numinfo; i++) {
 					byte heli = bufp.grf_load_byte();
-					avi[i].subtype &= ~0x01; // remove old property
-					avi[i].subtype |= (heli == 0) ? 0 : 1;
+					avi[e+i].subtype &= ~0x01; // remove old property
+					avi[e+i].subtype |= (heli == 0) ? 0 : 1;
 				}
 			}	break;
 			case 0x0A: {	/* Large */
 				for (i = 0; i < numinfo; i++) {
 					byte large = bufp.grf_load_byte();
-					avi[i].subtype &= ~0x02; // remove old property
-					avi[i].subtype |= (large == 1) ? 2 : 0;
+					avi[e+i].subtype &= ~0x02; // remove old property
+					avi[e+i].subtype |= (large == 1) ? 2 : 0;
 				}
 			}	break;
 			case 0x0B: {	/* Cost factor */
 				for (i = 0; i < numinfo; i++) {
 					byte cost_factor = bufp.grf_load_byte();
 
-					avi[i].base_cost = cost_factor; // ?? is it base_cost?
+					avi[e+i].base_cost = cost_factor; // ?? is it base_cost?
 				}
 			}	break;
 			case 0x0C: {	/* Speed */
 				for (i = 0; i < numinfo; i++) {
 					byte speed = bufp.grf_load_byte();
 
-					avi[i].max_speed = speed; // ?? units
+					avi[e+i].max_speed = speed; // ?? units
 				}
 			}	break;
 			case 0x0D: {	/* Acceleration */
 				for (i = 0; i < numinfo; i++) {
 					byte accel = bufp.grf_load_byte();
 
-					avi[i].acceleration = accel;
+					avi[e+i].acceleration = accel;
 				}
 			} break;
 			case 0x0E: {	/* Running cost factor */
 				for (i = 0; i < numinfo; i++) {
 					byte runcost = bufp.grf_load_byte();
 
-					avi[i].running_cost = runcost;
+					avi[e+i].running_cost = runcost;
 				}
 			} break;
 			case 0x0F: {	/* Passenger capacity */
 				for (i = 0; i < numinfo; i++) {
 					int capacity = bufp.grf_load_word();
 
-					avi[i].passenger_capacity = capacity;
+					avi[e+i].passenger_capacity = capacity;
 				}
 			}	break;
 			case 0x11: {	/* Mail capacity */
 				for (i = 0; i < numinfo; i++) {
 					byte capacity = bufp.grf_load_byte();
 
-					avi[i].mail_capacity = capacity;
+					avi[e+i].mail_capacity = capacity;
 				}
 			}	break;
 			case 0x12: {	/* SFX */
 				for (i = 0; i < numinfo; i++) {
 					byte sfx = bufp.grf_load_byte();
 
-					avi[i].sfx = sfx;
+					avi[e+i].sfx = sfx;
 				}
 			}	break;
 			case 0x13: {	/* Cargos available for refitting */
 				for (i = 0; i < numinfo; i++) {
 					int refit_mask = bufp.grf_load_dword();
 
-					_engine_info[AIRCRAFT_ENGINES_INDEX + engine + i].refit_mask = refit_mask;
+					Global._engine_info[Global.AIRCRAFT_ENGINES_INDEX + engine + i].refit_mask = refit_mask;
 				}
 			}	break;
 			case 0x18: { /* Cargo classes allowed */
 				for (i = 0; i < numinfo; i++) {
-					cargo_allowed[AIRCRAFT_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
+					cargo_allowed[Global.AIRCRAFT_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x19: { /* Cargo classes disallowed */
 				for (i = 0; i < numinfo; i++) {
-					cargo_disallowed[AIRCRAFT_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
+					cargo_disallowed[Global.AIRCRAFT_ENGINES_INDEX + engine + i] = bufp.grf_load_word();
 				}
 			} break;
 			case 0x14: /* Callback */
@@ -788,9 +809,9 @@ public class GRFFile
 							continue;
 						}
 
-						if (HASBIT(ground_sprite, 31)) {
+						if (BitOps.HASBIT(ground_sprite.id, 31)) {
 							// Bit 31 indicates that we should use a custom sprite.
-							dts.ground_sprite = GB(ground_sprite, 0, 15) - 0x42D;
+							dts.ground_sprite = BitOps.GB(ground_sprite.id, 0, 15) - 0x42D;
 							dts.ground_sprite += _cur_grffile.first_spriteset;
 						} else {
 							dts.ground_sprite = ground_sprite;
@@ -992,44 +1013,45 @@ public class GRFFile
 		switch (prop) {
 			case 0x08: /* Year of availability */
 				for (i = 0; i < numinfo; i++) {
-					_bridge[brid + i].avail_year = bufp.grf_load_byte();
+					Bridge._bridge[brid + i].avail_year = bufp.grf_load_byte();
 				}
 				break;
 
 			case 0x09: /* Minimum length */
 				for (i = 0; i < numinfo; i++) {
-					_bridge[brid + i].min_length = bufp.grf_load_byte();
+					Bridge._bridge[brid + i].min_length = bufp.grf_load_byte();
 				}
 				break;
 
 			case 0x0A: /* Maximum length */
 				for (i = 0; i < numinfo; i++) {
-					_bridge[brid + i].max_length = bufp.grf_load_byte();
+					Bridge._bridge[brid + i].max_length = bufp.grf_load_byte();
 				}
 				break;
 
 			case 0x0B: /* Cost factor */
 				for (i = 0; i < numinfo; i++) {
-					_bridge[brid + i].price = bufp.grf_load_byte();
+					Bridge._bridge[brid + i].price = bufp.grf_load_byte();
 				}
 				break;
 
 			case 0x0C: /* Maximum speed */
 				for (i = 0; i < numinfo; i++) {
-					_bridge[brid + i].speed = bufp.grf_load_word();
+					Bridge._bridge[brid + i].speed = bufp.grf_load_word();
 				}
 				break;
 
 			case 0x0D: /* Bridge sprite tables */
 				for (i = 0; i < numinfo; i++) {
-					Bridge *bridge = &_bridge[brid + i];
+					Bridge bridge = Bridge._bridge[brid + i];
 					byte tableid = bufp.grf_load_byte();
 					byte numtables = bufp.grf_load_byte();
 					byte table, sprite;
 
 					if (bridge.sprite_table == null) {
 						/* Allocate memory for sprite table pointers and set to null */
-						bridge.sprite_table = malloc(7 * sizeof(*bridge.sprite_table));
+						//bridge.sprite_table = malloc(7 * sizeof(*bridge.sprite_table));
+						bridge.sprite_table = new malloc(7 * sizeof(*bridge.sprite_table));
 						for (table = 0; table < 7; table++)
 							bridge.sprite_table[table] = null;
 					}
@@ -1043,7 +1065,7 @@ public class GRFFile
 							for (sprite = 0; sprite < 32; sprite++)
 								bridge.sprite_table[table][sprite] = bufp.grf_load_dword();
 						} else {
-							grfmsg(GMS_WARN, "BridgeChangeInfo: Table %d >= 7, skipping.", table);
+							grfmsg(severity.GMS_WARN, "BridgeChangeInfo: Table %d >= 7, skipping.", table);
 							// Skip past invalid data.
 							for (sprite = 0; sprite < 32; sprite++)
 								bufp.grf_load_dword();
@@ -1081,7 +1103,7 @@ public class GRFFile
 					if (price < NUM_PRICES) {
 						SetPriceBaseMultiplier(price, factor);
 					} else {
-						grfmsg(GMS_WARN, "GlobalVarChangeInfo: Price %d out of range, ignoring.", price);
+						grfmsg(severity.GMS_WARN, "GlobalVarChangeInfo: Price %d out of range, ignoring.", price);
 					}
 				}
 			} break;
@@ -1093,15 +1115,15 @@ public class GRFFile
 	}
 
 	static final VCI_Handler handler[] = {
-			/* GSF_TRAIN */    RailVehicleChangeInfo,
-			/* GSF_ROAD */     RoadVehicleChangeInfo,
-			/* GSF_SHIP */     ShipVehicleChangeInfo,
-			/* GSF_AIRCRAFT */ AircraftVehicleChangeInfo,
-			/* GSF_STATION */  StationChangeInfo,
+			/* GSF_TRAIN */    GRFFile::RailVehicleChangeInfo,
+			/* GSF_ROAD */     GRFFile::RoadVehicleChangeInfo,
+			/* GSF_SHIP */     GRFFile::ShipVehicleChangeInfo,
+			/* GSF_AIRCRAFT */ GRFFile::AircraftVehicleChangeInfo,
+			/* GSF_STATION */  GRFFile::StationChangeInfo,
 			/* GSF_CANAL */    null,
-			/* GSF_BRIDGE */   BridgeChangeInfo,
+			/* GSF_BRIDGE */   GRFFile::BridgeChangeInfo,
 			/* GSF_TOWNHOUSE */null,
-			/* GSF_GLOBALVAR */GlobalVarChangeInfo,
+			/* GSF_GLOBALVAR */GRFFile::GlobalVarChangeInfo,
 		};
 	
 	/* Action 0x00 */
@@ -1128,7 +1150,7 @@ public class GRFFile
 		byte numprops;
 		byte numinfo;
 		byte engine;
-		EngineInfo ei = null;
+		EngineInfo [] ei = null;
 
 		if (len == 1) {
 			Global.DEBUG_grf( 8, "Silently ignoring one-byte special sprite 0x00.");
@@ -1144,17 +1166,20 @@ public class GRFFile
 		Global.DEBUG_grf( 6, "VehicleChangeInfo: Feature %d, %d properties, to apply to %d+%d",
 		               feature, numprops, engine, numinfo);
 
-		if (feature >= lengthof(handler) || handler[feature] == null) {
-			grfmsg(GMS_WARN, "VehicleChangeInfo: Unsupported feature %d, skipping.", feature);
+		if (feature >= handler.length || handler[feature] == null) {
+			grfmsg(severity.GMS_WARN, "VehicleChangeInfo: Unsupported feature %d, skipping.", feature);
 			return;
 		}
 
+		int e;
 		if (feature <= GSF_AIRCRAFT) {
 			if (engine + numinfo > _vehcounts[feature]) {
-				grfmsg(GMS_ERROR, "VehicleChangeInfo: Last engine ID %d out of bounds (max %d), skipping.", engine + numinfo, _vehcounts[feature]);
+				grfmsg(severity.GMS_ERROR, "VehicleChangeInfo: Last engine ID %d out of bounds (max %d), skipping.", engine + numinfo, _vehcounts[feature]);
 				return;
 			}
-			ei = _engine_info[engine + _vehshifts[feature]];
+			//ei = Global._engine_info[engine + _vehshifts[feature]];
+			ei = Global._engine_info;
+			e = engine + _vehshifts[feature];
 		}
 
 		buf += 5;
@@ -1176,36 +1201,36 @@ public class GRFFile
 							for (i = 0; i < numinfo; i++) {
 								int date = bufp.grf_load_word();
 
-								ei[i].base_intro = date;
+								ei[e+i].base_intro = date;
 							}
 						}	break;
 						case 0x02: { /* Decay speed */
 							for (i = 0; i < numinfo; i++) {
 								byte decay = bufp.grf_load_byte();
 
-								ei[i].unk2 &= 0x80;
-								ei[i].unk2 |= decay & 0x7f;
+								ei[e+i].unk2 &= 0x80;
+								ei[e+i].unk2 |= decay & 0x7f;
 							}
 						}	break;
 						case 0x03: { /* Vehicle life */
 							for (i = 0; i < numinfo; i++) {
 								byte life = bufp.grf_load_byte();
 
-								ei[i].lifelength = life;
+								ei[e+i].lifelength = life;
 							}
 						}	break;
 						case 0x04: { /* Model life */
 							for (i = 0; i < numinfo; i++) {
 								byte life = bufp.grf_load_byte();
 
-								ei[i].base_life = life;
+								ei[e+i].base_life = life;
 							}
 						}	break;
 						case 0x06: { /* Climates available */
 							for (i = 0; i < numinfo; i++) {
 								byte climates = bufp.grf_load_byte();
 
-								ei[i].climates = climates;
+								ei[e+i].climates = climates;
 							}
 						}	break;
 						case 0x07: { /* Loading speed */
@@ -1236,7 +1261,7 @@ public class GRFFile
 			}
 
 			if (ignoring)
-				grfmsg(GMS_NOTICE, "VehicleChangeInfo: Ignoring property %x (not implemented).", prop);
+				grfmsg(severity.GMS_NOTICE, "VehicleChangeInfo: Ignoring property %x (not implemented).", prop);
 		}
 	}
 
@@ -1412,7 +1437,7 @@ public class GRFFile
 					dg.ranges[i].group = NewCallBackResultSpriteGroup(groupid);
 					dg.ranges[i].group.ref_count++;
 				} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
-					grfmsg(GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
+					grfmsg(severity.GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
 					dg.ranges[i].group = null;
 				} else {
 					dg.ranges[i].group = _cur_grffile.spritegroups[groupid];
@@ -1428,7 +1453,7 @@ public class GRFFile
 				dg.default_group = NewCallBackResultSpriteGroup(groupid);
 				dg.default_group.ref_count++;
 			} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
-				grfmsg(GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
+				grfmsg(severity.GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
 				dg.default_group = null;
 			} else {
 				dg.default_group = _cur_grffile.spritegroups[groupid];
@@ -1477,7 +1502,7 @@ public class GRFFile
 					rg.groups[i] = NewCallBackResultSpriteGroup(groupid);
 					rg.groups[i].ref_count++;
 				} else if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
-					grfmsg(GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
+					grfmsg(severity.GMS_WARN, "NewSpriteGroup(%02x:0x%x): Groupid %04x does not exist, leaving empty.", setid, numloaded, groupid);
 					rg.groups[i] = null;
 				} else {
 					rg.groups[i] = _cur_grffile.spritegroups[groupid];
@@ -1493,12 +1518,12 @@ public class GRFFile
 		}
 
 		if (!_cur_grffile.spriteset_start) {
-			grfmsg(GMS_ERROR, "NewSpriteGroup: No sprite set to work on! Skipping.");
+			grfmsg(severity.GMS_ERROR, "NewSpriteGroup: No sprite set to work on! Skipping.");
 			return;
 		}
 
 		if (_cur_grffile.spriteset_feature != feature) {
-			grfmsg(GMS_ERROR, "NewSpriteGroup: Group feature %x doesn't match set feature %x! Playing it risky and trying to use it anyway.", feature, _cur_grffile.spriteset_feature);
+			grfmsg(severity.GMS_ERROR, "NewSpriteGroup: Group feature %x doesn't match set feature %x! Playing it risky and trying to use it anyway.", feature, _cur_grffile.spriteset_feature);
 			// return; // XXX: we can't because of MB's newstats.grf --pasky
 		}
 
@@ -1512,11 +1537,11 @@ public class GRFFile
 			_cur_grffile.first_spriteset = _cur_grffile.spriteset_start;
 
 		if (numloaded > 16) {
-			grfmsg(GMS_WARN, "NewSpriteGroup: More than 16 sprites in group %x, skipping the rest.", setid);
+			grfmsg(severity.GMS_WARN, "NewSpriteGroup: More than 16 sprites in group %x, skipping the rest.", setid);
 			numloaded = 16;
 		}
 		if (numloading > 16) {
-			grfmsg(GMS_WARN, "NewSpriteGroup: More than 16 sprites in group %x, skipping the rest.", setid);
+			grfmsg(severity.GMS_WARN, "NewSpriteGroup: More than 16 sprites in group %x, skipping the rest.", setid);
 			numloading = 16;
 		}
 
@@ -1601,7 +1626,7 @@ public class GRFFile
 				feature, idcount, cidcount, wagover);
 
 		if (feature > GSF_STATION) {
-			grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Unsupported feature %d, skipping.", feature);
+			grfmsg(severity.GMS_WARN, "VehicleMapSpriteGroup: Unsupported feature %d, skipping.", feature);
 			return;
 		}
 
@@ -1620,7 +1645,7 @@ public class GRFFile
 					int groupid = grf_load_word(&bp);
 
 					if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
-						grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.",
+						grfmsg(severity.GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.",
 						       groupid, _cur_grffile.spritegroups_count);
 						return;
 					}
@@ -1640,7 +1665,7 @@ public class GRFFile
 				int groupid = grf_load_word(&bp);
 
 				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
-					grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.",
+					grfmsg(severity.GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.",
 					       groupid, _cur_grffile.spritegroups_count);
 					return;
 				}
@@ -1664,7 +1689,7 @@ public class GRFFile
 		 * callback''. I have no idea how this works, so we will ignore it for
 		 * now.  --octo */
 		if (idcount == 0) {
-			grfmsg(GMS_NOTICE, "NewMapping: Feature callbacks not implemented yet.");
+			grfmsg(severity.GMS_NOTICE, "NewMapping: Feature callbacks not implemented yet.");
 			return;
 		}
 
@@ -1673,7 +1698,7 @@ public class GRFFile
 		// what should we exactly do with that? --pasky
 
 		if (!_cur_grffile.spriteset_start || !_cur_grffile.spritegroups) {
-			grfmsg(GMS_WARN, "VehicleMapSpriteGroup: No sprite set to work on! Skipping.");
+			grfmsg(severity.GMS_WARN, "VehicleMapSpriteGroup: No sprite set to work on! Skipping.");
 			return;
 		}
 
@@ -1684,7 +1709,7 @@ public class GRFFile
 
 		if (wagover) {
 			if (last_engines_count == 0) {
-				grfmsg(GMS_ERROR, "VehicleMapSpriteGroup: WagonOverride: No engine to do override with.");
+				grfmsg(severity.GMS_ERROR, "VehicleMapSpriteGroup: WagonOverride: No engine to do override with.");
 				return;
 			}
 			Global.DEBUG_grf( 6, "VehicleMapSpriteGroup: WagonOverride: %u engines, %u wagons.",
@@ -1698,7 +1723,7 @@ public class GRFFile
 			byte *bp = &buf[4 + idcount];
 
 			if (engine_id > _vehcounts[feature]) {
-				grfmsg(GMS_ERROR, "Id %u for feature %x is out of bounds.",
+				grfmsg(severity.GMS_ERROR, "Id %u for feature %x is out of bounds.",
 						engine_id, feature);
 				return;
 			}
@@ -1712,7 +1737,7 @@ public class GRFFile
 				Global.DEBUG_grf( 8, "VehicleMapSpriteGroup: * [%d] Cargo type %x, group id %x", c, ctype, groupid);
 
 				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
-					grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.", groupid, _cur_grffile.spritegroups_count);
+					grfmsg(severity.GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.", groupid, _cur_grffile.spritegroups_count);
 					return;
 				}
 
@@ -1739,7 +1764,7 @@ public class GRFFile
 
 				// Don't tell me you don't love duplicated code!
 				if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
-					grfmsg(GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.", groupid, _cur_grffile.spritegroups_count);
+					grfmsg(severity.GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.", groupid, _cur_grffile.spritegroups_count);
 					return;
 				}
 
@@ -1798,7 +1823,7 @@ public class GRFFile
 		               id, endid, feature, lang);
 
 		if (lang & 0x80) {
-			grfmsg(GMS_WARN, "VehicleNewName: No support for changing in-game texts. Skipping.");
+			grfmsg(severity.GMS_WARN, "VehicleNewName: No support for changing in-game texts. Skipping.");
 			return;
 		}
 
@@ -1844,7 +1869,7 @@ public class GRFFile
 		type = bufp.grf_load_byte();
 		num  = bufp.grf_load_extended();
 
-		grfmsg(GMS_NOTICE, "GraphicsNew: Custom graphics (type %x) sprite block of length %d (unimplemented, ignoring).\n",
+		grfmsg(severity.GMS_NOTICE, "GraphicsNew: Custom graphics (type %x) sprite block of length %d (unimplemented, ignoring).\n",
 		       type, num);
 	}
 
@@ -1862,7 +1887,7 @@ public class GRFFile
 		 * B offset        Offset into data from beginning of next sprite
 		 *                 to place where parameter is to be stored. */
 		/* TODO */
-		grfmsg(GMS_NOTICE, "CfgApply: Ignoring (not implemented).\n");
+		grfmsg(severity.GMS_NOTICE, "CfgApply: Ignoring (not implemented).\n");
 	}
 
 	/* Action 0x07 */
@@ -1947,7 +1972,7 @@ public class GRFFile
 					param_val = _cur_grffile.param[param];
 				} else {
 					/* In-game variable. */
-					grfmsg(GMS_WARN, "Unsupported in-game variable 0x%02X. Ignoring test.", param);
+					grfmsg(severity.GMS_WARN, "Unsupported in-game variable 0x%02X. Ignoring test.", param);
 					return;
 				}
 		}
@@ -1972,17 +1997,17 @@ public class GRFFile
 			case 7: result = !param_val; /* GRFID is not active (only for param-num=88) */
 				break;
 			default:
-				grfmsg(GMS_WARN, "Unsupported test %d. Ignoring.", condtype);
+				grfmsg(severity.GMS_WARN, "Unsupported test %d. Ignoring.", condtype);
 				return;
 		}
 
 		if (!result) {
-			grfmsg(GMS_NOTICE, "Not skipping sprites, test was false.");
+			grfmsg(severity.GMS_NOTICE, "Not skipping sprites, test was false.");
 			return;
 		}
 
 		numsprites = bufp.grf_load_byte();
-		grfmsg(GMS_NOTICE, "Skipping %d sprites, test was true.", numsprites);
+		grfmsg(severity.GMS_NOTICE, "Skipping %d sprites, test was true.", numsprites);
 		_skip_sprites = numsprites;
 		if (_skip_sprites == 0) {
 			/* Zero means there are no sprites to skip, so
@@ -2040,7 +2065,7 @@ public class GRFFile
 			int first_sprite = bufp.grf_load_word();
 			int j;
 
-			grfmsg(GMS_NOTICE,
+			grfmsg(severity.GMS_NOTICE,
 				"SpriteReplace: [Set %d] Changing %d sprites, beginning with %d",
 				i, num_sprites, first_sprite
 			);
@@ -2254,7 +2279,7 @@ public class GRFFile
 				break;
 
 			default:
-				grfmsg(GMS_ERROR, "ParamSet: Unknown operation %d, skipping.", oper);
+				grfmsg(severity.GMS_ERROR, "ParamSet: Unknown operation %d, skipping.", oper);
 				return;
 		}
 
@@ -2306,7 +2331,7 @@ public class GRFFile
 
 			/* Unset activation flag */
 			if (file != null) {
-				grfmsg(GMS_NOTICE, "GRFInhibit: Deactivating file ``%s''", file.filename);
+				grfmsg(severity.GMS_NOTICE, "GRFInhibit: Deactivating file ``%s''", file.filename);
 				file.flags &= 0xFFFE;
 			}
 		}
@@ -2751,8 +2776,8 @@ class DataLoader
 	{
 
 		if (real < wanted) { 
-			grfmsg(GMS_ERROR, "%s/%d: Invalid special sprite length %d (expected %d)!", \
-			       where, _cur_spriteid - _cur_grffile->sprite_offset, real, wanted); \
+			grfmsg(severity.GMS_ERROR, "%s/%d: Invalid special sprite length %d (expected %d)!", \
+			       where, _cur_spriteid - _cur_grffile.sprite_offset, real, wanted); \
 			throw new GrfLoadException();
 		} 
 	} 
@@ -2761,11 +2786,13 @@ class DataLoader
 
 
 
-enum grfmsg_severity {
-	GMS_NOTICE,
-	GMS_WARN,
-	GMS_ERROR,
-	GMS_FATAL,
-} 
 
+
+//typedef bool (*VCI_Handler)(uint engine, int numinfo, int prop, byte **buf, int len);
+
+@FunctionalInterface
+interface VCI_Handler
+{
+	boolean accept(int engine, int numinfo, int prop, DataLoader buf, int len);
+}
 

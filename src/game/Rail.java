@@ -1,23 +1,21 @@
 package game;
 
-import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import game.TrackPathFinder.TPFHashEnt;
+import game.struct.FindLengthOfTunnelResult;
+import game.tables.RailTables;
 import game.util.BitOps;
 import game.util.Sprites;
-import game.TrackPathFinder.TPFHashEnt;
-import game.ai.Ai;
-import game.struct.FindLengthOfTunnelResult;
-import game.struct.TrackPathFinderLink;
-import game.tables.RailTables;
 
 public class Rail extends RailTables {
 
 	public static final int NUM_SSD_ENTRY = RailtypeInfo.NUM_SSD_ENTRY;
 	public static final int NUM_SSD_STACK = RailtypeInfo.NUM_SSD_STACK;// max amount of blocks to check recursively
 
-	private static final TileHighlightData _thd = new TileHighlightData();
+	//private static final TileHighlightData _thd = new TileHighlightData();
 
 	/** This struct contains all the info that is needed to draw and construct tracks.
 	 * /
@@ -3170,7 +3168,7 @@ public class Rail extends RailTables {
 
 	static void DoRailroadTrack(int mode)
 	{
-		Cmd.DoCommandP(TileIndex.TileVirtXY(_thd.selstart.x, _thd.selstart.y), TileIndex.TileVirtXY(_thd.selend.x, _thd.selend.y).getTile(), _cur_railtype | (mode << 4), null,
+		Cmd.DoCommandP(TileIndex.TileVirtXY(ViewPort._thd.selstart.x, ViewPort._thd.selstart.y), TileIndex.TileVirtXY(ViewPort._thd.selend.x, ViewPort._thd.selend.y).getTile(), _cur_railtype | (mode << 4), null,
 				_remove_button_clicked ?
 						Cmd.CMD_REMOVE_RAILROAD_TRACK | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1012_CAN_T_REMOVE_RAILROAD_TRACK) :
 							Cmd.CMD_BUILD_RAILROAD_TRACK  | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1011_CAN_T_BUILD_RAILROAD_TRACK)
@@ -3179,7 +3177,7 @@ public class Rail extends RailTables {
 
 	static void HandleAutodirPlacement()
 	{
-		TileHighlightData thd = _thd;
+		TileHighlightData thd = ViewPort._thd;
 		int trackstat = thd.drawstyle & 0xF; // 0..5
 
 		if(0!=(thd.drawstyle & ViewPort.HT_RAIL)) { // one tile case
@@ -3192,7 +3190,7 @@ public class Rail extends RailTables {
 
 	static void HandleAutoSignalPlacement()
 	{
-		TileHighlightData thd = _thd;
+		TileHighlightData thd = ViewPort._thd;
 		int trackstat = (thd.drawstyle & 0xF); // 0..5
 
 		if (thd.drawstyle == ViewPort.HT_RECT) { // one tile case
@@ -3297,7 +3295,7 @@ public class Rail extends RailTables {
 					break;
 				}
 			}
-			ViewPort.MarkTileDirty(_thd.pos.x, _thd.pos.y); // redraw tile selection
+			ViewPort.MarkTileDirty(ViewPort._thd.pos.x, ViewPort._thd.pos.y); // redraw tile selection
 			break;
 		}
 

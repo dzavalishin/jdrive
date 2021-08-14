@@ -2,7 +2,7 @@ package game;
 
 
 public abstract class AbstractID {
-	public int id;
+	public final int id;
 	
 	protected AbstractID(int id) {
 		this.id = id;

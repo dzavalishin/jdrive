@@ -48,7 +48,7 @@ public class AirCraft extends AirCraftTables {
 	{
 		//final Station st;
 		int best = 0;
-		StationID index = StationID.getInvalid();
+		int index = StationID.getInvalid().id;
 
 		//FOR_ALL_STATIONS(st)
 		//Station.forEach( (st) ->
@@ -67,13 +67,13 @@ public class AirCraft extends AirCraftTables {
 					continue;
 
 				distance = Map.DistanceSquare(v.tile, st.airport_tile);
-				if (distance < best || index.id == Station.INVALID_STATION) {
+				if (distance < best || index == Station.INVALID_STATION) {
 					best = distance;
-					index.id = st.index;
+					index = st.index;
 				}
 			}
 		}
-		return index;
+		return StationID.get(index);
 	}
 
 	/*

@@ -119,12 +119,13 @@ public class Gfx extends PaletteTabs
 	{
 		//final /* Pixel */ byte  src;
 		///* Pixel */ byte  dst;
-		int  src; // index
-		int  dst; // index
+		int  src = 0; // index
+		int  dst = 0; // index
 		int p;
 		int ht;
 
-		if (xo == 0 && yo == 0) return;
+		if (xo == 0 && yo == 0) 
+			return;
 
 		if (Hal._cursor.visible) UndrawMouseCursor();
 		TextEffect.UndrawTextMessage();
@@ -163,7 +164,7 @@ public class Gfx extends PaletteTabs
 			dst = top * p + left;
 			src = dst - yo * p;
 
-			// Decrese height. (yo is <=0).
+			// Decrease height. (yo is <=0).
 			height += yo;
 			assert(height > 0);
 

@@ -19,19 +19,21 @@ public class PlayerID extends AbstractID {
 		//return null;
 	}
 
-	public static PlayerID get(Owner o) {
+	/*public static PlayerID get(Owner o) {
 		return get(o.owner);
-	}
+	}*/
 
 	private static Map<Integer,PlayerID> ids = new HashMap<Integer,PlayerID>();
-	public static PlayerID get(int player) {
-
+	
+	public static PlayerID get(int player) 
+	{
 		PlayerID old = ids.get(player);
 		if( old == null ) 
 		{
 			old = new PlayerID(player);
 			ids.put(player, old);
 		}
+		assert player == old.id;
 		return old;
 	}
 

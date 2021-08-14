@@ -1009,7 +1009,7 @@ public class Town extends TownTables implements IPoolItem
 
 		// Current player is a town
 		old_player = Global._current_player;
-		Global._current_player.id = Owner.OWNER_TOWN;
+		Global._current_player = Owner.OWNER_TOWN_ID;
 
 		// Find a road that we can base the construction on.
 		tile = t.xy;

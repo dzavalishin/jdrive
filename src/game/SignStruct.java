@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 public class SignStruct implements IPoolItem
 {
 	StringID     str;
-	ViewportSign sign;
+	ViewportSign sign = new ViewportSign();
 	int          x;
 	int          y;
 	byte         z;

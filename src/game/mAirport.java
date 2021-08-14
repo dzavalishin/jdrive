@@ -272,7 +272,7 @@ public class mAirport
 		TileIndex tl; 
 
 		PlayerID old_player = Global._current_player;
-		Global._current_player.id = Owner.OWNER_TOWN;
+		Global._current_player = Owner.OWNER_TOWN_ID;
 
 		if(!Global._patches.allow_municipal_airports) 
 			MA_DestroyAirport(tn);

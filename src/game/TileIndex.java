@@ -518,10 +518,11 @@ public class TileIndex implements Comparable<TileIndex>
 		Global._m[tile].m1 = owner;
 	}
 
+	/*
 	boolean IsTileOwner(Owner owner)
 	{
 		return GetTileOwner().id == owner.owner;
-	}
+	}*/
 
 	boolean IsTileOwner(PlayerID owner)
 	{
