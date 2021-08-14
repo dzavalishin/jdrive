@@ -1,5 +1,7 @@
 package game;
 
+import game.ids.PlayerID;
+
 public class Owner {
 	private Owner(int m1) {
 		//owner = m1;

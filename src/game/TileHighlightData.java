@@ -1,5 +1,7 @@
 package game;
 
+import game.struct.Point;
+
 public class TileHighlightData {
 
 	Point size = new Point(0, 0);

@@ -3,6 +3,8 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.ids.PlayerID;
+import game.struct.TileIndexDiff;
 import game.tables.DisasterTables;
 import game.util.BitOps;
 

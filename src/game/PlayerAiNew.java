@@ -1,5 +1,7 @@
 package game;
 
+import game.ids.VehicleID;
+
 public class PlayerAiNew {
 
 	public static int AI_MAX_SPECIAL_VEHICLES = 100;

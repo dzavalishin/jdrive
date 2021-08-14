@@ -2,6 +2,9 @@ package game;
 
 import java.util.Iterator;
 
+import game.ids.PlayerID;
+import game.ids.StationID;
+import game.ids.StringID;
 import game.util.BitOps;
 import game.util.GameDate;
 import game.util.YearMonthDay;

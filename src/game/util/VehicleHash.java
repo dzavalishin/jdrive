@@ -3,9 +3,9 @@ package game.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import game.Point;
 import game.Vehicle;
-import game.VehicleID;
+import game.ids.VehicleID;
+import game.struct.Point;
 
 public class VehicleHash 
 {

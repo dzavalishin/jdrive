@@ -1,6 +1,6 @@
 package game.util.wcustom;
 
-import game.StringID;
+import game.ids.StringID;
 import game.struct.Textbuf;
 
 public class as_querystr_d extends AbstractWinCustom

@@ -1,5 +1,6 @@
 package game;
 
+import game.ids.StringID;
 import game.util.StringTable;
 
 // Just a shortcut

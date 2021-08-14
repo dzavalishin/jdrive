@@ -4,6 +4,10 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.ids.PlayerID;
+import game.ids.StringID;
+import game.struct.Point;
+
 public class SignStruct implements IPoolItem
 {
 	StringID     str;

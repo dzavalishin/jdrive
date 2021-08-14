@@ -1,5 +1,7 @@
 package game;
 
+import game.ids.PlayerID;
+import game.ids.SpriteID;
 import game.util.Sprites;
 
 public class Sprite extends Sprites {

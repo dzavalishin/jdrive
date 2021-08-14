@@ -1,4 +1,12 @@
 package game;
+import game.ids.CargoID;
+import game.ids.EngineID;
+import game.ids.PlayerID;
+import game.ids.StationID;
+import game.ids.StringID;
+import game.ids.UnitID;
+import game.ids.VehicleID;
+import game.struct.Point;
 import game.tables.AirConstants;
 import game.tables.AirCraftTables;
 import game.util.BitOps;
@@ -2076,18 +2084,18 @@ public class AirCraft extends AirCraftTables {
 	}
 
 
-	static boolean AirportFindFreeHelipad(Vehicle v, final AirportFTAClass Airport)
+	static boolean AirportFindFreeHelipad(Vehicle v, final AirportFTAClass airport)
 	{
 		Station st;
 		AirportFTA temp;
 
 		// if an airport doesn't have helipads, use terminals
-		if (Airport.helipads == null) return AirportFindFreeTerminal(v, Airport);
+		if (airport.helipads == null) return AirportFindFreeTerminal(v, airport);
 
 		// if there are more helicoptergroups, pick one, just as in AirportFindFreeTerminal()
-		if (Airport.helipads[0] > 1) {
+		if (airport.helipads[0] > 1) {
 			st = Station.GetStation(v.air.targetairport);
-			temp = Airport.layout[v.air.pos].next_in_chain;
+			temp = airport.layout[v.air.pos].next_in_chain;
 			while (temp != null) {
 				if (temp.heading == 255) {
 					if (!BitOps.HASBITS(st.airport_flags, temp.block)) {
@@ -2104,9 +2112,9 @@ public class AirCraft extends AirCraftTables {
 						//that means, sum up all terminals of
 						//groups with lower number
 						for(i = 1; i < target_group; i++)
-							group_start += Airport.helipads[i];
+							group_start += airport.helipads[i];
 
-						group_end = group_start + Airport.helipads[target_group];
+						group_end = group_start + airport.helipads[target_group];
 						if (FreeTerminal(v, group_start, group_end)) return true;
 					}
 				} else {
@@ -2119,7 +2127,7 @@ public class AirCraft extends AirCraftTables {
 		} else {
 			// only 1 helicoptergroup, check all helipads
 			// The blocks for helipads start after the last terminal (MAX_TERMINALS)
-			return FreeTerminal(v, Airport.MAX_TERMINALS, GetNumHelipads(Airport) + Airport.MAX_TERMINALS);
+			return FreeTerminal(v, AirportFTAClass.MAX_TERMINALS, GetNumHelipads(airport) + AirportFTAClass.MAX_TERMINALS);
 		}
 		return false;	// it shouldn't get here anytime, but just to be sure
 	}

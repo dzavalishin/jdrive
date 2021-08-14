@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import game.ai.Ai;
+import game.ids.EngineID;
+import game.ids.PlayerID;
+import game.ids.StringID;
+import game.struct.PlayerEconomyEntry;
 
 /** @file players.c
  * @todo Cleanup the messy DrawPlayerFace function asap
@@ -51,7 +55,7 @@ public class Player
 	int bankrupt_value;
 
 	boolean is_active;
-	int is_ai;
+	public int is_ai;
 	PlayerAI ai = new PlayerAI();
 	PlayerAiNew ainew;
 

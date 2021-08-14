@@ -1,6 +1,10 @@
 package game;
 
+import game.ids.EngineID;
+import game.ids.PlayerID;
+import game.ids.StringID;
 import game.struct.DrawEngineInfo;
+import game.struct.EngineInfo;
 import game.tables.EngineTables;
 import game.tables.EngineTables2;
 import game.util.BitOps;

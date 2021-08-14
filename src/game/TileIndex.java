@@ -2,6 +2,10 @@ package game;
 
 import java.util.function.Function;
 
+import game.ids.PlayerID;
+import game.struct.Point;
+import game.struct.TileIndexDiff;
+import game.struct.TileIndexDiffC;
 import game.util.BitOps;
 
 // TODO make == work for TileIndex or we're busted - make fabric and disable new(), 

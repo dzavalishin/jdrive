@@ -2,6 +2,8 @@ package game;
 
 import java.util.Iterator;
 
+import game.ids.StringID;
+import game.ids.VehicleID;
 import game.struct.GetDepotVehiclePtData;
 import game.util.BitOps;
 import game.util.GameDate;

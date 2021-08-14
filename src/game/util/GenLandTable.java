@@ -1,6 +1,6 @@
 package game.util;
 
-import game.TileIndexDiffC;
+import game.struct.TileIndexDiffC;
 
 public class GenLandTable {
 	/* $Id: genland.h 2701 2005-07-24 14:12:37Z tron $ */

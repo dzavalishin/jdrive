@@ -1,5 +1,7 @@
 package game;
 
+import game.tables.CurrencySpec;
+
 public class Currency {
 
 	public static final int CF_NOEURO = 0;

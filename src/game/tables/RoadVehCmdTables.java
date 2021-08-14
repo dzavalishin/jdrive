@@ -1,6 +1,6 @@
 package game.tables;
 
-import game.Point;
+import game.struct.Point;
 
 public class RoadVehCmdTables 
 {

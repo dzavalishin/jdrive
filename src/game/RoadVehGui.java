@@ -7,6 +7,7 @@ import game.util.wcustom.vehiclelist_d;
 
 import java.util.Iterator;
 
+import game.ids.StringID;
 import game.util.BitOps;
 
 public class RoadVehGui 

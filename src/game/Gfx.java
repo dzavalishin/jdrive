@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 
 import game.Gfx.BlitterParams;
+import game.ids.CursorID;
+import game.ids.StringID;
 import game.tables.PaletteTabs;
 import game.util.ArrayPtr;
 import game.util.BitOps;

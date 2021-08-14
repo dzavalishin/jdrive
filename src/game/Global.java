@@ -11,6 +11,13 @@ import game.util.Prices;
 import game.util.Strings;
 import game.util.YearMonthDay;
 import game.Cheat.Cheats;
+import game.ids.PlayerID;
+import game.ids.StringID;
+import game.ids.VehicleID;
+import game.struct.BackuppedOrders;
+import game.struct.ColorList;
+import game.struct.EngineInfo;
+import game.struct.Point;
 import game.tables.CargoConst;
 
 public class Global 

@@ -1,6 +1,9 @@
 package game;
 
 import game.tables.TunnelBridgeTables;
+import game.ids.PlayerID;
+import game.ifaces.TileTypeProcs;
+import game.struct.TileIndexDiff;
 import game.tables.RailTables;
 import game.util.BitOps;
 

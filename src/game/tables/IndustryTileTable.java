@@ -1,6 +1,6 @@
 package game.tables;
 
-import game.TileIndexDiffC;
+import game.struct.TileIndexDiffC;
 
 public class IndustryTileTable {
 	

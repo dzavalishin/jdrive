@@ -1,6 +1,6 @@
 package game.util.wcustom;
 
-import game.SortStruct;
+import game.struct.SortStruct;
 
 public class vehiclelist_d extends AbstractWinCustom  {
 	public SortStruct [] sort_list;

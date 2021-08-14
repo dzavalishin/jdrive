@@ -1,5 +1,8 @@
 package game;
 
+import game.ids.StringID;
+import game.struct.BridgeData;
+
 /** Struct containing information about a single bridge type
  */
 

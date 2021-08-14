@@ -3,6 +3,15 @@ package game;
 import java.util.Iterator;
 
 import game.ai.Ai;
+import game.ids.PlayerID;
+import game.ids.StationID;
+import game.ids.StringID;
+import game.ids.UnitID;
+import game.ids.VehicleID;
+import game.struct.FoundRoute;
+import game.struct.GoodsEntry;
+import game.struct.Pair;
+import game.struct.PlayerEconomyEntry;
 import game.tables.EconomeTables;
 import game.util.BitOps;
 import game.util.Prices;

@@ -3,6 +3,8 @@ package game;
 import java.util.HashMap;
 import java.util.Map;
 
+import game.ids.AbstractID;
+
 public class PalSpriteID extends AbstractID {
 	private PalSpriteID(int i) {
 		super(i);

@@ -1,5 +1,7 @@
 package game;
 
+import game.struct.TileIndexDiff;
+
 /**
  * Can be modified
  * @author dz

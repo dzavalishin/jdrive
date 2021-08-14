@@ -3,6 +3,11 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.ids.CursorID;
+import game.ids.PlayerID;
+import game.ids.StringID;
+import game.struct.ColorList;
+import game.struct.Point;
 import game.util.BitOps;
 import game.util.GameDate;
 

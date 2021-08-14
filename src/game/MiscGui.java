@@ -1,7 +1,10 @@
 package game;
 
 import game.struct.LandInfoData;
+import game.struct.Point;
 import game.struct.Textbuf;
+import game.ids.PlayerID;
+import game.ids.StringID;
 import game.struct.FiosItem;
 
 import game.util.BitOps;

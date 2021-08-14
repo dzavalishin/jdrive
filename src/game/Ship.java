@@ -1,4 +1,9 @@
 package game;
+import game.ids.CargoID;
+import game.ids.EngineID;
+import game.ids.UnitID;
+import game.ids.VehicleID;
+import game.struct.TileIndexDiffC;
 import game.util.BitOps;
 
 public class Ship {

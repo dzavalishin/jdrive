@@ -8,7 +8,11 @@ import java.util.function.Consumer;
 import game.tables.IndustryTables;
 import game.tables.IndustryTileTable;
 import game.util.BitOps;
-
+import game.ids.PlayerID;
+import game.ids.StringID;
+import game.ifaces.TileTypeProcs;
+import game.struct.ProducedCargo;
+import game.struct.TileIndexDiffC;
 import game.tables.DrawIndustrySpec1Struct;
 import game.tables.DrawIndustrySpec4Struct;
 import game.tables.DrawIndustryTileStruct;

@@ -4,6 +4,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import game.ids.CargoID;
+import game.ids.EngineID;
+import game.struct.EngineInfo;
+import game.struct.SortStruct;
 import game.tables.EngineTables;
 import game.util.BitOps;
 import game.util.wcustom.*;
@@ -439,7 +443,7 @@ private static void show_cargo(ctype) {
 		case Vehicle.VEH_Ship: {
 			int num = Global.NUM_SHIP_ENGINES;
 			Engine  e; // = GetEngine(Global.SHIP_ENGINES_INDEX);
-			byte cargo, refittable;
+			int cargo, refittable;
 			engine_id = Global.SHIP_ENGINES_INDEX;
 
 			do {
@@ -479,7 +483,7 @@ private static void show_cargo(ctype) {
 
 		case Vehicle.VEH_Aircraft:{
 			int num = Global.NUM_AIRCRAFT_ENGINES;
-			byte subtype;
+			int subtype;
 			//final Engine  e = GetEngine(Global.AIRCRAFT_ENGINES_INDEX);
 			engine_id = Global.AIRCRAFT_ENGINES_INDEX;
 
@@ -614,7 +618,7 @@ private static void show_cargo(ctype) {
 		case Vehicle.VEH_Ship: {
 			int num = Global.NUM_SHIP_ENGINES;
 			EngineID engine_id = EngineID.get( Global.SHIP_ENGINES_INDEX );
-			byte cargo, refittable;
+			int cargo, refittable;
 
 			if (selected_id0[0] != Engine.INVALID_ENGINE_ID.id) {
 				cargo = EngineGui.ShipVehInfo(selected_id0[0]).cargo_type;
@@ -661,7 +665,7 @@ private static void show_cargo(ctype) {
 				//final Engine  e = GetEngine(Global.AIRCRAFT_ENGINES_INDEX);
 				//EngineID engine_id = EngineID.get( Global.AIRCRAFT_ENGINES_INDEX );
 				int eid = Global.AIRCRAFT_ENGINES_INDEX;
-				byte subtype = EngineGui.AircraftVehInfo(selected_id0[0]).subtype;
+				int subtype = EngineGui.AircraftVehInfo(selected_id0[0]).subtype;
 
 				do {
 					final Engine  e = Engine.GetEngine(eid);//engine_id);
@@ -946,6 +950,8 @@ private static void show_cargo(ctype) {
 			w.widget.get(7).unkA = (w.vscroll.cap  << 8) + 1;
 			w.widget.get(9).unkA = (w.vscroll2.cap << 8) + 1;
 		} break;
+		default:
+			break;
 		}
 	}
 

@@ -5,6 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
+import game.ids.CursorID;
+import game.ids.SpriteID;
+import game.ids.StringID;
+import game.ids.VehicleID;
+import game.struct.Point;
 import game.util.AnimCursor;
 import game.util.AutoRail;
 import game.util.BitOps;

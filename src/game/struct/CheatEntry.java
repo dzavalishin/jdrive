@@ -1,6 +1,6 @@
 package game.struct;
 
-import game.StringID;
+import game.ids.StringID;
 
 public class CheatEntry {
 	//public ce_type type;    // type of selector

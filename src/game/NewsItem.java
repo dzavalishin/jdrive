@@ -4,6 +4,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import game.ids.StringID;
 import game.tables.SoundFx;
 import game.util.BitOps;
 import game.util.GameDate;

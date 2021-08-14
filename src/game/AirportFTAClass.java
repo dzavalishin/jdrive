@@ -1,4 +1,5 @@
 package game;
+import game.struct.TileIndexDiffC;
 import game.tables.AirCraftTables;
 import game.util.BitOps;
 

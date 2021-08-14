@@ -1,5 +1,7 @@
 package game;
 
+import game.ids.EngineID;
+
 public class VehicleRail extends VehicleChild {
 	int last_speed;		// NOSAVE: only used in UI
 	int crash_anim_pos;

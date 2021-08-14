@@ -1,7 +1,7 @@
 package game.tables;
 
-import game.Point;
 import game.Sprite;
+import game.struct.Point;
 
 public class TreeTables 
 {

@@ -1,5 +1,7 @@
 package game;
 
+import game.struct.Pair;
+
 class Subsidy {
 	int cargo_type;
 	int age;

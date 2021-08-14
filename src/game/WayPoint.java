@@ -3,6 +3,8 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.ids.StringID;
+import game.struct.Point;
 import game.util.BitOps;
 
 public class WayPoint implements IPoolItem

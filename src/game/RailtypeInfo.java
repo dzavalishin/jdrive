@@ -1,5 +1,9 @@
 package game;
 
+import game.ids.CursorID;
+import game.ids.SpriteID;
+import game.ids.StringID;
+
 public class RailtypeInfo 
 {
 

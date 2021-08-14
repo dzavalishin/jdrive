@@ -1,6 +1,6 @@
 package game.util.wcustom;
 
-import game.StringID;
+import game.ids.StringID;
 
 public class menu_d extends AbstractWinCustom 
 {

@@ -2,10 +2,10 @@ package game.tables;
 
 import game.AcceptedCargo;
 import game.AircraftVehicleInfo;
-import game.EngineInfo;
 import game.RailVehicleInfo;
 import game.RoadVehicleInfo;
 import game.ShipVehicleInfo;
+import game.struct.EngineInfo;
 
 public class EngineTables2 
 {

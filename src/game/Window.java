@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.function.BiConsumer;
 
+import game.ids.AbstractID;
+import game.ids.StringID;
+import game.struct.Point;
+import game.struct.Rect;
 import game.util.BitOps;
 import game.util.Pixel;
 import game.util.WindowConstants;

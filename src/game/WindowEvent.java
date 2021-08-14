@@ -1,5 +1,7 @@
 package game;
 
+import game.struct.Point;
+
 /* XXX - outside "byte event" so you can set event directly without going into
  * the union elements at first. Because of this every first element of the union
  * MUST BE 'byte event'. Whoever did this must get shot! Scheduled for immediate

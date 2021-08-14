@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import game.ai.Ai;
+import game.ids.PlayerID;
 import game.util.FileIO;
 import game.util.Strings;
 

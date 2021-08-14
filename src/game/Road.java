@@ -1,5 +1,8 @@
 package game;
 
+import game.ids.PlayerID;
+import game.ifaces.TileTypeProcs;
+import game.struct.Point;
 import game.tables.RoadTables;
 import game.util.ArrayPtr;
 import game.util.BitOps;

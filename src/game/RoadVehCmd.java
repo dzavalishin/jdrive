@@ -3,8 +3,12 @@ package game;
 import java.util.Comparator;
 import java.util.List;
 
+import game.ids.EngineID;
+import game.ids.UnitID;
+import game.ids.VehicleID;
 import game.struct.FindRoadToChooseData;
 import game.struct.OvertakeData;
+import game.struct.Point;
 import game.struct.RoadFindDepotData;
 import game.struct.RoadVehFindData;
 import game.tables.RoadVehCmdTables;

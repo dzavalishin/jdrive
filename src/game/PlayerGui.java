@@ -2,6 +2,8 @@ package game;
 
 import java.util.Iterator;
 
+import game.ids.PlayerID;
+import game.ids.StringID;
 import game.util.BitOps;
 
 public class PlayerGui 

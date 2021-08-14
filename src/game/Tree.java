@@ -1,4 +1,8 @@
 package game;
+import game.ids.PlayerID;
+import game.ifaces.TileTypeProcs;
+import game.struct.Point;
+import game.struct.TileIndexDiffC;
 import game.tables.TreeTables;
 import game.util.ArrayPtr;
 import game.util.BitOps;

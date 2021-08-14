@@ -3,6 +3,10 @@ package game;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import game.ids.PlayerID;
+import game.ids.StationID;
+import game.ids.StringID;
+import game.struct.SortStruct;
 import game.util.BitOps;
 import game.util.Strings;
 

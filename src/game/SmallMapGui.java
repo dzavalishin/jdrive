@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import game.util.BitOps;
 import game.util.Pixel;
+import game.struct.Point;
 import game.tables.SmallMapGuiTables;
 
 public class SmallMapGui extends SmallMapGuiTables

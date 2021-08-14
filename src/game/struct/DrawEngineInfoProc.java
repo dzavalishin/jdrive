@@ -1,6 +1,6 @@
 package game.struct;
 
-import game.EngineID;
+import game.ids.EngineID;
 
 //typedef void DrawEngineInfoProc(EngineID, int x, int y, int maxw);
 

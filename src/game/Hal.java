@@ -1,5 +1,9 @@
 package game;
 
+import game.ids.CursorID;
+import game.ids.PlayerID;
+import game.struct.Point;
+import game.struct.Rect;
 import game.struct.Textbuf;
 import game.util.AnimCursor;
 import game.util.BitOps;

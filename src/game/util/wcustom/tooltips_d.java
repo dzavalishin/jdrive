@@ -1,6 +1,6 @@
 package game.util.wcustom;
 
-import game.StringID;
+import game.ids.StringID;
 
 public class tooltips_d extends AbstractWinCustom {
 	//public StringID string_id;

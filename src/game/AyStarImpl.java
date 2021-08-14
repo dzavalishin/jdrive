@@ -1,5 +1,7 @@
 package game;
 
+import game.struct.OpenListNode;
+
 public abstract class AyStarImpl extends AyStar {
 
 	/*

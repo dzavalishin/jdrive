@@ -3,6 +3,18 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.ids.CargoID;
+import game.ids.EngineID;
+import game.ids.OrderID;
+import game.ids.PlayerID;
+import game.ids.StringID;
+import game.ids.UnitID;
+import game.ids.VehicleID;
+import game.ifaces.TileVehicleInterface;
+import game.struct.BackuppedOrders;
+import game.struct.Point;
+import game.struct.Rect;
+import game.struct.VQueueItem;
 import game.tables.EngineTables;
 import game.util.BitOps;
 import game.util.VehicleHash;

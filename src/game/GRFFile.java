@@ -1,5 +1,9 @@
 package game;
 
+import game.ids.CargoID;
+import game.ids.EngineID;
+import game.ids.SpriteID;
+import game.struct.EngineInfo;
 import game.util.BitOps;
 
 /* TTDPatch extended GRF format codec

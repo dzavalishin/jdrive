@@ -1,8 +1,8 @@
 package game.tables;
 
 import game.AcceptedCargo;
-import game.StringID;
-import game.SpriteID;
+import game.ids.SpriteID;
+import game.ids.StringID;
 
 // NOSAVE: These can be recalculated from InitializeLandscapeVariables
 public class CargoConst 

@@ -2,6 +2,9 @@ package game;
 
 import java.util.Iterator;
 
+import game.ids.PlayerID;
+import game.ids.StringID;
+
 public class MiscCmd {
 
 	/** Change the player's face.

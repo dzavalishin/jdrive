@@ -1,5 +1,9 @@
 package game;
 
+import game.ids.PlayerID;
+import game.ifaces.CommandCallback;
+import game.ifaces.CommandProc;
+
 public class Cmd {
 
 

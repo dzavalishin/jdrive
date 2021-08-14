@@ -1,7 +1,7 @@
 package game.ai;
 
 import game.Global;
-import game.PlayerID;
+import game.ids.PlayerID;
 
 public class Ai {
 

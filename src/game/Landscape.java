@@ -1,5 +1,8 @@
 package game;
 
+import game.ids.PlayerID;
+import game.ifaces.TileTypeProcs;
+import game.struct.TileIndexDiffC;
 import game.util.BitOps;
 import game.util.GenLandTable;
 

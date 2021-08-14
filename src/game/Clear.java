@@ -1,4 +1,7 @@
 package game;
+import game.ids.PlayerID;
+import game.ifaces.TileTypeProcs;
+import game.struct.TileIndexDiffC;
 import game.tables.ClearTables;
 import game.util.BitOps;
 

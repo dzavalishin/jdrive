@@ -1,6 +1,7 @@
 package game;
 
 import game.ai.Ai;
+import game.ids.PlayerID;
 import game.util.GameDate;
 
 public class GenerateWorld {

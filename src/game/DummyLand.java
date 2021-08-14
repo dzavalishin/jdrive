@@ -1,5 +1,8 @@
 package game;
 
+import game.ids.PlayerID;
+import game.ifaces.TileTypeProcs;
+
 public class DummyLand {
 
 

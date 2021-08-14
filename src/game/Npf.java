@@ -1,7 +1,11 @@
 package game;
 
+import game.ids.PlayerID;
 import game.struct.FindLengthOfTunnelResult;
+import game.struct.OpenListNode;
 import game.util.BitOps;
+import game.util.TTDQueue;
+import game.util.TTDQueueImpl;
 
 public class Npf {
 

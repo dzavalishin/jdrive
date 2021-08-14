@@ -1,5 +1,7 @@
 package game;
 
+import game.ids.VehicleID;
+
 public class PlayerAI {
 	int state;
 	int tick; // Used to determine how often to move

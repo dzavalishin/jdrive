@@ -1,6 +1,6 @@
 package game.util.wcustom;
 
-import game.EngineID;
+import game.ids.EngineID;
 
 public class replaceveh_d extends AbstractWinCustom {
 	public int vehicletype;

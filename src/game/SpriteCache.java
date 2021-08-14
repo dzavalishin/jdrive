@@ -1,5 +1,6 @@
 package game;
 
+import game.ids.SpriteID;
 import game.util.FileIO;
 
 public class SpriteCache {

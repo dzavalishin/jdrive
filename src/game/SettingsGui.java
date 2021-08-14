@@ -2,7 +2,9 @@ package game;
 
 import java.util.Iterator;
 
+import game.ids.StringID;
 import game.struct.GameSettingData;
+import game.tables.CurrencySpec;
 import game.tables.SettingsTables;
 import game.util.BitOps;
 import game.util.Strings;

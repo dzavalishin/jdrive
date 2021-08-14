@@ -2,18 +2,9 @@ package game.util;
 
 import java.nio.ByteBuffer;
 
-
-import game.CurrencySpec;
-import game.GameOptions;
-import game.Global;
-import game.Industry;
-import game.Landscape;
-import game.Station;
-import game.Str;
-import game.StringID;
-import game.Town;
-import game.WayPoint;
 import game.*;
+import game.ids.StringID;
+import game.tables.CurrencySpec;
 
 public class Strings extends StringTable
 {

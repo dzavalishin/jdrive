@@ -2,7 +2,14 @@ package game;
 
 import java.util.Iterator;
 
+import game.ids.CargoID;
+import game.ids.EngineID;
+import game.ids.PlayerID;
+import game.ids.StationID;
+import game.ids.UnitID;
+import game.ids.VehicleID;
 import game.struct.RailtypeSlowdownParams;
+import game.struct.TileIndexDiff;
 import game.struct.TrainCollideChecker;
 import game.tables.TrainTables;
 import game.util.BitOps;
