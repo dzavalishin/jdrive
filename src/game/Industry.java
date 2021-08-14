@@ -674,7 +674,10 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	static void TileLoop_Industry(TileIndex tile)
 	{
-		byte n;
+		int mm5 = 0xFF & tile.getMap().m5;
+		// TODO XXX HACK temp kill me
+		if(mm5 > _industry_map5_animation_next.length )
+			tile.getMap().m5 = mm5 = 0x18; // oilrig? just for fun
 
 		if (0 == (tile.getMap().m1 & 0x80)) {
 			MakeIndustryTileBigger(tile, tile.getMap().m1);
@@ -685,12 +688,8 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 		TransportIndustryGoods(tile);
 		
-		int mm5 = 0xFF & tile.getMap().m5;
-		// TODO XXX HACK temp kill me
-		if(mm5 > _industry_map5_animation_next.length )
-			tile.getMap().m5 = mm5 = 0x18; // oilrig? just for fun
 		
-		n = (byte) _industry_map5_animation_next[mm5];
+		int n = _industry_map5_animation_next[mm5];
 		if (n != 255) {
 			tile.getMap().m1 = 0;
 			tile.getMap().m5 = n;

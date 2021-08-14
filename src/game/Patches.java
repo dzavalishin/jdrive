@@ -45,10 +45,10 @@ public class Patches
 	byte toolbar_pos;			// position of toolbars, 0=left, 1=center, 2=right
 	byte window_snap_radius; // Windows snap at each other if closer than this
 
-	int max_trains;				//max trains in game per player (these are 16bit because the unitnumber field can't hold more)
-	int max_roadveh;				//max trucks in game per player
-	int max_aircraft;			//max planes in game per player
-	int max_ships;					//max ships in game per player
+	int max_trains = 1000;				//max trains in game per player (these are 16bit because the unitnumber field can't hold more)
+	int max_roadveh = 1000;				//max trucks in game per player
+	int max_aircraft = 1000;			//max planes in game per player
+	int max_ships = 1000;					//max ships in game per player
 
 	boolean servint_ispercent;	// service intervals are in percents
 	int servint_trains = 20;	// service interval for trains
