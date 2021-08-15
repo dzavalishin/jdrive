@@ -106,3 +106,72 @@ Integer. and Long. have operations needed
 
 a lot of 16 bit integers in original game, all become unsigneds when load from data files
 
+
+
+* hack it!
+
+## v->progress is unit16
+
+```
+static bool ShipAccelerate(Vehicle *v)
+{
+	uint spd;
+	byte t;
+
+	spd = min(v->cur_speed + 1, v->max_speed);
+
+	//updates statusbar only if speed have changed to save CPU time
+	if (spd != v->cur_speed) {
+		v->cur_speed = spd;
+		if (_patches.vehicle_speed)
+			InvalidateWindowWidget(WC_VEHICLE_VIEW, v->index, STATUS_BAR);
+	}
+
+	// Decrease somewhat when turning
+	if (!(v->direction & 1)) spd = spd * 3 / 4;
+
+	if (spd == 0) return false;
+	if ((byte)++spd == 0) return true;
+
+	v->progress = (t = v->progress) - (byte)spd;
+
+	return (t < v->progress);
+}
+
+```
+
+
+
+
+
+
+
+
+
+```
+	static boolean ShipAccelerate(Vehicle v)
+	{
+		int spd;
+		int t; // was unsigned byte
+
+		spd = Math.min(v.cur_speed + 1, v.max_speed);
+
+		//updates statusbar only if speed have changed to save CPU time
+		if (spd != v.cur_speed) {
+			v.cur_speed = spd;
+			if (Global._patches.vehicle_speed)
+				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
+		}
+
+		// Decrease somewhat when turning
+		if (0 ==(v.direction & 1)) spd = spd * 3 / 4;
+
+		if (spd == 0) return false;
+		if (++spd == 0) return true;
+
+		t =  v.progress & 0xFF;
+		v.progress = BitOps.uint16Wrap( t - spd );
+
+		return (t < v.progress);
+	}
+```

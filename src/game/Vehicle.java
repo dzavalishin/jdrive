@@ -1,6 +1,8 @@
 package game;
 
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
 
 import game.ids.CargoID;
@@ -371,6 +373,35 @@ public class Vehicle implements IPoolItem
 		reliability = Engine.GetEngine(engine_type).reliability;
 	}
 
+	
+	void UpdateVehiclePosHash(int x, int y)
+	{
+		_hash.update( new Point(left_coord, top_coord ), new Point(x,y), this );
+		/*
+		int old_hash, new_hash;
+		int old_x = left_coord;
+		int old_y = top_coord;
+		//Vehicle u;
+
+		new_hash = (x == INVALID_COORD) ? -1 : GEN_HASH(x,y);
+		old_hash = (old_x == INVALID_COORD) ? -1 : GEN_HASH(old_x, old_y);
+
+		if (old_hash == new_hash) return;
+
+		// remove from hash table? 
+		if (old_hash >= 0) {
+			//_vehicle_position_hash[old_hash] = null;
+			_hash.remove(old_hash);
+			}
+
+		// insert into hash table? 
+		if (new_hash >= 0) {
+			//_vehicle_position_hash[new_hash] = VehicleID.get(index);
+			_hash.put( this, new_hash);
+		}
+		*/
+	}
+	
 	/* TODO fixme
 	void UpdateVehiclePosHash(int x, int y)
 	{
@@ -493,9 +524,9 @@ public class Vehicle implements IPoolItem
 			has_artic_part = v.EngineHasArticPart();
 			Global.DeleteName(v.string_id);
 			v.type = 0;
-			//UpdateVehiclePosHash(v, INVALID_COORD, 0);
+			v.UpdateVehiclePosHash(INVALID_COORD, 0);
 			//v.next_hash = new VehicleID(Vehicle.INVALID_VEHICLE);
-			_hash.remove(v);
+			//_hash.remove(v);
 
 			if (v.orders != null)
 				v.DeleteVehicleOrders();
@@ -775,7 +806,7 @@ public class Vehicle implements IPoolItem
 	final static MemoryPool<Vehicle> _vehicle_pool = new MemoryPool<Vehicle>(factory);
 	private final static VehicleHash _hash = new VehicleHash(); 
 
-	private void UpdateVehiclePosHash(int x, int y) { _hash.put(x,y, this); }
+	//private void UpdateVehiclePosHash(int x, int y) { _hash.put(x,y, this); }
 
 
 	/**
@@ -846,7 +877,8 @@ public class Vehicle implements IPoolItem
 
 	//public static final int INVALID_COORD = (-0x8000);
 	//#define GEN_HASH(x,y) (((x & 0x1F80)>>7) + ((y & 0xFC0)))
-
+	int GEN_HASH(int x, int y) { return  ((x & 0x1F80)>>7) + (y & 0xFC0); }
+	//int GEN_HASH(int x, int y) { return  (x + y) & 0xFFFF; }
 	/*
 	 *	These command macros are used to call vehicle type specific commands with non type specific commands
 	 *	it should be used like: Cmd.DoCommandP(x, y, p1, p2, flags, CMD_STARTSTOP_VEH(v.type))
@@ -1194,9 +1226,21 @@ public class Vehicle implements IPoolItem
 
 	static Object VehicleFromPos(TileIndex tile, Object data, VehicleFromPosProc proc)
 	{
-		int x,y,x2,y2;
+		//int x,y,x2,y2;
 		Point pt = Point.RemapCoords(tile.TileX() * 16, tile.TileY() * 16, 0);
 
+		List<VehicleID> list = _hash.get(pt.x - 174, pt.y - 294, pt.x + 104, pt.y + 56);
+		
+
+		for(VehicleID vi : list) {
+			Vehicle v = GetVehicle(vi);
+			Object a;
+
+			a = proc.apply(v, data);
+			if (a != null) return a;
+		}		
+		
+		/*
 		x2 = ((pt.x + 104) & 0x1F80) >> 7;
 		x  = ((pt.x - 174) & 0x1F80) >> 7;
 
@@ -1207,7 +1251,8 @@ public class Vehicle implements IPoolItem
 			int xb = x;
 			for (;;) {
 				//VehicleID veh = _vehicle_position_hash[(x + y) & 0xFFFF];
-				VehicleID veh = _hash.get(x, y);
+				//VehicleID veh = _hash.get(x, y);
+				VehicleID veh = _hash.get((x + y) & 0xFFFF);
 				// TODO XXX must be veh list - more than one per coords
 				//while (veh.id != INVALID_VEHICLE) {
 				if (veh != null && veh.id != INVALID_VEHICLE) {
@@ -1231,6 +1276,7 @@ public class Vehicle implements IPoolItem
 
 			y = (y + 0x40) & ((0x3F) << 6);
 		}
+		*/
 		return null;
 	}
 
@@ -1287,6 +1333,7 @@ public class Vehicle implements IPoolItem
 
 		// clear it...
 		//memset(_vehicle_position_hash, -1, sizeof(_vehicle_position_hash));
+		//Arrays.fill(_vehicle_position_hash, VehicleID.getInvalid());
 		_hash.clear();
 	}
 
@@ -1559,6 +1606,27 @@ public class Vehicle implements IPoolItem
 
 	static void ViewportAddVehicles(DrawPixelInfo dpi)
 	{
+		
+		List<VehicleID> found = _hash.get( 
+				dpi.left - 70, dpi.top - 70, 
+				dpi.left+dpi.width, dpi.top+dpi.height );
+		 
+		for( VehicleID vi : found )
+		{
+			Vehicle v  = Vehicle.GetVehicle(vi);
+
+			if( v != null &&
+					0 == (v.vehstatus & VS_HIDDEN) &&
+					dpi.left <= v.right_coord &&
+					dpi.top <= v.bottom_coord &&
+					dpi.left + dpi.width >= v.left_coord &&
+					dpi.top + dpi.height >= v.top_coord ) {
+				DoDrawVehicle(v);
+			}
+			//	veh = v.next_hash;
+		}
+		
+		/*
 		int x,xb, y, x2, y2;
 		VehicleID veh;
 		Vehicle v;
@@ -1573,7 +1641,8 @@ public class Vehicle implements IPoolItem
 				xb = x;
 				for(;;) {
 					//veh = _vehicle_position_hash[(x + y) & 0xFFFF];
-					veh = _hash.get(x, y);
+					//veh = _hash.get(x, y);
+					veh = _hash.get((x + y) & 0xFFFF);
 					//while(veh.id != INVALID_VEHICLE) 
 					if( veh != null )
 					{
@@ -1601,6 +1670,7 @@ public class Vehicle implements IPoolItem
 					break;
 				y = (y + 0x40) & ((0x3F) << 6);
 			}
+			*/
 	}
 
 	static void ChimneySmokeInit(Vehicle v)
@@ -2767,6 +2837,8 @@ public class Vehicle implements IPoolItem
 				Math.max(_old_vehicle_coords.right,right_coord)+1,
 				Math.max(_old_vehicle_coords.bottom,bottom_coord)+1
 				);
+		//Hal.MarkWholeScreenDirty();
+
 	}
 
 	static final int _delta_coord[] = {
