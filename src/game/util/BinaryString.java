@@ -157,6 +157,10 @@ public class BinaryString
 		return (0xFF & lo) + ((0xFF & hi) << 8);
 	}
 
-	
+
+	@Override
+	public String toString() {		
+		return String.valueOf(mem, 0, usedLen);
+	}
 	
 }

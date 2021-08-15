@@ -1563,6 +1563,11 @@ public class TrainGui
 					break;
 
 				tile = Depot._last_built_train_depot_tile;
+				if( tile == null )
+				{
+					// TODO print error no depot
+					break;
+				}
 				do {
 					if (Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL) && tile.IsTileOwner(Global._local_player)) {
 						ShowTrainDepotWindow(tile);

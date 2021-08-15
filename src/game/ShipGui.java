@@ -142,7 +142,7 @@ public class ShipGui
 		//_alloc_wnd_parent_num = v.index;
 		w = Window.AllocateWindowDesc(_ship_refit_desc,v.index);
 		w.window_number = v.index;
-		w.caption_color =  v.owner.id;
+		w.caption_color = 0xFF & v.owner.id;
 		w.as_refit_d().sel = -1;
 	}
 
@@ -296,7 +296,7 @@ public class ShipGui
 		//_alloc_wnd_parent_num = veh;
 		w = Window.AllocateWindowDesc(_ship_details_desc, veh);
 		w.window_number = veh;
-		w.caption_color =  v.owner.id;
+		w.caption_color = 0xFF & v.owner.id;
 	}
 
 	static void CcBuildShip(boolean success, TileIndex tile, int p1, int p2)
@@ -459,9 +459,9 @@ public class ShipGui
 		w.resize.step_height = 24;
 
 		if (tile != null) {
-			w.caption_color =  tile.GetTileOwner().id;
+			w.caption_color = 0xFF & tile.GetTileOwner().id;
 		} else {
-			w.caption_color =  Global._local_player.id;
+			w.caption_color = 0xFF & Global._local_player.id;
 		}
 
 	}
@@ -620,7 +620,7 @@ public class ShipGui
 		Window  w = Window.AllocateWindowDescFront(_ship_view_desc, v.index);
 
 		if (w != null) {
-			w.caption_color =  v.owner.id;
+			w.caption_color = 0xFF & v.owner.id;
 			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number | (1 << 31), 0);
 		}
 	}
@@ -914,7 +914,7 @@ public class ShipGui
 		Window  w = Window.AllocateWindowDescFront(_ship_depot_desc,tile.tile);
 
 		if (w != null) {
-			w.caption_color =  TileIndex.get(w.window_number).GetTileOwner().id;
+			w.caption_color = 0xFF & TileIndex.get(w.window_number).GetTileOwner().id;
 			w.vscroll.cap = 2;
 			w.hscroll.cap = 3;
 			w.resize.step_width = 90;
@@ -1107,6 +1107,13 @@ public class ShipGui
 			if (!Window.IsWindowOfPrototype(w, _player_ships_widgets)) break;
 
 			tile = Depot._last_built_ship_depot_tile;
+			if( tile == null)
+			{
+				//ShowBuildShipWindow(null);
+				// TODO XXX [dz] show error no depot
+				break;
+			}
+			
 			do {
 				if (Depot.IsTileDepotType(tile, Global.TRANSPORT_WATER) && tile.IsTileOwner(Global._local_player)) 
 				{
@@ -1207,7 +1214,7 @@ public class ShipGui
 					w = Window.AllocateWindowDescFront(_other_player_ships_desc, (station<< 16) | player);
 				}
 				if (w != null) {
-					w.caption_color =  w.window_number;
+					w.caption_color = 0xff & w.window_number;
 					w.vscroll.cap = 4;
 					w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
 					w.resize.step_height = VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;

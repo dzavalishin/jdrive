@@ -328,7 +328,7 @@ public class AirCraft extends AirCraftTables {
 		// 0x56 - hangar facing other way international airport (86)
 		// 0x20 - hangar large airport (32)
 		// 0x41 - hangar small airport (65)
-		return tile.IsTileType( TileTypes.MP_STATION) &&
+		return tile != null && tile.IsTileType( TileTypes.MP_STATION) &&
 				(tile.getMap().m5 == 32 || tile.getMap().m5 == 65 || tile.getMap().m5 == 86);
 	}
 
@@ -3470,6 +3470,11 @@ public class AirCraft extends AirCraftTables {
 					break;
 
 				tile = Depot._last_built_aircraft_depot_tile;
+				if( tile == null )
+				{
+					// TODO err no hangar
+					break;
+				}
 				do {
 					if (IsAircraftHangarTile(tile) && tile.IsTileOwner(Global._local_player)) {
 						ShowAircraftDepotWindow(tile);

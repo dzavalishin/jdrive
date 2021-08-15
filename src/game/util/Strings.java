@@ -339,7 +339,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				num = num % _divisor_table[i];
 			}
 			if ( 0 != (tot |= quot) || (i == 9)) {
-				buff.append( '0' + quot );
+				buff.append( (char)('0' + quot) );
 				if (i == 0 || i == 3 || i == 6) buff.append( ',' );
 			}
 		}
@@ -552,26 +552,29 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 
 	//private static String ParseStringChoice(String src, int form, int [] dstlen)
-	private static String ParseStringChoice(String src, int form)
+	private static String ParseStringChoice(String src, int form, int [] skip )
 	{
 		char [] ca = src.toCharArray();
 		int cap = 0;
 
 		//<NUM> {Length of each string} {each string}
 		int n = 0xFF & ca[cap++];
-		int pos,i, mylen=0,mypos=0;
-		for(i=pos=0; i!=n; i++) {
+		
+		int i, mylen=0,mypos=0;
+		
+		for(i=0; i != n; i++) 
+		{
 			int len = 0xFF & ca[cap++];
 			if (i == form) {
-				mypos = pos;
+				mypos = cap;
 				mylen = len;
 			}
-			pos += len;
+			cap += len;
 		}
 		//if( dstlen != null ) dstlen[0] = mylen;
 		//memcpy(dst, b + mypos, mylen);
 		//return b + pos;
-
+		skip[0] = cap;
 		return new String( ca, mypos, mylen );
 	}
 
@@ -829,10 +832,11 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			case 0x8D: { // {P}
 				//int v = argv_orig[(byte)str[stri++]]; // contains the number that determines plural
 				int v = (Integer)arg[0xFF & str[stri++]]; // contains the number that determines plural
-				//int [] len = { 0 };
+				int [] skip = { 0 };
 				//str = ParseStringChoice(str, DeterminePluralForm(v), buff, len);
 				//buff += len[0];
-				buff.append(ParseStringChoice( new String( str, stri, str.length-stri ), DeterminePluralForm(v)));
+				buff.append( ParseStringChoice( new String( str, stri, str.length-stri ), DeterminePluralForm(v), skip) );
+				stri += skip[0];
 				break;
 			}
 

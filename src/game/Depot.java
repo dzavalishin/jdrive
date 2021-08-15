@@ -100,6 +100,8 @@ public class Depot implements IPoolItem
 	//static private boolean IsTileDepotType(TileIndex tile, TransportType type)
 	public static boolean IsTileDepotType(TileIndex tile, int type)
 	{
+		if( tile == null ) return false;
+		
 		switch(type)
 		{
 			case Global.TRANSPORT_RAIL:
