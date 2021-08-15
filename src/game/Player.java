@@ -649,7 +649,7 @@ public class Player
 		p.name_1 = Str.STR_SV_UNNAMED;
 		p.is_active = true;
 
-		p.money64 = p.player_money = p.current_loan = 100000;
+		p.money64 = p.player_money = p.current_loan = Integer.MAX_VALUE; // TODO return this 100000;
 
 		p.is_ai = (byte) (is_ai ? 1 : 0);
 		p.ai.state = 5; /* AIS_WANT_NEW_ROUTE */
