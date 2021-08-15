@@ -186,7 +186,7 @@ public class Clear extends ClearTables {
 		//mod = ts.modheight;
 		count = ts.modheight_count;
 		int i;
-		for (i = 0; i < count; i++ ) {
+		for (i = 0; /*i < count*/; i++ ) {
 			if (count == 0) {
 				if (ts.modheight_count >= 576)
 					return false;
