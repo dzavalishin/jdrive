@@ -446,7 +446,7 @@ public class MiscGui {
 
 	static Integer [] _errmsg_decode_params = new Integer[20];
 	static StringID _errmsg_message_1, _errmsg_message_2;
-	static int _errmsg_duration;
+	static int _errmsg_duration = 100; // TODO [dz] why?
 
 
 	static final Widget _errmsg_widgets[] = {

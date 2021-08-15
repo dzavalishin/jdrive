@@ -27,7 +27,7 @@ public class Patches
 	boolean new_nonstop;				// ttdpatch compatible nonstop handling
 	boolean roadveh_queue;			// buggy road vehicle queueing
 	boolean autoscroll = true;				// scroll when moving mouse to the edge.
-	byte errmsg_duration;		// duration of error message
+	byte errmsg_duration = 100;		// duration of error message
 	byte snow_line_height;	// a number 0-15 that configured snow line height
 	boolean bribe = true;							// enable bribing the local authority
 	boolean nonuniform_stations;// allow nonuniform train stations
