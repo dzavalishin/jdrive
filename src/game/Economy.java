@@ -794,6 +794,7 @@ public class Economy extends EconomeTables
 			final Player p = ii.next();
 			if (!p.is_active) continue;
 
+			/** TODO XXX return back, turned off for debug
 			Global._current_player = p.index;
 			Player.SET_EXPENSES_TYPE(Player.EXPENSES_LOAN_INT);
 
@@ -801,6 +802,7 @@ public class Economy extends EconomeTables
 
 			Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 			Player.SubtractMoneyFromPlayer(Global._price.station_value >> 2);
+			*/
 		}
 	}
 

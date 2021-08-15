@@ -401,10 +401,11 @@ public class ShipGui
 			break;
 
 		case WE_4:
+			/* TODO Why? 
 			if (null != Window.FindWindowById(Window.WC_VEHICLE_DEPOT, w.window_number)) 
 			{
 				w.DeleteWindow();
-			}
+			} */
 			break;
 
 		case WE_ON_EDIT_TEXT:

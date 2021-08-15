@@ -216,8 +216,8 @@ public class OrderGui {
 				if (Depot.IsTileDepotType(tile, Global.TRANSPORT_WATER) &&
 						tile.IsTileOwner(Global._local_player)) {
 					switch (tile.getMap().m5) {
-						case (byte) 0x81: tile = tile.isub(TileIndex.TileDiffXY(1, 0)); break;
-						case (byte) 0x83: tile = tile.isub(TileIndex.TileDiffXY(0, 1)); break;
+						case 0x81: tile = tile.isub(TileIndex.TileDiffXY(1, 0)); break;
+						case 0x83: tile = tile.isub(TileIndex.TileDiffXY(0, 1)); break;
 					}
 					order.type = Order.OT_GOTO_DEPOT;
 					order.flags = Order.OF_PART_OF_ORDERS;
