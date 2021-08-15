@@ -923,7 +923,7 @@ public class Gfx extends PaletteTabs
 					for (; num != 0; num--) {
 						//*dst = ctab[*dst];
 						//dst_data[0+dst_shift] = ctab[dst_data[0+dst_shift]]; // TODO displacement
-						dst.w( 0, ctab[dst.r(0)] );
+						dst.w( 0, ctab[0xFF & dst.r(0)] );
 						//dst_shift++;
 						dst.madd(1);
 					}
