@@ -146,7 +146,7 @@ public class ViewPort
 			bit <<= 1;
 		}
 
-		// TODO [dz] is it ok? Do we need viewports container at all?
+		// TODO [dz] is it ok? Do we need viewports container at all? Yes.
 		if( vp == null)
 		{
 			vp = new ViewPort();
@@ -161,7 +161,9 @@ public class ViewPort
 		vp.width = width;
 		vp.height = height;
 
-		vp.zoom = (byte) zoom;
+		// TODO XXX bring zoom back
+		//vp.zoom = (byte) zoom;
+		vp.zoom = 0;
 
 		vp.virtual_width = width << zoom;
 		vp.virtual_height = height << zoom;

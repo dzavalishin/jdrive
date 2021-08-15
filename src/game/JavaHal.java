@@ -81,6 +81,8 @@ class JavaHal extends Hal
 		_screen.top = 0;
 		_screen.zoom = 0;
 
+		
+		_cur_dpi = _screen;
 	}
 
 	@Override
