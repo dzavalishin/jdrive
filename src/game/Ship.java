@@ -300,8 +300,8 @@ public class Ship {
 	static void UpdateShipDeltaXY(Vehicle v, int dir)
 	{
 		int x = _delta_xy_table[dir];
-		v.x_offs        = BitOps.GB(x,  0, 8);
-		v.y_offs        = BitOps.GB(x,  8, 8);
+		v.x_offs        = (byte)BitOps.GB(x,  0, 8); // [dz] NB! Signed byte! 
+		v.y_offs        = (byte)BitOps.GB(x,  8, 8); // [dz] NB! Signed byte!
 		v.sprite_width  =  BitOps.GB(x, 16, 8);
 		v.sprite_height =  BitOps.GB(x, 24, 8);
 	}
@@ -355,7 +355,7 @@ public class Ship {
 	static boolean ShipAccelerate(Vehicle v)
 	{
 		int spd;
-		int t;
+		int t; // was unsigned byte
 
 		spd = Math.min(v.cur_speed + 1, v.max_speed);
 
@@ -372,7 +372,8 @@ public class Ship {
 		if (spd == 0) return false;
 		if (++spd == 0) return true;
 
-		v.progress = (t =  v.progress) - spd;
+		t =  v.progress & 0xFF;
+		v.progress = BitOps.uint16Wrap( t - spd );
 
 		return (t < v.progress);
 	}
@@ -400,7 +401,7 @@ public class Ship {
 
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
-			t = v.current_order;
+			t = new Order( v.current_order );
 			v.current_order.type = Order.OT_DUMMY;
 			v.current_order.flags = 0;
 

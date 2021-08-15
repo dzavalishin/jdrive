@@ -391,12 +391,17 @@ public class UnmovableCmd extends UnmovableTables {
 											((dir == 3) ? TileIndex.TileXY(r, Global.MapMaxY()).tile : 0)));  // bottom
 			tile = new TileIndex(itile);
 			j = 20;
+			boolean restart = false;
 			do {
 				if (--j == 0)
 				{
 					//goto restart;
-					continue;
+					//continue;
+					restart = true;
+					break;
 				}
+				if(restart) continue;
+				
 				tile = tile.iadd( TileIndex.ToTileIndexDiff(_tile_add[dir]) );
 				tile.TILE_MASK();
 

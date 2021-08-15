@@ -379,6 +379,10 @@ public class BitOps {
 		return new String( ca );
 	}
 
+	public static int uint16Wrap(int i) {
+		return i & 0xFFFF;
+	}
+
 	
 	
 	/*
