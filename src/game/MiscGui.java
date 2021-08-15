@@ -6,7 +6,7 @@ import game.struct.Textbuf;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.struct.FiosItem;
-
+import game.util.BinaryString;
 import game.util.BitOps;
 import game.util.GameDate;
 import game.util.Strings;
@@ -54,7 +54,7 @@ public class MiscGui {
 			}
 			Gfx.DrawStringCentered(140, 38, str, 0);
 
-			Strings._userstring = String.format("0x%X", lid.tile.getTile());
+			Strings._userstring = new BinaryString( String.format("0x%X", lid.tile.getTile()) );
 			Global.SetDParam(0, lid.tile.TileX());
 			Global.SetDParam(1, lid.tile.TileY());
 			Global.SetDParam(2, Strings.STR_SPEC_USERSTRING);
@@ -70,7 +70,7 @@ public class MiscGui {
 			{
 				//char buf[512];
 				//String p = Global.GetString(Str.STR_01CE_CARGO_ACCEPTED);
-				int pi = 0;
+				//int pi = 0;
 				boolean found = false;
 				StringBuilder sb = new StringBuilder();
 				sb.append(Global.GetString(Str.STR_01CE_CARGO_ACCEPTED));
@@ -91,7 +91,7 @@ public class MiscGui {
 							argv[0] = lid.ac.ct[i];
 							argv[1] = Global._cargoc.names_s[i];
 							//p = Global.GetStringWithArgs(p, Str.STR_01D1_8, argv);
-							sb.append(Strings.GetStringWithArgs( Str.STR_01D1_8, argv));
+							sb.append(Strings.GetStringWithArgs( Str.STR_01D1_8, (Object[])argv));
 						} else {
 							//p = Global.GetString(p, Global._cargoc.names_s[i]);
 							sb.append(Global.GetString( Global._cargoc.names_s[i]));
@@ -704,16 +704,16 @@ public class MiscGui {
 			int str_x, int str_y, int mask)
 	{
 		//char *b = Strings._userstring;
-		StringBuilder sb = new StringBuilder();
+		BinaryString sb = new BinaryString();
 		int i;
 
 		//b = InlineString(b, Str.STR_000D_ACCEPTS);
-		sb.append( Strings.InlineString(Str.STR_000D_ACCEPTS) );
+		sb.appendInlineString( Str.STR_000D_ACCEPTS );
 
 		for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
 			if (accepts.ct[i] >= 8 && 0 != (mask & 1) ) {
 				//b = InlineString(b, Global._cargoc.names_s[i]);
-				sb.append( Strings.InlineString( Global._cargoc.names_s[i] ) );
+				sb.appendInlineString( Global._cargoc.names_s[i] );
 				//*b++ = ',';
 				//*b++ = ' ';
 				sb.append( ", " );
@@ -733,11 +733,11 @@ public class MiscGui {
 
 		if( curr.length() == 3)
 		{
-			sb.append(Strings.InlineString(Str.STR_00D0_NOTHING));
-			Strings._userstring = sb.toString();
+			sb.appendInlineString(Str.STR_00D0_NOTHING);
+			Strings._userstring = new BinaryString( sb.toString() );
 		}
 		else
-			Strings._userstring = curr.substring(0, curr.length()-2);
+			Strings._userstring = new BinaryString( curr.substring(0, curr.length()-2) );
 
 		Gfx.DrawStringMultiLine(str_x, str_y, new StringID( Strings.STR_SPEC_USERSTRING ), 144);
 	}

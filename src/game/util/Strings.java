@@ -11,7 +11,7 @@ public class Strings extends StringTable
 
 	static DynamicLanguages _dynlang = new DynamicLanguages();
 
-	public static String _userstring;
+	public static BinaryString _userstring;
 
 	//private String StationGetSpecialString(String buff, int x);
 	//private String GetSpecialTownNameString(String buff, int ind, int seed);
@@ -83,7 +83,7 @@ public class Strings extends StringTable
 
 
 	// TODO fix me
-	private static String []_langpack_offs;
+	private static BinaryString []_langpack_offs;
 	private static LanguagePack _langpack;
 	private static int [] _langtab_num = new int [32]; // Offset into langpack offs
 	private static int [] _langtab_start = new int[32]; // Offset into langpack offs
@@ -212,7 +212,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	private static int _bind_index = 0;
 
 	//private static String StringGetStringPtr(StringID string)
-	private static String StringGetStringPtr(int string)
+	private static BinaryString StringGetStringPtr(int string)
 	{
 		return _langpack_offs[_langtab_start[string>> 11] + (string & 0x7FF)];
 	}
@@ -596,7 +596,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	}
 
 	//private static String FormatString(final String pstr, Object ... arg, int casei)
-	private static String FormatString(final String pstr, Object [] arg, int casei)
+	private static String FormatString(final BinaryString pstr, Object [] arg, int casei)
 	{
 		//byte b;
 		char b;
@@ -624,8 +624,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 			case 0x81: // {STRINL}
 				stri += 2;
-				// TODO buff.append( GetStringWithArgs(READ_LE_int(str-2), argv));
-				buff.append( "??" );
+				buff.append( GetStringWithArgs(pstr.READ_LE_int(stri-2), arg));
+				//buff.append( "??" );
 				break;
 			case 0x82: // {DATE_LONG}
 				buff.append( FormatYmdString( Getint(arg[argc++])) );
@@ -880,7 +880,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				assert(t.getXy() != null);
 
 				temp[0] = t.townnameparts;
-				buff.append( GetStringWithArgs( t.townnametype, temp) );
+				buff.append( GetStringWithArgs( t.townnametype, (Object[])temp) );
 				break;
 			}
 
@@ -1169,7 +1169,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		LanguagePack lang_pack = new LanguagePack();
 		//int len;
 		//char [][]langpack_offs;
-		String []langpack_offs;
+		BinaryString []langpack_offs;
 
 		String lang = String.format("%s%s", Global._path.lang_dir, _dynlang.file[lang_index]);
 		byte[] lang_pack_bytes = Main.ReadFileToMem(lang, 100000);
@@ -1198,7 +1198,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		// Allocate offsets
 		//langpack_offs = malloc(tot_count * sizeof(*langpack_offs));
 
-		langpack_offs = new String[tot_count]; 
+		langpack_offs = new BinaryString[tot_count]; 
 
 		// Fill offsets
 		byte[] s = BitOps.subArray(lang_pack_bytes, 0x9c); //0x9d);		
@@ -1213,7 +1213,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				len = ((len & 0x3F) << 8) + (lo & 0xFF);
 			}
 			//langpack_offs[i] = new String( s, sp, len );
-			langpack_offs[i] = BitOps.stringFromBytes( s, sp, len );
+			//langpack_offs[i] = BitOps.stringFromBytes( s, sp, len );
+			langpack_offs[i] = new BinaryString( s, sp, len );
 			//Global.debug("s = '%s'", langpack_offs[i] );
 			sp += len;
 		}
@@ -1311,22 +1312,23 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		 */
 	}
 
-	public static String InlineString(StringID string) {
+	/*
+	public static BinaryString InlineString(StringID string) {
 		char[] buf = new char[3];
 		buf[0] = 0x81;
 		buf[1] = (char) (string.id & 0xFF);
 		buf[2] = (char) (string.id >> 8);
-		return String.valueOf(buf);
+		return new BinaryString(buf);
 	}
 
-	public static String InlineString(int string) {
+	public static BinaryString InlineString(int string) {
 		char[] buf = new char[3];
 		buf[0] = 0x81;
 		buf[1] = (char) (string & 0xFF);
 		buf[2] = (char) (string >> 8);
-		return String.valueOf(buf);
+		return new BinaryString(buf);
 	}
-
+	*/
 
 }
 

@@ -7,6 +7,7 @@ import game.struct.DrawEngineInfo;
 import game.struct.EngineInfo;
 import game.tables.EngineTables;
 import game.tables.EngineTables2;
+import game.util.BinaryString;
 import game.util.BitOps;
 import game.util.Strings;
 
@@ -855,7 +856,7 @@ public class Engine extends EngineTables {
 		if (null == _engine_custom_names[engine])
 			return new StringID( _engine_name_strings[engine] );
 		//ttd_strlcpy(_userstring, _engine_custom_names[engine], lengthof(_userstring));
-		Strings._userstring = _engine_custom_names[engine];
+		Strings._userstring = new BinaryString(_engine_custom_names[engine]);
 		return new StringID(Strings.STR_SPEC_USERSTRING);
 	}
 

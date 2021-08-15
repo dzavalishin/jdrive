@@ -547,7 +547,8 @@ public class Gfx extends PaletteTabs
 					w += GetCharacterWidth(base + (byte)c);
 					if (w > maxw) {
 						sp = last_space;
-						if(sp >= sc.length || sc[sp] == 0)   // (str == null)
+						// [dz] break out if last_space == 0? Or else loop forever 
+						if(sp >= sc.length || sc[sp] == 0 || last_space == 0)   // (str == null)
 							return num + (base << 16);
 						break;
 					}
@@ -563,8 +564,8 @@ public class Gfx extends PaletteTabs
 			}
 
 			num++;
-			//str[-1] = '\0'; TODO why?
-			sc[sp-1] = 0;
+			//str[-1] = '\0'; TODO XXX why?
+			if(sp > 0 ) sc[sp-1] = 0;
 		}
 	}
 

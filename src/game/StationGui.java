@@ -7,6 +7,7 @@ import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.StringID;
 import game.struct.SortStruct;
+import game.util.BinaryString;
 import game.util.BitOps;
 import game.util.Strings;
 
@@ -416,16 +417,16 @@ public class StationGui extends Station  // to get constants
 
 		if (Window.IsWindowOfPrototype( w, _station_view_widgets)) {
 			//char *b = _userstring;
-			StringBuilder sb = new StringBuilder();
+			BinaryString sb = new BinaryString();
 
-			sb.append( Strings.InlineString(Str.STR_000C_ACCEPTS) );
+			sb.appendInlineString(Str.STR_000C_ACCEPTS);
 
 			boolean nonempty = false;
 			for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
 				//if (b >= endof(_userstring) - 5 - 1) break;
 				if( 0 != (st.goods[i].waiting_acceptance & 0x8000) ) 
 				{
-					sb.append( Strings.InlineString( Global._cargoc.names_s[i]) );
+					sb.appendInlineString( Global._cargoc.names_s[i]);
 					//*b++ = ',';
 					//*b++ = ' ';
 					sb.append( ", " );
@@ -434,10 +435,14 @@ public class StationGui extends Station  // to get constants
 			}
 
 			if (nonempty) {				
-				Strings._userstring = sb.toString();
-				Strings._userstring = Strings._userstring.substring(0, Strings._userstring.length()-2 );
+				Strings._userstring = sb;
+				//Strings._userstring = Strings._userstring.substring(0, Strings._userstring.length()-2 );
+				sb.setLength(sb.length()-2);
 			} else {
-				Strings._userstring = Strings.InlineString(Str.STR_000C_ACCEPTS) + Strings.InlineString(Str.STR_00D0_NOTHING);
+				sb = new BinaryString();
+				sb.appendInlineString(Str.STR_000C_ACCEPTS);
+				sb.appendInlineString(Str.STR_00D0_NOTHING);
+				Strings._userstring = sb;
 			}
 
 			Gfx.DrawStringMultiLine(2, 67, new StringID( Strings.STR_SPEC_USERSTRING ), 245);
