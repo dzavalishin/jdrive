@@ -1280,8 +1280,8 @@ public class TrainCmd extends TrainTables
 
 		int x = _delta_xy_table[direction];
 
-		v.x_offs        = BitOps.GB(x,  0, 8);
-		v.y_offs        = BitOps.GB(x,  8, 8);
+		v.x_offs        = (byte) BitOps.GB(x,  0, 8); // NB! Signed!
+		v.y_offs        = (byte) BitOps.GB(x,  8, 8);
 		v.sprite_width  =  BitOps.GB(x, 16, 8);
 		v.sprite_height =  BitOps.GB(x, 24, 8);
 	}
