@@ -22,18 +22,7 @@ public class Landscape extends GenLandTable
 
 
 
-	/*static final TileTypeProcs
-		_tile_type_clear_procs,
-		_tile_type_rail_procs,
-		_tile_type_road_procs,
-		_tile_type_town_procs,
-		_tile_type_trees_procs,
-		_tile_type_station_procs,
-		_tile_type_water_procs,
-		_tile_type_dummy_procs,
-		_tile_type_industry_procs,
-		_tile_type_tunnelbridge_procs,
-		_tile_type_unmovable_procs;*/
+
 
 	static final TileTypeProcs _tile_type_procs[] = {
 			Clear._tile_type_clear_procs,
@@ -73,7 +62,7 @@ public class Landscape extends GenLandTable
 		ti.z = ic.v;
 	}
 
-	/* find the landscape height for the coordinates x y */
+	/** find the landscape height for the coordinates x y */
 	static void FindLandscapeHeight(TileInfo ti, int x, int y)
 	{
 		ti.x = x;
@@ -748,11 +737,12 @@ public class Landscape extends GenLandTable
 				).TILE_MASK();
 	}
 
+	/*
 	// TODO move 
 	static boolean IsValidTile(TileIndex tile)
 	{
 		return (tile.getTile() < Global.MapSizeX() * Global.MapMaxY() && tile.TileX() != Global.MapMaxX());
-	}
+	}*/
 
 
 

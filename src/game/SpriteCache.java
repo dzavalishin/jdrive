@@ -110,7 +110,7 @@ public class SpriteCache {
 			//sprite = new Sprite(); // AllocSprite(sizeof(*sprite) + num);
 			_sprite_ptr[id] = sprite;
 			sprite.info   = type;
-			sprite.height = (byte) ((id != 142) ? height : 10); // Compensate for a TTD bug
+			sprite.height = ((id != 142) ? height : 10); // Compensate for a TTD bug
 			sprite.width  = width;
 			sprite.x_offs = FileIO.FioReadSignedWord();
 			sprite.y_offs = FileIO.FioReadSignedWord();

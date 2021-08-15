@@ -561,21 +561,22 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		int n = 0xFF & ca[cap++];
 		
 		int i, mylen=0,mypos=0;
+		int pos = 0;
 		
 		for(i=0; i != n; i++) 
 		{
 			int len = 0xFF & ca[cap++];
 			if (i == form) {
-				mypos = cap;
+				mypos = pos;
 				mylen = len;
 			}
-			cap += len;
+			pos += len;
 		}
 		//if( dstlen != null ) dstlen[0] = mylen;
 		//memcpy(dst, b + mypos, mylen);
 		//return b + pos;
-		skip[0] = cap;
-		return new String( ca, mypos, mylen );
+		skip[0] = cap+pos;
+		return new String( ca, mypos+cap, mylen );
 	}
 
 
