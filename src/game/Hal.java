@@ -284,20 +284,29 @@ void SortResolutions(int count)
 
 
 
-class DrawPixelInfo {
-	//Pixel dst_ptr;
-	//int [] dst_ptr; // image buffer - (green << 24) | (red << 16) | blue
-	//int dst_ptr_shift; // add to dst_ptr index when accessing [dz] to work around absence of pointers
-
+class DrawPixelInfo 
+{
 	Pixel dst_ptr; // Smart pointer
 	
 	int left, top, width, height;
 	int pitch;
 	int zoom;
 	
+	public DrawPixelInfo(DrawPixelInfo src) {
+		assignFrom(src);
+	}
+
+	public DrawPixelInfo() {
+		// TODO require at least dst_ptr
+	}
+
 	public void assignFrom(DrawPixelInfo dpi) 
 	{
-		dst_ptr = dpi.dst_ptr; // image buffer - (green << 24) | (red << 16) | blue
+		if(dpi.dst_ptr == null) 
+			dst_ptr = null;
+		else 
+			dst_ptr = new Pixel(dpi.dst_ptr); 
+		
 		left = dpi.left; 
 		top = dpi.top; 
 		width = dpi.width; 

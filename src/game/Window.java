@@ -591,6 +591,7 @@ public class Window extends WindowConstants
 
 		{
 			DrawPixelInfo dp = Hal._cur_dpi;
+			//DrawPixelInfo dp = new DrawPixelInfo(Hal._cur_dpi);
 			dp.width = right - left;
 			dp.height = bottom - top;
 			dp.left = left - w.left;
@@ -2818,12 +2819,18 @@ public class Window extends WindowConstants
 		case WWT_CAPTION: {
 			assert(r.bottom - r.top == 13); // XXX - to ensure the same sizes are used everywhere!
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, FR_BORDERONLY);
-			Gfx.DrawFrameRect(r.left+1, r.top+1, r.right-1, r.bottom-1, wi.color, (caption_color == -1/*0xFF*/) ? FR_LOWERED | FR_DARKENED : FR_LOWERED | FR_DARKENED | FR_BORDERONLY);
+			Gfx.DrawFrameRect(r.left+1, r.top+1, r.right-1, r.bottom-1, wi.color, (caption_color == 0xFF) ? FR_LOWERED | FR_DARKENED : FR_LOWERED | FR_DARKENED | FR_BORDERONLY);
 
 			if ( (caption_color & 0xFF) != 0xFF) {
-				byte pc = Global._player_colors[caption_color];
+				byte pc = Global._player_colors[caption_color & 0xFF];
 				Gfx.GfxFillRect(r.left+2, r.top+2, r.right-2, r.bottom-2, Global._color_list[pc].window_color_1b);
 			}
+			/*else
+			{
+				// [dz] added for captions were not cleared
+				Gfx.GfxFillRect(r.left+2, r.top+2, r.right-2, r.bottom-2, Global._color_list[pc].window_color_1b);
+				
+			}*/
 
 			Gfx.DrawStringCentered( (r.left+r.right+1)>>1, r.top+2, new StringID( wi.unkA ), 0x84);
 			//draw_default:;
