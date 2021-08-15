@@ -2962,8 +2962,9 @@ public class Vehicle implements IPoolItem
 			{
 				Vehicle u = i.next();
 
-				if (u.type == type && u.owner == Global._current_player &&
-						unit_num == u.unitnumber.id)
+				if (u.type == type && u.owner == Global._current_player 
+						&& u.unitnumber != null
+						&& unit_num == u.unitnumber.id)
 				{
 					restart = true;
 					break;
