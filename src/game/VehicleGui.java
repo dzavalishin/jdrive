@@ -163,7 +163,9 @@ public class VehicleGui {
 					while(voi.hasNext())
 					{
 						final Order order = voi.next();
-						if (order.type == Order.OT_GOTO_STATION && order.station == station) {
+						if (order != null && order.type == Order.OT_GOTO_STATION && order.station == station) 
+						{
+							_vehicle_sort[n[0]] = new SortStruct();
 							_vehicle_sort[n[0]].index = v.index;
 							_vehicle_sort[n[0]].owner = v.owner.id;
 							++n[0];

@@ -10,24 +10,8 @@ import game.struct.SortStruct;
 import game.util.BitOps;
 import game.util.Strings;
 
-public class StationGui extends Station  // to get finalants
+public class StationGui extends Station  // to get constants
 {
-
-	/* $Id: station_gui.c 3270 2005-12-07 15:48:52Z peter1138 $ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	static final int _rating_colors[] = {152,32,15,174,208,194,191,55,184,10,191,48};
 
