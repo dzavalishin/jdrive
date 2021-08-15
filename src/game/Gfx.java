@@ -651,10 +651,10 @@ public class Gfx extends PaletteTabs
 			for(;;) {
 				if( sp >= sc.length) {
 					y += mt;
-					if (--num < 0) {
+					//if (--num < 0) {
 						_stringwidth_base = 0;
 						return;
-					}
+					//}
 				}
 				c = sc[sp++]; // *src++;
 				if (c == 0) {

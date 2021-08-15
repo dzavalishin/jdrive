@@ -401,8 +401,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	static void UpdateRoadVehDeltaXY(Vehicle v)
 	{
 		int x = _delta_xy_table[v.direction];
-		v.x_offs        = BitOps.GB(x,  0, 8);
-		v.y_offs        = BitOps.GB(x,  8, 8);
+		v.x_offs        = (byte) BitOps.GB(x,  0, 8); // NB! Signed byte!
+		v.y_offs        = (byte) BitOps.GB(x,  8, 8);
 		v.sprite_width  =  BitOps.GB(x, 16, 8);
 		v.sprite_height =  BitOps.GB(x, 24, 8);
 	}
@@ -785,10 +785,10 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			if ((byte)++spd == 0)
 				return true;
 
-			//int t = 0xff & v.progress;
-			//v.progress = t - (0xff & spd);
-			int t = v.progress;
-			v.progress = t + spd; // TODO XXX [dz] changed to + - WHY?
+			int t = 0xff & v.progress;
+			v.progress = BitOps.uint16Wrap( t - spd );
+			//int t = v.progress;
+			//v.progress = t + spd; // TODO XXX [dz] changed to + - WHY?
 
 			return (t < v.progress);
 	}

@@ -93,7 +93,7 @@ public class BinaryString
 			return;
 		
 		int ext = Math.max(size - (mem.length-pos), ALLOC_STEP );
-		
+		mem = Arrays.copyOf(mem, ext + mem.length);
 	}
 	
 	
