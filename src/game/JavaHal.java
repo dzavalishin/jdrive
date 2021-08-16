@@ -19,6 +19,8 @@ class JavaHal extends Hal
 	{
 		JFrame frame = new JFrame("JTTD")
 		{
+
+			private static final long serialVersionUID = -2190948795509588568L;
 			/*
             @Override
             public void paint(Graphics g) {
@@ -163,8 +165,8 @@ class JavaHal extends Hal
 			}*/
 
 			_cursor.delta.x = _cursor.delta.y = 0;
-			Window._left_button_clicked = false;
-			Window._right_button_clicked = false;
+			//Window._left_button_clicked = false;
+			//Window._right_button_clicked = false;
 
 			// TODO return me 
 			if (Global._force_full_redraw)					

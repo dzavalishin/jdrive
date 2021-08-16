@@ -16,6 +16,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
+import java.util.Arrays;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -26,6 +27,8 @@ import javax.swing.Timer;
 public class MainWindow extends JPanel implements ActionListener
 {
 
+	private static final long serialVersionUID = 7030596255463826051L;
+	
 	public static final int TICK_TIME = 20;
 	public static final int TICKS_PER_SECOND = 1000 / TICK_TIME;
 
@@ -86,15 +89,21 @@ public class MainWindow extends JPanel implements ActionListener
 			@Override
 			public void mousePressed(MouseEvent e) {
 				if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_down = true;
-				if( e.getButton() == MouseEvent.BUTTON2 ) Window._right_button_down = true;								
+				
+				if( e.getButton() == MouseEvent.BUTTON2 )
+				{
+					Window._right_button_down = true;
+					Window._right_button_clicked = true; // yes, it is different - why?
+				}
 				e.consume();
 			}
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_clicked = true;
-				if( e.getButton() == MouseEvent.BUTTON2 ) Window._right_button_clicked = true;
+				//if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_clicked = true;
+				//if( e.getButton() == MouseEvent.BUTTON2 ) Window._right_button_clicked = true;
 				e.consume();
+				//System.out.printf("click %s", Window._left_button_clicked );
 			}
 
 			@Override
@@ -328,8 +337,6 @@ public class MainWindow extends JPanel implements ActionListener
 		//ColorModel cm = image.getColorModel();
 		//IndexColorModel icm = (IndexColorModel) cm;
 
-
-
 		image.setData(Raster.createRaster(image.getSampleModel(), new DataBufferByte(screen, screen.length), new java.awt.Point(0,0) ) );
 
 		g.drawImage(image, 0, 0, getBackground(), null);
@@ -348,7 +355,7 @@ public class MainWindow extends JPanel implements ActionListener
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-		flush(); // TODO kill me
+		//flush(); // TODO kill me
 		//repaint();
 		//frame.repaint();
 

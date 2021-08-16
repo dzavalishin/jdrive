@@ -201,7 +201,7 @@ public class Window extends WindowConstants
 	highscore_d as_highscore_d() { 
 		if(custom==null) custom = new highscore_d(); 
 		return (highscore_d) custom; 
-		}
+	}
 
 	menu_d as_menu_d() { 
 		if(custom==null) custom = new menu_d(); 
@@ -276,7 +276,7 @@ public class Window extends WindowConstants
 	void_d as_void_d() { 
 		if(custom==null) custom = new void_d(); 
 		return (void_d) custom; 
-		}
+	}
 
 	vp2_d as_vp_d() 
 	{ 
@@ -823,7 +823,7 @@ public class Window extends WindowConstants
 	 * windows intact (Main window, Toolbar, Statusbar, News Window, Chatbar)
 	 * @see FindDeletableWindow()
 	 * @return w Pointer to the window that is being deleted
-	 */
+	 * /
 	static private Window ForceFindDeletableWindow()
 	{
 		//Window w;
@@ -835,7 +835,7 @@ public class Window extends WindowConstants
 		}
 		assert false;
 		return null;
-	}
+	} */
 
 	static boolean IsWindowOfPrototype(final Window  w, final Widget[] widget)
 	{
@@ -2095,12 +2095,25 @@ public class Window extends WindowConstants
 		// Mouse event?
 		click = 0;
 		if (_left_button_down && !_left_button_clicked) {
+			//if (_left_button_clicked) {
 			_left_button_clicked = true;
+			//_left_button_clicked = false;
 			click = 1;
-		} else if (_right_button_clicked) {
-			_right_button_clicked = false;
+		} else {
+			if (_right_button_clicked) {
+				_right_button_clicked = false;
+				click = 2;
+			} 
+			/*if (_right_button_down && !_right_button_clicked) {
+			_right_button_clicked = true;
 			click = 2;
+		}*/
 		}
+
+
+
+		if( !_left_button_down ) _left_button_clicked = false;
+		if( !_right_button_down ) _right_button_clicked = false;
 
 		mousewheel = 0;
 		if (0 != Hal._cursor.wheel) {
@@ -2829,7 +2842,7 @@ public class Window extends WindowConstants
 			{
 				// [dz] added for captions were not cleared
 				Gfx.GfxFillRect(r.left+2, r.top+2, r.right-2, r.bottom-2, Global._color_list[pc].window_color_1b);
-				
+
 			}*/
 
 			Gfx.DrawStringCentered( (r.left+r.right+1)>>1, r.top+2, new StringID( wi.unkA ), 0x84);
@@ -2981,6 +2994,8 @@ public class Window extends WindowConstants
 				w2.InvalidateWidget(w.as_dropdown_d().parent_button);
 			}
 		} break;
+		default:
+			break;
 		}
 	}
 
