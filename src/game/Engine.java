@@ -836,7 +836,7 @@ public class Engine extends EngineTables {
 
 	static String[] _engine_custom_names = new String[Global.TOTAL_NUM_ENGINES];
 
-	void SetCustomEngineName(EngineID engine, String name)
+	static void SetCustomEngineName(EngineID engine, String name)
 	{
 		_engine_custom_names[engine.id] = name;
 	}
