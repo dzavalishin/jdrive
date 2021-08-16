@@ -820,7 +820,7 @@ public class Npf {
 		int type = aystar.user_data[NPF_TYPE];
 		/* Initialize to 0, so we can jump out (return) somewhere an have no neighbours */
 		aystar.num_neighbours = 0;
-		Global.DEBUG_npf( 4, "Expanding: (%d, %d, %d) [%d]", src_tile.TileX(), src_tile.TileY(), src_trackdir, src_tile);
+		Global.DEBUG_npf( 4, "Expanding: (%d, %d, %d) [%d]", src_tile.TileX(), src_tile.TileY(), src_trackdir, src_tile.getTile());
 
 		aystar.EndNodeCheck.apply(aystar,current);
 
@@ -942,6 +942,7 @@ public class Npf {
 			}
 			{
 				/* We've found ourselves a neighbour :-) */
+				aystar.neighbours[i] = new AyStarNode(); 
 				AyStarNode  neighbour = aystar.neighbours[i];
 				neighbour.tile = dst_tile;
 				neighbour.direction = dst_trackdir;

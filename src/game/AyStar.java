@@ -328,9 +328,8 @@ public class AyStar
 	 *  This function should be called when you are using the same instance again.
 	 */
 	static void AyStarMain_Clear(AyStar aystar) {
-		// Clean the Queue, but not the elements within. That will be done by
-		// the hash.
-		aystar.OpenListQueue.clear(false);
+		// Clean the Queue
+		aystar.OpenListQueue.clear();
 		// Clean the hashes
 		aystar.OpenListHash.clear_Hash(true);
 		aystar.ClosedListHash.clear_Hash(true);
