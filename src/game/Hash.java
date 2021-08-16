@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class Hash {
 	//private HashMap<HashKey,PathNode> map;
-	private HashMap<HashKey,Object> map;
+	private HashMap<HashKey,Object> map = new HashMap<HashKey, Object>();
 
 	public void Hash_Set(TileIndex tile, int direction, Object content) {
 		HashKey key = new HashKey( tile, direction);

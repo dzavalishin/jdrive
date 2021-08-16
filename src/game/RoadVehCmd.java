@@ -192,7 +192,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		v.road.slot = null;
 		v.road.slot_age = 0;
 		if (rs != null) {
-			Global.DEBUG_ms( 3, "Multistop: Clearing slot %d at 0x%x", v.road.slotindex, rs.xy);
+			Global.DEBUG_ms( 3, "Multistop: Clearing slot %d at %s", v.road.slotindex, rs.xy.toString());
 			// check that the slot is indeed assigned to the same vehicle
 			assert(rs.slot[v.road.slotindex] == v.index);
 			rs.slot[v.road.slotindex] = Station.INVALID_SLOT;
@@ -1615,7 +1615,7 @@ class RoadDriveEntry {
 				int mindist = 12, dist; // 12 is threshold distance.
 
 				//first we need to find out how far our stations are away.
-				Global.DEBUG_ms( 2, "Multistop: Attempting to obtain a slot for vehicle %d at station %d (0x%x)", v.unitnumber, st.index, st.getXy());
+				Global.DEBUG_ms( 2, "Multistop: Attempting to obtain a slot for vehicle %d at station %d (%d.%d)", v.unitnumber.id, st.index, st.getXy().getX(), st.getXy().getY() );
 				//for(; rs != null; rs = rs.next)
 				for( RoadStop rs : rsl )
 				{
@@ -1653,7 +1653,7 @@ class RoadDriveEntry {
 						mindist = dist;
 						best_stop = rs;
 					}
-					Global.DEBUG_ms( 3, "Multistop: Distance to stop at 0x%x is %d", rs.xy, dist);
+					Global.DEBUG_ms( 3, "Multistop: Distance to stop at %d.%d is %d", rs.xy.getX(), rs.xy.getY(), dist);
 				}
 
 				// best_stop now contains the best stop we found.
@@ -1667,11 +1667,11 @@ class RoadDriveEntry {
 					v.dest_tile = best_stop.xy;
 					v.road.slot_age = -5;
 					v.road.slotindex = slot;
-					Global.DEBUG_ms( 1, "Multistop: Slot %d at 0x%x assigned to vehicle %d (0x%x)", slot, best_stop.xy, v.unitnumber, v.tile);
+					Global.DEBUG_ms( 1, "Multistop: Slot %d at %s assigned to vehicle %d (%s)", slot, best_stop.xy.toString(), v.unitnumber.id, v.tile.toString());
 				} else if (first_stop!=null) {
 					//now we couldn't assign a slot for one reason or another.
 					//so we just go towards the first station
-					Global.DEBUG_ms( 1, "Multistop: No free slot found for vehicle %d, going to default station", v.unitnumber);
+					Global.DEBUG_ms( 1, "Multistop: No free slot found for vehicle %d, going to default station", v.unitnumber.id);
 					v.dest_tile = first_stop.xy;
 				}
 			}

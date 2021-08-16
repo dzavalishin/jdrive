@@ -84,12 +84,12 @@ public class AyStar
 	/* These will contain the open and closed lists */
 
 	/* The actual closed list */
-	Hash ClosedListHash;
+	Hash ClosedListHash = new Hash();
 	/* The open queue */
 	TTDQueue<OpenListNode> OpenListQueue = new TTDQueueImpl<OpenListNode>();
 	/* An extra hash to speed up the process of looking up an element in
 	 * the open list */
-	Hash OpenListHash;
+	Hash OpenListHash = new Hash();
 
 
 

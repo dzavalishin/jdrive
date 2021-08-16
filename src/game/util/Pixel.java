@@ -97,7 +97,8 @@ public class Pixel
 		assert( mem == from.mem );
 		assert( mem == to.mem );		
 		
-		return displ >= from.displ && displ <= to.displ;
+		//return displ >= from.displ && displ <= to.displ;
+		return displ >= from.displ && displ < to.displ;
 	}
 	
 	public void memset(byte color, int right) {

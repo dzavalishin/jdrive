@@ -66,7 +66,8 @@ public class SmallMapGui extends SmallMapGuiTables
 
 		do {
 			// check if the tile (xc,yc) is within the map range
-			if (xc < Global.MapMaxX() && yc < Global.MapMaxY()) {
+			if ( xc > 0 && yc > 0 && xc < Global.MapMaxX() && yc < Global.MapMaxY()) 
+			{
 				// check if the dst pointer points to a pixel inside the screen buffer
 				//if (dst > Hal._screen.dst_ptr && dst < dst_ptr_end)
 				if (dst.inside( Hal._screen.dst_ptr, dst_ptr_end) )
@@ -274,7 +275,7 @@ public class SmallMapGui extends SmallMapGuiTables
 	 * The passes are:
 	 * <ol><li>The colors of tiles in the different modes.</li>
 	 * <li>Town names (optional)</li>
-	 *
+	 *</ol>
 	 * @param dpi pointer to pixel to write onto
 	 * @param w pointer to Window struct
 	 * @param type type of map requested (vegetation, owners, routes, etc)
@@ -642,6 +643,11 @@ public class SmallMapGui extends SmallMapGuiTables
 
 			x =  (((vp.virtual_width - (220*32)) / 2) + vp.virtual_left) / 4;
 			y = ((((vp.virtual_height- (120*32)) / 2) + vp.virtual_top ) / 2) - 32;
+			
+			// TODO XXX [dz] hack, small map crashes on negatives -- fixed!
+			//x = Math.max(x, 0);
+			//y = Math.max(y, 0);
+			
 			w.as_smallmap_d().scroll_x = (y-x) & ~0xF;
 			w.as_smallmap_d().scroll_y = (x+y) & ~0xF;
 			w.as_smallmap_d().subscroll = 0;

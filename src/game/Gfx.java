@@ -801,7 +801,7 @@ public class Gfx extends PaletteTabs
 		//int src_shift = 0;
 
 		int num, skip;
-		byte done;
+		int done;
 		///* Pixel */ byte  *dst;
 		///* Pixel */ byte []  dst_data;
 		//int dst_shift = 0;
@@ -815,9 +815,9 @@ public class Gfx extends PaletteTabs
 
 			do {
 				do {
-					done = src_o.read(0); // src_o_data[src_o_shift];
+					done = 0xFF & src_o.read(0); // src_o_data[src_o_shift];
 					num = done & 0x7F;
-					skip = src_o.read(1); // src_o_data[src_o_shift+1];
+					skip = 0xFF & src_o.read(1); // src_o_data[src_o_shift+1];
 					//src = src_o + 2;
 					//src_data = src_o_data;
 					//src_shift = src_o_shift + 2;
@@ -894,12 +894,12 @@ public class Gfx extends PaletteTabs
 			do {
 				do {
 					//done = src_o_data[0+src_o_shift];
-					done = src_o.r(0);
+					done = 0xFF & src_o.r(0);
 					num = done & 0x7F;
 					//skip = src_o_data[1+src_o_shift];
-					skip = src_o.r(1);
+					skip = 0xFF & src_o.r(1);
 					//src_o_shift += num + 2;
-					src_o.madd(2);
+					src_o.madd(num + 2);
 
 					//dst_data = bp.dst_mem;
 					Pixel dst = new Pixel( bp.dst );

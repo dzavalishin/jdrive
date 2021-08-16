@@ -25,7 +25,7 @@ public class TileIndex implements Comparable<TileIndex>
 	public TileIndex(int x, int y)
 	{
 		tile = (y * Global.MapSizeX()) + x;
-		assert( tile >= 0 ); // TODO XXX can be out of map?
+		//assert( tile >= 0 ); // TODO XXX can be out of map? [dz] smallmap uses us out of map :(
 		// TODO assert < max
 	}
 

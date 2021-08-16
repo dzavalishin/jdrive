@@ -4,5 +4,5 @@ import game.PathNode;
 
 public class OpenListNode {
 	public int g;
-	public PathNode path;
+	public PathNode path = new PathNode();
 }
