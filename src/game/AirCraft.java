@@ -25,18 +25,6 @@ public class AirCraft extends AirCraftTables {
 	static public final int STATUS_BAR = Vehicle.STATUS_BAR;
 	
 
-	/*
-	static boolean AirportMove(Vehicle v, final AirportFTAClass Airport);
-	static boolean AirportSetBlocks(Vehicle v, AirportFTA *current_pos, final AirportFTAClass Airport);
-	static boolean AirportHasBlock(Vehicle v, AirportFTA *current_pos, final AirportFTAClass Airport);
-	static boolean AirportFindFreeTerminal(Vehicle v, final AirportFTAClass Airport);
-	static boolean AirportFindFreeHelipad(Vehicle v, final AirportFTAClass Airport);
-	static void AirportGoToNextPosition(Vehicle v, final AirportFTAClass Airport);
-	static void CrashAirplane(Vehicle v);
-
-	static void AircraftNextAirportPos_and_Order(Vehicle v);
-	static int GetAircraftFlyingAltitude(Vehicle v);
-	 */
 
 	static final /*SpriteID*/ int _aircraft_sprite[] = {
 			0x0EB5, 0x0EBD, 0x0EC5, 0x0ECD,
@@ -782,7 +770,7 @@ public class AirCraft extends AirCraftTables {
 		}
 
 		//spd = v.cur_speed + v.acceleration;
-		v.subspeed =  ((t=v.subspeed) + (int)spd);
+		v.subspeed = 0xFF & ((t=v.subspeed) + (int)spd);
 		spd = Math.min( v.cur_speed + (spd >> 8) + ((v.subspeed < t) ? 1 : 0), new_speed);
 
 		// adjust speed for broken vehicles
@@ -1080,7 +1068,7 @@ public class AirCraft extends AirCraftTables {
 
 		// If vehicle is in the air, use tile coordinate 0.
 		if(0 != (amd.flag & (AirportMovingData.AMED_TAKEOFF | AirportMovingData.AMED_SLOWTURN | AirportMovingData.AMED_LAND))) 
-			v.tile = null;
+			v.tile = TileIndex.get(0); //null; // [dz] comment above said '0', not invalid
 
 		// Adjust Z for land or takeoff?
 		z = v.z_pos;

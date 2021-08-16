@@ -1046,7 +1046,7 @@ public class Gfx extends PaletteTabs
 					for (i = 0; i != width; i++)
 					{
 						//if (src_data[i+src_shift] != 0) dst_data[i+dst_shift] = ctab[dst_data[i+dst_shift]];
-						if (src.r(i) != 0) dst.w(i, ctab[dst.r(i)]);
+						if (src.r(i) != 0) dst.w(i, ctab[0xFF & dst.r(i)]);
 					}
 					//src_shift += bp.width_org;
 					//dst_shift += bp.pitch;

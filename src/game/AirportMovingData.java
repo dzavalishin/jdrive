@@ -15,11 +15,11 @@ public class AirportMovingData {
 
 	// flags
 	public static final int AMED_NOSPDCLAMP	= 1<<0;
-	public static final int AMED_TAKEOFF		= 1<<1;
-	public static final int AMED_SLOWTURN		= 1<<2;
-	public static final int AMED_LAND				= 1<<3;
-	public static final int AMED_EXACTPOS		= 1<<4;
-	public static final int AMED_BRAKE			= 1<<5;
+	public static final int AMED_TAKEOFF	= 1<<1;
+	public static final int AMED_SLOWTURN	= 1<<2;
+	public static final int AMED_LAND		= 1<<3;
+	public static final int AMED_EXACTPOS	= 1<<4;
+	public static final int AMED_BRAKE		= 1<<5;
 	public static final int AMED_HELI_RAISE	= 1<<6;
 	public static final int AMED_HELI_LOWER	= 1<<7;
 
@@ -31,28 +31,28 @@ public class AirportMovingData {
 	/////*********Movement Positions on Airports********************///////
 	//Country Airfield (small) 4x3
 	public static final AirportMovingData _airport_moving_data_country[] = {
-			new AirportMovingData(  53, 3,AMED_EXACTPOS,3),											// 00 In Hangar
-			new AirportMovingData(  53, 27,0,0),																// 01 Taxi to right outside depot
-			new AirportMovingData(  32, 23,AMED_EXACTPOS,7),										// 02 Terminal 1
-			new AirportMovingData(  10, 23,AMED_EXACTPOS,7),										// 03 Terminal 2
-			new AirportMovingData(  43, 37,0,0),																// 04 Going towards terminal 2
-			new AirportMovingData(  24, 37,0,0),																// 05 Going towards terminal 2
-			new AirportMovingData(  53, 37,0,0),																// 06 Going for takeoff
-			new AirportMovingData(  61, 40,AMED_EXACTPOS,1),										// 07 Taxi to start of runway (takeoff)
-			new AirportMovingData(   3, 40,AMED_NOSPDCLAMP,0),									// 08 Accelerate to end of runway
-			new AirportMovingData( -79, 40,AMED_NOSPDCLAMP | AMED_TAKEOFF,0),		// 09 Take off
+			new AirportMovingData(  53, 3,AMED_EXACTPOS,3),						// 00 In Hangar
+			new AirportMovingData(  53, 27,0,0),								// 01 Taxi to right outside depot
+			new AirportMovingData(  32, 23,AMED_EXACTPOS,7),					// 02 Terminal 1
+			new AirportMovingData(  10, 23,AMED_EXACTPOS,7),					// 03 Terminal 2
+			new AirportMovingData(  43, 37,0,0),								// 04 Going towards terminal 2
+			new AirportMovingData(  24, 37,0,0),								// 05 Going towards terminal 2
+			new AirportMovingData(  53, 37,0,0),								// 06 Going for takeoff
+			new AirportMovingData(  61, 40,AMED_EXACTPOS,1),					// 07 Taxi to start of runway (takeoff)
+			new AirportMovingData(   3, 40,AMED_NOSPDCLAMP,0),					// 08 Accelerate to end of runway
+			new AirportMovingData( -79, 40,AMED_NOSPDCLAMP | AMED_TAKEOFF,0),	// 09 Take off
 			new AirportMovingData( 177, 40,AMED_NOSPDCLAMP | AMED_SLOWTURN,0),	// 10 Fly to landing position in air
-			new AirportMovingData(  56, 40,AMED_NOSPDCLAMP | AMED_LAND,0),			// 11 Going down for land
-			new AirportMovingData(   3, 40,AMED_NOSPDCLAMP | AMED_BRAKE,0),			// 12 Just landed, brake until end of runway
-			new AirportMovingData(   7, 40,0,0),																// 13 Just landed, turn around and taxi 1 square
-			new AirportMovingData(  53, 40,0,0),																// 14 Taxi from runway to crossing
+			new AirportMovingData(  56, 40,AMED_NOSPDCLAMP | AMED_LAND,0),		// 11 Going down for land
+			new AirportMovingData(   3, 40,AMED_NOSPDCLAMP | AMED_BRAKE,0),		// 12 Just landed, brake until end of runway
+			new AirportMovingData(   7, 40,0,0),								// 13 Just landed, turn around and taxi 1 square
+			new AirportMovingData(  53, 40,0,0),								// 14 Taxi from runway to crossing
 			new AirportMovingData( 145,-58,AMED_NOSPDCLAMP | AMED_SLOWTURN,0),	// 15 Fly around waiting for a landing spot (north-east)
 			new AirportMovingData( 260,-58,AMED_NOSPDCLAMP | AMED_SLOWTURN,0),	// 16 Fly around waiting for a landing spot (north-west)
 			new AirportMovingData( 291, 17,AMED_NOSPDCLAMP | AMED_SLOWTURN,0),	// 17 Fly around waiting for a landing spot (south-west)
 			new AirportMovingData( 177, 40,AMED_NOSPDCLAMP | AMED_SLOWTURN,0),	// 18 Fly around waiting for a landing spot (south)
-			new AirportMovingData(  44, 37,AMED_HELI_RAISE,0),									// 19 Helicopter takeoff
+			new AirportMovingData(  44, 37,AMED_HELI_RAISE,0),					// 19 Helicopter takeoff
 			new AirportMovingData(  44, 40,AMED_NOSPDCLAMP | AMED_SLOWTURN,0),	// 20 In position above landing spot helicopter
-			new AirportMovingData(  44, 40,AMED_HELI_LOWER,0)										// 21 Helicopter landing
+			new AirportMovingData(  44, 40,AMED_HELI_LOWER,0)					// 21 Helicopter landing
 	};
 
 	//City Airport (large) 6x6
