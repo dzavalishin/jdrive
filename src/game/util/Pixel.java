@@ -114,6 +114,30 @@ public class Pixel
 		System.arraycopy(src.mem, src.displ, mem, displ, num);		
 	}
 	
+	/** 
+	 * Read and increment pointer
+	 * @return <b>signed</b> byte
+	 */
+	public byte rpp() {
+		byte v = r(0);
+		shift(1);
+		return v;
+	}
+
+	public int hasBytesLeft() {
+		return mem.length-displ;
+	}
+	
+	/** 
+	 * Read and increment pointer
+	 * @return unsigned byte
+	 */
+	public int urpp() {
+		int v = 0xFF & r(0);
+		shift(1);
+		return v;
+	}
+	
 	
 	
 }
