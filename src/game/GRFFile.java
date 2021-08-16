@@ -1575,11 +1575,11 @@ public class GRFFile
 			// return; // XXX: we can't because of MB's newstats.grf --pasky
 		}
 
-		check_length(bufend - buf, 5, "NewSpriteGroup");
+		bufp.check_length(5, "NewSpriteGroup");
 		buf += 5;
-		check_length(bufend - buf, 2 * numloaded, "NewSpriteGroup");
-		loaded_ptr = buf;
-		loading_ptr = buf + 2 * numloaded;
+		bufp.check_length(2 * numloaded, "NewSpriteGroup");
+		DataLoader loaded_ptr = new DataLoader( bufp );
+		DataLoader loading_ptr = new DataLoader( bufp, 2 * numloaded );
 
 		if (_cur_grffile.first_spriteset == 0)
 			_cur_grffile.first_spriteset = _cur_grffile.spriteset_start;
@@ -1607,8 +1607,8 @@ public class GRFFile
 				_cur_grffile.spriteset_start + (_cur_grffile.spriteset_numents * (numloaded + numloading)) - _cur_grffile.sprite_offset);
 
 		for (i = 0; i < numloaded; i++) {
-			int spriteset_id = grf_load_word(&loaded_ptr);
-			if (HASBIT(spriteset_id, 15)) {
+			int spriteset_id = loaded_ptr.grf_load_word();
+			if (BitOps.HASBIT(spriteset_id, 15)) {
 				rg.loaded[i] = NewCallBackResultSpriteGroup(spriteset_id);
 			} else {
 				rg.loaded[i] = NewResultSpriteGroup(_cur_grffile.spriteset_start + spriteset_id * _cur_grffile.spriteset_numents, rg.sprites_per_set);
@@ -1618,8 +1618,8 @@ public class GRFFile
 		}
 
 		for (i = 0; i < numloading; i++) {
-			int spriteset_id = grf_load_word(&loading_ptr);
-			if (HASBIT(spriteset_id, 15)) {
+			int spriteset_id = loading_ptr.grf_load_word();
+			if (BitOps.HASBIT(spriteset_id, 15)) {
 				rg.loading[i] = NewCallBackResultSpriteGroup(spriteset_id);
 			} else {
 				rg.loading[i] = NewResultSpriteGroup(_cur_grffile.spriteset_start + spriteset_id * _cur_grffile.spriteset_numents, rg.sprites_per_set);
@@ -1628,8 +1628,10 @@ public class GRFFile
 			Global.DEBUG_grf( 8, "NewSpriteGroup: + rg.loading[%i] = %u (subset %u)", i, rg.loading[i].g.result.result, spriteset_id);
 		}
 
+		/*
 		if (_cur_grffile.spritegroups[setid] != null)
 			UnloadSpriteGroup(&_cur_grffile.spritegroups[setid]);
+		*/
 		_cur_grffile.spritegroups[setid] = group;
 		group.ref_count++;
 	}
@@ -1688,11 +1690,11 @@ public class GRFFile
 			{
 				byte stid = buf[3 + i];
 				StationSpec stat = _cur_grffile.stations[stid];
-				byte *bp = &buf[4 + idcount];
+				DataLoader bp = new DataLoader( bufp, 4 + idcount );
 
 				for (c = 0; c < cidcount; c++) {
-					byte ctype = grf_load_byte(&bp);
-					int groupid = grf_load_word(&bp);
+					byte ctype = bp.grf_load_byte();
+					int groupid = bp.grf_load_word();
 
 					if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
 						grfmsg(severity.GMS_WARN, "VehicleMapSpriteGroup: Spriteset %x out of range %x or empty, skipping.",
@@ -1856,11 +1858,13 @@ public class GRFFile
 		final String  name;
 
 		bufp.check_length( 6, "VehicleNewName");
-		buf++;
+		
+		bufp.grf_load_byte(); // buf++;
+		
 		feature  = bufp.grf_load_byte();
 		lang     = bufp.grf_load_byte();
 		num      = bufp.grf_load_byte();
-		id       = (lang & 0x80) ? bufp.grf_load_word() : bufp.grf_load_byte();
+		id       = (lang & 0x80) != 0 ? bufp.grf_load_word() : bufp.grf_load_byte();
 
 		if (feature > 3) {
 			Global.DEBUG_grf( 7, "VehicleNewName: Unsupported feature %d, skipping", feature);
@@ -1873,27 +1877,27 @@ public class GRFFile
 		Global.DEBUG_grf( 6, "VehicleNewName: About to rename engines %d..%d (feature %d) in language 0x%x.",
 				id, endid, feature, lang);
 
-		if (lang & 0x80) {
+		if( (lang & 0x80) != 0 ) {
 			grfmsg(severity.GMS_WARN, "VehicleNewName: No support for changing in-game texts. Skipping.");
 			return;
 		}
 
-		if (!(lang & 3)) {
+		if (0==(lang & 3)) {
 			/* XXX: If non-English name, silently skip it. */
 			Global.DEBUG_grf( 7, "VehicleNewName: Skipping non-English name.");
 			return;
 		}
 
 		//name = (final String )buf;
-		len -= (lang & 0x80) ? 6 : 5;
+		len -= (lang & 0x80) != 0 ? 6 : 5;
 		for (; id < endid && len > 0; id++) 
 		{
-			String name = bufp.grf_load_string();
-			size_t ofs = name.length() + 1;
+			String vname = bufp.grf_load_string();
+			int ofs = vname.length() + 1;
 
 			if (ofs < 128) {
-				Global.DEBUG_grf( 8, "VehicleNewName: %d <- %s", id, name);
-				SetCustomEngineName(id, name);
+				Global.DEBUG_grf( 8, "VehicleNewName: %d <- %s", id, vname);
+				Engine.SetCustomEngineName(EngineID.get(id), vname);
 			} else {
 				Global.DEBUG_grf( 7, "VehicleNewName: Too long a name (%d)", ofs);
 			}
