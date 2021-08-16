@@ -35,7 +35,8 @@ public class MainWindow extends JPanel implements ActionListener
 	public static final int TICKS_PER_SECOND = 1000 / TICK_TIME;
 
 	public static final int WIDTH = 1280;
-	public static final int HEIGHT = 1024;
+	//public static final int HEIGHT = 1024;
+	public static final int HEIGHT = 960;
 
 
 	private Timer timer = new Timer(TICK_TIME, this);	
@@ -329,21 +330,21 @@ public class MainWindow extends JPanel implements ActionListener
 		BufferedImage image = new BufferedImage(cm, wr, false, null);
 
 		 */
-		/*
-		for(int i = 0; i < 100; i++)
-			screen[5000+i+startX] = (byte) 0xFF;
-		startX++;
-		 */
 		BufferedImage image;
 
 		if(Gfx._pal_last_dirty != -1)
 			makePalette();
 
+		//int height = Hal._screen.height; // HEIGHT
+		//int width  = Hal._screen.width; // WIDTH
+		int height = HEIGHT;
+		int width  = WIDTH;
+		
 		//BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
 		if(icm!=null)
-			image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_BYTE_INDEXED, icm);
+			image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED, icm);
 		else
-			image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_BYTE_INDEXED);
+			image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED);
 
 		//ColorModel cm = image.getColorModel();
 		//IndexColorModel icm = (IndexColorModel) cm;

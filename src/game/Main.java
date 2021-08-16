@@ -395,8 +395,8 @@ public class Main {
 		 */
 		
 		// [dz] hacked in
-		Hal._screen.width = 1024;
-		Hal._screen.height = 768;
+		//Hal._screen.width = 1024;
+		//Hal._screen.height = 768;
 		
 		Global.hal.main_loop();
 
