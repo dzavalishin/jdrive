@@ -11,6 +11,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBufferByte;
@@ -28,7 +30,7 @@ public class MainWindow extends JPanel implements ActionListener
 {
 
 	private static final long serialVersionUID = 7030596255463826051L;
-	
+
 	public static final int TICK_TIME = 20;
 	public static final int TICKS_PER_SECOND = 1000 / TICK_TIME;
 
@@ -89,7 +91,7 @@ public class MainWindow extends JPanel implements ActionListener
 			@Override
 			public void mousePressed(MouseEvent e) {
 				if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_down = true;
-				
+
 				if( e.getButton() == MouseEvent.BUTTON2 )
 				{
 					Window._right_button_down = true;
@@ -117,8 +119,8 @@ public class MainWindow extends JPanel implements ActionListener
 				});
 
 		frame.addMouseMotionListener( new MouseMotionListener() 
-				//this.addMouseMotionListener( new MouseMotionListener() 
-				{
+		//this.addMouseMotionListener( new MouseMotionListener() 
+		{
 
 			@Override
 			public void mouseMoved(MouseEvent e) 
@@ -139,8 +141,17 @@ public class MainWindow extends JPanel implements ActionListener
 				e.consume();				
 				processMouse(x, y);
 			}
-				});
+		});
 
+		frame.addMouseWheelListener( new MouseWheelListener() 
+		{			
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				Hal._cursor.wheel = e.getWheelRotation();
+				e.consume();
+			}
+		});
+		
 		timer.start();
 	}
 
@@ -204,8 +215,8 @@ public class MainWindow extends JPanel implements ActionListener
 			case KeyEvent.VK_RIGHT:     fKey = Window.WKC_RIGHT;	break;
 			case KeyEvent.VK_UP:        fKey = Window.WKC_UP;	break;
 			case KeyEvent.VK_DOWN:      fKey = Window.WKC_DOWN;	break;
-			
-			
+
+
 			case KeyEvent.VK_F1:	fKey = Window.WKC_F1;	break;
 			case KeyEvent.VK_F2:	fKey = Window.WKC_F2;	break;
 			case KeyEvent.VK_F3:	fKey = Window.WKC_F3;	break;
