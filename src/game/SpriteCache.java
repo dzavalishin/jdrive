@@ -140,8 +140,8 @@ public class SpriteCache {
 		}
 	}
 
-	public static boolean LoadNextSprite(int load_index, byte file_index) {
-		int file_pos = (int) (FileIO.FioGetPos() | (file_index << 24));
+	public static boolean LoadNextSprite(int load_index, int file_index) {
+		int file_pos = (int) (FileIO.FioGetPos() | ( (file_index & 0xFF) << 24));
 
 		if (!ReadSpriteHeaderSkipData())
 			return false;

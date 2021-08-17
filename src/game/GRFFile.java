@@ -957,7 +957,7 @@ public class GRFFile
 				while (bufp.has(len)) {
 					byte length = bufp.grf_load_byte();
 					byte number = bufp.grf_load_byte();
-					StationLayout layout;
+					StationLayout [] layout;
 					int l, p;
 
 					if (length == 0 || number == 0) break;
@@ -968,8 +968,8 @@ public class GRFFile
 						memset(stat.platforms + stat.lengths, 0, length - stat.lengths);
 
 						stat.layouts = realloc(stat.layouts, length * sizeof(*stat.layouts));
-						memset(stat.layouts + stat.lengths, 0,
-								(length - stat.lengths) * sizeof(*stat.layouts));
+						//memset(stat.layouts + stat.lengths, 0,								(length - stat.lengths) * sizeof(*stat.layouts));
+						Arrays.fill(stat.layouts, stat.lengths, length - stat.lengths, null );
 
 						stat.lengths = length;
 					}
@@ -977,8 +977,8 @@ public class GRFFile
 
 					//debug("p %d > %d ?", number, stat.platforms[l]);
 					if (number > stat.platforms[l]) {
-						stat.layouts[l] = realloc(stat.layouts[l],
-								number * sizeof(**stat.layouts));
+						stat.layouts[l] = realloc(stat.layouts[l],								number * sizeof(**stat.layouts));
+						
 						// We expect null being 0 here, but C99 guarantees that.
 						memset(stat.layouts[l] + stat.platforms[l], 0,
 								(number - stat.platforms[l]) * sizeof(**stat.layouts));
@@ -987,7 +987,7 @@ public class GRFFile
 					}
 
 					p = 0;
-					layout = malloc(length * number);
+					layout = new StationLayout[length * number]; // malloc(length * number);
 					for (l = 0; l < length; l++)
 						for (p = 0; p < number; p++)
 							layout[l * number + p] = bufp.grf_load_byte();
@@ -1387,7 +1387,7 @@ public class GRFFile
 				);
 
 		for (i = 0; i < num_sets * num_ents; i++) {
-			LoadNextSprite(_cur_spriteid++, _file_index);
+			SpriteCache.LoadNextSprite(_cur_spriteid++, _file_index);
 		}
 	}
 
@@ -1416,20 +1416,21 @@ public class GRFFile
 		byte numloaded;
 		byte numloading;
 		SpriteGroup group;
-		RealSpriteGroup rg;
-		byte *loaded_ptr;
-		byte *loading_ptr;
-		int i;
+		//RealSpriteGroup rg;
+		//byte *loaded_ptr;
+		//byte *loading_ptr;
+		//int i;
 
 		bufp.check_length( 5, "NewSpriteGroup");
-		feature = buf[1];
-		setid = buf[2];
-		numloaded = buf[3];
-		numloading = buf[4];
+		feature = bufp.r(1);
+		setid = bufp.r(2);
+		numloaded = bufp.r(3);
+		numloading = bufp.r(4);
 
 		if (setid >= _cur_grffile.spritegroups_count) {
 			// Allocate memory for new sprite group references.
-			_cur_grffile.spritegroups = realloc(_cur_grffile.spritegroups, (setid + 1) * sizeof(*_cur_grffile.spritegroups));
+			//_cur_grffile.spritegroups = realloc(_cur_grffile.spritegroups, (setid + 1) * sizeof(*_cur_grffile.spritegroups));
+			_cur_grffile.spritegroups = Arrays.copyOf(_cur_grffile.spritegroups, setid + 1);
 			// Initialise new space to null
 			for (; _cur_grffile.spritegroups_count < (setid + 1); _cur_grffile.spritegroups_count++)
 				_cur_grffile.spritegroups[_cur_grffile.spritegroups_count] = null;
@@ -1445,7 +1446,7 @@ public class GRFFile
 			/* This stuff is getting actually evaluated in
 			 * EvalDeterministicSpriteGroup(). */
 
-			buf += 4; len -= 4;
+			bufp.shift( 4 ); len -= 4;
 			bufp.check_length( 6, "NewSpriteGroup 0x81/0x82");
 
 			group = new SpriteGroup();
@@ -1464,7 +1465,7 @@ public class GRFFile
 
 			dg.shift_num = bufp.grf_load_byte();
 			dg.and_mask = bufp.grf_load_byte();
-			dg.operation = dg.shift_num >> 6; /* w00t */
+			dg.operation = DeterministicSpriteGroupOperation.values[ dg.shift_num >> 6 ]; /* w00t */
 			dg.shift_num &= 0x3F;
 			if (dg.operation != DeterministicSpriteGroupOperation.DSG_OP_NONE) {
 				dg.add_val = bufp.grf_load_byte();
@@ -1474,7 +1475,7 @@ public class GRFFile
 			/* (groupid & 0x8000) means this is callback result. */
 
 			dg.num_ranges = bufp.grf_load_byte();
-			dg.ranges = calloc(dg.num_ranges, sizeof(*dg.ranges));
+			dg.ranges = new DeterministicSpriteGroupRange[dg.num_ranges]; //calloc(dg.num_ranges, sizeof(*dg.ranges));
 			for (i = 0; i < dg.num_ranges; i++) {
 				groupid = bufp.grf_load_word();
 				if (BitOps.HASBIT(groupid, 15)) {
@@ -1519,7 +1520,7 @@ public class GRFFile
 			/* This stuff is getting actually evaluated in
 			 * EvalRandomizedSpriteGroup(). */
 
-			buf += 4;
+			bufp.shift( 4 );
 			len -= 4;
 			bufp.check_length( 6, "NewSpriteGroup 0x80/0x83");
 
@@ -1576,7 +1577,7 @@ public class GRFFile
 		}
 
 		bufp.check_length(5, "NewSpriteGroup");
-		buf += 5;
+		bufp.shift( 5 );
 		bufp.check_length(2 * numloaded, "NewSpriteGroup");
 		DataLoader loaded_ptr = new DataLoader( bufp );
 		DataLoader loading_ptr = new DataLoader( bufp, 2 * numloaded );
@@ -1595,18 +1596,18 @@ public class GRFFile
 
 		group = new SpriteGroup();
 		group.type = SpriteGroupType.SGT_REAL;
-		rg = group.g.real;
+		RealSpriteGroup rg = (RealSpriteGroup) group;
 
 		rg.sprites_per_set = _cur_grffile.spriteset_numents;
-		rg.loaded_count  = numloaded;
-		rg.loading_count = numloading;
+		//rg.loaded_count  = numloaded;
+		//rg.loading_count = numloading;
 
 		Global.DEBUG_grf( 6, "NewSpriteGroup: New SpriteGroup 0x%02hhx, %u views, %u loaded, %u loading, sprites %u - %u",
-				setid, rg.sprites_per_set, rg.loaded_count, rg.loading_count,
+				setid, rg.sprites_per_set, rg.loaded_count(), rg.loading_count(),
 				_cur_grffile.spriteset_start - _cur_grffile.sprite_offset,
 				_cur_grffile.spriteset_start + (_cur_grffile.spriteset_numents * (numloaded + numloading)) - _cur_grffile.sprite_offset);
 
-		for (i = 0; i < numloaded; i++) {
+		for (int i = 0; i < numloaded; i++) {
 			int spriteset_id = loaded_ptr.grf_load_word();
 			if (BitOps.HASBIT(spriteset_id, 15)) {
 				rg.loaded[i] = NewCallBackResultSpriteGroup(spriteset_id);
@@ -1617,7 +1618,7 @@ public class GRFFile
 			Global.DEBUG_grf( 8, "NewSpriteGroup: + rg.loaded[%i]  = %u (subset %u)", i, rg.loaded[i].g.result.result, spriteset_id);
 		}
 
-		for (i = 0; i < numloading; i++) {
+		for (int i = 0; i < numloading; i++) {
 			int spriteset_id = loading_ptr.grf_load_word();
 			if (BitOps.HASBIT(spriteset_id, 15)) {
 				rg.loading[i] = NewCallBackResultSpriteGroup(spriteset_id);
@@ -2775,31 +2776,38 @@ public class GRFFile
 
 
 
-class DataLoader
+class DataLoader extends Pixel
 {
-	Pixel ptr; // TODO Pixel is a misleading name. It is a byte[] pointer
+	//Pixel ptr; // TODO Pixel is a misleading name. It is a byte[] pointer
+
+	public DataLoader(byte[] start) {
+		super(start);
+	}
+
+	
 
 	byte grf_load_byte()
 	{
-		return ptr.rpp();//*(*buf)++;
+		return rpp();//*(*buf)++;
 	}
+
 
 	int grf_load_ubyte()
 	{
-		return ptr.urpp();//*(*buf)++;
+		return urpp();//*(*buf)++;
 	}
 
 	public boolean has(int len) {
-		return ptr.hasBytesLeft() > len;
+		return hasBytesLeft() > len;
 	}
 
 	public int grf_load_dword_le() 
 	{
 		int v;
-		v =  ptr.urpp() << 24; //*(buf++) << 24;
-		v |= ptr.urpp() << 16; //*(buf++) << 16;
-		v |= ptr.urpp() << 8; //*(buf++) << 8;
-		v |= ptr.urpp() << 0; //*(buf++);
+		v =  urpp() << 24; //*(buf++) << 24;
+		v |= urpp() << 16; //*(buf++) << 16;
+		v |= urpp() << 8; //*(buf++) << 8;
+		v |= urpp() << 0; //*(buf++);
 		return v;
 	}
 
@@ -2807,8 +2815,8 @@ class DataLoader
 	{
 		int val;
 
-		val  = ptr.urpp();
-		val |= ptr.urpp() << 8;
+		val  = urpp();
+		val |= urpp() << 8;
 
 		return val;
 	}
@@ -2825,10 +2833,10 @@ class DataLoader
 	{
 		int val;
 
-		val  = ptr.urpp();
-		val |= ptr.urpp() << 8;
-		val |= ptr.urpp() << 16;
-		val |= ptr.urpp() << 24;
+		val  = urpp();
+		val |= urpp() << 8;
+		val |= urpp() << 16;
+		val |= urpp() << 24;
 
 		return val;
 	}
@@ -2849,8 +2857,8 @@ class DataLoader
 	public void check_length( int wanted, String where ) 
 	{
 
-		if (real < wanted) { 
-			grfmsg(severity.GMS_ERROR, "%s/%d: Invalid special sprite length %d (expected %d)!", 
+		if (hasBytesLeft() < wanted) { 
+			grfmsg(GRFFile.severity.GMS_ERROR, "%s/%d: Invalid special sprite length %d (expected %d)!", 
 					where, _cur_spriteid - _cur_grffile.sprite_offset, real, wanted); 
 			throw new GrfLoadException();
 		} 

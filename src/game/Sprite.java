@@ -293,6 +293,9 @@ class RealSpriteGroup extends SpriteGroup {
 	SpriteGroup [] loaded = new SpriteGroup[16]; // sprite ids
 	//byte loading_count;
 	SpriteGroup [] loading = new SpriteGroup[16]; // sprite ids
+	
+	public int loaded_count() { return loaded.length; }
+	public int loading_count() { return loading.length; }
 }
 
 /* Shared by deterministic and random groups. */
@@ -307,7 +310,9 @@ enum VarSpriteGroupScope {
 enum DeterministicSpriteGroupOperation {
 	DSG_OP_NONE,
 	DSG_OP_DIV,
-	DSG_OP_MOD,
+	DSG_OP_MOD;
+	
+	static DeterministicSpriteGroupOperation[] values = values();
 } 
 
 //class DeterministicSpriteGroupRange DeterministicSpriteGroupRange;
