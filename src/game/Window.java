@@ -2186,7 +2186,7 @@ public class Window extends WindowConstants
 		return -1;
 	}
 
-	static void InvalidateWindow(int cls, int number)
+	public static void InvalidateWindow(int cls, int number)
 	{
 		//final Window  w;
 
@@ -2232,7 +2232,7 @@ public class Window extends WindowConstants
 		}
 	}*/
 
-	static void InvalidateWindowWidget(int cls, int number, int widget_index)
+	public static void InvalidateWindowWidget(int cls, int number, int widget_index)
 	{
 		for (Window w : _windows) {
 			if (w.window_class == cls && w.window_number == number) {

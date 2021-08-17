@@ -3254,6 +3254,17 @@ public class Vehicle implements IPoolItem
 
 	}
 
+	public int getType() { return type; }
+
+	// TODO check against CmdStartStopTrain, replace code there with us
+	public void stop() {
+		if (type == Vehicle.VEH_Train)
+			rail.days_since_order_progr = 0;
+		vehstatus |= Vehicle.VS_STOPPED;		
+	}
+
+	public TileIndex getTile() { return tile; }
+
 	/*
 	// Save and load of vehicles
 	final SaveLoad _common_veh_desc[] = {

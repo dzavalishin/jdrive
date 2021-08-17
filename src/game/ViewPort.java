@@ -2089,7 +2089,7 @@ public class ViewPort
 	}
 
 
-	static boolean ScrollMainWindowToTile(TileIndex tile)
+	public static boolean ScrollMainWindowToTile(TileIndex tile)
 	{
 		if(tile == null)
 		{

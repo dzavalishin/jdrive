@@ -657,7 +657,8 @@ public class Console //extends ConsoleCmds
 	 * @param help the help string shown for the variable
 	 * @param type the type of the variable (simple atomic) so we know which values it can get
 	 */
-	static void IConsoleVarRegister(final String name, Object addr, IConsoleVarTypes type, final String help)
+	//static void IConsoleVarRegister(final String name, Object addr, IConsoleVarTypes type, final String help)
+	static void IConsoleVarRegister(final String name, IConsoleVarTypes type, final String help)
 	{
 		String new_cmd = name;
 		IConsoleVar item_new = new IConsoleVar(); //malloc(sizeof(IConsoleVar));

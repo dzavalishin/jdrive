@@ -12,7 +12,8 @@ package game.console;
  * <li> '++' to increase value by one
  * <li> '--' to decrease value by one
  */
-public class IConsoleVar {
+public class IConsoleVar 
+{
 	String 				name;               // name of the variable
 	//IConsoleVar 		next; // next variable in list
 

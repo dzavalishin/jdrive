@@ -191,7 +191,7 @@ public class Engine extends EngineTables {
 		}
 	}
 
-	static void StartupEngines()
+	public static void StartupEngines()
 	{
 		SetupEngineNames();
 

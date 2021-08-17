@@ -15,7 +15,7 @@ public class ConsoleCmds
 	static boolean _script_running;
 
 	// ** console command / variable defines ** //
-	//#define DEF_CONSOLE_CMD(function) static boolean function(byte argc, String argv[])
+	//#define DEF_CONSOLE_CMD(function) static boolean function(int argc, String ... argv)
 	//#define DEF_CONSOLE_HOOK(function) static boolean function(void)
 
 
@@ -80,10 +80,10 @@ public class ConsoleCmds
 
 	static void IConsoleHelp(String str)
 	{
-		IConsolePrintF(_icolour_warn, "- %s", str);
+		Console.IConsolePrintF(Console._icolour_warn, "- %s", str);
 	}
 
-	static boolean ConStopAllVehicles(byte argc, String argv[])
+	static boolean ConStopAllVehicles(int argc, String ... argv)
 	{
 		//Vehicle v;
 		if (argc == 0) {
@@ -97,18 +97,16 @@ public class ConsoleCmds
 			if (v.IsValidVehicle()) {
 				/* Code ripped from CmdStartStopTrain. Can't call it, because of
 				 * ownership problems, so we'll duplicate some code, for now */
-				if (v.type == Vehicle.VEH_Train)
-					v.rail.days_since_order_progr = 0;
-				v.vehstatus |= Vehicle.VS_STOPPED;
+				v.stop();
 				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
-				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
+				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.getTile().getTile());
 			}
 		});
 		return true;
 	}
 
 	
-	static boolean ConResetEngines(byte argc, String argv[])
+	static boolean ConResetEngines(byte argc, String ... argv)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Reset status data of all engines. This might solve some issues with 'lost' engines. Usage: 'resetengines'");
@@ -120,7 +118,7 @@ public class ConsoleCmds
 	}
 
 	//#ifdef _DEBUG
-	static boolean ConResetTile(byte argc, String argv[])
+	static boolean ConResetTile(int argc, String ... argv)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Reset a tile to bare land. Usage: 'resettile <tile>'");
@@ -130,7 +128,7 @@ public class ConsoleCmds
 
 		if (argc == 2) {
 			int [] result = {0};
-			if (GetArgumentInteger(result, argv[1])) {
+			if (Console.GetArgumentInteger(result, argv[1])) {
 				Landscape.DoClearSquare(TileIndex.get(result[0]));
 				return true;
 			}
@@ -140,7 +138,7 @@ public class ConsoleCmds
 	}
 	//#endif /* _DEBUG */
 
-	static boolean ConScrollToTile(byte argc, String argv[])
+	static boolean ConScrollToTile(int argc, String ... argv)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Center the screen on a given tile. Usage: 'scrollto <tile>'");
@@ -150,7 +148,7 @@ public class ConsoleCmds
 
 		if (argc == 2) {
 			int [] result = {0};
-			if (GetArgumentInteger(result, argv[1])) {
+			if (Console.GetArgumentInteger(result, argv[1])) {
 				ViewPort.ScrollMainWindowToTile(TileIndex.get(result[0]));
 				return true;
 			}
@@ -165,7 +163,7 @@ public class ConsoleCmds
 	//extern void SetFiosType(const byte fiostype);
 
 	// Save the map to a file 
-	static boolean function(byte argc, String argv[])(ConSave)
+	static boolean function(int argc, String ... argv)(ConSave)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Save the current game. Usage: 'save <filename>'");
@@ -211,7 +209,7 @@ public class ConsoleCmds
 	}
 
 
-	static boolean function(byte argc, String argv[])(ConLoad)
+	static boolean function(int argc, String ... argv)(ConLoad)
 	{
 		const FiosItem *item;
 		String file;
@@ -244,7 +242,7 @@ public class ConsoleCmds
 	}
 
 
-	static boolean function(byte argc, String argv[])(ConRemove)
+	static boolean function(int argc, String ... argv)(ConRemove)
 	{
 		const FiosItem* item;
 		const char* file;
@@ -270,7 +268,7 @@ public class ConsoleCmds
 
 
 	// List all the files in the current dir via console 
-	static boolean function(byte argc, String argv[])(ConListFiles)
+	static boolean function(int argc, String ... argv)(ConListFiles)
 	{
 		int i;
 
@@ -291,7 +289,7 @@ public class ConsoleCmds
 	}
 
 	// Change the dir via console 
-	static boolean function(byte argc, String argv[])(ConChangeDirectory)
+	static boolean function(int argc, String ... argv)(ConChangeDirectory)
 	{
 		const FiosItem *item;
 		String file;
@@ -319,7 +317,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConPrintWorkingDirectory)
+	static boolean function(int argc, String ... argv)(ConPrintWorkingDirectory)
 	{
 		String path;
 
@@ -337,7 +335,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConClearBuffer)
+	static boolean function(int argc, String ... argv)(ConClearBuffer)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Clear the console buffer. Usage: 'clear'");
@@ -355,7 +353,7 @@ public class ConsoleCmds
 	// ********************************* //
 	#ifdef ENABLE_NETWORK
 
-	static boolean function(byte argc, String argv[])(ConBan)
+	static boolean function(int argc, String ... argv)(ConBan)
 	{
 		NetworkClientInfo *ci;
 		uint32 index;
@@ -398,7 +396,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConUnBan)
+	static boolean function(int argc, String ... argv)(ConUnBan)
 	{
 		uint i, index;
 
@@ -428,7 +426,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConBanList)
+	static boolean function(int argc, String ... argv)(ConBanList)
 	{
 		uint i;
 
@@ -449,7 +447,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConPauseGame)
+	static boolean function(int argc, String ... argv)(ConPauseGame)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Pause a network game. Usage: 'pause'");
@@ -465,7 +463,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConUnPauseGame)
+	static boolean function(int argc, String ... argv)(ConUnPauseGame)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Unpause a network game. Usage: 'unpause'");
@@ -481,7 +479,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConRcon)
+	static boolean function(int argc, String ... argv)(ConRcon)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Remote control the server from another client. Usage: 'rcon <password> <command>'");
@@ -495,7 +493,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConStatus)
+	static boolean function(int argc, String ... argv)(ConStatus)
 	{
 		static String stat_str[] = {"inactive", "authorized", "waiting", "loading map", "map done", "ready", "active"};
 		String status;
@@ -518,7 +516,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConKick)
+	static boolean function(int argc, String ... argv)(ConKick)
 	{
 		NetworkClientInfo *ci;
 		uint32 index;
@@ -551,7 +549,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConResetCompany)
+	static boolean function(int argc, String ... argv)(ConResetCompany)
 	{
 		Player *p;
 		NetworkClientState *cs;
@@ -608,7 +606,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConNetworkClients)
+	static boolean function(int argc, String ... argv)(ConNetworkClients)
 	{
 		NetworkClientInfo *ci;
 
@@ -627,7 +625,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConNetworkConnect)
+	static boolean function(int argc, String ... argv)(ConNetworkConnect)
 	{
 		char *ip;
 		String port = null;
@@ -671,7 +669,7 @@ public class ConsoleCmds
 	/*   script file console commands   */
 	/* ******************************** */
 	/*
-	static boolean function(byte argc, String argv[])(ConExec)
+	static boolean function(int argc, String ... argv)(ConExec)
 	{
 		char cmdline[ICON_CMDLN_SIZE];
 		char *cmdptr;
@@ -711,7 +709,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConReturn)
+	static boolean function(int argc, String ... argv)(ConReturn)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Stop executing a running script. Usage: 'return'");
@@ -727,7 +725,7 @@ public class ConsoleCmds
 	/* **************************** */
 	//extern boolean CloseConsoleLogIfActive(void);
 	/*
-	static boolean function(byte argc, String argv[])(ConScript)
+	static boolean function(int argc, String ... argv)(ConScript)
 	{
 		extern FILE* _iconsole_output_file;
 
@@ -749,7 +747,7 @@ public class ConsoleCmds
 	}
 
 
-	static boolean function(byte argc, String argv[])(ConEcho)
+	static boolean function(int argc, String ... argv)(ConEcho)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Print back the first argument to the console. Usage: 'echo <arg>'");
@@ -761,7 +759,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConEchoC)
+	static boolean function(int argc, String ... argv)(ConEchoC)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Print back the first argument to the console in a given colour. Usage: 'echoc <colour> <arg2>'");
@@ -775,7 +773,7 @@ public class ConsoleCmds
 
 	extern void SwitchMode(int new_mode);
 
-	static boolean function(byte argc, String argv[])(ConNewGame)
+	static boolean function(int argc, String ... argv)(ConNewGame)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Start a new game. Usage: 'newgame'");
@@ -787,7 +785,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConAlias)
+	static boolean function(int argc, String ... argv)(ConAlias)
 	{
 		IConsoleAlias *alias;
 
@@ -808,7 +806,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConScreenShot)
+	static boolean function(int argc, String ... argv)(ConScreenShot)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Create a screenshot of the game. Usage: 'screenshot [big | no_con]'");
@@ -830,7 +828,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConInfoVar)
+	static boolean function(int argc, String ... argv)(ConInfoVar)
 	{
 		static String _icon_vartypes[] = {"boolean", "byte", "uint16", "uint32", "int16", "int32", "string"};
 		const IConsoleVar *var;
@@ -859,7 +857,7 @@ public class ConsoleCmds
 	}
 
 
-	static boolean function(byte argc, String argv[])(ConInfoCmd)
+	static boolean function(int argc, String ... argv)(ConInfoCmd)
 	{
 		const IConsoleCmd *cmd;
 
@@ -886,7 +884,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConDebugLevel)
+	static boolean function(int argc, String ... argv)(ConDebugLevel)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Get/set the default debugging level for the game. Usage: 'debug_level [<level>]'");
@@ -903,7 +901,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConExit)
+	static boolean function(int argc, String ... argv)(ConExit)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Exit the game. Usage: 'exit'");
@@ -914,7 +912,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConPart)
+	static boolean function(int argc, String ... argv)(ConPart)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Leave the currently joined/running game (only ingame). Usage: 'part'");
@@ -927,7 +925,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConHelp)
+	static boolean function(int argc, String ... argv)(ConHelp)
 	{
 		if (argc == 2) {
 			const IConsoleCmd *cmd;
@@ -976,7 +974,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConListCommands)
+	static boolean function(int argc, String ... argv)(ConListCommands)
 	{
 		const IConsoleCmd *cmd;
 		size_t l = 0;
@@ -997,7 +995,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConListVariables)
+	static boolean function(int argc, String ... argv)(ConListVariables)
 	{
 		const IConsoleVar *var;
 		size_t l = 0;
@@ -1017,7 +1015,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConListAliases)
+	static boolean function(int argc, String ... argv)(ConListAliases)
 	{
 		const IConsoleAlias *alias;
 		size_t l = 0;
@@ -1039,7 +1037,7 @@ public class ConsoleCmds
 
 	#ifdef ENABLE_NETWORK
 
-	static boolean function(byte argc, String argv[])(ConSay)
+	static boolean function(int argc, String ... argv)(ConSay)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Chat to your fellow players in a multiplayer game. Usage: 'say \"<msg>\"'");
@@ -1056,7 +1054,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConSayPlayer)
+	static boolean function(int argc, String ... argv)(ConSayPlayer)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Chat to a certain player in a multiplayer game. Usage: 'say_player <player-no> \"<msg>\"'");
@@ -1079,7 +1077,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConSayClient)
+	static boolean function(int argc, String ... argv)(ConSayClient)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Chat to a certain player in a multiplayer game. Usage: 'say_client <client-no> \"<msg>\"'");
@@ -1119,7 +1117,7 @@ public class ConsoleCmds
 	}
 
 	// Also use from within player_gui to change the password graphically 
-	boolean NetworkChangeCompanyPassword(byte argc, String argv[])
+	boolean NetworkChangeCompanyPassword(int argc, String ... argv)
 	{
 		if (argc == 0) {
 			if (_local_player >= MAX_PLAYERS) return true; // dedicated server
@@ -1183,7 +1181,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConProcServerIP)
+	static boolean function(int argc, String ... argv)(ConProcServerIP)
 	{
 		if (argc == 0) {
 			IConsolePrintF(_icolour_warn, "Current value for 'server_ip': %s", inet_ntoa(*(struct in_addr *)&_network_server_bind_ip));
@@ -1198,7 +1196,7 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(byte argc, String argv[])(ConPatch)
+	static boolean function(int argc, String ... argv)(ConPatch)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Change patch variables for all players. Usage: 'patch <name> [<value>]'");
@@ -1217,9 +1215,8 @@ public class ConsoleCmds
 	}
 	#endif /* ENABLE_NETWORK */
 
-	static boolean ConListDumpVariables(byte argc, String argv[])
+	static boolean ConListDumpVariables(int argc, String ... argv)
 	{
-		IConsoleVar var;
 
 		if (argc == 0) {
 			IConsoleHelp("List all variables with their value. Usage: 'dump_vars [<pre-filter>]'");
@@ -1227,7 +1224,7 @@ public class ConsoleCmds
 		}
 
 
-		for (var = Console._iconsole_vars; var != null; var = var.next) {
+		for (IConsoleVar var : Console._iconsole_vars.values()) {
 			if (argv[1] == null || var.name.equals(argv[1]))
 				var.IConsoleVarPrintGetValue();
 		}
@@ -1247,7 +1244,7 @@ public class ConsoleCmds
 		//extern boolean _stdlib_con_developer; /* XXX extern in .c */
 
 		//IConsoleVarRegister("con_developer",    &_stdlib_con_developer, ICONSOLE_VAR_BOOLEAN, "Enable/disable console debugging information (internal)");
-		IConsoleCmdRegister("resettile",        ConsoleCmds::ConResetTile);
+		Console.IConsoleCmdRegister("resettile",        ConsoleCmds::ConResetTile);
 		//IConsoleAliasRegister("dbg_echo",       "echo %A; echo %B");
 		//IConsoleAliasRegister("dbg_echo2",      "echo %!");
 	}
@@ -1293,7 +1290,7 @@ public class ConsoleCmds
 		IConsoleCmdRegister("pwd",          ConPrintWorkingDirectory);
 		IConsoleCmdRegister("clear",        ConClearBuffer);
 		*/
-		IConsoleCmdRegister("stopall",      ConsoleCmds::ConStopAllVehicles);
+		Console.IConsoleCmdRegister("stopall",      ConsoleCmds::ConStopAllVehicles);
 
 		/*
 		IConsoleAliasRegister("dir",      "ls");
@@ -1303,7 +1300,7 @@ public class ConsoleCmds
 		IConsoleAliasRegister("new_game", "newgame");
 		*/
 
-		IConsoleVarRegister("developer", _stdlib_developer, ICONSOLE_VAR_BYTE, "Redirect debugging output from the console/command line to the ingame console (value 2). Default value: 1");
+		Console.IConsoleVarRegister("developer", /*_stdlib_developer,*/ IConsoleVarTypes.ICONSOLE_VAR_BYTE, "Redirect debugging output from the console/command line to the ingame console (value 2). Default value: 1");
 
 		/* networking variables and functions */
 		/*#ifdef ENABLE_NETWORK

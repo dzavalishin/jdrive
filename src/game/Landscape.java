@@ -238,7 +238,7 @@ public class Landscape extends GenLandTable
 		}
 	}
 
-	static void DoClearSquare(TileIndex tile)
+	public static void DoClearSquare(TileIndex tile)
 	{
 		Landscape.ModifyTile(tile, TileTypes.MP_CLEAR,
 				//TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) |
