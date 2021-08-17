@@ -718,7 +718,7 @@ public class Npf {
 		/* If GetNeighbours said we could get here, we assume the station type
 		 * is correct */
 		if (
-				(fstd.station_index == -1 && tile == fstd.dest_coords) || /* We've found the tile, or */
+				( fstd.station_index == -1 && tile.equals(fstd.dest_coords) ) || /* We've found the tile, or */
 				(tile.IsTileType( TileTypes.MP_STATION) && tile.getMap().m2 == fstd.station_index) || /* the station */
 				(NPFGetFlag(node, NPF_FLAG_PBS_TARGET_SEEN)) /* or, we've passed it already (for pbs) */
 				) {
@@ -1025,10 +1025,10 @@ public class Npf {
 
 		if (result.best_bird_dist != 0) {
 			if (target!=null) {
-				Global.DEBUG_misc( 1, "NPF: Could not find route to 0x%x from 0x%x.", target.dest_coords, start1.tile);
+				Global.DEBUG_misc( 1, "NPF: Could not find route to %s from %s.", target.dest_coords.toString(), start1.tile.toString());
 			} else {
 				/* Assumption: target == null, so we are looking for a depot */
-				Global.DEBUG_misc( 1, "NPF: Could not find route to a depot from 0x%x.", start1.tile);
+				Global.DEBUG_misc( 1, "NPF: Could not find route to a depot from %s.", start1.tile.toString());
 			}
 
 		}

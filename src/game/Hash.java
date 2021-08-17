@@ -29,10 +29,11 @@ public class Hash {
 		return map.size();
 	}
 
+	
 }
 
 
-class HashKey
+class HashKey implements Comparable<HashKey>
 {
 	TileIndex tile;
 	int direction;
@@ -41,4 +42,32 @@ class HashKey
 		this.tile = tile;
 		this.direction = direction;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof HashKey) {
+			HashKey k = (HashKey) obj;
+			
+			return tile.equals(k.tile) && direction == k.direction; 
+					
+		}
+		return super.equals(obj);
+	}
+
+	@Override
+	public int compareTo(HashKey k) {
+		int i = tile.getTile() - k.tile.getTile();
+		if( i == 0 )
+			i = direction - k.direction;
+		
+		return i;
+	}
+	
+
+	@Override
+	public int hashCode() {		
+		return tile.getTile() << 2 + direction;
+	}
+	
+	
 }
