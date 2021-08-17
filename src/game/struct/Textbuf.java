@@ -192,8 +192,9 @@ public class Textbuf
 	}
 
 
-	public String getString() {
-		return new String(buf);
-	}
+	public String getString() { return new String(buf); }
+	public boolean isCaret() { return caret; }
+	public int getCaretXOffs() { return caretxoffs; }
+	public int getWidth() { return width; }
 	
 }

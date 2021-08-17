@@ -1,4 +1,11 @@
-package game;
+package game.console;
+
+import game.Engine;
+import game.Landscape;
+import game.TileIndex;
+import game.Vehicle;
+import game.ViewPort;
+import game.Window;
 
 public class ConsoleCmds 
 {
@@ -90,7 +97,7 @@ public class ConsoleCmds
 			if (v.IsValidVehicle()) {
 				/* Code ripped from CmdStartStopTrain. Can't call it, because of
 				 * ownership problems, so we'll duplicate some code, for now */
-				if (v.type == VEH_Train)
+				if (v.type == Vehicle.VEH_Train)
 					v.rail.days_since_order_progr = 0;
 				v.vehstatus |= Vehicle.VS_STOPPED;
 				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
@@ -1220,9 +1227,9 @@ public class ConsoleCmds
 		}
 
 
-		for (var = _iconsole_vars; var != null; var = var.next) {
+		for (var = Console._iconsole_vars; var != null; var = var.next) {
 			if (argv[1] == null || var.name.equals(argv[1]))
-				IConsoleVarPrintGetValue(var);
+				var.IConsoleVarPrintGetValue();
 		}
 
 		return true;

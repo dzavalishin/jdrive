@@ -10,37 +10,37 @@ import game.struct.Point;
 public class WindowEvent {
 
 	//int 
-	WindowEvents event;
-	Point pt = new Point(0, 0);
+	public WindowEvents event;
+	public Point pt = new Point(0, 0);
 
 	// click, dragdrop, mouseover
-	int widget;
+	public int widget;
 
 	// place
-	TileIndex tile;
-	TileIndex starttile;
-	int userdata;
+	public TileIndex tile;
+	public TileIndex starttile;
+	public int userdata;
 
 	// sizing
-	Point size;
-	Point diff;
+	public Point size;
+	public Point diff;
 
 	// edittext
-	String str;
+	public String str;
 
 	// popupmenu;
 
 	// dropdown
-	int button;
-	int index;
+	public int button;
+	public int index;
 
 	// keypress
-	boolean cont;   // continue the search? (default true)
-	int ascii;  // 8-bit ASCII-value of the key
-	int keycode;// untranslated key (including shift-state)
+	public boolean cont;   // continue the search? (default true)
+	public int ascii;  // 8-bit ASCII-value of the key
+	public int keycode;// untranslated key (including shift-state)
 
 	// message
-	int msg;    // message to be sent
-	int wparam; // additional message-specific information
-	int lparam; // additional message-specific information
+	public int msg;    // message to be sent
+	public int wparam; // additional message-specific information
+	public int lparam; // additional message-specific information
 }

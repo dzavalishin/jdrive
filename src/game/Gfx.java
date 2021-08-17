@@ -199,7 +199,7 @@ public class Gfx extends PaletteTabs
 			mem[dst++] = color;
 	}
 
-	static void GfxFillRect(int left, int top, int right, int bottom, int color)
+	public static void GfxFillRect(int left, int top, int right, int bottom, int color)
 	{
 		final DrawPixelInfo  dpi = Hal._cur_dpi;
 		Pixel dst;

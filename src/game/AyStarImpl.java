@@ -40,9 +40,9 @@ public abstract class AyStarImpl extends AyStar {
 		// TODO Auto-generated method stub
 
 	}
-*/
-	
-	@Override
+	 
+
+	//@Override
 	void addstart(AyStarNode start_node, int g) {
 		if( Global.AYSTAR_DEBUG )
 			Global.printf( String.format("[AyStar] Starting A* Algorithm from node (%d, %d, %d)\n", start_node.tile.TileX(), start_node.tile.TileY(), start_node.direction) );
@@ -61,8 +61,8 @@ public abstract class AyStarImpl extends AyStar {
 	 * When the algorithm is done (when the return value is not AYSTAR_STILL_BUSY)
 	 * aystar->clear() is called. Note that when you stop the algorithm halfway,
 	 * you should still call clear() yourself!
-	 */
-	@Override
+	 * /
+	//@Override
 	int main() {
 		int r, i = 0;
 		// Loop through the OpenList
@@ -104,22 +104,22 @@ public abstract class AyStarImpl extends AyStar {
 	 *	reached.
 	 *	AYSTAR_FOUND_END_NODE : indicates we found the end. Path_found now is true, and in path is the path found.
 	 *	AYSTAR_STILL_BUSY : indicates we have done this tile, did not found the path yet, and have items left to try.
-	 */
+	 * /
 
-	@Override
+	//@Override
 	int loop() {
 		int i, r;
 
 		// Get the best node from OpenList
 		OpenListNode current = OpenList_Pop();
-		
+
 		// If empty, drop an error
 		if (current == null) return AYSTAR_EMPTY_OPENLIST;
 
 		// Check for end node and if found, return that code
 		if (EndNodeCheck(current) == AYSTAR_FOUND_END_NODE) {
 			//if (aystar->FoundEndNode != null)
-				FoundEndNode(current);
+			FoundEndNode(current);
 			//free(current);
 			return AYSTAR_FOUND_END_NODE;
 		}
@@ -140,21 +140,21 @@ public abstract class AyStarImpl extends AyStar {
 		//current.free();
 
 		if (max_search_nodes != 0 && ClosedListHash.Hash_Size() >= max_search_nodes)
-			/* We've expanded enough nodes */
+			// We've expanded enough nodes 
 			return AYSTAR_LIMIT_REACHED;
 		else
 			// Return that we are still busy
 			return AYSTAR_STILL_BUSY;
 	}
 
-	
+
 	/**
 	 * Checks one tile and calculate his f-value
 	 *  return values:
 	 *	AYSTAR_DONE : indicates we are done
-	 */
+	 * /
 
-	@Override
+	//@Override
 	int checktile(AyStarNode current, OpenListNode parent) 
 	{
 		int new_f, new_g, new_h;
@@ -195,7 +195,7 @@ public abstract class AyStarImpl extends AyStar {
 			// It is lower, so change it to this item
 			check.g = new_g;
 			check.path.parent = closedlist_parent;
-			/* Copy user data, will probably have changed */
+			// Copy user data, will probably have changed 
 			for( i=0; i < current.user_data.length; i++ )
 				check.path.node.user_data[i] = current.user_data[i];
 			// Readd him in the OpenListQueue
@@ -208,11 +208,11 @@ public abstract class AyStarImpl extends AyStar {
 		return AYSTAR_DONE;
 	}
 
-	
-	
+
+
 	//@Override	void free() {		// Unused in java	}
 
-	@Override
+	//@Override
 	void clear() {
 		// Clean the Queue, but not the elements within. That will be done by
 		// the hash.
@@ -227,62 +227,62 @@ public abstract class AyStarImpl extends AyStar {
 
 	}
 
-	
-	
-	
-// This looks in the Hash if a node exists in ClosedList
-//  If so, it returns the PathNode, else NULL
-PathNode ClosedList_IsInList(AyStarNode node)
-{
-	return (PathNode)ClosedListHash.Hash_Get( node.tile, node.direction);
-}
 
-// This adds a node to the ClosedList
-//  It makes a copy of the data
-void ClosedList_Add(PathNode node)
-{
-	// Add a node to the ClosedList
-	PathNode new_node = new PathNode(node);
-	
-	ClosedListHash.Hash_Set( node.node.tile, node.node.direction, new_node);
-}
 
-// Checks if a node is in the OpenList
-//   If so, it returns the OpenListNode, else NULL
-OpenListNode OpenList_IsInList(AyStarNode node)
-{
-	return (OpenListNode)OpenListHash.Hash_Get( node.tile, node.direction );
-}
 
-// Gets the best node from OpenList
-//  returns the best node, or NULL of none is found
-// Also it deletes the node from the OpenList
-OpenListNode OpenList_Pop()
-{
-	// Return the item the Queue returns.. the best next OpenList item.
-	OpenListNode res = (OpenListNode)OpenListQueue.pop();
-	if (res != null)
-		OpenListHash.Hash_Delete(res.path.node.tile, res.path.node.direction);
+	// This looks in the Hash if a node exists in ClosedList
+	//  If so, it returns the PathNode, else NULL
+	PathNode ClosedList_IsInList(AyStarNode node)
+	{
+		return (PathNode)ClosedListHash.Hash_Get( node.tile, node.direction);
+	}
 
-	return res;
-}
+	// This adds a node to the ClosedList
+	//  It makes a copy of the data
+	void ClosedList_Add(PathNode node)
+	{
+		// Add a node to the ClosedList
+		PathNode new_node = new PathNode(node);
 
-// Adds a node to the OpenList
-//  It makes a copy of node, and puts the pointer of parent in the struct
-void OpenList_Add(PathNode parent, AyStarNode node, int f, int g)
-{
-	// Add a new Node to the OpenList
-	OpenListNode new_node = new OpenListNode();
-	new_node.g = g;
-	new_node.path.parent = parent;
-	
-	//new_node.path.node = *node; 
-	new_node.path.node = node; // TODO need a copy?
-	
-	OpenListHash.Hash_Set(node.tile, node.direction, new_node);
+		ClosedListHash.Hash_Set( node.node.tile, node.node.direction, new_node);
+	}
 
-	// Add it to the queue
-	OpenListQueue.push( new_node, f);
-}
-	
+	// Checks if a node is in the OpenList
+	//   If so, it returns the OpenListNode, else NULL
+	OpenListNode OpenList_IsInList(AyStarNode node)
+	{
+		return (OpenListNode)OpenListHash.Hash_Get( node.tile, node.direction );
+	}
+
+	// Gets the best node from OpenList
+	//  returns the best node, or NULL of none is found
+	// Also it deletes the node from the OpenList
+	OpenListNode OpenList_Pop()
+	{
+		// Return the item the Queue returns.. the best next OpenList item.
+		OpenListNode res = (OpenListNode)OpenListQueue.pop();
+		if (res != null)
+			OpenListHash.Hash_Delete(res.path.node.tile, res.path.node.direction);
+
+		return res;
+	}
+
+	// Adds a node to the OpenList
+	//  It makes a copy of node, and puts the pointer of parent in the struct
+	void OpenList_Add(PathNode parent, AyStarNode node, int f, int g)
+	{
+		// Add a new Node to the OpenList
+		OpenListNode new_node = new OpenListNode();
+		new_node.g = g;
+		new_node.path.parent = parent;
+
+		//new_node.path.node = *node; 
+		new_node.path.node = node; // TODO need a copy?
+
+		OpenListHash.Hash_Set(node.tile, node.direction, new_node);
+
+		// Add it to the queue
+		OpenListQueue.push( new_node, f);
+	}
+	*/
 }

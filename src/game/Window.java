@@ -493,7 +493,7 @@ public class Window extends WindowConstants
 		}
 	}
 
-	void SetWindowDirty()
+	public void SetWindowDirty()
 	{
 		Gfx.SetDirtyBlocks(left, top, left + width, top + height);
 	}
@@ -674,7 +674,7 @@ public class Window extends WindowConstants
 		return null;
 	}*/
 
-	static Window FindWindowById(int cls, int number)
+	public static Window FindWindowById(int cls, int number)
 	{
 		for (Window w : _windows) {
 			if (w.window_class == cls && w.window_number == number) 
@@ -685,7 +685,7 @@ public class Window extends WindowConstants
 	}
 
 
-	static void DeleteWindowById(int cls, int number)
+	public static void DeleteWindowById(int cls, int number)
 	{
 		Window w = FindWindowById(cls, number);
 		if( w != null )
@@ -3085,6 +3085,16 @@ public class Window extends WindowConstants
 		assert false;
 		return null;
 	}
+
+	public void setSize(int w, int h) {
+		width = w;
+		height = h;		
+	}
+
+	public int getHeight() { return height; }
+	public int getWidth() { return width; }
+	public int getLeft() { return left; }
+	public int getTop() { return top; }
 
 
 

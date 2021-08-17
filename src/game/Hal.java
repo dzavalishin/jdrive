@@ -72,7 +72,7 @@ public abstract class Hal
 	}
 	*/
 
-	static void MarkWholeScreenDirty()
+	public static void MarkWholeScreenDirty()
 	{
 		Gfx.SetDirtyBlocks(0, 0, _screen.width, _screen.height);
 	}
@@ -278,6 +278,8 @@ void SortResolutions(int count)
 		Global.error("InsertTextBufferClipboard");
 		return false;
 	}
+	public static int getScreenWidth() {		return _screen.width;	}
+	public static int getScreenHeight() { return _screen.height;	}
 
 
 }

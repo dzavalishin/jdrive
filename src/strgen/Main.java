@@ -1,4 +1,4 @@
-package game.strgen;
+package strgen;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
