@@ -31,6 +31,17 @@ public class DrawTileSeqStruct
 		this.unk = unk;
 		this.image = image;
 	}
+
+	public DrawTileSeqStruct(DrawTileSeqStruct src) 
+	{
+		this.delta_x = src.delta_x;
+		this.delta_y = src.delta_y;
+		this.delta_z = src.delta_z;
+		this.width = src.width;
+		this.height = src.height;
+		this.unk = src.unk;
+		this.image = src.image;
+	}
 }
 
 // see also DrawTileSprites

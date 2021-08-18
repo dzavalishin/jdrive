@@ -14,12 +14,12 @@ public class StationSpec
 	 * Bitmask of number of platforms available for the station.
 	 * 0..6 correpsond to 1..7, while bit 7 corresponds to >7 platforms.
 	 */
-	byte allowed_platforms;
+	int allowed_platforms;
 	/**
 	 * Bitmask of platform lengths available for the station.
 	 * 0..6 correpsond to 1..7, while bit 7 corresponds to >7 tiles long.
 	 */
-	byte allowed_lengths;
+	int allowed_lengths;
 
 	/** Number of tile layouts.
 	 * A minimum of 8 is required is required for stations.
