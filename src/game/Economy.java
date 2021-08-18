@@ -841,7 +841,7 @@ public class Economy extends EconomeTables
 	 * @param price Index of price base to change.
 	 * @param factor Amount to change by.
 	 */
-	void SetPriceBaseMultiplier(int price, byte factor)
+	static void SetPriceBaseMultiplier(int price, byte factor)
 	{
 		assert(price < Global.NUM_PRICES);
 		price_base_multiplier[price] = factor;

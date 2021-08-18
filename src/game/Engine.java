@@ -358,7 +358,7 @@ public class Engine extends EngineTables {
 	// memory. --pasky)
 	static SpriteGroup [][] engine_custom_sprites = new SpriteGroup[Global.TOTAL_NUM_ENGINES][NUM_GLOBAL_CID];
 
-	static void SetCustomEngineSprites(EngineID engine, byte cargo, SpriteGroup group)
+	static void SetCustomEngineSprites(EngineID engine, int cargo, SpriteGroup group)
 	{
 		if (engine_custom_sprites[engine.id][cargo] != null) {
 			Global.DEBUG_grf( 6,"SetCustomEngineSprites: engine `%d' cargo `%d' already has group -- removing.", engine, cargo);

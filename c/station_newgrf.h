@@ -56,7 +56,7 @@ typedef struct stationspec {
 	 */
 	SpriteGroup *spritegroup[NUM_GLOBAL_CID];
 } StationSpec;
-#endif
+
 /**
  * Struct containing information relating to station classes.
  */
@@ -66,7 +66,7 @@ typedef struct stationclass {
 	uint stations;      ///< Number of stations in this class.
 	StationSpec **spec; ///< Array of station specifications.
 } StationClass;
-
+#endif
 void ResetStationClasses(void);
 StationClassID AllocateStationClass(uint32 class);
 void SetStationClassName(StationClassID sclass, const char *name);

@@ -280,6 +280,8 @@ public class Gui
 			switch (index) {
 				//case 0: ShowSaveLoadDialog(SLD_SAVE_GAME); break;
 				//case 1: ShowSaveLoadDialog(SLD_LOAD_GAME); break;
+				case 0: SaveLoad.save(); break;
+				case 1: SaveLoad.load(); break;
 				case 2: IntroGui.AskExitToGameMenu();               break;
 				case 3: IntroGui.AskExitGame();                     break;
 			}

@@ -71,6 +71,11 @@ public class IntroGui
 			switch (e.widget) {
 			case 2: MiscGui.AskForNewGameToStart(); break;
 			// TODO case 3: ShowSaveLoadDialog(SLD_LOAD_GAME); break;
+			
+			case 3: 
+				SaveLoad.save();
+				break;
+			
 			case 4: /* TODO CreateScenario(); */ break;
 			// TODO case 5: ShowSaveLoadDialog(SLD_LOAD_SCENARIO); break;
 			case 6: case 7: case 8: case 9:

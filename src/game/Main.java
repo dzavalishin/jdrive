@@ -193,7 +193,8 @@ public class Main {
 			sprintf(filename, "%sopntitle.dat",  _path.second_data_dir);
 			if (SaveOrLoad(filename, SL_LOAD) != SL_OK)
 	#endif*/
-			GenerateWorld.doGenerateWorld(1, 256, 256); // if failed loading, make empty world.
+			//GenerateWorld.doGenerateWorld(1, 256, 256); // if failed loading, make empty world.
+			GenerateWorld.doGenerateWorld(0, 256, 256); // if failed loading, make empty world.
 		}
 
 		Global._pause = 0;
@@ -349,6 +350,9 @@ public class Main {
 		// This must be done early, since functions use the InvalidateWindow* calls
 		Window.InitWindowSystem();
 
+		//Engine.AddTypeToEngines(); // [dz] added, or StartupEngines crashes
+		//Engine.StartupEngines(); // [dz] added, or newgrf load crashes
+		
 		GfxInit.GfxLoadSprites();
 		Gfx.LoadStringWidthTable();
 
@@ -373,6 +377,9 @@ public class Main {
 		// TODO Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
 		GenerateWorld.doGenerateWorld(1, 256, 256); // Make the viewport initialization happy
+		
+		// GRFFile.CalculateRefitMasks();
+		
 		/*
 		if ((network) && (_network_available)) {
 			if (network_conn != null) {

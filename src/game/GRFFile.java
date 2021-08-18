@@ -599,7 +599,7 @@ public class GRFFile
 					// Documentation claims this is already the
 					// per-landscape cargo type id, but newships.grf
 					// assume otherwise.
-					cargo = local_cargo_id_ctype[cargo];
+					//cargo = local_cargo_id_ctype[cargo];
 				}
 				svi[e+i].cargo_type = cargo;
 			}
@@ -823,7 +823,7 @@ public class GRFFile
 				//classid |= *(buf++);
 				classid = bufp.grf_load_dword_le();
 
-				stat.sclass = AllocateStationClass(classid);
+				stat.sclass = StationClass.AllocateStationClass(classid);
 			}
 			break;
 		}
@@ -972,7 +972,8 @@ public class GRFFile
 				while (bufp.has(1)) {
 					byte length = bufp.grf_load_byte();
 					byte number = bufp.grf_load_byte();
-					StationLayout [] layout;
+					//StationLayout [] layout;
+					byte[] layout;
 					int l, p;
 
 					if (length == 0 || number == 0) break;
@@ -1009,7 +1010,8 @@ public class GRFFile
 					}
 
 					p = 0;
-					layout = new StationLayout[length * number]; // malloc(length * number);
+					//layout = new StationLayout[length * number]; // malloc(length * number);
+					layout = new byte[length * number]; // malloc(length * number);
 					for (l = 0; l < length; l++)
 						for (p = 0; p < number; p++)
 							layout[l * number + p] = bufp.grf_load_byte();
@@ -1165,7 +1167,7 @@ public class GRFFile
 				int price = gvid + i;
 
 				if (price < Global.NUM_PRICES) {
-					SetPriceBaseMultiplier(price, factor);
+					Economy.SetPriceBaseMultiplier(price, factor);
 				} else {
 					grfmsg(severity.GMS_WARN, "GlobalVarChangeInfo: Price %d out of range, ignoring.", price);
 				}
@@ -1754,7 +1756,7 @@ public class GRFFile
 					stat.spritegroup[0].ref_count++;
 					stat.grfid = _cur_grffile.grfid;
 					stat.localidx = stid;
-					SetCustomStation(stat);
+					StationClass.SetCustomStation(stat);
 				}
 			}
 			return;
@@ -1822,9 +1824,9 @@ public class GRFFile
 
 				if (wagover) {
 					// TODO: No multiple cargo types per vehicle yet. --pasky
-					SetWagonOverrideSprites(engine, _cur_grffile.spritegroups[groupid], last_engines, last_engines_count);
+					Engine.SetWagonOverrideSprites( EngineID.get(engine), _cur_grffile.spritegroups[groupid], last_engines, last_engines_count);
 				} else {
-					SetCustomEngineSprites(engine, ctype, _cur_grffile.spritegroups[groupid]);
+					Engine.SetCustomEngineSprites( EngineID.get(engine), ctype, _cur_grffile.spritegroups[groupid]);
 					last_engines[i] = (byte) engine;
 				}
 			}
@@ -1847,9 +1849,9 @@ public class GRFFile
 
 				if (wagover) {
 					// TODO: No multiple cargo types per vehicle yet. --pasky
-					SetWagonOverrideSprites(engine, _cur_grffile.spritegroups[groupid], last_engines, last_engines_count);
+					Engine.SetWagonOverrideSprites(EngineID.get(engine), _cur_grffile.spritegroups[groupid], last_engines, last_engines_count);
 				} else {
-					SetCustomEngineSprites(engine, Engine.GC_DEFAULT, _cur_grffile.spritegroups[groupid]);
+					Engine.SetCustomEngineSprites(EngineID.get(engine), Engine.GC_DEFAULT, _cur_grffile.spritegroups[groupid]);
 					last_engines[i] = (byte) engine;
 				}
 			}
@@ -2625,9 +2627,11 @@ public class GRFFile
 				}
 			} else {
 				// Don't apply default refit mask to wagons or engines with no capacity
+				Engine engineInfo = Engine.GetEngine(engine);
+				RailVehicleInfo railVehInfo = Engine.RailVehInfo(engine);
 				if (xor_mask == 0 
-						&& !(Engine.GetEngine(engine).type == Vehicle.VEH_Train && (Engine.RailVehInfo(engine).capacity == 0 || 0 != (Engine.RailVehInfo(engine).flags & Engine.RVI_WAGON) )))
-					xor_mask = Engine._default_refitmasks[Engine.GetEngine(engine).type - Vehicle.VEH_Train];
+						&& !(engineInfo.type == Vehicle.VEH_Train && (railVehInfo.capacity == 0 || 0 != (railVehInfo.flags & Engine.RVI_WAGON) )))
+					xor_mask = Engine._default_refitmasks[engineInfo.type - Vehicle.VEH_Train];
 			}
 			Global._engine_info[engine].refit_mask = ((mask & ~not_mask) ^ xor_mask) & Engine._landscape_global_cargo_mask[GameOptions._opt.landscape];
 		}
@@ -2783,7 +2787,7 @@ public class GRFFile
 	static boolean initialized = false; // XXX yikes
 	static String [] _newgrf_files = new String[32];
 
-	void LoadNewGRF(int load_index, int file_index)
+	static void LoadNewGRF(int load_index, int file_index)
 	{
 		int stage;
 
@@ -2816,6 +2820,7 @@ public class GRFFile
 		}
 
 		// Pre-calculate all refit masks after loading GRF files
+		// [dz] call later 
 		CalculateRefitMasks();
 	}
 

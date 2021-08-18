@@ -6,6 +6,7 @@ import game.util.FileIO;
 import game.util.LandscapeSprites;
 import game.util.Sprites;
 
+
 public class GfxInit extends LandscapeSprites  
 {
 	static String[] files_win = 
@@ -451,7 +452,7 @@ public class GfxInit extends LandscapeSprites
 
 		// TODO was called from LoadNewGRF 
 		//GRFFile.ResetNewGRFData();
-		// TODO LoadNewGRF(load_index, i);
+		// TODO GRFFile.LoadNewGRF(load_index, i);
 		
 	}
 

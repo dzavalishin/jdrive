@@ -1,7 +1,12 @@
 package game;
 
-public class Tile {
+import java.io.Serializable;
 
+public class Tile implements Serializable 
+{
+
+	private static final long serialVersionUID = -6829939704826964776L;
+	
 	//byte type_height;
 	int type;
 	int height;

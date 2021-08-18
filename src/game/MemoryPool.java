@@ -1,5 +1,6 @@
 package game;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,7 +14,7 @@ import java.util.function.Consumer;
  * TODO use dynamic array?
  */
 
-public class MemoryPool<CType extends IPoolItem>
+public class MemoryPool<CType extends IPoolItem> implements Serializable
 {
     Map<Integer,CType> pool = new HashMap<>();
     IPoolItemFactory<CType> ctor;

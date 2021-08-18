@@ -1,6 +1,9 @@
 package game;
 
-public interface IPoolItem {
+import java.io.Serializable;
+
+public interface IPoolItem extends Serializable 
+{
 
 	void setIndex(int index);
 	

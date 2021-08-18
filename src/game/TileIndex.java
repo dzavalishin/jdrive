@@ -1,5 +1,6 @@
 package game;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
 import game.ids.PlayerID;
@@ -12,8 +13,10 @@ import game.util.BitOps;
 // return same TileIndex for each TileIndex.tile
 // same with Mutable
 
-public class TileIndex implements Comparable<TileIndex>
+public class TileIndex implements Comparable<TileIndex>, Serializable
 {
+	private static final long serialVersionUID = 2317687924857389962L;
+	
 	protected int tile;
 
 

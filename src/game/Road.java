@@ -205,7 +205,7 @@ public class Road extends RoadTables
 			cost = Global._price.remove_road * 2;
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				Town.ChangeTownRating(t, -road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
+				t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
 				tile.getMap().m5 = ti.map5 & 0xC7;
 				tile.SetTileOwner( Owner.OWNER_NONE);
 				tile.MarkTileDirtyByTile();
@@ -240,7 +240,7 @@ public class Road extends RoadTables
 				} while(0 !=(t2>>=1) );
 
 				if(0 != (flags & Cmd.DC_EXEC) ) {
-					Town.ChangeTownRating(t, -road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
+					t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
 
 					tile.getMap().m5 ^= c;
 					if (BitOps.GB(tile.getMap().m5, 0, 4) == 0) {
@@ -272,7 +272,7 @@ public class Road extends RoadTables
 				cost = Global._price.remove_road * 2;
 				if(0 != (flags & Cmd.DC_EXEC) ) {
 					int pbs_track = Pbs.PBSTileReserved(tile);
-					Town.ChangeTownRating(t, -road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
+					t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
 
 					Landscape.ModifyTile(tile, TileTypes.MP_RAILWAY,
 							//TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |
