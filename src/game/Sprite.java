@@ -280,7 +280,7 @@ class SpriteGroup {
 class RealSpriteGroup extends SpriteGroup {
 	// XXX: Would anyone ever need more than 16 spritesets? Maybe we should
 	// use even less, now we take whole 8kb for custom sprites table, oh my!
-	byte sprites_per_set; // means number of directions - 4 or 8
+	int sprites_per_set; // means number of directions - 4 or 8
 
 	// Loaded = in motion, loading = not moving
 	// Each group contains several spritesets, for various loading stages
@@ -342,7 +342,9 @@ class DeterministicSpriteGroup extends SpriteGroup {
 
 enum RandomizedSpriteGroupCompareMode {
 	RSG_CMP_ANY,
-	RSG_CMP_ALL,
+	RSG_CMP_ALL;
+	
+	static RandomizedSpriteGroupCompareMode [] values = values();
 }
 
 class RandomizedSpriteGroup extends SpriteGroup {
