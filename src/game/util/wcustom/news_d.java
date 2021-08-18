@@ -1,5 +1,5 @@
 package game.util.wcustom;
-
+/*
 import game.NewsItem;
 
 public class news_d extends AbstractWinCustom {
@@ -8,3 +8,4 @@ public class news_d extends AbstractWinCustom {
 	public int scrollpos_y;
 	public NewsItem ni;
 }
+*/

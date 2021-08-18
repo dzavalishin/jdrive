@@ -213,9 +213,9 @@ public class Window extends WindowConstants
 		return (message_d) custom; 
 	}
 
-	news_d as_news_d() { 
-		if(custom==null) custom = new news_d(); 
-		return (news_d) custom; 
+	vp2_d as_news_d() { 
+		if(custom==null) custom = new vp2_d(); 
+		return (vp2_d) custom; 
 	}
 
 	order_d as_order_d() { 

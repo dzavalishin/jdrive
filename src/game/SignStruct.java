@@ -29,7 +29,7 @@ public class SignStruct implements IPoolItem
 	
 	private void clear() {
 		str = null;
-		sign = null;
+		sign = new ViewportSign();
 		x = y = z = 0;
 		index = 0;
 		owner = null;

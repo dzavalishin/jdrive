@@ -420,7 +420,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		StringBuilder buff = new StringBuilder();
 
 		GameDate.ConvertDayToYMD(ymd, number);
-		buff.append( String.format(" %02i-%02i-%04i", ymd.day, ymd.month + 1, ymd.year + Global.MAX_YEAR_BEGIN_REAL) );
+		buff.append( String.format(" %02d-%02d-%04d", ymd.day, ymd.month + 1, ymd.year + Global.MAX_YEAR_BEGIN_REAL) );
 
 		return buff.toString();
 	}
