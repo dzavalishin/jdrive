@@ -1,107 +1,86 @@
 package strgen;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+
+/** 
+ * Compiles a list of strings into a compiled string list 
+**/
 
 public class Main {
 
 	
 	
 
-	/* Compiles a list of strings into a compiled string list */
-
-	//typedef void (*ParseCmdProc)(char *buf, int value);
-
-	typedef struct {
-		uint32 ident;
-		uint32 version;			// 32-bits of auto generated version info which is basically a hash of strings.h
-		char name[32];			// the international name of this language
-		char own_name[32];	// the localized name of this language
-		char isocode[16];	// the ISO code for the language (not country code)
-		uint16 offsets[32];	// the offsets
-		byte plural_form;		// plural form index
-		byte pad[3];				// pad header to be a multiple of 4
-	} LanguagePackHeader;
-
-	typedef struct CmdStruct {
-		const char *cmd;
-		ParseCmdProc proc;
-		long value;
-		int8 consumes;
-		byte flags;
-	} CmdStruct;
-
-	enum {
-		C_DONTCOUNT = 1,
-		C_CASE = 2,
-	};
+	//enum Mode {
+	static final int C_DONTCOUNT = 1;
+	static final int C_CASE = 2;
+	//};
 
 
-	typedef struct Case {
-		int caseidx;
-		char *string;
-		struct Case *next;
-	} Case;
+
+
+
+
 
 	static boolean _masterlang;
 	static boolean _translated;
-	static const String _file = "(unknown file)";
+	static final String _file = "(unknown file)";
 	static int _cur_line;
 	static int _errors, _warnings;
 
-	typedef struct LangString {
-		char *name;							// Name of the string
-		char *english;					// English text
-		char *translated;				// Translated text
-		uint16 hash_next;				// next hash entry
-		uint16 index;
-		int line;               // line of string in source-file
-		Case *english_case;			// cases for english
-		Case *translated_case;	// cases for foreign
-	} LangString;
 
-	static LangString *_strings[65536];
+	static LangString [] _strings = new LangString[65536];
 
 
-	#define HASH_SIZE 32767
-	static uint16 _hash_head[HASH_SIZE];
+	static final int HASH_SIZE = 32767;
+	static int [] _hash_head = new int[HASH_SIZE];
 
-	static byte _put_buf[4096];
+	//static byte _put_buf[4096];
 	static int _put_pos;
 	static int _next_string_id;
 
-	static uint32 _hash;
-	static char _lang_name[32], _lang_ownname[32], _lang_isocode[16];
+	static int _hash;
+	static String _lang_name, _lang_ownname, _lang_isocode;
 	static byte _lang_pluralform;
-	#define MAX_NUM_GENDER 8
-	static char _genders[MAX_NUM_GENDER][8];
+	static final int MAX_NUM_GENDER = 8;
+	static String [] _genders = new String [MAX_NUM_GENDER];
 	static int _numgenders;
 
 	// contains the name of all cases.
-	#define MAX_NUM_CASES 50
-	static char _cases[MAX_NUM_CASES][16];
+	static final int MAX_NUM_CASES = 50;
+	static String [] _cases = new String [MAX_NUM_CASES];
 	static int _numcases;
 
 	// for each plural value, this is the number of plural forms.
-	static const byte _plural_form_counts[] = { 2,1,2,3,3,3,3,3,4 };
+	static final byte _plural_form_counts[] = { 2,1,2,3,3,3,3,3,4 };
 
-	static const char *_cur_ident;
-
-	typedef struct CmdPair {
-		const CmdStruct *a;
-		char *v;
-	} CmdPair;
-
-	typedef struct ParsedCommandStruct {
-		int np;
-		CmdPair pairs[32];
-		const CmdStruct *cmd[32]; // ordered by param #
-	} ParsedCommandStruct;
-
+	static final String _cur_ident;
 	// Used when generating some advanced commands.
 	static ParsedCommandStruct _cur_pcs;
 	static int _cur_argidx;
+
+	class CmdPair {
+		final CmdStruct a;
+		String v;
+	} 
+
+	class ParsedCommandStruct {
+		int np;
+		CmdPair [] pairs = new CmdPair[32];
+		CmdStruct [] cmd = new CmdStruct[32]; // ordered by param #
+	}
+
 
 	static int HashStr(String s)
 	{
@@ -113,17 +92,17 @@ public class Main {
 
 	static void HashAdd(String s, LangString ls)
 	{
-		uint hash = HashStr(s);
+		int hash = HashStr(s);
 		ls.hash_next = _hash_head[hash];
 		_hash_head[hash] = ls.index + 1;
 	}
 
-	static LangString *HashFind(const char *s)
+	static LangString HashFind(final String s)
 	{
 		int idx = _hash_head[HashStr(s)];
 		while (--idx >= 0) {
 			LangString ls = _strings[idx];
-			if (!strcmp(ls.name, s)) return ls;
+			if (ls.name.equals(s)) return ls;
 			idx = ls.hash_next;
 		}
 		return null;
@@ -153,11 +132,11 @@ public class Main {
 		String buf = String.format(s, args);
 		String b1 = String.format( "%s:%d: FATAL: %s\n", _file, _cur_line, buf);
 		System.err.print(b1);
-		exit(1);
+		System.exit(1);
 	}
 
 
-	/*static void ttd_strlcpy(char *dst, const char *src, size_t len)
+	/*static void ttd_strlcpy(char *dst, final char *src, size_t len)
 	{
 		assert(len > 0);
 		while (--len && *src)
@@ -166,55 +145,6 @@ public class Main {
 	}*/
 
 
-	static void PutByte(byte c)
-	{
-		if (_put_pos == lengthof(_put_buf))
-			Fatal("Put buffer too small");
-		_put_buf[_put_pos++] = c;
-	}
-
-
-	static void EmitSingleByte(char *buf, int value)
-	{
-		if (*buf != '\0')
-			Warning("Ignoring trailing letters in command");
-		PutByte((byte)value);
-	}
-
-
-	static void EmitEscapedByte(char *buf, int value)
-	{
-		if (*buf != '\0')
-			Warning("Ignoring trailing letters in command");
-		PutByte((byte)0x85);
-		PutByte((byte)value);
-	}
-
-	static void EmitSetX(char *buf, int value)
-	{
-		char *err;
-		int x = strtol(buf, &err, 0);
-		if (*err != 0)
-			Fatal("SetX param invalid");
-		PutByte(1);
-		PutByte((byte)x);
-	}
-
-
-	static void EmitSetXY(char *buf, int value)
-	{
-		char *err;
-		int x,y;
-
-		x = strtol(buf, &err, 0);
-		if (*err != ' ') Fatal("SetXY param invalid");
-		y = strtol(err+1, &err, 0);
-		if (*err != 0) Fatal("SetXY param invalid");
-
-		PutByte(2);
-		PutByte((byte)x);
-		PutByte((byte)y);
-	}
 
 	// The plural specifier looks like
 	// {NUM} {PLURAL -1 passenger passengers} then it picks either passenger/passengers depending on the count in NUM
@@ -277,244 +207,155 @@ public class Main {
 		return r;
 	}
 
-	// Forward declaration
-	static int TranslateArgumentIdx(int arg);
-
-	static void EmitWordList(char **words, int nw)
-	{
-		int i,j;
-
-		PutByte(nw);
-		for(i=0; i<nw; i++)
-			PutByte(strlen(words[i]));
-		for(i=0; i<nw; i++) {
-			for(j=0; words[i][j]; j++)
-				PutByte(words[i][j]);
-		}
-	}
-
-	static void EmitPlural(char *buf, int value)
-	{
-		int argidx = _cur_argidx;
-		char *words[5];
-		int nw = 0;
-
-		// Parse out the number, if one exists. Otherwise default to prev arg.
-		if (!ParseRelNum(&buf, &argidx))
-			argidx--;
-
-		// Parse each string
-		for (nw = 0; nw < 5; nw++) {
-			words[nw] = ParseWord(&buf);
-			if (!words[nw])
-				break;
-		}
-
-		if (nw == 0)
-			Fatal("%s: No plural words", _cur_ident);
-
-		if (_plural_form_counts[_lang_pluralform] != nw) {
-			if (_translated) {
-				Fatal("%s: Invalid number of plural forms. Expecting %d, found %d.", _cur_ident,
-					_plural_form_counts[_lang_pluralform], nw);
-			} else {
-				Warning("'%s' is untranslated. Tweaking english string to allow compilation for plural forms", _cur_ident);
-				if (nw > _plural_form_counts[_lang_pluralform]) {
-					nw = _plural_form_counts[_lang_pluralform];
-				} else {
-					for(; nw < _plural_form_counts[_lang_pluralform]; nw++) {
-						words[nw] = words[nw - 1];
-					}
-				}
-			}
-		}
-
-		PutByte(0x8D);
-		PutByte(TranslateArgumentIdx(argidx));
-		EmitWordList(words, nw);
-	}
 
 
-	static void EmitGender(char *buf, int value)
-	{
-		int argidx = _cur_argidx;
-		char *words[8];
-		int nw;
 
-		if (buf[0] == '=') {
-			buf++;
-
-			// This is a {G=DER} command
-			for(nw=0; ;nw++) {
-				if (nw >= 8)
-					Fatal("G argument '%s' invalid", buf);
-				if (!strcmp(buf, _genders[nw]))
-					break;
-			}
-			// now nw contains the gender index
-			PutByte(0x87);
-			PutByte(nw);
-
-		} else {
-			// This is a {G 0 foo bar two} command.
-			// If no relative number exists, default to +0
-			if (!ParseRelNum(&buf, &argidx)) {}
-
-			for(nw=0; nw<8; nw++) {
-				words[nw] = ParseWord(&buf);
-				if (!words[nw])
-					break;
-			}
-			if (nw != _numgenders) Fatal("Bad # of arguments for gender command");
-			PutByte(0x85);
-			PutByte(13);
-			PutByte(TranslateArgumentIdx(argidx));
-			EmitWordList(words, nw);
-		}
-	}
-
-
-	static const CmdStruct _cmd_structs[] = {
+	static final CmdStruct _cmd_structs[] = {
 		// Update position
-		{"SETX",  EmitSetX,  1, 0, 0},
-		{"SETXY", EmitSetXY, 2, 0, 0},
+		new CmdStruct("SETX",  Emitter::EmitSetX,  1, 0, 0),
+		new CmdStruct("SETXY", Emitter::EmitSetXY, 2, 0, 0),
 
 		// Font size
-		{"TINYFONT", EmitSingleByte, 8, 0, 0},
-		{"BIGFONT",  EmitSingleByte, 9, 0, 0},
+		new CmdStruct("TINYFONT", Emitter::EmitSingleByte, 8, 0, 0),
+		new CmdStruct("BIGFONT",  Emitter::EmitSingleByte, 9, 0, 0),
 
 		// New line
-		{"", EmitSingleByte, 10, 0, C_DONTCOUNT},
+		new CmdStruct("", Emitter::EmitSingleByte, 10, 0, C_DONTCOUNT),
 
-		{"{", EmitSingleByte, '{', 0, C_DONTCOUNT},
+		new CmdStruct("{", Emitter::EmitSingleByte, (int)'{', 0, C_DONTCOUNT),
 
 		// Colors
-		{"BLUE",    EmitSingleByte, 15, 0, 0},
-		{"SILVER",  EmitSingleByte, 16, 0, 0},
-		{"GOLD",    EmitSingleByte, 17, 0, 0},
-		{"RED",     EmitSingleByte, 18, 0, 0},
-		{"PURPLE",  EmitSingleByte, 19, 0, 0},
-		{"LTBROWN", EmitSingleByte, 20, 0, 0},
-		{"ORANGE",  EmitSingleByte, 21, 0, 0},
-		{"GREEN",   EmitSingleByte, 22, 0, 0},
-		{"YELLOW",  EmitSingleByte, 23, 0, 0},
-		{"DKGREEN", EmitSingleByte, 24, 0, 0},
-		{"CREAM",   EmitSingleByte, 25, 0, 0},
-		{"BROWN",   EmitSingleByte, 26, 0, 0},
-		{"WHITE",   EmitSingleByte, 27, 0, 0},
-		{"LTBLUE",  EmitSingleByte, 28, 0, 0},
-		{"GRAY",    EmitSingleByte, 29, 0, 0},
-		{"DKBLUE",  EmitSingleByte, 30, 0, 0},
-		{"BLACK",   EmitSingleByte, 31, 0, 0},
+		new CmdStruct("BLUE",    Emitter::EmitSingleByte, 15, 0, 0),
+		new CmdStruct("SILVER",  Emitter::EmitSingleByte, 16, 0, 0),
+		new CmdStruct("GOLD",    Emitter::EmitSingleByte, 17, 0, 0),
+		new CmdStruct("RED",     Emitter::EmitSingleByte, 18, 0, 0),
+		new CmdStruct("PURPLE",  Emitter::EmitSingleByte, 19, 0, 0),
+		new CmdStruct("LTBROWN", Emitter::EmitSingleByte, 20, 0, 0),
+		new CmdStruct("ORANGE",  Emitter::EmitSingleByte, 21, 0, 0),
+		new CmdStruct("GREEN",   Emitter::EmitSingleByte, 22, 0, 0),
+		new CmdStruct("YELLOW",  Emitter::EmitSingleByte, 23, 0, 0),
+		new CmdStruct("DKGREEN", Emitter::EmitSingleByte, 24, 0, 0),
+		new CmdStruct("CREAM",   Emitter::EmitSingleByte, 25, 0, 0),
+		new CmdStruct("BROWN",   Emitter::EmitSingleByte, 26, 0, 0),
+		new CmdStruct("WHITE",   Emitter::EmitSingleByte, 27, 0, 0),
+		new CmdStruct("LTBLUE",  Emitter::EmitSingleByte, 28, 0, 0),
+		new CmdStruct("GRAY",    Emitter::EmitSingleByte, 29, 0, 0),
+		new CmdStruct("DKBLUE",  Emitter::EmitSingleByte, 30, 0, 0),
+		new CmdStruct("BLACK",   Emitter::EmitSingleByte, 31, 0, 0),
 
 		// 0x85
-		{"CURRCOMPACT",   EmitEscapedByte, 0, 1, 0}, // compact currency (32 bits)
-		{"REV",           EmitEscapedByte, 2, 0, 0}, // openttd revision string
-		{"SHORTCARGO",    EmitEscapedByte, 3, 2, 0}, // short cargo description, only ### tons, or ### litres
-		{"CURRCOMPACT64", EmitEscapedByte, 4, 2, 0}, // compact currency 64 bits
+		new CmdStruct("CURRCOMPACT",   Emitter::EmitEscapedByte, 0, 1, 0), // compact currency (32 bits)
+		new CmdStruct("REV",           Emitter::EmitEscapedByte, 2, 0, 0), // openttd revision string
+		new CmdStruct("SHORTCARGO",    Emitter::EmitEscapedByte, 3, 2, 0), // short cargo description, only ### tons, or ### litres
+		new CmdStruct("CURRCOMPACT64", Emitter::EmitEscapedByte, 4, 2, 0), // compact currency 64 bits
 
-		{"COMPANY", EmitEscapedByte, 5, 1, 0},				// company string. This is actually a {STRING1}
+		new CmdStruct("COMPANY", Emitter::EmitEscapedByte, 5, 1, 0),				// company string. This is actually a new CmdStruct(STRING1)
 																							// The first string includes the second string.
 
-		{"PLAYERNAME", EmitEscapedByte, 5, 1, 0},		// playername string. This is actually a {STRING1}
+		new CmdStruct("PLAYERNAME", Emitter::EmitEscapedByte, 5, 1, 0),		// playername string. This is actually a new CmdStruct(STRING1)
 																							// The first string includes the second string.
 
-		{"VEHICLE", EmitEscapedByte, 5, 1, 0},		// playername string. This is actually a {STRING1}
+		new CmdStruct("VEHICLE", Emitter::EmitEscapedByte, 5, 1, 0),		// playername string. This is actually a new CmdStruct(STRING1)
 																							// The first string includes the second string.
 
 
-		{"STRING1", EmitEscapedByte, 5, 1, C_CASE},				// included string that consumes ONE argument
-		{"STRING2", EmitEscapedByte, 6, 2, C_CASE},				// included string that consumes TWO arguments
-		{"STRING3", EmitEscapedByte, 7, 3, C_CASE},				// included string that consumes THREE arguments
-		{"STRING4", EmitEscapedByte, 8, 4, C_CASE},				// included string that consumes FOUR arguments
-		{"STRING5", EmitEscapedByte, 9, 5, C_CASE},				// included string that consumes FIVE arguments
+		new CmdStruct("STRING1", Emitter::EmitEscapedByte, 5, 1, C_CASE),				// included string that consumes ONE argument
+		new CmdStruct("STRING2", Emitter::EmitEscapedByte, 6, 2, C_CASE),				// included string that consumes TWO arguments
+		new CmdStruct("STRING3", Emitter::EmitEscapedByte, 7, 3, C_CASE),				// included string that consumes THREE arguments
+		new CmdStruct("STRING4", Emitter::EmitEscapedByte, 8, 4, C_CASE),				// included string that consumes FOUR arguments
+		new CmdStruct("STRING5", Emitter::EmitEscapedByte, 9, 5, C_CASE),				// included string that consumes FIVE arguments
 
-		{"STATIONFEATURES", EmitEscapedByte, 10, 1, 0}, // station features string, icons of the features
-		{"INDUSTRY",        EmitEscapedByte, 11, 1, 0}, // industry, takes an industry #
-		{"VOLUME",          EmitEscapedByte, 12, 1, 0},
-		{"DATE_TINY",       EmitEscapedByte, 14, 1, 0},
-		{"CARGO",           EmitEscapedByte, 15, 2, 0},
+		new CmdStruct("STATIONFEATURES", Emitter::EmitEscapedByte, 10, 1, 0), // station features string, icons of the features
+		new CmdStruct("INDUSTRY",        Emitter::EmitEscapedByte, 11, 1, 0), // industry, takes an industry #
+		new CmdStruct("VOLUME",          Emitter::EmitEscapedByte, 12, 1, 0),
+		new CmdStruct("DATE_TINY",       Emitter::EmitEscapedByte, 14, 1, 0),
+		new CmdStruct("CARGO",           Emitter::EmitEscapedByte, 15, 2, 0),
 
-		{"P", EmitPlural, 0, 0, C_DONTCOUNT},					// plural specifier
-		{"G", EmitGender, 0, 0, C_DONTCOUNT},					// gender specifier
+		new CmdStruct("P", Emitter::EmitPlural, 0, 0, C_DONTCOUNT),					// plural specifier
+		new CmdStruct("G", Emitter::EmitGender, 0, 0, C_DONTCOUNT),					// gender specifier
 
-		{"DATE_LONG",  EmitSingleByte, 0x82, 1, 0},
-		{"DATE_SHORT", EmitSingleByte, 0x83, 1, 0},
+		new CmdStruct("DATE_LONG",  Emitter::EmitSingleByte, 0x82, 1, 0),
+		new CmdStruct("DATE_SHORT", Emitter::EmitSingleByte, 0x83, 1, 0),
 
-		{"VELOCITY", EmitSingleByte, 0x84, 1, 0},
+		new CmdStruct("VELOCITY", Emitter::EmitSingleByte, 0x84, 1, 0),
 
-		{"SKIP", EmitSingleByte, 0x86, 1, 0},
+		new CmdStruct("SKIP", Emitter::EmitSingleByte, 0x86, 1, 0),
 
-		{"STRING", EmitSingleByte, 0x88, 1, C_CASE},
+		new CmdStruct("STRING", Emitter::EmitSingleByte, 0x88, 1, C_CASE),
 
 		// Numbers
-		{"COMMA", EmitSingleByte, 0x8B, 1, 0}, // Number with comma
-		{"NUM",   EmitSingleByte, 0x8E, 1, 0}, // Signed number
+		new CmdStruct("COMMA", Emitter::EmitSingleByte, 0x8B, 1, 0), // Number with comma
+		new CmdStruct("NUM",   Emitter::EmitSingleByte, 0x8E, 1, 0), // Signed number
 
-		{"CURRENCY", EmitSingleByte, 0x8F, 1, 0},
+		new CmdStruct("CURRENCY", Emitter::EmitSingleByte, 0x8F, 1, 0),
 
-		{"WAYPOINT",   EmitSingleByte, 0x99, 1, 0}, // waypoint name
-		{"STATION",    EmitSingleByte, 0x9A, 1, 0},
-		{"TOWN",       EmitSingleByte, 0x9B, 1, 0},
-		{"CURRENCY64", EmitSingleByte, 0x9C, 2, 0},
+		new CmdStruct("WAYPOINT",   Emitter::EmitSingleByte, 0x99, 1, 0), // waypoint name
+		new CmdStruct("STATION",    Emitter::EmitSingleByte, 0x9A, 1, 0),
+		new CmdStruct("TOWN",       Emitter::EmitSingleByte, 0x9B, 1, 0),
+		new CmdStruct("CURRENCY64", Emitter::EmitSingleByte, 0x9C, 2, 0),
 		// 0x9D is used for the pseudo command SETCASE
 		// 0x9E is used for case switching
 
 		// 0x9E=158 is the LAST special character we may use.
 
-		{"UPARROW", EmitSingleByte, 0x80, 0, 0},
+		new CmdStruct("UPARROW", Emitter::EmitSingleByte, 0x80, 0, 0),
 
-		{"NBSP",       EmitSingleByte, 0xA0, 0, C_DONTCOUNT},
-		{"POUNDSIGN",  EmitSingleByte, 0xA3, 0, 0},
-		{"YENSIGN",    EmitSingleByte, 0xA5, 0, 0},
-		{"COPYRIGHT",  EmitSingleByte, 0xA9, 0, 0},
-		{"DOWNARROW",  EmitSingleByte, 0xAA, 0, 0},
-		{"CHECKMARK",  EmitSingleByte, 0xAC, 0, 0},
-		{"CROSS",      EmitSingleByte, 0xAD, 0, 0},
-		{"RIGHTARROW", EmitSingleByte, 0xAF, 0, 0},
+		new CmdStruct("NBSP",       Emitter::EmitSingleByte, 0xA0, 0, C_DONTCOUNT),
+		new CmdStruct("POUNDSIGN",  Emitter::EmitSingleByte, 0xA3, 0, 0),
+		new CmdStruct("YENSIGN",    Emitter::EmitSingleByte, 0xA5, 0, 0),
+		new CmdStruct("COPYRIGHT",  Emitter::EmitSingleByte, 0xA9, 0, 0),
+		new CmdStruct("DOWNARROW",  Emitter::EmitSingleByte, 0xAA, 0, 0),
+		new CmdStruct("CHECKMARK",  Emitter::EmitSingleByte, 0xAC, 0, 0),
+		new CmdStruct("CROSS",      Emitter::EmitSingleByte, 0xAD, 0, 0),
+		new CmdStruct("RIGHTARROW", Emitter::EmitSingleByte, 0xAF, 0, 0),
 
-		{"TRAIN", EmitSingleByte, 0x94, 0, 0},
-		{"LORRY", EmitSingleByte, 0x95, 0, 0},
-		{"BUS",   EmitSingleByte, 0x96, 0, 0},
-		{"PLANE", EmitSingleByte, 0x97, 0, 0},
-		{"SHIP",  EmitSingleByte, 0x98, 0, 0},
+		new CmdStruct("TRAIN", Emitter::EmitSingleByte, 0x94, 0, 0),
+		new CmdStruct("LORRY", Emitter::EmitSingleByte, 0x95, 0, 0),
+		new CmdStruct("BUS",   Emitter::EmitSingleByte, 0x96, 0, 0),
+		new CmdStruct("PLANE", Emitter::EmitSingleByte, 0x97, 0, 0),
+		new CmdStruct("SHIP",  Emitter::EmitSingleByte, 0x98, 0, 0),
 
-		{"SMALLUPARROW",   EmitSingleByte, 0x90, 0, 0},
-		{"SMALLDOWNARROW", EmitSingleByte, 0x91, 0, 0}
+		new CmdStruct("SMALLUPARROW",   Emitter::EmitSingleByte, 0x90, 0, 0),
+		new CmdStruct("SMALLDOWNARROW", Emitter::EmitSingleByte, 0x91, 0, 0)
 	};
 
 
-	static const CmdStruct *FindCmd(const char *s, int len)
+	static final CmdStruct FindCmd(String s)
 	{
+		/*
 		int i;
-		const CmdStruct *cs = _cmd_structs;
+		final CmdStruct *cs = _cmd_structs;
 		for(i=0; i != lengthof(_cmd_structs); i++, cs++) {
 			if (!strncmp(cs.cmd, s, len) && cs.cmd[len] == '\0')
 				return cs;
 		}
+		*/
+		for( CmdStruct cs : _cmd_structs)
+			if( s.equals(cs.cmd) ) return cs;
+		
 		return null;
 	}
 
-	static int ResolveCaseName(String str, int len)
+	static int ResolveCaseName(String str)
 	{
-		int i;
-		for(i=0; i<MAX_NUM_CASES; i++)
-			if (!memcmp(_cases[i], str, len) && _cases[i][len] == 0)
+		for(int i = 0; i < MAX_NUM_CASES; i++)
+			if(str.equals(_cases[i]))
 				return i + 1;
+		
 		Fatal("Invalid case-name '%s'", str);
 	}
 
 
 	// returns null on eof
 	// else returns command struct
-	static const CmdStruct *ParseCommandString(const char **str, char *param, int *argno, int *casei)
+	static final CmdStruct ParseCommandString(final String [] str, String param, int [] argno, int [] casei)
 	{
-		const char *s = *str, *start;
-		const CmdStruct *cmd;
+		final char *s = *str, *start;
+		final CmdStruct cmd;
 		byte c;
 
-		*argno = -1;
-		*casei = -1;
+		argno[0] = -1;
+		casei[0] = -1;
 
 		// Scan to the next command, exit if there's no next command.
 		for(; *s != '{'; s++) {
@@ -525,7 +366,7 @@ public class Main {
 
 		if (*s >= '0' && *s <= '9') {
 			char *end;
-			*argno = strtoul(s, &end, 0);
+			argno[0] = strtoul(s, &end, 0);
 			if (*end != ':') {
 					Fatal("missing arg #");
 				}
@@ -545,13 +386,13 @@ public class Main {
 		}
 
 		if (c == '.') {
-			const char *casep = s;
+			final char *casep = s;
 
-			if (!(cmd.flags & C_CASE))
+			if (0==(cmd.flags & C_CASE))
 				Fatal("Command '%s' can't have a case", cmd.cmd);
 
 			do c = *s++; while (c != '}' && c != ' ' && c != '\0');
-			*casei = ResolveCaseName(casep, s-casep-1);
+			casei[0] = ResolveCaseName(casep, s-casep-1);
 		}
 
 		if (c == '\0') {
@@ -584,21 +425,25 @@ public class Main {
 	}
 
 
-	static void HandlePragma(char *str)
+	static void HandlePragma(String istr)
 	{
-		if (!memcmp(str, "id ", 3)) {
-			_next_string_id = strtoul(str + 3, null, 0);
-		} else if (!memcmp(str, "name ", 5)) {
-			ttd_strlcpy(_lang_name, str + 5, sizeof(_lang_name));
-		} else if (!memcmp(str, "ownname ", 8)) {
-			ttd_strlcpy(_lang_ownname, str + 8, sizeof(_lang_ownname));
-		} else if (!memcmp(str, "isocode ", 8)) {
-			ttd_strlcpy(_lang_isocode, str + 8, sizeof(_lang_isocode));
-		} else if (!memcmp(str, "plural ", 7)) {
+		String [] token = istr.split("\\s");
+		String str = token[0];
+		String param = token[1];
+		
+		if (str.equals( "id ")) {
+			_next_string_id = Integer.parseInt(param);
+		} else if (str.equals( "name ")) {
+			_lang_name = param;
+		} else if (str.equals( "ownname ")) {
+			_lang_ownname = param;
+		} else if (str.equals( "isocode ")) {
+			_lang_isocode = param;
+		} else if (str.equals( "plural ")) {
 			_lang_pluralform = atoi(str + 7);
 			if (_lang_pluralform >= lengthof(_plural_form_counts))
 				Fatal("Invalid pluralform %d", _lang_pluralform);
-		} else if (!memcmp(str, "gender ", 7)) {
+		} else if (str.equals( "gender ", 7)) {
 			char *buf = str + 7, *s;
 			for(;;) {
 				s = ParseWord(&buf);
@@ -607,7 +452,7 @@ public class Main {
 				ttd_strlcpy(_genders[_numgenders], s, sizeof(_genders[_numgenders]));
 				_numgenders++;
 			}
-		} else if (!memcmp(str, "case ", 5)) {
+		} else if (str.equals( "case ", 5)) {
 			char *buf = str + 5, *s;
 			for(;;) {
 				s = ParseWord(&buf);
@@ -623,7 +468,7 @@ public class Main {
 
 	static void ExtractCommandString(ParsedCommandStruct *p, char *s, boolean warnings)
 	{
-		const CmdStruct *ar;
+		final CmdStruct *ar;
 		char param[100];
 		int argno;
 		int argidx = 0;
@@ -633,7 +478,7 @@ public class Main {
 
 		for(;;) {
 			// read until next command from a.
-			ar = ParseCommandString((const char **)&s, param, &argno, &casei);
+			ar = ParseCommandString((final char **)&s, param, &argno, &casei);
 			if (ar == null)
 				break;
 
@@ -657,25 +502,25 @@ public class Main {
 	}
 
 
-	static const CmdStruct *TranslateCmdForCompare(const CmdStruct *a)
+	static final CmdStruct TranslateCmdForCompare(final CmdStruct a)
 	{
-		if (!a) return null;
+		if (a == null) return null;
 
-		if (!strcmp(a.cmd, "STRING1") ||
-				!strcmp(a.cmd, "STRING2") ||
-				!strcmp(a.cmd, "STRING3") ||
-				!strcmp(a.cmd, "STRING4") ||
-				!strcmp(a.cmd, "STRING5"))
-			return FindCmd("STRING", 6);
+		if (a.cmd.equals( "STRING1") ||
+				a.cmd.equals( "STRING2") ||
+				a.cmd.equals( "STRING3") ||
+				a.cmd.equals( "STRING4") ||
+				a.cmd.equals( "STRING5"))
+			return FindCmd("STRING");
 
-		if (!strcmp(a.cmd, "SKIP"))
+		if (a.cmd.equals( "SKIP"))
 			return null;
 
 		return a;
 	}
 
 
-	static boolean CheckCommandsMatch(char *a, char *b, const char *name)
+	static boolean CheckCommandsMatch(String a, String b, final String name)
 	{
 		ParsedCommandStruct templ;
 		ParsedCommandStruct lang;
@@ -724,7 +569,7 @@ public class Main {
 		return result;
 	}
 
-	static void HandleString(char *str, boolean master)
+	static void HandleString(String str, boolean master)
 	{
 		char *s,*t;
 		LangString *ent;
@@ -838,7 +683,7 @@ public class Main {
 	}
 
 
-	static void ParseFile(const char *file, boolean english)
+	static void ParseFile(final char *file, boolean english)
 	{
 		FILE *in;
 		char buf[2048];
@@ -863,7 +708,7 @@ public class Main {
 	}
 
 
-	static uint32 MyHashStr(uint32 hash, const char *s)
+	static int MyHashStr(int hash, final char *s)
 	{
 		for(; *s; s++) {
 			hash = ((hash << 3) | (hash >> 29)) ^ *s;
@@ -874,12 +719,12 @@ public class Main {
 
 
 	// make a hash of the file to get a unique "version number"
-	static void MakeHashOfStrings(void)
+	static void MakeHashOfStrings()
 	{
-		uint32 hash = 0;
-		LangString *ls;
-		char *s;
-		const CmdStruct *cs;
+		int hash = 0;
+		LangString ls;
+		String s;
+		final CmdStruct cs;
 		char buf[256];
 		int i;
 		int argno;
@@ -893,7 +738,7 @@ public class Main {
 				hash = MyHashStr(hash, s + 1);
 
 				s = ls.english;
-				while ((cs = ParseCommandString((const char **)&s, buf, &argno, &casei)) != null) {
+				while ((cs = ParseCommandString((final char **)&s, buf, &argno, &casei)) != null) {
 					if (cs.flags & C_DONTCOUNT)
 						continue;
 
@@ -920,82 +765,96 @@ public class Main {
 
 
 
-	boolean CompareFiles(const char *n1, const char *n2)
+	static boolean CompareFiles(final String n1, final String n2)
 	{
-		FILE *f1, *f2;
-		char b1[4096];
-		char b2[4096];
-		size_t l1, l2;
+		//FILE *f1, *f2;
+		byte [] b1 = new byte[4096];
+		byte [] b2 = new byte[4096];
+		int l1, l2;
 
-		f2 = fopen(n2, "rb");
+		//f2 = fopen(n2, "rb");
+		BufferedInputStream f2 = new BufferedInputStream( new FileInputStream(n2) );
 		if (f2 == null) return false;
 
-		f1 = fopen(n1, "rb");
+		//f1 = fopen(n1, "rb");
+		//if (f1 == null) Fatal("can't open %s", n1);
+		BufferedInputStream f1 = new BufferedInputStream( new FileInputStream(n1) );
 		if (f1 == null) Fatal("can't open %s", n1);
 
 		do {
-			l1 = fread(b1, 1, sizeof(b1), f1);
-			l2 = fread(b2, 1, sizeof(b2), f2);
-
-			if (l1 != l2 || memcmp(b1, b2, l1)) {
-				fclose(f2);
-				fclose(f1);
+			//l1 = fread(b1, 1, sizeof(b1), f1);
+			//l2 = fread(b2, 1, sizeof(b2), f2);
+			l1 = f1.read(b1);
+			l2 = f2.read(b2);
+			
+			boolean diff = Arrays.compare(b1, b2) != 0;
+			if (l1 != l2 || 
+					//memcmp(b1, b2, l1)
+					diff
+					) {
+				f2.close();
+				f1.close();
 				return false;
 			}
-		} while (l1);
+		} while (l1 > 0);
 
-		fclose(f2);
-		fclose(f1);
+		f2.close();
+		f1.close();
 		return true;
 	}
 
 
-	static void WriteStringsH(const char *filename)
+	static void WriteStringsH(final String filename)
 	{
-		FILE *out;
+		//FILE *out;
+		Writer out  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp.xxx")));
 		int i;
 		int next = -1;
 		int lastgrp;
 
-		out = fopen("tmp.xxx", "w");
+		//out = fopen("tmp.xxx", "w");
 		if (out == null) { Fatal("can't open tmp.xxx"); }
 
-		fprintf(out, "enum {");
+		out.write("enum {");
 
 		lastgrp = 0;
 
 		for(i = 0; i != 65536; i++) {
-			if (_strings[i]) {
+			if (_strings[i] != null) {
 				if (lastgrp != (i >> 11)) {
 					lastgrp = (i >> 11);
-					fprintf(out, "};\n\nenum {");
+					out.write("};\n\nenum {");
 				}
 
-				fprintf(out, next == i ? "%s,\n" : "\n%s = 0x%X,\n", _strings[i].name, i);
+				String s = String.format( next == i ? "%s,\n" : "\n%s = 0x%X,\n", _strings[i].name, i);
+				out.write( s );
 				next = i + 1;
 			}
 		}
 
-		fprintf(out, "};\n");
+		out.write("};\n");
 
-		fprintf(out,
-			"\nenum {\n"
-			"\tLANGUAGE_PACK_IDENT = 0x474E414C, // Big Endian value for 'LANG' (LE is 0x 4C 41 4E 47)\n"
-			"\tLANGUAGE_PACK_VERSION = 0x%X,\n"
-			"};\n", (uint)_hash);
+		String suffix = String.format(
+			"\nenum {\n" +
+			"\tLANGUAGE_PACK_IDENT = 0x474E414C, // Big Endian value for 'LANG' (LE is 0x 4C 41 4E 47)\n" +
+			"\tLANGUAGE_PACK_VERSION = 0x%X,\n" +
+			"};\n", (int)_hash);
 
+			out.write(suffix);
 
-		fclose(out);
+		out.close();
 
 		if (CompareFiles("tmp.xxx", filename)) {
 			// files are equal. tmp.xxx is not needed
-			unlink("tmp.xxx");
+			Files.delete(Path.of("tmp.xxx"));
+			
 		} else {
 			// else rename tmp.xxx into filename
-	#if defined(WIN32) || defined(WIN64)
-			unlink(filename);
-	#endif
-			if (rename("tmp.xxx", filename) == -1) Fatal("rename() failed");
+	//#if defined(WIN32) || defined(WIN64)
+			Files.delete(Path.of(filename));
+	//#endif
+			Files.move(Path.of("tmp.xxx"), Path.of(filename), null);
+			//if (rename("tmp.xxx", filename) == -1) Fatal("rename() failed");
 		}
 	}
 
@@ -1003,27 +862,22 @@ public class Main {
 	{
 		int i, sum;
 
-		if (argidx < 0 || argidx >= lengthof(_cur_pcs.cmd))
+		if (argidx < 0 || argidx >= _cur_pcs.cmd.length)
 			Fatal("invalid argidx %d", argidx);
 
 		for(i = sum = 0; i < argidx; i++) {
-			const CmdStruct *cs = _cur_pcs.cmd[i];
-			sum += cs ? cs.consumes : 1;
+			final CmdStruct cs = _cur_pcs.cmd[i];
+			sum += cs != null ? cs.consumes : 1;
 		}
 
 		return sum;
 	}
 
-	static void PutArgidxCommand(void)
-	{
-		PutByte(0x8C);
-		PutByte(TranslateArgumentIdx(_cur_argidx));
-	}
 
 
-	static void PutCommandString(const char *str)
+	static void PutCommandString(final String str)
 	{
-		const CmdStruct *cs;
+		final CmdStruct cs;
 		char param[256];
 		int argno;
 		int casei;
@@ -1126,7 +980,7 @@ public class Main {
 					if (show_todo == 2) {
 						Warning("'%s' is untranslated", ls.name);
 					} else {
-						const char *s = "<TODO> ";
+						final char *s = "<TODO> ";
 						while(*s) PutByte(*s++);
 					}
 				}
