@@ -8,6 +8,7 @@ import game.struct.TileIndexDiffC;
 import game.tables.TreeTables;
 import game.util.ArrayPtr;
 import game.util.BitOps;
+import game.util.TownTables;
 
 
 public class Tree  extends TreeTables {
@@ -200,7 +201,7 @@ public class Tree  extends TreeTables {
 						if (Global._game_mode != GameModes.GM_EDITOR && Global._current_player.id < Global.MAX_PLAYERS) {
 							Town t = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 							if (t != null)
-								t.ChangeTownRating(Town.RATING_TREE_UP_STEP, Town.RATING_TREE_MAXIMUM);
+								t.ChangeTownRating(TownTables.RATING_TREE_UP_STEP, TownTables.RATING_TREE_MAXIMUM);
 						}
 
 						switch (tile.getMap().m5 & 0x1C) {
@@ -367,7 +368,7 @@ public class Tree  extends TreeTables {
 		if ( (0 != (flags & Cmd.DC_EXEC)) && Global._current_player.id < Global.MAX_PLAYERS) {
 			Town t = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 			if (t != null)
-				t.ChangeTownRating(Town.RATING_TREE_DOWN_STEP, Town.RATING_TREE_MINIMUM);
+				t.ChangeTownRating(TownTables.RATING_TREE_DOWN_STEP, TownTables.RATING_TREE_MINIMUM);
 		}
 
 		num = BitOps.GB(tile.getMap().m5, 6, 2) + 1;

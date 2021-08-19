@@ -8,6 +8,7 @@ import game.struct.Point;
 import game.tables.RoadTables;
 import game.util.ArrayPtr;
 import game.util.BitOps;
+import game.util.TownTables;
 
 public class Road extends RoadTables 
 {
@@ -207,7 +208,7 @@ public class Road extends RoadTables
 			cost = Global._price.remove_road * 2;
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
+				t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], TownTables.RATING_ROAD_MINIMUM);
 				tile.getMap().m5 = ti.map5 & 0xC7;
 				tile.SetTileOwner( Owner.OWNER_NONE);
 				tile.MarkTileDirtyByTile();
@@ -216,7 +217,7 @@ public class Road extends RoadTables
 		} else if (ti.type == TileTypes.MP_STREET.ordinal()) {
 			// check if you're allowed to remove the street owned by a town
 			// removal allowance depends on difficulty setting
-			if (!Town.CheckforTownRating(tile, flags, t, Town.ROAD_REMOVE)) return Cmd.CMD_ERROR;
+			if (!Town.CheckforTownRating(tile, flags, t, TownTables.ROAD_REMOVE)) return Cmd.CMD_ERROR;
 
 			// XXX - change cascading ifs to switch when doing rewrite
 			if ((ti.map5 & 0xF0) == 0) { // normal road
@@ -242,7 +243,7 @@ public class Road extends RoadTables
 				} while(0 !=(t2>>=1) );
 
 				if(0 != (flags & Cmd.DC_EXEC) ) {
-					if( t != null ) t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
+					if( t != null ) t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], TownTables.RATING_ROAD_MINIMUM);
 
 					tile.getMap().m5 ^= c;
 					if (BitOps.GB(tile.getMap().m5, 0, 4) == 0) {
@@ -274,7 +275,7 @@ public class Road extends RoadTables
 				cost = Global._price.remove_road * 2;
 				if(0 != (flags & Cmd.DC_EXEC) ) {
 					int pbs_track = Pbs.PBSTileReserved(tile);
-					t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
+					t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], TownTables.RATING_ROAD_MINIMUM);
 
 					Landscape.ModifyTile(tile, TileTypes.MP_RAILWAY,
 							//TileTypes.MP_SETTYPE(TileTypes.MP_RAILWAY) |

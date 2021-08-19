@@ -1,5 +1,6 @@
 package game;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -23,14 +24,15 @@ import game.tables.DrawIndustrySpec4Struct;
 import game.tables.DrawIndustryTileStruct;
 import game.tables.IndustrySpec;
 
-public class Industry extends IndustryTables implements IPoolItem 
+public class Industry extends IndustryTables implements IPoolItem, Serializable 
 {
 	private static final long serialVersionUID = 1L;
 	
 	public TileIndex xy;
 	int width; /* swapped order of w/h with town */
 	int height;
-	public Town town;
+	//public Town town;
+	public int townId;
 
 	int produced_cargo[];
 	int cargo_waiting[];
@@ -69,7 +71,8 @@ public class Industry extends IndustryTables implements IPoolItem
 		total_transported = new int[2];
 
 		xy = null;
-		town = null;
+		//town = null;
+		townId = -1;
 		was_cargo_delivered = false;
 
 		width = 0;
@@ -1239,7 +1242,7 @@ public class Industry extends IndustryTables implements IPoolItem
 			final Industry i = ii.next();
 			if (i.xy != null &&
 					i.type == type &&
-					i.town == t) {
+					i.getTown() == t) {
 				Global._error_message = Str.STR_0287_ONLY_ONE_ALLOWED_PER_TOWN;
 				return null;
 			}
@@ -1247,6 +1250,11 @@ public class Industry extends IndustryTables implements IPoolItem
 
 		return t;
 	}
+
+	private Town getTown() {
+		return Town.GetTown(townId);
+	}
+
 
 	static final byte _industry_map5_bits[] = {
 			16, 16, 16, 16, 16, 16, 16, 16,
@@ -1445,7 +1453,7 @@ public class Industry extends IndustryTables implements IPoolItem
 			i.production_rate[1] =  Math.min((Hal.RandomRange(256) + 128) * i.production_rate[1] >> 8 , 255);
 		}
 
-		i.town = t;
+		i.townId = t.index;
 		i.owner =  owner;
 
 		r = Hal.Random();
@@ -1809,7 +1817,7 @@ public class Industry extends IndustryTables implements IPoolItem
 		}
 
 		Global.SetDParam(0, type + Str.STR_4802_COAL_MINE);
-		Global.SetDParam(1, i.town.index);
+		Global.SetDParam(1, i.townId);
 		NewsItem.AddNewsItem(
 				(type != IT_FOREST) ?
 						Str.STR_482D_NEW_UNDER_CONSTRUCTION : Str.STR_482E_NEW_BEING_PLANTED_NEAR,
@@ -2001,7 +2009,7 @@ public class Industry extends IndustryTables implements IPoolItem
 		}
 	}
 
-	final ChunkHandler _industry_chunk_handlers[] = {
+	final Chunk Handler _industry_chunk_handlers[] = {
 		{ 'INDY', Save_INDY, Load_INDY, CH_ARRAY | CH_LAST},
 	};
 
@@ -2541,10 +2549,10 @@ public class Industry extends IndustryTables implements IPoolItem
 
 			// default to string sorting if they are otherwise equal
 			if (r == 0) {
-				Global.SetDParam(0, i.town.index);
+				Global.SetDParam(0, i.townId);
 				String buf1 = Global.GetString(Str.STR_TOWN);
 
-				Global.SetDParam(0, j.town.index);
+				Global.SetDParam(0, j.townId);
 				String buf2 = Global.GetString(Str.STR_TOWN);
 
 				r = buf1.compareToIgnoreCase(buf2);

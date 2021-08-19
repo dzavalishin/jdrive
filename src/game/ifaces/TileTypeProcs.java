@@ -1,5 +1,6 @@
 package game.ifaces;
 
+import java.io.Serializable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.ToIntBiFunction;
@@ -10,7 +11,8 @@ import game.TileIndex;
 import game.TileInfo;
 import game.struct.ProducedCargo;
 
-public class TileTypeProcs {
+public class TileTypeProcs implements Serializable 
+{
 	public TileTypeProcs(
 			Consumer<TileInfo> draw_tile,
 			Function<TileInfo,Integer> get_slope_z,

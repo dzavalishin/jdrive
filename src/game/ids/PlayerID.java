@@ -1,13 +1,15 @@
 package game.ids;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import game.Global;
 import game.Player;
 
-public class PlayerID extends AbstractID {
-
+public class PlayerID extends AbstractID implements Serializable 
+{
+	private static final long serialVersionUID = 1L;
 
 	private PlayerID(int i) {
 		super(i);

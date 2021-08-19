@@ -1,5 +1,9 @@
 package game;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -8,7 +12,7 @@ import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
 import game.util.MemoryPool;
 
-public class Depot implements IPoolItem
+public class Depot implements IPoolItem, Serializable
 {
 	TileIndex xy;
 	int town_index;
@@ -171,28 +175,6 @@ public class Depot implements IPoolItem
 		return 0 != ((0x4C >> direction) & tileh);
 	}
 
-	
-	
-
-
-		/* Max depots: 64000 (8 * 8000) */
-		//DEPOT_POOL_BLOCK_SIZE_BITS = 3,       /* In bits, so (1 << 3) == 8 */
-		//DEPOT_POOL_MAX_BLOCKS      = 8000,
-
-	// TODO fixme index
-	/**
-	 * Called if a new block is added to the depot-pool
-	 * /
-	static private void DepotPoolNewBlock(int start_item)
-	{
-		Depot depot;
-
-		FOR_ALL_DEPOTS_FROM(depot, start_item)
-			depot.index = start_item++;
-	}
-
-	/* Initialize the town-pool */
-	//MemoryPool _depot_pool = { "Depots", DEPOT_POOL_MAX_BLOCKS, DEPOT_POOL_BLOCK_SIZE_BITS, sizeof(Depot), &DepotPoolNewBlock, 0, 0, null };
 
 
 	/**
@@ -217,10 +199,8 @@ public class Depot implements IPoolItem
 	 */
 	static Depot AllocateDepot()
 	{
-		//Depot *depot;
 		Depot [] ret = {null};
 
-		//FOR_ALL_DEPOTS(depot) {
 		_depot_pool.forEach( (i,depot) ->
 		{
 			if (!depot.IsValidDepot()) {
@@ -322,6 +302,15 @@ public class Depot implements IPoolItem
 	};
 	*/
 	
+	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	{
+		_depot_pool = (MemoryPool<Depot>) oin.readObject();
+	}
+
+	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	{
+		oos.writeObject(_depot_pool);		
+	}
 
 }
 

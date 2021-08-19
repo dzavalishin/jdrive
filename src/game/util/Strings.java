@@ -728,7 +728,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 					// First print the town name and the industry type name
 					// The string STR_INDUSTRY_PATTERN controls the formatting
-					args[0] = i.town.index;
+					args[0] = i.townId;
 					args[1] = i.type + STR_4802_COAL_MINE;
 					buff.append( FormatString( StringGetStringPtr(STR_INDUSTRY_FORMAT), args, modifier >> 24) );
 					modifier = 0;

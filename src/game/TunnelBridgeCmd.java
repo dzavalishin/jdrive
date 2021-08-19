@@ -1,6 +1,8 @@
 package game;
 
 import game.tables.TunnelBridgeTables;
+import game.util.TownTables;
+
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.ids.PlayerID;
@@ -662,7 +664,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		// check if you're allowed to remove the tunnel owned by a town
 		// removal allowal depends on difficulty settings
 		if (tile.IsTileOwner(Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR) {
-			if (!Town.CheckforTownRating(tile, flags, t, Town.TUNNELBRIDGE_REMOVE)) {
+			if (!Town.CheckforTownRating(tile, flags, t, TownTables.TUNNELBRIDGE_REMOVE)) {
 				Global.SetDParam(0, t.index);
 				return Cmd.return_cmd_error(Str.STR_2009_LOCAL_AUTHORITY_REFUSES);
 			}
@@ -678,7 +680,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			Rail.UpdateSignalsOnSegment(tile, _updsignals_tunnel_dir[tile_dir]);
 			Rail.UpdateSignalsOnSegment(endtile, _updsignals_tunnel_dir[endtile_dir]);
 			if (tile.IsTileOwner(Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR)
-				t.ChangeTownRating(Town.RATING_TUNNEL_BRIDGE_DOWN_STEP, Town.RATING_TUNNEL_BRIDGE_MINIMUM);
+				t.ChangeTownRating(TownTables.RATING_TUNNEL_BRIDGE_DOWN_STEP, TownTables.RATING_TUNNEL_BRIDGE_MINIMUM);
 		}
 		return Global._price.clear_tunnel * (length[0] + 1);
 	}
@@ -784,7 +786,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		// check if you're allowed to remove the bridge owned by a town.
 		// removal allowal depends on difficulty settings
 		if (tile.IsTileOwner(Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR) {
-			if (!Town.CheckforTownRating(tile, flags, t, Town.TUNNELBRIDGE_REMOVE))
+			if (!Town.CheckforTownRating(tile, flags, t, TownTables.TUNNELBRIDGE_REMOVE))
 				return Cmd.CMD_ERROR;
 		}
 
@@ -797,7 +799,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			//checks if the owner is town then decrease town rating by RATING_TUNNEL_BRIDGE_DOWN_STEP until
 			// you have a "Poor" (0) town rating
 			if (tile.IsTileOwner(Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR)
-				t.ChangeTownRating(Town.RATING_TUNNEL_BRIDGE_DOWN_STEP, Town.RATING_TUNNEL_BRIDGE_MINIMUM);
+				t.ChangeTownRating(TownTables.RATING_TUNNEL_BRIDGE_DOWN_STEP, TownTables.RATING_TUNNEL_BRIDGE_MINIMUM);
 
 			do {
 				m5 = c.getMap().m5;

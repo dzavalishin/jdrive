@@ -9,9 +9,10 @@ import game.ids.PlayerID;
 import game.ids.StringID;
 import game.util.BitOps;
 import game.util.Strings;
+import game.util.TownTables;
 
 // extends to have finalants too
-public abstract class TownGui extends Town 
+public abstract class TownGui //extends Town 
 {
 
 	// used to get a sorted list of the towns
@@ -58,7 +59,7 @@ public abstract class TownGui extends Town
 				// if unwanted, disable everything.
 				if (t.unwanted[pid.id] != 0) {
 					avail_buttons = 0;
-				} else if (t.ratings[pid.id] < RATING_BRIBE_MAXIMUM) {
+				} else if (t.ratings[pid.id] < TownTables.RATING_BRIBE_MAXIMUM) {
 					avail_buttons = BitOps.RETSETBIT(avail_buttons, 7); // Allow bribing
 				}
 			}
@@ -67,8 +68,8 @@ public abstract class TownGui extends Town
 			avail = Player.GetPlayer(pid).player_money + Global._price.station_value * 200;
 			ref = Global._price.build_industry >> 8;
 
-				for (i = 0; i != _town_action_costs.length; i++, avail_buttons >>= 1) {
-					if (BitOps.HASBIT(avail_buttons, 0) && avail >= _town_action_costs[i] * ref) {
+				for (i = 0; i != Town._town_action_costs.length; i++, avail_buttons >>= 1) {
+					if (BitOps.HASBIT(avail_buttons, 0) && avail >= Town._town_action_costs[i] * ref) {
 						buttons = BitOps.RETSETBIT(buttons, i);
 						num++;
 					}
@@ -103,7 +104,7 @@ public abstract class TownGui extends Town
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Town t = GetTown(w.window_number);
+			final Town t = Town.GetTown(w.window_number);
 			int [] numact = {0};
 			int buttons = GetMaskOfTownActions(numact, Global._local_player, t);
 
@@ -141,19 +142,19 @@ public abstract class TownGui extends Town
 						int r = t.ratings[p.index.id];
 						int str = Str.STR_3035_APPALLING; // Apalling
 
-						if( r > RATING_APPALLING) {
+						if( r > TownTables.RATING_APPALLING) {
 							str++;
-							if(r > RATING_VERYPOOR) {											// Very Poor
+							if(r > TownTables.RATING_VERYPOOR) {											// Very Poor
 								str++;
-								if(r > RATING_POOR) {												// Poor
+								if(r > TownTables.RATING_POOR) {												// Poor
 									str++;
-									if( r > RATING_MEDIOCRE) {											// Mediocore
+									if( r > TownTables.RATING_MEDIOCRE) {											// Mediocore
 										str++;						
-										if(r > RATING_GOOD) {											// Good
+										if(r > TownTables.RATING_GOOD) {											// Good
 											str++;						
-											if(r > RATING_VERYGOOD) {											// Very Good
+											if(r > TownTables.RATING_VERYGOOD) {											// Very Good
 												str++;
-												if(r <= RATING_EXCELLENT) 											// Excellent
+												if(r <= TownTables.RATING_EXCELLENT) 											// Excellent
 													str++;														// Outstanding
 											}}}}}}
 
@@ -191,7 +192,7 @@ public abstract class TownGui extends Town
 				int i = w.as_def_d().data_1;
 
 				if (i != -1) {
-					Global.SetDParam(1, (Global._price.build_industry >> 8) * _town_action_costs[i]);
+					Global.SetDParam(1, (Global._price.build_industry >> 8) * Town._town_action_costs[i]);
 					Global.SetDParam(0, Str.STR_2046_SMALL_ADVERTISING_CAMPAIGN + i);
 					Gfx.DrawStringMultiLine(2, 159, new StringID(Str.STR_204D_INITIATE_A_SMALL_LOCAL + i), 313);
 				}
@@ -202,7 +203,7 @@ public abstract class TownGui extends Town
 		case WE_CLICK:
 			switch (e.widget) {
 			case 3: { /* listbox */
-				final Town t = GetTown(w.window_number);
+				final Town t = Town.GetTown(w.window_number);
 				int y = (e.pt.y - 0x6B) / 10;
 
 				if (!BitOps.IS_INT_INSIDE(y, 0, 5)) return;
@@ -216,7 +217,7 @@ public abstract class TownGui extends Town
 			}
 
 			case 6: { /* carry out the action */
-				Cmd.DoCommandP(GetTown(w.window_number).getXy(), w.window_number, w.as_def_d().data_1, null, Cmd.CMD_DO_TOWN_ACTION | Cmd.CMD_MSG(Str.STR_00B4_CAN_T_DO_THIS));
+				Cmd.DoCommandP(Town.GetTown(w.window_number).getXy(), w.window_number, w.as_def_d().data_1, null, Cmd.CMD_DO_TOWN_ACTION | Cmd.CMD_MSG(Str.STR_00B4_CAN_T_DO_THIS));
 				break;
 			}
 			}
@@ -250,7 +251,7 @@ public abstract class TownGui extends Town
 
 	static void TownViewWndProc(Window w, WindowEvent e)
 	{
-		Town t = GetTown(w.window_number);
+		Town t = Town.GetTown(w.window_number);
 
 		switch (e.event) {
 		case WE_PAINT:
@@ -374,7 +375,7 @@ public abstract class TownGui extends Town
 
 		if (w != null) {
 			w.flags4 |= Window.WF_DISABLE_VP_SCROLL;
-			ViewPort.AssignWindowViewport(w, 3, 17, 0xFE, 0x56, GetTown(town).getXy().tile, 1);
+			ViewPort.AssignWindowViewport(w, 3, 17, 0xFE, 0x56, Town.GetTown(town).getXy().tile, 1);
 		}
 	}
 
@@ -408,7 +409,7 @@ public abstract class TownGui extends Town
 			String buf2 = Strings.GetStringWithArgs(Str.STR_TOWN, (Object[])argv);
 
 			r = buf1.compareTo(buf2);
-			if(0 != (_town_sort_order & 1)) r = -r;
+			if(0 != (Town._town_sort_order & 1)) r = -r;
 			return r;
 		}
 	}
@@ -416,10 +417,10 @@ public abstract class TownGui extends Town
 
 	static class TownPopSorter implements Comparator<Integer> {
 		public int compare(Integer a, Integer b) {
-			final Town ta = GetTown(a);
-			final Town tb = GetTown(b);
+			final Town ta = Town.GetTown(a);
+			final Town tb = Town.GetTown(b);
 			int r = ta.population - tb.population;
-			if(0 !=  (_town_sort_order & 1)) r = -r;
+			if(0 !=  (Town._town_sort_order & 1)) r = -r;
 			return r;
 		}
 	}
@@ -432,7 +433,7 @@ public abstract class TownGui extends Town
 
 		/* Create array for sorting */
 		//_town_sort = realloc(_town_sort, GetTownPoolSize() * sizeof(_town_sort[0]));
-		_town_sort = new Integer[GetTownPoolSize()];
+		_town_sort = new Integer[Town.GetTownPoolSize()];
 		if (_town_sort == null)
 			Global.error("Could not allocate memory for the town-sorting-list");
 
@@ -446,7 +447,7 @@ public abstract class TownGui extends Town
 
 		//_last_town_idx = 0; // used for "cache"
 		//qsort(_town_sort, n, sizeof(_town_sort[0]), _town_sort_order & 2 ? TownPopSorter : TownNameSorter);
-		Comparator<Integer> sorter = (0 != (_town_sort_order & 2)) ? new TownPopSorter() : new TownNameSorter();
+		Comparator<Integer> sorter = (0 != (Town._town_sort_order & 2)) ? new TownPopSorter() : new TownNameSorter();
 		Arrays.sort(_town_sort, sorter );
 
 		Global.DEBUG_misc( 1, "Resorting Towns list...");
@@ -457,15 +458,15 @@ public abstract class TownGui extends Town
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			if (_town_sort_dirty) {
-				_town_sort_dirty = false;
+			if (Town._town_sort_dirty) {
+				Town._town_sort_dirty = false;
 				MakeSortedTownList();
 			}
 
 			MiscGui.SetVScrollCount(w, _num_town_sort);
 
 			w.DrawWindowWidgets();
-			Gfx.DoDrawString((_town_sort_order & 1) != 0 ? Gfx.DOWNARROW : Gfx.UPARROW, (_town_sort_order <= 1) ? 88 : 187, 15, 0x10);
+			Gfx.DoDrawString((Town._town_sort_order & 1) != 0 ? Gfx.DOWNARROW : Gfx.UPARROW, (Town._town_sort_order <= 1) ? 88 : 187, 15, 0x10);
 
 			{
 				Town t;
@@ -474,7 +475,7 @@ public abstract class TownGui extends Town
 				int y = 28;
 
 				while (i < _num_town_sort) {
-					t = GetTown(_town_sort[i]);
+					t = Town.GetTown(_town_sort[i]);
 
 					assert(t.getXy() != null);
 
@@ -486,7 +487,7 @@ public abstract class TownGui extends Town
 					i++;
 					if (++n == w.vscroll.cap) break; // max number of towns in 1 window
 				}
-				Global.SetDParam(0, GetWorldPopulation());
+				Global.SetDParam(0, Town.GetWorldPopulation());
 				Gfx.DrawString(3, w.height - 12 + 2, Str.STR_TOWN_POPULATION, 0);
 			}
 		} break;
@@ -494,14 +495,14 @@ public abstract class TownGui extends Town
 		case WE_CLICK:
 			switch(e.widget) {
 			case 3: { /* Sort by Name ascending/descending */
-				_town_sort_order = (_town_sort_order == 0) ? 1 : 0;
-				_town_sort_dirty = true;
+				Town._town_sort_order = (Town._town_sort_order == 0) ? 1 : 0;
+				Town._town_sort_dirty = true;
 				w.SetWindowDirty();
 			} break;
 
 			case 4: { /* Sort by Population ascending/descending */
-				_town_sort_order = (_town_sort_order == 2) ? 3 : 2;
-				_town_sort_dirty = true;
+				Town._town_sort_order = (Town._town_sort_order == 2) ? 3 : 2;
+				Town._town_sort_dirty = true;
 				w.SetWindowDirty();
 			} break;
 
@@ -515,7 +516,7 @@ public abstract class TownGui extends Town
 				if (id_v >= _num_town_sort) return; // click out of town bounds
 
 				{
-					final Town t = GetTown(_town_sort[id_v]);
+					final Town t = Town.GetTown(_town_sort[id_v]);
 					assert(t.getXy() != null);
 
 					ViewPort.ScrollMainWindowToTile(t.getXy());

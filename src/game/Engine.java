@@ -10,11 +10,17 @@ import game.tables.EngineTables;
 import game.tables.EngineTables2;
 import game.util.BinaryString;
 import game.util.BitOps;
+import game.util.MemoryPool;
 import game.util.Strings;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 
-public class Engine extends EngineTables {
+public class Engine extends EngineTables implements Serializable 
+{
 	int intro_date;
 	int age;
 	int reliability;
@@ -37,9 +43,6 @@ public class Engine extends EngineTables {
 	
 	static public final int INVALID_ENGINE  = Vehicle.INVALID_ENGINE;
 	static public final EngineID INVALID_ENGINE_ID  = EngineID.get( Vehicle.INVALID_ENGINE );
-
-
-
 	public static final int CALLBACK_FAILED = 0xFFFF;
 
 
@@ -56,24 +59,6 @@ public class Engine extends EngineTables {
 	
 	
 
-	
-	
-	
-	
-	
-	
-	
-
-
-
-	/* in global!
-	static EngineInfo 			[] _engine_info = new EngineInfo[Global.TOTAL_NUM_ENGINES];
-	static RailVehicleInfo 		[] _rail_vehicle_info = new RailVehicleInfo[Global.NUM_TRAIN_ENGINES];
-	static ShipVehicleInfo 		[] _ship_vehicle_info = new ShipVehicleInfo[Global.NUM_SHIP_ENGINES];
-	static AircraftVehicleInfo 	[] _aircraft_vehicle_info = new AircraftVehicleInfo[Global.NUM_AIRCRAFT_ENGINES];
-	static RoadVehicleInfo 		[] _road_vehicle_info = new RoadVehicleInfo [Global.NUM_ROAD_ENGINES];
-	*/
-	
 	
 	static  final RailVehicleInfo  RailVehInfo(int e)
 	{
@@ -1511,6 +1496,16 @@ public class Engine extends EngineTables {
 	}
 
 	
+	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	{
+		_engines = (Engine[]) oin.readObject();
+		AdjustAvailAircraft();
+	}
+
+	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	{
+		oos.writeObject(_engines);		
+	}
 	
 
 }

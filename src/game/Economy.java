@@ -890,11 +890,11 @@ public class Economy extends EconomeTables
 
 		fr.distance = (int)-1;
 
-		fr.from = from = Town.GetTown(Hal.RandomRange(Town._total_towns));
+		fr.from = from = Town.getRandomTown();//Town.GetTown(Hal.RandomRange(Town._total_towns));
 		if (from.getXy() == null || from.population < 400)
 			return;
 
-		fr.to = to = Town.GetTown(Hal.RandomRange(Town._total_towns));
+		fr.to = to = Town.getRandomTown();//Town.GetTown(Hal.RandomRange(Town._total_towns));
 		if (from==to || to.getXy() == null || to.population < 400 || to.pct_pass_transported > 42)
 			return;
 
@@ -934,7 +934,7 @@ public class Economy extends EconomeTables
 
 		if (cargo == AcceptedCargo.CT_GOODS || cargo == AcceptedCargo.CT_FOOD) {
 			// The destination is a town
-			Town t = Town.GetTown(Hal.RandomRange(Town._total_towns));
+			Town t = Town.getRandomTown(); //GetTown(Hal.RandomRange(Town._total_towns));
 
 			// Only want big towns
 			if (t.getXy() == null || t.population < 900)

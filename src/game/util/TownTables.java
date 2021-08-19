@@ -1,12 +1,18 @@
 package game.util;
 
+import java.io.Serializable;
+
 import game.Str;
 import game.struct.DrawTownTileStruct;
 import game.struct.HousetypeYear;
 
 public class TownTables 
-extends Str // just import strings 
+extends Str // just import strings
+implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
+
 	public static final int HOUSE_MAX            = 110;
 
 

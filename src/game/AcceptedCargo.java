@@ -1,9 +1,12 @@
 package game;
 
+import java.io.Serializable;
+
 // in original code it is an array
 // typedef uint AcceptedCargo[NUM_CARGO];
 
-public class AcceptedCargo {
+public class AcceptedCargo implements Serializable 
+{
 
 	int ct[] = new int[NUM_CARGO];
 

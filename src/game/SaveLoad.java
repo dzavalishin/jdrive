@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import game.util.MemoryPool;
+
 /** 
  * SaveLoad type struct. 
  * Do NOT use this directly but use the SLE_ 
@@ -43,8 +45,7 @@ public class SaveLoad
 			fos = new FileOutputStream("temp.sav");
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			
-			oos.writeObject(Global._m);
-			oos.writeObject(Town._town_pool);
+			writeAll(oos);
 			
 			oos.close();
 			
@@ -54,6 +55,7 @@ public class SaveLoad
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			//System.err.println(  );
 		}
 		
 		/*
@@ -70,19 +72,25 @@ public class SaveLoad
 		
 	}
 
+
+
+
 	
 	
 	static void load()
 	{
 		FileInputStream fis;
+		ObjectInputStream oin = null;
+		
 		try 
 		{
 			
 			fis = new FileInputStream("temp.sav");
-			ObjectInputStream oin = new ObjectInputStream(fis);
-			Global._m = (Tile[]) oin.readObject();
+			oin = new ObjectInputStream(fis);
 			
-			oin.close();
+			readAll(oin);
+			
+			Hal.MarkWholeScreenDirty();
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -93,6 +101,16 @@ public class SaveLoad
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} 
+		finally
+		{
+			if(oin != null )
+				try {
+					oin.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		
 		/*
@@ -103,6 +121,26 @@ FileInputStream fis = new FileInputStream("settings.xml");
     fis.close();
     return decodedSettings;		 */
 		
+	}
+
+	
+	// TODO Misc.java has a lot of stuff to save/load
+
+	private static void writeAll(ObjectOutputStream oos) throws IOException {
+		oos.writeObject(Global._m);
+		Town.saveGame(oos);
+		Engine.saveGame(oos);
+		Depot.saveGame(oos);
+		Order.saveGame(oos);
+	}
+
+
+	private static void readAll(ObjectInputStream oin) throws IOException, ClassNotFoundException {
+		Global._m = (Tile[]) oin.readObject();
+		Town.loadGame(oin);
+		Engine.loadGame(oin);
+		Depot.loadGame(oin);
+		Order.loadGame(oin);
 	}
 	
 	

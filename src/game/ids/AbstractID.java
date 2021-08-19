@@ -1,14 +1,16 @@
 package game.ids;
 
+import java.io.Serializable;
 
-public abstract class AbstractID {
+public abstract class AbstractID implements Serializable 
+{
+	private static final long serialVersionUID = 1L;
+	
 	public final int id;
 	
 	protected AbstractID(int id) {
 		this.id = id;
 	}
-	
-	//@Override	public abstract boolean equals(Object obj);
 	
 	@Override
 	public boolean equals(Object obj) {

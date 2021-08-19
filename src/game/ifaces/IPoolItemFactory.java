@@ -1,6 +1,9 @@
 package game.ifaces;
 
-public interface IPoolItemFactory<T> {
+import java.io.Serializable;
+
+public interface IPoolItemFactory<T> extends Serializable 
+{
 
 	T createObject();
 	

@@ -1,5 +1,9 @@
 package game;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -10,7 +14,7 @@ import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
 import game.util.MemoryPool;
 
-public class Order implements IPoolItem 
+public class Order implements IPoolItem, Serializable 
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -118,25 +122,6 @@ public class Order implements IPoolItem
 
 	
 	
-/*
-	enum {
-		// Max orders: 64000 (64 * 1000) 
-		ORDER_POOL_BLOCK_SIZE_BITS = 6,       //* In bits, so (1 << 6) == 64 
-		ORDER_POOL_MAX_BLOCKS      = 1000,
-	};
-*/
-	/**
-	 * Called if a new block is added to the order-pool
-	 * /
-	static void OrderPoolNewBlock(int start_item)
-	{
-		Order order;
-
-		FOR_ALL_ORDERS_FROM(order, start_item) order.index = start_item++;
-	}*/
-
-	/* Initialize the order-pool */
-	//MemoryPool _order_pool = { "Orders", ORDER_POOL_MAX_BLOCKS, ORDER_POOL_BLOCK_SIZE_BITS, sizeof(Order), &OrderPoolNewBlock, 0, 0, null };
 
 	/**
 	 *
@@ -207,7 +192,6 @@ public class Order implements IPoolItem
 	{
 		Order [] ret = { null };
 
-		//FOR_ALL_ORDERS(order)
 		_order_pool.forEach( (ii,order) ->
 		{
 			if (order.type == OT_NOTHING) {
@@ -1105,7 +1089,7 @@ public class Order implements IPoolItem
 		}
 	}; 
 
-	private final static MemoryPool<Order> _order_pool = new MemoryPool<Order>(factory);
+	private static MemoryPool<Order> _order_pool = new MemoryPool<Order>(factory);
 
 	
 	private Order getOrder(int index)
@@ -1264,4 +1248,14 @@ public class Order implements IPoolItem
 	
 */
 
+	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	{
+		_order_pool = (MemoryPool<Order>) oin.readObject();
+	}
+
+	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	{
+		oos.writeObject(_order_pool);		
+	}
+	
 }

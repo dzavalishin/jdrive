@@ -100,6 +100,10 @@ public class MemoryPool<CType extends IPoolItem> implements Serializable
 		return pool.values().toArray(Industry[]::new);
 	}
 
+	public int size() {
+		return pool.size();
+	}
+
 	
 }
 

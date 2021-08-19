@@ -370,7 +370,7 @@ public class DisasterCmd extends DisasterTables
 				i = Industry.GetIndustry(v.dest_tile.tile);
 				DestructIndustry(i);
 
-				Global.SetDParam(0, i.town.index);
+				Global.SetDParam(0, i.townId);
 				NewsItem.AddNewsItem(Str.STR_B002_OIL_REFINERY_EXPLOSION, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTile(), 0);
 				//SndPlayTileFx(SND_12_EXPLOSION, i.xy);
 			}
@@ -441,7 +441,7 @@ public class DisasterCmd extends DisasterTables
 				i = Industry.GetIndustry(v.dest_tile.tile);
 				DestructIndustry(i);
 
-				Global.SetDParam(0, i.town.index);
+				Global.SetDParam(0, i.townId);
 				NewsItem.AddNewsItem(Str.STR_B003_FACTORY_DESTROYED_IN_SUSPICIOUS, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTile(), 0);
 				//SndPlayTileFx(SND_12_EXPLOSION, i.xy);
 			}
@@ -912,7 +912,7 @@ public class DisasterCmd extends DisasterTables
 				if (i.xy != null && i.type == Industry.IT_COAL_MINE && --index < 0) 
 				{
 
-					Global.SetDParam(0, i.town.index);
+					Global.SetDParam(0, i.townId);
 					NewsItem.AddNewsItem(Str.STR_B005_COAL_MINE_SUBSIDENCE_LEAVES,
 							NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.iadd(1, 1).getTile(), 0);
 
