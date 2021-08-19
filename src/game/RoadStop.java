@@ -17,19 +17,16 @@ public class RoadStop implements IPoolItem
 
 	private static final long serialVersionUID = 1L;
 	
-	TileIndex xy;
-	boolean used;
-	byte status;
-	int index;
-	int slot[];// = new int[NUM_SLOTS];
-	//StationID station;
-	int station;
-	int type;
-	//RoadStop next;
-	//RoadStop prev;
+	TileIndex	xy;
+	boolean		used;
+	byte		status;
+	int			index;
+	int			slot[];
+	int			station;
+	int			type;
 
-	public static final int INVALID_STATION = -1; //0xFFFF;
-	public static final int INVALID_SLOT = -1; //0xFFFF;
+	public static final int INVALID_STATION = -1; 
+	public static final int INVALID_SLOT = -1; 
 	public static final int NUM_SLOTS = Station.NUM_SLOTS;
 	public static final int ROAD_STOP_LIMIT = 8;
 
