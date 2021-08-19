@@ -12,8 +12,10 @@ import game.struct.Point;
 
 public class SignStruct implements IPoolItem
 {
+	private static final long serialVersionUID = 1L;
+	
 	StringID     str;
-	ViewportSign sign = new ViewportSign();
+	ViewportSign sign;
 	int          x;
 	int          y;
 	byte         z;
@@ -93,29 +95,12 @@ public class SignStruct implements IPoolItem
 
 	private static SignStruct _new_sign_struct;
 
-	/* Max signs: 64000 (4 * 16000) */
-	//SIGN_POOL_BLOCK_SIZE_BITS = 2,       /* In bits, so (1 << 2) == 4 */
-	//SIGN_POOL_MAX_BLOCKS      = 16000,
-
-	/**
-	 * Called if a new block is added to the sign-pool
-	 * /
-	static void SignPoolNewBlock(int start_item)
-	{
-		SignStruct *ss;
-
-		FOR_ALL_SIGNS_FROM(ss, start_item)
-			ss.index = start_item++;
-	}*/
 
 	@Override
 	public void setIndex(int index) {
 		this.index = index;	
 	}
 
-
-	/* Initialize the sign-pool */
-	//MemoryPool _sign_pool = { "Signs", SIGN_POOL_MAX_BLOCKS, SIGN_POOL_BLOCK_SIZE_BITS, sizeof(SignStruct), &SignPoolNewBlock, 0, 0, NULL };
 
 	/**
 	 *
@@ -136,9 +121,6 @@ public class SignStruct implements IPoolItem
 	 */
 	static void UpdateAllSignVirtCoords()
 	{
-		//SignStruct *ss;
-
-		//FOR_ALL_SIGNS(ss)
 		_sign_pool.forEach( (i,ss) ->
 		{
 			if (ss.str != null)
@@ -176,7 +158,6 @@ public class SignStruct implements IPoolItem
 			if (ss.str == null) {
 				int index = ss.index;
 
-				//memset(ss, 0, sizeof(SignStruct));
 				ss.clear();
 				ss.index = index;
 

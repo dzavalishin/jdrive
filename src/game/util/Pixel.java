@@ -138,6 +138,23 @@ public class Pixel
 		shift(1);
 		return v;
 	}
+
+	/**
+	 * Write and increment pointer.
+	 * @param b Byte to write.
+	 */
+	public void wpp(byte b) {
+		w(0, b);
+		shift(1);
+		
+	}
+	
+	/**
+	 * Increment pointer
+	 */
+	public void inc() {
+		shift(1);		
+	}
 	
 	
 	

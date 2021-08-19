@@ -115,7 +115,7 @@ public class Gfx extends PaletteTabs
 			s.madd( spitch ); 
 		}
 	}
-	
+
 
 	static void GfxScroll(int left, int top, int width, int height, int xo, int yo)
 	{
@@ -540,7 +540,7 @@ public class Gfx extends PaletteTabs
 			for(;;) {
 				if (sp >= sc.length) 
 					return num + (base << 16);
-				
+
 				c = sc[sp++]; // *str++;
 				if (c == ASCII_LETTERSTART) last_space = sp;
 
@@ -604,7 +604,7 @@ public class Gfx extends PaletteTabs
 			for(;;) {
 				if(sp >= sc.length)
 					return;
-				
+
 				c = sc[sp++]; // *src++;
 				if (c == 0) {
 					y += mt;
@@ -653,8 +653,8 @@ public class Gfx extends PaletteTabs
 				if( sp >= sc.length) {
 					y += mt;
 					//if (--num < 0) {
-						_stringwidth_base = 0;
-						return;
+					_stringwidth_base = 0;
+					return;
 					//}
 				}
 				c = sc[sp++]; // *src++;
@@ -1106,7 +1106,7 @@ public class Gfx extends PaletteTabs
 		}
 	}
 
-	
+
 	private static void GfxBlitTileZoomMedium(BlitterParams bp)
 	{
 		Pixel src_o = new Pixel( bp.sprite );
@@ -1266,7 +1266,7 @@ public class Gfx extends PaletteTabs
 		}
 	}
 
-	
+
 	private static void GfxBlitZoomMediumUncomp(BlitterParams bp)
 	{
 		final Pixel src = new Pixel( bp.sprite );
@@ -1319,46 +1319,45 @@ public class Gfx extends PaletteTabs
 			}
 		}
 	}
-	/*
+
 	private static void GfxBlitTileZoomOut(BlitterParams bp)
 	{
-		final byte* src_o = bp.sprite;
-		final byte* src;
+		final Pixel src_o = new Pixel( bp.sprite );
+		Pixel src;
 		int num, skip;
-		byte done;
-		// Pixel  
-		byte  *dst;
-		final byte* ctab;
+		byte done;  
+		Pixel dst;
+		//final byte [] ctab;
 
-		if (bp.mode & 1) {
-			src_o += READ_LE_UINT16(src_o + bp.start_y * 2);
+		if(0 != (bp.mode & 1) ) {
+			src_o.madd( BitOps.READ_LE_UINT16(src_o.getMem(), bp.start_y * 2) );
 			for(;;) {
 				do {
-					done = src_o[0];
+					done = src_o.r(0);
 					num = done & 0x7F;
-					skip = src_o[1];
-					src = src_o + 2;
-					src_o += num + 2;
+					skip = src_o.r(1);
+					src = new Pixel(src_o, 2);
+					src_o.madd( num + 2 );
 
 					dst = bp.dst;
 
-					if (skip & 1) {
+					if(0 != (skip & 1) ) {
 						skip++;
-						src++;
+						src.inc();
 						if (--num == 0) continue;
 					}
 
-					if (skip & 2) {
+					if(0 != (skip & 2) ) {
 						skip += 2;
-						src += 2;
+						src.madd( 2 );
 						num -= 2;
 						if (num <= 0) continue;
 					}
 
 					if ( (skip -= bp.start_x) > 0) {
-						dst += skip >> 2;
+						dst.madd( skip >> 2 );
 					} else {
-						src -= skip;
+						src.madd( -skip );
 						num += skip;
 						if (num <= 0) continue;
 						skip = 0;
@@ -1370,59 +1369,60 @@ public class Gfx extends PaletteTabs
 						if (num <= 0) continue;
 					}
 
-					ctab = _color_remap_ptr;
+					byte [] ctab = _color_remap_ptr;
 					num = (num + 3) >> 2;
 						for (; num != 0; num--) {
-	 *dst = ctab[*src];
-							dst++;
-							src += 4;
+							//*dst = ctab[*src];
+							//dst++;
+							dst.wpp( ctab[0xFF & src.r(0)] );
+							src.madd( 4 );
 						}
-				} while (!(done & 0x80));
-				bp.dst += bp.pitch;
+				} while (0==(done & 0x80));
+				bp.dst.madd( bp.pitch );
 				if (--bp.height == 0) return;
 
 				do {
-					done = src_o[0];
-					src_o += (done & 0x7F) + 2;
-				} while (!(done & 0x80));
+					done = src_o.r(0);
+					src_o.madd( (done & 0x7F) + 2 );
+				} while (0==(done & 0x80));
 				if (--bp.height == 0) return;
 
 				do {
-					done = src_o[0];
-					src_o += (done & 0x7F) + 2;
-				} while (!(done & 0x80));
+					done = src_o.r(0);
+					src_o.madd( (done & 0x7F) + 2 );
+				} while (0==(done & 0x80));
 				if (--bp.height == 0) return;
 
 				do {
-					done = src_o[0];
-					src_o += (done & 0x7F) + 2;
-				} while (!(done & 0x80));
+					done = src_o.r(0);
+					src_o.madd( (done & 0x7F) + 2 );
+				} while (0==(done & 0x80));
 				if (--bp.height == 0) return;
 			}
-		} else if (bp.mode & 2) {
-			src_o += READ_LE_UINT16(src_o + bp.start_y * 2);
+		} else if(0 != (bp.mode & 2) ) {
+			src_o.madd( BitOps.READ_LE_UINT16(src_o.getMem(), bp.start_y * 2) );
 			for(;;) {
 				do {
-					done = src_o[0];
+					done = src_o.r(0);
 					num = done & 0x7F;
-					skip = src_o[1];
-					src_o += num + 2;
+					skip = src_o.r(1);
+					src_o.madd( num + 2 );
 
 					dst = bp.dst;
 
-					if (skip & 1) {
+					if(0 != (skip & 1) ) {
 						skip++;
 						if (--num == 0) continue;
 					}
 
-					if (skip & 2) {
+					if(0 != (skip & 2) ) {
 						skip += 2;
 						num -= 2;
 						if (num <= 0) continue;
 					}
 
 					if ( (skip -= bp.start_x) > 0) {
-						dst += skip >> 2;
+						dst.madd( skip >> 2 );
 					} else {
 						num += skip;
 						if (num <= 0) continue;
@@ -1435,64 +1435,64 @@ public class Gfx extends PaletteTabs
 						if (num <= 0) continue;
 					}
 
-					ctab = _color_remap_ptr;
+					byte [] ctab = _color_remap_ptr;
 					num = (num + 3) >> 2;
 						for (; num != 0; num--) {
-	 *dst = ctab[*dst];
-							dst++;
+							dst.w(0, ctab[0xFF & dst.r(0)] );
+							dst.inc();
 						}
 
-				} while (!(done & 0x80));
-				bp.dst += bp.pitch;
+				} while (0==(done & 0x80));
+				bp.dst.madd( bp.pitch );
 				if (--bp.height == 0) return;
 
 				do {
-					done = src_o[0];
-					src_o += (done & 0x7F) + 2;
-				} while (!(done & 0x80));
+					done = src_o.r(0);
+					src_o.madd( (done & 0x7F) + 2 );
+				} while (0==(done & 0x80));
 				if (--bp.height == 0) return;
 
 				do {
-					done = src_o[0];
-					src_o += (done & 0x7F) + 2;
-				} while (!(done & 0x80));
+					done = src_o.r(0);
+					src_o.madd( (done & 0x7F) + 2 );
+				} while (0==(done & 0x80));
 				if (--bp.height == 0) return;
 
 				do {
-					done = src_o[0];
-					src_o += (done & 0x7F) + 2;
-				} while (!(done & 0x80));
+					done = src_o.r(0);
+					src_o.madd( (done & 0x7F) + 2 );
+				} while (0==(done & 0x80));
 				if (--bp.height == 0) return;
 			}
 		} else {
-			src_o += READ_LE_UINT16(src_o + bp.start_y * 2);
+			src_o.madd( BitOps.READ_LE_UINT16(src_o.getMem(), bp.start_y * 2) );
 			for(;;) {
 				do {
-					done = src_o[0];
+					done = src_o.r(0);
 					num = done & 0x7F;
-					skip = src_o[1];
-					src = src_o + 2;
-					src_o += num + 2;
+					skip = src_o.r(1);
+					src = new Pixel(src_o, 2);
+					src_o.madd( num + 2 );
 
-					dst = bp.dst;
+					dst = new Pixel( bp.dst );
 
-					if (skip & 1) {
+					if(0 != (skip & 1) ) {
 						skip++;
-						src++;
+						src.inc();;
 						if (--num == 0) continue;
 					}
 
-					if (skip & 2) {
+					if(0 != (skip & 2) ) {
 						skip += 2;
-						src += 2;
+						src.madd( 2 );
 						num -= 2;
 						if (num <= 0) continue;
 					}
 
 					if ( (skip -= bp.start_x) > 0) {
-						dst += skip >> 2;
+						dst.madd( skip >> 2 );
 					} else {
-						src -= skip;
+						src.madd( -skip );
 						num += skip;
 						if (num <= 0) continue;
 						skip = 0;
@@ -1507,31 +1507,32 @@ public class Gfx extends PaletteTabs
 					num = (num + 3) >> 2;
 
 						for (; num != 0; num--) {
-	 *dst = *src;
-							dst++;
-							src += 4;
+							//*dst = *src;
+							//dst++;
+							dst.wpp( src.r(0) );
+							src.madd( 4 );
 						}
-				} while (!(done & 0x80));
+				} while (0==(done & 0x80));
 
-				bp.dst += bp.pitch;
+				bp.dst.madd( bp.pitch );
 				if (--bp.height == 0) return;
 
 				do {
-					done = src_o[0];
-					src_o += (done & 0x7F) + 2;
-				} while (!(done & 0x80));
+					done = src_o.r(0);
+					src_o.madd( (done & 0x7F) + 2 );
+				} while (0==(done & 0x80));
 				if (--bp.height == 0) return;
 
 				do {
-					done = src_o[0];
-					src_o += (done & 0x7F) + 2;
-				} while (!(done & 0x80));
+					done = src_o.r(0);
+					src_o.madd( (done & 0x7F) + 2 );
+				} while (0==(done & 0x80));
 				if (--bp.height == 0) return;
 
 				do {
-					done = src_o[0];
-					src_o += (done & 0x7F) + 2;
-				} while (!(done & 0x80));
+					done = src_o.r(0);
+					src_o.madd( (done & 0x7F) + 2 );
+				} while (0==(done & 0x80));
 				if (--bp.height == 0) return;
 			}
 		}
@@ -1539,9 +1540,8 @@ public class Gfx extends PaletteTabs
 
 	private static void GfxBlitZoomOutUncomp(BlitterParams bp)
 	{
-		final byte* src = bp.sprite;
-		// Pixel  
-		byte  *dst = bp.dst;
+		final Pixel src = new Pixel( bp.sprite );
+		Pixel dst = bp.dst;
 		int height = bp.height;
 		int width = bp.width;
 		int i;
@@ -1549,50 +1549,52 @@ public class Gfx extends PaletteTabs
 		assert(height > 0);
 		assert(width > 0);
 
-		if (bp.mode & 1) {
-			if (bp.info & 1) {
-				final byte *ctab = _color_remap_ptr;
+		if(0 != (bp.mode & 1) ) {
+			if(0 != (bp.info & 1) ) {
+				final byte [] ctab = _color_remap_ptr;
 
 				for (height >>= 2; height != 0; height--) {
 					for (i = 0; i != width >> 2; i++) {
-						byte b = ctab[src[i * 4]];
+						byte b = ctab[0xFF & src.r(i * 4)];
 
-						if (b != 0) dst[i] = b;
+						if (b != 0) dst.w(i, b);
 					}
-					src += bp.width_org * 4;
-					dst += bp.pitch;
+					src.madd( bp.width_org * 4 );
+					dst.madd( bp.pitch );
 				}
 			}
-		} else if (bp.mode & 2) {
-			if (bp.info & 1) {
-				final byte *ctab = _color_remap_ptr;
+		} else if(0 != (bp.mode & 2) ) {
+			if(0 != (bp.info & 1) ) {
+				final byte [] ctab = _color_remap_ptr;
 
 				for (height >>= 2; height != 0; height--) {
 					for (i = 0; i != width >> 2; i++)
-						if (src[i * 4] != 0) dst[i] = ctab[dst[i]];
-					src += bp.width_org * 4;
-					dst += bp.pitch;
+						if (src.r(i * 4) != 0) dst.w(i, ctab[0xFF & dst.r(i)]);
+					src.madd( bp.width_org * 4 );
+					dst.madd( bp.pitch );
 				}
 			}
 		} else {
-			if (bp.info & 1) {
+			if(0 != (bp.info & 1) ) {
 				for (height >>= 2; height != 0; height--) {
 					for (i = 0; i != width >> 2; i++)
-						if (src[i * 4] != 0) dst[i] = src[i * 4];
-					src += bp.width_org * 4;
-					dst += bp.pitch;
+					{
+						byte sb = src.r(i * 4);
+						if (sb != 0) dst.w(i, sb);
+					}
+					src.madd( bp.width_org * 4 );
+					dst.madd( bp.pitch );
 				}
 			}
 		}
 	}
-	 */
-	//typedef void (*BlitZoomFunc)(BlitterParams bp);
+
 
 	static final BlitZoomFunc zf_tile[] =
 		{
 				Gfx::GfxBlitTileZoomIn,
 				Gfx::GfxBlitTileZoomMedium,
-				Gfx::GfxBlitTileZoomIn,
+				Gfx::GfxBlitTileZoomOut,
 
 				//Gfx::GfxBlitTileZoomIn,
 				//Gfx::GfxBlitTileZoomMedium,
@@ -1603,7 +1605,7 @@ public class Gfx extends PaletteTabs
 		{
 				Gfx::GfxBlitZoomInUncomp,
 				Gfx::GfxBlitZoomMediumUncomp,
-				Gfx::GfxBlitZoomInUncomp,
+				Gfx::GfxBlitZoomOutUncomp,
 
 				//Gfx::GfxBlitZoomInUncomp,
 				//Gfx::GfxBlitZoomMediumUncomp,
@@ -1618,7 +1620,7 @@ public class Gfx extends PaletteTabs
 		BlitterParams bp = new BlitterParams(dpi.dst_ptr);
 
 		// TODO Fix Zoom
-		dpi.zoom = Math.min(dpi.zoom, 1);
+		//dpi.zoom = Math.min(dpi.zoom, 1);
 
 		int zoom_mask = ~((1 << dpi.zoom) - 1);
 
@@ -1723,7 +1725,6 @@ public class Gfx extends PaletteTabs
 		}
 	}
 
-	//void DoPaletteAnimations();
 
 	static void GfxInitPalettes()
 	{
@@ -1800,7 +1801,6 @@ public class Gfx extends PaletteTabs
 			j++;
 			if (j == 7) j = 0;
 		}
-		// TODO d += 4
 
 		// Radio tower blinking
 		{
@@ -1879,7 +1879,7 @@ public class Gfx extends PaletteTabs
 		//BitOps.memcmp()
 		//int cmp = Arrays<Colour>.compare(old_val, 0, c, _cur_palette, 217, 217+c);
 		boolean cmp = Arrays.equals(old_val, 0, c, _cur_palette, 217, 217+c);
-		
+
 		//if (memcmp(old_val, _cur_palette+217, c * sizeof(old_val[0])) != 0) 
 		if (cmp) 
 		{
@@ -1994,7 +1994,6 @@ public class Gfx extends PaletteTabs
 
 		assert(w * h < _cursor_backup.length);
 
-		// TODO Wrong memcpy_pitch, replace 
 		//Make backup of stuff below cursor
 		memcpy_pitch(
 				new Pixel( _cursor_backup ),
@@ -2138,7 +2137,7 @@ public class Gfx extends PaletteTabs
 					}
 					//no_more_coalesc:
 
-						left = x;
+					left = x;
 					top = y;
 
 					if (left   < Hal._invalid_rect.left  ) left   = Hal._invalid_rect.left;
@@ -2165,7 +2164,7 @@ public class Gfx extends PaletteTabs
 		Hal._invalid_rect.bottom = 0;
 	}
 
-	
+
 	static void SetDirtyBlocks(int left, int top, int right, int bottom)
 	{
 		//byte *b;
@@ -2344,7 +2343,7 @@ public class Gfx extends PaletteTabs
 		if (player == OWNER_SPECTATOR || player == OWNER_SPECTATOR - 1) return 1;
 		return (_color_list[_player_colors[player]].window_color_1b) | IS_PALETTE_COLOR;
 	}
-	*/
+	 */
 
 }
 
@@ -2380,7 +2379,7 @@ class DrawStringStateMachine
 		char c;
 
 		color &= 0xFF;
-		
+
 		if (color != 0xFE) {
 			if (x >= dpi.left + dpi.width ||
 					x + Hal._screen.width*2 <= dpi.left ||
@@ -2416,7 +2415,7 @@ class DrawStringStateMachine
 					Gfx._stringwidth_out = base;
 					return x;
 				}
-				
+
 				if (c >= Gfx.ASCII_LETTERSTART) {
 					if (x >= dpi.left + dpi.width)
 					{
@@ -2498,13 +2497,7 @@ class DrawStringStateMachine
 
 }
 
-/*
-class Colour {
-	byte r;
-	byte g;
-	byte b;
-} 
- */
+
 
 //typedef void (*BlitZoomFunc)(BlitterParams bp);
 @FunctionalInterface
