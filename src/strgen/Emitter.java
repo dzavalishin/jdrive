@@ -49,7 +49,7 @@ public class Emitter
 	void PutArgidxCommand() throws IOException
 	{
 		PutByte(0x8C);
-		PutByte(Main.TranslateArgumentIdx(_cur_argidx));
+		PutByte(TranslateArgumentIdx(_cur_argidx));
 	}
 
 	void EmitSingleByte(String buf, long value) throws IOException
@@ -126,20 +126,32 @@ public class Emitter
 		}
 	}
 
-	void EmitPlural(String buf, long value)
+	void EmitPlural(String buf, long value) throws IOException
 	{
-		int argidx = _cur_argidx;
+		int argidx[] = { _cur_argidx };
 		String [] words = new String[5];
 		int nw = 0;
 
-		// Parse out the number, if one exists. Otherwise default to prev arg.
-		if (!ParseRelNum(&buf, &argidx))
-			argidx--;
+		buf = buf.trim();
 
+		{
+			int [] skip = {-1};
+			// Parse out the number, if one exists. Otherwise default to prev arg.
+			if (!ParseRelNum(buf, argidx, skip))
+				argidx[0]--;
+			buf = buf.substring(skip[0]);
+		}
+		
 		// Parse each string
-		for (nw = 0; nw < 5; nw++) {
-			words[nw] = ParseWord(&buf);
-			if (!words[nw])
+		for (nw = 0; nw < 5; nw++) 
+		{
+			buf = buf.trim();
+			
+			int [] skip = {-1};
+			words[nw] = ParseWord(buf, skip);
+			buf = buf.substring(skip[0]);
+					
+			if (null == words[nw])
 				break;
 		}
 
@@ -163,19 +175,22 @@ public class Emitter
 		}
 
 		PutByte(0x8D);
-		PutByte(TranslateArgumentIdx(argidx));
+		PutByte(TranslateArgumentIdx(argidx[0]));
 		EmitWordList(words, nw);
 	}
 
 
-	void EmitGender(String buf, long value)
+	void EmitGender(String buf, long value) throws IOException
 	{
-		int argidx = _cur_argidx;
+		int [] argidx = { _cur_argidx };
 		String [] words = new String[8];
 		int nw;
 
-		if (buf[0] == '=') {
-			buf++;
+		buf = buf.trim();
+
+		if (buf.charAt(0) == '=') 
+		{
+			buf = buf.substring(1);
 
 			// This is a {G=DER} command
 			for(nw=0; ;nw++) {
@@ -190,19 +205,27 @@ public class Emitter
 			PutByte(nw);
 
 		} else {
+			int [] skip = {-1};
+			
+			buf = buf.trim();
 			// This is a {G 0 foo bar two} command.
 			// If no relative number exists, default to +0
-			if (!ParseRelNum(&buf, &argidx)) {}
+			if (!ParseRelNum(buf, argidx, skip)) {}
 
-			for(nw=0; nw<8; nw++) {
-				words[nw] = ParseWord(&buf);
-				if (!words[nw])
+			buf = buf.substring(skip[0]);
+
+			for(nw=0; nw<8; nw++) 
+			{
+				buf = buf.trim();
+				words[nw] = ParseWord(buf, skip);
+				buf = buf.substring(skip[0]);
+				if (null == words[nw])
 					break;
 			}
-			if (nw != _numgenders) Fatal("Bad # of arguments for gender command");
+			if (nw != Main._numgenders) Fatal("Bad # of arguments for gender command");
 			PutByte(0x85);
 			PutByte(13);
-			PutByte(TranslateArgumentIdx(argidx));
+			PutByte(TranslateArgumentIdx(argidx[0]));
 			EmitWordList(words, nw);
 		}
 	}
@@ -382,7 +405,7 @@ public class Emitter
 	
 	// returns null on eof
 	// else returns command struct
-	static final CmdStruct ParseCommandString(final String str, StringBuilder param, int [] argno, int [] casei, int [] skip)
+	static CmdStruct ParseCommandString(final String str, StringBuilder param, int [] argno, int [] casei, int [] skip)
 	{
 		//final char *s = *str, *start;
 		final CmdStruct cmd;
@@ -546,10 +569,10 @@ public class Emitter
 
 	
 	// Parse out the next word, or null
-	String ParseWord(String buf, int [] skip)
+	static String ParseWord(String buf, int [] skip)
 	{
 		
-		char [] cs = buf.trim().toCharArray();
+		char [] cs = buf.toCharArray();
 		int s = 0, r = -1;
 		
 		skip[0] = 0;
@@ -583,12 +606,67 @@ public class Emitter
 			}
 		}
 		//*buf = s;
-		skip[0] = s;
+		if(skip != null) skip[0] = s;
 		
 		assert r > 0;
 		
 		return new String( cs, r, s );
 	}
+	
+
+	// The plural specifier looks like
+	// {NUM} {PLURAL -1 passenger passengers} then it picks either passenger/passengers depending on the count in NUM
+
+	// This is encoded like
+	//  CommandByte <ARG#> <NUM> {Length of each string} {each string}
+
+	boolean ParseRelNum(String buf, int []value, int [] skip)
+	{
+		int s = 0, end;
+		boolean rel = false;
+		int v;
+		char [] cs = buf.toCharArray();
+
+		// caller must do
+		//while (*s == ' ' || *s == '\t') s++;
+		
+		if (cs[s] == '+') { rel = true; s++; }
+		
+		for( end = s; end < cs.length; end++ )
+			if(cs[end] < '0' || cs[end] > '9')
+				break;
+		
+		v = Integer.parseInt(new String(cs,s,end)); //strtol(s, &end, 0);
+		
+		if (end == s) return false;
+		
+		if (rel || (v < 0))
+			value[0] += v;
+		else
+			value[0] = v;
+		
+		//*buf = end;
+		skip[0] = end;
+		return true;
+	}
+
+
+	int TranslateArgumentIdx(int argidx)
+	{
+		int i, sum;
+
+		if (argidx < 0 || argidx >= _cur_pcs.cmd.length)
+			Fatal("invalid argidx %d", argidx);
+
+		for(i = sum = 0; i < argidx; i++) {
+			final CmdStruct cs = _cur_pcs.cmd[i];
+			sum += cs != null ? cs.consumes : 1;
+		}
+
+		return sum;
+	}
+
+
 	
 	
 }

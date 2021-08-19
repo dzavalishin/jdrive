@@ -6,12 +6,14 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -19,14 +21,14 @@ import java.util.Arrays;
 
 /** 
  * Compiles a list of strings into a compiled string list 
-**/
+ **/
 
 public class Main {
 
-	
+
 	static final int C_DONTCOUNT = Emitter.C_DONTCOUNT;
 	static final int C_CASE = Emitter.C_CASE;
-	
+
 
 
 
@@ -36,7 +38,7 @@ public class Main {
 
 
 	static boolean _masterlang;
-	static final String _file = "(unknown file)";
+	static String _file = "(unknown file)";
 	static int _cur_line;
 	static int _errors, _warnings;
 
@@ -125,188 +127,122 @@ public class Main {
 	{
 		assert(len > 0);
 		while (--len && *src)
-			*dst++=*src++;
-		*dst = 0;
+	 *dst++=*src++;
+	 *dst = 0;
 	}*/
 
 
-
-	// The plural specifier looks like
-	// {NUM} {PLURAL -1 passenger passengers} then it picks either passenger/passengers depending on the count in NUM
-
-	// This is encoded like
-	//  CommandByte <ARG#> <NUM> {Length of each string} {each string}
-
-	boolean ParseRelNum(char **buf, int []value)
-	{
-		char *s = *buf, *end;
-		boolean rel = false;
-		int v;
-
-		while (*s == ' ' || *s == '\t') s++;
-		
-		if (*s == '+') { rel = true; s++; }
-		
-		v = strtol(s, &end, 0);
-		
-		if (end == s) return false;
-		
-		if (rel || (v < 0))
-			value[0] += v;
-		else
-			value[0] = v;
-		
-		*buf = end;
-		return true;
-	}
-
-	// Parse out the next word, or null
-	char *ParseWord(char **buf)
-	{
-		char *s = *buf, *r;
-		while (*s == ' ' || *s == '\t') s++;
-		if (*s == 0)
-			return null;
-
-		if (*s == '"') {
-			r = ++s;
-			// parse until next " or NUL
-			for(;;) {
-				if (*s == 0)
-					break;
-				if (*s == '"') {
-					*s++ = 0;
-					break;
-				}
-				s++;
-			}
-		} else {
-			// proceed until whitespace or NUL
-			r = s;
-			for(;;) {
-				if (*s == 0)
-					break;
-				if (*s == ' ' || *s == '\t') {
-					*s++ = 0;
-					break;
-				}
-				s++;
-			}
-		}
-		*buf = s;
-		return r;
-	}
 
 
 
 
 	static final CmdStruct _cmd_structs[] = {
-		// Update position
-		new CmdStruct("SETX",  Emitter::EmitSetX,  1, 0, 0),
-		new CmdStruct("SETXY", Emitter::EmitSetXY, 2, 0, 0),
+			// Update position
+			new CmdStruct("SETX",  Emitter::EmitSetX,  1, 0, 0),
+			new CmdStruct("SETXY", Emitter::EmitSetXY, 2, 0, 0),
 
-		// Font size
-		new CmdStruct("TINYFONT", Emitter::EmitSingleByte, 8, 0, 0),
-		new CmdStruct("BIGFONT",  Emitter::EmitSingleByte, 9, 0, 0),
+			// Font size
+			new CmdStruct("TINYFONT", Emitter::EmitSingleByte, 8, 0, 0),
+			new CmdStruct("BIGFONT",  Emitter::EmitSingleByte, 9, 0, 0),
 
-		// New line
-		new CmdStruct("", Emitter::EmitSingleByte, 10, 0, C_DONTCOUNT),
+			// New line
+			new CmdStruct("", Emitter::EmitSingleByte, 10, 0, C_DONTCOUNT),
 
-		new CmdStruct("{", Emitter::EmitSingleByte, (int)'{', 0, C_DONTCOUNT),
+			new CmdStruct("{", Emitter::EmitSingleByte, (int)'{', 0, C_DONTCOUNT),
 
-		// Colors
-		new CmdStruct("BLUE",    Emitter::EmitSingleByte, 15, 0, 0),
-		new CmdStruct("SILVER",  Emitter::EmitSingleByte, 16, 0, 0),
-		new CmdStruct("GOLD",    Emitter::EmitSingleByte, 17, 0, 0),
-		new CmdStruct("RED",     Emitter::EmitSingleByte, 18, 0, 0),
-		new CmdStruct("PURPLE",  Emitter::EmitSingleByte, 19, 0, 0),
-		new CmdStruct("LTBROWN", Emitter::EmitSingleByte, 20, 0, 0),
-		new CmdStruct("ORANGE",  Emitter::EmitSingleByte, 21, 0, 0),
-		new CmdStruct("GREEN",   Emitter::EmitSingleByte, 22, 0, 0),
-		new CmdStruct("YELLOW",  Emitter::EmitSingleByte, 23, 0, 0),
-		new CmdStruct("DKGREEN", Emitter::EmitSingleByte, 24, 0, 0),
-		new CmdStruct("CREAM",   Emitter::EmitSingleByte, 25, 0, 0),
-		new CmdStruct("BROWN",   Emitter::EmitSingleByte, 26, 0, 0),
-		new CmdStruct("WHITE",   Emitter::EmitSingleByte, 27, 0, 0),
-		new CmdStruct("LTBLUE",  Emitter::EmitSingleByte, 28, 0, 0),
-		new CmdStruct("GRAY",    Emitter::EmitSingleByte, 29, 0, 0),
-		new CmdStruct("DKBLUE",  Emitter::EmitSingleByte, 30, 0, 0),
-		new CmdStruct("BLACK",   Emitter::EmitSingleByte, 31, 0, 0),
+			// Colors
+			new CmdStruct("BLUE",    Emitter::EmitSingleByte, 15, 0, 0),
+			new CmdStruct("SILVER",  Emitter::EmitSingleByte, 16, 0, 0),
+			new CmdStruct("GOLD",    Emitter::EmitSingleByte, 17, 0, 0),
+			new CmdStruct("RED",     Emitter::EmitSingleByte, 18, 0, 0),
+			new CmdStruct("PURPLE",  Emitter::EmitSingleByte, 19, 0, 0),
+			new CmdStruct("LTBROWN", Emitter::EmitSingleByte, 20, 0, 0),
+			new CmdStruct("ORANGE",  Emitter::EmitSingleByte, 21, 0, 0),
+			new CmdStruct("GREEN",   Emitter::EmitSingleByte, 22, 0, 0),
+			new CmdStruct("YELLOW",  Emitter::EmitSingleByte, 23, 0, 0),
+			new CmdStruct("DKGREEN", Emitter::EmitSingleByte, 24, 0, 0),
+			new CmdStruct("CREAM",   Emitter::EmitSingleByte, 25, 0, 0),
+			new CmdStruct("BROWN",   Emitter::EmitSingleByte, 26, 0, 0),
+			new CmdStruct("WHITE",   Emitter::EmitSingleByte, 27, 0, 0),
+			new CmdStruct("LTBLUE",  Emitter::EmitSingleByte, 28, 0, 0),
+			new CmdStruct("GRAY",    Emitter::EmitSingleByte, 29, 0, 0),
+			new CmdStruct("DKBLUE",  Emitter::EmitSingleByte, 30, 0, 0),
+			new CmdStruct("BLACK",   Emitter::EmitSingleByte, 31, 0, 0),
 
-		// 0x85
-		new CmdStruct("CURRCOMPACT",   Emitter::EmitEscapedByte, 0, 1, 0), // compact currency (32 bits)
-		new CmdStruct("REV",           Emitter::EmitEscapedByte, 2, 0, 0), // openttd revision string
-		new CmdStruct("SHORTCARGO",    Emitter::EmitEscapedByte, 3, 2, 0), // short cargo description, only ### tons, or ### litres
-		new CmdStruct("CURRCOMPACT64", Emitter::EmitEscapedByte, 4, 2, 0), // compact currency 64 bits
+			// 0x85
+			new CmdStruct("CURRCOMPACT",   Emitter::EmitEscapedByte, 0, 1, 0), // compact currency (32 bits)
+			new CmdStruct("REV",           Emitter::EmitEscapedByte, 2, 0, 0), // openttd revision string
+			new CmdStruct("SHORTCARGO",    Emitter::EmitEscapedByte, 3, 2, 0), // short cargo description, only ### tons, or ### litres
+			new CmdStruct("CURRCOMPACT64", Emitter::EmitEscapedByte, 4, 2, 0), // compact currency 64 bits
 
-		new CmdStruct("COMPANY", Emitter::EmitEscapedByte, 5, 1, 0),				// company string. This is actually a new CmdStruct(STRING1)
-																							// The first string includes the second string.
+			new CmdStruct("COMPANY", Emitter::EmitEscapedByte, 5, 1, 0),				// company string. This is actually a new CmdStruct(STRING1)
+			// The first string includes the second string.
 
-		new CmdStruct("PLAYERNAME", Emitter::EmitEscapedByte, 5, 1, 0),		// playername string. This is actually a new CmdStruct(STRING1)
-																							// The first string includes the second string.
+			new CmdStruct("PLAYERNAME", Emitter::EmitEscapedByte, 5, 1, 0),		// playername string. This is actually a new CmdStruct(STRING1)
+			// The first string includes the second string.
 
-		new CmdStruct("VEHICLE", Emitter::EmitEscapedByte, 5, 1, 0),		// playername string. This is actually a new CmdStruct(STRING1)
-																							// The first string includes the second string.
+			new CmdStruct("VEHICLE", Emitter::EmitEscapedByte, 5, 1, 0),		// playername string. This is actually a new CmdStruct(STRING1)
+			// The first string includes the second string.
 
 
-		new CmdStruct("STRING1", Emitter::EmitEscapedByte, 5, 1, C_CASE),				// included string that consumes ONE argument
-		new CmdStruct("STRING2", Emitter::EmitEscapedByte, 6, 2, C_CASE),				// included string that consumes TWO arguments
-		new CmdStruct("STRING3", Emitter::EmitEscapedByte, 7, 3, C_CASE),				// included string that consumes THREE arguments
-		new CmdStruct("STRING4", Emitter::EmitEscapedByte, 8, 4, C_CASE),				// included string that consumes FOUR arguments
-		new CmdStruct("STRING5", Emitter::EmitEscapedByte, 9, 5, C_CASE),				// included string that consumes FIVE arguments
+			new CmdStruct("STRING1", Emitter::EmitEscapedByte, 5, 1, C_CASE),				// included string that consumes ONE argument
+			new CmdStruct("STRING2", Emitter::EmitEscapedByte, 6, 2, C_CASE),				// included string that consumes TWO arguments
+			new CmdStruct("STRING3", Emitter::EmitEscapedByte, 7, 3, C_CASE),				// included string that consumes THREE arguments
+			new CmdStruct("STRING4", Emitter::EmitEscapedByte, 8, 4, C_CASE),				// included string that consumes FOUR arguments
+			new CmdStruct("STRING5", Emitter::EmitEscapedByte, 9, 5, C_CASE),				// included string that consumes FIVE arguments
 
-		new CmdStruct("STATIONFEATURES", Emitter::EmitEscapedByte, 10, 1, 0), // station features string, icons of the features
-		new CmdStruct("INDUSTRY",        Emitter::EmitEscapedByte, 11, 1, 0), // industry, takes an industry #
-		new CmdStruct("VOLUME",          Emitter::EmitEscapedByte, 12, 1, 0),
-		new CmdStruct("DATE_TINY",       Emitter::EmitEscapedByte, 14, 1, 0),
-		new CmdStruct("CARGO",           Emitter::EmitEscapedByte, 15, 2, 0),
+			new CmdStruct("STATIONFEATURES", Emitter::EmitEscapedByte, 10, 1, 0), // station features string, icons of the features
+			new CmdStruct("INDUSTRY",        Emitter::EmitEscapedByte, 11, 1, 0), // industry, takes an industry #
+			new CmdStruct("VOLUME",          Emitter::EmitEscapedByte, 12, 1, 0),
+			new CmdStruct("DATE_TINY",       Emitter::EmitEscapedByte, 14, 1, 0),
+			new CmdStruct("CARGO",           Emitter::EmitEscapedByte, 15, 2, 0),
 
-		new CmdStruct("P", Emitter::EmitPlural, 0, 0, C_DONTCOUNT),					// plural specifier
-		new CmdStruct("G", Emitter::EmitGender, 0, 0, C_DONTCOUNT),					// gender specifier
+			new CmdStruct("P", Emitter::EmitPlural, 0, 0, C_DONTCOUNT),					// plural specifier
+			new CmdStruct("G", Emitter::EmitGender, 0, 0, C_DONTCOUNT),					// gender specifier
 
-		new CmdStruct("DATE_LONG",  Emitter::EmitSingleByte, 0x82, 1, 0),
-		new CmdStruct("DATE_SHORT", Emitter::EmitSingleByte, 0x83, 1, 0),
+			new CmdStruct("DATE_LONG",  Emitter::EmitSingleByte, 0x82, 1, 0),
+			new CmdStruct("DATE_SHORT", Emitter::EmitSingleByte, 0x83, 1, 0),
 
-		new CmdStruct("VELOCITY", Emitter::EmitSingleByte, 0x84, 1, 0),
+			new CmdStruct("VELOCITY", Emitter::EmitSingleByte, 0x84, 1, 0),
 
-		new CmdStruct("SKIP", Emitter::EmitSingleByte, 0x86, 1, 0),
+			new CmdStruct("SKIP", Emitter::EmitSingleByte, 0x86, 1, 0),
 
-		new CmdStruct("STRING", Emitter::EmitSingleByte, 0x88, 1, C_CASE),
+			new CmdStruct("STRING", Emitter::EmitSingleByte, 0x88, 1, C_CASE),
 
-		// Numbers
-		new CmdStruct("COMMA", Emitter::EmitSingleByte, 0x8B, 1, 0), // Number with comma
-		new CmdStruct("NUM",   Emitter::EmitSingleByte, 0x8E, 1, 0), // Signed number
+			// Numbers
+			new CmdStruct("COMMA", Emitter::EmitSingleByte, 0x8B, 1, 0), // Number with comma
+			new CmdStruct("NUM",   Emitter::EmitSingleByte, 0x8E, 1, 0), // Signed number
 
-		new CmdStruct("CURRENCY", Emitter::EmitSingleByte, 0x8F, 1, 0),
+			new CmdStruct("CURRENCY", Emitter::EmitSingleByte, 0x8F, 1, 0),
 
-		new CmdStruct("WAYPOINT",   Emitter::EmitSingleByte, 0x99, 1, 0), // waypoint name
-		new CmdStruct("STATION",    Emitter::EmitSingleByte, 0x9A, 1, 0),
-		new CmdStruct("TOWN",       Emitter::EmitSingleByte, 0x9B, 1, 0),
-		new CmdStruct("CURRENCY64", Emitter::EmitSingleByte, 0x9C, 2, 0),
-		// 0x9D is used for the pseudo command SETCASE
-		// 0x9E is used for case switching
+			new CmdStruct("WAYPOINT",   Emitter::EmitSingleByte, 0x99, 1, 0), // waypoint name
+			new CmdStruct("STATION",    Emitter::EmitSingleByte, 0x9A, 1, 0),
+			new CmdStruct("TOWN",       Emitter::EmitSingleByte, 0x9B, 1, 0),
+			new CmdStruct("CURRENCY64", Emitter::EmitSingleByte, 0x9C, 2, 0),
+			// 0x9D is used for the pseudo command SETCASE
+			// 0x9E is used for case switching
 
-		// 0x9E=158 is the LAST special character we may use.
+			// 0x9E=158 is the LAST special character we may use.
 
-		new CmdStruct("UPARROW", Emitter::EmitSingleByte, 0x80, 0, 0),
+			new CmdStruct("UPARROW", Emitter::EmitSingleByte, 0x80, 0, 0),
 
-		new CmdStruct("NBSP",       Emitter::EmitSingleByte, 0xA0, 0, C_DONTCOUNT),
-		new CmdStruct("POUNDSIGN",  Emitter::EmitSingleByte, 0xA3, 0, 0),
-		new CmdStruct("YENSIGN",    Emitter::EmitSingleByte, 0xA5, 0, 0),
-		new CmdStruct("COPYRIGHT",  Emitter::EmitSingleByte, 0xA9, 0, 0),
-		new CmdStruct("DOWNARROW",  Emitter::EmitSingleByte, 0xAA, 0, 0),
-		new CmdStruct("CHECKMARK",  Emitter::EmitSingleByte, 0xAC, 0, 0),
-		new CmdStruct("CROSS",      Emitter::EmitSingleByte, 0xAD, 0, 0),
-		new CmdStruct("RIGHTARROW", Emitter::EmitSingleByte, 0xAF, 0, 0),
+			new CmdStruct("NBSP",       Emitter::EmitSingleByte, 0xA0, 0, C_DONTCOUNT),
+			new CmdStruct("POUNDSIGN",  Emitter::EmitSingleByte, 0xA3, 0, 0),
+			new CmdStruct("YENSIGN",    Emitter::EmitSingleByte, 0xA5, 0, 0),
+			new CmdStruct("COPYRIGHT",  Emitter::EmitSingleByte, 0xA9, 0, 0),
+			new CmdStruct("DOWNARROW",  Emitter::EmitSingleByte, 0xAA, 0, 0),
+			new CmdStruct("CHECKMARK",  Emitter::EmitSingleByte, 0xAC, 0, 0),
+			new CmdStruct("CROSS",      Emitter::EmitSingleByte, 0xAD, 0, 0),
+			new CmdStruct("RIGHTARROW", Emitter::EmitSingleByte, 0xAF, 0, 0),
 
-		new CmdStruct("TRAIN", Emitter::EmitSingleByte, 0x94, 0, 0),
-		new CmdStruct("LORRY", Emitter::EmitSingleByte, 0x95, 0, 0),
-		new CmdStruct("BUS",   Emitter::EmitSingleByte, 0x96, 0, 0),
-		new CmdStruct("PLANE", Emitter::EmitSingleByte, 0x97, 0, 0),
-		new CmdStruct("SHIP",  Emitter::EmitSingleByte, 0x98, 0, 0),
+			new CmdStruct("TRAIN", Emitter::EmitSingleByte, 0x94, 0, 0),
+			new CmdStruct("LORRY", Emitter::EmitSingleByte, 0x95, 0, 0),
+			new CmdStruct("BUS",   Emitter::EmitSingleByte, 0x96, 0, 0),
+			new CmdStruct("PLANE", Emitter::EmitSingleByte, 0x97, 0, 0),
+			new CmdStruct("SHIP",  Emitter::EmitSingleByte, 0x98, 0, 0),
 
-		new CmdStruct("SMALLUPARROW",   Emitter::EmitSingleByte, 0x90, 0, 0),
-		new CmdStruct("SMALLDOWNARROW", Emitter::EmitSingleByte, 0x91, 0, 0)
+			new CmdStruct("SMALLUPARROW",   Emitter::EmitSingleByte, 0x90, 0, 0),
+			new CmdStruct("SMALLDOWNARROW", Emitter::EmitSingleByte, 0x91, 0, 0)
 	};
 
 
@@ -319,10 +255,10 @@ public class Main {
 			if (!strncmp(cs.cmd, s, len) && cs.cmd[len] == '\0')
 				return cs;
 		}
-		*/
+		 */
 		for( CmdStruct cs : _cmd_structs)
 			if( s.equals(cs.cmd) ) return cs;
-		
+
 		return null;
 	}
 
@@ -331,8 +267,9 @@ public class Main {
 		for(int i = 0; i < MAX_NUM_CASES; i++)
 			if(str.equals(_cases[i]))
 				return i + 1;
-		
+
 		Fatal("Invalid case-name '%s'", str);
+		return 0; // Unreached
 	}
 
 
@@ -343,7 +280,7 @@ public class Main {
 		String [] token = istr.split("\\s");
 		String str = token[0];
 		String param = token[1];
-		
+
 		if (str.equals( "id")) {
 			_next_string_id = Integer.parseInt(param);
 		} else if (str.equals( "name")) {
@@ -356,20 +293,18 @@ public class Main {
 			_lang_pluralform = (byte) Integer.parseInt(param); // atoi(str + 7);
 			if (_lang_pluralform >= _plural_form_counts.length)
 				Fatal("Invalid pluralform %d", _lang_pluralform);
-		} else if (str.equals( "gender ", 7)) {
-			char *buf = str + 7, *s;
+		} else if (str.equals( "gender ")) {
 			for(;;) {
-				s = ParseWord(&buf);
-				if (!s) break;
+				String s = Emitter.ParseWord(param, null);
+				if (s == null) break;
 				if (_numgenders >= MAX_NUM_GENDER) Fatal("Too many genders, max %d", MAX_NUM_GENDER);
-				ttd_strlcpy(_genders[_numgenders], s, sizeof(_genders[_numgenders]));
+				_genders[_numgenders] = s;
 				_numgenders++;
 			}
-		} else if (str.equals( "case ", 5)) {
-			char *buf = str + 5, *s;
+		} else if (str.equals( "case ")) {
 			for(;;) {
-				s = ParseWord(&buf);
-				if (!s) break;
+				String s = Emitter.ParseWord(param, null);
+				if (s == null) break;
 				if (_numcases >= MAX_NUM_CASES) Fatal("Too many cases, max %d", MAX_NUM_CASES);
 				_cases[_numcases] = s;
 				_numcases++;
@@ -400,13 +335,13 @@ public class Main {
 
 	static boolean CheckCommandsMatch(String a, String b, final String name)
 	{
-		ParsedCommandStruct templ;
-		ParsedCommandStruct lang;
+		ParsedCommandStruct templ = new ParsedCommandStruct();
+		ParsedCommandStruct lang = new ParsedCommandStruct();
 		int i,j;
 		boolean result = true;
 
-		ExtractCommandString(&templ, b, true);
-		ExtractCommandString(&lang, a, true);
+		Emitter.ExtractCommandString(templ, b, true);
+		Emitter.ExtractCommandString(lang, a, true);
 
 		// For each string in templ, see if we find it in lang
 		if (templ.np != lang.np) {
@@ -438,8 +373,8 @@ public class Main {
 		for(i = 0; i < templ.cmd.length; i++) {
 			if (TranslateCmdForCompare(templ.cmd[i]) != TranslateCmdForCompare(lang.cmd[i])) {
 				Warning("%s: Param idx #%d '%s' doesn't match with template command '%s'", name, i,
-					null == lang.cmd[i] ? "<empty>" : lang.cmd[i].cmd,
-					null == templ.cmd[i] ? "<empty>" : templ.cmd[i].cmd);
+						null == lang.cmd[i] ? "<empty>" : lang.cmd[i].cmd,
+								null == templ.cmd[i] ? "<empty>" : templ.cmd[i].cmd);
 				result = false;
 			}
 		}
@@ -458,7 +393,7 @@ public class Main {
 			return;
 
 		char c0 = str.charAt(0);
-		
+
 		if (c0 == '#') {
 			if (str.charAt(1) == '#' && str.charAt(2) != '#')
 				HandlePragma(str.substring(2));
@@ -481,7 +416,7 @@ public class Main {
 		//for(t = s; t > str && (t[-1]==' ' || t[-1]=='\t'); t--);
 		//*t = 0;
 		//s++;
-		
+
 		String s = str.substring(colonIndex+1);
 		str = str.substring(0,colonIndex).strip();
 
@@ -569,14 +504,14 @@ public class Main {
 
 
 
-	static void ParseFile(final String file, boolean english)
+	static void ParseFile(final String file, boolean english) throws IOException
 	{
 		//Writer out  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp.xxx")));
 		FileReader fis = new FileReader(file);
 		if (fis == null) Fatal("Cannot open file");
-		
+
 		BufferedReader in = new BufferedReader( fis );
-		
+
 		//char buf[2048];
 
 		_file = file;
@@ -585,16 +520,16 @@ public class Main {
 		_numgenders = 0;
 		// TODO:!! We can't reset the cases. In case the translated strings
 		// derive some strings from english....
-		
+
 		_cur_line = 1;
 		while(true) // (fgets(buf, sizeof(buf),in) != null) 
 		{
 			String s = in.readLine();
 			if( s == null )
 				break;
-			
+
 			s = s.strip();
-			
+
 			HandleString(s, english);
 			_cur_line++;
 		}
@@ -605,7 +540,7 @@ public class Main {
 	static int MyHashStr(int hash, final String s)
 	{
 		char[] sc = s.toCharArray();
-		
+
 		for(int i = 0; i < sc.length; i++) {
 			hash = ((hash << 3) | (hash >> 29)) ^ sc[i];
 			if(0 != (hash & 1) ) hash = (hash>>1) ^ 0xDEADBEEF; else hash >>= 1;
@@ -620,11 +555,10 @@ public class Main {
 		int hash = 0;
 		LangString ls;
 		String s;
-		final CmdStruct cs;
-		char []  buf = new char[256];
+		//char []  buf = new char[256];
 		int i;
-		int argno;
-		int casei;
+		int [] argno = {-1};
+		int [] casei = {-1};
 
 		for(i = 0; i != 65536; i++) {
 			if ((ls=_strings[i]) != null) {
@@ -634,12 +568,24 @@ public class Main {
 				hash = MyHashStr(hash, s + 1);
 
 				s = ls.english;
-				while ((cs = ParseCommandString((final char **)&s, buf, &argno, &casei)) != null) {
-					if (cs.flags & C_DONTCOUNT)
+				while (true) 
+				{
+					StringBuilder buf = new StringBuilder();
+					CmdStruct cs;
+					s = s.trim();
+					
+					int [] skip = {-1};
+					if( (cs = Emitter.ParseCommandString(s, buf, argno, casei, skip)) == null)
+						break;
+					
+					s = s.substring(skip[0]);
+					
+					if(0 != (cs.flags & C_DONTCOUNT) )
 						continue;
 
-					hash ^= (cs - _cmd_structs) * 0x1234567;
-					if (hash & 1) hash = (hash>>1) ^ 0xF00BAA4; else hash >>= 1;
+					//hash ^= (cs - _cmd_structs) * 0x1234567; // TODO correct hash?
+					hash ^= (cs.hashCode()) * 0x1234567;
+					if(0 != (hash & 1)) hash = (hash>>1) ^ 0xF00BAA4; else hash >>= 1;
 				}
 			}
 		}
@@ -661,28 +607,63 @@ public class Main {
 
 
 
-	static boolean CompareFiles(final String n1, final String n2)
+	static boolean CompareFiles(final String n1, final String n2) 
 	{
-		//FILE *f1, *f2;
-		byte [] b1 = new byte[4096];
-		byte [] b2 = new byte[4096];
-		int l1, l2;
-
 		//f2 = fopen(n2, "rb");
-		BufferedInputStream f2 = new BufferedInputStream( new FileInputStream(n2) );
-		if (f2 == null) return false;
+		BufferedInputStream f2;
+		try {
+			f2 = new BufferedInputStream( new FileInputStream(n2) );
+		} catch (FileNotFoundException e1) {
+			//e1.printStackTrace();
+			//if (f2 == null) 
+			return false;
+		}
 
 		//f1 = fopen(n1, "rb");
 		//if (f1 == null) Fatal("can't open %s", n1);
-		BufferedInputStream f1 = new BufferedInputStream( new FileInputStream(n1) );
-		if (f1 == null) Fatal("can't open %s", n1);
+		BufferedInputStream f1 = null;
+		try {
+			f1 = new BufferedInputStream( new FileInputStream(n1) );
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			//if (f1 == null) 
+			Fatal("can't open %s", n1);
+		}
 
+		boolean ret = false;
+		try {
+			ret = doCompare(f2, f1);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally
+		{
+			try {
+				f2.close();
+				f1.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		return ret;
+	}
+
+	private static boolean doCompare(BufferedInputStream f2, BufferedInputStream f1)
+			throws IOException {
+		byte [] b1 = new byte[4096];
+		byte [] b2 = new byte[4096];
+		int l1;
+		int l2;
 		do {
 			//l1 = fread(b1, 1, sizeof(b1), f1);
 			//l2 = fread(b2, 1, sizeof(b2), f2);
 			l1 = f1.read(b1);
 			l2 = f2.read(b2);
-			
+
 			boolean diff = Arrays.compare(b1, b2) != 0;
 			if (l1 != l2 || 
 					//memcmp(b1, b2, l1)
@@ -694,23 +675,60 @@ public class Main {
 			}
 		} while (l1 > 0);
 
-		f2.close();
-		f1.close();
 		return true;
 	}
 
 
-	static void WriteStringsH(final String filename)
+	static void WriteStringsH(final String filename) throws FileNotFoundException
 	{
 		//FILE *out;
 		Writer out  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp.xxx")));
-		int i;
+		//int i;
 		int next = -1;
-		int lastgrp;
+		//int lastgrp;
 
 		//out = fopen("tmp.xxx", "w");
 		if (out == null) { Fatal("can't open tmp.xxx"); }
 
+		try {
+			codeGen(out, next);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		finally {
+			try {
+				out.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+
+			if (CompareFiles("tmp.xxx", filename)) {
+				// files are equal. tmp.xxx is not needed
+				Files.delete(Path.of("tmp.xxx"));
+
+			} else {
+				// else rename tmp.xxx into filename
+				//#if defined(WIN32) || defined(WIN64)
+				Files.delete(Path.of(filename));
+				//#endif
+				Files.move(Path.of("tmp.xxx"), Path.of(filename), (CopyOption[])null);
+				//if (rename("tmp.xxx", filename) == -1) Fatal("rename() failed");
+			}
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	private static void codeGen(Writer out, int next) throws IOException {
+		int i;
+		int lastgrp;
 		out.write("enum {");
 
 		lastgrp = 0;
@@ -731,53 +749,22 @@ public class Main {
 		out.write("};\n");
 
 		String suffix = String.format(
-			"\nenum {\n" +
-			"\tLANGUAGE_PACK_IDENT = 0x474E414C, // Big Endian value for 'LANG' (LE is 0x 4C 41 4E 47)\n" +
-			"\tLANGUAGE_PACK_VERSION = 0x%X,\n" +
-			"};\n", (int)_hash);
+				"\nenum {\n" +
+						"\tLANGUAGE_PACK_IDENT = 0x474E414C, // Big Endian value for 'LANG' (LE is 0x 4C 41 4E 47)\n" +
+						"\tLANGUAGE_PACK_VERSION = 0x%X,\n" +
+						"};\n", (int)_hash);
 
-			out.write(suffix);
-
-		out.close();
-
-		if (CompareFiles("tmp.xxx", filename)) {
-			// files are equal. tmp.xxx is not needed
-			Files.delete(Path.of("tmp.xxx"));
-			
-		} else {
-			// else rename tmp.xxx into filename
-	//#if defined(WIN32) || defined(WIN64)
-			Files.delete(Path.of(filename));
-	//#endif
-			Files.move(Path.of("tmp.xxx"), Path.of(filename), null);
-			//if (rename("tmp.xxx", filename) == -1) Fatal("rename() failed");
-		}
-	}
-
-	static int TranslateArgumentIdx(int argidx)
-	{
-		int i, sum;
-
-		if (argidx < 0 || argidx >= _cur_pcs.cmd.length)
-			Fatal("invalid argidx %d", argidx);
-
-		for(i = sum = 0; i < argidx; i++) {
-			final CmdStruct cs = _cur_pcs.cmd[i];
-			sum += cs != null ? cs.consumes : 1;
-		}
-
-		return sum;
+		out.write(suffix);
 	}
 
 
 
 
 
-
-	static void WriteLangfile(String filename, int show_todo)
+	static void WriteLangfile(String filename, int show_todo) throws FileNotFoundException
 	{
 		int [] in_use = new int[32];
-		
+
 		LanguagePackHeader hdr = new LanguagePackHeader();
 		//int i,j;
 
@@ -785,7 +772,7 @@ public class Main {
 		//if (f == null) Fatal("can't open %s", filename);
 		BufferedOutputStream b = new BufferedOutputStream(new FileOutputStream(filename));
 		DataOutputStream f = new DataOutputStream(b);
-		
+
 		//memset(&hdr, 0, sizeof(hdr));
 		for(int i = 0; i != 32; i++) {
 			int n = CountInUse(i);
@@ -802,16 +789,27 @@ public class Main {
 		hdr.isocode = _lang_isocode;
 
 		//fwrite(&hdr, sizeof(hdr), 1, f);
-		hdr.writeTo(f);
 
-		Emitter e = new Emitter(f);
-		
-		e.writeLangFile(in_use, show_todo);
+		try {
+			hdr.writeTo(f);
 
-		//fputc(0, f);
-		f.writeByte(0);
+			Emitter e = new Emitter(f);
+			e.writeLangFile(in_use, show_todo);
+			//fputc(0, f);
+			f.writeByte(0);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		finally {
 
-		f.close();
+			try {
+				f.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 
@@ -827,8 +825,8 @@ public class Main {
 
 	public static void main(String[] args) {
 		int argc = args.length;
-		
-	/*
+
+		/*
 		char *r;
 		char buf[256];
 		int show_todo = 0;
@@ -850,18 +848,31 @@ public class Main {
 
 
 		if (argc == 1) {
-*/		
-			_masterlang = true;
-			// parse master file
+		 */		
+		_masterlang = true;
+		// parse master file
+		try {
 			ParseFile("lang/english.txt", true);
-			MakeHashOfStrings();
-			if (_errors > 0) System.exit(1);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			Fatal(e.toString());
+		}
+		
+		MakeHashOfStrings();
+		if (_errors > 0) System.exit(1);
 
-			// write english.lng and strings.h
+		// write english.lng and strings.h
 
+		try {
 			WriteLangfile("lang/english.lng", 0);
 			WriteStringsH("table/strings.h");
-/*
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			Fatal(e.toString());
+		}
+		/*
 		} else if (argc == 2) {
 			_masterlang = false;
 			ParseFile("lang/english.txt", true);
@@ -880,9 +891,9 @@ public class Main {
 		}
 
 		return 0;
-*/		
+		 */		
 	}
 
-	
-	
+
+
 }
