@@ -1,8 +1,13 @@
 package game;
 
 import game.util.BitOps;
+import game.util.MemoryPool;
 import game.util.Strings;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -20,7 +25,7 @@ import game.struct.PlayerEconomyEntry;
  * @todo Cleanup the messy DrawPlayerFace function asap
  */
 
-public class Player 
+public class Player implements Serializable 
 {
 
 	int name_2;
@@ -58,8 +63,8 @@ public class Player
 
 	boolean is_active;
 	public int is_ai;
-	PlayerAI ai = new PlayerAI();
-	PlayerAiNew ainew;
+	// TODO PlayerAI ai = new PlayerAI();
+	// TODO PlayerAiNew ainew;
 
 	long [][] yearly_expenses = new long[3][13];
 
@@ -655,7 +660,7 @@ public class Player
 		p.money64 = p.player_money = p.current_loan = Integer.MAX_VALUE; // TODO return this 100000;
 
 		p.is_ai = (byte) (is_ai ? 1 : 0);
-		p.ai.state = 5; /* AIS_WANT_NEW_ROUTE */
+		// TODO p.ai.state = 5; /* AIS_WANT_NEW_ROUTE */
 		p.share_owners[0] = p.share_owners[1] = p.share_owners[2] = p.share_owners[3] = 
 				PlayerID.get( Owner.OWNER_SPECTATOR );
 
@@ -1564,8 +1569,28 @@ static void Load_PLYR()
 	}
 }
 
-final ChunkHandler _player_chunk_handlers[] = {
+final Chunk Handler _player_chunk_handlers[] = {
 		{ 'PLYR', Save_PLYR, Load_PLYR, CH_ARRAY | CH_LAST},
 };
 	 */
+
+	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	{
+		_players = (Player[]) oin.readObject();
+		for(Player p : _players)
+		{
+			_player_colors[p.index.id] = p.player_color;
+			p.UpdatePlayerMoney32();
+
+			// This is needed so an AI is attached to a loaded AI 
+			if (p.is_ai != 0 && (!Global._networking || Global._network_server) && Ai._ai.enabled)
+				Ai.AI_StartNewAI(p.index.id);
+		}
+	}
+
+	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	{
+		oos.writeObject(_players);		
+	}
+
 }

@@ -132,6 +132,13 @@ FileInputStream fis = new FileInputStream("settings.xml");
 		Engine.saveGame(oos);
 		Depot.saveGame(oos);
 		Order.saveGame(oos);
+		Player.saveGame(oos);
+		SignStruct.saveGame(oos);
+		TextEffect.saveGame(oos);
+		Vehicle.saveGame(oos);
+		WayPoint.saveGame(oos);
+		RoadStop.saveGame(oos);
+		Station.saveGame(oos);
 	}
 
 
@@ -141,6 +148,13 @@ FileInputStream fis = new FileInputStream("settings.xml");
 		Engine.loadGame(oin);
 		Depot.loadGame(oin);
 		Order.loadGame(oin);
+		Player.loadGame(oin);
+		SignStruct.loadGame(oin);
+		TextEffect.loadGame(oin);
+		Vehicle.loadGame(oin);
+		WayPoint.loadGame(oin);
+		RoadStop.loadGame(oin);
+		Station.loadGame(oin);
 	}
 	
 	

@@ -14,17 +14,18 @@ import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
 import game.util.MemoryPool;
 
-public class Order implements IPoolItem, Serializable 
+//public class Order implements IPoolItem, Serializable 
+public class Order implements Serializable 
 {
 	private static final long serialVersionUID = 1L;
 	
 	int  type;
 	int  flags;
-	int station;
+	int  station;
 
 	Order next;   //! Pointer to next order. If null, end of list
 
-	int index;         //! Index of the order, is not saved or anything, just for reference
+	//int index;         //! Index of the order, is not saved or anything, just for reference
 
 	/**
 	 *
@@ -48,7 +49,7 @@ public class Order implements IPoolItem, Serializable
 		flags   = 0;
 		station = Station.INVALID_STATION;
 		next = null;
-		index = 0;
+		//index = 0;
 	}
 
 	public Order() {
@@ -58,7 +59,7 @@ public class Order implements IPoolItem, Serializable
 	public Order( Order src )
 	{
 		AssignOrder(this, src);
-		index = src.index;
+		//index = src.index;
 		next = src.next; // TODO Do we need it?
 	}
 	
@@ -127,7 +128,7 @@ public class Order implements IPoolItem, Serializable
 	 *
 	 * Unpacks a order from savegames made with TTD(Patch)
 	 *
-	 */
+	 * /
 	Order UnpackOldOrder(int packed)
 	{
 		Order order = new Order();
@@ -150,7 +151,7 @@ public class Order implements IPoolItem, Serializable
 	 *
 	 * Unpacks a order from savegames with version 4 and lower
 	 *
-	 */
+	 * /
 	Order UnpackVersion4Order(int packed)
 	{
 		Order order = new Order();
@@ -190,6 +191,7 @@ public class Order implements IPoolItem, Serializable
 	 */
 	static Order AllocateOrder()
 	{
+		/*
 		Order [] ret = { null };
 
 		_order_pool.forEach( (ii,order) ->
@@ -206,16 +208,18 @@ public class Order implements IPoolItem, Serializable
 		});
 		if(ret[0] != null) return ret[0];
 
-		/* Check if we can add a block to the pool */
+		// Check if we can add a block to the pool 
 		if (_order_pool.AddBlockToPool()) 
 			return AllocateOrder();
 
 		return null;
+		*/
+		return new Order();
 	}
 
 
 
-	/** Add an order to the orderlist of a vehicle.
+	/** Add an order to the order list of a vehicle.
 	 * @param x,y unused
 	 * @param p1 various bitstuffed elements
 	 * - p1 = (bit  0 - 15) - ID of the vehicle
@@ -1081,6 +1085,7 @@ public class Order implements IPoolItem, Serializable
 	}
 
 
+	/*
 	private static IPoolItemFactory<Order> factory = new IPoolItemFactory<Order>() 
 	{		
 		@Override
@@ -1127,8 +1132,12 @@ public class Order implements IPoolItem, Serializable
 		_order_pool.forEach(c);
 	}
 	
-
+	*/
 	
+	static void InitializeOrders()
+	{
+		Global._backup_orders_tile = null;
+	}
 	
 	
 	
@@ -1146,7 +1155,7 @@ public class Order implements IPoolItem, Serializable
 		order.flags   = BitOps.GB(packed,  8,  8);
 		order.station = BitOps.GB(packed, 16, 16);
 		order.next    = null;
-		order.index   = 0; // avoid compiler warning
+		//order.index   = 0; // avoid compiler warning
 		return order;
 	}
 	
@@ -1242,7 +1251,7 @@ public class Order implements IPoolItem, Serializable
 		}
 	}
 
-	final ChunkHandler _order_chunk_handlers[] = {
+	final Chunk Handler _order_chunk_handlers[] = {
 		{ 'ORDR', Save_ORDR, Load_ORDR, CH_ARRAY | CH_LAST},
 	};
 	
@@ -1250,12 +1259,13 @@ public class Order implements IPoolItem, Serializable
 
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		_order_pool = (MemoryPool<Order>) oin.readObject();
+		//_order_pool = (MemoryPool<Order>) oin.readObject();
+		Global._backup_orders_tile = null; // TODO we must restore it too	
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		oos.writeObject(_order_pool);		
+		//oos.writeObject(_order_pool);		
 	}
 	
 }

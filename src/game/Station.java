@@ -1,5 +1,8 @@
 package game;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -3618,6 +3621,18 @@ public class Station extends StationTables implements IPoolItem
 		{ 'ROAD', Save_ROADSTOP,  Load_ROADSTOP,  CH_ARRAY | CH_LAST},
 	};
 	 */
+
+	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	{
+		_station_pool = (MemoryPool<Station>) oin.readObject();
+
+	}
+
+	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	{
+		oos.writeObject(_station_pool);		
+	}
+
 }
 
 

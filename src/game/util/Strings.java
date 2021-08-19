@@ -235,7 +235,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 		int argc = 0;
 
-		if (BitOps.GB(string, 0, 16) == 0) Global.error("!invalid string id 0 in GetString");
+		if (BitOps.GB(string, 0, 16) == 0) 
+			Global.error("!invalid string id 0 in GetString");
 
 		switch (tab) {
 		case 4:

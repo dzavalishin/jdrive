@@ -1447,7 +1447,8 @@ class RoadDriveEntry {
 				//we have arrived at the wrong station
 				//XXX The question is .. what to do? Actually we shouldn't be here
 				//but I guess we need to clear the slot
-				Global.DEBUG_ms( 1, "Multistop: Wrong station, force a slot clearing. Vehicle %d at 0x%x, should go to 0x%x of station %d (%x), destination 0x%x", v.unitnumber, v.tile, v.road.slot.xy, st.index, st.getXy(), v.dest_tile);
+				Global.DEBUG_ms( 1, "Multistop: Wrong station, force a slot clearing. Vehicle %d at %s, should go to %s of station %d (%s), destination %s", 
+						v.unitnumber.id, v.tile.toString(), v.road.slot.xy.toString(), st.index, st.getXy().toString(), v.dest_tile.toString());
 				ClearSlot(v, v.road.slot);
 			}
 

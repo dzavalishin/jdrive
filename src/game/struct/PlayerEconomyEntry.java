@@ -1,6 +1,9 @@
 package game.struct;
 
-public class PlayerEconomyEntry {
+import java.io.Serializable;
+
+public class PlayerEconomyEntry implements Serializable 
+{
 	
 	public int income;
 	public int expenses;

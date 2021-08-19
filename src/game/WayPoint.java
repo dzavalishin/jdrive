@@ -1,5 +1,8 @@
 package game;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -14,10 +17,11 @@ import game.util.MemoryPool;
 
 public class WayPoint implements IPoolItem
 {
+	private static final long serialVersionUID = 1L;
+	
 	public static final int RAIL_TYPE_WAYPOINT = 0xC4;
 	public static final int RAIL_WAYPOINT_TRACK_MASK = 1;
 
-	/* Max waypoints: 64000 (8 * 8000) */
 	public static final int WAYPOINT_POOL_BLOCK_SIZE_BITS = 3;       /* In bits, so (1 << 3) == 8 */
 	public static final int WAYPOINT_POOL_MAX_BLOCKS      = 8000;
 
@@ -656,7 +660,7 @@ static final SaveLoad _waypoint_desc[] = {
 		}
 	}
 
-	ChunkHandler chandler = new ChunkHandler( "CHKP", ChunkHandler.CH_ARRAY | ChunkHandler.CH_LAST ) {
+	Chunk Handler chandler = new ChunkHandler( "CHKP", ChunkHandler.CH_ARRAY | ChunkHandler.CH_LAST ) {
 		
 		@Override
 		void save_proc() {
@@ -678,10 +682,21 @@ static final SaveLoad _waypoint_desc[] = {
 		}
 	};
 	
-	final ChunkHandler _waypoint_chunk_handlers[] = {
+	final Chunk Handler _waypoint_chunk_handlers[] = {
 			chandler
 	};
 	*/
 
+	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	{
+		_waypoint_pool = (MemoryPool<WayPoint>) oin.readObject();
+	}
+
+	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	{
+		oos.writeObject(_waypoint_pool);		
+	}
+	
+	
 
 }

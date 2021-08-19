@@ -1,5 +1,8 @@
 package game;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -808,7 +811,7 @@ public class Vehicle implements IPoolItem
 		}
 	}; 
 
-	final static MemoryPool<Vehicle> _vehicle_pool = new MemoryPool<Vehicle>(factory);
+	static MemoryPool<Vehicle> _vehicle_pool = new MemoryPool<Vehicle>(factory);
 	private final static VehicleHash _hash = new VehicleHash(); 
 
 	//private void UpdateVehiclePosHash(int x, int y) { _hash.put(x,y, this); }
@@ -3697,7 +3700,18 @@ public class Vehicle implements IPoolItem
 	final ChunkHandler _veh_chunk_handlers[] = {
 		{ 'VEHS', Save_VEHS, Load_VEHS, CH_SPARSE_ARRAY | CH_LAST},
 	};
-	 */	
+	 */
+	
+	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	{
+		_vehicle_pool = (MemoryPool<Vehicle>) oin.readObject();
+	}
+
+	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	{
+		oos.writeObject(_vehicle_pool);		
+	}
+	
 }
 
 class BubbleMovement {

@@ -1,8 +1,13 @@
 package game;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import game.enums.GameModes;
 import game.ids.StringID;
 import game.struct.TextMessage;
+import game.util.MemoryPool;
 import game.util.Pixel;
 
 public class TextEffect 
@@ -400,17 +405,13 @@ public class TextEffect
 
 	static void AnimateAnimatedTiles()
 	{
-
-		//for (ti = _animated_tile_list; ti != endof(_animated_tile_list) && ti != null; ti++) {
 		for( TileIndex ti : _animated_tile_list)
 			if( ti != null)
 				Landscape.AnimateTile(ti);
-		
 	}
 
 	static void InitializeAnimatedTiles()
 	{
-		//memset(_animated_tile_list, 0, sizeof(_animated_tile_list));
 	}
 
 	/*
@@ -425,10 +426,22 @@ public class TextEffect
 	}
 
 	/*
-	final ChunkHandler _animated_tile_chunk_handlers[] = {
+	final Chunk Handler _animated_tile_chunk_handlers[] = {
 		{ 'ANIT', SaveLoad_ANIT, SaveLoad_ANIT, CH_RIFF | CH_LAST},
 	};*/
+
+
+	// TODO save/load more? _text_effect_list[] _text_message_list[]
 	
+	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	{
+		_animated_tile_list = (TileIndex[]) oin.readObject();
+	}
+
+	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	{
+		oos.writeObject(_animated_tile_list);		
+	}
 	
 }
 

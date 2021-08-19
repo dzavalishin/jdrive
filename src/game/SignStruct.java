@@ -1,6 +1,9 @@
 package game;
 
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -351,7 +354,7 @@ static const SaveLoad _sign_desc[] = {
 		_sign_sort_dirty = true;
 	}
 
-	final ChunkHandler _sign_chunk_handlers[] = {
+	final Chunk Handler _sign_chunk_handlers[] = {
 			{ 'SIGN', Save_SIGN, Load_SIGN, CH_ARRAY | CH_LAST},
 	};
 	 * @param bottom 
@@ -443,6 +446,15 @@ static const SaveLoad _sign_desc[] = {
 	}
 
 
+	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	{
+		_sign_pool = (MemoryPool<SignStruct>) oin.readObject();
+	}
+
+	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	{
+		oos.writeObject(_sign_pool);		
+	}
 
 
 }

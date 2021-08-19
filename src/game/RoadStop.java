@@ -1,5 +1,8 @@
 package game;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -7,6 +10,7 @@ import java.util.function.Consumer;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.util.MemoryPool;
+
 
 public class RoadStop implements IPoolItem
 {
@@ -87,11 +91,6 @@ public class RoadStop implements IPoolItem
 	
 	
 	
-	
-	
-	
-	
-	
 	static public RoadStopType GetRoadStopType(TileIndex tile)
 	{
 		return (tile.getMap().m5 < 0x47) ? RoadStopType.RS_TRUCK : RoadStopType.RS_BUS;
@@ -123,10 +122,6 @@ public class RoadStop implements IPoolItem
 	static RoadStop GetRoadStopByTile(TileIndex tile, RoadStopType type)
 	{
 		final Station st = Station.GetStation(tile.getMap().m2);
-		//RoadStop rs;
-
-		//for (rs = GetPrimaryRoadStop(st, type); rs.xy != tile; rs = rs.next) 
-		//	assert(rs.next != null);
 		
 		for(RoadStop rs : GetPrimaryRoadStop(st, type))
 		{
@@ -152,13 +147,10 @@ public class RoadStop implements IPoolItem
 	{
 		RoadStop[] ret = { null };
 	
-		//FOR_ALL_ROADSTOPS(rs) 
 		_roadstop_pool.forEach( (Integer i, RoadStop rs) ->
 		{
 			if (!rs.used) {
 				int index = rs.index;
-
-				//memset(rs, 0, sizeof(*rs));
 				rs.clear();
 				rs.index = index;
 
@@ -175,6 +167,15 @@ public class RoadStop implements IPoolItem
 		return null;
 	}
 
+	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	{
+		_roadstop_pool = (MemoryPool<RoadStop>) oin.readObject();
+	}
+
+	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	{
+		oos.writeObject(_roadstop_pool);		
+	}
 	
 }
 
