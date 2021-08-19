@@ -2,9 +2,12 @@ package strgen;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -13,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
+
 /** 
  * Compiles a list of strings into a compiled string list 
 **/
@@ -20,12 +24,10 @@ import java.util.Arrays;
 public class Main {
 
 	
+	static final int C_DONTCOUNT = Emitter.C_DONTCOUNT;
+	static final int C_CASE = Emitter.C_CASE;
 	
 
-	//enum Mode {
-	static final int C_DONTCOUNT = 1;
-	static final int C_CASE = 2;
-	//};
 
 
 
@@ -34,7 +36,6 @@ public class Main {
 
 
 	static boolean _masterlang;
-	static boolean _translated;
 	static final String _file = "(unknown file)";
 	static int _cur_line;
 	static int _errors, _warnings;
@@ -46,8 +47,6 @@ public class Main {
 	static final int HASH_SIZE = 32767;
 	static int [] _hash_head = new int[HASH_SIZE];
 
-	//static byte _put_buf[4096];
-	static int _put_pos;
 	static int _next_string_id;
 
 	static int _hash;
@@ -65,21 +64,7 @@ public class Main {
 	// for each plural value, this is the number of plural forms.
 	static final byte _plural_form_counts[] = { 2,1,2,3,3,3,3,3,4 };
 
-	static final String _cur_ident;
-	// Used when generating some advanced commands.
-	static ParsedCommandStruct _cur_pcs;
-	static int _cur_argidx;
 
-	class CmdPair {
-		final CmdStruct a;
-		String v;
-	} 
-
-	class ParsedCommandStruct {
-		int np;
-		CmdPair [] pairs = new CmdPair[32];
-		CmdStruct [] cmd = new CmdStruct[32]; // ordered by param #
-	}
 
 
 	static int HashStr(String s)
@@ -152,20 +137,25 @@ public class Main {
 	// This is encoded like
 	//  CommandByte <ARG#> <NUM> {Length of each string} {each string}
 
-	boolean ParseRelNum(char **buf, int *value)
+	boolean ParseRelNum(char **buf, int []value)
 	{
 		char *s = *buf, *end;
 		boolean rel = false;
 		int v;
 
 		while (*s == ' ' || *s == '\t') s++;
+		
 		if (*s == '+') { rel = true; s++; }
+		
 		v = strtol(s, &end, 0);
+		
 		if (end == s) return false;
+		
 		if (rel || (v < 0))
-			*value += v;
+			value[0] += v;
 		else
-			*value = v;
+			value[0] = v;
+		
 		*buf = end;
 		return true;
 	}
@@ -320,7 +310,7 @@ public class Main {
 	};
 
 
-	static final CmdStruct FindCmd(String s)
+	static CmdStruct FindCmd(String s)
 	{
 		/*
 		int i;
@@ -346,83 +336,6 @@ public class Main {
 	}
 
 
-	// returns null on eof
-	// else returns command struct
-	static final CmdStruct ParseCommandString(final String [] str, String param, int [] argno, int [] casei)
-	{
-		final char *s = *str, *start;
-		final CmdStruct cmd;
-		byte c;
-
-		argno[0] = -1;
-		casei[0] = -1;
-
-		// Scan to the next command, exit if there's no next command.
-		for(; *s != '{'; s++) {
-			if (*s == '\0')
-				return null;
-		}
-		s++; // Skip past the {
-
-		if (*s >= '0' && *s <= '9') {
-			char *end;
-			argno[0] = strtoul(s, &end, 0);
-			if (*end != ':') {
-					Fatal("missing arg #");
-				}
-			s = end + 1;
-		}
-
-		// parse command name
-		start = s;
-		do {
-			c = *s++;
-		} while (c != '}' && c != ' ' && c != '=' && c != '.' && c != 0);
-
-		cmd = FindCmd(start, s - start - 1);
-		if (cmd == null) {
-			Error("Undefined command '%.*s'", s - start - 1, start);
-			return null;
-		}
-
-		if (c == '.') {
-			final char *casep = s;
-
-			if (0==(cmd.flags & C_CASE))
-				Fatal("Command '%s' can't have a case", cmd.cmd);
-
-			do c = *s++; while (c != '}' && c != ' ' && c != '\0');
-			casei[0] = ResolveCaseName(casep, s-casep-1);
-		}
-
-		if (c == '\0') {
-			Error("Missing } from command '%s'", start);
-			return null;
-		}
-
-
-		if (c != '}') {
-			if (c == '=') s--;
-			// copy params
-			start = s;
-			for(;;) {
-				c = *s++;
-				if (c == '}') break;
-				if (c == '\0') {
-					Error("Missing } from command '%s'", start);
-					return null;
-				}
-				if ( s - start == 250)
-					Fatal("param command too long");
-				*param++ = c;
-			}
-		}
-		*param = 0;
-
-		*str = s;
-
-		return cmd;
-	}
 
 
 	static void HandlePragma(String istr)
@@ -431,17 +344,17 @@ public class Main {
 		String str = token[0];
 		String param = token[1];
 		
-		if (str.equals( "id ")) {
+		if (str.equals( "id")) {
 			_next_string_id = Integer.parseInt(param);
-		} else if (str.equals( "name ")) {
+		} else if (str.equals( "name")) {
 			_lang_name = param;
-		} else if (str.equals( "ownname ")) {
+		} else if (str.equals( "ownname")) {
 			_lang_ownname = param;
-		} else if (str.equals( "isocode ")) {
+		} else if (str.equals( "isocode")) {
 			_lang_isocode = param;
 		} else if (str.equals( "plural ")) {
-			_lang_pluralform = atoi(str + 7);
-			if (_lang_pluralform >= lengthof(_plural_form_counts))
+			_lang_pluralform = (byte) Integer.parseInt(param); // atoi(str + 7);
+			if (_lang_pluralform >= _plural_form_counts.length)
 				Fatal("Invalid pluralform %d", _lang_pluralform);
 		} else if (str.equals( "gender ", 7)) {
 			char *buf = str + 7, *s;
@@ -458,46 +371,11 @@ public class Main {
 				s = ParseWord(&buf);
 				if (!s) break;
 				if (_numcases >= MAX_NUM_CASES) Fatal("Too many cases, max %d", MAX_NUM_CASES);
-				ttd_strlcpy(_cases[_numcases], s, sizeof(_cases[_numcases]));
+				_cases[_numcases] = s;
 				_numcases++;
 			}
 		} else {
 			Fatal("unknown pragma '%s'", str);
-		}
-	}
-
-	static void ExtractCommandString(ParsedCommandStruct *p, char *s, boolean warnings)
-	{
-		final CmdStruct *ar;
-		char param[100];
-		int argno;
-		int argidx = 0;
-		int casei;
-
-		memset(p, 0, sizeof(*p));
-
-		for(;;) {
-			// read until next command from a.
-			ar = ParseCommandString((final char **)&s, param, &argno, &casei);
-			if (ar == null)
-				break;
-
-			// Sanity checking
-			if (argno != -1 && !ar.consumes) Fatal("Non consumer param can't have a paramindex");
-
-			if (ar.consumes) {
-				if (argno != -1)
-					argidx = argno;
-				if (argidx < 0 || argidx >= lengthof(p.cmd)) Fatal("invalid param idx %d", argidx);
-				if (p.cmd[argidx] != null && p.cmd[argidx] != ar) Fatal("duplicate param idx %d", argidx);
-
-				p.cmd[argidx++] = ar;
-			} else if (!(ar.flags & C_DONTCOUNT)) { // Ignore some of them
-				if (p.np >= lengthof(p.pairs)) Fatal("too many commands in string, max %d", lengthof(p.pairs));
-				p.pairs[p.np].a = ar;
-				p.pairs[p.np].v = param[0]?strdup(param):"";
-				p.np++;
-			}
 		}
 	}
 
@@ -541,7 +419,7 @@ public class Main {
 			boolean found = false;
 			for(j = 0; j < lang.np; j++) {
 				if (templ.pairs[i].a == lang.pairs[j].a &&
-						!strcmp(templ.pairs[i].v, lang.pairs[j].v)) {
+						templ.pairs[i].v.equals(lang.pairs[j].v)) {
 					// it was found in both. zero it out from lang so we don't find it again
 					lang.pairs[j].a = null;
 					found = true;
@@ -557,11 +435,11 @@ public class Main {
 
 		// if we reach here, all non consumer commands match up.
 		// Check if the non consumer commands match up also.
-		for(i = 0; i < lengthof(templ.cmd); i++) {
+		for(i = 0; i < templ.cmd.length; i++) {
 			if (TranslateCmdForCompare(templ.cmd[i]) != TranslateCmdForCompare(lang.cmd[i])) {
 				Warning("%s: Param idx #%d '%s' doesn't match with template command '%s'", name, i,
-					!lang.cmd[i] ? "<empty>" : lang.cmd[i].cmd,
-					!templ.cmd[i] ? "<empty>" : templ.cmd[i].cmd);
+					null == lang.cmd[i] ? "<empty>" : lang.cmd[i].cmd,
+					null == templ.cmd[i] ? "<empty>" : templ.cmd[i].cmd);
 				result = false;
 			}
 		}
@@ -571,75 +449,89 @@ public class Main {
 
 	static void HandleString(String str, boolean master)
 	{
-		char *s,*t;
-		LangString *ent;
-		char *casep;
+		//char *s,*t;
+		LangString ent;
+		String casep = null;
 
-		if (*str == '#') {
-			if (str[1] == '#' && str[2] != '#')
-				HandlePragma(str + 2);
+		// Ignore blank lines
+		if( str.length() == 0)
+			return;
+
+		char c0 = str.charAt(0);
+		
+		if (c0 == '#') {
+			if (str.charAt(1) == '#' && str.charAt(2) != '#')
+				HandlePragma(str.substring(2));
 			return;
 		}
 
 		// Ignore comments & blank lines
-		if (*str == ';' || *str == ' ' || *str == '\0')
+		if (c0 == ';' || c0 == ' ')
 			return;
 
-		s = strchr(str, ':');
-		if (s == null) {
+		//s = strchr(str, ':');
+		int colonIndex = str.indexOf(':');
+		if (colonIndex < 0 ) {
 			Error("Line has no ':' delimiter");
 			return;
 		}
 
 		// Trim spaces.
 		// After this str points to the command name, and s points to the command contents
-		for(t = s; t > str && (t[-1]==' ' || t[-1]=='\t'); t--);
-		*t = 0;
-		s++;
+		//for(t = s; t > str && (t[-1]==' ' || t[-1]=='\t'); t--);
+		//*t = 0;
+		//s++;
+		
+		String s = str.substring(colonIndex+1);
+		str = str.substring(0,colonIndex).strip();
 
 		// Check if the string has a case..
 		// The syntax for cases is IDENTNAME.case
-		casep = strchr(str, '.');
-		if (casep) *casep++ = 0;
+		int icasep = str.indexOf('.');
+		if (icasep > 0) 
+		{
+			casep = str.substring(icasep+1);
+			str = str.substring(0, icasep);
+		}
 
 		// Check if this string already exists..
 		ent = HashFind(str);
 
 		if (master) {
-			if (ent != null && !casep) {
+			if (ent != null && casep == null) {
 				Error("String name '%s' is used multiple times", str);
 				return;
 			}
 
-			if (ent == null && casep) {
+			if (ent == null && casep != null) {
 				Error("Base string name '%s' doesn't exist yet. Define it before defining a case.", str);
 				return;
 			}
 
 			if (ent == null) {
-				if (_strings[_next_string_id]) {
+				if (_strings[_next_string_id] != null) {
 					Error("String ID 0x%X for '%s' already in use by '%s'", ent, str, _strings[_next_string_id].name);
 					return;
 				}
 
 				// Allocate a new LangString
-				ent = calloc(sizeof(LangString), 1);
+				ent = new LangString();
 				_strings[_next_string_id] = ent;
 				ent.index = _next_string_id++;
-				ent.name = strdup(str);
+				ent.name = str;
 				ent.line = _cur_line;
 
 				HashAdd(str, ent);
 			}
 
-			if (casep) {
-				Case *c = malloc(sizeof(Case));
-				c.caseidx = ResolveCaseName(casep, strlen(casep));
-				c.string = strdup(s);
+			if (casep != null) {
+				Case c = new Case();
+				c.caseidx = ResolveCaseName(casep);
+				c.string = s;
 				c.next = ent.english_case;
 				ent.english_case = c;
 			} else {
-				ent.english = strdup(s);
+				ent.english = s;
 			}
 
 		} else {
@@ -648,45 +540,44 @@ public class Main {
 				return;
 			}
 
-			if (ent.translated && !casep) {
+			if (ent.translated != null && null == casep) {
 				Error("String name '%s' is used multiple times", str);
 				return;
 			}
 
-			if (s[0] == ':' && s[1] == '\0' && casep == null) {
+			if (s.charAt(0) == ':' && s.length() == 1 && casep == null) {
 				// Special syntax :: means we should just inherit the master string
-				ent.translated = strdup(ent.english);
+				ent.translated = ent.english;
 			} else {
 				// make sure that the commands match
 				if (!CheckCommandsMatch(s, ent.english, str))
 					return;
 
-				if (casep) {
-					Case *c = malloc(sizeof(Case));
-					c.caseidx = ResolveCaseName(casep, strlen(casep));
-					c.string = strdup(s);
+				if (casep != null) {
+					Case c = new Case();
+					c.caseidx = ResolveCaseName(casep);
+					c.string = s;
 					c.next = ent.translated_case;
 					ent.translated_case = c;
 				} else {
-					ent.translated = strdup(s);
+					ent.translated = s;
 				}
 			}
 		}
 	}
 
 
-	static void rstrip(char *buf)
-	{
-		int i = strlen(buf);
-		while (i>0 && (buf[i-1]=='\r' || buf[i-1]=='\n' || buf[i-1] == ' ')) i--;
-		buf[i] = 0;
-	}
 
 
-	static void ParseFile(final char *file, boolean english)
+	static void ParseFile(final String file, boolean english)
 	{
-		FILE *in;
-		char buf[2048];
+		//Writer out  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp.xxx")));
+		FileReader fis = new FileReader(file);
+		if (fis == null) Fatal("Cannot open file");
+		
+		BufferedReader in = new BufferedReader( fis );
+		
+		//char buf[2048];
 
 		_file = file;
 
@@ -694,25 +585,30 @@ public class Main {
 		_numgenders = 0;
 		// TODO:!! We can't reset the cases. In case the translated strings
 		// derive some strings from english....
-
-
-		in = fopen(file, "r");
-		if (in == null) Fatal("Cannot open file");
+		
 		_cur_line = 1;
-		while (fgets(buf, sizeof(buf),in) != null) {
-			rstrip(buf);
-			HandleString(buf, english);
+		while(true) // (fgets(buf, sizeof(buf),in) != null) 
+		{
+			String s = in.readLine();
+			if( s == null )
+				break;
+			
+			s = s.strip();
+			
+			HandleString(s, english);
 			_cur_line++;
 		}
-		fclose(in);
+		in.close();;
 	}
 
 
-	static int MyHashStr(int hash, final char *s)
+	static int MyHashStr(int hash, final String s)
 	{
-		for(; *s; s++) {
-			hash = ((hash << 3) | (hash >> 29)) ^ *s;
-			if (hash & 1) hash = (hash>>1) ^ 0xDEADBEEF; else hash >>= 1;
+		char[] sc = s.toCharArray();
+		
+		for(int i = 0; i < sc.length; i++) {
+			hash = ((hash << 3) | (hash >> 29)) ^ sc[i];
+			if(0 != (hash & 1) ) hash = (hash>>1) ^ 0xDEADBEEF; else hash >>= 1;
 		}
 		return hash;
 	}
@@ -725,7 +621,7 @@ public class Main {
 		LangString ls;
 		String s;
 		final CmdStruct cs;
-		char buf[256];
+		char []  buf = new char[256];
 		int i;
 		int argno;
 		int casei;
@@ -734,7 +630,7 @@ public class Main {
 			if ((ls=_strings[i]) != null) {
 				s = ls.name;
 				hash ^= i * 0x717239;
-				if (hash & 1) hash = (hash>>1) ^ 0xDEADBEEF; else hash >>= 1;
+				if(0 != (hash & 1)) hash = (hash>>1) ^ 0xDEADBEEF; else hash >>= 1;
 				hash = MyHashStr(hash, s + 1);
 
 				s = ls.english;
@@ -875,172 +771,59 @@ public class Main {
 
 
 
-	static void PutCommandString(final String str)
-	{
-		final CmdStruct cs;
-		char param[256];
-		int argno;
-		int casei;
 
-		_cur_argidx = 0;
-
-		while (*str != '\0') {
-			// Process characters as they are until we encounter a {
-			if (*str != '{') {
-				PutByte(*str++);
-				continue;
-			}
-			cs = ParseCommandString(&str, param, &argno, &casei);
-			if (cs == null) break;
-
-			if (casei != -1) {
-				PutByte(0x9D); // {SETCASE}
-				PutByte(casei);
-			}
-
-			// For params that consume values, we need to handle the argindex properly
-			if (cs.consumes) {
-				// Check if we need to output a move-param command
-				if (argno!=-1 && argno != _cur_argidx) {
-					_cur_argidx = argno;
-					PutArgidxCommand();
-				}
-
-				// Output the one from the master string... it's always accurate.
-				cs = _cur_pcs.cmd[_cur_argidx++];
-				if (!cs)
-					Fatal("%s: No argument exists at posision %d", _cur_ident, _cur_argidx-1);
-			}
-
-			cs.proc(param, cs.value);
-		}
-	}
-
-	static void WriteLength(BufferedOutputStream f, uint length)
-	{
-		if (length < 0xC0) {
-			//fputc(length, f);
-			f.write((byte)length);
-		} else if (length < 0x4000) {
-			f.write((byte)((length >> 8) | 0xC0));
-			f.write((byte)length & 0xFF);
-		} else {
-			Fatal("string too long");
-		}
-	}
 
 
 	static void WriteLangfile(String filename, int show_todo)
 	{
-		BufferedOutputStream f;
-		int in_use[32];
-		LanguagePackHeader hdr;
-		int i,j;
+		int [] in_use = new int[32];
+		
+		LanguagePackHeader hdr = new LanguagePackHeader();
+		//int i,j;
 
 		//f = fopen(filename, "wb");
 		//if (f == null) Fatal("can't open %s", filename);
-		f = new BufferedOutputStream(new FileOutputStream(filename));
+		BufferedOutputStream b = new BufferedOutputStream(new FileOutputStream(filename));
+		DataOutputStream f = new DataOutputStream(b);
 		
-		
-		memset(&hdr, 0, sizeof(hdr));
-		for(i = 0; i != 32; i++) {
+		//memset(&hdr, 0, sizeof(hdr));
+		for(int i = 0; i != 32; i++) {
 			int n = CountInUse(i);
 			in_use[i] = n;
-			hdr.offsets[i] = TO_LE16(n);
+			hdr.offsets[i] = n; TO_LE16(n);
 		}
 
 		// see line 655: fprintf(..."\tLANGUAGE_PACK_IDENT = 0x474E414C,...)
 		hdr.ident = TO_LE32(0x474E414C); // Big Endian value for 'LANG'
 		hdr.version = TO_LE32(_hash);
 		hdr.plural_form = _lang_pluralform;
-		strcpy(hdr.name, _lang_name);
-		strcpy(hdr.own_name, _lang_ownname);
-		strcpy(hdr.isocode, _lang_isocode);
+		hdr.name = _lang_name;
+		hdr.own_name = _lang_ownname;
+		hdr.isocode = _lang_isocode;
 
-		fwrite(&hdr, sizeof(hdr), 1, f);
+		//fwrite(&hdr, sizeof(hdr), 1, f);
+		hdr.writeTo(f);
 
-		for(i = 0; i != 32; i++) {
-			for(j = 0; j != in_use[i]; j++) {
-				LangString *ls = _strings[(i<<11)+j];
+		Emitter e = new Emitter(f);
+		
+		e.writeLangFile(in_use, show_todo);
 
-				Case *casep;
-				char *cmdp;
+		//fputc(0, f);
+		f.writeByte(0);
 
-				// For undefined strings, just set that it's an empty string
-				if (ls == null) {
-					WriteLength(f, 0);
-					continue;
-				}
-
-				_cur_ident = ls.name;
-				_cur_line = ls.line;
-
-				// Produce a message if a string doesn't have a translation.
-				if (show_todo && ls.translated == null) {
-					if (show_todo == 2) {
-						Warning("'%s' is untranslated", ls.name);
-					} else {
-						final char *s = "<TODO> ";
-						while(*s) PutByte(*s++);
-					}
-				}
-
-				// Extract the strings and stuff from the english command string
-				ExtractCommandString(&_cur_pcs, ls.english, false);
-
-				if (ls.translated_case || ls.translated) {
-					casep = ls.translated_case;
-					cmdp = ls.translated;
-				} else {
-					casep = ls.english_case;
-					cmdp = ls.english;
-				}
-
-				_translated = _masterlang || (cmdp != ls.english);
-
-				if (casep) {
-					Case *c;
-					int num;
-					// Need to output a case-switch.
-					// It has this format
-					// <0x9E> <NUM CASES> <CASE1> <LEN1> <STRING1> <CASE2> <LEN2> <STRING2> <CASE3> <LEN3> <STRING3> <STRINGDEFAULT>
-					// Each LEN is printed using 2 bytes in big endian order.
-					PutByte(0x9E);
-					// Count the number of cases
-					for(num=0,c=casep; c; c=c.next) num++;
-					PutByte(num);
-
-					// Write each case
-					for(c=casep; c; c=c.next) {
-						int pos;
-						PutByte(c.caseidx);
-						// Make some space for the 16-bit length
-						pos = _put_pos;
-						PutByte(0);
-						PutByte(0);
-						// Write string
-						PutCommandString(c.string);
-						PutByte(0); // terminate with a zero
-						// Fill in the length
-						_put_buf[pos] = (_put_pos - (pos + 2)) >> 8;
-						_put_buf[pos+1] = (_put_pos - (pos + 2)) & 0xFF;
-					}
-				}
-
-				if (cmdp)
-					PutCommandString(cmdp);
-
-				WriteLength(f, _put_pos);
-				fwrite(_put_buf, 1, _put_pos, f);
-				_put_pos = 0;
-			}
-		}
-
-		fputc(0, f);
-
-		fclose(f);
+		f.close();
 	}
 
+
+	private static int TO_LE32(int i) {
+		// TODO Auto-generated method stub
+		return i;
+	}
+
+	private static int TO_LE16(int n) {
+		// TODO Auto-generated method stub
+		return n;
+	}
 
 	public static void main(String[] args) {
 		int argc = args.length;
@@ -1072,7 +855,7 @@ public class Main {
 			// parse master file
 			ParseFile("lang/english.txt", true);
 			MakeHashOfStrings();
-			if (_errors) return 1;
+			if (_errors > 0) System.exit(1);
 
 			// write english.lng and strings.h
 

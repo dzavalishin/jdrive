@@ -1,5 +1,11 @@
 package strgen;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
+import game.util.BitOps;
+
 public class LanguagePackHeader 
 {
 
@@ -10,6 +16,26 @@ public class LanguagePackHeader
 		String isocode;					// the ISO code for the language (not country code)
 		int [] offsets = new int[32];	// the offsets
 		int plural_form;				// plural form index
+		
+		public void writeTo(DataOutputStream f) throws IOException 
+		{
+			//DataOutputStream d = new DataOutputStream(f);
+			//BitOps.writeInt32(f, ident);
+			f.writeInt(ident);
+			f.writeInt(version);
+			BitOps.writeFixedString(f,name,32);
+			BitOps.writeFixedString(f,own_name,32);
+			BitOps.writeFixedString(f,isocode,16);
+			
+			for(Integer i : offsets)
+				f.writeInt(i);
+			
+			f.writeByte(plural_form);
+			
+			f.writeByte( 0 );
+			f.writeByte( 0 );
+			f.writeByte( 0 );
+		}
 	
 	
 }

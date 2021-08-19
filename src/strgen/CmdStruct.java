@@ -1,5 +1,7 @@
 package strgen;
 
+import java.io.IOException;
+
 public class CmdStruct 
 {
 	String cmd;
@@ -25,5 +27,5 @@ public class CmdStruct
 @FunctionalInterface
 interface ParseCmdProc
 {
-	void accept(Emitter e, String buf, int value);
+	void accept(Emitter e, String buf, long value) throws IOException;
 }

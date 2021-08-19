@@ -3,6 +3,8 @@ package game.util;
 import game.IntContainer;
 import game.tables.TrackPathFinderTables;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -381,6 +383,18 @@ public class BitOps {
 
 	public static int uint16Wrap(int i) {
 		return i & 0xFFFF;
+	}
+
+	public static void writeFixedString(DataOutputStream f, String s, int len) throws IOException 
+	{
+		
+		int sl = s.length();
+		for( int i = 0; i < len; i++ )
+		{
+			char c = i >= sl ? 0 : s.charAt(i);
+			f.writeByte(c);
+		}
+		
 	}
 
 	
