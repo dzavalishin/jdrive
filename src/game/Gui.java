@@ -450,9 +450,9 @@ public class Gui
 
 	static void ShowRenameSignWindow(final SignStruct ss)
 	{
-		_rename_id = ss.index;
+		_rename_id = ss.getIndex();
 		_rename_what = 0;
-		MiscGui.ShowQueryString(ss.str, new StringID( Str.STR_280B_EDIT_SIGN_TEXT ), 30, 180, 1 , 0 );
+		MiscGui.ShowQueryString(ss.getString(), new StringID( Str.STR_280B_EDIT_SIGN_TEXT ), 30, 180, 1 , 0 );
 	}
 
 	static void ShowRenameWaypointWindow(final WayPoint wp)

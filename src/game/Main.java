@@ -1,5 +1,6 @@
 package game;
 import java.io.File;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -12,6 +13,7 @@ import game.enums.ThreadMsg;
 import game.ids.PlayerID;
 import game.util.FileIO;
 import game.util.Strings;
+import game.util.BitOps;
 
 public class Main {
 
@@ -179,7 +181,8 @@ public class Main {
 
 		Global._game_mode = GameModes.GM_MENU;
 		//CLRBITS(_display_opt, DO_TRANS_BUILDINGS); // don't make buildings transparent in intro
-		Global._display_opt = 0; // TODO BitOps.RETCLRBITS( Global._display_opt, DO_TRANS_BUILDINGS );
+		//Global._display_opt = 0; // TODO BitOps.RETCLRBITS( Global._display_opt, DO_TRANS_BUILDINGS );
+		Global._display_opt = (byte) BitOps.RETCLRBITS( Global._display_opt, Global.DO_TRANS_BUILDINGS );
 		GameOptions._opt_ptr = GameOptions._opt_newgame;
 
 		GfxInit.GfxLoadSprites();

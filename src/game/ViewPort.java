@@ -343,7 +343,7 @@ public class ViewPort
 
 		x -= vp.left;
 		y -= vp.top;
-		
+
 		if ( x >= vp.width || y >= vp.height
 				|| x < 0 || y < 0 )
 			return new Point(-1, -1);
@@ -354,7 +354,7 @@ public class ViewPort
 		//#if !defined(NEW_ROTATION)
 		a = y-x;
 		b = y+x;
-	//#else*/
+		//#else*/
 		//a = x+y;
 		//b = x-y;
 		//#endif
@@ -1039,38 +1039,25 @@ public class ViewPort
 		top = dpi.top;
 		right = left + dpi.width;
 		bottom = top + dpi.height;
+		Iterator<SignStruct> ii = SignStruct.getIterator();
 
-		if (dpi.zoom < 1) {
-			//FOR_ALL_SIGNS(ss)
-			//SignStruct.forEach( (ss) ->
-			Iterator<SignStruct> ii = SignStruct.getIterator();
+		if (dpi.zoom < 1) 
+		{
 			while(ii.hasNext())
 			{
 				SignStruct ss = ii.next();
-
-				if (ss.str != null &&
-						bottom > ss.sign.top &&
-						top < ss.sign.top + 12 &&
-						right > ss.sign.left &&
-						left < ss.sign.left + ss.sign.width_1) {
-
-					StringSpriteToDraw sstd = AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2806), ss.str.id, 0, 0);
-					if (sstd != null) {
-						sstd.width = ss.sign.width_1;
-						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
-					}
-				}
+				ss.draw(left, top, right, bottom, dpi.zoom);
 			}
 		} else if (dpi.zoom == 1) {
 			right += 2;
 			bottom += 2;
-			//FOR_ALL_SIGNS(ss) 			
-			Iterator<SignStruct> ii = SignStruct.getIterator();
+
 			while(ii.hasNext())
 			{
 				SignStruct ss = ii.next();
+				ss.draw(left, top, right, bottom, dpi.zoom);
 
-				if (ss.str != null &&
+				/*if (ss.str != null &&
 						bottom > ss.sign.top &&
 						top < ss.sign.top + 24 &&
 						right > ss.sign.left &&
@@ -1081,18 +1068,19 @@ public class ViewPort
 						sstd.width = ss.sign.width_1;
 						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
 					}
-				}
+				}*/
 			}
 		} else {
 			right += 4;
 			bottom += 5;
 
-			//FOR_ALL_SIGNS(ss) 
-			Iterator<SignStruct> ii = SignStruct.getIterator();
+
 			while(ii.hasNext())
 			{
 				SignStruct ss = ii.next();
+				ss.draw(left, top, right, bottom, dpi.zoom);
 
+				/*
 				if (ss.str != null &&
 						bottom > ss.sign.top &&
 						top < ss.sign.top + 24 &&
@@ -1104,7 +1092,7 @@ public class ViewPort
 						sstd.width = ss.sign.width_2 | 0x8000;
 						sstd.color = (ss.owner.id==Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
 					}
-				}
+				}*/
 			}
 		}
 	}
@@ -1338,61 +1326,61 @@ public class ViewPort
 		dp.zoom = 0;
 
 		dp.left >>= zoom;
-						dp.top >>= zoom;
-						dp.width >>= zoom;
-						dp.height >>= zoom;
+		dp.top >>= zoom;
+		dp.width >>= zoom;
+		dp.height >>= zoom;
 
-						//do 
-						for( StringSpriteToDraw ss : ssl )
-						{
-							if (ss.width != 0) {
-								int x = (ss.x >> zoom) - 1;
-								int y = (ss.y >> zoom) - 1;
-								int bottom = y + 11;
-								int w = ss.width;
+		//do 
+		for( StringSpriteToDraw ss : ssl )
+		{
+			if (ss.width != 0) {
+				int x = (ss.x >> zoom) - 1;
+				int y = (ss.y >> zoom) - 1;
+				int bottom = y + 11;
+				int w = ss.width;
 
-								if( 0 != (w & 0x8000) ) {
-									w &= ~0x8000;
-									y--;
-									bottom -= 6;
-									w -= 3;
-								}
+				if( 0 != (w & 0x8000) ) {
+					w &= ~0x8000;
+					y--;
+					bottom -= 6;
+					w -= 3;
+				}
 
-								/* Draw the rectangle if 'tranparent station signs' is off,
-								 * or if we are drawing a general text sign (Str.STR_2806) */
-								if (0 == (Global._display_opt & Global.DO_TRANS_SIGNS) || ss.string == Str.STR_2806)
-									Gfx.DrawFrameRect(
-											x, y, x + w, bottom, ss.color,
-											(Global._display_opt & Global.DO_TRANS_BUILDINGS) != 0 ? Window.FR_TRANSPARENT | Window.FR_NOBORDER : 0
-											);
-							}
+				/* Draw the rectangle if 'tranparent station signs' is off,
+				 * or if we are drawing a general text sign (Str.STR_2806) */
+				if (0 == (Global._display_opt & Global.DO_TRANS_SIGNS) || ss.string == Str.STR_2806)
+					Gfx.DrawFrameRect(
+							x, y, x + w, bottom, ss.color,
+							(Global._display_opt & Global.DO_TRANS_BUILDINGS) != 0 ? Window.FR_TRANSPARENT | Window.FR_NOBORDER : 0
+							);
+			}
 
-							Global.SetDParam(0, ss.params[0]);
-							Global.SetDParam(1, ss.params[1]);
-							Global.SetDParam(2, ss.params[2]);
-							/* if we didn't draw a rectangle, or if transparant building is on,
-							 * draw the text in the color the rectangle would have */
-							if ((
-									(Global._display_opt & Global.DO_TRANS_BUILDINGS)!=0 ||
-									((Global._display_opt & Global.DO_TRANS_SIGNS) != 0 && ss.string != Str.STR_2806)
-									) && ss.width != 0) {
-								/* Real colors need the IS_PALETTE_COLOR flag
-								 * otherwise colors from _string_colormap are assumed. */
-								Gfx.DrawString(
-										ss.x >> zoom, (ss.y >> zoom) - ((ss.width & 0x8000) != 0 ? 2 : 0),
-										ss.string, (Global._color_list[ss.color].window_color_bgb | Gfx.IS_PALETTE_COLOR)
-										);
-							} else {
-								Gfx.DrawString(
-										ss.x >> zoom, (ss.y >> zoom) - ((ss.width & 0x8000) != 0 ? 2 : 0),
-										ss.string, 16
-										);
-							}
+			Global.SetDParam(0, ss.params[0]);
+			Global.SetDParam(1, ss.params[1]);
+			Global.SetDParam(2, ss.params[2]);
+			/* if we didn't draw a rectangle, or if transparant building is on,
+			 * draw the text in the color the rectangle would have */
+			if ((
+					(Global._display_opt & Global.DO_TRANS_BUILDINGS)!=0 ||
+					((Global._display_opt & Global.DO_TRANS_SIGNS) != 0 && ss.string != Str.STR_2806)
+					) && ss.width != 0) {
+				/* Real colors need the IS_PALETTE_COLOR flag
+				 * otherwise colors from _string_colormap are assumed. */
+				Gfx.DrawString(
+						ss.x >> zoom, (ss.y >> zoom) - ((ss.width & 0x8000) != 0 ? 2 : 0),
+						ss.string, (Global._color_list[ss.color].window_color_bgb | Gfx.IS_PALETTE_COLOR)
+						);
+			} else {
+				Gfx.DrawString(
+						ss.x >> zoom, (ss.y >> zoom) - ((ss.width & 0x8000) != 0 ? 2 : 0),
+						ss.string, 16
+						);
+			}
 
-							//	ss = ss.next;
-						}// while (ss != null);
+			//	ss = ss.next;
+		}// while (ss != null);
 
-						Hal._cur_dpi = dpi;
+		Hal._cur_dpi = dpi;
 	}
 
 	static void ViewportDoDraw(final ViewPort vp, int left, int top, int right, int bottom)
@@ -1850,21 +1838,22 @@ public class ViewPort
 		//final SignStruct ss;
 
 		if (0 == (Global._display_opt & Global.DO_SHOW_SIGNS)) return false;
+		Iterator<SignStruct> i = SignStruct.getIterator();
 
 		if (vp.zoom < 1) {
 			x = x - vp.left + vp.virtual_left;
 			y = y - vp.top + vp.virtual_top;
 
-			//FOR_ALL_SIGNS(ss) 
-			Iterator<SignStruct> i = SignStruct.getIterator();
 			while(i.hasNext())
 			{
 				SignStruct ss = i.next();
-				if (ss.str != null &&
+				/*if (ss.str != null &&
 						y >= ss.sign.top &&
 						y < ss.sign.top + 12 &&
 						x >= ss.sign.left &&
-						x < ss.sign.left + ss.sign.width_1) {
+						x < ss.sign.left + ss.sign.width_1) */ 
+				if(ss.clickIn( x, y, vp.zoom ))
+				{
 					Gui.ShowRenameSignWindow(ss);
 					return true;
 				}
@@ -1873,16 +1862,16 @@ public class ViewPort
 			x = (x - vp.left + 1) * 2 + vp.virtual_left;
 			y = (y - vp.top + 1) * 2 + vp.virtual_top;
 
-			//FOR_ALL_SIGNS(ss) 
-			Iterator<SignStruct> i = SignStruct.getIterator();
 			while(i.hasNext())
 			{
 				SignStruct ss = i.next();
-				if (ss.str != null &&
+				/*if (ss.str != null &&
 						y >= ss.sign.top &&
 						y < ss.sign.top + 24 &&
 						x >= ss.sign.left &&
-						x < ss.sign.left + ss.sign.width_1 * 2) {
+						x < ss.sign.left + ss.sign.width_1 * 2)*/ 
+				if(ss.clickIn( x, y, vp.zoom ))
+				{
 					Gui.ShowRenameSignWindow(ss);
 					return true;
 				}
@@ -1891,16 +1880,16 @@ public class ViewPort
 			x = (x - vp.left + 3) * 4 + vp.virtual_left;
 			y = (y - vp.top + 3) * 4 + vp.virtual_top;
 
-			//FOR_ALL_SIGNS(ss) {
-			Iterator<SignStruct> i = SignStruct.getIterator();
 			while(i.hasNext())
 			{
 				SignStruct ss = i.next();
-				if (ss.str != null &&
+				/*if (ss.str != null &&
 						y >= ss.sign.top &&
 						y < ss.sign.top + 24 &&
 						x >= ss.sign.left &&
-						x < ss.sign.left + ss.sign.width_2 * 4) {
+						x < ss.sign.left + ss.sign.width_2 * 4) */ 
+				if(ss.clickIn( x, y, vp.zoom ))
+				{
 					Gui.ShowRenameSignWindow(ss);
 					return true;
 				}

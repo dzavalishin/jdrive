@@ -282,6 +282,8 @@ public class GraphGui
 				Window.InvalidateWindow(Window.WC_COMPANY_VALUE, 0);
 			}
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -395,6 +397,8 @@ public class GraphGui
 			if (e.widget == 2) /* Clicked on Legend */
 				ShowGraphLegend();
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -475,6 +479,8 @@ public class GraphGui
 			if (e.widget == 2)
 				ShowGraphLegend();
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -551,6 +557,8 @@ public class GraphGui
 		case WE_CLICK:
 			if (e.widget == 2)
 				ShowGraphLegend();
+			break;
+		default:
 			break;
 		}
 	}
@@ -631,6 +639,8 @@ public class GraphGui
 			if (e.widget == 3)
 				ShowPerformanceRatingDetail();
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -708,6 +718,8 @@ public class GraphGui
 		case WE_CLICK:
 			if (e.widget == 2)
 				ShowGraphLegend();
+			break;
+		default:
 			break;
 		}
 	}
@@ -800,6 +812,8 @@ public class GraphGui
 				break;
 			}
 		} break;
+		default:
+			break;
 		}
 	}
 
@@ -892,6 +906,8 @@ public class GraphGui
 
 			break;
 		}
+		default:
+			break;
 		}
 	}
 
@@ -1100,6 +1116,8 @@ public class GraphGui
 			}
 		}
 		break;
+		default:
+			break;
 		}
 	}
 
@@ -1156,10 +1174,10 @@ public class GraphGui
 			SignStruct ss;
 
 			ss = SignStruct.GetSign(cmp1);
-			String buf1 = Global.GetString(ss.str);
+			String buf1 = Global.GetString(ss.getString());
 
 			ss = SignStruct.GetSign(cmp2);
-			String buf2 = Global.GetString(ss.str);
+			String buf2 = Global.GetString(ss.getString());
 
 			return buf1.compareTo(buf2);
 		}
@@ -1179,11 +1197,10 @@ public class GraphGui
 		if (_sign_sort == null)
 			Global.error("Could not allocate memory for the sign-sorting-list");
 
-		//FOR_ALL_SIGNS(ss)
 		SignStruct.forEach( (ss) ->
 		{
-			if(ss.str.id != Str.STR_NULL) {
-				_sign_sort[n[0]++] = ss.index;
+			if(ss.getString().id != Str.STR_NULL) {
+				_sign_sort[n[0]++] = ss.getIndex();
 				_num_sign_sort++;
 			}
 		});
@@ -1226,10 +1243,10 @@ public class GraphGui
 				{
 					SignStruct ss = SignStruct.GetSign(_sign_sort[i]);
 
-					if (ss.owner.id != Owner.OWNER_NONE)
-						DrawPlayerIcon(ss.owner.id, 4, y + 1);
+					if (ss.getOwner().id != Owner.OWNER_NONE)
+						DrawPlayerIcon(ss.getOwner().id, 4, y + 1);
 
-					Gfx.DrawString(22, y, ss.str, 8);
+					Gfx.DrawString(22, y, ss.getString(), 8);
 					y += 10;
 				}
 			}
@@ -1250,13 +1267,15 @@ public class GraphGui
 					return;
 
 				ss = SignStruct.GetSign(_sign_sort[id_v]);
-				ViewPort.ScrollMainWindowToTile(TileIndex.TileVirtXY(ss.x, ss.y));
+				ViewPort.ScrollMainWindowToTile(ss.getTile());
 			} break;
 			}
 		} break;
 
 		case WE_RESIZE:
 			w.vscroll.cap += e.diff.y / 10;
+			break;
+		default:
 			break;
 		}
 	}

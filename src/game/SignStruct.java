@@ -4,6 +4,7 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
@@ -15,15 +16,15 @@ public class SignStruct implements IPoolItem
 {
 	private static final long serialVersionUID = 1L;
 	
-	StringID     str;
-	ViewportSign sign;
-	int          x;
-	int          y;
-	byte         z;
-	PlayerID     owner; // placed by this player. Anyone can delete them though.
+	private StringID     str;
+	private ViewportSign sign;
+	private int          x;
+	private int          y;
+	private byte         z;
+	private PlayerID     owner; // placed by this player. Anyone can delete them though.
 	// OWNER_NONE for gray signs from old games.
 
-	int          index;
+	private int          index;
 
 	private static IPoolItemFactory<SignStruct> factory = new IPoolItemFactory<SignStruct>() {
 		public SignStruct createObject() { return new SignStruct(); };
@@ -353,9 +354,93 @@ static const SaveLoad _sign_desc[] = {
 	final ChunkHandler _sign_chunk_handlers[] = {
 			{ 'SIGN', Save_SIGN, Load_SIGN, CH_ARRAY | CH_LAST},
 	};
+	 * @param bottom 
+	 * @param right 
+	 * @param top 
+	 * @param left 
+	 * @param mult 
 */
 
+	public void draw(int left, int top, int right, int bottom, int zoom) 
+	{
+		int mult = 1;
+		int sw = sign.width_1;
+		int topAdd = 12;
+		switch(zoom)
+		{
+		case 0:
+			break;
+		case 1:
+			mult = 2;
+			topAdd = 24;
+			break;
+		default:
+			mult = 4;
+			topAdd = 24;
+			sw = sign.width_2 | 0x8000;
+			break;
+		}
+		
+		if (str != null &&
+				bottom > sign.top &&
+				top < sign.top + topAdd &&
+				right > sign.left &&
+				left < sign.left + sign.width_1 * mult) 
+		{
 
+			StringSpriteToDraw sstd = ViewPort.AddStringToDraw(sign.left + 1, sign.top + 1, new StringID(Str.STR_2806), str.id, 0, 0);
+			if (sstd != null) {
+				sstd.width = sw;
+				sstd.color = (owner.id == Owner.OWNER_NONE || owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[owner.id];
+			}
+		}
+	}
+
+
+	public boolean clickIn( int x, int y, int zoom )
+	{
+		//int mult = 1;
+		int sw = sign.width_1;
+		int topAdd = 12;
+		switch(zoom)
+		{
+		case 0:
+			break;
+		case 1:
+			//mult = 2;
+			topAdd = 24;
+			sw = sign.width_1 * 2;
+			break;
+		default:
+			//mult = 4;
+			topAdd = 24;
+			sw = sign.width_2 * 4;
+			break;
+		}
+		
+		
+		return str != null &&
+				y >= sign.top &&
+				y < sign.top + topAdd &&
+				x >= sign.left &&
+				x < sign.left + sw;	
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public StringID getString() {
+		return str;
+	}
+
+	public PlayerID getOwner() {
+		return owner;
+	}
+
+	public TileIndex getTile() {
+		return TileIndex.TileVirtXY(x, y);
+	}
 
 
 
