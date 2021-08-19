@@ -209,9 +209,9 @@ public class Player
 				}
 			}
 		}
-		/* TODO draw the mouth
+
 		// draw the mouth 
-		{
+		do {
 			int val = BitOps.GB(face, 10, 6);
 			int val2;
 
@@ -221,7 +221,8 @@ public class Player
 				if (val2 < 3) {
 					Gfx.DrawSprite(( 0 != (flag&2) ? 0x397 : 0x367) + val2, x, y);
 					// skip the rest 
-					goto skip_mouth;
+					//goto skip_mouth;
+					break;
 				}
 
 				val2 -= 3;
@@ -252,9 +253,9 @@ public class Player
 				}
 			}
 
-			skip_mouth:;
-		}
-		 */
+			//skip_mouth:;
+		} while(false); // goto target
+		 
 
 		// draw the hair 
 		{
