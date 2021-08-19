@@ -384,7 +384,8 @@ public class Gfx extends PaletteTabs
 
 		for (ddd_pos = cap; cap < ca.length && (c = ca[cap++]) != '\0'; ) 
 		{
-			if (c >= ASCII_LETTERSTART) {
+			if (c >= ASCII_LETTERSTART) 
+			{
 				w += GetCharacterWidth(base + c);
 
 				if (w >= maxw) {
@@ -396,8 +397,8 @@ public class Gfx extends PaletteTabs
 					if(retwidth != null) retwidth[0] = w; 
 					String s = sb.toString().substring(0, ddd_pos-1);
 					return s+"...";
-
 				}
+				sb.append((char)c);
 			} else {
 				if (c == ASCII_SETX) cap++;
 				else if (c == ASCII_SETXY) cap += 2;

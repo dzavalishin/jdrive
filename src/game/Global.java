@@ -165,7 +165,7 @@ public class Global
 	
 	
 
-	public static int _news_display_opt = 0;
+	public static int _news_display_opt = 0xFF; //  All news on
 	public static boolean _news_ticker_sound = false;
 	public static NewsItem _statusbar_news_item = null;
 

@@ -7,6 +7,8 @@ import java.util.function.Consumer;
 
 import game.ids.PlayerID;
 import game.ids.StringID;
+import game.ifaces.IPoolItem;
+import game.ifaces.IPoolItemFactory;
 import game.ifaces.TileTypeProcs;
 import game.ifaces.TownActionProc;
 import game.ifaces.TownDrawTileProc;
