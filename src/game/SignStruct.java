@@ -6,6 +6,8 @@ import java.util.function.Consumer;
 
 import game.ids.PlayerID;
 import game.ids.StringID;
+import game.ifaces.IPoolItem;
+import game.ifaces.IPoolItemFactory;
 import game.struct.Point;
 
 public class SignStruct implements IPoolItem

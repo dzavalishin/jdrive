@@ -3,6 +3,8 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.ifaces.IPoolItem;
+import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
 
 public class Depot implements IPoolItem

@@ -5,6 +5,8 @@ import java.util.function.Consumer;
 
 import game.ids.OrderID;
 import game.ids.VehicleID;
+import game.ifaces.IPoolItem;
+import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
 
 public class Order implements IPoolItem {

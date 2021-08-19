@@ -1,4 +1,4 @@
-package game;
+package game.ifaces;
 
 import java.io.Serializable;
 

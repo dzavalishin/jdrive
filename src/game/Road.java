@@ -163,7 +163,7 @@ public class Road extends RoadTables
 		owner = tile.IsLevelCrossing() ? tile.getMap().m3 : tile.GetTileOwner().id;
 
 		if (owner == Owner.OWNER_TOWN && Global._game_mode != GameModes.GM_EDITOR) {
-			if (tile.IsTileType(TileTypes.MP_TUNNELBRIDGE)) { // index of town is not saved for bridge (no space)
+			if (tile.IsTileType(TileTypes.MP_TUNNELBRIDGE)) { // TODO index of town is not saved for bridge (no space)
 				t = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 			} else
 				t = Town.GetTown(tile.getMap().m2);
@@ -240,7 +240,7 @@ public class Road extends RoadTables
 				} while(0 !=(t2>>=1) );
 
 				if(0 != (flags & Cmd.DC_EXEC) ) {
-					t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
+					if( t != null ) t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], Town.RATING_ROAD_MINIMUM);
 
 					tile.getMap().m5 ^= c;
 					if (BitOps.GB(tile.getMap().m5, 0, 4) == 0) {

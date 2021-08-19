@@ -10,6 +10,8 @@ import game.tables.IndustryTileTable;
 import game.util.BitOps;
 import game.ids.PlayerID;
 import game.ids.StringID;
+import game.ifaces.IPoolItem;
+import game.ifaces.IPoolItemFactory;
 import game.ifaces.TileTypeProcs;
 import game.struct.ProducedCargo;
 import game.struct.TileIndexDiffC;

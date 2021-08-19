@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import game.ifaces.IPoolItem;
+import game.ifaces.IPoolItemFactory;
+
 /**
  * We don't need mem mgmt in java.
  * Just keep a map of int to object.

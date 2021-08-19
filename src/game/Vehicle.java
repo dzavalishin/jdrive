@@ -12,6 +12,8 @@ import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
+import game.ifaces.IPoolItem;
+import game.ifaces.IPoolItemFactory;
 import game.ifaces.TileVehicleInterface;
 import game.struct.BackuppedOrders;
 import game.struct.Point;

@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 
 import game.ids.StringID;
+import game.ifaces.IPoolItem;
+import game.ifaces.IPoolItemFactory;
 import game.struct.Point;
 import game.util.BitOps;
 
