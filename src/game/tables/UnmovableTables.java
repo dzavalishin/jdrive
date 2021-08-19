@@ -1,8 +1,8 @@
 package game.tables;
 
-import game.DrawTileSeqStruct;
-import game.DrawTileSprites;
 import game.Sprite;
+import game.struct.DrawTileSeqStruct;
+import game.struct.DrawTileSprites;
 import game.struct.DrawTileUnmovableStruct;
 
 public class UnmovableTables 

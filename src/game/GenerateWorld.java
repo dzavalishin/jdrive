@@ -1,6 +1,7 @@
 package game;
 
 import game.ai.Ai;
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.util.GameDate;
 

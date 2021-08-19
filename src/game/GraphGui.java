@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import game.enums.Owner;
 import game.tables.SmallMapGuiTables;
 import game.util.ArrayPtr;
 import game.util.BitOps;

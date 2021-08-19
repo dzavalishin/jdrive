@@ -1,5 +1,7 @@
 package game;
 
+import game.enums.GameModes;
+import game.enums.Owner;
 import game.util.BitOps;
 import game.util.Sprites;
 

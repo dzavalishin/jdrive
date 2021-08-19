@@ -1,4 +1,5 @@
 package game;
+import game.enums.Owner;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.PlayerID;
@@ -9,6 +10,7 @@ import game.ids.VehicleID;
 import game.struct.Point;
 import game.tables.AirConstants;
 import game.tables.AirCraftTables;
+import game.tables.AirportMovingData;
 import game.util.BitOps;
 import game.util.GameDate;
 import game.util.YearMonthDay;

@@ -1,6 +1,7 @@
 package game;
 
 import game.enums.StationClassID;
+import game.struct.DrawTileSprites;
 import game.tables.EngineTables;
 
 public class StationSpec 

@@ -1,6 +1,8 @@
-package game;
+package game.util;
 
 import java.util.HashMap;
+
+import game.TileIndex;
 
 public class Hash {
 	//private HashMap<HashKey,PathNode> map;

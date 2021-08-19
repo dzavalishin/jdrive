@@ -8,6 +8,9 @@ import java.util.function.Consumer;
 import game.tables.IndustryTables;
 import game.tables.IndustryTileTable;
 import game.util.BitOps;
+import game.util.MemoryPool;
+import game.enums.GameModes;
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
@@ -20,8 +23,10 @@ import game.tables.DrawIndustrySpec4Struct;
 import game.tables.DrawIndustryTileStruct;
 import game.tables.IndustrySpec;
 
-public class Industry extends IndustryTables implements IPoolItem {
-
+public class Industry extends IndustryTables implements IPoolItem 
+{
+	private static final long serialVersionUID = 1L;
+	
 	public TileIndex xy;
 	int width; /* swapped order of w/h with town */
 	int height;
@@ -124,7 +129,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 
 	public static Iterator<Industry> getIterator()
 	{
-		return _industry_pool.pool.values().iterator();
+		return _industry_pool.getIterator(); //pool.values().iterator();
 	}
 
 	static void forEach( Consumer<Industry> c )
@@ -1489,7 +1494,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 				cur_tile.getMap().m2 = i.index;
 				cur_tile.getMap().m1 = Global._generating_world ? 0x1E : 0; /* maturity */
 				
-				Global.printf("industry m5 = %x @%d.%d\n", cur_tile.getMap().m5, cur_tile.TileX(), cur_tile.TileY() );
+				//Global.printf("industry m5 = %x @%d.%d\n", cur_tile.getMap().m5, cur_tile.TileX(), cur_tile.TileY() );
 			}
 		} // while ((++it).ti.x != -0x80);
 
@@ -2555,7 +2560,7 @@ public class Industry extends IndustryTables implements IPoolItem {
 	{
 		_industry_sort_dirty = false;
 		/* Create array for sorting */
-		_industry_sort = _industry_pool.pool.values().toArray(Industry[]::new);
+		_industry_sort = _industry_pool.getValuesArray();
 
 		if (_industry_sort == null)
 			Global.fail("Could not allocate memory for the industry-sorting-list");

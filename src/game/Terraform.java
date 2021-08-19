@@ -3,6 +3,9 @@ package game;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import game.enums.GameModes;
+import game.enums.Owner;
+
 public class Terraform {
 
 

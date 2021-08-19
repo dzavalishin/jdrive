@@ -1,5 +1,6 @@
 package game;
 
+import game.enums.WindowEvents;
 import game.struct.Point;
 
 /* XXX - outside "byte event" so you can set event directly without going into

@@ -8,11 +8,13 @@ import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
+import game.struct.NPFFindStationOrTileData;
 import game.struct.RailtypeSlowdownParams;
 import game.struct.TileIndexDiff;
 import game.struct.TrainCollideChecker;
 import game.tables.TrainTables;
 import game.util.BitOps;
+import game.util.IntContainer;
 
 public class TrainCmd extends TrainTables 
 {

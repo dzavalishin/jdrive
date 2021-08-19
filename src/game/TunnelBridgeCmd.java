@@ -1,11 +1,14 @@
 package game;
 
 import game.tables.TunnelBridgeTables;
+import game.enums.GameModes;
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.TileIndexDiff;
 import game.tables.RailTables;
 import game.util.BitOps;
+import game.util.IntContainer;
 
 /** @file tunnelbridge_cmd.c
  * This file deals with tunnels and bridges (non-gui stuff)

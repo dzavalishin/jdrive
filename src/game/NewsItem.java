@@ -4,6 +4,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import game.enums.GameModes;
+import game.enums.WindowEvents;
 import game.ids.StringID;
 import game.tables.SoundFx;
 import game.util.BitOps;
@@ -492,7 +494,9 @@ public class NewsItem {
 	 */
 	static int GetNewsDisplayValue(int item)
 	{
-		assert(item < 10 && BitOps.GB(Global._news_display_opt, item * 2, 2) <= 2);
+//		assert(item < 10 && BitOps.GB(Global._news_display_opt, item * 2, 2) <= 2);
+		assert item < 10;
+		assert BitOps.GB(Global._news_display_opt, item * 2, 2) <= 2;
 		return BitOps.GB(Global._news_display_opt, item * 2, 2);
 	}
 

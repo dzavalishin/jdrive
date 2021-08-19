@@ -1,9 +1,11 @@
-package game;
+package game.struct;
+
+import game.AyStarNode;
 
 public class PathNode {
-	AyStarNode node;
+	public AyStarNode node;
 	// The parent of this item
-	PathNode parent;
+	public PathNode parent;
 
 	public PathNode() {
 		node = null;

@@ -1,5 +1,7 @@
 package game;
 
+import game.enums.GameModes;
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ifaces.CommandCallback;
 import game.ifaces.CommandProc;

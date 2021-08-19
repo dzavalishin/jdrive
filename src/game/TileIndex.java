@@ -8,6 +8,7 @@ import game.struct.Point;
 import game.struct.TileIndexDiff;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
+import game.util.IntContainer;
 
 // TODO make == work for TileIndex or we're busted - make fabric and disable new(), 
 // return same TileIndex for each TileIndex.tile

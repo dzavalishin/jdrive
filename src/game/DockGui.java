@@ -1,5 +1,7 @@
 package game;
 
+import game.enums.Owner;
+
 public class DockGui 
 {
 

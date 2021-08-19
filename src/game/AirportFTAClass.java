@@ -1,6 +1,7 @@
 package game;
 import game.struct.TileIndexDiffC;
 import game.tables.AirCraftTables;
+import game.tables.AirportFTAbuildup;
 import game.util.BitOps;
 
 //Finite sTate mAchine -. FTA

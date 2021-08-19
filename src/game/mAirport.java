@@ -2,6 +2,7 @@ package game;
 
 import java.util.Iterator;
 
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ids.StationID;
 

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import game.enums.GameModes;
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.StringID;
@@ -14,6 +16,8 @@ import game.ids.VehicleID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.ifaces.TileTypeProcs;
+import game.struct.DrawTileSeqStruct;
+import game.struct.DrawTileSprites;
 import game.struct.GoodsEntry;
 import game.struct.Point;
 import game.struct.ProducedCargo;
@@ -21,6 +25,9 @@ import game.struct.TileIndexDiff;
 import game.struct.TileIndexDiffC;
 import game.tables.StationTables;
 import game.util.BitOps;
+import game.util.IntContainer;
+import game.util.MemoryPool;
+import game.util.VehicleQueue;
 
 public class Station extends StationTables implements IPoolItem
 {
@@ -3388,7 +3395,7 @@ public class Station extends StationTables implements IPoolItem
 
 	public static Iterator<Station> getIterator()
 	{
-		return _station_pool.pool.values().iterator();
+		return _station_pool.getIterator(); //pool.values().iterator();
 	}
 
 	public static void forEach( Consumer<Station> c )

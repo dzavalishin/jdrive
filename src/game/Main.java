@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import game.ai.Ai;
+import game.enums.GameModes;
+import game.enums.Owner;
+import game.enums.SwitchModes;
+import game.enums.ThreadMsg;
 import game.ids.PlayerID;
 import game.util.FileIO;
 import game.util.Strings;

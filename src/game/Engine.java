@@ -1,5 +1,6 @@
 package game;
 
+import game.enums.Owner;
 import game.ids.EngineID;
 import game.ids.PlayerID;
 import game.ids.StringID;

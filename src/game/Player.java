@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import game.ai.Ai;
+import game.enums.GameModes;
+import game.enums.Owner;
 import game.ids.EngineID;
 import game.ids.PlayerID;
 import game.ids.StringID;

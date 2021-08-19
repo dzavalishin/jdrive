@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
+import game.util.MemoryPool;
 
 public class Depot implements IPoolItem
 {
@@ -56,7 +57,8 @@ public class Depot implements IPoolItem
 
 	public static Iterator<Depot> getIterator()
 	{
-		return _depot_pool.pool.values().iterator();
+		//return _depot_pool.pool.values().iterator();
+		return _depot_pool.getIterator();
 	}
 
 	static void forEach( Consumer<Depot> c )

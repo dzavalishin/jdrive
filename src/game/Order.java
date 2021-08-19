@@ -8,8 +8,12 @@ import game.ids.VehicleID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
+import game.util.MemoryPool;
 
-public class Order implements IPoolItem {
+public class Order implements IPoolItem 
+{
+	private static final long serialVersionUID = 1L;
+	
 	int  type;
 	int  flags;
 	int station;
@@ -845,7 +849,7 @@ public class Order implements IPoolItem {
 				//if (!HasOrderPoolFree(delta))					return_cmd_error(Str.STR_8831_NO_MORE_SPACE_FOR_ORDERS);
 
 				if (0 != (flags & Cmd.DC_EXEC)) {
-					final Order order;
+					//final Order order;
 					Order order_dst;
 
 					/* If the destination vehicle had a OrderList, destroy it */
@@ -1131,7 +1135,7 @@ public class Order implements IPoolItem {
 	
 	public static Iterator<Order> getIterator()
 	{
-		return _order_pool.pool.values().iterator();
+		return _order_pool.getIterator(); // pool.values().iterator();
 	}
 
 	static void forEach( Consumer<Order> c )

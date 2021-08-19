@@ -1,5 +1,6 @@
 package game;
 
+import game.enums.Owner;
 import game.util.BitOps;
 
 public class OrderGui {

@@ -1,4 +1,4 @@
-package game;
+package game.enums;
 
 public enum SwitchModes {
 	SM_NONE,

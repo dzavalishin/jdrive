@@ -3,6 +3,9 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.enums.GameModes;
+import game.enums.Owner;
+import game.enums.SwitchModes;
 import game.ids.CursorID;
 import game.ids.PlayerID;
 import game.ids.StringID;

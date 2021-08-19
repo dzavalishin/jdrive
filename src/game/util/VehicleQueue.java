@@ -1,31 +1,32 @@
-package game;
+package game.util;
 
+import game.Vehicle;
 import game.struct.VQueueItem;
 
 public abstract class VehicleQueue 
 {
 
-	VQueueItem top;
-	VQueueItem bottom;
+	public VQueueItem top;
+	public VQueueItem bottom;
 
 	// Dirty means "position" in VQueueItems is incorrect
 	// and needs to be rebuilt.
-	boolean dirty;	
-	int size;
+	public boolean dirty;	
+	public int size;
 
 	// Offset for "position" in queue - allows for O(1) pushes & pops
-	int offset;
+	public int offset;
 
 	// This comment is left here for historical reasons - [dz]
 	// Ahh, yes! Classic C functional programming!
 	// Should really be converted to C++, though . . .
-	abstract boolean	push(Vehicle item);
-	abstract Vehicle	pop();
-	abstract Vehicle	getTop();
-	abstract void		clean();
-	abstract void		clear();
-	abstract void		del(Vehicle item);
-	abstract int		getPos(Vehicle item);
+	public abstract boolean	push(Vehicle item);
+	public abstract Vehicle	pop();
+	public abstract Vehicle	getTop();
+	public abstract void		clean();
+	public abstract void		clear();
+	public abstract void		del(Vehicle item);
+	public abstract int		getPos(Vehicle item);
 
 	public VehicleQueue() {
 		size = 0;
@@ -50,7 +51,7 @@ class VQImpl extends VehicleQueue
 {
 
 	@Override
-	boolean push(Vehicle v) {
+	public boolean push(Vehicle v) {
 		VQueueItem newItem;
 
 		// Do not push NULLs
@@ -93,7 +94,7 @@ class VQImpl extends VehicleQueue
 	}
 
 	@Override
-	Vehicle pop() {
+	public Vehicle pop() {
 		Vehicle v;
 		VQueueItem oldItem;
 		
@@ -142,7 +143,7 @@ class VQImpl extends VehicleQueue
 	}
 
 	@Override
-	Vehicle getTop() {
+	public Vehicle getTop() {
 		if(size != 0)
 			return top.data;
 		else
@@ -150,7 +151,7 @@ class VQImpl extends VehicleQueue
 	}
 
 	@Override
-	void clean() {
+	public void clean() {
 		boolean done;
 		int currentSize;
 		VQueueItem currItem;
@@ -184,7 +185,7 @@ class VQImpl extends VehicleQueue
 	}
 
 	@Override
-	void clear() {
+	public void clear() {
 		while(pop() != null) {
 			// What? Expecting something? The clearing is done
 			// in the while statement above - I don't need anything here!
@@ -196,7 +197,7 @@ class VQImpl extends VehicleQueue
 	// This is one of the special functions - allows item to take itself off
 	// the queue no matter where in the queue it is!
 	@Override
-	void del(Vehicle v) {
+	public void del(Vehicle v) {
 		VQueueItem current;
 		VQueueItem above;
 		VQueueItem below;
@@ -229,7 +230,7 @@ class VQImpl extends VehicleQueue
 	}
 
 	@Override
-	int getPos(Vehicle v) {
+	public int getPos(Vehicle v) {
 		if(dirty)
 			clean();
 

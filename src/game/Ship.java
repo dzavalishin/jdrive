@@ -3,6 +3,7 @@ import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
+import game.struct.NPFFindStationOrTileData;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
 

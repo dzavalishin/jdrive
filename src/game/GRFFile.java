@@ -5,6 +5,8 @@ import java.util.Arrays;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.SpriteID;
+import game.struct.DrawTileSeqStruct;
+import game.struct.DrawTileSprites;
 import game.struct.EngineInfo;
 import game.tables.TunnelBridgeTables;
 import game.util.BitOps;

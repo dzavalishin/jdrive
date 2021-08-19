@@ -1,5 +1,8 @@
 package game;
 
+import game.enums.GameModes;
+import game.enums.SwitchModes;
+
 public class IntroGui 
 {
 

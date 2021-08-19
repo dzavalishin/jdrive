@@ -302,6 +302,8 @@ public class TrainGui
 			w.vscroll.cap += e.diff.y / 14;
 			w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
 		} break;
+		default:
+			break;
 		}
 	}
 
@@ -807,6 +809,8 @@ public class TrainGui
 			w.hscroll.cap += e.diff.x / 29;
 			w.widget.get(6).unkA = (w.vscroll.cap << 8) + 1;
 		} break;
+		default:
+			break;
 		}
 	}
 
@@ -902,6 +906,8 @@ public class TrainGui
 				}
 				break;
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -1102,6 +1108,8 @@ public class TrainGui
 			}
 			break;
 		}
+		default:
+			break;
 
 		}
 	}
@@ -1364,6 +1372,8 @@ public class TrainGui
 				Cmd.DoCommandP(null, w.window_number, 0, null,
 					Cmd.CMD_NAME_VEHICLE | Cmd.CMD_MSG(Str.STR_8866_CAN_T_NAME_TRAIN));
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -1632,6 +1642,8 @@ public class TrainGui
 			w.hscroll.cap += e.diff.x / 29;
 			w.vscroll.cap += e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL;
 			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
+			break;
+		default:
 			break;
 		}
 	}

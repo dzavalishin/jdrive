@@ -1,4 +1,4 @@
-package game;
+package game.enums;
 
 /**
  *  To have a concurrently running thread interface with the main program, use

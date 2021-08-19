@@ -6,10 +6,13 @@ import java.util.function.Consumer;
 
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
+import game.util.MemoryPool;
 
 public class RoadStop implements IPoolItem
 {
 
+	private static final long serialVersionUID = 1L;
+	
 	TileIndex xy;
 	boolean used;
 	byte status;
@@ -72,7 +75,7 @@ public class RoadStop implements IPoolItem
 	
 	public static Iterator<RoadStop> getIterator()
 	{
-		return _roadstop_pool.pool.values().iterator();
+		return _roadstop_pool.getIterator(); //pool.values().iterator();
 	}
 
 	public static void forEach( Consumer<RoadStop> c )

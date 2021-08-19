@@ -2,12 +2,17 @@ package game;
 
 import java.util.Iterator;
 
+import game.enums.GameModes;
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
+import game.struct.DrawTileSeqStruct;
+import game.struct.DrawTileSprites;
 import game.struct.DrawTileUnmovableStruct;
 import game.struct.TileIndexDiffC;
 import game.tables.UnmovableTables;
 import game.util.BitOps;
+import game.util.IntContainer;
 
 public class UnmovableCmd extends UnmovableTables {
 

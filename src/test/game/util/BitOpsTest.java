@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import game.IntContainer;
 import game.util.BitOps;
+import game.util.IntContainer;
 
 class BitOpsTest {
 

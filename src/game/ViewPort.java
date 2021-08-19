@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
+import game.enums.GameModes;
+import game.enums.Owner;
+import game.enums.WindowEvents;
 import game.ids.CursorID;
 import game.ids.SpriteID;
 import game.ids.StringID;

@@ -1,5 +1,7 @@
 package game;
 
+import game.struct.PathNode;
+
 /* Meant to be stored in AyStar.userpath */
 public class NPFFoundTargetData 
 {

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.function.BiConsumer;
 
+import game.enums.GameModes;
+import game.enums.WindowEvents;
 import game.ids.AbstractID;
 import game.ids.StringID;
 import game.struct.Point;

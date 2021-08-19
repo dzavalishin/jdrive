@@ -1,5 +1,5 @@
-package game;
-
+package game.struct;
+/*
 // saveload.h
 public abstract class ChunkHandler {
 
@@ -29,3 +29,4 @@ public abstract class ChunkHandler {
 	public static final int CH_NUM_PRI_LEVELS = 4;
 
 }
+*/

@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.enums.GameModes;
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
@@ -17,6 +19,8 @@ import game.struct.FindLengthOfTunnelResult;
 import game.struct.Point;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
+import game.util.IntContainer;
+import game.util.MemoryPool;
 import game.util.Strings;
 import game.util.TownTables;
 
@@ -2271,7 +2275,7 @@ public class Town extends TownTables implements IPoolItem, Serializable
 
 	public static Iterator<Town> getIterator()
 	{
-		return _town_pool.pool.values().iterator();
+		return _town_pool.getIterator(); // pool.values().iterator();
 	}
 
 

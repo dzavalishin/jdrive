@@ -1,4 +1,4 @@
-package game;
+package game.enums;
 
 public enum GameModes {
 	GM_MENU,

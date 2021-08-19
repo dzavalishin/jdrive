@@ -1,4 +1,4 @@
-package game;
+package game.tables;
 
 //state machine input struct (from external file, etc.)
 //Finite sTate mAchine --> FTA
@@ -6,10 +6,10 @@ package game;
 public class AirportFTAbuildup 
 {
 
-	int position;							// the position that an airplane is at
-	int heading;								// the current orders (eg. TAKEOFF, HANGAR, ENDLANDING, etc.)
-	int block;								// the block this position is on on the airport (st->airport_flags)
-	int next_in_chain;					// next position from this position
+	public final int position;							// the position that an airplane is at
+	public final int heading;								// the current orders (eg. TAKEOFF, HANGAR, ENDLANDING, etc.)
+	public final int block;								// the block this position is on on the airport (st->airport_flags)
+	public final int next_in_chain;					// next position from this position
 
 	public AirportFTAbuildup(int p, int h, int b, int n) 
 	{

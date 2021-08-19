@@ -1,7 +1,5 @@
 package game.tables;
 
-import game.AirportFTAbuildup;
-import game.AirportMovingData;
 import game.struct.TileIndexDiffC;
 
 public class AirCraftTables extends AirConstants

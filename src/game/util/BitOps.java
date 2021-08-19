@@ -1,6 +1,5 @@
 package game.util;
 
-import game.IntContainer;
 import game.tables.TrackPathFinderTables;
 
 import java.io.DataOutputStream;

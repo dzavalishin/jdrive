@@ -2,6 +2,8 @@ package game;
 
 import java.util.Iterator;
 
+import game.enums.GameModes;
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.util.BitOps;
@@ -560,7 +562,8 @@ public class PlayerGui
 
 			Global.SetDParam(0, p.president_name_1);
 			Global.SetDParam(1, p.president_name_2);
-			Gfx.DrawStringMultiCenter(48, 141, Str.STR_7037_PRESIDENT, 94);
+			//Gfx.DrawStringMultiCenter(48, 141, Str.STR_7037_PRESIDENT, 94); 
+			Gfx.DrawStringMultiCenter(54, 141, Str.STR_7037_PRESIDENT, 94); // TODO [dz] corrected x - error in DrawStringMultiCenter? 
 
 			Global.SetDParam64(0, Economy.CalculateCompanyValue(p) );
 			Gfx.DrawString(110, 114, Str.STR_7076_COMPANY_VALUE, 0);

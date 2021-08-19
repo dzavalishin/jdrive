@@ -9,6 +9,7 @@ import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.struct.Point;
+import game.util.MemoryPool;
 
 public class SignStruct implements IPoolItem
 {
@@ -77,7 +78,7 @@ public class SignStruct implements IPoolItem
 
 	public static Iterator<SignStruct> getIterator()
 	{
-		return _sign_pool.pool.values().iterator();
+		return _sign_pool.getIterator(); ////pool.values().iterator();
 	}
 
 	public static void forEach( Consumer<SignStruct> c )

@@ -1,6 +1,5 @@
 package game.util;
 
-import game.GameModes;
 import game.Global;
 import game.Player;
 import game.Ship;
@@ -9,6 +8,7 @@ import game.Town;
 import game.Train;
 import game.Vehicle;
 import game.Window;
+import game.enums.GameModes;
 
 public class GameDate {
 

@@ -11,6 +11,8 @@ import game.util.Prices;
 import game.util.Strings;
 import game.util.YearMonthDay;
 import game.Cheat.Cheats;
+import game.enums.GameModes;
+import game.enums.SwitchModes;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ids.VehicleID;
@@ -165,7 +167,7 @@ public class Global
 	
 	
 
-	public static int _news_display_opt = 0xFF; //  All news on
+	public static int _news_display_opt = 0xAAAAAAAA; //  All news on
 	public static boolean _news_ticker_sound = false;
 	public static NewsItem _statusbar_news_item = null;
 

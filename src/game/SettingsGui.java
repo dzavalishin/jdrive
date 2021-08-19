@@ -2,6 +2,7 @@ package game;
 
 import java.util.Iterator;
 
+import game.enums.GameModes;
 import game.ids.StringID;
 import game.struct.GameSettingData;
 import game.tables.CurrencySpec;

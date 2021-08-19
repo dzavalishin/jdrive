@@ -1,6 +1,8 @@
 package game;
 
 import game.struct.OpenListNode;
+import game.struct.PathNode;
+import game.util.Hash;
 import game.util.TTDQueue;
 import game.util.TTDQueueImpl;
 

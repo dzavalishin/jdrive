@@ -1,9 +1,9 @@
-package game;
+package game.tables;
 
 public class AirportMovingData {
-	int x,y;
-	int flag;
-	int direction;
+	public int x,y;
+	public int flag;
+	public int direction;
 
 	AirportMovingData(int x, int y, int flag, int dir)
 	{

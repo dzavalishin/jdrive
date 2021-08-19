@@ -3,11 +3,14 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.enums.Owner;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
+import game.struct.DrawTileSprites;
 import game.struct.Point;
 import game.util.BitOps;
+import game.util.MemoryPool;
 
 public class WayPoint implements IPoolItem
 {
@@ -53,7 +56,7 @@ public class WayPoint implements IPoolItem
 
 	public static Iterator<WayPoint> getIterator()
 	{
-		return _waypoint_pool.pool.values().iterator();
+		return _waypoint_pool.getIterator(); // pool.values().iterator();
 	}
 
 	public static void forEach( Consumer<WayPoint> c )

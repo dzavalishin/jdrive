@@ -1,4 +1,4 @@
-package game;
+package game.enums;
 /*
 public enum OrderType {
 	OT_NOTHING       = 0,

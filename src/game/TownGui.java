@@ -3,6 +3,8 @@ package game;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import game.enums.GameModes;
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.util.BitOps;

@@ -1,7 +1,7 @@
 package game.struct;
 
 import game.Vehicle;
-import game.VehicleQueue;
+import game.util.VehicleQueue;
 
 public class VQueueItem 
 {

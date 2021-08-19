@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
+import game.enums.GameModes;
+import game.enums.Owner;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.OrderID;
@@ -21,6 +23,7 @@ import game.struct.Rect;
 import game.struct.VQueueItem;
 import game.tables.EngineTables;
 import game.util.BitOps;
+import game.util.MemoryPool;
 import game.util.VehicleHash;
 
 public class Vehicle implements IPoolItem 
@@ -139,7 +142,7 @@ public class Vehicle implements IPoolItem
 	int value;
 
 	// Current position in a vehicle queue - can only belong to one queue at a time
-	VQueueItem queue_item;
+	public VQueueItem queue_item; // TODO VehicleQueue accesses me, why?
 
 
 	// TODO temp we create all of them, redo
@@ -859,7 +862,7 @@ public class Vehicle implements IPoolItem
 
 	public static Iterator<Vehicle> getIterator()
 	{
-		return _vehicle_pool.pool.values().iterator();
+		return _vehicle_pool.getIterator(); //pool.values().iterator();
 	}
 
 	private static Iterator<Vehicle> getIteratorFrom(int id) {
