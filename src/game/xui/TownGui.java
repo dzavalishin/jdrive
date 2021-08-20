@@ -65,9 +65,14 @@ public abstract class TownGui //extends Town
 			// bribe option enabled?
 			if (Global._patches.bribe) {
 				// if unwanted, disable everything.
-				if (t.unwanted[pid.id] != 0) {
+				//if (t.unwanted[pid.id] != 0) 
+				if (t.isUnwanted(pid.id)) 
+				{
 					avail_buttons = 0;
-				} else if (t.ratings[pid.id] < TownTables.RATING_BRIBE_MAXIMUM) {
+				} 
+				//else if (t.ratings[pid.id] < TownTables.RATING_BRIBE_MAXIMUM) 
+				else if (t.canBribe(pid.id)) 
+				{
 					avail_buttons = BitOps.RETSETBIT(avail_buttons, 7); // Allow bribing
 				}
 			}
@@ -84,7 +89,9 @@ public abstract class TownGui //extends Town
 				}
 
 				/* Disable build statue if already built */
-				if (BitOps.HASBIT(t.statues, pid.id)) {
+				//if (BitOps.HASBIT(t.statues, pid.id)) 
+				if (t.hasStatue(pid.id)) 
+				{
 					buttons = BitOps.RETCLRBIT(buttons, 4);
 					num--;
 				}
@@ -137,17 +144,19 @@ public abstract class TownGui //extends Town
 
 				// Draw list of players
 				int y[] = {25};
-				//FOR_ALL_PLAYERS(p)
+
 				Player.forEach( (p) ->
 				{
-					if (p.isActive() && (BitOps.HASBIT(t.have_ratings, p.getIndex().id) || t.exclusivity.id == p.getIndex().id)) {
+					//if (p.isActive() && (BitOps.HASBIT(t.have_ratings, p.getIndex().id) || t.exclusivity.id == p.getIndex().id)) 
+					if (p.isActive() && (t.hasRatingsFor(p.getIndex().id) || t.isExclusive( p.getIndex().id)) ) 
+					{
 						GraphGui.DrawPlayerIcon(p.getIndex().id, 2, y[0]);
 
-						Global.SetDParam(0, p.name_1);
-						Global.SetDParam(1, p.name_2);
+						Global.SetDParam(0, p.getName_1());
+						Global.SetDParam(1, p.getName_2());
 						Global.SetDParam(2, Player.GetPlayerNameString(p.getIndex(), 3));
 
-						int r = t.ratings[p.getIndex().id];
+						int r = t.getRatings(p.getIndex().id);
 						int str = Str.STR_3035_APPALLING; // Apalling
 
 						if( r > TownTables.RATING_APPALLING) {
@@ -167,7 +176,7 @@ public abstract class TownGui //extends Town
 											}}}}}}
 
 						Global.SetDParam(4, str);
-						if (t.exclusivity.id == p.getIndex().id) // red icon for player with exclusive rights
+						if (t.isExclusive(p.getIndex().id)) // red icon for player with exclusive rights
 							Gfx.DrawSprite(Sprite.SPR_BLOT | Sprite.PALETTE_TO_RED, 18, y[0]);
 
 						Gfx.DrawString(28, y[0], Str.STR_2024, 0);
@@ -271,7 +280,7 @@ public abstract class TownGui //extends Town
 			w.DrawWindowWidgets();
 
 			Global.SetDParam(0, t.getPopulation());
-			Global.SetDParam(1, t.num_houses);
+			Global.SetDParam(1, t.getNum_houses());
 			Gfx.DrawString(2, 107, Str.STR_2006_POPULATION, 0);
 
 			Global.SetDParam(0, t.act_pass);

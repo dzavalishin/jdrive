@@ -2633,8 +2633,8 @@ public class GRFFile
 				Engine engineInfo = Engine.GetEngine(engine);
 				RailVehicleInfo railVehInfo = Engine.RailVehInfo(engine);
 				if (xor_mask == 0 
-						&& !(engineInfo.type == Vehicle.VEH_Train && (railVehInfo.capacity == 0 || 0 != (railVehInfo.flags & Engine.RVI_WAGON) )))
-					xor_mask = Engine._default_refitmasks[engineInfo.type - Vehicle.VEH_Train];
+						&& !(engineInfo.getType() == Vehicle.VEH_Train && (railVehInfo.capacity == 0 || 0 != (railVehInfo.flags & Engine.RVI_WAGON) )))
+					xor_mask = Engine._default_refitmasks[engineInfo.getType() - Vehicle.VEH_Train];
 			}
 			Global._engine_info[engine].refit_mask = ((mask & ~not_mask) ^ xor_mask) & Engine._landscape_global_cargo_mask[GameOptions._opt.landscape];
 		}

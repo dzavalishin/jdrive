@@ -2791,7 +2791,7 @@ public class Rail extends RailTables {
 
 		/* calculate the point where the following wagon should be activated */
 		/* this depends on the length of the current vehicle */
-		length = v.rail.cached_veh_length;
+		length = v.rail.getCached_veh_length();
 
 		fract_coord_leave =
 				 (((_fractcoords_enter[dir] & 0x0F) +				// x

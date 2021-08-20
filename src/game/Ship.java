@@ -138,7 +138,7 @@ public class Ship {
 
 		if( 0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
 
-		cost = EngineGui.ShipVehInfo(v.engine_type.id).running_cost * Global._price.ship_running / 364;
+		cost = EngineGui.ShipVehInfo(v.getEngine_type().id).running_cost * Global._price.ship_running / 364;
 		v.profit_this_year -= cost >> 8;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);
@@ -363,7 +363,7 @@ public class Ship {
 		int spd;
 		int t; // was unsigned byte
 
-		spd = Math.min(v.cur_speed + 1, v.max_speed);
+		spd = Math.min(v.cur_speed + 1, v.getMax_speed());
 
 		//updates statusbar only if speed have changed to save CPU time
 		if (spd != v.cur_speed) {
@@ -606,7 +606,7 @@ public class Ship {
 
 	static int ShipGetNewDirection(Vehicle v, int x, int y)
 	{
-		int offs = (y - v.y_pos + 1) * 4 + (x - v.x_pos + 1);
+		int offs = (y - v.getY_pos() + 1) * 4 + (x - v.getX_pos() + 1);
 		assert(offs < 11 && offs != 3 && offs != 7);
 		return _new_vehicle_direction_table[offs];
 	}
@@ -687,8 +687,8 @@ public class Ship {
 		{
 			// staying in tile
 			if (v.ship.state == 0x80) {
-				gp.x = v.x_pos;
-				gp.y = v.y_pos;
+				gp.x = v.getX_pos();
+				gp.y = v.getY_pos();
 			} else {
 				/* isnot inside Depot */
 				r = v.VehicleEnterTile(gp.new_tile, gp.x, gp.y);
@@ -978,7 +978,8 @@ public class Ship {
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		if (!v.tile.IsTileDepotType(Global.TRANSPORT_WATER) || v.road.state != 0x80 || 0==(v.vehstatus&Vehicle.VS_STOPPED))
+		//if (!v.tile.IsTileDepotType(Global.TRANSPORT_WATER) || v.road.state != 0x80 || 0==(v.vehstatus&Vehicle.VS_STOPPED))
+		if (!v.tile.IsTileDepotType(Global.TRANSPORT_WATER) || !v.ship.isInDepot() || 0==(v.vehstatus&Vehicle.VS_STOPPED))
 			return Cmd.return_cmd_error(Str.STR_980B_SHIP_MUST_BE_STOPPED_IN);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -1114,13 +1115,13 @@ public class Ship {
 
 
 		/* Check cargo */
-		if (0==Engine.ShipVehInfo(v.engine_type.id).refittable) return Cmd.CMD_ERROR;
-		if (new_cid.id > AcceptedCargo.NUM_CARGO || !Vehicle.CanRefitTo(v.engine_type, new_cid)) return Cmd.CMD_ERROR;
+		if (0==Engine.ShipVehInfo(v.getEngine_type().id).refittable) return Cmd.CMD_ERROR;
+		if (new_cid.id > AcceptedCargo.NUM_CARGO || !Vehicle.CanRefitTo(v.getEngine_type(), new_cid)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);
 
 		cost = 0;
-		if (v.owner.IS_HUMAN_PLAYER() && new_cid.id != v.cargo_type) {
+		if (v.owner.IS_HUMAN_PLAYER() && new_cid.id != v.getCargo_type()) {
 			cost = Global._price.ship_base >> 7;
 		}
 

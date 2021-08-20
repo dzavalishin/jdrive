@@ -1504,12 +1504,12 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				vdir = v.direction >> 1;
 
 				// Enter tunnel?
-				if (v.road.state != 0xFF && dir == vdir) {
+				if ((!v.road.isInTunnel()) && dir == vdir) {
 					if (fc == _tunnel_fractcoord_4[dir] ||
 							fc == _tunnel_fractcoord_5[dir]) {
 
 						v.tile = tile;
-						v.road.state = 0xFF;
+						v.road.setInTunnel();
 						v.vehstatus |= Vehicle.VS_HIDDEN;
 						return 4;
 					} else {

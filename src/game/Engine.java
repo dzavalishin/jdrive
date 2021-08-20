@@ -449,11 +449,11 @@ public class Engine extends EngineTables implements Serializable
 
 						while (u != veh) {
 							chain_before++;
-							if (dsg.variable == 0x41 && u.engine_type != veh.engine_type)
+							if (dsg.variable == 0x41 && u.getEngine_type() != veh.getEngine_type())
 								chain_before = 0;
 							u = u.next;
 						}
-						while (u.next != null && (dsg.variable == 0x40 || u.next.engine_type == veh.engine_type)) {
+						while (u.next != null && (dsg.variable == 0x40 || u.next.getEngine_type() == veh.getEngine_type())) {
 							chain_after++;
 							u = u.next;
 						};
@@ -486,8 +486,8 @@ public class Engine extends EngineTables implements Serializable
 					case 0x15: value =  veh.service_interval & 0xFF; break;
 					case 0x16: value =  veh.last_station_visited; break;
 					case 0x17: value =  veh.tick_counter; break;
-					case 0x18: value =  veh.max_speed; break;
-					case 0x19: value =  veh.max_speed & 0xFF; break;
+					case 0x18: value =  veh.getMax_speed(); break;
+					case 0x19: value =  veh.getMax_speed() & 0xFF; break;
 					case 0x1F: value =  veh.direction; break;
 					case 0x28: value =  veh.cur_image; break;
 					case 0x29: value =  veh.cur_image & 0xFF; break;
@@ -497,21 +497,21 @@ public class Engine extends EngineTables implements Serializable
 					case 0x35: value =  veh.cur_speed & 0xFF; break;
 					case 0x36: value =  veh.subspeed; break;
 					case 0x37: value =  veh.acceleration; break;
-					case 0x39: value =  veh.cargo_type; break;
-					case 0x3A: value =  veh.cargo_cap; break;
-					case 0x3B: value =  veh.cargo_cap & 0xFF; break;
+					case 0x39: value =  veh.getCargo_type(); break;
+					case 0x3A: value =  veh.getCargo_cap(); break;
+					case 0x3B: value =  veh.getCargo_cap() & 0xFF; break;
 					case 0x3C: value =  veh.cargo_count; break;
 					case 0x3D: value =  veh.cargo_count & 0xFF; break;
-					case 0x3E: value =  veh.cargo_source; break; // Probably useless; so what
+					case 0x3E: value =  veh.getCargo_source(); break; // Probably useless; so what
 					case 0x3F: value =  veh.cargo_days; break;
 					case 0x40: value =  veh.age; break;
 					case 0x41: value =  veh.age & 0xFF; break;
 					case 0x42: value =  veh.max_age; break;
 					case 0x43: value =  veh.max_age & 0xFF; break;
-					case 0x44: value =  veh.build_year; break;
+					case 0x44: value =  veh.getBuild_year(); break;
 					case 0x45: value =  veh.unitnumber.id; break;
-					case 0x46: value =  veh.engine_type.id; break;
-					case 0x47: value =  veh.engine_type.id & 0xFF; break;
+					case 0x46: value =  veh.getEngine_type().id; break;
+					case 0x47: value =  veh.getEngine_type().id & 0xFF; break;
 					case 0x48: value =  veh.spritenum; break;
 					case 0x49: value =  veh.day_counter; break;
 					case 0x4A: value =  veh.breakdowns_since_last_service; break;
@@ -588,7 +588,7 @@ public class Engine extends EngineTables implements Serializable
 		int cargo = GC_PURCHASE;
 
 		if (v != null) {
-			cargo =  _global_cargo_id[GameOptions._opt.landscape][v.cargo_type];
+			cargo =  _global_cargo_id[GameOptions._opt.landscape][v.getCargo_type()];
 			assert(cargo != GC_INVALID);
 		}
 
@@ -614,9 +614,9 @@ public class Engine extends EngineTables implements Serializable
 		int r;
 
 		if (v != null) {
-			int capacity = v.cargo_cap;
+			int capacity = v.getCargo_cap();
 
-			cargo =  _global_cargo_id[GameOptions._opt.landscape][v.cargo_type];
+			cargo =  _global_cargo_id[GameOptions._opt.landscape][v.getCargo_type()];
 			assert(cargo != GC_INVALID);
 
 			if (capacity == 0) capacity = 1;
@@ -678,7 +678,7 @@ public class Engine extends EngineTables implements Serializable
 	static boolean UsesWagonOverride(final Vehicle  v)
 	{
 		assert(v.type == Vehicle.VEH_Train);
-		return GetWagonOverrideSpriteSet(v.engine_type, v.rail.first_engine.id) != null;
+		return GetWagonOverrideSpriteSet(v.getEngine_type(), v.rail.first_engine.id) != null;
 	}
 
 	/**
@@ -696,7 +696,7 @@ public class Engine extends EngineTables implements Serializable
 		int cargo = GC_DEFAULT;
 
 		if (v != null)
-			cargo =  _global_cargo_id[GameOptions._opt.landscape][v.cargo_type];
+			cargo =  _global_cargo_id[GameOptions._opt.landscape][v.getCargo_type()];
 
 		group = engine_custom_sprites[engine.id][cargo];
 
@@ -757,12 +757,12 @@ public class Engine extends EngineTables implements Serializable
 
 		_vsg_random_triggers = trigger;
 		_vsg_bits_to_reseed = 0;
-		group = TriggerVehicleSpriteGroup(GetVehicleSpriteGroup(veh.engine_type, veh), veh, 0,
+		group = TriggerVehicleSpriteGroup(GetVehicleSpriteGroup(veh.getEngine_type(), veh), veh, 0,
 				(resolve_callback) Engine::TriggerVehicleSpriteGroup);
 
-		if (group == null && veh.cargo_type != GC_DEFAULT) {
+		if (group == null && veh.getCargo_type() != GC_DEFAULT) {
 			// This group turned out to be empty but perhaps there'll be a default one.
-			group = TriggerVehicleSpriteGroup(engine_custom_sprites[veh.engine_type.id][GC_DEFAULT], veh, 0,
+			group = TriggerVehicleSpriteGroup(engine_custom_sprites[veh.getEngine_type().id][GC_DEFAULT], veh, 0,
 					(resolve_callback) Engine::TriggerVehicleSpriteGroup);
 		}
 
@@ -997,7 +997,7 @@ public class Engine extends EngineTables implements Serializable
 					Vehicle v = it.next();
 					if (v.type == Vehicle.VEH_Train || v.type == Vehicle.VEH_Road || v.type == Vehicle.VEH_Ship ||
 							(v.type == Vehicle.VEH_Aircraft && v.subtype <= 2)) {
-						if (v.owner == p.index && v.engine_type.id == index) {
+						if (v.owner == p.index && v.getEngine_type().id == index) {
 							/* The user did prove me wrong, so restore old value */
 							p.block_preview =  block_preview;
 							break;
@@ -1554,6 +1554,14 @@ public class Engine extends EngineTables implements Serializable
 	public void setAvailableTo(int playerId)
 	{
 		player_avail = BitOps.RETSETBIT(player_avail, playerId);
+	}
+
+	public boolean flagIsAvailable() {
+		return 0 != (flags & 1);
+	}
+
+	public int getType() {
+		return type;
 	}
 	
 }

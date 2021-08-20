@@ -658,7 +658,7 @@ public class WaterCmd extends WaterTables
 
 			if (v.type == Vehicle.VEH_Road) {	// flood bus/truck
 				pass[0] = 1;	// driver
-				if (v.cargo_type == AcceptedCargo.CT_PASSENGERS)
+				if (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS)
 					pass[0] += v.cargo_count;
 
 				v.vehstatus |= Vehicle.VS_CRASHED;
@@ -675,7 +675,7 @@ public class WaterCmd extends WaterTables
 				//BEGIN_ENUM_WAGONS(v)
 				v.forEachWagon( (vw) -> 
 				{
-					if (vw.cargo_type == AcceptedCargo.CT_PASSENGERS) pass[0] += vw.cargo_count;
+					if (vw.getCargo_type() == AcceptedCargo.CT_PASSENGERS) pass[0] += vw.cargo_count;
 					vw.vehstatus |= Vehicle.VS_CRASHED;
 				});
 				//END_ENUM_WAGONS(v)

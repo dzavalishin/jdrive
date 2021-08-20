@@ -1,15 +1,15 @@
 package game;
 
 public class AircraftVehicleInfo {
-	int image_index;
-	int base_cost;
-	int running_cost;
-	int subtype;
-	int sfx;
-	int acceleration;
-	int max_speed;
-	int mail_capacity;
-	int passenger_capacity;
+	public final int image_index;
+	public final int base_cost;
+	public final int running_cost;
+	public final int subtype;
+	public final int sfx;
+	public final int acceleration;
+	public final int max_speed;
+	public final int mail_capacity;
+	public final int passenger_capacity;
 
 	public AircraftVehicleInfo(
 			int i, int j, int k, 
@@ -27,4 +27,5 @@ public class AircraftVehicleInfo {
 		passenger_capacity = p;
 
 	}
+
 }

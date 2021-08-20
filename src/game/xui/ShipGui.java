@@ -101,7 +101,7 @@ public class ShipGui
 				if (!Cmd.CmdFailed(cost)) {
 					Global.SetDParam(2, cost);
 					Global.SetDParam(0, Global._cargoc.names_long[w.as_refit_d().cargo]);
-					Global.SetDParam(1, v.cargo_cap);
+					Global.SetDParam(1, v.getCargo_cap());
 					Gfx.DrawString(1, 137, Str.STR_9840_NEW_CAPACITY_COST_OF_REFIT, 0);
 				}
 			}
@@ -184,13 +184,13 @@ public class ShipGui
 
 				Global.SetDParam(0, (v.getAge() + 365 < v.max_age) ? Str.STR_AGE : Str.STR_AGE_RED);
 				Global.SetDParam(2, v.max_age / 366);
-				Global.SetDParam(3, Engine.ShipVehInfo(v.engine_type.id).running_cost * Global._price.ship_running >> 8);
+				Global.SetDParam(3, Engine.ShipVehInfo(v.getEngine_type().id).running_cost * Global._price.ship_running >> 8);
 				Gfx.DrawString(2, 15, Str.STR_9812_AGE_RUNNING_COST_YR, 0);
 			}
 
 			/* Draw max speed */
 			{
-				Global.SetDParam(0, v.max_speed * 10 >> 5);
+				Global.SetDParam(0, v.getMax_speed() * 10 >> 5);
 				Gfx.DrawString(2, 25, Str.STR_9813_MAX_SPEED, 0);
 			}
 
@@ -217,20 +217,20 @@ public class ShipGui
 
 			DrawShipImage(v, 3, 57, Vehicle.INVALID_VEHICLE);
 
-			Global.SetDParam(1, 1920 + v.build_year);
-			Global.SetDParam(0, Engine.GetCustomEngineName(v.engine_type.id).id);
+			Global.SetDParam(1, 1920 + v.getBuild_year());
+			Global.SetDParam(0, Engine.GetCustomEngineName(v.getEngine_type().id).id);
 			Global.SetDParam(2, v.value);
 			Gfx.DrawString(74, 57, Str.STR_9816_BUILT_VALUE, 0);
 
-			Global.SetDParam(0, Global._cargoc.names_long[v.cargo_type]);
-			Global.SetDParam(1, v.cargo_cap);
+			Global.SetDParam(0, Global._cargoc.names_long[v.getCargo_type()]);
+			Global.SetDParam(1, v.getCargo_cap());
 			Gfx.DrawString(74, 67, Str.STR_9817_CAPACITY, 0);
 
 			str = Str.STR_8812_EMPTY;
 			if (v.cargo_count != 0) {
-				Global.SetDParam(0, v.cargo_type);
+				Global.SetDParam(0, v.getCargo_type());
 				Global.SetDParam(1, v.cargo_count);
-				Global.SetDParam(2, v.cargo_source);
+				Global.SetDParam(2, v.getCargo_source());
 				str = Str.STR_8813_FROM;
 			}
 			Gfx.DrawString(74, 78, str, 0);
@@ -491,7 +491,7 @@ public class ShipGui
 			int str;
 
 			// Possible to refit?
-			if (Engine.ShipVehInfo(v.engine_type.id).refittable != 0 &&
+			if (Engine.ShipVehInfo(v.getEngine_type().id).refittable != 0 &&
 					v.isStopped() &&
 					v.ship.isInDepot() &&
 					Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_WATER))
@@ -555,7 +555,7 @@ public class ShipGui
 				Cmd.DoCommandP(v.getTile(), v.index, 0, null, Cmd.CMD_START_STOP_SHIP | Cmd.CMD_MSG(Str.STR_9818_CAN_T_STOP_START_SHIP));
 				break;
 			case 6: /* center main view */
-				ViewPort.ScrollMainWindowTo(v.x_pos, v.y_pos);
+				ViewPort.ScrollMainWindowTo(v.getX_pos(), v.getY_pos());
 				break;
 			case 7: /* goto hangar */
 				Cmd.DoCommandP(v.getTile(), v.index, 0, null, Cmd.CMD_SEND_SHIP_TO_DEPOT | Cmd.CMD_MSG(Str.STR_9819_CAN_T_SEND_SHIP_TO_DEPOT));

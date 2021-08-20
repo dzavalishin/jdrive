@@ -95,7 +95,7 @@ public class SignStruct implements IPoolItem
 	}
 	
 	
-	static boolean _sign_sort_dirty;
+	public static boolean _sign_sort_dirty;
 	//int *_sign_sort;
 
 
@@ -384,7 +384,7 @@ static const SaveLoad _sign_desc[] = {
 		default:
 			mult = 4;
 			topAdd = 24;
-			sw = sign.width_2 | 0x8000;
+			sw = sign.getWidth_2() | 0x8000;
 			break;
 		}
 		
@@ -421,7 +421,7 @@ static const SaveLoad _sign_desc[] = {
 		default:
 			//mult = 4;
 			topAdd = 24;
-			sw = sign.width_2 * 4;
+			sw = sign.getWidth_2() * 4;
 			break;
 		}
 		

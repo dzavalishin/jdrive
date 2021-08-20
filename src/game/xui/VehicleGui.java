@@ -26,6 +26,8 @@ import game.ids.EngineID;
 import game.sort.AbstractVehicleSorter;
 import game.sort.VehicleAgeSorter;
 import game.sort.VehicleCargoSorter;
+import game.sort.VehicleMaxSpeedSorter;
+import game.sort.VehicleNameSorter;
 import game.sort.VehicleNumberSorter;
 import game.sort.VehicleProfitLastYearSorter;
 import game.sort.VehicleProfitThisYearSorter;
@@ -281,8 +283,8 @@ private static void show_cargo(ctype) {
 		cmask = 0;
 		u = v;
 		do {
-			cmask |= Global._engine_info[u.engine_type.id].refit_mask;
-			u = u.next;
+			cmask |= Global._engine_info[u.getEngine_type().id].refit_mask;
+			u = u.getNext();
 		} while (v.getType() == Vehicle.VEH_Train && u != null);
 
 		/* Check which cargo has been selected from the refit window and draw list */
@@ -312,7 +314,7 @@ private static void show_cargo(ctype) {
 
 	static boolean ENGINE_IS_AVAILABLE(Engine e, EngineInfo info)
 	{
-		return (( (0 != (e.flags & 1)) && BitOps.HASBIT(info.climates, GameOptions._opt.landscape)) 
+		return (( e.flagIsAvailable() && BitOps.HASBIT(info.climates, GameOptions._opt.landscape)) 
 				|| e.isAvailableToMe());
 	}
 
@@ -750,11 +752,11 @@ private static void show_cargo(ctype) {
 						if (vehicle.getType() == Vehicle.VEH_Aircraft && vehicle.getSubtype() > 2) continue;
 
 						// do not count the vehicles, that contains only 0 in all var
-						if (vehicle.engine_type == null && vehicle.spritenum == 0) continue;
+						if (vehicle.getEngine_type() == null && vehicle.getSpritenum() == 0) continue;
 
-						if (vehicle.getType() != Engine.GetEngine(vehicle.engine_type).type) continue;
+						if (vehicle.getType() != Engine.GetEngine(vehicle.getEngine_type()).getType()) continue;
 
-						_player_num_engines[vehicle.engine_type.id]++;
+						_player_num_engines[vehicle.getEngine_type().id]++;
 					}
 				}
 			}
@@ -822,7 +824,7 @@ private static void show_cargo(ctype) {
 
 			if (w.as_replaceveh_d().vehicletype == Vehicle.VEH_Train) {
 				// set on/off for renew_keep_length
-				Global.SetDParam(1, p.renew_keep_length ? Str.STR_CONFIG_PATCHES_ON : Str.STR_CONFIG_PATCHES_OFF);
+				Global.SetDParam(1, p.isRenew_keep_length() ? Str.STR_CONFIG_PATCHES_ON : Str.STR_CONFIG_PATCHES_OFF);
 			}
 
 			w.DrawWindowWidgets();
@@ -910,7 +912,7 @@ private static void show_cargo(ctype) {
 				break;
 			}
 			case 17: { /* toggle renew_keep_length */
-				Cmd.DoCommandP( null, 5, p.renew_keep_length ? 0 : 1, null, Cmd.CMD_REPLACE_VEHICLE);
+				Cmd.DoCommandP( null, 5, p.isRenew_keep_length() ? 0 : 1, null, Cmd.CMD_REPLACE_VEHICLE);
 			} break;
 			case 4: { /* Start replacing */
 				EngineID veh_from = w.as_replaceveh_d().sel_engine[0];

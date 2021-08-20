@@ -2693,7 +2693,7 @@ public class Vehicle implements IPoolItem
 		if (
 				v.type == VEH_Train && 
 				v.rail.shortest_platform[0]*16 <= v.rail.cached_total_length && 
-				Player.GetPlayer(v.owner).renew_keep_length) 
+				Player.GetPlayer(v.owner).isRenew_keep_length()) 
 		{
 			// the train is not too long for the stations it visits. We should try to keep it that way if we change anything
 			train_fits_in_station = true;
@@ -2935,7 +2935,7 @@ public class Vehicle implements IPoolItem
 			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.ship.state),v.direction);
 
 		case VEH_Road:
-			if (v.road.state == 254) /* We'll assume the road vehicle is facing outwards */
+			if (v.road.isInDepot()) /* We'll assume the road vehicle is facing outwards */
 				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_ROAD)); /* Road vehicle in depot */
 
 			if (v.tile.IsRoadStationTile()) /* We'll assume the road vehicle is facing outwards */
@@ -3835,9 +3835,88 @@ public class Vehicle implements IPoolItem
 			return max_speed;
 	}
 
+	
+	public int getX_pos() {		return x_pos;	}
+	public int getY_pos() {		return y_pos;	}
+
+	
 	public int getMax_age() { return max_age; }
 	public Vehicle getNext() { return next; }
 	public int getService_interval() { return service_interval; }
+	public EngineID getEngine_type() {		return engine_type;	}
+	public int getBuild_year() {		return build_year;	}
+	public int getValue() { return value; }
+	public int getCargo_cap() {		return cargo_cap;	}
+	public int getCargo_type() {		return cargo_type;	}
+	public int getCargo_count() { return cargo_count; }
+
+	public int getBreakdowns_since_last_service() { return breakdowns_since_last_service; }
+
+	public int generateTrainDescription() 
+	{
+		int psp = Global._patches.vehicle_speed ? 1 : 0;
+		int str = Str.INVALID_STRING_ID.id;
+		
+		if (rail.crash_anim_pos != 0) {
+			str = Str.STR_8863_CRASHED;
+		} else if (isBroken()) {
+			str = Str.STR_885C_BROKEN_DOWN;
+		} else if(isStopped()) {
+			if (rail.last_speed == 0) {
+				str = Str.STR_8861_STOPPED;
+			} else {
+				Global.SetDParam(0, rail.last_speed * 10 >> 4);
+				str = Str.STR_TRAIN_STOPPING + psp;
+			}
+		} else {
+			switch (current_order.type) {
+			case Order.OT_GOTO_STATION: {
+				str = Str.STR_HEADING_FOR_STATION + psp;
+				Global.SetDParam(0, current_order.station);
+				Global.SetDParam(1, rail.last_speed * 10 >> 4);
+			} break;
+
+			case Order.OT_GOTO_DEPOT: {
+				Depot dep = Depot.GetDepot(current_order.station);
+				Global.SetDParam(0, dep.getTownIndex());
+				str = Str.STR_HEADING_FOR_TRAIN_DEPOT + psp;
+				Global.SetDParam(1, rail.last_speed * 10 >> 4);
+			} break;
+
+			case Order.OT_LOADING:
+			case Order.OT_LEAVESTATION:
+				str = Str.STR_882F_LOADING_UNLOADING;
+				break;
+
+			case Order.OT_GOTO_WAYPOINT: {
+				Global.SetDParam(0, current_order.station);
+				str = Str.STR_HEADING_FOR_WAYPOINT + psp;
+				Global.SetDParam(1, rail.last_speed * 10 >> 4);
+				break;
+			}
+
+			default:
+				if (num_orders == 0) {
+					str = Str.STR_NO_ORDERS + psp;
+					Global.SetDParam(0, rail.last_speed * 10 >> 4);
+				} else
+					str = Str.STR_EMPTY;
+				break;
+			}
+		}
+		
+		return str;
+	}
+
+	public int getSpritenum() { return spritenum; }
+
+	public int getCargo_source() {
+		return cargo_source;
+	}
+
+	public int getMax_speed() {
+		return max_speed;
+	}
 
 
 

@@ -669,7 +669,7 @@ public class Station extends StationTables implements IPoolItem
 		case Vehicle.VEH_Aircraft:	return st.airport_tile;
 		case Vehicle.VEH_Ship:			return st.dock_tile;
 		case Vehicle.VEH_Road:
-			if (v.cargo_type == AcceptedCargo.CT_PASSENGERS) {
+			if (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) {
 				return (st.bus_stops != null) ? st.bus_stops.get(0).xy : null;
 			} else {
 				return (st.truck_stops != null) ? st.truck_stops.get(0).xy : null;

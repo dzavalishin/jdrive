@@ -383,12 +383,12 @@ public class TrainGui
 			if (--skip < 0) {
 				int image = TrainCmd.GetTrainImage(v, 6);
 				int ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.getOwner()));
-				int width = v.rail.cached_veh_length;
+				int width = v.rail.getCached_veh_length();
 
 				if (dx + width <= count) {
 					if(v.isCrashed())
 						ormod = Sprite.PALETTE_CRASH;
-					Gfx.DrawSprite(image | ormod, x + 14 + WagonLengthToPixels(dx), y + 6 + (Sprite.is_custom_sprite(Engine.RailVehInfo(v.engine_type.id).image_index) ? _traininfo_vehicle_pitch : 0));
+					Gfx.DrawSprite(image | ormod, x + 14 + WagonLengthToPixels(dx), y + 6 + (Sprite.is_custom_sprite(Engine.RailVehInfo(v.getEngine_type().id).image_index) ? _traininfo_vehicle_pitch : 0));
 					if (v.index == selection.id)
 						Gfx.DrawFrameRect(x - 1 + WagonLengthToPixels(dx), y - 1, x + WagonLengthToPixels(dx + width) - 1, y + 12, 15, Window.FR_BORDERONLY);
 				}
@@ -427,7 +427,7 @@ public class TrainGui
 				num++;
 				// determine number of items in the X direction.
 				if (v.IsFrontEngine()) {
-					hnum = Math.max(hnum, v.rail.cached_total_length);
+					hnum = Math.max(hnum, v.rail.getCached_total_length());
 				}
 			}
 		}
@@ -463,7 +463,7 @@ public class TrainGui
 				Gfx.DrawString(x, y, (v.getMax_age() - 366 < v.getAge()) ? Str.STR_00E3 : Str.STR_00E2, 0);
 
 				// Number of wagons relative to a standard length wagon (rounded up)
-				Global.SetDParam(0, (v.rail.cached_total_length + 7) / 8);
+				Global.SetDParam(0, (v.rail.getCached_total_length() + 7) / 8);
 				Gfx.DrawStringRightAligned(w.widget.get(6).right - 1, y + 4, Str.STR_TINY_BLACK, 0);	//Draw the counter
 
 				/* Draw the pretty flag */
@@ -508,7 +508,7 @@ public class TrainGui
 		while (skip-- > 0) v = v.getNext();
 
 		/* find the vehicle in this row that was clicked */
-		while ((x -= WagonLengthToPixels(v.rail.cached_veh_length)) >= 0) {
+		while ((x -= WagonLengthToPixels(v.rail.getCached_veh_length())) >= 0) {
 			v = v.getNext();
 			if (v == null) break;
 		}
@@ -986,8 +986,8 @@ public class TrainGui
 
 			/* See if any vehicle can be refitted */
 			for ( u = v; u != null; u = u.getNext()) {
-				if (Global._engine_info[u.engine_type.id].refit_mask != 0 ||
-							 (0==(Engine.RailVehInfo(v.engine_type.id).flags & Engine.RVI_WAGON) && v.cargo_cap != 0)) {
+				if (Global._engine_info[u.getEngine_type().id].refit_mask != 0 ||
+							 (!Engine.RailVehInfo(v.getEngine_type().id).isWagon() && v.getCargo_cap() != 0)) {
 					w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 12);
 					/* We have a refittable carriage, bail out */
 					break;
@@ -999,55 +999,7 @@ public class TrainGui
 			Global.SetDParam(1, v.getUnitnumber().id);
 			w.DrawWindowWidgets();
 
-			int psp = Global._patches.vehicle_speed ? 1 : 0;
-			
-			if (v.rail.crash_anim_pos != 0) {
-				str = Str.STR_8863_CRASHED;
-			} else if (v.isBroken()) {
-				str = Str.STR_885C_BROKEN_DOWN;
-			} else if(v.isStopped()) {
-				if (v.rail.last_speed == 0) {
-					str = Str.STR_8861_STOPPED;
-				} else {
-					Global.SetDParam(0, v.rail.last_speed * 10 >> 4);
-					str = Str.STR_TRAIN_STOPPING + psp;
-				}
-			} else {
-				switch (v.current_order.type) {
-				case Order.OT_GOTO_STATION: {
-					str = Str.STR_HEADING_FOR_STATION + psp;
-					Global.SetDParam(0, v.current_order.station);
-					Global.SetDParam(1, v.rail.last_speed * 10 >> 4);
-				} break;
-
-				case Order.OT_GOTO_DEPOT: {
-					Depot dep = Depot.GetDepot(v.current_order.station);
-					Global.SetDParam(0, dep.getTownIndex());
-					str = Str.STR_HEADING_FOR_TRAIN_DEPOT + psp;
-					Global.SetDParam(1, v.rail.last_speed * 10 >> 4);
-				} break;
-
-				case Order.OT_LOADING:
-				case Order.OT_LEAVESTATION:
-					str = Str.STR_882F_LOADING_UNLOADING;
-					break;
-
-				case Order.OT_GOTO_WAYPOINT: {
-					Global.SetDParam(0, v.current_order.station);
-					str = Str.STR_HEADING_FOR_WAYPOINT + psp;
-					Global.SetDParam(1, v.rail.last_speed * 10 >> 4);
-					break;
-				}
-
-				default:
-					if (v.num_orders == 0) {
-						str = Str.STR_NO_ORDERS + psp;
-						Global.SetDParam(0, v.rail.last_speed * 10 >> 4);
-					} else
-						str = Str.STR_EMPTY;
-					break;
-				}
-			}
+			str = v.generateTrainDescription();
 
 			/* draw the flag plus orders */
 			Gfx.DrawSprite(v.isStopped() ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.widget.get(5).top + 1);
@@ -1064,7 +1016,7 @@ public class TrainGui
 				Cmd.DoCommandP(v.getTile(), v.index, 0, null, Cmd.CMD_START_STOP_TRAIN | Cmd.CMD_MSG(Str.STR_883B_CAN_T_STOP_START_TRAIN));
 				break;
 			case 6:	/* center main view */
-				ViewPort.ScrollMainWindowTo(v.x_pos, v.y_pos);
+				ViewPort.ScrollMainWindowTo(v.getX_pos(), v.getY_pos());
 				break;
 			case 7:	/* goto depot */
 				/* TrainGotoDepot has a nice randomizer in the pathfinder, which causes desyncs... */
@@ -1148,13 +1100,13 @@ public class TrainGui
 		//StringID 
 		int str;
 
-		if (v.cargo_cap != 0) {
-			num = v.cargo_count;
+		if (v.getCargo_cap() != 0) {
+			num = v.getCargo_count();
 			str = Str.STR_8812_EMPTY;
 			if (num != 0) {
-				Global.SetDParam(0, v.cargo_type);
+				Global.SetDParam(0, v.getCargo_type());
 				Global.SetDParam(1, num);
-				Global.SetDParam(2, v.cargo_source);
+				Global.SetDParam(2, v.getCargo_source());
 				str = Str.STR_8813_FROM;
 			}
 			Gfx.DrawString(x, y, str, 0);
@@ -1163,25 +1115,25 @@ public class TrainGui
 
 	static void TrainDetailsInfoTab(final Vehicle v, int x, int y)
 	{
-		final RailVehicleInfo rvi = Engine.RailVehInfo(v.engine_type.id);
+		final RailVehicleInfo rvi = Engine.RailVehInfo(v.getEngine_type().id);
 
 		if (!rvi.isWagon()) {
-			Global.SetDParam(0, Engine.GetCustomEngineName(v.engine_type.id).id);
-			Global.SetDParam(1, v.build_year + 1920);
-			Global.SetDParam(2, v.value);
+			Global.SetDParam(0, Engine.GetCustomEngineName(v.getEngine_type().id).id);
+			Global.SetDParam(1, v.getBuild_year() + 1920);
+			Global.SetDParam(2, v.getValue());
 			Gfx.DrawString(x, y, Str.STR_882C_BUILT_VALUE, 0x10);
 		} else {
-			Global.SetDParam(0, Engine.GetCustomEngineName(v.engine_type.id).id);
-			Global.SetDParam(1, v.value);
+			Global.SetDParam(0, Engine.GetCustomEngineName(v.getEngine_type().id).id);
+			Global.SetDParam(1, v.getValue());
 			Gfx.DrawString(x, y, Str.STR_882D_VALUE, 0x10);
 		}
 	}
 
 	static void TrainDetailsCapacityTab(final Vehicle v, int x, int y)
 	{
-		if (v.cargo_cap != 0) {
-			Global.SetDParam(0, Global._cargoc.names_long[v.cargo_type]);
-			Global.SetDParam(1, v.cargo_cap);
+		if (v.getCargo_cap() != 0) {
+			Global.SetDParam(0, Global._cargoc.names_long[v.getCargo_type()]);
+			Global.SetDParam(1, v.getCargo_cap());
 			Gfx.DrawString(x, y, Str.STR_013F_CAPACITY, 0);
 		}
 	}
@@ -1213,8 +1165,8 @@ public class TrainGui
 			if (det_tab != 3)
 				num++;
 			else {
-				tot_cargo[u.cargo_type][0] += u.cargo_count;
-				tot_cargo[u.cargo_type][1] += u.cargo_cap;
+				tot_cargo[u.getCargo_type()][0] += u.getCargo_count();
+				tot_cargo[u.getCargo_type()][1] += u.getCargo_cap();
 			}
 		} while ((u = u.GetNextVehicle()) != null);
 
@@ -1252,20 +1204,20 @@ public class TrainGui
 		Global.SetDParam(3, TrainCmd.GetTrainRunningCost(v) >> 8);
 		Gfx.DrawString(x, 15, Str.STR_885D_AGE_RUNNING_COST_YR, 0);
 
-		Global.SetDParam(2, v.rail.cached_max_speed * 10 >> 4);
-		Global.SetDParam(1, v.rail.cached_power);
-		Global.SetDParam(0, v.rail.cached_weight);
+		Global.SetDParam(2, v.rail.getCached_max_speed() * 10 >> 4);
+		Global.SetDParam(1, v.rail.getCached_power());
+		Global.SetDParam(0, v.rail.getCached_weight());
 		Gfx.DrawString(x, 25, Str.STR_885E_WEIGHT_T_POWER_HP_MAX_SPEED, 0);
 
 		Global.SetDParam(0, v.getProfit_this_year());
 		Global.SetDParam(1, v.getProfit_last_year());
 		Gfx.DrawString(x, 35, Str.STR_885F_PROFIT_THIS_YEAR_LAST_YEAR, 0);
 
-		Global.SetDParam(0, 100 * (v.reliability>>8) >> 8);
-		Global.SetDParam(1, v.breakdowns_since_last_service);
+		Global.SetDParam(0, 100 * (v.getReliability()>>8) >> 8);
+		Global.SetDParam(1, v.getBreakdowns_since_last_service());
 		Gfx.DrawString(x, 45, Str.STR_8860_RELIABILITY_BREAKDOWNS, 0);
 
-		Global.SetDParam(0, v.service_interval);
+		Global.SetDParam(0, v.getService_interval());
 		Global.SetDParam(1, v.date_of_last_service);
 		Gfx.DrawString(x + 11, 141, Global._patches.servint_ispercent?Str.STR_SERVICING_INTERVAL_PERCENT:Str.STR_883C_SERVICING_INTERVAL_DAYS, 0);
 
@@ -1281,7 +1233,7 @@ public class TrainGui
 					u = v;
 					do {
 						DrawTrainImage(u, x + WagonLengthToPixels(dx), y, 1, 0, VehicleID.getInvalid());
-						dx += u.rail.cached_veh_length;
+						dx += u.rail.getCached_veh_length();
 						u = u.getNext();
 					} while (u != null && u.IsArticulatedPart());
 					_train_details_drawer_proc[w.as_traindetails_d().tab].accept(v, x + WagonLengthToPixels(dx) + 2, y + 2);

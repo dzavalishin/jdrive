@@ -208,7 +208,7 @@ public class ViewPort
 
 			w.as_vp_d().follow_vehicle = follow_flags & 0xFFFF;
 			veh = Vehicle.GetVehicle(w.as_vp_d().follow_vehicle);
-			pt = MapXYZToViewport(vp, veh.x_pos, veh.y_pos, veh.z_pos);
+			pt = MapXYZToViewport(vp, veh.getX_pos(), veh.getY_pos(), veh.z_pos);
 		} else {
 			TileIndex tt = new TileIndex(follow_flags);
 			int tx = tt.TileX() * 16;
@@ -1166,11 +1166,11 @@ public class ViewPort
 						bottom > wp.sign.top &&
 						top < wp.sign.top + 24 &&
 						right > wp.sign.left &&
-						left < wp.sign.left + wp.sign.width_2*4) {
+						left < wp.sign.left + wp.sign.getWidth_2()*4) {
 
 					StringSpriteToDraw sstd = ViewPort.AddStringToDraw(wp.sign.left + 1, wp.sign.top + 1, Str.STR_WAYPOINT_VIEWPORT_TINY, wp.index, 0, 0);
 					if (sstd != null) {
-						sstd.width = wp.sign.width_2 | 0x8000;
+						sstd.width = wp.sign.getWidth_2() | 0x8000;
 						sstd.color = (wp.deleted != 0 ? 0xE : 11);
 					}
 				}
@@ -1522,7 +1522,7 @@ public class ViewPort
 
 		if (w.as_vp_d().follow_vehicle != Vehicle.INVALID_VEHICLE) {
 			final Vehicle veh = Vehicle.GetVehicle(w.as_vp_d().follow_vehicle);
-			Point pt = MapXYZToViewport(vp, veh.x_pos, veh.y_pos, veh.z_pos);
+			Point pt = MapXYZToViewport(vp, veh.getX_pos(), veh.getY_pos(), veh.z_pos);
 
 			SetViewportPosition(w, pt.x, pt.y);
 		} else {
@@ -1949,7 +1949,7 @@ public class ViewPort
 						y >= wp.sign.top &&
 						y < wp.sign.top + 24 &&
 						x >= wp.sign.left &&
-						x < wp.sign.left + wp.sign.width_2 * 4) {
+						x < wp.sign.left + wp.sign.getWidth_2() * 4) {
 					Gui.ShowRenameWaypointWindow(wp);
 					return true;
 				}

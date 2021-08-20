@@ -72,12 +72,12 @@ implements IPoolItem, Serializable
 	int ratings[];
 
 	// Maximum amount of passengers and mail that can be transported.
-	int max_pass;
-	int max_mail;
+	public int max_pass;
+	public int max_mail;
 	int new_max_pass;
 	int new_max_mail;
-	int act_pass;
-	int act_mail;
+	public int act_pass;
+	public int act_mail;
 	int new_act_pass;
 	int new_act_mail;
 
@@ -2451,6 +2451,35 @@ implements IPoolItem, Serializable
 	}
 
 	public int getPopulation() { return population; }
+	public ViewportSign getSign() { return sign; }
+
+	public int getNum_houses() {
+		return num_houses;
+	}
+
+	public boolean isUnwanted(int playerId) {
+		return unwanted[playerId] != 0;
+	}
+
+	public boolean canBribe(int playerId) {
+		return ratings[playerId] < TownTables.RATING_BRIBE_MAXIMUM;
+	}
+
+	public boolean hasStatue(int playerId) {
+		return BitOps.HASBIT(statues, playerId);
+	}
+
+	public boolean hasRatingsFor(int playerId) {
+		return BitOps.HASBIT(have_ratings, playerId);
+	}
+
+	public boolean isExclusive(int playerId) {
+		return exclusivity.id == playerId;
+	}
+
+	public int getRatings(int playerId) {
+		return ratings[playerId];
+	}
 	
 }
 

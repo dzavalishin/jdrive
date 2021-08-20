@@ -37,7 +37,7 @@ public class Player implements Serializable
 	int president_name_1;
 	int president_name_2;
 
-	int face;
+	public int face;
 
 	//int player_money;
 	int current_loan;
@@ -54,7 +54,7 @@ public class Player implements Serializable
 	TileIndex location_of_house;
 	TileIndex last_build_coordinate;
 
-	PlayerID share_owners[];
+	public PlayerID share_owners[];
 
 	int inaugurated_year;
 	public int num_valid_stat_ent;
@@ -71,8 +71,8 @@ public class Player implements Serializable
 
 	long [][] yearly_expenses = new long[3][13];
 
-	PlayerEconomyEntry cur_economy;
-	PlayerEconomyEntry old_economy[];
+	public PlayerEconomyEntry cur_economy;
+	public PlayerEconomyEntry old_economy[];
 	//EngineID engine_replacement[];
 	int engine_replacement[];
 	boolean engine_renew;
@@ -175,7 +175,7 @@ public class Player implements Serializable
 			0x34C, 0x34D, 0x34F
 	};
 
-	static void DrawPlayerFace(int face, int color, int x, int y)
+	public static void DrawPlayerFace(int face, int color, int x, int y)
 	{
 		int flag = 0;
 
@@ -824,7 +824,7 @@ public class Player implements Serializable
 			final Engine e = Engine.GetEngine(i);
 
 			//final RailVehicleInfo info = Engine.RailVehInfo(i);
-			if (e.type == Vehicle.VEH_Train &&
+			if (e.getType() == Vehicle.VEH_Train &&
 					(e.isAvailableTo(p) || e.getIntro_date() <= Global._date) &&
 					!Engine.RailVehInfo(i).isWagon()) 
 			{
@@ -929,11 +929,11 @@ public class Player implements Serializable
 					return Cmd.CMD_ERROR;
 
 				// check that the new vehicle type is the same as the original one
-				if (Engine.GetEngine(old_engine_type).type != Engine.GetEngine(new_engine_type).type)
+				if (Engine.GetEngine(old_engine_type).getType() != Engine.GetEngine(new_engine_type).getType())
 					return Cmd.CMD_ERROR;
 
 				// make sure that we do not replace a plane with a helicopter or vise versa
-				if (Engine.GetEngine(new_engine_type).type == Vehicle.VEH_Aircraft 
+				if (Engine.GetEngine(new_engine_type).getType() == Vehicle.VEH_Aircraft 
 						&& BitOps.HASBIT(Engine.AircraftVehInfo(old_engine_type.id).subtype, 0) != BitOps.HASBIT(Engine.AircraftVehInfo(new_engine_type.id).subtype, 0))
 					return Cmd.CMD_ERROR;
 
@@ -1148,7 +1148,7 @@ public class Player implements Serializable
 	
 
 	//static StringID EndGameGetPerformanceTitleFromValue(int value)
-	static int EndGameGetPerformanceTitleFromValue(int value)
+	public static int EndGameGetPerformanceTitleFromValue(int value)
 	{
 
 		long lvalue = BitOps.minu(value, 1000) >>> 6;
@@ -1618,6 +1618,25 @@ final Chunk Handler _player_chunk_handlers[] = {
 
 	public int getName_1() { return name_1; }
 	public int getName_2() { return name_2; }
+
+	public int getPresident_name_1() {		return president_name_1;	}
+	public int getPresident_name_2() {		return president_name_2;	}
+
+	public int getCurrent_loan() {		return current_loan;	}
+	public TileIndex getLocation_of_house() {		return location_of_house;	}
+	public int getInaugurated_year() {		return inaugurated_year;	}
+
+	public int getBankrupt_value() {
+		return bankrupt_value;
+	}
+
+	public long [][] getYearly_expenses() {
+		return yearly_expenses;
+	}
+
+	public boolean isRenew_keep_length() {
+		return renew_keep_length;
+	}
 
 
 

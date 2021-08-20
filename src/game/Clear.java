@@ -371,7 +371,7 @@ public class Clear extends ClearTables {
 		TileIndex tile;
 		//int ret, cost, money;
 		int [] cost = {0};
-		int [] money = {0};
+		long [] money = {0};
 
 		if (pp1 > Global.MapSize()) return Cmd.CMD_ERROR;
 

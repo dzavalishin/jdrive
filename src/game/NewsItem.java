@@ -320,7 +320,7 @@ public class NewsItem {
 				NewsItem ni = w.as_news_d().ni;
 				if( 0 != (ni.flags & NF_VEHICLE) ) {
 					Vehicle v = Vehicle.GetVehicle(ni.data_a.tile);
-					ViewPort.ScrollMainWindowTo(v.x_pos, v.y_pos);
+					ViewPort.ScrollMainWindowTo(v.getX_pos(), v.getY_pos());
 				} else if( 0 != (ni.flags & NF_TILE)) {
 					if (!ViewPort.ScrollMainWindowToTile(ni.data_a) && ni.data_b != null)
 						ViewPort.ScrollMainWindowToTile(ni.data_b);

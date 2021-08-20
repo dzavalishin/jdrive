@@ -375,8 +375,8 @@ public class SmallMapGui extends SmallMapGuiTables
 						&& !v.isHidden() && !v.isUnclickable() ) {
 					// Remap into flat coordinates.
 					Point pt = Point.RemapCoords(
-							(v.x_pos - w.as_smallmap_d().scroll_x) / 16,
-							(v.y_pos - w.as_smallmap_d().scroll_y) / 16,
+							(v.getX_pos() - w.as_smallmap_d().scroll_x) / 16,
+							(v.getY_pos() - w.as_smallmap_d().scroll_y) / 16,
 							0);
 					int x1 = pt.x;
 					int y1 = pt.y;
@@ -406,7 +406,7 @@ public class SmallMapGui extends SmallMapGuiTables
 
 					// Calculate pointer to pixel and the color
 					Pixel lptr = new Pixel( dpi.dst_ptr, y * dpi.pitch + x );
-					byte lcolor = (byte) ((type == 1) ? _vehicle_type_colors[v.type-0x10] : 0xF);
+					byte lcolor = (byte) ((type == 1) ? _vehicle_type_colors[v.getType()-0x10] : 0xF);
 
 					// And draw either one or two pixels depending on clipping
 					lptr.w(0, lcolor);
@@ -417,9 +417,7 @@ public class SmallMapGui extends SmallMapGuiTables
 		}
 
 		if (show_towns) {
-			//final Town t;
 
-			//FOR_ALL_TOWNS(t)
 			Town.forEach( (t) ->
 			{
 				if (t.getXy() != null) {
@@ -428,11 +426,11 @@ public class SmallMapGui extends SmallMapGuiTables
 							(int)(t.getXy().TileX() * 16 - w.as_smallmap_d().scroll_x) / 16,
 							(int)(t.getXy().TileY() * 16 - w.as_smallmap_d().scroll_y) / 16,
 							0);
-					int x1 = pt.x - w.as_smallmap_d().subscroll + 3 - (t.sign.width_2 >> 1);
+					int x1 = pt.x - w.as_smallmap_d().subscroll + 3 - (t.getSign().getWidth_2() >> 1);
 					int y1 = pt.y;
 
 					// Check if the town sign is within bounds
-					if (x1 + t.sign.width_2 > dpi.left &&
+					if (x1 + t.getSign().getWidth_2() > dpi.left &&
 							x1 < dpi.left + dpi.width &&
 							y1 + 6 > dpi.top &&
 							y1 < dpi.top + dpi.height) {

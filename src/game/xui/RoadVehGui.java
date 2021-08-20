@@ -1,17 +1,11 @@
 package game.xui;
 
-import game.util.GameDate;
-import game.util.YearMonthDay;
-import game.util.wcustom.buildtrain_d;
-import game.util.wcustom.vehiclelist_d;
-
 import java.util.Iterator;
 
 import game.Cmd;
 import game.Depot;
 import game.Engine;
 import game.Global;
-import game.Order;
 import game.Player;
 import game.RoadVehCmd;
 import game.RoadVehicleInfo;
@@ -22,6 +16,9 @@ import game.TileIndex;
 import game.Vehicle;
 import game.ids.StringID;
 import game.util.BitOps;
+import game.util.GameDate;
+import game.util.YearMonthDay;
+import game.util.wcustom.vehiclelist_d;
 
 public class RoadVehGui 
 {
@@ -92,7 +89,7 @@ public class RoadVehGui
 			if (0==Global._patches.servint_roadveh) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
-			Global.SetDParam(0, v.string_id);
+			Global.SetDParam(0, v.getString_id());
 			Global.SetDParam(1, v.getUnitnumber().id);
 			w.DrawWindowWidgets();
 
@@ -102,15 +99,15 @@ public class RoadVehGui
 
 				Global.SetDParam(1, year);
 
-				Global.SetDParam(0, (v.getAge() + 365 < v.max_age) ? Str.STR_AGE : Str.STR_AGE_RED);
-				Global.SetDParam(2, v.max_age / 366);
-				Global.SetDParam(3, Engine.RoadVehInfo(v.engine_type.id).running_cost * Global._price.roadveh_running >> 8);
+				Global.SetDParam(0, (v.getAge() + 365 < v.getMax_age()) ? Str.STR_AGE : Str.STR_AGE_RED);
+				Global.SetDParam(2, v.getMax_age() / 366);
+				Global.SetDParam(3, Engine.RoadVehInfo(v.getEngine_type().id).running_cost * Global._price.roadveh_running >> 8);
 				Gfx.DrawString(2, 15, Str.STR_900D_AGE_RUNNING_COST_YR, 0);
 			}
 
 			/* Draw max speed */
 			{
-				Global.SetDParam(0, v.max_speed * 10 >> 5);
+				Global.SetDParam(0, v.getMax_speed() * 10 >> 5);
 				Gfx.DrawString(2, 25, Str.STR_900E_MAX_SPEED, 0);
 			}
 
@@ -123,34 +120,34 @@ public class RoadVehGui
 
 			/* Draw breakdown & reliability */
 			{
-				Global.SetDParam(0, v.reliability * 100 >> 16);
-				Global.SetDParam(1, v.breakdowns_since_last_service);
+				Global.SetDParam(0, v.getReliability() * 100 >> 16);
+				Global.SetDParam(1, v.getBreakdowns_since_last_service());
 				Gfx.DrawString(2, 45, Str.STR_9010_RELIABILITY_BREAKDOWNS, 0);
 			}
 
 			/* Draw service interval text */
 			{
-				Global.SetDParam(0, v.service_interval);
+				Global.SetDParam(0, v.getService_interval());
 				Global.SetDParam(1, v.date_of_last_service);
 				Gfx.DrawString(13, 90, Global._patches.servint_ispercent?Str.STR_SERVICING_INTERVAL_PERCENT:Str.STR_883C_SERVICING_INTERVAL_DAYS, 0);
 			}
 
 			DrawRoadVehImage(v, 3, 57, Vehicle.INVALID_VEHICLE);
 
-			Global.SetDParam(0, Engine.GetCustomEngineName(v.engine_type.id).id);
-			Global.SetDParam(1, 1920 + v.build_year);
-			Global.SetDParam(2, v.value);
+			Global.SetDParam(0, Engine.GetCustomEngineName(v.getEngine_type().id).id);
+			Global.SetDParam(1, 1920 + v.getBuild_year());
+			Global.SetDParam(2, v.getValue());
 			Gfx.DrawString(34, 57, Str.STR_9011_BUILT_VALUE, 0);
 
-			Global.SetDParam(0, Global._cargoc.names_long[v.cargo_type]);
-			Global.SetDParam(1, v.cargo_cap);
+			Global.SetDParam(0, Global._cargoc.names_long[v.getCargo_type()]);
+			Global.SetDParam(1, v.getCargo_cap());
 			Gfx.DrawString(34, 67, Str.STR_9012_CAPACITY, 0);
 
 			str = Str.STR_8812_EMPTY;
-			if (v.cargo_count != 0) {
-				Global.SetDParam(0, v.cargo_type);
-				Global.SetDParam(1, v.cargo_count);
-				Global.SetDParam(2, v.cargo_source);
+			if (v.getCargo_count() != 0) {
+				Global.SetDParam(0, v.getCargo_type());
+				Global.SetDParam(1, v.getCargo_count());
+				Global.SetDParam(2, v.getCargo_source());
 				str = Str.STR_8813_FROM;
 			}
 			Gfx.DrawString(34, 78, str, 0);
@@ -163,7 +160,7 @@ public class RoadVehGui
 			case 2: /* rename */
 				v = Vehicle.GetVehicle(w.window_number);
 				Global.SetDParam(0, v.getUnitnumber().id);
-				MiscGui.ShowQueryString( new StringID(v.string_id), new StringID(Str.STR_902C_NAME_ROAD_VEHICLE), 31, 150, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID(v.getString_id()), new StringID(Str.STR_902C_NAME_ROAD_VEHICLE), 31, 150, w.window_class, w.window_number);
 				break;
 
 			case 5: /* increase int */
@@ -175,8 +172,8 @@ public class RoadVehGui
 				
 				v = Vehicle.GetVehicle(w.window_number);
 
-				mod = Depot.GetServiceIntervalClamped(mod + v.service_interval);
-				if (mod == v.service_interval) return;
+				mod = Depot.GetServiceIntervalClamped(mod + v.getService_interval());
+				if (mod == v.getService_interval()) return;
 
 				Cmd.DoCommandP(v.getTile(), v.index, mod, null, Cmd.CMD_CHANGE_ROADVEH_SERVICE_INT | Cmd.CMD_MSG(Str.STR_018A_CAN_T_CHANGE_SERVICING));
 				break;
@@ -250,7 +247,7 @@ public class RoadVehGui
 			w.disabled_state = (v.getOwner() != Global._local_player) ? (1<<8 | 1<<7) : 0;
 
 			/* draw widgets & caption */
-			Global.SetDParam(0, v.string_id);
+			Global.SetDParam(0, v.getString_id());
 			Global.SetDParam(1, v.getUnitnumber().id);
 			w.DrawWindowWidgets();
 
@@ -270,7 +267,7 @@ public class RoadVehGui
 				Cmd.DoCommandP(v.getTile(), v.index, 0, null, Cmd.CMD_START_STOP_ROADVEH | Cmd.CMD_MSG(Str.STR_9015_CAN_T_STOP_START_ROAD_VEHICLE));
 				break;
 			case 6: /* center main view */
-				ViewPort.ScrollMainWindowTo(v.x_pos, v.y_pos);
+				ViewPort.ScrollMainWindowTo(v.getX_pos(), v.getY_pos());
 				break;
 			case 7: /* goto hangar */
 				Cmd.DoCommandP(v.getTile(), v.index, 0, null, Cmd.CMD_SEND_ROADVEH_TO_DEPOT | Cmd.CMD_MSG(Str.STR_9018_CAN_T_SEND_VEHICLE_TO_DEPOT));
@@ -554,7 +551,7 @@ public class RoadVehGui
 
 		Vehicle.forEach( (v) ->
 		{
-			if (v.getType() == Vehicle.VEH_Road && v.road.state == 254 && v.getTile().equals(tile))
+			if (v.getType() == Vehicle.VEH_Road && v.road.isInDepot() && v.getTile().equals(tile))
 				num[0]++;
 		});
 
@@ -578,12 +575,12 @@ public class RoadVehGui
 		{
 			Vehicle v = ii.next();
 			
-			if (v.getType() == Vehicle.VEH_Road && v.road.state == 254 && v.getTile().equals(tile) &&
+			if (v.getType() == Vehicle.VEH_Road && v.road.isInDepot() && v.getTile().equals(tile) &&
 					--num[0] < 0 && num[0] >=	-w.vscroll.getCap() * w.hscroll.getCap()) {
 				DrawRoadVehImage(v, x+24, y, w.as_traindepot_d().sel);
 
 				Global.SetDParam(0, v.getUnitnumber().id);
-				Gfx.DrawString(x, y+2, (int)(v.max_age-366) >= v.getAge() ? Str.STR_00E2 : Str.STR_00E3, 0);
+				Gfx.DrawString(x, y+2, (int)(v.getMax_age()-366) >= v.getAge() ? Str.STR_00E2 : Str.STR_00E3, 0);
 
 				Gfx.DrawSprite( v.isStopped() ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x + 16, y);
 
@@ -619,7 +616,7 @@ public class RoadVehGui
 		while(ii.hasNext())
 		{
 			Vehicle v = ii.next();
-			if (v.getType() == Vehicle.VEH_Road && v.road.state == 254 && v.getTile().equals(tile) &&
+			if (v.getType() == Vehicle.VEH_Road && v.road.isInDepot() && v.getTile().equals(tile) &&
 					--pos < 0) {
 				veh[0] = v;
 				if (xm >= 24) return 0;
@@ -935,15 +932,15 @@ public class RoadVehGui
 				if (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_ROAD) && v.isHidden())
 					str = Str.STR_021F;
 				else
-					str = v.getAge() > v.max_age - 366 ? Str.STR_00E3 : Str.STR_00E2;
+					str = v.getAge() > v.getMax_age() - 366 ? Str.STR_00E3 : Str.STR_00E2;
 				Gfx.DrawString(x, y + 2, str, 0);
 
 				Global.SetDParam(0, v.getProfit_this_year());
 				Global.SetDParam(1, v.getProfit_last_year());
 				Gfx.DrawString(x + 24, y + 18, Str.STR_0198_PROFIT_THIS_YEAR_LAST_YEAR, 0);
 
-				if (v.string_id != Str.STR_SV_ROADVEH_NAME) {
-					Global.SetDParam(0, v.string_id);
+				if (v.getString_id() != Str.STR_SV_ROADVEH_NAME) {
+					Global.SetDParam(0, v.getString_id());
 					Gfx.DrawString(x + 24, y, Str.STR_01AB, 0);
 				}
 

@@ -282,7 +282,7 @@ public class Order implements Serializable
 						break;
 
 					case Vehicle.VEH_Road:
-						if (v.cargo_type == AcceptedCargo.CT_PASSENGERS) {
+						if (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) {
 							if (0 == (st.facilities & Station.FACIL_BUS_STOP)) return Cmd.CMD_ERROR;
 						} else {
 							if (0 == (st.facilities & Station.FACIL_TRUCK_STOP)) return Cmd.CMD_ERROR;
@@ -776,7 +776,7 @@ public class Order implements Serializable
 
 				/* Trucks can't share orders with busses (and visa versa) */
 				if (src.type == Vehicle.VEH_Road) {
-					if (src.cargo_type != dst.cargo_type && (src.cargo_type == AcceptedCargo.CT_PASSENGERS || dst.cargo_type == AcceptedCargo.CT_PASSENGERS))
+					if (src.getCargo_type() != dst.getCargo_type() && (src.getCargo_type() == AcceptedCargo.CT_PASSENGERS || dst.getCargo_type() == AcceptedCargo.CT_PASSENGERS))
 						return Cmd.CMD_ERROR;
 				}
 
@@ -834,7 +834,7 @@ public class Order implements Serializable
 					{
 						if (order.type == OT_GOTO_STATION) {
 							final Station st1 = Station.GetStation(order.station);
-							if (dst.cargo_type == AcceptedCargo.CT_PASSENGERS) {
+							if (dst.getCargo_type() == AcceptedCargo.CT_PASSENGERS) {
 								if (st1.bus_stops != null) required_dst = st1.bus_stops.get(0).xy; // TODO why first?
 							} else {
 								if (st1.truck_stops != null) required_dst = st1.truck_stops.get(0).xy;

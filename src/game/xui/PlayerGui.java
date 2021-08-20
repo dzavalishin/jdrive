@@ -42,10 +42,10 @@ public class PlayerGui
 			j = 3;
 			x = 215;
 			//tbl = p.yearly_expenses + 2;
-			tbl = p.yearly_expenses;
+			tbl = p.getYearly_expenses();
 			int tbl_p = 2;
 			do {
-				if (year >= p.inaugurated_year) {
+				if (year >= p.getInaugurated_year()) {
 					Global.SetDParam(0, year + 1920);
 					Gfx.DrawStringCenterUnderline(x-17, 15, new StringID( Str.STR_7010 ), 0);
 					sum = 0;
@@ -78,7 +78,7 @@ public class PlayerGui
 			y = 171;
 
 			// draw max loan aligned to loan below (y += 10)
-			Global.SetDParam64(0, (long)Global._economy.max_loan);
+			Global.SetDParam64(0, (long)Global._economy.getMax_loan());
 			Gfx.DrawString(202, y+10, Str.STR_MAX_LOAN, 0);
 
 		} else
@@ -91,14 +91,14 @@ public class PlayerGui
 		y += 10;
 
 		Gfx.DrawString(2, y, Str.STR_7027_LOAN, 0);
-		Global.SetDParam64(0, p.current_loan);
+		Global.SetDParam64(0, p.getCurrent_loan());
 		Gfx.DrawStringRightAligned(182, y, Str.STR_7028, 0);
 
 		y += 12;
 
 		Gfx.GfxFillRect(182 - 75, y-2, 182, y-2, 215);
 
-		Global.SetDParam64(0, p.getMoney() - p.current_loan);
+		Global.SetDParam64(0, p.getMoney() - p.getCurrent_loan());
 		Gfx.DrawStringRightAligned(182, y, Str.STR_7028, 0);
 	}
 
@@ -150,10 +150,10 @@ public class PlayerGui
 			PlayerID player = PlayerID.get( w.window_number );
 			final Player  p = Player.GetPlayer(player);
 
-			w.disabled_state = p.current_loan != 0 ? 0 : (1 << 7);
+			w.disabled_state = p.getCurrent_loan() != 0 ? 0 : (1 << 7);
 
-			Global.SetDParam(0, p.name_1);
-			Global.SetDParam(1, p.name_2);
+			Global.SetDParam(0, p.getName_1());
+			Global.SetDParam(1, p.getName_2());
 			Global.SetDParam(2, Player.GetPlayerNameString(player, 3));
 			Global.SetDParam(4, 10000);
 			w.DrawWindowWidgets();
@@ -504,8 +504,8 @@ public class PlayerGui
 				num++;
 
 				Global.SetDParam(num * 3 + 0, amt * 25);
-				Global.SetDParam(num * 3 + 1, p2.name_1);
-				Global.SetDParam(num * 3 + 2, p2.name_2);
+				Global.SetDParam(num * 3 + 1, p2.getName_1());
+				Global.SetDParam(num * 3 + 2, p2.getName_2());
 
 				if (num != 0) break;
 			}
@@ -522,13 +522,13 @@ public class PlayerGui
 			int dis = 0;
 
 			if (!Window.IsWindowOfPrototype(w, _other_player_company_widgets)) {
-				Widget[] ww = (p.location_of_house != null) ? _my_player_company_bh_widgets : _my_player_company_widgets;
+				Widget[] ww = (p.getLocation_of_house() != null) ? _my_player_company_bh_widgets : _my_player_company_widgets;
 				w.AssignWidgetToWindow( ww );
 
 				if (!Global._networking) 
 					w.hidden_state = BitOps.RETSETBIT(w.hidden_state, 11); // hide company-password widget
 			} else {
-				if (p.location_of_house == null) 
+				if (p.getLocation_of_house() == null) 
 					dis = BitOps.RETSETBIT(dis, 7);
 
 				if (Global._patches.allow_shares) { /* shares are allowed */
@@ -551,27 +551,27 @@ public class PlayerGui
 					dis |= (1 << 9) | (1 << 10);
 			}
 
-			Global.SetDParam(0, p.name_1);
-			Global.SetDParam(1, p.name_2);
+			Global.SetDParam(0, p.getName_1());
+			Global.SetDParam(1, p.getName_2());
 			Global.SetDParam(2, Player.GetPlayerNameString( PlayerID.get( w.window_number ), 3));
 
 			w.disabled_state = dis;
 			w.DrawWindowWidgets();
 
-			Global.SetDParam(0, p.inaugurated_year + 1920);
+			Global.SetDParam(0, p.getInaugurated_year() + 1920);
 			Gfx.DrawString(110, 25, Str.STR_7038_INAUGURATED, 0);
 
 			DrawPlayerVehiclesAmount( PlayerID.get(w.window_number) );
 
 			Gfx.DrawString(110,48, Str.STR_7006_COLOR_SCHEME, 0);
 			// Draw company-colour bus (0xC19)
-			Gfx.DrawSprite(Sprite.PLAYER_SPRITE_COLOR(p.index) + (0xC19 | Sprite.PALETTE_MODIFIER_COLOR), 215, 49);
+			Gfx.DrawSprite(Sprite.PLAYER_SPRITE_COLOR(p.getIndex()) + (0xC19 | Sprite.PALETTE_MODIFIER_COLOR), 215, 49);
 
 			//Player.DrawPlayerFace(p.face, p.getColor(), 2, 16);
 			p.DrawPlayerFace();
 
-			Global.SetDParam(0, p.president_name_1);
-			Global.SetDParam(1, p.president_name_2);
+			Global.SetDParam(0, p.getPresident_name_1());
+			Global.SetDParam(1, p.getPresident_name_2());
 			//Gfx.DrawStringMultiCenter(48, 141, Str.STR_7037_PRESIDENT, 94); 
 			Gfx.DrawStringMultiCenter(54, 141, Str.STR_7037_PRESIDENT, 94); // TODO [dz] corrected x - error in DrawStringMultiCenter? 
 
@@ -603,19 +603,19 @@ public class PlayerGui
 			case 5: {/* change president name */
 				final Player  p = Player.GetPlayer(w.window_number);
 				w.as_def_d().byte_1 = 0;
-				Global.SetDParam(0, p.president_name_2);
-				MiscGui.ShowQueryString( new StringID( p.president_name_1 ), new StringID( Str.STR_700B_PRESIDENT_S_NAME ), 31, 94, w.window_class, w.window_number);
+				Global.SetDParam(0, p.getPresident_name_2());
+				MiscGui.ShowQueryString( new StringID( p.getPresident_name_1() ), new StringID( Str.STR_700B_PRESIDENT_S_NAME ), 31, 94, w.window_class, w.window_number);
 			} break;
 
 			case 6: {/* change company name */
 				Player p = Player.GetPlayer(w.window_number);
 				w.as_def_d().byte_1 = 1;
-				Global.SetDParam(0, p.name_2);
-				MiscGui.ShowQueryString( new StringID(p.name_1), new StringID(Str.STR_700A_COMPANY_NAME), 31, 150, w.window_class, w.window_number);
+				Global.SetDParam(0, p.getName_2());
+				MiscGui.ShowQueryString( new StringID(p.getName_1()), new StringID(Str.STR_700A_COMPANY_NAME), 31, 150, w.window_class, w.window_number);
 			} break;
 
 			case 7: {/* build hq */
-				TileIndex tile = Player.GetPlayer(w.window_number).location_of_house;
+				TileIndex tile = Player.GetPlayer(w.window_number).getLocation_of_house();
 				if (tile == null) {
 					if (w.window_number != Global._local_player.id)
 						return;
@@ -726,16 +726,16 @@ public class PlayerGui
 		switch(e.event) {
 		case WE_PAINT: {
 			Player p = Player.GetPlayer(w.window_number);
-			Global.SetDParam(0, p.name_1);
-			Global.SetDParam(1, p.name_2);
+			Global.SetDParam(0, p.getName_1());
+			Global.SetDParam(1, p.getName_2());
 			w.DrawWindowWidgets();
 
 			
 			p.DrawPlayerFace();
 
-			Global.SetDParam(0, p.name_1);
-			Global.SetDParam(1, p.name_2);
-			Global.SetDParam(2, p.bankrupt_value);
+			Global.SetDParam(0, p.getName_1());
+			Global.SetDParam(1, p.getName_2());
+			Global.SetDParam(2, p.getBankrupt_value());
 			Gfx.DrawStringMultiCenter(214, 65, Str.STR_705B_WE_ARE_LOOKING_FOR_A_TRANSPORT, 238);
 			break;
 		}
@@ -823,15 +823,15 @@ public class PlayerGui
 			/* We need to get performance from last year because the image is shown
 			 * at the start of the new year when these things have already been copied */
 			if (w.as_highscore_d().background_img == Sprite.SPR_TYCOON_IMG2_BEGIN) { // Tycoon of the century \o/
-				Global.SetDParam(0, p.president_name_1);
-				Global.SetDParam(1, p.president_name_2);
-				Global.SetDParam(2, p.name_1);
-				Global.SetDParam(3, p.name_2);
+				Global.SetDParam(0, p.getPresident_name_1());
+				Global.SetDParam(1, p.getPresident_name_2());
+				Global.SetDParam(2, p.getName_1());
+				Global.SetDParam(3, p.getName_2());
 				Global.SetDParam(4, Player.EndGameGetPerformanceTitleFromValue(p.old_economy[0].performance_history));
 				Gfx.DrawStringMultiCenter(x + (640 / 2), y + 107, Str.STR_021C_OF_ACHIEVES_STATUS, 640);
 			} else {
-				Global.SetDParam(0, p.name_1);
-				Global.SetDParam(1, p.name_2);
+				Global.SetDParam(0, p.getName_1());
+				Global.SetDParam(1, p.getName_2());
 				Global.SetDParam(2, Player.EndGameGetPerformanceTitleFromValue(p.old_economy[0].performance_history));
 				Gfx.DrawStringMultiCenter(x + (640 / 2), y + 157, Str.STR_021B_ACHIEVES_STATUS, 640);
 			}

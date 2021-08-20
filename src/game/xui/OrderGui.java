@@ -283,7 +283,7 @@ public class OrderGui {
 				case Vehicle.VEH_Aircraft:	facil=Station.FACIL_AIRPORT;break;
 					
 				default:
-					if(v.getType() == Vehicle.VEH_Road && v.cargo_type == AcceptedCargo.CT_PASSENGERS)
+					if(v.getType() == Vehicle.VEH_Road && v.getCargo_type() == AcceptedCargo.CT_PASSENGERS)
 						facil=Station.FACIL_BUS_STOP;
 					else
 						facil=Station.FACIL_TRUCK_STOP;

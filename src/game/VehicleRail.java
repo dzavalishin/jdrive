@@ -106,5 +106,11 @@ public class VehicleRail extends VehicleChild {
 		track = IN_TUNNEL;
 	}
 
+	public int getCached_max_speed() {		return cached_max_speed;	}
+	public int getCached_power() {		return cached_power;	}
+	public int getCached_weight() {		return cached_weight;	}
+	public int getCached_veh_length() {		return cached_veh_length;	}
+	public int getCached_total_length() { return cached_total_length; }
+
 
 }

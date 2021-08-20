@@ -1248,8 +1248,8 @@ public class Economy extends EconomeTables
 
 		for (w = u; w != null; w = w.next) {
 			if (w.cargo_count != 0) {
-				if (v.cargo_type == w.cargo_type &&
-						u.last_station_visited == w.cargo_source)
+				if (v.getCargo_type() == w.getCargo_type() &&
+						u.last_station_visited == w.getCargo_source())
 					return false;
 				has_any_cargo = true;
 			}
@@ -1271,12 +1271,12 @@ public class Economy extends EconomeTables
 				boolean other_has_same_type = false;
 
 				for (w = x; w != null; w = w.next) {
-					if (w.cargo_count < w.cargo_cap && v.cargo_type == w.cargo_type)
+					if (w.cargo_count < w.getCargo_cap() && v.getCargo_type() == w.getCargo_type())
 						has_space_for_same_type = true;
 
 					if (w.cargo_count != 0) {
-						if (v.cargo_type == w.cargo_type &&
-								u.last_station_visited == w.cargo_source)
+						if (v.getCargo_type() == w.getCargo_type() &&
+								u.last_station_visited == w.getCargo_source())
 							other_has_same_type = true;
 						other_has_any_cargo = true;
 					}
@@ -1294,7 +1294,7 @@ public class Economy extends EconomeTables
 
 	static int LoadUnloadVehicle(Vehicle v)
 	{
-		StationID original_cargo_source = StationID.get( v.cargo_source );
+		StationID original_cargo_source = StationID.get( v.getCargo_source() );
 		int profit = 0;
 		int v_profit; //virtual profit for feeder systems
 		int v_profit_total = 0;
@@ -1320,14 +1320,14 @@ public class Economy extends EconomeTables
 		for (; v != null; v = v.next) {
 			GoodsEntry ge;
 
-			if (v.cargo_cap == 0) continue;
+			if (v.getCargo_cap() == 0) continue;
 
 			//ge = &st.goods[v.cargo_type];
-			ge = st.goods[v.cargo_type];
+			ge = st.goods[v.getCargo_type()];
 
 			/* unload? */
 			if (v.cargo_count != 0) {
-				if (v.cargo_source != last_visited && 0 != (ge.waiting_acceptance & 0x8000) && 0 == (u.current_order.flags & Order.OF_TRANSFER)) {
+				if (v.getCargo_source() != last_visited && 0 != (ge.waiting_acceptance & 0x8000) && 0 == (u.current_order.flags & Order.OF_TRANSFER)) {
 					// deliver goods to the station
 					st.time_since_unload = 0;
 
@@ -1348,9 +1348,9 @@ public class Economy extends EconomeTables
 					 * aircraft are delivering in very short time!
 					 */
 					if(v.type == Vehicle.VEH_Aircraft)
-						profit += DeliverGoods(v.cargo_count, v.cargo_type, v.cargo_source, last_visited, v.cargo_days * Global._patches.aircraft_speed_coeff);
+						profit += DeliverGoods(v.cargo_count, v.getCargo_type(), v.getCargo_source(), last_visited, v.cargo_days * Global._patches.aircraft_speed_coeff);
 					else
-						profit += DeliverGoods(v.cargo_count, v.cargo_type, v.cargo_source, last_visited, v.cargo_days);
+						profit += DeliverGoods(v.cargo_count, v.getCargo_type(), v.getCargo_source(), last_visited, v.cargo_days);
 
 					//>>>>>>> .theirs
 					result |= 1;
@@ -1367,15 +1367,15 @@ public class Economy extends EconomeTables
 					if(v.type == Vehicle.VEH_Aircraft) {
 						v_profit = GetTransportedGoodsIncome(
 								v.cargo_count,
-								Map.DistanceManhattan(Station.GetStation(v.cargo_source).getXy(), Station.GetStation(last_visited).getXy()),
+								Map.DistanceManhattan(Station.GetStation(v.getCargo_source()).getXy(), Station.GetStation(last_visited).getXy()),
 								v.cargo_days * Global._patches.aircraft_speed_coeff,
-								v.cargo_type) * 3 / 2;
+								v.getCargo_type()) * 3 / 2;
 					} else {
 						v_profit = GetTransportedGoodsIncome(
 								v.cargo_count,
-								Map.DistanceManhattan(Station.GetStation(v.cargo_source).getXy(), Station.GetStation(last_visited).getXy()),
+								Map.DistanceManhattan(Station.GetStation(v.getCargo_source()).getXy(), Station.GetStation(last_visited).getXy()),
 								v.cargo_days,
-								v.cargo_type) * 3 / 2;
+								v.getCargo_type()) * 3 / 2;
 					}
 					v_profit_total += v_profit;
 					unloading_time += v.cargo_count;
@@ -1383,13 +1383,13 @@ public class Economy extends EconomeTables
 					if (t == 0) {
 						// No goods waiting at station
 						ge.enroute_time = v.cargo_days;
-						ge.enroute_from = v.cargo_source;
+						ge.enroute_from = v.getCargo_source();
 					} else {
 						// Goods already waiting at station. Set counters to the worst value.
 						if (v.cargo_days >= ge.enroute_time)
 							ge.enroute_time = v.cargo_days;
 						if (last_visited != ge.enroute_from)
-							ge.enroute_from = v.cargo_source;
+							ge.enroute_from = v.getCargo_source();
 					}
 					// Update amount of waiting cargo
 					ge.waiting_acceptance = BitOps.RETSB(ge.waiting_acceptance, 0, 12, Math.min(v.cargo_count + t, 0xFFF));
@@ -1409,19 +1409,19 @@ public class Economy extends EconomeTables
 
 			/* update stats */
 			ge.days_since_pickup = 0;
-			t = u.max_speed;
+			t = u.getMax_speed();
 			if (u.type == Vehicle.VEH_Road) t >>=1;
-		if (u.type == Vehicle.VEH_Train) t = u.rail.cached_max_speed;
+		if (u.type == Vehicle.VEH_Train) t = u.rail.getCached_max_speed();
 
 		// if last speed is 0, we treat that as if no vehicle has ever visited the station.
 		ge.last_speed =  (t < 255 ? t : 255);
-		ge.last_age =  (Global._cur_year - v.build_year);
+		ge.last_age =  (Global._cur_year - v.getBuild_year());
 
 		// If there's goods waiting at the station, and the vehicle
 		//  has capacity for it, load it on the vehicle.
 		count = BitOps.GB(ge.waiting_acceptance, 0, 12);
 		if (count != 0 &&
-				(cap = v.cargo_cap - v.cargo_count) != 0) {
+				(cap = v.getCargo_cap() - v.cargo_count) != 0) {
 			int cargoshare;
 			int feeder_profit_share;
 
@@ -1463,7 +1463,7 @@ public class Economy extends EconomeTables
 		v = u;
 
 		if (v_profit_total > 0)
-			MiscGui.ShowFeederIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, v_profit_total);
+			MiscGui.ShowFeederIncomeAnimation(v.getX_pos(), v.getY_pos(), v.z_pos, v_profit_total);
 
 		if (v.type == Vehicle.VEH_Train) {
 			// Each platform tile is worth 2 rail vehicles.
@@ -1503,7 +1503,7 @@ public class Economy extends EconomeTables
 
 				// if (Player.IsLocalPlayer()) SndPlayVehicleFx(SND_14_CASHTILL, v);
 
-				MiscGui.ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, -profit);
+				MiscGui.ShowCostOrIncomeAnimation(v.getX_pos(), v.getY_pos(), v.z_pos, -profit);
 			}
 		}
 
@@ -1531,14 +1531,14 @@ public class Economy extends EconomeTables
 
 		Global.SetDParam(0, p.name_1);
 		Global.SetDParam(1, p.name_2);
-		Global.SetDParam(2, p.bankrupt_value);
+		Global.SetDParam(2, p.getBankrupt_value());
 		NewsItem.AddNewsItem( new StringID(Global._current_player.id + 16*2), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 
 		// original code does this a little bit differently
 		pi = p.index.id;
 		ChangeOwnershipOfPlayerItems(PlayerID.get(pi), Global._current_player);
 
-		if (p.bankrupt_value == 0) {
+		if (p.getBankrupt_value() == 0) {
 			owner = Global._current_player.GetPlayer();
 			owner.current_loan += p.current_loan;
 		}
@@ -1548,7 +1548,7 @@ public class Economy extends EconomeTables
 			if (p.share_owners[i].id != Owner.OWNER_SPECTATOR) {
 				owner = p.share_owners[i].GetPlayer();
 				owner.money64 += value;
-				owner.yearly_expenses[0][Player.EXPENSES_OTHER] += value;
+				owner.getYearly_expenses()[0][Player.EXPENSES_OTHER] += value;
 				//owner.UpdatePlayerMoney32();
 			}
 		}
@@ -1668,7 +1668,7 @@ public class Economy extends EconomeTables
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			DoAcquireCompany(p);
 		}
-		return p.bankrupt_value;
+		return p.getBankrupt_value();
 	}
 	/*
 	// Prices
@@ -1708,4 +1708,8 @@ public class Economy extends EconomeTables
 		{ 'ECMY', SaveLoad_ECMY, SaveLoad_ECMY, CH_RIFF | CH_LAST},
 	};
 	 */
+
+	public int getMax_loan() {
+		return max_loan;
+	}
 }
