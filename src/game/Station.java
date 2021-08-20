@@ -61,7 +61,7 @@ public class Station extends StationTables implements IPoolItem
 	int time_since_unload;
 	int delete_ctr;
 	PlayerID owner;
-	int facilities;
+	protected int facilities;
 	int airport_type;
 
 	// trainstation width/height
@@ -79,7 +79,7 @@ public class Station extends StationTables implements IPoolItem
 	VehicleQueue helicopter_queue;			// airport queue
 
 	VehicleID last_vehicle;
-	GoodsEntry goods[] = new GoodsEntry[AcceptedCargo.NUM_CARGO];
+	public GoodsEntry goods[] = new GoodsEntry[AcceptedCargo.NUM_CARGO];
 
 	// Stuff that is no longer used, but needed for conversion 
 	//TileIndex bus_tile_obsolete;
@@ -584,8 +584,8 @@ public class Station extends StationTables implements IPoolItem
 
 	// FIXME -- need to be embedded into Airport variable. Is dynamically
 	// deducteable from graphics-tile array, so will not be needed
-	final static  byte _airport_size_x[] = {4, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-	final static byte _airport_size_y[] = {3, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+	public final static  byte _airport_size_x[] = {4, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+	public final static byte _airport_size_y[] = {3, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
 	//void ShowAircraftDepotWindow(TileIndex tile);
 	//extern void UpdateAirplanesOnNewStation(Station st);
@@ -3647,6 +3647,8 @@ public class Station extends StationTables implements IPoolItem
 
 
 	public PlayerID getOwner() { return owner; }
+	public int getIndex() { return index; }
+	public int getFacilities() { return facilities; }
 
 }
 

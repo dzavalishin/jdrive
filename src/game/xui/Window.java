@@ -101,11 +101,11 @@ public class Window extends WindowConstants
 
 	static Point _cursorpos_drag_start = null;//new Point();
 
-	static boolean _left_button_down;
-	static boolean _left_button_clicked;
+	public static boolean _left_button_down;
+	public static boolean _left_button_clicked;
 
-	static boolean _right_button_down;
-	static boolean _right_button_clicked;
+	public static boolean _right_button_down;
+	public static boolean _right_button_clicked;
 
 	// XXX added parameter to AllocateWindowDesc
 	// int _alloc_wnd_parent_num;

@@ -21,6 +21,11 @@ public class Order implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
+	public int getType() {		return type;	}
+	public int getFlags() {		return flags;	}
+	public int getStation() {	return station;	}
+	public Order getNext() {	return next;	}
+
 	int  type;
 	int  flags;
 	int  station;

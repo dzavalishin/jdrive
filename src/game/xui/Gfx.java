@@ -21,7 +21,7 @@ import game.xui.Gfx.BlitterParams;
 public class Gfx extends PaletteTabs 
 {
 
-	static boolean _dbg_screen_rect;
+	public static boolean _dbg_screen_rect;
 
 
 	public static int _pal_first_dirty;
@@ -33,7 +33,7 @@ public class Gfx extends PaletteTabs
 	//} StringColorFlags;
 
 
-	static Colour [] _cur_palette = new Colour[256];
+	public static Colour [] _cur_palette = new Colour[256];
 
 	// XXX doesn't really belong here, but the only
 	// consumers always use it in conjunction with DoDrawString()
@@ -2025,19 +2025,17 @@ public class Gfx extends PaletteTabs
 		Hal._cursor.dirty = false;
 	}
 
-	/*#if defined(_DEBUG)
 	private static void DbgScreenRect(int left, int top, int right, int bottom)
 	{
-		DrawPixelInfo dp = new ;
+		DrawPixelInfo dp = new DrawPixelInfo();
 		DrawPixelInfo  old;
 
 		old = Hal._cur_dpi;
-		Hal._cur_dpi = &dp;
+		Hal._cur_dpi = dp;
 		dp = Hal._screen;
-		GfxFillRect(left, top, right - 1, bottom - 1, rand() & 255);
+		GfxFillRect(left, top, right - 1, bottom - 1, Hal.Random() & 255);
 		Hal._cur_dpi = old;
 	}
-	#endif*/
 
 	static void RedrawScreenRect(int left, int top, int right, int bottom)
 	{
@@ -2052,13 +2050,10 @@ public class Gfx extends PaletteTabs
 		}
 		TextEffect.UndrawTextMessage();
 
-		/* #if defined(_DEBUG)
 		if (_dbg_screen_rect)
 			DbgScreenRect(left, top, right, bottom);
 		else
-	#endif */
-
-		Window.DrawOverlappedWindowForAll(left, top, right, bottom);
+			Window.DrawOverlappedWindowForAll(left, top, right, bottom);
 		Global.hal.make_dirty(left, top, right - left, bottom - top);
 	}
 

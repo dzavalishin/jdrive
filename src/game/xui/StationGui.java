@@ -14,6 +14,7 @@ import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.StringID;
+import game.sort.GeneralOwnerSorter;
 import game.struct.SortStruct;
 import game.util.BinaryString;
 import game.util.BitOps;
@@ -109,7 +110,7 @@ public class StationGui extends Station  // to get constants
 		Station.forEach( (st) ->
 		{
 			if (st.getXy() != null && st.getOwner().id != Owner.OWNER_NONE) {
-				_station_sort[n[0]].index = st.index;
+				_station_sort[n[0]].index = st.getIndex();
 				_station_sort[n[0]].owner = st.getOwner().id;
 				n[0]++;
 				_num_station_sort[st.getOwner().id]++; // add number of stations of player
@@ -183,8 +184,8 @@ public class StationGui extends Station  // to get constants
 			/* draw widgets, with player's name in the caption */
 			{
 				final Player  p = Player.GetPlayer(owner);
-				Global.SetDParam(0, p.name_1);
-				Global.SetDParam(1, p.name_2);
+				Global.SetDParam(0, p.getName_1());
+				Global.SetDParam(1, p.getName_2());
 				Global.SetDParam(2, w.vscroll.count);
 				w.DrawWindowWidgets();
 			}
@@ -209,8 +210,8 @@ public class StationGui extends Station  // to get constants
 
 					assert(st.getXy() != null && st.getOwner().id == owner);
 
-					Global.SetDParam(0, st.index);
-					Global.SetDParam(1, st.facilities);
+					Global.SetDParam(0, st.getIndex());
+					Global.SetDParam(1, st.getFacilities());
 					x = Gfx.DrawString(xb, y, Str.STR_3049_0, 0) + 5;
 
 					// show cargo waiting and station ratings
@@ -357,7 +358,7 @@ public class StationGui extends Station  // to get constants
 		}
 		MiscGui.SetVScrollCount(w, num);
 
-		w.disabled_state = st.owner == Global._local_player ? 0 : (1 << 9);
+		w.disabled_state = st.getOwner() == Global._local_player ? 0 : (1 << 9);
 
 		/*
 		if (0==(st.facilities & FACIL_TRAIN)) 		w.disabled_state = BitOps.RETSETBIT(w.disabled_state,  10);
@@ -373,8 +374,8 @@ public class StationGui extends Station  // to get constants
 		if (st.hasFacility(FACIL_AIRPORT))       w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 12);
 		if (st.hasFacility(FACIL_DOCK))          w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 13);
 		
-		Global.SetDParam(0, st.index);
-		Global.SetDParam(1, st.facilities);
+		Global.SetDParam(0, st.getIndex());
+		Global.SetDParam(1, st.getFacilities());
 		w.DrawWindowWidgets();
 
 		x = 2;

@@ -827,7 +827,7 @@ public class Player implements Serializable
 			//final RailVehicleInfo info = Engine.RailVehInfo(i);
 			if (e.type == Vehicle.VEH_Train &&
 					(BitOps.HASBIT(e.player_avail, p.id) || e.intro_date <= Global._date) &&
-					0==(Engine.RailVehInfo(i).flags & Engine.RVI_WAGON)) 
+					!Engine.RailVehInfo(i).isWagon()) 
 			{
 				assert(e.railtype < Rail.RAILTYPE_END);
 				rt = BitOps.RETSETBIT(rt, e.railtype);
@@ -1616,6 +1616,9 @@ final Chunk Handler _player_chunk_handlers[] = {
 	}
 
 	public int getColor() { return player_color; }
+
+	public int getName_1() { return name_1; }
+	public int getName_2() { return name_2; }
 
 
 

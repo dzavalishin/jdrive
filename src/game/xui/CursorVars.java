@@ -116,6 +116,39 @@ public class CursorVars
 				&& draw_pos.y <= d;
 	}
 
+	public void processMouse(int x, int y) {
+		if (fix_at) {
+			int dx = x - pos.x;
+			int dy = y - pos.y;
+			if (dx != 0 || dy != 0) {
+				delta.x += dx;
+				delta.y += dy;
+
+				/* TODO set cursor pos
+				pt.x = _cursor.pos.x;
+				pt.y = _cursor.pos.y;
+
+				if (_wnd.double_size) {
+					pt.x *= 2;
+					pt.y *= 2;
+				}
+				ClientToScreen(hwnd, &pt);
+				SetCursorPos(pt.x, pt.y);
+				 */
+			}
+		} else {
+			delta.x += x - pos.x;
+			delta.y += y - pos.y;
+			pos.x = x;
+			pos.y = y;
+			dirty = true;
+		}
+	}
+
+	public void setWheel(int wheelRotation) {
+		wheel = wheelRotation;		
+	}
+
 
 }
 

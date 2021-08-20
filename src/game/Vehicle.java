@@ -3792,6 +3792,23 @@ public class Vehicle implements IPoolItem
 
 	public boolean isBroken() { return breakdown_ctr == 1; }
 
+	public UnitID getUnitnumber() { return unitnumber; }
+	public int getAge() { return age; }
+	public int getReliability() { return reliability; }
+
+	public AcceptedCargo countTotalCargo() 
+	{
+		AcceptedCargo cargo = new AcceptedCargo();
+
+		for (Vehicle v = this; v != null; v = v.next) 
+			cargo.ct[v.cargo_type] += v.cargo_cap;
+		
+		return cargo;
+	}
+
+	public int getProfit_this_year() { return profit_this_year; }
+	public int getProfit_last_year() { return profit_last_year; }
+
 
 
 	
@@ -3864,200 +3881,6 @@ interface VehicleLeaveTileProc
 
 
 
-abstract class abstractVehicleSorter implements Comparator<SortStruct>
-{
-
-	// if the sorting criteria had the same value, sort vehicle by unitnumber
-	protected static int VEHICLEUNITNUMBERSORTER(int r, Vehicle a, Vehicle b) 
-	{
-		if (r == 0) 
-			return a.unitnumber.id - b.unitnumber.id;
-		return r;
-	}
 
 
-}
-
-/************ Sorter functions *****************/
-class GeneralOwnerSorter extends abstractVehicleSorter
-{
-	public int compare (SortStruct a, SortStruct b)
-	{
-		return a.owner - b.owner;
-	}
-}
-
-/* Variables you need to set before calling this function!
- * 1. (byte)_internal_sort_type:					sorting criteria to sort on
- * 2. (boolean)_internal_sort_order:				sorting order, descending/ascending
- * 3. (int)_internal_name_sorter_id:	default StringID of the vehicle when no name is set. eg
- *    Str.STR_SV_TRAIN_NAME for trains or Str.STR_SV_AIRCRAFT_NAME for aircraft
- */
-class VehicleUnsortedSorter extends abstractVehicleSorter
-{
-	public int compare (SortStruct a, SortStruct b)
-	{
-		return a.index - b.index;
-	}
-}
-
-
-class VehicleNumberSorter extends abstractVehicleSorter
-{
-	public int compare (SortStruct a, SortStruct b)
-	{
-		final Vehicle va = Vehicle.GetVehicle(a.index);
-		final Vehicle vb = Vehicle.GetVehicle(b.index);
-		int r = va.unitnumber.id - vb.unitnumber.id;
-
-		return VehicleGui._internal_sort_order ? -r : r;
-	}
-}
-
-//static char _bufcache[64];	// used together with _last_vehicle_idx to hopefully speed up stringsorting
-
-class VehicleNameSorter extends abstractVehicleSorter
-{
-	public int compare (SortStruct a, SortStruct b)
-	{
-		final SortStruct cmp1 = a;
-		final SortStruct cmp2 = b;
-		final Vehicle va = Vehicle.GetVehicle(cmp1.index);
-		final Vehicle vb = Vehicle.GetVehicle(cmp2.index);
-		//char buf1[64] = "\0";
-		int r;
-
-		Global.SetDParam(0, va.string_id);
-		String buf1 = Global.GetString(Str.STR_JUST_STRING);
-
-		Global.SetDParam(0, vb.string_id);
-		String buf2 = Global.GetString(Str.STR_JUST_STRING);
-
-
-		r = buf1.compareToIgnoreCase(buf2);
-
-		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
-
-		return VehicleGui._internal_sort_order ? -r : r;
-	}
-}
-
-class VehicleAgeSorter extends abstractVehicleSorter
-{
-	public int compare (SortStruct a, SortStruct b)
-	{
-		final Vehicle va = Vehicle.GetVehicle(a.index);
-		final Vehicle vb = Vehicle.GetVehicle(b.index);
-		int r = va.age - vb.age;
-
-		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
-
-		return VehicleGui._internal_sort_order ? -r : r;
-	}
-}
-
-class VehicleProfitThisYearSorter extends abstractVehicleSorter
-{
-	public int compare (SortStruct a, SortStruct b)
-	{
-		final Vehicle va = Vehicle.GetVehicle(a.index);
-		final Vehicle vb = Vehicle.GetVehicle(b.index);
-		int r = va.profit_this_year - vb.profit_this_year;
-
-		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
-
-		return VehicleGui._internal_sort_order ? -r : r;
-	}
-}
-
-
-class VehicleProfitLastYearSorter extends abstractVehicleSorter
-{
-	public int compare (SortStruct a, SortStruct b)
-	{
-		final Vehicle va = Vehicle.GetVehicle(a.index);
-		final Vehicle vb = Vehicle.GetVehicle(b.index);
-		int r = va.profit_last_year - vb.profit_last_year;
-
-		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
-
-		return VehicleGui._internal_sort_order ? -r : r;
-	}
-}
-
-
-class VehicleCargoSorter extends abstractVehicleSorter
-{
-	public int compare (SortStruct a, SortStruct b)
-	{
-		final Vehicle  va = Vehicle.GetVehicle(a.index);
-		final Vehicle  vb = Vehicle.GetVehicle(b.index);
-		Vehicle  v;
-		AcceptedCargo cargoa = new AcceptedCargo();
-		AcceptedCargo cargob = new AcceptedCargo();
-		int r = 0;
-		int i;
-
-		//memset(cargoa, 0, sizeof(cargoa));
-		//memset(cargob, 0, sizeof(cargob));
-
-		for (v = va; v != null; v = v.next) cargoa.ct[v.cargo_type] += v.cargo_cap;
-		for (v = vb; v != null; v = v.next) cargob.ct[v.cargo_type] += v.cargo_cap;
-
-		for (i = 0; i < AcceptedCargo.NUM_CARGO; i++) {
-			r = cargoa.ct[i] - cargob.ct[i];
-			if (r != 0) break;
-		}
-
-		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
-
-		return VehicleGui._internal_sort_order ? -r : r;
-	}
-}
-
-class VehicleReliabilitySorter extends abstractVehicleSorter
-{
-	public int compare (SortStruct a, SortStruct b)
-	{
-		final Vehicle va = Vehicle.GetVehicle(a.index);
-		final Vehicle vb = Vehicle.GetVehicle(b.index);
-		int r = va.reliability - vb.reliability;
-
-		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
-
-		return VehicleGui._internal_sort_order ? -r : r;
-	}
-}
-
-class VehicleMaxSpeedSorter extends abstractVehicleSorter
-{
-	public int compare (SortStruct a, SortStruct b)
-	{
-		final Vehicle va = Vehicle.GetVehicle(a.index);
-		final Vehicle vb = Vehicle.GetVehicle(b.index);
-		int max_speed_a = 0xFFFF, max_speed_b = 0xFFFF;
-		int r;
-		Vehicle ua = va, ub = vb;
-
-		if (va.type == Vehicle.VEH_Train && vb.type == Vehicle.VEH_Train) {
-			do {
-				if (EngineGui.RailVehInfo(ua.engine_type.id).max_speed != 0)
-					max_speed_a = Math.min(max_speed_a, EngineGui.RailVehInfo(ua.engine_type.id).max_speed);
-			} while ((ua = ua.next) != null);
-
-			do {
-				if (EngineGui.RailVehInfo(ub.engine_type.id).max_speed != 0)
-					max_speed_b = Math.min(max_speed_b, EngineGui.RailVehInfo(ub.engine_type.id).max_speed);
-			} while ((ub = ub.next) != null);
-
-			r = max_speed_a - max_speed_b;
-		} else {
-			r = va.max_speed - vb.max_speed;
-		}
-
-		r = VEHICLEUNITNUMBERSORTER(r, va, vb);
-
-		return VehicleGui._internal_sort_order ? -r : r;
-	}
-}
 

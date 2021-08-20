@@ -11,6 +11,7 @@ import game.Str;
 import game.Terraform;
 import game.TileIndex;
 import game.enums.Owner;
+import game.ifaces.OnButtonClick;
 import game.util.BitOps;
 
 public class AirportGui 
@@ -95,7 +96,7 @@ public class AirportGui
 
 		case WE_PLACE_MOUSEUP:
 			if (e.pt.x != -1) {
-				Cmd.DoCommandP(e.tile, e.starttile.tile, 0, /*CcPlaySound10*/ null, Cmd.CMD_CLEAR_AREA | Cmd.CMD_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
+				Cmd.DoCommandP(e.tile, e.starttile.getTile(), 0, /*CcPlaySound10*/ null, Cmd.CMD_CLEAR_AREA | Cmd.CMD_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
 			}
 			break;
 
@@ -109,6 +110,8 @@ public class AirportGui
 
 		case WE_DESTROY:
 			if (Global._patches.link_terraform_toolbar) Window.DeleteWindowById(Window.WC_SCEN_LAND_GEN, 0);
+			break;
+		default:
 			break;
 		}
 	}
@@ -212,6 +215,28 @@ public class AirportGui
 
 		case WE_DESTROY:
 			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
+			break;
+		case WE_4:
+		case WE_ABORT_PLACE_OBJ:
+		case WE_CREATE:
+		case WE_DRAGDROP:
+		case WE_DROPDOWN_SELECT:
+		case WE_KEYPRESS:
+		case WE_MESSAGE:
+		case WE_MOUSEOVER:
+		case WE_ON_EDIT_TEXT:
+		case WE_ON_EDIT_TEXT_CANCEL:
+		case WE_PLACE_DRAG:
+		case WE_PLACE_MOUSEUP:
+		case WE_PLACE_OBJ:
+		case WE_PLACE_PRESIZE:
+		case WE_POPUPMENU_OVER:
+		case WE_POPUPMENU_SELECT:
+		case WE_RCLICK:
+		case WE_RESIZE:
+		case WE_TICK:
+		case WE_TIMEOUT:
+		default:
 			break;
 		}
 	}

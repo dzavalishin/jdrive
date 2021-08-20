@@ -23,6 +23,14 @@ import game.TrainCmd;
 import game.Vehicle;
 import game.ids.CargoID;
 import game.ids.EngineID;
+import game.sort.AbstractVehicleSorter;
+import game.sort.VehicleAgeSorter;
+import game.sort.VehicleCargoSorter;
+import game.sort.VehicleNumberSorter;
+import game.sort.VehicleProfitLastYearSorter;
+import game.sort.VehicleProfitThisYearSorter;
+import game.sort.VehicleReliabilitySorter;
+import game.sort.VehicleUnsortedSorter;
 import game.struct.EngineInfo;
 import game.struct.SortStruct;
 import game.tables.EngineTables;
@@ -60,7 +68,7 @@ public class VehicleGui {
 
 
 
-	static abstractVehicleSorter _vehicle_sorter[] = {
+	static AbstractVehicleSorter _vehicle_sorter[] = {
 			new VehicleUnsortedSorter(),
 			new VehicleNumberSorter(),
 			new VehicleNameSorter(),
@@ -168,11 +176,11 @@ public class VehicleGui {
 					while(voi.hasNext())
 					{
 						final Order order = voi.next();
-						if (order != null && order.type == Order.OT_GOTO_STATION && order.station == station) 
+						if (order != null && order.getType() == Order.OT_GOTO_STATION && order.getStation() == station) 
 						{
 							_vehicle_sort[n[0]] = new SortStruct();
 							_vehicle_sort[n[0]].index = v.index;
-							_vehicle_sort[n[0]].owner = v.owner.id;
+							_vehicle_sort[n[0]].owner = v.getOwner().id;
 							++n[0];
 							break;
 						}
@@ -184,11 +192,11 @@ public class VehicleGui {
 			//FOR_ALL_VEHICLES(v)
 			Vehicle.forEach( (v) ->
 			{
-				if (v.getType() == type && v.owner.id == owner && (
+				if (v.getType() == type && v.getOwner().id == owner && (
 						(type == Vehicle.VEH_Train && v.IsFrontEngine()) ||
 						(type != Vehicle.VEH_Train && v.getSubtype() <= subtype))) {
 					_vehicle_sort[n[0]].index = v.index;
-					_vehicle_sort[n[0]].owner = v.owner.id;
+					_vehicle_sort[n[0]].owner = v.getOwner().id;
 					++n[0];
 				}
 			});
@@ -338,7 +346,8 @@ private static void show_cargo(ctype) {
 			colour = sel[0] == 0 ? 0xC : 0x10;
 			if (!(ENGINE_IS_AVAILABLE(e, info) && show_outdated && (0 != EngineGui.RailVehInfo(i).power) && e.railtype == railtype)) 
 			{
-				if (e.railtype != railtype || 0==(rvi.flags & Engine.RVI_WAGON) != is_engine ||
+				//if (e.railtype != railtype || 0==(rvi.flags & Engine.RVI_WAGON) != is_engine ||
+				if (e.railtype != railtype || rvi.isWagon() == is_engine ||
 						!BitOps.HASBIT(e.player_avail, Global._local_player.id))
 					continue;
 			} /*else {
@@ -737,7 +746,7 @@ private static void show_cargo(ctype) {
 				{
 					Vehicle vehicle = ii.next();
 					
-					if (vehicle.owner == Global._local_player) {
+					if (vehicle.getOwner() == Global._local_player) {
 						if (vehicle.getType() == Vehicle.VEH_Aircraft && vehicle.getSubtype() > 2) continue;
 
 						// do not count the vehicles, that contains only 0 in all var
@@ -845,7 +854,7 @@ private static void show_cargo(ctype) {
 				for (i = 0 ; i < 2 ; i++) {
 					if (i > 0) offset = 228;
 					if (selected_id[i] != Engine.INVALID_ENGINE_ID) {
-						if (0==(EngineGui.RailVehInfo(selected_id[i].id).flags & Engine.RVI_WAGON)) {
+						if (!EngineGui.RailVehInfo(selected_id[i].id).isWagon()) {
 							/* it's an engine */
 							TrainGui.DrawTrainEnginePurchaseInfo(2 + offset, 15 + (14 * w.vscroll.cap), selected_id[i].id);
 						} else {

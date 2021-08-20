@@ -151,7 +151,7 @@ public class MainWindow extends JPanel implements ActionListener
 		{			
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
-				Hal._cursor.wheel = e.getWheelRotation();
+				Hal._cursor.setWheel( e.getWheelRotation() );
 				e.consume();
 			}
 		});
@@ -421,32 +421,8 @@ public class MainWindow extends JPanel implements ActionListener
 		x -= 10; //myLocation.x;
 		y -= 30; //myLocation.y;
 
-		if (Hal._cursor.fix_at) {
-			int dx = x - Hal._cursor.pos.x;
-			int dy = y - Hal._cursor.pos.y;
-			if (dx != 0 || dy != 0) {
-				Hal._cursor.delta.x += dx;
-				Hal._cursor.delta.y += dy;
-
-				/* TODO set cursor pos
-				pt.x = _cursor.pos.x;
-				pt.y = _cursor.pos.y;
-
-				if (_wnd.double_size) {
-					pt.x *= 2;
-					pt.y *= 2;
-				}
-				ClientToScreen(hwnd, &pt);
-				SetCursorPos(pt.x, pt.y);
-				 */
-			}
-		} else {
-			Hal._cursor.delta.x += x - Hal._cursor.pos.x;
-			Hal._cursor.delta.y += y - Hal._cursor.pos.y;
-			Hal._cursor.pos.x = x;
-			Hal._cursor.pos.y = y;
-			Hal._cursor.dirty = true;
-		}
+		Hal._cursor.processMouse(x, y);
+		
 	}
 
 
