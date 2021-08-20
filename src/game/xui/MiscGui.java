@@ -160,10 +160,10 @@ public class MiscGui {
 		p = Player.GetPlayer(Global._local_player.id < Global.MAX_PLAYERS ? Global._local_player.id : 0);
 
 		old_money = p.money64;
-		p.money64 = p.player_money = 0x7fffffff;
+		p.money64 = 0x7fffffff;
 		lid.costclear = Cmd.DoCommandByTile(tile, 0, 0, 0, Cmd.CMD_LANDSCAPE_CLEAR);
 		p.money64 = old_money;
-		p.UpdatePlayerMoney32();
+		//p.UpdatePlayerMoney32();
 
 		// Becuase build_date is not set yet in every TileDesc, we make sure it is empty
 		lid.td.build_date = 0;

@@ -2,21 +2,21 @@ package game;
 
 public class RailVehicleInfo {
 
-	int image_index;
-	int flags; /* 1=multihead engine, 2=wagon */
-	int base_cost;
-	int max_speed;
-	int power;
-	int weight;
-	int running_cost_base;
-	int engclass; // 0: steam, 1: diesel, 2: electric
-	int capacity;
-	int cargo_type;
-	int callbackmask; // see CallbackMask enum
-	int pow_wag_power;
-	int pow_wag_weight;
+	public final int image_index;
+	private int flags; /* 1=multihead engine, 2=wagon */
+	public final int base_cost;
+	public final int max_speed;
+	public final int power;
+	public final int weight;
+	public final int running_cost_base;
+	public final int engclass; // 0: steam, 1: diesel, 2: electric
+	public final int capacity;
+	public final int cargo_type;
+	public final int callbackmask; // see CallbackMask enum
+	public final int pow_wag_power;
+	public final int pow_wag_weight;
 	
-	int visual_effect; 
+	public final int visual_effect; 
 	// NOTE: this is not 100% implemented yet, at the
 	// moment it is only used as a 'fallback' value
 	// for when the 'powered wagon' callback fails. 
@@ -26,7 +26,7 @@ public class RailVehicleInfo {
 	//  Same goes for the callback result, which 
 	// atm is only used to check if a wagon is powered.
 	
-	int shorten_factor;	// length on main map for this type is 8 - shorten_factor
+	public final int shorten_factor;	// length on main map for this type is 8 - shorten_factor
 
 	public RailVehicleInfo(
 			int i, int j, int k, int l, int m, 
@@ -49,5 +49,8 @@ public class RailVehicleInfo {
 		 visual_effect =  v; 	
 		 shorten_factor =  w;
 	}
+
+	public boolean isMulttihead() { return  0 != (flags&Engine.RVI_MULTIHEAD);	}
+	public boolean isWagon() { return 0!=(flags & Engine.RVI_WAGON); }
 	
 }

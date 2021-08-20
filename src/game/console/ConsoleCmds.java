@@ -1254,7 +1254,7 @@ public class ConsoleCmds
 	/*  console command and variable registration */
 	/* ****************************************** */
 
-	static void IConsoleStdLibRegister()
+	public static void IConsoleStdLibRegister()
 	{
 		// stdlib
 		//extern byte _stdlib_developer; /* XXX extern in .c */

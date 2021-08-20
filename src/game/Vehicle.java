@@ -559,7 +559,7 @@ public class Vehicle implements IPoolItem
 	 * @param v Vehicle.
 	 * @return Next vehicle in the consist.
 	 */
-	Vehicle GetNextVehicle()
+	public Vehicle GetNextVehicle()
 	{
 		Vehicle u = next;
 		while (u != null && u.IsArticulatedPart()) {
@@ -2781,7 +2781,7 @@ public class Vehicle implements IPoolItem
 			w = v;
 			while (v.rail.shortest_platform[0]*16 < v.rail.cached_total_length) {
 				// the train is too long. We will remove cars one by one from the start of the train until it's short enough
-				while (w != null && 0==(Engine.RailVehInfo(w.engine_type.id).flags & Engine.RVI_WAGON) ) {
+				while (w != null && !(Engine.RailVehInfo(w.engine_type.id).isWagon()) ) {
 					w = w.GetNextVehicle();
 				}
 				if (w == null) {
@@ -3137,7 +3137,7 @@ public class Vehicle implements IPoolItem
 	 *  without loosing the order-list
 	 *
 	 */
-	static void BackupVehicleOrders(final Vehicle v, BackuppedOrders bak)
+	public static void BackupVehicleOrders(final Vehicle v, BackuppedOrders bak)
 	{
 		/* Save general info */
 		bak.orderindex       = OrderID.get(v.cur_order_index);
@@ -3274,6 +3274,7 @@ public class Vehicle implements IPoolItem
 
 	public int getType() { return type; }
 	public int getSubtype() { return subtype;	}
+	public PlayerID getOwner() {		return owner;	}
 
 	
 	// TODO check against CmdStartStopTrain, replace code there with us
@@ -3740,6 +3741,58 @@ public class Vehicle implements IPoolItem
 			return Sprite.PALETTE_TO_GREEN;
 		}
 	}
+
+	public int infoString() {
+		int str;
+		if (road.crashed_ctr != 0) {
+			str = Str.STR_8863_CRASHED;
+		} else if (isBroken()) {
+			str = Str.STR_885C_BROKEN_DOWN;
+		} else if(0 != (vehstatus & Vehicle.VS_STOPPED)) {
+			str = Str.STR_8861_STOPPED;
+		} else {
+			if (num_orders == 0) {
+				str = Str.STR_NO_ORDERS + (Global._patches.vehicle_speed ? 1 : 0);
+				Global.SetDParam(0, cur_speed * 10 >> 5);
+				return str;
+			}
+			int i = null == current_order ? -1 : current_order.type;
+			
+			switch (i) {
+			case Order.OT_GOTO_STATION: {
+				Global.SetDParam(0, current_order.station);
+				Global.SetDParam(1, cur_speed * 10 >> 5);
+				str = Str.STR_HEADING_FOR_STATION + (Global._patches.vehicle_speed ? 1 : 0);
+			} break;
+
+			case Order.OT_GOTO_DEPOT: {
+				Depot depot = Depot.GetDepot(current_order.station);
+				Global.SetDParam(0, depot.town_index);
+				Global.SetDParam(1, cur_speed * 10 >> 5);
+				str = Str.STR_HEADING_FOR_ROAD_DEPOT + (Global._patches.vehicle_speed ? 1 : 0);
+			} break;
+
+			case Order.OT_LOADING:
+			case Order.OT_LEAVESTATION:
+				str = Str.STR_882F_LOADING_UNLOADING;
+				break;
+
+			default:
+				str = Str.STR_EMPTY;
+				break;
+			}
+		}
+		return str;
+	}
+	
+	
+	public boolean isStopped() { return 0 != (vehstatus & Vehicle.VS_STOPPED); }
+	public boolean isCrashed() { return 0 != (vehstatus & Vehicle.VS_CRASHED); }
+	public boolean isHidden() { return 0 != (vehstatus & Vehicle.VS_HIDDEN); }
+
+	public boolean isBroken() { return breakdown_ctr == 1; }
+
+
 
 	
 }

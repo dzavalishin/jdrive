@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import game.enums.TileTypes;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.RememberData;
 import game.struct.TrackPathFinderLink;

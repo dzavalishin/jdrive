@@ -98,6 +98,12 @@ public class CursorVars
 
 	public boolean isVisible() { return visible; }
 
+	public void setDelta(int x, int y) 
+	{
+		delta.x = x;
+		delta.y = y;
+	}
+
 
 }
 

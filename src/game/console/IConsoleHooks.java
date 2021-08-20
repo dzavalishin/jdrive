@@ -70,18 +70,4 @@ public class IConsoleHooks
 	}
 	
 
-} 
-
-enum IConsoleHookTypes {
-	ICONSOLE_HOOK_ACCESS,
-	ICONSOLE_HOOK_PRE_ACTION,
-	ICONSOLE_HOOK_POST_ACTION
-}
-
-
-
-
-@FunctionalInterface
-interface IConsoleHook {
-	boolean accept();
 }

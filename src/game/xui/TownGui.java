@@ -54,7 +54,7 @@ public abstract class TownGui //extends Town
 	 */
 	public static int GetMaskOfTownActions(int [] nump, PlayerID pid, final Town t)
 	{
-		int avail, ref;
+		int ref;
 		int num = 0;
 		int avail_buttons = 0x7F; // by default all buttons except bribe are enabled.
 		int buttons = 0;
@@ -73,7 +73,7 @@ public abstract class TownGui //extends Town
 			}
 
 			// Things worth more than this are not shown
-			avail = Player.GetPlayer(pid).player_money + Global._price.station_value * 200;
+			long avail = Player.GetPlayer(pid).getMoney() + Global._price.station_value * 200;
 			ref = Global._price.build_industry >> 8;
 
 				for (i = 0; i != Town._town_action_costs.length; i++, avail_buttons >>= 1) {
@@ -140,14 +140,14 @@ public abstract class TownGui //extends Town
 				//FOR_ALL_PLAYERS(p)
 				Player.forEach( (p) ->
 				{
-					if (p.isActive() && (BitOps.HASBIT(t.have_ratings, p.index.id) || t.exclusivity.id == p.index.id)) {
-						GraphGui.DrawPlayerIcon(p.index.id, 2, y[0]);
+					if (p.isActive() && (BitOps.HASBIT(t.have_ratings, p.getIndex().id) || t.exclusivity.id == p.getIndex().id)) {
+						GraphGui.DrawPlayerIcon(p.getIndex().id, 2, y[0]);
 
 						Global.SetDParam(0, p.name_1);
 						Global.SetDParam(1, p.name_2);
-						Global.SetDParam(2, Player.GetPlayerNameString(p.index, 3));
+						Global.SetDParam(2, Player.GetPlayerNameString(p.getIndex(), 3));
 
-						int r = t.ratings[p.index.id];
+						int r = t.ratings[p.getIndex().id];
 						int str = Str.STR_3035_APPALLING; // Apalling
 
 						if( r > TownTables.RATING_APPALLING) {
@@ -167,7 +167,7 @@ public abstract class TownGui //extends Town
 											}}}}}}
 
 						Global.SetDParam(4, str);
-						if (t.exclusivity.id == p.index.id) // red icon for player with exclusive rights
+						if (t.exclusivity.id == p.getIndex().id) // red icon for player with exclusive rights
 							Gfx.DrawSprite(Sprite.SPR_BLOT | Sprite.PALETTE_TO_RED, 18, y[0]);
 
 						Gfx.DrawString(28, y[0], Str.STR_2024, 0);

@@ -434,11 +434,11 @@ public class Cmd {
 		return res;
 	}
 
-	static int GetAvailableMoneyForCommand()
+	static long GetAvailableMoneyForCommand()
 	{
 		PlayerID pid = Global._current_player;
 		if (pid.id >= Global.MAX_PLAYERS) return 0x7FFFFFFF; // max int
-		return Player.GetPlayer(pid).player_money;
+		return Player.GetPlayer(pid).getMoney();
 	}
 
 	// toplevel network safe docommand function for the current player. must not be called recursively.

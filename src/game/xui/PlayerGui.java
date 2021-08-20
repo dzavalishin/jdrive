@@ -85,7 +85,7 @@ public class PlayerGui
 			y = 15;
 
 		Gfx.DrawString(2, y, Str.STR_7026_BANK_BALANCE, 0);
-		Global.SetDParam64(0, p.money64);
+		Global.SetDParam64(0, p.getMoney());
 		Gfx.DrawStringRightAligned(182, y, Str.STR_7028, 0);
 
 		y += 10;
@@ -98,7 +98,7 @@ public class PlayerGui
 
 		Gfx.GfxFillRect(182 - 75, y-2, 182, y-2, 215);
 
-		Global.SetDParam64(0, p.money64 - p.current_loan);
+		Global.SetDParam64(0, p.getMoney() - p.current_loan);
 		Gfx.DrawStringRightAligned(182, y, Str.STR_7028, 0);
 	}
 
@@ -259,7 +259,7 @@ public class PlayerGui
 			{
 				final Player p = ii.next();
 				if (p.isActive()) {
-					used_colors = BitOps.RETSETBIT(used_colors, p.player_color);
+					used_colors = BitOps.RETSETBIT(used_colors, p.getColor());
 					num_free--;
 				}
 			}
@@ -332,7 +332,7 @@ public class PlayerGui
 			w.click_state = (w.click_state & ~(1<<5|1<<6)) | ((1<<5) << w.as_facesel_d().gender);
 			w.DrawWindowWidgets();
 			p = Player.GetPlayer(w.window_number);
-			Player.DrawPlayerFace(w.as_facesel_d().face, p.player_color, 2, 16);
+			Player.DrawPlayerFace(w.as_facesel_d().face, p.getColor(), 2, 16);
 		} break;
 
 		case WE_CLICK:
@@ -442,11 +442,11 @@ public class PlayerGui
 		while(ii.hasNext())
 		{
 			final Vehicle v = ii.next();
-			if (v.owner == player) {
-				switch (v.type) {
+			if (v.getOwner() == player) {
+				switch (v.getType()) {
 				case Vehicle.VEH_Train:    if (v.IsFrontEngine()) train++; break;
 				case Vehicle.VEH_Road:     road++; break;
-				case Vehicle.VEH_Aircraft: if (v.subtype <= 2) air++; break;
+				case Vehicle.VEH_Aircraft: if (v.getSubtype() <= 2) air++; break;
 				case Vehicle.VEH_Ship:     ship++; break;
 				default: break;
 				}
@@ -499,7 +499,7 @@ public class PlayerGui
 		{
 			final Player p2 = ii.next();
 
-			int amt = GetAmountOwnedBy(p, p2.index);
+			int amt = GetAmountOwnedBy(p, p2.getIndex());
 			if (amt != 0) {
 				num++;
 
@@ -567,7 +567,8 @@ public class PlayerGui
 			// Draw company-colour bus (0xC19)
 			Gfx.DrawSprite(Sprite.PLAYER_SPRITE_COLOR(p.index) + (0xC19 | Sprite.PALETTE_MODIFIER_COLOR), 215, 49);
 
-			Player.DrawPlayerFace(p.face, p.player_color, 2, 16);
+			//Player.DrawPlayerFace(p.face, p.getColor(), 2, 16);
+			p.DrawPlayerFace();
 
 			Global.SetDParam(0, p.president_name_1);
 			Global.SetDParam(1, p.president_name_2);
@@ -710,7 +711,7 @@ public class PlayerGui
 			PlayerGui::PlayerCompanyWndProc
 			);
 
-	static void ShowPlayerCompany(/*PlayerID*/ int player)
+	public static void ShowPlayerCompany(/*PlayerID*/ int player)
 	{
 		Window  w;
 
@@ -729,7 +730,8 @@ public class PlayerGui
 			Global.SetDParam(1, p.name_2);
 			w.DrawWindowWidgets();
 
-			Player.DrawPlayerFace(p.face, p.player_color, 2, 16);
+			
+			p.DrawPlayerFace();
 
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);

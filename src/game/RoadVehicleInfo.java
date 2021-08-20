@@ -1,13 +1,13 @@
 package game;
 
 public class RoadVehicleInfo {
-	int image_index;
-	int base_cost;
-	int running_cost;
-	int sfx;
-	int max_speed;
-	int capacity;
-	int cargo_type;
+	public final int image_index;
+	public final int base_cost;
+	public final int running_cost;
+	public final int sfx;
+	public final int max_speed;
+	public final int capacity;
+	public final int cargo_type;
 
 	public RoadVehicleInfo(
 			int i, int j, int k, 

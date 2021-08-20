@@ -1584,7 +1584,8 @@ public class Rail extends RailTables {
 	 */
 	public static int CmdConvertRail(int ex, int ey, int flags, int p1, int p2)
 	{
-		int ret, cost, money;
+		int ret, cost; 
+		long money;
 		int sx, sy, x, y;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
@@ -3185,7 +3186,8 @@ public class Rail extends RailTables {
 
 	static void DoRailroadTrack(int mode)
 	{
-		Cmd.DoCommandP(TileIndex.TileVirtXY(ViewPort._thd.selstart.x, ViewPort._thd.selstart.y), TileIndex.TileVirtXY(ViewPort._thd.selend.x, ViewPort._thd.selend.y).getTile(), _cur_railtype | (mode << 4), null,
+		//Cmd.DoCommandP(TileIndex.TileVirtXY(ViewPort._thd.selstart.x, ViewPort._thd.selstart.y), TileIndex.TileVirtXY(ViewPort._thd.selend.x, ViewPort._thd.selend.y).getTile(), _cur_railtype | (mode << 4), null,
+		Cmd.DoCommandP(ViewPort._thd.getStartTile(), ViewPort._thd.getEndTile().getTile(), _cur_railtype | (mode << 4), null,
 				_remove_button_clicked ?
 						Cmd.CMD_REMOVE_RAILROAD_TRACK | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1012_CAN_T_REMOVE_RAILROAD_TRACK) :
 							Cmd.CMD_BUILD_RAILROAD_TRACK  | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1011_CAN_T_BUILD_RAILROAD_TRACK)
@@ -3198,7 +3200,7 @@ public class Rail extends RailTables {
 		int trackstat = thd.drawstyle & 0xF; // 0..5
 
 		if(0!=(thd.drawstyle & ViewPort.HT_RAIL)) { // one tile case
-			GenericPlaceRail(TileIndex.TileVirtXY(thd.selend.x, thd.selend.y), trackstat);
+			GenericPlaceRail(thd.getEndTile(), trackstat);
 			return;
 		}
 
@@ -3210,16 +3212,16 @@ public class Rail extends RailTables {
 		TileHighlightData thd = ViewPort._thd;
 		int trackstat = (thd.drawstyle & 0xF); // 0..5
 
-		if (thd.drawstyle == ViewPort.HT_RECT) { // one tile case
-			GenericPlaceSignals(TileIndex.TileVirtXY(thd.selend.x, thd.selend.y));
+		if (thd.isRect()) { // one tile case
+			GenericPlaceSignals(thd.getEndTile()); // TileIndex.TileVirtXY(thd.selend.x, thd.selend.y));
 			return;
 		}
 
 		// Global._patches.drag_signals_density is given as a parameter such that each user in a network
 		// game can specify his/her own signal density
 		Cmd.DoCommandP(
-				TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y),
-				TileIndex.TileVirtXY(thd.selend.x, thd.selend.y).tile,
+				thd.getStartTile(), //TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y),
+				thd.getEndTile().getTile(),// TileIndex.TileVirtXY(thd.selend.x, thd.selend.y).tile,
 				(Global._ctrl_pressed ? 1 << 3 : 0) | (trackstat << 4) | (Global._patches.drag_signals_density << 24),
 				Rail::CcPlaySound1E,
 				_remove_button_clicked ?

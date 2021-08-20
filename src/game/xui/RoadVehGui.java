@@ -71,8 +71,8 @@ public class RoadVehGui
 	static void DrawRoadVehImage(final Vehicle v, int x, int y, /*VehicleID*/ int selection)
 	{
 		int image = RoadVehCmd.GetRoadVehImage(v, 6);
-		int ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner));
-		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) ormod = Sprite.PALETTE_CRASH;
+		int ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.getOwner()));
+		if(v.isCrashed()) ormod = Sprite.PALETTE_CRASH;
 		Gfx.DrawSprite(image | ormod, x + 14, y + 6);
 
 		if (v.index == selection) {
@@ -88,7 +88,7 @@ public class RoadVehGui
 			//StringID 
 			int str;
 
-			w.disabled_state = v.owner == Global._local_player ? 0 : (1 << 2);
+			w.disabled_state = v.getOwner() == Global._local_player ? 0 : (1 << 2);
 			if (0==Global._patches.servint_roadveh) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
@@ -231,7 +231,7 @@ public class RoadVehGui
 		//_alloc_wnd_parent_num = veh;
 		w = Window.AllocateWindowDesc(_roadveh_details_desc, veh);
 		w.window_number = veh;
-		w.caption_color = (byte) v.owner.id;
+		w.caption_color = (byte) v.getOwner().id;
 	}
 
 	static void CcCloneRoadVeh(boolean success, TileIndex tile, int p1, int p2)
@@ -247,17 +247,17 @@ public class RoadVehGui
 			//StringID 
 			int str;
 
-			w.disabled_state = (v.owner != Global._local_player) ? (1<<8 | 1<<7) : 0;
+			w.disabled_state = (v.getOwner() != Global._local_player) ? (1<<8 | 1<<7) : 0;
 
 			/* draw widgets & caption */
 			Global.SetDParam(0, v.string_id);
 			Global.SetDParam(1, v.unitnumber.id);
 			w.DrawWindowWidgets();
 
-			str = vehInfoString(v);
+			str = v.infoString();
 
 			/* draw the flag plus orders */
-			Gfx.DrawSprite( 0 != (v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.widget.get(5).top + 1);
+			Gfx.DrawSprite( v.isStopped() ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.widget.get(5).top + 1);
 			Gfx.DrawStringCenteredTruncated(w.widget.get(5).left + 8, w.widget.get(5).right, w.widget.get(5).top + 1, new StringID(str), 0);
 			w.DrawWindowViewport();
 		} break;
@@ -309,7 +309,7 @@ public class RoadVehGui
 				Vehicle v;
 				int h;
 				v = Vehicle.GetVehicle(w.window_number);
-				h = (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_ROAD) && 0 != (v.vehstatus&Vehicle.VS_STOPPED)) ? (1<< 7) : (1 << 11);
+				h = (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_ROAD) && v.isStopped()) ? (1<< 7) : (1 << 11);
 				if (h != w.hidden_state) {
 					w.hidden_state = h;
 					w.SetWindowDirty();
@@ -320,48 +320,6 @@ public class RoadVehGui
 		}
 	}
 
-	private static int vehInfoString(Vehicle v) {
-		int str;
-		if (v.road.crashed_ctr != 0) {
-			str = Str.STR_8863_CRASHED;
-		} else if (v.breakdown_ctr == 1) {
-			str = Str.STR_885C_BROKEN_DOWN;
-		} else if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) {
-			str = Str.STR_8861_STOPPED;
-		} else {
-			if (v.num_orders == 0) {
-				str = Str.STR_NO_ORDERS + (Global._patches.vehicle_speed ? 1 : 0);
-				Global.SetDParam(0, v.cur_speed * 10 >> 5);
-				return str;
-			}
-			int i = null == v.current_order ? -1 : v.current_order.type;
-			
-			switch (i) {
-			case Order.OT_GOTO_STATION: {
-				Global.SetDParam(0, v.current_order.station);
-				Global.SetDParam(1, v.cur_speed * 10 >> 5);
-				str = Str.STR_HEADING_FOR_STATION + (Global._patches.vehicle_speed ? 1 : 0);
-			} break;
-
-			case Order.OT_GOTO_DEPOT: {
-				Depot depot = Depot.GetDepot(v.current_order.station);
-				Global.SetDParam(0, depot.town_index);
-				Global.SetDParam(1, v.cur_speed * 10 >> 5);
-				str = Str.STR_HEADING_FOR_ROAD_DEPOT + (Global._patches.vehicle_speed ? 1 : 0);
-			} break;
-
-			case Order.OT_LOADING:
-			case Order.OT_LEAVESTATION:
-				str = Str.STR_882F_LOADING_UNLOADING;
-				break;
-
-			default:
-				str = Str.STR_EMPTY;
-				break;
-			}
-		}
-		return str;
-	}
 
 	static final Widget _roadveh_view_widgets[] = {
 	new Widget( Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,  14,   0,  10,   0,  13, Str.STR_00C5, Str.STR_018B_CLOSE_WINDOW ),
@@ -393,7 +351,7 @@ public class RoadVehGui
 		Window  w = Window.AllocateWindowDescFront(_roadveh_view_desc, v.index);
 
 		if (w != null) {
-			w.caption_color = (byte) v.owner.id;
+			w.caption_color = (byte) v.getOwner().id;
 			ViewPort.AssignWindowViewport(w, 3, 17, 0xE2, 0x54, w.window_number | (1 << 31), 0);
 		}
 	}
@@ -593,7 +551,7 @@ public class RoadVehGui
 
 		/* determine amount of items for scroller */
 		int [] num = {0};
-		//FOR_ALL_VEHICLES(v)
+
 		Vehicle.forEach( (v) ->
 		{
 			if (v.getType() == Vehicle.VEH_Road && v.road.state == 254 && v.getTile().equals(tile))
@@ -606,7 +564,7 @@ public class RoadVehGui
 		depot = Depot.GetDepotByTile(tile);
 		assert(depot != null);
 
-		Global.SetDParam(0, depot.town_index);
+		Global.SetDParam(0, depot.getTownIndex());
 		w.DrawWindowWidgets();
 
 		x = 2;
@@ -627,7 +585,7 @@ public class RoadVehGui
 				Global.SetDParam(0, v.unitnumber.id);
 				Gfx.DrawString(x, y+2, (int)(v.max_age-366) >= v.age ? Str.STR_00E2 : Str.STR_00E3, 0);
 
-				Gfx.DrawSprite((v.vehstatus & Vehicle.VS_STOPPED)!=0 ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x + 16, y);
+				Gfx.DrawSprite( v.isStopped() ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x + 16, y);
 
 				if ((x+=56) == 2 + 56 * w.hscroll.cap) {
 					x = 2;
@@ -656,7 +614,7 @@ public class RoadVehGui
 		pos = (row + w.vscroll.pos) * w.hscroll.cap + xt;
 
 		tile = TileIndex.get( w.window_number );
-		//FOR_ALL_VEHICLES(v)
+
 		Iterator<Vehicle> ii = Vehicle.getIterator();
 		while(ii.hasNext())
 		{
@@ -689,7 +647,7 @@ public class RoadVehGui
 			if (v[0] != null) {
 				w.as_traindepot_d().sel = v[0].index;
 				w.SetWindowDirty();
-				ViewPort.SetObjectToPlaceWnd( Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v[0].owner)) + RoadVehCmd.GetRoadVehImage(v[0], 6), 4, w);
+				ViewPort.SetObjectToPlaceWnd( Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v[0].getOwner())) + RoadVehCmd.GetRoadVehImage(v[0], 6), 4, w);
 			}
 			break;
 
@@ -698,7 +656,7 @@ public class RoadVehGui
 			break;
 
 		case -2: // click start/stop flag
-			Cmd.DoCommandP(v[0].tile, v[0].index, 0, null, Cmd.CMD_START_STOP_ROADVEH | Cmd.CMD_MSG(Str.STR_9015_CAN_T_STOP_START_ROAD_VEHICLE));
+			Cmd.DoCommandP(v[0].getTile(), v[0].index, 0, null, Cmd.CMD_START_STOP_ROADVEH | Cmd.CMD_MSG(Str.STR_9015_CAN_T_STOP_START_ROAD_VEHICLE));
 			break;
 
 		default:
@@ -968,7 +926,7 @@ public class RoadVehGui
 				//StringID 
 				int str;
 
-				assert(v.getType() == Vehicle.VEH_Road && v.owner.id == owner);
+				assert(v.getType() == Vehicle.VEH_Road && v.getOwner().id == owner);
 
 				DrawRoadVehImage(v, x + 22, y + 6, Vehicle.INVALID_VEHICLE);
 				VehicleGui.DrawVehicleProfitButton(v, x, y + 13);
@@ -1019,7 +977,7 @@ public class RoadVehGui
 
 					v	= Vehicle.GetVehicle(vl.sort_list[id_v].index);
 
-					assert(v.getType() == Vehicle.VEH_Road && v.owner.id == owner);
+					assert(v.getType() == Vehicle.VEH_Road && v.getOwner().id == owner);
 
 					ShowRoadVehViewWindow(v);
 				}
@@ -1041,7 +999,7 @@ public class RoadVehGui
 
 					tile = tile.iadd(1);
 					tile.TILE_MASK();
-				} while(tile != Depot._last_built_road_depot_tile);
+				} while(!tile.equals(Depot._last_built_road_depot_tile));
 
 				ShowBuildRoadVehWindow(null);
 			} break;

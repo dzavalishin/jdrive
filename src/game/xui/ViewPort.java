@@ -27,8 +27,11 @@ import game.ids.CursorID;
 import game.ids.SpriteID;
 import game.ids.StringID;
 import game.ids.VehicleID;
+import game.struct.ChildScreenSpriteToDraw;
+import game.struct.ParentSpriteToDraw;
 import game.struct.Point;
 import game.struct.StringSpriteToDraw;
+import game.struct.TileSpriteToDraw;
 import game.util.AnimCursor;
 import game.util.AutoRail;
 import game.util.BitOps;
@@ -465,7 +468,7 @@ public class ViewPort
 		ts = new TileSpriteToDraw();
 
 		ts.image = image;
-		ts.next = null;
+		//ts.next = null;
 		ts.x = x;
 		ts.y = y;
 		ts.z = z;
@@ -606,29 +609,15 @@ public class ViewPort
 
 		assert((image & Sprite.SPRITE_MASK) < Sprite.MAX_SPRITES);
 
-		/*
-		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
-			DEBUG_misc( 0, "Out of sprite mem");
-			return;
-		}
-		//cs = (ChildScreenSpriteToDraw*)vd.spritelist_mem;
-		cs = (ChildScreenSpriteToDraw)vd.spritelist_mem;
-		 */
 		cs = new ChildScreenSpriteToDraw();
 
 		if (vd.last_parent == null) return; // TODO whine here?
-
-		//vd.spritelist_mem += sizeof(ChildScreenSpriteToDraw);
-
-		//*vd.last_child = cs;
-		//vd.last_child = &cs.next;
 
 		vd.last_parent.children.add(cs);
 
 		cs.image = image;
 		cs.x = x;
 		cs.y = y;
-		//cs.next = null;
 	}
 
 	/* Returns a StringSpriteToDraw */
@@ -890,8 +879,7 @@ public class ViewPort
 		bottom = top + dpi.height;
 
 		if (dpi.zoom < 1) {
-			//FOR_ALL_TOWNS(t) 
-			//Town.forEach( (t) ->
+
 			Iterator<Town> ii = Town.getIterator();
 			while(ii.hasNext())
 			{

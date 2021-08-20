@@ -26,17 +26,24 @@ import game.TileIndex;
 import game.Town;
 import game.Vehicle;
 import game.WayPoint;
+
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.SwitchModes;
 import game.enums.TileTypes;
+
 import game.ids.CursorID;
 import game.ids.PlayerID;
 import game.ids.StringID;
+
 import game.struct.ColorList;
 import game.struct.Point;
+
 import game.util.BitOps;
 import game.util.GameDate;
+import game.ifaces.MenuClickedProc;
+import game.ifaces.OnButtonClick;
+import game.ifaces.ToolbarButtonProc;
 
 public class Gui
 {
@@ -673,7 +680,7 @@ public class Gui
 			while(i.hasNext())
 			{
 				final Player p = i.next();
-				if (p.isActive() && --index < 0) return p.index.id;
+				if (p.isActive() && --index < 0) return p.getIndex().id;
 			}
 		}
 		return -1;
@@ -740,17 +747,17 @@ public class Gui
 			{
 				final Player p = i.next();
 				if (p.isActive()) {
-					if (p.index.id == sel) {
+					if (p.getIndex().id == sel) {
 						Gfx.GfxFillRect(x, y, x + 238, y + 9, 0);
 					}
 
-					GraphGui.DrawPlayerIcon(p.index.id, x + 2, y + 1);
+					GraphGui.DrawPlayerIcon(p.getIndex().id, x + 2, y + 1);
 
 					Global.SetDParam(0, p.name_1);
 					Global.SetDParam(1, p.name_2);
-					Global.SetDParam(2, Player.GetPlayerNameString(p.index, 3));
+					Global.SetDParam(2, Player.GetPlayerNameString(p.getIndex(), 3));
 
-					color = (p.index.id == sel) ? 0xC : 0x10;
+					color = (p.getIndex().id == sel) ? 0xC : 0x10;
 					if(0 != (chk&1)) color = 14;
 					Gfx.DrawString(x + 19, y, Str.STR_7021, color);
 
@@ -934,7 +941,7 @@ public class Gui
 		Vehicle.forEach( (v) ->
 		{
 			if (v.getType() == Vehicle.VEH_Train && v.IsFrontEngine()) 
-				dis[0] = BitOps.RETCLRBIT(dis[0], v.owner.id);
+				dis[0] = BitOps.RETCLRBIT(dis[0], v.getOwner().id);
 		});
 		PopupMainPlayerToolbMenu(w, 310, 13, dis[0]);
 	}
@@ -945,7 +952,7 @@ public class Gui
 
 		Vehicle.forEach( (v) ->
 		{
-			if (v.getType() == Vehicle.VEH_Road) dis[0] = BitOps.RETCLRBIT(dis[0], v.owner.id);
+			if (v.getType() == Vehicle.VEH_Road) dis[0] = BitOps.RETCLRBIT(dis[0], v.getOwner().id);
 		});
 		PopupMainPlayerToolbMenu(w, 332, 14, dis[0]);
 	}
@@ -956,7 +963,7 @@ public class Gui
 
 		Vehicle.forEach( (v) ->
 		{
-			if (v.getType() == Vehicle.VEH_Ship) dis[0] = BitOps.RETCLRBIT(dis[0], v.owner.id);
+			if (v.getType() == Vehicle.VEH_Ship) dis[0] = BitOps.RETCLRBIT(dis[0], v.getOwner().id);
 		});
 		PopupMainPlayerToolbMenu(w, 354, 15, dis[0]);
 	}
@@ -967,7 +974,7 @@ public class Gui
 
 		Vehicle.forEach( (v) ->
 		{
-			if (v.getType() == Vehicle.VEH_Aircraft) dis[0] = BitOps.RETCLRBIT(dis[0], v.owner.id);
+			if (v.getType() == Vehicle.VEH_Aircraft) dis[0] = BitOps.RETCLRBIT(dis[0], v.getOwner().id);
 		});
 		PopupMainPlayerToolbMenu(w, 376, 16, dis[0]);
 	}
@@ -1842,7 +1849,7 @@ public class Gui
 	};
 
 	static int _industry_type_to_place;
-	static boolean _ignore_restrictions = false;
+	public static boolean _ignore_restrictions = false;
 
 	static void ScenEditIndustryWndProc(Window w, WindowEvent e)
 	{
@@ -2317,21 +2324,12 @@ public class Gui
 
 	static boolean DrawScrollingStatusText(final NewsItem ni, int pos)
 	{
-		//char buf[512];
 		StringID str;
-		//final char *s;
-		//char *d;
 		DrawPixelInfo tmp_dpi = new DrawPixelInfo();
 		DrawPixelInfo old_dpi;
 		int x;
-		//char buffer[256];
-
-		if (ni.display_mode == 3) {
-			str = new StringID( NewsItem._get_news_string_callback[ni.callback].apply(ni) );
-		} else {
-			Global.COPY_IN_DPARAM(0, ni.params, ni.params.length);
-			str = ni.string_id;
-		}
+		
+		str = ni.makeString();
 
 		String buf = Global.GetString(str);
 
@@ -2378,8 +2376,8 @@ public class Gui
 
 			if (p != null) {
 				// Draw player money
-				Global.SetDParam64(0, p.money64);
-				Gfx.DrawStringCentered(570, 1, p.player_money >= 0 ? Str.STR_0004 : Str.STR_0005, 0);
+				Global.SetDParam64(0, p.getMoney());
+				Gfx.DrawStringCentered(570, 1, p.getMoney() >= 0 ? Str.STR_0004 : Str.STR_0005, 0);
 			}
 
 			// Draw status bar
@@ -2655,13 +2653,5 @@ public class Gui
 
 
 
-@FunctionalInterface
-interface MenuClickedProc extends Consumer<Integer> {} 
-
-@FunctionalInterface
-interface OnButtonClick extends Consumer<Window> {} 
-
-@FunctionalInterface
-interface ToolbarButtonProc extends Consumer<Window> {} 
 
 

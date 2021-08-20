@@ -12,6 +12,8 @@ import java.util.function.Consumer;
 
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.RoadStopType;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.StringID;
@@ -531,7 +533,7 @@ public class Station extends StationTables implements IPoolItem
 	/**
 	 * Get the current size of the StationPool
 	 */
-	static int GetStationPoolSize()
+	protected static int GetStationPoolSize()
 	{
 		return _station_pool.total_items();
 	}
@@ -3637,6 +3639,14 @@ public class Station extends StationTables implements IPoolItem
 	{
 		oos.writeObject(_station_pool);		
 	}
+
+
+	public boolean hasFacility(int f) {
+		return 0 != (facilities & f);
+	}
+
+
+	public PlayerID getOwner() { return owner; }
 
 }
 

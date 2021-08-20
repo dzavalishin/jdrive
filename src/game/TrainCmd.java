@@ -2,6 +2,7 @@ package game;
 
 import java.util.Iterator;
 
+import game.enums.TileTypes;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.PlayerID;
@@ -731,7 +732,7 @@ public class TrainCmd extends TrainTables
 	/* Check if all the wagons of the given train are in a depot, returns the
 	 * number of cars (including loco) then. If not, sets the error message to
 	 * Str.STR_881A_TRAINS_CAN_ONLY_BE_ALTERED and returns -1 */
-	static int CheckTrainStoppedInDepot(Vehicle v)
+	public static int CheckTrainStoppedInDepot(Vehicle v)
 	{
 		int count;
 		TileIndex tile = v.tile;
@@ -2947,7 +2948,7 @@ public class TrainCmd extends TrainTables
 		Vehicle prev;
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		int r, tracks,ts;
-		int i, enterdir, /*newdir,*/ dir;
+		int enterdir, /*newdir,*/ dir;
 		int chosen_dir = 0; // TODO [dz] logic lost? Does not get value
 		int chosen_track;
 		//byte old_z;
@@ -3816,7 +3817,7 @@ public class TrainCmd extends TrainTables
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 	}
 
-	static int GetTrainRunningCost(Vehicle v)
+	public static int GetTrainRunningCost(Vehicle v)
 	{
 		int cost = 0;
 

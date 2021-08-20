@@ -66,7 +66,7 @@ public class Economy extends EconomeTables
 	} 
 
 	//static ScoreInfo _score_info[];
-	public static int _score_part[][] = new int [Global.MAX_PLAYERS][NUM_SCORE];
+	public static long _score_part[][] = new long [Global.MAX_PLAYERS][NUM_SCORE];
 
 	// Score info
 	public static final ScoreInfo _score_info[] = {
@@ -125,7 +125,7 @@ public class Economy extends EconomeTables
 		tile.iadd(1, 1).MarkTileDirtyByTile();
 	}
 
-	static long CalculateCompanyValue(final Player p)
+	public static long CalculateCompanyValue(final Player p)
 	{
 		PlayerID owner = p.index;
 		long value;
@@ -176,7 +176,7 @@ public class Economy extends EconomeTables
 		int score = 0;
 
 		//memset(_score_part[owner], 0, sizeof(_score_part[owner]));
-		_score_part[owner] = new int[NUM_SCORE];
+		_score_part[owner] = new long[NUM_SCORE];
 
 		/* Count vehicles */
 		{
@@ -285,7 +285,7 @@ public class Economy extends EconomeTables
 
 		/* Generate score for player money */
 		{
-			int money = p.player_money;
+			long money = p.getMoney();
 			if (money > 0) {
 				_score_part[owner][SCORE_MONEY] = money;
 			}
@@ -300,7 +300,7 @@ public class Economy extends EconomeTables
 		{
 			int i;
 			int total_score = 0;
-			int s;
+			long s;
 			score = 0;
 			for (i=0;i<NUM_SCORE;i++) {
 				// Skip the total
@@ -488,7 +488,7 @@ public class Economy extends EconomeTables
 		long val;
 
 		// If the player has money again, it does not go bankrupt
-		if (p.player_money >= 0) {
+		if (p.getMoney() >= 0) {
 			p.quarters_of_bankrupcy = 0;
 			return;
 		}
@@ -560,7 +560,7 @@ public class Economy extends EconomeTables
 	#endif /* ENABLE_NETWORK */
 
 				// Convert everything the player owns to NO_OWNER
-				p.money64 = p.player_money = 100000000;
+				p.money64 = Player.INITIAL_MONEY;
 				ChangeOwnershipOfPlayerItems(owner, PlayerID.get(Owner.OWNER_SPECTATOR));
 				// Register the player as not-active
 				p.is_active = false;
@@ -1560,7 +1560,7 @@ public class Economy extends EconomeTables
 				owner = p.share_owners[i].GetPlayer();
 				owner.money64 += value;
 				owner.yearly_expenses[0][Player.EXPENSES_OTHER] += value;
-				owner.UpdatePlayerMoney32();
+				//owner.UpdatePlayerMoney32();
 			}
 		}
 

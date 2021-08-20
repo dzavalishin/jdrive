@@ -39,7 +39,7 @@ public class Player implements Serializable
 
 	int face;
 
-	int player_money;
+	//int player_money;
 	int current_loan;
 	long money64; // internal 64-bit version of the money. the 32-bit field will be clamped to plus minus 2 billion
 
@@ -97,7 +97,7 @@ public class Player implements Serializable
 		inaugurated_year = num_valid_stat_ent = quarters_of_bankrupcy = bankrupt_asked =
 				is_ai = player_color = player_money_fraction = avail_railtypes = block_preview = 0;
 
-		name_2 = name_1 = president_name_1 = player_money = current_loan = bankrupt_timeout =
+		name_2 = name_1 = president_name_1 = current_loan = bankrupt_timeout =
 				bankrupt_value = cargo_types = engine_renew_months = 0;
 
 		money64 = engine_renew_money = president_name_2 = face = 0;
@@ -107,14 +107,20 @@ public class Player implements Serializable
 		cur_economy = new PlayerEconomyEntry();
 	}
 
+	
 	public boolean isActive() { return is_active; }
+	public PlayerID getIndex() { return index; }
+	public long getMoney() { return money64; }
 
+	
+	
 	//#define MAX_PLAYERS 8
 	static Player [] _players = new Player[Global.MAX_PLAYERS];
 	// NOSAVE: can be determined from player structs
 	private static int [] _player_colors = new int[Global.MAX_PLAYERS];
 
 
+	public static final long INITIAL_MONEY = 100000000;
 
 	static int _yearly_expenses_type; // TODO fixme, use parameter where possible
 	public static void SET_EXPENSES_TYPE(int x) { _yearly_expenses_type = x; }
@@ -328,7 +334,7 @@ public class Player implements Serializable
 	{
 		if (cost > 0) {
 			PlayerID pid = Global._current_player;
-			if (pid.id < Global.MAX_PLAYERS && cost > GetPlayer(pid).player_money) {
+			if (pid.id < Global.MAX_PLAYERS && cost > GetPlayer(pid).money64) {
 				Global.SetDParam(0, cost);
 				Global._error_message = Str.STR_0003_NOT_ENOUGH_CASH_REQUIRES;
 				return false;
@@ -340,7 +346,7 @@ public class Player implements Serializable
 	private void SubtractMoneyFromAnyPlayer(int cost)
 	{
 		money64 -= cost;
-		UpdatePlayerMoney32();
+		//UpdatePlayerMoney32();
 
 		yearly_expenses[0][_yearly_expenses_type] += cost;
 
@@ -372,7 +378,7 @@ public class Player implements Serializable
 	}
 
 	// the player_money field is kept as it is, but money64 contains the actual amount of money.
-	public void UpdatePlayerMoney32()
+	/*public void UpdatePlayerMoney32()
 	{
 		if (money64 < -2000000000)
 			player_money = -2000000000;
@@ -380,7 +386,7 @@ public class Player implements Serializable
 			player_money = 2000000000;
 		else
 			player_money = (int)money64;
-	}
+	}*/
 
 	public static void GetNameOfOwner(PlayerID owner, TileIndex tile)
 	{
@@ -661,7 +667,7 @@ public class Player implements Serializable
 		p.name_1 = Str.STR_SV_UNNAMED;
 		p.is_active = true;
 
-		p.money64 = p.player_money = p.current_loan = Integer.MAX_VALUE; // TODO return this 100000;
+		p.money64 = /*p.player_money*/ p.current_loan = Integer.MAX_VALUE; // TODO return this 100000;
 
 		p.is_ai = (byte) (is_ai ? 1 : 0);
 		// TODO p.ai.state = 5; /* AIS_WANT_NEW_ROUTE */
@@ -750,7 +756,7 @@ public class Player implements Serializable
 
 	// index is the next parameter in _decode_parameters to set up
 	//static StringID GetPlayerNameString(PlayerID player, int index)
-	static int GetPlayerNameString(PlayerID player, int index)
+	public static int GetPlayerNameString(PlayerID player, int index)
 	{
 		if (player.IS_HUMAN_PLAYER() && player.id < Global.MAX_PLAYERS) {
 			Global.SetDParam(index, player.id+1);
@@ -1099,7 +1105,7 @@ public class Player implements Serializable
 
 				/* Remove the company */
 				Economy.ChangeOwnershipOfPlayerItems(p.index, PlayerID.get(Owner.OWNER_SPECTATOR));
-				p.money64 = p.player_money = 100000000; // XXX - wtf?
+				p.money64 = 100000000; // XXX - wtf?
 				p.is_active = false;
 			}
 		} break;
@@ -1140,6 +1146,7 @@ public class Player implements Serializable
 			Str.STR_0218_MOGUL,
 			Str.STR_0219_TYCOON_OF_THE_CENTURY,
 	};
+	
 
 	//static StringID EndGameGetPerformanceTitleFromValue(int value)
 	static int EndGameGetPerformanceTitleFromValue(int value)
@@ -1584,7 +1591,7 @@ final Chunk Handler _player_chunk_handlers[] = {
 		for(Player p : _players)
 		{
 			_player_colors[p.index.id] = p.player_color;
-			p.UpdatePlayerMoney32();
+			//p.UpdatePlayerMoney32();
 
 			// This is needed so an AI is attached to a loaded AI 
 			if (p.is_ai != 0 && (!Global._networking || Global._network_server) && Ai._ai.enabled)
@@ -1607,6 +1614,10 @@ final Chunk Handler _player_chunk_handlers[] = {
 	public void DrawPlayerFace() {
 		DrawPlayerFace(face, player_color, 2, 16);		
 	}
+
+	public int getColor() { return player_color; }
+
+
 
 
 }

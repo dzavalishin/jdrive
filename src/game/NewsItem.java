@@ -228,9 +228,9 @@ public class NewsItem {
 	static void DrawNewsBorder(final Window w)
 	{
 		int left = 0;
-		int right = w.width - 1;
+		int right = w.getWidth() - 1;
 		int top = 0;
-		int bottom = w.height - 1;
+		int bottom = w.getHeight() - 1;
 
 		Gfx.GfxFillRect(left, top, right, bottom, 0xF);
 
@@ -248,7 +248,7 @@ public class NewsItem {
 		case WE_CREATE: { /* If chatbar is open at creation time, we need to go above it */
 			final Window w1 = Window.FindWindowById(Window.WC_SEND_NETWORK_MSG, 0);
 			w.message = new WindowMessage(); // [dz]
-			w.message.msg = (w1 != null) ? w1.height : 0;
+			w.message.msg = (w1 != null) ? w1.getHeight() : 0;
 		} break;
 
 		case WE_PAINT: {
@@ -277,13 +277,13 @@ public class NewsItem {
 
 					/* Shade the viewport into gray, or color*/
 					vp = w.viewport;
-					Gfx.GfxFillRect(vp.left - w.left, vp.top - w.top,
-							vp.left - w.left + vp.width - 1, vp.top - w.top + vp.height - 1,
+					Gfx.GfxFillRect(vp.getLeft() - w.getLeft(), vp.getTop() - w.getTop(),
+							vp.getLeft() - w.getLeft() + vp.getWidth() - 1, vp.getTop() - w.getTop() + vp.getHeight() - 1,
 							(0 !=(ni.flags & NF_INCOLOR) ? 0x322 : 0x323) | Sprite.USE_COLORTABLE
 							);
 
 					Global.COPY_IN_DPARAM(0, ni.params, ni.params.length);
-					Gfx.DrawStringMultiCenter(w.width / 2, 20, ni.string_id.id, 428);
+					Gfx.DrawStringMultiCenter(w.getWidth() / 2, 20, ni.string_id.id, 428);
 				}
 				break;
 			}
@@ -301,7 +301,7 @@ public class NewsItem {
 				} else {
 					w.DrawWindowViewport();
 					Global.COPY_IN_DPARAM(0, ni.params, ni.params.length);
-					Gfx.DrawStringMultiCenter(w.width / 2, w.height - 16, ni.string_id.id, 276);
+					Gfx.DrawStringMultiCenter(w.getWidth() / 2, w.getHeight() - 16, ni.string_id.id, 276);
 				}
 				break;
 			}
@@ -338,10 +338,6 @@ public class NewsItem {
 			break;
 
 		case WE_MESSAGE: /* The chatbar has notified us that is was either created or closed */
-			/*switch (e.msg) {
-			case WindowEvents.WE_CREATE.ordinal(): w.message.msg = e.wparam; break;
-			case WindowEvents.WE_DESTROY.ordinal(): w.message.msg = 0; break;
-			}*/
 			if( e.msg == WindowEvents.WE_CREATE.ordinal() )
 				w.message.msg = e.wparam; 
 			if( e.msg == WindowEvents.WE_DESTROY.ordinal() )
@@ -351,16 +347,16 @@ public class NewsItem {
 
 		case WE_TICK: { /* Scroll up newsmessages from the bottom in steps of 4 pixels */
 			int diff;
-			int y = Math.max(w.top - 4, Hal._screen.height - w.height - 12 - w.message.msg);
-			if (y == w.top) return;
+			int y = Math.max(w.getTop() - 4, Hal._screen.height - w.getHeight() - 12 - w.message.msg);
+			if (y == w.getTop()) return;
 
 			if (w.viewport != null)
-				w.viewport.top += y - w.top;
+				w.viewport.top += y - w.getTop();
 
-			diff = Math.abs(w.top - y);
+			diff = Math.abs(w.getTop() - y);
 			w.top = y;
 
-			Gfx.SetDirtyBlocks(w.left, w.top - diff, w.left + w.width, w.top + w.height);
+			Gfx.SetDirtyBlocks(w.getLeft(), w.getTop() - diff, w.getLeft() + w.getWidth(), w.getTop() + w.getHeight());
 		} break;
 		default:
 			break;
@@ -765,16 +761,16 @@ public class NewsItem {
 			w.DrawWindowWidgets();
 
 			if (_total_news == 0) break;
-			show = Math.min(_total_news, w.vscroll.cap);
+			show = Math.min(_total_news, w.vscroll.getCap());
 
-			for (p = w.vscroll.pos; p < w.vscroll.pos + show; p++) {
+			for (p = w.vscroll.getPos(); p < w.vscroll.getPos() + show; p++) {
 				// get news in correct order
 				final NewsItem ni = _news_items[getNews(p)];
 
 				Global.SetDParam(0, ni.date);
 				Gfx.DrawString(4, y, Str.STR_SHORT_DATE, 12);
 
-				DrawNewsString(82, y, 12, ni, w.width - 95);
+				DrawNewsString(82, y, 12, ni, w.getWidth() - 95);
 				y += 12;
 			}
 			break;
@@ -800,7 +796,7 @@ public class NewsItem {
 					//printf("=========================\n");
 				}*/
 
-				p = y + w.vscroll.pos;
+				p = y + w.vscroll.getPos();
 				if (p > _total_news - 1) break;
 
 				if (_latest_news >= p) {
@@ -852,7 +848,7 @@ public class NewsItem {
 			w.vscroll.cap = 10;
 			w.vscroll.count = _total_news;
 			w.resize.step_height = 12;
-			w.resize.height = w.height - 12 * 6; // minimum of 4 items in the list, each item 12 high
+			w.resize.height = w.getHeight() - 12 * 6; // minimum of 4 items in the list, each item 12 high
 			w.resize.step_width = 1;
 			w.resize.width = 200; // can't make window any smaller than 200 pixel
 			w.SetWindowDirty();
@@ -1066,6 +1062,20 @@ public class NewsItem {
 			Engine::GetNewsStringNewAircraftAvail, /* DNC_AIRCRAFTAVAIL */
 			Economy::GetNewsStringBankrupcy,        /* DNC_BANKRUPCY */
 	};
+
+
+
+
+
+	public StringID makeString() 
+	{
+		if (display_mode == 3) {
+			return new StringID( NewsItem._get_news_string_callback[callback].apply(this) );
+		} else {
+			Global.COPY_IN_DPARAM(0, params, params.length);
+			return string_id;
+		}
+	}
 
 
 }

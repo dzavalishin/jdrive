@@ -24,8 +24,8 @@ public class Gfx extends PaletteTabs
 	static boolean _dbg_screen_rect;
 
 
-	static int _pal_first_dirty;
-	static int _pal_last_dirty;
+	public static int _pal_first_dirty;
+	public static int _pal_last_dirty;
 
 
 	//typedef enum StringColorFlags {

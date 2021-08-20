@@ -84,7 +84,7 @@ public class StationGui extends Station  // to get constants
 	}
 
 	private static SortStruct [] _station_sort;
-	static boolean [] _station_sort_dirty = new boolean[Global.MAX_PLAYERS];
+	public static boolean [] _station_sort_dirty = new boolean[Global.MAX_PLAYERS];
 	private static boolean _global_station_sort_dirty;
 
 
@@ -108,11 +108,11 @@ public class StationGui extends Station  // to get constants
 		//FOR_ALL_STATIONS(st)
 		Station.forEach( (st) ->
 		{
-			if (st.getXy() != null && st.owner.id != Owner.OWNER_NONE) {
+			if (st.getXy() != null && st.getOwner().id != Owner.OWNER_NONE) {
 				_station_sort[n[0]].index = st.index;
-				_station_sort[n[0]].owner = st.owner.id;
+				_station_sort[n[0]].owner = st.getOwner().id;
 				n[0]++;
-				_num_station_sort[st.owner.id]++; // add number of stations of player
+				_num_station_sort[st.getOwner().id]++; // add number of stations of player
 			}
 		});
 
@@ -126,7 +126,6 @@ public class StationGui extends Station  // to get constants
 			_num_station_sort[si] += _num_station_sort[si-1];
 		}
 
-		//qsort(_station_sort, n, sizeof(_station_sort[0]), GeneralOwnerSorter); // sort by owner
 		Arrays.sort(_station_sort, new GeneralOwnerSorter());
 
 		// since indexes are messed up after adding/removing a station, mark all lists dirty
@@ -208,7 +207,7 @@ public class StationGui extends Station  // to get constants
 					int j;
 					int x;
 
-					assert(st.getXy() != null && st.owner.id == owner);
+					assert(st.getXy() != null && st.getOwner().id == owner);
 
 					Global.SetDParam(0, st.index);
 					Global.SetDParam(1, st.facilities);
@@ -248,7 +247,7 @@ public class StationGui extends Station  // to get constants
 
 					st = Station.GetStation(_station_sort[id_v].index);
 
-					assert(st.getXy() != null && st.owner == owner);
+					assert(st.getXy() != null && st.getOwner() == owner);
 
 					ViewPort.ScrollMainWindowToTile(st.getXy());
 				}
@@ -360,12 +359,20 @@ public class StationGui extends Station  // to get constants
 
 		w.disabled_state = st.owner == Global._local_player ? 0 : (1 << 9);
 
+		/*
 		if (0==(st.facilities & FACIL_TRAIN)) 		w.disabled_state = BitOps.RETSETBIT(w.disabled_state,  10);
 		if (0==(st.facilities & FACIL_TRUCK_STOP) &&
 				0==(st.facilities & FACIL_BUS_STOP))  w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 11);
 		if (0==(st.facilities & FACIL_AIRPORT))       w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 12);
 		if (0==(st.facilities & FACIL_DOCK))          w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 13);
-
+		*/
+		
+		if (st.hasFacility(FACIL_TRAIN)) 		w.disabled_state = BitOps.RETSETBIT(w.disabled_state,  10);
+		if (st.hasFacility(FACIL_TRUCK_STOP) &&
+				st.hasFacility(FACIL_BUS_STOP))  w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 11);
+		if (st.hasFacility(FACIL_AIRPORT))       w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 12);
+		if (st.hasFacility(FACIL_DOCK))          w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 13);
+		
 		Global.SetDParam(0, st.index);
 		Global.SetDParam(1, st.facilities);
 		w.DrawWindowWidgets();
@@ -506,20 +513,20 @@ public class StationGui extends Station  // to get constants
 
 			case 10: { /* Show a list of scheduled trains to this station */
 				final Station st = Station.GetStation(w.window_number);
-				TrainGui.ShowPlayerTrains(st.owner.id, w.window_number);
+				TrainGui.ShowPlayerTrains(st.getOwner().id, w.window_number);
 				break;
 			}
 
 			case 11: { /* Show a list of scheduled road-vehicles to this station */
 				final Station st = Station.GetStation(w.window_number);
-				RoadVehGui.ShowPlayerRoadVehicles(st.owner.id, w.window_number);
+				RoadVehGui.ShowPlayerRoadVehicles(st.getOwner().id, w.window_number);
 				break;
 			}
 
 			case 12: { /* Show a list of scheduled aircraft to this station */
 				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs have no owners, show the scheduled aircraft of current player */
-				PlayerID owner = (st.owner.id == Owner.OWNER_NONE) ? Global._current_player : st.owner;
+				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global._current_player : st.getOwner();
 				AirCraft.ShowPlayerAircraft(owner.id, w.window_number);
 				break;
 			}
@@ -527,7 +534,7 @@ public class StationGui extends Station  // to get constants
 			case 13: { /* Show a list of scheduled ships to this station */
 				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs/bouys have no owners, show the scheduled ships of current player */
-				PlayerID owner = (st.owner.id == Owner.OWNER_NONE) ? Global._current_player : st.owner;
+				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global._current_player : st.getOwner();
 				ShipGui.ShowPlayerShips(owner, StationID.get( w.window_number ) );
 				break;
 			}
@@ -545,7 +552,7 @@ public class StationGui extends Station  // to get constants
 		case WE_DESTROY: {
 			//WindowNumber 
 			int wno =
-					(w.window_number << 16) | Station.GetStation(w.window_number).owner.id;
+					(w.window_number << 16) | Station.GetStation(w.window_number).getOwner().id;
 
 			Window.DeleteWindowById(Window.WC_TRAINS_LIST, wno);
 			Window.DeleteWindowById(Window.WC_ROADVEH_LIST, wno);
@@ -573,7 +580,7 @@ public class StationGui extends Station  // to get constants
 
 		w = Window.AllocateWindowDescFront(_station_view_desc, station);
 		if (w != null) {
-			PlayerID owner = Station.GetStation(w.window_number).owner;
+			PlayerID owner = Station.GetStation(w.window_number).getOwner();
 			if (owner.id != Owner.OWNER_NONE) w.caption_color =  owner.id;
 			w.vscroll.cap = 5;
 		}

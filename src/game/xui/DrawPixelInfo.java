@@ -83,5 +83,16 @@ public class DrawPixelInfo
 
 		return true;
 	}
+
+	public void init(int width2, int height2, byte[] screen) 
+	{
+		dst_ptr = new Pixel( screen );
+		height = height2;
+		width = width2;
+		pitch = width2 * 1;
+		left = 0;
+		top = 0;
+		zoom = 0;
+	}
 	
 }

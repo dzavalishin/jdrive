@@ -5,6 +5,7 @@ import game.util.TownTables;
 import game.xui.ViewPort;
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.TileDesc;

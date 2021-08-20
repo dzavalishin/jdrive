@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class AcceptedCargo implements Serializable 
 {
 
-	int ct[] = new int[NUM_CARGO];
+	public int ct[] = new int[NUM_CARGO];
 
 	public void clear()
 	{

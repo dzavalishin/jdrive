@@ -55,8 +55,8 @@ public class Window extends WindowConstants
 	WindowMessage message;// = new WindowMessage(); // used 
 	//byte custom[WINDOW_CUSTOM_SIZE];
 	//byte custom[];
-	AbstractWinCustom custom;
-	public int[] custom_array = new int[2]; // TODO replace it all wit subclasses
+	public AbstractWinCustom custom; // TODO replace it all with subclasses
+	public int[] custom_array = new int[2]; 
 
 	BiConsumer<Window,WindowEvent> wndproc;
 
@@ -2139,7 +2139,7 @@ public class Window extends WindowConstants
 
 	static int _we4_timer;
 
-	static void UpdateWindows()
+	public static void UpdateWindows()
 	{
 		Window w;
 		int t,i;
@@ -3117,47 +3117,16 @@ public class Window extends WindowConstants
 		viewport.virtual_height += e.diff.y;		
 	}
 
+	public void disableVpScroll() {
+		flags4 |= Window.WF_DISABLE_VP_SCROLL;		
+	}
+
+	public void setTimeout(int i) { flags4 |= (i << Window.WF_TIMEOUT_SHL); }
 
 
 
 
 
 
-
-
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-class WindowMessage {
-	int msg;
-	int wparam;
-	int lparam;
-}
-
-
-class ResizeInfo {
-	int width; /* Minimum width and height */
-	int height;
-
-	int step_width; /* In how big steps the width and height go */
-	int step_height;
-} 
-
-
-class SizeRect {
-	int left,top,width,height;
 } 
 

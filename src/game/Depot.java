@@ -35,10 +35,10 @@ public class Depot implements IPoolItem, Serializable
 	
 	static MemoryPool<Depot> _depot_pool = new MemoryPool<Depot>(factory);
 
-	static TileIndex _last_built_train_depot_tile;
-	static TileIndex _last_built_road_depot_tile;
-	static TileIndex _last_built_aircraft_depot_tile;
-	static TileIndex _last_built_ship_depot_tile;
+	public static TileIndex _last_built_train_depot_tile;
+	public static TileIndex _last_built_road_depot_tile;
+	public static TileIndex _last_built_aircraft_depot_tile;
+	public static TileIndex _last_built_ship_depot_tile;
 
 	/**
 	 * Get the pointer to the depot with index 'index'
@@ -313,6 +313,8 @@ public class Depot implements IPoolItem, Serializable
 	{
 		oos.writeObject(_depot_pool);		
 	}
+
+	public int getTownIndex() { return town_index; }
 
 }
 

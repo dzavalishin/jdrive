@@ -26,12 +26,23 @@ public class TileHighlightData {
 
 	int place_mode;
 	boolean make_square_red;
-	//WindowClass window_class;
-	//WindowNumber window_number;
+
 	int window_class;
 	int window_number;
 
 	int userdata;
 	TileIndex redsq;
+	
+	public TileIndex getEndTile() {
+		return TileIndex.TileVirtXY(selend.x, selend.y);
+	}
+
+	public TileIndex getStartTile() {
+		return TileIndex.TileVirtXY(selstart.x, selstart.y);
+	}
+
+	public boolean isRect() {
+		return drawstyle == ViewPort.HT_RECT;
+	}
 
 }
