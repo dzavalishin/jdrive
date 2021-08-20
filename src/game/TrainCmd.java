@@ -237,7 +237,7 @@ public class TrainCmd extends TrainTables
 			num++;
 			drag_coeff += 3;
 
-			if (u.rail.track == 0x80)
+			if (u.rail.isInDepot()) //track == 0x80)
 				max_speed = Math.min(61, max_speed);
 
 			if (BitOps.HASBIT(u.rail.flags, Vehicle.VRF_GOINGUP)) {
@@ -500,7 +500,7 @@ public class TrainCmd extends TrainTables
 					v.z_pos = Landscape.GetSlopeZ(x,y);
 					v.owner = Global._current_player;
 					v.z_height = 6;
-					v.rail.track =  0x80;
+					v.rail.setInDepot(); //track =  0x80;
 					v.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_DEFPAL;
 
 					v.subtype = 0;
@@ -516,7 +516,7 @@ public class TrainCmd extends TrainTables
 					v.value = value;
 					//			v.day_counter = 0;
 
-					v.rail.railtype = Engine.GetEngine(engine).railtype;
+					v.rail.railtype = Engine.GetEngine(engine).getRailtype();
 
 					v.build_year =  Global._cur_year;
 					v.type = Vehicle.VEH_Train;
@@ -550,7 +550,8 @@ public class TrainCmd extends TrainTables
 			final Vehicle  v = it.next();
 			if (v.type == Vehicle.VEH_Train && v.IsFreeWagon() &&
 					v.tile.equals(u.tile) &&
-					v.rail.track == 0x80) {
+					v.rail.isInDepot() ) //track == 0x80) 
+			{
 				if (Cmd.CmdFailed(Cmd.DoCommandByTile(null, v.index | (u.index << 16), 1, Cmd.DC_EXEC,
 						Cmd.CMD_MOVE_RAIL_VEHICLE)))
 					break;
@@ -574,7 +575,7 @@ public class TrainCmd extends TrainTables
 		u.y_pos = v.y_pos;
 		u.z_pos = v.z_pos;
 		u.z_height = 6;
-		u.rail.track =  0x80;
+		u.rail.setInDepot(); //track =  0x80;
 		u.vehstatus = v.vehstatus & ~Vehicle.VS_STOPPED;
 		u.subtype = 0;
 		u.SetMultiheaded();
@@ -624,7 +625,7 @@ public class TrainCmd extends TrainTables
 		e = Engine.GetEngine(p1);
 
 		/* Check if depot and new engine uses the same kind of tracks */
-		if (!Rail.IsCompatibleRail(e.railtype, Rail.GetRailType(tile))) return Cmd.CMD_ERROR;
+		if (!Rail.IsCompatibleRail(e.getRailtype(), Rail.GetRailType(tile))) return Cmd.CMD_ERROR;
 
 		if(rvi.isWagon()) return CmdBuildRailWagon(EngineID.get(p1), tile, flags);
 
@@ -658,7 +659,7 @@ public class TrainCmd extends TrainTables
 				v.y_pos = (y |= _vehicle_initial_y_fract[dir]);
 				v.z_pos = Landscape.GetSlopeZ(x,y);
 				v.z_height = 6;
-				v.rail.track =  0x80;
+				v.rail.setInDepot(); //track =  0x80;
 				v.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_STOPPED | Vehicle.VS_DEFPAL;
 				v.spritenum = rvi.image_index;
 				v.cargo_type = rvi.cargo_type;
@@ -670,12 +671,12 @@ public class TrainCmd extends TrainTables
 
 				v.engine_type = EngineID.get( p1 );
 
-				v.reliability = e.reliability;
+				v.reliability = e.getReliability();
 				v.reliability_spd_dec = e.reliability_spd_dec;
-				v.max_age = e.lifelength * 366;
+				v.max_age = e.getLifelength() * 366;
 
 				v.string_id = Str.STR_SV_TRAIN_NAME;
-				v.rail.railtype = e.railtype;
+				v.rail.railtype = e.getRailtype();
 				Global._new_train_id = VehicleID.get( v.index );
 				Global._new_vehicle_id = VehicleID.get( v.index );
 
@@ -746,8 +747,8 @@ public class TrainCmd extends TrainTables
 		count = 0;
 		for (; v != null; v = v.next) {
 			count++;
-			if (v.rail.track != 0x80 || v.tile != tile ||
-					(v.IsFrontEngine() && 0==(v.vehstatus & Vehicle.VS_STOPPED))) {
+			if (!v.rail.isInDepot() || v.tile != tile ||
+					(v.IsFrontEngine() && !v.isStopped())) {
 				Global._error_message = Str.STR_881A_TRAINS_CAN_ONLY_BE_ALTERED;
 				return -1;
 			}
@@ -1944,7 +1945,7 @@ public class TrainCmd extends TrainTables
 			// no smoke?
 			if ( (Engine.RailVehInfo(engtype.id).isWagon() && effect_type == 0) ||
 					disable_effect ||
-					Engine.GetEngine(engtype).railtype > RAILTYPE_RAIL ||
+					Engine.GetEngine(engtype).getRailtype() > RAILTYPE_RAIL ||
 					0 != (v.vehstatus & Vehicle.VS_HIDDEN) ||
 					0 != (v.rail.track & 0xC0) 
 					) {
@@ -1995,7 +1996,7 @@ public class TrainCmd extends TrainTables
 
 		EngineID engtype = v.engine_type;
 
-		switch (Engine.GetEngine(engtype).railtype) {
+		switch (Engine.GetEngine(engtype).getRailtype()) {
 		case RAILTYPE_RAIL:
 			//SndPlayVehicleFx(sfx[RailVehInfo(engtype).engclass], v);
 			break;
@@ -2040,7 +2041,7 @@ public class TrainCmd extends TrainTables
 
 		// bail out if not all wagons are in the same depot or not in a depot at all
 		for (u = v; u != null; u = u.next) {
-			if (u.rail.track != 0x80 || u.tile != v.tile) return false;
+			if (!u.rail.isInDepot() || u.tile != v.tile) return false;
 		}
 
 		if (v.rail.force_proceed == 0) {
@@ -2773,7 +2774,8 @@ public class TrainCmd extends TrainTables
 		if (v != tcc.v &&
 				v != tcc.v_skip &&
 				v.type == Vehicle.VEH_Train &&
-				v.rail.track != 0x80 &&
+				//v.rail.track != 0x80 &&
+				!v.rail.isInDepot() &&
 				Math.abs(v.z_pos - tcc.v.z_pos) <= 6 &&
 				Math.abs(v.x_pos - tcc.v.x_pos) < 6 &&
 				Math.abs(v.y_pos - tcc.v.y_pos) < 6) {
@@ -2827,7 +2829,7 @@ public class TrainCmd extends TrainTables
 		int num;
 
 		/* can't collide in depot */
-		if (v.rail.track == 0x80) return;
+		if (v.rail.isInDepot()) return;
 
 		assert(v.rail.track == 0x40 || TileIndex.TileVirtXY(v.x_pos, v.y_pos) == v.tile);
 
@@ -2982,7 +2984,7 @@ public class TrainCmd extends TrainTables
 			if (v.GetNewVehiclePos(gp)) 
 			{
 				/* Staying in the old tile */
-				if (v.rail.track == 0x80) 
+				if (v.rail.isInDepot()) 
 				{
 					/* inside depot */
 					gp.x = v.x_pos;
@@ -3383,7 +3385,7 @@ public class TrainCmd extends TrainTables
 		 * others are on it */
 		DisableTrainCrossing(v.tile);
 
-		if (v.rail.track == 0x40) { // inside a tunnel
+		if (v.rail.isInTunnel()) { // inside a tunnel
 			TileIndex endtile = TunnelBridgeCmd.CheckTunnelBusy(v.tile, null);
 
 			if (!endtile.isValid()) // tunnel is busy (error returned)
@@ -3417,7 +3419,7 @@ public class TrainCmd extends TrainTables
 			//I need to buffer the train direction
 			if (0==(v.rail.track & 0x40))
 				v.direction = (v.direction + _random_dir_change[BitOps.GB(Hal.Random(), 0, 2)]) & 7;
-			if (0==(v.vehstatus & Vehicle.VS_HIDDEN)) {
+			if (!v.isHidden()) {
 				v.BeginVehicleMove();
 				UpdateTrainDeltaXY(v, v.direction);
 				v.cur_image = GetTrainImage(v, v.direction);
@@ -3432,7 +3434,7 @@ public class TrainCmd extends TrainTables
 		int r;
 		Vehicle u;
 
-		if (state == 4 && v.rail.track != 0x40) {
+		if (state == 4 && !v.rail.isInTunnel()) {
 			v.CreateEffectVehicleRel(4, 4, 8, Vehicle.EV_EXPLOSION_LARGE);
 		}
 
@@ -3725,7 +3727,7 @@ public class TrainCmd extends TrainTables
 	static boolean ValidateTrainInDepot( int data_a, int data_b )
 	{
 		Vehicle v = Vehicle.GetVehicle(data_a);
-		return  (v.rail.track == 0x80 && ((v.vehstatus | Vehicle.VS_STOPPED)!=0) );
+		return v.rail.isInDepot() && v.isStopped();
 	}
 
 	static void TrainEnterDepot(Vehicle v, TileIndex tile)

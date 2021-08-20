@@ -1474,7 +1474,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				dir = BitOps.GB(tile.getMap().m5, 0, 2);
 				vdir = v.direction >> 1;
 
-				if (v.rail.track != 0x40 && dir == vdir) {
+				if (!v.rail.isInTunnel() && dir == vdir) {
 					if (v.IsFrontEngine() && fc == _tunnel_fractcoord_1[dir]) {
 						if (v.spritenum < 4)
 							//SndPlayVehicleFx(SND_05_TRAIN_THROUGH_TUNNEL, v);
@@ -1484,7 +1484,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 						if (v.next == null)
 							Pbs.PBSClearTrack(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track));
 						v.tile = tile;
-						v.rail.track = 0x40;
+						v.rail.setInTunnel();
 						v.vehstatus |= Vehicle.VS_HIDDEN;
 						return 4;
 					}

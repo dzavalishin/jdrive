@@ -45,7 +45,7 @@ public class Window extends WindowConstants
 
 	public int click_state;
 	public int disabled_state;
-	int hidden_state;
+	public int hidden_state;
 
 	ViewPort viewport;
 	Widget [] original_widget;
@@ -494,7 +494,10 @@ public class Window extends WindowConstants
 	}
 
 
-	private static void scrollBarDirty(Window w, int wheel, Scrollbar sb) {
+	private static void scrollBarDirty(Window w, int wheel, Scrollbar sb) 
+	{
+		if (sb.wheel(wheel)) w.SetWindowDirty();
+		/*
 		if (sb.count > sb.cap) {
 			int pos = BitOps.clamp(sb.pos + wheel, 0, sb.count - sb.cap);
 			if (pos != sb.pos) {
@@ -502,6 +505,7 @@ public class Window extends WindowConstants
 				w.SetWindowDirty();
 			}
 		}
+		*/
 	}
 
 	public void SetWindowDirty()
@@ -1739,7 +1743,7 @@ public class Window extends WindowConstants
 				}
 
 				// Find the item we want to move to and make sure it's inside bounds.
-				pos = Math.min(Math.max(0, i + _scrollbar_start_pos) * sb.count / _scrollbar_size, Math.max(0, sb.count - sb.cap));
+				pos = Math.min(Math.max(0, i + _scrollbar_start_pos) * sb.getCount() / _scrollbar_size, Math.max(0, sb.getCount() - sb.getCap()));
 				if (pos != sb.pos) {
 					sb.pos = pos;
 					w.SetWindowDirty();
@@ -2449,6 +2453,8 @@ public class Window extends WindowConstants
 
 	private static Point HandleScrollbarHittest(final Scrollbar sb, int top, int bottom)
 	{
+		return sb.hittest(top, bottom);
+		/*
 		int height, count, pos, cap;
 
 		top += 10;
@@ -2466,7 +2472,7 @@ public class Window extends WindowConstants
 		if (count != 0) bottom -= (count - pos - cap) * height / count;
 
 		Point pt = new Point(top, bottom - 1);
-		return pt;
+		return pt; */
 	}
 
 	/*****************************************************
@@ -2523,7 +2529,7 @@ public class Window extends WindowConstants
 			flags4 |= WF_SCROLL_UP;
 			if (_scroller_click_timeout == 0) {
 				_scroller_click_timeout = 6;
-				if (sb.pos != 0) sb.pos--;
+				sb.up();
 			}
 			_left_button_clicked = false;
 		} else if (pos >= ma-10) {
@@ -2532,20 +2538,20 @@ public class Window extends WindowConstants
 
 			if (_scroller_click_timeout == 0) {
 				_scroller_click_timeout = 6;
-				if ((sb.pos + sb.cap) < sb.count)
-					sb.pos++;
+				sb.down();
 			}
 			_left_button_clicked = false;
 		} else {
 			//
-			Point pt = HandleScrollbarHittest(sb, mi, ma);
+			//Point pt = HandleScrollbarHittest(sb, mi, ma);
+			Point pt = sb.hittest(mi, ma);
 
 			if (pos < pt.x) {
-				sb.pos = Math.max(sb.pos - sb.cap, 0);
+				sb.pos = Math.max(sb.pos - sb.getCap(), 0);
 			} else if (pos > pt.y) {
 				sb.pos = Math.min(
-						sb.pos + sb.cap,
-						Math.max(sb.count - sb.cap, 0)
+						sb.pos + sb.getCap(),
+						Math.max(sb.getCount() - sb.getCap(), 0)
 						);
 			} else {
 				_scrollbar_start_pos = pt.x - mi - 9;

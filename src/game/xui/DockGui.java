@@ -9,6 +9,7 @@ import game.Terraform;
 import game.TileIndex;
 import game.WaterCmd;
 import game.enums.Owner;
+import game.ifaces.OnButtonClick;
 
 public class DockGui 
 {
@@ -103,12 +104,12 @@ public class DockGui
 	static OnButtonClick _build_docks_button_proc[] = {
 			DockGui::BuildDocksClick_Canal,
 			DockGui::BuildDocksClick_Lock,
-		null,
-		DockGui::BuildDocksClick_Demolish,
-		DockGui::BuildDocksClick_Depot,
-		DockGui::BuildDocksClick_Dock,
-		DockGui::BuildDocksClick_Buoy,
-		DockGui::BuildDocksClick_Landscaping,
+			null,
+			DockGui::BuildDocksClick_Demolish,
+			DockGui::BuildDocksClick_Depot,
+			DockGui::BuildDocksClick_Dock,
+			DockGui::BuildDocksClick_Buoy,
+			DockGui::BuildDocksClick_Landscaping,
 	};
 
 	static void BuildDocksToolbWndProc(Window w, WindowEvent e)
@@ -124,14 +125,14 @@ public class DockGui
 
 		case WE_KEYPRESS:
 			switch (e.keycode) {
-				case '1': BuildDocksClick_Canal(w); break;
-				case '2': BuildDocksClick_Lock(w); break;
-				case '3': BuildDocksClick_Demolish(w); break;
-				case '4': BuildDocksClick_Depot(w); break;
-				case '5': BuildDocksClick_Dock(w); break;
-				case '6': BuildDocksClick_Buoy(w); break;
-				case 'l': BuildDocksClick_Landscaping(w); break;
-				default:  return;
+			case '1': BuildDocksClick_Canal(w); break;
+			case '2': BuildDocksClick_Lock(w); break;
+			case '3': BuildDocksClick_Demolish(w); break;
+			case '4': BuildDocksClick_Depot(w); break;
+			case '5': BuildDocksClick_Dock(w); break;
+			case '6': BuildDocksClick_Buoy(w); break;
+			case 'l': BuildDocksClick_Landscaping(w); break;
+			default:  return;
 			}
 			break;
 
@@ -149,7 +150,7 @@ public class DockGui
 				if ((e.userdata & 0xF) == ViewPort.VPM_X_AND_Y) { // dragged actions
 					Terraform.GUIPlaceProcDragXY(e);
 				} else if (e.userdata == ViewPort.VPM_X_OR_Y) {
-					Cmd.DoCommandP(e.tile, e.starttile.tile, 0, DockGui::CcBuildCanal, Cmd.CMD_BUILD_CANAL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_CANT_BUILD_CANALS));
+					Cmd.DoCommandP(e.tile, e.starttile.getTile(), 0, DockGui::CcBuildCanal, Cmd.CMD_BUILD_CANAL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_CANT_BUILD_CANALS));
 				}
 			}
 			break;
@@ -171,10 +172,10 @@ public class DockGui
 
 			tile_from = tile_to = e.tile;
 			switch ( tile_from.GetTileSlope(null)) {
-				case  3: tile_to = tile_to.iadd(-1,  0); break;
-				case  6: tile_to = tile_to.iadd( 0, -1); break;
-				case  9: tile_to = tile_to.iadd( 0,  1); break;
-				case 12: tile_to = tile_to.iadd( 1,  0); break;
+			case  3: tile_to = tile_to.iadd(-1,  0); break;
+			case  6: tile_to = tile_to.iadd( 0, -1); break;
+			case  9: tile_to = tile_to.iadd( 0,  1); break;
+			case 12: tile_to = tile_to.iadd( 1,  0); break;
 			}
 			ViewPort.VpSetPresizeRange(tile_from, tile_to);
 		} break;
@@ -182,32 +183,34 @@ public class DockGui
 		case WE_DESTROY:
 			if (Global._patches.link_terraform_toolbar) Window.DeleteWindowById(Window.WC_SCEN_LAND_GEN, 0);
 			break;
+		default:
+			break;
 		}
 	}
 
 	static final Widget _build_docks_toolb_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,										Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   145,     0,    13, Str.STR_9801_DOCK_CONSTRUCTION,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7,   146,   157,     0,    13, 0x0,                         Str.STR_STICKY_BUTTON),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,    21,    14,    35, Sprite.SPR_IMG_BUILD_CANAL,					Str.STR_BUILD_CANALS_TIP),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    22,    43,    14,    35, Sprite.SPR_IMG_BUILD_LOCK,					Str.STR_BUILD_LOCKS_TIP),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,										Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   145,     0,    13, Str.STR_9801_DOCK_CONSTRUCTION,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7,   146,   157,     0,    13, 0x0,                         Str.STR_STICKY_BUTTON),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,    21,    14,    35, Sprite.SPR_IMG_BUILD_CANAL,					Str.STR_BUILD_CANALS_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    22,    43,    14,    35, Sprite.SPR_IMG_BUILD_LOCK,					Str.STR_BUILD_LOCKS_TIP),
 
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    44,    47,    14,    35, 0x0,													Str.STR_NULL),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    44,    47,    14,    35, 0x0,													Str.STR_NULL),
 
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    48,    69,    14,    35, 703,													Str.STR_018D_DEMOLISH_BUILDINGS_ETC),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    70,    91,    14,    35, 748,													Str.STR_981E_BUILD_SHIP_DEPOT_FOR_BUILDING),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    92,   113,    14,    35, 746,													Str.STR_981D_BUILD_SHIP_DOCK),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   114,   135,    14,    35, 693,													Str.STR_9834_POSITION_BUOY_WHICH_CAN),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   136,   157,    14,    35, Sprite.SPR_IMG_LANDSCAPING,				Str.STR_LANDSCAPING_TOOLBAR_TIP),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    48,    69,    14,    35, 703,													Str.STR_018D_DEMOLISH_BUILDINGS_ETC),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    70,    91,    14,    35, 748,													Str.STR_981E_BUILD_SHIP_DEPOT_FOR_BUILDING),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,    92,   113,    14,    35, 746,													Str.STR_981D_BUILD_SHIP_DOCK),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   114,   135,    14,    35, 693,													Str.STR_9834_POSITION_BUOY_WHICH_CAN),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,   136,   157,    14,    35, Sprite.SPR_IMG_LANDSCAPING,				Str.STR_LANDSCAPING_TOOLBAR_TIP),
 	};
 
 	static final WindowDesc _build_docks_toolbar_desc = new WindowDesc(
-		640-158, 22, 158, 36,
-		Window.WC_BUILD_TOOLBAR,0,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STICKY_BUTTON,
-		_build_docks_toolb_widgets,
-		DockGui::BuildDocksToolbWndProc
-	);
+			640-158, 22, 158, 36,
+			Window.WC_BUILD_TOOLBAR,0,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_STICKY_BUTTON,
+			_build_docks_toolb_widgets,
+			DockGui::BuildDocksToolbWndProc
+			);
 
 	static void ShowBuildDocksToolbar()
 	{
@@ -243,12 +246,12 @@ public class DockGui
 
 		case WE_CLICK:
 			switch (e.widget) {
-				case 3:
-				case 4:
-					Gui._station_show_coverage = e.widget - 3;
-					//SndPlayFx(SND_15_BEEP);
-					w.SetWindowDirty();
-					break;
+			case 3:
+			case 4:
+				Gui._station_show_coverage = e.widget - 3;
+				//SndPlayFx(SND_15_BEEP);
+				w.SetWindowDirty();
+				break;
 			}
 			break;
 
@@ -264,24 +267,26 @@ public class DockGui
 		case WE_DESTROY:
 			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
 			break;
+		default:
+			break;
 		}
 	}
 
 	static final Widget _build_dock_station_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,			Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   147,     0,    13, Str.STR_3068_DOCK,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   147,    14,    74, 0x0,						Str.STR_NULL),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    14,    73,    30,    40, Str.STR_02DB_OFF,	Str.STR_3065_DON_T_HIGHLIGHT_COVERAGE),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    74,   133,    30,    40, Str.STR_02DA_ON,		Str.STR_3064_HIGHLIGHT_COVERAGE_AREA),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,			Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   147,     0,    13, Str.STR_3068_DOCK,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   147,    14,    74, 0x0,						Str.STR_NULL),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    14,    73,    30,    40, Str.STR_02DB_OFF,	Str.STR_3065_DON_T_HIGHLIGHT_COVERAGE),
+			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    74,   133,    30,    40, Str.STR_02DA_ON,		Str.STR_3064_HIGHLIGHT_COVERAGE_AREA),
 	};
 
 	static final WindowDesc _build_dock_station_desc = new WindowDesc(
-		-1, -1, 148, 75,
-		Window.WC_BUILD_STATION,Window.WC_BUILD_TOOLBAR,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
-		_build_dock_station_widgets,
-		DockGui::BuildDockStationWndProc
-	);
+			-1, -1, 148, 75,
+			Window.WC_BUILD_STATION,Window.WC_BUILD_TOOLBAR,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
+			_build_dock_station_widgets,
+			DockGui::BuildDockStationWndProc
+			);
 
 	static void ShowBuildDockStationPicker()
 	{
@@ -329,24 +334,26 @@ public class DockGui
 		case WE_DESTROY:
 			if (!w.as_def_d().close) ViewPort.ResetObjectToPlace();
 			break;
+		default:
+			break;
 		}
 	}
 
 	static final Widget _build_docks_depot_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,												Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   203,     0,    13, Str.STR_3800_SHIP_DEPOT_ORIENTATION,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   203,    14,    85, 0x0,															Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,   100,    17,    82, 0x0,															Str.STR_3803_SELECT_SHIP_DEPOT_ORIENTATION),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   103,   200,    17,    82, 0x0,															Str.STR_3803_SELECT_SHIP_DEPOT_ORIENTATION),
+			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,												Str.STR_018B_CLOSE_WINDOW),
+			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   203,     0,    13, Str.STR_3800_SHIP_DEPOT_ORIENTATION,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     7,     0,   203,    14,    85, 0x0,															Str.STR_NULL),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     3,   100,    17,    82, 0x0,															Str.STR_3803_SELECT_SHIP_DEPOT_ORIENTATION),
+			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   103,   200,    17,    82, 0x0,															Str.STR_3803_SELECT_SHIP_DEPOT_ORIENTATION),
 	};
 
 	static final WindowDesc _build_docks_depot_desc = new WindowDesc(
-		-1, -1, 204, 86,
-		Window.WC_BUILD_DEPOT,Window.WC_BUILD_TOOLBAR,
-		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
-		_build_docks_depot_widgets,
-		DockGui::BuildDocksDepotWndProc
-	);
+			-1, -1, 204, 86,
+			Window.WC_BUILD_DEPOT,Window.WC_BUILD_TOOLBAR,
+			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
+			_build_docks_depot_widgets,
+			DockGui::BuildDocksDepotWndProc
+			);
 
 
 	static void ShowBuildDocksDepotPicker()

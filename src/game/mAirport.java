@@ -170,7 +170,7 @@ public class mAirport
 	}
 
 	//saves me changing too much code elsewhere
-	static boolean MA_OwnerHandler(PlayerID owner)
+	public static boolean MA_OwnerHandler(PlayerID owner)
 	{
 
 		if(!Global._patches.allow_municipal_airports) 

@@ -753,8 +753,8 @@ public class Gui
 
 					GraphGui.DrawPlayerIcon(p.getIndex().id, x + 2, y + 1);
 
-					Global.SetDParam(0, p.name_1);
-					Global.SetDParam(1, p.name_2);
+					Global.SetDParam(0, p.getName_1());
+					Global.SetDParam(1, p.getName_2());
 					Global.SetDParam(2, Player.GetPlayerNameString(p.getIndex(), 3));
 
 					color = (p.getIndex().id == sel) ? 0xC : 0x10;
@@ -2394,8 +2394,8 @@ public class Gui
 			} else {
 				if (p != null) {
 					// This is the default text
-					Global.SetDParam(0, p.name_1);
-					Global.SetDParam(1, p.name_2);
+					Global.SetDParam(0, p.getName_1());
+					Global.SetDParam(1, p.getName_2());
 					Gfx.DrawStringCentered(320, 1,	Str.STR_02BA, 0);
 				}
 			}

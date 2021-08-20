@@ -6,7 +6,6 @@ import game.Engine;
 import game.Global;
 import game.SpriteCache;
 import game.tables.EngineTables2;
-import game.tables.TunnelBridgeTables;
 import game.util.FileIO;
 import game.util.LandscapeSprites;
 import game.util.Sprites;
@@ -444,8 +443,7 @@ public class GfxInit extends LandscapeSprites
 				EngineTables2.orig_road_vehicle_info, 0, 
 				Global._road_vehicle_info, 0, Global._road_vehicle_info.length );
 
-		Bridge._bridge = new Bridge[TunnelBridgeTables.orig_bridge.length];
-		System.arraycopy( TunnelBridgeTables.orig_bridge, 0, Bridge._bridge, 0, Bridge._bridge.length );  
+		Bridge.loadOrigBridges();
 		
 		// Unload sprite group data
 		Engine.UnloadWagonOverrides();

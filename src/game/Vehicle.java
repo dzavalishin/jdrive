@@ -159,12 +159,12 @@ public class Vehicle implements IPoolItem
 
 
 	// TODO temp we create all of them, redo
-	VehicleRail rail = new VehicleRail();
-	VehicleAir air = new VehicleAir();
-	VehicleRoad road = new VehicleRoad();
-	VehicleSpecial special = new VehicleSpecial();
-	VehicleDisaster disaster; // TODO create me in disaster 
-	VehicleShip ship = new VehicleShip();
+	public VehicleRail rail = new VehicleRail();
+	public VehicleAir air = new VehicleAir();
+	public VehicleRoad road = new VehicleRoad();
+	public VehicleSpecial special = new VehicleSpecial();
+	public VehicleDisaster disaster; // TODO create me in disaster 
+	public VehicleShip ship = new VehicleShip();
 
 
 
@@ -388,7 +388,7 @@ public class Vehicle implements IPoolItem
 
 		date_of_last_service = Global._date;
 		breakdowns_since_last_service = 0;
-		reliability = Engine.GetEngine(engine_type).reliability;
+		reliability = Engine.GetEngine(engine_type).getReliability();
 	}
 
 	
@@ -975,7 +975,7 @@ public class Vehicle implements IPoolItem
 			return false;
 
 		return Global._patches.servint_ispercent ?
-				(reliability < Engine.GetEngine(engine_type).reliability * (100 - service_interval) / 100) :
+				(reliability < Engine.GetEngine(engine_type).getReliability() * (100 - service_interval) / 100) :
 					(date_of_last_service + service_interval < Global._date);
 	}
 
@@ -2918,16 +2918,17 @@ public class Vehicle implements IPoolItem
 		switch(v.type)
 		{
 		case VEH_Train:
-			if (v.rail.track == 0x80) /* We'll assume the train is facing outwards */
+			if (v.rail.isInDepot()) /* We'll assume the train is facing outwards */
 				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_RAIL)); /* Train in depot */
 
-			if (v.rail.track == 0x40) /* train in tunnel, so just use his direction and assume a diagonal track */
+			if (v.rail.isInTunnel()) /* train in tunnel, so just use his direction and assume a diagonal track */
 				return Rail.DiagdirToDiagTrackdir((v.direction >> 1) & 3);
 
 			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.rail.track),v.direction);
 
 		case VEH_Ship:
-			if (v.ship.state == 0x80)  /* Inside a depot? */
+			//if (v.ship.state == 0x80)  /* Inside a depot? */
+			if (v.ship.isInDepot())  /* Inside a depot? */
 				/* We'll assume the ship is facing outwards */
 				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_WATER)); /* Ship in depot */
 
@@ -3786,9 +3787,10 @@ public class Vehicle implements IPoolItem
 	}
 	
 	
-	public boolean isStopped() { return 0 != (vehstatus & Vehicle.VS_STOPPED); }
-	public boolean isCrashed() { return 0 != (vehstatus & Vehicle.VS_CRASHED); }
-	public boolean isHidden() { return 0 != (vehstatus & Vehicle.VS_HIDDEN); }
+	public boolean isStopped() { return 0 != (vehstatus & VS_STOPPED); }
+	public boolean isCrashed() { return 0 != (vehstatus & VS_CRASHED); }
+	public boolean isHidden() { return 0 != (vehstatus & VS_HIDDEN); }
+	public boolean isUnclickable() { return (vehstatus & VS_UNCLICKABLE) != 0; }
 
 	public boolean isBroken() { return breakdown_ctr == 1; }
 
@@ -3808,6 +3810,36 @@ public class Vehicle implements IPoolItem
 
 	public int getProfit_this_year() { return profit_this_year; }
 	public int getProfit_last_year() { return profit_last_year; }
+	public int getString_id() { return string_id; }
+
+	/**
+	 * For train finds out lowest max speed of all cars.
+	 * @return Maximum speed
+	 */
+	public int getRealMaxSpeed() 
+	{
+		if (getType() == Vehicle.VEH_Train ) 
+		{
+			Vehicle u = this;
+			int mSpeed = Integer.MAX_VALUE;
+			
+			do {
+				final int ms = Engine.RailVehInfo(engine_type.id).max_speed;
+				if (ms != 0)
+					mSpeed = Math.min(mSpeed, ms);
+			} while ((u = u.next) != null);
+			
+			return mSpeed;
+		}
+		else
+			return max_speed;
+	}
+
+	public int getMax_age() { return max_age; }
+	public Vehicle getNext() { return next; }
+	public int getService_interval() { return service_interval; }
+
+
 
 
 

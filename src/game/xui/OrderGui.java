@@ -58,7 +58,7 @@ public class OrderGui {
 
 		v = Vehicle.GetVehicle(w.window_number);
 
-		w.disabled_state = (v.owner == Global._local_player) ? 0 : (
+		w.disabled_state = (v.getOwner() == Global._local_player) ? 0 : (
 			1 << 4 |   //skip
 			1 << 5 |   //delete
 			1 << 6 |   //non-stop
@@ -68,7 +68,7 @@ public class OrderGui {
 			1 << 10    //transfer
 			);
 
-		if (v.type != Vehicle.VEH_Train)
+		if (v.getType() != Vehicle.VEH_Train)
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 6); //disable non-stop for non-trains
 
 		shared_orders = v.IsOrderListShared();
@@ -87,7 +87,7 @@ public class OrderGui {
 		order = v.GetVehicleOrder(sel);
 
 		if (order != null) {
-			switch (order.type) {
+			switch (order.getType()) {
 				case Order.OT_GOTO_STATION:
 					break;
 
@@ -116,7 +116,7 @@ public class OrderGui {
 		}
 
 		Global.SetDParam(0, v.string_id);
-		Global.SetDParam(1, v.unitnumber.id);
+		Global.SetDParam(1, v.getUnitnumber().id);
 		w.DrawWindowWidgets();
 
 		y = 15;
@@ -126,13 +126,13 @@ public class OrderGui {
 		while (order != null) {
 			int str = (v.cur_order_index == i) ? Str.STR_8805 : Str.STR_8804;
 
-			if (i - w.vscroll.pos < w.vscroll.cap) {
+			if (i - w.vscroll.pos < w.vscroll.getCap()) {
 				Global.SetDParam(1, 6);
 
-				switch (order.type) {
+				switch (order.getType()) {
 					case Order.OT_GOTO_STATION:
-						Global.SetDParam(1, StationOrderStrings[order.flags]);
-						Global.SetDParam(2, order.station);
+						Global.SetDParam(1, StationOrderStrings[order.getFlags()]);
+						Global.SetDParam(2, order.getStation());
 						break;
 
 					case Order.OT_GOTO_DEPOT: {
@@ -141,47 +141,47 @@ public class OrderGui {
 
 						if (v.getType() == Vehicle.VEH_Aircraft) {
 							s = Str.STR_GO_TO_AIRPORT_HANGAR;
-							Global.SetDParam(2, order.station);
+							Global.SetDParam(2, order.getStation());
 						} else {
-							Global.SetDParam(2, Depot.GetDepot(order.station).town_index);
+							Global.SetDParam(2, Depot.GetDepot(order.getStation()).getTownIndex());
 
 							switch (v.getType()) {
-								case Vehicle.VEH_Train: s = 0 != (order.flags & Order.OF_NON_STOP) ? Str.STR_880F_GO_NON_STOP_TO_TRAIN_DEPOT : Str.STR_GO_TO_TRAIN_DEPOT; break;
+								case Vehicle.VEH_Train: s = 0 != (order.getFlags() & Order.OF_NON_STOP) ? Str.STR_880F_GO_NON_STOP_TO_TRAIN_DEPOT : Str.STR_GO_TO_TRAIN_DEPOT; break;
 								case Vehicle.VEH_Road:  s = Str.STR_9038_GO_TO_ROADVEH_DEPOT; break;
 								case Vehicle.VEH_Ship:  s = Str.STR_GO_TO_SHIP_DEPOT; break;
 								default: break;
 							}
 						}
 
-						if( 0 != (order.flags & Order.OF_FULL_LOAD)) s++; /* service at */
+						if( 0 != (order.getFlags() & Order.OF_FULL_LOAD)) s++; /* service at */
 
 						Global.SetDParam(1, s);
 						break;
 					}
 
 					case Order.OT_GOTO_WAYPOINT:
-						Global.SetDParam(1, 0 != (order.flags & Order.OF_NON_STOP) ? Str.STR_GO_NON_STOP_TO_WAYPOINT : Str.STR_GO_TO_WAYPOINT);
-						Global.SetDParam(2, order.station);
+						Global.SetDParam(1, order.isNonStop() ? Str.STR_GO_NON_STOP_TO_WAYPOINT : Str.STR_GO_TO_WAYPOINT);
+						Global.SetDParam(2, order.getStation());
 						break;
 				}
 
 				color = (byte) ((i == w.as_order_d().sel) ? 0xC : 0x10);
 				Global.SetDParam(0, i + 1);
-				if (order.type != Order.OT_DUMMY) {
+				if (order.getType() != Order.OT_DUMMY) {
 					Gfx.DrawString(2, y, str, color);
 				} else {
 					Global.SetDParam(1, Str.STR_INVALID_ORDER);
-					Global.SetDParam(2, order.station);
+					Global.SetDParam(2, order.getStation());
 					Gfx.DrawString(2, y, str, color);
 				}
 				y += 10;
 			}
 
 			i++;
-			order = order.next;
+			order = order.getNext();
 		}
 
-		if (i - w.vscroll.pos < w.vscroll.cap) {
+		if (i - w.vscroll.pos < w.vscroll.getCap()) {
 			int str = shared_orders ? Str.STR_END_OF_SHARED_ORDERS : Str.STR_882A_END_OF_ORDERS;
 			color = (byte) ((i == w.as_order_d().sel) ? 0xC : 0x10);
 			Gfx.DrawString(2, y, str, color);
@@ -190,7 +190,7 @@ public class OrderGui {
 
 	static Order GetOrderCmdFromTile(final Vehicle v, TileIndex tile)
 	{
-		Order order = new Order();
+		//Order order = new Order();
 		int st_index;
 
 		// check depot first
@@ -198,31 +198,36 @@ public class OrderGui {
 			switch (tile.GetTileType()) {
 			case MP_RAILWAY:
 				if (v.getType() == Vehicle.VEH_Train && tile.IsTileOwner(Global._local_player)) {
-					if ((tile.getMap().m5&0xFC)==0xC0) {
+					if ((tile.getMap().m5&0xFC)==0xC0) 
+					{
+						/*
 						order.type = Order.OT_GOTO_DEPOT;
 						order.flags = Order.OF_PART_OF_ORDERS;
 						order.station = Depot.GetDepotByTile(tile).index;
-						return order;
+						return order;*/
+						return new Order( Order.OT_GOTO_DEPOT, Order.OF_PART_OF_ORDERS,  Depot.GetDepotByTile(tile).getIndex() );
 					}
 				}
 				break;
 
 			case MP_STREET:
-				if ((tile.getMap().m5 & 0xF0) == 0x20 && v.type == Vehicle.VEH_Road && tile.IsTileOwner(Global._local_player)) {
-					order.type = Order.OT_GOTO_DEPOT;
+				if ((tile.getMap().m5 & 0xF0) == 0x20 && v.getType() == Vehicle.VEH_Road && tile.IsTileOwner(Global._local_player)) {
+					/*order.type = Order.OT_GOTO_DEPOT;
 					order.flags = Order.OF_PART_OF_ORDERS;
 					order.station = Depot.GetDepotByTile(tile).index;
-					return order;
+					return order;*/
+					return new Order( Order.OT_GOTO_DEPOT, Order.OF_PART_OF_ORDERS,  Depot.GetDepotByTile(tile).getIndex() );
 				}
 				break;
 
 			case MP_STATION:
 				if (v.getType() != Vehicle.VEH_Aircraft) break;
 				if (AirCraft.IsAircraftHangarTile(tile) && tile.IsTileOwner(Global._local_player)) {
-					order.type = Order.OT_GOTO_DEPOT;
+					/*order.type = Order.OT_GOTO_DEPOT;
 					order.flags = Order.OF_PART_OF_ORDERS;
 					order.station = tile.getMap().m2;
-					return order;
+					return order; */
+					return new Order( Order.OT_GOTO_DEPOT, Order.OF_PART_OF_ORDERS, tile.getMap().m2 );
 				}
 				break;
 
@@ -234,10 +239,11 @@ public class OrderGui {
 						case 0x81: tile = tile.isub(TileIndex.TileDiffXY(1, 0)); break;
 						case 0x83: tile = tile.isub(TileIndex.TileDiffXY(0, 1)); break;
 					}
-					order.type = Order.OT_GOTO_DEPOT;
+					/*order.type = Order.OT_GOTO_DEPOT;
 					order.flags = Order.OF_PART_OF_ORDERS;
 					order.station = Depot.GetDepotByTile(tile).index;
-					return order;
+					return order;*/
+					return new Order( Order.OT_GOTO_DEPOT, Order.OF_PART_OF_ORDERS,  Depot.GetDepotByTile(tile).getIndex() );
 				}
 
 				default:
@@ -250,16 +256,17 @@ public class OrderGui {
 				v.getType() == Vehicle.VEH_Train &&
 						tile.IsTileOwner(Global._local_player) &&
 				WayPoint.IsRailWaypoint(tile)) {
-			order.type = Order.OT_GOTO_WAYPOINT;
+			/*order.type = Order.OT_GOTO_WAYPOINT;
 			order.flags = 0;
 			order.station = WayPoint.GetWaypointByTile(tile).index;
-			return order;
+			return order;*/
+			return new Order( Order.OT_GOTO_WAYPOINT, 0,  WayPoint.GetWaypointByTile(tile).index );
 		}
 
 		if (tile.IsTileType( TileTypes.MP_STATION)) {
 			final Station  st = Station.GetStation(st_index = tile.getMap().m2);
 			
-			if (st.owner == Global._current_player || st.owner.id == Owner.OWNER_NONE || mAirport.MA_OwnerHandler(st.owner)) {
+			if (st.getOwner() == Global._current_player || st.getOwner().id == Owner.OWNER_NONE || mAirport.MA_OwnerHandler(st.getOwner())) {
 				byte facil;
 				
 				/*
@@ -284,19 +291,21 @@ public class OrderGui {
 				}
 				
 				
-				if(0 != (st.facilities & facil)) {
-					order.type = Order.OT_GOTO_STATION;
+				if(0 != (st.getFacilities() & facil)) {
+					/*order.type = Order.OT_GOTO_STATION;
 					order.flags = 0;
 					order.station = st_index;
-					return order;
+					return order;*/
+					return new Order( Order.OT_GOTO_STATION, 0, st_index );
 				}
 			}
 		}
 
 		// not found
-		order.type = Order.OT_NOTHING;
+		/*order.type = Order.OT_NOTHING;
 		order.flags = 0;
-		return order;
+		return order;*/
+		return new Order( Order.OT_NOTHING, 0, 0 );
 	}
 
 	static boolean HandleOrderVehClick(final Vehicle  v, Vehicle  u, Window  w)
@@ -312,7 +321,7 @@ public class OrderGui {
 		// obviously if you press CTRL on a non-empty orders vehicle you know what you are doing
 		if (v.num_orders != 0 && !Global._ctrl_pressed) return false;
 
-		if (Cmd.DoCommandP(v.tile, v.index | (u.index << 16), Global._ctrl_pressed ? 0 : 1, null,
+		if (Cmd.DoCommandP(v.getTile(), v.index | (u.index << 16), Global._ctrl_pressed ? 0 : 1, null,
 				Global._ctrl_pressed ? Cmd.CMD_CLONE_ORDER | Cmd.CMD_MSG(Str.STR_CANT_SHARE_ORDER_LIST) : Cmd.CMD_CLONE_ORDER | Cmd.CMD_MSG(Str.STR_CANT_COPY_ORDER_LIST))) {
 			w.as_order_d().sel = -1;
 			ViewPort.ResetObjectToPlace();
@@ -331,9 +340,9 @@ public class OrderGui {
 		if (u != null && HandleOrderVehClick(v, u, w)) return;
 
 		cmd = GetOrderCmdFromTile(v, tile);
-		if (cmd.type == Order.OT_NOTHING) return;
+		if (cmd.getType() == Order.OT_NOTHING) return;
 
-		if (Cmd.DoCommandP(v.tile, v.index + (OrderGetSel(w) << 16), Order.PackOrder(cmd), null, Cmd.CMD_INSERT_ORDER | Cmd.CMD_MSG(Str.STR_8833_CAN_T_INSERT_NEW_ORDER))) {
+		if (Cmd.DoCommandP(v.getTile(), v.index + (OrderGetSel(w) << 16), Order.PackOrder(cmd), null, Cmd.CMD_INSERT_ORDER | Cmd.CMD_MSG(Str.STR_8833_CAN_T_INSERT_NEW_ORDER))) {
 			if (w.as_order_d().sel != -1) w.as_order_d().sel++;
 			ViewPort.ResetObjectToPlace();
 		}
@@ -353,32 +362,32 @@ public class OrderGui {
 
 	static void OrderClick_FullLoad(Window  w, final Vehicle  v)
 	{
-		Cmd.DoCommandP(v.tile, v.index + (OrderGetSel(w) << 16), Order.OFB_FULL_LOAD, null, Cmd.CMD_MODIFY_ORDER | Cmd.CMD_MSG(Str.STR_8835_CAN_T_MODIFY_THIS_ORDER));
+		Cmd.DoCommandP(v.getTile(), v.index + (OrderGetSel(w) << 16), Order.OFB_FULL_LOAD, null, Cmd.CMD_MODIFY_ORDER | Cmd.CMD_MSG(Str.STR_8835_CAN_T_MODIFY_THIS_ORDER));
 	}
 
 	static void OrderClick_Unload(Window  w, final Vehicle  v)
 	{
-		Cmd.DoCommandP(v.tile, v.index + (OrderGetSel(w) << 16), Order.OFB_UNLOAD,    null, Cmd.CMD_MODIFY_ORDER | Cmd.CMD_MSG(Str.STR_8835_CAN_T_MODIFY_THIS_ORDER));
+		Cmd.DoCommandP(v.getTile(), v.index + (OrderGetSel(w) << 16), Order.OFB_UNLOAD,    null, Cmd.CMD_MODIFY_ORDER | Cmd.CMD_MSG(Str.STR_8835_CAN_T_MODIFY_THIS_ORDER));
 	}
 
 	static void OrderClick_Nonstop(Window  w, final Vehicle  v)
 	{
-		Cmd.DoCommandP(v.tile, v.index + (OrderGetSel(w) << 16), Order.OFB_NON_STOP,  null, Cmd.CMD_MODIFY_ORDER | Cmd.CMD_MSG(Str.STR_8835_CAN_T_MODIFY_THIS_ORDER));
+		Cmd.DoCommandP(v.getTile(), v.index + (OrderGetSel(w) << 16), Order.OFB_NON_STOP,  null, Cmd.CMD_MODIFY_ORDER | Cmd.CMD_MSG(Str.STR_8835_CAN_T_MODIFY_THIS_ORDER));
 	}
 
 	static void OrderClick_Transfer(Window  w, final Vehicle  v)
 	{
-		Cmd.DoCommandP(v.tile, v.index + (OrderGetSel(w) <<  16), Order.OFB_TRANSFER, null, Cmd.CMD_MODIFY_ORDER | Cmd.CMD_MSG(Str.STR_8835_CAN_T_MODIFY_THIS_ORDER));
+		Cmd.DoCommandP(v.getTile(), v.index + (OrderGetSel(w) <<  16), Order.OFB_TRANSFER, null, Cmd.CMD_MODIFY_ORDER | Cmd.CMD_MSG(Str.STR_8835_CAN_T_MODIFY_THIS_ORDER));
 	}
 
 	static void OrderClick_Skip(Window  w, final Vehicle  v)
 	{
-		Cmd.DoCommandP(v.tile, v.index, 0, null, Cmd.CMD_SKIP_ORDER);
+		Cmd.DoCommandP(v.getTile(), v.index, 0, null, Cmd.CMD_SKIP_ORDER);
 	}
 
 	static void OrderClick_Delete(Window  w, final Vehicle  v)
 	{
-		Cmd.DoCommandP(v.tile, v.index, OrderGetSel(w), null, Cmd.CMD_DELETE_ORDER | Cmd.CMD_MSG(Str.STR_8834_CAN_T_DELETE_THIS_ORDER));
+		Cmd.DoCommandP(v.getTile(), v.index, OrderGetSel(w), null, Cmd.CMD_DELETE_ORDER | Cmd.CMD_MSG(Str.STR_8834_CAN_T_DELETE_THIS_ORDER));
 	}
 
 
@@ -415,24 +424,15 @@ public class OrderGui {
 				int sel;
 				sel = (e.pt.y - 15) / 10;
 
-				if ((int)sel >= w.vscroll.cap)
+				if ((int)sel >= w.vscroll.getCap())
 					return;
 
 				sel += w.vscroll.pos;
 
-				if (Global._ctrl_pressed && sel < v.num_orders) {
+				if (Global._ctrl_pressed && sel < v.num_orders) 
+				{
 					final Order ord = v.GetVehicleOrder(sel);
-					TileIndex xy = null;
-					switch (ord.type) {
-					case Order.OT_GOTO_STATION:			/* station order */
-						xy = Station.GetStation(ord.station).getXy() ;
-						break;
-					case Order.OT_GOTO_DEPOT:				/* goto depot order */
-						xy = Depot.GetDepot(ord.station).xy;
-						break;
-					case Order.OT_GOTO_WAYPOINT:	/* goto waypoint order */
-						xy = WayPoint.GetWaypoint(ord.station).xy;
-					}
+					TileIndex xy = ord.getTargetXy();
 
 					if (xy != null)
 						ViewPort.ScrollMainWindowToTile(xy);
@@ -496,7 +496,7 @@ public class OrderGui {
 			int s = OrderGetSel(w);
 
 			if (e.widget != 8) break;
-			if (s == v.num_orders || v.GetVehicleOrder(s).type != Order.OT_GOTO_DEPOT) {
+			if (s == v.num_orders || v.GetVehicleOrder(s).getType() != Order.OT_GOTO_DEPOT) {
 				MiscGui.GuiShowTooltips(Str.STR_8857_MAKE_THE_HIGHLIGHTED_ORDER);
 			} else {
 				MiscGui.GuiShowTooltips(Str.STR_SERVICE_HINT);
@@ -536,7 +536,7 @@ public class OrderGui {
 
 		case WE_RESIZE:
 			/* Update the scroll + matrix */
-			w.vscroll.cap = (w.widget.get(2).bottom - w.widget.get(2).top) / 10;
+			w.vscroll.setCap((w.widget.get(2).bottom - w.widget.get(2).top) / 10);
 			break;
 		default:
 			break;
@@ -626,16 +626,16 @@ public class OrderGui {
 
 		//_alloc_wnd_parent_num = veh;
 
-		if (v.owner != Global._local_player) {
+		if (v.getOwner() != Global._local_player) {
 			w = Window.AllocateWindowDesc(_other_orders_desc, veh);
 		} else {
-			w = Window.AllocateWindowDesc((v.type == Vehicle.VEH_Train) ? _orders_train_desc : _orders_desc, veh);
+			w = Window.AllocateWindowDesc((v.getType() == Vehicle.VEH_Train) ? _orders_train_desc : _orders_desc, veh);
 		}
 
 		if (w != null) {
 			w.window_number = veh;
-			w.caption_color = (byte) v.owner.id;
-			w.vscroll.cap = 6;
+			w.caption_color = (byte) v.getOwner().id;
+			w.vscroll.setCap(6);
 			w.resize.step_height = 10;
 			w.as_order_d().sel = -1;
 		}

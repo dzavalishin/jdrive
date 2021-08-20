@@ -45,7 +45,7 @@ public class Player implements Serializable
 
 	int player_color;
 	int player_money_fraction;
-	int avail_railtypes;
+	public int avail_railtypes;
 	int block_preview;
 	PlayerID index;
 
@@ -57,7 +57,7 @@ public class Player implements Serializable
 	PlayerID share_owners[];
 
 	int inaugurated_year;
-	int num_valid_stat_ent;
+	public int num_valid_stat_ent;
 
 	int quarters_of_bankrupcy;
 	int bankrupt_asked; // which players were asked about buying it?
@@ -818,7 +818,6 @@ public class Player implements Serializable
 	static byte GetPlayerRailtypes(PlayerID p)
 	{
 		byte rt = 0;
-		//EngineID i;
 		int i;
 
 		for (i = 0; i != Global.TOTAL_NUM_ENGINES; i++) {
@@ -826,11 +825,11 @@ public class Player implements Serializable
 
 			//final RailVehicleInfo info = Engine.RailVehInfo(i);
 			if (e.type == Vehicle.VEH_Train &&
-					(BitOps.HASBIT(e.player_avail, p.id) || e.intro_date <= Global._date) &&
+					(e.isAvailableTo(p) || e.getIntro_date() <= Global._date) &&
 					!Engine.RailVehInfo(i).isWagon()) 
 			{
-				assert(e.railtype < Rail.RAILTYPE_END);
-				rt = BitOps.RETSETBIT(rt, e.railtype);
+				assert(e.getRailtype() < Rail.RAILTYPE_END);
+				rt = BitOps.RETSETBIT(rt, e.getRailtype());
 			}
 		}
 
@@ -939,7 +938,7 @@ public class Player implements Serializable
 					return Cmd.CMD_ERROR;
 
 				// make sure that the player can actually buy the new engine
-				if (!BitOps.HASBIT(Engine.GetEngine(new_engine_type).player_avail, Global._current_player.id))
+				if (!Engine.GetEngine(new_engine_type).isAvailableToMe())
 					return Cmd.CMD_ERROR;
 
 				return p.AddEngineReplacement(old_engine_type, new_engine_type, flags);

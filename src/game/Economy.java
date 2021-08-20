@@ -13,6 +13,7 @@ import game.struct.FoundRoute;
 import game.struct.GoodsEntry;
 import game.struct.Pair;
 import game.struct.PlayerEconomyEntry;
+import game.struct.ScoreInfo;
 import game.tables.EconomeTables;
 import game.util.BitOps;
 import game.util.Prices;
@@ -52,18 +53,6 @@ public class Economy extends EconomeTables
 
 	public static final int SCORE_MAX = 1000; 	// The max score that can be in the performance history
 	//  the scores together of public static final int SCORE_info is allowed to be more!
-
-	static class ScoreInfo {
-		int id;			// Unique ID of the score
-		int needed;			// How much you need to get the perfect score
-		int score;			// How much score it will give
-
-		public ScoreInfo(int id, int needed, int score ) {
-			this.id = id;
-			this.needed = needed;
-			this.score = score;
-		}
-	} 
 
 	//static ScoreInfo _score_info[];
 	public static long _score_part[][] = new long [Global.MAX_PLAYERS][NUM_SCORE];
@@ -830,7 +819,7 @@ public class Economy extends EconomeTables
 	/**
 	 * Reset changes to the price base multipliers.
 	 */
-	static void ResetPriceBaseMultipliers()
+	public static void ResetPriceBaseMultipliers()
 	{
 		int i;
 

@@ -43,7 +43,7 @@ public class Depot implements IPoolItem, Serializable
 	/**
 	 * Get the pointer to the depot with index 'index'
 	 */
-	static Depot GetDepot(int index)
+	public static Depot GetDepot(int index)
 	{
 		return _depot_pool.GetItemFromPool(index);
 	}
@@ -90,7 +90,7 @@ public class Depot implements IPoolItem, Serializable
 	 * within the given bounds. @see MIN_SERVINT_PERCENT ,etc.
 	 * @param index proposed service interval
 	 */
-	static int GetServiceIntervalClamped(int index)
+	public static int GetServiceIntervalClamped(int index)
 	{
 		return (Global._patches.servint_ispercent) ? BitOps.clamp(index, MIN_SERVINT_PERCENT, MAX_SERVINT_PERCENT) : BitOps.clamp(index, MIN_SERVINT_DAYS, MAX_SERVINT_DAYS);
 	}
@@ -315,6 +315,7 @@ public class Depot implements IPoolItem, Serializable
 	}
 
 	public int getTownIndex() { return town_index; }
+	public int getIndex() { return index; }
 
 }
 

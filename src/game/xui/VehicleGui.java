@@ -313,7 +313,7 @@ private static void show_cargo(ctype) {
 	static boolean ENGINE_IS_AVAILABLE(Engine e, EngineInfo info)
 	{
 		return (( (0 != (e.flags & 1)) && BitOps.HASBIT(info.climates, GameOptions._opt.landscape)) 
-				|| BitOps.HASBIT(e.player_avail, Global._local_player.id));
+				|| e.isAvailableToMe());
 	}
 
 
@@ -344,11 +344,11 @@ private static void show_cargo(ctype) {
 
 
 			colour = sel[0] == 0 ? 0xC : 0x10;
-			if (!(ENGINE_IS_AVAILABLE(e, info) && show_outdated && (0 != EngineGui.RailVehInfo(i).power) && e.railtype == railtype)) 
+			if (!(ENGINE_IS_AVAILABLE(e, info) && show_outdated && (0 != EngineGui.RailVehInfo(i).power) && e.getRailtype() == railtype)) 
 			{
 				//if (e.railtype != railtype || 0==(rvi.flags & Engine.RVI_WAGON) != is_engine ||
-				if (e.railtype != railtype || rvi.isWagon() == is_engine ||
-						!BitOps.HASBIT(e.player_avail, Global._local_player.id))
+				if (e.getRailtype() != railtype || rvi.isWagon() == is_engine ||
+						!e.isAvailableToMe())
 					continue;
 			} /*else {
 			// TODO find a nice red colour for vehicles being replaced
@@ -395,13 +395,13 @@ private static void show_cargo(ctype) {
 				final Engine e = Engine.GetEngine(engine_id);
 				final EngineInfo info = Global._engine_info[engine_id];
 
-				if (ENGINE_IS_AVAILABLE(e,info) && (0 != EngineGui.RailVehInfo(engine_id).power) && e.railtype == railtype) {
+				if (ENGINE_IS_AVAILABLE(e,info) && (0 != EngineGui.RailVehInfo(engine_id).power) && e.getRailtype() == railtype) {
 					if (_player_num_engines[engine_id] > 0 || p.EngineHasReplacement(EngineID.get(engine_id))) {
 						if (sel[0] == 0) selected_id[0] = EngineID.get(engine_id);
 						count++;
 						sel[0]--;
 					}
-					if (BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
+					if (e.isAvailableToMe()) {
 						if (sel[1] == 0) selected_id[1] = EngineID.get(engine_id);
 						count2++;
 						sel[1]--;
@@ -434,7 +434,7 @@ private static void show_cargo(ctype) {
 
 				do {
 					final Engine e = Engine.GetEngine(engine_id);
-					if (cargo == EngineGui.RoadVehInfo(engine_id).cargo_type && BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
+					if (cargo == EngineGui.RoadVehInfo(engine_id).cargo_type && e.isAvailableToMe()) {
 						count2++;
 						if (sel[1] == 0) selected_id[1] = EngineID.get(engine_id);
 						sel[1]--;
@@ -473,7 +473,7 @@ private static void show_cargo(ctype) {
 
 				do {
 					e = Engine.GetEngine(engine_id);
-					if (BitOps.HASBIT(e.player_avail, Global._local_player.id) &&
+					if (e.isAvailableToMe() &&
 							(cargo == EngineGui.ShipVehInfo(engine_id).cargo_type 
 							|| 0 != (refittable & EngineGui.ShipVehInfo(engine_id).refittable)) 
 							) {
@@ -510,7 +510,7 @@ private static void show_cargo(ctype) {
 				engine_id = Global.AIRCRAFT_ENGINES_INDEX;
 				do {
 					Engine e = Engine.GetEngine(engine_id);
-					if (BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
+					if (e.isAvailableToMe()) {
 						if (BitOps.HASBIT(subtype, 0) == BitOps.HASBIT(EngineGui.AircraftVehInfo(engine_id).subtype, 0)) {
 							count2++;
 							if (sel[1] == 0) selected_id[1] = EngineID.get(engine_id );
@@ -569,7 +569,7 @@ private static void show_cargo(ctype) {
 		switch (w.as_replaceveh_d().vehicletype) {
 		case Vehicle.VEH_Train: {
 			/* RailType */ int railtype = _railtype_selected_in_replace_gui;
-			Gfx.DrawString(157, 99 + (14 * w.vscroll.cap), _rail_types_list[railtype], 0x10);
+			Gfx.DrawString(157, 99 + (14 * w.vscroll.getCap()), _rail_types_list[railtype], 0x10);
 			/* draw sorting criteria string */
 
 			/* Ensure that custom engines which substituted wagons
@@ -577,9 +577,9 @@ private static void show_cargo(ctype) {
 			 * XXX - DO NOT EVER DO THIS EVER AGAIN! GRRR hacking in wagons as
 			 * engines to get more types.. Stays here until we have our own format
 			 * then it is exit!!! */
-			train_engine_drawing_loop(x,  y,  pos,  sel0, selected_id0, railtype, w.vscroll.cap, true, false, true); // True engines
-			train_engine_drawing_loop(x2, y2, pos2, sel1, selected_id1, railtype, w.vscroll.cap, true, false, false); // True engines
-			train_engine_drawing_loop(x2, y2, pos2, sel1, selected_id1, railtype, w.vscroll.cap, false, false, false); // Feeble wagons
+			train_engine_drawing_loop(x,  y,  pos,  sel0, selected_id0, railtype, w.vscroll.getCap(), true, false, true); // True engines
+			train_engine_drawing_loop(x2, y2, pos2, sel1, selected_id1, railtype, w.vscroll.getCap(), true, false, false); // True engines
+			train_engine_drawing_loop(x2, y2, pos2, sel1, selected_id1, railtype, w.vscroll.getCap(), false, false, false); // Feeble wagons
 			break;
 		}
 
@@ -595,7 +595,7 @@ private static void show_cargo(ctype) {
 					final Engine  e = Engine.GetEngine( engine_id );
 
 					if (_player_num_engines[engine_id] > 0 || p.EngineHasReplacement(EngineID.get( engine_id ))) {
-						if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.cap, 0)) {
+						if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.getCap(), 0)) {
 							Gfx.DrawString(x[0]+59, y[0]+2, Engine.GetCustomEngineName(engine_id), sel0[0]==0 ? 0xC : 0x10);
 							RoadVehCmd.DrawRoadVehEngine(x[0]+29, y[0]+6, engine_id, 
 									_player_num_engines[engine_id] > 0 ? Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
@@ -606,8 +606,8 @@ private static void show_cargo(ctype) {
 						sel0[0]--;
 					}
 
-					if (EngineGui.RoadVehInfo(engine_id).cargo_type == cargo && BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
-						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.cap, 0) && EngineGui.RoadVehInfo(engine_id).cargo_type == cargo) {
+					if (EngineGui.RoadVehInfo(engine_id).cargo_type == cargo && e.isAvailableToMe()) {
+						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.getCap(), 0) && EngineGui.RoadVehInfo(engine_id).cargo_type == cargo) {
 							Gfx.DrawString(x2[0]+59, y2[0]+2, Engine.GetCustomEngineName(engine_id), sel1[0]==0 ? 0xC : 0x10);
 							RoadVehCmd.DrawRoadVehEngine(x2[0]+29, y2[0]+6, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 							y2[0] += 14;
@@ -634,7 +634,7 @@ private static void show_cargo(ctype) {
 					final Engine  e = Engine.GetEngine(engine_id);
 
 					if (_player_num_engines[engine_id.id] > 0 || p.EngineHasReplacement(engine_id)) {
-						if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.cap, 0)) {
+						if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.getCap(), 0)) {
 							Gfx.DrawString(x[0]+75, y[0]+7, Engine.GetCustomEngineName(engine_id.id), sel0[0]==0 ? 0xC : 0x10);
 							Ship.DrawShipEngine(x[0]+35, y[0]+10,  engine_id.id , 
 									_player_num_engines[engine_id.id] > 0 ? 
@@ -647,10 +647,10 @@ private static void show_cargo(ctype) {
 						sel0[0]--;
 					}
 					if (selected_id0[0] != Engine.INVALID_ENGINE_ID.id) {
-						if (BitOps.HASBIT(e.player_avail, Global._local_player.id) && 
+						if (e.isAvailableToMe() && 
 								( cargo == EngineGui.ShipVehInfo(engine_id.id).cargo_type || 0 != (refittable & EngineGui.ShipVehInfo(engine_id.id).refittable) )) 
 						{
-							if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.cap, 0)) {
+							if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.getCap(), 0)) {
 								Gfx.DrawString(x2[0]+75, y2[0]+7, Engine.GetCustomEngineName(engine_id.id), sel1[0]==0 ? 0xC : 0x10);
 								Ship.DrawShipEngine(x2[0]+35, y2[0]+10, engine_id.id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 								y2[0] += 24;
@@ -679,7 +679,7 @@ private static void show_cargo(ctype) {
 
 					if (_player_num_engines[engine_id.id] > 0 || p.EngineHasReplacement(engine_id)) {
 						if (sel0[0] == 0) selected_id0[0] = engine_id.id;
-						if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.cap, 0)) {
+						if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.getCap(), 0)) {
 							Gfx.DrawString(x[0]+62, y[0]+7, Engine.GetCustomEngineName(engine_id.id), sel0[0]==0 ? 0xC : 0x10);
 							AirCraft.DrawAircraftEngine(x[0]+29, y[0]+10, engine_id.id, _player_num_engines[engine_id.id] > 0 ? Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
 							Global.SetDParam(0, _player_num_engines[engine_id.id]);
@@ -688,10 +688,10 @@ private static void show_cargo(ctype) {
 						}
 						sel0[0]--;
 					}
-					if (BitOps.HASBIT(subtype, 0) == BitOps.HASBIT(EngineGui.AircraftVehInfo(engine_id.id).subtype, 0) &&
-							BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
+					if (BitOps.HASBIT(subtype, 0) == BitOps.HASBIT(EngineGui.AircraftVehInfo(engine_id.id).subtype, 0) 
+							&& e.isAvailableToMe()) {
 						if (sel1[0] == 0) selected_id1[0] = engine_id.id;
-						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.cap, 0)) {
+						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.getCap(), 0)) {
 							Gfx.DrawString(x2[0]+62, y2[0]+7, Engine.GetCustomEngineName(engine_id.id), sel1[0]==0 ? 0xC : 0x10);
 							AirCraft.DrawAircraftEngine(x2[0]+29, y2[0]+10, engine_id.id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 							y2[0] += 24;
@@ -838,7 +838,7 @@ private static void show_cargo(ctype) {
 				Global.SetDParam(0, Str.STR_NOT_REPLACING_VEHICLE_SELECTED);
 			}
 
-			Gfx.DrawString(145, (w.resize.step_height == 24 ? 67 : 87) + w.resize.step_height * w.vscroll.cap, Str.STR_02BD, 0x10);
+			Gfx.DrawString(145, (w.resize.step_height == 24 ? 67 : 87) + w.resize.step_height * w.vscroll.getCap(), Str.STR_02BD, 0x10);
 
 			/*	now we draw the two arrays according to what we just counted */
 			DrawEngineArrayInReplaceWindow(w, x, y, x2, y2, pos, pos2, sel[0], sel[1], selected_id[0], selected_id[1]);
@@ -856,10 +856,10 @@ private static void show_cargo(ctype) {
 					if (selected_id[i] != Engine.INVALID_ENGINE_ID) {
 						if (!EngineGui.RailVehInfo(selected_id[i].id).isWagon()) {
 							/* it's an engine */
-							TrainGui.DrawTrainEnginePurchaseInfo(2 + offset, 15 + (14 * w.vscroll.cap), selected_id[i].id);
+							TrainGui.DrawTrainEnginePurchaseInfo(2 + offset, 15 + (14 * w.vscroll.getCap()), selected_id[i].id);
 						} else {
 							/* it's a wagon. Train cars are not replaced with the current GUI, but this code is ready for newgrf if anybody adds that*/
-							TrainGui.DrawTrainWagonPurchaseInfo(2 + offset, 15 + (14 * w.vscroll.cap), selected_id[i].id);
+							TrainGui.DrawTrainWagonPurchaseInfo(2 + offset, 15 + (14 * w.vscroll.getCap()), selected_id[i].id);
 						}
 					}
 				}
@@ -868,9 +868,9 @@ private static void show_cargo(ctype) {
 
 			case Vehicle.VEH_Road: {
 				if (selected_id[0] != Engine.INVALID_ENGINE_ID) {
-					RoadVehGui.DrawRoadVehPurchaseInfo(2, 15 + (14 * w.vscroll.cap), selected_id[0].id);
+					RoadVehGui.DrawRoadVehPurchaseInfo(2, 15 + (14 * w.vscroll.getCap()), selected_id[0].id);
 					if (selected_id[1] != Engine.INVALID_ENGINE_ID) {
-						RoadVehGui.DrawRoadVehPurchaseInfo(2 + 228, 15 + (14 * w.vscroll.cap), selected_id[1].id);
+						RoadVehGui.DrawRoadVehPurchaseInfo(2 + 228, 15 + (14 * w.vscroll.getCap()), selected_id[1].id);
 					}
 				}
 				break;
@@ -878,9 +878,9 @@ private static void show_cargo(ctype) {
 
 			case Vehicle.VEH_Ship: {
 				if (selected_id[0] != Engine.INVALID_ENGINE_ID) {
-					ShipGui.DrawShipPurchaseInfo(2, 15 + (24 * w.vscroll.cap), selected_id[0].id);
+					ShipGui.DrawShipPurchaseInfo(2, 15 + (24 * w.vscroll.getCap()), selected_id[0].id);
 					if (selected_id[1] != Engine.INVALID_ENGINE_ID) {
-						ShipGui.DrawShipPurchaseInfo(2 + 228, 15 + (24 * w.vscroll.cap), selected_id[1].id);
+						ShipGui.DrawShipPurchaseInfo(2 + 228, 15 + (24 * w.vscroll.getCap()), selected_id[1].id);
 					}
 				}
 				break;
@@ -888,9 +888,9 @@ private static void show_cargo(ctype) {
 
 			case Vehicle.VEH_Aircraft: {
 				if (selected_id[0] != Engine.INVALID_ENGINE_ID) {
-					AirCraft.DrawAircraftPurchaseInfo(2, 15 + (24 * w.vscroll.cap), selected_id[0]);
+					AirCraft.DrawAircraftPurchaseInfo(2, 15 + (24 * w.vscroll.getCap()), selected_id[0]);
 					if (selected_id[1] != Engine.INVALID_ENGINE_ID) {
-						AirCraft.DrawAircraftPurchaseInfo(2 + 228, 15 + (24 * w.vscroll.cap), selected_id[1]);
+						AirCraft.DrawAircraftPurchaseInfo(2 + 228, 15 + (24 * w.vscroll.getCap()), selected_id[1]);
 					}
 				}
 				break;
@@ -901,7 +901,7 @@ private static void show_cargo(ctype) {
 		case WE_CLICK: {
 			// these 3 variables is used if any of the lists is clicked
 			int click_scroll_pos = w.vscroll2.pos;
-			int click_scroll_cap = w.vscroll2.cap;
+			int click_scroll_cap = w.vscroll2.getCap();
 			byte click_side = 1;
 
 			switch (e.widget) {
@@ -931,7 +931,7 @@ private static void show_cargo(ctype) {
 				// sets up that the left one was clicked. The default values are for the right one (9)
 				// this way, the code for 9 handles both sides
 				click_scroll_pos = w.vscroll.pos;
-				click_scroll_cap = w.vscroll.cap;
+				click_scroll_cap = w.vscroll.getCap();
 				click_side = 0;
 			case 9: {
 				int i = (e.pt.y - 14) / w.resize.step_height;
@@ -950,11 +950,11 @@ private static void show_cargo(ctype) {
 		} break;
 
 		case WE_RESIZE: {
-			w.vscroll.cap  += e.diff.y / (int)w.resize.step_height;
-			w.vscroll2.cap += e.diff.y / (int)w.resize.step_height;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / (int)w.resize.step_height);
+			w.vscroll2.setCap(w.vscroll2.getCap() + e.diff.y / (int)w.resize.step_height);
 
-			w.widget.get(7).unkA = (w.vscroll.cap  << 8) + 1;
-			w.widget.get(9).unkA = (w.vscroll2.cap << 8) + 1;
+			w.widget.get(7).unkA = (w.vscroll.getCap()  << 8) + 1;
+			w.widget.get(9).unkA = (w.vscroll2.getCap() << 8) + 1;
 		} break;
 		default:
 			break;
@@ -1054,25 +1054,25 @@ private static void show_cargo(ctype) {
 		switch (vehicletype) {
 		case Vehicle.VEH_Train:
 			w = Window.AllocateWindowDescFront(_replace_rail_vehicle_desc, vehicletype);
-			w.vscroll.cap  = 8;
+			w.vscroll.setCap(8);
 			w.resize.step_height = 14;
 			break;
 		case Vehicle.VEH_Road:
 			w = Window.AllocateWindowDescFront(_replace_road_vehicle_desc, vehicletype);
-			w.vscroll.cap  = 8;
+			w.vscroll.setCap(8);
 			w.resize.step_height = 14;
 			break;
 		case Vehicle.VEH_Ship:
 		case Vehicle.VEH_Aircraft:
 			w = Window.AllocateWindowDescFront(_replace_ship_aircraft_vehicle_desc, vehicletype);
-			w.vscroll.cap  = 4;
+			w.vscroll.setCap(4);
 			w.resize.step_height = 24;
 			break;
 		default: return;
 		}
 		w.caption_color = (byte) Global._local_player.id;
 		w.as_replaceveh_d().vehicletype = vehicletype;
-		w.vscroll2.cap = w.vscroll.cap;   // these two are always the same
+		w.vscroll2.setCap(w.vscroll.getCap());   // these two are always the same
 	}
 
 	public static void InitializeGUI()

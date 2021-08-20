@@ -391,7 +391,7 @@ public class Ship {
 
 	static void ShipEnterDepot(Vehicle v)
 	{
-		v.ship.state =  0x80;
+		v.ship.forceInDepot();
 		v.vehstatus |= Vehicle.VS_HIDDEN;
 		v.cur_speed = 0;
 		RecalcShipStuff(v);
@@ -932,15 +932,15 @@ public class Ship {
 			v.engine_type = EngineID.get( p1 );
 
 			e = Engine.GetEngine(p1);
-			v.reliability = e.reliability;
+			v.reliability = e.getReliability();
 			v.reliability_spd_dec = e.reliability_spd_dec;
-			v.max_age = e.lifelength * 366;
+			v.max_age = e.getLifelength() * 366;
 			
 			Global._new_ship_id = //v.index;
 			Global._new_vehicle_id = VehicleID.get( v.index );
 
 			v.string_id = Str.STR_SV_SHIP_NAME;
-			v.ship.state = 0x80;
+			v.ship.forceInDepot();//state = 0x80;
 
 			v.service_interval = Global._patches.servint_ships;
 			v.date_of_last_service = Global._date;
@@ -1109,7 +1109,7 @@ public class Ship {
 
 		if (v.type != Vehicle.VEH_Ship || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER) || 0==(v.vehstatus&Vehicle.VS_STOPPED) || v.ship.state != 0x80)
+		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER) || 0==(v.vehstatus&Vehicle.VS_STOPPED) || !v.ship.isInDepot())
 				return Cmd.return_cmd_error(Str.STR_980B_SHIP_MUST_BE_STOPPED_IN);
 
 

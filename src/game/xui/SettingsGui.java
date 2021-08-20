@@ -1078,11 +1078,11 @@ public class SettingsGui extends SettingsTables
 			case 3: { // select a grf file
 				int y = (e.pt.y - NEWGRF_WND_PROC_OFFSET_TOP_WIDGET) / NEWGRF_WND_PROC_ROWSIZE;
 
-				if (y >= w.vscroll.cap) return; // click out of bounds
+				if (y >= w.vscroll.getCap()) return; // click out of bounds
 
 				y += w.vscroll.pos;
 
-				if (y >= w.vscroll.count) return;
+				if (y >= w.vscroll.getCount()) return;
 
 				//_sel_grffile = _first_grffile;
 				// get selected grf-file

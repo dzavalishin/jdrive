@@ -160,12 +160,12 @@ public class SpriteCache {
 		return true;
 	}
 
-	static void DupSprite(int old, int newp) {
+	public static void DupSprite(int old, int newp) {
 		_sprite_file_pos[newp] = _sprite_file_pos[old];
 		_sprite_ptr[newp] = null;
 	}
 
-	static void SkipSprites(int count) {
+	public static void SkipSprites(int count) {
 		for (; count > 0; --count) {
 			if (!ReadSpriteHeaderSkipData())
 				return;
@@ -478,7 +478,7 @@ public class SpriteCache {
 	}
 	
 	
-	static void GfxInitSpriteMem()
+	public static void GfxInitSpriteMem()
 	{
 	}
 	

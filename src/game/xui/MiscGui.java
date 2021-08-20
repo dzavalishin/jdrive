@@ -798,24 +798,24 @@ public class MiscGui {
 
 	public static void SetVScrollCount(Window w, int num)
 	{
-		w.vscroll.count = num;
-		num -= w.vscroll.cap;
+		w.vscroll.setCount(num);
+		num -= w.vscroll.getCap();
 		if (num < 0) num = 0;
 		if (num < w.vscroll.pos) w.vscroll.pos = num;
 	}
 
 	public static void SetVScroll2Count(Window w, int num)
 	{
-		w.vscroll2.count = num;
-		num -= w.vscroll2.cap;
+		w.vscroll2.setCount(num);
+		num -= w.vscroll2.getCap();
 		if (num < 0) num = 0;
 		if (num < w.vscroll2.pos) w.vscroll2.pos = num;
 	}
 
 	public static void SetHScrollCount(Window w, int num)
 	{
-		w.hscroll.count = num;
-		num -= w.hscroll.cap;
+		w.hscroll.setCount(num);
+		num -= w.hscroll.getCap();
 		if (num < 0) num = 0;
 		if (num < w.hscroll.pos) w.hscroll.pos = num;
 	}
@@ -1418,7 +1418,7 @@ public class MiscGui {
 		}
 
 		w = Window.AllocateWindowDesc(_saveload_dialogs[mode]);
-		w.vscroll.cap = 24;
+		w.vscroll.setCap(24);
 		w.resize.step_width = 2;
 		w.resize.step_height = 10;
 		w.resize.height = w.height - 14 * 10; // Minimum of 10 items
@@ -1552,7 +1552,7 @@ public class MiscGui {
 			w.widget.get(4).left  += diff;
 			w.widget.get(4).right += e.diff.x;
 
-			w.vscroll.cap += e.diff.y / 10;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 10);
 		} break;
 		default:
 			break;
@@ -1598,7 +1598,7 @@ public class MiscGui {
 		BuildFileList();
 
 		w = Window.AllocateWindowDesc(_select_scenario_desc);
-		w.vscroll.cap = 27;
+		w.vscroll.setCap(27);
 		w.resize.step_width = 2;
 		w.resize.step_height = 10;
 		w.resize.height = w.height - 10 * 17; // Minimum of 10 in the list

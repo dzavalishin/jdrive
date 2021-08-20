@@ -252,7 +252,7 @@ public abstract class TownGui //extends Town
 		Window  w = Window.AllocateWindowDescFront(_town_authority_desc, town);
 
 		if (w != null) {
-			w.vscroll.cap = 5;
+			w.vscroll.setCap(5);
 			w.as_def_d().data_1 = -1;
 		}
 	}
@@ -461,7 +461,7 @@ public abstract class TownGui //extends Town
 
 					y += 10;
 					i++;
-					if (++n == w.vscroll.cap) break; // max number of towns in 1 window
+					if (++n == w.vscroll.getCap()) break; // max number of towns in 1 window
 				}
 				Global.SetDParam(0, Town.GetWorldPopulation());
 				Gfx.DrawString(3, w.height - 12 + 2, Str.STR_TOWN_POPULATION, 0);
@@ -485,7 +485,7 @@ public abstract class TownGui //extends Town
 			case 5: { /* Click on Town Matrix */
 				int id_v = (e.pt.y - 28) / 10;
 
-				if (id_v >= w.vscroll.cap) return; // click out of bounds
+				if (id_v >= w.vscroll.getCap()) return; // click out of bounds
 
 				id_v += w.vscroll.pos;
 
@@ -506,7 +506,7 @@ public abstract class TownGui //extends Town
 			break;
 
 		case WE_RESIZE:
-			w.vscroll.cap += e.diff.y / 10;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 10);
 			break;
 		default:
 			break;
@@ -527,7 +527,7 @@ public abstract class TownGui //extends Town
 		Window  w = Window.AllocateWindowDescFront(_town_directory_desc, 0);
 
 		if (w != null) {
-			w.vscroll.cap = 16;
+			w.vscroll.setCap(16);
 			w.resize.step_height = 10;
 			w.resize.height = w.height - 10 * 6; // minimum of 10 items in the list, each item 10 high
 		}

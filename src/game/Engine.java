@@ -315,7 +315,7 @@ public class Engine extends EngineTables implements Serializable
 	/**
 	 * Unload all wagon override sprite groups.
 	 */
-	static void UnloadWagonOverrides()
+	public static void UnloadWagonOverrides()
 	{
 		WagonOverrides wos;
 		WagonOverride wo;
@@ -361,7 +361,7 @@ public class Engine extends EngineTables implements Serializable
 	/**
 	 * Unload all engine sprite groups.
 	 */
-	static void UnloadCustomEngineSprites()
+	public static void UnloadCustomEngineSprites()
 	{
 		//EngineID 
 		int engine;
@@ -831,7 +831,7 @@ public class Engine extends EngineTables implements Serializable
 		_engine_custom_names[engine.id] = name;
 	}
 
-	static void UnloadCustomEngineNames()
+	public static void UnloadCustomEngineNames()
 	{
 		//char **i;
 		for (int i = 0; i < _engine_custom_names.length; i++) {
@@ -856,7 +856,8 @@ public class Engine extends EngineTables implements Serializable
 		Player p = Player.GetPlayer(player);
 
 		assert(e.railtype < Rail.RAILTYPE_END);
-		e.player_avail = BitOps.RETSETBIT(e.player_avail, player.id);
+		//e.player_avail = BitOps.RETSETBIT(e.player_avail, player.id);
+		e.setAvailableTo(player.id);
 		p.avail_railtypes = BitOps.RETSETBIT(p.avail_railtypes, e.railtype);
 
 		e.preview_player =  0xFF;
@@ -958,12 +959,12 @@ public class Engine extends EngineTables implements Serializable
 	// Determine if an engine type is a wagon (and not a loco)
 	static boolean IsWagon(EngineID index)
 	{
-		return (index.id < Global.NUM_TRAIN_ENGINES) && 0 != (RailVehInfo(index.id).flags & RVI_WAGON);
+		return (index.id < Global.NUM_TRAIN_ENGINES) && RailVehInfo(index.id).isWagon();
 	}
 
 	static boolean IsWagon(int index)
 	{
-		return (index < Global.NUM_TRAIN_ENGINES) && 0 != (RailVehInfo(index).flags & RVI_WAGON);
+		return (index < Global.NUM_TRAIN_ENGINES) && RailVehInfo(index).isWagon();
 	}
 
 	static void NewVehicleAvailable(Engine e)
@@ -984,7 +985,7 @@ public class Engine extends EngineTables implements Serializable
 				Player p = ii.next();
 				int block_preview = p.block_preview;
 
-				if (!BitOps.HASBIT(e.player_avail, p.index.id)) continue;
+				if (!e.isAvailableTo(p.index)) continue;
 
 				/* We assume the user did NOT build it.. prove me wrong ;) */
 				p.block_preview = 20;
@@ -1169,7 +1170,7 @@ public class Engine extends EngineTables implements Serializable
 		if (e.type != type) return false;
 
 		// check if it's available
-		if (!BitOps.HASBIT(e.player_avail, Global._current_player.id)) return false;
+		if (!e.isAvailableTo(Global._current_player.id)) return false;
 
 		return true;
 	}
@@ -1328,7 +1329,7 @@ public class Engine extends EngineTables implements Serializable
 	static void DrawTrainEngineInfo(int engine, int x, int y, int maxw)
 	{
 		final RailVehicleInfo rvi = RailVehInfo(engine);
-		int multihead = 0 != (rvi.flags & RVI_MULTIHEAD) ? 1 : 0;
+		int multihead = rvi.isMulttihead() ? 1 : 0;
 
 		Global.SetDParam(0, (Global._price.build_railvehicle >> 3) * rvi.base_cost >> 5);
 		Global.SetDParam(2, rvi.max_speed * 10 >> 4);
@@ -1518,8 +1519,43 @@ public class Engine extends EngineTables implements Serializable
 	{
 		oos.writeObject(_engines);		
 	}
-	
 
+	public int getIntro_date() {
+		return intro_date;
+	}
+
+	public int getLifelength() {
+		return lifelength;
+	}
+
+	public int getReliability() {
+		return reliability;
+	}
+
+	public int getRailtype() {
+		return railtype;
+	}
+
+	public boolean isAvailableTo(int playerId)
+	{
+		return BitOps.HASBIT(player_avail, playerId);
+	}
+
+	public boolean isAvailableTo(PlayerID p)
+	{
+		return isAvailableTo(p.id);
+	}
+	
+	public boolean isAvailableToMe()
+	{
+		return isAvailableTo(Global._local_player.id);
+	}
+	
+	public void setAvailableTo(int playerId)
+	{
+		player_avail = BitOps.RETSETBIT(player_avail, playerId);
+	}
+	
 }
 
 

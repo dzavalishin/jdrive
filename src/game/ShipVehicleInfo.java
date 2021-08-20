@@ -1,14 +1,14 @@
 package game;
 
 public class ShipVehicleInfo {
-	int image_index;
-	int base_cost;
-	int max_speed;
-	int cargo_type;
-	int capacity;
-	int running_cost;
-	int sfx;
-	int refittable;
+	public final int image_index;
+	public final int base_cost;
+	public final int max_speed;
+	public final int cargo_type;
+	public final int capacity;
+	public final int running_cost;
+	public final int sfx;
+	public final int refittable;
 
 	public ShipVehicleInfo(
 			int i, int j, int k, 

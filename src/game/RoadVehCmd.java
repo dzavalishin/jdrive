@@ -142,9 +142,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			v.engine_type = EngineID.get(p1);
 
 			e = Engine.GetEngine(p1);
-			v.reliability = e.reliability;
+			v.reliability = e.getReliability();
 			v.reliability_spd_dec = e.reliability_spd_dec;
-			v.max_age = e.lifelength * 366;
+			v.max_age = e.getLifelength() * 366;
 			Global._new_roadveh_id = VehicleID.get( v.index );
 			Global._new_vehicle_id = VehicleID.get( v.index );
 

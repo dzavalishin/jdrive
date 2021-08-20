@@ -43,7 +43,7 @@ public class TrainGui
 		final Engine  e = Engine.GetEngine(engine_number);
 		int multihead = rvi.isMulttihead() ? 1:0;
 		YearMonthDay ymd = new YearMonthDay();
-		GameDate.ConvertDayToYMD(ymd, e.intro_date);
+		GameDate.ConvertDayToYMD(ymd, e.getIntro_date());
 
 		/* Purchase Cost - Engine weight */
 		Global.SetDParam(0, rvi.base_cost * (Global._price.build_railvehicle >> 3) >> 5);
@@ -83,12 +83,12 @@ public class TrainGui
 
 		/* Design date - Life length */
 		Global.SetDParam(0, ymd.year + 1920);
-		Global.SetDParam(1, e.lifelength);
+		Global.SetDParam(1, e.getLifelength());
 		Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_DESIGNED_LIFE, 0);
 		y += 10;
 
 		/* Reliability */
-		Global.SetDParam(0, e.reliability * 100 >> 16);
+		Global.SetDParam(0, e.getReliability() * 100 >> 16);
 		Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_RELIABILITY, 0);
 		y += 10;
 	}
@@ -147,7 +147,7 @@ public class TrainGui
 		
 			if (v.getType() == Vehicle.VEH_Train && v.IsFrontEngine() &&
 					v.getTile().equals(tile) &&
-					v.rail.track == 0x80) {
+					v.rail.isInDepot()) {
 				if (found != null) // must be exactly one.
 					return;
 				found = v;
@@ -192,8 +192,8 @@ public class TrainGui
 			final Engine e = Engine.GetEngine(i);
 			final RailVehicleInfo rvi = Engine.RailVehInfo(i);
 
-			if (!Rail.IsCompatibleRail(e.railtype, railtype) || (!rvi.isWagon()) != is_engine ||
-					!BitOps.HASBIT(e.player_avail, Global._local_player.id))
+			if (!Rail.IsCompatibleRail(e.getRailtype(), railtype) || (!rvi.isWagon()) != is_engine ||
+					!e.isAvailableToMe())
 				continue;
 
 			if (sel[0] == 0)
@@ -225,8 +225,8 @@ public class TrainGui
 
 				for (i = 0; i < Global.NUM_TRAIN_ENGINES; i++) {
 					final Engine ee = Engine.GetEngine(i);
-					if (Rail.IsCompatibleRail(ee.railtype, railtype)
-					    && BitOps.HASBIT(ee.player_avail, Global._local_player.id))
+					if (Rail.IsCompatibleRail(ee.getRailtype(), railtype)
+					    && ee.isAvailableToMe())
 						count++;
 				}
 				MiscGui.SetVScrollCount(w, count);
@@ -249,8 +249,8 @@ public class TrainGui
 				 * XXX - DO NOT EVER DO THIS EVER AGAIN! GRRR hacking in wagons as
 				 * engines to get more types.. Stays here until we have our own format
 				 * then it is exit!!! */
-				engine_drawing_loop(x, y, pos, sel, selected_id, railtype, w.vscroll.cap, true); // True engines
-				engine_drawing_loop(x, y, pos, sel, selected_id, railtype, w.vscroll.cap, false); // Feeble wagons
+				engine_drawing_loop(x, y, pos, sel, selected_id, railtype, w.vscroll.getCap(), true); // True engines
+				engine_drawing_loop(x, y, pos, sel, selected_id, railtype, w.vscroll.getCap(), false); // Feeble wagons
 
 				w.as_buildtrain_d().sel_engine = selected_id[0];
 
@@ -272,7 +272,7 @@ public class TrainGui
 			switch(e.widget) {
 			case 2: {
 				int i = (e.pt.y - 14) / 14;
-				if (i < w.vscroll.cap) {
+				if (i < w.vscroll.getCap()) {
 					w.as_buildtrain_d().sel_index =  (i + w.vscroll.pos);
 					w.SetWindowDirty();
 				}
@@ -314,8 +314,8 @@ public class TrainGui
 			if (e.diff.y == 0)
 				break;
 
-			w.vscroll.cap += e.diff.y / 14;
-			w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 14);
+			w.widget.get(2).unkA = (w.vscroll.getCap() << 8) + 1;
 		} break;
 		default:
 			break;
@@ -350,8 +350,8 @@ public class TrainGui
 
 		w = Window.AllocateWindowDesc(_new_rail_vehicle_desc);
 		w.window_number = tile.getTile();
-		w.vscroll.cap = 8;
-		w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
+		w.vscroll.setCap(8);
+		w.widget.get(2).unkA = (w.vscroll.getCap() << 8) + 1;
 
 		w.resize.step_height = 14;
 		w.resize.height = w.height - 14 * 4; /* Minimum of 4 vehicles in the display */
@@ -395,7 +395,7 @@ public class TrainGui
 				dx += width;
 			}
 
-			v = v.next;
+			v = v.getNext();
 		} while (dx < count && v != null);
 	}
 
@@ -415,8 +415,7 @@ public class TrainGui
 		/* determine amount of items for scroller */
 		num = 0;
 		hnum = 8;
-		//FOR_ALL_VEHICLES(v)
-		//Vehicle.forEach( (v) ->
+
 		Iterator<Vehicle> ii = Vehicle.getIterator();
 		while(ii.hasNext())
 		{
@@ -424,7 +423,7 @@ public class TrainGui
 			if (v.getType() == Vehicle.VEH_Train &&
 				  (v.IsFrontEngine() || v.IsFreeWagon()) &&
 					v.getTile().equals(tile) &&
-					v.rail.track == 0x80) {
+					v.rail.isInDepot()) {
 				num++;
 				// determine number of items in the X direction.
 				if (v.IsFrontEngine()) {
@@ -451,19 +450,17 @@ public class TrainGui
 		num = w.vscroll.pos;
 
 		// draw all trains
-		//FOR_ALL_VEHICLES(v) 
-		//Vehicle.forEach( (v) ->
 		ii = Vehicle.getIterator();
 		while(ii.hasNext())
 		{
 			Vehicle v = ii.next();
 			if (v.getType() == Vehicle.VEH_Train && v.IsFrontEngine() &&
-					v.getTile().equals(tile) && v.rail.track == 0x80 &&
-					--num < 0 && num >= -w.vscroll.cap) {
-				DrawTrainImage(v, x+21, y, w.hscroll.cap, w.hscroll.pos, VehicleID.get( w.as_traindepot_d().sel ));
+					v.getTile().equals(tile) && v.rail.isInDepot() &&
+					--num < 0 && num >= -w.vscroll.getCap()) {
+				DrawTrainImage(v, x+21, y, w.hscroll.getCap(), w.hscroll.pos, VehicleID.get( w.as_traindepot_d().sel ));
 				/* Draw the train number */
-				Global.SetDParam(0, v.unitnumber.id);
-				Gfx.DrawString(x, y, (v.max_age - 366 < v.getAge()) ? Str.STR_00E3 : Str.STR_00E2, 0);
+				Global.SetDParam(0, v.getUnitnumber().id);
+				Gfx.DrawString(x, y, (v.getMax_age() - 366 < v.getAge()) ? Str.STR_00E3 : Str.STR_00E2, 0);
 
 				// Number of wagons relative to a standard length wagon (rounded up)
 				Global.SetDParam(0, (v.rail.cached_total_length + 7) / 8);
@@ -477,22 +474,20 @@ public class TrainGui
 		}
 
 		// draw all remaining vehicles
-		//FOR_ALL_VEHICLES(v) 
-		//Vehicle.forEach( (v) ->
 		ii = Vehicle.getIterator();
 		while(ii.hasNext())
 		{
 			Vehicle v = ii.next();
 			if (v.getType() == Vehicle.VEH_Train && v.IsFreeWagon() &&
-					v.getTile().equals(tile) && v.rail.track == 0x80 &&
-					--num < 0 && num >= -w.vscroll.cap) {
-				DrawTrainImage(v, x+50, y, w.hscroll.cap - 1, 0, VehicleID.get( w.as_traindepot_d().sel) );
+					v.getTile().equals(tile) && v.rail.isInDepot() &&
+					--num < 0 && num >= -w.vscroll.getCap()) {
+				DrawTrainImage(v, x+50, y, w.hscroll.getCap() - 1, 0, VehicleID.get( w.as_traindepot_d().sel) );
 				Gfx.DrawString(x, y+2, Str.STR_8816, 0);
 
 				/*Draw the train counter */
 				i = 0;
 				u = v;
-				do i++; while ( (u=u.next) != null);		//Determine length of train
+				do i++; while ( (u=u.getNext()) != null);		//Determine length of train
 				Global.SetDParam(0, i);				//Set the counter
 				Gfx.DrawStringRightAligned(w.widget.get(6).right - 1, y + 4, Str.STR_TINY_BLACK, 0);	//Draw the counter
 				y += 14;
@@ -510,11 +505,11 @@ public class TrainGui
 			return (x >= -10) ? -2 : -1;
 
 		// skip vehicles that are scrolled off the left side
-		while (skip-- > 0) v = v.next;
+		while (skip-- > 0) v = v.getNext();
 
 		/* find the vehicle in this row that was clicked */
 		while ((x -= WagonLengthToPixels(v.rail.cached_veh_length)) >= 0) {
-			v = v.next;
+			v = v.getNext();
 			if (v == null) break;
 		}
 
@@ -535,13 +530,12 @@ public class TrainGui
 		x = x - 23;
 
 		row = (y - 14) / 14;
-		if ( (int) row >= w.vscroll.cap)
+		if ( (int) row >= w.vscroll.getCap())
 			return 1; /* means err */
 
 		row += w.vscroll.pos;
 
 		/* go through all the locomotives */
-		//FOR_ALL_VEHICLES(v)
 		Iterator<Vehicle> ii;
 		
 		ii = Vehicle.getIterator();
@@ -551,7 +545,7 @@ public class TrainGui
 			if (v.getType() == Vehicle.VEH_Train &&
 					v.IsFrontEngine() &&
 					v.getTile().getTile() == w.window_number &&
-					v.rail.track == 0x80 &&
+					v.rail.isInDepot() &&
 					--row < 0) {
 						skip = w.hscroll.pos;
 						//goto found_it;
@@ -570,7 +564,7 @@ public class TrainGui
 			if (v.getType() == Vehicle.VEH_Train &&
 					v.IsFreeWagon() &&
 					v.getTile().getTile() == w.window_number &&
-					v.rail.track == 0x80 &&
+					v.rail.isInDepot() &&
 					--row < 0)
 			{
 						//goto found_it;
@@ -820,9 +814,9 @@ public class TrainGui
 			} break;
 		case WE_RESIZE: {
 			/* Update the scroll + matrix */
-			w.vscroll.cap += e.diff.y / 14;
-			w.hscroll.cap += e.diff.x / 29;
-			w.widget.get(6).unkA = (w.vscroll.cap << 8) + 1;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 14);
+			w.hscroll.setCap(w.hscroll.getCap() + e.diff.x / 29);
+			w.widget.get(6).unkA = (w.vscroll.getCap() << 8) + 1;
 		} break;
 		default:
 			break;
@@ -869,8 +863,8 @@ public class TrainGui
 			TileIndex wt = TileIndex.get(w.window_number);
 		
 			w.caption_color =  wt.GetTileOwner().id;
-			w.vscroll.cap = 6;
-			w.hscroll.cap = 10;
+			w.vscroll.setCap(6);
+			w.hscroll.setCap(10);
 			w.resize.step_width = 29;
 			w.resize.step_height = 14;
 			w.as_traindepot_d().sel = VehicleID.getInvalid().id;
@@ -884,7 +878,7 @@ public class TrainGui
 		case WE_PAINT: {
 			final Vehicle v = Vehicle.GetVehicle(w.window_number);
 
-			Global.SetDParam(0, v.string_id);
+			Global.SetDParam(0, v.getString_id());
 			Global.SetDParam(1, v.getUnitnumber().id);
 			w.DrawWindowWidgets();
 
@@ -991,7 +985,7 @@ public class TrainGui
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 12);
 
 			/* See if any vehicle can be refitted */
-			for ( u = v; u != null; u = u.next) {
+			for ( u = v; u != null; u = u.getNext()) {
 				if (Global._engine_info[u.engine_type.id].refit_mask != 0 ||
 							 (0==(Engine.RailVehInfo(v.engine_type.id).flags & Engine.RVI_WAGON) && v.cargo_cap != 0)) {
 					w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 12);
@@ -1001,7 +995,7 @@ public class TrainGui
 			}
 
 			/* draw widgets & caption */
-			Global.SetDParam(0, v.string_id);
+			Global.SetDParam(0, v.getString_id());
 			Global.SetDParam(1, v.getUnitnumber().id);
 			w.DrawWindowWidgets();
 
@@ -1244,7 +1238,7 @@ public class TrainGui
 		if (0==Global._patches.servint_trains) // disable service-scroller when interval is set to disabled
 			w.disabled_state |= (1 << 6) | (1 << 7);
 
-		Global.SetDParam(0, v.string_id);
+		Global.SetDParam(0, v.getString_id());
 		Global.SetDParam(1, v.getUnitnumber().id);
 		w.DrawWindowWidgets();
 
@@ -1253,8 +1247,8 @@ public class TrainGui
 
 		x = 2;
 
-		Global.SetDParam(0, (v.getAge() + 365 < v.max_age) ? Str.STR_AGE : Str.STR_AGE_RED);
-		Global.SetDParam(2, v.max_age / 366);
+		Global.SetDParam(0, (v.getAge() + 365 < v.getMax_age()) ? Str.STR_AGE : Str.STR_AGE_RED);
+		Global.SetDParam(2, v.getMax_age() / 366);
 		Global.SetDParam(3, TrainCmd.GetTrainRunningCost(v) >> 8);
 		Gfx.DrawString(x, 15, Str.STR_885D_AGE_RUNNING_COST_YR, 0);
 
@@ -1288,7 +1282,7 @@ public class TrainGui
 					do {
 						DrawTrainImage(u, x + WagonLengthToPixels(dx), y, 1, 0, VehicleID.getInvalid());
 						dx += u.rail.cached_veh_length;
-						u = u.next;
+						u = u.getNext();
 					} while (u != null && u.IsArticulatedPart());
 					_train_details_drawer_proc[w.as_traindetails_d().tab].accept(v, x + WagonLengthToPixels(dx) + 2, y + 2);
 					y += 14;
@@ -1327,7 +1321,7 @@ public class TrainGui
 			case 2: /* name train */
 				v = Vehicle.GetVehicle(w.window_number);
 				Global.SetDParam(0, v.getUnitnumber().id);
-				MiscGui.ShowQueryString( new StringID( v.string_id ), new StringID( Str.STR_8865_NAME_TRAIN ), 31, 150, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID( v.getString_id() ), new StringID( Str.STR_8865_NAME_TRAIN ), 31, 150, w.window_class, w.window_number);
 				break;
 			/*	
 			case 6:	// inc serv interval 
@@ -1355,8 +1349,8 @@ public class TrainGui
 				
 				v = Vehicle.GetVehicle(w.window_number);
 
-				mod = Depot.GetServiceIntervalClamped(mod + v.service_interval);
-				if (mod == v.service_interval) return;
+				mod = Depot.GetServiceIntervalClamped(mod + v.getService_interval());
+				if (mod == v.getService_interval()) return;
 
 				Cmd.DoCommandP(v.getTile(), v.index, mod, null, Cmd.CMD_CHANGE_TRAIN_SERVICE_INT | Cmd.CMD_MSG(Str.STR_018A_CAN_T_CHANGE_SERVICING));
 				break;
@@ -1435,7 +1429,7 @@ public class TrainGui
 
 		w.window_number = veh;
 		w.caption_color =  v.getOwner().id;
-		w.vscroll.cap = 6;
+		w.vscroll.setCap(6);
 		w.as_traindetails_d().tab = 0;
 	}
 
@@ -1500,14 +1494,14 @@ public class TrainGui
 				final Player p = Player.GetPlayer(owner);
 				if (station == Station.INVALID_STATION) {
 					/* Company Name -- (###) Trains */
-					Global.SetDParam(0, p.name_1);
-					Global.SetDParam(1, p.name_2);
-					Global.SetDParam(2, w.vscroll.count);
+					Global.SetDParam(0, p.getName_1());
+					Global.SetDParam(1, p.getName_2());
+					Global.SetDParam(2, w.vscroll.getCount());
 					w.widget.get(1).unkA = Str.STR_881B_TRAINS;
 				} else {
 					/* Station Name -- (###) Trains */
 					Global.SetDParam(0, station);
-					Global.SetDParam(1, w.vscroll.count);
+					Global.SetDParam(1, w.vscroll.getCount());
 					w.widget.get(1).unkA = Str.STR_SCHEDULED_TRAINS;
 				}
 				w.DrawWindowWidgets();
@@ -1517,7 +1511,7 @@ public class TrainGui
 			/* draw arrow pointing up/down for ascending/descending sorting */
 			Gfx.DoDrawString(0 != (vl.flags & Vehicle.VL_DESC) ? Gfx.DOWNARROW : Gfx.UPARROW, 69, 15, 0x10);
 
-			max = Math.min(w.vscroll.pos + w.vscroll.cap, vl.list_length);
+			max = Math.min(w.vscroll.pos + w.vscroll.getCap(), vl.list_length);
 			for (i = w.vscroll.pos; i < max; ++i) {
 				Vehicle v = Vehicle.GetVehicle(vl.sort_list[i].index);
 				//StringID 
@@ -1525,22 +1519,22 @@ public class TrainGui
 
 				assert(v.getType() == Vehicle.VEH_Train && v.getOwner().id == owner);
 
-				DrawTrainImage(v, x + 21, y + 6, w.hscroll.cap, 0, VehicleID.getInvalid());
+				DrawTrainImage(v, x + 21, y + 6, w.hscroll.getCap(), 0, VehicleID.getInvalid());
 				VehicleGui.DrawVehicleProfitButton(v, x, y + 13);
 
 				Global.SetDParam(0, v.getUnitnumber().id);
 				if (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_RAIL) && v.isHidden())
 					str = Str.STR_021F;
 				else
-					str = v.getAge() > v.max_age - 366 ? Str.STR_00E3 : Str.STR_00E2;
+					str = v.getAge() > v.getMax_age() - 366 ? Str.STR_00E3 : Str.STR_00E2;
 				Gfx.DrawString(x, y + 2, str, 0);
 
 				Global.SetDParam(0, v.getProfit_this_year());
 				Global.SetDParam(1, v.getProfit_last_year());
 				Gfx.DrawString(x + 21, y + 18, Str.STR_0198_PROFIT_THIS_YEAR_LAST_YEAR, 0);
 
-				if (v.string_id != Str.STR_SV_TRAIN_NAME) {
-					Global.SetDParam(0, v.string_id);
+				if (v.getString_id() != Str.STR_SV_TRAIN_NAME) {
+					Global.SetDParam(0, v.getString_id());
 					Gfx.DrawString(x + 21, y, Str.STR_01AB, 0);
 				}
 
@@ -1565,7 +1559,7 @@ public class TrainGui
 			case 7: { /* Matrix to show vehicles */
 				int id_v = (e.pt.y - VehicleGui.PLY_WND_PRC__OFFSET_TOP_WIDGET) / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL;
 
-				if (id_v >= w.vscroll.cap) return; // click out of bounds
+				if (id_v >= w.vscroll.getCap()) return; // click out of bounds
 
 				id_v += w.vscroll.pos;
 
@@ -1655,9 +1649,9 @@ public class TrainGui
 
 		case WE_RESIZE:
 			/* Update the scroll + matrix */
-			w.hscroll.cap += e.diff.x / 29;
-			w.vscroll.cap += e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL;
-			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
+			w.hscroll.setCap(w.hscroll.getCap() + e.diff.x / 29);
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL);
+			w.widget.get(7).unkA = (w.vscroll.getCap() << 8) + 1;
 			break;
 		default:
 			break;
@@ -1691,9 +1685,9 @@ public class TrainGui
 		}
 		if (null != w) {
 			w.caption_color =  player;
-			w.hscroll.cap = 10;
-			w.vscroll.cap = 7; // maximum number of vehicles shown
-			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
+			w.hscroll.setCap(10);
+			w.vscroll.setCap(7); // maximum number of vehicles shown
+			w.widget.get(7).unkA = (w.vscroll.getCap() << 8) + 1;
 			w.resize.step_height = VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL;
 			w.resize.step_width = 29;
 			w.resize.height = 220 - (VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL * 3); /* Minimum of 4 vehicles */

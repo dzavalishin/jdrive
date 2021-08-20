@@ -249,32 +249,29 @@ public class GraphGui
 
 	static void GraphLegendWndProc(Window w, WindowEvent e)
 	{
-		//final Player  p;
-
 		switch(e.event) {
 		case WE_PAINT:
-			//FOR_ALL_PLAYERS(p)
+
 			Player.forEach( (p) ->
 			{
-				if (!p.isActive()) _legend_excludebits = BitOps.RETSETBIT(_legend_excludebits, p.index.id);
+				if (!p.isActive()) _legend_excludebits = BitOps.RETSETBIT(_legend_excludebits, p.getIndex().id);
 			});
 
 			w.click_state = (~_legend_excludebits) << 3;
 			w.DrawWindowWidgets();
 
-			//FOR_ALL_PLAYERS(p)
 			Iterator<Player> ii = Player.getIterator();
 			while(ii.hasNext())
 			{
 				Player p = ii.next();
 				if (!p.isActive()) continue;
 
-				DrawPlayerIcon(p.index.id, 4, 18+p.index.id*12);
+				DrawPlayerIcon(p.getIndex().id, 4, 18+p.getIndex().id*12);
 
-				Global.SetDParam(0, p.name_1);
-				Global.SetDParam(1, p.name_2);
-				Global.SetDParam(2, Player.GetPlayerNameString(p.index, 3));
-				Gfx.DrawString(21,17+p.index.id*12,Str.STR_7021,BitOps.HASBIT(_legend_excludebits, p.index.id) ? 0x10 : 0xC);
+				Global.SetDParam(0, p.getName_1());
+				Global.SetDParam(1, p.getName_2());
+				Global.SetDParam(2, Player.GetPlayerNameString(p.getIndex(), 3));
+				Gfx.DrawString(21,17+p.getIndex().id*12,Str.STR_7021,BitOps.HASBIT(_legend_excludebits, p.getIndex().id) ? 0x10 : 0xC);
 			}
 			break;
 
@@ -328,14 +325,12 @@ public class GraphGui
 	static void SetupGraphDrawerForPlayers(GraphDrawer gd)
 	{
 		int [] excludebits = {_legend_excludebits};
-		//int nums;
 		int mo,yr;
 
 		// Exclude the players which aren't valid
-		//FOR_ALL_PLAYERS(p)
 		Player.forEach((p) ->
 		{
-			if (!p.isActive()) excludebits[0] = BitOps.RETSETBIT(excludebits[0],p.index.id);
+			if (!p.isActive()) excludebits[0] = BitOps.RETSETBIT(excludebits[0],p.getIndex().id);
 		});
 
 		gd.sel = excludebits[0];
@@ -383,11 +378,11 @@ public class GraphGui
 			SetupGraphDrawerForPlayers(gd);
 
 			int [] numd = {0};
-			//FOR_ALL_PLAYERS(p) 
+ 
 			Player.forEach((p) ->
 			{
 				if (p.isActive()) {
-					gd.colors[numd[0]] = (byte) Global._color_list[p.player_color].window_color_bgb;
+					gd.colors[numd[0]] = (byte) Global._color_list[p.getColor()].window_color_bgb;
 					for(int j=gd.num_on_x_axis,i=0; --j >= 0;) {
 						gd.cost[numd[0]][i] = (j >= p.num_valid_stat_ent) ? INVALID_VALUE : (long)(p.old_economy[j].income + p.old_economy[j].expenses);
 						i++;
@@ -467,7 +462,7 @@ public class GraphGui
 				Player p = ii.next();
 				
 				if (p.isActive()) {
-					gd.colors[numd] = (byte) Global._color_list[p.player_color].window_color_bgb;
+					gd.colors[numd] = (byte) Global._color_list[p.getColor()].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
 						gd.cost[numd][i] = (j >= p.num_valid_stat_ent) ? INVALID_VALUE : (long)p.old_economy[j].income;
 						i++;
@@ -546,7 +541,7 @@ public class GraphGui
 				Player p = ii.next();
 				
 				if (p.isActive()) {
-					gd.colors[numd] = (byte) Global._color_list[p.player_color].window_color_bgb;
+					gd.colors[numd] = (byte) Global._color_list[p.getColor()].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
 						gd.cost[numd][i] = (j >= p.num_valid_stat_ent) ? INVALID_VALUE : (long)p.old_economy[j].delivered_cargo;
 						i++;
@@ -625,7 +620,7 @@ public class GraphGui
 				Player p = ii.next();
 				
 				if (p.isActive()) {
-					gd.colors[numd] = (byte) Global._color_list[p.player_color].window_color_bgb;
+					gd.colors[numd] = (byte) Global._color_list[p.getColor()].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
 						gd.cost[numd][i] = (j >= p.num_valid_stat_ent) ? INVALID_VALUE : (long)p.old_economy[j].performance_history;
 						i++;
@@ -707,7 +702,7 @@ public class GraphGui
 				Player p = ii.next();
 				
 				if (p.isActive()) {
-					gd.colors[numd] = (byte) Global._color_list[p.player_color].window_color_bgb;
+					gd.colors[numd] = (byte) Global._color_list[p.getColor()].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
 						gd.cost[numd][i] = (j >= p.num_valid_stat_ent) ? INVALID_VALUE : (long)p.old_economy[j].company_value;
 						i++;
@@ -867,8 +862,6 @@ public class GraphGui
 	{
 		public int  compare(Player p1, Player p2)
 		{
-			//final Player  p1 = *(final Player  final*)elem1;
-			//final Player  p2 = *(final Player  final*)elem2;
 			if( p1 == null ) return 1;
 			if( p2 == null ) return -1;
 			
@@ -881,34 +874,31 @@ public class GraphGui
 		switch (e.event) {
 		case WE_PAINT: {
 			final Player[]  plist = new Player[Global.MAX_PLAYERS];
-			//final Player  p;
 			int i;
 
 			w.DrawWindowWidgets();
 
 			int[] pl_num = {0};
-			//pl_num = 0;
-			//FOR_ALL_PLAYERS(p)
+
 			Player.forEach( (p) ->
 			{
 				if (p.isActive()) plist[pl_num[0]++] = p;
 			});
 
-			//qsort((void*)plist, pl_num, sizeof(*plist), PerfHistComp);
 			Arrays.sort( plist, new PerfHistComp() );
 
 			for (i = 0; i != pl_num[0]; i++) 
 			{
 				Player p = plist[i];
 				Global.SetDParam(0, i + Str.STR_01AC_1ST);
-				Global.SetDParam(1, p.name_1);
-				Global.SetDParam(2, p.name_2);
-				Global.SetDParam(3, Player.GetPlayerNameString(p.index, 4));
+				Global.SetDParam(1, p.getName_1());
+				Global.SetDParam(2, p.getName_2());
+				Global.SetDParam(3, Player.GetPlayerNameString(p.getIndex(), 4));
 				//Global.SetDParam(5, GetPerformanceTitleFromValue(p.old_economy[1].performance_history));
 				Global.SetDParam(5, GetPerformanceTitleFromValue(p.old_economy[0].performance_history));
 
 				Gfx.DrawString(2, 15 + i * 10, i == 0 ? Str.STR_7054 : Str.STR_7055, 0);
-				DrawPlayerIcon(p.index.id, 27, 16 + i * 10);
+				DrawPlayerIcon(p.getIndex().id, 27, 16 + i * 10);
 			}
 
 			break;
@@ -946,8 +936,10 @@ public class GraphGui
 	{
 		switch(e.event) {
 		case WE_PAINT: {
-			int val, needed, score, i;
-			int owner, x;
+			long val, needed, score; 
+			int x;
+			int i;
+			int owner; 
 			int y=14;
 			int total_score = 0;
 			int color_done, color_notdone;
@@ -983,7 +975,7 @@ public class GraphGui
 				}
 
 				if (i == owner) x = 1; else x = 0;
-				DrawPlayerIcon(i, i * 37 + 13 + x, 16 + x);
+				DrawPlayerIcon(i, (int)(i * 37 + 13 + x), (int)(16 + x) ); // TODO long truncated
 			}
 
 			// The colors used to show how the progress is going
@@ -1006,13 +998,13 @@ public class GraphGui
 				Gfx.DrawString(7, y, Str.STR_PERFORMANCE_DETAIL_VEHICLES + i, 0);
 
 				// Draw the score
-				Global.SetDParam(0, score);
+				Global.SetDParam(0, (int)score); // TODO long -> int
 				Gfx.DrawStringRightAligned(107, y, Str.SET_PERFORMANCE_DETAIL_INT, 0);
 
 				// Calculate the %-bar
 				if (val > needed) x = 50;
 				else if (val == 0) x = 0;
-				else x = ((val * 50) / needed);
+				else x = (int) ((val * 50) / needed); // TODO long -> int
 
 				// SCORE_LOAN is inversed
 				if (val < 0 && i == Economy.SCORE_LOAN)
@@ -1026,7 +1018,7 @@ public class GraphGui
 
 				// Calculate the %
 				if (val > needed) x = 100;
-				else x = ((val * 100) / needed);
+				else x = (int)((val * 100) / needed); // TODO long -> int
 
 				// SCORE_LOAN is inversed
 				if (val < 0 && i == Economy.SCORE_LOAN)
@@ -1042,8 +1034,8 @@ public class GraphGui
 
 				// Draw the amount we have against what is needed
 				//  For some of them it is in currency format
-				Global.SetDParam(0, val);
-				Global.SetDParam(1, needed);
+				Global.SetDParam(0, (int)val); // TODO long -> int
+				Global.SetDParam(1, (int)needed); // TODO long -> int
 				switch (i) {
 				case Economy.SCORE_MIN_PROFIT:
 				case Economy.SCORE_MIN_INCOME:
@@ -1232,11 +1224,11 @@ public class GraphGui
 
 			MiscGui.SetVScrollCount(w, _num_sign_sort);
 
-			Global.SetDParam(0, w.vscroll.count);
+			Global.SetDParam(0, w.vscroll.getCount());
 			w.DrawWindowWidgets();
 
 			/* No signs? */
-			if (w.vscroll.count == 0) {
+			if (w.vscroll.getCount() == 0) {
 				Gfx.DrawString(2, y, Str.STR_304A_NONE, 0);
 				return;
 			}
@@ -1246,7 +1238,7 @@ public class GraphGui
 				int i;
 
 				/* Start drawing the signs */
-				for (i = w.vscroll.pos; i < w.vscroll.cap + w.vscroll.pos && i < w.vscroll.count; i++) 
+				for (i = w.vscroll.pos; i < w.vscroll.getCap() + w.vscroll.pos && i < w.vscroll.getCount(); i++) 
 				{
 					SignStruct ss = SignStruct.GetSign(_sign_sort[i]);
 
@@ -1265,12 +1257,12 @@ public class GraphGui
 				int id_v = (e.pt.y - 15) / 10;
 				SignStruct ss;
 
-				if (id_v >= w.vscroll.cap)
+				if (id_v >= w.vscroll.getCap())
 					return;
 
 				id_v += w.vscroll.pos;
 
-				if (id_v >= w.vscroll.count)
+				if (id_v >= w.vscroll.getCount())
 					return;
 
 				ss = SignStruct.GetSign(_sign_sort[id_v]);
@@ -1280,7 +1272,7 @@ public class GraphGui
 		} break;
 
 		case WE_RESIZE:
-			w.vscroll.cap += e.diff.y / 10;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 10);
 			break;
 		default:
 			break;
@@ -1311,7 +1303,7 @@ public class GraphGui
 
 		w = Window.AllocateWindowDescFront(_sign_list_desc, 0);
 		if (w != null) {
-			w.vscroll.cap = 12;
+			w.vscroll.setCap(12);
 			w.resize.step_height = 10;
 			w.resize.height = w.height - 10 * 7; // minimum if 5 in the list
 		}

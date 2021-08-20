@@ -2687,7 +2687,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			break;
 
 		case WE_RESIZE:
-			w.vscroll.cap += e.diff.y / 10;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 10);
 			break;
 		default:
 			break;
@@ -2711,7 +2711,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		/* Industry List */
 		Window w = Window.AllocateWindowDescFront(_industry_directory_desc, 0);
 		if (w != null) {
-			w.vscroll.cap = 16;
+			w.vscroll.setCap(16);
 			w.resize.height = w.getHeight() - 6 * 10; // minimum 10 items
 			w.resize.step_height = 10;
 			w.SetWindowDirty();

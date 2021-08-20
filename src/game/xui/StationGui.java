@@ -186,7 +186,7 @@ public class StationGui extends Station  // to get constants
 				final Player  p = Player.GetPlayer(owner);
 				Global.SetDParam(0, p.getName_1());
 				Global.SetDParam(1, p.getName_2());
-				Global.SetDParam(2, w.vscroll.count);
+				Global.SetDParam(2, w.vscroll.getCount());
 				w.DrawWindowWidgets();
 			}
 
@@ -195,7 +195,7 @@ public class StationGui extends Station  // to get constants
 				int xb = 2;
 				int y = 16; // offset from top of widget
 
-				if (w.vscroll.count == 0) { // player has no stations
+				if (w.vscroll.getCount() == 0) { // player has no stations
 					Gfx.DrawString(xb, y, Str.STR_304A_NONE, 0);
 					return;
 				}
@@ -225,7 +225,7 @@ public class StationGui extends Station  // to get constants
 					}
 					y += 10;
 					i++; // next station
-					if (++p == w.vscroll.cap) break; // max number of stations in 1 window
+					if (++p == w.vscroll.getCap()) break; // max number of stations in 1 window
 				}
 			}
 		} break;
@@ -234,7 +234,7 @@ public class StationGui extends Station  // to get constants
 			case 3: {
 				int id_v = (e.pt.y - 15) / 10;
 
-				if (id_v >= w.vscroll.cap) return; // click out of bounds
+				if (id_v >= w.vscroll.getCap()) return; // click out of bounds
 
 				id_v += w.vscroll.pos;
 
@@ -265,7 +265,7 @@ public class StationGui extends Station  // to get constants
 			break;
 
 		case WE_RESIZE:
-			w.vscroll.cap += e.diff.y / 10;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 10);
 			break;
 		default:
 			break;
@@ -297,7 +297,7 @@ public class StationGui extends Station  // to get constants
 		w = Window.AllocateWindowDescFront(_player_stations_desc, player);
 		if (w != null) {
 			w.caption_color = (byte)w.window_number;
-			w.vscroll.cap = 12;
+			w.vscroll.setCap(12);
 			w.resize.step_height = 10;
 			w.resize.height = w.height - 10 * 7; // minimum if 5 in the list
 		}
@@ -583,7 +583,7 @@ public class StationGui extends Station  // to get constants
 		if (w != null) {
 			PlayerID owner = Station.GetStation(w.window_number).getOwner();
 			if (owner.id != Owner.OWNER_NONE) w.caption_color =  owner.id;
-			w.vscroll.cap = 5;
+			w.vscroll.setCap(5);
 		}
 	}
 

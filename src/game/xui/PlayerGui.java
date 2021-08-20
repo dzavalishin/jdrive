@@ -596,7 +596,7 @@ public class PlayerGui
 				Window wf = Window.AllocateWindowDescFront(_select_player_color_desc,w.window_number);
 				if (wf != null) {
 					wf.caption_color = (byte) wf.window_number;
-					wf.vscroll.cap = 8;
+					wf.vscroll.setCap(8);
 				}
 			} break;
 

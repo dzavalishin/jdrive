@@ -36,7 +36,7 @@ public class RoadVehGui
 		final RoadVehicleInfo rvi = Engine.RoadVehInfo(engine_number);
 		final Engine  e = Engine.GetEngine(engine_number);
 		YearMonthDay ymd = new YearMonthDay();
-		GameDate.ConvertDayToYMD(ymd, e.intro_date);
+		GameDate.ConvertDayToYMD(ymd, e.getIntro_date());
 
 		/* Purchase cost - Max speed */
 		Global.SetDParam(0, rvi.base_cost * (Global._price.roadveh_base>>3)>>5);
@@ -58,12 +58,12 @@ public class RoadVehGui
 
 		/* Design date - Life length */
 		Global.SetDParam(0, ymd.year + 1920);
-		Global.SetDParam(1, e.lifelength);
+		Global.SetDParam(1, e.getLifelength());
 		Gfx.DrawString(x, y, Str.STR_PURCHASE_INFO_DESIGNED_LIFE, 0);
 		y += 10;
 
 		/* Reliability */
-		Global.SetDParam(0, e.reliability * 100 >> 16);
+		Global.SetDParam(0, e.getReliability() * 100 >> 16);
 		Gfx.DrawString(x, y, Str.STR_PURCHASE_INFO_RELIABILITY, 0);
 		y += 10;
 	}
@@ -93,16 +93,16 @@ public class RoadVehGui
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
 			Global.SetDParam(0, v.string_id);
-			Global.SetDParam(1, v.unitnumber.id);
+			Global.SetDParam(1, v.getUnitnumber().id);
 			w.DrawWindowWidgets();
 
 			/* Draw running cost */
 			{
-				int year = v.age / 366;
+				int year = v.getAge() / 366;
 
 				Global.SetDParam(1, year);
 
-				Global.SetDParam(0, (v.age + 365 < v.max_age) ? Str.STR_AGE : Str.STR_AGE_RED);
+				Global.SetDParam(0, (v.getAge() + 365 < v.max_age) ? Str.STR_AGE : Str.STR_AGE_RED);
 				Global.SetDParam(2, v.max_age / 366);
 				Global.SetDParam(3, Engine.RoadVehInfo(v.engine_type.id).running_cost * Global._price.roadveh_running >> 8);
 				Gfx.DrawString(2, 15, Str.STR_900D_AGE_RUNNING_COST_YR, 0);
@@ -116,8 +116,8 @@ public class RoadVehGui
 
 			/* Draw profit */
 			{
-				Global.SetDParam(0, v.profit_this_year);
-				Global.SetDParam(1, v.profit_last_year);
+				Global.SetDParam(0, v.getProfit_this_year());
+				Global.SetDParam(1, v.getProfit_last_year());
 				Gfx.DrawString(2, 35, Str.STR_900F_PROFIT_THIS_YEAR_LAST_YEAR, 0);
 			}
 
@@ -162,7 +162,7 @@ public class RoadVehGui
 			switch (e.widget) {
 			case 2: /* rename */
 				v = Vehicle.GetVehicle(w.window_number);
-				Global.SetDParam(0, v.unitnumber.id);
+				Global.SetDParam(0, v.getUnitnumber().id);
 				MiscGui.ShowQueryString( new StringID(v.string_id), new StringID(Str.STR_902C_NAME_ROAD_VEHICLE), 31, 150, w.window_class, w.window_number);
 				break;
 
@@ -251,7 +251,7 @@ public class RoadVehGui
 
 			/* draw widgets & caption */
 			Global.SetDParam(0, v.string_id);
-			Global.SetDParam(1, v.unitnumber.id);
+			Global.SetDParam(1, v.getUnitnumber().id);
 			w.DrawWindowWidgets();
 
 			str = v.infoString();
@@ -369,7 +369,7 @@ public class RoadVehGui
 			int i = 0;
 			do {
 				final Engine e = Engine.GetEngine(Global.ROAD_ENGINES_INDEX + i++);
-				if (BitOps.HASBIT(e.player_avail, Global._local_player.id))
+				if (e.isAvailableToMe())
 					count++;
 			} while (--num > 0);
 			MiscGui.SetVScrollCount(w, count);
@@ -399,9 +399,9 @@ public class RoadVehGui
 			do {
 				final Engine  e = Engine.GetEngine(Global.ROAD_ENGINES_INDEX + ei++ );
 
-				if (BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
+				if (e.isAvailableToMe()) {
 					if (sel==0) selected_id = engine_id;
-					if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.cap, 0)) {
+					if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.getCap(), 0)) {
 						Gfx.DrawString(x+59, y+2, Engine.GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
 						RoadVehCmd.DrawRoadVehEngine(x+29, y+6, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 						y += 14;
@@ -444,7 +444,7 @@ public class RoadVehGui
 			switch(e.widget) {
 			case 2: { /* listbox */
 				int i = (e.pt.y - 14) / 14;
-				if (i < w.vscroll.cap) {
+				if (i < w.vscroll.getCap()) {
 					w.as_buildtrain_d().sel_index =  (i + w.vscroll.pos);
 					w.SetWindowDirty();
 				}
@@ -487,8 +487,8 @@ public class RoadVehGui
 			if (e.diff.y == 0)
 				break;
 
-			w.vscroll.cap += e.diff.y / 14;
-			w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 14);
+			w.widget.get(2).unkA = (w.vscroll.getCap() << 8) + 1;
 		} break;
 		default:
 			break;
@@ -523,8 +523,8 @@ public class RoadVehGui
 
 		w = Window.AllocateWindowDesc(_new_road_veh_desc);
 		w.window_number = tile.getTile();
-		w.vscroll.cap = 8;
-		w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
+		w.vscroll.setCap(8);
+		w.widget.get(2).unkA = (w.vscroll.getCap() << 8) + 1;
 
 		w.resize.step_height = 14;
 		w.resize.height = w.height - 14 * 4; /* Minimum of 4 vehicles in the display */
@@ -558,7 +558,7 @@ public class RoadVehGui
 				num[0]++;
 		});
 
-		MiscGui.SetVScrollCount(w, (num[0] + w.hscroll.cap - 1) / w.hscroll.cap);
+		MiscGui.SetVScrollCount(w, (num[0] + w.hscroll.getCap() - 1) / w.hscroll.getCap());
 
 		/* locate the depot struct */
 		depot = Depot.GetDepotByTile(tile);
@@ -569,7 +569,7 @@ public class RoadVehGui
 
 		x = 2;
 		y = 15;
-		num[0] = w.vscroll.pos * w.hscroll.cap;
+		num[0] = w.vscroll.pos * w.hscroll.getCap();
 
 		//FOR_ALL_VEHICLES(v) 
 		//Vehicle.forEach( (v) ->
@@ -579,15 +579,15 @@ public class RoadVehGui
 			Vehicle v = ii.next();
 			
 			if (v.getType() == Vehicle.VEH_Road && v.road.state == 254 && v.getTile().equals(tile) &&
-					--num[0] < 0 && num[0] >=	-w.vscroll.cap * w.hscroll.cap) {
+					--num[0] < 0 && num[0] >=	-w.vscroll.getCap() * w.hscroll.getCap()) {
 				DrawRoadVehImage(v, x+24, y, w.as_traindepot_d().sel);
 
-				Global.SetDParam(0, v.unitnumber.id);
-				Gfx.DrawString(x, y+2, (int)(v.max_age-366) >= v.age ? Str.STR_00E2 : Str.STR_00E3, 0);
+				Global.SetDParam(0, v.getUnitnumber().id);
+				Gfx.DrawString(x, y+2, (int)(v.max_age-366) >= v.getAge() ? Str.STR_00E2 : Str.STR_00E3, 0);
 
 				Gfx.DrawSprite( v.isStopped() ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x + 16, y);
 
-				if ((x+=56) == 2 + 56 * w.hscroll.cap) {
+				if ((x+=56) == 2 + 56 * w.hscroll.getCap()) {
 					x = 2;
 					y += 14;
 				}
@@ -604,14 +604,14 @@ public class RoadVehGui
 
 		xt = x / 56;
 		xm = x % 56;
-		if (xt >= w.hscroll.cap)
+		if (xt >= w.hscroll.getCap())
 			return 1;
 
 		row = (y - 14) / 14;
-		if (row >= w.vscroll.cap)
+		if (row >= w.vscroll.getCap())
 			return 1;
 
-		pos = (row + w.vscroll.pos) * w.hscroll.cap + xt;
+		pos = (row + w.vscroll.pos) * w.hscroll.getCap() + xt;
 
 		tile = TileIndex.get( w.window_number );
 
@@ -791,9 +791,9 @@ public class RoadVehGui
 
 		case WE_RESIZE: {
 			/* Update the scroll + matrix */
-			w.vscroll.cap += e.diff.y / 14;
-			w.hscroll.cap += e.diff.x / 56;
-			w.widget.get(5).unkA = (w.vscroll.cap << 8) + w.hscroll.cap;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 14);
+			w.hscroll.setCap(w.hscroll.getCap() + e.diff.x / 56);
+			w.widget.get(5).unkA = (w.vscroll.getCap() << 8) + w.hscroll.getCap();
 
 		} break;
 		default:
@@ -834,8 +834,8 @@ public class RoadVehGui
 		w = Window.AllocateWindowDescFront(_road_depot_desc, tile.getTile());
 		if (w!=null) {
 			w.caption_color = (byte) TileIndex.get(w.window_number).GetTileOwner().id;
-			w.hscroll.cap = 5;
-			w.vscroll.cap = 3;
+			w.hscroll.setCap(5);
+			w.vscroll.setCap(3);
 			w.resize.step_width = 56;
 			w.resize.step_height = 14;
 			w.as_traindepot_d().sel = Vehicle.INVALID_VEHICLE;
@@ -903,14 +903,14 @@ public class RoadVehGui
 				final Player p = Player.GetPlayer(owner);
 				if (station == Station.INVALID_STATION) {
 					/* Company Name -- (###) Road vehicles */
-					Global.SetDParam(0, p.name_1);
-					Global.SetDParam(1, p.name_2);
-					Global.SetDParam(2, w.vscroll.count);
+					Global.SetDParam(0, p.getName_1());
+					Global.SetDParam(1, p.getName_2());
+					Global.SetDParam(2, w.vscroll.getCount());
 					w.widget.get(1).unkA = Str.STR_9001_ROAD_VEHICLES;
 				} else {
 					/* Station Name -- (###) Road vehicles */
 					Global.SetDParam(0, station);
-					Global.SetDParam(1, w.vscroll.count);
+					Global.SetDParam(1, w.vscroll.getCount());
 					w.widget.get(1).unkA = Str.STR_SCHEDULED_ROAD_VEHICLES;
 				}
 				w.DrawWindowWidgets();
@@ -920,7 +920,7 @@ public class RoadVehGui
 			/* draw arrow pointing up/down for ascending/descending sorting */
 			Gfx.DoDrawString(0 != (vl.flags & Vehicle.VL_DESC) ? Gfx.DOWNARROW : Gfx.UPARROW, 69, 15, 0x10);
 
-			max = Math.min(w.vscroll.pos + w.vscroll.cap, vl.list_length);
+			max = Math.min(w.vscroll.pos + w.vscroll.getCap(), vl.list_length);
 			for (i = w.vscroll.pos; i < max; ++i) {
 				Vehicle v = Vehicle.GetVehicle(vl.sort_list[i].index);
 				//StringID 
@@ -931,15 +931,15 @@ public class RoadVehGui
 				DrawRoadVehImage(v, x + 22, y + 6, Vehicle.INVALID_VEHICLE);
 				VehicleGui.DrawVehicleProfitButton(v, x, y + 13);
 
-				Global.SetDParam(0, v.unitnumber.id);
-				if (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_ROAD) && 0!=(v.vehstatus & Vehicle.VS_HIDDEN))
+				Global.SetDParam(0, v.getUnitnumber().id);
+				if (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_ROAD) && v.isHidden())
 					str = Str.STR_021F;
 				else
-					str = v.age > v.max_age - 366 ? Str.STR_00E3 : Str.STR_00E2;
+					str = v.getAge() > v.max_age - 366 ? Str.STR_00E3 : Str.STR_00E2;
 				Gfx.DrawString(x, y + 2, str, 0);
 
-				Global.SetDParam(0, v.profit_this_year);
-				Global.SetDParam(1, v.profit_last_year);
+				Global.SetDParam(0, v.getProfit_this_year());
+				Global.SetDParam(1, v.getProfit_last_year());
 				Gfx.DrawString(x + 24, y + 18, Str.STR_0198_PROFIT_THIS_YEAR_LAST_YEAR, 0);
 
 				if (v.string_id != Str.STR_SV_ROADVEH_NAME) {
@@ -966,7 +966,7 @@ public class RoadVehGui
 			case 7: { /* Matrix to show vehicles */
 				int id_v = (e.pt.y - VehicleGui.PLY_WND_PRC__OFFSET_TOP_WIDGET) / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL;
 
-				if (id_v >= w.vscroll.cap) return; // click out of bounds
+				if (id_v >= w.vscroll.getCap()) return; // click out of bounds
 
 				id_v += w.vscroll.pos;
 
@@ -1050,8 +1050,8 @@ public class RoadVehGui
 
 		case WE_RESIZE:
 			/* Update the scroll + matrix */
-			w.vscroll.cap += e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL;
-			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL);
+			w.widget.get(7).unkA = (w.vscroll.getCap() << 8) + 1;
 			break;
 		default:
 			break;
@@ -1087,8 +1087,8 @@ public class RoadVehGui
 		}
 		if (w != null) {
 			w.caption_color = (byte) player;
-			w.vscroll.cap = 7; // maximum number of vehicles shown
-			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
+			w.vscroll.setCap(7); // maximum number of vehicles shown
+			w.widget.get(7).unkA = (w.vscroll.getCap() << 8) + 1;
 			w.resize.step_height = VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL;
 			w.resize.height = 220 - (VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_SMALL * 3); /* Minimum of 4 vehicles */
 		}

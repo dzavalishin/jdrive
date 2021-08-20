@@ -197,7 +197,7 @@ public class NewsItem {
 		w = Window.FindWindowById(Window.WC_MESSAGE_HISTORY, 0);
 		if (w == null) return;
 		w.SetWindowDirty();
-		w.vscroll.count = _total_news;
+		w.vscroll.setCount(_total_news);
 	}
 
 	//public static void AddValidatedNewsItem(StringID string, int flags, int data_a, int data_b, ValidationProc *validation)
@@ -812,7 +812,7 @@ public class NewsItem {
 			break;
 
 		case WE_RESIZE:
-			w.vscroll.cap += e.diff.y / 12;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 12);
 			break;
 		default:
 			break;
@@ -845,8 +845,8 @@ public class NewsItem {
 		w = Window.AllocateWindowDesc(_message_history_desc);
 
 		if (w != null) {
-			w.vscroll.cap = 10;
-			w.vscroll.count = _total_news;
+			w.vscroll.setCap(10);
+			w.vscroll.setCount(_total_news);
 			w.resize.step_height = 12;
 			w.resize.height = w.getHeight() - 12 * 6; // minimum of 4 items in the list, each item 12 high
 			w.resize.step_width = 1;

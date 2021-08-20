@@ -70,6 +70,13 @@ public class Order implements Serializable
 		next = src.next; // TODO Do we need it?
 	}
 	
+	public Order(int t, int f, int st) 
+	{
+		type = t;
+		flags = f;
+		station = st;
+	}
+
 	public static final int OT_NOTHING       = 0;
 	public static final int OT_GOTO_STATION  = 1;
 	public static final int OT_GOTO_DEPOT    = 2;
@@ -1149,13 +1156,13 @@ public class Order implements Serializable
 	
 	
 	@Deprecated
-	static int PackOrder(final Order order)
+	public static int PackOrder(final Order order)
 	{
 		return (0xFFFF & order.station) << 16 | (0xFF & order.flags) << 8 | (0xFF & order.type);
 	}
 
 	@Deprecated
-	static Order UnpackOrder(int packed)
+	public static Order UnpackOrder(int packed)
 	{
 		Order order = new Order();
 		order.type    = BitOps.GB(packed,  0,  8);
@@ -1273,6 +1280,25 @@ public class Order implements Serializable
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
 		//oos.writeObject(_order_pool);		
+	}
+	public TileIndex getTargetXy() 
+	{
+		switch(getType()) 
+		{
+		case Order.OT_GOTO_STATION:			/* station order */
+			return Station.GetStation(getStation()).getXy() ;
+
+		case Order.OT_GOTO_DEPOT:				/* goto depot order */
+			return Depot.GetDepot(getStation()).xy;
+
+		case Order.OT_GOTO_WAYPOINT:	/* goto waypoint order */
+			return WayPoint.GetWaypoint(getStation()).xy;
+		}		
+		return null;
+	}
+	
+	public boolean isNonStop() {		
+		return 0 != (flags & OF_NON_STOP);
 	}
 	
 }

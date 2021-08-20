@@ -313,8 +313,6 @@ public class SmallMapGui extends SmallMapGuiTables
 
 		/* setup owner table */
 		if (type == 5) {
-			//final Player  p;
-
 			/* fill with some special colors */
 			_owner_colors[Owner.OWNER_TOWN] = MKCOLOR(0xB4B4B4B4);
 			_owner_colors[Owner.OWNER_NONE] = MKCOLOR(0x54545454);
@@ -322,12 +320,11 @@ public class SmallMapGui extends SmallMapGuiTables
 			_owner_colors[Owner.OWNER_SPECTATOR] = MKCOLOR(0x20202020); /* industry */
 
 			/* now fill with the player colors */
-			//FOR_ALL_PLAYERS(p)
 			Player.forEach( (p) ->
 			{
 				if (p.isActive())
-					_owner_colors[p.index.id] =
-					dup_byte32(SpriteCache.GetNonSprite(775 + p.player_color)[0xCB]); // XXX - magic pixel
+					_owner_colors[p.getIndex().id] =
+					dup_byte32(SpriteCache.GetNonSprite(775 + p.getColor())[0xCB]); // XXX - magic pixel
 			});
 		}
 
@@ -374,8 +371,8 @@ public class SmallMapGui extends SmallMapGuiTables
 			{
 				Vehicle v = ii.next();
 
-				if (v.type != 0 && v.type != Vehicle.VEH_Special &&
-						(v.vehstatus & (Vehicle.VS_HIDDEN | Vehicle.VS_UNCLICKABLE)) == 0) {
+				if (v.getType() != 0 && v.getType() != Vehicle.VEH_Special 
+						&& !v.isHidden() && !v.isUnclickable() ) {
 					// Remap into flat coordinates.
 					Point pt = Point.RemapCoords(
 							(v.x_pos - w.as_smallmap_d().scroll_x) / 16,
