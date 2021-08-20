@@ -313,7 +313,8 @@ public class Landscape extends GenLandTable
 	 */
 	static int CmdClearArea(int ex, int ey, int flags, int p1, int p2)
 	{
-		int cost, ret, money;
+		int cost, ret; 
+		long money;
 		int sx,sy;
 		int x,y;
 		boolean success = false;
@@ -365,7 +366,7 @@ public class Landscape extends GenLandTable
 	/* utility function used to modify a tile */
 	public static void ModifyTile(TileIndex tile, TileTypes type, int flags, int ... args)
 	{
-		int i;
+		//int i;
 		int p = 0;
 
 		/*

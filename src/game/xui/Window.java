@@ -3123,6 +3123,40 @@ public class Window extends WindowConstants
 
 	public void setTimeout(int i) { flags4 |= (i << Window.WF_TIMEOUT_SHL); }
 
+	public BiConsumer<Window, WindowEvent> getWndproc() {
+		return wndproc;
+	}
+
+	public void setScrollPos(int x, int y) 
+	{
+		as_vp_d().scrollpos_x += x << viewport.zoom;
+		as_vp_d().scrollpos_y += y << viewport.zoom;
+	}
+
+	public static void updateScrollerTimeout() 
+	{
+		if (_scroller_click_timeout > 3) {
+			_scroller_click_timeout -= 3;
+		} else {
+			_scroller_click_timeout = 0;
+		}
+	}
+
+	public static void afterLoad() {
+		Window w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+
+		//w.as_vp_d().scrollpos_x = _saved_scrollpos_x;
+		//w.as_vp_d().scrollpos_y = _saved_scrollpos_y;
+
+		// TODO ((vp_d)w.custom).scrollpos_x = Global._saved_scrollpos_x;
+		// TODO ((vp_d)w.custom).scrollpos_y = Global._saved_scrollpos_y;
+
+		ViewPort vp = w.viewport;
+		// TODO XXX vp.zoom = _saved_scrollpos_zoom;
+		vp.virtual_width = vp.width << vp.zoom;
+		vp.virtual_height = vp.height << vp.zoom;
+	}
+
 
 
 

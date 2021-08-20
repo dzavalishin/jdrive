@@ -3452,7 +3452,7 @@ public class Rail extends RailTables {
 		BiConsumer<Window,WindowEvent>  cmp = Rail::BuildRailToolbWndProc;
 		
 		// don't recreate the window if we're clicking on a button and the window exists.
-		if (button < 0 || null == (w = Window.FindWindowById(Window.WC_BUILD_TOOLBAR, 0)) || (w.wndproc != cmp) ) {
+		if (button < 0 || null == (w = Window.FindWindowById(Window.WC_BUILD_TOOLBAR, 0)) || (w.getWndproc() != cmp) ) {
 			Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);
 			_cur_railtype = railtype;
 			w = Window.AllocateWindowDesc(_build_rail_desc);

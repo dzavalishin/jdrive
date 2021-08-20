@@ -104,6 +104,18 @@ public class CursorVars
 		delta.y = y;
 	}
 
+	public boolean xBetween(int l, int r) {
+		return 
+				draw_pos.x + draw_size.x >= l &&
+				draw_pos.x <= r;
+	}
+
+	public boolean yBetween(int u, int d) {
+		return 
+				draw_pos.y + draw_size.y >= u
+				&& draw_pos.y <= d;
+	}
+
 
 }
 

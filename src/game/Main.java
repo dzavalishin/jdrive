@@ -852,8 +852,7 @@ public class Main {
 			Window w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 			assert(w != null);
 
-			w.as_vp_d().scrollpos_x += x << w.viewport.zoom;
-			w.as_vp_d().scrollpos_y += y << w.viewport.zoom;
+			w.setScrollPos(x,y);
 		}
 	}
 
@@ -926,11 +925,8 @@ public class Main {
 		//IncreaseSpriteLRU();
 		Hal.InteractiveRandom();
 
-		if (Window._scroller_click_timeout > 3) {
-			Window._scroller_click_timeout -= 3;
-		} else {
-			Window._scroller_click_timeout = 0;
-		}
+		Window.updateScrollerTimeout();
+		
 
 		Global._caret_timer += 3;
 		Global._timer_counter += 8;
@@ -1062,8 +1058,6 @@ public class Main {
 
 	static boolean AfterLoadGame(int version)
 	{
-		Window w;
-		ViewPort vp;
 		Player p;
 
 		// in version 2.1 of the savegame, town owner was unified.
@@ -1135,18 +1129,8 @@ public class Main {
 		Window.ResetWindowSystem();
 		Gui.SetupColorsAndInitialWindow();
 
-		w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
-
-		//w.as_vp_d().scrollpos_x = _saved_scrollpos_x;
-		//w.as_vp_d().scrollpos_y = _saved_scrollpos_y;
-
-		// TODO ((vp_d)w.custom).scrollpos_x = Global._saved_scrollpos_x;
-		// TODO ((vp_d)w.custom).scrollpos_y = Global._saved_scrollpos_y;
-
-		vp = w.viewport;
-		// TODO vp.zoom = _saved_scrollpos_zoom;
-		vp.virtual_width = vp.width << vp.zoom;
-		vp.virtual_height = vp.height << vp.zoom;
+		Window.afterLoad();
+		
 
 		// // FIXME KILLME 
 		// in version 4.1 of the savegame, is_active was introduced to determine
@@ -1163,7 +1147,7 @@ public class Main {
 		if (!Global._players[0].is_active && (!Global._networking || (Global._networking && Global._network_server)))
 			Player.DoStartupNewPlayer(false);
 
-		Gui.DoZoomInOutWindow(Gui.ZOOM_NONE, w); // update button status
+		Gui.DoZoomInOutWindow(Gui.ZOOM_NONE, Window.FindWindowById(Window.WC_MAIN_WINDOW, 0)); // update button status
 		Hal.MarkWholeScreenDirty();
 
 		// // FIXME KILLME In 5.1, Oilrigs have been moved (again)

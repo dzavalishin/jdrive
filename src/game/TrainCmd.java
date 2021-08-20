@@ -75,7 +75,7 @@ public class TrainCmd extends TrainTables
 
 				// check if its a powered wagon
 				u.rail.flags = BitOps.RETCLRBIT(u.rail.flags, Vehicle.VRF_POWEREDWAGON);
-				if ((rvi_v.pow_wag_power != 0) && 0 != (rvi_u.flags & Engine.RVI_WAGON) && Engine.UsesWagonOverride(u)) {
+				if ((rvi_v.pow_wag_power != 0) && rvi_u.isWagon() && Engine.UsesWagonOverride(u)) {
 					if (BitOps.HASBIT(rvi_u.callbackmask, CBM_WAGON_POWER)) {
 						int callback = Engine.GetCallBackResult(CBID_WAGON_POWER,  u.engine_type, u);
 
@@ -91,7 +91,7 @@ public class TrainCmd extends TrainTables
 				}
 
 				// max speed is the minimum of the speed limits of all vehicles in the consist
-				if (0 != (rvi_u.flags & Engine.RVI_WAGON) || Global._patches.wagon_speed_limits)
+				if (rvi_u.isWagon() || Global._patches.wagon_speed_limits)
 					if (rvi_u.max_speed != 0 && !Engine.UsesWagonOverride(u))
 						max_speed = Math.min(rvi_u.max_speed, max_speed);
 			}
@@ -348,7 +348,7 @@ public class TrainCmd extends TrainTables
 			image = (6 & _engine_sprite_and[img]) + _engine_sprite_base[img];
 		}
 
-		if(0 != (rvi.flags & Engine.RVI_MULTIHEAD) ) {
+		if(rvi.isMulttihead()) {
 			Gfx.DrawSprite(image | image_ormod, x - 14, y);
 			x += 15;
 			image = 0;
@@ -626,11 +626,11 @@ public class TrainCmd extends TrainTables
 		/* Check if depot and new engine uses the same kind of tracks */
 		if (!Rail.IsCompatibleRail(e.railtype, Rail.GetRailType(tile))) return Cmd.CMD_ERROR;
 
-		if(0 != (rvi.flags & Engine.RVI_WAGON)) return CmdBuildRailWagon(EngineID.get(p1), tile, flags);
+		if(rvi.isWagon()) return CmdBuildRailWagon(EngineID.get(p1), tile, flags);
 
 		value = EstimateTrainCost(rvi);
 
-		num_vehicles = (rvi.flags & Engine.RVI_MULTIHEAD) != 0 ? 2 : 1;
+		num_vehicles = rvi.isMulttihead() ? 2 : 1;
 		num_vehicles += CountArticulatedParts(rvi, EngineID.get(p1));
 
 		if (0==(flags & Cmd.DC_QUERY_COST)) {
@@ -695,7 +695,7 @@ public class TrainCmd extends TrainTables
 
 				v.VehiclePositionChanged();
 
-				if( 0 != (rvi.flags & Engine.RVI_MULTIHEAD)) {
+				if( rvi.isMulttihead()) {
 					v.SetMultiheaded();
 					AddRearEngineToMultiheadedTrain(vl[0], vl[1], true);
 					/* Now we need to link the front and rear engines together
@@ -1152,7 +1152,7 @@ public class TrainCmd extends TrainTables
 			if (v == first && first.IsFrontEngine()) {
 				Window.DeleteWindowById(Window.WC_VEHICLE_VIEW, first.index);
 			}
-			if (Player.IsLocalPlayer() && (p1 == 1 || 0==(Engine.RailVehInfo(v.engine_type.id).flags & Engine.RVI_WAGON))) {
+			if (Player.IsLocalPlayer() && (p1 == 1 || !Engine.RailVehInfo(v.engine_type.id).isWagon()) ) {
 				Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, Vehicle.VEH_Train);
 			}
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, first.tile.tile);
@@ -1942,7 +1942,7 @@ public class TrainCmd extends TrainTables
 			int x, y;
 
 			// no smoke?
-			if ( (0 != (Engine.RailVehInfo(engtype.id).flags & Engine.RVI_WAGON) && effect_type == 0) ||
+			if ( (Engine.RailVehInfo(engtype.id).isWagon() && effect_type == 0) ||
 					disable_effect ||
 					Engine.GetEngine(engtype).railtype > RAILTYPE_RAIL ||
 					0 != (v.vehstatus & Vehicle.VS_HIDDEN) ||

@@ -5,7 +5,7 @@ import game.util.Pixel;
 
 public class DrawPixelInfo 
 {
-	Pixel dst_ptr; // Smart pointer
+	public Pixel dst_ptr; // Smart pointer
 	
 	public int left, top;
 
