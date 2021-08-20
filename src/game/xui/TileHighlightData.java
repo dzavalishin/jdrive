@@ -45,4 +45,16 @@ public class TileHighlightData {
 		return drawstyle == ViewPort.HT_RECT;
 	}
 
+	public int getTrackState() {
+		return drawstyle & 0xF;  // 0..5
+	}
+
+	public boolean hasRail() {
+		return 0 != (drawstyle & ViewPort.HT_RAIL);
+	}
+
+	public void markPosDirty() {
+		ViewPort.MarkTileDirty(pos.x, pos.y); 		
+	}
+
 }

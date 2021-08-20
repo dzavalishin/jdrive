@@ -3197,9 +3197,9 @@ public class Rail extends RailTables {
 	static void HandleAutodirPlacement()
 	{
 		TileHighlightData thd = ViewPort._thd;
-		int trackstat = thd.drawstyle & 0xF; // 0..5
+		int trackstat = thd.getTrackState();
 
-		if(0!=(thd.drawstyle & ViewPort.HT_RAIL)) { // one tile case
+		if(thd.hasRail()) { // one tile case
 			GenericPlaceRail(thd.getEndTile(), trackstat);
 			return;
 		}
@@ -3210,7 +3210,7 @@ public class Rail extends RailTables {
 	static void HandleAutoSignalPlacement()
 	{
 		TileHighlightData thd = ViewPort._thd;
-		int trackstat = (thd.drawstyle & 0xF); // 0..5
+		int trackstat = thd.getTrackState(); // (thd.drawstyle & 0xF); // 0..5
 
 		if (thd.isRect()) { // one tile case
 			GenericPlaceSignals(thd.getEndTile()); // TileIndex.TileVirtXY(thd.selend.x, thd.selend.y));
@@ -3314,7 +3314,8 @@ public class Rail extends RailTables {
 					break;
 				}
 			}
-			ViewPort.MarkTileDirty(ViewPort._thd.pos.x, ViewPort._thd.pos.y); // redraw tile selection
+			// redraw tile selection
+			ViewPort._thd.markPosDirty();
 			break;
 		}
 
