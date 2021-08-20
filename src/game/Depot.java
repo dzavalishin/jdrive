@@ -7,10 +7,12 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.enums.TileTypes;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
 import game.util.MemoryPool;
+import game.xui.Window;
 
 public class Depot implements IPoolItem, Serializable
 {
@@ -182,7 +184,7 @@ public class Depot implements IPoolItem, Serializable
 	 *
 	 * @return Returns the depot if the tile had a depot, else it returns null
 	 */
-	static Depot GetDepotByTile(TileIndex tile)
+	public static Depot GetDepotByTile(TileIndex tile)
 	{
 		Depot [] ret = {null};
 		_depot_pool.forEach( (i,depot) ->
@@ -197,7 +199,7 @@ public class Depot implements IPoolItem, Serializable
 	/**
 	 * Allocate a new depot
 	 */
-	static Depot AllocateDepot()
+	public static Depot AllocateDepot()
 	{
 		Depot [] ret = {null};
 

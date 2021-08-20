@@ -2,11 +2,12 @@ package game;
 
 import game.tables.TunnelBridgeTables;
 import game.util.TownTables;
-
+import game.xui.ViewPort;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiff;
 import game.tables.RailTables;
 import game.util.BitOps;

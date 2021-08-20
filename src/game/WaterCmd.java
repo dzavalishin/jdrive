@@ -2,13 +2,20 @@ package game;
 
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.Point;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiff;
 import game.struct.TileIndexDiffC;
 import game.tables.WaterTables;
 import game.util.BitOps;
+import game.xui.Gfx;
+import game.xui.ShipGui;
+import game.xui.VehicleGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class WaterCmd extends WaterTables
 {

@@ -12,6 +12,7 @@ import game.tables.TunnelBridgeTables;
 import game.util.BitOps;
 import game.util.FileIO;
 import game.util.Pixel;
+import game.xui.TrainGui;
 
 /* TTDPatch extended GRF format codec
  * (c) Petr Baudis 2004 (GPL'd)

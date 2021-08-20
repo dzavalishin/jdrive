@@ -4,6 +4,8 @@ import java.util.Iterator;
 
 import game.ids.PlayerID;
 import game.ids.StringID;
+import game.xui.SettingsGui;
+import game.xui.Window;
 
 public class MiscCmd {
 

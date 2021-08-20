@@ -1,9 +1,9 @@
 package game.struct;
 
-import game.Gfx;
 import game.Global;
-import game.Widget;
-import game.Window;
+import game.xui.Gfx;
+import game.xui.Widget;
+import game.xui.Window;
 
 public class Textbuf 
 {

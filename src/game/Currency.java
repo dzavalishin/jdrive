@@ -7,7 +7,7 @@ public class Currency {
 	public static final int CF_NOEURO = 0;
 	public static final int CF_ISEURO = 1;
 	
-	final static int _currency_string_list[] = {
+	public final static int _currency_string_list[] = {
 		Str.STR_CURR_GBP,
 		Str.STR_CURR_USD,
 		Str.STR_CURR_EUR,
@@ -41,7 +41,7 @@ public class Currency {
 
 
 	// get a mask of the allowed currencies depending on the year
-	static int GetMaskOfAllowedCurrencies()
+	public static int GetMaskOfAllowedCurrencies()
 	{
 		int mask = 0;
 		int i;

@@ -1,11 +1,14 @@
 package game;
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiffC;
 import game.tables.ClearTables;
 import game.util.BitOps;
+import game.xui.ViewPort;
 
 // clear_cmd.c
 public class Clear extends ClearTables {
@@ -80,7 +83,7 @@ public class Clear extends ClearTables {
 	static void TerraformAddDirtyTile(TerraformerState ts, TileIndex tile)
 	{
 		int i, count;
-		MutableTileIndex t;
+		//MutableTileIndex t;
 
 		count = ts.tile_table_count;
 		if (count >= 625) return;

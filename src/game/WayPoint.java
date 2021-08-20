@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
@@ -14,6 +15,7 @@ import game.struct.DrawTileSprites;
 import game.struct.Point;
 import game.util.BitOps;
 import game.util.MemoryPool;
+import game.xui.ViewPort;
 
 public class WayPoint implements IPoolItem
 {

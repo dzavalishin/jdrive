@@ -3,6 +3,9 @@ package game;
 import game.util.BitOps;
 import game.util.MemoryPool;
 import game.util.Strings;
+import game.xui.Gfx;
+import game.xui.PlayerGui;
+import game.xui.Window;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -21,7 +24,7 @@ import game.ids.PlayerID;
 import game.ids.StringID;
 import game.struct.PlayerEconomyEntry;
 
-/** @file players.c
+/** 
  * @todo Cleanup the messy DrawPlayerFace function asap
  */
 
@@ -104,6 +107,7 @@ public class Player implements Serializable
 		cur_economy = new PlayerEconomyEntry();
 	}
 
+	public boolean isActive() { return is_active; }
 
 	//#define MAX_PLAYERS 8
 	static Player [] _players = new Player[Global.MAX_PLAYERS];
@@ -368,7 +372,7 @@ public class Player implements Serializable
 	}
 
 	// the player_money field is kept as it is, but money64 contains the actual amount of money.
-	void UpdatePlayerMoney32()
+	public void UpdatePlayerMoney32()
 	{
 		if (money64 < -2000000000)
 			player_money = -2000000000;
@@ -378,7 +382,7 @@ public class Player implements Serializable
 			player_money = (int)money64;
 	}
 
-	static void GetNameOfOwner(PlayerID owner, TileIndex tile)
+	public static void GetNameOfOwner(PlayerID owner, TileIndex tile)
 	{
 		Global.SetDParam(2, owner.id);
 
@@ -1592,5 +1596,17 @@ final Chunk Handler _player_chunk_handlers[] = {
 	{
 		oos.writeObject(_players);		
 	}
+
+	public String generateFileName() {
+		Global.SetDParam(0, name_1);
+		Global.SetDParam(1, name_2);
+		Global.SetDParam(2, Global._date);
+		return Global.GetString(Str.STR_4004);
+	}
+
+	public void DrawPlayerFace() {
+		DrawPlayerFace(face, player_color, 2, 16);		
+	}
+
 
 }

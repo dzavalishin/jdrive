@@ -3,12 +3,13 @@ package game;
 import game.enums.Owner;
 import game.ids.CursorID;
 import game.ids.PlayerID;
-import game.struct.Point;
 import game.struct.Rect;
 import game.struct.Textbuf;
 import game.util.AnimCursor;
 import game.util.BitOps;
-import game.util.Pixel;
+import game.xui.CursorVars;
+import game.xui.DrawPixelInfo;
+import game.xui.Gfx;
 
 public abstract class Hal
 {
@@ -27,175 +28,29 @@ public abstract class Hal
 	public static Rect _invalid_rect = new Rect();
 	public static CursorVars _cursor = new CursorVars();
 
-	//HalVideoDriver _video_driver;
 
-	/*
-	static void SetDirtyBlocks(int left, int top, int right, int bottom)
-	{
-		//byte b[];
-		int width;
-		int height;
-
-		if (left < 0) left = 0;
-		if (top < 0) top = 0;
-		if (right > _screen.width) right = _screen.width;
-		if (bottom > _screen.height) bottom = _screen.height;
-
-		if (left >= right || top >= bottom) return;
-
-		if (left   < _invalid_rect.left  ) _invalid_rect.left   = left;
-		if (top    < _invalid_rect.top   ) _invalid_rect.top    = top;
-		if (right  > _invalid_rect.right ) _invalid_rect.right  = right;
-		if (bottom > _invalid_rect.bottom) _invalid_rect.bottom = bottom;
-
-		left >>= 6;
-		top  >>= 3;
-
-		//b = _dirty_blocks + top * DIRTY_BYTES_PER_LINE + left;
-		Pixel b = new Pixel( Gfx._dirty_blocks, top * Gfx.DIRTY_BYTES_PER_LINE + left);
-
-		width  = ((right  - 1) >> 6) - left + 1;
-		height = ((bottom - 1) >> 3) - top  + 1;
-
-		assert(width > 0 && height > 0);
-
-		do {
-			int i = width;
-
-			do { 
-				//b[--i] = (byte) 0xFF; 
-				b.w( --i, (byte) 0xFF ); 
-				} while (i > 0);
-
-			//b += Gfx.DIRTY_BYTES_PER_LINE;
-			b.madd( Gfx.DIRTY_BYTES_PER_LINE );
-		} while (--height != 0);
-	}
-	*/
 
 	public static void MarkWholeScreenDirty()
 	{
 		Gfx.SetDirtyBlocks(0, 0, _screen.width, _screen.height);
 	}
 
-	static boolean FillDrawPixelInfo(DrawPixelInfo n,  DrawPixelInfo o, int left, int top, int width, int height)
+
+
+
+	public static void CursorTick()
 	{
-		int t;
-
-		if (o == null) o = _cur_dpi;
-
-		n.zoom = 0;
-
-		assert(width > 0);
-		assert(height > 0);
-
-		n.left = 0;
-		if ((left -= o.left) < 0) {
-			width += left;
-			if (width < 0) return false;
-			n.left = -left;
-			left = 0;
-		}
-
-		if ((t=width + left - o.width) > 0) {
-			width -= t;
-			if (width < 0) return false;
-		}
-		n.width = width;
-
-		n.top = 0;
-		if ((top -= o.top) < 0) {
-			height += top;
-			if (height < 0) return false;
-			n.top = -top;
-			top = 0;
-		}
-
-		n.pitch = o.pitch;
-		//n.dst_ptr = o.dst_ptr + left + top * o.pitch;
-		n.dst_ptr = new Pixel(o.dst_ptr, left + top * o.pitch);
-
-		if ((t=height + top - o.height) > 0) {
-			height -= t;
-			if (height < 0) return false;
-		}
-		n.height = height;
-
-		return true;
+		_cursor.tick();
 	}
 
-	static void SetCursorSprite(CursorID cursor)
+	public static void SetMouseCursor(CursorID cursor)
 	{
-		CursorVars cv =_cursor;
-		Sprite p;
-
-		if (cv.sprite == cursor) return;
-
-		p = SpriteCache.GetSprite(cursor.id & Sprite.SPRITE_MASK);
-		cv.sprite = cursor;
-		cv.size.y = p.height;
-		cv.size.x = p.width;
-		cv.offs.x = p.x_offs;
-		cv.offs.y = p.y_offs;
-
-		cv.dirty = true;
+		_cursor.setCursor(cursor);
 	}
 
-	static void SwitchAnimatedCursor()
+	public static void SetAnimatedMouseCursor( AnimCursor[] animcursors)
 	{
-		CursorVars cv = _cursor;
-		
-		if(
-			(cv.animate_pos >= cv.animate_list.length )
-			||
-			(cv.animate_list[cv.animate_pos] == null)
-				||
-				(cv.animate_list[cv.animate_pos].spriteId == 0xFFFF)
-				)
-		{
-			cv.animate_pos = 0;
-		}
-		
-		CursorID sprite = CursorID.get( cv.animate_list[cv.animate_pos].spriteId );
-		cv.animate_timeout = cv.animate_list[cv.animate_pos].time;
-		//cv.animate_pos += 2;
-		cv.animate_pos++;
-		
-		SetCursorSprite(sprite);
-		/*
-		CursorID[] cur = cv.animate_cur;
-		CursorID sprite;
-
-		// ANIM_CURSOR_END is 0xFFFF in table/animcursors.h
-		if (cur[0] == null || cur[0].id == 0xFFFF) cur = cv.animate_list;
-
-		sprite = cur[0];
-		cv.animate_timeout = cur[1].id;
-		cv.animate_cur = new CursorId( cur.id + 2);
-
-		SetCursorSprite(sprite);
-		*/
-	}
-
-	static void CursorTick()
-	{
-		if (_cursor.animate_timeout != 0 && --_cursor.animate_timeout == 0)
-			SwitchAnimatedCursor();
-	}
-
-	static void SetMouseCursor(CursorID cursor)
-	{
-		// Turn off animation
-		_cursor.animate_timeout = 0;
-		// Set cursor
-		SetCursorSprite(cursor);
-	}
-
-	static void SetAnimatedMouseCursor( AnimCursor[] animcursors)
-	{
-		_cursor.animate_list = animcursors;
-		_cursor.animate_pos = 0;
-		SwitchAnimatedCursor();
+		_cursor.setCursor(animcursors);
 	}
 
 	static boolean ChangeResInGame(int w, int h)
@@ -249,7 +104,7 @@ void SortResolutions(int count)
 	}
 
 
-	static int InteractiveRandom()
+	public static int InteractiveRandom()
 	{
 		int t = Global._random_seeds[1][1];
 		int s = Global._random_seeds[1][0];
@@ -257,7 +112,7 @@ void SortResolutions(int count)
 		return Global._random_seeds[1][1] = BitOps.ROR32(s, 3) - 1;
 	}
 
-	static int InteractiveRandomRange(int max)
+	public static int InteractiveRandomRange(int max)
 	{
 		return BitOps.GB(InteractiveRandom(), 0, 16) * max >> 16;
 	}
@@ -287,53 +142,3 @@ void SortResolutions(int count)
 
 
 
-class DrawPixelInfo 
-{
-	Pixel dst_ptr; // Smart pointer
-	
-	int left, top, width, height;
-	int pitch;
-	int zoom;
-	
-	public DrawPixelInfo(DrawPixelInfo src) {
-		assignFrom(src);
-	}
-
-	public DrawPixelInfo() {
-		// TODO require at least dst_ptr
-	}
-
-	public void assignFrom(DrawPixelInfo dpi) 
-	{
-		if(dpi.dst_ptr == null) 
-			dst_ptr = null;
-		else 
-			dst_ptr = new Pixel(dpi.dst_ptr); 
-		
-		left = dpi.left; 
-		top = dpi.top; 
-		width = dpi.width; 
-		height = dpi.height;
-		pitch = dpi.pitch;
-		zoom = dpi.zoom;
-	}
-}
-
-class CursorVars {
-	Point pos = new Point(0, 0); 
-	Point size = new Point(0, 0); 
-	Point offs = new Point(0, 0); 
-	Point delta = new Point(0, 0);
-	Point draw_pos = new Point(0, 0); 
-	Point draw_size = new Point(0, 0);
-	CursorID sprite;
-
-	int wheel; // mouse wheel movement
-	AnimCursor[] animate_list;
-	int animate_pos;
-	int animate_timeout;
-
-	boolean visible;
-	boolean dirty;
-	boolean fix_at;
-} 

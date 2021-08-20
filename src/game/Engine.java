@@ -1,5 +1,11 @@
 package game;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Iterator;
+
 import game.enums.Owner;
 import game.ids.EngineID;
 import game.ids.PlayerID;
@@ -10,14 +16,12 @@ import game.tables.EngineTables;
 import game.tables.EngineTables2;
 import game.util.BinaryString;
 import game.util.BitOps;
-import game.util.MemoryPool;
 import game.util.Strings;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Iterator;
+import game.xui.Gfx;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
 
 public class Engine extends EngineTables implements Serializable 
 {
@@ -60,25 +64,25 @@ public class Engine extends EngineTables implements Serializable
 	
 
 	
-	static  final RailVehicleInfo  RailVehInfo(int e)
+	public static final RailVehicleInfo  RailVehInfo(int e)
 	{
 		assert(e < Global._rail_vehicle_info.length);
 		return Global._rail_vehicle_info[e];
 	}
 
-	static  final ShipVehicleInfo  ShipVehInfo(int e ) //EngineID e)
+	public static final ShipVehicleInfo  ShipVehInfo(int e ) //EngineID e)
 	{
 		assert(e >= Global.SHIP_ENGINES_INDEX && e < Global.SHIP_ENGINES_INDEX + Global._ship_vehicle_info.length);
 		return Global._ship_vehicle_info[e - Global.SHIP_ENGINES_INDEX];
 	}
 
-	static  final AircraftVehicleInfo  AircraftVehInfo(int e)
+	public static final AircraftVehicleInfo  AircraftVehInfo(int e)
 	{
 		assert(e >= Global.AIRCRAFT_ENGINES_INDEX && e < Global.AIRCRAFT_ENGINES_INDEX + Global._aircraft_vehicle_info.length);
 		return Global._aircraft_vehicle_info[e - Global.AIRCRAFT_ENGINES_INDEX];
 	}
 
-	static  final RoadVehicleInfo  RoadVehInfo(int e)
+	public static final RoadVehicleInfo  RoadVehInfo(int e)
 	{
 		assert(e >= Global.ROAD_ENGINES_INDEX && e < Global.ROAD_ENGINES_INDEX + Global._road_vehicle_info.length);
 		return Global._road_vehicle_info[e - Global.ROAD_ENGINES_INDEX];
@@ -837,7 +841,7 @@ public class Engine extends EngineTables implements Serializable
 	}
 
 	//StringID GetCustomEngineName(EngineID engine)
-	static StringID GetCustomEngineName(int engine)
+	public static StringID GetCustomEngineName(int engine)
 	{
 		if (null == _engine_custom_names[engine])
 			return new StringID( _engine_name_strings[engine] );
@@ -894,7 +898,7 @@ public class Engine extends EngineTables implements Serializable
 		return best_player;
 	}
 
-	static void EnginesDailyLoop()
+	public static void EnginesDailyLoop()
 	{
 		//EngineID i;
 
@@ -1033,7 +1037,7 @@ public class Engine extends EngineTables implements Serializable
 		}
 	}
 
-	static void EnginesMonthlyLoop()
+	public static void EnginesMonthlyLoop()
 	{
 		if (Global._cur_year < 130) {
 			for (int i = 0 ; i < _engines.length; i++) 
@@ -1263,14 +1267,14 @@ public class Engine extends EngineTables implements Serializable
 			//EngineID engine = w.window_number;
 			int engine = w.window_number;
 			DrawEngineInfo dei;
-			int width;
+			int width = w.getWidth();
 
 			w.DrawWindowWidgets();
 
 			Global.SetDParam(0, GetEngineCategoryName(engine));
 			Gfx.DrawStringMultiCenter(150, 44, Str.STR_8101_WE_HAVE_JUST_DESIGNED_A, 296);
 
-			Gfx.DrawStringCentered(w.width >> 1, 80, GetCustomEngineName(engine), 0x10);
+			Gfx.DrawStringCentered(width >> 1, 80, GetCustomEngineName(engine), 0x10);
 
 			if(engine < Global.NUM_TRAIN_ENGINES) 
 				dei = _draw_engine_list[0];
@@ -1281,7 +1285,6 @@ public class Engine extends EngineTables implements Serializable
 			else
 				dei = _draw_engine_list[3];
 
-			width = w.width;
 			dei.engine_proc.accept(width >> 1, 100, engine, 0);
 			dei.info_proc.accept(engine, width >> 1, 130, width - 52);
 			break;
@@ -1298,6 +1301,8 @@ public class Engine extends EngineTables implements Serializable
 				w.DeleteWindow();
 				break;
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -1346,19 +1351,21 @@ public class Engine extends EngineTables implements Serializable
 		EngineID engine;
 
 		NewsItem.DrawNewsBorder(w);
-
+		
+		int width = w.getWidth();
+		
 		engine = EngineID.get( w.as_news_d().ni.string_id.id ); // TODO add field of EngineID type?
 		Global.SetDParam(0, GetEngineCategoryName(engine.id));
-		Gfx.DrawStringMultiCenter(w.width >> 1, 20, Str.STR_8859_NEW_NOW_AVAILABLE, w.width - 2);
+		Gfx.DrawStringMultiCenter(width >> 1, 20, Str.STR_8859_NEW_NOW_AVAILABLE, width - 2);
 
-		Gfx.GfxFillRect(25, 56, w.width - 25, w.height - 2, 10);
+		Gfx.GfxFillRect(25, 56, width - 25, w.getHeight() - 2, 10);
 
 		Global.SetDParam(0, GetCustomEngineName(engine.id).id);
-		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_885A, w.width - 2);
+		Gfx.DrawStringMultiCenter(width >> 1, 57, Str.STR_885A, width - 2);
 
-		TrainCmd.DrawTrainEngine(w.width >> 1, 88, engine.id, 0);
-		Gfx.GfxFillRect(25, 56, w.width - 56, 112, 0x323 | Sprite.USE_COLORTABLE);
-		DrawTrainEngineInfo(engine.id, w.width >> 1, 129, w.width - 52);
+		TrainCmd.DrawTrainEngine(width >> 1, 88, engine.id, 0);
+		Gfx.GfxFillRect(25, 56, width - 56, 112, 0x323 | Sprite.USE_COLORTABLE);
+		DrawTrainEngineInfo(engine.id, width >> 1, 129, width - 52);
 	}
 
 	//StringID GetNewsStringNewTrainAvail(final NewsItem ni)
@@ -1391,17 +1398,19 @@ public class Engine extends EngineTables implements Serializable
 
 		NewsItem.DrawNewsBorder(w);
 
+		int width = w.getWidth();
+
 		engine = w.as_news_d().ni.string_id.id;
 
-		Gfx.DrawStringMultiCenter(w.width >> 1, 20, Str.STR_A02C_NEW_AIRCRAFT_NOW_AVAILABLE, w.width - 2);
-		Gfx.GfxFillRect(25, 56, w.width - 25, w.height - 2, 10);
+		Gfx.DrawStringMultiCenter(width >> 1, 20, Str.STR_A02C_NEW_AIRCRAFT_NOW_AVAILABLE, width - 2);
+		Gfx.GfxFillRect(25, 56, width - 25, w.getHeight() - 2, 10);
 
 		Global.SetDParam(0, GetCustomEngineName(engine).id);
-		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_A02D, w.width - 2);
+		Gfx.DrawStringMultiCenter(width >> 1, 57, Str.STR_A02D, width - 2);
 
-		AirCraft.DrawAircraftEngine(w.width >> 1, 93, engine, 0);
-		Gfx.GfxFillRect(25, 56, w.width - 56, 110, 0x323 | Sprite.USE_COLORTABLE);
-		DrawAircraftEngineInfo( engine, w.width >> 1, 131, w.width - 52);
+		AirCraft.DrawAircraftEngine(width >> 1, 93, engine, 0);
+		Gfx.GfxFillRect(25, 56, width - 56, 110, 0x323 | Sprite.USE_COLORTABLE);
+		DrawAircraftEngineInfo( engine, width >> 1, 131, width - 52);
 	}
 
 	static int GetNewsStringNewAircraftAvail(final NewsItem ni)
@@ -1434,16 +1443,18 @@ public class Engine extends EngineTables implements Serializable
 
 		NewsItem.DrawNewsBorder(w);
 
+		int width = w.getWidth();
+
 		engine = w.as_news_d().ni.string_id.id;
-		Gfx.DrawStringMultiCenter(w.width >> 1, 20, Str.STR_9028_NEW_ROAD_VEHICLE_NOW_AVAILABLE, w.width - 2);
-		Gfx.GfxFillRect(25, 56, w.width - 25, w.height - 2, 10);
+		Gfx.DrawStringMultiCenter(width >> 1, 20, Str.STR_9028_NEW_ROAD_VEHICLE_NOW_AVAILABLE, width - 2);
+		Gfx.GfxFillRect(25, 56, width - 25, w.getHeight() - 2, 10);
 
 		Global.SetDParam(0, GetCustomEngineName(engine).id);
-		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_9029, w.width - 2);
+		Gfx.DrawStringMultiCenter(width >> 1, 57, Str.STR_9029, width - 2);
 
-		RoadVehCmd.DrawRoadVehEngine(w.width >> 1, 88, engine, 0);
-		Gfx.GfxFillRect(25, 56, w.width - 56, 112, 0x323 | Sprite.USE_COLORTABLE);
-		DrawRoadVehEngineInfo( engine, w.width >> 1, 129, w.width - 52);
+		RoadVehCmd.DrawRoadVehEngine(width >> 1, 88, engine, 0);
+		Gfx.GfxFillRect(25, 56, width - 56, 112, 0x323 | Sprite.USE_COLORTABLE);
+		DrawRoadVehEngineInfo( engine, width >> 1, 129, width - 52);
 	}
 
 	static /*StringID*/ int GetNewsStringNewRoadVehAvail(final NewsItem ni)
@@ -1472,18 +1483,19 @@ public class Engine extends EngineTables implements Serializable
 		int engine;
 
 		NewsItem.DrawNewsBorder(w);
+		int width = w.getWidth();
 
 		engine = w.as_news_d().ni.string_id.id;
 
-		Gfx.DrawStringMultiCenter(w.width >> 1, 20, Str.STR_982C_NEW_SHIP_NOW_AVAILABLE, w.width - 2);
-		Gfx.GfxFillRect(25, 56, w.width - 25, w.height - 2, 10);
+		Gfx.DrawStringMultiCenter(width >> 1, 20, Str.STR_982C_NEW_SHIP_NOW_AVAILABLE, width - 2);
+		Gfx.GfxFillRect(25, 56, width - 25, w.getHeight() - 2, 10);
 
 		Global.SetDParam(0, GetCustomEngineName(engine).id);
-		Gfx.DrawStringMultiCenter(w.width >> 1, 57, Str.STR_982D, w.width - 2);
+		Gfx.DrawStringMultiCenter(width >> 1, 57, Str.STR_982D, width - 2);
 
-		Ship.DrawShipEngine(w.width >> 1, 93, engine, 0);
-		Gfx.GfxFillRect(25, 56, w.width - 56, 110, 0x323 | Sprite.USE_COLORTABLE);
-		DrawShipEngineInfo( engine, w.width >> 1, 131, w.width - 52);
+		Ship.DrawShipEngine(width >> 1, 93, engine, 0);
+		Gfx.GfxFillRect(25, 56, width - 56, 110, 0x323 | Sprite.USE_COLORTABLE);
+		DrawShipEngineInfo( engine, width >> 1, 131, width - 52);
 	}
 
 	static int GetNewsStringNewShipAvail(final NewsItem ni)

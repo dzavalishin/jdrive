@@ -1,15 +1,23 @@
 package game;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.TileTypes;
+import game.xui.DockGui;
+import game.xui.Gui;
+import game.xui.MiscGui;
+import game.xui.ViewPort;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
 
 public class Terraform {
 
 
-	static void CcTerraform(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcTerraform(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			// TODO SndPlayTileFx(SND_1F_SPLAT, tile);
@@ -97,7 +105,7 @@ public class Terraform {
 	 * allows for additional implements that are more local. For example X_Y drag
 	 * of convertrail which belongs in rail_gui.c and not terraform_gui.c
 	 **/
-	static boolean GUIPlaceProcDragXY(final WindowEvent we)
+	public static boolean GUIPlaceProcDragXY(final WindowEvent we)
 	{
 		TileIndex start_tile = we.starttile;
 		TileIndex end_tile = we.tile;
@@ -136,59 +144,59 @@ public class Terraform {
 		'O',
 	};
 
-	static void PlaceProc_DemolishArea(TileIndex tile)
+	public static void PlaceProc_DemolishArea(TileIndex tile)
 	{
 		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_X_AND_Y | Gui.GUI_PlaceProc_DemolishArea);
 	}
 
-	static void PlaceProc_RaiseLand(TileIndex tile)
+	public static void PlaceProc_RaiseLand(TileIndex tile)
 	{
 		GenericRaiseLowerLand(tile, 1);
 	}
 
-	static void PlaceProc_LowerLand(TileIndex tile)
+	public static void PlaceProc_LowerLand(TileIndex tile)
 	{
 		GenericRaiseLowerLand(tile, 0);
 	}
 
-	static void PlaceProc_LevelLand(TileIndex tile)
+	public static void PlaceProc_LevelLand(TileIndex tile)
 	{
 		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_X_AND_Y | Gui.GUI_PlaceProc_LevelArea);
 	}
 
-	static void PlaceProc_PlantTree(TileIndex tile) {}
+	public static void PlaceProc_PlantTree(TileIndex tile) {}
 
-	static void TerraformClick_Lower(Window w)
+	public static void TerraformClick_Lower(Window w)
 	{
 		Gui.HandlePlacePushButton(w, 4, Sprite.ANIMCURSOR_LOWERLAND, 2, Terraform::PlaceProc_LowerLand);
 	}
 
-	static void TerraformClick_Raise(Window w)
+	public static void TerraformClick_Raise(Window w)
 	{
 		Gui.HandlePlacePushButton(w, 5, Sprite.ANIMCURSOR_RAISELAND, 2, Terraform::PlaceProc_RaiseLand);
 	}
 
-	static void TerraformClick_Level(Window w)
+	public static void TerraformClick_Level(Window w)
 	{
 		Gui.HandlePlacePushButton(w, 6, Sprite.SPR_CURSOR_LEVEL_LAND, 2, Terraform::PlaceProc_LevelLand);
 	}
 
-	static void TerraformClick_Dynamite(Window w)
+	public static void TerraformClick_Dynamite(Window w)
 	{
 		Gui.HandlePlacePushButton(w, 7, Sprite.ANIMCURSOR_DEMOLISH , 1, Terraform::PlaceProc_DemolishArea);
 	}
 
-	static void TerraformClick_BuyLand(Window w)
+	public static void TerraformClick_BuyLand(Window w)
 	{
 		Gui.HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_BUY_LAND, 1, Rail::PlaceProc_BuyLand);
 	}
 
-	static void TerraformClick_Trees(Window w)
+	public static void TerraformClick_Trees(Window w)
 	{
 		if (Gui.HandlePlacePushButton(w, 9, Sprite.SPR_CURSOR_MOUSE, 1, Terraform::PlaceProc_PlantTree)) MiscGui.ShowBuildTreesToolbar();
 	}
 
-	static void TerraformClick_PlaceSign(Window w)
+	public static void TerraformClick_PlaceSign(Window w)
 	{
 		Gui.HandlePlacePushButton(w, 10, Sprite.SPR_CURSOR_SIGN, 1, SignStruct::PlaceProc_Sign);
 	}
@@ -254,6 +262,8 @@ public class Terraform {
 
 		case WE_PLACE_PRESIZE: {
 		} break;
+		default:
+			break;
 		}
 	}
 
@@ -285,7 +295,7 @@ public class Terraform {
 		Terraform::TerraformToolbWndProc
 	);
 
-	static void ShowTerraformToolbar()
+	public static void ShowTerraformToolbar()
 	{
 		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
 		Window.AllocateWindowDescFront(_terraform_desc, 0);

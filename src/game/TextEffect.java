@@ -9,6 +9,10 @@ import game.ids.StringID;
 import game.struct.TextMessage;
 import game.util.MemoryPool;
 import game.util.Pixel;
+import game.xui.CursorVars;
+import game.xui.DrawPixelInfo;
+import game.xui.Gfx;
+import game.xui.ViewPort;
 
 public class TextEffect 
 {
@@ -112,7 +116,7 @@ public class TextEffect
 	}
 
 	// Hide the textbox
-	static void UndrawTextMessage()
+	public static void UndrawTextMessage()
 	{
 		CursorVars _cursor = Hal._cursor;
 		if (_textmessage_visible) {
@@ -126,7 +130,7 @@ public class TextEffect
 			//   looks nicely ;)
 			// (and now hope this story above makes sense to you ;))
 
-			if (_cursor.visible) {
+			if (_cursor.isVisible()) {
 				if (_cursor.draw_pos.x + _cursor.draw_size.x >= _textmessage_box_left &&
 					_cursor.draw_pos.x <= _textmessage_box_left + _textmessage_width &&
 					_cursor.draw_pos.y + _cursor.draw_size.y >= Hal._screen.height - _textmessage_box_bottom - _textmessage_box_y &&
@@ -186,7 +190,7 @@ public class TextEffect
 	}
 
 	// Draw the textmessage-box
-	static void DrawTextMessage()
+	public static void DrawTextMessage()
 	{
 		int i, j;
 		boolean has_message;
@@ -251,7 +255,7 @@ public class TextEffect
 		);
 	}
 
-	static void AddTextEffect(int msg, int x, int y, int duration)
+	public static void AddTextEffect(int msg, int x, int y, int duration)
 	{
 		AddTextEffect(new StringID( msg ), x, y, duration);
 	}
@@ -326,7 +330,7 @@ public class TextEffect
 		}
 	}
 
-	static void DrawTextEffects(DrawPixelInfo dpi)
+	public static void DrawTextEffects(DrawPixelInfo dpi)
 	{
 		//TextEffect te;
 

@@ -4,8 +4,8 @@ import game.Engine;
 import game.Landscape;
 import game.TileIndex;
 import game.Vehicle;
-import game.ViewPort;
-import game.Window;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class ConsoleCmds 
 {

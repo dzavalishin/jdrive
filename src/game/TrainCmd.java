@@ -15,6 +15,11 @@ import game.struct.TrainCollideChecker;
 import game.tables.TrainTables;
 import game.util.BitOps;
 import game.util.IntContainer;
+import game.xui.Gfx;
+import game.xui.TrainGui;
+import game.xui.VehicleGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class TrainCmd extends TrainTables 
 {
@@ -320,7 +325,7 @@ public class TrainCmd extends TrainTables
 
 	//extern int _traininfo_vehicle_pitch;
 
-	static void DrawTrainEngine(int x, int y, /*EngineID*/int engine, int image_ormod)
+	public static void DrawTrainEngine(int x, int y, /*EngineID*/int engine, int image_ormod)
 	{
 		final RailVehicleInfo rvi = Engine.RailVehInfo(engine);
 

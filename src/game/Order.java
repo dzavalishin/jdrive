@@ -13,6 +13,8 @@ import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
 import game.util.MemoryPool;
+import game.xui.VehicleGui;
+import game.xui.Window;
 
 //public class Order implements IPoolItem, Serializable 
 public class Order implements Serializable 

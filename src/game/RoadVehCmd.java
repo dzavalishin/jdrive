@@ -4,6 +4,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import game.enums.Owner;
+import game.enums.RoadStopType;
+import game.enums.TileTypes;
 import game.ids.EngineID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
@@ -16,13 +18,17 @@ import game.struct.RoadVehFindData;
 import game.tables.RoadVehCmdTables;
 
 import game.util.BitOps;
+import game.xui.Gfx;
+import game.xui.VehicleGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class RoadVehCmd extends RoadVehCmdTables {
 
 
 	public static final int STATUS_BAR = AirCraft.STATUS_BAR;
 
-	static int GetRoadVehImage(final Vehicle v, int direction)
+	public static int GetRoadVehImage(final Vehicle v, int direction)
 	{
 		int img = v.spritenum;
 		int image;
@@ -40,7 +46,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		return image;
 	}
 
-	static void DrawRoadVehEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
+	public static void DrawRoadVehEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
 	{
 		int spritenum = Engine.RoadVehInfo(engine).image_index;
 
@@ -1697,9 +1703,6 @@ class RoadDriveEntry {
 
 	static void RoadVehiclesYearlyLoop()
 	{
-		//Vehicle v;
-
-		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
 			if (v.type == Vehicle.VEH_Road) {

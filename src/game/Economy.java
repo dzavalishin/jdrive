@@ -16,6 +16,10 @@ import game.struct.PlayerEconomyEntry;
 import game.tables.EconomeTables;
 import game.util.BitOps;
 import game.util.Prices;
+import game.xui.Gfx;
+import game.xui.MiscGui;
+import game.xui.VehicleGui;
+import game.xui.Window;
 
 public class Economy extends EconomeTables 
 {
@@ -62,10 +66,10 @@ public class Economy extends EconomeTables
 	} 
 
 	//static ScoreInfo _score_info[];
-	static int _score_part[][] = new int [Global.MAX_PLAYERS][NUM_SCORE];
+	public static int _score_part[][] = new int [Global.MAX_PLAYERS][NUM_SCORE];
 
 	// Score info
-	static final ScoreInfo _score_info[] = {
+	public static final ScoreInfo _score_info[] = {
 			new ScoreInfo( SCORE_VEHICLES,		120, 			100),
 			new ScoreInfo( SCORE_STATIONS,		80, 			100),
 			new ScoreInfo( SCORE_MIN_PROFIT,	10000,		100),
@@ -166,7 +170,7 @@ public class Economy extends EconomeTables
 
 	// if update is set to true, the economy is updated with this score
 	//  (also the house is updated, should only be true in the on-tick event)
-	static int UpdateCompanyRatingAndValue(Player p, boolean update)
+	public static int UpdateCompanyRatingAndValue(Player p, boolean update)
 	{
 		int owner = p.index.id;
 		int score = 0;
@@ -587,55 +591,55 @@ public class Economy extends EconomeTables
 
 		switch(w.as_news_d().ni.string_id.id >> 4) {
 		case 1:
-			Gfx.DrawStringCentered(w.width>>1, 1, Str.STR_7056_TRANSPORT_COMPANY_IN_TROUBLE, 0);
+			Gfx.DrawStringCentered(w.getWidth()>>1, 1, Str.STR_7056_TRANSPORT_COMPANY_IN_TROUBLE, 0);
 
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
 
 			Gfx.DrawStringMultiCenter(
-					((w.width - 101) >> 1) + 98,
+					((w.getWidth() - 101) >> 1) + 98,
 					90,
 					Str.STR_7057_WILL_BE_SOLD_OFF_OR_DECLARED,
-					w.width - 101);
+					w.getWidth() - 101);
 			break;
 
 		case 2: {
 			int price;
 
-			Gfx.DrawStringCentered(w.width>>1, 1, Str.STR_7059_TRANSPORT_COMPANY_MERGER, 0);
+			Gfx.DrawStringCentered(w.getWidth()>>1, 1, Str.STR_7059_TRANSPORT_COMPANY_MERGER, 0);
 			Global.COPY_IN_DPARAM(0,w.as_news_d().ni.params, 2);
 			Global.SetDParam(2, p.name_1);
 			Global.SetDParam(3, p.name_2);
 			price = w.as_news_d().ni.params[2];
 			Global.SetDParam(4, price);
 			Gfx.DrawStringMultiCenter(
-					((w.width - 101) >> 1) + 98,
+					((w.getWidth() - 101) >> 1) + 98,
 					90,
 					price==0 ? Str.STR_707F_HAS_BEEN_TAKEN_OVER_BY : Str.STR_705A_HAS_BEEN_SOLD_TO_FOR,
-							w.width - 101);
+							w.getWidth() - 101);
 			break;
 		}
 
 		case 3:
-			Gfx.DrawStringCentered(w.width>>1, 1, Str.STR_705C_BANKRUPT, 0);
+			Gfx.DrawStringCentered(w.getWidth()>>1, 1, Str.STR_705C_BANKRUPT, 0);
 			Global.COPY_IN_DPARAM(0,w.as_news_d().ni.params, 2);
 			Gfx.DrawStringMultiCenter(
-					((w.width - 101) >> 1) + 98,
+					((w.getWidth() - 101) >> 1) + 98,
 					90,
 					Str.STR_705D_HAS_BEEN_CLOSED_DOWN_BY,
-					w.width - 101);
+					w.getWidth() - 101);
 			break;
 
 		case 4:
-			Gfx.DrawStringCentered(w.width>>1, 1, Str.STR_705E_NEW_TRANSPORT_COMPANY_LAUNCHED, 0);
+			Gfx.DrawStringCentered(w.getWidth()>>1, 1, Str.STR_705E_NEW_TRANSPORT_COMPANY_LAUNCHED, 0);
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
 			Global.COPY_IN_DPARAM(2,w.as_news_d().ni.params, 2);
 			Gfx.DrawStringMultiCenter(
-					((w.width - 101) >> 1) + 98,
+					((w.getWidth() - 101) >> 1) + 98,
 					90,
 					Str.STR_705F_STARTS_CONSTRUCTION_NEAR,
-					w.width - 101);
+					w.getWidth() - 101);
 			break;
 
 		default:
@@ -848,7 +852,7 @@ public class Economy extends EconomeTables
 		price_base_multiplier[price] = factor;
 	}
 
-	static void StartupEconomy()
+	public static void StartupEconomy()
 	{
 		int i;
 
@@ -1061,7 +1065,7 @@ public class Economy extends EconomeTables
 			SlObject(&_subsidies[index], _subsidies_desc);
 	} */
 
-	static int GetTransportedGoodsIncome(int num_pieces, int dist, int transit_days, int cargo_type)
+	public static int GetTransportedGoodsIncome(int num_pieces, int dist, int transit_days, int cargo_type)
 	{
 		int cargo = cargo_type;
 		int f;

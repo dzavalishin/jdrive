@@ -11,6 +11,13 @@ import game.tables.SoundFx;
 import game.util.BitOps;
 import game.util.GameDate;
 import game.util.wcustom.def_d;
+import game.xui.Gfx;
+import game.xui.ViewPort;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
+import game.xui.WindowMessage;
 
 public class NewsItem {
 	StringID string_id;
@@ -668,7 +675,7 @@ public class NewsItem {
 		}
 	}
 
-	static void ShowLastNewsMessage()
+	public static void ShowLastNewsMessage()
 	{
 		if (_forced_news == INVALID_NEWS) {
 			ShowNewsMessage(_current_news);
@@ -834,7 +841,7 @@ public class NewsItem {
 			NewsItem::MessageHistoryWndProc
 			);
 
-	static void ShowMessageHistory()
+	public static void ShowMessageHistory()
 	{
 		Window w;
 
@@ -1036,7 +1043,7 @@ public class NewsItem {
 			NewsItem::MessageOptionsWndProc
 			);
 
-	static void ShowMessageOptions()
+	public static void ShowMessageOptions()
 	{
 		Window.DeleteWindowById(Window.WC_GAME_OPTIONS, 0);
 		Window.AllocateWindowDesc(_message_options_desc, 0);

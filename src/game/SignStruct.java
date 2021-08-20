@@ -13,7 +13,11 @@ import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.struct.Point;
+import game.struct.StringSpriteToDraw;
 import game.util.MemoryPool;
+import game.xui.Gui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class SignStruct implements IPoolItem
 {
@@ -59,7 +63,7 @@ public class SignStruct implements IPoolItem
 	/**
 	 * Get the pointer to the sign with index 'index'
 	 */
-	static SignStruct GetSign(int index)
+	public static SignStruct GetSign(int index)
 	{
 		return _sign_pool.GetItemFromPool(index);
 	}
@@ -67,7 +71,7 @@ public class SignStruct implements IPoolItem
 	/**
 	 * Get the current size of the SignPool
 	 */
-	static int GetSignPoolSize()
+	public static int GetSignPoolSize()
 	{
 		return _sign_pool.total_items();
 	}
@@ -286,7 +290,7 @@ public class SignStruct implements IPoolItem
 	 *  sign-tool is selected
 	 *
 	 */
-	static void PlaceProc_Sign(TileIndex tile)
+	public static void PlaceProc_Sign(TileIndex tile)
 	{
 		Cmd.DoCommandP(tile, 0, 0, SignStruct::CcPlaceSign, Cmd.CMD_PLACE_SIGN | Cmd.CMD_MSG(Str.STR_2809_CAN_T_PLACE_SIGN_HERE));
 	}

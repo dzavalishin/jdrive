@@ -1,12 +1,15 @@
 package game;
 
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
 import game.util.GenLandTable;
 import game.util.IntContainer;
+import game.xui.ViewPort;
 
 public class Landscape extends GenLandTable
 {
@@ -65,7 +68,7 @@ public class Landscape extends GenLandTable
 	}
 
 	/** find the landscape height for the coordinates x y */
-	static void FindLandscapeHeight(TileInfo ti, int x, int y)
+	public static void FindLandscapeHeight(TileInfo ti, int x, int y)
 	{
 		ti.x = x;
 		ti.y = y;
@@ -274,17 +277,17 @@ public class Landscape extends GenLandTable
 		_tile_type_procs[tile.GetTileType().ordinal()].animate_tile_proc.accept(tile);
 	}
 
-	static void ClickTile(TileIndex tile)
+	public static void ClickTile(TileIndex tile)
 	{
 		_tile_type_procs[tile.GetTileType().ordinal()].click_tile_proc.accept(tile);
 	}
 
-	static void DrawTile(TileInfo ti)
+	public static void DrawTile(TileInfo ti)
 	{
 		_tile_type_procs[ti.type].draw_tile_proc.accept(ti);
 	}
 
-	static TileDesc GetTileDesc(TileIndex tile)
+	public static TileDesc GetTileDesc(TileIndex tile)
 	{
 		return _tile_type_procs[tile.GetTileType().ordinal()].get_tile_desc_proc.apply(tile);
 	}
@@ -360,7 +363,7 @@ public class Landscape extends GenLandTable
 
 
 	/* utility function used to modify a tile */
-	static void ModifyTile(TileIndex tile, TileTypes type, int flags, int ... args)
+	public static void ModifyTile(TileIndex tile, TileTypes type, int flags, int ... args)
 	{
 		int i;
 		int p = 0;
@@ -728,7 +731,7 @@ public class Landscape extends GenLandTable
 		TrainCmd.OnTick_Train();
 	}
 
-	static TileIndex AdjustTileCoordRandomly(TileIndex a, int rng)
+	public static TileIndex AdjustTileCoordRandomly(TileIndex a, int rng)
 	{
 		int rn = rng;
 		int r = Global.Random();

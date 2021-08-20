@@ -2,6 +2,11 @@ package game;
 
 import game.ids.StringID;
 import game.struct.BridgeData;
+import game.xui.Gfx;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
 
 /** Struct containing information about a single bridge type
  */
@@ -61,10 +66,10 @@ public class Bridge
 
 			w.DrawWindowWidgets();
 
-			for (i = 0; i < 4 && i + w.vscroll.pos < _bridgedata.count; i++) {
-				final Bridge b = _bridge[_bridgedata.indexes[i + w.vscroll.pos]];
+			for (i = 0; i < 4 && i + w.vscroll.getPos() < _bridgedata.count; i++) {
+				final Bridge b = _bridge[_bridgedata.indexes[i + w.vscroll.getPos()]];
 
-				Global.SetDParam(2, _bridgedata.costs[i + w.vscroll.pos]);
+				Global.SetDParam(2, _bridgedata.costs[i + w.vscroll.getPos()]);
 				Global.SetDParam(1, (b.speed >> 4) * 10);
 				Global.SetDParam(0, b.material);
 				Gfx.DrawSprite(b.sprite, 3, 15 + i * 22);
@@ -86,9 +91,11 @@ public class Bridge
 		case WE_CLICK:
 			if (e.widget == 2) {
 				int ind = ((int)e.pt.y - 14) / 22;
-				if (ind < 4 && (ind += w.vscroll.pos) < _bridgedata.count)
+				if (ind < 4 && (ind += w.vscroll.getPos()) < _bridgedata.count)
 					BuildBridge(w, ind);
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -127,7 +134,7 @@ public class Bridge
 	);
 
 
-	static void ShowBuildBridgeWindow(TileIndex start, TileIndex end, int bridge_type)
+	public static void ShowBuildBridgeWindow(TileIndex start, TileIndex end, int bridge_type)
 	{
 		int j = 0;
 		int ret;

@@ -5,6 +5,8 @@ import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ifaces.CommandCallback;
 import game.ifaces.CommandProc;
+import game.xui.MiscGui;
+import game.xui.SettingsGui;
 
 public class Cmd {
 
@@ -180,7 +182,7 @@ public class Cmd {
 	 * @param res the resulting value from the command to be checked
 	 * @return Return true if the command failed, false otherwise
 	 */
-	static boolean CmdFailed(int res)
+	public static boolean CmdFailed(int res)
 	{
 		// lower 16bits are the StringID of the possible error
 		return res <= (CMD_ERROR | Str.INVALID_STRING_ID.id);
@@ -346,7 +348,7 @@ public class Cmd {
 
 	int GetCommandFlags(int cmd) {return _command_proc_table[cmd & 0xFF].flags;}
 
-	static int DoCommandByTile(TileIndex tile, int p1, int p2, int flags, int procc)
+	public static int DoCommandByTile(TileIndex tile, int p1, int p2, int flags, int procc)
 	{
 		if(null == tile)
 		{
@@ -359,7 +361,7 @@ public class Cmd {
 
 	static int _docommand_recursive;
 
-	static int DoCommand(int x, int y, int p1, int p2, int flags, int procc)
+	public static int DoCommand(int x, int y, int p1, int p2, int flags, int procc)
 	{
 		int res;
 		CommandProc proc;
@@ -441,7 +443,7 @@ public class Cmd {
 
 	// toplevel network safe docommand function for the current player. must not be called recursively.
 	// the callback is called when the command succeeded or failed.
-	static boolean DoCommandP(TileIndex tile, int p1, int p2, CommandCallback callback, int cmd)
+	public static boolean DoCommandP(TileIndex tile, int p1, int p2, CommandCallback callback, int cmd)
 	{
 		int res = 0,res2;
 		CommandProc proc;

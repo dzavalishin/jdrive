@@ -6,6 +6,11 @@ import game.ids.VehicleID;
 import game.struct.NPFFindStationOrTileData;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
+import game.xui.EngineGui;
+import game.xui.Gfx;
+import game.xui.VehicleGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class Ship {
 
@@ -20,7 +25,7 @@ public class Ship {
 		return  (r | r >>> 8);
 	}
 
-	static void DrawShipEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
+	public static void DrawShipEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
 	{
 		int spritenum = EngineGui.ShipVehInfo(engine).image_index;
 		// TODO custom spr
@@ -36,7 +41,7 @@ public class Ship {
 		Gfx.DrawSprite((6 + _ship_sprites[spritenum]) | image_ormod, x, y);
 	}
 
-	static int GetShipImage(final Vehicle v, int direction)
+	public static int GetShipImage(final Vehicle v, int direction)
 	{
 		int spritenum = v.spritenum;
 

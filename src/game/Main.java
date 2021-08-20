@@ -13,6 +13,13 @@ import game.enums.ThreadMsg;
 import game.ids.PlayerID;
 import game.util.FileIO;
 import game.util.Strings;
+import game.xui.Gfx;
+import game.xui.GfxInit;
+import game.xui.Gui;
+import game.xui.SettingsGui;
+import game.xui.VehicleGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 import game.util.BitOps;
 
 public class Main {
@@ -635,7 +642,7 @@ public class Main {
 		*/
 	}
 
-	static void SwitchMode(SwitchModes new_mode)
+	public static void SwitchMode(SwitchModes new_mode)
 	{
 		/*
 		// If we are saving something, the network stays in his current state

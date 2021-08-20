@@ -1,14 +1,17 @@
 package game;
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.Point;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiffC;
 import game.tables.TreeTables;
 import game.util.ArrayPtr;
 import game.util.BitOps;
 import game.util.TownTables;
+import game.xui.ViewPort;
 
 
 public class Tree  extends TreeTables {
@@ -93,7 +96,7 @@ public class Tree  extends TreeTables {
 		} while (--i > 0);
 	}
 
-	static void PlaceTreesRandomly()
+	public static void PlaceTreesRandomly()
 	{
 		int i;
 

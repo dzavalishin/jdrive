@@ -6,13 +6,26 @@ import java.util.function.Consumer;
 
 import game.TrackPathFinder.TPFHashEnt;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
+import game.ifaces.OnButtonClick;
 import game.ifaces.TileTypeProcs;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.Point;
+import game.struct.TileDesc;
 import game.tables.RailTables;
 import game.util.BitOps;
 import game.util.Sprites;
+import game.xui.Gfx;
+import game.xui.Gui;
+import game.xui.MiscGui;
+import game.xui.TileHighlightData;
+import game.xui.TrainGui;
+import game.xui.ViewPort;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
 
 public class Rail extends RailTables {
 
@@ -3415,19 +3428,19 @@ public class Rail extends RailTables {
 		final RailtypeInfo rti = GetRailTypeInfo(railtype);
 
 		assert(railtype < RAILTYPE_END);
-		//w.widget.get(RTW_CAPTION).unkA = rti.strings.toolbar_caption;
-		w.widget.get(RTW_CAPTION).unkA = rti.toolbar_caption.id;
-		w.widget.get(RTW_BUILD_NS).unkA = rti.gui_sprites.build_ns_rail.id;
-		w.widget.get(RTW_BUILD_X).unkA = rti.gui_sprites.build_x_rail.id;
-		w.widget.get(RTW_BUILD_EW).unkA = rti.gui_sprites.build_ew_rail.id;
-		w.widget.get(RTW_BUILD_Y).unkA = rti.gui_sprites.build_y_rail.id;
-		w.widget.get(RTW_AUTORAIL).unkA = rti.gui_sprites.auto_rail.id;
-		w.widget.get(RTW_BUILD_DEPOT).unkA = rti.gui_sprites.build_depot.id;
-		w.widget.get(RTW_CONVERT_RAIL).unkA = rti.gui_sprites.convert_rail.id;
-		w.widget.get(RTW_BUILD_TUNNEL).unkA = rti.gui_sprites.build_tunnel.id;
+		//w.getWidget(RTW_CAPTION).unkA = rti.strings.toolbar_caption;
+		w.getWidget(RTW_CAPTION).unkA = rti.toolbar_caption.id;
+		w.getWidget(RTW_BUILD_NS).unkA = rti.gui_sprites.build_ns_rail.id;
+		w.getWidget(RTW_BUILD_X).unkA = rti.gui_sprites.build_x_rail.id;
+		w.getWidget(RTW_BUILD_EW).unkA = rti.gui_sprites.build_ew_rail.id;
+		w.getWidget(RTW_BUILD_Y).unkA = rti.gui_sprites.build_y_rail.id;
+		w.getWidget(RTW_AUTORAIL).unkA = rti.gui_sprites.auto_rail.id;
+		w.getWidget(RTW_BUILD_DEPOT).unkA = rti.gui_sprites.build_depot.id;
+		w.getWidget(RTW_CONVERT_RAIL).unkA = rti.gui_sprites.convert_rail.id;
+		w.getWidget(RTW_BUILD_TUNNEL).unkA = rti.gui_sprites.build_tunnel.id;
 	}
 
-	static void ShowBuildRailToolbar(/*RailType*/ int railtype, int button)
+	public static void ShowBuildRailToolbar(/*RailType*/ int railtype, int button)
 	{
 		Window w;
 
@@ -3706,12 +3719,12 @@ public class Rail extends RailTables {
 		case WE_PAINT: {
 			int i;
 
-			w.click_state = (1 << 3) << (_cur_waypoint_type - w.hscroll.pos);
+			w.click_state = (1 << 3) << (_cur_waypoint_type - w.hscroll.getPos());
 			w.DrawWindowWidgets();
 
 			for (i = 0; i < 5; i++) {
-				if (w.hscroll.pos + i < _waypoint_count) {
-					WayPoint.DrawWaypointSprite(2 + i * 68, 25, w.hscroll.pos + i, _cur_railtype);
+				if (w.hscroll.getPos() + i < _waypoint_count) {
+					WayPoint.DrawWaypointSprite(2 + i * 68, 25, w.hscroll.getPos() + i, _cur_railtype);
 				}
 			}
 			break;
@@ -3719,7 +3732,7 @@ public class Rail extends RailTables {
 		case WE_CLICK: {
 			switch (e.widget) {
 			case 3: case 4: case 5: case 6: case 7:
-				_cur_waypoint_type =  (e.widget - 3 + w.hscroll.pos);
+				_cur_waypoint_type =  (e.widget - 3 + w.hscroll.getPos());
 				//SndPlayFx(SND_15_BEEP);
 				w.SetWindowDirty();
 				break;

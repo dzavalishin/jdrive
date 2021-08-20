@@ -24,6 +24,7 @@ import game.struct.DrawTileSprites;
 import game.struct.GoodsEntry;
 import game.struct.Point;
 import game.struct.ProducedCargo;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiff;
 import game.struct.TileIndexDiffC;
 import game.tables.StationTables;
@@ -31,6 +32,10 @@ import game.util.BitOps;
 import game.util.IntContainer;
 import game.util.MemoryPool;
 import game.util.VehicleQueue;
+import game.xui.Gfx;
+import game.xui.StationGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class Station extends StationTables implements IPoolItem
 {
@@ -334,7 +339,7 @@ public class Station extends StationTables implements IPoolItem
 	}
 
 	// Get a list of the cargo types that are accepted around the tile.
-	static void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile0,
+	public static void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile0,
 			int w, int h, int rad)
 	{
 		int x,y;

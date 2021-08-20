@@ -1,5 +1,6 @@
 package game;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.PlayerID;
@@ -15,6 +16,15 @@ import game.util.BitOps;
 import game.util.GameDate;
 import game.util.YearMonthDay;
 import game.util.wcustom.vehiclelist_d;
+import game.xui.Gfx;
+import game.xui.MiscGui;
+import game.xui.OrderGui;
+import game.xui.VehicleGui;
+import game.xui.ViewPort;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
 
 import java.util.Iterator;
 import java.util.function.BiConsumer;
@@ -109,7 +119,7 @@ public class AirCraft extends AirCraftTables {
 		return direction + _aircraft_sprite[spritenum];
 	}
 
-	static void DrawAircraftEngine(int x, int y, int engine, int image_ormod)
+	public static void DrawAircraftEngine(int x, int y, int engine, int image_ormod)
 	{
 		int spritenum = Engine.AircraftVehInfo(engine).image_index;
 		int sprite = (6 + _aircraft_sprite[spritenum]);
@@ -313,7 +323,7 @@ public class AirCraft extends AirCraftTables {
 		return value;
 	}
 
-	static boolean IsAircraftHangarTile(TileIndex tile)
+	public static boolean IsAircraftHangarTile(TileIndex tile)
 	{
 		// 0x56 - hangar facing other way international airport (86)
 		// 0x20 - hangar large airport (32)
@@ -2423,7 +2433,7 @@ public class AirCraft extends AirCraftTables {
 				int x = 2;
 				int y = 15;
 				int sel = w.as_buildtrain_d().sel_index;
-				int pos = w.vscroll.pos;
+				int pos = w.vscroll.getPos();
 				/*EngineID*/ int engine_id = Global.AIRCRAFT_ENGINES_INDEX;
 				//EngineID 
 				int selected_id = Engine.INVALID_ENGINE;
@@ -2432,7 +2442,7 @@ public class AirCraft extends AirCraftTables {
 					final Engine e = Engine.GetEngine(ei++);
 					if (BitOps.HASBIT(e.player_avail, Global._local_player.id)) {
 						if (sel==0) selected_id = engine_id;
-						if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.cap, 0)) {
+						if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.getCap(), 0)) {
 							Gfx.DrawString(x+62, y+7, Engine.GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
 							DrawAircraftEngine(x+29, y+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
 							y += 24;
@@ -2446,7 +2456,7 @@ public class AirCraft extends AirCraftTables {
 				w.as_buildtrain_d().sel_engine =selected_id;
 
 				if (selected_id != Engine.INVALID_ENGINE) {
-					DrawAircraftPurchaseInfo(2, w.widget.get(4).top + 1, EngineID.get(selected_id) );
+					DrawAircraftPurchaseInfo(2, w.getWidget(4).top + 1, EngineID.get(selected_id) );
 				}
 			}
 		} break;
@@ -2455,8 +2465,8 @@ public class AirCraft extends AirCraftTables {
 			switch(we.widget) {
 			case 2: { /* listbox */
 				int i = (we.pt.y - 14) / 24;
-				if (i < w.vscroll.cap) {
-					w.as_buildtrain_d().sel_index =  (i + w.vscroll.pos);
+				if (i < w.vscroll.getCap()) {
+					w.as_buildtrain_d().sel_index =  (i + w.vscroll.getPos());
 					w.SetWindowDirty();
 				}
 			} break;
@@ -2474,7 +2484,7 @@ public class AirCraft extends AirCraftTables {
 				if (sel_eng != Engine.INVALID_ENGINE) {
 					w.as_buildtrain_d().rename_engine = sel_eng;
 					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng),
-							new StringID(Str.STR_A039_RENAME_AIRCRAFT_TYPE), 31, 160, w.window_class, w.window_number);
+							new StringID(Str.STR_A039_RENAME_AIRCRAFT_TYPE), 31, 160, w.getWindowClass(), w.window_number);
 				}
 			} break;
 			}
@@ -2496,7 +2506,7 @@ public class AirCraft extends AirCraftTables {
 
 		case WE_RESIZE:
 			w.vscroll.cap += we.diff.y / 24;
-			w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
+			w.getWidget(2).unkA = (w.vscroll.getCap() << 8) + 1;
 			break;
 		default:
 			break;
@@ -2532,7 +2542,7 @@ public class AirCraft extends AirCraftTables {
 		w = Window.AllocateWindowDesc(_new_aircraft_desc);
 		w.window_number = tile.tile;
 		w.vscroll.cap = 4;
-		w.widget.get(2).unkA = (w.vscroll.cap << 8) + 1;
+		w.getWidget(2).unkA = (w.vscroll.getCap() << 8) + 1;
 
 		w.resize.step_height = 24;
 
@@ -2880,8 +2890,8 @@ public class AirCraft extends AirCraftTables {
 			}
 
 			/* draw the flag plus orders */
-			Gfx.DrawSprite((0 != (v.vehstatus & Vehicle.VS_STOPPED)) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.widget.get(5).top + 1);
-			Gfx.DrawStringCenteredTruncated(w.widget.get(5).left + 8, w.widget.get(5).right, w.widget.get(5).top + 1, new StringID(str), 0);
+			Gfx.DrawSprite((0 != (v.vehstatus & Vehicle.VS_STOPPED)) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.getWidget(5).top + 1);
+			Gfx.DrawStringCenteredTruncated(w.getWidget(5).left + 8, w.getWidget(5).right, w.getWidget(5).top + 1, new StringID(str), 0);
 			w.DrawWindowViewport();
 		} break;
 
@@ -2915,10 +2925,7 @@ public class AirCraft extends AirCraftTables {
 		} break;
 
 		case WE_RESIZE:
-			w.viewport.width  += e.diff.x;
-			w.viewport.height += e.diff.y;
-			w.viewport.virtual_width  += e.diff.x;
-			w.viewport.virtual_height += e.diff.y;
+			w.resizeViewPort(e);
 			break;
 
 		case WE_DESTROY:
@@ -2951,7 +2958,7 @@ public class AirCraft extends AirCraftTables {
 	);
 
 
-	static void ShowAircraftViewWindow(final Vehicle  v)
+	public static void ShowAircraftViewWindow(final Vehicle  v)
 	{
 		Window  w = Window.AllocateWindowDescFront(_aircraft_view_desc, v.index);
 
@@ -2989,14 +2996,14 @@ public class AirCraft extends AirCraftTables {
 			}
 		}
 		
-		MiscGui.SetVScrollCount(w, (num + w.hscroll.cap - 1) / w.hscroll.cap);
+		MiscGui.SetVScrollCount(w, (num + w.hscroll.getCap() - 1) / w.hscroll.getCap());
 
 		Global.SetDParam(0, tile.getMap().m2);
 		w.DrawWindowWidgets();
 
 		x = 2;
 		y = 15;
-		num = w.vscroll.pos * w.hscroll.cap;
+		num = w.vscroll.getPos() * w.hscroll.getCap();
 
 		//FOR_ALL_VEHICLES(v) 
 		//Vehicle.forEach( (v) ->
@@ -3009,7 +3016,7 @@ public class AirCraft extends AirCraftTables {
 					v.subtype <= 2 &&
 					0 != (v.vehstatus&Vehicle.VS_HIDDEN) &&
 					v.tile.getTile() == tile.getTile() &&
-					--num < 0 && num >= -w.vscroll.cap * w.hscroll.cap) {
+					--num < 0 && num >= -w.vscroll.getCap() * w.hscroll.getCap()) {
 
 				DrawAircraftImage(v, x+12, y, VehicleID.get( w.as_traindepot_d().sel ) );
 
@@ -3018,7 +3025,7 @@ public class AirCraft extends AirCraftTables {
 
 				Gfx.DrawSprite( 0 != (v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x, y + 12);
 
-				if ((x+=74) == 2 + 74 * w.hscroll.cap) {
+				if ((x+=74) == 2 + 74 * w.hscroll.getCap()) {
 					x = 2;
 					y += 24;
 				}
@@ -3034,15 +3041,15 @@ public class AirCraft extends AirCraftTables {
 
 		xt = x / 74;
 		xm = x % 74;
-		if (xt >= w.hscroll.cap)
+		if (xt >= w.hscroll.getCap())
 			return 1;
 
 		row = (y - 14) / 24;
 		ym = (y - 14) % 24;
-		if (row >= w.vscroll.cap)
+		if (row >= w.vscroll.getCap())
 			return 1;
 
-		pos = (row + w.vscroll.pos) * w.hscroll.cap + xt;
+		pos = (row + w.vscroll.getPos()) * w.hscroll.getCap() + xt;
 
 		int tile = w.window_number;
 		//FOR_ALL_VEHICLES(v)
@@ -3228,7 +3235,7 @@ public class AirCraft extends AirCraftTables {
 		case WE_RESIZE:
 			w.vscroll.cap += e.diff.y / 24;
 			w.hscroll.cap += e.diff.x / 74;
-			w.widget.get(5).unkA = (w.vscroll.cap << 8) + w.hscroll.cap;
+			w.getWidget(5).unkA = (w.vscroll.getCap() << 8) + w.hscroll.getCap();
 			break;
 		default:
 			break;
@@ -3371,13 +3378,13 @@ public class AirCraft extends AirCraftTables {
 					/* Company Name -- (###) Aircraft */
 					Global.SetDParam(0, p.name_1);
 					Global.SetDParam(1, p.name_2);
-					Global.SetDParam(2, w.vscroll.count);
-					w.widget.get(1).unkA = Str.STR_A009_AIRCRAFT;
+					Global.SetDParam(2, w.vscroll.getCount());
+					w.getWidget(1).unkA = Str.STR_A009_AIRCRAFT;
 				} else {
 					/* Station Name -- (###) Aircraft */
 					Global.SetDParam(0, station);
 					Global.SetDParam(1, w.vscroll.count);
-					w.widget.get(1).unkA = Str.STR_SCHEDULED_AIRCRAFT;
+					w.getWidget(1).unkA = Str.STR_SCHEDULED_AIRCRAFT;
 				}
 				w.DrawWindowWidgets();
 			}
@@ -3386,8 +3393,8 @@ public class AirCraft extends AirCraftTables {
 			/* draw arrow pointing up/down for ascending/descending sorting */
 			Gfx.DoDrawString( (vl.flags & Vehicle.VL_DESC) != 0 ? Gfx.DOWNARROW : Gfx.UPARROW, 69, 15, 0x10);
 
-			max = Math.min(w.vscroll.pos + w.vscroll.cap, vl.list_length);
-			for (i = w.vscroll.pos; i < max; ++i) {
+			max = Math.min(w.vscroll.getPos() + w.vscroll.getCap(), vl.list_length);
+			for (i = w.vscroll.getPos(); i < max; ++i) {
 				Vehicle v = Vehicle.GetVehicle(vl.sort_list[i].index);
 				//StringID 
 				int str;
@@ -3436,9 +3443,9 @@ public class AirCraft extends AirCraftTables {
 			case 7: { /* Matrix to show vehicles */
 				int id_v = (e.pt.y - VehicleGui.PLY_WND_PRC__OFFSET_TOP_WIDGET) / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
 
-				if (id_v >= w.vscroll.cap) return; // click out of bounds
+				if (id_v >= w.vscroll.getCap()) return; // click out of bounds
 
-				id_v += w.vscroll.pos;
+				id_v += w.vscroll.getPos();
 
 				{
 					Vehicle v;
@@ -3527,7 +3534,7 @@ public class AirCraft extends AirCraftTables {
 		case WE_RESIZE:
 			/* Update the scroll + matrix */
 			w.vscroll.cap += e.diff.y / VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
-			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
+			w.getWidget(7).unkA = (w.vscroll.getCap() << 8) + 1;
 			break;
 		default:
 			break;
@@ -3555,7 +3562,7 @@ public class AirCraft extends AirCraftTables {
 		ShowPlayerAircraft(player.id, station.id);
 	}
 	
-	static void ShowPlayerAircraft(int player, int station)
+	public static void ShowPlayerAircraft(int player, int station)
 	{
 		Window w;
 
@@ -3568,7 +3575,7 @@ public class AirCraft extends AirCraftTables {
 		if (w != null) {
 			w.caption_color =  w.window_number;
 			w.vscroll.cap = 4;
-			w.widget.get(7).unkA = (w.vscroll.cap << 8) + 1;
+			w.getWidget(7).unkA = (w.vscroll.getCap() << 8) + 1;
 			w.resize.step_height = VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
 		}
 	}

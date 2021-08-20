@@ -6,10 +6,10 @@ import java.util.function.Function;
 import java.util.function.ToIntBiFunction;
 
 import game.AcceptedCargo;
-import game.TileDesc;
 import game.TileIndex;
 import game.TileInfo;
 import game.struct.ProducedCargo;
+import game.struct.TileDesc;
 
 public class TileTypeProcs implements Serializable 
 {

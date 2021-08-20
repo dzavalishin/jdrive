@@ -8,6 +8,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import game.util.Pixel;
+import game.xui.Gfx;
+import game.xui.Window;
 
 class JavaHal extends Hal
 {

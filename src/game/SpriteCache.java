@@ -453,25 +453,25 @@ public class SpriteCache {
 		return p;
 	}	
 
-	static Sprite GetSprite(SpriteID sprite)
+	public static Sprite GetSprite(SpriteID sprite)
 	{
 		return GetRawSprite(sprite);
 	}
 
-	static Sprite GetSprite(int sprite)
+	public static Sprite GetSprite(int sprite)
 	{
 		return GetRawSprite(sprite);
 	}
 
 	
 	// TODO do we need it?
-	static byte[] GetNonSpriteData(SpriteID sprite)
+	public static byte[] GetNonSpriteData(SpriteID sprite)
 	{
 		DataCarrier dc = (DataCarrier) GetRawSprite(sprite);
 		return dc.data;
 	}
 
-	static byte[] GetNonSprite(int sprite)
+	public static byte[] GetNonSprite(int sprite)
 	{
 		DataCarrier dc = (DataCarrier) GetRawSprite(sprite);
 		return dc.data;

@@ -3,24 +3,24 @@ package game;
 public class Cheat {
 	boolean been_used;	// has this cheat been used before?
 	//byte value;			// active?
-	boolean value;			// active?
+	public final boolean value;			// active?
 
 	public Cheat() {
 		been_used = false;	
 		value = false;			
 	}
 
-	static class Cheats {
-		Cheat magic_bulldozer;		// dynamite industries, unmovables
-		Cheat switch_player;			// change to another player
-		Cheat money;							// get rich
-		Cheat crossing_tunnels;		// allow tunnels that cross each other
-		Cheat build_in_pause;			// build while in pause mode
-		Cheat no_jetcrash;				// no jet will crash on small airports anymore
-		Cheat switch_climate;
-		Cheat change_date;				//changes date ingame
-		Cheat setup_prod;				//setup raw-material production in game
-		Cheat day_length;				// change day length
+	public static class Cheats {
+		public Cheat magic_bulldozer;		// dynamite industries, unmovables
+		public Cheat switch_player;			// change to another player
+		public Cheat money;							// get rich
+		public Cheat crossing_tunnels;		// allow tunnels that cross each other
+		public Cheat build_in_pause;			// build while in pause mode
+		public Cheat no_jetcrash;				// no jet will crash on small airports anymore
+		public Cheat switch_climate;
+		public Cheat change_date;				//changes date ingame
+		public Cheat setup_prod;				//setup raw-material production in game
+		public Cheat day_length;				// change day length
 
 		public Cheats() {
 

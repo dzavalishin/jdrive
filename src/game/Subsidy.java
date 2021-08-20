@@ -1,6 +1,8 @@
 package game;
 
 import game.struct.Pair;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 class Subsidy {
 	int cargo_type;

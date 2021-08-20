@@ -24,6 +24,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import game.xui.Gfx;
+import game.xui.Window;
+
 
 
 public class MainWindow extends JPanel implements ActionListener

@@ -10,6 +10,15 @@ import game.tables.IndustryTables;
 import game.tables.IndustryTileTable;
 import game.util.BitOps;
 import game.util.MemoryPool;
+import game.xui.Gfx;
+import game.xui.Gui;
+import game.xui.MiscGui;
+import game.xui.SettingsGui;
+import game.xui.ViewPort;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.ids.PlayerID;
@@ -18,6 +27,7 @@ import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.ifaces.TileTypeProcs;
 import game.struct.ProducedCargo;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiffC;
 import game.tables.DrawIndustrySpec1Struct;
 import game.tables.DrawIndustrySpec4Struct;
@@ -1604,7 +1614,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	}
 
 
-	static Industry CreateNewIndustry(TileIndex tile, int type)
+	public static Industry CreateNewIndustry(TileIndex tile, int type)
 	{
 		final Town t;
 		final IndustryTileTable [] it;
@@ -1670,7 +1680,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 	}
 
-	static void GenerateIndustries()
+	public static void GenerateIndustries()
 	{
 		int i = 0;
 		final byte [] b = _industry_create_table[GameOptions._opt.landscape];
@@ -2282,7 +2292,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			},
 	};
 
-	static void ShowBuildIndustryWindow()
+	public static void ShowBuildIndustryWindow()
 	{
 		Window.AllocateWindowDescFront(_industry_window_desc[BitOps.b2i(Global._patches.build_rawmaterial_ind)][GameOptions._opt_ptr.landscape],0);
 	}
@@ -2695,7 +2705,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 
 
-	static void ShowIndustryDirectory()
+	public static void ShowIndustryDirectory()
 	{
 		/* Industry List */
 		Window w = Window.AllocateWindowDescFront(_industry_directory_desc, 0);
