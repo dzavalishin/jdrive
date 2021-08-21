@@ -5166,5 +5166,5 @@ public class StringTable
 
 public class StringHashCodes {
 	LANGUAGE_PACK_IDENT = 0x474E414C, // Big Endian value for 'LANG' (LE is 0x 4C 41 4E 47)
-	LANGUAGE_PACK_VERSION = 0xF798C32E,
+	LANGUAGE_PACK_VERSION = 0xC06FD5EF,
 }

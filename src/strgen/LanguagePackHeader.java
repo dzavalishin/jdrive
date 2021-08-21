@@ -19,8 +19,6 @@ public class LanguagePackHeader
 		
 		public void writeTo(DataOutputStream f) throws IOException 
 		{
-			//DataOutputStream d = new DataOutputStream(f);
-			//BitOps.writeInt32(f, ident);
 			f.writeInt(ident);
 			f.writeInt(version);
 			BitOps.writeFixedString(f,name,32);
@@ -28,7 +26,7 @@ public class LanguagePackHeader
 			BitOps.writeFixedString(f,isocode,16);
 			
 			for(Integer i : offsets)
-				f.writeInt(i);
+				f.writeShort(i);
 			
 			f.writeByte(plural_form);
 			
