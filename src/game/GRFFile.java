@@ -2,9 +2,7 @@ package game;
 
 import java.util.Arrays;
 
-import game.ids.CargoID;
 import game.ids.EngineID;
-import game.ids.SpriteID;
 import game.struct.DrawTileSeqStruct;
 import game.struct.DrawTileSprites;
 import game.struct.EngineInfo;
@@ -12,6 +10,7 @@ import game.tables.TunnelBridgeTables;
 import game.util.BitOps;
 import game.util.FileIO;
 import game.util.Pixel;
+import game.xui.TrainGui;
 
 /* TTDPatch extended GRF format codec
  * (c) Petr Baudis 2004 (GPL'd)
@@ -192,10 +191,12 @@ public class GRFFile
 
 		if (condition != 0) {
 			ei.unk2 &= ~0x80;
-			rvi.flags &= ~2;
+			//rvi.flags &= ~2;
+			rvi.setWagon(false);
 		} else {
 			ei.unk2 |= 0x80;
-			rvi.flags |= 2;
+			//rvi.flags |= 2;
+			rvi.setWagon(true);
 		}
 	}
 
@@ -243,7 +244,8 @@ public class GRFFile
 			for (i = 0; i < numinfo; i++) {
 				int power = bufp.grf_load_word();
 
-				if(0 != (rvi[e+i].flags & Engine.RVI_MULTIHEAD) )
+				//if(0 != (rvi[e+i].flags & Engine.RVI_MULTIHEAD) )
+				if( rvi[e+i].isMulttihead() )
 					power /= 2;
 
 				rvi[e+i].power = power;
@@ -282,13 +284,15 @@ public class GRFFile
 				byte dual = bufp.grf_load_byte();
 
 				if (dual != 0) {
-					if (0==(rvi[e+i].flags & Engine.RVI_MULTIHEAD)) // adjust power if needed
+					if (!(rvi[e+i].isMulttihead())) // adjust power if needed
 						rvi[e+i].power /= 2;
-					rvi[e+i].flags |= Engine.RVI_MULTIHEAD;
+					//rvi[e+i].flags |= Engine.RVI_MULTIHEAD;
+					rvi[e+i].setMultihead(true);
 				} else {
-					if(0 != (rvi[e+i].flags & Engine.RVI_MULTIHEAD) ) // adjust power if needed
+					if(rvi[e+i].isMulttihead() ) // adjust power if needed
 						rvi[e+i].power *= 2;
-					rvi[e+i].flags &= ~Engine.RVI_MULTIHEAD;
+					//rvi[e+i].flags &= ~Engine.RVI_MULTIHEAD;
+					rvi[e+i].setMultihead(false);
 				}
 			}
 		} break;
@@ -903,7 +907,7 @@ public class GRFFile
 					DrawTileSprites dts = stat.renderdata[t];
 					final DrawTileSprites sdts = srcstat.renderdata[t];
 					//final DrawTileSeqStruct  sdtss = sdts.seq;
-					int seq_count = 0;
+					//int seq_count = 0;
 
 					dts.ground_sprite = sdts.ground_sprite;
 					if (0 == dts.ground_sprite) {
@@ -2530,7 +2534,7 @@ public class GRFFile
 	 */
 	static void ResetNewGRFData()
 	{
-		int i;
+		//int i;
 		/*
 		// Copy/reset original engine info data
 		memcpy(&_engine_info, &orig_engine_info, sizeof(orig_engine_info));
@@ -2632,8 +2636,8 @@ public class GRFFile
 				Engine engineInfo = Engine.GetEngine(engine);
 				RailVehicleInfo railVehInfo = Engine.RailVehInfo(engine);
 				if (xor_mask == 0 
-						&& !(engineInfo.type == Vehicle.VEH_Train && (railVehInfo.capacity == 0 || 0 != (railVehInfo.flags & Engine.RVI_WAGON) )))
-					xor_mask = Engine._default_refitmasks[engineInfo.type - Vehicle.VEH_Train];
+						&& !(engineInfo.getType() == Vehicle.VEH_Train && (railVehInfo.capacity == 0 || railVehInfo.isWagon() )))
+					xor_mask = Engine._default_refitmasks[engineInfo.getType() - Vehicle.VEH_Train];
 			}
 			Global._engine_info[engine].refit_mask = ((mask & ~not_mask) ^ xor_mask) & Engine._landscape_global_cargo_mask[GameOptions._opt.landscape];
 		}

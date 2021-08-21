@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.struct.TileIndexDiff;
 import game.tables.DisasterTables;
@@ -165,7 +166,7 @@ public class DisasterCmd extends DisasterTables
 							0);
 				}
 			}
-			if (v.y_pos >= ((int)Global.MapSizeY() + 9) * 16 - 1)
+			if (v.getY_pos() >= ((int)Global.MapSizeY() + 9) * 16 - 1)
 				DeleteDisasterVeh(v);
 			return;
 		}
@@ -184,13 +185,13 @@ public class DisasterCmd extends DisasterTables
 				st.airport_flags = BitOps.RETCLRBITS(st.airport_flags, Airport.RUNWAY_IN_block);
 			}
 
-			SetDisasterVehiclePos(v, v.x_pos, v.y_pos, v.z_pos);
+			SetDisasterVehiclePos(v, v.getX_pos(), v.getY_pos(), v.z_pos);
 			DeleteDisasterVeh(v);
 			return;
 		}
 
-		x = v.x_pos;
-		y = v.y_pos;
+		x = v.getX_pos();
+		y = v.getY_pos();
 		z = Landscape.GetSlopeZ(x,y);
 		if (z < v.z_pos)
 			z = v.z_pos - 1;
@@ -243,7 +244,7 @@ public class DisasterCmd extends DisasterTables
 			// fly around randomly
 			int x = v.dest_tile.TileX() * 16;
 			int y = v.dest_tile.TileY() * 16;
-			if (Math.abs(x - v.x_pos) + Math.abs(y - v.y_pos) >= 16) {
+			if (Math.abs(x - v.getX_pos()) + Math.abs(y - v.getY_pos()) >= 16) {
 				v.direction = Vehicle.GetDirectionTowards(v, x, y);
 				v.GetNewVehiclePos( gp);
 				SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
@@ -277,14 +278,14 @@ public class DisasterCmd extends DisasterTables
 				return;
 			}
 
-			dist = Math.abs(v.x_pos - u.x_pos) + Math.abs(v.y_pos - u.y_pos);
+			dist = Math.abs(v.getX_pos() - u.getX_pos()) + Math.abs(v.getY_pos() - u.getY_pos());
 
 			if (dist < 16 && 0==(u.vehstatus&Vehicle.VS_HIDDEN) && u.breakdown_ctr==0) {
 				u.breakdown_ctr = 3;
 				u.breakdown_delay = 140;
 			}
 
-			v.direction = Vehicle.GetDirectionTowards(v, u.x_pos, u.y_pos);
+			v.direction = Vehicle.GetDirectionTowards(v, u.getX_pos(), u.getY_pos());
 			v.GetNewVehiclePos(gp);
 
 			z = v.z_pos;
@@ -379,8 +380,8 @@ public class DisasterCmd extends DisasterTables
 			TileIndex tile;
 			int ind;
 
-			x = v.x_pos - 15*16;
-			y = v.y_pos;
+			x = v.getX_pos() - 15*16;
+			y = v.getY_pos();
 
 			if ( (int)x > Global.MapMaxX() * 16-1)
 				return;
@@ -450,8 +451,8 @@ public class DisasterCmd extends DisasterTables
 			TileIndex tile;
 			int ind;
 
-			x = v.x_pos - 15*16;
-			y = v.y_pos;
+			x = v.getX_pos() - 15*16;
+			y = v.getY_pos();
 
 			if ( (int)x > Global.MapMaxX() * 16-1)
 				return;
@@ -498,7 +499,7 @@ public class DisasterCmd extends DisasterTables
 		if (v.current_order.station == 1) {
 			int x = v.dest_tile.TileX() * 16 + 8;
 			int y = v.dest_tile.TileY() * 16 + 8;
-			if (Math.abs(v.x_pos - x) + Math.abs(v.y_pos - y) >= 8) {
+			if (Math.abs(v.getX_pos() - x) + Math.abs(v.getY_pos() - y) >= 8) {
 				v.direction = Vehicle.GetDirectionTowards(v, x, y);
 
 				v.GetNewVehiclePos(gp);
@@ -506,9 +507,9 @@ public class DisasterCmd extends DisasterTables
 				return;
 			}
 
-			z = Landscape.GetSlopeZ(v.x_pos, v.y_pos);
+			z = Landscape.GetSlopeZ(v.getX_pos(), v.getY_pos());
 			if (z < v.z_pos) {
-				SetDisasterVehiclePos(v, v.x_pos, v.y_pos, v.z_pos - 1);
+				SetDisasterVehiclePos(v, v.getX_pos(), v.getY_pos(), v.z_pos - 1);
 				return;
 			}
 
@@ -518,7 +519,7 @@ public class DisasterCmd extends DisasterTables
 			Vehicle.forEach( (u) ->
 			{
 				if (u.type == Vehicle.VEH_Train || u.type == Vehicle.VEH_Road) {
-					if (Math.abs(u.x_pos - v.x_pos) + Math.abs(u.y_pos - v.y_pos) <= 12*16) {
+					if (Math.abs(u.getX_pos() - v.getX_pos()) + Math.abs(u.getY_pos() - v.getY_pos()) <= 12*16) {
 						u.breakdown_ctr = 5;
 						u.breakdown_delay = 0xF0;
 					}
@@ -538,7 +539,7 @@ public class DisasterCmd extends DisasterTables
 				return;
 			}
 
-			InitializeDisasterVehicle(u, -6*16, v.y_pos, 135, 5, 11);
+			InitializeDisasterVehicle(u, -6*16, v.getY_pos(), 135, 5, 11);
 			u.disaster.unk2 = v.index;
 
 			w = Vehicle.ForceAllocateSpecialVehicle();
@@ -546,13 +547,13 @@ public class DisasterCmd extends DisasterTables
 				return;
 
 			u.next = w;
-			InitializeDisasterVehicle(w, -6*16, v.y_pos, 0, 5, 12);
+			InitializeDisasterVehicle(w, -6*16, v.getY_pos(), 0, 5, 12);
 			w.vehstatus |= Vehicle.VS_DISASTER;
 		} else if (v.current_order.station < 1) {
 
 			int x = v.dest_tile.TileX() * 16;
 			int y = v.dest_tile.TileY() * 16;
-			if (Math.abs(x - v.x_pos) + Math.abs(y - v.y_pos) >= 16) {
+			if (Math.abs(x - v.getX_pos()) + Math.abs(y - v.getY_pos()) >= 16) {
 				v.direction = Vehicle.GetDirectionTowards(v, x, y);
 				v.GetNewVehiclePos( gp);
 				SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
@@ -598,7 +599,7 @@ public class DisasterCmd extends DisasterTables
 
 		if (v.current_order.station == 0) {
 			u = Vehicle.GetVehicle(v.disaster.unk2);
-			if (Math.abs(v.x_pos - u.x_pos) > 16)
+			if (Math.abs(v.getX_pos() - u.getX_pos()) > 16)
 				return;
 			v.current_order.station = 1;
 
@@ -610,8 +611,8 @@ public class DisasterCmd extends DisasterTables
 			for(i=0; i!=80; i++) {
 				int r = Hal.Random();
 				Vehicle.CreateEffectVehicleAbove(
-						BitOps.GB(r, 0, 6) + v.x_pos - 32,
-						BitOps.GB(r, 5, 6) + v.y_pos - 32,
+						BitOps.GB(r, 0, 6) + v.getX_pos() - 32,
+						BitOps.GB(r, 5, 6) + v.getY_pos() - 32,
 						0,
 						Vehicle.EV_EXPLOSION_SMALL);
 			}

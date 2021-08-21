@@ -13,12 +13,19 @@ import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
 import game.util.MemoryPool;
+import game.xui.VehicleGui;
+import game.xui.Window;
 
 //public class Order implements IPoolItem, Serializable 
 public class Order implements Serializable 
 {
 	private static final long serialVersionUID = 1L;
 	
+	public int getType() {		return type;	}
+	public int getFlags() {		return flags;	}
+	public int getStation() {	return station;	}
+	public Order getNext() {	return next;	}
+
 	int  type;
 	int  flags;
 	int  station;
@@ -63,6 +70,13 @@ public class Order implements Serializable
 		next = src.next; // TODO Do we need it?
 	}
 	
+	public Order(int t, int f, int st) 
+	{
+		type = t;
+		flags = f;
+		station = st;
+	}
+
 	public static final int OT_NOTHING       = 0;
 	public static final int OT_GOTO_STATION  = 1;
 	public static final int OT_GOTO_DEPOT    = 2;
@@ -268,7 +282,7 @@ public class Order implements Serializable
 						break;
 
 					case Vehicle.VEH_Road:
-						if (v.cargo_type == AcceptedCargo.CT_PASSENGERS) {
+						if (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) {
 							if (0 == (st.facilities & Station.FACIL_BUS_STOP)) return Cmd.CMD_ERROR;
 						} else {
 							if (0 == (st.facilities & Station.FACIL_TRUCK_STOP)) return Cmd.CMD_ERROR;
@@ -762,7 +776,7 @@ public class Order implements Serializable
 
 				/* Trucks can't share orders with busses (and visa versa) */
 				if (src.type == Vehicle.VEH_Road) {
-					if (src.cargo_type != dst.cargo_type && (src.cargo_type == AcceptedCargo.CT_PASSENGERS || dst.cargo_type == AcceptedCargo.CT_PASSENGERS))
+					if (src.getCargo_type() != dst.getCargo_type() && (src.getCargo_type() == AcceptedCargo.CT_PASSENGERS || dst.getCargo_type() == AcceptedCargo.CT_PASSENGERS))
 						return Cmd.CMD_ERROR;
 				}
 
@@ -820,7 +834,7 @@ public class Order implements Serializable
 					{
 						if (order.type == OT_GOTO_STATION) {
 							final Station st1 = Station.GetStation(order.station);
-							if (dst.cargo_type == AcceptedCargo.CT_PASSENGERS) {
+							if (dst.getCargo_type() == AcceptedCargo.CT_PASSENGERS) {
 								if (st1.bus_stops != null) required_dst = st1.bus_stops.get(0).xy; // TODO why first?
 							} else {
 								if (st1.truck_stops != null) required_dst = st1.truck_stops.get(0).xy;
@@ -1142,13 +1156,13 @@ public class Order implements Serializable
 	
 	
 	@Deprecated
-	static int PackOrder(final Order order)
+	public static int PackOrder(final Order order)
 	{
 		return (0xFFFF & order.station) << 16 | (0xFF & order.flags) << 8 | (0xFF & order.type);
 	}
 
 	@Deprecated
-	static Order UnpackOrder(int packed)
+	public static Order UnpackOrder(int packed)
 	{
 		Order order = new Order();
 		order.type    = BitOps.GB(packed,  0,  8);
@@ -1266,6 +1280,25 @@ public class Order implements Serializable
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
 		//oos.writeObject(_order_pool);		
+	}
+	public TileIndex getTargetXy() 
+	{
+		switch(getType()) 
+		{
+		case Order.OT_GOTO_STATION:			/* station order */
+			return Station.GetStation(getStation()).getXy() ;
+
+		case Order.OT_GOTO_DEPOT:				/* goto depot order */
+			return Depot.GetDepot(getStation()).xy;
+
+		case Order.OT_GOTO_WAYPOINT:	/* goto waypoint order */
+			return WayPoint.GetWaypoint(getStation()).xy;
+		}		
+		return null;
+	}
+	
+	public boolean isNonStop() {		
+		return 0 != (flags & OF_NON_STOP);
 	}
 	
 }

@@ -1,13 +1,16 @@
 package game;
 
-public class RoadVehicleInfo {
-	int image_index;
-	int base_cost;
-	int running_cost;
-	int sfx;
-	int max_speed;
-	int capacity;
-	int cargo_type;
+public class RoadVehicleInfo 
+{
+	// TODO GRFFile modifies us so final modifier is off. Redo!
+
+	public int image_index;
+	public int base_cost;
+	public int running_cost;
+	public int sfx;
+	public int max_speed;
+	public int capacity;
+	public int cargo_type;
 
 	public RoadVehicleInfo(
 			int i, int j, int k, 

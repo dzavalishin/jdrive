@@ -2,13 +2,18 @@ package game;
 
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.Point;
+import game.struct.TileDesc;
 import game.tables.RoadTables;
 import game.util.ArrayPtr;
 import game.util.BitOps;
 import game.util.TownTables;
+import game.xui.Gfx;
+import game.xui.RoadVehGui;
+import game.xui.ViewPort;
 
 public class Road extends RoadTables 
 {
@@ -956,7 +961,7 @@ public class Road extends RoadTables
 		}
 	}
 
-	static void DrawRoadDepotSprite(int x, int y, int image)
+	public static void DrawRoadDepotSprite(int x, int y, int image)
 	{
 		int ormod;
 		final ArrayPtr<DrawRoadSeqStruct> dtssa;

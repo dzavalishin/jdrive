@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
+import game.enums.RoadStopType;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.util.MemoryPool;
@@ -176,8 +177,4 @@ public class RoadStop implements IPoolItem
 	
 }
 
-enum RoadStopType {
-	RS_BUS,
-	RS_TRUCK
-} 
 

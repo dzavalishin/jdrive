@@ -4,11 +4,16 @@ import game.ai.Ai;
 import game.enums.Owner;
 import game.ids.PlayerID;
 import game.util.GameDate;
+import game.xui.AirportGui;
+import game.xui.DockGui;
+import game.xui.RoadGui;
+import game.xui.VehicleGui;
+import game.xui.ViewPort;
 
 public class GenerateWorld {
 
 
-	static void doGenerateWorld(int mode, int size_x, int size_y)
+	public static void doGenerateWorld(int mode, int size_x, int size_y)
 	{
 		int i;
 

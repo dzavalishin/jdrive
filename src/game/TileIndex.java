@@ -3,12 +3,14 @@ package game;
 import java.io.Serializable;
 import java.util.function.Function;
 
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.struct.Point;
 import game.struct.TileIndexDiff;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
 import game.util.IntContainer;
+import game.xui.ViewPort;
 
 // TODO make == work for TileIndex or we're busted - make fabric and disable new(), 
 // return same TileIndex for each TileIndex.tile
@@ -234,22 +236,22 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	}
 
 
-	int TileX()
+	public int TileX()
 	{
 		return tile & Global.MapMaxX();
 	}
 	
-	int getX()
+	public int getX()
 	{
 		return tile & Global.MapMaxX();
 	}
 
-	int TileY()
+	public int TileY()
 	{
 		return tile >> Global.MapLogX();
 	}
 
-	int getY()
+	public int getY()
 	{
 		return tile >> Global.MapLogX();
 	}
@@ -262,19 +264,19 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	}
 
 
-	void SetMapExtraBits(int i)
+	public void SetMapExtraBits(int i)
 	{
 		//assert(tile < Global.MapSize());
 		Global._m[tile].extra =  BitOps.RETSB(Global._m[tile].extra, 0, 2, i & 3);
 	}
 
-	int GetMapExtraBits()
+	public int GetMapExtraBits()
 	{
 		//assert(tile < MapSize());
 		return BitOps.GB(Global._m[tile].extra, 0, 2);
 	}
 
-	void MarkTileDirtyByTile()
+	public void MarkTileDirtyByTile()
 	{
 		Point pt = Point.RemapCoords(TileX() * 16, TileY() * 16, GetTileZ());
 		ViewPort.MarkAllViewportsDirty(
@@ -285,7 +287,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 				);
 	}
 
-	int GetTileSlope(IntContainer h)
+	public int GetTileSlope(IntContainer h)
 	{
 		int a;
 		int b;
@@ -321,7 +323,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return r;
 	}
 
-	int GetTileZ()
+	public int GetTileZ()
 	{
 		IntContainer h = new IntContainer();
 		GetTileSlope(h);
@@ -335,7 +337,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	//  INVALID_TILE, because the y is wrapped. This is needed in
 	//  for example, farmland. When the tile is not wrapped,
 	//  the result will be tile + TileDiffXY(addx, addy)
-	static int TileAddWrap(TileIndex tile, int addx, int addy)
+	public static int TileAddWrap(TileIndex tile, int addx, int addy)
 	{
 		int x = tile.TileX() + addx;
 		int y = tile.TileY() + addy;
@@ -347,7 +349,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return INVALID_TILE.getTile();
 	}
 
-	TileIndex TileAddWrap(int addx, int addy)
+	public TileIndex TileAddWrap(int addx, int addy)
 	{
 		return new TileIndex(TileAddWrap(this, addx, addy));
 	}
@@ -361,7 +363,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	};
 
 
-	static  TileIndexDiff TileOffsByDir(int dir)
+	public static TileIndexDiff TileOffsByDir(int dir)
 	{
 		//extern final TileIndexDiffC _tileoffs_by_dir[4];
 
@@ -370,7 +372,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	}
 
 
-	static  TileIndexDiffC TileIndexDiffCByDir(int dir) {
+	public static TileIndexDiffC TileIndexDiffCByDir(int dir) {
 		//extern final TileIndexDiffC _tileoffs_by_dir[4];
 		return _tileoffs_by_dir[dir];
 	}
@@ -378,7 +380,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	/* Returns tile + the diff given in diff. If the result tile would end up
 	 * outside of the map, INVALID_TILE is returned instead.
 	 */
-	static  TileIndex AddTileIndexDiffCWrap(TileIndex tile, TileIndexDiffC diff) {
+	public static  TileIndex AddTileIndexDiffCWrap(TileIndex tile, TileIndexDiffC diff) {
 		int x = tile.TileX() + diff.x;
 		int y = tile.TileY() + diff.y;
 		if (x < 0 || y < 0 || x > (int)Global.MapMaxX() || y > (int)Global.MapMaxY())
@@ -411,7 +413,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 
 
-	static TileIndexDiff TileDiffXY(int x, int y)
+	public static TileIndexDiff TileDiffXY(int x, int y)
 	{
 		// Multiplication gives much better optimization on MSVC than shifting.
 		// 0 << shift isn't optimized to 0 properly.
@@ -422,43 +424,43 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 
 
-	static TileIndex TileVirtXY(int x, int y)
+	public static TileIndex TileVirtXY(int x, int y)
 	{
 		return new TileIndex((y >> 4 << Global.MapLogX()) + (x >> 4));
 	}
 
 
-	int TileHeight()
+	public int TileHeight()
 	{
 		//assert(tile < MapSize());
 		return Global._m[tile].height;
 	}
 
-	static int TileHeight(int index)
+	public static int TileHeight(int index)
 	{
 		assert(index < Global.MapSize());
 		assert(index >= 0); 
 		return Global._m[index].height;
 	}
 
-	int TilePixelHeight()
+	public int TilePixelHeight()
 	{
 		return TileHeight() * 8;
 	}
 
-	static  boolean IsSteepTileh(int tileh)
+	public static  boolean IsSteepTileh(int tileh)
 	{
 		return 0 != (tileh & 0x10);
 	}
 
-	void SetTileHeight(int height)
+	public void SetTileHeight(int height)
 	{
 		//assert(tile < MapSize());
 		assert(height < 16);
 		Global._m[tile].height = height;
 	}
 
-	TileTypes GetTileType()
+	public TileTypes GetTileType()
 	{
 		//assert(tile < MapSize());
 		//return new TileType(Global._m[tile].type);
@@ -466,36 +468,36 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 	}
 
-	void SetTileType(TileTypes type)
+	public void SetTileType(TileTypes type)
 	{
 		//assert(tile < MapSize());
 		Global._m[tile].type = type.ordinal();
 	}
 
-	boolean IsTileType(int type)
+	public boolean IsTileType(int type)
 	{
 		return GetTileType().ordinal() == type;
 	}
 
-	boolean IsTileType(TileType type)
+	public boolean IsTileType(TileType type)
 	{
 		return GetTileType().ordinal() == type.type;
 	}
 
-	boolean IsTileType(TileTypes type)
+	public boolean IsTileType(TileTypes type)
 	{
 		return GetTileType() == type;
 	}
 
-	boolean IsTunnelTile()
+	public boolean IsTunnelTile()
 	{
 		return IsTileType(TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(Global._m[tile].m5, 4, 4) == 0;
 	}
 
-	boolean IsWaterTile() { return IsTileType(TileTypes.MP_WATER) && getMap().m5 == 0; }
+	public boolean IsWaterTile() { return IsTileType(TileTypes.MP_WATER) && getMap().m5 == 0; }
 
 	//Owner GetTileOwner()
-	PlayerID GetTileOwner()
+	public PlayerID GetTileOwner()
 	{
 		//assert(tile < MapSize());
 		assert(!IsTileType(TileTypes.MP_HOUSE));
@@ -506,7 +508,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return PlayerID.get(Global._m[tile].m1);
 	}
 
-	void SetTileOwner(PlayerID owner)
+	public void SetTileOwner(PlayerID owner)
 	{
 		//assert(tile < MapSize());
 		assert(!IsTileType(TileTypes.MP_HOUSE));
@@ -516,7 +518,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		Global._m[tile].m1 = owner.id;
 	}
 
-	void SetTileOwner(int owner)
+	public void SetTileOwner(int owner)
 	{
 		//assert(tile < MapSize());
 		assert(!IsTileType(TileTypes.MP_HOUSE));
@@ -532,13 +534,13 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return GetTileOwner().id == owner.owner;
 	}*/
 
-	boolean IsTileOwner(PlayerID owner)
+	public boolean IsTileOwner(PlayerID owner)
 	{
 		return GetTileOwner() == owner;
 	}
 
 
-	boolean IsTileOwner(int owner)
+	public boolean IsTileOwner(int owner)
 	{
 		return GetTileOwner().id == owner;
 	}
@@ -605,12 +607,12 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 
 	// TODO use code below
-	static TileIndex RandomTileSeed(int r) 
+	public static TileIndex RandomTileSeed(int r) 
 	{ 
 		return new TileIndex( TILE_MASK(r) ); 
 	}
 
-	static TileIndex RandomTile() 
+	public static TileIndex RandomTile() 
 	{
 		while(true)
 		{
@@ -791,43 +793,6 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 }
 
 
-enum TileTypes {
-	MP_CLEAR,
-	MP_RAILWAY,
-	MP_STREET,
-	MP_HOUSE,
-	MP_TREES,
-	MP_STATION,
-	MP_WATER,
-	MP_VOID, // invisible tiles at the SW and SE border
-	MP_INDUSTRY,
-	MP_TUNNELBRIDGE,
-	MP_UNMOVABLE,
-	
-	MP_NOCHANGE // used in modify tile func if we don't want to change type
-	;
-
-	static TileTypes[] values = values();
-
-
-	//public static int MP_SETTYPE( TileTypes x ) { return  ((x.ordinal()+1) << 8); }
-
-	public static final int MP_MAP2 = 1<<0;
-	public static final int MP_MAP3LO = 1<<1;
-	public static final int MP_MAP3HI = 1<<2;
-	public static final int MP_MAP5 = 1<<3;
-	public static final int MP_MAPOWNER_CURRENT = 1<<4;
-	public static final int MP_MAPOWNER = 1<<5;
-
-	public static final int MP_TYPE_MASK = 0xF << 8;
-
-	public static final int MP_MAP2_CLEAR = 1 << 12;
-	public static final int MP_MAP3LO_CLEAR = 1 << 13;
-	public static final int MP_MAP3HI_CLEAR = 1 << 14;
-
-	public static final int MP_NODIRTY = 1<<15;
-
-}
 
 
 @FunctionalInterface

@@ -3,6 +3,9 @@ package game;
 import game.util.BitOps;
 import game.util.MemoryPool;
 import game.util.Strings;
+import game.xui.Gfx;
+import game.xui.PlayerGui;
+import game.xui.Window;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -21,7 +24,7 @@ import game.ids.PlayerID;
 import game.ids.StringID;
 import game.struct.PlayerEconomyEntry;
 
-/** @file players.c
+/** 
  * @todo Cleanup the messy DrawPlayerFace function asap
  */
 
@@ -34,15 +37,15 @@ public class Player implements Serializable
 	int president_name_1;
 	int president_name_2;
 
-	int face;
+	public int face;
 
-	int player_money;
+	//int player_money;
 	int current_loan;
 	long money64; // internal 64-bit version of the money. the 32-bit field will be clamped to plus minus 2 billion
 
 	int player_color;
 	int player_money_fraction;
-	int avail_railtypes;
+	public int avail_railtypes;
 	int block_preview;
 	PlayerID index;
 
@@ -51,10 +54,10 @@ public class Player implements Serializable
 	TileIndex location_of_house;
 	TileIndex last_build_coordinate;
 
-	PlayerID share_owners[];
+	public PlayerID share_owners[];
 
 	int inaugurated_year;
-	int num_valid_stat_ent;
+	public int num_valid_stat_ent;
 
 	int quarters_of_bankrupcy;
 	int bankrupt_asked; // which players were asked about buying it?
@@ -68,8 +71,8 @@ public class Player implements Serializable
 
 	long [][] yearly_expenses = new long[3][13];
 
-	PlayerEconomyEntry cur_economy;
-	PlayerEconomyEntry old_economy[];
+	public PlayerEconomyEntry cur_economy;
+	public PlayerEconomyEntry old_economy[];
 	//EngineID engine_replacement[];
 	int engine_replacement[];
 	boolean engine_renew;
@@ -94,7 +97,7 @@ public class Player implements Serializable
 		inaugurated_year = num_valid_stat_ent = quarters_of_bankrupcy = bankrupt_asked =
 				is_ai = player_color = player_money_fraction = avail_railtypes = block_preview = 0;
 
-		name_2 = name_1 = president_name_1 = player_money = current_loan = bankrupt_timeout =
+		name_2 = name_1 = president_name_1 = current_loan = bankrupt_timeout =
 				bankrupt_value = cargo_types = engine_renew_months = 0;
 
 		money64 = engine_renew_money = president_name_2 = face = 0;
@@ -104,13 +107,20 @@ public class Player implements Serializable
 		cur_economy = new PlayerEconomyEntry();
 	}
 
+	
+	public boolean isActive() { return is_active; }
+	public PlayerID getIndex() { return index; }
+	public long getMoney() { return money64; }
 
+	
+	
 	//#define MAX_PLAYERS 8
 	static Player [] _players = new Player[Global.MAX_PLAYERS];
 	// NOSAVE: can be determined from player structs
 	private static int [] _player_colors = new int[Global.MAX_PLAYERS];
 
 
+	public static final long INITIAL_MONEY = 100000000;
 
 	static int _yearly_expenses_type; // TODO fixme, use parameter where possible
 	public static void SET_EXPENSES_TYPE(int x) { _yearly_expenses_type = x; }
@@ -165,7 +175,7 @@ public class Player implements Serializable
 			0x34C, 0x34D, 0x34F
 	};
 
-	static void DrawPlayerFace(int face, int color, int x, int y)
+	public static void DrawPlayerFace(int face, int color, int x, int y)
 	{
 		int flag = 0;
 
@@ -324,7 +334,7 @@ public class Player implements Serializable
 	{
 		if (cost > 0) {
 			PlayerID pid = Global._current_player;
-			if (pid.id < Global.MAX_PLAYERS && cost > GetPlayer(pid).player_money) {
+			if (pid.id < Global.MAX_PLAYERS && cost > GetPlayer(pid).money64) {
 				Global.SetDParam(0, cost);
 				Global._error_message = Str.STR_0003_NOT_ENOUGH_CASH_REQUIRES;
 				return false;
@@ -336,7 +346,7 @@ public class Player implements Serializable
 	private void SubtractMoneyFromAnyPlayer(int cost)
 	{
 		money64 -= cost;
-		UpdatePlayerMoney32();
+		//UpdatePlayerMoney32();
 
 		yearly_expenses[0][_yearly_expenses_type] += cost;
 
@@ -368,7 +378,7 @@ public class Player implements Serializable
 	}
 
 	// the player_money field is kept as it is, but money64 contains the actual amount of money.
-	void UpdatePlayerMoney32()
+	/*public void UpdatePlayerMoney32()
 	{
 		if (money64 < -2000000000)
 			player_money = -2000000000;
@@ -376,9 +386,9 @@ public class Player implements Serializable
 			player_money = 2000000000;
 		else
 			player_money = (int)money64;
-	}
+	}*/
 
-	static void GetNameOfOwner(PlayerID owner, TileIndex tile)
+	public static void GetNameOfOwner(PlayerID owner, TileIndex tile)
 	{
 		Global.SetDParam(2, owner.id);
 
@@ -657,7 +667,7 @@ public class Player implements Serializable
 		p.name_1 = Str.STR_SV_UNNAMED;
 		p.is_active = true;
 
-		p.money64 = p.player_money = p.current_loan = Integer.MAX_VALUE; // TODO return this 100000;
+		p.money64 = /*p.player_money*/ p.current_loan = Integer.MAX_VALUE; // TODO return this 100000;
 
 		p.is_ai = (byte) (is_ai ? 1 : 0);
 		// TODO p.ai.state = 5; /* AIS_WANT_NEW_ROUTE */
@@ -746,7 +756,7 @@ public class Player implements Serializable
 
 	// index is the next parameter in _decode_parameters to set up
 	//static StringID GetPlayerNameString(PlayerID player, int index)
-	static int GetPlayerNameString(PlayerID player, int index)
+	public static int GetPlayerNameString(PlayerID player, int index)
 	{
 		if (player.IS_HUMAN_PLAYER() && player.id < Global.MAX_PLAYERS) {
 			Global.SetDParam(index, player.id+1);
@@ -808,19 +818,18 @@ public class Player implements Serializable
 	static byte GetPlayerRailtypes(PlayerID p)
 	{
 		byte rt = 0;
-		//EngineID i;
 		int i;
 
 		for (i = 0; i != Global.TOTAL_NUM_ENGINES; i++) {
 			final Engine e = Engine.GetEngine(i);
 
 			//final RailVehicleInfo info = Engine.RailVehInfo(i);
-			if (e.type == Vehicle.VEH_Train &&
-					(BitOps.HASBIT(e.player_avail, p.id) || e.intro_date <= Global._date) &&
-					0==(Engine.RailVehInfo(i).flags & Engine.RVI_WAGON)) 
+			if (e.getType() == Vehicle.VEH_Train &&
+					(e.isAvailableTo(p) || e.getIntro_date() <= Global._date) &&
+					!Engine.RailVehInfo(i).isWagon()) 
 			{
-				assert(e.railtype < Rail.RAILTYPE_END);
-				rt = BitOps.RETSETBIT(rt, e.railtype);
+				assert(e.getRailtype() < Rail.RAILTYPE_END);
+				rt = BitOps.RETSETBIT(rt, e.getRailtype());
 			}
 		}
 
@@ -920,16 +929,16 @@ public class Player implements Serializable
 					return Cmd.CMD_ERROR;
 
 				// check that the new vehicle type is the same as the original one
-				if (Engine.GetEngine(old_engine_type).type != Engine.GetEngine(new_engine_type).type)
+				if (Engine.GetEngine(old_engine_type).getType() != Engine.GetEngine(new_engine_type).getType())
 					return Cmd.CMD_ERROR;
 
 				// make sure that we do not replace a plane with a helicopter or vise versa
-				if (Engine.GetEngine(new_engine_type).type == Vehicle.VEH_Aircraft 
+				if (Engine.GetEngine(new_engine_type).getType() == Vehicle.VEH_Aircraft 
 						&& BitOps.HASBIT(Engine.AircraftVehInfo(old_engine_type.id).subtype, 0) != BitOps.HASBIT(Engine.AircraftVehInfo(new_engine_type.id).subtype, 0))
 					return Cmd.CMD_ERROR;
 
 				// make sure that the player can actually buy the new engine
-				if (!BitOps.HASBIT(Engine.GetEngine(new_engine_type).player_avail, Global._current_player.id))
+				if (!Engine.GetEngine(new_engine_type).isAvailableToMe())
 					return Cmd.CMD_ERROR;
 
 				return p.AddEngineReplacement(old_engine_type, new_engine_type, flags);
@@ -1095,7 +1104,7 @@ public class Player implements Serializable
 
 				/* Remove the company */
 				Economy.ChangeOwnershipOfPlayerItems(p.index, PlayerID.get(Owner.OWNER_SPECTATOR));
-				p.money64 = p.player_money = 100000000; // XXX - wtf?
+				p.money64 = 100000000; // XXX - wtf?
 				p.is_active = false;
 			}
 		} break;
@@ -1136,9 +1145,10 @@ public class Player implements Serializable
 			Str.STR_0218_MOGUL,
 			Str.STR_0219_TYCOON_OF_THE_CENTURY,
 	};
+	
 
 	//static StringID EndGameGetPerformanceTitleFromValue(int value)
-	static int EndGameGetPerformanceTitleFromValue(int value)
+	public static int EndGameGetPerformanceTitleFromValue(int value)
 	{
 
 		long lvalue = BitOps.minu(value, 1000) >>> 6;
@@ -1580,7 +1590,7 @@ final Chunk Handler _player_chunk_handlers[] = {
 		for(Player p : _players)
 		{
 			_player_colors[p.index.id] = p.player_color;
-			p.UpdatePlayerMoney32();
+			//p.UpdatePlayerMoney32();
 
 			// This is needed so an AI is attached to a loaded AI 
 			if (p.is_ai != 0 && (!Global._networking || Global._network_server) && Ai._ai.enabled)
@@ -1592,5 +1602,36 @@ final Chunk Handler _player_chunk_handlers[] = {
 	{
 		oos.writeObject(_players);		
 	}
+
+	public String generateFileName() {
+		Global.SetDParam(0, name_1);
+		Global.SetDParam(1, name_2);
+		Global.SetDParam(2, Global._date);
+		return Global.GetString(Str.STR_4004);
+	}
+
+	public void DrawPlayerFace() {
+		DrawPlayerFace(face, player_color, 2, 16);		
+	}
+
+	public int getColor() { return player_color; }
+
+	public int getName_1() { return name_1; }
+	public int getName_2() { return name_2; }
+
+	public int getPresident_name_1() {		return president_name_1;	}
+	public int getPresident_name_2() {		return president_name_2;	}
+
+	public int getCurrent_loan() {		return current_loan;	}
+	public TileIndex getLocation_of_house() {		return location_of_house;	}
+	public int getInaugurated_year() {		return inaugurated_year;	}
+
+	public int getBankrupt_value() {		return bankrupt_value;	}
+	public long [][] getYearly_expenses() {		return yearly_expenses;	}
+	public boolean isRenew_keep_length() {		return renew_keep_length;	}
+
+	public void setMoney(long m) { money64 = m; }
+
+
 
 }

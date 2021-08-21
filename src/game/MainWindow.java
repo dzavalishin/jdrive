@@ -24,6 +24,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import game.xui.Gfx;
+import game.xui.Window;
+
 
 
 public class MainWindow extends JPanel implements ActionListener
@@ -36,7 +39,8 @@ public class MainWindow extends JPanel implements ActionListener
 
 	public static final int WIDTH = 1280;
 	//public static final int HEIGHT = 1024;
-	public static final int HEIGHT = 960;
+	//public static final int HEIGHT = 960;
+	public static final int HEIGHT = 800;
 
 
 	private Timer timer = new Timer(TICK_TIME, this);	
@@ -148,7 +152,7 @@ public class MainWindow extends JPanel implements ActionListener
 		{			
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
-				Hal._cursor.wheel = e.getWheelRotation();
+				Hal._cursor.setWheel( e.getWheelRotation() );
 				e.consume();
 			}
 		});
@@ -178,12 +182,22 @@ public class MainWindow extends JPanel implements ActionListener
 		Global._shift_pressed = (e.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK) != 0;
 		Gfx._dbg_screen_rect = (e.getModifiersEx() & KeyEvent.META_DOWN_MASK) != 0;// _wnd.has_focus && GetAsyncKeyState(VK_CAPITAL)<0;
 
+		/*
 		Global._dirkeys = (byte)
 				(((e.getKeyCode() == KeyEvent.VK_LEFT) ? 1 : 0) +
 						((e.getKeyCode() == KeyEvent.VK_UP)  ? 2 : 0) +
 						((e.getKeyCode() == KeyEvent.VK_RIGHT)  ? 4 : 0) +
 						((e.getKeyCode() == KeyEvent.VK_DOWN)  ? 8 : 0));
-
+		 */
+		
+		switch(e.getKeyCode())
+		{
+		case KeyEvent.VK_LEFT:	modDirKeys(1, pressed); break; 
+		case KeyEvent.VK_UP:	modDirKeys(2, pressed); break;
+		case KeyEvent.VK_RIGHT:	modDirKeys(4, pressed); break;
+		case KeyEvent.VK_DOWN:	modDirKeys(8, pressed); break;		
+		}
+		
 
 		if(!pressed) return;
 
@@ -261,6 +275,11 @@ public class MainWindow extends JPanel implements ActionListener
 
 
 
+
+	private void modDirKeys(int i, boolean pressed) {
+		if( pressed )	Global._dirkeys |= i;
+		else			Global._dirkeys &= ~i;		
+	}
 
 	static int startX = 0;
 
@@ -418,32 +437,8 @@ public class MainWindow extends JPanel implements ActionListener
 		x -= 10; //myLocation.x;
 		y -= 30; //myLocation.y;
 
-		if (Hal._cursor.fix_at) {
-			int dx = x - Hal._cursor.pos.x;
-			int dy = y - Hal._cursor.pos.y;
-			if (dx != 0 || dy != 0) {
-				Hal._cursor.delta.x += dx;
-				Hal._cursor.delta.y += dy;
-
-				/* TODO set cursor pos
-				pt.x = _cursor.pos.x;
-				pt.y = _cursor.pos.y;
-
-				if (_wnd.double_size) {
-					pt.x *= 2;
-					pt.y *= 2;
-				}
-				ClientToScreen(hwnd, &pt);
-				SetCursorPos(pt.x, pt.y);
-				 */
-			}
-		} else {
-			Hal._cursor.delta.x += x - Hal._cursor.pos.x;
-			Hal._cursor.delta.y += y - Hal._cursor.pos.y;
-			Hal._cursor.pos.x = x;
-			Hal._cursor.pos.y = y;
-			Hal._cursor.dirty = true;
-		}
+		Hal._cursor.processMouse(x, y);
+		
 	}
 
 

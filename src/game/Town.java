@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
@@ -20,17 +21,23 @@ import game.ifaces.TownDrawTileProc;
 import game.struct.DrawTownTileStruct;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.Point;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
 import game.util.IntContainer;
 import game.util.MemoryPool;
 import game.util.Strings;
 import game.util.TownTables;
+import game.xui.Gfx;
+import game.xui.TownGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class Town 
 //extends TownTables 
 implements IPoolItem, Serializable 
 {
+
 
 	private static final long serialVersionUID = 1L;
 
@@ -65,12 +72,12 @@ implements IPoolItem, Serializable
 	int ratings[];
 
 	// Maximum amount of passengers and mail that can be transported.
-	int max_pass;
-	int max_mail;
+	public int max_pass;
+	public int max_mail;
 	int new_max_pass;
 	int new_max_mail;
-	int act_pass;
-	int act_mail;
+	public int act_pass;
+	public int act_mail;
 	int new_act_pass;
 	int new_act_mail;
 
@@ -187,7 +194,7 @@ implements IPoolItem, Serializable
 	/**
 	 * Get the current size of the TownPool
 	 */
-	static  int GetTownPoolSize()
+	public static  int GetTownPoolSize()
 	{
 		return _town_pool.total_items();
 	}
@@ -228,8 +235,6 @@ implements IPoolItem, Serializable
 
 	// Local
 	private static int _grow_town_result;
-	protected static int _town_sort_order;
-	protected static boolean _town_sort_dirty;
 	private static int _cur_town_iter;
 	private static int _cur_town_ctr;
 
@@ -376,10 +381,10 @@ implements IPoolItem, Serializable
 	void MarkTownSignDirty()
 	{
 		ViewPort.MarkAllViewportsDirty(
-				sign.left-6,
-				sign.top-3,
-				sign.left+sign.width_1*4+12,
-				sign.top + 45
+				sign.getLeft()-6,
+				sign.getTop()-3,
+				sign.getLeft()+sign.getWidth_1()*4+12,
+				sign.getTop() + 45
 				);
 	}
 
@@ -404,10 +409,10 @@ implements IPoolItem, Serializable
 		Window.InvalidateWindow(Window.WC_TOWN_VIEW, index);
 		UpdateTownVirtCoord();
 
-		if(0 != (_town_sort_order & 2)) _town_sort_dirty = true;
+		if(0 != (TownGui._town_sort_order & 2)) TownGui._town_sort_dirty = true;
 	}
 
-	static int GetWorldPopulation()
+	public static int GetWorldPopulation()
 	{
 		int [] pop = {0};
 		Town.forEach( (t) -> pop[0] += t.population );
@@ -1220,7 +1225,7 @@ implements IPoolItem, Serializable
 		t.townnameparts = townnameparts;
 
 		t.UpdateTownVirtCoord();
-		_town_sort_dirty = true;
+		TownGui._town_sort_dirty = true;
 
 		x = (Hal.Random() & 0xF) + 8;
 		if (Global._game_mode == GameModes.GM_EDITOR)
@@ -1314,7 +1319,7 @@ implements IPoolItem, Serializable
 		return 0;
 	}
 
-	static Town CreateRandomTown(int attempts)
+	public static Town CreateRandomTown(int attempts)
 	{
 		TileIndex tile;
 		TileInfo ti = new TileInfo();
@@ -1353,7 +1358,7 @@ implements IPoolItem, Serializable
 
 	static final byte _num_initial_towns[] = {11, 23, 46};
 
-	static boolean GenerateTowns()
+	public static boolean GenerateTowns()
 	{
 		int num = 0;
 		int n = Map.ScaleByMapSize(_num_initial_towns[GameOptions._opt.diff.number_towns] + (Hal.Random() & 7));
@@ -1732,7 +1737,7 @@ implements IPoolItem, Serializable
 			t.townnametype = str.id;
 
 			t.UpdateTownVirtCoord();
-			_town_sort_dirty = true;
+			TownGui._town_sort_dirty = true;
 			Station.UpdateAllStationVirtCoord();
 			Hal.MarkWholeScreenDirty();
 		} else {
@@ -1748,7 +1753,7 @@ implements IPoolItem, Serializable
 		// Delete town authority window
 		//  and remove from list of sorted towns
 		Window.DeleteWindowById(Window.WC_TOWN_VIEW, index);
-		_town_sort_dirty = true;
+		TownGui._town_sort_dirty = true;
 
 		// Delete all industries belonging to the town
 		Industry.forEach( (i) ->
@@ -1807,7 +1812,7 @@ implements IPoolItem, Serializable
 		Global._generating_world = false;
 	}
 
-	final static int _town_action_costs[] = {
+	public final static int _town_action_costs[] = {
 			2, 4, 9, 35, 48, 53, 117, 175
 	};
 
@@ -2117,7 +2122,7 @@ implements IPoolItem, Serializable
 	}
 
 
-	static Town ClosestTownFromTile(TileIndex tile, int threshold)
+	public static Town ClosestTownFromTile(TileIndex tile, int threshold)
 	{
 		//Town t;
 		int [] best = { threshold >= 0 ? threshold : Integer.MAX_VALUE };
@@ -2244,7 +2249,7 @@ implements IPoolItem, Serializable
 		_cur_town_ctr = 0;
 		_cur_town_iter = 0;
 		//_total_towns = 0;
-		_town_sort_dirty = true;
+		TownGui._town_sort_dirty = true;
 	}
 
 	final static TileTypeProcs _tile_type_town_procs = new TileTypeProcs(
@@ -2284,7 +2289,7 @@ implements IPoolItem, Serializable
 				t.UpdateTownVirtCoord();
 			}
 		});
-		_town_sort_dirty = true;
+		TownGui._town_sort_dirty = true;
 	}
 
 
@@ -2414,6 +2419,66 @@ implements IPoolItem, Serializable
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
 		oos.writeObject(_town_pool);		
+	}
+
+	
+	public static class TownPopSorter implements Comparator<Integer> {
+		public int compare(Integer a, Integer b) {
+			final Town ta = GetTown(a);
+			final Town tb = GetTown(b);
+			int r = ta.population - tb.population;
+			if(0 !=  (TownGui._town_sort_order & 1)) r = -r;
+			return r;
+		}
+	}
+
+	public static class TownNameSorter implements Comparator<Integer> {
+		public int compare(Integer a, Integer b) 
+		{
+			int r;
+			Integer [] argv = new Integer[1];
+	
+			argv[0] = a;
+			String buf1 = Strings.GetStringWithArgs(Str.STR_TOWN, (Object[])argv);
+	
+			argv[0] = b;
+			String buf2 = Strings.GetStringWithArgs(Str.STR_TOWN, (Object[])argv);
+	
+			r = buf1.compareTo(buf2);
+			if(0 != (TownGui._town_sort_order & 1)) r = -r;
+			return r;
+		}
+	}
+
+	public int getPopulation() { return population; }
+	public ViewportSign getSign() { return sign; }
+
+	public int getNum_houses() {
+		return num_houses;
+	}
+
+	public boolean isUnwanted(int playerId) {
+		return unwanted[playerId] != 0;
+	}
+
+	public boolean canBribe(int playerId) {
+		return ratings[playerId] < TownTables.RATING_BRIBE_MAXIMUM;
+	}
+
+	public boolean hasStatue(int playerId) {
+		return BitOps.HASBIT(statues, playerId);
+	}
+
+	public boolean hasRatingsFor(int playerId) {
+		return BitOps.HASBIT(have_ratings, playerId);
+	}
+
+	public boolean isExclusive(int playerId) {
+		return exclusivity.id == playerId;
+	}
+
+	public int getRatings(int playerId) {
+		return ratings[playerId];
 	}
 	
 }

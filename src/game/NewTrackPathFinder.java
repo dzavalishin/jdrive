@@ -3,6 +3,7 @@ package game;
 import java.util.HashMap;
 import java.util.Map;
 
+import game.enums.TileTypes;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.HashLink;
 import game.struct.StackedItem;

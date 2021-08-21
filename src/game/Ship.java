@@ -6,6 +6,11 @@ import game.ids.VehicleID;
 import game.struct.NPFFindStationOrTileData;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
+import game.xui.EngineGui;
+import game.xui.Gfx;
+import game.xui.VehicleGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class Ship {
 
@@ -20,7 +25,7 @@ public class Ship {
 		return  (r | r >>> 8);
 	}
 
-	static void DrawShipEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
+	public static void DrawShipEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
 	{
 		int spritenum = EngineGui.ShipVehInfo(engine).image_index;
 		// TODO custom spr
@@ -36,7 +41,7 @@ public class Ship {
 		Gfx.DrawSprite((6 + _ship_sprites[spritenum]) | image_ormod, x, y);
 	}
 
-	static int GetShipImage(final Vehicle v, int direction)
+	public static int GetShipImage(final Vehicle v, int direction)
 	{
 		int spritenum = v.spritenum;
 
@@ -133,7 +138,7 @@ public class Ship {
 
 		if( 0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
 
-		cost = EngineGui.ShipVehInfo(v.engine_type.id).running_cost * Global._price.ship_running / 364;
+		cost = EngineGui.ShipVehInfo(v.getEngine_type().id).running_cost * Global._price.ship_running / 364;
 		v.profit_this_year -= cost >> 8;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);
@@ -358,7 +363,7 @@ public class Ship {
 		int spd;
 		int t; // was unsigned byte
 
-		spd = Math.min(v.cur_speed + 1, v.max_speed);
+		spd = Math.min(v.cur_speed + 1, v.getMax_speed());
 
 		//updates statusbar only if speed have changed to save CPU time
 		if (spd != v.cur_speed) {
@@ -386,7 +391,7 @@ public class Ship {
 
 	static void ShipEnterDepot(Vehicle v)
 	{
-		v.ship.state =  0x80;
+		v.ship.forceInDepot();
 		v.vehstatus |= Vehicle.VS_HIDDEN;
 		v.cur_speed = 0;
 		RecalcShipStuff(v);
@@ -601,7 +606,7 @@ public class Ship {
 
 	static int ShipGetNewDirection(Vehicle v, int x, int y)
 	{
-		int offs = (y - v.y_pos + 1) * 4 + (x - v.x_pos + 1);
+		int offs = (y - v.getY_pos() + 1) * 4 + (x - v.getX_pos() + 1);
 		assert(offs < 11 && offs != 3 && offs != 7);
 		return _new_vehicle_direction_table[offs];
 	}
@@ -682,8 +687,8 @@ public class Ship {
 		{
 			// staying in tile
 			if (v.ship.state == 0x80) {
-				gp.x = v.x_pos;
-				gp.y = v.y_pos;
+				gp.x = v.getX_pos();
+				gp.y = v.getY_pos();
 			} else {
 				/* isnot inside Depot */
 				r = v.VehicleEnterTile(gp.new_tile, gp.x, gp.y);
@@ -927,15 +932,15 @@ public class Ship {
 			v.engine_type = EngineID.get( p1 );
 
 			e = Engine.GetEngine(p1);
-			v.reliability = e.reliability;
+			v.reliability = e.getReliability();
 			v.reliability_spd_dec = e.reliability_spd_dec;
-			v.max_age = e.lifelength * 366;
+			v.max_age = e.getLifelength() * 366;
 			
 			Global._new_ship_id = //v.index;
 			Global._new_vehicle_id = VehicleID.get( v.index );
 
 			v.string_id = Str.STR_SV_SHIP_NAME;
-			v.ship.state = 0x80;
+			v.ship.forceInDepot();//state = 0x80;
 
 			v.service_interval = Global._patches.servint_ships;
 			v.date_of_last_service = Global._date;
@@ -973,7 +978,8 @@ public class Ship {
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		if (!v.tile.IsTileDepotType(Global.TRANSPORT_WATER) || v.road.state != 0x80 || 0==(v.vehstatus&Vehicle.VS_STOPPED))
+		//if (!v.tile.IsTileDepotType(Global.TRANSPORT_WATER) || v.road.state != 0x80 || 0==(v.vehstatus&Vehicle.VS_STOPPED))
+		if (!v.tile.IsTileDepotType(Global.TRANSPORT_WATER) || !v.ship.isInDepot() || 0==(v.vehstatus&Vehicle.VS_STOPPED))
 			return Cmd.return_cmd_error(Str.STR_980B_SHIP_MUST_BE_STOPPED_IN);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -1104,18 +1110,18 @@ public class Ship {
 
 		if (v.type != Vehicle.VEH_Ship || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER) || 0==(v.vehstatus&Vehicle.VS_STOPPED) || v.ship.state != 0x80)
+		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER) || 0==(v.vehstatus&Vehicle.VS_STOPPED) || !v.ship.isInDepot())
 				return Cmd.return_cmd_error(Str.STR_980B_SHIP_MUST_BE_STOPPED_IN);
 
 
 		/* Check cargo */
-		if (0==Engine.ShipVehInfo(v.engine_type.id).refittable) return Cmd.CMD_ERROR;
-		if (new_cid.id > AcceptedCargo.NUM_CARGO || !Vehicle.CanRefitTo(v.engine_type, new_cid)) return Cmd.CMD_ERROR;
+		if (0==Engine.ShipVehInfo(v.getEngine_type().id).refittable) return Cmd.CMD_ERROR;
+		if (new_cid.id > AcceptedCargo.NUM_CARGO || !Vehicle.CanRefitTo(v.getEngine_type(), new_cid)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);
 
 		cost = 0;
-		if (v.owner.IS_HUMAN_PLAYER() && new_cid.id != v.cargo_type) {
+		if (v.owner.IS_HUMAN_PLAYER() && new_cid.id != v.getCargo_type()) {
 			cost = Global._price.ship_base >> 7;
 		}
 

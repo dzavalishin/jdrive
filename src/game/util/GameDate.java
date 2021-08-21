@@ -7,8 +7,8 @@ import game.Station;
 import game.Town;
 import game.Train;
 import game.Vehicle;
-import game.Window;
 import game.enums.GameModes;
+import game.xui.Window;
 
 public class GameDate {
 

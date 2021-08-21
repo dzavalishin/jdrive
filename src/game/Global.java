@@ -10,6 +10,10 @@ import game.util.Paths;
 import game.util.Prices;
 import game.util.Strings;
 import game.util.YearMonthDay;
+import game.xui.EngineGui;
+import game.xui.MiscGui;
+import game.xui.PlayerGui;
+import game.xui.Window;
 import game.Cheat.Cheats;
 import game.enums.GameModes;
 import game.enums.SwitchModes;
@@ -122,14 +126,15 @@ public class Global
 	public static int _map_size;
 
 	public static int[] _cur_resolution = new int[2];
-
 	public static int [][] _random_seeds = new int[2][2];
-
 	public static ColorList [] _color_list = new ColorList[16];
-
-
 	public static String _cmd_text = null;
 
+	// to be saved
+	public static int _saved_scrollpos_x;
+	public static int _saved_scrollpos_y;
+	public static int _saved_scrollpos_zoom;
+	
 	//public static StringID _error_message;
 	//public static StringID _error_message_2;
 	public static int _error_message;
@@ -409,7 +414,7 @@ public class Global
 		_decode_parameters[n] = v;
 	}
 
-	static void SetDParam64(int n, long v)
+	public static void SetDParam64(int n, long v)
 	{
 		//assert(n + 1 < lengthof(_decode_parameters));
 		_decode_parameters[n + 0] = (int) (v & 0xffffffff);
@@ -512,7 +517,7 @@ public class Global
 
 
 
-	static String GetString(StringID string)
+	public static String GetString(StringID string)
 	{
 		return Strings.GetString(string);
 	}
@@ -629,7 +634,7 @@ public class Global
 	}
 
 
-	static void SetDate(int date)
+	public static void SetDate(int date)
 	{
 		YearMonthDay ymd = new YearMonthDay();
 		GameDate.ConvertDayToYMD(ymd, _date = date);
@@ -640,12 +645,12 @@ public class Global
 	#endif /* ENABLE_NETWORK */
 	}
 	
-	static void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
+	public static void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
 	{
 		MiscGui.ShowErrorMessage( msg_1, msg_2, x, y);
 	}
 
-	static void ShowErrorMessage(int msg_1, int msg_2, int x, int y)
+	public static void ShowErrorMessage(int msg_1, int msg_2, int x, int y)
 	{
 		MiscGui.ShowErrorMessage( new StringID(msg_1), new StringID(msg_2), x, y);
 	}

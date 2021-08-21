@@ -5,16 +5,16 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-import game.Gfx;
 import game.Global;
 import game.Hal;
-import game.Widget;
-import game.Window;
-import game.WindowDesc;
-import game.WindowEvent;
 import game.struct.Textbuf;
 import game.util.BitOps;
 import game.util.Strings;
+import game.xui.Gfx;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
 
 public class Console //extends ConsoleCmds 
 {

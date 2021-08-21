@@ -6,13 +6,26 @@ import java.util.function.Consumer;
 
 import game.TrackPathFinder.TPFHashEnt;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
+import game.ifaces.OnButtonClick;
 import game.ifaces.TileTypeProcs;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.Point;
+import game.struct.TileDesc;
 import game.tables.RailTables;
 import game.util.BitOps;
 import game.util.Sprites;
+import game.xui.Gfx;
+import game.xui.Gui;
+import game.xui.MiscGui;
+import game.xui.TileHighlightData;
+import game.xui.TrainGui;
+import game.xui.ViewPort;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
 
 public class Rail extends RailTables {
 
@@ -101,7 +114,7 @@ public class Rail extends RailTables {
 	/**
 	 * Maps a Trackdir to the corresponding TrackdirBits value
 	 */
-	static  /*TrackdirBits*/ int  TrackdirToTrackdirBits(/*Trackdir*/ int trackdir) 
+	public static  /*TrackdirBits*/ int  TrackdirToTrackdirBits(/*Trackdir*/ int trackdir) 
 	{ 
 		return 1 << trackdir; 
 	}
@@ -118,13 +131,13 @@ public class Rail extends RailTables {
 	 * direction along with the trackdir.
 	 */
 	//extern final byte _signal_along_trackdir[TRACKDIR_END];
-	static  int SignalAlongTrackdir(/*Trackdir*/ int trackdir) {return  _signal_along_trackdir[trackdir];}
+	public static  int SignalAlongTrackdir(/*Trackdir*/ int trackdir) {return  _signal_along_trackdir[trackdir];}
 
 	/**
 	 * Maps a trackdir to the bit that stores its status in the map arrays, in the
 	 * direction against the trackdir.
 	 */
-	static  int SignalAgainstTrackdir(/*Trackdir*/ int trackdir) {
+	public static  int SignalAgainstTrackdir(/*Trackdir*/ int trackdir) {
 		//extern final byte _signal_against_trackdir[TRACKDIR_END];
 		return  _signal_against_trackdir[trackdir];
 	}
@@ -133,7 +146,7 @@ public class Rail extends RailTables {
 	 * Maps a Track to the bits that store the status of the two signals that can
 	 * be present on the given track.
 	 */
-	static  int SignalOnTrack(/* Track */ int  track) {
+	public static  int SignalOnTrack(/* Track */ int  track) {
 		//extern final byte _signal_on_track[TRACK_END];
 		return  _signal_on_track[track];
 	}
@@ -161,7 +174,7 @@ public class Rail extends RailTables {
 	/**
 	 * Maps a trackdir to the reverse trackdir.
 	 */
-	static  /*Trackdir*/ int ReverseTrackdir(/*Trackdir*/ int trackdir) {
+	public static  /*Trackdir*/ int ReverseTrackdir(/*Trackdir*/ int trackdir) {
 		//extern final Trackdir _reverse_trackdir[TRACKDIR_END];
 		return _reverse_trackdir[trackdir];
 	}
@@ -170,7 +183,7 @@ public class Rail extends RailTables {
 	/**
 	 * Returns the Track that a given Trackdir represents
 	 */
-	static  /* Track */ int  TrackdirToTrack(/*Trackdir*/ int trackdir) { return (trackdir & 0x7); }
+	public static  /* Track */ int  TrackdirToTrack(/*Trackdir*/ int trackdir) { return (trackdir & 0x7); }
 
 
 
@@ -178,14 +191,14 @@ public class Rail extends RailTables {
 	 * Discards all directional information from the given TrackdirBits. Any
 	 * Track which is present in either direction will be present in the result.
 	 */
-	static  /*TrackBits*/ int  TrackdirBitsToTrackBits(/*TrackdirBits*/ int  bits) { return bits | (bits >> 8); }
+	public static  /*TrackBits*/ int  TrackdirBitsToTrackBits(/*TrackdirBits*/ int  bits) { return bits | (bits >> 8); }
 
 	/**
 	 * Maps a trackdir to the trackdir that you will end up on if you go straight
 	 * ahead. This will be the same trackdir for diagonal trackdirs, but a
 	 * different (alternating) one for straight trackdirs
 	 */
-	static  /*Trackdir*/ int NextTrackdir(/*Trackdir*/ int trackdir) {
+	public static  /*Trackdir*/ int NextTrackdir(/*Trackdir*/ int trackdir) {
 		//extern final Trackdir _next_trackdir[TRACKDIR_END];
 		return _next_trackdir[trackdir];
 	}
@@ -195,7 +208,7 @@ public class Rail extends RailTables {
 	 * Maps a trackdir to the (4-way) direction the tile is exited when following
 	 * that trackdir.
 	 */
-	static  /*DiagDirection*/ int  TrackdirToExitdir(/*Trackdir*/ int trackdir) {
+	public static  /*DiagDirection*/ int  TrackdirToExitdir(/*Trackdir*/ int trackdir) {
 		//extern final DiagDirection _trackdir_to_exitdir[TRACKDIR_END];
 		return _trackdir_to_exitdir[trackdir];
 	}
@@ -204,7 +217,7 @@ public class Rail extends RailTables {
 	 * Maps a track and an (4-way) dir to the trackdir that represents the track
 	 * with the exit in the given direction.
 	 */
-	static  /*Trackdir*/ int TrackExitdirToTrackdir(/* Track */ int  track, /*DiagDirection*/ int  diagdir) {
+	public static  /*Trackdir*/ int TrackExitdirToTrackdir(/* Track */ int  track, /*DiagDirection*/ int  diagdir) {
 		//extern final Trackdir _track_exitdir_to_trackdir[TRACK_END][DIAGDIR_END];
 		return _track_exitdir_to_trackdir[track][diagdir];
 	}
@@ -213,7 +226,7 @@ public class Rail extends RailTables {
 	 * Maps a track and an (4-way) dir to the trackdir that represents the track
 	 * with the exit in the given direction.
 	 */
-	static  /*Trackdir*/ int TrackEnterdirToTrackdir(/* Track */ int  track, /*DiagDirection*/ int  diagdir) {
+	public static  /*Trackdir*/ int TrackEnterdirToTrackdir(/* Track */ int  track, /*DiagDirection*/ int  diagdir) {
 		//extern final Trackdir _track_enterdir_to_trackdir[TRACK_END][DIAGDIR_END];
 		return _track_enterdir_to_trackdir[track][diagdir];
 	}
@@ -222,7 +235,7 @@ public class Rail extends RailTables {
 	 * Maps a track and a full (8-way) direction to the trackdir that represents
 	 * the track running in the given direction.
 	 */
-	static  /*Trackdir*/ int TrackDirectionToTrackdir(/* Track */ int  track, /*Direction*/ int dir) {
+	public static  /*Trackdir*/ int TrackDirectionToTrackdir(/* Track */ int  track, /*Direction*/ int dir) {
 		//extern final Trackdir _track_direction_to_trackdir[TRACK_END][DIR_END];
 		return _track_direction_to_trackdir[track][dir];
 	}
@@ -235,19 +248,19 @@ public class Rail extends RailTables {
 	 * Returns all trackdirs that can be reached when entering a tile from a given
 	 * (diagonal) direction. This will obviously include 90 degree turns, since no
 	 * information is available about the exact angle of entering */
-	static  /*TrackdirBits*/ int  DiagdirReachesTrackdirs(/*DiagDirection*/ int  diagdir) { return _exitdir_reaches_trackdirs[diagdir]; }
+	public static  /*TrackdirBits*/ int  DiagdirReachesTrackdirs(/*DiagDirection*/ int  diagdir) { return _exitdir_reaches_trackdirs[diagdir]; }
 
 	/**
 	 * Returns all tracks that can be reached when entering a tile from a given
 	 * (diagonal) direction. This will obviously include 90 degree turns, since no
 	 * information is available about the exact angle of entering */
-	static  /*TrackBits*/ int  DiagdirReachesTracks(/*DiagDirection*/ int  diagdir) { return TrackdirBitsToTrackBits(DiagdirReachesTrackdirs(diagdir)); }
+	public static  /*TrackBits*/ int  DiagdirReachesTracks(/*DiagDirection*/ int  diagdir) { return TrackdirBitsToTrackBits(DiagdirReachesTrackdirs(diagdir)); }
 
 	/**
 	 * Maps a trackdir to the trackdirs that can be reached from it (ie, when
 	 * entering the next tile. This will include 90 degree turns!
 	 */
-	static  /*TrackdirBits*/ int  TrackdirReachesTrackdirs(/*Trackdir*/ int trackdir) { return _exitdir_reaches_trackdirs[TrackdirToExitdir(trackdir)]; }
+	public static  /*TrackdirBits*/ int  TrackdirReachesTrackdirs(/*Trackdir*/ int trackdir) { return _exitdir_reaches_trackdirs[TrackdirToExitdir(trackdir)]; }
 	/* Note that there is no direct table for this function (there used to be),
 	 * but it uses two simpeler tables to achieve the result */
 
@@ -255,7 +268,7 @@ public class Rail extends RailTables {
 	/**
 	 * Maps a trackdir to all trackdirs that make 90 deg turns with it.
 	 */
-	static  /*TrackdirBits*/ int  TrackdirCrossesTrackdirs(/*Trackdir*/ int trackdir) {
+	public static  /*TrackdirBits*/ int  TrackdirCrossesTrackdirs(/*Trackdir*/ int trackdir) {
 		//extern final TrackdirBits _track_crosses_trackdirs[TRACKDIR_END];
 		return _track_crosses_trackdirs[TrackdirToTrack(trackdir)];
 	}
@@ -263,7 +276,7 @@ public class Rail extends RailTables {
 	/**
 	 * Maps a (4-way) direction to the reverse.
 	 */
-	static  /*DiagDirection*/ int  ReverseDiagdir(/*DiagDirection*/ int  diagdir) {
+	public static  /*DiagDirection*/ int  ReverseDiagdir(/*DiagDirection*/ int  diagdir) {
 		//extern final DiagDirection _reverse_diagdir[DIAGDIR_END];
 		return _reverse_diagdir[diagdir];
 	}
@@ -271,14 +284,14 @@ public class Rail extends RailTables {
 	/**
 	 * Maps a (8-way) direction to a (4-way) DiagDirection
 	 */
-	static  /*DiagDirection*/ int  DirToDiagdir(/*Direction*/ int dir) {
+	public static  /*DiagDirection*/ int  DirToDiagdir(/*Direction*/ int dir) {
 		assert(dir < TileIndex.DIR_END);
 		return (dir >> 1);
 	}
 
 
 	/* Checks if a given Trackdir is diagonal. */
-	static  boolean IsDiagonalTrackdir(/*Trackdir*/ int trackdir) { return IsDiagonalTrack(TrackdirToTrack(trackdir)); }
+	public static  boolean IsDiagonalTrackdir(/*Trackdir*/ int trackdir) { return IsDiagonalTrack(TrackdirToTrack(trackdir)); }
 
 	/*
 	 * Functions quering signals on tiles.
@@ -292,7 +305,7 @@ public class Rail extends RailTables {
 	 * Along meaning if you are currently driving on the given trackdir, this is
 	 * the signal that is facing us (for which we stop when it's red).
 	 */
-	static  boolean HasSignalOnTrackdir(TileIndex tile, /*Trackdir*/ int trackdir)
+	public static  boolean HasSignalOnTrackdir(TileIndex tile, /*Trackdir*/ int trackdir)
 	{
 		assert (IsValidTrackdir(trackdir));
 		return (GetRailTileType(tile) == RAIL_TYPE_SIGNALS) && 
@@ -307,7 +320,7 @@ public class Rail extends RailTables {
 	 * signal types cannot be mixed. This function is trying to be
 	 * future-compatible, though.
 	 */
-	static  /*SignalType*/ int GetSignalType(TileIndex tile, /* Track */ int  track)
+	public static  /*SignalType*/ int GetSignalType(TileIndex tile, /* Track */ int  track)
 	{
 		assert(IsValidTrack(track));
 		assert(GetRailTileType(tile) == RAIL_TYPE_SIGNALS);
@@ -338,7 +351,7 @@ public class Rail extends RailTables {
 	 * @param railtype the rail type which the information is requested for
 	 * @return The pointer to the RailtypeInfo
 	 */
-	static final RailtypeInfo GetRailTypeInfo(/*RailType*/ int railtype)
+	public static final RailtypeInfo GetRailTypeInfo(/*RailType*/ int railtype)
 	{
 		assert(railtype < RAILTYPE_END);
 		return _railtypes[railtype];
@@ -352,7 +365,7 @@ public class Rail extends RailTables {
 	 * @param  enginetype The RailType of the engine we are considering.
 	 * @param  tiletype   The RailType of the tile we are considering.
 	 */
-	static  boolean IsCompatibleRail(/*RailType*/ int enginetype, /*RailType*/ int tiletype)
+	public static  boolean IsCompatibleRail(/*RailType*/ int enginetype, /*RailType*/ int tiletype)
 	{
 		return BitOps.HASBIT(GetRailTypeInfo(enginetype).compatible_railtypes, tiletype);
 	}
@@ -364,7 +377,7 @@ public class Rail extends RailTables {
 	 * @param  bits The tracks present.
 	 * @return Whether the tracks present overlap in any way.
 	 */
-	static  boolean TracksOverlap(/*TrackBits*/ int  bits)
+	public static  boolean TracksOverlap(/*TrackBits*/ int  bits)
 	{
 		/* With no, or only one track, there is no overlap */
 		if (bits == 0 || BitOps.KILL_FIRST_BIT(bits) == 0)
@@ -391,7 +404,7 @@ public class Rail extends RailTables {
 
 
 
-	/*RailType*/ static int GetTileRailType(TileIndex tile, /*Trackdir*/ int trackdir)
+	public /*RailType*/ static int GetTileRailType(TileIndex tile, /*Trackdir*/ int trackdir)
 	{
 		/*RailType*/ int type = INVALID_RAILTYPE;
 		/*DiagDirection*/ int  exitdir = TrackdirToExitdir(trackdir);
@@ -480,7 +493,7 @@ public class Rail extends RailTables {
 	 *               11uuuudd => rail depot
 	 */
 
-	static boolean CheckTrackCombination(TileIndex tile, /*TrackBits*/ int  to_build, int flags)
+	public static boolean CheckTrackCombination(TileIndex tile, /*TrackBits*/ int  to_build, int flags)
 	{
 		/*RailTileType*/ int  type = GetRailTileType(tile);
 		/*TrackBits*/ int  current; /* The current track layout */
@@ -517,7 +530,7 @@ public class Rail extends RailTables {
 
 
 
-	static int GetRailFoundation(int tileh, int bits)
+	public static int GetRailFoundation(int tileh, int bits)
 	{
 
 		if ((~_valid_tileh_slopes[0][tileh] & bits) == 0)
@@ -551,7 +564,7 @@ public class Rail extends RailTables {
 	}
 
 
-	static int CheckRailSlope(int tileh, /*TrackBits*/ int  rail_bits, /*TrackBits*/ int  existing, TileIndex tile)
+	public static int CheckRailSlope(int tileh, /*TrackBits*/ int  rail_bits, /*TrackBits*/ int  existing, TileIndex tile)
 	{
 		// never allow building on top of steep tiles
 		if (!TileIndex.IsSteepTileh(tileh)) {
@@ -584,14 +597,14 @@ public class Rail extends RailTables {
 	}
 
 	/* Validate functions for rail building */
-	static  boolean ValParamTrackOrientation(/* Track */ int  track) {return IsValidTrack(track);}
+	public static  boolean ValParamTrackOrientation(/* Track */ int  track) {return IsValidTrack(track);}
 
 	/** Build a single piece of rail
 	 * @param x,y coordinates on where to build
 	 * @param p1 railtype of being built piece (normal, mono, maglev)
 	 * @param p2 rail track to build
 	 */
-	static int CmdBuildSingleRail(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuildSingleRail(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile;
 		int tileh;
@@ -718,7 +731,7 @@ public class Rail extends RailTables {
 	 * @param p1 unused
 	 * @param p2 rail orientation
 	 */
-	static int CmdRemoveSingleRail(int x, int y, int flags, int p1, int p2)
+	public static int CmdRemoveSingleRail(int x, int y, int flags, int p1, int p2)
 	{
 		/* Track */ int  track = p2;
 		/*TrackBits*/ int  trackbit;
@@ -840,7 +853,7 @@ public class Rail extends RailTables {
 	 * @param ey
 	 * @return
 	 */
-	static int ValidateAutoDrag(/*Trackdir*/ int [] trackdir, int x, int y, int ex, int ey)
+	public static int ValidateAutoDrag(/*Trackdir*/ int [] trackdir, int x, int y, int ex, int ey)
 	{
 		int dx, dy, trdx, trdy;
 
@@ -890,7 +903,7 @@ public class Rail extends RailTables {
 	 * - p2 = (bit 4-6) - track-orientation, valid values: 0-5 (Track enum)
 	 * - p2 = (bit 7)   - 0 = build, 1 = remove tracks
 	 */
-	static int CmdRailTrackHelper(int x, int y, int flags, int p1, int p2)
+	public static int CmdRailTrackHelper(int x, int y, int flags, int p1, int p2)
 	{
 		int ex, ey;
 		int ret, total_cost = 0;
@@ -943,7 +956,7 @@ public class Rail extends RailTables {
 	 * Stub for the unified rail builder/remover
 	 * @see CmdRailTrackHelper
 	 */
-	static int CmdBuildRailroadTrack(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuildRailroadTrack(int x, int y, int flags, int p1, int p2)
 	{
 		return CmdRailTrackHelper(x, y, flags, p1, BitOps.RETCLRBIT(p2, 7));
 	}
@@ -952,7 +965,7 @@ public class Rail extends RailTables {
 	 * Stub for the unified rail builder/remover
 	 * @see CmdRailTrackHelper
 	 */
-	static int CmdRemoveRailroadTrack(int x, int y, int flags, int p1, int p2)
+	public static int CmdRemoveRailroadTrack(int x, int y, int flags, int p1, int p2)
 	{
 		return CmdRailTrackHelper(x, y, flags, p1, BitOps.RETSETBIT(p2, 7));
 	}
@@ -965,7 +978,7 @@ public class Rail extends RailTables {
 	 * @todo When checking for the tile slope,
 	 * distingush between "Flat land required" and "land sloped in wrong direction"
 	 */
-	static int CmdBuildTrainDepot(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuildTrainDepot(int x, int y, int flags, int p1, int p2)
 	{
 		Depot d;
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
@@ -1038,7 +1051,7 @@ public class Rail extends RailTables {
 	+  * @param p2 used for CmdBuildManySignals() to copy direction of first signal
 	+  * TODO: p2 should be replaced by two bits for "along" and "against" the track.
 	+  */
-	static int CmdBuildSingleSignal(int x, int y, int flags, int p1, int p2)
+	public static int CmdBuildSingleSignal(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		boolean semaphore;
@@ -1168,7 +1181,7 @@ public class Rail extends RailTables {
 	 * - p2 (bit 3)     - 0 = signals, 1 = semaphores
 	 * - p2 (bit 24-31) - user defined signals_density
 	 */
-	static int BuildAutoSignals(int x, int y, /*Trackdir*/ int trackdir, int flags, int p2, int signals)
+	public static int BuildAutoSignals(int x, int y, /*Trackdir*/ int trackdir, int flags, int p2, int signals)
 	{
 		int signal_density =  (p2 >> 24);
 		int signal_ctr = signal_density * 2;
@@ -1571,7 +1584,8 @@ public class Rail extends RailTables {
 	 */
 	public static int CmdConvertRail(int ex, int ey, int flags, int p1, int p2)
 	{
-		int ret, cost, money;
+		int ret, cost; 
+		long money;
 		int sx, sy, x, y;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
@@ -2777,7 +2791,7 @@ public class Rail extends RailTables {
 
 		/* calculate the point where the following wagon should be activated */
 		/* this depends on the length of the current vehicle */
-		length = v.rail.cached_veh_length;
+		length = v.rail.getCached_veh_length();
 
 		fract_coord_leave =
 				 (((_fractcoords_enter[dir] & 0x0F) +				// x
@@ -2796,7 +2810,7 @@ public class Rail extends RailTables {
 				if (v.next == null)
 					Pbs.PBSClearTrack(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track));
 
-				v.rail.track = 0x80;
+				v.rail.setInDepot();
 				v.vehstatus |= Vehicle.VS_HIDDEN; /* hide it */
 				v.direction ^= 4;
 
@@ -3172,7 +3186,8 @@ public class Rail extends RailTables {
 
 	static void DoRailroadTrack(int mode)
 	{
-		Cmd.DoCommandP(TileIndex.TileVirtXY(ViewPort._thd.selstart.x, ViewPort._thd.selstart.y), TileIndex.TileVirtXY(ViewPort._thd.selend.x, ViewPort._thd.selend.y).getTile(), _cur_railtype | (mode << 4), null,
+		//Cmd.DoCommandP(TileIndex.TileVirtXY(ViewPort._thd.selstart.x, ViewPort._thd.selstart.y), TileIndex.TileVirtXY(ViewPort._thd.selend.x, ViewPort._thd.selend.y).getTile(), _cur_railtype | (mode << 4), null,
+		Cmd.DoCommandP(ViewPort._thd.getStartTile(), ViewPort._thd.getEndTile().getTile(), _cur_railtype | (mode << 4), null,
 				_remove_button_clicked ?
 						Cmd.CMD_REMOVE_RAILROAD_TRACK | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1012_CAN_T_REMOVE_RAILROAD_TRACK) :
 							Cmd.CMD_BUILD_RAILROAD_TRACK  | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1011_CAN_T_BUILD_RAILROAD_TRACK)
@@ -3182,10 +3197,10 @@ public class Rail extends RailTables {
 	static void HandleAutodirPlacement()
 	{
 		TileHighlightData thd = ViewPort._thd;
-		int trackstat = thd.drawstyle & 0xF; // 0..5
+		int trackstat = thd.getTrackState();
 
-		if(0!=(thd.drawstyle & ViewPort.HT_RAIL)) { // one tile case
-			GenericPlaceRail(TileIndex.TileVirtXY(thd.selend.x, thd.selend.y), trackstat);
+		if(thd.hasRail()) { // one tile case
+			GenericPlaceRail(thd.getEndTile(), trackstat);
 			return;
 		}
 
@@ -3195,18 +3210,18 @@ public class Rail extends RailTables {
 	static void HandleAutoSignalPlacement()
 	{
 		TileHighlightData thd = ViewPort._thd;
-		int trackstat = (thd.drawstyle & 0xF); // 0..5
+		int trackstat = thd.getTrackState(); // (thd.drawstyle & 0xF); // 0..5
 
-		if (thd.drawstyle == ViewPort.HT_RECT) { // one tile case
-			GenericPlaceSignals(TileIndex.TileVirtXY(thd.selend.x, thd.selend.y));
+		if (thd.isRect()) { // one tile case
+			GenericPlaceSignals(thd.getEndTile()); // TileIndex.TileVirtXY(thd.selend.x, thd.selend.y));
 			return;
 		}
 
 		// Global._patches.drag_signals_density is given as a parameter such that each user in a network
 		// game can specify his/her own signal density
 		Cmd.DoCommandP(
-				TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y),
-				TileIndex.TileVirtXY(thd.selend.x, thd.selend.y).tile,
+				thd.getStartTile(), //TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y),
+				thd.getEndTile().getTile(),// TileIndex.TileVirtXY(thd.selend.x, thd.selend.y).tile,
 				(Global._ctrl_pressed ? 1 << 3 : 0) | (trackstat << 4) | (Global._patches.drag_signals_density << 24),
 				Rail::CcPlaySound1E,
 				_remove_button_clicked ?
@@ -3299,7 +3314,8 @@ public class Rail extends RailTables {
 					break;
 				}
 			}
-			ViewPort.MarkTileDirty(ViewPort._thd.pos.x, ViewPort._thd.pos.y); // redraw tile selection
+			// redraw tile selection
+			ViewPort._thd.markPosDirty();
 			break;
 		}
 
@@ -3415,19 +3431,19 @@ public class Rail extends RailTables {
 		final RailtypeInfo rti = GetRailTypeInfo(railtype);
 
 		assert(railtype < RAILTYPE_END);
-		//w.widget.get(RTW_CAPTION).unkA = rti.strings.toolbar_caption;
-		w.widget.get(RTW_CAPTION).unkA = rti.toolbar_caption.id;
-		w.widget.get(RTW_BUILD_NS).unkA = rti.gui_sprites.build_ns_rail.id;
-		w.widget.get(RTW_BUILD_X).unkA = rti.gui_sprites.build_x_rail.id;
-		w.widget.get(RTW_BUILD_EW).unkA = rti.gui_sprites.build_ew_rail.id;
-		w.widget.get(RTW_BUILD_Y).unkA = rti.gui_sprites.build_y_rail.id;
-		w.widget.get(RTW_AUTORAIL).unkA = rti.gui_sprites.auto_rail.id;
-		w.widget.get(RTW_BUILD_DEPOT).unkA = rti.gui_sprites.build_depot.id;
-		w.widget.get(RTW_CONVERT_RAIL).unkA = rti.gui_sprites.convert_rail.id;
-		w.widget.get(RTW_BUILD_TUNNEL).unkA = rti.gui_sprites.build_tunnel.id;
+		//w.getWidget(RTW_CAPTION).unkA = rti.strings.toolbar_caption;
+		w.getWidget(RTW_CAPTION).unkA = rti.toolbar_caption.id;
+		w.getWidget(RTW_BUILD_NS).unkA = rti.gui_sprites.build_ns_rail.id;
+		w.getWidget(RTW_BUILD_X).unkA = rti.gui_sprites.build_x_rail.id;
+		w.getWidget(RTW_BUILD_EW).unkA = rti.gui_sprites.build_ew_rail.id;
+		w.getWidget(RTW_BUILD_Y).unkA = rti.gui_sprites.build_y_rail.id;
+		w.getWidget(RTW_AUTORAIL).unkA = rti.gui_sprites.auto_rail.id;
+		w.getWidget(RTW_BUILD_DEPOT).unkA = rti.gui_sprites.build_depot.id;
+		w.getWidget(RTW_CONVERT_RAIL).unkA = rti.gui_sprites.convert_rail.id;
+		w.getWidget(RTW_BUILD_TUNNEL).unkA = rti.gui_sprites.build_tunnel.id;
 	}
 
-	static void ShowBuildRailToolbar(/*RailType*/ int railtype, int button)
+	public static void ShowBuildRailToolbar(/*RailType*/ int railtype, int button)
 	{
 		Window w;
 
@@ -3436,7 +3452,7 @@ public class Rail extends RailTables {
 		BiConsumer<Window,WindowEvent>  cmp = Rail::BuildRailToolbWndProc;
 		
 		// don't recreate the window if we're clicking on a button and the window exists.
-		if (button < 0 || null == (w = Window.FindWindowById(Window.WC_BUILD_TOOLBAR, 0)) || (w.wndproc != cmp) ) {
+		if (button < 0 || null == (w = Window.FindWindowById(Window.WC_BUILD_TOOLBAR, 0)) || (w.getWndproc() != cmp) ) {
 			Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);
 			_cur_railtype = railtype;
 			w = Window.AllocateWindowDesc(_build_rail_desc);
@@ -3706,12 +3722,12 @@ public class Rail extends RailTables {
 		case WE_PAINT: {
 			int i;
 
-			w.click_state = (1 << 3) << (_cur_waypoint_type - w.hscroll.pos);
+			w.click_state = (1 << 3) << (_cur_waypoint_type - w.hscroll.getPos());
 			w.DrawWindowWidgets();
 
 			for (i = 0; i < 5; i++) {
-				if (w.hscroll.pos + i < _waypoint_count) {
-					WayPoint.DrawWaypointSprite(2 + i * 68, 25, w.hscroll.pos + i, _cur_railtype);
+				if (w.hscroll.getPos() + i < _waypoint_count) {
+					WayPoint.DrawWaypointSprite(2 + i * 68, 25, w.hscroll.getPos() + i, _cur_railtype);
 				}
 			}
 			break;
@@ -3719,7 +3735,7 @@ public class Rail extends RailTables {
 		case WE_CLICK: {
 			switch (e.widget) {
 			case 3: case 4: case 5: case 6: case 7:
-				_cur_waypoint_type =  (e.widget - 3 + w.hscroll.pos);
+				_cur_waypoint_type =  (e.widget - 3 + w.hscroll.getPos());
 				//SndPlayFx(SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
@@ -3765,8 +3781,8 @@ public class Rail extends RailTables {
 	static void ShowBuildWaypointPicker()
 	{
 		Window w = Window.AllocateWindowDesc(_build_waypoint_desc);
-		w.hscroll.cap = 5;
-		w.hscroll.count = _waypoint_count;
+		w.hscroll.setCap(5);
+		w.hscroll.setCount(_waypoint_count);
 	}
 
 	static void BuildSignalWndProc(Window w, WindowEvent e)

@@ -3,13 +3,14 @@ package game;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.OrderID;
@@ -23,14 +24,23 @@ import game.ifaces.TileVehicleInterface;
 import game.struct.BackuppedOrders;
 import game.struct.Point;
 import game.struct.Rect;
+import game.struct.SortStruct;
 import game.struct.VQueueItem;
 import game.tables.EngineTables;
 import game.util.BitOps;
 import game.util.MemoryPool;
 import game.util.VehicleHash;
+import game.xui.DrawPixelInfo;
+import game.xui.EngineGui;
+import game.xui.MiscGui;
+import game.xui.VehicleGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class Vehicle implements IPoolItem 
 {
+	private static final long serialVersionUID = 1L;
+	
 	static public final int INVALID_VEHICLE = -1; //0xFFFF; // TODO -1?
 	static public final int INVALID_ENGINE  = -1;
 	private static final int INVALID_COORD = -0x8000;
@@ -103,7 +113,7 @@ public class Vehicle implements IPoolItem
 	int tick_counter;// increased by one for each tick
 
 	/* Begin Order-stuff */
-	Order current_order = new Order();     //! The current order (+ status, like: loading)
+	public Order current_order = new Order();     //! The current order (+ status, like: loading)
 	//OrderID cur_order_index; //! The index to the current order
 	int cur_order_index; //! The index to the current order
 
@@ -149,12 +159,12 @@ public class Vehicle implements IPoolItem
 
 
 	// TODO temp we create all of them, redo
-	VehicleRail rail = new VehicleRail();
-	VehicleAir air = new VehicleAir();
-	VehicleRoad road = new VehicleRoad();
-	VehicleSpecial special = new VehicleSpecial();
-	VehicleDisaster disaster; // TODO create me in disaster 
-	VehicleShip ship = new VehicleShip();
+	public VehicleRail rail = new VehicleRail();
+	public VehicleAir air = new VehicleAir();
+	public VehicleRoad road = new VehicleRoad();
+	public VehicleSpecial special = new VehicleSpecial();
+	public VehicleDisaster disaster; // TODO create me in disaster 
+	public VehicleShip ship = new VehicleShip();
 
 
 
@@ -378,7 +388,7 @@ public class Vehicle implements IPoolItem
 
 		date_of_last_service = Global._date;
 		breakdowns_since_last_service = 0;
-		reliability = Engine.GetEngine(engine_type).reliability;
+		reliability = Engine.GetEngine(engine_type).getReliability();
 	}
 
 	
@@ -467,7 +477,7 @@ public class Vehicle implements IPoolItem
 
 
 
-	Vehicle GetFirstVehicleInChain()
+	public Vehicle GetFirstVehicleInChain()
 	{
 		Vehicle v = this;
 		Vehicle u;
@@ -549,7 +559,7 @@ public class Vehicle implements IPoolItem
 	 * @param v Vehicle.
 	 * @return Next vehicle in the consist.
 	 */
-	Vehicle GetNextVehicle()
+	public Vehicle GetNextVehicle()
 	{
 		Vehicle u = next;
 		while (u != null && u.IsArticulatedPart()) {
@@ -586,7 +596,7 @@ public class Vehicle implements IPoolItem
 	 * @param v vehicle to check
 	 * @return Returns true if vehicle is a front engine
 	 */
-	boolean IsFrontEngine()
+	public boolean IsFrontEngine()
 	{
 		return HASBIT_subtype( Train_Front);
 	}
@@ -594,7 +604,7 @@ public class Vehicle implements IPoolItem
 	/** Set front engine state
 	 * @param v vehicle to change
 	 */
-	void SetFrontEngine()
+	public void SetFrontEngine()
 	{
 		SETBIT_subtype( Train_Front);
 	}
@@ -602,7 +612,7 @@ public class Vehicle implements IPoolItem
 	/** Remove the front engine state
 	 * @param v vehicle to change
 	 */
-	void ClearFrontEngine()
+	public void ClearFrontEngine()
 	{
 		CLRBIT_subtype( Train_Front);
 	}
@@ -611,7 +621,7 @@ public class Vehicle implements IPoolItem
 	 * @param v vehicle to check
 	 * @return Returns true if vehicle is an articulated part
 	 */
-	boolean IsArticulatedPart()
+	public boolean IsArticulatedPart()
 	{
 		return HASBIT_subtype( Train_Articulated_Part);
 	}
@@ -619,7 +629,7 @@ public class Vehicle implements IPoolItem
 	/** Set a vehicle to be an articulated part
 	 * @param v vehicle to change
 	 */
-	void SetArticulatedPart()
+	public void SetArticulatedPart()
 	{
 		SETBIT_subtype( Train_Articulated_Part);
 	}
@@ -627,7 +637,7 @@ public class Vehicle implements IPoolItem
 	/** Clear a vehicle from being an articulated part
 	 * @param v vehicle to change
 	 */
-	void ClearArticulatedPart()
+	public void ClearArticulatedPart()
 	{
 		CLRBIT_subtype( Train_Articulated_Part);
 	}
@@ -636,7 +646,7 @@ public class Vehicle implements IPoolItem
 	 * @param v vehicle to check
 	 * @return Returns true if vehicle is a wagon
 	 */
-	boolean IsTrainWagon()
+	public boolean IsTrainWagon()
 	{
 		return HASBIT_subtype( Train_Wagon);
 	}
@@ -644,7 +654,7 @@ public class Vehicle implements IPoolItem
 	/** Set a vehicle to be a wagon
 	 * @param v vehicle to change
 	 */
-	void SetTrainWagon()
+	public void SetTrainWagon()
 	{
 		SETBIT_subtype( Train_Wagon);
 	}
@@ -652,7 +662,7 @@ public class Vehicle implements IPoolItem
 	/** Clear wagon property
 	 * @param v vehicle to change
 	 */
-	void ClearTrainWagon()
+	public void ClearTrainWagon()
 	{
 		CLRBIT_subtype( Train_Wagon);
 	}
@@ -661,7 +671,7 @@ public class Vehicle implements IPoolItem
 	 * @param v vehicle to check
 	 * @return Returns true if vehicle is an engine
 	 */
-	boolean IsTrainEngine()
+	public boolean IsTrainEngine()
 	{
 		return HASBIT_subtype( Train_Engine);
 	}
@@ -669,7 +679,7 @@ public class Vehicle implements IPoolItem
 	/** Set engine status
 	 * @param v vehicle to change
 	 */
-	void SetTrainEngine()
+	public void SetTrainEngine()
 	{
 		SETBIT_subtype( Train_Engine);
 	}
@@ -677,7 +687,7 @@ public class Vehicle implements IPoolItem
 	/** Clear engine status
 	 * @param v vehicle to change
 	 */
-	void ClearTrainEngine()
+	public void ClearTrainEngine()
 	{
 		CLRBIT_subtype( Train_Engine);
 	}
@@ -686,7 +696,7 @@ public class Vehicle implements IPoolItem
 	 * @param v vehicle to check
 	 * @return Returns true if vehicle is a free wagon
 	 */
-	boolean IsFreeWagon()
+	public boolean IsFreeWagon()
 	{
 		return HASBIT_subtype( Train_Free_Wagon);
 	}
@@ -694,7 +704,7 @@ public class Vehicle implements IPoolItem
 	/** Set if a vehicle is a free wagon
 	 * @param v vehicle to change
 	 */
-	void SetFreeWagon()
+	public void SetFreeWagon()
 	{
 		SETBIT_subtype( Train_Free_Wagon);
 	}
@@ -702,7 +712,7 @@ public class Vehicle implements IPoolItem
 	/** Clear a vehicle from being a free wagon
 	 * @param v vehicle to change
 	 */
-	void ClearFreeWagon()
+	public void ClearFreeWagon()
 	{
 		CLRBIT_subtype( Train_Free_Wagon);
 	}
@@ -711,7 +721,7 @@ public class Vehicle implements IPoolItem
 	 * @param v vehicle to check
 	 * @return Returns true if vehicle is a multiheaded engine
 	 */
-	boolean IsMultiheaded()
+	public boolean IsMultiheaded()
 	{
 		return HASBIT_subtype( Train_Multiheaded);
 	}
@@ -719,7 +729,7 @@ public class Vehicle implements IPoolItem
 	/** Set if a vehicle is a multiheaded engine
 	 * @param v vehicle to change
 	 */
-	void SetMultiheaded()
+	public void SetMultiheaded()
 	{
 		SETBIT_subtype( Train_Multiheaded);
 	}
@@ -727,7 +737,7 @@ public class Vehicle implements IPoolItem
 	/** Clear multiheaded engine property
 	 * @param v vehicle to change
 	 */
-	void ClearMultiheaded()
+	public void ClearMultiheaded()
 	{
 		CLRBIT_subtype( Train_Multiheaded);
 	}
@@ -740,7 +750,7 @@ public class Vehicle implements IPoolItem
 	 * @param v Vehicle.
 	 * @return True if the engine has an articulated part.
 	 */
-	boolean EngineHasArticPart()
+	public boolean EngineHasArticPart()
 	{
 		return (next != null) && next.IsArticulatedPart();
 	}
@@ -749,7 +759,7 @@ public class Vehicle implements IPoolItem
 	 * @param v Vehicle.
 	 * @return Last part of the engine.
 	 */
-	Vehicle GetLastEnginePart()
+	public Vehicle GetLastEnginePart()
 	{
 		Vehicle v = this;
 		while (v.EngineHasArticPart()) v = v.next;
@@ -836,7 +846,7 @@ public class Vehicle implements IPoolItem
 	/**
 	 * Get the current size of the VehiclePool
 	 */
-	static int GetVehiclePoolSize()
+	public static int GetVehiclePoolSize()
 	{
 		return _vehicle_pool.total_items();
 	}
@@ -965,7 +975,7 @@ public class Vehicle implements IPoolItem
 			return false;
 
 		return Global._patches.servint_ispercent ?
-				(reliability < Engine.GetEngine(engine_type).reliability * (100 - service_interval) / 100) :
+				(reliability < Engine.GetEngine(engine_type).getReliability() * (100 - service_interval) / 100) :
 					(date_of_last_service + service_interval < Global._date);
 	}
 
@@ -1198,7 +1208,7 @@ public class Vehicle implements IPoolItem
 	}
 
 
-	static Vehicle AllocateVehicle()
+	public static Vehicle AllocateVehicle()
 	{
 		int[] counter = { 0 }; // TODO not static?
 		return AllocateSingleVehicle(counter);
@@ -1210,7 +1220,7 @@ public class Vehicle implements IPoolItem
 	 * @param num number of vehicles to allocate room for
 	 *	returns true if there is room to allocate all the vehicles
 	 */
-	static boolean AllocateVehicles(Vehicle[] vl, int num)
+	public static boolean AllocateVehicles(Vehicle[] vl, int num)
 	{
 		int i;
 		Vehicle v;
@@ -1232,7 +1242,7 @@ public class Vehicle implements IPoolItem
 
 	//static VehicleID _vehicle_position_hash[0x1000];
 
-	static Object VehicleFromPos(TileIndex tile, Object data, VehicleFromPosProc proc)
+	public static Object VehicleFromPos(TileIndex tile, Object data, VehicleFromPosProc proc)
 	{
 		//int x,y,x2,y2;
 		Point pt = Point.RemapCoords(tile.TileX() * 16, tile.TileY() * 16, 0);
@@ -1591,14 +1601,14 @@ public class Vehicle implements IPoolItem
 	 * @param cid_to check refit to this cargo-type
 	 * @return true if it is possible, false otherwise
 	 */
-	static boolean CanRefitTo(EngineID engine_type, CargoID cid_to)
+	public static boolean CanRefitTo(EngineID engine_type, CargoID cid_to)
 	{
 		//CargoID 
 		int cid = EngineTables._global_cargo_id[GameOptions._opt_ptr.landscape][cid_to.id];
 		return BitOps.HASBIT(Global._engine_info[engine_type.id].refit_mask, cid);
 	}
 
-	static void DoDrawVehicle(final Vehicle v)
+	public static void DoDrawVehicle(final Vehicle v)
 	{
 		int image = v.cur_image;
 
@@ -1612,7 +1622,7 @@ public class Vehicle implements IPoolItem
 				v.sprite_width, v.sprite_height, v.z_height, v.z_pos);
 	}
 
-	static void ViewportAddVehicles(DrawPixelInfo dpi)
+	public static void ViewportAddVehicles(DrawPixelInfo dpi)
 	{
 		
 		List<VehicleID> found = _hash.get( 
@@ -2299,17 +2309,17 @@ public class Vehicle implements IPoolItem
 		_effect_tick_procs[v.subtype].accept(v);
 	}
 
-	static Vehicle CheckClickOnVehicle(final ViewPort vp, int x, int y)
+	public static Vehicle CheckClickOnVehicle(final ViewPort vp, int x, int y)
 	{
 		Vehicle [] found = {null}; //, v;
 		int [] best_dist = {(int)-1};
 
-		if ( (int)(x -= vp.left) >= (int)vp.width ||
-				(int)(y -= vp.top) >= (int)vp.height)
+		if ( (int)(x -= vp.getLeft()) >= (int)vp.getWidth() ||
+				(int)(y -= vp.getTop()) >= (int)vp.getHeight())
 			return null;
 
-		x = (x << vp.zoom) + vp.virtual_left;
-		y = (y << vp.zoom) + vp.virtual_top;
+		x = (x << vp.getZoom()) + vp.getVirtual_left();
+		y = (y << vp.getZoom()) + vp.getVirtual_top();
 
 		int fx = x;
 		int fy = y;
@@ -2683,7 +2693,7 @@ public class Vehicle implements IPoolItem
 		if (
 				v.type == VEH_Train && 
 				v.rail.shortest_platform[0]*16 <= v.rail.cached_total_length && 
-				Player.GetPlayer(v.owner).renew_keep_length) 
+				Player.GetPlayer(v.owner).isRenew_keep_length()) 
 		{
 			// the train is not too long for the stations it visits. We should try to keep it that way if we change anything
 			train_fits_in_station = true;
@@ -2771,7 +2781,7 @@ public class Vehicle implements IPoolItem
 			w = v;
 			while (v.rail.shortest_platform[0]*16 < v.rail.cached_total_length) {
 				// the train is too long. We will remove cars one by one from the start of the train until it's short enough
-				while (w != null && 0==(Engine.RailVehInfo(w.engine_type.id).flags & Engine.RVI_WAGON) ) {
+				while (w != null && !(Engine.RailVehInfo(w.engine_type.id).isWagon()) ) {
 					w = w.GetNextVehicle();
 				}
 				if (w == null) {
@@ -2908,23 +2918,24 @@ public class Vehicle implements IPoolItem
 		switch(v.type)
 		{
 		case VEH_Train:
-			if (v.rail.track == 0x80) /* We'll assume the train is facing outwards */
+			if (v.rail.isInDepot()) /* We'll assume the train is facing outwards */
 				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_RAIL)); /* Train in depot */
 
-			if (v.rail.track == 0x40) /* train in tunnel, so just use his direction and assume a diagonal track */
+			if (v.rail.isInTunnel()) /* train in tunnel, so just use his direction and assume a diagonal track */
 				return Rail.DiagdirToDiagTrackdir((v.direction >> 1) & 3);
 
 			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.rail.track),v.direction);
 
 		case VEH_Ship:
-			if (v.ship.state == 0x80)  /* Inside a depot? */
+			//if (v.ship.state == 0x80)  /* Inside a depot? */
+			if (v.ship.isInDepot())  /* Inside a depot? */
 				/* We'll assume the ship is facing outwards */
 				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_WATER)); /* Ship in depot */
 
 			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.ship.state),v.direction);
 
 		case VEH_Road:
-			if (v.road.state == 254) /* We'll assume the road vehicle is facing outwards */
+			if (v.road.isInDepot()) /* We'll assume the road vehicle is facing outwards */
 				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_ROAD)); /* Road vehicle in depot */
 
 			if (v.tile.IsRoadStationTile()) /* We'll assume the road vehicle is facing outwards */
@@ -3127,7 +3138,7 @@ public class Vehicle implements IPoolItem
 	 *  without loosing the order-list
 	 *
 	 */
-	static void BackupVehicleOrders(final Vehicle v, BackuppedOrders bak)
+	public static void BackupVehicleOrders(final Vehicle v, BackuppedOrders bak)
 	{
 		/* Save general info */
 		bak.orderindex       = OrderID.get(v.cur_order_index);
@@ -3180,7 +3191,7 @@ public class Vehicle implements IPoolItem
 	 * Restore vehicle orders that are backupped via BackupVehicleOrders
 	 *
 	 */
-	static void RestoreVehicleOrders(final Vehicle  v, final BackuppedOrders bak)
+	public static void RestoreVehicleOrders(final Vehicle  v, final BackuppedOrders bak)
 	{
 		//int i;
 
@@ -3263,7 +3274,10 @@ public class Vehicle implements IPoolItem
 	}
 
 	public int getType() { return type; }
+	public int getSubtype() { return subtype;	}
+	public PlayerID getOwner() {		return owner;	}
 
+	
 	// TODO check against CmdStartStopTrain, replace code there with us
 	public void stop() {
 		if (type == Vehicle.VEH_Train)
@@ -3711,6 +3725,202 @@ public class Vehicle implements IPoolItem
 	{
 		oos.writeObject(_vehicle_pool);		
 	}
+
+	/**
+	 * Color for profit-based colored icons
+	 * @return Color to paint icon with 
+	 */
+
+	public int encodeColor() {
+		if (age <= 365 * 2) {
+			return Sprite.PALETTE_TO_GREY;
+		} else if (profit_last_year < 0) {
+			return Sprite.PALETTE_TO_RED;
+		} else if (profit_last_year < 10000) {
+			return Sprite.PALETTE_TO_YELLOW;
+		} else {
+			return Sprite.PALETTE_TO_GREEN;
+		}
+	}
+
+	public int infoString() {
+		int str;
+		if (road.crashed_ctr != 0) {
+			str = Str.STR_8863_CRASHED;
+		} else if (isBroken()) {
+			str = Str.STR_885C_BROKEN_DOWN;
+		} else if(0 != (vehstatus & Vehicle.VS_STOPPED)) {
+			str = Str.STR_8861_STOPPED;
+		} else {
+			if (num_orders == 0) {
+				str = Str.STR_NO_ORDERS + (Global._patches.vehicle_speed ? 1 : 0);
+				Global.SetDParam(0, cur_speed * 10 >> 5);
+				return str;
+			}
+			int i = null == current_order ? -1 : current_order.type;
+			
+			switch (i) {
+			case Order.OT_GOTO_STATION: {
+				Global.SetDParam(0, current_order.station);
+				Global.SetDParam(1, cur_speed * 10 >> 5);
+				str = Str.STR_HEADING_FOR_STATION + (Global._patches.vehicle_speed ? 1 : 0);
+			} break;
+
+			case Order.OT_GOTO_DEPOT: {
+				Depot depot = Depot.GetDepot(current_order.station);
+				Global.SetDParam(0, depot.town_index);
+				Global.SetDParam(1, cur_speed * 10 >> 5);
+				str = Str.STR_HEADING_FOR_ROAD_DEPOT + (Global._patches.vehicle_speed ? 1 : 0);
+			} break;
+
+			case Order.OT_LOADING:
+			case Order.OT_LEAVESTATION:
+				str = Str.STR_882F_LOADING_UNLOADING;
+				break;
+
+			default:
+				str = Str.STR_EMPTY;
+				break;
+			}
+		}
+		return str;
+	}
+	
+	
+	public boolean isStopped() { return 0 != (vehstatus & VS_STOPPED); }
+	public boolean isCrashed() { return 0 != (vehstatus & VS_CRASHED); }
+	public boolean isHidden() { return 0 != (vehstatus & VS_HIDDEN); }
+	public boolean isUnclickable() { return (vehstatus & VS_UNCLICKABLE) != 0; }
+
+	public boolean isBroken() { return breakdown_ctr == 1; }
+
+	public UnitID getUnitnumber() { return unitnumber; }
+	public int getAge() { return age; }
+	public int getReliability() { return reliability; }
+
+	public AcceptedCargo countTotalCargo() 
+	{
+		AcceptedCargo cargo = new AcceptedCargo();
+
+		for (Vehicle v = this; v != null; v = v.next) 
+			cargo.ct[v.cargo_type] += v.cargo_cap;
+		
+		return cargo;
+	}
+
+	public int getProfit_this_year() { return profit_this_year; }
+	public int getProfit_last_year() { return profit_last_year; }
+	public int getString_id() { return string_id; }
+
+	/**
+	 * For train finds out lowest max speed of all cars.
+	 * @return Maximum speed
+	 */
+	public int getRealMaxSpeed() 
+	{
+		if (getType() == Vehicle.VEH_Train ) 
+		{
+			Vehicle u = this;
+			int mSpeed = Integer.MAX_VALUE;
+			
+			do {
+				final int ms = Engine.RailVehInfo(engine_type.id).max_speed;
+				if (ms != 0)
+					mSpeed = Math.min(mSpeed, ms);
+			} while ((u = u.next) != null);
+			
+			return mSpeed;
+		}
+		else
+			return max_speed;
+	}
+
+	
+	public int getX_pos() { return x_pos;	}
+	public int getY_pos() { return y_pos;	}
+	public int getZ_pos() { return z_pos;	}
+
+	
+	public int getMax_age() { return max_age; }
+	public Vehicle getNext() { return next; }
+	public int getService_interval() { return service_interval; }
+	public EngineID getEngine_type() {		return engine_type;	}
+	public int getBuild_year() {		return build_year;	}
+	public int getValue() { return value; }
+	public int getCargo_cap() {		return cargo_cap;	}
+	public int getCargo_type() {		return cargo_type;	}
+	public int getCargo_count() { return cargo_count; }
+
+	public int getBreakdowns_since_last_service() { return breakdowns_since_last_service; }
+
+	public int generateTrainDescription() 
+	{
+		int psp = Global._patches.vehicle_speed ? 1 : 0;
+		int str = Str.INVALID_STRING_ID.id;
+		
+		if (rail.crash_anim_pos != 0) {
+			str = Str.STR_8863_CRASHED;
+		} else if (isBroken()) {
+			str = Str.STR_885C_BROKEN_DOWN;
+		} else if(isStopped()) {
+			if (rail.last_speed == 0) {
+				str = Str.STR_8861_STOPPED;
+			} else {
+				Global.SetDParam(0, rail.last_speed * 10 >> 4);
+				str = Str.STR_TRAIN_STOPPING + psp;
+			}
+		} else {
+			switch (current_order.type) {
+			case Order.OT_GOTO_STATION: {
+				str = Str.STR_HEADING_FOR_STATION + psp;
+				Global.SetDParam(0, current_order.station);
+				Global.SetDParam(1, rail.last_speed * 10 >> 4);
+			} break;
+
+			case Order.OT_GOTO_DEPOT: {
+				Depot dep = Depot.GetDepot(current_order.station);
+				Global.SetDParam(0, dep.getTownIndex());
+				str = Str.STR_HEADING_FOR_TRAIN_DEPOT + psp;
+				Global.SetDParam(1, rail.last_speed * 10 >> 4);
+			} break;
+
+			case Order.OT_LOADING:
+			case Order.OT_LEAVESTATION:
+				str = Str.STR_882F_LOADING_UNLOADING;
+				break;
+
+			case Order.OT_GOTO_WAYPOINT: {
+				Global.SetDParam(0, current_order.station);
+				str = Str.STR_HEADING_FOR_WAYPOINT + psp;
+				Global.SetDParam(1, rail.last_speed * 10 >> 4);
+				break;
+			}
+
+			default:
+				if (num_orders == 0) {
+					str = Str.STR_NO_ORDERS + psp;
+					Global.SetDParam(0, rail.last_speed * 10 >> 4);
+				} else
+					str = Str.STR_EMPTY;
+				break;
+			}
+		}
+		
+		return str;
+	}
+
+	public int getSpritenum() { return spritenum; }
+	public int getCargo_source() {		return cargo_source;	}
+	public int getMax_speed() {		return max_speed;	}
+	public int getNum_orders() { return num_orders; }
+	public int getCur_order_index() { return cur_order_index; }
+	public int getCur_speed() { return cur_speed;	}
+
+
+
+
+
+
 	
 }
 
@@ -3777,4 +3987,10 @@ interface VehicleLeaveTileProc
 {
 	void accept (Vehicle v, TileIndex tile, int x, int y);
 }
+
+
+
+
+
+
 

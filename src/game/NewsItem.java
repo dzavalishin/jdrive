@@ -11,6 +11,13 @@ import game.tables.SoundFx;
 import game.util.BitOps;
 import game.util.GameDate;
 import game.util.wcustom.def_d;
+import game.xui.Gfx;
+import game.xui.ViewPort;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
+import game.xui.WindowMessage;
 
 public class NewsItem {
 	StringID string_id;
@@ -190,27 +197,24 @@ public class NewsItem {
 		w = Window.FindWindowById(Window.WC_MESSAGE_HISTORY, 0);
 		if (w == null) return;
 		w.SetWindowDirty();
-		w.vscroll.count = _total_news;
+		w.vscroll.setCount(_total_news);
 	}
 
 	//public static void AddValidatedNewsItem(StringID string, int flags, int data_a, int data_b, ValidationProc *validation)
 	static public void AddNewsItem(StringID string, int flags, int data_a, int data_b)
 	{
 		AddValidatedNewsItem(string.id, flags, data_a, data_b, null);
-		//_news_items[_latest_news].isValid = validation;
 	}
 
 	static public void AddNewsItem(int string, int flags, int data_a, int data_b)
 	{
 		AddValidatedNewsItem(string, flags, data_a, data_b, null);
-		//_news_items[_latest_news].isValid = validation;
 	}
 
 
 
 	static void InitNewsItemStructs()
 	{
-		//memset(_news_items, 0, sizeof(_news_items));
 		_current_news = INVALID_NEWS;
 		_oldest_news = 0;
 		_latest_news = INVALID_NEWS;
@@ -221,9 +225,9 @@ public class NewsItem {
 	static void DrawNewsBorder(final Window w)
 	{
 		int left = 0;
-		int right = w.width - 1;
+		int right = w.getWidth() - 1;
 		int top = 0;
-		int bottom = w.height - 1;
+		int bottom = w.getHeight() - 1;
 
 		Gfx.GfxFillRect(left, top, right, bottom, 0xF);
 
@@ -240,8 +244,9 @@ public class NewsItem {
 		switch (e.event) {
 		case WE_CREATE: { /* If chatbar is open at creation time, we need to go above it */
 			final Window w1 = Window.FindWindowById(Window.WC_SEND_NETWORK_MSG, 0);
+			// TODO [dz] what the hell is message?
 			w.message = new WindowMessage(); // [dz]
-			w.message.msg = (w1 != null) ? w1.height : 0;
+			w.message.msg = (w1 != null) ? w1.getHeight() : 0;
 		} break;
 
 		case WE_PAINT: {
@@ -268,15 +273,15 @@ public class NewsItem {
 					w.DrawWindowViewport();
 					Global._display_opt = bk;
 
-					/* Shade the viewport into gray, or color*/
-					vp = w.viewport;
-					Gfx.GfxFillRect(vp.left - w.left, vp.top - w.top,
-							vp.left - w.left + vp.width - 1, vp.top - w.top + vp.height - 1,
+					/* Shade the viewport into gray, or color */
+					vp = w.getViewport();
+					Gfx.GfxFillRect(vp.getLeft() - w.getLeft(), vp.getTop() - w.getTop(),
+							vp.getLeft() - w.getLeft() + vp.getWidth() - 1, vp.getTop() - w.getTop() + vp.getHeight() - 1,
 							(0 !=(ni.flags & NF_INCOLOR) ? 0x322 : 0x323) | Sprite.USE_COLORTABLE
 							);
 
 					Global.COPY_IN_DPARAM(0, ni.params, ni.params.length);
-					Gfx.DrawStringMultiCenter(w.width / 2, 20, ni.string_id.id, 428);
+					Gfx.DrawStringMultiCenter(w.getWidth() / 2, 20, ni.string_id.id, 428);
 				}
 				break;
 			}
@@ -294,7 +299,7 @@ public class NewsItem {
 				} else {
 					w.DrawWindowViewport();
 					Global.COPY_IN_DPARAM(0, ni.params, ni.params.length);
-					Gfx.DrawStringMultiCenter(w.width / 2, w.height - 16, ni.string_id.id, 276);
+					Gfx.DrawStringMultiCenter(w.getWidth() / 2, w.getHeight() - 16, ni.string_id.id, 276);
 				}
 				break;
 			}
@@ -313,7 +318,7 @@ public class NewsItem {
 				NewsItem ni = w.as_news_d().ni;
 				if( 0 != (ni.flags & NF_VEHICLE) ) {
 					Vehicle v = Vehicle.GetVehicle(ni.data_a.tile);
-					ViewPort.ScrollMainWindowTo(v.x_pos, v.y_pos);
+					ViewPort.ScrollMainWindowTo(v.getX_pos(), v.getY_pos());
 				} else if( 0 != (ni.flags & NF_TILE)) {
 					if (!ViewPort.ScrollMainWindowToTile(ni.data_a) && ni.data_b != null)
 						ViewPort.ScrollMainWindowToTile(ni.data_b);
@@ -331,10 +336,6 @@ public class NewsItem {
 			break;
 
 		case WE_MESSAGE: /* The chatbar has notified us that is was either created or closed */
-			/*switch (e.msg) {
-			case WindowEvents.WE_CREATE.ordinal(): w.message.msg = e.wparam; break;
-			case WindowEvents.WE_DESTROY.ordinal(): w.message.msg = 0; break;
-			}*/
 			if( e.msg == WindowEvents.WE_CREATE.ordinal() )
 				w.message.msg = e.wparam; 
 			if( e.msg == WindowEvents.WE_DESTROY.ordinal() )
@@ -344,16 +345,16 @@ public class NewsItem {
 
 		case WE_TICK: { /* Scroll up newsmessages from the bottom in steps of 4 pixels */
 			int diff;
-			int y = Math.max(w.top - 4, Hal._screen.height - w.height - 12 - w.message.msg);
-			if (y == w.top) return;
+			int y = Math.max(w.getTop() - 4, Hal._screen.height - w.getHeight() - 12 - w.message.msg);
+			if (y == w.getTop()) return;
 
-			if (w.viewport != null)
-				w.viewport.top += y - w.top;
+			if (w.getViewport() != null)
+				w.getViewport().top += y - w.getTop();
 
-			diff = Math.abs(w.top - y);
-			w.top = y;
+			diff = Math.abs(w.getTop() - y);
+			w.setTop(y);
 
-			Gfx.SetDirtyBlocks(w.left, w.top - diff, w.left + w.width, w.top + w.height);
+			Gfx.SetDirtyBlocks(w.getLeft(), w.getTop() - diff, w.getLeft() + w.getWidth(), w.getTop() + w.getHeight());
 		} break;
 		default:
 			break;
@@ -554,7 +555,7 @@ public class NewsItem {
 		}
 		}
 		w.as_news_d().ni = _news_items[_forced_news == INVALID_NEWS ? _current_news : _forced_news];
-		w.flags4 |= Window.WF_DISABLE_VP_SCROLL;
+		w.disableVpScroll();
 	}
 
 	// show news item in the ticker
@@ -668,7 +669,7 @@ public class NewsItem {
 		}
 	}
 
-	static void ShowLastNewsMessage()
+	public static void ShowLastNewsMessage()
 	{
 		if (_forced_news == INVALID_NEWS) {
 			ShowNewsMessage(_current_news);
@@ -758,16 +759,16 @@ public class NewsItem {
 			w.DrawWindowWidgets();
 
 			if (_total_news == 0) break;
-			show = Math.min(_total_news, w.vscroll.cap);
+			show = Math.min(_total_news, w.vscroll.getCap());
 
-			for (p = w.vscroll.pos; p < w.vscroll.pos + show; p++) {
+			for (p = w.vscroll.getPos(); p < w.vscroll.getPos() + show; p++) {
 				// get news in correct order
 				final NewsItem ni = _news_items[getNews(p)];
 
 				Global.SetDParam(0, ni.date);
 				Gfx.DrawString(4, y, Str.STR_SHORT_DATE, 12);
 
-				DrawNewsString(82, y, 12, ni, w.width - 95);
+				DrawNewsString(82, y, 12, ni, w.getWidth() - 95);
 				y += 12;
 			}
 			break;
@@ -793,7 +794,7 @@ public class NewsItem {
 					//printf("=========================\n");
 				}*/
 
-				p = y + w.vscroll.pos;
+				p = y + w.vscroll.getPos();
 				if (p > _total_news - 1) break;
 
 				if (_latest_news >= p) {
@@ -809,7 +810,7 @@ public class NewsItem {
 			break;
 
 		case WE_RESIZE:
-			w.vscroll.cap += e.diff.y / 12;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 12);
 			break;
 		default:
 			break;
@@ -834,7 +835,7 @@ public class NewsItem {
 			NewsItem::MessageHistoryWndProc
 			);
 
-	static void ShowMessageHistory()
+	public static void ShowMessageHistory()
 	{
 		Window w;
 
@@ -842,10 +843,10 @@ public class NewsItem {
 		w = Window.AllocateWindowDesc(_message_history_desc);
 
 		if (w != null) {
-			w.vscroll.cap = 10;
-			w.vscroll.count = _total_news;
+			w.vscroll.setCap(10);
+			w.vscroll.setCount(_total_news);
 			w.resize.step_height = 12;
-			w.resize.height = w.height - 12 * 6; // minimum of 4 items in the list, each item 12 high
+			w.resize.height = w.getHeight() - 12 * 6; // minimum of 4 items in the list, each item 12 high
 			w.resize.step_width = 1;
 			w.resize.width = 200; // can't make window any smaller than 200 pixel
 			w.SetWindowDirty();
@@ -944,7 +945,8 @@ public class NewsItem {
 
 					//w.as_def_d().data_1 |= (1 << element);
 					((def_d)w.custom).data_1 |= (1 << element);
-					w.flags4 |= 5 << Window.WF_TIMEOUT_SHL; // XXX - setup unclick (fake widget)
+					//w.flags4 |= 5 << Window.WF_TIMEOUT_SHL; // XXX - setup unclick (fake widget)
+					w.setTimeout(5);
 					w.SetWindowDirty();
 				}
 				break;
@@ -1036,7 +1038,7 @@ public class NewsItem {
 			NewsItem::MessageOptionsWndProc
 			);
 
-	static void ShowMessageOptions()
+	public static void ShowMessageOptions()
 	{
 		Window.DeleteWindowById(Window.WC_GAME_OPTIONS, 0);
 		Window.AllocateWindowDesc(_message_options_desc, 0);
@@ -1059,6 +1061,25 @@ public class NewsItem {
 			Engine::GetNewsStringNewAircraftAvail, /* DNC_AIRCRAFTAVAIL */
 			Economy::GetNewsStringBankrupcy,        /* DNC_BANKRUPCY */
 	};
+
+
+
+
+
+	public StringID makeString() 
+	{
+		if (display_mode == 3) {
+			return new StringID( NewsItem._get_news_string_callback[callback].apply(this) );
+		} else {
+			Global.COPY_IN_DPARAM(0, params, params.length);
+			return string_id;
+		}
+	}
+
+
+	public StringID getString_id() {
+		return string_id;
+	}
 
 
 }

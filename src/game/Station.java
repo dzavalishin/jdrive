@@ -12,6 +12,8 @@ import java.util.function.Consumer;
 
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.RoadStopType;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.StringID;
@@ -24,6 +26,7 @@ import game.struct.DrawTileSprites;
 import game.struct.GoodsEntry;
 import game.struct.Point;
 import game.struct.ProducedCargo;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiff;
 import game.struct.TileIndexDiffC;
 import game.tables.StationTables;
@@ -31,6 +34,10 @@ import game.util.BitOps;
 import game.util.IntContainer;
 import game.util.MemoryPool;
 import game.util.VehicleQueue;
+import game.xui.Gfx;
+import game.xui.StationGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class Station extends StationTables implements IPoolItem
 {
@@ -54,7 +61,7 @@ public class Station extends StationTables implements IPoolItem
 	int time_since_unload;
 	int delete_ctr;
 	PlayerID owner;
-	int facilities;
+	protected int facilities;
 	int airport_type;
 
 	// trainstation width/height
@@ -72,7 +79,7 @@ public class Station extends StationTables implements IPoolItem
 	VehicleQueue helicopter_queue;			// airport queue
 
 	VehicleID last_vehicle;
-	GoodsEntry goods[] = new GoodsEntry[AcceptedCargo.NUM_CARGO];
+	public GoodsEntry goods[] = new GoodsEntry[AcceptedCargo.NUM_CARGO];
 
 	// Stuff that is no longer used, but needed for conversion 
 	//TileIndex bus_tile_obsolete;
@@ -334,7 +341,7 @@ public class Station extends StationTables implements IPoolItem
 	}
 
 	// Get a list of the cargo types that are accepted around the tile.
-	static void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile0,
+	public static void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile0,
 			int w, int h, int rad)
 	{
 		int x,y;
@@ -526,7 +533,7 @@ public class Station extends StationTables implements IPoolItem
 	/**
 	 * Get the current size of the StationPool
 	 */
-	static int GetStationPoolSize()
+	protected static int GetStationPoolSize()
 	{
 		return _station_pool.total_items();
 	}
@@ -577,22 +584,22 @@ public class Station extends StationTables implements IPoolItem
 
 	// FIXME -- need to be embedded into Airport variable. Is dynamically
 	// deducteable from graphics-tile array, so will not be needed
-	final static  byte _airport_size_x[] = {4, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-	final static byte _airport_size_y[] = {3, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+	public final static  byte _airport_size_x[] = {4, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+	public final static byte _airport_size_y[] = {3, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
 	//void ShowAircraftDepotWindow(TileIndex tile);
 	//extern void UpdateAirplanesOnNewStation(Station st);
 
 	private void MarkStationDirty()
 	{
-		if (sign.width_1 != 0) {
+		if (sign.getWidth_1() != 0) {
 			Window.InvalidateWindowWidget(Window.WC_STATION_VIEW, index, 1);
 
 			ViewPort.MarkAllViewportsDirty(
-					sign.left - 6,
-					sign.top,
-					sign.left + (sign.width_1 << 2) + 12,
-					sign.top + 48);
+					sign.getLeft() - 6,
+					sign.getTop(),
+					sign.getLeft() + (sign.getWidth_1() << 2) + 12,
+					sign.getTop() + 48);
 		}
 	}
 
@@ -662,7 +669,7 @@ public class Station extends StationTables implements IPoolItem
 		case Vehicle.VEH_Aircraft:	return st.airport_tile;
 		case Vehicle.VEH_Ship:			return st.dock_tile;
 		case Vehicle.VEH_Road:
-			if (v.cargo_type == AcceptedCargo.CT_PASSENGERS) {
+			if (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) {
 				return (st.bus_stops != null) ? st.bus_stops.get(0).xy : null;
 			} else {
 				return (st.truck_stops != null) ? st.truck_stops.get(0).xy : null;
@@ -1735,7 +1742,7 @@ public class Station extends StationTables implements IPoolItem
 			if (Global._current_player.id < Global.MAX_PLAYERS && 0 != (flags&Cmd.DC_EXEC))
 				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global._current_player.id);
 
-			st.sign.width_1 = 0;
+			st.sign.setWidth_1(0);
 
 			if (!GenerateStationName(st, tile, 0)) return Cmd.CMD_ERROR;
 
@@ -1983,7 +1990,7 @@ public class Station extends StationTables implements IPoolItem
 			if (Global._current_player.id < Global.MAX_PLAYERS && (flags & Cmd.DC_EXEC) != 0)
 				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global._current_player.id);
 
-			st.sign.width_1 = 0;
+			st.sign.setWidth_1(0);
 
 			// if airport type equals Heliport then generate
 			// type 5 name, which is heliport, otherwise airport names (1)
@@ -2124,7 +2131,7 @@ public class Station extends StationTables implements IPoolItem
 		if (st == null) return Cmd.CMD_ERROR;
 
 		st.town = Town.ClosestTownFromTile(ti.tile, (int)-1);
-		st.sign.width_1 = 0;
+		st.sign.setWidth_1(0);
 
 		if (!GenerateStationName(st, ti.tile, 4)) return Cmd.CMD_ERROR;
 
@@ -2311,7 +2318,7 @@ public class Station extends StationTables implements IPoolItem
 			if (Global._current_player.id < Global.MAX_PLAYERS && 0!= (flags&Cmd.DC_EXEC) )
 				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global._current_player.id);
 
-			st.sign.width_1 = 0;
+			st.sign.setWidth_1(0);
 
 			if (!GenerateStationName(st, tile, 3)) return Cmd.CMD_ERROR;
 
@@ -3242,7 +3249,7 @@ public class Station extends StationTables implements IPoolItem
 		}
 
 		st.town = Town.ClosestTownFromTile(tile, -1);
-		st.sign.width_1 = 0;
+		st.sign.setWidth_1(0);
 
 		tile.SetTileType(TileTypes.MP_STATION);
 		tile.SetTileOwner(Owner.OWNER_NONE);
@@ -3632,6 +3639,22 @@ public class Station extends StationTables implements IPoolItem
 	{
 		oos.writeObject(_station_pool);		
 	}
+
+
+	public boolean hasFacility(int f) {
+		return 0 != (facilities & f);
+	}
+
+
+	public PlayerID getOwner() { return owner; }
+	public int getIndex() { return index; }
+	public int getFacilities() { return facilities; }
+	public ViewportSign getSign() {		return sign;	}
+
+
+	public boolean hasNoFacilities() { return 0 == facilities; }
+
+
 
 }
 

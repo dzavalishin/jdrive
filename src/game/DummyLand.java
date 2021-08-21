@@ -3,6 +3,8 @@ package game;
 import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
+import game.struct.TileDesc;
+import game.xui.ViewPort;
 
 public class DummyLand {
 

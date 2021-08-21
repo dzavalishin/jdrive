@@ -2,11 +2,13 @@ package game;
 
 import game.tables.TunnelBridgeTables;
 import game.util.TownTables;
-
+import game.xui.ViewPort;
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiff;
 import game.tables.RailTables;
 import game.util.BitOps;
@@ -1472,7 +1474,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				dir = BitOps.GB(tile.getMap().m5, 0, 2);
 				vdir = v.direction >> 1;
 
-				if (v.rail.track != 0x40 && dir == vdir) {
+				if (!v.rail.isInTunnel() && dir == vdir) {
 					if (v.IsFrontEngine() && fc == _tunnel_fractcoord_1[dir]) {
 						if (v.spritenum < 4)
 							//SndPlayVehicleFx(SND_05_TRAIN_THROUGH_TUNNEL, v);
@@ -1482,7 +1484,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 						if (v.next == null)
 							Pbs.PBSClearTrack(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track));
 						v.tile = tile;
-						v.rail.track = 0x40;
+						v.rail.setInTunnel();
 						v.vehstatus |= Vehicle.VS_HIDDEN;
 						return 4;
 					}
@@ -1502,12 +1504,12 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				vdir = v.direction >> 1;
 
 				// Enter tunnel?
-				if (v.road.state != 0xFF && dir == vdir) {
+				if ((!v.road.isInTunnel()) && dir == vdir) {
 					if (fc == _tunnel_fractcoord_4[dir] ||
 							fc == _tunnel_fractcoord_5[dir]) {
 
 						v.tile = tile;
-						v.road.state = 0xFF;
+						v.road.setInTunnel();
 						v.vehstatus |= Vehicle.VS_HIDDEN;
 						return 4;
 					} else {

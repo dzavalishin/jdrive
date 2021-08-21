@@ -3,6 +3,7 @@ package game;
 import java.util.Iterator;
 
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ids.StationID;
 
@@ -169,7 +170,7 @@ public class mAirport
 	}
 
 	//saves me changing too much code elsewhere
-	static boolean MA_OwnerHandler(PlayerID owner)
+	public static boolean MA_OwnerHandler(PlayerID owner)
 	{
 
 		if(!Global._patches.allow_municipal_airports) 
@@ -321,7 +322,7 @@ public class mAirport
 	}
 
 	// same as above but isnt as stringent
-	static void MA_EditorAddAirport(Town tn)
+	public static void MA_EditorAddAirport(Town tn)
 	{
 		//Station st;
 		TileIndex tl;

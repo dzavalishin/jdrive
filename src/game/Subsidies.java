@@ -2,6 +2,11 @@ package game;
 
 import game.util.GameDate;
 import game.util.YearMonthDay;
+import game.xui.Gfx;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
 
 public class Subsidies {
 
@@ -210,7 +215,7 @@ public class Subsidies {
 			);
 
 
-	static void ShowSubsidiesList()
+	public static void ShowSubsidiesList()
 	{
 		Window.AllocateWindowDescFront(_subsidies_list_desc, 0);
 	}

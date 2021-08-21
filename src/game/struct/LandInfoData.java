@@ -1,7 +1,6 @@
 package game.struct;
 
 import game.AcceptedCargo;
-import game.TileDesc;
 import game.TileIndex;
 import game.Town;
 

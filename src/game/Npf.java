@@ -1,5 +1,6 @@
 package game;
 
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.NPFFindStationOrTileData;

@@ -4,6 +4,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import game.enums.Owner;
+import game.enums.RoadStopType;
+import game.enums.TileTypes;
 import game.ids.EngineID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
@@ -16,13 +18,17 @@ import game.struct.RoadVehFindData;
 import game.tables.RoadVehCmdTables;
 
 import game.util.BitOps;
+import game.xui.Gfx;
+import game.xui.VehicleGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class RoadVehCmd extends RoadVehCmdTables {
 
 
 	public static final int STATUS_BAR = AirCraft.STATUS_BAR;
 
-	static int GetRoadVehImage(final Vehicle v, int direction)
+	public static int GetRoadVehImage(final Vehicle v, int direction)
 	{
 		int img = v.spritenum;
 		int image;
@@ -35,12 +41,12 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		}*/
 
 		image = direction + _roadveh_images[img];
-		if (v.cargo_count >= (v.cargo_cap >> 1))
+		if (v.cargo_count >= (v.getCargo_cap() >> 1))
 			image += _roadveh_full_adder[img];
 		return image;
 	}
 
-	static void DrawRoadVehEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
+	public static void DrawRoadVehEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
 	{
 		int spritenum = Engine.RoadVehInfo(engine).image_index;
 
@@ -111,7 +117,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			v.z_pos = Landscape.GetSlopeZ(x,y);
 			v.z_height = 6;
 
-			v.road.state = 254;
+			v.road.setInDepot(); //state = 254;
 			v.vehstatus = Vehicle.VS_HIDDEN|Vehicle.VS_STOPPED|Vehicle.VS_DEFPAL;
 
 			v.spritenum = rvi.image_index;
@@ -136,9 +142,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			v.engine_type = EngineID.get(p1);
 
 			e = Engine.GetEngine(p1);
-			v.reliability = e.reliability;
+			v.reliability = e.getReliability();
 			v.reliability_spd_dec = e.reliability_spd_dec;
-			v.max_age = e.lifelength * 366;
+			v.max_age = e.getLifelength() * 366;
 			Global._new_roadveh_id = VehicleID.get( v.index );
 			Global._new_vehicle_id = VehicleID.get( v.index );
 
@@ -221,7 +227,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) || v.road.state != 254 || 0==(v.vehstatus&Vehicle.VS_STOPPED))
+		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) || !v.road.isInDepot() || 0==(v.vehstatus&Vehicle.VS_STOPPED))
 			return Cmd.return_cmd_error(Str.STR_9013_MUST_BE_STOPPED_INSIDE);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -263,7 +269,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		TileIndex tile = v.tile;
 		int i;
 
-		if (v.road.state == 255) tile = TunnelBridgeCmd.GetVehicleOutOfTunnelTile(v);
+		if (v.road.isInTunnel()) tile = TunnelBridgeCmd.GetVehicleOutOfTunnelTile(v);
 
 		if (Global._patches.new_pathfinding_all) {
 			NPFFoundTargetData ftd;
@@ -462,7 +468,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		v.BeginVehicleMove();
 		UpdateRoadVehDeltaXY(v);
 		v.cur_image = GetRoadVehImage(v, v.direction);
-		SetRoadVehPosition(v, v.x_pos, v.y_pos);
+		SetRoadVehPosition(v, v.getX_pos(), v.getY_pos());
 	}
 
 	static void RoadVehIsCrashed(Vehicle v)
@@ -483,8 +489,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		Vehicle u = (Vehicle) o;
 		if (v.type != Vehicle.VEH_Train ||
 				Math.abs(v.z_pos - u.z_pos) > 6 ||
-				Math.abs(v.x_pos - u.x_pos) > 4 ||
-				Math.abs(v.y_pos - u.y_pos) > 4)
+				Math.abs(v.getX_pos() - u.getX_pos()) > 4 ||
+				Math.abs(v.getY_pos() - u.getY_pos()) > 4)
 			return null;
 		return v;
 	}
@@ -499,7 +505,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 
 		pass = 1;
-		if (v.cargo_type == 0)
+		if (v.getCargo_type() == 0)
 			pass += v.cargo_count;
 		v.cargo_count = 0;
 		Global.SetDParam(0, pass);
@@ -519,7 +525,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	{
 		TileIndex tile;
 
-		if (v.road.state == 255)
+		if (v.road.isInTunnel())
 			return;
 
 		tile = v.tile;
@@ -609,7 +615,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 				int mindist = Integer.MAX_VALUE;
 				RoadStopType type;
 
-				type = (v.cargo_type == AcceptedCargo.CT_PASSENGERS) ? RoadStopType.RS_BUS : RoadStopType.RS_TRUCK;
+				type = (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) ? RoadStopType.RS_BUS : RoadStopType.RS_TRUCK;
 				List<RoadStop> rsl = RoadStop.GetPrimaryRoadStop(st, type);
 
 				if (rsl == null || rsl.size() == 0) {
@@ -684,12 +690,12 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	{
 		RoadVehFindData rvf = (RoadVehFindData) o;
 
-		int x_diff = v.x_pos - rvf.x;
-		int y_diff = v.y_pos - rvf.y;
+		int x_diff = v.getX_pos() - rvf.x;
+		int y_diff = v.getY_pos() - rvf.y;
 
 		if (rvf.veh == v ||
 				v.type != Vehicle.VEH_Road ||
-				v.road.state == 254 ||
+				v.road.isInDepot() ||
 				Math.abs(v.z_pos - rvf.veh.z_pos) > 6 ||
 				v.direction != rvf.dir ||
 				(_dists[v.direction] < 0 && (x_diff <= _dists[v.direction] || x_diff > 0)) ||
@@ -732,7 +738,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	static void RoadVehArrivesAt(final Vehicle  v, Station  st)
 	{
-		if (v.cargo_type == AcceptedCargo.CT_PASSENGERS) {
+		if (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) {
 			/* Check if station was ever visited before */
 			if (0==(st.had_vehicle_of_type & Station.HVOT_BUS)) {
 				int flags;
@@ -768,7 +774,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		int spd = v.cur_speed + 1 + ((v.road.overtaking != 0)?1:0);
 
 		// Clamp
-		spd = Math.min(spd, v.max_speed);
+		spd = Math.min(spd, v.getMax_speed());
 
 		//updates statusbar only if speed have changed to save CPU time
 		if (spd != v.cur_speed) {
@@ -798,8 +804,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	static int RoadVehGetNewDirection(Vehicle v, int x, int y)
 	{
 
-		x = x - v.x_pos + 1;
-		y = y - v.y_pos + 1;
+		x = x - v.getX_pos() + 1;
+		y = y - v.getY_pos() + 1;
 
 		if ((int)x > 2 || (int)y > 2)
 			return v.direction;
@@ -850,7 +856,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		od.v = v;
 		od.u = u;
 
-		if (u.max_speed >= v.max_speed &&
+		if (u.getMax_speed() >= v.getMax_speed() &&
 				0==(u.vehstatus&Vehicle.VS_STOPPED) &&
 				u.cur_speed != 0)
 			return;
@@ -900,7 +906,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			v.cur_speed = v.cur_speed * 232 >> 8;
 		} else {
 			int spd = v.cur_speed + 2;
-			if (spd <= v.max_speed)
+			if (spd <= v.getMax_speed())
 				v.cur_speed = spd;
 		}
 	}
@@ -979,7 +985,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 				final Station  st = Station.GetStation(tile.getMap().m2);
 				int val = tile.getMap().m5;
 				// TODO why .get(0) is ok?
-				if (v.cargo_type != AcceptedCargo.CT_PASSENGERS) {
+				if (v.getCargo_type() != AcceptedCargo.CT_PASSENGERS) {
 					if (BitOps.IS_INT_INSIDE(val, 0x43, 0x47) && (Global._patches.roadveh_queue || 0!=(st.truck_stops.get(0).status&3)))
 						bitmask |= _road_veh_fp_ax_or[(val-0x43)&3];
 				} else {
@@ -1164,7 +1170,7 @@ class RoadDriveEntry {
 		}
 
 		// exit if vehicle is stopped
-		if(0!= (v.vehstatus & Vehicle.VS_STOPPED))
+		if(v.isStopped())
 			return;
 
 		ProcessRoadVehOrder(v);
@@ -1173,7 +1179,7 @@ class RoadDriveEntry {
 		if (v.current_order.type == Order.OT_LOADING)
 			return;
 
-		if (v.road.state == 254) {
+		if (v.road.isInDepot()) {
 			int dir;
 			//final RoadDriveEntry rdp;
 			final Point[] rdp;
@@ -1221,7 +1227,7 @@ class RoadDriveEntry {
 
 		v.BeginVehicleMove();
 
-		if (v.road.state == 255) {
+		if (v.road.isInTunnel()) {
 			v.GetNewVehiclePos(gp);
 
 			if (RoadVehFindCloseTo(v, gp.x, gp.y, v.direction) != null) {
@@ -1369,8 +1375,8 @@ class RoadDriveEntry {
 			return;
 		}
 
-		x = (v.x_pos&~15)+(rd.x&15);
-		y = (v.y_pos&~15)+(rd.y&15);
+		x = (v.getX_pos()&~15)+(rd.x&15);
+		y = (v.getY_pos()&~15)+(rd.y&15);
 
 		new_dir = RoadVehGetSlidingDirection(v, x, y);
 
@@ -1387,7 +1393,7 @@ class RoadDriveEntry {
 			if (old_dir != v.road.state) {
 				v.cur_image = GetRoadVehImage(v, new_dir);
 				UpdateRoadVehDeltaXY(v);
-				SetRoadVehPosition(v, v.x_pos, v.y_pos);
+				SetRoadVehPosition(v, v.getX_pos(), v.getY_pos());
 				return;
 			}
 		}
@@ -1474,7 +1480,7 @@ class RoadDriveEntry {
 
 	static void RoadVehEnterDepot(Vehicle v)
 	{
-		v.road.state = 254;
+		v.road.setInDepot();
 		v.vehstatus |= Vehicle.VS_HIDDEN;
 
 		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
@@ -1602,7 +1608,7 @@ class RoadDriveEntry {
 				&& v.current_order.type == Order.OT_GOTO_STATION 
 				&& 0==(v.vehstatus & Vehicle.VS_CRASHED)) 
 		{
-			RoadStopType type = (v.cargo_type == AcceptedCargo.CT_PASSENGERS) ? RoadStopType.RS_BUS : RoadStopType.RS_TRUCK;
+			RoadStopType type = (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) ? RoadStopType.RS_BUS : RoadStopType.RS_TRUCK;
 
 			st = Station.GetStation(v.current_order.station);
 
@@ -1634,19 +1640,19 @@ class RoadDriveEntry {
 					// In that case, add penalty.
 					switch(v.direction) {
 					case 1: // going north east,x position decreasing
-						if (v.x_pos <= (int)rs.xy.TileX() * 16 + 15)
+						if (v.getX_pos() <= (int)rs.xy.TileX() * 16 + 15)
 							dist += 6;
 						break;
 					case 3: // Going south east, y position increasing
-						if (v.y_pos >= (int)rs.xy.TileY() * 16)
+						if (v.getY_pos() >= (int)rs.xy.TileY() * 16)
 							dist += 6;
 						break;
 					case 5: // Going south west, x position increasing
-						if (v.x_pos >= (int)rs.xy.TileX() * 16)
+						if (v.getX_pos() >= (int)rs.xy.TileX() * 16)
 							dist += 6;
 						break;
 					case 7: // Going north west, y position decrasing.
-						if (v.y_pos <= (int)rs.xy.TileY() * 16 + 15)
+						if (v.getY_pos() <= (int)rs.xy.TileY() * 16 + 15)
 							dist += 6;
 						break;
 					}
@@ -1683,7 +1689,7 @@ class RoadDriveEntry {
 		if(0 != (v.vehstatus & Vehicle.VS_STOPPED))
 			return;
 
-		cost = Engine.RoadVehInfo(v.engine_type.id).running_cost * Global._price.roadveh_running / 364;
+		cost = Engine.RoadVehInfo(v.getEngine_type().id).running_cost * Global._price.roadveh_running / 364;
 
 		v.profit_this_year -= cost >> 8;
 
@@ -1697,9 +1703,6 @@ class RoadDriveEntry {
 
 	static void RoadVehiclesYearlyLoop()
 	{
-		//Vehicle v;
-
-		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
 			if (v.type == Vehicle.VEH_Road) {

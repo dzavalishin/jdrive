@@ -7,10 +7,12 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.enums.TileTypes;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
 import game.util.MemoryPool;
+import game.xui.Window;
 
 public class Depot implements IPoolItem, Serializable
 {
@@ -33,15 +35,15 @@ public class Depot implements IPoolItem, Serializable
 	
 	static MemoryPool<Depot> _depot_pool = new MemoryPool<Depot>(factory);
 
-	static TileIndex _last_built_train_depot_tile;
-	static TileIndex _last_built_road_depot_tile;
-	static TileIndex _last_built_aircraft_depot_tile;
-	static TileIndex _last_built_ship_depot_tile;
+	public static TileIndex _last_built_train_depot_tile;
+	public static TileIndex _last_built_road_depot_tile;
+	public static TileIndex _last_built_aircraft_depot_tile;
+	public static TileIndex _last_built_ship_depot_tile;
 
 	/**
 	 * Get the pointer to the depot with index 'index'
 	 */
-	static Depot GetDepot(int index)
+	public static Depot GetDepot(int index)
 	{
 		return _depot_pool.GetItemFromPool(index);
 	}
@@ -88,7 +90,7 @@ public class Depot implements IPoolItem, Serializable
 	 * within the given bounds. @see MIN_SERVINT_PERCENT ,etc.
 	 * @param index proposed service interval
 	 */
-	static int GetServiceIntervalClamped(int index)
+	public static int GetServiceIntervalClamped(int index)
 	{
 		return (Global._patches.servint_ispercent) ? BitOps.clamp(index, MIN_SERVINT_PERCENT, MAX_SERVINT_PERCENT) : BitOps.clamp(index, MIN_SERVINT_DAYS, MAX_SERVINT_DAYS);
 	}
@@ -182,7 +184,7 @@ public class Depot implements IPoolItem, Serializable
 	 *
 	 * @return Returns the depot if the tile had a depot, else it returns null
 	 */
-	static Depot GetDepotByTile(TileIndex tile)
+	public static Depot GetDepotByTile(TileIndex tile)
 	{
 		Depot [] ret = {null};
 		_depot_pool.forEach( (i,depot) ->
@@ -197,7 +199,7 @@ public class Depot implements IPoolItem, Serializable
 	/**
 	 * Allocate a new depot
 	 */
-	static Depot AllocateDepot()
+	public static Depot AllocateDepot()
 	{
 		Depot [] ret = {null};
 
@@ -311,6 +313,9 @@ public class Depot implements IPoolItem, Serializable
 	{
 		oos.writeObject(_depot_pool);		
 	}
+
+	public int getTownIndex() { return town_index; }
+	public int getIndex() { return index; }
 
 }
 

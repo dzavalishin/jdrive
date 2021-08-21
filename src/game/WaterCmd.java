@@ -2,13 +2,20 @@ package game;
 
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.Point;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiff;
 import game.struct.TileIndexDiffC;
 import game.tables.WaterTables;
 import game.util.BitOps;
+import game.xui.Gfx;
+import game.xui.ShipGui;
+import game.xui.VehicleGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class WaterCmd extends WaterTables
 {
@@ -499,7 +506,7 @@ public class WaterCmd extends WaterTables
 			DrawWaterStuff(ti, _shipdepot_display_seq[nSeq], Sprite.PLAYER_SPRITE_COLOR(ti.tile.GetTileOwner()), 0);
 	}
 
-	static void DrawShipDepotSprite(int x, int y, int image)
+	public static void DrawShipDepotSprite(int x, int y, int image)
 	{
 		final WaterDrawTileStruct[] wdtsa = _shipdepot_display_seq[image];
 
@@ -651,7 +658,7 @@ public class WaterCmd extends WaterTables
 
 			if (v.type == Vehicle.VEH_Road) {	// flood bus/truck
 				pass[0] = 1;	// driver
-				if (v.cargo_type == AcceptedCargo.CT_PASSENGERS)
+				if (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS)
 					pass[0] += v.cargo_count;
 
 				v.vehstatus |= Vehicle.VS_CRASHED;
@@ -668,7 +675,7 @@ public class WaterCmd extends WaterTables
 				//BEGIN_ENUM_WAGONS(v)
 				v.forEachWagon( (vw) -> 
 				{
-					if (vw.cargo_type == AcceptedCargo.CT_PASSENGERS) pass[0] += vw.cargo_count;
+					if (vw.getCargo_type() == AcceptedCargo.CT_PASSENGERS) pass[0] += vw.cargo_count;
 					vw.vehstatus |= Vehicle.VS_CRASHED;
 				});
 				//END_ENUM_WAGONS(v)

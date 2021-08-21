@@ -1,5 +1,7 @@
 package game;
 
+import game.enums.TileTypes;
+
 //@Deprecated
 public class TileType {
 	int type;

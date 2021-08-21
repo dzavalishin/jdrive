@@ -38,7 +38,7 @@ public class SaveLoad
 {
 	
 	
-	static void save()
+	public static void save()
 	{
 		FileOutputStream fos;
 		try {
@@ -77,7 +77,7 @@ public class SaveLoad
 
 	
 	
-	static void load()
+	public static void load()
 	{
 		FileInputStream fis;
 		ObjectInputStream oin = null;

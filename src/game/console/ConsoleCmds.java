@@ -4,8 +4,8 @@ import game.Engine;
 import game.Landscape;
 import game.TileIndex;
 import game.Vehicle;
-import game.ViewPort;
-import game.Window;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class ConsoleCmds 
 {
@@ -1254,7 +1254,7 @@ public class ConsoleCmds
 	/*  console command and variable registration */
 	/* ****************************************** */
 
-	static void IConsoleStdLibRegister()
+	public static void IConsoleStdLibRegister()
 	{
 		// stdlib
 		//extern byte _stdlib_developer; /* XXX extern in .c */

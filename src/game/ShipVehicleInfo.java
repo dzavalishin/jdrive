@@ -1,14 +1,17 @@
 package game;
 
-public class ShipVehicleInfo {
-	int image_index;
-	int base_cost;
-	int max_speed;
-	int cargo_type;
-	int capacity;
-	int running_cost;
-	int sfx;
-	int refittable;
+public class ShipVehicleInfo 
+{
+	// TODO GRFFile modifies us so final is removed, redo!
+	
+	public int image_index;
+	public int base_cost;
+	public int max_speed;
+	public int cargo_type;
+	public int capacity;
+	public int running_cost;
+	public int sfx;
+	public int refittable;
 
 	public ShipVehicleInfo(
 			int i, int j, int k, 

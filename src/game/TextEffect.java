@@ -9,6 +9,10 @@ import game.ids.StringID;
 import game.struct.TextMessage;
 import game.util.MemoryPool;
 import game.util.Pixel;
+import game.xui.CursorVars;
+import game.xui.DrawPixelInfo;
+import game.xui.Gfx;
+import game.xui.ViewPort;
 
 public class TextEffect 
 {
@@ -22,12 +26,12 @@ public class TextEffect
 	int params_1;
 	int params_2;
 
-	
+
 
 
 
 	static final int MAX_CHAT_MESSAGES = 10;
-	
+
 	static TextEffect _text_effect_list[] = new TextEffect[30];
 	static TextMessage _text_message_list[] = new TextMessage[MAX_CHAT_MESSAGES];
 	static TileIndex _animated_tile_list[] = new TileIndex[256];
@@ -55,7 +59,7 @@ public class TextEffect
 		int i;
 
 		buf = String.format(message, args);
-		
+
 
 		/* Special color magic */
 		if ((color & 0xFF) == 0xC9) color = 0x1CA;
@@ -90,7 +94,7 @@ public class TextEffect
 		}
 
 		_text_message_list[MAX_CHAT_MESSAGES - 1] = new TextMessage();
-		
+
 		_text_message_list[MAX_CHAT_MESSAGES - 1].color = color;
 		_text_message_list[MAX_CHAT_MESSAGES - 1].end_date = Global._date + duration;
 		_text_message_list[MAX_CHAT_MESSAGES - 1].message = buf;
@@ -112,7 +116,7 @@ public class TextEffect
 	}
 
 	// Hide the textbox
-	static void UndrawTextMessage()
+	public static void UndrawTextMessage()
 	{
 		CursorVars _cursor = Hal._cursor;
 		if (_textmessage_visible) {
@@ -126,11 +130,20 @@ public class TextEffect
 			//   looks nicely ;)
 			// (and now hope this story above makes sense to you ;))
 
-			if (_cursor.visible) {
+			/*if (_cursor.isVisible()) {
 				if (_cursor.draw_pos.x + _cursor.draw_size.x >= _textmessage_box_left &&
 					_cursor.draw_pos.x <= _textmessage_box_left + _textmessage_width &&
 					_cursor.draw_pos.y + _cursor.draw_size.y >= Hal._screen.height - _textmessage_box_bottom - _textmessage_box_y &&
 					_cursor.draw_pos.y <= Hal._screen.height - _textmessage_box_bottom) {
+					Gfx.UndrawMouseCursor();
+				}
+			}*/
+
+			if (_cursor.isVisible()) 
+			{
+				if (_cursor.xBetween( _textmessage_box_left,  _textmessage_box_left + _textmessage_width) &&
+						_cursor.yBetween(Hal._screen.height - _textmessage_box_bottom - _textmessage_box_y, Hal._screen.height - _textmessage_box_bottom) ) 
+				{
 					Gfx.UndrawMouseCursor();
 				}
 			}
@@ -142,12 +155,12 @@ public class TextEffect
 					Hal._screen.dst_ptr + _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch,
 				_textmessage_backup,
 				_textmessage_width, _textmessage_box_y, _textmessage_width, Hal._screen.pitch);
-			*/
+			 */
 			Gfx.memcpy_pitch(
-				new Pixel(Hal._screen.dst_ptr, _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch ),	
-				new Pixel(_textmessage_backup),
-				_textmessage_width, _textmessage_box_y, _textmessage_width, Hal._screen.pitch);
-				
+					new Pixel(Hal._screen.dst_ptr, _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch ),	
+					new Pixel(_textmessage_backup),
+					_textmessage_width, _textmessage_box_y, _textmessage_width, Hal._screen.pitch);
+
 			// And make sure it is updated next time
 			Global.hal.make_dirty(_textmessage_box_left, Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y, _textmessage_width, _textmessage_box_y);
 
@@ -174,7 +187,7 @@ public class TextEffect
 					}
 
 				}
-				
+
 				/* Mark the last item as empty */
 				_text_message_list[MAX_CHAT_MESSAGES - 1].message = null;
 				_textmessage_dirty = true;
@@ -186,7 +199,7 @@ public class TextEffect
 	}
 
 	// Draw the textmessage-box
-	static void DrawTextMessage()
+	public static void DrawTextMessage()
 	{
 		int i, j;
 		boolean has_message;
@@ -213,12 +226,12 @@ public class TextEffect
 			_textmessage_backup,
 			Hal._screen.dst_ptr + _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch,
 			_textmessage_width, _textmessage_box_y, Hal._screen.pitch, _textmessage_width);
-		*/
+		 */
 		Gfx.memcpy_pitch(
 				new Pixel(_textmessage_backup),
 				new Pixel(Hal._screen.dst_ptr, _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch),
 				_textmessage_width, _textmessage_box_y, Hal._screen.pitch, _textmessage_width);
-		
+
 		// Switch to _screen painting
 		Hal._cur_dpi = Hal._screen;
 
@@ -244,18 +257,18 @@ public class TextEffect
 	private void MarkTextEffectAreaDirty()
 	{
 		ViewPort.MarkAllViewportsDirty(
-			x,
-			y - 1,
-			(right - x)*2 + x + 1,
-			(bottom - (y - 1)) * 2 + (y - 1) + 1
-		);
+				x,
+				y - 1,
+				(right - x)*2 + x + 1,
+				(bottom - (y - 1)) * 2 + (y - 1) + 1
+				);
 	}
 
-	static void AddTextEffect(int msg, int x, int y, int duration)
+	public static void AddTextEffect(int msg, int x, int y, int duration)
 	{
 		AddTextEffect(new StringID( msg ), x, y, duration);
 	}
-	
+
 	static void AddTextEffect(StringID msg, int x, int y, int duration)
 	{
 		TextEffect te = new TextEffect();
@@ -275,7 +288,7 @@ public class TextEffect
 			if(i >= _text_effect_list.length)
 				return;
 		}
-		
+
 		te.string_id = msg;
 		te.duration = duration;
 		te.y = y - 5;
@@ -326,7 +339,7 @@ public class TextEffect
 		}
 	}
 
-	static void DrawTextEffects(DrawPixelInfo dpi)
+	public static void DrawTextEffects(DrawPixelInfo dpi)
 	{
 		//TextEffect te;
 
@@ -342,7 +355,7 @@ public class TextEffect
 						dpi.top > te.bottom ||
 						dpi.left + dpi.width <= te.x ||
 						dpi.top + dpi.height <= te.y)
-							continue;
+					continue;
 				ViewPort.AddStringToDraw(te.x, te.y, te.string_id, te.params_1, te.params_2, 0);
 			}
 		} else if (dpi.zoom == 1) {
@@ -357,7 +370,7 @@ public class TextEffect
 						dpi.top > te.bottom*2 - te.y ||
 						(dpi.left + dpi.width) <= te.x ||
 						(dpi.top + dpi.height) <= te.y)
-							continue;
+					continue;
 				ViewPort.AddStringToDraw(te.x, te.y, new StringID(te.string_id.id-1), te.params_1, te.params_2, 0);
 			}
 
@@ -432,7 +445,7 @@ public class TextEffect
 
 
 	// TODO save/load more? _text_effect_list[] _text_message_list[]
-	
+
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
 		_animated_tile_list = (TileIndex[]) oin.readObject();
@@ -442,7 +455,7 @@ public class TextEffect
 	{
 		oos.writeObject(_animated_tile_list);		
 	}
-	
+
 }
 
 

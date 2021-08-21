@@ -1,5 +1,6 @@
 package game;
 
+import game.enums.TileTypes;
 import game.struct.FindLengthOfTunnelResult;
 import game.tables.TrackPathFinderTables;
 import game.util.BitOps;

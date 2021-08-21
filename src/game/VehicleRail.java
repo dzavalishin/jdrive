@@ -29,7 +29,7 @@ public class VehicleRail extends VehicleChild {
 	// 0xffff == not in train
 	EngineID first_engine;
 
-	int track;
+	int track; // 0x80 - depot?
 	int force_proceed;
 	int railtype;
 
@@ -86,6 +86,31 @@ public class VehicleRail extends VehicleChild {
 		other_multiheaded_part = null;
 		first_engine = null;
 	}
+
+	private static final int IN_DEPOT = 0x80;
+	private static final int IN_TUNNEL = 0x40; // and bridge?
+	
+	public boolean isInDepot() {
+		return track == IN_DEPOT;
+	}
+
+	public void setInDepot() {
+		track = IN_DEPOT;		
+	}
+
+	public boolean isInTunnel() {
+		return track == IN_TUNNEL;
+	}
+
+	public void setInTunnel() {
+		track = IN_TUNNEL;
+	}
+
+	public int getCached_max_speed() {		return cached_max_speed;	}
+	public int getCached_power() {		return cached_power;	}
+	public int getCached_weight() {		return cached_weight;	}
+	public int getCached_veh_length() {		return cached_veh_length;	}
+	public int getCached_total_length() { return cached_total_length; }
 
 
 }

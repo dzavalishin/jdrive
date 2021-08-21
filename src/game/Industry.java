@@ -10,14 +10,25 @@ import game.tables.IndustryTables;
 import game.tables.IndustryTileTable;
 import game.util.BitOps;
 import game.util.MemoryPool;
+import game.xui.Gfx;
+import game.xui.Gui;
+import game.xui.MiscGui;
+import game.xui.SettingsGui;
+import game.xui.ViewPort;
+import game.xui.Widget;
+import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.ifaces.TileTypeProcs;
 import game.struct.ProducedCargo;
+import game.struct.TileDesc;
 import game.struct.TileIndexDiffC;
 import game.tables.DrawIndustrySpec1Struct;
 import game.tables.DrawIndustrySpec4Struct;
@@ -1604,7 +1615,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	}
 
 
-	static Industry CreateNewIndustry(TileIndex tile, int type)
+	public static Industry CreateNewIndustry(TileIndex tile, int type)
 	{
 		final Town t;
 		final IndustryTileTable [] it;
@@ -1670,7 +1681,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 	}
 
-	static void GenerateIndustries()
+	public static void GenerateIndustries()
 	{
 		int i = 0;
 		final byte [] b = _industry_create_table[GameOptions._opt.landscape];
@@ -2048,7 +2059,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				int ind_type = _build_industry_types[GameOptions._opt_ptr.landscape][w.as_def_d().data_1];
 
 				Global.SetDParam(0, (Global._price.build_industry >> 5) * _industry_type_costs[ind_type]);
-				Gfx.DrawStringCentered(85, w.height - 21, Str.STR_482F_COST, 0);
+				Gfx.DrawStringCentered(85, w.getHeight() - 21, Str.STR_482F_COST, 0);
 			}
 			break;
 
@@ -2282,7 +2293,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			},
 	};
 
-	static void ShowBuildIndustryWindow()
+	public static void ShowBuildIndustryWindow()
 	{
 		Window.AllocateWindowDescFront(_industry_window_desc[BitOps.b2i(Global._patches.build_rawmaterial_ind)][GameOptions._opt_ptr.landscape],0);
 	}
@@ -2384,7 +2395,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 						}
 						UpdateIndustryProduction(i);
 						w.SetWindowDirty();
-						w.flags4 |= 5 << Window.WF_TIMEOUT_SHL;
+						w.setTimeout(5);
 						w.as_vp2_d().data_2 =  (line+1);
 						w.as_vp2_d().data_3 =  (x < 15 ? 1 : 2);
 					} else if (BitOps.IS_INT_INSIDE(x, 34, 160)) {
@@ -2393,7 +2404,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 						Global.SetDParam(0, i.production_rate[line] * 8);
 						MiscGui.ShowQueryString( new StringID( Str.STR_CONFIG_PATCHES_INT32 ),
 								new StringID( Str.STR_CONFIG_GAME_PRODUCTION ),
-								10, 100, w.window_class,
+								10, 100, w.getWindowClass(),
 								w.window_number);
 					}
 				}
@@ -2470,7 +2481,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		w = Window.AllocateWindowDescFront(_industry_view_desc, industry);
 		if (w != null) {
-			w.flags4 |= Window.WF_DISABLE_VP_SCROLL;
+			w.disableVpScroll();
 			w.as_vp2_d().data_1 = 0;
 			w.as_vp2_d().data_2 = 0;
 			w.as_vp2_d().data_3 = 0;
@@ -2597,7 +2608,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			w.DrawWindowWidgets();
 			Gfx.DoDrawString(0 != (_industry_sort_order & 1) ? Gfx.DOWNARROW : Gfx.UPARROW, _indicator_positions[_industry_sort_order>>1], 15, 0x10);
 
-			p = w.vscroll.pos;
+			p = w.vscroll.getPos();
 			n = 0;
 
 			while (p < _industry_sort.length) 
@@ -2623,7 +2634,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 					Gfx.DrawString(4, 28+n*10, Str.STR_INDUSTRYDIR_ITEM_NOPROD, 0);
 				}
 				p++;
-				if (++n == w.vscroll.cap)
+				if (++n == w.vscroll.getCap())
 					break;
 			}
 		} break;
@@ -2659,9 +2670,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				int p;
 				Industry c;
 
-				if (!BitOps.IS_INT_INSIDE(y, 0, w.vscroll.cap))
+				if (!BitOps.IS_INT_INSIDE(y, 0, w.vscroll.getCap()))
 					return;
-				p = y + w.vscroll.pos;
+				p = y + w.vscroll.getPos();
 				if (p < _industry_sort.length) {
 					//c = Industry.GetIndustry(_industry_sort[p]);
 					c = _industry_sort[p];
@@ -2676,7 +2687,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			break;
 
 		case WE_RESIZE:
-			w.vscroll.cap += e.diff.y / 10;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 10);
 			break;
 		default:
 			break;
@@ -2695,13 +2706,13 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 
 
-	static void ShowIndustryDirectory()
+	public static void ShowIndustryDirectory()
 	{
 		/* Industry List */
 		Window w = Window.AllocateWindowDescFront(_industry_directory_desc, 0);
 		if (w != null) {
-			w.vscroll.cap = 16;
-			w.resize.height = w.height - 6 * 10; // minimum 10 items
+			w.vscroll.setCap(16);
+			w.resize.height = w.getHeight() - 6 * 10; // minimum 10 items
 			w.resize.step_height = 10;
 			w.SetWindowDirty();
 		}

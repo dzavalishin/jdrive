@@ -8,11 +8,11 @@ public class Tile implements Serializable
 	private static final long serialVersionUID = -6829939704826964776L;
 	
 	//byte type_height;
-	int type;
-	int height;
+	public int type;
+	public int height;
 
-	int m1; // owner?
-	int m2;
+	public int m1; // owner?
+	public int m2;
 
 	//byte m3;
 	//byte m4;
@@ -20,10 +20,10 @@ public class Tile implements Serializable
 	//byte extra;
 
 	// being bytes they're treated as negative too often
-	int m3;
-	int m4;
-	int m5;
-	int extra;
+	public int m3;
+	public int m4;
+	public int m5;
+	public int extra;
 	
 	// TODO use DiaginalDirections instead
 	public static final int DIAGDIR_NE  = 0;      /* Northeast, upper right on your monitor */

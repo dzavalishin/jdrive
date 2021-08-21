@@ -8,6 +8,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import game.util.Pixel;
+import game.xui.Gfx;
+import game.xui.Window;
 
 class JavaHal extends Hal
 {
@@ -74,16 +76,7 @@ class JavaHal extends Hal
 
 		mw.updateLocation();
 
-		_screen.dst_ptr = new Pixel( screen );
-		_screen.height = MainWindow.HEIGHT;
-		_screen.width = MainWindow.WIDTH;
-		//_screen.pitch = MainWindow.WIDTH * 3;
-		_screen.pitch = MainWindow.WIDTH * 1;
-		_screen.left = 0;
-		_screen.top = 0;
-		_screen.zoom = 0;
-
-		
+		_screen.init(MainWindow.WIDTH, MainWindow.HEIGHT, screen );		
 		_cur_dpi = _screen;
 	}
 
@@ -164,7 +157,7 @@ class JavaHal extends Hal
 				e.printStackTrace();
 			}*/
 
-			_cursor.delta.x = _cursor.delta.y = 0;
+			_cursor.setDelta(0,0);
 			//Window._left_button_clicked = false;
 			//Window._right_button_clicked = false;
 

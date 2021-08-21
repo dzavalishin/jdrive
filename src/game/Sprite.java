@@ -2,6 +2,7 @@ package game;
 
 import game.ids.PlayerID;
 import game.ids.SpriteID;
+import game.util.Pixel;
 import game.util.Sprites;
 
 public class Sprite extends Sprites {
@@ -238,6 +239,17 @@ public class Sprite extends Sprites {
 		Global.DEBUG_grf( 1, "Unable to remove unknown sprite group type `0x%x'.", group.type);
 		 */
 	}
+
+	public int getHeight() { return height;	}
+	public int getWidth() {		return width;	}
+
+	public int getX_offs() {		return x_offs;	}
+	public int getY_offs() {		return y_offs;	}
+
+	public int getInfo() {		return info;	}
+	//public byte[] getData() {		return data;	}
+
+	public Pixel getPointer() { return  new Pixel( data ); }
 
 
 
