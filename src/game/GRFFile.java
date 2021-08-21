@@ -2,9 +2,7 @@ package game;
 
 import java.util.Arrays;
 
-import game.ids.CargoID;
 import game.ids.EngineID;
-import game.ids.SpriteID;
 import game.struct.DrawTileSeqStruct;
 import game.struct.DrawTileSprites;
 import game.struct.EngineInfo;
@@ -193,10 +191,12 @@ public class GRFFile
 
 		if (condition != 0) {
 			ei.unk2 &= ~0x80;
-			rvi.flags &= ~2;
+			//rvi.flags &= ~2;
+			rvi.setWagon(false);
 		} else {
 			ei.unk2 |= 0x80;
-			rvi.flags |= 2;
+			//rvi.flags |= 2;
+			rvi.setWagon(true);
 		}
 	}
 
@@ -286,11 +286,13 @@ public class GRFFile
 				if (dual != 0) {
 					if (!(rvi[e+i].isMulttihead())) // adjust power if needed
 						rvi[e+i].power /= 2;
-					rvi[e+i].flags |= Engine.RVI_MULTIHEAD;
+					//rvi[e+i].flags |= Engine.RVI_MULTIHEAD;
+					rvi[e+i].setMultihead(true);
 				} else {
 					if(rvi[e+i].isMulttihead() ) // adjust power if needed
 						rvi[e+i].power *= 2;
-					rvi[e+i].flags &= ~Engine.RVI_MULTIHEAD;
+					//rvi[e+i].flags &= ~Engine.RVI_MULTIHEAD;
+					rvi[e+i].setMultihead(false);
 				}
 			}
 		} break;
