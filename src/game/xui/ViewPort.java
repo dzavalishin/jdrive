@@ -30,6 +30,7 @@ import game.ids.VehicleID;
 import game.struct.ChildScreenSpriteToDraw;
 import game.struct.ParentSpriteToDraw;
 import game.struct.Point;
+import game.struct.Rect;
 import game.struct.StringSpriteToDraw;
 import game.struct.TileSpriteToDraw;
 import game.util.AnimCursor;
@@ -206,7 +207,7 @@ public class ViewPort
 
 			w.as_vp_d().follow_vehicle = follow_flags & 0xFFFF;
 			veh = Vehicle.GetVehicle(w.as_vp_d().follow_vehicle);
-			pt = MapXYZToViewport(vp, veh.getX_pos(), veh.getY_pos(), veh.z_pos);
+			pt = MapXYZToViewport(vp, veh.getX_pos(), veh.getY_pos(), veh.getZ_pos());
 		} else {
 			TileIndex tt = new TileIndex(follow_flags);
 			int tx = tt.TileX() * 16;
@@ -625,7 +626,7 @@ public class ViewPort
 	}
 
 	/* Returns a StringSpriteToDraw - [dz] was Object / was void **/
-	static StringSpriteToDraw AddStringToDraw(int x, int y, /*StringID*/ int string, int params_1, int params_2, int params_3)
+	public static StringSpriteToDraw AddStringToDraw(int x, int y, /*StringID*/ int string, int params_1, int params_2, int params_3)
 	{
 		ViewportDrawer vd = _cur_vd;
 		StringSpriteToDraw ss = new StringSpriteToDraw();
@@ -866,16 +867,18 @@ public class ViewPort
 	static void ViewportAddTownNames(DrawPixelInfo dpi)
 	{
 		//Town t;
-		int left, top, right, bottom;
+		//int left, top, right, bottom;
 
 		if( (0 == (Global._display_opt & Global.DO_SHOW_TOWN_NAMES)) || Global._game_mode == GameModes.GM_MENU)
 			return;
 
-		left = dpi.left;
-		top = dpi.top;
-		right = left + dpi.width;
-		bottom = top + dpi.height;
+		//left = dpi.left;
+		//top = dpi.top;
+		//right = left + dpi.width;
+		//bottom = top + dpi.height;
 
+		Rect rect = new Rect(dpi);
+		
 		if (dpi.zoom < 1) {
 
 			Iterator<Town> ii = Town.getIterator();
@@ -884,19 +887,24 @@ public class ViewPort
 				Town t = ii.next();
 
 				if (t.getXy() != null &&
-						bottom > t.sign.top &&
-						top < t.sign.top + 12 &&
-						right > t.sign.left &&
-						left < t.sign.left + t.sign.width_1) {
+						//bottom > t.sign.top &&
+						//top < t.sign.top + 12 &&
+						//right > t.sign.left &&
+						//left < t.sign.left + t.sign.width_1
+						t.getSign().intersects( rect, t.getSign().getWidth_1(), 12 )
+						) {
 
-					AddStringToDraw(t.sign.left + 1, t.sign.top + 1,
+					//AddStringToDraw(t.getSign().left + 1, t.sign.top + 1,
+					//		Global._patches.population_in_label ? Str.STR_TOWN_LABEL_POP : Str.STR_TOWN_LABEL,
+					//				t.index, t.getPopulation(), 0);
+					t.getSign().draw(
 							Global._patches.population_in_label ? Str.STR_TOWN_LABEL_POP : Str.STR_TOWN_LABEL,
 									t.index, t.getPopulation(), 0);
 				}
 			}
 		} else if (dpi.zoom == 1) {
-			right += 2;
-			bottom += 2;
+			rect.right += 2;
+			rect.bottom += 2;
 
 			Iterator<Town> ii = Town.getIterator();
 			while(ii.hasNext())
@@ -904,19 +912,22 @@ public class ViewPort
 				Town t = ii.next();
 
 				if (t.getXy() != null &&
-						bottom > t.sign.top &&
-						top < t.sign.top + 24 &&
-						right > t.sign.left &&
-						left < t.sign.left + t.sign.width_1*2) 
-				{
-					AddStringToDraw(t.sign.left + 1, t.sign.top + 1,
-							Global._patches.population_in_label ? Str.STR_TOWN_LABEL_POP : Str.STR_TOWN_LABEL,
-									t.index, t.getPopulation(), 0);
+						//bottom > t.sign.top &&
+						//top < t.sign.top + 24 &&
+						//right > t.sign.left &&
+						//left < t.sign.left + t.sign.width_1*2 
+					t.getSign().intersects( rect, t.getSign().getWidth_1()*2, 24 )
+				) {
+					//AddStringToDraw(t.sign.left + 1, t.sign.top + 1,
+					//		Global._patches.population_in_label ? Str.STR_TOWN_LABEL_POP : Str.STR_TOWN_LABEL,
+					//				t.index, t.getPopulation(), 0);
+					t.getSign().draw( Global._patches.population_in_label ? Str.STR_TOWN_LABEL_POP : Str.STR_TOWN_LABEL,
+							t.index, t.getPopulation(), 0);
 				}
 			}
 		} else {
-			right += 4;
-			bottom += 5;
+			rect.right += 4;
+			rect.bottom += 5;
 
 			assert(dpi.zoom == 2);
 
@@ -926,13 +937,16 @@ public class ViewPort
 				Town t = ii.next();
 
 				if (t.getXy() != null &&
-						bottom > t.sign.top &&
-						top < t.sign.top + 24 &&
-						right > t.sign.left &&
-						left < t.sign.left + t.sign.width_2*4) {
-
-					ViewPort.AddStringToDraw(t.sign.left + 5, t.sign.top + 1, Str.STR_TOWN_LABEL_TINY_BLACK, t.index, 0, 0);
-					ViewPort.AddStringToDraw(t.sign.left + 1, t.sign.top - 3, Str.STR_TOWN_LABEL_TINY_WHITE, t.index, 0, 0);
+						//bottom > t.sign.top &&
+						//top < t.sign.top + 24 &&
+						//right > t.sign.left &&
+						//left < t.sign.left + t.sign.width_2*4
+					t.getSign().intersects( rect, t.getSign().getWidth_2()*4, 24 )
+						) {
+					//ViewPort.AddStringToDraw(t.sign.left + 5, t.sign.top + 1, Str.STR_TOWN_LABEL_TINY_BLACK, t.index, 0, 0);
+					t.getSign().draw( 5, 1, Str.STR_TOWN_LABEL_TINY_BLACK, t.index, 0, 0);
+					//ViewPort.AddStringToDraw(t.sign.left + 1, t.sign.top - 3, Str.STR_TOWN_LABEL_TINY_WHITE, t.index, 0, 0);
+					t.getSign().draw( 1, -3, Str.STR_TOWN_LABEL_TINY_WHITE, t.index, 0, 0);
 				}
 			}
 		}
@@ -940,17 +954,16 @@ public class ViewPort
 
 	static void ViewportAddStationNames(DrawPixelInfo dpi)
 	{
-		int left, top, right, bottom;
-		//Station st;
-		//StringSpriteToDraw sstd;
+		//int left, top, right, bottom;
 
 		if (0 == (Global._display_opt & Global.DO_SHOW_STATION_NAMES) || Global._game_mode == GameModes.GM_MENU)
 			return;
 
-		left = dpi.left;
-		top = dpi.top;
-		right = left + dpi.width;
-		bottom = top + dpi.height;
+		//left = dpi.left;
+		//top = dpi.top;
+		//right = left + dpi.width;
+		//bottom = top + dpi.height;
+		Rect rect = new Rect(dpi);
 
 		if (dpi.zoom < 1) {
 
@@ -959,21 +972,24 @@ public class ViewPort
 			{
 				Station st = ii.next();
 				if (st.getXy() != null &&
-						bottom > st.sign.top &&
-						top < st.sign.top + 12 &&
-						right > st.sign.left &&
-						left < st.sign.left + st.sign.width_1) {
+						//bottom > st.sign.top &&
+						//top < st.sign.top + 12 &&
+						//right > st.sign.left &&
+						//left < st.sign.left + st.sign.width_1
+					st.getSign().intersects( rect, st.getSign().getWidth_1(), 12 )
+						) {
 
-					StringSpriteToDraw sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
+					//StringSpriteToDraw sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
+					StringSpriteToDraw sstd=st.getSign().draw( Str.STR_305C_0, st.getIndex(), st.getFacilities(), 0);
 					if (sstd != null) {
-						sstd.color = (st.owner.id == Owner.OWNER_NONE || st.owner.id == Owner.OWNER_TOWN || 0==st.facilities) ? 0xE : Global._player_colors[st.owner.id];
-						sstd.width = st.sign.width_1;
+						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global._player_colors[st.getOwner().id];
+						sstd.width = st.getSign().getWidth_1();
 					}
 				}
 			}
 		} else if (dpi.zoom == 1) {
-			right += 2;
-			bottom += 2;
+			rect.right += 2;
+			rect.bottom += 2;
 
 			//FOR_ALL_STATIONS(st) 
 			//Station.forEach( (st) ->
@@ -983,15 +999,18 @@ public class ViewPort
 				Station st = ii.next();
 
 				if (st.getXy() != null &&
-						bottom > st.sign.top &&
-						top < st.sign.top + 24 &&
-						right > st.sign.left &&
-						left < st.sign.left + st.sign.width_1*2) {
+						//bottom > st.sign.top &&
+						//top < st.sign.top + 24 &&
+						//right > st.sign.left &&
+						//left < st.sign.left + st.sign.width_1*2
+					st.getSign().intersects( rect, st.getSign().getWidth_1()*2, 24 )
+						) {
 
-					StringSpriteToDraw sstd=(StringSpriteToDraw) AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
+					//StringSpriteToDraw sstd= AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.getIndex(), st.getFacilities(), 0);
+					StringSpriteToDraw sstd= st.getSign().draw(Str.STR_305C_0, st.getIndex(), st.getFacilities(), 0);
 					if (sstd != null) {
-						sstd.color = (st.owner.id == Owner.OWNER_NONE || st.owner.id == Owner.OWNER_TOWN || 0==st.facilities) ? 0xE : Global._player_colors[st.owner.id];
-						sstd.width = st.sign.width_1;
+						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global._player_colors[st.getOwner().id];
+						sstd.width = st.getSign().getWidth_1();
 					}
 				}
 			}
@@ -999,8 +1018,8 @@ public class ViewPort
 		} else {
 			assert(dpi.zoom == 2);
 
-			right += 4;
-			bottom += 5;
+			rect.right += 4;
+			rect.bottom += 5;
 
 			//FOR_ALL_STATIONS(st) 
 			//Station.forEach( (st) ->
@@ -1009,15 +1028,19 @@ public class ViewPort
 			{
 				Station st = ii.next();
 				if (st.getXy() != null &&
-						bottom > st.sign.top &&
-						top < st.sign.top + 24 &&
-						right > st.sign.left &&
-						left < st.sign.left + st.sign.width_2*4) {
+						//bottom > st.sign.top &&
+						//top < st.sign.top + 24 &&
+						//right > st.sign.left &&
+						//left < st.sign.left + st.sign.width_2*4
+					st.getSign().intersects( rect, st.getSign().getWidth_2()*4, 24 )
+						) {
 
-					StringSpriteToDraw sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_STATION_SIGN_TINY, st.index, st.facilities, 0);
+					//StringSpriteToDraw sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_STATION_SIGN_TINY, st.getIndex(), st.getFacilities(), 0);
+					StringSpriteToDraw sstd=st.getSign().draw(Str.STR_STATION_SIGN_TINY, st.getIndex(), st.getFacilities(), 0);
 					if (sstd != null) {
-						sstd.color = (st.owner.id == Owner.OWNER_NONE || st.owner.id == Owner.OWNER_TOWN || 0 == st.facilities) ? 0xE : Global._player_colors[st.owner.id];
-						sstd.width = st.sign.width_2 | 0x8000;
+						//sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || 0 == st.facilities) ? 0xE : Global._player_colors[st.getOwner().id];
+						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global._player_colors[st.getOwner().id];
+						sstd.width = st.getSign().getWidth_2() | 0x8000;
 					}
 				}
 			}
@@ -1026,34 +1049,36 @@ public class ViewPort
 
 	static void ViewportAddSigns(DrawPixelInfo dpi)
 	{
-		//SignStruct ss;
-		int left, top, right, bottom;
-		//StringSpriteToDraw sstd;
+		//int left, top, right, bottom;
 
 		if (0 == (Global._display_opt & Global.DO_SHOW_SIGNS))
 			return;
 
-		left = dpi.left;
-		top = dpi.top;
-		right = left + dpi.width;
-		bottom = top + dpi.height;
-		Iterator<SignStruct> ii = SignStruct.getIterator();
+		//left = dpi.left;
+		//top = dpi.top;
+		//right = left + dpi.width;
+		//bottom = top + dpi.height;
+		Rect rect = new Rect(dpi);
 
+		Iterator<SignStruct> ii = SignStruct.getIterator();
+		
 		if (dpi.zoom < 1) 
 		{
 			while(ii.hasNext())
 			{
 				SignStruct ss = ii.next();
-				ss.draw(left, top, right, bottom, dpi.zoom);
+				//ss.draw(left, top, right, bottom, dpi.zoom);
+				ss.draw(rect, dpi.zoom);
 			}
 		} else if (dpi.zoom == 1) {
-			right += 2;
-			bottom += 2;
+			rect.right += 2;
+			rect.bottom += 2;
 
 			while(ii.hasNext())
 			{
 				SignStruct ss = ii.next();
-				ss.draw(left, top, right, bottom, dpi.zoom);
+				//ss.draw(left, top, right, bottom, dpi.zoom);
+				ss.draw(rect, dpi.zoom);
 
 				/*if (ss.str != null &&
 						bottom > ss.sign.top &&
@@ -1069,14 +1094,15 @@ public class ViewPort
 				}*/
 			}
 		} else {
-			right += 4;
-			bottom += 5;
+			rect.right += 4;
+			rect.bottom += 5;
 
 
 			while(ii.hasNext())
 			{
 				SignStruct ss = ii.next();
-				ss.draw(left, top, right, bottom, dpi.zoom);
+				//ss.draw(left, top, right, bottom, dpi.zoom);
+				ss.draw(rect, dpi.zoom);
 
 				/*
 				if (ss.str != null &&
@@ -1097,76 +1123,77 @@ public class ViewPort
 
 	static void ViewportAddWaypoints(DrawPixelInfo dpi)
 	{
-		//Waypoint wp;
-
-		int left, top, right, bottom;
-		//StringSpriteToDraw sstd;
+		//int left, top, right, bottom;
 
 		if (0 == (Global._display_opt & Global.DO_WAYPOINTS))
 			return;
 
-		left = dpi.left;
-		top = dpi.top;
-		right = left + dpi.width;
-		bottom = top + dpi.height;
+		//left = dpi.left;
+		//top = dpi.top;
+		//right = left + dpi.width;
+		//bottom = top + dpi.height;
+		Rect rect = new Rect(dpi);
 
 		if (dpi.zoom < 1) {
-			//FOR_ALL_WAYPOINTS(wp) 
-			//WayPoint.forEach( (wp) ->
+
 			Iterator<WayPoint> ii = WayPoint.getIterator();
 			while(ii.hasNext())
 			{
 				WayPoint wp = ii.next();
 				if (wp.xy != null &&
-						bottom > wp.sign.top &&
-						top < wp.sign.top + 12 &&
-						right > wp.sign.left &&
-						left < wp.sign.left + wp.sign.width_1) {
+						//bottom > wp.sign.top &&
+						//top < wp.sign.top + 12 &&
+						//right > wp.sign.left &&
+						//left < wp.sign.left + wp.sign.width_1
+						wp.getSign().intersects( rect, wp.getSign().getWidth_1(), 12 )
+						) {
 
-					StringSpriteToDraw sstd = ViewPort.AddStringToDraw(wp.sign.left + 1, wp.sign.top + 1, Str.STR_WAYPOINT_VIEWPORT, wp.index, 0, 0);
+					StringSpriteToDraw sstd = wp.sign.draw(Str.STR_WAYPOINT_VIEWPORT, wp.index, 0, 0);
 					if (sstd != null) {
-						sstd.width = wp.sign.width_1;
+						sstd.width = wp.sign.getWidth_1();
 						sstd.color = (wp.deleted != 0 ? 0xE : 11);
 					}
 				}
 			}
 		} else if (dpi.zoom == 1) {
-			right += 2;
-			bottom += 2;
-			//FOR_ALL_WAYPOINTS(wp) 
+			rect.right += 2;
+			rect.bottom += 2;
+ 
 			Iterator<WayPoint> ii = WayPoint.getIterator();
 			while(ii.hasNext())
 			{
 				WayPoint wp = ii.next();
 				if (wp.xy != null &&
-						bottom > wp.sign.top &&
-						top < wp.sign.top + 24 &&
-						right > wp.sign.left &&
-						left < wp.sign.left + wp.sign.width_1*2) {
-
-					StringSpriteToDraw sstd = ViewPort.AddStringToDraw(wp.sign.left + 1, wp.sign.top + 1, Str.STR_WAYPOINT_VIEWPORT, wp.index, 0, 0);
+						//bottom > wp.sign.top &&
+						//top < wp.sign.top + 24 &&
+						//right > wp.sign.left &&
+						//left < wp.sign.left + wp.sign.width_1*2
+					wp.getSign().intersects( rect, wp.getSign().getWidth_1()*2, 24 )
+						) {
+					StringSpriteToDraw sstd = wp.sign.draw(Str.STR_WAYPOINT_VIEWPORT, wp.index, 0, 0);
 					if (sstd != null) {
-						sstd.width = wp.sign.width_1;
+						sstd.width = wp.sign.getWidth_1();
 						sstd.color = (wp.deleted != 0 ? 0xE : 11);
 					}
 				}
 			}
 		} else {
-			right += 4;
-			bottom += 5;
+			rect.right += 4;
+			rect.bottom += 5;
 
-			//FOR_ALL_WAYPOINTS(wp) 
 			Iterator<WayPoint> ii = WayPoint.getIterator();
 			while(ii.hasNext())
 			{
 				WayPoint wp = ii.next();
 				if (wp.xy != null &&
-						bottom > wp.sign.top &&
-						top < wp.sign.top + 24 &&
-						right > wp.sign.left &&
-						left < wp.sign.left + wp.sign.getWidth_2()*4) {
+						//bottom > wp.sign.top &&
+						//top < wp.sign.top + 24 &&
+						//right > wp.sign.left &&
+						//left < wp.sign.left + wp.sign.getWidth_2()*4
+						wp.getSign().intersects( rect, wp.getSign().getWidth_2()*4, 24 )
+						) {
 
-					StringSpriteToDraw sstd = ViewPort.AddStringToDraw(wp.sign.left + 1, wp.sign.top + 1, Str.STR_WAYPOINT_VIEWPORT_TINY, wp.index, 0, 0);
+					StringSpriteToDraw sstd = wp.sign.draw(Str.STR_WAYPOINT_VIEWPORT_TINY, wp.index, 0, 0);
 					if (sstd != null) {
 						sstd.width = wp.sign.getWidth_2() | 0x8000;
 						sstd.color = (wp.deleted != 0 ? 0xE : 11);
@@ -1181,18 +1208,18 @@ public class ViewPort
 		String buffer;
 		int w;
 
-		sign.top = top;
+		sign.setTop(top);
 
 		buffer = Global.GetString(str);
 		w = Gfx.GetStringWidth(buffer) + 3;
-		sign.width_1 = w;
-		sign.left = left - w / 2;
+		sign.setWidth_1(w);
+		sign.setLeft(left - w / 2);
 
 		// zoomed out version
 		Gfx._stringwidth_base = 0xE0;
 		w = Gfx.GetStringWidth(buffer) + 3;
 		Gfx._stringwidth_base = 0;
-		sign.width_2 = w;
+		sign.setWidth_2(w);
 	}
 
 
@@ -1520,7 +1547,7 @@ public class ViewPort
 
 		if (w.as_vp_d().follow_vehicle != Vehicle.INVALID_VEHICLE) {
 			final Vehicle veh = Vehicle.GetVehicle(w.as_vp_d().follow_vehicle);
-			Point pt = MapXYZToViewport(vp, veh.getX_pos(), veh.getY_pos(), veh.z_pos);
+			Point pt = MapXYZToViewport(vp, veh.getX_pos(), veh.getY_pos(), veh.getZ_pos());
 
 			SetViewportPosition(w, pt.x, pt.y);
 		} else {
@@ -1712,10 +1739,12 @@ public class ViewPort
 			{
 				Town t = i.next();
 				if (t.getXy() != null &&
-						y >= t.sign.top &&
-						y < t.sign.top + 12 &&
-						x >= t.sign.left &&
-						x < t.sign.left + t.sign.width_1) {
+						//y >= t.sign.top &&
+						//y < t.sign.top + 12 &&
+						//x >= t.sign.left &&
+						//x < t.sign.left + t.sign.width_1
+					t.getSign().pointIn(x, y, t.getSign().getWidth_1(), 12 )
+					) {
 					TownGui.ShowTownViewWindow(t.index);
 					return true;
 				}
@@ -1730,10 +1759,12 @@ public class ViewPort
 			{
 				Town t = i.next();
 				if (t.getXy() != null &&
-						y >= t.sign.top &&
-						y < t.sign.top + 24 &&
-						x >= t.sign.left &&
-						x < t.sign.left + t.sign.width_1 * 2) {
+						//y >= t.sign.top &&
+						//y < t.sign.top + 24 &&
+						//x >= t.sign.left &&
+						//x < t.sign.left + t.sign.width_1 * 2
+						t.getSign().pointIn(x, y, t.getSign().getWidth_1()*2, 24 )
+						) {
 					TownGui.ShowTownViewWindow(t.index);
 					return true;
 				}
@@ -1748,10 +1779,12 @@ public class ViewPort
 			{
 				Town t = i.next();
 				if (t.getXy() != null &&
-						y >= t.sign.top &&
-						y < t.sign.top + 24 &&
-						x >= t.sign.left &&
-						x < t.sign.left + t.sign.width_2 * 4) {
+						//y >= t.sign.top &&
+						//y < t.sign.top + 24 &&
+						//x >= t.sign.left &&
+						//x < t.sign.left + t.sign.width_2 * 4
+					t.getSign().pointIn(x, y, t.getSign().getWidth_2()*4, 24 )
+						) {
 					TownGui.ShowTownViewWindow(t.index);
 					return true;
 				}
@@ -1778,11 +1811,13 @@ public class ViewPort
 			{
 				Station st = i.next();
 				if (st.getXy() != null &&
-						y >= st.sign.top &&
-						y < st.sign.top + 12 &&
-						x >= st.sign.left &&
-						x < st.sign.left + st.sign.width_1) {
-					StationGui.ShowStationViewWindow(st.index);
+						//y >= st.sign.top &&
+						//y < st.sign.top + 12 &&
+						//x >= st.sign.left &&
+						//x < st.sign.left + st.sign.width_1
+					st.getSign().pointIn(x, y, st.getSign().getWidth_1(), 12 )
+						) {
+					StationGui.ShowStationViewWindow(st.getIndex());
 					return true;
 				}
 			}
@@ -1796,11 +1831,13 @@ public class ViewPort
 			{
 				Station st = i.next();
 				if (st.getXy() != null &&
-						y >= st.sign.top &&
-						y < st.sign.top + 24 &&
-						x >= st.sign.left &&
-						x < st.sign.left + st.sign.width_1 * 2) {
-					StationGui.ShowStationViewWindow(st.index);
+						//y >= st.sign.top &&
+						//y < st.sign.top + 24 &&
+						//x >= st.sign.left &&
+						//x < st.sign.left + st.sign.width_1 * 2
+					st.getSign().pointIn(x, y, st.getSign().getWidth_1()*2, 24 )
+						) {
+					StationGui.ShowStationViewWindow(st.getIndex());
 					return true;
 				}
 			}
@@ -1814,11 +1851,13 @@ public class ViewPort
 			{
 				Station st = i.next();
 				if (st.getXy() != null &&
-						y >= st.sign.top &&
-						y < st.sign.top + 24 &&
-						x >= st.sign.left &&
-						x < st.sign.left + st.sign.width_2 * 4) {
-					StationGui.ShowStationViewWindow(st.index);
+						//y >= st.sign.top &&
+						//y < st.sign.top + 24 &&
+						//x >= st.sign.left &&
+						//x < st.sign.left + st.sign.width_2 * 4
+					st.getSign().pointIn(x, y, st.getSign().getWidth_2()*4, 24 )
+						) {
+					StationGui.ShowStationViewWindow(st.getIndex());
 					return true;
 				}
 			}
@@ -1909,10 +1948,10 @@ public class ViewPort
 			{
 				WayPoint wp = i.next();
 				if (wp.xy != null &&
-						y >= wp.sign.top &&
-						y < wp.sign.top + 12 &&
-						x >= wp.sign.left &&
-						x < wp.sign.left + wp.sign.width_1) {
+						y >= wp.sign.getTop() &&
+						y < wp.sign.getTop() + 12 &&
+						x >= wp.sign.getLeft() &&
+						x < wp.sign.getLeft() + wp.sign.getWidth_1()) {
 					Gui.ShowRenameWaypointWindow(wp);
 					return true;
 				}
@@ -1927,10 +1966,10 @@ public class ViewPort
 			{
 				WayPoint wp = i.next();
 				if (wp.xy != null &&
-						y >= wp.sign.top &&
-						y < wp.sign.top + 24 &&
-						x >= wp.sign.left &&
-						x < wp.sign.left + wp.sign.width_1 * 2) {
+						y >= wp.sign.getTop() &&
+						y < wp.sign.getTop() + 24 &&
+						x >= wp.sign.getLeft() &&
+						x < wp.sign.getLeft() + wp.sign.getWidth_1() * 2) {
 					Gui.ShowRenameWaypointWindow(wp);
 					return true;
 				}
@@ -1944,10 +1983,10 @@ public class ViewPort
 			{
 				WayPoint wp = i.next();
 				if (wp.xy != null &&
-						y >= wp.sign.top &&
-						y < wp.sign.top + 24 &&
-						x >= wp.sign.left &&
-						x < wp.sign.left + wp.sign.getWidth_2() * 4) {
+						y >= wp.sign.getTop() &&
+						y < wp.sign.getTop() + 24 &&
+						x >= wp.sign.getLeft() &&
+						x < wp.sign.getLeft() + wp.sign.getWidth_2() * 4) {
 					Gui.ShowRenameWaypointWindow(wp);
 					return true;
 				}

@@ -592,14 +592,14 @@ public class Station extends StationTables implements IPoolItem
 
 	private void MarkStationDirty()
 	{
-		if (sign.width_1 != 0) {
+		if (sign.getWidth_1() != 0) {
 			Window.InvalidateWindowWidget(Window.WC_STATION_VIEW, index, 1);
 
 			ViewPort.MarkAllViewportsDirty(
-					sign.left - 6,
-					sign.top,
-					sign.left + (sign.width_1 << 2) + 12,
-					sign.top + 48);
+					sign.getLeft() - 6,
+					sign.getTop(),
+					sign.getLeft() + (sign.getWidth_1() << 2) + 12,
+					sign.getTop() + 48);
 		}
 	}
 
@@ -1742,7 +1742,7 @@ public class Station extends StationTables implements IPoolItem
 			if (Global._current_player.id < Global.MAX_PLAYERS && 0 != (flags&Cmd.DC_EXEC))
 				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global._current_player.id);
 
-			st.sign.width_1 = 0;
+			st.sign.setWidth_1(0);
 
 			if (!GenerateStationName(st, tile, 0)) return Cmd.CMD_ERROR;
 
@@ -1990,7 +1990,7 @@ public class Station extends StationTables implements IPoolItem
 			if (Global._current_player.id < Global.MAX_PLAYERS && (flags & Cmd.DC_EXEC) != 0)
 				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global._current_player.id);
 
-			st.sign.width_1 = 0;
+			st.sign.setWidth_1(0);
 
 			// if airport type equals Heliport then generate
 			// type 5 name, which is heliport, otherwise airport names (1)
@@ -2131,7 +2131,7 @@ public class Station extends StationTables implements IPoolItem
 		if (st == null) return Cmd.CMD_ERROR;
 
 		st.town = Town.ClosestTownFromTile(ti.tile, (int)-1);
-		st.sign.width_1 = 0;
+		st.sign.setWidth_1(0);
 
 		if (!GenerateStationName(st, ti.tile, 4)) return Cmd.CMD_ERROR;
 
@@ -2318,7 +2318,7 @@ public class Station extends StationTables implements IPoolItem
 			if (Global._current_player.id < Global.MAX_PLAYERS && 0!= (flags&Cmd.DC_EXEC) )
 				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global._current_player.id);
 
-			st.sign.width_1 = 0;
+			st.sign.setWidth_1(0);
 
 			if (!GenerateStationName(st, tile, 3)) return Cmd.CMD_ERROR;
 
@@ -3249,7 +3249,7 @@ public class Station extends StationTables implements IPoolItem
 		}
 
 		st.town = Town.ClosestTownFromTile(tile, -1);
-		st.sign.width_1 = 0;
+		st.sign.setWidth_1(0);
 
 		tile.SetTileType(TileTypes.MP_STATION);
 		tile.SetTileOwner(Owner.OWNER_NONE);
@@ -3649,6 +3649,12 @@ public class Station extends StationTables implements IPoolItem
 	public PlayerID getOwner() { return owner; }
 	public int getIndex() { return index; }
 	public int getFacilities() { return facilities; }
+	public ViewportSign getSign() {		return sign;	}
+
+
+	public boolean hasNoFacilities() { return 0 == facilities; }
+
+
 
 }
 

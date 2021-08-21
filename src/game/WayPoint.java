@@ -193,10 +193,10 @@ private void WaypointPoolNewBlock(int start_item)
 	private void RedrawWaypointSign()
 	{
 		ViewPort.MarkAllViewportsDirty(
-				sign.left - 6,
-				sign.top,
-				sign.left + (sign.width_1 << 2) + 12,
-				sign.top + 48);
+				sign.getLeft() - 6,
+				sign.getTop(),
+				sign.getLeft() + (sign.getWidth_1() << 2) + 12,
+				sign.getTop() + 48);
 	}
 
 	/* Update all signs */
@@ -698,6 +698,8 @@ static final SaveLoad _waypoint_desc[] = {
 	{
 		oos.writeObject(_waypoint_pool);		
 	}
+
+	public ViewportSign getSign() { return sign;	}
 	
 	
 

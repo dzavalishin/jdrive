@@ -13,6 +13,7 @@ import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.struct.Point;
+import game.struct.Rect;
 import game.struct.StringSpriteToDraw;
 import game.util.MemoryPool;
 import game.xui.Gui;
@@ -146,10 +147,10 @@ public class SignStruct implements IPoolItem
 	private void MarkSignDirty()
 	{
 		ViewPort.MarkAllViewportsDirty(
-				sign.left - 6,
-				sign.top  - 3,
-				sign.left + sign.width_1 * 4 + 12,
-				sign.top  + 45);
+				sign.getLeft() - 6,
+				sign.getTop()  - 3,
+				sign.getLeft() + sign.getWidth_1() * 4 + 12,
+				sign.getTop()  + 45);
 	}
 
 	/**
@@ -360,7 +361,10 @@ static const SaveLoad _sign_desc[] = {
 
 	final Chunk Handler _sign_chunk_handlers[] = {
 			{ 'SIGN', Save_SIGN, Load_SIGN, CH_ARRAY | CH_LAST},
-	};
+	}; */
+
+	
+	/**	
 	 * @param bottom 
 	 * @param right 
 	 * @param top 
@@ -371,7 +375,7 @@ static const SaveLoad _sign_desc[] = {
 	public void draw(int left, int top, int right, int bottom, int zoom) 
 	{
 		int mult = 1;
-		int sw = sign.width_1;
+		int sw = sign.getWidth_1();
 		int topAdd = 12;
 		switch(zoom)
 		{
@@ -389,13 +393,13 @@ static const SaveLoad _sign_desc[] = {
 		}
 		
 		if (str != null &&
-				bottom > sign.top &&
-				top < sign.top + topAdd &&
-				right > sign.left &&
-				left < sign.left + sign.width_1 * mult) 
+				bottom > sign.getTop() &&
+				top < sign.getTop() + topAdd &&
+				right > sign.getLeft() &&
+				left < sign.getLeft() + sign.getWidth_1() * mult) 
 		{
 
-			StringSpriteToDraw sstd = ViewPort.AddStringToDraw(sign.left + 1, sign.top + 1, new StringID(Str.STR_2806), str.id, 0, 0);
+			StringSpriteToDraw sstd = ViewPort.AddStringToDraw(sign.getLeft() + 1, sign.getTop() + 1, new StringID(Str.STR_2806), str.id, 0, 0);
 			if (sstd != null) {
 				sstd.width = sw;
 				sstd.color = (owner.id == Owner.OWNER_NONE || owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[owner.id];
@@ -403,11 +407,14 @@ static const SaveLoad _sign_desc[] = {
 		}
 	}
 
+	public void draw(Rect rect, int zoom) {
+		draw(rect.left, rect.top, rect.right, rect.bottom, zoom);		
+	}
 
 	public boolean clickIn( int x, int y, int zoom )
 	{
 		//int mult = 1;
-		int sw = sign.width_1;
+		int sw = sign.getWidth_1();
 		int topAdd = 12;
 		switch(zoom)
 		{
@@ -416,7 +423,7 @@ static const SaveLoad _sign_desc[] = {
 		case 1:
 			//mult = 2;
 			topAdd = 24;
-			sw = sign.width_1 * 2;
+			sw = sign.getWidth_1() * 2;
 			break;
 		default:
 			//mult = 4;
@@ -427,10 +434,10 @@ static const SaveLoad _sign_desc[] = {
 		
 		
 		return str != null &&
-				y >= sign.top &&
-				y < sign.top + topAdd &&
-				x >= sign.left &&
-				x < sign.left + sw;	
+				y >= sign.getTop() &&
+				y < sign.getTop() + topAdd &&
+				x >= sign.getLeft() &&
+				x < sign.getLeft() + sw;	
 	}
 
 	public int getIndex() {
@@ -459,6 +466,7 @@ static const SaveLoad _sign_desc[] = {
 	{
 		oos.writeObject(_sign_pool);		
 	}
+
 
 
 }

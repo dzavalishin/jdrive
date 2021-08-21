@@ -3836,8 +3836,9 @@ public class Vehicle implements IPoolItem
 	}
 
 	
-	public int getX_pos() {		return x_pos;	}
-	public int getY_pos() {		return y_pos;	}
+	public int getX_pos() { return x_pos;	}
+	public int getY_pos() { return y_pos;	}
+	public int getZ_pos() { return z_pos;	}
 
 	
 	public int getMax_age() { return max_age; }
@@ -3914,6 +3915,7 @@ public class Vehicle implements IPoolItem
 	public int getNum_orders() { return num_orders; }
 	public int getCur_order_index() { return cur_order_index; }
 	public int getCur_speed() { return cur_speed;	}
+
 
 
 

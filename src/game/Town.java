@@ -381,10 +381,10 @@ implements IPoolItem, Serializable
 	void MarkTownSignDirty()
 	{
 		ViewPort.MarkAllViewportsDirty(
-				sign.left-6,
-				sign.top-3,
-				sign.left+sign.width_1*4+12,
-				sign.top + 45
+				sign.getLeft()-6,
+				sign.getTop()-3,
+				sign.getLeft()+sign.getWidth_1()*4+12,
+				sign.getTop() + 45
 				);
 	}
 
