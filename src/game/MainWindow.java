@@ -115,10 +115,12 @@ public class MainWindow extends JPanel implements ActionListener
 
 			@Override
 			public void mouseExited(MouseEvent e) {
+				Window._mouse_inside = false;
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
+				Window._mouse_inside = true;
 			}
 
 				});

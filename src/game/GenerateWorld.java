@@ -18,7 +18,7 @@ public class GenerateWorld {
 		int i;
 
 		// Make sure everything is done via OWNER_NONE
-		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 		Global._generating_world = true;
 		InitializeGame(size_x, size_y);

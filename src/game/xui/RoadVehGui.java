@@ -85,7 +85,7 @@ public class RoadVehGui
 			//StringID 
 			int str;
 
-			w.disabled_state = v.getOwner() == Global._local_player ? 0 : (1 << 2);
+			w.disabled_state = v.getOwner() == Global.gs._local_player ? 0 : (1 << 2);
 			if (0==Global._patches.servint_roadveh) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
@@ -244,7 +244,7 @@ public class RoadVehGui
 			//StringID 
 			int str;
 
-			w.disabled_state = (v.getOwner() != Global._local_player) ? (1<<8 | 1<<7) : 0;
+			w.disabled_state = (v.getOwner() != Global.gs._local_player) ? (1<<8 | 1<<7) : 0;
 
 			/* draw widgets & caption */
 			Global.SetDParam(0, v.getString_id());
@@ -400,7 +400,7 @@ public class RoadVehGui
 					if (sel==0) selected_id = engine_id;
 					if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.getCap(), 0)) {
 						Gfx.DrawString(x+59, y+2, Engine.GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
-						RoadVehCmd.DrawRoadVehEngine(x+29, y+6, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+						RoadVehCmd.DrawRoadVehEngine(x+29, y+6, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)));
 						y += 14;
 					}
 					sel--;
@@ -529,7 +529,7 @@ public class RoadVehGui
 		if (tile != null) {
 			w.caption_color = (byte) tile.GetTileOwner().id;
 		} else {
-			w.caption_color = (byte) Global._local_player.id;
+			w.caption_color = (byte) Global.gs._local_player.id;
 		}
 	}
 
@@ -544,7 +544,7 @@ public class RoadVehGui
 
 		/* setup disabled buttons */
 		w.disabled_state =
-			tile.IsTileOwner( Global._local_player) ? 0 : ((1<<4) | (1<<7) | (1<<8));
+			tile.IsTileOwner( Global.gs._local_player) ? 0 : ((1<<4) | (1<<7) | (1<<8));
 
 		/* determine amount of items for scroller */
 		int [] num = {0};
@@ -988,7 +988,7 @@ public class RoadVehGui
 
 				tile = Depot._last_built_road_depot_tile;
 				do {
-					if (Depot.IsTileDepotType(tile, Global.TRANSPORT_ROAD) && tile.IsTileOwner( Global._local_player)) {
+					if (Depot.IsTileDepotType(tile, Global.TRANSPORT_ROAD) && tile.IsTileOwner( Global.gs._local_player)) {
 						ShowRoadDepotWindow(tile);
 						ShowBuildRoadVehWindow(tile);
 						return;
@@ -1077,7 +1077,7 @@ public class RoadVehGui
 	{
 		Window w;
 
-		if ( player == Global._local_player.id) {
+		if ( player == Global.gs._local_player.id) {
 			w = Window.AllocateWindowDescFront(_player_roadveh_desc, (station<< 16) | player);
 		} else  {
 			w = Window.AllocateWindowDescFront(_other_player_roadveh_desc, (station<< 16) | player);

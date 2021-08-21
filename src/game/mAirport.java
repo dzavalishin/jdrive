@@ -156,7 +156,7 @@ public class mAirport
 			while(v.IsValidVehicle() && order != null)
 			{
 				if(v.IsValidVehicle()
-					&& v.owner == Global._current_player
+					&& v.owner == Global.gs._current_player
 					&& Station.GetStation(order.station) == st
 					&& st.owner.id == Owner.OWNER_TOWN) {
 						vehiclecount[0]++;
@@ -276,8 +276,8 @@ public class mAirport
 		//Station st;
 		TileIndex tl; 
 
-		PlayerID old_player = Global._current_player;
-		Global._current_player = Owner.OWNER_TOWN_ID;
+		PlayerID old_player = Global.gs._current_player;
+		Global.gs._current_player = Owner.OWNER_TOWN_ID;
 
 		if(!Global._patches.allow_municipal_airports) 
 			MA_DestroyAirport(tn);
@@ -285,7 +285,7 @@ public class mAirport
 		if(!Global._patches.allow_municipal_airports 
 			|| (Global._cur_year + 1920) < 1990 
 			|| tn.population < MA_MIN_POPULATION) {
-			Global._current_player = old_player;
+			Global.gs._current_player = old_player;
 			return;
 		}
 
@@ -300,7 +300,7 @@ public class mAirport
 				&& st.owner.id == Owner.OWNER_TOWN 
 				&& st.town == tn) 
 			{
-				Global._current_player = old_player;
+				Global.gs._current_player = old_player;
 				return;
 			}
 
@@ -311,14 +311,14 @@ public class mAirport
 		tl = MA_FindSite(tn);
 		
 		if(tl == TileIndex.INVALID_TILE) {
-			Global._current_player = old_player;
+			Global.gs._current_player = old_player;
 			return;
 		}
 		
 		MA_BuildAirport(tl);
 		MA_AnnounceAirport(tn, tl);
 		
-		Global._current_player = old_player;
+		Global.gs._current_player = old_player;
 	}
 
 	// same as above but isnt as stringent
@@ -326,9 +326,9 @@ public class mAirport
 	{
 		//Station st;
 		TileIndex tl;
-		PlayerID old_player = Global._current_player;
+		PlayerID old_player = Global.gs._current_player;
 		
-		Global._current_player = PlayerID.get( Owner.OWNER_TOWN );
+		Global.gs._current_player = PlayerID.get( Owner.OWNER_TOWN );
 		
 		//FOR_ALL_STATIONS(st) 
 		Iterator<Station> it = Station.getIterator();
@@ -341,7 +341,7 @@ public class mAirport
 				&& st.town == tn
 				&& st.airport_type != AirportFTAClass.AT_OILRIG) { //not really needed but you never know
 					MA_DestroyAirport(tn);
-					Global._current_player = old_player;
+					Global.gs._current_player = old_player;
 					return;
 			}
 		}
@@ -351,14 +351,14 @@ public class mAirport
 		if(Global._cur_year + 1920 < INT_AIRPORT_YEAR) {
 			Global.SetDParam(0, tn.index);
 			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_TOO_EARLY, Str.INVALID_STRING_ID.id, 300, 300);
-			Global._current_player = old_player;
+			Global.gs._current_player = old_player;
 			return;
 		}
 
 		if(tn.population < MA_MIN_POPULATION) {
 			Global.SetDParam(0, tn.index);
 			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_LOW_POPULATION, Str.INVALID_STRING_ID.id, 300, 300);
-			Global._current_player = old_player;
+			Global.gs._current_player = old_player;
 			return;
 		}
 
@@ -367,14 +367,14 @@ public class mAirport
 		if(tl == TileIndex.INVALID_TILE) {
 			Global.SetDParam(0, tn.index);
 			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_NO_SITE, Str.INVALID_STRING_ID.id, 300, 300);
-			Global._current_player = old_player;
+			Global.gs._current_player = old_player;
 			return;
 		}
 		
 		MA_BuildAirport(tl);
 		
 		
-		Global._current_player = old_player;
+		Global.gs._current_player = old_player;
 		return;
 	}
 	

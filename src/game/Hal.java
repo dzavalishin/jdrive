@@ -82,7 +82,7 @@ void SortResolutions(int count)
 		// Get the color for DrawString-subroutines which matches the color
 		//  of the player
 		if (player.id == Owner.OWNER_SPECTATOR || player.id == Owner.OWNER_SPECTATOR - 1) return 1;
-		return (Global._color_list[Global._player_colors[player.id]].window_color_1b) | Gfx.IS_PALETTE_COLOR;
+		return (Global._color_list[Global.gs._player_colors[player.id]].window_color_1b) | Gfx.IS_PALETTE_COLOR;
 	}
 
 	

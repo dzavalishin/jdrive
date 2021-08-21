@@ -106,6 +106,13 @@ public class Window extends WindowConstants
 
 	public static boolean _right_button_down;
 	public static boolean _right_button_clicked;
+	
+	/** 
+	 * Mouse is inside our OS level window.
+	 * 
+	 * If no - forbid edge scrolling.
+	 */
+	public static boolean _mouse_inside;
 
 	// XXX added parameter to AllocateWindowDesc
 	// int _alloc_wnd_parent_num;
@@ -2013,10 +2020,15 @@ public class Window extends WindowConstants
 		y = Hal._cursor.pos.y;
 
 
-		if (click == 0 && mousewheel == 0) {
-			if (Global._patches.autoscroll && Global._game_mode != GameModes.GM_MENU) {
+		if (click == 0 && mousewheel == 0) 
+		{
+			if (Global._patches.autoscroll && Global._game_mode != GameModes.GM_MENU && _mouse_inside) 
+			{
 				w = FindWindowFromPt(x, y);
-				if (w == null || 0 != (w.flags4 & WF_DISABLE_VP_SCROLL) ) return;
+				
+				if (w == null || 0 != (w.flags4 & WF_DISABLE_VP_SCROLL) ) 
+					return;
+				
 				vp = w.IsPtInWindowViewport(x, y);
 				if (vp != null) {
 					vp2_d vpd = w.as_vp2_d();
@@ -2103,7 +2115,7 @@ public class Window extends WindowConstants
 		int click;
 		int mousewheel;
 
-		Global._current_player = Global._local_player;
+		Global.gs._current_player = Global.gs._local_player;
 
 		// Handle pressed keys
 		if (Global._pressed_key != 0) {
@@ -2856,7 +2868,7 @@ public class Window extends WindowConstants
 			Gfx.DrawFrameRect(r.left+1, r.top+1, r.right-1, r.bottom-1, wi.color, (caption_color == 0xFF) ? FR_LOWERED | FR_DARKENED : FR_LOWERED | FR_DARKENED | FR_BORDERONLY);
 
 			if ( (caption_color & 0xFF) != 0xFF) {
-				byte pc = Global._player_colors[caption_color & 0xFF];
+				int pc = Global.gs._player_colors[caption_color & 0xFF];
 				Gfx.GfxFillRect(r.left+2, r.top+2, r.right-2, r.bottom-2, Global._color_list[pc].window_color_1b);
 			}
 			/*else
@@ -3098,11 +3110,6 @@ public class Window extends WindowConstants
 	}
 
 	public static Window getMain() {
-		/*for(Window w : Window._windows )
-		{
-			if(w.window_class == Window.WC_MAIN_WINDOW)
-				return w;
-		}*/
 		Window w = FindWindowById(WC_MAIN_WINDOW, 0);
 		assert w != null;
 		return w;

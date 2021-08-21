@@ -167,7 +167,7 @@ public class AirCraft extends AirCraftTables {
 		// to just query the cost, it is not neccessary to have a valid tile (automation/AI)
 		if(0 != (flags & Cmd.DC_QUERY_COST)) return value;
 
-		if (!IsAircraftHangarTile(tile) || !tile.IsTileOwner(Global._current_player)) return Cmd.CMD_ERROR;
+		if (!IsAircraftHangarTile(tile) || !tile.IsTileOwner(Global.gs._current_player)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
@@ -189,7 +189,7 @@ public class AirCraft extends AirCraftTables {
 			v.type = u.type = Vehicle.VEH_Aircraft;
 			v.direction = 3;
 
-			v.owner = u.owner = Global._current_player;
+			v.owner = u.owner = Global.gs._current_player;
 
 			v.tile = tile;
 			//			u.tile = 0;
@@ -299,7 +299,7 @@ public class AirCraft extends AirCraftTables {
 
 				w.type = Vehicle.VEH_Aircraft;
 				w.direction = 0;
-				w.owner = Global._current_player;
+				w.owner = Global.gs._current_player;
 				w.x_pos = v.getX_pos();
 				w.y_pos = v.getY_pos();
 				w.z_pos = v.z_pos + 5;
@@ -1403,7 +1403,7 @@ public class AirCraft extends AirCraftTables {
 			st.had_vehicle_of_type |= Station.HVOT_AIRCRAFT;
 			Global.SetDParam(0, st.index);
 			// show newsitem of celebrating citizens
-			flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+			flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 			NewsItem.AddNewsItem(
 					Str.STR_A033_CITIZENS_CELEBRATE_FIRST,
 					flags,
@@ -1456,7 +1456,7 @@ public class AirCraft extends AirCraftTables {
 				v.vehstatus |= Vehicle.VS_STOPPED;
 				Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
 
-				if (v.owner == Global._local_player) {
+				if (v.owner == Global.gs._local_player) {
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddValidatedNewsItem(
 							Str.STR_A014_AIRCRAFT_IS_WAITING_IN,
@@ -1661,13 +1661,13 @@ public class AirCraft extends AirCraftTables {
 		AircraftNextAirportPos_and_Order(v);
 
 		// check if the aircraft needs to be replaced or renewed and send it to a hangar if needed
-		if (v.owner == Global._local_player && (
+		if (v.owner == Global.gs._local_player && (
 				p.EngineHasReplacement(v.getEngine_type()) ||
 				(p.engine_renew && v.age - v.max_age > p.engine_renew_months * 30)
 				)) {
-			Global._current_player = Global._local_player;
+			Global.gs._current_player = Global.gs._local_player;
 			Cmd.DoCommandP(v.tile, v.index, 1, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
-			Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 		}
 	}
 
@@ -1787,14 +1787,14 @@ public class AirCraft extends AirCraftTables {
 		AircraftLandAirplane(v);  // maybe crash airplane
 		v.air.state = Airport.ENDLANDING;
 		// check if the aircraft needs to be replaced or renewed and send it to a hangar if needed
-		if (v.current_order.type != Order.OT_GOTO_DEPOT && v.owner == Global._local_player) {
+		if (v.current_order.type != Order.OT_GOTO_DEPOT && v.owner == Global.gs._local_player) {
 			// only the vehicle owner needs to calculate the rest (locally)
 			if (p.EngineHasReplacement(v.getEngine_type()) ||
 					(p.engine_renew && v.age - v.max_age > (p.engine_renew_months * 30))) {
 				// send the aircraft to the hangar at next airport (bit 17 set)
-				Global._current_player = Global._local_player;
+				Global.gs._current_player = Global.gs._local_player;
 				Cmd.DoCommandP(v.tile, v.index, 1 << 16, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
-				Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+				Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 			}
 		}
 	}
@@ -2444,7 +2444,7 @@ public class AirCraft extends AirCraftTables {
 						if (sel==0) selected_id = engine_id;
 						if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.getCap(), 0)) {
 							Gfx.DrawString(x+62, y+7, Engine.GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
-							DrawAircraftEngine(x+29, y+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+							DrawAircraftEngine(x+29, y+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)));
 							y += 24;
 						}
 						sel--;
@@ -2549,7 +2549,7 @@ public class AirCraft extends AirCraftTables {
 		if (tile != null) {
 			w.caption_color =  tile.GetTileOwner().id;
 		} else {
-			w.caption_color =  Global._local_player.id;
+			w.caption_color =  Global.gs._local_player.id;
 		}
 	}
 
@@ -2638,7 +2638,7 @@ public class AirCraft extends AirCraftTables {
 		case WE_PAINT: {
 			Vehicle v = Vehicle.GetVehicle(w.window_number);
 
-			w.disabled_state = v.owner == Global._local_player ? 0 : (1 << 2);
+			w.disabled_state = v.owner == Global.gs._local_player ? 0 : (1 << 2);
 			if (0==Global._patches.servint_aircraft) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
@@ -2846,7 +2846,7 @@ public class AirCraft extends AirCraftTables {
 				disabled = 0;
 			}
 
-			if (v.owner != Global._local_player) disabled |= 1 << 8 | 1 << 7;
+			if (v.owner != Global.gs._local_player) disabled |= 1 << 8 | 1 << 7;
 			w.disabled_state = disabled;
 
 			/* draw widgets & caption */
@@ -2978,7 +2978,7 @@ public class AirCraft extends AirCraftTables {
 
 		/* setup disabled buttons */
 		w.disabled_state =
-				tile.IsTileOwner(Global._local_player) ? 0 : ((1<<4) | (1<<7) | (1<<8));
+				tile.IsTileOwner(Global.gs._local_player) ? 0 : ((1<<4) | (1<<7) | (1<<8));
 
 		/* determine amount of items for scroller */
 		num = 0;
@@ -3473,7 +3473,7 @@ public class AirCraft extends AirCraftTables {
 					break;
 				}
 				do {
-					if (IsAircraftHangarTile(tile) && tile.IsTileOwner(Global._local_player)) {
+					if (IsAircraftHangarTile(tile) && tile.IsTileOwner(Global.gs._local_player)) {
 						ShowAircraftDepotWindow(tile);
 						ShowBuildAircraftWindow(tile);
 						return;
@@ -3566,7 +3566,7 @@ public class AirCraft extends AirCraftTables {
 	{
 		Window w;
 
-		if (player == Global._local_player.id) {
+		if (player == Global.gs._local_player.id) {
 			w = Window.AllocateWindowDescFront(_player_aircraft_desc, (station << 16) | player);
 		} else  {
 			w = Window.AllocateWindowDescFront(_other_player_aircraft_desc, (station << 16) | player);

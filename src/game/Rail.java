@@ -586,7 +586,7 @@ public class Rail extends RailTables {
 					)) { // partly up
 				if (existing != 0) {
 					return 0;
-				} else if (!Global._patches.build_on_slopes || Global._is_old_ai_player) {
+				} else if (!Global._patches.build_on_slopes || Global.gs._is_old_ai_player) {
 					return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 				} else {
 					return Global._price.terraform;
@@ -638,7 +638,7 @@ public class Rail extends RailTables {
 				cost += ret;
 
 				if(0 != (flags & Cmd.DC_EXEC)) {
-					tile.SetTileOwner( Global._current_player);
+					tile.SetTileOwner( Global.gs._current_player);
 					tile.getMap().m3 = BitOps.RETSB(tile.getMap().m3, 0, 4, p1);
 					tile.getMap().m5 = ((m5 & 0xC7) | 0x20); // railroad under bridge
 				}
@@ -659,7 +659,7 @@ public class Rail extends RailTables {
 				return Cmd.CMD_ERROR;
 			}
 			if ( (0 != (m5 & RAIL_TYPE_SPECIAL)) ||
-					!tile.IsTileOwner( Global._current_player) ||
+					!tile.IsTileOwner( Global.gs._current_player) ||
 					BitOps.GB(tile.getMap().m3, 0, 4) != p1) {
 				// Get detailed error message
 				return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
@@ -686,7 +686,7 @@ public class Rail extends RailTables {
 					)) {
 				if(0 != (flags & Cmd.DC_EXEC)) {
 					tile.getMap().m3 = 0xFF & tile.GetTileOwner().id;
-					tile.SetTileOwner( Global._current_player);
+					tile.SetTileOwner( Global.gs._current_player);
 					tile.getMap().m4 = 0xFF & p1;
 					tile.getMap().m5 = 0xFF & (0x10 | (track == TRACK_DIAG1 ? 0x08 : 0x00)); // level crossing
 				}
@@ -708,7 +708,7 @@ public class Rail extends RailTables {
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				tile.SetTileType(TileTypes.MP_RAILWAY);
-				tile.SetTileOwner( Global._current_player);
+				tile.SetTileOwner( Global.gs._current_player);
 				tile.getMap().m2 = 0; // Bare land
 				tile.getMap().m3 = 0xFF & p1; // No signals, rail type
 				tile.getMap().m5 = 0xFF & trackbit;
@@ -749,7 +749,7 @@ public class Rail extends RailTables {
 		if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && !tile.IsTileType( TileTypes.MP_STREET) && !tile.IsTileType( TileTypes.MP_RAILWAY))
 			return Cmd.CMD_ERROR;
 
-		if (Global._current_player.id != Owner.OWNER_WATER && !Player.CheckTileOwnership(tile))
+		if (Global.gs._current_player.id != Owner.OWNER_WATER && !Player.CheckTileOwnership(tile))
 			return Cmd.CMD_ERROR;
 
 		// allow building rail under bridge
@@ -1003,7 +1003,7 @@ public class Rail extends RailTables {
 		 */
 
 		if (tileh != 0 && (
-				Global._is_old_ai_player ||
+				Global.gs._is_old_ai_player ||
 				!Global._patches.build_on_slopes ||
 				TileIndex.IsSteepTileh(tileh) ||
 				!Depot.CanBuildDepotByTileh(p2, tileh)
@@ -1521,7 +1521,7 @@ public class Rail extends RailTables {
 			return Cmd.CMD_ERROR;
 
 		/* Only water can remove signals from anyone */
-		if (Global._current_player.id != Owner.OWNER_WATER && !Player.CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
+		if (Global.gs._current_player.id != Owner.OWNER_WATER && !Player.CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
@@ -1637,7 +1637,7 @@ public class Rail extends RailTables {
 
 	static int RemoveTrainDepot(TileIndex tile, int flags)
 	{
-		if (!Player.CheckTileOwnership(tile) && Global._current_player.id != Owner.OWNER_WATER)
+		if (!Player.CheckTileOwnership(tile) && Global.gs._current_player.id != Owner.OWNER_WATER)
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle())
@@ -1664,7 +1664,7 @@ public class Rail extends RailTables {
 			if(0 !=  (m5 & RAIL_TYPE_SPECIAL))
 				return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 
-			if (!tile.IsTileOwner( Global._current_player.id))
+			if (!tile.IsTileOwner( Global.gs._current_player.id))
 				return Cmd.return_cmd_error(Str.STR_1024_AREA_IS_OWNED_BY_ANOTHER);
 
 			return Cmd.return_cmd_error(Str.STR_1008_MUST_REMOVE_RAILROAD_TRACK);
@@ -2141,7 +2141,7 @@ public class Rail extends RailTables {
 		final RailtypeInfo rti = GetRailTypeInfo(railtype);
 		final DrawTrackSeqStruct [] dtssa = _track_depot_layout_table[imagei];
 
-		ormod = Sprite.PLAYER_SPRITE_COLOR(Global._local_player);
+		ormod = Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player);
 
 		//dtss = _track_depot_layout_table[image];
 
@@ -2182,7 +2182,7 @@ public class Rail extends RailTables {
 			if(dtss.image == 0) break;
 			Point pt = Point.RemapCoords(dtss.subcoord_x, dtss.subcoord_y, 0);
 			img = dtss.image;
-			if(0 != (img & Sprites.PALETTE_MODIFIER_COLOR)) img |= Sprite.PLAYER_SPRITE_COLOR(Global._local_player);
+			if(0 != (img & Sprites.PALETTE_MODIFIER_COLOR)) img |= Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player);
 			Gfx.DrawSprite(img, x + pt.x, y + pt.y);
 		}
 	}
@@ -3447,7 +3447,7 @@ public class Rail extends RailTables {
 	{
 		Window w;
 
-		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
+		if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR) return;
 
 		BiConsumer<Window,WindowEvent>  cmp = Rail::BuildRailToolbWndProc;
 		

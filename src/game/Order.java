@@ -947,7 +947,7 @@ public class Order implements Serializable
 		if (v.next_shared != null) return false;
 
 		/* Only check every 20 days, so that we don't flood the message log */
-		if (v.owner == Global._local_player && v.day_counter % 20 == 0) {
+		if (v.owner == Global.gs._local_player && v.day_counter % 20 == 0) {
 			int n_st, problem_type = -1;
 			//final Order order;
 			Station st;

@@ -50,7 +50,7 @@ public class PlayerID extends AbstractID implements Serializable
 
 	public boolean IS_INTERACTIVE_PLAYER()
 	{
-		return equals( Global._local_player );
+		return equals( Global.gs._local_player );
 	}
 
 	@Override

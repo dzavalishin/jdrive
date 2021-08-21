@@ -358,7 +358,7 @@ public class StationGui extends Station  // to get constants
 		}
 		MiscGui.SetVScrollCount(w, num);
 
-		w.disabled_state = st.getOwner() == Global._local_player ? 0 : (1 << 9);
+		w.disabled_state = st.getOwner() == Global.gs._local_player ? 0 : (1 << 9);
 
 		/*
 		if (0==(st.facilities & FACIL_TRAIN)) 		w.disabled_state = BitOps.RETSETBIT(w.disabled_state,  10);
@@ -527,7 +527,7 @@ public class StationGui extends Station  // to get constants
 			case 12: { /* Show a list of scheduled aircraft to this station */
 				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs have no owners, show the scheduled aircraft of current player */
-				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global._current_player : st.getOwner();
+				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global.gs._current_player : st.getOwner();
 				AirCraft.ShowPlayerAircraft(owner.id, w.window_number);
 				break;
 			}
@@ -535,7 +535,7 @@ public class StationGui extends Station  // to get constants
 			case 13: { /* Show a list of scheduled ships to this station */
 				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs/bouys have no owners, show the scheduled ships of current player */
-				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global._current_player : st.getOwner();
+				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global.gs._current_player : st.getOwner();
 				ShipGui.ShowPlayerShips(owner, StationID.get( w.window_number ) );
 				break;
 			}

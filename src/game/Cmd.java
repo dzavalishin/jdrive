@@ -425,8 +425,8 @@ public class Cmd {
 		if (--_docommand_recursive == 0) {
 			Player.SubtractMoneyFromPlayer(res);
 			// XXX - Old AI hack which doesn't use DoCommandDP; update last build coord of player
-			if ( (x|y) != 0 && Global._current_player.id < Global.MAX_PLAYERS) {
-				Player.GetPlayer(Global._current_player).last_build_coordinate = TileIndex.TileVirtXY(x, y);
+			if ( (x|y) != 0 && Global.gs._current_player.id < Global.MAX_PLAYERS) {
+				Player.GetCurrentPlayer().last_build_coordinate = TileIndex.TileVirtXY(x, y);
 			}
 		}
 
@@ -436,7 +436,7 @@ public class Cmd {
 
 	static long GetAvailableMoneyForCommand()
 	{
-		PlayerID pid = Global._current_player;
+		PlayerID pid = Global.gs._current_player;
 		if (pid.id >= Global.MAX_PLAYERS) return 0x7FFFFFFF; // max int
 		return Player.GetPlayer(pid).getMoney();
 	}
@@ -474,7 +474,7 @@ public class Cmd {
 
 		/** Spectator has no rights except for the dedicated server which
 		 * is a spectator but is the server, so can do anything */
-		if (Global._current_player.id == Owner.OWNER_SPECTATOR && !Global._network_dedicated) {
+		if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR && !Global._network_dedicated) {
 			Global.ShowErrorMessage(Global._error_message, Global._error_message_2, x, y);
 			Global._cmd_text = null;
 			return false;
@@ -570,9 +570,9 @@ public class Cmd {
 		// * the other parties won't be able to execute our command and will desync.
 		// * @todo Rewrite dedicated server to something more than a dirty hack!
 		if (_networking && !(cmd & Cmd.CMD_NETWORK_COMMAND)) {
-			if (_network_dedicated) Global._local_player = 0;
+			if (_network_dedicated) Global.gs._local_player = 0;
 			NetworkSend_Command(tile, p1, p2, cmd, callback);
-			if (_network_dedicated) Global._local_player = Owner.OWNER_SPECTATOR;
+			if (_network_dedicated) Global.gs._local_player = Owner.OWNER_SPECTATOR;
 			_docommand_recursive = 0;
 			Global._cmd_text = null;
 			return true;
@@ -580,12 +580,12 @@ public class Cmd {
 		#endif /* ENABLE_NETWORK */
 
 		// update last build coordinate of player.
-		if ( tile != null && Global._current_player.id < Global.MAX_PLAYERS) 
-			Player.GetPlayer(Global._current_player).last_build_coordinate = tile;
+		if ( tile != null && Global.gs._current_player.id < Global.MAX_PLAYERS) 
+			Player.GetCurrentPlayer().last_build_coordinate = tile;
 
 		/* Actually try and execute the command. If no cost-type is given
 		 * use the construction one */
-		Player._yearly_expenses_type = Player.EXPENSES_CONSTRUCTION;
+		Global.gs._yearly_expenses_type = Player.EXPENSES_CONSTRUCTION;
 		res2 = proc.exec(x,y, flags|Cmd.DC_EXEC, p1, p2);
 
 		// If notest is on, it means the result of the test can be different than

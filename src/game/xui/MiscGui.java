@@ -157,7 +157,7 @@ public class MiscGui {
 		lid.tile = tile;
 		lid.town = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 
-		p = Player.GetPlayer(Global._local_player.id < Global.MAX_PLAYERS ? Global._local_player.id : 0);
+		p = Player.GetPlayer(Global.gs._local_player.id < Global.MAX_PLAYERS ? Global.gs._local_player.id : 0);
 
 		old_money = p.getMoney();
 		p.setMoney( 0x7fffffff );
@@ -1167,7 +1167,7 @@ public class MiscGui {
 	{
 		/* Check if we are not a specatator who wants to generate a name..
 		    Let's use the name of player #0 for now. */
-		final Player  p = Player.GetPlayer(Global._local_player.id < Global.MAX_PLAYERS ? Global._local_player.id : 0);
+		final Player  p = Player.GetPlayer(Global.gs._local_player.id < Global.MAX_PLAYERS ? Global.gs._local_player.id : 0);
 
 		/*Global.SetDParam(0, p.name_1);
 		Global.SetDParam(1, p.name_2);
@@ -1617,14 +1617,14 @@ public class MiscGui {
 			//if (Player._players[p1].is_active) 
 			if (Player.GetPlayer(p1).isActive()) 
 			{
-				Global._local_player = PlayerID.get( p1 );
+				Global.gs._local_player = PlayerID.get( p1 );
 				Hal.MarkWholeScreenDirty();
-				return Global._local_player.id;
+				return Global.gs._local_player.id;
 			}
 			p1 += p2;
 		}
 
-		return Global._local_player.id;
+		return Global.gs._local_player.id;
 	}
 
 	// p1 -1 or +1 (down/up)
@@ -1702,7 +1702,7 @@ public class MiscGui {
 	/*
 	static final CheatEntry _cheats_ui[] = {
 		new CheatEntry(CE_CLICK, 0, Str.STR_CHEAT_MONEY, 					&_cheats.money.value, 					&_cheats.money.been_used, 					&ClickMoneyCheat,					0, 0, 0),
-		new CheatEntry(CE_UINT8, 0, Str.STR_CHEAT_CHANGE_PLAYER, 	&Global._local_player, 								&_cheats.switch_player.been_used,		&ClickChangePlayerCheat,	0, 11, 1),
+		new CheatEntry(CE_UINT8, 0, Str.STR_CHEAT_CHANGE_PLAYER, 	&Global.gs._local_player, 								&_cheats.switch_player.been_used,		&ClickChangePlayerCheat,	0, 11, 1),
 		new CheatEntry(CE_BOOL, 0, Str.STR_CHEAT_EXTRA_DYNAMITE,	&_cheats.magic_bulldozer.value,	&_cheats.magic_bulldozer.been_used, null,											0, 0, 0),
 		new CheatEntry(CE_BOOL, 0, Str.STR_CHEAT_CROSSINGTUNNELS,	&_cheats.crossing_tunnels.value,&_cheats.crossing_tunnels.been_used,null,											0, 0, 0),
 		new CheatEntry(CE_BOOL, 0, Str.STR_CHEAT_BUILD_IN_PAUSE,	&_cheats.build_in_pause.value,	&_cheats.build_in_pause.been_used,	null,											0, 0, 0),
@@ -1774,7 +1774,7 @@ public class MiscGui {
 
 					// draw colored flag for change player cheat
 					if (ce.str == Str.STR_CHEAT_CHANGE_PLAYER) {
-						DrawPlayerIcon(Global._current_player, 156, y + 2);
+						DrawPlayerIcon(Global.gs._current_player, 156, y + 2);
 					}
 				}
 

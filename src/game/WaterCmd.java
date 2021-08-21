@@ -365,7 +365,7 @@ public class WaterCmd extends WaterTables
 
 			if(0 != (flags & Cmd.DC_AUTO) )return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 			// don't allow water to delete it.
-			if (Global._current_player.id == Owner.OWNER_WATER) return Cmd.CMD_ERROR;
+			if (Global.gs._current_player.id == Owner.OWNER_WATER) return Cmd.CMD_ERROR;
 			// move to the middle tile..
 			return RemoveShiplift(tile.iadd( TileIndex.ToTileIndexDiff(_shiplift_tomiddle_offs[m5 & 0xF])), flags) ;
 		} else {
@@ -520,7 +520,7 @@ public class WaterCmd extends WaterTables
 			if(wdts.delta_x == 0x80) break;
 			
 			Point pt = Point.RemapCoords(wdts.delta_x, wdts.delta_y, wdts.delta_z);
-			Gfx.DrawSprite(wdts.image + Sprite.PLAYER_SPRITE_COLOR(Global._local_player), x + pt.x, y + pt.y);
+			Gfx.DrawSprite(wdts.image + Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player), x + pt.x, y + pt.y);
 		}
 	}
 
@@ -597,7 +597,7 @@ public class WaterCmd extends WaterTables
 
 				case MP_CLEAR:
 				case MP_TREES:
-					Global._current_player = PlayerID.get( Owner.OWNER_WATER );
+					Global.gs._current_player = PlayerID.get( Owner.OWNER_WATER );
 					if (!Cmd.CmdFailed(Cmd.DoCommandByTile(target, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR))) {
 						Landscape.ModifyTile(
 							target, TileTypes.MP_WATER,
@@ -632,7 +632,7 @@ public class WaterCmd extends WaterTables
 				}
 			}
 
-			Global._current_player = PlayerID.get( Owner.OWNER_WATER );
+			Global.gs._current_player = PlayerID.get( Owner.OWNER_WATER );
 			{
 				Vehicle v = Vehicle.FindVehicleOnTileZ(target, 0);
 				if (v != null) FloodVehicle(v);
@@ -719,9 +719,9 @@ public class WaterCmd extends WaterTables
 				TileLoopWaterHelper(tile, _tile_loop_offs_array[i]);
 			}
 		}
-		// Global._current_player can be changed by TileLoopWaterHelper.. reset it back
+		// Global.gs._current_player can be changed by TileLoopWaterHelper.. reset it back
 		//   here
-		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 		// edges
 		if (tile.TileX() == 0 && BitOps.IS_INT_INSIDE(tile.TileY(), 1, Global.MapSizeY() - 3 + 1)) //NE

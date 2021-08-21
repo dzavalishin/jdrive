@@ -121,7 +121,7 @@ public abstract class TownGui //extends Town
 		case WE_PAINT: {
 			final Town t = Town.GetTown(w.window_number);
 			int [] numact = {0};
-			int buttons = GetMaskOfTownActions(numact, Global._local_player, t);
+			int buttons = GetMaskOfTownActions(numact, Global.gs._local_player, t);
 
 			MiscGui.SetVScrollCount(w, numact[0] + 1);
 
@@ -225,7 +225,7 @@ public abstract class TownGui //extends Town
 
 				if (!BitOps.IS_INT_INSIDE(y, 0, 5)) return;
 
-				y = GetNthSetBit(GetMaskOfTownActions(null, Global._local_player, t), y + w.vscroll.pos - 1);
+				y = GetNthSetBit(GetMaskOfTownActions(null, Global.gs._local_player, t), y + w.vscroll.pos - 1);
 				if (y >= 0) {
 					w.as_def_d().data_1 = y;
 					w.SetWindowDirty();

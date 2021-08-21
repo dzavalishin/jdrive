@@ -29,15 +29,12 @@ import game.tables.CargoConst;
 public class Global 
 {
 
+	public static GameState gs = new GameState(); 
+	
 	public static final int MAX_PLAYERS = 8;
 	public static final int MAX_SCREEN_WIDTH = 2048;
 	public static final int MAX_SCREEN_HEIGHT = 1200;
 
-	public static Player[] _players = new Player[MAX_PLAYERS];
-	public static byte [] _player_colors = new byte[MAX_PLAYERS];
-	public static PlayerID _current_player;
-	public static PlayerID _local_player;
-	public static boolean _is_old_ai_player = false;
 
 	public static Economy _economy = new Economy();
 	public static final Cheats  _cheats = Cheat.cs;

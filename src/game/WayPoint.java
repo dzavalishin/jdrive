@@ -445,7 +445,7 @@ private void WaypointPoolNewBlock(int start_item)
 		if (!tile.IsTileType(TileTypes.MP_RAILWAY) || !IsRailWaypoint(tile))
 			return Cmd.CMD_ERROR;
 
-		if (!tile.CheckTileOwnership() && !(Global._current_player.id == Owner.OWNER_WATER))
+		if (!tile.CheckTileOwnership() && !(Global.gs._current_player.id == Owner.OWNER_WATER))
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle())
@@ -564,7 +564,7 @@ private void WaypointPoolNewBlock(int start_item)
 		final RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
 		int ormod, img;
 
-		ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player));
+		ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player));
 
 		x += 33;
 		y += 17;

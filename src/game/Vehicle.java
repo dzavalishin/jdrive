@@ -349,7 +349,7 @@ public class Vehicle implements IPoolItem
 	//calculates tax
 	public void MA_Tax(int income)
 	{
-		int old_expenses_type = Player._yearly_expenses_type;
+		int old_expenses_type = Global.gs._yearly_expenses_type;
 		assert income >= 0;
 
 		if(Global._patches.allow_municipal_airports) {
@@ -375,7 +375,7 @@ public class Vehicle implements IPoolItem
 			}
 
 			Player.SubtractMoneyFromPlayer((int)tax);
-			Player._yearly_expenses_type = old_expenses_type;
+			Global.gs._yearly_expenses_type = old_expenses_type;
 		}
 		return;
 	}
@@ -2415,7 +2415,7 @@ public class Vehicle implements IPoolItem
 
 	static void ShowVehicleGettingOld(Vehicle v, /*StringID*/ int msg)
 	{
-		if (v.owner != Global._local_player) return;
+		if (v.owner != Global.gs._local_player) return;
 
 		// Do not show getting-old message if autorenew is active
 		if (Player.GetPlayer(v.owner).engine_renew) return;
@@ -2678,7 +2678,7 @@ public class Vehicle implements IPoolItem
 		//END MA vars
 
 
-		Global._current_player = v.owner;
+		Global.gs._current_player = v.owner;
 
 		assert(v.type == VEH_Train || v.type == VEH_Road || v.type == VEH_Ship || v.type == VEH_Aircraft);
 
@@ -2736,7 +2736,7 @@ public class Vehicle implements IPoolItem
 			} while (w.type == VEH_Train && (w = w.GetNextVehicle()) != null);
 
 			if (0 == (flags & Cmd.DC_EXEC) && (Cmd.CmdFailed(temp_cost) || p.money64 < (int)(cost + p.engine_renew_money) || cost == 0)) {
-				if (p.money64 < (int)(cost + p.engine_renew_money) && ( Global._local_player == v.owner ) && cost != 0) {
+				if (p.money64 < (int)(cost + p.engine_renew_money) && ( Global.gs._local_player == v.owner ) && cost != 0) {
 					int message;
 					Global.SetDParam(0, v.unitnumber.id);
 					switch (v.type) {
@@ -2751,7 +2751,7 @@ public class Vehicle implements IPoolItem
 					NewsItem.AddNewsItem(message, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 				}
 				if (stopped) v.vehstatus &= ~VS_STOPPED;
-				Global._current_player = PlayerID.get(Owner.OWNER_NONE);
+				Global.gs._current_player = PlayerID.get(Owner.OWNER_NONE);
 				return 0;
 			}
 
@@ -2801,7 +2801,7 @@ public class Vehicle implements IPoolItem
 		if (Player.IsLocalPlayer()) MiscGui.ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
 
 		if (stopped) v.vehstatus &= ~VS_STOPPED;
-		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 		return 0;
 	}
@@ -2981,7 +2981,7 @@ public class Vehicle implements IPoolItem
 			{
 				Vehicle u = i.next();
 
-				if (u.type == type && u.owner == Global._current_player 
+				if (u.type == type && u.owner == Global.gs._current_player 
 						&& u.unitnumber != null
 						&& unit_num == u.unitnumber.id)
 				{

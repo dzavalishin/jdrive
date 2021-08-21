@@ -869,9 +869,9 @@ public class Gui
 		w = Window.AllocateWindow(x, 0x16, 0xF1, 0x52, Gui::PlayerMenuWndProc, Window.WC_TOOLBAR_MENU, _player_menu_widgets);
 		w.flags4 &= ~Window.WF_WHITE_BORDER_MASK;
 		w.as_menu_d().item_count = 0;
-		w.as_menu_d().sel_index = (Global._local_player.id != Owner.OWNER_SPECTATOR) ? Global._local_player.id : GetPlayerIndexFromMenu(0);
+		w.as_menu_d().sel_index = (Global.gs._local_player.id != Owner.OWNER_SPECTATOR) ? Global.gs._local_player.id : GetPlayerIndexFromMenu(0);
 		if (Global._networking && main_button == 9) {
-			if (Global._local_player.id != Owner.OWNER_SPECTATOR) {
+			if (Global.gs._local_player.id != Owner.OWNER_SPECTATOR) {
 				w.as_menu_d().sel_index++;
 			} else {
 				/* Select client list by default for spectators */
@@ -1074,7 +1074,7 @@ public class Gui
 
 	static void ToolbarBuildRailClick(Window w)
 	{
-		final Player p = Player.GetPlayer(Global._local_player);
+		final Player p = Player.GetPlayer(Global.gs._local_player);
 		Window w2;
 		w2 = PopupMainToolbMenu(w, 457, 19, Str.STR_1015_RAILROAD_CONSTRUCTION, Rail.RAILTYPE_END, ~p.avail_railtypes);
 		w2.as_menu_d().sel_index = _last_built_railtype;
@@ -1893,7 +1893,7 @@ public class Gui
 				return;
 			}
 
-			Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 			Global._generating_world = true;
 			Gui._ignore_restrictions = true;
 			if (!TryBuildIndustry(e.tile,type)) {
@@ -2031,7 +2031,7 @@ public class Gui
 			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB4 | Sprite.PALETTE_MODIFIER_GREYOUT);
 
 			// if spectator, disable things
-			if (Global._current_player.id == Owner.OWNER_SPECTATOR){
+			if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR){
 				w.disabled_state |= (1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23);
 			} else {
 				w.disabled_state &= ~((1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23));
@@ -2048,7 +2048,7 @@ public class Gui
 
 		case WE_KEYPRESS: {
 			//PlayerID 
-			int local = (Global._local_player.id != Owner.OWNER_SPECTATOR) ? Global._local_player.id : 0;
+			int local = (Global.gs._local_player.id != Owner.OWNER_SPECTATOR) ? Global.gs._local_player.id : 0;
 
 			switch (e.keycode) {
 			case Window.WKC_F1: case Window.WKC_PAUSE:
@@ -2369,7 +2369,7 @@ public class Gui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Player p = (Global._local_player.id == Owner.OWNER_SPECTATOR) ? null : Player.GetPlayer(Global._local_player);
+			final Player p = (Global.gs._local_player.id == Owner.OWNER_SPECTATOR) ? null : Player.GetPlayer(Global.gs._local_player);
 
 			w.DrawWindowWidgets();
 			Global.SetDParam(0, Global._date);
@@ -2414,7 +2414,7 @@ public class Gui
 		case WE_CLICK:
 			switch (e.widget) {
 				case 1: NewsItem.ShowLastNewsMessage(); break;
-				case 2: if (Global._local_player.id != Owner.OWNER_SPECTATOR) PlayerGui.ShowPlayerFinances(Global._local_player.id); break;
+				case 2: if (Global.gs._local_player.id != Owner.OWNER_SPECTATOR) PlayerGui.ShowPlayerFinances(Global.gs._local_player.id); break;
 				default: ViewPort.ResetObjectToPlace();
 			}
 			break;

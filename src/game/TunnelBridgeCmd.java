@@ -254,8 +254,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 
 		// Towns are not allowed to use bridges on slopes.
-		allow_on_slopes = (!Global._is_old_ai_player
-				&& Global._current_player.id != Owner.OWNER_TOWN && Global._patches.build_on_slopes);
+		allow_on_slopes = (!Global.gs._is_old_ai_player
+				&& Global.gs._current_player.id != Owner.OWNER_TOWN && Global._patches.build_on_slopes);
 
 		/* Try and clear the start landscape */
 
@@ -406,7 +406,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 			bridge_len += 2;	// begin and end tiles/ramps
 
-			if (Global._current_player.id < Global.MAX_PLAYERS && !Global._is_old_ai_player)
+			if (Global.gs._current_player.id < Global.MAX_PLAYERS && !Global.gs._is_old_ai_player)
 				bridge_len = CalcBridgeLenCostFactor(bridge_len);
 
 			cost += ((long)bridge_len * Global._price.build_bridge * b.price) >> 8;
@@ -729,7 +729,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			int cost;
 
 			// check if we own the tile below the bridge..
-			if (Global._current_player.id != Owner.OWNER_WATER && (!Player.CheckTileOwnership(tile) || !Vehicle.EnsureNoVehicleZ(tile, tile.TilePixelHeight())))
+			if (Global.gs._current_player.id != Owner.OWNER_WATER && (!Player.CheckTileOwnership(tile) || !Vehicle.EnsureNoVehicleZ(tile, tile.TilePixelHeight())))
 				return Cmd.CMD_ERROR;
 
 			cost = 0 != (tile.getMap().m5 & 8) ? Global._price.remove_road * 2 : Global._price.remove_rail;
@@ -759,7 +759,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		tile = FindEdgesOfBridge(tile, endtile);
 
 		// floods, scenario editor can always destroy bridges
-		if (Global._current_player.id != Owner.OWNER_WATER && Global._game_mode != GameModes.GM_EDITOR && !Player.CheckTileOwnership(tile)) {
+		if (Global.gs._current_player.id != Owner.OWNER_WATER && Global._game_mode != GameModes.GM_EDITOR && !Player.CheckTileOwnership(tile)) {
 			if (!(Global._patches.extra_dynamite || Global._cheats.magic_bulldozer.value) || !tile.IsTileOwner(Owner.OWNER_TOWN))
 				return Cmd.CMD_ERROR;
 		}

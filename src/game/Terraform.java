@@ -297,7 +297,7 @@ public class Terraform {
 
 	public static void ShowTerraformToolbar()
 	{
-		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
+		if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR) return;
 		Window.AllocateWindowDescFront(_terraform_desc, 0);
 	}
 	

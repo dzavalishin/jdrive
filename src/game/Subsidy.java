@@ -267,7 +267,7 @@ class Subsidy {
 			modified = true;
 		} else if (age == 2*12-1) {
 			Station st = Station.GetStation(to);
-			if (st.owner == Global._local_player) {
+			if (st.owner == Global.gs._local_player) {
 				pair = SetupSubsidyDecodeParam(true);
 				NewsItem.AddNewsItem(Str.STR_202F_SUBSIDY_WITHDRAWN_SERVICE, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 			}

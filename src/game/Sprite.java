@@ -51,11 +51,11 @@ public class Sprite extends Sprites {
 	}
 
 	public static int PLAYER_SPRITE_COLOR(PlayerID player) {
-		return  (Global._player_colors[player.id] + 0x307) << PALETTE_SPRITE_START;
+		return  (Global.gs._player_colors[player.id] + 0x307) << PALETTE_SPRITE_START;
 	}
 
 	public static int PLAYER_SPRITE_COLOR(int player) {
-		return  (Global._player_colors[player] + 0x307) << PALETTE_SPRITE_START;
+		return  (Global.gs._player_colors[player] + 0x307) << PALETTE_SPRITE_START;
 	}
 	
 	public static int SPRITE_PALETTE(int color) {

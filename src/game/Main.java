@@ -212,7 +212,7 @@ public class Main {
 		}
 
 		Global._pause = 0;
-		Global._local_player = null;
+		Global.gs._local_player = null;
 		Hal.MarkWholeScreenDirty();
 
 		// Play main theme
@@ -527,13 +527,13 @@ public class Main {
 
 		// In a dedicated server, the server does not play
 		if (Global._network_dedicated) {
-			Global._local_player = PlayerID.get( Owner.OWNER_SPECTATOR);
+			Global.gs._local_player = PlayerID.get( Owner.OWNER_SPECTATOR);
 		} else {
 			// Create a single player
 			Player.DoStartupNewPlayer(false);
 
-			Global._local_player = PlayerID.get(0); 
-			Global._current_player = Global._local_player;
+			Global.gs._local_player = PlayerID.get(0); 
+			Global.gs._current_player = Global.gs._local_player;
 			Cmd.DoCommandP(null, (Global._patches.autorenew ? (1 << 15) : 0 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 		}
 
@@ -560,7 +560,7 @@ public class Main {
 		// Startup the game system
 		GenerateWorld.doGenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
 
-		Global._local_player = PlayerID.get(Owner.OWNER_NONE);
+		Global.gs._local_player = PlayerID.get(Owner.OWNER_NONE);
 		Hal.MarkWholeScreenDirty();
 	}
 
@@ -609,8 +609,8 @@ public class Main {
 		Engine.StartupEngines();
 		// TODO StartupDisasters();
 
-		Global._local_player = null;
-		Global._current_player = Global._local_player;
+		Global.gs._local_player = null;
+		Global.gs._current_player = Global.gs._local_player;
 		DoCommandP(0, (Global._patches.autorenew ? 1 << 15 : 0 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
 
 		Global.hal.MarkWholeScreenDirty();
@@ -699,7 +699,7 @@ public class Main {
 				LoadIntroGame();
 				Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			} else {
-				Global._local_player = null;
+				Global.gs._local_player = null;
 				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE); // decrease pause counter (was increased from opening load dialog)
 				/*
 				if (_network_server)
@@ -716,12 +716,12 @@ public class Main {
 
 				GameOptions._opt_ptr = GameOptions._opt;
 
-				Global._local_player = PlayerID.get(Owner.OWNER_NONE);
+				Global.gs._local_player = PlayerID.get(Owner.OWNER_NONE);
 				Global._generating_world = true;
 				// delete all players.
 				for (i = 0; i != Global.MAX_PLAYERS; i++) {
 					Economy.ChangeOwnershipOfPlayerItems( PlayerID.get(i), PlayerID.get(Owner.OWNER_SPECTATOR));
-					Global._players[i].is_active = false;
+					Global.gs._players[i].is_active = false;
 				}
 				Global._generating_world = false;
 				// delete all stations owned by a player
@@ -749,7 +749,7 @@ public class Main {
 		case SM_GENRANDLAND: /* Generate random land within scenario editor */
 			GenerateWorld.doGenerateWorld(2, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
 			// XXX: set date
-			Global._local_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._local_player = PlayerID.get( Owner.OWNER_NONE );
 			Hal.MarkWholeScreenDirty();
 			break;
 		}
@@ -790,8 +790,8 @@ public class Main {
 		} else {
 			// All these actions has to be done from OWNER_NONE
 			//  for multiplayer compatibility
-			PlayerID p =  Global._current_player;
-			Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+			PlayerID p =  Global.gs._current_player;
+			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 			TextEffect.AnimateAnimatedTiles();
 			Global.IncreaseDate();
@@ -803,7 +803,7 @@ public class Main {
 
 			Window.CallWindowTickEvent();
 			NewsItem.NewsLoop();
-			Global._current_player = p;
+			Global.gs._current_player = p;
 		}
 	}
 
@@ -811,8 +811,8 @@ public class Main {
 	{
 		String buf;
 
-		if (Global._patches.keep_all_autosave && Global._local_player.id != Owner.OWNER_SPECTATOR) {
-			final Player p = Global._local_player.GetPlayer();
+		if (Global._patches.keep_all_autosave && Global.gs._local_player.id != Owner.OWNER_SPECTATOR) {
+			final Player p = Global.gs._local_player.GetPlayer();
 			String s;
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
@@ -981,9 +981,7 @@ public class Main {
 	// before savegame version 4, the name of the company determined if it existed
 	static void CheckIsPlayerActive()
 	{
-
-		//FOR_ALL_PLAYERS(p) 
-		for( Player p: Global._players )
+		for( Player p: Global.gs._players )
 		{
 			if (p.name_1 != 0) p.is_active = true;
 		}
@@ -1134,7 +1132,7 @@ public class Main {
 		//  a player does not exist yet. So create one here.
 		// 1 exeption: network-games. Those can have 0 players
 		//   But this exeption is not true for network_servers!
-		if (!Global._players[0].is_active && (!Global._networking || (Global._networking && Global._network_server)))
+		if (!Global.gs._players[0].is_active && (!Global._networking || (Global._networking && Global._network_server)))
 			Player.DoStartupNewPlayer(false);
 
 		Gui.DoZoomInOutWindow(Gui.ZOOM_NONE, Window.getMain()); // update button status
@@ -1264,8 +1262,8 @@ public class Main {
 			UpdateAllWaypointCustomGraphics();
 		}
 		*/
-		//FOR_ALL_PLAYERS(p) 
-		for( Player pp: Global._players )
+ 
+		for( Player pp: Global.gs._players )
 			pp.avail_railtypes = Player.GetPlayerRailtypes(pp.index);
 
 		return true;
@@ -1275,9 +1273,6 @@ public class Main {
 	
 	static void DeterminePaths()
 	{
-		//String s;
-		//String cfg;
-
 		String cwd = null;
 		try {
 			cwd = new java.io.File(".").getCanonicalPath();

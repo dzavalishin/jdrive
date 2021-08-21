@@ -415,7 +415,7 @@ public class Ship {
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) {
 				v.vehstatus |= Vehicle.VS_STOPPED;
-				if (v.owner == Global._local_player) {
+				if (v.owner == Global.gs._local_player) {
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddNewsItem(
 						Str.STR_981C_SHIP_IS_WAITING_IN_DEPOT,
@@ -437,7 +437,7 @@ public class Ship {
 			st.had_vehicle_of_type |= Station.HVOT_SHIP;
 
 			Global.SetDParam(0, st.index);
-			flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+			flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 			NewsItem.AddNewsItem(
 				Str.STR_9833_CITIZENS_CELEBRATE_FIRST,
 				flags,
@@ -895,7 +895,7 @@ public class Ship {
 		/* The ai_new queries the vehicle cost before building the route,
 		 * so we must check against cheaters no sooner than now. --pasky */
 		if (!tile.IsTileDepotType(Global.TRANSPORT_WATER)) return Cmd.CMD_ERROR;
-		if (!tile.IsTileOwner( Global._current_player.id)) return Cmd.CMD_ERROR;
+		if (!tile.IsTileOwner( Global.gs._current_player.id)) return Cmd.CMD_ERROR;
 
 		v = Vehicle.AllocateVehicle(); // TODO can pass type or make subobject for ship
 		if (v == null || /* Order.IsOrderPoolFull() || */
@@ -907,7 +907,7 @@ public class Ship {
 
 			v.unitnumber = unit_num;
 
-			v.owner = Global._current_player;
+			v.owner = Global.gs._current_player;
 			v.tile = tile;
 			x = tile.TileX() * 16 + 8;
 			y = tile.TileY() * 16 + 8;

@@ -205,7 +205,7 @@ public class SignStruct implements IPoolItem
 			ss.str = new StringID(Str.STR_280A_SIGN);
 			ss.x = x;
 			ss.y = y;
-			ss.owner = Global._current_player; // owner of the sign; just eyecandy
+			ss.owner = Global.gs._current_player; // owner of the sign; just eyecandy
 			ss.z = (byte) Landscape.GetSlopeZ(x,y);
 			ss.UpdateSignVirtCoords();
 			ss.MarkSignDirty();
@@ -242,7 +242,7 @@ public class SignStruct implements IPoolItem
 				Global.DeleteName(ss.str);
 				/* Assign the new one */
 				ss.str = str;
-				ss.owner = Global._current_player;
+				ss.owner = Global.gs._current_player;
 
 				/* Update; mark sign dirty twice, because it can either becom longer, or shorter */
 				ss.MarkSignDirty();
@@ -402,7 +402,7 @@ static const SaveLoad _sign_desc[] = {
 			StringSpriteToDraw sstd = ViewPort.AddStringToDraw(sign.getLeft() + 1, sign.getTop() + 1, new StringID(Str.STR_2806), str.id, 0, 0);
 			if (sstd != null) {
 				sstd.width = sw;
-				sstd.color = (owner.id == Owner.OWNER_NONE || owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[owner.id];
+				sstd.color = (owner.id == Owner.OWNER_NONE || owner.id == Owner.OWNER_TOWN)?14:Global.gs._player_colors[owner.id];
 			}
 		}
 	}

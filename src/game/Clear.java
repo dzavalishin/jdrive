@@ -441,7 +441,7 @@ public class Clear extends ClearTables {
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
 		if (tile.IsTileType( TileTypes.MP_UNMOVABLE) && tile.getMap().m5 == 3 &&
-				tile.IsTileOwner(Global._current_player.id))
+				tile.IsTileOwner(Global.gs._current_player.id))
 			return Cmd.return_cmd_error(Str.STR_5807_YOU_ALREADY_OWN_IT);
 
 		cost = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
@@ -516,7 +516,7 @@ public class Clear extends ClearTables {
 		tile = TileIndex.TileVirtXY(x, y);
 
 		if (!tile.IsTileType( TileTypes.MP_UNMOVABLE) || tile.getMap().m5 != 3) return Cmd.CMD_ERROR;
-		if (!tile.CheckTileOwnership() && Global._current_player.id != Owner.OWNER_WATER) return Cmd.CMD_ERROR;
+		if (!tile.CheckTileOwnership() && Global.gs._current_player.id != Owner.OWNER_WATER) return Cmd.CMD_ERROR;
 
 
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
