@@ -204,20 +204,17 @@ public class NewsItem {
 	static public void AddNewsItem(StringID string, int flags, int data_a, int data_b)
 	{
 		AddValidatedNewsItem(string.id, flags, data_a, data_b, null);
-		//_news_items[_latest_news].isValid = validation;
 	}
 
 	static public void AddNewsItem(int string, int flags, int data_a, int data_b)
 	{
 		AddValidatedNewsItem(string, flags, data_a, data_b, null);
-		//_news_items[_latest_news].isValid = validation;
 	}
 
 
 
 	static void InitNewsItemStructs()
 	{
-		//memset(_news_items, 0, sizeof(_news_items));
 		_current_news = INVALID_NEWS;
 		_oldest_news = 0;
 		_latest_news = INVALID_NEWS;
@@ -276,7 +273,7 @@ public class NewsItem {
 					w.DrawWindowViewport();
 					Global._display_opt = bk;
 
-					/* Shade the viewport into gray, or color*/
+					/* Shade the viewport into gray, or color */
 					vp = w.getViewport();
 					Gfx.GfxFillRect(vp.getLeft() - w.getLeft(), vp.getTop() - w.getTop(),
 							vp.getLeft() - w.getLeft() + vp.getWidth() - 1, vp.getTop() - w.getTop() + vp.getHeight() - 1,

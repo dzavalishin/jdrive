@@ -610,9 +610,11 @@ public class Gfx extends PaletteTabs
 			_stringwidth_base = _stringwidth_out;
 
 			for(;;) {
-				if(sp >= sc.length)
+				if(sp >= sc.length) {
+					_stringwidth_base = 0;
 					return;
-
+				}
+				
 				c = sc[sp++]; // *src++;
 				if (c == 0) {
 					y += mt;

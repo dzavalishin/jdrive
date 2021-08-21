@@ -39,7 +39,8 @@ public class MainWindow extends JPanel implements ActionListener
 
 	public static final int WIDTH = 1280;
 	//public static final int HEIGHT = 1024;
-	public static final int HEIGHT = 960;
+	//public static final int HEIGHT = 960;
+	public static final int HEIGHT = 800;
 
 
 	private Timer timer = new Timer(TICK_TIME, this);	
