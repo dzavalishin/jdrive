@@ -24,10 +24,10 @@ public class TileHighlightData {
 	int new_drawstyle;  // only used in UpdateTileSelection() to as a buffer to compare if there was a change between old and new
 	int next_drawstyle; // queued, but not yet drawn style
 
-	int place_mode;
+	public int place_mode;
 	boolean make_square_red;
 
-	int window_class;
+	public int window_class;
 	int window_number;
 
 	int userdata;

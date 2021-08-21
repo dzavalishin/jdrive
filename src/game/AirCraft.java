@@ -2729,7 +2729,7 @@ public class AirCraft extends AirCraftTables {
 			case 2: /* rename */
 				v = Vehicle.GetVehicle(w.window_number);
 				Global.SetDParam(0, v.unitnumber.id);
-				MiscGui.ShowQueryString( new StringID(v.string_id), new StringID(Str.STR_A030_NAME_AIRCRAFT), 31, 150, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID(v.string_id), new StringID(Str.STR_A030_NAME_AIRCRAFT), 31, 150, w.getWindowClass(), w.window_number);
 				break;
 			/*	
 			case 5: // increase int 

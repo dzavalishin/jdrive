@@ -1,7 +1,7 @@
 package game.xui;
 
 public class WindowMessage {
-	int msg;
-	int wparam;
-	int lparam;
+	public int msg;
+	public int wparam;
+	public int lparam;
 }

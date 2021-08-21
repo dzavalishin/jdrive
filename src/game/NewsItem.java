@@ -247,6 +247,7 @@ public class NewsItem {
 		switch (e.event) {
 		case WE_CREATE: { /* If chatbar is open at creation time, we need to go above it */
 			final Window w1 = Window.FindWindowById(Window.WC_SEND_NETWORK_MSG, 0);
+			// TODO [dz] what the hell is message?
 			w.message = new WindowMessage(); // [dz]
 			w.message.msg = (w1 != null) ? w1.getHeight() : 0;
 		} break;
@@ -276,7 +277,7 @@ public class NewsItem {
 					Global._display_opt = bk;
 
 					/* Shade the viewport into gray, or color*/
-					vp = w.viewport;
+					vp = w.getViewport();
 					Gfx.GfxFillRect(vp.getLeft() - w.getLeft(), vp.getTop() - w.getTop(),
 							vp.getLeft() - w.getLeft() + vp.getWidth() - 1, vp.getTop() - w.getTop() + vp.getHeight() - 1,
 							(0 !=(ni.flags & NF_INCOLOR) ? 0x322 : 0x323) | Sprite.USE_COLORTABLE
@@ -350,11 +351,11 @@ public class NewsItem {
 			int y = Math.max(w.getTop() - 4, Hal._screen.height - w.getHeight() - 12 - w.message.msg);
 			if (y == w.getTop()) return;
 
-			if (w.viewport != null)
-				w.viewport.top += y - w.getTop();
+			if (w.getViewport() != null)
+				w.getViewport().top += y - w.getTop();
 
 			diff = Math.abs(w.getTop() - y);
-			w.top = y;
+			w.setTop(y);
 
 			Gfx.SetDirtyBlocks(w.getLeft(), w.getTop() - diff, w.getLeft() + w.getWidth(), w.getTop() + w.getHeight());
 		} break;
@@ -557,7 +558,7 @@ public class NewsItem {
 		}
 		}
 		w.as_news_d().ni = _news_items[_forced_news == INVALID_NEWS ? _current_news : _forced_news];
-		w.flags4 |= Window.WF_DISABLE_VP_SCROLL;
+		w.disableVpScroll();
 	}
 
 	// show news item in the ticker
@@ -947,7 +948,8 @@ public class NewsItem {
 
 					//w.as_def_d().data_1 |= (1 << element);
 					((def_d)w.custom).data_1 |= (1 << element);
-					w.flags4 |= 5 << Window.WF_TIMEOUT_SHL; // XXX - setup unclick (fake widget)
+					//w.flags4 |= 5 << Window.WF_TIMEOUT_SHL; // XXX - setup unclick (fake widget)
+					w.setTimeout(5);
 					w.SetWindowDirty();
 				}
 				break;
@@ -1075,6 +1077,11 @@ public class NewsItem {
 			Global.COPY_IN_DPARAM(0, params, params.length);
 			return string_id;
 		}
+	}
+
+
+	public StringID getString_id() {
+		return string_id;
 	}
 
 

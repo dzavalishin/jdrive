@@ -1355,7 +1355,7 @@ public class Engine extends EngineTables implements Serializable
 		
 		int width = w.getWidth();
 		
-		engine = EngineID.get( w.as_news_d().ni.string_id.id ); // TODO add field of EngineID type?
+		engine = EngineID.get( w.as_news_d().ni.getString_id().id ); // TODO add field of EngineID type?
 		Global.SetDParam(0, GetEngineCategoryName(engine.id));
 		Gfx.DrawStringMultiCenter(width >> 1, 20, Str.STR_8859_NEW_NOW_AVAILABLE, width - 2);
 
@@ -1373,7 +1373,7 @@ public class Engine extends EngineTables implements Serializable
 	static int GetNewsStringNewTrainAvail(final NewsItem ni)
 	{
 		//EngineID
-		int engine = ni.string_id.id;
+		int engine = ni.getString_id().id;
 		Global.SetDParam(0, Str.STR_8859_NEW_NOW_AVAILABLE);
 		Global.SetDParam(1, GetEngineCategoryName(engine));
 		Global.SetDParam(2, GetCustomEngineName(engine).id);
@@ -1401,7 +1401,7 @@ public class Engine extends EngineTables implements Serializable
 
 		int width = w.getWidth();
 
-		engine = w.as_news_d().ni.string_id.id;
+		engine = w.as_news_d().ni.getString_id().id;
 
 		Gfx.DrawStringMultiCenter(width >> 1, 20, Str.STR_A02C_NEW_AIRCRAFT_NOW_AVAILABLE, width - 2);
 		Gfx.GfxFillRect(25, 56, width - 25, w.getHeight() - 2, 10);
@@ -1417,7 +1417,7 @@ public class Engine extends EngineTables implements Serializable
 	static int GetNewsStringNewAircraftAvail(final NewsItem ni)
 	{
 		//EngineID 
-		int engine = ni.string_id.id;
+		int engine = ni.getString_id().id;
 		Global.SetDParam(0, Str.STR_A02C_NEW_AIRCRAFT_NOW_AVAILABLE);
 		Global.SetDParam(1, GetCustomEngineName(engine).id);
 		return Str.STR_02B6;
@@ -1446,7 +1446,7 @@ public class Engine extends EngineTables implements Serializable
 
 		int width = w.getWidth();
 
-		engine = w.as_news_d().ni.string_id.id;
+		engine = w.as_news_d().ni.getString_id().id;
 		Gfx.DrawStringMultiCenter(width >> 1, 20, Str.STR_9028_NEW_ROAD_VEHICLE_NOW_AVAILABLE, width - 2);
 		Gfx.GfxFillRect(25, 56, width - 25, w.getHeight() - 2, 10);
 
@@ -1461,7 +1461,7 @@ public class Engine extends EngineTables implements Serializable
 	static /*StringID*/ int GetNewsStringNewRoadVehAvail(final NewsItem ni)
 	{
 		//EngineID 
-		int engine = ni.string_id.id;
+		int engine = ni.getString_id().id;
 		Global.SetDParam(0, Str.STR_9028_NEW_ROAD_VEHICLE_NOW_AVAILABLE);
 		Global.SetDParam(1, GetCustomEngineName(engine).id);
 		return Str.STR_02B6;
@@ -1486,7 +1486,7 @@ public class Engine extends EngineTables implements Serializable
 		NewsItem.DrawNewsBorder(w);
 		int width = w.getWidth();
 
-		engine = w.as_news_d().ni.string_id.id;
+		engine = w.as_news_d().ni.getString_id().id;
 
 		Gfx.DrawStringMultiCenter(width >> 1, 20, Str.STR_982C_NEW_SHIP_NOW_AVAILABLE, width - 2);
 		Gfx.GfxFillRect(25, 56, width - 25, w.getHeight() - 2, 10);
@@ -1502,7 +1502,7 @@ public class Engine extends EngineTables implements Serializable
 	static int GetNewsStringNewShipAvail(final NewsItem ni)
 	{
 		//EngineID 
-		int engine = ni.string_id.id;
+		int engine = ni.getString_id().id;
 		Global.SetDParam(0, Str.STR_982C_NEW_SHIP_NOW_AVAILABLE);
 		Global.SetDParam(1, GetCustomEngineName(engine).id);
 		return Str.STR_02B6;

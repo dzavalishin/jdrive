@@ -993,7 +993,7 @@ public class Gui
 		}
 
 		assert(w != null);
-		vp = w.viewport;
+		vp = w.getViewport();
 
 		if (how == ZOOM_IN) {
 			if (vp.zoom == 0) return false;
@@ -1188,7 +1188,7 @@ public class Gui
 
 		assert(w != null);
 
-		vp = w.viewport;
+		vp = w.getViewport();
 
 		if (Global._game_mode != GameModes.GM_MENU) {
 			if ((in && vp.zoom == 0) || (!in && vp.zoom == 2))
@@ -2387,7 +2387,7 @@ public class Gui
 				Gfx.DrawStringCentered(320, 1,	Str.STR_032F_AUTOSAVE, 0);
 			} else if (Global._pause != 0) {
 				Gfx.DrawStringCentered(320, 1,	Str.STR_0319_PAUSED, 0);
-			} else if (w.as_def_d().data_1 > -1280 && Window.FindWindowById(Window.WC_NEWS_WINDOW,0) == null && Global._statusbar_news_item.string_id != null) {
+			} else if (w.as_def_d().data_1 > -1280 && Window.FindWindowById(Window.WC_NEWS_WINDOW,0) == null && Global._statusbar_news_item.getString_id() != null) {
 				// Draw the scrolling news text
 				if (!DrawScrollingStatusText(Global._statusbar_news_item, w.as_def_d().data_1))
 					w.as_def_d().data_1 = -1280;

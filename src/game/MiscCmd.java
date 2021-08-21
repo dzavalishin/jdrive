@@ -78,7 +78,7 @@ public class MiscCmd {
 
 			p.money64 += loan;
 			p.current_loan += loan;
-			p.UpdatePlayerMoney32();
+			//p.UpdatePlayerMoney32();
 			p.InvalidatePlayerWindows();
 		}
 
@@ -93,7 +93,7 @@ public class MiscCmd {
 	static int CmdDecreaseLoan(int x, int y, int flags, int p1, int p2)
 	{
 		Player p;
-		int loan;
+		long loan;
 
 		p = Player.GetPlayer(Global._current_player);
 
@@ -104,22 +104,22 @@ public class MiscCmd {
 		/* p2 is true while CTRL is pressed (repay all possible loan, or max money you have)
 		 * Repay any loan in chunks of 10.000 pounds */
 		if (p2 != 0) {
-			loan = Math.min(loan, p.player_money);
+			loan = Math.min(loan, p.getMoney());
 			loan = Math.max(loan, 10000);
 			loan -= loan % 10000;
 		} else {
 			loan = Math.min(loan, (Global._current_player.IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000);
 		}
 
-		if (p.player_money < loan) {
-			Global.SetDParam(0, loan);
+		if (p.getMoney() < loan) {
+			Global.SetDParam(0, (int)loan); // TODO long -> int
 			return Cmd.return_cmd_error(Str.STR_702E_REQUIRED);
 		}
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			p.money64 -= loan;
 			p.current_loan -= loan;
-			p.UpdatePlayerMoney32();
+			//p.UpdatePlayerMoney32();
 			p.InvalidatePlayerWindows();
 		}
 		return 0;

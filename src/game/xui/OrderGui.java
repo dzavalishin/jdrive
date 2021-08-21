@@ -25,7 +25,7 @@ public class OrderGui {
 		final Vehicle  v = Vehicle.GetVehicle(w.window_number);
 		int num = w.as_order_d().sel;
 
-		return (num >= 0 && num < v.num_orders) ? num : v.num_orders;
+		return (num >= 0 && num < v.getNum_orders()) ? num : v.getNum_orders();
 	}
 
 	static /*StringID*/ int StationOrderStrings[] = {
@@ -73,13 +73,13 @@ public class OrderGui {
 
 		shared_orders = v.IsOrderListShared();
 
-		if ((int)v.num_orders + (shared_orders?1:0) <= (int)w.as_order_d().sel)
+		if ((int)v.getNum_orders() + (shared_orders?1:0) <= (int)w.as_order_d().sel)
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 5); /* delete */
 
-		if (v.num_orders == 0)
+		if (v.getNum_orders() == 0)
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 4); /* skip */
 
-		MiscGui.SetVScrollCount(w, v.num_orders + 1);
+		MiscGui.SetVScrollCount(w, v.getNum_orders() + 1);
 
 		sel = OrderGetSel(w);
 		Global.SetDParam(2, Str.STR_8827_FULL_LOAD);
@@ -115,7 +115,7 @@ public class OrderGui {
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 10); /* transfer */
 		}
 
-		Global.SetDParam(0, v.string_id);
+		Global.SetDParam(0, v.getString_id());
 		Global.SetDParam(1, v.getUnitnumber().id);
 		w.DrawWindowWidgets();
 
@@ -124,7 +124,7 @@ public class OrderGui {
 		i = w.vscroll.pos;
 		order = v.GetVehicleOrder(i);
 		while (order != null) {
-			int str = (v.cur_order_index == i) ? Str.STR_8805 : Str.STR_8804;
+			int str = (v.getCur_order_index() == i) ? Str.STR_8805 : Str.STR_8804;
 
 			if (i - w.vscroll.pos < w.vscroll.getCap()) {
 				Global.SetDParam(1, 6);
@@ -319,7 +319,7 @@ public class OrderGui {
 
 		// v is vehicle getting orders. Only copy/clone orders if vehicle doesn't have any orders yet
 		// obviously if you press CTRL on a non-empty orders vehicle you know what you are doing
-		if (v.num_orders != 0 && !Global._ctrl_pressed) return false;
+		if (v.getNum_orders() != 0 && !Global._ctrl_pressed) return false;
 
 		if (Cmd.DoCommandP(v.getTile(), v.index | (u.index << 16), Global._ctrl_pressed ? 0 : 1, null,
 				Global._ctrl_pressed ? Cmd.CMD_CLONE_ORDER | Cmd.CMD_MSG(Str.STR_CANT_SHARE_ORDER_LIST) : Cmd.CMD_CLONE_ORDER | Cmd.CMD_MSG(Str.STR_CANT_COPY_ORDER_LIST))) {
@@ -429,7 +429,7 @@ public class OrderGui {
 
 				sel += w.vscroll.pos;
 
-				if (Global._ctrl_pressed && sel < v.num_orders) 
+				if (Global._ctrl_pressed && sel < v.getNum_orders()) 
 				{
 					final Order ord = v.GetVehicleOrder(sel);
 					TileIndex xy = ord.getTargetXy();
@@ -496,7 +496,7 @@ public class OrderGui {
 			int s = OrderGetSel(w);
 
 			if (e.widget != 8) break;
-			if (s == v.num_orders || v.GetVehicleOrder(s).getType() != Order.OT_GOTO_DEPOT) {
+			if (s == v.getNum_orders() || v.GetVehicleOrder(s).getType() != Order.OT_GOTO_DEPOT) {
 				MiscGui.GuiShowTooltips(Str.STR_8857_MAKE_THE_HIGHLIGHTED_ORDER);
 			} else {
 				MiscGui.GuiShowTooltips(Str.STR_SERVICE_HINT);

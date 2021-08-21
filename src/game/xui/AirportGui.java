@@ -267,7 +267,7 @@ public class AirportGui
 		Window.AllocateWindowDesc(_build_airport_desc);
 	}
 
-	static void InitializeAirportGui()
+	public static void InitializeAirportGui()
 	{
 		_selected_airport_type = Airport.AT_SMALL;
 		Depot._last_built_aircraft_depot_tile = null;

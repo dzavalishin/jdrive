@@ -528,7 +528,7 @@ public class SettingsGui extends SettingsTables
 			SettingsGui::GameDifficultyWndProc
 	);
 
-	static void ShowGameDifficulty()
+	public static void ShowGameDifficulty()
 	{
 		Window.DeleteWindowById(Window.WC_GAME_OPTIONS, 0);
 		/* Copy current settings (ingame or in intro) to temporary holding place

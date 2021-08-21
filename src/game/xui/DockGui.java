@@ -363,7 +363,7 @@ public class DockGui
 	}
 
 
-	static void InitializeDockGui()
+	public static void InitializeDockGui()
 	{
 		_ship_depot_direction = 0;
 	}

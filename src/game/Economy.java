@@ -569,7 +569,7 @@ public class Economy extends EconomeTables
 
 		NewsItem.DrawNewsBorder(w);
 
-		p = Player.GetPlayer(w.as_news_d().ni.string_id.id & 15);
+		p = Player.GetPlayer(w.as_news_d().ni.getString_id().id & 15);
 		Player.DrawPlayerFace(p.face, p.player_color, 2, 23);
 		Gfx.GfxFillRect(3, 23, 3+91, 23+118, 0x323 | Sprite.USE_COLORTABLE);
 
@@ -578,7 +578,7 @@ public class Economy extends EconomeTables
 
 		Gfx.DrawStringMultiCenter(49, 148, Str.STR_7058_PRESIDENT, 94);
 
-		switch(w.as_news_d().ni.string_id.id >> 4) {
+		switch(w.as_news_d().ni.getString_id().id >> 4) {
 		case 1:
 			Gfx.DrawStringCentered(w.getWidth()>>1, 1, Str.STR_7056_TRANSPORT_COMPANY_IN_TROUBLE, 0);
 
@@ -639,9 +639,9 @@ public class Economy extends EconomeTables
 
 	static int GetNewsStringBankrupcy(final NewsItem ni)
 	{
-		final Player p = PlayerID.get(ni.string_id.id & 0xF).GetPlayer();
+		final Player p = PlayerID.get(ni.getString_id().id & 0xF).GetPlayer();
 
-		switch (ni.string_id.id >> 4) {
+		switch (ni.getString_id().id >> 4) {
 		case 1:
 			Global.SetDParam(0, Str.STR_7056_TRANSPORT_COMPANY_IN_TROUBLE);
 			Global.SetDParam(1, Str.STR_7057_WILL_BE_SOLD_OFF_OR_DECLARED);

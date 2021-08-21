@@ -1626,18 +1626,11 @@ final Chunk Handler _player_chunk_handlers[] = {
 	public TileIndex getLocation_of_house() {		return location_of_house;	}
 	public int getInaugurated_year() {		return inaugurated_year;	}
 
-	public int getBankrupt_value() {
-		return bankrupt_value;
-	}
+	public int getBankrupt_value() {		return bankrupt_value;	}
+	public long [][] getYearly_expenses() {		return yearly_expenses;	}
+	public boolean isRenew_keep_length() {		return renew_keep_length;	}
 
-	public long [][] getYearly_expenses() {
-		return yearly_expenses;
-	}
-
-	public boolean isRenew_keep_length() {
-		return renew_keep_length;
-	}
-
+	public void setMoney(long m) { money64 = m; }
 
 
 

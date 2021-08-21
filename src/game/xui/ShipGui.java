@@ -87,7 +87,7 @@ public class ShipGui
 		case WE_PAINT: {
 			final Vehicle v = Vehicle.GetVehicle(w.window_number);
 
-			Global.SetDParam(0, v.string_id);
+			Global.SetDParam(0, v.getString_id());
 			Global.SetDParam(1, v.getUnitnumber().id);
 			w.DrawWindowWidgets();
 
@@ -172,7 +172,7 @@ public class ShipGui
 			if (0==Global._patches.servint_ships) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
-			Global.SetDParam(0, v.string_id);
+			Global.SetDParam(0, v.getString_id());
 			Global.SetDParam(1, v.getUnitnumber().id);
 			w.DrawWindowWidgets();
 
@@ -182,8 +182,8 @@ public class ShipGui
 
 				Global.SetDParam(1, year);
 
-				Global.SetDParam(0, (v.getAge() + 365 < v.max_age) ? Str.STR_AGE : Str.STR_AGE_RED);
-				Global.SetDParam(2, v.max_age / 366);
+				Global.SetDParam(0, (v.getAge() + 365 < v.getMax_age()) ? Str.STR_AGE : Str.STR_AGE_RED);
+				Global.SetDParam(2, v.getMax_age() / 366);
 				Global.SetDParam(3, Engine.ShipVehInfo(v.getEngine_type().id).running_cost * Global._price.ship_running >> 8);
 				Gfx.DrawString(2, 15, Str.STR_9812_AGE_RUNNING_COST_YR, 0);
 			}
@@ -203,14 +203,14 @@ public class ShipGui
 
 			/* Draw breakdown & reliability */
 			{
-				Global.SetDParam(0, v.reliability * 100 >> 16);
-				Global.SetDParam(1, v.breakdowns_since_last_service);
+				Global.SetDParam(0, v.getReliability() * 100 >> 16);
+				Global.SetDParam(1, v.getBreakdowns_since_last_service());
 				Gfx.DrawString(2, 45, Str.STR_9815_RELIABILITY_BREAKDOWNS, 0);
 			}
 
 			/* Draw service interval text */
 			{
-				Global.SetDParam(0, v.service_interval);
+				Global.SetDParam(0, v.getService_interval());
 				Global.SetDParam(1, v.date_of_last_service);
 				Gfx.DrawString(13, 90, Global._patches.servint_ispercent?Str.STR_SERVICING_INTERVAL_PERCENT:Str.STR_883C_SERVICING_INTERVAL_DAYS, 0);
 			}
@@ -219,7 +219,7 @@ public class ShipGui
 
 			Global.SetDParam(1, 1920 + v.getBuild_year());
 			Global.SetDParam(0, Engine.GetCustomEngineName(v.getEngine_type().id).id);
-			Global.SetDParam(2, v.value);
+			Global.SetDParam(2, v.getValue());
 			Gfx.DrawString(74, 57, Str.STR_9816_BUILT_VALUE, 0);
 
 			Global.SetDParam(0, Global._cargoc.names_long[v.getCargo_type()]);
@@ -227,9 +227,9 @@ public class ShipGui
 			Gfx.DrawString(74, 67, Str.STR_9817_CAPACITY, 0);
 
 			str = Str.STR_8812_EMPTY;
-			if (v.cargo_count != 0) {
+			if (v.getCargo_count() != 0) {
 				Global.SetDParam(0, v.getCargo_type());
-				Global.SetDParam(1, v.cargo_count);
+				Global.SetDParam(1, v.getCargo_count());
 				Global.SetDParam(2, v.getCargo_source());
 				str = Str.STR_8813_FROM;
 			}
@@ -243,7 +243,7 @@ public class ShipGui
 			case 2: /* rename */
 				v = Vehicle.GetVehicle(w.window_number);
 				Global.SetDParam(0, v.getUnitnumber().id);
-				MiscGui.ShowQueryString( new StringID(v.string_id), new StringID(Str.STR_9831_NAME_SHIP), 31, 150, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID(v.getString_id()), new StringID(Str.STR_9831_NAME_SHIP), 31, 150, w.window_class, w.window_number);
 				break;
 			case 5: /* increase int */
 			case 6: /* decrease int */
@@ -254,8 +254,8 @@ public class ShipGui
 
 					v = Vehicle.GetVehicle(w.window_number);
 
-				mod = Depot.GetServiceIntervalClamped(mod + v.service_interval);
-				if (mod == v.service_interval) return;
+				mod = Depot.GetServiceIntervalClamped(mod + v.getService_interval());
+				if (mod == v.getService_interval()) return;
 
 				Cmd.DoCommandP(v.getTile(), v.index, mod, null, Cmd.CMD_CHANGE_SHIP_SERVICE_INT | Cmd.CMD_MSG(Str.STR_018A_CAN_T_CHANGE_SERVICING));
 				break;
@@ -502,7 +502,7 @@ public class ShipGui
 			w.disabled_state = disabled;
 
 			/* draw widgets & caption */
-			Global.SetDParam(0, v.string_id);
+			Global.SetDParam(0, v.getString_id());
 			Global.SetDParam(1, v.getUnitnumber().id);
 			w.DrawWindowWidgets();
 
@@ -512,17 +512,17 @@ public class ShipGui
 				str = Str.STR_8861_STOPPED;
 			} else {
 				int vehicle_speed = Global._patches.vehicle_speed ? 1 : 0;
-				switch (v.current_order.type) {
+				switch (v.current_order.getType()) {
 				case Order.OT_GOTO_STATION: {
-					Global.SetDParam(0, v.current_order.station);
-					Global.SetDParam(1, v.cur_speed * 10 >> 5);
+					Global.SetDParam(0, v.current_order.getStation());
+					Global.SetDParam(1, v.getCur_speed() * 10 >> 5);
 					str = Str.STR_HEADING_FOR_STATION + vehicle_speed;
 				} break;
 
 				case Order.OT_GOTO_DEPOT: {
-					Depot depot = Depot.GetDepot(v.current_order.station);
-					Global.SetDParam(0, depot.town_index);
-					Global.SetDParam(1, v.cur_speed * 10 >> 5);
+					Depot depot = Depot.GetDepot(v.current_order.getStation());
+					Global.SetDParam(0, depot.getTownIndex());
+					Global.SetDParam(1, v.getCur_speed() * 10 >> 5);
 					str = Str.STR_HEADING_FOR_SHIP_DEPOT + vehicle_speed;
 				} break;
 
@@ -532,9 +532,9 @@ public class ShipGui
 					break;
 
 				default:
-					if (v.num_orders == 0) {
+					if (v.getNum_orders() == 0) {
 						str = Str.STR_NO_ORDERS + vehicle_speed;
-						Global.SetDParam(0, v.cur_speed * 10 >> 5);
+						Global.SetDParam(0, v.getCur_speed() * 10 >> 5);
 					} else
 						str = Str.STR_EMPTY;
 					break;
@@ -681,7 +681,7 @@ public class ShipGui
 				DrawShipImage(v, x[0]+19, y[0], w.as_traindepot_d().sel);
 
 				Global.SetDParam(0, v.getUnitnumber().id);
-				Gfx.DrawString(x[0], y[0]+2, (int)(v.max_age-366) >= v.getAge() ? Str.STR_00E2 : Str.STR_00E3, 0);
+				Gfx.DrawString(x[0], y[0]+2, (int)(v.getMax_age()-366) >= v.getAge() ? Str.STR_00E2 : Str.STR_00E3, 0);
 
 				Gfx.DrawSprite(v.isStopped() ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x[0], y[0] + 9);
 
@@ -945,7 +945,7 @@ public class ShipGui
 		//final Order order;
 		int sel, i = 0;
 
-		sel = v.cur_order_index;
+		sel = v.getCur_order_index();
 
 		//FOR_VEHICLE_ORDERS(v, order) 
 		//v.forEachOrder( (order) ->
@@ -1067,15 +1067,15 @@ public class ShipGui
 				if (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_WATER) && v.isHidden())
 					str = Str.STR_021F;
 				else
-					str = v.getAge() > v.max_age - 366 ? Str.STR_00E3 : Str.STR_00E2;
+					str = v.getAge() > v.getMax_age() - 366 ? Str.STR_00E3 : Str.STR_00E2;
 					Gfx.DrawString(x, y + 2, str, 0);
 
 					Global.SetDParam(0, v.getProfit_this_year());
 					Global.SetDParam(1, v.getProfit_last_year());
 					Gfx.DrawString(x + 12, y + 28, Str.STR_0198_PROFIT_THIS_YEAR_LAST_YEAR, 0);
 
-					if (v.string_id != Str.STR_SV_SHIP_NAME) {
-						Global.SetDParam(0, v.string_id);
+					if (v.getString_id() != Str.STR_SV_SHIP_NAME) {
+						Global.SetDParam(0, v.getString_id());
 						Gfx.DrawString(x + 12, y, Str.STR_01AB, 0);
 					}
 

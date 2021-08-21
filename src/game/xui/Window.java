@@ -52,7 +52,7 @@ public class Window extends WindowConstants
 	List<Widget> widget;
 	int desc_flags;
 
-	WindowMessage message;// = new WindowMessage(); // used 
+	public WindowMessage message;// = new WindowMessage(); // used 
 	//byte custom[WINDOW_CUSTOM_SIZE];
 	//byte custom[];
 	public AbstractWinCustom custom; // TODO replace it all with subclasses
@@ -3127,6 +3127,7 @@ public class Window extends WindowConstants
 		flags4 |= Window.WF_DISABLE_VP_SCROLL;		
 	}
 
+	// TODO & TIMEOUT_BITS or set separate field
 	public void setTimeout(int i) { flags4 |= (i << Window.WF_TIMEOUT_SHL); }
 
 	public BiConsumer<Window, WindowEvent> getWndproc() {
@@ -3161,6 +3162,14 @@ public class Window extends WindowConstants
 		// TODO XXX vp.zoom = _saved_scrollpos_zoom;
 		vp.virtual_width = vp.width << vp.zoom;
 		vp.virtual_height = vp.height << vp.zoom;
+	}
+
+	public void setTop(int top) {
+		this.top = top;
+	}
+
+	public ViewPort getViewport() {
+		return viewport;
 	}
 
 

@@ -244,7 +244,8 @@ public class GRFFile
 			for (i = 0; i < numinfo; i++) {
 				int power = bufp.grf_load_word();
 
-				if(0 != (rvi[e+i].flags & Engine.RVI_MULTIHEAD) )
+				//if(0 != (rvi[e+i].flags & Engine.RVI_MULTIHEAD) )
+				if( rvi[e+i].isMulttihead() )
 					power /= 2;
 
 				rvi[e+i].power = power;
@@ -283,11 +284,11 @@ public class GRFFile
 				byte dual = bufp.grf_load_byte();
 
 				if (dual != 0) {
-					if (0==(rvi[e+i].flags & Engine.RVI_MULTIHEAD)) // adjust power if needed
+					if (!(rvi[e+i].isMulttihead())) // adjust power if needed
 						rvi[e+i].power /= 2;
 					rvi[e+i].flags |= Engine.RVI_MULTIHEAD;
 				} else {
-					if(0 != (rvi[e+i].flags & Engine.RVI_MULTIHEAD) ) // adjust power if needed
+					if(rvi[e+i].isMulttihead() ) // adjust power if needed
 						rvi[e+i].power *= 2;
 					rvi[e+i].flags &= ~Engine.RVI_MULTIHEAD;
 				}
@@ -904,7 +905,7 @@ public class GRFFile
 					DrawTileSprites dts = stat.renderdata[t];
 					final DrawTileSprites sdts = srcstat.renderdata[t];
 					//final DrawTileSeqStruct  sdtss = sdts.seq;
-					int seq_count = 0;
+					//int seq_count = 0;
 
 					dts.ground_sprite = sdts.ground_sprite;
 					if (0 == dts.ground_sprite) {
@@ -2531,7 +2532,7 @@ public class GRFFile
 	 */
 	static void ResetNewGRFData()
 	{
-		int i;
+		//int i;
 		/*
 		// Copy/reset original engine info data
 		memcpy(&_engine_info, &orig_engine_info, sizeof(orig_engine_info));
@@ -2633,7 +2634,7 @@ public class GRFFile
 				Engine engineInfo = Engine.GetEngine(engine);
 				RailVehicleInfo railVehInfo = Engine.RailVehInfo(engine);
 				if (xor_mask == 0 
-						&& !(engineInfo.getType() == Vehicle.VEH_Train && (railVehInfo.capacity == 0 || 0 != (railVehInfo.flags & Engine.RVI_WAGON) )))
+						&& !(engineInfo.getType() == Vehicle.VEH_Train && (railVehInfo.capacity == 0 || railVehInfo.isWagon() )))
 					xor_mask = Engine._default_refitmasks[engineInfo.getType() - Vehicle.VEH_Train];
 			}
 			Global._engine_info[engine].refit_mask = ((mask & ~not_mask) ^ xor_mask) & Engine._landscape_global_cargo_mask[GameOptions._opt.landscape];

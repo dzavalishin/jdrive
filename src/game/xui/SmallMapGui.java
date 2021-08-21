@@ -447,7 +447,7 @@ public class SmallMapGui extends SmallMapGuiTables
 			Point pt;
 
 			// Find main viewport.
-			vp = Window.FindWindowById(Window.WC_MAIN_WINDOW,0).viewport;
+			vp = Window.FindWindowById(Window.WC_MAIN_WINDOW,0).getViewport();
 
 			pt = Point.RemapCoords(w.as_smallmap_d().scroll_x, w.as_smallmap_d().scroll_y, 0);
 
@@ -581,8 +581,8 @@ public class SmallMapGui extends SmallMapGuiTables
 				w2 = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 
 				pt = Point.RemapCoords(w.as_smallmap_d().scroll_x, w.as_smallmap_d().scroll_y, 0);
-				w2.as_vp_d().scrollpos_x = pt.x + ((Hal._cursor.pos.x - w.left + 2) << 4) - (w2.viewport.virtual_width >> 1);
-				w2.as_vp_d().scrollpos_y = pt.y + ((Hal._cursor.pos.y - w.top - 16) << 4) - (w2.viewport.virtual_height >> 1);
+				w2.as_vp_d().scrollpos_x = pt.x + ((Hal._cursor.pos.x - w.left + 2) << 4) - (w2.getViewport().virtual_width >> 1);
+				w2.as_vp_d().scrollpos_y = pt.y + ((Hal._cursor.pos.y - w.top - 16) << 4) - (w2.getViewport().virtual_height >> 1);
 			} break;
 
 			case 5: /* Show land contours */
@@ -648,7 +648,7 @@ public class SmallMapGui extends SmallMapGuiTables
 			w.resize.width = 350;
 			w.resize.height = 250;
 
-			vp = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0).viewport;
+			vp = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0).getViewport();
 
 			x =  (((vp.virtual_width - (220*32)) / 2) + vp.virtual_left) / 4;
 			y = ((((vp.virtual_height- (120*32)) / 2) + vp.virtual_top ) / 2) - 32;
@@ -708,16 +708,16 @@ public class SmallMapGui extends SmallMapGuiTables
 				int y = w.as_vp_d().scrollpos_y;
 
 				// set this view to same location. Based on the center, adjusting for zoom
-				w2.as_vp_d().scrollpos_x =  x - (w2.viewport.virtual_width -  w.viewport.virtual_width) / 2;
-				w2.as_vp_d().scrollpos_y =  y - (w2.viewport.virtual_height - w.viewport.virtual_height) / 2;
+				w2.as_vp_d().scrollpos_x =  x - (w2.getViewport().virtual_width -  w.getViewport().virtual_width) / 2;
+				w2.as_vp_d().scrollpos_y =  y - (w2.getViewport().virtual_height - w.getViewport().virtual_height) / 2;
 			} break;
 			case 8: { /* inverse location button (move this view to same spot as main view) 'Copy Location' */
 				final Window  w2 = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 				int x = w2.as_vp_d().scrollpos_x;
 				int y = w2.as_vp_d().scrollpos_y;
 
-				w.as_vp_d().scrollpos_x =  x + (w2.viewport.virtual_width -  w.viewport.virtual_width) / 2;
-				w.as_vp_d().scrollpos_y =  y + (w2.viewport.virtual_height - w.viewport.virtual_height) / 2;
+				w.as_vp_d().scrollpos_x =  x + (w2.getViewport().virtual_width -  w.getViewport().virtual_width) / 2;
+				w.as_vp_d().scrollpos_y =  y + (w2.getViewport().virtual_height - w.getViewport().virtual_height) / 2;
 			} break;
 			}
 		} break;
@@ -763,8 +763,8 @@ public class SmallMapGui extends SmallMapGuiTables
 			// center on same place as main window (zoom is maximum, no adjustment needed)
 			x = w.as_vp_d().scrollpos_x;
 			y = w.as_vp_d().scrollpos_y;
-			w.as_vp_d().scrollpos_x = x + (v.viewport.virtual_width  - (294)) / 2;
-			w.as_vp_d().scrollpos_y = y + (v.viewport.virtual_height - (214)) / 2;
+			w.as_vp_d().scrollpos_x = x + (v.getViewport().virtual_width  - (294)) / 2;
+			w.as_vp_d().scrollpos_y = y + (v.getViewport().virtual_height - (214)) / 2;
 		}
 	}
 

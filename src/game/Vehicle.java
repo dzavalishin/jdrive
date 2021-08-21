@@ -113,7 +113,7 @@ public class Vehicle implements IPoolItem
 	int tick_counter;// increased by one for each tick
 
 	/* Begin Order-stuff */
-	Order current_order = new Order();     //! The current order (+ status, like: loading)
+	public Order current_order = new Order();     //! The current order (+ status, like: loading)
 	//OrderID cur_order_index; //! The index to the current order
 	int cur_order_index; //! The index to the current order
 
@@ -3909,14 +3909,11 @@ public class Vehicle implements IPoolItem
 	}
 
 	public int getSpritenum() { return spritenum; }
-
-	public int getCargo_source() {
-		return cargo_source;
-	}
-
-	public int getMax_speed() {
-		return max_speed;
-	}
+	public int getCargo_source() {		return cargo_source;	}
+	public int getMax_speed() {		return max_speed;	}
+	public int getNum_orders() { return num_orders; }
+	public int getCur_order_index() { return cur_order_index; }
+	public int getCur_speed() { return cur_speed;	}
 
 
 

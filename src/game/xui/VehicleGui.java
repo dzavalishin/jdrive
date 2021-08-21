@@ -35,6 +35,7 @@ import game.sort.VehicleReliabilitySorter;
 import game.sort.VehicleUnsortedSorter;
 import game.struct.EngineInfo;
 import game.struct.SortStruct;
+import game.struct.Sorting;
 import game.tables.EngineTables;
 import game.util.BitOps;
 import game.util.wcustom.*;
@@ -44,7 +45,7 @@ public class VehicleGui {
 
 
 
-	static Sorting _sorting = new Sorting();
+	public static Sorting _sorting = new Sorting();
 
 	static int _internal_name_sorter_id; // internal StringID for default vehicle-names
 	static int _last_vehicle_idx;        // cached index to hopefully speed up name-sorting
@@ -234,7 +235,7 @@ public class VehicleGui {
 
 
 	/* General Vehicle GUI based procedures that are independent of vehicle types */
-	static void InitializeVehiclesGuiList()
+	public static void InitializeVehiclesGuiList()
 	{
 		_railtype_selected_in_replace_gui = Train.RAILTYPE_RAIL;
 	}
@@ -1129,17 +1130,6 @@ private static void show_cargo(ctype) {
 //extern const StringID _vehicle_sort_listing[];
 
 
-class Listing {
-	boolean order;	// Ascending/descending?
-	int criteria;	// Sorting criteria
-}
-
-class Sorting {
-	Listing aircraft = new Listing();
-	Listing roadveh  = new Listing();
-	Listing ship     = new Listing();
-	Listing train    = new Listing();
-} 
 
 
 //interface VehicleComparator extends Comparator<SortStruct> {}

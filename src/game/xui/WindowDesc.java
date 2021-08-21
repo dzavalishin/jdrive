@@ -3,9 +3,9 @@ package game.xui;
 import java.util.function.BiConsumer;
 
 public class WindowDesc {
-	int 			left, top, width, height;
-	int 	cls;
-	int 	parent_cls;
+	public int 			left, top, width, height;
+	int 			cls;
+	int 			parent_cls;
 	int 			flags;
 	Widget []		widgets;
 	//WindowProc *proc;

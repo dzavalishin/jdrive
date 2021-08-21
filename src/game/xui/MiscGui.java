@@ -159,10 +159,10 @@ public class MiscGui {
 
 		p = Player.GetPlayer(Global._local_player.id < Global.MAX_PLAYERS ? Global._local_player.id : 0);
 
-		old_money = p.money64;
-		p.money64 = 0x7fffffff;
+		old_money = p.getMoney();
+		p.setMoney( 0x7fffffff );
 		lid.costclear = Cmd.DoCommandByTile(tile, 0, 0, 0, Cmd.CMD_LANDSCAPE_CLEAR);
-		p.money64 = old_money;
+		p.setMoney( old_money );
 		//p.UpdatePlayerMoney32();
 
 		// Becuase build_date is not set yet in every TileDesc, we make sure it is empty
@@ -577,7 +577,7 @@ public class MiscGui {
 					}
 				}
 				 */
-				vp = Window.getMain().viewport;
+				vp = Window.getMain().getViewport();
 
 				assert vp != null;
 
@@ -599,7 +599,7 @@ public class MiscGui {
 				pt = Point.RemapCoords2(x, y);
 				//for(w=_windows; w.window_class != Window.WC_MAIN_WINDOW; w++) {}
 				//vp = w.viewport;
-				vp = Window.getMain().viewport;
+				vp = Window.getMain().getViewport();
 
 				pt.x = BitOps.clamp(((pt.x - vp.virtual_left) >> vp.zoom) + vp.left - (334/2), 0, Hal._screen.width - 334);
 				pt.y = BitOps.clamp(((pt.y - vp.virtual_top) >> vp.zoom) + vp.top - (137/2), 22, Hal._screen.height - 137);

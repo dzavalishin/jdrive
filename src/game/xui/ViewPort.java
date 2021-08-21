@@ -48,10 +48,8 @@ import game.util.Pixel;
 public class ViewPort 
 {
 
-
-
-
-	int left,top;												// screen coordinates for the viewport
+	
+	public int left,top;												// screen coordinates for the viewport
 	int width, height;									// screen width/height for the viewport
 
 	int virtual_left, virtual_top;			// virtual coordinates
@@ -300,7 +298,7 @@ public class ViewPort
 
 	static void SetViewportPosition(Window w, int x, int y)
 	{
-		ViewPort vp = w.viewport;
+		ViewPort vp = w.getViewport();
 		int old_left = vp.virtual_left;
 		int old_top = vp.virtual_top;
 		int i;
@@ -437,7 +435,7 @@ public class ViewPort
 		int x, y;
 		ViewPort  vp;
 
-		vp = w.viewport;
+		vp = w.getViewport();
 
 		if (in) {
 			x = ((Hal._cursor.pos.x - vp.left) >> 1) + (vp.width >> 2);
@@ -1510,7 +1508,7 @@ public class ViewPort
 		dpi.left += w.left;
 		dpi.top += w.top;
 
-		ViewportDraw(w.viewport, dpi.left, dpi.top, dpi.left + dpi.width, dpi.top + dpi.height);
+		ViewportDraw(w.getViewport(), dpi.left, dpi.top, dpi.left + dpi.width, dpi.top + dpi.height);
 
 		dpi.left -= w.left;
 		dpi.top -= w.top;
@@ -1518,7 +1516,7 @@ public class ViewPort
 
 	static void UpdateViewportPosition(Window w)
 	{
-		final ViewPort vp = w.viewport;
+		final ViewPort vp = w.getViewport();
 
 		if (w.as_vp_d().follow_vehicle != Vehicle.INVALID_VEHICLE) {
 			final Vehicle veh = Vehicle.GetVehicle(w.as_vp_d().follow_vehicle);
@@ -2052,7 +2050,7 @@ public class ViewPort
 	{
 		Point pt;
 
-		pt = MapXYZToViewport(w.viewport, x, y, Landscape.GetSlopeZ(x, y));
+		pt = MapXYZToViewport(w.getViewport(), x, y, Landscape.GetSlopeZ(x, y));
 		w.as_vp_d().follow_vehicle = VehicleID.get( Vehicle.INVALID_VEHICLE ).id;
 
 		if (w.as_vp_d().scrollpos_x == pt.x && w.as_vp_d().scrollpos_y == pt.y)
