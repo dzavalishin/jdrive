@@ -2,7 +2,7 @@
 
 This is an attempt to port OPenTTD to Java.
 
-Current state: game is not playable. No save/load implemented and pathfinding is broken.
+Current state: game is not playable. Save/load isincomplete and pathfinding is broken.
 
 Screen shot:
 

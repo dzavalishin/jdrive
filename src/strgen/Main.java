@@ -15,7 +15,9 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
 
@@ -74,7 +76,7 @@ public class Main {
 		int hash = 0;
 		for(char c : s.toCharArray())
 			hash = ((hash << 3) | (hash >>> 29)) ^ c;
-		return hash % HASH_SIZE;
+		return Math.abs( hash % HASH_SIZE );
 	}
 
 	static void HashAdd(String s, LangString ls)
@@ -282,18 +284,19 @@ public class Main {
 		String param = token[1];
 
 		if (str.equals( "id")) {
-			_next_string_id = Integer.parseInt(param);
+			//_next_string_id = Integer.parseInt(param);
+			_next_string_id = Integer.decode(param);
 		} else if (str.equals( "name")) {
 			_lang_name = param;
 		} else if (str.equals( "ownname")) {
 			_lang_ownname = param;
 		} else if (str.equals( "isocode")) {
 			_lang_isocode = param;
-		} else if (str.equals( "plural ")) {
+		} else if (str.equals( "plural")) {
 			_lang_pluralform = (byte) Integer.parseInt(param); // atoi(str + 7);
 			if (_lang_pluralform >= _plural_form_counts.length)
 				Fatal("Invalid pluralform %d", _lang_pluralform);
-		} else if (str.equals( "gender ")) {
+		} else if (str.equals( "gender")) {
 			for(;;) {
 				String s = Emitter.ParseWord(param, null);
 				if (s == null) break;
@@ -301,7 +304,7 @@ public class Main {
 				_genders[_numgenders] = s;
 				_numgenders++;
 			}
-		} else if (str.equals( "case ")) {
+		} else if (str.equals( "case")) {
 			for(;;) {
 				String s = Emitter.ParseWord(param, null);
 				if (s == null) break;
@@ -713,9 +716,13 @@ public class Main {
 			} else {
 				// else rename tmp.xxx into filename
 				//#if defined(WIN32) || defined(WIN64)
+				try {
 				Files.delete(Path.of(filename));
+				} catch (NoSuchFileException e) {
+					// Ignore
+				}
 				//#endif
-				Files.move(Path.of("tmp.xxx"), Path.of(filename), (CopyOption[])null);
+				Files.move(Path.of("tmp.xxx"), Path.of(filename), StandardCopyOption.REPLACE_EXISTING);
 				//if (rename("tmp.xxx", filename) == -1) Fatal("rename() failed");
 			}
 		}
@@ -852,7 +859,7 @@ public class Main {
 		_masterlang = true;
 		// parse master file
 		try {
-			ParseFile("lang/english.txt", true);
+			ParseFile("data/lang/english.txt", true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -865,8 +872,8 @@ public class Main {
 		// write english.lng and strings.h
 
 		try {
-			WriteLangfile("lang/english.lng", 0);
-			WriteStringsH("table/strings.h");
+			WriteLangfile("data/bin/english.lng", 0);
+			WriteStringsH("data/strings.h");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

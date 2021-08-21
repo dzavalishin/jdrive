@@ -1,6 +1,5 @@
 package strgen;
 
-import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
@@ -12,7 +11,7 @@ public class Emitter
 	int _cur_argidx;
 	String _cur_ident = "??";
 	// Used when generating some advanced commands.
-	ParsedCommandStruct _cur_pcs = null;
+	ParsedCommandStruct _cur_pcs = new ParsedCommandStruct();
 	static boolean _translated;
 
 	
@@ -139,7 +138,8 @@ public class Emitter
 			// Parse out the number, if one exists. Otherwise default to prev arg.
 			if (!ParseRelNum(buf, argidx, skip))
 				argidx[0]--;
-			buf = buf.substring(skip[0]);
+			else
+				buf = buf.substring(skip[0]);
 		}
 		
 		// Parse each string
@@ -281,6 +281,7 @@ public class Emitter
 				}
 
 				// Extract the strings and stuff from the english command string
+				_cur_pcs = new ParsedCommandStruct();
 				ExtractCommandString(_cur_pcs, ls.english, false);
 
 				if (ls.translated_case != null || ls.translated != null) {
@@ -413,6 +414,7 @@ public class Emitter
 
 		argno[0] = -1;
 		casei[0] = -1;
+		skip[0] = -1;
 
 		/*
 		// Scan to the next command, exit if there's no next command.
@@ -422,10 +424,24 @@ public class Emitter
 		}
 		*/
 		
+		
+		if(str.length() == 0) return null;
+		
 		char [] sc = str.toCharArray(); 
 		int s = 0; // position in sc
+
+		while( true )
+		{
+			if( s >= sc.length ) return null;
+			
+			if( sc[s] == '{' ) break;
+			
+			s++;
+		}
 		
-		assert sc[s] == '{';		
+		
+		assert sc[s] == '{';
+		
 		s++; // Skip past the {
 
 		if (sc[s] >= '0' && sc[s] <= '9') {
@@ -447,13 +463,17 @@ public class Emitter
 		c = 0;
 		do {
 			if( s >= sc.length )
-				break;
+			{
+				Error("Missing } from command '%s'", start);
+				return null;
+			}
 			c = sc[s++];
 		} while (c != '}' && c != ' ' && c != '=' && c != '.' && c != 0);
 
 		cmd = Main.FindCmd(new String( sc, start, s - start - 1) );
 		if (cmd == null) {
-			Error("Undefined command '%.*s'", s - start - 1, start);
+			//Error("Undefined command '%.*s'", s - start - 1, start);
+			Error("Undefined command '%s'", str.substring(start, s));
 			return null;
 		}
 
@@ -474,7 +494,7 @@ public class Emitter
 			casei[0] = Main.ResolveCaseName(new String( sc, casep, s-casep-1) );
 		}
 
-		if (c == '\0') {
+		if (c != '}' && s >= sc.length) {
 			Error("Missing } from command '%s'", start);
 			return null;
 		}
@@ -550,15 +570,19 @@ public class Emitter
 			if (ar.consumes != 0) {
 				if (argno[0] != -1)
 					argidx = argno[0];
-				if (argidx < 0 || argidx >= p.cmd.length) Fatal("invalid param idx %d", argidx);
-				if (p.cmd[argidx] != null && p.cmd[argidx] != ar) Fatal("duplicate param idx %d", argidx);
+				if (argidx < 0 || argidx >= p.cmd.length) 
+					Fatal("invalid param idx %d", argidx);
+				if (p.cmd[argidx] != null && p.cmd[argidx] != ar) 
+					Fatal("duplicate param idx %d", argidx);
 
 				p.cmd[argidx++] = ar;
 			} 
 			else if (0==(ar.flags & C_DONTCOUNT)) 
 			{ // Ignore some of them
 				String ps = param.toString();
-				if (p.np >= p.pairs.length) Fatal("too many commands in string, max %d", p.pairs.length);
+				if (p.np >= p.pairs.length) 
+					Fatal("too many commands in string, max %d", p.pairs.length);
+				p.pairs[p.np] = new CmdPair();
 				p.pairs[p.np].a = ar;
 				p.pairs[p.np].v = ps.length() != 0 ? ps : "";
 				p.np++;
@@ -588,7 +612,10 @@ public class Emitter
 					break;
 				if (cs[s] == '"') {
 					//*s++ = 0;
-					break;
+					//break;
+					if(skip != null) skip[0] = s+1;					
+					assert r > 0;					
+					return new String( cs, r, s-1 );
 				}
 				s++;
 			}
@@ -636,9 +663,13 @@ public class Emitter
 			if(cs[end] < '0' || cs[end] > '9')
 				break;
 		
-		v = Integer.parseInt(new String(cs,s,end)); //strtol(s, &end, 0);
+		try {
+			v = Integer.parseInt(new String(cs,s,end)); //strtol(s, &end, 0);
+		} catch (NumberFormatException e) {
+			return false;
+		}
 		
-		if (end == s) return false;
+		//if (end == s) return false;
 		
 		if (rel || (v < 0))
 			value[0] += v;
