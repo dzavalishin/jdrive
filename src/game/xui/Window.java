@@ -3108,9 +3108,15 @@ public class Window extends WindowConstants
 		return w;
 	}
 
+	/**
+	 * Delete basic windows or game start/restart.
+	 * Or there will be duplicates. 
+	 */
 	public static void deleteMain()
 	{
 		Window w = FindWindowById(WC_MAIN_WINDOW, 0);
+		if( w != null ) w.DeleteWindow();
+		w = FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
 		if( w != null ) w.DeleteWindow();
 	}
 	
@@ -3173,7 +3179,7 @@ public class Window extends WindowConstants
 		// TODO ((vp_d)w.custom).scrollpos_y = Global._saved_scrollpos_y;
 
 		ViewPort vp = w.viewport;
-		// TODO XXX vp.zoom = _saved_scrollpos_zoom;
+		vp.zoom = (byte) Global._saved_scrollpos_zoom;
 		vp.virtual_width = vp.width << vp.zoom;
 		vp.virtual_height = vp.height << vp.zoom;
 	}
