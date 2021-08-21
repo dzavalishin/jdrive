@@ -2110,7 +2110,7 @@ public class ViewPort
 
 	public static boolean ScrollMainWindowTo(int x, int y)
 	{
-		return ScrollWindowTo(x, y, Window.FindWindowById(Window.WC_MAIN_WINDOW, 0));
+		return ScrollWindowTo(x, y, Window.getMain());
 	}
 
 

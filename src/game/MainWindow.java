@@ -182,12 +182,22 @@ public class MainWindow extends JPanel implements ActionListener
 		Global._shift_pressed = (e.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK) != 0;
 		Gfx._dbg_screen_rect = (e.getModifiersEx() & KeyEvent.META_DOWN_MASK) != 0;// _wnd.has_focus && GetAsyncKeyState(VK_CAPITAL)<0;
 
+		/*
 		Global._dirkeys = (byte)
 				(((e.getKeyCode() == KeyEvent.VK_LEFT) ? 1 : 0) +
 						((e.getKeyCode() == KeyEvent.VK_UP)  ? 2 : 0) +
 						((e.getKeyCode() == KeyEvent.VK_RIGHT)  ? 4 : 0) +
 						((e.getKeyCode() == KeyEvent.VK_DOWN)  ? 8 : 0));
-
+		 */
+		
+		switch(e.getKeyCode())
+		{
+		case KeyEvent.VK_LEFT:	modDirKeys(1, pressed); break; 
+		case KeyEvent.VK_UP:	modDirKeys(2, pressed); break;
+		case KeyEvent.VK_RIGHT:	modDirKeys(4, pressed); break;
+		case KeyEvent.VK_DOWN:	modDirKeys(8, pressed); break;		
+		}
+		
 
 		if(!pressed) return;
 
@@ -265,6 +275,11 @@ public class MainWindow extends JPanel implements ActionListener
 
 
 
+
+	private void modDirKeys(int i, boolean pressed) {
+		if( pressed )	Global._dirkeys |= i;
+		else			Global._dirkeys &= ~i;		
+	}
 
 	static int startX = 0;
 

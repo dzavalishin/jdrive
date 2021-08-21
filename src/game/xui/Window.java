@@ -2027,16 +2027,21 @@ public class Window extends WindowConstants
 					if (x - scroll_edge < 0) {
 						vpd.scrollpos_x += (x - scroll_edge) * scrollspeed << vp.zoom;
 						//Global.printf("scroll left");
+						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
+
 					} else if (scroll_edge - (vp.width - x) > 0) {
 						vpd.scrollpos_x += (scroll_edge - (vp.width - x)) * scrollspeed << vp.zoom;
 						//Global.printf("scroll right");
+						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
 					}
 					if (y - scroll_edge < 0) {
 						vpd.scrollpos_y += (y - scroll_edge) * scrollspeed << vp.zoom;
 						//Global.printf("scroll up");
+						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
 					} else if (scroll_edge - (vp.height - y) > 0) {
 						vpd.scrollpos_y += (scroll_edge - (vp.height - y)) * scrollspeed << vp.zoom;
 						//Global.printf("scroll dn");
+						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
 					}
 
 				}
@@ -3093,15 +3098,22 @@ public class Window extends WindowConstants
 	}
 
 	public static Window getMain() {
-		for(Window w : Window._windows )
+		/*for(Window w : Window._windows )
 		{
 			if(w.window_class == Window.WC_MAIN_WINDOW)
 				return w;
-		}
-		assert false;
-		return null;
+		}*/
+		Window w = FindWindowById(WC_MAIN_WINDOW, 0);
+		assert w != null;
+		return w;
 	}
 
+	public static void deleteMain()
+	{
+		Window w = FindWindowById(WC_MAIN_WINDOW, 0);
+		if( w != null ) w.DeleteWindow();
+	}
+	
 	public void setSize(int w, int h) {
 		width = w;
 		height = h;		
@@ -3138,6 +3150,7 @@ public class Window extends WindowConstants
 	{
 		as_vp_d().scrollpos_x += x << viewport.zoom;
 		as_vp_d().scrollpos_y += y << viewport.zoom;
+		//System.out.printf("scroll %d.%d w %d.%d %x\n", as_vp_d().scrollpos_x, as_vp_d().scrollpos_y, window_class, window_number, hashCode() );
 	}
 
 	public static void updateScrollerTimeout() 
@@ -3149,11 +3162,12 @@ public class Window extends WindowConstants
 		}
 	}
 
-	public static void afterLoad() {
-		Window w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+	public static void afterLoad() // TODO call me 
+	{
+		Window w = Window.getMain();
 
-		//w.as_vp_d().scrollpos_x = _saved_scrollpos_x;
-		//w.as_vp_d().scrollpos_y = _saved_scrollpos_y;
+		w.as_vp_d().scrollpos_x = Global._saved_scrollpos_x;
+		w.as_vp_d().scrollpos_y = Global._saved_scrollpos_y;
 
 		// TODO ((vp_d)w.custom).scrollpos_x = Global._saved_scrollpos_x;
 		// TODO ((vp_d)w.custom).scrollpos_y = Global._saved_scrollpos_y;
@@ -3164,6 +3178,18 @@ public class Window extends WindowConstants
 		vp.virtual_height = vp.height << vp.zoom;
 	}
 
+	void BeforeSave() // TODO call me
+	{
+		final Window w = Window.getMain(); // Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+
+		//if (w != null) {
+		Global._saved_scrollpos_x = w.as_vp2_d().scrollpos_x;
+		Global._saved_scrollpos_y = w.as_vp2_d().scrollpos_y;
+		Global._saved_scrollpos_zoom = w.viewport.zoom;
+		//}
+	}
+	
+	
 	public void setTop(int top) {
 		this.top = top;
 	}

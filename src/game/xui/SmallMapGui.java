@@ -447,7 +447,7 @@ public class SmallMapGui extends SmallMapGuiTables
 			Point pt;
 
 			// Find main viewport.
-			vp = Window.FindWindowById(Window.WC_MAIN_WINDOW,0).getViewport();
+			vp = Window.getMain().getViewport();
 
 			pt = Point.RemapCoords(w.as_smallmap_d().scroll_x, w.as_smallmap_d().scroll_y, 0);
 
@@ -578,7 +578,7 @@ public class SmallMapGui extends SmallMapGuiTables
 
 				Window._left_button_clicked = false;
 
-				w2 = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+				w2 = Window.getMain();
 
 				pt = Point.RemapCoords(w.as_smallmap_d().scroll_x, w.as_smallmap_d().scroll_y, 0);
 				w2.as_vp_d().scrollpos_x = pt.x + ((Hal._cursor.pos.x - w.left + 2) << 4) - (w2.getViewport().virtual_width >> 1);
@@ -648,7 +648,7 @@ public class SmallMapGui extends SmallMapGuiTables
 			w.resize.width = 350;
 			w.resize.height = 250;
 
-			vp = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0).getViewport();
+			vp = Window.getMain().getViewport();
 
 			x =  (((vp.virtual_width - (220*32)) / 2) + vp.virtual_left) / 4;
 			y = ((((vp.virtual_height- (120*32)) / 2) + vp.virtual_top ) / 2) - 32;
@@ -703,7 +703,7 @@ public class SmallMapGui extends SmallMapGuiTables
 				Gui.DoZoomInOutWindow(Gui.ZOOM_OUT, w);
 				break;
 			case 7: { /* location button (move main view to same spot as this view) 'Paste Location' */
-				Window w2 = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+				Window w2 = Window.getMain();
 				int x = w.as_vp_d().scrollpos_x; // Where is the main looking at
 				int y = w.as_vp_d().scrollpos_y;
 
@@ -712,7 +712,7 @@ public class SmallMapGui extends SmallMapGuiTables
 				w2.as_vp_d().scrollpos_y =  y - (w2.getViewport().virtual_height - w.getViewport().virtual_height) / 2;
 			} break;
 			case 8: { /* inverse location button (move this view to same spot as main view) 'Copy Location' */
-				final Window  w2 = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+				final Window  w2 = Window.getMain();
 				int x = w2.as_vp_d().scrollpos_x;
 				int y = w2.as_vp_d().scrollpos_y;
 
@@ -756,7 +756,7 @@ public class SmallMapGui extends SmallMapGuiTables
 		if (null != w) {
 			int x, y;
 			// the main window with the main view
-			v = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+			v = Window.getMain();
 			// New viewport start ats (zero,zero)
 			ViewPort.AssignWindowViewport(w, 3, 17, 294, 214, 0 , 0);
 

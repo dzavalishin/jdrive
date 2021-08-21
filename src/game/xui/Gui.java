@@ -93,12 +93,14 @@ public class Gui
 		// XXX: these are not done
 		switch (Global._game_mode) {
 		case GM_MENU:
+			Window.deleteMain();
 			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
 			ViewPort.AssignWindowViewport( w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
 			IntroGui.ShowSelectGameWindow();
 			break;
 			
 		case GM_NORMAL:
+			Window.deleteMain();
 			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
 			ViewPort.AssignWindowViewport(w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
 
@@ -113,6 +115,7 @@ public class Gui
 			break;
 			
 		case GM_EDITOR:
+			Window.deleteMain();
 			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
 			ViewPort.AssignWindowViewport(w, 0, 0, width, height, 0, 0);
 
@@ -1050,12 +1053,12 @@ public class Gui
 
 	static void MaxZoomIn()
 	{
-		while (DoZoomInOutWindow(ZOOM_IN, Window.FindWindowById(Window.WC_MAIN_WINDOW, 0) ) ) {}
+		while (DoZoomInOutWindow(ZOOM_IN, Window.getMain() ) ) {}
 	}
 
 	static void ToolbarZoomInClick(Window w)
 	{
-		if (DoZoomInOutWindow(ZOOM_IN, Window.FindWindowById(Window.WC_MAIN_WINDOW, 0))) {
+		if (DoZoomInOutWindow(ZOOM_IN, Window.getMain() )) {
 			w.HandleButtonClick(17);
 			//SndPlayFx(SND_15_BEEP);
 		}
@@ -1063,7 +1066,7 @@ public class Gui
 
 	static void ToolbarZoomOutClick(Window w)
 	{
-		if (DoZoomInOutWindow(ZOOM_OUT,Window.FindWindowById(Window.WC_MAIN_WINDOW, 0))) {
+		if (DoZoomInOutWindow( ZOOM_OUT, Window.getMain() )) {
 			w.HandleButtonClick(18);
 			//SndPlayFx(SND_15_BEEP);
 		}
@@ -1167,7 +1170,7 @@ public class Gui
 
 	static void ToolbarScenZoomIn(Window w)
 	{
-		if (DoZoomInOutWindow(ZOOM_IN, Window.FindWindowById(Window.WC_MAIN_WINDOW, 0))) {
+		if (DoZoomInOutWindow(ZOOM_IN, Window.getMain())) {
 			w.HandleButtonClick(9);
 			//SndPlayFx(SND_15_BEEP);
 		}
@@ -1175,7 +1178,7 @@ public class Gui
 
 	static void ToolbarScenZoomOut(Window w)
 	{
-		if (DoZoomInOutWindow(ZOOM_OUT, Window.FindWindowById(Window.WC_MAIN_WINDOW, 0))) {
+		if (DoZoomInOutWindow(ZOOM_OUT, Window.getMain())) {
 			w.HandleButtonClick(10);
 			//SndPlayFx(SND_15_BEEP);
 		}

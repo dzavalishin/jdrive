@@ -849,10 +849,10 @@ public class Main {
 	static void ScrollMainViewport(int x, int y)
 	{
 		if (Global._game_mode != GameModes.GM_MENU) {
-			Window w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
-			assert(w != null);
+			//Window w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+			//assert(w != null);
 
-			w.setScrollPos(x,y);
+			Window.getMain().setScrollPos(x,y);
 		}
 	}
 
@@ -961,16 +961,6 @@ public class Main {
 		// TODO MusicLoop();
 	}
 
-	void BeforeSaveGame()
-	{
-		final Window w = Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
-
-		if (w != null) {
-			// TODO Global._saved_scrollpos_x = ((vp_d)w.custom).scrollpos_x;
-			//_saved_scrollpos_y = ((vp_d)w.custom).scrollpos_y;
-			//_saved_scrollpos_zoom = w.viewport.zoom;
-		}
-	}
 
 	/*unused
 	static void ConvertTownOwner()
@@ -1147,7 +1137,7 @@ public class Main {
 		if (!Global._players[0].is_active && (!Global._networking || (Global._networking && Global._network_server)))
 			Player.DoStartupNewPlayer(false);
 
-		Gui.DoZoomInOutWindow(Gui.ZOOM_NONE, Window.FindWindowById(Window.WC_MAIN_WINDOW, 0)); // update button status
+		Gui.DoZoomInOutWindow(Gui.ZOOM_NONE, Window.getMain()); // update button status
 		Hal.MarkWholeScreenDirty();
 
 		// // FIXME KILLME In 5.1, Oilrigs have been moved (again)
