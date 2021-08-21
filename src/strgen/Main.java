@@ -612,23 +612,17 @@ public class Main {
 
 	static boolean CompareFiles(final String n1, final String n2) 
 	{
-		//f2 = fopen(n2, "rb");
 		BufferedInputStream f2;
 		try {
 			f2 = new BufferedInputStream( new FileInputStream(n2) );
 		} catch (FileNotFoundException e1) {
-			//e1.printStackTrace();
-			//if (f2 == null) 
 			return false;
 		}
 
-		//f1 = fopen(n1, "rb");
-		//if (f1 == null) Fatal("can't open %s", n1);
 		BufferedInputStream f1 = null;
 		try {
 			f1 = new BufferedInputStream( new FileInputStream(n1) );
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			//if (f1 == null) 
 			Fatal("can't open %s", n1);
@@ -662,14 +656,11 @@ public class Main {
 		int l1;
 		int l2;
 		do {
-			//l1 = fread(b1, 1, sizeof(b1), f1);
-			//l2 = fread(b2, 1, sizeof(b2), f2);
 			l1 = f1.read(b1);
 			l2 = f2.read(b2);
 
 			boolean diff = Arrays.compare(b1, b2) != 0;
 			if (l1 != l2 || 
-					//memcmp(b1, b2, l1)
 					diff
 					) {
 				f2.close();
@@ -684,14 +675,8 @@ public class Main {
 
 	static void WriteStringsH(final String filename) throws FileNotFoundException
 	{
-		//FILE *out;
 		Writer out  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp.xxx")));
-		//int i;
 		int next = -1;
-		//int lastgrp;
-
-		//out = fopen("tmp.xxx", "w");
-		if (out == null) { Fatal("can't open tmp.xxx"); }
 
 		try {
 			codeGen(out, next);
@@ -715,13 +700,11 @@ public class Main {
 
 			} else {
 				// else rename tmp.xxx into filename
-				//#if defined(WIN32) || defined(WIN64)
 				try {
 				Files.delete(Path.of(filename));
 				} catch (NoSuchFileException e) {
 					// Ignore
 				}
-				//#endif
 				Files.move(Path.of("tmp.xxx"), Path.of(filename), StandardCopyOption.REPLACE_EXISTING);
 				//if (rename("tmp.xxx", filename) == -1) Fatal("rename() failed");
 			}
@@ -736,30 +719,36 @@ public class Main {
 	private static void codeGen(Writer out, int next) throws IOException {
 		int i;
 		int lastgrp;
-		out.write("enum {");
+		out.write(
+				"package game.util;\n\n"
+				+ "public class StringTable \n"
+				+ "{\n"
+				+ ""
+				);
 
 		lastgrp = 0;
 
 		for(i = 0; i != 65536; i++) {
 			if (_strings[i] != null) {
-				if (lastgrp != (i >> 11)) {
+				/*if (lastgrp != (i >> 11)) {
 					lastgrp = (i >> 11);
-					out.write("};\n\nenum {");
-				}
+					out.write("};n\npublic class StringHashCodes {");
+				}*/
 
-				String s = String.format( next == i ? "%s,\n" : "\n%s = 0x%X,\n", _strings[i].name, i);
+				//String s = String.format( next == i ? "%s,\n" : "\n%s = 0x%X,\n", _strings[i].name, i);
+				String s = String.format( "\n\tpublic static final int %s = 0x%X;\n", _strings[i].name, i);
 				out.write( s );
 				next = i + 1;
 			}
 		}
 
-		out.write("};\n");
+		out.write("}\n");
 
 		String suffix = String.format(
-				"\nenum {\n" +
+				"\npublic class StringHashCodes {\n" +
 						"\tLANGUAGE_PACK_IDENT = 0x474E414C, // Big Endian value for 'LANG' (LE is 0x 4C 41 4E 47)\n" +
 						"\tLANGUAGE_PACK_VERSION = 0x%X,\n" +
-						"};\n", (int)_hash);
+						"}\n", (int)_hash);
 
 		out.write(suffix);
 	}
@@ -873,7 +862,7 @@ public class Main {
 
 		try {
 			WriteLangfile("data/bin/english.lng", 0);
-			WriteStringsH("data/strings.h");
+			WriteStringsH("data/StringTable.java");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
