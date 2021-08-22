@@ -4,7 +4,6 @@ import game.tables.TrackPathFinderTables;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import game.Hal;

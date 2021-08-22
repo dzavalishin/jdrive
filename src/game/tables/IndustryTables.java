@@ -2,7 +2,6 @@ package game.tables;
 
 import game.AcceptedCargo;
 import game.Str;
-import game.struct.TileIndexDiffC;
 import game.util.Sprites;
 
 public class IndustryTables 

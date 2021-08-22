@@ -1,5 +1,7 @@
 package game;
 
+import java.io.Serializable;
+
 import game.ids.PlayerID;
 
 /**
@@ -11,9 +13,10 @@ import game.ids.PlayerID;
  *
  */
 
-public class GameState 
+public class GameState implements Serializable
 {
-
+	private static final long serialVersionUID = 1L;
+	
 	// Player
 	public Player[] _players = new Player[Global.MAX_PLAYERS];
 	public int [] _player_colors = new int[Global.MAX_PLAYERS];

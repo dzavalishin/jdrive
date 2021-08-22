@@ -16,6 +16,8 @@ import game.xui.Window;
 
 public class Depot implements IPoolItem, Serializable
 {
+	private static final long serialVersionUID = 1L;
+	
 	TileIndex xy;
 	int town_index;
 	int index;
@@ -27,6 +29,11 @@ public class Depot implements IPoolItem, Serializable
 	}
 	
 	static IPoolItemFactory<Depot> factory = new IPoolItemFactory<Depot>() {		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public Depot createObject() {
 			return new Depot();

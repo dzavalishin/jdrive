@@ -42,6 +42,11 @@ import game.xui.Window;
 public class Station extends StationTables implements IPoolItem
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	TileIndex xy;
 
 	List<RoadStop> bus_stops; 
@@ -507,6 +512,11 @@ public class Station extends StationTables implements IPoolItem
 	}
 
 	private static IPoolItemFactory<Station> factory = new IPoolItemFactory<Station>() {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public Station createObject() {

@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PalSpriteID extends AbstractID {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private PalSpriteID(int i) {
 		super(i);
 	}

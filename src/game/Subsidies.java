@@ -49,7 +49,7 @@ public class Subsidies {
 	{
 		//final Subsidy  s;
 		int num;
-		int offs;
+		//int offs;
 
 		if (y < 0) return;
 
@@ -196,6 +196,8 @@ public class Subsidies {
 			switch (e.widget) {
 			case 2: HandleSubsidyClick(e.pt.y - 25); break;
 			}
+			break;
+		default:
 			break;
 		}
 	}

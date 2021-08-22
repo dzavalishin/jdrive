@@ -62,8 +62,7 @@ class VQImpl extends VehicleQueue
 
 		newItem = new VQueueItem();
 
-		if(newItem == null)
-			return false;
+		//if(newItem == null)			return false;
 
 		if(size == 0) {
 			assert(top == null);

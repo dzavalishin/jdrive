@@ -661,7 +661,7 @@ public class Gfx extends PaletteTabs
 
 			for(;;) {
 				if( sp >= sc.length) {
-					y += mt;
+					//y += mt;
 					//if (--num < 0) {
 					_stringwidth_base = 0;
 					return;

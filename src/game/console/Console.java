@@ -61,7 +61,7 @@ public class Console //extends ConsoleCmds
 	// ** stdlib ** //
 	static byte _stdlib_developer = 1;
 	static boolean _stdlib_con_developer = false;
-	static FileWriter _iconsole_output_file;
+	static FileWriter _iconsole_output_file = null;
 
 	// ** main console cmd buffer
 	static String[] _iconsole_history = new String[ICON_HISTORY_SIZE];
@@ -791,7 +791,8 @@ public class Console //extends ConsoleCmds
 		/* Some variables need really specific handling, handle this in its
 		 * callback function */
 		if (var.proc != null) {
-			var.proc.accept(0, null);
+			//var.proc.accept(0, null);
+			var.proc.accept(0);
 			return;
 		}
 
@@ -972,12 +973,15 @@ public class Console //extends ConsoleCmds
 		 * the found action taking into account its hooking code
 		 */
 		cmd = IConsoleCmdGet(tokens[0]);
-		if (cmd != null) {
+		if (cmd != null && cmd.hook != null) {
 			if (cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_ACCESS)) {
 				cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_PRE_ACTION);
 				if (cmd.proc.accept(t_index, tokens)) { // index started with 0
 					cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_POST_ACTION);
-				} else cmd.proc.accept(0, null); // if command failed, give help
+				} else { 
+					//cmd.proc.accept(0, null); // if command failed, give help
+					cmd.proc.accept(0); // if command failed, give help
+				}
 			}
 			return;
 		}
@@ -1124,6 +1128,8 @@ public class Console //extends ConsoleCmds
 					e.cont = true;
 				break;
 			}
+		default:
+			break;
 		}
 
 	}

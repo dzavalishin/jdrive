@@ -1,7 +1,5 @@
 package game.struct;
 
-import game.ids.EngineID;
-
 //typedef void DrawEngineProc(int x, int y, EngineID engine, int image_ormod);
 @FunctionalInterface
 public interface DrawEngineProc

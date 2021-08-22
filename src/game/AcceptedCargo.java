@@ -7,7 +7,8 @@ import java.io.Serializable;
 
 public class AcceptedCargo implements Serializable 
 {
-
+	private static final long serialVersionUID = -8588718305311725293L;
+	
 	public int ct[] = new int[NUM_CARGO];
 
 	public void clear()

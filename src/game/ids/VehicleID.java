@@ -10,6 +10,10 @@ public class VehicleID extends AbstractID {
 		id = -1;
 	}*/
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private VehicleID(int i) {
 		super(i);
 	}

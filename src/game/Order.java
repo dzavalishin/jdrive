@@ -4,15 +4,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.function.Consumer;
 
 import game.ids.OrderID;
 import game.ids.VehicleID;
-import game.ifaces.IPoolItem;
-import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
-import game.util.MemoryPool;
 import game.xui.VehicleGui;
 import game.xui.Window;
 
@@ -1155,13 +1150,13 @@ public class Order implements Serializable
 	
 	
 	
-	@Deprecated
+	// TODO @Deprecated
 	public static int PackOrder(final Order order)
 	{
 		return (0xFFFF & order.station) << 16 | (0xFF & order.flags) << 8 | (0xFF & order.type);
 	}
 
-	@Deprecated
+	// TODO @Deprecated
 	public static Order UnpackOrder(int packed)
 	{
 		Order order = new Order();

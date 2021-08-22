@@ -6,6 +6,10 @@ import java.util.Map;
 public class StationID extends AbstractID 
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private StationID(int i) {
 		super(i);
 	}

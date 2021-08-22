@@ -66,6 +66,11 @@ public class RoadStop implements IPoolItem
 	
 	
 	private static IPoolItemFactory<RoadStop> factory = new IPoolItemFactory<RoadStop>() {		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public RoadStop createObject() {
 			return new RoadStop();

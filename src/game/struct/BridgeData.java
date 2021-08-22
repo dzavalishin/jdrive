@@ -9,6 +9,6 @@ public class BridgeData
 	public TileIndex start_tile;
 	public TileIndex end_tile;
 	public int type;
-	public byte [] indexes = new byte[Bridge.MAX_BRIDGES];
+	public int [] indexes = new int[Bridge.MAX_BRIDGES];
 	public int  [] costs  = new int[Bridge.MAX_BRIDGES];
 }

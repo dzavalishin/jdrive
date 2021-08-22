@@ -464,10 +464,12 @@ public class ShipGui
 	{
 		Window w;
 
-		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.getTile());
+		int wn = tile == null ? -1 : tile.getTile();
+		
+		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, wn );
 
 		w = Window.AllocateWindowDesc(_new_ship_desc);
-		w.window_number = tile.getTile();
+		w.window_number = wn;
 		w.vscroll.setCap(4);
 		w.widget.get(2).unkA = (w.vscroll.getCap() << 8) + 1;
 

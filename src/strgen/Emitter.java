@@ -599,7 +599,7 @@ public class Emitter
 		char [] cs = buf.toCharArray();
 		int s = 0, r = -1;
 		
-		skip[0] = 0;
+		if( skip != null ) skip[0] = 0;
 		
 		if (cs.length == 0)
 			return null;

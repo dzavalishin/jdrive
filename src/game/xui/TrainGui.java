@@ -7,7 +7,6 @@ import game.Cmd;
 import game.Depot;
 import game.Engine;
 import game.Global;
-import game.Order;
 import game.Player;
 import game.Rail;
 import game.RailVehicleInfo;
@@ -346,10 +345,12 @@ public class TrainGui
 	{
 		Window w;
 
-		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.getTile());
+		int wn = tile == null ? -1 : tile.getTile();
+		
+		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, wn);
 
 		w = Window.AllocateWindowDesc(_new_rail_vehicle_desc);
-		w.window_number = tile.getTile();
+		w.window_number = wn;
 		w.vscroll.setCap(8);
 		w.widget.get(2).unkA = (w.vscroll.getCap() << 8) + 1;
 

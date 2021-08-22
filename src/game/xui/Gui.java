@@ -2349,7 +2349,7 @@ public class Gui
 			} else if (s[sp] == 0x0D) {
 				d[dp+0] = d[dp+1] = d[dp+2] = d[dp+3] = ' ';
 				dp += 4;
-			} else if ((byte)s[sp] >= ' ' && ((byte)s[sp] < 0x88 || (byte)s[sp] >= 0x99)) {
+			} else if (s[sp] >= ' ' && (s[sp] < 0x88 || s[sp] >= 0x99)) {
 				d[dp++] = s[sp];
 			}
 		}

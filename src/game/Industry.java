@@ -109,6 +109,11 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	private static  IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public Industry createObject() {
 			return new Industry();

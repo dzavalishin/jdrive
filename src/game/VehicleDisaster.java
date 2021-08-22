@@ -2,6 +2,10 @@ package game;
 
 public class VehicleDisaster extends VehicleChild {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	int image_override;
 	int unk2;
 

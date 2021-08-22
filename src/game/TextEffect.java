@@ -7,7 +7,6 @@ import java.io.ObjectOutputStream;
 import game.enums.GameModes;
 import game.ids.StringID;
 import game.struct.TextMessage;
-import game.util.MemoryPool;
 import game.util.Pixel;
 import game.xui.CursorVars;
 import game.xui.DrawPixelInfo;

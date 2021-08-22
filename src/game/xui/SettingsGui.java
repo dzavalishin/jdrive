@@ -78,7 +78,7 @@ public class SettingsGui extends SettingsTables
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			int i;
+			//int i;
 			/*StringID*/ int str = Str.STR_02BE_DEFAULT;
 			//w.disabled_state = (Global._vehicle_design_names & 1) ? (++str, 0) : (1 << 21);
 			
@@ -99,7 +99,7 @@ public class SettingsGui extends SettingsTables
 			Global.SetDParam(4, Str.STR_TOWNNAME_ORIGINAL_ENGLISH + GameOptions._opt_ptr.town_name);
 			Global.SetDParam(5, _autosave_dropdown[GameOptions._opt_ptr.autosave]);
 			Global.SetDParam(6, 0); // TODO Strings.SPECSTR_LANGUAGE_START + _dynlang.curr);
-			i = GetCurRes();
+			//i = GetCurRes();
 			Global.SetDParam(7, 0); // TODO i == _num_resolutions ? Str.STR_RES_OTHER : Strings.SPECSTR_RESOLUTION_START + i);
 			Global.SetDParam(8, 0); // TODO Strings.SPECSTR_SCREENSHOT_START + _cur_screenshot_format);
 			
@@ -128,7 +128,7 @@ public class SettingsGui extends SettingsTables
 				Window.ShowDropDownMenu(w, _driveside_dropdown, GameOptions._opt_ptr.road_side, 11, i, 0);
 			} return;
 			case 13: case 14: { /* Setup townname dropdown */
-				int i = GameOptions._opt_ptr.town_name;
+				//int i = GameOptions._opt_ptr.town_name;
 				// TODO Window.ShowDropDownMenu(w, BuildDynamicDropdown(Str.STR_TOWNNAME_ORIGINAL_ENGLISH, Strings.SPECSTR_TOWNNAME_LAST - SPECStr.STR_TOWNNAME_START + 1), i, 14, (Global._game_mode == GameModes.GM_MENU) ? 0 : (-1) ^ (1 << i), 0);
 				return;
 			}
@@ -324,7 +324,7 @@ public class SettingsGui extends SettingsTables
 	public static void SetDifficultyLevel(int mode, GameOptions gm_opt)
 	{
 
-		int i;
+		//int i;
 		assert(mode <= 3);
 
 		gm_opt.diff_level =  mode;
@@ -343,8 +343,8 @@ public class SettingsGui extends SettingsTables
 	//extern void StartupEconomy();
 
 	//enum {
-	private static final int GAMEDIFF_WND_TOP_OFFSET = 45;
-	private static final int GAMEDIFF_WND_ROWSIZE    = 9;
+	//private static final int GAMEDIFF_WND_TOP_OFFSET = 45;
+	//private static final int GAMEDIFF_WND_ROWSIZE    = 9;
 	//};
 
 	// Temporary holding place of values in the difficulty window until 'Save' is clicked
@@ -673,12 +673,12 @@ public class SettingsGui extends SettingsTables
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			int x,y;
+			//int x,y;
 			//final PatchEntry pe;
 			//final PatchPage page;
-			int clk;
-			int val;
-			int i;
+			//int clk;
+			//int val;
+			//int i;
 
 			w.click_state = 1 << (w.as_def_d().data_1 + 4);
 
@@ -1029,8 +1029,8 @@ public class SettingsGui extends SettingsTables
 		//static GRFFile _sel_grffile;
 		switch (e.event) {
 		case WE_PAINT: {
-			int x, y = NEWGRF_WND_PROC_OFFSET_TOP_WIDGET;
-			int i = 0;
+			//int x, y = NEWGRF_WND_PROC_OFFSET_TOP_WIDGET;
+			//int i = 0;
 			//GRFFile *c = _first_grffile;
 
 			w.DrawWindowWidgets();

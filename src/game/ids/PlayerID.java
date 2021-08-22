@@ -53,6 +53,7 @@ public class PlayerID extends AbstractID implements Serializable
 		return equals( Global.gs._local_player );
 	}
 
+	/*
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof PlayerID) {
@@ -60,6 +61,7 @@ public class PlayerID extends AbstractID implements Serializable
 			return him.id == id;
 		}
 		return false;
-	}
+	}*/
 
+	
 }

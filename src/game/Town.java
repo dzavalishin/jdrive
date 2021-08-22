@@ -155,6 +155,11 @@ implements IPoolItem, Serializable
 
 
 	private static IPoolItemFactory<Town> factory = new IPoolItemFactory<Town>() {		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public Town createObject() { return new Town(); }
 	};

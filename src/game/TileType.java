@@ -29,5 +29,11 @@ public class TileType {
 		
 		return super.equals(obj);
 	}
-	// TODO comarison / equals
+	
+	@Override
+	public int hashCode() {
+		return type;
+	}
+	
+	// TODO comarison 
 }

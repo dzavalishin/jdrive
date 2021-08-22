@@ -780,20 +780,20 @@ public class Npf {
 				return tile.IsTileOwner(owner); /* Railway needs owner check, while the street is public */
 			break;
 		case MP_TUNNELBRIDGE:
-			if( false )
+			/*if( false )
 			{
-				/* OPTIMISATION: If we are on the middle of a bridge, we will not do the cpu
-				 * intensive owner check, instead we will just assume that if the vehicle
-				 * managed to get on the bridge, it is probably allowed to :-)
-				 */
+				// * OPTIMISATION: If we are on the middle of a bridge, we will not do the cpu
+				// * intensive owner check, instead we will just assume that if the vehicle
+				// * managed to get on the bridge, it is probably allowed to :-)
+
 				if ((tile.getMap().m5 & 0xC6) == 0xC0 && BitOps.GB(tile.getMap().m5, 0, 1) == (enterdir & 0x1)) {
-					/* on the middle part of a railway bridge: find bridge ending */
+					// on the middle part of a railway bridge: find bridge ending 
 					while (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && !((tile.getMap().m5 & 0xC6) == 0x80)) {
 						tile = tile.iadd( TileIndex.TileOffsByDir(BitOps.GB(tile.getMap().m5, 0, 1)) );
 					}
 				}
-				/* if we were on a railway middle part, we are now at a railway bridge ending */
-			}
+				// if we were on a railway middle part, we are now at a railway bridge ending 
+			}*/
 			if (
 					(tile.getMap().m5 & 0xFC) == 0 /* railway tunnel */
 					|| (tile.getMap().m5 & 0xC6) == 0x80 /* railway bridge ending */

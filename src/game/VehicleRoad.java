@@ -2,6 +2,10 @@ package game;
 
 public class VehicleRoad extends VehicleChild {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	int state;
 	int frame;
 	int unk2;

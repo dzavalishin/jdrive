@@ -18,7 +18,6 @@ import game.xui.GfxInit;
 import game.xui.Gui;
 import game.xui.SettingsGui;
 import game.xui.VehicleGui;
-import game.xui.ViewPort;
 import game.xui.Window;
 import game.util.BitOps;
 
@@ -54,11 +53,11 @@ public class Main {
 	public static byte [] ReadFileToMem( String filename, int maxsize)
 	{
 		byte [] buf = new byte[maxsize];
-		if( buf == null )
+		/*if( buf == null )
 		{
 			error("ReadFileToMem: out of memory");
 			return null;
-		}
+		}*/
 
 		RandomAccessFile f;
 		try {
@@ -229,7 +228,7 @@ public class Main {
 		//String network_conn = null;
 		//final String optformat;
 		//String musicdriver, sounddriver, videodriver;
-		int resolution[] = {0,0};
+		//int resolution[] = {0,0};
 		int startdate = -1;
 		boolean dedicated = false;
 
@@ -751,6 +750,10 @@ public class Main {
 			// XXX: set date
 			Global.gs._local_player = PlayerID.get( Owner.OWNER_NONE );
 			Hal.MarkWholeScreenDirty();
+			break;
+			
+		default:
+			assert false;
 			break;
 		}
 

@@ -3,7 +3,6 @@ package game;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -24,14 +23,12 @@ import game.ifaces.TileVehicleInterface;
 import game.struct.BackuppedOrders;
 import game.struct.Point;
 import game.struct.Rect;
-import game.struct.SortStruct;
 import game.struct.VQueueItem;
 import game.tables.EngineTables;
 import game.util.BitOps;
 import game.util.MemoryPool;
 import game.util.VehicleHash;
 import game.xui.DrawPixelInfo;
-import game.xui.EngineGui;
 import game.xui.MiscGui;
 import game.xui.VehicleGui;
 import game.xui.ViewPort;
@@ -815,6 +812,11 @@ public class Vehicle implements IPoolItem
 
 	private static IPoolItemFactory<Vehicle> factory = new IPoolItemFactory<Vehicle>() 
 	{		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public Vehicle createObject() {
 			return new Vehicle();
@@ -2682,7 +2684,7 @@ public class Vehicle implements IPoolItem
 
 		assert(v.type == VEH_Train || v.type == VEH_Road || v.type == VEH_Ship || v.type == VEH_Aircraft);
 
-		assert 0 != (v.vehstatus & VS_STOPPED);	// the vehicle should have been stopped in VehicleEnteredDepotThisTick() if needed
+		assert v.isStopped();	// the vehicle should have been stopped in VehicleEnteredDepotThisTick() if needed
 
 		if (v.leave_depot_instantly) {
 			// we stopped the vehicle to do this, so we have to remember to start it again when we are done
@@ -2951,15 +2953,15 @@ public class Vehicle implements IPoolItem
 	 * result << 8 contains the id of the station entered. If the return value has
 	 * bit 0x8 set, the vehicle could not and did not enter the tile. Are there
 	 * other bits that can be set? */
-	int VehicleEnterTile(TileIndex tile, int x, int y)
+	int VehicleEnterTile(TileIndex itile, int x, int y)
 	{
 		TileIndex old_tile = tile;
-		int result = Landscape._tile_type_procs[tile.GetTileType().ordinal()].vehicle_enter_tile_proc.apply(this, tile, x, y);
+		int result = Landscape._tile_type_procs[tile.GetTileType().ordinal()].vehicle_enter_tile_proc.apply(this, itile, x, y);
 
 		/* When vehicle_enter_tile_proc returns 8, that apparently means that
 		 * we cannot enter the tile at all. In that case, don't call
 		 * leave_tile. */
-		if (0 == (result & 8) && old_tile != tile) {
+		if (0 == (result & 8) && old_tile != itile) {
 			TileVehicleInterface proc = Landscape._tile_type_procs[old_tile.GetTileType().ordinal()].vehicle_leave_tile_proc;
 			if (proc != null)
 				proc.apply(this, old_tile, x, y);

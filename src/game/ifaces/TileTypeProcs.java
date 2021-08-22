@@ -13,6 +13,11 @@ import game.struct.TileDesc;
 
 public class TileTypeProcs implements Serializable 
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public TileTypeProcs(
 			Consumer<TileInfo> draw_tile,
 			Function<TileInfo,Integer> get_slope_z,

@@ -2054,7 +2054,7 @@ public class Rail extends RailTables {
 			if (WayPoint.IsRailWaypoint(ti.tile) && BitOps.HASBIT(ti.tile.getMap().m3, 4)) {
 				// look for customization
 				int stat_id = WayPoint.GetWaypointByTile(ti.tile).stat_id;
-				final StationSpec stat = null; // TODO Station.GetCustomStation(STAT_CLASS_WAYP, stat_id);
+				//final StationSpec stat = null; // TODO Station.GetCustomStation(STAT_CLASS_WAYP, stat_id);
 
 				/*if (stat != null) {
 					final DrawTileSeqStruct seq;

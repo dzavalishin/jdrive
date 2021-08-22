@@ -5,6 +5,10 @@ import java.io.Serializable;
 public class PlayerEconomyEntry implements Serializable 
 {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public int income;
 	public int expenses;
 	public int delivered_cargo;

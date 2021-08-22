@@ -50,6 +50,8 @@ public class WayPoint implements IPoolItem
 
 	private static IPoolItemFactory<WayPoint> factory = new IPoolItemFactory<WayPoint>() 
 	{		
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public WayPoint createObject() {
 			return new WayPoint();
@@ -360,7 +362,7 @@ private void WaypointPoolNewBlock(int start_item)
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP5, wp.index, RAIL_TYPE_WAYPOINT | dir);
 
 			// TODO GetCustomStation
-			//if (BitOps.GB(p1, 0, 8) < Station.GetNumCustomStations(STAT_CLASS_WAYP))
+			//if (BitOps.GB(p1, 0, 8) < Station.GetNumCustomStations(StationClassID.STAT_CLASS_WAYP))
 			//	spec = Station.GetCustomStation(STAT_CLASS_WAYP, BitOps.GB(p1, 0, 8));
 
 			if (spec != null) {
@@ -557,11 +559,11 @@ private void WaypointPoolNewBlock(int start_item)
 	/* Draw a WayPoint */
 	static void DrawWaypointSprite(int x, int y, int stat_id, /* RailType */ int railtype)
 	{
-		final StationSpec stat;
-		int relocation;
-		final DrawTileSprites cust;
+		//final StationSpec stat;
+		//int relocation;
+		//final DrawTileSprites cust;
 		//final DrawTileSeqStruct seq;
-		final RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
+		//final RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
 		int ormod, img;
 
 		ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player));

@@ -130,11 +130,13 @@ public class AirportFTAClass extends Airport // bring in constants
 
 	static void UnInitializeAirports()
 	{
+		/*
 		CountryAirport.AirportFTAClass_Destructor();
 		CityAirport.AirportFTAClass_Destructor();
 		Heliport.AirportFTAClass_Destructor();
 		MetropolitanAirport.AirportFTAClass_Destructor();
 		InternationalAirport.AirportFTAClass_Destructor();
+		*/
 	}
 
 	private AirportFTAClass(
@@ -223,6 +225,7 @@ public class AirportFTAClass extends Airport // bring in constants
 		//AirportPrintOut(Airport, false);
 	}
 
+	/*
 	private void AirportFTAClass_Destructor()
 	{
 		int i;
@@ -238,7 +241,7 @@ public class AirportFTAClass extends Airport // bring in constants
 		}
 		//free(Airport.layout);
 		//free(Airport);
-	}
+	}*/
 
 	static int AirportGetNofElements(final AirportFTAbuildup [] FA)
 	{

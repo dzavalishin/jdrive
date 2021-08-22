@@ -2537,10 +2537,12 @@ public class AirCraft extends AirCraftTables {
 	{
 		Window w;
 
-		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.tile);
+		final int wn = tile == null ? 0 : tile.tile; // TODO check use of window_number
+
+		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, wn);
 
 		w = Window.AllocateWindowDesc(_new_aircraft_desc);
-		w.window_number = tile.tile;
+		w.window_number = wn; 
 		w.vscroll.setCap(4);
 		w.getWidget(2).unkA = (w.vscroll.getCap() << 8) + 1;
 

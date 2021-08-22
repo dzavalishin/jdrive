@@ -10,10 +10,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -558,10 +556,10 @@ public class Main {
 	static void WriteStringsH(final String filename) throws FileNotFoundException
 	{
 		Writer out  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp.xxx")));
-		int next = -1;
+		//int next = -1;
 
 		try {
-			codeGen(out, next);
+			codeGen(out); //, next);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -598,9 +596,9 @@ public class Main {
 
 	}
 
-	private static void codeGen(Writer out, int next) throws IOException {
+	private static void codeGen(Writer out) throws IOException {
 		int i;
-		int lastgrp;
+		//int lastgrp;
 		out.write(
 				"package game.util;\n\n"
 				+ "public class StringTable \n"
@@ -608,7 +606,7 @@ public class Main {
 				+ ""
 				);
 
-		lastgrp = 0;
+		//lastgrp = 0;
 
 		for(i = 0; i != 65536; i++) {
 			if (_strings[i] != null) {
@@ -620,7 +618,7 @@ public class Main {
 				//String s = String.format( next == i ? "%s,\n" : "\n%s = 0x%X,\n", _strings[i].name, i);
 				String s = String.format( "\n\tpublic static final int %s = 0x%X;\n", _strings[i].name, i);
 				out.write( s );
-				next = i + 1;
+				//next = i + 1;
 			}
 		}
 

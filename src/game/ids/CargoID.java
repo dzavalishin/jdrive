@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CargoID extends AbstractID {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private CargoID(int i) {
 		super(i);
 	}

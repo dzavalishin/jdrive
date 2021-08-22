@@ -7,6 +7,10 @@ import game.Engine;
 
 public class EngineID extends AbstractID {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private EngineID(int i) {
 		super(i);
 	}

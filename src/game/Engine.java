@@ -25,6 +25,10 @@ import game.xui.WindowEvent;
 
 public class Engine extends EngineTables implements Serializable 
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	int intro_date;
 	int age;
 	int reliability;

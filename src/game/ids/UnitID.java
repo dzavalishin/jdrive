@@ -5,6 +5,10 @@ import java.util.Map;
 
 public class UnitID extends AbstractID {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private UnitID(int i) {
 		super(i);
 	}

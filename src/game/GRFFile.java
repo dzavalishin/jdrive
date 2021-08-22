@@ -698,7 +698,7 @@ public class GRFFile
 		switch (prop) {
 		case 0x08: {	/* Sprite ID */
 			for (i = 0; i < numinfo; i++) {
-				byte spriteid = bufp.grf_load_byte();
+				int spriteid = bufp.grf_load_ubyte();
 
 				if (spriteid == 0xFF)
 					spriteid = (byte) 0xFD; // ships have different custom id in the GRF file
@@ -1443,7 +1443,7 @@ public class GRFFile
 		byte feature;
 		byte setid;
 		/* XXX: For stations, these two are "little cargo" and "lotsa cargo" sets. */
-		byte numloaded;
+		int numloaded;
 		byte numloading;
 		SpriteGroup group;
 		//RealSpriteGroup rg;
@@ -1481,6 +1481,8 @@ public class GRFFile
 
 			group = new SpriteGroup();
 			group.type = SpriteGroupType.SGT_DETERMINISTIC;
+			
+			assert group instanceof DeterministicSpriteGroup;
 			dg = (DeterministicSpriteGroup)group; //.g.determ;
 
 			/* XXX: We don't free() anything, assuming that if there was
@@ -1556,11 +1558,9 @@ public class GRFFile
 
 			group = new SpriteGroup();
 			group.type = SpriteGroupType.SGT_RANDOMIZED;
-			rg = (RandomizedSpriteGroup)group;
 
-			/* XXX: We don't free() anything, assuming that if there was
-			 * some action here before, it got associated by action 3.
-			 * We should perhaps keep some refcount? --pasky */
+			assert group instanceof RandomizedSpriteGroup;
+			rg = (RandomizedSpriteGroup)group;
 
 			rg.var_scope = numloaded == 0x83 ? VarSpriteGroupScope.VSG_SCOPE_PARENT : VarSpriteGroupScope.VSG_SCOPE_SELF;
 
@@ -1626,6 +1626,8 @@ public class GRFFile
 
 		group = new SpriteGroup();
 		group.type = SpriteGroupType.SGT_REAL;
+		
+		assert group instanceof RealSpriteGroup;
 		RealSpriteGroup rg = (RealSpriteGroup) group;
 
 		rg.sprites_per_set = _cur_grffile.spriteset_numents;
@@ -1725,7 +1727,7 @@ public class GRFFile
 				DataLoader bp = new DataLoader( bufp, 4 + idcount );
 
 				for (c = 0; c < cidcount; c++) {
-					byte ctype = bp.grf_load_byte();
+					int ctype = bp.grf_load_ubyte();
 					int groupid = bp.grf_load_word();
 
 					if (groupid >= _cur_grffile.spritegroups_count || _cur_grffile.spritegroups[groupid] == null) {
@@ -1816,7 +1818,7 @@ public class GRFFile
 			Global.DEBUG_grf( 7, "VehicleMapSpriteGroup: [%d] Engine %d...", i, engine);
 
 			for (c = 0; c < cidcount; c++) {
-				byte ctype = bp.grf_load_byte();
+				int ctype = bp.grf_load_ubyte();
 				int groupid = bp.grf_load_word();
 
 				Global.DEBUG_grf( 8, "VehicleMapSpriteGroup: * [%d] Cargo type %x, group id %x", c, ctype, groupid);
@@ -2198,12 +2200,12 @@ public class GRFFile
 		 * B parnum        see action 6, only used with built-in message 03 */
 		/* TODO: For now we just show the message, sometimes incomplete and never translated. */
 
-		byte severity;
-		byte msgid;
+		int severity;
+		int msgid;
 
 		bufp.check_length( 6, "GRFError");
-		severity = bufp.r(1);
-		msgid = bufp.r(3);
+		severity = 0xFF & bufp.r(1);
+		msgid = 0xFF & bufp.r(3);
 
 		// Undocumented TTDPatch feature.
 		if ((severity & 0x80) == 0 && _cur_stage == 0)
@@ -2249,8 +2251,8 @@ public class GRFFile
 		 *         (source2 like in 05, and source1 as well)
 		 */
 
-		byte target;
-		byte oper;
+		int target;
+		int oper;
 		int src1;
 		int src2;
 		int data = 0;
@@ -2258,10 +2260,10 @@ public class GRFFile
 
 		bufp.check_length( 5, "ParamSet");
 		bufp.shift(1);
-		target = bufp.grf_load_byte();
-		oper = bufp.grf_load_byte();
-		src1 = bufp.grf_load_byte();
-		src2 = bufp.grf_load_byte();
+		target = bufp.grf_load_ubyte();
+		oper = bufp.grf_load_ubyte();
+		src1 = bufp.grf_load_ubyte();
+		src2 = bufp.grf_load_ubyte();
 
 		if (bufp.hasBytesLeft() >= 8) data = bufp.grf_load_dword();
 
@@ -2501,6 +2503,7 @@ public class GRFFile
 
 	static void ResetCustomStations()
 	{
+		/*
 		GRFFile file;
 		int i;
 		//CargoID c;
@@ -2509,17 +2512,15 @@ public class GRFFile
 			for (i = 0; i < file.stations.length; i++) {
 				if (file.stations[i].grfid != file.grfid) continue;
 
-				// TODO: Release renderdata, platforms and layouts
 
-				/*
 				// Release this stations sprite groups.
 				for (c = 0; c < NUM_GLOBAL_CID; c++) {
 					if (file.stations[i].spritegroup[c] != null)
 						UnloadSpriteGroup(&file.stations[i].spritegroup[c]);
 				}
-				 */
 			}
 		}
+		*/
 	}
 
 

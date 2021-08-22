@@ -14,12 +14,9 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
-import java.util.Arrays;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;

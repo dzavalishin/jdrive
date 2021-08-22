@@ -1,10 +1,19 @@
 package game;
 
 import java.util.HashMap;
-
 import java.util.Map;
 import java.util.function.Consumer;
 
+import game.Cheat.Cheats;
+import game.enums.GameModes;
+import game.enums.SwitchModes;
+import game.ids.StringID;
+import game.ids.VehicleID;
+import game.struct.BackuppedOrders;
+import game.struct.ColorList;
+import game.struct.EngineInfo;
+import game.struct.Point;
+import game.tables.CargoConst;
 import game.util.GameDate;
 import game.util.Paths;
 import game.util.Prices;
@@ -14,17 +23,6 @@ import game.xui.EngineGui;
 import game.xui.MiscGui;
 import game.xui.PlayerGui;
 import game.xui.Window;
-import game.Cheat.Cheats;
-import game.enums.GameModes;
-import game.enums.SwitchModes;
-import game.ids.PlayerID;
-import game.ids.StringID;
-import game.ids.VehicleID;
-import game.struct.BackuppedOrders;
-import game.struct.ColorList;
-import game.struct.EngineInfo;
-import game.struct.Point;
-import game.tables.CargoConst;
 
 public class Global 
 {

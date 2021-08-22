@@ -103,7 +103,10 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return String.format("%d.%d", getX(), getY() );
 	}
 
-
+	@Override
+	public int hashCode() {
+		return tile;
+	}
 
 
 

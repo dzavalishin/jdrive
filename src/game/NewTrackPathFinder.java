@@ -7,7 +7,6 @@ import game.enums.TileTypes;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.HashLink;
 import game.struct.StackedItem;
-import game.tables.TrackPathFinderTables;
 import game.util.BitOps;
 
 public class NewTrackPathFinder extends Pathfind 

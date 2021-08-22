@@ -35,6 +35,11 @@ public class SignStruct implements IPoolItem
 	private int          index;
 
 	private static IPoolItemFactory<SignStruct> factory = new IPoolItemFactory<SignStruct>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public SignStruct createObject() { return new SignStruct(); };
 	};
 

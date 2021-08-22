@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SpriteID extends AbstractID {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private SpriteID(int i) {
 		super(i);
 	}

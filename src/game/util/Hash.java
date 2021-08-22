@@ -68,7 +68,7 @@ class HashKey implements Comparable<HashKey>
 
 	@Override
 	public int hashCode() {		
-		return tile.getTile() << 2 + direction;
+		return (tile.getTile() << 2) + direction;
 	}
 	
 	

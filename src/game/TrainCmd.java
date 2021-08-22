@@ -1371,7 +1371,7 @@ public class TrainCmd extends TrainTables
 
 			t = a.direction;
 			a.direction = b.direction;
-			a.direction = t;
+			b.direction = t;
 
 			/* toggle direction */
 			if (0==(a.rail.track & 0x80)) a.direction ^= 4;

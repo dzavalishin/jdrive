@@ -1674,10 +1674,8 @@ public class Window extends WindowConstants
 				}
 
 				e.event = WindowEvents.WE_RESIZE;
-				e.size.x = x + w.width;
-				e.size.y = y + w.height;
-				e.diff.x = x;
-				e.diff.y = y;
+				e.size = new Point(x + w.width, y + w.height);
+				e.diff = new Point(x,y);
 				w.wndproc.accept(w, e);
 
 				w.SetWindowDirty();

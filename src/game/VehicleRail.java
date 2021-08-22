@@ -3,6 +3,10 @@ package game;
 import game.ids.EngineID;
 
 public class VehicleRail extends VehicleChild {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	int last_speed;		// NOSAVE: only used in UI
 	int crash_anim_pos;
 	int days_since_order_progr;

@@ -3,7 +3,10 @@ package game.ids;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CursorID extends AbstractID {
+public class CursorID extends AbstractID 
+{
+	private static final long serialVersionUID = 1L;
+	
 	private CursorID(int i) {
 		super(i);
 	}

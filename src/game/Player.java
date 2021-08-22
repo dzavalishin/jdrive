@@ -562,7 +562,7 @@ public class Player implements Serializable
 				for(i=0; i!=16; i++) if (colors[i] == pcolor) {
 					colors[i] = (byte) 0xFF;
 
-					t2 = _color_similar_1[pcolor];
+					t2 = 0xFF & _color_similar_1[pcolor];
 					if (t2 == 0xFF) break;
 					for(i=0; i!=15; i++) {
 						if (colors[i] == t2) {
@@ -571,7 +571,7 @@ public class Player implements Serializable
 						}
 					}
 
-					t2 = _color_similar_2[pcolor];
+					t2 = 0xFF & _color_similar_2[pcolor];
 					if (t2 == 0xFF) break;
 					for(i=0; i!=15; i++) {
 						if (colors[i] == t2) {

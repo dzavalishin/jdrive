@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import game.util.MemoryPool;
-
 /** 
  * SaveLoad type struct. 
  * Do NOT use this directly but use the SLE_ 
