@@ -15,5 +15,5 @@ public class IConsoleCmd {
 	IConsoleCmdProc proc;    // process executed when command is typed
 
 	// any special trigger action that needs executing
-	IConsoleHooks 	hook = new IConsoleHooks();       
+    final IConsoleHooks 	hook = new IConsoleHooks();
 } 
