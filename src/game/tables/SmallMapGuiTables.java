@@ -242,8 +242,8 @@ public class SmallMapGuiTables
 
 
 	public static class AndOr {
-		public int mor;
-		public int mand;
+		public final int mor;
+		public final int mand;
 
 		public AndOr(int o, int a) {
 			mor = o;

@@ -148,21 +148,21 @@ public class PaletteTabs
 	};
 
 
-	static Colour [] _a = { M( 32,  68, 112), M( 36,  72, 116), M( 40,  76, 120), M( 44,  80, 124), M( 48,  84, 128) };	
-	static Colour [] _ac = { M( 28, 108, 124), M( 32, 112, 128), M( 36, 116, 132), M( 40, 120, 136), M( 44, 124, 140) };	
-	static Colour [] _lh = { M(240, 208,   0), M(  0,   0,   0), M(  0,   0,  	0), M(  0,   0,   0) };
-	static Colour [] _or = { M(252,  60,   0), M(252,  84,   0), M(252, 108,   0), M(252, 124,   0),
+	static final Colour [] _a = { M( 32,  68, 112), M( 36,  72, 116), M( 40,  76, 120), M( 44,  80, 124), M( 48,  84, 128) };
+	static final Colour [] _ac = { M( 28, 108, 124), M( 32, 112, 128), M( 36, 116, 132), M( 40, 120, 136), M( 44, 124, 140) };
+	static final Colour [] _lh = { M(240, 208,   0), M(  0,   0,   0), M(  0,   0,  	0), M(  0,   0,   0) };
+	static final Colour [] _or = { M(252,  60,   0), M(252,  84,   0), M(252, 108,   0), M(252, 124,   0),
 			M(252, 148,   0), M(252, 172,   0), M(252, 196,   0) };
 
-	static Colour [] _e = { M( 76,  24,   8), M(108,  44,  24), M(144,  72,  52), M(176, 108,  84),
+	static final Colour [] _e = { M( 76,  24,   8), M(108,  44,  24), M(144,  72,  52), M(176, 108,  84),
 			M(212, 148, 128) };
 
-	static Colour [] _b = { M(216, 244, 252), M(172, 208, 224), M(132, 172, 196), M(100, 132, 168),
+	static final Colour [] _b = { M(216, 244, 252), M(172, 208, 224), M(132, 172, 196), M(100, 132, 168),
 			M( 72, 100, 144), M( 72, 100, 144), M( 72, 100, 144), M( 72, 100, 144),
 			M( 72, 100, 144), M( 72, 100, 144), M( 72, 100, 144), M( 72, 100, 144),
 			M(100, 132, 168), M(132, 172, 196), M(172, 208, 224) };
 
-	static Colour [] _bc = { M(216, 244, 252), M(180, 220, 232), M(148, 200, 216), M(116, 180, 196),
+	static final Colour [] _bc = { M(216, 244, 252), M(180, 220, 232), M(148, 200, 216), M(116, 180, 196),
 			M( 92, 164, 184), M( 92, 164, 184), M( 92, 164, 184), M( 92, 164, 184),
 			M( 92, 164, 184), M( 92, 164, 184), M( 92, 164, 184), M( 92, 164, 184),
 			M(116, 180, 196), M(148, 200, 216), M(180, 220, 232) };
@@ -180,13 +180,13 @@ public class PaletteTabs
 		Colour bc[45]; // glittery water Toyland
 		 */
 
-		public Colour a[];  // dark blue water
-		public Colour ac[]; // dark blue water Toyland
-		public Colour lighthouse[]; // lighthouse & stadium
-		public Colour oil_ref[];    // oil refinery
-		public Colour e[];  // ???
-		public Colour b[];  // glittery water
-		public Colour bc[]; // glittery water Toyland
+		public final Colour[] a;  // dark blue water
+		public final Colour[] ac; // dark blue water Toyland
+		public final Colour[] lighthouse; // lighthouse & stadium
+		public final Colour[] oil_ref;    // oil refinery
+		public final Colour[] e;  // ???
+		public final Colour[] b;  // glittery water
+		public final Colour[] bc; // glittery water Toyland
 
 		public ExtraPaletteValues() {
 			a = _a;
@@ -207,8 +207,8 @@ public class PaletteTabs
 
 	// Color table for colors in lang files (e.g. {BLACK})
 	public static class StringColor {
-		public int text;
-		public int shadow;
+		public final int text;
+		public final int shadow;
 
 		public StringColor(int i, int j) {
 			text = i;

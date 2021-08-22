@@ -1,10 +1,10 @@
 package game.tables;
 
 public class DrawIndustrySpec1Struct {
-	public int x;
-	public int image_1;
-	public int image_2;
-	public int image_3;
+	public final int x;
+	public final int image_1;
+	public final int image_2;
+	public final int image_3;
 
 	public DrawIndustrySpec1Struct(int i, int j, int k, int l) 
 	{

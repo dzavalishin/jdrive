@@ -2,7 +2,7 @@ package game.tables;
 
 public class EconomeTables {
 
-	protected static byte _price_category[] = {
+	protected static final byte[] _price_category = {
 			0, 2, 2, 2, 2, 2, 2, 2,
 			2, 2, 2, 2, 2, 2, 2, 2,
 			2, 2, 2, 2, 2, 2, 2, 2,

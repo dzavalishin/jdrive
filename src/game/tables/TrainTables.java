@@ -182,7 +182,7 @@ public class TrainTables
 	};
 
 
-	public static byte _matching_tracks[] = {0x30, 1, 0xC, 2, 0x30, 1, 0xC, 2};
+	public static final byte[] _matching_tracks = {0x30, 1, 0xC, 2, 0x30, 1, 0xC, 2};
 
 
 	/*

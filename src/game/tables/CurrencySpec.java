@@ -25,7 +25,7 @@ public class CurrencySpec {
 	//|  separator        |     postfix
 	//|   |    Euro year  |       |
 	//|   |    |          |       |
-	public static CurrencySpec[] _currency_specs = {				
+	public static final CurrencySpec[] _currency_specs = {
 			//{    1, ',', CF_NOEURO, "\xA3", ""     }, // british pounds
 			new CurrencySpec(    1, ',', CF_NOEURO, "", "gbp"     ), // british pounds
 			new CurrencySpec(    2, ',', CF_NOEURO, "$",    ""     ), // us dollars

@@ -1,9 +1,10 @@
 package game.tables;
 
 public class AirportMovingData {
-	public int x,y;
-	public int flag;
-	public int direction;
+	public final int x;
+    public final int y;
+	public final int flag;
+	public final int direction;
 
 	AirportMovingData(int x, int y, int flag, int dir)
 	{
