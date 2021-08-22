@@ -12,7 +12,7 @@ public class CargoID extends AbstractID {
 		super(i);
 	}
 	
-	private static Map<Integer,CargoID> ids = new HashMap<Integer,CargoID>();
+	private static final Map<Integer,CargoID> ids = new HashMap<Integer,CargoID>();
 	public static CargoID get(int player) 
 	{
 		CargoID old = ids.get(player);

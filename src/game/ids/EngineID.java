@@ -20,7 +20,7 @@ public class EngineID extends AbstractID {
 		id = -1;
 	}*/
 
-	private static Map<Integer,EngineID> ids = new HashMap<Integer,EngineID>();
+	private static final Map<Integer,EngineID> ids = new HashMap<Integer,EngineID>();
 	public static EngineID get(int player) 
 	{
 		EngineID old = ids.get(player);

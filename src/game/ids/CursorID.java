@@ -11,7 +11,7 @@ public class CursorID extends AbstractID
 		super(i);
 	}
 	
-	private static Map<Integer,CursorID> ids = new HashMap<Integer,CursorID>();
+	private static final Map<Integer,CursorID> ids = new HashMap<Integer,CursorID>();
 	public static CursorID get(int player) 
 	{
 		CursorID old = ids.get(player);

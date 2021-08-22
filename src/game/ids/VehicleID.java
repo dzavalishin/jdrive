@@ -19,7 +19,7 @@ public class VehicleID extends AbstractID {
 	}
 
 
-	private static Map<Integer,VehicleID> ids = new HashMap<Integer,VehicleID>();
+	private static final Map<Integer,VehicleID> ids = new HashMap<Integer,VehicleID>();
 	public static VehicleID get(int player) 
 	{
 		VehicleID old = ids.get(player);

@@ -14,7 +14,7 @@ public class StationID extends AbstractID
 		super(i);
 	}
 	
-	private static Map<Integer,StationID> ids = new HashMap<Integer,StationID>();
+	private static final Map<Integer,StationID> ids = new HashMap<Integer,StationID>();
 	public static StationID get(int player) 
 	{
 		StationID old = ids.get(player);

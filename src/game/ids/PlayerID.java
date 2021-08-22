@@ -28,7 +28,7 @@ public class PlayerID extends AbstractID implements Serializable
 		return get(o.owner);
 	}*/
 
-	private static Map<Integer,PlayerID> ids = new HashMap<Integer,PlayerID>();
+	private static final Map<Integer,PlayerID> ids = new HashMap<Integer,PlayerID>();
 	
 	public static PlayerID get(int player) 
 	{
