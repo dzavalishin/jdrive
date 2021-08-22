@@ -4,11 +4,11 @@ import java.io.IOException;
 
 public class CmdStruct 
 {
-	String cmd;
-	ParseCmdProc proc;
-	long value;
-	int consumes;
-	int flags;
+	final String cmd;
+	final ParseCmdProc proc;
+	final long value;
+	final int consumes;
+	final int flags;
 
 	
 	public CmdStruct(String cs, ParseCmdProc p, int v, int c, int f) 

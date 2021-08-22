@@ -14,7 +14,7 @@ public class CmdTable {
 			// New line
 			new CmdStruct("", Emitter::EmitSingleByte, 10, 0, Main.C_DONTCOUNT),
 	
-			new CmdStruct("{", Emitter::EmitSingleByte, (int)'{', 0, Main.C_DONTCOUNT),
+			new CmdStruct("{", Emitter::EmitSingleByte, '{', 0, Main.C_DONTCOUNT),
 	
 			// Colors
 			new CmdStruct("BLUE",    Emitter::EmitSingleByte, 15, 0, 0),

@@ -43,11 +43,11 @@ public class Main {
 	static int _errors, _warnings;
 
 
-	static LangString [] _strings = new LangString[65536];
+	static final LangString [] _strings = new LangString[65536];
 
 
 	static final int HASH_SIZE = 32767;
-	static int [] _hash_head = new int[HASH_SIZE];
+	static final int [] _hash_head = new int[HASH_SIZE];
 
 	static int _next_string_id;
 
@@ -55,12 +55,12 @@ public class Main {
 	static String _lang_name, _lang_ownname, _lang_isocode;
 	static byte _lang_pluralform;
 	static final int MAX_NUM_GENDER = 8;
-	static String [] _genders = new String [MAX_NUM_GENDER];
+	static final String [] _genders = new String [MAX_NUM_GENDER];
 	static int _numgenders;
 
 	// contains the name of all cases.
 	static final int MAX_NUM_CASES = 50;
-	static String [] _cases = new String [MAX_NUM_CASES];
+	static final String [] _cases = new String [MAX_NUM_CASES];
 	static int _numcases;
 
 	// for each plural value, this is the number of plural forms.
@@ -198,7 +198,7 @@ public class Main {
 	}
 
 
-	static final CmdStruct TranslateCmdForCompare(final CmdStruct a)
+	static CmdStruct TranslateCmdForCompare(final CmdStruct a)
 	{
 		if (a == null) return null;
 

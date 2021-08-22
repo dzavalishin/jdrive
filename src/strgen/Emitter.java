@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class Emitter 
 {
-	private DataOutputStream f;
+	private final DataOutputStream f;
 
 	int _put_pos;
 	int _cur_argidx;
@@ -15,7 +15,7 @@ public class Emitter
 	static boolean _translated;
 
 	
-	static byte [] _put_buf = new byte[4096];
+	static final byte [] _put_buf = new byte[4096];
 	
 	
 	
@@ -36,8 +36,7 @@ public class Emitter
 		f = s;
 	}
 
-	void PutByte(int c) throws IOException
-	{
+	void PutByte(int c) {
 
 		if (_put_pos >= _put_buf.length)
 			Fatal("Put buffer too small");
