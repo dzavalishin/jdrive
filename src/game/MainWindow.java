@@ -14,12 +14,9 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
-import java.util.Arrays;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -43,9 +40,9 @@ public class MainWindow extends JPanel implements ActionListener
 	public static final int HEIGHT = 800;
 
 
-	private Timer timer = new Timer(TICK_TIME, this);	
-	private JFrame frame;
-	private byte[] screen;
+	private final Timer timer = new Timer(TICK_TIME, this);
+	private final JFrame frame;
+	private final byte[] screen;
 	private Point myLocation;
 
 	/*
@@ -115,10 +112,12 @@ public class MainWindow extends JPanel implements ActionListener
 
 			@Override
 			public void mouseExited(MouseEvent e) {
+				Window._mouse_inside = false;
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
+				Window._mouse_inside = true;
 			}
 
 				});
@@ -243,7 +242,7 @@ public class MainWindow extends JPanel implements ActionListener
 			case KeyEvent.VK_F9:	fKey = Window.WKC_F9;	break;
 			case KeyEvent.VK_F10:	fKey = Window.WKC_F10;	break;
 			case KeyEvent.VK_F11:	fKey = Window.WKC_F11;	break;
-			case KeyEvent.VK_F12:	fKey = Window.WKC_F11;	break;
+			case KeyEvent.VK_F12:	fKey = Window.WKC_F12;	break;
 
 			}
 		}

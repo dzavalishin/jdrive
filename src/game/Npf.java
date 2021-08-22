@@ -1,5 +1,9 @@
 package game;
 
+import game.aystar.AyStar;
+import game.aystar.AyStarNode;
+import game.aystar.AyStar_CalculateH;
+import game.aystar.AyStar_EndNodeCheck;
 import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.struct.FindLengthOfTunnelResult;
@@ -12,7 +16,7 @@ import game.util.TTDQueueImpl;
 
 public class Npf {
 
-	static AyStar _npf_aystar = new AyStar();
+	static final AyStar _npf_aystar = new AyStar();
 
 	public static final int NPF_TILE_LENGTH = Global.NPF_TILE_LENGTH;
 
@@ -120,7 +124,7 @@ public class Npf {
 	/* The cost of each trackdir. A diagonal piece is the full NPF_TILE_LENGTH,
 	 * the shorter piece is sqrt(2)/2*NPF_TILE_LENGTH =~ 0.7071
 	 */
-	static final int NPF_STRAIGHT_LENGTH = (int)(NPF_TILE_LENGTH * Map.STRAIGHT_TRACK_LENGTH);
+	static final int NPF_STRAIGHT_LENGTH = NPF_TILE_LENGTH * Map.STRAIGHT_TRACK_LENGTH;
 
 	//static final int _trackdir_length[TRACKDIR_END] = 
 	static final int _trackdir_length[] = 
@@ -225,9 +229,9 @@ public class Npf {
 	/**
 	 * Calculates a hash value for use in the NPF.
 	 * @param key1	The TileIndex of the tile to hash
-	 * @param key1	The Trackdir of the track on the tile.
-	 *
-	 * @todo	Think of a better hash.
+	 * @param key2	The Trackdir of the track on the tile.
+	 * <br>
+	 * TODO	Think of a better hash.
 	 */
 	static int NPFHash(int key1, int key2)
 	{
@@ -278,7 +282,7 @@ public class Npf {
 	 * reserve the appropriate tracks, if needed. */
 	static void NPFReservePBSPath(AyStar as)
 	{
-		NPFFoundTargetData ftd = (NPFFoundTargetData)as.user_path;
+		NPFFoundTargetData ftd = as.user_path;
 		boolean eol_end = false;
 
 		if (ftd.best_trackdir == 0xFF)
@@ -368,7 +372,7 @@ public class Npf {
 	static int NPFCalcStationOrTileHeuristic(AyStar  as, AyStarNode  current, OpenListNode  parent)
 	{
 		NPFFindStationOrTileData  fstd = (NPFFindStationOrTileData )as.user_target;
-		NPFFoundTargetData ftd = (NPFFoundTargetData)as.user_path;
+		NPFFoundTargetData ftd = as.user_path;
 		TileIndex from = current.tile;
 		TileIndex to = fstd.dest_coords;
 		int dist;
@@ -741,7 +745,7 @@ public class Npf {
 	 */
 	static void NPFSaveTargetData(AyStar  as, OpenListNode  current)
 	{
-		NPFFoundTargetData ftd = (NPFFoundTargetData)as.user_path;
+		NPFFoundTargetData ftd = as.user_path;
 		ftd.best_trackdir = current.path.node.user_data[NPF_TRACKDIR_CHOICE];
 		ftd.best_path_dist = current.g;
 		ftd.best_bird_dist = 0;
@@ -755,7 +759,8 @@ public class Npf {
 	 * @param tile     The tile that is about to be entered.
 	 * @param enterdir The direction from which the vehicle wants to enter the tile.
 	 * @return         true if the vehicle can enter the tile.
-	 * @todo           This function should be used in other places than just NPF,
+	 *
+	 * TODO           This function should be used in other places than just NPF,
 	 *                 maybe moved to another file too.
 	 */
 	static boolean VehicleMayEnterTile(PlayerID owner, TileIndex tile, /*DiagDirection*/ int enterdir)
@@ -776,20 +781,20 @@ public class Npf {
 				return tile.IsTileOwner(owner); /* Railway needs owner check, while the street is public */
 			break;
 		case MP_TUNNELBRIDGE:
-			if( false )
+			/*if( false )
 			{
-				/* OPTIMISATION: If we are on the middle of a bridge, we will not do the cpu
-				 * intensive owner check, instead we will just assume that if the vehicle
-				 * managed to get on the bridge, it is probably allowed to :-)
-				 */
+				// * OPTIMISATION: If we are on the middle of a bridge, we will not do the cpu
+				// * intensive owner check, instead we will just assume that if the vehicle
+				// * managed to get on the bridge, it is probably allowed to :-)
+
 				if ((tile.getMap().m5 & 0xC6) == 0xC0 && BitOps.GB(tile.getMap().m5, 0, 1) == (enterdir & 0x1)) {
-					/* on the middle part of a railway bridge: find bridge ending */
+					// on the middle part of a railway bridge: find bridge ending 
 					while (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && !((tile.getMap().m5 & 0xC6) == 0x80)) {
 						tile = tile.iadd( TileIndex.TileOffsByDir(BitOps.GB(tile.getMap().m5, 0, 1)) );
 					}
 				}
-				/* if we were on a railway middle part, we are now at a railway bridge ending */
-			}
+				// if we were on a railway middle part, we are now at a railway bridge ending 
+			}*/
 			if (
 					(tile.getMap().m5 & 0xFC) == 0 /* railway tunnel */
 					|| (tile.getMap().m5 & 0xC6) == 0x80 /* railway bridge ending */
@@ -812,7 +817,8 @@ public class Npf {
 	 * copy AyStarNode.user_data[NPF_NODE_FLAGS] from the parent */
 	static void NPFFollowTrack(AyStar  aystar, OpenListNode  current)
 	{
-		/*Trackdir*/ int src_trackdir = (/*Trackdir*/ int)current.path.node.direction;
+		/*Trackdir*/ /*Trackdir*/
+		int src_trackdir = current.path.node.direction;
 		TileIndex src_tile = current.path.node.tile;
 		/*DiagDirection*/ int src_exitdir = Rail.TrackdirToExitdir(src_trackdir);
 		FindLengthOfTunnelResult flotr;
@@ -1008,8 +1014,8 @@ public class Npf {
 		}
 
 		/* Initialize result */
-		result.best_bird_dist = (int)-1;
-		result.best_path_dist = (int)-1;
+		result.best_bird_dist = -1;
+		result.best_path_dist = -1;
 		result.best_trackdir = Rail.INVALID_TRACKDIR;
 		_npf_aystar.user_path = result;
 
@@ -1149,8 +1155,8 @@ public class Npf {
 
 		/* Initialize Result */
 		_npf_aystar.user_path = result;
-		best_result.best_path_dist = (int)-1;
-		best_result.best_bird_dist = (int)-1;
+		best_result.best_path_dist = -1;
+		best_result.best_bird_dist = -1;
 
 		/* Just iterate the depots in order of increasing distance */
 		while( (current = depots.pop()) != null ) {
@@ -1169,8 +1175,8 @@ public class Npf {
 			_npf_aystar.addstart.apply(_npf_aystar, start, 0);
 
 			/* Initialize result */
-			result.best_bird_dist = (int)-1;
-			result.best_path_dist = (int)-1;
+			result.best_bird_dist = -1;
+			result.best_path_dist = -1;
 			result.best_trackdir = Rail.INVALID_TRACKDIR;
 
 			/* Initialize target */
@@ -1193,12 +1199,12 @@ public class Npf {
 	static void InitializeNPF()
 	{
 		AyStar.init_AyStar(_npf_aystar, Npf::NPFHash, NPF_HASH_SIZE);
-		_npf_aystar.loops_per_tick = 0;
-		_npf_aystar.max_path_cost = 0;
-		//_npf_aystar.max_search_nodes = 0;
+		_npf_aystar.setLoops_per_tick(0);
+		_npf_aystar.setMax_path_cost(0);
+
 		/* We will limit the number of nodes for now, until we have a better
 		 * solution to really fix performance */
-		_npf_aystar.max_search_nodes = Global._patches.npf_max_search_nodes;
+		_npf_aystar.setMax_search_nodes(Global._patches.npf_max_search_nodes);
 	}
 
 	static void NPFFillWithOrderData(NPFFindStationOrTileData  fstd, Vehicle  v)

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import game.enums.Owner;
@@ -25,6 +26,10 @@ import game.xui.WindowEvent;
 
 public class Engine extends EngineTables implements Serializable 
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	int intro_date;
 	int age;
 	int reliability;
@@ -64,25 +69,25 @@ public class Engine extends EngineTables implements Serializable
 	
 
 	
-	public static final RailVehicleInfo  RailVehInfo(int e)
+	public static RailVehicleInfo  RailVehInfo(int e)
 	{
 		assert(e < Global._rail_vehicle_info.length);
 		return Global._rail_vehicle_info[e];
 	}
 
-	public static final ShipVehicleInfo  ShipVehInfo(int e ) //EngineID e)
+	public static ShipVehicleInfo  ShipVehInfo(int e ) //EngineID e)
 	{
 		assert(e >= Global.SHIP_ENGINES_INDEX && e < Global.SHIP_ENGINES_INDEX + Global._ship_vehicle_info.length);
 		return Global._ship_vehicle_info[e - Global.SHIP_ENGINES_INDEX];
 	}
 
-	public static final AircraftVehicleInfo  AircraftVehInfo(int e)
+	public static AircraftVehicleInfo  AircraftVehInfo(int e)
 	{
 		assert(e >= Global.AIRCRAFT_ENGINES_INDEX && e < Global.AIRCRAFT_ENGINES_INDEX + Global._aircraft_vehicle_info.length);
 		return Global._aircraft_vehicle_info[e - Global.AIRCRAFT_ENGINES_INDEX];
 	}
 
-	public static final RoadVehicleInfo  RoadVehInfo(int e)
+	public static RoadVehicleInfo  RoadVehInfo(int e)
 	{
 		assert(e >= Global.ROAD_ENGINES_INDEX && e < Global.ROAD_ENGINES_INDEX + Global._road_vehicle_info.length);
 		return Global._road_vehicle_info[e - Global.ROAD_ENGINES_INDEX];
@@ -120,8 +125,7 @@ public class Engine extends EngineTables implements Serializable
 	static void SetupEngineNames()
 	{
 		//for (name = _engine_name_strings; name != endof(_engine_name_strings); name++)
-		for (int i = 0; i < _engine_name_strings.length; i++)
-			_engine_name_strings[i] = Str.STR_SV_EMPTY;
+		Arrays.fill(_engine_name_strings, Str.STR_SV_EMPTY);
 
 		DeleteCustomEngineNames();
 		LoadCustomEngineNames();
@@ -152,7 +156,7 @@ public class Engine extends EngineTables implements Serializable
 			e.reliability = e.reliability_max;
 		} else if ((age -= e.duration_phase_2) < e.duration_phase_3) {
 			int max = e.reliability_max;
-			e.reliability = (int)age * (int)(e.reliability_final - max) / e.duration_phase_3 + max;
+			e.reliability = age * (e.reliability_final - max) / e.duration_phase_3 + max;
 		} else {
 			// time's up for this engine
 			// make it either available to all players (if never_expire_vehicles is enabled and if it was available earlier)
@@ -262,7 +266,7 @@ public class Engine extends EngineTables implements Serializable
 		WagonOverride [] overrides;
 	}
 
-	static WagonOverrides[] _engine_wagon_overrides = new WagonOverrides[Global.TOTAL_NUM_ENGINES];
+	static final WagonOverrides[] _engine_wagon_overrides = new WagonOverrides[Global.TOTAL_NUM_ENGINES];
 
 	static void SetWagonOverrideSprites(EngineID engine, SpriteGroup group, byte [] train_id,
 			int trains)
@@ -290,7 +294,7 @@ public class Engine extends EngineTables implements Serializable
 		System.arraycopy(train_id, 0, wo.train_id, 0, trains);
 	}
 
-	static final SpriteGroup GetWagonOverrideSpriteSet(EngineID engine, int overriding_engine)
+	static SpriteGroup GetWagonOverrideSpriteSet(EngineID engine, int overriding_engine)
 	{
 		final WagonOverrides wos = _engine_wagon_overrides[engine.id];
 		int i;
@@ -346,7 +350,7 @@ public class Engine extends EngineTables implements Serializable
 	// (It isn't and shouldn't be like this in the GRF files since new cargo types
 	// may appear in future - however it's more convenient to store it like this in
 	// memory. --pasky)
-	static SpriteGroup [][] engine_custom_sprites = new SpriteGroup[Global.TOTAL_NUM_ENGINES][NUM_GLOBAL_CID];
+	static final SpriteGroup [][] engine_custom_sprites = new SpriteGroup[Global.TOTAL_NUM_ENGINES][NUM_GLOBAL_CID];
 
 	static void SetCustomEngineSprites(EngineID engine, int cargo, SpriteGroup group)
 	{
@@ -392,7 +396,7 @@ public class Engine extends EngineTables implements Serializable
 	typedef SpriteGroup *(*resolve_callback)(final SpriteGroup *spritegroup,
 			final Vehicle veh, int callback_info, void *resolve_func); /* XXX data pointer used as function pointer */
 
-	static final SpriteGroup ResolveVehicleSpriteGroup(
+	static SpriteGroup ResolveVehicleSpriteGroup(
 			final SpriteGroup spritegroup,
 			Vehicle veh, int callback_info, 
 			resolve_callback resolve_func)
@@ -582,7 +586,7 @@ public class Engine extends EngineTables implements Serializable
 		}
 	}
 
-	static final SpriteGroup GetVehicleSpriteGroup(EngineID engine, final Vehicle v)
+	static SpriteGroup GetVehicleSpriteGroup(EngineID engine, final Vehicle v)
 	{
 		SpriteGroup group;
 		int cargo = GC_PURCHASE;
@@ -625,12 +629,12 @@ public class Engine extends EngineTables implements Serializable
 		}
 
 		group = GetVehicleSpriteGroup(engine, v);
-		group = ResolveVehicleSpriteGroup(group, v, 0, (resolve_callback) Engine::ResolveVehicleSpriteGroup);
+		group = ResolveVehicleSpriteGroup(group, v, 0, Engine::ResolveVehicleSpriteGroup);
 
 		if (group == null && cargo != GC_DEFAULT) {
 			// This group is empty but perhaps there'll be a default one.
 			group = ResolveVehicleSpriteGroup(engine_custom_sprites[engine.id][GC_DEFAULT], v, 0,
-					(resolve_callback) Engine::ResolveVehicleSpriteGroup);
+					Engine::ResolveVehicleSpriteGroup);
 		}
 
 		if (group == null)
@@ -706,12 +710,12 @@ public class Engine extends EngineTables implements Serializable
 			if (overset != null) group = overset;
 		}
 
-		group = ResolveVehicleSpriteGroup(group, v, callback_info, (resolve_callback) Engine::ResolveVehicleSpriteGroup);
+		group = ResolveVehicleSpriteGroup(group, v, callback_info, Engine::ResolveVehicleSpriteGroup);
 
 		if (group == null && cargo != GC_DEFAULT) {
 			// This group is empty but perhaps there'll be a default one.
 			group = ResolveVehicleSpriteGroup(engine_custom_sprites[engine.id][GC_DEFAULT], v, callback_info,
-					(resolve_callback) Engine::ResolveVehicleSpriteGroup);
+					Engine::ResolveVehicleSpriteGroup);
 		}
 
 		if (group == null || group.type != SpriteGroupType.SGT_CALLBACK)
@@ -727,8 +731,8 @@ public class Engine extends EngineTables implements Serializable
 	static int _vsg_random_triggers;
 	static byte _vsg_bits_to_reseed;
 
-	static final SpriteGroup TriggerVehicleSpriteGroup(final SpriteGroup spritegroup,
-			Vehicle veh, int callback_info, resolve_callback resolve_func)
+	static SpriteGroup TriggerVehicleSpriteGroup(final SpriteGroup spritegroup,
+												 Vehicle veh, int callback_info, resolve_callback resolve_func)
 	{
 		if (spritegroup == null)
 			return null;
@@ -758,12 +762,12 @@ public class Engine extends EngineTables implements Serializable
 		_vsg_random_triggers = trigger;
 		_vsg_bits_to_reseed = 0;
 		group = TriggerVehicleSpriteGroup(GetVehicleSpriteGroup(veh.getEngine_type(), veh), veh, 0,
-				(resolve_callback) Engine::TriggerVehicleSpriteGroup);
+				Engine::TriggerVehicleSpriteGroup);
 
 		if (group == null && veh.getCargo_type() != GC_DEFAULT) {
 			// This group turned out to be empty but perhaps there'll be a default one.
 			group = TriggerVehicleSpriteGroup(engine_custom_sprites[veh.getEngine_type().id][GC_DEFAULT], veh, 0,
-					(resolve_callback) Engine::TriggerVehicleSpriteGroup);
+					Engine::TriggerVehicleSpriteGroup);
 		}
 
 		if (group == null)
@@ -824,7 +828,7 @@ public class Engine extends EngineTables implements Serializable
 		DoTriggerVehicle(veh, trigger, 0, true);
 	}
 
-	static String[] _engine_custom_names = new String[Global.TOTAL_NUM_ENGINES];
+	static final String[] _engine_custom_names = new String[Global.TOTAL_NUM_ENGINES];
 
 	static void SetCustomEngineName(EngineID engine, String name)
 	{
@@ -834,10 +838,8 @@ public class Engine extends EngineTables implements Serializable
 	public static void UnloadCustomEngineNames()
 	{
 		//char **i;
-		for (int i = 0; i < _engine_custom_names.length; i++) {
-			//free(*i);
-			_engine_custom_names[i] = null;
-		}
+		//free(*i);
+		Arrays.fill(_engine_custom_names, null);
 	}
 
 	//StringID GetCustomEngineName(EngineID engine)
@@ -948,10 +950,10 @@ public class Engine extends EngineTables implements Serializable
 		if (!Engine.IsEngineIndex(p1)) return Cmd.CMD_ERROR;
 
 		e = Engine.GetEngine(p1);
-		if (GetBestPlayer(e.preview_player) != Global._current_player.id) return Cmd.CMD_ERROR;
+		if (GetBestPlayer(e.preview_player) != Global.gs._current_player.id) return Cmd.CMD_ERROR;
 
 		if( 0 != (flags & Cmd.DC_EXEC))
-			AcceptEnginePreview(e, Global._current_player);
+			AcceptEnginePreview(e, Global.gs._current_player);
 
 		return 0;
 	}
@@ -1050,7 +1052,7 @@ public class Engine extends EngineTables implements Serializable
 					CalcEngineReliability(e);
 				}
 
-				if (0 == (e.flags & ENGINE_AVAILABLE) && (int)(Global._date - Math.min(Global._date, 365)) >= e.intro_date) {
+				if (0 == (e.flags & ENGINE_AVAILABLE) && (Global._date - Math.min(Global._date, 365)) >= e.intro_date) {
 					// Introduce it to all players
 					NewVehicleAvailable(e);
 				} else if (0 == (e.flags & (ENGINE_AVAILABLE|ENGINE_INTRODUCING)) && Global._date >= e.intro_date) {
@@ -1170,7 +1172,7 @@ public class Engine extends EngineTables implements Serializable
 		if (e.type != type) return false;
 
 		// check if it's available
-		if (!e.isAvailableTo(Global._current_player.id)) return false;
+		if (!e.isAvailableTo(Global.gs._current_player.id)) return false;
 
 		return true;
 	}
@@ -1199,7 +1201,7 @@ public class Engine extends EngineTables implements Serializable
 	
 	
 	public static Engine [] _engines = new Engine[Global.TOTAL_NUM_ENGINES];
-	public static /*StringID*/ int [] _engine_name_strings = new int[Global.TOTAL_NUM_ENGINES];
+	public static final /*StringID*/ int [] _engine_name_strings = new int[Global.TOTAL_NUM_ENGINES];
 
 	public static Engine GetEngine(EngineID i)
 	{
@@ -1548,7 +1550,7 @@ public class Engine extends EngineTables implements Serializable
 	
 	public boolean isAvailableToMe()
 	{
-		return isAvailableTo(Global._local_player.id);
+		return isAvailableTo(Global.gs._local_player.id);
 	}
 	
 	public void setAvailableTo(int playerId)

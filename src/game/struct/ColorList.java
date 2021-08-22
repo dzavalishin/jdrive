@@ -1,11 +1,14 @@
 package game.struct;
 
 public class ColorList {
-	public int unk0, unk1, unk2;
-	public int window_color_1a;
-	public int window_color_1b;
-	public int window_color_bga, window_color_bgb;
-	public int window_color_2;
+	public final int unk0;
+    public final int unk1;
+    public final int unk2;
+	public final int window_color_1a;
+	public final int window_color_1b;
+	public final int window_color_bga;
+    public final int window_color_bgb;
+	public final int window_color_2;
 
 	public ColorList(byte[] b) 
 	{

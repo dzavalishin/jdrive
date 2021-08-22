@@ -11,7 +11,6 @@ import game.enums.TileTypes;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
-import game.struct.DrawTileSprites;
 import game.struct.Point;
 import game.util.BitOps;
 import game.util.MemoryPool;
@@ -48,8 +47,10 @@ public class WayPoint implements IPoolItem
 
 
 
-	private static IPoolItemFactory<WayPoint> factory = new IPoolItemFactory<WayPoint>() 
+	private static final IPoolItemFactory<WayPoint> factory = new IPoolItemFactory<WayPoint>()
 	{		
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public WayPoint createObject() {
 			return new WayPoint();
@@ -219,7 +220,7 @@ private void WaypointPoolNewBlock(int start_item)
 		boolean used_waypoint[] = new boolean[MAX_WAYPOINTS_PER_TOWN];
 		int i;
 
-		town_index = Town.ClosestTownFromTile(xy, (int)-1).index;
+		town_index = Town.ClosestTownFromTile(xy, -1).index;
 
 		//memset(used_waypoint, 0, sizeof(used_waypoint));
 		//used_waypoint.clear();
@@ -302,7 +303,7 @@ private void WaypointPoolNewBlock(int start_item)
 	 * @param p1 graphics for WayPoint type, 0 indicates standard graphics
 	 * @param p2 unused
 	 *
-	 * @todo When checking for the tile slope,
+	 * TODO When checking for the tile slope,
 	 * distingush between "Flat land required" and "land sloped in wrong direction"
 	 */
 	static int CmdBuildTrainWaypoint(int x, int y, int flags, int p1, int p2)
@@ -360,7 +361,7 @@ private void WaypointPoolNewBlock(int start_item)
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP5, wp.index, RAIL_TYPE_WAYPOINT | dir);
 
 			// TODO GetCustomStation
-			//if (BitOps.GB(p1, 0, 8) < Station.GetNumCustomStations(STAT_CLASS_WAYP))
+			//if (BitOps.GB(p1, 0, 8) < Station.GetNumCustomStations(StationClassID.STAT_CLASS_WAYP))
 			//	spec = Station.GetCustomStation(STAT_CLASS_WAYP, BitOps.GB(p1, 0, 8));
 
 			if (spec != null) {
@@ -445,7 +446,7 @@ private void WaypointPoolNewBlock(int start_item)
 		if (!tile.IsTileType(TileTypes.MP_RAILWAY) || !IsRailWaypoint(tile))
 			return Cmd.CMD_ERROR;
 
-		if (!tile.CheckTileOwnership() && !(Global._current_player.id == Owner.OWNER_WATER))
+		if (!tile.CheckTileOwnership() && !(Global.gs._current_player.id == Owner.OWNER_WATER))
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle())
@@ -557,14 +558,14 @@ private void WaypointPoolNewBlock(int start_item)
 	/* Draw a WayPoint */
 	static void DrawWaypointSprite(int x, int y, int stat_id, /* RailType */ int railtype)
 	{
-		final StationSpec stat;
-		int relocation;
-		final DrawTileSprites cust;
+		//final StationSpec stat;
+		//int relocation;
+		//final DrawTileSprites cust;
 		//final DrawTileSeqStruct seq;
-		final RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
+		//final RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
 		int ormod, img;
 
-		ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player));
+		ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player));
 
 		x += 33;
 		y += 17;

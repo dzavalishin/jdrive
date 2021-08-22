@@ -1,5 +1,6 @@
-package game;
+package game.aystar;
 
+import game.NPFFoundTargetData;
 import game.struct.OpenListNode;
 import game.struct.PathNode;
 import game.util.Hash;
@@ -10,14 +11,14 @@ public class AyStar
 {
 
 
-	static final int	AYSTAR_FOUND_END_NODE = 1;
-	static final int	AYSTAR_EMPTY_OPENLIST = 2;
-	static final int	AYSTAR_STILL_BUSY = 3;
-	static final int	AYSTAR_NO_PATH = 4;
-	static final int	AYSTAR_LIMIT_REACHED = 5;
-	static final int	AYSTAR_DONE = 6;
+	public static final int	AYSTAR_FOUND_END_NODE = 1;
+	public static final int	AYSTAR_EMPTY_OPENLIST = 2;
+	public static final int	AYSTAR_STILL_BUSY = 3;
+	public static final int	AYSTAR_NO_PATH = 4;
+	public static final int	AYSTAR_LIMIT_REACHED = 5;
+	public static final int	AYSTAR_DONE = 6;
 
-	static final int	AYSTAR_INVALID_NODE = -1;
+	public static final int	AYSTAR_INVALID_NODE = -1;
 
 
 
@@ -26,12 +27,12 @@ public class AyStar
 
 	/* These should point to the application specific routines that do the
 	 * actual work */ 
-	AyStar_CalculateG CalculateG;
-	AyStar_CalculateH CalculateH;
-	AyStar_GetNeighbours GetNeighbours;
-	AyStar_EndNodeCheck EndNodeCheck;
-	AyStar_FoundEndNode FoundEndNode;
-	AyStar_BeforeExit BeforeExit;
+	public AyStar_CalculateG CalculateG;
+	public AyStar_CalculateH CalculateH;
+	public AyStar_GetNeighbours GetNeighbours;
+	public AyStar_EndNodeCheck EndNodeCheck;
+	public AyStar_FoundEndNode FoundEndNode;
+	public AyStar_BeforeExit BeforeExit;
 
 
 
@@ -44,29 +45,29 @@ public class AyStar
 	 * everything */
 	// TODO resurrect
 	//Object user_path;
-	Object user_target;
-	int [] user_data = new int[10];
+	public Object user_target;
+	public final int [] user_data = new int[10];
 
 	// [dz] can be some superclass or interface of NPFFoundTargetData? 
-	NPFFoundTargetData user_path;
+	public NPFFoundTargetData user_path;
 
 	/* How many loops are there called before AyStarMain_Main gives
 	 * control back to the caller. 0 = until done */
-	byte loops_per_tick;
+	private int loops_per_tick;
 	/* If the g-value goes over this number, it stops searching
 	 *  0 = infinite */
-	int max_path_cost;
+	private int max_path_cost;
 	/* The maximum amount of nodes that will be expanded, 0 = infinite */
-	int max_search_nodes;
+	private int max_search_nodes;
 
 	/* These should be filled with the neighbours of a tile by
 	 * GetNeighbours */
-	AyStarNode neighbours[];
-	int num_neighbours;
+	public final AyStarNode[] neighbours;
+	public int num_neighbours;
 
 	/* These will contain the methods for manipulating the AyStar. Only
 	 * main() should be called externally */
-	AyStar_AddStartNode addstart;
+	public AyStar_AddStartNode addstart;
 	AyStar_Main main;
 	AyStar_Loop loop;
 	AyStar_Free free;
@@ -86,12 +87,12 @@ public class AyStar
 	/* These will contain the open and closed lists */
 
 	/* The actual closed list */
-	Hash ClosedListHash = new Hash();
+	final Hash ClosedListHash = new Hash();
 	/* The open queue */
-	TTDQueue<OpenListNode> OpenListQueue = new TTDQueueImpl<OpenListNode>();
+	final TTDQueue<OpenListNode> OpenListQueue = new TTDQueueImpl<OpenListNode>();
 	/* An extra hash to speed up the process of looking up an element in
 	 * the open list */
-	Hash OpenListHash = new Hash();
+	final Hash OpenListHash = new Hash();
 
 
 
@@ -100,7 +101,7 @@ public class AyStar
 		neighbours = new AyStarNode[12];
 	}
 
-	static void init_AyStar(AyStar aystar, Hash_HashProc hash, int num_buckets) {
+	public static void init_AyStar(AyStar aystar, Hash_HashProc hash, int num_buckets) {
 		// Allocated the Hash for the OpenList and ClosedList
 		// TODO init_Hash(aystar.OpenListHash, hash, num_buckets);
 		// TODO init_Hash(aystar.ClosedListHash, hash, num_buckets);
@@ -177,7 +178,7 @@ public class AyStar
 	static OpenListNode AyStarMain_OpenList_Pop(AyStar aystar)
 	{
 		// Return the item the Queue returns.. the best next OpenList item.
-		OpenListNode res = (OpenListNode)aystar.OpenListQueue.pop();
+		OpenListNode res = aystar.OpenListQueue.pop();
 		if (res != null)
 			aystar.OpenListHash.Hash_Delete(res.path.node.tile, res.path.node.direction);
 
@@ -222,7 +223,7 @@ public class AyStar
 		assert(new_g >= 0);
 		// Add the parent g-value to the new g-value
 		new_g += parent.g;
-		if (aystar.max_path_cost != 0 && (int)new_g > aystar.max_path_cost) return AYSTAR_DONE;
+		if (aystar.getMax_path_cost() != 0 && new_g > aystar.getMax_path_cost()) return AYSTAR_DONE;
 
 		// Calculate the h-value
 		new_h = aystar.CalculateH.apply(aystar, current, parent);
@@ -351,11 +352,13 @@ public class AyStar
 	 * aystar.clear() is called. Note that when you stop the algorithm halfway,
 	 * you should still call clear() yourself!
 	 */
-	static int AyStarMain_Main(AyStar aystar) {
+	public static int AyStarMain_Main(AyStar aystar) {
 		int r, i = 0;
 		// Loop through the OpenList
 		//  Quit if result is no AYSTAR_STILL_BUSY or is more than loops_per_tick
-		while ((r = aystar.loop.apply(aystar)) == AYSTAR_STILL_BUSY && (aystar.loops_per_tick == 0 || ++i < aystar.loops_per_tick)) { }
+		//noinspection StatementWithEmptyBody
+		while ((r = aystar.loop.apply(aystar)) == AYSTAR_STILL_BUSY && (aystar.getLoops_per_tick() == 0 || ++i < aystar.getLoops_per_tick()))
+			{ }
 		/*#ifdef AYSTAR_DEBUG
 		if (r == AYSTAR_FOUND_END_NODE)
 			printf("[AyStar] Found path!\n");
@@ -395,125 +398,33 @@ public class AyStar
 			TileX(start_node.tile), TileY(start_node.tile), start_node.direction);
 	#endif*/
 		AyStarMain_OpenList_Add(aystar, null, start_node, 0, g);
+	}
+
+	public int getMax_search_nodes() {
+		return max_search_nodes;
+	}
+
+	public void setMax_search_nodes(int max_search_nodes) {
+		this.max_search_nodes = max_search_nodes;
+	}
+
+	public int getMax_path_cost() {
+		return max_path_cost;
+	}
+
+	public void setMax_path_cost(int max_path_cost) {
+		this.max_path_cost = max_path_cost;
+	}
+
+	public int getLoops_per_tick() {
+		return loops_per_tick;
+	}
+
+	public void setLoops_per_tick(int loops_per_tick) {
+		this.loops_per_tick = loops_per_tick;
 	}	
 
 
-}
-
-
-/*
- * This function is called to calculate the G-value for AyStar Algorithm.
- *  return values can be:
- *	AYSTAR_INVALID_NODE : indicates an item is not valid (e.g.: unwalkable)
- *	Any value >= 0 : the g-value for this tile
- */
-//abstract int CalculateG(AyStarNode current, OpenListNode parent);
-@FunctionalInterface
-interface AyStar_CalculateG {
-	int apply(AyStar as, AyStarNode current, OpenListNode parent);
-}
-
-/*
- * This function is called to calculate the H-value for AyStar Algorithm.
- *  Mostly, this must result the distance (Manhattan way) between the
- *   current point and the end point
- *  return values can be:
- *	Any value >= 0 : the h-value for this tile
- */
-@FunctionalInterface
-interface AyStar_CalculateH {
-	int apply(AyStar as, AyStarNode current, OpenListNode parent);
-}
-/*
- * This function request the tiles around the current tile and put them in tiles_around
- *  tiles_around is never resetted, so if you are not using directions, just leave it alone.
- * Warning: never add more tiles_around than memory allocated for it.
- */
-@FunctionalInterface
-interface AyStar_GetNeighbours {
-	void apply(AyStar as, OpenListNode current);
-}
-
-/*
- * This function is called to check if the end-tile is found
- *  return values can be:
- *	AYSTAR_FOUND_END_NODE : indicates this is the end tile
- *	AYSTAR_DONE : indicates this is not the end tile (or direction was wrong)
- */
-/*
- * The 2nd parameter should be OpenListNode, and NOT AyStarNode. AyStarNode is
- * part of OpenListNode and so it could be accessed without any problems.
- * The good part about OpenListNode is, and how AIs use it, that you can
- * access the parent of the current node, and so check if you, for example
- * don't try to enter the file tile with a 90-degree curve. So please, leave
- * this an OpenListNode, it works just fine -- TrueLight
- */
-@FunctionalInterface
-interface AyStar_EndNodeCheck {
-	int apply(AyStar as, OpenListNode current);
-}
-
-/*
- * If the End Node is found, this function is called.
- *  It can do, for example, calculate the route and put that in an array
- */
-@FunctionalInterface
-interface AyStar_FoundEndNode {
-	void apply(AyStar as, OpenListNode current);
-}
-
-/*
- * Is called when aystar ends it pathfinding, but before cleanup.
- */
-@FunctionalInterface
-interface AyStar_BeforeExit {
-	void apply(AyStar as);
-}
-
-
-
-
-//typedef void AyStar_AddStartNode(AyStar *aystar, AyStarNode* start_node, uint g);
-@FunctionalInterface
-interface AyStar_AddStartNode {
-	void apply(AyStar aystar, AyStarNode start_node, int g);
-}
-
-//typedef int AyStar_Main(AyStar *aystar);
-@FunctionalInterface
-interface AyStar_Main {
-	int apply(AyStar aystar);
-}
-
-
-//typedef int AyStar_Loop(AyStar *aystar);
-@FunctionalInterface
-interface AyStar_Loop {
-	int apply(AyStar aystar);
-}
-
-//typedef int AyStar_CheckTile(AyStar *aystar, AyStarNode *current, OpenListNode *parent);
-@FunctionalInterface
-interface AyStar_CheckTile
-{
-	int apply(AyStar aystar, AyStarNode current, OpenListNode parent);
-}
-//typedef void AyStar_Free(AyStar *aystar);
-@FunctionalInterface
-interface AyStar_Free {
-	void apply(AyStar aystar);
-}
-
-//typedef void AyStar_Clear(AyStar *aystar);
-@FunctionalInterface
-interface AyStar_Clear {
-	void apply(AyStar aystar);
-}
-
-//typedef uint Hash_HashProc(uint key1, uint key2);
-@FunctionalInterface
-interface Hash_HashProc {
-	int apply(int key1, int key2);
 }
 
 

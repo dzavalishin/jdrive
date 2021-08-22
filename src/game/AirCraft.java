@@ -167,7 +167,7 @@ public class AirCraft extends AirCraftTables {
 		// to just query the cost, it is not neccessary to have a valid tile (automation/AI)
 		if(0 != (flags & Cmd.DC_QUERY_COST)) return value;
 
-		if (!IsAircraftHangarTile(tile) || !tile.IsTileOwner(Global._current_player)) return Cmd.CMD_ERROR;
+		if (!IsAircraftHangarTile(tile) || !tile.IsTileOwner(Global.gs._current_player)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
@@ -189,7 +189,7 @@ public class AirCraft extends AirCraftTables {
 			v.type = u.type = Vehicle.VEH_Aircraft;
 			v.direction = 3;
 
-			v.owner = u.owner = Global._current_player;
+			v.owner = u.owner = Global.gs._current_player;
 
 			v.tile = tile;
 			//			u.tile = 0;
@@ -299,7 +299,7 @@ public class AirCraft extends AirCraftTables {
 
 				w.type = Vehicle.VEH_Aircraft;
 				w.direction = 0;
-				w.owner = Global._current_player;
+				w.owner = Global.gs._current_player;
 				w.x_pos = v.getX_pos();
 				w.y_pos = v.getY_pos();
 				w.z_pos = v.z_pos + 5;
@@ -782,7 +782,7 @@ public class AirCraft extends AirCraftTables {
 		}
 
 		//spd = v.cur_speed + v.acceleration;
-		v.subspeed = 0xFF & ((t=v.subspeed) + (int)spd);
+		v.subspeed = 0xFF & ((t=v.subspeed) + spd);
 		spd = Math.min( v.cur_speed + (spd >> 8) + ((v.subspeed < t) ? 1 : 0), new_speed);
 
 		// adjust speed for broken vehicles
@@ -808,7 +808,7 @@ public class AirCraft extends AirCraftTables {
 
 		if (spd == 0) return 0; //false;
 
-		if ((int)++spd == 0)
+		if (++spd == 0)
 			return 1; //true;
 
 
@@ -949,7 +949,7 @@ public class AirCraft extends AirCraftTables {
 		dist = Math.abs(x + amd.x - v.getX_pos()) +  Math.abs(y + amd.y - v.getY_pos());
 
 		// Clear queues when there's no patch
-		if(Global._patches.aircraft_queueing == false && v.queue_item != null) {
+		if(!Global._patches.aircraft_queueing && v.queue_item != null) {
 			v.queue_item.queue.del(v);
 			v.z_pos = GetAircraftFlyingAltitude(v);		
 		}
@@ -959,7 +959,7 @@ public class AirCraft extends AirCraftTables {
 			// If it's already in the queue, don't re-add it
 			// Otherwise, add it to queue - but don't add helicopters!
 			// otherwise, helicopters will be part of the queue and can't land separately!
-			if(!(v.queue_item != null) && (Global._patches.aircraft_queueing == true && v.subtype != 0)) {
+			if(!(v.queue_item != null) && (Global._patches.aircraft_queueing && v.subtype != 0)) {
 				// Add to queue
 				assert(st.airport_queue.push(v));
 			}
@@ -970,7 +970,7 @@ public class AirCraft extends AirCraftTables {
 			// If it's already in the queue, don't re-add it
 			// Otherwise, add it to queue - but don't add helicopters!
 			// otherwise, helicopters will be part of the queue and can't land separately!
-			if(v.queue_item == null && Global._patches.aircraft_queueing == true && v.subtype != 0) {
+			if(v.queue_item == null && Global._patches.aircraft_queueing && v.subtype != 0) {
 				// Add to queue
 				st.airport_queue.push(v);
 			}
@@ -1064,13 +1064,13 @@ public class AirCraft extends AirCraftTables {
 
 		// Turn. Do it slowly if in the air.
 		newdir =  Vehicle.GetDirectionTowards(v, x + amd.x, y + amd.y);
-		if (newdir != v.direction) {
+		if (newdir != v.direction)
+		{
+			v.direction = newdir;
 			if(0 != (amd.flag & AirportMovingData.AMED_SLOWTURN)) {
 				if (v.load_unload_time_rem == 0) v.load_unload_time_rem = 8;
-				v.direction = newdir;
 			} else {
 				v.cur_speed >>= 1;
-		v.direction = newdir;
 			}
 		}
 
@@ -1213,7 +1213,7 @@ public class AirCraft extends AirCraftTables {
 		int8 x;
 		int8 y;
 	} */
-	static Point [] smoke_pos = {
+	static final Point [] smoke_pos = {
 			new Point(  5,  5 ),
 			new Point(  6,  0 ),
 			new Point(  5, -5 ),
@@ -1403,7 +1403,7 @@ public class AirCraft extends AirCraftTables {
 			st.had_vehicle_of_type |= Station.HVOT_AIRCRAFT;
 			Global.SetDParam(0, st.index);
 			// show newsitem of celebrating citizens
-			flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+			flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 			NewsItem.AddNewsItem(
 					Str.STR_A033_CITIZENS_CELEBRATE_FIRST,
 					flags,
@@ -1411,7 +1411,7 @@ public class AirCraft extends AirCraftTables {
 					0);
 		}
 
-		old_order = v.current_order;
+		old_order = new Order( v.current_order );
 		v.current_order.type = Order.OT_LOADING;
 		v.current_order.flags = 0;
 
@@ -1456,7 +1456,7 @@ public class AirCraft extends AirCraftTables {
 				v.vehstatus |= Vehicle.VS_STOPPED;
 				Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
 
-				if (v.owner == Global._local_player) {
+				if (v.owner == Global.gs._local_player) {
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddValidatedNewsItem(
 							Str.STR_A014_AIRCRAFT_IS_WAITING_IN,
@@ -1661,13 +1661,13 @@ public class AirCraft extends AirCraftTables {
 		AircraftNextAirportPos_and_Order(v);
 
 		// check if the aircraft needs to be replaced or renewed and send it to a hangar if needed
-		if (v.owner == Global._local_player && (
+		if (v.owner == Global.gs._local_player && (
 				p.EngineHasReplacement(v.getEngine_type()) ||
 				(p.engine_renew && v.age - v.max_age > p.engine_renew_months * 30)
 				)) {
-			Global._current_player = Global._local_player;
+			Global.gs._current_player = Global.gs._local_player;
 			Cmd.DoCommandP(v.tile, v.index, 1, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
-			Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 		}
 	}
 
@@ -1710,12 +1710,12 @@ public class AirCraft extends AirCraftTables {
 					// If it's already in the queue, don't re-add it
 					// Otherwise, add it to queue - but do helicopters seperately!
 					// Otherwise, helicopters will be part of the queue and can't land separately!
-					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing == true && v.subtype != 0)) {
+					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing && v.subtype != 0)) {
 						// Add to queue
 						assert(st.airport_queue.push(v));
 					}
 
-					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing == true && v.subtype == 0)) {
+					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing && v.subtype == 0)) {
 						// Add to queue
 						assert(st.helicopter_queue.push(v));
 					}
@@ -1726,7 +1726,7 @@ public class AirCraft extends AirCraftTables {
 					tsubspeed = v.subspeed;
 
 					// If we're on top, go in
-					if(st.airport_queue.getTop() == v && (Global._patches.aircraft_queueing == true && v.subtype != 0)) {
+					if(st.airport_queue.getTop() == v && (Global._patches.aircraft_queueing && v.subtype != 0)) {
 						if (!AirportHasBlock(v, current, Airport)) {			
 							can_land = true;
 							st.airport_queue.pop();
@@ -1736,7 +1736,7 @@ public class AirCraft extends AirCraftTables {
 					}
 
 					// Helicopters have their own queue
-					if(v.subtype == 0 && st.helicopter_queue.getTop() == v && Global._patches.aircraft_queueing == true) {
+					if(v.subtype == 0 && st.helicopter_queue.getTop() == v && Global._patches.aircraft_queueing) {
 						if (!AirportHasBlock(v, current, Airport)) {
 							can_land = true;
 							st.helicopter_queue.pop();
@@ -1753,16 +1753,17 @@ public class AirCraft extends AirCraftTables {
 						}
 					}
 
-					if(Global._patches.aircraft_queueing == false) { // || v.subtype == 0
-						if (!AirportHasBlock(v, current, Airport)) {			
+					if(!Global._patches.aircraft_queueing) { // || v.subtype == 0
+						/*if (!AirportHasBlock(v, current, Airport)) {
 							can_land = true;
 						} else {
 							can_land = false;
-						}
+						}*/
+						can_land = !AirportHasBlock(v, current, Airport);
 					}
 
 
-					if(can_land == true) {
+					if(can_land) {
 						v.air.state = landingtype; // LANDING / HELILANDING
 						// it's a bit dirty, but I need to set position to next position, otherwise
 						// if there are multiple runways, plane won't know which one it took (because
@@ -1787,14 +1788,14 @@ public class AirCraft extends AirCraftTables {
 		AircraftLandAirplane(v);  // maybe crash airplane
 		v.air.state = Airport.ENDLANDING;
 		// check if the aircraft needs to be replaced or renewed and send it to a hangar if needed
-		if (v.current_order.type != Order.OT_GOTO_DEPOT && v.owner == Global._local_player) {
+		if (v.current_order.type != Order.OT_GOTO_DEPOT && v.owner == Global.gs._local_player) {
 			// only the vehicle owner needs to calculate the rest (locally)
 			if (p.EngineHasReplacement(v.getEngine_type()) ||
 					(p.engine_renew && v.age - v.max_age > (p.engine_renew_months * 30))) {
 				// send the aircraft to the hangar at next airport (bit 17 set)
-				Global._current_player = Global._local_player;
+				Global.gs._current_player = Global.gs._local_player;
 				Cmd.DoCommandP(v.tile, v.index, 1 << 16, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
-				Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+				Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 			}
 		}
 	}
@@ -2444,7 +2445,7 @@ public class AirCraft extends AirCraftTables {
 						if (sel==0) selected_id = engine_id;
 						if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.getCap(), 0)) {
 							Gfx.DrawString(x+62, y+7, Engine.GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
-							DrawAircraftEngine(x+29, y+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+							DrawAircraftEngine(x+29, y+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)));
 							y += 24;
 						}
 						sel--;
@@ -2537,10 +2538,12 @@ public class AirCraft extends AirCraftTables {
 	{
 		Window w;
 
-		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.tile);
+		final int wn = tile == null ? 0 : tile.tile; // TODO check use of window_number
+
+		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, wn);
 
 		w = Window.AllocateWindowDesc(_new_aircraft_desc);
-		w.window_number = tile.tile;
+		w.window_number = wn; 
 		w.vscroll.setCap(4);
 		w.getWidget(2).unkA = (w.vscroll.getCap() << 8) + 1;
 
@@ -2549,7 +2552,7 @@ public class AirCraft extends AirCraftTables {
 		if (tile != null) {
 			w.caption_color =  tile.GetTileOwner().id;
 		} else {
-			w.caption_color =  Global._local_player.id;
+			w.caption_color =  Global.gs._local_player.id;
 		}
 	}
 
@@ -2638,7 +2641,7 @@ public class AirCraft extends AirCraftTables {
 		case WE_PAINT: {
 			Vehicle v = Vehicle.GetVehicle(w.window_number);
 
-			w.disabled_state = v.owner == Global._local_player ? 0 : (1 << 2);
+			w.disabled_state = v.owner == Global.gs._local_player ? 0 : (1 << 2);
 			if (0==Global._patches.servint_aircraft) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
@@ -2846,7 +2849,7 @@ public class AirCraft extends AirCraftTables {
 				disabled = 0;
 			}
 
-			if (v.owner != Global._local_player) disabled |= 1 << 8 | 1 << 7;
+			if (v.owner != Global.gs._local_player) disabled |= 1 << 8 | 1 << 7;
 			w.disabled_state = disabled;
 
 			/* draw widgets & caption */
@@ -2978,7 +2981,7 @@ public class AirCraft extends AirCraftTables {
 
 		/* setup disabled buttons */
 		w.disabled_state =
-				tile.IsTileOwner(Global._local_player) ? 0 : ((1<<4) | (1<<7) | (1<<8));
+				tile.IsTileOwner(Global.gs._local_player) ? 0 : ((1<<4) | (1<<7) | (1<<8));
 
 		/* determine amount of items for scroller */
 		num = 0;
@@ -3021,7 +3024,7 @@ public class AirCraft extends AirCraftTables {
 				DrawAircraftImage(v, x+12, y, VehicleID.get( w.as_traindepot_d().sel ) );
 
 				Global.SetDParam(0, v.unitnumber.id);
-				Gfx.DrawString(x, y+2, (int)(v.max_age-366) >= v.age ? Str.STR_00E2 : Str.STR_00E3, 0);
+				Gfx.DrawString(x, y+2, (v.max_age-366) >= v.age ? Str.STR_00E2 : Str.STR_00E3, 0);
 
 				Gfx.DrawSprite( 0 != (v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x, y + 12);
 
@@ -3108,8 +3111,8 @@ public class AirCraft extends AirCraftTables {
 
 	/**
 	 * Clones an aircraft
-	 * @param *v is the original vehicle to clone
-	 * @param *w is the window of the hangar where the clone is build
+	 * @param v is the original vehicle to clone
+	 * @param w is the window of the hangar where the clone is build
 	 */
 	static void HandleCloneVehClick(final Vehicle  v, final Window  w)
 	{
@@ -3473,7 +3476,7 @@ public class AirCraft extends AirCraftTables {
 					break;
 				}
 				do {
-					if (IsAircraftHangarTile(tile) && tile.IsTileOwner(Global._local_player)) {
+					if (IsAircraftHangarTile(tile) && tile.IsTileOwner(Global.gs._local_player)) {
 						ShowAircraftDepotWindow(tile);
 						ShowBuildAircraftWindow(tile);
 						return;
@@ -3566,7 +3569,7 @@ public class AirCraft extends AirCraftTables {
 	{
 		Window w;
 
-		if (player == Global._local_player.id) {
+		if (player == Global.gs._local_player.id) {
 			w = Window.AllocateWindowDescFront(_player_aircraft_desc, (station << 16) | player);
 		} else  {
 			w = Window.AllocateWindowDescFront(_other_player_aircraft_desc, (station << 16) | player);

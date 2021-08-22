@@ -23,6 +23,6 @@ public class ParentSpriteToDraw
 	public int tile_z;
 	public int tile_z_bottom;
 
-	public ArrayList<ChildScreenSpriteToDraw> children = new ArrayList<ChildScreenSpriteToDraw>();
+	public final ArrayList<ChildScreenSpriteToDraw> children = new ArrayList<ChildScreenSpriteToDraw>();
 
 }

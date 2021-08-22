@@ -22,4 +22,10 @@ public class StringID //extends AbstractID
 	}
 	
 	//String value; // don't mess
+	
+	@Override
+	public int hashCode() {
+		return id;
+	}
+	
 }

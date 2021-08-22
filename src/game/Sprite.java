@@ -51,11 +51,11 @@ public class Sprite extends Sprites {
 	}
 
 	public static int PLAYER_SPRITE_COLOR(PlayerID player) {
-		return  (Global._player_colors[player.id] + 0x307) << PALETTE_SPRITE_START;
+		return  (Global.gs._player_colors[player.id] + 0x307) << PALETTE_SPRITE_START;
 	}
 
 	public static int PLAYER_SPRITE_COLOR(int player) {
-		return  (Global._player_colors[player] + 0x307) << PALETTE_SPRITE_START;
+		return  (Global.gs._player_colors[player] + 0x307) << PALETTE_SPRITE_START;
 	}
 	
 	public static int SPRITE_PALETTE(int color) {
@@ -108,7 +108,7 @@ public class Sprite extends Sprites {
 		return dsg.default_group;
 	}
 
-	static int GetDeterministicSpriteValue(byte var)
+	static int GetDeterministicSpriteValue(int var)
 	{
 		switch (var) {
 		case 0x00:
@@ -302,9 +302,9 @@ class RealSpriteGroup extends SpriteGroup {
 	// of da stuff.
 
 	//byte loaded_count;
-	SpriteGroup [] loaded = new SpriteGroup[16]; // sprite ids
+	final SpriteGroup [] loaded = new SpriteGroup[16]; // sprite ids
 	//byte loading_count;
-	SpriteGroup [] loading = new SpriteGroup[16]; // sprite ids
+	final SpriteGroup [] loading = new SpriteGroup[16]; // sprite ids
 	
 	public int loaded_count() { return loaded.length; }
 	public int loading_count() { return loading.length; }
@@ -324,7 +324,7 @@ enum DeterministicSpriteGroupOperation {
 	DSG_OP_DIV,
 	DSG_OP_MOD;
 	
-	static DeterministicSpriteGroupOperation[] values = values();
+	static final DeterministicSpriteGroupOperation[] values = values();
 } 
 
 //class DeterministicSpriteGroupRange DeterministicSpriteGroupRange;
@@ -332,7 +332,7 @@ enum DeterministicSpriteGroupOperation {
 class DeterministicSpriteGroup extends SpriteGroup {
 	// Take this variable:
 	VarSpriteGroupScope var_scope;
-	byte variable;
+	int variable;
 	byte parameter; ///< Used for variables between 0x60 and 0x7F inclusive.
 
 	// Do this with it:
@@ -356,7 +356,7 @@ enum RandomizedSpriteGroupCompareMode {
 	RSG_CMP_ANY,
 	RSG_CMP_ALL;
 	
-	static RandomizedSpriteGroupCompareMode [] values = values();
+	static final RandomizedSpriteGroupCompareMode [] values = values();
 }
 
 class RandomizedSpriteGroup extends SpriteGroup {

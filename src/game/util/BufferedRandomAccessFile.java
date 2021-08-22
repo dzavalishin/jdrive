@@ -186,8 +186,7 @@ public class BufferedRandomAccessFile extends RandomAccessFile
      * {@inheritDoc}
      */
     @Override
-    public long getFilePointer() throws IOException
-    {
+    public long getFilePointer() {
         return realpos - bufend + bufpos;
     }
 

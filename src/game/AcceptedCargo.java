@@ -1,21 +1,20 @@
 package game;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 // in original code it is an array
 // typedef uint AcceptedCargo[NUM_CARGO];
 
 public class AcceptedCargo implements Serializable 
 {
-
-	public int ct[] = new int[NUM_CARGO];
+	private static final long serialVersionUID = -8588718305311725293L;
+	
+	public final int[] ct = new int[NUM_CARGO];
 
 	public void clear()
 	{
-		for(int i = 0; i < ct.length; i++)
-		{
-			ct[i] = 0;
-		}
+		Arrays.fill(ct, 0);
 	}
 
 	public AcceptedCargo() {

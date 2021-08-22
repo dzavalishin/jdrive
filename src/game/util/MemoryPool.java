@@ -22,8 +22,8 @@ public class MemoryPool<CType extends IPoolItem> implements Serializable
 {
 	private static final long serialVersionUID = -6590423407301731923L;
 	
-	private Map<Integer,CType> pool = new HashMap<>();
-    private IPoolItemFactory<CType> ctor;
+	private final Map<Integer,CType> pool = new HashMap<>();
+    private final IPoolItemFactory<CType> ctor;
     //private static int lastIndex = 1;
     //private static int lastIndex = 0;
     private int lastIndex = 0;

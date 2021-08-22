@@ -1,6 +1,6 @@
 package game.struct;
 
-import game.AyStarNode;
+import game.aystar.AyStarNode;
 
 public class PathNode {
 	public AyStarNode node;

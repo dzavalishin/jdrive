@@ -35,8 +35,7 @@ public class DummyLand {
 	static AcceptedCargo GetAcceptedCargo_Dummy(TileIndex tile)
 	{
 		/* not used */
-		AcceptedCargo ac = new AcceptedCargo();
-		return ac;
+        return new AcceptedCargo();
 	}
 
 	static TileDesc GetTileDesc_Dummy(TileIndex tile )

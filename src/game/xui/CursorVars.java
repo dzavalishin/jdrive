@@ -7,12 +7,12 @@ import game.util.AnimCursor;
 
 public class CursorVars 
 {
-	Point pos = new Point(0, 0); 
-	Point size = new Point(0, 0); 
-	Point offs = new Point(0, 0); 
-	Point delta = new Point(0, 0);
-	Point draw_pos = new Point(0, 0); 
-	Point draw_size = new Point(0, 0);
+	final Point pos = new Point(0, 0);
+	final Point size = new Point(0, 0);
+	final Point offs = new Point(0, 0);
+	final Point delta = new Point(0, 0);
+	final Point draw_pos = new Point(0, 0);
+	final Point draw_size = new Point(0, 0);
 	CursorID sprite;
 
 	int wheel; // mouse wheel movement

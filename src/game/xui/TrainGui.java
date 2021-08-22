@@ -7,7 +7,6 @@ import game.Cmd;
 import game.Depot;
 import game.Engine;
 import game.Global;
-import game.Order;
 import game.Player;
 import game.Rail;
 import game.RailVehicleInfo;
@@ -202,7 +201,7 @@ public class TrainGui
 			if (BitOps.IS_INT_INSIDE(--pos[0], -show_max, 0)) {
 				Gfx.DrawString(x[0] + 59, y[0] + 2, Engine.GetCustomEngineName(i), sel[0] == 0 ? 0xC : 0x10);
 				TrainCmd.DrawTrainEngine(x[0] + 29, y[0] + 6, i,
-					Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+					Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)));
 				y[0] += 14;
 			}
 			--sel[0];
@@ -346,10 +345,12 @@ public class TrainGui
 	{
 		Window w;
 
-		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.getTile());
+		int wn = tile == null ? -1 : tile.getTile();
+		
+		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, wn);
 
 		w = Window.AllocateWindowDesc(_new_rail_vehicle_desc);
-		w.window_number = tile.getTile();
+		w.window_number = wn;
 		w.vscroll.setCap(8);
 		w.widget.get(2).unkA = (w.vscroll.getCap() << 8) + 1;
 
@@ -360,8 +361,8 @@ public class TrainGui
 			w.caption_color =  tile.GetTileOwner().id;
 			w.as_buildtrain_d().railtype =  BitOps.GB(tile.getMap().m3, 0, 4);
 		} else {
-			w.caption_color =  Global._local_player.id;
-			w.as_buildtrain_d().railtype =  Rail.GetBestRailtype(Player.GetPlayer(Global._local_player));
+			w.caption_color =  Global.gs._local_player.id;
+			w.as_buildtrain_d().railtype =  Rail.GetBestRailtype(Player.GetPlayer(Global.gs._local_player));
 		}
 	}
 
@@ -410,7 +411,7 @@ public class TrainGui
 
 		/* setup disabled buttons */
 		w.disabled_state =
-				tile.IsTileOwner(Global._local_player) ? 0 : ((1 << 4) | (1 << 5) | (1 << 8) | (1<<9));
+				tile.IsTileOwner(Global.gs._local_player) ? 0 : ((1 << 4) | (1 << 5) | (1 << 8) | (1<<9));
 
 		/* determine amount of items for scroller */
 		num = 0;
@@ -669,8 +670,8 @@ public class TrainGui
 
 	/**
 	 * Clones a train
-	 * @param *v is the original vehicle to clone
-	 * @param *w is the window of the depot where the clone is build
+	 * @param v is the original vehicle to clone
+	 * @param w is the window of the depot where the clone is build
 	 */
 	static void HandleCloneVehClick(Vehicle  v, final Window  w)
 	{
@@ -980,7 +981,7 @@ public class TrainGui
 
 			v = Vehicle.GetVehicle(w.window_number);
 
-			w.disabled_state = (v.getOwner() == Global._local_player) ? 0 : 0x380;
+			w.disabled_state = (v.getOwner() == Global.gs._local_player) ? 0 : 0x380;
 
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 12);
 
@@ -1184,7 +1185,7 @@ public class TrainGui
 		MiscGui.SetVScrollCount(w, num);
 
 		w.disabled_state = 1 << (det_tab + 9);
-		if (v.getOwner() != Global._local_player)
+		if (v.getOwner() != Global.gs._local_player)
 			w.disabled_state |= (1 << 2);
 
 		if (0==Global._patches.servint_trains) // disable service-scroller when interval is set to disabled
@@ -1541,7 +1542,7 @@ public class TrainGui
 					break;
 				}
 				do {
-					if (Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL) && tile.IsTileOwner(Global._local_player)) {
+					if (Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL) && tile.IsTileOwner(Global.gs._local_player)) {
 						ShowTrainDepotWindow(tile);
 						ShowBuildTrainWindow(tile);
 						return;
@@ -1630,7 +1631,7 @@ public class TrainGui
 	{
 		Window w;
 
-		if (player == Global._local_player.id) {
+		if (player == Global.gs._local_player.id) {
 			w = Window.AllocateWindowDescFront(_player_trains_desc, (station << 16) | player);
 		} else {
 			w = Window.AllocateWindowDescFront(_other_player_trains_desc, (station << 16) | player);

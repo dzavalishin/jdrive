@@ -6,9 +6,9 @@ public class RoadTables
 {
 
 	public static class DrawRoadTileStruct {
-		public int image;
-		public int subcoord_x;
-		public int subcoord_y;
+		public final int image;
+		public final int subcoord_x;
+		public final int subcoord_y;
 
 		public DrawRoadTileStruct(int i, int j, int k) {
 			image = i;
@@ -18,11 +18,11 @@ public class RoadTables
 	} 
 
 	public static class DrawRoadSeqStruct {
-		public int image;
-		public int subcoord_x;
-		public int subcoord_y;
-		public int width;
-		public int height;
+		public final int image;
+		public final int subcoord_x;
+		public final int subcoord_y;
+		public final int width;
+		public final int height;
 
 		public DrawRoadSeqStruct(int x, int i, int j, int k, int l) {
 			image = x;

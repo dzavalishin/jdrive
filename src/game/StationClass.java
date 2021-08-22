@@ -4,6 +4,11 @@ import java.util.Arrays;
 
 import game.enums.StationClassID;
 
+/**
+ *
+ * Functions for dealing with station classes and custom stations.
+ **/
+
 public class StationClass 
 {
 	int id;          ///< ID of this class, e.g. 'DFLT', 'WAYP', etc.
@@ -14,9 +19,7 @@ public class StationClass
 	
 	
 	
-	/* $Id: station_newgrf.c 3167 2005-11-12 00:19:34Z peter1138 $ */
 
-	/** @file station_newgrf.c Functions for dealing with station classes and custom stations. */
 
 
 
@@ -24,7 +27,7 @@ public class StationClass
 	private static final int STAT_CLASS_MAX = 16;
 
 
-	static StationClass [] station_classes = new StationClass[STAT_CLASS_MAX];
+	static final StationClass [] station_classes = new StationClass[STAT_CLASS_MAX];
 
 	/**
 	 * Reset station classes to their default state.

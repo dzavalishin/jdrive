@@ -1,5 +1,6 @@
 package game;
 
+import game.aystar.AyStarNode;
 import game.struct.PathNode;
 
 /* Meant to be stored in AyStar.userpath */

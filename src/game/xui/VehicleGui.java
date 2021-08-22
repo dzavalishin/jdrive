@@ -1,7 +1,6 @@
 package game.xui;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Iterator;
 
 import game.AcceptedCargo;
@@ -45,14 +44,14 @@ public class VehicleGui {
 
 
 
-	public static Sorting _sorting = new Sorting();
+	public static final Sorting _sorting = new Sorting();
 
 	static int _internal_name_sorter_id; // internal StringID for default vehicle-names
 	static int _last_vehicle_idx;        // cached index to hopefully speed up name-sorting
 	public static boolean   _internal_sort_order;     // descending/ascending
 	//static int   _internal_sort_order;     // descending/ascending
 
-	static int [] _player_num_engines = new int[Global.TOTAL_NUM_ENGINES];
+	static final int [] _player_num_engines = new int[Global.TOTAL_NUM_ENGINES];
 	static /* RailType */ int _railtype_selected_in_replace_gui;
 
 	public static final int PLY_WND_PRC__OFFSET_TOP_WIDGET = 26;
@@ -71,7 +70,7 @@ public class VehicleGui {
 
 
 
-	static AbstractVehicleSorter _vehicle_sorter[] = {
+	static final AbstractVehicleSorter[] _vehicle_sorter = {
 			new VehicleUnsortedSorter(),
 			new VehicleNumberSorter(),
 			new VehicleNameSorter(),
@@ -96,7 +95,7 @@ public class VehicleGui {
 			//INVALID_STRING_ID
 	};
 
-	static int _rail_types_list[] = {
+	static final int[] _rail_types_list = {
 			Str.STR_RAIL_VEHICLES,
 			Str.STR_MONORAIL_VEHICLES,
 			Str.STR_MAGLEV_VEHICLES,
@@ -155,8 +154,7 @@ public class VehicleGui {
 		/* Create array for sorting */
 		//_vehicle_sort = realloc(_vehicle_sort, GetVehiclePoolSize() * sizeof(_vehicle_sort[0]));
 		_vehicle_sort = new SortStruct[Vehicle.GetVehiclePoolSize()]; 
-		if (_vehicle_sort == null)
-			Global.error("Could not allocate memory for the vehicle-sorting-list");
+		//if (_vehicle_sort == null)			Global.error("Could not allocate memory for the vehicle-sorting-list");
 
 		Global.DEBUG_misc(1, "Building vehicle list for player %d station %d...",
 				owner, station);
@@ -191,8 +189,6 @@ public class VehicleGui {
 				}
 			}
 		} else {
-			//final Vehicle v;
-			//FOR_ALL_VEHICLES(v)
 			Vehicle.forEach( (v) ->
 			{
 				if (v.getType() == type && v.getOwner().id == owner && (
@@ -205,12 +201,10 @@ public class VehicleGui {
 			});
 		}
 
-		//free(vl.sort_list);
 		//vl.sort_list = malloc(n * sizeof(vl.sort_list[0]));
 		vl.sort_list = new SortStruct[n[0]];
 
-		if (n[0] != 0 && vl.sort_list == null)
-			Global.error("Could not allocate memory for the vehicle-sorting-list");
+		//if (n[0] != 0 && vl.sort_list == null)			Global.error("Could not allocate memory for the vehicle-sorting-list");
 		vl.list_length = n[0];
 
 		for (i = 0; i < n[0]; ++i) vl.sort_list[i] = _vehicle_sort[i];
@@ -265,7 +259,7 @@ private static void show_cargo(ctype) {
 
 	/** Draw the list of available refit options for a consist.
 	 * Draw the list and highlight the selected refit option (if any)
-	 * @param *v first vehicle in consist to get the refit-options of
+	 * @param v first vehicle in consist to get the refit-options of
 	 * @param sel selected refit cargo-type in the window
 	 * @return the cargo type that is hightlighted, AcceptedCargo.CT_INVALID if none
 	 */
@@ -311,7 +305,7 @@ private static void show_cargo(ctype) {
 
 	// this define is to match engine.c, but engine.c keeps it to itself
 	// ENGINE_AVAILABLE is used in ReplaceVehicleWndProc
-	//#define ENGINE_AVAILABLE ((e.flags & 1 && BitOps.HASBIT(info.climates, GameOptions._opt.landscape)) || BitOps.HASBIT(e.player_avail, Global._local_player))
+	//#define ENGINE_AVAILABLE ((e.flags & 1 && BitOps.HASBIT(info.climates, GameOptions._opt.landscape)) || BitOps.HASBIT(e.player_avail, Global.gs._local_player))
 
 	static boolean ENGINE_IS_AVAILABLE(Engine e, EngineInfo info)
 	{
@@ -330,7 +324,7 @@ private static void show_cargo(ctype) {
 		//EngineID i;
 		int i;
 		int colour;
-		final Player p = Player.GetPlayer(Global._local_player);
+		final Player p = Player.GetPlayer(Global.gs._local_player);
 
 		for (i = 0; i < Global.NUM_TRAIN_ENGINES; i++) 
 		{
@@ -363,7 +357,7 @@ private static void show_cargo(ctype) {
 				Gfx.DrawString(x[0] + 59, y[0] + 2, Engine.GetCustomEngineName(i), colour);
 				// show_outdated is true only for left side, which is where we show old replacements
 				TrainCmd.DrawTrainEngine(x[0] + 29, y[0] + 6, i, (_player_num_engines[i] == 0 && show_outdated) ?
-						Sprite.PALETTE_CRASH : Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+						Sprite.PALETTE_CRASH : Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)));
 				if ( show_outdated ) {
 					Global.SetDParam(0, _player_num_engines[i]);
 					Gfx.DrawStringRightAligned(213, y[0]+5, Str.STR_TINY_BLACK, 0);
@@ -384,7 +378,7 @@ private static void show_cargo(ctype) {
 		int count2 = 0;
 		//EngineID engine_id;
 		int engine_id;
-		final Player p = Player.GetPlayer(Global._local_player);
+		final Player p = Player.GetPlayer(Global.gs._local_player);
 
 		sel[0] = w.as_replaceveh_d().sel_index[0];
 		sel[1] = w.as_replaceveh_d().sel_index[1];
@@ -392,8 +386,8 @@ private static void show_cargo(ctype) {
 		switch (w.as_replaceveh_d().vehicletype) {
 		case Vehicle.VEH_Train: {
 			railtype = _railtype_selected_in_replace_gui;
-			w.widget.get(13).color = Global._player_colors[Global._local_player.id];	// sets the colour of that art thing
-			w.widget.get(16).color = Global._player_colors[Global._local_player.id];	// sets the colour of that art thing
+			w.widget.get(13).color = Global.gs._player_colors[Global.gs._local_player.id];	// sets the colour of that art thing
+			w.widget.get(16).color = Global.gs._player_colors[Global.gs._local_player.id];	// sets the colour of that art thing
 			for (engine_id = 0; engine_id < Global.NUM_TRAIN_ENGINES; engine_id++) {
 				final Engine e = Engine.GetEngine(engine_id);
 				final EngineInfo info = Global._engine_info[engine_id];
@@ -535,14 +529,13 @@ private static void show_cargo(ctype) {
 
 		w.as_replaceveh_d().count[0] = count;
 		w.as_replaceveh_d().count[1] = count2;
-		return;
 	}
 
 
 	static void DrawEngineArrayInReplaceWindow(Window w, int px, int py, int px2, int py2, int ppos, int ppos2,
 			int psel1, int psel2, EngineID pselected_id1, EngineID pselected_id2)
 	{
-		final Player p = Player.GetPlayer(Global._local_player);
+		final Player p = Player.GetPlayer(Global.gs._local_player);
 
 		/*
 	int [] sel = new int[2];
@@ -601,7 +594,7 @@ private static void show_cargo(ctype) {
 						if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.getCap(), 0)) {
 							Gfx.DrawString(x[0]+59, y[0]+2, Engine.GetCustomEngineName(engine_id), sel0[0]==0 ? 0xC : 0x10);
 							RoadVehCmd.DrawRoadVehEngine(x[0]+29, y[0]+6, engine_id, 
-									_player_num_engines[engine_id] > 0 ? Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
+									_player_num_engines[engine_id] > 0 ? Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)) : Sprite.PALETTE_CRASH);
 							Global.SetDParam(0, _player_num_engines[engine_id]);
 							Gfx.DrawStringRightAligned(213, y[0]+5, Str.STR_TINY_BLACK, 0);
 							y[0] += 14;
@@ -612,7 +605,7 @@ private static void show_cargo(ctype) {
 					if (EngineGui.RoadVehInfo(engine_id).cargo_type == cargo && e.isAvailableToMe()) {
 						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.getCap(), 0) && EngineGui.RoadVehInfo(engine_id).cargo_type == cargo) {
 							Gfx.DrawString(x2[0]+59, y2[0]+2, Engine.GetCustomEngineName(engine_id), sel1[0]==0 ? 0xC : 0x10);
-							RoadVehCmd.DrawRoadVehEngine(x2[0]+29, y2[0]+6, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+							RoadVehCmd.DrawRoadVehEngine(x2[0]+29, y2[0]+6, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)));
 							y2[0] += 14;
 						}
 						sel1[0]--;
@@ -641,7 +634,7 @@ private static void show_cargo(ctype) {
 							Gfx.DrawString(x[0]+75, y[0]+7, Engine.GetCustomEngineName(engine_id.id), sel0[0]==0 ? 0xC : 0x10);
 							Ship.DrawShipEngine(x[0]+35, y[0]+10,  engine_id.id , 
 									_player_num_engines[engine_id.id] > 0 ? 
-											Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)) : 
+											Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)) : 
 												Sprite.PALETTE_CRASH);
 							Global.SetDParam(0, _player_num_engines[engine_id.id]);
 							Gfx.DrawStringRightAligned(213, y[0]+15, Str.STR_TINY_BLACK, 0);
@@ -655,7 +648,7 @@ private static void show_cargo(ctype) {
 						{
 							if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.getCap(), 0)) {
 								Gfx.DrawString(x2[0]+75, y2[0]+7, Engine.GetCustomEngineName(engine_id.id), sel1[0]==0 ? 0xC : 0x10);
-								Ship.DrawShipEngine(x2[0]+35, y2[0]+10, engine_id.id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+								Ship.DrawShipEngine(x2[0]+35, y2[0]+10, engine_id.id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)));
 								y2[0] += 24;
 							}
 							sel1[0]--;
@@ -684,7 +677,7 @@ private static void show_cargo(ctype) {
 						if (sel0[0] == 0) selected_id0[0] = engine_id.id;
 						if (BitOps.IS_INT_INSIDE(--pos[0], -w.vscroll.getCap(), 0)) {
 							Gfx.DrawString(x[0]+62, y[0]+7, Engine.GetCustomEngineName(engine_id.id), sel0[0]==0 ? 0xC : 0x10);
-							AirCraft.DrawAircraftEngine(x[0]+29, y[0]+10, engine_id.id, _player_num_engines[engine_id.id] > 0 ? Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)) : Sprite.PALETTE_CRASH);
+							AirCraft.DrawAircraftEngine(x[0]+29, y[0]+10, engine_id.id, _player_num_engines[engine_id.id] > 0 ? Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)) : Sprite.PALETTE_CRASH);
 							Global.SetDParam(0, _player_num_engines[engine_id.id]);
 							Gfx.DrawStringRightAligned(213, y[0]+15, Str.STR_TINY_BLACK, 0);
 							y[0] += 24;
@@ -696,7 +689,7 @@ private static void show_cargo(ctype) {
 						if (sel1[0] == 0) selected_id1[0] = engine_id.id;
 						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.getCap(), 0)) {
 							Gfx.DrawString(x2[0]+62, y2[0]+7, Engine.GetCustomEngineName(engine_id.id), sel1[0]==0 ? 0xC : 0x10);
-							AirCraft.DrawAircraftEngine(x2[0]+29, y2[0]+10, engine_id.id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+							AirCraft.DrawAircraftEngine(x2[0]+29, y2[0]+10, engine_id.id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)));
 							y2[0] += 24;
 						}
 						sel1[0]--;
@@ -720,7 +713,7 @@ private static void show_cargo(ctype) {
 
 	static void ReplaceVehicleWndProc(Window w, WindowEvent e)
 	{
-		final Player p = Player.GetPlayer(Global._local_player);
+		final Player p = Player.GetPlayer(Global.gs._local_player);
 
 		switch (e.event) {
 		case WE_PAINT: {
@@ -749,7 +742,7 @@ private static void show_cargo(ctype) {
 				{
 					Vehicle vehicle = ii.next();
 					
-					if (vehicle.getOwner() == Global._local_player) {
+					if (vehicle.getOwner() == Global.gs._local_player) {
 						if (vehicle.getType() == Vehicle.VEH_Aircraft && vehicle.getSubtype() > 2) continue;
 
 						// do not count the vehicles, that contains only 0 in all var
@@ -909,7 +902,7 @@ private static void show_cargo(ctype) {
 
 			switch (e.widget) {
 			case 14: case 15: { /* Select sorting criteria dropdown menu */
-				Window.ShowDropDownMenu(w, _rail_types_list, _railtype_selected_in_replace_gui, 15, 0, ~Player.GetPlayer(Global._local_player).avail_railtypes);
+				Window.ShowDropDownMenu(w, _rail_types_list, _railtype_selected_in_replace_gui, 15, 0, ~Player.GetPlayer(Global.gs._local_player).avail_railtypes);
 				break;
 			}
 			case 17: { /* toggle renew_keep_length */
@@ -953,8 +946,8 @@ private static void show_cargo(ctype) {
 		} break;
 
 		case WE_RESIZE: {
-			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / (int)w.resize.step_height);
-			w.vscroll2.setCap(w.vscroll2.getCap() + e.diff.y / (int)w.resize.step_height);
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / w.resize.step_height);
+			w.vscroll2.setCap(w.vscroll2.getCap() + e.diff.y / w.resize.step_height);
 
 			w.widget.get(7).unkA = (w.vscroll.getCap()  << 8) + 1;
 			w.widget.get(9).unkA = (w.vscroll2.getCap() << 8) + 1;
@@ -1073,7 +1066,7 @@ private static void show_cargo(ctype) {
 			break;
 		default: return;
 		}
-		w.caption_color = (byte) Global._local_player.id;
+		w.caption_color = (byte) Global.gs._local_player.id;
 		w.as_replaceveh_d().vehicletype = vehicletype;
 		w.vscroll2.setCap(w.vscroll.getCap());   // these two are always the same
 	}
@@ -1086,8 +1079,8 @@ private static void show_cargo(ctype) {
 	/** Assigns an already open vehicle window to a new vehicle.
 	 * Assigns an already open vehicle window to a new vehicle. If the vehicle got
 	 * any sub window open (orders and so on) it will change owner too.
-	 * @param *from_v the current owner of the window
-	 * @param *to_v the new owner of the window
+	 * @param from_v the current owner of the window
+	 * @param to_v the new owner of the window
 	 */
 	public static void ChangeVehicleViewWindow(final Vehicle from_v, final Vehicle to_v)
 	{

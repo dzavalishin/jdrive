@@ -28,7 +28,7 @@ public class OrderGui {
 		return (num >= 0 && num < v.getNum_orders()) ? num : v.getNum_orders();
 	}
 
-	static /*StringID*/ int StationOrderStrings[] = {
+	static final /*StringID*/ int[] StationOrderStrings = {
 		Str.STR_8806_GO_TO,
 		Str.STR_8807_GO_TO_TRANSFER,
 		Str.STR_8808_GO_TO_UNLOAD,
@@ -58,7 +58,7 @@ public class OrderGui {
 
 		v = Vehicle.GetVehicle(w.window_number);
 
-		w.disabled_state = (v.getOwner() == Global._local_player) ? 0 : (
+		w.disabled_state = (v.getOwner() == Global.gs._local_player) ? 0 : (
 			1 << 4 |   //skip
 			1 << 5 |   //delete
 			1 << 6 |   //non-stop
@@ -73,7 +73,7 @@ public class OrderGui {
 
 		shared_orders = v.IsOrderListShared();
 
-		if ((int)v.getNum_orders() + (shared_orders?1:0) <= (int)w.as_order_d().sel)
+		if (v.getNum_orders() + (shared_orders?1:0) <= w.as_order_d().sel)
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 5); /* delete */
 
 		if (v.getNum_orders() == 0)
@@ -197,7 +197,7 @@ public class OrderGui {
 		if (Global._patches.gotodepot) {
 			switch (tile.GetTileType()) {
 			case MP_RAILWAY:
-				if (v.getType() == Vehicle.VEH_Train && tile.IsTileOwner(Global._local_player)) {
+				if (v.getType() == Vehicle.VEH_Train && tile.IsTileOwner(Global.gs._local_player)) {
 					if ((tile.getMap().m5&0xFC)==0xC0) 
 					{
 						/*
@@ -211,7 +211,7 @@ public class OrderGui {
 				break;
 
 			case MP_STREET:
-				if ((tile.getMap().m5 & 0xF0) == 0x20 && v.getType() == Vehicle.VEH_Road && tile.IsTileOwner(Global._local_player)) {
+				if ((tile.getMap().m5 & 0xF0) == 0x20 && v.getType() == Vehicle.VEH_Road && tile.IsTileOwner(Global.gs._local_player)) {
 					/*order.type = Order.OT_GOTO_DEPOT;
 					order.flags = Order.OF_PART_OF_ORDERS;
 					order.station = Depot.GetDepotByTile(tile).index;
@@ -222,7 +222,7 @@ public class OrderGui {
 
 			case MP_STATION:
 				if (v.getType() != Vehicle.VEH_Aircraft) break;
-				if (AirCraft.IsAircraftHangarTile(tile) && tile.IsTileOwner(Global._local_player)) {
+				if (AirCraft.IsAircraftHangarTile(tile) && tile.IsTileOwner(Global.gs._local_player)) {
 					/*order.type = Order.OT_GOTO_DEPOT;
 					order.flags = Order.OF_PART_OF_ORDERS;
 					order.station = tile.getMap().m2;
@@ -234,7 +234,7 @@ public class OrderGui {
 			case MP_WATER:
 				if (v.getType() != Vehicle.VEH_Ship) break;
 				if (Depot.IsTileDepotType(tile, Global.TRANSPORT_WATER) &&
-						tile.IsTileOwner(Global._local_player)) {
+						tile.IsTileOwner(Global.gs._local_player)) {
 					switch (tile.getMap().m5) {
 						case 0x81: tile = tile.isub(TileIndex.TileDiffXY(1, 0)); break;
 						case 0x83: tile = tile.isub(TileIndex.TileDiffXY(0, 1)); break;
@@ -254,7 +254,7 @@ public class OrderGui {
 		// check waypoint
 		if (tile.IsTileType( TileTypes.MP_RAILWAY) &&
 				v.getType() == Vehicle.VEH_Train &&
-						tile.IsTileOwner(Global._local_player) &&
+						tile.IsTileOwner(Global.gs._local_player) &&
 				WayPoint.IsRailWaypoint(tile)) {
 			/*order.type = Order.OT_GOTO_WAYPOINT;
 			order.flags = 0;
@@ -266,7 +266,7 @@ public class OrderGui {
 		if (tile.IsTileType( TileTypes.MP_STATION)) {
 			final Station  st = Station.GetStation(st_index = tile.getMap().m2);
 			
-			if (st.getOwner() == Global._current_player || st.getOwner().id == Owner.OWNER_NONE || mAirport.MA_OwnerHandler(st.getOwner())) {
+			if (st.getOwner() == Global.gs._current_player || st.getOwner().id == Owner.OWNER_NONE || mAirport.MA_OwnerHandler(st.getOwner())) {
 				byte facil;
 				
 				/*
@@ -424,7 +424,7 @@ public class OrderGui {
 				int sel;
 				sel = (e.pt.y - 15) / 10;
 
-				if ((int)sel >= w.vscroll.getCap())
+				if (sel >= w.vscroll.getCap())
 					return;
 
 				sel += w.vscroll.pos;
@@ -626,7 +626,7 @@ public class OrderGui {
 
 		//_alloc_wnd_parent_num = veh;
 
-		if (v.getOwner() != Global._local_player) {
+		if (v.getOwner() != Global.gs._local_player) {
 			w = Window.AllocateWindowDesc(_other_orders_desc, veh);
 		} else {
 			w = Window.AllocateWindowDesc((v.getType() == Vehicle.VEH_Train) ? _orders_train_desc : _orders_desc, veh);

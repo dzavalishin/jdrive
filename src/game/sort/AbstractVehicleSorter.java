@@ -9,7 +9,7 @@ import game.struct.SortStruct;
 /* Variables you need to set before calling this function!
  * 1. (byte)_internal_sort_type:					sorting criteria to sort on
  * 2. (boolean)_internal_sort_order:				sorting order, descending/ascending
- * 3. (int)_internal_name_sorter_id:	default StringID of the vehicle when no name is set. eg
+ * 3. (int)_internal_name_sorter_id:	default StringID of the vehicle when no name is set. e.g.
  *    Str.STR_SV_TRAIN_NAME for trains or Str.STR_SV_AIRCRAFT_NAME for aircraft
  */
 

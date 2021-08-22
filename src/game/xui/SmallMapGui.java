@@ -62,7 +62,7 @@ public class SmallMapGui extends SmallMapGuiTables
 	 * Draws one column of the small map in a certain mode onto the screen buffer. This
 	 * function looks exactly the same for all types
 	 *
-	 * @param dst Pointer to a part of the screen buffer to write to.
+	 * @param idst Pointer to a part of the screen buffer to write to.
 	 * @param xc The X coordinate of the first tile in the column.
 	 * @param yc The Y coordinate of the first tile in the column
 	 * @param pitch Number of pixels to advance in the screen buffer each time a pixel is written.
@@ -128,7 +128,7 @@ public class SmallMapGui extends SmallMapGuiTables
 	/**
 	 * Return the color a tile would be displayed with in the small map in mode "Vehicles".
 	 *
-	 * @param t The tile of which we would like to get the color.
+	 * @param tile The tile of which we would like to get the color.
 	 * @return The color of tile in the small map in mode "Vehicles"
 	 */
 	static  int GetSmallMapVehiclesPixels(TileIndex tile)
@@ -160,7 +160,7 @@ public class SmallMapGui extends SmallMapGuiTables
 	/**
 	 * Return the color a tile would be displayed with in the small map in mode "Routes".
 	 *
-	 * @param t The tile of which we would like to get the color.
+	 * @param tile The tile of which we would like to get the color.
 	 * @return The color of tile  in the small map in mode "Routes"
 	 */
 	static  int GetSmallMapRoutesPixels(TileIndex tile)
@@ -235,7 +235,7 @@ public class SmallMapGui extends SmallMapGuiTables
 	/**
 	 * Return the color a tile would be displayed with in the small map in mode "Owner".
 	 *
-	 * @param t The tile of which we would like to get the color.
+	 * @param tile The tile of which we would like to get the color.
 	 * @return The color of tile in the small map in mode "Owner"
 	 */
 	static  int GetSmallMapOwnerPixels(TileIndex tile)
@@ -255,7 +255,7 @@ public class SmallMapGui extends SmallMapGuiTables
 
 	/* each tile has 4 x pixels and 1 y pixel */
 
-	static GetSmallMapPixels _smallmap_draw_procs[] = {
+	static final GetSmallMapPixels[] _smallmap_draw_procs = {
 			SmallMapGui::GetSmallMapContoursPixels,
 			SmallMapGui::GetSmallMapVehiclesPixels,
 			SmallMapGui::GetSmallMapIndustriesPixels,
@@ -423,8 +423,8 @@ public class SmallMapGui extends SmallMapGuiTables
 				if (t.getXy() != null) {
 					// Remap the town coordinate
 					Point pt = Point.RemapCoords(
-							(int)(t.getXy().TileX() * 16 - w.as_smallmap_d().scroll_x) / 16,
-							(int)(t.getXy().TileY() * 16 - w.as_smallmap_d().scroll_y) / 16,
+							(t.getXy().TileX() * 16 - w.as_smallmap_d().scroll_x) / 16,
+							(t.getXy().TileY() * 16 - w.as_smallmap_d().scroll_y) / 16,
 							0);
 					int x1 = pt.x - w.as_smallmap_d().subscroll + 3 - (t.getSign().getWidth_2() >> 1);
 					int y1 = pt.y;
@@ -479,6 +479,7 @@ public class SmallMapGui extends SmallMapGuiTables
 
 			mask = 0xFFFFFFFF;
 
+			//noinspection ConstantConditions
 			do { // goto replacement
 				/* distance from left edge */
 				if (x < 0) {
@@ -533,7 +534,7 @@ public class SmallMapGui extends SmallMapGuiTables
 		switch (e.event) {
 		case WE_PAINT: {
 			final int []tbl_mem;
-			int tbl_shift = 0;
+			//int tbl_shift = 0;
 			int x,y,y_org;
 			DrawPixelInfo new_dpi = new DrawPixelInfo();
 
@@ -543,7 +544,7 @@ public class SmallMapGui extends SmallMapGuiTables
 
 			/* draw the legend */
 			tbl_mem = _legend_table[(_smallmap_type != 2) ? _smallmap_type : (GameOptions._opt.landscape + IND_OFFS)];
-			tbl_shift = 0;
+			int tbl_shift = 0;
 
 			x = 4;
 			y_org = w.height - 43 - 11;

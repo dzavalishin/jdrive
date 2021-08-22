@@ -47,9 +47,9 @@ public abstract class TownGui //extends Town
 	//extern void DrawPlayerIcon(int p, int x, int y);
 
 	/** Get a list of available actions to do at a town.
-	 * @param *nump if not null add put the number of available actions in it
+	 * @param nump if not null add put the number of available actions in it
 	 * @param pid the player that is querying the town
-	 * @param *t the town that is queried
+	 * @param t the town that is queried
 	 * @return bitmasked value of enabled actions
 	 */
 	public static int GetMaskOfTownActions(int [] nump, PlayerID pid, final Town t)
@@ -78,7 +78,7 @@ public abstract class TownGui //extends Town
 			}
 
 			// Things worth more than this are not shown
-			long avail = Player.GetPlayer(pid).getMoney() + Global._price.station_value * 200;
+			long avail = Player.GetPlayer(pid).getMoney() + Global._price.station_value * 200L;
 			ref = Global._price.build_industry >> 8;
 
 				for (i = 0; i != Town._town_action_costs.length; i++, avail_buttons >>= 1) {
@@ -121,7 +121,7 @@ public abstract class TownGui //extends Town
 		case WE_PAINT: {
 			final Town t = Town.GetTown(w.window_number);
 			int [] numact = {0};
-			int buttons = GetMaskOfTownActions(numact, Global._local_player, t);
+			int buttons = GetMaskOfTownActions(numact, Global.gs._local_player, t);
 
 			MiscGui.SetVScrollCount(w, numact[0] + 1);
 
@@ -225,7 +225,7 @@ public abstract class TownGui //extends Town
 
 				if (!BitOps.IS_INT_INSIDE(y, 0, 5)) return;
 
-				y = GetNthSetBit(GetMaskOfTownActions(null, Global._local_player, t), y + w.vscroll.pos - 1);
+				y = GetNthSetBit(GetMaskOfTownActions(null, Global.gs._local_player, t), y + w.vscroll.pos - 1);
 				if (y >= 0) {
 					w.as_def_d().data_1 = y;
 					w.SetWindowDirty();
@@ -419,10 +419,8 @@ public abstract class TownGui //extends Town
 		/* Create array for sorting */
 		//_town_sort = realloc(_town_sort, GetTownPoolSize() * sizeof(_town_sort[0]));
 		_town_sort = new Integer[Town.GetTownPoolSize()];
-		if (_town_sort == null)
-			Global.error("Could not allocate memory for the town-sorting-list");
+		//if (_town_sort == null)			Global.error("Could not allocate memory for the town-sorting-list");
 
-		//FOR_ALL_TOWNS(t)
 		Town.forEach( (t) ->
 		{
 			if (t.getXy() != null) _town_sort[n[0]++] = t.index;
@@ -430,8 +428,6 @@ public abstract class TownGui //extends Town
 
 		_num_town_sort = n[0];
 
-		//_last_town_idx = 0; // used for "cache"
-		//qsort(_town_sort, n, sizeof(_town_sort[0]), _town_sort_order & 2 ? TownPopSorter : TownNameSorter);
 		Comparator<Integer> sorter = (0 != (_town_sort_order & 2)) ? new Town.TownPopSorter() : new Town.TownNameSorter();
 		Arrays.sort(_town_sort, sorter );
 

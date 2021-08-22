@@ -478,8 +478,8 @@ public class RailTables {
 	};		
 
 	public static class _RailBit {
-		public int xinc[];
-		public int yinc[];
+		public final int[] xinc;
+		public final int[] yinc;
 		public _RailBit(int[] xinc2, int[] yinc2) {
 			xinc = xinc2;
 			yinc = yinc2;
@@ -765,11 +765,11 @@ public class RailTables {
 		}
 
 		//SpriteID
-		public int image;
-		public int subcoord_x;
-		public int subcoord_y;
-		public int width;
-		public int height;
+		public final int image;
+		public final int subcoord_x;
+		public final int subcoord_y;
+		public final int width;
+		public final int height;
 	}
 
 	//#define TILE_SEQ_BEGIN(x) { x, 0, 0, 0, 0 },

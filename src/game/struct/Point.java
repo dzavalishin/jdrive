@@ -21,7 +21,6 @@ public class Point implements Comparable<Point> {
 
 
 	public static Point RemapCoords(int x, int y, int z) {
-		Point pt = new Point((y - x) * 2, y + x - z);
 		//#if !defined(NEW_ROTATION)
 		//pt.x = ;
 		//pt.y = ;
@@ -29,7 +28,7 @@ public class Point implements Comparable<Point> {
 		pt.x = (x + y) * 2;
 		pt.y = x - y - z;
 		#endif*/
-		return pt;
+		return new Point((y - x) * 2, y + x - z);
 	}
 
 	public static Point RemapCoords2(int x, int y)

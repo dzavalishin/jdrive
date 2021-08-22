@@ -1,10 +1,10 @@
 package game.struct;
 
 public class GameSettingData {
-	public int min;
-	public int max;
-	public int step;
-	public /*StringID*/ int str;
+	public final int min;
+	public final int max;
+	public final int step;
+	public final /*StringID*/ int str;
 
 	public GameSettingData(int i, int j, int k, int s) {
 		min = i;

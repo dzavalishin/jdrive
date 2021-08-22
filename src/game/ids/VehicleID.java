@@ -10,12 +10,16 @@ public class VehicleID extends AbstractID {
 		id = -1;
 	}*/
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private VehicleID(int i) {
 		super(i);
 	}
 
 
-	private static Map<Integer,VehicleID> ids = new HashMap<Integer,VehicleID>();
+	private static final Map<Integer,VehicleID> ids = new HashMap<Integer,VehicleID>();
 	public static VehicleID get(int player) 
 	{
 		VehicleID old = ids.get(player);

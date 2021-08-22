@@ -154,7 +154,12 @@ implements IPoolItem, Serializable
 
 
 
-	private static IPoolItemFactory<Town> factory = new IPoolItemFactory<Town>() {		
+	private static final IPoolItemFactory<Town> factory = new IPoolItemFactory<Town>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public Town createObject() { return new Town(); }
 	};
@@ -248,7 +253,7 @@ implements IPoolItem, Serializable
 		ViewPort.AddChildSpriteScreen(0x5A3, 0xE, 0x3C - BitOps.GB(ti.tile.getMap().m1, 0, 7));
 	}
 
-	static TownDrawTileProc _town_draw_tile_procs[] = {
+	static final TownDrawTileProc[] _town_draw_tile_procs = {
 			Town::TownDrawHouseLift
 	};
 
@@ -492,14 +497,14 @@ implements IPoolItem, Serializable
 		if ( 0 != (TownTables._house_more_flags[house] & 8) && 0 != (t.flags12 & 1) && --t.time_until_rebuild == 0) {
 			t.time_until_rebuild =  (BitOps.GB(r, 16, 6) + 130);
 
-			Global._current_player = PlayerID.get( Owner.OWNER_TOWN );
+			Global.gs._current_player = PlayerID.get( Owner.OWNER_TOWN );
 
 			t.ClearTownHouse(tile);
 
 			// rebuild with another house?
 			if (BitOps.GB(r, 24, 8) >= 12) DoBuildTownHouse(t, tile);
 
-			Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 		}
 	}
 
@@ -526,8 +531,8 @@ implements IPoolItem, Serializable
 			Global._cleared_town_rating += rating;
 			Global._cleared_town = t = GetTown(tile.getMap().m2);
 
-			if (Global._current_player.id < Global.MAX_PLAYERS) {
-				if (rating > t.ratings[Global._current_player.id] 
+			if (Global.gs._current_player.id < Global.MAX_PLAYERS) {
+				if (rating > t.ratings[Global.gs._current_player.id] 
 						&& 0==(flags & Cmd.DC_NO_TOWN_RATING) 
 						&& !Global._cheats.magic_bulldozer.value) {
 					Global.SetDParam(0, t.index);
@@ -1030,44 +1035,42 @@ implements IPoolItem, Serializable
 		//if(disableGrow) return false;
 
 		// Current player is a town
-		old_player = Global._current_player;
-		Global._current_player = Owner.OWNER_TOWN_ID;
+		old_player = Global.gs._current_player;
+		Global.gs._current_player = Owner.OWNER_TOWN_ID;
 
 		// Find a road that we can base the construction on.
 		tile = xy;
 		//for (ptr = _town_coord_mod; ptr != endof(_town_coord_mod); ++ptr) 
-		for(int i = 0; i < _town_coord_mod.length; i++)
-		{
-			ptr = _town_coord_mod[i];
+		for (TileIndexDiffC tileIndexDiffC : _town_coord_mod) {
+			ptr = tileIndexDiffC;
 			if (Road.GetRoadBitsByTile(tile) != 0) {
 				boolean r = GrowTownAtRoad(tile);
-				Global._current_player = old_player;
+				Global.gs._current_player = old_player;
 				return r;
 			}
-			tile = tile.iadd( TileIndex.ToTileIndexDiff(ptr));
+			tile = tile.iadd(TileIndex.ToTileIndexDiff(ptr));
 		}
 
 		// No road available, try to build a random road block by
 		// clearing some land and then building a road there.
 		tile = xy;
 		//for (ptr = _town_coord_mod; ptr != endof(_town_coord_mod); ++ptr) 		{
-		for(int i = 0; i < _town_coord_mod.length; i++)
-		{
-			ptr = _town_coord_mod[i];
+		for (TileIndexDiffC tileIndexDiffC : _town_coord_mod) {
+			ptr = tileIndexDiffC;
 			Landscape.FindLandscapeHeightByTile(ti, tile);
 
 			// Only work with plain land that not already has a house with map5=0
 			if (ti.tileh == 0 && (ti.type != TileTypes.MP_HOUSE.ordinal() || ti.map5 != 0)) {
 				if (!Cmd.CmdFailed(Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_AUTO, Cmd.CMD_LANDSCAPE_CLEAR))) {
 					Cmd.DoCommandByTile(tile, GenRandomRoadBits(), this.index, Cmd.DC_EXEC | Cmd.DC_AUTO, Cmd.CMD_BUILD_ROAD);
-					Global._current_player = old_player;
+					Global.gs._current_player = old_player;
 					return true;
 				}
 			}
-			tile = tile.iadd( TileIndex.ToTileIndexDiff(ptr));
+			tile = tile.iadd(TileIndex.ToTileIndexDiff(ptr));
 		}
 
-		Global._current_player = old_player;
+		Global.gs._current_player = old_player;
 		return false;
 	}
 
@@ -1730,7 +1733,7 @@ implements IPoolItem, Serializable
 		t = GetTown(p1);
 
 		str = Global.AllocateNameUnique(Global._cmd_text, 4);
-		if (str == null) return Cmd.CMD_ERROR;
+		//if (str == null) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			Global.DeleteName(t.townnametype);
@@ -1823,7 +1826,7 @@ implements IPoolItem, Serializable
 
 	static void TownActionAdvertise(Town t, int action)
 	{
-		Station.ModifyStationRatingAround(t.xy, Global._current_player,
+		Station.ModifyStationRatingAround(t.xy, Global.gs._current_player,
 				_advertising_amount[action],
 				_advertising_radius[action]);
 	}
@@ -1836,7 +1839,7 @@ implements IPoolItem, Serializable
 
 		Global.SetDParam(0, t.index);
 
-		p = Player.GetPlayer(Global._current_player);
+		p = Player.GetCurrentPlayer();
 		Global.SetDParam(1, p.name_1);
 		Global.SetDParam(2, p.name_2);
 
@@ -1857,10 +1860,10 @@ implements IPoolItem, Serializable
 			return false;
 
 
-		old = Global._current_player;
-		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+		old = Global.gs._current_player;
+		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 		r = Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
-		Global._current_player = old;
+		Global.gs._current_player = old;
 
 		if (Cmd.CmdFailed(r)) return false;
 
@@ -1900,13 +1903,12 @@ implements IPoolItem, Serializable
 		TileIndex tile = xy;
 		//final TileIndexDiffC p;
 
-		statues = BitOps.RETSETBIT(statues, Global._current_player.id);
+		statues = BitOps.RETSETBIT(statues, Global.gs._current_player.id);
 
 		//for (p = _statue_tiles; p != endof(_statue_tiles); ++p) 
-		for( int i = 0; i < _statue_tiles.length; i++ )
-		{
+		for (TileIndexDiffC statue_tile : _statue_tiles) {
 			if (DoBuildStatueOfCompany(tile)) return;
-			tile = tile.iadd( TileIndex.ToTileIndexDiff(_statue_tiles[i]) );
+			tile = tile.iadd(TileIndex.ToTileIndexDiff(statue_tile));
 		}
 	}
 
@@ -1920,9 +1922,9 @@ implements IPoolItem, Serializable
 	static void TownActionBuyRights(Town t, int action)
 	{
 		t.exclusive_counter = 12;
-		t.exclusivity = Global._current_player;
+		t.exclusivity = Global.gs._current_player;
 
-		Station.ModifyStationRatingAround(t.xy, Global._current_player, 130, 17);
+		Station.ModifyStationRatingAround(t.xy, Global.gs._current_player, 130, 17);
 	}
 
 	static void TownActionBribe(Town t, int action)
@@ -1931,12 +1933,12 @@ implements IPoolItem, Serializable
 			//Station st;
 
 			// set as unwanted for 6 months
-			t.unwanted[Global._current_player.id] = 6;
+			t.unwanted[Global.gs._current_player.id] = 6;
 
 			// set all close by station ratings to 0
 			Station.forEach( (st) ->
 			{
-				if (st.town == t && st.owner == Global._current_player) {
+				if (st.town == t && st.owner == Global.gs._current_player) {
 					for (int i = 0; i != AcceptedCargo.NUM_CARGO; i++) 
 						st.goods[i].rating = 0;
 				}
@@ -1950,15 +1952,15 @@ implements IPoolItem, Serializable
 			 *	ChangeTownRating is only for stuff in demolishing. Bribe failure should
 			 *	be independent of any cheat settings
 			 */
-			if (t.ratings[Global._current_player.id] > TownTables.RATING_BRIBE_DOWN_TO) {
-				t.ratings[Global._current_player.id] = TownTables.RATING_BRIBE_DOWN_TO;
+			if (t.ratings[Global.gs._current_player.id] > TownTables.RATING_BRIBE_DOWN_TO) {
+				t.ratings[Global.gs._current_player.id] = TownTables.RATING_BRIBE_DOWN_TO;
 			}
 		} else {
 			t.ChangeTownRating(TownTables.RATING_BRIBE_UP_STEP, TownTables.RATING_BRIBE_MAXIMUM);
 		}
 	}
 
-	static TownActionProc _town_action_proc[] = {
+	static final TownActionProc[] _town_action_proc = {
 			Town::TownActionAdvertise,
 			Town::TownActionAdvertise,
 			Town::TownActionAdvertise,
@@ -1987,7 +1989,7 @@ implements IPoolItem, Serializable
 
 		t = GetTown(p1);
 
-		if (!BitOps.HASBIT(TownGui.GetMaskOfTownActions(null, Global._current_player, t), p2)) return Cmd.CMD_ERROR;
+		if (!BitOps.HASBIT(TownGui.GetMaskOfTownActions(null, Global.gs._current_player, t), p2)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 
@@ -2105,14 +2107,14 @@ implements IPoolItem, Serializable
 	{
 		Town t;
 
-		if (Global._current_player.id >= Global.MAX_PLAYERS)
+		if (Global.gs._current_player.id >= Global.MAX_PLAYERS)
 			return true;
 
 		t = ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 		if (t == null)
 			return true;
 
-		if (t.ratings[Global._current_player.id] > -200)
+		if (t.ratings[Global.gs._current_player.id] > -200)
 			return true;
 
 		Global._error_message = Str.STR_2009_LOCAL_AUTHORITY_REFUSES;
@@ -2156,14 +2158,14 @@ implements IPoolItem, Serializable
 
 		//	if magic_bulldozer cheat is active, town doesn't penaltize for removing stuff
 		if ( //t == null ||
-				Global._current_player.id >= Global.MAX_PLAYERS ||
+				Global.gs._current_player.id >= Global.MAX_PLAYERS ||
 				(Global._cheats.magic_bulldozer.value && add < 0)) {
 			return;
 		}
 
-		have_ratings = BitOps.RETSETBIT(have_ratings, Global._current_player.id);
+		have_ratings = BitOps.RETSETBIT(have_ratings, Global.gs._current_player.id);
 
-		rating = ratings[Global._current_player.id];
+		rating = ratings[Global.gs._current_player.id];
 
 		if (add < 0) {
 			if (rating > max) {
@@ -2176,7 +2178,7 @@ implements IPoolItem, Serializable
 				if (rating > max) rating = max;
 			}
 		}
-		ratings[Global._current_player.id] = rating;
+		ratings[Global.gs._current_player.id] = rating;
 	}
 
 	/*	penalty for removing town-owned stuff */
@@ -2192,7 +2194,7 @@ implements IPoolItem, Serializable
 		int modemod;
 
 		//	if magic_bulldozer cheat is active, town doesn't restrict your destructive actions
-		if (t == null || Global._current_player.id >= Global.MAX_PLAYERS || Global._cheats.magic_bulldozer.value)
+		if (t == null || Global.gs._current_player.id >= Global.MAX_PLAYERS || Global._cheats.magic_bulldozer.value)
 			return true;
 
 		/*	check if you're allowed to remove the street/bridge/tunnel/industry
@@ -2201,7 +2203,7 @@ implements IPoolItem, Serializable
 		 */
 		modemod = _default_rating_settings[GameOptions._opt.diff.town_council_tolerance][type];
 
-		if (t.ratings[Global._current_player.id] < 16 + modemod && 0==(flags & Cmd.DC_NO_TOWN_RATING)) {
+		if (t.ratings[Global.gs._current_player.id] < 16 + modemod && 0==(flags & Cmd.DC_NO_TOWN_RATING)) {
 			Global.SetDParam(0, t.index);
 			Global._error_message = Str.STR_2009_LOCAL_AUTHORITY_REFUSES;
 			return false;

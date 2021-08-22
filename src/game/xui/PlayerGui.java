@@ -78,7 +78,7 @@ public class PlayerGui
 			y = 171;
 
 			// draw max loan aligned to loan below (y += 10)
-			Global.SetDParam64(0, (long)Global._economy.getMax_loan());
+			Global.SetDParam64(0, Global._economy.getMax_loan());
 			Gfx.DrawString(202, y+10, Str.STR_MAX_LOAN, 0);
 
 		} else
@@ -228,7 +228,7 @@ public class PlayerGui
 		Window w;
 		int mode;
 
-		mode = BitOps.b2i(player != Global._local_player.id) * 2 + BitOps.b2i(show_small);
+		mode = BitOps.b2i(player != Global.gs._local_player.id) * 2 + BitOps.b2i(show_small);
 		w = Window.AllocateWindowDescFront(desc_table[mode], player);
 		if (w != null) {
 			w.caption_color = (byte) w.window_number;
@@ -287,7 +287,7 @@ public class PlayerGui
 				int used_colors;
 				int i;
 
-				if ((int)item >= 8)
+				if (item >= 8)
 					return;
 				item += w.vscroll.pos;
 				used_colors = w.as_def_d().data_1;
@@ -541,11 +541,11 @@ public class PlayerGui
 						dis = BitOps.RETSETBIT(dis, 9);
 
 					/* If the player doesn't own any shares, disable sell button */
-					if (GetAmountOwnedBy(p, Global._local_player) == 0) 
+					if (GetAmountOwnedBy(p, Global.gs._local_player) == 0) 
 						dis = BitOps.RETSETBIT(dis, 10);
 
 					/* Spectators cannot do anything of course */
-					if (Global._local_player.id == Owner.OWNER_SPECTATOR) 
+					if (Global.gs._local_player.id == Owner.OWNER_SPECTATOR) 
 						dis |= (1 << 9) | (1 << 10);
 				} else /* shares are not allowed, disable buy/sell buttons */
 					dis |= (1 << 9) | (1 << 10);
@@ -617,7 +617,7 @@ public class PlayerGui
 			case 7: {/* build hq */
 				TileIndex tile = Player.GetPlayer(w.window_number).getLocation_of_house();
 				if (tile == null) {
-					if (w.window_number != Global._local_player.id)
+					if (w.window_number != Global.gs._local_player.id)
 						return;
 					ViewPort.SetObjectToPlaceWnd(Sprite.SPR_CURSOR_HQ, 1, w);
 					ViewPort.SetTileSelectSize(2, 2);
@@ -641,8 +641,8 @@ public class PlayerGui
 				/*#ifdef ENABLE_NETWORK
 				if (!IsWindowOfPrototype(w, _other_player_company_widgets)) {
 					w.as_def_d().byte_1 = 2;
-					ShowQueryString(Strings.BindCString(_network_player_info[Global._local_player].password),
-							Str.STR_SET_COMPANY_PASSWORD, sizeof(_network_player_info[Global._local_player].password), 250, w.window_class, w.window_number);
+					ShowQueryString(Strings.BindCString(_network_player_info[Global.gs._local_player].password),
+							Str.STR_SET_COMPANY_PASSWORD, sizeof(_network_player_info[Global.gs._local_player].password), 250, w.window_class, w.window_number);
 				}
 				#endif */
 			}	break;
@@ -715,7 +715,7 @@ public class PlayerGui
 	{
 		Window  w;
 
-		w = Window.AllocateWindowDescFront( (player == Global._local_player.id) ? _my_player_company_desc : _other_player_company_desc, player);
+		w = Window.AllocateWindowDescFront( (player == Global.gs._local_player.id) ? _my_player_company_desc : _other_player_company_desc, player);
 		if (w != null) w.caption_color = (byte) w.window_number;
 	}
 
@@ -808,7 +808,7 @@ public class PlayerGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Player p = Player.GetPlayer(Global._local_player);
+			final Player p = Player.GetPlayer(Global.gs._local_player);
 			int x, y;
 
 			{
@@ -966,8 +966,8 @@ public class PlayerGui
 
 					w.as_highscore_d().background_img = Sprite.SPR_TYCOON_IMG1_BEGIN;
 
-					if (Global._local_player.id != Owner.OWNER_SPECTATOR) {
-						final Player p = Player.GetPlayer(Global._local_player);
+					if (Global.gs._local_player.id != Owner.OWNER_SPECTATOR) {
+						final Player p = Player.GetPlayer(Global.gs._local_player);
 						if (p.old_economy[0].performance_history == Economy.SCORE_MAX)
 							w.as_highscore_d().background_img = Sprite.SPR_TYCOON_IMG2_BEGIN;
 					}
@@ -979,7 +979,7 @@ public class PlayerGui
 						w.as_highscore_d().rank = SaveHighScoreValueNetwork();
 					} else {
 						// in single player _local player is always valid
-						final Player p = Player.GetPlayer(Global._local_player);
+						final Player p = Player.GetPlayer(Global.gs._local_player);
 						w.window_number = GameOptions._opt.diff_level;
 						w.as_highscore_d().rank = SaveHighScoreValue(p);
 					}*/

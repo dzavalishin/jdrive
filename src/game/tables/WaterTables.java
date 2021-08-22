@@ -8,14 +8,14 @@ public class WaterTables
 	/* $Id: water_land.h 2781 2005-08-01 16:31:19Z ludde $ */
 
 	public static class WaterDrawTileStruct {
-		public int delta_x;
-		public int delta_y;
-		public int delta_z;
-		public int width;
-		public int height;
-		public int unk;
+		public final int delta_x;
+		public final int delta_y;
+		public final int delta_z;
+		public final int width;
+		public final int height;
+		public final int unk;
 		//SpriteID 
-		public int image;
+		public final int image;
 
 		public WaterDrawTileStruct(int i, int j, int k, int l, int m, int n, int img) {
 			delta_x = i;

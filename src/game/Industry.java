@@ -107,7 +107,12 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	public static final int INDUSTRY_POOL_MAX_BLOCKS      = 8000;
 
 
-	private static  IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() {
+	private static final IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public Industry createObject() {
@@ -115,7 +120,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 	};
 	/* Initialize the industry-pool */
-	static MemoryPool<Industry> _industry_pool = new MemoryPool<Industry>(factory); 
+	static final MemoryPool<Industry> _industry_pool = new MemoryPool<Industry>(factory);
 
 
 	@Override
@@ -318,6 +323,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		return Landscape.GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
 	}
 
+	@SuppressWarnings("SameReturnValue")
 	static int GetSlopeTileh_Industry(final TileInfo  ti)
 	{
 		return 0;
@@ -371,9 +377,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		 * with magic_bulldozer cheat you can destroy industries
 		 * (area around OILRIG is water, so water shouldn't flood it
 		 */
-		if ((Global._current_player.id != Owner.OWNER_WATER && Global._game_mode != GameModes.GM_EDITOR &&
+		if ((Global.gs._current_player.id != Owner.OWNER_WATER && Global._game_mode != GameModes.GM_EDITOR &&
 				!Global._cheats.magic_bulldozer.value) ||
-				(Global._current_player.id == Owner.OWNER_WATER && i.type == IT_OIL_RIG) ) {
+				(Global.gs._current_player.id == Owner.OWNER_WATER && i.type == IT_OIL_RIG) ) {
 			Global.SetDParam(0, Str.STR_4802_COAL_MINE + i.type);
 			return Cmd.return_cmd_error(Str.STR_4800_IN_THE_WAY);
 		}
@@ -434,7 +440,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	{
 		int m,n;
 
-		switch((int)tile.getMap().m5) {
+		switch(tile.getMap().m5) {
 		case 174:
 			if ((Global._tick_counter & 1) == 0) {
 				m = tile.getMap().m3 + 1;
@@ -645,7 +651,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		if (0 == (tile.getMap().m1 & 0x80))
 			return;
 
-		switch((int)tile.getMap().m5) {
+		switch(tile.getMap().m5) {
 		case 8:
 			MakeIndustryTileBiggerCase8(tile);
 			break;
@@ -723,7 +729,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 
 
-		switch (0xFF & (int)tile.getMap().m5) {
+		switch (0xFF & tile.getMap().m5) {
 		case 0x18: // coast line at oilrigs
 		case 0x19:
 		case 0x1A:
@@ -993,7 +999,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			int y = i.height / 2 + Hal.Random() % 31 - 16;
 			TileIndex tile = new TileIndex(
 					TileIndex.TileAddWrap( new TileIndex(i.xy), x, y));
-			if (tile != TileIndex.INVALID_TILE) PlantFarmField(tile);
+			if (tile.isValid()) PlantFarmField(tile);
 		}
 	}
 
@@ -1021,10 +1027,10 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				do {
 					tile.TILE_MASK();
 					if (tile.IsTileType( TileTypes.MP_TREES)) {
-						PlayerID old_player = Global._current_player;
+						PlayerID old_player = Global.gs._current_player;
 						/* found a tree */
 
-						Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+						Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 						_industry_sound_ctr = 1;
 						_industry_sound_tile = tile;
 						//SndPlayTileFx(SND_38_CHAINSAW, tile);
@@ -1034,7 +1040,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 						i.cargo_waiting[0] = Math.min(0xffff, i.cargo_waiting[0] + 45);
 
-						Global._current_player = old_player;
+						Global.gs._current_player = old_player;
 						return;
 					}
 					tile.madd( TileIndex.ToTileIndexDiff(_chop_dir[dir]) );
@@ -1236,12 +1242,12 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		return true;
 	}
 
-	static final Town CheckMultipleIndustryInTown(TileIndex tile, int type)
+	static Town CheckMultipleIndustryInTown(TileIndex tile, int type)
 	{
 		final Town t;
 		//final Industry  i;
 
-		t = Town.ClosestTownFromTile(tile, (int)-1);
+		t = Town.ClosestTownFromTile(tile, -1);
 
 		if (Global._patches.multiple_industry_per_town) return t;
 
@@ -1665,8 +1671,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 
 		if (GameOptions._opt.diff.number_industries != 0) {
-			PlayerID old_player = Global._current_player;
-			Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+			PlayerID old_player = Global.gs._current_player;
+			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 			assert(num > 0);
 
 			do {
@@ -1677,7 +1683,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				}
 			} while (--num > 0);
 
-			Global._current_player = old_player;
+			Global.gs._current_player = old_player;
 		}
 	}
 
@@ -1906,8 +1912,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	static void IndustryMonthlyLoop()
 	{
 		//Industry i;
-		PlayerID old_player = Global._current_player;
-		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+		PlayerID old_player = Global.gs._current_player;
+		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 		//FOR_ALL_INDUSTRIES(i) 
 		Industry.forEach( (i) ->
@@ -1923,7 +1929,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			if (i != null && i.xy != null) ChangeIndustryProduction(i);
 		}
 
-		Global._current_player = old_player;
+		Global.gs._current_player = old_player;
 
 		// production-change
 		_industry_sort_dirty = true;

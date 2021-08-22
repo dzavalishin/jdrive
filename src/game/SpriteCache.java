@@ -10,8 +10,8 @@ public class SpriteCache {
 
 	//#define WANT_NEW_LRU
 
-	static Sprite[] _sprite_ptr = new Sprite[Sprite.MAX_SPRITES];
-	static int [] _sprite_file_pos = new int[Sprite.MAX_SPRITES];
+	static final Sprite[] _sprite_ptr = new Sprite[Sprite.MAX_SPRITES];
+	static final int [] _sprite_file_pos = new int[Sprite.MAX_SPRITES];
 
 	//#if defined(WANT_NEW_LRU)
 	//static int _sprite_lru_new[Sprite.MAX_SPRITES];

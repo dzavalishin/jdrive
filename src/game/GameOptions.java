@@ -16,10 +16,10 @@ public class GameOptions
 
 	/* These are the options for the current game
 	 * either ingame, or loaded. Also used for networking games */
-	public static GameOptions _opt = new GameOptions(); // TODO must be set up!
+	public static final GameOptions _opt = new GameOptions(); // TODO must be set up!
 
 	/* These are the default options for a new game */
-	public static GameOptions _opt_newgame = new GameOptions(); // TODO must be set up!
+	public static final GameOptions _opt_newgame = new GameOptions(); // TODO must be set up!
 
 	// Pointer to one of the two _opt OR _opt_newgame structs
 	public static GameOptions _opt_ptr;

@@ -2,13 +2,13 @@ package game.struct;
 
 public class DrawTileUnmovableStruct 
 {
-	public int image;
-	public int subcoord_x;
-	public int subcoord_y;
-	public int width;
-	public int height;
-	public int z_size;
-	public int unused;
+	public final int image;
+	public final int subcoord_x;
+	public final int subcoord_y;
+	public final int width;
+	public final int height;
+	public final int z_size;
+	public final int unused;
 
 	public DrawTileUnmovableStruct(int i, int j, int k, int l, int m, int n, int o) {
 		image = i;

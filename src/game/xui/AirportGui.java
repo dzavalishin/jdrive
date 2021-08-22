@@ -136,7 +136,7 @@ public class AirportGui
 
 	static void ShowBuildAirToolbar()
 	{
-		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
+		if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR) return;
 		Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);
 		Window.AllocateWindowDescFront(_air_toolbar_desc, 0);
 		if (Global._patches.link_terraform_toolbar) Terraform.ShowTerraformToolbar();
@@ -185,7 +185,7 @@ public class AirportGui
 	    // strings such as 'Size' and 'Coverage Area'
 			Gfx.DrawStringCentered(74, 16, Str.STR_305B_SIZE, 0);
 			Gfx.DrawStringCentered(74, 78, Str.STR_3066_COVERAGE_AREA_HIGHLIGHT, 0);
-			MiscGui.DrawStationCoverageAreaText(2, 104, (int)-1, rad);
+			MiscGui.DrawStationCoverageAreaText(2, 104, -1, rad);
 			break;
 		}
 

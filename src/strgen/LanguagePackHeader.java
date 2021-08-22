@@ -1,6 +1,5 @@
 package strgen;
 
-import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
@@ -14,13 +13,11 @@ public class LanguagePackHeader
 		String name;					// the international name of this language
 		String own_name;				// the localized name of this language
 		String isocode;					// the ISO code for the language (not country code)
-		int [] offsets = new int[32];	// the offsets
+		final int [] offsets = new int[32];	// the offsets
 		int plural_form;				// plural form index
 		
 		public void writeTo(DataOutputStream f) throws IOException 
 		{
-			//DataOutputStream d = new DataOutputStream(f);
-			//BitOps.writeInt32(f, ident);
 			f.writeInt(ident);
 			f.writeInt(version);
 			BitOps.writeFixedString(f,name,32);
@@ -28,7 +25,7 @@ public class LanguagePackHeader
 			BitOps.writeFixedString(f,isocode,16);
 			
 			for(Integer i : offsets)
-				f.writeInt(i);
+				f.writeShort(i);
 			
 			f.writeByte(plural_form);
 			

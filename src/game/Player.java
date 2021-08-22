@@ -1,12 +1,5 @@
 package game;
 
-import game.util.BitOps;
-import game.util.MemoryPool;
-import game.util.Strings;
-import game.xui.Gfx;
-import game.xui.PlayerGui;
-import game.xui.Window;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,14 +16,21 @@ import game.ids.EngineID;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.struct.PlayerEconomyEntry;
+import game.util.BitOps;
+import game.util.Strings;
+import game.xui.Gfx;
+import game.xui.PlayerGui;
+import game.xui.Window;
 
 /** 
- * @todo Cleanup the messy DrawPlayerFace function asap
+ * TODO Cleanup the messy DrawPlayerFace function asap
  */
 
 public class Player implements Serializable 
 {
 
+	private static final long serialVersionUID = 1L;
+	
 	int name_2;
 	int name_1;
 
@@ -69,7 +69,7 @@ public class Player implements Serializable
 	// TODO PlayerAI ai = new PlayerAI();
 	// TODO PlayerAiNew ainew;
 
-	long [][] yearly_expenses = new long[3][13];
+	final long [][] yearly_expenses = new long[3][13];
 
 	public PlayerEconomyEntry cur_economy;
 	public PlayerEconomyEntry old_economy[];
@@ -112,18 +112,11 @@ public class Player implements Serializable
 	public PlayerID getIndex() { return index; }
 	public long getMoney() { return money64; }
 
-	
-	
-	//#define MAX_PLAYERS 8
-	static Player [] _players = new Player[Global.MAX_PLAYERS];
-	// NOSAVE: can be determined from player structs
-	private static int [] _player_colors = new int[Global.MAX_PLAYERS];
 
 
 	public static final long INITIAL_MONEY = 100000000;
 
-	static int _yearly_expenses_type; // TODO fixme, use parameter where possible
-	public static void SET_EXPENSES_TYPE(int x) { _yearly_expenses_type = x; }
+	public static void SET_EXPENSES_TYPE(int x) { Global.gs._yearly_expenses_type = x; }
 
 	public static final int EXPENSES_CONSTRUCTION = 0;
 	public static final int EXPENSES_NEW_VEHICLES = 1;
@@ -139,27 +132,29 @@ public class Player implements Serializable
 	public static final int EXPENSES_LOAN_INT = 11;
 	public static final int EXPENSES_OTHER = 12;
 
-	private static int _cur_player_tick_index;
-	private static int _next_competitor_start;
 
 
 
 
 	public static Player GetPlayer(PlayerID i)
 	{
-		assert(i.id < _players.length);
-		return _players[i.id];
+		assert(i.id < Global.gs._players.length);
+		return Global.gs._players[i.id];
 	}
 
 	public static Player GetPlayer(int i)
 	{
-		assert(i < _players.length);
-		return _players[i];
+		assert(i < Global.gs._players.length);
+		return Global.gs._players[i];
+	}
+
+	public static Player GetCurrentPlayer() {
+		return GetPlayer(Global.gs._current_player);
 	}
 
 	static boolean IsLocalPlayer()
 	{
-		return Global._local_player == Global._current_player;
+		return Global.gs._local_player == Global.gs._current_player;
 	}
 
 
@@ -179,7 +174,7 @@ public class Player implements Serializable
 	{
 		int flag = 0;
 
-		if ( (int)face < 0)
+		if ( face < 0)
 			flag |= 1;
 		if ((((((face >> 7) ^ face) >> 7) ^ face) & 0x8080000) == 0x8000000)
 			flag |= 2;
@@ -325,7 +320,7 @@ public class Player implements Serializable
 	{
 		PlayerID pid = index;
 
-		if (pid == Global._local_player) Window.InvalidateWindow(Window.WC_STATUS_BAR, 0);
+		if (pid == Global.gs._local_player) Window.InvalidateWindow(Window.WC_STATUS_BAR, 0);
 		Window.InvalidateWindow(Window.WC_FINANCES, pid.id);
 	}
 
@@ -333,7 +328,7 @@ public class Player implements Serializable
 	public static boolean CheckPlayerHasMoney(int cost)
 	{
 		if (cost > 0) {
-			PlayerID pid = Global._current_player;
+			PlayerID pid = Global.gs._current_player;
 			if (pid.id < Global.MAX_PLAYERS && cost > GetPlayer(pid).money64) {
 				Global.SetDParam(0, cost);
 				Global._error_message = Str.STR_0003_NOT_ENOUGH_CASH_REQUIRES;
@@ -348,11 +343,11 @@ public class Player implements Serializable
 		money64 -= cost;
 		//UpdatePlayerMoney32();
 
-		yearly_expenses[0][_yearly_expenses_type] += cost;
+		yearly_expenses[0][Global.gs._yearly_expenses_type] += cost;
 
-		if(0 != ( ( 1 << _yearly_expenses_type ) & (1<<7|1<<8|1<<9|1<<10)) )
+		if(0 != ( ( 1 << Global.gs._yearly_expenses_type ) & (1<<7|1<<8|1<<9|1<<10)) )
 			cur_economy.income -= cost;
-		else if(0 != (( 1 << _yearly_expenses_type ) & (1<<2|1<<3|1<<4|1<<5|1<<6|1<<11)) )
+		else if(0 != (( 1 << Global.gs._yearly_expenses_type ) & (1<<2|1<<3|1<<4|1<<5|1<<6|1<<11)) )
 			cur_economy.expenses -= cost;
 
 		InvalidatePlayerWindows();
@@ -360,7 +355,7 @@ public class Player implements Serializable
 
 	static void SubtractMoneyFromPlayer(int cost)
 	{
-		PlayerID pid = Global._current_player;
+		PlayerID pid = Global.gs._current_player;
 		if (pid.id < Global.MAX_PLAYERS)
 			GetPlayer(pid).SubtractMoneyFromAnyPlayer(cost);
 	}
@@ -401,7 +396,7 @@ public class Player implements Serializable
 				Global.SetDParam(1, p.name_2);
 			}
 		} else {
-			Town t = Town.ClosestTownFromTile(tile, (int)-1);
+			Town t = Town.ClosestTownFromTile(tile, -1);
 			Global.SetDParam(0, Str.STR_TOWN);
 			Global.SetDParam(1, t.index);
 		}
@@ -412,7 +407,7 @@ public class Player implements Serializable
 	{
 		assert(owner.id <= Owner.OWNER_WATER);
 
-		if (owner == Global._current_player)
+		if (owner == Global.gs._current_player)
 			return true;
 		Global._error_message = Str.STR_013B_OWNED_BY;
 		GetNameOfOwner(owner, new TileIndex(0) );
@@ -425,7 +420,7 @@ public class Player implements Serializable
 
 		assert(owner.id <= Owner.OWNER_WATER);
 
-		if (owner == Global._current_player)
+		if (owner == Global.gs._current_player)
 			return true;
 		Global._error_message = Str.STR_013B_OWNED_BY;
 
@@ -484,7 +479,7 @@ public class Player implements Serializable
 		if (tile == null)
 			return;
 
-		t = Town.ClosestTownFromTile(tile, (int)-1);
+		t = Town.ClosestTownFromTile(tile, -1);
 
 		if( t != null && BitOps.IS_INT_INSIDE(t.townnametype, Strings.SPECSTR_TOWNNAME_START, Strings.SPECSTR_TOWNNAME_LAST+1)) 
 		{
@@ -561,13 +556,13 @@ public class Player implements Serializable
 
 		// Move the colors that look similar to each player's color to the side
 		//FOR_ALL_PLAYERS(p)
-		for( Player p : _players )
+		for( Player p : Global.gs._players )
 			if (p.is_active) {
 				pcolor = p.player_color;
 				for(i=0; i!=16; i++) if (colors[i] == pcolor) {
 					colors[i] = (byte) 0xFF;
 
-					t2 = _color_similar_1[pcolor];
+					t2 = 0xFF & _color_similar_1[pcolor];
 					if (t2 == 0xFF) break;
 					for(i=0; i!=15; i++) {
 						if (colors[i] == t2) {
@@ -576,7 +571,7 @@ public class Player implements Serializable
 						}
 					}
 
-					t2 = _color_similar_2[pcolor];
+					t2 = 0xFF & _color_similar_2[pcolor];
 					if (t2 == 0xFF) break;
 					for(i=0; i!=15; i++) {
 						if (colors[i] == t2) {
@@ -640,7 +635,7 @@ public class Player implements Serializable
 	{
 		//Player p;
 		// Find a free slot
-		for( Player p : _players ) {
+		for( Player p : Global.gs._players ) {
 			if (!p.is_active) {
 				int i = p.index.id;
 				//memset(p, 0, sizeof(Player));
@@ -663,7 +658,7 @@ public class Player implements Serializable
 
 		// Make a color
 		p.player_color = GeneratePlayerColor();
-		_player_colors[p.index.id] = p.player_color;
+		Global.gs._player_colors[p.index.id] = p.player_color;
 		p.name_1 = Str.STR_SV_UNNAMED;
 		p.is_active = true;
 
@@ -700,7 +695,7 @@ public class Player implements Serializable
 	static void StartupPlayers()
 	{
 		// The AI starts like in the setting with +2 month max
-		_next_competitor_start = GameOptions._opt.diff.competitor_start_time * 90 * Global.DAY_TICKS + Hal.RandomRange(60 * Global.DAY_TICKS) + 1;
+		Global.gs._next_competitor_start = GameOptions._opt.diff.competitor_start_time * 90 * Global.DAY_TICKS + Hal.RandomRange(60 * Global.DAY_TICKS) + 1;
 	}
 
 	private static void MaybeStartNewPlayer()
@@ -710,33 +705,32 @@ public class Player implements Serializable
 
 		// count number of competitors
 		n = 0;
-		for( Player p : _players ) {
+		for( Player p : Global.gs._players ) {
 			if (p.is_active && p.is_ai != 0)
 				n++;
 		}
 
 		// when there's a lot of computers in game, the probability that a new one starts is lower
-		if (n < (int)GameOptions._opt.diff.max_no_competitors)
+		if (n < GameOptions._opt.diff.max_no_competitors)
 			if (n < (Global._network_server ? Hal.InteractiveRandomRange(GameOptions._opt.diff.max_no_competitors + 2) : Hal.RandomRange(GameOptions._opt.diff.max_no_competitors + 2)) )
 				// Send a command to all clients to start  up a new AI. Works fine for Multiplayer and SinglePlayer 
 				Cmd.DoCommandP(new TileIndex(0), 1, 0, null, Cmd.CMD_PLAYER_CTRL);
 
 		// The next AI starts like the difficulty setting said, with +2 month max
-		_next_competitor_start = GameOptions._opt.diff.competitor_start_time * 90 * Global.DAY_TICKS + 1;
-		_next_competitor_start += Global._network_server ? Hal.InteractiveRandomRange(60 * Global.DAY_TICKS) : Hal.RandomRange(60 * Global.DAY_TICKS);
+		Global.gs._next_competitor_start = GameOptions._opt.diff.competitor_start_time * 90 * Global.DAY_TICKS + 1;
+		Global.gs._next_competitor_start += Global._network_server ? Hal.InteractiveRandomRange(60 * Global.DAY_TICKS) : Hal.RandomRange(60 * Global.DAY_TICKS);
 	}
 
 	static void InitializePlayers()
 	{
 		int i;
-		//memset(_players, 0, sizeof(_players));
 
 		for(i = 0; i != Global.MAX_PLAYERS; i++)
 		{
-			_players[i] = new Player();
-			_players[i].index=PlayerID.get(i);
+			Global.gs._players[i] = new Player();
+			Global.gs._players[i].index=PlayerID.get(i);
 		}
-		_cur_player_tick_index = 0;
+		Global.gs._cur_player_tick_index = 0;
 	}
 
 	static void OnTick_Players()
@@ -746,11 +740,11 @@ public class Player implements Serializable
 		if (Global._game_mode == GameModes.GM_EDITOR)
 			return;
 
-		p = GetPlayer(_cur_player_tick_index);
-		_cur_player_tick_index = (_cur_player_tick_index + 1) % Global.MAX_PLAYERS;
+		p = GetPlayer(Global.gs._cur_player_tick_index);
+		Global.gs._cur_player_tick_index = (Global.gs._cur_player_tick_index + 1) % Global.MAX_PLAYERS;
 		if (p.name_1 != 0) p.GenerateCompanyName();
 
-		if (Ai.AI_AllowNewAI() && Global._game_mode != GameModes.GM_MENU && 0 == --_next_competitor_start)
+		if (Ai.AI_AllowNewAI() && Global._game_mode != GameModes.GM_MENU && 0 == --Global.gs._next_competitor_start)
 			MaybeStartNewPlayer();
 	}
 
@@ -772,7 +766,7 @@ public class Player implements Serializable
 		//Player p;
 
 		// Copy statistics
-		for( Player p : _players ) 
+		for( Player p : Global.gs._players ) 
 		{
 			if (p.is_active) 
 			{
@@ -790,9 +784,9 @@ public class Player implements Serializable
 			}
 		}
 
-		if (Global._patches.show_finances && Global._local_player.id != Owner.OWNER_SPECTATOR) {
-			PlayerGui.ShowPlayerFinances(Global._local_player.id);
-			Player p = GetPlayer(Global._local_player);
+		if (Global._patches.show_finances && Global.gs._local_player.id != Owner.OWNER_SPECTATOR) {
+			PlayerGui.ShowPlayerFinances(Global.gs._local_player.id);
+			Player p = GetPlayer(Global.gs._local_player);
 
 			/* TODO sound
 			if (p.num_valid_stat_ent > 5 && p.old_economy[0].performance_history < p.old_economy[4].performance_history) {
@@ -877,10 +871,10 @@ public class Player implements Serializable
 	static int CmdReplaceVehicle(int x, int y, int flags, int p1, int p2)
 	{
 		Player p;
-		if (!(Global._current_player.id < Global.MAX_PLAYERS))
+		if (!(Global.gs._current_player.id < Global.MAX_PLAYERS))
 			return Cmd.CMD_ERROR;
 
-		p = GetPlayer(Global._current_player);
+		p = GetPlayer(Global.gs._current_player);
 		switch (BitOps.GB(p1, 0, 3)) {
 		case 0:
 			if (p.engine_renew == ( 0 != BitOps.GB(p2, 0, 1)) )
@@ -895,11 +889,11 @@ public class Player implements Serializable
 			}
 			break;
 		case 1:
-			if (p.engine_renew_months == (int)p2)
+			if (p.engine_renew_months == p2)
 				return Cmd.CMD_ERROR;
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				p.engine_renew_months = (int)p2;
+				p.engine_renew_months = p2;
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew_months = p.engine_renew_months;
 					Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
@@ -907,11 +901,11 @@ public class Player implements Serializable
 			}
 			break;
 		case 2:
-			if (p.engine_renew_money == (int)p2)
+			if (p.engine_renew_money == p2)
 				return Cmd.CMD_ERROR;
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				p.engine_renew_money = (int)p2;
+				p.engine_renew_money = p2;
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew_money = p.engine_renew_money;
 					Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
@@ -950,8 +944,8 @@ public class Player implements Serializable
 		case 4:
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				p.engine_renew = 0 != BitOps.GB(p1, 15, 1);
-				p.engine_renew_months = (int)BitOps.GB(p1, 16, 16);
-				p.engine_renew_money = (int)p2;
+				p.engine_renew_months = BitOps.GB(p1, 16, 16);
+				p.engine_renew_money = p2;
 
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew = p.engine_renew;
@@ -989,16 +983,18 @@ public class Player implements Serializable
 	 * - p1 = 2 - PlayerID of the that is getting deleted
 	 * - p1 = 3 - #1 p2 = (bit  0-15) - player to merge (p2 & 0xFFFF)
 	 *          - #2 p2 = (bit 16-31) - player to be merged into ((p2>>16)&0xFFFF)
-	 * @todo In the case of p1=0, create new player, the clientID of the new player is in parameter
+	 *
+	 * TODO In the case of p1=0, create new player, the clientID of the new player is in parameter
 	 * p2. This parameter is passed in at function DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)
 	 * on the server itself. First of all this is unbelievably ugly; second of all, well,
 	 * it IS ugly! <b>Someone fix this up :)</b> So where to fix?@n
-	 * @arg - network_server.c:838 DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)@n
-	 * @arg - network_client.c:536 DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_MAP) from where the map has been received
+	 *
+	 * arg - network_server.c:838 DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)@n
+	 * arg - network_client.c:536 DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_MAP) from where the map has been received
 	 */
 	static int CmdPlayerCtrl(int x, int y, int flags, int p1, int p2)
 	{
-		if(0 != (flags & Cmd.DC_EXEC)) Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+		if(0 != (flags & Cmd.DC_EXEC)) Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 		switch (p1) {
 		case 0: { // Create a new Player 
@@ -1017,23 +1013,23 @@ public class Player implements Serializable
 			#endif /* ENABLE_NETWORK */
 
 			if (p != null) {
-				if (Global._local_player.id == Owner.OWNER_SPECTATOR && (!Ai._ai.network_client || Ai._ai.network_playas == Owner.OWNER_SPECTATOR)) {
+				if (Global.gs._local_player.id == Owner.OWNER_SPECTATOR && (!Ai._ai.network_client || Ai._ai.network_playas == Owner.OWNER_SPECTATOR)) {
 					/* Check if we do not want to be a spectator in network */
 					if (!Global._networking || (Global._network_server && !Global._network_dedicated) || Global._network_playas != Owner.OWNER_SPECTATOR || Ai._ai.network_client) {
 						if (Ai._ai.network_client) {
 							/* As ai-network-client, we have our own rulez (disable GUI and stuff) */
 							Ai._ai.network_playas = (byte) p.index.id;
-							Global._local_player      = PlayerID.get( Owner.OWNER_SPECTATOR );
+							Global.gs._local_player = PlayerID.get( Owner.OWNER_SPECTATOR );
 							if (Ai._ai.network_playas != Owner.OWNER_SPECTATOR) {
 								/* If we didn't join the game as a spectator, activate the AI */
 								Ai.AI_StartNewAI(Ai._ai.network_playas);
 							}
 						} else {
-							Global._local_player = p.index;
+							Global.gs._local_player = p.index;
 						}
-						Global.hal.MarkWholeScreenDirty();
+						Hal.MarkWholeScreenDirty();
 					}
-				} else if (p.index == Global._local_player) {
+				} else if (p.index == Global.gs._local_player) {
 					Cmd.DoCommandP(TileIndex.get(0), ((Global._patches.autorenew ? 1:0) << 15 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 				}
 				/* #ifdef ENABLE_NETWORK
@@ -1367,7 +1363,7 @@ public class Player implements Serializable
 
 	public static Iterator<Player> getIterator()
 	{
-		List<Player> list = Arrays.asList(_players);
+		List<Player> list = Arrays.asList(Global.gs._players);
 		return list.iterator();
 	}
 
@@ -1382,7 +1378,7 @@ public class Player implements Serializable
 	/* Validate functions for rail building */
 	static boolean ValParamRailtype(int rail) 
 	{ 
-		return BitOps.HASBIT(GetPlayer(Global._current_player).avail_railtypes, rail);
+		return BitOps.HASBIT(GetPlayer(Global.gs._current_player).avail_railtypes, rail);
 	}
 
 
@@ -1584,12 +1580,11 @@ final Chunk Handler _player_chunk_handlers[] = {
 };
 	 */
 
-	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
-	{
-		_players = (Player[]) oin.readObject();
-		for(Player p : _players)
+	public static void loadGame(ObjectInputStream oin) {
+		//Global.gs._players = (Player[]) oin.readObject();
+		for(Player p : Global.gs._players)
 		{
-			_player_colors[p.index.id] = p.player_color;
+			Global.gs._player_colors[p.index.id] = p.player_color;
 			//p.UpdatePlayerMoney32();
 
 			// This is needed so an AI is attached to a loaded AI 
@@ -1598,9 +1593,8 @@ final Chunk Handler _player_chunk_handlers[] = {
 		}
 	}
 
-	public static void saveGame(ObjectOutputStream oos) throws IOException 
-	{
-		oos.writeObject(_players);		
+	public static void saveGame(ObjectOutputStream oos) {
+		//oos.writeObject(Global.gs._players);		
 	}
 
 	public String generateFileName() {
@@ -1631,6 +1625,7 @@ final Chunk Handler _player_chunk_handlers[] = {
 	public boolean isRenew_keep_length() {		return renew_keep_length;	}
 
 	public void setMoney(long m) { money64 = m; }
+
 
 
 

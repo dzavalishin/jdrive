@@ -4,11 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OrderID extends AbstractID {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private OrderID(int i) {
 		super(i);
 	}
 	
-	private static Map<Integer,OrderID> ids = new HashMap<Integer,OrderID>();
+	private static final Map<Integer,OrderID> ids = new HashMap<Integer,OrderID>();
 	public static OrderID get(int player) 
 	{
 		OrderID old = ids.get(player);

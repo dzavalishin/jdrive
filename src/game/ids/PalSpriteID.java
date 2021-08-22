@@ -4,11 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PalSpriteID extends AbstractID {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private PalSpriteID(int i) {
 		super(i);
 	}
 	
-	private static Map<Integer,PalSpriteID> ids = new HashMap<Integer,PalSpriteID>();
+	private static final Map<Integer,PalSpriteID> ids = new HashMap<Integer,PalSpriteID>();
 	public static PalSpriteID get(int player) 
 	{
 		PalSpriteID old = ids.get(player);

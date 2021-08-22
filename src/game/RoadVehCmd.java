@@ -91,7 +91,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		/* The ai_new queries the vehicle cost before building the route,
 		 * so we must check against cheaters no sooner than now. --pasky */
 		if (!Depot.IsTileDepotType(tile, Global.TRANSPORT_ROAD)) return Cmd.CMD_ERROR;
-		if (!tile.IsTileOwner(Global._current_player)) return Cmd.CMD_ERROR;
+		if (!tile.IsTileOwner(Global.gs._current_player)) return Cmd.CMD_ERROR;
 
 		v = Vehicle.AllocateVehicle();
 		if (v == null ) // || IsOrderPoolFull())
@@ -107,7 +107,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 			v.unitnumber = unit_num;
 			v.direction = 0;
-			v.owner = Global._current_player;
+			v.owner = Global.gs._current_player;
 
 			v.tile = tile;
 			x = tile.TileX() * 16 + 8;
@@ -285,13 +285,13 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		} else {
 			RoadFindDepotData rfdd = new RoadFindDepotData();
 			rfdd.owner = v.owner.id;
-			rfdd.best_length = (int)-1;
+			rfdd.best_length = -1;
 
 			/* search in all directions */
 			for(i=0; i!=4; i++)
 				Pathfind.FollowTrack(tile, 0x2000 | Global.TRANSPORT_ROAD, i, RoadVehCmd::EnumRoadSignalFindDepot, null, rfdd);
 
-			if (rfdd.best_length == (int)-1)
+			if (rfdd.best_length == -1)
 				return null;
 
 			return Depot.GetDepotByTile(rfdd.tile);
@@ -745,7 +745,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 				st.had_vehicle_of_type |= Station.HVOT_BUS;
 				Global.SetDParam(0, st.index);
-				flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+				flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 				NewsItem.AddNewsItem(
 						Str.STR_902F_CITIZENS_CELEBRATE_FIRST,
 						flags,
@@ -759,7 +759,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 				st.had_vehicle_of_type |= Station.HVOT_TRUCK;
 				Global.SetDParam(0, st.index);
-				flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+				flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 				NewsItem.AddNewsItem(
 						Str.STR_9030_CITIZENS_CELEBRATE_FIRST,
 						flags,
@@ -807,7 +807,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		x = x - v.getX_pos() + 1;
 		y = y - v.getY_pos() + 1;
 
-		if ((int)x > 2 || (int)y > 2)
+		if (x > 2 || y > 2)
 			return v.direction;
 		return _roadveh_new_dir[y*4+x];
 	}
@@ -845,7 +845,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		if (0==(od.tilebits & bits) || 0!=(bits&0x3C) || 0!=(bits & 0x3F3F0000))
 			return true;
-		return Vehicle.VehicleFromPos(od.tile, od, (VehicleFromPosProc)RoadVehCmd::EnumFindVehToOvertake) != null;
+		return Vehicle.VehicleFromPos(od.tile, od, RoadVehCmd::EnumFindVehToOvertake) != null;
 	}
 
 	static void RoadVehCheckOvertake(Vehicle v, Vehicle u)
@@ -886,14 +886,13 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (FindRoadVehToOvertake(od))
 			return;
 
+		v.road.overtaking = 0x10;
 		if (od.u.cur_speed == 0 || 0 != (od.u.vehstatus & Vehicle.VS_STOPPED)) {
 			v.road.overtaking_ctr = 0x11;
-			v.road.overtaking = 0x10;
 		} else {
 			//		if (FindRoadVehToOvertake(&od))
 			//			return;
 			v.road.overtaking_ctr = 0;
-			v.road.overtaking = 0x10;
 		}
 	}
 
@@ -924,7 +923,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		num = Hal.RandomRange(num);
 
-		for(i=0; !((bits & 1)!=0 && (((int)--num) < 0)); bits>>=1,i++)
+		for(i=0; !((bits & 1)!=0 && (--num < 0)); bits>>=1,i++)
 			;
 		return i;
 	}
@@ -1087,14 +1086,14 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			frd.dest = desttile;
 
 			best_track = -1;
-			best_dist = (int)-1;
-			best_maxlen = (int)-1;
+			best_dist = -1;
+			best_maxlen = -1;
 			i = 0;
 			do {
 				if(0!= (bitmask & 1)) {
 					if (best_track == -1) best_track = i; // in case we don't find the path, just pick a track
-					frd.maxtracklen = (int)-1;
-					frd.mindist = (int)-1;
+					frd.maxtracklen = -1;
+					frd.mindist = -1;
 					Pathfind.FollowTrack(tile, 0x3000 | Global.TRANSPORT_ROAD, _road_pf_directions[i], RoadVehCmd::EnumRoadTrackFindDist, null, frd);
 
 					if (frd.mindist < best_dist || (frd.mindist==best_dist && frd.maxtracklen < best_maxlen)) {
@@ -1270,7 +1269,7 @@ class RoadDriveEntry {
 				return;
 			}
 
-			boolean do_goto = false;
+			boolean do_goto; // = false;
 			//again:
 			do { // goto target
 				do_goto = false;
@@ -1300,7 +1299,7 @@ class RoadDriveEntry {
 					dir = _road_reverse_table[rd.x&3];
 					//goto again;
 					do_goto = true;
-					continue;
+					//continue;
 				}
 			} while(do_goto); // goto target do end
 
@@ -1503,7 +1502,7 @@ class RoadDriveEntry {
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) {
 				v.vehstatus |= Vehicle.VS_STOPPED;
-				if (v.owner == Global._local_player) {
+				if (v.owner == Global.gs._local_player) {
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddNewsItem(
 							Str.STR_9016_ROAD_VEHICLE_IS_WAITING,
@@ -1581,7 +1580,7 @@ class RoadDriveEntry {
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 	}
 
-	class dist_compare implements Comparator<Integer> {
+	static class dist_compare implements Comparator<Integer> {
 		public int compare(Integer a, Integer b) {
 			return a - b;
 		}
@@ -1640,19 +1639,19 @@ class RoadDriveEntry {
 					// In that case, add penalty.
 					switch(v.direction) {
 					case 1: // going north east,x position decreasing
-						if (v.getX_pos() <= (int)rs.xy.TileX() * 16 + 15)
+						if (v.getX_pos() <= rs.xy.TileX() * 16 + 15)
 							dist += 6;
 						break;
 					case 3: // Going south east, y position increasing
-						if (v.getY_pos() >= (int)rs.xy.TileY() * 16)
+						if (v.getY_pos() >= rs.xy.TileY() * 16)
 							dist += 6;
 						break;
 					case 5: // Going south west, x position increasing
-						if (v.getX_pos() >= (int)rs.xy.TileX() * 16)
+						if (v.getX_pos() >= rs.xy.TileX() * 16)
 							dist += 6;
 						break;
 					case 7: // Going north west, y position decrasing.
-						if (v.getY_pos() <= (int)rs.xy.TileY() * 16 + 15)
+						if (v.getY_pos() <= rs.xy.TileY() * 16 + 15)
 							dist += 6;
 						break;
 					}

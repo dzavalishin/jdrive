@@ -1,9 +1,11 @@
-package game;
+package game.aystar;
+
+import game.TileIndex;
 
 public class AyStarNode {
-	TileIndex tile;
-	int direction;
-	int user_data[];
+	public TileIndex tile;
+	public int direction;
+	public final int[] user_data;
 
 	
 	public AyStarNode() {

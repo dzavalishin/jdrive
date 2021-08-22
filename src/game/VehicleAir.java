@@ -2,6 +2,10 @@ package game;
 
 public class VehicleAir extends VehicleChild {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	int crashed_counter;
 	int pos;
 	int previous_pos;

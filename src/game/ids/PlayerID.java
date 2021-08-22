@@ -28,7 +28,7 @@ public class PlayerID extends AbstractID implements Serializable
 		return get(o.owner);
 	}*/
 
-	private static Map<Integer,PlayerID> ids = new HashMap<Integer,PlayerID>();
+	private static final Map<Integer,PlayerID> ids = new HashMap<Integer,PlayerID>();
 	
 	public static PlayerID get(int player) 
 	{
@@ -50,9 +50,10 @@ public class PlayerID extends AbstractID implements Serializable
 
 	public boolean IS_INTERACTIVE_PLAYER()
 	{
-		return equals( Global._local_player );
+		return equals( Global.gs._local_player );
 	}
 
+	/*
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof PlayerID) {
@@ -60,6 +61,7 @@ public class PlayerID extends AbstractID implements Serializable
 			return him.id == id;
 		}
 		return false;
-	}
+	}*/
 
+	
 }

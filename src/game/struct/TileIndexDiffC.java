@@ -2,8 +2,8 @@ package game.struct;
 
 public class TileIndexDiffC 
 {
-	public int x;
-	public int y;
+	public final int x;
+	public final int y;
 
 	public TileIndexDiffC(int i, int j) {
 		x = i;

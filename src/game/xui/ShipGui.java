@@ -168,7 +168,7 @@ public class ShipGui
 			//StringID 
 			int str;
 
-			w.disabled_state = v.getOwner() == Global._local_player ? 0 : (1 << 2);
+			w.disabled_state = v.getOwner() == Global.gs._local_player ? 0 : (1 << 2);
 			if (0==Global._patches.servint_ships) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
@@ -370,7 +370,7 @@ public class ShipGui
 						if (BitOps.IS_INT_INSIDE(--pos, -w.vscroll.getCap(), 0)) 
 						{
 							Gfx.DrawString(x+75, y+7, Engine.GetCustomEngineName(engine_id), sel==0 ? 0xC : 0x10);
-							Ship.DrawShipEngine(x+35, y+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global._local_player)));
+							Ship.DrawShipEngine(x+35, y+10, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)));
 							y += 24;
 						}
 						sel--;
@@ -464,10 +464,12 @@ public class ShipGui
 	{
 		Window w;
 
-		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.getTile());
+		int wn = tile == null ? -1 : tile.getTile();
+		
+		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, wn );
 
 		w = Window.AllocateWindowDesc(_new_ship_desc);
-		w.window_number = tile.getTile();
+		w.window_number = wn;
 		w.vscroll.setCap(4);
 		w.widget.get(2).unkA = (w.vscroll.getCap() << 8) + 1;
 
@@ -476,7 +478,7 @@ public class ShipGui
 		if (tile != null) {
 			w.caption_color = 0xFF & tile.GetTileOwner().id;
 		} else {
-			w.caption_color = 0xFF & Global._local_player.id;
+			w.caption_color = 0xFF & Global.gs._local_player.id;
 		}
 
 	}
@@ -497,7 +499,7 @@ public class ShipGui
 					Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_WATER))
 				disabled = 0;
 
-			if (v.getOwner() != Global._local_player)
+			if (v.getOwner() != Global.gs._local_player)
 				disabled |= 1<<8 | 1<<7;
 			w.disabled_state = disabled;
 
@@ -650,7 +652,7 @@ public class ShipGui
 
 		/* setup disabled buttons */
 		w.disabled_state =
-				tile.IsTileOwner(Global._local_player) ? 0 : ((1 << 4) | (1 << 7));
+				tile.IsTileOwner(Global.gs._local_player) ? 0 : ((1 << 4) | (1 << 7));
 
 		/* determine amount of items for scroller */
 		int [] num = {0};
@@ -681,7 +683,7 @@ public class ShipGui
 				DrawShipImage(v, x[0]+19, y[0], w.as_traindepot_d().sel);
 
 				Global.SetDParam(0, v.getUnitnumber().id);
-				Gfx.DrawString(x[0], y[0]+2, (int)(v.getMax_age()-366) >= v.getAge() ? Str.STR_00E2 : Str.STR_00E3, 0);
+				Gfx.DrawString(x[0], y[0]+2, (v.getMax_age()-366) >= v.getAge() ? Str.STR_00E2 : Str.STR_00E3, 0);
 
 				Gfx.DrawSprite(v.isStopped() ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x[0], y[0] + 9);
 
@@ -768,8 +770,8 @@ public class ShipGui
 
 	/**
 	 * Clones a ship
-	 * @param *v is the original vehicle to clone
-	 * @param *w is the window of the depot where the clone is build
+	 * @param v is the original vehicle to clone
+	 * @param w is the window of the depot where the clone is build
 	 */
 	static void HandleCloneVehClick(final Vehicle  v, final Window  w)
 	{
@@ -1130,7 +1132,7 @@ public class ShipGui
 			}
 			
 			do {
-				if (Depot.IsTileDepotType(tile, Global.TRANSPORT_WATER) && tile.IsTileOwner(Global._local_player)) 
+				if (Depot.IsTileDepotType(tile, Global.TRANSPORT_WATER) && tile.IsTileOwner(Global.gs._local_player)) 
 				{
 					ShowShipDepotWindow(tile);
 					ShowBuildShipWindow(tile);
@@ -1223,7 +1225,7 @@ public class ShipGui
 			{
 				Window w;
 
-				if (player == Global._local_player.id) {
+				if (player == Global.gs._local_player.id) {
 					w = Window.AllocateWindowDescFront(_player_ships_desc, (station<< 16) | player);
 				} else  {
 					w = Window.AllocateWindowDescFront(_other_player_ships_desc, (station<< 16) | player);

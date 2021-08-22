@@ -79,7 +79,7 @@ s/TileY(tile)/tile.TileY()/g
 
 s/MAX_PLAYERS/Global.MAX_PLAYERS/g
 s/SetDParam/Global.SetDParam/g
-s/_current_player/Global._current_player/g
+s/_current_player/Global.gs._current_player/g
 s/_game_mode/Global._game_mode/g
 s/GetString/Global.GetString/g
 s/_opt/GameOptions._opt/g
@@ -88,7 +88,7 @@ s/_cmd_text/Global._cmd_text/g
 s/_price/Global._price/g
 s/_color_list/Global._color_list/g
 s/_error_message/Global._error_message/g
-s/_local_player/Global._local_player/g
+s/_local_player/Global.gs._local_player/g
 
 
 s/GfxFillRect/Gfx.GfxFillRect/g

@@ -8,6 +8,10 @@ import game.xui.ViewPort;
 
 public class ViewportSign implements Serializable 
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int left;
 	private int top;
 	private int width_1;

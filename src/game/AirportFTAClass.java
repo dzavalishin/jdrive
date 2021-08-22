@@ -43,7 +43,8 @@ public class AirportFTAClass extends Airport // bring in constants
 	/** Get buildable airport bitmask.
 	 * @return get all buildable airports at this given time, bitmasked.
 	 * Bit 0 means the small airport is buildable, etc.
-	 * @todo set availability of airports by year, instead of airplane
+	 *
+	 * TODO set availability of airports by year, instead of airplane
 	 */
 	public static int GetValidAirports()	{
 		int bytemask = Global._avail_aircraft; /// sets the first 3 bytes, 0 - 2, @see AdjustAvailAircraft()
@@ -130,11 +131,13 @@ public class AirportFTAClass extends Airport // bring in constants
 
 	static void UnInitializeAirports()
 	{
+		/*
 		CountryAirport.AirportFTAClass_Destructor();
 		CityAirport.AirportFTAClass_Destructor();
 		Heliport.AirportFTAClass_Destructor();
 		MetropolitanAirport.AirportFTAClass_Destructor();
 		InternationalAirport.AirportFTAClass_Destructor();
+		*/
 	}
 
 	private AirportFTAClass(
@@ -223,6 +226,7 @@ public class AirportFTAClass extends Airport // bring in constants
 		//AirportPrintOut(Airport, false);
 	}
 
+	/*
 	private void AirportFTAClass_Destructor()
 	{
 		int i;
@@ -238,7 +242,7 @@ public class AirportFTAClass extends Airport // bring in constants
 		}
 		//free(Airport.layout);
 		//free(Airport);
-	}
+	}*/
 
 	static int AirportGetNofElements(final AirportFTAbuildup [] FA)
 	{
@@ -381,7 +385,7 @@ static byte AirportBlockToString(int block)
 }
 	 */
 
-	final static AirportFTAClass GetAirport(final int airport_type)
+	static AirportFTAClass GetAirport(final int airport_type)
 	{
 		AirportFTAClass Airport = null;
 		//FIXME -- AircraftNextAirportPos_and_Order . Needs something nicer, don't like this code

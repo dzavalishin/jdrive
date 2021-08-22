@@ -32,7 +32,7 @@ public class Textbuf
 	/**
 	 * Delete a character from a textbuffer, either with 'Delete' or 'Backspace'
 	 * The character is delete from the position the caret is at
-	 * @param tb @Textbuf type to be changed
+	 *
 	 * @param delmode Type of deletion, either @Window.WKC_BACKSPACE or @Window.WKC_DELETE
 	 * @return Return true on successfull change of Textbuf, or false otherwise
 	 */

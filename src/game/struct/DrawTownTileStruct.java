@@ -6,15 +6,15 @@ public class DrawTownTileStruct {
 
 	//SpriteID sprite_1;
 	//SpriteID sprite_2;
-	public int sprite_1;
-	public int sprite_2;
+	public final int sprite_1;
+	public final int sprite_2;
 
-	public int subtile_x;
-	public int subtile_y;
-	public int width;
-	public int height;
-	public int dz;
-	public int proc;
+	public final int subtile_x;
+	public final int subtile_y;
+	public final int width;
+	public final int height;
+	public final int dz;
+	public final int proc;
 
 	/** Writes the data into the Town Tile Drawing Struct
 	 * @param s1 The first sprite of the building, mostly the ground sprite

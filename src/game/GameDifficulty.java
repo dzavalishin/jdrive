@@ -72,8 +72,7 @@ public class GameDifficulty
 	}
 
 	@Override
-	protected GameDifficulty clone() throws CloneNotSupportedException 
-	{
+	protected GameDifficulty clone() {
 		return makeClone();
 	}
 

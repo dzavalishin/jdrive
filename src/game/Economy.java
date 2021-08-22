@@ -55,7 +55,7 @@ public class Economy extends EconomeTables
 	//  the scores together of public static final int SCORE_info is allowed to be more!
 
 	//static ScoreInfo _score_info[];
-	public static long _score_part[][] = new long [Global.MAX_PLAYERS][NUM_SCORE];
+	public static final long[][] _score_part = new long [Global.MAX_PLAYERS][NUM_SCORE];
 
 	// Score info
 	public static final ScoreInfo _score_info[] = {
@@ -132,7 +132,7 @@ public class Economy extends EconomeTables
 				}
 			});
 
-			value = num[0] * Global._price.station_value * 25;
+			value = num[0] * Global._price.station_value * 25L;
 		}
 
 		{
@@ -147,7 +147,7 @@ public class Economy extends EconomeTables
 						v.type == Vehicle.VEH_Road ||
 						(v.type == Vehicle.VEH_Aircraft && v.subtype<=2) ||
 						v.type == Vehicle.VEH_Ship) {
-					value += v.value * 3 >> 1;
+					value += v.value * 3L >> 1;
 				}
 			}
 		}
@@ -323,8 +323,8 @@ public class Economy extends EconomeTables
 	// use Owner.OWNER_SPECTATOR as new_player to delete the player.
 	static void ChangeOwnershipOfPlayerItems(PlayerID old_player, PlayerID new_player)
 	{
-		PlayerID old = Global._current_player;
-		Global._current_player = old_player;
+		PlayerID old = Global.gs._current_player;
+		Global.gs._current_player = old_player;
 
 		if (new_player.id == Owner.OWNER_SPECTATOR) {
 
@@ -450,23 +450,22 @@ public class Economy extends EconomeTables
 			int i;
 
 			/* Check for shares */
-			//FOR_ALL_PLAYERS(p) 
-			for( Player p : Global._players )
+			for( Player p : Global.gs._players )
 			{
 				for (i = 0; i < 4; i++) {
 					/* 'Sell' the share if this player has any */
-					if (p.share_owners[i] == Global._current_player)
+					if (p.share_owners[i] == Global.gs._current_player)
 						p.share_owners[i] = PlayerID.get( Owner.OWNER_SPECTATOR );
 				}
 			}
 
-			Player p = Global._current_player.GetPlayer();
+			Player p = Global.gs._current_player.GetPlayer();
 			/* Sell all the shares that people have on this company */
 			for (i = 0; i < 4; i++)
 				p.share_owners[i] = PlayerID.get( Owner.OWNER_SPECTATOR );
 		}
 
-		Global._current_player = old;
+		Global.gs._current_player = old;
 
 		Hal.MarkWholeScreenDirty();
 	}
@@ -556,7 +555,7 @@ public class Economy extends EconomeTables
 
 				if (!owner.IS_HUMAN_PLAYER() && (!Global._networking || Global._network_server) && Ai._ai.enabled)
 					Ai.AI_PlayerDied(owner);
-				if (owner.IS_HUMAN_PLAYER() && owner == Global._local_player && Ai._ai.network_client)
+				if (owner.IS_HUMAN_PLAYER() && owner == Global.gs._local_player && Ai._ai.network_client)
 					Ai.AI_PlayerDied(owner);
 			}
 		}
@@ -690,7 +689,7 @@ public class Economy extends EconomeTables
 		Station.forEach( (ii,st) ->
 		{
 			if (st.getXy() != null) {
-				Global._current_player = st.owner; // TODO kill global
+				Global.gs._current_player = st.owner; // TODO kill global
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
 				Player.SubtractMoneyFromPlayer(Global._price.station_value >> 1);
 			}
@@ -789,7 +788,7 @@ public class Economy extends EconomeTables
 			if (!p.is_active) continue;
 
 			/** TODO XXX return back, turned off for debug
-			Global._current_player = p.index;
+			Global.gs._current_player = p.index;
 			Player.SET_EXPENSES_TYPE(Player.EXPENSES_LOAN_INT);
 
 			Player.SubtractMoneyFromPlayer(BitOps.BIGMULUS(p.current_loan, interest, 16));
@@ -814,7 +813,7 @@ public class Economy extends EconomeTables
 	}
 
 
-	static byte price_base_multiplier[] = new byte[Global.NUM_PRICES];
+	static final byte[] price_base_multiplier = new byte[Global.NUM_PRICES];
 
 	/**
 	 * Reset changes to the price base multipliers.
@@ -881,7 +880,7 @@ public class Economy extends EconomeTables
 	{
 		Town from,to;
 
-		fr.distance = (int)-1;
+		fr.distance = -1;
 
 		fr.from = from = Town.getRandomTown();//Town.GetTown(Hal.RandomRange(Town._total_towns));
 		if (from.getXy() == null || from.population < 400)
@@ -1166,7 +1165,7 @@ public class Economy extends EconomeTables
 				pair = s.SetupSubsidyDecodeParam(false);
 				Global.InjectDParam(2);
 
-				p = Global._current_player.GetPlayer();
+				p = Global.gs._current_player.GetPlayer();
 				Global.SetDParam(0, p.name_1);
 				Global.SetDParam(1, p.name_2);
 				NewsItem.AddNewsItem(
@@ -1191,7 +1190,7 @@ public class Economy extends EconomeTables
 
 		// Update player statistics
 		{
-			Player p = Global._current_player.GetPlayer();
+			Player p = Global.gs._current_player.GetPlayer();
 			p.cur_economy.delivered_cargo += num_pieces;
 			p.cargo_types = BitOps.RETSETBIT(p.cargo_types, cargo_type);
 		}
@@ -1312,8 +1311,8 @@ public class Economy extends EconomeTables
 
 		v.cur_speed = 0;
 
-		old_player = Global._current_player;
-		Global._current_player = v.owner;
+		old_player = Global.gs._current_player;
+		Global.gs._current_player = v.owner;
 
 		st = Station.GetStation(last_visited = v.last_station_visited);
 
@@ -1414,7 +1413,7 @@ public class Economy extends EconomeTables
 		if (u.type == Vehicle.VEH_Train) t = u.rail.getCached_max_speed();
 
 		// if last speed is 0, we treat that as if no vehicle has ever visited the station.
-		ge.last_speed =  (t < 255 ? t : 255);
+		ge.last_speed =  (Math.min(t, 255));
 		ge.last_age =  (Global._cur_year - v.getBuild_year());
 
 		// If there's goods waiting at the station, and the vehicle
@@ -1507,7 +1506,7 @@ public class Economy extends EconomeTables
 			}
 		}
 
-		Global._current_player = old_player;
+		Global.gs._current_player = old_player;
 		return result;
 	}
 
@@ -1518,7 +1517,7 @@ public class Economy extends EconomeTables
 			AddInflation();
 		PlayersPayInterest();
 		// Reset the _current_player flag
-		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 		HandleEconomyFluctuations();
 		SubsidyMonthlyHandler();
 	}
@@ -1532,14 +1531,14 @@ public class Economy extends EconomeTables
 		Global.SetDParam(0, p.name_1);
 		Global.SetDParam(1, p.name_2);
 		Global.SetDParam(2, p.getBankrupt_value());
-		NewsItem.AddNewsItem( new StringID(Global._current_player.id + 16*2), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
+		NewsItem.AddNewsItem( new StringID(Global.gs._current_player.id + 16*2), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 
 		// original code does this a little bit differently
 		pi = p.index.id;
-		ChangeOwnershipOfPlayerItems(PlayerID.get(pi), Global._current_player);
+		ChangeOwnershipOfPlayerItems(PlayerID.get(pi), Global.gs._current_player);
 
 		if (p.getBankrupt_value() == 0) {
-			owner = Global._current_player.GetPlayer();
+			owner = Global.gs._current_player.GetPlayer();
 			owner.current_loan += p.current_loan;
 		}
 
@@ -1648,7 +1647,9 @@ public class Economy extends EconomeTables
 	/** Buy up another company.
 	 * When a competing company is gone bankrupt you get the chance to purchase
 	 * that company.
-	 * @todo currently this only works for AI players
+	 * <br>
+	 * TODO currently this only works for AI players
+	 *
 	 * @param x,y unused
 	 * @param p1 player/company to buy up
 	 * @param p2 unused

@@ -7,7 +7,6 @@ import java.io.ObjectOutputStream;
 import game.enums.GameModes;
 import game.ids.StringID;
 import game.struct.TextMessage;
-import game.util.MemoryPool;
 import game.util.Pixel;
 import game.xui.CursorVars;
 import game.xui.DrawPixelInfo;
@@ -32,8 +31,8 @@ public class TextEffect
 
 	static final int MAX_CHAT_MESSAGES = 10;
 
-	static TextEffect _text_effect_list[] = new TextEffect[30];
-	static TextMessage _text_message_list[] = new TextMessage[MAX_CHAT_MESSAGES];
+	static final TextEffect[] _text_effect_list = new TextEffect[30];
+	static final TextMessage[] _text_message_list = new TextMessage[MAX_CHAT_MESSAGES];
 	static TileIndex _animated_tile_list[] = new TileIndex[256];
 
 
@@ -150,12 +149,6 @@ public class TextEffect
 
 			_textmessage_visible = false;
 			// Put our 'shot' back to the screen
-			/*
-			memcpy_pitch(
-					Hal._screen.dst_ptr + _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch,
-				_textmessage_backup,
-				_textmessage_width, _textmessage_box_y, _textmessage_width, Hal._screen.pitch);
-			 */
 			Gfx.memcpy_pitch(
 					new Pixel(Hal._screen.dst_ptr, _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch ),	
 					new Pixel(_textmessage_backup),
@@ -180,7 +173,6 @@ public class TextEffect
 				/* Move the remaining messages over the current message */
 				if (i != MAX_CHAT_MESSAGES - 1)
 				{
-					//memmove(&_text_message_list[i], &_text_message_list[i + 1], sizeof(_text_message_list[i]) * (MAX_CHAT_MESSAGES - i - 1));
 					for (int j = i; j < MAX_CHAT_MESSAGES-1; j++) 
 					{
 						_text_message_list[j] = _text_message_list[j+1];
@@ -221,12 +213,6 @@ public class TextEffect
 		if (!has_message) return;
 
 		// Make a copy of the screen as it is before painting (for undraw)
-		/*
-		memcpy_pitch(
-			_textmessage_backup,
-			Hal._screen.dst_ptr + _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch,
-			_textmessage_width, _textmessage_box_y, Hal._screen.pitch, _textmessage_width);
-		 */
 		Gfx.memcpy_pitch(
 				new Pixel(_textmessage_backup),
 				new Pixel(Hal._screen.dst_ptr, _textmessage_box_left + (Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y) * Hal._screen.pitch),
@@ -278,11 +264,6 @@ public class TextEffect
 		if (Global._game_mode == GameModes.GM_MENU)
 			return;
 
-		/*
-		for (te = _text_effect_list; te.string_id != Global.INVALID_STRING_ID; ) {
-			if (++te == endof(_text_effect_list)) return;
-		}*/
-
 		for(int i = 0 ; _text_effect_list[i].string_id != Global.INVALID_STRING_ID ; i++)
 		{
 			if(i >= _text_effect_list.length)
@@ -318,9 +299,6 @@ public class TextEffect
 
 	static void MoveAllTextEffects()
 	{
-		//TextEffect te;
-
-		//for (te = _text_effect_list; te != endof(_text_effect_list); te++) 
 		for( TextEffect te : _text_effect_list) 
 		{
 			if (te.string_id != Global.INVALID_STRING_ID) 
@@ -341,7 +319,6 @@ public class TextEffect
 
 	public static void DrawTextEffects(DrawPixelInfo dpi)
 	{
-		//TextEffect te;
 
 		if (dpi.zoom < 1) {
 			//for (te = _text_effect_list; te != endof(_text_effect_list); te++) 
@@ -379,7 +356,6 @@ public class TextEffect
 
 	static void DeleteAnimatedTile(TileIndex tile)
 	{
-		//TileIndex ti;
 
 		//for (ti = _animated_tile_list; ti != endof(_animated_tile_list); ti++) {
 		for(int i = 0 ; i < _animated_tile_list.length; i++)
@@ -400,7 +376,6 @@ public class TextEffect
 
 	static boolean AddAnimatedTile(TileIndex tile)
 	{
-		//TileIndex ti;
 
 		//for (ti = _animated_tile_list; ti != endof(_animated_tile_list); ti++) {
 		//for( TileIndex ti : _animated_tile_list)

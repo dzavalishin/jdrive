@@ -21,5 +21,9 @@ public abstract class AbstractID implements Serializable
 		return false;
 	}
 
+	@Override
+	public int hashCode() {
+		return id;
+	}
 	
 }

@@ -53,18 +53,18 @@ public class Console //extends ConsoleCmds
 	//static ConsoleWindow _iconsole_win; // Pointer to console window
 	static Window _iconsole_win; // Pointer to console window
 	static boolean _iconsole_inited;
-	static String[]_iconsole_buffer = new String[ICON_BUFFER + 1];
-	static int[] _iconsole_cbuffer = new int[ICON_BUFFER + 1];
-	static Textbuf _iconsole_cmdline = new Textbuf();
+	static final String[]_iconsole_buffer = new String[ICON_BUFFER + 1];
+	static final int[] _iconsole_cbuffer = new int[ICON_BUFFER + 1];
+	static final Textbuf _iconsole_cmdline = new Textbuf();
 	static byte _iconsole_scroll;
 
 	// ** stdlib ** //
-	static byte _stdlib_developer = 1;
-	static boolean _stdlib_con_developer = false;
-	static FileWriter _iconsole_output_file;
+	static final byte _stdlib_developer = 1;
+	static final boolean _stdlib_con_developer = false;
+	static FileWriter _iconsole_output_file = null;
 
 	// ** main console cmd buffer
-	static String[] _iconsole_history = new String[ICON_HISTORY_SIZE];
+	static final String[] _iconsole_history = new String[ICON_HISTORY_SIZE];
 	static int _iconsole_historypos;
 
 	/* *************** */
@@ -240,7 +240,7 @@ public class Console //extends ConsoleCmds
 
 		//memmove(_iconsole_history[1], &_iconsole_history[0],				sizeof(_iconsole_history[0]) * (ICON_HISTORY_SIZE - 1));
 		System.arraycopy(_iconsole_history, 0, _iconsole_history, 1, ICON_HISTORY_SIZE - 1);
-		_iconsole_history[0] = new String(cmd);
+		_iconsole_history[0] = cmd;
 		IConsoleResetHistoryPos();
 	}
 
@@ -344,7 +344,7 @@ public class Console //extends ConsoleCmds
 	/**
 	 * It is possible to print debugging information to the console,
 	 * which is achieved by using this function. Can only be used by
-	 * @debug() in debug.c. You need at least a level 2 (developer) for debugging
+	 * debug() in debug.c. You need at least a level 2 (developer) for debugging
 	 * messages to show up
 	 */
 	static void IConsoleDebug(final String string)
@@ -376,8 +376,8 @@ public class Console //extends ConsoleCmds
 	/**
 	 * Change a string into its number representation. Supports
 	 * decimal and hexadecimal numbers as well as 'on'/'off' 'true'/'false'
-	 * @param *value the variable a successfull conversion will be put in
-	 * @param *arg the string to be converted
+	 * @param value the variable a successfull conversion will be put in
+	 * @param arg the string to be converted
 	 * @return Return true on success or false on failure
 	 */
 	static boolean GetArgumentInteger(int []value, final String arg)
@@ -560,9 +560,9 @@ public class Console //extends ConsoleCmds
 	/**
 	 * An alias is just another name for a command, or for more commands
 	 * Execute it as well.
-	 * @param *alias is the alias of the command
+	 * @param alias is the alias of the command
 	 * @param tokencount the number of parameters passed
-	 * @param *tokens are the parameters given to the original command (0 is the first param)
+	 * @param tokens are the parameters given to the original command (0 is the first param)
 	 */
 	static void IConsoleAliasExec(final IConsoleAlias alias, int tokencount, String ... tokens)
 	{
@@ -660,13 +660,12 @@ public class Console //extends ConsoleCmds
 	//static void IConsoleVarRegister(final String name, Object addr, IConsoleVarTypes type, final String help)
 	static void IConsoleVarRegister(final String name, IConsoleVarTypes type, final String help)
 	{
-		String new_cmd = name;
 		IConsoleVar item_new = new IConsoleVar(); //malloc(sizeof(IConsoleVar));
 
 		item_new.help = help;
 
 		//item_new.next = null;
-		item_new.name = new_cmd;
+		item_new.name = name;
 		//item_new.addr = addr;
 		item_new.proc = null;
 		item_new.type = type;
@@ -697,7 +696,7 @@ public class Console //extends ConsoleCmds
 
 	/**
 	 * Set a new value to a console variable
-	 * @param *var the variable being set/changed
+	 * @param var the variable being set/changed
 	 * @param value the new value given to the variable, cast properly
 	 */
 	static private void IConsoleVarSetValue(final IConsoleVar var, int value)
@@ -733,8 +732,8 @@ public class Console //extends ConsoleCmds
 	/**
 	 * Set a new value to a string-type variable. Basically this
 	 * means to copy the new value over to the container.
-	 * @param *var the variable in question
-	 * @param *value the new value
+	 * @param var the variable in question
+	 * @param value the new value
 	 */
 	static private void IConsoleVarSetStringvalue(final IConsoleVar var, String value)
 	{
@@ -744,12 +743,11 @@ public class Console //extends ConsoleCmds
 		var.value = value;
 		var.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_POST_ACTION);
 		IConsoleVarPrintSetValue(var); // print out the new value, giving feedback
-		return;
 	}
 
 	/**
 	 * Query the current value of a variable and return it
-	 * @param *var the variable queried
+	 * @param var the variable queried
 	 * @return current value of the variable
 	 */
 	static private int IConsoleVarGetValue(final IConsoleVar var)
@@ -791,7 +789,8 @@ public class Console //extends ConsoleCmds
 		/* Some variables need really specific handling, handle this in its
 		 * callback function */
 		if (var.proc != null) {
-			var.proc.accept(0, null);
+			//var.proc.accept(0, null);
+			var.proc.accept(0);
 			return;
 		}
 
@@ -812,9 +811,9 @@ public class Console //extends ConsoleCmds
 	/**
 	 * Execute a variable command. Without any parameters, print out its value
 	 * with parameters it assigns a new value to the variable
-	 * @param *var the variable that we will be querying/changing
+	 * @param var the variable that we will be querying/changing
 	 * @param tokencount how many additional parameters have been given to the commandline
-	 * @param *token the actual parameters the variable was called with
+	 * @param token the actual parameters the variable was called with
 	 */
 	static void IConsoleVarExec(final IConsoleVar var, int tokencount, String ... token)
 	{
@@ -972,12 +971,15 @@ public class Console //extends ConsoleCmds
 		 * the found action taking into account its hooking code
 		 */
 		cmd = IConsoleCmdGet(tokens[0]);
-		if (cmd != null) {
+		if (cmd != null && cmd.hook != null) {
 			if (cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_ACCESS)) {
 				cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_PRE_ACTION);
 				if (cmd.proc.accept(t_index, tokens)) { // index started with 0
 					cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_POST_ACTION);
-				} else cmd.proc.accept(0, null); // if command failed, give help
+				} else { 
+					//cmd.proc.accept(0, null); // if command failed, give help
+					cmd.proc.accept(0); // if command failed, give help
+				}
 			}
 			return;
 		}
@@ -1124,6 +1126,8 @@ public class Console //extends ConsoleCmds
 					e.cont = true;
 				break;
 			}
+		default:
+			break;
 		}
 
 	}

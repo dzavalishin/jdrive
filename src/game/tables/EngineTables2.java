@@ -19,14 +19,14 @@ public class EngineTables2
 
 	//#include "../sound.h"
 
-	/** Writes the properties of a vehicle into the EngineInfo struct.
+	/* * Writes the properties of a vehicle into the EngineInfo struct.
 	 * @see EngineInfo
 	 * @param a Introduction date
 	 * @param e Rail Type of the vehicle
 	 * @param f Bitmask of the climates
 	 */
 	//#define MK(a, b, c, d, e, f) { a, b, c, d, e, f, 0 }
-	/** Writes the properties of a train carriage into the EngineInfo struct.
+	/* * Writes the properties of a train carriage into the EngineInfo struct.
 	 * @see EngineInfo
 	 * @param a Introduction date
 	 * @param e Rail Type of the vehicle
@@ -636,7 +636,8 @@ class CarriageInfo extends EngineInfo
 	 * @param a Introduction date
 	 * @param e Rail Type of the vehicle
 	 * @param f Bitmask of the climates
-	 * @note the 0x80 in parameter b sets the "is carriage bit"
+	 *
+	 * @apiNote the 0x80 in parameter b sets the "is carriage bit"
 	 */
 	//#define MW(a, b, c, d, e, f) { a, b | 0x80, c, d, e, f, 0 }
 	public CarriageInfo(int a, int b, int c, int d, int e, int f) 

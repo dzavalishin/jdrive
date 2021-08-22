@@ -9,8 +9,6 @@ import java.util.Set;
 import game.enums.TileTypes;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.RememberData;
-import game.struct.TrackPathFinderLink;
-import game.tables.TrackPathFinderTables;
 import game.util.BitOps;
 
 public class TrackPathFinder extends Pathfind 
@@ -38,7 +36,7 @@ public class TrackPathFinder extends Pathfind
 	//TileIndex [] hash_tile = new TileIndex[0x400]; /* stores the link index when multi link. */
 	//TrackPathFinderLink [] links = new TrackPathFinderLink[0x400]; /* hopefully, this is enough. */
 
-	Map<Integer,TPFHashEnt> tileBits = new HashMap<Integer,TPFHashEnt>();
+	final Map<Integer,TPFHashEnt> tileBits = new HashMap<Integer,TPFHashEnt>();
 
 	// -------------------------------------------------
 	// Class
@@ -313,7 +311,7 @@ public class TrackPathFinder extends Pathfind
 
 		int bits;
 		int i = 0;
-		RememberData rd = null;
+		RememberData _rd = null;
 		int owner = -1;
 
 		/* XXX: Mode 2 is currently only used for ships, why is this code here? */
@@ -363,7 +361,7 @@ public class TrackPathFinder extends Pathfind
 				bits>>=1;
 			}
 
-			rd = tpf.rd;
+			_rd = tpf.rd;
 			//goto continue_here;
 			skipStart = true;
 		}
@@ -377,12 +375,12 @@ public class TrackPathFinder extends Pathfind
 					++i;
 					continue;
 				}
-				rd = tpf.rd;
+				_rd = tpf.rd;
 
 				// Change direction 4 times only
 				if ((byte)i != tpf.rd.pft_var6) {
 					if(++tpf.rd.depth > 4) {
-						tpf.rd = rd;
+						tpf.rd = _rd;
 						return;
 					}
 					tpf.rd.pft_var6 = i;
@@ -397,7 +395,7 @@ public class TrackPathFinder extends Pathfind
 				tpf.TPFMode2( tile, _tpf_new_direction[tpf.the_dir]);
 			}
 
-			tpf.rd = rd;
+			tpf.rd = _rd;
 			
 			++i;
 		} while ( (bits>>>=1) != 0);

@@ -148,7 +148,7 @@ public class Tree  extends TreeTables {
 
 		if (p2 > Global.MapSize()) return Cmd.CMD_ERROR;
 		/* Check the tree type. It can be random or some valid value within the current climate */
-		if (p1 != (int)-1 && p1 - _tree_base_by_landscape[GameOptions._opt.landscape] >= _tree_count_by_landscape[GameOptions._opt.landscape]) return Cmd.CMD_ERROR;
+		if (p1 != -1 && p1 - _tree_base_by_landscape[GameOptions._opt.landscape] >= _tree_count_by_landscape[GameOptions._opt.landscape]) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 
@@ -201,7 +201,7 @@ public class Tree  extends TreeTables {
 						int treetype;
 						int m2;
 
-						if (Global._game_mode != GameModes.GM_EDITOR && Global._current_player.id < Global.MAX_PLAYERS) {
+						if (Global._game_mode != GameModes.GM_EDITOR && Global.gs._current_player.id < Global.MAX_PLAYERS) {
 							Town t = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 							if (t != null)
 								t.ChangeTownRating(TownTables.RATING_TREE_UP_STEP, TownTables.RATING_TREE_MAXIMUM);
@@ -368,7 +368,7 @@ public class Tree  extends TreeTables {
 	{
 		int num;
 
-		if ( (0 != (flags & Cmd.DC_EXEC)) && Global._current_player.id < Global.MAX_PLAYERS) {
+		if ( (0 != (flags & Cmd.DC_EXEC)) && Global.gs._current_player.id < Global.MAX_PLAYERS) {
 			Town t = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 			if (t != null)
 				t.ChangeTownRating(TownTables.RATING_TREE_DOWN_STEP, TownTables.RATING_TREE_MINIMUM);

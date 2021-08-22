@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import game.util.MemoryPool;
-
 /** 
  * SaveLoad type struct. 
  * Do NOT use this directly but use the SLE_ 
@@ -126,7 +124,9 @@ FileInputStream fis = new FileInputStream("settings.xml");
 	
 	// TODO Misc.java has a lot of stuff to save/load
 
-	private static void writeAll(ObjectOutputStream oos) throws IOException {
+	private static void writeAll(ObjectOutputStream oos) throws IOException 
+	{
+		oos.writeObject(Global.gs);
 		oos.writeObject(Global._m);
 		Town.saveGame(oos);
 		Engine.saveGame(oos);
@@ -142,13 +142,15 @@ FileInputStream fis = new FileInputStream("settings.xml");
 	}
 
 
-	private static void readAll(ObjectInputStream oin) throws IOException, ClassNotFoundException {
+	private static void readAll(ObjectInputStream oin) throws IOException, ClassNotFoundException 
+	{
+		Global.gs = (GameState) oin.readObject();
 		Global._m = (Tile[]) oin.readObject();
 		Town.loadGame(oin);
 		Engine.loadGame(oin);
 		Depot.loadGame(oin);
 		Order.loadGame(oin);
-		Player.loadGame(oin);
+		Player.loadGame(oin); // fix after load
 		SignStruct.loadGame(oin);
 		TextEffect.loadGame(oin);
 		Vehicle.loadGame(oin);

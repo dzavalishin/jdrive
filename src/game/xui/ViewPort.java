@@ -117,8 +117,8 @@ public class ViewPort
 
 
 
-	public static TileHighlightData _thd = new TileHighlightData();
-	public static List<ViewPort> _viewports = new ArrayList<ViewPort>();
+	public static final TileHighlightData _thd = new TileHighlightData();
+	public static final List<ViewPort> _viewports = new ArrayList<ViewPort>();
 
 	public void removeFromAll()
 	{
@@ -187,7 +187,7 @@ public class ViewPort
 			_viewports.add(vp);
 		}
 
-		assert vp != null;
+		//assert vp != null;
 		//Global._active_viewports |= bit;
 
 		vp.left = x + w.left;
@@ -224,7 +224,7 @@ public class ViewPort
 		vp.virtual_top = 0;//pt.y;
 	}
 
-	static Point _vp_move_offs = new Point(0, 0);
+	static final Point _vp_move_offs = new Point(0, 0);
 
 	static void DoSetViewportPosition(Window startw, int left, int top, int width, int height)
 	{
@@ -982,7 +982,7 @@ public class ViewPort
 					//StringSpriteToDraw sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
 					StringSpriteToDraw sstd=st.getSign().draw( Str.STR_305C_0, st.getIndex(), st.getFacilities(), 0);
 					if (sstd != null) {
-						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global._player_colors[st.getOwner().id];
+						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global.gs._player_colors[st.getOwner().id];
 						sstd.width = st.getSign().getWidth_1();
 					}
 				}
@@ -1009,7 +1009,7 @@ public class ViewPort
 					//StringSpriteToDraw sstd= AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.getIndex(), st.getFacilities(), 0);
 					StringSpriteToDraw sstd= st.getSign().draw(Str.STR_305C_0, st.getIndex(), st.getFacilities(), 0);
 					if (sstd != null) {
-						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global._player_colors[st.getOwner().id];
+						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global.gs._player_colors[st.getOwner().id];
 						sstd.width = st.getSign().getWidth_1();
 					}
 				}
@@ -1038,8 +1038,8 @@ public class ViewPort
 					//StringSpriteToDraw sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_STATION_SIGN_TINY, st.getIndex(), st.getFacilities(), 0);
 					StringSpriteToDraw sstd=st.getSign().draw(Str.STR_STATION_SIGN_TINY, st.getIndex(), st.getFacilities(), 0);
 					if (sstd != null) {
-						//sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || 0 == st.facilities) ? 0xE : Global._player_colors[st.getOwner().id];
-						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global._player_colors[st.getOwner().id];
+						//sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || 0 == st.facilities) ? 0xE : Global.gs._player_colors[st.getOwner().id];
+						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global.gs._player_colors[st.getOwner().id];
 						sstd.width = st.getSign().getWidth_2() | 0x8000;
 					}
 				}
@@ -1089,7 +1089,7 @@ public class ViewPort
 					StringSpriteToDraw sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2806), ss.str.id, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_1;
-						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
+						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global.gs._player_colors[ss.owner.id];
 					}
 				}*/
 			}
@@ -1114,7 +1114,7 @@ public class ViewPort
 					StringSpriteToDraw sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2002), ss.str.id, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_2 | 0x8000;
-						sstd.color = (ss.owner.id==Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global._player_colors[ss.owner.id];
+						sstd.color = (ss.owner.id==Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global.gs._player_colors[ss.owner.id];
 					}
 				}*/
 			}
@@ -1314,11 +1314,9 @@ public class ViewPort
 	static void ViewportDrawParentSprites(ParentSpriteToDraw psd[])
 	{
 		//for (; *psd != null; psd++) 
-		for(int pp = 0; pp < psd.length; pp++ )
-		{
+		for (final ParentSpriteToDraw ps : psd) {
 			//final ParentSpriteToDraw  ps = *psd;
-			final ParentSpriteToDraw  ps = psd[pp];
-			if( ps == null ) break;
+			if (ps == null) break;
 
 			Point pt = Point.RemapCoords(ps.tile_x, ps.tile_y, ps.tile_z);
 
@@ -1327,8 +1325,7 @@ public class ViewPort
 			Gfx.DrawSprite(ps.image, pt.x, pt.y);
 
 			//for (cs = ps.child; cs != null; cs = cs.next) 
-			for( ChildScreenSpriteToDraw cs : ps.children )
-			{
+			for (ChildScreenSpriteToDraw cs : ps.children) {
 				Gfx.DrawSprite(cs.image, ps.left + cs.x, ps.top + cs.y);
 			}
 		}
@@ -2015,7 +2012,7 @@ public class ViewPort
 	static void Nop(final Vehicle v) {}
 
 
-	static OnVehicleClickProc _on_vehicle_click_proc[] = {
+	static final OnVehicleClickProc[] _on_vehicle_click_proc = {
 			ViewPort::SafeShowTrainViewWindow,
 			RoadVehGui::ShowRoadVehViewWindow,
 			ShipGui::ShowShipViewWindow,
@@ -2313,7 +2310,7 @@ public class ViewPort
 		w = Math.abs(dx) + 16;
 		h = Math.abs(dy) + 16;
 
-		if (TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y) == TileIndex.TileVirtXY(x, y)) { // check if we're only within one tile
+		if (TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y).equals(TileIndex.TileVirtXY(x, y)) ) { // check if we're only within one tile
 			if (method == VPM_RAILDIRS)
 				b = GetAutorailHT(x, y);
 			else // rect for autosignals on one tile
@@ -2583,15 +2580,15 @@ public class ViewPort
 
 
 class ViewportDrawer {
-	DrawPixelInfo dpi = new DrawPixelInfo();
+	final DrawPixelInfo dpi = new DrawPixelInfo();
 
 	//byte *spritelist_mem;
 	//final byte *eof_spritelist_mem;
 
 	//StringSpriteToDraw last_string, first_string;
 	//TileSpriteToDraw **last_tile, *first_tile;
-	ArrayList<TileSpriteToDraw> tile_list = new ArrayList<TileSpriteToDraw>();
-	ArrayList<StringSpriteToDraw> string_list = new ArrayList<StringSpriteToDraw>();
+	final ArrayList<TileSpriteToDraw> tile_list = new ArrayList<TileSpriteToDraw>();
+	final ArrayList<StringSpriteToDraw> string_list = new ArrayList<StringSpriteToDraw>();
 
 	//ChildScreenSpriteToDraw **last_child;
 
@@ -2599,7 +2596,7 @@ class ViewportDrawer {
 
 	//ParentSpriteToDraw parent_list;
 	//ParentSpriteToDraw eof_parent_list;
-	ArrayList<ParentSpriteToDraw> parent_list = new ArrayList<ParentSpriteToDraw>();
+	final ArrayList<ParentSpriteToDraw> parent_list = new ArrayList<ParentSpriteToDraw>();
 
 	byte combine_sprites;
 

@@ -33,7 +33,7 @@ public class UnmovableCmd extends UnmovableTables {
 		Player p = null;
 
 		/* Find player that has HQ flooded, and reset their location_of_house */
-		if (Global._current_player.id == Owner.OWNER_WATER) {
+		if (Global.gs._current_player.id == Owner.OWNER_WATER) {
 			boolean dodelete = false;
 
 			//FOR_ALL_PLAYERS(p)
@@ -48,7 +48,7 @@ public class UnmovableCmd extends UnmovableTables {
 			}
 			if (!dodelete) return Cmd.CMD_ERROR;
 		} else /* Destruction was initiated by player */
-			p = Player.GetPlayer(Global._current_player);
+			p = Player.GetCurrentPlayer();
 
 		if (p.location_of_house == null) return Cmd.CMD_ERROR;
 
@@ -76,7 +76,7 @@ public class UnmovableCmd extends UnmovableTables {
 	static int CmdBuildCompanyHQ(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
-		Player p = Player.GetPlayer(Global._current_player);
+		Player p = Player.GetCurrentPlayer();
 		int cost;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
@@ -108,7 +108,7 @@ public class UnmovableCmd extends UnmovableTables {
 					//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
 					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x83);
 			Economy.UpdatePlayerHouse(p, score);
-			Window.InvalidateWindow(Window.WC_COMPANY, (int)p.index.id);
+			Window.InvalidateWindow(Window.WC_COMPANY, p.index.id);
 		}
 
 		return cost;
@@ -209,7 +209,7 @@ public class UnmovableCmd extends UnmovableTables {
 		int m5 = tile.getMap().m5;
 
 		if(0 != (m5 & 0x80)) {
-			if (Global._current_player.id == Owner.OWNER_WATER) return DestroyCompanyHQ(tile, Cmd.DC_EXEC);
+			if (Global.gs._current_player.id == Owner.OWNER_WATER) return DestroyCompanyHQ(tile, Cmd.DC_EXEC);
 			return Cmd.return_cmd_error(Str.STR_5804_COMPANY_HEADQUARTERS_IN);
 		}
 
@@ -218,7 +218,7 @@ public class UnmovableCmd extends UnmovableTables {
 
 		// checks if you're allowed to remove unmovable things
 		if (Global._game_mode != GameModes.GM_EDITOR 
-				&& Global._current_player.id != Owner.OWNER_WATER 
+				&& Global.gs._current_player.id != Owner.OWNER_WATER 
 				&& ((flags & Cmd.DC_AUTO) != 0 || !Global._cheats.magic_bulldozer.value) )
 			return Cmd.return_cmd_error(Str.STR_5800_OBJECT_IN_THE_WAY);
 
@@ -392,7 +392,7 @@ public class UnmovableCmd extends UnmovableTables {
 		do {
 			//restart:
 			r = Hal.Random();
-			dir = r >> 30;
+			dir = r >>> 30;
 			r %= (dir == 0 || dir == 2) ? Global.MapMaxY() : Global.MapMaxX();
 			int itile =
 					(dir == 0) ? TileIndex.TileXY(0, r).tile   : 0 + // left
@@ -410,12 +410,12 @@ public class UnmovableCmd extends UnmovableTables {
 					restart = true;
 					break;
 				}
-				if(restart) continue;
-				
+
 				tile = tile.iadd( TileIndex.ToTileIndexDiff(_tile_add[dir]) );
 				tile.TILE_MASK();
 
 			} while (!(tile.IsTileType( TileTypes.MP_CLEAR) && tile.GetTileSlope(h) == 0 && h.v <= 16));
+			if(restart) continue;
 
 			tile.TILE_ASSERT();
 

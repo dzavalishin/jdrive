@@ -4,7 +4,7 @@ import game.enums.TileTypes;
 
 //@Deprecated
 public class TileType {
-	int type;
+	final int type;
 	
 	public TileType(int t) {
 		type = t;
@@ -29,5 +29,11 @@ public class TileType {
 		
 		return super.equals(obj);
 	}
-	// TODO comarison / equals
+	
+	@Override
+	public int hashCode() {
+		return type;
+	}
+	
+	// TODO comarison 
 }

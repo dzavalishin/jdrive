@@ -55,9 +55,8 @@ public class TrackPathFinderTables
 	};
 	
 
-	static {
-		assert 128 == _ffb_64.length;  
-	}
+	static {        //noinspection ConstantConditions
+        assert 128 == _ffb_64.length; }
 
 	
 	public static final int _new_track[][] = {

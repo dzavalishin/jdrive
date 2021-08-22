@@ -6,5 +6,5 @@ public class TileIndexDiff {
 		diff = i;
 	}
 
-	public int diff;
+	public final int diff;
 }

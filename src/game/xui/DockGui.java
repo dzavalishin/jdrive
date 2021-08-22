@@ -101,7 +101,7 @@ public class DockGui
 	}
 
 	//typedef void OnButtonClick(Window w);
-	static OnButtonClick _build_docks_button_proc[] = {
+	static final OnButtonClick[] _build_docks_button_proc = {
 			DockGui::BuildDocksClick_Canal,
 			DockGui::BuildDocksClick_Lock,
 			null,
@@ -214,7 +214,7 @@ public class DockGui
 
 	static void ShowBuildDocksToolbar()
 	{
-		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
+		if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR) return;
 		Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);
 		Window.AllocateWindowDesc(_build_docks_toolbar_desc);
 		if (Global._patches.link_terraform_toolbar) 
@@ -240,7 +240,7 @@ public class DockGui
 			}
 
 			Gfx.DrawStringCentered(74, 17, Str.STR_3066_COVERAGE_AREA_HIGHLIGHT, 0);
-			MiscGui.DrawStationCoverageAreaText(4, 50, (int)-1, rad);
+			MiscGui.DrawStationCoverageAreaText(4, 50, -1, rad);
 			break;
 		}
 

@@ -23,6 +23,10 @@ import game.util.Strings;
 public class StationGui extends Station  // to get constants
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	static final int _rating_colors[] = {152,32,15,174,208,194,191,55,184,10,191,48};
 
 
@@ -60,7 +64,7 @@ public class StationGui extends Station  // to get constants
 		if (rating != 0) Gfx.GfxFillRect(x + 1, y + 8, x + rating, y + 8, 0xD0);
 	}
 
-	static int [] _num_station_sort = new int[Global.MAX_PLAYERS];
+	static final int [] _num_station_sort = new int[Global.MAX_PLAYERS];
 
 	//static char _bufcache[64];
 	//static int _last_station_idx;
@@ -69,23 +73,21 @@ public class StationGui extends Station  // to get constants
 	{
 		public int compare(SortStruct a, SortStruct b)
 		{
-			//char buf1[64];
-			int [] argv = new int[1];
-			//final SortStruct *cmp1 = (final SortStruct*)a;
-			//final SortStruct *cmp2 = (final SortStruct*)b;
-
+			/*int [] argv = new int[1];
 			argv[0] = a.index;
 			String buf1 = Strings.GetStringWithArgs(Str.STR_STATION, argv);
 
 			argv[0] = b.index;
-			String buf2 = Strings.GetStringWithArgs(Str.STR_STATION, argv);
+			String buf2 = Strings.GetStringWithArgs(Str.STR_STATION, argv); */
 
+			String buf1 = Strings.GetStringWithArgs(Str.STR_STATION, a.index);
+			String buf2 = Strings.GetStringWithArgs(Str.STR_STATION, b.index);
 			return buf1.compareTo(buf2);
 		}
 	}
 
 	private static SortStruct [] _station_sort;
-	public static boolean [] _station_sort_dirty = new boolean[Global.MAX_PLAYERS];
+	public static final boolean [] _station_sort_dirty = new boolean[Global.MAX_PLAYERS];
 	private static boolean _global_station_sort_dirty;
 
 
@@ -97,16 +99,13 @@ public class StationGui extends Station  // to get constants
 
 		// reset #-of stations to 0 because ++ is used for value-assignment
 		//memset(_num_station_sort, 0, sizeof(_num_station_sort));
-		for( int si = 0; si < _num_station_sort.length; si++ )
-			_num_station_sort[si] = 0;
+		Arrays.fill(_num_station_sort, 0);
 
 		/* Create array for sorting */
 		//_station_sort = realloc(_station_sort, GetStationPoolSize() * sizeof(_station_sort[0]));
 		_station_sort = new SortStruct[GetStationPoolSize()];
-		if (_station_sort == null)
-			Global.error("Could not allocate memory for the station-sorting-list");
+		//if (_station_sort == null)			Global.error("Could not allocate memory for the station-sorting-list");
 
-		//FOR_ALL_STATIONS(st)
 		Station.forEach( (st) ->
 		{
 			if (st.getXy() != null && st.getOwner().id != Owner.OWNER_NONE) {
@@ -130,9 +129,7 @@ public class StationGui extends Station  // to get constants
 		Arrays.sort(_station_sort, new GeneralOwnerSorter());
 
 		// since indexes are messed up after adding/removing a station, mark all lists dirty
-		for (int si = 0; si < _station_sort_dirty.length; si++) {
-			_station_sort_dirty[si] = true;
-		}
+		Arrays.fill(_station_sort_dirty, true);
 		//memset(_station_sort_dirty, true, sizeof(_station_sort_dirty));
 
 		_global_station_sort_dirty = false;
@@ -358,7 +355,7 @@ public class StationGui extends Station  // to get constants
 		}
 		MiscGui.SetVScrollCount(w, num);
 
-		w.disabled_state = st.getOwner() == Global._local_player ? 0 : (1 << 9);
+		w.disabled_state = st.getOwner() == Global.gs._local_player ? 0 : (1 << 9);
 
 		/*
 		if (0==(st.facilities & FACIL_TRAIN)) 		w.disabled_state = BitOps.RETSETBIT(w.disabled_state,  10);
@@ -527,7 +524,7 @@ public class StationGui extends Station  // to get constants
 			case 12: { /* Show a list of scheduled aircraft to this station */
 				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs have no owners, show the scheduled aircraft of current player */
-				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global._current_player : st.getOwner();
+				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global.gs._current_player : st.getOwner();
 				AirCraft.ShowPlayerAircraft(owner.id, w.window_number);
 				break;
 			}
@@ -535,7 +532,7 @@ public class StationGui extends Station  // to get constants
 			case 13: { /* Show a list of scheduled ships to this station */
 				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs/bouys have no owners, show the scheduled ships of current player */
-				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global._current_player : st.getOwner();
+				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global.gs._current_player : st.getOwner();
 				ShipGui.ShowPlayerShips(owner, StationID.get( w.window_number ) );
 				break;
 			}

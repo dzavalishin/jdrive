@@ -5,6 +5,6 @@ public class TileDesc {
 	public int str;
 	public int owner;
 	public int build_date;
-	public Integer []dparam = new Integer[2];
+	public final Integer []dparam = new Integer[2];
 
 }

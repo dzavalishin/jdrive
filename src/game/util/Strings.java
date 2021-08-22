@@ -9,7 +9,7 @@ import game.tables.CurrencySpec;
 public class Strings extends StringTable
 {
 
-	static DynamicLanguages _dynlang = new DynamicLanguages();
+	static final DynamicLanguages _dynlang = new DynamicLanguages();
 
 	public static BinaryString _userstring;
 
@@ -85,8 +85,8 @@ public class Strings extends StringTable
 	// TODO fix me
 	private static BinaryString []_langpack_offs;
 	private static LanguagePack _langpack;
-	private static int [] _langtab_num = new int [32]; // Offset into langpack offs
-	private static int [] _langtab_start = new int[32]; // Offset into langpack offs
+	private static final int [] _langtab_num = new int [32]; // Offset into langpack offs
+	private static final int [] _langtab_start = new int[32]; // Offset into langpack offs
 
 	//private final StringID _cargo_string_list[NUM_LANDSCAPE][NUM_CARGO] = {
 	private final static int _cargo_string_list[][] = {
@@ -848,7 +848,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 			case 0x8F: // {CURRENCY}
 				// TODO buff.append( FormatGenericCurrency(_currency, Getint(arg[argc++]), false) );
-				buff.append( Getint(arg[argc++]) + "$" ); //argc++;
+				buff.append(Getint(arg[argc++])).append("$"); //argc++;
 				break;
 
 			case 0x99: { // {WAYPOINT}
@@ -892,7 +892,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 			case 0x9C: { // TODO {CURRENCY64}
 				//buff.append( FormatGenericCurrency(_currency, Getlong(arg[argc++]), false) );
-				buff.append( Getint(arg[argc++]) + "$" ); //argc++;
+				buff.append(Getint(arg[argc++])).append("$"); //argc++;
 				break;
 			}
 
@@ -1233,7 +1233,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	}
 
-	private static String [] __elng =  {"english.lng "};
+	private static final String [] __elng =  {"english.lng "};
 
 	// make a list of the available language packs. put the data in _dynlang struct.
 	public static void InitializeLanguagePacks()
@@ -1349,7 +1349,7 @@ class LanguagePack {
 	String own_name;	// the localized name of this language	
 	String isocode;	// the ISO code for the language (not country code)
 
-	int offsets[] = new int[32];	// the offsets
+	final int[] offsets = new int[32];	// the offsets
 	byte plural_form;		// how to compute plural forms
 
 	byte data[];

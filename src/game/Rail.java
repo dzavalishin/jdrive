@@ -27,6 +27,7 @@ import game.xui.Window;
 import game.xui.WindowDesc;
 import game.xui.WindowEvent;
 
+@SuppressWarnings("SuspiciousNameCombination")
 public class Rail extends RailTables {
 
 	public static final int NUM_SSD_ENTRY = RailtypeInfo.NUM_SSD_ENTRY;
@@ -93,7 +94,8 @@ public class Rail extends RailTables {
 	 *    is determined by normal rail. Check sprites 1005 and following for this order<p>
 	 * 2) The position where the railtype is loaded must always be the same, otherwise
 	 *    the offset will fail.<p>
-	 * @note: Something more flexible might be desirable in the future.
+	 *
+	 * @apiNote  Something more flexible might be desirable in the future.
 	 * /
 		SpriteID total_offset;
 
@@ -324,7 +326,8 @@ public class Rail extends RailTables {
 	{
 		assert(IsValidTrack(track));
 		assert(GetRailTileType(tile) == RAIL_TYPE_SIGNALS);
-		return (/*SignalType*/ int)(tile.getMap().m4 & SIGTYPE_MASK);
+		/*SignalType*/
+		return tile.getMap().m4 & SIGTYPE_MASK;
 	}
 
 
@@ -351,7 +354,7 @@ public class Rail extends RailTables {
 	 * @param railtype the rail type which the information is requested for
 	 * @return The pointer to the RailtypeInfo
 	 */
-	public static final RailtypeInfo GetRailTypeInfo(/*RailType*/ int railtype)
+	public static RailtypeInfo GetRailTypeInfo(/*RailType*/ int railtype)
 	{
 		assert(railtype < RAILTYPE_END);
 		return _railtypes[railtype];
@@ -586,7 +589,7 @@ public class Rail extends RailTables {
 					)) { // partly up
 				if (existing != 0) {
 					return 0;
-				} else if (!Global._patches.build_on_slopes || Global._is_old_ai_player) {
+				} else if (!Global._patches.build_on_slopes || Global.gs._is_old_ai_player) {
 					return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 				} else {
 					return Global._price.terraform;
@@ -638,7 +641,7 @@ public class Rail extends RailTables {
 				cost += ret;
 
 				if(0 != (flags & Cmd.DC_EXEC)) {
-					tile.SetTileOwner( Global._current_player);
+					tile.SetTileOwner( Global.gs._current_player);
 					tile.getMap().m3 = BitOps.RETSB(tile.getMap().m3, 0, 4, p1);
 					tile.getMap().m5 = ((m5 & 0xC7) | 0x20); // railroad under bridge
 				}
@@ -659,7 +662,7 @@ public class Rail extends RailTables {
 				return Cmd.CMD_ERROR;
 			}
 			if ( (0 != (m5 & RAIL_TYPE_SPECIAL)) ||
-					!tile.IsTileOwner( Global._current_player) ||
+					!tile.IsTileOwner( Global.gs._current_player) ||
 					BitOps.GB(tile.getMap().m3, 0, 4) != p1) {
 				// Get detailed error message
 				return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
@@ -686,7 +689,7 @@ public class Rail extends RailTables {
 					)) {
 				if(0 != (flags & Cmd.DC_EXEC)) {
 					tile.getMap().m3 = 0xFF & tile.GetTileOwner().id;
-					tile.SetTileOwner( Global._current_player);
+					tile.SetTileOwner( Global.gs._current_player);
 					tile.getMap().m4 = 0xFF & p1;
 					tile.getMap().m5 = 0xFF & (0x10 | (track == TRACK_DIAG1 ? 0x08 : 0x00)); // level crossing
 				}
@@ -708,7 +711,7 @@ public class Rail extends RailTables {
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				tile.SetTileType(TileTypes.MP_RAILWAY);
-				tile.SetTileOwner( Global._current_player);
+				tile.SetTileOwner( Global.gs._current_player);
 				tile.getMap().m2 = 0; // Bare land
 				tile.getMap().m3 = 0xFF & p1; // No signals, rail type
 				tile.getMap().m5 = 0xFF & trackbit;
@@ -749,7 +752,7 @@ public class Rail extends RailTables {
 		if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && !tile.IsTileType( TileTypes.MP_STREET) && !tile.IsTileType( TileTypes.MP_RAILWAY))
 			return Cmd.CMD_ERROR;
 
-		if (Global._current_player.id != Owner.OWNER_WATER && !Player.CheckTileOwnership(tile))
+		if (Global.gs._current_player.id != Owner.OWNER_WATER && !Player.CheckTileOwnership(tile))
 			return Cmd.CMD_ERROR;
 
 		// allow building rail under bridge
@@ -975,7 +978,7 @@ public class Rail extends RailTables {
 	 * @param p1 rail type
 	 * @param p2 depot direction (0 through 3), where 0 is NE, 1 is SE, 2 is SW, 3 is NW
 	 *
-	 * @todo When checking for the tile slope,
+	 * TODO When checking for the tile slope,
 	 * distingush between "Flat land required" and "land sloped in wrong direction"
 	 */
 	public static int CmdBuildTrainDepot(int x, int y, int flags, int p1, int p2)
@@ -1003,7 +1006,7 @@ public class Rail extends RailTables {
 		 */
 
 		if (tileh != 0 && (
-				Global._is_old_ai_player ||
+				Global.gs._is_old_ai_player ||
 				!Global._patches.build_on_slopes ||
 				TileIndex.IsSteepTileh(tileh) ||
 				!Depot.CanBuildDepotByTileh(p2, tileh)
@@ -1029,7 +1032,7 @@ public class Rail extends RailTables {
 					);
 
 			d.xy = tile;
-			d.town_index = Town.ClosestTownFromTile(tile, (int)-1).index;
+			d.town_index = Town.ClosestTownFromTile(tile, -1).index;
 
 			SetSignalsOnBothDir(tile, (p2&1) != 0 ? 2 : 1);
 
@@ -1521,7 +1524,7 @@ public class Rail extends RailTables {
 			return Cmd.CMD_ERROR;
 
 		/* Only water can remove signals from anyone */
-		if (Global._current_player.id != Owner.OWNER_WATER && !Player.CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
+		if (Global.gs._current_player.id != Owner.OWNER_WATER && !Player.CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
@@ -1637,7 +1640,7 @@ public class Rail extends RailTables {
 
 	static int RemoveTrainDepot(TileIndex tile, int flags)
 	{
-		if (!Player.CheckTileOwnership(tile) && Global._current_player.id != Owner.OWNER_WATER)
+		if (!Player.CheckTileOwnership(tile) && Global.gs._current_player.id != Owner.OWNER_WATER)
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle())
@@ -1664,7 +1667,7 @@ public class Rail extends RailTables {
 			if(0 !=  (m5 & RAIL_TYPE_SPECIAL))
 				return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 
-			if (!tile.IsTileOwner( Global._current_player.id))
+			if (!tile.IsTileOwner( Global.gs._current_player.id))
 				return Cmd.return_cmd_error(Str.STR_1024_AREA_IS_OWNED_BY_ANOTHER);
 
 			return Cmd.return_cmd_error(Str.STR_1008_MUST_REMOVE_RAILROAD_TRACK);
@@ -2054,7 +2057,7 @@ public class Rail extends RailTables {
 			if (WayPoint.IsRailWaypoint(ti.tile) && BitOps.HASBIT(ti.tile.getMap().m3, 4)) {
 				// look for customization
 				int stat_id = WayPoint.GetWaypointByTile(ti.tile).stat_id;
-				final StationSpec stat = null; // TODO Station.GetCustomStation(STAT_CLASS_WAYP, stat_id);
+				//final StationSpec stat = null; // TODO Station.GetCustomStation(STAT_CLASS_WAYP, stat_id);
 
 				/*if (stat != null) {
 					final DrawTileSeqStruct seq;
@@ -2141,7 +2144,7 @@ public class Rail extends RailTables {
 		final RailtypeInfo rti = GetRailTypeInfo(railtype);
 		final DrawTrackSeqStruct [] dtssa = _track_depot_layout_table[imagei];
 
-		ormod = Sprite.PLAYER_SPRITE_COLOR(Global._local_player);
+		ormod = Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player);
 
 		//dtss = _track_depot_layout_table[image];
 
@@ -2182,7 +2185,7 @@ public class Rail extends RailTables {
 			if(dtss.image == 0) break;
 			Point pt = Point.RemapCoords(dtss.subcoord_x, dtss.subcoord_y, 0);
 			img = dtss.image;
-			if(0 != (img & Sprites.PALETTE_MODIFIER_COLOR)) img |= Sprite.PLAYER_SPRITE_COLOR(Global._local_player);
+			if(0 != (img & Sprites.PALETTE_MODIFIER_COLOR)) img |= Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player);
 			Gfx.DrawSprite(img, x + pt.x, y + pt.y);
 		}
 	}
@@ -2204,16 +2207,16 @@ public class Rail extends RailTables {
 		int presignal_exits_free;
 
 		// these are used to keep track of the signals that change.
-		byte [] bit = new byte[NUM_SSD_ENTRY];
-		TileIndex[] tile = new TileIndex[NUM_SSD_ENTRY];
+		final byte [] bit = new byte[NUM_SSD_ENTRY];
+		final TileIndex[] tile = new TileIndex[NUM_SSD_ENTRY];
 
 		int pbs_cur;
 		// these are used to keep track of all signals in the block
-		TileIndex [] pbs_tile = new TileIndex[NUM_SSD_ENTRY];
+		final TileIndex [] pbs_tile = new TileIndex[NUM_SSD_ENTRY];
 
 		// these are used to keep track of the stack that modifies presignals recursively
-		TileIndex [] next_tile = new TileIndex[NUM_SSD_STACK];
-		byte [] next_dir = new byte[NUM_SSD_STACK];
+		final TileIndex [] next_tile = new TileIndex[NUM_SSD_STACK];
+		final byte [] next_dir = new byte[NUM_SSD_STACK];
 
 	}
 
@@ -2565,8 +2568,7 @@ public class Rail extends RailTables {
 
 	static AcceptedCargo GetAcceptedCargo_Track(TileIndex tile)
 	{
-		AcceptedCargo ac = new AcceptedCargo();
-		return ac;
+		return new AcceptedCargo();
 		/* not used */
 	}
 
@@ -3447,7 +3449,7 @@ public class Rail extends RailTables {
 	{
 		Window w;
 
-		if (Global._current_player.id == Owner.OWNER_SPECTATOR) return;
+		if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR) return;
 
 		BiConsumer<Window,WindowEvent>  cmp = Rail::BuildRailToolbWndProc;
 		
@@ -3538,7 +3540,7 @@ public class Rail extends RailTables {
 			Gfx.DrawStringCentered(74, 101, Str.STR_3004_PLATFORM_LENGTH, 0);
 			Gfx.DrawStringCentered(74, 141, Str.STR_3066_COVERAGE_AREA_HIGHLIGHT, 0);
 
-			MiscGui.DrawStationCoverageAreaText(2, 166, (int)-1, rad);
+			MiscGui.DrawStationCoverageAreaText(2, 166, -1, rad);
 		} break;
 
 		case WE_CLICK: {

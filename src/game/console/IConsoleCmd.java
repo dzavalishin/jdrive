@@ -13,5 +13,7 @@ public class IConsoleCmd {
 	//IConsoleCmd 	next; // next command in list
 
 	IConsoleCmdProc proc;    // process executed when command is typed
-	IConsoleHooks 	hook;       // any special trigger action that needs executing
+
+	// any special trigger action that needs executing
+    final IConsoleHooks 	hook = new IConsoleHooks();
 } 

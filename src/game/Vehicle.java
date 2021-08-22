@@ -3,7 +3,6 @@ package game;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -24,14 +23,12 @@ import game.ifaces.TileVehicleInterface;
 import game.struct.BackuppedOrders;
 import game.struct.Point;
 import game.struct.Rect;
-import game.struct.SortStruct;
 import game.struct.VQueueItem;
 import game.tables.EngineTables;
 import game.util.BitOps;
 import game.util.MemoryPool;
 import game.util.VehicleHash;
 import game.xui.DrawPixelInfo;
-import game.xui.EngineGui;
 import game.xui.MiscGui;
 import game.xui.VehicleGui;
 import game.xui.ViewPort;
@@ -349,7 +346,7 @@ public class Vehicle implements IPoolItem
 	//calculates tax
 	public void MA_Tax(int income)
 	{
-		int old_expenses_type = Player._yearly_expenses_type;
+		int old_expenses_type = Global.gs._yearly_expenses_type;
 		assert income >= 0;
 
 		if(Global._patches.allow_municipal_airports) {
@@ -375,9 +372,8 @@ public class Vehicle implements IPoolItem
 			}
 
 			Player.SubtractMoneyFromPlayer((int)tax);
-			Player._yearly_expenses_type = old_expenses_type;
+			Global.gs._yearly_expenses_type = old_expenses_type;
 		}
-		return;
 	}
 
 
@@ -482,7 +478,7 @@ public class Vehicle implements IPoolItem
 		Vehicle v = this;
 		Vehicle u;
 
-		assert(v != null);
+		//assert(v != null);
 
 		if (v.first != null) {
 			if (v.first.IsFrontEngine()) return v.first;
@@ -502,7 +498,7 @@ public class Vehicle implements IPoolItem
 		if( v.IsFrontEngine())
 			for (u = v; u != null; u = u.next) u.first = v;
 
-		return (Vehicle)v;
+		return v;
 	}
 
 	int CountVehiclesInChain()
@@ -535,7 +531,7 @@ public class Vehicle implements IPoolItem
 	static void DeleteVehicle(Vehicle v)
 	{
 		Vehicle u;
-		boolean has_artic_part = false;
+		boolean has_artic_part;// = false;
 
 		do {
 			u = v.next;
@@ -555,8 +551,9 @@ public class Vehicle implements IPoolItem
 
 
 
-	/** Get the next real (non-articulated part) vehicle in the consist.
-	 * @param v Vehicle.
+	/**
+	 * Get the next real (non-articulated part) vehicle in the consist.
+	 *
 	 * @return Next vehicle in the consist.
 	 */
 	public Vehicle GetNextVehicle()
@@ -592,8 +589,9 @@ public class Vehicle implements IPoolItem
 
 
 
-	/** Check if a vehicle is front engine
-	 * @param v vehicle to check
+	/**
+	 * Check if a vehicle is front engine
+	 *
 	 * @return Returns true if vehicle is a front engine
 	 */
 	public boolean IsFrontEngine()
@@ -601,24 +599,25 @@ public class Vehicle implements IPoolItem
 		return HASBIT_subtype( Train_Front);
 	}
 
-	/** Set front engine state
-	 * @param v vehicle to change
+	/**
+	 * Set front engine state
 	 */
 	public void SetFrontEngine()
 	{
 		SETBIT_subtype( Train_Front);
 	}
 
-	/** Remove the front engine state
-	 * @param v vehicle to change
+	/**
+	 * Remove the front engine state
 	 */
 	public void ClearFrontEngine()
 	{
 		CLRBIT_subtype( Train_Front);
 	}
 
-	/** Check if a vehicle is an articulated part of an engine
-	 * @param v vehicle to check
+	/**
+	 * Check if a vehicle is an articulated part of an engine
+	 *
 	 * @return Returns true if vehicle is an articulated part
 	 */
 	public boolean IsArticulatedPart()
@@ -626,24 +625,25 @@ public class Vehicle implements IPoolItem
 		return HASBIT_subtype( Train_Articulated_Part);
 	}
 
-	/** Set a vehicle to be an articulated part
-	 * @param v vehicle to change
+	/**
+	 * Set a vehicle to be an articulated part
 	 */
 	public void SetArticulatedPart()
 	{
 		SETBIT_subtype( Train_Articulated_Part);
 	}
 
-	/** Clear a vehicle from being an articulated part
-	 * @param v vehicle to change
+	/**
+	 * Clear a vehicle from being an articulated part
 	 */
 	public void ClearArticulatedPart()
 	{
 		CLRBIT_subtype( Train_Articulated_Part);
 	}
 
-	/** Check if a vehicle is a wagon
-	 * @param v vehicle to check
+	/**
+	 * Check if a vehicle is a wagon
+	 *
 	 * @return Returns true if vehicle is a wagon
 	 */
 	public boolean IsTrainWagon()
@@ -651,24 +651,25 @@ public class Vehicle implements IPoolItem
 		return HASBIT_subtype( Train_Wagon);
 	}
 
-	/** Set a vehicle to be a wagon
-	 * @param v vehicle to change
+	/**
+	 * Set a vehicle to be a wagon
 	 */
 	public void SetTrainWagon()
 	{
 		SETBIT_subtype( Train_Wagon);
 	}
 
-	/** Clear wagon property
-	 * @param v vehicle to change
+	/**
+	 * Clear wagon property
 	 */
 	public void ClearTrainWagon()
 	{
 		CLRBIT_subtype( Train_Wagon);
 	}
 
-	/** Check if a vehicle is an engine (can be first in a train)
-	 * @param v vehicle to check
+	/**
+	 * Check if a vehicle is an engine (can be first in a train)
+
 	 * @return Returns true if vehicle is an engine
 	 */
 	public boolean IsTrainEngine()
@@ -676,8 +677,8 @@ public class Vehicle implements IPoolItem
 		return HASBIT_subtype( Train_Engine);
 	}
 
-	/** Set engine status
-	 * @param v vehicle to change
+	/**
+	 * Set engine status
 	 */
 	public void SetTrainEngine()
 	{
@@ -685,7 +686,6 @@ public class Vehicle implements IPoolItem
 	}
 
 	/** Clear engine status
-	 * @param v vehicle to change
 	 */
 	public void ClearTrainEngine()
 	{
@@ -693,7 +693,6 @@ public class Vehicle implements IPoolItem
 	}
 
 	/** Check if a vehicle is a free wagon (got no engine in front of it)
-	 * @param v vehicle to check
 	 * @return Returns true if vehicle is a free wagon
 	 */
 	public boolean IsFreeWagon()
@@ -702,7 +701,6 @@ public class Vehicle implements IPoolItem
 	}
 
 	/** Set if a vehicle is a free wagon
-	 * @param v vehicle to change
 	 */
 	public void SetFreeWagon()
 	{
@@ -710,7 +708,6 @@ public class Vehicle implements IPoolItem
 	}
 
 	/** Clear a vehicle from being a free wagon
-	 * @param v vehicle to change
 	 */
 	public void ClearFreeWagon()
 	{
@@ -718,7 +715,6 @@ public class Vehicle implements IPoolItem
 	}
 
 	/** Check if a vehicle is a multiheaded engine
-	 * @param v vehicle to check
 	 * @return Returns true if vehicle is a multiheaded engine
 	 */
 	public boolean IsMultiheaded()
@@ -727,7 +723,6 @@ public class Vehicle implements IPoolItem
 	}
 
 	/** Set if a vehicle is a multiheaded engine
-	 * @param v vehicle to change
 	 */
 	public void SetMultiheaded()
 	{
@@ -735,7 +730,6 @@ public class Vehicle implements IPoolItem
 	}
 
 	/** Clear multiheaded engine property
-	 * @param v vehicle to change
 	 */
 	public void ClearMultiheaded()
 	{
@@ -747,7 +741,6 @@ public class Vehicle implements IPoolItem
 
 
 	/** Check if an engine has an articulated part.
-	 * @param v Vehicle.
 	 * @return True if the engine has an articulated part.
 	 */
 	public boolean EngineHasArticPart()
@@ -756,7 +749,6 @@ public class Vehicle implements IPoolItem
 	}
 
 	/** Get the last part of a multi-part engine.
-	 * @param v Vehicle.
 	 * @return Last part of the engine.
 	 */
 	public Vehicle GetLastEnginePart()
@@ -813,8 +805,13 @@ public class Vehicle implements IPoolItem
 		return u;
 	}
 
-	private static IPoolItemFactory<Vehicle> factory = new IPoolItemFactory<Vehicle>() 
+	private static final IPoolItemFactory<Vehicle> factory = new IPoolItemFactory<Vehicle>()
 	{		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public Vehicle createObject() {
 			return new Vehicle();
@@ -991,7 +988,7 @@ public class Vehicle implements IPoolItem
 
 	public Object EnsureNoVehicleProc(Object data)
 	{
-		if (tile != (TileIndex)data || type == VEH_Disaster)
+		if (tile != data || type == VEH_Disaster)
 			return null;
 
 		VehicleInTheWayErrMsg();
@@ -1187,7 +1184,7 @@ public class Vehicle implements IPoolItem
 		{	// make sure the offset in the array is not larger than the array itself
 			//FOR_ALL_VEHICLES_FROM(v, offset + skip_vehicles[0])
 			Iterator<Vehicle> ii = getIteratorFrom(offset + skip_vehicles[0]);
-			while(ii.hasNext())
+			while(ii != null && ii.hasNext())
 			{
 				Vehicle v = ii.next();
 
@@ -1483,8 +1480,8 @@ public class Vehicle implements IPoolItem
 	// head of the linked list to tell what vehicles that visited a depot in a tick
 	static Vehicle  _first_veh_in_depot_list;
 
-	/** Adds a vehicle to the list of vehicles, that visited a depot this tick
-	 * @param *v vehicle to add
+	/**
+	 * Adds this vehicle to the list of vehicles, that visited a depot this tick
 	 */
 	void VehicleEnteredDepotThisTick()
 	{
@@ -1510,7 +1507,7 @@ public class Vehicle implements IPoolItem
 		}
 	}
 
-	static ConsumerOfVehicle[] _vehicle_tick_procs = {
+	static final ConsumerOfVehicle[] _vehicle_tick_procs = {
 			TrainCmd::Train_Tick,
 			RoadVehCmd::RoadVeh_Tick,
 			Ship::Ship_Tick,
@@ -1930,9 +1927,9 @@ public class Vehicle implements IPoolItem
 	}
 
 	static class BulldozerMovement {
-		int direction;
-		int image;
-		int duration;
+		final int direction;
+		final int image;
+		final int duration;
 
 		public BulldozerMovement(int direction, int image, int dur) {
 			this.direction = direction;
@@ -1975,7 +1972,7 @@ public class Vehicle implements IPoolItem
 		{  0, -1 }
 	};*/
 
-	static Point[]_inc_by_dir = {
+	static final Point[]_inc_by_dir = {
 			new Point(  -1,  0 ),
 			new Point(   0,  1 ),
 			new Point(   1,  0 ),
@@ -2312,10 +2309,10 @@ public class Vehicle implements IPoolItem
 	public static Vehicle CheckClickOnVehicle(final ViewPort vp, int x, int y)
 	{
 		Vehicle [] found = {null}; //, v;
-		int [] best_dist = {(int)-1};
+		int [] best_dist = {-1};
 
-		if ( (int)(x -= vp.getLeft()) >= (int)vp.getWidth() ||
-				(int)(y -= vp.getTop()) >= (int)vp.getHeight())
+		if ( (x -= vp.getLeft()) >= vp.getWidth() ||
+				(y -= vp.getTop()) >= vp.getHeight())
 			return null;
 
 		x = (x << vp.getZoom()) + vp.getVirtual_left();
@@ -2399,7 +2396,7 @@ public class Vehicle implements IPoolItem
 		if (GameOptions._opt.diff.vehicle_breakdowns == 1) rel += 0x6666;
 
 		/* check if to break down */
-		if (_breakdown_chance[(int)Math.min(rel, 0xffff) >> 10] <= v.breakdown_chance) {
+		if (_breakdown_chance[Math.min(rel, 0xffff) >> 10] <= v.breakdown_chance) {
 			v.breakdown_ctr    =  (BitOps.GB(r, 16, 6) + 0x3F);
 			v.breakdown_delay  =  (BitOps.GB(r, 24, 7) + 0x80);
 			v.breakdown_chance = 0;
@@ -2415,7 +2412,7 @@ public class Vehicle implements IPoolItem
 
 	static void ShowVehicleGettingOld(Vehicle v, /*StringID*/ int msg)
 	{
-		if (v.owner != Global._local_player) return;
+		if (v.owner != Global.gs._local_player) return;
 
 		// Do not show getting-old message if autorenew is active
 		if (Player.GetPlayer(v.owner).engine_renew) return;
@@ -2462,7 +2459,7 @@ public class Vehicle implements IPoolItem
 		if (!IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
 		v = Vehicle.GetVehicle(p1);
 		v_front = v;
-		w = null;
+		//w = null;
 		w_front = null;
 		w_rear = null;
 
@@ -2678,11 +2675,11 @@ public class Vehicle implements IPoolItem
 		//END MA vars
 
 
-		Global._current_player = v.owner;
+		Global.gs._current_player = v.owner;
 
 		assert(v.type == VEH_Train || v.type == VEH_Road || v.type == VEH_Ship || v.type == VEH_Aircraft);
 
-		assert 0 != (v.vehstatus & VS_STOPPED);	// the vehicle should have been stopped in VehicleEnteredDepotThisTick() if needed
+		assert v.isStopped();	// the vehicle should have been stopped in VehicleEnteredDepotThisTick() if needed
 
 		if (v.leave_depot_instantly) {
 			// we stopped the vehicle to do this, so we have to remember to start it again when we are done
@@ -2736,7 +2733,7 @@ public class Vehicle implements IPoolItem
 			} while (w.type == VEH_Train && (w = w.GetNextVehicle()) != null);
 
 			if (0 == (flags & Cmd.DC_EXEC) && (Cmd.CmdFailed(temp_cost) || p.money64 < (int)(cost + p.engine_renew_money) || cost == 0)) {
-				if (p.money64 < (int)(cost + p.engine_renew_money) && ( Global._local_player == v.owner ) && cost != 0) {
+				if (p.money64 < (int)(cost + p.engine_renew_money) && ( Global.gs._local_player == v.owner ) && cost != 0) {
 					int message;
 					Global.SetDParam(0, v.unitnumber.id);
 					switch (v.type) {
@@ -2751,7 +2748,7 @@ public class Vehicle implements IPoolItem
 					NewsItem.AddNewsItem(message, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 				}
 				if (stopped) v.vehstatus &= ~VS_STOPPED;
-				Global._current_player = PlayerID.get(Owner.OWNER_NONE);
+				Global.gs._current_player = PlayerID.get(Owner.OWNER_NONE);
 				return 0;
 			}
 
@@ -2801,7 +2798,7 @@ public class Vehicle implements IPoolItem
 		if (Player.IsLocalPlayer()) MiscGui.ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
 
 		if (stopped) v.vehstatus &= ~VS_STOPPED;
-		Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 		return 0;
 	}
@@ -2821,7 +2818,7 @@ public class Vehicle implements IPoolItem
 		if (!Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		StringID str = Global.AllocateNameUnique(Global._cmd_text, 2);
-		if (str == null) return Cmd.CMD_ERROR;
+		//if (str == null) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			StringID old_str = new StringID( v.string_id );
@@ -2838,7 +2835,7 @@ public class Vehicle implements IPoolItem
 
 
 
-	static Rect _old_vehicle_coords = new Rect();
+	static final Rect _old_vehicle_coords = new Rect();
 
 	public void BeginVehicleMove() {
 		_old_vehicle_coords.left = left_coord;
@@ -2951,15 +2948,15 @@ public class Vehicle implements IPoolItem
 	 * result << 8 contains the id of the station entered. If the return value has
 	 * bit 0x8 set, the vehicle could not and did not enter the tile. Are there
 	 * other bits that can be set? */
-	int VehicleEnterTile(TileIndex tile, int x, int y)
+	int VehicleEnterTile(TileIndex itile, int x, int y)
 	{
 		TileIndex old_tile = tile;
-		int result = Landscape._tile_type_procs[tile.GetTileType().ordinal()].vehicle_enter_tile_proc.apply(this, tile, x, y);
+		int result = Landscape._tile_type_procs[tile.GetTileType().ordinal()].vehicle_enter_tile_proc.apply(this, itile, x, y);
 
 		/* When vehicle_enter_tile_proc returns 8, that apparently means that
 		 * we cannot enter the tile at all. In that case, don't call
 		 * leave_tile. */
-		if (0 == (result & 8) && old_tile != tile) {
+		if (0 == (result & 8) && old_tile != itile) {
 			TileVehicleInterface proc = Landscape._tile_type_procs[old_tile.GetTileType().ordinal()].vehicle_leave_tile_proc;
 			if (proc != null)
 				proc.apply(this, old_tile, x, y);
@@ -2971,7 +2968,7 @@ public class Vehicle implements IPoolItem
 	{
 		int unit_num = 0;
 
-		boolean restart = false;
+		boolean restart; // = false;
 		while(true)
 		{
 			unit_num++;
@@ -2981,7 +2978,7 @@ public class Vehicle implements IPoolItem
 			{
 				Vehicle u = i.next();
 
-				if (u.type == type && u.owner == Global._current_player 
+				if (u.type == type && u.owner == Global.gs._current_player 
 						&& u.unitnumber != null
 						&& unit_num == u.unitnumber.id)
 				{
@@ -3856,7 +3853,7 @@ public class Vehicle implements IPoolItem
 	public int generateTrainDescription() 
 	{
 		int psp = Global._patches.vehicle_speed ? 1 : 0;
-		int str = Str.INVALID_STRING_ID.id;
+		int str;// = Str.INVALID_STRING_ID.id;
 		
 		if (rail.crash_anim_pos != 0) {
 			str = Str.STR_8863_CRASHED;
@@ -3925,10 +3922,10 @@ public class Vehicle implements IPoolItem
 }
 
 class BubbleMovement {
-	int x;
-	int y;
-	int z;
-	int image;
+	final int x;
+	final int y;
+	final int z;
+	final int image;
 
 	public BubbleMovement(int x, int y, int z, int image ) {
 		this.x = x;

@@ -4,15 +4,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.function.Consumer;
 
 import game.ids.OrderID;
 import game.ids.VehicleID;
-import game.ifaces.IPoolItem;
-import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
-import game.util.MemoryPool;
 import game.xui.VehicleGui;
 import game.xui.Window;
 
@@ -94,7 +89,7 @@ public class Order implements Serializable
 	 * No new cargo is loaded onto the vehicle whatsoever */
 	public static final int OF_UNLOAD             = 0x2;
 	/** Wait for full load of all vehicles, or of at least one cargo type, depending on patch setting
-	 * @todo make this two different flags */
+	 * TODO make this two different flags */
 	public static final int OF_FULL_LOAD          = 0x4;
 
 	//Flags for depots:
@@ -107,7 +102,7 @@ public class Order implements Serializable
 
 	//Common flags
 	/** This causes the vehicle not to stop at intermediate OR the destination station (depending on patch settings)
-	 * @todo make this two different flags */
+	 * TODO make this two different flags */
 	public static final int OF_NON_STOP           = 0x8;
 
 
@@ -498,7 +493,7 @@ public class Order implements Serializable
 	}
 
 	/** Declone an order-list
-	 * @param *dst delete the orders of this vehicle
+	 * @param dst delete the orders of this vehicle
 	 * @param flags execution flags
 	 */
 	static int DecloneOrder(Vehicle dst, int flags)
@@ -896,7 +891,8 @@ public class Order implements Serializable
 	 * @param p2 various bistuffed elements
 	 * - p2 = (bit  0-15) - current order-index (p2 & 0xFFFF)
 	 * - p2 = (bit 16-31) - service interval (p2 >> 16)
-	 * @todo Unfortunately you cannot safely restore the unitnumber or the old vehicle
+	 * <br>
+	 * TODO Unfortunately you cannot safely restore the unitnumber or the old vehicle
 	 * as far as I can see. We can store it in BackuppedOrders, and restore it, but
 	 * but we have no way of seeing it has been tampered with or not, as we have no
 	 * legit way of knowing what that ID was.@n
@@ -947,11 +943,11 @@ public class Order implements Serializable
 		if (v.next_shared != null) return false;
 
 		/* Only check every 20 days, so that we don't flood the message log */
-		if (v.owner == Global._local_player && v.day_counter % 20 == 0) {
+		if (v.owner == Global.gs._local_player && v.day_counter % 20 == 0) {
 			int n_st, problem_type = -1;
 			//final Order order;
 			Station st;
-			int message = 0;
+			//int message = 0;
 
 			/* Check the order list */
 			n_st = 0;
@@ -1008,7 +1004,7 @@ public class Order implements Serializable
 				return true;
 			}
 
-			message = Str.STR_TRAIN_HAS_TOO_FEW_ORDERS + ((v.type - Vehicle.VEH_Train) << 2) + problem_type;
+			int message = Str.STR_TRAIN_HAS_TOO_FEW_ORDERS + ((v.type - Vehicle.VEH_Train) << 2) + problem_type;
 			/*DEBUG(misc, 3) ("Checkorder mode 0: Triggered News Item for %d", v.index);*/
 
 			Global.SetDParam(0, v.unitnumber.id);
@@ -1155,13 +1151,13 @@ public class Order implements Serializable
 	
 	
 	
-	@Deprecated
+	// TODO @Deprecated
 	public static int PackOrder(final Order order)
 	{
 		return (0xFFFF & order.station) << 16 | (0xFF & order.flags) << 8 | (0xFF & order.type);
 	}
 
-	@Deprecated
+	// TODO @Deprecated
 	public static Order UnpackOrder(int packed)
 	{
 		Order order = new Order();
@@ -1271,14 +1267,12 @@ public class Order implements Serializable
 	
 */
 
-	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
-	{
+	public static void loadGame(ObjectInputStream oin) {
 		//_order_pool = (MemoryPool<Order>) oin.readObject();
 		Global._backup_orders_tile = null; // TODO we must restore it too	
 	}
 
-	public static void saveGame(ObjectOutputStream oos) throws IOException 
-	{
+	public static void saveGame(ObjectOutputStream oos) {
 		//oos.writeObject(_order_pool);		
 	}
 	public TileIndex getTargetXy() 

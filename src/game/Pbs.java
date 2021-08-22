@@ -3,8 +3,7 @@ import game.enums.TileTypes;
 import game.struct.FindLengthOfTunnelResult;
 import game.util.BitOps;
 
-/** @file pbs.h Path-Based-Signalling header file
- *  @see pbs.c */
+
 
 /** @file pbs.c Path-Based-Signalling implementation file
  *  @see pbs.h */
@@ -330,18 +329,19 @@ public class Pbs {
 		if (!Rail.HasSignalOnTrackdir(tile, trackdir))
 			return false;
 
-		if (Rail.GetSignalType(tile, Rail.TrackdirToTrack(trackdir)) == 4)
+		/*if (Rail.GetSignalType(tile, Rail.TrackdirToTrack(trackdir)) == 4)
 			return true;
 		else
-			return false;
+			return false;*/
+		return Rail.GetSignalType(tile, Rail.TrackdirToTrack(trackdir)) == 4;
 	}
 
 	static class SetSignalsDataPbs {
 		int cur;
 
 		// these are used to keep track of the signals.
-		byte [] bit = new byte[NUM_SSD_ENTRY];
-		TileIndex [] tile = new TileIndex[NUM_SSD_ENTRY];
+		final byte [] bit = new byte[NUM_SSD_ENTRY];
+		final TileIndex [] tile = new TileIndex[NUM_SSD_ENTRY];
 	} 
 
 	// This function stores the signals inside the SetSignalsDataPbs struct, passed as callback to FollowTrack() in the PBSIsPbsSegment() function below
@@ -386,7 +386,7 @@ public class Pbs {
 
 		ssd.cur = 0;
 
-		Pathfind.FollowTrack(tilep, 0xC000 | Global.TRANSPORT_RAIL, direction, (TPFEnumProc)Pbs::SetSignalsEnumProcPBS, null, ssd);
+		Pathfind.FollowTrack(tilep, 0xC000 | Global.TRANSPORT_RAIL, direction, Pbs::SetSignalsEnumProcPBS, null, ssd);
 		
 		for(i=0; i!=ssd.cur; i++) {
 			TileIndex tile = ssd.tile[i];

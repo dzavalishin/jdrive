@@ -9,6 +9,11 @@ import game.struct.TileIndexDiff;
  */
 public class MutableTileIndex extends TileIndex
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public MutableTileIndex(TileIndex src)
 	{
 		super( src.tile );

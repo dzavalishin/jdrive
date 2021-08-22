@@ -17,7 +17,7 @@ public class MiscCmd {
 	static int CmdSetPlayerFace(int x, int y, int flags, int p1, int p2)
 	{
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			Player.GetPlayer(Global._current_player).face = p2;
+			Player.GetCurrentPlayer().face = p2;
 			Hal.MarkWholeScreenDirty();
 		}
 		return 0;
@@ -36,7 +36,7 @@ public class MiscCmd {
 		if (p2 >= 16) return Cmd.CMD_ERROR; // max 16 colours
 		colour = (byte) p2;
 
-		p = Player.GetPlayer(Global._current_player);
+		p = Player.GetCurrentPlayer();
 
 		/* Ensure no two companies have the same colour */
 		//FOR_ALL_PLAYERS(pp)
@@ -49,7 +49,7 @@ public class MiscCmd {
 		}
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			Global._player_colors[Global._current_player.id] = colour;
+			Global.gs._player_colors[Global.gs._current_player.id] = colour;
 			p.player_color = colour;
 			Hal.MarkWholeScreenDirty();
 		}
@@ -65,7 +65,7 @@ public class MiscCmd {
 	{
 		Player p;
 
-		p = Player.GetPlayer(Global._current_player);
+		p = Player.GetCurrentPlayer();
 
 		if (p.current_loan >= Global._economy.getMax_loan()) {
 			Global.SetDParam(0, Global._economy.getMax_loan());
@@ -74,7 +74,7 @@ public class MiscCmd {
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			/* Loan the maximum amount or not? */
-			int loan = (p2 != 0) ? Global._economy.getMax_loan() - p.current_loan : (Global._current_player.IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000;
+			int loan = (p2 != 0) ? Global._economy.getMax_loan() - p.current_loan : (Global.gs._current_player.IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000;
 
 			p.money64 += loan;
 			p.current_loan += loan;
@@ -95,7 +95,7 @@ public class MiscCmd {
 		Player p;
 		long loan;
 
-		p = Player.GetPlayer(Global._current_player);
+		p = Player.GetCurrentPlayer();
 
 		if (p.current_loan == 0) return Cmd.return_cmd_error(Str.STR_702D_LOAN_ALREADY_REPAYED);
 
@@ -108,7 +108,7 @@ public class MiscCmd {
 			loan = Math.max(loan, 10000);
 			loan -= loan % 10000;
 		} else {
-			loan = Math.min(loan, (Global._current_player.IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000);
+			loan = Math.min(loan, (Global.gs._current_player.IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000);
 		}
 
 		if (p.getMoney() < loan) {
@@ -141,7 +141,7 @@ public class MiscCmd {
 		if (str == null) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			p = Player.GetPlayer(Global._current_player);
+			p = Player.GetCurrentPlayer();
 			Global.DeleteName(p.name_1);
 			p.name_1 = str.id;
 			Hal.MarkWholeScreenDirty();
@@ -167,13 +167,12 @@ public class MiscCmd {
 		if (str == null) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			p = Player.GetPlayer(Global._current_player);
+			p = Player.GetCurrentPlayer();
 			Global.DeleteName(p.president_name_1);
 			p.president_name_1 = str.id;
 
 			if (p.name_1 == Str.STR_SV_UNNAMED) {
-				String buf = String.format("%s Transport", Global._cmd_text);
-				Global._cmd_text = buf;
+				Global._cmd_text = String.format("%s Transport", Global._cmd_text);
 				Cmd.DoCommandByTile(new TileIndex(0), 0, 0, Cmd.DC_EXEC, Cmd.CMD_CHANGE_COMPANY_NAME);
 			}
 			Hal.MarkWholeScreenDirty();
@@ -215,7 +214,7 @@ public class MiscCmd {
 		if (_networking) return Cmd.CMD_ERROR;
 	#endif*/
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
-		return (int)p1;
+		return p1;
 	}
 
 	/** Transfer funds (money) from one player to another.
@@ -228,8 +227,8 @@ public class MiscCmd {
 	 */
 	static int CmdGiveMoney(int x, int y, int flags, int p1, int p2)
 	{
-		final Player p = Player.GetPlayer(Global._current_player);
-		int amount = Math.min((int)p1, 20000000);
+		final Player p = Player.GetCurrentPlayer();
+		int amount = Math.min(p1, 20000000);
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 
@@ -239,10 +238,10 @@ public class MiscCmd {
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			/* Add money to player */
-			PlayerID old_cp = Global._current_player;
-			Global._current_player = PlayerID.get( p2 );
+			PlayerID old_cp = Global.gs._current_player;
+			Global.gs._current_player = PlayerID.get( p2 );
 			Player.SubtractMoneyFromPlayer(-amount);
-			Global._current_player = old_cp;
+			Global.gs._current_player = old_cp;
 		}
 
 		/* Subtract money from local-player */
@@ -260,7 +259,7 @@ public class MiscCmd {
 	 */
 	static int CmdChangeDifficultyLevel(int x, int y, int flags, int p1, int p2)
 	{
-		if (p1 != (int)-1L && ((int)p1 >= Global.GAME_DIFFICULTY_NUM || (int)p1 < 0)) return Cmd.CMD_ERROR;
+		if (p1 != (int)-1L && (p1 >= Global.GAME_DIFFICULTY_NUM || p1 < 0)) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			if (p1 != (int)-1L) {

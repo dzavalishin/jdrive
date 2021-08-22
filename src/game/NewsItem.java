@@ -130,7 +130,7 @@ public class NewsItem {
 	static final int  MAX_NEWS = 30;
 	static final byte   INVALID_NEWS = -1;
 
-	static NewsItem _news_items[] = new NewsItem[MAX_NEWS];
+	static final NewsItem[] _news_items = new NewsItem[MAX_NEWS];
 	static int _current_news = INVALID_NEWS; // points to news item that should be shown next
 	static int _oldest_news = 0;    // points to first item in fifo queue
 	static int _latest_news = INVALID_NEWS;  // points to last item in fifo queue
@@ -437,7 +437,7 @@ public class NewsItem {
 			//new Widget(   WIDGETS_END),
 	};
 
-	static WindowDesc _news_type13_desc = new WindowDesc(
+	static final WindowDesc _news_type13_desc = new WindowDesc(
 			Window.WDP_CENTER, 476, 430, 170,
 			Window.WC_NEWS_WINDOW, 0,
 			WindowDesc.WDF_DEF_WIDGET,
@@ -451,7 +451,7 @@ public class NewsItem {
 			//new Widget(   WIDGETS_END),
 	};
 
-	static WindowDesc _news_type2_desc = new WindowDesc(
+	static final WindowDesc _news_type2_desc = new WindowDesc(
 			Window.WDP_CENTER, 476, 430, 130,
 			Window.WC_NEWS_WINDOW, 0,
 			WindowDesc.WDF_DEF_WIDGET,
@@ -467,7 +467,7 @@ public class NewsItem {
 			//new Widget(    WIDGETS_END),
 	};
 
-	static WindowDesc _news_type0_desc = new WindowDesc(
+	static final WindowDesc _news_type0_desc = new WindowDesc(
 			Window.WDP_CENTER, 476, 280, 87,
 			Window.WC_NEWS_WINDOW, 0,
 			WindowDesc.WDF_DEF_WIDGET,
@@ -701,7 +701,7 @@ public class NewsItem {
 	 * length exceeds maximum length it will be postfixed by '...'
 	 * @param x,y position of the string
 	 * @param color the color the string will be shown in
-	 * @param *ni NewsItem being printed
+	 * @param ni NewsItem being printed
 	 * @param maxw maximum width of string in pixels
 	 */
 	static void DrawNewsString(int x, int y, int color, final NewsItem ni, int maxw)

@@ -498,7 +498,7 @@ public class TrainCmd extends TrainTables
 					v.x_pos = x;
 					v.y_pos = y;
 					v.z_pos = Landscape.GetSlopeZ(x,y);
-					v.owner = Global._current_player;
+					v.owner = Global.gs._current_player;
 					v.z_height = 6;
 					v.rail.setInDepot(); //track =  0x80;
 					v.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_DEFPAL;
@@ -616,7 +616,7 @@ public class TrainCmd extends TrainTables
 		 * to the player. Doesn't matter if only the cost is queried */
 		if (0==(flags & Cmd.DC_QUERY_COST)) {
 			if (!Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
-			if (!tile.IsTileOwner( Global._current_player)) return Cmd.CMD_ERROR;
+			if (!tile.IsTileOwner( Global.gs._current_player)) return Cmd.CMD_ERROR;
 		}
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
@@ -654,7 +654,7 @@ public class TrainCmd extends TrainTables
 
 				v.direction = dir * 2 + 1;
 				v.tile = tile;
-				v.owner = Global._current_player;
+				v.owner = Global.gs._current_player;
 				v.x_pos = (x |= _vehicle_initial_x_fract[dir]);
 				v.y_pos = (y |= _vehicle_initial_y_fract[dir]);
 				v.z_pos = Landscape.GetSlopeZ(x,y);
@@ -1371,7 +1371,7 @@ public class TrainCmd extends TrainTables
 
 			t = a.direction;
 			a.direction = b.direction;
-			a.direction = t;
+			b.direction = t;
 
 			/* toggle direction */
 			if (0==(a.rail.track & 0x80)) a.direction ^= 4;
@@ -2584,7 +2584,7 @@ public class TrainCmd extends TrainTables
 		if (0 == (st.had_vehicle_of_type & Station.HVOT_TRAIN)) {
 			st.had_vehicle_of_type |= Station.HVOT_TRAIN;
 			Global.SetDParam(0, st.index);
-			flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+			flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 			NewsItem.AddNewsItem(
 					Str.STR_8801_CITIZENS_CELEBRATE_FIRST,
 					flags,
@@ -2681,6 +2681,7 @@ public class TrainCmd extends TrainTables
 			offs += ((y < -2) ? 2 : 1) * 4;
 		}
 
+		//noinspection ConstantConditions
 		assert(offs < 11);
 		return _new_vehicle_direction_table[offs];
 	}
@@ -2831,7 +2832,7 @@ public class TrainCmd extends TrainTables
 		/* can't collide in depot */
 		if (v.rail.isInDepot()) return;
 
-		assert(v.rail.track == 0x40 || TileIndex.TileVirtXY(v.getX_pos(), v.getY_pos()) == v.tile);
+		assert(v.rail.track == 0x40 || TileIndex.TileVirtXY(v.getX_pos(), v.getY_pos()).equals(v.tile) );
 
 		tcc.v = v;
 		tcc.v_skip = v.next;
@@ -3264,7 +3265,7 @@ public class TrainCmd extends TrainTables
 		ReverseTrainDirection(v);
 		 */
 	}
-
+	// TODO chosen_dir is overwritten! Why?
 	private static boolean green_light(Vehicle v, GetNewVehiclePosResult gp, Vehicle prev, int enterdir, int chosen_dir, int chosen_track) 
 	{
 		if (v.next == null)
@@ -3410,7 +3411,7 @@ public class TrainCmd extends TrainTables
 		}
 	}
 
-	private static int _random_dir_change[] = { -1, 0, 0, 1};
+	private static final int[] _random_dir_change = { -1, 0, 0, 1};
 
 	static void ChangeTrainDirRandomly(Vehicle v)
 	{
@@ -3759,7 +3760,7 @@ public class TrainCmd extends TrainTables
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) { // User initiated?
 				v.vehstatus |= Vehicle.VS_STOPPED;
-				if (v.owner == Global._local_player) {
+				if (v.owner == Global.gs._local_player) {
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddValidatedNewsItem(
 							Str.STR_8814_TRAIN_IS_WAITING_IN_DEPOT,
@@ -3844,7 +3845,7 @@ public class TrainCmd extends TrainTables
 			CheckIfTrainNeedsService(v);
 
 			// check if train hasn't advanced in its order list for a set number of days
-			if (Global._patches.lost_train_days != 0 && v.num_orders != 0 && 0==(v.vehstatus & (Vehicle.VS_STOPPED | Vehicle.VS_CRASHED) ) && ++v.rail.days_since_order_progr >= Global._patches.lost_train_days && v.owner == Global._local_player) {
+			if (Global._patches.lost_train_days != 0 && v.num_orders != 0 && 0==(v.vehstatus & (Vehicle.VS_STOPPED | Vehicle.VS_CRASHED) ) && ++v.rail.days_since_order_progr >= Global._patches.lost_train_days && v.owner == Global.gs._local_player) {
 				v.rail.days_since_order_progr = 0;
 				Global.SetDParam(0, v.unitnumber.id);
 				NewsItem.AddNewsItem(
@@ -3892,7 +3893,7 @@ public class TrainCmd extends TrainTables
 			if (v.type == Vehicle.VEH_Train && v.IsFrontEngine()) {
 
 				// show warning if train is not generating enough income last 2 years (corresponds to a red icon in the vehicle list)
-				if (Global._patches.train_income_warn && v.owner == Global._local_player && v.age >= 730 && v.profit_this_year < 0) {
+				if (Global._patches.train_income_warn && v.owner == Global.gs._local_player && v.age >= 730 && v.profit_this_year < 0) {
 					Global.SetDParam(1, v.profit_this_year);
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddNewsItem(

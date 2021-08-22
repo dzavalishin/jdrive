@@ -33,8 +33,8 @@ public class DisasterTables
 			min = i;
 			max = j;
 		}
-		public int min;
-		public int max;
+		public final int min;
+		public final int max;
 	} 
 	
 	public static final MinMax [] _dis_years = {

@@ -83,7 +83,7 @@ public class Road extends RoadTables
 			return true;
 
 		// Only do the special processing for actual players.
-		if (Global._current_player.id >= Global.MAX_PLAYERS)
+		if (Global.gs._current_player.id >= Global.MAX_PLAYERS)
 			return true;
 
 		// A railway crossing has the road owner in the map3_lo byte.
@@ -398,7 +398,7 @@ public class Road extends RoadTables
 		/* Road pieces are max 4 bitset values (NE, NW, SE, SW) and town can only be non-zero
 		 * if a non-player is building the road */
 		if ((pieces >> 4) != 0 
-				|| (Global._current_player.id < Global.MAX_PLAYERS && p2 != 0) 
+				|| (Global.gs._current_player.id < Global.MAX_PLAYERS && p2 != 0) 
 				|| !Town.IsTownIndex(p2)) 
 			return Cmd.CMD_ERROR;
 
@@ -445,7 +445,7 @@ public class Road extends RoadTables
 							//TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
 							TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5,
 							p2,
-							Global._current_player.id, /* map3_lo */
+							Global.gs._current_player.id, /* map3_lo */
 							tile.getMap().m3 & 0xF,    /* map3_hi */
 							m5 /* map5 */
 							);
@@ -505,7 +505,7 @@ public class Road extends RoadTables
 		}
 		if (Cmd.CmdFailed(cost)) return Cmd.return_cmd_error(Str.STR_1800_LAND_SLOPED_IN_WRONG_DIRECTION);
 
-		if (cost != 0 && (!Global._patches.build_on_slopes || Global._is_old_ai_player))
+		if (cost != 0 && (!Global._patches.build_on_slopes || Global.gs._is_old_ai_player))
 			return Cmd.CMD_ERROR;
 
 		if (ti.type != TileTypes.MP_STREET.ordinal() || (ti.map5 & 0xF0) != 0) {
@@ -529,7 +529,7 @@ public class Road extends RoadTables
 				tile.SetTileType( TileTypes.MP_STREET);
 				tile.getMap().m5 = 0;
 				tile.getMap().m2 = 0xFF & p2;
-				tile.SetTileOwner( Global._current_player);
+				tile.SetTileOwner( Global.gs._current_player);
 			}
 
 			tile.getMap().m5 |= pieces;
@@ -676,7 +676,7 @@ public class Road extends RoadTables
 	 * @param p1 depot direction (0 through 3), where 0 is NW, 1 is NE, etc.
 	 * @param p2 unused
 	 *
-	 * @todo When checking for the tile slope,
+	 * TODO When checking for the tile slope,
 	 * distingush between "Flat land required" and "land sloped in wrong direction"
 	 */
 	public static int CmdBuildRoadDepot(int x, int y, int flags, int p1, int p2)
@@ -714,7 +714,7 @@ public class Road extends RoadTables
 			if (Player.IsLocalPlayer()) Depot._last_built_road_depot_tile = tile;
 
 			dep.xy = tile;
-			dep.town_index = Town.ClosestTownFromTile(tile, (int)-1).index;
+			dep.town_index = Town.ClosestTownFromTile(tile, -1).index;
 
 			Landscape.ModifyTile(tile, TileTypes.MP_STREET,
 					//TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
@@ -728,7 +728,7 @@ public class Road extends RoadTables
 
 	static int RemoveRoadDepot(TileIndex tile, int flags)
 	{
-		if (!Player.CheckTileOwnership(tile) && Global._current_player.id != Owner.OWNER_WATER)
+		if (!Player.CheckTileOwnership(tile) && Global.gs._current_player.id != Owner.OWNER_WATER)
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
@@ -966,7 +966,7 @@ public class Road extends RoadTables
 		int ormod;
 		final ArrayPtr<DrawRoadSeqStruct> dtssa;
 
-		ormod = Sprite.PLAYER_SPRITE_COLOR(Global._local_player);
+		ormod = Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player);
 
 		dtssa = new ArrayPtr<DrawRoadSeqStruct>( _road_display_datas[image] );
 
@@ -1038,8 +1038,7 @@ public class Road extends RoadTables
 
 	static AcceptedCargo GetAcceptedCargo_Road(TileIndex tile )
 	{
-		AcceptedCargo ac = new AcceptedCargo();
-		return ac;
+		return new AcceptedCargo();
 		/* not used */
 	}
 
@@ -1088,7 +1087,7 @@ public class Road extends RoadTables
 			return;
 
 		if (BitOps.GB(tile.getMap().m4, 4, 3) < 6) {
-			t = Town.ClosestTownFromTile(tile, (int)-1);
+			t = Town.ClosestTownFromTile(tile, -1);
 
 			grp = 0;
 			if (t != null) {

@@ -396,7 +396,7 @@ public class Landscape extends GenLandTable
 		}
 
 		if( 0 != (flags & (TileTypes.MP_MAPOWNER|TileTypes.MP_MAPOWNER_CURRENT)) ) {
-			/*PlayerID*/ int x = Global._current_player.id;
+			/*PlayerID*/ int x = Global.gs._current_player.id;
 			if(0 != (flags & TileTypes.MP_MAPOWNER) ) x = args[p++];
 			tile.getMap().m1 = x;
 		}
@@ -734,12 +734,11 @@ public class Landscape extends GenLandTable
 
 	public static TileIndex AdjustTileCoordRandomly(TileIndex a, int rng)
 	{
-		int rn = rng;
 		int r = Global.Random();
 
 		return new TileIndex(
-				a.TileX() + (BitOps.GB(r, 0, 8) * rn * 2 >> 8) - rn,
-				a.TileY() + (BitOps.GB(r, 8, 8) * rn * 2 >> 8) - rn
+				a.TileX() + (BitOps.GB(r, 0, 8) * rng * 2 >> 8) - rng,
+				a.TileY() + (BitOps.GB(r, 8, 8) * rng * 2 >> 8) - rng
 				).TILE_MASK();
 	}
 

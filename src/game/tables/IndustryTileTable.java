@@ -4,8 +4,8 @@ import game.struct.TileIndexDiffC;
 
 public class IndustryTileTable {
 	
-	public TileIndexDiffC ti;
-	public int map5;
+	public final TileIndexDiffC ti;
+	public final int map5;
 
 	public IndustryTileTable( int x, int y, int m) {
 		ti = new TileIndexDiffC(x,y);

@@ -55,7 +55,7 @@ public class Misc extends MiscTables
 	static void OnNewDay_EffectVehicle(Vehicle v) { /* empty */ }
 
 
-	static OnNewVehicleDayProc  _on_new_vehicle_day_proc[] = {
+	static final OnNewVehicleDayProc[] _on_new_vehicle_day_proc = {
 		TrainCmd::OnNewDay_Train,
 		RoadVehCmd::OnNewDay_RoadVeh,
 		Ship::OnNewDay_Ship,
@@ -196,19 +196,6 @@ public class Misc extends MiscTables
 	}
 
 
-	static final SaveLoadGlobVarList _view_desc[] = {
-		{&_saved_scrollpos_x,			SLE_FILE_I16 | SLE_VAR_INT, 0, 5},
-		{&_saved_scrollpos_x,			SLE_INT32, 6, 255},
-		{&_saved_scrollpos_y,			SLE_FILE_I16 | SLE_VAR_INT, 0, 5},
-		{&_saved_scrollpos_y,			SLE_INT32, 6, 255},
-		{&_saved_scrollpos_zoom,	SLE_UINT8,	0, 255},
-		{null,										0,					0,   0}
-	};
-
-	static void SaveLoad_VIEW()
-	{
-		SlGlobList(_view_desc);
-	}
 
 	static int _map_dim_x;
 	static int _map_dim_y;

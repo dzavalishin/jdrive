@@ -6,12 +6,12 @@ public class TTDQueueImpl<ItemType>  extends TTDQueue<ItemType>
 {
 	
 	//private ArrayList<ItemType> list = new ArrayList<ItemType>();
-	private ArrayList<WeightedPair> list = new ArrayList<WeightedPair>();
+	private final ArrayList<WeightedPair> list = new ArrayList<WeightedPair>();
 	
 	static class WeightedPair
 	{
-		int  weight;
-		Object item;
+		final int  weight;
+		final Object item;
 
 		public WeightedPair(int w, Object new_node) {
 			weight = w;
@@ -19,6 +19,7 @@ public class TTDQueueImpl<ItemType>  extends TTDQueue<ItemType>
 		}
 	}
 	
+	@SuppressWarnings("ConstantConditions")
 	@Override
 	public void push(ItemType new_node, int f) {
 		//list.add(f, new_node);

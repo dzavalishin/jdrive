@@ -7,7 +7,6 @@ import game.enums.TileTypes;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.HashLink;
 import game.struct.StackedItem;
-import game.tables.TrackPathFinderTables;
 import game.util.BitOps;
 
 public class NewTrackPathFinder extends Pathfind 
@@ -26,7 +25,7 @@ public class NewTrackPathFinder extends Pathfind
 	int num_links_left;
 
 	int nstack;
-	StackedItem [] stack = new StackedItem[256]; // priority queue of stacked items
+	final StackedItem [] stack = new StackedItem[256]; // priority queue of stacked items
 
 	//int [] hash_head = new int[0x400]; // hash heads. 0 means unused. 0xFFFC = length, 0x3 = dir
 	//TileIndex [] hash_tile = new TileIndex[0x400]; // tiles. or links.
@@ -34,7 +33,7 @@ public class NewTrackPathFinder extends Pathfind
 
 	//HashLink[] links = new HashLink[0x400]; // hash links
 
-	Map<Integer,NTPHashItem> hash = new HashMap<Integer,NTPHashItem>();
+	final Map<Integer,NTPHashItem> hash = new HashMap<Integer,NTPHashItem>();
 
 	// -------------------------------------------------
 	// Class
@@ -77,7 +76,6 @@ public class NewTrackPathFinder extends Pathfind
 			hi.bits = dir;
 			hi.distance = length;
 			tpf.hash.put(tile.getTile(), hi);
-			return true;
 		}
 		else
 		{
@@ -87,8 +85,8 @@ public class NewTrackPathFinder extends Pathfind
 
 			hi.bits = dir;
 			hi.distance = length;
-			return true;
 		}
+		return true;
 
 		/*
 		// never visited before?
@@ -170,8 +168,9 @@ public class NewTrackPathFinder extends Pathfind
 	 * Checks if the shortest path to the given tile/dir so far is still the given
 	 * length.
 	 * @return true if the length is still the same
-	 * @pre    The given tile/dir combination should be present in the hash, by a
-	 *         previous call to NtpVisit().
+	 *
+	 * <p>    The given tile/dir combination should be present in the hash, by a
+	 *         previous call to NtpVisit().</p>
 	 */
 	public boolean NtpCheck( TileIndex tile, int dir, int length)
 	{

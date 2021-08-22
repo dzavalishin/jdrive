@@ -55,7 +55,7 @@ public class Ship {
 		return _ship_sprites[spritenum] + direction;
 	}
 
-	static final Depot  FindClosestShipDepot(final Vehicle  v)
+	static Depot  FindClosestShipDepot(final Vehicle  v)
 	{
 		//final Depot  depot;
 		Depot [] best_depot = { null };
@@ -415,7 +415,7 @@ public class Ship {
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) {
 				v.vehstatus |= Vehicle.VS_STOPPED;
-				if (v.owner == Global._local_player) {
+				if (v.owner == Global.gs._local_player) {
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddNewsItem(
 						Str.STR_981C_SHIP_IS_WAITING_IN_DEPOT,
@@ -437,7 +437,7 @@ public class Ship {
 			st.had_vehicle_of_type |= Station.HVOT_SHIP;
 
 			Global.SetDParam(0, st.index);
-			flags = (v.owner == Global._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+			flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 			NewsItem.AddNewsItem(
 				Str.STR_9833_CITIZENS_CELEBRATE_FIRST,
 				flags,
@@ -477,7 +477,7 @@ public class Ship {
 
 	static final byte _pick_shiptrack_table[] = {1, 3, 2, 2, 0, 0};
 
-	private static final boolean TryTrack(int best_track, int i, PathFindShip pfs, int ship_dir, int best_length, int best_bird_dist)
+	private static boolean TryTrack(int best_track, int i, PathFindShip pfs, int ship_dir, int best_length, int best_bird_dist)
 	{
 		if (best_track >= 0) {
 			if (pfs.best_bird_dist != 0) {
@@ -518,8 +518,8 @@ public class Ship {
 			i = BitOps.FIND_FIRST_BIT(bits);
 			bits = BitOps.KILL_FIRST_BIT(bits);
 
-			pfs.best_bird_dist = (int)-1;
-			pfs.best_length = (int)-1;
+			pfs.best_bird_dist = -1;
+			pfs.best_length = -1;
 
 			//FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], (TPFEnumProc*)ShipTrackFollower, null, &pfs);
 			Pathfind.FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], Ship::ShipTrackFollower, null, pfs);
@@ -572,13 +572,13 @@ public class Ship {
 
 			//tile2 = TILE_ADD(tile, -TileOffsByDir(enterdir));
 			tile2 = tile.isub( TileIndex.TileOffsByDir(enterdir) );
-			tot_dist = (int)-1;
+			tot_dist = -1;
 
 			/* Let's find out how far it would be if we would reverse first */
 			b = GetTileShipTrackStatus(tile2) & _ship_sometracks[Rail.ReverseDiagdir(enterdir)] & v.ship.state;
 			if (b != 0) {
 				dist = FindShipTrack(v, tile2, Rail.ReverseDiagdir(enterdir), b, tile, track);
-				if (dist != (int)-1)
+				if (dist != -1)
 					tot_dist = dist + 1;
 			}
 			/* And if we would not reverse? */
@@ -895,7 +895,7 @@ public class Ship {
 		/* The ai_new queries the vehicle cost before building the route,
 		 * so we must check against cheaters no sooner than now. --pasky */
 		if (!tile.IsTileDepotType(Global.TRANSPORT_WATER)) return Cmd.CMD_ERROR;
-		if (!tile.IsTileOwner( Global._current_player.id)) return Cmd.CMD_ERROR;
+		if (!tile.IsTileOwner( Global.gs._current_player.id)) return Cmd.CMD_ERROR;
 
 		v = Vehicle.AllocateVehicle(); // TODO can pass type or make subobject for ship
 		if (v == null || /* Order.IsOrderPoolFull() || */
@@ -907,7 +907,7 @@ public class Ship {
 
 			v.unitnumber = unit_num;
 
-			v.owner = Global._current_player;
+			v.owner = Global.gs._current_player;
 			v.tile = tile;
 			x = tile.TileX() * 16 + 8;
 			y = tile.TileY() * 16 + 8;

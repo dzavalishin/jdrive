@@ -46,7 +46,7 @@ public class Prices {
 	public int remove_dock;
 	public int remove_house;
 	public int remove_road;
-	public int [] running_rail = new int[3];
+	public final int [] running_rail = new int[3];
 	public int aircraft_running;
 	public int roadveh_running;
 	public int ship_running;

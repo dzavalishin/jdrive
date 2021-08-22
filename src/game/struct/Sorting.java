@@ -3,9 +3,9 @@ package game.struct;
 
 public class Sorting 
 {
-	public Listing aircraft = new Listing();
-	public Listing roadveh  = new Listing();
-	public Listing ship     = new Listing();
-	public Listing train    = new Listing();
+	public final Listing aircraft = new Listing();
+	public final Listing roadveh  = new Listing();
+	public final Listing ship     = new Listing();
+	public final Listing train    = new Listing();
 
 }

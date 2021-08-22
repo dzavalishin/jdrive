@@ -8,7 +8,7 @@ public class StringSpriteToDraw
 	//StringSpriteToDraw next;
 	public int x;
 	public int y;
-	public int params[] = new int[3];
+	public final int[] params = new int[3];
 	public int width;
 
 }

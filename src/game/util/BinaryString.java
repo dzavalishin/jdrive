@@ -48,7 +48,7 @@ public class BinaryString
 	/**
 	 * Used in language pack loader
 	 * @param s byte string to load from
-	 * @param pos position
+	 * @param ppos position
 	 * @param len length
 	 */
 	public BinaryString(byte[] s, int ppos, int len) 
@@ -152,8 +152,8 @@ public class BinaryString
 
 	public int READ_LE_int(int i) 
 	{
-		int hi = (int)mem[1+i];
-		int lo = (int)mem[0+i];
+		int hi = mem[1+i];
+		int lo = mem[0+i];
 		return (0xFF & lo) + ((0xFF & hi) << 8);
 	}
 

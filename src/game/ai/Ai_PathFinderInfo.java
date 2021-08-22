@@ -1,4 +1,6 @@
-package game;
+package game.ai;
+
+import game.TileIndex;
 
 public class Ai_PathFinderInfo {
 
@@ -9,8 +11,8 @@ public class Ai_PathFinderInfo {
 	byte start_direction; // 0 to 3 or AI_PATHFINDER_NO_DIRECTION
 	byte end_direction; // 0 to 3 or AI_PATHFINDER_NO_DIRECTION
 
-	TileIndex route[];
-	byte route_extra[]; // Some extra information about the route like bridge/tunnel
+	final TileIndex[] route;
+	final byte[] route_extra; // Some extra information about the route like bridge/tunnel
 	
 	int route_length;
 	int position; // Current position in the build-path, needed to build the path

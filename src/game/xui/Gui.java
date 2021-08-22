@@ -869,9 +869,9 @@ public class Gui
 		w = Window.AllocateWindow(x, 0x16, 0xF1, 0x52, Gui::PlayerMenuWndProc, Window.WC_TOOLBAR_MENU, _player_menu_widgets);
 		w.flags4 &= ~Window.WF_WHITE_BORDER_MASK;
 		w.as_menu_d().item_count = 0;
-		w.as_menu_d().sel_index = (Global._local_player.id != Owner.OWNER_SPECTATOR) ? Global._local_player.id : GetPlayerIndexFromMenu(0);
+		w.as_menu_d().sel_index = (Global.gs._local_player.id != Owner.OWNER_SPECTATOR) ? Global.gs._local_player.id : GetPlayerIndexFromMenu(0);
 		if (Global._networking && main_button == 9) {
-			if (Global._local_player.id != Owner.OWNER_SPECTATOR) {
+			if (Global.gs._local_player.id != Owner.OWNER_SPECTATOR) {
 				w.as_menu_d().sel_index++;
 			} else {
 				/* Select client list by default for spectators */
@@ -1051,9 +1051,11 @@ public class Gui
 		return true;
 	}
 
+	@SuppressWarnings("StatementWithEmptyBody")
 	static void MaxZoomIn()
 	{
-		while (DoZoomInOutWindow(ZOOM_IN, Window.getMain() ) ) {}
+		while (DoZoomInOutWindow(ZOOM_IN, Window.getMain() ) )
+			{}
 	}
 
 	static void ToolbarZoomInClick(Window w)
@@ -1074,7 +1076,7 @@ public class Gui
 
 	static void ToolbarBuildRailClick(Window w)
 	{
-		final Player p = Player.GetPlayer(Global._local_player);
+		final Player p = Player.GetPlayer(Global.gs._local_player);
 		Window w2;
 		w2 = PopupMainToolbMenu(w, 457, 19, Str.STR_1015_RAILROAD_CONSTRUCTION, Rail.RAILTYPE_END, ~p.avail_railtypes);
 		w2.as_menu_d().sel_index = _last_built_railtype;
@@ -1121,7 +1123,7 @@ public class Gui
 
 		w = PopupMainToolbMenu(w,  43, 2, Str.STR_02C3_GAME_OPTIONS, 13, 0);
 
-		x = (int)-1;
+		x = -1;
 		if(0 != (Global._display_opt & Global.DO_SHOW_TOWN_NAMES))    x = BitOps.RETCLRBIT(x,  5);
 		if(0 != (Global._display_opt & Global.DO_SHOW_STATION_NAMES)) x = BitOps.RETCLRBIT(x,  6);
 		if(0 != (Global._display_opt & Global.DO_SHOW_SIGNS))         x = BitOps.RETCLRBIT(x,  7);
@@ -1295,7 +1297,7 @@ public class Gui
 		Global._generating_world = true; // used to create green terraformed land
 
 		if (_terraform_size == 1) {
-			Cmd.DoCommandP(tile, 8, (int)mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Global._error_message_2));
+			Cmd.DoCommandP(tile, 8, mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Global._error_message_2));
 		} else {
 			// TODO SndPlayTileFx(SND_1F_SPLAT, tile);
 
@@ -1330,7 +1332,7 @@ public class Gui
 			TileIndex.forAll( sizex, sizey, tile, (tile2) ->
 			{
 				if (tile2.TileHeight() == h[0]) {
-					Cmd.DoCommandP(tile2, 8, (int)mode, null, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO);
+					Cmd.DoCommandP(tile2, 8, mode, null, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO);
 				}
 				return false;
 			}); //END_TILE_LOOP(tile2, sizex, sizey, tile)
@@ -1893,7 +1895,7 @@ public class Gui
 				return;
 			}
 
-			Global._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 			Global._generating_world = true;
 			Gui._ignore_restrictions = true;
 			if (!TryBuildIndustry(e.tile,type)) {
@@ -2031,7 +2033,7 @@ public class Gui
 			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB4 | Sprite.PALETTE_MODIFIER_GREYOUT);
 
 			// if spectator, disable things
-			if (Global._current_player.id == Owner.OWNER_SPECTATOR){
+			if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR){
 				w.disabled_state |= (1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23);
 			} else {
 				w.disabled_state &= ~((1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23));
@@ -2048,7 +2050,7 @@ public class Gui
 
 		case WE_KEYPRESS: {
 			//PlayerID 
-			int local = (Global._local_player.id != Owner.OWNER_SPECTATOR) ? Global._local_player.id : 0;
+			int local = (Global.gs._local_player.id != Owner.OWNER_SPECTATOR) ? Global.gs._local_player.id : 0;
 
 			switch (e.keycode) {
 			case Window.WKC_F1: case Window.WKC_PAUSE:
@@ -2349,7 +2351,7 @@ public class Gui
 			} else if (s[sp] == 0x0D) {
 				d[dp+0] = d[dp+1] = d[dp+2] = d[dp+3] = ' ';
 				dp += 4;
-			} else if ((byte)s[sp] >= ' ' && ((byte)s[sp] < 0x88 || (byte)s[sp] >= 0x99)) {
+			} else if (s[sp] >= ' ' && (s[sp] < 0x88 || s[sp] >= 0x99)) {
 				d[dp++] = s[sp];
 			}
 		}
@@ -2369,7 +2371,7 @@ public class Gui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Player p = (Global._local_player.id == Owner.OWNER_SPECTATOR) ? null : Player.GetPlayer(Global._local_player);
+			final Player p = (Global.gs._local_player.id == Owner.OWNER_SPECTATOR) ? null : Player.GetPlayer(Global.gs._local_player);
 
 			w.DrawWindowWidgets();
 			Global.SetDParam(0, Global._date);
@@ -2414,7 +2416,7 @@ public class Gui
 		case WE_CLICK:
 			switch (e.widget) {
 				case 1: NewsItem.ShowLastNewsMessage(); break;
-				case 2: if (Global._local_player.id != Owner.OWNER_SPECTATOR) PlayerGui.ShowPlayerFinances(Global._local_player.id); break;
+				case 2: if (Global.gs._local_player.id != Owner.OWNER_SPECTATOR) PlayerGui.ShowPlayerFinances(Global.gs._local_player.id); break;
 				default: ViewPort.ResetObjectToPlace();
 			}
 			break;
@@ -2448,7 +2450,7 @@ public class Gui
 	//{   WIDGETS_END},
 	};
 
-	static WindowDesc _main_status_desc = new WindowDesc(
+	static final WindowDesc _main_status_desc = new WindowDesc(
 		Window.WDP_CENTER, 0, 640, 12,
 		Window.WC_STATUS_BAR,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,

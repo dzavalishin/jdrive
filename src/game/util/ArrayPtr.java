@@ -14,7 +14,7 @@ import java.util.Arrays;
 public class ArrayPtr<ItemType> {
 
 
-		private ItemType [] mem; // real mem 
+		private final ItemType [] mem; // real mem
 		private int displ;		// current displacement
 		
 		public void madd( int add ) { displ += add; }
@@ -64,7 +64,6 @@ public class ArrayPtr<ItemType> {
 
 		/**
 		 * read ++ - read item at current position and increment pointer.
-		 * @param v
 		 */
 		public ItemType rpp() {
 			ItemType r = read(0);
