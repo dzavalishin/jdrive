@@ -231,6 +231,7 @@ public class MiscGui {
 			"  All Translators - Who made OpenTTD a truly international game",
 			"  Bug Reporters - Without whom OpenTTD would still be full of bugs!",
 			"",
+			"  Java port by Dmitry Zavalishin, 2021",
 			"",
 			"And last but not least:",
 			"  Chris Sawyer - For an amazing game!"

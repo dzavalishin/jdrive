@@ -2332,7 +2332,8 @@ public class Rail extends RailTables {
 			// now check all tiles from start to end for a "hidden" vehicle
 			// NOTE: the hashes for tiles may overlap, so this could maybe be optimised a bit by not checking every tile?
 			dest.track = 0x40; // trackbit for vehicles "hidden" inside a tunnel
-			for (; tile != flotr.tile; tile = tile.iadd(TileIndex.TileOffsByDir(direction)) ) {
+			for (; !tile.equals(flotr.tile); tile = tile.iadd(TileIndex.TileOffsByDir(direction)) ) 
+			{
 				if (Vehicle.VehicleFromPos(tile, dest, Rail::SignalVehicleCheckProc) != null)
 					return true;
 			}
