@@ -253,8 +253,8 @@ public class MainWindow extends JPanel implements ActionListener
 		if(0 != (e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK))  shifts |= Window.WKC_CTRL;
 		if(0 != (e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK))   shifts |= Window.WKC_ALT;
 
-		Global._pressed_key = fKey << 16 | (aKey & 0xFFFF) | shifts;
-
+		Global._pressed_key = fKey << 16 | (aKey & 0xFFFF) | (shifts << 16);
+		//System.out.printf("k %x\n", Global._pressed_key );
 	}
 
 	/* TODO keys

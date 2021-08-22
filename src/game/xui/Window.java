@@ -1958,7 +1958,7 @@ public class Window extends WindowConstants
 		// Setup event
 		we.event = WindowEvents.WE_KEYPRESS;
 		we.ascii =  (key & 0xFF);
-		we.keycode = key >> 16;
+		we.keycode = key >>> 16;
 			we.cont = true;
 
 			// check if we have a query string window open before allowing hotkeys
@@ -3120,10 +3120,17 @@ public class Window extends WindowConstants
 	 */
 	public static void deleteMain()
 	{
+		// TODO delete all?
+		
 		Window w = FindWindowById(WC_MAIN_WINDOW, 0);
 		if( w != null ) w.DeleteWindow();
+		
 		w = FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
 		if( w != null ) w.DeleteWindow();
+
+		w = FindWindowById(Window.WC_SAVELOAD, 0);
+		if( w != null ) w.DeleteWindow();
+		
 	}
 	
 	public void setSize(int w, int h) {

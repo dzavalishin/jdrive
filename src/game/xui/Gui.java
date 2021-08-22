@@ -2514,6 +2514,8 @@ public class Gui
 
 			if (Global._game_mode == GameModes.GM_MENU) break;
 
+			//System.out.printf("wkey %x\n", e.keycode );
+			
 			switch (e.keycode) {
 				case 'C':
 				case 'Z': {
