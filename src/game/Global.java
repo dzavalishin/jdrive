@@ -113,7 +113,7 @@ public class Global
 	public static boolean _rightclick_emulate;
 
 	public static int _display_hz;
-	public static int _fullscreen_bpp;
+	//public static int _fullscreen_bpp;
 
 
 	public static int _map_log_x = 8; //6;

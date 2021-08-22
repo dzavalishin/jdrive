@@ -23,14 +23,6 @@ public class Hal
 	MainWindow mw = null;
 	private static byte[] screen; // TODO static
 	
-	/*
-	// graphics
-	public abstract void start_video(String parm);
-	public abstract void stop_video();
-	public abstract void make_dirty(int left, int top, int width, int height);
-	public abstract void main_loop();
-	public abstract boolean change_resolution(int w, int h);
-	*/
 	
 	void toggle_fullscreen(boolean fullscreen) { } // TODO
 
@@ -108,11 +100,9 @@ void SortResolutions(int count)
 		}
 	}
 	
-	//public abstract void ShowOSErrorBox(String buf);
 	
 	public static int Random() {		
 		return (int) (Math.random() * Integer.MAX_VALUE);
-		//return (int) (Math.random() * 0xFFFF);
 	}
 
 
@@ -231,18 +221,12 @@ void SortResolutions(int count)
 
 		while(true) {
 			try {
-				//Thread.sleep(100); // TODO 10 fps?
-				Thread.sleep(10); // TODO 10 fps?
+				Thread.sleep(10); // TODO 100 fps?
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			/*
-			while (PeekMessage(&mesg, NULL, 0, 0, PM_REMOVE)) {
-				InteractiveRandom(); // randomness
-				TranslateMessage(&mesg);
-				DispatchMessage(&mesg);
-			}*/
+
 			if (Global._exit_game) return;
 
 			/*#if defined(_DEBUG)
@@ -272,15 +256,6 @@ void SortResolutions(int count)
 				_dbg_screen_rect = _wnd.has_focus && GetAsyncKeyState(VK_CAPITAL)<0;
 				#endif
 
-				// determine which directional keys are down
-				if (_wnd.has_focus) {
-					_dirkeys =
-							(GetAsyncKeyState(VK_LEFT) < 0 ? 1 : 0) +
-							(GetAsyncKeyState(VK_UP) < 0 ? 2 : 0) +
-							(GetAsyncKeyState(VK_RIGHT) < 0 ? 4 : 0) +
-							(GetAsyncKeyState(VK_DOWN) < 0 ? 8 : 0);
-				} else
-					_dirkeys = 0;
 			 */
 			//try {
 				Main.GameLoop();
@@ -298,7 +273,6 @@ void SortResolutions(int count)
 
 			mw.flush();
 
-			//GdiFlush();
 			//_screen.dst_ptr = _wnd.buffer_bits;
 			//try {
 				Window.UpdateWindows();
