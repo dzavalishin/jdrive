@@ -16,20 +16,6 @@
             </manifest>
             <zipfileset src="jar-in-jar-loader.zip"/>
             <fileset dir="${dir.jarfile}/bin"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.junit.jupiter.api_5.7.1.v20210222-1948.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.junit.jupiter.engine_5.7.1.v20210222-1948.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.junit.jupiter.migrationsupport_5.7.1.v20210222-1948.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.junit.jupiter.params_5.7.1.v20210222-1948.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.junit.platform.commons_1.7.1.v20210222-1948.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.junit.platform.engine_1.7.1.v20210222-1948.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.junit.platform.launcher_1.7.1.v20210222-1948.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.junit.platform.runner_1.7.1.v20210222-1948.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.junit.platform.suite.api_1.7.1.v20210222-1948.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.junit.vintage.engine_5.7.1.v20210222-1948.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.opentest4j_1.2.0.v20190826-0900.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.apiguardian_1.1.0.v20190826-0900.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.junit_4.13.0.v20200204-1500.jar"/>
-            <zipfileset dir="C:/Users/dz/.p2/pool/plugins" includes="org.hamcrest.core_1.3.0.v20180420-1519.jar"/>
         </jar>
     </target>
 </project>

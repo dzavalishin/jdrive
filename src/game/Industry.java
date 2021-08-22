@@ -129,6 +129,37 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	}
 
 
+	
+	/**
+	 * Check if an Industry really exists.
+	 */
+	public boolean isValid()
+	{
+		return xy != null; 
+	}
+	
+	public boolean acceptsCargo(int cargoType )
+	{
+		return cargoType == accepts_cargo[0] 
+				|| cargoType == accepts_cargo[1] 
+				|| cargoType == accepts_cargo[2];
+	}
+
+	public boolean producesCargo(int cargoType) {
+		// ind.produced_cargo[0] != AcceptedCargo.CT_INVALID &&	ind.produced_cargo[0] != cargo_type
+		return produced_cargo[0] == cargoType || produced_cargo[1] == cargoType;
+	}
+
+	
+	public void acceptCargo(int cargo_type, int num_pieces) 
+	{
+		was_cargo_delivered = true;
+		// TODO why [0]?
+		cargo_waiting[0] = Math.min(cargo_waiting[0] + num_pieces, 0xFFFF);
+	}
+
+
+	
 	/**
 	 * Check if an Industry really exists.
 	 */

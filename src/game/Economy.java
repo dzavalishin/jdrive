@@ -1088,24 +1088,20 @@ public class Economy extends EconomeTables
 
 		/* Check if there's an industry close to the station that accepts
 		 * the cargo */
-		//best = null;
-		//u = ;
-		//FOR_ALL_INDUSTRIES(ind)
 		Industry.forEach( (ind) ->
 		{
 			int t;
-			if (ind.xy != null && (cargo_type == ind.accepts_cargo[0] || cargo_type
-					== ind.accepts_cargo[1] || cargo_type == ind.accepts_cargo[2]) &&
-					ind.produced_cargo[0] != AcceptedCargo.CT_INVALID &&
-					ind.produced_cargo[0] != cargo_type &&
-					(t = Map.DistanceManhattan(ind.xy, xy)) < 2 * u[0]) {
+			if (ind.isValid() && ind.acceptsCargo(cargo_type) 
+					&& !ind.producesCargo(cargo_type)
+					 &&	(t = Map.DistanceManhattan(ind.xy, xy)) < 2 * u[0]) 
+			{
 				u[0] = t;
 				best[0] = ind;
 			}
 		});
 
 		/* Found one? */
-		if (best != null) {
+		if (best[0] != null) {
 			best[0].was_cargo_delivered = true;
 			best[0].cargo_waiting[0] = Math.min(best[0].cargo_waiting[0] + num_pieces, 0xFFFF);
 		}
