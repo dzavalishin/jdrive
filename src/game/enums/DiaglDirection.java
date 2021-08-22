@@ -9,8 +9,8 @@ public enum DiaglDirection
 	DIAGDIR_END( 4 ),
 	INVALID_DIAGDIR ( 0xFF );
 	
-	private int value; 
-	private DiaglDirection(int value) 
+	private final int value;
+	DiaglDirection(int value)
 	{ 
 		this.value = value; 
 	}

@@ -17,7 +17,7 @@ public enum TileTypes {
 	MP_NOCHANGE // used in modify tile func if we don't want to change type
 	;
 
-	public static TileTypes[] values = values();
+	public static final TileTypes[] values = values();
 
 
 	//public static int MP_SETTYPE( TileTypes x ) { return  ((x.ordinal()+1) << 8); }
