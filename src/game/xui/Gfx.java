@@ -1333,11 +1333,10 @@ public class Gfx extends PaletteTabs
 	private static void GfxBlitTileZoomOut(BlitterParams bp)
 	{
 		final Pixel src_o = new Pixel( bp.sprite );
-		Pixel src;
+		//Pixel src;
 		int num, skip;
 		byte done;  
-		Pixel dst;
-		//final byte [] ctab;
+		//Pixel dst;
 
 		if(0 != (bp.mode & 1) ) {
 			src_o.madd( BitOps.READ_LE_UINT16(src_o.getMem(), bp.start_y * 2) );
@@ -1345,11 +1344,11 @@ public class Gfx extends PaletteTabs
 				do {
 					done = src_o.r(0);
 					num = done & 0x7F;
-					skip = src_o.r(1);
-					src = new Pixel(src_o, 2);
+					skip = 0xFF & src_o.r(1);
+					final Pixel src = new Pixel(src_o, 2);
 					src_o.madd( num + 2 );
 
-					dst = bp.dst;
+					Pixel dst = new Pixel( bp.dst );
 
 					if(0 != (skip & 1) ) {
 						skip++;
@@ -1415,10 +1414,10 @@ public class Gfx extends PaletteTabs
 				do {
 					done = src_o.r(0);
 					num = done & 0x7F;
-					skip = src_o.r(1);
+					skip = 0xFF & src_o.r(1);
 					src_o.madd( num + 2 );
 
-					dst = bp.dst;
+					Pixel dst = new Pixel ( bp.dst );
 
 					if(0 != (skip & 1) ) {
 						skip++;
@@ -1480,11 +1479,11 @@ public class Gfx extends PaletteTabs
 				do {
 					done = src_o.r(0);
 					num = done & 0x7F;
-					skip = src_o.r(1);
-					src = new Pixel(src_o, 2);
+					skip = 0xFF & src_o.r(1);
+					final Pixel src = new Pixel(src_o, 2);
 					src_o.madd( num + 2 );
 
-					dst = new Pixel( bp.dst );
+					Pixel dst = new Pixel( bp.dst );
 
 					if(0 != (skip & 1) ) {
 						skip++;
@@ -1551,7 +1550,7 @@ public class Gfx extends PaletteTabs
 	private static void GfxBlitZoomOutUncomp(BlitterParams bp)
 	{
 		final Pixel src = new Pixel( bp.sprite );
-		Pixel dst = bp.dst;
+		final Pixel dst = bp.dst;
 		int height = bp.height;
 		int width = bp.width;
 		int i;
@@ -1605,10 +1604,6 @@ public class Gfx extends PaletteTabs
 				Gfx::GfxBlitTileZoomIn,
 				Gfx::GfxBlitTileZoomMedium,
 				Gfx::GfxBlitTileZoomOut,
-
-				//Gfx::GfxBlitTileZoomIn,
-				//Gfx::GfxBlitTileZoomMedium,
-				//Gfx::GfxBlitTileZoomOut
 		};
 
 	static final BlitZoomFunc zf_uncomp[] =
@@ -1616,24 +1611,16 @@ public class Gfx extends PaletteTabs
 				Gfx::GfxBlitZoomInUncomp,
 				Gfx::GfxBlitZoomMediumUncomp,
 				Gfx::GfxBlitZoomOutUncomp,
-
-				//Gfx::GfxBlitZoomInUncomp,
-				//Gfx::GfxBlitZoomMediumUncomp,
-				//Gfx::GfxBlitZoomOutUncomp
 		};
 
-	static void GfxMainBlitter(final Sprite  sprite, int x, int y, int mode)
+	static void GfxMainBlitter(final Sprite sprite, int x, int y, int mode)
 	{
 		final DrawPixelInfo  dpi = Hal._cur_dpi;
 		int start_x, start_y;
 		byte info;
 		BlitterParams bp = new BlitterParams(dpi.dst_ptr);
 
-		// TODO Fix Zoom
-		//dpi.zoom = Math.min(dpi.zoom, 1);
-
 		int zoom_mask = ~((1 << dpi.zoom) - 1);
-
 
 		/* decode sprite header */
 		x += sprite.getX_offs();
@@ -1694,7 +1681,7 @@ public class Gfx extends PaletteTabs
 				if (bp.width <= 0) return;
 			}
 
-			zf_tile[dpi.zoom].accept(bp); // TODO apply?
+			zf_tile[dpi.zoom].accept(bp);
 		} else {
 			bp.sprite.madd( bp.width * (bp.height & ~zoom_mask) );
 			bp.height &= zoom_mask;
@@ -1926,9 +1913,8 @@ public class Gfx extends PaletteTabs
 
 	public static int GetCharacterWidth(int key)
 	{
-		// TODO XXX
-		if( ! (key >= ASCII_LETTERSTART && key - ASCII_LETTERSTART < _stringwidth_table.length))
-			return 15; // TEMP! to prevent assert
+		/*if( ! (key >= ASCII_LETTERSTART && key - ASCII_LETTERSTART < _stringwidth_table.length))
+			return 15; // TEMP! to prevent assert */
 		assert(key >= ASCII_LETTERSTART && key - ASCII_LETTERSTART < _stringwidth_table.length);
 		return _stringwidth_table[key - ASCII_LETTERSTART];
 	}
@@ -2215,142 +2201,14 @@ public class Gfx extends PaletteTabs
 		} while (--height != 0);
 	}
 
+	/* Frankly must be here, not in Hal
 	void MarkWholeScreenDirty()
 	{
 		SetDirtyBlocks(0, 0, Hal._screen.width, Hal._screen.height);
 	}
+	*/
 
-	/* in DrawPixelInfo
-	static boolean FillDrawPixelInfo(DrawPixelInfo  n, DrawPixelInfo  o, int left, int top, int width, int height)
-	{
-		int t;
 
-		if (o == null) o = Hal._cur_dpi;
-
-		n.zoom = 0;
-
-		assert(width > 0);
-		assert(height > 0);
-
-		n.left = 0;
-		if ((left -= o.left) < 0) {
-			width += left;
-			if (width < 0) return false;
-			n.left = -left;
-			left = 0;
-		}
-
-		if ((t=width + left - o.width) > 0) {
-			width -= t;
-			if (width < 0) return false;
-		}
-		n.width = width;
-
-		n.top = 0;
-		if ((top -= o.top) < 0) {
-			height += top;
-			if (height < 0) return false;
-			n.top = -top;
-			top = 0;
-		}
-
-		//n.dst_ptr = o.dst_ptr + left + top * (n.pitch = o.pitch);
-		n.dst_ptr = new Pixel( o.dst_ptr, left + top * (n.pitch = o.pitch) );
-
-		if ((t=height + top - o.height) > 0) {
-			height -= t;
-			if (height < 0) return false;
-		}
-		n.height = height;
-
-		return true;
-	} */
-
-	/*
-	static void SetCursorSprite(CursorID cursor)
-	{
-		CursorVars cv = Hal._cursor;
-		final Sprite p;
-
-		if (cv.sprite == cursor) return;
-
-		p = SpriteCache.GetSprite(cursor.id & Sprite.SPRITE_MASK);
-		cv.sprite = cursor;
-		cv.size.y = p.height;
-		cv.size.x = p.width;
-		cv.offs.x = p.x_offs;
-		cv.offs.y = p.y_offs;
-
-		cv.dirty = true;
-	}*/
-
-	/* Now in Hal and rewritten
-	static void SwitchAnimatedCursor()
-	{
-		CursorVars cv = Hal._cursor;
-		final CursorID cur = cv.animate_cur;
-		CursorID sprite;
-
-		// ANIM_CURSOR_END is 0xFFFF in table/animcursors.h
-		if (cur == null || *cur == 0xFFFF) cur = cv.animate_list;
-
-		sprite = cur[0];
-		cv.animate_timeout = cur[1];
-		cv.animate_cur = cur + 2;
-
-		SetCursorSprite(sprite);
-	}
-
-	void CursorTick()
-	{
-		if (_cursor.animate_timeout != 0 && --_cursor.animate_timeout == 0)
-			SwitchAnimatedCursor();
-	}
-
-	void SetMouseCursor(CursorID cursor)
-	{
-		// Turn off animation
-		_cursor.animate_timeout = 0;
-		// Set cursor
-		SetCursorSprite(cursor);
-	}
-
-	void SetAnimatedMouseCursor(final CursorID *table)
-	{
-		_cursor.animate_list = table;
-		_cursor.animate_cur = null;
-		SwitchAnimatedCursor();
-	}
-
-	boolean ChangeResInGame(int w, int h)
-	{
-		return
-			(Hal._screen.width == w && Hal._screen.height == h) ||
-			Global.hal._video_driver.change_resolution(w, h);
-	}
-
-	void ToggleFullScreen(boolean fs) {Global.hal._video_driver.toggle_fullscreen(fs);}
-
-	static int CDECL compare_res(final void *pa, final void *pb)
-	{
-		int x = ((final int*)pa)[0] - ((final int*)pb)[0];
-		if (x != 0) return x;
-		return ((final int*)pa)[1] - ((final int*)pb)[1];
-	}
-
-	void SortResolutions(int count)
-	{
-		qsort(_resolutions, count, sizeof(_resolutions[0]), compare_res);
-	}
-
-	int GetDrawStringPlayerColor(PlayerID player)
-	{
-		// Get the color for DrawString-subroutines which matches the color
-		//  of the player
-		if (player == OWNER_SPECTATOR || player == OWNER_SPECTATOR - 1) return 1;
-		return (_color_list[_player_colors[player]].window_color_1b) | IS_PALETTE_COLOR;
-	}
-	 */
 
 }
 
