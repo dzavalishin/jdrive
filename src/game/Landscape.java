@@ -734,12 +734,11 @@ public class Landscape extends GenLandTable
 
 	public static TileIndex AdjustTileCoordRandomly(TileIndex a, int rng)
 	{
-		int rn = rng;
 		int r = Global.Random();
 
 		return new TileIndex(
-				a.TileX() + (BitOps.GB(r, 0, 8) * rn * 2 >> 8) - rn,
-				a.TileY() + (BitOps.GB(r, 8, 8) * rn * 2 >> 8) - rn
+				a.TileX() + (BitOps.GB(r, 0, 8) * rng * 2 >> 8) - rng,
+				a.TileY() + (BitOps.GB(r, 8, 8) * rng * 2 >> 8) - rng
 				).TILE_MASK();
 	}
 

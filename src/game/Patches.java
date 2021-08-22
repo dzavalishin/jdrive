@@ -1,6 +1,7 @@
 package game;
 
-public class Patches 
+@SuppressWarnings("CanBeFinal")
+public class Patches
 {
 	public boolean modified_catchment;	//different-size catchment areas
 	public boolean vehicle_speed = true;			// show vehicle speed

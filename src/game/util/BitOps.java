@@ -131,15 +131,15 @@ public class BitOps {
 	//static void SETBITS(x,y) ((x) |= (y))
 	//static void CLRBITS(x,y) ((x) &= ~(y))
 
-	public static int RETSETBITS( int x, int y)
+	public static int RETSETBITS( int x, int bits)
 	{
-		x |= y;
+		x |= bits;
 		return x;
 	}
 
-	public static byte RETSETBITS( byte x, byte y)
+	public static byte RETSETBITS( byte x, byte bits)
 	{
-		x |= y;
+		x |= bits;
 		return x;
 	}
 
@@ -225,7 +225,7 @@ public class BitOps {
 	
 	public static boolean CHANCE16R(int a, int b, int [] r) 
 	{ 
-		return ((int)(r[0]=Hal.Random()) <= (int)((65536 * a) / b)); 
+		return ((r[0]=Hal.Random()) <= ((65536 * a) / b));
 	}
 
 	public static boolean CHANCE16I(int a, int b, int v) { return Integer.compareUnsigned( v, (65536 * a) / b ) <= 0; }
@@ -268,7 +268,7 @@ public class BitOps {
 
 	/**
 	 * Rotate x Left/Right by n (must be >= 0)
-	 * @note Assumes a byte has 8 bits
+	 * Assumes a byte has 8 bits
 	 */
 	//static void ROL(x, n) ((x) << (n) | (x) >> (sizeof(x) * 8 - (n)))
 
@@ -290,11 +290,11 @@ public class BitOps {
 
 	/**
 	 * Return the smallest multiple of n equal or greater than x
-	 * @note n must be a power of 2
+	 * @apiNote  n must be a power of 2
 	 */
-	static public int ALIGN(int x, int n) 
+	static public int ALIGN(int data, int n)
 	{ 
-		return (x + n - 1) & ~(n - 1); 
+		return (data + n - 1) & ~(n - 1);
 	}
 
 	/* orig impl below
@@ -332,9 +332,11 @@ public class BitOps {
 		return (int) (prod >>> shift);
 	}
 
-	/** Only allow valid ascii-function codes. Filter special codes like BELL and
+	/**
+	 * Only allow valid ascii-function codes. Filter special codes like BELL and
 	 * so on [we need a special filter here later]
-	 * @param key character to be checked
+	 *
+	 * @param bkey character to be checked
 	 * @return true or false depending if the character is printable/valid or not */
 	// XXX This filter stops certain crashes, but may be too restrictive.
 	public static boolean IsValidAsciiChar(int bkey) 
@@ -359,8 +361,8 @@ public class BitOps {
 
 	public static int READ_LE_UINT16(byte[] b, int shift) 
 	{
-		int hi = (int)b[1+shift];
-		int lo = (int)b[0+shift];
+		int hi = b[1+shift];
+		int lo = b[0+shift];
 		return (0xFF & lo) + ((0xFF & hi) << 8);
 	}
 

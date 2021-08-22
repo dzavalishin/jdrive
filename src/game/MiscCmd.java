@@ -172,8 +172,7 @@ public class MiscCmd {
 			p.president_name_1 = str.id;
 
 			if (p.name_1 == Str.STR_SV_UNNAMED) {
-				String buf = String.format("%s Transport", Global._cmd_text);
-				Global._cmd_text = buf;
+				Global._cmd_text = String.format("%s Transport", Global._cmd_text);
 				Cmd.DoCommandByTile(new TileIndex(0), 0, 0, Cmd.DC_EXEC, Cmd.CMD_CHANGE_COMPANY_NAME);
 			}
 			Hal.MarkWholeScreenDirty();
@@ -215,7 +214,7 @@ public class MiscCmd {
 		if (_networking) return Cmd.CMD_ERROR;
 	#endif*/
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
-		return (int)p1;
+		return p1;
 	}
 
 	/** Transfer funds (money) from one player to another.
@@ -229,7 +228,7 @@ public class MiscCmd {
 	static int CmdGiveMoney(int x, int y, int flags, int p1, int p2)
 	{
 		final Player p = Player.GetCurrentPlayer();
-		int amount = Math.min((int)p1, 20000000);
+		int amount = Math.min(p1, 20000000);
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 
@@ -260,7 +259,7 @@ public class MiscCmd {
 	 */
 	static int CmdChangeDifficultyLevel(int x, int y, int flags, int p1, int p2)
 	{
-		if (p1 != (int)-1L && ((int)p1 >= Global.GAME_DIFFICULTY_NUM || (int)p1 < 0)) return Cmd.CMD_ERROR;
+		if (p1 != (int)-1L && (p1 >= Global.GAME_DIFFICULTY_NUM || p1 < 0)) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			if (p1 != (int)-1L) {

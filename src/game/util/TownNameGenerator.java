@@ -69,7 +69,8 @@ public class TownNameGenerator extends TownNameTables
 			buf += ( name_original_english_6[i]);
 
 		char c = buf.charAt(0);
-		if (c == 'C' && (c == 'e' || c == 'i'))
+		char c1 = buf.charAt(1);
+		if (c == 'C' && (c1 == 'e' || c1 == 'i'))
 			buf = "K" + buf.substring(1);
 
 		buf = RetReplaceWords("Cunt", "East", buf);

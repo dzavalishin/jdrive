@@ -2500,7 +2500,7 @@ static final String name_danish_3[] = {
 };
 	
 	// TODO split?
-	static String name_russian_real[] = {
+	static final String[] name_russian_real = {
 			/*
 			"Ага",
 			"Абадзехская",

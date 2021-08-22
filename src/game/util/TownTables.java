@@ -6,7 +6,8 @@ import game.Str;
 import game.struct.DrawTownTileStruct;
 import game.struct.HousetypeYear;
 
-public class TownTables 
+@SuppressWarnings("ConstantConditions")
+public class TownTables
 extends Str // just import strings
 implements Serializable
 {
@@ -69,14 +70,9 @@ implements Serializable
 	public static final int HOUSE_TROP_CHURCH    = 0x53;
 	public static final int HOUSE_TOY_CHURCH     = 0x5b;
 
-	
 
-	/* $Id: town_land.h 3118 2005-11-02 13:06:07Z tron $ */
 
-	/** @file town_land.h
-	 * /
-
-	enum {
+	/*enum {
 		HOUSE_TEMP_CHURCH    = 0x03,
 		HOUSE_STADIUM        = 0x14,
 		HOUSE_MODERN_STADIUM = 0x20,
@@ -85,8 +81,8 @@ implements Serializable
 		HOUSE_TROP_CHURCH    = 0x53,
 		HOUSE_TOY_CHURCH     = 0x5b,
 
-		HOUSE_MAX            = 110
-	};
+		HOUSE_MAX            = 110;
+	};*/
 
 	/** Writes the data into the Town Tile Drawing Struct
 	 * @param s1 The first sprite of the building, mostly the ground sprite

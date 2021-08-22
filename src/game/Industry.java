@@ -107,7 +107,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	public static final int INDUSTRY_POOL_MAX_BLOCKS      = 8000;
 
 
-	private static  IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() {
+	private static final IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() {
 
 		/**
 		 * 
@@ -120,7 +120,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 	};
 	/* Initialize the industry-pool */
-	static MemoryPool<Industry> _industry_pool = new MemoryPool<Industry>(factory); 
+	static final MemoryPool<Industry> _industry_pool = new MemoryPool<Industry>(factory);
 
 
 	@Override
@@ -323,6 +323,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		return Landscape.GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
 	}
 
+	@SuppressWarnings("SameReturnValue")
 	static int GetSlopeTileh_Industry(final TileInfo  ti)
 	{
 		return 0;
@@ -439,7 +440,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	{
 		int m,n;
 
-		switch((int)tile.getMap().m5) {
+		switch(tile.getMap().m5) {
 		case 174:
 			if ((Global._tick_counter & 1) == 0) {
 				m = tile.getMap().m3 + 1;
@@ -650,7 +651,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		if (0 == (tile.getMap().m1 & 0x80))
 			return;
 
-		switch((int)tile.getMap().m5) {
+		switch(tile.getMap().m5) {
 		case 8:
 			MakeIndustryTileBiggerCase8(tile);
 			break;
@@ -728,7 +729,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 
 
-		switch (0xFF & (int)tile.getMap().m5) {
+		switch (0xFF & tile.getMap().m5) {
 		case 0x18: // coast line at oilrigs
 		case 0x19:
 		case 0x1A:
@@ -998,7 +999,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			int y = i.height / 2 + Hal.Random() % 31 - 16;
 			TileIndex tile = new TileIndex(
 					TileIndex.TileAddWrap( new TileIndex(i.xy), x, y));
-			if (tile != TileIndex.INVALID_TILE) PlantFarmField(tile);
+			if (tile.isValid()) PlantFarmField(tile);
 		}
 	}
 
@@ -1241,12 +1242,12 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		return true;
 	}
 
-	static final Town CheckMultipleIndustryInTown(TileIndex tile, int type)
+	static Town CheckMultipleIndustryInTown(TileIndex tile, int type)
 	{
 		final Town t;
 		//final Industry  i;
 
-		t = Town.ClosestTownFromTile(tile, (int)-1);
+		t = Town.ClosestTownFromTile(tile, -1);
 
 		if (Global._patches.multiple_industry_per_town) return t;
 

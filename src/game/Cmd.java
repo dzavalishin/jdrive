@@ -156,10 +156,10 @@ public class Cmd {
 	public static final int DC_NO_TOWN_RATING = 0x40;	// town rating does not disallow you from building
 	public static final int DC_FORCETEST = 0x80;		// force test too.
 
-	public static final int CMD_ERROR = ((int)0x80000000);
+	public static final int CMD_ERROR = 0x80000000;
 
 	//#define public static final int CMD_MSG(x) ((x)<<16)
-	public static final int CMD_MSG(int x) { return x << 16; }
+	public static int CMD_MSG(int x) { return x << 16; }
 
 	public static final int CMD_AUTO = 0x200;
 	public static final int CMD_NO_WATER = 0x400;
@@ -675,8 +675,8 @@ interface CommandProc {
 
 class Command 
 {
-	CommandProc proc;
-	int flags;
+	final CommandProc proc;
+	final int flags;
 
 	public Command(CommandProc p, int f) {
 		proc = p;

@@ -26,7 +26,7 @@ public class FileIO {
 	//BufferedInputStream bis = new BufferedInputStream(fis);
 
 	static BufferedRandomAccessFile cur_fh;
-	static BufferedRandomAccessFile handles[] = new BufferedRandomAccessFile[32];
+	static final BufferedRandomAccessFile[] handles = new BufferedRandomAccessFile[32];
 
 
 	//static FileIO _fio = this;
@@ -36,15 +36,9 @@ public class FileIO {
 	{
 		//return _fio.pos + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
 		//return pos;// + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
-		try {
-			return cur_fh.getFilePointer();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.exit(33);
-			return -1;
-		}
-	}
+        return cur_fh.getFilePointer();
+
+    }
 
 	public static void FioSeekTo(long ppos, int mode)
 	{

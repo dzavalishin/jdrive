@@ -670,8 +670,8 @@ public class TrainGui
 
 	/**
 	 * Clones a train
-	 * @param *v is the original vehicle to clone
-	 * @param *w is the window of the depot where the clone is build
+	 * @param v is the original vehicle to clone
+	 * @param w is the window of the depot where the clone is build
 	 */
 	static void HandleCloneVehClick(Vehicle  v, final Window  w)
 	{

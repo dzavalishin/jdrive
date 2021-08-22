@@ -47,6 +47,6 @@ public class StationSpec
 	 * Used for obtaining the sprite offset of custom sprites, and for
 	 * evaluating callbacks.
 	 */
-	SpriteGroup [] spritegroup = new SpriteGroup[EngineTables.NUM_GLOBAL_CID];
+    final SpriteGroup [] spritegroup = new SpriteGroup[EngineTables.NUM_GLOBAL_CID];
 
 }

@@ -148,7 +148,7 @@ public class Tree  extends TreeTables {
 
 		if (p2 > Global.MapSize()) return Cmd.CMD_ERROR;
 		/* Check the tree type. It can be random or some valid value within the current climate */
-		if (p1 != (int)-1 && p1 - _tree_base_by_landscape[GameOptions._opt.landscape] >= _tree_count_by_landscape[GameOptions._opt.landscape]) return Cmd.CMD_ERROR;
+		if (p1 != -1 && p1 - _tree_base_by_landscape[GameOptions._opt.landscape] >= _tree_count_by_landscape[GameOptions._opt.landscape]) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 

@@ -13,7 +13,7 @@ import game.util.Sprites;
 
 public class GfxInit extends LandscapeSprites  
 {
-	static String[] files_win = 
+	static final String[] files_win =
 		{ 
 				"TRG1R.GRF",
 				"TRGIR.GRF",
@@ -21,7 +21,7 @@ public class GfxInit extends LandscapeSprites
 				null
 		};
 
-	static String[] files_landscape = 
+	static final String[] files_landscape =
 		{ 
 			"TRGC.GRF",
 			"TRGHR.GRF", // TODO "TRGH.GRF",
@@ -359,7 +359,7 @@ public class GfxInit extends LandscapeSprites
 	};
 
 	// TODO return me private static byte _sprite_page_to_load = (byte) 0xFF;
-	private static byte _sprite_page_to_load = 2; // desert
+	private static final byte _sprite_page_to_load = 2; // desert
 
 	//private static boolean _use_dos_palette = false;
 

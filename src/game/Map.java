@@ -191,7 +191,7 @@ public class Map {
 	{
 		final int dx = Math.abs(t0.TileX() - t1.TileX());
 		final int dy = Math.abs(t0.TileY() - t1.TileY());
-		return dx > dy ? dx : dy;
+		return Math.max(dx, dy);
 	}
 
 
@@ -208,9 +208,9 @@ public class Map {
 		final int yl = tile.TileY();
 		final int xh = Global.MapSizeX() - 1 - xl;
 		final int yh = Global.MapSizeY() - 1 - yl;
-		final int minl = xl < yl ? xl : yl;
-		final int minh = xh < yh ? xh : yh;
-		return minl < minh ? minl : minh;
+		final int minl = Math.min(xl, yl);
+		final int minh = Math.min(xh, yh);
+		return Math.min(minl, minh);
 	}
 	
 }

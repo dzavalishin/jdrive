@@ -782,7 +782,7 @@ public class AirCraft extends AirCraftTables {
 		}
 
 		//spd = v.cur_speed + v.acceleration;
-		v.subspeed = 0xFF & ((t=v.subspeed) + (int)spd);
+		v.subspeed = 0xFF & ((t=v.subspeed) + spd);
 		spd = Math.min( v.cur_speed + (spd >> 8) + ((v.subspeed < t) ? 1 : 0), new_speed);
 
 		// adjust speed for broken vehicles
@@ -808,7 +808,7 @@ public class AirCraft extends AirCraftTables {
 
 		if (spd == 0) return 0; //false;
 
-		if ((int)++spd == 0)
+		if (++spd == 0)
 			return 1; //true;
 
 
@@ -949,7 +949,7 @@ public class AirCraft extends AirCraftTables {
 		dist = Math.abs(x + amd.x - v.getX_pos()) +  Math.abs(y + amd.y - v.getY_pos());
 
 		// Clear queues when there's no patch
-		if(Global._patches.aircraft_queueing == false && v.queue_item != null) {
+		if(!Global._patches.aircraft_queueing && v.queue_item != null) {
 			v.queue_item.queue.del(v);
 			v.z_pos = GetAircraftFlyingAltitude(v);		
 		}
@@ -959,7 +959,7 @@ public class AirCraft extends AirCraftTables {
 			// If it's already in the queue, don't re-add it
 			// Otherwise, add it to queue - but don't add helicopters!
 			// otherwise, helicopters will be part of the queue and can't land separately!
-			if(!(v.queue_item != null) && (Global._patches.aircraft_queueing == true && v.subtype != 0)) {
+			if(!(v.queue_item != null) && (Global._patches.aircraft_queueing && v.subtype != 0)) {
 				// Add to queue
 				assert(st.airport_queue.push(v));
 			}
@@ -970,7 +970,7 @@ public class AirCraft extends AirCraftTables {
 			// If it's already in the queue, don't re-add it
 			// Otherwise, add it to queue - but don't add helicopters!
 			// otherwise, helicopters will be part of the queue and can't land separately!
-			if(v.queue_item == null && Global._patches.aircraft_queueing == true && v.subtype != 0) {
+			if(v.queue_item == null && Global._patches.aircraft_queueing && v.subtype != 0) {
 				// Add to queue
 				st.airport_queue.push(v);
 			}
@@ -1064,13 +1064,13 @@ public class AirCraft extends AirCraftTables {
 
 		// Turn. Do it slowly if in the air.
 		newdir =  Vehicle.GetDirectionTowards(v, x + amd.x, y + amd.y);
-		if (newdir != v.direction) {
+		if (newdir != v.direction)
+		{
+			v.direction = newdir;
 			if(0 != (amd.flag & AirportMovingData.AMED_SLOWTURN)) {
 				if (v.load_unload_time_rem == 0) v.load_unload_time_rem = 8;
-				v.direction = newdir;
 			} else {
 				v.cur_speed >>= 1;
-		v.direction = newdir;
 			}
 		}
 
@@ -1213,7 +1213,7 @@ public class AirCraft extends AirCraftTables {
 		int8 x;
 		int8 y;
 	} */
-	static Point [] smoke_pos = {
+	static final Point [] smoke_pos = {
 			new Point(  5,  5 ),
 			new Point(  6,  0 ),
 			new Point(  5, -5 ),
@@ -1411,7 +1411,7 @@ public class AirCraft extends AirCraftTables {
 					0);
 		}
 
-		old_order = v.current_order;
+		old_order = new Order( v.current_order );
 		v.current_order.type = Order.OT_LOADING;
 		v.current_order.flags = 0;
 
@@ -1710,12 +1710,12 @@ public class AirCraft extends AirCraftTables {
 					// If it's already in the queue, don't re-add it
 					// Otherwise, add it to queue - but do helicopters seperately!
 					// Otherwise, helicopters will be part of the queue and can't land separately!
-					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing == true && v.subtype != 0)) {
+					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing && v.subtype != 0)) {
 						// Add to queue
 						assert(st.airport_queue.push(v));
 					}
 
-					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing == true && v.subtype == 0)) {
+					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing && v.subtype == 0)) {
 						// Add to queue
 						assert(st.helicopter_queue.push(v));
 					}
@@ -1726,7 +1726,7 @@ public class AirCraft extends AirCraftTables {
 					tsubspeed = v.subspeed;
 
 					// If we're on top, go in
-					if(st.airport_queue.getTop() == v && (Global._patches.aircraft_queueing == true && v.subtype != 0)) {
+					if(st.airport_queue.getTop() == v && (Global._patches.aircraft_queueing && v.subtype != 0)) {
 						if (!AirportHasBlock(v, current, Airport)) {			
 							can_land = true;
 							st.airport_queue.pop();
@@ -1736,7 +1736,7 @@ public class AirCraft extends AirCraftTables {
 					}
 
 					// Helicopters have their own queue
-					if(v.subtype == 0 && st.helicopter_queue.getTop() == v && Global._patches.aircraft_queueing == true) {
+					if(v.subtype == 0 && st.helicopter_queue.getTop() == v && Global._patches.aircraft_queueing) {
 						if (!AirportHasBlock(v, current, Airport)) {
 							can_land = true;
 							st.helicopter_queue.pop();
@@ -1753,16 +1753,17 @@ public class AirCraft extends AirCraftTables {
 						}
 					}
 
-					if(Global._patches.aircraft_queueing == false) { // || v.subtype == 0
-						if (!AirportHasBlock(v, current, Airport)) {			
+					if(!Global._patches.aircraft_queueing) { // || v.subtype == 0
+						/*if (!AirportHasBlock(v, current, Airport)) {
 							can_land = true;
 						} else {
 							can_land = false;
-						}
+						}*/
+						can_land = !AirportHasBlock(v, current, Airport);
 					}
 
 
-					if(can_land == true) {
+					if(can_land) {
 						v.air.state = landingtype; // LANDING / HELILANDING
 						// it's a bit dirty, but I need to set position to next position, otherwise
 						// if there are multiple runways, plane won't know which one it took (because
@@ -3023,7 +3024,7 @@ public class AirCraft extends AirCraftTables {
 				DrawAircraftImage(v, x+12, y, VehicleID.get( w.as_traindepot_d().sel ) );
 
 				Global.SetDParam(0, v.unitnumber.id);
-				Gfx.DrawString(x, y+2, (int)(v.max_age-366) >= v.age ? Str.STR_00E2 : Str.STR_00E3, 0);
+				Gfx.DrawString(x, y+2, (v.max_age-366) >= v.age ? Str.STR_00E2 : Str.STR_00E3, 0);
 
 				Gfx.DrawSprite( 0 != (v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x, y + 12);
 
@@ -3110,8 +3111,8 @@ public class AirCraft extends AirCraftTables {
 
 	/**
 	 * Clones an aircraft
-	 * @param *v is the original vehicle to clone
-	 * @param *w is the window of the hangar where the clone is build
+	 * @param v is the original vehicle to clone
+	 * @param w is the window of the hangar where the clone is build
 	 */
 	static void HandleCloneVehClick(final Vehicle  v, final Window  w)
 	{

@@ -28,7 +28,7 @@ public class Depot implements IPoolItem, Serializable
 		index = 0;
 	}
 	
-	static IPoolItemFactory<Depot> factory = new IPoolItemFactory<Depot>() {		
+	static final IPoolItemFactory<Depot> factory = new IPoolItemFactory<Depot>() {
 		/**
 		 * 
 		 */

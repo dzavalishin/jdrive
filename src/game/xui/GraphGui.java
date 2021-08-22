@@ -43,8 +43,8 @@ public class GraphGui
 		//StringID 
 		int format_str_y_axis;
 		byte color_3, color_2, bg_line_color;
-		byte [] colors = new byte[GRAPH_NUM];
-		long [][] cost = new long[GRAPH_NUM][24]; // last 2 years
+		final byte [] colors = new byte[GRAPH_NUM];
+		final long [][] cost = new long[GRAPH_NUM][24]; // last 2 years
 	}
 
 	static final int INVALID_VALUE = 0x80000000;
@@ -144,7 +144,7 @@ public class GraphGui
 
 		/* setup scaling */
 		y_scaling = INVALID_VALUE;
-		value = adj_height * 2;
+		value = adj_height * 2L;
 
 		if (mx > value) {
 			mx = (mx + 7) & ~7;

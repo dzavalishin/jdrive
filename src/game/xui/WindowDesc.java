@@ -3,13 +3,16 @@ package game.xui;
 import java.util.function.BiConsumer;
 
 public class WindowDesc {
-	public int 			left, top, width, height;
-	int 			cls;
-	int 			parent_cls;
-	int 			flags;
-	Widget []		widgets;
+	public final int 			left;
+    public int top;
+    public final int width;
+    public final int height;
+	final int 			cls;
+	final int 			parent_cls;
+	final int 			flags;
+	final Widget []		widgets;
 	//WindowProc *proc;
-	BiConsumer<Window,WindowEvent> proc;
+    final BiConsumer<Window,WindowEvent> proc;
 
 	// flags
 	public static final int WDF_STD_TOOLTIPS   = 1; /* use standard routine when displaying tooltips */

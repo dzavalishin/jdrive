@@ -676,7 +676,7 @@ public class Road extends RoadTables
 	 * @param p1 depot direction (0 through 3), where 0 is NW, 1 is NE, etc.
 	 * @param p2 unused
 	 *
-	 * @todo When checking for the tile slope,
+	 * TODO When checking for the tile slope,
 	 * distingush between "Flat land required" and "land sloped in wrong direction"
 	 */
 	public static int CmdBuildRoadDepot(int x, int y, int flags, int p1, int p2)
@@ -714,7 +714,7 @@ public class Road extends RoadTables
 			if (Player.IsLocalPlayer()) Depot._last_built_road_depot_tile = tile;
 
 			dep.xy = tile;
-			dep.town_index = Town.ClosestTownFromTile(tile, (int)-1).index;
+			dep.town_index = Town.ClosestTownFromTile(tile, -1).index;
 
 			Landscape.ModifyTile(tile, TileTypes.MP_STREET,
 					//TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
@@ -1038,8 +1038,7 @@ public class Road extends RoadTables
 
 	static AcceptedCargo GetAcceptedCargo_Road(TileIndex tile )
 	{
-		AcceptedCargo ac = new AcceptedCargo();
-		return ac;
+		return new AcceptedCargo();
 		/* not used */
 	}
 
@@ -1088,7 +1087,7 @@ public class Road extends RoadTables
 			return;
 
 		if (BitOps.GB(tile.getMap().m4, 4, 3) < 6) {
-			t = Town.ClosestTownFromTile(tile, (int)-1);
+			t = Town.ClosestTownFromTile(tile, -1);
 
 			grp = 0;
 			if (t != null) {

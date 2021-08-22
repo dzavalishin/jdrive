@@ -683,7 +683,7 @@ public class ShipGui
 				DrawShipImage(v, x[0]+19, y[0], w.as_traindepot_d().sel);
 
 				Global.SetDParam(0, v.getUnitnumber().id);
-				Gfx.DrawString(x[0], y[0]+2, (int)(v.getMax_age()-366) >= v.getAge() ? Str.STR_00E2 : Str.STR_00E3, 0);
+				Gfx.DrawString(x[0], y[0]+2, (v.getMax_age()-366) >= v.getAge() ? Str.STR_00E2 : Str.STR_00E3, 0);
 
 				Gfx.DrawSprite(v.isStopped() ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x[0], y[0] + 9);
 
@@ -770,8 +770,8 @@ public class ShipGui
 
 	/**
 	 * Clones a ship
-	 * @param *v is the original vehicle to clone
-	 * @param *w is the window of the depot where the clone is build
+	 * @param v is the original vehicle to clone
+	 * @param w is the window of the depot where the clone is build
 	 */
 	static void HandleCloneVehClick(final Vehicle  v, final Window  w)
 	{

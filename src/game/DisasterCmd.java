@@ -166,7 +166,7 @@ public class DisasterCmd extends DisasterTables
 							0);
 				}
 			}
-			if (v.getY_pos() >= ((int)Global.MapSizeY() + 9) * 16 - 1)
+			if (v.getY_pos() >= (Global.MapSizeY() + 9) * 16 - 1)
 				DeleteDisasterVeh(v);
 			return;
 		}
@@ -383,7 +383,7 @@ public class DisasterCmd extends DisasterTables
 			x = v.getX_pos() - 15*16;
 			y = v.getY_pos();
 
-			if ( (int)x > Global.MapMaxX() * 16-1)
+			if ( x > Global.MapMaxX() * 16-1)
 				return;
 
 			tile = TileIndex.TileVirtXY(x, y);
@@ -411,7 +411,7 @@ public class DisasterCmd extends DisasterTables
 		v.GetNewVehiclePos(gp);
 		SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
 
-		if (gp.x > (int)Global.MapSizeX() * 16 + 9*16 - 1) {
+		if (gp.x > Global.MapSizeX() * 16 + 9*16 - 1) {
 			DeleteDisasterVeh(v);
 			return;
 		}
@@ -454,7 +454,7 @@ public class DisasterCmd extends DisasterTables
 			x = v.getX_pos() - 15*16;
 			y = v.getY_pos();
 
-			if ( (int)x > Global.MapMaxX() * 16-1)
+			if ( x > Global.MapMaxX() * 16-1)
 				return;
 
 			tile = TileIndex.TileVirtXY(x, y);
@@ -526,7 +526,7 @@ public class DisasterCmd extends DisasterTables
 				}
 			});
 
-			t = Town.ClosestTownFromTile(v.dest_tile, (int)-1);
+			t = Town.ClosestTownFromTile(v.dest_tile, -1);
 			Global.SetDParam(0, t.index);
 			NewsItem.AddNewsItem(Str.STR_B004_UFO_LANDS_NEAR,
 					NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ACCIDENT, 0),
@@ -592,7 +592,7 @@ public class DisasterCmd extends DisasterTables
 		v.GetNewVehiclePos( gp);
 		SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
 
-		if (gp.x > (int)Global.MapSizeX() * 16 + 9*16 - 1) {
+		if (gp.x > Global.MapSizeX() * 16 + 9*16 - 1) {
 			DeleteDisasterVeh(v);
 			return;
 		}
@@ -666,7 +666,7 @@ public class DisasterCmd extends DisasterTables
 
 	static void DisasterTick_null(Vehicle v) {}
 
-	static DisasterVehicleTickProc _disastervehicle_tick_procs[] = {
+	static final DisasterVehicleTickProc[] _disastervehicle_tick_procs = {
 			DisasterCmd::DisasterTick_Zeppeliner, DisasterCmd::DisasterTick_null,
 			DisasterCmd::DisasterTick_UFO, DisasterCmd::DisasterTick_null,
 			DisasterCmd::DisasterTick_2, DisasterCmd::DisasterTick_null,
@@ -934,7 +934,7 @@ public class DisasterCmd extends DisasterTables
 		}
 	}
 
-	static DisasterInitProc _disaster_initprocs[] = {
+	static final DisasterInitProc[] _disaster_initprocs = {
 			DisasterCmd::Disaster0_Init,
 			DisasterCmd::Disaster1_Init,
 			DisasterCmd::Disaster2_Init,

@@ -28,7 +28,7 @@ public class OrderGui {
 		return (num >= 0 && num < v.getNum_orders()) ? num : v.getNum_orders();
 	}
 
-	static /*StringID*/ int StationOrderStrings[] = {
+	static final /*StringID*/ int[] StationOrderStrings = {
 		Str.STR_8806_GO_TO,
 		Str.STR_8807_GO_TO_TRANSFER,
 		Str.STR_8808_GO_TO_UNLOAD,
@@ -73,7 +73,7 @@ public class OrderGui {
 
 		shared_orders = v.IsOrderListShared();
 
-		if ((int)v.getNum_orders() + (shared_orders?1:0) <= (int)w.as_order_d().sel)
+		if (v.getNum_orders() + (shared_orders?1:0) <= w.as_order_d().sel)
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 5); /* delete */
 
 		if (v.getNum_orders() == 0)
@@ -424,7 +424,7 @@ public class OrderGui {
 				int sel;
 				sel = (e.pt.y - 15) / 10;
 
-				if ((int)sel >= w.vscroll.getCap())
+				if (sel >= w.vscroll.getCap())
 					return;
 
 				sel += w.vscroll.pos;

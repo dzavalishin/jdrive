@@ -78,7 +78,7 @@ public class PlayerGui
 			y = 171;
 
 			// draw max loan aligned to loan below (y += 10)
-			Global.SetDParam64(0, (long)Global._economy.getMax_loan());
+			Global.SetDParam64(0, Global._economy.getMax_loan());
 			Gfx.DrawString(202, y+10, Str.STR_MAX_LOAN, 0);
 
 		} else
@@ -287,7 +287,7 @@ public class PlayerGui
 				int used_colors;
 				int i;
 
-				if ((int)item >= 8)
+				if (item >= 8)
 					return;
 				item += w.vscroll.pos;
 				used_colors = w.as_def_d().data_1;

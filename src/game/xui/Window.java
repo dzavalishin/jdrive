@@ -34,9 +34,9 @@ public class Window extends WindowConstants
 	int left, top;
 	int width, height;
 
-	public Scrollbar hscroll;
-	public Scrollbar vscroll;
-	public Scrollbar vscroll2;
+	public final Scrollbar hscroll;
+	public final Scrollbar vscroll;
+	public final Scrollbar vscroll2;
 	public ResizeInfo resize; // = new ResizeInfo();
 
 	public int caption_color;
@@ -47,14 +47,14 @@ public class Window extends WindowConstants
 
 	ViewPort viewport;
 	Widget [] original_widget;
-	List<Widget> widget;
+	final List<Widget> widget;
 	int desc_flags;
 
 	public WindowMessage message;// = new WindowMessage(); // used 
 	//byte custom[WINDOW_CUSTOM_SIZE];
 	//byte custom[];
 	public AbstractWinCustom custom; // TODO replace it all with subclasses
-	public int[] custom_array = new int[2]; 
+	public final int[] custom_array = new int[2];
 
 	BiConsumer<Window,WindowEvent> wndproc;
 
@@ -71,7 +71,7 @@ public class Window extends WindowConstants
 		vscroll  = new Scrollbar();
 		vscroll2 = new Scrollbar();
 
-		resize = null;
+		//resize = null;
 
 
 		viewport = null;
@@ -93,7 +93,7 @@ public class Window extends WindowConstants
 
 
 	//static Window _windows[] = new Window[25];
-	static List<Window> _windows = new ArrayList<Window>();
+	static final List<Window> _windows = new ArrayList<Window>();
 
 
 
@@ -330,9 +330,10 @@ public class Window extends WindowConstants
 
 
 
-	/** Returns the index for the widget located at the given position
-	 * relative to the window. It includes all widget-corner pixels as well.
-	 * @param *w Window to look inside
+	/**
+	 * Returns the index for the widget located at the given position
+	 * relative to this window. It includes all widget-corner pixels as well.
+	 *
 	 * @param  x,y Window client coordinates
 	 * @return A widget index, or -1 if no widget was found.
 	 */
@@ -369,7 +370,7 @@ public class Window extends WindowConstants
 
 
 	// delta between mouse cursor and upper left corner of dragged window
-	static Point _drag_delta = new Point(0, 0);
+	static final Point _drag_delta = new Point(0, 0);
 
 	public void HandleButtonClick(int widget)
 	{
@@ -399,7 +400,7 @@ public class Window extends WindowConstants
 
 			if (0 != (wi.type & 0xE0)) {
 				/* special widget handling for buttons*/
-				switch((int)wi.type) {
+				switch(wi.type) {
 				case WWT_IMGBTN  | WWB_PUSHBUTTON: /* WWT_PUSHIMGBTN */
 				case WWT_TEXTBTN | WWB_PUSHBUTTON: /* WWT_PUSHTXTBTN */
 					w.HandleButtonClick(e.widget);
@@ -460,10 +461,11 @@ public class Window extends WindowConstants
 		w.wndproc.accept(w, e);
 	}
 
-	/** Dispatch the mousewheel-action to the window which will scroll any
+	/**
+	 * Dispatch the mousewheel-action to the window which will scroll any
 	 * compatible scrollbars if the mouse is pointed over the bar or its contents
-	 * @param *w Window
-	 * @param widget the widget where the scrollwheel was used
+	 *
+	 * @param widgeti the widget where the scrollwheel was used
 	 * @param wheel scroll up or down
 	 */
 	void DispatchMouseWheelEvent(int widgeti, int wheel)
@@ -892,17 +894,19 @@ public class Window extends WindowConstants
 		//else			widget.clear(); // XXX really?
 	}
 
-	/** Open a new window. If there is no space for a new window, close an open
+	/**
+	 * Open a new window. If there is no space for a new window, close an open
 	 * window. Try to avoid stickied windows, but if there is no else, close one of
 	 * those as well. Then make sure all created windows are below some always-on-top
 	 * ones. Finally set all variables and call the WE_CREATE event
+	 *
 	 * @param x offset in pixels from the left of the screen
 	 * @param y offset in pixels from the top of the screen
 	 * @param width width in pixels of the window
 	 * @param height height in pixels of the window
-	 * @param *proc @see WindowProc function to call when any messages/updates happen to the window
+	 * @param proc @see WindowProc function to call when any messages/updates happen to the window
 	 * @param cls @see WindowClass class of the window, used for identification and grouping
-	 * @param *widget @see Widget pointer to the window layout and various elements
+	 * @param widget @see Widget pointer to the window layout and various elements
 	 * @return @see Window pointer of the newly created window
 	 */
 	static Window AllocateWindow(
@@ -1005,7 +1009,7 @@ public class Window extends WindowConstants
 
 
 
-	static SizeRect _awap_r = new SizeRect();
+	static final SizeRect _awap_r = new SizeRect();
 
 	static boolean IsGoodAutoPlace1(int left, int top)
 	{
@@ -1404,13 +1408,12 @@ public class Window extends WindowConstants
 			return false;
 		}
 
+		e.pt = Hal._cursor.pos;
 		if (_left_button_down) {
 			e.event = WindowEvents.WE_POPUPMENU_OVER;
-			e.pt = Hal._cursor.pos;
 		} else {
 			_popup_menu_active = false;
 			e.event = WindowEvents.WE_POPUPMENU_SELECT;
-			e.pt = Hal._cursor.pos;
 		}
 
 		w.wndproc.accept(w, e);
@@ -1616,14 +1619,14 @@ public class Window extends WindowConstants
 				/* X and Y has to go by step.. calculate it.
 				 * The cast to int is necessary else x/y are implicitly casted to
 				 * unsigned int, which won't work. */
-				if (w.resize.step_width > 1) x -= x % (int)w.resize.step_width;
+				if (w.resize.step_width > 1) x -= x % w.resize.step_width;
 
-				if (w.resize.step_height > 1) y -= y % (int)w.resize.step_height;
+				if (w.resize.step_height > 1) y -= y % w.resize.step_height;
 
 				/* Check if we don't go below the minimum set size */
-				if ((int)w.width + x < (int)w.resize.width)
+				if (w.width + x < w.resize.width)
 					x = w.resize.width - w.width;
-				if ((int)w.height + y < (int)w.resize.height)
+				if (w.height + y < w.resize.height)
 					y = w.resize.height - w.height;
 
 				/* Window already on size */
@@ -1849,7 +1852,7 @@ public class Window extends WindowConstants
 				x = -hvx;
 				sub = 0;
 			}
-			if (x > (int)Global.MapMaxX() * 16 - hvx) {
+			if (x > Global.MapMaxX() * 16 - hvx) {
 				x = Global.MapMaxX() * 16 - hvx;
 				sub = 0;
 			}
@@ -1857,7 +1860,7 @@ public class Window extends WindowConstants
 				y = -hvy;
 				sub = 0;
 			}
-			if (y > (int)Global.MapMaxY() * 16 - hvy) {
+			if (y > Global.MapMaxY() * 16 - hvy) {
 				y = Global.MapMaxY() * 16 - hvy;
 				sub = 0;
 			}

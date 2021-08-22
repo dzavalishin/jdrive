@@ -74,7 +74,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		this.tile = tile;
 	}
 
-	public static TileIndex INVALID_TILE = getInvalid(); //new TileIndex(-1);
+	public static final TileIndex INVALID_TILE = getInvalid(); //new TileIndex(-1);
 
 	
 	
@@ -791,7 +791,6 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return Rail.GetRailTileType(this);
 	}
 
-	
 
 }
 

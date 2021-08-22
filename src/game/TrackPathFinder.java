@@ -36,7 +36,7 @@ public class TrackPathFinder extends Pathfind
 	//TileIndex [] hash_tile = new TileIndex[0x400]; /* stores the link index when multi link. */
 	//TrackPathFinderLink [] links = new TrackPathFinderLink[0x400]; /* hopefully, this is enough. */
 
-	Map<Integer,TPFHashEnt> tileBits = new HashMap<Integer,TPFHashEnt>();
+	final Map<Integer,TPFHashEnt> tileBits = new HashMap<Integer,TPFHashEnt>();
 
 	// -------------------------------------------------
 	// Class

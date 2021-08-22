@@ -40,9 +40,9 @@ public class MainWindow extends JPanel implements ActionListener
 	public static final int HEIGHT = 800;
 
 
-	private Timer timer = new Timer(TICK_TIME, this);	
-	private JFrame frame;
-	private byte[] screen;
+	private final Timer timer = new Timer(TICK_TIME, this);
+	private final JFrame frame;
+	private final byte[] screen;
 	private Point myLocation;
 
 	/*
@@ -242,7 +242,7 @@ public class MainWindow extends JPanel implements ActionListener
 			case KeyEvent.VK_F9:	fKey = Window.WKC_F9;	break;
 			case KeyEvent.VK_F10:	fKey = Window.WKC_F10;	break;
 			case KeyEvent.VK_F11:	fKey = Window.WKC_F11;	break;
-			case KeyEvent.VK_F12:	fKey = Window.WKC_F11;	break;
+			case KeyEvent.VK_F12:	fKey = Window.WKC_F12;	break;
 
 			}
 		}

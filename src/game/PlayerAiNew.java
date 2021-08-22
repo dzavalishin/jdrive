@@ -7,7 +7,7 @@ import game.ids.VehicleID;
 
 public class PlayerAiNew {
 
-	public static int AI_MAX_SPECIAL_VEHICLES = 100;
+	public static final int AI_MAX_SPECIAL_VEHICLES = 100;
 	
 	int state;
 	int tick;
@@ -35,7 +35,7 @@ public class PlayerAiNew {
 
 	int last_id; // here is stored the last id of the searched city/industry
 	int last_vehiclecheck_date; // Used in CheckVehicle
-	Ai_SpecialVehicle special_vehicles[]; // Some vehicles have some special flags
+	final Ai_SpecialVehicle[] special_vehicles; // Some vehicles have some special flags
 
 	TileIndex from_tile;
 	TileIndex to_tile;

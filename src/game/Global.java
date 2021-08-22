@@ -34,7 +34,7 @@ public class Global
 	public static final int MAX_SCREEN_HEIGHT = 1200;
 
 
-	public static Economy _economy = new Economy();
+	public static final Economy _economy = new Economy();
 	public static final Cheats  _cheats = Cheat.cs;
 
 	public static Consumer<TileIndex> _place_proc;
@@ -97,8 +97,8 @@ public class Global
 	
 	public static final int GAME_DIFFICULTY_NUM = 18;
 	
-	static public Hal hal = new Hal();
-	static public Patches _patches = new Patches();
+	static public final Hal hal = new Hal();
+	static public final Patches _patches = new Patches();
 
 	public static GameModes _game_mode;
 	public static boolean _exit_game = false;
@@ -120,9 +120,9 @@ public class Global
 	public static int _map_tile_mask;
 	public static int _map_size;
 
-	public static int[] _cur_resolution = new int[2];
-	public static int [][] _random_seeds = new int[2][2];
-	public static ColorList [] _color_list = new ColorList[16];
+	public static final int[] _cur_resolution = new int[2];
+	public static final int [][] _random_seeds = new int[2][2];
+	public static final ColorList [] _color_list = new ColorList[16];
 	public static String _cmd_text = null;
 
 	
@@ -145,7 +145,7 @@ public class Global
 
 	public static TileIndex _backup_orders_tile;
 	//public static BackuppedOrders [] _backup_orders_data = new BackuppedOrders[1];
-	public static BackuppedOrders [] _backup_orders_data = { new BackuppedOrders() };
+	public static final BackuppedOrders [] _backup_orders_data = { new BackuppedOrders() };
 
 	/* Access Vehicle Data */
 	//#include "table/engines.h"
@@ -155,11 +155,11 @@ public class Global
 	//public static  finalAircraftVehicleInfo orig_aircraft_vehicle_info[NUM_AIRCRAFT_ENGINES];
 	//public static  finalRoadVehicleInfo orig_road_vehicle_info[NUM_ROAD_ENGINES];
 
-	public static  EngineInfo []			_engine_info = new EngineInfo[TOTAL_NUM_ENGINES];
-	public static  RailVehicleInfo []		_rail_vehicle_info = new RailVehicleInfo[NUM_TRAIN_ENGINES];
-	public static  ShipVehicleInfo []		_ship_vehicle_info = new ShipVehicleInfo[NUM_SHIP_ENGINES];
-	public static  AircraftVehicleInfo []	_aircraft_vehicle_info = new AircraftVehicleInfo[NUM_AIRCRAFT_ENGINES];
-	public static  RoadVehicleInfo []		_road_vehicle_info = new RoadVehicleInfo[NUM_ROAD_ENGINES];
+	public static final EngineInfo []			_engine_info = new EngineInfo[TOTAL_NUM_ENGINES];
+	public static final RailVehicleInfo []		_rail_vehicle_info = new RailVehicleInfo[NUM_TRAIN_ENGINES];
+	public static final ShipVehicleInfo []		_ship_vehicle_info = new ShipVehicleInfo[NUM_SHIP_ENGINES];
+	public static final AircraftVehicleInfo []	_aircraft_vehicle_info = new AircraftVehicleInfo[NUM_AIRCRAFT_ENGINES];
+	public static final RoadVehicleInfo []		_road_vehicle_info = new RoadVehicleInfo[NUM_ROAD_ENGINES];
 	
 	
 
@@ -171,12 +171,12 @@ public class Global
 
 	public static final int NUM_PRICES = 49;
 
-	public static Prices _price = new Prices();
-	public static int [] _price_frac = new int[NUM_PRICES];
+	public static final Prices _price = new Prices();
+	public static final int [] _price_frac = new int[NUM_PRICES];
 
-	public static int []_cargo_payment_rates = new int[AcceptedCargo.NUM_CARGO];
-	public static int [] _cargo_payment_rates_frac = new int[AcceptedCargo.NUM_CARGO];
-	public static CargoConst _cargoc = new CargoConst();
+	public static final int []_cargo_payment_rates = new int[AcceptedCargo.NUM_CARGO];
+	public static final int [] _cargo_payment_rates_frac = new int[AcceptedCargo.NUM_CARGO];
+	public static final CargoConst _cargoc = new CargoConst();
 
 	/* --- 1 Day is 74 ticks ---
 	 * The game's internal structure is dictated by ticks. The date counter (date_fract) is an integer of
@@ -186,10 +186,10 @@ public class Global
 	 * * 1 tick is approximately 27ms.
 	 * * 1 day is thus about 2 seconds (74*27 = 1998) on a machine that can run OpenTTD normally
 	 */
-	public static int DAY_TICKS = 74;
-	public static int MAX_YEAR_BEGIN_REAL = 1920;
-	public static int MAX_YEAR_END_REAL = 2090;
-	public static int MAX_YEAR_END = 170;
+	public static final int DAY_TICKS = 74;
+	public static final int MAX_YEAR_BEGIN_REAL = 1920;
+	public static final int MAX_YEAR_END_REAL = 2090;
+	public static final int MAX_YEAR_END = 170;
 
 	public static int _date;
 	public static int _date_fract;
@@ -200,7 +200,7 @@ public class Global
 	public static int _frame_counter;
 	public static int _timer_counter;
 
-	public static Paths _path = new Paths();
+	public static final Paths _path = new Paths();
 
 	public static Tile _m[]; // = new Tile[1024*1024]; // TODO map size
 
@@ -224,7 +224,7 @@ public class Global
 	// etc
 	// Skip aging of cargo?
 	public static int _age_cargo_skip_counter;
-	public static Point _tile_fract_coords = new Point(0,0); // TODO to ViewPort?
+	public static final Point _tile_fract_coords = new Point(0,0); // TODO to ViewPort?
 	public static String _screenshot_name;
 	public static byte _vehicle_design_names;
 	public static int _get_z_hint;
@@ -232,7 +232,7 @@ public class Global
 	public static int _cleared_town_rating;
 	public static int _caret_timer;
 	public static Vehicle _place_clicked_vehicle;
-	public static int _num_resolutions = 1; // TODO _num_resolutions
+	public static final int _num_resolutions = 1; // TODO _num_resolutions
 	public static int _make_screenshot;
 	
 	// Available aircraft types
@@ -246,10 +246,10 @@ public class Global
 	public static int _disaster_delay;
 
 	// Net
-	public static boolean _networking = false;
+	public static final boolean _networking = false;
 	public static boolean _network_available = false;  // is network mode available?
-	public static boolean _network_server = false; // network-server is active
-	public static boolean _network_dedicated = false; // are we a dedicated server?
+	public static final boolean _network_server = false; // network-server is active
+	public static final boolean _network_dedicated = false; // are we a dedicated server?
 	public static byte _network_playas; // an id to play as..
 
 	// main/startup
@@ -259,7 +259,7 @@ public class Global
 	public static int _pause = 0; // [dz] must be it - stacked pause 
 	public static byte _display_opt = (byte) 0xFF; // [dz] display all!
 	public static boolean _do_autosave;
-	public static boolean _use_dos_palette = false;
+	public static final boolean _use_dos_palette = false;
 
 
 
@@ -296,18 +296,18 @@ public class Global
 
 	//void DEBUG(name, level) if (level == 0 || _debug_ ## name ## _level >= level) debug
 
-	static int _debug_ai_level = 0;
+	static final int _debug_ai_level = 0;
 	static int _debug_driver_level = 0;
-	static int _debug_grf_level = 0;
-	static int _debug_map_level = 0;
-	static int _debug_misc_level = 0;
-	static int _debug_ms_level = 0;
+	static final int _debug_grf_level = 0;
+	static final int _debug_map_level = 0;
+	static final int _debug_misc_level = 0;
+	static final int _debug_ms_level = 0;
 	static int _debug_net_level = 0;
-	static int _debug_spritecache_level = 0;
+	static final int _debug_spritecache_level = 0;
 	static int _debug_oldloader_level = 0;
-	static int _debug_pbs_level = 0;
-	static int _debug_ntp_level = 0;
-	static int _debug_npf_level = 0;
+	static final int _debug_pbs_level = 0;
+	static final int _debug_ntp_level = 0;
+	static final int _debug_npf_level = 0;
 
 
 
@@ -396,7 +396,7 @@ public class Global
 	}
 
 	//public static Object[] _decode_parameters = new Object[20];
-	public static Integer[] _decode_parameters = new Integer[20];
+	public static final Integer[] _decode_parameters = new Integer[20];
 
 
 	public static void SetDParam(int n, int v)
@@ -440,7 +440,7 @@ public class Global
 
 
 	private static int next_name_id = 0;
-	private static Map<Integer,String> _name_array = new HashMap<Integer,String>();
+	private static final Map<Integer,String> _name_array = new HashMap<Integer,String>();
 
 
 
@@ -455,7 +455,7 @@ public class Global
 
 	public static String GetName(int id)
 	{
-		return new String(_name_array.get(id & ~0x600));
+		return _name_array.get(id & ~0x600);
 	}
 
 

@@ -2681,6 +2681,7 @@ public class TrainCmd extends TrainTables
 			offs += ((y < -2) ? 2 : 1) * 4;
 		}
 
+		//noinspection ConstantConditions
 		assert(offs < 11);
 		return _new_vehicle_direction_table[offs];
 	}
@@ -2831,7 +2832,7 @@ public class TrainCmd extends TrainTables
 		/* can't collide in depot */
 		if (v.rail.isInDepot()) return;
 
-		assert(v.rail.track == 0x40 || TileIndex.TileVirtXY(v.getX_pos(), v.getY_pos()) == v.tile);
+		assert(v.rail.track == 0x40 || TileIndex.TileVirtXY(v.getX_pos(), v.getY_pos()).equals(v.tile) );
 
 		tcc.v = v;
 		tcc.v_skip = v.next;
@@ -3264,7 +3265,7 @@ public class TrainCmd extends TrainTables
 		ReverseTrainDirection(v);
 		 */
 	}
-
+	// TODO chosen_dir is overwritten! Why?
 	private static boolean green_light(Vehicle v, GetNewVehiclePosResult gp, Vehicle prev, int enterdir, int chosen_dir, int chosen_track) 
 	{
 		if (v.next == null)
@@ -3410,7 +3411,7 @@ public class TrainCmd extends TrainTables
 		}
 	}
 
-	private static int _random_dir_change[] = { -1, 0, 0, 1};
+	private static final int[] _random_dir_change = { -1, 0, 0, 1};
 
 	static void ChangeTrainDirRandomly(Vehicle v)
 	{

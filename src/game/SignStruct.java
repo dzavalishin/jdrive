@@ -34,7 +34,7 @@ public class SignStruct implements IPoolItem
 
 	private int          index;
 
-	private static IPoolItemFactory<SignStruct> factory = new IPoolItemFactory<SignStruct>() {
+	private static final IPoolItemFactory<SignStruct> factory = new IPoolItemFactory<SignStruct>() {
 		/**
 		 * 
 		 */
@@ -147,7 +147,6 @@ public class SignStruct implements IPoolItem
 	 *
 	 * Marks the region of a sign as dirty
 	 *
-	 * @param ss Pointer to the SignStruct
 	 */
 	private void MarkSignDirty()
 	{
@@ -238,7 +237,7 @@ public class SignStruct implements IPoolItem
 		if (Global._cmd_text != null) {
 			/* Create the name */
 			StringID str = Global.AllocateName(Global._cmd_text, 0);
-			if (str == null) return Cmd.CMD_ERROR;
+			//if (str == null) return Cmd.CMD_ERROR;
 
 			if(0 != (flags & Cmd.DC_EXEC) ) {
 				SignStruct ss = GetSign(p1);

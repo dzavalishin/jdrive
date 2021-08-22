@@ -511,7 +511,7 @@ public class Station extends StationTables implements IPoolItem
 		}
 	}
 
-	private static IPoolItemFactory<Station> factory = new IPoolItemFactory<Station>() {
+	private static final IPoolItemFactory<Station> factory = new IPoolItemFactory<Station>() {
 
 		/**
 		 * 
@@ -1018,10 +1018,10 @@ public class Station extends StationTables implements IPoolItem
 			int flat_z = z;
 			if (tileh>0) {
 				// need to check so the entrance to the station is not pointing at a slope.
-				if (((invalid_dirs&1)!=0 && 0==(tileh & 0xC) && (int)w_cur == w) ||
+				if (((invalid_dirs&1)!=0 && 0==(tileh & 0xC) && w_cur == w) ||
 						((invalid_dirs&2)!=0 && 0==(tileh & 6) &&	h_cur == 1) ||
 						((invalid_dirs&4)!=0 && 0==(tileh & 3) && w_cur == 1) ||
-						((invalid_dirs&8)!=0 && 0==(tileh & 9) && (int)h_cur == h)) {
+						((invalid_dirs&8)!=0 && 0==(tileh & 9) && h_cur == h)) {
 					Global._error_message = Str.STR_0007_FLAT_LAND_REQUIRED;
 					error[0] = Cmd.CMD_ERROR;
 					return true;
@@ -1146,6 +1146,7 @@ public class Station extends StationTables implements IPoolItem
 		return layout;
 	}
 
+	// TODO This code is wrong, rewrite lookling at C original
 	private static byte [] CreateMulti(byte [] layout, int n, int b)
 	{
 		int i = n;
@@ -1276,7 +1277,7 @@ public class Station extends StationTables implements IPoolItem
 			st = AllocateStation();
 			if (st == null) return Cmd.CMD_ERROR;
 
-			st.town = Town.ClosestTownFromTile(tile_org, (int)-1);
+			st.town = Town.ClosestTownFromTile(tile_org, -1);
 			if (Global.gs._current_player.id < Global.MAX_PLAYERS && 0 != (flags & Cmd.DC_EXEC))
 				st.town.have_ratings = BitOps.RETSETBIT(st.town.have_ratings, Global.gs._current_player.id);
 
@@ -1745,7 +1746,7 @@ public class Station extends StationTables implements IPoolItem
 			st = AllocateStation();
 			if (st == null) return Cmd.CMD_ERROR;
 
-			st.town = t = Town.ClosestTownFromTile(tile, (int)-1);
+			st.town = t = Town.ClosestTownFromTile(tile, -1);
 
 			//FindRoadStationSpot(type, st, currstop, prev);
 
@@ -1834,6 +1835,7 @@ public class Station extends StationTables implements IPoolItem
 			}
 
 			cur_stop.used = false;
+			//noinspection AssertWithSideEffects
 			assert primary_stop.remove(cur_stop);
 			//if (cur_stop.prev != null) cur_stop.prev.next = cur_stop.next;
 			//if (cur_stop.next != null) cur_stop.next.prev = cur_stop.prev;
@@ -1943,7 +1945,7 @@ public class Station extends StationTables implements IPoolItem
 		if (0 == (flags & Cmd.DC_NO_TOWN_RATING) && !Town.CheckIfAuthorityAllows(tile))
 			return Cmd.CMD_ERROR;
 
-		t = Town.ClosestTownFromTile(tile, (int)-1);
+		t = Town.ClosestTownFromTile(tile, -1);
 
 		/* Check if local auth refuses a new airport */
 		{
@@ -2140,7 +2142,7 @@ public class Station extends StationTables implements IPoolItem
 		st = AllocateStation();
 		if (st == null) return Cmd.CMD_ERROR;
 
-		st.town = Town.ClosestTownFromTile(ti.tile, (int)-1);
+		st.town = Town.ClosestTownFromTile(ti.tile, -1);
 		st.sign.setWidth_1(0);
 
 		if (!GenerateStationName(st, ti.tile, 4)) return Cmd.CMD_ERROR;
@@ -2323,7 +2325,7 @@ public class Station extends StationTables implements IPoolItem
 			st = AllocateStation();
 			if (st == null) return Cmd.CMD_ERROR;
 
-			st.town = t = Town.ClosestTownFromTile(tile, (int)-1);
+			st.town = t = Town.ClosestTownFromTile(tile, -1);
 
 			if (Global.gs._current_player.id < Global.MAX_PLAYERS && 0!= (flags&Cmd.DC_EXEC) )
 				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global.gs._current_player.id);
@@ -2471,7 +2473,7 @@ public class Station extends StationTables implements IPoolItem
 		{
 			final DrawTileSeqStruct dtss = t.seq[ssi];
 
-			if(((byte) dtss.delta_x) == 0x80)
+			if((dtss.delta_x) == 0x80)
 				break;
 
 			image = dtss.image + relocation;
@@ -2482,7 +2484,7 @@ public class Station extends StationTables implements IPoolItem
 				if(0 != (image & Sprite.PALETTE_MODIFIER_COLOR)) image |= image_or_modificator;
 			}
 
-			if ((byte)dtss.delta_z != 0x80) {
+			if (dtss.delta_z != 0x80) {
 				ViewPort.AddSortableSpriteToDraw(image, ti.x + dtss.delta_x, ti.y + dtss.delta_y, dtss.width, dtss.height, dtss.unk, ti.z + dtss.delta_z);
 			} else {
 				ViewPort.AddChildSpriteScreen(image, dtss.delta_x, dtss.delta_y);
@@ -2516,7 +2518,7 @@ public class Station extends StationTables implements IPoolItem
 		{
 			final DrawTileSeqStruct dtss = t.seq[ssp];
 
-			if( ((byte) dtss.delta_x) == 0x80)  
+			if( (dtss.delta_x) == 0x80)
 				break;
 
 			Point pt = Point.RemapCoords(dtss.delta_x, dtss.delta_y, dtss.delta_z);
@@ -2538,8 +2540,7 @@ public class Station extends StationTables implements IPoolItem
 	//private static void GetAcceptedCargo_Station(TileIndex tile, AcceptedCargo ac)
 	private static AcceptedCargo GetAcceptedCargo_Station(TileIndex tile)
 	{
-		AcceptedCargo ac = new AcceptedCargo();
-		return ac;
+		return new AcceptedCargo();
 		/* not used */
 	}
 
@@ -2957,7 +2958,7 @@ public class Station extends StationTables implements IPoolItem
 					// if rating is <= 127 and there are any items waiting, maybe remove some goods.
 					if (rating <= 127 && waiting != 0) {
 						int r = Hal.Random();
-						if ( (int)rating <= (r & 0x7F) ) {
+						if ( rating <= (r & 0x7F) ) {
 							waiting = Math.max(waiting - ((r >> 8)&3) - 1, 0);
 							waiting_changed = true;
 						}
@@ -3059,7 +3060,7 @@ public class Station extends StationTables implements IPoolItem
 		if (!st.IsValidStation() || !Player.CheckOwnership(st.owner)) return Cmd.CMD_ERROR;
 
 		str = Global.AllocateNameUnique(Global._cmd_text, 6);
-		if (str == null) return Cmd.CMD_ERROR;
+		//if (str == null) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			//StringID 
@@ -3369,8 +3370,7 @@ public class Station extends StationTables implements IPoolItem
 
 		// set stations to be sorted on load of savegame
 		//memset(StationGui._station_sort_dirty, true, sizeof(_station_sort_dirty));
-		for(int i = 0; i < StationGui._station_sort_dirty.length; i++)
-			StationGui._station_sort_dirty[i] = false;
+		Arrays.fill(StationGui._station_sort_dirty, false);
 		_global_station_sort_dirty = true; // load of savegame
 	}
 

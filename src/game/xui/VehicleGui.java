@@ -44,14 +44,14 @@ public class VehicleGui {
 
 
 
-	public static Sorting _sorting = new Sorting();
+	public static final Sorting _sorting = new Sorting();
 
 	static int _internal_name_sorter_id; // internal StringID for default vehicle-names
 	static int _last_vehicle_idx;        // cached index to hopefully speed up name-sorting
 	public static boolean   _internal_sort_order;     // descending/ascending
 	//static int   _internal_sort_order;     // descending/ascending
 
-	static int [] _player_num_engines = new int[Global.TOTAL_NUM_ENGINES];
+	static final int [] _player_num_engines = new int[Global.TOTAL_NUM_ENGINES];
 	static /* RailType */ int _railtype_selected_in_replace_gui;
 
 	public static final int PLY_WND_PRC__OFFSET_TOP_WIDGET = 26;
@@ -70,7 +70,7 @@ public class VehicleGui {
 
 
 
-	static AbstractVehicleSorter _vehicle_sorter[] = {
+	static final AbstractVehicleSorter[] _vehicle_sorter = {
 			new VehicleUnsortedSorter(),
 			new VehicleNumberSorter(),
 			new VehicleNameSorter(),
@@ -95,7 +95,7 @@ public class VehicleGui {
 			//INVALID_STRING_ID
 	};
 
-	static int _rail_types_list[] = {
+	static final int[] _rail_types_list = {
 			Str.STR_RAIL_VEHICLES,
 			Str.STR_MONORAIL_VEHICLES,
 			Str.STR_MAGLEV_VEHICLES,
@@ -154,8 +154,7 @@ public class VehicleGui {
 		/* Create array for sorting */
 		//_vehicle_sort = realloc(_vehicle_sort, GetVehiclePoolSize() * sizeof(_vehicle_sort[0]));
 		_vehicle_sort = new SortStruct[Vehicle.GetVehiclePoolSize()]; 
-		if (_vehicle_sort == null)
-			Global.error("Could not allocate memory for the vehicle-sorting-list");
+		//if (_vehicle_sort == null)			Global.error("Could not allocate memory for the vehicle-sorting-list");
 
 		Global.DEBUG_misc(1, "Building vehicle list for player %d station %d...",
 				owner, station);
@@ -190,8 +189,6 @@ public class VehicleGui {
 				}
 			}
 		} else {
-			//final Vehicle v;
-			//FOR_ALL_VEHICLES(v)
 			Vehicle.forEach( (v) ->
 			{
 				if (v.getType() == type && v.getOwner().id == owner && (
@@ -204,12 +201,10 @@ public class VehicleGui {
 			});
 		}
 
-		//free(vl.sort_list);
 		//vl.sort_list = malloc(n * sizeof(vl.sort_list[0]));
 		vl.sort_list = new SortStruct[n[0]];
 
-		if (n[0] != 0 && vl.sort_list == null)
-			Global.error("Could not allocate memory for the vehicle-sorting-list");
+		//if (n[0] != 0 && vl.sort_list == null)			Global.error("Could not allocate memory for the vehicle-sorting-list");
 		vl.list_length = n[0];
 
 		for (i = 0; i < n[0]; ++i) vl.sort_list[i] = _vehicle_sort[i];
@@ -264,7 +259,7 @@ private static void show_cargo(ctype) {
 
 	/** Draw the list of available refit options for a consist.
 	 * Draw the list and highlight the selected refit option (if any)
-	 * @param *v first vehicle in consist to get the refit-options of
+	 * @param v first vehicle in consist to get the refit-options of
 	 * @param sel selected refit cargo-type in the window
 	 * @return the cargo type that is hightlighted, AcceptedCargo.CT_INVALID if none
 	 */
@@ -534,7 +529,6 @@ private static void show_cargo(ctype) {
 
 		w.as_replaceveh_d().count[0] = count;
 		w.as_replaceveh_d().count[1] = count2;
-		return;
 	}
 
 
@@ -952,8 +946,8 @@ private static void show_cargo(ctype) {
 		} break;
 
 		case WE_RESIZE: {
-			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / (int)w.resize.step_height);
-			w.vscroll2.setCap(w.vscroll2.getCap() + e.diff.y / (int)w.resize.step_height);
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / w.resize.step_height);
+			w.vscroll2.setCap(w.vscroll2.getCap() + e.diff.y / w.resize.step_height);
 
 			w.widget.get(7).unkA = (w.vscroll.getCap()  << 8) + 1;
 			w.widget.get(9).unkA = (w.vscroll2.getCap() << 8) + 1;
@@ -1085,8 +1079,8 @@ private static void show_cargo(ctype) {
 	/** Assigns an already open vehicle window to a new vehicle.
 	 * Assigns an already open vehicle window to a new vehicle. If the vehicle got
 	 * any sub window open (orders and so on) it will change owner too.
-	 * @param *from_v the current owner of the window
-	 * @param *to_v the new owner of the window
+	 * @param from_v the current owner of the window
+	 * @param to_v the new owner of the window
 	 */
 	public static void ChangeVehicleViewWindow(final Vehicle from_v, final Vehicle to_v)
 	{

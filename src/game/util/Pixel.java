@@ -11,7 +11,7 @@ package game.util;
 
 public class Pixel 
 {
-	private byte [] mem; // real mem 
+	private final byte [] mem; // real mem
 	private int displ;		// current displacement
 	
 	public void madd( int add ) { displ += add; }

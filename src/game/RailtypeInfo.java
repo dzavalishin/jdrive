@@ -15,21 +15,21 @@ public class RailtypeInfo
 
 	/** Struct containing the main sprites. @note not all sprites are listed, but only
 	 *  the ones used directly in the code */
-	RailBaseSprites base_sprites;
+	final RailBaseSprites base_sprites;
 
 	/** struct containing the sprites for the rail GUI. @note only sprites referred to
 	 * directly in the code are listed */
-	RailGuiSprites gui_sprites;
+	final RailGuiSprites gui_sprites;
 
-	RailCursors cursor;
+	final RailCursors cursor;
 
-	StringID toolbar_caption;
+	final StringID toolbar_caption;
 
 	/** sprite number difference between a piece of track on a snowy ground and the corresponding one on normal ground */
-	SpriteID snow_offset;
+	final SpriteID snow_offset;
 
 	/** bitmask to the OTHER railtypes that can be used by an engine of THIS railtype */
-	byte compatible_railtypes;
+	final byte compatible_railtypes;
 
 	/**
 	 * Offset between the current railtype and normal rail. This means that:<p>
@@ -37,14 +37,15 @@ public class RailtypeInfo
 	 *    is determined by normal rail. Check sprites 1005 and following for this order<p>
 	 * 2) The position where the railtype is loaded must always be the same, otherwise
 	 *    the offset will fail.<p>
-	 * @note: Something more flexible might be desirable in the future.
+	 *
+	 * @apiNote  Something more flexible might be desirable in the future.
 	 */
-	SpriteID total_offset;
+	final SpriteID total_offset;
 
 	/**
 	 * Bridge offset
 	 */
-	SpriteID bridge_offset;
+	final SpriteID bridge_offset;
 
 
 
@@ -78,14 +79,14 @@ public class RailtypeInfo
 //final RailtypeInfo _railtypes[RAILTYPE_END];
 
 class RailCursors {
-	CursorID rail_ns;
-	CursorID rail_swne;
-	CursorID rail_ew;
-	CursorID rail_nwse;
-	CursorID autorail;
-	CursorID depot;
-	CursorID tunnel;
-	CursorID convert;
+	final CursorID rail_ns;
+	final CursorID rail_swne;
+	final CursorID rail_ew;
+	final CursorID rail_nwse;
+	final CursorID autorail;
+	final CursorID depot;
+	final CursorID tunnel;
+	final CursorID convert;
 
 	public RailCursors(int[] cur) {
 		int i = 0;
@@ -101,14 +102,14 @@ class RailCursors {
 }
 
 class RailGuiSprites {
-	SpriteID build_ns_rail;      ///< button for building single rail in N-S direction
-	SpriteID build_x_rail;       ///< button for building single rail in X direction
-	SpriteID build_ew_rail;      ///< button for building single rail in E-W direction
-	SpriteID build_y_rail;       ///< button for building single rail in Y direction
-	SpriteID auto_rail;          ///< button for the autorail construction
-	SpriteID build_depot;        ///< button for building depots
-	SpriteID build_tunnel;       ///< button for building a tunnel
-	SpriteID convert_rail;       ///< button for converting rail
+	final SpriteID build_ns_rail;      ///< button for building single rail in N-S direction
+	final SpriteID build_x_rail;       ///< button for building single rail in X direction
+	final SpriteID build_ew_rail;      ///< button for building single rail in E-W direction
+	final SpriteID build_y_rail;       ///< button for building single rail in Y direction
+	final SpriteID auto_rail;          ///< button for the autorail construction
+	final SpriteID build_depot;        ///< button for building depots
+	final SpriteID build_tunnel;       ///< button for building a tunnel
+	final SpriteID convert_rail;       ///< button for converting rail
 
 	public RailGuiSprites(int[] spr) 
 	{
@@ -126,17 +127,17 @@ class RailGuiSprites {
 }
 
 class RailBaseSprites {
-	SpriteID track_y;      ///< single piece of rail in Y direction, with ground
-	SpriteID track_ns;     ///< two pieces of rail in North and South corner (East-West direction)
-	SpriteID ground;       ///< ground sprite for a 3-way switch
-	SpriteID single_y;     ///< single piece of rail in Y direction, without ground
-	SpriteID single_x;     ///< single piece of rail in X direction
-	SpriteID single_n;     ///< single piece of rail in the northern corner
-	SpriteID single_s;     ///< single piece of rail in the southern corner
-	SpriteID single_e;     ///< single piece of rail in the eastern corner
-	SpriteID single_w;     ///< single piece of rail in the western corner
-	SpriteID crossing;     ///< level crossing, rail in X direction
-	SpriteID tunnel;       ///< tunnel sprites base
+	final SpriteID track_y;      ///< single piece of rail in Y direction, with ground
+	final SpriteID track_ns;     ///< two pieces of rail in North and South corner (East-West direction)
+	final SpriteID ground;       ///< ground sprite for a 3-way switch
+	final SpriteID single_y;     ///< single piece of rail in Y direction, without ground
+	final SpriteID single_x;     ///< single piece of rail in X direction
+	final SpriteID single_n;     ///< single piece of rail in the northern corner
+	final SpriteID single_s;     ///< single piece of rail in the southern corner
+	final SpriteID single_e;     ///< single piece of rail in the eastern corner
+	final SpriteID single_w;     ///< single piece of rail in the western corner
+	final SpriteID crossing;     ///< level crossing, rail in X direction
+	final SpriteID tunnel;       ///< tunnel sprites base
 
 	public RailBaseSprites(int[] spr) 
 	{

@@ -33,7 +33,7 @@ public class Gfx extends PaletteTabs
 	//} StringColorFlags;
 
 
-	public static Colour [] _cur_palette = new Colour[256];
+	public static final Colour [] _cur_palette = new Colour[256];
 
 	// XXX doesn't really belong here, but the only
 	// consumers always use it in conjunction with DoDrawString()
@@ -46,21 +46,21 @@ public class Gfx extends PaletteTabs
 	static final int ASCII_LETTERSTART = 32;
 	public static int _stringwidth_base = 0;
 	//VARDEF byte _stringwidth_table[0x2A0];
-	private static byte [] _stringwidth_table = new byte[0x2A0];
+	private static final byte [] _stringwidth_table = new byte[0x2A0];
 
 	static int _stringwidth_out;
 	//static /* Pixel */ byte  []_cursor_backup = new /* Pixel */ byte [64 * 64];
 
 
 
-	static byte [] _cursor_backup = new byte[64 * 64];
+	static final byte [] _cursor_backup = new byte[64 * 64];
 	//static Rect _invalid_rect;
 	static byte [] _color_remap_ptr;
-	static byte [] _string_colorremap = new byte[3];
+	static final byte [] _string_colorremap = new byte[3];
 
 	static final int DIRTY_BYTES_PER_LINE = (Global.MAX_SCREEN_WIDTH / 64);
 	// TODO [dz] 32* ?
-	static byte [] _dirty_blocks = new byte[4 * DIRTY_BYTES_PER_LINE * Global.MAX_SCREEN_HEIGHT / 8];
+	static final byte [] _dirty_blocks = new byte[4 * DIRTY_BYTES_PER_LINE * Global.MAX_SCREEN_HEIGHT / 8];
 
 
 	/* 
@@ -163,7 +163,7 @@ public class Gfx extends PaletteTabs
 
 			for (ht = height; ht > 0; --ht) {
 				//memcpy(dst, src, width);
-				System.arraycopy(Hal._screen.dst_ptr, src, Hal._screen.dst_ptr, dst, width);
+				System.arraycopy(Hal._screen.dst_ptr.getMem(), src, Hal._screen.dst_ptr.getMem(), dst, width);
 				src -= p;
 				dst -= p;
 			}
@@ -190,7 +190,7 @@ public class Gfx extends PaletteTabs
 			// because source and destination may overlap
 			for (ht = height; ht > 0; --ht) {
 				//memmove(dst, src, width);
-				System.arraycopy(Hal._screen.dst_ptr, src, Hal._screen.dst_ptr, dst, width);
+				System.arraycopy(Hal._screen.dst_ptr.getMem(), src, Hal._screen.dst_ptr.getMem(), dst, width);
 				src += p;
 				dst += p;
 			}
@@ -402,7 +402,7 @@ public class Gfx extends PaletteTabs
 					//return ddd_w;
 
 					if(retwidth != null) retwidth[0] = w; 
-					String s = sb.toString().substring(0, ddd_pos-1);
+					String s = sb.substring(0, ddd_pos-1);
 					return s+"...";
 				}
 				sb.append((char)c);
@@ -780,7 +780,7 @@ public class Gfx extends PaletteTabs
 		//int[]  dst_mem;
 		//int  dst_offset;
 
-		Pixel dst;
+		final Pixel dst;
 
 		int mode;
 		int width, height;
@@ -1750,8 +1750,8 @@ public class Gfx extends PaletteTabs
 	//#define EXTR(p, q) (((int)(_timer_counter * (p)) * (q)) >> 16)
 	//#define EXTR2(p, q) (((int)(~_timer_counter * (p)) * (q)) >> 16)
 
-	static int EXTR(int p, int q) { return ( (((int)((Global._timer_counter ) * p) * q) >>> 16) ) % q; }
-	static int EXTR2(int p, int q) { return ( (((int)(((~Global._timer_counter) ) * p) * q) >>> 16) ) % q; }
+	static int EXTR(int p, int q) { return ( (((Global._timer_counter) * p * q) >>> 16) ) % q; }
+	static int EXTR2(int p, int q) { return ( ((((~Global._timer_counter)) * p * q) >>> 16) ) % q; }
 
 	public static void DoPaletteAnimations()
 	{
@@ -2357,7 +2357,7 @@ public class Gfx extends PaletteTabs
 
 class DrawStringStateMachine
 {
-	private DrawPixelInfo dpi = Hal._cur_dpi;
+	private final DrawPixelInfo dpi = Hal._cur_dpi;
 	private int base = Gfx._stringwidth_base;
 	private int sp = 0; // string pointer
 	private int color;

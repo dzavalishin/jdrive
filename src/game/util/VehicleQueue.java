@@ -169,7 +169,7 @@ class VQImpl extends VehicleQueue
 		offset = 0;
 
 		currentSize = 1;
-		while(done == false) {
+		while(!done) {
 			currItem.position = currentSize;
 			currItem = currItem.below;
 			if(currItem == null) {
@@ -190,8 +190,7 @@ class VQImpl extends VehicleQueue
 			// in the while statement above - I don't need anything here!
 		}
 		clean();
-		return;
-	}
+    }
 
 	// This is one of the special functions - allows item to take itself off
 	// the queue no matter where in the queue it is!

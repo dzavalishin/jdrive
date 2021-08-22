@@ -65,7 +65,7 @@ public class RoadStop implements IPoolItem
 	}
 	
 	
-	private static IPoolItemFactory<RoadStop> factory = new IPoolItemFactory<RoadStop>() {		
+	private static final IPoolItemFactory<RoadStop> factory = new IPoolItemFactory<RoadStop>() {
 		/**
 		 * 
 		 */

@@ -33,17 +33,13 @@ public class Scrollbar
 		bottom -= 9;
 
 		int height = (bottom - top);
-		int tpos = this.pos;
-		int tcount = this.count;
-		int tcap = this.cap;
 
-		if (tcount != 0) top += height * tpos / tcount;
+		if (count != 0) top += height * pos / count;
 
-		if (tcap > tcount) tcap = tcount;
-		if (tcount != 0) bottom -= (tcount - tpos - tcap) * height / tcount;
+		if (cap > count) cap = count;
+		if (count != 0) bottom -= (count - pos - cap) * height / count;
 
-		Point pt = new Point(top, bottom - 1);
-		return pt;
+		return new Point(top, bottom - 1);
 	}
 
 	public void up() {

@@ -27,6 +27,7 @@ import game.xui.Window;
 import game.xui.WindowDesc;
 import game.xui.WindowEvent;
 
+@SuppressWarnings("SuspiciousNameCombination")
 public class Rail extends RailTables {
 
 	public static final int NUM_SSD_ENTRY = RailtypeInfo.NUM_SSD_ENTRY;
@@ -93,7 +94,8 @@ public class Rail extends RailTables {
 	 *    is determined by normal rail. Check sprites 1005 and following for this order<p>
 	 * 2) The position where the railtype is loaded must always be the same, otherwise
 	 *    the offset will fail.<p>
-	 * @note: Something more flexible might be desirable in the future.
+	 *
+	 * @apiNote  Something more flexible might be desirable in the future.
 	 * /
 		SpriteID total_offset;
 
@@ -324,7 +326,8 @@ public class Rail extends RailTables {
 	{
 		assert(IsValidTrack(track));
 		assert(GetRailTileType(tile) == RAIL_TYPE_SIGNALS);
-		return (/*SignalType*/ int)(tile.getMap().m4 & SIGTYPE_MASK);
+		/*SignalType*/
+		return tile.getMap().m4 & SIGTYPE_MASK;
 	}
 
 
@@ -351,7 +354,7 @@ public class Rail extends RailTables {
 	 * @param railtype the rail type which the information is requested for
 	 * @return The pointer to the RailtypeInfo
 	 */
-	public static final RailtypeInfo GetRailTypeInfo(/*RailType*/ int railtype)
+	public static RailtypeInfo GetRailTypeInfo(/*RailType*/ int railtype)
 	{
 		assert(railtype < RAILTYPE_END);
 		return _railtypes[railtype];
@@ -975,7 +978,7 @@ public class Rail extends RailTables {
 	 * @param p1 rail type
 	 * @param p2 depot direction (0 through 3), where 0 is NE, 1 is SE, 2 is SW, 3 is NW
 	 *
-	 * @todo When checking for the tile slope,
+	 * TODO When checking for the tile slope,
 	 * distingush between "Flat land required" and "land sloped in wrong direction"
 	 */
 	public static int CmdBuildTrainDepot(int x, int y, int flags, int p1, int p2)
@@ -1029,7 +1032,7 @@ public class Rail extends RailTables {
 					);
 
 			d.xy = tile;
-			d.town_index = Town.ClosestTownFromTile(tile, (int)-1).index;
+			d.town_index = Town.ClosestTownFromTile(tile, -1).index;
 
 			SetSignalsOnBothDir(tile, (p2&1) != 0 ? 2 : 1);
 
@@ -2204,16 +2207,16 @@ public class Rail extends RailTables {
 		int presignal_exits_free;
 
 		// these are used to keep track of the signals that change.
-		byte [] bit = new byte[NUM_SSD_ENTRY];
-		TileIndex[] tile = new TileIndex[NUM_SSD_ENTRY];
+		final byte [] bit = new byte[NUM_SSD_ENTRY];
+		final TileIndex[] tile = new TileIndex[NUM_SSD_ENTRY];
 
 		int pbs_cur;
 		// these are used to keep track of all signals in the block
-		TileIndex [] pbs_tile = new TileIndex[NUM_SSD_ENTRY];
+		final TileIndex [] pbs_tile = new TileIndex[NUM_SSD_ENTRY];
 
 		// these are used to keep track of the stack that modifies presignals recursively
-		TileIndex [] next_tile = new TileIndex[NUM_SSD_STACK];
-		byte [] next_dir = new byte[NUM_SSD_STACK];
+		final TileIndex [] next_tile = new TileIndex[NUM_SSD_STACK];
+		final byte [] next_dir = new byte[NUM_SSD_STACK];
 
 	}
 
@@ -2565,8 +2568,7 @@ public class Rail extends RailTables {
 
 	static AcceptedCargo GetAcceptedCargo_Track(TileIndex tile)
 	{
-		AcceptedCargo ac = new AcceptedCargo();
-		return ac;
+		return new AcceptedCargo();
 		/* not used */
 	}
 
@@ -3538,7 +3540,7 @@ public class Rail extends RailTables {
 			Gfx.DrawStringCentered(74, 101, Str.STR_3004_PLATFORM_LENGTH, 0);
 			Gfx.DrawStringCentered(74, 141, Str.STR_3066_COVERAGE_AREA_HIGHLIGHT, 0);
 
-			MiscGui.DrawStationCoverageAreaText(2, 166, (int)-1, rad);
+			MiscGui.DrawStationCoverageAreaText(2, 166, -1, rad);
 		} break;
 
 		case WE_CLICK: {

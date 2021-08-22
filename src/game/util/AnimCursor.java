@@ -17,8 +17,8 @@ public class AnimCursor {
 
 	/** Creates two array entries that define one
 	 *  status of the cursor.
-	 *  @param Sprite The Sprite to be displayed
-	 *  @param display_time The Number of ticks to display the sprite
+	 *  @param spriteId The Sprite to be displayed
+	 *  @param time The Number of ticks to display the sprite
 	 */
 	public AnimCursor(int spriteId, int time) 
 	{

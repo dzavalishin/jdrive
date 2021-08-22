@@ -4,7 +4,7 @@ import game.enums.TileTypes;
 
 //@Deprecated
 public class TileType {
-	int type;
+	final int type;
 	
 	public TileType(int t) {
 		type = t;

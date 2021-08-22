@@ -55,7 +55,7 @@ public class Ship {
 		return _ship_sprites[spritenum] + direction;
 	}
 
-	static final Depot  FindClosestShipDepot(final Vehicle  v)
+	static Depot  FindClosestShipDepot(final Vehicle  v)
 	{
 		//final Depot  depot;
 		Depot [] best_depot = { null };
@@ -477,7 +477,7 @@ public class Ship {
 
 	static final byte _pick_shiptrack_table[] = {1, 3, 2, 2, 0, 0};
 
-	private static final boolean TryTrack(int best_track, int i, PathFindShip pfs, int ship_dir, int best_length, int best_bird_dist)
+	private static boolean TryTrack(int best_track, int i, PathFindShip pfs, int ship_dir, int best_length, int best_bird_dist)
 	{
 		if (best_track >= 0) {
 			if (pfs.best_bird_dist != 0) {
@@ -518,8 +518,8 @@ public class Ship {
 			i = BitOps.FIND_FIRST_BIT(bits);
 			bits = BitOps.KILL_FIRST_BIT(bits);
 
-			pfs.best_bird_dist = (int)-1;
-			pfs.best_length = (int)-1;
+			pfs.best_bird_dist = -1;
+			pfs.best_length = -1;
 
 			//FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], (TPFEnumProc*)ShipTrackFollower, null, &pfs);
 			Pathfind.FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], Ship::ShipTrackFollower, null, pfs);
@@ -572,13 +572,13 @@ public class Ship {
 
 			//tile2 = TILE_ADD(tile, -TileOffsByDir(enterdir));
 			tile2 = tile.isub( TileIndex.TileOffsByDir(enterdir) );
-			tot_dist = (int)-1;
+			tot_dist = -1;
 
 			/* Let's find out how far it would be if we would reverse first */
 			b = GetTileShipTrackStatus(tile2) & _ship_sometracks[Rail.ReverseDiagdir(enterdir)] & v.ship.state;
 			if (b != 0) {
 				dist = FindShipTrack(v, tile2, Rail.ReverseDiagdir(enterdir), b, tile, track);
-				if (dist != (int)-1)
+				if (dist != -1)
 					tot_dist = dist + 1;
 			}
 			/* And if we would not reverse? */

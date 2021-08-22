@@ -55,7 +55,7 @@ public class Misc extends MiscTables
 	static void OnNewDay_EffectVehicle(Vehicle v) { /* empty */ }
 
 
-	static OnNewVehicleDayProc  _on_new_vehicle_day_proc[] = {
+	static final OnNewVehicleDayProc[] _on_new_vehicle_day_proc = {
 		TrainCmd::OnNewDay_Train,
 		RoadVehCmd::OnNewDay_RoadVeh,
 		Ship::OnNewDay_Ship,

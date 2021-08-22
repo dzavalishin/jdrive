@@ -87,7 +87,7 @@ public class RoadGui
 		if (success) {
 			//SndPlayTileFx(SND_1F_SPLAT, tile);
 			ViewPort.ResetObjectToPlace();
-			BuildRoadOutsideStation(tile, (int)p1);
+			BuildRoadOutsideStation(tile, p1);
 		}
 	}
 
@@ -163,7 +163,7 @@ public class RoadGui
 		w.SetWindowDirty();
 		//SndPlayFx(SND_15_BEEP);
 		w.click_state = BitOps.RETTOGGLEBIT(w.click_state, 11);
-		ViewPort.SetSelectionRed(BitOps.HASBIT(w.click_state, 11) != false);
+		ViewPort.SetSelectionRed(BitOps.HASBIT(w.click_state, 11));
 	}
 
 	static void BuildRoadClick_Landscaping(Window w)

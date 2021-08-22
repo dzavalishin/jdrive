@@ -31,8 +31,8 @@ public class TextEffect
 
 	static final int MAX_CHAT_MESSAGES = 10;
 
-	static TextEffect _text_effect_list[] = new TextEffect[30];
-	static TextMessage _text_message_list[] = new TextMessage[MAX_CHAT_MESSAGES];
+	static final TextEffect[] _text_effect_list = new TextEffect[30];
+	static final TextMessage[] _text_message_list = new TextMessage[MAX_CHAT_MESSAGES];
 	static TileIndex _animated_tile_list[] = new TileIndex[256];
 
 

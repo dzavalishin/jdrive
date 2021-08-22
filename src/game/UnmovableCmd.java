@@ -108,7 +108,7 @@ public class UnmovableCmd extends UnmovableTables {
 					//TileTypes.MP_SETTYPE(TileTypes.MP_UNMOVABLE) | 
 					TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5, 0x83);
 			Economy.UpdatePlayerHouse(p, score);
-			Window.InvalidateWindow(Window.WC_COMPANY, (int)p.index.id);
+			Window.InvalidateWindow(Window.WC_COMPANY, p.index.id);
 		}
 
 		return cost;
@@ -392,7 +392,7 @@ public class UnmovableCmd extends UnmovableTables {
 		do {
 			//restart:
 			r = Hal.Random();
-			dir = r >> 30;
+			dir = r >>> 30;
 			r %= (dir == 0 || dir == 2) ? Global.MapMaxY() : Global.MapMaxX();
 			int itile =
 					(dir == 0) ? TileIndex.TileXY(0, r).tile   : 0 + // left
@@ -410,12 +410,12 @@ public class UnmovableCmd extends UnmovableTables {
 					restart = true;
 					break;
 				}
-				if(restart) continue;
-				
+
 				tile = tile.iadd( TileIndex.ToTileIndexDiff(_tile_add[dir]) );
 				tile.TILE_MASK();
 
 			} while (!(tile.IsTileType( TileTypes.MP_CLEAR) && tile.GetTileSlope(h) == 0 && h.v <= 16));
+			if(restart) continue;
 
 			tile.TILE_ASSERT();
 

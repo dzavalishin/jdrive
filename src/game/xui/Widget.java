@@ -1,8 +1,8 @@
 package game.xui;
 
 public class Widget {
-	int type;
-	int resize_flag;
+	final int type;
+	final int resize_flag;
 	int color;
 	public int left;
 	public int right;

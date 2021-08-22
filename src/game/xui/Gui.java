@@ -1051,9 +1051,11 @@ public class Gui
 		return true;
 	}
 
+	@SuppressWarnings("StatementWithEmptyBody")
 	static void MaxZoomIn()
 	{
-		while (DoZoomInOutWindow(ZOOM_IN, Window.getMain() ) ) {}
+		while (DoZoomInOutWindow(ZOOM_IN, Window.getMain() ) )
+			{}
 	}
 
 	static void ToolbarZoomInClick(Window w)
@@ -1121,7 +1123,7 @@ public class Gui
 
 		w = PopupMainToolbMenu(w,  43, 2, Str.STR_02C3_GAME_OPTIONS, 13, 0);
 
-		x = (int)-1;
+		x = -1;
 		if(0 != (Global._display_opt & Global.DO_SHOW_TOWN_NAMES))    x = BitOps.RETCLRBIT(x,  5);
 		if(0 != (Global._display_opt & Global.DO_SHOW_STATION_NAMES)) x = BitOps.RETCLRBIT(x,  6);
 		if(0 != (Global._display_opt & Global.DO_SHOW_SIGNS))         x = BitOps.RETCLRBIT(x,  7);
@@ -1295,7 +1297,7 @@ public class Gui
 		Global._generating_world = true; // used to create green terraformed land
 
 		if (_terraform_size == 1) {
-			Cmd.DoCommandP(tile, 8, (int)mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Global._error_message_2));
+			Cmd.DoCommandP(tile, 8, mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Global._error_message_2));
 		} else {
 			// TODO SndPlayTileFx(SND_1F_SPLAT, tile);
 
@@ -1330,7 +1332,7 @@ public class Gui
 			TileIndex.forAll( sizex, sizey, tile, (tile2) ->
 			{
 				if (tile2.TileHeight() == h[0]) {
-					Cmd.DoCommandP(tile2, 8, (int)mode, null, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO);
+					Cmd.DoCommandP(tile2, 8, mode, null, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO);
 				}
 				return false;
 			}); //END_TILE_LOOP(tile2, sizex, sizey, tile)
@@ -2448,7 +2450,7 @@ public class Gui
 	//{   WIDGETS_END},
 	};
 
-	static WindowDesc _main_status_desc = new WindowDesc(
+	static final WindowDesc _main_status_desc = new WindowDesc(
 		Window.WDP_CENTER, 0, 640, 12,
 		Window.WC_STATUS_BAR,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,

@@ -23,7 +23,7 @@ import game.xui.PlayerGui;
 import game.xui.Window;
 
 /** 
- * @todo Cleanup the messy DrawPlayerFace function asap
+ * TODO Cleanup the messy DrawPlayerFace function asap
  */
 
 public class Player implements Serializable 
@@ -69,7 +69,7 @@ public class Player implements Serializable
 	// TODO PlayerAI ai = new PlayerAI();
 	// TODO PlayerAiNew ainew;
 
-	long [][] yearly_expenses = new long[3][13];
+	final long [][] yearly_expenses = new long[3][13];
 
 	public PlayerEconomyEntry cur_economy;
 	public PlayerEconomyEntry old_economy[];
@@ -174,7 +174,7 @@ public class Player implements Serializable
 	{
 		int flag = 0;
 
-		if ( (int)face < 0)
+		if ( face < 0)
 			flag |= 1;
 		if ((((((face >> 7) ^ face) >> 7) ^ face) & 0x8080000) == 0x8000000)
 			flag |= 2;
@@ -396,7 +396,7 @@ public class Player implements Serializable
 				Global.SetDParam(1, p.name_2);
 			}
 		} else {
-			Town t = Town.ClosestTownFromTile(tile, (int)-1);
+			Town t = Town.ClosestTownFromTile(tile, -1);
 			Global.SetDParam(0, Str.STR_TOWN);
 			Global.SetDParam(1, t.index);
 		}
@@ -479,7 +479,7 @@ public class Player implements Serializable
 		if (tile == null)
 			return;
 
-		t = Town.ClosestTownFromTile(tile, (int)-1);
+		t = Town.ClosestTownFromTile(tile, -1);
 
 		if( t != null && BitOps.IS_INT_INSIDE(t.townnametype, Strings.SPECSTR_TOWNNAME_START, Strings.SPECSTR_TOWNNAME_LAST+1)) 
 		{
@@ -711,7 +711,7 @@ public class Player implements Serializable
 		}
 
 		// when there's a lot of computers in game, the probability that a new one starts is lower
-		if (n < (int)GameOptions._opt.diff.max_no_competitors)
+		if (n < GameOptions._opt.diff.max_no_competitors)
 			if (n < (Global._network_server ? Hal.InteractiveRandomRange(GameOptions._opt.diff.max_no_competitors + 2) : Hal.RandomRange(GameOptions._opt.diff.max_no_competitors + 2)) )
 				// Send a command to all clients to start  up a new AI. Works fine for Multiplayer and SinglePlayer 
 				Cmd.DoCommandP(new TileIndex(0), 1, 0, null, Cmd.CMD_PLAYER_CTRL);
@@ -889,11 +889,11 @@ public class Player implements Serializable
 			}
 			break;
 		case 1:
-			if (p.engine_renew_months == (int)p2)
+			if (p.engine_renew_months == p2)
 				return Cmd.CMD_ERROR;
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				p.engine_renew_months = (int)p2;
+				p.engine_renew_months = p2;
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew_months = p.engine_renew_months;
 					Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
@@ -901,11 +901,11 @@ public class Player implements Serializable
 			}
 			break;
 		case 2:
-			if (p.engine_renew_money == (int)p2)
+			if (p.engine_renew_money == p2)
 				return Cmd.CMD_ERROR;
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				p.engine_renew_money = (int)p2;
+				p.engine_renew_money = p2;
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew_money = p.engine_renew_money;
 					Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
@@ -944,8 +944,8 @@ public class Player implements Serializable
 		case 4:
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				p.engine_renew = 0 != BitOps.GB(p1, 15, 1);
-				p.engine_renew_months = (int)BitOps.GB(p1, 16, 16);
-				p.engine_renew_money = (int)p2;
+				p.engine_renew_months = BitOps.GB(p1, 16, 16);
+				p.engine_renew_money = p2;
 
 				if (IsLocalPlayer()) {
 					Global._patches.autorenew = p.engine_renew;
@@ -983,12 +983,14 @@ public class Player implements Serializable
 	 * - p1 = 2 - PlayerID of the that is getting deleted
 	 * - p1 = 3 - #1 p2 = (bit  0-15) - player to merge (p2 & 0xFFFF)
 	 *          - #2 p2 = (bit 16-31) - player to be merged into ((p2>>16)&0xFFFF)
-	 * @todo In the case of p1=0, create new player, the clientID of the new player is in parameter
+	 *
+	 * TODO In the case of p1=0, create new player, the clientID of the new player is in parameter
 	 * p2. This parameter is passed in at function DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)
 	 * on the server itself. First of all this is unbelievably ugly; second of all, well,
 	 * it IS ugly! <b>Someone fix this up :)</b> So where to fix?@n
-	 * @arg - network_server.c:838 DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)@n
-	 * @arg - network_client.c:536 DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_MAP) from where the map has been received
+	 *
+	 * arg - network_server.c:838 DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)@n
+	 * arg - network_client.c:536 DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_MAP) from where the map has been received
 	 */
 	static int CmdPlayerCtrl(int x, int y, int flags, int p1, int p2)
 	{
@@ -1578,8 +1580,7 @@ final Chunk Handler _player_chunk_handlers[] = {
 };
 	 */
 
-	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
-	{
+	public static void loadGame(ObjectInputStream oin) {
 		//Global.gs._players = (Player[]) oin.readObject();
 		for(Player p : Global.gs._players)
 		{
@@ -1592,8 +1593,7 @@ final Chunk Handler _player_chunk_handlers[] = {
 		}
 	}
 
-	public static void saveGame(ObjectOutputStream oos) throws IOException 
-	{
+	public static void saveGame(ObjectOutputStream oos) {
 		//oos.writeObject(Global.gs._players);		
 	}
 

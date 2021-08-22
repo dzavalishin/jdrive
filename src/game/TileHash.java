@@ -16,7 +16,7 @@ import java.util.List;
 
 public class TileHash<ItemType>
 {
-	Map<Integer, List<ItemType> > map = new HashMap<Integer, List<ItemType> >();
+	final Map<Integer, List<ItemType> > map = new HashMap<Integer, List<ItemType> >();
 	
 
 	public void add(TileIndex tileIndex, ItemType item)
@@ -50,7 +50,6 @@ public class TileHash<ItemType>
 		if( mi == null )
 		{
 			Global.error("TileHash attempt to remove %s (%s)", item.toString(), item.getClass().getName());
-			return;
 		}
 		else
 			mi.remove(item);			

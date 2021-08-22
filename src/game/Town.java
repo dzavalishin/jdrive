@@ -154,7 +154,7 @@ implements IPoolItem, Serializable
 
 
 
-	private static IPoolItemFactory<Town> factory = new IPoolItemFactory<Town>() {		
+	private static final IPoolItemFactory<Town> factory = new IPoolItemFactory<Town>() {
 		/**
 		 * 
 		 */
@@ -253,7 +253,7 @@ implements IPoolItem, Serializable
 		ViewPort.AddChildSpriteScreen(0x5A3, 0xE, 0x3C - BitOps.GB(ti.tile.getMap().m1, 0, 7));
 	}
 
-	static TownDrawTileProc _town_draw_tile_procs[] = {
+	static final TownDrawTileProc[] _town_draw_tile_procs = {
 			Town::TownDrawHouseLift
 	};
 
@@ -1041,24 +1041,22 @@ implements IPoolItem, Serializable
 		// Find a road that we can base the construction on.
 		tile = xy;
 		//for (ptr = _town_coord_mod; ptr != endof(_town_coord_mod); ++ptr) 
-		for(int i = 0; i < _town_coord_mod.length; i++)
-		{
-			ptr = _town_coord_mod[i];
+		for (TileIndexDiffC tileIndexDiffC : _town_coord_mod) {
+			ptr = tileIndexDiffC;
 			if (Road.GetRoadBitsByTile(tile) != 0) {
 				boolean r = GrowTownAtRoad(tile);
 				Global.gs._current_player = old_player;
 				return r;
 			}
-			tile = tile.iadd( TileIndex.ToTileIndexDiff(ptr));
+			tile = tile.iadd(TileIndex.ToTileIndexDiff(ptr));
 		}
 
 		// No road available, try to build a random road block by
 		// clearing some land and then building a road there.
 		tile = xy;
 		//for (ptr = _town_coord_mod; ptr != endof(_town_coord_mod); ++ptr) 		{
-		for(int i = 0; i < _town_coord_mod.length; i++)
-		{
-			ptr = _town_coord_mod[i];
+		for (TileIndexDiffC tileIndexDiffC : _town_coord_mod) {
+			ptr = tileIndexDiffC;
 			Landscape.FindLandscapeHeightByTile(ti, tile);
 
 			// Only work with plain land that not already has a house with map5=0
@@ -1069,7 +1067,7 @@ implements IPoolItem, Serializable
 					return true;
 				}
 			}
-			tile = tile.iadd( TileIndex.ToTileIndexDiff(ptr));
+			tile = tile.iadd(TileIndex.ToTileIndexDiff(ptr));
 		}
 
 		Global.gs._current_player = old_player;
@@ -1735,7 +1733,7 @@ implements IPoolItem, Serializable
 		t = GetTown(p1);
 
 		str = Global.AllocateNameUnique(Global._cmd_text, 4);
-		if (str == null) return Cmd.CMD_ERROR;
+		//if (str == null) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			Global.DeleteName(t.townnametype);
@@ -1908,10 +1906,9 @@ implements IPoolItem, Serializable
 		statues = BitOps.RETSETBIT(statues, Global.gs._current_player.id);
 
 		//for (p = _statue_tiles; p != endof(_statue_tiles); ++p) 
-		for( int i = 0; i < _statue_tiles.length; i++ )
-		{
+		for (TileIndexDiffC statue_tile : _statue_tiles) {
 			if (DoBuildStatueOfCompany(tile)) return;
-			tile = tile.iadd( TileIndex.ToTileIndexDiff(_statue_tiles[i]) );
+			tile = tile.iadd(TileIndex.ToTileIndexDiff(statue_tile));
 		}
 	}
 
@@ -1963,7 +1960,7 @@ implements IPoolItem, Serializable
 		}
 	}
 
-	static TownActionProc _town_action_proc[] = {
+	static final TownActionProc[] _town_action_proc = {
 			Town::TownActionAdvertise,
 			Town::TownActionAdvertise,
 			Town::TownActionAdvertise,

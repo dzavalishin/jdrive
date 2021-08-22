@@ -462,7 +462,7 @@ public class MiscGui {
 		Window.AllocateWindowDescFront(_build_trees_scen_desc, 0);
 	}
 
-	static Integer [] _errmsg_decode_params = new Integer[20];
+	static final Integer [] _errmsg_decode_params = new Integer[20];
 	static StringID _errmsg_message_1, _errmsg_message_2;
 	static int _errmsg_duration = 100; // TODO [dz] why?
 
@@ -1542,8 +1542,7 @@ public class MiscGui {
 				}
 				break;
 			}
-		case WE_DESTROY:
-			break;
+		//case WE_DESTROY:			break;
 
 		case WE_RESIZE: {
 			/* Widget 3 and 4 have to go with halve speed, make it so obiwan */
@@ -1554,6 +1553,7 @@ public class MiscGui {
 
 			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 10);
 		} break;
+
 		default:
 			break;
 		}

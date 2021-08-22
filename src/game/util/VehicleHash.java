@@ -100,7 +100,7 @@ public class VehicleHash
 	}
 	
 	//ArrayList<VehicleID> list = new ArrayList<VehicleID>();
-	Map<Integer,VehicleID> map = new HashMap<Integer,VehicleID>();
+	final Map<Integer,VehicleID> map = new HashMap<Integer,VehicleID>();
 		
 	public List<VehicleID> get(int x1, int y1, int x2, int y2) {
 		x1 >>= 8; // down

@@ -11,7 +11,6 @@ import game.enums.TileTypes;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
-import game.struct.DrawTileSprites;
 import game.struct.Point;
 import game.util.BitOps;
 import game.util.MemoryPool;
@@ -48,7 +47,7 @@ public class WayPoint implements IPoolItem
 
 
 
-	private static IPoolItemFactory<WayPoint> factory = new IPoolItemFactory<WayPoint>() 
+	private static final IPoolItemFactory<WayPoint> factory = new IPoolItemFactory<WayPoint>()
 	{		
 		private static final long serialVersionUID = 1L;
 
@@ -221,7 +220,7 @@ private void WaypointPoolNewBlock(int start_item)
 		boolean used_waypoint[] = new boolean[MAX_WAYPOINTS_PER_TOWN];
 		int i;
 
-		town_index = Town.ClosestTownFromTile(xy, (int)-1).index;
+		town_index = Town.ClosestTownFromTile(xy, -1).index;
 
 		//memset(used_waypoint, 0, sizeof(used_waypoint));
 		//used_waypoint.clear();
@@ -304,7 +303,7 @@ private void WaypointPoolNewBlock(int start_item)
 	 * @param p1 graphics for WayPoint type, 0 indicates standard graphics
 	 * @param p2 unused
 	 *
-	 * @todo When checking for the tile slope,
+	 * TODO When checking for the tile slope,
 	 * distingush between "Flat land required" and "land sloped in wrong direction"
 	 */
 	static int CmdBuildTrainWaypoint(int x, int y, int flags, int p1, int p2)

@@ -26,11 +26,11 @@ public class Hal
 	
 	void toggle_fullscreen(boolean fullscreen) { } // TODO
 
-	public static DrawPixelInfo _screen = new DrawPixelInfo();
+	public static final DrawPixelInfo _screen = new DrawPixelInfo();
 	public static DrawPixelInfo _cur_dpi = new DrawPixelInfo();
 
-	public static Rect _invalid_rect = new Rect();
-	public static CursorVars _cursor = new CursorVars();
+	public static final Rect _invalid_rect = new Rect();
+	public static final CursorVars _cursor = new CursorVars();
 
 
 

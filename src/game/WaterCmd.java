@@ -89,7 +89,7 @@ public class WaterCmd extends WaterTables
 		if(0 != (flags & Cmd.DC_EXEC) ) {
 			depot.xy = tile;
 			Depot._last_built_ship_depot_tile = tile;
-			depot.town_index = Town.ClosestTownFromTile(tile, (int)-1).index;
+			depot.town_index = Town.ClosestTownFromTile(tile, -1).index;
 
 			Landscape.ModifyTile(tile, TileTypes.MP_WATER,
 				//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
@@ -372,7 +372,7 @@ public class WaterCmd extends WaterTables
 			// ship depot
 			if(0 != (flags & Cmd.DC_AUTO) )return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 
-			switch ((int)m5) {
+			switch (m5) {
 				case 0x80: break;
 				case 0x81: tile = tile.isub(TileIndex.TileDiffXY(1, 0)); break;
 				case 0x82: break;
@@ -537,8 +537,7 @@ public class WaterCmd extends WaterTables
 
 	static AcceptedCargo GetAcceptedCargo_Water(TileIndex tile)
 	{
-		AcceptedCargo ac = new AcceptedCargo();
-		return ac;
+		return new AcceptedCargo();
 		/* not used */
 	}
 

@@ -5,7 +5,7 @@ import game.Global;
 public class GameDate {
 
 	
-	static final int M(int a, int b) { return ((a<<5)|b); }
+	static int M(int a, int b) { return ((a<<5)|b); }
 	static final int _month_date_from_year_day[] = {
 	M(0,1),M(0,2),M(0,3),M(0,4),M(0,5),M(0,6),M(0,7),M(0,8),M(0,9),M(0,10),M(0,11),M(0,12),M(0,13),M(0,14),M(0,15),M(0,16),M(0,17),M(0,18),M(0,19),M(0,20),M(0,21),M(0,22),M(0,23),M(0,24),M(0,25),M(0,26),M(0,27),M(0,28),M(0,29),M(0,30),M(0,31),
 	M(1,1),M(1,2),M(1,3),M(1,4),M(1,5),M(1,6),M(1,7),M(1,8),M(1,9),M(1,10),M(1,11),M(1,12),M(1,13),M(1,14),M(1,15),M(1,16),M(1,17),M(1,18),M(1,19),M(1,20),M(1,21),M(1,22),M(1,23),M(1,24),M(1,25),M(1,26),M(1,27),M(1,28),M(1,29),
@@ -106,10 +106,10 @@ public class GameDate {
 		} else if (BitOps.IS_INT_INSIDE(date, 2091, 65536))
 			return date;
 		else
-			return (int)-1;
+			return -1;
 
 		// invalid ranges?
-		if (month >= 12 || !BitOps.IS_INT_INSIDE(day, 1, 31+1)) return (int)-1;
+		if (month >= 12 || !BitOps.IS_INT_INSIDE(day, 1, 31+1)) return -1;
 
 		return ConvertYMDToDay(year, month, day);
 	}

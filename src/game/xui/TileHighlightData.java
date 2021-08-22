@@ -8,14 +8,14 @@ public class TileHighlightData {
 	Point size = new Point(0, 0);
 	Point outersize = new Point(0, 0);
 	Point pos = new Point(0, 0);
-	Point offs = new Point(0, 0);
+	final Point offs = new Point(0, 0);
 
-	Point new_pos = new Point(0, 0);
-	Point new_size = new Point(0, 0);
-	Point new_outersize = new Point(0, 0);
+	final Point new_pos = new Point(0, 0);
+	final Point new_size = new Point(0, 0);
+	final Point new_outersize = new Point(0, 0);
 
-	Point selend = new Point(0, 0);
-	Point selstart = new Point(0, 0);
+	final Point selend = new Point(0, 0);
+	final Point selstart = new Point(0, 0);
 
 	int dirty;
 	int sizelimit;

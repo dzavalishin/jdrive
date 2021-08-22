@@ -23,7 +23,7 @@ import game.util.BitOps;
 
 public class Main {
 
-	private static SmallFiosItem _file_to_saveload = new SmallFiosItem();
+	private static final SmallFiosItem _file_to_saveload = new SmallFiosItem();
 
 
 
@@ -333,7 +333,7 @@ public class Main {
 		// TODO if (sounddriver[0]) ttd_strlcpy(_ini_sounddriver, sounddriver, sizeof(_ini_sounddriver));
 		// TODO if (videodriver[0]) ttd_strlcpy(_ini_videodriver, videodriver, sizeof(_ini_videodriver));
 		// TODO if (resolution[0]) { _cur_resolution[0] = resolution[0]; _cur_resolution[1] = resolution[1]; }
-		if (startdate != (int)-1) Global._patches.starting_date = startdate;
+		if (startdate != -1) Global._patches.starting_date = startdate;
 
 		if (Global._dedicated_forks && !dedicated)
 			Global._dedicated_forks = false;
@@ -1110,7 +1110,7 @@ public class Main {
 		SignStruct.UpdateAllSignVirtCoords();
 
 		// make sure there is a town in the game
-		if (Global._game_mode == GameModes.GM_NORMAL && null == Town.ClosestTownFromTile(TileIndex.get(0), (int)-1)) 
+		if (Global._game_mode == GameModes.GM_NORMAL && null == Town.ClosestTownFromTile(TileIndex.get(0), -1))
 		{
 			Global._error_message = Str.STR_NO_TOWN_IN_SCENARIO;
 			return false;

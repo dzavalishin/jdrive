@@ -19,8 +19,8 @@ public class Bridge
 	public int  max_length;     ///< the maximum length of the bridge (not counting start and end tile)
 	public int price;        ///< the relative price of the bridge
 	public int speed;        ///< maximum travel speed
-	public /*PalSpriteID*/ int sprite;  ///< the sprite which is used in the GUI (possibly with a recolor sprite)
-	public /*StringID*/ int material;   ///< the string that contains the bridge description
+	public final /*PalSpriteID*/ int sprite;  ///< the sprite which is used in the GUI (possibly with a recolor sprite)
+	public final /*StringID*/ int material;   ///< the string that contains the bridge description
 	//PalSpriteID **sprite_table; ///< table of sprites for drawing the bridge
 	public /*PalSpriteID*/ int [][] sprite_table; ///< table of sprites for drawing the bridge
 	public int  flags;          ///< bit 0 set: disable drawing of far pillars.
@@ -32,7 +32,7 @@ public class Bridge
 	static Bridge _bridge[] = new Bridge[MAX_BRIDGES];
 
 
-	static BridgeData  _bridgedata = new BridgeData();
+	static final BridgeData  _bridgedata = new BridgeData();
 
 	public Bridge(int i, int j, int k, int l, int m, int n, int str, int[][] object, int o) {
 		avail_year = i;
@@ -91,7 +91,7 @@ public class Bridge
 
 		case WE_CLICK:
 			if (e.widget == 2) {
-				int ind = ((int)e.pt.y - 14) / 22;
+				int ind = (e.pt.y - 14) / 22;
 				if (ind < 4 && (ind += w.vscroll.getPos()) < _bridgedata.count)
 					BuildBridge(w, ind);
 			}

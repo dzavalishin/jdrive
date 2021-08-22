@@ -884,7 +884,8 @@ public class SettingsGui extends SettingsTables
 	 * - p1 = (bit 0- 7) - the patches type (page) that is being changed (finalruction, network, ai)
 	 * - p2 = (bit 8-15) - the actual patch (entry) being set inside the category
 	 * @param p2 the new value for the patch
-	 * @todo check that the new value is a valid one. Awful lot of work, but since only
+	 *
+	 * TODO check that the new value is a valid one. Awful lot of work, but since only
 	 * the server is allowed to do this, we trust it on this one :)
 	 */
 	public static int CmdChangePatchSetting(int x, int y, int flags, int p1, int p2)

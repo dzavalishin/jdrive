@@ -203,15 +203,12 @@ class Subsidy {
 
 	static boolean CheckSubsidyDuplicate(Subsidy s)
 	{
-		for(int i = 0; i < _subsidies.length; i++) 
-		{
-			Subsidy ss = _subsidies[i];
+		for (Subsidy ss : _subsidies) {
 			/*if (s != ss &&
 					ss.from == s.from &&
 					ss.to == s.to &&
 					ss.cargo_type == s.cargo_type)*/
-			if(ss.equalsExAge(s))
-			{
+			if (ss.equalsExAge(s)) {
 				s.markInvalid();
 				return true;
 			}

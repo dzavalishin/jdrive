@@ -14,9 +14,10 @@ import game.tables.RailTables;
 import game.util.BitOps;
 import game.util.IntContainer;
 
-/** @file tunnelbridge_cmd.c
- * This file deals with tunnels and bridges (non-gui stuff)
- * @todo seperate this file into two
+/**
+ * This class deals with tunnels and bridges (non-gui stuff)
+ *
+ * TODO seperate this file into two
  */
 public class TunnelBridgeCmd extends TunnelBridgeTables
 {
@@ -60,7 +61,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	static final int BRIDGE_NO_FOUNDATION = 1 << 0 | 1 << 3 | 1 << 6 | 1 << 9 | 1 << 12;
 	//};
 
-	static  final /*PalSpriteID*/ int [] GetBridgeSpriteTable(int index, int table)
+	static /*PalSpriteID*/ int [] GetBridgeSpriteTable(int index, int table)
 	{
 		final Bridge bridge = Bridge._bridge[index];
 		assert(table < 7);
@@ -455,7 +456,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		TileInfo ti = new TileInfo();
 		int z;
 
-		if ((int)x > Global.MapMaxX() * 16 - 1 || (int)y > Global.MapMaxY() * 16 - 1)
+		if (x > Global.MapMaxX() * 16 - 1 || y > Global.MapMaxY() * 16 - 1)
 			return Cmd.CMD_ERROR;
 
 		/* check if valid, and make sure that (x,y) is smaller than (x2,y2) */
@@ -466,12 +467,12 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			direction++;
 			if (y > y2) {
 				{ int t = y; y = y2; y2 = t; } // intswap(y,y2);
-				{ int t = x; x = x2; x2 = t; } // intswap(x,x2);
+				//{ int t = x; x = x2; x2 = t; } // intswap(x,x2);
 				exc_tile|=2;
 			}
 		} else if (y == y2) {
 			if (x > x2) {
-				{ int t = y; y = y2; y2 = t; } // intswap(y,y2);
+				//{ int t = y; y = y2; y2 = t; } // intswap(y,y2);
 				{ int t = x; x = x2; x2 = t; } // intswap(x,x2);
 				exc_tile|=2;
 			}
@@ -587,7 +588,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				direction++;
 				if(tiorg.tileh != 3) {
 					direction++;
-					if(tiorg.tileh != 3) 
+					if(tiorg.tileh != 9)
 						return Cmd.return_cmd_error(Str.STR_500B_SITE_UNSUITABLE_FOR_TUNNEL);
 				}
 			}			
@@ -662,7 +663,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 		Global._build_tunnel_endtile = endtile;
 
-		t = Town.ClosestTownFromTile(tile, (int)-1); //needed for town rating penalty
+		t = Town.ClosestTownFromTile(tile, -1); //needed for town rating penalty
 		// check if you're allowed to remove the tunnel owned by a town
 		// removal allowal depends on difficulty settings
 		if (tile.IsTileOwner(Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR) {
@@ -784,7 +785,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		endtile[0]	= endtile[0].iadd( (0 != direction) ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
 
 
-		t = Town.ClosestTownFromTile(tile, (int)-1); //needed for town rating penalty
+		t = Town.ClosestTownFromTile(tile, -1); //needed for town rating penalty
 		// check if you're allowed to remove the bridge owned by a town.
 		// removal allowal depends on difficulty settings
 		if (tile.IsTileOwner(Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR) {
@@ -1321,8 +1322,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 	static AcceptedCargo GetAcceptedCargo_TunnelBridge(TileIndex tile)
 	{
-		AcceptedCargo ac = new AcceptedCargo();
-		return ac;
+		return new AcceptedCargo();
 		/* not used */
 	}
 

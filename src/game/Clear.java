@@ -11,6 +11,7 @@ import game.util.BitOps;
 import game.xui.ViewPort;
 
 // clear_cmd.c
+@SuppressWarnings("EmptyMethod")
 public class Clear extends ClearTables {
 
 	static class TerraformerHeightMod {
@@ -359,8 +360,9 @@ public class Clear extends ClearTables {
 
 
 	/** Levels a selected (rectangle) area of land
-	 * @param x,y end tile of area-drag
-	 * @param p1 start tile of area drag
+	 * @param ex end tile of area-drag
+	 * @param ey end tile of area-drag
+	 * @param pp1 start tile of area drag
 	 * @param p2 unused
 	 */
 	static int CmdLevelLand(int ex, int ey, int flags, int pp1, int p2)
@@ -395,7 +397,7 @@ public class Clear extends ClearTables {
 		int size_y = ey-sy+1;
 
 		money[0] = Cmd.GetAvailableMoneyForCommand();
-		cost[0] = 0;
+		//cost[0] = 0;
 
 		//BEGIN_TILE_LOOP(tile2, size_x, size_y, tile) 
 		TileIndex.forAll( size_x, size_y, tile, (tile2) ->
@@ -607,11 +609,11 @@ public class Clear extends ClearTables {
 
 	static AcceptedCargo GetAcceptedCargo_Clear(TileIndex tile)
 	{
-		AcceptedCargo ac = new AcceptedCargo();
-		return ac;
+		return new AcceptedCargo();
 		/* unused */
 	}
 
+	@SuppressWarnings("EmptyMethod")
 	static void AnimateTile_Clear(TileIndex tile)
 	{
 		/* unused */
@@ -648,7 +650,7 @@ public class Clear extends ClearTables {
 				dirty = tile;
 			}
 		} else {
-			if (self == false && neighbour == false) {
+			if (!self && !neighbour) {
 				tile.getMap().m4 =  BitOps.RETSB(tile.getMap().m4, 5, 3, 0);
 				dirty = tile;
 			}
@@ -670,7 +672,7 @@ public class Clear extends ClearTables {
 				dirty = tile;
 			}
 		} else {
-			if (self == false && neighbour == false) {
+			if (!self && !neighbour) {
 				tile.getMap().m4 =  BitOps.RETSB(tile.getMap().m4, 2, 3, 0);
 				dirty = tile;
 			}
@@ -891,7 +893,6 @@ public class Clear extends ClearTables {
 
 	static void ChangeTileOwner_Clear(TileIndex tile, PlayerID old_player, PlayerID new_player)
 	{
-		return;
 	}
 
 	static void InitializeClearLand()
