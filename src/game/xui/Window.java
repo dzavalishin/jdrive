@@ -28,8 +28,6 @@ import game.util.wcustom.*;
 public class Window extends WindowConstants
 {
 	int flags4;
-	//WindowClass window_class;
-	//WindowNumber window_number;
 	int window_class;
 	public int window_number;
 
@@ -122,7 +120,7 @@ public class Window extends WindowConstants
 	static int _scroller_click_timeout;
 
 	/**
-	 * TODO Controlled fro Widget
+	 * TODO Controlled from Widget
 	 */
 	public static boolean _scrolling_scrollbar = false;
 
@@ -3179,14 +3177,11 @@ public class Window extends WindowConstants
 	{
 		Window w = Window.getMain();
 
-		w.as_vp_d().scrollpos_x = Global._saved_scrollpos_x;
-		w.as_vp_d().scrollpos_y = Global._saved_scrollpos_y;
-
-		// TODO ((vp_d)w.custom).scrollpos_x = Global._saved_scrollpos_x;
-		// TODO ((vp_d)w.custom).scrollpos_y = Global._saved_scrollpos_y;
+		w.as_vp_d().scrollpos_x = Global.gs._saved_scrollpos_x;
+		w.as_vp_d().scrollpos_y = Global.gs._saved_scrollpos_y;
 
 		ViewPort vp = w.viewport;
-		vp.zoom = (byte) Global._saved_scrollpos_zoom;
+		vp.zoom = (byte) Global.gs._saved_scrollpos_zoom;
 		vp.virtual_width = vp.width << vp.zoom;
 		vp.virtual_height = vp.height << vp.zoom;
 	}
@@ -3196,9 +3191,9 @@ public class Window extends WindowConstants
 		final Window w = Window.getMain(); // Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
 
 		//if (w != null) {
-		Global._saved_scrollpos_x = w.as_vp2_d().scrollpos_x;
-		Global._saved_scrollpos_y = w.as_vp2_d().scrollpos_y;
-		Global._saved_scrollpos_zoom = w.viewport.zoom;
+		Global.gs._saved_scrollpos_x = w.as_vp2_d().scrollpos_x;
+		Global.gs._saved_scrollpos_y = w.as_vp2_d().scrollpos_y;
+		Global.gs._saved_scrollpos_zoom = w.viewport.zoom;
 		//}
 	}
 	

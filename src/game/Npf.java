@@ -1,5 +1,9 @@
 package game;
 
+import game.aystar.AyStar;
+import game.aystar.AyStarNode;
+import game.aystar.AyStar_CalculateH;
+import game.aystar.AyStar_EndNodeCheck;
 import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.struct.FindLengthOfTunnelResult;
@@ -1193,12 +1197,12 @@ public class Npf {
 	static void InitializeNPF()
 	{
 		AyStar.init_AyStar(_npf_aystar, Npf::NPFHash, NPF_HASH_SIZE);
-		_npf_aystar.loops_per_tick = 0;
-		_npf_aystar.max_path_cost = 0;
-		//_npf_aystar.max_search_nodes = 0;
+		_npf_aystar.setLoops_per_tick(0);
+		_npf_aystar.setMax_path_cost(0);
+
 		/* We will limit the number of nodes for now, until we have a better
 		 * solution to really fix performance */
-		_npf_aystar.max_search_nodes = Global._patches.npf_max_search_nodes;
+		_npf_aystar.setMax_search_nodes(Global._patches.npf_max_search_nodes);
 	}
 
 	static void NPFFillWithOrderData(NPFFindStationOrTileData  fstd, Vehicle  v)

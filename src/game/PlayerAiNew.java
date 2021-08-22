@@ -1,5 +1,8 @@
 package game;
 
+import game.ai.Ai_PathFinderInfo;
+import game.ai.Ai_SpecialVehicle;
+import game.aystar.AyStar;
 import game.ids.VehicleID;
 
 public class PlayerAiNew {

@@ -127,10 +127,6 @@ public class Global
 	public static ColorList [] _color_list = new ColorList[16];
 	public static String _cmd_text = null;
 
-	// to be saved
-	public static int _saved_scrollpos_x;
-	public static int _saved_scrollpos_y;
-	public static int _saved_scrollpos_zoom;
 	
 	//public static StringID _error_message;
 	//public static StringID _error_message_2;

@@ -25,5 +25,9 @@ public class GameState
 	int _cur_player_tick_index;
 	int _next_competitor_start;
 	
+	// Window?
+	public int _saved_scrollpos_x;
+	public int _saved_scrollpos_y;
+	public int _saved_scrollpos_zoom;
 	
 }

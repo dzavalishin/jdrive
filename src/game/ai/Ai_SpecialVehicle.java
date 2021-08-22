@@ -1,4 +1,4 @@
-package game;
+package game.ai;
 
 import game.ids.VehicleID;
 

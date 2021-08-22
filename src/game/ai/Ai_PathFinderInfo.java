@@ -1,4 +1,6 @@
-package game;
+package game.ai;
+
+import game.TileIndex;
 
 public class Ai_PathFinderInfo {
 

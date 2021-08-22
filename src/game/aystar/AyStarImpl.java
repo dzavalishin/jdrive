@@ -1,4 +1,4 @@
-package game;
+package game.aystar;
 
 import game.struct.OpenListNode;
 
