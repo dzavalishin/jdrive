@@ -46,7 +46,7 @@ public class AyStar
 	// TODO resurrect
 	//Object user_path;
 	public Object user_target;
-	public int [] user_data = new int[10];
+	public final int [] user_data = new int[10];
 
 	// [dz] can be some superclass or interface of NPFFoundTargetData? 
 	public NPFFoundTargetData user_path;
@@ -62,7 +62,7 @@ public class AyStar
 
 	/* These should be filled with the neighbours of a tile by
 	 * GetNeighbours */
-	public AyStarNode neighbours[];
+	public final AyStarNode[] neighbours;
 	public int num_neighbours;
 
 	/* These will contain the methods for manipulating the AyStar. Only
@@ -87,12 +87,12 @@ public class AyStar
 	/* These will contain the open and closed lists */
 
 	/* The actual closed list */
-	Hash ClosedListHash = new Hash();
+	final Hash ClosedListHash = new Hash();
 	/* The open queue */
-	TTDQueue<OpenListNode> OpenListQueue = new TTDQueueImpl<OpenListNode>();
+	final TTDQueue<OpenListNode> OpenListQueue = new TTDQueueImpl<OpenListNode>();
 	/* An extra hash to speed up the process of looking up an element in
 	 * the open list */
-	Hash OpenListHash = new Hash();
+	final Hash OpenListHash = new Hash();
 
 
 
@@ -178,7 +178,7 @@ public class AyStar
 	static OpenListNode AyStarMain_OpenList_Pop(AyStar aystar)
 	{
 		// Return the item the Queue returns.. the best next OpenList item.
-		OpenListNode res = (OpenListNode)aystar.OpenListQueue.pop();
+		OpenListNode res = aystar.OpenListQueue.pop();
 		if (res != null)
 			aystar.OpenListHash.Hash_Delete(res.path.node.tile, res.path.node.direction);
 
@@ -223,7 +223,7 @@ public class AyStar
 		assert(new_g >= 0);
 		// Add the parent g-value to the new g-value
 		new_g += parent.g;
-		if (aystar.getMax_path_cost() != 0 && (int)new_g > aystar.getMax_path_cost()) return AYSTAR_DONE;
+		if (aystar.getMax_path_cost() != 0 && new_g > aystar.getMax_path_cost()) return AYSTAR_DONE;
 
 		// Calculate the h-value
 		new_h = aystar.CalculateH.apply(aystar, current, parent);
@@ -356,7 +356,9 @@ public class AyStar
 		int r, i = 0;
 		// Loop through the OpenList
 		//  Quit if result is no AYSTAR_STILL_BUSY or is more than loops_per_tick
-		while ((r = aystar.loop.apply(aystar)) == AYSTAR_STILL_BUSY && (aystar.getLoops_per_tick() == 0 || ++i < aystar.getLoops_per_tick())) { }
+		//noinspection StatementWithEmptyBody
+		while ((r = aystar.loop.apply(aystar)) == AYSTAR_STILL_BUSY && (aystar.getLoops_per_tick() == 0 || ++i < aystar.getLoops_per_tick()))
+			{ }
 		/*#ifdef AYSTAR_DEBUG
 		if (r == AYSTAR_FOUND_END_NODE)
 			printf("[AyStar] Found path!\n");

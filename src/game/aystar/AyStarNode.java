@@ -5,7 +5,7 @@ import game.TileIndex;
 public class AyStarNode {
 	public TileIndex tile;
 	public int direction;
-	public int user_data[];
+	public final int[] user_data;
 
 	
 	public AyStarNode() {
