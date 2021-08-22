@@ -99,7 +99,7 @@ public class Global
 	
 	public static final int GAME_DIFFICULTY_NUM = 18;
 	
-	static public Hal hal = new JavaHal();
+	static public Hal hal = new Hal();
 	static public Patches _patches = new Patches();
 
 	public static GameModes _game_mode;
