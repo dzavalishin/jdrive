@@ -52,21 +52,21 @@ public class TileTypeProcs implements Serializable
 	}
 
 	//abstract void draw_tile_proc(TileInfo ti);
-	public Consumer<TileInfo> draw_tile_proc;
+	public final Consumer<TileInfo> draw_tile_proc;
 	
 	//abstract int get_slope_z_proc(TileInfo ti);
 	//Consumer<TileInfo> get_slope_z_proc;
-	public Function<TileInfo,Integer> get_slope_z_proc;
+	public final Function<TileInfo,Integer> get_slope_z_proc;
 	
 	//abstract int clear_tile_proc(TileIndex tile, byte flags);
 	//BiConsumer<TileIndex, Byte> clear_tile_proc;
-	public ToIntBiFunction<TileIndex, Byte> clear_tile_proc;
+	public final ToIntBiFunction<TileIndex, Byte> clear_tile_proc;
 	
 	//abstract AcceptedCargo get_accepted_cargo_proc(TileIndex tile);
-	public Function<TileIndex,AcceptedCargo> get_accepted_cargo_proc;
+	public final Function<TileIndex,AcceptedCargo> get_accepted_cargo_proc;
 	
 	//abstract TileDesc get_tile_desc_proc(TileIndex tile);
-	public Function<TileIndex,TileDesc> get_tile_desc_proc;
+	public final Function<TileIndex,TileDesc> get_tile_desc_proc;
 
 	/**
 	 * GetTileTrackStatusProcs return a value that contains the possible tracks
@@ -92,22 +92,22 @@ public class TileTypeProcs implements Serializable
 	
 	//abstract int get_tile_track_status_proc(TileIndex tile, TransportType mode);
 	//ToIntBiFunction<TileIndex,TransportType> get_tile_track_status_proc; 
-	public ToIntBiFunction<TileIndex,Integer> get_tile_track_status_proc; 
+	public final ToIntBiFunction<TileIndex,Integer> get_tile_track_status_proc;
 	
 	//abstract void click_tile_proc(TileIndex tile);
-	public Consumer<TileIndex> click_tile_proc;
+	public final Consumer<TileIndex> click_tile_proc;
 	
 	//abstract void animate_tile_proc(TileIndex tile);
-	public Consumer<TileIndex> animate_tile_proc;
+	public final Consumer<TileIndex> animate_tile_proc;
 	
 	//abstract void tile_loop_proc(TileIndex tile);
-	public Consumer<TileIndex> tile_loop_proc;
+	public final Consumer<TileIndex> tile_loop_proc;
 	
 	//abstract void change_tile_owner_proc(TileIndex tile, PlayerID old_player, PlayerID new_player);
-	public ChangeOwnerInterface change_tile_owner_proc;
+	public final ChangeOwnerInterface change_tile_owner_proc;
 	
 	//abstract byte[] get_produced_cargo_proc(TileIndex tile);
-	public Function<TileIndex,ProducedCargo> get_produced_cargo_proc;
+	public final Function<TileIndex,ProducedCargo> get_produced_cargo_proc;
 
 	/**
 	 *  Return value has bit 0x2 set, when the vehicle enters a station. Then,
@@ -118,11 +118,11 @@ public class TileTypeProcs implements Serializable
 	//abstract int vehicle_enter_tile_proc(Vehicle v, TileIndex tile, int x, int y);
 	//abstract void vehicle_leave_tile_proc(Vehicle v, TileIndex tile, int x, int y);
 	
-	public TileVehicleInterface vehicle_enter_tile_proc;
-	public TileVehicleInterface vehicle_leave_tile_proc;
+	public final TileVehicleInterface vehicle_enter_tile_proc;
+	public final TileVehicleInterface vehicle_leave_tile_proc;
 	
 	//abstract int get_slope_tileh_proc(final TileInfo ti);
-	public Function<TileInfo,Integer> get_slope_tileh_proc;
+	public final Function<TileInfo,Integer> get_slope_tileh_proc;
 
 }
 
