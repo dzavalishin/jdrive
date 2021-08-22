@@ -7,7 +7,7 @@ public class Ai {
 
 
 
-	public static AIStruct _ai = new AIStruct();
+	public static final AIStruct _ai = new AIStruct();
 	//static AIPlayer _ai_player[MAX_PLAYERS];
 
 	// ai.c
