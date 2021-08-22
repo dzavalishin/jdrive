@@ -2640,7 +2640,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				MakeSortedIndustryList();
 			}
 
-			MiscGui.SetVScrollCount(w, _industry_sort.length);
+			w.SetVScrollCount( _industry_sort.length);
 
 			w.DrawWindowWidgets();
 			Gfx.DoDrawString(0 != (_industry_sort_order & 1) ? Gfx.DOWNARROW : Gfx.UPARROW, _indicator_positions[_industry_sort_order>>1], 15, 0x10);

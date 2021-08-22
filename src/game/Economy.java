@@ -1102,8 +1102,9 @@ public class Economy extends EconomeTables
 
 		/* Found one? */
 		if (best[0] != null) {
-			best[0].was_cargo_delivered = true;
-			best[0].cargo_waiting[0] = Math.min(best[0].cargo_waiting[0] + num_pieces, 0xFFFF);
+			//best[0].was_cargo_delivered = true;
+			//best[0].cargo_waiting[0] = Math.min(best[0].cargo_waiting[0] + num_pieces, 0xFFFF);
+			best[0].acceptCargo(cargo_type, num_pieces);
 		}
 	}
 
@@ -1115,22 +1116,23 @@ public class Economy extends EconomeTables
 		Player p;
 
 		// check if there is an already existing subsidy that applies to us
-		for(int i = 0; i < Subsidy._subsidies.length; i++) 
-		{
-			Subsidy s = Subsidy._subsidies[i];
-			/*if (s.cargo_type == cargo_type &&
-					s.age >= 12 &&
-					s.from == from.index &&
-					s.to == to.index)*/
+		//for(int i = 0; i < Subsidy._subsidies.length; i++) 
+		//{
+		//	Subsidy s = Subsidy._subsidies[i];
+		for( Subsidy s : Subsidy._subsidies )
+			/*if (s.cargo_type == cargo_type &&	s.age >= 12 && s.from == from.index && s.to == to.index)*/
 			if( s.appliesTo(from,to,cargo_type))
 				return true;
-		}
+		//}
 
 		/* check if there's a new subsidy that applies.. */
-		for(int i = 0; i < Subsidy._subsidies.length; i++) 
+		//for(int i = 0; i < Subsidy._subsidies.length; i++) 
+		//{
+		//	Subsidy s = Subsidy._subsidies[i];
+		for( Subsidy s : Subsidy._subsidies )
 		{
-			Subsidy s = Subsidy._subsidies[i];
-			if (s.cargo_type == cargo_type && s.age < 12) {
+			if (s.cargo_type == cargo_type && s.age < 12) 
+			{
 
 				/* Check distance from source */
 				if (cargo_type == AcceptedCargo.CT_PASSENGERS || cargo_type == AcceptedCargo.CT_MAIL) {
@@ -1138,7 +1140,7 @@ public class Economy extends EconomeTables
 				} else {
 					xy = (Industry.GetIndustry(s.from)).xy;
 				}
-				//xy = s.getFromXy();
+
 				if (Map.DistanceMax(xy, from.getXy()) > 9)
 					continue;
 
@@ -1148,7 +1150,7 @@ public class Economy extends EconomeTables
 				} else {
 					xy = (Industry.GetIndustry(s.to)).xy;
 				}
-				//xy = s.getToXy();
+
 				if (Map.DistanceMax(xy, to.getXy()) > 9)
 					continue;
 
@@ -1211,17 +1213,13 @@ public class Economy extends EconomeTables
 
 		// Modify profit if a subsidy is in effect
 		if (subsidised) {
-			if (GameOptions._opt.diff.subsidy_multiplier < 1) {
-				/* 1.5x */
+			if (GameOptions._opt.diff.subsidy_multiplier < 1) {				/* 1.5x */
 				profit += profit >> 1;
-			} else if (GameOptions._opt.diff.subsidy_multiplier == 1) {
-				/* 2x */
+			} else if (GameOptions._opt.diff.subsidy_multiplier == 1) {		/* 2x */
 				profit *= 2;
-			} else if (GameOptions._opt.diff.subsidy_multiplier == 2) {
-				/* 3x */
+			} else if (GameOptions._opt.diff.subsidy_multiplier == 2) {		/* 3x */
 				profit *= 3;
-			} else {
-				/* 4x */
+			} else {														/* 4x */
 				profit *= 4;
 			}
 		}
@@ -1250,7 +1248,6 @@ public class Economy extends EconomeTables
 			}
 		}
 
-		//FOR_ALL_VEHICLES(x)
 		Iterator<Vehicle> ii = Vehicle.getIterator();
 		while(ii.hasNext())
 		{

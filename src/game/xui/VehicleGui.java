@@ -522,8 +522,8 @@ private static void show_cargo(ctype) {
 		}
 		}
 		// sets up the number of items in each list
-		MiscGui.SetVScrollCount(w, count);
-		MiscGui.SetVScroll2Count(w, count2);
+		w.SetVScrollCount( count);
+		w.SetVScroll2Count(count2);
 		w.as_replaceveh_d().sel_engine[0] = selected_id[0];
 		w.as_replaceveh_d().sel_engine[1] = selected_id[1];
 

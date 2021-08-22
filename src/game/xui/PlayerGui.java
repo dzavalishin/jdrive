@@ -264,7 +264,7 @@ public class PlayerGui
 				}
 			}
 			w.as_def_d().data_1 = used_colors;
-			MiscGui.SetVScrollCount(w, num_free);
+			w.SetVScrollCount( num_free);
 			w.DrawWindowWidgets();
 
 			x = 2;

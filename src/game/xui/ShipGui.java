@@ -347,7 +347,7 @@ public class ShipGui
 					final Engine e = Engine.GetEngine(Global.SHIP_ENGINES_INDEX + i++);
 					if (e.isAvailableToMe()) count++;
 				} while (--num > 0);
-				MiscGui.SetVScrollCount(w, count);
+				w.SetVScrollCount( count);
 			}
 
 			w.DrawWindowWidgets();
@@ -663,7 +663,7 @@ public class ShipGui
 				num[0]++;
 		});
 		
-		MiscGui.SetVScrollCount(w, (num[0] + w.hscroll.getCap() - 1) / w.hscroll.getCap());
+		w.SetVScrollCount( (num[0] + w.hscroll.getCap() - 1) / w.hscroll.getCap());
 
 		/* locate the depot struct */
 		depot = Depot.GetDepotByTile(tile);
@@ -1026,7 +1026,7 @@ public class ShipGui
 			VehicleGui.BuildVehicleList(vl, Vehicle.VEH_Ship, owner, station);
 			VehicleGui.SortVehicleList(vl);
 
-			MiscGui.SetVScrollCount(w, vl.list_length);
+			w.SetVScrollCount( vl.list_length);
 
 			// disable 'Sort By' tooltip on Unsorted sorting criteria
 			if (vl.sort_type == VehicleGui.SORT_BY_UNSORTED)

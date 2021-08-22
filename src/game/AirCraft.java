@@ -2422,7 +2422,7 @@ public class AirCraft extends AirCraftTables {
 					final Engine e = Engine.GetEngine(ei++);
 					if (e.isAvailableToMe()) count++;
 				} while (--num > 0);
-				MiscGui.SetVScrollCount(w, count);
+				w.SetVScrollCount( count);
 			}
 
 			w.DrawWindowWidgets();
@@ -2999,7 +2999,7 @@ public class AirCraft extends AirCraftTables {
 			}
 		}
 		
-		MiscGui.SetVScrollCount(w, (num + w.hscroll.getCap() - 1) / w.hscroll.getCap());
+		w.SetVScrollCount( (num + w.hscroll.getCap() - 1) / w.hscroll.getCap());
 
 		Global.SetDParam(0, tile.getMap().m2);
 		w.DrawWindowWidgets();
@@ -3369,7 +3369,7 @@ public class AirCraft extends AirCraftTables {
 			VehicleGui.BuildVehicleList(vl, Vehicle.VEH_Aircraft, owner, station);
 			VehicleGui.SortVehicleList(vl);
 
-			MiscGui.SetVScrollCount(w, vl.list_length);
+			w.SetVScrollCount( vl.list_length);
 
 			// disable 'Sort By' tooltip on Unsorted sorting criteria
 			if (vl.sort_type == VehicleGui.SORT_BY_UNSORTED) w.disabled_state |= (1 << 3);

@@ -228,7 +228,7 @@ public class TrainGui
 					    && ee.isAvailableToMe())
 						count++;
 				}
-				MiscGui.SetVScrollCount(w, count);
+				w.SetVScrollCount( count);
 			}
 
 			Global.SetDParam(0, w.as_buildtrain_d().railtype + Str.STR_881C_NEW_RAIL_VEHICLES);
@@ -436,8 +436,8 @@ public class TrainGui
 		/* Always have 1 empty row, so people can change the setting of the train */
 		num++;
 
-		MiscGui.SetVScrollCount(w, num);
-		MiscGui.SetHScrollCount(w, (hnum + 7) / 8);
+		w.SetVScrollCount( num);
+		w.SetHScrollCount((hnum + 7) / 8);
 
 		/* locate the depot struct */
 		depot = Depot.GetDepotByTile(tile);
@@ -1182,7 +1182,7 @@ public class TrainGui
 			num++;	// needs one more because first line is description string
 		}
 
-		MiscGui.SetVScrollCount(w, num);
+		w.SetVScrollCount( num);
 
 		w.disabled_state = 1 << (det_tab + 9);
 		if (v.getOwner() != Global.gs._local_player)
@@ -1436,7 +1436,7 @@ public class TrainGui
 			VehicleGui.BuildVehicleList(vl, Vehicle.VEH_Train, owner, station);
 			VehicleGui.SortVehicleList(vl);
 
-			MiscGui.SetVScrollCount(w, vl.list_length);
+			w.SetVScrollCount( vl.list_length);
 
 			// disable 'Sort By' tooltip on Unsorted sorting criteria
 			if (vl.sort_type == VehicleGui.SORT_BY_UNSORTED)

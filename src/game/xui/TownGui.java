@@ -123,7 +123,7 @@ public abstract class TownGui //extends Town
 			int [] numact = {0};
 			int buttons = GetMaskOfTownActions(numact, Global.gs._local_player, t);
 
-			MiscGui.SetVScrollCount(w, numact[0] + 1);
+			w.SetVScrollCount( numact[0] + 1);
 
 			if (w.as_def_d().data_1 != -1 && !BitOps.HASBIT(buttons, w.as_def_d().data_1))
 				w.as_def_d().data_1 = -1;
@@ -444,7 +444,7 @@ public abstract class TownGui //extends Town
 				MakeSortedTownList();
 			}
 
-			MiscGui.SetVScrollCount(w, _num_town_sort);
+			w.SetVScrollCount( _num_town_sort);
 
 			w.DrawWindowWidgets();
 			Gfx.DoDrawString((_town_sort_order & 1) != 0 ? Gfx.DOWNARROW : Gfx.UPARROW, (_town_sort_order <= 1) ? 88 : 187, 15, 0x10);
