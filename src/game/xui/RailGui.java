@@ -237,7 +237,7 @@ public class RailGui {
 				Cmd.CMD_BUILD_TUNNEL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_5016_CAN_T_BUILD_TUNNEL_HERE));
 	}
 
-	static void PlaceProc_BuyLand(TileIndex tile)
+	public static void PlaceProc_BuyLand(TileIndex tile)
 	{
 		Cmd.DoCommandP(tile, 0, 0, null /*CcPlaySound1E*/, Cmd.CMD_PURCHASE_LAND_AREA | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_5806_CAN_T_PURCHASE_THIS_LAND));
 	}
