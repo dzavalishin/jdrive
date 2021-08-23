@@ -1917,6 +1917,7 @@ public class Rail extends RailTables {
 			spri = spr.track_ns.id+1; break;
 			
 		default:
+			junction = true;
 			if(0==(track & (TRACK_BIT_RIGHT | TRACK_BIT_UPPER | TRACK_BIT_DIAG1)))			
 				spri = spr.ground.id; 
 			else if(0 == (track & (TRACK_BIT_LEFT | TRACK_BIT_LOWER | TRACK_BIT_DIAG1)))
