@@ -1332,17 +1332,17 @@ public class TrainCmd extends TrainTables
 		rail2.flags = BitOps.RETCLRBIT(rail2.flags, Vehicle.VRF_GOINGDOWN);
 
 		// Reverse the rail-flags (if needed) 
-	if (BitOps.HASBIT(flag1, Vehicle.VRF_GOINGUP)) {
-		rail2.flags = BitOps.RETSETBIT(rail2.flags, Vehicle.VRF_GOINGDOWN);
-	} else if (BitOps.HASBIT(flag1, Vehicle.VRF_GOINGDOWN)) {
-		rail2.flags = BitOps.RETSETBIT(rail2.flags, Vehicle.VRF_GOINGUP);
+		if (BitOps.HASBIT(flag1, Vehicle.VRF_GOINGUP)) {
+			rail2.flags = BitOps.RETSETBIT(rail2.flags, Vehicle.VRF_GOINGDOWN);
+		} else if (BitOps.HASBIT(flag1, Vehicle.VRF_GOINGDOWN)) {
+			rail2.flags = BitOps.RETSETBIT(rail2.flags, Vehicle.VRF_GOINGUP);
+		}
+		if (BitOps.HASBIT(flag2, Vehicle.VRF_GOINGUP)) {
+			rail1.flags = BitOps.RETSETBIT(rail1.flags, Vehicle.VRF_GOINGDOWN);
+		} else if (BitOps.HASBIT(flag2, Vehicle.VRF_GOINGDOWN)) {
+			rail1.flags = BitOps.RETSETBIT(rail1.flags, Vehicle.VRF_GOINGUP);
+		}
 	}
-	if (BitOps.HASBIT(flag2, Vehicle.VRF_GOINGUP)) {
-		rail1.flags = BitOps.RETSETBIT(rail1.flags, Vehicle.VRF_GOINGDOWN);
-	} else if (BitOps.HASBIT(flag2, Vehicle.VRF_GOINGDOWN)) {
-		rail1.flags = BitOps.RETSETBIT(rail1.flags, Vehicle.VRF_GOINGUP);
-	}
-}
 
 
 	static void ReverseTrainSwapVeh(Vehicle v, int l, int r)
@@ -1774,7 +1774,7 @@ public class TrainCmd extends TrainTables
 	static boolean NtpCallbFindDepot(TileIndex tile, Object o, int track, int length)
 	{
 		TrainFindDepotData tfdd = (TrainFindDepotData) o;
-		
+
 		if (tile.IsTileType( TileTypes.MP_RAILWAY) && tile.IsTileOwner( tfdd.owner)) {
 			if ((tile.getMap().m5 & ~0x3) == 0xC0) {
 				tfdd.best_length = length;
@@ -2119,7 +2119,7 @@ public class TrainCmd extends TrainTables
 	static boolean NtpCallbFindStation(TileIndex tile, Object o, int track, int length)
 	{
 		TrainTrackFollowerData ttfd = (TrainTrackFollowerData) o;
-		
+
 		// heading for nowhere?
 		if (ttfd.dest_coords == null)
 			return false;
@@ -2974,9 +2974,9 @@ public class TrainCmd extends TrainTables
 					v.VehiclePositionChanged();
 					continue;
 				}
+				update_image_and_delta(v,gp,prev);
+				continue; 
 			}
-			update_image_and_delta(v,gp,prev);
-			//continue; // TODO [dz] check logic against orig code, this 'continue' kills code below
 
 
 
@@ -3443,7 +3443,7 @@ public class TrainCmd extends TrainTables
 		if (state <= 200 && BitOps.CHANCE16(1, 7)) 
 		{
 			r = Hal.Random();
-			
+
 			index = (r * 10 >> 16);
 
 			u = v;
