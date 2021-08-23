@@ -91,9 +91,9 @@ public class TrainCmd extends TrainTables
 				}
 
 				// max speed is the minimum of the speed limits of all vehicles in the consist
-				if (rvi_u.isWagon() || Global._patches.wagon_speed_limits)
-					if (rvi_u.max_speed != 0 && !Engine.UsesWagonOverride(u))
-						max_speed = Math.min(rvi_u.max_speed, max_speed);
+				if (!rvi_u.isWagon() || Global._patches.wagon_speed_limits)
+					if (rvi_u.getMax_speed() != 0 && !Engine.UsesWagonOverride(u))
+						max_speed = Math.min(rvi_u.getMax_speed(), max_speed);
 			}
 
 			// check the vehicle length (callback)
@@ -664,7 +664,7 @@ public class TrainCmd extends TrainTables
 				v.spritenum = rvi.image_index;
 				v.cargo_type = rvi.cargo_type;
 				v.cargo_cap = rvi.capacity;
-				v.max_speed = rvi.max_speed;
+				v.max_speed = rvi.getMax_speed();
 				v.value = value;
 				v.last_station_visited = Station.INVALID_STATION;
 				v.dest_tile = null;
@@ -2952,7 +2952,7 @@ public class TrainCmd extends TrainTables
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 		int r, tracks,ts;
 		int enterdir, /*newdir,*/ dir;
-		int chosen_dir = 0; // TODO [dz] logic lost? Does not get value
+		//int chosen_dir = 0; 
 		int chosen_track;
 		//byte old_z;
 
@@ -3050,7 +3050,7 @@ public class TrainCmd extends TrainTables
 				return;
 			}
 
-			/* Check if the new tile contrains tracks that are compatible
+			/* Check if the new tile contains tracks that are compatible
 			 * with the current train, if not, bail out. */
 			if (!CheckCompatibleRail(v, gp.new_tile)) {
 				//debug("!CheckCompatibleRail(%p, %x)", v, gp.new_tile);
@@ -3086,7 +3086,7 @@ public class TrainCmd extends TrainTables
 						if (v.rail.force_proceed != 0)
 						{
 							//goto green_light;
-							if( green_light(v,gp,prev,enterdir,chosen_dir,chosen_track) ) return;
+							if( green_light(v,gp,prev,enterdir,chosen_track) ) return;
 							continue;
 						}
 
@@ -3110,7 +3110,7 @@ public class TrainCmd extends TrainTables
 								v.rail.pbs_end_trackdir = ftd.node.direction;
 
 								//goto green_light;
-								if( green_light(v,gp,prev,enterdir,chosen_dir,chosen_track) ) return;
+								if( green_light(v,gp,prev,enterdir,chosen_track) ) return;
 								continue;
 
 							}
@@ -3122,7 +3122,7 @@ public class TrainCmd extends TrainTables
 						// on entering the block, we reset our status
 						v.rail.pbs_status = Pbs.PBS_STAT_NONE;
 						//goto green_light;
-						if( green_light(v,gp,prev,enterdir,chosen_dir,chosen_track) ) return;
+						if( green_light(v,gp,prev,enterdir,chosen_track) ) return;
 						continue;
 					};
 					Global.DEBUG_pbs(3, "pbs: (%i) no green light found, or was no pbs-block",v.unitnumber);
@@ -3142,7 +3142,7 @@ public class TrainCmd extends TrainTables
 			}
 
 			//green_light:
-			if( green_light(v,gp,prev,enterdir,chosen_dir,chosen_track) ) return;
+			if( green_light(v,gp,prev,enterdir,chosen_track) ) return;
 			continue;
 			/*
 				if (v.next == null)
@@ -3265,9 +3265,11 @@ public class TrainCmd extends TrainTables
 		ReverseTrainDirection(v);
 		 */
 	}
-	// TODO chosen_dir is overwritten! Why?
-	private static boolean green_light(Vehicle v, GetNewVehiclePosResult gp, Vehicle prev, int enterdir, int chosen_dir, int chosen_track) 
+
+	private static boolean green_light(Vehicle v, GetNewVehiclePosResult gp, Vehicle prev, int enterdir, int chosen_track)	
 	{
+		int chosen_dir;
+		
 		if (v.next == null)
 			Pbs.PBSClearTrack(gp.old_tile, BitOps.FIND_FIRST_BIT(v.rail.track));
 
@@ -3751,7 +3753,7 @@ public class TrainCmd extends TrainTables
 
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
-			t = v.current_order;
+			t = new Order( v.current_order );
 			v.current_order.type = Order.OT_DUMMY;
 			v.current_order.flags = 0;
 

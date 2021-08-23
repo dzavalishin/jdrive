@@ -1050,6 +1050,10 @@ public class Npf {
 		AyStarNode start1 = new AyStarNode();
 		AyStarNode start2 = new AyStarNode();
 
+		// [dz] catch invalid target case, pretend we reached it
+		if(!target.isValid())
+			return NPFFoundTargetData.ON_TARGET;
+		
 		start1.tile = tile1;
 		start2.tile = tile2;
 		/* We set this in case the target is also the start tile, we will just

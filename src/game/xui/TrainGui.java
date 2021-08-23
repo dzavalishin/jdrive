@@ -51,7 +51,7 @@ public class TrainGui
 		y += 10;
 
 		/* Max speed - Engine power */
-		Global.SetDParam(0, rvi.max_speed * 10 >> 4);
+		Global.SetDParam(0, rvi.getMax_speed() * 10 >> 4);
 		Global.SetDParam(1, rvi.power << multihead);
 		Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_SPEED_POWER, 0);
 		y += 10;
@@ -121,8 +121,8 @@ public class TrainGui
 		y += 10;
 
 		/* Wagon speed limit, displayed if above zero */
-		if (rvi.max_speed > 0 && Global._patches.wagon_speed_limits) {
-			Global.SetDParam(0, rvi.max_speed * 10 >> 4);
+		if (rvi.getMax_speed() > 0 && Global._patches.wagon_speed_limits) {
+			Global.SetDParam(0, rvi.getMax_speed() * 10 >> 4);
 			Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_SPEED, 0);
 			y += 10;
 		}

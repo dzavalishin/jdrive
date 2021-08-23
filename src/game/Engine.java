@@ -1334,7 +1334,7 @@ public class Engine extends EngineTables implements Serializable
 		int multihead = rvi.isMulttihead() ? 1 : 0;
 
 		Global.SetDParam(0, (Global._price.build_railvehicle >> 3) * rvi.base_cost >> 5);
-		Global.SetDParam(2, rvi.max_speed * 10 >> 4);
+		Global.SetDParam(2, rvi.getMax_speed() * 10 >> 4);
 		Global.SetDParam(3, rvi.power << multihead);
 		Global.SetDParam(1, rvi.weight << multihead);
 

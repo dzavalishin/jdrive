@@ -317,11 +317,11 @@ public class EngineTables2
 	
 	//final RailVehicleInfo orig_rail_vehicle_info[NUM_TRAIN_ENGINES] = {
 	public final static RailVehicleInfo orig_rail_vehicle_info[] = {
-			// image_index  max_speed (kph)      running_cost_base                 callbackmask    shortened factor
-			// |  flags     |        power (hp)  |    running_cost_class           |   powered wagons power
-			// |  |    base_cost     |    weight      |    capacity                |   |   powered wagons weight
-			// |  |    |    |        |    |      |    |    |    cargo_type         |   |   |   visual effects
-			// |  |    |    |        |    |      |    |    |    |                  |   |   |   |   |
+                               // image_index  max_speed (kph)      running_cost_base                 callbackmask    shortened factor
+                               // |  flags     |        power (hp)  |    running_cost_class           |   powered wagons power
+                               // |  |    base_cost     |    weight      |    capacity                |   |   powered wagons weight
+                               // |  |    |    |        |    |      |    |    |    cargo_type         |   |   |   visual effects
+                               // |  |    |    |        |    |      |    |    |    |                  |   |   |   |   |
 			new RailVehicleInfo(  2, 0,   7,  64,     300,  47,    50,   0,   0,   0               ,  0,  0,  0,  0,  0 ), /*   0 */
 			new RailVehicleInfo( 19, 0,   8,  80,     600,  65,    65,   1,   0,   0               ,  0,  0,  0,  0,  0 ), /*   1 */
 			new RailVehicleInfo(  2, 0,  10,  72,     400,  85,    90,   0,   0,   0               ,  0,  0,  0,  0,  0 ), /*   2 */
