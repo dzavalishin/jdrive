@@ -1,8 +1,9 @@
 package game;
 
-import game.ids.CursorID;
 import game.ids.SpriteID;
 import game.ids.StringID;
+import game.struct.RailCursors;
+import game.struct.RailGuiSprites;
 
 public class RailtypeInfo 
 {
@@ -15,21 +16,21 @@ public class RailtypeInfo
 
 	/** Struct containing the main sprites. @note not all sprites are listed, but only
 	 *  the ones used directly in the code */
-	final RailBaseSprites base_sprites;
+	public final RailBaseSprites base_sprites;
 
 	/** struct containing the sprites for the rail GUI. @note only sprites referred to
 	 * directly in the code are listed */
-	final RailGuiSprites gui_sprites;
+	public final RailGuiSprites gui_sprites;
 
-	final RailCursors cursor;
+	public final RailCursors cursor;
 
-	final StringID toolbar_caption;
+	public final StringID toolbar_caption;
 
 	/** sprite number difference between a piece of track on a snowy ground and the corresponding one on normal ground */
-	final SpriteID snow_offset;
+	public final SpriteID snow_offset;
 
 	/** bitmask to the OTHER railtypes that can be used by an engine of THIS railtype */
-	final byte compatible_railtypes;
+	public final byte compatible_railtypes;
 
 	/**
 	 * Offset between the current railtype and normal rail. This means that:<p>
@@ -40,12 +41,12 @@ public class RailtypeInfo
 	 *
 	 * @apiNote  Something more flexible might be desirable in the future.
 	 */
-	final SpriteID total_offset;
+	public final SpriteID total_offset;
 
 	/**
 	 * Bridge offset
 	 */
-	final SpriteID bridge_offset;
+	public final SpriteID bridge_offset;
 
 
 
@@ -76,55 +77,8 @@ public class RailtypeInfo
 
 } 
 
-//final RailtypeInfo _railtypes[RAILTYPE_END];
 
-class RailCursors {
-	final CursorID rail_ns;
-	final CursorID rail_swne;
-	final CursorID rail_ew;
-	final CursorID rail_nwse;
-	final CursorID autorail;
-	final CursorID depot;
-	final CursorID tunnel;
-	final CursorID convert;
 
-	public RailCursors(int[] cur) {
-		int i = 0;
-		 rail_ns = CursorID.get( cur[i++]);
-		 rail_swne = CursorID.get( cur[i++]);
-		 rail_ew = CursorID.get( cur[i++]);
-		 rail_nwse = CursorID.get( cur[i++]);
-		 autorail = CursorID.get( cur[i++]);
-		 depot = CursorID.get( cur[i++]);
-		 tunnel = CursorID.get( cur[i++]);
-		 convert = CursorID.get( cur[i++]);
-	}
-}
-
-class RailGuiSprites {
-	final SpriteID build_ns_rail;      ///< button for building single rail in N-S direction
-	final SpriteID build_x_rail;       ///< button for building single rail in X direction
-	final SpriteID build_ew_rail;      ///< button for building single rail in E-W direction
-	final SpriteID build_y_rail;       ///< button for building single rail in Y direction
-	final SpriteID auto_rail;          ///< button for the autorail construction
-	final SpriteID build_depot;        ///< button for building depots
-	final SpriteID build_tunnel;       ///< button for building a tunnel
-	final SpriteID convert_rail;       ///< button for converting rail
-
-	public RailGuiSprites(int[] spr) 
-	{
-		int i = 0;
-		build_ns_rail = SpriteID.get( spr[i++]);      
-		build_x_rail = SpriteID.get( spr[i++]);       
-		build_ew_rail = SpriteID.get( spr[i++]);      
-		build_y_rail = SpriteID.get( spr[i++]);       
-		auto_rail = SpriteID.get( spr[i++]);          
-		build_depot = SpriteID.get( spr[i++]);        
-		build_tunnel = SpriteID.get( spr[i++]);       
-		convert_rail = SpriteID.get( spr[i++]);       
-	}
-
-}
 
 class RailBaseSprites {
 	final SpriteID track_y;      ///< single piece of rail in Y direction, with ground

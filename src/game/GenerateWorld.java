@@ -6,6 +6,7 @@ import game.ids.PlayerID;
 import game.util.GameDate;
 import game.xui.AirportGui;
 import game.xui.DockGui;
+import game.xui.RailGui;
 import game.xui.RoadGui;
 import game.xui.VehicleGui;
 import game.xui.ViewPort;
@@ -91,7 +92,7 @@ public class GenerateWorld {
 		Landscape.InitializeLandscape();
 		Clear.InitializeClearLand();
 		Rail.InitializeRail();
-		Rail.InitializeRailGui();
+		RailGui.InitializeRailGui();
 		Road.InitializeRoad();
 		RoadGui.InitializeRoadGui();
 		AirportGui.InitializeAirportGui();
