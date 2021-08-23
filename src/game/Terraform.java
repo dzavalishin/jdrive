@@ -2,11 +2,13 @@ package game;
 
 import java.util.function.Consumer;
 
+
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.TileTypes;
 import game.xui.DockGui;
 import game.xui.Gui;
+import game.xui.RailGui;
 import game.xui.MiscGui;
 import game.xui.ViewPort;
 import game.xui.Widget;
@@ -188,7 +190,7 @@ public class Terraform {
 
 	public static void TerraformClick_BuyLand(Window w)
 	{
-		Gui.HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_BUY_LAND, 1, Rail::PlaceProc_BuyLand);
+		Gui.HandlePlacePushButton(w, 8, Sprite.SPR_CURSOR_BUY_LAND, 1, RailGui::PlaceProc_BuyLand);
 	}
 
 	public static void TerraformClick_Trees(Window w)

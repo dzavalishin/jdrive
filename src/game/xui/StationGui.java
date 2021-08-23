@@ -176,7 +176,7 @@ public class StationGui extends Station  // to get constants
 			// stations are stored as a cummulative index, eg 25, 41, 43. This means
 			// Player0: 25; Player1: (41-25) 16; Player2: (43-41) 2 stations
 			i = (owner == 0) ? 0 : _num_station_sort[owner - 1];
-			MiscGui.SetVScrollCount(w, _num_station_sort[owner] - i);
+			w.SetVScrollCount( _num_station_sort[owner] - i);
 
 			/* draw widgets, with player's name in the caption */
 			{
@@ -353,7 +353,7 @@ public class StationGui extends Station  // to get constants
 				if (st.goods[i].enroute_from != station_id) num++;
 			}
 		}
-		MiscGui.SetVScrollCount(w, num);
+		w.SetVScrollCount( num);
 
 		w.disabled_state = st.getOwner() == Global.gs._local_player ? 0 : (1 << 9);
 

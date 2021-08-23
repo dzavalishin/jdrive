@@ -1958,7 +1958,7 @@ public class Window extends WindowConstants
 		// Setup event
 		we.event = WindowEvents.WE_KEYPRESS;
 		we.ascii =  (key & 0xFF);
-		we.keycode = key >> 16;
+		we.keycode = key >>> 16;
 			we.cont = true;
 
 			// check if we have a query string window open before allowing hotkeys
@@ -3120,10 +3120,17 @@ public class Window extends WindowConstants
 	 */
 	public static void deleteMain()
 	{
+		// TODO delete all?
+		
 		Window w = FindWindowById(WC_MAIN_WINDOW, 0);
 		if( w != null ) w.DeleteWindow();
+		
 		w = FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
 		if( w != null ) w.DeleteWindow();
+
+		w = FindWindowById(Window.WC_SAVELOAD, 0);
+		if( w != null ) w.DeleteWindow();
+		
 	}
 	
 	public void setSize(int w, int h) {
@@ -3209,6 +3216,32 @@ public class Window extends WindowConstants
 
 
 
+	public void SetVScrollCount(int num)
+	{
+		//w.vscroll.setCount(num);
+		//num -= w.vscroll.getCap();
+		//if (num < 0) num = 0;
+		//if (num < w.vscroll.pos) w.vscroll.pos = num;
+		vscroll.updateCount(num);
+	}
+
+	public void SetVScroll2Count(int num)
+	{
+		//w.vscroll2.setCount(num);
+		//num -= w.vscroll2.getCap();
+		//if (num < 0) num = 0;
+		//if (num < w.vscroll2.pos) w.vscroll2.pos = num;
+		vscroll2.updateCount(num);
+	}
+
+	public void SetHScrollCount(int num)
+	{
+		/*w.hscroll.setCount(num);
+		num -= w.hscroll.getCap();
+		if (num < 0) num = 0;
+		if (num < w.hscroll.pos) w.hscroll.pos = num; */
+		hscroll.updateCount(num);
+	}
 
 
 

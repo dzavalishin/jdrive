@@ -1222,7 +1222,7 @@ public class GraphGui
 			if (SignStruct._sign_sort_dirty)
 				GlobalSortSignList();
 
-			MiscGui.SetVScrollCount(w, _num_sign_sort);
+			w.SetVScrollCount( _num_sign_sort);
 
 			Global.SetDParam(0, w.vscroll.getCount());
 			w.DrawWindowWidgets();

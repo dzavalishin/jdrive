@@ -231,6 +231,7 @@ public class MiscGui {
 			"  All Translators - Who made OpenTTD a truly international game",
 			"  Bug Reporters - Without whom OpenTTD would still be full of bugs!",
 			"",
+			"  Java port by Dmitry Zavalishin, 2021",
 			"",
 			"And last but not least:",
 			"  Chris Sawyer - For an amazing game!"
@@ -796,31 +797,36 @@ public class MiscGui {
 	}
 	 */
 
+	/* Gone to Window
+	
 	public static void SetVScrollCount(Window w, int num)
 	{
-		w.vscroll.setCount(num);
-		num -= w.vscroll.getCap();
-		if (num < 0) num = 0;
-		if (num < w.vscroll.pos) w.vscroll.pos = num;
+		//w.vscroll.setCount(num);
+		//num -= w.vscroll.getCap();
+		//if (num < 0) num = 0;
+		//if (num < w.vscroll.pos) w.vscroll.pos = num;
+		w.vscroll.updateCount(num);
 	}
 
 	public static void SetVScroll2Count(Window w, int num)
 	{
-		w.vscroll2.setCount(num);
-		num -= w.vscroll2.getCap();
-		if (num < 0) num = 0;
-		if (num < w.vscroll2.pos) w.vscroll2.pos = num;
+		//w.vscroll2.setCount(num);
+		//num -= w.vscroll2.getCap();
+		//if (num < 0) num = 0;
+		//if (num < w.vscroll2.pos) w.vscroll2.pos = num;
+		w.vscroll2.updateCount(num);
 	}
 
 	public static void SetHScrollCount(Window w, int num)
 	{
-		w.hscroll.setCount(num);
+		/*w.hscroll.setCount(num);
 		num -= w.hscroll.getCap();
 		if (num < 0) num = 0;
-		if (num < w.hscroll.pos) w.hscroll.pos = num;
+		if (num < w.hscroll.pos) w.hscroll.pos = num; * /
+		w.hscroll.updateCount(num);
 	}
 
-
+	*/
 
 
 
@@ -1474,7 +1480,7 @@ public class MiscGui {
 			}
 
 			// TODO SetVScrollCount(w, _fios_num);
-			SetVScrollCount(w, 0);
+			w.SetVScrollCount(0);
 
 			w.DrawWindowWidgets();
 			Gfx.DoDrawString(

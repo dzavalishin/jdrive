@@ -249,7 +249,7 @@ public class Sprite extends Sprites {
 	public int getInfo() {		return info;	}
 	//public byte[] getData() {		return data;	}
 
-	public Pixel getPointer() { return  new Pixel( data ); }
+	public Pixel getPointer() { return new Pixel( data ); }
 
 
 

@@ -91,6 +91,9 @@ public class Player implements Serializable
 
 		share_owners = new PlayerID[4];
 		old_economy = new PlayerEconomyEntry[24];
+		for(int i = 0; i < old_economy.length; i++ )
+			old_economy[i] = new PlayerEconomyEntry();
+		
 		engine_replacement = new int[Global.TOTAL_NUM_ENGINES];
 
 

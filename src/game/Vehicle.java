@@ -3821,7 +3821,7 @@ public class Vehicle implements IPoolItem
 			int mSpeed = Integer.MAX_VALUE;
 			
 			do {
-				final int ms = Engine.RailVehInfo(engine_type.id).max_speed;
+				final int ms = Engine.RailVehInfo(engine_type.id).getMax_speed();
 				if (ms != 0)
 					mSpeed = Math.min(mSpeed, ms);
 			} while ((u = u.next) != null);

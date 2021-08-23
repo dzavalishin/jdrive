@@ -7,7 +7,7 @@ public class RailVehicleInfo
 	public int image_index;
 	private int flags; /* 1=multihead engine, 2=wagon */
 	public int base_cost;
-	public int max_speed;
+	private int max_speed;
 	public int power;
 	public int weight;
 	public int running_cost_base;
@@ -31,14 +31,14 @@ public class RailVehicleInfo
 	public int shorten_factor;	// length on main map for this type is 8 - shorten_factor
 
 	public RailVehicleInfo(
-			int i, int j, int k, int l, int m, 
+			int i, int j, int k, int ms, int m, 
 			int n, int o, int p, int q, int r, 
 			int s, int t, int u, int v, int w) 
 	{
 		 image_index =  i;
 		 flags =  j; 
 		 base_cost =  k;
-		 max_speed = l;
+		 max_speed = ms;
 		 power = m;
 		 weight = n;
 		 running_cost_base =  o;
@@ -68,5 +68,31 @@ public class RailVehicleInfo
 		else
 			flags &= ~Engine.RVI_MULTIHEAD;
 	}
+
+
+	public int getPower() {
+		return power;
+	}
+
+	public void setPower(int power) {
+		this.power = power;
+	}
+
+	public int getWeight() {		return weight;	}
+	public void setWeight(int weight) {		this.weight = weight;	}
+
+	public int getEngclass() {		return engclass;	}
+	public void setEngclass(int engclass) {		this.engclass = engclass;	}
+
+	public int getCapacity() {		return capacity;	}
+	public void setCapacity(int capacity) {		this.capacity = capacity;	}
+
+	public int getCallbackmask() {		return callbackmask;	}
+	public void setCallbackmask(int callbackmask) {		this.callbackmask = callbackmask;	}
+
+	public int getMax_speed() {		return max_speed;	}
+	public void setMax_speed(int speed) { 
+		max_speed = speed; 
+		}
 	
 }

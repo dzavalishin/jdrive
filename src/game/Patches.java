@@ -35,7 +35,7 @@ public class Patches
 	public boolean always_small_airport = true; // always allow small airports
 	public boolean allow_municipal_airports; // allow town to build airports
 	public int municipal_airports_tax; // tax rate of municipal airports
-	public boolean realistic_acceleration; // realistic acceleration for trains
+	public boolean realistic_acceleration = true; // realistic acceleration for trains
 	public boolean wagon_speed_limits; // enable wagon speed limits
 	public boolean forbid_90_deg; // forbid trains to make 90 deg turns
 	public boolean invisible_trees = true; // don't show trees when buildings are transparent

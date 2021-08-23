@@ -79,7 +79,7 @@ public class OrderGui {
 		if (v.getNum_orders() == 0)
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 4); /* skip */
 
-		MiscGui.SetVScrollCount(w, v.getNum_orders() + 1);
+		w.SetVScrollCount( v.getNum_orders() + 1);
 
 		sel = OrderGetSel(w);
 		Global.SetDParam(2, Str.STR_8827_FULL_LOAD);

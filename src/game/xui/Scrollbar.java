@@ -79,6 +79,14 @@ public class Scrollbar
 		this.cap = cap;
 		this.count = count;		
 	}
+
+	public void updateCount(int num) 
+	{
+		count = num;
+		num -= cap;
+		if (num < 0) num = 0;
+		if (num < pos) pos = num;
+	}
 	
 	
 }

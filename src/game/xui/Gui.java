@@ -432,7 +432,7 @@ public class Gui
 	static void MenuClickBuildRail(int index)
 	{
 		_last_built_railtype = index; //RailType.values[index];
-		Rail.ShowBuildRailToolbar(_last_built_railtype, -1);
+		RailGui.ShowBuildRailToolbar(_last_built_railtype, -1);
 	}
 
 	static void MenuClickBuildRoad(int index)
@@ -2073,7 +2073,7 @@ public class Gui
 			case Window.WKC_SHIFT | Window.WKC_F4: AirCraft.ShowPlayerAircraft(local, Station.INVALID_STATION); break;
 			case Window.WKC_SHIFT | Window.WKC_F5: ToolbarZoomInClick(w); break;
 			case Window.WKC_SHIFT | Window.WKC_F6: ToolbarZoomOutClick(w); break;
-			case Window.WKC_SHIFT | Window.WKC_F7: Rail.ShowBuildRailToolbar(_last_built_railtype,-1); break;
+			case Window.WKC_SHIFT | Window.WKC_F7: RailGui.ShowBuildRailToolbar(_last_built_railtype,-1); break;
 			case Window.WKC_SHIFT | Window.WKC_F8: RoadGui.ShowBuildRoadToolbar(); break;
 			case Window.WKC_SHIFT | Window.WKC_F9: DockGui.ShowBuildDocksToolbar(); break;
 			case Window.WKC_SHIFT | Window.WKC_F10:AirportGui.ShowBuildAirToolbar(); break;
@@ -2082,7 +2082,7 @@ public class Gui
 			case Window.WKC_CTRL  | 'S': Global._make_screenshot = 1; break;
 			case Window.WKC_CTRL  | 'G': Global._make_screenshot = 2; break;
 			// TODO case Window.WKC_CTRL | Window.WKC_ALT | 'C': if (!_networking) ShowCheatWindow(); break;
-			case 'A': Rail.ShowBuildRailToolbar(_last_built_railtype, 4); break; /* Invoke Autorail */
+			case 'A': RailGui.ShowBuildRailToolbar(_last_built_railtype, 4); break; /* Invoke Autorail */
 			case 'L': Terraform.ShowTerraformToolbar(); break;
 			default: return;
 			}
@@ -2514,6 +2514,8 @@ public class Gui
 
 			if (Global._game_mode == GameModes.GM_MENU) break;
 
+			//System.out.printf("wkey %x\n", e.keycode );
+			
 			switch (e.keycode) {
 				case 'C':
 				case 'Z': {

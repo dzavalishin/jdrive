@@ -237,7 +237,7 @@ public class GRFFile
 				if (speed == 0xFFFF)
 					speed = 0;
 
-				rvi[e+i].max_speed = speed;
+				rvi[e+i].setMax_speed( speed );
 			}
 		} break;
 		case 0x0B: { /* Power */
