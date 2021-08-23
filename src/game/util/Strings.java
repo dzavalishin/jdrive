@@ -1233,7 +1233,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	}
 
-	private static final String [] __elng =  {"english.lng "};
+	private static final String [] __elng =  {"english.lng"};
 
 	// make a list of the available language packs. put the data in _dynlang struct.
 	public static void InitializeLanguagePacks()
