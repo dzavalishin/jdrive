@@ -1,11 +1,11 @@
 # JDrive
 
-This is an attempt to port OPenTTD to Java.
+This is an attempt to port [OpenTTD](https://www.openttd.org/) to Java.
 
-Current state: game is not playable. Save/load isincomplete and pathfinding is broken.
+Current state: The game is not playable. Saving/loading is incomplete and pathfinding is broken.
 
-Screen shot:
+Screenshot:
 
-![2021-08-15_22-16-36 (2)](https://user-images.githubusercontent.com/11458393/129686284-d844865f-4f69-4e1d-9596-0c3c8c88398b.png)
+![screenshot of the game](https://user-images.githubusercontent.com/11458393/129686284-d844865f-4f69-4e1d-9596-0c3c8c88398b.png)
 
 You're welcome to take part in development.
