@@ -11,6 +11,8 @@ import game.Player;
 import game.SignStruct;
 import game.Sprite;
 import game.Str;
+import game.charts.CargoPaymentRatesChart;
+import game.charts.CompanyValueGraph;
 import game.enums.Owner;
 import game.tables.SmallMapGuiTables;
 import game.util.ArrayPtr;
@@ -67,8 +69,8 @@ public class GraphGui
 		//final long []row_ptr;
 		//final long []col_ptr;
 
-		ArrayPtr<Long> row_ptr;
-		ArrayPtr<Long> col_ptr;
+		//ArrayPtr<Long> row_ptr;
+		//ArrayPtr<Long> col_ptr;
 
 		/* the colors and cost array of GraphDrawer must accomodate
 		 * both values for cargo and players. So if any are higher, quit */
@@ -100,7 +102,7 @@ public class GraphGui
 		Gfx.GfxFillRect(x, gw.top, x, bottom, gw.color_2);
 
 		adj_height = gw.height;
-		if (gw.include_neg) adj_height >>= 1;
+		if (gw.include_neg) adj_height >>>= 1;
 
 		/* draw horiz edge line */
 		y = adj_height + gw.top;
@@ -113,22 +115,26 @@ public class GraphGui
 		num_dataset = gw.num_dataset;
 		assert(num_dataset > 0);
 
-		 //return Arrays.stream(array).filter(Objects::nonNull).mapToLong(Long::longValue).toArray();
-	
+		//return Arrays.stream(array).filter(Objects::nonNull).mapToLong(Long::longValue).toArray();
+
 		//Arrays.stream(gw.cost[0]).mapToObj( (lv) -> new Long(lv) ).toArray();
-		Long[] la = ArrayPtr.toLongArray(gw.cost[0]);
+		//Long[] la = ArrayPtr.toLongArray(gw.cost[0]);
 		//row_ptr = new ArrayPtr<Long>( gw.cost[0] );
-		row_ptr = new ArrayPtr<Long>( la );
-		
+		//row_ptr = new ArrayPtr<Long>( la );
+
 		mx = 0;
 		/* bit selection for the showing of various players, base max element
 		 * on to-be shown player-information. This way the graph can scale */
 		sel = gw.sel;
 		do {
+			Long[] la1 = ArrayPtr.toLongArray(gw.cost[i]);
+			//row_ptr = 
+			ArrayPtr<Long> col_ptr = new ArrayPtr<Long>( la1 ); // gw.cost[0];
+			
 			if (0==(sel&1)) {
 				num_x = gw.num_on_x_axis;
 				assert(num_x > 0);
-				col_ptr = new ArrayPtr<Long>( row_ptr );
+				//col_ptr = new ArrayPtr<Long>( row_ptr );
 				do 
 				{
 					if( !col_ptr.hasCurrent() ) break;
@@ -139,7 +145,7 @@ public class GraphGui
 				} while (--num_x > 0);
 			}
 			sel>>=1;
-			row_ptr.madd(24);
+			//row_ptr.madd(24);
 		} while ( --num_dataset > 0 );
 
 		/* setup scaling */
@@ -148,22 +154,22 @@ public class GraphGui
 
 		if (mx > value) {
 			mx = (mx + 7) & ~7;
-			y_scaling = (((long) (value>>1) << 32) / mx);
+			y_scaling = (((long) (value>>>1) << 32) / mx);
 			value = mx;
 		}
 
 		/* draw text strings on the y axis */
 		tmp = value;
-		if (gw.include_neg) tmp >>= 1;
+		if (gw.include_neg) tmp >>>= 1;
 			x = gw.left + 45;
 			y = gw.top - 3;
 			i = 9;
 			do {
 				Global.SetDParam(0, gw.format_str_y_axis);
 				Global.SetDParam64(1, (long)tmp);
-				tmp -= (value >> 3);
+				tmp -= (value >>> 3);
 				Gfx.DrawStringRightAligned(x, y, Str.STR_0170, gw.color_3);
-				y += gw.height >> 3;
+				y += gw.height >>> 3;
 			} while (--i > 0);
 
 			/* draw strings on the x axis */
@@ -201,40 +207,49 @@ public class GraphGui
 
 			/* draw lines and dots */
 			i = 0;
-			{
-				//Long[] la1 = (Long[]) Arrays.stream(gw.cost[0]).mapToObj( (lv) -> Long.valueOf(lv) ).toArray();
-				Long[] la1 = ArrayPtr.toLongArray(gw.cost[0]);
-				row_ptr = new ArrayPtr<Long>( la1 ); // gw.cost[0];
-			}
 			sel = gw.sel; // show only selected lines. GraphDrawer qw.sel set in Graph-Legend (_legend_excludebits)
 			do {
-				if (0==(sel & 1)) {
-					x = gw.left + 55;
-					j = gw.num_on_x_axis;assert(j>0);
-					col_ptr = new ArrayPtr<Long>( row_ptr );
-					color = gw.colors[i];
-					old_y = old_x = INVALID_VALUE;
-					do {
-						if(!col_ptr.hasCurrent()) break;
-						cur_val = col_ptr.rpp();
-						if (cur_val != INVALID_VALUE) {
-							y = (int) (adj_height - BitOps.BIGMULSS64(cur_val, y_scaling >> 1, 31) + gw.top);
 
-							Gfx.GfxFillRect(x-1, y-1, x+1, y+1, color);
-							if (old_x != INVALID_VALUE)
-								Gfx.GfxDrawLine(old_x, old_y, x, y, color);
+				//Long[] la1 = (Long[]) Arrays.stream(gw.cost[0]).mapToObj( (lv) -> Long.valueOf(lv) ).toArray();
+				Long[] la1 = ArrayPtr.toLongArray(gw.cost[i]);
+				//row_ptr = 
+				ArrayPtr<Long> col_ptr = new ArrayPtr<Long>( la1 ); // gw.cost[0];
 
-							old_x = x;
-							old_y = y;
-						} else {
-							old_x = INVALID_VALUE;
-						}
-						x+=22;
-					} while (--j > 0);
+
+				if (0!=(sel & 1))
+				{
+					sel>>=1;
+					continue;
 				}
+				
+				x = gw.left + 55;
+				j = gw.num_on_x_axis;assert(j>0);
+				//col_ptr = new ArrayPtr<Long>( row_ptr );
+				color = gw.colors[i];
+				old_y = old_x = INVALID_VALUE;
+				do {
+					if(!col_ptr.hasCurrent()) break;
+					cur_val = col_ptr.rpp(); //System.out.printf("%d ", cur_val);
+					if (cur_val != INVALID_VALUE) 
+					{
+						final long mul = BitOps.BIGMULSS64(cur_val, y_scaling >>> 4, 28);
+						y = (int) (adj_height - mul + gw.top);
+						System.out.printf("mul %d y %d  ", mul, y);
+						Gfx.GfxFillRect(x-1, y-1, x+1, y+1, color);
+						if (old_x != INVALID_VALUE)
+							Gfx.GfxDrawLine(old_x, old_y, x, y, color);
+
+						old_x = x;
+						old_y = y;
+					} else {
+						old_x = INVALID_VALUE;
+					}
+					x+=22;
+				} while (--j > 0);
+				System.out.println();
 
 				sel>>=1;
-				row_ptr.madd(24);
+				//row_ptr.madd(24);
 			} while ( ++i < gw.num_dataset);
 	}
 
@@ -378,7 +393,7 @@ public class GraphGui
 			SetupGraphDrawerForPlayers(gd);
 
 			int [] numd = {0};
- 
+
 			Player.forEach((p) ->
 			{
 				if (p.isActive()) {
@@ -460,7 +475,7 @@ public class GraphGui
 			while(ii.hasNext())
 			{
 				Player p = ii.next();
-				
+
 				if (p.isActive()) {
 					gd.colors[numd] = (byte) Global._color_list[p.getColor()].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
@@ -539,7 +554,7 @@ public class GraphGui
 			while(ii.hasNext())
 			{
 				Player p = ii.next();
-				
+
 				if (p.isActive()) {
 					gd.colors[numd] = (byte) Global._color_list[p.getColor()].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
@@ -618,7 +633,7 @@ public class GraphGui
 			while(ii.hasNext())
 			{
 				Player p = ii.next();
-				
+
 				if (p.isActive()) {
 					gd.colors[numd] = (byte) Global._color_list[p.getColor()].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
@@ -671,7 +686,7 @@ public class GraphGui
 
 	/*****************/
 	/* COMPANY VALUE */
-	/*****************/
+	/***************** /
 
 	static void CompanyValueGraphWndProc(Window w, WindowEvent e)
 	{
@@ -695,12 +710,12 @@ public class GraphGui
 			SetupGraphDrawerForPlayers(gd);
 
 			numd = 0;
-			//FOR_ALL_PLAYERS(p) 
+ 
 			Iterator<Player> ii = Player.getIterator();
 			while(ii.hasNext())
 			{
 				Player p = ii.next();
-				
+
 				if (p.isActive()) {
 					gd.colors[numd] = (byte) Global._color_list[p.getColor()].window_color_bgb;
 					for(j=gd.num_on_x_axis,i=0; --j >= 0;) {
@@ -740,17 +755,19 @@ public class GraphGui
 			_company_value_graph_widgets,
 			GraphGui::CompanyValueGraphWndProc
 			);
-
+	*/
 	static void ShowCompanyValueGraph()
 	{
+		/*
 		if (null == Window.AllocateWindowDescFront(_company_value_graph_desc, 0)) {
 			Window.InvalidateWindow(Window.WC_GRAPH_LEGEND, 0);
-		}
+		}*/
+		CompanyValueGraph.showChart();
 	}
 
 	/*****************/
 	/* PAYMENT RATES */
-	/*****************/
+	/***************** /
 
 	static final int _cargo_legend_colors[] = {152, 32, 15, 174, 208, 194, 191, 84, 184, 10, 202, 215};
 
@@ -845,10 +862,11 @@ public class GraphGui
 			GraphGui::CargoPaymentRatesWndProc
 			);
 
-
+*/
 	static void ShowCargoPaymentRates()
 	{
-		Window.AllocateWindowDescFront(_cargo_payment_rates_desc, 0);
+		//Window.AllocateWindowDescFront(_cargo_payment_rates_desc, 0);
+		CargoPaymentRatesChart.showChart();
 	}
 
 
@@ -864,7 +882,7 @@ public class GraphGui
 		{
 			if( p1 == null ) return 1;
 			if( p2 == null ) return -1;
-			
+
 			return p2.old_economy[1].performance_history - p1.old_economy[1].performance_history;
 		}
 	}

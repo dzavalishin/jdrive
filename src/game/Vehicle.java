@@ -1487,14 +1487,19 @@ public class Vehicle implements IPoolItem
 	{
 		Vehicle v = this;
 		// we need to set v.leave_depot_instantly as we have no control of it's contents at this time
-		if (BitOps.HASBIT(v.current_order.flags, Order.OFB_HALT_IN_DEPOT) && !BitOps.HASBIT(v.current_order.flags, Order.OFB_PART_OF_ORDERS) && v.current_order.type == Order.OT_GOTO_DEPOT) {
+		//if (BitOps.HASBIT(v.current_order.flags, Order.OFB_HALT_IN_DEPOT) && !BitOps.HASBIT(v.current_order.flags, Order.OFB_PART_OF_ORDERS) && v.current_order.type == Order.OT_GOTO_DEPOT) 
+		if (v.current_order.hasFlag(Order.OFB_HALT_IN_DEPOT) 
+				&& !v.current_order.hasFlag(Order.OFB_PART_OF_ORDERS) 
+				&& v.current_order.typeIs(Order.OT_GOTO_DEPOT) ) 
+		{
 			// we keep the vehicle in the depot since the user ordered it to stay
 			v.leave_depot_instantly = false;
 		} else {
 			// the vehicle do not plan on stopping in the depot, so we stop it to ensure that it will not reserve the path
 			// out of the depot before we might autoreplace it to a different engine. The new engine would not own the reserved path
 			// we store that we stopped the vehicle, so autoreplace can start it again
-			v.vehstatus |= VS_STOPPED;
+			//v.vehstatus |= VS_STOPPED;
+			v.stop();
 			v.leave_depot_instantly = true;
 		}
 

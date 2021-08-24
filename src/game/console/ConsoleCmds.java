@@ -7,7 +7,7 @@ import game.Vehicle;
 import game.xui.ViewPort;
 import game.xui.Window;
 
-public class ConsoleCmds 
+public class ConsoleCmds extends Console
 {
 
 	// ** scriptfile handling ** //
@@ -83,7 +83,7 @@ public class ConsoleCmds
 		Console.IConsolePrintF(Console._icolour_warn, "- %s", str);
 	}
 
-	static boolean ConStopAllVehicles(int argc, String ... argv)
+	static boolean constopAllVehicles(int argc, String ... argv)
 	{
 		//Vehicle v;
 		if (argc == 0) {
@@ -106,7 +106,7 @@ public class ConsoleCmds
 	}
 
 	
-	static boolean ConResetEngines(byte argc, String ... argv)
+	static boolean ConResetEngines(int argc, String ... argv)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Reset status data of all engines. This might solve some issues with 'lost' engines. Usage: 'resetengines'");
@@ -160,7 +160,7 @@ public class ConsoleCmds
 	/*
 	//extern boolean SafeSaveOrLoad(String filename, int mode, int newgm);
 	//extern void BuildFileList(void);
-	//extern void SetFiosType(const byte fiostype);
+	//extern void SetFiosType(final byte fiostype);
 
 	// Save the map to a file 
 	static boolean function(int argc, String ... argv)(ConSave)
@@ -186,7 +186,7 @@ public class ConsoleCmds
 		return false;
 	}
 
-	static const FiosItem* GetFiosItem(const char* file)
+	static final FiosItem* GetFiosItem(final char* file)
 	{
 		int i;
 
@@ -211,7 +211,7 @@ public class ConsoleCmds
 
 	static boolean function(int argc, String ... argv)(ConLoad)
 	{
-		const FiosItem *item;
+		final FiosItem *item;
 		String file;
 
 		if (argc == 0) {
@@ -244,8 +244,8 @@ public class ConsoleCmds
 
 	static boolean function(int argc, String ... argv)(ConRemove)
 	{
-		const FiosItem* item;
-		const char* file;
+		final FiosItem* item;
+		final char* file;
 
 		if (argc == 0) {
 			IConsoleHelp("Remove a savegame by name or index. Usage: 'rm <file | number>'");
@@ -280,7 +280,7 @@ public class ConsoleCmds
 		BuildFileList();
 
 		for (i = 0; i < _fios_num; i++) {
-			const FiosItem *item = &_fios_list[i];
+			final FiosItem *item = &_fios_list[i];
 			IConsolePrintF(_icolour_def, "%d) %s", i, item.title);
 		}
 
@@ -291,7 +291,7 @@ public class ConsoleCmds
 	// Change the dir via console 
 	static boolean function(int argc, String ... argv)(ConChangeDirectory)
 	{
-		const FiosItem *item;
+		final FiosItem *item;
 		String file;
 
 		if (argc == 0) {
@@ -493,11 +493,11 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConStatus)
+	static boolean function(int argc, String ... argv)(finalatus)
 	{
 		static String stat_str[] = {"inactive", "authorized", "waiting", "loading map", "map done", "ready", "active"};
 		String status;
-		const NetworkClientState *cs;
+		final NetworkClientState *cs;
 
 		if (argc == 0) {
 			IConsoleHelp("List the status of all clients connected to the server: Usage 'status'");
@@ -506,7 +506,7 @@ public class ConsoleCmds
 
 		FOR_ALL_CLIENTS(cs) {
 			int lag = NetworkCalculateLag(cs);
-			const NetworkClientInfo *ci = DEREF_CLIENT_INFO(cs);
+			final NetworkClientInfo *ci = DEREF_CLIENT_INFO(cs);
 
 			status = (cs.status <= STATUS_ACTIVE) ? stat_str[cs.status] : "unknown";
 			IConsolePrintF(8, "Client #%1d  name: '%s'  status: '%s'  frame-lag: %3d  company: %1d  IP: %s  unique-id: '%s'",
@@ -784,10 +784,10 @@ public class ConsoleCmds
 		GenRandomNewGame(Random(), InteractiveRandom());
 		return true;
 	}
-
-	static boolean function(int argc, String ... argv)(ConAlias)
+	*/
+	static boolean ConAlias(int argc, String ... argv)
 	{
-		IConsoleAlias *alias;
+		IConsoleAlias alias;
 
 		if (argc == 0) {
 			IConsoleHelp("Add a new alias, or redefine the behaviour of an existing alias . Usage: 'alias <name> <command>'");
@@ -800,12 +800,12 @@ public class ConsoleCmds
 		if (alias == null) {
 			IConsoleAliasRegister(argv[1], argv[2]);
 		} else {
-			free(alias.cmdline);
-			alias.cmdline = strdup(argv[2]);
+			alias.cmdline = argv[2];
 		}
 		return true;
 	}
 
+	/*
 	static boolean function(int argc, String ... argv)(ConScreenShot)
 	{
 		if (argc == 0) {
@@ -831,7 +831,7 @@ public class ConsoleCmds
 	static boolean function(int argc, String ... argv)(ConInfoVar)
 	{
 		static String _icon_vartypes[] = {"boolean", "byte", "uint16", "uint32", "int16", "int32", "string"};
-		const IConsoleVar *var;
+		final IConsoleVar *var;
 
 		if (argc == 0) {
 			IConsoleHelp("Print out debugging information about a variable. Usage: 'info_var <var>'");
@@ -859,7 +859,7 @@ public class ConsoleCmds
 
 	static boolean function(int argc, String ... argv)(ConInfoCmd)
 	{
-		const IConsoleCmd *cmd;
+		final IConsoleCmd *cmd;
 
 		if (argc == 0) {
 			IConsoleHelp("Print out debugging information about a command. Usage: 'info_cmd <cmd>'");
@@ -924,17 +924,17 @@ public class ConsoleCmds
 		_switch_mode = SM_MENU;
 		return true;
 	}
-
-	static boolean function(int argc, String ... argv)(ConHelp)
+*/
+	static boolean ConHelp(int argc, String ... argv)
 	{
 		if (argc == 2) {
-			const IConsoleCmd *cmd;
-			const IConsoleVar *var;
-			const IConsoleAlias *alias;
+			IConsoleCmd cmd;
+			final IConsoleVar var;
+			final IConsoleAlias alias;
 
 			cmd = IConsoleCmdGet(argv[1]);
 			if (cmd != null) {
-				cmd.proc(0, null);
+				cmd.proc.accept(0, null);
 				return true;
 			}
 
@@ -942,7 +942,7 @@ public class ConsoleCmds
 			if (alias != null) {
 				cmd = IConsoleCmdGet(alias.cmdline);
 				if (cmd != null) {
-					cmd.proc(0, null);
+					cmd.proc.accept(0, null);
 					return true;
 				}
 				IConsolePrintF(_icolour_err, "ERROR: alias is of special type, please see its execution-line: '%s'", alias.cmdline);
@@ -974,20 +974,16 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConListCommands)
+	static boolean ConListCommands(int argc, String ... argv)
 	{
-		const IConsoleCmd *cmd;
-		size_t l = 0;
-
 		if (argc == 0) {
 			IConsoleHelp("List all registered commands. Usage: 'list_cmds [<pre-filter>]'");
 			return true;
 		}
 
-		if (argv[1] != null) l = strlen(argv[1]);
-
-		for (cmd = _iconsole_cmds; cmd != null; cmd = cmd.next) {
-			if (argv[1] == null || strncmp(cmd.name, argv[1], l) == 0) {
+		for (IConsoleCmd cmd : _iconsole_cmds.values())
+		{
+			if (argv[1] == null || cmd.name.equals( argv[1]) ) {
 					IConsolePrintF(_icolour_def, "%s", cmd.name);
 			}
 		}
@@ -995,46 +991,37 @@ public class ConsoleCmds
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConListVariables)
+	static boolean ConListVariables(int argc, String ... argv)
 	{
-		const IConsoleVar *var;
-		size_t l = 0;
-
 		if (argc == 0) {
 			IConsoleHelp("List all registered variables. Usage: 'list_vars [<pre-filter>]'");
 			return true;
 		}
 
-		if (argv[1] != null) l = strlen(argv[1]);
-
-		for (var = _iconsole_vars; var != null; var = var.next) {
-			if (argv[1] == null || strncmp(var.name, argv[1], l) == 0)
+		for (IConsoleVar var : _iconsole_vars.values()) {
+			if (argv[1] == null || var.name.equals(argv[1]))
 				IConsolePrintF(_icolour_def, "%s", var.name);
 		}
 
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConListAliases)
+	static boolean ConListAliases(int argc, String ... argv)
 	{
-		const IConsoleAlias *alias;
-		size_t l = 0;
-
 		if (argc == 0) {
 			IConsoleHelp("List all registered aliases. Usage: 'list_aliases [<pre-filter>]'");
 			return true;
 		}
 
-		if (argv[1] != null) l = strlen(argv[1]);
-
-		for (alias = _iconsole_aliases; alias != null; alias = alias.next) {
-			if (argv[1] == null || strncmp(alias.name, argv[1], l) == 0)
+		for (IConsoleAlias alias : _iconsole_aliases.values()) {
+			if (argv[1] == null || alias.name.equals(argv[1]))
 				IConsolePrintF(_icolour_def, "%s => %s", alias.name, alias.cmdline);
 		}
 
 		return true;
 	}
-
+	
+	/*
 	#ifdef ENABLE_NETWORK
 
 	static boolean function(int argc, String ... argv)(ConSay)
@@ -1260,6 +1247,11 @@ public class ConsoleCmds
 		//extern byte _stdlib_developer; /* XXX extern in .c */
 
 		// default variables and functions
+		IConsoleCmdRegister("help",         ConsoleCmds::ConHelp);
+		IConsoleCmdRegister("list_cmds",    ConsoleCmds::ConListCommands);
+		IConsoleCmdRegister("list_vars",    ConsoleCmds::ConListVariables);
+		IConsoleCmdRegister("list_aliases", ConsoleCmds::ConListAliases);
+		IConsoleCmdRegister("alias",        ConsoleCmds::ConAlias);
 		/*
 		IConsoleCmdRegister("debug_level",  ConDebugLevel);
 		IConsoleCmdRegister("dump_vars",    ConListDumpVariables);
@@ -1268,20 +1260,13 @@ public class ConsoleCmds
 		IConsoleCmdRegister("exec",         ConExec);
 		IConsoleCmdRegister("exit",         ConExit);
 		IConsoleCmdRegister("part",         ConPart);
-		IConsoleCmdRegister("help",         ConHelp);
 		IConsoleCmdRegister("info_cmd",     ConInfoCmd);
 		IConsoleCmdRegister("info_var",     ConInfoVar);
-		IConsoleCmdRegister("list_cmds",    ConListCommands);
-		IConsoleCmdRegister("list_vars",    ConListVariables);
-		IConsoleCmdRegister("list_aliases", ConListAliases);
 		IConsoleCmdRegister("newgame",      ConNewGame);
 		IConsoleCmdRegister("quit",         ConExit);
-		IConsoleCmdRegister("resetengines", ConResetEngines);
 		IConsoleCmdRegister("return",       ConReturn);
 		IConsoleCmdRegister("screenshot",   ConScreenShot);
 		IConsoleCmdRegister("script",       ConScript);
-		IConsoleCmdRegister("scrollto",     ConScrollToTile);
-		IConsoleCmdRegister("alias",        ConAlias);
 		IConsoleCmdRegister("load",         ConLoad);
 		IConsoleCmdRegister("rm",           ConRemove);
 		IConsoleCmdRegister("save",         ConSave);
@@ -1290,7 +1275,9 @@ public class ConsoleCmds
 		IConsoleCmdRegister("pwd",          ConPrintWorkingDirectory);
 		IConsoleCmdRegister("clear",        ConClearBuffer);
 		*/
-		Console.IConsoleCmdRegister("stopall",      ConsoleCmds::ConStopAllVehicles);
+		IConsoleCmdRegister("scrollto",     ConsoleCmds::ConScrollToTile);
+		IConsoleCmdRegister("resetengines", ConsoleCmds::ConResetEngines);
+		IConsoleCmdRegister("stopall",      ConsoleCmds::constopAllVehicles);
 
 		/*
 		IConsoleAliasRegister("dir",      "ls");
@@ -1321,7 +1308,7 @@ public class ConsoleCmds
 		IConsoleCmdHookAdd("connect",          ICONSOLE_HOOK_ACCESS, ConHookClientOnly);
 		IConsoleCmdRegister("clients",         ConNetworkClients);
 		IConsoleCmdHookAdd("clients",          ICONSOLE_HOOK_ACCESS, ConHookNeedNetwork);
-		IConsoleCmdRegister("status",          ConStatus);
+		IConsoleCmdRegister("status",          constatus);
 		IConsoleCmdHookAdd("status",           ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
 		IConsoleCmdHookAdd("resetengines",     ICONSOLE_HOOK_ACCESS, ConHookNoNetwork);
 		IConsoleCmdHookAdd("stopall",          ICONSOLE_HOOK_ACCESS, ConHookNoNetwork);
@@ -1405,8 +1392,8 @@ public class ConsoleCmds
 
 		// debugging stuff
 	/* TODO XXX #ifdef _DEBUG
-		IConsoleDebugLibRegister();
 	#endif */
+		IConsoleDebugLibRegister();
 	}
 
 }

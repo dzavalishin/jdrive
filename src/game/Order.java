@@ -1028,16 +1028,13 @@ public class Order implements Serializable
 	 */
 	static void DeleteDestinationFromVehicleOrder(Order dest)
 	{
-		//Vehicle v;
-		//Order order;
 		boolean [] need_invalidate = {false};
 
 		/* Go through all vehicles */
-		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
 			if (v.type == 0 || v.orders == null)
-				return; //continue; // TODO [dz] is it ok to ret from lambda?
+				return; //continue; 
 
 			/* Forget about this station if this station is removed */
 			if (v.last_station_visited == dest.station && dest.type == OT_GOTO_STATION)
@@ -1054,7 +1051,7 @@ public class Order implements Serializable
 
 			/* Clear the order from the order-list */
 			need_invalidate[0] = false;
-			//FOR_VEHICLE_ORDERS(v, order)
+
 			v.forEachOrder( (order) ->
 			{
 				if (order.type == dest.type && order.station == dest.station) {
@@ -1290,9 +1287,17 @@ public class Order implements Serializable
 		}		
 		return null;
 	}
+
+	public boolean typeIs(int t) {
+		return type == t;
+	}
 	
 	public boolean isNonStop() {		
 		return 0 != (flags & OF_NON_STOP);
+	}
+	
+	public boolean hasFlag(int flag) {
+		return BitOps.HASBIT(flags, flag);
 	}
 	
 }

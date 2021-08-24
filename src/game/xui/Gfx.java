@@ -442,7 +442,7 @@ public class Gfx extends PaletteTabs
 	/* returns right coordinate */
 	public static int DrawString(int x, int y, int str, int color)
 	{
-		String buffer = Global.GetString( str);
+		String buffer = Global.GetString(str);
 		return DoDrawString(buffer, x, y, color);
 	}
 	/* returns right coordinate */

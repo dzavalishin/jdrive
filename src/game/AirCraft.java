@@ -1310,7 +1310,7 @@ public class AirCraft extends AirCraftTables {
 			}
 
 			{
-				Order b = v.current_order;
+				Order b = new Order( v.current_order );
 				v.current_order.type = Order.OT_NOTHING;
 				v.current_order.flags = 0;
 				if (0==(b.flags & Order.OF_NON_STOP)) return;
@@ -1446,7 +1446,7 @@ public class AirCraft extends AirCraftTables {
 		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
-			old_order = v.current_order;
+			old_order = new Order( v.current_order );
 			v.current_order.type = Order.OT_NOTHING;
 			v.current_order.flags = 0;
 

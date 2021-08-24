@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import game.ai.Ai;
+import game.console.Console;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.SwitchModes;
@@ -385,7 +386,7 @@ public class Main {
 			SettingsGui.SetDifficultyLevel(0, GameOptions._opt_newgame);
 
 		// initialize the ingame console
-		// TODO Console.IConsoleInit();
+		Console.IConsoleInit();
 		VehicleGui.InitializeGUI();
 		// TODO Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
