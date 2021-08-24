@@ -12,6 +12,7 @@ import game.SignStruct;
 import game.Sprite;
 import game.Str;
 import game.charts.CargoPaymentRatesChart;
+import game.charts.CompanyValueGraph;
 import game.enums.Owner;
 import game.tables.SmallMapGuiTables;
 import game.util.ArrayPtr;
@@ -685,7 +686,7 @@ public class GraphGui
 
 	/*****************/
 	/* COMPANY VALUE */
-	/*****************/
+	/***************** /
 
 	static void CompanyValueGraphWndProc(Window w, WindowEvent e)
 	{
@@ -709,7 +710,7 @@ public class GraphGui
 			SetupGraphDrawerForPlayers(gd);
 
 			numd = 0;
-			//FOR_ALL_PLAYERS(p) 
+ 
 			Iterator<Player> ii = Player.getIterator();
 			while(ii.hasNext())
 			{
@@ -754,17 +755,19 @@ public class GraphGui
 			_company_value_graph_widgets,
 			GraphGui::CompanyValueGraphWndProc
 			);
-
+	*/
 	static void ShowCompanyValueGraph()
 	{
+		/*
 		if (null == Window.AllocateWindowDescFront(_company_value_graph_desc, 0)) {
 			Window.InvalidateWindow(Window.WC_GRAPH_LEGEND, 0);
-		}
+		}*/
+		CompanyValueGraph.showChart();
 	}
 
 	/*****************/
 	/* PAYMENT RATES */
-	/*****************/
+	/***************** /
 
 	static final int _cargo_legend_colors[] = {152, 32, 15, 174, 208, 194, 191, 84, 184, 10, 202, 215};
 
@@ -859,7 +862,7 @@ public class GraphGui
 			GraphGui::CargoPaymentRatesWndProc
 			);
 
-
+*/
 	static void ShowCargoPaymentRates()
 	{
 		//Window.AllocateWindowDescFront(_cargo_payment_rates_desc, 0);
