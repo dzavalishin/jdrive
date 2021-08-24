@@ -51,7 +51,6 @@ public class Console //extends ConsoleCmds
 
 
 	// ** main console ** //
-	//static ConsoleWindow _iconsole_win; // Pointer to console window
 	static Window _iconsole_win; // Pointer to console window
 	static boolean _iconsole_inited;
 	static final String[]_iconsole_buffer = new String[ICON_BUFFER + 1];
@@ -96,7 +95,6 @@ public class Console //extends ConsoleCmds
 
 	public static void IConsoleInit()
 	{
-		//extern final char _openttd_revision[];
 		_iconsole_output_file = null;
 		_icolour_def  =  1;
 		_icolour_err  =  3;
@@ -115,17 +113,10 @@ public class Console //extends ConsoleCmds
 		#endif
 		 */
 
-		// TODO
-		//memset(_iconsole_history, 0, sizeof(_iconsole_history));
-		//memset(_iconsole_buffer, 0, sizeof(_iconsole_buffer));
-		//memset(_iconsole_cbuffer, 0, sizeof(_iconsole_cbuffer));
 
-
-		//_iconsole_cmdline.buf = calloc(ICON_CMDLN_SIZE, sizeof(*_iconsole_cmdline.buf)); // create buffer and zero it
-		//_iconsole_cmdline.buf = new char[ICON_CMDLN_SIZE]; 
 		_iconsole_cmdline.maxlength = ICON_CMDLN_SIZE - 1;
 
-		IConsolePrintF(13, "OpenTTD Game Console Revision 7 - %s", Strings._openttd_revision);
+		IConsolePrintF(13, "Java OpenTTD Game Console Revision 7 - %s", Strings._openttd_revision);
 		IConsolePrint(12,  "------------------------------------");
 		IConsolePrint(12,  "use \"help\" for more information");
 		IConsolePrint(12,  "");
@@ -700,90 +691,8 @@ public class Console //extends ConsoleCmds
 		return _iconsole_vars.get(name);
 	}
 
-	/**
-	 * Set a new value to a console variable
-	 * @param var the variable being set/changed
-	 * @param value the new value given to the variable, cast properly
-	 */
-	static private void IConsoleVarSetValue(final IConsoleVar var, int value)
-	{
-		var.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_PRE_ACTION);
-		/*
-		switch (var.type) {
-		case ICONSOLE_VAR_BOOLEAN:
-		 *(boolean*)var.addr = (value != 0);
-			break;
-		case ICONSOLE_VAR_BYTE:
-		 *(byte*)var.addr = (byte)value;
-			break;
-		case ICONSOLE_VAR_UINT16:
-		 *(int*)var.addr = (int)value;
-			break;
-		case ICONSOLE_VAR_INT16:
-		 *(int16*)var.addr = (int16)value;
-			break;
-		case ICONSOLE_VAR_UINT32:
-		 *(int*)var.addr = (int)value;
-			break;
-		case ICONSOLE_VAR_INT32:
-		 *(int32*)var.addr = (int32)value;
-			break;
-		default: NOT_REACHED();
-		}*/
 
-		var.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_POST_ACTION);
-		IConsoleVarPrintSetValue(var);
-	}
 
-	/**
-	 * Set a new value to a string-type variable. Basically this
-	 * means to copy the new value over to the container.
-	 * @param var the variable in question
-	 * @param value the new value
-	 */
-	static private void IConsoleVarSetStringvalue(final IConsoleVar var, String value)
-	{
-		if (var.type != IConsoleVarTypes.ICONSOLE_VAR_STRING /*|| var.addr == null*/) return;
-
-		var.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_PRE_ACTION);
-		var.value = value;
-		var.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_POST_ACTION);
-		IConsoleVarPrintSetValue(var); // print out the new value, giving feedback
-	}
-
-	/**
-	 * Query the current value of a variable and return it
-	 * @param var the variable queried
-	 * @return current value of the variable
-	 */
-	static private int IConsoleVarGetValue(final IConsoleVar var)
-	{
-		//int result = 0;
-
-		/*
-		switch (var.type) {
-		case ICONSOLE_VAR_BOOLEAN:
-			result = *(boolean*)var.addr;
-			break;
-		case ICONSOLE_VAR_BYTE:
-			result = *(byte*)var.addr;
-			break;
-		case ICONSOLE_VAR_UINT16:
-			result = *(int*)var.addr;
-			break;
-		case ICONSOLE_VAR_INT16:
-			result = *(int16*)var.addr;
-			break;
-		case ICONSOLE_VAR_UINT32:
-			result = *(int*)var.addr;
-			break;
-		case ICONSOLE_VAR_INT32:
-			result = *(int32*)var.addr;
-			break;
-		default: NOT_REACHED();
-		}*/
-		return (Integer)var.value;
-	}
 
 
 	/**
@@ -804,15 +713,6 @@ public class Console //extends ConsoleCmds
 		IConsolePrintF(_icolour_warn, "Current value for '%s' is:  %s", var.name, value);
 	}
 
-	/**
-	 * Print out the value of the variable after it has been assigned
-	 * a new value, thus giving us feedback on the action
-	 */
-	static void IConsoleVarPrintSetValue(final IConsoleVar var)
-	{
-		String value = var.IConsoleVarGetStringValue();
-		IConsolePrintF(_icolour_warn, "'%s' changed to:  %s", var.name, value);
-	}
 
 	/**
 	 * Execute a variable command. Without any parameters, print out its value
@@ -823,7 +723,7 @@ public class Console //extends ConsoleCmds
 	 */
 	static void IConsoleVarExec(final IConsoleVar var, int tokencount, String ... token)
 	{
-		final String tokenptr = token[0];
+		String tokenptr = token[0];
 		int t_index = tokencount;
 
 		if (_stdlib_con_developer)
@@ -835,7 +735,10 @@ public class Console //extends ConsoleCmds
 		}
 
 		/* Use of assignment sign is not mandatory but supported, so just 'ignore it appropiately' */
-		if (tokenptr.equalsIgnoreCase("=")) tokencount--;
+		if (tokenptr.equalsIgnoreCase("=")) {
+			tokencount--;
+			tokenptr = token[1];
+		}
 
 		if (tokencount == 1) {
 			/* Some variables need really special handling, handle it in their callback procedure */
@@ -846,25 +749,25 @@ public class Console //extends ConsoleCmds
 			/* Strings need special processing. No need to convert the argument to
 			 * an integer value, just copy over the argument on a one-by-one basis */
 			if (var.type == IConsoleVarTypes.ICONSOLE_VAR_STRING) {
-				IConsoleVarSetStringvalue(var, token[t_index - tokencount]);
+				var.IConsoleVarSetStringvalue(token[t_index - tokencount]);
 				return;
 			} else {
 				int [] value = {0};
 
 				if (GetArgumentInteger(value, token[t_index - tokencount])) {
-					IConsoleVarSetValue(var, value[0]);
+					var.IConsoleVarSetValue(value[0]);
 					return;
 				}
 			}
 
 			/* Increase or decrease the value by one. This of course can only happen to 'number' types */
 			if (tokenptr.equals("++") && var.type != IConsoleVarTypes.ICONSOLE_VAR_STRING) {
-				IConsoleVarSetValue(var, IConsoleVarGetValue(var) + 1);
+				var.IConsoleVarSetValue(var.IConsoleVarGetValue() + 1);
 				return;
 			}
 
 			if (tokenptr.equals("--") && var.type != IConsoleVarTypes.ICONSOLE_VAR_STRING) {
-				IConsoleVarSetValue(var, IConsoleVarGetValue(var) - 1);
+				var.IConsoleVarSetValue(var.IConsoleVarGetValue() - 1);
 				return;
 			}
 		}
@@ -904,7 +807,7 @@ public class Console //extends ConsoleCmds
 		boolean longtoken = false;
 		boolean foundtoken = false;
 
-		if (cmdstr.charAt(0) == '#') return; // comments
+		if (cmdstr.length() == 0 || cmdstr.charAt(0) == '#') return; // comments
 
 		for (int i = 0; i < cmdstr.length(); i++) {
 			char c = cmdstr.charAt(i);
@@ -1007,7 +910,7 @@ public class Console //extends ConsoleCmds
 		var = IConsoleVarGet(tokens[0]);
 		if (var != null) {
 			if (var.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_ACCESS))
-				IConsoleVarExec(var, t_index, tokens[1]);
+				IConsoleVarExec(var, t_index, tokens[1], tokens[2]);
 
 			return;
 		}
@@ -1016,7 +919,7 @@ public class Console //extends ConsoleCmds
 	}
 
 
-	static void windowProc( Window w, WindowEvent e)
+	private static void windowProc( Window w, WindowEvent e)
 	{
 		switch (e.event) {
 		case WE_PAINT: {
@@ -1089,7 +992,10 @@ public class Console //extends ConsoleCmds
 					++_iconsole_scroll;
 				w.SetWindowDirty();
 				break;
+			
+			case '`':
 			case Window.WKC_BACKQUOTE:
+			case Window.WKC_ESC:
 				IConsoleSwitch();
 				break;
 			case Window.WKC_RETURN: case Window.WKC_NUM_ENTER:
@@ -1154,22 +1060,6 @@ public class Console //extends ConsoleCmds
 
 
 
-
-// --------------------------------------------
-// More classes
-// --------------------------------------------
-
-
-
-
-
-
-
-enum IConsoleModes {
-	ICONSOLE_FULL,
-	ICONSOLE_OPENED,
-	ICONSOLE_CLOSED
-}
 
 
 

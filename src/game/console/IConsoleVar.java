@@ -77,21 +77,101 @@ public class IConsoleVar
 		return value.toString();
 	}
 
-}
+	
+	/**
+	 * Set a new value to a console variable
+	 * 
+	 * @param value the new value given to the variable, cast properly
+	 */
+	public void IConsoleVarSetValue(int value)
+	{
+		hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_PRE_ACTION);
+		
+		switch (type) {
+		case ICONSOLE_VAR_BOOLEAN:
+			this.value = value != 0;
+			break;
+		case ICONSOLE_VAR_BYTE:
+		case ICONSOLE_VAR_UINT16:
+		case ICONSOLE_VAR_INT16:
+		case ICONSOLE_VAR_UINT32:
+		case ICONSOLE_VAR_INT32:
+			this.value= (Integer)value;
+			break;
 
-@FunctionalInterface
-interface IConsoleCmdProc {
-	boolean accept(int argc, String ... argv);
-}
+		default: assert false;// NOT_REACHED();		
+		}
+		
+		hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_POST_ACTION);
+		
+		IConsoleVarPrintSetValue();
+	}
 
+	/**
+	 * Query the current value of a variable and return it
+	 * @param var the variable queried
+	 * @return current value of the variable
+	 */
+	public int IConsoleVarGetValue()
+	{
+		//int result = 0;
 
-enum IConsoleVarTypes {
-	ICONSOLE_VAR_BOOLEAN,
-	ICONSOLE_VAR_BYTE,
-	ICONSOLE_VAR_UINT16,
-	ICONSOLE_VAR_UINT32,
-	ICONSOLE_VAR_INT16,
-	ICONSOLE_VAR_INT32,
-	ICONSOLE_VAR_STRING
+		/*
+		switch (var.type) {
+		case ICONSOLE_VAR_BOOLEAN:
+			result = *(boolean*)var.addr;
+			break;
+		case ICONSOLE_VAR_BYTE:
+			result = *(byte*)var.addr;
+			break;
+		case ICONSOLE_VAR_UINT16:
+			result = *(int*)var.addr;
+			break;
+		case ICONSOLE_VAR_INT16:
+			result = *(int16*)var.addr;
+			break;
+		case ICONSOLE_VAR_UINT32:
+			result = *(int*)var.addr;
+			break;
+		case ICONSOLE_VAR_INT32:
+			result = *(int32*)var.addr;
+			break;
+		default: NOT_REACHED();
+		}*/
+		return (Integer)value;
+	}
+	
+	/**
+	 * Print out the value of the variable after it has been assigned
+	 * a new value, thus giving us feedback on the action
+	 */
+	public void IConsoleVarPrintSetValue()
+	{
+		String value = IConsoleVarGetStringValue();
+		Console.IConsolePrintF(Console._icolour_warn, "'%s' changed to:  %s", name, value);
+	}
+	
+
+	
+	/**
+	 * Set a new value to a string-type variable. Basically this
+	 * means to copy the new value over to the container.
+	 * @param var the variable in question
+	 * @param value the new value
+	 */
+	public void IConsoleVarSetStringvalue(String value)
+	{
+		if (type != IConsoleVarTypes.ICONSOLE_VAR_STRING /*|| var.addr == null*/) return;
+
+		hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_PRE_ACTION);
+		this.value = value;
+		hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_POST_ACTION);
+		IConsoleVarPrintSetValue(); // print out the new value, giving feedback
+	}
+	
+	
+	
+	
+	
 } 
 

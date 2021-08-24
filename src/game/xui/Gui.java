@@ -2503,7 +2503,8 @@ public class Gui
 			break;
 
 		case WE_KEYPRESS:
-			if (e.keycode == Window.WKC_BACKQUOTE) {
+			//if (e.keycode == Window.WKC_BACKQUOTE) {
+			if (e.ascii == '`') {
 				Console.IConsoleSwitch();
 				e.cont = false;
 				break;
