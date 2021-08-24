@@ -73,6 +73,7 @@ public class IConsoleVar
 		default: NOT_REACHED();
 		}
 		 */
+		if( value == null ) return "? (null)";
 		return value.toString();
 	}
 

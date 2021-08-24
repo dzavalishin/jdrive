@@ -973,21 +973,23 @@ public class ConsoleCmds extends Console
 		IConsolePrint( 1, "");
 		return true;
 	}
-/*
-	static boolean function(int argc, String ... argv)(ConListCommands)
+
+	static boolean ConListCommands(int argc, String ... argv)
 	{
-		final IConsoleCmd *cmd;
-		size_t l = 0;
+		//final IConsoleCmd cmd;
+		//int l = 0;
 
 		if (argc == 0) {
 			IConsoleHelp("List all registered commands. Usage: 'list_cmds [<pre-filter>]'");
 			return true;
 		}
 
-		if (argv[1] != null) l = strlen(argv[1]);
+		//if (argv[1] != null) l = argv[1].length();
 
-		for (cmd = _iconsole_cmds; cmd != null; cmd = cmd.next) {
-			if (argv[1] == null || strncmp(cmd.name, argv[1], l) == 0) {
+		//for (cmd = _iconsole_cmds; cmd != null; cmd = cmd.next) 
+		for (IConsoleCmd cmd : _iconsole_cmds.values())
+		{
+			if (argv[1] == null || cmd.name.equals( argv[1]) ) {
 					IConsolePrintF(_icolour_def, "%s", cmd.name);
 			}
 		}
@@ -995,26 +997,26 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConListVariables)
+	static boolean ConListVariables(int argc, String ... argv)
 	{
-		final IConsoleVar *var;
-		size_t l = 0;
+		//final IConsoleVar var;
+		//int l = 0;
 
 		if (argc == 0) {
 			IConsoleHelp("List all registered variables. Usage: 'list_vars [<pre-filter>]'");
 			return true;
 		}
 
-		if (argv[1] != null) l = strlen(argv[1]);
+		//if (argv[1] != null) l = strlen(argv[1]);
 
-		for (var = _iconsole_vars; var != null; var = var.next) {
-			if (argv[1] == null || strncmp(var.name, argv[1], l) == 0)
+		for (IConsoleVar var : _iconsole_vars.values()) {
+			if (argv[1] == null || var.name.equals(argv[1]))
 				IConsolePrintF(_icolour_def, "%s", var.name);
 		}
 
 		return true;
 	}
-
+/*
 	static boolean function(int argc, String ... argv)(ConListAliases)
 	{
 		final IConsoleAlias *alias;
@@ -1261,6 +1263,8 @@ public class ConsoleCmds extends Console
 
 		// default variables and functions
 		IConsoleCmdRegister("help",         ConsoleCmds::ConHelp);
+		IConsoleCmdRegister("list_cmds",    ConsoleCmds::ConListCommands);
+		IConsoleCmdRegister("list_vars",    ConsoleCmds::ConListVariables);
 		/*
 		IConsoleCmdRegister("debug_level",  ConDebugLevel);
 		IConsoleCmdRegister("dump_vars",    ConListDumpVariables);
@@ -1271,8 +1275,6 @@ public class ConsoleCmds extends Console
 		IConsoleCmdRegister("part",         ConPart);
 		IConsoleCmdRegister("info_cmd",     ConInfoCmd);
 		IConsoleCmdRegister("info_var",     ConInfoVar);
-		IConsoleCmdRegister("list_cmds",    ConListCommands);
-		IConsoleCmdRegister("list_vars",    ConListVariables);
 		IConsoleCmdRegister("list_aliases", ConListAliases);
 		IConsoleCmdRegister("newgame",      ConNewGame);
 		IConsoleCmdRegister("quit",         ConExit);
