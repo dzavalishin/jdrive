@@ -947,7 +947,7 @@ public class Console //extends ConsoleCmds
 				if (!foundtoken) break;
 
 				if (longtoken) {
-					tokenstream[tstream_i] = c;
+					tokenstream[tstream_i++] = c;
 				} else {
 					//tokenstream[tstream_i] = 0;
 					tokens[t_index++] = new String(tokenstream, 0, tstream_i);
@@ -955,7 +955,7 @@ public class Console //extends ConsoleCmds
 					foundtoken = false;
 				}
 
-				tstream_i++;
+				//tstream_i++;
 				break;
 			case '"': /* Tokens enclosed in "" are one token */
 				longtoken = !longtoken;
