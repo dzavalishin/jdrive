@@ -11,6 +11,7 @@ import game.Player;
 import game.SignStruct;
 import game.Sprite;
 import game.Str;
+import game.charts.CargoPaymentRatesChart;
 import game.enums.Owner;
 import game.tables.SmallMapGuiTables;
 import game.util.ArrayPtr;
@@ -861,7 +862,8 @@ public class GraphGui
 
 	static void ShowCargoPaymentRates()
 	{
-		Window.AllocateWindowDescFront(_cargo_payment_rates_desc, 0);
+		//Window.AllocateWindowDescFront(_cargo_payment_rates_desc, 0);
+		CargoPaymentRatesChart.showChart();
 	}
 
 
