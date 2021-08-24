@@ -663,7 +663,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			}
 
 			{
-				Order b = v.current_order;
+				Order b = new Order( v.current_order );
 				v.current_order.type = Order.OT_LEAVESTATION;
 				v.current_order.flags = 0;
 				if (0==(b.flags & Order.OF_NON_STOP))
@@ -1416,7 +1416,7 @@ class RoadDriveEntry {
 
 				RoadVehArrivesAt(v, st);
 
-				old_order = v.current_order;
+				old_order = new Order( v.current_order );
 				v.current_order.type = Order.OT_LOADING;
 				v.current_order.flags = 0;
 

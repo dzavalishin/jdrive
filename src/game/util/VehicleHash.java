@@ -22,92 +22,28 @@ import game.struct.Point;
 
 public class VehicleHash 
 {
-	/*
-	//private final Map<Point,Integer> map = new HashMap<>(0x1000);
-	private final Map<Integer,Integer> map = new HashMap<>(0x1000);
-
-
-	public void put( /*Point p, Vehicle v, int hash)
-	{
-		/*
-		int old_x = v.left_coord;
-		int old_y = v.top_coord;
-
-		map.remove(new Point(old_x,old_y)); * /		
-		map.put(hash, v.index );
-	}
-
 	
-	public void put( int x, int y, Vehicle v, int hash)
-	{
-		put(new Point(x,y), v, hash);
-	}
+	//private static final int DELETE_BITS = 8;
+	private static final int DELETE_BITS = 3;
 
-
-	public void put(Vehicle v)
-	{
-
-	}
-
-	
-	public VehicleID get(int x, int y)
-	{
-		return get(new Point(x,y));				
-	}
-
-	public VehicleID get(Point point) {
-		Integer veh = map.get(point);
-		if(veh == null) return null;
-		return VehicleID.get( veh );
-	}
-	
-	public void clear()
-	{
-		map.clear();
-	}
-
-	public void remove(Vehicle v) {
-		Integer [] k = { null };
-		
-		map.forEach( (kk,vv) ->
-		{
-			if(vv == v.index) k[0] = kk; // TODO SLOOOW loop for all!
-		});
-		
-		if(k[0] != null)
-			map.remove(k[0]);
-		
-	}
-
-	public VehicleID get(int i) {
-		Integer veh = map.get(i);
-		if(veh == null) return null;
-		return VehicleID.get( veh );
-	}
-
-	public void remove(int old_hash) {
-		map.remove(old_hash);		
-	}
-	*/
-	
 	static int hashFunc(int x, int y )
 	{
 		return (x << 16) + (y & 0xFFFF);
 	}
 	
 	private int hashFunc(Point prev) {
-		return hashFunc(prev.x >> 8, prev.y >> 8);
+		return hashFunc(prev.x >> DELETE_BITS, prev.y >> DELETE_BITS);
 	}
 	
 	//ArrayList<VehicleID> list = new ArrayList<VehicleID>();
 	final Map<Integer,VehicleID> map = new HashMap<Integer,VehicleID>();
 		
 	public List<VehicleID> get(int x1, int y1, int x2, int y2) {
-		x1 >>= 8; // down
-		x2 = (x2 >> 8) + 1; // up
+		x1 >>= DELETE_BITS; // down
+		x2 = (x2 >> DELETE_BITS) + 1; // up
 
-		y1 >>= 8;
-		y2 = (y2 >> 8) + 1;
+		y1 >>= DELETE_BITS;
+		y2 = (y2 >> DELETE_BITS) + 1;
 
 		ArrayList<VehicleID> list = new ArrayList<VehicleID>();  
 		

@@ -1290,9 +1290,17 @@ public class Order implements Serializable
 		}		
 		return null;
 	}
+
+	public boolean typeIs(int t) {
+		return type == t;
+	}
 	
 	public boolean isNonStop() {		
 		return 0 != (flags & OF_NON_STOP);
+	}
+	
+	public boolean hasFlag(int flag) {
+		return BitOps.HASBIT(flags, flag);
 	}
 	
 }
