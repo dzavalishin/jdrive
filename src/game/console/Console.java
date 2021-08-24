@@ -563,9 +563,10 @@ public class Console //extends ConsoleCmds
 	 */
 	static void IConsoleAliasExec(final IConsoleAlias alias, int tokencount, String ... tokens)
 	{
-		/*
+	/*
 		final String cmdptr;
-		String aliases[ICON_MAX_ALIAS_LINES], aliasstream[ICON_MAX_STREAMSIZE];
+		String [] aliases = new String[ICON_MAX_ALIAS_LINES]
+		String aliasstream[ICON_MAX_STREAMSIZE];
 		int i;
 		int a_index, astream_i;
 
@@ -630,7 +631,7 @@ public class Console //extends ConsoleCmds
 		}
 
 		for (i = 0; i <= (int)a_index; i++) IConsoleCmdExec(aliases[i]); // execute each alias in turn
-		 */
+	*/
 	}
 
 	/**

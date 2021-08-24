@@ -106,7 +106,7 @@ public class ConsoleCmds extends Console
 	}
 
 	
-	static boolean ConResetEngines(byte argc, String ... argv)
+	static boolean ConResetEngines(int argc, String ... argv)
 	{
 		if (argc == 0) {
 			IConsoleHelp("Reset status data of all engines. This might solve some issues with 'lost' engines. Usage: 'resetengines'");
@@ -784,10 +784,10 @@ public class ConsoleCmds extends Console
 		GenRandomNewGame(Random(), InteractiveRandom());
 		return true;
 	}
-
-	static boolean function(int argc, String ... argv)(ConAlias)
+	*/
+	static boolean ConAlias(int argc, String ... argv)
 	{
-		IConsoleAlias *alias;
+		IConsoleAlias alias;
 
 		if (argc == 0) {
 			IConsoleHelp("Add a new alias, or redefine the behaviour of an existing alias . Usage: 'alias <name> <command>'");
@@ -800,12 +800,12 @@ public class ConsoleCmds extends Console
 		if (alias == null) {
 			IConsoleAliasRegister(argv[1], argv[2]);
 		} else {
-			free(alias.cmdline);
-			alias.cmdline = strdup(argv[2]);
+			alias.cmdline = argv[2];
 		}
 		return true;
 	}
 
+	/*
 	static boolean function(int argc, String ... argv)(ConScreenShot)
 	{
 		if (argc == 0) {
@@ -976,17 +976,11 @@ public class ConsoleCmds extends Console
 
 	static boolean ConListCommands(int argc, String ... argv)
 	{
-		//final IConsoleCmd cmd;
-		//int l = 0;
-
 		if (argc == 0) {
 			IConsoleHelp("List all registered commands. Usage: 'list_cmds [<pre-filter>]'");
 			return true;
 		}
 
-		//if (argv[1] != null) l = argv[1].length();
-
-		//for (cmd = _iconsole_cmds; cmd != null; cmd = cmd.next) 
 		for (IConsoleCmd cmd : _iconsole_cmds.values())
 		{
 			if (argv[1] == null || cmd.name.equals( argv[1]) ) {
@@ -999,15 +993,10 @@ public class ConsoleCmds extends Console
 
 	static boolean ConListVariables(int argc, String ... argv)
 	{
-		//final IConsoleVar var;
-		//int l = 0;
-
 		if (argc == 0) {
 			IConsoleHelp("List all registered variables. Usage: 'list_vars [<pre-filter>]'");
 			return true;
 		}
-
-		//if (argv[1] != null) l = strlen(argv[1]);
 
 		for (IConsoleVar var : _iconsole_vars.values()) {
 			if (argv[1] == null || var.name.equals(argv[1]))
@@ -1016,27 +1005,23 @@ public class ConsoleCmds extends Console
 
 		return true;
 	}
-/*
-	static boolean function(int argc, String ... argv)(ConListAliases)
-	{
-		final IConsoleAlias *alias;
-		size_t l = 0;
 
+	static boolean ConListAliases(int argc, String ... argv)
+	{
 		if (argc == 0) {
 			IConsoleHelp("List all registered aliases. Usage: 'list_aliases [<pre-filter>]'");
 			return true;
 		}
 
-		if (argv[1] != null) l = strlen(argv[1]);
-
-		for (alias = _iconsole_aliases; alias != null; alias = alias.next) {
-			if (argv[1] == null || strncmp(alias.name, argv[1], l) == 0)
+		for (IConsoleAlias alias : _iconsole_aliases.values()) {
+			if (argv[1] == null || alias.name.equals(argv[1]))
 				IConsolePrintF(_icolour_def, "%s => %s", alias.name, alias.cmdline);
 		}
 
 		return true;
 	}
-
+	
+	/*
 	#ifdef ENABLE_NETWORK
 
 	static boolean function(int argc, String ... argv)(ConSay)
@@ -1265,6 +1250,8 @@ public class ConsoleCmds extends Console
 		IConsoleCmdRegister("help",         ConsoleCmds::ConHelp);
 		IConsoleCmdRegister("list_cmds",    ConsoleCmds::ConListCommands);
 		IConsoleCmdRegister("list_vars",    ConsoleCmds::ConListVariables);
+		IConsoleCmdRegister("list_aliases", ConsoleCmds::ConListAliases);
+		IConsoleCmdRegister("alias",        ConsoleCmds::ConAlias);
 		/*
 		IConsoleCmdRegister("debug_level",  ConDebugLevel);
 		IConsoleCmdRegister("dump_vars",    ConListDumpVariables);
@@ -1275,15 +1262,11 @@ public class ConsoleCmds extends Console
 		IConsoleCmdRegister("part",         ConPart);
 		IConsoleCmdRegister("info_cmd",     ConInfoCmd);
 		IConsoleCmdRegister("info_var",     ConInfoVar);
-		IConsoleCmdRegister("list_aliases", ConListAliases);
 		IConsoleCmdRegister("newgame",      ConNewGame);
 		IConsoleCmdRegister("quit",         ConExit);
-		IConsoleCmdRegister("resetengines", ConResetEngines);
 		IConsoleCmdRegister("return",       ConReturn);
 		IConsoleCmdRegister("screenshot",   ConScreenShot);
 		IConsoleCmdRegister("script",       ConScript);
-		IConsoleCmdRegister("scrollto",     ConScrollToTile);
-		IConsoleCmdRegister("alias",        ConAlias);
 		IConsoleCmdRegister("load",         ConLoad);
 		IConsoleCmdRegister("rm",           ConRemove);
 		IConsoleCmdRegister("save",         ConSave);
@@ -1292,7 +1275,9 @@ public class ConsoleCmds extends Console
 		IConsoleCmdRegister("pwd",          ConPrintWorkingDirectory);
 		IConsoleCmdRegister("clear",        ConClearBuffer);
 		*/
-		Console.IConsoleCmdRegister("stopall",      ConsoleCmds::constopAllVehicles);
+		IConsoleCmdRegister("scrollto",     ConsoleCmds::ConScrollToTile);
+		IConsoleCmdRegister("resetengines", ConsoleCmds::ConResetEngines);
+		IConsoleCmdRegister("stopall",      ConsoleCmds::constopAllVehicles);
 
 		/*
 		IConsoleAliasRegister("dir",      "ls");
@@ -1407,8 +1392,8 @@ public class ConsoleCmds extends Console
 
 		// debugging stuff
 	/* TODO XXX #ifdef _DEBUG
-		IConsoleDebugLibRegister();
 	#endif */
+		IConsoleDebugLibRegister();
 	}
 
 }
