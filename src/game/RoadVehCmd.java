@@ -1488,12 +1488,11 @@ class RoadDriveEntry {
 
 		v.TriggerVehicle(Engine.VEHICLE_TRIGGER_DEPOT);
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
-			Order t;
-
+		if (v.current_order.type == Order.OT_GOTO_DEPOT) 
+		{
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
-			t = v.current_order;
+			Order t = new Order( v.current_order );
 			v.current_order.type = Order.OT_DUMMY;
 			v.current_order.flags = 0;
 
