@@ -929,10 +929,17 @@ public class Console //extends ConsoleCmds
 		 * of characters in our stream or the max amount of tokens we can handle */
 		t_index = 0;
 		tstream_i = 0;
-		for (int i = 0; i < cmdstr.length(); i++) {
+		for (int i = 0; true; i++) {
+			
+			if(i >= cmdstr.length())
+			{
+				if(foundtoken) tokens[t_index++] = new String(tokenstream, 0, tstream_i);
+				break;
+			}
 
-			if (t_index >= tokens.length || tstream_i >= tokenstream.length) break;
-
+			if (t_index >= tokens.length || tstream_i >= tokenstream.length) 
+				break;
+			
 			char c = cmdstr.charAt(i);
 
 			switch (c) {

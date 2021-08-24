@@ -21,6 +21,11 @@ public class Textbuf
 	}
 
 
+	public Textbuf() {
+		allocate(128);
+	}
+
+
 	void DelChar()
 	{
 		width -= Gfx.GetCharacterWidth(buf[caretpos]);
@@ -197,7 +202,7 @@ public class Textbuf
 	}
 
 
-	public String getString() { return new String(buf); }
+	public String getString() { return new String(buf, 0, length); }
 	public boolean isCaret() { return caret; }
 	public int getCaretXOffs() { return caretxoffs; }
 	public int getWidth() { return width; }
