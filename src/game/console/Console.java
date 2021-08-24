@@ -3,6 +3,7 @@ package game.console;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import game.Global;
@@ -24,9 +25,9 @@ public class Console //extends ConsoleCmds
 	public static final int  ICON_MAX_STREAMSIZE = 1024;
 
 	// ** console parser ** //
-	static Map<String,IConsoleCmd>   _iconsole_cmds;    // list of registred commands
-	static Map<String,IConsoleVar>   _iconsole_vars;    // list of registred vars
-	static Map<String,IConsoleAlias> _iconsole_aliases; // list of registred aliases
+	static Map<String,IConsoleCmd>   _iconsole_cmds = new HashMap<String,IConsoleCmd>();    // list of registred commands
+	static Map<String,IConsoleVar>   _iconsole_vars = new HashMap<String,IConsoleVar>();    // list of registred vars
+	static Map<String,IConsoleAlias> _iconsole_aliases = new HashMap<String,IConsoleAlias>(); // list of registred aliases
 
 	// ** console colors/modes ** //
 	static byte _icolour_def;
@@ -34,7 +35,7 @@ public class Console //extends ConsoleCmds
 	static byte _icolour_warn;
 	static byte _icolour_dbg;
 	static byte _icolour_cmd;
-	static IConsoleModes _iconsole_mode;
+	static IConsoleModes _iconsole_mode = IConsoleModes.ICONSOLE_CLOSED;
 
 
 
@@ -55,7 +56,7 @@ public class Console //extends ConsoleCmds
 	static boolean _iconsole_inited;
 	static final String[]_iconsole_buffer = new String[ICON_BUFFER + 1];
 	static final int[] _iconsole_cbuffer = new int[ICON_BUFFER + 1];
-	static final Textbuf _iconsole_cmdline = new Textbuf();
+	static final Textbuf _iconsole_cmdline = new Textbuf(128);
 	static byte _iconsole_scroll;
 
 	// ** stdlib ** //
@@ -75,7 +76,7 @@ public class Console //extends ConsoleCmds
 	{
 		_iconsole_cmdline.allocate(256); // String();
 		_iconsole_cmdline.DeleteTextBufferAll();
-		_iconsole_win.SetWindowDirty();
+		if(_iconsole_win != null) _iconsole_win.SetWindowDirty();
 	}
 
 	static  void IConsoleResetHistoryPos() {_iconsole_historypos = ICON_HISTORY_SIZE - 1;}
@@ -93,7 +94,7 @@ public class Console //extends ConsoleCmds
 			Console::windowProc
 			);
 
-	static void IConsoleInit()
+	public static void IConsoleInit()
 	{
 		//extern final char _openttd_revision[];
 		_iconsole_output_file = null;
@@ -206,7 +207,10 @@ public class Console //extends ConsoleCmds
 		Hal.MarkWholeScreenDirty();
 	}
 
-	static void IConsoleSwitch()
+	/**
+	 * Turn on/off
+	 */
+	public static void IConsoleSwitch()
 	{
 		switch (_iconsole_mode) {
 		case ICONSOLE_CLOSED:
@@ -252,6 +256,8 @@ public class Console //extends ConsoleCmds
 	{
 		int i = _iconsole_historypos + direction;
 
+		if(_iconsole_history[0] == null) return;
+		
 		// watch out for overflows, just wrap around
 		if (i < 0) i = ICON_HISTORY_SIZE - 1;
 		if (i >= ICON_HISTORY_SIZE) i = 0;

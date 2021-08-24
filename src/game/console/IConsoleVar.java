@@ -21,7 +21,7 @@ public class IConsoleVar
 	String 				help;               // the optional help string shown when requesting information
 	IConsoleVarTypes 	type;    // type of variable (for correct assignment/output)
 	IConsoleCmdProc 	proc;    // some variables need really special handling, use a callback function for that
-	IConsoleHooks 		hook;       // any special trigger action that needs executing
+	IConsoleHooks 		hook = new IConsoleHooks();       // any special trigger action that needs executing
 
 	public void IConsoleVarPrintGetValue() {
 

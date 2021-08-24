@@ -1,6 +1,7 @@
 package game.xui;
 
 import java.util.Iterator;
+
 import java.util.function.Consumer;
 
 import game.AirCraft;
@@ -27,6 +28,8 @@ import game.Town;
 import game.Vehicle;
 import game.WayPoint;
 
+import game.console.Console;
+
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.SwitchModes;
@@ -41,6 +44,7 @@ import game.struct.Point;
 
 import game.util.BitOps;
 import game.util.GameDate;
+
 import game.ifaces.MenuClickedProc;
 import game.ifaces.OnButtonClick;
 import game.ifaces.ToolbarButtonProc;
@@ -543,7 +547,7 @@ public class Gui
 	{
 		switch (index) {
 			case 0: MiscGui.PlaceLandBlockInfo(); break;
-			// TODO case 2: Console.IConsoleSwitch();     break;
+			case 2: Console.IConsoleSwitch();     break;
 			case 3: Global._make_screenshot = 1; break;
 			case 4: Global._make_screenshot = 2; break;
 			case 5: MiscGui.ShowAboutWindow();    break;
@@ -2500,7 +2504,7 @@ public class Gui
 
 		case WE_KEYPRESS:
 			if (e.keycode == Window.WKC_BACKQUOTE) {
-				// TODO Console.IConsoleSwitch();
+				Console.IConsoleSwitch();
 				e.cont = false;
 				break;
 			}
