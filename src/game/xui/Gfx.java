@@ -41,17 +41,12 @@ public class Gfx extends PaletteTabs
 	public static final String DOWNARROW = String.valueOf((char)0xAA); // "\xAA";
 
 
-	//static void GfxMainBlitter(final Sprite *sprite, int x, int y, int mode);
 
 	static final int ASCII_LETTERSTART = 32;
 	public static int _stringwidth_base = 0;
-	//VARDEF byte _stringwidth_table[0x2A0];
 	private static final byte [] _stringwidth_table = new byte[0x2A0];
 
 	static int _stringwidth_out;
-	//static /* Pixel */ byte  []_cursor_backup = new /* Pixel */ byte [64 * 64];
-
-
 
 	static final byte [] _cursor_backup = new byte[64 * 64];
 	//static Rect _invalid_rect;
@@ -63,42 +58,7 @@ public class Gfx extends PaletteTabs
 	static final byte [] _dirty_blocks = new byte[4 * DIRTY_BYTES_PER_LINE * Global.MAX_SCREEN_HEIGHT / 8];
 
 
-	/* 
-	static void memcpy_pitch(void *d, void *s, int w, int h, int spitch, int dpitch)
-	{
-		byte *dp = (byte*)d;
-		byte *sp = (byte*)s;
 
-		assert(h >= 0);
-		for (; h != 0; --h) {
-			memcpy(dp, sp, w);
-			dp += dpitch;
-			sp += spitch;
-		}
-	}*/
-
-	/*
-	static void memcpy_pitch(
-			byte[] d, byte []s, 
-			int w, int h, 
-			int spitch, int dpitch,
-			int d_offset, int s_offset
-			)
-	{
-		//byte *dp = (byte*)d;
-		//byte *sp = (byte*)s;
-		int sp = s_offset;
-		int dp = d_offset;
-
-		assert(h >= 0);
-		for (; h != 0; --h) {
-			//memcpy(dp, sp, w);
-			System.arraycopy(s, sp, d, dp, w);
-
-			dp += dpitch;
-			sp += spitch;
-		}
-	}*/
 
 	public static void memcpy_pitch(
 			Pixel d, Pixel s, 
@@ -106,15 +66,8 @@ public class Gfx extends PaletteTabs
 			int spitch, int dpitch
 			)
 	{
-		//byte *dp = (byte*)d;
-		//byte *sp = (byte*)s;
-		//int sp = 0;
-		//int dp = 0;
-
 		assert(h >= 0);
 		for (; h != 0; --h) {
-			//memcpy(dp, sp, w);
-			//System.arraycopy(s, sp, d, dp, w);
 			d.copyFrom(s, w);
 
 			d.madd( dpitch );
@@ -199,11 +152,11 @@ public class Gfx extends PaletteTabs
 		Global.hal.make_dirty(left, top, width, height);
 	}
 
-	static void memset( int[] mem, int dst, int color, int count)
+	/*static void memset( int[] mem, int dst, int color, int count)
 	{
 		while(count-- > 0)
 			mem[dst++] = color;
-	}
+	}*/
 
 	public static void GfxFillRect(int left, int top, int right, int bottom, int color)
 	{
@@ -1878,7 +1831,7 @@ public class Gfx extends PaletteTabs
 		boolean cmp = Arrays.equals(old_val, 0, c, _cur_palette, 217, 217+c);
 
 		//if (memcmp(old_val, _cur_palette+217, c * sizeof(old_val[0])) != 0) 
-		if (cmp) 
+		if (!cmp) 
 		{
 			if (_pal_first_dirty > 217) _pal_first_dirty = 217;
 			if (_pal_last_dirty < 217 + c) _pal_last_dirty = 217 + c;
@@ -1937,14 +1890,12 @@ public class Gfx extends PaletteTabs
 		if (Hal._cursor.visible) {
 			Hal._cursor.visible = false;
 			memcpy_pitch(
-					//Hal._screen.dst_ptr + Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch,
 					new Pixel(Hal._screen.dst_ptr, Hal._cursor.draw_pos.x + Hal._cursor.draw_pos.y * Hal._screen.pitch ),					
 					new Pixel(_cursor_backup),
 
 					Hal._cursor.draw_size.x, 
 					Hal._cursor.draw_size.y,
 
-					//Hal._cursor.draw_size.x, 
 					Hal._cursor.draw_size.x, 
 					Hal._screen.pitch
 					);
