@@ -1502,7 +1502,7 @@ public class Station extends StationTables implements IPoolItem
 
 	/* Get's the direction the station exit points towards. Ie, returns 0 for a
 	 * station with the exit NE. */
-	static int GetRoadStationDir(TileIndex tile)
+	public static int GetRoadStationDir(TileIndex tile)
 	{
 		assert(tile.IsRoadStationTile());
 		return (tile.M().m5 - 0x43) & 3;

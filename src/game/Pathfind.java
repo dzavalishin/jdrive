@@ -55,7 +55,7 @@ public abstract class Pathfind extends TrackPathFinderTables
 	/* Returns the end tile and the length of a tunnel. The length does not
 	 * include the starting tile (entry), it does include the end tile (exit).
 	 */
-	static FindLengthOfTunnelResult FindLengthOfTunnel(TileIndex tile, int direction)
+	public static FindLengthOfTunnelResult FindLengthOfTunnel(TileIndex tile, int direction)
 	{
 		FindLengthOfTunnelResult flotr = new FindLengthOfTunnelResult();
 		int x,y;

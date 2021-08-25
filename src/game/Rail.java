@@ -3232,7 +3232,7 @@ static  byte SignalOnTrack(Track track) {
 	 * Maps a (4-way) direction to the diagonal trackdir that runs in that
 	 * direction.
 	 */
-	static  /*Trackdir*/ int DiagdirToDiagTrackdir(/*DiagDirection*/ int  diagdir) {
+	public static  /*Trackdir*/ int DiagdirToDiagTrackdir(/*DiagDirection*/ int  diagdir) {
 		//extern final Trackdir _dir_to_diag_trackdir[DIAGDIR_END];
 		return _dir_to_diag_trackdir[diagdir];
 	}

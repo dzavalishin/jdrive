@@ -32,6 +32,7 @@ import game.struct.ParentSpriteToDraw;
 import game.struct.Point;
 import game.struct.Rect;
 import game.struct.StringSpriteToDraw;
+import game.struct.TileMarker;
 import game.struct.TileSpriteToDraw;
 import game.util.AnimCursor;
 import game.util.AutoRail;
@@ -456,18 +457,9 @@ public class ViewPort
 
 		assert((image & Sprite.SPRITE_MASK) < Sprite.MAX_SPRITES);
 
-		/*
-		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
-			DEBUG_misc( 0, "Out of sprite mem");
-			return;
-		}
-		ts = (TileSpriteToDraw)vd.spritelist_mem;
-		vd.spritelist_mem += sizeof(TileSpriteToDraw);
-		 */
 		ts = new TileSpriteToDraw();
 
 		ts.image = image;
-		//ts.next = null;
 		ts.x = x;
 		ts.y = y;
 		ts.z = z;
@@ -1222,13 +1214,45 @@ public class ViewPort
 		sign.setWidth_2(w);
 	}
 
+	
+	
+	//public static List<TileIndex> markTilesBlue = new ArrayList<>();
+	public static List<TileMarker> markTiles = new ArrayList<>();
 
+	public static void clearTileMarkers()
+	{
+		markTiles.clear();
+		//markTilesRed.clear();
+	}
 	static void ViewportDrawTileSprites(List<TileSpriteToDraw> tiles)
 	{
 		for( TileSpriteToDraw ts : tiles )
 		{
 			Point pt = Point.RemapCoords(ts.x, ts.y, ts.z);
 			Gfx.DrawSprite(ts.image, pt.x, pt.y);
+			
+			// [dz] mark tiles with point
+			//Point ptr = new Point(pt.x, pt.y+12); 
+			//Gfx.GfxFillRect(ptr.x, ptr.y, ptr.x+3, ptr.y+3, 239); // flashing: 234/239 red 222 blue
+		}
+		
+		//markTiles.clear();
+		//if(markTiles.isEmpty()) markTiles.add(TileIndex.get(3333));
+		//if(markTiles.isEmpty()) markTiles.add(TileIndex.get(1));
+		
+		/*for(TileIndex tile : markTilesBlue)
+		{
+			Point pt = Point.RemapCoords(tile);
+			Gfx.GfxFillRect(pt.x-1, pt.y-1, pt.x+3, pt.y+3, 222); // flashing: 234/239 red 222 blue
+			// [dz] mark tiles with point
+			//Point ptr = new Point(pt.x, pt.y+12); 
+			//Gfx.GfxFillRect(ptr.x, ptr.y, ptr.x+3, ptr.y+3, 239); // flashing: 234/239 red 222 blue
+		}*/
+
+		for(TileMarker m : markTiles)
+		{
+			Point pt = Point.RemapCoords(m.getTile());
+			Gfx.GfxFillRect(pt.x-1, pt.y-1, pt.x+3, pt.y+3, m.getColor()); // flashing: 234/239 red 222 blue
 		}
 	}
 
@@ -1802,7 +1826,6 @@ public class ViewPort
 			x = x - vp.left + vp.virtual_left;
 			y = y - vp.top + vp.virtual_top;
 
-			//FOR_ALL_STATIONS(st) 
 			Iterator<Station> i = Station.getIterator();
 			while(i.hasNext())
 			{
@@ -1822,7 +1845,6 @@ public class ViewPort
 			x = (x - vp.left + 1) * 2 + vp.virtual_left;
 			y = (y - vp.top + 1) * 2 + vp.virtual_top;
 
-			//FOR_ALL_STATIONS(st) 
 			Iterator<Station> i = Station.getIterator();
 			while(i.hasNext())
 			{
@@ -1842,7 +1864,6 @@ public class ViewPort
 			x = (x - vp.left + 3) * 4 + vp.virtual_left;
 			y = (y - vp.top + 3) * 4 + vp.virtual_top;
 
-			//FOR_ALL_STATIONS(st) 
 			Iterator<Station> i = Station.getIterator();
 			while(i.hasNext())
 			{
@@ -2207,7 +2228,8 @@ public class ViewPort
 		// redraw selection
 		if (_thd.drawstyle != _thd.new_drawstyle ||
 				_thd.pos.x != _thd.new_pos.x || _thd.pos.y != _thd.new_pos.y ||
-				_thd.size.x != _thd.new_size.x || _thd.size.y != _thd.new_size.y) {
+				_thd.size.x != _thd.new_size.x || _thd.size.y != _thd.new_size.y) 
+		{
 			// clear the old selection?
 			if (_thd.drawstyle != 0) SetSelectionTilesDirty();
 

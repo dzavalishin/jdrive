@@ -18,4 +18,24 @@ public class PathNode {
 		parent = src.parent;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof PathNode) {
+			PathNode pnode = (PathNode) obj;
+			
+			if( parent == null && pnode.parent != null ) return false;
+			if( parent != null && pnode.parent == null ) return false;
+			
+			if( node == null && pnode.node != null ) return false;
+			if( node != null && pnode.node == null ) return false;
+			
+			if( parent != null && !parent.equals(pnode.parent) ) return false; 
+			if( node != null && !node.equals(pnode.node) ) return false;
+			
+			return true;
+		}
+		
+		return super.equals(obj);
+	}
+	
 }

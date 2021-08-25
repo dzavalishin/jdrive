@@ -15,6 +15,7 @@ import game.struct.OvertakeData;
 import game.struct.Point;
 import game.struct.RoadFindDepotData;
 import game.struct.RoadVehFindData;
+import game.struct.TileMarker;
 import game.tables.RoadVehCmdTables;
 
 import game.util.BitOps;
@@ -271,6 +272,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		if (v.road.isInTunnel()) tile = TunnelBridgeCmd.GetVehicleOutOfTunnelTile(v);
 
+		//TileMarker.mark(tile, 209);
+		
 		if (Global._patches.new_pathfinding_all) {
 			NPFFoundTargetData ftd;
 			/* See where we are now */

@@ -254,7 +254,7 @@ public class Landscape extends GenLandTable
 	}
 
 	//static int GetTileTrackStatus(TileIndex tile, TransportType mode)
-	static int GetTileTrackStatus(TileIndex tile, int mode)
+	public static int GetTileTrackStatus(TileIndex tile, int mode)
 	{
 		return _tile_type_procs[tile.GetTileType().ordinal()].get_tile_track_status_proc.applyAsInt(tile, mode);
 	}

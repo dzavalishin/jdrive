@@ -316,9 +316,6 @@ public class Window extends WindowConstants
 	// -----------------------------------
 
 
-	//WindowProc *wndproc;
-	//abstract void WindowProc( WindowEvent e);
-	//void wndproc(WindowEvent e) { WindowProc(e); }
 
 	void CallWindowEventNP(WindowEvents event)
 	{
@@ -551,7 +548,6 @@ public class Window extends WindowConstants
 
 	static void DrawOverlappedWindowForAll(int left, int top, int right, int bottom)
 	{
-		//Window w;
 		DrawPixelInfo bk = new DrawPixelInfo();
 		Hal._cur_dpi = bk;
 

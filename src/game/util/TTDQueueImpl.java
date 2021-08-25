@@ -1,6 +1,7 @@
 package game.util;
 
 import java.util.ArrayList;
+import java.util.ListIterator;
 
 public class TTDQueueImpl<ItemType>  extends TTDQueue<ItemType>  
 {
@@ -74,7 +75,8 @@ public class TTDQueueImpl<ItemType>  extends TTDQueue<ItemType>
 	@Override
 	public ItemType pop() {
 		if( list.isEmpty()) return null;
-		WeightedPair ret = list.remove(0);
+		//WeightedPair ret = list.remove(0);
+		WeightedPair ret = list.remove(list.size()-1);
 		return ret == null ? null : (ItemType) ret.item;
 	}
 
@@ -84,8 +86,18 @@ public class TTDQueueImpl<ItemType>  extends TTDQueue<ItemType>
 	}
 
 	@Override
-	public void del(ItemType check, int i) {
-		assert check.equals( list.remove(i).item );
+	public void del(ItemType check) 
+	{
+		for( ListIterator<WeightedPair> i = list.listIterator();
+				i.hasNext(); )
+		{
+			final Object item = i.next().item;
+			if(check == item || check.equals(item))
+			{
+				i.remove();
+				return;
+			}
+		}
 	}
 
 }

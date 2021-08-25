@@ -1,6 +1,8 @@
 package game.struct;
 
 import game.Landscape;
+import game.TileIndex;
+import game.TileInfo;
 
 /**
  * 
@@ -61,6 +63,21 @@ public class Point implements Comparable<Point> {
 		
 		//return x + y; diagonal ones will have same code
 		return x + (y << 8);
+	}
+
+
+	/**
+	 * Remap tile index into screen x,y
+	 * @param tile to find coordinates for
+	 * @return Point of tile center in screen coordinates.
+	 */
+	public static Point RemapCoords(TileIndex tile) 
+	{
+		Point pt = Point.RemapCoords(
+				tile.getX()*TileInfo.TILE_SIZE, 
+				tile.getY()*TileInfo.TILE_SIZE, 
+				tile.GetTileZ() );
+		return new Point(pt.x, pt.y+12);
 	}
 
 	

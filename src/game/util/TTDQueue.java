@@ -9,6 +9,6 @@ public abstract class TTDQueue<ItemType>
 
 	public abstract void clear();
 
-	public abstract void del(ItemType check, int i);
+	public abstract void del(ItemType check);
 
 }

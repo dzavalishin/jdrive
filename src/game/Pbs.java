@@ -208,7 +208,7 @@ public class Pbs {
 		}
 	}
 
-	static int PBSTileUnavail(TileIndex tile) {
+	public static int PBSTileUnavail(TileIndex tile) {
 		assert(tile.IsValidTile());
 		switch (tile.GetTileType()) {
 			case MP_RAILWAY:
