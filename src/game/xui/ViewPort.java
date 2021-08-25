@@ -32,6 +32,7 @@ import game.struct.ParentSpriteToDraw;
 import game.struct.Point;
 import game.struct.Rect;
 import game.struct.StringSpriteToDraw;
+import game.struct.TileMarker;
 import game.struct.TileSpriteToDraw;
 import game.util.AnimCursor;
 import game.util.AutoRail;
@@ -1213,7 +1214,16 @@ public class ViewPort
 		sign.setWidth_2(w);
 	}
 
+	
+	
+	//public static List<TileIndex> markTilesBlue = new ArrayList<>();
+	public static List<TileMarker> markTiles = new ArrayList<>();
 
+	public static void clearTileMarkers()
+	{
+		markTiles.clear();
+		//markTilesRed.clear();
+	}
 	static void ViewportDrawTileSprites(List<TileSpriteToDraw> tiles)
 	{
 		for( TileSpriteToDraw ts : tiles )
@@ -1224,6 +1234,25 @@ public class ViewPort
 			// [dz] mark tiles with point
 			//Point ptr = new Point(pt.x, pt.y+12); 
 			//Gfx.GfxFillRect(ptr.x, ptr.y, ptr.x+3, ptr.y+3, 239); // flashing: 234/239 red 222 blue
+		}
+		
+		//markTiles.clear();
+		//if(markTiles.isEmpty()) markTiles.add(TileIndex.get(3333));
+		//if(markTiles.isEmpty()) markTiles.add(TileIndex.get(1));
+		
+		/*for(TileIndex tile : markTilesBlue)
+		{
+			Point pt = Point.RemapCoords(tile);
+			Gfx.GfxFillRect(pt.x-1, pt.y-1, pt.x+3, pt.y+3, 222); // flashing: 234/239 red 222 blue
+			// [dz] mark tiles with point
+			//Point ptr = new Point(pt.x, pt.y+12); 
+			//Gfx.GfxFillRect(ptr.x, ptr.y, ptr.x+3, ptr.y+3, 239); // flashing: 234/239 red 222 blue
+		}*/
+
+		for(TileMarker m : markTiles)
+		{
+			Point pt = Point.RemapCoords(m.getTile());
+			Gfx.GfxFillRect(pt.x-1, pt.y-1, pt.x+3, pt.y+3, m.getColor()); // flashing: 234/239 red 222 blue
 		}
 	}
 

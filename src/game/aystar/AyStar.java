@@ -1,11 +1,14 @@
 package game.aystar;
 
 import game.NPFFoundTargetData;
+import game.TileIndex;
 import game.struct.OpenListNode;
 import game.struct.PathNode;
 import game.util.Hash;
 import game.util.TTDQueue;
 import game.util.TTDQueueImpl;
+import game.struct.TileMarker;
+import game.xui.ViewPort;
 
 public class AyStar 
 {
@@ -253,6 +256,7 @@ public class AyStar
 		} else {
 			// A new node, add him to the OpenList
 			AyStarMain_OpenList_Add(aystar, closedlist_parent, current, new_f, new_g);
+			markRed(current.tile); // Debug
 		}
 
 		return AYSTAR_DONE;
@@ -278,6 +282,8 @@ public class AyStar
 		// If empty, drop an error
 		if (current == null) return AYSTAR_EMPTY_OPENLIST;
 
+		markBlue(current); // Debug
+		
 		// Check for end node and if found, return that code
 		if (aystar.EndNodeCheck.apply(aystar, current) == AYSTAR_FOUND_END_NODE) {
 			if (aystar.FoundEndNode != null)
@@ -310,6 +316,25 @@ public class AyStar
 	}
 
 
+	private static void markBlue(OpenListNode current) 
+	{
+		if( 
+				current != null &&
+				current.path != null &&
+				current.path.node != null &&
+				current.path.node.tile != null
+		)
+			TileMarker.markFlashBlue(current.path.node.tile);		
+	}
+
+	private static void markRed(TileIndex tile) {
+		
+		
+		if( tile != null )
+			TileMarker.markFlashRed(tile);
+		
+	}
+	
 	/*
 	 * This function frees the memory it allocated
 	 */
@@ -393,11 +418,12 @@ public class AyStar
 	 * g is the cost for starting with this node.
 	 */
 	static void AyStarMain_AddStartNode(AyStar aystar, AyStarNode start_node, int g) {
-		/*#ifdef AYSTAR_DEBUG
-		printf("[AyStar] Starting A* Algorithm from node (%d, %d, %d)\n",
-			TileX(start_node.tile), TileY(start_node.tile), start_node.direction);
-	#endif*/
+		//#ifdef AYSTAR_DEBUG
+		System.out.printf("[AyStar] Starting A* Algorithm from node (%d, %d, %d)\n",
+			start_node.tile.getX(), start_node.tile.getY(), start_node.direction);
+		//#endif*/
 		AyStarMain_OpenList_Add(aystar, null, start_node, 0, g);
+		TileMarker.mark(start_node.tile, 209);
 	}
 
 	public int getMax_search_nodes() {

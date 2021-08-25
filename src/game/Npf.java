@@ -10,9 +10,11 @@ import game.struct.FindLengthOfTunnelResult;
 import game.struct.NPFFindStationOrTileData;
 import game.struct.OpenListNode;
 import game.struct.PathNode;
+import game.struct.TileMarker;
 import game.util.BitOps;
 import game.util.TTDQueue;
 import game.util.TTDQueueImpl;
+import game.xui.ViewPort;
 
 public class Npf {
 
@@ -983,24 +985,23 @@ public class Npf {
 		int r;
 		NPFFoundTargetData result = new NPFFoundTargetData();
 
+		//ViewPort.clearTileMarkers();
+		TileMarker.clearAll();
+		
 		/* Initialize procs */
 		_npf_aystar.CalculateH = heuristic_proc;
 		_npf_aystar.EndNodeCheck = target_proc;
 		_npf_aystar.FoundEndNode = Npf::NPFSaveTargetData;
 		_npf_aystar.GetNeighbours = Npf::NPFFollowTrack;
-		if (type == Global.TRANSPORT_RAIL)
-			_npf_aystar.CalculateG = Npf::NPFRailPathCost;
-		else if (type == Global.TRANSPORT_ROAD)
-			_npf_aystar.CalculateG = Npf::NPFRoadPathCost;
-		else if (type == Global.TRANSPORT_WATER)
-			_npf_aystar.CalculateG = Npf::NPFWaterPathCost;
+		
+		if (type == Global.TRANSPORT_RAIL)			_npf_aystar.CalculateG = Npf::NPFRailPathCost;
+		else if (type == Global.TRANSPORT_ROAD)		_npf_aystar.CalculateG = Npf::NPFRoadPathCost;
+		else if (type == Global.TRANSPORT_WATER)	_npf_aystar.CalculateG = Npf::NPFWaterPathCost;
 		else
 			assert false;
 
-		if (pbs_mode != Pbs.PBS_MODE_NONE)
-			_npf_aystar.BeforeExit = Npf::NPFReservePBSPath;
-		else
-			_npf_aystar.BeforeExit = null;
+		if (pbs_mode != Pbs.PBS_MODE_NONE)			_npf_aystar.BeforeExit = Npf::NPFReservePBSPath;
+		else										_npf_aystar.BeforeExit = null;
 
 		/* Initialize Start Node(s) */
 		start1.user_data[NPF_TRACKDIR_CHOICE] = Rail.INVALID_TRACKDIR;
