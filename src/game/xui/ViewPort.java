@@ -456,18 +456,9 @@ public class ViewPort
 
 		assert((image & Sprite.SPRITE_MASK) < Sprite.MAX_SPRITES);
 
-		/*
-		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
-			DEBUG_misc( 0, "Out of sprite mem");
-			return;
-		}
-		ts = (TileSpriteToDraw)vd.spritelist_mem;
-		vd.spritelist_mem += sizeof(TileSpriteToDraw);
-		 */
 		ts = new TileSpriteToDraw();
 
 		ts.image = image;
-		//ts.next = null;
 		ts.x = x;
 		ts.y = y;
 		ts.z = z;
@@ -1229,6 +1220,10 @@ public class ViewPort
 		{
 			Point pt = Point.RemapCoords(ts.x, ts.y, ts.z);
 			Gfx.DrawSprite(ts.image, pt.x, pt.y);
+			
+			// [dz] mark tiles with point
+			//Point ptr = new Point(pt.x, pt.y+12); 
+			//Gfx.GfxFillRect(ptr.x, ptr.y, ptr.x+3, ptr.y+3, 239); // flashing: 234/239 red 222 blue
 		}
 	}
 
@@ -1802,7 +1797,6 @@ public class ViewPort
 			x = x - vp.left + vp.virtual_left;
 			y = y - vp.top + vp.virtual_top;
 
-			//FOR_ALL_STATIONS(st) 
 			Iterator<Station> i = Station.getIterator();
 			while(i.hasNext())
 			{
@@ -1822,7 +1816,6 @@ public class ViewPort
 			x = (x - vp.left + 1) * 2 + vp.virtual_left;
 			y = (y - vp.top + 1) * 2 + vp.virtual_top;
 
-			//FOR_ALL_STATIONS(st) 
 			Iterator<Station> i = Station.getIterator();
 			while(i.hasNext())
 			{
@@ -1842,7 +1835,6 @@ public class ViewPort
 			x = (x - vp.left + 3) * 4 + vp.virtual_left;
 			y = (y - vp.top + 3) * 4 + vp.virtual_top;
 
-			//FOR_ALL_STATIONS(st) 
 			Iterator<Station> i = Station.getIterator();
 			while(i.hasNext())
 			{
@@ -2207,7 +2199,8 @@ public class ViewPort
 		// redraw selection
 		if (_thd.drawstyle != _thd.new_drawstyle ||
 				_thd.pos.x != _thd.new_pos.x || _thd.pos.y != _thd.new_pos.y ||
-				_thd.size.x != _thd.new_size.x || _thd.size.y != _thd.new_size.y) {
+				_thd.size.x != _thd.new_size.x || _thd.size.y != _thd.new_size.y) 
+		{
 			// clear the old selection?
 			if (_thd.drawstyle != 0) SetSelectionTilesDirty();
 

@@ -1687,9 +1687,6 @@ public class Gfx extends PaletteTabs
 		DoPaletteAnimations();
 	}
 
-	//#define EXTR(p, q) (((int)(_timer_counter * (p)) * (q)) >> 16)
-	//#define EXTR2(p, q) (((int)(~_timer_counter * (p)) * (q)) >> 16)
-
 	static int EXTR(int p, int q) { return ( (((Global._timer_counter) * p * q) >>> 16) ) % q; }
 	static int EXTR2(int p, int q) { return ( ((((~Global._timer_counter)) * p * q) >>> 16) ) % q; }
 
@@ -1705,9 +1702,6 @@ public class Gfx extends PaletteTabs
 		int i;
 		int j;
 
-		//Colour d;
-		//d = _cur_palette[217];
-		//memcpy(old_val, d, c * sizeof(old_val));
 		ArrayPtr<Colour> d = new ArrayPtr<Colour>( _cur_palette, 217 );  
 
 		System.arraycopy(_cur_palette, 217, old_val, 0, c);
