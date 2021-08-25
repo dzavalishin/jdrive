@@ -2,9 +2,9 @@
 
 This is an attempt to port [OpenTTD](https://www.openttd.org/) to Java.
 
-Current state: The game is not playable. Save/load is incomplete and pathfinding is broken.
+Current state: The game is partially playable - road vehicles are working. But Save/load is incomplete.
 
-You're welcome to take part in development!
+You're welcome to take part in testing and/or development!
 
 Screenshots:
 
