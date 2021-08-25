@@ -483,6 +483,7 @@ public class Gfx extends PaletteTabs
 		GfxFillRect((xl + xr - w) / 2, y + 10, (xl + xr + w) / 2, y + 10, _string_colorremap[1]);
 	}
 
+	/*
 	private static int FormatStringLinebreaks(String str, int maxw)
 	{
 		int num = 0;
@@ -545,6 +546,7 @@ public class Gfx extends PaletteTabs
 		int sp = 0;
 
 		tmp = FormatStringLinebreaks(buffer, maxw); // TODO used?
+		//tmp = FormatStringLinebreaks(sc, maxw); // TODO used?
 		num = BitOps.GB(tmp, 0, 16);
 
 		switch (BitOps.GB(tmp, 16, 16)) {
@@ -636,7 +638,19 @@ public class Gfx extends PaletteTabs
 			}
 		}
 	}
+	*/
 
+	public static void DrawStringMultiCenter(int x, int y, int str, int maxw)
+	{
+		MultilineString.DrawStringMultiCenter( x,  y,  str,  maxw);
+	}
+	
+	
+	public static void DrawStringMultiLine(int x, int y, StringID str, int maxw)
+	{
+		MultilineString.DrawStringMultiLine( x, y, str, maxw );		
+	}	
+	
 	public static int GetStringWidth(final String str)
 	{
 		int w = 0;
