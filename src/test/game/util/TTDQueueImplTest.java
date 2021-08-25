@@ -64,7 +64,7 @@ class TTDQueueImplTest {
 	void testDel() {
 		TTDQueueImpl<Integer> q = new TTDQueueImpl<Integer>();
 		q.push(800, 800);
-		q.del(800, 0);
+		q.del(800);
 		
 	}
 

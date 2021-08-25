@@ -484,7 +484,7 @@ public class Npf {
 		//#ifdef NO_DEBUG_MESSAGES
 		//return;
 		//#else
-		if (Global._debug_npf_level >= 1)
+		//if (Global._debug_npf_level >= 1)
 		{
 			switch(tile.GetTileType()) {
 			case MP_RAILWAY:

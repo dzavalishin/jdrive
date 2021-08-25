@@ -17,17 +17,6 @@ public abstract class AyStar extends AyStarDefs
 
 
 
-	/* These fields should be filled before initting the AyStar, but not changed
-	 * afterwards (except for user_data and user_path)! (free and init again to change them) */
-
-	/* These should point to the application specific routines that do the
-	 * actual work */ 
-	//public AyStar_CalculateG CalculateG;
-	//public AyStar_CalculateH CalculateH;
-	//public AyStar_GetNeighbours GetNeighbours;
-	//public AyStar_EndNodeCheck EndNodeCheck;
-	//public AyStar_FoundEndNode FoundEndNode;
-	//public AyStar_BeforeExit BeforeExit;
 
 
 
@@ -38,8 +27,7 @@ public abstract class AyStar extends AyStarDefs
 	 * afterwards, user_target should typically contain information about
 	 * what where looking for, and user_data can contain just about
 	 * everything */
-	// TODO resurrect
-	//Object user_path;
+
 	public Object user_target;
 	public final int [] user_data = new int[10];
 
@@ -60,24 +48,7 @@ public abstract class AyStar extends AyStarDefs
 	public final AyStarNode[] neighbours;
 	public int num_neighbours;
 
-	/* These will contain the methods for manipulating the AyStar. Only
-	 * main() should be called externally */
-	//public AyStar_AddStartNode addstart;
-	//AyStar_Main main;
-	//AyStar_Loop loop;
-	//AyStar_Free free;
-	//AyStar_Clear clear;
-	//AyStar_CheckTile checktile;
 
-
-	/*
-	abstract void addstart(AyStarNode start_node, int g);
-	abstract int main();
-	abstract int loop();
-	abstract int checktile(AyStarNode current, OpenListNode parent);
-	abstract void free();
-	abstract void clear();
-	*/
 
 	/* These will contain the open and closed lists */
 
@@ -228,7 +199,7 @@ public abstract class AyStar extends AyStarDefs
 			
 			// Yes, check if this g value is lower..
 			if (new_g > check.g) return AYSTAR_DONE;
-			OpenListQueue.del( check, 0);
+			OpenListQueue.del(check);
 			
 			// It is lower, so change it to this item
 			check.g = new_g;
