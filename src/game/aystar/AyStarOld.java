@@ -8,9 +8,9 @@ import game.util.Hash;
 import game.util.TTDQueue;
 import game.util.TTDQueueImpl;
 import game.struct.TileMarker;
+import game.xui.ViewPort;
 
-
-public abstract class AyStar extends AyStarDefs
+public class AyStarOld extends AyStarDefs
 {
 
 
@@ -22,12 +22,12 @@ public abstract class AyStar extends AyStarDefs
 
 	/* These should point to the application specific routines that do the
 	 * actual work */ 
-	//public AyStar_CalculateG CalculateG;
-	//public AyStar_CalculateH CalculateH;
-	//public AyStar_GetNeighbours GetNeighbours;
-	//public AyStar_EndNodeCheck EndNodeCheck;
-	//public AyStar_FoundEndNode FoundEndNode;
-	//public AyStar_BeforeExit BeforeExit;
+	public AyStar_CalculateG CalculateG;
+	public AyStar_CalculateH CalculateH;
+	public AyStar_GetNeighbours GetNeighbours;
+	public AyStar_EndNodeCheck EndNodeCheck;
+	public AyStar_FoundEndNode FoundEndNode;
+	public AyStar_BeforeExit BeforeExit;
 
 
 
@@ -62,12 +62,12 @@ public abstract class AyStar extends AyStarDefs
 
 	/* These will contain the methods for manipulating the AyStar. Only
 	 * main() should be called externally */
-	//public AyStar_AddStartNode addstart;
-	//AyStar_Main main;
-	//AyStar_Loop loop;
-	//AyStar_Free free;
-	//AyStar_Clear clear;
-	//AyStar_CheckTile checktile;
+	public AyStar_AddStartNode addstart;
+	AyStar_Main main;
+	AyStar_Loop loop;
+	AyStar_Free free;
+	AyStar_Clear clear;
+	AyStar_CheckTile checktile;
 
 
 	/*
@@ -92,12 +92,11 @@ public abstract class AyStar extends AyStarDefs
 
 
 
-	public AyStar() {
+	public AyStarOld() {
 		neighbours = new AyStarNode[12];
 	}
 
-	/*
-	public static void init_AyStar(AyStar aystar, Hash_HashProc hash, int num_buckets) {
+	public static void init_AyStar(AyStarOld aystar, Hash_HashProc hash, int num_buckets) {
 		// Allocated the Hash for the OpenList and ClosedList
 		// TODO init_Hash(aystar.OpenListHash, hash, num_buckets);
 		// TODO init_Hash(aystar.ClosedListHash, hash, num_buckets);
@@ -108,18 +107,18 @@ public abstract class AyStar extends AyStarDefs
 		//  That is why it can stay this high
 		//init_BinaryHeap(aystar.OpenListQueue, 102400); // TODO kill init_BinaryHeap?
 
-		aystar.addstart	= AyStar::AyStarMain_AddStartNode;
-		aystar.main		= AyStar::AyStarMain_Main;
-		//aystar.loop		= AyStar::AyStarMain_Loop;
-		aystar.free		= AyStar::AyStarMain_Free;
-		aystar.clear		= AyStar::AyStarMain_Clear;
-		//aystar.checktile	= AyStar::AyStarMain_CheckTile;
-	}*/
+		aystar.addstart	= AyStarOld::AyStarMain_AddStartNode;
+		aystar.main		= AyStarOld::AyStarMain_Main;
+		aystar.loop		= AyStarOld::AyStarMain_Loop;
+		aystar.free		= AyStarOld::AyStarMain_Free;
+		aystar.clear		= AyStarOld::AyStarMain_Clear;
+		aystar.checktile	= AyStarOld::AyStarMain_CheckTile;
+	}
 
 
 	// Adds a node to the OpenList
 	//  It makes a copy of node, and puts the pointer of parent in the struct
-	protected void openList_Add(PathNode parent, AyStarNode node, int f, int g)
+	void AyStarMain_OpenList_Add(PathNode parent, AyStarNode node, int f, int g)
 	{
 		// Add a new Node to the OpenList
 		OpenListNode new_node = new OpenListNode();
@@ -147,60 +146,71 @@ public abstract class AyStar extends AyStarDefs
 
 	// This looks in the Hash if a node exists in ClosedList
 	//  If so, it returns the PathNode, else NULL
-	protected PathNode closedList_IsInList(AyStarNode node)
+	static PathNode AyStarMain_ClosedList_IsInList(AyStarOld aystar, AyStarNode node)
 	{
-		return (PathNode)ClosedListHash.Hash_Get( node.tile, node.direction );
+		return (PathNode)aystar.ClosedListHash.Hash_Get( node.tile, node.direction);
 	}
 
 	// This adds a node to the ClosedList
 	//  It makes a copy of the data
-	protected void closedList_Add(PathNode node)
+	static void AyStarMain_ClosedList_Add(AyStarOld aystar, PathNode node)
 	{
 		// Add a node to the ClosedList
 		PathNode new_node = new PathNode( node );
-		ClosedListHash.Hash_Set( node.node.tile, node.node.direction, new_node);
+		aystar.ClosedListHash.Hash_Set( node.node.tile, node.node.direction, new_node);
 	}
 
 	// Checks if a node is in the OpenList
 	//   If so, it returns the OpenListNode, else NULL
-	protected OpenListNode openList_IsInList(AyStarNode node)
+	static OpenListNode AyStarMain_OpenList_IsInList(AyStarOld aystar, AyStarNode node)
 	{
-		return (OpenListNode)OpenListHash.Hash_Get(node.tile, node.direction);
+		return (OpenListNode)aystar.OpenListHash.Hash_Get(node.tile, node.direction);
 	}
 
 	// Gets the best node from OpenList
 	//  returns the best node, or NULL of none is found
 	// Also it deletes the node from the OpenList
-	protected OpenListNode openList_Pop()
+	static OpenListNode AyStarMain_OpenList_Pop(AyStarOld aystar)
 	{
 		// Return the item the Queue returns.. the best next OpenList item.
-		OpenListNode res = OpenListQueue.pop();
+		OpenListNode res = aystar.OpenListQueue.pop();
 		if (res != null)
-			OpenListHash.Hash_Delete(res.path.node.tile, res.path.node.direction);
+			aystar.OpenListHash.Hash_Delete(res.path.node.tile, res.path.node.direction);
 
 		return res;
 	}
 
+	// Adds a node to the OpenList
+	//  It makes a copy of node, and puts the pointer of parent in the struct
+	static void AyStarMain_OpenList_Add(AyStarOld aystar, PathNode parent, AyStarNode node, int f, int g)
+	{
+		// Add a new Node to the OpenList
+		OpenListNode new_node = new OpenListNode();
+		new_node.g = g;
+		new_node.path.parent = parent;
+		new_node.path.node = node;
+		aystar.OpenListHash.Hash_Set(node.tile, node.direction, new_node);
+
+		// Add it to the queue
+		aystar.OpenListQueue.push(new_node, f);
+	}
 
 
 	/*
 	 * Checks one tile and calculate his f-value
 	 *  return values:
 	 *	AYSTAR_DONE : indicates we are done
-	 *
-	 * Can be overriden
 	 */
-	int checkTile(AyStarNode current, OpenListNode parent) 
-	{
+	static int AyStarMain_CheckTile(AyStarOld aystar, AyStarNode current, OpenListNode parent) {
 		int new_f, new_g, new_h;
 		PathNode closedlist_parent;
 		OpenListNode check;
 
 		// Check the new node against the ClosedList
-		if (closedList_IsInList(current) != null) return AYSTAR_DONE;
+		if (AyStarMain_ClosedList_IsInList(aystar, current) != null) return AYSTAR_DONE;
 
 		// Calculate the G-value for this node
-		new_g = calculateG(current, parent);
+		new_g = aystar.CalculateG.apply(aystar, current, parent);
 		// If the value was INVALID_NODE, we don't do anything with this node
 		if (new_g == AYSTAR_INVALID_NODE) return AYSTAR_DONE;
 
@@ -208,10 +218,10 @@ public abstract class AyStar extends AyStarDefs
 		assert(new_g >= 0);
 		// Add the parent g-value to the new g-value
 		new_g += parent.g;
-		if (getMax_path_cost() != 0 && new_g > getMax_path_cost()) return AYSTAR_DONE;
+		if (aystar.getMax_path_cost() != 0 && new_g > aystar.getMax_path_cost()) return AYSTAR_DONE;
 
 		// Calculate the h-value
-		new_h = calculateH(current, parent);
+		new_h = aystar.CalculateH.apply(aystar, current, parent);
 		// There should not be given any error-code..
 		assert(new_h >= 0);
 
@@ -219,32 +229,25 @@ public abstract class AyStar extends AyStarDefs
 		new_f = new_g + new_h;
 
 		// Get the pointer to the parent in the ClosedList (the currentone is to a copy of the one in the OpenList)
-		closedlist_parent = closedList_IsInList(parent.path.node);
+		closedlist_parent = AyStarMain_ClosedList_IsInList(aystar, parent.path.node);
 
 		// Check if this item is already in the OpenList
-		if ((check = openList_IsInList(current)) != null) 
-		{
+		if ((check = AyStarMain_OpenList_IsInList(aystar, current)) != null) {
 			int i;
-			
 			// Yes, check if this g value is lower..
 			if (new_g > check.g) return AYSTAR_DONE;
-			OpenListQueue.del( check, 0);
-			
+			aystar.OpenListQueue.del( check, 0);
 			// It is lower, so change it to this item
 			check.g = new_g;
 			check.path.parent = closedlist_parent;
-			
 			// Copy user data, will probably have changed 
 			for (i=0;i< current.user_data.length;i++)
 				check.path.node.user_data[i] = current.user_data[i];
-			
 			// Readd him in the OpenListQueue
-			OpenListQueue.push(check, new_f);
-		} 
-		else 
-		{
+			aystar.OpenListQueue.push(check, new_f);
+		} else {
 			// A new node, add him to the OpenList
-			openList_Add(closedlist_parent, current, new_f, new_g);
+			AyStarMain_OpenList_Add(aystar, closedlist_parent, current, new_f, new_g);
 			markRed(current.tile); // Debug
 		}
 
@@ -262,41 +265,39 @@ public abstract class AyStar extends AyStarDefs
 	 *	reached.
 	 *	AYSTAR_FOUND_END_NODE : indicates we found the end. Path_found now is true, and in path is the path found.
 	 *	AYSTAR_STILL_BUSY : indicates we have done this tile, did not found the path yet, and have items left to try.
-	 *  <br>
-	 *  Was func ptr in C version. So can be overridden.
 	 */
-	int loop() 
-	{
+	static int AyStarMain_Loop(AyStarOld aystar) {
 		int i;
 
 		// Get the best node from OpenList
-		OpenListNode current = openList_Pop();
+		OpenListNode current = AyStarMain_OpenList_Pop(aystar);
 		// If empty, drop an error
 		if (current == null) return AYSTAR_EMPTY_OPENLIST;
 
 		markBlue(current); // Debug
 		
 		// Check for end node and if found, return that code
-		if (endNodeCheck(current) == AYSTAR_FOUND_END_NODE) {
-			foundEndNode(current);
+		if (aystar.EndNodeCheck.apply(aystar, current) == AYSTAR_FOUND_END_NODE) {
+			if (aystar.FoundEndNode != null)
+				aystar.FoundEndNode.apply(aystar, current);
 			//free(current);
 			return AYSTAR_FOUND_END_NODE;
 		}
 
 		// Add the node to the ClosedList
-		closedList_Add(current.path);
+		AyStarMain_ClosedList_Add(aystar, current.path);
 
 		// Load the neighbours
-		getNeighbours(current);
+		aystar.GetNeighbours.apply(aystar, current);
 
 		// Go through all neighbours
-		for (i=0;i<num_neighbours;i++) {
+		for (i=0;i<aystar.num_neighbours;i++) {
 			// Check and add them to the OpenList if needed
 			//int r = 
-			checkTile(neighbours[i], current);
+			aystar.checktile.apply(aystar, aystar.neighbours[i], current);
 		}
 
-		if (max_search_nodes != 0 && ClosedListHash.Hash_Size() >= max_search_nodes)
+		if (aystar.max_search_nodes != 0 && aystar.ClosedListHash.Hash_Size() >= aystar.max_search_nodes)
 			// We've expanded enough nodes 
 			return AYSTAR_LIMIT_REACHED;
 		else
@@ -327,7 +328,7 @@ public abstract class AyStar extends AyStarDefs
 	/*
 	 * This function frees the memory it allocated
 	 */
-	static void AyStarMain_Free(AyStar aystar) 
+	static void AyStarMain_Free(AyStarOld aystar) 
 	{
 		/* TODO ok?
 		aystar.OpenListQueue.free(false);
@@ -344,17 +345,16 @@ public abstract class AyStar extends AyStarDefs
 	 * This function make the memory go back to zero
 	 *  This function should be called when you are using the same instance again.
 	 */
-	void clear() 
-	{
+	static void AyStarMain_Clear(AyStarOld aystar) {
 		// Clean the Queue
-		OpenListQueue.clear();
+		aystar.OpenListQueue.clear();
 		// Clean the hashes
-		OpenListHash.clear_Hash(true);
-		ClosedListHash.clear_Hash(true);
+		aystar.OpenListHash.clear_Hash(true);
+		aystar.ClosedListHash.clear_Hash(true);
 
-		//*#ifdef AYSTAR_DEBUG
-		System.out.printf("[AyStar] Cleared AyStar\n");
-		//#endif
+		/*#ifdef AYSTAR_DEBUG
+		printf("[AyStar] Cleared AyStar\n");
+	#endif*/
 	}
 
 	/*
@@ -367,28 +367,28 @@ public abstract class AyStar extends AyStarDefs
 	 * aystar.clear() is called. Note that when you stop the algorithm halfway,
 	 * you should still call clear() yourself!
 	 */
-	public int main() {
+	public static int AyStarMain_Main(AyStarOld aystar) {
 		int r, i = 0;
 		// Loop through the OpenList
 		//  Quit if result is no AYSTAR_STILL_BUSY or is more than loops_per_tick
 		//noinspection StatementWithEmptyBody
-		while ((r = loop()) == AYSTAR_STILL_BUSY && (getLoops_per_tick() == 0 || ++i < getLoops_per_tick()))
+		while ((r = aystar.loop.apply(aystar)) == AYSTAR_STILL_BUSY && (aystar.getLoops_per_tick() == 0 || ++i < aystar.getLoops_per_tick()))
 			{ }
-		//#ifdef AYSTAR_DEBUG
+		/*#ifdef AYSTAR_DEBUG
 		if (r == AYSTAR_FOUND_END_NODE)
-			System.out.printf("[AyStar] Found path!\n");
+			printf("[AyStar] Found path!\n");
 		else if (r == AYSTAR_EMPTY_OPENLIST)
-			System.out.printf("[AyStar] OpenList run dry, no path found\n");
+			printf("[AyStar] OpenList run dry, no path found\n");
 		else if (r == AYSTAR_LIMIT_REACHED)
-			System.out.printf("[AyStar] Exceeded search_nodes, no path found\n");
-		//#endif*/
+			printf("[AyStar] Exceeded search_nodes, no path found\n");
+	#endif*/
 
-		
-		beforeExit();
+		if (aystar.BeforeExit != null)
+			aystar.BeforeExit.apply(aystar);
 
 		if (r != AYSTAR_STILL_BUSY)
 			// We're done, clean up 
-			clear();
+			aystar.clear.apply(aystar);
 
 		// Check result-value
 		if (r == AYSTAR_FOUND_END_NODE) return AYSTAR_FOUND_END_NODE;
@@ -406,16 +406,13 @@ public abstract class AyStar extends AyStarDefs
 	 * if the AyStar has been used before (though the normal main loop calls
 	 * clear() automatically when the algorithm finishes
 	 * g is the cost for starting with this node.
-	 * 
-	 * Can be overridden.
 	 */
-	public void addStartNode(AyStarNode start_node, int g) 
-	{
+	static void AyStarMain_AddStartNode(AyStarOld aystar, AyStarNode start_node, int g) {
 		//#ifdef AYSTAR_DEBUG
 		System.out.printf("[AyStar] Starting A* Algorithm from node (%d, %d, %d)\n",
 			start_node.tile.getX(), start_node.tile.getY(), start_node.direction);
 		//#endif*/
-		openList_Add(null, start_node, 0, g);
+		AyStarMain_OpenList_Add(aystar, null, start_node, 0, g);
 		TileMarker.mark(start_node.tile, 209);
 	}
 
@@ -444,15 +441,6 @@ public abstract class AyStar extends AyStarDefs
 	}	
 
 
-	// To be defined by caller
-	
-	public abstract int endNodeCheck(OpenListNode current);
-	abstract int calculateG (AyStarNode current, OpenListNode parent);
-	abstract int calculateH(AyStarNode current, OpenListNode parent);
-	abstract void getNeighbours(OpenListNode current);
-		
-	void beforeExit() { } 
-	void foundEndNode(OpenListNode current) { }	
 }
 
 
