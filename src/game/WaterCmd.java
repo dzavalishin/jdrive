@@ -339,7 +339,7 @@ public class WaterCmd extends WaterTables
 				return Cmd.CMD_ERROR;
 
 			// Make sure it's not an edge tile.
-			if ( (BitOps.IS_INT_INSIDE(tile.TileX(), 1, Global.MapMaxX() - 1) &&
+			if( !(BitOps.IS_INT_INSIDE(tile.TileX(), 1, Global.MapMaxX() - 1) &&
 					BitOps.IS_INT_INSIDE(tile.TileY(), 1, Global.MapMaxY() - 1)) )
 				return Cmd.return_cmd_error(Str.STR_0002_TOO_CLOSE_TO_EDGE_OF_MAP);
 

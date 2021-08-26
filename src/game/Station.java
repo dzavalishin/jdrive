@@ -2268,17 +2268,19 @@ public class Station extends StationTables implements IPoolItem
 
 		direction=0;
 		if(ti.tileh != 3)
-			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
+		{
 		direction++;
 		if(ti.tileh != 9 )
-			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
+		{
 		direction++;
 		if(ti.tileh != 12 )
-			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
+		{
 		direction++;
 		if(ti.tileh != 6)
 			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
-
+		}
+		}
+		}
 		if (!ti.tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
 		cost = Cmd.DoCommandByTile(ti.tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);

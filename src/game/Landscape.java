@@ -303,7 +303,9 @@ public class Landscape extends GenLandTable
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		return _tile_type_procs[tile.GetTileType().ordinal()].clear_tile_proc.applyAsInt(tile, (byte)flags);
+		final int ordinal = tile.GetTileType().ordinal();
+		final TileTypeProcs func = _tile_type_procs[ordinal];
+		return func.clear_tile_proc.applyAsInt(tile, (byte)flags);
 	}
 
 	/** Clear a big piece of landscape

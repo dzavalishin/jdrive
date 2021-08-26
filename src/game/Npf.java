@@ -19,17 +19,15 @@ import game.xui.ViewPort;
 
 public class Npf {
 
-	//static final AyStar _npf_aystar = new AyStar();
-
 	public static final int NPF_TILE_LENGTH = Global.NPF_TILE_LENGTH;
 
 	//mowing grass
 	//enum {
-	private static final int NPF_HASH_BITS = 12; /* The size of the hash used in pathfinding. Just changing this value should be sufficient to change the hash size. Should be an even value. */
+	//private static final int NPF_HASH_BITS = 12; /* The size of the hash used in pathfinding. Just changing this value should be sufficient to change the hash size. Should be an even value. */
 	/* Do no change below values */
-	private static final int NPF_HASH_SIZE = 1 << NPF_HASH_BITS;
-	private static final int NPF_HASH_HALFBITS = NPF_HASH_BITS / 2;
-	private static final int NPF_HASH_HALFMASK = (1 << NPF_HASH_HALFBITS) - 1;
+	//private static final int NPF_HASH_SIZE = 1 << NPF_HASH_BITS;
+	//private static final int NPF_HASH_HALFBITS = NPF_HASH_BITS / 2;
+	//private static final int NPF_HASH_HALFMASK = (1 << NPF_HASH_HALFBITS) - 1;
 	//};
 
 	/** This penalty is the equivalent of "inifite", which means that paths that
@@ -234,8 +232,8 @@ public class Npf {
 	 * @param key1	The TileIndex of the tile to hash
 	 * @param key2	The Trackdir of the track on the tile.
 	 * <br>
-	 * TODO	Think of a better hash.
-	 */
+	 * TO DO	Think of a better hash.
+	 * /
 	static int NPFHash(int key1, int key2)
 	{
 		TileIndex t1 = new TileIndex(key1);
@@ -243,12 +241,12 @@ public class Npf {
 		assert(Rail.IsValidTrackdir(key2));
 		assert(t1.IsValidTile());
 
-		/* TODO: think of a better hash? */
+		/* TO DO: think of a better hash? * /
 		int part1 = t1.TileX() & NPF_HASH_HALFMASK;
 		int part2 = t1.TileY() & NPF_HASH_HALFMASK;
 
 		return ((((part1 << NPF_HASH_HALFBITS) | part2)) + (NPF_HASH_SIZE * key2 / Rail.TRACKDIR_END)) % NPF_HASH_SIZE;
-	}
+	} */
 
 	static int NPFCalcZero(AyStar as, AyStarNode  current, OpenListNode  parent)
 	{
@@ -879,7 +877,7 @@ public class Npf {
 			dst_tile = TileIndex.AddTileIndexDiffCWrap(src_tile, TileIndex.TileIndexDiffCByDir(Rail.TrackdirToExitdir(src_trackdir)));
 			if (!dst_tile.isValid()) {
 				/* We reached the border of the map *
-				/* TODO Nicer control flow for this *
+				/* TO DO Nicer control flow for this *
 				return;
 			}
 		}
