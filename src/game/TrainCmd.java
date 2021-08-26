@@ -2557,7 +2557,7 @@ public class TrainCmd extends TrainTables
 		}
 
 		spd = v.subspeed + accel * 2;
-		v.subspeed = spd;
+		v.subspeed = 0xFF & spd;
 		{
 			int tempmax = v.getMax_speed();
 			if (v.cur_speed > v.getMax_speed())
@@ -2568,7 +2568,7 @@ public class TrainCmd extends TrainTables
 		if (0 == (v.direction & 1)) spd = spd * 3 >> 2;
 
 				spd += v.progress;
-				v.progress = spd;
+				v.progress = 0xFF & spd;
 				return (spd >> 8);
 	}
 
