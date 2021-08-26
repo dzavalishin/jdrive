@@ -75,4 +75,11 @@ public class VehicleHash
 	public void clear() {
 		map.clear();		
 	}
+
+	public void remove(Point point, Vehicle vehicle) {
+		int hash1 = hashFunc(point);
+		VehicleID old = map.remove(Integer.valueOf(hash1));
+		assert( old.id == vehicle.index );
+	}
+
 }

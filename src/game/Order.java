@@ -72,6 +72,11 @@ public class Order implements Serializable
 		station = st;
 	}
 
+	public Order(int t) {
+		clean();
+		type = t;
+	}
+
 	public static final int OT_NOTHING       = 0;
 	public static final int OT_GOTO_STATION  = 1;
 	public static final int OT_GOTO_DEPOT    = 2;

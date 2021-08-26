@@ -11,7 +11,7 @@ import game.ids.PlayerID;
  *     // code
  * }
  * 
- * // Will return to prevoius player here or if exception is thrown
+ * // Will return to previous player here or if exception is thrown
  *
  */
 

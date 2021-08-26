@@ -340,8 +340,6 @@ public class Vehicle implements IPoolItem
 
 
 
-	//abstract void VehicleTickProc();
-	//typedef void *VehicleFromPosProc(Vehicle v, void *data);
 
 	//calculates tax
 	public void MA_Tax(int income)
@@ -390,69 +388,12 @@ public class Vehicle implements IPoolItem
 	
 	void UpdateVehiclePosHash(int x, int y)
 	{
-		_hash.update( new Point(left_coord, top_coord ), new Point(x,y), this );
-		/*
-		int old_hash, new_hash;
-		int old_x = left_coord;
-		int old_y = top_coord;
-		//Vehicle u;
-
-		new_hash = (x == INVALID_COORD) ? -1 : GEN_HASH(x,y);
-		old_hash = (old_x == INVALID_COORD) ? -1 : GEN_HASH(old_x, old_y);
-
-		if (old_hash == new_hash) return;
-
-		// remove from hash table? 
-		if (old_hash >= 0) {
-			//_vehicle_position_hash[old_hash] = null;
-			_hash.remove(old_hash);
-			}
-
-		// insert into hash table? 
-		if (new_hash >= 0) {
-			//_vehicle_position_hash[new_hash] = VehicleID.get(index);
-			_hash.put( this, new_hash);
-		}
-		*/
+		if( x == INVALID_COORD )
+			_hash.remove( new Point(left_coord, top_coord ), this );
+		else
+			_hash.update( new Point(left_coord, top_coord ), new Point(x,y), this );
 	}
 	
-	/* TODO fixme
-	void UpdateVehiclePosHash(int x, int y)
-	{
-		VehicleID old_hash, *new_hash;
-		int old_x = left_coord;
-		int old_y = top_coord;
-		Vehicle u;
-
-		new_hash = (x == INVALID_COORD) ? null : &_vehicle_position_hash[GEN_HASH(x,y)];
-		old_hash = (old_x == INVALID_COORD) ? null : &_vehicle_position_hash[GEN_HASH(old_x, old_y)];
-
-		if (old_hash == new_hash) return;
-
-		// remove from hash table? 
-		if (old_hash != null) {
-			Vehicle last = null;
-			VehicleID idx = *old_hash;
-			while ((u = GetVehicle(idx)) != v) {
-				idx = u.next_hash;
-				assert(idx != INVALID_VEHICLE);
-				last = u;
-			}
-
-			if (last == null) {
-	 *old_hash = next_hash;
-			} else {
-				last.next_hash = next_hash;
-			}
-		}
-
-		// insert into hash table? 
-		if (new_hash != null) {
-			next_hash = *new_hash;
-	 *new_hash = index;
-		}
-	}
-	 */
 
 	void VehiclePositionChanged()
 	{
@@ -539,11 +480,10 @@ public class Vehicle implements IPoolItem
 			Global.DeleteName(v.string_id);
 			v.type = 0;
 			v.UpdateVehiclePosHash(INVALID_COORD, 0);
-			//v.next_hash = new VehicleID(Vehicle.INVALID_VEHICLE);
 			//_hash.remove(v);
-
-			if (v.orders != null)
-				v.DeleteVehicleOrders();
+			
+			v.DeleteVehicleOrders();
+			
 			v = u;
 		} while (v != null && has_artic_part);
 	}
@@ -596,7 +536,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public boolean IsFrontEngine()
 	{
-		return HASBIT_subtype( Train_Front);
+		return HASBIT_subtype(Train_Front);
 	}
 
 	/**
@@ -604,7 +544,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public void SetFrontEngine()
 	{
-		SETBIT_subtype( Train_Front);
+		SETBIT_subtype(Train_Front);
 	}
 
 	/**
@@ -612,7 +552,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public void ClearFrontEngine()
 	{
-		CLRBIT_subtype( Train_Front);
+		CLRBIT_subtype(Train_Front);
 	}
 
 	/**
@@ -622,7 +562,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public boolean IsArticulatedPart()
 	{
-		return HASBIT_subtype( Train_Articulated_Part);
+		return HASBIT_subtype(Train_Articulated_Part);
 	}
 
 	/**
@@ -630,7 +570,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public void SetArticulatedPart()
 	{
-		SETBIT_subtype( Train_Articulated_Part);
+		SETBIT_subtype(Train_Articulated_Part);
 	}
 
 	/**
@@ -638,7 +578,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public void ClearArticulatedPart()
 	{
-		CLRBIT_subtype( Train_Articulated_Part);
+		CLRBIT_subtype(Train_Articulated_Part);
 	}
 
 	/**
@@ -648,7 +588,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public boolean IsTrainWagon()
 	{
-		return HASBIT_subtype( Train_Wagon);
+		return HASBIT_subtype(Train_Wagon);
 	}
 
 	/**
@@ -656,7 +596,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public void SetTrainWagon()
 	{
-		SETBIT_subtype( Train_Wagon);
+		SETBIT_subtype(Train_Wagon);
 	}
 
 	/**
@@ -664,7 +604,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public void ClearTrainWagon()
 	{
-		CLRBIT_subtype( Train_Wagon);
+		CLRBIT_subtype(Train_Wagon);
 	}
 
 	/**
@@ -674,7 +614,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public boolean IsTrainEngine()
 	{
-		return HASBIT_subtype( Train_Engine);
+		return HASBIT_subtype(Train_Engine);
 	}
 
 	/**
@@ -682,14 +622,14 @@ public class Vehicle implements IPoolItem
 	 */
 	public void SetTrainEngine()
 	{
-		SETBIT_subtype( Train_Engine);
+		SETBIT_subtype(Train_Engine);
 	}
 
 	/** Clear engine status
 	 */
 	public void ClearTrainEngine()
 	{
-		CLRBIT_subtype( Train_Engine);
+		CLRBIT_subtype(Train_Engine);
 	}
 
 	/** Check if a vehicle is a free wagon (got no engine in front of it)
@@ -697,21 +637,21 @@ public class Vehicle implements IPoolItem
 	 */
 	public boolean IsFreeWagon()
 	{
-		return HASBIT_subtype( Train_Free_Wagon);
+		return HASBIT_subtype(Train_Free_Wagon);
 	}
 
 	/** Set if a vehicle is a free wagon
 	 */
 	public void SetFreeWagon()
 	{
-		SETBIT_subtype( Train_Free_Wagon);
+		SETBIT_subtype(Train_Free_Wagon);
 	}
 
 	/** Clear a vehicle from being a free wagon
 	 */
 	public void ClearFreeWagon()
 	{
-		CLRBIT_subtype( Train_Free_Wagon);
+		CLRBIT_subtype(Train_Free_Wagon);
 	}
 
 	/** Check if a vehicle is a multiheaded engine
@@ -719,21 +659,21 @@ public class Vehicle implements IPoolItem
 	 */
 	public boolean IsMultiheaded()
 	{
-		return HASBIT_subtype( Train_Multiheaded);
+		return HASBIT_subtype(Train_Multiheaded);
 	}
 
 	/** Set if a vehicle is a multiheaded engine
 	 */
 	public void SetMultiheaded()
 	{
-		SETBIT_subtype( Train_Multiheaded);
+		SETBIT_subtype(Train_Multiheaded);
 	}
 
 	/** Clear multiheaded engine property
 	 */
 	public void ClearMultiheaded()
 	{
-		CLRBIT_subtype( Train_Multiheaded);
+		CLRBIT_subtype(Train_Multiheaded);
 	}
 
 
@@ -807,9 +747,6 @@ public class Vehicle implements IPoolItem
 
 	private static final IPoolItemFactory<Vehicle> factory = new IPoolItemFactory<Vehicle>()
 	{		
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -821,7 +758,6 @@ public class Vehicle implements IPoolItem
 	static MemoryPool<Vehicle> _vehicle_pool = new MemoryPool<Vehicle>(factory);
 	private final static VehicleHash _hash = new VehicleHash(); 
 
-	//private void UpdateVehiclePosHash(int x, int y) { _hash.put(x,y, this); }
 
 
 	/**
@@ -892,7 +828,7 @@ public class Vehicle implements IPoolItem
 
 	//public static final int INVALID_COORD = (-0x8000);
 	//#define GEN_HASH(x,y) (((x & 0x1F80)>>7) + ((y & 0xFC0)))
-	int GEN_HASH(int x, int y) { return  ((x & 0x1F80)>>7) + (y & 0xFC0); }
+	//int GEN_HASH(int x, int y) { return  ((x & 0x1F80)>>7) + (y & 0xFC0); }
 	//int GEN_HASH(int x, int y) { return  (x + y) & 0xFFFF; }
 	/*
 	 *	These command macros are used to call vehicle type specific commands with non type specific commands
@@ -936,18 +872,6 @@ public class Vehicle implements IPoolItem
 	public static final int BLOCKS_FOR_SPECIAL_VEHICLES   = 2; //! Blocks needed for special vehicles
 	//};*/
 
-	/**
-	 * Called if a new block is added to the vehicle-pool
-	 * /
-	static void VehiclePoolNewBlock(int start_item)
-	{
-		Vehicle v;
-
-		FOR_ALL_VEHICLES_FROM(v, start_item) v.index = start_item++;
-	}*/
-
-	/* Initialize the vehicle-pool */
-	//MemoryPool _vehicle_pool = { "Vehicle", VEHICLES_POOL_MAX_BLOCKS, VEHICLES_POOL_BLOCK_SIZE_BITS, sizeof(Vehicle), &VehiclePoolNewBlock, 0, 0, null };
 
 	/*
 	void VehicleServiceInDepot(Vehicle v)
@@ -1063,7 +987,7 @@ public class Vehicle implements IPoolItem
 		int fx2 = x2;
 		int fy1 = y1;
 		int fy2 = y2;
-		//FOR_ALL_VEHICLES(veh)
+
 		_vehicle_pool.forEach( (ii,veh) ->
 		{
 			if ((veh.type == VEH_Train || veh.type == VEH_Road) && (z==0xFF || veh.z_pos == z)) {
@@ -1099,9 +1023,7 @@ public class Vehicle implements IPoolItem
 	// Called after load to update coordinates
 	public static void AfterLoadVehicles()
 	{
-		//Vehicle v;
 
-		//FOR_ALL_VEHICLES(v)
 		_vehicle_pool.forEach( (ii,v) ->
 		{
 			v.first = null;
@@ -1148,7 +1070,6 @@ public class Vehicle implements IPoolItem
 
 		Vehicle [] ret = {null};
 
-		//FOR_ALL_VEHICLES(v)
 		_vehicle_pool.forEach( (ii,v) ->
 		{
 			/* TODO speedup No more room for the special vehicles, return null */
@@ -1182,7 +1103,7 @@ public class Vehicle implements IPoolItem
 
 		if (skip_vehicles[0] < (_vehicle_pool.total_items() - offset)) 
 		{	// make sure the offset in the array is not larger than the array itself
-			//FOR_ALL_VEHICLES_FROM(v, offset + skip_vehicles[0])
+
 			Iterator<Vehicle> ii = getIteratorFrom(offset + skip_vehicles[0]);
 			while(ii != null && ii.hasNext())
 			{
@@ -1255,84 +1176,10 @@ public class Vehicle implements IPoolItem
 			if (a != null) return a;
 		}		
 		
-		/*
-		x2 = ((pt.x + 104) & 0x1F80) >> 7;
-		x  = ((pt.x - 174) & 0x1F80) >> 7;
-
-		y2 = ((pt.y + 56) & 0xFC0);
-		y  = ((pt.y - 294) & 0xFC0);
-
-		for (;;) {
-			int xb = x;
-			for (;;) {
-				//VehicleID veh = _vehicle_position_hash[(x + y) & 0xFFFF];
-				//VehicleID veh = _hash.get(x, y);
-				VehicleID veh = _hash.get((x + y) & 0xFFFF);
-				// TODO XXX must be veh list - more than one per coords
-				//while (veh.id != INVALID_VEHICLE) {
-				if (veh != null && veh.id != INVALID_VEHICLE) {
-					Vehicle v = GetVehicle(veh);
-					Object a;
-
-					a = proc.apply(v, data);
-					if (a != null) return a;
-					//veh = v.next_hash;
-				}
-
-				if (x == x2)
-					break;
-
-				x = (x + 1) & 0x3F;
-			}
-			x = xb;
-
-			if (y == y2)
-				break;
-
-			y = (y + 0x40) & ((0x3F) << 6);
-		}
-		*/
 		return null;
 	}
 
 
-	/*
-	void UpdateVehiclePosHash(Vehicle v, int x, int y)
-	{
-		VehicleID old_hash, *new_hash;
-		int old_x = v.left_coord;
-		int old_y = v.top_coord;
-		Vehicle u;
-
-		new_hash = (x == INVALID_COORD) ? null : &_vehicle_position_hash[GEN_HASH(x,y)];
-		old_hash = (old_x == INVALID_COORD) ? null : &_vehicle_position_hash[GEN_HASH(old_x, old_y)];
-
-		if (old_hash == new_hash) return;
-
-		/* remove from hash table? * /
-		if (old_hash != null) {
-			Vehicle last = null;
-			VehicleID idx = *old_hash;
-			while ((u = GetVehicle(idx)) != v) {
-				idx = u.next_hash;
-				assert(idx != INVALID_VEHICLE);
-				last = u;
-			}
-
-			if (last == null) {
-	 *old_hash = v.next_hash;
-			} else {
-				last.next_hash = v.next_hash;
-			}
-		}
-
-		/* insert into hash table? * /
-		if (new_hash != null) {
-			v.next_hash = *new_hash;
-	 *new_hash = v.index;
-		}
-	}
-	 */
 	public static void InitializeVehicles()
 	{
 		int i;
@@ -1346,9 +1193,6 @@ public class Vehicle implements IPoolItem
 		for (i = 0; i < BLOCKS_FOR_SPECIAL_VEHICLES; i++)
 			_vehicle_pool.AddBlockToPool();
 
-		// clear it...
-		//memset(_vehicle_position_hash, -1, sizeof(_vehicle_position_hash));
-		//Arrays.fill(_vehicle_position_hash, VehicleID.getInvalid());
 		_hash.clear();
 	}
 
@@ -1369,7 +1213,6 @@ public class Vehicle implements IPoolItem
 	{
 		Vehicle [] ret = {null};
 
-		//FOR_ALL_VEHICLES(u)
 		_vehicle_pool.forEach( (ii,u) ->
 		{
 			if (u.type == VEH_Train && u.next == v) ret[0] = u;
@@ -1385,7 +1228,6 @@ public class Vehicle implements IPoolItem
 	public Vehicle GetPrevVehicleInChain()
 	{
 		Vehicle u;
-		//assert(v != null);
 
 		u = GetFirstVehicleInChain();
 
@@ -1523,11 +1365,8 @@ public class Vehicle implements IPoolItem
 
 	static void CallVehicleTicks()
 	{
-		//Vehicle v;
-
 		_first_veh_in_depot_list = null;	// now we are sure it's initialized at the start of each tick
 
-		//FOR_ALL_VEHICLES(v)
 		_vehicle_pool.forEach( (ii,v) ->
 		{
 			if (v.type != 0) {
@@ -1966,16 +1805,6 @@ public class Vehicle implements IPoolItem
 			new BulldozerMovement(  3, 1, 7 )
 	};
 
-	/*
-	static final struct {
-		int8 x;
-		int8 y;
-	} _inc_by_dir[] = {
-		{ -1,  0 },
-		{  0,  1 },
-		{  1,  0 },
-		{  0, -1 }
-	};*/
 
 	static final Point[]_inc_by_dir = {
 			new Point(  -1,  0 ),
@@ -2326,7 +2155,6 @@ public class Vehicle implements IPoolItem
 		int fx = x;
 		int fy = y;
 
-		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
 			if (v.type != 0 && (v.vehstatus & (VS_HIDDEN|VS_UNCLICKABLE)) == 0 &&
@@ -3009,17 +2837,6 @@ public class Vehicle implements IPoolItem
 	 */
 	public boolean CheckForValidOrders()
 	{
-		//final Order order;
-		//boolean ok = false;
-
-		//FOR_VEHICLE_ORDERS(v, order)
-		/*
-		_order_pool.forEach( (ii,order) ->
-		{
-			if (order.type != Order.OT_DUMMY) ok = true; // TODO return true;
-		});
-		 */
-
 		for(Order order = orders; order != null; order = order.next )
 			if (order.type != Order.OT_DUMMY) 
 				return true;
@@ -3038,6 +2855,8 @@ public class Vehicle implements IPoolItem
 	{
 		Order order, cur;
 
+		if(orders == null) return;
+		
 		/* If we have a shared order-list, don't delete the list, but just
 		    remove our pointer */
 		if (Order.IsOrderListShared(this)) {
@@ -3107,9 +2926,6 @@ public class Vehicle implements IPoolItem
 	 */
 	public boolean VehicleHasDepotOrders()
 	{
-		//final Order order;
-
-		//FOR_VEHICLE_ORDERS(v, order) 
 		for(Order order = orders; order != null; order = order.next )
 		{
 			if (order.type == Order.OT_GOTO_DEPOT)
@@ -3168,19 +2984,16 @@ public class Vehicle implements IPoolItem
 			bak.clone = VehicleID.getInvalid();
 
 			/* Copy the orders */
-			//FOR_VEHICLE_ORDERS(v, order) 
 			for(Order order = v.orders; order != null; order = order.next )
 			{
-				//*dest = *order;
-				//dest++;
-				bak.order.add(order);
+				bak.order.add(new Order(order) );
 			}
 			/* End the list with an Order.OT_NOTHING */
 			//dest.type = Order.OT_NOTHING;
 			//dest.next = null;
-			Order empty_order = new Order();
-			empty_order.type = Order.OT_NOTHING;
-			empty_order.next = null;
+			Order empty_order = new Order(Order.OT_NOTHING);
+			//empty_order.type = Order.OT_NOTHING;
+			//empty_order.next = null;
 			bak.order.add(empty_order);
 		}
 	}
@@ -3188,6 +3001,7 @@ public class Vehicle implements IPoolItem
 	public boolean IsOrderListShared() {
 		return Order.IsOrderListShared(this);
 	}
+
 	/**
 	 *
 	 * Restore vehicle orders that are backupped via BackupVehicleOrders
@@ -3195,8 +3009,6 @@ public class Vehicle implements IPoolItem
 	 */
 	public static void RestoreVehicleOrders(final Vehicle  v, final BackuppedOrders bak)
 	{
-		//int i;
-
 		/* If we have a custom name, process that */
 		if (bak.name != null) {
 			Global._cmd_text = bak.name;
