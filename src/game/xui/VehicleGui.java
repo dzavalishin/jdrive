@@ -193,7 +193,9 @@ public class VehicleGui {
 			{
 				if (v.getType() == type && v.getOwner().id == owner && (
 						(type == Vehicle.VEH_Train && v.IsFrontEngine()) ||
-						(type != Vehicle.VEH_Train && v.getSubtype() <= subtype))) {
+						(type != Vehicle.VEH_Train && v.getSubtype() <= subtype))) 
+				{
+					if(_vehicle_sort[n[0]] == null) _vehicle_sort[n[0]] = new SortStruct();
 					_vehicle_sort[n[0]].index = v.index;
 					_vehicle_sort[n[0]].owner = v.getOwner().id;
 					++n[0];

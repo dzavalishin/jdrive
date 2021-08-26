@@ -1319,7 +1319,9 @@ public class Economy extends EconomeTables
 
 			/* unload? */
 			if (v.cargo_count != 0) {
-				if (v.getCargo_source() != last_visited && 0 != (ge.waiting_acceptance & 0x8000) && 0 == (u.current_order.flags & Order.OF_TRANSFER)) {
+				if (v.getCargo_source() != last_visited 
+						&& 0 != (ge.waiting_acceptance & 0x8000) 
+						&& 0 == (u.current_order.flags & Order.OF_TRANSFER)) {
 					// deliver goods to the station
 					st.time_since_unload = 0;
 
