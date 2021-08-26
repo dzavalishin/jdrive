@@ -1138,11 +1138,11 @@ public class Station extends StationTables implements IPoolItem
 	{
 		int i = n;
 		int li = 0;
-		do {
-			layout[li++] = 0;
-		} 
-		while (--i > 0);
-		layout[((n-1) >> 1)-n] = 2;
+		do { layout[li++] = 0; } while (--i > 0);
+		
+		
+		final int j = ((n-1) >> 1)-n;
+		layout[j+n] = 2;
 		return layout;
 	}
 

@@ -747,7 +747,7 @@ public class TrainCmd extends TrainTables
 		count = 0;
 		for (; v != null; v = v.next) {
 			count++;
-			if (!v.rail.isInDepot() || v.tile != tile ||
+			if (!v.rail.isInDepot() || !v.tile.equals(tile) ||
 					(v.IsFrontEngine() && !v.isStopped())) {
 				Global._error_message = Str.STR_881A_TRAINS_CAN_ONLY_BE_ALTERED;
 				return -1;
@@ -946,7 +946,7 @@ public class TrainCmd extends TrainTables
 			if (num > (Global._patches.mammoth_trains ? 100 : 9) && dst_head.IsFrontEngine())
 				return Cmd.return_cmd_error(Str.STR_8819_TRAIN_TOO_LONG);
 
-			assert(dst_head.tile == src_head.tile);
+			assert(dst_head.tile.equals(src_head.tile) );
 		}
 
 		// when moving all wagons, we can't have the same src_head and dst_head
