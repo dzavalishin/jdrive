@@ -2738,6 +2738,7 @@ public class Vehicle implements IPoolItem
 		if (dirdiff == 0)
 			return dir;
 		return  ((dir+((dirdiff&7)<5?1:-1)) & 7);
+		//return _new_direction_table[i];
 	}
 
 	/* Trackdir */ int GetVehicleTrackdir()

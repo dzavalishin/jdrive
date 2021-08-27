@@ -100,7 +100,7 @@ public class Patches
 	public boolean ai_in_multiplayer; // Do we allow AIs in multiplayer
 
 	public boolean aircraft_queueing = true; // Aircraft queueing patch
-	public int aircraft_speed_coeff = 1; // Coefficient of aircraft speed, based on Benben's patch
+	public int aircraft_speed_coeff = 8; // Coefficient of aircraft speed, based on Benben's patch
 
 	/*
 	 * New Path Finding

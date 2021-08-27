@@ -773,14 +773,15 @@ public class AirCraft extends AirCraftTables {
 
 		new_speed = v.getMax_speed() * Global._patches.aircraft_speed_coeff;
 
-		// Don't fo faster than max
+		// Don't go faster than max
 		if(v.air.desired_speed > new_speed) {
 			v.air.desired_speed = new_speed;
 		}
 
 		//spd = v.cur_speed + v.acceleration;
-		v.subspeed = 0xFF & ((t=v.subspeed) + spd);
-		spd = Math.min( v.cur_speed + (spd >> 8) + ((v.subspeed < t) ? 1 : 0), new_speed);
+		t = 0xFF & v.subspeed;
+		v.subspeed = 0xFF & (t + spd);
+		spd = 0xFFFF & Math.min( v.cur_speed + (spd >> 8) + ((v.subspeed < t) ? 1 : 0), new_speed);
 
 		// adjust speed for broken vehicles
 		if( 0 != (v.vehstatus&Vehicle.VS_AIRCRAFT_BROKEN)) spd = Math.min(spd, v.getMax_speed() / 3 * Global._patches.aircraft_speed_coeff);
@@ -794,7 +795,7 @@ public class AirCraft extends AirCraftTables {
 		if((v.air.state == Airport.LANDING || v.air.state == Airport.ENDLANDING) && spd > 15 * Global._patches.aircraft_speed_coeff)
 			spd = Math.min(v.cur_speed, spd);
 
-		//updates statusbar only if speed have changed to save CPU time
+		//updates status bar only if speed have changed to save CPU time
 		if (spd != v.cur_speed) {
 			v.cur_speed = spd;
 			if (Global._patches.vehicle_speed)
@@ -805,12 +806,13 @@ public class AirCraft extends AirCraftTables {
 
 		if (spd == 0) return 0; //false;
 
-		if (++spd == 0)
+		if ( ((++spd) & 0xFFFF) == 0)
 			return 1; //true;
 
 
 		spd += v.progress;
-		v.progress = spd;
+		spd &= 0xFFFF;
+		v.progress = 0xFF & spd;
 		return (spd >> 8);
 	}
 
@@ -844,7 +846,8 @@ public class AirCraft extends AirCraftTables {
 	/* returns true if staying in the same tile */
 	static boolean GetNewAircraftPos(Vehicle v, GetNewVehiclePosResult gp, int tilesMoved)
 	{
-
+		//tilesMoved /= 256;
+		
 		int x = v.getX_pos() + _delta_coord[v.direction] * tilesMoved;
 		int y = v.getY_pos() + _delta_coord[v.direction + 8] * tilesMoved;
 
@@ -1068,6 +1071,17 @@ public class AirCraft extends AirCraftTables {
 				if (v.load_unload_time_rem == 0) v.load_unload_time_rem = 8;
 			} else {
 				v.cur_speed >>= 1;
+				//if(v.air.state != Airport.FLYING)
+				/*{
+				// [dz] fix rotational movement on taxi to takeoff point
+				// if direction is still wrong slow down more
+				if(v.direction != Vehicle.GetDirectionTowards(v, x + amd.x, y + amd.y))
+				{
+					v.cur_speed >>= 1;
+					v.subspeed = 0;
+					v.progress = 0;
+				}
+				}*/
 			}
 		}
 
