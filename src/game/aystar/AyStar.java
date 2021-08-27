@@ -13,14 +13,6 @@ import game.struct.TileMarker;
 public abstract class AyStar extends AyStarDefs
 {
 
-
-
-
-
-
-
-
-
 	/* These are completely untouched by AyStar, they can be accesed by
 	 * the application specific routines to input and output data.
 	 * user_path should typically contain data about the resulting path
@@ -61,6 +53,7 @@ public abstract class AyStar extends AyStarDefs
 	final Hash OpenListHash = new Hash();
 
 
+	protected static boolean debug = false;
 
 
 	public AyStar() {
@@ -102,19 +95,6 @@ public abstract class AyStar extends AyStarDefs
 		// Add it to the queue
 		OpenListQueue.push(new_node, f);
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	// This looks in the Hash if a node exists in ClosedList
 	//  If so, it returns the PathNode, else NULL
@@ -295,21 +275,6 @@ public abstract class AyStar extends AyStarDefs
 		
 	}
 	
-	/*
-	 * This function frees the memory it allocated
-	 */
-	static void AyStarMain_Free(AyStar aystar) 
-	{
-		/* TODO ok?
-		aystar.OpenListQueue.free(false);
-		// 2nd argument above is false, below is true, to free the values only once 
-		aystar.OpenListHash.delete_Hash(true);
-		aystar.ClosedListHash.delete_Hash(true);
-		*/
-		/*#ifdef AYSTAR_DEBUG
-		printf("[AyStar] Memory free'd\n");
-	#endif*/
-	}
 
 	/*
 	 * This function make the memory go back to zero
@@ -323,9 +288,7 @@ public abstract class AyStar extends AyStarDefs
 		OpenListHash.clear_Hash(true);
 		ClosedListHash.clear_Hash(true);
 
-		//*#ifdef AYSTAR_DEBUG
-		System.out.printf("[AyStar] Cleared AyStar\n");
-		//#endif
+		if(debug) System.out.printf("[AyStar] Cleared AyStar\n");
 	}
 
 	/*
@@ -345,14 +308,16 @@ public abstract class AyStar extends AyStarDefs
 		//noinspection StatementWithEmptyBody
 		while ((r = loop()) == AYSTAR_STILL_BUSY && (getLoops_per_tick() == 0 || ++i < getLoops_per_tick()))
 			{ }
-		//#ifdef AYSTAR_DEBUG
+		
+		if(debug) 
+		{
 		if (r == AYSTAR_FOUND_END_NODE)
 			System.out.printf("[AyStar] Found path!\n");
 		else if (r == AYSTAR_EMPTY_OPENLIST)
 			System.out.printf("[AyStar] OpenList run dry, no path found\n");
 		else if (r == AYSTAR_LIMIT_REACHED)
 			System.out.printf("[AyStar] Exceeded search_nodes, no path found\n");
-		//#endif*/
+		}
 
 		
 		beforeExit();
@@ -382,10 +347,10 @@ public abstract class AyStar extends AyStarDefs
 	 */
 	public void addStartNode(AyStarNode start_node, int g) 
 	{
-		//#ifdef AYSTAR_DEBUG
-		System.out.printf("[AyStar] Starting A* Algorithm from node (%d, %d, %d)\n",
-			start_node.tile.getX(), start_node.tile.getY(), start_node.direction);
-		//#endif*/
+		if(debug) 
+			System.out.printf("[AyStar] Starting A* Algorithm from node (%d, %d, %d)\n",
+					start_node.tile.getX(), start_node.tile.getY(), start_node.direction);
+
 		openList_Add(null, start_node, 0, g);
 		TileMarker.mark(start_node.tile, 209);
 	}

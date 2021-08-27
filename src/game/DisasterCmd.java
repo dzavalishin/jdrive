@@ -573,7 +573,7 @@ public class DisasterCmd extends DisasterTables
 					break;
 				tile = tile.iadd(1);
 				tile.TILE_MASK();
-			} while (tile != tile_org);
+			} while (!tile.equals(tile_org));
 			v.dest_tile = tile;
 			v.age = 0;
 		} else

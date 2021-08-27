@@ -43,7 +43,7 @@ public class MultilineString
 				if (c == Gfx.ASCII_LETTERSTART) last_space = sp;
 
 				if (c >= Gfx.ASCII_LETTERSTART) {
-					w += Gfx.GetCharacterWidth(base + (byte)c);
+					w += Gfx.GetCharacterWidth(base + (0xFF & c));
 					if (w > maxw) {
 						sp = last_space;
 						// [dz] break out if last_space == 0? Or else loop forever 

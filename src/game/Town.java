@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -37,7 +38,6 @@ public class Town
 //extends TownTables 
 implements IPoolItem, Serializable 
 {
-
 
 	private static final long serialVersionUID = 1L;
 
@@ -110,6 +110,10 @@ implements IPoolItem, Serializable
 	// NOSAVE: UpdateTownRadius updates this given the house count.
 	int radius[];
 
+	// flags 12 bits
+	private static final int GROW_BIT            = 0x01;
+	private static final int TOWN_HAS_CHURCH     = 0x02;
+	private static final int TOWN_HAS_STADIUM    = 0x04;
 
 	private void clear()
 	{
@@ -184,7 +188,6 @@ implements IPoolItem, Serializable
 	 */
 	public boolean IsValidTown()
 	{
-		//return xy.getTile() != 0; /* XXX: Replace by INVALID_TILE someday */
 		return xy.isValid();
 	}
 
@@ -234,8 +237,6 @@ implements IPoolItem, Serializable
 	private static final int TOWN_GROWTH_FREQUENCY = 23;
 
 
-	private static final int TOWN_HAS_CHURCH     = 0x02;
-	private static final int TOWN_HAS_STADIUM    = 0x04;
 
 
 	// Local
@@ -494,7 +495,7 @@ implements IPoolItem, Serializable
 			t.new_act_mail += moved;
 		}
 
-		if ( 0 != (TownTables._house_more_flags[house] & 8) && 0 != (t.flags12 & 1) && --t.time_until_rebuild == 0) {
+		if ( 0 != (TownTables._house_more_flags[house] & 8) && 0 != (t.flags12 & GROW_BIT) && --t.time_until_rebuild == 0) {
 			t.time_until_rebuild =  (BitOps.GB(r, 16, 6) + 130);
 
 			Global.gs._current_player = PlayerID.get( Owner.OWNER_TOWN );
@@ -601,7 +602,7 @@ implements IPoolItem, Serializable
 
 	void TownTickHandler()
 	{
-		if(0 != (flags12&1)) 
+		if(0 != (flags12 & GROW_BIT)) 
 		{
 			int i = grow_counter - 1;
 			if (i < 0) {
@@ -1031,7 +1032,6 @@ implements IPoolItem, Serializable
 		TileInfo ti = new TileInfo();
 		PlayerID old_player;
 
-		// TODO XXX TEMP debug remove me now!
 		//if(disableGrow) return false;
 
 		// Current player is a town
@@ -1187,7 +1187,7 @@ implements IPoolItem, Serializable
 
 		// clear the town struct
 		i = t.index;
-		//memset(t, 0, sizeof(Town));
+
 		t.clear();
 		t.index = i;
 
@@ -1216,8 +1216,8 @@ implements IPoolItem, Serializable
 		t.act_food = 0;
 		t.act_water = 0;
 
-		for(i = 0; i != Global.MAX_PLAYERS; i++)
-			t.ratings[i] = 500;
+		//for(i = 0; i != Global.MAX_PLAYERS; i++)			t.ratings[i] = 500;
+		Arrays.fill(t.ratings, 500);
 
 		t.have_ratings = 0;
 		t.exclusivity = PlayerID.get(-1);
@@ -1247,7 +1247,6 @@ implements IPoolItem, Serializable
 		t.UpdateTownMaxPass();
 	}
 
-	//static int _total_towns = 0;
 	static Town AllocateTown()
 	{
 		Iterator<Town> it = Town.getIterator();
@@ -1915,7 +1914,7 @@ implements IPoolItem, Serializable
 	static void TownActionFundBuildings(Town t, int action)
 	{
 		t.grow_counter = 1;
-		t.flags12 |= 1;
+		t.flags12 |= GROW_BIT;
 		t.fund_buildings_months = 3;
 	}
 
@@ -2013,13 +2012,7 @@ implements IPoolItem, Serializable
 
 	static void UpdateTownGrowRate(Town t)
 	{
-
-		//Station st;
-		int m;
-		//Player p;
-
 		// Reset player ratings if they're low
-		//FOR_ALL_PLAYERS(p) 
 		Player.forEach( (p) ->
 		{
 			if (p.is_active && t.ratings[p.index.id] <= 200) {
@@ -2028,7 +2021,7 @@ implements IPoolItem, Serializable
 		});
 
 		int [] n = { 0 };
-		//FOR_ALL_STATIONS(st) 
+
 		Station.forEach( (st) ->
 		{
 			if( st.getXy() == null ) return;
@@ -2045,8 +2038,10 @@ implements IPoolItem, Serializable
 			}
 		});
 
-		t.flags12 &= ~1;
+		t.flags12 &= ~GROW_BIT;
 
+		int m;
+		
 		if (t.fund_buildings_months != 0) {
 			m = _grow_count_values1[Math.min(n[0], 5)];
 			t.fund_buildings_months--;
@@ -2070,7 +2065,7 @@ implements IPoolItem, Serializable
 		if (m <= t.grow_counter)
 			t.grow_counter = m;
 
-		t.flags12 |= 1;
+		t.flags12 |= GROW_BIT;
 	}
 
 	static void UpdateTownAmounts(Town t)
@@ -2137,7 +2132,6 @@ implements IPoolItem, Serializable
 				))
 			return GetTown(tile.getMap().m2);
 
-		//FOR_ALL_TOWNS(t) 
 		Town.forEach( (t) ->
 		{
 			if (t.xy != null) {

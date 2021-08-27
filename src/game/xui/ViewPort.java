@@ -724,7 +724,7 @@ public class ViewPort
 		//#endif
 
 		// Draw a red error square?
-		if (_thd.redsq != null && _thd.redsq == ti.tile) {
+		if (_thd.redsq != null && _thd.redsq.equals(ti.tile)) {
 			DrawSelectionSprite(Sprite.PALETTE_TILE_RED_PULSATING | (Sprite.SPR_SELECT_TILE + Landscape._tileh_to_sprite[ti.tileh]), ti);
 			return;
 		}
@@ -2149,7 +2149,7 @@ public class ViewPort
 		old = _thd.redsq;
 		_thd.redsq = tile;
 
-		if (tile != old) {
+		if (tile == null || !tile.equals(old)) {
 			if (tile != null) tile.MarkTileDirtyByTile();
 			if (old  != null) old.MarkTileDirtyByTile();
 		}

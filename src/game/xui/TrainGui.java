@@ -1550,7 +1550,7 @@ public class TrainGui
 
 					tile = tile.iadd(1);
 					tile.TILE_MASK();
-				} while(tile != Depot._last_built_train_depot_tile);
+				} while(!tile.equals(Depot._last_built_train_depot_tile));
 
 				ShowBuildTrainWindow(null);
 			} break;

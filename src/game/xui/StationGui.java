@@ -365,11 +365,11 @@ public class StationGui extends Station  // to get constants
 		if (0==(st.facilities & FACIL_DOCK))          w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 13);
 		*/
 		
-		if (st.hasFacility(FACIL_TRAIN)) 		w.disabled_state = BitOps.RETSETBIT(w.disabled_state,  10);
-		if (st.hasFacility(FACIL_TRUCK_STOP) &&
-				st.hasFacility(FACIL_BUS_STOP))  w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 11);
-		if (st.hasFacility(FACIL_AIRPORT))       w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 12);
-		if (st.hasFacility(FACIL_DOCK))          w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 13);
+		if (!st.hasFacility(FACIL_TRAIN)) 		w.disabled_state = BitOps.RETSETBIT(w.disabled_state,  10);
+		if (!st.hasFacility(FACIL_TRUCK_STOP) &&
+				!st.hasFacility(FACIL_BUS_STOP))  w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 11);
+		if (!st.hasFacility(FACIL_AIRPORT))       w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 12);
+		if (!st.hasFacility(FACIL_DOCK))          w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 13);
 		
 		Global.SetDParam(0, st.getIndex());
 		Global.SetDParam(1, st.getFacilities());

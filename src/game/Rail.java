@@ -2296,7 +2296,7 @@ public class Rail extends RailTables {
 		}
 
 		/* Wrong tile, or no train? Not a match */
-		if (tile != dest.tile) return null;
+		if (!tile.equals(dest.tile)) return null;
 
 		/* Are we on the same piece of track? */
 		if(0 != (dest.track & (v.rail.track + (v.rail.track << 8)))) return v;

@@ -152,16 +152,13 @@ public class VehicleGui {
 		if (0 ==(vl.flags & Vehicle.VL_REBUILD)) return;
 
 		/* Create array for sorting */
-		//_vehicle_sort = realloc(_vehicle_sort, GetVehiclePoolSize() * sizeof(_vehicle_sort[0]));
 		_vehicle_sort = new SortStruct[Vehicle.GetVehiclePoolSize()]; 
-		//if (_vehicle_sort == null)			Global.error("Could not allocate memory for the vehicle-sorting-list");
 
 		Global.DEBUG_misc(1, "Building vehicle list for player %d station %d...",
 				owner, station);
 
 		if (station != Station.INVALID_STATION) {
-			//final Vehicle v;
-			//FOR_ALL_VEHICLES(v)
+
 			Iterator<Vehicle> it = Vehicle.getIterator();
 			while(it.hasNext())
 			{
@@ -170,9 +167,6 @@ public class VehicleGui {
 						(type == Vehicle.VEH_Train && v.IsFrontEngine()) ||
 						(type != Vehicle.VEH_Train && v.getSubtype() <= subtype))) {
 
-					//final Order order;
-
-					//FOR_VEHICLE_ORDERS(v, order)
 					Iterator<Order> voi = v.getOrdersIterator();
 					while(voi.hasNext())
 					{
@@ -193,7 +187,9 @@ public class VehicleGui {
 			{
 				if (v.getType() == type && v.getOwner().id == owner && (
 						(type == Vehicle.VEH_Train && v.IsFrontEngine()) ||
-						(type != Vehicle.VEH_Train && v.getSubtype() <= subtype))) {
+						(type != Vehicle.VEH_Train && v.getSubtype() <= subtype))) 
+				{
+					if(_vehicle_sort[n[0]] == null) _vehicle_sort[n[0]] = new SortStruct();
 					_vehicle_sort[n[0]].index = v.index;
 					_vehicle_sort[n[0]].owner = v.getOwner().id;
 					++n[0];
@@ -201,10 +197,7 @@ public class VehicleGui {
 			});
 		}
 
-		//vl.sort_list = malloc(n * sizeof(vl.sort_list[0]));
 		vl.sort_list = new SortStruct[n[0]];
-
-		//if (n[0] != 0 && vl.sort_list == null)			Global.error("Could not allocate memory for the vehicle-sorting-list");
 		vl.list_length = n[0];
 
 		for (i = 0; i < n[0]; ++i) vl.sort_list[i] = _vehicle_sort[i];
@@ -219,8 +212,7 @@ public class VehicleGui {
 
 		_internal_sort_order = 0 != (vl.flags & Vehicle.VL_DESC) ? true : false;
 		_internal_name_sorter_id = Str.STR_SV_TRAIN_NAME;
-		//_last_vehicle_idx = 0; // used for "cache" in namesorting
-		//qsort(vl.sort_list, vl.list_length, sizeof(vl.sort_list[0]),_vehicle_sorter[vl.sort_type]);
+
 		Arrays.sort( vl.sort_list, _vehicle_sorter[vl.sort_type] );
 
 		vl.resort_timer = Global.DAY_TICKS * PERIODIC_RESORT_DAYS;

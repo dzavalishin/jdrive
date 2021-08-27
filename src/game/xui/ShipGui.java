@@ -1016,6 +1016,8 @@ public class ShipGui
 		int owner = BitOps.GB(w.window_number, 0, 8);
 		vehiclelist_d vl = w.as_vehiclelist_d();
 
+		if( station == 0xFFFF ) station = Station.INVALID_STATION; // fucking bitstuffing
+		
 		switch(e.event) {
 		case WE_PAINT: {
 			int x = 2;
@@ -1141,7 +1143,7 @@ public class ShipGui
 
 				tile = tile.iadd(1);
 				tile.TILE_MASK();
-			} while(tile != Depot._last_built_ship_depot_tile);
+			} while(!tile.equals(Depot._last_built_ship_depot_tile));
 
 			ShowBuildShipWindow(null);
 		} break;

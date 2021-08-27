@@ -623,10 +623,12 @@ public class Clear extends ClearTables {
 	{
 		boolean self, neighbour;
 		TileIndex dirty = TileIndex.INVALID_TILE;
-
-		switch (tile.GetTileType()) {
+		final TileTypes type = tile.GetTileType();
+		
+		switch (type) {
 			case MP_CLEAR:
-				self = (BitOps.GB(tile.getMap().m5, 0, 5) == 15);
+				// land type == partial desert
+				self = (BitOps.GB(tile.getMap().m5, 0, 5) == 15); 
 				break;
 
 			default:
@@ -636,6 +638,7 @@ public class Clear extends ClearTables {
 
 		switch (tile.iadd(1, 0).GetTileType()) {
 			case MP_CLEAR:
+				// land type == partial desert
 				neighbour = (BitOps.GB(tile.iadd(1, 0).M().m5, 0, 5) == 15);
 				break;
 
@@ -644,7 +647,7 @@ public class Clear extends ClearTables {
 				break;
 		}
 
-		if (BitOps.GB(tile.getMap().m4, 5, 3) == 0) {
+		if (BitOps.GB(tile.getMap().m4, 5, 3) == 0) { //fence?
 			if (self != neighbour) {
 				tile.getMap().m4 =  BitOps.RETSB(tile.getMap().m4, 5, 3, 3);
 				dirty = tile;
@@ -658,6 +661,7 @@ public class Clear extends ClearTables {
 
 		switch (tile.iadd(0, 1).GetTileType()) {
 			case MP_CLEAR:
+				// land type == partial desert
 				neighbour = (BitOps.GB(tile.iadd(0, 1).M().m5, 0, 5) == 15);
 				break;
 
@@ -740,7 +744,7 @@ public class Clear extends ClearTables {
 				return;
 		}
 
-		tile.getMap().m5 = m5;
+		tile.getMap().m5 = 0xFF & m5;
 		tile.MarkTileDirtyByTile();
 	}
 
@@ -775,16 +779,20 @@ public class Clear extends ClearTables {
 		}
 
 		m5 = tile.getMap().m5;
-		if ((m5 & 0x1C) == 0x10 || (m5 & 0x1C) == 0x14) return;
+		if ((m5 & 0x1C) == 0x10 || (m5 & 0x1C) == 0x14) return; // 1C == 0001 1100 - ??
 
 		if ((m5 & 0x1C) != 0xC) {
-			if ((m5 & 3) == 3) return;
+			if ((m5 & 3) == 3) return; // full frass/full show
 
 			if (Global._game_mode != GameModes.GM_EDITOR) {
-				m5 += 0x20;
+				if( Hal.RandomRange(20) >= 2) // add some randomness to growth rate
+					m5 += 0x20;
+				if( Hal.RandomRange(20) < 2) // add some randomness to growth rate
+					m5 += 0x20;
+				m5 &= 0xFF;
 				if (m5 >= 0x20) {
 					// Didn't overflow
-					tile.getMap().m5 = m5;
+					tile.getMap().m5 = 0xFF & m5;
 					return;
 				}
 				/* did overflow, so continue */
@@ -795,9 +803,10 @@ public class Clear extends ClearTables {
 		} else if (Global._game_mode != GameModes.GM_EDITOR) {
 			/* handle farm field */
 			m5 += 0x20;
+			m5 &= 0xFF;
 			if (m5 >= 0x20) {
 				// Didn't overflow
-				tile.getMap().m5 = m5;
+				tile.getMap().m5 = 0xFF & m5;
 				return;
 			}
 			/* overflowed */
@@ -805,10 +814,10 @@ public class Clear extends ClearTables {
 			assert( (m3 & 0xF) != 0);
 			if ( (m3 & 0xF) >= 9) /* NOTE: will not work properly if m3&0xF == 0xF */
 				m3 &= ~0xF;
-			tile.getMap().m3 = m3;
+			tile.getMap().m3 = 0xFF & m3;
 		}
 
-		tile.getMap().m5 = m5;
+		tile.getMap().m5 = 0xFF & m5;
 		tile.MarkTileDirtyByTile();
 	}
 

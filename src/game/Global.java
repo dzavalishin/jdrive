@@ -205,9 +205,10 @@ public class Global
 	public static Tile _m[]; // = new Tile[1024*1024]; // TODO map size
 
 	// keybd
-	public static int _pressed_key; // Low 8 bits = ASCII, High 16 bits = keycode
-	public static boolean _ctrl_pressed;  // Is Ctrl pressed?
-	public static boolean _shift_pressed;  // Is Alt pressed?
+	public static int _pressed_key;             // Low 8 bits = ASCII, High 16 bits = keycode
+	public static boolean _ctrl_pressed;        // Is Ctrl pressed?
+	public static boolean _shift_pressed;  
+	public static boolean _alt_pressed;         // Is Alt pressed?
 	public static byte _dirkeys;				// 1=left, 2=up, 4=right, 8=down
 
 	public static byte _no_scroll;
@@ -322,55 +323,55 @@ public class Global
 	// instead of DEBUG(ai, 0)( printf args)
 	public static void DEBUG_ai( int level, String s, Object ... arg )
 	{
-		if( level >= _debug_ai_level )
+		if( level <= _debug_ai_level )
 			debug( s, arg );
 	}
 
 	public static void DEBUG_ms( int level, String s, Object ... arg )
 	{
-		if( level >= _debug_ms_level )
+		if( level <= _debug_ms_level )
 			debug( s, arg );
 	}
 
 	public static void DEBUG_misc( int level, String s, Object ... arg )
 	{
-		if( level >= _debug_misc_level )
+		if( level <= _debug_misc_level )
 			debug( s, arg );
 	}
 
 	public static void DEBUG_grf( int level, String s, Object ... arg )
 	{
-		if( level >= _debug_grf_level )
+		if( level <= _debug_grf_level )
 			debug( s, arg );
 	}
 
 	public static void DEBUG_spritecache( int level, String s, Object ... arg )
 	{
-		if( level >= _debug_spritecache_level )
+		if( level <= _debug_spritecache_level )
 			debug( s, arg );
 	}
 
 	public static void DEBUG_map( int level, String s, Object ... arg )
 	{
-		if( level >= _debug_map_level )
+		if( level <= _debug_map_level )
 			debug( s, arg );
 	}
 
 	public static void DEBUG_npf( int level, String s, Object ... arg )
 	{
-		if( level >= _debug_npf_level )
+		if( level <= _debug_npf_level )
 			debug( s, arg );
 	}
 
 	public static void DEBUG_pbs( int level, String s, Object ... arg )
 	{
-		if( level >= _debug_pbs_level )
+		if( level <= _debug_pbs_level )
 			debug( s, arg );
 	}
 
 	public static void DEBUG_ntp( int level, String s, Object ... arg )
 	{
-		if( level >= _debug_ntp_level )
+		if( level <= _debug_ntp_level )
 			debug( s, arg );
 	}
 

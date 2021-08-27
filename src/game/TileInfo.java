@@ -14,4 +14,6 @@ public class TileInfo {
 	static final public int TILE_PIXELS = 32;   // a tile is 32x32 pixels 
 	static final public int TILE_HEIGHT = 8;    // The standard height-difference between tiles on two levels is 8 (z-diff 8) 
 	
+	public static final int EXTRABITS_DESERT = 1;
+	
 }

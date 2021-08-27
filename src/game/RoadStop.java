@@ -128,7 +128,7 @@ public class RoadStop implements IPoolItem
 		
 		for(RoadStop rs : GetPrimaryRoadStop(st, type))
 		{
-			if(rs.xy.getTile() == tile.getTile())
+			if(rs.xy.equals(tile))
 				return rs;
 		}
 

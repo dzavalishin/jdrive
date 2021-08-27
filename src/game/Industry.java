@@ -448,7 +448,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			i.last_mo_transported[0] += am;
 			if (am != 0 && (m5 = 0xFF & _industry_produce_map5[tile.getMap().m5]) != 0xFF) {
 				tile.getMap().m1 = 0x80;
-				tile.getMap().m5 = m5;
+				tile.getMap().m5 = 0xFF & m5;
 				tile.MarkTileDirtyByTile();
 			}
 		}
@@ -730,8 +730,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		if (v != null) v.special.unk2 = dir;
 	}
 
-	private static void SET_AND_ANIMATE(TileIndex tile, int a, int b)   { tile.getMap().m5 =  a; tile.getMap().m1 = b; TextEffect.AddAnimatedTile(tile); }
-	private static void SET_AND_UNANIMATE(TileIndex tile, int a, int b) { tile.getMap().m5 =  a; tile.getMap().m1 = b; TextEffect.DeleteAnimatedTile(tile); }
+	private static void SET_AND_ANIMATE(TileIndex tile, int a, int b)   { tile.getMap().m5 = 0xFF & a; tile.getMap().m1 = b; TextEffect.AddAnimatedTile(tile); }
+	private static void SET_AND_UNANIMATE(TileIndex tile, int a, int b) { tile.getMap().m5 = 0xFF & a; tile.getMap().m1 = b; TextEffect.DeleteAnimatedTile(tile); }
 
 
 	static void TileLoop_Industry(TileIndex tile)
@@ -754,7 +754,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		int n = _industry_map5_animation_next[mm5];
 		if (n != 255) {
 			tile.getMap().m1 = 0;
-			tile.getMap().m5 = n;
+			tile.getMap().m5 = 0xFF & n;
 			tile.MarkTileDirtyByTile();
 			return;
 		}

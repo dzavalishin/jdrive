@@ -747,7 +747,7 @@ public class TrainCmd extends TrainTables
 		count = 0;
 		for (; v != null; v = v.next) {
 			count++;
-			if (!v.rail.isInDepot() || v.tile != tile ||
+			if (!v.rail.isInDepot() || !v.tile.equals(tile) ||
 					(v.IsFrontEngine() && !v.isStopped())) {
 				Global._error_message = Str.STR_881A_TRAINS_CAN_ONLY_BE_ALTERED;
 				return -1;
@@ -946,7 +946,7 @@ public class TrainCmd extends TrainTables
 			if (num > (Global._patches.mammoth_trains ? 100 : 9) && dst_head.IsFrontEngine())
 				return Cmd.return_cmd_error(Str.STR_8819_TRAIN_TOO_LONG);
 
-			assert(dst_head.tile == src_head.tile);
+			assert(dst_head.tile.equals(src_head.tile) );
 		}
 
 		// when moving all wagons, we can't have the same src_head and dst_head
@@ -1544,7 +1544,7 @@ public class TrainCmd extends TrainTables
 			TileIndex tile = TileIndex.AddTileIndexDiffCWrap(v.tile, TileIndex.TileIndexDiffCByDir(Rail.TrackdirToExitdir(trackdir)));
 
 			int ts;
-			assert(tile != TileIndex.INVALID_TILE);
+			assert(tile.isValid());
 
 			ts = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_RAIL);
 			ts &= Rail.TrackdirReachesTrackdirs(trackdir);
@@ -2037,11 +2037,9 @@ public class TrainCmd extends TrainTables
 
 	static boolean CheckTrainStayInDepot(Vehicle v)
 	{
-		Vehicle u;
-
 		// bail out if not all wagons are in the same depot or not in a depot at all
-		for (u = v; u != null; u = u.next) {
-			if (!u.rail.isInDepot() || u.tile != v.tile) return false;
+		for (Vehicle u = v; u != null; u = u.next) {
+			if (!u.rail.isInDepot() || !u.tile.equals(v.tile)) return false;
 		}
 
 		if (v.rail.force_proceed == 0) {
@@ -2557,7 +2555,7 @@ public class TrainCmd extends TrainTables
 		}
 
 		spd = v.subspeed + accel * 2;
-		v.subspeed = spd;
+		v.subspeed = 0xFF & spd;
 		{
 			int tempmax = v.getMax_speed();
 			if (v.cur_speed > v.getMax_speed())
@@ -2568,7 +2566,7 @@ public class TrainCmd extends TrainTables
 		if (0 == (v.direction & 1)) spd = spd * 3 >> 2;
 
 				spd += v.progress;
-				v.progress = spd;
+				v.progress = 0xFF & spd;
 				return (spd >> 8);
 	}
 
@@ -2961,7 +2959,8 @@ public class TrainCmd extends TrainTables
 		{
 			v.BeginVehicleMove();
 
-			if (v.rail.track == 0x40)
+			//if (v.rail.track == 0x40)
+			if (v.rail.isInTunnel())
 			{
 				// in tunnel 
 				v.GetNewVehiclePos(gp);
@@ -3333,7 +3332,7 @@ public class TrainCmd extends TrainTables
 		v.y_pos = gp.y;
 
 		// update the Z position of the vehicle 
-		int old_z = AfterSetTrainPos(v, (gp.new_tile != gp.old_tile));
+		int old_z = AfterSetTrainPos(v, (!gp.new_tile.equals(gp.old_tile)));
 
 		if (prev == null) {
 			// This is the first vehicle in the train 
@@ -3376,7 +3375,7 @@ public class TrainCmd extends TrainTables
 				Pbs.PBSClearPath(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track), v.rail.pbs_end_tile, v.rail.pbs_end_trackdir);
 				Pbs.PBSClearPath(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track) + 8, v.rail.pbs_end_tile, v.rail.pbs_end_trackdir);
 			};
-			if (v.tile != u.tile) {
+			if (!v.tile.equals(u.tile)) {
 				Pbs.PBSClearTrack(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track));
 			};
 		}

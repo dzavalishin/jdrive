@@ -984,7 +984,7 @@ public class Economy extends EconomeTables
 				FindSubsidyPassengerRoute(fr);
 				if(fr.to == null) continue; // [dz] hack
 				
-				if (fr.distance <= 70) {
+				if (fr.distance <= 70 && (fr.to instanceof Town) ) {
 					s.cargo_type = AcceptedCargo.CT_PASSENGERS;
 					s.from = ((Town)fr.from).index;
 					s.to = ((Town)fr.to).index;
@@ -1319,7 +1319,9 @@ public class Economy extends EconomeTables
 
 			/* unload? */
 			if (v.cargo_count != 0) {
-				if (v.getCargo_source() != last_visited && 0 != (ge.waiting_acceptance & 0x8000) && 0 == (u.current_order.flags & Order.OF_TRANSFER)) {
+				if (v.getCargo_source() != last_visited 
+						&& 0 != (ge.waiting_acceptance & 0x8000) 
+						&& 0 == (u.current_order.flags & Order.OF_TRANSFER)) {
 					// deliver goods to the station
 					st.time_since_unload = 0;
 

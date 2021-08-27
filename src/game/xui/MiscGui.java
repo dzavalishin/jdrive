@@ -1548,6 +1548,7 @@ public class MiscGui {
 				}
 				break;
 			}
+			break;
 		//case WE_DESTROY:			break;
 
 		case WE_RESIZE: {
