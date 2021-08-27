@@ -269,13 +269,11 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 	public void SetMapExtraBits(int i)
 	{
-		//assert(tile < Global.MapSize());
 		Global._m[tile].extra =  BitOps.RETSB(Global._m[tile].extra, 0, 2, i & 3);
 	}
 
 	public int GetMapExtraBits()
 	{
-		//assert(tile < MapSize());
 		return BitOps.GB(Global._m[tile].extra, 0, 2);
 	}
 

@@ -58,7 +58,7 @@ public class Terraform {
 		TileIndex.forAll( size_x, size_y, TileIndex.TileXY(sx, sy), (tile) ->
 		{
 			if (tile.GetTileType() != TileTypes.MP_WATER) {
-				tile.SetMapExtraBits( (Global._ctrl_pressed) ? 0 : 1);
+				tile.SetMapExtraBits( (Global._ctrl_pressed) ? 0 : TileInfo.EXTRABITS_DESERT);
 				Cmd.DoCommandP(tile, 0, 0, null, Cmd.CMD_LANDSCAPE_CLEAR);
 				tile.MarkTileDirtyByTile();
 			}

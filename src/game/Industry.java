@@ -1217,7 +1217,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static boolean CheckNewIndustry_Plantation(TileIndex tile, int type)
 	{
-		if (tile.GetMapExtraBits() == 1) {
+		if (tile.GetMapExtraBits() == TileInfo.EXTRABITS_DESERT) {
 			Global._error_message = Str.STR_0239_SITE_UNSUITABLE;
 			return false;
 		}
@@ -1227,7 +1227,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static boolean CheckNewIndustry_Water(TileIndex tile, int type)
 	{
-		if (tile.GetMapExtraBits() != 1) {
+		if (tile.GetMapExtraBits() != TileInfo.EXTRABITS_DESERT) {
 			Global._error_message = Str.STR_0318_CAN_ONLY_BE_BUILT_IN_DESERT;
 			return false;
 		}

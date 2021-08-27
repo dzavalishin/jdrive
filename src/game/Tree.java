@@ -438,7 +438,7 @@ public class Tree  extends TreeTables {
 
 			// TODO if (BitOps.CHANCE16I(1, 200, r)) SndPlayTileFx(forest_sounds[BitOps.GB(r, 16, 2)], tile);
 			
-		} else if (b == 1) {
+		} else if (b == TileInfo.EXTRABITS_DESERT) {
 			if (BitOps.GB(tile.getMap().m2, 4, 2) != 2) {
 				tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 4, 2, 2);
 				tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 6, 2, 3);

@@ -2599,7 +2599,7 @@ public class Rail extends RailTables {
 				break;
 
 			case Landscape.LT_DESERT:
-				if (tile.GetMapExtraBits() == 1) { /* convert into desert? */
+				if (tile.GetMapExtraBits() == TileInfo.EXTRABITS_DESERT) { /* convert into desert? */
 					new_ground = RAIL_GROUND_ICE_DESERT;
 					//goto modify_me;
 					do_goto = true;

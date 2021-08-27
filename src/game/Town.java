@@ -2057,7 +2057,7 @@ implements IPoolItem, Serializable
 			if (t.xy.TilePixelHeight() >= GameOptions._opt.snow_line && t.act_food == 0 && t.population > 90)
 				return;
 		} else if (GameOptions._opt.landscape == Landscape.LT_DESERT) {
-			if (t.xy.GetMapExtraBits() == 1 && (t.act_food==0 || t.act_water==0) && t.population > 60)
+			if (t.xy.GetMapExtraBits() == TileInfo.EXTRABITS_DESERT && (t.act_food==0 || t.act_water==0) && t.population > 60)
 				return;
 		}
 
