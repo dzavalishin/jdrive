@@ -2037,11 +2037,9 @@ public class TrainCmd extends TrainTables
 
 	static boolean CheckTrainStayInDepot(Vehicle v)
 	{
-		Vehicle u;
-
 		// bail out if not all wagons are in the same depot or not in a depot at all
-		for (u = v; u != null; u = u.next) {
-			if (!u.rail.isInDepot() || u.tile != v.tile) return false;
+		for (Vehicle u = v; u != null; u = u.next) {
+			if (!u.rail.isInDepot() || !u.tile.equals(v.tile)) return false;
 		}
 
 		if (v.rail.force_proceed == 0) {
@@ -2961,7 +2959,8 @@ public class TrainCmd extends TrainTables
 		{
 			v.BeginVehicleMove();
 
-			if (v.rail.track == 0x40)
+			//if (v.rail.track == 0x40)
+			if (v.rail.isInTunnel())
 			{
 				// in tunnel 
 				v.GetNewVehiclePos(gp);
