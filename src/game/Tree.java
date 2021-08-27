@@ -622,7 +622,8 @@ public class Tree  extends TreeTables {
 			}
 		}
 		// byte underflow
-		if (--_trees_tick_ctr != 0) return;
+		if (--_trees_tick_ctr > 0) return;
+		_trees_tick_ctr = 0x7F;
 
 		/* place a tree at a random spot */
 		r = Hal.Random();
