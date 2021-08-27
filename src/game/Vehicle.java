@@ -19,6 +19,7 @@ import game.ids.UnitID;
 import game.ids.VehicleID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
+import game.ifaces.TileTypeProcs;
 import game.ifaces.TileVehicleInterface;
 import game.struct.BackuppedOrders;
 import game.struct.Point;
@@ -2780,14 +2781,21 @@ public class Vehicle implements IPoolItem
 		default: return 0xFF;
 		}
 	}
-	/* Return value has bit 0x2 set, when the vehicle enters a station. Then,
+	/**
+	 * Return value has bit 0x2 set, when the vehicle enters a station. Then,
 	 * result << 8 contains the id of the station entered. If the return value has
 	 * bit 0x8 set, the vehicle could not and did not enter the tile. Are there
-	 * other bits that can be set? */
+	 * other bits that can be set?
+	 * 
+	 *  @param itile tile we are entering
+	 *  
+	**/
 	int VehicleEnterTile(TileIndex itile, int x, int y)
 	{
 		TileIndex old_tile = tile;
-		int result = Landscape._tile_type_procs[tile.GetTileType().ordinal()].vehicle_enter_tile_proc.apply(this, itile, x, y);
+		final int ordinal = itile.GetTileType().ordinal();
+		final TileTypeProcs func = Landscape._tile_type_procs[ordinal];
+		int result = func.vehicle_enter_tile_proc.apply(this, itile, x, y);
 
 		/* When vehicle_enter_tile_proc returns 8, that apparently means that
 		 * we cannot enter the tile at all. In that case, don't call
