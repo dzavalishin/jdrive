@@ -179,7 +179,9 @@ public class MainWindow extends JPanel implements ActionListener
 	{
 		Global._ctrl_pressed = (e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0; // _wnd.has_focus && GetAsyncKeyState(VK_CONTROL)<0;
 		Global._shift_pressed = (e.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK) != 0;
-		Gfx._dbg_screen_rect = (e.getModifiersEx() & KeyEvent.META_DOWN_MASK) != 0;// _wnd.has_focus && GetAsyncKeyState(VK_CAPITAL)<0;
+		Global._alt_pressed = (e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK) != 0;
+		boolean meta_pressed = (e.getModifiersEx() & KeyEvent.META_DOWN_MASK) != 0;// _wnd.has_focus && GetAsyncKeyState(VK_CAPITAL)<0;
+		Gfx._dbg_screen_rect = meta_pressed; 
 
 		/*
 		Global._dirkeys = (byte)
@@ -189,14 +191,31 @@ public class MainWindow extends JPanel implements ActionListener
 						((e.getKeyCode() == KeyEvent.VK_DOWN)  ? 8 : 0));
 		 */
 		
+		boolean prev_ff = Global._fast_forward;
+		
 		switch(e.getKeyCode())
 		{
 		case KeyEvent.VK_LEFT:	modDirKeys(1, pressed); break; 
 		case KeyEvent.VK_UP:	modDirKeys(2, pressed); break;
 		case KeyEvent.VK_RIGHT:	modDirKeys(4, pressed); break;
-		case KeyEvent.VK_DOWN:	modDirKeys(8, pressed); break;		
+		case KeyEvent.VK_DOWN:	modDirKeys(8, pressed); break;
+		
+		case KeyEvent.VK_TAB:
+		{
+			if(!pressed) Global._fast_forward = false;
+			else
+			{
+				if(!(Global._ctrl_pressed || Global._alt_pressed || Global._shift_pressed || meta_pressed ))
+					Global._fast_forward = true;
+			}
+		}
 		}
 		
+		if( prev_ff != Global._fast_forward)
+		{			
+			//Window w = Window.FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
+			Window.InvalidateWindow(Window.WC_MAIN_TOOLBAR, 0);
+		}
 
 		if(!pressed) return;
 

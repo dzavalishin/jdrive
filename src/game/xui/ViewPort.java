@@ -2149,7 +2149,7 @@ public class ViewPort
 		old = _thd.redsq;
 		_thd.redsq = tile;
 
-		if (!tile.equals(old)) {
+		if (tile == null || !tile.equals(old)) {
 			if (tile != null) tile.MarkTileDirtyByTile();
 			if (old  != null) old.MarkTileDirtyByTile();
 		}

@@ -221,7 +221,8 @@ void SortResolutions(int count)
 
 		while(true) {
 			try {
-				Thread.sleep(10); // TODO 100 fps?
+				if(!Global._fast_forward)
+					Thread.sleep(10); // TODO 100 fps?
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -205,9 +205,10 @@ public class Global
 	public static Tile _m[]; // = new Tile[1024*1024]; // TODO map size
 
 	// keybd
-	public static int _pressed_key; // Low 8 bits = ASCII, High 16 bits = keycode
-	public static boolean _ctrl_pressed;  // Is Ctrl pressed?
-	public static boolean _shift_pressed;  // Is Alt pressed?
+	public static int _pressed_key;             // Low 8 bits = ASCII, High 16 bits = keycode
+	public static boolean _ctrl_pressed;        // Is Ctrl pressed?
+	public static boolean _shift_pressed;  
+	public static boolean _alt_pressed;         // Is Alt pressed?
 	public static byte _dirkeys;				// 1=left, 2=up, 4=right, 8=down
 
 	public static byte _no_scroll;
