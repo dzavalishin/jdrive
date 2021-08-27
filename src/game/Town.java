@@ -188,7 +188,6 @@ implements IPoolItem, Serializable
 	 */
 	public boolean IsValidTown()
 	{
-		//return xy.getTile() != 0; /* XXX: Replace by INVALID_TILE someday */
 		return xy.isValid();
 	}
 
@@ -2133,7 +2132,6 @@ implements IPoolItem, Serializable
 				))
 			return GetTown(tile.getMap().m2);
 
-		//FOR_ALL_TOWNS(t) 
 		Town.forEach( (t) ->
 		{
 			if (t.xy != null) {

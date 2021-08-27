@@ -816,8 +816,6 @@ public class Station extends StationTables implements IPoolItem
 		int z,z2;
 		long tmp;
 
-		//Station s;
-		//FOR_ALL_STATIONS(s) 
 		_station_pool.forEach( (i,s) ->			
 		{
 			if (s != st && s.xy != null && s.town==t) {
@@ -3006,7 +3004,6 @@ public class Station extends StationTables implements IPoolItem
 		st = GetStation(i);
 		if (st != null && st.xy != null) StationHandleBigTick(st);
 
-		//FOR_ALL_STATIONS(st)
 		_station_pool.forEach( (ii,sst) ->
 		{
 			if (sst.xy != null) StationHandleSmallTick(sst);
