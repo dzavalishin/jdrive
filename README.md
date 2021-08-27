@@ -1,4 +1,4 @@
-# JDrive
+# NextTTD (JDrive)
 
 This is an attempt to port [OpenTTD](https://www.openttd.org/) to Java.
 
