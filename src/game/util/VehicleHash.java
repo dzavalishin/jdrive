@@ -103,7 +103,7 @@ public class VehicleHash
 		}
 		
 		// TODO return after aircraft debug
-		assert( old.id == vehicle.index );
+		//assert( old.id == vehicle.index );
 
 	}
 

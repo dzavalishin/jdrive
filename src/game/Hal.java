@@ -21,7 +21,9 @@ import game.xui.Window;
 public class Hal
 {
 	MainWindow mw = null;
-	private static byte[] screen; // TODO static
+
+	private static byte[] screen1; // TODO static
+	private static byte[] screen2; // TODO static
 	
 	
 	void toggle_fullscreen(boolean fullscreen) { } // TODO
@@ -175,9 +177,10 @@ void SortResolutions(int count)
 		//frame.setSize(600, 400);
 
 		//screen = new int[2048*2048]; // TODO scr size!
-		screen = new byte[2048*2048*4]; // TODO scr size!
+		screen1 = new byte[2048*2048*4]; // TODO scr size!
+		screen2 = new byte[2048*2048*4]; // TODO scr size!
 
-		mw = new MainWindow(frame,screen);
+		mw = new MainWindow(frame,screen1);
 
 		//frame.setSize(mw.getMapSizeX(), mw.getMapSizeY());
 		frame.setSize(1280+30, 1024);
@@ -200,10 +203,29 @@ void SortResolutions(int count)
 
 		mw.updateLocation();
 
-		_screen.init(MainWindow.WIDTH, MainWindow.HEIGHT, screen );		
+		_screen.init(MainWindow.WIDTH, MainWindow.HEIGHT, screen2 );		
 		_cur_dpi = _screen;
 	}
 
+	//static boolean firstShown = true;
+	public void switchPages()
+	{
+		/*
+		if(firstShown)
+		{
+			_screen.setScreen(screen1);
+			mw.setScreen(screen2);
+		}
+		else
+		{
+			_screen.setScreen(screen2);
+			mw.setScreen(screen1);
+		}*/
+		System.arraycopy(screen2, 0, screen1, 0, screen2.length);
+		mw.flush();
+		//firstShown = !firstShown;
+	}
+	
 	public void stop_video() {
 		// TODO Auto-generated method stub
 
@@ -272,7 +294,8 @@ void SortResolutions(int count)
 			if (Global._force_full_redraw)					
 				MarkWholeScreenDirty();
 
-			mw.flush();
+			switchPages();
+			//mw.flush();
 
 			//_screen.dst_ptr = _wnd.buffer_bits;
 			//try {

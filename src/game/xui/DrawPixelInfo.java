@@ -94,5 +94,10 @@ public class DrawPixelInfo
 		top = 0;
 		zoom = 0;
 	}
+
+	public void setScreen(byte[] screen) 
+	{
+		dst_ptr = new Pixel( screen );
+	}
 	
 }
