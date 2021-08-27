@@ -1,4 +1,4 @@
-package game.struct; // TODO move
+package game.struct; 
 
 public class GoodsEntry
 {

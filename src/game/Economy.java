@@ -984,7 +984,7 @@ public class Economy extends EconomeTables
 				FindSubsidyPassengerRoute(fr);
 				if(fr.to == null) continue; // [dz] hack
 				
-				if (fr.distance <= 70) {
+				if (fr.distance <= 70 && (fr.to instanceof Town) ) {
 					s.cargo_type = AcceptedCargo.CT_PASSENGERS;
 					s.from = ((Town)fr.from).index;
 					s.to = ((Town)fr.to).index;

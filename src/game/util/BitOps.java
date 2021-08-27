@@ -221,14 +221,31 @@ public class BitOps {
 		//return ((uint)((a)-(min)) < (uint)((max)-(min)))
 	}
 
-	public static boolean CHANCE16(int a, int b) { return Integer.compareUnsigned( Hal.Random(), (65536 * a) / b ) <= 0; }
-	
-	public static boolean CHANCE16R(int a, int b, int [] r) 
+	public static boolean CHANCE16(int a, int b) 
 	{ 
-		return ((r[0]=Hal.Random()) <= ((65536 * a) / b));
+		final int r = Hal.Random();
+		final int v = (int)( (Integer.MAX_VALUE*2L * (double)a) / b );
+		boolean ret = Integer.compareUnsigned( r, v ) <= 0;
+		return ret;
+	}
+	
+	public static boolean CHANCE16R(int a, int b, int [] rv) 
+	{ 
+		//return ((r[0]=Hal.Random()) <= ((Integer.MAX_VALUE * a) / b));
+		final int r = Hal.Random();
+		rv[0] = r;
+		//final double v = (Integer.MAX_VALUE * (double)a) / b;
+		final int v = (int)( (Integer.MAX_VALUE*2L * (double)a) / b );
+		return Integer.compareUnsigned( r, v ) <= 0; 
 	}
 
-	public static boolean CHANCE16I(int a, int b, int v) { return Integer.compareUnsigned( v, (65536 * a) / b ) <= 0; }
+	public static boolean CHANCE16I(int a, int b, int r) 
+	{ 
+		//return Integer.compareUnsigned( v, (65536 * a) / b ) <= 0; 
+		//final double v = (Integer.MAX_VALUE * (double)a) / b;
+		final int v = (int)( (Integer.MAX_VALUE*2L * (double)a) / b );
+		return Integer.compareUnsigned( r, v ) <= 0; 
+	}
 
 
 	/*

@@ -270,7 +270,7 @@ public class Station extends StationTables implements IPoolItem
 		int i;
 
 		for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
-			if( 0 != (goods[i].waiting_acceptance & 0x8000) ) 
+			if( goods[i] != null && 0 != (goods[i].waiting_acceptance & 0x8000) ) 
 				mask |= 1 << i;
 		}
 		return mask;
@@ -469,6 +469,7 @@ public class Station extends StationTables implements IPoolItem
 					(i == AcceptedCargo.CT_PASSENGERS && 0 == (facilities & (byte)~FACIL_TRUCK_STOP)))
 				amt = 0;
 
+			if(goods[i] == null) goods[i] = new GoodsEntry();
 			goods[i].waiting_acceptance = BitOps.RETSB(goods[i].waiting_acceptance, 12, 4, amt);
 		}
 
@@ -3288,7 +3289,9 @@ public class Station extends StationTables implements IPoolItem
 		st.facilities = FACIL_AIRPORT | FACIL_DOCK;
 		st.build_date = Global._date;
 
-		for (j = 0; j != AcceptedCargo.NUM_CARGO; j++) {
+		for (j = 0; j != AcceptedCargo.NUM_CARGO; j++) 
+		{
+			st.goods[j] = new GoodsEntry();
 			st.goods[j].waiting_acceptance = 0;
 			st.goods[j].days_since_pickup = 0;
 			st.goods[j].enroute_from = INVALID_STATION;

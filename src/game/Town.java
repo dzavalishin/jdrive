@@ -1033,7 +1033,6 @@ implements IPoolItem, Serializable
 		TileInfo ti = new TileInfo();
 		PlayerID old_player;
 
-		// TODO XXX TEMP debug remove me now!
 		//if(disableGrow) return false;
 
 		// Current player is a town
@@ -2014,13 +2013,7 @@ implements IPoolItem, Serializable
 
 	static void UpdateTownGrowRate(Town t)
 	{
-
-		//Station st;
-		int m;
-		//Player p;
-
 		// Reset player ratings if they're low
-		//FOR_ALL_PLAYERS(p) 
 		Player.forEach( (p) ->
 		{
 			if (p.is_active && t.ratings[p.index.id] <= 200) {
@@ -2029,7 +2022,7 @@ implements IPoolItem, Serializable
 		});
 
 		int [] n = { 0 };
-		//FOR_ALL_STATIONS(st) 
+
 		Station.forEach( (st) ->
 		{
 			if( st.getXy() == null ) return;
@@ -2048,6 +2041,8 @@ implements IPoolItem, Serializable
 
 		t.flags12 &= ~GROW_BIT;
 
+		int m;
+		
 		if (t.fund_buildings_months != 0) {
 			m = _grow_count_values1[Math.min(n[0], 5)];
 			t.fund_buildings_months--;
