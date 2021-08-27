@@ -647,18 +647,32 @@ public class Landscape extends GenLandTable
 			TileIndex tile = new TileIndex(ti);
 
 			//for (data = _make_desert_or_rainforest_data;
-			//		data != endof(_make_desert_or_rainforest_data); ++data) 
+			//		data != endof(_make_desert_or_rainforest_data); ++data)
+			broken = false;
 			for( TileIndexDiffC data : _make_desert_or_rainforest_data)
 			{
-				TileIndex t = new TileIndex( TileIndex.TILE_MASK(ti + TileIndex.ToTileIndexDiff(data).diff) );
-				if (t.TileHeight() >= 4 || t.IsTileType(TileTypes.MP_WATER)) 
+				final int scan = ti + TileIndex.ToTileIndexDiff(data).diff;
+				//TileIndex t = new TileIndex( TileIndex.TILE_MASK(scan) );
+				TileIndex t = new TileIndex( scan );
+				if(!t.isValid()) 
+				{
+					broken = true;
+					break;
+				}
+				
+				final int tileHeight = t.TileHeight();
+				if (tileHeight >= 4 
+						|| t.IsTileType(TileTypes.MP_WATER)) 
 				{
 					broken = true;
 					break;
 				}
 			}
 			if( !broken )// (data == endof(_make_desert_or_rainforest_data))
-				tile.SetMapExtraBits(1);
+			{
+				Global.debug("desert ");
+				tile.SetMapExtraBits(TileInfo.EXTRABITS_DESERT);
+			}
 		}
 
 		for (i = 0; i != 256; i++)
@@ -674,7 +688,8 @@ public class Landscape extends GenLandTable
 			for( TileIndexDiffC data : _make_desert_or_rainforest_data)
 			{
 				TileIndex t = new TileIndex( TileIndex.TILE_MASK(ti + TileIndex.ToTileIndexDiff(data).diff));
-				if (t.IsTileType(TileTypes.MP_CLEAR) && (t.getMap().m5 & 0x1c) == 0x14) 
+				if (t.IsTileType(TileTypes.MP_CLEAR) 
+						&& (t.getMap().m5 & 0x1c) == 0x14) 
 				{
 					broken = true;
 					break;

@@ -912,7 +912,8 @@ public class Vehicle implements IPoolItem
 
 	public Object EnsureNoVehicleProc(Object data)
 	{
-		if (!tile.equals(data) || type == VEH_Disaster)
+		// TODO [dz] can tile be null for valid vehicle?
+		if (tile == null || !tile.equals(data) || type == VEH_Disaster)
 			return null;
 
 		VehicleInTheWayErrMsg();
@@ -1158,7 +1159,6 @@ public class Vehicle implements IPoolItem
 	}
 
 
-	//static VehicleID _vehicle_position_hash[0x1000];
 
 	public static Object VehicleFromPos(TileIndex tile, Object data, VehicleFromPosProc proc)
 	{
@@ -1171,7 +1171,10 @@ public class Vehicle implements IPoolItem
 		for(VehicleID vi : list) {
 			Vehicle v = GetVehicle(vi);
 			Object a;
-
+			
+			if(!v.IsValidVehicle()) 
+				continue;
+			
 			a = proc.apply(v, data);
 			if (a != null) return a;
 		}		
