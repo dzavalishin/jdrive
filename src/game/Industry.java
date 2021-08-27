@@ -433,8 +433,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		Industry  i = GetIndustry(tile.getMap().m2);
 		int cw, am;
 
+		// [dz] uncommented check for i.produced_cargo[0] > 0 - why it was commented out?
 		cw = Math.min(i.cargo_waiting[0], 255);
-		if (cw > _industry_min_cargo[i.type]/* && i.produced_cargo[0] != 0xFF*/) {
+		if (cw > _industry_min_cargo[i.type] && i.produced_cargo[0] > 0) {
 			int m5;
 
 			i.cargo_waiting[0] -= cw;
