@@ -1229,10 +1229,10 @@ public class Npf {
 		 * dest_tile, not just any stop of that station.
 		 * So only for train orders to stations we fill fstd.station_index, for all
 		 * others only dest_coords */
-		if ((v.current_order.type) == Order.OT_GOTO_STATION && v.type == Vehicle.VEH_Train) {
-			fstd.station_index = v.current_order.station;
+		if ((v.getCurrent_order().type) == Order.OT_GOTO_STATION && v.type == Vehicle.VEH_Train) {
+			fstd.station_index = v.getCurrent_order().station;
 			/* Let's take the closest tile of the station as our target for trains */
-			fstd.dest_coords = CalcClosestStationTile(v.current_order.station, v.tile);
+			fstd.dest_coords = CalcClosestStationTile(v.getCurrent_order().station, v.tile);
 		} else {
 			fstd.dest_coords = v.dest_tile;
 			fstd.station_index = -1;

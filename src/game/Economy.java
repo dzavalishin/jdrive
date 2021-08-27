@@ -1237,7 +1237,7 @@ public class Economy extends EconomeTables
 		//final Vehicle x;
 		boolean has_any_cargo = false;
 
-		if (0==(u.current_order.flags & Order.OF_FULL_LOAD)) return false;
+		if (0==(u.getCurrent_order().flags & Order.OF_FULL_LOAD)) return false;
 
 		for (w = u; w != null; w = w.next) {
 			if (w.cargo_count != 0) {
@@ -1256,7 +1256,7 @@ public class Economy extends EconomeTables
 			if ((x.type != Vehicle.VEH_Train || x.IsFrontEngine()) && // for all locs
 					u.last_station_visited == x.last_station_visited && // at the same station
 					0 == (x.vehstatus & Vehicle.VS_STOPPED) && // not stopped
-					x.current_order.type == Order.OT_LOADING && // loading
+					x.getCurrent_order().type == Order.OT_LOADING && // loading
 					u != x) { // not itself
 				boolean other_has_any_cargo = false;
 				boolean has_space_for_same_type = false;
@@ -1300,7 +1300,7 @@ public class Economy extends EconomeTables
 		PlayerID old_player;
 		boolean completely_empty = true;
 
-		assert(v.current_order.type == Order.OT_LOADING);
+		assert(v.getCurrent_order().type == Order.OT_LOADING);
 
 		v.cur_speed = 0;
 
@@ -1321,7 +1321,7 @@ public class Economy extends EconomeTables
 			if (v.cargo_count != 0) {
 				if (v.getCargo_source() != last_visited 
 						&& 0 != (ge.waiting_acceptance & 0x8000) 
-						&& 0 == (u.current_order.flags & Order.OF_TRANSFER)) {
+						&& 0 == (u.getCurrent_order().flags & Order.OF_TRANSFER)) {
 					// deliver goods to the station
 					st.time_since_unload = 0;
 
@@ -1350,7 +1350,7 @@ public class Economy extends EconomeTables
 					result |= 1;
 					v.cargo_count = 0;
 				} 
-				else if( 0 != (u.current_order.flags & (Order.OF_UNLOAD | Order.OF_TRANSFER))) 
+				else if( 0 != (u.getCurrent_order().flags & (Order.OF_UNLOAD | Order.OF_TRANSFER))) 
 				{
 					/* unload goods and let it wait at the station */
 					st.time_since_unload = 0;
@@ -1398,7 +1398,7 @@ public class Economy extends EconomeTables
 			}
 
 			/* don't pick up goods that we unloaded */
-			if(0 != (u.current_order.flags & Order.OF_UNLOAD)) 
+			if(0 != (u.getCurrent_order().flags & Order.OF_UNLOAD)) 
 				continue;
 
 			/* update stats */

@@ -9,6 +9,7 @@ import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
+import game.struct.GetNewVehiclePosResult;
 import game.struct.NPFFindStationOrTileData;
 import game.struct.RailtypeSlowdownParams;
 import game.struct.TileIndexDiff;
@@ -124,7 +125,7 @@ public class TrainCmd extends TrainTables
 
 	static boolean TrainShouldStop(final Vehicle  v, TileIndex tile)
 	{
-		final Order  o = v.current_order;
+		final Order  o = v.getCurrent_order();
 
 		assert(v.type == Vehicle.VEH_Train);
 		assert(v.tile.IsTileType( TileTypes.MP_STATION));
@@ -1194,7 +1195,7 @@ public class TrainCmd extends TrainTables
 						switch_engine = true;
 						/* Copy important data from the front engine */
 						new_f.unitnumber = first.unitnumber;
-						new_f.current_order = first.current_order;
+						new_f.setCurrent_order(first.getCurrent_order());
 						new_f.cur_order_index = first.cur_order_index;
 						new_f.orders = first.orders;
 						new_f.num_orders = first.num_orders;
@@ -1862,15 +1863,15 @@ public class TrainCmd extends TrainTables
 
 		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) return Cmd.CMD_ERROR;
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				if (BitOps.HASBIT(v.current_order.flags, Order.OFB_PART_OF_ORDERS)) {
+				if (BitOps.HASBIT(v.getCurrent_order().flags, Order.OFB_PART_OF_ORDERS)) {
 					v.rail.days_since_order_progr = 0;
 					v.cur_order_index++;
 				}
 
-				v.current_order.type = Order.OT_DUMMY;
-				v.current_order.flags = 0;
+				v.getCurrent_order().type = Order.OT_DUMMY;
+				v.getCurrent_order().flags = 0;
 				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 			}
 			return 0;
@@ -1882,9 +1883,9 @@ public class TrainCmd extends TrainTables
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			v.dest_tile = tfdd.tile;
-			v.current_order.type = Order.OT_GOTO_DEPOT;
-			v.current_order.flags = Order.OF_NON_STOP | Order.OF_FULL_LOAD;
-			v.current_order.station = Depot.GetDepotByTile(tfdd.tile).index;
+			v.getCurrent_order().type = Order.OT_GOTO_DEPOT;
+			v.getCurrent_order().flags = Order.OF_NON_STOP | Order.OF_FULL_LOAD;
+			v.getCurrent_order().station = Depot.GetDepotByTile(tfdd.tile).index;
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 			/* If there is no depot in front, reverse automatically */
 			if (tfdd.reverse)
@@ -2147,8 +2148,8 @@ public class TrainCmd extends TrainTables
 	static void FillWithStationData(TrainTrackFollowerData fd, final Vehicle  v)
 	{
 		fd.dest_coords = v.dest_tile;
-		if (v.current_order.type == Order.OT_GOTO_STATION) {
-			fd.station_index = StationID.get( v.current_order.station );
+		if (v.getCurrent_order().type == Order.OT_GOTO_STATION) {
+			fd.station_index = StationID.get( v.getCurrent_order().station );
 		} else {
 			fd.station_index = StationID.get( Station.INVALID_STATION );
 		}
@@ -2385,30 +2386,30 @@ public class TrainCmd extends TrainTables
 		boolean result;
 
 		// These are un-interruptible
-		if (v.current_order.type >= Order.OT_GOTO_DEPOT &&
-				v.current_order.type <= Order.OT_LEAVESTATION) {
+		if (v.getCurrent_order().type >= Order.OT_GOTO_DEPOT &&
+				v.getCurrent_order().type <= Order.OT_LEAVESTATION) {
 			// Let a depot order in the orderlist interrupt.
-			if (v.current_order.type != Order.OT_GOTO_DEPOT ||
-					0==(v.current_order.flags & Order.OF_UNLOAD))
+			if (v.getCurrent_order().type != Order.OT_GOTO_DEPOT ||
+					0==(v.getCurrent_order().flags & Order.OF_UNLOAD))
 				return false;
 		}
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT &&
-				(v.current_order.flags & (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED)) ==  (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED) &&
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT &&
+				(v.getCurrent_order().flags & (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED)) ==  (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED) &&
 				!v.VehicleNeedsService()) {
 			v.cur_order_index++;
 		}
 
 		// check if we've reached the waypoint?
-		if (v.current_order.type == Order.OT_GOTO_WAYPOINT && v.tile.equals(v.dest_tile)) {
+		if (v.getCurrent_order().type == Order.OT_GOTO_WAYPOINT && v.tile.equals(v.dest_tile)) {
 			v.cur_order_index++;
 		}
 
 		// check if we've reached a non-stop station while TTDPatch nonstop is enabled..
 		if (Global._patches.new_nonstop &&
-				0 != (v.current_order.flags & Order.OF_NON_STOP) &&
+				0 != (v.getCurrent_order().flags & Order.OF_NON_STOP) &&
 				v.tile.IsTileType( TileTypes.MP_STATION) &&
-				v.current_order.station == v.tile.getMap().m2) {
+				v.getCurrent_order().station == v.tile.getMap().m2) {
 			v.cur_order_index++;
 		}
 
@@ -2419,20 +2420,20 @@ public class TrainCmd extends TrainTables
 
 		// If no order, do nothing.
 		if (order == null) {
-			v.current_order.type = Order.OT_NOTHING;
-			v.current_order.flags = 0;
+			v.getCurrent_order().type = Order.OT_NOTHING;
+			v.getCurrent_order().flags = 0;
 			v.dest_tile = null;
 			return false;
 		}
 
 		// If it is unchanged, keep it.
-		if (order.type    == v.current_order.type &&
-				order.flags   == v.current_order.flags &&
-				order.station == v.current_order.station)
+		if (order.type    == v.getCurrent_order().type &&
+				order.flags   == v.getCurrent_order().flags &&
+				order.station == v.getCurrent_order().station)
 			return false;
 
 		// Otherwise set it, and determine the destination tile.
-		v.current_order = new Order( order );
+		v.setCurrent_order(new Order( order ));
 
 		v.dest_tile = null;
 
@@ -2492,19 +2493,19 @@ public class TrainCmd extends TrainTables
 
 	static void HandleTrainLoading(Vehicle v, boolean mode)
 	{
-		if (v.current_order.type == Order.OT_NOTHING) return;
+		if (v.getCurrent_order().type == Order.OT_NOTHING) return;
 
-		if (v.current_order.type != Order.OT_DUMMY) {
-			if (v.current_order.type != Order.OT_LOADING) return;
+		if (v.getCurrent_order().type != Order.OT_DUMMY) {
+			if (v.getCurrent_order().type != Order.OT_LOADING) return;
 			if (mode) return;
 
 			// don't mark the train as lost if we're loading on the final station.
-			if(0 != (v.current_order.flags & Order.OF_NON_STOP) )
+			if(0 != (v.getCurrent_order().flags & Order.OF_NON_STOP) )
 				v.rail.days_since_order_progr = 0;
 
 			if (--v.load_unload_time_rem != 0) return;
 
-			if (0 != (v.current_order.flags & Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
+			if (0 != (v.getCurrent_order().flags & Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
 				v.rail.days_since_order_progr = 0; /* Prevent a train lost message for full loading trains */
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_INC);
 				if (Economy.LoadUnloadVehicle(v) != 0) {
@@ -2521,9 +2522,9 @@ public class TrainCmd extends TrainTables
 			TrainPlayLeaveStationSound(v);
 
 			{
-				Order b = new Order( v.current_order );
-				v.current_order.type = Order.OT_LEAVESTATION;
-				v.current_order.flags = 0;
+				Order b = new Order( v.getCurrent_order() );
+				v.getCurrent_order().type = Order.OT_LEAVESTATION;
+				v.getCurrent_order().flags = 0;
 
 				// If this was not the final order, don't remove it from the list.
 				if (0==(b.flags & Order.OF_NON_STOP)) return;
@@ -2591,19 +2592,19 @@ public class TrainCmd extends TrainTables
 		}
 
 		// Did we reach the final destination?
-		if (v.current_order.type == Order.OT_GOTO_STATION &&
-				v.current_order.station == station) {
+		if (v.getCurrent_order().type == Order.OT_GOTO_STATION &&
+				v.getCurrent_order().station == station) {
 			// Yeah, keep the load/unload flags
 			// Non Stop now means if the order should be increased.
-			v.current_order.type = Order.OT_LOADING;
-			v.current_order.flags &= Order.OF_FULL_LOAD | Order.OF_UNLOAD | Order.OF_TRANSFER;
-			v.current_order.flags |= Order.OF_NON_STOP;
+			v.getCurrent_order().type = Order.OT_LOADING;
+			v.getCurrent_order().flags &= Order.OF_FULL_LOAD | Order.OF_UNLOAD | Order.OF_TRANSFER;
+			v.getCurrent_order().flags |= Order.OF_NON_STOP;
 		} else {
 			// No, just do a simple load
-			v.current_order.type = Order.OT_LOADING;
-			v.current_order.flags = 0;
+			v.getCurrent_order().type = Order.OT_LOADING;
+			v.getCurrent_order().flags = 0;
 		}
-		v.current_order.station = 0;
+		v.getCurrent_order().station = 0;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_INC);
 		if (Economy.LoadUnloadVehicle(v) != 0) {
@@ -3009,9 +3010,9 @@ public class TrainCmd extends TrainTables
 						return;
 					}
 
-					if (v.current_order.type == Order.OT_LEAVESTATION) {
-						v.current_order.type = Order.OT_NOTHING;
-						v.current_order.flags = 0;
+					if (v.getCurrent_order().type == Order.OT_LEAVESTATION) {
+						v.getCurrent_order().type = Order.OT_NOTHING;
+						v.getCurrent_order().flags = 0;
 						Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 					}
 				}
@@ -3606,7 +3607,7 @@ public class TrainCmd extends TrainTables
 			if  (v.rail.pbs_status == Pbs.PBS_STAT_HAS_PATH)
 				return true;
 
-			if ((trackdir != Rail.INVALID_TRACKDIR) && (Pbs.PBSIsPbsSignal(tile,trackdir) && Pbs.PBSIsPbsSegment(tile,trackdir)) && !(v.tile.IsTileType( TileTypes.MP_STATION) && (v.current_order.station == v.tile.M().m2))) {
+			if ((trackdir != Rail.INVALID_TRACKDIR) && (Pbs.PBSIsPbsSignal(tile,trackdir) && Pbs.PBSIsPbsSegment(tile,trackdir)) && !(v.tile.IsTileType( TileTypes.MP_STATION) && (v.getCurrent_order().station == v.tile.M().m2))) {
 				NPFFindStationOrTileData fstd = new NPFFindStationOrTileData();
 				NPFFoundTargetData ftd;
 
@@ -3675,7 +3676,7 @@ public class TrainCmd extends TrainTables
 
 		HandleTrainLoading(v, mode);
 
-		if (v.current_order.type == Order.OT_LOADING)
+		if (v.getCurrent_order().type == Order.OT_LOADING)
 			return;
 
 		if (CheckTrainStayInDepot(v))
@@ -3747,13 +3748,13 @@ public class TrainCmd extends TrainTables
 
 		v.TriggerVehicle(Engine.VEHICLE_TRIGGER_DEPOT);
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT) 
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) 
 		{
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
-			Order t = new Order( v.current_order );
-			v.current_order.type = Order.OT_DUMMY;
-			v.current_order.flags = 0;
+			Order t = new Order( v.getCurrent_order() );
+			v.getCurrent_order().type = Order.OT_DUMMY;
+			v.getCurrent_order().flags = 0;
 
 			if (BitOps.HASBIT(t.flags, Order.OFB_PART_OF_ORDERS)) { // Part of the orderlist?
 				v.rail.days_since_order_progr = 0;
@@ -3788,19 +3789,19 @@ public class TrainCmd extends TrainTables
 
 		// Don't interfere with a depot visit scheduled by the user, or a
 		// depot visit by the order list.
-		if (v.current_order.type == Order.OT_GOTO_DEPOT &&
-				(v.current_order.flags & (Order.OF_HALT_IN_DEPOT | Order.OF_PART_OF_ORDERS)) != 0)
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT &&
+				(v.getCurrent_order().flags & (Order.OF_HALT_IN_DEPOT | Order.OF_PART_OF_ORDERS)) != 0)
 			return;
 
 		tfdd = FindClosestTrainDepot(v);
 		/* Only go to the depot if it is not too far out of our way. */
 		if (tfdd.best_length == (int)-1 || tfdd.best_length > 16 ) {
-			if (v.current_order.type == Order.OT_GOTO_DEPOT) {
+			if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
 				/* If we were already heading for a depot but it has
 				 * suddenly moved farther away, we continue our normal
 				 * schedule? */
-				v.current_order.type = Order.OT_DUMMY;
-				v.current_order.flags = 0;
+				v.getCurrent_order().type = Order.OT_DUMMY;
+				v.getCurrent_order().flags = 0;
 				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 			}
 			return;
@@ -3808,14 +3809,14 @@ public class TrainCmd extends TrainTables
 
 		depot = Depot.GetDepotByTile(tfdd.tile);
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT &&
-				v.current_order.station != depot.index &&
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT &&
+				v.getCurrent_order().station != depot.index &&
 				!BitOps.CHANCE16(3,16))
 			return;
 
-		v.current_order.type = Order.OT_GOTO_DEPOT;
-		v.current_order.flags = Order.OF_NON_STOP;
-		v.current_order.station = depot.index;
+		v.getCurrent_order().type = Order.OT_GOTO_DEPOT;
+		v.getCurrent_order().flags = Order.OF_NON_STOP;
+		v.getCurrent_order().station = depot.index;
 		v.dest_tile = tfdd.tile;
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 	}
@@ -3858,9 +3859,9 @@ public class TrainCmd extends TrainTables
 			Order.CheckOrders(v.index, Order.OC_INIT);
 
 			/* update destination */
-			if (v.current_order.type == Order.OT_GOTO_STATION)
+			if (v.getCurrent_order().type == Order.OT_GOTO_STATION)
 			{
-				TileIndex tile = Station.GetStation(v.current_order.station).train_tile;
+				TileIndex tile = Station.GetStation(v.getCurrent_order().station).train_tile;
 
 				if(tile != null)
 					v.dest_tile = tile;

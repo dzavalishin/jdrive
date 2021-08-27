@@ -514,15 +514,15 @@ public class ShipGui
 				str = Str.STR_8861_STOPPED;
 			} else {
 				int vehicle_speed = Global._patches.vehicle_speed ? 1 : 0;
-				switch (v.current_order.getType()) {
+				switch (v.getCurrent_order().getType()) {
 				case Order.OT_GOTO_STATION: {
-					Global.SetDParam(0, v.current_order.getStation());
+					Global.SetDParam(0, v.getCurrent_order().getStation());
 					Global.SetDParam(1, v.getCur_speed() * 10 >> 5);
 					str = Str.STR_HEADING_FOR_STATION + vehicle_speed;
 				} break;
 
 				case Order.OT_GOTO_DEPOT: {
-					Depot depot = Depot.GetDepot(v.current_order.getStation());
+					Depot depot = Depot.GetDepot(v.getCurrent_order().getStation());
 					Global.SetDParam(0, depot.getTownIndex());
 					Global.SetDParam(1, v.getCur_speed() * 10 >> 5);
 					str = Str.STR_HEADING_FOR_SHIP_DEPOT + vehicle_speed;

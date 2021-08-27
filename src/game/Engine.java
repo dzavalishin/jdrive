@@ -478,8 +478,8 @@ public class Engine extends EngineTables implements Serializable
 					case 0x04: value =  veh.index; break;
 					case 0x05: value =  veh.index & 0xFF; break;
 					/* XXX? Is THIS right? */
-					case 0x0A: value =  Order.PackOrder(veh.current_order); break;
-					case 0x0B: value =  Order.PackOrder(veh.current_order) & 0xff; break;
+					case 0x0A: value =  Order.PackOrder(veh.getCurrent_order()); break;
+					case 0x0B: value =  Order.PackOrder(veh.getCurrent_order()) & 0xff; break;
 					case 0x0C: value =  veh.num_orders; break;
 					case 0x0D: value =  veh.cur_order_index; break;
 					case 0x10: value =  veh.load_unload_time_rem; break;

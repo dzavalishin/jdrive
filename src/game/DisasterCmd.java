@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import game.enums.Owner;
 import game.enums.TileTypes;
 import game.ids.PlayerID;
+import game.struct.GetNewVehiclePosResult;
 import game.struct.TileIndexDiff;
 import game.tables.DisasterTables;
 import game.util.BitOps;
@@ -68,9 +69,9 @@ public class DisasterCmd extends DisasterTables
 		v.owner = PlayerID.get(Owner.OWNER_NONE);
 		v.vehstatus = Vehicle.VS_UNCLICKABLE;
 		v.disaster.image_override = 0;
-		v.current_order.type = Order.OT_NOTHING;
-		v.current_order.flags = 0;
-		v.current_order.station = 0;
+		v.getCurrent_order().type = Order.OT_NOTHING;
+		v.getCurrent_order().flags = 0;
+		v.getCurrent_order().station = 0;
 
 		DisasterVehicleUpdateImage(v);
 		v.VehiclePositionChanged();
@@ -132,7 +133,7 @@ public class DisasterCmd extends DisasterTables
 
 		++v.tick_counter;
 
-		if (v.current_order.station < 2) {
+		if (v.getCurrent_order().station < 2) {
 			if(0 != (v.tick_counter&1) )
 				return;
 
@@ -140,23 +141,23 @@ public class DisasterCmd extends DisasterTables
 
 			SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
 
-			if (v.current_order.station == 1) {
+			if (v.getCurrent_order().station == 1) {
 				if (++v.age == 38) {
-					v.current_order.station = 2;
+					v.getCurrent_order().station = 2;
 					v.age = 0;
 				}
 
 				if ((v.tick_counter&7)==0) {
 					v.CreateEffectVehicleRel(0, -17, 2, Vehicle.EV_SMOKE);
 				}
-			} else if (v.current_order.station == 0) {
+			} else if (v.getCurrent_order().station == 0) {
 				tile = v.tile; /**/
 
 				if (tile.IsValidTile() &&
 						tile.IsTileType( TileTypes.MP_STATION) &&
 						BitOps.IS_INT_INSIDE(tile.getMap().m5, 8, 0x43) &&
 						tile.GetTileOwner().IS_HUMAN_PLAYER()) {
-					v.current_order.station = 1;
+					v.getCurrent_order().station = 1;
 					v.age = 0;
 
 					Global.SetDParam(0, tile.getMap().m2);
@@ -171,7 +172,7 @@ public class DisasterCmd extends DisasterTables
 			return;
 		}
 
-		if (v.current_order.station > 2) {
+		if (v.getCurrent_order().station > 2) {
 			if (++v.age <= 13320)
 				return;
 
@@ -214,7 +215,7 @@ public class DisasterCmd extends DisasterTables
 						Vehicle.EV_EXPLOSION_SMALL);
 			}
 		} else if (v.age == 350) {
-			v.current_order.station = 3;
+			v.getCurrent_order().station = 3;
 			v.age = 0;
 		}
 
@@ -240,7 +241,7 @@ public class DisasterCmd extends DisasterTables
 
 		v.disaster.image_override = 0 != (++v.tick_counter & 8) ? Sprite.SPR_UFO_SMALL_SCOUT_DARKER : Sprite.SPR_UFO_SMALL_SCOUT;
 
-		if (v.current_order.station == 0) {
+		if (v.getCurrent_order().station == 0) {
 			// fly around randomly
 			int x = v.dest_tile.TileX() * 16;
 			int y = v.dest_tile.TileY() * 16;
@@ -254,7 +255,7 @@ public class DisasterCmd extends DisasterTables
 				v.dest_tile = Hal.RandomTile();
 				return;
 			}
-			v.current_order.station = 1;
+			v.getCurrent_order().station = 1;
 
 
 			//FOR_ALL_VEHICLES(u)
@@ -335,7 +336,7 @@ public class DisasterCmd extends DisasterTables
 
 		v.tick_counter++;
 		v.disaster.image_override =
-				(v.current_order.station == 1 && 0 != (v.tick_counter & 4)) ? Sprite.SPR_F_15_FIRING : 0;
+				(v.getCurrent_order().station == 1 && 0 != (v.tick_counter & 4)) ? Sprite.SPR_F_15_FIRING : 0;
 
 		v.GetNewVehiclePos( gp);
 		SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
@@ -345,7 +346,7 @@ public class DisasterCmd extends DisasterTables
 			return;
 		}
 
-		if (v.current_order.station == 2) {
+		if (v.getCurrent_order().station == 2) {
 			if (0==(v.tick_counter&3)) {
 				Industry i = Industry.GetIndustry(v.dest_tile.tile);
 				int x = i.xy.TileX() * 16;
@@ -359,13 +360,13 @@ public class DisasterCmd extends DisasterTables
 						Vehicle.EV_EXPLOSION_SMALL);
 
 				if (++v.age >= 55)
-					v.current_order.station = 3;
+					v.getCurrent_order().station = 3;
 			}
-		} else if (v.current_order.station == 1) {
+		} else if (v.getCurrent_order().station == 1) {
 			if (++v.age == 112) {
 				Industry i;
 
-				v.current_order.station = 2;
+				v.getCurrent_order().station = 2;
 				v.age = 0;
 
 				i = Industry.GetIndustry(v.dest_tile.tile);
@@ -375,7 +376,7 @@ public class DisasterCmd extends DisasterTables
 				NewsItem.AddNewsItem(Str.STR_B002_OIL_REFINERY_EXPLOSION, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTile(), 0);
 				//SndPlayTileFx(SND_12_EXPLOSION, i.xy);
 			}
-		} else if (v.current_order.station == 0) {
+		} else if (v.getCurrent_order().station == 0) {
 			int x,y;
 			TileIndex tile;
 			int ind;
@@ -393,7 +394,7 @@ public class DisasterCmd extends DisasterTables
 			v.dest_tile = TileIndex.get( ind = tile.getMap().m2 );
 
 			if (Industry.GetIndustry(ind).type == Industry.IT_OIL_REFINERY) {
-				v.current_order.station = 1;
+				v.getCurrent_order().station = 1;
 				v.age = 0;
 			}
 		}
@@ -406,7 +407,7 @@ public class DisasterCmd extends DisasterTables
 
 		v.tick_counter++;
 		v.disaster.image_override =
-				(v.current_order.station == 1 && 0 != (v.tick_counter & 4)) ? Sprite.SPR_AH_64A_FIRING : 0;
+				(v.getCurrent_order().station == 1 && 0 != (v.tick_counter & 4)) ? Sprite.SPR_AH_64A_FIRING : 0;
 
 		v.GetNewVehiclePos(gp);
 		SetDisasterVehiclePos(v, gp.x, gp.y, v.z_pos);
@@ -416,7 +417,7 @@ public class DisasterCmd extends DisasterTables
 			return;
 		}
 
-		if (v.current_order.station == 2) {
+		if (v.getCurrent_order().station == 2) {
 			if (0==(v.tick_counter&3)) {
 				Industry i = Industry.GetIndustry(v.dest_tile.tile);
 				int x = i.xy.TileX() * 16;
@@ -430,13 +431,13 @@ public class DisasterCmd extends DisasterTables
 						Vehicle.EV_EXPLOSION_SMALL);
 
 				if (++v.age >= 55)
-					v.current_order.station = 3;
+					v.getCurrent_order().station = 3;
 			}
-		} else if (v.current_order.station == 1) {
+		} else if (v.getCurrent_order().station == 1) {
 			if (++v.age == 112) {
 				Industry i;
 
-				v.current_order.station = 2;
+				v.getCurrent_order().station = 2;
 				v.age = 0;
 
 				i = Industry.GetIndustry(v.dest_tile.tile);
@@ -446,7 +447,7 @@ public class DisasterCmd extends DisasterTables
 				NewsItem.AddNewsItem(Str.STR_B003_FACTORY_DESTROYED_IN_SUSPICIOUS, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTile(), 0);
 				//SndPlayTileFx(SND_12_EXPLOSION, i.xy);
 			}
-		} else if (v.current_order.station == 0) {
+		} else if (v.getCurrent_order().station == 0) {
 			int x,y;
 			TileIndex tile;
 			int ind;
@@ -464,7 +465,7 @@ public class DisasterCmd extends DisasterTables
 			v.dest_tile = TileIndex.get( ind = tile.getMap().m2 );
 
 			if (Industry.GetIndustry(ind).type == Industry.IT_FACTORY) {
-				v.current_order.station = 1;
+				v.getCurrent_order().station = 1;
 				v.age = 0;
 			}
 		}
@@ -496,7 +497,7 @@ public class DisasterCmd extends DisasterTables
 
 		v.tick_counter++;
 
-		if (v.current_order.station == 1) {
+		if (v.getCurrent_order().station == 1) {
 			int x = v.dest_tile.TileX() * 16 + 8;
 			int y = v.dest_tile.TileY() * 16 + 8;
 			if (Math.abs(v.getX_pos() - x) + Math.abs(v.getY_pos() - y) >= 8) {
@@ -513,7 +514,7 @@ public class DisasterCmd extends DisasterTables
 				return;
 			}
 
-			v.current_order.station = 2;
+			v.getCurrent_order().station = 2;
 
 			//FOR_ALL_VEHICLES(u)
 			Vehicle.forEach( (u) ->
@@ -549,7 +550,7 @@ public class DisasterCmd extends DisasterTables
 			u.next = w;
 			InitializeDisasterVehicle(w, -6*16, v.getY_pos(), 0, 5, 12);
 			w.vehstatus |= Vehicle.VS_DISASTER;
-		} else if (v.current_order.station < 1) {
+		} else if (v.getCurrent_order().station < 1) {
 
 			int x = v.dest_tile.TileX() * 16;
 			int y = v.dest_tile.TileY() * 16;
@@ -564,7 +565,7 @@ public class DisasterCmd extends DisasterTables
 				v.dest_tile = Hal.RandomTile();
 				return;
 			}
-			v.current_order.station = 1;
+			v.getCurrent_order().station = 1;
 
 			tile_org = tile = Hal.RandomTile();
 			do {
@@ -597,11 +598,11 @@ public class DisasterCmd extends DisasterTables
 			return;
 		}
 
-		if (v.current_order.station == 0) {
+		if (v.getCurrent_order().station == 0) {
 			u = Vehicle.GetVehicle(v.disaster.unk2);
 			if (Math.abs(v.getX_pos() - u.getX_pos()) > 16)
 				return;
-			v.current_order.station = 1;
+			v.getCurrent_order().station = 1;
 
 			u.CreateEffectVehicleRel(0, 7, 8, Vehicle.EV_EXPLOSION_LARGE);
 			//SndPlayVehicleFx(SND_12_EXPLOSION, u);

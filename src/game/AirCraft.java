@@ -8,6 +8,7 @@ import game.ids.StationID;
 import game.ids.StringID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
+import game.struct.GetNewVehiclePosResult;
 import game.struct.Point;
 import game.tables.AirConstants;
 import game.tables.AirCraftTables;
@@ -33,9 +34,9 @@ import java.util.function.BiConsumer;
 public class AirCraft extends AirCraftTables {
 
 
-	
+
 	static public final int STATUS_BAR = Vehicle.STATUS_BAR;
-	
+
 
 
 	static final /*SpriteID*/ int _aircraft_sprite[] = {
@@ -64,7 +65,7 @@ public class AirCraft extends AirCraftTables {
 		while(ii.hasNext())
 		{
 			Station st = ii.next();
-			
+
 			if (st.owner == v.owner && 0 != (st.facilities & Station.FACIL_AIRPORT) &&
 					AirportFTAClass.GetAirport(st.airport_type).nof_depots() > 0) {
 				int distance;
@@ -261,7 +262,7 @@ public class AirCraft extends AirCraftTables {
 				int i;
 
 				int nof_depots = apc.airport_depots.length;
-				
+
 				for (i = 0; i < /*apc.*/nof_depots; i++) {
 					if( st.airport_tile.iadd( TileIndex.ToTileIndexDiff(apc.airport_depots[i])).equals(tile) ) {
 						assert(apc.layout[i].heading == Airport.HANGAR);
@@ -432,13 +433,13 @@ public class AirCraft extends AirCraftTables {
 
 		if (v.type != Vehicle.VEH_Aircraft || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT && p2 == 0) {
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT && p2 == 0) {
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				if(0 !=  (v.current_order.flags & Order.OF_UNLOAD)) 
+				if(0 !=  (v.getCurrent_order().flags & Order.OF_UNLOAD)) 
 					v.cur_order_index++;
 
-				v.current_order.type = Order.OT_DUMMY;
-				v.current_order.flags = 0;
+				v.getCurrent_order().type = Order.OT_DUMMY;
+				v.getCurrent_order().flags = 0;
 				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			}
 		} else {
@@ -463,9 +464,9 @@ public class AirCraft extends AirCraftTables {
 			}
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				v.current_order.type = Order.OT_GOTO_DEPOT;
-				v.current_order.flags = BitOps.HASBIT(p2, 16) ? 0 : Order.OF_NON_STOP | Order.OF_FULL_LOAD;
-				v.current_order.station = next_airport_index;
+				v.getCurrent_order().type = Order.OT_GOTO_DEPOT;
+				v.getCurrent_order().flags = BitOps.HASBIT(p2, 16) ? 0 : Order.OF_NON_STOP | Order.OF_FULL_LOAD;
+				v.getCurrent_order().station = next_airport_index;
 				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 				if (BitOps.HASBIT(p2, 17) || (p2 == 0 && v.air.state == Airport.FLYING && !next_airport_has_hangar)) {
 					// the aircraft is now heading for a different hangar than the next in the orders
@@ -577,24 +578,24 @@ public class AirCraft extends AirCraftTables {
 		if (!v.VehicleNeedsService()) return;
 		if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT && 0 !=
-				(v.current_order.flags & Order.OF_HALT_IN_DEPOT))
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT && 0 !=
+				(v.getCurrent_order().flags & Order.OF_HALT_IN_DEPOT))
 			return;
 
 		if (Global._patches.gotodepot && v.VehicleHasDepotOrders()) return;
 
-		st = Station.GetStation(v.current_order.station);
+		st = Station.GetStation(v.getCurrent_order().station);
 
 		// only goto depot if the target airport has terminals (eg. it is airport)
 		if (st.getXy() != null && st.airport_tile != null && AirportFTAClass.GetAirport(st.airport_type).terminals != null) {
 			//			printf("targetairport = %d, st.index = %d\n", v.air.targetairport, st.index);
 			//			v.air.targetairport = st.index;
-			v.current_order.type = Order.OT_GOTO_DEPOT;
-			v.current_order.flags = Order.OF_NON_STOP;
+			v.getCurrent_order().type = Order.OT_GOTO_DEPOT;
+			v.getCurrent_order().flags = Order.OF_NON_STOP;
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
-		} else if (v.current_order.type == Order.OT_GOTO_DEPOT) {
-			v.current_order.type = Order.OT_DUMMY;
-			v.current_order.flags = 0;
+		} else if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
+			v.getCurrent_order().type = Order.OT_DUMMY;
+			v.getCurrent_order().flags = 0;
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 		}
 	}
@@ -663,7 +664,7 @@ public class AirCraft extends AirCraftTables {
 
 		// if true, helicopter rotors do not rotate. This should only be the case if a helicopter is
 		// loading/unloading at a terminal or stopped
-		if (v.current_order.type == Order.OT_LOADING || 0 != (v.vehstatus & Vehicle.VS_STOPPED)) {
+		if (v.getCurrent_order().type == Order.OT_LOADING || 0 != (v.vehstatus & Vehicle.VS_STOPPED)) {
 			if (u.cur_speed != 0) {
 				u.cur_speed++;
 				if (u.cur_speed >= 0x80 && u.cur_image == Sprite.SPR_ROTOR_MOVING_3) {
@@ -838,12 +839,12 @@ public class AirCraft extends AirCraftTables {
 		return maxz + queue_adjust;
 	}
 
-	
+
 	private static final int _delta_coord[] = {
 			-1,-1,-1, 0, 1, 1, 1, 0, /* x */
 			-1, 0, 1, 1, 1, 0,-1,-1, /* y */
 	};
-	
+
 	/* returns true if staying in the same tile */
 	static boolean GetNewAircraftPos(Vehicle v, GetNewVehiclePosResult gp, int tilesMoved)
 	{
@@ -1250,15 +1251,15 @@ public class AirCraft extends AirCraftTables {
 		final Order order;
 
 		// Order.OT_GOTO_DEPOT, Order.OT_LOADING
-		if (v.current_order.type == Order.OT_GOTO_DEPOT ||
-				v.current_order.type == Order.OT_LOADING) {
-			if (v.current_order.type != Order.OT_GOTO_DEPOT ||
-					0==(v.current_order.flags & Order.OF_UNLOAD))
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT ||
+				v.getCurrent_order().type == Order.OT_LOADING) {
+			if (v.getCurrent_order().type != Order.OT_GOTO_DEPOT ||
+					0==(v.getCurrent_order().flags & Order.OF_UNLOAD))
 				return;
 		}
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT &&
-				(v.current_order.flags & (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED)) == (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED) &&
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT &&
+				(v.getCurrent_order().flags & (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED)) == (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED) &&
 				!v.VehicleNeedsService()) {
 			v.cur_order_index++;
 		}
@@ -1268,20 +1269,20 @@ public class AirCraft extends AirCraftTables {
 		order = v.GetVehicleOrder(v.cur_order_index);
 
 		if (order == null) {
-			v.current_order.type = Order.OT_NOTHING;
-			v.current_order.flags = 0;
+			v.getCurrent_order().type = Order.OT_NOTHING;
+			v.getCurrent_order().flags = 0;
 			return;
 		}
 
 		if (order.type == Order.OT_DUMMY && !v.CheckForValidOrders())
 			CrashAirplane(v);
 
-		if (order.type    == v.current_order.type   &&
-				order.flags   == v.current_order.flags  &&
-				order.station == v.current_order.station)
+		if (order.type    == v.getCurrent_order().type   &&
+				order.flags   == v.getCurrent_order().flags  &&
+				order.station == v.getCurrent_order().station)
 			return;
 
-		v.current_order = new Order( order );
+		v.setCurrent_order(new Order( order ));
 
 		// orders are changed in flight, ensure going to the right station
 		if (order.type == Order.OT_GOTO_STATION && v.air.state == Airport.FLYING) {
@@ -1296,23 +1297,23 @@ public class AirCraft extends AirCraftTables {
 
 	static void HandleAircraftLoading(Vehicle v, int mode)
 	{
-		if (v.current_order.type == Order.OT_NOTHING) return;
+		if (v.getCurrent_order().type == Order.OT_NOTHING) return;
 
-		if (v.current_order.type != Order.OT_DUMMY) {
-			if (v.current_order.type != Order.OT_LOADING) return;
+		if (v.getCurrent_order().type != Order.OT_DUMMY) {
+			if (v.getCurrent_order().type != Order.OT_LOADING) return;
 			if (mode != 0) return;
 			if (--v.load_unload_time_rem != 0) return;
 
-			if ( (v.current_order.flags & Order.OF_FULL_LOAD) != 0 && v.CanFillVehicle()) {
+			if ( (v.getCurrent_order().flags & Order.OF_FULL_LOAD) != 0 && v.CanFillVehicle()) {
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_AIRCRAFT_INC);
 				Economy.LoadUnloadVehicle(v);
 				return;
 			}
 
 			{
-				Order b = new Order( v.current_order );
-				v.current_order.type = Order.OT_NOTHING;
-				v.current_order.flags = 0;
+				Order b = new Order( v.getCurrent_order() );
+				v.getCurrent_order().type = Order.OT_NOTHING;
+				v.getCurrent_order().flags = 0;
 				if (0==(b.flags & Order.OF_NON_STOP)) return;
 			}
 		}
@@ -1341,7 +1342,7 @@ public class AirCraft extends AirCraftTables {
 		v.cargo_count = 0;
 		v.next.cargo_count = 0;
 		st = Station.GetStation(v.air.targetairport);
-		
+
 		if (st.airport_tile == null) {
 			newsitem = Str.STR_PLANE_CRASH_OUT_OF_FUEL;
 		} else {
@@ -1391,7 +1392,7 @@ public class AirCraft extends AirCraftTables {
 		Station st;
 		Order old_order;
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT) return;
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) return;
 
 		st = Station.GetStation(v.air.targetairport);
 		v.last_station_visited = v.air.targetairport;
@@ -1411,13 +1412,13 @@ public class AirCraft extends AirCraftTables {
 					0);
 		}
 
-		old_order = new Order( v.current_order );
-		v.current_order.type = Order.OT_LOADING;
-		v.current_order.flags = 0;
+		old_order = new Order( v.getCurrent_order() );
+		v.getCurrent_order().type = Order.OT_LOADING;
+		v.getCurrent_order().flags = 0;
 
 		if (old_order.type == Order.OT_GOTO_STATION &&
-				v.current_order.station == v.last_station_visited) {
-			v.current_order.flags =
+				v.getCurrent_order().station == v.last_station_visited) {
+			v.getCurrent_order().flags =
 					(old_order.flags & (Order.OF_FULL_LOAD | Order.OF_UNLOAD)) | Order.OF_NON_STOP;
 		}
 
@@ -1443,12 +1444,12 @@ public class AirCraft extends AirCraftTables {
 
 		v.TriggerVehicle(Engine.VEHICLE_TRIGGER_DEPOT);
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
-			old_order = new Order( v.current_order );
-			v.current_order.type = Order.OT_NOTHING;
-			v.current_order.flags = 0;
+			old_order = new Order( v.getCurrent_order() );
+			v.getCurrent_order().type = Order.OT_NOTHING;
+			v.getCurrent_order().flags = 0;
 
 			if (BitOps.HASBIT(old_order.flags, Order.OFB_PART_OF_ORDERS)) {
 				v.cur_order_index++;
@@ -1487,9 +1488,9 @@ public class AirCraft extends AirCraftTables {
 		final Station  st;
 		final AirportFTAClass airport;
 
-		if (v.current_order.type == Order.OT_GOTO_STATION ||
-				v.current_order.type == Order.OT_GOTO_DEPOT)
-			v.air.targetairport = v.current_order.station;
+		if (v.getCurrent_order().type == Order.OT_GOTO_STATION ||
+				v.getCurrent_order().type == Order.OT_GOTO_DEPOT)
+			v.air.targetairport = v.getCurrent_order().station;
 
 		st = Station.GetStation(v.air.targetairport);
 		airport = AirportFTAClass.GetAirport(st.airport_type);
@@ -1547,21 +1548,21 @@ public class AirCraft extends AirCraftTables {
 		}
 
 		// if we were sent to the depot, stay there
-		if (v.current_order.type == Order.OT_GOTO_DEPOT && 0 != (v.vehstatus & Vehicle.VS_STOPPED)) {
-			v.current_order.type = Order.OT_NOTHING;
-			v.current_order.flags = 0;
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT && 0 != (v.vehstatus & Vehicle.VS_STOPPED)) {
+			v.getCurrent_order().type = Order.OT_NOTHING;
+			v.getCurrent_order().flags = 0;
 			return;
 		}
 
-		if (v.current_order.type != Order.OT_GOTO_STATION &&
-				v.current_order.type != Order.OT_GOTO_DEPOT)
+		if (v.getCurrent_order().type != Order.OT_GOTO_STATION &&
+				v.getCurrent_order().type != Order.OT_GOTO_DEPOT)
 			return;
 
 		// if the block of the next position is busy, stay put
 		if (AirportHasBlock(v, Airport.layout[v.air.pos], Airport)) return;
 
 		// We are already at the target airport, we need to find a terminal
-		if (v.current_order.station == v.air.targetairport) {
+		if (v.getCurrent_order().station == v.air.targetairport) {
 			// FindFreeTerminal:
 			// 1. Find a free terminal, 2. Occupy it, 3. Set the vehicle's state to that terminal
 			if (v.subtype != 0) {
@@ -1597,7 +1598,7 @@ public class AirCraft extends AirCraftTables {
 			return;
 		}
 
-		if (v.current_order.type == Order.OT_NOTHING) return;
+		if (v.getCurrent_order().type == Order.OT_NOTHING) return;
 
 		// if the block of the next position is busy, stay put
 		if (AirportHasBlock(v, airport.layout[v.air.pos], airport)) {
@@ -1607,21 +1608,21 @@ public class AirCraft extends AirCraftTables {
 		// airport-road is free. We either have to go to another airport, or to the hangar
 		// --. start moving
 
-		switch (v.current_order.type) {
+		switch (v.getCurrent_order().type) {
 		case Order.OT_GOTO_STATION: // ready to fly to another airport
 			// airplane goto state takeoff, helicopter to helitakeoff
 			v.air.state = (v.subtype != 0) ? Airport.TAKEOFF : Airport.HELITAKEOFF;
 			break;
 		case Order.OT_GOTO_DEPOT:   // visit hangar for serivicing, sale, etc.
-			if (v.current_order.station == v.air.targetairport) {
+			if (v.getCurrent_order().station == v.air.targetairport) {
 				v.air.state = Airport.HANGAR;
 			} else {
 				v.air.state = (v.subtype != 0) ? Airport.TAKEOFF : Airport.HELITAKEOFF;
 			}
 			break;
 		default:  // orders have been deleted (no orders), goto depot and don't bother us
-			v.current_order.type = Order.OT_NOTHING;
-			v.current_order.flags = 0;
+			v.getCurrent_order().type = Order.OT_NOTHING;
+			v.getCurrent_order().flags = 0;
 			v.air.state = Airport.HANGAR;
 		}
 
@@ -1788,7 +1789,7 @@ public class AirCraft extends AirCraftTables {
 		AircraftLandAirplane(v);  // maybe crash airplane
 		v.air.state = Airport.ENDLANDING;
 		// check if the aircraft needs to be replaced or renewed and send it to a hangar if needed
-		if (v.current_order.type != Order.OT_GOTO_DEPOT && v.owner == Global.gs._local_player) {
+		if (v.getCurrent_order().type != Order.OT_GOTO_DEPOT && v.owner == Global.gs._local_player) {
 			// only the vehicle owner needs to calculate the rest (locally)
 			if (p.EngineHasReplacement(v.getEngine_type()) ||
 					(p.engine_renew && v.age - v.max_age > (p.engine_renew_months * 30))) {
@@ -1815,7 +1816,7 @@ public class AirCraft extends AirCraftTables {
 		// 1. in case all terminals are busy AirportFindFreeTerminal() returns false or
 		// 2. not going for terminal (but depot, no order),
 		// -. get out of the way to the hangar.
-		if (v.current_order.type == Order.OT_GOTO_STATION) {
+		if (v.getCurrent_order().type == Order.OT_GOTO_STATION) {
 			if (AirportFindFreeTerminal(v, airport)) return;
 		}
 		v.air.state = Airport.HANGAR;
@@ -1834,7 +1835,7 @@ public class AirCraft extends AirCraftTables {
 		// -. else TAKEOFF
 		// the reason behind this is that if an airport has a terminal, it also has a hangar. Airplanes
 		// must go to a hangar.
-		if (v.current_order.type == Order.OT_GOTO_STATION) {
+		if (v.getCurrent_order().type == Order.OT_GOTO_STATION) {
 			if (AirportFindFreeHelipad(v, Airport)) return;
 		}
 		v.air.state = (Airport.terminals != null) ? AirConstants.HANGAR : AirConstants.HELITAKEOFF;
@@ -2157,7 +2158,7 @@ public class AirCraft extends AirCraftTables {
 		ProcessAircraftOrder(v);
 		HandleAircraftLoading(v, loop);
 
-		if (v.current_order.type >= Order.OT_LOADING) return;
+		if (v.getCurrent_order().type >= Order.OT_LOADING) return;
 
 		// pass the right airport structure to the functions
 		// DEREF_STATION gets target airport (Station st), its type is passed to GetAirport
@@ -2240,44 +2241,54 @@ public class AirCraft extends AirCraftTables {
 
 	static void UpdateAirplanesOnNewStation(Station st)
 	{
-		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
-		//Vehicle v;
-		//int takeofftype;
-		//int cnt;
 		// only 1 station is updated per function call, so it is enough to get entry_point once
 		final AirportFTAClass ap = AirportFTAClass.GetAirport(st.airport_type);
-		//FOR_ALL_VEHICLES(v)
+
 		Vehicle.forEach( (v) ->
 		{
-			if (v.type == Vehicle.VEH_Aircraft && v.subtype <= 2) {
-				if (v.air.targetairport == st.index) {	// if heading to this airport
-					/*	update position of airplane. If plane is not flying, landing, or taking off
-							you cannot delete airport, so it doesn't matter
-					 */
-					if (v.air.state >= Airport.FLYING) {	// circle around
-						v.air.pos = v.air.previous_pos = ap.entry_point;
-						v.air.state = Airport.FLYING;
-						// landing plane needs to be reset to flying height (only if in pause mode upgrade,
-						// in normal mode, plane is reset in AircraftController. It doesn't hurt for FLYING
-						v.GetNewVehiclePos( gp);
-						// set new position x,y,z
-						SetAircraftPosition(v, gp.x, gp.y, GetAircraftFlyingAltitude(v));
-					} else {
-						assert(v.air.state == Airport.ENDTAKEOFF || v.air.state == Airport.HELITAKEOFF);
-						int takeofftype = (v.subtype == 0) ? Airport.HELITAKEOFF : Airport.ENDTAKEOFF;
-						// search in airportdata for that heading
-						// easiest to do, since this doesn't happen a lot
-						for (int cnt = 0; cnt < ap.nofelements; cnt++) 
-						{
-							if (ap.layout[cnt].heading == takeofftype) {
-								v.air.pos = ap.layout[cnt].position;
-								break;
-							}
-						}
-					}
+			updateOneAirplaneOnNewStation(st, ap, v);
+		});
+	}
+
+	private static void updateOneAirplaneOnNewStation(
+			Station st, final AirportFTAClass ap, Vehicle v) {
+		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
+
+		if (v.type != Vehicle.VEH_Aircraft || v.subtype > 2)
+			return;
+
+		if (v.air.targetairport != st.index) 	// if heading to this airport
+			return;
+
+		/*
+		 * Update position of airplane. If plane is not flying, 
+		 * landing, or taking off you cannot delete airport, 
+		 * so it doesn't matter
+		 */
+		if (v.air.state >= Airport.FLYING) 
+		{	// circle around
+			v.air.pos = v.air.previous_pos = ap.entry_point;
+			v.air.state = Airport.FLYING;
+			// landing plane needs to be reset to flying height (only if in pause mode upgrade,
+			// in normal mode, plane is reset in AircraftController. It doesn't hurt for FLYING
+			v.GetNewVehiclePos( gp);
+			// set new position x,y,z
+			SetAircraftPosition(v, gp.x, gp.y, GetAircraftFlyingAltitude(v));
+		} else {
+			assert(v.air.state == Airport.ENDTAKEOFF || v.air.state == Airport.HELITAKEOFF);
+			int takeofftype = (v.subtype == 0) ? Airport.HELITAKEOFF : Airport.ENDTAKEOFF;
+			// search in airportdata for that heading
+			// easiest to do, since this doesn't happen a lot
+			for (int cnt = 0; cnt < ap.nofelements; cnt++) 
+			{
+				if (ap.layout[cnt].heading == takeofftype) {
+					v.air.pos = ap.layout[cnt].position;
+					break;
 				}
 			}
-		});
+		}
+
+
 	}
 
 
@@ -2370,7 +2381,7 @@ public class AirCraft extends AirCraftTables {
 		y += 10;
 	}
 
-	
+
 	static void DrawAircraftImage(final Vehicle v, int x, int y, VehicleID selection)
 	{
 		DrawAircraftImage(v, x, y,  selection.id );
@@ -2620,7 +2631,7 @@ public class AirCraft extends AirCraftTables {
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 			_aircraft_refit_widgets,
 			AirCraft::AircraftRefitWndProc
-	);
+			);
 
 	static void ShowAircraftRefitWindow(final Vehicle  v)
 	{
@@ -2734,14 +2745,14 @@ public class AirCraft extends AirCraftTables {
 				Global.SetDParam(0, v.unitnumber.id);
 				MiscGui.ShowQueryString( new StringID(v.string_id), new StringID(Str.STR_A030_NAME_AIRCRAFT), 31, 150, w.getWindowClass(), w.window_number);
 				break;
-			/*	
+				/*	
 			case 5: // increase int 
 				mod = _ctrl_pressed? 5 : 10;
 				goto do_change_service_int;
 			case 6: // decrease int 
 				mod = _ctrl_pressed?- 5 : -10;
 				do_change_service_int:
-			*/
+				 */
 			case 5: // increase int 
 			case 6: // decrease int 
 
@@ -2749,7 +2760,7 @@ public class AirCraft extends AirCraftTables {
 					mod = Global._ctrl_pressed? 5 : 10;
 				else
 					mod = Global._ctrl_pressed? -5 : -10;
-				
+
 				v = Vehicle.GetVehicle(w.window_number);
 
 				mod = Depot.GetServiceIntervalClamped(mod + v.service_interval);
@@ -2796,7 +2807,7 @@ public class AirCraft extends AirCraftTables {
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 			_aircraft_details_widgets,
 			AirCraft::AircraftDetailsWndProc
-	);
+			);
 
 
 	static void ShowAircraftDetailsWindow(final Vehicle  v)
@@ -2862,21 +2873,21 @@ public class AirCraft extends AirCraftTables {
 			} else if(0 !=  (v.vehstatus & Vehicle.VS_STOPPED)) {
 				str = Str.STR_8861_STOPPED;
 			} else {
-				switch (v.current_order.type) {
+				switch (v.getCurrent_order().type) {
 				case Order.OT_GOTO_STATION: {
-					Global.SetDParam(0, v.current_order.station);
+					Global.SetDParam(0, v.getCurrent_order().station);
 					Global.SetDParam(1, v.cur_speed * 8 / Global._patches.aircraft_speed_coeff);
 					str = Str.STR_HEADING_FOR_STATION + (Global._patches.vehicle_speed ? 1 : 0);
 				} break;
 
 				case Order.OT_GOTO_DEPOT: {
-					Global.SetDParam(0, v.current_order.station);
+					Global.SetDParam(0, v.getCurrent_order().station);
 					Global.SetDParam(1, v.cur_speed * 8 / Global._patches.aircraft_speed_coeff);
 					str = Str.STR_HEADING_FOR_HANGAR + (Global._patches.vehicle_speed ? 1 : 0);
 				} break;
 
 				case Order.OT_LOADING:
-					Global.SetDParam(0, v.current_order.station);
+					Global.SetDParam(0, v.getCurrent_order().station);
 					Global.SetDParam(1, v.cur_speed * 8 / Global._patches.aircraft_speed_coeff);
 					str = Str.STR_882F_LOADING_UNLOADING;
 					break;
@@ -2958,7 +2969,7 @@ public class AirCraft extends AirCraftTables {
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 			_aircraft_view_widgets,
 			AirCraft::AircraftViewWndProc
-	);
+			);
 
 
 	public static void ShowAircraftViewWindow(final Vehicle  v)
@@ -2990,7 +3001,7 @@ public class AirCraft extends AirCraftTables {
 		while(ii.hasNext())
 		{
 			Vehicle v = ii.next();
-			
+
 			if (v.type == Vehicle.VEH_Aircraft &&
 					v.subtype <= 2 &&
 					0 != (v.vehstatus & Vehicle.VS_HIDDEN) &&
@@ -2998,7 +3009,7 @@ public class AirCraft extends AirCraftTables {
 				num++;
 			}
 		}
-		
+
 		w.SetVScrollCount( (num + w.hscroll.getCap() - 1) / w.hscroll.getCap());
 
 		Global.SetDParam(0, tile.getMap().m2);
@@ -3014,7 +3025,7 @@ public class AirCraft extends AirCraftTables {
 		while(ii1.hasNext())
 		{
 			Vehicle v = ii1.next();
-			
+
 			if (v.type == Vehicle.VEH_Aircraft &&
 					v.subtype <= 2 &&
 					0 != (v.vehstatus&Vehicle.VS_HIDDEN) &&
@@ -3268,7 +3279,7 @@ public class AirCraft extends AirCraftTables {
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS | WindowDesc.WDF_STICKY_BUTTON | WindowDesc.WDF_RESIZABLE,
 			_aircraft_depot_widgets,
 			AirCraft::AircraftDepotWndProc
-	);
+			);
 
 
 	static void ShowAircraftDepotWindow(TileIndex tile)
@@ -3564,7 +3575,7 @@ public class AirCraft extends AirCraftTables {
 	{
 		ShowPlayerAircraft(player.id, station.id);
 	}
-	
+
 	public static void ShowPlayerAircraft(int player, int station)
 	{
 		Window w;

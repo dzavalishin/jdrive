@@ -15,7 +15,7 @@ import game.xui.Window;
 public class Order implements Serializable 
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	public int getType() {		return type;	}
 	public int getFlags() {		return flags;	}
 	public int getStation() {	return station;	}
@@ -44,7 +44,7 @@ public class Order implements Serializable
 		to.flags   = from.flags;
 		to.station = from.station;
 	}
-		
+
 	private void clean() 
 	{
 		type    = OT_NOTHING;
@@ -57,14 +57,14 @@ public class Order implements Serializable
 	public Order() {
 		clean();
 	}
-	
+
 	public Order( Order src )
 	{
 		AssignOrder(this, src);
 		//index = src.index;
 		next = src.next; // TODO Do we need it?
 	}
-	
+
 	public Order(int t, int f, int st) 
 	{
 		type = t;
@@ -135,8 +135,8 @@ public class Order implements Serializable
 	public static final int OC_INIT     = 0; //the order checker can initialize a news message
 	public static final int OC_VALIDATE = 1; //the order checker validates a news message
 
-	
-	
+
+
 
 	/**
 	 *
@@ -188,10 +188,10 @@ public class Order implements Serializable
 		Order temp_order = new Order();
 		AssignOrder(temp_order, order1);
 		Order temp_next = order1.next;
-		
+
 		AssignOrder(order1, order2);
 		order1.next = order2.next;
-		
+
 		AssignOrder(order2, temp_order);
 		order2.next = temp_next.next;
 	}
@@ -227,7 +227,7 @@ public class Order implements Serializable
 			return AllocateOrder();
 
 		return null;
-		*/
+		 */
 		return new Order();
 	}
 
@@ -257,158 +257,158 @@ public class Order implements Serializable
 		/* Check if the inserted order is to the correct destination (owner, type),
 		 * and has the correct flags if any */
 		switch (new_order.type) {
-			case OT_GOTO_STATION: {
+		case OT_GOTO_STATION: {
+			final Station st;
+
+			if (!Station.IsStationIndex(new_order.station)) return Cmd.CMD_ERROR;
+			st = Station.GetStation(new_order.station);
+
+			if (!st.IsValidStation() ||
+					(st.airport_type != AirportFTAClass.AT_OILRIG && !(st.IsBuoy()) && !Player.CheckOwnership(st.owner) && !mAirport.MA_OwnerHandler(st.owner)))
+				return Cmd.CMD_ERROR;
+
+			//MA checks
+			if(Global._patches.allow_municipal_airports && !mAirport.MA_WithinVehicleQuota(Station.GetStation(new_order.station))) {
+				Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
+				return Cmd.CMD_ERROR;
+				//End MA checks
+
+			}
+
+
+			switch (v.type) {
+			case Vehicle.VEH_Train:
+				if (0 == (st.facilities & Station.FACIL_TRAIN)) return Cmd.CMD_ERROR;
+				break;
+
+			case Vehicle.VEH_Road:
+				if (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) {
+					if (0 == (st.facilities & Station.FACIL_BUS_STOP)) return Cmd.CMD_ERROR;
+				} else {
+					if (0 == (st.facilities & Station.FACIL_TRUCK_STOP)) return Cmd.CMD_ERROR;
+				}
+				break;
+
+			case Vehicle.VEH_Ship:
+				if (0 == (st.facilities & Station.FACIL_DOCK)) return Cmd.CMD_ERROR;
+				break;
+
+			case Vehicle.VEH_Aircraft:
+				if (0 == (st.facilities & Station.FACIL_AIRPORT)) return Cmd.CMD_ERROR;
+				break;
+
+			default: return Cmd.CMD_ERROR;
+			}
+
+			/* Order flags can be any of the following for stations:
+			 * [full-load | unload] [+ transfer] [+ non-stop]
+			 * non-stop orders (if any) are only valid for trains */
+			switch (new_order.flags) {
+			case 0:
+			case OF_FULL_LOAD:
+			case OF_FULL_LOAD | OF_TRANSFER:
+			case OF_UNLOAD:
+			case OF_UNLOAD | OF_TRANSFER:
+			case OF_TRANSFER:
+				break;
+
+			case OF_NON_STOP:
+			case OF_NON_STOP | OF_FULL_LOAD:
+			case OF_NON_STOP | OF_FULL_LOAD | OF_TRANSFER:
+			case OF_NON_STOP | OF_UNLOAD:
+			case OF_NON_STOP | OF_UNLOAD | OF_TRANSFER:
+			case OF_NON_STOP | OF_TRANSFER:
+				if (v.type != Vehicle.VEH_Train) return Cmd.CMD_ERROR;
+				break;
+
+			default: return Cmd.CMD_ERROR;
+			}
+			break;
+		}
+
+		case OT_GOTO_DEPOT: {
+			if (v.type == Vehicle.VEH_Aircraft) {
 				final Station st;
 
 				if (!Station.IsStationIndex(new_order.station)) return Cmd.CMD_ERROR;
 				st = Station.GetStation(new_order.station);
 
 				if (!st.IsValidStation() ||
-					(st.airport_type != AirportFTAClass.AT_OILRIG && !(st.IsBuoy()) && !Player.CheckOwnership(st.owner) && !mAirport.MA_OwnerHandler(st.owner)))
+						(st.airport_type != AirportFTAClass.AT_OILRIG && !Player.CheckOwnership(st.owner)) ||
+						0 == (st.facilities & Station.FACIL_AIRPORT) ||
+						AirportFTAClass.GetAirport(st.airport_type).nof_depots() == 0) {
 					return Cmd.CMD_ERROR;
-
-				//MA checks
-				if(Global._patches.allow_municipal_airports && !mAirport.MA_WithinVehicleQuota(Station.GetStation(new_order.station))) {
-					Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
-					return Cmd.CMD_ERROR;
-				//End MA checks
-
 				}
-			
+			} else {
+				final Depot dp;
+
+				if (!Depot.IsDepotIndex(new_order.station)) return Cmd.CMD_ERROR;
+				dp = Depot.GetDepot(new_order.station);
+
+				if (!dp.IsValidDepot() || !Player.CheckOwnership(dp.xy.GetTileOwner()))
+					return Cmd.CMD_ERROR;
 
 				switch (v.type) {
-					case Vehicle.VEH_Train:
-						if (0 == (st.facilities & Station.FACIL_TRAIN)) return Cmd.CMD_ERROR;
-						break;
+				case Vehicle.VEH_Train:
+					if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
+					break;
 
-					case Vehicle.VEH_Road:
-						if (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) {
-							if (0 == (st.facilities & Station.FACIL_BUS_STOP)) return Cmd.CMD_ERROR;
-						} else {
-							if (0 == (st.facilities & Station.FACIL_TRUCK_STOP)) return Cmd.CMD_ERROR;
-						}
-						break;
+				case Vehicle.VEH_Road:
+					if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_ROAD)) return Cmd.CMD_ERROR;
+					break;
 
-					case Vehicle.VEH_Ship:
-						if (0 == (st.facilities & Station.FACIL_DOCK)) return Cmd.CMD_ERROR;
-						break;
+				case Vehicle.VEH_Ship:
+					if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_WATER)) return Cmd.CMD_ERROR;
+					break;
 
-					case Vehicle.VEH_Aircraft:
-						if (0 == (st.facilities & Station.FACIL_AIRPORT)) return Cmd.CMD_ERROR;
-						break;
-
-					default: return Cmd.CMD_ERROR;
+				default: return Cmd.CMD_ERROR;
 				}
-
-				/* Order flags can be any of the following for stations:
-				 * [full-load | unload] [+ transfer] [+ non-stop]
-				 * non-stop orders (if any) are only valid for trains */
-				switch (new_order.flags) {
-					case 0:
-					case OF_FULL_LOAD:
-					case OF_FULL_LOAD | OF_TRANSFER:
-					case OF_UNLOAD:
-					case OF_UNLOAD | OF_TRANSFER:
-					case OF_TRANSFER:
-						break;
-
-					case OF_NON_STOP:
-					case OF_NON_STOP | OF_FULL_LOAD:
-					case OF_NON_STOP | OF_FULL_LOAD | OF_TRANSFER:
-					case OF_NON_STOP | OF_UNLOAD:
-					case OF_NON_STOP | OF_UNLOAD | OF_TRANSFER:
-					case OF_NON_STOP | OF_TRANSFER:
-						if (v.type != Vehicle.VEH_Train) return Cmd.CMD_ERROR;
-						break;
-
-					default: return Cmd.CMD_ERROR;
-				}
-				break;
 			}
 
-			case OT_GOTO_DEPOT: {
-				if (v.type == Vehicle.VEH_Aircraft) {
-					final Station st;
-
-					if (!Station.IsStationIndex(new_order.station)) return Cmd.CMD_ERROR;
-					st = Station.GetStation(new_order.station);
-
-					if (!st.IsValidStation() ||
-							(st.airport_type != AirportFTAClass.AT_OILRIG && !Player.CheckOwnership(st.owner)) ||
-							0 == (st.facilities & Station.FACIL_AIRPORT) ||
-							AirportFTAClass.GetAirport(st.airport_type).nof_depots() == 0) {
-						return Cmd.CMD_ERROR;
-					}
-				} else {
-					final Depot dp;
-
-					if (!Depot.IsDepotIndex(new_order.station)) return Cmd.CMD_ERROR;
-					dp = Depot.GetDepot(new_order.station);
-
-					if (!dp.IsValidDepot() || !Player.CheckOwnership(dp.xy.GetTileOwner()))
-						return Cmd.CMD_ERROR;
-
-					switch (v.type) {
-						case Vehicle.VEH_Train:
-							if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
-							break;
-
-						case Vehicle.VEH_Road:
-							if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_ROAD)) return Cmd.CMD_ERROR;
-							break;
-
-						case Vehicle.VEH_Ship:
-							if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_WATER)) return Cmd.CMD_ERROR;
-							break;
-
-						default: return Cmd.CMD_ERROR;
-					}
-				}
-
-				/* Order flags can be any of the following for depots:
-				 * order [+ halt] [+ non-stop]
-				 * non-stop orders (if any) are only valid for trains */
-				switch (new_order.flags) {
-					case OF_PART_OF_ORDERS:
-					case OF_PART_OF_ORDERS | OF_HALT_IN_DEPOT:
-						break;
-
-					case OF_NON_STOP | OF_PART_OF_ORDERS:
-					case OF_NON_STOP | OF_PART_OF_ORDERS | OF_HALT_IN_DEPOT:
-						if (v.type != Vehicle.VEH_Train) return Cmd.CMD_ERROR;
-						break;
-
-					default: return Cmd.CMD_ERROR;
-				}
+			/* Order flags can be any of the following for depots:
+			 * order [+ halt] [+ non-stop]
+			 * non-stop orders (if any) are only valid for trains */
+			switch (new_order.flags) {
+			case OF_PART_OF_ORDERS:
+			case OF_PART_OF_ORDERS | OF_HALT_IN_DEPOT:
 				break;
-			}
 
-			case OT_GOTO_WAYPOINT: {
-				WayPoint wp;
-
+			case OF_NON_STOP | OF_PART_OF_ORDERS:
+			case OF_NON_STOP | OF_PART_OF_ORDERS | OF_HALT_IN_DEPOT:
 				if (v.type != Vehicle.VEH_Train) return Cmd.CMD_ERROR;
-
-				if (!WayPoint.IsWaypointIndex(new_order.station)) return Cmd.CMD_ERROR;
-				wp = WayPoint.GetWaypoint(new_order.station);
-
-				if (!Player.CheckOwnership(wp.xy.GetTileOwner())) return Cmd.CMD_ERROR;
-
-				/* Order flags can be any of the following for waypoints:
-				 * [non-stop]
-				 * non-stop orders (if any) are only valid for trains */
-				switch (new_order.flags) {
-					case 0: break;
-
-					case OF_NON_STOP:
-						if (v.type != Vehicle.VEH_Train) return Cmd.CMD_ERROR;
-						break;
-
-					default: return Cmd.CMD_ERROR;
-				}
 				break;
-			}
 
 			default: return Cmd.CMD_ERROR;
+			}
+			break;
+		}
+
+		case OT_GOTO_WAYPOINT: {
+			WayPoint wp;
+
+			if (v.type != Vehicle.VEH_Train) return Cmd.CMD_ERROR;
+
+			if (!WayPoint.IsWaypointIndex(new_order.station)) return Cmd.CMD_ERROR;
+			wp = WayPoint.GetWaypoint(new_order.station);
+
+			if (!Player.CheckOwnership(wp.xy.GetTileOwner())) return Cmd.CMD_ERROR;
+
+			/* Order flags can be any of the following for waypoints:
+			 * [non-stop]
+			 * non-stop orders (if any) are only valid for trains */
+			switch (new_order.flags) {
+			case 0: break;
+
+			case OF_NON_STOP:
+				if (v.type != Vehicle.VEH_Train) return Cmd.CMD_ERROR;
+				break;
+
+			default: return Cmd.CMD_ERROR;
+			}
+			break;
+		}
+
+		default: return Cmd.CMD_ERROR;
 		}
 
 		if (sel_ord.id > v.num_orders) return Cmd.CMD_ERROR;
@@ -422,13 +422,13 @@ public class Order implements Serializable
 		/* For ships, make sure that the station is not too far away from the
 		 * previous destination, for human players with new pathfinding disabled */
 		if (v.type == Vehicle.VEH_Ship && v.owner.IS_HUMAN_PLAYER() &&
-			sel_ord.id != 0 && v.GetVehicleOrder(sel_ord.id - 1).type == OT_GOTO_STATION
-			&& !Global._patches.new_pathfinding_all) {
+				sel_ord.id != 0 && v.GetVehicleOrder(sel_ord.id - 1).type == OT_GOTO_STATION
+				&& !Global._patches.new_pathfinding_all) {
 
 			int dist = Map.DistanceManhattan(
 					Station.GetStation(v.GetVehicleOrder(sel_ord.id - 1).station).getXy(),
 					Station.GetStation(new_order.station).getXy()
-			);
+					);
 			if (dist >= 130)
 				return Cmd.return_cmd_error(Str.STR_0210_TOO_FAR_FROM_PREVIOUS_DESTINATIO);
 		}
@@ -570,7 +570,7 @@ public class Order implements Serializable
 
 				if (u.type == Vehicle.VEH_Aircraft) {
 					/* Take out of airport queue
-					*/
+					 */
 					if(u.queue_item != null)
 					{
 						v.queue_item.queue.del(v);
@@ -588,9 +588,9 @@ public class Order implements Serializable
 
 				/* NON-stop flag is misused to see if a train is in a station that is
 				 * on his order list or not */
-				if (sel_ord.id == u.cur_order_index && u.current_order.type == OT_LOADING &&
-						BitOps.HASBIT(u.current_order.flags, OFB_NON_STOP)) {
-					u.current_order.flags = 0;
+				if (sel_ord.id == u.cur_order_index && u.getCurrent_order().type == OT_LOADING &&
+						BitOps.HASBIT(u.getCurrent_order().flags, OFB_NON_STOP)) {
+					u.getCurrent_order().flags = 0;
 				}
 
 				/* Update any possible open window of the Vehicle */
@@ -634,8 +634,8 @@ public class Order implements Serializable
 
 			/* NON-stop flag is misused to see if a train is in a station that is
 			 * on his order list or not */
-			if (v.current_order.type == OT_LOADING && BitOps.HASBIT(v.current_order.flags, OFB_NON_STOP))
-				v.current_order.flags = 0;
+			if (v.getCurrent_order().type == OT_LOADING && BitOps.HASBIT(v.getCurrent_order().flags, OFB_NON_STOP))
+				v.getCurrent_order().flags = 0;
 
 			if (v.type == Vehicle.VEH_Train) v.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
 			v.InvalidateVehicleOrder();
@@ -684,8 +684,8 @@ public class Order implements Serializable
 
 		order = v.GetVehicleOrder(sel_ord);
 		if (order.type != OT_GOTO_STATION &&
-			 (order.type != OT_GOTO_DEPOT || p2 == OFB_UNLOAD) &&
-			 (order.type != OT_GOTO_WAYPOINT || p2 != OFB_NON_STOP))
+				(order.type != OT_GOTO_DEPOT || p2 == OFB_UNLOAD) &&
+				(order.type != OT_GOTO_WAYPOINT || p2 != OFB_NON_STOP))
 			return Cmd.CMD_ERROR;
 
 		if (0 != (flags & Cmd.DC_EXEC)) {
@@ -713,8 +713,8 @@ public class Order implements Serializable
 				while (u != null) {
 					/* toggle u.current_order "Full load" flag if it changed */
 					if (sel_ord.id == u.cur_order_index &&
-							BitOps.HASBIT(u.current_order.flags, OFB_FULL_LOAD) != BitOps.HASBIT(order.flags, OFB_FULL_LOAD))
-						u.current_order.flags = BitOps.RETTOGGLEBIT(u.current_order.flags, OFB_FULL_LOAD);
+							BitOps.HASBIT(u.getCurrent_order().flags, OFB_FULL_LOAD) != BitOps.HASBIT(order.flags, OFB_FULL_LOAD))
+						u.getCurrent_order().flags = BitOps.RETTOGGLEBIT(u.getCurrent_order().flags, OFB_FULL_LOAD);
 					u.InvalidateVehicleOrder();
 					u = u.next_shared;
 				}
@@ -763,132 +763,132 @@ public class Order implements Serializable
 		//End MA checks;
 
 		switch (p2) {
-			case CO_SHARE: {
-				Vehicle src;
+		case CO_SHARE: {
+			Vehicle src;
 
-				if (!veh_src.IsVehicleIndex()) return Cmd.CMD_ERROR;
+			if (!veh_src.IsVehicleIndex()) return Cmd.CMD_ERROR;
 
-				src = Vehicle.GetVehicle(veh_src);
+			src = Vehicle.GetVehicle(veh_src);
 
-				/* Sanity checks */
-				if (src.type == 0 || !Player.CheckOwnership(src.owner) || dst.type != src.type || dst == src)
+			/* Sanity checks */
+			if (src.type == 0 || !Player.CheckOwnership(src.owner) || dst.type != src.type || dst == src)
+				return Cmd.CMD_ERROR;
+
+			/* Trucks can't share orders with busses (and visa versa) */
+			if (src.type == Vehicle.VEH_Road) {
+				if (src.getCargo_type() != dst.getCargo_type() && (src.getCargo_type() == AcceptedCargo.CT_PASSENGERS || dst.getCargo_type() == AcceptedCargo.CT_PASSENGERS))
 					return Cmd.CMD_ERROR;
+			}
 
-				/* Trucks can't share orders with busses (and visa versa) */
-				if (src.type == Vehicle.VEH_Road) {
-					if (src.getCargo_type() != dst.getCargo_type() && (src.getCargo_type() == AcceptedCargo.CT_PASSENGERS || dst.getCargo_type() == AcceptedCargo.CT_PASSENGERS))
+			/* Is the vehicle already in the shared list? */
+			{
+				Vehicle u = src.GetFirstVehicleFromSharedList();
+				while (u != null) {
+					if (u == dst)
 						return Cmd.CMD_ERROR;
+					u = u.next_shared;
 				}
+			}
 
-				/* Is the vehicle already in the shared list? */
+			if (0 != (flags & Cmd.DC_EXEC)) {
+				/* If the destination vehicle had a OrderList, destroy it */
+				dst.DeleteVehicleOrders();
+
+				dst.orders = src.orders;
+				dst.num_orders = src.num_orders;
+
+				/* Link this vehicle in the shared-list */
+				dst.next_shared = src.next_shared;
+				dst.prev_shared = src;
+				if (src.next_shared != null)
+					src.next_shared.prev_shared = dst;
+				src.next_shared = dst;
+
+				dst.InvalidateVehicleOrder();
+				src.InvalidateVehicleOrder();
+
+				VehicleGui.RebuildVehicleLists();
+				if (dst.type == Vehicle.VEH_Train) dst.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
+			}
+		} break;
+
+		case CO_COPY: {
+			Vehicle src;
+			int delta;
+
+			if (!veh_src.IsVehicleIndex()) return Cmd.CMD_ERROR;
+
+			src = Vehicle.GetVehicle(veh_src);
+
+			/* Sanity checks */
+			if (src.type == 0 || !Player.CheckOwnership(src.owner) || dst.type != src.type || dst == src)
+				return Cmd.CMD_ERROR;
+
+			/* Trucks can't copy all the orders from busses (and visa versa) */
+			if (src.type == Vehicle.VEH_Road) {
+				//final Order order;
+				TileIndex required_dst = TileIndex.INVALID_TILE;
+
+				//FOR_VEHICLE_ORDERS(src, order) 
+				for(Order order = src.orders; order != null; order = order.next )
 				{
-					Vehicle u = src.GetFirstVehicleFromSharedList();
-					while (u != null) {
-						if (u == dst)
-							return Cmd.CMD_ERROR;
-						u = u.next_shared;
-					}
-				}
-
-				if (0 != (flags & Cmd.DC_EXEC)) {
-					/* If the destination vehicle had a OrderList, destroy it */
-					dst.DeleteVehicleOrders();
-
-					dst.orders = src.orders;
-					dst.num_orders = src.num_orders;
-
-					/* Link this vehicle in the shared-list */
-					dst.next_shared = src.next_shared;
-					dst.prev_shared = src;
-					if (src.next_shared != null)
-						src.next_shared.prev_shared = dst;
-					src.next_shared = dst;
-
-					dst.InvalidateVehicleOrder();
-					src.InvalidateVehicleOrder();
-
-					VehicleGui.RebuildVehicleLists();
-					if (dst.type == Vehicle.VEH_Train) dst.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
-				}
-			} break;
-
-			case CO_COPY: {
-				Vehicle src;
-				int delta;
-
-				if (!veh_src.IsVehicleIndex()) return Cmd.CMD_ERROR;
-
-				src = Vehicle.GetVehicle(veh_src);
-
-				/* Sanity checks */
-				if (src.type == 0 || !Player.CheckOwnership(src.owner) || dst.type != src.type || dst == src)
-					return Cmd.CMD_ERROR;
-
-				/* Trucks can't copy all the orders from busses (and visa versa) */
-				if (src.type == Vehicle.VEH_Road) {
-					//final Order order;
-					TileIndex required_dst = TileIndex.INVALID_TILE;
-
-					//FOR_VEHICLE_ORDERS(src, order) 
-					for(Order order = src.orders; order != null; order = order.next )
-					{
-						if (order.type == OT_GOTO_STATION) {
-							final Station st1 = Station.GetStation(order.station);
-							if (dst.getCargo_type() == AcceptedCargo.CT_PASSENGERS) {
-								if (st1.bus_stops != null) required_dst = st1.bus_stops.get(0).xy; // TODO why first?
-							} else {
-								if (st1.truck_stops != null) required_dst = st1.truck_stops.get(0).xy;
-							}
-							/* This station has not the correct road-bay, so we can't copy! */
-							if (required_dst == TileIndex.INVALID_TILE)
-								return Cmd.CMD_ERROR;
+					if (order.type == OT_GOTO_STATION) {
+						final Station st1 = Station.GetStation(order.station);
+						if (dst.getCargo_type() == AcceptedCargo.CT_PASSENGERS) {
+							if (st1.bus_stops != null) required_dst = st1.bus_stops.get(0).xy; // TODO why first?
+						} else {
+							if (st1.truck_stops != null) required_dst = st1.truck_stops.get(0).xy;
 						}
+						/* This station has not the correct road-bay, so we can't copy! */
+						if (required_dst == TileIndex.INVALID_TILE)
+							return Cmd.CMD_ERROR;
 					}
 				}
+			}
 
-				/* make sure there are orders available */
-				delta = dst.IsOrderListShared() ? src.num_orders + 1 : src.num_orders - dst.num_orders;
-				//if (!HasOrderPoolFree(delta))					return_cmd_error(Str.STR_8831_NO_MORE_SPACE_FOR_ORDERS);
+			/* make sure there are orders available */
+			delta = dst.IsOrderListShared() ? src.num_orders + 1 : src.num_orders - dst.num_orders;
+			//if (!HasOrderPoolFree(delta))					return_cmd_error(Str.STR_8831_NO_MORE_SPACE_FOR_ORDERS);
 
-				if (0 != (flags & Cmd.DC_EXEC)) {
-					//final Order order;
-					Order order_dst;
+			if (0 != (flags & Cmd.DC_EXEC)) {
+				//final Order order;
+				Order order_dst;
 
-					/* If the destination vehicle had a OrderList, destroy it */
-					dst.DeleteVehicleOrders();
+				/* If the destination vehicle had a OrderList, destroy it */
+				dst.DeleteVehicleOrders();
 
-					if(src.orders != null)
-					{
-						dst.orders = AllocateOrder();
-						AssignOrder(dst.orders, src.orders);
-					}
-					
-					order_dst = dst.orders;
-					//FOR_VEHICLE_ORDERS(src, order)
-					for(Order order_src = src.orders; order_src != null && order_src.next != null; order_src = order_src.next )
-					{
-						order_dst.next = AllocateOrder();
-						AssignOrder(order_dst.next, order_src.next);
-						order_dst = order_dst.next;
-					}
-
-					dst.num_orders = src.num_orders;
-
-					dst.InvalidateVehicleOrder();
-
-					VehicleGui.RebuildVehicleLists();
-					if (dst.type == Vehicle.VEH_Train) dst.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
+				if(src.orders != null)
+				{
+					dst.orders = AllocateOrder();
+					AssignOrder(dst.orders, src.orders);
 				}
-			} break;
 
-			case CO_UNSHARE: return DecloneOrder(dst, flags);
-			default: return Cmd.CMD_ERROR;
+				order_dst = dst.orders;
+				//FOR_VEHICLE_ORDERS(src, order)
+				for(Order order_src = src.orders; order_src != null && order_src.next != null; order_src = order_src.next )
+				{
+					order_dst.next = AllocateOrder();
+					AssignOrder(order_dst.next, order_src.next);
+					order_dst = order_dst.next;
+				}
+
+				dst.num_orders = src.num_orders;
+
+				dst.InvalidateVehicleOrder();
+
+				VehicleGui.RebuildVehicleLists();
+				if (dst.type == Vehicle.VEH_Train) dst.rail.shortest_platform[1] = 0; // we changed the orders so we invalidate the station length collector
+			}
+		} break;
+
+		case CO_UNSHARE: return DecloneOrder(dst, flags);
+		default: return Cmd.CMD_ERROR;
 		}
 
 		return 0;
 	}
 
-	
+
 
 	/** Restore the current order-index of a vehicle and sets service-interval.
 	 * @param x,y unused
@@ -1014,11 +1014,11 @@ public class Order implements Serializable
 
 			Global.SetDParam(0, v.unitnumber.id);
 			NewsItem.AddValidatedNewsItem(
-				message,
-				NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT | NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0),
-				v.index,
-				OC_VALIDATE,	//next time, just validate the orders
-				Order::CheckOrders);
+					message,
+					NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT | NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0),
+					v.index,
+					OC_VALIDATE,	//next time, just validate the orders
+					Order::CheckOrders);
 		}
 
 		return true;
@@ -1046,11 +1046,11 @@ public class Order implements Serializable
 				v.last_station_visited = Station.INVALID_STATION;
 
 			/* Check the current Order */
-			if (v.current_order.type    == dest.type &&
-					v.current_order.station == dest.station) {
+			if (v.getCurrent_order().type    == dest.type &&
+					v.getCurrent_order().station == dest.station) {
 				/* Mark the order as DUMMY */
-				v.current_order.type = OT_DUMMY;
-				v.current_order.flags = 0;
+				v.getCurrent_order().type = OT_DUMMY;
+				v.getCurrent_order().flags = 0;
 				Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 			}
 
@@ -1108,23 +1108,23 @@ public class Order implements Serializable
 
 	private static MemoryPool<Order> _order_pool = new MemoryPool<Order>(factory);
 
-	
+
 	private Order getOrder(int index)
 	{
 		return _order_pool.GetItemFromPool(index);
 	}
-	
+
 	private Order getOrder(OrderID index)
 	{
 		return _order_pool.GetItemFromPool(index.id);
 	}
-	
+
 	@Override
 	public void setIndex(int index) {
 		this.index = index;		
 	}
-	
-	
+
+
 	static void InitializeOrders()
 	{
 		_order_pool.CleanPool();
@@ -1133,7 +1133,7 @@ public class Order implements Serializable
 		Global._backup_orders_tile = null;
 	}
 
-	
+
 	public static Iterator<Order> getIterator()
 	{
 		return _order_pool.getIterator(); // pool.values().iterator();
@@ -1143,16 +1143,16 @@ public class Order implements Serializable
 	{
 		_order_pool.forEach(c);
 	}
-	
-	*/
-	
+
+	 */
+
 	static void InitializeOrders()
 	{
 		Global._backup_orders_tile = null;
 	}
-	
-	
-	
+
+
+
 	// TODO @Deprecated
 	public static int PackOrder(final Order order)
 	{
@@ -1170,12 +1170,12 @@ public class Order implements Serializable
 		//order.index   = 0; // avoid compiler warning
 		return order;
 	}
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	/*
 	static final SaveLoad _order_desc[] = {
 		SLE_VAR(Order,type,					SLE_UINT8),
@@ -1266,8 +1266,8 @@ public class Order implements Serializable
 	final Chunk Handler _order_chunk_handlers[] = {
 		{ 'ORDR', Save_ORDR, Load_ORDR, CH_ARRAY | CH_LAST},
 	};
-	
-*/
+
+	 */
 
 	public static void loadGame(ObjectInputStream oin) {
 		//_order_pool = (MemoryPool<Order>) oin.readObject();
@@ -1296,13 +1296,52 @@ public class Order implements Serializable
 	public boolean typeIs(int t) {
 		return type == t;
 	}
-	
+
 	public boolean isNonStop() {		
 		return 0 != (flags & OF_NON_STOP);
 	}
-	
+
 	public boolean hasFlag(int flag) {
 		return BitOps.HASBIT(flags, flag);
 	}
-	
+
+
+	private String[] orderTypeNames = {
+			"NOTHING (0)",
+			"GOTO_STATION (1)",
+			"GOTO_DEPOT (2)",
+			"LOADING (3)",
+			"LEAVESTATION (4)",
+			"DUMMY (5)",
+			"GOTO_WAYPOINT (6)",
+	};
+
+	private String[] orderFlagNames = {
+			"TRANSFER (1)",
+			"UNLOAD/PART_OF_ORDERS (2)",
+			"FULL_LOAD/HALT_IN_DEPOT/SERVICE_IF_NEEDED (4)",
+			"NON_STOP (8)"
+	};
+
+
+	@Override
+	public String toString() 
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("Order ");
+		sb.append(orderTypeNames[type]);
+
+		if( flags != 0 )
+		{
+			sb.append(" flags: ");
+			for( int i = 0; i < 31; i++ )
+			{
+				if(0 != ( flags & (1<<i) ) )
+					sb.append(orderFlagNames[i]+" ");
+			}
+		}
+
+		return sb.toString();
+	}
+
 }

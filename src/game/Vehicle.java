@@ -17,14 +17,18 @@ import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
+import game.ifaces.ConsumerOfVehicle;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.ifaces.TileTypeProcs;
 import game.ifaces.TileVehicleInterface;
+import game.ifaces.VehicleFromPosProc;
 import game.struct.BackuppedOrders;
+import game.struct.GetNewVehiclePosResult;
 import game.struct.Point;
 import game.struct.Rect;
 import game.struct.VQueueItem;
+import game.tables.BubbleMovement;
 import game.tables.EngineTables;
 import game.util.BitOps;
 import game.util.MemoryPool;
@@ -39,50 +43,40 @@ public class Vehicle implements IPoolItem
 {
 	private static final long serialVersionUID = 1L;
 	
-	static public final int INVALID_VEHICLE = -1; //0xFFFF; // TODO -1?
-	static public final int INVALID_ENGINE  = -1;
-	private static final int INVALID_COORD = -0x8000;
 
-	/* A lot of code calls for the invalidation of the status bar, which is widget 5.
-	 * Best is to have a virtual value for it when it needs to change again */
-	static public final int STATUS_BAR = 5;
+	int type;				// type, ie roadven,train,ship,aircraft,special
+	int subtype;     		// subtype (Filled with values from EffectVehicles or TrainSubTypes)
 
-	//private static int GEN_HASH(int x, int y) { return (((x & 0x1F80)>>7) + ((y & 0xFC0))); }
-	//static VehicleID _vehicle_position_hash[] = new VehicleID[0x1000];
+	//VehicleID index;		// NOSAVE: Index in vehicle array
+	public int index;		// NOSAVE: Index in vehicle array
 
-	int type;	// type, ie roadven,train,ship,aircraft,special
-	int subtype;     // subtype (Filled with values from EffectVehicles or TrainSubTypes)
+	Vehicle next;			// next
+	Vehicle first;			// NOSAVE: pointer to the first vehicle in the chain
+	Vehicle depot_list;		//NOSAVE: linked list to tell what vehicles entered a depot during the last tick. Used by autoreplace
 
-	//VehicleID index;	// NOSAVE: Index in vehicle array
-	public int index;	// NOSAVE: Index in vehicle array
+	//StringID string_id;	// Displayed string
+	int string_id;			// Displayed string
 
-	Vehicle next;		// next
-	Vehicle first;   // NOSAVE: pointer to the first vehicle in the chain
-	Vehicle depot_list;	//NOSAVE: linked list to tell what vehicles entered a depot during the last tick. Used by autoreplace
+	UnitID unitnumber;		// unit number, for display purposes only
+	PlayerID owner;			// which player owns the vehicle?
 
-	//StringID string_id; // Displayed string
-	int string_id; // Displayed string
+	TileIndex tile;			// Current tile index
+	TileIndex dest_tile;	// Heading for this tile
 
-	UnitID unitnumber;	// unit number, for display purposes only
-	PlayerID owner;				// which player owns the vehicle?
-
-	TileIndex tile;		// Current tile index
-	TileIndex dest_tile; // Heading for this tile
-
-	int x_pos;			// coordinates
+	int x_pos;				// coordinates
 	int y_pos;
-	int z_pos;		// Was byte, changed for aircraft queueing
-	int direction;		// facing
+	int z_pos;				// Was byte, changed for aircraft queueing
+	int direction;			// facing
 
-	int spritenum; // currently displayed sprite index
+	int spritenum; 			// currently displayed sprite index
 	// 0xfd == custom sprite, 0xfe == custom second head sprite
 	// 0xff == reserved for another custom sprite
-	int cur_image; // sprite number for this vehicle
-	int sprite_width;// width of vehicle sprite
-	int sprite_height;// height of vehicle sprite
-	int z_height;		// z-height of vehicle sprite
-	int x_offs;			// x offset for vehicle sprite
-	int y_offs;			// y offset for vehicle sprite
+	int cur_image; 			// sprite number for this vehicle
+	int sprite_width;		// width of vehicle sprite
+	int sprite_height;		// height of vehicle sprite
+	int z_height;			// z-height of vehicle sprite
+	int x_offs;				// x offset for vehicle sprite
+	int y_offs;				// y offset for vehicle sprite
 
 	EngineID engine_type;
 
@@ -90,34 +84,34 @@ public class Vehicle implements IPoolItem
 	// bitmask used to resolve them; parts of it get reseeded when triggers
 	// of corresponding spritegroups get matched
 	int random_bits;
-	int waiting_triggers; // triggers to be yet matched
+	int waiting_triggers; 	// triggers to be yet matched
 
-	int max_speed;	// maximum speed
-	int cur_speed;	// current speed
-	int subspeed;		// fractional speed
-	int acceleration; // used by train & aircraft
+	int max_speed;			// maximum speed
+	int cur_speed;			// current speed
+	int subspeed;			// fractional speed
+	int acceleration; 		// used by train & aircraft
 	int progress;
 
-	int vehstatus;		// Status
+	int vehstatus;			// Status
 	int last_station_visited;
 
-	int cargo_type;	// type of cargo this vehicle is carrying
-	int cargo_days; // how many days have the pieces been in transit
-	int cargo_source;// source of cargo
-	int cargo_cap;	// total capacity
-	int cargo_count;// how many pieces are used
+	int cargo_type;			// type of cargo this vehicle is carrying
+	int cargo_days; 		// how many days have the pieces been in transit
+	int cargo_source;		// source of cargo
+	int cargo_cap;			// total capacity
+	int cargo_count;		// how many pieces are used
 
-	int day_counter; // increased by one for each day
-	int tick_counter;// increased by one for each tick
+	int day_counter; 		// increased by one for each day
+	int tick_counter;		// increased by one for each tick
 
 	/* Begin Order-stuff */
-	public Order current_order = new Order();     //! The current order (+ status, like: loading)
+	private Order current_order = new Order();     //! The current order (+ status, like: loading)
 	//OrderID cur_order_index; //! The index to the current order
-	int cur_order_index; //! The index to the current order
+	int cur_order_index; 	//! The index to the current order
 
 	Order orders;           //! Pointer to the first order for this vehicle
 	//OrderID num_orders = new OrderID(0);      //! How many orders there are in the list TODO [dz] its just int?
-	int num_orders;      //! How many orders there are in the list 
+	int num_orders;      	//! How many orders there are in the list 
 
 	Vehicle next_shared;    //! If not null, this points to the next vehicle that shared the order
 	Vehicle prev_shared;    //! If not null, this points to the prev vehicle that shared the order
@@ -133,7 +127,7 @@ public class Vehicle implements IPoolItem
 
 	// Related to age and service time
 	int age;				// Age in days
-	int max_age;		// Maximum age
+	int max_age;			// Maximum age
 	public int date_of_last_service;
 	int service_interval;
 	int reliability;
@@ -165,13 +159,18 @@ public class Vehicle implements IPoolItem
 	public VehicleShip ship = new VehicleShip();
 
 
+	static public final int INVALID_VEHICLE = -1; //0xFFFF; // TODO -1?
+	static public final int INVALID_ENGINE  = -1;
+	private static final int INVALID_COORD = -0x8000;
+
+	/* A lot of code calls for the invalidation of the status bar, which is widget 5.
+	 * Best is to have a virtual value for it when it needs to change again */
+	static public final int STATUS_BAR = 5;
 
 
 	private void InitializeVehicle()
 	{
 		int indexc = index;
-
-
 
 		type = 0;	
 		subtype = 0;
@@ -3741,81 +3740,17 @@ public class Vehicle implements IPoolItem
 	public int getCur_order_index() { return cur_order_index; }
 	public int getCur_speed() { return cur_speed;	}
 
+	public Order getCurrent_order() {
+		return current_order;
+	}
 
+	public void setCurrent_order(Order order) {
+		Global.debug("set %s", order);
+		this.current_order = new Order( order );
+	}
 
 
 
 
 	
 }
-
-class BubbleMovement {
-	final int x;
-	final int y;
-	final int z;
-	final int image;
-
-	public BubbleMovement(int x, int y, int z, int image ) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.image = image;
-	}
-
-	//#define ME(i) { i, 4, 0, 0 }
-
-	public BubbleMovement(int x) {
-		this.x = x;
-		this.y = 4;
-		this.z = 0;
-		this.image = 0;
-	}
-
-}
-
-
-@FunctionalInterface
-interface VehicleFromPosProc {
-
-	/**
-	 * Applies this function to the given arguments.
-	 *
-	 * @param t the first function argument
-	 * @param u the second function argument
-	 * @return the function result
-	 */
-	Object apply(Vehicle v, Object o);
-}
-
-
-class GetNewVehiclePosResult {
-	int x,y;
-	TileIndex old_tile;
-	TileIndex new_tile;
-}
-
-@FunctionalInterface
-interface ConsumerOfVehicle extends Consumer<Vehicle> {}
-
-
-//typedef uint32 VehicleEnterTileProc(Vehicle *v, TileIndex tile, int x, int y);
-@FunctionalInterface
-interface VehicleEnterTileProc
-{
-	int accept (Vehicle v, TileIndex tile, int x, int y);
-}
-
-//typedef void VehicleLeaveTileProc(Vehicle *v, TileIndex tile, int x, int y);
-
-@FunctionalInterface
-interface VehicleLeaveTileProc
-{
-	void accept (Vehicle v, TileIndex tile, int x, int y);
-}
-
-
-
-
-
-
-
