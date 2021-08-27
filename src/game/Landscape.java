@@ -428,7 +428,9 @@ public class Landscape extends GenLandTable
 		count = (Global.MapSizeX() / TILELOOP_SIZE) * (Global.MapSizeY() / TILELOOP_SIZE);
 		do {
 			TileIndex itile = new TileIndex(tile);
-			_tile_type_procs[itile.GetTileType().ordinal()].tile_loop_proc.accept(itile);
+			final int ordinal = itile.GetTileType().ordinal();
+			final TileTypeProcs func = _tile_type_procs[ordinal];
+			func.tile_loop_proc.accept(itile);
 
 			if (itile.TileX() < Global.MapSizeX() - TILELOOP_SIZE) {
 				tile += TILELOOP_SIZE; /* no overflow */

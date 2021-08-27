@@ -179,6 +179,7 @@ public class Tree  extends TreeTables {
 
 					if( 0 != (flags & Cmd.DC_EXEC)) {
 						tile.getMap().m5 += 0x40;
+						tile.getMap().m5 &= 0xFF;
 						tile.MarkTileDirtyByTile();
 					}
 					// 2x as expensive to add more trees to an existing tile
@@ -585,7 +586,7 @@ public class Tree  extends TreeTables {
 			m5++;
 		}
 
-		tile.getMap().m5 = m5;
+		tile.getMap().m5 = 0xFF & m5;
 		tile.MarkTileDirtyByTile();
 	}
 
