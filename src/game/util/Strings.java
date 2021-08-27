@@ -13,13 +13,7 @@ public class Strings extends StringTable
 
 	public static BinaryString _userstring;
 
-	//private String StationGetSpecialString(String buff, int x);
-	//private String GetSpecialTownNameString(String buff, int ind, int seed);
-	//private String GetSpecialPlayerNameString(String buff, int ind, final int *argv);
-
-	//private String FormatString(String buff, final String str, final int *argv, int casei);
-
-	public static final String _openttd_revision = "TODO generate revision";
+	public static final String _openttd_revision = Version.NAME;
 
 
 	// special string constants
@@ -160,11 +154,11 @@ public class Strings extends StringTable
 	}
 
 	//Read an long from the argv array.
-	private static long Getlong(Object o)
+	/*private static long Getlong(Object o)
 	{
 		assert o != null;
 		return ((Long)o).longValue();
-	}
+	}*/
 
 	//Extract subarray
 	private static Object[] GetArgvPtr(Object [] o, int pos, int size )
@@ -755,24 +749,25 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				buff += len;
 					 */
 
-					/*
-							//final byte* s = (final byte*)GetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
-							final String s = StringGetStringPtr(arg[(byte)str[stri++]]); // contains the string that determines gender.
+					
+					//final byte* s = (final byte*)GetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
+					//final BinaryString s = StringGetStringPtr((Integer)arg[0xFF & str[stri++]]); // contains the string that determines gender.
 
-							byte argindex = (byte)str[stri++];
-							Object arg = arg[argindex];
-							//byte[] s = (byte [])GetStringPtr(arg);
-							String s = StringGetStringPtr(arg);
+					int argindex = 0xFF & str[stri++];
+					Object sNo = arg[argindex];
+					BinaryString s = StringGetStringPtr((Integer)sNo);
 
-							int gender = 0;
-							if (s != null && s[0] == 0x87) gender = s[1];
+					int gender = 0;
+					if (s != null && s.charAt(0) == 0x87) gender = s.charAt(1);
 
-							int[]skip = { 0 };
-							buff.append( ExtractChoice( str, skip, gender);
-							str = str.substring(skip[0] );
-					 */
-					stri+=2;
-					buff.append( " !!fixCase13!! " );
+					int[]skip = { 0 };
+					buff.append( ExtractChoice( new String( str ).substring(stri), skip, gender) );
+					//str = str.substring(skip[0] );
+					assert skip[0] >= 0;
+					stri += skip[0];
+					
+					//stri+=2;
+					//buff.append( " !!fixCase13!! " );
 					break;
 				}
 
