@@ -433,8 +433,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		Industry  i = GetIndustry(tile.getMap().m2);
 		int cw, am;
 
+		// [dz] uncommented check for i.produced_cargo[0] > 0 - why it was commented out?
 		cw = Math.min(i.cargo_waiting[0], 255);
-		if (cw > _industry_min_cargo[i.type]/* && i.produced_cargo[0] != 0xFF*/) {
+		if (cw > _industry_min_cargo[i.type] && i.produced_cargo[0] > 0) {
 			int m5;
 
 			i.cargo_waiting[0] -= cw;
@@ -1217,7 +1218,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static boolean CheckNewIndustry_Plantation(TileIndex tile, int type)
 	{
-		if (tile.GetMapExtraBits() == 1) {
+		if (tile.GetMapExtraBits() == TileInfo.EXTRABITS_DESERT) {
 			Global._error_message = Str.STR_0239_SITE_UNSUITABLE;
 			return false;
 		}
@@ -1227,7 +1228,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static boolean CheckNewIndustry_Water(TileIndex tile, int type)
 	{
-		if (tile.GetMapExtraBits() != 1) {
+		if (tile.GetMapExtraBits() != TileInfo.EXTRABITS_DESERT) {
 			Global._error_message = Str.STR_0318_CAN_ONLY_BE_BUILT_IN_DESERT;
 			return false;
 		}

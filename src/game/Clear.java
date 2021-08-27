@@ -752,13 +752,13 @@ public class Clear extends ClearTables {
 	{
 	 	if ((tile.getMap().m5 & 0x1C) == 0x14) return;
 
-		if (tile.GetMapExtraBits() == 1) {
+		if (tile.GetMapExtraBits() == TileInfo.EXTRABITS_DESERT) {
 			tile.getMap().m5 = 0x17;
 		} else {
-			if (tile.iadd( TileIndex.TileDiffXY( 1,  0)).GetMapExtraBits() != 1 &&
-					tile.iadd( TileIndex.TileDiffXY(-1,  0)).GetMapExtraBits() != 1 &&
-					tile.iadd( TileIndex.TileDiffXY( 0,  1)).GetMapExtraBits() != 1 &&
-					tile.iadd( TileIndex.TileDiffXY( 0, -1)).GetMapExtraBits() != 1)
+			if (tile.iadd( TileIndex.TileDiffXY( 1,  0)).GetMapExtraBits() != TileInfo.EXTRABITS_DESERT &&
+					tile.iadd( TileIndex.TileDiffXY(-1,  0)).GetMapExtraBits() != TileInfo.EXTRABITS_DESERT &&
+					tile.iadd( TileIndex.TileDiffXY( 0,  1)).GetMapExtraBits() != TileInfo.EXTRABITS_DESERT &&
+					tile.iadd( TileIndex.TileDiffXY( 0, -1)).GetMapExtraBits() != TileInfo.EXTRABITS_DESERT)
 				return;
 			tile.getMap().m5 = 0x15;
 		}

@@ -3,6 +3,7 @@ import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
+import game.struct.GetNewVehiclePosResult;
 import game.struct.NPFFindStationOrTileData;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
@@ -99,8 +100,8 @@ public class Ship {
 		if (!v.VehicleNeedsService())     return;
 		if(0 != (v.vehstatus & Vehicle.VS_STOPPED))   return;
 
-		if ( (v.current_order.type == Order.OT_GOTO_DEPOT) &&
-				0 != (v.current_order.flags & Order.OF_HALT_IN_DEPOT))
+		if ( (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) &&
+				0 != (v.getCurrent_order().flags & Order.OF_HALT_IN_DEPOT))
 			return;
 
 		if (Global._patches.gotodepot && v.VehicleHasDepotOrders()) return;
@@ -108,17 +109,17 @@ public class Ship {
 		depot = FindClosestShipDepot(v);
 
 		if (depot == null || Map.DistanceManhattan(v.tile, depot.xy) > 12) {
-			if (v.current_order.type == Order.OT_GOTO_DEPOT) {
-				v.current_order.type = Order.OT_DUMMY;
-				v.current_order.flags = 0;
+			if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
+				v.getCurrent_order().type = Order.OT_DUMMY;
+				v.getCurrent_order().flags = 0;
 				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			}
 			return;
 		}
 
-		v.current_order.type = Order.OT_GOTO_DEPOT;
-		v.current_order.flags = Order.OF_NON_STOP;
-		v.current_order.station = depot.index;
+		v.getCurrent_order().type = Order.OT_GOTO_DEPOT;
+		v.getCurrent_order().flags = Order.OF_NON_STOP;
+		v.getCurrent_order().station = depot.index;
 		v.dest_tile = depot.xy;
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 	}
@@ -203,15 +204,15 @@ public class Ship {
 	{
 		final Order order;
 
-		if (v.current_order.type >= Order.OT_GOTO_DEPOT &&
-				v.current_order.type <= Order.OT_LEAVESTATION) {
-			if (v.current_order.type != Order.OT_GOTO_DEPOT ||
-					0 == (v.current_order.flags & Order.OF_UNLOAD))
+		if (v.getCurrent_order().type >= Order.OT_GOTO_DEPOT &&
+				v.getCurrent_order().type <= Order.OT_LEAVESTATION) {
+			if (v.getCurrent_order().type != Order.OT_GOTO_DEPOT ||
+					0 == (v.getCurrent_order().flags & Order.OF_UNLOAD))
 				return;
 		}
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT &&
-				(v.current_order.flags & (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED)) == (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED) &&
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT &&
+				(v.getCurrent_order().flags & (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED)) == (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED) &&
 				!v.VehicleNeedsService()) {
 			v.cur_order_index++;
 		}
@@ -223,18 +224,18 @@ public class Ship {
 		order = v.GetVehicleOrder(v.cur_order_index);
 
 		if (order == null) {
-			v.current_order.type  = Order.OT_NOTHING;
-			v.current_order.flags = 0;
+			v.getCurrent_order().type  = Order.OT_NOTHING;
+			v.getCurrent_order().flags = 0;
 			v.dest_tile = null;
 			return;
 		}
 
-		if (order.type    == v.current_order.type &&
-				order.flags   == v.current_order.flags &&
-				order.station == v.current_order.station)
+		if (order.type    == v.getCurrent_order().type &&
+				order.flags   == v.getCurrent_order().flags &&
+				order.station == v.getCurrent_order().station)
 			return;
 
-		v.current_order = new Order( order );
+		v.setCurrent_order(new Order( order ));
 
 		if (order.type == Order.OT_GOTO_STATION) {
 			final Station st;
@@ -260,13 +261,13 @@ public class Ship {
 
 	static void HandleShipLoading(Vehicle v)
 	{
-		if (v.current_order.type == Order.OT_NOTHING) return;
+		if (v.getCurrent_order().type == Order.OT_NOTHING) return;
 
-		if (v.current_order.type != Order.OT_DUMMY) {
-			if (v.current_order.type != Order.OT_LOADING) return;
+		if (v.getCurrent_order().type != Order.OT_DUMMY) {
+			if (v.getCurrent_order().type != Order.OT_LOADING) return;
 			if (--v.load_unload_time_rem > 0) return;
 
-			if (0 != (v.current_order.flags & Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
+			if (0 != (v.getCurrent_order().flags & Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_INC);
 				if (Economy.LoadUnloadVehicle(v)!=0) {
 					Window.InvalidateWindow(Window.WC_SHIPS_LIST, v.owner.id);
@@ -277,9 +278,9 @@ public class Ship {
 			PlayShipSound(v);
 
 			{
-				Order b = new Order( v.current_order );
-				v.current_order.type = Order.OT_LEAVESTATION;
-				v.current_order.flags = 0;
+				Order b = new Order( v.getCurrent_order() );
+				v.getCurrent_order().type = Order.OT_LEAVESTATION;
+				v.getCurrent_order().flags = 0;
 				if (0 == (b.flags & Order.OF_NON_STOP)) return;
 			}
 		}
@@ -402,13 +403,13 @@ public class Ship {
 
 		v.TriggerVehicle(Engine.VEHICLE_TRIGGER_DEPOT);
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT) 
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) 
 		{
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
-			Order t = new Order( v.current_order );
-			v.current_order.type = Order.OT_DUMMY;
-			v.current_order.flags = 0;
+			Order t = new Order( v.getCurrent_order() );
+			v.getCurrent_order().type = Order.OT_DUMMY;
+			v.getCurrent_order().flags = 0;
 
 			if (BitOps.HASBIT(t.flags, Order.OFB_PART_OF_ORDERS)) {
 				v.cur_order_index++;
@@ -673,7 +674,7 @@ public class Ship {
 		ProcessShipOrder(v);
 		HandleShipLoading(v);
 
-		if (v.current_order.type == Order.OT_LOADING) return;
+		if (v.getCurrent_order().type == Order.OT_LOADING) return;
 
 		CheckShipLeaveDepot(v);
 
@@ -699,39 +700,39 @@ public class Ship {
 
 				/* A leave station order only needs one tick to get processed, so we can
 				 * always skip ahead. */
-				if (v.current_order.type == Order.OT_LEAVESTATION) {
-					v.current_order.type = Order.OT_NOTHING;
-					v.current_order.flags = 0;
+				if (v.getCurrent_order().type == Order.OT_LEAVESTATION) {
+					v.getCurrent_order().type = Order.OT_NOTHING;
+					v.getCurrent_order().flags = 0;
 					Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 				} else if (v.dest_tile != null) {
 					/* We have a target, let's see if we reached it... */
-					if (v.current_order.type == Order.OT_GOTO_STATION &&
+					if (v.getCurrent_order().type == Order.OT_GOTO_STATION &&
 							v.dest_tile.IsBuoyTile() &&
 							Map.DistanceManhattan(v.dest_tile, gp.new_tile) <= 3) {
 						/* We got within 3 tiles of our target buoy, so let's skip to our
 						 * next Order */
 						v.cur_order_index++;
-						v.current_order.type = Order.OT_DUMMY;
+						v.getCurrent_order().type = Order.OT_DUMMY;
 						v.InvalidateVehicleOrder();
 					} else {
 						/* Non-buoy orders really need to reach the tile */
 						if (v.dest_tile.equals(gp.new_tile)) {
-							if (v.current_order.type == Order.OT_GOTO_DEPOT) {
+							if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
 								if ((gp.x&0xF)==8 && (gp.y&0xF)==8) {
 									ShipEnterDepot(v);
 									return;
 								}
-							} else if (v.current_order.type == Order.OT_GOTO_STATION) {
+							} else if (v.getCurrent_order().type == Order.OT_GOTO_STATION) {
 								Station st;
 
-								v.last_station_visited = v.current_order.station;
+								v.last_station_visited = v.getCurrent_order().station;
 
 								/* Process station in the orderlist. */
-								st = Station.GetStation(v.current_order.station);
+								st = Station.GetStation(v.getCurrent_order().station);
 								if(0 != (st.facilities & Station.FACIL_DOCK)) { /* ugly, ugly workaround for problem with ships able to drop off cargo at wrong stations */
-									v.current_order.type = Order.OT_LOADING;
-									v.current_order.flags &= Order.OF_FULL_LOAD | Order.OF_UNLOAD;
-									v.current_order.flags |= Order.OF_NON_STOP;
+									v.getCurrent_order().type = Order.OT_LOADING;
+									v.getCurrent_order().flags &= Order.OF_FULL_LOAD | Order.OF_UNLOAD;
+									v.getCurrent_order().flags |= Order.OF_NON_STOP;
 									ShipArrivesAt(v, st);
 
 									Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_INC);
@@ -741,8 +742,8 @@ public class Ship {
 									}
 									Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 								} else { /* leave stations without docks right aways */
-									v.current_order.type = Order.OT_LEAVESTATION;
-									v.current_order.flags = 0;
+									v.getCurrent_order().type = Order.OT_LEAVESTATION;
+									v.getCurrent_order().flags = 0;
 									v.cur_order_index++;
 									v.InvalidateVehicleOrder();
 								}
@@ -1038,15 +1039,15 @@ public class Ship {
 		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) return Cmd.CMD_ERROR;
 
 		/* If the current orders are already goto-Depot */
-		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				/* If the orders to 'goto depot' are in the orders list (forced servicing),
 				 * then skip to the next order; effectively cancelling this forced service */
-				if (BitOps.HASBIT(v.current_order.flags, Order.OFB_PART_OF_ORDERS))
+				if (BitOps.HASBIT(v.getCurrent_order().flags, Order.OFB_PART_OF_ORDERS))
 					v.cur_order_index++;
 
-				v.current_order.type = Order.OT_DUMMY;
-				v.current_order.flags = 0;
+				v.getCurrent_order().type = Order.OT_DUMMY;
+				v.getCurrent_order().flags = 0;
 				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			}
 			return 0;
@@ -1058,9 +1059,9 @@ public class Ship {
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			v.dest_tile = dep.xy;
-			v.current_order.type = Order.OT_GOTO_DEPOT;
-			v.current_order.flags = Order.OF_NON_STOP | Order.OF_HALT_IN_DEPOT;
-			v.current_order.station = dep.index;
+			v.getCurrent_order().type = Order.OT_GOTO_DEPOT;
+			v.getCurrent_order().flags = Order.OF_NON_STOP | Order.OF_HALT_IN_DEPOT;
+			v.getCurrent_order().station = dep.index;
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 		}
 

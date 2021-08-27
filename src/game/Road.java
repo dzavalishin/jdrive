@@ -1077,7 +1077,7 @@ public class Road extends RoadTables
 			}
 		} else if (GameOptions._opt.landscape == Landscape.LT_DESERT) {
 			// Fix desert style
-			if (tile.GetMapExtraBits() == 1 && 0==(tile.getMap().m4 & 0x80)) {
+			if (tile.GetMapExtraBits() == TileInfo.EXTRABITS_DESERT && 0==(tile.getMap().m4 & 0x80)) {
 				tile.getMap().m4 |= 0x80;
 				tile.MarkTileDirtyByTile();
 			}

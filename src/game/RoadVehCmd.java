@@ -10,6 +10,7 @@ import game.ids.EngineID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
 import game.struct.FindRoadToChooseData;
+import game.struct.GetNewVehiclePosResult;
 import game.struct.NPFFindStationOrTileData;
 import game.struct.OvertakeData;
 import game.struct.Point;
@@ -320,15 +321,15 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) return Cmd.CMD_ERROR;
 
 		/* If the current orders are already goto-depot */
-		if (v.current_order.type == Order.OT_GOTO_DEPOT) {
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				/* If the orders to 'goto depot' are in the orders list (forced servicing),
 				 * then skip to the next order; effectively cancelling this forced service */
-				if (BitOps.HASBIT(v.current_order.flags, Order.OFB_PART_OF_ORDERS))
+				if (BitOps.HASBIT(v.getCurrent_order().flags, Order.OFB_PART_OF_ORDERS))
 					v.cur_order_index++;
 
-				v.current_order.type = Order.OT_DUMMY;
-				v.current_order.flags = 0;
+				v.getCurrent_order().type = Order.OT_DUMMY;
+				v.getCurrent_order().flags = 0;
 				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			}
 			return 0;
@@ -338,9 +339,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (dep == null) return Cmd.return_cmd_error(Str.STR_9019_UNABLE_TO_FIND_LOCAL_DEPOT);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			v.current_order.type = Order.OT_GOTO_DEPOT;
-			v.current_order.flags = Order.OF_NON_STOP | Order.OF_HALT_IN_DEPOT;
-			v.current_order.station = dep.index;
+			v.getCurrent_order().type = Order.OT_GOTO_DEPOT;
+			v.getCurrent_order().flags = Order.OF_NON_STOP | Order.OF_HALT_IN_DEPOT;
+			v.getCurrent_order().station = dep.index;
 			v.dest_tile = dep.xy;
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 		}
@@ -575,15 +576,15 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		final Order order;
 		final Station st;
 
-		if (v.current_order.type >= Order.OT_GOTO_DEPOT && v.current_order.type <= Order.OT_LEAVESTATION) {
+		if (v.getCurrent_order().type >= Order.OT_GOTO_DEPOT && v.getCurrent_order().type <= Order.OT_LEAVESTATION) {
 			// Let a depot order in the orderlist interrupt.
-			if (v.current_order.type != Order.OT_GOTO_DEPOT ||
-					0==(v.current_order.flags & Order.OF_UNLOAD))
+			if (v.getCurrent_order().type != Order.OT_GOTO_DEPOT ||
+					0==(v.getCurrent_order().flags & Order.OF_UNLOAD))
 				return;
 		}
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT &&
-				(v.current_order.flags & (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED)) == (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED) &&
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT &&
+				(v.getCurrent_order().flags & (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED)) == (Order.OF_PART_OF_ORDERS | Order.OF_SERVICE_IF_NEEDED) &&
 				!v.VehicleNeedsService()) {
 			v.cur_order_index++;
 		}
@@ -594,18 +595,18 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		order = v.GetVehicleOrder(v.cur_order_index);
 
 		if (order == null) {
-			v.current_order.type = Order.OT_NOTHING;
-			v.current_order.flags = 0;
+			v.getCurrent_order().type = Order.OT_NOTHING;
+			v.getCurrent_order().flags = 0;
 			v.dest_tile = null;
 			return;
 		}
 
-		if (order.type    == v.current_order.type &&
-				order.flags   == v.current_order.flags &&
-				order.station == v.current_order.station)
+		if (order.type    == v.getCurrent_order().type &&
+				order.flags   == v.getCurrent_order().flags &&
+				order.station == v.getCurrent_order().station)
 			return;
 
-		v.current_order = new Order( order );
+		v.setCurrent_order(new Order( order ));
 
 		v.dest_tile = null;
 
@@ -646,17 +647,17 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	static void HandleRoadVehLoading(Vehicle v)
 	{
-		if (v.current_order.type == Order.OT_NOTHING)
+		if (v.getCurrent_order().type == Order.OT_NOTHING)
 			return;
 
-		if (v.current_order.type != Order.OT_DUMMY) {
-			if (v.current_order.type != Order.OT_LOADING)
+		if (v.getCurrent_order().type != Order.OT_DUMMY) {
+			if (v.getCurrent_order().type != Order.OT_LOADING)
 				return;
 
 			if (--v.load_unload_time_rem > 0)
 				return;
 
-			if (0 != (v.current_order.flags & Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
+			if (0 != (v.getCurrent_order().flags & Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_INC);
 				if (0 != Economy.LoadUnloadVehicle(v)) {
 					Window.InvalidateWindow(Window.WC_ROADVEH_LIST, v.owner);
@@ -666,9 +667,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			}
 
 			{
-				Order b = new Order( v.current_order );
-				v.current_order.type = Order.OT_LEAVESTATION;
-				v.current_order.flags = 0;
+				Order b = new Order( v.getCurrent_order() );
+				v.getCurrent_order().type = Order.OT_LEAVESTATION;
+				v.getCurrent_order().flags = 0;
 				if (0==(b.flags & Order.OF_NON_STOP))
 					return;
 			}
@@ -1178,7 +1179,7 @@ class RoadDriveEntry {
 		ProcessRoadVehOrder(v);
 		HandleRoadVehLoading(v);
 
-		if (v.current_order.type == Order.OT_LOADING)
+		if (v.getCurrent_order().type == Order.OT_LOADING)
 			return;
 
 		if (v.road.isInDepot()) {
@@ -1407,8 +1408,8 @@ class RoadDriveEntry {
 
 			st = Station.GetStation(v.tile.M().m2);
 
-			if (v.current_order.type != Order.OT_LEAVESTATION &&
-					v.current_order.type != Order.OT_GOTO_DEPOT) {
+			if (v.getCurrent_order().type != Order.OT_LEAVESTATION &&
+					v.getCurrent_order().type != Order.OT_GOTO_DEPOT) {
 				Order old_order;
 
 				//*b &= ~0x80;
@@ -1419,13 +1420,13 @@ class RoadDriveEntry {
 
 				RoadVehArrivesAt(v, st);
 
-				old_order = new Order( v.current_order );
-				v.current_order.type = Order.OT_LOADING;
-				v.current_order.flags = 0;
+				old_order = new Order( v.getCurrent_order() );
+				v.getCurrent_order().type = Order.OT_LOADING;
+				v.getCurrent_order().flags = 0;
 
 				if (old_order.type == Order.OT_GOTO_STATION &&
-						v.current_order.station == v.last_station_visited) {
-					v.current_order.flags =
+						v.getCurrent_order().station == v.last_station_visited) {
+					v.getCurrent_order().flags =
 							(old_order.flags & (Order.OF_FULL_LOAD | Order.OF_UNLOAD | Order.OF_TRANSFER)) | Order.OF_NON_STOP;
 				}
 
@@ -1438,13 +1439,13 @@ class RoadDriveEntry {
 				return;
 			}
 
-			if (v.current_order.type != Order.OT_GOTO_DEPOT) {
+			if (v.getCurrent_order().type != Order.OT_GOTO_DEPOT) {
 				if(0 != (rs.status & 0x80)) {
 					v.cur_speed = 0;
 					return;
 				}
-				v.current_order.type = Order.OT_NOTHING;
-				v.current_order.flags = 0;
+				v.getCurrent_order().type = Order.OT_NOTHING;
+				v.getCurrent_order().flags = 0;
 			}
 			rs.status |= 0x80;
 
@@ -1491,13 +1492,13 @@ class RoadDriveEntry {
 
 		v.TriggerVehicle(Engine.VEHICLE_TRIGGER_DEPOT);
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT) 
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) 
 		{
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
-			Order t = new Order( v.current_order );
-			v.current_order.type = Order.OT_DUMMY;
-			v.current_order.flags = 0;
+			Order t = new Order( v.getCurrent_order() );
+			v.getCurrent_order().type = Order.OT_DUMMY;
+			v.getCurrent_order().flags = 0;
 
 			// Part of the orderlist?
 			if (BitOps.HASBIT(t.flags, Order.OFB_PART_OF_ORDERS)) {
@@ -1551,8 +1552,8 @@ class RoadDriveEntry {
 
 		// Don't interfere with a depot visit scheduled by the user, or a
 		// depot visit by the order list.
-		if (v.current_order.type == Order.OT_GOTO_DEPOT &&
-				(v.current_order.flags & (Order.OF_HALT_IN_DEPOT | Order.OF_PART_OF_ORDERS)) != 0)
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT &&
+				(v.getCurrent_order().flags & (Order.OF_HALT_IN_DEPOT | Order.OF_PART_OF_ORDERS)) != 0)
 			return;
 
 		//If we already got a slot at a stop, use that FIRST, and go to a depot later
@@ -1562,22 +1563,22 @@ class RoadDriveEntry {
 		depot = FindClosestRoadDepot(v);
 
 		if (depot == null || Map.DistanceManhattan(v.tile, depot.xy) > 12) {
-			if (v.current_order.type == Order.OT_GOTO_DEPOT) {
-				v.current_order.type = Order.OT_DUMMY;
-				v.current_order.flags = 0;
+			if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
+				v.getCurrent_order().type = Order.OT_DUMMY;
+				v.getCurrent_order().flags = 0;
 				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			}
 			return;
 		}
 
-		if (v.current_order.type == Order.OT_GOTO_DEPOT &&
-				0 != (v.current_order.flags & Order.OF_NON_STOP) &&
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT &&
+				0 != (v.getCurrent_order().flags & Order.OF_NON_STOP) &&
 				!BitOps.CHANCE16(1,20))
 			return;
 
-		v.current_order.type = Order.OT_GOTO_DEPOT;
-		v.current_order.flags = Order.OF_NON_STOP;
-		v.current_order.station = depot.index;
+		v.getCurrent_order().type = Order.OT_GOTO_DEPOT;
+		v.getCurrent_order().flags = Order.OF_NON_STOP;
+		v.getCurrent_order().station = depot.index;
 		v.dest_tile = depot.xy;
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 	}
@@ -1605,13 +1606,13 @@ class RoadDriveEntry {
 		Order.CheckOrders(v.index, Order.OC_INIT);
 
 		/* update destination */
-		if ( v.current_order != null
-				&& v.current_order.type == Order.OT_GOTO_STATION 
+		if ( v.getCurrent_order() != null
+				&& v.getCurrent_order().type == Order.OT_GOTO_STATION 
 				&& 0==(v.vehstatus & Vehicle.VS_CRASHED)) 
 		{
 			RoadStopType type = (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) ? RoadStopType.RS_BUS : RoadStopType.RS_TRUCK;
 
-			st = Station.GetStation(v.current_order.station);
+			st = Station.GetStation(v.getCurrent_order().station);
 
 			//Current slot has expired
 			if ( (v.road.slot_age++ <= 0) && (v.road.slot != null))

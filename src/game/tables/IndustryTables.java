@@ -1309,7 +1309,7 @@ public class IndustryTables
 
 	
 	public static final IndustrySpec _industry_spec[] = {
-	/*        name                    not close to   produce prodrate  accepts     checkproc */
+	          /*        name                    not close to   produce prodrate  accepts     checkproc */
 		new IndustrySpec(_tile_table_coal_mine,         1,255,255,    1,255,  15, 0,  255,255,255,  0),
 		new IndustrySpec(_tile_table_power_station,     0,255,255,  255,255,   0, 0,    1,255,255,  0),
 		new IndustrySpec(_tile_table_sawmill,           3,255,255,    5,255,   0, 0,    7,255,255,  0),

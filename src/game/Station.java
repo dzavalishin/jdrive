@@ -2690,10 +2690,10 @@ public class Station extends StationTables implements IPoolItem
 			{
 
 				station_id = tile.getMap().m2;
-				if ((0==(v.current_order.flags & Order.OF_NON_STOP) && !Global._patches.new_nonstop) ||
-						(v.current_order.type == Order.OT_GOTO_STATION && v.current_order.station == station_id)) {
-					if (!(Global._patches.new_nonstop && 0!=(v.current_order.flags & Order.OF_NON_STOP) ) &&
-							v.current_order.type != Order.OT_LEAVESTATION &&
+				if ((0==(v.getCurrent_order().flags & Order.OF_NON_STOP) && !Global._patches.new_nonstop) ||
+						(v.getCurrent_order().type == Order.OT_GOTO_STATION && v.getCurrent_order().station == station_id)) {
+					if (!(Global._patches.new_nonstop && 0!=(v.getCurrent_order().flags & Order.OF_NON_STOP) ) &&
+							v.getCurrent_order().type != Order.OT_LEAVESTATION &&
 							v.last_station_visited != station_id) {
 						x &= 0xF;
 						y &= 0xF;
