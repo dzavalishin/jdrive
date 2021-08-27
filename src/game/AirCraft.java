@@ -1,6 +1,8 @@
 package game;
 import game.enums.Owner;
+
 import game.enums.TileTypes;
+import game.ifaces.AircraftStateHandler;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.PlayerID;
@@ -28,7 +30,6 @@ import game.xui.WindowDesc;
 import game.xui.WindowEvent;
 
 import java.util.Iterator;
-import java.util.function.BiConsumer;
 
 
 public class AirCraft extends AirCraftTables {
@@ -55,12 +56,9 @@ public class AirCraft extends AirCraftTables {
 	 */
 	static StationID FindNearestHangar(final Vehicle v)
 	{
-		//final Station st;
 		int best = 0;
 		int index = StationID.getInvalid().id;
 
-		//FOR_ALL_STATIONS(st)
-		//Station.forEach( (st) ->
 		Iterator<Station> ii = Station.getIterator();
 		while(ii.hasNext())
 		{
@@ -145,7 +143,9 @@ public class AirCraft extends AirCraftTables {
 	}
 
 
-	/** Build an aircraft.
+	/** 
+	 * Build an aircraft.
+	 * 
 	 * @param x,y tile coordinates of depot where aircraft is built
 	 * @param p1 aircraft type being built (engine)
 	 * @param p2 unused
@@ -153,7 +153,6 @@ public class AirCraft extends AirCraftTables {
 	static int CmdBuildAircraft(int x, int y, int flags, int p1, int p2)
 	{
 		int value;
-		//Vehicle vl[3], *v, *u, *w;
 		Vehicle v, u, w;
 		Vehicle [] vl  = new Vehicle[3];
 		UnitID unit_num;
@@ -629,9 +628,6 @@ public class AirCraft extends AirCraftTables {
 
 	static void AircraftYearlyLoop()
 	{
-		//		Vehicle v;
-
-		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
 			if (v.type == Vehicle.VEH_Aircraft && v.subtype <= 2) {
@@ -1210,10 +1206,6 @@ public class AirCraft extends AirCraftTables {
 	}
 
 
-	/*static final struct {
-		int8 x;
-		int8 y;
-	} */
 	static final Point [] smoke_pos = {
 			new Point(  5,  5 ),
 			new Point(  6,  0 ),
@@ -1842,8 +1834,8 @@ public class AirCraft extends AirCraftTables {
 	}
 
 	static final AircraftStateHandler [] _aircraft_state_handlers = {
-			AirCraft::AircraftEventHandler_General,				// TO_ALL         =  0
-			AirCraft::AircraftEventHandler_InHangar,			// HANGAR         =  1
+			AirCraft::AircraftEventHandler_General,			// TO_ALL         =  0
+			AirCraft::AircraftEventHandler_InHangar,		// HANGAR         =  1
 			AirCraft::AircraftEventHandler_AtTerminal,		// TERM1          =  2
 			AirCraft::AircraftEventHandler_AtTerminal,		// TERM2          =  3
 			AirCraft::AircraftEventHandler_AtTerminal,		// TERM3          =  4
@@ -1852,15 +1844,15 @@ public class AirCraft extends AirCraftTables {
 			AirCraft::AircraftEventHandler_AtTerminal,		// TERM6          =  7
 			AirCraft::AircraftEventHandler_AtTerminal,		// HELIPAD1       =  8
 			AirCraft::AircraftEventHandler_AtTerminal,		// HELIPAD2       =  9
-			AirCraft::AircraftEventHandler_TakeOff,				// TAKEOFF        = 10
+			AirCraft::AircraftEventHandler_TakeOff,			// TAKEOFF        = 10
 			AirCraft::AircraftEventHandler_StartTakeOff,	// STARTTAKEOFF   = 11
 			AirCraft::AircraftEventHandler_EndTakeOff,		// ENDTAKEOFF     = 12
 			AirCraft::AircraftEventHandler_HeliTakeOff,		// HELITAKEOFF    = 13
-			AirCraft::AircraftEventHandler_Flying,				// FLYING         = 14
-			AirCraft::AircraftEventHandler_Landing,				// LANDING        = 15
+			AirCraft::AircraftEventHandler_Flying,			// FLYING         = 14
+			AirCraft::AircraftEventHandler_Landing,			// LANDING        = 15
 			AirCraft::AircraftEventHandler_EndLanding,		// ENDLANDING     = 16
 			AirCraft::AircraftEventHandler_HeliLanding,		// HELILANDING    = 17
-			AirCraft::AircraftEventHandler_HeliEndLanding,// HELIENDLANDING = 18
+			AirCraft::AircraftEventHandler_HeliEndLanding,	// HELIENDLANDING = 18
 	};
 
 	static void AirportClearBlock(final Vehicle  v, final AirportFTAClass Airport)
@@ -2185,9 +2177,6 @@ public class AirCraft extends AirCraftTables {
 
 	static void UpdateOilRig()
 	{
-		//Station  st;
-
-		//FOR_ALL_STATIONS(st) 
 		Station.forEach( (st) ->
 		{
 			if (st.airport_type == 5) st.airport_type = Airport.AT_OILRIG;
@@ -2197,11 +2186,9 @@ public class AirCraft extends AirCraftTables {
 	// need to be called to load aircraft from old version
 	static void UpdateOldAircraft()
 	{
-		//Station st;
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 
 		// set airport_flags to 0 for all airports just to be sure
-		//FOR_ALL_STATIONS(st)
 		Station.forEach( (st) ->
 		{
 			st.airport_flags = 0; // reset airport
@@ -2209,7 +2196,6 @@ public class AirCraft extends AirCraftTables {
 			if (st.airport_type == 3) st.airport_type = Airport.AT_OILRIG;
 		});
 
-		//FOR_ALL_VEHICLES(v_oldstyle)
 		Iterator<Vehicle> ii = Vehicle.getIterator();
 		while(ii.hasNext())
 		{
@@ -3598,8 +3584,4 @@ public class AirCraft extends AirCraftTables {
 }
 
 
-
-//typedef void AircraftStateHandler(Vehicle v, final AirportFTAClass Airport);
-@FunctionalInterface
-interface AircraftStateHandler extends BiConsumer<Vehicle, AirportFTAClass> {}
 
