@@ -8,6 +8,8 @@ You're welcome to take part in testing and/or development!
 
 Screenshots:
 
+![27 Aug 2021](https://raw.githubusercontent.com/dzavalishin/jdrive/master/docs/history/2021-08-27_18-20-18.png)
+
 ![23 Aug 2021](https://user-images.githubusercontent.com/11458393/130508122-ea062c84-1a82-4f90-ab91-c5e9f677639f.png)
 
 
