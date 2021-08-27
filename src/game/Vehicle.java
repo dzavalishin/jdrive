@@ -912,7 +912,7 @@ public class Vehicle implements IPoolItem
 
 	public Object EnsureNoVehicleProc(Object data)
 	{
-		if (tile != data || type == VEH_Disaster)
+		if (!tile.equals(data) || type == VEH_Disaster)
 			return null;
 
 		VehicleInTheWayErrMsg();
@@ -928,7 +928,7 @@ public class Vehicle implements IPoolItem
 	{
 		final TileInfo ti = (TileInfo) data;
 
-		if (tile != ti.tile || z_pos != ti.z || type == VEH_Disaster)
+		if (!tile.equals(ti.tile) || z_pos != ti.z || type == VEH_Disaster)
 			return null;
 
 		VehicleInTheWayErrMsg();
@@ -2789,7 +2789,7 @@ public class Vehicle implements IPoolItem
 		/* When vehicle_enter_tile_proc returns 8, that apparently means that
 		 * we cannot enter the tile at all. In that case, don't call
 		 * leave_tile. */
-		if (0 == (result & 8) && old_tile != itile) {
+		if (0 == (result & 8) && !old_tile.equals(itile)) {
 			TileVehicleInterface proc = Landscape._tile_type_procs[old_tile.GetTileType().ordinal()].vehicle_leave_tile_proc;
 			if (proc != null)
 				proc.apply(this, old_tile, x, y);

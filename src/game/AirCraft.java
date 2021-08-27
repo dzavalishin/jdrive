@@ -855,7 +855,7 @@ public class AirCraft extends AirCraftTables {
 		gp.y = y;
 		gp.old_tile = v.tile;
 		gp.new_tile = TileIndex.TileVirtXY(x,y);
-		return gp.old_tile == gp.new_tile;
+		return gp.old_tile.equals( gp.new_tile );
 	}
 
 	static boolean AircraftController(Vehicle v)
@@ -2393,7 +2393,7 @@ public class AirCraft extends AirCraftTables {
 		if (success) {
 			final Vehicle  v = Vehicle.GetVehicle(Global._new_aircraft_id);
 
-			if (v.tile == Global._backup_orders_tile) {
+			if (v.tile.equals( Global._backup_orders_tile )) {
 				Global._backup_orders_tile = null;
 				Vehicle.RestoreVehicleOrders(v, Global._backup_orders_data[0]);
 			}
@@ -3484,7 +3484,7 @@ public class AirCraft extends AirCraftTables {
 
 					tile = tile.iadd(1);
 					tile.TILE_MASK();
-				} while(tile != Depot._last_built_aircraft_depot_tile);
+				} while(!tile.equals(Depot._last_built_aircraft_depot_tile));
 
 				ShowBuildAircraftWindow(null);
 			} break;

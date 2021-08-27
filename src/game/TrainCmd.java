@@ -1544,7 +1544,7 @@ public class TrainCmd extends TrainTables
 			TileIndex tile = TileIndex.AddTileIndexDiffCWrap(v.tile, TileIndex.TileIndexDiffCByDir(Rail.TrackdirToExitdir(trackdir)));
 
 			int ts;
-			assert(tile != TileIndex.INVALID_TILE);
+			assert(tile.isValid());
 
 			ts = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_RAIL);
 			ts &= Rail.TrackdirReachesTrackdirs(trackdir);
@@ -3332,7 +3332,7 @@ public class TrainCmd extends TrainTables
 		v.y_pos = gp.y;
 
 		// update the Z position of the vehicle 
-		int old_z = AfterSetTrainPos(v, (gp.new_tile != gp.old_tile));
+		int old_z = AfterSetTrainPos(v, (!gp.new_tile.equals(gp.old_tile)));
 
 		if (prev == null) {
 			// This is the first vehicle in the train 
@@ -3375,7 +3375,7 @@ public class TrainCmd extends TrainTables
 				Pbs.PBSClearPath(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track), v.rail.pbs_end_tile, v.rail.pbs_end_trackdir);
 				Pbs.PBSClearPath(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track) + 8, v.rail.pbs_end_tile, v.rail.pbs_end_trackdir);
 			};
-			if (v.tile != u.tile) {
+			if (!v.tile.equals(u.tile)) {
 				Pbs.PBSClearTrack(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track));
 			};
 		}

@@ -835,7 +835,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	{
 		OvertakeData od = (OvertakeData) o;
 
-		if (v.tile != od.tile || v.type != Vehicle.VEH_Road || v == od.u || v == od.v)
+		if (!v.tile.equals(od.tile) || v.type != Vehicle.VEH_Road || v == od.u || v == od.v)
 			return null;
 		return v;
 	}
@@ -1011,7 +1011,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (v.road.reverse_ctr != 0) {
 			/* What happens here?? */
 			v.road.reverse_ctr = 0;
-			if (v.tile != tile) {
+			if (!v.tile.equals(tile)) {
 				return return_track(_road_reverse_table[enterdir],signal);
 			}
 		}

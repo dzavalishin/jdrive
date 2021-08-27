@@ -744,12 +744,6 @@ public class Landscape extends GenLandTable
 				).TILE_MASK();
 	}
 
-	/*
-	// TODO move 
-	static boolean IsValidTile(TileIndex tile)
-	{
-		return (tile.getTile() < Global.MapSizeX() * Global.MapMaxY() && tile.TileX() != Global.MapMaxX());
-	}*/
 
 
 

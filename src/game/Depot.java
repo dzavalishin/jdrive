@@ -196,7 +196,8 @@ public class Depot implements IPoolItem, Serializable
 		Depot [] ret = {null};
 		_depot_pool.forEach( (i,depot) ->
 		{
-			if (depot.xy.getTile() == tile.getTile())
+			//if (depot.xy.getTile() == tile.getTile())
+			if (depot.xy.equals(tile))
 				ret[0] = depot;
 		});
 

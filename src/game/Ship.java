@@ -458,7 +458,7 @@ public class Ship {
 		}
 
 		// Skip this tile in the calculation
-		if (tile != pfs.skiptile) {
+		if (!tile.equals(pfs.skiptile)) {
 			pfs.best_bird_dist = (int) BitOps.minu(pfs.best_bird_dist, Map.DistanceMaxPlusManhattan(pfs.dest_coords, tile));
 		}
 

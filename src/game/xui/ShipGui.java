@@ -1143,7 +1143,7 @@ public class ShipGui
 
 				tile = tile.iadd(1);
 				tile.TILE_MASK();
-			} while(tile != Depot._last_built_ship_depot_tile);
+			} while(!tile.equals(Depot._last_built_ship_depot_tile));
 
 			ShowBuildShipWindow(null);
 		} break;
