@@ -254,7 +254,7 @@ private void WaypointPoolNewBlock(int start_item)
 		while(ii.hasNext())
 		{
 			WayPoint wp = ii.next();
-			if ( (0 != wp.deleted) && (null != wp.xy) ) {
+			if ( (0 != wp.deleted) && wp.isValid() ) {
 				cur_dist = Map.DistanceManhattan(tile, wp.xy);
 				if (cur_dist < thres) {
 					thres = cur_dist;

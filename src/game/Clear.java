@@ -348,10 +348,8 @@ public class Clear extends ClearTables {
 			/* finally mark the dirty tiles dirty */
 			{
 				int count = ts.tile_table_count;
-				//MutableTileIndex ti = new MutableTileIndex( ts.tile_table );
 				for (int i = 0 ; i < count; i++) {
 					ts.tile_table[i].MarkTileDirtyByTile();
-					//ti.madd(1); // TODO check all .add / .sub for modification of TileIndex stored elsewhere
 				}
 			}
 		}

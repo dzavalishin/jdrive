@@ -330,9 +330,6 @@ public class Main {
 		// TODO LoadFromHighScore();
 
 		// override config?
-		// TODO if (musicdriver[0]) ttd_strlcpy(_ini_musicdriver, musicdriver, sizeof(_ini_musicdriver));
-		// TODO if (sounddriver[0]) ttd_strlcpy(_ini_sounddriver, sounddriver, sizeof(_ini_sounddriver));
-		// TODO if (videodriver[0]) ttd_strlcpy(_ini_videodriver, videodriver, sizeof(_ini_videodriver));
 		// TODO if (resolution[0]) { _cur_resolution[0] = resolution[0]; _cur_resolution[1] = resolution[1]; }
 		if (startdate != -1) Global._patches.starting_date = startdate;
 
@@ -370,10 +367,7 @@ public class Main {
 		GfxInit.GfxLoadSprites();
 		Gfx.LoadStringWidthTable();
 
-		Global.DEBUG_misc( 1, "Loading drivers...");
-		// TODO LoadDriver(SOUND_DRIVER, _ini_sounddriver);
-		// TODO LoadDriver(MUSIC_DRIVER, _ini_musicdriver);
-		// TODO LoadDriver(VIDEO_DRIVER, _ini_videodriver); // load video last, to prevent an empty window while sound and music loads
+		//Global.DEBUG_misc( 1, "Loading drivers...");
 		// TODO _savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 
 		// initialize network-core
@@ -422,7 +416,7 @@ public class Main {
 		Global.hal.main_loop();
 
 		// TODO WaitTillSaved();
-		// TODO Console.IConsoleFree();
+		//Console.IConsoleFree();
 
 		/*
 		if (_network_available) {
@@ -433,7 +427,6 @@ public class Main {
 		}
 		 */
 
-		//_video_driver.stop();
 		Global.hal.stop_video();
 		//_music_driver.stop(); TODO return
 		//_sound_driver.stop(); TODO return

@@ -128,11 +128,5 @@ public class GenerateWorld {
 	}
 
 
-	/* Global
-	static void InitializeNameMgr()
-	{
-		// TODO memset(_name_array, 0, sizeof(_name_array));
-	}*/
-	
 	
 }

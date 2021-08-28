@@ -22,8 +22,8 @@ public class Hal
 {
 	MainWindow mw = null;
 
-	private static byte[] screen1; // TODO static
-	private static byte[] screen2; // TODO static
+	private static byte[] screen1; 
+	private static byte[] screen2; 
 	
 	
 	void toggle_fullscreen(boolean fullscreen) { } // TODO
@@ -290,7 +290,6 @@ void SortResolutions(int count)
 			//Window._left_button_clicked = false;
 			//Window._right_button_clicked = false;
 
-			// TODO return me 
 			if (Global._force_full_redraw)					
 				MarkWholeScreenDirty();
 

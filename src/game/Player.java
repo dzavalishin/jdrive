@@ -674,7 +674,7 @@ public class Player implements Serializable
 
 		p.avail_railtypes = GetPlayerRailtypes(p.index);
 		p.inaugurated_year = Global._cur_year;
-		p.face = Hal.Random(); // TODO range?
+		p.face = Hal.Random();
 
 		/* Engine renewal settings */
 		p.InitialiseEngineReplacement();

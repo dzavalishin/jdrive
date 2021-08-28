@@ -107,11 +107,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	public static final int INDUSTRY_POOL_MAX_BLOCKS      = 8000;
 
 
-	private static final IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() {
-
-		/**
-		 * 
-		 */
+	private static final IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() 
+	{
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -162,11 +159,11 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	
 	/**
 	 * Check if an Industry really exists.
-	 */
+	 * /
 	public static boolean IsValidIndustry(Industry industry)
 	{
-		return industry.isValid(); /* XXX: Replace by INVALID_TILE someday */
-	}
+		return industry.isValid(); 
+	} */
 
 	/**
 	 * Get the pointer to the industry with index 'index'

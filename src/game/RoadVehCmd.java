@@ -799,8 +799,6 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 			int t = 0xff & v.progress;
 			v.progress = BitOps.uint16Wrap( t - spd );
-			//int t = v.progress;
-			//v.progress = t + spd; // TODO XXX [dz] changed to + - WHY?
 
 			return (t < v.progress);
 	}

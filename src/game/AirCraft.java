@@ -3294,14 +3294,10 @@ public class AirCraft extends AirCraftTables {
 	}
 
 	static void DrawSmallOrderList(final Vehicle v, int x, int y) {
-		//final Order order;
 		int sel, i = 0;
 
 		sel = v.cur_order_index;
 
-		//FOR_VEHICLE_ORDERS(v, order)
-		// TODO iterator
-		//v.forEachOrder( (order) ->
 		Iterator<Order> oi = v.getOrdersIterator();
 		while(oi.hasNext())
 		{

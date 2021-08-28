@@ -972,7 +972,7 @@ public class DisasterCmd extends DisasterTables
 		Global._disaster_delay = BitOps.GB(Hal.Random(), 0, 9) + 730;
 	}
 
-	void DisasterDailyLoop()
+	static void DisasterDailyLoop()
 	{
 		if (--Global._disaster_delay != 0) return;
 

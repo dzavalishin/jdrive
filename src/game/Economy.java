@@ -682,14 +682,10 @@ public class Economy extends EconomeTables
 
 	static void PlayersGenStatistics()
 	{
-		//Station st;
-		//Player p;
-
-		//FOR_ALL_STATIONS(st)
 		Station.forEach( (ii,st) ->
 		{
 			if (st.getXy() != null) {
-				Global.gs._current_player = st.owner; // TODO kill global
+				Global.gs._current_player = st.owner; 
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
 				Player.SubtractMoneyFromPlayer(Global._price.station_value >> 1);
 			}
@@ -698,7 +694,6 @@ public class Economy extends EconomeTables
 		if (!BitOps.HASBIT(1<<0|1<<3|1<<6|1<<9, Global._cur_month))
 			return;
 
-		//FOR_ALL_PLAYERS(p) 
 		Player.forEach( (p) ->
 		{
 			if (p.is_active) {

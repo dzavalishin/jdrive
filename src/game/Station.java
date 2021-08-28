@@ -730,7 +730,7 @@ public class Station extends StationTables implements IPoolItem
 		//FOR_ALL_STATIONS(st) 
 		_station_pool.forEach( (i,st) ->
 		{
-			if (st.xy == null) {
+			if (!st.isValid()) {
 				StationID index = StationID.get(st.index);
 
 				//memset(st, 0, sizeof(Station));

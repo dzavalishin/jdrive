@@ -106,11 +106,9 @@ public class Map {
 		Global._map_size = size_x * size_y;
 		Global._map_tile_mask = Global._map_size - 1;
 
-		//free(_m);
 		Global._m = new Tile[Global._map_size];
 
-		// XXX TODO handle memory shortage more gracefully
-		if (Global._m == null) Global.error("Failed to allocate memory for the map");
+		if (Global._m == null) Global.fatal("Failed to allocate memory for the map");
 	}
 
 
