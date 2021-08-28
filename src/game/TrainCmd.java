@@ -2795,11 +2795,9 @@ public class TrainCmd extends TrainTables
 		v.rail.crash_anim_pos++;
 
 		u = v;
-		//BEGIN_ENUM_WAGONS(v)
 		do {
-			v.setCrashed()
+			v.setCrashed(true);
 		} while ( (v=v.next) != null);
-		//END_ENUM_WAGONS(v)
 
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, u.index, Vehicle.STATUS_BAR);
 	}

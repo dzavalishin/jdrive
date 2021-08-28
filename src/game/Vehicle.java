@@ -3765,7 +3765,7 @@ public class Vehicle implements IPoolItem
 	}
 
 	public void setCurrent_order(Order order) {
-		Global.debug("set %s", order);
+		//Global.debug("set %s", order);
 		this.current_order = new Order( order );
 	}
 

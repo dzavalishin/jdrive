@@ -660,7 +660,7 @@ public class WaterCmd extends WaterTables
 				if (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS)
 					pass[0] += v.cargo_count;
 
-				v.setCrashed()
+				v.setCrashed(true);
 				v.road.crashed_ctr = 2000;	// max 2220, disappear pretty fast
 				VehicleGui.RebuildVehicleLists();
 			} else if (v.type == Vehicle.VEH_Train) {
