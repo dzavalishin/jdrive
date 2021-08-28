@@ -34,7 +34,7 @@ public class MultilineString
 
 			for(;;) {
 				if (sp >= sc.length) 
-					break;
+				{ last_space = sp; break; }
 				/*{
 					addLine( new String( sc, lineStart, sp-lineStart), base );
 					return; // num + (base << 16);
