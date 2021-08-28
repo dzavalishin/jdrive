@@ -108,7 +108,7 @@ public class Map {
 
 		Global._m = new Tile[Global._map_size];
 
-		if (Global._m == null) Global.fatal("Failed to allocate memory for the map");
+		if (Global._m == null) Global.error("Failed to allocate memory for the map");
 	}
 
 
