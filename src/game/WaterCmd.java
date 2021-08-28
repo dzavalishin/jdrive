@@ -652,7 +652,7 @@ public class WaterCmd extends WaterTables
 
 	static void FloodVehicle(Vehicle v)
 	{
-		if (0==(v.vehstatus & Vehicle.VS_CRASHED)) {
+		if (!v.isCrashed()) {
 			int[] pass = {0};
 
 			if (v.type == Vehicle.VEH_Road) {	// flood bus/truck
@@ -660,7 +660,7 @@ public class WaterCmd extends WaterTables
 				if (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS)
 					pass[0] += v.cargo_count;
 
-				v.vehstatus |= Vehicle.VS_CRASHED;
+				v.setCrashed()
 				v.road.crashed_ctr = 2000;	// max 2220, disappear pretty fast
 				VehicleGui.RebuildVehicleLists();
 			} else if (v.type == Vehicle.VEH_Train) {
@@ -671,13 +671,11 @@ public class WaterCmd extends WaterTables
 				if (v.IsFrontEngine()) pass[0] = 4; // driver
 
 				// crash all wagons, and count passangers
-				//BEGIN_ENUM_WAGONS(v)
 				v.forEachWagon( (vw) -> 
 				{
 					if (vw.getCargo_type() == AcceptedCargo.CT_PASSENGERS) pass[0] += vw.cargo_count;
-					vw.vehstatus |= Vehicle.VS_CRASHED;
+					vw.setCrashed(true);
 				});
-				//END_ENUM_WAGONS(v)
 
 				v = u;
 				v.rail.crash_anim_pos = 4000; // max 4440, disappear pretty fast

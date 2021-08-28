@@ -2815,7 +2815,7 @@ public class Rail extends RailTables {
 					Pbs.PBSClearTrack(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track));
 
 				v.rail.setInDepot();
-				v.vehstatus |= Vehicle.VS_HIDDEN; /* hide it */
+				v.setHidden(true); /* hide it */
 				v.direction ^= 4;
 
 				if (v.next == null)
@@ -2829,7 +2829,7 @@ public class Rail extends RailTables {
 			if (_leave_directions[dir] == v.direction) {
 				/* leave the depot? */
 				if ((v=v.next) != null) {
-					v.vehstatus &= ~Vehicle.VS_HIDDEN;
+					v.setHidden(false); 
 					v.rail.track =  _depot_track_mask[dir];
 					assert(v.rail.track != 0);
 				}

@@ -1485,7 +1485,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 							Pbs.PBSClearTrack(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track));
 						v.tile = tile;
 						v.rail.setInTunnel();
-						v.vehstatus |= Vehicle.VS_HIDDEN;
+						v.setHidden(true);
 						return 4;
 					}
 				}
@@ -1495,7 +1495,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					v.tile = tile;
 					v.rail.track =  _exit_tunnel_track[dir];
 					assert(v.rail.track != 0);
-					v.vehstatus &= ~Vehicle.VS_HIDDEN;
+					v.setHidden(false);
 					return 4;
 				}
 			} else if (v.type == Vehicle.VEH_Road) {
@@ -1510,7 +1510,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 						v.tile = tile;
 						v.road.setInTunnel();
-						v.vehstatus |= Vehicle.VS_HIDDEN;
+						v.setHidden(true);
 						return 4;
 					} else {
 						return 0;
@@ -1525,7 +1525,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					v.tile = tile;
 					v.road.state = _road_exit_tunnel_state[dir];
 					v.road.frame = _road_exit_tunnel_frame[dir];
-					v.vehstatus &= ~Vehicle.VS_HIDDEN;
+					v.setHidden(false);
 					return 4;
 				}
 			}

@@ -281,7 +281,7 @@ public class DisasterCmd extends DisasterTables
 
 			dist = Math.abs(v.getX_pos() - u.getX_pos()) + Math.abs(v.getY_pos() - u.getY_pos());
 
-			if (dist < 16 && 0==(u.vehstatus&Vehicle.VS_HIDDEN) && u.breakdown_ctr==0) {
+			if (dist < 16 && !u.isHidden() && u.breakdown_ctr==0) {
 				u.breakdown_ctr = 3;
 				u.breakdown_delay = 140;
 			}
@@ -293,11 +293,11 @@ public class DisasterCmd extends DisasterTables
 			if (dist <= 16 && z > u.z_pos) z--;
 			SetDisasterVehiclePos(v, gp.x, gp.y, z);
 
-			if (z <= u.z_pos && (u.vehstatus&Vehicle.VS_HIDDEN)==0) {
+			if (z <= u.z_pos && !u.isHidden() ) {
 				v.age++;
 				if (u.road.crashed_ctr == 0) {
 					u.road.crashed_ctr++;
-					u.vehstatus |= Vehicle.VS_CRASHED;
+					u.setCrashed(true);
 
 					NewsItem.AddNewsItem(Str.STR_B001_ROAD_VEHICLE_DESTROYED,
 							NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ACCIDENT, 0),

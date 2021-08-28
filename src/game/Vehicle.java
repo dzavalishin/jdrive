@@ -886,7 +886,7 @@ public class Vehicle implements IPoolItem
 
 	public boolean VehicleNeedsService()
 	{
-		if( 0 != (vehstatus & VS_CRASHED) )
+		if(isCrashed())
 			return false; /* Crashed vehicles don't need service anymore */
 
 		if (Player.GetPlayer(owner).engine_replacement[engine_type.id] != INVALID_ENGINE)
@@ -1459,7 +1459,7 @@ public class Vehicle implements IPoolItem
 		if(0!=(v.vehstatus & VS_DISASTER)) {
 			image = Sprite.RET_MAKE_TRANSPARENT(image);
 		} else if( 0 != (v.vehstatus & VS_DEFPAL) ) {
-			image |= (0!=(v.vehstatus & VS_CRASHED)) ? Sprite.PALETTE_CRASH : Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner));
+			image |= v.isCrashed() ? Sprite.PALETTE_CRASH : Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner));
 		}
 
 		ViewPort.AddSortableSpriteToDraw(image, v.x_pos + v.x_offs, v.y_pos + v.y_offs,
@@ -1477,15 +1477,13 @@ public class Vehicle implements IPoolItem
 		{
 			Vehicle v  = Vehicle.GetVehicle(vi);
 
-			if( v != null &&
-					0 == (v.vehstatus & VS_HIDDEN) &&
+			if( v != null && !v.isHidden() &&
 					dpi.left <= v.right_coord &&
 					dpi.top <= v.bottom_coord &&
 					dpi.left + dpi.width >= v.left_coord &&
 					dpi.top + dpi.height >= v.top_coord ) {
 				DoDrawVehicle(v);
 			}
-			//	veh = v.next_hash;
 		}
 		
 		/*
@@ -2209,7 +2207,7 @@ public class Vehicle implements IPoolItem
 		if ((rel_old >> 8) != (rel >> 8))
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
-		if (v.breakdown_ctr != 0 || (0 != (v.vehstatus & VS_STOPPED)) ||
+		if (v.breakdown_ctr != 0 || v.isStopped() ||
 				v.cur_speed < 5 || Global._game_mode == GameModes.GM_MENU) {
 			return;
 		}
@@ -2583,7 +2581,7 @@ public class Vehicle implements IPoolItem
 
 					NewsItem.AddNewsItem(message, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 				}
-				if (stopped) v.vehstatus &= ~VS_STOPPED;
+				if (stopped) v.setStopped(false);
 				Global.gs._current_player = PlayerID.get(Owner.OWNER_NONE);
 				return 0;
 			}
@@ -2633,7 +2631,7 @@ public class Vehicle implements IPoolItem
 
 		if (Player.IsLocalPlayer()) MiscGui.ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
 
-		if (stopped) v.vehstatus &= ~VS_STOPPED;
+		if (stopped) v.setStopped(false);
 		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
 
 		return 0;
@@ -2743,39 +2741,39 @@ public class Vehicle implements IPoolItem
 
 	/* Trackdir */ int GetVehicleTrackdir()
 	{
-		final Vehicle  v = this;
+		//final Vehicle  v = this;
 
-		if( 0 != (v.vehstatus & VS_CRASHED)) 
+		if(isCrashed())
 			return Rail.INVALID_TRACKDIR;
 		//return Trackdir.INVALID_TRACKDIR;
 
-		switch(v.type)
+		switch(type)
 		{
 		case VEH_Train:
-			if (v.rail.isInDepot()) /* We'll assume the train is facing outwards */
-				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_RAIL)); /* Train in depot */
+			if (rail.isInDepot()) /* We'll assume the train is facing outwards */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, Global.TRANSPORT_RAIL)); /* Train in depot */
 
-			if (v.rail.isInTunnel()) /* train in tunnel, so just use his direction and assume a diagonal track */
-				return Rail.DiagdirToDiagTrackdir((v.direction >> 1) & 3);
+			if (rail.isInTunnel()) /* train in tunnel, so just use his direction and assume a diagonal track */
+				return Rail.DiagdirToDiagTrackdir((direction >> 1) & 3);
 
-			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.rail.track),v.direction);
+			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(rail.track),direction);
 
 		case VEH_Ship:
 			//if (v.ship.state == 0x80)  /* Inside a depot? */
-			if (v.ship.isInDepot())  /* Inside a depot? */
+			if (ship.isInDepot())  /* Inside a depot? */
 				/* We'll assume the ship is facing outwards */
-				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_WATER)); /* Ship in depot */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, Global.TRANSPORT_WATER)); /* Ship in depot */
 
-			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(v.ship.state),v.direction);
+			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(ship.state),direction);
 
 		case VEH_Road:
-			if (v.road.isInDepot()) /* We'll assume the road vehicle is facing outwards */
-				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(v.tile, Global.TRANSPORT_ROAD)); /* Road vehicle in depot */
+			if (road.isInDepot()) /* We'll assume the road vehicle is facing outwards */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, Global.TRANSPORT_ROAD)); /* Road vehicle in depot */
 
-			if (v.tile.IsRoadStationTile()) /* We'll assume the road vehicle is facing outwards */
-				return Rail.DiagdirToDiagTrackdir(Station.GetRoadStationDir(v.tile)); /* Road vehicle in a station */
+			if (tile.IsRoadStationTile()) /* We'll assume the road vehicle is facing outwards */
+				return Rail.DiagdirToDiagTrackdir(Station.GetRoadStationDir(tile)); /* Road vehicle in a station */
 
-			return Rail.DiagdirToDiagTrackdir((v.direction >> 1) & 3);
+			return Rail.DiagdirToDiagTrackdir((direction >> 1) & 3);
 
 			/* case VEH_Aircraft: case VEH_Special: case VEH_Disaster: */
 		default: return 0xFF;
@@ -3104,6 +3102,7 @@ public class Vehicle implements IPoolItem
 
 	
 	// TODO check against CmdStartStopTrain, replace code there with us
+	// TODO check against setStopped
 	public void stop() {
 		if (type == Vehicle.VEH_Train)
 			rail.days_since_order_progr = 0;
@@ -3574,7 +3573,7 @@ public class Vehicle implements IPoolItem
 			str = Str.STR_8863_CRASHED;
 		} else if (isBroken()) {
 			str = Str.STR_885C_BROKEN_DOWN;
-		} else if(0 != (vehstatus & Vehicle.VS_STOPPED)) {
+		} else if(isStopped()) {
 			str = Str.STR_8861_STOPPED;
 		} else {
 			if (num_orders == 0) {
@@ -3616,8 +3615,28 @@ public class Vehicle implements IPoolItem
 	public boolean isCrashed() { return 0 != (vehstatus & VS_CRASHED); }
 	public boolean isHidden() { return 0 != (vehstatus & VS_HIDDEN); }
 	public boolean isUnclickable() { return (vehstatus & VS_UNCLICKABLE) != 0; }
+	public boolean isTrainSlowing() { return (vehstatus & VS_TRAIN_SLOWING) != 0; }
+	public boolean isAircraftBroken() { return (vehstatus & VS_AIRCRAFT_BROKEN) != 0; }
+	
 
 	public boolean isBroken() { return breakdown_ctr == 1; }
+
+	
+	public void setHidden(boolean b) { setResetStatus(VS_HIDDEN, b); }
+	public void setStopped(boolean b) { setResetStatus(VS_STOPPED, b); }
+	public void setCrashed(boolean b) { setResetStatus(VS_CRASHED, b); }
+	public void setTrainSlowing(boolean b) { setResetStatus(VS_TRAIN_SLOWING, b); }
+	public void setDisaster(boolean b) { setResetStatus(VS_DISASTER, b); }
+	public void setAircraftBroken(boolean b) { setResetStatus(VS_AIRCRAFT_BROKEN, b); }
+	
+	public void toggleStopped() { vehstatus ^= Vehicle.VS_STOPPED; }
+
+	
+	private void setResetStatus(int f, boolean b) 
+	{
+		if(b) vehstatus |= f;
+		else vehstatus &= ~f;		
+	}
 
 	public UnitID getUnitnumber() { return unitnumber; }
 	public int getAge() { return age; }

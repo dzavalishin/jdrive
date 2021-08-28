@@ -153,7 +153,7 @@ public class OrderGui {
 							}
 						}
 
-						if( 0 != (order.getFlags() & Order.OF_FULL_LOAD)) s++; /* service at */
+						if( order.hasFlags(Order.OF_FULL_LOAD)) s++; /* service at */
 
 						Global.SetDParam(1, s);
 						break;
