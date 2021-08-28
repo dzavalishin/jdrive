@@ -326,7 +326,7 @@ public class Economy extends EconomeTables
 		PlayerID old = Global.gs._current_player;
 		Global.gs._current_player = old_player;
 
-		if (new_player.id == Owner.OWNER_SPECTATOR) {
+		if (new_player.isSpectator()) {
 
 			for (int i = 0; i < Subsidy._subsidies.length; i++) 
 			{
@@ -404,7 +404,7 @@ public class Economy extends EconomeTables
 				Vehicle v = vii.next();
 				if (v.owner == old_player && BitOps.IS_INT_INSIDE(v.type, Vehicle.VEH_Train, Vehicle.VEH_Aircraft+1) ) 
 				{
-					if (new_player.id == Owner.OWNER_SPECTATOR) {
+					if (new_player.isSpectator()) {
 						Window.DeleteWindowById(Window.WC_VEHICLE_VIEW, v.index);
 						Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, v.index);
 						Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, v.index);
@@ -1482,13 +1482,13 @@ public class Economy extends EconomeTables
 
 			if (profit != 0) {
 
-				if (Station.GetStation(last_visited).owner.id == Owner.OWNER_TOWN 
-						&& Station.GetStation(original_cargo_source.id).owner.id == Owner.OWNER_TOWN)
+				if (Station.GetStation(last_visited).owner.isTown() 
+						&& Station.GetStation(original_cargo_source.id).owner.isTown())
 
 					v.MA_Tax(profit*2);
 
-				else if (Station.GetStation(last_visited).owner.id == Owner.OWNER_TOWN 
-						|| Station.GetStation(original_cargo_source.id).owner.id == Owner.OWNER_TOWN)
+				else if (Station.GetStation(last_visited).owner.isTown() 
+						|| Station.GetStation(original_cargo_source.id).owner.isTown())
 
 					v.MA_Tax(profit);
 
@@ -1512,7 +1512,7 @@ public class Economy extends EconomeTables
 			AddInflation();
 		PlayersPayInterest();
 		// Reset the _current_player flag
-		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+		Global.gs._current_player = PlayerID.getNone();
 		HandleEconomyFluctuations();
 		SubsidyMonthlyHandler();
 	}

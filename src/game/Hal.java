@@ -86,8 +86,8 @@ void SortResolutions(int count)
 	int GetDrawStringPlayerColor(PlayerID player)
 	{
 		// Get the color for DrawString-subroutines which matches the color
-		//  of the player
-		if (player.id == Owner.OWNER_SPECTATOR || player.id == Owner.OWNER_SPECTATOR - 1) return 1;
+		//  of the player - TODO -1??!!
+		if (player.isSpectator() || player.id == Owner.OWNER_SPECTATOR - 1) return 1;
 		return (Global._color_list[Global.gs._player_colors[player.id]].window_color_1b) | Gfx.IS_PALETTE_COLOR;
 	}
 

@@ -728,7 +728,7 @@ public class Road extends RoadTables
 
 	static int RemoveRoadDepot(TileIndex tile, int flags)
 	{
-		if (!Player.CheckTileOwnership(tile) && Global.gs._current_player.id != Owner.OWNER_WATER)
+		if (!Player.CheckTileOwnership(tile) && !Global.gs._current_player.isWater())
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
@@ -1250,7 +1250,7 @@ public class Road extends RoadTables
 	{
 		// road/rail crossing where the road is owned by the current player?
 		if (old_player.id == tile.getMap().m3 && tile.IsLevelCrossing()) {
-			tile.getMap().m3 =  ((new_player.id == Owner.OWNER_SPECTATOR) ? Owner.OWNER_NONE : new_player.id);
+			tile.getMap().m3 =  ((new_player.isSpectator()) ? Owner.OWNER_NONE : new_player.id);
 		}
 
 		if (!tile.IsTileOwner(old_player)) return;

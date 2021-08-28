@@ -136,7 +136,7 @@ public class AirportGui
 
 	static void ShowBuildAirToolbar()
 	{
-		if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR) return;
+		if (Global.gs._current_player.isSpectator()) return;
 		Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);
 		Window.AllocateWindowDescFront(_air_toolbar_desc, 0);
 		if (Global._patches.link_terraform_toolbar) Terraform.ShowTerraformToolbar();

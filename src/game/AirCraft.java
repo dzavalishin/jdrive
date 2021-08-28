@@ -1674,7 +1674,7 @@ public class AirCraft extends AirCraftTables {
 				)) {
 			Global.gs._current_player = Global.gs._local_player;
 			Cmd.DoCommandP(v.tile, v.index, 1, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
-			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.getNone();
 		}
 	}
 
@@ -1695,7 +1695,7 @@ public class AirCraft extends AirCraftTables {
 		// heliport/oilrig, etc -. no airplanes (HELICOPTERS_ONLY)
 		// runway busy or not allowed to use this airstation, circle
 		if (! (v.subtype == Airport.acc_planes ||
-				st.airport_tile == null || (st.owner.id != Owner.OWNER_NONE && st.owner != v.owner && ! mAirport.MA_OwnerHandler(st.owner)) )) {
+				st.airport_tile == null || (st.owner.isNotNone() && st.owner != v.owner && ! mAirport.MA_OwnerHandler(st.owner)) )) {
 
 			// {32,FLYING,NOTHING_block,37}, {32,LANDING,N,33}, {32,HELILANDING,N,41},
 			// if it is an airplane, look for LANDING, for helicopter HELILANDING
@@ -1802,7 +1802,7 @@ public class AirCraft extends AirCraftTables {
 				// send the aircraft to the hangar at next airport (bit 17 set)
 				Global.gs._current_player = Global.gs._local_player;
 				Cmd.DoCommandP(v.tile, v.index, 1 << 16, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
-				Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+				Global.gs._current_player = PlayerID.getNone();
 			}
 		}
 	}

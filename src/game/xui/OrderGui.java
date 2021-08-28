@@ -266,7 +266,7 @@ public class OrderGui {
 		if (tile.IsTileType( TileTypes.MP_STATION)) {
 			final Station  st = Station.GetStation(st_index = tile.getMap().m2);
 			
-			if (st.getOwner() == Global.gs._current_player || st.getOwner().id == Owner.OWNER_NONE || mAirport.MA_OwnerHandler(st.getOwner())) {
+			if (st.getOwner() == Global.gs._current_player || st.getOwner().isNone() || mAirport.MA_OwnerHandler(st.getOwner())) {
 				byte facil;
 				
 				/*

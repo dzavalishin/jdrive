@@ -560,7 +560,7 @@ public class Main {
 		// Startup the game system
 		GenerateWorld.doGenerateWorld(1, 1 << Global._patches.map_x, 1 << Global._patches.map_y);
 
-		Global.gs._local_player = PlayerID.get(Owner.OWNER_NONE);
+		Global.gs._local_player = PlayerID.getNone();
 		Hal.MarkWholeScreenDirty();
 	}
 
@@ -716,7 +716,7 @@ public class Main {
 
 				GameOptions._opt_ptr = GameOptions._opt;
 
-				Global.gs._local_player = PlayerID.get(Owner.OWNER_NONE);
+				Global.gs._local_player = PlayerID.getNone();
 				Global._generating_world = true;
 				// delete all players.
 				for (i = 0; i != Global.MAX_PLAYERS; i++) {
@@ -749,7 +749,7 @@ public class Main {
 		case SM_GENRANDLAND: /* Generate random land within scenario editor */
 			GenerateWorld.doGenerateWorld(2, 1<<Global._patches.map_x, 1<<Global._patches.map_y);
 			// XXX: set date
-			Global.gs._local_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._local_player = PlayerID.getNone();
 			Hal.MarkWholeScreenDirty();
 			break;
 			
@@ -795,7 +795,7 @@ public class Main {
 			// All these actions has to be done from OWNER_NONE
 			//  for multiplayer compatibility
 			PlayerID p =  Global.gs._current_player;
-			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.getNone();
 
 			TextEffect.AnimateAnimatedTiles();
 			Global.IncreaseDate();

@@ -408,9 +408,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		 * with magic_bulldozer cheat you can destroy industries
 		 * (area around OILRIG is water, so water shouldn't flood it
 		 */
-		if ((Global.gs._current_player.id != Owner.OWNER_WATER && Global._game_mode != GameModes.GM_EDITOR &&
+		if ((!Global.gs._current_player.isWater() && Global._game_mode != GameModes.GM_EDITOR &&
 				!Global._cheats.magic_bulldozer.value) ||
-				(Global.gs._current_player.id == Owner.OWNER_WATER && i.type == IT_OIL_RIG) ) {
+				(Global.gs._current_player.isWater() && i.type == IT_OIL_RIG) ) {
 			Global.SetDParam(0, Str.STR_4802_COAL_MINE + i.type);
 			return Cmd.return_cmd_error(Str.STR_4800_IN_THE_WAY);
 		}
@@ -1062,7 +1062,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 						PlayerID old_player = Global.gs._current_player;
 						/* found a tree */
 
-						Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+						Global.gs._current_player = PlayerID.getNone();
 						_industry_sound_ctr = 1;
 						_industry_sound_tile = tile;
 						//SndPlayTileFx(SND_38_CHAINSAW, tile);
@@ -1704,7 +1704,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		if (GameOptions._opt.diff.number_industries != 0) {
 			PlayerID old_player = Global.gs._current_player;
-			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.getNone();
 			assert(num > 0);
 
 			do {
@@ -1945,7 +1945,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	{
 		//Industry i;
 		PlayerID old_player = Global.gs._current_player;
-		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+		Global.gs._current_player = PlayerID.getNone();
 
 		//FOR_ALL_INDUSTRIES(i) 
 		Industry.forEach( (i) ->

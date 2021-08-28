@@ -1260,7 +1260,7 @@ public class GraphGui
 				{
 					SignStruct ss = SignStruct.GetSign(_sign_sort[i]);
 
-					if (ss.getOwner().id != Owner.OWNER_NONE)
+					if (ss.getOwner().isNotNone())
 						DrawPlayerIcon(ss.getOwner().id, 4, y + 1);
 
 					Gfx.DrawString(22, y, ss.getString(), 8);

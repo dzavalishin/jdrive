@@ -730,7 +730,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			int cost;
 
 			// check if we own the tile below the bridge..
-			if (Global.gs._current_player.id != Owner.OWNER_WATER && (!Player.CheckTileOwnership(tile) || !Vehicle.EnsureNoVehicleZ(tile, tile.TilePixelHeight())))
+			if (!Global.gs._current_player.isWater() && (!Player.CheckTileOwnership(tile) || !Vehicle.EnsureNoVehicleZ(tile, tile.TilePixelHeight())))
 				return Cmd.CMD_ERROR;
 
 			cost = 0 != (tile.getMap().m5 & 8) ? Global._price.remove_road * 2 : Global._price.remove_rail;
@@ -760,7 +760,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		tile = FindEdgesOfBridge(tile, endtile);
 
 		// floods, scenario editor can always destroy bridges
-		if (Global.gs._current_player.id != Owner.OWNER_WATER && Global._game_mode != GameModes.GM_EDITOR && !Player.CheckTileOwnership(tile)) {
+		if (!Global.gs._current_player.isWater() && Global._game_mode != GameModes.GM_EDITOR && !Player.CheckTileOwnership(tile)) {
 			if (!(Global._patches.extra_dynamite || Global._cheats.magic_bulldozer.value) || !tile.IsTileOwner(Owner.OWNER_TOWN))
 				return Cmd.CMD_ERROR;
 		}

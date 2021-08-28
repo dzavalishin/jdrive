@@ -365,7 +365,7 @@ public class WaterCmd extends WaterTables
 
 			if(0 != (flags & Cmd.DC_AUTO) )return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 			// don't allow water to delete it.
-			if (Global.gs._current_player.id == Owner.OWNER_WATER) return Cmd.CMD_ERROR;
+			if (Global.gs._current_player.isWater()) return Cmd.CMD_ERROR;
 			// move to the middle tile..
 			return RemoveShiplift(tile.iadd( TileIndex.ToTileIndexDiff(_shiplift_tomiddle_offs[m5 & 0xF])), flags) ;
 		} else {
@@ -718,7 +718,7 @@ public class WaterCmd extends WaterTables
 		}
 		// Global.gs._current_player can be changed by TileLoopWaterHelper.. reset it back
 		//   here
-		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+		Global.gs._current_player = PlayerID.getNone();
 
 		// edges
 		if (tile.TileX() == 0 && BitOps.IS_INT_INSIDE(tile.TileY(), 1, Global.MapSizeY() - 3 + 1)) //NE

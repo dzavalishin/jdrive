@@ -377,7 +377,7 @@ public class Vehicle implements IPoolItem
 
 	void VehicleServiceInDepot()
 	{
-		if (tile.GetTileOwner().id == Owner.OWNER_TOWN) 
+		if (tile.GetTileOwner().isTown()) 
 			MA_Tax(value);
 
 		date_of_last_service = Global._date;
@@ -2582,7 +2582,7 @@ public class Vehicle implements IPoolItem
 					NewsItem.AddNewsItem(message, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 				}
 				if (stopped) v.setStopped(false);
-				Global.gs._current_player = PlayerID.get(Owner.OWNER_NONE);
+				Global.gs._current_player = PlayerID.getNone();
 				return 0;
 			}
 
@@ -2632,7 +2632,7 @@ public class Vehicle implements IPoolItem
 		if (Player.IsLocalPlayer()) MiscGui.ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
 
 		if (stopped) v.setStopped(false);
-		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+		Global.gs._current_player = PlayerID.getNone();
 
 		return 0;
 	}

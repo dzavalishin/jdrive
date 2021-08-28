@@ -920,7 +920,7 @@ public class Engine extends EngineTables implements Serializable
 				} else if (e.preview_player != 0xFF) {
 					PlayerID best_player = PlayerID.get( GetBestPlayer(e.preview_player) );
 
-					if (best_player.id == Owner.OWNER_SPECTATOR) {
+					if (best_player.isSpectator()) {
 						e.preview_player =  0xFF;
 						continue;
 					}

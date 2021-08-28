@@ -108,7 +108,7 @@ public class StationGui extends Station  // to get constants
 
 		Station.forEach( (st) ->
 		{
-			if (st.getXy() != null && st.getOwner().id != Owner.OWNER_NONE) {
+			if (st.getXy() != null && st.getOwner().isNotNone()) {
 				_station_sort[n[0]].index = st.getIndex();
 				_station_sort[n[0]].owner = st.getOwner().id;
 				n[0]++;
@@ -524,7 +524,7 @@ public class StationGui extends Station  // to get constants
 			case 12: { /* Show a list of scheduled aircraft to this station */
 				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs have no owners, show the scheduled aircraft of current player */
-				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global.gs._current_player : st.getOwner();
+				PlayerID owner = (st.getOwner().isNone()) ? Global.gs._current_player : st.getOwner();
 				AirCraft.ShowPlayerAircraft(owner.id, w.window_number);
 				break;
 			}
@@ -532,7 +532,7 @@ public class StationGui extends Station  // to get constants
 			case 13: { /* Show a list of scheduled ships to this station */
 				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs/bouys have no owners, show the scheduled ships of current player */
-				PlayerID owner = (st.getOwner().id == Owner.OWNER_NONE) ? Global.gs._current_player : st.getOwner();
+				PlayerID owner = (st.getOwner().isNone()) ? Global.gs._current_player : st.getOwner();
 				ShipGui.ShowPlayerShips(owner, StationID.get( w.window_number ) );
 				break;
 			}
@@ -579,7 +579,7 @@ public class StationGui extends Station  // to get constants
 		w = Window.AllocateWindowDescFront(_station_view_desc, station);
 		if (w != null) {
 			PlayerID owner = Station.GetStation(w.window_number).getOwner();
-			if (owner.id != Owner.OWNER_NONE) w.caption_color =  owner.id;
+			if (owner.isNotNone()) w.caption_color =  owner.id;
 			w.vscroll.setCap(5);
 		}
 	}

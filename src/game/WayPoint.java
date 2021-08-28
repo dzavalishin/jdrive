@@ -446,7 +446,7 @@ private void WaypointPoolNewBlock(int start_item)
 		if (!tile.IsTileType(TileTypes.MP_RAILWAY) || !IsRailWaypoint(tile))
 			return Cmd.CMD_ERROR;
 
-		if (!tile.CheckTileOwnership() && !(Global.gs._current_player.id == Owner.OWNER_WATER))
+		if (!tile.CheckTileOwnership() && !(Global.gs._current_player.isWater()))
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle())

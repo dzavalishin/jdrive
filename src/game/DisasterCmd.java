@@ -26,7 +26,7 @@ public class DisasterCmd extends DisasterTables
 
 		case MP_HOUSE: {
 			PlayerID p = Global.gs._current_player;
-			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.getNone();
 			Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 			Global.gs._current_player = p;
 			break;
@@ -66,7 +66,7 @@ public class DisasterCmd extends DisasterTables
 		v.sprite_width = 2;
 		v.sprite_height = 2;
 		v.z_height = 5;
-		v.owner = PlayerID.get(Owner.OWNER_NONE);
+		v.owner = PlayerID.getNone();
 		v.vehstatus = Vehicle.VS_UNCLICKABLE;
 		v.disaster.image_override = 0;
 		v.getCurrent_order().type = Order.OT_NOTHING;
@@ -549,7 +549,7 @@ public class DisasterCmd extends DisasterTables
 
 			u.next = w;
 			InitializeDisasterVehicle(w, -6*16, v.getY_pos(), 0, 5, 12);
-			w.vehstatus |= Vehicle.VS_DISASTER;
+			w.setDisaster(true);
 		} else if (v.getCurrent_order().station < 1) {
 
 			int x = v.dest_tile.TileX() * 16;
@@ -726,7 +726,7 @@ public class DisasterCmd extends DisasterTables
 		if (u != null) {
 			v.next = u;
 			InitializeDisasterVehicle(u, x, 0, 0, 3, 1);
-			u.vehstatus |= Vehicle.VS_DISASTER;
+			u.setDisaster(true);
 		}
 	}
 
@@ -750,7 +750,7 @@ public class DisasterCmd extends DisasterTables
 		if (u != null) {
 			v.next = u;
 			InitializeDisasterVehicle(u,x,0,0,3,3);
-			u.vehstatus |= Vehicle.VS_DISASTER;
+			u.setDisaster(true);
 		}
 	}
 
@@ -790,7 +790,7 @@ public class DisasterCmd extends DisasterTables
 		if (u != null) {
 			v.next = u;
 			InitializeDisasterVehicle(u,x,y,0,3,5);
-			u.vehstatus |= Vehicle.VS_DISASTER;
+			u.setDisaster(true);
 		}
 	}
 
@@ -829,7 +829,7 @@ public class DisasterCmd extends DisasterTables
 		if (u != null) {
 			v.next = u;
 			InitializeDisasterVehicle(u,x,y,0,5,7);
-			u.vehstatus |= Vehicle.VS_DISASTER;
+			u.setDisaster(true);
 
 			w = Vehicle.ForceAllocateSpecialVehicle();
 			if (w != null) {
@@ -859,7 +859,7 @@ public class DisasterCmd extends DisasterTables
 		if (u != null) {
 			v.next = u;
 			InitializeDisasterVehicle(u,x,y,0,7,10);
-			u.vehstatus |= Vehicle.VS_DISASTER;
+			u.setDisaster(true);
 		}
 	}
 

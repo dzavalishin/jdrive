@@ -545,7 +545,7 @@ public class PlayerGui
 						dis = BitOps.RETSETBIT(dis, 10);
 
 					/* Spectators cannot do anything of course */
-					if (Global.gs._local_player.id == Owner.OWNER_SPECTATOR) 
+					if (Global.gs._local_player.isSpectator()) 
 						dis |= (1 << 9) | (1 << 10);
 				} else /* shares are not allowed, disable buy/sell buttons */
 					dis |= (1 << 9) | (1 << 10);

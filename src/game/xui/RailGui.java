@@ -620,7 +620,7 @@ public class RailGui {
 	{
 		Window w;
 
-		if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR) return;
+		if (Global.gs._current_player.isSpectator()) return;
 
 		BiConsumer<Window,WindowEvent>  cmp = RailGui::BuildRailToolbWndProc;
 		

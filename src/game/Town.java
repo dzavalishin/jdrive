@@ -371,7 +371,6 @@ implements IPoolItem, Serializable
 		tile.MarkTileDirtyByTile();
 	}
 
-	//static void UpdateTownRadius(Town t);
 
 	static boolean IsCloseToTown(TileIndex tile, int dist)
 	{
@@ -505,7 +504,7 @@ implements IPoolItem, Serializable
 			// rebuild with another house?
 			if (BitOps.GB(r, 24, 8) >= 12) DoBuildTownHouse(t, tile);
 
-			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.getNone();
 		}
 	}
 
@@ -1860,7 +1859,7 @@ implements IPoolItem, Serializable
 
 
 		old = Global.gs._current_player;
-		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+		Global.gs._current_player = PlayerID.getNone();
 		r = Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 		Global.gs._current_player = old;
 

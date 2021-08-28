@@ -474,7 +474,7 @@ public class Cmd {
 
 		/** Spectator has no rights except for the dedicated server which
 		 * is a spectator but is the server, so can do anything */
-		if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR && !Global._network_dedicated) {
+		if (Global.gs._current_player.isSpectator() && !Global._network_dedicated) {
 			Global.ShowErrorMessage(Global._error_message, Global._error_message_2, x, y);
 			Global._cmd_text = null;
 			return false;
