@@ -46,6 +46,10 @@ public class WayPoint implements IPoolItem
 	public int deleted;      ///< Delete counter. If greater than 0 then it is decremented until it reaches 0; the WayPoint is then is deleted.
 
 
+	public boolean isValid()
+	{
+		return xy != null;
+	}
 
 	private static final IPoolItemFactory<WayPoint> factory = new IPoolItemFactory<WayPoint>()
 	{		
@@ -162,10 +166,9 @@ private void WaypointPoolNewBlock(int start_item)
 		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
 		_waypoint_pool.forEach((i,wp) ->
 		{
-			if (wp.xy == null) {
+			if (!wp.isValid()) {
 				int index = wp.index;
 
-				//memset(wp, 0, sizeof(WayPoint));
 				wp.clear();
 				wp.index = index;
 
@@ -203,12 +206,9 @@ private void WaypointPoolNewBlock(int start_item)
 	/* Update all signs */
 	static void UpdateAllWaypointSigns()
 	{
-		//WayPoint wp;
-
-		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
 		_waypoint_pool.forEach((i,wp) ->
 		{
-			if(wp.xy != null)
+			if(wp.isValid())
 				wp.UpdateWaypointSign();
 		});
 	}
@@ -216,7 +216,6 @@ private void WaypointPoolNewBlock(int start_item)
 	/* Set the default name for a WayPoint */
 	private void MakeDefaultWaypointName()
 	{
-		//WayPoint local_wp;
 		boolean used_waypoint[] = new boolean[MAX_WAYPOINTS_PER_TOWN];
 		int i;
 
@@ -234,7 +233,7 @@ private void WaypointPoolNewBlock(int start_item)
 				return;
 			}
 			
-			if (local_wp.xy != null && local_wp.string.id == Str.STR_NULL && local_wp.town_index == town_index)
+			if (local_wp.isValid() && local_wp.string.id == Str.STR_NULL && local_wp.town_index == town_index)
 				used_waypoint[local_wp.town_cn] = true;
 		});
 
@@ -251,8 +250,6 @@ private void WaypointPoolNewBlock(int start_item)
 		WayPoint best = null;
 		int thres = 8, cur_dist;
 
-		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
-		//_waypoint_pool.forEach((i,wp) ->
 		Iterator<WayPoint> ii = getIterator();
 		while(ii.hasNext())
 		{
@@ -671,7 +668,7 @@ static final SaveLoad _waypoint_desc[] = {
 
 			for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
 			{
-				if (wp.xy != null) {
+				if (wp.isValid()) {
 					SlSetArrayIndex(wp.index);
 					SlObject(wp, _waypoint_desc);
 				}

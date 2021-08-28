@@ -249,7 +249,7 @@ public class Station extends StationTables implements IPoolItem
 	{
 		_station_pool.forEach( (i,st) ->
 		{
-			if (st.xy != null) st.UpdateStationVirtCoord();
+			if (st.isValid()) st.UpdateStationVirtCoord();
 		});
 	}
 
@@ -818,7 +818,7 @@ public class Station extends StationTables implements IPoolItem
 
 		_station_pool.forEach( (i,s) ->			
 		{
-			if (s != st && s.xy != null && s.town==t) {
+			if (s != st && s.isValid() && s.town==t) {
 				int str = M(s.string_id);
 				if (str <= 0x20) {
 					if (str == M(Str.STR_SV_STNAME_FOREST))
@@ -944,7 +944,7 @@ public class Station extends StationTables implements IPoolItem
 		//FOR_ALL_STATIONS(st) 
 		_station_pool.forEach( (i,st) ->			
 		{
-			if (st.xy != null && (owner.isSpectator() || st.owner == owner)) {
+			if (st.isValid() && (owner.isSpectator() || st.owner == owner)) {
 				int cur_dist = Map.DistanceManhattan(tile, st.xy);
 
 				if (cur_dist < threshold[0]) {
@@ -1953,7 +1953,7 @@ public class Station extends StationTables implements IPoolItem
 			_station_pool.forEach( (i,st) ->
 			{
 				if ( (st.owner == null || st.owner.id != Owner.OWNER_TOWN) 
-						&& st.xy != null 
+						&& st.isValid() 
 						&& st.town == t 
 						&& 0 != (st.facilities&FACIL_AIRPORT) 
 						&& st.airport_type != AirportFTAClass.AT_OILRIG)
@@ -2816,7 +2816,7 @@ public class Station extends StationTables implements IPoolItem
 		//FOR_ALL_STATIONS(st)
 		_station_pool.forEach( (i,st) ->
 		{
-			if (st.xy != null && st.owner.id < Global.MAX_PLAYERS) DeleteStation(st);
+			if (st.isValid() && st.owner.id < Global.MAX_PLAYERS) DeleteStation(st);
 		});
 	}
 
@@ -3002,11 +3002,11 @@ public class Station extends StationTables implements IPoolItem
 		if (++_station_tick_ctr == GetStationPoolSize()) _station_tick_ctr = 0;
 
 		st = GetStation(i);
-		if (st != null && st.xy != null) StationHandleBigTick(st);
+		if (st != null && st.isValid()) StationHandleBigTick(st);
 
 		_station_pool.forEach( (ii,sst) ->
 		{
-			if (sst.xy != null) StationHandleSmallTick(sst);
+			if (sst.isValid()) StationHandleSmallTick(sst);
 		});
 	}
 
@@ -3019,7 +3019,7 @@ public class Station extends StationTables implements IPoolItem
 	{
 		_station_pool.forEach( (ii,st) ->
 		{
-			if (st.xy != null && st.owner == owner &&
+			if (st.isValid() && st.owner == owner &&
 					Map.DistanceManhattan(tile, st.xy) <= radius) {
 
 				for (int i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
@@ -3401,9 +3401,17 @@ public class Station extends StationTables implements IPoolItem
 	 */
 	public boolean IsValidStation()
 	{
-		return xy != null; /* XXX: Replace by INVALID_TILE someday */
+		return xy != null;
 	}
 
+	/**
+	 * Check if a station really exists.
+	 */
+	public boolean isValid()
+	{
+		return xy != null;
+	}
+	
 	public boolean IsBuoy()
 	{
 		return 0 != (had_vehicle_of_type & HVOT_BUOY); /* XXX: We should really ditch this ugly coding and switch to something sane... */

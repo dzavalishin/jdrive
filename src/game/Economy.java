@@ -902,7 +902,7 @@ public class Economy extends EconomeTables
 		fr.distance = -1;
 
 		fr.from = i = Industry.GetIndustry(Hal.RandomRange(Industry._total_industries));
-		if (i.xy == null)
+		if (!i.isValid())
 			return;
 
 		// Randomize cargo type
@@ -938,7 +938,7 @@ public class Economy extends EconomeTables
 			Industry i2 = Industry.GetIndustry(Hal.RandomRange(Industry._total_industries));
 
 			// The industry must accept the cargo
-			if (i == i2 || i2.xy == null ||
+			if (i == i2 || !i2.isValid() ||
 					(cargo != i2.accepts_cargo[0] &&
 					cargo != i2.accepts_cargo[1] &&
 					cargo != i2.accepts_cargo[2]))

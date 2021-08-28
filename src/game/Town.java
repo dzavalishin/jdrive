@@ -188,7 +188,12 @@ implements IPoolItem, Serializable
 	 */
 	public boolean IsValidTown()
 	{
-		return xy.isValid();
+		return xy != null; //xy.isValid();
+	}
+
+	public boolean isValid()
+	{
+		return xy != null; //xy.isValid();
 	}
 
 	/**
@@ -377,7 +382,7 @@ implements IPoolItem, Serializable
 		for(Iterator<Town> i = _town_pool.getIterator(); i.hasNext();)
 		{
 			final Town t = i.next();
-			if (t.xy != null && Map.DistanceManhattan(tile, t.xy) < dist) 
+			if (t.isValid() && Map.DistanceManhattan(tile, t.xy) < dist) 
 				return true;
 		}
 		return false;
@@ -634,7 +639,7 @@ implements IPoolItem, Serializable
 
 			t = GetTown(i);
 
-			if(t != null && t.xy != null) t.TownTickHandler();
+			if(t != null && t.isValid()) t.TownTickHandler();
 		}
 	}
 
@@ -1153,7 +1158,7 @@ implements IPoolItem, Serializable
 			while(it.hasNext())
 			{
 				Town t2 = it.next();
-				if (t2.xy != null) {
+				if (t2.isValid()) {
 					// We can't just compare the numbers since
 					// several numbers may map to a single name.
 					Global.SetDParam(0, t2.index);
@@ -1252,7 +1257,7 @@ implements IPoolItem, Serializable
 		while(it.hasNext())
 		{
 			Town t = it.next();
-			if (t.xy == null) {
+			if (!t.isValid()) {
 				int index = t.index;
 
 				//if (t.index > _total_towns)					_total_towns = t.index;
@@ -1759,7 +1764,7 @@ implements IPoolItem, Serializable
 		// Delete all industries belonging to the town
 		Industry.forEach( (i) ->
 		{
-			if (i.xy != null && i.townId == index)
+			if (i.isValid() && i.townId == index)
 				Industry.DeleteIndustry(i);
 		});
 
@@ -2133,7 +2138,7 @@ implements IPoolItem, Serializable
 
 		Town.forEach( (t) ->
 		{
-			if (t.xy != null) {
+			if (t.isValid()) {
 				int dist = Map.DistanceManhattan(tile, t.xy);
 				if (dist < best[0]) {
 					best[0] = dist;
@@ -2212,7 +2217,7 @@ implements IPoolItem, Serializable
 		//FOR_ALL_TOWNS(t)
 		Town.forEach( (t) ->
 		{
-			if (t.xy != null) 
+			if (t.isValid()) 
 			{
 				if (t.road_build_months != 0)
 					t.road_build_months--;
@@ -2279,7 +2284,7 @@ implements IPoolItem, Serializable
 	{
 		Town.forEach( (t) ->
 		{
-			if (t.xy != null) {
+			if (t.isValid()) {
 				t.UpdateTownRadius();
 				t.UpdateTownVirtCoord();
 			}

@@ -767,7 +767,7 @@ public class DisasterCmd extends DisasterTables
 		while(ii.hasNext())
 		{
 			Industry i = ii.next();
-			if (i.xy != null &&
+			if (i.isValid() &&
 					i.type == Industry.IT_OIL_REFINERY &&
 					(found==null || BitOps.CHANCE16(1,2))) {
 				found = i;
@@ -806,7 +806,7 @@ public class DisasterCmd extends DisasterTables
 		while(ii.hasNext())
 		{
 			Industry i = ii.next();
-			if (i.xy != null &&
+			if (i.isValid() &&
 					i.type == Industry.IT_FACTORY &&
 					(found==null || BitOps.CHANCE16(1,2))) {
 				found = i;
@@ -911,7 +911,7 @@ public class DisasterCmd extends DisasterTables
 			while(ii.hasNext())
 			{
 				Industry i = ii.next();
-				if (i.xy != null && i.type == Industry.IT_COAL_MINE && --index < 0) 
+				if (i.isValid() && i.type == Industry.IT_COAL_MINE && --index < 0) 
 				{
 
 					Global.SetDParam(0, i.townId);

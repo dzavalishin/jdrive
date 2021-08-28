@@ -165,7 +165,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	 */
 	public static boolean IsValidIndustry(Industry industry)
 	{
-		return industry.xy != null; /* XXX: Replace by INVALID_TILE someday */
+		return industry.isValid(); /* XXX: Replace by INVALID_TILE someday */
 	}
 
 	/**
@@ -1171,7 +1171,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		//FOR_ALL_INDUSTRIES(i) 
 		Industry.forEach( (i) ->
 		{
-			if (i.xy != null) ProduceIndustryGoods(i);
+			if (i.isValid()) ProduceIndustryGoods(i);
 		});
 	}
 
@@ -1289,7 +1289,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		while(ii.hasNext())
 		{
 			final Industry i = ii.next();
-			if (i.xy != null &&
+			if (i.isValid() &&
 					i.type == type &&
 					i.getTown() == t) {
 				Global._error_message = Str.STR_0287_ONLY_ONE_ALLOWED_PER_TOWN;
@@ -1426,7 +1426,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		{
 			Industry i = ii.next();
 			// check if an industry that accepts the same goods is nearby
-			if (i.xy != null &&
+			if (i.isValid() &&
 					Map.DistanceMax(tile, i.xy) <= 14 &&
 					spec.accepts_cargo[0] != AcceptedCargo.CT_INVALID &&
 					spec.accepts_cargo[0] == i.accepts_cargo[0] && (
@@ -1439,7 +1439,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			}
 
 			// check "not close to" field.
-			if (i.xy != null &&
+			if (i.isValid() &&
 					(i.type == spec.a || i.type == spec.b || i.type == spec.c) &&
 					Map.DistanceMax(tile, i.xy) <= 14) {
 				Global._error_message = Str.STR_INDUSTRY_TOO_CLOSE;
@@ -1458,7 +1458,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		{
 			Industry i = ii.next();
 
-			if (i.xy == null) {
+			if (!i.isValid()) {
 				int index = i.index;
 
 				if (i.index > _total_industries) _total_industries = i.index;
@@ -1950,7 +1950,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		//FOR_ALL_INDUSTRIES(i) 
 		Industry.forEach( (i) ->
 		{
-			if (i.xy != null) UpdateIndustryStatistics(i);
+			if (i.isValid()) UpdateIndustryStatistics(i);
 		});
 
 		/* 3% chance that we start a new industry */
@@ -1958,7 +1958,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			MaybeNewIndustry(Hal.Random());
 		} else if (!Global._patches.smooth_economy && _total_industries > 0) {
 			Industry i = GetIndustry(Hal.RandomRange(_total_industries));
-			if (i != null && i.xy != null) ChangeIndustryProduction(i);
+			if (i != null && i.isValid()) ChangeIndustryProduction(i);
 		}
 
 		Global.gs._current_player = old_player;

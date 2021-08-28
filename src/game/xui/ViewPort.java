@@ -1132,7 +1132,7 @@ public class ViewPort
 			while(ii.hasNext())
 			{
 				WayPoint wp = ii.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						//bottom > wp.sign.top &&
 						//top < wp.sign.top + 12 &&
 						//right > wp.sign.left &&
@@ -1155,7 +1155,7 @@ public class ViewPort
 			while(ii.hasNext())
 			{
 				WayPoint wp = ii.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						//bottom > wp.sign.top &&
 						//top < wp.sign.top + 24 &&
 						//right > wp.sign.left &&
@@ -1177,7 +1177,7 @@ public class ViewPort
 			while(ii.hasNext())
 			{
 				WayPoint wp = ii.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						//bottom > wp.sign.top &&
 						//top < wp.sign.top + 24 &&
 						//right > wp.sign.left &&
@@ -1965,7 +1965,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				WayPoint wp = i.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						y >= wp.sign.getTop() &&
 						y < wp.sign.getTop() + 12 &&
 						x >= wp.sign.getLeft() &&
@@ -1983,7 +1983,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				WayPoint wp = i.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						y >= wp.sign.getTop() &&
 						y < wp.sign.getTop() + 24 &&
 						x >= wp.sign.getLeft() &&
@@ -2000,7 +2000,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				WayPoint wp = i.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						y >= wp.sign.getTop() &&
 						y < wp.sign.getTop() + 24 &&
 						x >= wp.sign.getLeft() &&
