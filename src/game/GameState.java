@@ -3,6 +3,8 @@ package game;
 import java.io.Serializable;
 
 import game.ids.PlayerID;
+import game.util.MemoryPool;
+import game.util.VehicleHash;
 
 /**
  * 
@@ -17,9 +19,6 @@ public class GameState implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
-	// Player
-	public final Player[] _players = new Player[Global.MAX_PLAYERS];
-	public final int [] _player_colors = new int[Global.MAX_PLAYERS];
 	
 	public PlayerID _current_player;
 	public PlayerID _local_player;
@@ -32,5 +31,37 @@ public class GameState implements Serializable
 	public int _saved_scrollpos_x;
 	public int _saved_scrollpos_y;
 	public int _saved_scrollpos_zoom;
+
+
+
+
+	// -------------------------------------------------------------------
+	// Game object containers
+	// -------------------------------------------------------------------
+
+	public final Player[] _players = new Player[Global.MAX_PLAYERS];
+	public final int [] _player_colors = new int[Global.MAX_PLAYERS];
+
+
+	final TileIndex _animated_tile_list[] = new TileIndex[256];
+
+
+	final MemoryPool<SignStruct> _signs = new MemoryPool<SignStruct>(SignStruct.factory);
+	
+	/* Initialize the industry-pool */
+	final MemoryPool<Industry> _industies = new MemoryPool<Industry>(Industry.factory);
+	//static MemoryPool<Town> _town_pool = new MemoryPool<Town>(Town::new);
+	final MemoryPool<Town> _towns = new MemoryPool<Town>(Town.factory);
+	public final Engine [] _engines = new Engine[Global.TOTAL_NUM_ENGINES];
+	final MemoryPool<Depot> _depots = new MemoryPool<Depot>(Depot.factory);
+
+	final MemoryPool<Vehicle> _vehicles = new MemoryPool<Vehicle>(Vehicle.factory);
+	final VehicleHash _vehicle_hash = new VehicleHash();
+
+	final MemoryPool<WayPoint> _waypoints = new MemoryPool<WayPoint>(WayPoint.factory);
+
+
+	final MemoryPool<Station> _stations = new MemoryPool<Station>(Station.factory);
+	final MemoryPool<RoadStop> _roadstops = new MemoryPool<RoadStop>(RoadStop.factory);
 	
 }

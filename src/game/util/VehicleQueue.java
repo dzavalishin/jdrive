@@ -1,5 +1,7 @@
 package game.util;
 
+import java.io.Serializable;
+
 import game.Vehicle;
 import game.struct.VQueueItem;
 
@@ -47,7 +49,7 @@ public abstract class VehicleQueue
 
 
 
-class VQImpl extends VehicleQueue
+class VQImpl extends VehicleQueue implements Serializable
 {
 
 	@Override

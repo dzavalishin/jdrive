@@ -32,7 +32,6 @@ import game.struct.TileIndexDiffC;
 import game.tables.StationTables;
 import game.util.BitOps;
 import game.util.IntContainer;
-import game.util.MemoryPool;
 import game.util.VehicleQueue;
 import game.xui.Gfx;
 import game.xui.StationGui;
@@ -247,7 +246,7 @@ public class Station extends StationTables implements IPoolItem
 	// Update the virtual coords needed to draw the station sign for all stations.
 	static void UpdateAllStationVirtCoord()
 	{
-		_station_pool.forEach( (i,st) ->
+		Global.gs._stations.forEach( (i,st) ->
 		{
 			if (st.isValid()) st.UpdateStationVirtCoord();
 		});
@@ -512,7 +511,7 @@ public class Station extends StationTables implements IPoolItem
 		}
 	}
 
-	private static final IPoolItemFactory<Station> factory = new IPoolItemFactory<Station>() {
+	static final IPoolItemFactory<Station> factory = new IPoolItemFactory<Station>() {
 
 		/**
 		 * 
@@ -521,12 +520,10 @@ public class Station extends StationTables implements IPoolItem
 
 		@Override
 		public Station createObject() {
-			// TODO Auto-generated method stub
 			return new Station();
 		}
 	};
-	private static MemoryPool<Station> _station_pool = new MemoryPool<Station>(factory);
-
+	
 	@Override
 	public void setIndex(int index) {
 		this.index = index;
@@ -538,7 +535,7 @@ public class Station extends StationTables implements IPoolItem
 	 */
 	public static Station GetStation(int index)
 	{
-		return _station_pool.GetItemFromPool(index);
+		return Global.gs._stations.GetItemFromPool(index);
 	}
 
 	/**
@@ -546,7 +543,7 @@ public class Station extends StationTables implements IPoolItem
 	 */
 	protected static int GetStationPoolSize()
 	{
-		return _station_pool.total_items();
+		return Global.gs._stations.total_items();
 	}
 
 	static boolean IsStationIndex(int index)
@@ -728,7 +725,7 @@ public class Station extends StationTables implements IPoolItem
 		Station [] ret = {null};
 
 		//FOR_ALL_STATIONS(st) 
-		_station_pool.forEach( (i,st) ->
+		Global.gs._stations.forEach( (i,st) ->
 		{
 			if (!st.isValid()) {
 				StationID index = StationID.get(st.index);
@@ -744,7 +741,7 @@ public class Station extends StationTables implements IPoolItem
 		if( ret[0] != null ) return ret[0];
 
 		/* Check if we can add a block to the pool */
-		if(_station_pool.AddBlockToPool()) 
+		if(Global.gs._stations.AddBlockToPool()) 
 			return AllocateStation();
 
 		Global._error_message = Str.STR_3008_TOO_MANY_STATIONS_LOADING;
@@ -816,7 +813,7 @@ public class Station extends StationTables implements IPoolItem
 		int z,z2;
 		long tmp;
 
-		_station_pool.forEach( (i,s) ->			
+		Global.gs._stations.forEach( (i,s) ->			
 		{
 			if (s != st && s.isValid() && s.town==t) {
 				int str = M(s.string_id);
@@ -942,7 +939,7 @@ public class Station extends StationTables implements IPoolItem
 		//Station  st;
 
 		//FOR_ALL_STATIONS(st) 
-		_station_pool.forEach( (i,st) ->			
+		Global.gs._stations.forEach( (i,st) ->			
 		{
 			if (st.isValid() && (owner.isSpectator() || st.owner == owner)) {
 				int cur_dist = Map.DistanceManhattan(tile, st.xy);
@@ -1950,7 +1947,7 @@ public class Station extends StationTables implements IPoolItem
 		{
 			int [] num = {0};
  
-			_station_pool.forEach( (i,st) ->
+			Global.gs._stations.forEach( (i,st) ->
 			{
 				if ( (st.owner == null || st.owner.id != Owner.OWNER_TOWN) 
 						&& st.isValid() 
@@ -2202,7 +2199,7 @@ public class Station extends StationTables implements IPoolItem
 
 		if (Global.gs._current_player.id >= Global.MAX_PLAYERS) {
 			/* XXX: strange stuff */
-			return Cmd.return_cmd_error(Str.INVALID_STRING_ID.id);
+			return Cmd.return_cmd_error(Str.INVALID_STRING);
 		}
 
 		tile = st.dock_tile;
@@ -2814,7 +2811,7 @@ public class Station extends StationTables implements IPoolItem
 		//Station st;
 
 		//FOR_ALL_STATIONS(st)
-		_station_pool.forEach( (i,st) ->
+		Global.gs._stations.forEach( (i,st) ->
 		{
 			if (st.isValid() && st.owner.id < Global.MAX_PLAYERS) DeleteStation(st);
 		});
@@ -3004,7 +3001,7 @@ public class Station extends StationTables implements IPoolItem
 		st = GetStation(i);
 		if (st != null && st.isValid()) StationHandleBigTick(st);
 
-		_station_pool.forEach( (ii,sst) ->
+		Global.gs._stations.forEach( (ii,sst) ->
 		{
 			if (sst.isValid()) StationHandleSmallTick(sst);
 		});
@@ -3017,7 +3014,7 @@ public class Station extends StationTables implements IPoolItem
 
 	public static void ModifyStationRatingAround(TileIndex tile, PlayerID owner, int amount, int radius)
 	{
-		_station_pool.forEach( (ii,st) ->
+		Global.gs._stations.forEach( (ii,st) ->
 		{
 			if (st.isValid() && st.owner == owner &&
 					Map.DistanceManhattan(tile, st.xy) <= radius) {
@@ -3361,8 +3358,8 @@ public class Station extends StationTables implements IPoolItem
 	public static void InitializeStations()
 	{
 		/* Clean the station pool and create 1 block in it */
-		_station_pool.CleanPool();
-		_station_pool.AddBlockToPool();
+		Global.gs._stations.CleanPool();
+		Global.gs._stations.AddBlockToPool();
 
 		/* Clean the roadstop pool and create 1 block in it */
 		//CleanPool(&_roadstop_pool);
@@ -3419,20 +3416,24 @@ public class Station extends StationTables implements IPoolItem
 
 	public static void forEach(BiConsumer<Integer, Station> c) 
 	{
-		_station_pool.forEach(c);
+		Global.gs._stations.forEach(c);
 
 	}
 
 	public static Iterator<Station> getIterator()
 	{
-		return _station_pool.getIterator(); //pool.values().iterator();
+		return Global.gs._stations.getIterator(); //pool.values().iterator();
 	}
 
 	public static void forEach( Consumer<Station> c )
 	{
-		_station_pool.forEach(c);
+		Global.gs._stations.forEach(c);
 	}
 
+	public static void forEachValid( Consumer<Station> c )
+	{
+		Global.gs._stations.forEachValid(c);
+	}
 
 
 
@@ -3651,13 +3652,13 @@ public class Station extends StationTables implements IPoolItem
 
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		_station_pool = (MemoryPool<Station>) oin.readObject();
+		//_station_pool = (MemoryPool<Station>) oin.readObject();
 
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		oos.writeObject(_station_pool);		
+		//oos.writeObject(_station_pool);		
 	}
 
 

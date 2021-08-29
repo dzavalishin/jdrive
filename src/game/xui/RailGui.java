@@ -54,7 +54,7 @@ public class RailGui {
 				Str.STR_SIGNAL_EXIT,
 				Str.STR_SIGNAL_COMBO,
 				Str.STR_SIGNAL_PBS,
-				Str.INVALID_STRING_ID.id
+				Str.INVALID_STRING
 		};
 
 	static class _Railstation {

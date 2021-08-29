@@ -292,7 +292,7 @@ public class Global
 		System.exit(33);
 	}
 
-	public static final StringID  INVALID_STRING_ID = new StringID(0xFFFF);
+	public static final StringID  INVALID_STRING_ID = new StringID(Str.INVALID_STRING);
 
 
 	//void DEBUG(name, level) if (level == 0 || _debug_ ## name ## _level >= level) debug

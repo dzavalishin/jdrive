@@ -33,9 +33,6 @@ public class TextEffect
 
 	static final TextEffect[] _text_effect_list = new TextEffect[30];
 	static final TextMessage[] _text_message_list = new TextMessage[MAX_CHAT_MESSAGES];
-	static TileIndex _animated_tile_list[] = new TileIndex[256];
-
-
 	static int _textmessage_width = 0;
 	static boolean _textmessage_dirty = true;
 	static boolean _textmessage_visible = false;
@@ -358,16 +355,16 @@ public class TextEffect
 	{
 
 		//for (ti = _animated_tile_list; ti != endof(_animated_tile_list); ti++) {
-		for(int i = 0 ; i < _animated_tile_list.length; i++)
+		for(int i = 0 ; i < Global.gs._animated_tile_list.length; i++)
 		{
-			if (tile.equals(_animated_tile_list[i])) 
+			if (tile.equals(Global.gs._animated_tile_list[i])) 
 			{
 				/* remove the hole */
 				//memmove(ti, ti + 1, endof(_animated_tile_list) - 1 - ti);
-				System.arraycopy(_animated_tile_list, i+1, _animated_tile_list, i, _animated_tile_list.length - i - 1);
+				System.arraycopy(Global.gs._animated_tile_list, i+1, Global.gs._animated_tile_list, i, Global.gs._animated_tile_list.length - i - 1);
 				/* and clear last item */
 				//endof(_animated_tile_list)[-1] = 0;
-				_animated_tile_list[_animated_tile_list.length-1] = null;
+				Global.gs._animated_tile_list[Global.gs._animated_tile_list.length-1] = null;
 				tile.MarkTileDirtyByTile();
 				return;
 			}
@@ -379,10 +376,10 @@ public class TextEffect
 
 		//for (ti = _animated_tile_list; ti != endof(_animated_tile_list); ti++) {
 		//for( TileIndex ti : _animated_tile_list)
-		for(int i = 0 ; i < _animated_tile_list.length; i++)
+		for(int i = 0 ; i < Global.gs._animated_tile_list.length; i++)
 		{
-			if (tile.equals(_animated_tile_list[i]) || _animated_tile_list[i] == null) {
-				_animated_tile_list[i] = tile;
+			if (tile.equals(Global.gs._animated_tile_list[i]) || Global.gs._animated_tile_list[i] == null) {
+				Global.gs._animated_tile_list[i] = tile;
 				tile.MarkTileDirtyByTile();
 				return true;
 			}
@@ -393,7 +390,7 @@ public class TextEffect
 
 	static void AnimateAnimatedTiles()
 	{
-		for( TileIndex ti : _animated_tile_list)
+		for( TileIndex ti : Global.gs._animated_tile_list)
 			if( ti != null)
 				Landscape.AnimateTile(ti);
 	}
@@ -423,12 +420,12 @@ public class TextEffect
 
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		_animated_tile_list = (TileIndex[]) oin.readObject();
+		//_animated_tile_list = (TileIndex[]) oin.readObject();
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		oos.writeObject(_animated_tile_list);		
+		//oos.writeObject(_animated_tile_list);		
 	}
 
 }

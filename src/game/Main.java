@@ -690,7 +690,7 @@ public class Main {
 
 			if (!SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GameModes.GM_NORMAL)) {
 				LoadIntroGame();
-				Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+				Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			} else {
 				Global.gs._local_player = null;
 				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE); // decrease pause counter (was increased from opening load dialog)
@@ -720,7 +720,7 @@ public class Main {
 				// delete all stations owned by a player
 				Station.DeleteAllPlayerStations();
 			} else {
-				Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+				Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			}
 			break;
 		}
@@ -733,7 +733,7 @@ public class Main {
 		case SM_SAVE: /* TODO Save game */
 			/*
 			if (SaveOrLoad(_file_to_saveload.name, SL_SAVE) != SL_OK) {
-				Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
+				Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
 			} else {
 				Window.DeleteWindowById(Window.WC_SAVELOAD, 0);
 			}*/

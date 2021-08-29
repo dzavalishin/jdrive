@@ -66,6 +66,11 @@ public class MemoryPool<CType extends IPoolItem> implements Serializable
         pool.forEach( (i,o) -> c.accept(o) );
     }
 
+    public void forEachValid( Consumer<CType> c )
+    {
+        pool.forEach( (i,o) -> { if( o.isValid() ) c.accept(o); } );
+    }
+
 	public boolean AddBlockToPool() 
 	{
 		int key = lastIndex ++;

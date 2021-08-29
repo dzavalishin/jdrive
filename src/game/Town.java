@@ -158,20 +158,13 @@ implements IPoolItem, Serializable
 
 
 
-	private static final IPoolItemFactory<Town> factory = new IPoolItemFactory<Town>() {
-		/**
-		 * 
-		 */
+	static final IPoolItemFactory<Town> factory = new IPoolItemFactory<Town>() {
 		private static final long serialVersionUID = 1L;
 
 		@Override
 		public Town createObject() { return new Town(); }
 	};
 	
-	static MemoryPool<Town> _town_pool = new MemoryPool<Town>(factory);
-	//static MemoryPool<Town> _town_pool = new MemoryPool<Town>(Town::new);
-
-
 	@Override
 	public void setIndex(int index) {
 		this.index = index;
@@ -201,7 +194,7 @@ implements IPoolItem, Serializable
 	 */
 	public static Town GetTown(int index)
 	{
-		return _town_pool.GetItemFromPool(index);
+		return Global.gs._towns.GetItemFromPool(index);
 	}
 
 	/**
@@ -209,7 +202,7 @@ implements IPoolItem, Serializable
 	 */
 	public static  int GetTownPoolSize()
 	{
-		return _town_pool.total_items();
+		return Global.gs._towns.total_items();
 	}
 
 	static  boolean IsTownIndex(int index)
@@ -379,7 +372,7 @@ implements IPoolItem, Serializable
 
 	static boolean IsCloseToTown(TileIndex tile, int dist)
 	{
-		for(Iterator<Town> i = _town_pool.getIterator(); i.hasNext();)
+		for(Iterator<Town> i = getIterator(); i.hasNext();)
 		{
 			final Town t = i.next();
 			if (t.isValid() && Map.DistanceManhattan(tile, t.xy) < dist) 
@@ -1276,7 +1269,7 @@ implements IPoolItem, Serializable
 		}
 
 		/* Check if we can add a block to the pool */
-		if (_town_pool.AddBlockToPool())
+		if (Global.gs._towns.AddBlockToPool())
 			return AllocateTown();
 
 		return null;
@@ -2240,8 +2233,8 @@ implements IPoolItem, Serializable
 	static void InitializeTowns()
 	{
 		/* Clean the town pool and create 1 block in it */
-		_town_pool.CleanPool();
-		_town_pool.AddBlockToPool();
+		Global.gs._towns.CleanPool();
+		Global.gs._towns.AddBlockToPool();
 
 		Subsidy._subsidies = new Subsidy[Global.MAX_PLAYERS];
 
@@ -2251,7 +2244,6 @@ implements IPoolItem, Serializable
 
 		_cur_town_ctr = 0;
 		_cur_town_iter = 0;
-		//_total_towns = 0;
 		TownGui._town_sort_dirty = true;
 	}
 
@@ -2274,12 +2266,16 @@ implements IPoolItem, Serializable
 
 
 	public static void forEach(Consumer<Town> c) {
-		_town_pool.forEach(c);
+		Global.gs._towns.forEach(c);
+	}
+
+	public static void forEachValid(Consumer<Town> c) {
+		Global.gs._towns.forEachValid(c);
 	}
 
 	public static Iterator<Town> getIterator()
 	{
-		return _town_pool.getIterator(); // pool.values().iterator();
+		return Global.gs._towns.getIterator(); // pool.values().iterator();
 	}
 
 
@@ -2300,7 +2296,7 @@ implements IPoolItem, Serializable
 	public static Town getRandomTown() 
 	{
 		;
-		return GetTown(Hal.RandomRange(_town_pool.size()));
+		return GetTown(Hal.RandomRange(Global.gs._towns.size()));
 		//return GetTown(Hal.RandomRange(_total_towns));
 	}
 
@@ -2415,13 +2411,13 @@ implements IPoolItem, Serializable
 
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		_town_pool = (MemoryPool<Town>) oin.readObject();
+		//GameState._towns = (MemoryPool<Town>) oin.readObject();
 		AfterLoadTown();
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		oos.writeObject(_town_pool);		
+		//oos.writeObject(GameState._towns);		
 	}
 
 	

@@ -15,7 +15,6 @@ import game.ifaces.IPoolItemFactory;
 import game.struct.Point;
 import game.struct.Rect;
 import game.struct.StringSpriteToDraw;
-import game.util.MemoryPool;
 import game.xui.Gui;
 import game.xui.ViewPort;
 import game.xui.Window;
@@ -34,18 +33,13 @@ public class SignStruct implements IPoolItem
 
 	private int          index;
 
-	private static final IPoolItemFactory<SignStruct> factory = new IPoolItemFactory<SignStruct>() {
-		/**
-		 * 
-		 */
+	static final IPoolItemFactory<SignStruct> factory = new IPoolItemFactory<SignStruct>() 
+	{
 		private static final long serialVersionUID = 1L;
 
 		public SignStruct createObject() { return new SignStruct(); };
 	};
 
-	private static MemoryPool<SignStruct> _sign_pool = new MemoryPool<SignStruct>(factory);
-
-	
 	private void clear() {
 		str = null;
 		sign = new ViewportSign();
@@ -71,7 +65,7 @@ public class SignStruct implements IPoolItem
 	 */
 	public static SignStruct GetSign(int index)
 	{
-		return _sign_pool.GetItemFromPool(index);
+		return Global.gs._signs.GetItemFromPool(index);
 	}
 
 	/**
@@ -79,7 +73,7 @@ public class SignStruct implements IPoolItem
 	 */
 	public static int GetSignPoolSize()
 	{
-		return _sign_pool.total_items();
+		return Global.gs._signs.total_items();
 	}
 
 	static boolean IsSignIndex(int index)
@@ -92,12 +86,12 @@ public class SignStruct implements IPoolItem
 
 	public static Iterator<SignStruct> getIterator()
 	{
-		return _sign_pool.getIterator(); ////pool.values().iterator();
+		return Global.gs._signs.getIterator(); ////pool.values().iterator();
 	}
 
 	public static void forEach( Consumer<SignStruct> c )
 	{
-		_sign_pool.forEach(c);
+		Global.gs._signs.forEach(c);
 	}
 	
 	
@@ -136,7 +130,7 @@ public class SignStruct implements IPoolItem
 	 */
 	static void UpdateAllSignVirtCoords()
 	{
-		_sign_pool.forEach( (i,ss) ->
+		Global.gs._signs.forEach( (i,ss) ->
 		{
 			if (ss.str != null)
 				ss.UpdateSignVirtCoords();
@@ -167,7 +161,7 @@ public class SignStruct implements IPoolItem
 	{
 		SignStruct [] ret = {null};
  
-		_sign_pool.forEach( (i,ss) ->
+		Global.gs._signs.forEach( (i,ss) ->
 		{
 			if (ss.str == null) {
 				int index = ss.index;
@@ -182,7 +176,7 @@ public class SignStruct implements IPoolItem
 		if( ret[0] != null ) return ret[0];
 		
 		/* Check if we can add a block to the pool */
-		if(_sign_pool.AddBlockToPool())
+		if(Global.gs._signs.AddBlockToPool())
 			return AllocateSign();
 
 		return null;
@@ -307,8 +301,8 @@ public class SignStruct implements IPoolItem
 	 */
 	static void InitializeSigns()
 	{
-		_sign_pool.CleanPool();
-		_sign_pool.AddBlockToPool();
+		Global.gs._signs.CleanPool();
+		Global.gs._signs.AddBlockToPool();
 	}
 	/*
 static const SaveLoad _sign_desc[] = {
@@ -463,12 +457,12 @@ static const SaveLoad _sign_desc[] = {
 
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		_sign_pool = (MemoryPool<SignStruct>) oin.readObject();
+		//_sign_pool = (MemoryPool<SignStruct>) oin.readObject();
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		oos.writeObject(_sign_pool);		
+		//oos.writeObject(_sign_pool);		
 	}
 
 

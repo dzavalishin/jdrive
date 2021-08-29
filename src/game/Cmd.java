@@ -186,7 +186,7 @@ public class Cmd {
 	public static boolean CmdFailed(int res)
 	{
 		// lower 16bits are the StringID of the possible error
-		return res <= (CMD_ERROR | Str.INVALID_STRING_ID.id);
+		return res <= (CMD_ERROR | Str.INVALID_STRING);
 	}
 
 
@@ -376,7 +376,7 @@ public class Cmd {
 
 		proc = _command_proc_table[procc].proc;
 
-		if (_docommand_recursive == 0) Global._error_message = Str.INVALID_STRING_ID.id;
+		if (_docommand_recursive == 0) Global._error_message = Str.INVALID_STRING;
 
 		_docommand_recursive++;
 
@@ -469,7 +469,7 @@ public class Cmd {
 
 		assert(_docommand_recursive == 0);
 
-		Global._error_message = Str.INVALID_STRING_ID.id;
+		Global._error_message = Str.INVALID_STRING;
 		Global._error_message_2 = cmd >> 16;
 		Global._additional_cash_required = 0;
 

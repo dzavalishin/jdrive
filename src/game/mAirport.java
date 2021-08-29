@@ -350,14 +350,14 @@ public class mAirport
 
 		if(Global._cur_year + 1920 < INT_AIRPORT_YEAR) {
 			Global.SetDParam(0, tn.index);
-			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_TOO_EARLY, Str.INVALID_STRING_ID.id, 300, 300);
+			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_TOO_EARLY, Str.INVALID_STRING, 300, 300);
 			Global.gs._current_player = old_player;
 			return;
 		}
 
 		if(tn.population < MA_MIN_POPULATION) {
 			Global.SetDParam(0, tn.index);
-			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_LOW_POPULATION, Str.INVALID_STRING_ID.id, 300, 300);
+			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_LOW_POPULATION, Str.INVALID_STRING, 300, 300);
 			Global.gs._current_player = old_player;
 			return;
 		}
@@ -366,7 +366,7 @@ public class mAirport
 
 		if(tl == TileIndex.INVALID_TILE) {
 			Global.SetDParam(0, tn.index);
-			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_NO_SITE, Str.INVALID_STRING_ID.id, 300, 300);
+			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_NO_SITE, Str.INVALID_STRING, 300, 300);
 			Global.gs._current_player = old_player;
 			return;
 		}

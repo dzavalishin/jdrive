@@ -10,7 +10,6 @@ import java.util.function.Consumer;
 import game.enums.RoadStopType;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
-import game.util.MemoryPool;
 
 
 public class RoadStop implements IPoolItem
@@ -67,7 +66,7 @@ public class RoadStop implements IPoolItem
 	@Override
 	public boolean isValid() { return used; }
 	
-	private static final IPoolItemFactory<RoadStop> factory = new IPoolItemFactory<RoadStop>() {
+	static final IPoolItemFactory<RoadStop> factory = new IPoolItemFactory<RoadStop>() {
 		/**
 		 * 
 		 */
@@ -79,17 +78,14 @@ public class RoadStop implements IPoolItem
 		}
 	};
 	
-	private static MemoryPool<RoadStop> _roadstop_pool = new MemoryPool<RoadStop>(factory);
-
-	
 	public static Iterator<RoadStop> getIterator()
 	{
-		return _roadstop_pool.getIterator(); //pool.values().iterator();
+		return Global.gs._roadstops.getIterator(); //pool.values().iterator();
 	}
 
 	public static void forEach( Consumer<RoadStop> c )
 	{
-		_roadstop_pool.forEach(c);
+		Global.gs._roadstops.forEach(c);
 	}
 
 	
@@ -152,7 +148,7 @@ public class RoadStop implements IPoolItem
 	{
 		RoadStop[] ret = { null };
 	
-		_roadstop_pool.forEach( (Integer i, RoadStop rs) ->
+		Global.gs._roadstops.forEach( (Integer i, RoadStop rs) ->
 		{
 			if (!rs.used) {
 				int index = rs.index;
@@ -166,7 +162,7 @@ public class RoadStop implements IPoolItem
 		if( ret[0] != null ) return ret[0];
 		
 		// Check if we can add a block to the pool 
-		if (_roadstop_pool.AddBlockToPool()) 
+		if (Global.gs._roadstops.AddBlockToPool()) 
 			return AllocateRoadStop();
 
 		return null;
@@ -174,12 +170,12 @@ public class RoadStop implements IPoolItem
 
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		_roadstop_pool = (MemoryPool<RoadStop>) oin.readObject();
+		//_roadstop_pool = (MemoryPool<RoadStop>) oin.readObject();
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		oos.writeObject(_roadstop_pool);		
+		//oos.writeObject(_roadstop_pool);		
 	}
 	
 }

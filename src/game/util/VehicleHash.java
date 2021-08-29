@@ -1,5 +1,6 @@
 package game.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,8 +15,6 @@ import game.struct.Point;
 
 /**
  * 
- * TODO spatial hash to find vehicles intersecting some part of map.
- *
  * General idea is to reduce coordinates by / 8 and check all possible
  * squares of 256*256 size.
  * 
@@ -23,7 +22,7 @@ import game.struct.Point;
  *
  */
 
-public class VehicleHash 
+public class VehicleHash implements Serializable
 {
 
 	//private static final int DELETE_BITS = 8;

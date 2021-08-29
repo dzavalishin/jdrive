@@ -247,7 +247,7 @@ public class Clear extends ClearTables {
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		Global._error_message = Str.INVALID_STRING_ID.id;
+		Global._error_message = Str.INVALID_STRING;
 		Global._terraform_err_tile = null;
 
 		ts.direction = direction = (p2 != 0) ? 1 : -1;

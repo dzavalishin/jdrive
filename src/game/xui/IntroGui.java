@@ -50,7 +50,7 @@ public class IntroGui
 		Window.InvalidateWindowClasses(Window.WC_SELECT_GAME);
 	}
 
-	static final int mapsizes[] = {Str.STR_64, Str.STR_128, Str.STR_256, Str.STR_512, Str.STR_1024, Str.STR_2048, Str.INVALID_STRING_ID.id };
+	static final int mapsizes[] = {Str.STR_64, Str.STR_128, Str.STR_256, Str.STR_512, Str.STR_1024, Str.STR_2048, Str.INVALID_STRING };
 
 	static void SelectGameWndProc(Window w, WindowEvent e)
 	{
@@ -102,7 +102,7 @@ public class IntroGui
 				} else
 					ShowNetworkGameWindow();
 	#else*/
-				Global.ShowErrorMessage(Str.INVALID_STRING_ID.id , Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
+				Global.ShowErrorMessage(Str.INVALID_STRING , Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
 	//#endif
 				break;
 			case 16: SettingsGui.ShowGameOptions(); break;

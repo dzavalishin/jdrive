@@ -9,13 +9,13 @@ public class SettingsTables
 	protected static final /*StringID*/ int _distances_dropdown[] = {
 			Str.STR_0139_IMPERIAL_MILES,
 			Str.STR_013A_METRIC_KILOMETERS,
-			Str.INVALID_STRING_ID.id
+			Str.INVALID_STRING
 	};
 
 	protected static final /*StringID*/ int _driveside_dropdown[] = {
 			Str.STR_02E9_DRIVE_ON_LEFT,
 			Str.STR_02EA_DRIVE_ON_RIGHT,
-			Str.INVALID_STRING_ID.id
+			Str.INVALID_STRING
 	};
 
 	protected static final /*StringID*/ int _autosave_dropdown[] = {
@@ -24,13 +24,13 @@ public class SettingsTables
 			Str.STR_02F8_EVERY_3_MONTHS,
 			Str.STR_02F9_EVERY_6_MONTHS,
 			Str.STR_02FA_EVERY_12_MONTHS,
-			Str.INVALID_STRING_ID.id,
+			Str.INVALID_STRING,
 	};
 
 	protected static final /*StringID*/ int _designnames_dropdown[] = {
 			Str.STR_02BE_DEFAULT,
 			Str.STR_02BF_CUSTOM,
-			Str.INVALID_STRING_ID.id
+			Str.INVALID_STRING
 	};
 
 

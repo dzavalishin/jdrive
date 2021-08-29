@@ -32,7 +32,7 @@ public class Currency {
 		Str.STR_CURR_RUR,
 		Str.STR_CURR_SEK,
 		Str.STR_CURR_CUSTOM,
-		Str.INVALID_STRING_ID.id
+		Str.INVALID_STRING
 	};
 
 	// NOTE: Make sure both lists are in the same order

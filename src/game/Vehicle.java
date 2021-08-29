@@ -30,8 +30,6 @@ import game.struct.VQueueItem;
 import game.tables.BubbleMovement;
 import game.tables.EngineTables;
 import game.util.BitOps;
-import game.util.MemoryPool;
-import game.util.VehicleHash;
 import game.xui.DrawPixelInfo;
 import game.xui.MiscGui;
 import game.xui.VehicleGui;
@@ -388,9 +386,9 @@ public class Vehicle implements IPoolItem
 	void UpdateVehiclePosHash(int x, int y)
 	{
 		if( x == INVALID_COORD )
-			_hash.remove( new Point(left_coord, top_coord ), this );
+			Global.gs._vehicle_hash.remove( new Point(left_coord, top_coord ), this );
 		else
-			_hash.update( new Point(left_coord, top_coord ), new Point(x,y), this );
+			Global.gs._vehicle_hash.update( new Point(left_coord, top_coord ), new Point(x,y), this );
 	}
 	
 
@@ -744,7 +742,7 @@ public class Vehicle implements IPoolItem
 		return u;
 	}
 
-	private static final IPoolItemFactory<Vehicle> factory = new IPoolItemFactory<Vehicle>()
+	static final IPoolItemFactory<Vehicle> factory = new IPoolItemFactory<Vehicle>()
 	{		
 		private static final long serialVersionUID = 1L;
 
@@ -754,17 +752,12 @@ public class Vehicle implements IPoolItem
 		}
 	}; 
 
-	static MemoryPool<Vehicle> _vehicle_pool = new MemoryPool<Vehicle>(factory);
-	private final static VehicleHash _hash = new VehicleHash(); 
-
-
-
 	/**
 	 * Get the pointer to the vehicle with index 'index'
 	 */
 	public static Vehicle GetVehicle(VehicleID index)
 	{
-		return _vehicle_pool.GetItemFromPool(index.id);
+		return Global.gs._vehicles.GetItemFromPool(index.id);
 	}
 
 	/**
@@ -772,7 +765,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public static Vehicle GetVehicle(int index)
 	{
-		return _vehicle_pool.GetItemFromPool(index);
+		return Global.gs._vehicles.GetItemFromPool(index);
 	}
 
 	/**
@@ -780,7 +773,7 @@ public class Vehicle implements IPoolItem
 	 */
 	public static int GetVehiclePoolSize()
 	{
-		return _vehicle_pool.total_items();
+		return Global.gs._vehicles.total_items();
 	}
 
 	/**
@@ -796,7 +789,7 @@ public class Vehicle implements IPoolItem
 
 	public static void forEach( Consumer<Vehicle> c )
 	{
-		_vehicle_pool.forEach(c);
+		Global.gs._vehicles.forEach(c);
 	}
 
 	public void forEachOrder(Consumer<Order> c)
@@ -807,7 +800,7 @@ public class Vehicle implements IPoolItem
 
 	public static Iterator<Vehicle> getIterator()
 	{
-		return _vehicle_pool.getIterator(); //pool.values().iterator();
+		return Global.gs._vehicles.getIterator(); //pool.values().iterator();
 	}
 
 	private static Iterator<Vehicle> getIteratorFrom(int id) {
@@ -988,7 +981,7 @@ public class Vehicle implements IPoolItem
 		int fy1 = y1;
 		int fy2 = y2;
 
-		_vehicle_pool.forEach( (ii,veh) ->
+		Global.gs._vehicles.forEach( (ii,veh) ->
 		{
 			if ((veh.type == VEH_Train || veh.type == VEH_Road) && (z==0xFF || veh.z_pos == z)) {
 				if ((veh.x_pos>>4) >= fx1 && (veh.x_pos>>4) <= fx2 &&
@@ -1024,7 +1017,7 @@ public class Vehicle implements IPoolItem
 	public static void AfterLoadVehicles()
 	{
 
-		_vehicle_pool.forEach( (ii,v) ->
+		Global.gs._vehicles.forEach( (ii,v) ->
 		{
 			v.first = null;
 			if (v.type != 0) {
@@ -1070,7 +1063,7 @@ public class Vehicle implements IPoolItem
 
 		Vehicle [] ret = {null};
 
-		_vehicle_pool.forEach( (ii,v) ->
+		Global.gs._vehicles.forEach( (ii,v) ->
 		{
 			/* TODO speedup No more room for the special vehicles, return null */
 			//if (v.index >= (1 << _vehicle_pool.block_size_bits) * BLOCKS_FOR_SPECIAL_VEHICLES)
@@ -1101,7 +1094,7 @@ public class Vehicle implements IPoolItem
 		 * first blocks */
 		final int offset = (1 << VEHICLES_POOL_BLOCK_SIZE_BITS) * BLOCKS_FOR_SPECIAL_VEHICLES;
 
-		if (skip_vehicles[0] < (_vehicle_pool.total_items() - offset)) 
+		if (skip_vehicles[0] < (Global.gs._vehicles.total_items() - offset)) 
 		{	// make sure the offset in the array is not larger than the array itself
 
 			Iterator<Vehicle> ii = getIteratorFrom(offset + skip_vehicles[0]);
@@ -1119,7 +1112,7 @@ public class Vehicle implements IPoolItem
 		}
 
 		/* Check if we can add a block to the pool */
-		if (_vehicle_pool.AddBlockToPool())
+		if (Global.gs._vehicles.AddBlockToPool())
 			return AllocateSingleVehicle(skip_vehicles);
 
 		return null;
@@ -1164,7 +1157,7 @@ public class Vehicle implements IPoolItem
 		//int x,y,x2,y2;
 		Point pt = Point.RemapCoords(tile.TileX() * 16, tile.TileY() * 16, 0);
 
-		List<VehicleID> list = _hash.get(pt.x - 174, pt.y - 294, pt.x + 104, pt.y + 56);
+		List<VehicleID> list = Global.gs._vehicle_hash.get(pt.x - 174, pt.y - 294, pt.x + 104, pt.y + 56);
 		
 
 		for(VehicleID vi : list) {
@@ -1189,13 +1182,13 @@ public class Vehicle implements IPoolItem
 		/* Clean the vehicle pool, and reserve enough blocks
 		 *  for the special vehicles, plus one for all the other
 		 *  vehicles (which is increased on-the-fly) */
-		_vehicle_pool.CleanPool();
-		_vehicle_pool.AddBlockToPool();
+		Global.gs._vehicles.CleanPool();
+		Global.gs._vehicles.AddBlockToPool();
 
 		for (i = 0; i < BLOCKS_FOR_SPECIAL_VEHICLES; i++)
-			_vehicle_pool.AddBlockToPool();
+			Global.gs._vehicles.AddBlockToPool();
 
-		_hash.clear();
+		Global.gs._vehicle_hash.clear();
 	}
 
 	public Vehicle GetLastVehicleInChain()	
@@ -1215,7 +1208,7 @@ public class Vehicle implements IPoolItem
 	{
 		Vehicle [] ret = {null};
 
-		_vehicle_pool.forEach( (ii,u) ->
+		Global.gs._vehicles.forEach( (ii,u) ->
 		{
 			if (u.type == VEH_Train && u.next == v) ret[0] = u;
 		});
@@ -1369,7 +1362,7 @@ public class Vehicle implements IPoolItem
 	{
 		_first_veh_in_depot_list = null;	// now we are sure it's initialized at the start of each tick
 
-		_vehicle_pool.forEach( (ii,v) ->
+		Global.gs._vehicles.forEach( (ii,v) ->
 		{
 			if (v.type != 0) {
 				_vehicle_tick_procs[v.type - 0x10].accept(v);
@@ -1468,7 +1461,7 @@ public class Vehicle implements IPoolItem
 	public static void ViewportAddVehicles(DrawPixelInfo dpi)
 	{
 		
-		List<VehicleID> found = _hash.get( 
+		List<VehicleID> found = Global.gs._vehicle_hash.get( 
 				dpi.left - 70, dpi.top - 70, 
 				dpi.left+dpi.width, dpi.top+dpi.height );
 		 
@@ -2815,7 +2808,7 @@ public class Vehicle implements IPoolItem
 			unit_num++;
 			restart = false;
 			//FOR_ALL_VEHICLES(u)
-			for( Iterator<Vehicle> i = _vehicle_pool.getIterator(); i.hasNext(); )
+			for( Iterator<Vehicle> i = Global.gs._vehicles.getIterator(); i.hasNext(); )
 			{
 				Vehicle u = i.next();
 
@@ -3541,12 +3534,12 @@ public class Vehicle implements IPoolItem
 	
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		_vehicle_pool = (MemoryPool<Vehicle>) oin.readObject();
+		//_vehicle_pool = (MemoryPool<Vehicle>) oin.readObject();
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		oos.writeObject(_vehicle_pool);		
+		//oos.writeObject(_vehicle_pool);		
 	}
 
 	/**
@@ -3699,7 +3692,7 @@ public class Vehicle implements IPoolItem
 	public int generateTrainDescription() 
 	{
 		int psp = Global._patches.vehicle_speed ? 1 : 0;
-		int str;// = Str.INVALID_STRING_ID.id;
+		int str;// = Str.INVALID_STRING;
 		
 		if (rail.crash_anim_pos != 0) {
 			str = Str.STR_8863_CRASHED;

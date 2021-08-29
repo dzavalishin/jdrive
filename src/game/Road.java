@@ -199,16 +199,16 @@ public class Road extends RoadTables
 			if ((ti.map5 & 0xE9) == 0xE8) {
 				if(0 != (pieces & 10)) {
 					//goto return_error;
-					return Cmd.return_cmd_error(Str.INVALID_STRING_ID.id);
+					return Cmd.return_cmd_error(Str.INVALID_STRING);
 				}
 			} else if ((ti.map5 & 0xE9) == 0xE9) {
 				if(0 != (pieces & 5)) {
 					//goto return_error;			
-					return Cmd.return_cmd_error(Str.INVALID_STRING_ID.id);
+					return Cmd.return_cmd_error(Str.INVALID_STRING);
 				}
 			} else {
 				//goto return_error;
-				return Cmd.return_cmd_error(Str.INVALID_STRING_ID.id);
+				return Cmd.return_cmd_error(Str.INVALID_STRING);
 			}
 			cost = Global._price.remove_road * 2;
 
@@ -238,7 +238,7 @@ public class Road extends RoadTables
 				if ((c &= ti.map5) == 0) 
 				{
 					//goto return_error;
-					return Cmd.return_cmd_error(Str.INVALID_STRING_ID.id);
+					return Cmd.return_cmd_error(Str.INVALID_STRING);
 				}
 				// calculate the cost
 				t2 = c;
@@ -266,14 +266,14 @@ public class Road extends RoadTables
 					if(0 != (pieces & 5) )
 					{
 						//goto return_error;
-						return Cmd.return_cmd_error(Str.INVALID_STRING_ID.id);
+						return Cmd.return_cmd_error(Str.INVALID_STRING);
 					}
 				} else {
 					c = 1;
 					if(0 != (pieces & 10) )
 					{
 						//goto return_error;
-						return Cmd.return_cmd_error(Str.INVALID_STRING_ID.id);
+						return Cmd.return_cmd_error(Str.INVALID_STRING);
 					}
 				}
 
@@ -295,11 +295,11 @@ public class Road extends RoadTables
 			} else
 			{
 				//goto return_error;
-				return Cmd.return_cmd_error(Str.INVALID_STRING_ID.id);
+				return Cmd.return_cmd_error(Str.INVALID_STRING);
 			}
 		} else {
 			//return_error:;
-			return Cmd.return_cmd_error(Str.INVALID_STRING_ID.id);
+			return Cmd.return_cmd_error(Str.INVALID_STRING);
 		}
 	}
 

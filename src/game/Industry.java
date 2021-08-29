@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 import game.tables.IndustryTables;
 import game.tables.IndustryTileTable;
 import game.util.BitOps;
-import game.util.MemoryPool;
 import game.xui.Gfx;
 import game.xui.Gui;
 import game.xui.MiscGui;
@@ -107,7 +106,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	public static final int INDUSTRY_POOL_MAX_BLOCKS      = 8000;
 
 
-	private static final IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() 
+	static final IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() 
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -116,10 +115,6 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			return new Industry();
 		}
 	};
-	/* Initialize the industry-pool */
-	static final MemoryPool<Industry> _industry_pool = new MemoryPool<Industry>(factory);
-
-
 	@Override
 	public void setIndex(int index) {
 		this.index = index;
@@ -170,20 +165,24 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	 */
 	public static Industry GetIndustry(int index)
 	{
-		return _industry_pool.GetItemFromPool(index);
+		return Global.gs._industies.GetItemFromPool(index);
 	}
 
 
 	public static Iterator<Industry> getIterator()
 	{
-		return _industry_pool.getIterator(); //pool.values().iterator();
+		return Global.gs._industies.getIterator(); 
 	}
 
 	static void forEach( Consumer<Industry> c )
 	{
-		_industry_pool.forEach(c);
+		Global.gs._industies.forEach(c);
 	}
 
+	static void forEachValid( Consumer<Industry> c )
+	{
+		Global.gs._industies.forEachValid(c);
+	}
 
 
 
@@ -1450,7 +1449,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	{
 		//Industry i;
 
-		Iterator<Industry> ii = Industry.getIterator();
+		Iterator<Industry> ii = getIterator();
 		while(ii.hasNext())
 		{
 			Industry i = ii.next();
@@ -1460,7 +1459,6 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 				if (i.index > _total_industries) _total_industries = i.index;
 
-				//memset(i, 0, sizeof(*i));
 				i.clear();
 				i.index = index;
 
@@ -1469,7 +1467,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 
 		/* Check if we can add a block to the pool */
-		return _industry_pool.AddBlockToPool() ? AllocateIndustry() : null;
+		return Global.gs._industies.AddBlockToPool() ? AllocateIndustry() : null;
 	}
 
 
@@ -1968,8 +1966,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void InitializeIndustries()
 	{
-		_industry_pool.CleanPool();
-		_industry_pool.AddBlockToPool();
+		Global.gs._industies.CleanPool();
+		Global.gs._industies.AddBlockToPool();
 
 		_total_industries = 0;
 		_industry_sort_dirty = true;
@@ -2614,7 +2612,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	{
 		_industry_sort_dirty = false;
 		/* Create array for sorting */
-		_industry_sort = _industry_pool.getValuesArray();
+		_industry_sort = Global.gs._industies.getValuesArray();
 
 		if (_industry_sort == null)
 			Global.fail("Could not allocate memory for the industry-sorting-list");
