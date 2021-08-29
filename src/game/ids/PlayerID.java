@@ -6,6 +6,7 @@ import java.util.Map;
 
 import game.Global;
 import game.Player;
+import game.enums.Owner;
 
 public class PlayerID extends AbstractID implements Serializable 
 {
@@ -42,6 +43,13 @@ public class PlayerID extends AbstractID implements Serializable
 		return old;
 	}
 
+	/** Get 'OWNER_NONE' user */
+	public static PlayerID getNone() 
+	{
+		return get(Owner.OWNER_NONE);
+	}
+	
+	
 
 	public boolean IS_HUMAN_PLAYER()
 	{
@@ -53,6 +61,35 @@ public class PlayerID extends AbstractID implements Serializable
 		return equals( Global.gs._local_player );
 	}
 
+	public boolean isSpectator()
+	{
+		return id == Owner.OWNER_SPECTATOR;
+	}
+	
+	/** Owner is water */
+	public boolean isWater()
+	{
+		return id == Owner.OWNER_WATER;
+	}
+		
+	/** Owner is town */
+	public boolean isTown()
+	{
+		return id == Owner.OWNER_TOWN;
+	}	
+	
+	/** No owner */
+	public boolean isNone()
+	{
+		return id == Owner.OWNER_NONE;
+	}	
+	
+	/** Not OWNER_NONE */
+	public boolean isNotNone()
+	{
+		return id != Owner.OWNER_NONE;
+	}	
+	
 	/*
 	@Override
 	public boolean equals(Object obj) {

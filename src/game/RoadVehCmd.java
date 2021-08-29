@@ -189,7 +189,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (v.type != Vehicle.VEH_Road || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		if (0 !=(flags & Cmd.DC_EXEC)) {
-			v.vehstatus ^= Vehicle.VS_STOPPED;
+			v.toggleStopped();
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 		}
@@ -229,7 +229,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) || !v.road.isInDepot() || 0==(v.vehstatus&Vehicle.VS_STOPPED))
+		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) || !v.road.isInDepot() || !v.isStopped())
 			return Cmd.return_cmd_error(Str.STR_9013_MUST_BE_STOPPED_INSIDE);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -318,7 +318,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		if (v.type != Vehicle.VEH_Road || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) return Cmd.CMD_ERROR;
+		if(v.isCrashed()) return Cmd.CMD_ERROR;
 
 		/* If the current orders are already goto-depot */
 		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
@@ -504,7 +504,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		int pass;
 
 		v.road.crashed_ctr++;
-		v.vehstatus |= Vehicle.VS_CRASHED;
+		v.setCrashed(true);
 
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 
@@ -556,7 +556,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 			//SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?					SND_0F_VEHICLE_BREAKDOWN : SND_35_COMEDY_BREAKDOWN, v);
 
-			if (0==(v.vehstatus & Vehicle.VS_HIDDEN)) {
+			if(!v.isHidden()) {
 				Vehicle u = v.CreateEffectVehicleRel(4, 4, 5, Vehicle.EV_BREAKDOWN_SMOKE);
 				if (u != null)
 					u.special.unk0 = v.breakdown_delay * 2;
@@ -657,7 +657,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			if (--v.load_unload_time_rem > 0)
 				return;
 
-			if (0 != (v.getCurrent_order().flags & Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
+			if(v.getCurrent_order().hasFlag(Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_INC);
 				if (0 != Economy.LoadUnloadVehicle(v)) {
 					Window.InvalidateWindow(Window.WC_ROADVEH_LIST, v.owner);
@@ -799,8 +799,6 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 			int t = 0xff & v.progress;
 			v.progress = BitOps.uint16Wrap( t - spd );
-			//int t = v.progress;
-			//v.progress = t + spd; // TODO XXX [dz] changed to + - WHY?
 
 			return (t < v.progress);
 	}
@@ -860,8 +858,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		od.v = v;
 		od.u = u;
 
-		if (u.getMax_speed() >= v.getMax_speed() &&
-				0==(u.vehstatus&Vehicle.VS_STOPPED) &&
+		if (u.getMax_speed() >= v.getMax_speed() && !u.isStopped() &&
 				u.cur_speed != 0)
 			return;
 
@@ -891,7 +888,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			return;
 
 		v.road.overtaking = 0x10;
-		if (od.u.cur_speed == 0 || 0 != (od.u.vehstatus & Vehicle.VS_STOPPED)) {
+		if(od.u.cur_speed == 0 || od.u.isStopped()) {
 			v.road.overtaking_ctr = 0x11;
 		} else {
 			//		if (FindRoadVehToOvertake(&od))
@@ -1208,7 +1205,7 @@ class RoadDriveEntry {
 
 			v.BeginVehicleMove();
 
-			v.vehstatus &= ~Vehicle.VS_HIDDEN;
+			v.setHidden(false);
 			v.road.state = rd2;
 			v.road.frame = 6;
 
@@ -1484,7 +1481,7 @@ class RoadDriveEntry {
 	static void RoadVehEnterDepot(Vehicle v)
 	{
 		v.road.setInDepot();
-		v.vehstatus |= Vehicle.VS_HIDDEN;
+		v.setHidden(true);
 
 		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
@@ -1504,7 +1501,7 @@ class RoadDriveEntry {
 			if (BitOps.HASBIT(t.flags, Order.OFB_PART_OF_ORDERS)) {
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) {
-				v.vehstatus |= Vehicle.VS_STOPPED;
+				v.setStopped(true);
 				if (v.owner == Global.gs._local_player) {
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddNewsItem(
@@ -1544,7 +1541,7 @@ class RoadDriveEntry {
 		if (!v.VehicleNeedsService())
 			return;
 
-		if(0 != (v.vehstatus & Vehicle.VS_STOPPED))
+		if(v.isStopped())
 			return;
 
 		if (Global._patches.gotodepot && v.VehicleHasDepotOrders())
@@ -1608,7 +1605,7 @@ class RoadDriveEntry {
 		/* update destination */
 		if ( v.getCurrent_order() != null
 				&& v.getCurrent_order().type == Order.OT_GOTO_STATION 
-				&& 0==(v.vehstatus & Vehicle.VS_CRASHED)) 
+				&& !v.isCrashed()) 
 		{
 			RoadStopType type = (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) ? RoadStopType.RS_BUS : RoadStopType.RS_TRUCK;
 
@@ -1688,7 +1685,7 @@ class RoadDriveEntry {
 			}
 		}
 
-		if(0 != (v.vehstatus & Vehicle.VS_STOPPED))
+		if(v.isStopped())
 			return;
 
 		cost = Engine.RoadVehInfo(v.getEngine_type().id).running_cost * Global._price.roadveh_running / 364;

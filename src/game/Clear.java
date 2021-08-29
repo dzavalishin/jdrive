@@ -348,10 +348,8 @@ public class Clear extends ClearTables {
 			/* finally mark the dirty tiles dirty */
 			{
 				int count = ts.tile_table_count;
-				//MutableTileIndex ti = new MutableTileIndex( ts.tile_table );
 				for (int i = 0 ; i < count; i++) {
 					ts.tile_table[i].MarkTileDirtyByTile();
-					//ti.madd(1); // TODO check all .add / .sub for modification of TileIndex stored elsewhere
 				}
 			}
 		}
@@ -518,7 +516,7 @@ public class Clear extends ClearTables {
 		tile = TileIndex.TileVirtXY(x, y);
 
 		if (!tile.IsTileType( TileTypes.MP_UNMOVABLE) || tile.getMap().m5 != 3) return Cmd.CMD_ERROR;
-		if (!tile.CheckTileOwnership() && Global.gs._current_player.id != Owner.OWNER_WATER) return Cmd.CMD_ERROR;
+		if (!tile.CheckTileOwnership() && !Global.gs._current_player.isWater()) return Cmd.CMD_ERROR;
 
 
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;

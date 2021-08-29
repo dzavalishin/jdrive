@@ -1,8 +1,7 @@
 package game;
-import game.enums.Owner;
+import java.util.Iterator;
 
 import game.enums.TileTypes;
-import game.ifaces.AircraftStateHandler;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.PlayerID;
@@ -10,6 +9,7 @@ import game.ids.StationID;
 import game.ids.StringID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
+import game.ifaces.AircraftStateHandler;
 import game.struct.GetNewVehiclePosResult;
 import game.struct.Point;
 import game.tables.AirConstants;
@@ -28,8 +28,6 @@ import game.xui.Widget;
 import game.xui.Window;
 import game.xui.WindowDesc;
 import game.xui.WindowEvent;
-
-import java.util.Iterator;
 
 
 public class AirCraft extends AirCraftTables {
@@ -334,7 +332,7 @@ public class AirCraft extends AirCraftTables {
 
 	static boolean CheckStoppedInHangar(final Vehicle  v)
 	{
-		if (0 == (v.vehstatus & Vehicle.VS_STOPPED) || !IsAircraftHangarTile(v.tile)) {
+		if(!v.isStopped() || !IsAircraftHangarTile(v.tile)) {
 			Global._error_message = Str.STR_A01B_AIRCRAFT_MUST_BE_STOPPED;
 			return false;
 		}
@@ -398,7 +396,7 @@ public class AirCraft extends AirCraftTables {
 
 		if (Global._patches.allow_municipal_airports 
 				&& mAirport.MA_VehicleIsAtMunicipalAirport(v) 
-				&& 0==(v.vehstatus & Vehicle.VS_STOPPED)) 
+				&& !v.isStopped())
 			return Cmd.return_cmd_error(Str.STR_MA_CANT_STOP_AT_MUNICIPAL);
 
 		// cannot stop airplane when in flight, or when taking off / landing
@@ -406,7 +404,7 @@ public class AirCraft extends AirCraftTables {
 			return Cmd.return_cmd_error(Str.STR_A017_AIRCRAFT_IS_IN_FLIGHT);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			v.vehstatus ^= Vehicle.VS_STOPPED;
+			v.toggleStopped();
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 			Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
@@ -575,7 +573,7 @@ public class AirCraft extends AirCraftTables {
 
 		if (Global._patches.servint_aircraft == 0) return;
 		if (!v.VehicleNeedsService()) return;
-		if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
+		if(v.isStopped()) return;
 
 		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT && 0 !=
 				(v.getCurrent_order().flags & Order.OF_HALT_IN_DEPOT))
@@ -613,7 +611,7 @@ public class AirCraft extends AirCraftTables {
 		v.AgeVehicle();
 		CheckIfAircraftNeedsService(v);
 
-		if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
+		if(v.isStopped()) return;
 
 		cost = Engine.AircraftVehInfo(v.getEngine_type().id).running_cost * Global._price.aircraft_running / 364;
 
@@ -656,11 +654,11 @@ public class AirCraft extends AirCraftTables {
 
 		u = v.next.next;
 
-		if( 0 != (u.vehstatus & Vehicle.VS_HIDDEN) ) return;
+		if( u.isHidden() ) return;
 
 		// if true, helicopter rotors do not rotate. This should only be the case if a helicopter is
 		// loading/unloading at a terminal or stopped
-		if (v.getCurrent_order().type == Order.OT_LOADING || 0 != (v.vehstatus & Vehicle.VS_STOPPED)) {
+		if (v.getCurrent_order().type == Order.OT_LOADING || v.isStopped()) {
 			if (u.cur_speed != 0) {
 				u.cur_speed++;
 				if (u.cur_speed >= 0x80 && u.cur_image == Sprite.SPR_ROTOR_MOVING_3) {
@@ -742,13 +740,13 @@ public class AirCraft extends AirCraftTables {
 		v.cur_speed = 0;
 		v.subspeed = 0;
 		v.progress = 0;
-		v.vehstatus |= Vehicle.VS_HIDDEN;
+		v.setHidden(true);
 
 		u = v.next;
-		u.vehstatus |= Vehicle.VS_HIDDEN;
+		u.setHidden(true);
 		u = u.next;
 		if (u != null) {
-			u.vehstatus |= Vehicle.VS_HIDDEN;
+			u.setHidden(true);
 			u.cur_speed = 0;
 		}
 
@@ -784,7 +782,7 @@ public class AirCraft extends AirCraftTables {
 		spd = 0xFFFF & Math.min( v.cur_speed + (spd >> 8) + ((v.subspeed < t) ? 1 : 0), new_speed);
 
 		// adjust speed for broken vehicles
-		if( 0 != (v.vehstatus&Vehicle.VS_AIRCRAFT_BROKEN)) spd = Math.min(spd, v.getMax_speed() / 3 * Global._patches.aircraft_speed_coeff);
+		if(v.isAircraftBroken()) spd = Math.min(spd, v.getMax_speed() / 3 * Global._patches.aircraft_speed_coeff);
 
 		if(v.air.state == Airport.FLYING && v.subtype == 0 && v.air.desired_speed == 0) {
 			if(spd > 0)
@@ -1210,7 +1208,7 @@ public class AirCraft extends AirCraftTables {
 	{
 		if (v.breakdown_ctr != 1) {
 			v.breakdown_ctr = 1;
-			v.vehstatus |= Vehicle.VS_AIRCRAFT_BROKEN;
+			v.setAircraftBroken(true);
 
 			if (v.breakdowns_since_last_service != 255)
 				v.breakdowns_since_last_service++;
@@ -1234,10 +1232,10 @@ public class AirCraft extends AirCraftTables {
 	static void HandleAircraftSmoke(Vehicle v)
 	{
 
-		if (0==(v.vehstatus & Vehicle.VS_AIRCRAFT_BROKEN)) return;
+		if (!v.isAircraftBroken()) return;
 
 		if (v.cur_speed < 10) {
-			v.vehstatus &= ~Vehicle.VS_AIRCRAFT_BROKEN;
+			v.setAircraftBroken(false);
 			v.breakdown_ctr = 0;
 			return;
 		}
@@ -1334,7 +1332,7 @@ public class AirCraft extends AirCraftTables {
 		//StringID 
 		int newsitem;
 
-		v.vehstatus |= Vehicle.VS_CRASHED;
+		v.setCrashed(true);
 		v.air.crashed_counter = 0;
 
 		v.CreateEffectVehicleRel(4, 4, 8, Vehicle.EV_EXPLOSION_LARGE);
@@ -1438,7 +1436,7 @@ public class AirCraft extends AirCraftTables {
 	{
 		final Vehicle  v = Vehicle.GetVehicle(data_a);
 
-		return (IsAircraftHangarTile(v.tile) && 0 != (v.vehstatus & Vehicle.VS_STOPPED));
+		return (IsAircraftHangarTile(v.tile) && v.isStopped());
 	}
 
 	static void AircraftEnterHangar(Vehicle v)
@@ -1460,7 +1458,7 @@ public class AirCraft extends AirCraftTables {
 			if (BitOps.HASBIT(old_order.flags, Order.OFB_PART_OF_ORDERS)) {
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(old_order.flags, Order.OFB_HALT_IN_DEPOT)) { // force depot visit
-				v.vehstatus |= Vehicle.VS_STOPPED;
+				v.setStopped(true);
 				Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
 
 				if (v.owner == Global.gs._local_player) {
@@ -1509,15 +1507,15 @@ public class AirCraft extends AirCraftTables {
 		v.subspeed = 0;
 		v.progress = 0;
 		v.direction = 3;
-		v.vehstatus &= ~Vehicle.VS_HIDDEN;
+		v.setHidden(false);
 		{
 			Vehicle u = v.next;
-			u.vehstatus &= ~Vehicle.VS_HIDDEN;
+			u.setHidden(false);
 
 			// Rotor blades
 			u = u.next;
 			if (u != null) {
-				u.vehstatus &= ~Vehicle.VS_HIDDEN;
+				u.setHidden(false);
 				u.cur_speed = 80;
 			}
 		}
@@ -1554,7 +1552,7 @@ public class AirCraft extends AirCraftTables {
 		}
 
 		// if we were sent to the depot, stay there
-		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT && 0 != (v.vehstatus & Vehicle.VS_STOPPED)) {
+		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT && v.isStopped()) {
 			v.getCurrent_order().type = Order.OT_NOTHING;
 			v.getCurrent_order().flags = 0;
 			return;
@@ -1674,7 +1672,7 @@ public class AirCraft extends AirCraftTables {
 				)) {
 			Global.gs._current_player = Global.gs._local_player;
 			Cmd.DoCommandP(v.tile, v.index, 1, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
-			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.getNone();
 		}
 	}
 
@@ -1695,7 +1693,7 @@ public class AirCraft extends AirCraftTables {
 		// heliport/oilrig, etc -. no airplanes (HELICOPTERS_ONLY)
 		// runway busy or not allowed to use this airstation, circle
 		if (! (v.subtype == Airport.acc_planes ||
-				st.airport_tile == null || (st.owner.id != Owner.OWNER_NONE && st.owner != v.owner && ! mAirport.MA_OwnerHandler(st.owner)) )) {
+				st.airport_tile == null || (st.owner.isNotNone() && st.owner != v.owner && ! mAirport.MA_OwnerHandler(st.owner)) )) {
 
 			// {32,FLYING,NOTHING_block,37}, {32,LANDING,N,33}, {32,HELILANDING,N,41},
 			// if it is an airplane, look for LANDING, for helicopter HELILANDING
@@ -1802,7 +1800,7 @@ public class AirCraft extends AirCraftTables {
 				// send the aircraft to the hangar at next airport (bit 17 set)
 				Global.gs._current_player = Global.gs._local_player;
 				Cmd.DoCommandP(v.tile, v.index, 1 << 16, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
-				Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+				Global.gs._current_player = PlayerID.getNone();
 			}
 		}
 	}
@@ -2144,12 +2142,12 @@ public class AirCraft extends AirCraftTables {
 	{
 		v.tick_counter++;
 
-		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) {
+		if(v.isCrashed()) {
 			HandleCrashedAircraft(v);
 			return;
 		}
 
-		if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
+		if(v.isStopped()) return;
 
 		/* aircraft is broken down? */
 		if (v.breakdown_ctr != 0) {
@@ -2218,13 +2216,13 @@ public class AirCraft extends AirCraftTables {
 			// skip those
 			if (v_oldstyle.type == Vehicle.VEH_Aircraft && v_oldstyle.subtype <= 2) {
 				// airplane in terminal stopped doesn't hurt anyone, so goto next
-				if ((0 !=(v_oldstyle.vehstatus & Vehicle.VS_STOPPED)) && v_oldstyle.air.state == 0) {
+				if(v_oldstyle.isStopped() && v_oldstyle.air.state == 0) {
 					v_oldstyle.air.state = Airport.HANGAR;
 					continue;
 				}
 
 				AircraftLeaveHangar(v_oldstyle); // make airplane visible if it was in a depot for example
-				v_oldstyle.vehstatus &= ~Vehicle.VS_STOPPED; // make airplane moving
+				v_oldstyle.setStopped(false); // make airplane moving
 				v_oldstyle.air.state = Airport.FLYING;
 				AircraftNextAirportPos_and_Order(v_oldstyle); // move it to the entry point of the airport
 				v_oldstyle.GetNewVehiclePos(gp); // get the position of the plane (to be used for setting)
@@ -2391,7 +2389,7 @@ public class AirCraft extends AirCraftTables {
 	{
 		int image = GetAircraftImage(v, 6);
 		int ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(v.owner));
-		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) ormod = Sprite.PALETTE_CRASH;
+		if(v.isCrashed()) ormod = Sprite.PALETTE_CRASH;
 		Gfx.DrawSprite(image | ormod, x + 25, y + 10);
 		if (v.subtype == 0) Gfx.DrawSprite(Sprite.SPR_ROTOR_STOPPED, x + 25, y + 5);
 		if (v.index == selection) {
@@ -2856,7 +2854,7 @@ public class AirCraft extends AirCraftTables {
 			//StringID 
 			int str;
 
-			if (0 != (v.vehstatus & Vehicle.VS_STOPPED) && IsAircraftHangarTile(v.tile)) {
+			if (v.isStopped() && IsAircraftHangarTile(v.tile)) {
 				disabled = 0;
 			}
 
@@ -2870,7 +2868,7 @@ public class AirCraft extends AirCraftTables {
 
 			if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) {
 				str = Str.STR_8863_CRASHED;
-			} else if(0 !=  (v.vehstatus & Vehicle.VS_STOPPED)) {
+			} else if(v.isStopped()) {
 				str = Str.STR_8861_STOPPED;
 			} else {
 				switch (v.getCurrent_order().type) {
@@ -2904,7 +2902,7 @@ public class AirCraft extends AirCraftTables {
 			}
 
 			/* draw the flag plus orders */
-			Gfx.DrawSprite((0 != (v.vehstatus & Vehicle.VS_STOPPED)) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.getWidget(5).top + 1);
+			Gfx.DrawSprite((v.isStopped()) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, 2, w.getWidget(5).top + 1);
 			Gfx.DrawStringCenteredTruncated(w.getWidget(5).left + 8, w.getWidget(5).right, w.getWidget(5).top + 1, new StringID(str), 0);
 			w.DrawWindowViewport();
 		} break;
@@ -2984,11 +2982,9 @@ public class AirCraft extends AirCraftTables {
 
 	static void DrawAircraftDepotWindow(Window w)
 	{
-		TileIndex tile;
-		//Vehicle v;
 		int num,x,y;
 
-		tile = new TileIndex(w.window_number);
+		TileIndex tile = new TileIndex(w.window_number);
 
 		/* setup disabled buttons */
 		w.disabled_state =
@@ -2996,7 +2992,7 @@ public class AirCraft extends AirCraftTables {
 
 		/* determine amount of items for scroller */
 		num = 0;
-		//FOR_ALL_VEHICLES(v)
+
 		Iterator<Vehicle> ii = Vehicle.getIterator();
 		while(ii.hasNext())
 		{
@@ -3004,7 +3000,7 @@ public class AirCraft extends AirCraftTables {
 
 			if (v.type == Vehicle.VEH_Aircraft &&
 					v.subtype <= 2 &&
-					0 != (v.vehstatus & Vehicle.VS_HIDDEN) &&
+					v.isHidden() &&
 					v.tile.getTile() == tile.getTile() ) {
 				num++;
 			}
@@ -3019,8 +3015,6 @@ public class AirCraft extends AirCraftTables {
 		y = 15;
 		num = w.vscroll.getPos() * w.hscroll.getCap();
 
-		//FOR_ALL_VEHICLES(v) 
-		//Vehicle.forEach( (v) ->
 		Iterator<Vehicle> ii1 = Vehicle.getIterator();
 		while(ii1.hasNext())
 		{
@@ -3028,7 +3022,7 @@ public class AirCraft extends AirCraftTables {
 
 			if (v.type == Vehicle.VEH_Aircraft &&
 					v.subtype <= 2 &&
-					0 != (v.vehstatus&Vehicle.VS_HIDDEN) &&
+					v.isHidden() &&
 					v.tile.getTile() == tile.getTile() &&
 					--num < 0 && num >= -w.vscroll.getCap() * w.hscroll.getCap()) {
 
@@ -3037,7 +3031,7 @@ public class AirCraft extends AirCraftTables {
 				Global.SetDParam(0, v.unitnumber.id);
 				Gfx.DrawString(x, y+2, (v.max_age-366) >= v.age ? Str.STR_00E2 : Str.STR_00E3, 0);
 
-				Gfx.DrawSprite( 0 != (v.vehstatus & Vehicle.VS_STOPPED) ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x, y + 12);
+				Gfx.DrawSprite( v.isStopped() ? Sprite.SPR_FLAG_VEH_STOPPED : Sprite.SPR_FLAG_VEH_RUNNING, x, y + 12);
 
 				if ((x+=74) == 2 + 74 * w.hscroll.getCap()) {
 					x = 2;
@@ -3050,7 +3044,6 @@ public class AirCraft extends AirCraftTables {
 	static int GetVehicleFromAircraftDepotWndPt(final Window w, int x, int y, Vehicle[] veh) 
 	{
 		int xt,row,xm,ym;
-		//TileIndex tile;
 		int pos;
 
 		xt = x / 74;
@@ -3066,13 +3059,13 @@ public class AirCraft extends AirCraftTables {
 		pos = (row + w.vscroll.getPos()) * w.hscroll.getCap() + xt;
 
 		int tile = w.window_number;
-		//FOR_ALL_VEHICLES(v)
+
 		Iterator<Vehicle> ii = Vehicle.getIterator();
 		while(ii.hasNext())
 		{
 			Vehicle v = ii.next();
 			if (v.type == Vehicle.VEH_Aircraft && v.subtype <= 2 &&
-					0 !=(v.vehstatus & Vehicle.VS_HIDDEN) && v.tile.tile == tile &&
+					v.isHidden() && v.tile.tile == tile &&
 					--pos < 0) {
 				veh[0] = v;
 				if (xm >= 12) return 0;
@@ -3299,14 +3292,10 @@ public class AirCraft extends AirCraftTables {
 	}
 
 	static void DrawSmallOrderList(final Vehicle v, int x, int y) {
-		//final Order order;
 		int sel, i = 0;
 
 		sel = v.cur_order_index;
 
-		//FOR_VEHICLE_ORDERS(v, order)
-		// TODO iterator
-		//v.forEachOrder( (order) ->
 		Iterator<Order> oi = v.getOrdersIterator();
 		while(oi.hasNext())
 		{
@@ -3366,6 +3355,7 @@ public class AirCraft extends AirCraftTables {
 	{
 		//StationID 
 		int station = BitOps.GB(w.window_number, 16, 16);
+		if( station == 0xFFFF ) station = -1;
 		//PlayerID 
 		int owner = BitOps.GB(w.window_number, 0, 8);
 		vehiclelist_d vl = w.as_vehiclelist_d();
@@ -3419,7 +3409,7 @@ public class AirCraft extends AirCraftTables {
 				VehicleGui.DrawVehicleProfitButton(v, x, y + 13);
 
 				Global.SetDParam(0, v.unitnumber.id);
-				if (IsAircraftHangarTile(v.tile) && 0 != (v.vehstatus & Vehicle.VS_HIDDEN)) {
+				if(IsAircraftHangarTile(v.tile) && v.isHidden()) {
 					str = Str.STR_021F;
 				} else {
 					str = v.age > v.max_age - 366 ? Str.STR_00E3 : Str.STR_00E2;

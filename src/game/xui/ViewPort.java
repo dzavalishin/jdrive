@@ -974,7 +974,7 @@ public class ViewPort
 					//StringSpriteToDraw sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.index, st.facilities, 0);
 					StringSpriteToDraw sstd=st.getSign().draw( Str.STR_305C_0, st.getIndex(), st.getFacilities(), 0);
 					if (sstd != null) {
-						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global.gs._player_colors[st.getOwner().id];
+						sstd.color = (st.getOwner().isNone() || st.getOwner().isTown() || st.hasNoFacilities()) ? 0xE : Global.gs._player_colors[st.getOwner().id];
 						sstd.width = st.getSign().getWidth_1();
 					}
 				}
@@ -1001,7 +1001,7 @@ public class ViewPort
 					//StringSpriteToDraw sstd= AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_305C_0, st.getIndex(), st.getFacilities(), 0);
 					StringSpriteToDraw sstd= st.getSign().draw(Str.STR_305C_0, st.getIndex(), st.getFacilities(), 0);
 					if (sstd != null) {
-						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global.gs._player_colors[st.getOwner().id];
+						sstd.color = (st.getOwner().isNone() || st.getOwner().isTown() || st.hasNoFacilities()) ? 0xE : Global.gs._player_colors[st.getOwner().id];
 						sstd.width = st.getSign().getWidth_1();
 					}
 				}
@@ -1030,8 +1030,8 @@ public class ViewPort
 					//StringSpriteToDraw sstd=ViewPort.AddStringToDraw(st.sign.left + 1, st.sign.top + 1, Str.STR_STATION_SIGN_TINY, st.getIndex(), st.getFacilities(), 0);
 					StringSpriteToDraw sstd=st.getSign().draw(Str.STR_STATION_SIGN_TINY, st.getIndex(), st.getFacilities(), 0);
 					if (sstd != null) {
-						//sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || 0 == st.facilities) ? 0xE : Global.gs._player_colors[st.getOwner().id];
-						sstd.color = (st.getOwner().id == Owner.OWNER_NONE || st.getOwner().id == Owner.OWNER_TOWN || st.hasNoFacilities()) ? 0xE : Global.gs._player_colors[st.getOwner().id];
+						//sstd.color = (st.getOwner().isNone() || st.getOwner().isTown() || 0 == st.facilities) ? 0xE : Global.gs._player_colors[st.getOwner().id];
+						sstd.color = (st.getOwner().isNone() || st.getOwner().isTown() || st.hasNoFacilities()) ? 0xE : Global.gs._player_colors[st.getOwner().id];
 						sstd.width = st.getSign().getWidth_2() | 0x8000;
 					}
 				}
@@ -1081,7 +1081,7 @@ public class ViewPort
 					StringSpriteToDraw sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2806), ss.str.id, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_1;
-						sstd.color = (ss.owner.id == Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global.gs._player_colors[ss.owner.id];
+						sstd.color = (ss.owner.isNone() || ss.owner.isTown())?14:Global.gs._player_colors[ss.owner.id];
 					}
 				}*/
 			}
@@ -1106,7 +1106,7 @@ public class ViewPort
 					StringSpriteToDraw sstd=AddStringToDraw(ss.sign.left + 1, ss.sign.top + 1, new StringID(Str.STR_2002), ss.str.id, 0, 0);
 					if (sstd != null) {
 						sstd.width = ss.sign.width_2 | 0x8000;
-						sstd.color = (ss.owner.id==Owner.OWNER_NONE || ss.owner.id == Owner.OWNER_TOWN)?14:Global.gs._player_colors[ss.owner.id];
+						sstd.color = (ss.owner.id==Owner.OWNER_NONE || ss.owner.isTown())?14:Global.gs._player_colors[ss.owner.id];
 					}
 				}*/
 			}
@@ -1132,7 +1132,7 @@ public class ViewPort
 			while(ii.hasNext())
 			{
 				WayPoint wp = ii.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						//bottom > wp.sign.top &&
 						//top < wp.sign.top + 12 &&
 						//right > wp.sign.left &&
@@ -1155,7 +1155,7 @@ public class ViewPort
 			while(ii.hasNext())
 			{
 				WayPoint wp = ii.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						//bottom > wp.sign.top &&
 						//top < wp.sign.top + 24 &&
 						//right > wp.sign.left &&
@@ -1177,7 +1177,7 @@ public class ViewPort
 			while(ii.hasNext())
 			{
 				WayPoint wp = ii.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						//bottom > wp.sign.top &&
 						//top < wp.sign.top + 24 &&
 						//right > wp.sign.left &&
@@ -1965,7 +1965,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				WayPoint wp = i.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						y >= wp.sign.getTop() &&
 						y < wp.sign.getTop() + 12 &&
 						x >= wp.sign.getLeft() &&
@@ -1983,7 +1983,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				WayPoint wp = i.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						y >= wp.sign.getTop() &&
 						y < wp.sign.getTop() + 24 &&
 						x >= wp.sign.getLeft() &&
@@ -2000,7 +2000,7 @@ public class ViewPort
 			while(i.hasNext())
 			{
 				WayPoint wp = i.next();
-				if (wp.xy != null &&
+				if (wp.isValid() &&
 						y >= wp.sign.getTop() &&
 						y < wp.sign.getTop() + 24 &&
 						x >= wp.sign.getLeft() &&

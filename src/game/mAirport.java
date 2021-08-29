@@ -44,7 +44,7 @@ public class mAirport
 		while(order != null)
 		{
 			st = Station.GetStation(order.station);
-			if(st.owner.id == Owner.OWNER_TOWN)
+			if(st.owner.isTown())
 				stationcount++;
 
 			order = order.next;
@@ -63,7 +63,7 @@ public class mAirport
 		while(order != null)
 		{
 			st = Station.GetStation(order.station);
-			if(st.owner.id == Owner.OWNER_TOWN)
+			if(st.owner.isTown())
 				stationcount++;
 			if(stationcount == count) 
 				return StationID.get(st.index);
@@ -77,7 +77,7 @@ public class mAirport
 	{
 		if(!Global._patches.allow_municipal_airports)
 			return false;
-		if(v.tile.GetTileOwner().id == Owner.OWNER_TOWN)
+		if(v.tile.GetTileOwner().isTown())
 			return true;
 
 		return false;
@@ -89,7 +89,7 @@ public class mAirport
 		Station.forEach( (st) ->
 		{
 			if(st.IsValidStation() 
-				&& st.owner.id == Owner.OWNER_TOWN
+				&& st.owner.isTown()
 				&& st.town == tn) { 
 					Cmd.DoCommandByTile(st.getXy(), 0, 0, Cmd.DC_EXEC,Cmd.CMD_LANDSCAPE_CLEAR);
 					tn.ExpandTown(); //this just builds over the gap thats left
@@ -158,7 +158,7 @@ public class mAirport
 				if(v.IsValidVehicle()
 					&& v.owner == Global.gs._current_player
 					&& Station.GetStation(order.station) == st
-					&& st.owner.id == Owner.OWNER_TOWN) {
+					&& st.owner.isTown()) {
 						vehiclecount[0]++;
 						break;
 				}
@@ -176,7 +176,7 @@ public class mAirport
 		if(!Global._patches.allow_municipal_airports) 
 			return false;
 		
-		return (owner.id == Owner.OWNER_TOWN);
+		return (owner.isTown());
 		
 	}
 
@@ -297,7 +297,7 @@ public class mAirport
 			
 			if(st.IsValidStation()
 				&& st.facilities == Station.FACIL_AIRPORT
-				&& st.owner.id == Owner.OWNER_TOWN 
+				&& st.owner.isTown() 
 				&& st.town == tn) 
 			{
 				Global.gs._current_player = old_player;
@@ -337,7 +337,7 @@ public class mAirport
 			Station st = it.next();
 			if(st.IsValidStation()
 				&& st.facilities == Station.FACIL_AIRPORT
-				&& st.owner.id == Owner.OWNER_TOWN 
+				&& st.owner.isTown() 
 				&& st.town == tn
 				&& st.airport_type != AirportFTAClass.AT_OILRIG) { //not really needed but you never know
 					MA_DestroyAirport(tn);

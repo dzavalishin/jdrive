@@ -42,7 +42,7 @@ public class MainWindow extends JPanel implements ActionListener
 
 	private final Timer timer = new Timer(TICK_TIME, this);
 	private final JFrame frame;
-	private final byte[] screen;
+	private byte[] screen;
 	private Point myLocation;
 
 	/*
@@ -54,6 +54,11 @@ public class MainWindow extends JPanel implements ActionListener
 		defaultMessageFont = new java.awt.Font(java.awt.Font.SERIF, java.awt.Font.PLAIN, 20 );
 	}
 	 */
+	public void setScreen(byte[] screen2) {
+		this.screen = screen2;
+	}
+	
+	
 	public MainWindow(JFrame frame, byte[] screen2) 
 	{
 		this.frame = frame;
@@ -123,8 +128,8 @@ public class MainWindow extends JPanel implements ActionListener
 				});
 
 		frame.addMouseMotionListener( new MouseMotionListener() 
-		//this.addMouseMotionListener( new MouseMotionListener() 
-		{
+				//this.addMouseMotionListener( new MouseMotionListener() 
+				{
 
 			@Override
 			public void mouseMoved(MouseEvent e) 
@@ -145,7 +150,7 @@ public class MainWindow extends JPanel implements ActionListener
 				e.consume();				
 				processMouse(x, y);
 			}
-		});
+				});
 
 		frame.addMouseWheelListener( new MouseWheelListener() 
 		{			
@@ -155,7 +160,7 @@ public class MainWindow extends JPanel implements ActionListener
 				e.consume();
 			}
 		});
-		
+
 		timer.start();
 	}
 
@@ -190,16 +195,16 @@ public class MainWindow extends JPanel implements ActionListener
 						((e.getKeyCode() == KeyEvent.VK_RIGHT)  ? 4 : 0) +
 						((e.getKeyCode() == KeyEvent.VK_DOWN)  ? 8 : 0));
 		 */
-		
+
 		boolean prev_ff = Global._fast_forward;
-		
+
 		switch(e.getKeyCode())
 		{
 		case KeyEvent.VK_LEFT:	modDirKeys(1, pressed); break; 
 		case KeyEvent.VK_UP:	modDirKeys(2, pressed); break;
 		case KeyEvent.VK_RIGHT:	modDirKeys(4, pressed); break;
 		case KeyEvent.VK_DOWN:	modDirKeys(8, pressed); break;
-		
+
 		case KeyEvent.VK_TAB:
 		{
 			if(!pressed) Global._fast_forward = false;
@@ -210,7 +215,7 @@ public class MainWindow extends JPanel implements ActionListener
 			}
 		}
 		}
-		
+
 		if( prev_ff != Global._fast_forward)
 		{			
 			//Window w = Window.FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
@@ -242,12 +247,15 @@ public class MainWindow extends JPanel implements ActionListener
 			case KeyEvent.VK_TAB:       fKey = Window.WKC_TAB;	break;
 			case KeyEvent.VK_PAUSE:     fKey = Window.WKC_PAUSE;	break;
 
-			case KeyEvent.VK_ESCAPE:    fKey = Window.WKC_ESC;	break;
+			case KeyEvent.VK_ESCAPE:    fKey = Window.WKC_ESC;		break;
 
-			case KeyEvent.VK_LEFT:      fKey = Window.WKC_LEFT;	break;
+			case KeyEvent.VK_LEFT:      fKey = Window.WKC_LEFT;		break;
 			case KeyEvent.VK_RIGHT:     fKey = Window.WKC_RIGHT;	break;
-			case KeyEvent.VK_UP:        fKey = Window.WKC_UP;	break;
-			case KeyEvent.VK_DOWN:      fKey = Window.WKC_DOWN;	break;
+			case KeyEvent.VK_UP:        fKey = Window.WKC_UP;		break;
+			case KeyEvent.VK_DOWN:      fKey = Window.WKC_DOWN;		break;
+
+			case KeyEvent.VK_PAGE_UP:   fKey = Window.WKC_PAGEUP;	break;
+			case KeyEvent.VK_PAGE_DOWN: fKey = Window.WKC_PAGEDOWN;	break;
 
 
 			case KeyEvent.VK_F1:	fKey = Window.WKC_F1;	break;
@@ -376,7 +384,7 @@ public class MainWindow extends JPanel implements ActionListener
 		//int width  = Hal._screen.width; // WIDTH
 		int height = HEIGHT;
 		int width  = WIDTH;
-		
+
 		//BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
 		if(icm!=null)
 			image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED, icm);
@@ -456,8 +464,10 @@ public class MainWindow extends JPanel implements ActionListener
 		y -= 30; //myLocation.y;
 
 		Hal._cursor.processMouse(x, y);
-		
+
 	}
+
+
 
 
 

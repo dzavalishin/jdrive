@@ -1,6 +1,5 @@
 package game;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -511,7 +510,7 @@ public class Order implements Serializable
 		return 0;
 	}
 
-	/** Delete an order from the orderlist of a vehicle.
+	/** Delete an order from the order list of a vehicle.
 	 * @param x,y unused
 	 * @param p1 the ID of the vehicle
 	 * @param p2 the order to delete (max 255)
@@ -828,8 +827,7 @@ public class Order implements Serializable
 			if (src.type == Vehicle.VEH_Road) {
 				//final Order order;
 				TileIndex required_dst = TileIndex.INVALID_TILE;
-
-				//FOR_VEHICLE_ORDERS(src, order) 
+ 
 				for(Order order = src.orders; order != null; order = order.next )
 				{
 					if (order.type == OT_GOTO_STATION) {
@@ -864,7 +862,7 @@ public class Order implements Serializable
 				}
 
 				order_dst = dst.orders;
-				//FOR_VEHICLE_ORDERS(src, order)
+
 				for(Order order_src = src.orders; order_src != null && order_src.next != null; order_src = order_src.next )
 				{
 					order_dst.next = AllocateOrder();
@@ -938,10 +936,10 @@ public class Order implements Serializable
 		if (Global._patches.order_review_system == 0) return false;
 
 		/* Do nothing for crashed vehicles */
-		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) return false;
+		if(v.isCrashed()) return false;
 
 		/* Do nothing for stopped vehicles if setting is '1' */
-		if (Global._patches.order_review_system == 1 && 0 != (v.vehstatus & Vehicle.VS_STOPPED) )
+		if (Global._patches.order_review_system == 1 && v.isStopped() )
 			return false;
 
 		/* do nothing we we're not the first vehicle in a share-chain */
@@ -963,7 +961,6 @@ public class Order implements Serializable
 				DEBUG(misc, 3) ("CheckOrder called in mode 1 (validation mode) for %d", v.index);
 			}*/
 
-			//FOR_VEHICLE_ORDERS(v, order) 
 			for(Order order = v.orders; order != null; order = order.next )
 			{
 				/* Dummy order? */
@@ -1277,18 +1274,19 @@ public class Order implements Serializable
 	public static void saveGame(ObjectOutputStream oos) {
 		//oos.writeObject(_order_pool);		
 	}
+	
 	public TileIndex getTargetXy() 
 	{
 		switch(getType()) 
 		{
 		case Order.OT_GOTO_STATION:			/* station order */
-			return Station.GetStation(getStation()).getXy() ;
+			return Station.GetStation(station).getXy() ;
 
 		case Order.OT_GOTO_DEPOT:				/* goto depot order */
-			return Depot.GetDepot(getStation()).xy;
+			return Depot.GetDepot(station).xy;
 
 		case Order.OT_GOTO_WAYPOINT:	/* goto waypoint order */
-			return WayPoint.GetWaypoint(getStation()).xy;
+			return WayPoint.GetWaypoint(station).xy;
 		}		
 		return null;
 	}
@@ -1303,6 +1301,18 @@ public class Order implements Serializable
 
 	public boolean hasFlag(int flag) {
 		return BitOps.HASBIT(flags, flag);
+	}
+
+	public boolean hasFlags(int flag) {
+		return BitOps.HASBIT(flags, flag);
+	}
+
+	public void setFlags(int flag) {
+		flags |= flag;
+	}
+
+	public void resetFlags(int flag) {
+		flags &= ~flag;
 	}
 
 

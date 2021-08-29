@@ -718,7 +718,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 					Integer args[] = new Integer[2];
 
 					// industry not valid anymore?
-					if (i.xy == null)
+					if (!i.isValid())
 						break;
 
 					// First print the town name and the industry type name

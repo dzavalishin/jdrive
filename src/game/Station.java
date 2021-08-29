@@ -249,7 +249,7 @@ public class Station extends StationTables implements IPoolItem
 	{
 		_station_pool.forEach( (i,st) ->
 		{
-			if (st.xy != null) st.UpdateStationVirtCoord();
+			if (st.isValid()) st.UpdateStationVirtCoord();
 		});
 	}
 
@@ -730,7 +730,7 @@ public class Station extends StationTables implements IPoolItem
 		//FOR_ALL_STATIONS(st) 
 		_station_pool.forEach( (i,st) ->
 		{
-			if (st.xy == null) {
+			if (!st.isValid()) {
 				StationID index = StationID.get(st.index);
 
 				//memset(st, 0, sizeof(Station));
@@ -818,7 +818,7 @@ public class Station extends StationTables implements IPoolItem
 
 		_station_pool.forEach( (i,s) ->			
 		{
-			if (s != st && s.xy != null && s.town==t) {
+			if (s != st && s.isValid() && s.town==t) {
 				int str = M(s.string_id);
 				if (str <= 0x20) {
 					if (str == M(Str.STR_SV_STNAME_FOREST))
@@ -944,7 +944,7 @@ public class Station extends StationTables implements IPoolItem
 		//FOR_ALL_STATIONS(st) 
 		_station_pool.forEach( (i,st) ->			
 		{
-			if (st.xy != null && (owner.id == Owner.OWNER_SPECTATOR || st.owner == owner)) {
+			if (st.isValid() && (owner.isSpectator() || st.owner == owner)) {
 				int cur_dist = Map.DistanceManhattan(tile, st.xy);
 
 				if (cur_dist < threshold[0]) {
@@ -1258,7 +1258,7 @@ public class Station extends StationTables implements IPoolItem
 
 		if (st != null) {
 			// Reuse an existing station.
-			if (st.owner.id != Owner.OWNER_NONE && st.owner != Global.gs._current_player)
+			if (st.owner.isNotNone() && st.owner != Global.gs._current_player)
 				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
 			if (st.train_tile != null) {
@@ -1434,7 +1434,7 @@ public class Station extends StationTables implements IPoolItem
 		// make sure the specified tile belongs to the current player, and that it is a railroad station.
 		if (!tile.IsTileType(TileTypes.MP_STATION) || tile.getMap().m5 >= 8 || !Global._patches.nonuniform_stations) return Cmd.CMD_ERROR;
 		st = GetStation(tile.getMap().m2);
-		if (Global.gs._current_player.id != Owner.OWNER_WATER && (!Player.CheckOwnership(st.owner) || !tile.EnsureNoVehicle())) return Cmd.CMD_ERROR;
+		if (!Global.gs._current_player.isWater() && (!Player.CheckOwnership(st.owner) || !tile.EnsureNoVehicle())) return Cmd.CMD_ERROR;
 
 		// if we reached here, it means we can actually delete it. do that.
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -1598,11 +1598,11 @@ public class Station extends StationTables implements IPoolItem
 		int cost;
 
 		/* if there is flooding and non-uniform stations are enabled, remove platforms tile by tile */
-		if (Global.gs._current_player.id == Owner.OWNER_WATER && Global._patches.nonuniform_stations)
+		if (Global.gs._current_player.isWater() && Global._patches.nonuniform_stations)
 			return Cmd.DoCommandByTile(itile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_REMOVE_FROM_RAILROAD_STATION);
 
 		/* Current player owns the station? */
-		if (Global.gs._current_player.id != Owner.OWNER_WATER && !Player.CheckOwnership(st.owner))
+		if (!Global.gs._current_player.isWater() && !Player.CheckOwnership(st.owner))
 			return Cmd.CMD_ERROR;
 
 		/* determine width and height of platforms */
@@ -1732,7 +1732,7 @@ public class Station extends StationTables implements IPoolItem
 			return Cmd.return_cmd_error( (type) ? Str.STR_3008B_TOO_MANY_TRUCK_STOPS : Str.STR_3008A_TOO_MANY_BUS_STOPS);
 
 		if (st != null) {
-			if (st.owner.id != Owner.OWNER_NONE && st.owner != Global.gs._current_player)
+			if (st.owner.isNotNone() && st.owner != Global.gs._current_player)
 				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
 			if (!CheckStationSpreadOut(st, tile, 1, 1))
@@ -1805,7 +1805,7 @@ public class Station extends StationTables implements IPoolItem
 		RoadStop cur_stop;
 		boolean is_truck = tile.getMap().m5 < 0x47;
 
-		if (Global.gs._current_player.id != Owner.OWNER_WATER && !Player.CheckOwnership(st.owner))
+		if (!Global.gs._current_player.isWater() && !Player.CheckOwnership(st.owner))
 			return Cmd.CMD_ERROR;
 
 		if (is_truck) { // truck stop
@@ -1953,7 +1953,7 @@ public class Station extends StationTables implements IPoolItem
 			_station_pool.forEach( (i,st) ->
 			{
 				if ( (st.owner == null || st.owner.id != Owner.OWNER_TOWN) 
-						&& st.xy != null 
+						&& st.isValid() 
 						&& st.town == t 
 						&& 0 != (st.facilities&FACIL_AIRPORT) 
 						&& st.airport_type != AirportFTAClass.AT_OILRIG)
@@ -1982,7 +1982,7 @@ public class Station extends StationTables implements IPoolItem
 		}
 
 		if (st != null) {
-			if (st.owner.id != Owner.OWNER_NONE && st.owner != Global.gs._current_player)
+			if (st.owner.isNotNone() && st.owner != Global.gs._current_player)
 				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
 			if (!CheckStationSpreadOut(st, tile, 1, 1))
@@ -2073,7 +2073,7 @@ public class Station extends StationTables implements IPoolItem
 		int w,h;
 		int cost;
 
-		if (Global.gs._current_player.id != Owner.OWNER_WATER && !Player.CheckOwnership(st.owner))
+		if (!Global.gs._current_player.isWater() && !Player.CheckOwnership(st.owner))
 			return Cmd.CMD_ERROR;
 
 		tile = st.airport_tile;
@@ -2153,7 +2153,7 @@ public class Station extends StationTables implements IPoolItem
 			/* Buoys are marked in the Station struct by this flag. Yes, it is this
 			 * braindead.. */
 			st.had_vehicle_of_type |= HVOT_BUOY;
-			st.owner = PlayerID.get( Owner.OWNER_NONE );
+			st.owner = PlayerID.getNone();
 
 			st.build_date = Global._date;
 
@@ -2314,7 +2314,7 @@ public class Station extends StationTables implements IPoolItem
 		}
 
 		if (st != null) {
-			if (st.owner.id != Owner.OWNER_NONE && st.owner != Global.gs._current_player)
+			if (st.owner.isNotNone() && st.owner != Global.gs._current_player)
 				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
 			if (!CheckStationSpreadOut(st, tile, 1, 1)) return Cmd.CMD_ERROR;
@@ -2706,7 +2706,7 @@ public class Station extends StationTables implements IPoolItem
 							if (x < 12) {
 								int spd;
 
-								v.vehstatus |= Vehicle.VS_TRAIN_SLOWING;
+								v.setTrainSlowing(true);;
 								spd = _enter_station_speedtable[x];
 								if (spd < v.cur_speed) v.cur_speed = spd;
 							}
@@ -2816,7 +2816,7 @@ public class Station extends StationTables implements IPoolItem
 		//FOR_ALL_STATIONS(st)
 		_station_pool.forEach( (i,st) ->
 		{
-			if (st.xy != null && st.owner.id < Global.MAX_PLAYERS) DeleteStation(st);
+			if (st.isValid() && st.owner.id < Global.MAX_PLAYERS) DeleteStation(st);
 		});
 	}
 
@@ -3002,11 +3002,11 @@ public class Station extends StationTables implements IPoolItem
 		if (++_station_tick_ctr == GetStationPoolSize()) _station_tick_ctr = 0;
 
 		st = GetStation(i);
-		if (st != null && st.xy != null) StationHandleBigTick(st);
+		if (st != null && st.isValid()) StationHandleBigTick(st);
 
 		_station_pool.forEach( (ii,sst) ->
 		{
-			if (sst.xy != null) StationHandleSmallTick(sst);
+			if (sst.isValid()) StationHandleSmallTick(sst);
 		});
 	}
 
@@ -3019,7 +3019,7 @@ public class Station extends StationTables implements IPoolItem
 	{
 		_station_pool.forEach( (ii,st) ->
 		{
-			if (st.xy != null && st.owner == owner &&
+			if (st.isValid() && st.owner == owner &&
 					Map.DistanceManhattan(tile, st.xy) <= radius) {
 
 				for (int i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
@@ -3269,7 +3269,7 @@ public class Station extends StationTables implements IPoolItem
 		tile.getMap().m4 = 0;
 		tile.getMap().m5 = 0x4B;
 
-		st.owner = PlayerID.get( Owner.OWNER_NONE );
+		st.owner = PlayerID.getNone();
 		st.airport_flags = 0;
 		st.airport_type = AirportFTAClass.AT_OILRIG;
 		st.xy = tile;
@@ -3401,9 +3401,17 @@ public class Station extends StationTables implements IPoolItem
 	 */
 	public boolean IsValidStation()
 	{
-		return xy != null; /* XXX: Replace by INVALID_TILE someday */
+		return xy != null;
 	}
 
+	/**
+	 * Check if a station really exists.
+	 */
+	public boolean isValid()
+	{
+		return xy != null;
+	}
+	
 	public boolean IsBuoy()
 	{
 		return 0 != (had_vehicle_of_type & HVOT_BUOY); /* XXX: We should really ditch this ugly coding and switch to something sane... */

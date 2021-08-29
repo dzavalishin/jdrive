@@ -26,7 +26,7 @@ public class DisasterCmd extends DisasterTables
 
 		case MP_HOUSE: {
 			PlayerID p = Global.gs._current_player;
-			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.getNone();
 			Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 			Global.gs._current_player = p;
 			break;
@@ -66,7 +66,7 @@ public class DisasterCmd extends DisasterTables
 		v.sprite_width = 2;
 		v.sprite_height = 2;
 		v.z_height = 5;
-		v.owner = PlayerID.get(Owner.OWNER_NONE);
+		v.owner = PlayerID.getNone();
 		v.vehstatus = Vehicle.VS_UNCLICKABLE;
 		v.disaster.image_override = 0;
 		v.getCurrent_order().type = Order.OT_NOTHING;
@@ -281,7 +281,7 @@ public class DisasterCmd extends DisasterTables
 
 			dist = Math.abs(v.getX_pos() - u.getX_pos()) + Math.abs(v.getY_pos() - u.getY_pos());
 
-			if (dist < 16 && 0==(u.vehstatus&Vehicle.VS_HIDDEN) && u.breakdown_ctr==0) {
+			if (dist < 16 && !u.isHidden() && u.breakdown_ctr==0) {
 				u.breakdown_ctr = 3;
 				u.breakdown_delay = 140;
 			}
@@ -293,11 +293,11 @@ public class DisasterCmd extends DisasterTables
 			if (dist <= 16 && z > u.z_pos) z--;
 			SetDisasterVehiclePos(v, gp.x, gp.y, z);
 
-			if (z <= u.z_pos && (u.vehstatus&Vehicle.VS_HIDDEN)==0) {
+			if (z <= u.z_pos && !u.isHidden() ) {
 				v.age++;
 				if (u.road.crashed_ctr == 0) {
 					u.road.crashed_ctr++;
-					u.vehstatus |= Vehicle.VS_CRASHED;
+					u.setCrashed(true);
 
 					NewsItem.AddNewsItem(Str.STR_B001_ROAD_VEHICLE_DESTROYED,
 							NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ACCIDENT, 0),
@@ -549,7 +549,7 @@ public class DisasterCmd extends DisasterTables
 
 			u.next = w;
 			InitializeDisasterVehicle(w, -6*16, v.getY_pos(), 0, 5, 12);
-			w.vehstatus |= Vehicle.VS_DISASTER;
+			w.setDisaster(true);
 		} else if (v.getCurrent_order().station < 1) {
 
 			int x = v.dest_tile.TileX() * 16;
@@ -726,7 +726,7 @@ public class DisasterCmd extends DisasterTables
 		if (u != null) {
 			v.next = u;
 			InitializeDisasterVehicle(u, x, 0, 0, 3, 1);
-			u.vehstatus |= Vehicle.VS_DISASTER;
+			u.setDisaster(true);
 		}
 	}
 
@@ -750,7 +750,7 @@ public class DisasterCmd extends DisasterTables
 		if (u != null) {
 			v.next = u;
 			InitializeDisasterVehicle(u,x,0,0,3,3);
-			u.vehstatus |= Vehicle.VS_DISASTER;
+			u.setDisaster(true);
 		}
 	}
 
@@ -767,7 +767,7 @@ public class DisasterCmd extends DisasterTables
 		while(ii.hasNext())
 		{
 			Industry i = ii.next();
-			if (i.xy != null &&
+			if (i.isValid() &&
 					i.type == Industry.IT_OIL_REFINERY &&
 					(found==null || BitOps.CHANCE16(1,2))) {
 				found = i;
@@ -790,7 +790,7 @@ public class DisasterCmd extends DisasterTables
 		if (u != null) {
 			v.next = u;
 			InitializeDisasterVehicle(u,x,y,0,3,5);
-			u.vehstatus |= Vehicle.VS_DISASTER;
+			u.setDisaster(true);
 		}
 	}
 
@@ -806,7 +806,7 @@ public class DisasterCmd extends DisasterTables
 		while(ii.hasNext())
 		{
 			Industry i = ii.next();
-			if (i.xy != null &&
+			if (i.isValid() &&
 					i.type == Industry.IT_FACTORY &&
 					(found==null || BitOps.CHANCE16(1,2))) {
 				found = i;
@@ -829,7 +829,7 @@ public class DisasterCmd extends DisasterTables
 		if (u != null) {
 			v.next = u;
 			InitializeDisasterVehicle(u,x,y,0,5,7);
-			u.vehstatus |= Vehicle.VS_DISASTER;
+			u.setDisaster(true);
 
 			w = Vehicle.ForceAllocateSpecialVehicle();
 			if (w != null) {
@@ -859,7 +859,7 @@ public class DisasterCmd extends DisasterTables
 		if (u != null) {
 			v.next = u;
 			InitializeDisasterVehicle(u,x,y,0,7,10);
-			u.vehstatus |= Vehicle.VS_DISASTER;
+			u.setDisaster(true);
 		}
 	}
 
@@ -911,7 +911,7 @@ public class DisasterCmd extends DisasterTables
 			while(ii.hasNext())
 			{
 				Industry i = ii.next();
-				if (i.xy != null && i.type == Industry.IT_COAL_MINE && --index < 0) 
+				if (i.isValid() && i.type == Industry.IT_COAL_MINE && --index < 0) 
 				{
 
 					Global.SetDParam(0, i.townId);
@@ -972,7 +972,7 @@ public class DisasterCmd extends DisasterTables
 		Global._disaster_delay = BitOps.GB(Hal.Random(), 0, 9) + 730;
 	}
 
-	void DisasterDailyLoop()
+	static void DisasterDailyLoop()
 	{
 		if (--Global._disaster_delay != 0) return;
 

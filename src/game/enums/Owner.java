@@ -9,7 +9,7 @@ public class Owner {
 	//int owner; 
 
 	//typedef enum {
-	public static final int OWNER_TOWN			= 0xf;	// a town owns the tile
+	public static final int OWNER_TOWN			= 0x0F;	// a town owns the tile
 	public static final int OWNER_NONE			= 0x10;	// nobody owns the tile
 	public static final int OWNER_WATER		= 0x11;	// "water" owns the tile
 	public static final int OWNER_SPECTATOR	= 0xff;	// spectator in MP or in scenario editor

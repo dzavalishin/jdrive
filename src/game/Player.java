@@ -674,7 +674,7 @@ public class Player implements Serializable
 
 		p.avail_railtypes = GetPlayerRailtypes(p.index);
 		p.inaugurated_year = Global._cur_year;
-		p.face = Hal.Random(); // TODO range?
+		p.face = Hal.Random();
 
 		/* Engine renewal settings */
 		p.InitialiseEngineReplacement();
@@ -997,7 +997,7 @@ public class Player implements Serializable
 	 */
 	static int CmdPlayerCtrl(int x, int y, int flags, int p1, int p2)
 	{
-		if(0 != (flags & Cmd.DC_EXEC)) Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+		if(0 != (flags & Cmd.DC_EXEC)) Global.gs._current_player = PlayerID.getNone();
 
 		switch (p1) {
 		case 0: { // Create a new Player 
@@ -1016,7 +1016,7 @@ public class Player implements Serializable
 			#endif /* ENABLE_NETWORK */
 
 			if (p != null) {
-				if (Global.gs._local_player.id == Owner.OWNER_SPECTATOR && (!Ai._ai.network_client || Ai._ai.network_playas == Owner.OWNER_SPECTATOR)) {
+				if (Global.gs._local_player.isSpectator() && (!Ai._ai.network_client || Ai._ai.network_playas == Owner.OWNER_SPECTATOR)) {
 					/* Check if we do not want to be a spectator in network */
 					if (!Global._networking || (Global._network_server && !Global._network_dedicated) || Global._network_playas != Owner.OWNER_SPECTATOR || Ai._ai.network_client) {
 						if (Ai._ai.network_client) {

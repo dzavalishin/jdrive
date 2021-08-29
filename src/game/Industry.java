@@ -107,11 +107,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	public static final int INDUSTRY_POOL_MAX_BLOCKS      = 8000;
 
 
-	private static final IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() {
-
-		/**
-		 * 
-		 */
+	private static final IPoolItemFactory<Industry> factory = new IPoolItemFactory<Industry>() 
+	{
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -162,11 +159,11 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	
 	/**
 	 * Check if an Industry really exists.
-	 */
+	 * /
 	public static boolean IsValidIndustry(Industry industry)
 	{
-		return industry.xy != null; /* XXX: Replace by INVALID_TILE someday */
-	}
+		return industry.isValid(); 
+	} */
 
 	/**
 	 * Get the pointer to the industry with index 'index'
@@ -408,9 +405,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		 * with magic_bulldozer cheat you can destroy industries
 		 * (area around OILRIG is water, so water shouldn't flood it
 		 */
-		if ((Global.gs._current_player.id != Owner.OWNER_WATER && Global._game_mode != GameModes.GM_EDITOR &&
+		if ((!Global.gs._current_player.isWater() && Global._game_mode != GameModes.GM_EDITOR &&
 				!Global._cheats.magic_bulldozer.value) ||
-				(Global.gs._current_player.id == Owner.OWNER_WATER && i.type == IT_OIL_RIG) ) {
+				(Global.gs._current_player.isWater() && i.type == IT_OIL_RIG) ) {
 			Global.SetDParam(0, Str.STR_4802_COAL_MINE + i.type);
 			return Cmd.return_cmd_error(Str.STR_4800_IN_THE_WAY);
 		}
@@ -1062,7 +1059,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 						PlayerID old_player = Global.gs._current_player;
 						/* found a tree */
 
-						Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+						Global.gs._current_player = PlayerID.getNone();
 						_industry_sound_ctr = 1;
 						_industry_sound_tile = tile;
 						//SndPlayTileFx(SND_38_CHAINSAW, tile);
@@ -1171,7 +1168,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		//FOR_ALL_INDUSTRIES(i) 
 		Industry.forEach( (i) ->
 		{
-			if (i.xy != null) ProduceIndustryGoods(i);
+			if (i.isValid()) ProduceIndustryGoods(i);
 		});
 	}
 
@@ -1289,7 +1286,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		while(ii.hasNext())
 		{
 			final Industry i = ii.next();
-			if (i.xy != null &&
+			if (i.isValid() &&
 					i.type == type &&
 					i.getTown() == t) {
 				Global._error_message = Str.STR_0287_ONLY_ONE_ALLOWED_PER_TOWN;
@@ -1426,7 +1423,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		{
 			Industry i = ii.next();
 			// check if an industry that accepts the same goods is nearby
-			if (i.xy != null &&
+			if (i.isValid() &&
 					Map.DistanceMax(tile, i.xy) <= 14 &&
 					spec.accepts_cargo[0] != AcceptedCargo.CT_INVALID &&
 					spec.accepts_cargo[0] == i.accepts_cargo[0] && (
@@ -1439,7 +1436,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			}
 
 			// check "not close to" field.
-			if (i.xy != null &&
+			if (i.isValid() &&
 					(i.type == spec.a || i.type == spec.b || i.type == spec.c) &&
 					Map.DistanceMax(tile, i.xy) <= 14) {
 				Global._error_message = Str.STR_INDUSTRY_TOO_CLOSE;
@@ -1458,7 +1455,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		{
 			Industry i = ii.next();
 
-			if (i.xy == null) {
+			if (!i.isValid()) {
 				int index = i.index;
 
 				if (i.index > _total_industries) _total_industries = i.index;
@@ -1704,7 +1701,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		if (GameOptions._opt.diff.number_industries != 0) {
 			PlayerID old_player = Global.gs._current_player;
-			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.getNone();
 			assert(num > 0);
 
 			do {
@@ -1945,12 +1942,12 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	{
 		//Industry i;
 		PlayerID old_player = Global.gs._current_player;
-		Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+		Global.gs._current_player = PlayerID.getNone();
 
 		//FOR_ALL_INDUSTRIES(i) 
 		Industry.forEach( (i) ->
 		{
-			if (i.xy != null) UpdateIndustryStatistics(i);
+			if (i.isValid()) UpdateIndustryStatistics(i);
 		});
 
 		/* 3% chance that we start a new industry */
@@ -1958,7 +1955,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			MaybeNewIndustry(Hal.Random());
 		} else if (!Global._patches.smooth_economy && _total_industries > 0) {
 			Industry i = GetIndustry(Hal.RandomRange(_total_industries));
-			if (i != null && i.xy != null) ChangeIndustryProduction(i);
+			if (i != null && i.isValid()) ChangeIndustryProduction(i);
 		}
 
 		Global.gs._current_player = old_player;

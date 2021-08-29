@@ -98,7 +98,7 @@ public class Ship {
 
 		if (Global._patches.servint_ships == 0) return;
 		if (!v.VehicleNeedsService())     return;
-		if(0 != (v.vehstatus & Vehicle.VS_STOPPED))   return;
+		if(v.isStopped())   return;
 
 		if ( (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) &&
 				0 != (v.getCurrent_order().flags & Order.OF_HALT_IN_DEPOT))
@@ -137,7 +137,7 @@ public class Ship {
 
 		Order.CheckOrders(v.index, Order.OC_INIT);
 
-		if( 0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
+		if( v.isStopped()) return;
 
 		cost = EngineGui.ShipVehInfo(v.getEngine_type().id).running_cost * Global._price.ship_running / 364;
 		v.profit_this_year -= cost >> 8;
@@ -164,7 +164,7 @@ public class Ship {
 
 			//SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?				SND_10_TRAIN_BREAKDOWN : SND_3A_COMEDY_BREAKDOWN_2, v);
 
-			if (0 ==(v.vehstatus & Vehicle.VS_HIDDEN)) {
+			if(!v.isHidden()) {
 				Vehicle u = v.CreateEffectVehicleRel(4, 4, 5, Vehicle.EV_BREAKDOWN_SMOKE);
 				if (u != null) u.special.unk0 = v.breakdown_delay * 2;
 			}
@@ -349,7 +349,7 @@ public class Ship {
 		}
 		v.direction    = BitOps.GB(m, 0, 8);
 		v.ship.state =  BitOps.GB(m, 8, 8);
-		v.vehstatus &= ~Vehicle.VS_HIDDEN;
+		v.setHidden(false);
 
 		v.cur_speed = 0;
 		RecalcShipStuff(v);
@@ -393,7 +393,7 @@ public class Ship {
 	static void ShipEnterDepot(Vehicle v)
 	{
 		v.ship.forceInDepot();
-		v.vehstatus |= Vehicle.VS_HIDDEN;
+		v.setHidden(true);
 		v.cur_speed = 0;
 		RecalcShipStuff(v);
 
@@ -414,7 +414,7 @@ public class Ship {
 			if (BitOps.HASBIT(t.flags, Order.OFB_PART_OF_ORDERS)) {
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) {
-				v.vehstatus |= Vehicle.VS_STOPPED;
+				v.setStopped(true);
 				if (v.owner == Global.gs._local_player) {
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddNewsItem(
@@ -669,7 +669,7 @@ public class Ship {
 			v.breakdown_ctr--;
 		}
 
-		if(0 != (v.vehstatus & Vehicle.VS_STOPPED)) return;
+		if(v.isStopped()) return;
 
 		ProcessShipOrder(v);
 		HandleShipLoading(v);
@@ -979,7 +979,7 @@ public class Ship {
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
 		//if (!v.tile.IsTileDepotType(Global.TRANSPORT_WATER) || v.road.state != 0x80 || 0==(v.vehstatus&Vehicle.VS_STOPPED))
-		if (!v.tile.IsTileDepotType(Global.TRANSPORT_WATER) || !v.ship.isInDepot() || 0==(v.vehstatus&Vehicle.VS_STOPPED))
+		if (!v.tile.IsTileDepotType(Global.TRANSPORT_WATER) || !v.ship.isInDepot() || !v.isStopped())
 			return Cmd.return_cmd_error(Str.STR_980B_SHIP_MUST_BE_STOPPED_IN);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -1011,7 +1011,7 @@ public class Ship {
 		if (v.type != Vehicle.VEH_Ship || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		if( 0 != (flags & Cmd.DC_EXEC)) {
-			v.vehstatus ^= Vehicle.VS_STOPPED;
+			v.toggleStopped();
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.getTile());
 			Window.InvalidateWindowClasses(Window.WC_SHIPS_LIST);
@@ -1036,7 +1036,7 @@ public class Ship {
 
 		if (v.type != Vehicle.VEH_Ship || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) return Cmd.CMD_ERROR;
+		if(v.isCrashed()) return Cmd.CMD_ERROR;
 
 		/* If the current orders are already goto-Depot */
 		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
@@ -1110,7 +1110,7 @@ public class Ship {
 
 		if (v.type != Vehicle.VEH_Ship || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER) || 0==(v.vehstatus&Vehicle.VS_STOPPED) || !v.ship.isInDepot())
+		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER) || !v.isStopped() || !v.ship.isInDepot())
 				return Cmd.return_cmd_error(Str.STR_980B_SHIP_MUST_BE_STOPPED_IN);
 
 

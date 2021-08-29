@@ -406,7 +406,7 @@ static const SaveLoad _sign_desc[] = {
 			StringSpriteToDraw sstd = ViewPort.AddStringToDraw(sign.getLeft() + 1, sign.getTop() + 1, new StringID(Str.STR_2806), str.id, 0, 0);
 			if (sstd != null) {
 				sstd.width = sw;
-				sstd.color = (owner.id == Owner.OWNER_NONE || owner.id == Owner.OWNER_TOWN)?14:Global.gs._player_colors[owner.id];
+				sstd.color = (owner.isNone() || owner.isTown())?14:Global.gs._player_colors[owner.id];
 			}
 		}
 	}

@@ -549,7 +549,7 @@ public class Global
 
 		TextEffect.TextMessageDailyLoop();
 
-		// TODO DisasterDailyLoop();
+		DisasterCmd.DisasterDailyLoop();
 		WayPoint.WaypointsDailyLoop();
 
 		if (Global._game_mode != GameModes.GM_MENU) {

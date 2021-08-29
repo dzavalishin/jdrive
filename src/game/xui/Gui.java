@@ -1899,7 +1899,7 @@ public class Gui
 				return;
 			}
 
-			Global.gs._current_player = PlayerID.get( Owner.OWNER_NONE );
+			Global.gs._current_player = PlayerID.getNone();
 			Global._generating_world = true;
 			Gui._ignore_restrictions = true;
 			if (!TryBuildIndustry(e.tile,type)) {
@@ -2037,7 +2037,7 @@ public class Gui
 			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB4 | Sprite.PALETTE_MODIFIER_GREYOUT);
 
 			// if spectator, disable things
-			if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR){
+			if (Global.gs._current_player.isSpectator()){
 				w.disabled_state |= (1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23);
 			} else {
 				w.disabled_state &= ~((1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23));
@@ -2375,7 +2375,7 @@ public class Gui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			final Player p = (Global.gs._local_player.id == Owner.OWNER_SPECTATOR) ? null : Player.GetPlayer(Global.gs._local_player);
+			final Player p = (Global.gs._local_player.isSpectator()) ? null : Player.GetPlayer(Global.gs._local_player);
 
 			w.DrawWindowWidgets();
 			Global.SetDParam(0, Global._date);

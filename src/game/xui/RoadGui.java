@@ -315,7 +315,7 @@ public class RoadGui
 
 	static void ShowBuildRoadToolbar()
 	{
-		if (Global.gs._current_player.id == Owner.OWNER_SPECTATOR) return;
+		if (Global.gs._current_player.isSpectator()) return;
 		Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);
 		Window.AllocateWindowDesc(_build_road_desc);
 		if (Global._patches.link_terraform_toolbar) Terraform.ShowTerraformToolbar();

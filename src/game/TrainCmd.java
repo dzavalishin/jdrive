@@ -1111,7 +1111,7 @@ public class TrainCmd extends TrainTables
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			v.rail.days_since_order_progr = 0;
-			v.vehstatus ^= Vehicle.VS_STOPPED;
+			v.toggleStopped();
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 		}
@@ -1795,7 +1795,7 @@ public class TrainCmd extends TrainTables
 		TrainFindDepotData tfdd = new TrainFindDepotData();
 		TileIndex tile = v.tile;
 
-		assert(0 == (v.vehstatus & Vehicle.VS_CRASHED));
+		assert(!v.isCrashed());
 
 		tfdd.owner = v.owner;
 		tfdd.best_length = (int)-1;
@@ -1861,7 +1861,7 @@ public class TrainCmd extends TrainTables
 
 		if (v.type != Vehicle.VEH_Train || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) return Cmd.CMD_ERROR;
+		if(v.isCrashed()) return Cmd.CMD_ERROR;
 
 		if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
 			if(0 != (flags & Cmd.DC_EXEC)) {
@@ -1929,7 +1929,7 @@ public class TrainCmd extends TrainTables
 	{
 		final Vehicle  u;
 
-		if ( 0 != (v.vehstatus & Vehicle.VS_TRAIN_SLOWING) 
+		if ( v.isTrainSlowing()
 				|| v.load_unload_time_rem != 0 
 				|| v.cur_speed < 2)
 			return;
@@ -1947,7 +1947,7 @@ public class TrainCmd extends TrainTables
 			if ( (Engine.RailVehInfo(engtype.id).isWagon() && effect_type == 0) ||
 					disable_effect ||
 					Engine.GetEngine(engtype).getRailtype() > RAILTYPE_RAIL ||
-					0 != (v.vehstatus & Vehicle.VS_HIDDEN) ||
+					v.isHidden() ||
 					0 != (v.rail.track & 0xC0) 
 					) {
 				continue;
@@ -2022,7 +2022,7 @@ public class TrainCmd extends TrainTables
 		v.rail.track = 1;
 		if(0 != (v.direction & 2)) v.rail.track = 2;
 
-		v.vehstatus &= ~Vehicle.VS_HIDDEN;
+		v.setHidden(false);
 		v.cur_speed = 0;
 
 		UpdateTrainDeltaXY(v, v.direction);
@@ -2505,7 +2505,7 @@ public class TrainCmd extends TrainTables
 
 			if (--v.load_unload_time_rem != 0) return;
 
-			if (0 != (v.getCurrent_order().flags & Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
+			if (v.getCurrent_order().hasFlag(Order.OF_FULL_LOAD) && v.CanFillVehicle()) {
 				v.rail.days_since_order_progr = 0; /* Prevent a train lost message for full loading trains */
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_INC);
 				if (Economy.LoadUnloadVehicle(v) != 0) {
@@ -2541,7 +2541,7 @@ public class TrainCmd extends TrainTables
 		int spd;
 		int accel;
 
-		if ( 0 != (v.vehstatus & Vehicle.VS_STOPPED) || BitOps.HASBIT(v.rail.flags, Vehicle.VRF_REVERSING)) {
+		if ( v.isStopped() || BitOps.HASBIT(v.rail.flags, Vehicle.VRF_REVERSING)) {
 			if (Global._patches.realistic_acceleration) {
 				accel = GetTrainAcceleration(v, AM_BRAKE) * 2;
 			} else {
@@ -2598,7 +2598,7 @@ public class TrainCmd extends TrainTables
 			// Non Stop now means if the order should be increased.
 			v.getCurrent_order().type = Order.OT_LOADING;
 			v.getCurrent_order().flags &= Order.OF_FULL_LOAD | Order.OF_UNLOAD | Order.OF_TRANSFER;
-			v.getCurrent_order().flags |= Order.OF_NON_STOP;
+			v.getCurrent_order().setFlags(Order.OF_NON_STOP);
 		} else {
 			// No, just do a simple load
 			v.getCurrent_order().type = Order.OT_LOADING;
@@ -2795,11 +2795,9 @@ public class TrainCmd extends TrainTables
 		v.rail.crash_anim_pos++;
 
 		u = v;
-		//BEGIN_ENUM_WAGONS(v)
 		do {
-			v.vehstatus |= Vehicle.VS_CRASHED;
+			v.setCrashed(true);
 		} while ( (v=v.next) != null);
-		//END_ENUM_WAGONS(v)
 
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, u.index, Vehicle.STATUS_BAR);
 	}
@@ -2849,7 +2847,7 @@ public class TrainCmd extends TrainTables
 
 		//two drivers + passangers killed in train v
 		num = 2 + CountPassengersInTrain(v);
-		if (0 == (coll.vehstatus & Vehicle.VS_CRASHED))
+		if (!coll.isCrashed())
 			//two drivers + passangers killed in train coll (if it was not crashed already)
 			num += 2 + CountPassengersInTrain(coll);
 
@@ -3487,7 +3485,7 @@ public class TrainCmd extends TrainTables
 
 			//SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?			SND_10_TRAIN_BREAKDOWN : SND_3A_COMEDY_BREAKDOWN_2, v);
 
-			if (0==(v.vehstatus & Vehicle.VS_HIDDEN)) {
+			if(!v.isHidden()) {
 				Vehicle u = v.CreateEffectVehicleRel(4, 4, 5, Vehicle.EV_BREAKDOWN_SMOKE);
 				if (u != null) u.special.unk0 = v.breakdown_delay * 2;
 			}
@@ -3513,12 +3511,12 @@ public class TrainCmd extends TrainTables
 
 		t = v.breakdown_ctr;
 		if (t > 1) {
-			v.vehstatus |= Vehicle.VS_TRAIN_SLOWING;
+			v.setTrainSlowing(true);
 
 			break_speed = _breakdown_speeds[BitOps.GB(~t, 4, 4)];
 			if (break_speed < v.cur_speed) v.cur_speed = break_speed;
 		} else {
-			v.vehstatus &= ~Vehicle.VS_TRAIN_SLOWING;
+			v.setTrainSlowing(false);
 		}
 
 		if(0 != (v.rail.track & 0x40)) return true; // exit if inside a tunnel
@@ -3627,7 +3625,7 @@ public class TrainCmd extends TrainTables
 			};
 
 			// slow down
-			v.vehstatus |= Vehicle.VS_TRAIN_SLOWING;
+			v.setTrainSlowing(true);
 			break_speed = _breakdown_speeds[x & 0xF];
 			if (0==(v.direction&1)) break_speed >>= 1;
 			if (break_speed < v.cur_speed) v.cur_speed = break_speed;
@@ -3662,7 +3660,7 @@ public class TrainCmd extends TrainTables
 		}
 
 		/* exit if train is stopped */
-		if ( (v.vehstatus & Vehicle.VS_STOPPED) != 0 && v.cur_speed == 0)
+		if ( v.isStopped() && v.cur_speed == 0)
 			return;
 
 
@@ -3717,7 +3715,7 @@ public class TrainCmd extends TrainTables
 			// make sure vehicle wasn't deleted.
 			if (v.type == Vehicle.VEH_Train && v.IsFrontEngine())
 				TrainLocoHandler(v, true);
-		} else if (v.IsFreeWagon() && BitOps.HASBITS(v.vehstatus, Vehicle.VS_CRASHED)) {
+		} else if (v.IsFreeWagon() && v.isCrashed()) {
 			// Delete flooded standalone wagon
 			if (++v.rail.crash_anim_pos >= 4400)
 				v.DeleteVehicle();
@@ -3760,7 +3758,7 @@ public class TrainCmd extends TrainTables
 				v.rail.days_since_order_progr = 0;
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) { // User initiated?
-				v.vehstatus |= Vehicle.VS_STOPPED;
+				v.setStopped(true);
 				if (v.owner == Global.gs._local_player) {
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddValidatedNewsItem(
@@ -3784,7 +3782,7 @@ public class TrainCmd extends TrainTables
 		if (v.rail.pbs_status == Pbs.PBS_STAT_HAS_PATH)      return;
 		if (Global._patches.servint_trains == 0)                   return;
 		if (!v.VehicleNeedsService())                        return;
-		if(0 != (v.vehstatus & Vehicle.VS_STOPPED))                      return;
+		if(v.isStopped())                      return;
 		if (Global._patches.gotodepot && v.VehicleHasDepotOrders()) return;
 
 		// Don't interfere with a depot visit scheduled by the user, or a
@@ -3867,7 +3865,7 @@ public class TrainCmd extends TrainTables
 					v.dest_tile = tile;
 			}
 
-			if ((v.vehstatus & Vehicle.VS_STOPPED) == 0) {
+			if (!v.isStopped()) {
 				/* running costs */
 				int cost = GetTrainRunningCost(v) / 364;
 

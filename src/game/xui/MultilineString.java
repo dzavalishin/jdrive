@@ -21,8 +21,8 @@ public class MultilineString
 		//int num = 0;
 		int base = Gfx._stringwidth_base;
 		int w;
-		int last_space;
-		char c;
+		char c = 0;
+		int last_space = 0;
 		int lineStart = 0;
 
 		char sc[] = str.toCharArray();
@@ -30,14 +30,15 @@ public class MultilineString
 
 		for(;;) {
 			w = 0;
-			last_space = 0;
+			//last_space = 0;
 
 			for(;;) {
 				if (sp >= sc.length) 
-				{
+				{ last_space = sp; break; }
+				/*{
 					addLine( new String( sc, lineStart, sp-lineStart), base );
 					return; // num + (base << 16);
-				}
+				}*/
 				
 				c = sc[sp++]; // *str++;
 				if (c == Gfx.ASCII_LETTERSTART) last_space = sp;
@@ -45,22 +46,23 @@ public class MultilineString
 				if (c >= Gfx.ASCII_LETTERSTART) {
 					w += Gfx.GetCharacterWidth(base + (0xFF & c));
 					if (w > maxw) {
-						sp = last_space;
+						/*sp = last_space;
 						// [dz] break out if last_space == 0? Or else loop forever 
 						if(sp >= sc.length || sc[sp] == 0 || last_space == 0) 
 						{// (str == null)
 							addLine( new String( sc, lineStart, sp-lineStart), base );
 							return; // num + (base << 16);
-						}
+						}*/
 						break;
 					}
 				} else {
-					if (sp >= sc.length || c == 0) 
-					{
+					if (sp >= sc.length || c == 0)
+						break;
+					/*{
 						addLine( new String( sc, lineStart, sp-lineStart), base );
 						return; // num + (base << 16);
-					}
-					if (c == Gfx.ASCII_NL) break;
+					}*/
+					if (c == Gfx.ASCII_NL) { last_space = sp; break; }
 
 					if (c == Gfx.ASCII_SETX) sp++;
 					else if (c == Gfx.ASCII_SETXY) sp += 2;
@@ -69,11 +71,21 @@ public class MultilineString
 				}
 			}
 
+			if(last_space == lineStart)
+			{
+				Global.error("word too long in '%s'", str);
+				return;
+			}
+			
 			//num++;
 			//str[-1] = '\0'; TODO XXX why?
 			//if(sp > 0 ) sc[sp-1] = 0;
-			addLine( new String( sc, lineStart, sp-lineStart), base );
+			addLine( new String( sc, lineStart, last_space-lineStart), base );
+			sp = last_space;
 			lineStart = sp;
+			
+			if (sp >= sc.length || c == 0) 
+				return;
 		}
 	}
 
