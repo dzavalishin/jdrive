@@ -1,8 +1,7 @@
 package game;
-import game.enums.Owner;
+import java.util.Iterator;
 
 import game.enums.TileTypes;
-import game.ifaces.AircraftStateHandler;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.PlayerID;
@@ -10,6 +9,7 @@ import game.ids.StationID;
 import game.ids.StringID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
+import game.ifaces.AircraftStateHandler;
 import game.struct.GetNewVehiclePosResult;
 import game.struct.Point;
 import game.tables.AirConstants;
@@ -28,8 +28,6 @@ import game.xui.Widget;
 import game.xui.Window;
 import game.xui.WindowDesc;
 import game.xui.WindowEvent;
-
-import java.util.Iterator;
 
 
 public class AirCraft extends AirCraftTables {
@@ -3357,6 +3355,7 @@ public class AirCraft extends AirCraftTables {
 	{
 		//StationID 
 		int station = BitOps.GB(w.window_number, 16, 16);
+		if( station == 0xFFFF ) station = -1;
 		//PlayerID 
 		int owner = BitOps.GB(w.window_number, 0, 8);
 		vehiclelist_d vl = w.as_vehiclelist_d();
