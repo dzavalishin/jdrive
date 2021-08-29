@@ -347,12 +347,23 @@ public class FileIO {
 
 
 
-	private static void loadDirs(List<FiosItem> items, Path dir) {
+	private static void loadDirs(List<FiosItem> items, Path dir) 
+	{
+		// Parent directory, only if not in root already.
+		if (_fios_path.length() != 0) {
+			FiosItem fios = new FiosItem();
+			fios.type = FiosType.PARENT;
+			fios.mtime = 0;
+			fios.name = "..";
+			fios.title = ".. (Parent directory)";
+			items.add(fios);
+		}
+		
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*")) 
 		{
 			for (Path entry: stream) {
 				System.out.println(entry.getFileName());
-				File file= entry.getFileName().toFile();
+				File file = entry.toFile();
 				//filename = String.format( "%s/%s", _fios_path, dirent.d_name);
 				if(file.isDirectory() && file.getName().charAt(0) != '.') 
 				{
@@ -376,12 +387,6 @@ public class FileIO {
 	// Get a list of savegames
 	public static List<FiosItem> FiosGetSavegameList(int mode)
 	{
-		//DIR *dir;
-		//struct dirent *dirent;
-		//struct stat sb;
-		//int sort_start;
-		//char filename[MAX_PATH];
-
 		List<FiosItem> items = new ArrayList<>();
 		
 		if (_fios_save_path == null)
@@ -389,19 +394,9 @@ public class FileIO {
 		
 		_fios_path = _fios_save_path;
 
-		// Parent directory, only if not in root already.
-		if (_fios_path.length() != 0) {
-			FiosItem fios = new FiosItem();
-			fios.type = FiosType.PARENT;
-			fios.mtime = 0;
-			fios.name = "..";
-			fios.title = ".. (Parent directory)";
-			items.add(fios);
-		}
-
-		// Show subdirectories first
 		Path dir = new File(_fios_path).toPath();
 
+		// Show subdirectories first
 		loadDirs(items, dir);
 
 
@@ -455,14 +450,6 @@ public class FileIO {
 	// Get a list of scenarios
 	public static List<FiosItem> FiosGetScenarioList(int mode)
 	{
-		/*
-		FiosItem *fios;
-		DIR *dir;
-		struct dirent *dirent;
-		struct stat sb;
-		int sort_start;
-		char filename[MAX_PATH];
-		*/
 		List<FiosItem> items = new ArrayList<>();
 		
 		if (_fios_scn_path == null) 
@@ -471,14 +458,6 @@ public class FileIO {
 		_fios_path = _fios_scn_path;
 
 		
-		// Parent directory, only if not in root already.
-		if (_fios_path.length() != 0) {
-			FiosItem fios = new FiosItem();
-			fios.type = FiosType.PARENT;
-			fios.mtime = 0;
-			fios.name = "..";
-			fios.title = ".. (Parent directory)";
-		}
 
 		// Show subdirectories first
 		Path dir = new File(_fios_path).toPath();
@@ -539,18 +518,19 @@ public class FileIO {
 		switch (item.type) {
 		case PARENT:
 		{
-			int pos = path.lastIndexOf(File.pathSeparatorChar);
+			int pos = path.lastIndexOf(File.separatorChar);
 			if( pos < 0 ) break;
 			path = path.substring(0, pos);
 		}
-
+			break;
+			
 		case DIR:			
-			path = path + File.pathSeparator + item.name;			
+			path = path + File.separator + item.name;			
 			break;
 
 		case DIRECT:
 			path = item.name;
-			while(path.endsWith(File.pathSeparator))
+			while(path.endsWith(File.separator))
 				path = path.substring(0, path.length()-1);
 			break;
 
@@ -558,10 +538,16 @@ public class FileIO {
 		case OLDFILE:
 		case SCENARIO:
 		case OLD_SCENARIO: {
-			return String.format("%s/%s", path, item.name);
+			return String.format("%s%s%s", path, File.separator, item.name);
 		}
 		}
 
+		if(_fios_path == _fios_scn_path)
+			_fios_path = _fios_scn_path = path;
+		
+		if(_fios_path == _fios_save_path)
+			_fios_path = _fios_save_path = path;
+				
 		return null;
 	}
 
