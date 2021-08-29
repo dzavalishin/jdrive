@@ -61,7 +61,7 @@ public class SignStruct implements IPoolItem
 	/**
 	 * Check if a Sign really exists.
 	 */
-	boolean IsValidSign()
+	public boolean isValid()
 	{
 		return str != null;
 	}

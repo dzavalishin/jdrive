@@ -148,7 +148,8 @@ public class Cmd {
 
 
 	public static final int DC_EXEC = 1;
-	public static final int DC_AUTO = 2;				// don't allow building on structures
+	/** Don't allow building on structures */
+	public static final int DC_AUTO = 2;				
 	public static final int DC_QUERY_COST = 4;			// query cost only; don't build.
 	public static final int DC_NO_WATER = 8;			// don't allow building on water
 	public static final int DC_NO_RAIL_OVERLAP = 0x10;	// don't allow overlap of rails (used in buildrail)

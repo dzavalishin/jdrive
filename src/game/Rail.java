@@ -687,9 +687,9 @@ public class Rail extends RailTables {
 					(track == TRACK_DIAG1 && m5 == 0x05) ||
 					(track == TRACK_DIAG2 && m5 == 0x0A) // correct direction?
 					)) {
-				if(0 != (flags & Cmd.DC_EXEC)) {
-					tile.getMap().m3 = 0xFF & tile.GetTileOwner().id;
-					tile.SetTileOwner( Global.gs._current_player);
+				if(0 != (flags & Cmd.DC_EXEC)) { // crossing
+					tile.getMap().m3 = 0xFF & tile.GetTileOwner().id; // road owner
+					tile.SetTileOwner(Global.gs._current_player); // rail owner
 					tile.getMap().m4 = 0xFF & p1;
 					tile.getMap().m5 = 0xFF & (0x10 | (track == TRACK_DIAG1 ? 0x08 : 0x00)); // level crossing
 				}

@@ -773,7 +773,8 @@ implements IPoolItem, Serializable
 
 	private static void build_road_and_exit(TileIndex tile, int rcmd, int t1index )
 	{
-		if (!Cmd.CmdFailed(Cmd.DoCommandByTile(tile, rcmd, /*t1.index*/ t1index, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD)))
+		final int cmd = Cmd.DoCommandByTile(tile, rcmd, /*t1.index*/ t1index, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
+		if (!Cmd.CmdFailed(cmd))
 			_grow_town_result = -1;
 	}
 
@@ -942,7 +943,12 @@ implements IPoolItem, Serializable
 
 
 
-	// Returns true if a house was built, or no if the build failed.
+	/**
+	 * Returns true if a house was built, or no if the build failed.
+	 *  
+	 * @param itile
+	 * @return
+	 */
 	boolean GrowTownAtRoad(TileIndex itile)
 	{
 		int mask;
@@ -1032,7 +1038,7 @@ implements IPoolItem, Serializable
 	boolean GrowTown()
 	{
 		TileIndex tile;
-		TileIndexDiffC ptr;
+		//TileIndexDiffC ptr;
 		TileInfo ti = new TileInfo();
 		PlayerID old_player;
 
@@ -1044,9 +1050,9 @@ implements IPoolItem, Serializable
 
 		// Find a road that we can base the construction on.
 		tile = xy;
-		//for (ptr = _town_coord_mod; ptr != endof(_town_coord_mod); ++ptr) 
-		for (TileIndexDiffC tileIndexDiffC : _town_coord_mod) {
-			ptr = tileIndexDiffC;
+ 
+		for (TileIndexDiffC ptr : _town_coord_mod) 
+		{
 			if (Road.GetRoadBitsByTile(tile) != 0) {
 				boolean r = GrowTownAtRoad(tile);
 				Global.gs._current_player = old_player;
@@ -1058,9 +1064,9 @@ implements IPoolItem, Serializable
 		// No road available, try to build a random road block by
 		// clearing some land and then building a road there.
 		tile = xy;
-		//for (ptr = _town_coord_mod; ptr != endof(_town_coord_mod); ++ptr) 		{
-		for (TileIndexDiffC tileIndexDiffC : _town_coord_mod) {
-			ptr = tileIndexDiffC;
+
+		for (TileIndexDiffC ptr : _town_coord_mod) 
+		{
 			Landscape.FindLandscapeHeightByTile(ti, tile);
 
 			// Only work with plain land that not already has a house with map5=0
@@ -2125,15 +2131,12 @@ implements IPoolItem, Serializable
 
 	public static Town ClosestTownFromTile(TileIndex tile, int threshold)
 	{
-		//Town t;
 		int [] best = { threshold >= 0 ? threshold : Integer.MAX_VALUE };
 		Town [] best_town = { null };
 
-		// XXX - Fix this so for a given tiletype the owner of the type is in the same variable
-		if (tile.IsTileType( TileTypes.MP_HOUSE) || (
-				tile.IsTileType( TileTypes.MP_STREET) &&
-				(tile.IsLevelCrossing() ? tile.getMap().m3 : tile.GetTileOwner().id) == Owner.OWNER_TOWN
-				))
+		if(tile.IsTileType(TileTypes.MP_HOUSE) || (
+				tile.IsTileType( TileTypes.MP_STREET) && tile.GetRoadOwner().isTown() ) )
+				//(tile.IsLevelCrossing() ? tile.getMap().m3 : tile.GetTileOwner().id) == Owner.OWNER_TOWN) )
 			return GetTown(tile.getMap().m2);
 
 		Town.forEach( (t) ->

@@ -344,7 +344,7 @@ public class Order implements Serializable
 				if (!Depot.IsDepotIndex(new_order.station)) return Cmd.CMD_ERROR;
 				dp = Depot.GetDepot(new_order.station);
 
-				if (!dp.IsValidDepot() || !Player.CheckOwnership(dp.xy.GetTileOwner()))
+				if (!dp.isValid() || !Player.CheckOwnership(dp.xy.GetTileOwner()))
 					return Cmd.CMD_ERROR;
 
 				switch (v.type) {

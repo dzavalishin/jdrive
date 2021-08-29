@@ -106,9 +106,10 @@ public class Depot implements IPoolItem, Serializable
 	/**
 	 * Check if a depot really exists.
 	 */
-	public boolean IsValidDepot()
+	public boolean isValid()
 	{
-		return (xy != null) && (xy.getTile() != 0); /* XXX: Replace by INVALID_TILE someday */
+		//return (xy != null) && (xy.getTile() != 0); 
+		return xy != null; 
 	}
 
 	/**
@@ -213,7 +214,7 @@ public class Depot implements IPoolItem, Serializable
 
 		_depot_pool.forEach( (i,depot) ->
 		{
-			if (!depot.IsValidDepot()) {
+			if (!depot.isValid()) {
 				int index = depot.index;
 				depot.clear();
 				//memset(depot, 0, sizeof(Depot));

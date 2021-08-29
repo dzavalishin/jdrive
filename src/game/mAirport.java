@@ -153,9 +153,9 @@ public class mAirport
 		Vehicle.forEach( (v) ->
 		{
 			Order order = v.orders;
-			while(v.IsValidVehicle() && order != null)
+			while(v.isValid() && order != null)
 			{
-				if(v.IsValidVehicle()
+				if(v.isValid()
 					&& v.owner == Global.gs._current_player
 					&& Station.GetStation(order.station) == st
 					&& st.owner.isTown()) {

@@ -355,19 +355,6 @@ public class ViewPort
 			}
 	}
 
-	/* gone to Window
-	ViewPort IsPtInWindowViewport(final Window w, int x, int y)
-	{
-		ViewPort vp = w.viewport;
-
-		if (vp != null &&
-		    BitOps.IS_INT_INSIDE(x, vp.left, vp.left + vp.width) &&
-				BitOps.IS_INT_INSIDE(y, vp.top, vp.top + vp.height))
-			return vp;
-
-		return null;
-	}
-	 */
 	static Point TranslateXYToTileCoord(final ViewPort vp, int x, int y)
 	{
 		int z;
@@ -421,8 +408,6 @@ public class ViewPort
 				(vp = w.IsPtInWindowViewport(x, y)) != null)
 			return TranslateXYToTileCoord(vp, zoom_x, zoom_y);
 
-		//Point pt = ;
-		//pt.y = pt.x = -1;
 		return new Point(-1, -1);
 	}
 
@@ -2604,20 +2589,11 @@ public class ViewPort
 class ViewportDrawer {
 	final DrawPixelInfo dpi = new DrawPixelInfo();
 
-	//byte *spritelist_mem;
-	//final byte *eof_spritelist_mem;
-
-	//StringSpriteToDraw last_string, first_string;
-	//TileSpriteToDraw **last_tile, *first_tile;
 	final ArrayList<TileSpriteToDraw> tile_list = new ArrayList<TileSpriteToDraw>();
 	final ArrayList<StringSpriteToDraw> string_list = new ArrayList<StringSpriteToDraw>();
 
-	//ChildScreenSpriteToDraw **last_child;
-
 	ParentSpriteToDraw last_parent;
 
-	//ParentSpriteToDraw parent_list;
-	//ParentSpriteToDraw eof_parent_list;
 	final ArrayList<ParentSpriteToDraw> parent_list = new ArrayList<ParentSpriteToDraw>();
 
 	byte combine_sprites;

@@ -382,7 +382,7 @@ public class Road extends RoadTables
 	}
 
 	/** Build a piece of road.
-	 * @param x,y tile coordinates for road finalruction
+	 * @param x,y tile coordinates for road construction
 	 * @param p1 road piece flags
 	 * @param p2 the town that is building the road (0 if not applicable)
 	 */
@@ -409,7 +409,7 @@ public class Road extends RoadTables
 		if (ti.type != TileTypes.MP_TUNNELBRIDGE.ordinal() && !tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
 		boolean doClear = false;
-		do { // for goto reeplacement
+		do { // this 'do' is goto reeplacement
 			if (ti.type == TileTypes.MP_STREET.ordinal()) {
 				if (0==(ti.map5 & 0xF0)) {
 					if ((pieces & ti.map5) == pieces)
@@ -533,6 +533,7 @@ public class Road extends RoadTables
 			}
 
 			tile.getMap().m5 |= pieces;
+			Global.debug("town road pieces 0x%X", pieces);
 
 			tile.MarkTileDirtyByTile();
 		}

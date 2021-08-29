@@ -94,7 +94,7 @@ public class ConsoleCmds extends Console
 		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
-			if (v.IsValidVehicle()) {
+			if (v.isValid()) {
 				/* Code ripped from CmdStartStopTrain. Can't call it, because of
 				 * ownership problems, so we'll duplicate some code, for now */
 				v.stop();

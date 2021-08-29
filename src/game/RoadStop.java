@@ -64,6 +64,8 @@ public class RoadStop implements IPoolItem
 		this.index = index;		
 	}
 	
+	@Override
+	public boolean isValid() { return used; }
 	
 	private static final IPoolItemFactory<RoadStop> factory = new IPoolItemFactory<RoadStop>() {
 		/**

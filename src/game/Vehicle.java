@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import game.enums.GameModes;
-import game.enums.Owner;
 import game.enums.TileTypes;
 import game.ids.CargoID;
 import game.ids.EngineID;
@@ -701,7 +700,7 @@ public class Vehicle implements IPoolItem
 	/**
 	 * Check if a Vehicle really exists.
 	 */
-	public boolean IsValidVehicle()
+	public boolean isValid()
 	{
 		return type != 0;
 	}
@@ -1172,7 +1171,7 @@ public class Vehicle implements IPoolItem
 			Vehicle v = GetVehicle(vi);
 			Object a;
 			
-			if(!v.IsValidVehicle()) 
+			if(!v.isValid()) 
 				continue;
 			
 			a = proc.apply(v, data);
