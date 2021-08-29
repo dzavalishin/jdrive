@@ -1,7 +1,6 @@
 package game.xui;
 
 import java.util.Iterator;
-
 import java.util.function.Consumer;
 
 import game.AirCraft;
@@ -15,7 +14,6 @@ import game.Landscape;
 import game.NewsItem;
 import game.Player;
 import game.Rail;
-import game.SaveLoad;
 import game.SignStruct;
 import game.Sprite;
 import game.SpriteCache;
@@ -27,27 +25,21 @@ import game.TileIndex;
 import game.Town;
 import game.Vehicle;
 import game.WayPoint;
-
 import game.console.Console;
-
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.SwitchModes;
 import game.enums.TileTypes;
-
 import game.ids.CursorID;
 import game.ids.PlayerID;
 import game.ids.StringID;
-
-import game.struct.ColorList;
-import game.struct.Point;
-
-import game.util.BitOps;
-import game.util.GameDate;
-
 import game.ifaces.MenuClickedProc;
 import game.ifaces.OnButtonClick;
 import game.ifaces.ToolbarButtonProc;
+import game.struct.ColorList;
+import game.struct.Point;
+import game.util.BitOps;
+import game.util.GameDate;
 
 public class Gui
 {

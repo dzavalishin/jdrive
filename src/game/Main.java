@@ -450,7 +450,7 @@ public class Main {
 		FileIO.FioCloseAll();
 		UnInitializeGame();
 
-		//return 0;
+		System.exit(0);
 	}
 
 	/** Mutex so that only one thread can communicate with the main program
@@ -615,27 +615,25 @@ public class Main {
 
 	static boolean SafeSaveOrLoad(final String filename, int mode, GameModes newgm)
 	{
-		return false;
-		/*
 		GameModes ogm = Global._game_mode;
-		int r;
+		SaveOrLoadResult r;
 
 		Global._game_mode = newgm;
-		r = SaveOrLoad(filename, mode);
-		if (r == SL_REINIT) {
+		r = SaveLoad.SaveOrLoad(filename, mode);
+		if (r == SaveOrLoadResult.SL_REINIT) {
 			switch (ogm) {
-			case GameModes.GM_MENU:   LoadIntroGame();      break;
-			case GameModes.GM_EDITOR: MakeNewEditorWorld(); break;
+			case GM_MENU:   LoadIntroGame();      break;
+			case GM_EDITOR: MakeNewEditorWorld(); break;
 			default:        MakeNewGame();        break;
 			}
 			return false;
-		} else if (r != SL_OK) {
+		} else if (r != SaveOrLoadResult.SL_OK) {
 			Global._game_mode = ogm;
 			return false;
 		} else {
 			return true;
 		}
-		*/
+
 	}
 
 	public static void SwitchMode(SwitchModes new_mode)
@@ -975,7 +973,7 @@ public class Main {
 
 	static boolean AfterLoadGame()
 	{
-		Player p;
+		//Player p;
 
 		// convert road side to my format.
 		if (GameOptions._opt.road_side != 0) GameOptions._opt.road_side = 1;

@@ -13,6 +13,7 @@ import game.Sprite;
 import game.Str;
 import game.TextEffect;
 import game.TileIndex;
+import game.console.Console;
 import game.enums.GameModes;
 import game.enums.WindowEvents;
 import game.ids.AbstractID;
@@ -2362,8 +2363,6 @@ public class Window extends WindowConstants
 
 	static void RelocateAllWindows(int neww, int newh)
 	{
-		//Window w;
-
 		for (Window w : GameState._windows) {
 			int left, top;
 
@@ -2376,7 +2375,7 @@ public class Window extends WindowConstants
 				continue; // don't modify top,left
 			}
 
-			// TODO Console.IConsoleResize();
+			Console.IConsoleResize();
 
 			if (w.window_class == WC_MAIN_TOOLBAR) {
 				top = w.top;

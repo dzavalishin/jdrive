@@ -181,7 +181,7 @@ public class Console //extends ConsoleCmds
 		CloseConsoleLogIfActive();
 	}
 
-	static void IConsoleResize()
+	public static void IConsoleResize()
 	{
 		_iconsole_win = Window.FindWindowById(Window.WC_CONSOLE, 0);
 
