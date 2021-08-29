@@ -261,7 +261,7 @@ public class TextEffect
 		if (Global._game_mode == GameModes.GM_MENU)
 			return;
 
-		for(int i = 0 ; _text_effect_list[i].string_id != Global.INVALID_STRING_ID ; i++)
+		for(int i = 0 ; _text_effect_list[i].string_id.isValid(); i++)
 		{
 			if(i >= _text_effect_list.length)
 				return;
@@ -285,7 +285,7 @@ public class TextEffect
 	private void MoveTextEffect()
 	{
 		if (duration < 8) {
-			string_id = Global.INVALID_STRING_ID;
+			string_id = Str.INVALID_STRING_ID();
 		} else {
 			duration -= 8;
 			y--;
@@ -298,7 +298,7 @@ public class TextEffect
 	{
 		for( TextEffect te : _text_effect_list) 
 		{
-			if (te.string_id != Global.INVALID_STRING_ID) 
+			if (te.string_id.isValid()) 
 				te.MoveTextEffect();
 		}
 	}
@@ -310,7 +310,7 @@ public class TextEffect
 
 		for( TextEffect te : _text_effect_list) 
 		{
-			te.string_id = Global.INVALID_STRING_ID;
+			te.string_id = Str.INVALID_STRING_ID();
 		}
 	}
 
@@ -321,7 +321,7 @@ public class TextEffect
 			//for (te = _text_effect_list; te != endof(_text_effect_list); te++) 
 			for( TextEffect te : _text_effect_list )
 			{
-				if (te.string_id == Global.INVALID_STRING_ID)
+				if (!te.string_id.isValid())
 					continue;
 
 				/* intersection? */
@@ -336,7 +336,7 @@ public class TextEffect
 			//for (te = _text_effect_list; te != endof(_text_effect_list); te++) 
 			for( TextEffect te : _text_effect_list )
 			{
-				if (te.string_id == Global.INVALID_STRING_ID)
+				if(!te.string_id.isValid())
 					continue;
 
 				/* intersection? */

@@ -879,7 +879,7 @@ public class NewsItem {
 	}
 
 
-	private static final int message_opt[] = {Str.STR_OFF, Str.STR_SUMMARY, Str.STR_FULL, Global.INVALID_STRING_ID.id};
+	private static final int message_opt[] = {Str.STR_OFF, Str.STR_SUMMARY, Str.STR_FULL, Str.INVALID_STRING};
 	private static final int message_val[] = {0x0, 0x55555555, 0xAAAAAAAA}; // 0x555.. = 01010101010101010101 (all summary), 286.. 1010... (full)
 	private static final int message_dis[] = 
 		{
@@ -1027,7 +1027,6 @@ public class NewsItem {
 			new Widget(     Window.WWT_TEXTBTN,   Window.RESIZE_NONE,     3,    87,   98,   154,   165, Str.STR_0225,             Str.STR_NULL),
 			new Widget(           Window.WWT_4,   Window.RESIZE_NONE,     3,     4,   98,   166,   177, Str.STR_02DB_OFF,         Str.STR_NULL),
 
-			//new Widget(    WIDGETS_END),
 	};
 
 	static final WindowDesc _message_options_desc = new WindowDesc(

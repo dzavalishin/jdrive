@@ -28,7 +28,7 @@ public class Patches
 	public boolean new_nonstop;				// ttdpatch compatible nonstop handling
 	public boolean roadveh_queue = true;			// buggy road vehicle queueing
 	public boolean autoscroll = true;				// scroll when moving mouse to the edge.
-	public byte errmsg_duration = 100;		// duration of error message
+	public byte errmsg_duration = 20;		// duration of error message
 	public byte snow_line_height = 7;	// a number 0-15 that configured snow line height
 	public boolean bribe = true;							// enable bribing the local authority
 	public boolean nonuniform_stations;// allow nonuniform train stations
@@ -76,8 +76,8 @@ public class Patches
 	public int colored_news_date = 1920; // when does newspaper become colored?
 
 	public boolean keep_all_autosave;		// name the autosave in a different way.
-	public boolean autosave_on_exit;		// save an autosave when you quit the game, but do not ask "Do you really want to quit?"
-	public byte max_num_autosaves;		// controls how many autosavegames are made before the game starts to overwrite (names them 0 to max_num_autosaves - 1)
+	public boolean autosave_on_exit = true;		// save an autosave when you quit the game, but do not ask "Do you really want to quit?"
+	public byte max_num_autosaves = 10;		// controls how many autosavegames are made before the game starts to overwrite (names them 0 to max_num_autosaves - 1)
 	public boolean extra_dynamite = true;			// extra dynamite
 
 	public boolean never_expire_vehicles; // never expire vehicles

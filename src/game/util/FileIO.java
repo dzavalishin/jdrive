@@ -1,9 +1,20 @@
 package game.util;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import game.Global;
+import game.Str;
+import game.enums.FiosType;
+import game.enums.GameModes;
+import game.ids.StringID;
+import game.struct.FiosItem;
 
 /*************************************************/
 /* FILE IO ROUTINES ******************************/
@@ -36,9 +47,9 @@ public class FileIO {
 	{
 		//return _fio.pos + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
 		//return pos;// + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
-        return cur_fh.getFilePointer();
+		return cur_fh.getFilePointer();
 
-    }
+	}
 
 	public static void FioSeekTo(long ppos, int mode)
 	{
@@ -192,7 +203,7 @@ public class FileIO {
 		f = fopen(buf, "rb");
 		#if !defined(WIN32)
 		if (f == NULL) {
-			char *s;
+			String s;
 			// Make lower case and try again
 			for(s=buf + strlen(_path.data_dir) - 1; *s != 0; s++)
 	 *s = tolower(*s);
@@ -242,7 +253,7 @@ public class FileIO {
 		f = fopen(buf, "rb");
 		#if !defined(WIN32)
 		if (f == NULL) {
-			char *s;
+			String s;
 			// Make lower case and try again
 			for(s=buf + strlen(_path.data_dir) - 1; *s != 0; s++)
 		 *s = tolower(*s);
@@ -275,7 +286,7 @@ public class FileIO {
 		f = fopen(buf, "rb");
 		#if !defined(WIN32)
 		if (f == NULL) {
-			char *s;
+			String s;
 			// Make lower case and try again
 			for(s=buf + strlen(_path.data_dir) - 1; *s != 0; s++)
 		 *s = tolower(*s);
@@ -310,4 +321,310 @@ public class FileIO {
 		FioSeekToFile(slot << 24);
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	static String _fios_path;
+	static String _fios_save_path;
+	static String _fios_scn_path;
+	//static FiosItem [] _fios_items;
+	static int _fios_count, _fios_alloc;
+
+
+
+
+
+
+	private static void loadDirs(List<FiosItem> items, Path dir) {
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*")) 
+		{
+			for (Path entry: stream) {
+				System.out.println(entry.getFileName());
+				File file= entry.getFileName().toFile();
+				//filename = String.format( "%s/%s", _fios_path, dirent.d_name);
+				if(file.isDirectory() && file.getName().charAt(0) != '.') 
+				{
+					FiosItem fios = new FiosItem();
+					fios.type = FiosType.DIR;
+					fios.mtime = 0;
+					fios.name = file.getName();
+					fios.title = String.format(	"%s/ (Directory)", file.getName() );
+					items.add(fios);
+				}
+	
+			}
+		} catch (IOException x) {
+			System.err.println(x); // TODO err print
+		}
+	}
+
+	
+	
+	
+	// Get a list of savegames
+	public static List<FiosItem> FiosGetSavegameList(int mode)
+	{
+		//DIR *dir;
+		//struct dirent *dirent;
+		//struct stat sb;
+		//int sort_start;
+		//char filename[MAX_PATH];
+
+		List<FiosItem> items = new ArrayList<>();
+		
+		if (_fios_save_path == null)
+		_fios_save_path = Global._path.save_dir;
+		
+		_fios_path = _fios_save_path;
+
+		// Parent directory, only if not in root already.
+		if (_fios_path.length() != 0) {
+			FiosItem fios = new FiosItem();
+			fios.type = FiosType.PARENT;
+			fios.mtime = 0;
+			fios.name = "..";
+			fios.title = ".. (Parent directory)";
+			items.add(fios);
+		}
+
+		// Show subdirectories first
+		Path dir = new File(_fios_path).toPath();
+
+		loadDirs(items, dir);
+
+
+		/*{
+			// XXX ugly global variables ... 
+			byte order = _savegame_sort_order;
+			_savegame_sort_order = SORT_BY_NAME | SORT_ASCENDING;
+			qsort(_fios_items, _fios_count, sizeof(FiosItem), compare_FiosItems);
+			_savegame_sort_order = order;
+		}*/
+
+		// this is where to start sorting
+		//sort_start = _fios_count;
+
+		/* Show savegame files
+		 * .SAV OpenTTD saved game
+		 */
+
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.{sav,scn}")) 
+		{
+			for (Path entry: stream) {
+				System.out.println(entry.getFileName());
+				File file= entry.getFileName().toFile();
+				//filename = String.format( "%s/%s", _fios_path, dirent.d_name);
+				final String name = file.getName();
+
+				if(file.isDirectory() || name.charAt(0) == '.')
+					continue;
+
+				FiosItem fios = new FiosItem();
+				fios.type = FiosType.FILE;
+				fios.mtime = file.lastModified();
+				fios.name = name;
+				fios.title = String.format(	"%s", name );
+				items.add(fios);
+
+				// TODO GetOldSaveGameName(fios.title, filename);
+
+			}
+		} catch (IOException x) {
+			System.err.println(x); // TODO err print
+		}
+
+
+
+		//qsort(_fios_items + sort_start, _fios_count - sort_start, sizeof(FiosItem), compare_FiosItems);
+		//*num = _fios_count;
+		return items;
+	}
+
+	// Get a list of scenarios
+	public static List<FiosItem> FiosGetScenarioList(int mode)
+	{
+		/*
+		FiosItem *fios;
+		DIR *dir;
+		struct dirent *dirent;
+		struct stat sb;
+		int sort_start;
+		char filename[MAX_PATH];
+		*/
+		List<FiosItem> items = new ArrayList<>();
+		
+		if (_fios_scn_path == null) 
+			_fios_scn_path = Global._path.scenario_dir;		
+
+		_fios_path = _fios_scn_path;
+
+		
+		// Parent directory, only if not in root already.
+		if (_fios_path.length() != 0) {
+			FiosItem fios = new FiosItem();
+			fios.type = FiosType.PARENT;
+			fios.mtime = 0;
+			fios.name = "..";
+			fios.title = ".. (Parent directory)";
+		}
+
+		// Show subdirectories first
+		Path dir = new File(_fios_path).toPath();
+
+		loadDirs(items, dir);
+
+		/*{
+			//* XXX ugly global variables ... 
+			byte order = _savegame_sort_order;
+			_savegame_sort_order = SORT_BY_NAME | SORT_ASCENDING;
+			qsort(_fios_items, _fios_count, sizeof(FiosItem), compare_FiosItems);
+			_savegame_sort_order = order;
+		}*/
+
+		// this is where to start sorting
+		//sort_start = _fios_count;
+
+		/* Show scenario files
+		 * .SCN OpenTTD style scenario file
+		 */
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.scn")) 
+		{
+			for (Path entry: stream) {
+				System.out.println(entry.getFileName());
+				File file= entry.getFileName().toFile();
+				//filename = String.format( "%s/%s", _fios_path, dirent.d_name);
+				final String name = file.getName();
+
+				if(file.isDirectory() || name.charAt(0) == '.')
+					continue;
+
+				FiosItem fios = new FiosItem();
+				fios.type = FiosType.FILE;
+				fios.mtime = file.lastModified();
+				fios.name = name;
+				fios.title = String.format(	"%s", name );
+				items.add(fios);
+
+				// TODO GetOldSaveGameName(fios.title, filename);
+
+			}
+		} catch (IOException x) {
+			System.err.println(x); // TODO err print
+		}
+
+		//qsort(_fios_items + sort_start, _fios_count - sort_start, sizeof(FiosItem), compare_FiosItems);
+		//*num = _fios_count;
+		return items;
+	}
+
+
+
+	// Browse to
+	public static String FiosBrowseTo(final FiosItem item)
+	{
+		String path = _fios_path;
+
+		switch (item.type) {
+		case PARENT:
+		{
+			int pos = path.lastIndexOf(File.pathSeparatorChar);
+			if( pos < 0 ) break;
+			path = path.substring(0, pos);
+		}
+
+		case DIR:			
+			path = path + File.pathSeparator + item.name;			
+			break;
+
+		case DIRECT:
+			path = item.name;
+			while(path.endsWith(File.pathSeparator))
+				path = path.substring(0, path.length()-1);
+			break;
+
+		case FILE:
+		case OLDFILE:
+		case SCENARIO:
+		case OLD_SCENARIO: {
+			return String.format("%s/%s", path, item.name);
+		}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get descriptive texts. Returns the path and free space
+	 * left on the device
+	 * @param path string describing the path
+	 * @param tfs total free space in megabytes, optional (can be null)
+	 * @return StringID describing the path (free space or failure)
+	 */
+	public static /*StringID*/ int FiosGetDescText(String [] path, long []tot)
+	{
+		long free = 0;
+		path[0] = _fios_path;
+
+		File f = new File(path[0]);
+		free = f.getFreeSpace();
+		
+		/*{
+			struct statvfs s;
+
+			if (statvfs(*path, &s) == 0) {
+				free = (uint64)s.f_frsize * s.f_bavail >> 20;
+			} else
+				return STR_4006_UNABLE_TO_READ_DRIVE;
+		}*/
+		
+		if( free == 0 ) return Str.STR_4006_UNABLE_TO_READ_DRIVE;
+		
+		if (tot != null) tot[0] = free;
+		return Str.STR_4005_BYTES_FREE;
+	} 
+
+	public static String FiosMakeSavegameName(String name)
+	{
+		String extension;
+
+		if (Global._game_mode == GameModes.GM_EDITOR)
+			extension = ".scn";
+		else
+			extension = ".sav";
+
+		// Don't append the extension, if it is already there
+		//int period = name.lastIndexOf('.');
+		//if (period >= 0 && strcasecmp(period, extension) == 0) extension = "";
+		if( name.endsWith(extension) ) extension = ""; 
+
+		return String.format("%s/%s%s", _fios_path, name, extension);
+	}
+
+	public static boolean FiosDelete(String name)
+	{
+		File f = new File(String.format("%s/%s", _fios_path, name));		
+		return f.delete();
+	}
+
+	public static boolean FileExists(String filename)
+	{
+		File f = new File(filename);		
+		return f.canRead();
+	}
+
+
+
 }
+

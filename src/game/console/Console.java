@@ -116,7 +116,7 @@ public class Console //extends ConsoleCmds
 
 		_iconsole_cmdline.maxlength = ICON_CMDLN_SIZE - 1;
 
-		IConsolePrintF(13, "Java OpenTTD Game Console Revision 7 - %s", Strings._openttd_revision);
+		IConsolePrintF(13, "NextTTD Game Console Revision 7 - %s", Strings._openttd_revision);
 		IConsolePrint(12,  "------------------------------------");
 		IConsolePrint(12,  "use \"help\" for more information");
 		IConsolePrint(12,  "");

@@ -959,7 +959,7 @@ public class ConsoleCmds extends Console
 			return true;
 		}
 
-		IConsolePrint(13, " ---- OpenTTD Console Help ---- ");
+		IConsolePrint(13, " ---- NextTTD Console Help ---- ");
 		IConsolePrint( 1, " - variables: [command to list all variables: list_vars]");
 		IConsolePrint( 1, " set value with '<var> = <value>', use '++/--' to in-or decrement");
 		IConsolePrint( 1, " or omit '=' and just '<var> <value>'. get value with typing '<var>'");

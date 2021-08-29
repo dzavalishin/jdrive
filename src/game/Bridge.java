@@ -147,7 +147,7 @@ public class Bridge
 		_bridgedata.start_tile = start;
 		_bridgedata.end_tile = end;
 
-		errmsg = Str.INVALID_STRING_ID;
+		errmsg = Str.INVALID_STRING_ID();
 
 		// only query bridge building possibility once, result is the same for all bridges!
 		// returns CMD_ERROR on failure, and price on success

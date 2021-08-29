@@ -78,14 +78,14 @@ public class IntroGui
 		case WE_CLICK:
 			switch (e.widget) {
 			case 2: MiscGui.AskForNewGameToStart(); break;
-			// TODO case 3: ShowSaveLoadDialog(SLD_LOAD_GAME); break;
+			case 3: MiscGui.ShowSaveLoadDialog(Global.SLD_LOAD_GAME); break;
 			
-			case 3: 
-				SaveLoad.load();
-				break;
+			//case 3: 
+				//SaveLoad.load();
+				//break;
 			
 			case 4: /* TODO CreateScenario(); */ break;
-			// TODO case 5: ShowSaveLoadDialog(SLD_LOAD_SCENARIO); break;
+			case 5: MiscGui.ShowSaveLoadDialog(Global.SLD_LOAD_SCENARIO); break;
 			case 6: case 7: case 8: case 9:
 				SetNewLandscapeType(e.widget - 6);
 				break;
@@ -149,7 +149,7 @@ public class IntroGui
 		Main.SwitchMode(SwitchModes.SM_NEWGAME);
 	}
 
-	void StartScenarioEditor(int rnd1, int rnd2)
+	static void StartScenarioEditor(int rnd1, int rnd2)
 	{
 		Global._random_seeds[0][0] = rnd1;
 		Global._random_seeds[0][1] = rnd2;

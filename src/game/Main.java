@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import game.SaveLoad.SaveOrLoadResult;
 import game.ai.Ai;
 import game.console.Console;
 import game.enums.GameModes;
@@ -12,11 +13,13 @@ import game.enums.Owner;
 import game.enums.SwitchModes;
 import game.enums.ThreadMsg;
 import game.ids.PlayerID;
+import game.struct.SmallFiosItem;
 import game.util.FileIO;
 import game.util.Strings;
 import game.xui.Gfx;
 import game.xui.GfxInit;
 import game.xui.Gui;
+import game.xui.MiscGui;
 import game.xui.SettingsGui;
 import game.xui.VehicleGui;
 import game.xui.Window;
@@ -24,7 +27,7 @@ import game.util.BitOps;
 
 public class Main {
 
-	private static final SmallFiosItem _file_to_saveload = new SmallFiosItem();
+	public static final SmallFiosItem _file_to_saveload = new SmallFiosItem();
 
 
 
@@ -237,7 +240,7 @@ public class Main {
 
 		Global._game_mode = GameModes.GM_MENU;
 		Global._switch_mode = SwitchModes.SM_MENU;
-		Global._switch_mode_errorstr = Str.INVALID_STRING_ID;
+		Global._switch_mode_errorstr = Str.INVALID_STRING_ID();
 		Global._dedicated_forks = false;
 		dedicated = false;
 		Global._config_file = null;
@@ -731,12 +734,12 @@ public class Main {
 			break;
 
 		case SM_SAVE: /* TODO Save game */
-			/*
-			if (SaveOrLoad(_file_to_saveload.name, SL_SAVE) != SL_OK) {
+			
+			if (SaveLoad.SaveOrLoad(_file_to_saveload.name, SaveLoad.SL_SAVE) != SaveOrLoadResult.SL_OK) {
 				Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
 			} else {
 				Window.DeleteWindowById(Window.WC_SAVELOAD, 0);
-			}*/
+			}
 			break;
 
 		case SM_GENRANDLAND: /* Generate random land within scenario editor */
@@ -751,8 +754,8 @@ public class Main {
 			break;
 		}
 
-		if (Global._switch_mode_errorstr != Str.INVALID_STRING_ID)
-			Global.ShowErrorMessage(Str.INVALID_STRING_ID,Global._switch_mode_errorstr,0,0);
+		if (Global._switch_mode_errorstr.isValid())
+			Global.ShowErrorMessage(Str.INVALID_STRING_ID(),Global._switch_mode_errorstr,0,0);
 	}
 
 
@@ -820,27 +823,27 @@ public class Main {
 
 			
 			//sprintf(buf, "%s%s", Global._path.autosave_dir, PATHSEP);
-			buf = String.format("%s%s%s.sav", Global._path.autosave_dir, File.pathSeparator, s);
+			buf = String.format("%s%s%s.sav", Global._path.autosave_dir, File.separator, s);
 
 			
 		} else { /* generate a savegame name and number according to _patches.max_num_autosaves */
 			//sprintf(buf, "%s%sautosave%d.sav", _path.autosave_dir, PATHSEP, _autosave_ctr);
-			// TODO buf = String.format("%s%sautosave%d.sav", Global._path.autosave_dir, File.pathSeparator, Global._autosave_ctr);
+			buf = String.format("%s%sautosave%d.sav", Global._path.autosave_dir, File.separator, Global._autosave_ctr);
 
-			/* TODO
+
 			Global._autosave_ctr++;
 			if (Global._autosave_ctr >= Global._patches.max_num_autosaves) {
 				// we reached the limit for numbers of autosaves. We will start over
 				Global._autosave_ctr = 0;
 			
-			}*/
+			}
 		}
 
-		/* TODO
+
 		Global.DEBUG_misc( 2, "Autosaving to %s", buf);
-		if (SaveOrLoad(buf, SL_SAVE) != SL_OK)
-			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_AUTOSAVE_FAILED, 0, 0);
-		*/
+		if (SaveLoad.SaveOrLoad(buf, SaveLoad.SL_SAVE) != SaveOrLoadResult.SL_OK)
+			Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_AUTOSAVE_FAILED, 0, 0);
+
 	}
 
 	static void ScrollMainViewport(int x, int y)
@@ -853,7 +856,6 @@ public class Main {
 		}
 	}
 
-	//static final byte scrollamt[16][2] = {
 	static final byte scrollamt[][] = {
 			{ 0, 0},
 			{-2, 0}, // 1:left
@@ -893,7 +895,7 @@ public class Main {
 		if (Global._do_autosave) {
 			Global._do_autosave = false;
 			DoAutosave();
-			// TODO RedrawAutosave();
+			MiscGui.RedrawAutosave();
 		}
 
 		// handle scrolling of the main window
@@ -959,119 +961,21 @@ public class Main {
 	}
 
 
-	/*unused
-	static void ConvertTownOwner()
-	{
-		TileIndex tile;
 
-		for (tile = 0; tile != MapSize(); tile++) {
-			if (IsTileType(tile, MP_STREET)) {
-				if (IsLevelCrossing(tile) && _m[tile].m3 & 0x80) _m[tile].m3 = Owner.OWNER_TOWN;
-
-				if (_m[tile].m1 & 0x80) SetTileOwner(tile, Owner.OWNER_TOWN);
-			} else if (IsTileType(tile, MP_TUNNELBRIDGE)) {
-				if (_m[tile].m1 & 0x80) SetTileOwner(tile, Owner.OWNER_TOWN);
-			}
-		}
-	}*/
-
-	// before savegame version 4, the name of the company determined if it existed
+	/*/ before savegame version 4, the name of the company determined if it existed
 	static void CheckIsPlayerActive()
 	{
 		for( Player p: Global.gs._players )
 		{
 			if (p.name_1 != 0) p.is_active = true;
 		}
-	}
-
-	/* unused
-	// since savegame version 4.1, exclusive transport rights are stored at towns
-	static void UpdateExclusiveRights()
-	{
-		Town* t;
-
-		FOR_ALL_TOWNS(t) {
-			if (t.xy != 0) t.exclusivity = -1;
-		}
-
-		/* FIXME old exclusive rights status is not being imported (stored in s.blocked_months_obsolete)
-				could be implemented this way:
-				1.) Go through all stations
-						Build an array town_blocked[ town_id ][ player_id ]
-					 that stores if at least one station in that town is blocked for a player
-				2.) Go through that array, if you find a town that is not blocked for
-						one player, but for all others, then give him exclusivity.
-	 * /
-	} */
-
-	/* unused
-	static final byte convert_currency[] = {
-		 0,  1, 12,  8,  3,
-		10, 14, 19,  4,  5,
-		 9, 11, 13,  6, 17,
-		16, 22, 21,  7, 15,
-		18,  2, 20, };
-
-	// since savegame version 4.2 the currencies are arranged differently
-	static void UpdateCurrencies()
-	{
-		_opt.currency = convert_currency[_opt.currency];
-	} */
-
-	/* Up to revision 1413 the invisible tiles at the southern border have not been
-	 * MP_VOID, even though they should have. This is fixed by this function
-	 * unused/
-	static void UpdateVoidTiles()
-	{
-		int i;
-
-		for (i = 0; i < MapMaxY(); ++i)
-			SetTileType(i * MapSizeX() + MapMaxX(), MP_VOID);
-		for (i = 0; i < MapSizeX(); ++i)
-			SetTileType(MapSizeX() * MapMaxY() + i, MP_VOID);
-	}
-
-	/* unused
-	// since savegame version 6.0 each sign has an "owner", signs without owner (from old games are set to 255)
-	static void UpdateSignOwner()
-	{
-		SignStruct *ss;
-
-		FOR_ALL_SIGNS(ss) ss.owner = OWNER_NONE;
 	}*/
 
 
-	static boolean AfterLoadGame(int version)
+
+	static boolean AfterLoadGame()
 	{
 		Player p;
-
-		// in version 2.1 of the savegame, town owner was unified.
-		//if (CheckSavegameVersionOldStyle(2, 1)) ConvertTownOwner();
-
-		// from version 4.1 of the savegame, exclusive rights are stored at towns
-		//if (CheckSavegameVersionOldStyle(4, 1)) UpdateExclusiveRights();
-
-		// from version 4.2 of the savegame, currencies are in a different order
-		//if (CheckSavegameVersionOldStyle(4, 2)) UpdateCurrencies();
-
-		// from version 6.1 of the savegame, signs have an "owner"
-		//if (CheckSavegameVersionOldStyle(6, 1)) UpdateSignOwner();
-
-		/* In old version there seems to be a problem that water is owned by
-		    OWNER_NONE, not OWNER_WATER.. I can't replicate it for the current
-		    (4.3) version, so I just check when versions are older, and then
-		    walk through the whole map.. */
-		/* TODO check me
-		if (CheckSavegameVersionOldStyle(4, 3)) {
-			TileIndex tile = new TileIndex(0, 0);
-			int w = MapSizeX();
-			int h = MapSizeY();
-
-			BEGIN_TILE_LOOP(tile_cur, w, h, tile)
-			if (IsTileType(tile_cur, MP_WATER) && GetTileOwner(tile_cur) >= Global.MAX_PLAYERS)
-				SetTileOwner(tile_cur, OWNER_WATER);
-			END_TILE_LOOP(tile_cur, w, h, tile)
-		}*/
 
 		// convert road side to my format.
 		if (GameOptions._opt.road_side != 0) GameOptions._opt.road_side = 1;
@@ -1088,15 +992,8 @@ public class Main {
 		// Update all vehicles
 		Vehicle.AfterLoadVehicles();
 
-		// FIXME KILLME Update all waypoints
-		// TODO if (CheckSavegameVersion(12)) FixOldWaypoints();
-
 		WayPoint.UpdateAllWaypointSigns();
 
-		// FIXME KILLME in version 2.2 of the savegame, we have new airports
-		// TODO if (CheckSavegameVersionOldStyle(2, 2)) UpdateOldAircraft();
-
-		// FIXME KILLME ?
 		Station.UpdateAllStationVirtCoord();
 
 		// Setup town coords
@@ -1114,16 +1011,9 @@ public class Main {
 		Window.ResetWindowSystem();
 		Gui.SetupColorsAndInitialWindow();
 
-		Window.afterLoad();
-		
+		//Window.afterLoad(); // called in loader
 
-		// // FIXME KILLME 
-		// in version 4.1 of the savegame, is_active was introduced to determine
-		// if a player does exist, rather then checking name_1
-		// TODO if (CheckSavegameVersionOldStyle(4, 1)) CheckIsPlayerActive();
 
-		// the void tiles on the southern border used to belong to a wrong class (pre 4.3).
-		//if (CheckSavegameVersionOldStyle(4, 3)) UpdateVoidTiles();
 
 		// If Load Scenario / New (Scenario) Game is used,
 		//  a player does not exist yet. So create one here.
@@ -1134,131 +1024,6 @@ public class Main {
 
 		Gui.DoZoomInOutWindow(Gui.ZOOM_NONE, Window.getMain()); // update button status
 		Hal.MarkWholeScreenDirty();
-
-		// // FIXME KILLME In 5.1, Oilrigs have been moved (again)
-		//if (CheckSavegameVersionOldStyle(5, 1)) UpdateOilRig();
-
-		/* // FIXME KILLME In version 6.1 we put the town index in the map-array. To do this, we need
-		 *  to use m2 (16bit big), so we need to clean m2, and that is where this is
-		 *  all about ;) * /
-		if (CheckSavegameVersionOldStyle(6, 1)) {
-			BEGIN_TILE_LOOP(tile, MapSizeX(), MapSizeY(), 0) {
-				if (IsTileType(tile, MP_HOUSE)) {
-					_m[tile].m4 = _m[tile].m2;
-					//XXX magic
-					SetTileType(tile, MP_VOID);
-					_m[tile].m2 = ClosestTownFromTile(tile,(int)-1).index;
-					SetTileType(tile, MP_HOUSE);
-				} else if (IsTileType(tile, MP_STREET)) {
-					//XXX magic
-					_m[tile].m4 |= (_m[tile].m2 << 4);
-					if (IsTileOwner(tile, Owner.OWNER_TOWN)) {
-						SetTileType(tile, MP_VOID);
-						_m[tile].m2 = ClosestTownFromTile(tile,(int)-1).index;
-						SetTileType(tile, MP_STREET);
-					} else {
-						_m[tile].m2 = 0;
-					}
-				}
-			} END_TILE_LOOP(tile, MapSizeX(), MapSizeY(), 0);
-		}
-		*/
-		/* // FIXME KILLME From version 9.0, we update the max passengers of a town (was sometimes negative
-		 *  before that. * /
-		if (CheckSavegameVersion(9)) {
-			Town *t;
-			FOR_ALL_TOWNS(t) UpdateTownMaxPass(t);
-		}*/
-
-		/* // FIXME KILLME From version 15.0, we moved a semaphore bit from bit 2 to bit 3 in m4, making
-		 *  room for PBS. While doing that, clean some blocks that should be empty, for PBS. */
-		/*
-		if (CheckSavegameVersion(15)) {
-			BEGIN_TILE_LOOP(tile, MapSizeX(), MapSizeY(), 0) {
-				if (IsTileType(tile, MP_RAILWAY) && HasSignals(tile) && HASBIT(_m[tile].m4, 2)) {
-					CLRBIT(_m[tile].m4, 2);
-					SETBIT(_m[tile].m4, 3);
-				}
-				// Clear possible junk data in PBS bits.
-				if (IsTileType(tile, MP_RAILWAY) && !HASBIT(_m[tile].m5, 7))
-					SB(_m[tile].m4, 4, 4, 0);
-			} END_TILE_LOOP(tile, MapSizeX(), MapSizeY(), 0);
-		}*/
-
-		/* // FIXME KILLME From version 16.0, we included autorenew on engines, which are now saved, but
-		 *  of course, we do need to initialize them for older savegames. */
-		/*
-		if (CheckSavegameVersion(16)) {
-			FOR_ALL_PLAYERS(p) {
-				InitialiseEngineReplacement(p);
-				p.engine_renew = false;
-				p.engine_renew_months = -6;
-				p.engine_renew_money = 100000;
-			}
-			if (_local_player < Global.MAX_PLAYERS) {
-				// Set the human controlled player to the patch settings
-				// Scenario editor do not have any companies
-				p = _local_player.GetPlayer();
-				p.engine_renew = Global._patches.autorenew;
-				p.engine_renew_months = Global._patches.autorenew_months;
-				p.engine_renew_money = Global._patches.autorenew_money;
-			}
-		}
-
-		/* // FIXME KILLME In version 16.1 of the savegame, trains became aware of station lengths
-			need to initialized to the invalid state
-			players needs to set renew_keep_length too * /
-		if (CheckSavegameVersionOldStyle(16, 1)) {
-			Vehicle *v;
-			FOR_ALL_PLAYERS(p) {
-				p.renew_keep_length = false;
-			}
-
-			FOR_ALL_VEHICLES(v) {
-				if (v.type == VEH_Train) {
-					v.u.rail.shortest_platform[0] = 255;
-					v.u.rail.shortest_platform[1] = 0;
-				}
-			}
-		}
-
-		/* // FIXME KILLME In version 17, ground type is moved from m2 to m4 for depots and
-		 * waypoints to make way for storing the index in m2. The custom graphics
-		 * id which was stored in m4 is now saved as a grf/id reference in the
-		 * waypoint struct. * /
-		if (CheckSavegameVersion(17)) {
-			Waypoint *wp;
-
-			FOR_ALL_WAYPOINTS(wp) {
-				if (wp.xy != 0 && wp.deleted == 0) {
-					final StationSpec *spec = null;
-
-					if (HASBIT(_m[wp.xy].m3, 4))
-						spec = GetCustomStation(STAT_CLASS_WAYP, _m[wp.xy].m4 + 1);
-
-					if (spec != null) {
-						wp.stat_id = _m[wp.xy].m4 + 1;
-						wp.grfid = spec.grfid;
-						wp.localidx = spec.localidx;
-					} else {
-						// No custom graphics set, so set to default.
-						wp.stat_id = 0;
-						wp.grfid = 0;
-						wp.localidx = 0;
-					}
-
-					// Move ground type bits from m2 to m4.
-					_m[wp.xy].m4 = GB(_m[wp.xy].m2, 0, 4);
-					// Store waypoint index in the tile.
-					_m[wp.xy].m2 = wp.index;
-				}
-			}
-		} else {
-			/* As of version 17, we recalculate the custom graphic ID of waypoints
-			 * from the GRF ID / station index. * /
-			UpdateAllWaypointCustomGraphics();
-		}
-		*/
  
 		for( Player pp: Global.gs._players )
 			pp.avail_railtypes = Player.GetPlayerRailtypes(pp.index);
@@ -1410,12 +1175,4 @@ class MyGetOptData
 }
 */
 
-
-//Deals with the type of the savegame, independent of extension
-class SmallFiosItem 
-{
-	int mode;             // savegame/scenario type (old, new)
-	String name;  // name
-	String title;      // internal name of the game
-} 
 

@@ -184,7 +184,7 @@ public class Global
 	 * increased by 885. When it overflows, the new day loop is called.
 	 * * this that means 1 day is : 65536 / 885 = 74 ticks
 	 * * 1 tick is approximately 27ms.
-	 * * 1 day is thus about 2 seconds (74*27 = 1998) on a machine that can run OpenTTD normally
+	 * * 1 day is thus about 2 seconds (74*27 = 1998) on a machine that can run NextTTD normally
 	 */
 	public static final int DAY_TICKS = 74;
 	public static final int MAX_YEAR_BEGIN_REAL = 1920;
@@ -201,6 +201,7 @@ public class Global
 	public static int _timer_counter;
 
 	public static final Paths _path = new Paths();
+	public static int _autosave_ctr = 0;
 
 	public static Tile _m[]; // = new Tile[1024*1024]; // TODO map size
 
@@ -292,7 +293,7 @@ public class Global
 		System.exit(33);
 	}
 
-	public static final StringID  INVALID_STRING_ID = new StringID(Str.INVALID_STRING);
+	//public static final StringID  INVALID_STRING_ID = new StringID(Str.INVALID_STRING);
 
 
 	//void DEBUG(name, level) if (level == 0 || _debug_ ## name ## _level >= level) debug
@@ -441,6 +442,7 @@ public class Global
 
 
 	private static int next_name_id = 0;
+
 	private static final Map<Integer,String> _name_array = new HashMap<Integer,String>();
 
 
@@ -544,7 +546,7 @@ public class Global
 			return;
 		Global._date_fract = 0;
 
-		/* yeah, increse day counter and call various daily loops */
+		/* yeah, increase day counter and call various daily loops */
 		Global._date++;
 
 		TextEffect.TextMessageDailyLoop();
@@ -565,11 +567,11 @@ public class Global
 
 		/* yes, call various monthly loops */
 		if (Global._game_mode != GameModes.GM_MENU) {
-			/* TODO
-			if (BitOps.HASBIT(Global._autosave_months[_opt.autosave], Global._cur_month)) {
+			
+			//TODO if (BitOps.HASBIT(Global._autosave_months[GameOptions._opt.autosave], Global._cur_month)) {
 				Global._do_autosave = true;
-				RedrawAutosave();
-			}*/
+				MiscGui.RedrawAutosave();
+			//}
 
 			Economy.PlayersMonthlyLoop();
 			Engine.EnginesMonthlyLoop();
@@ -604,11 +606,12 @@ public class Global
 		if (Global._cur_year == Global._patches.ending_date - Global.MAX_YEAR_BEGIN_REAL) {
 			PlayerGui.ShowEndGameChart();
 			/* check if we reached 2090 (MAX_YEAR_END_REAL), that's the maximum year. */
-		} else if (Global._cur_year == (Global.MAX_YEAR_END + 1)) {
-			//Vehicle v;
+		} 
+		else if (Global._cur_year == (Global.MAX_YEAR_END + 1)) 
+		{
 			Global._cur_year = Global.MAX_YEAR_END;
 			Global._date = 62093;
-			//FOR_ALL_VEHICLES(v)
+
 			Vehicle.forEach( (v) ->
 			{
 				v.date_of_last_service -= 365; // 1 year is 365 days long

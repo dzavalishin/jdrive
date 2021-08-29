@@ -1,8 +1,12 @@
 package game.xui;
 
 import game.struct.LandInfoData;
+
 import game.struct.Point;
 import game.struct.Textbuf;
+
+import java.util.List;
+
 import game.AcceptedCargo;
 import game.Cmd;
 import game.Engine;
@@ -10,7 +14,9 @@ import game.GameOptions;
 import game.Global;
 import game.Hal;
 import game.Landscape;
+import game.Main;
 import game.Player;
+import game.SaveLoad;
 import game.Sprite;
 import game.Station;
 import game.Str;
@@ -18,8 +24,10 @@ import game.TextEffect;
 import game.TileIndex;
 import game.Town;
 import game.Tree;
+import game.enums.FiosType;
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.SwitchModes;
 import game.enums.WindowEvents;
 import game.ids.PlayerID;
 import game.ids.StringID;
@@ -29,6 +37,7 @@ import game.util.BitOps;
 import game.util.GameDate;
 import game.util.Strings;
 import game.util.YearMonthDay;
+import game.util.FileIO;
 
 public class MiscGui {
 
@@ -131,7 +140,6 @@ public class MiscGui {
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,	Str.STR_018B_CLOSE_WINDOW),
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   279,     0,    13, Str.STR_01A3_LAND_AREA_INFORMATION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   279,    14,    92, 0x0,				Str.STR_NULL),
-			//{    WIDGETS_END},
 	};
 
 	static final WindowDesc _land_info_desc = new WindowDesc(
@@ -231,7 +239,7 @@ public class MiscGui {
 			"  All Translators - Who made OpenTTD a truly international game",
 			"  Bug Reporters - Without whom OpenTTD would still be full of bugs!",
 			"",
-			"  Java port by Dmitry Zavalishin, 2021",
+			"  NextTTD Java port by Dmitry Zavalishin, 2021",
 			"",
 			"And last but not least:",
 			"  Chris Sawyer - For an amazing game!"
@@ -412,7 +420,6 @@ public class MiscGui {
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    72,   105,   110,   155, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,   110,   155, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
 			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   2,   140,   157,   168, Str.STR_TREES_RANDOM_TYPE, Str.STR_TREES_RANDOM_TYPE_TIP),
-			//{    WIDGETS_END},
 	};
 
 	static final WindowDesc _build_trees_desc = new WindowDesc(
@@ -441,7 +448,6 @@ public class MiscGui {
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   107,   140,   110,   155, 0x0,							Str.STR_280D_SELECT_TREE_TYPE_TO_PLANT),
 			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   140,   157,   168, Str.STR_TREES_RANDOM_TYPE,	Str.STR_TREES_RANDOM_TYPE_TIP),
 			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   140,   170,   181, Str.STR_028A_RANDOM_TREES,	Str.STR_028B_PLANT_TREES_RANDOMLY_OVER),
-			//{    WIDGETS_END},
 	};
 
 	static final WindowDesc _build_trees_scen_desc = new WindowDesc(
@@ -472,7 +478,6 @@ public class MiscGui {
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     4,     0,    10,     0,    13, Str.STR_00C5,					Str.STR_018B_CLOSE_WINDOW),
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     4,    11,   239,     0,    13, Str.STR_00B2_MESSAGE,	Str.STR_NULL),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     4,     0,   239,    14,    45, 0x0,								Str.STR_NULL),
-			//{    WIDGETS_END},
 	};
 
 	static final Widget _errmsg_face_widgets[] = {
@@ -492,10 +497,10 @@ public class MiscGui {
 			if (!Window.IsWindowOfPrototype(w, _errmsg_face_widgets)) {
 				Gfx.DrawStringMultiCenter(
 						120,
-						(_errmsg_message_1 == Str.INVALID_STRING_ID ? 25 : 15),
+						(_errmsg_message_1.isValid() ? 15 : 25),
 						_errmsg_message_2.id,
 						238);
-				if (_errmsg_message_1 != Str.INVALID_STRING_ID)
+				if (_errmsg_message_1.isValid())
 					Gfx.DrawStringMultiCenter(
 							120,
 							30,
@@ -507,10 +512,10 @@ public class MiscGui {
 
 				Gfx.DrawStringMultiCenter(
 						214,
-						(_errmsg_message_1 == Str.INVALID_STRING_ID ? 65 : 45),
+						(_errmsg_message_1.isValid() ? 45 : 65),
 						_errmsg_message_2.id,
 						238);
-				if (_errmsg_message_1 != Str.INVALID_STRING_ID)
+				if (_errmsg_message_1.isValid())
 					Gfx.DrawStringMultiCenter(
 							214,
 							90,
@@ -529,7 +534,7 @@ public class MiscGui {
 
 		case WE_DESTROY:
 			ViewPort.SetRedErrorSquare(null);
-			Global._switch_mode_errorstr = Str.INVALID_STRING_ID;
+			Global._switch_mode_errorstr = StringID.getInvalid();
 			break;
 
 		case WE_KEYPRESS:
@@ -625,7 +630,7 @@ public class MiscGui {
 			msg = Str.STR_0807_ESTIMATED_INCOME;
 		}
 		Global.SetDParam(0, cost);
-		ShowErrorMessage(Str.INVALID_STRING_ID, new StringID(msg), x, y);
+		ShowErrorMessage(Str.INVALID_STRING_ID(), new StringID(msg), x, y);
 	}
 
 	public static void ShowCostOrIncomeAnimation(int x, int y, int z, int cost)
@@ -654,7 +659,6 @@ public class MiscGui {
 
 	static final Widget _tooltips_widgets[] = {
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   199,     0,    31, 0x0, Str.STR_NULL),
-			//{   WIDGETS_END},
 	};
 
 
@@ -677,7 +681,6 @@ public class MiscGui {
 
 	static void GuiShowTooltips(/*StringID*/ int string_id)
 	{
-		//char buffer[512];
 		Window w;
 		int right,bottom;
 		int x,y;
@@ -692,7 +695,6 @@ public class MiscGui {
 		}
 
 		String buffer = Global.GetString(string_id);
-
 		right = Gfx.GetStringWidth(buffer) + 4;
 
 		bottom = 14;
@@ -778,55 +780,6 @@ public class MiscGui {
 			w.SetWindowDirty();
 		}
 	}
-
-	/*
-	void UnclickSomeWindowButtons(Window w, int mask)
-	{
-		int x = w.click_state & mask;
-		int i = 0;
-		w.click_state ^= x;
-		do {
-			if (x & 1) InvalidateWidget(w, i);
-		} while (i++, x >>= 1);
-	}
-
-
-	void UnclickWindowButtons(Window w)
-	{
-		UnclickSomeWindowButtons(w, (int)-1);
-	}
-	 */
-
-	/* Gone to Window
-	
-	public static void SetVScrollCount(Window w, int num)
-	{
-		//w.vscroll.setCount(num);
-		//num -= w.vscroll.getCap();
-		//if (num < 0) num = 0;
-		//if (num < w.vscroll.pos) w.vscroll.pos = num;
-		w.vscroll.updateCount(num);
-	}
-
-	public static void SetVScroll2Count(Window w, int num)
-	{
-		//w.vscroll2.setCount(num);
-		//num -= w.vscroll2.getCap();
-		//if (num < 0) num = 0;
-		//if (num < w.vscroll2.pos) w.vscroll2.pos = num;
-		w.vscroll2.updateCount(num);
-	}
-
-	public static void SetHScrollCount(Window w, int num)
-	{
-		/*w.hscroll.setCount(num);
-		num -= w.hscroll.getCap();
-		if (num < 0) num = 0;
-		if (num < w.hscroll.pos) w.hscroll.pos = num; * /
-		w.hscroll.updateCount(num);
-	}
-
-	*/
 
 
 
@@ -978,7 +931,6 @@ public class MiscGui {
 			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     0,   129,    30,    41, Str.STR_012E_CANCEL,	Str.STR_NULL),
 			new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   130,   259,    30,    41, Str.STR_012F_OK,			Str.STR_NULL),
 			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   257,    16,    27, 0x0,							Str.STR_NULL),
-			//{   WIDGETS_END},
 	};
 
 	static final WindowDesc _query_string_desc = new WindowDesc(
@@ -991,9 +943,9 @@ public class MiscGui {
 
 	//static char _edit_str_buf[64];
 	//static char _orig_str_buf[lengthof(_edit_str_buf)];
-	private static String _edit_str_buf;
+	private static String _edit_str_buf = "";
 	//static char _orig_str_buf[lengthof(_edit_str_buf)];
-	private static String _orig_str_buf;
+	private static String _orig_str_buf = "";
 
 	static void ShowQueryString(int str, int caption, int maxlen, int maxwidth, int window_class, int window_number)
 	{
@@ -1050,7 +1002,6 @@ public class MiscGui {
 			new Widget(          Window.WWT_6,     Window.RESIZE_RB,    14,     2,   243,    50,   291, 0x0,								Str.STR_400A_LIST_OF_DRIVES_DIRECTORIES),
 			new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   245,   256,    60,   281, 0x0,								Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
 			new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   245,   256,   282,   293, 0x0,								Str.STR_RESIZE_BUTTON),
-			//{   WIDGETS_END},
 	};
 
 	static final Widget _load_dialog_2_widgets[] = {
@@ -1064,7 +1015,6 @@ public class MiscGui {
 			new Widget(          Window.WWT_6,     Window.RESIZE_RB,    14,     2,   243,    50,   291, 0x0,										Str.STR_400A_LIST_OF_DRIVES_DIRECTORIES),
 			new Widget(  Window.WWT_SCROLLBAR,    Window.RESIZE_LRB,    14,   245,   256,    60,   281, 0x0,										Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
 			new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   245,   256,   282,   293, 0x0,										Str.STR_RESIZE_BUTTON),
-			//{   WIDGETS_END},
 	};
 
 	static final Widget _save_dialog_widgets[] = {
@@ -1082,7 +1032,6 @@ public class MiscGui {
 			new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,     0,   127,   308,   319, Str.STR_4003_DELETE,		Str.STR_400C_DELETE_THE_CURRENTLY_SELECTED),
 			new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   128,   244,   308,   319, Str.STR_4002_SAVE,			Str.STR_400D_SAVE_THE_CURRENT_GAME_USING),
 			new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   245,   256,   308,   319, 0x0,								Str.STR_RESIZE_BUTTON),
-			//{   WIDGETS_END},
 	};
 
 	static final Widget _save_dialog_scen_widgets[] = {
@@ -1100,48 +1049,50 @@ public class MiscGui {
 			new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,     0,   127,   308,   319, Str.STR_4003_DELETE,				Str.STR_400C_DELETE_THE_CURRENTLY_SELECTED),
 			new Widget( Window.WWT_PUSHTXTBTN,     Window.RESIZE_TB,    14,   128,   244,   308,   319, Str.STR_4002_SAVE,					Str.STR_400D_SAVE_THE_CURRENT_GAME_USING),
 			new Widget(  Window.WWT_RESIZEBOX,   Window.RESIZE_LRTB,    14,   245,   256,   308,   319, 0x0,										Str.STR_RESIZE_BUTTON),
-			//{   WIDGETS_END},
 	};
 
 
 	// Colors for fios types
 	final static byte _fios_colors[] = {13, 9, 9, 6, 5, 6, 5};
+	private static List<FiosItem> _fios_list;
+	private static FiosItem o_dir = new FiosItem();
 
 	static void BuildFileList()
 	{
-		/* TODO BuildFileList()
+		
 		_fios_path_changed = true;
-		FiosFreeSavegameList();
+
 		switch (Global._saveload_mode) {
-		case SLD_NEW_GAME:
-		case SLD_LOAD_SCENARIO:
-		case SLD_SAVE_SCENARIO:
-			_fios_list = FiosGetScenarioList(_fios_num, Global._saveload_mode);
+		case Global.SLD_NEW_GAME:
+		case Global.SLD_LOAD_SCENARIO:
+		case Global.SLD_SAVE_SCENARIO:
+			_fios_list = FileIO.FiosGetScenarioList(Global._saveload_mode);
 			break;
 
 		default:
-			_fios_list = FiosGetSavegameList(_fios_num, Global._saveload_mode);
+			_fios_list = FileIO.FiosGetSavegameList(Global._saveload_mode);
 			break;
 		}
-		 */
+		
 	}
-	/*
+	
 	static void DrawFiosTexts(int maxw)
 	{
-		static final String path = null;
-		static StringID str = Str.STR_4006_UNABLE_TO_READ_DRIVE;
-		static int [] tot = { 0 };
+		final String [] path = { "" };
+		int str = Str.STR_4006_UNABLE_TO_READ_DRIVE;
+		long [] tot = { 0 };
 
 		if (_fios_path_changed) {
-			str = FiosGetDescText(path, tot);
+			str = FileIO.FiosGetDescText(path, tot);
 			_fios_path_changed = false;
 		}
 
-		if (str != Str.STR_4006_UNABLE_TO_READ_DRIVE) Global.SetDParam(0, tot);
+		if (str != Str.STR_4006_UNABLE_TO_READ_DRIVE) 
+			Global.SetDParam(0, tot[0] >= Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)(tot[0]) );
 		Gfx.DrawString(2, 37, str, 0);
-		Gfx.DoDrawStringTruncated(path, 2, 27, 16, maxw);
+		Gfx.DoDrawStringTruncated(path[0], 2, 27, 16, maxw);
 	}
-	 */
+	
 
 	static void MakeSortedSaveGameList()
 	{
@@ -1151,15 +1102,15 @@ public class MiscGui {
 		int s_amount;
 		int i;
 
-		// *	Directories are always above the files (FIOS_TYPE_DIR)
-		// *	Drives (A:\ (windows only) are always under the files (FIOS_TYPE_DRIVE)
+		// *	Directories are always above the files (FiosType.DIR)
+		// *	Drives (A:\ (windows only) are always under the files (FiosType.DRIVE)
 		// *	Only sort savegames/scenarios, not directories
 		// *
 		for (i = 0; i < _fios_num; i++) {
 			switch (_fios_list[i].type) {
-			case FIOS_TYPE_DIR:    sort_start++; break;
-			case FIOS_TYPE_PARENT: sort_start++; break;
-			case FIOS_TYPE_DRIVE:  sort_end++;   break;
+			case FiosType.DIR:    sort_start++; break;
+			case FiosType.PARENT: sort_start++; break;
+			case FiosType.DRIVE:  sort_end++;   break;
 			}
 		}
 
@@ -1185,37 +1136,36 @@ public class MiscGui {
 
 	static void SaveLoadDlgWndProc(Window w, WindowEvent e)
 	{
-		/*
-		static FiosItem o_dir;
+		
 
 		switch (e.event) {
-		case WindowEvents.WE_CREATE: { // Set up OPENTTD button 
-			o_dir.type = FIOS_TYPE_DIRECT;
+		case WE_CREATE: { // Set up OPENTTD button 
+			o_dir.type = FiosType.DIRECT;
 			switch (Global._saveload_mode) {
-			case SLD_SAVE_GAME:
-			case SLD_LOAD_GAME:
+			case Global.SLD_SAVE_GAME:
+			case Global.SLD_LOAD_GAME:
 				//ttd_strlcpy(&o_dir.name[0], _path.save_dir, sizeof(o_dir.name));
-				o_dir.name[0] = _path.save_dir;
+				o_dir.name = Global._path.save_dir;
 				break;
 
-			case SLD_SAVE_SCENARIO:
-			case SLD_LOAD_SCENARIO:
+			case Global.SLD_SAVE_SCENARIO:
+			case Global.SLD_LOAD_SCENARIO:
 				//ttd_strlcpy(&o_dir.name[0], _path.scenario_dir, sizeof(o_dir.name));
-				o_dir.name[0] =_path.scenario_dir;
+				o_dir.name = Global._path.scenario_dir;
 				break;
 
 			default:
 				//ttd_strlcpy(&o_dir.name[0], _path.personal_dir, sizeof(o_dir.name));
-				o_dir.name[0] = _path.personal_dir;
+				o_dir.name = Global._path.personal_dir;
 			}
 			break;
 		}
 
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			int y,pos;
-			final FiosItem item;
+			FiosItem item;
 
-			SetVScrollCount(w, _fios_num);
+			w.SetVScrollCount(_fios_list.size());
 			w.DrawWindowWidgets();
 			DrawFiosTexts(w.width);
 
@@ -1226,28 +1176,28 @@ public class MiscGui {
 
 			Gfx.GfxFillRect(w.widget.get(7).left + 1, w.widget.get(7).top + 1, w.widget.get(7).right, w.widget.get(7).bottom, 0xD7);
 			Gfx.DoDrawString(
-					_savegame_sort_order & SORT_DESCENDING ? DOWNARROW : UPARROW,
-							_savegame_sort_order & SORT_BY_NAME ? w.widget.get(2).right - 9 : w.widget.get(3).right - 9,
+					0 != (_savegame_sort_order & SORT_DESCENDING) ? Gfx.DOWNARROW : Gfx.UPARROW,
+							0 != (_savegame_sort_order & SORT_BY_NAME) ? w.widget.get(2).right - 9 : w.widget.get(3).right - 9,
 									15, 16
 					);
 
 			y = w.widget.get(7).top + 1;
 			pos = w.vscroll.pos;
-			while (pos < _fios_num) {
-				item = _fios_list + pos;
-				Gfx.DoDrawStringTruncated(item.title, 4, y, _fios_colors[item.type], w.width - 18);
+			while (pos < _fios_list.size()) {
+				item = _fios_list.get( pos );
+				Gfx.DoDrawStringTruncated(item.title, 4, y, _fios_colors[item.type.ordinal()], w.width - 18);
 				pos++;
 				y += 10;
-				if (y >= w.vscroll.cap * 10 + w.widget.get(7).top + 1) break;
+				if (y >= w.vscroll.getCap() * 10 + w.widget.get(7).top + 1) break;
 			}
 
-			if (Global._saveload_mode == SLD_SAVE_GAME || Global._saveload_mode == SLD_SAVE_SCENARIO) {
+			if (Global._saveload_mode == Global.SLD_SAVE_GAME || Global._saveload_mode == Global.SLD_SAVE_SCENARIO) {
 				DrawEditBox(w, 10);
 			}
 			break;
 		}
-		case WindowEvents.WE_CLICK:
-			switch (e.click.widget) {
+		case WE_CLICK:
+			switch (e.widget) {
 			case 2: // Sort save names by name 
 				_savegame_sort_order = (_savegame_sort_order == SORT_BY_NAME) ?
 						SORT_BY_NAME | SORT_DESCENDING : SORT_BY_NAME;
@@ -1263,38 +1213,38 @@ public class MiscGui {
 				break;
 
 			case 6: // OpenTTD 'button', jumps to OpenTTD directory 
-				FiosBrowseTo(o_dir);
+				FileIO.FiosBrowseTo(o_dir);
 				w.SetWindowDirty();
 				BuildFileList();
 				break;
 
 			case 7: { // Click the listbox 
-				int y = (e.click.pt.y - w.widget.get(e.widget).top - 1) / 10;
+				int y = (e.pt.y - w.widget.get(e.widget).top - 1) / 10;
 				String name;
 				final FiosItem file;
 
-				if (y < 0 || (y += w.vscroll.pos) >= w.vscroll.count) return;
+				if (y < 0 || (y += w.vscroll.pos) >= w.vscroll.getCount()) return;
 
-				file = _fios_list + y;
+				file = _fios_list.get( y );
 
-				name = FiosBrowseTo(file);
+				name = FileIO.FiosBrowseTo(file);
 				if (name != null) {
-					if (Global._saveload_mode == SLD_LOAD_GAME || Global._saveload_mode == SLD_LOAD_SCENARIO) {
-						_switch_mode = (Global._game_mode == GameModes.GM_EDITOR) ? SM_LOAD_SCENARIO : SM_LOAD;
+					if (Global._saveload_mode == Global.SLD_LOAD_GAME || Global._saveload_mode == Global.SLD_LOAD_SCENARIO) {
+						Global._switch_mode = (Global._game_mode == GameModes.GM_EDITOR) ? SwitchModes.SM_LOAD_SCENARIO : SwitchModes.SM_LOAD;
 
 						SetFiosType(file.type);
 						//ttd_strlcpy(_file_to_saveload.name, name, sizeof(_file_to_saveload.name));
 						//ttd_strlcpy(_file_to_saveload.title, file.title, sizeof(_file_to_saveload.title));
-						_file_to_saveload.name =  name;
-						_file_to_saveload.title = file.title;
+						Main._file_to_saveload.name =  name;
+						Main._file_to_saveload.title = file.title;
 
-						Window.DeleteWindow(w);
+						w.DeleteWindow();
 					} else {
-						// SLD_SAVE_GAME, SLD_SAVE_SCENARIO copy clicked name to editbox
+						// Global.SLD_SAVE_GAME, Global.SLD_SAVE_SCENARIO copy clicked name to editbox
 						//ttd_strlcpy(w.as_querystr_d().text.buf, file.name, w.as_querystr_d().text.maxlength);
-						w.as_querystr_d().text.buf = file.name;
-						UpdateTextBufferSize(w.as_querystr_d().text);
-						InvalidateWidget(w, 10);
+						w.as_querystr_d().text.setText( file.name );
+						//UpdateTextBufferSize(w.as_querystr_d().text);
+						w.InvalidateWidget(10);
 					}
 				} else {
 					// Changed directory, need repaint.
@@ -1308,64 +1258,64 @@ public class MiscGui {
 				break;
 			}
 			break;
-		case WindowEvents.WE_MOUSELOOP:
+		case WE_MOUSELOOP:
 			HandleEditBox(w, 10);
 			break;
-		case WindowEvents.WE_KEYPRESS:
-			if (e.keypress.keycode == Window.WKC_ESC) {
-				DeleteWindow(w);
+		case WE_KEYPRESS:
+			if (e.keycode == Window.WKC_ESC) {
+				w.DeleteWindow();
 				return;
 			}
 
-			if (Global._saveload_mode == SLD_SAVE_GAME || Global._saveload_mode == SLD_SAVE_SCENARIO) {
+			if (Global._saveload_mode == Global.SLD_SAVE_GAME || Global._saveload_mode == Global.SLD_SAVE_SCENARIO) {
 				if (HandleEditBoxKey(w, 10, e) == 1) // Press Enter 
-					HandleButtonClick(w, 12);
+					w.HandleButtonClick(12);
 			}
 			break;
-		case WindowEvents.WE_TIMEOUT:
+		case WE_TIMEOUT:
 			if (BitOps.HASBIT(w.click_state, 11)) { // Delete button clicked 
-				if (!FiosDelete(w.as_querystr_d().text.buf)) {
-					ShowErrorMessage(Str.INVALID_STRING_ID, Str.STR_4008_UNABLE_TO_DELETE_FILE, 0, 0);
+				if (!FileIO.FiosDelete(w.as_querystr_d().text.getString())) {
+					Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_4008_UNABLE_TO_DELETE_FILE, 0, 0);
 				}
 				w.SetWindowDirty();
 				BuildFileList();
-				if (Global._saveload_mode == SLD_SAVE_GAME) {
+				if (Global._saveload_mode == Global.SLD_SAVE_GAME) {
 					GenerateFileName(); // Reset file name to current date 
-					UpdateTextBufferSize(w.as_querystr_d().text);
+					w.as_querystr_d().text.UpdateTextBufferSize();
 				}
 			} else if (BitOps.HASBIT(w.click_state, 12)) { // Save button clicked 
-				_switch_mode = SM_SAVE;
-				FiosMakeSavegameName(_file_to_saveload.name, w.as_querystr_d().text.buf);
+				Global._switch_mode = SwitchModes.SM_SAVE;
+				Main._file_to_saveload.name = FileIO.FiosMakeSavegameName(w.as_querystr_d().text.getString());
 
 				// In the editor set up the vehicle engines correctly (date might have changed) 
-				if (Global._game_mode == GameModes.GM_EDITOR) StartupEngines();
+				if (Global._game_mode == GameModes.GM_EDITOR) Engine.StartupEngines();
 			}
 			break;
-		case WindowEvents.WE_DESTROY:
+		case WE_DESTROY:
 			// pause is only used in single-player, non-editor mode, non menu mode
-			if(!_networking && (Global._game_mode != GameModes.GM_EDITOR) && (Global._game_mode != GameModes.GM_MENU))
-				Cmd.DoCommandP(0, 0, 0, null, Cmd.CMD_PAUSE);
-			FiosFreeSavegameList();
-			_no_scroll = BitOps.RETCLRBIT(_no_scroll, SCROLL_SAVE);
+			if(!Global._networking && (Global._game_mode != GameModes.GM_EDITOR) && (Global._game_mode != GameModes.GM_MENU))
+				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE);
+			
+			Global._no_scroll = BitOps.RETCLRBIT(Global._no_scroll, Global.SCROLL_SAVE);
 			break;
-		case WindowEvents.WE_RESIZE: {
+		case WE_RESIZE: {
 			// Widget 2 and 3 have to go with halve speed, make it so obiwan 
-			int diff = e.sizing.diff.x / 2;
-			w.widget.get(2].right += diff;
-			w.widget.get(3].left  += diff;
-			w.widget.get(3].right += e.sizing.diff.x;
+			int diff = e.diff.x / 2;
+			w.widget.get(2).right += diff;
+			w.widget.get(3).left  += diff;
+			w.widget.get(3).right += e.diff.x;
 
 			// Same for widget 11 and 12 in save-dialog 
-			if (Global._saveload_mode == SLD_SAVE_GAME || Global._saveload_mode == SLD_SAVE_SCENARIO) {
-				w.widget.get(11].right += diff;
-				w.widget.get(12].left  += diff;
-				w.widget.get(12].right += e.sizing.diff.x;
+			if (Global._saveload_mode == Global.SLD_SAVE_GAME || Global._saveload_mode == Global.SLD_SAVE_SCENARIO) {
+				w.widget.get(11).right += diff;
+				w.widget.get(12).left  += diff;
+				w.widget.get(12).right += e.diff.x;
 			}
 
-			w.vscroll.cap += e.sizing.diff.y / 10;
+			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 10);
 		} break;
 		}
-		 */
+		 
 	}
 
 	static final WindowDesc _load_dialog_desc = new WindowDesc(
@@ -1407,7 +1357,7 @@ public class MiscGui {
 			_save_dialog_scen_desc,
 	};
 
-	void ShowSaveLoadDialog(int mode)
+	static void ShowSaveLoadDialog(int mode)
 	{
 		Window w;
 
@@ -1446,7 +1396,7 @@ public class MiscGui {
 		ViewPort.ResetObjectToPlace();
 	}
 
-	void RedrawAutosave()
+	public static void RedrawAutosave()
 	{
 		Window.FindWindowById(Window.WC_STATUS_BAR, 0).SetWindowDirty();
 	}
@@ -1471,16 +1421,16 @@ public class MiscGui {
 		switch (e.event) {
 		case WE_PAINT:
 		{
-			int y,pos;
-			final FiosItem item;
+			int y,pos;			
 
 			if (_savegame_sort_dirty) {
 				_savegame_sort_dirty = false;
 				MakeSortedSaveGameList();
 			}
 
-			// TODO SetVScrollCount(w, _fios_num);
-			w.SetVScrollCount(0);
+			int _fios_num = _fios_list.size();
+			//SetVScrollCount(w, _fios_num);
+			w.SetVScrollCount(_fios_num);
 
 			w.DrawWindowWidgets();
 			Gfx.DoDrawString(
@@ -1492,14 +1442,14 @@ public class MiscGui {
 
 			y = list_start;
 			pos = w.vscroll.pos;
-			/* TODO SelectScenarioWndProc
+
 			while (pos < _fios_num) {
-				item = _fios_list + pos;
-				Gfx.DoDrawString(item.title, 4, y, _fios_colors[item.type]);
+				final FiosItem item = _fios_list.get(pos);
+				Gfx.DoDrawString(item.title, 4, y, _fios_colors[item.type.ordinal()]);
 				pos++;
 				y += 10;
-				if (y >= w.vscroll.cap * 10 + list_start) break;
-			} */
+				if (y >= w.vscroll.getCap() * 10 + list_start) break;
+			} 
 		}
 		break;
 
@@ -1528,23 +1478,23 @@ public class MiscGui {
 				if (e.pt.y < list_start)
 					IntroGui.GenRandomNewGame(Hal.Random(), Hal.InteractiveRandom());
 				else {
-					/* TODO click
+
 					String name;
 					int y = (e.pt.y - list_start) / 10;
 					final FiosItem file;
 
-					if (y < 0 || (y += w.vscroll.pos) >= w.vscroll.count)
+					if (y < 0 || (y += w.vscroll.pos) >= w.vscroll.getCount())
 						return;
 
-					file = _fios_list + y;
+					file = _fios_list.get(y);
 
-					name = FiosBrowseTo(file);
+					name = FileIO.FiosBrowseTo(file);
 					if (name != null) {
 						SetFiosType(file.type);
-						_file_to_saveload.name = name;
-						Window.DeleteWindow(w);
-						StartScenarioEditor(Hal.Random(), InteractiveHal.Random());
-					} */
+						Main._file_to_saveload.name = name;
+						w.DeleteWindow();
+						IntroGui.StartScenarioEditor(Hal.Random(), Hal.InteractiveRandom());
+					}
 				}
 				break;
 			}
@@ -1566,24 +1516,25 @@ public class MiscGui {
 		}
 	}
 
-	void SetFiosType(final int fiostype)
+	static void SetFiosType(final FiosType type)
 	{
-		/* TODO SetFiosType
-		switch (fiostype) {
-		case FIOS_TYPE_FILE:
-		case FIOS_TYPE_SCENARIO:
-			_file_to_saveload.mode = SL_LOAD;
+
+		switch (type) {
+		case FILE:
+		case SCENARIO:
+			Main._file_to_saveload.mode = SaveLoad.SL_LOAD;
 			break;
 
-		case FIOS_TYPE_OLDFILE:
-		case FIOS_TYPE_OLD_SCENARIO:
-			_file_to_saveload.mode = SL_OLD_LOAD;
+		case OLDFILE:
+		case OLD_SCENARIO:
+			//Main._file_to_saveload.mode = SaveLoad.SL_OLD_LOAD;
+			Main._file_to_saveload.mode = SaveLoad.SL_LOAD; // TODO kill me
 			break;
 
 		default:
-			_file_to_saveload.mode = SL_INVALID;
+			Main._file_to_saveload.mode = SaveLoad.SL_INVALID;
 			break;
-		} */
+		} 
 	}
 
 	static final WindowDesc _select_scenario_desc = new WindowDesc(

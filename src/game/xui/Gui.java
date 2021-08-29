@@ -312,17 +312,17 @@ public class Gui
 	{
 		if (Global._game_mode == GameModes.GM_EDITOR) {
 			switch (index) {
-				//case 0: ShowSaveLoadDialog(SLD_SAVE_SCENARIO); break;
-				//case 1: ShowSaveLoadDialog(SLD_LOAD_SCENARIO); break;
+				case 0: MiscGui.ShowSaveLoadDialog(Global.SLD_SAVE_SCENARIO); break;
+				case 1: MiscGui.ShowSaveLoadDialog(Global.SLD_LOAD_SCENARIO); break;
 				case 2: IntroGui.AskExitToGameMenu();                   break;
 				case 4: IntroGui.AskExitGame();                         break;
 			}
 		} else {
 			switch (index) {
-				//case 0: ShowSaveLoadDialog(SLD_SAVE_GAME); break;
-				//case 1: ShowSaveLoadDialog(SLD_LOAD_GAME); break;
-				case 0: SaveLoad.save(); break;
-				case 1: SaveLoad.load(); break;
+				case 0: MiscGui.ShowSaveLoadDialog(Global.SLD_SAVE_GAME); break;
+				case 1: MiscGui.ShowSaveLoadDialog(Global.SLD_LOAD_GAME); break;
+				//case 0: SaveLoad.save(); break;
+				//case 1: SaveLoad.load(); break;
 				case 2: IntroGui.AskExitToGameMenu();               break;
 				case 3: IntroGui.AskExitGame();                     break;
 			}

@@ -1,10 +1,13 @@
 package game;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import game.ids.PlayerID;
 import game.util.MemoryPool;
 import game.util.VehicleHash;
+import game.xui.Window;
 
 /**
  * 
@@ -20,8 +23,8 @@ public class GameState implements Serializable
 	private static final long serialVersionUID = 1L;
 	
 	
-	public PlayerID _current_player;
-	public PlayerID _local_player;
+	public PlayerID _current_player = PlayerID.getNone();
+	public PlayerID _local_player = PlayerID.getNone();
 	public final boolean _is_old_ai_player = false;
 	int _yearly_expenses_type; // TODO fixme, use parameter where possible
 	int _cur_player_tick_index;
@@ -63,5 +66,9 @@ public class GameState implements Serializable
 
 	final MemoryPool<Station> _stations = new MemoryPool<Station>(Station.factory);
 	final MemoryPool<RoadStop> _roadstops = new MemoryPool<RoadStop>(RoadStop.factory);
+
+
+	//static Window _windows[] = new Window[25];
+	public static final List<Window> _windows = new ArrayList<Window>();
 	
 }
