@@ -1,6 +1,8 @@
-package game.struct; 
+package game.struct;
 
-public class GoodsEntry
+import java.io.Serializable;
+
+public class GoodsEntry implements Serializable
 {
 
 	public int waiting_acceptance;
