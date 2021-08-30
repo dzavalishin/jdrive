@@ -333,7 +333,7 @@ public class Economy extends EconomeTables
 
 		/* Take care of rating in towns */
 		{
-			if (!new_player.isSpectator() {
+			if (!new_player.isSpectator()) {
 
 				Town.forEach( (t) ->
 				{
