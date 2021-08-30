@@ -6,14 +6,12 @@ import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
-import game.enums.Owner;
 import game.enums.TileTypes;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.struct.Point;
 import game.util.BitOps;
-import game.util.MemoryPool;
 import game.xui.ViewPort;
 
 public class WayPoint implements IPoolItem
@@ -51,7 +49,7 @@ public class WayPoint implements IPoolItem
 		return xy != null;
 	}
 
-	private static final IPoolItemFactory<WayPoint> factory = new IPoolItemFactory<WayPoint>()
+	static final IPoolItemFactory<WayPoint> factory = new IPoolItemFactory<WayPoint>()
 	{		
 		private static final long serialVersionUID = 1L;
 
@@ -61,18 +59,14 @@ public class WayPoint implements IPoolItem
 		}
 	};
 
-	private static MemoryPool<WayPoint> _waypoint_pool = new MemoryPool<WayPoint>(factory);
-	/* Initialize the town-pool */
-	//MemoryPool _waypoint_pool = { "Waypoints", WAYPOINT_POOL_MAX_BLOCKS, WAYPOINT_POOL_BLOCK_SIZE_BITS, sizeof(WayPoint), &WaypointPoolNewBlock, 0, 0, null };
-
 	public static Iterator<WayPoint> getIterator()
 	{
-		return _waypoint_pool.getIterator(); // pool.values().iterator();
+		return Global.gs._waypoints.getIterator(); // pool.values().iterator();
 	}
 
 	public static void forEach( Consumer<WayPoint> c )
 	{
-		_waypoint_pool.forEach(c);
+		Global.gs._waypoints.forEach(c);
 	}
 	
 	
@@ -101,7 +95,7 @@ public class WayPoint implements IPoolItem
 	 */
 	public static WayPoint GetWaypoint(int index)
 	{
-		return _waypoint_pool.GetItemFromPool(index);
+		return Global.gs._waypoints.GetItemFromPool(index);
 	}
 
 	/**
@@ -109,7 +103,7 @@ public class WayPoint implements IPoolItem
 	 */
 	private static int GetWaypointPoolSize()
 	{
-		return _waypoint_pool.total_items();
+		return Global.gs._waypoints.total_items();
 	}
 
 	public static boolean IsWaypointIndex(int index)
@@ -140,19 +134,6 @@ public class WayPoint implements IPoolItem
 	}
 
 
-	// TODO NOT CALLED
-	/**
-	 * Called if a new block is added to the WayPoint-pool
-	 * /
-private void WaypointPoolNewBlock(int start_item)
-{
-	WayPoint wp;
-
-	//FOR_ALL_WAYPOINTS_FROM(wp, start_item)
-    for (wp = GetWaypoint(start_item); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null)
-		wp.index = start_item++;
-}*/
-
 	@Override
 	public void setIndex(int index) {
 		this.index = index;	
@@ -164,7 +145,7 @@ private void WaypointPoolNewBlock(int start_item)
 		WayPoint [] ret = {null};
 
 		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
-		_waypoint_pool.forEach((i,wp) ->
+		Global.gs._waypoints.forEach((i,wp) ->
 		{
 			if (!wp.isValid()) {
 				int index = wp.index;
@@ -179,7 +160,7 @@ private void WaypointPoolNewBlock(int start_item)
 		if( ret[0] != null ) return ret[0];
 		
 		/* Check if we can add a block to the pool */
-		if (_waypoint_pool.AddBlockToPool())
+		if (Global.gs._waypoints.AddBlockToPool())
 			return AllocateWaypoint();
 
 		return null;
@@ -206,7 +187,7 @@ private void WaypointPoolNewBlock(int start_item)
 	/* Update all signs */
 	static void UpdateAllWaypointSigns()
 	{
-		_waypoint_pool.forEach((i,wp) ->
+		Global.gs._waypoints.forEach((i,wp) ->
 		{
 			if(wp.isValid())
 				wp.UpdateWaypointSign();
@@ -225,7 +206,7 @@ private void WaypointPoolNewBlock(int start_item)
 		//used_waypoint.clear();
 		/* Find an unused WayPoint number belonging to this town */
 		//for (local_wp = GetWaypoint(0); local_wp != null; local_wp = (local_wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(local_wp.index + 1) : null) 
-		_waypoint_pool.forEach((ii,local_wp) ->
+		Global.gs._waypoints.forEach((ii,local_wp) ->
 		{
 			if (this == local_wp)
 			{
@@ -416,7 +397,7 @@ private void WaypointPoolNewBlock(int start_item)
 	/* Daily loop for waypoints */
 	static void WaypointsDailyLoop()
 	{
-		_waypoint_pool.forEach((i,wp) -> {
+		Global.gs._waypoints.forEach((i,wp) -> {
 			if( (0 != wp.deleted) && (0 == --wp.deleted) )
 				wp.DoDeleteWaypoint();
 
@@ -624,25 +605,9 @@ void FixOldWaypoints()
 
 	static void InitializeWaypoints()
 	{
-		_waypoint_pool.CleanPool();
-		_waypoint_pool.AddBlockToPool();
+		Global.gs._waypoints.CleanPool();
+		Global.gs._waypoints.AddBlockToPool();
 	}
-	/*
-static final SaveLoad _waypoint_desc[] = {
-	SLE_CONDVAR(WayPoint, xy, SLE_FILE_U16 | SLE_VAR_U32, 0, 5),
-	SLE_CONDVAR(WayPoint, xy, SLE_int, 6, 255),
-	SLE_CONDVAR(WayPoint, town_index, SLE_UINT16, 12, 255),
-	SLE_CONDVAR(WayPoint, town_cn, SLE_UINT8, 12, 255),
-	SLE_VAR(WayPoint, string, SLE_UINT16),
-	SLE_VAR(WayPoint, deleted, SLE_UINT8),
-
-	SLE_CONDVAR(WayPoint, build_date, SLE_UINT16,  3, 255),
-	SLE_CONDVAR(WayPoint, localidx,   SLE_UINT8,   3, 255),
-	SLE_CONDVAR(WayPoint, grfid,      SLE_int, 17, 255),
-
-	SLE_END()
-};
-	 */
 
 	/*
 	private static void Load_WAYP()
@@ -689,12 +654,12 @@ static final SaveLoad _waypoint_desc[] = {
 
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		_waypoint_pool = (MemoryPool<WayPoint>) oin.readObject();
+		//_waypoint_pool = (MemoryPool<WayPoint>) oin.readObject();
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		oos.writeObject(_waypoint_pool);		
+		//oos.writeObject(_waypoint_pool);		
 	}
 
 	public ViewportSign getSign() { return sign;	}

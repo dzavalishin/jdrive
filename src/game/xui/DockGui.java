@@ -8,7 +8,6 @@ import game.Str;
 import game.Terraform;
 import game.TileIndex;
 import game.WaterCmd;
-import game.enums.Owner;
 import game.ifaces.OnButtonClick;
 
 public class DockGui 

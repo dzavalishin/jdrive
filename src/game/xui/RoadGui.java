@@ -10,13 +10,10 @@ import game.Station;
 import game.Str;
 import game.Terraform;
 import game.TileIndex;
-
 import game.enums.GameModes;
-import game.enums.Owner;
+import game.enums.RoadStopType;
 import game.enums.TileTypes;
 import game.ifaces.OnButtonClick;
-import game.enums.RoadStopType;
-
 import game.util.BitOps;
 import game.util.Sprites;
 

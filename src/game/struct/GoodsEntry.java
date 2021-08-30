@@ -1,8 +1,11 @@
-package game.struct; 
+package game.struct;
 
-public class GoodsEntry
+import java.io.Serializable;
+
+public class GoodsEntry implements Serializable
 {
-
+	private static final long serialVersionUID = 1L;
+	
 	public int waiting_acceptance;
 	public int days_since_pickup;
 	public int rating;

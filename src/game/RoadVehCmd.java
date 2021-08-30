@@ -16,9 +16,7 @@ import game.struct.OvertakeData;
 import game.struct.Point;
 import game.struct.RoadFindDepotData;
 import game.struct.RoadVehFindData;
-import game.struct.TileMarker;
 import game.tables.RoadVehCmdTables;
-
 import game.util.BitOps;
 import game.xui.Gfx;
 import game.xui.VehicleGui;

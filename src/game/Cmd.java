@@ -1,7 +1,6 @@
 package game;
 
 import game.enums.GameModes;
-import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ifaces.CommandCallback;
 import game.ifaces.CommandProc;
@@ -148,7 +147,8 @@ public class Cmd {
 
 
 	public static final int DC_EXEC = 1;
-	public static final int DC_AUTO = 2;				// don't allow building on structures
+	/** Don't allow building on structures */
+	public static final int DC_AUTO = 2;				
 	public static final int DC_QUERY_COST = 4;			// query cost only; don't build.
 	public static final int DC_NO_WATER = 8;			// don't allow building on water
 	public static final int DC_NO_RAIL_OVERLAP = 0x10;	// don't allow overlap of rails (used in buildrail)
@@ -185,7 +185,7 @@ public class Cmd {
 	public static boolean CmdFailed(int res)
 	{
 		// lower 16bits are the StringID of the possible error
-		return res <= (CMD_ERROR | Str.INVALID_STRING_ID.id);
+		return res <= (CMD_ERROR | Str.INVALID_STRING);
 	}
 
 
@@ -375,7 +375,7 @@ public class Cmd {
 
 		proc = _command_proc_table[procc].proc;
 
-		if (_docommand_recursive == 0) Global._error_message = Str.INVALID_STRING_ID.id;
+		if (_docommand_recursive == 0) Global._error_message = Str.INVALID_STRING;
 
 		_docommand_recursive++;
 
@@ -468,7 +468,7 @@ public class Cmd {
 
 		assert(_docommand_recursive == 0);
 
-		Global._error_message = Str.INVALID_STRING_ID.id;
+		Global._error_message = Str.INVALID_STRING;
 		Global._error_message_2 = cmd >> 16;
 		Global._additional_cash_required = 0;
 

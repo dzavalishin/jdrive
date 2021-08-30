@@ -13,7 +13,6 @@ import game.Sprite;
 import game.Str;
 import game.charts.CargoPaymentRatesChart;
 import game.charts.CompanyValueGraph;
-import game.enums.Owner;
 import game.tables.SmallMapGuiTables;
 import game.util.ArrayPtr;
 import game.util.BitOps;

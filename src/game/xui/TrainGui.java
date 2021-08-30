@@ -358,7 +358,7 @@ public class TrainGui
 		w.resize.height = w.height - 14 * 4; /* Minimum of 4 vehicles in the display */
 
 		if (tile != null) {
-			w.caption_color =  tile.GetTileOwner().id;
+			w.caption_color = tile.GetTileOwner().id;
 			w.as_buildtrain_d().railtype =  BitOps.GB(tile.getMap().m3, 0, 4);
 		} else {
 			w.caption_color =  Global.gs._local_player.id;
@@ -863,7 +863,7 @@ public class TrainGui
 		if (null != w) {
 			TileIndex wt = TileIndex.get(w.window_number);
 		
-			w.caption_color =  wt.GetTileOwner().id;
+			w.caption_color = wt.GetTileOwner().id;
 			w.vscroll.setCap(6);
 			w.hscroll.setCap(10);
 			w.resize.step_width = 29;

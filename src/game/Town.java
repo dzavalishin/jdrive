@@ -26,7 +26,6 @@ import game.struct.TileDesc;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
 import game.util.IntContainer;
-import game.util.MemoryPool;
 import game.util.Strings;
 import game.util.TownTables;
 import game.xui.Gfx;
@@ -158,20 +157,13 @@ implements IPoolItem, Serializable
 
 
 
-	private static final IPoolItemFactory<Town> factory = new IPoolItemFactory<Town>() {
-		/**
-		 * 
-		 */
+	static final IPoolItemFactory<Town> factory = new IPoolItemFactory<Town>() {
 		private static final long serialVersionUID = 1L;
 
 		@Override
 		public Town createObject() { return new Town(); }
 	};
 	
-	static MemoryPool<Town> _town_pool = new MemoryPool<Town>(factory);
-	//static MemoryPool<Town> _town_pool = new MemoryPool<Town>(Town::new);
-
-
 	@Override
 	public void setIndex(int index) {
 		this.index = index;
@@ -201,7 +193,7 @@ implements IPoolItem, Serializable
 	 */
 	public static Town GetTown(int index)
 	{
-		return _town_pool.GetItemFromPool(index);
+		return Global.gs._towns.GetItemFromPool(index);
 	}
 
 	/**
@@ -209,7 +201,7 @@ implements IPoolItem, Serializable
 	 */
 	public static  int GetTownPoolSize()
 	{
-		return _town_pool.total_items();
+		return Global.gs._towns.total_items();
 	}
 
 	static  boolean IsTownIndex(int index)
@@ -379,7 +371,7 @@ implements IPoolItem, Serializable
 
 	static boolean IsCloseToTown(TileIndex tile, int dist)
 	{
-		for(Iterator<Town> i = _town_pool.getIterator(); i.hasNext();)
+		for(Iterator<Town> i = getIterator(); i.hasNext();)
 		{
 			final Town t = i.next();
 			if (t.isValid() && Map.DistanceManhattan(tile, t.xy) < dist) 
@@ -773,7 +765,8 @@ implements IPoolItem, Serializable
 
 	private static void build_road_and_exit(TileIndex tile, int rcmd, int t1index )
 	{
-		if (!Cmd.CmdFailed(Cmd.DoCommandByTile(tile, rcmd, /*t1.index*/ t1index, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD)))
+		final int cmd = Cmd.DoCommandByTile(tile, rcmd, /*t1.index*/ t1index, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
+		if (!Cmd.CmdFailed(cmd))
 			_grow_town_result = -1;
 	}
 
@@ -942,7 +935,12 @@ implements IPoolItem, Serializable
 
 
 
-	// Returns true if a house was built, or no if the build failed.
+	/**
+	 * Returns true if a house was built, or no if the build failed.
+	 *  
+	 * @param itile
+	 * @return
+	 */
 	boolean GrowTownAtRoad(TileIndex itile)
 	{
 		int mask;
@@ -1032,7 +1030,7 @@ implements IPoolItem, Serializable
 	boolean GrowTown()
 	{
 		TileIndex tile;
-		TileIndexDiffC ptr;
+		//TileIndexDiffC ptr;
 		TileInfo ti = new TileInfo();
 		PlayerID old_player;
 
@@ -1044,9 +1042,9 @@ implements IPoolItem, Serializable
 
 		// Find a road that we can base the construction on.
 		tile = xy;
-		//for (ptr = _town_coord_mod; ptr != endof(_town_coord_mod); ++ptr) 
-		for (TileIndexDiffC tileIndexDiffC : _town_coord_mod) {
-			ptr = tileIndexDiffC;
+ 
+		for (TileIndexDiffC ptr : _town_coord_mod) 
+		{
 			if (Road.GetRoadBitsByTile(tile) != 0) {
 				boolean r = GrowTownAtRoad(tile);
 				Global.gs._current_player = old_player;
@@ -1058,9 +1056,9 @@ implements IPoolItem, Serializable
 		// No road available, try to build a random road block by
 		// clearing some land and then building a road there.
 		tile = xy;
-		//for (ptr = _town_coord_mod; ptr != endof(_town_coord_mod); ++ptr) 		{
-		for (TileIndexDiffC tileIndexDiffC : _town_coord_mod) {
-			ptr = tileIndexDiffC;
+
+		for (TileIndexDiffC ptr : _town_coord_mod) 
+		{
 			Landscape.FindLandscapeHeightByTile(ti, tile);
 
 			// Only work with plain land that not already has a house with map5=0
@@ -1270,7 +1268,7 @@ implements IPoolItem, Serializable
 		}
 
 		/* Check if we can add a block to the pool */
-		if (_town_pool.AddBlockToPool())
+		if (Global.gs._towns.AddBlockToPool())
 			return AllocateTown();
 
 		return null;
@@ -2125,15 +2123,12 @@ implements IPoolItem, Serializable
 
 	public static Town ClosestTownFromTile(TileIndex tile, int threshold)
 	{
-		//Town t;
 		int [] best = { threshold >= 0 ? threshold : Integer.MAX_VALUE };
 		Town [] best_town = { null };
 
-		// XXX - Fix this so for a given tiletype the owner of the type is in the same variable
-		if (tile.IsTileType( TileTypes.MP_HOUSE) || (
-				tile.IsTileType( TileTypes.MP_STREET) &&
-				(tile.IsLevelCrossing() ? tile.getMap().m3 : tile.GetTileOwner().id) == Owner.OWNER_TOWN
-				))
+		if(tile.IsTileType(TileTypes.MP_HOUSE) || (
+				tile.IsTileType( TileTypes.MP_STREET) && tile.GetRoadOwner().isTown() ) )
+				//(tile.IsLevelCrossing() ? tile.getMap().m3 : tile.GetTileOwner().id) == Owner.OWNER_TOWN) )
 			return GetTown(tile.getMap().m2);
 
 		Town.forEach( (t) ->
@@ -2237,8 +2232,8 @@ implements IPoolItem, Serializable
 	static void InitializeTowns()
 	{
 		/* Clean the town pool and create 1 block in it */
-		_town_pool.CleanPool();
-		_town_pool.AddBlockToPool();
+		Global.gs._towns.CleanPool();
+		Global.gs._towns.AddBlockToPool();
 
 		Subsidy._subsidies = new Subsidy[Global.MAX_PLAYERS];
 
@@ -2248,7 +2243,6 @@ implements IPoolItem, Serializable
 
 		_cur_town_ctr = 0;
 		_cur_town_iter = 0;
-		//_total_towns = 0;
 		TownGui._town_sort_dirty = true;
 	}
 
@@ -2271,12 +2265,16 @@ implements IPoolItem, Serializable
 
 
 	public static void forEach(Consumer<Town> c) {
-		_town_pool.forEach(c);
+		Global.gs._towns.forEach(c);
+	}
+
+	public static void forEachValid(Consumer<Town> c) {
+		Global.gs._towns.forEachValid(c);
 	}
 
 	public static Iterator<Town> getIterator()
 	{
-		return _town_pool.getIterator(); // pool.values().iterator();
+		return Global.gs._towns.getIterator(); // pool.values().iterator();
 	}
 
 
@@ -2297,7 +2295,7 @@ implements IPoolItem, Serializable
 	public static Town getRandomTown() 
 	{
 		;
-		return GetTown(Hal.RandomRange(_town_pool.size()));
+		return GetTown(Hal.RandomRange(Global.gs._towns.size()));
 		//return GetTown(Hal.RandomRange(_total_towns));
 	}
 
@@ -2412,13 +2410,13 @@ implements IPoolItem, Serializable
 
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		_town_pool = (MemoryPool<Town>) oin.readObject();
+		//GameState._towns = (MemoryPool<Town>) oin.readObject();
 		AfterLoadTown();
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		oos.writeObject(_town_pool);		
+		//oos.writeObject(GameState._towns);		
 	}
 
 	

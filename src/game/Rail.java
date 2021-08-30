@@ -1,14 +1,12 @@
 package game;
 
 import java.util.Map.Entry;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import game.TrackPathFinder.TPFHashEnt;
 import game.enums.Owner;
 import game.enums.TileTypes;
 import game.ids.PlayerID;
-import game.ifaces.OnButtonClick;
 import game.ifaces.TileTypeProcs;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.Point;
@@ -18,14 +16,9 @@ import game.util.BitOps;
 import game.util.Sprites;
 import game.xui.Gfx;
 import game.xui.Gui;
-import game.xui.MiscGui;
-import game.xui.TileHighlightData;
 import game.xui.TrainGui;
 import game.xui.ViewPort;
-import game.xui.Widget;
 import game.xui.Window;
-import game.xui.WindowDesc;
-import game.xui.WindowEvent;
 
 @SuppressWarnings("SuspiciousNameCombination")
 public class Rail extends RailTables {
@@ -687,9 +680,9 @@ public class Rail extends RailTables {
 					(track == TRACK_DIAG1 && m5 == 0x05) ||
 					(track == TRACK_DIAG2 && m5 == 0x0A) // correct direction?
 					)) {
-				if(0 != (flags & Cmd.DC_EXEC)) {
-					tile.getMap().m3 = 0xFF & tile.GetTileOwner().id;
-					tile.SetTileOwner( Global.gs._current_player);
+				if(0 != (flags & Cmd.DC_EXEC)) { // crossing
+					tile.getMap().m3 = 0xFF & tile.GetTileOwner().id; // road owner
+					tile.SetTileOwner(Global.gs._current_player); // rail owner
 					tile.getMap().m4 = 0xFF & p1;
 					tile.getMap().m5 = 0xFF & (0x10 | (track == TRACK_DIAG1 ? 0x08 : 0x00)); // level crossing
 				}

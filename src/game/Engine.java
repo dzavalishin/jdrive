@@ -168,10 +168,10 @@ public class Engine extends EngineTables implements Serializable
 
 	static void AddTypeToEngines()
 	{
-		Engine [] e = Engine._engines;
+		Engine [] e = Global.gs._engines;
 		int i = 0;
 
-		for( i = 0; i < _engines.length; i++ )
+		for( i = 0; i < Global.gs._engines.length; i++ )
 			e[i] = new Engine();
 		
 		i = 0;
@@ -179,9 +179,9 @@ public class Engine extends EngineTables implements Serializable
 		do e[i].type = Vehicle.VEH_Road;     while (++i < Global.SHIP_ENGINES_INDEX);
 		do e[i].type = Vehicle.VEH_Ship;     while (++i < Global.AIRCRAFT_ENGINES_INDEX);
 		do e[i].type = Vehicle.VEH_Aircraft; while (++i < Global.TOTAL_NUM_ENGINES);
-		if( i < _engines.length )
+		if( i < Global.gs._engines.length )
 		{
-			do e[i].type = Vehicle.VEH_Special;  while (++i < _engines.length);
+			do e[i].type = Vehicle.VEH_Special;  while (++i < Global.gs._engines.length);
 		}
 	}
 
@@ -190,9 +190,9 @@ public class Engine extends EngineTables implements Serializable
 		SetupEngineNames();
 
 		//for (e = _engines, ei = _engine_info; e != endof(_engines); e++, ei++) 
-		for (int i = 0; i < Engine._engines.length; i++ ) 
+		for (int i = 0; i < Global.gs._engines.length; i++ ) 
 		{
-			final Engine e = Engine._engines[i];
+			final Engine e = Global.gs._engines[i];
 			
 			// TODO XXX must make copy!
 			Global._engine_info[i] = EngineTables2.orig_engine_info[i];
@@ -907,8 +907,8 @@ public class Engine extends EngineTables implements Serializable
 
 		if (Global._cur_year >= 130) return;
 
-		for (int i = 0; i != _engines.length; i++) {
-			Engine  e = _engines[i];
+		for (int i = 0; i != Global.gs._engines.length; i++) {
+			Engine  e = Global.gs._engines[i];
 
 			if(0 != (e.flags & ENGINE_INTRODUCING)) {
 				if(0 !=  (e.flags & ENGINE_PREVIEWING)) {
@@ -1043,9 +1043,9 @@ public class Engine extends EngineTables implements Serializable
 	public static void EnginesMonthlyLoop()
 	{
 		if (Global._cur_year < 130) {
-			for (int i = 0 ; i < _engines.length; i++) 
+			for (int i = 0 ; i < Global.gs._engines.length; i++) 
 			{
-				Engine e = _engines[i];
+				Engine e = Global.gs._engines[i];
 				// Age the vehicle
 				if(0 != (e.flags & ENGINE_AVAILABLE) && e.age != 0xFFFF) {
 					e.age++;
@@ -1200,19 +1200,18 @@ public class Engine extends EngineTables implements Serializable
 	
 	
 	
-	public static Engine [] _engines = new Engine[Global.TOTAL_NUM_ENGINES];
 	public static final /*StringID*/ int [] _engine_name_strings = new int[Global.TOTAL_NUM_ENGINES];
 
 	public static Engine GetEngine(EngineID i)
 	{
-	  assert(i.id < _engines.length);
-	  return _engines[i.id];
+	  assert(i.id < Global.gs._engines.length);
+	  return Global.gs._engines[i.id];
 	}
 
 	public static Engine GetEngine(int i)
 	{
-	  assert(i < _engines.length);
-	  return _engines[i];
+	  assert(i < Global.gs._engines.length);
+	  return Global.gs._engines[i];
 	}
 
 	public static boolean IsEngineIndex(int index)
@@ -1513,13 +1512,13 @@ public class Engine extends EngineTables implements Serializable
 	
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		_engines = (Engine[]) oin.readObject();
+		//Global.gs._engines = (Engine[]) oin.readObject();
 		AdjustAvailAircraft();
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		oos.writeObject(_engines);		
+		//oos.writeObject(Global.gs._engines);		
 	}
 
 	public int getIntro_date() {

@@ -80,7 +80,7 @@ public class Ship {
 			Depot.forEach( (depot) ->
 			{
 				TileIndex tile = depot.xy;
-				if (depot.IsValidDepot() && tile.IsTileDepotType(Global.TRANSPORT_WATER) && tile.IsTileOwner(v.owner)) {
+				if (depot.isValid() && tile.IsTileDepotType(Global.TRANSPORT_WATER) && tile.IsTileOwner(v.owner)) {
 					int dist = Map.DistanceManhattan(tile, tile2);
 					if (dist < best_dist[0]) {
 						best_dist[0] = dist;

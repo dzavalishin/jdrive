@@ -5,7 +5,6 @@ import java.util.List;
 
 import game.Global;
 import game.ids.StringID;
-import game.util.BitOps;
 
 public class MultilineString 
 {

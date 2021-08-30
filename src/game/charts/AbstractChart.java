@@ -11,6 +11,8 @@ import org.jfree.ui.RefineryUtilities;
 
 public abstract class AbstractChart extends JFrame 
 {
+	private static final long serialVersionUID = 1L;
+
 	abstract DefaultCategoryDataset createDataset(); 
 	
 	public AbstractChart( 

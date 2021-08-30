@@ -15,7 +15,6 @@ import game.struct.TileMarker;
 import game.util.BitOps;
 import game.util.TTDQueue;
 import game.util.TTDQueueImpl;
-import game.xui.ViewPort;
 
 public class Npf {
 
@@ -1129,7 +1128,7 @@ public class Npf {
 		{
 			/* Check if this is really a valid depot, it is of the needed type and
 			 * owner */
-			if (depot.IsValidDepot() && Depot.IsTileDepotType(depot.xy, type) && depot.xy.IsTileOwner(owner))
+			if (depot.isValid() && Depot.IsTileDepotType(depot.xy, type) && depot.xy.IsTileOwner(owner))
 				/* If so, let's add it to the queue, sorted by distance */
 				depots.push(depot, Map.DistanceManhattan(tile, depot.xy));
 		});

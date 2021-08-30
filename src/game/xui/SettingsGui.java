@@ -36,12 +36,12 @@ public class SettingsGui extends SettingsTables
 		int [] buf = new int[num + 1];
 		//StringID *p = buf;
 		//while (--num>=0) *p++ = base++;
-		//*p = Str.INVALID_STRING_ID.id;
+		//*p = Str.INVALID_STRING;
 		int i;
 		for( i = 0; i < num; i++ )
 			buf[i] = base++;
 
-		buf[i] = Str.INVALID_STRING_ID.id;
+		buf[i] = Str.INVALID_STRING;
 
 		return buf;
 	}
@@ -546,14 +546,14 @@ public class SettingsGui extends SettingsTables
 
 	static int AiNew_PatchActive_Warning(int p1)
 	{
-		if (p1 == 1) Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.TEMP_AI_ACTIVATED, 0, 0);
+		if (p1 == 1) Global.ShowErrorMessage(Str.INVALID_STRING, Str.TEMP_AI_ACTIVATED, 0, 0);
 		return 0;
 	}
 
 	static int Ai_In_Multiplayer_Warning(int p1)
 	{
 		if (p1 == 1) {
-			Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.TEMP_AI_MULTIPLAYER, 0, 0);
+			Global.ShowErrorMessage(Str.INVALID_STRING, Str.TEMP_AI_MULTIPLAYER, 0, 0);
 			Global._patches.ainew_active = true;
 		}
 		return 0;
@@ -600,7 +600,7 @@ public class SettingsGui extends SettingsTables
 		}
 
 		if (!warning)
-			Global.ShowErrorMessage(Str.INVALID_STRING_ID.id, Str.STR_CONFIG_PATCHES_SERVICE_INTERVAL_INCOMPATIBLE, 0, 0);
+			Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_CONFIG_PATCHES_SERVICE_INTERVAL_INCOMPATIBLE, 0, 0);
 
 		return InValidateDetailsWindow(0);
 	}

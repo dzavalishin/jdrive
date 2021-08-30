@@ -11,7 +11,6 @@ import game.enums.TileTypes;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
-import game.util.MemoryPool;
 import game.xui.Window;
 
 public class Depot implements IPoolItem, Serializable
@@ -40,8 +39,6 @@ public class Depot implements IPoolItem, Serializable
 		}
 	};
 	
-	static MemoryPool<Depot> _depot_pool = new MemoryPool<Depot>(factory);
-
 	public static TileIndex _last_built_train_depot_tile;
 	public static TileIndex _last_built_road_depot_tile;
 	public static TileIndex _last_built_aircraft_depot_tile;
@@ -52,7 +49,7 @@ public class Depot implements IPoolItem, Serializable
 	 */
 	public static Depot GetDepot(int index)
 	{
-		return _depot_pool.GetItemFromPool(index);
+		return Global.gs._depots.GetItemFromPool(index);
 	}
 
 	/**
@@ -60,7 +57,7 @@ public class Depot implements IPoolItem, Serializable
 	 */
 	static int GetDepotPoolSize()
 	{
-		return _depot_pool.total_items();
+		return Global.gs._depots.total_items();
 	}
 
 	static boolean IsDepotIndex(int index)
@@ -71,12 +68,12 @@ public class Depot implements IPoolItem, Serializable
 	public static Iterator<Depot> getIterator()
 	{
 		//return _depot_pool.pool.values().iterator();
-		return _depot_pool.getIterator();
+		return Global.gs._depots.getIterator();
 	}
 
 	static void forEach( Consumer<Depot> c )
 	{
-		_depot_pool.forEach(c);
+		Global.gs._depots.forEach(c);
 	}
 
 	
@@ -106,9 +103,10 @@ public class Depot implements IPoolItem, Serializable
 	/**
 	 * Check if a depot really exists.
 	 */
-	public boolean IsValidDepot()
+	public boolean isValid()
 	{
-		return (xy != null) && (xy.getTile() != 0); /* XXX: Replace by INVALID_TILE someday */
+		//return (xy != null) && (xy.getTile() != 0); 
+		return xy != null; 
 	}
 
 	/**
@@ -194,7 +192,7 @@ public class Depot implements IPoolItem, Serializable
 	public static Depot GetDepotByTile(TileIndex tile)
 	{
 		Depot [] ret = {null};
-		_depot_pool.forEach( (i,depot) ->
+		Global.gs._depots.forEach( (i,depot) ->
 		{
 			//if (depot.xy.getTile() == tile.getTile())
 			if (depot.xy.equals(tile))
@@ -211,9 +209,9 @@ public class Depot implements IPoolItem, Serializable
 	{
 		Depot [] ret = {null};
 
-		_depot_pool.forEach( (i,depot) ->
+		Global.gs._depots.forEach( (i,depot) ->
 		{
-			if (!depot.IsValidDepot()) {
+			if (!depot.isValid()) {
 				int index = depot.index;
 				depot.clear();
 				//memset(depot, 0, sizeof(Depot));
@@ -226,7 +224,7 @@ public class Depot implements IPoolItem, Serializable
 		if( ret[0] != null) return ret[0];
 		
 		/* Check if we can add a block to the pool */
-		if (_depot_pool.AddBlockToPool())
+		if (Global.gs._depots.AddBlockToPool())
 			return AllocateDepot();
 
 		return null;
@@ -267,8 +265,8 @@ public class Depot implements IPoolItem, Serializable
 
 	static void InitializeDepot()
 	{
-		_depot_pool.CleanPool();
-		_depot_pool.AddBlockToPool();
+		Global.gs._depots.CleanPool();
+		Global.gs._depots.AddBlockToPool();
 	}
 
 	/*
@@ -314,12 +312,12 @@ public class Depot implements IPoolItem, Serializable
 	
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		_depot_pool = (MemoryPool<Depot>) oin.readObject();
+		//_depots = (MemoryPool<Depot>) oin.readObject();
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		oos.writeObject(_depot_pool);		
+		//oos.writeObject(_depots);		
 	}
 
 	public int getTownIndex() { return town_index; }

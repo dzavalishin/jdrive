@@ -2,14 +2,12 @@ package game;
 
 import java.util.function.Consumer;
 
-
 import game.enums.GameModes;
-import game.enums.Owner;
 import game.enums.TileTypes;
 import game.xui.DockGui;
 import game.xui.Gui;
-import game.xui.RailGui;
 import game.xui.MiscGui;
+import game.xui.RailGui;
 import game.xui.ViewPort;
 import game.xui.Widget;
 import game.xui.Window;

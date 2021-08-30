@@ -116,7 +116,7 @@ public class Console //extends ConsoleCmds
 
 		_iconsole_cmdline.maxlength = ICON_CMDLN_SIZE - 1;
 
-		IConsolePrintF(13, "Java OpenTTD Game Console Revision 7 - %s", Strings._openttd_revision);
+		IConsolePrintF(13, "NextTTD Game Console Revision 7 - %s", Strings._openttd_revision);
 		IConsolePrint(12,  "------------------------------------");
 		IConsolePrint(12,  "use \"help\" for more information");
 		IConsolePrint(12,  "");
@@ -181,7 +181,7 @@ public class Console //extends ConsoleCmds
 		CloseConsoleLogIfActive();
 	}
 
-	static void IConsoleResize()
+	public static void IConsoleResize()
 	{
 		_iconsole_win = Window.FindWindowById(Window.WC_CONSOLE, 0);
 
@@ -706,7 +706,7 @@ public class Console //extends ConsoleCmds
 		 * callback function */
 		if (var.proc != null) {
 			//var.proc.accept(0, null);
-			var.proc.accept(0);
+			var.proc.accept();
 			return;
 		}
 
@@ -744,7 +744,7 @@ public class Console //extends ConsoleCmds
 		if (tokencount == 1) {
 			/* Some variables need really special handling, handle it in their callback procedure */
 			if (var.proc != null) {
-				var.proc.accept(tokencount, token[t_index - tokencount]); // set the new value
+				var.proc.accept(token[t_index - tokencount]); // set the new value
 				return;
 			}
 			/* Strings need special processing. No need to convert the argument to
@@ -891,11 +891,10 @@ public class Console //extends ConsoleCmds
 		if (cmd != null && cmd.hook != null) {
 			if (cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_ACCESS)) {
 				cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_PRE_ACTION);
-				if (cmd.proc.accept(t_index, tokens)) { // index started with 0
+				if (cmd.proc.accept(tokens)) { // index started with 0
 					cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_POST_ACTION);
 				} else { 
-					//cmd.proc.accept(0, null); // if command failed, give help
-					cmd.proc.accept(0); // if command failed, give help
+					cmd.proc.accept(); // if command failed, give help
 				}
 			}
 			return;

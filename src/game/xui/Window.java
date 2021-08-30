@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.function.BiConsumer;
 
-
+import game.GameState;
 import game.Global;
 import game.Hal;
 import game.Sprite;
 import game.Str;
 import game.TextEffect;
 import game.TileIndex;
+import game.console.Console;
 import game.enums.GameModes;
 import game.enums.WindowEvents;
 import game.ids.AbstractID;
@@ -92,11 +93,6 @@ public class Window extends WindowConstants
 	// static state
 
 
-	//static Window _windows[] = new Window[25];
-	static final List<Window> _windows = new ArrayList<Window>();
-
-
-
 	static Point _cursorpos_drag_start = null;//new Point();
 
 	public static boolean _left_button_down;
@@ -111,9 +107,6 @@ public class Window extends WindowConstants
 	 * If no - forbid edge scrolling.
 	 */
 	public static boolean _mouse_inside;
-
-	// XXX added parameter to AllocateWindowDesc
-	// int _alloc_wnd_parent_num;
 
 	static int _scrollbar_start_pos;
 	static int _scrollbar_size;
@@ -147,7 +140,7 @@ public class Window extends WindowConstants
 
 
 	public static Iterator<Window> getIterator() {
-		return _windows.iterator();
+		return GameState._windows.iterator();
 	}
 
 	/**
@@ -159,9 +152,9 @@ public class Window extends WindowConstants
 	{
 		int i = 0;
 
-		for(; i < _windows.size(); i++ )
+		for(; i < GameState._windows.size(); i++ )
 		{
-			if( _windows.get(i) == startw )
+			if( GameState._windows.get(i) == startw )
 			{
 				final int ci = i;
 
@@ -172,14 +165,14 @@ public class Window extends WindowConstants
 					@Override
 					public boolean hasNext() 
 					{
-						if(curw >= _windows.size()) 
+						if(curw >= GameState._windows.size()) 
 							return false;
-						return _windows.get(curw) != null;
+						return GameState._windows.get(curw) != null;
 					}
 
 					@Override
 					public Window next() {
-						return _windows.get(curw++);
+						return GameState._windows.get(curw++);
 					}
 
 				};
@@ -551,7 +544,7 @@ public class Window extends WindowConstants
 		DrawPixelInfo bk = new DrawPixelInfo();
 		Hal._cur_dpi = bk;
 
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			if (right > w.left &&
 					bottom > w.top &&
 					left < w.left + w.width &&
@@ -566,14 +559,14 @@ public class Window extends WindowConstants
 		//final Window  v = w;
 		int x, wi, wie;
 
-		wi = _windows.indexOf(w);
-		wie = _windows.size();
+		wi = GameState._windows.indexOf(w);
+		wie = GameState._windows.size();
 		assert wi >= 0;
 
 		//while (++v != _last_window) 
 		while (++wi < wie) 
 		{
-			final Window  v = _windows.get(wi);
+			final Window  v = GameState._windows.get(wi);
 
 			if (right > v.left &&
 					bottom > v.top &&
@@ -676,7 +669,7 @@ public class Window extends WindowConstants
 		//v = --_last_window;
 		//count = (byte*)v - (byte*)w;
 		//memmove(w, w + 1, count);
-		_windows.remove(w);
+		GameState._windows.remove(w);
 	}
 
 	/*
@@ -693,7 +686,7 @@ public class Window extends WindowConstants
 
 	public static Window FindWindowById(int cls, int number)
 	{
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			if (w.window_class == cls && w.window_number == number) 
 				return w;
 		}
@@ -712,9 +705,9 @@ public class Window extends WindowConstants
 	static void DeleteWindowByClass(int cls)
 	{
 
-		for(int i = 0; i < _windows.size();) 
+		for(int i = 0; i < GameState._windows.size();) 
 		{
-			Window w = _windows.get(i);
+			Window w = GameState._windows.get(i);
 
 			if (w.window_class == cls) {
 				w.DeleteWindow();
@@ -768,8 +761,8 @@ public class Window extends WindowConstants
 	{
 		Window v;
 
-		int wi = _windows.indexOf(this);
-		int we = _windows.size();
+		int wi = GameState._windows.indexOf(this);
+		int we = GameState._windows.size();
 		assert wi >= 0;
 
 		int i = we;
@@ -777,7 +770,7 @@ public class Window extends WindowConstants
 		{
 			i--;
 			if( i < 0 ) return this;
-			v = _windows.get(i);
+			v = GameState._windows.get(i);
 			if( !v.IsVitalWindow() )
 				break;
 		}		
@@ -786,8 +779,8 @@ public class Window extends WindowConstants
 		// TODO assert i > wi;
 
 		// insert w above i
-		_windows.remove(this); // all windows moved a step down
-		_windows.add(i, this);
+		GameState._windows.remove(this); // all windows moved a step down
+		GameState._windows.add(i, this);
 		SetWindowDirty();
 
 		return this; // TODO kill me, make void
@@ -862,32 +855,16 @@ public class Window extends WindowConstants
 	/* Copies 'widget' to 'w.widget' to allow for resizable windows */
 	void AssignWidgetToWindow(final Widget[] nwidget)
 	{
-		/*
-		w.original_widget = widget;
-
-		if (widget != null) {
-			int index = 1;
-			final Widget wi;
-
-			for (wi = widget; wi.type != WWT_LAST; wi++) index++;
-
-			w.widget = realloc(w.widget, sizeof(*w.widget) * index);
-			memcpy(w.widget, widget, sizeof(*w.widget) * index);
-		} else {
-			w.widget = null;
-		}
-		 */
 		original_widget = nwidget;
-		widget.clear(); // XXX really?
+		widget.clear();
 		if(nwidget != null)
 		{
 			for( Widget ww : nwidget)
 			{
 				if(ww.type != WWT_LAST)
-					widget.add(ww);
+					widget.add(new Widget(ww) );
 			}
-		}
-		//else			widget.clear(); // XXX really?
+		}		
 	}
 
 	/**
@@ -970,7 +947,7 @@ public class Window extends WindowConstants
 		w.resize.step_width = 1;
 		w.resize.step_height = 1;
 
-		_windows.add(w);
+		GameState._windows.add(w);
 		//_last_window++;
 
 		w.SetWindowDirty();
@@ -1021,7 +998,7 @@ public class Window extends WindowConstants
 			return false;
 
 		// Make sure it is not obscured by any window.
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			if (w.window_class == WC_MAIN_WINDOW) continue;
 
 			if (right > w.left &&
@@ -1051,7 +1028,7 @@ public class Window extends WindowConstants
 			return false;
 
 		// Make sure it is not obscured by any window.
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			if (w.window_class == WC_MAIN_WINDOW) continue;
 
 			if (left + width > w.left &&
@@ -1081,7 +1058,7 @@ public class Window extends WindowConstants
 			return pt;
 		}
 
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			if (w.window_class == WC_MAIN_WINDOW) continue;
 			/*
 			if (IsGoodAutoPlace1(w.left+w.width+2,w.top)) goto ok_pos;
@@ -1111,7 +1088,7 @@ public class Window extends WindowConstants
 
 		}
 
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			if (w.window_class == WC_MAIN_WINDOW) continue;
 
 			/*
@@ -1142,7 +1119,7 @@ public class Window extends WindowConstants
 			while(true)
 			{
 				boolean again = false;
-				for (Window w : _windows) {
+				for (Window w : GameState._windows) {
 					if (w.left == left && w.top == top) {
 						left += 5;
 						top += 5;
@@ -1261,7 +1238,7 @@ public class Window extends WindowConstants
 
 	static public Window FindWindowFromPt(int x, int y)
 	{		
-		ListIterator<Window> i = _windows.listIterator(_windows.size());
+		ListIterator<Window> i = GameState._windows.listIterator(GameState._windows.size());
 
 		while (i.hasPrevious()) {
 			Window w = i.previous();
@@ -1310,10 +1287,10 @@ public class Window extends WindowConstants
 	static void DecreaseWindowCounters()
 	{
 		// Fight concurrent modification
-		ArrayList<Window> wcopy = new ArrayList<Window>(_windows);
+		ArrayList<Window> wcopy = new ArrayList<Window>(GameState._windows);
 
 		//ListIterator<Window> i = _windows.listIterator(_windows.size());
-		ListIterator<Window> i = wcopy.listIterator(_windows.size());
+		ListIterator<Window> i = wcopy.listIterator(GameState._windows.size());
 
 		//for (w = _last_window; w != _windows;) {
 		//	--w;
@@ -1328,7 +1305,7 @@ public class Window extends WindowConstants
 			w.CallWindowEventNP(WindowEvents.WE_MOUSELOOP);
 		}
 
-		i = _windows.listIterator(_windows.size());
+		i = GameState._windows.listIterator(GameState._windows.size());
 		//for (w = _last_window; w != _windows;) {
 		//	--w;
 		while (i.hasPrevious()) {
@@ -1460,7 +1437,7 @@ public class Window extends WindowConstants
 		if (!_dragging_window) return true;
 
 		// Otherwise find the window...
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			if (0 != (w.flags4 & WF_DRAGGING)) {
 				final Widget t = w.widget.get(1); // the title bar ... ugh
 				//final Window v;
@@ -1488,7 +1465,7 @@ public class Window extends WindowConstants
 					int delta;
 
 					//for (v = _windows; v != _last_window; ++v) 
-					for (Window v : _windows ) 
+					for (Window v : GameState._windows ) 
 					{
 						if (v == w) continue; // Don't snap at yourself
 
@@ -1724,7 +1701,7 @@ public class Window extends WindowConstants
 		if (!_scrolling_scrollbar) return true;
 
 		// Find the scrolling window
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			if (0 != (w.flags4 & WF_SCROLL_MIDDLE)) {
 				// Abort if no button is clicked any more.
 				if (!_left_button_down) {
@@ -1966,9 +1943,9 @@ public class Window extends WindowConstants
 			}
 
 			// Call the event, start with the uppermost window.
-			for (int i = _windows.size()-1; i >= 0 ; i-- ) 
+			for (int i = GameState._windows.size()-1; i >= 0 ; i-- ) 
 			{
-				Window w = _windows.get(i);
+				Window w = GameState._windows.get(i);
 				// if a query window is open, only call the event for certain window types
 				if (query_open &&
 						w.window_class != WC_QUERY_STRING &&
@@ -2163,18 +2140,18 @@ public class Window extends WindowConstants
 		t = _we4_timer + 1;
 		if (t >= 100) 
 		{
-			for (i = _windows.size()-1; i >= 0; i--) 
+			for (i = GameState._windows.size()-1; i >= 0; i--) 
 			{
-				w = _windows.get(i);
+				w = GameState._windows.get(i);
 				w.CallWindowEventNP(WindowEvents.WE_4);
 			}
 			t = 0;
 		}
 		_we4_timer = t;
 
-		for (i = _windows.size()-1; i >= 0; i--) 
+		for (i = GameState._windows.size()-1; i >= 0; i--) 
 		{
-			w = _windows.get(i);
+			w = GameState._windows.get(i);
 			if (0 != (w.flags4 & WF_WHITE_BORDER_MASK)) {
 				w.flags4 -= WF_WHITE_BORDER_ONE;
 				if ( 0 == (w.flags4 & WF_WHITE_BORDER_MASK)) {
@@ -2185,7 +2162,7 @@ public class Window extends WindowConstants
 
 		Gfx.DrawDirtyBlocks();
 
-		for (Window ww : _windows) {
+		for (Window ww : GameState._windows) {
 			if (ww.viewport != null) 
 				ViewPort.UpdateViewportPosition(ww);
 		}
@@ -2216,7 +2193,7 @@ public class Window extends WindowConstants
 	{
 		//final Window  w;
 
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			if (w.window_class == cls && w.window_number == number) 
 				w.SetWindowDirty();
 		}
@@ -2240,6 +2217,11 @@ public class Window extends WindowConstants
 
 	public void InvalidateWidget(int widget_index)
 	{
+		if( widget_index >= widget.size() )
+		{
+			Global.error("invalid vidget %d in InvalidateWidget", widget_index);
+			return;
+		}
 		final Widget wi = widget.get(widget_index);
 
 		/* Don't redraw the window if the widget is invisible or of no-type */
@@ -2260,7 +2242,7 @@ public class Window extends WindowConstants
 
 	public static void InvalidateWindowWidget(int cls, int number, int widget_index)
 	{
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			if (w.window_class == cls && w.window_number == number) {
 				w.InvalidateWidget(widget_index);
 			}
@@ -2281,7 +2263,7 @@ public class Window extends WindowConstants
 	{
 		//final Window  w;
 
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			if (w.window_class == cls) w.SetWindowDirty();
 		}
 	}
@@ -2290,17 +2272,17 @@ public class Window extends WindowConstants
 	public static void CallWindowTickEvent()
 	{
 		int i;
-		for (i = _windows.size()-1; i >= 0; i--) {
-			Window w = _windows.get(i);
+		for (i = GameState._windows.size()-1; i >= 0; i--) {
+			Window w = GameState._windows.get(i);
 			w.CallWindowEventNP(WindowEvents.WE_TICK);
 		}
 	}
 
 	static void DeleteNonVitalWindows()
 	{
-		for (int i = 0; i < _windows.size();) 
+		for (int i = 0; i < GameState._windows.size();) 
 		{
-			Window w = _windows.get(i);
+			Window w = GameState._windows.get(i);
 			if (w.window_class != WC_MAIN_WINDOW &&
 					w.window_class != WC_SELECT_GAME &&
 					w.window_class != WC_MAIN_TOOLBAR &&
@@ -2321,7 +2303,7 @@ public class Window extends WindowConstants
 	 * with this function. It closes all windows calling the standard function,
 	 * then, does a little hacked loop of closing all stickied windows. Note
 	 * that standard windows (status bar, etc.) are not stickied, so these aren't affected */
-	static void DeleteAllNonVitalWindows()
+	public static void DeleteAllNonVitalWindows()
 	{
 		//Window w;
 
@@ -2329,9 +2311,9 @@ public class Window extends WindowConstants
 		DeleteNonVitalWindows();
 		// Delete all sticked windows
 		//for (w = _windows; w != _last_window;) {
-		for (int i = 0; i < _windows.size();) 
+		for (int i = 0; i < GameState._windows.size();) 
 		{
-			Window w = _windows.get(i);
+			Window w = GameState._windows.get(i);
 			if (0 != (w.flags4 & WF_STICKY)) {
 				w.DeleteWindow();
 				i = 0;
@@ -2365,9 +2347,7 @@ public class Window extends WindowConstants
 
 	static void RelocateAllWindows(int neww, int newh)
 	{
-		//Window w;
-
-		for (Window w : _windows) {
+		for (Window w : GameState._windows) {
 			int left, top;
 
 			if (w.window_class == WC_MAIN_WINDOW) {
@@ -2379,7 +2359,7 @@ public class Window extends WindowConstants
 				continue; // don't modify top,left
 			}
 
-			// TODO Console.IConsoleResize();
+			Console.IConsoleResize();
 
 			if (w.window_class == WC_MAIN_TOOLBAR) {
 				top = w.top;
@@ -2462,40 +2442,20 @@ public class Window extends WindowConstants
 
 
 
-
-	private static Point HandleScrollbarHittest(final Scrollbar sb, int top, int bottom)
+	/*private static Point HandleScrollbarHittest(final Scrollbar sb, int top, int bottom)
 	{
 		return sb.hittest(top, bottom);
-		/*
-		int height, count, pos, cap;
-
-		top += 10;
-		bottom -= 9;
-
-		height = (bottom - top);
-
-		pos = sb.pos;
-		count = sb.count;
-		cap = sb.cap;
-
-		if (count != 0) top += height * pos / count;
-
-		if (cap > count) cap = count;
-		if (count != 0) bottom -= (count - pos - cap) * height / count;
-
-		Point pt = new Point(top, bottom - 1);
-		return pt; */
-	}
+	}*/
 
 	/*****************************************************
 	 * Special handling for the scrollbar widget type.
 	 * Handles the special scrolling buttons and other
 	 * scrolling.
-	 * Parameters:
-	 *   w   - Window.
-	 *   wi  - Pointer to the scrollbar widget.
-	 *   x   - The X coordinate of the mouse click.
-	 *   y   - The Y coordinate of the mouse click.
+	 * 
+	 * @param wi  - Pointer to the scrollbar widget.
+	 * @param x   - The X coordinate of the mouse click.
+	 * @param y   - The Y coordinate of the mouse click.
+	 * 
 	 */
 
 	void ScrollbarClickHandler(final Widget wi, int x, int y)
@@ -2701,7 +2661,7 @@ public class Window extends WindowConstants
 			Point pt;
 			int c1,c2;
 
-			assert(r.right - r.left == 11); // XXX - to ensure the same sizes are used everywhere!
+			assert(r.right - r.left == 11); // To ensure the same sizes are used everywhere!
 
 			// draw up/down buttons
 			clicked = !!((flags4 & (WF_SCROLL_UP | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_UP);
@@ -2725,7 +2685,7 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+7, r.top+10, r.left+7, r.bottom-10, c1);
 			Gfx.GfxFillRect(r.left+8, r.top+10, r.left+8, r.bottom-10, c2);
 
-			pt = HandleScrollbarHittest(vscroll, r.top, r.bottom);
+			pt = vscroll.hittest(r.top, r.bottom);
 			Gfx.DrawFrameRect(r.left, pt.x, r.right, pt.y, wi.color, (flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_MIDDLE ? FR_LOWERED : 0);
 			break;
 		}
@@ -2757,7 +2717,7 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+7, r.top+10, r.left+7, r.bottom-10, c1);
 			Gfx.GfxFillRect(r.left+8, r.top+10, r.left+8, r.bottom-10, c2);
 
-			pt = HandleScrollbarHittest(vscroll2, r.top, r.bottom);
+			pt = vscroll2.hittest(r.top, r.bottom);
 			Gfx.DrawFrameRect(r.left, pt.x, r.right, pt.y, wi.color, (flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_MIDDLE | WF_SCROLL2) ? FR_LOWERED : 0);
 			break;
 		}
@@ -2791,7 +2751,7 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+10, r.top+8, r.right-10, r.top+8, c2);
 
 			// draw actual scrollbar
-			pt = HandleScrollbarHittest(hscroll, r.left, r.right);
+			pt = hscroll.hittest(r.left, r.right);
 			Gfx.DrawFrameRect(pt.x, r.top, pt.y, r.bottom, wi.color, (flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL)) == (WF_SCROLL_MIDDLE | WF_HSCROLL) ? FR_LOWERED : 0);
 
 			break;
@@ -2841,7 +2801,7 @@ public class Window extends WindowConstants
 		}
 
 		case WWT_RESIZEBOX: {
-			assert(r.right - r.left == 11); // XXX - to ensure the same sizes are used everywhere!
+			assert(r.right - r.left == 11); // ensure the same sizes are used everywhere
 
 			clicked = 0 != (flags4 & WF_SIZING);
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
@@ -2947,7 +2907,7 @@ public class Window extends WindowConstants
 			y = 2;
 			sel = w.as_dropdown_d().selected_index;
 
-			for (i = 0; i < w.as_dropdown_d().items.length && w.as_dropdown_d().items[i] != Global.INVALID_STRING_ID.id; i++) {
+			for (i = 0; i < w.as_dropdown_d().items.length && w.as_dropdown_d().items[i] != Str.INVALID_STRING; i++) {
 				if (BitOps.HASBIT(w.as_dropdown_d().hidden_state, i)) {
 					sel--;
 					continue;
@@ -3049,7 +3009,7 @@ public class Window extends WindowConstants
 		w.InvalidateWidget(button);
 
 		//for (i = 0; strings[i] != Global.INVALID_STRING_ID; i++) {}
-		for (i = 0; i < strings.length && strings[i] != Global.INVALID_STRING_ID.id; i++) 
+		for (i = 0; i < strings.length && strings[i] != Str.INVALID_STRING; i++) 
 		{}
 		if (i == 0) return;
 
@@ -3059,7 +3019,7 @@ public class Window extends WindowConstants
 			int j;
 
 			//for (j = 0; strings[j] != Global.INVALID_STRING_ID; j++) {
-			for (j = 0; strings[j] != Global.INVALID_STRING_ID.id; j++) {
+			for (j = 0; strings[j] != Str.INVALID_STRING; j++) {
 				if (BitOps.HASBIT(hidden_mask, j)) i--;
 			}
 		}
@@ -3177,7 +3137,7 @@ public class Window extends WindowConstants
 		}
 	}
 
-	public static void afterLoad() // TODO call me 
+	public static void afterLoad() 
 	{
 		Window w = Window.getMain();
 
@@ -3190,9 +3150,9 @@ public class Window extends WindowConstants
 		vp.virtual_height = vp.height << vp.zoom;
 	}
 
-	void BeforeSave() // TODO call me
+	public static void BeforeSave()
 	{
-		final Window w = Window.getMain(); // Window.FindWindowById(Window.WC_MAIN_WINDOW, 0);
+		final Window w = Window.getMain();
 
 		//if (w != null) {
 		Global.gs._saved_scrollpos_x = w.as_vp2_d().scrollpos_x;
@@ -3214,28 +3174,16 @@ public class Window extends WindowConstants
 
 	public void SetVScrollCount(int num)
 	{
-		//w.vscroll.setCount(num);
-		//num -= w.vscroll.getCap();
-		//if (num < 0) num = 0;
-		//if (num < w.vscroll.pos) w.vscroll.pos = num;
 		vscroll.updateCount(num);
 	}
 
 	public void SetVScroll2Count(int num)
 	{
-		//w.vscroll2.setCount(num);
-		//num -= w.vscroll2.getCap();
-		//if (num < 0) num = 0;
-		//if (num < w.vscroll2.pos) w.vscroll2.pos = num;
 		vscroll2.updateCount(num);
 	}
 
 	public void SetHScrollCount(int num)
 	{
-		/*w.hscroll.setCount(num);
-		num -= w.hscroll.getCap();
-		if (num < 0) num = 0;
-		if (num < w.hscroll.pos) w.hscroll.pos = num; */
 		hscroll.updateCount(num);
 	}
 

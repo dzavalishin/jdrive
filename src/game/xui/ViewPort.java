@@ -21,7 +21,6 @@ import game.Vehicle;
 import game.ViewportSign;
 import game.WayPoint;
 import game.enums.GameModes;
-import game.enums.Owner;
 import game.enums.WindowEvents;
 import game.ids.CursorID;
 import game.ids.SpriteID;
@@ -138,7 +137,6 @@ public class ViewPort
 
 
 
-	//#define VIEWPORT_DRAW_MEM (65536 * 2)
 
 	static boolean _added_tile_sprite;
 	static boolean _offset_ground_sprites;
@@ -150,8 +148,6 @@ public class ViewPort
 
 
 	static ViewportDrawer _cur_vd;
-
-	//TileHighlightData _thd;
 	static TileInfo _cur_ti;
 
 
@@ -168,7 +164,7 @@ public class ViewPort
 	{
 		ViewPort vp = null;
 		Point pt;
-		int bit = 1;
+		//int bit = 1;
 		//for (vp = _viewports, bit = 1; ; vp++, bit <<= 1) 
 		for (ViewPort vps : _viewports ) 
 		{
@@ -178,27 +174,25 @@ public class ViewPort
 				vp = vps;
 				break;
 			}
-			bit <<= 1;
+			//bit <<= 1;
 		}
 
-		// TODO [dz] is it ok? Do we need viewports container at all? Yes.
+		// [dz] is it ok? Do we need viewports container at all? Yes, we do.
 		if( vp == null)
 		{
 			vp = new ViewPort();
 			_viewports.add(vp);
 		}
 
-		//assert vp != null;
-		//Global._active_viewports |= bit;
 
 		vp.left = x + w.left;
 		vp.top = y + w.top;
 		vp.width = width;
 		vp.height = height;
 
-		// TODO XXX bring zoom back
-		//vp.zoom = (byte) zoom;
-		vp.zoom = 0;
+		// bring zoom back
+		vp.zoom = (byte) zoom;
+		//vp.zoom = 0;
 
 		vp.virtual_width = width << zoom;
 		vp.virtual_height = height << zoom;
@@ -355,19 +349,6 @@ public class ViewPort
 			}
 	}
 
-	/* gone to Window
-	ViewPort IsPtInWindowViewport(final Window w, int x, int y)
-	{
-		ViewPort vp = w.viewport;
-
-		if (vp != null &&
-		    BitOps.IS_INT_INSIDE(x, vp.left, vp.left + vp.width) &&
-				BitOps.IS_INT_INSIDE(y, vp.top, vp.top + vp.height))
-			return vp;
-
-		return null;
-	}
-	 */
 	static Point TranslateXYToTileCoord(final ViewPort vp, int x, int y)
 	{
 		int z;
@@ -421,8 +402,6 @@ public class ViewPort
 				(vp = w.IsPtInWindowViewport(x, y)) != null)
 			return TranslateXYToTileCoord(vp, zoom_x, zoom_y);
 
-		//Point pt = ;
-		//pt.y = pt.x = -1;
 		return new Point(-1, -1);
 	}
 
@@ -1433,10 +1412,6 @@ public class ViewPort
 		int y;
 		DrawPixelInfo old_dpi;
 
-		//byte [] mem = new byte[VIEWPORT_DRAW_MEM];
-		//ParentSpriteToDraw parent_list = new ParentSpriteToDraw[6144];
-
-		//_cur_vd = vd;
 		_cur_vd = vd;
 
 		old_dpi = Hal._cur_dpi;
@@ -1484,25 +1459,17 @@ public class ViewPort
 		ViewportAddWaypoints(vd.dpi);
 		//#endif
 
-		// This assert should never happen (because the length of the parent_list
-		//  is checked)
-		//assert(vd.parent_list <= endof(parent_list));
 
-		//if (vd.first_tile != null) ViewportDrawTileSprites(vd.first_tile);
 		ViewportDrawTileSprites(vd.tile_list);
 
-		/* null terminate parent sprite list */
-		//[dz] TODO !!! *vd.parent_list = null;
 
 		ParentSpriteToDraw[] parents = vd.parent_list.toArray(ParentSpriteToDraw[]::new);
 		if(parents.length > 0)
 		{
-			//ParentSpriteToDraw[] parents = (ParentSpriteToDraw[]) array;
-
 			ViewportSortParentSprites(parents);
 			ViewportDrawParentSprites(parents);
 		}
-		//if (vd.first_string != null) ViewportDrawStrings(vd.dpi, vd.first_string);
+
 		ViewportDrawStrings(vd.dpi, vd.string_list);
 
 		Hal._cur_dpi = old_dpi;
@@ -2604,20 +2571,11 @@ public class ViewPort
 class ViewportDrawer {
 	final DrawPixelInfo dpi = new DrawPixelInfo();
 
-	//byte *spritelist_mem;
-	//final byte *eof_spritelist_mem;
-
-	//StringSpriteToDraw last_string, first_string;
-	//TileSpriteToDraw **last_tile, *first_tile;
 	final ArrayList<TileSpriteToDraw> tile_list = new ArrayList<TileSpriteToDraw>();
 	final ArrayList<StringSpriteToDraw> string_list = new ArrayList<StringSpriteToDraw>();
 
-	//ChildScreenSpriteToDraw **last_child;
-
 	ParentSpriteToDraw last_parent;
 
-	//ParentSpriteToDraw parent_list;
-	//ParentSpriteToDraw eof_parent_list;
 	final ArrayList<ParentSpriteToDraw> parent_list = new ArrayList<ParentSpriteToDraw>();
 
 	byte combine_sprites;

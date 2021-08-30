@@ -1,6 +1,6 @@
 package game.ids;
 
-
+import game.Str;
 
 public class StringID //extends AbstractID 
 {
@@ -11,8 +11,8 @@ public class StringID //extends AbstractID
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-
+	public boolean equals(Object obj) 
+	{
 		if (obj instanceof StringID) {
 			StringID si = (StringID) obj;
 			return si.id == id;
@@ -21,11 +21,21 @@ public class StringID //extends AbstractID
 		return super.equals(obj);
 	}
 	
-	//String value; // don't mess
-	
 	@Override
 	public int hashCode() {
 		return id;
+	}
+
+	public boolean isValid() {
+		return  id != Str.INVALID_STRING;
+	}
+
+	private static StringID invalid = null;
+	
+	public static StringID getInvalid() {
+		if( invalid == null )
+			invalid = new StringID(Str.INVALID_STRING);
+		return invalid;
 	}
 	
 }

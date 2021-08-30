@@ -13,11 +13,8 @@ import game.Str;
 import game.Terraform;
 import game.TileIndex;
 import game.WayPoint;
-import game.enums.Owner;
 import game.enums.TileTypes;
-
 import game.ifaces.OnButtonClick;
-
 import game.util.BitOps;
 import game.util.Sprites;
 
@@ -54,7 +51,7 @@ public class RailGui {
 				Str.STR_SIGNAL_EXIT,
 				Str.STR_SIGNAL_COMBO,
 				Str.STR_SIGNAL_PBS,
-				Str.INVALID_STRING_ID.id
+				Str.INVALID_STRING
 		};
 
 	static class _Railstation {

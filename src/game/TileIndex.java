@@ -529,15 +529,20 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		Global._m[tile].m1 = owner;
 	}
 
-	/*
-	boolean IsTileOwner(Owner owner)
+	
+	/**
+	 * Get owner of road for this tile. Take rail/road crossings in account.
+	 * @return Owner
+	 */
+	public PlayerID GetRoadOwner()
 	{
-		return GetTileOwner().id == owner.owner;
-	}*/
+		assert IsTileType(TileTypes.MP_STREET);
+		return IsLevelCrossing() ? PlayerID.get(getMap().m3) : GetTileOwner();
+	}
 
 	public boolean IsTileOwner(PlayerID owner)
 	{
-		return GetTileOwner() == owner;
+		return GetTileOwner().equals(owner);
 	}
 
 
@@ -725,6 +730,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	 */
 	public boolean IsLevelCrossing()
 	{
+		assert IsTileType(TileTypes.MP_STREET);
 		return (getMap().m5 & 0xF0) == 0x10;
 	}
 

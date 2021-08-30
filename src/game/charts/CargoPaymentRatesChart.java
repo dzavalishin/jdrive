@@ -8,6 +8,7 @@ import game.Global;
 
 public class CargoPaymentRatesChart extends AbstractChart//JFrame// ApplicationFrame
 {
+	private static final long serialVersionUID = 1L;
 
 	public CargoPaymentRatesChart() {
 		super(
