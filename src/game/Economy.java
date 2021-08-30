@@ -120,10 +120,8 @@ public class Economy extends EconomeTables
 		long value;
 
 		{
-			//Station st;
 			int [] num = {0};
 
-			//FOR_ALL_STATIONS(st)
 			Station.forEach( (ii,st) ->
 			{
 				if (st.getXy() != null && st.owner == owner) {
@@ -136,7 +134,6 @@ public class Economy extends EconomeTables
 		}
 
 		{
-			//FOR_ALL_VEHICLES(v)
 			Iterator<Vehicle> ii = Vehicle.getIterator();
 			while(ii.hasNext())
 			{
@@ -169,12 +166,9 @@ public class Economy extends EconomeTables
 
 		/* Count vehicles */
 		{
-			//Vehicle v;
 			int min_profit = _score_info[SCORE_MIN_PROFIT].needed;
 			int num = 0;
 
-			//FOR_ALL_VEHICLES(v) 
-			//Vehicle.forEach( (v) ->
 			Iterator<Vehicle> ii = Vehicle.getIterator();
 			while(ii.hasNext())
 			{
@@ -201,9 +195,7 @@ public class Economy extends EconomeTables
 		/* Count stations */
 		{
 			int [] num = { 0 };
-			//Station st;
 
-			//FOR_ALL_STATIONS(st)
 			Station.forEach( (ii,st) ->
 			{
 				if (st.getXy() != null && st.owner.id == owner) {
@@ -333,16 +325,16 @@ public class Economy extends EconomeTables
 				Subsidy s = Subsidy._subsidies[i];
 
 				if (s.isValid() && s.age >= 12) {
-					if (Station.GetStation(s.to).owner == old_player)
+					if (Station.GetStation(s.to).owner.equals(old_player))
 						s.markInvalid();
 				}
 			}
 		}
 
 		/* Take care of rating in towns */
-		{ //Town t;
-			if (new_player.id != Owner.OWNER_SPECTATOR) {
-				//FOR_ALL_TOWNS(t)
+		{
+			if (!new_player.isSpectator() {
+
 				Town.forEach( (t) ->
 				{
 					/* If a player takes over, give the ratings to that player. */
@@ -372,12 +364,11 @@ public class Economy extends EconomeTables
 			int num_aircraft = 0;
 
 			// Determine Ids for the new vehicles
-			//FOR_ALL_VEHICLES(v) 
 			Iterator<Vehicle> ii = Vehicle.getIterator();
 			while(ii.hasNext())
 			{
 				Vehicle v = ii.next();
-				if (v.owner == new_player) {
+				if (v.owner.equals(new_player)) {
 					switch (v.type) {
 					case Vehicle.VEH_Train:
 						if (v.IsFrontEngine()) num_train++;
@@ -396,13 +387,11 @@ public class Economy extends EconomeTables
 				}
 			}
 
-			//FOR_ALL_VEHICLES(v)
-			//Vehicle.forEach( (v) ->
 			Iterator<Vehicle> vii = Vehicle.getIterator();
 			while(vii.hasNext())
 			{
 				Vehicle v = vii.next();
-				if (v.owner == old_player && BitOps.IS_INT_INSIDE(v.type, Vehicle.VEH_Train, Vehicle.VEH_Aircraft+1) ) 
+				if (v.owner.equals(old_player) && BitOps.IS_INT_INSIDE(v.type, Vehicle.VEH_Train, Vehicle.VEH_Aircraft+1) ) 
 				{
 					if (new_player.isSpectator()) {
 						Window.DeleteWindowById(Window.WC_VEHICLE_VIEW, v.index);
@@ -434,8 +423,6 @@ public class Economy extends EconomeTables
 
 		// Change color of existing windows
 		if (new_player.id != Owner.OWNER_SPECTATOR) {
-			//Window w;
-			//for (w = _windows; w != _last_window; w++) {
 			Iterator<Window> it = Window.getIterator();
 			while(it.hasNext())
 			{
@@ -446,7 +433,6 @@ public class Economy extends EconomeTables
 		}
 
 		{
-			//Player p;
 			int i;
 
 			/* Check for shares */
@@ -454,7 +440,7 @@ public class Economy extends EconomeTables
 			{
 				for (i = 0; i < 4; i++) {
 					/* 'Sell' the share if this player has any */
-					if (p.share_owners[i] == Global.gs._current_player)
+					if (p.share_owners[i].equals(Global.gs._current_player))
 						p.share_owners[i] = PlayerID.get( Owner.OWNER_SPECTATOR );
 				}
 			}
@@ -541,7 +527,7 @@ public class Economy extends EconomeTables
 						}
 					}
 					// Make sure the player no longer controls the company
-					if (owner.IS_HUMAN_PLAYER(owner) && owner == _local_player) {
+					if (owner.IS_HUMAN_PLAYER(owner) && owner.equals(_local_player)) {
 						// Switch the player to spectator..
 						_local_player = Owner.OWNER_SPECTATOR;
 					}
@@ -555,7 +541,7 @@ public class Economy extends EconomeTables
 
 				if (!owner.IS_HUMAN_PLAYER() && (!Global._networking || Global._network_server) && Ai._ai.enabled)
 					Ai.AI_PlayerDied(owner);
-				if (owner.IS_HUMAN_PLAYER() && owner == Global.gs._local_player && Ai._ai.network_client)
+				if (owner.IS_HUMAN_PLAYER() && owner.isLocalPlayer() && Ai._ai.network_client)
 					Ai.AI_PlayerDied(owner);
 			}
 		}
@@ -632,7 +618,6 @@ public class Economy extends EconomeTables
 
 		default:
 			assert false;
-			//NOT_REACHED();
 		}
 	}
 
@@ -673,7 +658,6 @@ public class Economy extends EconomeTables
 			return Str.STR_02B6;
 		default:
 			assert false;
-			//NOT_REACHED();
 		}
 
 		/* useless, but avoids compiler warning this way */
@@ -742,7 +726,7 @@ public class Economy extends EconomeTables
 	 */
 	static void AddInflation()
 	{
-		/*
+		/* TODO
 		int i;
 		int inf = Global._economy.infl_amount * 54;
 
@@ -775,7 +759,6 @@ public class Economy extends EconomeTables
 	{		
 		int interest = Global._economy.interest_rate * 54;
 
-		//FOR_ALL_PLAYERS(p)
 		Iterator<Player> ii = Player.getIterator();
 		while(ii.hasNext())
 		{

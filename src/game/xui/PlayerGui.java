@@ -442,7 +442,7 @@ public class PlayerGui
 		while(ii.hasNext())
 		{
 			final Vehicle v = ii.next();
-			if (v.getOwner() == player) {
+			if (v.getOwner().equals(player)) {
 				switch (v.getType()) {
 				case Vehicle.VEH_Train:    if (v.IsFrontEngine()) train++; break;
 				case Vehicle.VEH_Road:     road++; break;

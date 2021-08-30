@@ -156,7 +156,7 @@ public class Player implements Serializable
 
 	static boolean IsLocalPlayer()
 	{
-		return Global.gs._local_player == Global.gs._current_player;
+		return Global.gs._local_player.id == Global.gs._current_player.id;
 	}
 
 
@@ -322,7 +322,7 @@ public class Player implements Serializable
 	{
 		PlayerID pid = index;
 
-		if (pid == Global.gs._local_player) Window.InvalidateWindow(Window.WC_STATUS_BAR, 0);
+		if (pid.equals(Global.gs._local_player)) Window.InvalidateWindow(Window.WC_STATUS_BAR, 0);
 		Window.InvalidateWindow(Window.WC_FINANCES, pid.id);
 	}
 
@@ -409,7 +409,7 @@ public class Player implements Serializable
 	{
 		assert(owner.id <= Owner.OWNER_WATER);
 
-		if (owner == Global.gs._current_player)
+		if (owner.equals(Global.gs._current_player))
 			return true;
 		Global._error_message = Str.STR_013B_OWNED_BY;
 		GetNameOfOwner(owner, new TileIndex(0) );
@@ -422,7 +422,7 @@ public class Player implements Serializable
 
 		assert(owner.id <= Owner.OWNER_WATER);
 
-		if (owner == Global.gs._current_player)
+		if (owner.equals(Global.gs._current_player))
 			return true;
 		Global._error_message = Str.STR_013B_OWNED_BY;
 
@@ -1031,7 +1031,7 @@ public class Player implements Serializable
 						}
 						Hal.MarkWholeScreenDirty();
 					}
-				} else if (p.index == Global.gs._local_player) {
+				} else if (p.index.isLocalPlayer()) {
 					Cmd.DoCommandP(TileIndex.get(0), ((Global._patches.autorenew ? 1:0) << 15 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 				}
 				/* #ifdef ENABLE_NETWORK
@@ -1238,7 +1238,7 @@ public class Player implements Serializable
 				hs.title = EndGameGetPerformanceTitleFromValue(hs.score);
 
 				// get the ranking of the local player
-				if ((*p_cur).index == _local_player)
+				if ((*p_cur).index.equals(_local_player))
 					player = i;
 
 				p_cur++;

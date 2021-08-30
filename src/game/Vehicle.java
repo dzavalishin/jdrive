@@ -2559,7 +2559,7 @@ public class Vehicle implements IPoolItem
 			} while (w.type == VEH_Train && (w = w.GetNextVehicle()) != null);
 
 			if (0 == (flags & Cmd.DC_EXEC) && (Cmd.CmdFailed(temp_cost) || p.money64 < (int)(cost + p.engine_renew_money) || cost == 0)) {
-				if (p.money64 < (int)(cost + p.engine_renew_money) && ( Global.gs._local_player == v.owner ) && cost != 0) {
+				if (p.money64 < (int)(cost + p.engine_renew_money) && ( Global.gs._local_player.equals(v.owner) ) && cost != 0) {
 					int message;
 					Global.SetDParam(0, v.unitnumber.id);
 					switch (v.type) {
