@@ -48,9 +48,10 @@ public class AirCraft extends AirCraftTables {
 			0x0EBD, 0x0EC5
 	};
 
-	/* Find the nearest hangar to v
-	 * INVALID_STATION is returned, if the player does not have any suitable
-	 * airports (like helipads only)
+	/**
+	 *  Find the nearest hangar to v
+	 * 
+	 * @return Station ID or INVALID_STATION if the player does not have any suitable airports (like helipads only)
 	 */
 	static StationID FindNearestHangar(final Vehicle v)
 	{

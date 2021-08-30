@@ -542,7 +542,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 	public boolean IsTileOwner(PlayerID owner)
 	{
-		return GetTileOwner() == owner;
+		return GetTileOwner().equals(owner);
 	}
 
 

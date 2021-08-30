@@ -16,18 +16,10 @@ public class PlayerID extends AbstractID implements Serializable
 		super(i);
 	}
 
-	/*public PlayerID(Owner o) {
-		id = o.owner;
-	}*/
-
 	public Player GetPlayer() {
 		return Player.GetPlayer(id);
-		//return null;
 	}
 
-	/*public static PlayerID get(Owner o) {
-		return get(o.owner);
-	}*/
 
 	private static final Map<Integer,PlayerID> ids = new HashMap<Integer,PlayerID>();
 	

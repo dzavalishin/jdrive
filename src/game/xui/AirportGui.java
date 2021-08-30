@@ -10,7 +10,6 @@ import game.Station;
 import game.Str;
 import game.Terraform;
 import game.TileIndex;
-import game.enums.Owner;
 import game.ifaces.OnButtonClick;
 import game.util.BitOps;
 

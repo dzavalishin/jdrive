@@ -26,7 +26,6 @@ import game.struct.TileDesc;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
 import game.util.IntContainer;
-import game.util.MemoryPool;
 import game.util.Strings;
 import game.util.TownTables;
 import game.xui.Gfx;

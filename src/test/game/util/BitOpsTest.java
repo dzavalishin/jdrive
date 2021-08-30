@@ -227,7 +227,8 @@ class BitOpsTest {
 	@Test
 	void testCHANCE16I() {
 		// test callability
-		boolean v = BitOps.CHANCE16I(1, 10, 5);
+		//boolean v = 
+		BitOps.CHANCE16I(1, 10, 5);
 	}
 
 	@Test

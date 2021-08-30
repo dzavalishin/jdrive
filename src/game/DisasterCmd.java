@@ -3,7 +3,6 @@ package game;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
-import game.enums.Owner;
 import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.struct.GetNewVehiclePosResult;

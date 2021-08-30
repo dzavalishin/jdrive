@@ -132,6 +132,8 @@ public class SaveLoad
 			fis = new FileInputStream(filename); //Main._file_to_saveload.name);
 			oin = new ObjectInputStream(fis);
 
+			Window.DeleteAllNonVitalWindows();
+
 			readAll(oin);
 
 			Hal.MarkWholeScreenDirty();

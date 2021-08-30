@@ -16,6 +16,7 @@ public abstract class AbstractID implements Serializable
 	public boolean equals(Object obj) {
 		if (obj instanceof AbstractID) {
 			AbstractID him = (AbstractID) obj;
+			if( getClass() != him.getClass() ) return false;
 			return him.id == id;
 		}
 		return false;

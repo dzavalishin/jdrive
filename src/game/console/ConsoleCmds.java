@@ -15,8 +15,6 @@ public class ConsoleCmds extends Console
 	static boolean _script_running;
 
 	// ** console command / variable defines ** //
-	//#define DEF_CONSOLE_CMD(function) static boolean function(int argc, String ... argv)
-	//#define DEF_CONSOLE_HOOK(function) static boolean function(void)
 
 
 	/* **************************** */
@@ -83,15 +81,14 @@ public class ConsoleCmds extends Console
 		Console.IConsolePrintF(Console._icolour_warn, "- %s", str);
 	}
 
-	static boolean constopAllVehicles(int argc, String ... argv)
+	static boolean constopAllVehicles(String ... argv)
 	{
 		//Vehicle v;
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Stops all vehicles in the game. For debugging only! Use at your own risk... Usage: 'stopall'");
 			return true;
 		}
 
-		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
 			if (v.isValid()) {
@@ -106,9 +103,9 @@ public class ConsoleCmds extends Console
 	}
 
 	
-	static boolean ConResetEngines(int argc, String ... argv)
+	static boolean ConResetEngines(String ... argv)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Reset status data of all engines. This might solve some issues with 'lost' engines. Usage: 'resetengines'");
 			return true;
 		}
@@ -118,15 +115,15 @@ public class ConsoleCmds extends Console
 	}
 
 	//#ifdef _DEBUG
-	static boolean ConResetTile(int argc, String ... argv)
+	static boolean ConResetTile(String ... argv)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Reset a tile to bare land. Usage: 'resettile <tile>'");
 			IConsoleHelp("Tile can be either decimal (34161) or hexadecimal (0x4a5B)");
 			return true;
 		}
 
-		if (argc == 2) {
+		if (argv.length == 2) {
 			int [] result = {0};
 			if (Console.GetArgumentInteger(result, argv[1])) {
 				Landscape.DoClearSquare(TileIndex.get(result[0]));
@@ -138,15 +135,15 @@ public class ConsoleCmds extends Console
 	}
 	//#endif /* _DEBUG */
 
-	static boolean ConScrollToTile(int argc, String ... argv)
+	static boolean ConScrollToTile(String ... argv)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Center the screen on a given tile. Usage: 'scrollto <tile>'");
 			IConsoleHelp("Tile can be either decimal (34161) or hexadecimal (0x4a5B)");
 			return true;
 		}
 
-		if (argc == 2) {
+		if (argv.length == 2) {
 			int [] result = {0};
 			if (Console.GetArgumentInteger(result, argv[1])) {
 				ViewPort.ScrollMainWindowToTile(TileIndex.get(result[0]));
@@ -163,14 +160,14 @@ public class ConsoleCmds extends Console
 	//extern void SetFiosType(final byte fiostype);
 
 	// Save the map to a file 
-	static boolean function(int argc, String ... argv)(ConSave)
+	static boolean function(String ... argv)(ConSave)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Save the current game. Usage: 'save <filename>'");
 			return true;
 		}
 
-		if (argc == 2) {
+		if (argv.length == 2) {
 			char buf[200];
 
 			snprintf(buf, lengthof(buf), "%s%s%s.sav", _path.save_dir, PATHSEP, argv[1]);
@@ -209,17 +206,17 @@ public class ConsoleCmds extends Console
 	}
 
 
-	static boolean function(int argc, String ... argv)(ConLoad)
+	static boolean function(String ... argv)(ConLoad)
 	{
 		final FiosItem *item;
 		String file;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Load a game by name or index. Usage: 'load <file | number>'");
 			return true;
 		}
 
-		if (argc != 2) return false;
+		if (argv.length != 2) return false;
 
 		file = argv[1];
 		item = GetFiosItem(file);
@@ -242,17 +239,17 @@ public class ConsoleCmds extends Console
 	}
 
 
-	static boolean function(int argc, String ... argv)(ConRemove)
+	static boolean function(String ... argv)(ConRemove)
 	{
 		final FiosItem* item;
 		final char* file;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Remove a savegame by name or index. Usage: 'rm <file | number>'");
 			return true;
 		}
 
-		if (argc != 2) return false;
+		if (argv.length != 2) return false;
 
 		file = argv[1];
 		item = GetFiosItem(file);
@@ -268,11 +265,11 @@ public class ConsoleCmds extends Console
 
 
 	// List all the files in the current dir via console 
-	static boolean function(int argc, String ... argv)(ConListFiles)
+	static boolean function(String ... argv)(ConListFiles)
 	{
 		int i;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("List all loadable savegames and directories in the current dir via console. Usage: 'ls | dir'");
 			return true;
 		}
@@ -289,17 +286,17 @@ public class ConsoleCmds extends Console
 	}
 
 	// Change the dir via console 
-	static boolean function(int argc, String ... argv)(ConChangeDirectory)
+	static boolean function(String ... argv)(ConChangeDirectory)
 	{
 		final FiosItem *item;
 		String file;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Change the dir via console. Usage: 'cd <directory | number>'");
 			return true;
 		}
 
-		if (argc != 2) return false;
+		if (argv.length != 2) return false;
 
 		file = argv[1];
 		item = GetFiosItem(file);
@@ -317,11 +314,11 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConPrintWorkingDirectory)
+	static boolean function(String ... argv)(ConPrintWorkingDirectory)
 	{
 		String path;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Print out the current working directory. Usage: 'pwd'");
 			return true;
 		}
@@ -335,9 +332,9 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConClearBuffer)
+	static boolean function(String ... argv)(ConClearBuffer)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Clear the console buffer. Usage: 'clear'");
 			return true;
 		}
@@ -353,18 +350,18 @@ public class ConsoleCmds extends Console
 	// ********************************* //
 	#ifdef ENABLE_NETWORK
 
-	static boolean function(int argc, String ... argv)(ConBan)
+	static boolean function(String ... argv)(ConBan)
 	{
 		NetworkClientInfo *ci;
 		uint32 index;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Ban a player from a network game. Usage: 'ban <client-id>'");
 			IConsoleHelp("For client-id's, see the command 'clients'");
 			return true;
 		}
 
-		if (argc != 2) return false;
+		if (argv.length != 2) return false;
 
 		index = atoi(argv[1]);
 
@@ -396,17 +393,17 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConUnBan)
+	static boolean function(String ... argv)(ConUnBan)
 	{
 		uint i, index;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Unban a player from a network game. Usage: 'unban <ip | id>'");
 			IConsoleHelp("For a list of banned IP's, see the command 'banlist'");
 			return true;
 		}
 
-		if (argc != 2) return false;
+		if (argv.length != 2) return false;
 
 		index = (strchr(argv[1], '.') == null) ? atoi(argv[1]) : 0;
 		index--;
@@ -426,11 +423,11 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConBanList)
+	static boolean function(String ... argv)(ConBanList)
 	{
 		uint i;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("List the IP's of banned clients: Usage 'banlist'");
 			return true;
 		}
@@ -447,9 +444,9 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConPauseGame)
+	static boolean function(String ... argv)(ConPauseGame)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Pause a network game. Usage: 'pause'");
 			return true;
 		}
@@ -463,9 +460,9 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConUnPauseGame)
+	static boolean function(String ... argv)(ConUnPauseGame)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Unpause a network game. Usage: 'unpause'");
 			return true;
 		}
@@ -479,27 +476,27 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConRcon)
+	static boolean function(String ... argv)(ConRcon)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Remote control the server from another client. Usage: 'rcon <password> <command>'");
 			IConsoleHelp("Remember to enclose the command in quotes, otherwise only the first parameter is sent");
 			return true;
 		}
 
-		if (argc < 3) return false;
+		if (argv.length < 3) return false;
 
 		SEND_COMMAND(PACKET_CLIENT_RCON)(argv[1], argv[2]);
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(finalatus)
+	static boolean function(String ... argv)(finalatus)
 	{
 		static String stat_str[] = {"inactive", "authorized", "waiting", "loading map", "map done", "ready", "active"};
 		String status;
 		final NetworkClientState *cs;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("List the status of all clients connected to the server: Usage 'status'");
 			return true;
 		}
@@ -516,18 +513,18 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConKick)
+	static boolean function(String ... argv)(ConKick)
 	{
 		NetworkClientInfo *ci;
 		uint32 index;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Kick a player from a network game. Usage: 'kick <client-id>'");
 			IConsoleHelp("For client-id's, see the command 'clients'");
 			return true;
 		}
 
-		if (argc != 2) return false;
+		if (argv.length != 2) return false;
 
 		index = atoi(argv[1]);
 		if (index == NETWORK_SERVER_INDEX) {
@@ -549,20 +546,20 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConResetCompany)
+	static boolean function(String ... argv)(ConResetCompany)
 	{
 		Player *p;
 		NetworkClientState *cs;
 		NetworkClientInfo *ci;
 		byte index;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Remove an idle company from the game. Usage: 'reset_company <company-id>'");
 			IConsoleHelp("For company-id's, see the list of companies from the dropdown menu. Player 1 is 1, etc.");
 			return true;
 		}
 
-		if (argc != 2) return false;
+		if (argv.length != 2) return false;
 
 		index = atoi(argv[1]);
 
@@ -606,11 +603,11 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConNetworkClients)
+	static boolean function(String ... argv)(ConNetworkClients)
 	{
 		NetworkClientInfo *ci;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Get a list of connected clients including their ID, name, company-id, and IP. Usage: 'clients'");
 			return true;
 		}
@@ -625,20 +622,20 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConNetworkConnect)
+	static boolean function(String ... argv)(ConNetworkConnect)
 	{
 		char *ip;
 		String port = null;
 		String player = null;
 		uint16 rport;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Connect to a remote OTTD server and join the game. Usage: 'connect <ip>'");
 			IConsoleHelp("IP can contain port and player: 'IP#Player:Port', eg: 'server.ottd.org#2:443'");
 			return true;
 		}
 
-		if (argc < 2) return false;
+		if (argv.length < 2) return false;
 
 		if (_networking) // We are in network-mode, first close it!
 			NetworkDisconnect();
@@ -669,22 +666,22 @@ public class ConsoleCmds extends Console
 	/*   script file console commands   */
 	/* ******************************** */
 	/*
-	static boolean function(int argc, String ... argv)(ConExec)
+	static boolean function(String ... argv)(ConExec)
 	{
 		char cmdline[ICON_CMDLN_SIZE];
 		char *cmdptr;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Execute a local script file. Usage: 'exec <script> <?>'");
 			return true;
 		}
 
-		if (argc < 2) return false;
+		if (argv.length < 2) return false;
 
 		_script_file = fopen(argv[1], "r");
 
 		if (_script_file == null) {
-			if (argc == 2 || atoi(argv[2]) != 0) IConsoleError("script file not found");
+			if (argv.length == 2 || atoi(argv[2]) != 0) IConsoleError("script file not found");
 			return true;
 		}
 
@@ -709,9 +706,9 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConReturn)
+	static boolean function(String ... argv)(ConReturn)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Stop executing a running script. Usage: 'return'");
 			return true;
 		}
@@ -725,18 +722,18 @@ public class ConsoleCmds extends Console
 	/* **************************** */
 	//extern boolean CloseConsoleLogIfActive(void);
 	/*
-	static boolean function(int argc, String ... argv)(ConScript)
+	static boolean function(String ... argv)(ConScript)
 	{
 		extern FILE* _iconsole_output_file;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Start or stop logging console output to a file. Usage: 'script <filename>'");
 			IConsoleHelp("If filename is omitted, a running log is stopped if it is active");
 			return true;
 		}
 
 		if (!CloseConsoleLogIfActive()) {
-			if (argc < 2) return false;
+			if (argv.length < 2) return false;
 
 			IConsolePrintF(_icolour_def, "file output started to: %s", argv[1]);
 			_iconsole_output_file = fopen(argv[1], "ab");
@@ -747,35 +744,35 @@ public class ConsoleCmds extends Console
 	}
 
 
-	static boolean function(int argc, String ... argv)(ConEcho)
+	static boolean function(String ... argv)(ConEcho)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Print back the first argument to the console. Usage: 'echo <arg>'");
 			return true;
 		}
 
-		if (argc < 2) return false;
+		if (argv.length < 2) return false;
 		IConsolePrint(_icolour_def, argv[1]);
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConEchoC)
+	static boolean function(String ... argv)(ConEchoC)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Print back the first argument to the console in a given colour. Usage: 'echoc <colour> <arg2>'");
 			return true;
 		}
 
-		if (argc < 3) return false;
+		if (argv.length < 3) return false;
 		IConsolePrint(atoi(argv[1]), argv[2]);
 		return true;
 	}
 
 	extern void SwitchMode(int new_mode);
 
-	static boolean function(int argc, String ... argv)(ConNewGame)
+	static boolean function(String ... argv)(ConNewGame)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Start a new game. Usage: 'newgame'");
 			IConsoleHelp("The server can force a new game using 'newgame', any client using it will part and start a single-player game");
 			return true;
@@ -785,16 +782,16 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 	*/
-	static boolean ConAlias(int argc, String ... argv)
+	static boolean ConAlias(String ... argv)
 	{
 		IConsoleAlias alias;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Add a new alias, or redefine the behaviour of an existing alias . Usage: 'alias <name> <command>'");
 			return true;
 		}
 
-		if (argc < 3) return false;
+		if (argv.length < 3) return false;
 
 		alias = IConsoleAliasGet(argv[1]);
 		if (alias == null) {
@@ -806,39 +803,39 @@ public class ConsoleCmds extends Console
 	}
 
 	/*
-	static boolean function(int argc, String ... argv)(ConScreenShot)
+	static boolean function(String ... argv)(ConScreenShot)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Create a screenshot of the game. Usage: 'screenshot [big | no_con]'");
 			IConsoleHelp("'big' makes a screenshot of the whole map, 'no_con' hides the console to create the screenshot");
 			return true;
 		}
 
-		if (argc > 3) return false;
+		if (argv.length > 3) return false;
 
 		_make_screenshot = 1;
-		if (argc > 1) {
-			if (strcmp(argv[1], "big") == 0 || (argc == 3 && strcmp(argv[2], "big") == 0))
+		if (argv.length > 1) {
+			if (strcmp(argv[1], "big") == 0 || (argv.length == 3 && strcmp(argv[2], "big") == 0))
 				_make_screenshot = 2;
 
-			if (strcmp(argv[1], "no_con") == 0 || (argc == 3 && strcmp(argv[2], "no_con") == 0))
+			if (strcmp(argv[1], "no_con") == 0 || (argv.length == 3 && strcmp(argv[2], "no_con") == 0))
 				IConsoleClose();
 		}
 
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConInfoVar)
+	static boolean function(String ... argv)(ConInfoVar)
 	{
 		static String _icon_vartypes[] = {"boolean", "byte", "uint16", "uint32", "int16", "int32", "string"};
 		final IConsoleVar *var;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Print out debugging information about a variable. Usage: 'info_var <var>'");
 			return true;
 		}
 
-		if (argc < 2) return false;
+		if (argv.length < 2) return false;
 
 		var = IConsoleVarGet(argv[1]);
 		if (var == null) {
@@ -857,16 +854,16 @@ public class ConsoleCmds extends Console
 	}
 
 
-	static boolean function(int argc, String ... argv)(ConInfoCmd)
+	static boolean function(String ... argv)(ConInfoCmd)
 	{
 		final IConsoleCmd *cmd;
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Print out debugging information about a command. Usage: 'info_cmd <cmd>'");
 			return true;
 		}
 
-		if (argc < 2) return false;
+		if (argv.length < 2) return false;
 
 		cmd = IConsoleCmdGet(argv[1]);
 		if (cmd == null) {
@@ -884,26 +881,26 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConDebugLevel)
+	static boolean function(String ... argv)(ConDebugLevel)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Get/set the default debugging level for the game. Usage: 'debug_level [<level>]'");
 			IConsoleHelp("Level can be any combination of names, levels. Eg 'net=5 ms=4'. Remember to enclose it in \"'s");
 			return true;
 		}
 
-		if (argc > 2) return false;
+		if (argv.length > 2) return false;
 
-		if (argc == 1) {
+		if (argv.length == 1) {
 			IConsolePrintF(_icolour_def, "Current debug-level: '%s'", GetDebugString());
 		} else SetDebugString(argv[1]);
 
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConExit)
+	static boolean function(String ... argv)(ConExit)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Exit the game. Usage: 'exit'");
 			return true;
 		}
@@ -912,9 +909,9 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConPart)
+	static boolean function(String ... argv)(ConPart)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Leave the currently joined/running game (only ingame). Usage: 'part'");
 			return true;
 		}
@@ -925,16 +922,16 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 */
-	static boolean ConHelp(int argc, String ... argv)
+	static boolean ConHelp(String ... argv)
 	{
-		if (argc == 2) {
+		if (argv.length == 2) {
 			IConsoleCmd cmd;
 			final IConsoleVar var;
 			final IConsoleAlias alias;
 
 			cmd = IConsoleCmdGet(argv[1]);
 			if (cmd != null) {
-				cmd.proc.accept(0, null);
+				cmd.proc.accept();
 				return true;
 			}
 
@@ -942,7 +939,7 @@ public class ConsoleCmds extends Console
 			if (alias != null) {
 				cmd = IConsoleCmdGet(alias.cmdline);
 				if (cmd != null) {
-					cmd.proc.accept(0, null);
+					cmd.proc.accept();
 					return true;
 				}
 				IConsolePrintF(_icolour_err, "ERROR: alias is of special type, please see its execution-line: '%s'", alias.cmdline);
@@ -974,9 +971,9 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean ConListCommands(int argc, String ... argv)
+	static boolean ConListCommands(String ... argv)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("List all registered commands. Usage: 'list_cmds [<pre-filter>]'");
 			return true;
 		}
@@ -991,9 +988,9 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean ConListVariables(int argc, String ... argv)
+	static boolean ConListVariables(String ... argv)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("List all registered variables. Usage: 'list_vars [<pre-filter>]'");
 			return true;
 		}
@@ -1006,9 +1003,9 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean ConListAliases(int argc, String ... argv)
+	static boolean ConListAliases(String ... argv)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("List all registered aliases. Usage: 'list_aliases [<pre-filter>]'");
 			return true;
 		}
@@ -1024,14 +1021,14 @@ public class ConsoleCmds extends Console
 	/*
 	#ifdef ENABLE_NETWORK
 
-	static boolean function(int argc, String ... argv)(ConSay)
+	static boolean function(String ... argv)(ConSay)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Chat to your fellow players in a multiplayer game. Usage: 'say \"<msg>\"'");
 			return true;
 		}
 
-		if (argc != 2) return false;
+		if (argv.length != 2) return false;
 
 		if (!_network_server) {
 			SEND_COMMAND(PACKET_CLIENT_CHAT)(NETWORK_ACTION_CHAT, DESTTYPE_BROADCAST, 0 /* param does not matter * /, argv[1]);
@@ -1041,15 +1038,15 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConSayPlayer)
+	static boolean function(String ... argv)(ConSayPlayer)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Chat to a certain player in a multiplayer game. Usage: 'say_player <player-no> \"<msg>\"'");
 			IConsoleHelp("PlayerNo is the player that plays as company <playerno>, 1 through max_players");
 			return true;
 		}
 
-		if (argc != 3) return false;
+		if (argv.length != 3) return false;
 
 		if (atoi(argv[1]) < 1 || atoi(argv[1]) > MAX_PLAYERS) {
 			IConsolePrintF(_icolour_def, "Unknown player. Player range is between 1 and %d.", MAX_PLAYERS);
@@ -1064,15 +1061,15 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConSayClient)
+	static boolean function(String ... argv)(ConSayClient)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Chat to a certain player in a multiplayer game. Usage: 'say_client <client-no> \"<msg>\"'");
 			IConsoleHelp("For client-id's, see the command 'clients'");
 			return true;
 		}
 
-		if (argc != 3) return false;
+		if (argv.length != 3) return false;
 
 		if (!_network_server) {
 			SEND_COMMAND(PACKET_CLIENT_CHAT)(NETWORK_ACTION_CHAT_CLIENT, DESTTYPE_CLIENT, atoi(argv[1]), argv[2]);
@@ -1104,9 +1101,9 @@ public class ConsoleCmds extends Console
 	}
 
 	// Also use from within player_gui to change the password graphically 
-	boolean NetworkChangeCompanyPassword(int argc, String ... argv)
+	boolean NetworkChangeCompanyPassword(String ... argv)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			if (_local_player >= MAX_PLAYERS) return true; // dedicated server
 			IConsolePrintF(_icolour_warn, "Current value for 'company_pw': %s", _network_player_info[_local_player].password);
 			return true;
@@ -1117,7 +1114,7 @@ public class ConsoleCmds extends Console
 			return false;
 		}
 
-		if (argc != 1) return false;
+		if (argv.length != 1) return false;
 
 		if (strncmp(argv[0], "*", sizeof(_network_player_info[_local_player].password)) == 0)
 			argv[0][0] = '\0';
@@ -1168,14 +1165,14 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConProcServerIP)
+	static boolean function(String ... argv)(ConProcServerIP)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsolePrintF(_icolour_warn, "Current value for 'server_ip': %s", inet_ntoa(*(struct in_addr *)&_network_server_bind_ip));
 			return true;
 		}
 
-		if (argc != 1) return false;
+		if (argv.length != 1) return false;
 
 		_network_server_bind_ip = (strcmp(argv[0], "all") == 0) ? inet_addr("0.0.0.0") : inet_addr(argv[0]);
 		snprintf(_network_server_bind_ip_host, sizeof(_network_server_bind_ip_host), "%s", inet_ntoa(*(struct in_addr *)&_network_server_bind_ip));
@@ -1183,17 +1180,17 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(int argc, String ... argv)(ConPatch)
+	static boolean function(String ... argv)(ConPatch)
 	{
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("Change patch variables for all players. Usage: 'patch <name> [<value>]'");
 			IConsoleHelp("Omitting <value> will print out the current value of the patch-setting.");
 			return true;
 		}
 
-		if (argc == 1 || argc > 3) return false;
+		if (argv.length == 1 || argv.length > 3) return false;
 
-		if (argc == 2) {
+		if (argv.length == 2) {
 			IConsoleGetPatchSetting(argv[1]);
 		} else
 			IConsoleSetPatchSetting(argv[1], argv[2]);
@@ -1202,10 +1199,10 @@ public class ConsoleCmds extends Console
 	}
 	#endif /* ENABLE_NETWORK */
 
-	static boolean ConListDumpVariables(int argc, String ... argv)
+	static boolean ConListDumpVariables(String ... argv)
 	{
 
-		if (argc == 0) {
+		if (argv.length == 0) {
 			IConsoleHelp("List all variables with their value. Usage: 'dump_vars [<pre-filter>]'");
 			return true;
 		}

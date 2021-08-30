@@ -855,32 +855,16 @@ public class Window extends WindowConstants
 	/* Copies 'widget' to 'w.widget' to allow for resizable windows */
 	void AssignWidgetToWindow(final Widget[] nwidget)
 	{
-		/*
-		w.original_widget = widget;
-
-		if (widget != null) {
-			int index = 1;
-			final Widget wi;
-
-			for (wi = widget; wi.type != WWT_LAST; wi++) index++;
-
-			w.widget = realloc(w.widget, sizeof(*w.widget) * index);
-			memcpy(w.widget, widget, sizeof(*w.widget) * index);
-		} else {
-			w.widget = null;
-		}
-		 */
 		original_widget = nwidget;
-		widget.clear(); // XXX really?
+		widget.clear();
 		if(nwidget != null)
 		{
 			for( Widget ww : nwidget)
 			{
 				if(ww.type != WWT_LAST)
-					widget.add(ww);
+					widget.add(new Widget(ww) );
 			}
-		}
-		//else			widget.clear(); // XXX really?
+		}		
 	}
 
 	/**
@@ -2319,7 +2303,7 @@ public class Window extends WindowConstants
 	 * with this function. It closes all windows calling the standard function,
 	 * then, does a little hacked loop of closing all stickied windows. Note
 	 * that standard windows (status bar, etc.) are not stickied, so these aren't affected */
-	static void DeleteAllNonVitalWindows()
+	public static void DeleteAllNonVitalWindows()
 	{
 		//Window w;
 
@@ -2458,40 +2442,20 @@ public class Window extends WindowConstants
 
 
 
-
-	private static Point HandleScrollbarHittest(final Scrollbar sb, int top, int bottom)
+	/*private static Point HandleScrollbarHittest(final Scrollbar sb, int top, int bottom)
 	{
 		return sb.hittest(top, bottom);
-		/*
-		int height, count, pos, cap;
-
-		top += 10;
-		bottom -= 9;
-
-		height = (bottom - top);
-
-		pos = sb.pos;
-		count = sb.count;
-		cap = sb.cap;
-
-		if (count != 0) top += height * pos / count;
-
-		if (cap > count) cap = count;
-		if (count != 0) bottom -= (count - pos - cap) * height / count;
-
-		Point pt = new Point(top, bottom - 1);
-		return pt; */
-	}
+	}*/
 
 	/*****************************************************
 	 * Special handling for the scrollbar widget type.
 	 * Handles the special scrolling buttons and other
 	 * scrolling.
-	 * Parameters:
-	 *   w   - Window.
-	 *   wi  - Pointer to the scrollbar widget.
-	 *   x   - The X coordinate of the mouse click.
-	 *   y   - The Y coordinate of the mouse click.
+	 * 
+	 * @param wi  - Pointer to the scrollbar widget.
+	 * @param x   - The X coordinate of the mouse click.
+	 * @param y   - The Y coordinate of the mouse click.
+	 * 
 	 */
 
 	void ScrollbarClickHandler(final Widget wi, int x, int y)
@@ -2721,7 +2685,7 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+7, r.top+10, r.left+7, r.bottom-10, c1);
 			Gfx.GfxFillRect(r.left+8, r.top+10, r.left+8, r.bottom-10, c2);
 
-			pt = HandleScrollbarHittest(vscroll, r.top, r.bottom);
+			pt = vscroll.hittest(r.top, r.bottom);
 			Gfx.DrawFrameRect(r.left, pt.x, r.right, pt.y, wi.color, (flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_MIDDLE ? FR_LOWERED : 0);
 			break;
 		}
@@ -2753,7 +2717,7 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+7, r.top+10, r.left+7, r.bottom-10, c1);
 			Gfx.GfxFillRect(r.left+8, r.top+10, r.left+8, r.bottom-10, c2);
 
-			pt = HandleScrollbarHittest(vscroll2, r.top, r.bottom);
+			pt = vscroll2.hittest(r.top, r.bottom);
 			Gfx.DrawFrameRect(r.left, pt.x, r.right, pt.y, wi.color, (flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_MIDDLE | WF_SCROLL2) ? FR_LOWERED : 0);
 			break;
 		}
@@ -2787,7 +2751,7 @@ public class Window extends WindowConstants
 			Gfx.GfxFillRect(r.left+10, r.top+8, r.right-10, r.top+8, c2);
 
 			// draw actual scrollbar
-			pt = HandleScrollbarHittest(hscroll, r.left, r.right);
+			pt = hscroll.hittest(r.left, r.right);
 			Gfx.DrawFrameRect(pt.x, r.top, pt.y, r.bottom, wi.color, (flags4 & (WF_SCROLL_MIDDLE | WF_HSCROLL)) == (WF_SCROLL_MIDDLE | WF_HSCROLL) ? FR_LOWERED : 0);
 
 			break;
@@ -2837,7 +2801,7 @@ public class Window extends WindowConstants
 		}
 
 		case WWT_RESIZEBOX: {
-			assert(r.right - r.left == 11); // XXX - to ensure the same sizes are used everywhere!
+			assert(r.right - r.left == 11); // ensure the same sizes are used everywhere
 
 			clicked = 0 != (flags4 & WF_SIZING);
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);

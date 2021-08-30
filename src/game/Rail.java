@@ -1,14 +1,12 @@
 package game;
 
 import java.util.Map.Entry;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import game.TrackPathFinder.TPFHashEnt;
 import game.enums.Owner;
 import game.enums.TileTypes;
 import game.ids.PlayerID;
-import game.ifaces.OnButtonClick;
 import game.ifaces.TileTypeProcs;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.Point;
@@ -18,14 +16,9 @@ import game.util.BitOps;
 import game.util.Sprites;
 import game.xui.Gfx;
 import game.xui.Gui;
-import game.xui.MiscGui;
-import game.xui.TileHighlightData;
 import game.xui.TrainGui;
 import game.xui.ViewPort;
-import game.xui.Widget;
 import game.xui.Window;
-import game.xui.WindowDesc;
-import game.xui.WindowEvent;
 
 @SuppressWarnings("SuspiciousNameCombination")
 public class Rail extends RailTables {

@@ -13,7 +13,6 @@ import game.Global;
 import game.Str;
 import game.enums.FiosType;
 import game.enums.GameModes;
-import game.ids.StringID;
 import game.struct.FiosItem;
 
 /*************************************************/
@@ -540,6 +539,10 @@ public class FileIO {
 		case OLD_SCENARIO: {
 			return String.format("%s%s%s", path, File.separator, item.name);
 		}
+		case DRIVE:
+		default:
+			assert false;
+			break;
 		}
 
 		if(_fios_path == _fios_scn_path)

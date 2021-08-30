@@ -77,7 +77,7 @@ public class Tree  extends TreeTables {
 			//int dist = myabs(x) + myabs(y);
 			int dist = Math.abs(x) + Math.abs(y);
 			// TODO use or create TileIndex method
-			TileIndex cur_tile = new TileIndex( TileIndex.TILE_MASK(tile.getTile() + tile.TileDiffXY(x, y).diff) );
+			TileIndex cur_tile = new TileIndex( TileIndex.TILE_MASK(tile.getTile() + TileIndex.TileDiffXY(x, y).diff) );
 
 			/* Only on tiles within 13 squares from tile,
 			    on clear tiles, and NOT on farm-tiles or rocks */

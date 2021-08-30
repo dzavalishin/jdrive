@@ -29,7 +29,7 @@ public class IConsoleVar
 		/* Some variables need really specific handling, handle this in its
 		 * callback function */
 		if (proc != null) {
-			proc.accept(0); //, null);
+			proc.accept();
 			return;
 		}
 

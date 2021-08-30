@@ -8,7 +8,7 @@ public class Widget {
 	public int right;
 	public int top;
 	public int bottom;
-	public int unkA; // TODO string id
+	public int unkA; // Sprite or String id, depends on use
 	//StringID tooltips;
 	int tooltips;
 
@@ -30,8 +30,22 @@ public class Widget {
 		this.unkA = unkA;
 		this.tooltips = tooltips;
 		
-		this.type =  type;
-		this.resize_flag =  resize_flag;
-		this.color =  color;
+		this.type = type;
+		this.resize_flag = resize_flag;
+		this.color = color;
+	}
+
+	public Widget(Widget ww) {
+		this.left        = ww.left;
+		this.right       = ww.right;
+		this.top         = ww.top;
+		this.bottom      = ww.bottom;
+
+		this.unkA        = ww.unkA;
+		this.tooltips    = ww.tooltips;
+		
+		this.type        = ww.type;
+		this.resize_flag = ww.resize_flag;
+		this.color       = ww.color;
 	}
 }

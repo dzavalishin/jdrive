@@ -13,11 +13,8 @@ import game.Str;
 import game.Terraform;
 import game.TileIndex;
 import game.WayPoint;
-import game.enums.Owner;
 import game.enums.TileTypes;
-
 import game.ifaces.OnButtonClick;
-
 import game.util.BitOps;
 import game.util.Sprites;
 

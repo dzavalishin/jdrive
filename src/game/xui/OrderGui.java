@@ -13,7 +13,6 @@ import game.TileIndex;
 import game.Vehicle;
 import game.WayPoint;
 import game.mAirport;
-import game.enums.Owner;
 import game.enums.TileTypes;
 import game.util.BitOps;
 

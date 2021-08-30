@@ -50,7 +50,8 @@ public abstract class VehicleQueue
 
 
 class VQImpl extends VehicleQueue implements Serializable
-{
+{	
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public boolean push(Vehicle v) {

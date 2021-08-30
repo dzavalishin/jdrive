@@ -204,12 +204,12 @@ public class Main {
 
 		// Generate a world.
 		filename = String.format( "%sopntitle.dat",  Global._path.data_dir );
-		// TODO if (SaveOrLoad(filename, SL_LOAD) != SL_OK) 
+		// TODO if (SaveLoad.SaveOrLoad(filename, SaveLoad.SL_LOAD) != SaveOrLoadResult.SL_OK) 
 		{
 			/*#if defined SECOND_DATA_DIR
 			sprintf(filename, "%sopntitle.dat",  _path.second_data_dir);
 			if (SaveOrLoad(filename, SL_LOAD) != SL_OK)
-	#endif*/
+			#endif*/
 			//GenerateWorld.doGenerateWorld(1, 256, 256); // if failed loading, make empty world.
 			GenerateWorld.doGenerateWorld(0, 256, 256); // if failed loading, make empty world.
 		}
@@ -693,7 +693,7 @@ public class Main {
 				LoadIntroGame();
 				Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			} else {
-				Global.gs._local_player = null;
+				// [dz] Global.gs._local_player = PlayerID.get(0);
 				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE); // decrease pause counter (was increased from opening load dialog)
 				/*
 				if (_network_server)

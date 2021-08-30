@@ -21,7 +21,6 @@ import game.Vehicle;
 import game.ViewportSign;
 import game.WayPoint;
 import game.enums.GameModes;
-import game.enums.Owner;
 import game.enums.WindowEvents;
 import game.ids.CursorID;
 import game.ids.SpriteID;
@@ -138,7 +137,6 @@ public class ViewPort
 
 
 
-	//#define VIEWPORT_DRAW_MEM (65536 * 2)
 
 	static boolean _added_tile_sprite;
 	static boolean _offset_ground_sprites;
@@ -150,8 +148,6 @@ public class ViewPort
 
 
 	static ViewportDrawer _cur_vd;
-
-	//TileHighlightData _thd;
 	static TileInfo _cur_ti;
 
 
@@ -168,7 +164,7 @@ public class ViewPort
 	{
 		ViewPort vp = null;
 		Point pt;
-		int bit = 1;
+		//int bit = 1;
 		//for (vp = _viewports, bit = 1; ; vp++, bit <<= 1) 
 		for (ViewPort vps : _viewports ) 
 		{
@@ -178,27 +174,25 @@ public class ViewPort
 				vp = vps;
 				break;
 			}
-			bit <<= 1;
+			//bit <<= 1;
 		}
 
-		// TODO [dz] is it ok? Do we need viewports container at all? Yes.
+		// [dz] is it ok? Do we need viewports container at all? Yes, we do.
 		if( vp == null)
 		{
 			vp = new ViewPort();
 			_viewports.add(vp);
 		}
 
-		//assert vp != null;
-		//Global._active_viewports |= bit;
 
 		vp.left = x + w.left;
 		vp.top = y + w.top;
 		vp.width = width;
 		vp.height = height;
 
-		// TODO XXX bring zoom back
-		//vp.zoom = (byte) zoom;
-		vp.zoom = 0;
+		// bring zoom back
+		vp.zoom = (byte) zoom;
+		//vp.zoom = 0;
 
 		vp.virtual_width = width << zoom;
 		vp.virtual_height = height << zoom;
@@ -1418,10 +1412,6 @@ public class ViewPort
 		int y;
 		DrawPixelInfo old_dpi;
 
-		//byte [] mem = new byte[VIEWPORT_DRAW_MEM];
-		//ParentSpriteToDraw parent_list = new ParentSpriteToDraw[6144];
-
-		//_cur_vd = vd;
 		_cur_vd = vd;
 
 		old_dpi = Hal._cur_dpi;
@@ -1469,25 +1459,17 @@ public class ViewPort
 		ViewportAddWaypoints(vd.dpi);
 		//#endif
 
-		// This assert should never happen (because the length of the parent_list
-		//  is checked)
-		//assert(vd.parent_list <= endof(parent_list));
 
-		//if (vd.first_tile != null) ViewportDrawTileSprites(vd.first_tile);
 		ViewportDrawTileSprites(vd.tile_list);
 
-		/* null terminate parent sprite list */
-		//[dz] TODO !!! *vd.parent_list = null;
 
 		ParentSpriteToDraw[] parents = vd.parent_list.toArray(ParentSpriteToDraw[]::new);
 		if(parents.length > 0)
 		{
-			//ParentSpriteToDraw[] parents = (ParentSpriteToDraw[]) array;
-
 			ViewportSortParentSprites(parents);
 			ViewportDrawParentSprites(parents);
 		}
-		//if (vd.first_string != null) ViewportDrawStrings(vd.dpi, vd.first_string);
+
 		ViewportDrawStrings(vd.dpi, vd.string_list);
 
 		Hal._cur_dpi = old_dpi;

@@ -15,7 +15,6 @@ import game.struct.TileMarker;
 import game.util.BitOps;
 import game.util.TTDQueue;
 import game.util.TTDQueueImpl;
-import game.xui.ViewPort;
 
 public class Npf {
 

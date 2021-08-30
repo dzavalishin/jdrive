@@ -1314,6 +1314,8 @@ public class MiscGui {
 
 			w.vscroll.setCap(w.vscroll.getCap() + e.diff.y / 10);
 		} break;
+		default:
+			break;
 		}
 		 
 	}
