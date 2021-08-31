@@ -23,3 +23,7 @@
 hs_err_pid*
 /bin/
 *.sav
+
+# junit
+test/test-report/*.txt
+test/test-report/*.xml
