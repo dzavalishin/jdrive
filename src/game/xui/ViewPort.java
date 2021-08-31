@@ -1660,8 +1660,9 @@ public class ViewPort
 		if (BitOps.IS_INT_INSIDE(x, 0, Global.MapSizeX() * 16) &&
 				BitOps.IS_INT_INSIDE(y, 0, Global.MapSizeY() * 16))
 			z = TileIndex.TileVirtXY(x, y).GetTileZ();
+		
 		pt = Point.RemapCoords(x, y, z);
-
+		//Global.debug("MarkTileDirty %s", pt.toString() );
 		MarkAllViewportsDirty(
 				pt.x - 31,
 				pt.y - 122,
@@ -1676,6 +1677,8 @@ public class ViewPort
 		int x = _thd.pos.x;
 		int y = _thd.pos.y;
 
+		//Global.debug("SetSelectionTilesDirty %d.%d", x, y );
+		
 		x_size = _thd.size.x;
 		y_size = _thd.size.y;
 
@@ -2169,7 +2172,8 @@ public class ViewPort
 				_thd.new_size.y = y2 - y1 + 16;
 				_thd.new_drawstyle = _thd.next_drawstyle;
 			}
-		} else if (_thd.place_mode != VHM_NONE) {
+		} else if (_thd.place_mode != VHM_NONE) 
+		{
 			Point pt = GetTileBelowCursor();
 			x1 = pt.x;
 			y1 = pt.y;
@@ -2191,18 +2195,21 @@ public class ViewPort
 			}
 		}
 
+		//Global.debug("UpdateTileSelection before redraw old %d.%d new %d.%d mode %d", _thd.pos.x, _thd.pos.y, _thd.new_pos.x, _thd.new_pos.y,  _thd.place_mode );
+		
 		// redraw selection
 		if (_thd.drawstyle != _thd.new_drawstyle ||
 				_thd.pos.x != _thd.new_pos.x || _thd.pos.y != _thd.new_pos.y ||
 				_thd.size.x != _thd.new_size.x || _thd.size.y != _thd.new_size.y) 
 		{
+			//Global.debug("UpdateTileSelection redraw %d.%d", _thd.pos.x, _thd.pos.y );
 			// clear the old selection?
 			if (_thd.drawstyle != 0) SetSelectionTilesDirty();
 
 			_thd.drawstyle = _thd.new_drawstyle;
-			_thd.pos = _thd.new_pos;
-			_thd.size = _thd.new_size;
-			_thd.outersize = _thd.new_outersize;
+			_thd.pos = new Point( _thd.new_pos );
+			_thd.size = new Point(  _thd.new_size );
+			_thd.outersize = new Point( _thd.new_outersize );
 			_thd.dirty = 0xff;
 
 			// draw the new selection?

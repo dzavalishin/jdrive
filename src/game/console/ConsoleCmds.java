@@ -1,6 +1,7 @@
 package game.console;
 
 import game.Engine;
+import game.Global;
 import game.Landscape;
 import game.TileIndex;
 import game.Vehicle;
@@ -1388,9 +1389,8 @@ public class ConsoleCmds extends Console
 	#endif /* ENABLE_NETWORK */
 
 		// debugging stuff
-	/* TODO XXX #ifdef _DEBUG
-	#endif */
-		IConsoleDebugLibRegister();
+		if(Global.debugEnabled)
+			IConsoleDebugLibRegister();
 	}
 
 }

@@ -1,6 +1,5 @@
 package game;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -26,6 +25,7 @@ import game.xui.Window;
 
 public class Global 
 {
+	public static final boolean debugEnabled = true;
 
 	public static GameState gs = new GameState(); 
 	
@@ -115,8 +115,8 @@ public class Global
 
 
 	public static int _map_log_x = 8; //6;
-	public static int _map_size_x = 256; // TODO XXX who inits it?
-	public static int _map_size_y = 256; // TODO XXX who inits it?
+	public static int _map_size_x = 256;
+	public static int _map_size_y = 256;
 	public static int _map_tile_mask;
 	public static int _map_size;
 
@@ -288,7 +288,7 @@ public class Global
 		System.err.println(buf);		
 	}
 	
-	public static void error(IOException e) 
+	public static void error(Throwable e) 
 	{	
 		error("Exception %s ", e.toString());
 	}
@@ -310,18 +310,18 @@ public class Global
 
 	//void DEBUG(name, level) if (level == 0 || _debug_ ## name ## _level >= level) debug
 
-	static final int _debug_ai_level = 0;
+	static int _debug_ai_level = 0;
 	static int _debug_driver_level = 0;
-	static final int _debug_grf_level = 0;
-	static final int _debug_map_level = 0;
-	static final int _debug_misc_level = 0;
-	static final int _debug_ms_level = 0;
+	static int _debug_grf_level = 0;
+	static int _debug_map_level = 0;
+	static int _debug_misc_level = 0;
+	static int _debug_ms_level = 0;
 	static int _debug_net_level = 0;
-	static final int _debug_spritecache_level = 0;
+	static int _debug_spritecache_level = 0;
 	static int _debug_oldloader_level = 0;
-	static final int _debug_pbs_level = 0;
-	static final int _debug_ntp_level = 0;
-	static final int _debug_npf_level = 0;
+	static int _debug_pbs_level = 0;
+	static int _debug_ntp_level = 0;
+	static int _debug_npf_level = 0;
 
 
 

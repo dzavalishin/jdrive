@@ -22,6 +22,12 @@ public class Point implements Comparable<Point> {
 	}
 
 
+	public Point(Point p) {
+		x = p.x;
+		y = p.y;
+	}
+
+
 	public static Point RemapCoords(int x, int y, int z) {
 		//#if !defined(NEW_ROTATION)
 		//pt.x = ;
@@ -81,5 +87,9 @@ public class Point implements Comparable<Point> {
 	}
 
 	
+	@Override
+	public String toString() {		
+		return String.format("%d.%d", x, y);
+	}
 	
 }

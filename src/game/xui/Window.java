@@ -2127,8 +2127,6 @@ public class Window extends WindowConstants
 		}
 
 		MouseLoop(click, mousewheel);
-
-		//_left_button_clicked = false; // TODO [dz] ok? Or who resets it?
 	}
 
 

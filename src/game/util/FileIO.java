@@ -495,8 +495,6 @@ public class FileIO {
 				fios.title = String.format(	"%s", name );
 				items.add(fios);
 
-				// TODO GetOldSaveGameName(fios.title, filename);
-
 			}
 		} catch (IOException x) {
 			System.err.println(x); // TODO err print

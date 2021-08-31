@@ -26,7 +26,7 @@ public class Hal
 	private static byte[] screen2; 
 	
 	
-	void toggle_fullscreen(boolean fullscreen) { } // TODO
+	void toggle_fullscreen(boolean fullscreen) { }
 
 	public static final DrawPixelInfo _screen = new DrawPixelInfo();
 	public static DrawPixelInfo _cur_dpi = new DrawPixelInfo();
@@ -106,7 +106,7 @@ void SortResolutions(int count)
 	
 	public static int Random() {		
 		//return (int) (Math.random() * Integer.MAX_VALUE);
-		return rng.nextInt();
+		return Math.abs(rng.nextInt());
 	}
 
 
@@ -229,8 +229,7 @@ void SortResolutions(int count)
 	}
 	
 	public void stop_video() {
-		// TODO Auto-generated method stub
-
+		// Empty
 	}
 
 	public void make_dirty(int left, int top, int width, int height) {
@@ -246,7 +245,7 @@ void SortResolutions(int count)
 		while(true) {
 			try {
 				if(!Global._fast_forward)
-					Thread.sleep(10); // TODO 100 fps?
+					Thread.sleep(10);
 			} catch (InterruptedException e) {
 				
 				Global.error(e);
