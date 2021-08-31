@@ -8,6 +8,7 @@ import game.ifaces.TileTypeProcs;
 import game.struct.Point;
 import game.struct.TileDesc;
 import game.tables.RoadTables;
+import game.tables.Snd;
 import game.util.ArrayPtr;
 import game.util.BitOps;
 import game.util.TownTables;
@@ -1223,7 +1224,7 @@ public class Road extends RoadTables
 		if (tile.IsLevelCrossing()) {
 			if (v.type == Vehicle.VEH_Train && BitOps.GB(tile.getMap().m5, 2, 1) == 0) {
 				/* train crossing a road */
-				//SndPlayVehicleFx(SND_0E_LEVEL_CROSSING, v);
+				v.SndPlayVehicleFx(Snd.SND_0E_LEVEL_CROSSING);
 				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
 				tile.MarkTileDirtyByTile();
 			}

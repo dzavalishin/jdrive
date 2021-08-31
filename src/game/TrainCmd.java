@@ -14,6 +14,7 @@ import game.struct.NPFFindStationOrTileData;
 import game.struct.RailtypeSlowdownParams;
 import game.struct.TileIndexDiff;
 import game.struct.TrainCollideChecker;
+import game.tables.Snd;
 import game.tables.TrainTables;
 import game.util.BitOps;
 import game.util.IntContainer;
@@ -2842,7 +2843,7 @@ public class TrainCmd extends TrainTables
 				);
 
 		Station.ModifyStationRatingAround(v.tile, v.owner, -160, 30);
-		//SndPlayVehicleFx(SND_13_BIG_CRASH, v);
+		v.SndPlayVehicleFx(Snd.SND_13_BIG_CRASH);
 	}
 
 
@@ -3463,7 +3464,8 @@ public class TrainCmd extends TrainTables
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
-			//SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?			SND_10_TRAIN_BREAKDOWN : SND_3A_COMEDY_BREAKDOWN_2, v);
+			v.SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?			
+				Snd.SND_10_TRAIN_BREAKDOWN : Snd.SND_3A_COMEDY_BREAKDOWN_2);
 
 			if(!v.isHidden()) {
 				Vehicle u = v.CreateEffectVehicleRel(4, 4, 5, Vehicle.EV_BREAKDOWN_SMOKE);
@@ -3570,7 +3572,7 @@ public class TrainCmd extends TrainTables
 					if (tile.IsTileType( TileTypes.MP_STREET) && tile.IsLevelCrossing()) {
 						if (BitOps.GB(tile.getMap().m5, 2, 1) == 0) {
 							tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
-							//SndPlayVehicleFx(SND_0E_LEVEL_CROSSING, v);
+							v.SndPlayVehicleFx(Snd.SND_0E_LEVEL_CROSSING);
 							tile.MarkTileDirtyByTile();
 						}
 					}

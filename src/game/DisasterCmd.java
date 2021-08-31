@@ -8,6 +8,7 @@ import game.ids.PlayerID;
 import game.struct.GetNewVehiclePosResult;
 import game.struct.TileIndexDiff;
 import game.tables.DisasterTables;
+import game.tables.Snd;
 import game.util.BitOps;
 
 public class DisasterCmd extends DisasterTables 
@@ -199,7 +200,7 @@ public class DisasterCmd extends DisasterTables
 
 		if (++v.age == 1) {
 			v.CreateEffectVehicleRel(0, 7, 8, Vehicle.EV_EXPLOSION_LARGE);
-			//SndPlayVehicleFx(SND_12_EXPLOSION, v);
+			v.SndPlayVehicleFx(Snd.SND_12_EXPLOSION);
 			v.disaster.image_override = Sprite.SPR_BLIMP_CRASHING;
 		} else if (v.age == 70) {
 			v.disaster.image_override = Sprite.SPR_BLIMP_CRASHED;
@@ -308,7 +309,7 @@ public class DisasterCmd extends DisasterTables
 			// destroy?
 			if (v.age > 50) {
 				v.CreateEffectVehicleRel(0, 7, 8, Vehicle.EV_EXPLOSION_LARGE);
-				//SndPlayVehicleFx(SND_12_EXPLOSION, v);
+				v.SndPlayVehicleFx(Snd.SND_12_EXPLOSION);
 				DeleteDisasterVeh(v);
 			}
 		}
@@ -605,7 +606,7 @@ public class DisasterCmd extends DisasterTables
 			v.getCurrent_order().station = 1;
 
 			u.CreateEffectVehicleRel(0, 7, 8, Vehicle.EV_EXPLOSION_LARGE);
-			//SndPlayVehicleFx(SND_12_EXPLOSION, u);
+			u.SndPlayVehicleFx(Snd.SND_12_EXPLOSION);
 
 			DeleteDisasterVeh(u);
 

@@ -1,46 +1,85 @@
 package game.util;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
+
+import game.Engine;
+import game.Global;
+import game.Landscape;
+import game.Rail;
 import game.TileIndex;
 import game.Vehicle;
+import game.ids.EngineID;
+import game.struct.Point;
 import game.tables.Snd;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class Sound {
+	private static final int SAMPLES_PER_XFER = 32;
 	private static final int SOUND_SLOT = 31;
 	private static final int PANNING_LEVELS = 16;
 	private static int _file_count;
 	private static FileEntry[] _files;
 	private static Mixer _mixer;
+	private static int effect_vol = 127;
+
+
+	static final Snd trainSfx[] = {
+			Snd.SND_04_TRAIN,
+			Snd.SND_0A_TRAIN_HORN,
+			Snd.SND_0A_TRAIN_HORN
+	};
 
 	public static void TrainPlayLeaveStationSound(final Vehicle  v)
 	{
-		/*
+
 		EngineID engtype = v.getEngine_type();
 
 		switch (Engine.GetEngine(engtype).getRailtype()) {
-		case RAILTYPE_RAIL:
-			//SndPlayVehicleFx(sfx[RailVehInfo(engtype).engclass], v);
+		case Rail.RAILTYPE_RAIL:
+			v.SndPlayVehicleFx(trainSfx[Engine.RailVehInfo(engtype.id).engclass]);
 			break;
 
-		case RAILTYPE_MONO:
-			SndPlayVehicleFx(SND_47_MAGLEV_2, v);
+		case Rail.RAILTYPE_MONO:
+			v.SndPlayVehicleFx(Snd.SND_47_MAGLEV_2);
 			break;
 
-		case RAILTYPE_MAGLEV:
-			//SndPlayVehicleFx(SND_41_MAGLEV, v);
+		case Rail.RAILTYPE_MAGLEV:
+			v.SndPlayVehicleFx(Snd.SND_41_MAGLEV);
 			break;
 		}
-		 */
-	}
-
-	public static void SndPlayTileFx(Snd snd, TileIndex tile) {
-
 
 	}
+
 
 	public static void MxInitialize(int freq) {
 		_mixer = new Mixer(freq);
+		
+		
+		Thread mixerThread = new Thread() 
+		{
+			@Override
+		    public void run() {
+		        try {
+		            Thread.sleep(1); // Don't kill CPU in any case
+		            soundPump();		            
+		        } catch(InterruptedException v) {
+		        	//mixerThread.interrupt();
+		        	interrupt();
+		        }
+		    }  
+		};
+
+		mixerThread.setDaemon(true);
+		mixerThread.setName("Sfx Mixer");
+		mixerThread.start();		
 	}
 
 	static class FileEntry {
@@ -52,7 +91,7 @@ public class Sound {
 		byte [] data;
 	}
 
-	
+
 	static class MixerChannel {
 		// Mixer
 		Mixer mx;
@@ -73,19 +112,19 @@ public class Sound {
 
 		int flags;
 
-		void MxSetChannelVolume(int left, int right)
+		void setChannelVolume(int left, int right)
 		{
 			volume_left = left;
 			volume_right = right;
 		}
 
 
-		void MxActivateChannel()
+		void activateChannel()
 		{
 			active = true;
 		}
 
-		void MxSetChannelRawSrc( byte [] mem, int size, int rate, int flags )
+		void setChannelRawSrc( byte [] mem, int size, int rate, int flags )
 		{
 			memory = mem;
 			this.flags = flags;
@@ -97,19 +136,19 @@ public class Sound {
 			// adjust the magnitude to prevent overflow
 			while(0 != (size & 0xFFFF0000)) {
 				size >>= 1;
-				rate = (rate >> 1) + 1;
+			rate = (rate >> 1) + 1;
 			}
 
 			samples_left = size * mx.play_rate / rate;
 		}
-		
-		void MxCloseChannel()
+
+		void closeChannel()
 		{
 			active = false;
 			memory = null;
 		}
-		
-		void mix_int8_to_int16(int [] buffer, int samples)
+
+		void mixInt8ToInt16(int [] buffer, int samples)
 		{			
 			int bufferPos = 0;
 
@@ -141,7 +180,7 @@ public class Sound {
 			//sc.pos = b - sc.memory;
 			pos = b.getDisplacement();
 		}
-		
+
 	}
 
 	static class Mixer 
@@ -155,7 +194,7 @@ public class Sound {
 				channels[i] = new MixerChannel();
 		}
 
-		MixerChannel MxAllocateChannel()
+		MixerChannel allocateChannel()
 		{
 			for (MixerChannel mc : channels)
 				if (mc.memory == null) {
@@ -165,8 +204,8 @@ public class Sound {
 				}
 			return null;
 		}
-		
-		void MxMixSamples(int [] buffer, int samples)
+
+		void mixSamples(int [] buffer, int samples)
 		{
 			// Clear the buffer
 			//memset(buffer, 0, sizeof(int16) * 2 * samples);
@@ -176,16 +215,16 @@ public class Sound {
 			for(MixerChannel mc : channels) 
 			{
 				if (mc.active) {
-					mc.mix_int8_to_int16(buffer, samples);
-					if (mc.samples_left == 0) mc.MxCloseChannel();
+					mc.mixInt8ToInt16(buffer, samples);
+					if (mc.samples_left == 0) mc.closeChannel();
 				}
 			}
 		}
-		
-		
+
+
 	}
-	
-	
+
+
 	public static void SoundInitialize(String filename) 
 	{		
 		int count;
@@ -215,7 +254,7 @@ public class Sound {
 			// Check for special case, see else case
 			byte[] nameBytes = FileIO.FioReadBlock(FileIO.FioReadByte()); // Read the name of the sound
 			String name = BitOps.stringFromBytes(nameBytes, 0, nameBytes.length);
-			
+
 			if(!name.equals("Corrupt sound")) {
 				FileIO.FioSeekTo(12, FileIO.SEEK_CUR); // Skip past RIFF header
 
@@ -262,11 +301,11 @@ public class Sound {
 		if( ((tag >> 8) & 0xFF) != cs[0]) return false;		
 		if( ((tag >>16) & 0xFF) != cs[0]) return false;		
 		if( ((tag >>24) & 0xFF) != cs[0]) return false;		
-		
+
 		return true;
 	}
 
-	
+
 	static boolean SetBankSource(MixerChannel mc, int bank)
 	{
 		FileEntry fe;
@@ -279,7 +318,7 @@ public class Sound {
 
 		if(fe.data == null)
 		{
-		
+
 			byte [] mem = new byte[fe.file_size];
 
 			FileIO.FioSeekToFile(fe.file_offset);
@@ -287,33 +326,156 @@ public class Sound {
 
 			for (i = 0; i != fe.file_size; i++)
 				mem[i] += -128; // Convert unsigned sound data to signed
-			
+
 			fe.data = mem;
 		}
-		
+
 		assert(fe.bits_per_sample == 8 && fe.channels == 1 && fe.file_size != 0 && fe.rate != 0);
 
-		mc.MxSetChannelRawSrc(fe.data, fe.file_size, fe.rate, 0);
+		mc.setChannelRawSrc(fe.data, fe.file_size, fe.rate, 0);
 
 		return true;
 	}
 
-	
+
 	static void StartSound(int sound, int panning, int volume)
 	{
 		int left_vol, right_vol;
 
-		if (volume == 0) return;
-		MixerChannel mc = _mixer.MxAllocateChannel();
-		if (mc == null) return;
+		Global.debug("start snd %d", sound);
 		
+		if (volume == 0) return;
+		MixerChannel mc = _mixer.allocateChannel();
+		if (mc == null) return;
+
 		if (!SetBankSource(mc,sound)) return;
 
 		panning = BitOps.clamp(panning, -PANNING_LEVELS, PANNING_LEVELS);
 		left_vol = (volume * PANNING_LEVELS) - (volume * panning);
 		right_vol = (volume * PANNING_LEVELS) + (volume * panning);
-		mc.MxSetChannelVolume(left_vol * 128 / PANNING_LEVELS, right_vol * 128 / PANNING_LEVELS);
-		mc.MxActivateChannel();
+		mc.setChannelVolume(left_vol * 128 / PANNING_LEVELS, right_vol * 128 / PANNING_LEVELS);
+		mc.activateChannel();
 	}
 
+
+	static final int _vol_factor_by_zoom[] = {255, 190, 134};
+
+	static final int _sound_base_vol[] = {
+			128,  90, 128, 128, 128, 128, 128, 128,
+			128,  90,  90, 128, 128, 128, 128, 128,
+			128, 128, 128,  80, 128, 128, 128, 128,
+			128, 128, 128, 128, 128, 128, 128, 128,
+			128, 128,  90,  90,  90, 128,  90, 128,
+			128,  90, 128, 128, 128,  90, 128, 128,
+			128, 128, 128, 128,  90, 128, 128, 128,
+			128,  90, 128, 128, 128, 128, 128, 128,
+			128, 128,  90,  90,  90, 128, 128, 128,
+			90,
+	};
+
+	static final int _sound_idx[] = {
+			2,  3,  4,  5,  6,  7,  8,  9,
+			10, 11, 12, 13, 14, 15, 16, 17,
+			18, 19, 20, 21, 22, 23, 24, 25,
+			26, 27, 28, 29, 30, 31, 32, 33,
+			34, 35, 36, 37, 38, 39, 40,  0,
+			1, 41, 42, 43, 44, 45, 46, 47,
+			48, 49, 50, 51, 52, 53, 54, 55,
+			56, 57, 58, 59, 60, 61, 62, 63,
+			64, 65, 66, 67, 68, 69, 70, 71,
+			72,
+	};
+
+	public static void SndPlayScreenCoordFx(/*SoundFx*/ int  sound, int x, int y)
+	{
+		if (effect_vol  == 0) return;
+
+		Iterator<Window> ii = Window.getIterator();
+		while( ii.hasNext() )
+		{
+			Window w = ii.next();
+			final ViewPort vp = w.getViewport();
+
+			if (vp != null &&
+					BitOps.IS_INSIDE_1D(x, vp.getVirtual_left(), vp.getVirtual_width()) &&
+					BitOps.IS_INSIDE_1D(y, vp.getVirtual_top(), vp.getVirtual_height())) {
+				int left = (x - vp.getVirtual_left());
+
+				StartSound(
+						_sound_idx[sound],
+						left / (vp.getVirtual_width() / ((PANNING_LEVELS << 1) + 1)) - PANNING_LEVELS,
+						(_sound_base_vol[sound] * effect_vol * _vol_factor_by_zoom[vp.getZoom()]) >> 15
+						);
+				return;
+			}
+		}
+
+	}
+
+	public static void SndPlayTileFx(Snd snd, TileIndex tile) {
+		SndPlayTileFx(snd.ordinal(), tile);
+	}
+
+	static void SndPlayTileFx(/*SoundFx*/ int  sound, TileIndex tile)
+	{
+		/* emits sound from center (+ 8) of the tile */
+		int x = tile.TileX() * 16 + 8;
+		int y = tile.TileY() * 16 + 8;
+		Point pt = Point.RemapCoords(x, y, Landscape.GetSlopeZ(x, y));
+		SndPlayScreenCoordFx(sound, pt.x, pt.y);
+	}
+
+
+	void SndPlayFx(/*SoundFx*/ int  sound)
+	{
+		StartSound(
+				_sound_idx[sound],
+				0,
+				(_sound_base_vol[sound] * effect_vol) >> 7
+				);
+	}
+
+
+
+	public static void soundPump() 
+	{
+		SourceDataLine soundLine = null;
+
+		// Set up an audio input stream piped from the mixer
+		try {
+			AudioFormat audioFormat = new AudioFormat(_mixer.play_rate, 16, 2, false, false);			
+			DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
+			soundLine = (SourceDataLine) AudioSystem.getLine(info);
+			soundLine.open(audioFormat);
+			soundLine.start();
+
+			int[] intBuffer = new int[SAMPLES_PER_XFER];
+			byte[] byteBuffer = new byte[SAMPLES_PER_XFER*2];
+
+			while(!Global._exit_game) 
+			{
+				_mixer.mixSamples(intBuffer, intBuffer.length);
+
+				for(int i = 0; i < SAMPLES_PER_XFER; i++)
+				{
+					byteBuffer[i*2+0] = (byte) intBuffer[i];
+					byteBuffer[i*2+1] = (byte) (intBuffer[i] >> 8);
+				}
+				
+				// Writes audio data to the mixer via this source data line.
+				soundLine.write(byteBuffer, 0, SAMPLES_PER_XFER*2);
+				
+			}
+		} catch (LineUnavailableException ex) {
+			ex.printStackTrace();
+		} finally {
+			if(soundLine != null)
+			{
+				soundLine.drain();
+				soundLine.close();
+			}
+		}
+	}
 }
+
+

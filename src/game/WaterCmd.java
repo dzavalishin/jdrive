@@ -9,6 +9,7 @@ import game.struct.Point;
 import game.struct.TileDesc;
 import game.struct.TileIndexDiff;
 import game.struct.TileIndexDiffC;
+import game.tables.Snd;
 import game.tables.WaterTables;
 import game.util.BitOps;
 import game.xui.Gfx;
@@ -693,7 +694,7 @@ public class WaterCmd extends WaterTables
 				v.index,
 				0);
 			v.CreateEffectVehicleRel(4, 4, 8, Vehicle.EV_EXPLOSION_LARGE);
-			//SndPlayVehicleFx(SND_12_EXPLOSION, v);
+			v.SndPlayVehicleFx(Snd.SND_12_EXPLOSION);
 		}
 	}
 

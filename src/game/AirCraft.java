@@ -15,6 +15,7 @@ import game.struct.Point;
 import game.tables.AirConstants;
 import game.tables.AirCraftTables;
 import game.tables.AirportMovingData;
+import game.tables.Snd;
 import game.util.BitOps;
 import game.util.GameDate;
 import game.util.YearMonthDay;
@@ -761,7 +762,7 @@ public class AirCraft extends AirCraftTables {
 
 	static void PlayAircraftSound(final Vehicle  v)
 	{
-		//SndPlayVehicleFx(AircraftVehInfo(v.engine_type).sfx, v);
+		v.SndPlayVehicleFx(Engine.AircraftVehInfo(v.engine_type.id).sfx);
 	}
 
 	static int UpdateAircraftSpeed(Vehicle v)
@@ -892,7 +893,7 @@ public class AirCraft extends AirCraftTables {
 			// Make sure the rotors don't rotate too fast
 			if (u.cur_speed > 32) {
 				v.cur_speed = 0;
-				//if (--u.cur_speed == 32) SndPlayVehicleFx(SND_18_HELICOPTER, v);
+				if (--u.cur_speed == 32) v.SndPlayVehicleFx(Snd.SND_18_HELICOPTER);
 			} else {
 				u.cur_speed = 32;
 				if (UpdateAircraftSpeed(v) >= 1) {
@@ -1361,7 +1362,7 @@ public class AirCraft extends AirCraftTables {
 				v.index,
 				0);
 
-		//SndPlayVehicleFx(SND_12_EXPLOSION, v);
+		v.SndPlayVehicleFx(Snd.SND_12_EXPLOSION);
 	}
 
 	static void MaybeCrashAirplane(Vehicle v)
@@ -1483,7 +1484,7 @@ public class AirCraft extends AirCraftTables {
 	static void AircraftLandAirplane(Vehicle v)
 	{
 		AircraftLand(v);
-		//SndPlayVehicleFx(SND_17_SKID_PLANE, v);
+		v.SndPlayVehicleFx(Snd.SND_17_SKID_PLANE);
 		MaybeCrashAirplane(v);
 	}
 

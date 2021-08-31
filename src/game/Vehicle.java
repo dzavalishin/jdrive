@@ -30,7 +30,9 @@ import game.struct.Rect;
 import game.struct.VQueueItem;
 import game.tables.BubbleMovement;
 import game.tables.EngineTables;
+import game.tables.Snd;
 import game.util.BitOps;
+import game.util.Sound;
 import game.xui.DrawPixelInfo;
 import game.xui.MiscGui;
 import game.xui.VehicleGui;
@@ -2033,7 +2035,7 @@ public class Vehicle implements IPoolItem
 		if (b.y == 4 && b.x == 1) {
 			if (v.z_pos > 180 || BitOps.CHANCE16I(1, 96, Hal.InteractiveRandom())) {
 				v.spritenum = 5;
-				// TODO SndPlayVehicleFx(SND_2F_POP, v);
+				v.SndPlayVehicleFx(Snd.SND_2F_POP);
 			}
 			et = 0;
 		}
@@ -2042,7 +2044,7 @@ public class Vehicle implements IPoolItem
 			TileIndex tile;
 
 			et++;
-			// TODO SndPlayVehicleFx(SND_31_EXTRACT, v);
+			v.SndPlayVehicleFx(Snd.SND_31_EXTRACT);
 
 			tile = TileIndex.TileVirtXY(v.x_pos, v.y_pos);
 			if (tile.IsTileType( TileTypes.MP_INDUSTRY) && tile.getMap().m5 == 0xA2) 
@@ -3769,7 +3771,18 @@ public class Vehicle implements IPoolItem
 	}
 
 
+	public void SndPlayVehicleFx(/*SoundFx*/ Snd snd)
+	{
+		SndPlayVehicleFx(snd.ordinal());
+	}
 
+	void SndPlayVehicleFx(/*SoundFx*/ int snd)
+	{
+		Sound.SndPlayScreenCoordFx(snd,
+			(left_coord + right_coord) / 2,
+			(top_coord + bottom_coord) / 2
+		);
+	}
 
 	
 }

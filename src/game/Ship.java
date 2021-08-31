@@ -6,6 +6,7 @@ import game.ids.VehicleID;
 import game.struct.GetNewVehiclePosResult;
 import game.struct.NPFFindStationOrTileData;
 import game.struct.TileIndexDiffC;
+import game.tables.Snd;
 import game.util.BitOps;
 import game.xui.EngineGui;
 import game.xui.Gfx;
@@ -162,7 +163,8 @@ public class Ship {
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
-			//SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?				SND_10_TRAIN_BREAKDOWN : SND_3A_COMEDY_BREAKDOWN_2, v);
+			v.SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?				
+				Snd.SND_10_TRAIN_BREAKDOWN : Snd.SND_3A_COMEDY_BREAKDOWN_2);
 
 			if(!v.isHidden()) {
 				Vehicle u = v.CreateEffectVehicleRel(4, 4, 5, Vehicle.EV_BREAKDOWN_SMOKE);
@@ -186,7 +188,7 @@ public class Ship {
 
 	static void PlayShipSound(Vehicle v)
 	{
-		// TODO SndPlayVehicleFx(EngineGui.ShipVehInfo(v.engine_type).sfx, v);
+		v.SndPlayVehicleFx(EngineGui.ShipVehInfo(v.engine_type.id).sfx);
 	}
 
 	static final TileIndexDiffC _dock_offs[] = {
