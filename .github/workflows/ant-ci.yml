@@ -20,4 +20,4 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
     - name: Build with Ant
-      run: ant -noinput -buildfile build.xml test
+      run: ant -noinput -buildfile build.xml test create_run_jar
