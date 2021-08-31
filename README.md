@@ -2,6 +2,8 @@
 
 This is an attempt to port [OpenTTD](https://www.openttd.org/) to Java.
 
+[![Java CI](https://github.com/dzavalishin/jdrive/actions/workflows/ant-ci.yml/badge.svg)](https://github.com/dzavalishin/jdrive/actions/workflows/ant-ci.yml)
+
 Current state: The game is basically playable - aircrafts, trains, ships and road vehicles are working. But Save/load is not completely tested.
 
 You're welcome to take part in testing and/or development!
