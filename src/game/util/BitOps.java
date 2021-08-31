@@ -161,13 +161,22 @@ public class BitOps {
 
 	//extern const byte _ffb_64[128];
 
-	/* Returns the position of the first bit that is not zero, counted from the
-	 * left. Ie, 10110100 returns 2, 00000001 returns 0, etc. When x == 0 returns
-	 * 0.
+	/**
+	 * Returns the position of the first bit that is not zero, counted from the
+	 * RIGHT. Ie, 10110100 returns 2, 00000001 returns 0, etc. 
+	 * 
+	 * LIMITED TO LOWER 6 BITS!
+	 * 
+	 * @return When x == 0 returns 0
 	 */
 	public static int FIND_FIRST_BIT(int x) { return TrackPathFinderTables._ffb_64[(x & 0xFF)]; }
-	/* Returns x with the first bit that is not zero, counted from the left, set
+	
+	/**
+	 * Returns x with the first bit that is not zero, counted from the RIGHT, set
 	 * to zero. So, 10110100 returns 10110000, 00000001 returns 00000000, etc.
+
+	 * LIMITED TO LOWER 6 BITS!
+	 * 
 	 */
 	public static int KILL_FIRST_BIT(int x) { return TrackPathFinderTables._ffb_64[(x & 0xFF)+64]; }
 	

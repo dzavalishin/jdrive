@@ -53,6 +53,11 @@ public class PlayerID extends AbstractID implements Serializable
 		return equals( Global.gs._local_player );
 	}
 
+	public boolean isLocalPlayer()
+	{
+		return equals( Global.gs._local_player );
+	}
+
 	public boolean isSpectator()
 	{
 		return id == Owner.OWNER_SPECTATOR;

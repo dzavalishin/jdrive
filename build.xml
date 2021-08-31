@@ -6,7 +6,14 @@
     <property name="dir.buildfile" value="."/>
     <property name="dir.workspace" value="${dir.buildfile}/../.."/>
     <property name="dir.jarfile" value="${dir.buildfile}"/>
-    <target name="create_run_jar">
+
+    <path id="test.classpath">
+        <pathelement path="bin"/>
+        <fileset dir="${ant.home}/lib" includes="*.jar" />
+        <fileset dir="lib" includes="*.jar" />
+    </path>
+
+    <target name="create_run_jar" depends="compile">
         <jar destfile="${dir.jarfile}/JDrive.jar">
             <manifest>
                 <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
@@ -18,4 +25,26 @@
             <fileset dir="${dir.jarfile}/bin"/>
         </jar>
     </target>
+
+    <target name="compile">
+        <mkdir dir="bin"/>
+        <javac destdir="bin" includeantruntime="false" encoding="UTF-8" classpathref="test.classpath">
+            <src path="src"/>
+        </javac>
+    </target>
+
+    <target name="test" depends="compile">
+        <junitlauncher haltOnFailure="true" printSummary="true">
+            <classpath refid="test.classpath"/>
+            <testclasses outputdir="test/test-report">
+                <fileset dir="bin">
+                    <include name="test/game/util/*Test.class"/>
+                    <include name="test/game/**/*Test.class"/>
+                </fileset>
+                <listener type="legacy-xml" sendSysOut="true" sendSysErr="true"/>
+                <listener type="legacy-plain" sendSysOut="true" />
+            </testclasses>
+        </junitlauncher>
+    </target>
+
 </project>

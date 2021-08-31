@@ -21,7 +21,7 @@ class TTDQueueImplTest {
 		q.push(200, 200);
 		q.push(100, 100);
 		
-		int max = Integer.MAX_VALUE;
+		int max = 0; //Integer.MAX_VALUE;
 		
 		while(true)
 		{
@@ -30,8 +30,9 @@ class TTDQueueImplTest {
 				break;
 			
 			Integer ret = (Integer) o;
+			//System.out.print(ret+" ");
 			
-			assertTrue( ret <= max );
+			assertTrue( ret >= max );
 			max = ret;
 		}
 		

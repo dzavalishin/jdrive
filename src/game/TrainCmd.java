@@ -2583,7 +2583,7 @@ public class TrainCmd extends TrainTables
 		if (0 == (st.had_vehicle_of_type & Station.HVOT_TRAIN)) {
 			st.had_vehicle_of_type |= Station.HVOT_TRAIN;
 			Global.SetDParam(0, st.index);
-			flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+			flags = (v.owner.isLocalPlayer()) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 			NewsItem.AddNewsItem(
 					Str.STR_8801_CITIZENS_CELEBRATE_FIRST,
 					flags,
@@ -3759,7 +3759,7 @@ public class TrainCmd extends TrainTables
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) { // User initiated?
 				v.setStopped(true);
-				if (v.owner == Global.gs._local_player) {
+				if (v.owner.isLocalPlayer()) {
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddValidatedNewsItem(
 							Str.STR_8814_TRAIN_IS_WAITING_IN_DEPOT,
@@ -3844,7 +3844,7 @@ public class TrainCmd extends TrainTables
 			CheckIfTrainNeedsService(v);
 
 			// check if train hasn't advanced in its order list for a set number of days
-			if (Global._patches.lost_train_days != 0 && v.num_orders != 0 && 0==(v.vehstatus & (Vehicle.VS_STOPPED | Vehicle.VS_CRASHED) ) && ++v.rail.days_since_order_progr >= Global._patches.lost_train_days && v.owner == Global.gs._local_player) {
+			if (Global._patches.lost_train_days != 0 && v.num_orders != 0 && 0==(v.vehstatus & (Vehicle.VS_STOPPED | Vehicle.VS_CRASHED) ) && ++v.rail.days_since_order_progr >= Global._patches.lost_train_days && v.owner.isLocalPlayer()) {
 				v.rail.days_since_order_progr = 0;
 				Global.SetDParam(0, v.unitnumber.id);
 				NewsItem.AddNewsItem(
@@ -3892,7 +3892,7 @@ public class TrainCmd extends TrainTables
 			if (v.type == Vehicle.VEH_Train && v.IsFrontEngine()) {
 
 				// show warning if train is not generating enough income last 2 years (corresponds to a red icon in the vehicle list)
-				if (Global._patches.train_income_warn && v.owner == Global.gs._local_player && v.age >= 730 && v.profit_this_year < 0) {
+				if (Global._patches.train_income_warn && v.owner.equals(Global.gs._local_player) && v.age >= 730 && v.profit_this_year < 0) {
 					Global.SetDParam(1, v.profit_this_year);
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddNewsItem(

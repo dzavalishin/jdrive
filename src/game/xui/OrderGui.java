@@ -57,7 +57,7 @@ public class OrderGui {
 
 		v = Vehicle.GetVehicle(w.window_number);
 
-		w.disabled_state = (v.getOwner() == Global.gs._local_player) ? 0 : (
+		w.disabled_state = (v.getOwner().isLocalPlayer()) ? 0 : (
 			1 << 4 |   //skip
 			1 << 5 |   //delete
 			1 << 6 |   //non-stop
@@ -265,7 +265,7 @@ public class OrderGui {
 		if (tile.IsTileType( TileTypes.MP_STATION)) {
 			final Station  st = Station.GetStation(st_index = tile.getMap().m2);
 			
-			if (st.getOwner() == Global.gs._current_player || st.getOwner().isNone() || mAirport.MA_OwnerHandler(st.getOwner())) {
+			if (st.getOwner().equals(Global.gs._current_player) || st.getOwner().isNone() || mAirport.MA_OwnerHandler(st.getOwner())) {
 				byte facil;
 				
 				/*
