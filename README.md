@@ -2,7 +2,7 @@
 
 This is an attempt to port [OpenTTD](https://www.openttd.org/) to Java.
 
-Current state: The game is partially playable - trains, ships and road vehicles are working. But Save/load is incomplete.
+Current state: The game is basically playable - aircrafts, trains, ships and road vehicles are working. But Save/load is not completely tested.
 
 You're welcome to take part in testing and/or development!
 
