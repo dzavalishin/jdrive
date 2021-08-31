@@ -26,7 +26,7 @@ public class Hal
 	private static byte[] screen2; 
 	
 	
-	void toggle_fullscreen(boolean fullscreen) { }
+	void toggle_fullscreen(boolean fullscreen) { throw new UnsupportedOperationException(); }
 
 	public static final DrawPixelInfo _screen = new DrawPixelInfo();
 	public static DrawPixelInfo _cur_dpi = new DrawPixelInfo();

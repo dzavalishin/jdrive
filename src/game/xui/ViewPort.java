@@ -1999,7 +1999,7 @@ public class ViewPort
 		TrainGui.ShowTrainViewWindow(v);
 	}
 
-	static void Nop(final Vehicle v) {}
+	static void Nop(final Vehicle v) {/*empty*/}
 
 
 	static final OnVehicleClickProc[] _on_vehicle_click_proc = {

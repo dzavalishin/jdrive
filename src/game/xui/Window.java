@@ -1434,7 +1434,6 @@ public class Window extends WindowConstants
 
 	static boolean HandleWindowDragging()
 	{
-		//Window w;
 		// Get out immediately if no window is being dragged at all.
 		if (!_dragging_window) return true;
 
@@ -1694,7 +1693,6 @@ public class Window extends WindowConstants
 
 	static boolean HandleScrollbarScrolling()
 	{
-		//Window w;
 		int i;
 		int pos;
 		Scrollbar sb;
@@ -2532,7 +2530,7 @@ public class Window extends WindowConstants
 				_scrollbar_size = ma - mi - 23;
 				flags4 |= WF_SCROLL_MIDDLE;
 				_scrolling_scrollbar = true;
-				_cursorpos_drag_start = Hal._cursor.pos;
+				_cursorpos_drag_start = new Point( Hal._cursor.pos );
 			}
 		}
 

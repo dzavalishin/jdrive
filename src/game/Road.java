@@ -534,7 +534,7 @@ public class Road extends RoadTables
 			}
 
 			tile.getMap().m5 |= pieces;
-			Global.debug("town road pieces 0x%X", pieces);
+			//Global.debug("town road pieces 0x%X", pieces);
 
 			tile.MarkTileDirtyByTile();
 		}

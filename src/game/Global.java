@@ -12,6 +12,7 @@ import game.ids.VehicleID;
 import game.struct.BackuppedOrders;
 import game.struct.ColorList;
 import game.struct.EngineInfo;
+import game.struct.HighScore;
 import game.struct.Point;
 import game.tables.CargoConst;
 import game.util.GameDate;
@@ -263,7 +264,7 @@ public class Global
 	public static boolean _do_autosave;
 	public static final boolean _use_dos_palette = false;
 
-
+	static HighScore [][] _highscore_table = new HighScore[5][5]; // 4 difficulty-settings (+ network); top 5
 
 	// binary logarithm of the map size, try to avoid using this one
 	public static int MapLogX()  { return _map_log_x; }

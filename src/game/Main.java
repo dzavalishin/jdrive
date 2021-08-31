@@ -104,8 +104,6 @@ public class Main {
 
 	static void showhelp()
 	{
-		//char buf[4096], *p;
-
 		String help =
 				"Command line options:\n" +
 				"  -v drv              = Set video driver (see below)\n" +
@@ -120,15 +118,11 @@ public class Main {
 				"  -G seed             = Set random seed\n" +
 				"  -n [ip#player:port] = Start networkgame\n" +
 				"  -D                  = Start dedicated server\n" +
-				//#if !defined(__MORPHOS__) && !defined(__AMIGA__)
-				//"  -f                  = Fork into the background (dedicated only)\n"
-				//#endif
+				"  -f                  = Fork into the background (dedicated only)\n" +
 				"  -i                  = Force to use the DOS palette (use this if you see a lot of pink)\n" +
 				"  -p #player          = Player as #player (deprecated) (network only)\n" +
 				"  -c config_file      = Use 'config_file' instead of 'openttd.cfg'\n"
 				;
-
-		// TODO GetDriverList(p);
 
 		Hal.ShowInfo(help);
 	}
@@ -330,7 +324,7 @@ public class Main {
 
 		// TODO LoadFromConfig();
 		// TODO CheckConfig();
-		// TODO LoadFromHighScore();
+		SaveLoad.LoadFromHighScore();
 
 		// override config?
 		// TODO if (resolution[0]) { _cur_resolution[0] = resolution[0]; _cur_resolution[1] = resolution[1]; }
@@ -435,7 +429,7 @@ public class Main {
 		//_sound_driver.stop(); TODO return
 
 		// TODO SaveToConfig();
-		// TODO SaveToHighScore();
+		SaveLoad.SaveToHighScore();
 
 		// uninitialize airport state machines
 		AirportFTAClass.UnInitializeAirports();
