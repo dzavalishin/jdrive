@@ -102,7 +102,8 @@ public class VehicleHash implements Serializable
 			return;
 		}
 		
-		assert old.id == vehicle.index;
+		// TODO debug me
+		//assert old.id == vehicle.index;
 
 	}
 

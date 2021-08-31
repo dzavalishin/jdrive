@@ -443,7 +443,7 @@ public class Sound {
 
 		// Set up an audio input stream piped from the mixer
 		try {
-			AudioFormat audioFormat = new AudioFormat(_mixer.play_rate, 16, 2, false, false);			
+			AudioFormat audioFormat = new AudioFormat(_mixer.play_rate, 16, 2, true, false);			
 			DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
 			soundLine = (SourceDataLine) AudioSystem.getLine(info);
 			soundLine.open(audioFormat);
@@ -466,6 +466,8 @@ public class Sound {
 				soundLine.write(byteBuffer, 0, SAMPLES_PER_XFER*2);
 				
 			}
+		} catch (IllegalArgumentException ex) {
+			ex.printStackTrace();
 		} catch (LineUnavailableException ex) {
 			ex.printStackTrace();
 		} finally {
