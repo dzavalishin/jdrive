@@ -15,6 +15,7 @@ import game.enums.ThreadMsg;
 import game.ids.PlayerID;
 import game.struct.SmallFiosItem;
 import game.util.FileIO;
+import game.util.Sound;
 import game.util.Strings;
 import game.xui.Gfx;
 import game.xui.GfxInit;
@@ -352,8 +353,8 @@ public class Main {
 
 		// Sample catalogue
 		Global.DEBUG_misc( 1, "Loading sound effects...");
-		// TODO MxInitialize(11025);
-		// TODO SoundInitialize("sample.cat");
+		Sound.MxInitialize(11025);
+		Sound.SoundInitialize("sample.cat");
 
 		// This must be done early, since functions use the InvalidateWindow* calls
 		Window.InitWindowSystem();
