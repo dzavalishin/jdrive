@@ -1,5 +1,5 @@
 package game.util.wcustom;
 
-public class order_d extends AbstractWinCustom {
+public class order_d implements AbstractWinCustom {
 	public int sel;
 }

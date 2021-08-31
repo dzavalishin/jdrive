@@ -335,7 +335,7 @@ public class Gfx extends PaletteTabs
 		int c;
 		int ddd_pos;
 
-		base = _stringwidth_base;
+		//base = _stringwidth_base;
 		//ddd_w = 
 		ddd = GetCharacterWidth(base + '.') * 3;
 
@@ -1454,7 +1454,7 @@ public class Gfx extends PaletteTabs
 
 					if(0 != (skip & 1) ) {
 						skip++;
-						src.inc();;
+						src.inc();
 						if (--num == 0) continue;
 					}
 
@@ -1701,8 +1701,8 @@ public class Gfx extends PaletteTabs
 		DoPaletteAnimations();
 	}
 
-	static int EXTR(int p, int q) { return ( (((Global._timer_counter) * p * q) >>> 16) ) % q; }
-	static int EXTR2(int p, int q) { return ( ((((~Global._timer_counter)) * p * q) >>> 16) ) % q; }
+	static int EXTR(int p, int q) { return ( (Global._timer_counter * p * q) >>> 16) % q; }
+	static int EXTR2(int p, int q) { return ( ((~Global._timer_counter) * p * q) >>> 16)  % q; }
 
 	public static void DoPaletteAnimations()
 	{
@@ -1716,7 +1716,7 @@ public class Gfx extends PaletteTabs
 		int i;
 		int j;
 
-		ArrayPtr<Colour> d = new ArrayPtr<Colour>( _cur_palette, 217 );  
+		ArrayPtr<Colour> d = new ArrayPtr<>( _cur_palette, 217 );  
 
 		System.arraycopy(_cur_palette, 217, old_val, 0, c);
 

@@ -28,7 +28,7 @@ public class CursorVars
 	{
 		Sprite p;
 
-		if (sprite == cursor) return;
+ 		if( sprite != null && sprite.equals(cursor) ) return;
 
 		p = game.SpriteCache.GetSprite(cursor.id & Sprite.SPRITE_MASK);
 		sprite = cursor;
@@ -54,12 +54,12 @@ public class CursorVars
 			animate_pos = 0;
 		}
 
-		CursorID sprite = CursorID.get( animate_list[animate_pos].spriteId );
+		CursorID csprite = CursorID.get( animate_list[animate_pos].spriteId );
 		animate_timeout = animate_list[animate_pos].time;
 		//animate_pos += 2;
 		animate_pos++;
 
-		SetCursorSprite(sprite);
+		SetCursorSprite(csprite);
 		/*
 		CursorID[] cur = cv.animate_cur;
 		CursorID sprite;

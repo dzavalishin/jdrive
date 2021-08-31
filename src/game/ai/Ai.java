@@ -101,27 +101,4 @@ public class Ai {
 	*/
 
 	
-}
-
-
-
-
-/* How DoCommands look like for an AI */
-class AICommand {
-	int tile;
-	int p1;
-	int p2;
-	int procc;
-
-	String text;
-	int uid;
-
-	AICommand next;
-} 
-
-/* The struct for an AIScript Player */
-class AIPlayer {
-	boolean active;            //! Is this AI active?
-	AICommand queue;       //! The commands that he has in his queue
-	AICommand queue_tail;  //! The tail of this queue
 } 

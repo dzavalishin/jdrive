@@ -9,5 +9,5 @@ public enum FiosType {
 	SCENARIO,
 	OLD_SCENARIO,
 	DIRECT,
-};
+}
 

@@ -3,6 +3,7 @@ package game;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -12,7 +13,7 @@ import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 
 
-public class RoadStop implements IPoolItem
+public class RoadStop implements IPoolItem, Serializable
 {
 
 	private static final long serialVersionUID = 1L;

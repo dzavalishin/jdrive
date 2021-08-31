@@ -1,6 +1,5 @@
 package game;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -71,7 +70,7 @@ public class Engine extends EngineTables implements Serializable
 	
 	public static RailVehicleInfo  RailVehInfo(int e)
 	{
-		assert(e < Global._rail_vehicle_info.length);
+		assert(e >= 0 && e < Global._rail_vehicle_info.length);
 		return Global._rail_vehicle_info[e];
 	}
 
@@ -453,14 +452,15 @@ public class Engine extends EngineTables implements Serializable
 
 						while (u != veh) {
 							chain_before++;
-							if (dsg.variable == 0x41 && u.getEngine_type() != veh.getEngine_type())
+							if( dsg.variable == 0x41 && !u.getEngine_type().equals(veh.getEngine_type()) )
 								chain_before = 0;
 							u = u.next;
 						}
-						while (u.next != null && (dsg.variable == 0x40 || u.next.getEngine_type() == veh.getEngine_type())) {
+						while (u.next != null && (dsg.variable == 0x40 || u.next.getEngine_type().equals(veh.getEngine_type()) )) 
+						{
 							chain_after++;
 							u = u.next;
-						};
+						}
 
 						value = chain_before | chain_after << 8
 								| (chain_before + chain_after) << 16;
@@ -998,8 +998,10 @@ public class Engine extends EngineTables implements Serializable
 				{
 					Vehicle v = it.next();
 					if (v.type == Vehicle.VEH_Train || v.type == Vehicle.VEH_Road || v.type == Vehicle.VEH_Ship ||
-							(v.type == Vehicle.VEH_Aircraft && v.subtype <= 2)) {
-						if (v.owner == p.index && v.getEngine_type().id == index) {
+							(v.type == Vehicle.VEH_Aircraft && v.subtype <= 2)) 
+					{
+						if(v.owner.equals(p.index) && v.getEngine_type().id == index) 
+						{
 							/* The user did prove me wrong, so restore old value */
 							p.block_preview =  block_preview;
 							break;
@@ -1172,9 +1174,7 @@ public class Engine extends EngineTables implements Serializable
 		if (e.type != type) return false;
 
 		// check if it's available
-		if (!e.isAvailableTo(Global.gs._current_player.id)) return false;
-
-		return true;
+		return e.isAvailableTo(Global.gs._current_player.id);
 	}
 
 
@@ -1510,13 +1510,13 @@ public class Engine extends EngineTables implements Serializable
 	}
 
 	
-	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	public static void loadGame(ObjectInputStream oin)
 	{
 		//Global.gs._engines = (Engine[]) oin.readObject();
 		AdjustAvailAircraft();
 	}
 
-	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	public static void saveGame(ObjectOutputStream oos) 
 	{
 		//oos.writeObject(Global.gs._engines);		
 	}

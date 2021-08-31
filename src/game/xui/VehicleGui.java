@@ -210,7 +210,7 @@ public class VehicleGui {
 	{
 		if (0 == (vl.flags & Vehicle.VL_RESORT)) return;
 
-		_internal_sort_order = 0 != (vl.flags & Vehicle.VL_DESC) ? true : false;
+		_internal_sort_order = 0 != (vl.flags & Vehicle.VL_DESC);
 		_internal_name_sorter_id = Str.STR_SV_TRAIN_NAME;
 
 		Arrays.sort( vl.sort_list, _vehicle_sorter[vl.sort_type] );
@@ -321,7 +321,7 @@ private static void show_cargo(ctype) {
 		for (i = 0; i < Global.NUM_TRAIN_ENGINES; i++) 
 		{
 			final Engine e = Engine.GetEngine(i);
-			final RailVehicleInfo rvi = EngineGui.RailVehInfo(i);
+			final RailVehicleInfo rvi = Engine.RailVehInfo(i);
 			final EngineInfo info = Global._engine_info[i];
 
 			if (!p.EngineHasReplacement(EngineID.get(i) ) && _player_num_engines[i] == 0 && show_outdated) continue;
@@ -333,7 +333,7 @@ private static void show_cargo(ctype) {
 
 
 			colour = sel[0] == 0 ? 0xC : 0x10;
-			if (!(ENGINE_IS_AVAILABLE(e, info) && show_outdated && (0 != EngineGui.RailVehInfo(i).power) && e.getRailtype() == railtype)) 
+			if (!(ENGINE_IS_AVAILABLE(e, info) && show_outdated && (0 != Engine.RailVehInfo(i).power) && e.getRailtype() == railtype)) 
 			{
 				//if (e.railtype != railtype || 0==(rvi.flags & Engine.RVI_WAGON) != is_engine ||
 				if (e.getRailtype() != railtype || rvi.isWagon() == is_engine ||
@@ -384,7 +384,7 @@ private static void show_cargo(ctype) {
 				final Engine e = Engine.GetEngine(engine_id);
 				final EngineInfo info = Global._engine_info[engine_id];
 
-				if (ENGINE_IS_AVAILABLE(e,info) && (0 != EngineGui.RailVehInfo(engine_id).power) && e.getRailtype() == railtype) {
+				if (ENGINE_IS_AVAILABLE(e,info) && (0 != Engine.RailVehInfo(engine_id).power) && e.getRailtype() == railtype) {
 					if (_player_num_engines[engine_id] > 0 || p.EngineHasReplacement(EngineID.get(engine_id))) {
 						if (sel[0] == 0) selected_id[0] = EngineID.get(engine_id);
 						count++;
@@ -419,7 +419,7 @@ private static void show_cargo(ctype) {
 			if (selected_id[0] != Engine.INVALID_ENGINE_ID) { // only draw right array if we have anything in the left one
 				num = Global.NUM_ROAD_ENGINES;
 				engine_id = Global.ROAD_ENGINES_INDEX;
-				cargo = EngineGui.RoadVehInfo(selected_id[0].id).cargo_type;
+				cargo = Engine.RoadVehInfo(selected_id[0].id).cargo_type;
 
 				do {
 					final Engine e = Engine.GetEngine(engine_id);
@@ -457,14 +457,14 @@ private static void show_cargo(ctype) {
 				num = Global.NUM_SHIP_ENGINES;
 				//e = GetEngine(Global.SHIP_ENGINES_INDEX);
 				engine_id = Global.SHIP_ENGINES_INDEX;
-				cargo = EngineGui.ShipVehInfo(selected_id[0].id).cargo_type;
-				refittable = EngineGui.ShipVehInfo(selected_id[0].id).refittable;
+				cargo = Engine.ShipVehInfo(selected_id[0].id).cargo_type;
+				refittable = Engine.ShipVehInfo(selected_id[0].id).refittable;
 
 				do {
 					e = Engine.GetEngine(engine_id);
 					if (e.isAvailableToMe() &&
-							(cargo == EngineGui.ShipVehInfo(engine_id).cargo_type 
-							|| 0 != (refittable & EngineGui.ShipVehInfo(engine_id).refittable)) 
+							(cargo == Engine.ShipVehInfo(engine_id).cargo_type 
+							|| 0 != (refittable & Engine.ShipVehInfo(engine_id).refittable)) 
 							) {
 						if (sel[1] == 0) selected_id[1] = EngineID.get( engine_id );
 						sel[1]--;
@@ -495,12 +495,12 @@ private static void show_cargo(ctype) {
 			if (selected_id[0] != Engine.INVALID_ENGINE_ID) {
 				num = Global.NUM_AIRCRAFT_ENGINES;
 				//e = GetEngine(Global.AIRCRAFT_ENGINES_INDEX);
-				subtype = EngineGui.AircraftVehInfo(selected_id[0].id).subtype;
+				subtype = Engine.AircraftVehInfo(selected_id[0].id).subtype;
 				engine_id = Global.AIRCRAFT_ENGINES_INDEX;
 				do {
 					Engine e = Engine.GetEngine(engine_id);
 					if (e.isAvailableToMe()) {
-						if (BitOps.HASBIT(subtype, 0) == BitOps.HASBIT(EngineGui.AircraftVehInfo(engine_id).subtype, 0)) {
+						if (BitOps.HASBIT(subtype, 0) == BitOps.HASBIT(Engine.AircraftVehInfo(engine_id).subtype, 0)) {
 							count2++;
 							if (sel[1] == 0) selected_id[1] = EngineID.get(engine_id );
 							sel[1]--;
@@ -577,7 +577,7 @@ private static void show_cargo(ctype) {
 			int cargo;
 
 			if (selected_id0[0] >= Global.ROAD_ENGINES_INDEX && selected_id0[0] < Global.SHIP_ENGINES_INDEX) {
-				cargo = EngineGui.RoadVehInfo(selected_id0[0]).cargo_type;
+				cargo = Engine.RoadVehInfo(selected_id0[0]).cargo_type;
 
 				do {
 					final Engine  e = Engine.GetEngine( engine_id );
@@ -594,8 +594,8 @@ private static void show_cargo(ctype) {
 						sel0[0]--;
 					}
 
-					if (EngineGui.RoadVehInfo(engine_id).cargo_type == cargo && e.isAvailableToMe()) {
-						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.getCap(), 0) && EngineGui.RoadVehInfo(engine_id).cargo_type == cargo) {
+					if (Engine.RoadVehInfo(engine_id).cargo_type == cargo && e.isAvailableToMe()) {
+						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.getCap(), 0) && Engine.RoadVehInfo(engine_id).cargo_type == cargo) {
 							Gfx.DrawString(x2[0]+59, y2[0]+2, Engine.GetCustomEngineName(engine_id), sel1[0]==0 ? 0xC : 0x10);
 							RoadVehCmd.DrawRoadVehEngine(x2[0]+29, y2[0]+6, engine_id, Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player)));
 							y2[0] += 14;
@@ -615,8 +615,8 @@ private static void show_cargo(ctype) {
 			int cargo, refittable;
 
 			if (selected_id0[0] != Engine.INVALID_ENGINE_ID.id) {
-				cargo = EngineGui.ShipVehInfo(selected_id0[0]).cargo_type;
-				refittable = EngineGui.ShipVehInfo(selected_id0[0]).refittable;
+				cargo = Engine.ShipVehInfo(selected_id0[0]).cargo_type;
+				refittable = Engine.ShipVehInfo(selected_id0[0]).refittable;
 
 				do {
 					final Engine  e = Engine.GetEngine(engine_id);
@@ -636,7 +636,7 @@ private static void show_cargo(ctype) {
 					}
 					if (selected_id0[0] != Engine.INVALID_ENGINE_ID.id) {
 						if (e.isAvailableToMe() && 
-								( cargo == EngineGui.ShipVehInfo(engine_id.id).cargo_type || 0 != (refittable & EngineGui.ShipVehInfo(engine_id.id).refittable) )) 
+								( cargo == Engine.ShipVehInfo(engine_id.id).cargo_type || 0 != (refittable & Engine.ShipVehInfo(engine_id.id).refittable) )) 
 						{
 							if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.getCap(), 0)) {
 								Gfx.DrawString(x2[0]+75, y2[0]+7, Engine.GetCustomEngineName(engine_id.id), sel1[0]==0 ? 0xC : 0x10);
@@ -659,7 +659,7 @@ private static void show_cargo(ctype) {
 				//final Engine  e = GetEngine(Global.AIRCRAFT_ENGINES_INDEX);
 				//EngineID engine_id = EngineID.get( Global.AIRCRAFT_ENGINES_INDEX );
 				int eid = Global.AIRCRAFT_ENGINES_INDEX;
-				int subtype = EngineGui.AircraftVehInfo(selected_id0[0]).subtype;
+				int subtype = Engine.AircraftVehInfo(selected_id0[0]).subtype;
 
 				do {
 					final Engine  e = Engine.GetEngine(eid);//engine_id);
@@ -676,7 +676,7 @@ private static void show_cargo(ctype) {
 						}
 						sel0[0]--;
 					}
-					if (BitOps.HASBIT(subtype, 0) == BitOps.HASBIT(EngineGui.AircraftVehInfo(engine_id.id).subtype, 0) 
+					if (BitOps.HASBIT(subtype, 0) == BitOps.HASBIT(Engine.AircraftVehInfo(engine_id.id).subtype, 0) 
 							&& e.isAvailableToMe()) {
 						if (sel1[0] == 0) selected_id1[0] = engine_id.id;
 						if (BitOps.IS_INT_INSIDE(--pos2[0], -w.vscroll.getCap(), 0)) {
@@ -722,19 +722,18 @@ private static void show_cargo(ctype) {
 
 			{
 				int i;
-				//final Vehicle vehicle;
 
 				for (i = 0; i < _player_num_engines.length; i++) {
 					_player_num_engines[i] = 0;
 				}
-				//FOR_ALL_VEHICLES(vehicle) {
-				//Vehicle.forEach( (vehicle) ->
+
 				Iterator<Vehicle> ii = Vehicle.getIterator();
 				while(ii.hasNext())
 				{
 					Vehicle vehicle = ii.next();
 					
-					if (vehicle.getOwner() == Global.gs._local_player) {
+					if (vehicle.getOwner().isLocalPlayer()) 
+					{
 						if (vehicle.getType() == Vehicle.VEH_Aircraft && vehicle.getSubtype() > 2) continue;
 
 						// do not count the vehicles, that contains only 0 in all var
@@ -787,9 +786,10 @@ private static void show_cargo(ctype) {
 			// or The right list (new replacement) has the existing replacement vehicle selected
 			if (selected_id[0] == Engine.INVALID_ENGINE_ID ||
 					selected_id[1] == Engine.INVALID_ENGINE_ID ||
-					selected_id[0] == selected_id[1] ||
+					selected_id[0].equals(selected_id[1]) ||
 					p.EngineReplacement(selected_id[1]) != Engine.INVALID_ENGINE_ID ||
-					p.EngineReplacement(selected_id[0]) == selected_id[1]) {
+					p.EngineReplacement(selected_id[0]).equals(selected_id[1])) 
+			{
 				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 4);
 			} else {
 				w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 4);
@@ -842,7 +842,7 @@ private static void show_cargo(ctype) {
 				for (i = 0 ; i < 2 ; i++) {
 					if (i > 0) offset = 228;
 					if (selected_id[i] != Engine.INVALID_ENGINE_ID) {
-						if (!EngineGui.RailVehInfo(selected_id[i].id).isWagon()) {
+						if (!Engine.RailVehInfo(selected_id[i].id).isWagon()) {
 							/* it's an engine */
 							TrainGui.DrawTrainEnginePurchaseInfo(2 + offset, 15 + (14 * w.vscroll.getCap()), selected_id[i].id);
 						} else {

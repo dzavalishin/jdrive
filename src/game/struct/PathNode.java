@@ -38,4 +38,14 @@ public class PathNode {
 		return super.equals(obj);
 	}
 	
+	@Override
+	public int hashCode() {
+		int hc = 0;
+		
+		if(parent != null) hc += parent.hashCode() << 2;
+		if(node != null) hc += node.hashCode();
+		
+		return hc;
+	}
+	
 }

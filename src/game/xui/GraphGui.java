@@ -128,8 +128,8 @@ public class GraphGui
 		do {
 			Long[] la1 = ArrayPtr.toLongArray(gw.cost[i]);
 			//row_ptr = 
-			ArrayPtr<Long> col_ptr = new ArrayPtr<Long>( la1 ); // gw.cost[0];
-			
+			ArrayPtr<Long> col_ptr = new ArrayPtr<>( la1 ); // gw.cost[0];
+
 			if (0==(sel&1)) {
 				num_x = gw.num_on_x_axis;
 				assert(num_x > 0);
@@ -153,19 +153,21 @@ public class GraphGui
 
 		if (mx > value) {
 			mx = (mx + 7) & ~7;
-			y_scaling = (((long) (value>>>1) << 32) / mx);
+			y_scaling = (( (value>>>1) << 32) / mx);
 			value = mx;
 		}
 
 		/* draw text strings on the y axis */
 		tmp = value;
-		if (gw.include_neg) tmp >>>= 1;
+		if (gw.include_neg) 
+			tmp >>>= 1;
+
 			x = gw.left + 45;
 			y = gw.top - 3;
 			i = 9;
 			do {
 				Global.SetDParam(0, gw.format_str_y_axis);
-				Global.SetDParam64(1, (long)tmp);
+				Global.SetDParam64(1, tmp);
 				tmp -= (value >>> 3);
 				Gfx.DrawStringRightAligned(x, y, Str.STR_0170, gw.color_3);
 				y += gw.height >>> 3;
@@ -212,7 +214,7 @@ public class GraphGui
 				//Long[] la1 = (Long[]) Arrays.stream(gw.cost[0]).mapToObj( (lv) -> Long.valueOf(lv) ).toArray();
 				Long[] la1 = ArrayPtr.toLongArray(gw.cost[i]);
 				//row_ptr = 
-				ArrayPtr<Long> col_ptr = new ArrayPtr<Long>( la1 ); // gw.cost[0];
+				ArrayPtr<Long> col_ptr = new ArrayPtr<>( la1 ); // gw.cost[0];
 
 
 				if (0!=(sel & 1))
@@ -220,7 +222,7 @@ public class GraphGui
 					sel>>=1;
 					continue;
 				}
-				
+
 				x = gw.left + 55;
 				j = gw.num_on_x_axis;assert(j>0);
 				//col_ptr = new ArrayPtr<Long>( row_ptr );
@@ -397,9 +399,9 @@ public class GraphGui
 			{
 				if (p.isActive()) {
 					gd.colors[numd[0]] = (byte) Global._color_list[p.getColor()].window_color_bgb;
-					for(int j=gd.num_on_x_axis,i=0; --j >= 0;) {
+					for(int j=gd.num_on_x_axis,i=0; --j >= 0; i++ ) 
+					{
 						gd.cost[numd[0]][i] = (j >= p.num_valid_stat_ent) ? INVALID_VALUE : (long)(p.old_economy[j].income + p.old_economy[j].expenses);
-						i++;
 					}
 				}
 				numd[0]++;
@@ -709,7 +711,7 @@ public class GraphGui
 			SetupGraphDrawerForPlayers(gd);
 
 			numd = 0;
- 
+
 			Iterator<Player> ii = Player.getIterator();
 			while(ii.hasNext())
 			{
@@ -754,7 +756,7 @@ public class GraphGui
 			_company_value_graph_widgets,
 			GraphGui::CompanyValueGraphWndProc
 			);
-	*/
+	 */
 	static void ShowCompanyValueGraph()
 	{
 		/*
@@ -861,7 +863,7 @@ public class GraphGui
 			GraphGui::CargoPaymentRatesWndProc
 			);
 
-*/
+	 */
 	static void ShowCargoPaymentRates()
 	{
 		//Window.AllocateWindowDescFront(_cargo_payment_rates_desc, 0);
@@ -984,7 +986,7 @@ public class GraphGui
 				}
 
 				// Check if we have the player marked as inactive
-				if(0 != ((w.disabled_state & (1 << (i+13))))) {
+				if(0 != (w.disabled_state & (1 << (i+13)))) {
 					// New player! Yippie :p
 					w.disabled_state -= 1 << (i+13);
 					// We need a repaint
@@ -992,7 +994,7 @@ public class GraphGui
 				}
 
 				if (i == owner) x = 1; else x = 0;
-				DrawPlayerIcon(i, (int)(i * 37 + 13 + x), (int)(16 + x) ); // TODO long truncated
+				DrawPlayerIcon(i, (i * 37 + 13 + x), (16 + x) ); // TODO long truncated
 			}
 
 			// The colors used to show how the progress is going

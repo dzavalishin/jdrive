@@ -1,9 +1,13 @@
 package game.ids;
 
+import java.io.Serializable;
+
 import game.Str;
 
-public class StringID //extends AbstractID 
+public class StringID implements Serializable //extends AbstractID 
 {
+	private static final long serialVersionUID = 1L;
+	
 	public final int id;
 	
 	public StringID(int i) {

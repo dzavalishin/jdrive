@@ -92,7 +92,8 @@ public class Bridge
 		case WE_CLICK:
 			if (e.widget == 2) {
 				int ind = (e.pt.y - 14) / 22;
-				if (ind < 4 && (ind += w.vscroll.getPos()) < _bridgedata.count)
+				ind += w.vscroll.getPos();
+				if (ind < 4 && ind < _bridgedata.count)
 					BuildBridge(w, ind);
 			}
 			break;

@@ -108,7 +108,7 @@ public class BinaryString
 	public BinaryString append( byte c )
 	{
 		tryExtend(1);
-		mem[pos++] = (char) (0xFF & (int)c); // positive
+		mem[pos++] = (char) (0xFF & c); // positive
 		if(pos > usedLen) usedLen = pos;
 		return this;
 	}

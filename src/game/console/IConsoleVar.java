@@ -23,9 +23,8 @@ public class IConsoleVar
 	IConsoleCmdProc 	proc;    // some variables need really special handling, use a callback function for that
 	IConsoleHooks 		hook = new IConsoleHooks();       // any special trigger action that needs executing
 
-	public void IConsoleVarPrintGetValue() {
-
-		String value;
+	public void IConsoleVarPrintGetValue() 
+	{
 		/* Some variables need really specific handling, handle this in its
 		 * callback function */
 		if (proc != null) {
@@ -33,9 +32,8 @@ public class IConsoleVar
 			return;
 		}
 
-		value = IConsoleVarGetStringValue();
-		Console.IConsolePrintF(Console._icolour_warn, "Current value for '%s' is:  %s", name, value);
-
+		String sv = IConsoleVarGetStringValue();
+		Console.IConsolePrintF(Console._icolour_warn, "Current value for '%s' is:  %s", name, sv);
 	}
 
 	/**
@@ -96,7 +94,7 @@ public class IConsoleVar
 		case ICONSOLE_VAR_INT16:
 		case ICONSOLE_VAR_UINT32:
 		case ICONSOLE_VAR_INT32:
-			this.value= (Integer)value;
+			this.value = value;
 			break;
 
 		default: assert false;// NOT_REACHED();		
@@ -147,8 +145,8 @@ public class IConsoleVar
 	 */
 	public void IConsoleVarPrintSetValue()
 	{
-		String value = IConsoleVarGetStringValue();
-		Console.IConsolePrintF(Console._icolour_warn, "'%s' changed to:  %s", name, value);
+		String sv = IConsoleVarGetStringValue();
+		Console.IConsolePrintF(Console._icolour_warn, "'%s' changed to:  %s", name, sv);
 	}
 	
 

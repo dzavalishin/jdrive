@@ -31,7 +31,7 @@ public class CargoPaymentRatesChart extends AbstractChart//JFrame// ApplicationF
 			//TODO gd.colors[i] = (byte) _cargo_legend_colors[i];
 			
 			for(int j=0; j!=20; j++) {
-				long cost = (long)Economy.GetTransportedGoodsIncome(10, 20, j*6+6, i);
+				long cost = Economy.GetTransportedGoodsIncome(10, 20, j*6+6, i);
 				dataset.addValue( cost , sName , Integer.toString(j*6+6) );
 			}
 		}

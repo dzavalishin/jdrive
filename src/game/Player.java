@@ -140,13 +140,15 @@ public class Player implements Serializable
 
 	public static Player GetPlayer(PlayerID i)
 	{
-		assert(i.id < Global.gs._players.length);
+		//assert(i.id < Global.gs._players.length);
+		i.assertValid();
 		return Global.gs._players[i.id];
 	}
 
 	public static Player GetPlayer(int i)
 	{
-		assert(i < Global.gs._players.length);
+		//assert(i < Global.gs._players.length);
+		PlayerID.assertValid(i);
 		return Global.gs._players[i];
 	}
 
@@ -1151,7 +1153,7 @@ public class Player implements Serializable
 
 		long lvalue = BitOps.minu(value, 1000) >>> 6;
 				if (lvalue >= _endgame_perf_titles.length) 
-					lvalue = _endgame_perf_titles.length - 1;
+					lvalue = _endgame_perf_titles.length - 1L;
 
 				return _endgame_perf_titles[(int) lvalue];
 	}

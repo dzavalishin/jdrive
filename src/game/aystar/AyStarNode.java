@@ -35,4 +35,9 @@ public class AyStarNode
 		return super.equals(obj);
 	}
 	
+	@Override
+	public int hashCode() {
+		return (tile.getTile() << 2) + direction;
+	}
+	
 }

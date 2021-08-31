@@ -16,7 +16,7 @@ import java.util.List;
 
 public class TileHash<ItemType>
 {
-	final Map<Integer, List<ItemType> > map = new HashMap<Integer, List<ItemType> >();
+	final Map<Integer, List<ItemType> > map = new HashMap<>();
 	
 
 	public void add(TileIndex tileIndex, ItemType item)
@@ -29,7 +29,7 @@ public class TileHash<ItemType>
 		List<ItemType> mi = map.get(tileIndex);
 		if( mi == null )
 		{
-			mi = new ArrayList<ItemType>();
+			mi = new ArrayList<>();
 			mi.add(item);
 			map.put(tileIndex, mi);
 		}

@@ -19,7 +19,6 @@ import game.util.Paths;
 import game.util.Prices;
 import game.util.Strings;
 import game.util.YearMonthDay;
-import game.xui.EngineGui;
 import game.xui.MiscGui;
 import game.xui.PlayerGui;
 import game.xui.Window;
@@ -287,6 +286,12 @@ public class Global
 		System.err.println(buf);		
 	}
 
+	/**
+	 * Does not return 
+	 * 
+	 * @param s format
+	 * @param arg printf args
+	 */
 	public static void fail(String s, Object ... arg) {
 		String buf = String.format(s, arg);
 		System.err.println(buf);
@@ -443,7 +448,7 @@ public class Global
 
 	private static int next_name_id = 0;
 
-	private static final Map<Integer,String> _name_array = new HashMap<Integer,String>();
+	private static final Map<Integer,String> _name_array = new HashMap<>();
 
 
 
@@ -556,7 +561,7 @@ public class Global
 
 		if (Global._game_mode != GameModes.GM_MENU) {
 			Window.InvalidateWindowWidget(Window.WC_STATUS_BAR, 0, 0);
-			EngineGui.EnginesDailyLoop();
+			Engine.EnginesDailyLoop();
 		}
 
 		/* check if we entered a new month? */
@@ -612,10 +617,8 @@ public class Global
 			Global._cur_year = Global.MAX_YEAR_END;
 			Global._date = 62093;
 
-			Vehicle.forEach( (v) ->
-			{
-				v.date_of_last_service -= 365; // 1 year is 365 days long
-			});
+			// 1 year is 365 days long
+			Vehicle.forEach( (v) -> v.date_of_last_service -= 365 );
 
 			/* Because the _date wraps here, and text-messages expire by game-days, we have to clean out
 			 *  all of them if the date is set back, else those messages will hang for ever */

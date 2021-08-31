@@ -389,7 +389,7 @@ public class FileIO {
 		List<FiosItem> items = new ArrayList<>();
 		
 		if (_fios_save_path == null)
-		_fios_save_path = Global._path.save_dir;
+			_fios_save_path = Global._path.save_dir;
 		
 		_fios_path = _fios_save_path;
 
@@ -605,6 +605,7 @@ public class FileIO {
 	{
 		File f = new File(String.format("%s/%s", _fios_path, name));		
 		return f.delete();
+		//Files.delete(null)
 	}
 
 	public static boolean FileExists(String filename)

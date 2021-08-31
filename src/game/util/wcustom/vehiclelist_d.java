@@ -2,7 +2,7 @@ package game.util.wcustom;
 
 import game.struct.SortStruct;
 
-public class vehiclelist_d extends AbstractWinCustom  {
+public class vehiclelist_d implements AbstractWinCustom  {
 	public SortStruct [] sort_list;
 	public int list_length;
 	public int sort_type;

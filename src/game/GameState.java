@@ -49,26 +49,26 @@ public class GameState implements Serializable
 	final TileIndex _animated_tile_list[] = new TileIndex[256];
 
 
-	final MemoryPool<SignStruct> _signs = new MemoryPool<SignStruct>(SignStruct.factory);
+	final MemoryPool<SignStruct> _signs = new MemoryPool<>(SignStruct.factory);
 	
 	/* Initialize the industry-pool */
-	final MemoryPool<Industry> _industies = new MemoryPool<Industry>(Industry.factory);
+	final MemoryPool<Industry> _industies = new MemoryPool<>(Industry.factory);
 	//static MemoryPool<Town> _town_pool = new MemoryPool<Town>(Town::new);
-	final MemoryPool<Town> _towns = new MemoryPool<Town>(Town.factory);
+	final MemoryPool<Town> _towns = new MemoryPool<>(Town.factory);
 	public final Engine [] _engines = new Engine[Global.TOTAL_NUM_ENGINES];
-	final MemoryPool<Depot> _depots = new MemoryPool<Depot>(Depot.factory);
+	final MemoryPool<Depot> _depots = new MemoryPool<>(Depot.factory);
 
-	final MemoryPool<Vehicle> _vehicles = new MemoryPool<Vehicle>(Vehicle.factory);
+	final MemoryPool<Vehicle> _vehicles = new MemoryPool<>(Vehicle.factory);
 	final VehicleHash _vehicle_hash = new VehicleHash();
 
-	final MemoryPool<WayPoint> _waypoints = new MemoryPool<WayPoint>(WayPoint.factory);
+	final MemoryPool<WayPoint> _waypoints = new MemoryPool<>(WayPoint.factory);
 
 
-	final MemoryPool<Station> _stations = new MemoryPool<Station>(Station.factory);
-	final MemoryPool<RoadStop> _roadstops = new MemoryPool<RoadStop>(RoadStop.factory);
+	final MemoryPool<Station> _stations = new MemoryPool<>(Station.factory);
+	final MemoryPool<RoadStop> _roadstops = new MemoryPool<>(RoadStop.factory);
 
 
 	//static Window _windows[] = new Window[25];
-	public static final List<Window> _windows = new ArrayList<Window>();
+	public static final List<Window> _windows = new ArrayList<>();
 	
 }

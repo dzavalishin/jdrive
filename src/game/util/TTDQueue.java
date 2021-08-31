@@ -1,6 +1,6 @@
 package game.util;
 
-public abstract class TTDQueue<ItemType> 
+public interface TTDQueue<ItemType> 
 {
 
 	public abstract void push(ItemType new_node, int f);

@@ -156,6 +156,8 @@ public class Depot implements IPoolItem, Serializable
 					case 2: return Tile.DIAGDIR_NW;
 					case 3: return Tile.DIAGDIR_SE;
 				}
+				// Fall through
+				
 			default:
 				return Tile.INVALID_DIAGDIR; /* Not reached */
 		}

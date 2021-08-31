@@ -24,6 +24,7 @@ import game.xui.TrainGui;
 
 public class GRFFile 
 {
+	private static final String NEW_SPRITE_GROUP = "NewSpriteGroup";
 	String filename;
 	int grfid;
 	int flags;
@@ -1384,7 +1385,7 @@ public class GRFFile
 		//byte *loading_ptr;
 		//int i;
 
-		bufp.check_length( 5, "NewSpriteGroup");
+		bufp.check_length( 5, NEW_SPRITE_GROUP);
 		feature = bufp.r(1);
 		setid = bufp.r(2);
 		numloaded = bufp.r(3);
@@ -1539,9 +1540,9 @@ public class GRFFile
 			// return; // XXX: we can't because of MB's newstats.grf --pasky
 		}
 
-		bufp.check_length(5, "NewSpriteGroup");
+		bufp.check_length(5, NEW_SPRITE_GROUP);
 		bufp.shift( 5 );
-		bufp.check_length(2 * numloaded, "NewSpriteGroup");
+		bufp.check_length(2 * numloaded, NEW_SPRITE_GROUP);
 		DataLoader loaded_ptr = new DataLoader( bufp, 0 );
 		DataLoader loading_ptr = new DataLoader( bufp, 2 * numloaded );
 
@@ -1952,7 +1953,7 @@ public class GRFFile
 		default: break;
 		}
 
-		switch (0xFF & (int)param) {
+		switch (0xFF & param) {
 		case 0x83:    /* current climate, 0=temp, 1=arctic, 2=trop, 3=toyland */
 			param_val = GameOptions._opt.landscape;
 			break;
@@ -2259,14 +2260,14 @@ public class GRFFile
 
 		case 0x05:
 			if (src2 < 0)
-				res = src1 >> -(int)src2;
+				res = src1 >> -src2;
 			else
 				res = src1 << src2;
 			break;
 
 			case 0x06:
 				if (src2 < 0)
-					res = src1 >> -(int)src2;
+					res = src1 >> -src2;
 				else
 					res = src1 << src2;
 				break;
@@ -2528,8 +2529,7 @@ public class GRFFile
 
 		newfile = new GRFFile();// calloc(1, sizeof(*newfile));
 
-		if (newfile == null)
-			Global.fail("Out of memory");
+		//if (newfile == null)			Global.fail("Out of memory");
 
 		newfile.filename = filename;
 		newfile.sprite_offset = sprite_offset;

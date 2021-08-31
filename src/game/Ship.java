@@ -415,7 +415,8 @@ public class Ship {
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) {
 				v.setStopped(true);
-				if (v.owner == Global.gs._local_player) {
+				if (v.owner.isLocalPlayer()) 
+				{
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddNewsItem(
 						Str.STR_981C_SHIP_IS_WAITING_IN_DEPOT,
@@ -437,7 +438,7 @@ public class Ship {
 			st.had_vehicle_of_type |= Station.HVOT_SHIP;
 
 			Global.SetDParam(0, st.index);
-			flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+			flags = v.owner.isLocalPlayer() ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 			NewsItem.AddNewsItem(
 				Str.STR_9833_CITIZENS_CELEBRATE_FIRST,
 				flags,
@@ -614,7 +615,7 @@ public class Ship {
 	static int GetAvailShipTracks(TileIndex tile, int dir)
 	{
 		int r = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_WATER);
-		return  ((r | r >>> 8)) & _ship_sometracks[dir];
+		return  (r | r >>> 8) & _ship_sometracks[dir];
 	}
 
 	static final byte _ship_subcoord[][][] = {
@@ -810,7 +811,7 @@ public class Ship {
 		v.z_pos = Landscape.GetSlopeZ(gp.x, gp.y);
 		
 		ShipController_getout( v, dir );
-		return;
+		
 		/* to func 
 	getout:
 		UpdateShipDeltaXY(v, dir);
@@ -992,7 +993,7 @@ public class Ship {
 				Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, Vehicle.VEH_Ship); // updates the replace Ship window
 		}
 
-		return -(int)v.value;
+		return -v.value;
 	}
 
 	/** Start/Stop a ship.

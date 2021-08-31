@@ -63,7 +63,7 @@ public class AirCraft extends AirCraftTables {
 		{
 			Station st = ii.next();
 
-			if (st.owner == v.owner && 0 != (st.facilities & Station.FACIL_AIRPORT) &&
+			if (st.owner.equals(v.owner) && 0 != (st.facilities & Station.FACIL_AIRPORT) &&
 					AirportFTAClass.GetAirport(st.airport_type).nof_depots() > 0) {
 				int distance;
 
@@ -377,7 +377,7 @@ public class AirCraft extends AirCraftTables {
 				Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, Vehicle.VEH_Aircraft); // updates the replace Aircraft window
 		}
 
-		return -(int)v.value;
+		return -v.value;
 	}
 
 	/** Start/Stop an aircraft.
@@ -958,7 +958,7 @@ public class AirCraft extends AirCraftTables {
 			// If it's already in the queue, don't re-add it
 			// Otherwise, add it to queue - but don't add helicopters!
 			// otherwise, helicopters will be part of the queue and can't land separately!
-			if(!(v.queue_item != null) && (Global._patches.aircraft_queueing && v.subtype != 0)) {
+			if(v.queue_item == null && (Global._patches.aircraft_queueing && v.subtype != 0)) {
 				// Add to queue
 				assert(st.airport_queue.push(v));
 			}
@@ -1462,7 +1462,7 @@ public class AirCraft extends AirCraftTables {
 				v.setStopped(true);
 				Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
 
-				if (v.owner == Global.gs._local_player) {
+				if (v.owner.isLocalPlayer()) {
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddValidatedNewsItem(
 							Str.STR_A014_AIRCRAFT_IS_WAITING_IN,
@@ -1667,7 +1667,7 @@ public class AirCraft extends AirCraftTables {
 		AircraftNextAirportPos_and_Order(v);
 
 		// check if the aircraft needs to be replaced or renewed and send it to a hangar if needed
-		if (v.owner == Global.gs._local_player && (
+		if (v.owner.isLocalPlayer() && (
 				p.EngineHasReplacement(v.getEngine_type()) ||
 				(p.engine_renew && v.age - v.max_age > p.engine_renew_months * 30)
 				)) {
@@ -1694,7 +1694,8 @@ public class AirCraft extends AirCraftTables {
 		// heliport/oilrig, etc -. no airplanes (HELICOPTERS_ONLY)
 		// runway busy or not allowed to use this airstation, circle
 		if (! (v.subtype == Airport.acc_planes ||
-				st.airport_tile == null || (st.owner.isNotNone() && st.owner != v.owner && ! mAirport.MA_OwnerHandler(st.owner)) )) {
+				st.airport_tile == null || 
+				(st.owner.isNotNone() && !st.owner.equals(v.owner) && !mAirport.MA_OwnerHandler(st.owner)) )) {
 
 			// {32,FLYING,NOTHING_block,37}, {32,LANDING,N,33}, {32,HELILANDING,N,41},
 			// if it is an airplane, look for LANDING, for helicopter HELILANDING
@@ -1716,12 +1717,12 @@ public class AirCraft extends AirCraftTables {
 					// If it's already in the queue, don't re-add it
 					// Otherwise, add it to queue - but do helicopters seperately!
 					// Otherwise, helicopters will be part of the queue and can't land separately!
-					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing && v.subtype != 0)) {
+					if(v.queue_item == null && (Global._patches.aircraft_queueing && v.subtype != 0)) {
 						// Add to queue
 						assert(st.airport_queue.push(v));
 					}
 
-					if(!(v.queue_item != null) && (Global._patches.aircraft_queueing && v.subtype == 0)) {
+					if(v.queue_item == null && (Global._patches.aircraft_queueing && v.subtype == 0)) {
 						// Add to queue
 						assert(st.helicopter_queue.push(v));
 					}
@@ -1794,7 +1795,7 @@ public class AirCraft extends AirCraftTables {
 		AircraftLandAirplane(v);  // maybe crash airplane
 		v.air.state = Airport.ENDLANDING;
 		// check if the aircraft needs to be replaced or renewed and send it to a hangar if needed
-		if (v.getCurrent_order().type != Order.OT_GOTO_DEPOT && v.owner == Global.gs._local_player) {
+		if (v.getCurrent_order().type != Order.OT_GOTO_DEPOT && v.owner.isLocalPlayer()) {
 			// only the vehicle owner needs to calculate the rest (locally)
 			if (p.EngineHasReplacement(v.getEngine_type()) ||
 					(p.engine_renew && v.age - v.max_age > (p.engine_renew_months * 30))) {
@@ -1985,7 +1986,7 @@ public class AirCraft extends AirCraftTables {
 					break;
 				}
 				current = current.next_in_chain;
-			};
+			}
 
 			// if the block to be checked is in the next position, then exclude that from
 			// checking, because it has been set by the airplane before
@@ -2243,10 +2244,7 @@ public class AirCraft extends AirCraftTables {
 		// only 1 station is updated per function call, so it is enough to get entry_point once
 		final AirportFTAClass ap = AirportFTAClass.GetAirport(st.airport_type);
 
-		Vehicle.forEach( (v) ->
-		{
-			updateOneAirplaneOnNewStation(st, ap, v);
-		});
+		Vehicle.forEach( (v) -> updateOneAirplaneOnNewStation(st, ap, v) );
 	}
 
 	private static void updateOneAirplaneOnNewStation(
@@ -2651,7 +2649,7 @@ public class AirCraft extends AirCraftTables {
 		case WE_PAINT: {
 			Vehicle v = Vehicle.GetVehicle(w.window_number);
 
-			w.disabled_state = v.owner == Global.gs._local_player ? 0 : (1 << 2);
+			w.disabled_state = v.owner.isLocalPlayer() ? 0 : (1 << 2);
 			if (0==Global._patches.servint_aircraft) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
@@ -2859,7 +2857,7 @@ public class AirCraft extends AirCraftTables {
 				disabled = 0;
 			}
 
-			if (v.owner != Global.gs._local_player) disabled |= 1 << 8 | 1 << 7;
+			if (!v.owner.isLocalPlayer()) disabled |= 1 << 8 | 1 << 7;
 			w.disabled_state = disabled;
 
 			/* draw widgets & caption */

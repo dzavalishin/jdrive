@@ -21,16 +21,19 @@ public class PlayerID extends AbstractID implements Serializable
 	}
 
 
-	private static final Map<Integer,PlayerID> ids = new HashMap<Integer,PlayerID>();
+	private static final Map<Integer,PlayerID> ids = new HashMap<>();
 	
 	public static PlayerID get(int player) 
 	{
-		PlayerID old = ids.get(player);
+		/*PlayerID old = ids.get(player);
 		if( old == null ) 
 		{
 			old = new PlayerID(player);
-			ids.put(player, old);
-		}
+			ids.put(player, old);		
+		}*/
+		
+		//PlayerID old = ids.computeIfAbsent(player, k -> new PlayerID(k));
+		PlayerID old = ids.computeIfAbsent(player, PlayerID::new );		
 		assert player == old.id;
 		return old;
 	}
@@ -56,6 +59,11 @@ public class PlayerID extends AbstractID implements Serializable
 	public boolean isLocalPlayer()
 	{
 		return equals( Global.gs._local_player );
+	}
+
+	public boolean isCurrentPlayer() 
+	{ 
+		return equals( Global.gs._current_player ); 
 	}
 
 	public boolean isSpectator()
@@ -97,5 +105,26 @@ public class PlayerID extends AbstractID implements Serializable
 		return false;
 	}*/
 
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
+	public void assertValid() 
+	{
+		assertValid(id);
+	}
+
+	public static void assertValid(int i) {
+		if( i < 0 || i >= Global.gs._players.length )
+			throw new IllegalArgumentException("Invalid PlayerID: " + i);		
+	}
+
+	
 	
 }

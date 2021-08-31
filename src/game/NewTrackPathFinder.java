@@ -33,7 +33,7 @@ public class NewTrackPathFinder extends Pathfind
 
 	//HashLink[] links = new HashLink[0x400]; // hash links
 
-	final Map<Integer,NTPHashItem> hash = new HashMap<Integer,NTPHashItem>();
+	final Map<Integer,NTPHashItem> hash = new HashMap<>();
 
 	// -------------------------------------------------
 	// Class

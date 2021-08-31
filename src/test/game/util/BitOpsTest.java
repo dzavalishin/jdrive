@@ -35,7 +35,7 @@ class BitOpsTest {
 		assertEquals( 0, BitOps.RETAB(0x20, 4, 2, 2) );
 	}
 
-	@Test
+	/*@Test
 	void testMin() {
 		assertEquals(BitOps.min(3, 4), 3 );
 	}
@@ -48,7 +48,7 @@ class BitOpsTest {
 	@Test
 	void testMax64() {
 		assertEquals(BitOps.max64(33l, 44l), 44l );
-	}
+	}*/
 
 	@Test
 	void testMinu() {
@@ -75,10 +75,10 @@ class BitOpsTest {
 
 	@Test
 	void testBIGMULSS64() {
-		assertEquals( 3*2, BitOps.BIGMULSS64(3*256, 2, 8) );
-		assertEquals( 3*2, BitOps.BIGMULSS64(3*256*256, 2, 16) );
-		assertEquals( 3*2, BitOps.BIGMULSS64(3*256*256*256, 2, 24) );
-		assertEquals( 3*2, BitOps.BIGMULSS64(3*256*256*256*16L, 2, 24+4) );
+		assertEquals( 3*2L, BitOps.BIGMULSS64(3*256L, 2, 8) );
+		assertEquals( 3*2L, BitOps.BIGMULSS64(3*256*256L, 2, 16) );
+		assertEquals( 3*2L, BitOps.BIGMULSS64(3*256*256*256L, 2, 24) );
+		assertEquals( 3*2L, BitOps.BIGMULSS64(3*256*256*256*16L, 2, 24+4) );
 	}
 
 	@Test
@@ -127,6 +127,7 @@ class BitOpsTest {
 	void testRETTOGGLEBITIntInt() {
 		assertEquals(0x01, BitOps.RETSETBIT(0x00, 0));
 		assertEquals(0xFE, BitOps.RETCLRBIT(0xFF, 0));
+		assertEquals(0xFF, BitOps.RETCLRBIT(0xFE, 0));
 	}
 
 	@Test
@@ -247,7 +248,7 @@ class BitOpsTest {
 		BitOps.CHANCE16I(1, 10, 5);
 	}
 
-	@Test
+	/*@Test
 	void testMyabs() {
 		assertEquals(BitOps.myabs(-5), 5);
 		assertEquals(BitOps.myabs(5), 5);
@@ -257,7 +258,7 @@ class BitOpsTest {
 	void testMyabs64() {
 		assertEquals(BitOps.myabs64(-5l), 5l);
 		assertEquals(BitOps.myabs64(5l), 5l);
-	}
+	}*/
 
 	@Test
 	void testROR8() {

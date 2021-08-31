@@ -16,7 +16,7 @@ public class BackuppedOrders
 	public OrderID orderindex;
 	
 	//Order order[MAX_BACKUP_ORDER_COUNT + 1];
-	public final List<Order> order = new ArrayList<Order>();
+	public final List<Order> order = new ArrayList<>();
 	
 	public int service_interval;
 	public String name;

@@ -102,9 +102,11 @@ void SortResolutions(int count)
 		}
 	}
 	
+	private static java.util.Random rng = new java.util.Random();
 	
 	public static int Random() {		
-		return (int) (Math.random() * Integer.MAX_VALUE);
+		//return (int) (Math.random() * Integer.MAX_VALUE);
+		return rng.nextInt();
 	}
 
 

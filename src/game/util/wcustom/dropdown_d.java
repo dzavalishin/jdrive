@@ -2,7 +2,7 @@ package game.util.wcustom;
 
 
 
-public class dropdown_d extends AbstractWinCustom  {
+public class dropdown_d implements AbstractWinCustom  {
 	public int disabled_state;
 	public int hidden_state;
 	public int parent_wnd_class;
@@ -14,4 +14,4 @@ public class dropdown_d extends AbstractWinCustom  {
 	public int items[];
 	public int click_delay;
 	public boolean drag_mode;
-} ;
+} 

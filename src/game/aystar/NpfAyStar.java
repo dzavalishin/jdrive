@@ -250,6 +250,7 @@ public class NpfAyStar extends AyStar
 		BeforeExit = func;		
 	}
 
+	@Override
 	void beforeExit() 
 	{ 
 		if( null != BeforeExit ) BeforeExit.apply(this);

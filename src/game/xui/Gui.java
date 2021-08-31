@@ -150,10 +150,6 @@ public class Gui
 
 	static byte _terraform_size = 1;
 	static /* RailType */ int _last_built_railtype;
-	//extern void doGenerateWorld(int mode, int size_x, int size_y);
-
-	//extern void GenerateIndustries();
-	//extern boolean GenerateTowns();
 
 	static void HandleOnEditTextCancel()
 	{
@@ -1051,7 +1047,7 @@ public class Gui
 	static void MaxZoomIn()
 	{
 		while (DoZoomInOutWindow(ZOOM_IN, Window.getMain() ) )
-			{}
+			;
 	}
 
 	static void ToolbarZoomInClick(Window w)
@@ -1984,6 +1980,7 @@ public class Gui
 
 	static void ToolbarBtn_null(Window w)
 	{
+		/* is empty */
 	}
 
 

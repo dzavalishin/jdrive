@@ -394,11 +394,12 @@ public class UnmovableCmd extends UnmovableTables {
 			r = Hal.Random();
 			dir = r >>> 30;
 			r %= (dir == 0 || dir == 2) ? Global.MapMaxY() : Global.MapMaxX();
-			int itile =
-					(dir == 0) ? TileIndex.TileXY(0, r).tile   : 0 + // left
-							((dir == 1) ? TileIndex.TileXY(r, 0).tile : 0 + // top
-									((dir == 2) ? TileIndex.TileXY(Global.MapMaxX(), r).tile : 0 + // right
-											((dir == 3) ? TileIndex.TileXY(r, Global.MapMaxY()).tile : 0)));  // bottom
+			
+			final int d3 = (dir == 3) ? TileIndex.TileXY(r, Global.MapMaxY()).tile : 0; // right
+			final int d2 = (dir == 2) ? TileIndex.TileXY(Global.MapMaxX(), r).tile : 0 + d3; // top 
+			final int d1 = (dir == 1) ? TileIndex.TileXY(r, 0).tile : 0 + d2; // bottom 
+			int itile = (dir == 0) ? TileIndex.TileXY(0, r).tile   : 0 + d1; // left
+  
 			tile = new TileIndex(itile);
 			j = 20;
 			boolean restart = false;

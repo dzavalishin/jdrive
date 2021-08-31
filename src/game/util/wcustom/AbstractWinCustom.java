@@ -1,7 +1,7 @@
 package game.util.wcustom;
 
 // base class for Window attachments of diff kinds
-public class AbstractWinCustom {
+public interface AbstractWinCustom {
 	// empty
 } 
 

@@ -5,6 +5,8 @@ import java.io.IOException;
 
 public class Emitter 
 {
+	private static final String MISSING_CLOSING = "Missing } from command '%s'";
+
 	private final DataOutputStream f;
 
 	int _put_pos;
@@ -44,13 +46,13 @@ public class Emitter
 
 	}
 
-	void PutArgidxCommand() throws IOException
+	void PutArgidxCommand()
 	{
 		PutByte(0x8C);
 		PutByte(TranslateArgumentIdx(_cur_argidx));
 	}
 
-	void EmitSingleByte(String buf, long value) throws IOException
+	void EmitSingleByte(String buf, long value)
 	{
 		if (buf.length() != 0)
 			Warning("Ignoring trailing letters in command");
@@ -58,7 +60,7 @@ public class Emitter
 	}
 
 
-	void EmitEscapedByte(String buf, long value) throws IOException
+	void EmitEscapedByte(String buf, long value)
 	{
 		if (buf.length() != 0)
 			Warning("Ignoring trailing letters in command");
@@ -66,7 +68,7 @@ public class Emitter
 		PutByte((byte)value);
 	}
 
-	void EmitSetX(String buf, long value) throws IOException
+	void EmitSetX(String buf, long value)
 	{
 		int x = Integer.parseInt(buf);
 				/*char *err;
@@ -78,7 +80,7 @@ public class Emitter
 	}
 
 
-	void EmitSetXY(String buf, long value) throws IOException
+	void EmitSetXY(String buf, long value)
 	{
 		/*
 		char *err;
@@ -101,7 +103,7 @@ public class Emitter
 		PutByte((byte)y);
 	}
 
-	void EmitWordList(String [] words, int nw) throws IOException
+	void EmitWordList(String [] words, int nw)
 	{
 		int i,j;
 
@@ -124,7 +126,7 @@ public class Emitter
 		}
 	}
 
-	void EmitPlural(String buf, long value) throws IOException
+	void EmitPlural(String buf, long value)
 	{
 		int argidx[] = { _cur_argidx };
 		String [] words = new String[5];
@@ -179,7 +181,7 @@ public class Emitter
 	}
 
 
-	void EmitGender(String buf, long value) throws IOException
+	void EmitGender(String buf, long value)
 	{
 		int [] argidx = { _cur_argidx };
 		String [] words = new String[8];
@@ -209,7 +211,8 @@ public class Emitter
 			buf = buf.trim();
 			// This is a {G 0 foo bar two} command.
 			// If no relative number exists, default to +0
-			if (!ParseRelNum(buf, argidx, skip)) {}
+			//if (!ParseRelNum(buf, argidx, skip)) {}
+			ParseRelNum(buf, argidx, skip);
 
 			buf = buf.substring(skip[0]);
 
@@ -273,8 +276,6 @@ public class Emitter
 					if (show_todo == 2) {
 						Warning("'%s' is untranslated", ls.name);
 					} else {
-						//final char *s = "<TODO> ";
-						//while(*s) PutByte(*s++);
 						PutString("<TODO> ");
 					}
 				}
@@ -335,7 +336,7 @@ public class Emitter
 		
 	}
 
-	private void PutString(String s) throws IOException 
+	private void PutString(String s) 
 	{
 		char [] ca = s.toCharArray();
 		for( char c : ca )
@@ -350,7 +351,6 @@ public class Emitter
 	void PutCommandString(final String str) throws IOException
 	{
 		
-		//char param[256];
 		StringBuilder param = new StringBuilder(); 
 		int [] argno = {-1};
 		int [] casei = {-1};
@@ -463,7 +463,7 @@ public class Emitter
 		do {
 			if( s >= sc.length )
 			{
-				Error("Missing } from command '%s'", start);
+				Error(MISSING_CLOSING, start);
 				return null;
 			}
 			c = sc[s++];
@@ -494,7 +494,7 @@ public class Emitter
 		}
 
 		if (c != '}' && s >= sc.length) {
-			Error("Missing } from command '%s'", start);
+			Error(MISSING_CLOSING, start);
 			return null;
 		}
 
@@ -511,7 +511,7 @@ public class Emitter
 				
 				if (c == '}') break;
 				if (c == '\0') {
-					Error("Missing } from command '%s'", start);
+					Error(MISSING_CLOSING, start);
 					return null;
 				}
 				if ( s - start == 250)

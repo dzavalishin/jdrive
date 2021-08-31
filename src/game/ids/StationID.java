@@ -5,16 +5,13 @@ import java.util.Map;
 
 public class StationID extends AbstractID 
 {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+	
 	private StationID(int i) {
 		super(i);
 	}
 	
-	private static final Map<Integer,StationID> ids = new HashMap<Integer,StationID>();
+	private static final Map<Integer,StationID> ids = new HashMap<>();
 	public static StationID get(int player) 
 	{
 		StationID old = ids.get(player);
@@ -30,4 +27,15 @@ public class StationID extends AbstractID
 		return get(-1);
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+	
+	
 }

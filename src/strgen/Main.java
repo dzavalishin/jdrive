@@ -18,6 +18,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
+import game.Version;
+
 
 /** 
  * Compiles a list of strings into a compiled string list 
@@ -26,6 +28,7 @@ import java.util.Arrays;
 public class Main {
 
 
+	private static final String TMP_XXX = "tmp.xxx";
 	static final int C_DONTCOUNT = Emitter.C_DONTCOUNT;
 	static final int C_CASE = Emitter.C_CASE;
 
@@ -99,7 +102,7 @@ public class Main {
 	static void  Warning(String s, Object ... args)
 	{
 		String buf = String.format(s, args);
-		String b1 = String.format( "%s:%d: Warning: %s\n", _file, _cur_line, buf);
+		String b1 = String.format( "%s:%d: Warning: %s%n", _file, _cur_line, buf);
 		_warnings++;
 		System.err.print(b1);
 	}
@@ -108,7 +111,7 @@ public class Main {
 	static void  Error(String s, Object ... args)
 	{
 		String buf = String.format(s, args);
-		String b1 = String.format( "%s:%d: Error: %s\n", _file, _cur_line, buf);
+		String b1 = String.format( "%s:%d: Error: %s%n", _file, _cur_line, buf);
 		System.err.print(b1);
 		_errors++;
 	}
@@ -117,7 +120,7 @@ public class Main {
 	static void  Fatal(String s, Object ... args)
 	{
 		String buf = String.format(s, args);
-		String b1 = String.format( "%s:%d: FATAL: %s\n", _file, _cur_line, buf);
+		String b1 = String.format( "%s:%d: FATAL: %s%n", _file, _cur_line, buf);
 		System.err.print(b1);
 		System.exit(1);
 	}
@@ -391,7 +394,7 @@ public class Main {
 	{
 		//Writer out  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp.xxx")));
 		FileReader fis = new FileReader(file);
-		if (fis == null) Fatal("Cannot open file");
+		//if (fis == null) Fatal("Cannot open file");
 
 		BufferedReader in = new BufferedReader( fis );
 
@@ -416,7 +419,7 @@ public class Main {
 			HandleString(s, english);
 			_cur_line++;
 		}
-		in.close();;
+		in.close();
 	}
 
 
@@ -456,13 +459,13 @@ public class Main {
 					StringBuilder buf = new StringBuilder();
 					CmdStruct cs;
 					s = s.trim();
-					
+
 					int [] skip = {-1};
 					if( (cs = Emitter.ParseCommandString(s, buf, argno, casei, skip)) == null)
 						break;
-					
+
 					s = s.substring(skip[0]);
-					
+
 					if(0 != (cs.flags & C_DONTCOUNT) )
 						continue;
 
@@ -555,7 +558,7 @@ public class Main {
 
 	static void WriteStringsH(final String filename) throws FileNotFoundException
 	{
-		Writer out  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("tmp.xxx")));
+		Writer out  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(TMP_XXX)));
 		//int next = -1;
 
 		try {
@@ -574,18 +577,18 @@ public class Main {
 		}
 		try {
 
-			if (CompareFiles("tmp.xxx", filename)) {
+			if (CompareFiles(TMP_XXX, filename)) {
 				// files are equal. tmp.xxx is not needed
-				Files.delete(Path.of("tmp.xxx"));
+				Files.delete(Path.of(TMP_XXX));
 
 			} else {
 				// else rename tmp.xxx into filename
 				try {
-				Files.delete(Path.of(filename));
+					Files.delete(Path.of(filename));
 				} catch (NoSuchFileException e) {
 					// Ignore
 				}
-				Files.move(Path.of("tmp.xxx"), Path.of(filename), StandardCopyOption.REPLACE_EXISTING);
+				Files.move(Path.of(TMP_XXX), Path.of(filename), StandardCopyOption.REPLACE_EXISTING);
 				//if (rename("tmp.xxx", filename) == -1) Fatal("rename() failed");
 			}
 		}
@@ -601,9 +604,9 @@ public class Main {
 		//int lastgrp;
 		out.write(
 				"package game.util;\n\n"
-				+ "public class StringTable \n"
-				+ "{\n"
-				+ ""
+						+ "public class StringTable \n"
+						+ "{\n"
+						+ ""
 				);
 
 		//lastgrp = 0;
@@ -616,7 +619,7 @@ public class Main {
 				}*/
 
 				//String s = String.format( next == i ? "%s,\n" : "\n%s = 0x%X,\n", _strings[i].name, i);
-				String s = String.format( "\n\tpublic static final int %s = 0x%X;\n", _strings[i].name, i);
+				String s = String.format( "%n\tpublic static final int %s = 0x%X;%n", _strings[i].name, i);
 				out.write( s );
 				//next = i + 1;
 			}
@@ -628,7 +631,7 @@ public class Main {
 				"\npublic class StringHashCodes {\n" +
 						"\tLANGUAGE_PACK_IDENT = 0x474E414C, // Big Endian value for 'LANG' (LE is 0x 4C 41 4E 47)\n" +
 						"\tLANGUAGE_PACK_VERSION = 0x%X,\n" +
-						"}\n", (int)_hash);
+						"}\n", _hash);
 
 		out.write(suffix);
 	}
@@ -691,7 +694,7 @@ public class Main {
 		int b2 = (n >> 16) & 0xFF;
 		int b1 = (n >> 8) & 0xFF;
 		int b0 = n & 0xFF;
-		
+
 		return 
 				b0 << 24 |
 				b1 << 16 |
@@ -708,73 +711,82 @@ public class Main {
 
 	public static void main(String[] args) {
 		int argc = args.length;
+		int argv = 0;
 
-		/*
-		char *r;
-		char buf[256];
+		//char *r;
+		//char buf[256];
 		int show_todo = 0;
 
-		if (argc > 1 && (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version"))) {
-			puts("$Revision: 3310 $");
-			return 0;
+		if (argc > 1 && (args[0].equals("-v") || args[0].equals("--version"))) {
+			System.out.println(Version.NAME);
+			return;
 		}
 
-		if (argc > 1 && !strcmp(argv[1], "-t")) {
+		if (argc > 1 && args[0].equals("-t")) {
 			show_todo = 1;
-			argc--, argv++;
+			argc--; argv++;
 		}
 
-		if (argc > 1 && !strcmp(argv[1], "-w")) {
+		if (argc > 1 && args[argv].equals("-w")) {
 			show_todo = 2;
-			argc--, argv++;
+			argc--; argv++;
 		}
 
 
 		if (argc == 1) {
-		 */		
-		_masterlang = true;
-		// parse master file
-		try {
-			ParseFile("data/lang/english.txt", true);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			Fatal(e.toString());
-		}
-		
-		MakeHashOfStrings();
-		if (_errors > 0) System.exit(1);
 
-		// write english.lng and strings.h
+			_masterlang = true;
+			// parse master file
+			try {
+				ParseFile("data/lang/english.txt", true);
+			} catch (IOException e) {
+				e.printStackTrace();
+				Fatal(e.toString());
+			}
 
-		try {
-			WriteLangfile("data/bin/english.lng", 0);
-			WriteStringsH("data/StringTable.java");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			Fatal(e.toString());
-		}
-		/*
+			MakeHashOfStrings();
+			if (_errors > 0) System.exit(1);
+
+			// write english.lng and strings.h
+
+			try {
+				WriteLangfile("data/bin/english.lng", 0);
+				WriteStringsH("data/StringTable.java");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				Fatal(e.toString());
+			}
+
 		} else if (argc == 2) {
 			_masterlang = false;
-			ParseFile("lang/english.txt", true);
-			MakeHashOfStrings();
-			ParseFile(argv[1], false);
+			try {
+				ParseFile("data/lang/english.txt", true);
+				MakeHashOfStrings();
+				ParseFile(args[argv], false);
+			} catch (IOException e) {
+				e.printStackTrace();
+				Fatal(e.toString());
+			}
 
-			if (_errors) return 1;
 
-			strcpy(buf, argv[1]);
-			r = strrchr(buf, '.');
-			if (!r || strcmp(r, ".txt")) r = strchr(buf, 0);
-			strcpy(r, ".lng");
-			WriteLangfile(buf, show_todo);
+			if (_errors != 0) System.exit(1);
+
+			String buf = args[argv];
+			if(buf.endsWith(".txt"))
+				buf = buf.substring(0,buf.length()-4);
+			buf += ".lng";
+			try {
+				WriteLangfile(buf, show_todo);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				Fatal(e.toString());
+			}
+
 		} else {
-			fprintf(stderr, "invalid arguments\n");
+			System.err.println("invalid arguments\n");
 		}
 
-		return 0;
-		 */		
+
 	}
 
 

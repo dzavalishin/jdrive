@@ -108,9 +108,9 @@ public class Sprite extends Sprites {
 		return dsg.default_group;
 	}
 
-	static int GetDeterministicSpriteValue(int var)
+	static int GetDeterministicSpriteValue(int ivar)
 	{
-		switch (var) {
+		switch (ivar) {
 		case 0x00:
 			return Global._date;
 		case 0x01:
@@ -280,7 +280,7 @@ class SpriteGroup {
 		CallbackResultSpriteGroup callback;
 		ResultSpriteGroup result;
 	} g; */
-};
+}
 
 
 

@@ -24,7 +24,7 @@ public class SaveLoad
 	public static final int SL_SAVE = 1;
 	//public static final int SL_OLD_LOAD = 2;
 
-	static enum SaveOrLoadResult
+	enum SaveOrLoadResult
 	{
 	SL_OK, // completed successfully
 	SL_ERROR, // error that was caught before internal structures were modified
@@ -84,13 +84,13 @@ public class SaveLoad
 	public static void save(String filename)
 	{
 		FileOutputStream fos;
+		ObjectOutputStream oos = null;
 		try {
 			fos = new FileOutputStream(filename); //Main._file_to_saveload.name); //"temp.sav");
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos = new ObjectOutputStream(fos);
 
 			writeAll(oos);
 
-			oos.close();
 
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -99,6 +99,14 @@ public class SaveLoad
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			//System.err.println(  );
+		} finally {
+			if(oos != null)
+				try {
+					oos.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 
 		/*
@@ -121,15 +129,14 @@ public class SaveLoad
 
 
 	public static void load(String filename)
-	{
-		FileInputStream fis;
+	{		
 		ObjectInputStream oin = null;
 
-		try 
+		try( FileInputStream fis = new FileInputStream(filename) ) 
 		{
 
 			//fis = new FileInputStream("temp.sav");
-			fis = new FileInputStream(filename); //Main._file_to_saveload.name);
+			//fis ; //Main._file_to_saveload.name);
 			oin = new ObjectInputStream(fis);
 
 			Window.DeleteAllNonVitalWindows();

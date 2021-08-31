@@ -12,7 +12,7 @@ public class CargoID extends AbstractID {
 		super(i);
 	}
 	
-	private static final Map<Integer,CargoID> ids = new HashMap<Integer,CargoID>();
+	private static final Map<Integer,CargoID> ids = new HashMap<>();
 	public static CargoID get(int player) 
 	{
 		CargoID old = ids.get(player);
@@ -24,6 +24,15 @@ public class CargoID extends AbstractID {
 		return old;
 	}
 	
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
 	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
 	
 }

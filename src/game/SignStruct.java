@@ -36,7 +36,7 @@ public class SignStruct implements IPoolItem
 	{
 		private static final long serialVersionUID = 1L;
 
-		public SignStruct createObject() { return new SignStruct(); };
+		public SignStruct createObject() { return new SignStruct(); }
 	};
 
 	private void clear() {

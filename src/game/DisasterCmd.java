@@ -390,7 +390,8 @@ public class DisasterCmd extends DisasterTables
 			if (!tile.IsTileType( TileTypes.MP_INDUSTRY))
 				return;
 
-			v.dest_tile = TileIndex.get( ind = tile.getMap().m2 );
+			ind = tile.getMap().m2;
+			v.dest_tile = TileIndex.get( ind );
 
 			if (Industry.GetIndustry(ind).type == Industry.IT_OIL_REFINERY) {
 				v.getCurrent_order().station = 1;
@@ -576,8 +577,8 @@ public class DisasterCmd extends DisasterTables
 			} while (!tile.equals(tile_org));
 			v.dest_tile = tile;
 			v.age = 0;
-		} else
-			return;
+		}
+			
 	}
 
 	// The plane which will shoot down the UFO
@@ -664,7 +665,7 @@ public class DisasterCmd extends DisasterTables
 	}
 
 
-	static void DisasterTick_null(Vehicle v) {}
+	static void DisasterTick_null(Vehicle v) { /* is empty */ }
 
 	static final DisasterVehicleTickProc[] _disastervehicle_tick_procs = {
 			DisasterCmd::DisasterTick_Zeppeliner, DisasterCmd::DisasterTick_null,

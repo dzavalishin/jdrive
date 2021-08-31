@@ -1,6 +1,6 @@
 package game.tables;
 
-public enum SoundFx {
+public enum Snd {
 	// [dz] added
 	SND_NONE,
 	

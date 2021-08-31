@@ -297,7 +297,7 @@ public class Tree  extends TreeTables {
 			tmp = BitOps.ROR16(tmp, 1);
 			tmp += ti.y;
 
-			d = new ArrayPtr<Point>( _tree_layout_xy[BitOps.GB(tmp, 4, 2)] );
+			d = new ArrayPtr<>( _tree_layout_xy[BitOps.GB(tmp, 4, 2)] );
 
 			index = BitOps.GB(tmp, 6, 2) + (ti.tile.M().m3 << 2);
 
@@ -308,7 +308,7 @@ public class Tree  extends TreeTables {
 			assert(index < _tree_layout_sprite.length);
 			int[] sp = _tree_layout_sprite[index];
 			Integer[] ia = ArrayPtr.toIntegerArray(sp);
-			s = new ArrayPtr<Integer>(ia);
+			s = new ArrayPtr<>(ia);
 		}
 
 		ViewPort.StartSpriteCombine();
@@ -327,7 +327,7 @@ public class Tree  extends TreeTables {
 				te[i].image = image;
 				te[i].x =  d.r().x;
 				te[i].y =  d.r().y;
-				s.inc();;
+				s.inc();
 				d.inc();
 			} while (i >0 );
 

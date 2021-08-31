@@ -11,7 +11,7 @@ class TTDQueueImplTest {
 	@Test
 	void testPush() 
 	{
-		TTDQueueImpl<Integer> q = new TTDQueueImpl<Integer>();
+		TTDQueueImpl<Integer> q = new TTDQueueImpl<>();
 		
 		q.push(800, 800);
 		q.push(200, 200);
@@ -46,7 +46,7 @@ class TTDQueueImplTest {
 
 	@Test
 	void testClear() {
-		TTDQueueImpl<Integer> q = new TTDQueueImpl<Integer>();
+		TTDQueueImpl<Integer> q = new TTDQueueImpl<>();
 		
 		q.push(800, 800);
 		q.push(200, 200);
@@ -63,7 +63,7 @@ class TTDQueueImplTest {
 
 	@Test
 	void testDel() {
-		TTDQueueImpl<Integer> q = new TTDQueueImpl<Integer>();
+		TTDQueueImpl<Integer> q = new TTDQueueImpl<>();
 		q.push(800, 800);
 		q.del(800);
 		

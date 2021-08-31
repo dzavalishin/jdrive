@@ -25,9 +25,9 @@ public class Console //extends ConsoleCmds
 	public static final int  ICON_MAX_STREAMSIZE = 1024;
 
 	// ** console parser ** //
-	static Map<String,IConsoleCmd>   _iconsole_cmds = new HashMap<String,IConsoleCmd>();    // list of registred commands
-	static Map<String,IConsoleVar>   _iconsole_vars = new HashMap<String,IConsoleVar>();    // list of registred vars
-	static Map<String,IConsoleAlias> _iconsole_aliases = new HashMap<String,IConsoleAlias>(); // list of registred aliases
+	static Map<String,IConsoleCmd>   _iconsole_cmds = new HashMap<>();    // list of registred commands
+	static Map<String,IConsoleVar>   _iconsole_vars = new HashMap<>();    // list of registred vars
+	static Map<String,IConsoleAlias> _iconsole_aliases = new HashMap<>(); // list of registred aliases
 
 	// ** console colors/modes ** //
 	static byte _icolour_def;
@@ -421,9 +421,9 @@ public class Console //extends ConsoleCmds
 	 */
 	static void IConsoleVarHookAdd(final String name, IConsoleHookTypes type, IConsoleHook proc)
 	{
-		IConsoleVar var = IConsoleVarGet(name);
-		if (var == null) return;
-		var.hook.IConsoleHookAdd(type, proc);
+		IConsoleVar variable = IConsoleVarGet(name);
+		if (variable == null) return;
+		variable.hook.IConsoleHookAdd(type, proc);
 	}
 
 	/**
@@ -699,30 +699,30 @@ public class Console //extends ConsoleCmds
 	/**
 	 * Print out the value of the variable when asked
 	 */
-	static void IConsoleVarPrintGetValue(final IConsoleVar var)
+	static void IConsoleVarPrintGetValue(final IConsoleVar variable)
 	{
 		String value;
 		/* Some variables need really specific handling, handle this in its
 		 * callback function */
-		if (var.proc != null) {
+		if (variable.proc != null) {
 			//var.proc.accept(0, null);
-			var.proc.accept();
+			variable.proc.accept();
 			return;
 		}
 
-		value = var.IConsoleVarGetStringValue();
-		IConsolePrintF(_icolour_warn, "Current value for '%s' is:  %s", var.name, value);
+		value = variable.IConsoleVarGetStringValue();
+		IConsolePrintF(_icolour_warn, "Current value for '%s' is:  %s", variable.name, value);
 	}
 
 
 	/**
 	 * Execute a variable command. Without any parameters, print out its value
 	 * with parameters it assigns a new value to the variable
-	 * @param var the variable that we will be querying/changing
+	 * @param variable the variable that we will be querying/changing
 	 * @param tokencount how many additional parameters have been given to the commandline
 	 * @param token the actual parameters the variable was called with
 	 */
-	static void IConsoleVarExec(final IConsoleVar var, int tokencount, String ... token)
+	static void IConsoleVarExec(final IConsoleVar variable, int tokencount, String ... token)
 	{
 		String tokenptr = token[0];
 		int t_index = tokencount;
@@ -731,7 +731,7 @@ public class Console //extends ConsoleCmds
 			IConsolePrintF(_icolour_dbg, "condbg: requested command is a variable");
 
 		if (tokencount == 0) { /* Just print out value */
-			IConsoleVarPrintGetValue(var);
+			IConsoleVarPrintGetValue(variable);
 			return;
 		}
 
@@ -743,32 +743,32 @@ public class Console //extends ConsoleCmds
 
 		if (tokencount == 1) {
 			/* Some variables need really special handling, handle it in their callback procedure */
-			if (var.proc != null) {
-				var.proc.accept(token[t_index - tokencount]); // set the new value
+			if (variable.proc != null) {
+				variable.proc.accept(token[t_index - tokencount]); // set the new value
 				return;
 			}
 			/* Strings need special processing. No need to convert the argument to
 			 * an integer value, just copy over the argument on a one-by-one basis */
-			if (var.type == IConsoleVarTypes.ICONSOLE_VAR_STRING) {
-				var.IConsoleVarSetStringvalue(token[t_index - tokencount]);
+			if (variable.type == IConsoleVarTypes.ICONSOLE_VAR_STRING) {
+				variable.IConsoleVarSetStringvalue(token[t_index - tokencount]);
 				return;
 			} else {
 				int [] value = {0};
 
 				if (GetArgumentInteger(value, token[t_index - tokencount])) {
-					var.IConsoleVarSetValue(value[0]);
+					variable.IConsoleVarSetValue(value[0]);
 					return;
 				}
 			}
 
 			/* Increase or decrease the value by one. This of course can only happen to 'number' types */
-			if (tokenptr.equals("++") && var.type != IConsoleVarTypes.ICONSOLE_VAR_STRING) {
-				var.IConsoleVarSetValue(var.IConsoleVarGetValue() + 1);
+			if (tokenptr.equals("++") && variable.type != IConsoleVarTypes.ICONSOLE_VAR_STRING) {
+				variable.IConsoleVarSetValue(variable.IConsoleVarGetValue() + 1);
 				return;
 			}
 
-			if (tokenptr.equals("--") && var.type != IConsoleVarTypes.ICONSOLE_VAR_STRING) {
-				var.IConsoleVarSetValue(var.IConsoleVarGetValue() - 1);
+			if (tokenptr.equals("--") && variable.type != IConsoleVarTypes.ICONSOLE_VAR_STRING) {
+				variable.IConsoleVarSetValue(variable.IConsoleVarGetValue() - 1);
 				return;
 			}
 		}
@@ -784,9 +784,9 @@ public class Console //extends ConsoleCmds
 	 */
 	static void IConsoleVarProcAdd(final String name, IConsoleCmdProc proc)
 	{
-		IConsoleVar var = IConsoleVarGet(name);
-		if (var == null) return;
-		var.proc = proc;
+		IConsoleVar variable = IConsoleVarGet(name);
+		if (variable == null) return;
+		variable.proc = proc;
 	}
 
 	/**
@@ -798,7 +798,7 @@ public class Console //extends ConsoleCmds
 	{
 		IConsoleCmd   cmd    = null;
 		IConsoleAlias alias  = null;
-		IConsoleVar   var    = null;
+		//IConsoleVar   variable    = null;
 
 		//final String cmdptr;
 		String [] tokens = new String[ICON_TOKEN_COUNT];
@@ -907,10 +907,10 @@ public class Console //extends ConsoleCmds
 			return;
 		}
 
-		var = IConsoleVarGet(tokens[0]);
-		if (var != null) {
-			if (var.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_ACCESS))
-				IConsoleVarExec(var, t_index, tokens[1], tokens[2]);
+		IConsoleVar variable = IConsoleVarGet(tokens[0]);
+		if (variable != null) {
+			if (variable.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_ACCESS))
+				IConsoleVarExec(variable, t_index, tokens[1], tokens[2]);
 
 			return;
 		}
@@ -1045,6 +1045,8 @@ public class Console //extends ConsoleCmds
 					e.cont = true;
 				break;
 			}
+			break;
+			
 		default:
 			break;
 		}

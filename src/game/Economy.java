@@ -124,7 +124,7 @@ public class Economy extends EconomeTables
 
 			Station.forEach( (ii,st) ->
 			{
-				if (st.getXy() != null && st.owner == owner) {
+				if( st.getXy() != null && st.owner.equals(owner) ) {
 					int facil = st.facilities;
 					do num[0] += (facil&1); while ((facil >>= 1) > 0);
 				}
@@ -138,7 +138,7 @@ public class Economy extends EconomeTables
 			while(ii.hasNext())
 			{
 				Vehicle v = ii.next();
-				if (v.owner != owner)
+				if (!v.owner.equals(owner))
 					continue;
 				if (v.type == Vehicle.VEH_Train ||
 						v.type == Vehicle.VEH_Road ||
@@ -274,7 +274,7 @@ public class Economy extends EconomeTables
 
 		/* Generate score for loan */
 		{
-			_score_part[owner][SCORE_LOAN] = _score_info[SCORE_LOAN].needed - p.current_loan;
+			_score_part[owner][SCORE_LOAN] = _score_info[SCORE_LOAN].needed - (long)p.current_loan;
 		}
 
 		// Now we calculate the score for each item..
@@ -494,7 +494,7 @@ public class Economy extends EconomeTables
 				p.bankrupt_timeout = 0;
 				break;
 			}
-			// Else, falltrue to case 4...
+			// Else, fall thru to case 4...
 		}
 		case 4: {
 			// Close everything the owner has open
@@ -765,7 +765,6 @@ public class Economy extends EconomeTables
 			final Player p = ii.next();
 			if (!p.is_active) continue;
 
-			/** TODO XXX return back, turned off for debug
 			Global.gs._current_player = p.index;
 			Player.SET_EXPENSES_TYPE(Player.EXPENSES_LOAN_INT);
 
@@ -773,7 +772,6 @@ public class Economy extends EconomeTables
 
 			Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 			Player.SubtractMoneyFromPlayer(Global._price.station_value >> 2);
-			*/
 		}
 	}
 
@@ -782,7 +780,7 @@ public class Economy extends EconomeTables
 		if (GameOptions._opt.diff.economy == 0) return;
 
 		if (--Global._economy.fluct == 0) {
-			Global._economy.fluct = -(int)BitOps.GB(Hal.Random(), 0, 2);
+			Global._economy.fluct = -BitOps.GB(Hal.Random(), 0, 2);
 			NewsItem.AddNewsItem(Str.STR_7073_WORLD_RECESSION_FINANCIAL, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL,0,NewsItem.NT_ECONOMY,0), 0, 0);
 		} else if (Global._economy.fluct == -12) {
 			Global._economy.fluct = BitOps.GB(Hal.Random(), 0, 8) + 312;

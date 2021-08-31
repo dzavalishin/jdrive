@@ -168,7 +168,7 @@ public class ShipGui
 			//StringID 
 			int str;
 
-			w.disabled_state = v.getOwner() == Global.gs._local_player ? 0 : (1 << 2);
+			w.disabled_state = v.getOwner().isLocalPlayer() ? 0 : (1 << 2);
 			if (0==Global._patches.servint_ships) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
@@ -499,7 +499,7 @@ public class ShipGui
 					Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_WATER))
 				disabled = 0;
 
-			if (v.getOwner() != Global.gs._local_player)
+			if (!v.getOwner().isLocalPlayer())
 				disabled |= 1<<8 | 1<<7;
 			w.disabled_state = disabled;
 
@@ -603,6 +603,8 @@ public class ShipGui
 				w.SetWindowDirty();
 			}
 		}
+		break;
+		
 		default:
 			break;
 		}
@@ -1069,24 +1071,26 @@ public class ShipGui
 				VehicleGui.DrawVehicleProfitButton(v, x, y + 13);
 
 				Global.SetDParam(0, v.getUnitnumber().id);
+				
 				if (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_WATER) && v.isHidden())
 					str = Str.STR_021F;
 				else
 					str = v.getAge() > v.getMax_age() - 366 ? Str.STR_00E3 : Str.STR_00E2;
-					Gfx.DrawString(x, y + 2, str, 0);
+					
+				Gfx.DrawString(x, y + 2, str, 0);
 
-					Global.SetDParam(0, v.getProfit_this_year());
-					Global.SetDParam(1, v.getProfit_last_year());
-					Gfx.DrawString(x + 12, y + 28, Str.STR_0198_PROFIT_THIS_YEAR_LAST_YEAR, 0);
+				Global.SetDParam(0, v.getProfit_this_year());
+				Global.SetDParam(1, v.getProfit_last_year());
+				Gfx.DrawString(x + 12, y + 28, Str.STR_0198_PROFIT_THIS_YEAR_LAST_YEAR, 0);
 
-					if (v.getString_id() != Str.STR_SV_SHIP_NAME) {
-						Global.SetDParam(0, v.getString_id());
-						Gfx.DrawString(x + 12, y, Str.STR_01AB, 0);
-					}
+				if (v.getString_id() != Str.STR_SV_SHIP_NAME) {
+					Global.SetDParam(0, v.getString_id());
+					Gfx.DrawString(x + 12, y, Str.STR_01AB, 0);
+				}
 
-					DrawSmallOrderList(v, x + 138, y);
+				DrawSmallOrderList(v, x + 138, y);
 
-					y += VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
+				y += VehicleGui.PLY_WND_PRC__SIZE_OF_ROW_BIG;
 			}
 		}	break;
 

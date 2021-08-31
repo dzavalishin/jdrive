@@ -10,6 +10,7 @@ import game.Hal;
 
 // macros.h stuff
 public class BitOps {
+	private BitOps() { } // Prevent construction
 
 	/// Fetch n bits starting at bit s from x
 	static public int GB(int x, int s, int n) { return (x >> s) & ((1 << n) - 1); }
@@ -34,10 +35,11 @@ public class BitOps {
 	}
 
 
+	/*
 	static public int min(int a, int b) { if (a <= b) return a; return b; }
 	static public int max(int a, int b) { if (a >= b) return a; return b; }
 	static public long max64(long a, long b) { if (a >= b) return a; return b; }
-
+	*/
 	//static  uint minu(uint a, uint b) { if (a <= b) return a; return b; }
 	//static  uint maxu(uint a, uint b) { if (a >= b) return a; return b; }
 
@@ -45,13 +47,15 @@ public class BitOps {
 	public static long minu(int a, int b) 
 	{ 
 		long la = Integer.toUnsignedLong(a); long lb = Integer.toUnsignedLong(b); 
-		if (la <= lb) return la; return lb; 
+		if (la <= lb) return la; 
+		return lb; 
 	}
 
 	public static long maxu(int a, int b) 
 	{ 
 		long la = Integer.toUnsignedLong(a); long lb = Integer.toUnsignedLong(b); 
-		if (la >= lb) return la; return lb; 
+		if (la >= lb) return la; 
+		return lb; 
 	}
 
 	static public int clamp(int a, int min, int max)
@@ -234,8 +238,7 @@ public class BitOps {
 	{ 
 		final int r = Hal.Random();
 		final int v = (int)( (Integer.MAX_VALUE*2L * (double)a) / b );
-		boolean ret = Integer.compareUnsigned( r, v ) <= 0;
-		return ret;
+		return Integer.compareUnsigned( r, v ) <= 0;
 	}
 	
 	public static boolean CHANCE16R(int a, int b, int [] rv) 
@@ -262,8 +265,8 @@ public class BitOps {
 		for(_i=0; _b!=0; _i++,_b>>=1)								\
 			if (_b&1)
 	 */
-	public static  int myabs(int a) { if (a<0) a = -a; return a; }
-	public static  long myabs64(long a) { if (a<0) a = -a; return a; }
+	//public static  int myabs(int a) { if (a<0) a = -a; return a; }
+	//public static  long myabs64(long a) { if (a<0) a = -a; return a; }
 
 
 	/*

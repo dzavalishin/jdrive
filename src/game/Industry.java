@@ -8,7 +8,9 @@ import java.util.function.Consumer;
 
 import game.tables.IndustryTables;
 import game.tables.IndustryTileTable;
+import game.tables.Snd;
 import game.util.BitOps;
+import game.util.Sound;
 import game.xui.Gfx;
 import game.xui.Gui;
 import game.xui.MiscGui;
@@ -539,11 +541,11 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				m = tile.getMap().m3 + 1;
 
 				if (m == 1) {
-					//SndPlayTileFx(SND_2C_MACHINERY, tile);
+					Sound.SndPlayTileFx(Snd.SND_2C_MACHINERY, tile);
 				} else if (m == 23) {
-					//SndPlayTileFx(SND_2B_COMEDY_HIT, tile);
+					Sound.SndPlayTileFx(Snd.SND_2B_COMEDY_HIT, tile);
 				} else if (m == 28) {
-					//SndPlayTileFx(SND_2A_EXTRAAcceptedCargo.CT_AND_POP, tile);
+					Sound.SndPlayTileFx(Snd.SND_2A_EXTRACT_AND_POP, tile);
 				}
 
 				if (m >= 50) {

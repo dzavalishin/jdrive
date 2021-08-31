@@ -1,6 +1,5 @@
 package game;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -317,7 +316,7 @@ implements IPoolItem, Serializable
 	{
 		int z = Landscape.GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
 		if (ti.tileh != 0) z = (z & ~7) + 4;
-		return (int) z;
+		return z;
 	}
 
 	static int GetSlopeTileh_Town(final TileInfo ti)
@@ -1779,7 +1778,7 @@ implements IPoolItem, Serializable
 			case MP_STREET:
 			case MP_TUNNELBRIDGE:
 				if (tile.IsTileOwner(Owner.OWNER_TOWN) &&
-						ClosestTownFromTile(tile, (int)-1) == this)
+						ClosestTownFromTile(tile, -1) == this)
 					Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 				break;
 
@@ -1939,7 +1938,8 @@ implements IPoolItem, Serializable
 			// set all close by station ratings to 0
 			Station.forEach( (st) ->
 			{
-				if (st.town == t && st.owner == Global.gs._current_player) {
+				if(st.town == t && st.owner.isCurrentPlayer()) 
+				{
 					for (int i = 0; i != AcceptedCargo.NUM_CARGO; i++) 
 						st.goods[i].rating = 0;
 				}
@@ -2293,8 +2293,7 @@ implements IPoolItem, Serializable
 
 
 	public static Town getRandomTown() 
-	{
-		;
+	{		
 		return GetTown(Hal.RandomRange(Global.gs._towns.size()));
 		//return GetTown(Hal.RandomRange(_total_towns));
 	}
@@ -2408,13 +2407,13 @@ implements IPoolItem, Serializable
 	};
 	 */
 
-	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
+	public static void loadGame(ObjectInputStream oin)
 	{
 		//GameState._towns = (MemoryPool<Town>) oin.readObject();
 		AfterLoadTown();
 	}
 
-	public static void saveGame(ObjectOutputStream oos) throws IOException 
+	public static void saveGame(ObjectOutputStream oos) 
 	{
 		//oos.writeObject(GameState._towns);		
 	}

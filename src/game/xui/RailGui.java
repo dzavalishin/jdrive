@@ -190,10 +190,10 @@ public class RailGui {
 
 		trackstat = tile.GetTileTrackStatus(Global.TRANSPORT_RAIL);
 
-		if(0 != ((trackstat & 0x30))) // N-S direction
+		if(0 != (trackstat & 0x30)) // N-S direction
 			trackstat = (Global._tile_fract_coords.x <= Global._tile_fract_coords.y) ? 0x20 : 0x10;
 
-		if(0 !=  ((trackstat & 0x0C))) // E-W direction
+		if(0 !=  (trackstat & 0x0C)) // E-W direction
 			trackstat = (Global._tile_fract_coords.x + Global._tile_fract_coords.y <= 15) ? 4 : 8;
 
 		// Lookup the bit index
@@ -998,14 +998,14 @@ public class RailGui {
 					Global._patches.drag_signals_density--;
 					//SndPlayFx(SND_15_BEEP);
 					w.SetWindowDirty();
-				};
+				}
 				break;
 			case 8: // increase drag density
 				if (Global._patches.drag_signals_density < 20) {
 					Global._patches.drag_signals_density++;
 					//SndPlayFx(SND_15_BEEP);
 					w.SetWindowDirty();
-				};
+				}
 				break;
 			case 9: // autosignal mode toggle button
 				_cur_autosig_compl = !_cur_autosig_compl;

@@ -89,7 +89,7 @@ public class Subsidies {
 				}
 			}
 		}
-		return;
+		
 
 		/*
 		handle_click:

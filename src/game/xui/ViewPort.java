@@ -118,7 +118,7 @@ public class ViewPort
 
 
 	public static final TileHighlightData _thd = new TileHighlightData();
-	public static final List<ViewPort> _viewports = new ArrayList<ViewPort>();
+	public static final List<ViewPort> _viewports = new ArrayList<>();
 
 	public void removeFromAll()
 	{
@@ -763,8 +763,7 @@ public class ViewPort
 				BitOps.IS_INSIDE_1D(ti.x, _thd.pos.x + _thd.offs.x, _thd.size.x + _thd.outersize.x) &&
 				BitOps.IS_INSIDE_1D(ti.y, _thd.pos.y + _thd.offs.y, _thd.size.y + _thd.outersize.y)) {
 			// Draw a blue rect.
-			DrawSelectionSprite(Sprite.PALETTE_SEL_TILE_BLUE | (Sprite.SPR_SELECT_TILE + Landscape._tileh_to_sprite[ti.tileh]), ti);
-			return;
+			DrawSelectionSprite(Sprite.PALETTE_SEL_TILE_BLUE | (Sprite.SPR_SELECT_TILE + Landscape._tileh_to_sprite[ti.tileh]), ti);			
 		}
 	}
 
@@ -1636,11 +1635,11 @@ public class ViewPort
 	}
 
 
-	@Deprecated
+	/*@Deprecated
 	void MarkTileDirtyByTile(TileIndex tile)
 	{
 		tile.MarkTileDirtyByTile();		
-	}	
+	}*/	
 	/*
 	void MarkTileDirtyByTile(TileIndex tile)
 	{
@@ -2291,7 +2290,7 @@ public class ViewPort
 	static void CalcRaildirsDrawstyle(TileHighlightData thd, int x, int y, int method)
 	{
 		int d;
-		int b=6;
+		int b;//=6;
 		int w,h;
 
 		int dx = thd.selstart.x - (thd.selend.x&~0xF);
@@ -2571,18 +2570,18 @@ public class ViewPort
 class ViewportDrawer {
 	final DrawPixelInfo dpi = new DrawPixelInfo();
 
-	final ArrayList<TileSpriteToDraw> tile_list = new ArrayList<TileSpriteToDraw>();
-	final ArrayList<StringSpriteToDraw> string_list = new ArrayList<StringSpriteToDraw>();
+	final ArrayList<TileSpriteToDraw> tile_list = new ArrayList<>();
+	final ArrayList<StringSpriteToDraw> string_list = new ArrayList<>();
 
 	ParentSpriteToDraw last_parent;
 
-	final ArrayList<ParentSpriteToDraw> parent_list = new ArrayList<ParentSpriteToDraw>();
+	final ArrayList<ParentSpriteToDraw> parent_list = new ArrayList<>();
 
 	byte combine_sprites;
 
 	int offs_x, offs_y; // used when drawing ground sprites relative
 	boolean ground_child;
-} ;
+} 
 
 
 //typedef void OnVehicleClickProc(final Vehicle v);

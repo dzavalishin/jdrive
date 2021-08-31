@@ -3,11 +3,11 @@ package game.util;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
-public class TTDQueueImpl<ItemType>  extends TTDQueue<ItemType>  
+public class TTDQueueImpl<ItemType>  implements TTDQueue<ItemType>  
 {
 	
 	//private ArrayList<ItemType> list = new ArrayList<ItemType>();
-	private final ArrayList<WeightedPair> list = new ArrayList<WeightedPair>();
+	private final ArrayList<WeightedPair> list = new ArrayList<>();
 	
 	static class WeightedPair
 	{

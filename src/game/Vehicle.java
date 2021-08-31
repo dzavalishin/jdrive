@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 import game.enums.GameModes;
@@ -167,7 +168,7 @@ public class Vehicle implements IPoolItem
 
 	private void InitializeVehicle()
 	{
-		int indexc = index;
+		//int indexc = index;
 
 		type = 0;	
 		subtype = 0;
@@ -270,7 +271,7 @@ public class Vehicle implements IPoolItem
 
 		air.desired_speed = 1;
 
-		index = indexc;
+		//index = indexc;
 	}
 
 	public Vehicle() {
@@ -1408,11 +1409,11 @@ public class Vehicle implements IPoolItem
 
 	boolean CanFillVehicle()
 	{
-		Vehicle v = this;
-		TileIndex tile = v.tile;
+		//Vehicle v = this;
+		//TileIndex tile = v.tile;
 
 		if (tile.IsTileType(TileTypes.MP_STATION) ||
-				(v.type == VEH_Ship && (
+				(type == VEH_Ship && (
 						tile.iadd(TileIndex.TileDiffXY(1,  0)).IsTileType(TileTypes.MP_STATION) ||
 						tile.iadd(TileIndex.TileDiffXY(-1, 0)).IsTileType(TileTypes.MP_STATION) ||
 						tile.iadd(TileIndex.TileDiffXY(0,  1)).IsTileType(TileTypes.MP_STATION) ||
@@ -1422,8 +1423,10 @@ public class Vehicle implements IPoolItem
 
 			// If patch is active, use alternative CanFillVehicle-function
 			if (Global._patches.full_load_any)
-				return CanFillVehicle_FullLoadAny(v);
+				return CanFillVehicle_FullLoadAny(this);
 
+			Vehicle v = this;
+			
 			do {
 				if (v.cargo_count != v.cargo_cap)
 					return true;
@@ -2238,7 +2241,7 @@ public class Vehicle implements IPoolItem
 
 	static void ShowVehicleGettingOld(Vehicle v, /*StringID*/ int msg)
 	{
-		if (v.owner != Global.gs._local_player) return;
+		if(!v.owner.isLocalPlayer()) return;
 
 		// Do not show getting-old message if autorenew is active
 		if (Player.GetPlayer(v.owner).engine_renew) return;
@@ -2250,23 +2253,22 @@ public class Vehicle implements IPoolItem
 
 	void AgeVehicle()
 	{
-		int age;
 		Vehicle v = this;
 
 		if (v.age < 65535)
 			v.age++;
 
-		age = v.age - v.max_age;
-		if (age == 366*0 || age == 366*1 || age == 366*2 || age == 366*3 || age == 366*4)
+		int agep = v.age - v.max_age;
+		if (agep == 366*0 || agep == 366*1 || agep == 366*2 || agep == 366*3 || agep == 366*4)
 			v.reliability_spd_dec <<= 1;
 
 		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
-		if (age == -366) {
+		if (agep == -366) {
 			ShowVehicleGettingOld(v, Str.STR_01A0_IS_GETTING_OLD);
-		} else if (age == 0) {
+		} else if (agep == 0) {
 			ShowVehicleGettingOld(v, Str.STR_01A1_IS_GETTING_VERY_OLD);
-		} else if (age == 366*1 || age == 366*2 || age == 366*3 || age == 366*4 || age == 366*5) {
+		} else if (agep == 366*1 || agep == 366*2 || agep == 366*3 || agep == 366*4 || agep == 366*5) {
 			ShowVehicleGettingOld(v, Str.STR_01A2_IS_GETTING_VERY_OLD_AND);
 		}
 	}
@@ -2812,7 +2814,7 @@ public class Vehicle implements IPoolItem
 			{
 				Vehicle u = i.next();
 
-				if (u.type == type && u.owner == Global.gs._current_player 
+				if (u.type == type && u.owner.isCurrentPlayer() 
 						&& u.unitnumber != null
 						&& unit_num == u.unitnumber.id)
 				{
@@ -3051,13 +3053,18 @@ public class Vehicle implements IPoolItem
 		return new Iterator<Order>() 
 		{
 			Order curr = orders; 
+			
 			@Override
 			public boolean hasNext() {
 				return curr != null;
 			}
 
 			@Override
-			public Order next() {
+			public Order next() 
+			{
+				if( curr == null ) 
+					throw new NoSuchElementException();
+				
 				Order ret = curr;
 				curr = curr.next;
 				return ret;
