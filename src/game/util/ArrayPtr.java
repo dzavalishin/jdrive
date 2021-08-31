@@ -147,7 +147,6 @@ public class ArrayPtr<ItemType> {
 			System.arraycopy(src.mem, src.displ, mem, displ, num);		
 		}
 		
-		// TODO toLongArray 		Long[] la = (Long[]) Arrays.stream(gw.cost[0]).mapToObj( (lv) -> Long.valueOf(lv) ).toArray();
 
 		
 		public static Integer[] toIntegerArray(int [] iia) 

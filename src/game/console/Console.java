@@ -150,8 +150,8 @@ public class Console //extends ConsoleCmds
 				_iconsole_output_file.write(string);
 				_iconsole_output_file.write("\n");
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				Global.error(e);
 			}
 		}
 	}
@@ -164,8 +164,7 @@ public class Console //extends ConsoleCmds
 			try {
 				_iconsole_output_file.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Global.error(e);
 			}
 			_iconsole_output_file = null;
 			return true;

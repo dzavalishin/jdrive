@@ -1,22 +1,26 @@
 package game.util;
 
+/** 
+ * 
+ * This class defines all the the animated cursors.
+ * <p> 
+ * Animated cursors consist of the number of sprites that are
+ * displayed in a round-robin manner. Each sprite also has a time
+ * associated that indicates how many ticks the corresponding sprite
+ * is to be displayed.
+ * <p> 
+ * All these arrays end up in an array of pointers called _animcursors.
+ * 
+ */
 public class AnimCursor {
 
 	public final int spriteId;
 	public final int time;
 	
-	/** @file animcursors.h
-	 * This file defines all the the animated cursors.
-	 * Animated cursors consist of the number of sprites that are
-	 * displayed in a round-robin manner. Each sprite also has a time
-	 * associated that indicates how many ticks the corresponding sprite
-	 * is to be displayed. Currently all this information is recorded in a single
-	 * array. @todo This should be converted into an array of structs on the long run
-	 * All these arrays end up in an array of pointers called _animcursors.
-	 */
 
-	/** Creates two array entries that define one
-	 *  status of the cursor.
+	/** 
+	 * Creates array entry that defines one status of the cursor.
+	 * 
 	 *  @param spriteId The Sprite to be displayed
 	 *  @param time The Number of ticks to display the sprite
 	 */
@@ -26,11 +30,7 @@ public class AnimCursor {
 		this.time = time;
 
 	}
-	//#define new AnimCursor(Sprite, display_time) Sprite, display_time,
 
-	/** This indicates the termination of the cursor list
-	 */
-	//public static final int ANIM_CURSOR_END() 0xFFFF
 
 	/** Animated cursor elements for demolishion
 	 */

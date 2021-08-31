@@ -59,8 +59,8 @@ public class FileIO {
 			//cur_fh.seek(pos=ppos);
 			cur_fh.seek(ppos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 			System.exit(33);
 		}
 	}
@@ -92,8 +92,8 @@ public class FileIO {
 			d = cur_fh.read();
 			//pos++;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 			System.exit(33);
 		}
 		assert( d >= 0 );
@@ -148,8 +148,8 @@ public class FileIO {
 		try {
 			cur_fh.read(buf, 0, size);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 			System.exit(33);
 		}
 		return buf;
@@ -162,8 +162,8 @@ public class FileIO {
 			try {
 				handles[slot].close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				Global.error(e);
 			}
 			handles[slot] = null;
 		}
@@ -185,8 +185,8 @@ public class FileIO {
 			try {
 				f.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				Global.error(e);
 			}
 
 		return f != null;
@@ -241,8 +241,8 @@ public class FileIO {
 		try {
 			f = new BufferedRandomAccessFile(buf,"r", 10240 );
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 			return null;
 		}
 

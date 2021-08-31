@@ -75,16 +75,16 @@ public class Main {
 		try {
 			len = f.read(buf);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 			return null;
 		} finally
 		{
 			try {
 				f.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				Global.error(e);
 			}
 			
 		}
@@ -1037,8 +1037,8 @@ public class Main {
 		try {
 			cwd = new java.io.File(".").getCanonicalPath();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 			error(e.toString());
 		}
 		

@@ -97,8 +97,8 @@ void SortResolutions(int count)
 		try {
 			Thread.sleep(milliseconds);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 		}
 	}
 	
@@ -248,8 +248,8 @@ void SortResolutions(int count)
 				if(!Global._fast_forward)
 					Thread.sleep(10); // TODO 100 fps?
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				Global.error(e);
 			}
 
 			if (Global._exit_game) return;
@@ -285,7 +285,7 @@ void SortResolutions(int count)
 			//try {
 				Main.GameLoop();
 			/*} catch (Throwable e) {
-				e.printStackTrace();
+				Global.error(e);
 			}*/
 
 			_cursor.setDelta(0,0);
@@ -302,7 +302,7 @@ void SortResolutions(int count)
 			//try {
 				Window.UpdateWindows();
 			/*} catch (Throwable e) {
-				e.printStackTrace();
+				Global.error(e);
 			}*/
 
 			checkPaletteAnim();

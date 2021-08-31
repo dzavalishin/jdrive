@@ -515,7 +515,7 @@ public class Main {
 		try {
 			ret = doCompare(f2, f1);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		finally
@@ -524,7 +524,7 @@ public class Main {
 				f2.close();
 				f1.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 		}
@@ -564,14 +564,14 @@ public class Main {
 		try {
 			codeGen(out); //, next);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+			
 			e1.printStackTrace();
 		}
 		finally {
 			try {
 				out.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 		}
@@ -593,7 +593,7 @@ public class Main {
 			}
 		}
 		catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -674,7 +674,7 @@ public class Main {
 			e.writeLangFile(in_use, show_todo);
 			f.writeByte(0);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+			
 			e1.printStackTrace();
 		}
 		finally {
@@ -682,7 +682,7 @@ public class Main {
 			try {
 				f.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 		}

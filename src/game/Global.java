@@ -1,5 +1,6 @@
 package game;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -283,7 +284,13 @@ public class Global
 
 	public static void error(String s, Object ... arg) {
 		String buf = String.format(s, arg);
+		System.err.print("Error: ");
 		System.err.println(buf);		
+	}
+	
+	public static void error(IOException e) 
+	{	
+		error("Exception %s ", e.toString());
 	}
 
 	/**

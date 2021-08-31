@@ -93,19 +93,19 @@ public class SaveLoad
 
 
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 			//System.err.println(  );
 		} finally {
 			if(oos != null)
 				try {
 					oos.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					
+					Global.error(e);
 				}
 		}
 
@@ -146,14 +146,14 @@ public class SaveLoad
 			Hal.MarkWholeScreenDirty();
 
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 		} 
 		finally
 		{
@@ -161,8 +161,8 @@ public class SaveLoad
 				try {
 					oin.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					
+					Global.error(e);
 				}
 		}
 
