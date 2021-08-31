@@ -32,7 +32,7 @@ class BitOpsTest {
 
 	@Test
 	void testRETAB() {
-		fail("Not yet implemented");
+		assertEquals( 0, BitOps.RETAB(0x20, 4, 2, 2) );
 	}
 
 	@Test
@@ -69,106 +69,122 @@ class BitOpsTest {
 
 	@Test
 	void testBIGMULSS() {
-		fail("Not yet implemented");
+		assertEquals( 3*2, BitOps.BIGMULSS(3*256, 2, 8) );
+		assertEquals( 3*2, BitOps.BIGMULSS(3*256*256, 2, 16) );
 	}
 
 	@Test
 	void testBIGMULSS64() {
-		fail("Not yet implemented");
+		assertEquals( 3*2, BitOps.BIGMULSS64(3*256, 2, 8) );
+		assertEquals( 3*2, BitOps.BIGMULSS64(3*256*256, 2, 16) );
+		assertEquals( 3*2, BitOps.BIGMULSS64(3*256*256*256, 2, 24) );
+		assertEquals( 3*2, BitOps.BIGMULSS64(3*256*256*256*16L, 2, 24+4) );
 	}
 
 	@Test
 	void testIS_INSIDE_1D() {
-		fail("Not yet implemented");
+		assertEquals(true, BitOps.IS_INSIDE_1D(1, 1, 3));
+		assertEquals(true, BitOps.IS_INSIDE_1D(3, 1, 3));
+		assertEquals(false, BitOps.IS_INSIDE_1D(4, 1, 3));
+		assertEquals(false, BitOps.IS_INSIDE_1D(0, 1, 3));
 	}
 
 	@Test
 	void testHASBIT() {
-		fail("Not yet implemented");
+		assertEquals(true, BitOps.HASBIT((byte)0xFE, 2));
+		assertEquals(false, BitOps.HASBIT((byte)0xFE, 0));
 	}
 
 	@Test
 	void testRETCLRBITByteInt() {
-		fail("Not yet implemented");
+		assertEquals((byte)0xFE, BitOps.RETCLRBIT((byte)0xFF, 0));
 	}
 
 	@Test
 	void testRETSETBITByteInt() {
-		fail("Not yet implemented");
+		assertEquals(0x01, BitOps.RETSETBIT((byte)0x00, 0));
 	}
 
 	@Test
 	void testRETTOGGLEBITByteInt() {
-		fail("Not yet implemented");
+		assertEquals((byte)0x01, BitOps.RETSETBIT((byte)0x00, 0));
+		assertEquals((byte)0xFE, BitOps.RETCLRBIT((byte)0xFF, 0));
 	}
 
 	@Test
 	void testRETCLRBITIntInt() {
-		fail("Not yet implemented");
+		assertEquals(0x01, BitOps.RETSETBIT(0x00, 0));
+		assertEquals(0xFE, BitOps.RETCLRBIT(0xFF, 0));
 	}
 
 	@Test
 	void testRETSETBITIntInt() {
-		fail("Not yet implemented");
+		assertEquals(0x01, BitOps.RETSETBIT(0x00, 0));
+		assertEquals(0x10, BitOps.RETSETBIT(0x00, 4));
 	}
 
 	@Test
 	void testRETTOGGLEBITIntInt() {
-		fail("Not yet implemented");
+		assertEquals(0x01, BitOps.RETSETBIT(0x00, 0));
+		assertEquals(0xFE, BitOps.RETCLRBIT(0xFF, 0));
 	}
 
 	@Test
 	void testHASBITS() {
-		fail("Not yet implemented");
-	}
+		assertEquals(true, BitOps.HASBITS(0x55, 0x05));
+		assertEquals(true, BitOps.HASBITS(0x55, 0x50));	
+		assertEquals(false, BitOps.HASBITS(0x55, 0x0A));
+		assertEquals(false, BitOps.HASBITS(0x55, 0xA0));
+		}
 
 	@Test
-	void testRETSETBITSIntInt() {
-		fail("Not yet implemented");
+	void testRETSETBITSIntInt() 
+	{
+		assertEquals(0x01, BitOps.RETSETBIT(0, 0));
+		assertEquals(0x10, BitOps.RETSETBIT(0, 4));
+		assertEquals(0x11, BitOps.RETSETBIT(1, 4));
 	}
 
 	@Test
 	void testRETSETBITSByteByte() {
-		fail("Not yet implemented");
+		assertEquals(0x10, BitOps.RETSETBITS((byte)0x00, (byte)0x10));
 	}
 
 	@Test
 	void testRETCLRBITSIntInt() {
-		fail("Not yet implemented");
+		assertEquals(0xEF, BitOps.RETCLRBITS(0xFF, 0x10));
 	}
 
 	@Test
 	void testRETCLRBITSByteByte() {
-		fail("Not yet implemented");
+		assertEquals((byte)0xEF, BitOps.RETCLRBITS((byte)0xFF, (byte)0x10));
 	}
 
 	@Test
 	void testFIND_FIRST_BIT() {
-		System.err.print("FIND_FIRST_BIT: ");
-		System.err.println(BitOps.FIND_FIRST_BIT(0x40));
+		System.err.print("FIND_FIRST_BIT: "); System.err.println(BitOps.FIND_FIRST_BIT(0x8));
 
+		assertEquals(BitOps.FIND_FIRST_BIT(0x06), 1);
+		assertEquals(BitOps.FIND_FIRST_BIT(0x0F), 0);
 		assertEquals(BitOps.FIND_FIRST_BIT(0x20), 5);
-		assertEquals(BitOps.FIND_FIRST_BIT(0x40), 6);
-		assertEquals(BitOps.FIND_FIRST_BIT(0x80), 7);
 	}
 
 	@Test
 	void testKILL_FIRST_BIT() {
-		assertEquals(BitOps.KILL_FIRST_BIT(0x20), 0); // TODO bits 6 & 7?
-		assertEquals(BitOps.KILL_FIRST_BIT(0x22), 2); // TODO bits 6 & 7?
+		assertEquals(0, BitOps.KILL_FIRST_BIT(0x20)); 
+		assertEquals(0x20, BitOps.KILL_FIRST_BIT(0x22));
 	}
 
 	@Test
 	void testFindFirstBit2x64() {
-		fail("Not yet implemented");
-		//System.err.println(BitOps.FindFirstBit2x64(0x80));
-		assertEquals(BitOps.FindFirstBit2x64(0x1), 0 );
-		assertEquals(BitOps.FindFirstBit2x64(0x80), 7 ); // TODO which bits must work?
+		assertEquals(8, BitOps.FindFirstBit2x64(0x100) );
+		assertEquals(11, BitOps.FindFirstBit2x64(0x800) );
 	}
 
 	@Test
 	void testKillFirstBit2x64() {
-		fail("Not yet implemented");
+		assertEquals(0x1000, BitOps.KillFirstBit2x64(0x1100) );
+		assertEquals(0x1000, BitOps.KillFirstBit2x64(0x1800) );
 	}
 
 	@Test
@@ -363,7 +379,8 @@ class BitOpsTest {
 
 	@Test
 	void testREAD_LE_UINT16() {
-		fail("Not yet implemented");
+		byte[] b = { 0, 55, (byte) 0xAA, 0, 0 };
+		assertEquals(0xAA, BitOps.READ_LE_UINT16(b, 2));
 	}
 
 }
