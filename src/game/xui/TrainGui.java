@@ -20,7 +20,6 @@ import game.ids.StringID;
 import game.ids.VehicleID;
 import game.struct.GetDepotVehiclePtData;
 import game.util.BitOps;
-import game.util.GameDate;
 import game.util.YearMonthDay;
 import game.util.wcustom.vehiclelist_d;
 
@@ -41,8 +40,8 @@ public class TrainGui
 		final RailVehicleInfo rvi = Engine.RailVehInfo(engine_number);
 		final Engine  e = Engine.GetEngine(engine_number);
 		int multihead = rvi.isMulttihead() ? 1:0;
-		YearMonthDay ymd = new YearMonthDay();
-		GameDate.ConvertDayToYMD(ymd, e.getIntro_date());
+		YearMonthDay ymd = new YearMonthDay(e.getIntro_date());
+		//YearMonthDay.ConvertDayToYMD(ymd, e.getIntro_date());
 
 		/* Purchase Cost - Engine weight */
 		Global.SetDParam(0, rvi.base_cost * (Global._price.build_railvehicle >> 3) >> 5);

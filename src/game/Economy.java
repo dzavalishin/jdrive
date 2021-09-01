@@ -675,7 +675,7 @@ public class Economy extends EconomeTables
 			}
 		});
 
-		if (!BitOps.HASBIT(1<<0|1<<3|1<<6|1<<9, Global._cur_month))
+		if (!BitOps.HASBIT(1<<0|1<<3|1<<6|1<<9, Global.get_cur_month()))
 			return;
 
 		Player.forEach( (p) ->
@@ -1385,7 +1385,7 @@ public class Economy extends EconomeTables
 
 		// if last speed is 0, we treat that as if no vehicle has ever visited the station.
 		ge.last_speed =  (Math.min(t, 255));
-		ge.last_age =  (Global._cur_year - v.getBuild_year());
+		ge.last_age =  (Global.get_cur_year() - v.getBuild_year());
 
 		// If there's goods waiting at the station, and the vehicle
 		//  has capacity for it, load it on the vehicle.
@@ -1481,10 +1481,10 @@ public class Economy extends EconomeTables
 		return result;
 	}
 
-	static void PlayersMonthlyLoop()
+	public static void PlayersMonthlyLoop()
 	{
 		PlayersGenStatistics();
-		if (Global._patches.inflation && Global._cur_year < Global.MAX_YEAR_END)
+		if (Global._patches.inflation && Global.get_cur_year() < Global.MAX_YEAR_END)
 			AddInflation();
 		PlayersPayInterest();
 		// Reset the _current_player flag

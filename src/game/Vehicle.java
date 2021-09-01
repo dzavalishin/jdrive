@@ -380,7 +380,7 @@ public class Vehicle implements IPoolItem
 		if (tile.GetTileOwner().isTown()) 
 			MA_Tax(value);
 
-		date_of_last_service = Global._date;
+		date_of_last_service = Global.get_date();
 		breakdowns_since_last_service = 0;
 		reliability = Engine.GetEngine(engine_type).getReliability();
 	}
@@ -892,7 +892,7 @@ public class Vehicle implements IPoolItem
 
 		return Global._patches.servint_ispercent ?
 				(reliability < Engine.GetEngine(engine_type).getReliability() * (100 - service_interval) / 100) :
-					(date_of_last_service + service_interval < Global._date);
+					(date_of_last_service + service_interval < Global.get_date());
 	}
 
 	public void VehicleInTheWayErrMsg()

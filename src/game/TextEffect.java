@@ -73,7 +73,7 @@ public class TextEffect
 
 				_text_message_list[i].message = buf;
 				_text_message_list[i].color = color;
-				_text_message_list[i].end_date = Global._date + duration;
+				_text_message_list[i].end_date = Global.get_date() + duration;
 
 				_textmessage_dirty = true;
 				return;
@@ -92,13 +92,13 @@ public class TextEffect
 		_text_message_list[MAX_CHAT_MESSAGES - 1] = new TextMessage();
 
 		_text_message_list[MAX_CHAT_MESSAGES - 1].color = color;
-		_text_message_list[MAX_CHAT_MESSAGES - 1].end_date = Global._date + duration;
+		_text_message_list[MAX_CHAT_MESSAGES - 1].end_date = Global.get_date() + duration;
 		_text_message_list[MAX_CHAT_MESSAGES - 1].message = buf;
 
 		_textmessage_dirty = true;
 	}
 
-	static void InitTextMessage()
+	public static void InitTextMessage()
 	{
 		int i;
 
@@ -159,14 +159,14 @@ public class TextEffect
 	}
 
 	// Check if a message is expired every day
-	static void TextMessageDailyLoop()
+	public static void TextMessageDailyLoop()
 	{
 		int i;
 
 		for (i = 0; i < MAX_CHAT_MESSAGES; i++) {
 			if (_text_message_list[i].message == null) continue;
 
-			if (Global._date > _text_message_list[i].end_date) {
+			if (Global.get_date() > _text_message_list[i].end_date) {
 				/* Move the remaining messages over the current message */
 				if (i != MAX_CHAT_MESSAGES - 1)
 				{

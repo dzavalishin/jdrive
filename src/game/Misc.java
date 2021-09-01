@@ -77,7 +77,7 @@ public class Misc extends MiscTables
 	/**
 	 * Runs the day_proc for every DAY_TICKS vehicle starting at daytick.
 	 */
-	static void RunVehicleDayProc(int daytick)
+	public static void RunVehicleDayProc(int daytick)
 	{
 		int total = Global.gs._vehicles.total_items();
 

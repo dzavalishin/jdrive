@@ -184,14 +184,14 @@ public class NewsItem {
 		ni.flags = 0xFF & ((flags >> 8) | NF_NOEXPIRE);
 
 		// show this news message in color?
-		if (Global._date >= GameDate.ConvertIntDate(Global._patches.colored_news_date))
+		if (Global.get_date() >= GameDate.ConvertIntDate(Global._patches.colored_news_date))
 			ni.flags |= NF_INCOLOR;
 
 		ni.type = (flags >>> 16) & 0xFF;
 		ni.callback = (flags >>> 24);
 		ni.data_a = new TileIndex( data_a );
 		ni.data_b = new TileIndex( data_b );
-		ni.date = Global._date;
+		ni.date = Global.get_date();
 		ni.isValid = valid;
 		Global.COPY_OUT_DPARAM(ni.params, 0, ni.params.length);
 
@@ -612,7 +612,7 @@ public class NewsItem {
 			ni = _news_items[_current_news];
 
 			// check the date, don't show too old items
-			if (Global._date - _news_items_age[ni.type] > ni.date) return;
+			if (Global.get_date() - _news_items_age[ni.type] > ni.date) return;
 
 			// execute the validation function to see if this item is still valid
 			if (ni.isValid != null && !ni.isValid.test(ni.data_a.getTile(), ni.data_b.getTile())) return;

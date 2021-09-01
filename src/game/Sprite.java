@@ -112,15 +112,15 @@ public class Sprite extends Sprites {
 	{
 		switch (ivar) {
 		case 0x00:
-			return Global._date;
+			return Global.get_date();
 		case 0x01:
-			return Global._cur_year;
+			return Global.get_cur_year();
 		case 0x02:
-			return Global._cur_month;
+			return Global.get_cur_month();
 		case 0x03:
 			return GameOptions._opt.landscape;
 		case 0x09:
-			return Global._date_fract;
+			return Global.get_date_fract();
 		case 0x0A:
 			return Global._tick_counter;
 		case 0x0C:

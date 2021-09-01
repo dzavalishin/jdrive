@@ -73,13 +73,13 @@ public class GenerateWorld {
 		Global._pause = 0;
 		Global._fast_forward = false;
 		Global._tick_counter = 0;
-		Global._date_fract = 0;
+		Global.gs.date.reset_date_fract();
 		Global._cur_tileloop_tile = 0;
 
 		{
 			int starting = GameDate.ConvertIntDate(Global._patches.starting_date);
 			if ( starting == -1) starting = 10958;
-			Global.SetDate(starting);
+			Global.gs.date.SetDate(starting);
 		}
 
 		Vehicle.InitializeVehicles();

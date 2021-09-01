@@ -51,8 +51,8 @@ public class AirportFTAClass extends Airport // bring in constants
 
 		// 1980-1-1 is -. 21915
 		// 1990-1-1 is -. 25568
-		if (Global._date >= 21915) bytemask = BitOps.RETSETBIT(bytemask, 3); // metropilitan airport 1980
-		if (Global._date >= 25568) bytemask = BitOps.RETSETBIT(bytemask, 4); // international airport 1990
+		if (Global.get_date() >= 21915) bytemask = BitOps.RETSETBIT(bytemask, 3); // metropilitan airport 1980
+		if (Global.get_date() >= 25568) bytemask = BitOps.RETSETBIT(bytemask, 4); // international airport 1990
 		return bytemask;
 	}
 

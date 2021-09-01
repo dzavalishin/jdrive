@@ -946,8 +946,8 @@ public class Ship {
 			v.ship.forceInDepot();//state = 0x80;
 
 			v.service_interval = Global._patches.servint_ships;
-			v.date_of_last_service = Global._date;
-			v.build_year =  Global._cur_year;
+			v.date_of_last_service = Global.get_date();
+			v.build_year =  Global.get_cur_year();
 			v.cur_image = 0x0E5E;
 			v.type = Vehicle.VEH_Ship;
 			v.random_bits = Vehicle.VehicleRandomBits();

@@ -281,7 +281,7 @@ public class mAirport
 			MA_DestroyAirport(tn);
 		
 		if(!Global._patches.allow_municipal_airports 
-			|| (Global._cur_year + 1920) < 1990 
+			|| (Global.get_cur_year() + 1920) < 1990 
 			|| tn.population < MA_MIN_POPULATION) {
 			Global.gs._current_player = old_player;
 			return;
@@ -346,7 +346,7 @@ public class mAirport
 
 		if(!Global._patches.allow_municipal_airports) return;
 
-		if(Global._cur_year + 1920 < INT_AIRPORT_YEAR) {
+		if(Global.get_cur_year() + 1920 < INT_AIRPORT_YEAR) {
 			Global.SetDParam(0, tn.index);
 			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_TOO_EARLY, Str.INVALID_STRING, 300, 300);
 			Global.gs._current_player = old_player;

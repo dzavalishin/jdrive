@@ -790,7 +790,7 @@ public class Main {
 			Global.gs._current_player = PlayerID.getNone();
 
 			TextEffect.AnimateAnimatedTiles();
-			Global.IncreaseDate();
+			Global.gs.date.IncreaseDate();
 			Landscape.RunTileLoop();
 			Vehicle.CallVehicleTicks();
 			Landscape.CallLandscapeTick();
@@ -812,7 +812,7 @@ public class Main {
 			String s;
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
-			Global.SetDParam(2, Global._date);
+			Global.SetDParam(2, Global.get_date());
 			//s = GetString(buf + strlen(_path.autosave_dir) + strlen(PATHSEP), Str.STR_4004);
 			//strcpy(s, ".sav");
 			s = Global.GetString(Str.STR_4004);
@@ -980,7 +980,7 @@ public class Main {
 		GfxInit.GfxLoadSprites();
 
 		// Update current year
-		Global.SetDate(Global._date);
+		Global.gs.date.SetDate(Global.get_date());
 
 		// reinit the landscape variables (landscape might have changed)
 		Misc.InitializeLandscapeVariables(true);

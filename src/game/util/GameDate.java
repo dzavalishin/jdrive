@@ -1,8 +1,33 @@
 package game.util;
 
+import game.AirCraft;
+import game.Currency;
+import game.DisasterCmd;
+import game.Economy;
+import game.Engine;
 import game.Global;
+import game.Industry;
+import game.Misc;
+import game.Player;
+import game.RoadVehCmd;
+import game.Ship;
+import game.Station;
+import game.TextEffect;
+import game.Town;
+import game.TrainCmd;
+import game.Vehicle;
+import game.WayPoint;
+import game.enums.GameModes;
+import game.xui.MiscGui;
+import game.xui.PlayerGui;
+import game.xui.Window;
 
-public class GameDate {
+public class GameDate 
+{
+	public int _date;
+	public int _date_fract;
+	public int _cur_year;
+	public int _cur_month;
 
 	
 	static int M(int a, int b) { return ((a<<5)|b); }
@@ -42,30 +67,6 @@ public class GameDate {
 		ACCUM_SEP,ACCUM_OCT,ACCUM_NOV,ACCUM_DEC,
 	};
 
-
-	public static void ConvertDayToYMD(YearMonthDay ymd, int date)
-	{
-		int yr = date / (365+365+365+366);
-		int rem = date % (365+365+365+366);
-		int x;
-
-		yr *= 4;
-
-		if (rem >= 366) {
-			rem--;
-			do {
-				rem -= 365;
-				yr++;
-			} while (rem >= 365);
-			if (rem >= 31+28) rem++;
-		}
-
-		ymd.year = yr;
-
-		x = _month_date_from_year_day[rem];
-		ymd.month = x >> 5;
-		ymd.day = x & 0x1F;
-	}
 
 	// year is a number between 0..?
 	// month is a number between 0..11
@@ -116,6 +117,124 @@ public class GameDate {
 
 	
 	
+
+	
+	public void IncreaseDate()
+	{
+		//YearMonthDay ymd = new YearMonthDay();
+
+		if (Global._game_mode == GameModes.GM_MENU) {
+			Global._tick_counter++;
+			return;
+		}
+
+		Misc.RunVehicleDayProc(_date_fract);
+
+		/* increase day, and check if a new day is there? */
+		Global._tick_counter++;
+
+		_date_fract++;
+		if (_date_fract < (Global.DAY_TICKS*Global._patches.day_length))
+			return;
+		_date_fract = 0;
+
+		/* yeah, increase day counter and call various daily loops */
+		_date++;
+
+		TextEffect.TextMessageDailyLoop();
+
+		DisasterCmd.DisasterDailyLoop();
+		WayPoint.WaypointsDailyLoop();
+
+		if (Global._game_mode != GameModes.GM_MENU) {
+			Window.InvalidateWindowWidget(Window.WC_STATUS_BAR, 0, 0);
+			Engine.EnginesDailyLoop();
+		}
+
+		/* check if we entered a new month? */
+		YearMonthDay ymd = new YearMonthDay(_date);
+		//YearMonthDay.ConvertDayToYMD(ymd, _date);
+		if ((byte)ymd.month == _cur_month)
+			return;
+		_cur_month = ymd.month;
+
+		/* yes, call various monthly loops */
+		if (Global._game_mode != GameModes.GM_MENU) {
+			
+			//TODO if (BitOps.HASBIT(Global._autosave_months[GameOptions._opt.autosave], _cur_month)) {
+				Global._do_autosave = true;
+				MiscGui.RedrawAutosave();
+			//}
+
+			Economy.PlayersMonthlyLoop();
+			Engine.EnginesMonthlyLoop();
+			Town.TownsMonthlyLoop();
+			Industry.IndustryMonthlyLoop();
+			//Station._global_station_sort_dirty();
+			Station._global_station_sort_dirty = true;
+			/*#ifdef ENABLE_NETWORK
+			if (_network_server)
+				NetworkServerMonthlyLoop();
+	#endif /* ENABLE_NETWORK */
+		}
+
+		/* check if we entered a new year? */
+		if ((byte)ymd.year == _cur_year)
+			return;
+		_cur_year = ymd.year;
+
+		/* yes, call various yearly loops */
+
+		Player.PlayersYearlyLoop();
+		TrainCmd.TrainsYearlyLoop();
+		RoadVehCmd.RoadVehiclesYearlyLoop();
+		AirCraft.AircraftYearlyLoop();
+		Ship.ShipsYearlyLoop();
+		/*#ifdef ENABLE_NETWORK
+		if (_network_server)
+			NetworkServerYearlyLoop();
+	#endif /* ENABLE_NETWORK */
+
+		/* check if we reached end of the game (31 dec 2050) */
+		if (_cur_year == Global._patches.ending_date - Global.MAX_YEAR_BEGIN_REAL) {
+			PlayerGui.ShowEndGameChart();
+			/* check if we reached 2090 (MAX_YEAR_END_REAL), that's the maximum year. */
+		} 
+		else if (_cur_year == (Global.MAX_YEAR_END + 1)) 
+		{
+			_cur_year = Global.MAX_YEAR_END;
+			_date = 62093;
+
+			// 1 year is 365 days long
+			Vehicle.forEach( (v) -> v.date_of_last_service -= 365 );
+
+			/* Because the _date wraps here, and text-messages expire by game-days, we have to clean out
+			 *  all of them if the date is set back, else those messages will hang for ever */
+			TextEffect.InitTextMessage();
+		}
+
+		if (Global._patches.auto_euro)
+			Currency.CheckSwitchToEuro();
+
+		/* XXX: check if year 2050 was reached */
+	}
+
+
+	public void SetDate(int date)
+	{
+		_date = date;
+		YearMonthDay ymd = new YearMonthDay(_date);
+		//YearMonthDay.ConvertDayToYMD(ymd, _date = date);
+		_cur_year = ymd.year;
+		_cur_month = ymd.month;
+	/*#ifdef ENABLE_NETWORK
+		_network_last_advertise_date = 0;
+	#endif /* ENABLE_NETWORK */
+	}
+
+	public void reset_date_fract() {
+		_date_fract = 0;		
+	}
 	
 	
 	

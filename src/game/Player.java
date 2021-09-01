@@ -672,7 +672,7 @@ public class Player implements Serializable
 				PlayerID.get( Owner.OWNER_SPECTATOR );
 
 		p.avail_railtypes = GetPlayerRailtypes(p.index);
-		p.inaugurated_year = Global._cur_year;
+		p.inaugurated_year = Global.get_cur_year();
 		p.face = Hal.Random();
 
 		/* Engine renewal settings */
@@ -821,7 +821,7 @@ public class Player implements Serializable
 
 			//final RailVehicleInfo info = Engine.RailVehInfo(i);
 			if (e.getType() == Vehicle.VEH_Train &&
-					(e.isAvailableTo(p) || e.getIntro_date() <= Global._date) &&
+					(e.isAvailableTo(p) || e.getIntro_date() <= Global.get_date()) &&
 					!Engine.RailVehInfo(i).isWagon()) 
 			{
 				assert(e.getRailtype() < Rail.RAILTYPE_END);
@@ -1605,7 +1605,7 @@ final Chunk Handler _player_chunk_handlers[] = {
 	public String generateFileName() {
 		Global.SetDParam(0, name_1);
 		Global.SetDParam(1, name_2);
-		Global.SetDParam(2, Global._date);
+		Global.SetDParam(2, Global.get_date());
 		return Global.GetString(Str.STR_4004);
 	}
 

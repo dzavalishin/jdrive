@@ -1501,7 +1501,7 @@ implements IPoolItem, Serializable
 			for(;;) {
 				house = houses[Hal.RandomRange(num)];
 
-				if (Global._cur_year < TownTables._housetype_years[house].min || Global._cur_year > TownTables._housetype_years[house].max)
+				if (Global.get_cur_year() < TownTables._housetype_years[house].min || Global.get_cur_year() > TownTables._housetype_years[house].max)
 					continue;
 
 				// Special houses that there can be only one of.

@@ -153,8 +153,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 			v.service_interval = Global._patches.servint_roadveh;
 
-			v.date_of_last_service = Global._date;
-			v.build_year =  Global._cur_year;
+			v.date_of_last_service = Global.get_date();
+			v.build_year =  Global.get_cur_year();
 
 			v.type = Vehicle.VEH_Road;
 			v.cur_image = 0xC15;
@@ -1704,7 +1704,7 @@ class RoadDriveEntry {
 	}
 
 
-	static void RoadVehiclesYearlyLoop()
+	public static void RoadVehiclesYearlyLoop()
 	{
 		Vehicle.forEach( (v) ->
 		{

@@ -38,7 +38,7 @@ public class PlayerGui
 			Gfx.DrawStringRightAligned(111, 27 + 10*13 + 2, Str.STR_7020_TOTAL, 0);
 
 			/* draw the price columns */
-			year = Global._cur_year - 2;
+			year = Global.get_cur_year() - 2;
 			j = 3;
 			x = 215;
 			//tbl = p.yearly_expenses + 2;

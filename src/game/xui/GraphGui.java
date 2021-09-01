@@ -360,8 +360,8 @@ public class GraphGui
 
 		gd.num_on_x_axis = Math.min(nums[0],24);
 
-		mo = (Global._cur_month/3-nums[0])*3;
-		yr = Global._cur_year;
+		mo = (Global.get_cur_month()/3-nums[0])*3;
+		yr = Global.get_cur_year();
 		while (mo < 0) {
 			yr--;
 			mo += 12;

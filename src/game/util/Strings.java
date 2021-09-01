@@ -377,10 +377,10 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	private static String FormatYmdString(int number)
 	{
 		//final String src;
-		YearMonthDay ymd = new YearMonthDay();
 		StringBuilder buff = new StringBuilder();
 
-		GameDate.ConvertDayToYMD(ymd, number);
+		YearMonthDay ymd = new YearMonthDay(number);
+		//YearMonthDay.ConvertDayToYMD(ymd, number);
 
 		buff.append(StringGetStringPtr(ymd.day + STR_01AC_1ST - 1));
 
@@ -395,10 +395,10 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	private static String FormatMonthAndYear(int number)
 	{
 		//String src;
-		YearMonthDay ymd = new YearMonthDay();
 		StringBuilder buff = new StringBuilder();
 
-		GameDate.ConvertDayToYMD(ymd, number);
+		YearMonthDay ymd = new YearMonthDay(number);
+		//YearMonthDay.ConvertDayToYMD(ymd, number);
 
 		//for (src = GetStringPtr(STR_MONTH_JAN + ymd.month); (*buff++ = *src++) != '\0';) {}
 		buff.append( StringGetStringPtr(STR_MONTH_JAN + ymd.month) );
@@ -411,10 +411,10 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	private static String FormatTinyDate(int number)
 	{
-		YearMonthDay ymd = new YearMonthDay();
 		StringBuilder buff = new StringBuilder();
 
-		GameDate.ConvertDayToYMD(ymd, number);
+		YearMonthDay ymd = new YearMonthDay(number);
+		//YearMonthDay.ConvertDayToYMD(ymd, number);
 		buff.append( String.format(" %02d-%02d-%04d", ymd.day, ymd.month + 1, ymd.year + Global.MAX_YEAR_BEGIN_REAL) );
 
 		return buff.toString();
