@@ -1,7 +1,8 @@
 package game;
+
+import gnu.getopt.Getopt;
+
 import java.io.File;
-
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -244,29 +245,40 @@ public class Main {
 		//   a letter means: it accepts that param (e.g.: -h)
 		//   a ':' behind it means: it need a param (e.g.: -m<driver>)
 		//   a '::' behind it means: it can optional have a param (e.g.: -d<debug>)
-		//#if !defined(__MORPHOS__) && !defined(__AMIGA__) && !defined(WIN32)
-		//optformat = "bm:s:v:hDfn::eit:d::r:g::G:p:c:";
-		//#else
-		//optformat = "bm:s:v:hDn::eit:d::r:g::G:p:c:"; // no fork option
-		//#endif
 
+		//optformat = "bm:s:v:hDfn::eit:d::r:g::G:p:c:";
+
+		Getopt g = new Getopt("NextTTD", argv, "bhfc:t:g::"); //"n::ed::r:G:p:");
+		
+		int c;
+		while ((c = g.getopt()) != -1)
+		   {
+		     switch(c)
+		       {
+				case 'h': showhelp(); return;
+				
+				case 'f': Global._dedicated_forks = true; break;
+				case 'e': Global._switch_mode = SwitchModes.SM_EDITOR; break;
+				case 'b': Ai._ai.network_client = true; break;
+
+				case 'c': Global._path.config_file = g.getOptarg(); break;
+				case 't': startdate = Integer.parseInt(g.getOptarg()); break;
+
+				case 'g':
+					if (g.getOptarg() != null) {
+						_file_to_saveload.name = g.getOptarg();
+						Global._switch_mode = SwitchModes.SM_LOAD;
+					} else
+						Global._switch_mode = SwitchModes.SM_NEWGAME;
+					break;
+		       }
+		   }
+		
 		/*
 		mgo.MyGetOptInit( argv, optformat);
 		
 		while ((i = mgo.MyGetOpt()) != -1) {
 			switch(i) {
-			case 'm': musicdriver = new String( mgo.opt ); break;
-			case 's': sounddriver = new String( mgo.opt ); break;
-			case 'v': videodriver = new String( mgo.opt ); break;
-			case 'D': {
-				musicdriver = "null";
-				sounddriver = "null";
-				videodriver = "dedicated";
-				dedicated = true;
-			} break;
-			case 'f': {
-				Global._dedicated_forks = true;
-			}; break;
 			case 'n': {
 				network = true;
 				if (mgo.opt != null)
@@ -275,21 +287,11 @@ public class Main {
 				else
 					network_conn = null;
 			} break; 
-			case 'b': Ai._ai.network_client = true; break;
 			//case 'r': ParseResolution(resolution, mgo.opt); break;
-			case 't': startdate = Integer.parseInt(mgo.opt); break;
 			case 'd': {
 				if (mgo.opt != null) SetDebugString(mgo.opt);
 			} break;
-			case 'e': Global._switch_mode = SwitchModes.SM_EDITOR; break;
-			case 'i': Global._use_dos_palette = true; break;
-			case 'g':
-				if (mgo.opt != null) {
-					_file_to_saveload.name = mgo.opt;
-					Global._switch_mode = SwitchModes.SM_LOAD;
-				} else
-					Global._switch_mode = SwitchModes.SM_NEWGAME;
-				break;
+
 			case 'G':
 				Global._random_seeds[0][0] = Integer.parseInt(mgo.opt);
 				break;
@@ -299,13 +301,7 @@ public class Main {
 				if (BitOps.IS_INT_INSIDE(i, 1, Global.MAX_PLAYERS)) Global._network_playas =  netp;
 				break;
 			}
-			case 'c':
-				Global._config_file = new String(mgo.opt);
-				break;
 			case -2:
-			case 'h':
-				showhelp();
-				return;
 			}
 		}
 		*/
@@ -1038,7 +1034,7 @@ public class Main {
 			error(e.toString());
 		}
 		
-		Global.printf("Start in '%s'", cwd);
+		//Global.printf("Start in '%s'", cwd);
 		
 		String slcwd = cwd + File.separator;
 		

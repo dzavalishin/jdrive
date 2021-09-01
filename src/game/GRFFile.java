@@ -562,12 +562,12 @@ public class GRFFile
 				int cargo = bufp.grf_load_ubyte();
 
 				// XXX: Need to consult this with patchman yet.
-				if(false) {
+				/*if(false) {
 					// Documentation claims this is already the
 					// per-landscape cargo type id, but newships.grf
 					// assume otherwise.
 					//cargo = local_cargo_id_ctype[cargo];
-				}
+				}*/
 				svi[e+i].cargo_type = cargo;
 			}
 		}	break;
