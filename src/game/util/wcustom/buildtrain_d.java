@@ -1,7 +1,7 @@
 package game.util.wcustom;
 
 
-public class buildtrain_d extends AbstractWinCustom {
+public class buildtrain_d implements AbstractWinCustom {
 	public int railtype;
 	public int sel_index;
 	//public EngineID sel_engine;

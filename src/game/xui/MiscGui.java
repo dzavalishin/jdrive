@@ -45,7 +45,7 @@ public class MiscGui {
 	private static boolean _savegame_sort_dirty;
 	private static int _savegame_sort_order;
 
-	private static final int SORT_ASCENDING  = 0;
+	//private static final int SORT_ASCENDING  = 0;
 	private static final int SORT_DESCENDING = 1;
 	private static final int SORT_BY_DATE    = 0;
 	private static final int SORT_BY_NAME    = 2;

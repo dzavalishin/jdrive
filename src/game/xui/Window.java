@@ -1,5 +1,6 @@
 package game.xui;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -84,7 +85,7 @@ public class Window extends WindowConstants
 		wndproc = null;
 
 		//List<Widget> 
-		widget =  new ArrayList<Widget>();
+		widget =  new ArrayList<>();
 		resize = new ResizeInfo();
 	}	
 
@@ -653,7 +654,8 @@ public class Window extends WindowConstants
 		CallWindowEventNP(WindowEvents.WE_DESTROY);
 
 		Window w = FindWindowById(wc, wn);
-
+		if(w == null) throw new InvalidParameterException();
+		
 		vp = w.viewport;
 		w.viewport = null;
 		if (vp != null) {
@@ -1287,7 +1289,7 @@ public class Window extends WindowConstants
 	static void DecreaseWindowCounters()
 	{
 		// Fight concurrent modification
-		ArrayList<Window> wcopy = new ArrayList<Window>(GameState._windows);
+		ArrayList<Window> wcopy = new ArrayList<>(GameState._windows);
 
 		//ListIterator<Window> i = _windows.listIterator(_windows.size());
 		ListIterator<Window> i = wcopy.listIterator(GameState._windows.size());
@@ -1395,7 +1397,7 @@ public class Window extends WindowConstants
 	}
 
 	static Window last_w = null;
-	static boolean HandleMouseOver()
+	static void HandleMouseOver()
 	{
 		Window w;
 		WindowEvent e = new WindowEvent();
@@ -1424,7 +1426,7 @@ public class Window extends WindowConstants
 		}
 
 		// Mouseover never stops execution
-		return true;
+		//return true;
 	}
 
 
@@ -1432,7 +1434,6 @@ public class Window extends WindowConstants
 
 	static boolean HandleWindowDragging()
 	{
-		//Window w;
 		// Get out immediately if no window is being dragged at all.
 		if (!_dragging_window) return true;
 
@@ -1692,7 +1693,6 @@ public class Window extends WindowConstants
 
 	static boolean HandleScrollbarScrolling()
 	{
-		//Window w;
 		int i;
 		int pos;
 		Scrollbar sb;
@@ -1986,7 +1986,7 @@ public class Window extends WindowConstants
 		if (!HandleWindowDragging())     return;
 		if (!HandleScrollbarScrolling()) return;
 		if (!HandleViewportScroll())     return;
-		if (!HandleMouseOver())          return;
+		HandleMouseOver();
 
 		x = Hal._cursor.pos.x;
 		y = Hal._cursor.pos.y;
@@ -2125,8 +2125,6 @@ public class Window extends WindowConstants
 		}
 
 		MouseLoop(click, mousewheel);
-
-		//_left_button_clicked = false; // TODO [dz] ok? Or who resets it?
 	}
 
 
@@ -2336,6 +2334,8 @@ public class Window extends WindowConstants
 		if (w == null || w.window_class != WC_MAIN_TOOLBAR)
 			w = FindWindowById(WC_MAIN_TOOLBAR, 0);
 
+		if(w == null) throw new InvalidParameterException();
+		
 		switch (Global._patches.toolbar_pos) {
 		case 1:  w.left = (Hal._screen.width - w.width) >> 1; break;
 		case 2:  w.left = Hal._screen.width - w.width; break;
@@ -2530,7 +2530,7 @@ public class Window extends WindowConstants
 				_scrollbar_size = ma - mi - 23;
 				flags4 |= WF_SCROLL_MIDDLE;
 				_scrolling_scrollbar = true;
-				_cursorpos_drag_start = Hal._cursor.pos;
+				_cursorpos_drag_start = new Point( Hal._cursor.pos );
 			}
 		}
 
@@ -2664,11 +2664,11 @@ public class Window extends WindowConstants
 			assert(r.right - r.left == 11); // To ensure the same sizes are used everywhere!
 
 			// draw up/down buttons
-			clicked = !!((flags4 & (WF_SCROLL_UP | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_UP);
+			clicked = (flags4 & (WF_SCROLL_UP | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_UP;
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.top + 9, wi.color, (clicked) ? FR_LOWERED : 0);
 			Gfx.DoDrawString(Gfx.UPARROW, r.left + 2 + clickshift, r.top + clickshift, 0x10);
 
-			clicked = !!(((flags4 & (WF_SCROLL_DOWN | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_DOWN));
+			clicked = (flags4 & (WF_SCROLL_DOWN | WF_HSCROLL | WF_SCROLL2)) == WF_SCROLL_DOWN;
 			Gfx.DrawFrameRect(r.left, r.bottom - 9, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
 			Gfx.DoDrawString(Gfx.DOWNARROW, r.left + 2 + clickshift, r.bottom - 9 + clickshift, 0x10);
 
@@ -2696,11 +2696,11 @@ public class Window extends WindowConstants
 			assert(r.right - r.left == 11); // XXX - to ensure the same sizes are used everywhere!
 
 			// draw up/down buttons
-			clicked = !!((flags4 & (WF_SCROLL_UP | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_UP | WF_SCROLL2));
+			clicked = (flags4 & (WF_SCROLL_UP | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_UP | WF_SCROLL2);
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.top + 9, wi.color,  (clicked) ? FR_LOWERED : 0);
 			Gfx.DoDrawString(Gfx.UPARROW, r.left + 2 + (clicked ? 1 : 0), r.top + (clicked ? 1 : 0), 0x10);
 
-			clicked = !!((flags4 & (WF_SCROLL_DOWN | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_DOWN | WF_SCROLL2));
+			clicked = (flags4 & (WF_SCROLL_DOWN | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_DOWN | WF_SCROLL2);
 			Gfx.DrawFrameRect(r.left, r.bottom - 9, r.right, r.bottom, wi.color,  (clicked) ? FR_LOWERED : 0);
 			Gfx.DoDrawString(Gfx.DOWNARROW, r.left + 2 + (clicked ? 1 : 0), r.bottom - 9 + (clicked ? 1 : 0), 0x10);
 
@@ -2729,11 +2729,11 @@ public class Window extends WindowConstants
 
 			assert(r.bottom - r.top == 11); // XXX - to ensure the same sizes are used everywhere!
 
-			clicked = !!((flags4 & (WF_SCROLL_UP | WF_HSCROLL)) == (WF_SCROLL_UP | WF_HSCROLL));
+			clicked = (flags4 & (WF_SCROLL_UP | WF_HSCROLL)) == (WF_SCROLL_UP | WF_HSCROLL);
 			Gfx.DrawFrameRect(r.left, r.top, r.left + 9, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
 			Gfx.DrawSprite(Sprite.SPR_ARROW_LEFT, r.left + 1 + (clicked ? 1 : 0), r.top + 1 + (clicked ? 1 : 0));
 
-			clicked = !!((flags4 & (WF_SCROLL_DOWN | WF_HSCROLL)) == (WF_SCROLL_DOWN | WF_HSCROLL));
+			clicked = (flags4 & (WF_SCROLL_DOWN | WF_HSCROLL)) == (WF_SCROLL_DOWN | WF_HSCROLL);
 			Gfx.DrawFrameRect(r.right-9, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
 			Gfx.DrawSprite(Sprite.SPR_ARROW_RIGHT, r.right - 8 + (clicked ? 1 : 0), r.top + 1 + (clicked ? 1 : 0));
 
@@ -3010,7 +3010,8 @@ public class Window extends WindowConstants
 
 		//for (i = 0; strings[i] != Global.INVALID_STRING_ID; i++) {}
 		for (i = 0; i < strings.length && strings[i] != Str.INVALID_STRING; i++) 
-		{}
+			;
+		
 		if (i == 0) return;
 
 		wi = w.widget.get(button);

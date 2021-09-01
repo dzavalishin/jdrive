@@ -39,7 +39,7 @@ public class VehicleHash implements Serializable
 	}
 
 	//ArrayList<VehicleID> list = new ArrayList<VehicleID>();
-	final Map<Integer,VehicleID> map = new HashMap<Integer,VehicleID>();
+	final Map<Integer,VehicleID> map = new HashMap<>();
 
 	public List<VehicleID> get(int x1, int y1, int x2, int y2) {
 		x1 >>= DELETE_BITS; // down
@@ -48,7 +48,7 @@ public class VehicleHash implements Serializable
 		y1 >>= DELETE_BITS;
 		y2 = (y2 >> DELETE_BITS) + 1;
 
-		ArrayList<VehicleID> list = new ArrayList<VehicleID>();  
+		ArrayList<VehicleID> list = new ArrayList<>();  
 
 		for(int x = x1; x <= x2; x++ )
 		{
@@ -102,8 +102,8 @@ public class VehicleHash implements Serializable
 			return;
 		}
 		
-		// TODO return after aircraft debug
-		//assert( old.id == vehicle.index );
+		// TODO debug me
+		//assert old.id == vehicle.index;
 
 	}
 

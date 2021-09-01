@@ -12,6 +12,7 @@ import game.ids.VehicleID;
 import game.struct.BackuppedOrders;
 import game.struct.ColorList;
 import game.struct.EngineInfo;
+import game.struct.HighScore;
 import game.struct.Point;
 import game.tables.CargoConst;
 import game.util.GameDate;
@@ -19,13 +20,13 @@ import game.util.Paths;
 import game.util.Prices;
 import game.util.Strings;
 import game.util.YearMonthDay;
-import game.xui.EngineGui;
 import game.xui.MiscGui;
 import game.xui.PlayerGui;
 import game.xui.Window;
 
 public class Global 
 {
+	public static final boolean debugEnabled = true;
 
 	public static GameState gs = new GameState(); 
 	
@@ -115,8 +116,8 @@ public class Global
 
 
 	public static int _map_log_x = 8; //6;
-	public static int _map_size_x = 256; // TODO XXX who inits it?
-	public static int _map_size_y = 256; // TODO XXX who inits it?
+	public static int _map_size_x = 256;
+	public static int _map_size_y = 256;
 	public static int _map_tile_mask;
 	public static int _map_size;
 
@@ -263,7 +264,7 @@ public class Global
 	public static boolean _do_autosave;
 	public static final boolean _use_dos_palette = false;
 
-
+	static HighScore [][] _highscore_table = new HighScore[5][5]; // 4 difficulty-settings (+ network); top 5
 
 	// binary logarithm of the map size, try to avoid using this one
 	public static int MapLogX()  { return _map_log_x; }
@@ -284,9 +285,21 @@ public class Global
 
 	public static void error(String s, Object ... arg) {
 		String buf = String.format(s, arg);
+		System.err.print("Error: ");
 		System.err.println(buf);		
 	}
+	
+	public static void error(Throwable e) 
+	{	
+		error("Exception %s ", e.toString());
+	}
 
+	/**
+	 * Does not return 
+	 * 
+	 * @param s format
+	 * @param arg printf args
+	 */
 	public static void fail(String s, Object ... arg) {
 		String buf = String.format(s, arg);
 		System.err.println(buf);
@@ -298,18 +311,18 @@ public class Global
 
 	//void DEBUG(name, level) if (level == 0 || _debug_ ## name ## _level >= level) debug
 
-	static final int _debug_ai_level = 0;
+	static int _debug_ai_level = 0;
 	static int _debug_driver_level = 0;
-	static final int _debug_grf_level = 0;
-	static final int _debug_map_level = 0;
-	static final int _debug_misc_level = 0;
-	static final int _debug_ms_level = 0;
+	static int _debug_grf_level = 0;
+	static int _debug_map_level = 0;
+	static int _debug_misc_level = 0;
+	static int _debug_ms_level = 0;
 	static int _debug_net_level = 0;
-	static final int _debug_spritecache_level = 0;
+	static int _debug_spritecache_level = 0;
 	static int _debug_oldloader_level = 0;
-	static final int _debug_pbs_level = 0;
-	static final int _debug_ntp_level = 0;
-	static final int _debug_npf_level = 0;
+	static int _debug_pbs_level = 0;
+	static int _debug_ntp_level = 0;
+	static int _debug_npf_level = 0;
 
 
 
@@ -443,7 +456,7 @@ public class Global
 
 	private static int next_name_id = 0;
 
-	private static final Map<Integer,String> _name_array = new HashMap<Integer,String>();
+	private static final Map<Integer,String> _name_array = new HashMap<>();
 
 
 
@@ -556,7 +569,7 @@ public class Global
 
 		if (Global._game_mode != GameModes.GM_MENU) {
 			Window.InvalidateWindowWidget(Window.WC_STATUS_BAR, 0, 0);
-			EngineGui.EnginesDailyLoop();
+			Engine.EnginesDailyLoop();
 		}
 
 		/* check if we entered a new month? */
@@ -612,10 +625,8 @@ public class Global
 			Global._cur_year = Global.MAX_YEAR_END;
 			Global._date = 62093;
 
-			Vehicle.forEach( (v) ->
-			{
-				v.date_of_last_service -= 365; // 1 year is 365 days long
-			});
+			// 1 year is 365 days long
+			Vehicle.forEach( (v) -> v.date_of_last_service -= 365 );
 
 			/* Because the _date wraps here, and text-messages expire by game-days, we have to clean out
 			 *  all of them if the date is set back, else those messages will hang for ever */

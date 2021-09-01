@@ -3,7 +3,6 @@ package game;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -17,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -43,7 +43,7 @@ public class MainWindow extends JPanel implements ActionListener
 	private final Timer timer = new Timer(TICK_TIME, this);
 	private final JFrame frame;
 	private byte[] screen;
-	private Point myLocation;
+	//private Point myLocation;
 
 	/*
 	public static final java.awt.Font bigMessageFont;
@@ -64,7 +64,7 @@ public class MainWindow extends JPanel implements ActionListener
 		this.frame = frame;
 		this.screen = screen2;
 
-		myLocation = getLocation();
+		//myLocation = getLocation();
 
 		//setSize(WIDTH, HEIGHT);
 		//setMinimumSize(new Dimension(WIDTH, HEIGHT));
@@ -74,7 +74,7 @@ public class MainWindow extends JPanel implements ActionListener
 		frame.addKeyListener(new KeyListener() {		
 			//this.addKeyListener(new KeyListener() {		
 			@Override
-			public void keyTyped(KeyEvent e) { }
+			public void keyTyped(KeyEvent e) { /* is empty */ }
 
 			@Override
 			public void keyReleased(KeyEvent e) { processKey(e, false); e.consume(); }
@@ -152,22 +152,28 @@ public class MainWindow extends JPanel implements ActionListener
 			}
 				});
 
-		frame.addMouseWheelListener( new MouseWheelListener() 
+		/*frame.addMouseWheelListener( new MouseWheelListener() 
 		{			
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
 				Hal._cursor.setWheel( e.getWheelRotation() );
 				e.consume();
 			}
-		});
+		});*/
 
+		
+		frame.addMouseWheelListener( (e) -> {
+			Hal._cursor.setWheel( e.getWheelRotation() );
+			e.consume();
+		});
+		
 		timer.start();
 	}
 
 
 	public void updateLocation()
 	{
-		myLocation = getLocation();
+		//myLocation = getLocation();
 	}
 
 	@Override
@@ -309,6 +315,7 @@ public class MainWindow extends JPanel implements ActionListener
 
 	static int startX = 0;
 
+	@Override
 	public void paint(Graphics g) 
 	{
 		//Dimension d = getSize();

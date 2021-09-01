@@ -37,7 +37,7 @@ public class Train extends TrainTables
 
 			// store vehicle weight in cache
 			u.rail.cached_veh_weight = vweight;
-		};
+		}
 
 		// store consist weight in cache
 		v.rail.cached_weight = weight;

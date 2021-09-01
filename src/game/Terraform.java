@@ -29,9 +29,9 @@ public class Terraform {
 	static void GenericRaiseLowerLand(TileIndex tile, int mode)
 	{
 		if (mode!=0) {
-			Cmd.DoCommandP(tile, 8, (int)mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0808_CAN_T_RAISE_LAND_HERE));
+			Cmd.DoCommandP(tile, 8, mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0808_CAN_T_RAISE_LAND_HERE));
 		} else {
-			Cmd.DoCommandP(tile, 8, (int)mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0809_CAN_T_LOWER_LAND_HERE));
+			Cmd.DoCommandP(tile, 8, mode, Terraform::CcTerraform, Cmd.CMD_TERRAFORM_LAND | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_0809_CAN_T_LOWER_LAND_HERE));
 		}
 	}
 
@@ -260,8 +260,9 @@ public class Terraform {
 			if (w != null) w.as_def_d().close=true;
 			break;
 
-		case WE_PLACE_PRESIZE: {
-		} break;
+		case WE_PLACE_PRESIZE: 
+			break;
+			
 		default:
 			break;
 		}

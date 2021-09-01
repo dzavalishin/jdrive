@@ -147,20 +147,20 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 		{                                                        
 			int h_cur = h;                                         
-			int var = tile;                                       
+			int variable = tile;                                       
 			do {                                                   
 				int w_cur = w;                                       
 				do {
 
 					//ti.tile = var;
 					//c.accept(ti);
-					if( c.apply( new TileIndex(var) ) )
+					if( c.apply( new TileIndex(variable) ) )
 						return;
 
-					++var;
+					++variable;
 				} while ( --w_cur != 0);
 				//int diff = (y * Global.MapSizeX()) + x);
-				var += Global.MapSizeX() - w;
+				variable += Global.MapSizeX() - w;
 				//} while (var += TileDiffXY(0, 1) - (w), --h_cur != 0);				
 			} while ( --h_cur != 0); 
 		}
@@ -186,20 +186,20 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 		{                                                        
 			int h_cur = h;                                         
-			int var = tile;                                       
+			int variable = tile;                                       
 			do {                                                   
 				int w_cur = w;                                       
 				do {
 
 					//ti.tile = var;
 					//c.accept(ti);
-					if( c.apply( new TileIndex(var), h_cur, w_cur ) )
+					if( c.apply( new TileIndex(variable), h_cur, w_cur ) )
 						return;
 
-					++var;
+					++variable;
 				} while ( --w_cur != 0);
 				//int diff = (y * Global.MapSizeX()) + x);
-				var += Global.MapSizeX() - w;
+				variable += Global.MapSizeX() - w;
 				//} while (var += TileDiffXY(0, 1) - (w), --h_cur != 0);				
 			} while ( --h_cur != 0); 
 		}
@@ -384,7 +384,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	public static  TileIndex AddTileIndexDiffCWrap(TileIndex tile, TileIndexDiffC diff) {
 		int x = tile.TileX() + diff.x;
 		int y = tile.TileY() + diff.y;
-		if (x < 0 || y < 0 || x > (int)Global.MapMaxX() || y > (int)Global.MapMaxY())
+		if (x < 0 || y < 0 || x > Global.MapMaxX() || y > Global.MapMaxY())
 			return INVALID_TILE;
 		else
 			return TileXY(x, y);
@@ -406,7 +406,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	 * Watch out! There are _no_ brackets around here, to prevent intermediate
 	 * rounding! Be careful when using this!
 	 * This value should be sqrt(2)/2 ~ 0.7071 */
-	public static int STRAIGHT_TRACK_LENGTH = game.Map.STRAIGHT_TRACK_LENGTH;
+	public static final int STRAIGHT_TRACK_LENGTH = game.Map.STRAIGHT_TRACK_LENGTH;
 
 
 

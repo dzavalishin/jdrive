@@ -118,7 +118,7 @@ public class ViewPort
 
 
 	public static final TileHighlightData _thd = new TileHighlightData();
-	public static final List<ViewPort> _viewports = new ArrayList<ViewPort>();
+	public static final List<ViewPort> _viewports = new ArrayList<>();
 
 	public void removeFromAll()
 	{
@@ -763,8 +763,7 @@ public class ViewPort
 				BitOps.IS_INSIDE_1D(ti.x, _thd.pos.x + _thd.offs.x, _thd.size.x + _thd.outersize.x) &&
 				BitOps.IS_INSIDE_1D(ti.y, _thd.pos.y + _thd.offs.y, _thd.size.y + _thd.outersize.y)) {
 			// Draw a blue rect.
-			DrawSelectionSprite(Sprite.PALETTE_SEL_TILE_BLUE | (Sprite.SPR_SELECT_TILE + Landscape._tileh_to_sprite[ti.tileh]), ti);
-			return;
+			DrawSelectionSprite(Sprite.PALETTE_SEL_TILE_BLUE | (Sprite.SPR_SELECT_TILE + Landscape._tileh_to_sprite[ti.tileh]), ti);			
 		}
 	}
 
@@ -1636,11 +1635,11 @@ public class ViewPort
 	}
 
 
-	@Deprecated
+	/*@Deprecated
 	void MarkTileDirtyByTile(TileIndex tile)
 	{
 		tile.MarkTileDirtyByTile();		
-	}	
+	}*/	
 	/*
 	void MarkTileDirtyByTile(TileIndex tile)
 	{
@@ -1661,8 +1660,9 @@ public class ViewPort
 		if (BitOps.IS_INT_INSIDE(x, 0, Global.MapSizeX() * 16) &&
 				BitOps.IS_INT_INSIDE(y, 0, Global.MapSizeY() * 16))
 			z = TileIndex.TileVirtXY(x, y).GetTileZ();
+		
 		pt = Point.RemapCoords(x, y, z);
-
+		//Global.debug("MarkTileDirty %s", pt.toString() );
 		MarkAllViewportsDirty(
 				pt.x - 31,
 				pt.y - 122,
@@ -1677,6 +1677,8 @@ public class ViewPort
 		int x = _thd.pos.x;
 		int y = _thd.pos.y;
 
+		//Global.debug("SetSelectionTilesDirty %d.%d", x, y );
+		
 		x_size = _thd.size.x;
 		y_size = _thd.size.y;
 
@@ -1997,7 +1999,7 @@ public class ViewPort
 		TrainGui.ShowTrainViewWindow(v);
 	}
 
-	static void Nop(final Vehicle v) {}
+	static void Nop(final Vehicle v) {/*empty*/}
 
 
 	static final OnVehicleClickProc[] _on_vehicle_click_proc = {
@@ -2170,7 +2172,8 @@ public class ViewPort
 				_thd.new_size.y = y2 - y1 + 16;
 				_thd.new_drawstyle = _thd.next_drawstyle;
 			}
-		} else if (_thd.place_mode != VHM_NONE) {
+		} else if (_thd.place_mode != VHM_NONE) 
+		{
 			Point pt = GetTileBelowCursor();
 			x1 = pt.x;
 			y1 = pt.y;
@@ -2192,18 +2195,21 @@ public class ViewPort
 			}
 		}
 
+		//Global.debug("UpdateTileSelection before redraw old %d.%d new %d.%d mode %d", _thd.pos.x, _thd.pos.y, _thd.new_pos.x, _thd.new_pos.y,  _thd.place_mode );
+		
 		// redraw selection
 		if (_thd.drawstyle != _thd.new_drawstyle ||
 				_thd.pos.x != _thd.new_pos.x || _thd.pos.y != _thd.new_pos.y ||
 				_thd.size.x != _thd.new_size.x || _thd.size.y != _thd.new_size.y) 
 		{
+			//Global.debug("UpdateTileSelection redraw %d.%d", _thd.pos.x, _thd.pos.y );
 			// clear the old selection?
 			if (_thd.drawstyle != 0) SetSelectionTilesDirty();
 
 			_thd.drawstyle = _thd.new_drawstyle;
-			_thd.pos = _thd.new_pos;
-			_thd.size = _thd.new_size;
-			_thd.outersize = _thd.new_outersize;
+			_thd.pos = new Point( _thd.new_pos );
+			_thd.size = new Point(  _thd.new_size );
+			_thd.outersize = new Point( _thd.new_outersize );
 			_thd.dirty = 0xff;
 
 			// draw the new selection?
@@ -2291,7 +2297,7 @@ public class ViewPort
 	static void CalcRaildirsDrawstyle(TileHighlightData thd, int x, int y, int method)
 	{
 		int d;
-		int b=6;
+		int b;//=6;
 		int w,h;
 
 		int dx = thd.selstart.x - (thd.selend.x&~0xF);
@@ -2571,18 +2577,18 @@ public class ViewPort
 class ViewportDrawer {
 	final DrawPixelInfo dpi = new DrawPixelInfo();
 
-	final ArrayList<TileSpriteToDraw> tile_list = new ArrayList<TileSpriteToDraw>();
-	final ArrayList<StringSpriteToDraw> string_list = new ArrayList<StringSpriteToDraw>();
+	final ArrayList<TileSpriteToDraw> tile_list = new ArrayList<>();
+	final ArrayList<StringSpriteToDraw> string_list = new ArrayList<>();
 
 	ParentSpriteToDraw last_parent;
 
-	final ArrayList<ParentSpriteToDraw> parent_list = new ArrayList<ParentSpriteToDraw>();
+	final ArrayList<ParentSpriteToDraw> parent_list = new ArrayList<>();
 
 	byte combine_sprites;
 
 	int offs_x, offs_y; // used when drawing ground sprites relative
 	boolean ground_child;
-} ;
+} 
 
 
 //typedef void OnVehicleClickProc(final Vehicle v);

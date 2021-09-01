@@ -219,7 +219,8 @@ public class WayPoint implements IPoolItem
 		});
 
 		/* Find an empty spot */
-		for (i = 0; used_waypoint[i] && i < MAX_WAYPOINTS_PER_TOWN; i++) {}
+		for (i = 0; used_waypoint[i] && i < MAX_WAYPOINTS_PER_TOWN; i++) 
+			;
 
 		string = new StringID( Str.STR_NULL );
 		town_cn =  i;

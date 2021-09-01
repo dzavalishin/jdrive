@@ -26,7 +26,7 @@ public class Hal
 	private static byte[] screen2; 
 	
 	
-	void toggle_fullscreen(boolean fullscreen) { } // TODO
+	void toggle_fullscreen(boolean fullscreen) { throw new UnsupportedOperationException(); }
 
 	public static final DrawPixelInfo _screen = new DrawPixelInfo();
 	public static DrawPixelInfo _cur_dpi = new DrawPixelInfo();
@@ -97,14 +97,16 @@ void SortResolutions(int count)
 		try {
 			Thread.sleep(milliseconds);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 		}
 	}
 	
+	private static java.util.Random rng = new java.util.Random();
 	
 	public static int Random() {		
-		return (int) (Math.random() * Integer.MAX_VALUE);
+		//return (int) (Math.random() * Integer.MAX_VALUE);
+		return Math.abs(rng.nextInt());
 	}
 
 
@@ -227,8 +229,7 @@ void SortResolutions(int count)
 	}
 	
 	public void stop_video() {
-		// TODO Auto-generated method stub
-
+		// Empty
 	}
 
 	public void make_dirty(int left, int top, int width, int height) {
@@ -244,10 +245,10 @@ void SortResolutions(int count)
 		while(true) {
 			try {
 				if(!Global._fast_forward)
-					Thread.sleep(10); // TODO 100 fps?
+					Thread.sleep(10);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				Global.error(e);
 			}
 
 			if (Global._exit_game) return;
@@ -283,7 +284,7 @@ void SortResolutions(int count)
 			//try {
 				Main.GameLoop();
 			/*} catch (Throwable e) {
-				e.printStackTrace();
+				Global.error(e);
 			}*/
 
 			_cursor.setDelta(0,0);
@@ -300,7 +301,7 @@ void SortResolutions(int count)
 			//try {
 				Window.UpdateWindows();
 			/*} catch (Throwable e) {
-				e.printStackTrace();
+				Global.error(e);
 			}*/
 
 			checkPaletteAnim();

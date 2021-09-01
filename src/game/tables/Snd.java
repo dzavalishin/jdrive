@@ -1,8 +1,8 @@
 package game.tables;
 
-public enum SoundFx {
-	// [dz] added
-	SND_NONE,
+public enum Snd {
+	// [dz] added = NOT HERE!
+	//SND_NONE,
 	
 	SND_02_SPLAT,                          //  0 == 0x00 !
 	SND_03_FACTORY_WHISTLE,
@@ -76,6 +76,8 @@ public enum SoundFx {
 	SND_45_PLANE_CRASHING,
 	SND_46_PLANE_ENGINE_SPUTTERING,
 	SND_47_MAGLEV_2,
-	SND_48_DISTANT_BIRD                    // 72 == 0x48
+	SND_48_DISTANT_BIRD,                    // 72 == 0x48
+
+	SND_NONE, // not in file, won't play? TODO Redo!
 
 }

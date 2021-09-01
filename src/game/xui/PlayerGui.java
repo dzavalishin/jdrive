@@ -483,17 +483,16 @@ public class PlayerGui
 
 	static int GetAmountOwnedBy(final Player p, PlayerID owner)
 	{
-		return BitOps.b2i(p.share_owners[0] == owner) +
-				BitOps.b2i(p.share_owners[1] == owner) +
-				BitOps.b2i(p.share_owners[2] == owner) +
-				BitOps.b2i(p.share_owners[3] == owner);
+		return BitOps.b2i(owner.equals(p.share_owners[0])) +
+				BitOps.b2i(owner.equals(p.share_owners[1])) +
+				BitOps.b2i(owner.equals(p.share_owners[2])) +
+				BitOps.b2i(owner.equals(p.share_owners[3]));
 	}
 
 	static void DrawCompanyOwnerText(final Player p)
 	{
 		int num = -1;
 
-		//FOR_ALL_PLAYERS(p2)
 		Iterator<Player> ii = Player.getIterator();
 		while(ii.hasNext())
 		{

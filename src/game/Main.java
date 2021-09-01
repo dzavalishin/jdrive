@@ -15,6 +15,7 @@ import game.enums.ThreadMsg;
 import game.ids.PlayerID;
 import game.struct.SmallFiosItem;
 import game.util.FileIO;
+import game.util.Sound;
 import game.util.Strings;
 import game.xui.Gfx;
 import game.xui.GfxInit;
@@ -75,16 +76,16 @@ public class Main {
 		try {
 			len = f.read(buf);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 			return null;
 		} finally
 		{
 			try {
 				f.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				Global.error(e);
 			}
 			
 		}
@@ -104,8 +105,6 @@ public class Main {
 
 	static void showhelp()
 	{
-		//char buf[4096], *p;
-
 		String help =
 				"Command line options:\n" +
 				"  -v drv              = Set video driver (see below)\n" +
@@ -120,15 +119,11 @@ public class Main {
 				"  -G seed             = Set random seed\n" +
 				"  -n [ip#player:port] = Start networkgame\n" +
 				"  -D                  = Start dedicated server\n" +
-				//#if !defined(__MORPHOS__) && !defined(__AMIGA__)
-				//"  -f                  = Fork into the background (dedicated only)\n"
-				//#endif
+				"  -f                  = Fork into the background (dedicated only)\n" +
 				"  -i                  = Force to use the DOS palette (use this if you see a lot of pink)\n" +
 				"  -p #player          = Player as #player (deprecated) (network only)\n" +
 				"  -c config_file      = Use 'config_file' instead of 'openttd.cfg'\n"
 				;
-
-		// TODO GetDriverList(p);
 
 		Hal.ShowInfo(help);
 	}
@@ -330,7 +325,7 @@ public class Main {
 
 		// TODO LoadFromConfig();
 		// TODO CheckConfig();
-		// TODO LoadFromHighScore();
+		SaveLoad.LoadFromHighScore();
 
 		// override config?
 		// TODO if (resolution[0]) { _cur_resolution[0] = resolution[0]; _cur_resolution[1] = resolution[1]; }
@@ -358,8 +353,9 @@ public class Main {
 
 		// Sample catalogue
 		Global.DEBUG_misc( 1, "Loading sound effects...");
-		// TODO MxInitialize(11025);
-		// TODO SoundInitialize("sample.cat");
+		Sound.MxInitialize(11025);
+		Sound.SoundInitialize("sample.cat");
+		Sound.StartSound(2, 0, 50);
 
 		// This must be done early, since functions use the InvalidateWindow* calls
 		Window.InitWindowSystem();
@@ -435,7 +431,7 @@ public class Main {
 		//_sound_driver.stop(); TODO return
 
 		// TODO SaveToConfig();
-		// TODO SaveToHighScore();
+		SaveLoad.SaveToHighScore();
 
 		// uninitialize airport state machines
 		AirportFTAClass.UnInitializeAirports();
@@ -955,7 +951,7 @@ public class Main {
 
 		Window.InputLoop();
 
-		// TODO MusicLoop();
+
 	}
 
 
@@ -1037,8 +1033,8 @@ public class Main {
 		try {
 			cwd = new java.io.File(".").getCanonicalPath();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 			error(e.toString());
 		}
 		

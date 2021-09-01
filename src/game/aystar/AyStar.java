@@ -47,7 +47,7 @@ public abstract class AyStar extends AyStarDefs
 	/* The actual closed list */
 	final Hash ClosedListHash = new Hash();
 	/* The open queue */
-	final TTDQueue<OpenListNode> OpenListQueue = new TTDQueueImpl<OpenListNode>();
+	final TTDQueue<OpenListNode> OpenListQueue = new TTDQueueImpl<>();
 	/* An extra hash to speed up the process of looking up an element in
 	 * the open list */
 	final Hash OpenListHash = new Hash();
@@ -56,33 +56,18 @@ public abstract class AyStar extends AyStarDefs
 	protected static boolean debug = false;
 
 
-	public AyStar() {
+	protected AyStar() {
 		neighbours = new AyStarNode[12];
 	}
 
-	/*
-	public static void init_AyStar(AyStar aystar, Hash_HashProc hash, int num_buckets) {
-		// Allocated the Hash for the OpenList and ClosedList
-		// TODO init_Hash(aystar.OpenListHash, hash, num_buckets);
-		// TODO init_Hash(aystar.ClosedListHash, hash, num_buckets);
-
-		// Set up our sorting queue
-		//  BinaryHeap allocates a block of 1024 nodes
-		//  When that one gets full it reserves an other one, till this number
-		//  That is why it can stay this high
-		//init_BinaryHeap(aystar.OpenListQueue, 102400); // TODO kill init_BinaryHeap?
-
-		aystar.addstart	= AyStar::AyStarMain_AddStartNode;
-		aystar.main		= AyStar::AyStarMain_Main;
-		//aystar.loop		= AyStar::AyStarMain_Loop;
-		aystar.free		= AyStar::AyStarMain_Free;
-		aystar.clear		= AyStar::AyStarMain_Clear;
-		//aystar.checktile	= AyStar::AyStarMain_CheckTile;
-	}*/
 
 
-	// Adds a node to the OpenList
-	//  It makes a copy of node, and puts the pointer of parent in the struct
+	/** 
+	 * Adds a node to the OpenList
+	 * 
+	 * It makes a copy of node, and puts the pointer of parent in the struct
+	 *  
+	**/
 	protected void openList_Add(PathNode parent, AyStarNode node, int f, int g)
 	{
 		// Add a new Node to the OpenList
@@ -96,8 +81,15 @@ public abstract class AyStar extends AyStarDefs
 		OpenListQueue.push(new_node, f);
 	}
 
-	// This looks in the Hash if a node exists in ClosedList
-	//  If so, it returns the PathNode, else NULL
+	/**
+	 * 
+	 * This looks in the Hash if a node exists in ClosedList
+	 * 
+	 * If so, it returns the PathNode, else NULL
+	 * 
+	 * @param node
+	 * @return
+	 */
 	protected PathNode closedList_IsInList(AyStarNode node)
 	{
 		return (PathNode)ClosedListHash.Hash_Get( node.tile, node.direction );
@@ -134,12 +126,12 @@ public abstract class AyStar extends AyStarDefs
 
 
 
-	/*
+	/**
 	 * Checks one tile and calculate his f-value
-	 *  return values:
-	 *	AYSTAR_DONE : indicates we are done
+	 *  
+	 * @return AYSTAR_DONE : indicates we are done
 	 *
-	 * Can be overriden
+	 * Can be overridden
 	 */
 	int checkTile(AyStarNode current, OpenListNode parent) 
 	{
@@ -189,6 +181,8 @@ public abstract class AyStar extends AyStarDefs
 			for (i=0;i< current.user_data.length;i++)
 				check.path.node.user_data[i] = current.user_data[i];
 			
+			//check.path.node.user_data = Arrays.copyOf(current.user_data, current.user_data.length);
+			
 			// Readd him in the OpenListQueue
 			OpenListQueue.push(check, new_f);
 		} 
@@ -203,7 +197,8 @@ public abstract class AyStar extends AyStarDefs
 	}
 
 
-	/*
+	/**
+	 * 
 	 * This function is the core of AyStar. It handles one item and checks
 	 *  his neighbour items. If they are valid, they are added to be checked too.
 	 *  return values:
@@ -213,7 +208,7 @@ public abstract class AyStar extends AyStarDefs
 	 *	reached.
 	 *	AYSTAR_FOUND_END_NODE : indicates we found the end. Path_found now is true, and in path is the path found.
 	 *	AYSTAR_STILL_BUSY : indicates we have done this tile, did not found the path yet, and have items left to try.
-	 *  <br>
+	 *  <p>
 	 *  Was func ptr in C version. So can be overridden.
 	 */
 	int loop() 
@@ -276,9 +271,10 @@ public abstract class AyStar extends AyStarDefs
 	}
 	
 
-	/*
+	/**
 	 * This function make the memory go back to zero
-	 *  This function should be called when you are using the same instance again.
+	 * 
+	 * This function should be called when you are using the same instance again.
 	 */
 	void clear() 
 	{
@@ -288,15 +284,17 @@ public abstract class AyStar extends AyStarDefs
 		OpenListHash.clear_Hash(true);
 		ClosedListHash.clear_Hash(true);
 
-		if(debug) System.out.printf("[AyStar] Cleared AyStar\n");
+		if(debug) System.out.printf("[AyStar] Cleared AyStar%n");
 	}
 
-	/*
+	/**
 	 * This is the function you call to run AyStar.
-	 *  return values:
+	 * 
+	 * @return
 	 *	AYSTAR_FOUND_END_NODE : indicates we found an end node.
 	 *	AYSTAR_NO_PATH : indicates that there was no path found.
 	 *	AYSTAR_STILL_BUSY : indicates we have done some checked, that we did not found the path yet, and that we still have items left to try.
+	 * <p>
 	 * When the algorithm is done (when the return value is not AYSTAR_STILL_BUSY)
 	 * aystar.clear() is called. Note that when you stop the algorithm halfway,
 	 * you should still call clear() yourself!
@@ -307,16 +305,16 @@ public abstract class AyStar extends AyStarDefs
 		//  Quit if result is no AYSTAR_STILL_BUSY or is more than loops_per_tick
 		//noinspection StatementWithEmptyBody
 		while ((r = loop()) == AYSTAR_STILL_BUSY && (getLoops_per_tick() == 0 || ++i < getLoops_per_tick()))
-			{ }
+			;
 		
 		if(debug) 
 		{
 		if (r == AYSTAR_FOUND_END_NODE)
-			System.out.printf("[AyStar] Found path!\n");
+			System.out.printf("[AyStar] Found path!%n");
 		else if (r == AYSTAR_EMPTY_OPENLIST)
-			System.out.printf("[AyStar] OpenList run dry, no path found\n");
+			System.out.printf("[AyStar] OpenList run dry, no path found%n");
 		else if (r == AYSTAR_LIMIT_REACHED)
-			System.out.printf("[AyStar] Exceeded search_nodes, no path found\n");
+			System.out.printf("[AyStar] Exceeded search_nodes, no path found%n");
 		}
 
 		
@@ -336,19 +334,20 @@ public abstract class AyStar extends AyStarDefs
 	}
 
 
-	/*
+	/**
+	 * 
 	 * Adds a node from where to start an algorithm. Multiple nodes can be added
 	 * if wanted. You should make sure that clear() is called before adding nodes
 	 * if the AyStar has been used before (though the normal main loop calls
 	 * clear() automatically when the algorithm finishes
 	 * g is the cost for starting with this node.
-	 * 
+	 * <p>
 	 * Can be overridden.
 	 */
 	public void addStartNode(AyStarNode start_node, int g) 
 	{
 		if(debug) 
-			System.out.printf("[AyStar] Starting A* Algorithm from node (%d, %d, %d)\n",
+			System.out.printf("[AyStar] Starting A* Algorithm from node (%d, %d, %d)%n",
 					start_node.tile.getX(), start_node.tile.getY(), start_node.direction);
 
 		openList_Add(null, start_node, 0, g);

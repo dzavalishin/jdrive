@@ -9,6 +9,7 @@ import game.struct.Point;
 import game.struct.TileDesc;
 import game.struct.TileIndexDiff;
 import game.struct.TileIndexDiffC;
+import game.tables.Snd;
 import game.tables.WaterTables;
 import game.util.BitOps;
 import game.xui.Gfx;
@@ -664,10 +665,10 @@ public class WaterCmd extends WaterTables
 				v.road.crashed_ctr = 2000;	// max 2220, disappear pretty fast
 				VehicleGui.RebuildVehicleLists();
 			} else if (v.type == Vehicle.VEH_Train) {
-				Vehicle  u;
+				//Vehicle  u;
 
 				v = v.GetFirstVehicleInChain();
-				u = v;
+				//u = v;
 				if (v.IsFrontEngine()) pass[0] = 4; // driver
 
 				// crash all wagons, and count passangers
@@ -677,7 +678,7 @@ public class WaterCmd extends WaterTables
 					vw.setCrashed(true);
 				});
 
-				v = u;
+				//v = u;
 				v.rail.crash_anim_pos = 4000; // max 4440, disappear pretty fast
 				VehicleGui.RebuildVehicleLists();
 			} else {
@@ -693,7 +694,7 @@ public class WaterCmd extends WaterTables
 				v.index,
 				0);
 			v.CreateEffectVehicleRel(4, 4, 8, Vehicle.EV_EXPLOSION_LARGE);
-			//SndPlayVehicleFx(SND_12_EXPLOSION, v);
+			v.SndPlayVehicleFx(Snd.SND_12_EXPLOSION);
 		}
 	}
 

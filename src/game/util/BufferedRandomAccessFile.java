@@ -21,6 +21,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import game.Global;
+
 /**
  * This class is a version of the one published at
  * https://code.google.com/p/jmzreader/wiki/BufferedRandomAccessFile augmented to handle unsigned
@@ -214,8 +216,8 @@ public class BufferedRandomAccessFile extends RandomAccessFile
     	try {
 			seek(getFilePointer() + bytes);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			Global.error(e);
 			System.exit(33);
 		}
     }

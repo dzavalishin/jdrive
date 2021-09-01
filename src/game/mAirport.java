@@ -77,10 +77,8 @@ public class mAirport
 	{
 		if(!Global._patches.allow_municipal_airports)
 			return false;
-		if(v.tile.GetTileOwner().isTown())
-			return true;
-
-		return false;
+		
+		return v.tile.GetTileOwner().isTown();
 	}	
 
 	//does exactly what it says on the tin
@@ -156,7 +154,7 @@ public class mAirport
 			while(v.isValid() && order != null)
 			{
 				if(v.isValid()
-					&& v.owner == Global.gs._current_player
+					&& v.owner.isCurrentPlayer()
 					&& Station.GetStation(order.station) == st
 					&& st.owner.isTown()) {
 						vehiclecount[0]++;
@@ -374,8 +372,7 @@ public class mAirport
 		MA_BuildAirport(tl);
 		
 		
-		Global.gs._current_player = old_player;
-		return;
+		Global.gs._current_player = old_player;		
 	}
 	
 	

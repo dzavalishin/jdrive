@@ -15,7 +15,7 @@ public abstract class AbstractChart extends JFrame
 
 	abstract DefaultCategoryDataset createDataset(); 
 	
-	public AbstractChart( 
+	protected AbstractChart( 
 			String applicationTitle , String chartTitle,
 			String legendX, String legendY
 			) 

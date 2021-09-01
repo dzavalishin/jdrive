@@ -3,17 +3,16 @@ package game.ids;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UnitID extends AbstractID {
-
-	/**
-	 * 
-	 */
+public class UnitID extends AbstractID 
+{
 	private static final long serialVersionUID = 1L;
+	
 	private UnitID(int i) {
 		super(i);
 	}
 	
-	private static final Map<Integer,UnitID> ids = new HashMap<Integer,UnitID>();
+	private static final Map<Integer,UnitID> ids = new HashMap<>();
+
 	public static UnitID get(int player) 
 	{
 		UnitID old = ids.get(player);
@@ -25,4 +24,14 @@ public class UnitID extends AbstractID {
 		return old;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+	
 }

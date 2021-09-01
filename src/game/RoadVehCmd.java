@@ -17,6 +17,7 @@ import game.struct.Point;
 import game.struct.RoadFindDepotData;
 import game.struct.RoadVehFindData;
 import game.tables.RoadVehCmdTables;
+import game.tables.Snd;
 import game.util.BitOps;
 import game.xui.Gfx;
 import game.xui.VehicleGui;
@@ -242,7 +243,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 				Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, Vehicle.VEH_Road); // updates the replace Road window
 		}
 
-		return -(int)v.value;
+		return -v.value;
 	}
 
 
@@ -272,7 +273,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (v.road.isInTunnel()) tile = TunnelBridgeCmd.GetVehicleOutOfTunnelTile(v);
 
 		//TileMarker.mark(tile, 209);
-		
+
 		if (Global._patches.new_pathfinding_all) {
 			NPFFoundTargetData ftd;
 			/* See where we are now */
@@ -520,7 +521,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 						0);
 
 		Station.ModifyStationRatingAround(v.tile, v.owner, -160, 22);
-		//SndPlayVehicleFx(SND_12_EXPLOSION, v);
+		v.SndPlayVehicleFx(Snd.SND_12_EXPLOSION);
 	}
 
 	static void RoadVehCheckTrainCrash(Vehicle v)
@@ -552,7 +553,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
-			//SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?					SND_0F_VEHICLE_BREAKDOWN : SND_35_COMEDY_BREAKDOWN, v);
+			v.SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?					
+					Snd.SND_0F_VEHICLE_BREAKDOWN : Snd.SND_35_COMEDY_BREAKDOWN);
 
 			if(!v.isHidden()) {
 				Vehicle u = v.CreateEffectVehicleRel(4, 4, 5, Vehicle.EV_BREAKDOWN_SMOKE);
@@ -620,7 +622,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 				type = (v.getCargo_type() == AcceptedCargo.CT_PASSENGERS) ? RoadStopType.RS_BUS : RoadStopType.RS_TRUCK;
 				List<RoadStop> rsl = RoadStop.GetPrimaryRoadStop(st, type);
 
-				if (rsl == null || rsl.size() == 0) {
+				if (rsl == null || rsl.isEmpty()) {
 					//There is no stop left at the station, so don't even TRY to go there
 					v.cur_order_index++;
 					v.InvalidateVehicleOrder();
@@ -679,12 +681,14 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	static void StartRoadVehSound(Vehicle v)
 	{
-		/*
-	SoundFx s = Engine.RoadVehInfo(v.engine_type).sfx;
-	if (s == SND_19_BUS_START_PULL_AWAY && (v.tick_counter & 3) == 0)
-		s = SND_1A_BUS_START_PULL_AWAY_WITH_HORN;
-	SndPlayVehicleFx(s, v);
-		 */
+
+		/*SoundFx*/ int s = Engine.RoadVehInfo(v.engine_type.id).sfx; //trainSfx;
+		
+		if (s == Snd.SND_19_BUS_START_PULL_AWAY.ordinal() && (v.tick_counter & 3) == 0)
+			s = Snd.SND_1A_BUS_START_PULL_AWAY_WITH_HORN.ordinal();
+		
+		v.SndPlayVehicleFx(s);
+
 	}
 
 
@@ -747,7 +751,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 				st.had_vehicle_of_type |= Station.HVOT_BUS;
 				Global.SetDParam(0, st.index);
-				flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+				flags = v.owner.isLocalPlayer() ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 				NewsItem.AddNewsItem(
 						Str.STR_902F_CITIZENS_CELEBRATE_FIRST,
 						flags,
@@ -761,7 +765,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 				st.had_vehicle_of_type |= Station.HVOT_TRUCK;
 				Global.SetDParam(0, st.index);
-				flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+				flags = v.owner.isLocalPlayer() ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 				NewsItem.AddNewsItem(
 						Str.STR_9030_CITIZENS_CELEBRATE_FIRST,
 						flags,
@@ -1286,7 +1290,8 @@ class RoadDriveEntry {
 				x = tile.TileX() * 16 + rdp[0].x;
 				y = tile.TileY() * 16 + rdp[0].y;
 
-				if (RoadVehFindCloseTo(v, x, y, newdir=RoadVehGetSlidingDirection(v, x, y)) != null)
+				newdir=RoadVehGetSlidingDirection(v, x, y);
+				if (RoadVehFindCloseTo(v, x, y, newdir) != null)
 					return;
 
 				r = v.VehicleEnterTile( tile, x, y);
@@ -1500,7 +1505,8 @@ class RoadDriveEntry {
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) {
 				v.setStopped(true);
-				if (v.owner == Global.gs._local_player) {
+				if (v.owner.isLocalPlayer()) 
+				{
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddNewsItem(
 							Str.STR_9016_ROAD_VEHICLE_IS_WAITING,
@@ -1690,11 +1696,11 @@ class RoadDriveEntry {
 
 		v.profit_this_year -= cost >> 8;
 
-		Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_RUN);
-		Player.SubtractMoneyFromPlayerFract(v.owner, cost);
+					Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_RUN);
+					Player.SubtractMoneyFromPlayerFract(v.owner, cost);
 
-		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
-		Window.InvalidateWindowClasses(Window.WC_ROADVEH_LIST);
+					Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
+					Window.InvalidateWindowClasses(Window.WC_ROADVEH_LIST);
 	}
 
 

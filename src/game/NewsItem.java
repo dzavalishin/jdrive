@@ -7,9 +7,10 @@ import java.util.function.Function;
 import game.enums.GameModes;
 import game.enums.WindowEvents;
 import game.ids.StringID;
-import game.tables.SoundFx;
+import game.tables.Snd;
 import game.util.BitOps;
 import game.util.GameDate;
+import game.util.Sound;
 import game.util.wcustom.def_d;
 import game.xui.Gfx;
 import game.xui.ViewPort;
@@ -475,17 +476,17 @@ public class NewsItem {
 			NewsItem::NewsWindowProc
 			);
 
-	static final SoundFx _news_sounds[] = {
-			SoundFx.SND_1D_APPLAUSE,
-			SoundFx.SND_1D_APPLAUSE,
-			SoundFx.SND_NONE,
-			SoundFx.SND_NONE,
-			SoundFx.SND_NONE,
-			SoundFx.SND_NONE,
-			SoundFx.SND_1E_OOOOH,
-			SoundFx.SND_NONE,
-			SoundFx.SND_NONE,
-			SoundFx.SND_NONE
+	static final Snd _news_sounds[] = {
+			Snd.SND_1D_APPLAUSE,
+			Snd.SND_1D_APPLAUSE,
+			Snd.SND_NONE,
+			Snd.SND_NONE,
+			Snd.SND_NONE,
+			Snd.SND_NONE,
+			Snd.SND_1E_OOOOH,
+			Snd.SND_NONE,
+			Snd.SND_NONE,
+			Snd.SND_NONE
 	};
 
 	/** Get the value of an item of the news-display settings. This is
@@ -521,8 +522,8 @@ public class NewsItem {
 		ni.flags &= ~(NF_NOEXPIRE | NF_FORCE_BIG);
 		ni.duration = 555;
 
-		//sound = _news_sounds[ni.type];
-		//if (sound != 0) SndPlayFx(sound);
+		Snd sound = _news_sounds[ni.type];
+		if (sound != Snd.SND_NONE) Sound.SndPlayFx(sound);
 
 		top = Hal._screen.height;
 		switch (ni.display_mode) {

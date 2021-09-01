@@ -27,3 +27,4 @@ hs_err_pid*
 # junit
 test/test-report/*.txt
 test/test-report/*.xml
+hiscore.xml

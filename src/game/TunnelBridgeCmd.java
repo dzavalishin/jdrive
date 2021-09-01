@@ -11,6 +11,7 @@ import game.ifaces.TileTypeProcs;
 import game.struct.TileDesc;
 import game.struct.TileIndexDiff;
 import game.tables.RailTables;
+import game.tables.Snd;
 import game.util.BitOps;
 import game.util.IntContainer;
 
@@ -1477,7 +1478,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				if (!v.rail.isInTunnel() && dir == vdir) {
 					if (v.IsFrontEngine() && fc == _tunnel_fractcoord_1[dir]) {
 						if (v.spritenum < 4)
-							//SndPlayVehicleFx(SND_05_TRAIN_THROUGH_TUNNEL, v);
+							v.SndPlayVehicleFx(Snd.SND_05_TRAIN_THROUGH_TUNNEL);
 							return 0;
 					}
 					if (fc == _tunnel_fractcoord_2[dir]) {

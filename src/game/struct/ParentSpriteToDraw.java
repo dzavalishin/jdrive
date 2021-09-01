@@ -1,6 +1,7 @@
 package game.struct;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ParentSpriteToDraw 
 {
@@ -23,6 +24,6 @@ public class ParentSpriteToDraw
 	public int tile_z;
 	public int tile_z_bottom;
 
-	public final ArrayList<ChildScreenSpriteToDraw> children = new ArrayList<ChildScreenSpriteToDraw>();
+	public final List<ChildScreenSpriteToDraw> children = new ArrayList<>();
 
 }

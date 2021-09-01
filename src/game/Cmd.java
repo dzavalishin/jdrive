@@ -352,7 +352,7 @@ public class Cmd {
 	{
 		if(null == tile)
 		{
-			Global.error("null tile in DoCommandByTile");
+			// TODO debug me Global.error("null tile in DoCommandByTile");
 			return Cmd.CMD_ERROR;
 		}
 		return DoCommand(tile.TileX() * 16, tile.TileY() * 16, p1, p2, flags, procc);

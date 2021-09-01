@@ -1,6 +1,7 @@
 package game.console;
 
 import game.Engine;
+import game.Global;
 import game.Landscape;
 import game.TileIndex;
 import game.Vehicle;
@@ -926,7 +927,7 @@ public class ConsoleCmds extends Console
 	{
 		if (argv.length == 2) {
 			IConsoleCmd cmd;
-			final IConsoleVar var;
+			//final IConsoleVar variable;
 			final IConsoleAlias alias;
 
 			cmd = IConsoleCmdGet(argv[1]);
@@ -946,9 +947,9 @@ public class ConsoleCmds extends Console
 				return true;
 			}
 
-			var = IConsoleVarGet(argv[1]);
-			if (var != null && var.help != null) {
-				IConsoleHelp(var.help);
+			final IConsoleVar variable = IConsoleVarGet(argv[1]);
+			if (variable != null && variable.help != null) {
+				IConsoleHelp(variable.help);
 				return true;
 			}
 
@@ -995,9 +996,9 @@ public class ConsoleCmds extends Console
 			return true;
 		}
 
-		for (IConsoleVar var : _iconsole_vars.values()) {
-			if (argv[1] == null || var.name.equals(argv[1]))
-				IConsolePrintF(_icolour_def, "%s", var.name);
+		for (IConsoleVar variable : _iconsole_vars.values()) {
+			if (argv[1] == null || variable.name.equals(argv[1]))
+				IConsolePrintF(_icolour_def, "%s", variable.name);
 		}
 
 		return true;
@@ -1208,9 +1209,9 @@ public class ConsoleCmds extends Console
 		}
 
 
-		for (IConsoleVar var : Console._iconsole_vars.values()) {
-			if (argv[1] == null || var.name.equals(argv[1]))
-				var.IConsoleVarPrintGetValue();
+		for (IConsoleVar ivar : Console._iconsole_vars.values()) {
+			if (argv[1] == null || ivar.name.equals(argv[1]))
+				ivar.IConsoleVarPrintGetValue();
 		}
 
 		return true;
@@ -1388,9 +1389,8 @@ public class ConsoleCmds extends Console
 	#endif /* ENABLE_NETWORK */
 
 		// debugging stuff
-	/* TODO XXX #ifdef _DEBUG
-	#endif */
-		IConsoleDebugLibRegister();
+		if(Global.debugEnabled)
+			IConsoleDebugLibRegister();
 	}
 
 }

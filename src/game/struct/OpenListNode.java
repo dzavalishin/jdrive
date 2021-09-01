@@ -23,4 +23,9 @@ public class OpenListNode {
 		}
 		return super.equals(obj);
 	}
+	
+	@Override
+	public int hashCode() {
+		return path.hashCode()+g;
+	}
 }

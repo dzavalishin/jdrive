@@ -14,6 +14,7 @@ import game.enums.Owner;
 import game.ids.EngineID;
 import game.ids.PlayerID;
 import game.ids.StringID;
+import game.struct.HighScore;
 import game.struct.PlayerEconomyEntry;
 import game.util.BitOps;
 import game.util.Strings;
@@ -21,9 +22,6 @@ import game.xui.Gfx;
 import game.xui.PlayerGui;
 import game.xui.Window;
 
-/** 
- * TODO Cleanup the messy DrawPlayerFace function asap
- */
 
 public class Player implements Serializable 
 {
@@ -140,13 +138,15 @@ public class Player implements Serializable
 
 	public static Player GetPlayer(PlayerID i)
 	{
-		assert(i.id < Global.gs._players.length);
+		//assert(i.id < Global.gs._players.length);
+		i.assertValid();
 		return Global.gs._players[i.id];
 	}
 
 	public static Player GetPlayer(int i)
 	{
-		assert(i < Global.gs._players.length);
+		//assert(i < Global.gs._players.length);
+		PlayerID.assertValid(i);
 		return Global.gs._players[i];
 	}
 
@@ -1151,43 +1151,46 @@ public class Player implements Serializable
 
 		long lvalue = BitOps.minu(value, 1000) >>> 6;
 				if (lvalue >= _endgame_perf_titles.length) 
-					lvalue = _endgame_perf_titles.length - 1;
+					lvalue = _endgame_perf_titles.length - 1L;
 
 				return _endgame_perf_titles[(int) lvalue];
 	}
 
 
 	// Save the highscore for the Player 
-	static byte SaveHighScoreValue(final Player p)
+	static int SaveHighScoreValue(final Player p)
 	{
-		/*
-	HighScore hs = _highscore_table[GameOptions._opt.diff_level];
+		
+	HighScore[] hs = Global._highscore_table[GameOptions._opt.diff_level];
 	int i;
-	uint16 score = p.old_economy[0].performance_history;
+	int score = p.old_economy[0].performance_history;
 
 	// Exclude cheaters from the honour of being in the highscore table 
 	if (Cheat.CheatHasBeenUsed())
 		return -1;
 
-	for (i = 0; i < lengthof(_highscore_table[0]); i++) {
+	for (i = 0; i < hs.length; i++) 
+	{
 		// You are in the TOP5. Move all values one down and save us there 
 		if (hs[i].score <= score) {
-			char buf[sizeof(hs[i].company)];
+			//char buf[sizeof(hs[i].company)];
 
 			// move all elements one down starting from the replaced one
-			memmove(&hs[i + 1], &hs[i], sizeof(HighScore) * (lengthof(_highscore_table[0]) - i - 1));
+			//memmove(&hs[i + 1], &hs[i], sizeof(HighScore) * (lengthof(_highscore_table[0]) - i - 1));
+			System.arraycopy(hs, i, hs, i+1, hs.length - i - 1);
+			
 			Global.SetDParam(0, p.president_name_1);
 			Global.SetDParam(1, p.president_name_2);
 			Global.SetDParam(2, p.name_1);
 			Global.SetDParam(3, p.name_2);
-			GetString(buf, Str.STR_HIGHSCORE_NAME); // get manager/company name string
-			ttd_strlcpy(hs[i].company, buf, sizeof(buf));
+			String buf = Strings.GetString(Str.STR_HIGHSCORE_NAME); // get manager/company name string
+			hs[i].company = buf;
 			hs[i].score = score;
-			hs[i].title = EndGameGetPerformanceTitleFromValue(score);
+			hs[i].title = Strings.GetString(EndGameGetPerformanceTitleFromValue(score));
 			return i;
 		}
 	}
-		 */
+		
 		return -1; // too bad; we did not make it into the top5
 	}
 

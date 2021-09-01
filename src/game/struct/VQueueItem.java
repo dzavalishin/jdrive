@@ -1,10 +1,14 @@
 package game.struct;
 
+import java.io.Serializable;
+
 import game.Vehicle;
 import game.util.VehicleQueue;
 
-public class VQueueItem 
+public class VQueueItem implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	public Vehicle data;
 	
 	// Position in queue

@@ -36,7 +36,7 @@ public class TrackPathFinder extends Pathfind
 	//TileIndex [] hash_tile = new TileIndex[0x400]; /* stores the link index when multi link. */
 	//TrackPathFinderLink [] links = new TrackPathFinderLink[0x400]; /* hopefully, this is enough. */
 
-	final Map<Integer,TPFHashEnt> tileBits = new HashMap<Integer,TPFHashEnt>();
+	final Map<Integer,TPFHashEnt> tileBits = new HashMap<>();
 
 	// -------------------------------------------------
 	// Class
@@ -196,7 +196,7 @@ public class TrackPathFinder extends Pathfind
 
 		int bits;
 		int i;
-		RememberData rd;
+		//RememberData rdCopy;
 		TileIndex tile_org = tile;
 
 		if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
@@ -215,7 +215,7 @@ public class TrackPathFinder extends Pathfind
 					/* Check if we are on a bridge (middle parts don't have an owner */
 					if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) || (tile.getMap().m5 & 0xC0) != 0xC0)
 						if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) || (tile_org.getMap().m5 & 0xC0) != 0xC0)
-							if (tile_org.GetTileOwner() != tile.GetTileOwner())
+							if (!tile_org.GetTileOwner().equals(tile.GetTileOwner()))
 								return;
 		}
 
@@ -236,7 +236,7 @@ public class TrackPathFinder extends Pathfind
 					bits = BitOps.KILL_FIRST_BIT(bits);
 
 					tpf.the_dir = (_otherdir_mask[direction] & (1 << i)) != 0 ? (i+8) : i;
-					rd = tpf.rd;
+					RememberData rdCopy = tpf.rd;
 
 					{
 						int [] iptr = { tpf.rd.pft_var6 };
@@ -251,7 +251,7 @@ public class TrackPathFinder extends Pathfind
 							tpf.rd.pft_var6 = iptr[0];
 						}
 					}
-					tpf.rd = rd;
+					tpf.rd = rdCopy;
 				} while (bits != 0);
 			}
 		}
@@ -287,7 +287,7 @@ public class TrackPathFinder extends Pathfind
 			bits = BitOps.KILL_FIRST_BIT(bits);
 
 			tpf.the_dir = (_otherdir_mask[direction] & (1 << i)) != 0 ? (i+8) : i;
-			rd = tpf.rd;
+			RememberData rdCopy = tpf.rd;
 			if (TPFSetTileBit(tpf, tile, tpf.the_dir) ) 
 			{
 				int [] iptr = { tpf.rd.pft_var6 };
@@ -298,7 +298,7 @@ public class TrackPathFinder extends Pathfind
 					tpf.TPFMode1(tile, _tpf_new_direction[tpf.the_dir]);
 				}
 			}
-			tpf.rd = rd;
+			tpf.rd = rdCopy;
 		} while (bits != 0);
 	}
 

@@ -2,7 +2,7 @@ package game.util.wcustom;
 
 import game.ids.StringID;
 
-public class menu_d extends AbstractWinCustom 
+public class menu_d implements AbstractWinCustom 
 {
 	public int item_count; /* follow_vehicle */
 	public int sel_index;		/* scrollpos_x */

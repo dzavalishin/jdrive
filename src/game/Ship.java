@@ -6,6 +6,7 @@ import game.ids.VehicleID;
 import game.struct.GetNewVehiclePosResult;
 import game.struct.NPFFindStationOrTileData;
 import game.struct.TileIndexDiffC;
+import game.tables.Snd;
 import game.util.BitOps;
 import game.xui.EngineGui;
 import game.xui.Gfx;
@@ -162,7 +163,8 @@ public class Ship {
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
-			//SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?				SND_10_TRAIN_BREAKDOWN : SND_3A_COMEDY_BREAKDOWN_2, v);
+			v.SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?				
+				Snd.SND_10_TRAIN_BREAKDOWN : Snd.SND_3A_COMEDY_BREAKDOWN_2);
 
 			if(!v.isHidden()) {
 				Vehicle u = v.CreateEffectVehicleRel(4, 4, 5, Vehicle.EV_BREAKDOWN_SMOKE);
@@ -186,7 +188,7 @@ public class Ship {
 
 	static void PlayShipSound(Vehicle v)
 	{
-		// TODO SndPlayVehicleFx(EngineGui.ShipVehInfo(v.engine_type).sfx, v);
+		v.SndPlayVehicleFx(EngineGui.ShipVehInfo(v.engine_type.id).sfx);
 	}
 
 	static final TileIndexDiffC _dock_offs[] = {
@@ -415,7 +417,8 @@ public class Ship {
 				v.cur_order_index++;
 			} else if (BitOps.HASBIT(t.flags, Order.OFB_HALT_IN_DEPOT)) {
 				v.setStopped(true);
-				if (v.owner == Global.gs._local_player) {
+				if (v.owner.isLocalPlayer()) 
+				{
 					Global.SetDParam(0, v.unitnumber.id);
 					NewsItem.AddNewsItem(
 						Str.STR_981C_SHIP_IS_WAITING_IN_DEPOT,
@@ -437,7 +440,7 @@ public class Ship {
 			st.had_vehicle_of_type |= Station.HVOT_SHIP;
 
 			Global.SetDParam(0, st.index);
-			flags = (v.owner == Global.gs._local_player) ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
+			flags = v.owner.isLocalPlayer() ? NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_PLAYER, 0) : NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ARRIVAL_OTHER, 0);
 			NewsItem.AddNewsItem(
 				Str.STR_9833_CITIZENS_CELEBRATE_FIRST,
 				flags,
@@ -614,7 +617,7 @@ public class Ship {
 	static int GetAvailShipTracks(TileIndex tile, int dir)
 	{
 		int r = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_WATER);
-		return  ((r | r >>> 8)) & _ship_sometracks[dir];
+		return  (r | r >>> 8) & _ship_sometracks[dir];
 	}
 
 	static final byte _ship_subcoord[][][] = {
@@ -810,7 +813,7 @@ public class Ship {
 		v.z_pos = Landscape.GetSlopeZ(gp.x, gp.y);
 		
 		ShipController_getout( v, dir );
-		return;
+		
 		/* to func 
 	getout:
 		UpdateShipDeltaXY(v, dir);
@@ -992,7 +995,7 @@ public class Ship {
 				Window.InvalidateWindow(Window.WC_REPLACE_VEHICLE, Vehicle.VEH_Ship); // updates the replace Ship window
 		}
 
-		return -(int)v.value;
+		return -v.value;
 	}
 
 	/** Start/Stop a ship.

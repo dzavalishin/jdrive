@@ -623,9 +623,7 @@ public class OrderGui {
 		Window.DeleteWindowById(Window.WC_VEHICLE_ORDERS, veh);
 		Window.DeleteWindowById(Window.WC_VEHICLE_DETAILS, veh);
 
-		//_alloc_wnd_parent_num = veh;
-
-		if (v.getOwner() != Global.gs._local_player) {
+		if (!v.getOwner().isLocalPlayer()) {
 			w = Window.AllocateWindowDesc(_other_orders_desc, veh);
 		} else {
 			w = Window.AllocateWindowDesc((v.getType() == Vehicle.VEH_Train) ? _orders_train_desc : _orders_desc, veh);

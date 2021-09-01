@@ -168,8 +168,13 @@ public class SmallMapGuiTables
 
 
 
+	/**
+	 * @deprecated
+	 * @param d
+	 * @param val
+	 */
 	//#if defined(TTD_ALIGNMENT_4)
-	@Deprecated
+	@Deprecated 
 	static  void WRITE_PIXELS(Pixel d, int val)
 	{
 		/*#	if defined(TTD_BIG_ENDIAN)
@@ -185,7 +190,11 @@ public class SmallMapGuiTables
 		//#	endif
 	}
 
-	/* need to use OR, otherwise we will overwrite the wrong pixels at the edges :( */
+	/** need to use OR, otherwise we will overwrite the wrong pixels at the edges :( 
+	 * 
+	 * @deprecated
+	 * 
+	 * */
 	@Deprecated
 	static  void WRITE_PIXELS_OR(Pixel d, int val)
 	{

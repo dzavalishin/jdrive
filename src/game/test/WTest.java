@@ -51,33 +51,14 @@ public class WTest {
 		//frame.add(l);
 		frame.setVisible(true);
 
-
-		mi1.addActionListener( new ActionListener() 
-			{
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.exit(0);				
-			}
-
-		});
-
-		mi2.addActionListener( new ActionListener() 
-		{
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			JLabel l = new JLabel("Привет1");
-			l.setForeground(Color.BLACK);
-			frame.add(l);
+		mi1.addActionListener( e -> System.exit(0) ); 
+		
+		mi2.addActionListener( e -> {
+			JLabel l1 = new JLabel("Привет1");
+			l1.setForeground(Color.BLACK);
+			frame.add(l1);
 			frame.validate();
-			//frame.invalidate();
-			//frame.repaint();
-			//frame.setVisible(false);
-			//frame.setVisible(true);
-
-
-		}
-
-	});
+		});
 		
 	}
 

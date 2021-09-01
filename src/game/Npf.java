@@ -192,7 +192,7 @@ public class Npf {
 			int dst_type = Rail.GetTileRailType(dst_tile, exitdir);
 			if (!Rail.IsCompatibleRail(enginetype, dst_type))
 				return true;
-			if (tile.GetTileOwner() != dst_tile.GetTileOwner())
+			if(!tile.GetTileOwner().equals(dst_tile.GetTileOwner()))
 				return true;
 
 			/* Prevent us from entering a depot from behind */
@@ -338,7 +338,7 @@ public class Npf {
 						NPFSetFlag(ftd.node, NPF_FLAG_PBS_BLOCKED, true);
 						Global.DEBUG_pbs( 1, "PBS: Self-crossing path!!!");
 						return;
-					};
+					}
 
 					Pbs.PBSReserveTrack(curr.node.tile, Rail.TrackdirToTrack(curr.node.direction) );
 
@@ -612,7 +612,7 @@ public class Npf {
 				&& 0 != (Pbs.PBSTileUnavail(tile) & (1<<trackdir))) 
 		{
 			NPFSetFlag(current, NPF_FLAG_PBS_BLOCKED, true);
-		};
+		}
 
 		/* Check for signals */
 		if (tile.IsTileType( TileTypes.MP_RAILWAY) && Rail.HasSignalOnTrackdir(tile, trackdir)) {
@@ -1113,7 +1113,7 @@ public class Npf {
 		 * always find the closest depot. It will probably be most efficient
 		 * for ships, since the heuristic will not be to far off then. I hope.
 		 */
-		TTDQueue<Depot> depots = new TTDQueueImpl<Depot>();
+		TTDQueue<Depot> depots = new TTDQueueImpl<>();
 		int r;
 		NPFFoundTargetData best_result = new NPFFoundTargetData();
 		NPFFoundTargetData result = new NPFFoundTargetData();

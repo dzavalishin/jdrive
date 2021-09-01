@@ -98,8 +98,8 @@ public class Station extends StationTables implements IPoolItem
 	private void clear()
 	{
 		xy= null;
-		bus_stops   = new ArrayList<RoadStop>();
-		truck_stops = new ArrayList<RoadStop>();
+		bus_stops   = new ArrayList<>();
+		truck_stops = new ArrayList<>();
 		train_tile=airport_tile=dock_tile = null;
 		town = null;
 		string_id = 0;
@@ -197,8 +197,8 @@ public class Station extends StationTables implements IPoolItem
 
 		xy = tile;
 		airport_tile = dock_tile = train_tile = null;
-		bus_stops = new ArrayList<RoadStop>(); 
-		truck_stops = new ArrayList<RoadStop>();
+		bus_stops = new ArrayList<>(); 
+		truck_stops = new ArrayList<>();
 		had_vehicle_of_type = 0;
 		time_since_load = 255;
 		time_since_unload = 255;
@@ -478,7 +478,7 @@ public class Station extends StationTables implements IPoolItem
 			return;
 
 		// show a message to report that the acceptance was changed?
-		if (show_msg && owner == Global.gs._local_player && 0 != facilities) {
+		if (show_msg && owner.isLocalPlayer() && 0 != facilities) {
 			int accept=0, reject=0; /* these contain two string ids each */
 			final int[] str = Global._cargoc.names_s;
 
@@ -936,12 +936,10 @@ public class Station extends StationTables implements IPoolItem
 	{
 		Station [] best_station = {null};
 		int [] threshold = {threshold_i};
-		//Station  st;
 
-		//FOR_ALL_STATIONS(st) 
 		Global.gs._stations.forEach( (i,st) ->			
 		{
-			if (st.isValid() && (owner.isSpectator() || st.owner == owner)) {
+			if (st.isValid() && (owner.isSpectator() || st.owner.equals(owner))) {
 				int cur_dist = Map.DistanceManhattan(tile, st.xy);
 
 				if (cur_dist < threshold[0]) {
@@ -954,7 +952,6 @@ public class Station extends StationTables implements IPoolItem
 		return best_station[0];
 	}
 
-	//static int ClearTile_Station(TileIndex tile, byte flags);
 
 	/**
 	 * 
@@ -969,8 +966,6 @@ public class Station extends StationTables implements IPoolItem
 	 * @param station - return something here? :)
 	 * @return
 	 */
-	// 
-	// 
 	static public int CheckFlatLandBelow(TileIndex tile, int w, int h, int flags, int invalid_dirs, StationID[] station)
 	{
 		int [] cost = {0};
@@ -1048,7 +1043,7 @@ public class Station extends StationTables implements IPoolItem
 					StationID st = StationID.get( tile_cur.getMap().m2 );
 					if (station[0].id == INVALID_STATION) {
 						station[0] = st;
-					} else if (station[0] != st) {
+					} else if(!station[0].equals(st)) {
 						Global._error_message = Str.STR_3006_ADJOINS_MORE_THAN_ONE_EXISTING;
 						error[0] = Cmd.CMD_ERROR;
 						return true;
@@ -1255,7 +1250,7 @@ public class Station extends StationTables implements IPoolItem
 
 		if (st != null) {
 			// Reuse an existing station.
-			if (st.owner.isNotNone() && st.owner != Global.gs._current_player)
+			if (st.owner.isNotNone() && !st.owner.isCurrentPlayer())
 				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
 			if (st.train_tile != null) {
@@ -1729,7 +1724,7 @@ public class Station extends StationTables implements IPoolItem
 			return Cmd.return_cmd_error( (type) ? Str.STR_3008B_TOO_MANY_TRUCK_STOPS : Str.STR_3008A_TOO_MANY_BUS_STOPS);
 
 		if (st != null) {
-			if (st.owner.isNotNone() && st.owner != Global.gs._current_player)
+			if (st.owner.isNotNone() && !st.owner.isCurrentPlayer())
 				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
 			if (!CheckStationSpreadOut(st, tile, 1, 1))
@@ -1832,7 +1827,8 @@ public class Station extends StationTables implements IPoolItem
 
 			cur_stop.used = false;
 			//noinspection AssertWithSideEffects
-			assert primary_stop.remove(cur_stop);
+			final boolean removeRet = primary_stop.remove(cur_stop);
+			assert removeRet;
 			//if (cur_stop.prev != null) cur_stop.prev.next = cur_stop.next;
 			//if (cur_stop.next != null) cur_stop.next.prev = cur_stop.prev;
 
@@ -1979,7 +1975,7 @@ public class Station extends StationTables implements IPoolItem
 		}
 
 		if (st != null) {
-			if (st.owner.isNotNone() && st.owner != Global.gs._current_player)
+			if (st.owner.isNotNone() && !st.owner.isCurrentPlayer() )
 				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
 			if (!CheckStationSpreadOut(st, tile, 1, 1))
@@ -2216,7 +2212,7 @@ public class Station extends StationTables implements IPoolItem
 
 			Landscape.ModifyTile(tile, TileTypes.MP_WATER,
 					//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) |
-					TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR,
+					TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5,
 					Owner.OWNER_WATER, /* map_owner */
 					0			/* map5 */
 					);
@@ -2311,7 +2307,7 @@ public class Station extends StationTables implements IPoolItem
 		}
 
 		if (st != null) {
-			if (st.owner.isNotNone() && st.owner != Global.gs._current_player)
+			if(st.owner.isNotNone() && !st.owner.isCurrentPlayer())
 				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
 			if (!CheckStationSpreadOut(st, tile, 1, 1)) return Cmd.CMD_ERROR;
@@ -2703,7 +2699,7 @@ public class Station extends StationTables implements IPoolItem
 							if (x < 12) {
 								int spd;
 
-								v.setTrainSlowing(true);;
+								v.setTrainSlowing(true);
 								spd = _enter_station_speedtable[x];
 								if (spd < v.cur_speed) v.cur_speed = spd;
 							}
@@ -2817,27 +2813,29 @@ public class Station extends StationTables implements IPoolItem
 		});
 	}
 
-	private static void CheckOrphanedSlots(final  Station st, RoadStopType rst)
+	private static void CheckOrphanedSlots(final Station st, RoadStopType rst)
 	{
-		//RoadStop rs;
-		int k;
+		for(RoadStop rs : RoadStop.GetPrimaryRoadStop(st, rst))
+			checkStop(st, rst, rs);
+	}
 
-		//for (rs = RoadStop.GetPrimaryRoadStop(st, rst); rs != null; rs = rs.next) 
-		for(RoadStop rs : RoadStop.GetPrimaryRoadStop(st, rst)) 
+
+	private static void checkStop(final Station st, RoadStopType rst, RoadStop rs) 
+	{
+
+		for (int k = 0; k < RoadStop.NUM_SLOTS; k++) 
 		{
-			for (k = 0; k < RoadStop.NUM_SLOTS; k++) {
-				if (rs.slot[k] != INVALID_SLOT) {
-					final  Vehicle v = Vehicle.GetVehicle(rs.slot[k]);
+			if (rs.slot[k] != INVALID_SLOT) {
+				final  Vehicle v = Vehicle.GetVehicle(rs.slot[k]);
 
-					if (v.type != Vehicle.VEH_Road || v.road.slot != rs) {
-						Global.DEBUG_ms( 0,
-								"Multistop: Orphaned %s slot at 0x%X of station %d (don't panic)",
-								(rst == RoadStopType.RS_BUS) ? "bus" : "truck", rs.xy, st.index);
-						rs.slot[k] = INVALID_SLOT;
-					}
+				if (v.type != Vehicle.VEH_Road || v.road.slot != rs) {
+					Global.DEBUG_ms( 0,
+							"Multistop: Orphaned %s slot at 0x%X of station %d (don't panic)",
+							(rst == RoadStopType.RS_BUS) ? "bus" : "truck", rs.xy, st.index);
+					rs.slot[k] = INVALID_SLOT;
 				}
 			}
-		}
+		}		
 	}
 
 	/* this function is called for one station each tick */
@@ -2852,8 +2850,17 @@ public class Station extends StationTables implements IPoolItem
 		CheckOrphanedSlots(st, RoadStopType.RS_TRUCK);
 	}
 
-	private static byte byte_inc_sat_RET(byte p) { byte b = (byte) (p + 1); if (b != 0) p = b; return p; }
-	private static int inc_sat_RET(int p) { int b = (p + 1); if (b != 0) p = b; return p; }
+	private static byte byte_inc_sat_RET(byte p) { // TODO to BitOps + test
+		byte b = (byte) (p + 1); 
+		if (b != 0) p = b; 
+		return p; 
+		}
+	
+	private static int inc_sat_RET(int p) { // TODO to BitOps + test
+		int b = (p + 1); 
+		if (b != 0) p = b; 
+		return p; 
+		}
 
 	private static void UpdateStationRating(Station st)
 	{
@@ -3009,6 +3016,7 @@ public class Station extends StationTables implements IPoolItem
 
 	public static void StationMonthlyLoop()
 	{
+		/* is empty */
 	}
 
 
@@ -3016,7 +3024,7 @@ public class Station extends StationTables implements IPoolItem
 	{
 		Global.gs._stations.forEach( (ii,st) ->
 		{
-			if (st.isValid() && st.owner == owner &&
+			if (st.isValid() && st.owner.equals(owner) &&
 					Map.DistanceManhattan(tile, st.xy) <= radius) {
 
 				for (int i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
@@ -3134,7 +3142,7 @@ public class Station extends StationTables implements IPoolItem
 				{
 					Station st = GetStation(st_index);
 					if (!st.IsBuoy() &&
-							( 0==st.town.exclusive_counter || (st.town.exclusivity == st.owner) ) && // check exclusive transport rights
+							( 0==st.town.exclusive_counter || (st.town.exclusivity.equals(st.owner) ) ) && // check exclusive transport rights
 							st.goods[type].rating != 0 &&
 							(!Global._patches.selectgoods || 0!=st.goods[type].last_speed) && // if last_speed is 0, no vehicle has been there.
 							((st.facilities & (byte)~FACIL_BUS_STOP)!=0 || type==AcceptedCargo.CT_PASSENGERS) && // if we have other fac. than a bus stop, or the cargo is passengers

@@ -1,6 +1,6 @@
 package game.util.wcustom;
 
-public class void_d extends AbstractWinCustom {
+public class void_d implements AbstractWinCustom {
 	//byte [] data;
 	public Object data;
 }

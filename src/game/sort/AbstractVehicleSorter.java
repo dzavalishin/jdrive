@@ -16,7 +16,8 @@ import game.struct.SortStruct;
 
 public abstract class AbstractVehicleSorter implements Comparator<SortStruct>
 {
-
+	protected AbstractVehicleSorter() { } 
+	
 	// if the sorting criteria had the same value, sort vehicle by unitnumber
 	protected static int VEHICLEUNITNUMBERSORTER(int r, Vehicle a, Vehicle b) 
 	{

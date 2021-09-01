@@ -5,21 +5,16 @@ import java.util.Map;
 
 import game.Vehicle;
 
-public class VehicleID extends AbstractID {
-	/*private VehicleID() {
-		id = -1;
-	}*/
-
-	/**
-	 * 
-	 */
+public class VehicleID extends AbstractID 
+{
 	private static final long serialVersionUID = 1L;
+	
 	private VehicleID(int i) {
 		super(i);
 	}
 
 
-	private static final Map<Integer,VehicleID> ids = new HashMap<Integer,VehicleID>();
+	private static final Map<Integer,VehicleID> ids = new HashMap<>();
 	public static VehicleID get(int player) 
 	{
 		VehicleID old = ids.get(player);
@@ -40,5 +35,14 @@ public class VehicleID extends AbstractID {
 		return Vehicle.IsVehicleIndex(this.id);
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
 	
 }

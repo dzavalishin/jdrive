@@ -3,7 +3,7 @@ package game.util.wcustom;
 import game.ids.StringID;
 import game.struct.Textbuf;
 
-public class as_querystr_d extends AbstractWinCustom
+public class as_querystr_d implements AbstractWinCustom
 {
 	public StringID caption;
 	public int wnd_class;

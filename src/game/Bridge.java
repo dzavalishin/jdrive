@@ -2,7 +2,9 @@ package game;
 
 import game.ids.StringID;
 import game.struct.BridgeData;
+import game.tables.Snd;
 import game.tables.TunnelBridgeTables;
+import game.util.Sound;
 import game.xui.Gfx;
 import game.xui.Widget;
 import game.xui.Window;
@@ -48,7 +50,7 @@ public class Bridge
 
 	static void CcBuildBridge(boolean success, TileIndex tile, int p1, int p2)
 	{
-		// TODO if (success) SndPlayTileFx(SoundFx.SND_27_BLACKSMITH_ANVIL, tile);
+		if (success) Sound.SndPlayTileFx(Snd.SND_27_BLACKSMITH_ANVIL, tile);
 	}
 
 	static void BuildBridge(Window w, int i)
@@ -92,7 +94,8 @@ public class Bridge
 		case WE_CLICK:
 			if (e.widget == 2) {
 				int ind = (e.pt.y - 14) / 22;
-				if (ind < 4 && (ind += w.vscroll.getPos()) < _bridgedata.count)
+				ind += w.vscroll.getPos();
+				if (ind < 4 && ind < _bridgedata.count)
 					BuildBridge(w, ind);
 			}
 			break;

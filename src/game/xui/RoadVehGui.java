@@ -85,7 +85,7 @@ public class RoadVehGui
 			//StringID 
 			int str;
 
-			w.disabled_state = v.getOwner() == Global.gs._local_player ? 0 : (1 << 2);
+			w.disabled_state = v.getOwner().isLocalPlayer() ? 0 : (1 << 2);
 			if (0==Global._patches.servint_roadveh) // disable service-scroller when interval is set to disabled
 				w.disabled_state |= (1 << 5) | (1 << 6);
 
@@ -244,7 +244,7 @@ public class RoadVehGui
 			//StringID 
 			int str;
 
-			w.disabled_state = (v.getOwner() != Global.gs._local_player) ? (1<<8 | 1<<7) : 0;
+			w.disabled_state = (!v.getOwner().isLocalPlayer()) ? (1<<8 | 1<<7) : 0;
 
 			/* draw widgets & caption */
 			Global.SetDParam(0, v.getString_id());
@@ -312,6 +312,8 @@ public class RoadVehGui
 					w.SetWindowDirty();
 				}
 			}
+			break;
+			
 		default:
 			break;
 		}

@@ -37,6 +37,11 @@ class Subsidy {
 		return super.equals(obj);
 	}
 
+	@Override
+	public int hashCode() {
+		return cargo_type+age+(from<<1)+(to<<2);
+	}
+	
 	public boolean equalsExAge(Subsidy ss) 
 	{
 		return this != ss &&
@@ -224,7 +229,7 @@ class Subsidy {
 			if (s.isValid() && s.age < 12 &&
 					s.cargo_type != AcceptedCargo.CT_PASSENGERS && s.cargo_type != AcceptedCargo.CT_MAIL &&
 					(index == s.from || (s.cargo_type!=AcceptedCargo.CT_GOODS && s.cargo_type!=AcceptedCargo.CT_FOOD && index==s.to))) {
-				s.markInvalid();;
+				s.markInvalid();
 			}
 		}
 	}
@@ -264,7 +269,8 @@ class Subsidy {
 			modified = true;
 		} else if (age == 2*12-1) {
 			Station st = Station.GetStation(to);
-			if (st.owner == Global.gs._local_player) {
+			if (st.owner.isLocalPlayer()) 
+			{
 				pair = SetupSubsidyDecodeParam(true);
 				NewsItem.AddNewsItem(Str.STR_202F_SUBSIDY_WITHDRAWN_SERVICE, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_SUBSIDIES, 0), pair.a, pair.b);
 			}

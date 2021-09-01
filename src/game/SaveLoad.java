@@ -1,5 +1,9 @@
 package game;
 
+import java.beans.ExceptionListener;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -7,6 +11,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import game.struct.HighScore;
 import game.xui.Window;
 
 /**
@@ -19,19 +24,20 @@ import game.xui.Window;
 
 public class SaveLoad 
 {
+	private static final String HISCORE_FILE_NAME = "hiscore.xml";
 	public static final int SL_INVALID = -1;
 	public static final int SL_LOAD = 0;
 	public static final int SL_SAVE = 1;
 	//public static final int SL_OLD_LOAD = 2;
 
-	static enum SaveOrLoadResult
+	enum SaveOrLoadResult
 	{
-	SL_OK, // completed successfully
-	SL_ERROR, // error that was caught before internal structures were modified
-	SL_REINIT, // error that was caught in the middle of updating game state, need to clear it. (can only happen during load)
+		SL_OK, // completed successfully
+		SL_ERROR, // error that was caught before internal structures were modified
+		SL_REINIT, // error that was caught in the middle of updating game state, need to clear it. (can only happen during load)
 	}
-	
-	
+
+
 	/**
 	 * Main Save or Load function where the high-level saveload functions are
 	 * handled. It opens the savegame, selects format and checks versions
@@ -63,42 +69,50 @@ public class SaveLoad
 
 
 			/* After loading fix up savegame for any internal changes that
-			* might've occured since then. If it fails, load back the old game */
+			 * might've occured since then. If it fails, load back the old game */
 			if (!Main.AfterLoadGame()) return SaveOrLoadResult.SL_REINIT;
 		}
 
 		return SaveOrLoadResult.SL_OK;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
 
 	public static void save(String filename)
 	{
 		FileOutputStream fos;
+		ObjectOutputStream oos = null;
 		try {
 			fos = new FileOutputStream(filename); //Main._file_to_saveload.name); //"temp.sav");
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos = new ObjectOutputStream(fos);
 
 			writeAll(oos);
 
-			oos.close();
 
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+			Global.error(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+			Global.error(e);
 			//System.err.println(  );
+		} finally {
+			if(oos != null)
+				try {
+					oos.close();
+				} catch (IOException e) {
+
+					Global.error(e);
+				}
 		}
 
 		/*
@@ -121,15 +135,14 @@ public class SaveLoad
 
 
 	public static void load(String filename)
-	{
-		FileInputStream fis;
+	{		
 		ObjectInputStream oin = null;
 
-		try 
+		try( FileInputStream fis = new FileInputStream(filename) ) 
 		{
 
 			//fis = new FileInputStream("temp.sav");
-			fis = new FileInputStream(filename); //Main._file_to_saveload.name);
+			//fis ; //Main._file_to_saveload.name);
 			oin = new ObjectInputStream(fis);
 
 			Window.DeleteAllNonVitalWindows();
@@ -139,14 +152,14 @@ public class SaveLoad
 			Hal.MarkWholeScreenDirty();
 
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+			Global.error(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+			Global.error(e);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+			Global.error(e);
 		} 
 		finally
 		{
@@ -154,8 +167,8 @@ public class SaveLoad
 				try {
 					oin.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+
+					Global.error(e);
 				}
 		}
 
@@ -175,7 +188,7 @@ FileInputStream fis = new FileInputStream("settings.xml");
 	private static void writeAll(ObjectOutputStream oos) throws IOException 
 	{
 		Window.BeforeSave();
-		
+
 		oos.writeObject(Global.gs);
 		oos.writeObject(Global._m);
 		Town.saveGame(oos);
@@ -207,11 +220,55 @@ FileInputStream fis = new FileInputStream("settings.xml");
 		WayPoint.loadGame(oin);
 		RoadStop.loadGame(oin);
 		Station.loadGame(oin);
-		
+
 		Window.afterLoad();
 	}
 
 
 
 
+	static void SaveToHighScore()
+	{
+		File fn = new File( Global._path.personal_dir, HISCORE_FILE_NAME );
+		
+		FileOutputStream fos;
+		try {
+			fos = new FileOutputStream(fn);
+		} catch (FileNotFoundException e1) {
+			Global.error("Can't load hiscore: ", e1.toString());
+			return;
+		}
+		
+		XMLEncoder encoder = new XMLEncoder(fos);
+		encoder.setExceptionListener(new ExceptionListener() {
+			public void exceptionThrown(Exception e) {
+				Global.error(e);
+			}
+		});
+		encoder.writeObject(Global._highscore_table);
+		encoder.close();		
+	}
+	
+	static void LoadFromHighScore()
+	{
+		// If can't load 
+		//Global._highscore_table = new HighScore[5][5];
+		
+		File fn = new File( Global._path.personal_dir, HISCORE_FILE_NAME );
+		
+		FileInputStream fis;
+		try {
+			fis = new FileInputStream(fn);
+		    XMLDecoder decoder = new XMLDecoder(fis);
+		    Object read = decoder.readObject();
+		    if( read != null ) Global._highscore_table = (HighScore [][]) read;
+		    decoder.close();
+		    fis.close();
+		} catch (IOException e) {
+			Global.error("Can't save hiscore: ", e.toString());
+			return;
+		}
+	    
+	}
+	
 }

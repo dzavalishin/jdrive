@@ -354,7 +354,7 @@ public class StationGui extends Station  // to get constants
 		}
 		w.SetVScrollCount( num);
 
-		w.disabled_state = st.getOwner() == Global.gs._local_player ? 0 : (1 << 9);
+		w.disabled_state = st.getOwner().isLocalPlayer() ? 0 : (1 << 9);
 
 		/*
 		if (0==(st.facilities & FACIL_TRAIN)) 		w.disabled_state = BitOps.RETSETBIT(w.disabled_state,  10);

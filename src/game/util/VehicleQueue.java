@@ -5,9 +5,10 @@ import java.io.Serializable;
 import game.Vehicle;
 import game.struct.VQueueItem;
 
-public abstract class VehicleQueue 
+public abstract class VehicleQueue implements Serializable 
 {
-
+	private static final long serialVersionUID = 1L;
+	
 	public VQueueItem top;
 	public VQueueItem bottom;
 
@@ -30,7 +31,7 @@ public abstract class VehicleQueue
 	public abstract void		del(Vehicle item);
 	public abstract int		getPos(Vehicle item);
 
-	public VehicleQueue() {
+	protected VehicleQueue() {
 		size = 0;
 		offset = 0;
 		top = null;

@@ -14,9 +14,11 @@ import game.struct.NPFFindStationOrTileData;
 import game.struct.RailtypeSlowdownParams;
 import game.struct.TileIndexDiff;
 import game.struct.TrainCollideChecker;
+import game.tables.Snd;
 import game.tables.TrainTables;
 import game.util.BitOps;
 import game.util.IntContainer;
+import game.util.Sound;
 import game.xui.Gfx;
 import game.xui.TrainGui;
 import game.xui.VehicleGui;
@@ -107,7 +109,7 @@ public class TrainCmd extends TrainTables
 			u.rail.cached_veh_length = 8 - veh_len;
 			v.rail.cached_total_length += u.rail.getCached_veh_length();
 
-		};
+		}
 
 		// store consist weight/max speed in cache
 		v.rail.cached_max_speed = max_speed;
@@ -480,7 +482,7 @@ public class TrainCmd extends TrainTables
 						final Vehicle  w = it.next();
 
 						if (w.type == Vehicle.VEH_Train && w.tile.equals(tile) &&
-								w.IsFreeWagon() && w.getEngine_type() == engine) {
+								w.IsFreeWagon() && w.getEngine_type().equals(engine)) {
 							u = w.GetLastVehicleInChain();
 							break;
 						}
@@ -584,15 +586,21 @@ public class TrainCmd extends TrainTables
 		u.cargo_type = v.getCargo_type();
 		u.cargo_cap = v.getCargo_cap();
 		u.rail.railtype = v.rail.railtype;
-		if (building) v.next = u;
+		
+		if (building) 
+			v.next = u;
+		
 		u.engine_type = v.getEngine_type();
 		u.build_year = v.getBuild_year();
-		if (building) v.value >>= 1;
-			u.value = v.value;
-			u.type = Vehicle.VEH_Train;
-			u.cur_image = 0xAC2;
-			u.random_bits = Vehicle.VehicleRandomBits();
-			u.VehiclePositionChanged();
+		
+		if (building) 
+			v.value >>= 1;
+
+		u.value = v.value;
+		u.type = Vehicle.VEH_Train;
+		u.cur_image = 0xAC2;
+		u.random_bits = Vehicle.VehicleRandomBits();
+		u.VehiclePositionChanged();
 	}
 
 	/** Build a railroad vehicle.
@@ -778,7 +786,9 @@ public class TrainCmd extends TrainTables
 			return v;
 		}
 
-		for (u = first; u.GetNextVehicle() != v; u = u.GetNextVehicle()) {}
+		for (u = first; u.GetNextVehicle() != v; u = u.GetNextVehicle())
+			;
+
 		u.GetLastEnginePart().next = v.GetNextVehicle();
 		return first;
 	}
@@ -799,7 +809,8 @@ public class TrainCmd extends TrainTables
 				// check so all vehicles in the line have the same engine.
 				Vehicle v = dst;
 
-				while (v.getEngine_type() == eng) {
+				while(v.getEngine_type().equals(eng)) 
+				{
 					v = v.next;
 					if (v == null) return dst;
 				}
@@ -1072,7 +1083,7 @@ public class TrainCmd extends TrainTables
 				}
 				/* Update the depot window */
 				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, src_head.tile.tile);
-			};
+			}
 
 			if (dst_head != null) {
 				NormaliseTrainConsist(dst_head);
@@ -1410,7 +1421,7 @@ public class TrainCmd extends TrainTables
 	/* Check if the vehicle is a train and is on the tile we are testing */
 	static Object TestTrainOnCrossing(Vehicle v, Object data)
 	{
-		if (!v.tile.equals( (TileIndex)data ) || v.type != Vehicle.VEH_Train) return null;
+		if (!v.tile.equals( data ) || v.type != Vehicle.VEH_Train) return null;
 		return v;
 	}
 
@@ -1561,7 +1572,7 @@ public class TrainCmd extends TrainTables
 			Pbs.PBSClearPath(to_tile, trackdir, pbs_end_tile, pbs_end_trackdir);
 			if (v.rail.track != 0x40)
 				Pbs.PBSReserveTrack(to_tile, trackdir & 7);
-		};
+		}
 
 		if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_RAIL))
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
@@ -1736,7 +1747,7 @@ public class TrainCmd extends TrainTables
 							}
 						}
 					}
-				};
+				}
 
 				if (amount != 0) 
 				{
@@ -1798,7 +1809,7 @@ public class TrainCmd extends TrainTables
 		assert(!v.isCrashed());
 
 		tfdd.owner = v.owner;
-		tfdd.best_length = (int)-1;
+		tfdd.best_length = -1;
 		tfdd.reverse = false;
 
 		if (tile.IsTileDepotType(Global.TRANSPORT_RAIL)){
@@ -1833,7 +1844,7 @@ public class TrainCmd extends TrainTables
 			i = v.direction >> 1;
 		if (0==(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
 		Pathfind.NewTrainPathfind(tile, TileIndex.get(0), i, (NTPEnumProc)TrainCmd::NtpCallbFindDepot, tfdd);
-		if (tfdd.best_length == (int)-1){
+		if (tfdd.best_length == -1){
 			tfdd.reverse = true;
 			// search in backwards direction
 			i = (v.direction^4) >> 1;
@@ -1878,7 +1889,7 @@ public class TrainCmd extends TrainTables
 		}
 
 		tfdd = FindClosestTrainDepot(v);
-		if (tfdd.best_length == (int)-1)
+		if (tfdd.best_length == -1)
 			return Cmd.return_cmd_error(Str.STR_883A_UNABLE_TO_FIND_ROUTE_TO);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -1992,32 +2003,11 @@ public class TrainCmd extends TrainTables
 		} while ((v = v.next) != null);
 	}
 
-	static void TrainPlayLeaveStationSound(final Vehicle  v)
-	{
-
-		EngineID engtype = v.getEngine_type();
-
-		switch (Engine.GetEngine(engtype).getRailtype()) {
-		case RAILTYPE_RAIL:
-			//SndPlayVehicleFx(sfx[RailVehInfo(engtype).engclass], v);
-			break;
-
-		case RAILTYPE_MONO:
-			//SndPlayVehicleFx(SND_47_MAGLEV_2, v);
-			break;
-
-		case RAILTYPE_MAGLEV:
-			//SndPlayVehicleFx(SND_41_MAGLEV, v);
-			break;
-		}
-	}
-
-
 	static boolean CheckTrainStayInDepot_green(Vehicle v)
 	{
 		v.VehicleServiceInDepot();
 		Window.InvalidateWindowClasses(Window.WC_TRAINS_LIST);
-		TrainPlayLeaveStationSound(v);
+		Sound.TrainPlayLeaveStationSound(v);
 
 		v.rail.track = 1;
 		if(0 != (v.direction & 2)) v.rail.track = 2;
@@ -2165,10 +2155,6 @@ public class TrainCmd extends TrainTables
 	{
 		TrainTrackFollowerData fd = new TrainTrackFollowerData();
 		int best_track;
-		/*#ifdef PF_BENCHMARK
-	int time = _rdtsc();
-	static float f;
-#endif*/
 
 		assert( (trackdirbits & ~0x3F) == 0);
 
@@ -2221,8 +2207,8 @@ public class TrainCmd extends TrainTables
 			FillWithStationData(fd, v);
 
 			/* New train pathfinding */
-			fd.best_bird_dist = (int)-1;
-			fd.best_track_dist = (int)-1;
+			fd.best_bird_dist = -1;
+			fd.best_track_dist = -1;
 			fd.best_track = 0xFF;
 
 			Pathfind.NewTrainPathfind(tile.isub(TileIndex.TileOffsByDir(enterdir)), v.dest_tile,
@@ -2235,12 +2221,6 @@ public class TrainCmd extends TrainTables
 				best_track = fd.best_track & 7;
 			}
 		}
-
-		/*#ifdef PF_BENCHMARK
-	time = _rdtsc() - time;
-	f = f * 0.99 + 0.01 * time;
-	printf("PF time = %d %f\n", time, f);
-#endif*/
 
 		return best_track;
 	}
@@ -2330,8 +2310,8 @@ public class TrainCmd extends TrainTables
 			}
 		} else {
 			while(true) {
-				fd.best_bird_dist = (int)-1;
-				fd.best_track_dist = (int)-1;
+				fd.best_bird_dist = -1;
+				fd.best_track_dist = -1;
 
 				Pathfind.NewTrainPathfind(v.tile, v.dest_tile, reverse ^ i, (NTPEnumProc)TrainCmd::NtpCallbFindStation, fd);
 
@@ -2519,7 +2499,7 @@ public class TrainCmd extends TrainTables
 				return;
 			}
 
-			TrainPlayLeaveStationSound(v);
+			Sound.TrainPlayLeaveStationSound(v);
 
 			{
 				Order b = new Order( v.getCurrent_order() );
@@ -2561,10 +2541,11 @@ public class TrainCmd extends TrainTables
 			int tempmax = v.getMax_speed();
 			if (v.cur_speed > v.getMax_speed())
 				tempmax = v.cur_speed - (v.cur_speed / 10) - 1;
-			v.cur_speed = spd = BitOps.clamp(v.cur_speed + ((int)spd >> 8), 0, tempmax);
+			v.cur_speed = spd = BitOps.clamp(v.cur_speed + (spd >> 8), 0, tempmax);
 		}
 
-		if (0 == (v.direction & 1)) spd = spd * 3 >> 2;
+		if(0 == (v.direction & 1)) 
+			spd = spd * 3 >> 2;
 
 				spd += v.progress;
 				v.progress = 0xFF & spd;
@@ -2862,7 +2843,7 @@ public class TrainCmd extends TrainTables
 				);
 
 		Station.ModifyStationRatingAround(v.tile, v.owner, -160, 30);
-		//SndPlayVehicleFx(SND_13_BIG_CRASH, v);
+		v.SndPlayVehicleFx(Snd.SND_13_BIG_CRASH);
 	}
 
 
@@ -3113,7 +3094,7 @@ public class TrainCmd extends TrainTables
 
 							}
 
-						};
+						}
 
 					} else {
 						// we have already planned a path through this pbs block
@@ -3122,9 +3103,9 @@ public class TrainCmd extends TrainTables
 						//goto green_light;
 						if( green_light(v,gp,prev,enterdir,chosen_track) ) return;
 						continue;
-					};
+					}
 					Global.DEBUG_pbs(3, "pbs: (%i) no green light found, or was no pbs-block",v.unitnumber);
-				};
+				}
 
 				/* Check if it's a red signal and that force proceed is not clicked. */
 				if ( (0 != ((tracks>>16)&chosen_track)) && (v.rail.force_proceed == 0) )
@@ -3141,7 +3122,7 @@ public class TrainCmd extends TrainTables
 
 			//green_light:
 			if( green_light(v,gp,prev,enterdir,chosen_track) ) return;
-			continue;
+
 			/*
 				if (v.next == null)
 					PBSClearTrack(gp.old_tile, BitOps.FIND_FIRST_BIT(v.rail.track));
@@ -3210,7 +3191,7 @@ public class TrainCmd extends TrainTables
 			}
 			}*/
 		}
-		return;
+
 
 		/*
 		invalid_rail:
@@ -3267,7 +3248,7 @@ public class TrainCmd extends TrainTables
 	private static boolean green_light(Vehicle v, GetNewVehiclePosResult gp, Vehicle prev, int enterdir, int chosen_track)	
 	{
 		int chosen_dir;
-		
+
 		if (v.next == null)
 			Pbs.PBSClearTrack(gp.old_tile, BitOps.FIND_FIRST_BIT(v.rail.track));
 
@@ -3373,10 +3354,10 @@ public class TrainCmd extends TrainTables
 			if (v == u) {
 				Pbs.PBSClearPath(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track), v.rail.pbs_end_tile, v.rail.pbs_end_trackdir);
 				Pbs.PBSClearPath(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track) + 8, v.rail.pbs_end_tile, v.rail.pbs_end_trackdir);
-			};
+			}
 			if (!v.tile.equals(u.tile)) {
 				Pbs.PBSClearTrack(v.tile, BitOps.FIND_FIRST_BIT(v.rail.track));
-			};
+			}
 		}
 
 		if (0==(v.rail.track & 0xC0))
@@ -3483,7 +3464,8 @@ public class TrainCmd extends TrainTables
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
-			//SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?			SND_10_TRAIN_BREAKDOWN : SND_3A_COMEDY_BREAKDOWN_2, v);
+			v.SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?			
+				Snd.SND_10_TRAIN_BREAKDOWN : Snd.SND_3A_COMEDY_BREAKDOWN_2);
 
 			if(!v.isHidden()) {
 				Vehicle u = v.CreateEffectVehicleRel(4, 4, 5, Vehicle.EV_BREAKDOWN_SMOKE);
@@ -3590,7 +3572,7 @@ public class TrainCmd extends TrainTables
 					if (tile.IsTileType( TileTypes.MP_STREET) && tile.IsLevelCrossing()) {
 						if (BitOps.GB(tile.getMap().m5, 2, 1) == 0) {
 							tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
-							//SndPlayVehicleFx(SND_0E_LEVEL_CROSSING, v);
+							v.SndPlayVehicleFx(Snd.SND_0E_LEVEL_CROSSING);
 							tile.MarkTileDirtyByTile();
 						}
 					}
@@ -3621,8 +3603,8 @@ public class TrainCmd extends TrainTables
 						v.rail.pbs_end_trackdir = ftd.node.direction;
 						return true;
 					}
-				};
-			};
+				}
+			}
 
 			// slow down
 			v.setTrainSlowing(true);
@@ -3793,7 +3775,7 @@ public class TrainCmd extends TrainTables
 
 		tfdd = FindClosestTrainDepot(v);
 		/* Only go to the depot if it is not too far out of our way. */
-		if (tfdd.best_length == (int)-1 || tfdd.best_length > 16 ) {
+		if (tfdd.best_length == -1 || tfdd.best_length > 16 ) {
 			if (v.getCurrent_order().type == Order.OT_GOTO_DEPOT) {
 				/* If we were already heading for a depot but it has
 				 * suddenly moved farther away, we continue our normal

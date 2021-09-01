@@ -511,37 +511,51 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			// Used in:
 			//   Latvian
 		case 3:
-			return n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;
-
+		{
+			final int nn = n != 0 ? 1 : 2;
+			return n%10==1 && n%100!=11 ? 0 : nn;
+		}
 			// Three forms, special case for one and two
 			// Used in:
 			//   Gaelige (Irish)
 		case 4:
-			return n==1 ? 0 : (n==2 ? 1 : 2);
-
+		{
+			final int nn = n==2 ? 1 : 2;
+			return n==1 ? 0 : nn;
+		}
 			// Three forms, special case for numbers ending in 1[2-9]
 			// Used in:
 			//   Lithuanian
 		case 5:
-			return n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n%100<10 || n%100>=20) ? 1 : 2;
-
+		{
+			final int nn = n%10>=2 && (n%100<10 || n%100>=20) ? 1 : 2;
+			return n%10==1 && n%100!=11 ? 0 : nn;
+		}
 			// Three forms, special cases for numbers ending in 1 and 2, 3, 4, except those ending in 1[1-4]
 			// Used in:
 			//   Croatian, Czech, Russian, Slovak, Ukrainian
 		case 6:
-			return n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;
-
+		{
+			int nn = n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;
+			return n%10==1 && n%100!=11 ? 0 : nn;
+		}
 			// Three forms, special case for one and some numbers ending in 2, 3, or 4
 			// Used in:
 			//   Polish
 		case 7:
-			return n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;
-
+		{
+			int nn = n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;
+			return n==1 ? 0 : nn;
+		}
 			// Four forms, special case for one and all numbers ending in 02, 03, or 04
 			// Used in:
 			//   Slovenian
 		case 8:
-			return n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3;
+		{
+			final int n0 = n%100==3 || n%100==4 ? 2 : 3;
+			final int n1 = n%100==2 ? 1 : n0;
+			return n%100==1 ? 0 : n1;
+		}
 		}
 	}
 
@@ -597,7 +611,6 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	//private static String FormatString(final String pstr, Object ... arg, int casei)
 	private static String FormatString(final BinaryString pstr, Object [] arg, int casei)
 	{
-		//byte b;
 		char b;
 		//final Object[] arg_orig = arg;
 		int modifier = 0;
@@ -610,9 +623,9 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		while ( stri < str.length && (b = (char) (0xFF & str[stri++])) != '\0') 
 		{
 			
-			switch ((int)b) {
+			switch (b) {
 			case 0x1: // {SETX}
-				buff.append( (char)b );
+				buff.append( b );
 				buff.append( str[stri++] );
 				break;
 			case 0x2: // {SETXY}
@@ -642,7 +655,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			}
 			// 0x85 is used as escape character..
 			case 0x85:
-				switch ((int)str[stri++]) {
+				switch(str[stri++]) {
 				case 0: /* {CURRCOMPACT} */
 					// TODO buff.append( FormatGenericCurrency(Global._currency, Getint(arg[argc++]), true) );
 					buff.append( "$$$" ); argc++;
@@ -718,7 +731,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 					Integer args[] = new Integer[2];
 
 					// industry not valid anymore?
-					if (!i.isValid())
+					if (i == null || !i.isValid())
 						break;
 
 					// First print the town name and the industry type name
@@ -847,18 +860,19 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				break;
 
 			case 0x99: { // {WAYPOINT}
-				int [] temp = new int[2];
 				WayPoint wp = WayPoint.GetWaypoint(Getint(arg[argc++]));
 				int sstr;
 				//StringID str;
 				if (wp.string.id != STR_NULL) {
 					sstr = wp.string.id;
 				} else {
-					temp[0] = wp.town_index;
-					temp[1] = wp.town_cn + 1;
+					//int [] temp = new int[2];
+					//temp[0] = wp.town_index;
+					//temp[1] = wp.town_cn + 1;
 					sstr = wp.town_cn == 0 ? STR_WAYPOINTNAME_CITY : STR_WAYPOINTNAME_CITY_SERIAL;
 				}
-				buff.append( GetStringWithArgs(sstr, temp) );
+				//buff.append( GetStringWithArgs(sstr, temp) );
+				buff.append( GetStringWithArgs(sstr, wp.town_index, wp.town_cn + 1 ) );
 			} break;
 
 			case 0x9A: { // {STATION}
@@ -916,7 +930,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			}
 
 			default:
-				buff.append( (char)b );
+				buff.append( b );
 			}
 		}
 
@@ -1124,7 +1138,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		if (BitOps.IS_INT_INSIDE(ind, (SPECSTR_RESOLUTION_START - 0x70E4), (SPECSTR_RESOLUTION_END - 0x70E4) + 1)) {
 			//int i = ind - (SPECSTR_RESOLUTION_START - 0x70E4);
 			// TODO return String.format("%dx%d", _resolutions[i][0], _resolutions[i][1]);
-			return String.format("1024x768");
+			return "1024x768";
 		}
 
 		// screenshot format name?

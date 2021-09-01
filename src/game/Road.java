@@ -8,6 +8,7 @@ import game.ifaces.TileTypeProcs;
 import game.struct.Point;
 import game.struct.TileDesc;
 import game.tables.RoadTables;
+import game.tables.Snd;
 import game.util.ArrayPtr;
 import game.util.BitOps;
 import game.util.TownTables;
@@ -41,6 +42,7 @@ public class Road extends RoadTables
 			b = tile.getMap().m5;
 
 			if ((b & 0xF0) == 0) {
+				;
 			} else if (tile.IsLevelCrossing()) {
 				b =  ((0 != (b&8)) ? 5:10);
 			} else if ((b & 0xF0) == 0x20) {
@@ -533,7 +535,7 @@ public class Road extends RoadTables
 			}
 
 			tile.getMap().m5 |= pieces;
-			Global.debug("town road pieces 0x%X", pieces);
+			//Global.debug("town road pieces 0x%X", pieces);
 
 			tile.MarkTileDirtyByTile();
 		}
@@ -793,7 +795,7 @@ public class Road extends RoadTables
 		int i = 0;
 		switch(bits)
 		{
-		case (ROAD_NW | ROAD_SE): i++;
+		case (ROAD_NW | ROAD_SE): i++; // Fall through
 		case (ROAD_SW | ROAD_NE):
 
 			switch(tileh)
@@ -941,7 +943,7 @@ public class Road extends RoadTables
 			if (player.id < Global.MAX_PLAYERS)
 				ormod = Sprite.PLAYER_SPRITE_COLOR(player);
 
-			drssa = new ArrayPtr<DrawRoadSeqStruct>( _road_display_datas[ti.map5 & 0xF] );
+			drssa = new ArrayPtr<>( _road_display_datas[ti.map5 & 0xF] );
 
 			//ViewPort.DrawGroundSprite(drss++.image);
 			ViewPort.DrawGroundSprite(drssa.rpp().image);
@@ -969,7 +971,7 @@ public class Road extends RoadTables
 
 		ormod = Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player);
 
-		dtssa = new ArrayPtr<DrawRoadSeqStruct>( _road_display_datas[image] );
+		dtssa = new ArrayPtr<>( _road_display_datas[image] );
 
 		x += 33;
 		y += 17;
@@ -1222,7 +1224,7 @@ public class Road extends RoadTables
 		if (tile.IsLevelCrossing()) {
 			if (v.type == Vehicle.VEH_Train && BitOps.GB(tile.getMap().m5, 2, 1) == 0) {
 				/* train crossing a road */
-				//SndPlayVehicleFx(SND_0E_LEVEL_CROSSING, v);
+				v.SndPlayVehicleFx(Snd.SND_0E_LEVEL_CROSSING);
 				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 1);
 				tile.MarkTileDirtyByTile();
 			}

@@ -1252,8 +1252,8 @@ public class Rail extends RailTables {
 					// start of tunnel
 					track_mode = 64;
 					track_height =  Landscape.GetSlopeZ(x+8, y+8);
-				};
-			};
+				}
+			}
 
 			/* for pieces that we cannot build signals on but are not an end of track or a junction, we continue counting. When a signal
 				 should be placed in one of these tiles, it is instead placed on the last possible place for signals, and the counting is
@@ -1284,10 +1284,10 @@ public class Rail extends RailTables {
 						total_cost += retr;
 						signals = 0;
 						track_mode = 0;
-					};
-				};
+					}
+				}
 				continue;
-			};
+			}
 
 			if (!tile.IsTileType( TileTypes.MP_RAILWAY))
 				return total_cost;  // no more track, we are finished
@@ -1375,7 +1375,7 @@ public class Rail extends RailTables {
 				if (retr == Cmd.CMD_ERROR) return Cmd.CMD_ERROR;
 				total_cost += retr;
 				signals = 0;
-			};
+			}
 
 			// when removing signals, the last position is always handled
 			if (0 != mode) signals = 0;
@@ -1895,11 +1895,11 @@ public class Rail extends RailTables {
 		switch(track)
 		{
 		case (TRACK_BIT_DIAG1 | TRACK_BIT_DIAG2): spri++;
-		case TRACK_BIT_LEFT:  spri++;
-		case TRACK_BIT_RIGHT: spri++;
-		case TRACK_BIT_LOWER: spri++;
-		case TRACK_BIT_UPPER: spri++;
-		case TRACK_BIT_DIAG1: spri++;
+		case TRACK_BIT_LEFT:  spri++; // Fall through
+		case TRACK_BIT_RIGHT: spri++; // Fall through
+		case TRACK_BIT_LOWER: spri++; // Fall through
+		case TRACK_BIT_UPPER: spri++; // Fall through
+		case TRACK_BIT_DIAG1: spri++; // Fall through
 		case TRACK_BIT_DIAG2: 
 			break;
 			
@@ -2417,7 +2417,7 @@ public class Rail extends RailTables {
 				TileIndex tile = ssd.pbs_tile[i];
 				tile.getMap().m4 = BitOps.RETSB(tile.getMap().m4, 0, 3, SIGTYPE_PBS);
 				tile.MarkTileDirtyByTile();
-			};
+			}
 
 			// then mark the signals in the segment accordingly
 			for (i = 0; i != ssd.cur; i++) 

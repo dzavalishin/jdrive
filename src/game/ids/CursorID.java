@@ -11,7 +11,7 @@ public class CursorID extends AbstractID
 		super(i);
 	}
 	
-	private static final Map<Integer,CursorID> ids = new HashMap<Integer,CursorID>();
+	private static final Map<Integer,CursorID> ids = new HashMap<>();
 	public static CursorID get(int player) 
 	{
 		CursorID old = ids.get(player);
@@ -22,4 +22,15 @@ public class CursorID extends AbstractID
 		}
 		return old;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+	
 }

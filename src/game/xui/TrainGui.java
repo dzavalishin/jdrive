@@ -67,7 +67,7 @@ public class TrainGui
 			Global.SetDParam(1, rvi.pow_wag_weight);
 			Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_PWAGPOWER_PWAGWEIGHT, 0);
 			y += 10;
-		};
+		}
 
 		/* Cargo type + capacity, or N/A */
 		Global.SetDParam(0, Str.STR_8838_N_A);
@@ -526,12 +526,11 @@ public class TrainGui
 	{
 		int row;
 		int skip = 0;
-		//Vehicle v;
 
 		x = x - 23;
 
 		row = (y - 14) / 14;
-		if ( (int) row >= w.vscroll.getCap())
+		if(row >= w.vscroll.getCap())
 			return 1; /* means err */
 
 		row += w.vscroll.pos;
@@ -981,8 +980,7 @@ public class TrainGui
 
 			v = Vehicle.GetVehicle(w.window_number);
 
-			w.disabled_state = (v.getOwner() == Global.gs._local_player) ? 0 : 0x380;
-
+			w.disabled_state = (v.getOwner().isLocalPlayer()) ? 0 : 0x380;
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 12);
 
 			/* See if any vehicle can be refitted */
@@ -1185,7 +1183,7 @@ public class TrainGui
 		w.SetVScrollCount( num);
 
 		w.disabled_state = 1 << (det_tab + 9);
-		if (v.getOwner() != Global.gs._local_player)
+		if (!v.getOwner().isLocalPlayer())
 			w.disabled_state |= (1 << 2);
 
 		if (0==Global._patches.servint_trains) // disable service-scroller when interval is set to disabled
