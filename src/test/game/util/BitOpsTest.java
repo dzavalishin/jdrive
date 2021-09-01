@@ -113,7 +113,7 @@ class BitOpsTest {
 
 	@Test
 	void testRETCLRBITIntInt() {
-		assertEquals(0x01, BitOps.RETSETBIT(0x00, 0));
+		assertEquals(0x01, BitOps.RETCLRBIT(0x01, 1));
 		assertEquals(0xFE, BitOps.RETCLRBIT(0xFF, 0));
 	}
 
@@ -125,9 +125,9 @@ class BitOpsTest {
 
 	@Test
 	void testRETTOGGLEBITIntInt() {
-		assertEquals(0x01, BitOps.RETSETBIT(0x00, 0));
-		assertEquals(0xFE, BitOps.RETCLRBIT(0xFF, 0));
-		assertEquals(0xFF, BitOps.RETCLRBIT(0xFE, 0));
+		assertEquals(0x01, BitOps.RETTOGGLEBIT(0x00, 0));
+		assertEquals(0xFE, BitOps.RETTOGGLEBIT(0xFF, 0));
+		assertEquals(0xFF, BitOps.RETTOGGLEBIT(0xFE, 0));
 	}
 
 	@Test
@@ -163,7 +163,7 @@ class BitOpsTest {
 
 	@Test
 	void testFIND_FIRST_BIT() {
-		System.err.print("FIND_FIRST_BIT: "); System.err.println(BitOps.FIND_FIRST_BIT(0x8));
+		//System.err.print("FIND_FIRST_BIT: "); System.err.println(BitOps.FIND_FIRST_BIT(0x8));
 
 		assertEquals(BitOps.FIND_FIRST_BIT(0x06), 1);
 		assertEquals(BitOps.FIND_FIRST_BIT(0x0F), 0);
