@@ -111,11 +111,6 @@ public class Global
 	//public static int _fullscreen_bpp;
 
 
-	public static int _map_log_x = 8; //6;
-	public static int _map_size_x = 256;
-	public static int _map_size_y = 256;
-	public static int _map_tile_mask;
-	public static int _map_size;
 
 	public static final int[] _cur_resolution = new int[2];
 	public static final int [][] _random_seeds = new int[2][2];
@@ -198,7 +193,6 @@ public class Global
 	public static final Paths _path = new Paths();
 	public static int _autosave_ctr = 0;
 
-	public static Tile _m[]; // = new Tile[1024*1024]; // TODO map size
 
 	// keybd
 	public static int _pressed_key;             // Low 8 bits = ASCII, High 16 bits = keycode
@@ -266,15 +260,15 @@ public class Global
 
 	
 	// binary logarithm of the map size, try to avoid using this one
-	public static int MapLogX()  { return _map_log_x; }
+	public static int MapLogX()  { return gs._map_log_x; }
 	/** The size of the map */
-	public static int MapSizeX() { return _map_size_x; }
-	public static int MapSizeY() { return _map_size_y; }
+	public static int MapSizeX() { return gs._map_size_x; }
+	public static int MapSizeY() { return gs._map_size_y; }
 	/** The maximum coordinates */
-	public static int MapMaxX() { return _map_size_x - 1; }
-	public static int MapMaxY() { return _map_size_y - 1; }
+	public static int MapMaxX() { return gs._map_size_x - 1; }
+	public static int MapMaxY() { return gs._map_size_y - 1; }
 	/** The number of tiles in the map */
-	public static int MapSize() { return _map_size; }
+	public static int MapSize() { return gs._map_size; }
 
 
 	public static void printf(String s, Object ... arg) {

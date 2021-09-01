@@ -190,7 +190,7 @@ FileInputStream fis = new FileInputStream("settings.xml");
 		Window.BeforeSave();
 
 		oos.writeObject(Global.gs);
-		oos.writeObject(Global._m);
+		//oos.writeObject(Global._m);
 		Town.saveGame(oos);
 		Engine.saveGame(oos);
 		Depot.saveGame(oos);
@@ -208,7 +208,7 @@ FileInputStream fis = new FileInputStream("settings.xml");
 	private static void readAll(ObjectInputStream oin) throws IOException, ClassNotFoundException 
 	{
 		Global.gs = (GameState) oin.readObject();
-		Global._m = (Tile[]) oin.readObject();
+		//Global._m = (Tile[]) oin.readObject();
 		Town.loadGame(oin);
 		Engine.loadGame(oin);
 		Depot.loadGame(oin);

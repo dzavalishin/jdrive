@@ -147,10 +147,13 @@ public class Depot implements IPoolItem, Serializable
 			case Global.TRANSPORT_RAIL:
 			case Global.TRANSPORT_ROAD:
 				/* Rail and road store a diagonal direction in bits 0 and 1 */
-				return BitOps.GB(Global._m[tile.getTile()].m5, 0, 2);
+				//return BitOps.GB(Global._m[tile.getTile()].m5, 0, 2);
+				return BitOps.GB(tile.M().m5, 0, 2);
 			case Global.TRANSPORT_WATER:
 				/* Water is stubborn, it stores the directions in a different order. */
-				switch (BitOps.GB(Global._m[tile.getTile()].m5, 0, 2)) {
+				//switch (BitOps.GB(Global._m[tile.getTile()].m5, 0, 2)) 
+				switch (BitOps.GB(tile.M().m5, 0, 2)) 
+				{
 					case 0: return Tile.DIAGDIR_NE;
 					case 1: return Tile.DIAGDIR_SW;
 					case 2: return Tile.DIAGDIR_NW;

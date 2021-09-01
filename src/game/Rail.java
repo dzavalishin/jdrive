@@ -2968,7 +2968,8 @@ static  byte SignalOnTrack(Track track) {
 	static int GetRailTileType(TileIndex tile)
 	{
 		assert(tile.IsTileType(TileTypes.MP_RAILWAY));
-		return  Global._m[tile.getTile()].m5 & RAIL_TILE_TYPE_MASK;
+		//return  Global._m[tile.getTile()].m5 & RAIL_TILE_TYPE_MASK;
+		return  tile.M().m5 & RAIL_TILE_TYPE_MASK;
 	}
 
 	/**
@@ -2987,7 +2988,7 @@ static  byte SignalOnTrack(Track track) {
 	//static  RailType GetRailType(TileIndex tile) 
 	static int GetRailType(TileIndex tile) 
 	{ 
-		return Global._m[tile.getTile()].m3 & RAILTYPE_MASK; 
+		return tile.M().m3 & RAILTYPE_MASK; 
 	}
 	/**
 	 * Returns the rail type of the given rail tile (ie rail, mono, maglev).
@@ -3019,7 +3020,7 @@ static  byte SignalOnTrack(Track track) {
 	static int GetRailTileSubtype(TileIndex tile)
 	{
 		assert(GetRailTileType(tile) == RAIL_TYPE_DEPOT_WAYPOINT);
-		return Global._m[tile.getTile()].m5 & RAIL_SUBTYPE_MASK;
+		return tile.M().m5 & RAIL_SUBTYPE_MASK;
 	}
 	/**
 	 * Returns the RailTileSubtype of a given rail tile with type
@@ -3062,7 +3063,7 @@ static  byte SignalOnTrack(Track track) {
 	static int GetTrackBits(TileIndex tile)
 	{
 		assert(GetRailTileType(tile) == RAIL_TYPE_NORMAL || GetRailTileType(tile) == RAIL_TYPE_SIGNALS);
-		return Global._m[tile.getTile()].m5 & TRACK_BIT_MASK;
+		return tile.M().m5 & TRACK_BIT_MASK;
 	}
 	/**
 	 * Returns the tracks present on the given plain rail tile (IsPlainRailTile())
@@ -3323,7 +3324,7 @@ static  byte SignalOnTrack(Track track) {
 		assert(IsValidTrack(track));
 		return (
 				(GetRailTileType(tile) == RAIL_TYPE_SIGNALS) 
-				&& ((Global._m[tile.getTile()].m3 & SignalOnTrack(track)) != 0));
+				&& ((tile.M().m3 & SignalOnTrack(track)) != 0));
 	}
 
 	/**
@@ -3429,7 +3430,7 @@ static  byte SignalOnTrack(Track track) {
 	 */
 	static  boolean IsLevelCrossing(TileIndex tile)
 	{
-		return (Global._m[tile.getTile()].m5 & 0xF0) == 0x10;
+		return (tile.M().m5 & 0xF0) == 0x10;
 	}
 
 	/**

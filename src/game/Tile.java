@@ -2,6 +2,9 @@ package game;
 
 import java.io.Serializable;
 
+import game.enums.Owner;
+import game.enums.TileTypes;
+
 public class Tile implements Serializable 
 {
 
@@ -42,6 +45,16 @@ public class Tile implements Serializable
 		height = b & 0xF;		
 	}
 
+	public Tile() {
+		type        = TileTypes.MP_CLEAR.ordinal();
+		height      = 0;
+		m1          = Owner.OWNER_NONE;
+		m2          = 0;
+		m3          = 0;
+		m4          = 0;
+		m5          = 3;
+		extra       = 0;
+	}
 
 
 } 

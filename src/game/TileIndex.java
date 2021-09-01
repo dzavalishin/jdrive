@@ -230,12 +230,12 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 	public Tile getMap()
 	{
-		return Global._m[tile];
+		return Global.gs._m[tile];
 	}
 
 	public Tile M()
 	{
-		return Global._m[tile];
+		return Global.gs._m[tile];
 	}
 
 
@@ -269,12 +269,12 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 	public void SetMapExtraBits(int i)
 	{
-		Global._m[tile].extra =  BitOps.RETSB(Global._m[tile].extra, 0, 2, i & 3);
+		Global.gs._m[tile].extra =  BitOps.RETSB(Global.gs._m[tile].extra, 0, 2, i & 3);
 	}
 
 	public int GetMapExtraBits()
 	{
-		return BitOps.GB(Global._m[tile].extra, 0, 2);
+		return BitOps.GB(Global.gs._m[tile].extra, 0, 2);
 	}
 
 	public void MarkTileDirtyByTile()
@@ -434,14 +434,14 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	public int TileHeight()
 	{
 		//assert(tile < MapSize());
-		return Global._m[tile].height;
+		return Global.gs._m[tile].height;
 	}
 
 	public static int TileHeight(int index)
 	{
 		assert(index < Global.MapSize());
 		assert(index >= 0); 
-		return Global._m[index].height;
+		return Global.gs._m[index].height;
 	}
 
 	public int TilePixelHeight()
@@ -458,21 +458,21 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	{
 		//assert(tile < MapSize());
 		assert(height < 16);
-		Global._m[tile].height = height;
+		Global.gs._m[tile].height = height;
 	}
 
 	public TileTypes GetTileType()
 	{
 		//assert(tile < MapSize());
-		//return new TileType(Global._m[tile].type);
-		return TileTypes.values[Global._m[tile].type];
+		//return new TileType(Global.gs._m[tile].type);
+		return TileTypes.values[Global.gs._m[tile].type];
 
 	}
 
 	public void SetTileType(TileTypes type)
 	{
 		//assert(tile < MapSize());
-		Global._m[tile].type = type.ordinal();
+		Global.gs._m[tile].type = type.ordinal();
 	}
 
 	public boolean IsTileType(int type)
@@ -492,7 +492,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 	public boolean IsTunnelTile()
 	{
-		return IsTileType(TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(Global._m[tile].m5, 4, 4) == 0;
+		return IsTileType(TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(Global.gs._m[tile].m5, 4, 4) == 0;
 	}
 
 	public boolean IsWaterTile() { return IsTileType(TileTypes.MP_WATER) && getMap().m5 == 0; }
@@ -505,8 +505,8 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		assert(!IsTileType(TileTypes.MP_VOID));
 		assert(!IsTileType(TileTypes.MP_INDUSTRY));
 
-		//return new Owner(Global._m[tile].m1);
-		return PlayerID.get(Global._m[tile].m1);
+		//return new Owner(Global.gs._m[tile].m1);
+		return PlayerID.get(Global.gs._m[tile].m1);
 	}
 
 	public void SetTileOwner(PlayerID owner)
@@ -516,7 +516,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		assert(!IsTileType(TileTypes.MP_VOID));
 		assert(!IsTileType(TileTypes.MP_INDUSTRY));
 
-		Global._m[tile].m1 = owner.id;
+		Global.gs._m[tile].m1 = owner.id;
 	}
 
 	public void SetTileOwner(int owner)
@@ -526,7 +526,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		assert(!IsTileType(TileTypes.MP_VOID));
 		assert(!IsTileType(TileTypes.MP_INDUSTRY));
 
-		Global._m[tile].m1 = owner;
+		Global.gs._m[tile].m1 = owner;
 	}
 
 	
@@ -558,26 +558,26 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	}
 
 
-	public static int TILE_MASK(int x) { return (x & Global._map_tile_mask); }
+	public static int TILE_MASK(int x) { return (x & Global.gs._map_tile_mask); }
 	public static void TILE_ASSERT(int x) { assert TILE_MASK(x) == x; }
 	
 	public void TILE_ASSERT() { assert TILE_MASK(tile) == tile; }
 
 
-	public void clrBit_m1(int i) {		Global._m[tile].m1 = BitOps.RETCLRBIT(Global._m[tile].m1, i);	}
-	public void setBit_m1(int i) {		Global._m[tile].m1 = BitOps.RETSETBIT(Global._m[tile].m1, i);	}
+	public void clrBit_m1(int i) {		Global.gs._m[tile].m1 = BitOps.RETCLRBIT(Global.gs._m[tile].m1, i);	}
+	public void setBit_m1(int i) {		Global.gs._m[tile].m1 = BitOps.RETSETBIT(Global.gs._m[tile].m1, i);	}
 
-	public void clrBit_m2(int i) {		Global._m[tile].m2 = BitOps.RETCLRBIT(Global._m[tile].m2, i);	}
-	public void setBit_m2(int i) {		Global._m[tile].m2 = BitOps.RETSETBIT(Global._m[tile].m2, i);	}
+	public void clrBit_m2(int i) {		Global.gs._m[tile].m2 = BitOps.RETCLRBIT(Global.gs._m[tile].m2, i);	}
+	public void setBit_m2(int i) {		Global.gs._m[tile].m2 = BitOps.RETSETBIT(Global.gs._m[tile].m2, i);	}
 
-	public void clrBit_m3(int i) {		Global._m[tile].m3 = BitOps.RETCLRBIT(Global._m[tile].m3, i);	}
-	public void setBit_m3(int i) {		Global._m[tile].m3 = BitOps.RETSETBIT(Global._m[tile].m3, i);	}
+	public void clrBit_m3(int i) {		Global.gs._m[tile].m3 = BitOps.RETCLRBIT(Global.gs._m[tile].m3, i);	}
+	public void setBit_m3(int i) {		Global.gs._m[tile].m3 = BitOps.RETSETBIT(Global.gs._m[tile].m3, i);	}
 
-	public void clrBit_m4(int i) {		Global._m[tile].m4 = BitOps.RETCLRBIT(Global._m[tile].m4, i);	}
-	public void setBit_m4(int i) {		Global._m[tile].m4 = BitOps.RETSETBIT(Global._m[tile].m4, i);	}
+	public void clrBit_m4(int i) {		Global.gs._m[tile].m4 = BitOps.RETCLRBIT(Global.gs._m[tile].m4, i);	}
+	public void setBit_m4(int i) {		Global.gs._m[tile].m4 = BitOps.RETSETBIT(Global.gs._m[tile].m4, i);	}
 
-	public void clrBit_m5(int i) {		Global._m[tile].m5 = BitOps.RETCLRBIT(Global._m[tile].m5, i);	}
-	public void setBit_m5(int i) {		Global._m[tile].m5 = BitOps.RETSETBIT(Global._m[tile].m5, i);	}
+	public void clrBit_m5(int i) {		Global.gs._m[tile].m5 = BitOps.RETCLRBIT(Global.gs._m[tile].m5, i);	}
+	public void setBit_m5(int i) {		Global.gs._m[tile].m5 = BitOps.RETSETBIT(Global.gs._m[tile].m5, i);	}
 
 	// TODO must be in Mutable only!
 	public TileIndex TILE_MASK() {

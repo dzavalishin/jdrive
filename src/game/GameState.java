@@ -27,6 +27,9 @@ public class GameState implements Serializable
 	// Big and structured stuff
 	// -------------------------------------------------------------------
 
+	/** Game map */
+	public Tile _m[];
+	
 	public final GameDate date = new GameDate();
 	public final Economy _economy = new Economy();
 
@@ -34,6 +37,12 @@ public class GameState implements Serializable
 	// -------------------------------------------------------------------
 	// Variables
 	// -------------------------------------------------------------------
+
+	public int _map_log_x = 8; //6;
+	public int _map_size_x = 256;
+	public int _map_size_y = 256;
+	public int _map_tile_mask;
+	public int _map_size;
 	
 	public PlayerID _current_player = PlayerID.getNone();
 	public PlayerID _local_player = PlayerID.getNone();
