@@ -516,13 +516,18 @@ public class MusicGui
 	
 	static class MusicFileSettings {
 		int playlist;
-		int music_vol;
-		int effect_vol;
+		int music_vol = 100;
+		int effect_vol = 100;
 		byte [] custom_1 = new byte[33];
 		byte [] custom_2 = new byte[33];
 		boolean btn_down;
 		boolean shuffle;
 		char [] extmidi = new char[80];
+	}
+
+
+	public static int getEffectVolume() {
+		return msf.effect_vol;
 	}
 
 	
