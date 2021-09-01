@@ -1,6 +1,7 @@
 package game;
 import java.io.File;
 
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -21,6 +22,7 @@ import game.xui.Gfx;
 import game.xui.GfxInit;
 import game.xui.Gui;
 import game.xui.MiscGui;
+import game.xui.MusicGui;
 import game.xui.SettingsGui;
 import game.xui.VehicleGui;
 import game.xui.Window;
@@ -950,7 +952,7 @@ public class Main {
 		if (0 == Global._pause || Global._cheats.build_in_pause.value) TextEffect.MoveAllTextEffects();
 
 		Window.InputLoop();
-
+		MusicGui.MusicLoop();
 
 	}
 
@@ -1048,7 +1050,7 @@ public class Main {
 		Global._path.save_dir = slcwd+"save";
 		Global._path.autosave_dir = Global._path.save_dir + File.separator +  "autosave";
 		Global._path.scenario_dir = slcwd+"scenario";
-		Global._path.gm_dir = slcwd+"gm"+ File.separator;
+		Global._path.gm_dir = slcwd+"resources"+ File.separator + "gm"+ File.separator;
 		Global._path.data_dir = slcwd+"resources"+ File.separator;
 		//Global._path.lang_dir = slcwd+"lang"+ File.separator;
 		Global._path.lang_dir = slcwd+"resources"+ File.separator;

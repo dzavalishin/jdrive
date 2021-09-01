@@ -519,7 +519,7 @@ public class Gui
 
 	static void MenuClickMusicWindow(int index)
 	{
-		// TODO ShowMusicWindow();
+		MusicGui.ShowMusicWindow();
 	}
 
 	static void MenuClickNewspaper(int index)
@@ -2071,10 +2071,10 @@ public class Gui
 			case Window.WKC_SHIFT | Window.WKC_F9: DockGui.ShowBuildDocksToolbar(); break;
 			case Window.WKC_SHIFT | Window.WKC_F10:AirportGui.ShowBuildAirToolbar(); break;
 			case Window.WKC_SHIFT | Window.WKC_F11: MiscGui.ShowBuildTreesToolbar(); break;
-			// TODO case Window.WKC_SHIFT | Window.WKC_F12: ShowMusicWindow(); break;
+			case Window.WKC_SHIFT | Window.WKC_F12: MusicGui.ShowMusicWindow(); break;
 			case Window.WKC_CTRL  | 'S': Global._make_screenshot = 1; break;
 			case Window.WKC_CTRL  | 'G': Global._make_screenshot = 2; break;
-			// TODO case Window.WKC_CTRL | Window.WKC_ALT | 'C': if (!_networking) ShowCheatWindow(); break;
+			//case Window.WKC_CTRL | Window.WKC_ALT | 'C': if (!_networking) ShowCheatWindow(); break;
 			case 'A': RailGui.ShowBuildRailToolbar(_last_built_railtype, 4); break; /* Invoke Autorail */
 			case 'L': Terraform.ShowTerraformToolbar(); break;
 			default: return;
