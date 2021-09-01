@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequencer;
+import javax.sound.midi.Synthesizer;
 
 import game.Global;
 
@@ -21,7 +23,17 @@ public class Music
 		if(sequencer == null)
 			return;
 
-		//sequencer.set
+		/* Does not work
+		if (sequencer instanceof Synthesizer) {
+			Synthesizer synthesizer = (Synthesizer) sequencer;
+			MidiChannel[] channels = synthesizer.getChannels();
+
+			// gain is a value between 0 and 1 (loudest)
+			double gain = volume / 127D;
+			for (int i = 0; i < channels.length; i++) {
+				channels[i].controlChange(7, (int) (gain * 127.0));
+			}
+		} */
 	}
 
 
@@ -67,7 +79,7 @@ public class Music
 				sequencer.stop();
 				sequencer.close();
 			}			
-			
+
 			sequencer.setSequence(MidiSystem.getSequence(midiFile));
 			sequencer.open();
 			sequencer.start();

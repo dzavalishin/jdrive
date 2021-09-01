@@ -209,7 +209,6 @@ public class Sound {
 		void mixSamples(int [] buffer, int samples)
 		{
 			// Clear the buffer
-			//memset(buffer, 0, sizeof(int16) * 2 * samples);
 			Arrays.fill(buffer, (byte)0);
 
 			// Mix each channel
@@ -273,7 +272,7 @@ public class Sound {
 						FileIO.FioReadDword();   // avg bytes per second
 						FileIO.FioReadWord();    // alignment
 						fe.bits_per_sample = FileIO.FioReadByte(); // bits per sample
-						FileIO.FioSeekTo(size - (2 + 2 + 4 + 4 + 2 + 1), FileIO.SEEK_CUR);
+						FileIO.FioSeekTo(size - (2 + 2 + 4 + 4 + 2 + 1L), FileIO.SEEK_CUR);
 					} else if (check4chars(tag, 'a', 't', 'a', 'd')) {
 						fe.file_size = size;
 						fe.file_offset = (int)FileIO.FioGetPos() | (SOUND_SLOT << 24);
@@ -340,8 +339,7 @@ public class Sound {
 	}
 
 
-	// TODO private!
-	public static void StartSound(int sound, int panning, int volume)
+	private static void StartSound(int sound, int panning, int volume)
 	{
 		int left_vol, right_vol;
 

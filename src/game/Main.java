@@ -357,7 +357,7 @@ public class Main {
 		Global.DEBUG_misc( 1, "Loading sound effects...");
 		Sound.MxInitialize(11025);
 		Sound.SoundInitialize("sample.cat");
-		Sound.StartSound(2, 0, 50);
+		//Sound.StartSound(2, 0, 50);
 
 		// This must be done early, since functions use the InvalidateWindow* calls
 		Window.InitWindowSystem();
