@@ -216,6 +216,7 @@ public class Sound {
 			{
 				if (mc.active) {
 					mc.mixInt8ToInt16(buffer, samples);
+					Global.debug("mix ch %x", mc.hashCode());
 					if (mc.samples_left == 0) mc.closeChannel();
 				}
 			}
@@ -297,9 +298,9 @@ public class Sound {
 
 	private static boolean check4chars(int tag, char ... cs ) 
 	{
-		if( ((tag >> 0) & 0xFF) != cs[0]) return false;		
-		if( ((tag >> 8) & 0xFF) != cs[0]) return false;		
-		if( ((tag >>16) & 0xFF) != cs[0]) return false;		
+		if( ((tag >> 0) & 0xFF) != cs[3]) return false;		
+		if( ((tag >> 8) & 0xFF) != cs[2]) return false;		
+		if( ((tag >>16) & 0xFF) != cs[1]) return false;		
 		if( ((tag >>24) & 0xFF) != cs[0]) return false;		
 
 		return true;
@@ -338,7 +339,8 @@ public class Sound {
 	}
 
 
-	static void StartSound(int sound, int panning, int volume)
+	// TODO private!
+	public static void StartSound(int sound, int panning, int volume)
 	{
 		int left_vol, right_vol;
 
@@ -425,8 +427,11 @@ public class Sound {
 		SndPlayScreenCoordFx(sound, pt.x, pt.y);
 	}
 
+	public static void SndPlayFx(Snd sound) {
+		SndPlayFx(sound.ordinal());
+	}
 
-	void SndPlayFx(/*SoundFx*/ int  sound)
+	static void SndPlayFx(/*SoundFx*/ int  sound)
 	{
 		StartSound(
 				_sound_idx[sound],
@@ -454,7 +459,7 @@ public class Sound {
 
 			while(!Global._exit_game) 
 			{
-				_mixer.mixSamples(intBuffer, intBuffer.length);
+				_mixer.mixSamples(intBuffer, intBuffer.length/2); // stereo!
 
 				for(int i = 0; i < SAMPLES_PER_XFER; i++)
 				{
@@ -478,6 +483,8 @@ public class Sound {
 			}
 		}
 	}
+
+
 }
 
 

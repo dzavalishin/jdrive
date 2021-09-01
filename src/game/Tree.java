@@ -7,9 +7,11 @@ import game.ifaces.TileTypeProcs;
 import game.struct.Point;
 import game.struct.TileDesc;
 import game.struct.TileIndexDiffC;
+import game.tables.Snd;
 import game.tables.TreeTables;
 import game.util.ArrayPtr;
 import game.util.BitOps;
+import game.util.Sound;
 import game.util.TownTables;
 import game.xui.ViewPort;
 
@@ -17,7 +19,7 @@ import game.xui.ViewPort;
 public class Tree  extends TreeTables {
 
 	private static int _trees_tick_ctr; // TODO usage?
-	
+
 	static int GetRandomTreeType(TileIndex tile, int seed)
 	{
 		switch (GameOptions._opt.landscape) {
@@ -153,7 +155,7 @@ public class Tree  extends TreeTables {
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 
 		TileIndex tp2 = new TileIndex(p2);
-		
+
 		// make sure sx,sy are smaller than ex,ey
 		sx = tp2.TileX();
 		sy = tp2.TileY();
@@ -421,23 +423,22 @@ public class Tree  extends TreeTables {
 		/* not used */
 	}
 
+	static final Snd [] forest_sounds = {
+			Snd.SND_42_LOON_BIRD,
+			Snd.SND_43_LION,
+			Snd.SND_44_MONKEYS,
+			Snd.SND_48_DISTANT_BIRD
+	};
+
 	static void TileLoopTreesDesert(TileIndex tile)
 	{
-		/*
-		static final SoundFx forest_sounds[] = {
-			SND_42_LOON_BIRD,
-			SND_43_LION,
-			SND_44_MONKEYS,
-			SND_48_DISTANT_BIRD
-		};*/
 
 		int b =  tile.GetMapExtraBits();
 
 		if (b == 2) {
-			//int r = Hal.Random();
+			int r = Hal.Random();
+			if (BitOps.CHANCE16I(1, 200, r)) Sound.SndPlayTileFx(forest_sounds[BitOps.GB(r, 16, 2)], tile);
 
-			// TODO if (BitOps.CHANCE16I(1, 200, r)) SndPlayTileFx(forest_sounds[BitOps.GB(r, 16, 2)], tile);
-			
 		} else if (b == TileInfo.EXTRABITS_DESERT) {
 			if (BitOps.GB(tile.getMap().m2, 4, 2) != 2) {
 				tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 4, 2, 2);
@@ -693,6 +694,6 @@ public class Tree  extends TreeTables {
 			null,											/* vehicle_enter_tile_proc */
 			null,											/* vehicle_leave_tile_proc */
 			Tree::GetSlopeTileh_Trees			/* get_slope_tileh_proc */
-	);
+			);
 
 }
