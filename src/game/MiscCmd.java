@@ -67,15 +67,15 @@ public class MiscCmd {
 
 		p = Player.GetCurrentPlayer();
 
-		if (p.current_loan >= Global._economy.getMax_loan()) {
-			Global.SetDParam(0, Global._economy.getMax_loan());
+		if (p.current_loan >= Global.gs._economy.getMax_loan()) {
+			Global.SetDParam(0, Global.gs._economy.getMax_loan());
 			return Cmd.return_cmd_error(Str.STR_702B_MAXIMUM_PERMITTED_LOAN);
 		}
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			/* Loan the maximum amount or not? */
 			final int v = (Global.gs._current_player.IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000;
-			int loan = (p2 != 0) ? Global._economy.getMax_loan() - p.current_loan : v;
+			int loan = (p2 != 0) ? Global.gs._economy.getMax_loan() - p.current_loan : v;
 
 			p.money64 += loan;
 			p.current_loan += loan;

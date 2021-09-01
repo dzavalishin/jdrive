@@ -25,7 +25,6 @@ import game.xui.Window;
 public class Economy extends EconomeTables 
 {
 
-
 	// Maximum possible loan
 	int max_loan;
 	int max_loan_unround;
@@ -100,8 +99,6 @@ public class Economy extends EconomeTables
 		/* house is already big enough */
 		if (val <= tile.getMap().m5)
 			return;
-
-		//int ti = tile.getTile();
 
 		tile.iadd(0, 0).getMap().m5 =   val;
 		tile.iadd(0, 1).getMap().m5 = ++val;
@@ -724,22 +721,22 @@ public class Economy extends EconomeTables
 	 *value += (int)(tmp >> 16) + (low >> 16);
 	}
 	 */
-	static void AddInflation()
+	void AddInflation()
 	{
 		/* TODO
 		int i;
-		int inf = Global._economy.infl_amount * 54;
+		int inf = infl_amount * 54;
 
 		for (i = 0; i != NUM_PRICES; i++) {
 			AddSingleInflation((int*)&_price + i, _price_frac + i, inf);
 		}
 
-		Global._economy.max_loan_unround += BIGMULUS(Global._economy.max_loan_unround, inf, 16);
+		max_loan_unround += BIGMULUS(max_loan_unround, inf, 16);
 
-		if (Global._economy.max_loan + 50000 <= Global._economy.max_loan_unround)
-			Global._economy.max_loan += 50000;
+		if (max_loan + 50000 <= max_loan_unround)
+			max_loan += 50000;
 
-		inf = Global._economy.infl_amount_pr * 54;
+		inf = infl_amount_pr * 54;
 		for (i = 0; i != NUM_CARGO; i++) {
 			AddSingleInflation(
 				(int*)_cargo_payment_rates + i,
@@ -755,9 +752,9 @@ public class Economy extends EconomeTables
 		 */
 	}
 
-	static void PlayersPayInterest()
+	void PlayersPayInterest()
 	{		
-		int interest = Global._economy.interest_rate * 54;
+		int interest = interest_rate * 54;
 
 		Iterator<Player> ii = Player.getIterator();
 		while(ii.hasNext())
@@ -775,15 +772,15 @@ public class Economy extends EconomeTables
 		}
 	}
 
-	static void HandleEconomyFluctuations()
+	void HandleEconomyFluctuations()
 	{
 		if (GameOptions._opt.diff.economy == 0) return;
 
-		if (--Global._economy.fluct == 0) {
-			Global._economy.fluct = -BitOps.GB(Hal.Random(), 0, 2);
+		if (--fluct == 0) {
+			fluct = -BitOps.GB(Hal.Random(), 0, 2);
 			NewsItem.AddNewsItem(Str.STR_7073_WORLD_RECESSION_FINANCIAL, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL,0,NewsItem.NT_ECONOMY,0), 0, 0);
-		} else if (Global._economy.fluct == -12) {
-			Global._economy.fluct = BitOps.GB(Hal.Random(), 0, 8) + 312;
+		} else if (fluct == -12) {
+			fluct = BitOps.GB(Hal.Random(), 0, 8) + 312;
 			NewsItem.AddNewsItem(Str.STR_7074_RECESSION_OVER_UPTURN_IN, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL,0,NewsItem.NT_ECONOMY,0), 0, 0);
 		}
 	}
@@ -816,7 +813,7 @@ public class Economy extends EconomeTables
 		price_base_multiplier[price] = factor;
 	}
 
-	public static void StartupEconomy()
+	public void StartupEconomy()
 	{
 		int i;
 
@@ -843,11 +840,11 @@ public class Economy extends EconomeTables
 			Global._price_frac[i] = 0;
 		}
 
-		Global._economy.interest_rate = GameOptions._opt.diff.initial_interest;
-		Global._economy.infl_amount = GameOptions._opt.diff.initial_interest;
-		Global._economy.infl_amount_pr = Math.max(0, GameOptions._opt.diff.initial_interest - 1);
-		Global._economy.max_loan_unround = Global._economy.max_loan = GameOptions._opt.diff.max_loan * 1000;
-		Global._economy.fluct = BitOps.GB(Hal.Random(), 0, 8) + 168;
+		interest_rate = GameOptions._opt.diff.initial_interest;
+		infl_amount = GameOptions._opt.diff.initial_interest;
+		infl_amount_pr = Math.max(0, GameOptions._opt.diff.initial_interest - 1);
+		max_loan_unround = max_loan = GameOptions._opt.diff.max_loan * 1000;
+		fluct = BitOps.GB(Hal.Random(), 0, 8) + 168;
 	}
 
 
@@ -1481,7 +1478,7 @@ public class Economy extends EconomeTables
 		return result;
 	}
 
-	public static void PlayersMonthlyLoop()
+	public void PlayersMonthlyLoop()
 	{
 		PlayersGenStatistics();
 		if (Global._patches.inflation && Global.get_cur_year() < Global.MAX_YEAR_END)
@@ -1681,7 +1678,6 @@ public class Economy extends EconomeTables
 	};
 	 */
 
-	public int getMax_loan() {
-		return max_loan;
-	}
+	public int getMax_loan() { return max_loan; }
+	public int getFluct() { return fluct; }
 }

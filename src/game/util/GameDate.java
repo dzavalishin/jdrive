@@ -166,7 +166,7 @@ public class GameDate
 				MiscGui.RedrawAutosave();
 			//}
 
-			Economy.PlayersMonthlyLoop();
+			Global.gs._economy.PlayersMonthlyLoop();
 			Engine.EnginesMonthlyLoop();
 			Town.TownsMonthlyLoop();
 			Industry.IndustryMonthlyLoop();

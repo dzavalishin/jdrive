@@ -25,7 +25,7 @@ public class GenerateWorld {
 		ViewPort.SetObjectToPlace(Sprite.SPR_CURSOR_ZZZ, 0, 0, 0);
 
 		// Must start economy early because of the costs.
-		Economy.StartupEconomy();
+		Global.gs._economy.StartupEconomy();
 
 		// Don't generate landscape items when in the scenario editor.
 		if (mode == 1) {

@@ -18,23 +18,20 @@ import game.tables.CargoConst;
 import game.util.Paths;
 import game.util.Prices;
 import game.util.Strings;
-import game.util.YearMonthDay;
 import game.xui.MiscGui;
-import game.xui.PlayerGui;
-import game.xui.Window;
 
 public class Global 
 {
 	public static final boolean debugEnabled = true;
 
 	public static GameState gs = new GameState(); 
+	static HighScore [][] _highscore_table = new HighScore[5][5]; // 4 difficulty-settings (+ network); top 5
 	
 	public static final int MAX_PLAYERS = 8;
 	public static final int MAX_SCREEN_WIDTH = 2048;
 	public static final int MAX_SCREEN_HEIGHT = 1200;
 
 
-	public static final Economy _economy = new Economy();
 	public static final Cheats  _cheats = Cheat.cs;
 
 	public static Consumer<TileIndex> _place_proc;
@@ -261,7 +258,6 @@ public class Global
 	public static boolean _do_autosave;
 	public static final boolean _use_dos_palette = false;
 
-	static HighScore [][] _highscore_table = new HighScore[5][5]; // 4 difficulty-settings (+ network); top 5
 
 	public static int get_date()		{		return gs.date._date;		}
 	public static int get_cur_month()	{		return gs.date._cur_month;	}
@@ -271,13 +267,13 @@ public class Global
 	
 	// binary logarithm of the map size, try to avoid using this one
 	public static int MapLogX()  { return _map_log_x; }
-	/* The size of the map */
+	/** The size of the map */
 	public static int MapSizeX() { return _map_size_x; }
 	public static int MapSizeY() { return _map_size_y; }
-	/* The maximum coordinates */
+	/** The maximum coordinates */
 	public static int MapMaxX() { return _map_size_x - 1; }
 	public static int MapMaxY() { return _map_size_y - 1; }
-	/* The number of tiles in the map */
+	/** The number of tiles in the map */
 	public static int MapSize() { return _map_size; }
 
 

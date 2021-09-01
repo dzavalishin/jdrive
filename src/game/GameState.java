@@ -23,11 +23,22 @@ public class GameState implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
-	public GameDate date = new GameDate();
+	// -------------------------------------------------------------------
+	// Big and structured stuff
+	// -------------------------------------------------------------------
+
+	public final GameDate date = new GameDate();
+	public final Economy _economy = new Economy();
+
+	
+	// -------------------------------------------------------------------
+	// Variables
+	// -------------------------------------------------------------------
 	
 	public PlayerID _current_player = PlayerID.getNone();
 	public PlayerID _local_player = PlayerID.getNone();
 	public final boolean _is_old_ai_player = false;
+	
 	int _yearly_expenses_type; // TODO fixme, use parameter where possible
 	int _cur_player_tick_index;
 	int _next_competitor_start;

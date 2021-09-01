@@ -302,7 +302,7 @@ public class UnmovableCmd extends UnmovableTables {
 		// Top town buildings generate 250, so the top HQ type makes 256.
 		if (BitOps.GB(r, 0, 8) < (256 / 4 / (6 - level))) {
 			int amt = BitOps.GB(r, 0, 8) / 8 / 4 + 1;
-			if (Global._economy.fluct <= 0) amt = (amt + 1) >> 1;
+			if (Global.gs._economy.getFluct() <= 0) amt = (amt + 1) >> 1;
 			Station.MoveGoodsToStation(tile, 2, 2, AcceptedCargo.CT_PASSENGERS, amt);
 		}
 
@@ -311,7 +311,7 @@ public class UnmovableCmd extends UnmovableTables {
 		// equations.
 		if (BitOps.GB(r, 8, 8) < (196 / 4 / (6 - level))) {
 			int amt = BitOps.GB(r, 8, 8) / 8 / 4 + 1;
-			if (Global._economy.fluct <= 0) amt = (amt + 1) >> 1;
+			if (Global.gs._economy.getFluct() <= 0) amt = (amt + 1) >> 1;
 			Station.MoveGoodsToStation(tile, 2, 2, AcceptedCargo.CT_MAIL, amt);
 		}
 	}
