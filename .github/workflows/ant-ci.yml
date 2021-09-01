@@ -20,5 +20,7 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
+    - name: Download ant libs
+      run: sh test/getant.sh 
     - name: Build with Ant
       run: ant -noinput -buildfile build.xml test create_run_jar
