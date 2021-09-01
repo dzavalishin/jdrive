@@ -1981,7 +1981,7 @@ public class GRFFile
 		}
 
 		case 0x8D:    /* TTD Version, 00=DOS, 01=Windows */
-			param_val = BitOps.b2i(!Global._use_dos_palette);
+			param_val = 1; // BitOps.b2i(!Global._use_dos_palette);
 			break;
 		case 0x8E:
 			param_val = TrainGui._traininfo_vehicle_pitch;

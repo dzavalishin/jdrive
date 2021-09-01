@@ -178,8 +178,6 @@ public class Main {
 	static void UnInitializeGame()
 	{
 		Window.UnInitWindowSystem();
-
-		//free(_config_file);
 	}
 
 	static void LoadIntroGame()
@@ -240,7 +238,7 @@ public class Main {
 		Global._switch_mode_errorstr = Str.INVALID_STRING_ID();
 		Global._dedicated_forks = false;
 		dedicated = false;
-		Global._config_file = null;
+		Global._path.config_file = null;
 
 		// The last param of the following function means this:
 		//   a letter means: it accepts that param (e.g.: -h)
@@ -325,7 +323,7 @@ public class Main {
 		//	DedicatedFork();
 		//#endif
 
-		// TODO LoadFromConfig();
+		SaveLoad.LoadFromConfig();
 		// TODO CheckConfig();
 		SaveLoad.LoadFromHighScore();
 
@@ -1055,8 +1053,8 @@ public class Main {
 		//Global._path.lang_dir = slcwd+"lang"+ File.separator;
 		Global._path.lang_dir = slcwd+"resources"+ File.separator;
 
-		if (Global._config_file == null)
-			Global._config_file =  Global._path.personal_dir + "openttd.cfg";
+		if (Global._path.config_file == null)
+			Global._path.config_file =  Global._path.personal_dir + "nextttd.cfg";
 
 		/* TODO paths
 		_highscore_file = str_fmt("%shs.dat", _path.personal_dir);

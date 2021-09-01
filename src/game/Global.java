@@ -237,20 +237,20 @@ public class Global
 	public static int _disaster_delay;
 
 	// Net
-	public static final boolean _networking = false;
+	public static boolean _networking = false;
 	public static boolean _network_available = false;  // is network mode available?
-	public static final boolean _network_server = false; // network-server is active
-	public static final boolean _network_dedicated = false; // are we a dedicated server?
+	public static boolean _network_server = false; // network-server is active
+	public static boolean _network_dedicated = false; // are we a dedicated server?
 	public static byte _network_playas; // an id to play as..
 
 	// main/startup
-	public static String _config_file;
+	//public static String _config_file;
 	public static boolean _dedicated_forks;
 	public static SwitchModes _switch_mode;
-	public static int _pause = 0; // [dz] must be it - stacked pause 
+	public static int _pause = 0; // [dz] must be int - stacked pause 
 	public static byte _display_opt = (byte) 0xFF; // [dz] display all!
 	public static boolean _do_autosave;
-	public static final boolean _use_dos_palette = false;
+	//public static final boolean _use_dos_palette = false;
 
 
 	public static int get_date()		{		return gs.date._date;		}
