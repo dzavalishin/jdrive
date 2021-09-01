@@ -49,8 +49,8 @@ public class Currency {
 		for (i = 0; i != CurrencySpec._currency_specs.length; i++) {
 			long to_euro = CurrencySpec._currency_specs[i].to_euro;
 
-			if (to_euro != CF_NOEURO && to_euro != CF_ISEURO && Global._cur_year >= to_euro - Global.MAX_YEAR_BEGIN_REAL) continue;
-			if (to_euro == CF_ISEURO && Global._cur_year < 2000 - Global.MAX_YEAR_BEGIN_REAL) continue;
+			if (to_euro != CF_NOEURO && to_euro != CF_ISEURO && Global.get_cur_year() >= to_euro - Global.MAX_YEAR_BEGIN_REAL) continue;
+			if (to_euro == CF_ISEURO && Global.get_cur_year() < 2000 - Global.MAX_YEAR_BEGIN_REAL) continue;
 			mask |= (1 << i);
 		}
 		mask |= (1 << 23); // always allow custom currency
@@ -58,11 +58,11 @@ public class Currency {
 	}
 
 
-	static void CheckSwitchToEuro()
+	public static void CheckSwitchToEuro()
 	{
 		if (CurrencySpec._currency_specs[GameOptions._opt.currency].to_euro != CF_NOEURO &&
 				CurrencySpec._currency_specs[GameOptions._opt.currency].to_euro != CF_ISEURO &&
-						Global.MAX_YEAR_BEGIN_REAL + Global._cur_year >= CurrencySpec._currency_specs[GameOptions._opt.currency].to_euro) {
+						Global.MAX_YEAR_BEGIN_REAL + Global.get_cur_year() >= CurrencySpec._currency_specs[GameOptions._opt.currency].to_euro) {
 			GameOptions._opt.currency = 2; // this is the index of euro above.
 			NewsItem.AddNewsItem(Str.STR_EURO_INTRODUCE, NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, 0, NewsItem.NT_ECONOMY, 0), 0, 0);
 		}

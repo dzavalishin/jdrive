@@ -952,7 +952,7 @@ public class DisasterCmd extends DisasterTables
 	static void DoDisaster()
 	{
 		byte [] buf = new byte[_dis_years.length];
-		byte year = (byte) Global._cur_year;
+		byte year = (byte) Global.get_cur_year();
 		int i;
 		int j;
 
@@ -973,7 +973,7 @@ public class DisasterCmd extends DisasterTables
 		Global._disaster_delay = BitOps.GB(Hal.Random(), 0, 9) + 730;
 	}
 
-	static void DisasterDailyLoop()
+	public static void DisasterDailyLoop()
 	{
 		if (--Global._disaster_delay != 0) return;
 

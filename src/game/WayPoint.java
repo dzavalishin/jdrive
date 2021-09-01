@@ -366,7 +366,7 @@ public class WayPoint implements IPoolItem
 
 			wp.deleted = 0;
 			wp.xy = tile;
-			wp.build_date = Global._date;
+			wp.build_date = Global.get_date();
 
 			if (wp.town_index == Str.STR_NULL)
 				wp.MakeDefaultWaypointName();
@@ -396,7 +396,7 @@ public class WayPoint implements IPoolItem
 	}
 
 	/* Daily loop for waypoints */
-	static void WaypointsDailyLoop()
+	public static void WaypointsDailyLoop()
 	{
 		Global.gs._waypoints.forEach((i,wp) -> {
 			if( (0 != wp.deleted) && (0 == --wp.deleted) )

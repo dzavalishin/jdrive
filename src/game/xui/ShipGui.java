@@ -20,7 +20,6 @@ import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.StringID;
 import game.util.BitOps;
-import game.util.GameDate;
 import game.util.YearMonthDay;
 import game.util.wcustom.vehiclelist_d;
 
@@ -34,7 +33,6 @@ public class ShipGui
 	 */
 	static void DrawShipPurchaseInfo(int x, int y, /*EngineID*/ int engine_number)
 	{
-		YearMonthDay ymd = new YearMonthDay();
 		final ShipVehicleInfo svi = Engine.ShipVehInfo(engine_number);
 		final Engine  e;
 
@@ -58,7 +56,8 @@ public class ShipGui
 
 		/* Design date - Life length */
 		e = Engine.GetEngine(engine_number);
-		GameDate.ConvertDayToYMD(ymd, e.getIntro_date());
+		YearMonthDay ymd = new YearMonthDay(e.getIntro_date());
+		//YearMonthDay.ConvertDayToYMD(ymd, e.getIntro_date());
 		Global.SetDParam(0, ymd.year + 1920);
 		Global.SetDParam(1, e.getLifelength());
 		Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_DESIGNED_LIFE, 0);

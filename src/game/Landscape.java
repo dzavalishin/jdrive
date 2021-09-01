@@ -454,12 +454,13 @@ public class Landscape extends GenLandTable
 		int map_size = Global.MapSize();
 		int i;
 
-		Global._m = new Tile[map_size];
+		Global.gs._m = new Tile[map_size];
 
 		for (i = 0; i < map_size; i++) 
 		{
-			Global._m[i] = new Tile();
+			Global.gs._m[i] = new Tile();
 
+			/*
 			Global._m[i].type        = TileTypes.MP_CLEAR.ordinal();
 			Global._m[i].height      = 0;
 			Global._m[i].m1          = Owner.OWNER_NONE;
@@ -468,6 +469,7 @@ public class Landscape extends GenLandTable
 			Global._m[i].m4          = 0;
 			Global._m[i].m5          = 3;
 			Global._m[i].extra       = 0;
+			*/
 		}
 
 		// create void tiles at the border

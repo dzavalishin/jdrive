@@ -474,7 +474,7 @@ implements IPoolItem, Serializable
 			int amt = BitOps.GB(r, 0, 8) / 8 + 1;
 			int moved;
 
-			if (Global._economy.fluct <= 0) amt = (amt + 1) >> 1;
+			if (Global.gs._economy.getFluct() <= 0) amt = (amt + 1) >> 1;
 			t.new_max_pass += amt;
 			moved = Station.MoveGoodsToStation(tile, 1, 1, AcceptedCargo.CT_PASSENGERS, amt);
 			t.new_act_pass += moved;
@@ -484,7 +484,7 @@ implements IPoolItem, Serializable
 			int amt = BitOps.GB(r, 8, 8) / 8 + 1;
 			int moved;
 
-			if (Global._economy.fluct <= 0) amt = (amt + 1) >> 1;
+			if (Global.gs._economy.getFluct() <= 0) amt = (amt + 1) >> 1;
 			t.new_max_mail += amt;
 			moved = Station.MoveGoodsToStation(tile, 1, 1, AcceptedCargo.CT_MAIL, amt);
 			t.new_act_mail += moved;
@@ -1501,7 +1501,7 @@ implements IPoolItem, Serializable
 			for(;;) {
 				house = houses[Hal.RandomRange(num)];
 
-				if (Global._cur_year < TownTables._housetype_years[house].min || Global._cur_year > TownTables._housetype_years[house].max)
+				if (Global.get_cur_year() < TownTables._housetype_years[house].min || Global.get_cur_year() > TownTables._housetype_years[house].max)
 					continue;
 
 				// Special houses that there can be only one of.

@@ -1,6 +1,5 @@
 package game;
 
-import game.util.GameDate;
 import game.util.YearMonthDay;
 import game.xui.Gfx;
 import game.xui.Widget;
@@ -121,7 +120,6 @@ public class Subsidies {
 
 	static void DrawSubsidiesWindow(final Window  w)
 	{
-		YearMonthDay ymd = new YearMonthDay();
 		//final Subsidy  s;
 		int num;
 		int x;
@@ -129,7 +127,8 @@ public class Subsidies {
 
 		w.DrawWindowWidgets();
 
-		GameDate.ConvertDayToYMD(ymd, Global._date);
+		YearMonthDay ymd = new YearMonthDay(Global.get_date());
+		//YearMonthDay.ConvertDayToYMD(ymd, Global._date);
 
 		y = 15;
 		x = 1;
@@ -146,7 +145,7 @@ public class Subsidies {
 				s.SetupSubsidyDecodeParam(true);
 				x2 = Gfx.DrawString(x + 2, y, Str.STR_2027_FROM_TO, 0);
 
-				Global.SetDParam(0, Global._date - ymd.day + 384 - s.age * 32);
+				Global.SetDParam(0, Global.get_date() - ymd.day + 384 - s.age * 32);
 				Gfx.DrawString(x2, y, Str.STR_2028_BY, 0);
 				y += 10;
 				num++;
@@ -177,7 +176,7 @@ public class Subsidies {
 
 				xt = Gfx.DrawString(x + 2, y, Str.STR_202C_FROM_TO, 0);
 
-				Global.SetDParam(0, Global._date - ymd.day + 768 - s.age * 32);
+				Global.SetDParam(0, Global.get_date() - ymd.day + 768 - s.age * 32);
 				Gfx.DrawString(xt, y, Str.STR_202D_UNTIL, 0);
 				y += 10;
 				num++;

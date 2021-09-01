@@ -1,6 +1,8 @@
 package game;
-import java.io.File;
 
+import gnu.getopt.Getopt;
+
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -21,6 +23,7 @@ import game.xui.Gfx;
 import game.xui.GfxInit;
 import game.xui.Gui;
 import game.xui.MiscGui;
+import game.xui.MusicGui;
 import game.xui.SettingsGui;
 import game.xui.VehicleGui;
 import game.xui.Window;
@@ -176,8 +179,6 @@ public class Main {
 	static void UnInitializeGame()
 	{
 		Window.UnInitWindowSystem();
-
-		//free(_config_file);
 	}
 
 	static void LoadIntroGame()
@@ -238,35 +239,46 @@ public class Main {
 		Global._switch_mode_errorstr = Str.INVALID_STRING_ID();
 		Global._dedicated_forks = false;
 		dedicated = false;
-		Global._config_file = null;
+		Global._path.config_file = null;
 
 		// The last param of the following function means this:
 		//   a letter means: it accepts that param (e.g.: -h)
 		//   a ':' behind it means: it need a param (e.g.: -m<driver>)
 		//   a '::' behind it means: it can optional have a param (e.g.: -d<debug>)
-		//#if !defined(__MORPHOS__) && !defined(__AMIGA__) && !defined(WIN32)
-		//optformat = "bm:s:v:hDfn::eit:d::r:g::G:p:c:";
-		//#else
-		//optformat = "bm:s:v:hDn::eit:d::r:g::G:p:c:"; // no fork option
-		//#endif
 
+		//optformat = "bm:s:v:hDfn::eit:d::r:g::G:p:c:";
+
+		Getopt g = new Getopt("NextTTD", argv, "bhfc:t:g::"); //"n::ed::r:G:p:");
+		
+		int c;
+		while ((c = g.getopt()) != -1)
+		   {
+		     switch(c)
+		       {
+				case 'h': showhelp(); return;
+				
+				case 'f': Global._dedicated_forks = true; break;
+				case 'e': Global._switch_mode = SwitchModes.SM_EDITOR; break;
+				case 'b': Ai._ai.network_client = true; break;
+
+				case 'c': Global._path.config_file = g.getOptarg(); break;
+				case 't': startdate = Integer.parseInt(g.getOptarg()); break;
+
+				case 'g':
+					if (g.getOptarg() != null) {
+						_file_to_saveload.name = g.getOptarg();
+						Global._switch_mode = SwitchModes.SM_LOAD;
+					} else
+						Global._switch_mode = SwitchModes.SM_NEWGAME;
+					break;
+		       }
+		   }
+		
 		/*
 		mgo.MyGetOptInit( argv, optformat);
 		
 		while ((i = mgo.MyGetOpt()) != -1) {
 			switch(i) {
-			case 'm': musicdriver = new String( mgo.opt ); break;
-			case 's': sounddriver = new String( mgo.opt ); break;
-			case 'v': videodriver = new String( mgo.opt ); break;
-			case 'D': {
-				musicdriver = "null";
-				sounddriver = "null";
-				videodriver = "dedicated";
-				dedicated = true;
-			} break;
-			case 'f': {
-				Global._dedicated_forks = true;
-			}; break;
 			case 'n': {
 				network = true;
 				if (mgo.opt != null)
@@ -275,21 +287,11 @@ public class Main {
 				else
 					network_conn = null;
 			} break; 
-			case 'b': Ai._ai.network_client = true; break;
 			//case 'r': ParseResolution(resolution, mgo.opt); break;
-			case 't': startdate = Integer.parseInt(mgo.opt); break;
 			case 'd': {
 				if (mgo.opt != null) SetDebugString(mgo.opt);
 			} break;
-			case 'e': Global._switch_mode = SwitchModes.SM_EDITOR; break;
-			case 'i': Global._use_dos_palette = true; break;
-			case 'g':
-				if (mgo.opt != null) {
-					_file_to_saveload.name = mgo.opt;
-					Global._switch_mode = SwitchModes.SM_LOAD;
-				} else
-					Global._switch_mode = SwitchModes.SM_NEWGAME;
-				break;
+
 			case 'G':
 				Global._random_seeds[0][0] = Integer.parseInt(mgo.opt);
 				break;
@@ -299,13 +301,7 @@ public class Main {
 				if (BitOps.IS_INT_INSIDE(i, 1, Global.MAX_PLAYERS)) Global._network_playas =  netp;
 				break;
 			}
-			case 'c':
-				Global._config_file = new String(mgo.opt);
-				break;
 			case -2:
-			case 'h':
-				showhelp();
-				return;
 			}
 		}
 		*/
@@ -323,7 +319,7 @@ public class Main {
 		//	DedicatedFork();
 		//#endif
 
-		// TODO LoadFromConfig();
+		SaveLoad.LoadFromConfig();
 		// TODO CheckConfig();
 		SaveLoad.LoadFromHighScore();
 
@@ -355,7 +351,7 @@ public class Main {
 		Global.DEBUG_misc( 1, "Loading sound effects...");
 		Sound.MxInitialize(11025);
 		Sound.SoundInitialize("sample.cat");
-		Sound.StartSound(2, 0, 50);
+		//Sound.StartSound(2, 0, 50);
 
 		// This must be done early, since functions use the InvalidateWindow* calls
 		Window.InitWindowSystem();
@@ -788,7 +784,7 @@ public class Main {
 			Global.gs._current_player = PlayerID.getNone();
 
 			TextEffect.AnimateAnimatedTiles();
-			Global.IncreaseDate();
+			Global.gs.date.IncreaseDate();
 			Landscape.RunTileLoop();
 			Vehicle.CallVehicleTicks();
 			Landscape.CallLandscapeTick();
@@ -810,7 +806,7 @@ public class Main {
 			String s;
 			Global.SetDParam(0, p.name_1);
 			Global.SetDParam(1, p.name_2);
-			Global.SetDParam(2, Global._date);
+			Global.SetDParam(2, Global.get_date());
 			//s = GetString(buf + strlen(_path.autosave_dir) + strlen(PATHSEP), Str.STR_4004);
 			//strcpy(s, ".sav");
 			s = Global.GetString(Str.STR_4004);
@@ -950,7 +946,7 @@ public class Main {
 		if (0 == Global._pause || Global._cheats.build_in_pause.value) TextEffect.MoveAllTextEffects();
 
 		Window.InputLoop();
-
+		MusicGui.MusicLoop();
 
 	}
 
@@ -978,7 +974,7 @@ public class Main {
 		GfxInit.GfxLoadSprites();
 
 		// Update current year
-		Global.SetDate(Global._date);
+		Global.gs.date.SetDate(Global.get_date());
 
 		// reinit the landscape variables (landscape might have changed)
 		Misc.InitializeLandscapeVariables(true);
@@ -1038,7 +1034,7 @@ public class Main {
 			error(e.toString());
 		}
 		
-		Global.printf("Start in '%s'", cwd);
+		//Global.printf("Start in '%s'", cwd);
 		
 		String slcwd = cwd + File.separator;
 		
@@ -1048,13 +1044,13 @@ public class Main {
 		Global._path.save_dir = slcwd+"save";
 		Global._path.autosave_dir = Global._path.save_dir + File.separator +  "autosave";
 		Global._path.scenario_dir = slcwd+"scenario";
-		Global._path.gm_dir = slcwd+"gm"+ File.separator;
+		Global._path.gm_dir = slcwd+"resources"+ File.separator + "gm"+ File.separator;
 		Global._path.data_dir = slcwd+"resources"+ File.separator;
 		//Global._path.lang_dir = slcwd+"lang"+ File.separator;
 		Global._path.lang_dir = slcwd+"resources"+ File.separator;
 
-		if (Global._config_file == null)
-			Global._config_file =  Global._path.personal_dir + "openttd.cfg";
+		if (Global._path.config_file == null)
+			Global._path.config_file =  Global._path.personal_dir + "nextttd.cfg";
 
 		/* TODO paths
 		_highscore_file = str_fmt("%shs.dat", _path.personal_dir);

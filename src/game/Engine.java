@@ -132,7 +132,7 @@ public class Engine extends EngineTables implements Serializable
 
 	static void AdjustAvailAircraft()
 	{
-		int date = Global._date;
+		int date = Global.get_date();
 		byte avail = 0;
 		if (date >= 12784) avail |= 2; // big airport
 		if (date < 14610 || Global._patches.always_small_airport) avail |= 1;  // small airport
@@ -209,8 +209,8 @@ public class Engine extends EngineTables implements Serializable
 
 			r = Hal.Random();
 			e.intro_date = BitOps.GB(r, 0, 9) + ei.base_intro;
-			if (e.intro_date <= Global._date) {
-				e.age = (Global._date - e.intro_date) >> 5;
+			if (e.intro_date <= Global.get_date()) {
+				e.age = (Global.get_date() - e.intro_date) >> 5;
 				e.player_avail = -1;
 				e.flags |= ENGINE_AVAILABLE;
 			}
@@ -905,7 +905,7 @@ public class Engine extends EngineTables implements Serializable
 	{
 		//EngineID i;
 
-		if (Global._cur_year >= 130) return;
+		if (Global.get_cur_year() >= 130) return;
 
 		for (int i = 0; i != Global.gs._engines.length; i++) {
 			Engine  e = Global.gs._engines[i];
@@ -1044,7 +1044,7 @@ public class Engine extends EngineTables implements Serializable
 
 	public static void EnginesMonthlyLoop()
 	{
-		if (Global._cur_year < 130) {
+		if (Global.get_cur_year() < 130) {
 			for (int i = 0 ; i < Global.gs._engines.length; i++) 
 			{
 				Engine e = Global.gs._engines[i];
@@ -1054,10 +1054,10 @@ public class Engine extends EngineTables implements Serializable
 					CalcEngineReliability(e);
 				}
 
-				if (0 == (e.flags & ENGINE_AVAILABLE) && (Global._date - Math.min(Global._date, 365)) >= e.intro_date) {
+				if (0 == (e.flags & ENGINE_AVAILABLE) && (Global.get_date() - Math.min(Global.get_date(), 365)) >= e.intro_date) {
 					// Introduce it to all players
 					NewVehicleAvailable(e);
-				} else if (0 == (e.flags & (ENGINE_AVAILABLE|ENGINE_INTRODUCING)) && Global._date >= e.intro_date) {
+				} else if (0 == (e.flags & (ENGINE_AVAILABLE|ENGINE_INTRODUCING)) && Global.get_date() >= e.intro_date) {
 					// Introduction date has passed.. show introducing dialog to one player.
 					e.flags |= ENGINE_INTRODUCING;
 

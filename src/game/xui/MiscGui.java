@@ -1603,15 +1603,15 @@ public class MiscGui {
 	// p2 1 (increase) or -1 (decrease)
 	static int ClickChangeDateCheat(int p1, int p2)
 	{
-		YearMonthDay ymd = new YearMonthDay();
-		GameDate.ConvertDayToYMD(ymd, Global._date);
+		YearMonthDay ymd = new YearMonthDay(Global.get_date());
+		//YearMonthDay.ConvertDayToYMD(ymd, Global._date);
 
-		if ((ymd.year == 0 && p2 == -1) || (ymd.year == 170 && p2 == 1)) return Global._cur_year;
+		if ((ymd.year == 0 && p2 == -1) || (ymd.year == 170 && p2 == 1)) return Global.get_cur_year();
 
-		Global.SetDate(GameDate.ConvertYMDToDay(Global._cur_year + p2, ymd.month, ymd.day));
+		Global.gs.date.SetDate(GameDate.ConvertYMDToDay(Global.get_cur_year() + p2, ymd.month, ymd.day));
 		Engine.EnginesMonthlyLoop();
 		Window.FindWindowById(Window.WC_STATUS_BAR, 0).SetWindowDirty();
-		return Global._cur_year;
+		return Global.get_cur_year();
 	}
 
 	//typedef int CheckButtonClick(int, int);

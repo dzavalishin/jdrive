@@ -156,7 +156,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		int max; // max possible length of a bridge (with patch 100)
 
 		if (bridge_type >= Bridge.MAX_BRIDGES) return false;
-		if (b.avail_year > Global._cur_year) return false;
+		if (b.avail_year > Global.get_cur_year()) return false;
 
 		max = b.max_length;
 		if (max >= 16 && Global._patches.longbridges) max = 100;

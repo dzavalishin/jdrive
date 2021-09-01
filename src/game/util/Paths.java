@@ -10,6 +10,8 @@ public class Paths {
 	public String autosave_dir;
 	public String scenario_dir;
 	public String second_data_dir;
+	
+	public String config_file;
 }
 
 

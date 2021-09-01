@@ -521,7 +521,7 @@ public class TrainCmd extends TrainTables
 
 					v.rail.railtype = Engine.GetEngine(engine).getRailtype();
 
-					v.build_year =  Global._cur_year;
+					v.build_year =  Global.get_cur_year();
 					v.type = Vehicle.VEH_Train;
 					v.cur_image = 0xAC2;
 					v.random_bits = Vehicle.VehicleRandomBits();
@@ -690,8 +690,8 @@ public class TrainCmd extends TrainTables
 				Global._new_vehicle_id = VehicleID.get( v.index );
 
 				v.service_interval = Global._patches.servint_trains;
-				v.date_of_last_service = Global._date;
-				v.build_year =  Global._cur_year;
+				v.date_of_last_service = Global.get_date();
+				v.build_year =  Global.get_cur_year();
 				v.type = Vehicle.VEH_Train;
 				v.cur_image = 0xAC2;
 				v.random_bits = Vehicle.VehicleRandomBits();
@@ -3862,7 +3862,7 @@ public class TrainCmd extends TrainTables
 		}
 	}
 
-	static void TrainsYearlyLoop()
+	public static void TrainsYearlyLoop()
 	{
 		//Vehicle v;
 

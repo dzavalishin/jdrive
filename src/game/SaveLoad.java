@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Properties;
 
 import game.struct.HighScore;
 import game.xui.Window;
@@ -190,7 +191,7 @@ FileInputStream fis = new FileInputStream("settings.xml");
 		Window.BeforeSave();
 
 		oos.writeObject(Global.gs);
-		oos.writeObject(Global._m);
+		//oos.writeObject(Global._m);
 		Town.saveGame(oos);
 		Engine.saveGame(oos);
 		Depot.saveGame(oos);
@@ -208,7 +209,7 @@ FileInputStream fis = new FileInputStream("settings.xml");
 	private static void readAll(ObjectInputStream oin) throws IOException, ClassNotFoundException 
 	{
 		Global.gs = (GameState) oin.readObject();
-		Global._m = (Tile[]) oin.readObject();
+		//Global._m = (Tile[]) oin.readObject();
 		Town.loadGame(oin);
 		Engine.loadGame(oin);
 		Depot.loadGame(oin);
@@ -230,7 +231,7 @@ FileInputStream fis = new FileInputStream("settings.xml");
 	static void SaveToHighScore()
 	{
 		File fn = new File( Global._path.personal_dir, HISCORE_FILE_NAME );
-		
+
 		FileOutputStream fos;
 		try {
 			fos = new FileOutputStream(fn);
@@ -238,7 +239,7 @@ FileInputStream fis = new FileInputStream("settings.xml");
 			Global.error("Can't load hiscore: ", e1.toString());
 			return;
 		}
-		
+
 		XMLEncoder encoder = new XMLEncoder(fos);
 		encoder.setExceptionListener(new ExceptionListener() {
 			public void exceptionThrown(Exception e) {
@@ -248,27 +249,80 @@ FileInputStream fis = new FileInputStream("settings.xml");
 		encoder.writeObject(Global._highscore_table);
 		encoder.close();		
 	}
-	
+
 	static void LoadFromHighScore()
 	{
 		// If can't load 
 		//Global._highscore_table = new HighScore[5][5];
-		
+
 		File fn = new File( Global._path.personal_dir, HISCORE_FILE_NAME );
-		
+
 		FileInputStream fis;
 		try {
 			fis = new FileInputStream(fn);
-		    XMLDecoder decoder = new XMLDecoder(fis);
-		    Object read = decoder.readObject();
-		    if( read != null ) Global._highscore_table = (HighScore [][]) read;
-		    decoder.close();
-		    fis.close();
+			XMLDecoder decoder = new XMLDecoder(fis);
+			Object read = decoder.readObject();
+			if( read != null ) Global._highscore_table = (HighScore [][]) read;
+			decoder.close();
+			fis.close();
 		} catch (IOException e) {
 			Global.error("Can't save hiscore: ", e.toString());
 			return;
 		}
-	    
+
 	}
-	
+
+
+	static Properties prop = new Properties();
+
+	public static void LoadFromConfig()
+	{
+		//ini file should look like host=localhost
+		try {
+			prop.load(new FileInputStream(Global._path.config_file));
+		} catch (FileNotFoundException e) {
+			// Ignore
+		} catch (IOException e) {
+			Global.error(e);		
+		}
+		//String host = prop.getProperty("host");
+
+		loadConfigItems();
+	}
+
+	static void loadConfigItems()
+	{
+		Global._debug_ai_level 			= getIntProperty("debug-ai", 0);
+		Global._debug_grf_level			= getIntProperty("debug-grf", 0);
+		Global._debug_map_level			= getIntProperty("debug-map", 0);
+		Global._debug_misc_level		= getIntProperty("debug-misc", 0);
+		Global._debug_ms_level 			= getIntProperty("debug-ms", 0);
+		Global._debug_npf_level			= getIntProperty("debug-npf", 0);
+		Global._debug_ntp_level			= getIntProperty("debug-ntp", 0);
+		Global._debug_pbs_level			= getIntProperty("debug-pbs", 0);
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+	private static int getIntProperty(String name, int def) {
+		String v = prop.getProperty(name);
+
+		if(v == null) return def;
+		try {
+			return Integer.parseInt(v);
+		}
+		catch (NumberFormatException e) {
+			return def;
+		}
+
+	}
 }

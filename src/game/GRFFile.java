@@ -562,12 +562,12 @@ public class GRFFile
 				int cargo = bufp.grf_load_ubyte();
 
 				// XXX: Need to consult this with patchman yet.
-				if(false) {
+				/*if(false) {
 					// Documentation claims this is already the
 					// per-landscape cargo type id, but newships.grf
 					// assume otherwise.
 					//cargo = local_cargo_id_ctype[cargo];
-				}
+				}*/
 				svi[e+i].cargo_type = cargo;
 			}
 		}	break;
@@ -1981,7 +1981,7 @@ public class GRFFile
 		}
 
 		case 0x8D:    /* TTD Version, 00=DOS, 01=Windows */
-			param_val = BitOps.b2i(!Global._use_dos_palette);
+			param_val = 1; // BitOps.b2i(!Global._use_dos_palette);
 			break;
 		case 0x8E:
 			param_val = TrainGui._traininfo_vehicle_pitch;

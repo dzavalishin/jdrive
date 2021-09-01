@@ -38,7 +38,7 @@ public class PlayerGui
 			Gfx.DrawStringRightAligned(111, 27 + 10*13 + 2, Str.STR_7020_TOTAL, 0);
 
 			/* draw the price columns */
-			year = Global._cur_year - 2;
+			year = Global.get_cur_year() - 2;
 			j = 3;
 			x = 215;
 			//tbl = p.yearly_expenses + 2;
@@ -78,7 +78,7 @@ public class PlayerGui
 			y = 171;
 
 			// draw max loan aligned to loan below (y += 10)
-			Global.SetDParam64(0, Global._economy.getMax_loan());
+			Global.SetDParam64(0, Global.gs._economy.getMax_loan());
 			Gfx.DrawString(202, y+10, Str.STR_MAX_LOAN, 0);
 
 		} else

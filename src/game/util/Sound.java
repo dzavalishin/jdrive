@@ -18,6 +18,7 @@ import game.Vehicle;
 import game.ids.EngineID;
 import game.struct.Point;
 import game.tables.Snd;
+import game.xui.MusicGui;
 import game.xui.ViewPort;
 import game.xui.Window;
 
@@ -28,7 +29,7 @@ public class Sound {
 	private static int _file_count;
 	private static FileEntry[] _files;
 	private static Mixer _mixer;
-	private static int effect_vol = 127;
+	//private static int effect_vol = 127;
 
 
 	static final Snd trainSfx[] = {
@@ -208,7 +209,6 @@ public class Sound {
 		void mixSamples(int [] buffer, int samples)
 		{
 			// Clear the buffer
-			//memset(buffer, 0, sizeof(int16) * 2 * samples);
 			Arrays.fill(buffer, (byte)0);
 
 			// Mix each channel
@@ -272,7 +272,7 @@ public class Sound {
 						FileIO.FioReadDword();   // avg bytes per second
 						FileIO.FioReadWord();    // alignment
 						fe.bits_per_sample = FileIO.FioReadByte(); // bits per sample
-						FileIO.FioSeekTo(size - (2 + 2 + 4 + 4 + 2 + 1), FileIO.SEEK_CUR);
+						FileIO.FioSeekTo(size - (2 + 2 + 4 + 4 + 2 + 1L), FileIO.SEEK_CUR);
 					} else if (check4chars(tag, 'a', 't', 'a', 'd')) {
 						fe.file_size = size;
 						fe.file_offset = (int)FileIO.FioGetPos() | (SOUND_SLOT << 24);
@@ -339,8 +339,7 @@ public class Sound {
 	}
 
 
-	// TODO private!
-	public static void StartSound(int sound, int panning, int volume)
+	private static void StartSound(int sound, int panning, int volume)
 	{
 		int left_vol, right_vol;
 
@@ -390,7 +389,7 @@ public class Sound {
 
 	public static void SndPlayScreenCoordFx(/*SoundFx*/ int  sound, int x, int y)
 	{
-		if (effect_vol  == 0) return;
+		if (MusicGui.getEffectVolume() == 0) return;
 
 		Iterator<Window> ii = Window.getIterator();
 		while( ii.hasNext() )
@@ -406,7 +405,7 @@ public class Sound {
 				StartSound(
 						_sound_idx[sound],
 						left / (vp.getVirtual_width() / ((PANNING_LEVELS << 1) + 1)) - PANNING_LEVELS,
-						(_sound_base_vol[sound] * effect_vol * _vol_factor_by_zoom[vp.getZoom()]) >> 15
+						(_sound_base_vol[sound] * MusicGui.getEffectVolume() * _vol_factor_by_zoom[vp.getZoom()]) >> 15
 						);
 				return;
 			}
@@ -436,7 +435,7 @@ public class Sound {
 		StartSound(
 				_sound_idx[sound],
 				0,
-				(_sound_base_vol[sound] * effect_vol) >> 7
+				(_sound_base_vol[sound] * MusicGui.getEffectVolume()) >> 7
 				);
 	}
 

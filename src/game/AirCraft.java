@@ -17,7 +17,6 @@ import game.tables.AirCraftTables;
 import game.tables.AirportMovingData;
 import game.tables.Snd;
 import game.util.BitOps;
-import game.util.GameDate;
 import game.util.YearMonthDay;
 import game.util.wcustom.vehiclelist_d;
 import game.xui.Gfx;
@@ -280,8 +279,8 @@ public class AirCraft extends AirCraftTables {
 
 			v.service_interval = Global._patches.servint_aircraft;
 
-			v.date_of_last_service = Global._date;
-			v.build_year = u.build_year =  Global._cur_year;
+			v.date_of_last_service = Global.get_date();
+			v.build_year = u.build_year =  Global.get_cur_year();
 
 			v.cur_image = u.cur_image = 0xEA0;
 
@@ -626,7 +625,7 @@ public class AirCraft extends AirCraftTables {
 		Window.InvalidateWindowClasses(Window.WC_AIRCRAFT_LIST);
 	}
 
-	static void AircraftYearlyLoop()
+	public static void AircraftYearlyLoop()
 	{
 		Vehicle.forEach( (v) ->
 		{
@@ -1595,7 +1594,7 @@ public class AirCraft extends AirCraftTables {
 			if (Global._patches.serviceathelipad) {
 				if (v.subtype == 0 && airport.helipads != null) {
 					// an exerpt of ServiceAircraft, without the invisibility stuff
-					v.date_of_last_service = Global._date;
+					v.date_of_last_service = Global.get_date();
 					v.breakdowns_since_last_service = 0;
 					v.reliability = Engine.GetEngine(v.getEngine_type()).getReliability();
 					Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
@@ -2347,8 +2346,8 @@ public class AirCraft extends AirCraftTables {
 	{
 		final AircraftVehicleInfo avi = Engine.AircraftVehInfo(engine_number.id);
 		final Engine  e = Engine.GetEngine(engine_number);
-		YearMonthDay ymd = new YearMonthDay();
-		GameDate.ConvertDayToYMD(ymd, e.getIntro_date());
+		YearMonthDay ymd = new YearMonthDay(e.getIntro_date());
+		//YearMonthDay.ConvertDayToYMD(ymd, e.getIntro_date());
 
 		/* Purchase cost - Max speed */
 		Global.SetDParam(0, avi.base_cost * (Global._price.aircraft_base>>3)>>5);

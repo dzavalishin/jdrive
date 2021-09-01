@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import game.ids.PlayerID;
+import game.util.GameDate;
 import game.util.MemoryPool;
 import game.util.VehicleHash;
 import game.xui.Window;
@@ -22,10 +23,31 @@ public class GameState implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
+	// -------------------------------------------------------------------
+	// Big and structured stuff
+	// -------------------------------------------------------------------
+
+	/** Game map */
+	public Tile _m[];
+	
+	public final GameDate date = new GameDate();
+	public final Economy _economy = new Economy();
+
+	
+	// -------------------------------------------------------------------
+	// Variables
+	// -------------------------------------------------------------------
+
+	public int _map_log_x = 8; //6;
+	public int _map_size_x = 256;
+	public int _map_size_y = 256;
+	public int _map_tile_mask;
+	public int _map_size;
 	
 	public PlayerID _current_player = PlayerID.getNone();
 	public PlayerID _local_player = PlayerID.getNone();
 	public final boolean _is_old_ai_player = false;
+	
 	int _yearly_expenses_type; // TODO fixme, use parameter where possible
 	int _cur_player_tick_index;
 	int _next_competitor_start;
@@ -66,6 +88,8 @@ public class GameState implements Serializable
 
 	final MemoryPool<Station> _stations = new MemoryPool<>(Station.factory);
 	final MemoryPool<RoadStop> _roadstops = new MemoryPool<>(RoadStop.factory);
+
+
 
 
 	//static Window _windows[] = new Window[25];

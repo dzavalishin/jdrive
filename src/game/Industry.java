@@ -439,7 +439,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			i.cargo_waiting[0] -= cw;
 
 			/* fluctuating economy? */
-			if (Global._economy.fluct <= 0) cw = (cw + 1) / 2;
+			if (Global.gs._economy.getFluct() <= 0) cw = (cw + 1) / 2;
 
 			i.last_mo_production[0] += cw;
 
@@ -456,7 +456,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		if (cw > _industry_min_cargo[i.type]) {
 			i.cargo_waiting[1] -= cw;
 
-			if (Global._economy.fluct <= 0) cw = (cw + 1) / 2;
+			if (Global.gs._economy.getFluct() <= 0) cw = (cw + 1) / 2;
 
 			i.last_mo_production[1] += cw;
 
@@ -1516,7 +1516,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		i.total_transported[0] = 0;
 		i.total_transported[1] = 0;
 		i.was_cargo_delivered = false;
-		i.last_prod_year =  Global._cur_year;
+		i.last_prod_year =  Global.get_cur_year();
 		i.total_production[0] = i.production_rate[0] * 8;
 		i.total_production[1] = i.production_rate[1] * 8;
 
@@ -1737,7 +1737,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			return;
 
 		case INDUSTRY_CLOSABLE:
-			if ((Global._cur_year - i.last_prod_year) < 5 || !BitOps.CHANCE16(1, 180))
+			if ((Global.get_cur_year() - i.last_prod_year) < 5 || !BitOps.CHANCE16(1, 180))
 				closeit = false;
 			break;
 
@@ -1799,7 +1799,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		if (i.produced_cargo[0] != AcceptedCargo.CT_INVALID) {
 			pct = 0;
 			if (i.last_mo_production[0] != 0) {
-				i.last_prod_year =  Global._cur_year;
+				i.last_prod_year =  Global.get_cur_year();
 				pct =  Math.min(i.last_mo_transported[0] * 256 / i.last_mo_production[0],255);
 			}
 			i.pct_transported[0] = pct;
@@ -1814,7 +1814,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		if (i.produced_cargo[1] != AcceptedCargo.CT_INVALID) {
 			pct = 0;
 			if (i.last_mo_production[1] != 0) {
-				i.last_prod_year =  Global._cur_year;
+				i.last_prod_year =  Global.get_cur_year();
 				pct =  Math.min(i.last_mo_transported[1] * 256 / i.last_mo_production[1],255);
 			}
 			i.pct_transported[1] = pct;
@@ -1852,8 +1852,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		type = _new_industry_rand[GameOptions._opt.landscape][BitOps.GB(r, 16, 5)];
 
-		if (type == IT_OIL_WELL && Global._date > 10958) return;
-		if (type == IT_OIL_RIG  && Global._date < 14610) return;
+		if (type == IT_OIL_WELL && Global.get_date() > 10958) return;
+		if (type == IT_OIL_RIG  && Global.get_date() < 14610) return;
 
 		j = 2000;
 		for (;;) {
@@ -1925,7 +1925,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		case INDUSTRY_CLOSABLE:
 			/* maybe close */
-			if ( (Global._cur_year - i.last_prod_year) >= 5 && BitOps.CHANCE16(1,2)) {
+			if ( (Global.get_cur_year() - i.last_prod_year) >= 5 && BitOps.CHANCE16(1,2)) {
 				i.prod_level = 0;
 				str = _industry_close_strings[type];
 			}
@@ -1938,7 +1938,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 	}
 
-	static void IndustryMonthlyLoop()
+	public static void IndustryMonthlyLoop()
 	{
 		//Industry i;
 		PlayerID old_player = Global.gs._current_player;

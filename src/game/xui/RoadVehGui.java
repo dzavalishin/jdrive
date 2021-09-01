@@ -16,7 +16,6 @@ import game.TileIndex;
 import game.Vehicle;
 import game.ids.StringID;
 import game.util.BitOps;
-import game.util.GameDate;
 import game.util.YearMonthDay;
 import game.util.wcustom.vehiclelist_d;
 
@@ -32,8 +31,8 @@ public class RoadVehGui
 	{
 		final RoadVehicleInfo rvi = Engine.RoadVehInfo(engine_number);
 		final Engine  e = Engine.GetEngine(engine_number);
-		YearMonthDay ymd = new YearMonthDay();
-		GameDate.ConvertDayToYMD(ymd, e.getIntro_date());
+		YearMonthDay ymd = new YearMonthDay(e.getIntro_date());
+		//YearMonthDay.ConvertDayToYMD(ymd, e.getIntro_date());
 
 		/* Purchase cost - Max speed */
 		Global.SetDParam(0, rvi.base_cost * (Global._price.roadveh_base>>3)>>5);

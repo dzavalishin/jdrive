@@ -482,7 +482,7 @@ public class SettingsGui extends SettingsTables
 				//  This way when you load a game, the max loan and interest rate
 				//  are loaded correctly.
 				if (Global._game_mode == GameModes.GM_EDITOR)
-					Economy.StartupEconomy();
+					Global.gs._economy.StartupEconomy();
 				break;
 			}
 			case 11: /* Cancel button - close window, abandon changes */

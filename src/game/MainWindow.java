@@ -467,8 +467,8 @@ public class MainWindow extends JPanel implements ActionListener
 
 	private void processMouse(int x, int y) {
 		// TODO hack
-		x -= 10; //myLocation.x;
-		y -= 30; //myLocation.y;
+		x -= 13; //myLocation.x;
+		y -= 36; //myLocation.y;
 
 		Hal._cursor.processMouse(x, y);
 

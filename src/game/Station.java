@@ -1296,7 +1296,7 @@ public class Station extends StationTables implements IPoolItem
 			st.trainst_w = finalvalues[1];
 			st.trainst_h = finalvalues[2];
 
-			st.build_date = Global._date;
+			st.build_date = Global.get_date();
 
 			tile_delta = direction != 0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 
@@ -1765,7 +1765,7 @@ public class Station extends StationTables implements IPoolItem
 			st.facilities |= (type) ? FACIL_TRUCK_STOP : FACIL_BUS_STOP;
 			st.owner = Global.gs._current_player;
 
-			st.build_date = Global._date;
+			st.build_date = Global.get_date();
 
 			Landscape.ModifyTile(tile, TileTypes.MP_STATION,
 					//TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | 
@@ -2020,7 +2020,7 @@ public class Station extends StationTables implements IPoolItem
 			st.airport_type = p1;
 			st.airport_flags = 0;
 
-			st.build_date = Global._date;
+			st.build_date = Global.get_date();
 
 			/* if airport was demolished while planes were en-route to it, the
 			 * positions can no longer be the same (v.air.pos), since different
@@ -2148,7 +2148,7 @@ public class Station extends StationTables implements IPoolItem
 			st.had_vehicle_of_type |= HVOT_BUOY;
 			st.owner = PlayerID.getNone();
 
-			st.build_date = Global._date;
+			st.build_date = Global.get_date();
 
 			Landscape.ModifyTile(ti.tile, TileTypes.MP_STATION,
 					//TileTypes.MP_SETTYPE(TileTypes.MP_STATION) |
@@ -2337,7 +2337,7 @@ public class Station extends StationTables implements IPoolItem
 			st.facilities |= FACIL_DOCK;
 			st.owner = Global.gs._current_player;
 
-			st.build_date = Global._date;
+			st.build_date = Global.get_date();
 
 			Landscape.ModifyTile(tile, TileTypes.MP_STATION,
 					//TileTypes.MP_SETTYPE(TileTypes.MP_STATION) | 
@@ -3289,7 +3289,7 @@ public class Station extends StationTables implements IPoolItem
 		st.delete_ctr = 0;
 		st.last_vehicle = VehicleID.getInvalid();
 		st.facilities = FACIL_AIRPORT | FACIL_DOCK;
-		st.build_date = Global._date;
+		st.build_date = Global.get_date();
 
 		for (j = 0; j != AcceptedCargo.NUM_CARGO; j++) 
 		{

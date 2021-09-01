@@ -1711,7 +1711,7 @@ public class Gfx extends PaletteTabs
 		 * A few more for the DOS palette, because the water colors are
 		 * 245-254 for DOS and 217-226 for Windows.  */
 		final ExtraPaletteValues ev = _extra_palette_values;
-		int c = Global._use_dos_palette ? 38 : 28;
+		int c = /* Global._use_dos_palette ? 38 :*/ 28;
 		Colour [] old_val = new Colour[38]; // max(38, 28)
 		int i;
 		int j;

@@ -59,7 +59,7 @@ public class Console //extends ConsoleCmds
 	static byte _iconsole_scroll;
 
 	// ** stdlib ** //
-	static final byte _stdlib_developer = 1;
+	//static final byte _stdlib_developer = 1;
 	static final boolean _stdlib_con_developer = false;
 	static FileWriter _iconsole_output_file = null;
 
@@ -345,7 +345,7 @@ public class Console //extends ConsoleCmds
 	 */
 	static void IConsoleDebug(final String string)
 	{
-		if (_stdlib_developer > 1)
+		// TODO must be value of console var if (_stdlib_developer > 0)if (_stdlib_developer > 1)
 			IConsolePrintF(_icolour_dbg, "dbg: %s", string);
 	}
 
@@ -356,7 +356,8 @@ public class Console //extends ConsoleCmds
 	 */
 	static void IConsoleWarning(final String  string)
 	{
-		if (_stdlib_developer > 0)
+		// TODO must be value of console var if (_stdlib_developer > 0)
+		//if(Global._debug_misc_level > 0)
 			IConsolePrintF(_icolour_warn, "WARNING: %s", string);
 	}
 

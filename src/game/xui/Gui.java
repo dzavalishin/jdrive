@@ -519,7 +519,7 @@ public class Gui
 
 	static void MenuClickMusicWindow(int index)
 	{
-		// TODO ShowMusicWindow();
+		MusicGui.ShowMusicWindow();
 	}
 
 	static void MenuClickNewspaper(int index)
@@ -1140,7 +1140,7 @@ public class Gui
 			w.HandleButtonClick(6);
 			w.InvalidateWidget(5);
 
-			if (Global._date > MinDate) Global.SetDate(GameDate.ConvertYMDToDay(Global._cur_year - 1, 0, 1));
+			if (Global.get_date() > MinDate) Global.gs.date.SetDate(GameDate.ConvertYMDToDay(Global.get_cur_year() - 1, 0, 1));
 		}
 		Window._left_button_clicked = false;
 	}
@@ -1152,7 +1152,7 @@ public class Gui
 			w.HandleButtonClick(7);
 			w.InvalidateWidget(5);
 
-			if (Global._date < MaxDate) Global.SetDate(GameDate.ConvertYMDToDay(Global._cur_year + 1, 0, 1));
+			if (Global.get_date() < MaxDate) Global.gs.date.SetDate(GameDate.ConvertYMDToDay(Global.get_cur_year() + 1, 0, 1));
 		}
 		Window._left_button_clicked = false;
 	}
@@ -2071,10 +2071,10 @@ public class Gui
 			case Window.WKC_SHIFT | Window.WKC_F9: DockGui.ShowBuildDocksToolbar(); break;
 			case Window.WKC_SHIFT | Window.WKC_F10:AirportGui.ShowBuildAirToolbar(); break;
 			case Window.WKC_SHIFT | Window.WKC_F11: MiscGui.ShowBuildTreesToolbar(); break;
-			// TODO case Window.WKC_SHIFT | Window.WKC_F12: ShowMusicWindow(); break;
+			case Window.WKC_SHIFT | Window.WKC_F12: MusicGui.ShowMusicWindow(); break;
 			case Window.WKC_CTRL  | 'S': Global._make_screenshot = 1; break;
 			case Window.WKC_CTRL  | 'G': Global._make_screenshot = 2; break;
-			// TODO case Window.WKC_CTRL | Window.WKC_ALT | 'C': if (!_networking) ShowCheatWindow(); break;
+			//case Window.WKC_CTRL | Window.WKC_ALT | 'C': if (!_networking) ShowCheatWindow(); break;
 			case 'A': RailGui.ShowBuildRailToolbar(_last_built_railtype, 4); break; /* Invoke Autorail */
 			case 'L': Terraform.ShowTerraformToolbar(); break;
 			default: return;
@@ -2231,12 +2231,12 @@ public class Gui
 		switch(e.event) {
 		case WE_PAINT:
 			/* XXX look for better place for these */
-			if (Global._date <= MinDate) {
+			if (Global.get_date() <= MinDate) {
 				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 6);
 			} else {
 				w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 6);
 			}
-			if (Global._date >= MaxDate) {
+			if (Global.get_date() >= MaxDate) {
 				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 7);
 			} else {
 				w.disabled_state = BitOps.RETCLRBIT(w.disabled_state, 7);
@@ -2248,10 +2248,10 @@ public class Gui
 
 			w.DrawWindowWidgets();
 
-			Global.SetDParam(0, Global._date);
+			Global.SetDParam(0, Global.get_date());
 			Gfx.DrawStringCentered(298, 6, Str.STR_00AF, 0);
 
-			Global.SetDParam(0, Global._date);
+			Global.SetDParam(0, Global.get_date());
 			Gfx.DrawStringCentered(161, 1, Str.STR_0221_OPENTTD, 0);
 			Gfx.DrawStringCentered(161, 11,Str.STR_0222_SCENARIO_EDITOR, 0);
 
@@ -2367,7 +2367,7 @@ public class Gui
 			final Player p = (Global.gs._local_player.isSpectator()) ? null : Player.GetPlayer(Global.gs._local_player);
 
 			w.DrawWindowWidgets();
-			Global.SetDParam(0, Global._date);
+			Global.SetDParam(0, Global.get_date());
 			Gfx.DrawStringCentered(
 				70, 1, (Global._pause != 0 || Global._patches.status_long_date) ? Str.STR_00AF : Str.STR_00AE, 0
 			);
