@@ -4,11 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequencer;
-import javax.sound.midi.Synthesizer;
 
 import game.Global;
 
@@ -56,11 +54,11 @@ public class Music
 
 	public static void play_song(String filename) 
 	{
-		Global.debug("playing music %s", filename);
+		//Global.debug("playing music %s", filename);
 		File midiFile = new File(filename);
 
 		if(!midiFile.exists() || midiFile.isDirectory() || !midiFile.canRead()) {
-			Global.debug("failed to play music %s", filename);
+			Global.error("failed to play music %s", filename);
 			return;
 		}
 
@@ -70,7 +68,7 @@ public class Music
 
 			if(sequencer == null)
 			{
-				Global.debug("failed to get MIDI seqencer");
+				Global.error("failed to get MIDI seqencer");
 				return;
 			}
 
@@ -84,11 +82,11 @@ public class Music
 			sequencer.open();
 			sequencer.start();
 		} catch(MidiUnavailableException mue) {
-			System.out.println("Midi device unavailable!");
+			Global.error("Midi device unavailable");
 		} catch(InvalidMidiDataException imde) {
-			System.out.println("Invalid Midi data!");
+			Global.error("Invalid Midi data");
 		} catch(IOException ioe) {
-			System.out.println("I/O Error!");
+			Global.error("I/O Error");
 		} 
 
 	}  
