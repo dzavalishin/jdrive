@@ -221,9 +221,9 @@ public class Main {
 
 	public static void main(String[] argv) 
 	{
-		int argc = argv.length;
+		//int argc = argv.length;
 		//MyGetOptData mgo = new MyGetOptData();
-		int i;
+		//int i;
 		boolean network = false;
 		//String network_conn = null;
 		//final String optformat;

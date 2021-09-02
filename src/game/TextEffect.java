@@ -35,7 +35,8 @@ public class TextEffect
 
 
 
-	static final int MAX_CHAT_MESSAGES = 10;
+	private static final int MAX_ANIMATED_TILES = 256;
+	private static final int MAX_CHAT_MESSAGES = 10;
 
 	static final List<TextEffect> _text_effect_list = new ArrayList<>();
 	static final List<TextMessage> _text_message_list = new ArrayList<>();
@@ -306,26 +307,34 @@ public class TextEffect
 
 	static void DeleteAnimatedTile(TileIndex tile)
 	{
-
+		if( Global.gs._animated_tile_list.remove(tile) )
+			tile.MarkTileDirtyByTile();
+		/*
 		for(int i = 0 ; i < Global.gs._animated_tile_list.length; i++)
 		{
 			if (tile.equals(Global.gs._animated_tile_list[i])) 
 			{
-				/* remove the hole */
+				// remove the hole 
 				//memmove(ti, ti + 1, endof(_animated_tile_list) - 1 - ti);
 				System.arraycopy(Global.gs._animated_tile_list, i+1, Global.gs._animated_tile_list, i, Global.gs._animated_tile_list.length - i - 1);
-				/* and clear last item */
+				// and clear last item 
 				//endof(_animated_tile_list)[-1] = 0;
 				Global.gs._animated_tile_list[Global.gs._animated_tile_list.length-1] = null;
 				tile.MarkTileDirtyByTile();
 				return;
 			}
-		}
+		}*/
 	}
 
 	static boolean AddAnimatedTile(TileIndex tile)
 	{
-
+		if(Global.gs._animated_tile_list.size() > MAX_ANIMATED_TILES)
+			return false;
+		
+		Global.gs._animated_tile_list.add(tile);
+		tile.MarkTileDirtyByTile();
+		return true;
+		/*
 		//for (ti = _animated_tile_list; ti != endof(_animated_tile_list); ti++) {
 		//for( TileIndex ti : _animated_tile_list)
 		for(int i = 0 ; i < Global.gs._animated_tile_list.length; i++)
@@ -337,18 +346,20 @@ public class TextEffect
 			}
 		}
 
-		return false;
+		return false;*/
 	}
 
 	static void AnimateAnimatedTiles()
 	{
-		for( TileIndex ti : Global.gs._animated_tile_list)
+		// AnimateTile modifies list, hence a copy
+		for( TileIndex ti : Global.gs._animated_tile_list.toArray(TileIndex[]::new))
 			if( ti != null)
 				Landscape.AnimateTile(ti);
 	}
 
 	static void InitializeAnimatedTiles()
 	{
+		Global.gs._animated_tile_list.clear();
 	}
 
 

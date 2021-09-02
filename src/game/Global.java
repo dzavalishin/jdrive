@@ -404,14 +404,14 @@ public class Global
 	public static final Integer[] _decode_parameters = new Integer[20];
 
 
-	@Deprecated
+	//@Deprecated
 	public static void SetDParam(int n, int v)
 	{
 		//assert(n < _decode_parameters.length);
 		_decode_parameters[n] = v;
 	}
 
-	@Deprecated
+	//@Deprecated
 	public static void SetDParam64(int n, long v)
 	{
 		//assert(n + 1 < lengthof(_decode_parameters));
