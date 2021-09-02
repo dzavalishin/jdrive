@@ -22,7 +22,41 @@ It's time to move on.
 
 My goals:
 
-  * Reduce code complexity and obscurity. Core functions code must be twice 
+  * Reduce code complexity and obscurity. Core functions code must be twice shorter in terms of byte count.
+  * No more bit fields and C/asm style polymorphism. Make code more OO and, where possible, functional.
+  * Make game save automatic. No manual enumeration of fields to save.  
+
+As a result game code must be really easy to understand and modify.
+
+Example:
+
+Obscure and long:
+```c
+FOR_ALL_INDUSTRIES(ind) {
+	if (ind->xy != 0 && (cargo_type == ind->accepts_cargo[0] || cargo_type
+			 == ind->accepts_cargo[1] || cargo_type == ind->accepts_cargo[2]) &&
+			 ind->produced_cargo[0] != CT_INVALID &&
+			 ind->produced_cargo[0] != cargo_type &&
+			 (t = DistanceManhattan(ind->xy, xy)) < 2 * u) 
+	{
+		...
+	}
+}
+```
+
+Easy to understand and short:
+```java
+Industry.forEach( ind ->
+{			
+	if (ind.isValid() && ind.acceptsCargo(cargo_type) 
+			&& !ind.producesCargo(cargo_type)
+			&& (t = Map.DistanceManhattan(ind.xy, xy)) < 2 * u[0]) 
+	{
+		...
+	}
+});
+```
+
 
 ## Why Java
 
