@@ -475,6 +475,9 @@ public class MusicGui
 		case WE_MOUSELOOP:
 			Window.InvalidateWindowWidget(Window.WC_MUSIC_WINDOW, 0, 7);
 			break;
+			
+		default:
+			break;
 		}
 
 	}

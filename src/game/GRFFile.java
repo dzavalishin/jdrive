@@ -67,7 +67,7 @@ public class GRFFile
 	//static  int _traininfo_vehicle_pitch;
 
 	static GRFFile _cur_grffile;
-	static GRFFile _first_grffile;
+	public static GRFFile _first_grffile;
 	static int _cur_spriteid;
 	static int _cur_stage;
 
@@ -148,7 +148,7 @@ public class GRFFile
 		buf = String.format(str, args);
 
 		export_severity = 2 - (severity == GRFFile.severity.GMS_FATAL ? 2 : severity.ordinal());
-		Global.DEBUG_grf( export_severity, "[%s][%s] %s", _cur_grffile.filename, severitystr[severity.ordinal()], buf);
+		Global.DEBUG_grf( export_severity, "[%s][%s] %s", _cur_grffile.getFilename(), severitystr[severity.ordinal()], buf);
 	}
 
 
@@ -164,7 +164,7 @@ public class GRFFile
 	{
 		GRFFile file;
 
-		for (file = _first_grffile; file != null; file = file.next) {
+		for (file = _first_grffile; file != null; file = file.getNext()) {
 			if (file.grfid == grfid) break;
 		}
 		return file;
@@ -174,8 +174,8 @@ public class GRFFile
 	{
 		GRFFile file;
 
-		for (file = _first_grffile; file != null; file = file.next) {
-			if( file.filename.equals(filename) ) 
+		for (file = _first_grffile; file != null; file = file.getNext()) {
+			if( file.getFilename().equals(filename) ) 
 				break;
 		}
 		return file;
@@ -2074,7 +2074,7 @@ public class GRFFile
 		_cur_grffile.flags |= 0x0001; /* set active flag */
 
 		Global.DEBUG_grf( 1, "[%s] Loaded GRFv%d set %08lx - %s:\n%s",
-				_cur_grffile.filename, version, grfid, name, info);
+				_cur_grffile.getFilename(), version, grfid, name, info);
 	}
 
 	static void SpriteReplace(DataLoader bufp) //, int len)
@@ -2366,7 +2366,7 @@ public class GRFFile
 
 			/* Unset activation flag */
 			if (file != null) {
-				grfmsg(severity.GMS_NOTICE, "GRFInhibit: Deactivating file ``%s''", file.filename);
+				grfmsg(severity.GMS_NOTICE, "GRFInhibit: Deactivating file ``%s''", file.getFilename());
 				file.flags &= 0xFFFE;
 			}
 		}
@@ -2424,7 +2424,7 @@ public class GRFFile
 		if (file.spritegroups == null)
 			return;
 
-		Global.DEBUG_grf( 6, "ReleaseSpriteGroups: Releasing for `%s'.", file.filename);
+		Global.DEBUG_grf( 6, "ReleaseSpriteGroups: Releasing for `%s'.", file.getFilename());
 		/*
 		for (i = 0; i < file.spritegroups_count; i++) {
 			if (file.spritegroups[i] != null)
@@ -2467,7 +2467,7 @@ public class GRFFile
 	 * Reset all NewGRF loaded data
 	 * TODO
 	 */
-	static void ResetNewGRFData()
+	public static void ResetNewGRFData()
 	{
 		//int i;
 		/*
@@ -2725,9 +2725,13 @@ public class GRFFile
 
 
 	static boolean initialized = false; // XXX yikes
-	static final String [] _newgrf_files = new String[32];
-
-	static void LoadNewGRF(int load_index, int file_index)
+	static final String [] _newgrf_files = //new String[32];
+		{
+			"xussr.grf"	
+		};
+			
+			
+	public static void LoadNewGRF(int load_index, int file_index)
 	{
 		int stage;
 
@@ -2761,7 +2765,46 @@ public class GRFFile
 
 		// Pre-calculate all refit masks after loading GRF files
 		// [dz] call later 
-		CalculateRefitMasks();
+		//CalculateRefitMasks();
+	}
+
+
+
+
+
+
+
+
+
+
+	public GRFFile getNext() {
+		return next;
+	}
+
+
+
+
+
+
+
+
+
+
+	public String getFilename() {
+		return filename;
+	}
+
+
+
+
+
+
+
+
+
+
+	public int getGrfid() {
+		return grfid;
 	}
 
 }

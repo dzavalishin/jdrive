@@ -1,0 +1,124 @@
+<body>
+
+
+<h1>Format of a GRF File</h1>
+
+A GRF file is a collection of "sprites", meaning rectangular graphics
+objects that are drawn to the screen.  Examples are the vehicle graphics,
+the landscape tiles, and pretty much everything that you see on the 
+screen.
+<p>
+The GRF file is simply one sprite following after another until the end
+of the file with no meta-information.  The list of sprites is terminated
+by a zero-size sprite, and followed by what looks to be a 
+four-byte checksum at the very end of the file.  TTD never even looks at the
+checksum though.</p>
+
+<h2>Sprite Info</h2>
+Each sprite starts with a record of the following data:
+<dl><dt>WORD size</dt>
+<dd>Note, size can be either compressed or uncompressed size,
+		see below.  It includes the following info bytes.</dd>
+<dt>BYTE info</dt>
+<dd>Bitcoded value that determines what type this sprite is.
+<table class="wikitable"><tbody><tr><td>Bit</td><td>Val</td><td>Meaning</td></tr>
+<tr><td>0</td><td>1</td><td>?</td></tr>
+<tr><td>1</td><td>2</td><td>Size is compressed size if set<br>
+			  If this bit is set, the given size is simply the
+			  size in the file.  If it is unset, you *must*
+			  decompress it to find out how large it is in the
+			  file.</td></tr>
+<tr><td>2</td><td>4</td><td>?</td></tr>
+<tr><td>3</td><td>8</td><td>Has transparency (i.e. is a tile), see below</td></tr>
+<tr><td colspan="2">others</td><td>?</td></tr>
+</tbody></table>
+		If info==0xff, the sprite is a special type and has none
+		of the following info byte, it is simply a stream of some
+		bytes with the given size.  For example, these are used
+		for specifying colour maps for the transparency feature and
+		the company colours, as well as making a grey-scale image
+		for the newspaper.  With TTDPatch, these sprites are so-called
+		"actions", see TTDPatch's sprites.txt for more details.</dd>
+<dt>BYTE ydim</dt><dd>How many lines there are in the sprite (y dimension)</dd>
+<dt>WORD xdim</dt><dd>How many columns there are (x dimension)</dd>
+<dt>WORD xrel</dt><dd>Horizontal offset.  The offset is counted from the base coordinate for each sprite.</dd>
+<dt>WORD yrel</dt><dd>Vertical offset</dd>
+</dl>
+
+After this follows the actual compressed data.  If info bit 3 is not set, the 
+data is simply a stream of pixels from left to right, and from top to bottom,
+making up xdim*ydim bytes.
+<p>
+Finally, the file ends with a four byte checksum.  I do not know the algorithm
+to calculate this, however it isn't important because this checksum is never
+even looked at anyway.</p>
+
+<h2>Tile sprites</h2>
+
+If info bit 3 is set, the sprite is a tile and has some special transparency
+information that is encoded like follows.  Each line is encoded separately 
+and split into "chunks".  Each chunk contains pixels, but the chunks may
+skip a few pixels which are then transparent.
+<p>
+The sprite data first starts off with a list of two-byte offsets, one for each
+line.  These determine at which offset each line starts, counted from the
+first info byte.  Then follow the chunks for the lines:</p>
+
+<dl><dt>BYTE cinfo</dt><dd>The high bit is set if this is the last chunk in the line.
+		The line need not be filled entirely, any remaining pixels 
+		are simply transparent.
+		The lower seven bits give the length of this chunk in pixels.</dd>
+<dt>BYTE cofs</dt><dd>x offset at which this chunk starts.  The pixels between this
+		chunk and the last one will be transparent.</dd>
+</dl>
+After this follow (cinfo &amp; 0x7f) bytes of pixels.
+
+<h2>Compression algorithm</h2>
+
+The compression used is a variation on the LZ77 algorithm which detects 
+redundancy and losslessly reduces the size of the data.  Here's how the
+compressed data looks in a GRF file.
+<p>
+The compressed stream contains either a pointer to an earlier location and
+a length, which means that these bytes are copied over from the given location,
+or it contains a length and a verbatim chunk which is copied to the output
+stream.</p>
+
+<dl><dt>BYTE code</dt><dd>The high bit of the code shows whether this is a verbatim
+		chunk (not set)  or a repetition of earlier data (set).</dd></dl>
+
+The meaning of the following bytes depends on whether the high bit of code is set. 
+<p>
+If the high bit is <i>not set</i>, what follows is code&amp;0x7f bytes of verbatim data,
+or 0x80 bytes of verbatim data if code==0.</p>
+<p>
+If the high bit is <i>set</i>, the code has a slightly different meaning.  Bits 3 to 7
+are now five bits defining the negative value of the length, that is how much data 
+should be copied from the earlier location.  Bits 0 to 2 are the high bits of an offset, 
+with the low bits being in the next byte.</p>
+
+<dl><dt>BYTE lofs</dt><dd>Low bits of the offset</dd></dl>
+
+Use this to extract length and offset:
+<pre>unsigned long length = -(code &gt;&gt; 3);
+unsigned long offset = ( (code &amp; 7) &lt;&lt; 8 ) | lofs;
+</pre>
+
+It's important that the variables are unsigned and at least two bytes large.
+(But "code" must be a signed char, of course.)
+<p>
+The offset is counted backwards from the current location.  So you subtract
+the offset from your position in the output stream and copy the given number
+of bytes.</p>
+<p>
+And that's pretty much all you need to know about a GRF file!</p>
+
+    <br>
+     Copyright © 1999-2006 by
+    Josef Drexler.<br>
+     &nbsp; 
+    <address>
+      Last changed on Sep 24 2006 19:27 EDT by <a href="http://www.ttdpatch.net/email.php?GRFCodec%2CGRF+Format">Josef Drexler</a>
+
+
+</body>
