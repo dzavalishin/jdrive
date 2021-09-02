@@ -57,6 +57,28 @@ Industry.forEach( ind ->
 });
 ```
 
+One more example. Code:
+
+```c
+static bool AnyTownExists(void)
+{
+	const Town* t;
+
+	FOR_ALL_TOWNS(t) {
+		if (t->xy != 0) return true;
+	}
+	return false;
+}
+```
+Becomes:
+```java
+public static boolean anyTownExist()
+{
+	return stream().anyMatch( t -> t.isValid() );
+}
+```
+
+
 
 ## Why Java
 
