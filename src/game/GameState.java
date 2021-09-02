@@ -92,7 +92,6 @@ public class GameState implements Serializable
 
 
 
-	//static Window _windows[] = new Window[25];
-	public static final List<Window> _windows = new ArrayList<>();
+	public final List<Window> _windows = new ArrayList<>();
 	
 }

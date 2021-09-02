@@ -375,14 +375,6 @@ public class RoadVehGui
 
 		w.DrawWindowWidgets();
 
-		/* // TODO XXX HACK
-		if(null != w.custom && !(w.custom instanceof buildtrain_d))
-		{
-			Global.error("retype custom from %s", w.custom.getClass().getName() );
-			w.custom = null;
-		}*/
-		
-
 		{
 			int num = Global.NUM_ROAD_ENGINES;
 			int x = 1;

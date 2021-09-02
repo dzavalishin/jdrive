@@ -507,28 +507,7 @@ public class ViewPort
 
 		vd.last_parent = null;
 
-		/*
-		if (vd.spritelist_mem >= vd.eof_spritelist_mem) {
-			Global.DEBUG_misc( 0, "Out of sprite mem");
-			return;
-		}
-		ps = (ParentSpriteToDraw )vd.spritelist_mem;
-		 */
 		ps = new ParentSpriteToDraw();
-
-		/*
-		if (vd.parent_list >= vd.eof_parent_list) {
-			// This can happen rarely, mostly when you zoom out completely
-			//  and have a lot of stuff that moves (and is added to the
-			//  sort-list, this function). To solve it, increase
-			//  parent_list somewhere below to a higher number.
-			// This can not really hurt you, it just gives some black
-			//  spots on the screen ;)
-			Global.DEBUG_misc( 0, "Out of sprite mem (parent_list)");
-			return;
-		}*/
-
-		//vd.spritelist_mem += sizeof(ParentSpriteToDraw);
 
 		ps.image = image;
 		ps.tile_x = x;
@@ -551,12 +530,8 @@ public class ViewPort
 		}
 
 		ps.unk16 = 0;
-		//ps.child = null;
-		//vd.last_child = &ps.child; // TODO vd.last_ps = ps and later last_ps.child = ...?
 
 		vd.last_parent = ps;
-
-		//*vd.parent_list++ = ps;
 		vd.parent_list.add( ps );
 
 		if (vd.combine_sprites == 1) vd.combine_sprites = 2;

@@ -650,10 +650,6 @@ public class SmallMapGui extends SmallMapGuiTables
 			x =  (((vp.virtual_width - (220*32)) / 2) + vp.virtual_left) / 4;
 			y = ((((vp.virtual_height- (120*32)) / 2) + vp.virtual_top ) / 2) - 32;
 			
-			// TODO XXX [dz] hack, small map crashes on negatives -- fixed!
-			//x = Math.max(x, 0);
-			//y = Math.max(y, 0);
-			
 			w.as_smallmap_d().scroll_x = (y-x) & ~0xF;
 			w.as_smallmap_d().scroll_y = (x+y) & ~0xF;
 			w.as_smallmap_d().subscroll = 0;

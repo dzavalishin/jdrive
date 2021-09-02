@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.function.BiConsumer;
 
-import game.GameState;
 import game.Global;
 import game.Hal;
 import game.Sprite;
@@ -141,7 +140,7 @@ public class Window extends WindowConstants
 
 
 	public static Iterator<Window> getIterator() {
-		return GameState._windows.iterator();
+		return Global.gs._windows.iterator();
 	}
 
 	/**
@@ -153,9 +152,9 @@ public class Window extends WindowConstants
 	{
 		int i = 0;
 
-		for(; i < GameState._windows.size(); i++ )
+		for(; i < Global.gs._windows.size(); i++ )
 		{
-			if( GameState._windows.get(i) == startw )
+			if( Global.gs._windows.get(i) == startw )
 			{
 				final int ci = i;
 
@@ -166,14 +165,14 @@ public class Window extends WindowConstants
 					@Override
 					public boolean hasNext() 
 					{
-						if(curw >= GameState._windows.size()) 
+						if(curw >= Global.gs._windows.size()) 
 							return false;
-						return GameState._windows.get(curw) != null;
+						return Global.gs._windows.get(curw) != null;
 					}
 
 					@Override
 					public Window next() {
-						return GameState._windows.get(curw++);
+						return Global.gs._windows.get(curw++);
 					}
 
 				};
@@ -545,7 +544,7 @@ public class Window extends WindowConstants
 		DrawPixelInfo bk = new DrawPixelInfo();
 		Hal._cur_dpi = bk;
 
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			if (right > w.left &&
 					bottom > w.top &&
 					left < w.left + w.width &&
@@ -560,14 +559,14 @@ public class Window extends WindowConstants
 		//final Window  v = w;
 		int x, wi, wie;
 
-		wi = GameState._windows.indexOf(w);
-		wie = GameState._windows.size();
+		wi = Global.gs._windows.indexOf(w);
+		wie = Global.gs._windows.size();
 		assert wi >= 0;
 
 		//while (++v != _last_window) 
 		while (++wi < wie) 
 		{
-			final Window  v = GameState._windows.get(wi);
+			final Window  v = Global.gs._windows.get(wi);
 
 			if (right > v.left &&
 					bottom > v.top &&
@@ -671,7 +670,7 @@ public class Window extends WindowConstants
 		//v = --_last_window;
 		//count = (byte*)v - (byte*)w;
 		//memmove(w, w + 1, count);
-		GameState._windows.remove(w);
+		Global.gs._windows.remove(w);
 	}
 
 	/*
@@ -688,7 +687,7 @@ public class Window extends WindowConstants
 
 	public static Window FindWindowById(int cls, int number)
 	{
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			if (w.window_class == cls && w.window_number == number) 
 				return w;
 		}
@@ -707,9 +706,9 @@ public class Window extends WindowConstants
 	static void DeleteWindowByClass(int cls)
 	{
 
-		for(int i = 0; i < GameState._windows.size();) 
+		for(int i = 0; i < Global.gs._windows.size();) 
 		{
-			Window w = GameState._windows.get(i);
+			Window w = Global.gs._windows.get(i);
 
 			if (w.window_class == cls) {
 				w.DeleteWindow();
@@ -763,8 +762,8 @@ public class Window extends WindowConstants
 	{
 		Window v;
 
-		int wi = GameState._windows.indexOf(this);
-		int we = GameState._windows.size();
+		int wi = Global.gs._windows.indexOf(this);
+		int we = Global.gs._windows.size();
 		assert wi >= 0;
 
 		int i = we;
@@ -772,7 +771,7 @@ public class Window extends WindowConstants
 		{
 			i--;
 			if( i < 0 ) return this;
-			v = GameState._windows.get(i);
+			v = Global.gs._windows.get(i);
 			if( !v.IsVitalWindow() )
 				break;
 		}		
@@ -781,8 +780,8 @@ public class Window extends WindowConstants
 		// TODO assert i > wi;
 
 		// insert w above i
-		GameState._windows.remove(this); // all windows moved a step down
-		GameState._windows.add(i, this);
+		Global.gs._windows.remove(this); // all windows moved a step down
+		Global.gs._windows.add(i, this);
 		SetWindowDirty();
 
 		return this; // TODO kill me, make void
@@ -949,7 +948,7 @@ public class Window extends WindowConstants
 		w.resize.step_width = 1;
 		w.resize.step_height = 1;
 
-		GameState._windows.add(w);
+		Global.gs._windows.add(w);
 		//_last_window++;
 
 		w.SetWindowDirty();
@@ -1000,7 +999,7 @@ public class Window extends WindowConstants
 			return false;
 
 		// Make sure it is not obscured by any window.
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			if (w.window_class == WC_MAIN_WINDOW) continue;
 
 			if (right > w.left &&
@@ -1030,7 +1029,7 @@ public class Window extends WindowConstants
 			return false;
 
 		// Make sure it is not obscured by any window.
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			if (w.window_class == WC_MAIN_WINDOW) continue;
 
 			if (left + width > w.left &&
@@ -1060,7 +1059,7 @@ public class Window extends WindowConstants
 			return pt;
 		}
 
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			if (w.window_class == WC_MAIN_WINDOW) continue;
 			/*
 			if (IsGoodAutoPlace1(w.left+w.width+2,w.top)) goto ok_pos;
@@ -1090,7 +1089,7 @@ public class Window extends WindowConstants
 
 		}
 
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			if (w.window_class == WC_MAIN_WINDOW) continue;
 
 			/*
@@ -1121,7 +1120,7 @@ public class Window extends WindowConstants
 			while(true)
 			{
 				boolean again = false;
-				for (Window w : GameState._windows) {
+				for (Window w : Global.gs._windows) {
 					if (w.left == left && w.top == top) {
 						left += 5;
 						top += 5;
@@ -1240,7 +1239,7 @@ public class Window extends WindowConstants
 
 	static public Window FindWindowFromPt(int x, int y)
 	{		
-		ListIterator<Window> i = GameState._windows.listIterator(GameState._windows.size());
+		ListIterator<Window> i = Global.gs._windows.listIterator(Global.gs._windows.size());
 
 		while (i.hasPrevious()) {
 			Window w = i.previous();
@@ -1255,8 +1254,10 @@ public class Window extends WindowConstants
 
 	public static void InitWindowSystem()
 	{
-		// TODO Console.IConsoleClose();
+		Console.IConsoleClose();
 
+		Global.gs._windows.clear(); // Kill all windows
+		
 		//memset(&_windows, 0, sizeof(_windows));
 		//_last_window = _windows;
 		//memset(_viewports, 0, sizeof(_viewports));
@@ -1289,10 +1290,10 @@ public class Window extends WindowConstants
 	static void DecreaseWindowCounters()
 	{
 		// Fight concurrent modification
-		ArrayList<Window> wcopy = new ArrayList<>(GameState._windows);
+		ArrayList<Window> wcopy = new ArrayList<>(Global.gs._windows);
 
 		//ListIterator<Window> i = _windows.listIterator(_windows.size());
-		ListIterator<Window> i = wcopy.listIterator(GameState._windows.size());
+		ListIterator<Window> i = wcopy.listIterator(Global.gs._windows.size());
 
 		//for (w = _last_window; w != _windows;) {
 		//	--w;
@@ -1307,7 +1308,7 @@ public class Window extends WindowConstants
 			w.CallWindowEventNP(WindowEvents.WE_MOUSELOOP);
 		}
 
-		i = GameState._windows.listIterator(GameState._windows.size());
+		i = Global.gs._windows.listIterator(Global.gs._windows.size());
 		//for (w = _last_window; w != _windows;) {
 		//	--w;
 		while (i.hasPrevious()) {
@@ -1438,7 +1439,7 @@ public class Window extends WindowConstants
 		if (!_dragging_window) return true;
 
 		// Otherwise find the window...
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			if (0 != (w.flags4 & WF_DRAGGING)) {
 				final Widget t = w.widget.get(1); // the title bar ... ugh
 				//final Window v;
@@ -1466,7 +1467,7 @@ public class Window extends WindowConstants
 					int delta;
 
 					//for (v = _windows; v != _last_window; ++v) 
-					for (Window v : GameState._windows ) 
+					for (Window v : Global.gs._windows ) 
 					{
 						if (v == w) continue; // Don't snap at yourself
 
@@ -1701,7 +1702,7 @@ public class Window extends WindowConstants
 		if (!_scrolling_scrollbar) return true;
 
 		// Find the scrolling window
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			if (0 != (w.flags4 & WF_SCROLL_MIDDLE)) {
 				// Abort if no button is clicked any more.
 				if (!_left_button_down) {
@@ -1943,9 +1944,9 @@ public class Window extends WindowConstants
 			}
 
 			// Call the event, start with the uppermost window.
-			for (int i = GameState._windows.size()-1; i >= 0 ; i-- ) 
+			for (int i = Global.gs._windows.size()-1; i >= 0 ; i-- ) 
 			{
-				Window w = GameState._windows.get(i);
+				Window w = Global.gs._windows.get(i);
 				// if a query window is open, only call the event for certain window types
 				if (query_open &&
 						w.window_class != WC_QUERY_STRING &&
@@ -2138,18 +2139,18 @@ public class Window extends WindowConstants
 		t = _we4_timer + 1;
 		if (t >= 100) 
 		{
-			for (i = GameState._windows.size()-1; i >= 0; i--) 
+			for (i = Global.gs._windows.size()-1; i >= 0; i--) 
 			{
-				w = GameState._windows.get(i);
+				w = Global.gs._windows.get(i);
 				w.CallWindowEventNP(WindowEvents.WE_4);
 			}
 			t = 0;
 		}
 		_we4_timer = t;
 
-		for (i = GameState._windows.size()-1; i >= 0; i--) 
+		for (i = Global.gs._windows.size()-1; i >= 0; i--) 
 		{
-			w = GameState._windows.get(i);
+			w = Global.gs._windows.get(i);
 			if (0 != (w.flags4 & WF_WHITE_BORDER_MASK)) {
 				w.flags4 -= WF_WHITE_BORDER_ONE;
 				if ( 0 == (w.flags4 & WF_WHITE_BORDER_MASK)) {
@@ -2160,7 +2161,7 @@ public class Window extends WindowConstants
 
 		Gfx.DrawDirtyBlocks();
 
-		for (Window ww : GameState._windows) {
+		for (Window ww : Global.gs._windows) {
 			if (ww.viewport != null) 
 				ViewPort.UpdateViewportPosition(ww);
 		}
@@ -2191,7 +2192,7 @@ public class Window extends WindowConstants
 	{
 		//final Window  w;
 
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			if (w.window_class == cls && w.window_number == number) 
 				w.SetWindowDirty();
 		}
@@ -2240,7 +2241,7 @@ public class Window extends WindowConstants
 
 	public static void InvalidateWindowWidget(int cls, int number, int widget_index)
 	{
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			if (w.window_class == cls && w.window_number == number) {
 				w.InvalidateWidget(widget_index);
 			}
@@ -2261,7 +2262,7 @@ public class Window extends WindowConstants
 	{
 		//final Window  w;
 
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			if (w.window_class == cls) w.SetWindowDirty();
 		}
 	}
@@ -2270,17 +2271,17 @@ public class Window extends WindowConstants
 	public static void CallWindowTickEvent()
 	{
 		int i;
-		for (i = GameState._windows.size()-1; i >= 0; i--) {
-			Window w = GameState._windows.get(i);
+		for (i = Global.gs._windows.size()-1; i >= 0; i--) {
+			Window w = Global.gs._windows.get(i);
 			w.CallWindowEventNP(WindowEvents.WE_TICK);
 		}
 	}
 
 	static void DeleteNonVitalWindows()
 	{
-		for (int i = 0; i < GameState._windows.size();) 
+		for (int i = 0; i < Global.gs._windows.size();) 
 		{
-			Window w = GameState._windows.get(i);
+			Window w = Global.gs._windows.get(i);
 			if (w.window_class != WC_MAIN_WINDOW &&
 					w.window_class != WC_SELECT_GAME &&
 					w.window_class != WC_MAIN_TOOLBAR &&
@@ -2309,9 +2310,9 @@ public class Window extends WindowConstants
 		DeleteNonVitalWindows();
 		// Delete all sticked windows
 		//for (w = _windows; w != _last_window;) {
-		for (int i = 0; i < GameState._windows.size();) 
+		for (int i = 0; i < Global.gs._windows.size();) 
 		{
-			Window w = GameState._windows.get(i);
+			Window w = Global.gs._windows.get(i);
 			if (0 != (w.flags4 & WF_STICKY)) {
 				w.DeleteWindow();
 				i = 0;
@@ -2347,7 +2348,7 @@ public class Window extends WindowConstants
 
 	static void RelocateAllWindows(int neww, int newh)
 	{
-		for (Window w : GameState._windows) {
+		for (Window w : Global.gs._windows) {
 			int left, top;
 
 			if (w.window_class == WC_MAIN_WINDOW) {

@@ -220,7 +220,7 @@ public class Console //extends ConsoleCmds
 		Hal.MarkWholeScreenDirty();
 	}
 
-	static void IConsoleClose() {if (_iconsole_mode == IConsoleModes.ICONSOLE_OPENED) IConsoleSwitch();}
+	public static void IConsoleClose() {if (_iconsole_mode == IConsoleModes.ICONSOLE_OPENED) IConsoleSwitch();}
 	static void IConsoleOpen()  {if (_iconsole_mode == IConsoleModes.ICONSOLE_CLOSED) IConsoleSwitch();}
 
 	/**

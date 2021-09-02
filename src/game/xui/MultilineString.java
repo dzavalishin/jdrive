@@ -77,7 +77,7 @@ public class MultilineString
 			}
 			
 			//num++;
-			//str[-1] = '\0'; TODO XXX why?
+			//str[-1] = '\0'; 
 			//if(sp > 0 ) sc[sp-1] = 0;
 			addLine( new String( sc, lineStart, last_space-lineStart), base );
 			sp = last_space;
