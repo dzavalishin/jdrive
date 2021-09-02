@@ -17,7 +17,6 @@ import game.struct.Point;
 import game.tables.CargoConst;
 import game.util.Paths;
 import game.util.Prices;
-import game.util.Strings;
 import game.xui.MiscGui;
 
 public class Global 

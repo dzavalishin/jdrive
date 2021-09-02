@@ -3,7 +3,12 @@ package game;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
+import game.console.Console;
 import game.enums.GameModes;
 import game.ids.StringID;
 import game.struct.TextMessage;
@@ -32,8 +37,12 @@ public class TextEffect
 
 	static final int MAX_CHAT_MESSAGES = 10;
 
-	static final TextEffect[] _text_effect_list = new TextEffect[30];
-	static final TextMessage[] _text_message_list = new TextMessage[MAX_CHAT_MESSAGES];
+	//static final TextEffect[] _text_effect_list = new TextEffect[30];
+	//static final TextMessage[] _text_message_list = new TextMessage[MAX_CHAT_MESSAGES];
+	
+	static final List<TextEffect> _text_effect_list = new ArrayList<>();
+	static final List<TextMessage> _text_message_list = new ArrayList<>();
+	
 	static int _textmessage_width = 0;
 	static boolean _textmessage_dirty = true;
 	static boolean _textmessage_visible = false;
@@ -71,7 +80,7 @@ public class TextEffect
 		//while (GetStringWidth(buf) > _textmessage_width - 9) 
 		//	buf[--length] = '\0';
 
-		/* Find an empty spot and put the message there */
+		/* Find an empty spot and put the message there * /
 		for (i = 0; i < MAX_CHAT_MESSAGES; i++) {
 			if (_text_message_list[i].message == null) {
 				// Empty spot
@@ -84,12 +93,19 @@ public class TextEffect
 				_textmessage_dirty = true;
 				return;
 			}
-		}
+		} */
 
+		_text_message_list.add( new TextMessage(buf, color, Global.get_date() + duration) );
+		
+		
 		// We did not found a free spot, trash the first one, and add to the end
 		//memmove(&_text_message_list[0], &_text_message_list[1], sizeof(_text_message_list[0]) * (MAX_CHAT_MESSAGES - 1));
 		//ttd_strlcpy(_text_message_list[MAX_CHAT_MESSAGES - 1].message, buf, sizeof(_text_message_list[MAX_CHAT_MESSAGES - 1].message));
 
+		while(_text_message_list.size() > MAX_CHAT_MESSAGES)
+			_text_message_list.remove(0);
+		
+		/*
 		for (i = 0; i < MAX_CHAT_MESSAGES-1; i++) 
 		{
 			_text_message_list[i] = _text_message_list[i+1];
@@ -102,17 +118,19 @@ public class TextEffect
 		_text_message_list[MAX_CHAT_MESSAGES - 1].message = buf;
 
 		_textmessage_dirty = true;
+		*/
 	}
 
 	public static void InitTextMessage()
 	{
+		/*
 		int i;
 
 		for (i = 0; i < MAX_CHAT_MESSAGES; i++) 
 		{
 			_text_message_list[i] = new TextMessage();
 			_text_message_list[i].message = null;
-		}
+		}*/
 
 		_textmessage_width = _textmessage_box_max_width;
 	}
@@ -167,13 +185,23 @@ public class TextEffect
 	// Check if a message is expired every day
 	public static void TextMessageDailyLoop()
 	{
+		for( ListIterator<TextMessage> i = _text_message_list.listIterator(); i.hasNext(); )
+		{
+			TextMessage m = i.next();
+			
+			if (Global.get_date() > m.end_date) {
+				i.remove();
+			}
+		}
+		
+		/*
 		int i;
 
 		for (i = 0; i < MAX_CHAT_MESSAGES; i++) {
 			if (_text_message_list[i].message == null) continue;
 
 			if (Global.get_date() > _text_message_list[i].end_date) {
-				/* Move the remaining messages over the current message */
+				/* Move the remaining messages over the current message 
 				if (i != MAX_CHAT_MESSAGES - 1)
 				{
 					for (int j = i; j < MAX_CHAT_MESSAGES-1; j++) 
@@ -183,14 +211,14 @@ public class TextEffect
 
 				}
 
-				/* Mark the last item as empty */
+				/* Mark the last item as empty 
 				_text_message_list[MAX_CHAT_MESSAGES - 1].message = null;
 				_textmessage_dirty = true;
 
-				/* Go one item back, because we moved the array 1 to the left */
+				// Go one item back, because we moved the array 1 to the left 
 				i--;
 			}
-		}
+		}*/
 	}
 
 	// Draw the textmessage-box
@@ -204,17 +232,19 @@ public class TextEffect
 		// First undraw if needed
 		UndrawTextMessage();
 
-		// TODO if (Console._iconsole_mode == IConsoleModes.ICONSOLE_FULL)			return;
+		if (Console.isFullSize()) return;
 
-		/* Check if we have anything to draw at all */
+		/* Check if we have anything to draw at all * /
 		has_message = false;
 		for ( i = 0; i < MAX_CHAT_MESSAGES; i++) {
 			if (_text_message_list[i].message == null) break;
 
 			has_message = true;
 		}
-		if (!has_message) return;
+		if (!has_message) return; */
 
+		if(_text_message_list.isEmpty()) return;
+		
 		// Make a copy of the screen as it is before painting (for undraw)
 		Gfx.memcpy_pitch(
 				new Pixel(_textmessage_backup),
@@ -225,17 +255,27 @@ public class TextEffect
 		Hal._cur_dpi = Hal._screen;
 
 		j = 0;
+		
 		// Paint the messages
-		for (i = MAX_CHAT_MESSAGES - 1; i >= 0; i--) {
+		/*for (i = MAX_CHAT_MESSAGES - 1; i >= 0; i--) {
 			if (_text_message_list[i].message == null) continue;
 
 			j++;
-			Gfx.GfxFillRect(_textmessage_box_left, Hal._screen.height-_textmessage_box_bottom-j*13-2, _textmessage_box_left+_textmessage_width - 1, Hal._screen.height-_textmessage_box_bottom-j*13+10, /* black, but with some alpha */ 0x322 | Sprite.USE_COLORTABLE);
+			Gfx.GfxFillRect(_textmessage_box_left, Hal._screen.height-_textmessage_box_bottom-j*13-2, _textmessage_box_left+_textmessage_width - 1, Hal._screen.height-_textmessage_box_bottom-j*13+10, / * black, but with some alpha * / 0x322 | Sprite.USE_COLORTABLE);
 
 			Gfx.DoDrawString(_text_message_list[i].message, _textmessage_box_left + 2, Hal._screen.height - _textmessage_box_bottom - j * 13 - 1, 0x10);
 			Gfx.DoDrawString(_text_message_list[i].message, _textmessage_box_left + 3, Hal._screen.height - _textmessage_box_bottom - j * 13, _text_message_list[i].color);
-		}
+		}*/
 
+		for(TextMessage m : _text_message_list)
+		{
+			j++;
+			Gfx.GfxFillRect(_textmessage_box_left, Hal._screen.height-_textmessage_box_bottom-j*13-2, _textmessage_box_left+_textmessage_width - 1, Hal._screen.height-_textmessage_box_bottom-j*13+10, /* black, but with some alpha */ 0x322 | Sprite.USE_COLORTABLE);
+
+			Gfx.DoDrawString(m.message, _textmessage_box_left + 2, Hal._screen.height - _textmessage_box_bottom - j * 13 - 1, 0x10);
+			Gfx.DoDrawString(m.message, _textmessage_box_left + 3, Hal._screen.height - _textmessage_box_bottom - j * 13, m.color);
+		}
+		
 		// Make sure the data is updated next flush
 		Global.hal.make_dirty(_textmessage_box_left, Hal._screen.height-_textmessage_box_bottom-_textmessage_box_y, _textmessage_width, _textmessage_box_y);
 
@@ -267,13 +307,6 @@ public class TextEffect
 		if (Global._game_mode == GameModes.GM_MENU)
 			return;
 
-		int i = 0;
-		for( ; _text_effect_list[i].string_id.isValid(); i++)
-		{
-			if(i >= _text_effect_list.length)
-				return;
-		}
-
 		te.string_id = msg;
 		te.duration = duration;
 		te.y = y - 5;
@@ -288,7 +321,7 @@ public class TextEffect
 		te.right = x + (w >> 1) - 1;
 		te.MarkTextEffectAreaDirty();
 		
-		_text_effect_list[i] = te;
+		_text_effect_list.add( te );
 	}
 
 	private void MoveTextEffect()
@@ -305,22 +338,27 @@ public class TextEffect
 
 	static void MoveAllTextEffects()
 	{
+		/*
 		for( TextEffect te : _text_effect_list) 
 		{
 			if (te.string_id.isValid()) 
 				te.MoveTextEffect();
+		}*/
+		
+		for( ListIterator<TextEffect> i = _text_effect_list.listIterator(); i.hasNext(); )
+		{
+			TextEffect te = i.next();
+			
+			if (te.string_id.isValid()) 
+				te.MoveTextEffect();
+			else
+				i.remove();
 		}
 	}
 
 	static void InitTextEffects()
 	{
-		for( int i = 0; i < _text_effect_list.length; i++)
-			_text_effect_list[i] = new TextEffect();
-
-		for( TextEffect te : _text_effect_list) 
-		{
-			te.string_id = Str.INVALID_STRING_ID();
-		}
+		_text_effect_list.clear();
 	}
 
 	public static void DrawTextEffects(DrawPixelInfo dpi)

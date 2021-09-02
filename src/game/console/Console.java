@@ -1053,6 +1053,10 @@ public class Console //extends ConsoleCmds
 
 	}
 
+	public static boolean isFullSize() {
+		return _iconsole_mode == IConsoleModes.ICONSOLE_FULL;
+	}
+
 
 }
 
