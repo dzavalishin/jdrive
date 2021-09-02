@@ -607,7 +607,7 @@ public class Player implements Serializable
 			president_name_1 = Strings.SPECSTR_PRESIDENT_NAME;
 
 			Global.SetDParam(0, president_name_2);
-			buffer = Global.GetString(president_name_1);
+			buffer = Strings.GetString(president_name_1);
 			if (buffer.length() >= 32 || Gfx.GetStringWidth(buffer) >= 94)
 				continue;
 			boolean restart = false;
@@ -618,7 +618,7 @@ public class Player implements Serializable
 				Player pp =  ii.next();
 				if (pp.is_active && this != pp) {
 					Global.SetDParam(0, pp.president_name_2);
-					String buffer2 = Global.GetString(pp.president_name_1);
+					String buffer2 = Strings.GetString(pp.president_name_1);
 					if(buffer2.equalsIgnoreCase(buffer))
 					{
 						restart = true;
@@ -1605,7 +1605,7 @@ final Chunk Handler _player_chunk_handlers[] = {
 		Global.SetDParam(0, name_1);
 		Global.SetDParam(1, name_2);
 		Global.SetDParam(2, Global.get_date());
-		return Global.GetString(Str.STR_4004);
+		return Strings.GetString(Str.STR_4004);
 	}
 
 	public void DrawPlayerFace() {

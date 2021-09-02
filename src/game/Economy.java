@@ -881,7 +881,7 @@ public class Economy extends EconomeTables implements Serializable
 			return;
 
 		// Randomize cargo type
-		if ( 0 != (Global.Random()&1) && i.produced_cargo[1] != AcceptedCargo.CT_INVALID) {
+		if ( 0 != (Hal.Random()&1) && i.produced_cargo[1] != AcceptedCargo.CT_INVALID) {
 			cargo = i.produced_cargo[1];
 			trans = i.pct_transported[1];
 			total = i.total_production[1];

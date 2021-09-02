@@ -6,6 +6,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import game.Global;
 import game.Player;
+import game.util.Strings;
 
 public class CompanyValueGraph extends AbstractChart
 {
@@ -43,7 +44,7 @@ public class CompanyValueGraph extends AbstractChart
 		while(ii.hasNext())
 		{
 			Player p = ii.next();
-			String sName = Global.GetString(p.getName_1()) + " " + Global.GetString(p.getName_2());
+			String sName = Strings.GetString(p.getName_1()) + " " + Strings.GetString(p.getName_2());
 
 			if (p.isActive()) {
 				//gd.colors[numd] = (byte) Global._color_list[p.getColor()].window_color_bgb;

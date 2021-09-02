@@ -38,6 +38,7 @@ import game.util.AnimCursor;
 import game.util.AutoRail;
 import game.util.BitOps;
 import game.util.Pixel;
+import game.util.Strings;
 
 
 /**
@@ -1150,7 +1151,7 @@ public class ViewPort implements Serializable
 
 		sign.setTop(top);
 
-		buffer = Global.GetString(str);
+		buffer = Strings.GetString(str);
 		w = Gfx.GetStringWidth(buffer) + 3;
 		sign.setWidth_1(w);
 		sign.setLeft(left - w / 2);

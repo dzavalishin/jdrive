@@ -102,7 +102,7 @@ public class MiscGui {
 				//int pi = 0;
 				boolean found = false;
 				StringBuilder sb = new StringBuilder();
-				sb.append(Global.GetString(Str.STR_01CE_CARGO_ACCEPTED));
+				sb.append(Strings.GetString(Str.STR_01CE_CARGO_ACCEPTED));
 
 				for (i = 0; i < AcceptedCargo.NUM_CARGO; ++i) {
 					if (lid.ac.ct[i] > 0) {
@@ -123,7 +123,7 @@ public class MiscGui {
 							sb.append(Strings.GetStringWithArgs( Str.STR_01D1_8, (Object[])argv));
 						} else {
 							//p = Global.GetString(p, Global._cargoc.names_s[i]);
-							sb.append(Global.GetString( Global._cargoc.names_s[i]));
+							sb.append(Strings.GetString( Global._cargoc.names_s[i]));
 						}
 					}
 				}
@@ -696,7 +696,7 @@ public class MiscGui {
 			w.DeleteWindow();
 		}
 
-		String buffer = Global.GetString(string_id);
+		String buffer = Strings.GetString(string_id);
 		right = Gfx.GetStringWidth(buffer) + 4;
 
 		bottom = 14;
@@ -972,7 +972,7 @@ public class MiscGui {
 
 		w = Window.AllocateWindowDesc(_query_string_desc);
 
-		_edit_str_buf = Global.GetString(str);
+		_edit_str_buf = Strings.GetString(str);
 		//_edit_str_buf[realmaxlen] = '\0';
 
 		if(0 != (maxlen & 0x1000)) {

@@ -11,6 +11,7 @@ import game.tables.Snd;
 import game.util.BitOps;
 import game.util.GameDate;
 import game.util.Sound;
+import game.util.Strings;
 import game.util.wcustom.def_d;
 import game.xui.Gfx;
 import game.xui.ViewPort;
@@ -717,7 +718,7 @@ public class NewsItem {
 			str = ni.string_id;
 		}
 
-		buffer = Global.GetString(str);
+		buffer = Strings.GetString(str);
 		/* Copy the just gotten string to another buffer to remove any formatting
 		 * from it such as big fonts, etc. * /
 		for (ptr = buffer, dest = buffer2; *ptr != '\0'; ptr++) {

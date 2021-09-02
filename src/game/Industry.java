@@ -11,6 +11,7 @@ import game.tables.IndustryTileTable;
 import game.tables.Snd;
 import game.util.BitOps;
 import game.util.Sound;
+import game.util.Strings;
 import game.xui.Gfx;
 import game.xui.Gui;
 import game.xui.MiscGui;
@@ -577,7 +578,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				m = tile.getMap().m1;
 				m = (m & 3) + 1;
 				n = tile.getMap().m5;
-				/*
+				/* implemented below
 				if (m == 4 && (m=0,++n) == 32+1 && (n=30,b)) {
 					tile.getMap().m1 = 0x83;
 					tile.getMap().m5 = 29;
@@ -2586,10 +2587,10 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			// default to string sorting if they are otherwise equal
 			if (r == 0) {
 				Global.SetDParam(0, i.townId);
-				String buf1 = Global.GetString(Str.STR_TOWN);
+				String buf1 = Strings.GetString(Str.STR_TOWN);
 
 				Global.SetDParam(0, j.townId);
-				String buf2 = Global.GetString(Str.STR_TOWN);
+				String buf2 = Strings.GetString(Str.STR_TOWN);
 
 				r = buf1.compareToIgnoreCase(buf2);
 			}

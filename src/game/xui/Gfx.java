@@ -16,6 +16,7 @@ import game.util.ArrayPtr;
 import game.util.BitOps;
 import game.util.Colour;
 import game.util.Pixel;
+import game.util.Strings;
 import game.xui.Gfx.BlitterParams;
 
 public class Gfx extends PaletteTabs 
@@ -389,13 +390,13 @@ public class Gfx extends PaletteTabs
 	}*/
 	private static String TruncateStringID(StringID src, int maxw, int [] retmax)
 	{
-		return TruncateString(Global.GetString(src), maxw, retmax);
+		return TruncateString(Strings.GetString(src), maxw, retmax);
 	}
 
 	/* returns right coordinate */
 	public static int DrawString(int x, int y, int str, int color)
 	{
-		String buffer = Global.GetString(str);
+		String buffer = Strings.GetString(str);
 		return DoDrawString(buffer, x, y, color);
 	}
 	/* returns right coordinate */
@@ -417,7 +418,7 @@ public class Gfx extends PaletteTabs
 	{
 		//char buffer[512];
 
-		String buffer = Global.GetString(str);
+		String buffer = Strings.GetString(str);
 		DoDrawString(buffer, x - GetStringWidth(buffer), y, color);
 	}
 	
@@ -425,7 +426,7 @@ public class Gfx extends PaletteTabs
 	{
 		//char buffer[512];
 
-		String buffer = Global.GetString(str);
+		String buffer = Strings.GetString(str);
 		DoDrawString(buffer, x - GetStringWidth(buffer), y, color);
 	}
 
@@ -448,7 +449,7 @@ public class Gfx extends PaletteTabs
 		//char buffer[512];
 		int w;
 
-		String s = Global.GetString(str);
+		String s = Strings.GetString(str);
 
 		w = GetStringWidth(s);
 		DoDrawString(s, x - w / 2, y, color);

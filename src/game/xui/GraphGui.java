@@ -16,6 +16,7 @@ import game.charts.CompanyValueGraph;
 import game.tables.SmallMapGuiTables;
 import game.util.ArrayPtr;
 import game.util.BitOps;
+import game.util.Strings;
 
 public class GraphGui 
 {
@@ -1192,10 +1193,10 @@ public class GraphGui
 			SignStruct ss;
 
 			ss = SignStruct.GetSign(cmp1);
-			String buf1 = Global.GetString(ss.getString());
+			String buf1 = Strings.GetString(ss.getString());
 
 			ss = SignStruct.GetSign(cmp2);
-			String buf2 = Global.GetString(ss.getString());
+			String buf2 = Strings.GetString(ss.getString());
 
 			return buf1.compareTo(buf2);
 		}

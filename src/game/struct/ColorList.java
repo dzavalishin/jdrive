@@ -1,6 +1,9 @@
 package game.struct;
 
-public class ColorList {
+import java.io.Serializable;
+
+public class ColorList implements Serializable 
+{
 	public final int unk0;
     public final int unk1;
     public final int unk2;

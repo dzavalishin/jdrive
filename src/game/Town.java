@@ -1145,7 +1145,7 @@ implements IPoolItem, Serializable
 			r = Hal.Random();
 
 			Global.SetDParam(0, r);
-			buf1 = Global.GetString(townnametype);
+			buf1 = Strings.GetString(townnametype);
 
 			// Check size and width
 			//if (strlen(buf1) >= 31 || Global.GetStringWidth(buf1) > 130) continue;
@@ -1161,7 +1161,7 @@ implements IPoolItem, Serializable
 					// We can't just compare the numbers since
 					// several numbers may map to a single name.
 					Global.SetDParam(0, t2.index);
-					buf2 = Global.GetString(Str.STR_TOWN);
+					buf2 = Strings.GetString(Str.STR_TOWN);
 					if (buf1.equals(buf2)) {
 						if (tries-- < 0) return false;
 						//goto restart;

@@ -8,6 +8,7 @@ import game.enums.GameModes;
 import game.ids.StringID;
 import game.struct.TextMessage;
 import game.util.Pixel;
+import game.util.Strings;
 import game.xui.CursorVars;
 import game.xui.DrawPixelInfo;
 import game.xui.Gfx;
@@ -45,9 +46,14 @@ public class TextEffect
 	//static Pixel _textmessage_backup[] = new Pixel[150 * 400]; // (y * max_width)
 	static final byte _textmessage_backup[] = new byte[150 * 400]; // (y * max_width)
 
-	//extern void memcpy_pitch(void *d, void *s, int w, int h, int spitch, int dpitch);
 
-	// Duration is in game-days
+	/** 
+	 * 
+	 * @param color
+	 * @param duration is in game-days
+	 * @param message
+	 * @param args
+	 */
 	static void AddTextMessage(int color, int duration, final String message, Object ... args)
 	{
 		String buf;
@@ -261,7 +267,8 @@ public class TextEffect
 		if (Global._game_mode == GameModes.GM_MENU)
 			return;
 
-		for(int i = 0 ; _text_effect_list[i].string_id.isValid(); i++)
+		int i = 0;
+		for( ; _text_effect_list[i].string_id.isValid(); i++)
 		{
 			if(i >= _text_effect_list.length)
 				return;
@@ -274,12 +281,14 @@ public class TextEffect
 		te.params_1 = (int) Global.GetDParam(0);
 		te.params_2 = (int) Global.GetDParam(4);
 
-		buffer = Global.GetString(msg);
+		buffer = Strings.GetString(msg);
 		w = Gfx.GetStringWidth(buffer);
 
 		te.x = x - (w >> 1);
 		te.right = x + (w >> 1) - 1;
 		te.MarkTextEffectAreaDirty();
+		
+		_text_effect_list[i] = te;
 	}
 
 	private void MoveTextEffect()
@@ -316,9 +325,8 @@ public class TextEffect
 
 	public static void DrawTextEffects(DrawPixelInfo dpi)
 	{
-
-		if (dpi.zoom < 1) {
-			//for (te = _text_effect_list; te != endof(_text_effect_list); te++) 
+		if (dpi.zoom < 1) 
+		{
 			for( TextEffect te : _text_effect_list )
 			{
 				if (!te.string_id.isValid())
@@ -332,8 +340,10 @@ public class TextEffect
 					continue;
 				ViewPort.AddStringToDraw(te.x, te.y, te.string_id, te.params_1, te.params_2, 0);
 			}
-		} else if (dpi.zoom == 1) {
-			//for (te = _text_effect_list; te != endof(_text_effect_list); te++) 
+		} 
+		else if (dpi.zoom == 1) 
+		{
+ 
 			for( TextEffect te : _text_effect_list )
 			{
 				if(!te.string_id.isValid())
@@ -354,7 +364,6 @@ public class TextEffect
 	static void DeleteAnimatedTile(TileIndex tile)
 	{
 
-		//for (ti = _animated_tile_list; ti != endof(_animated_tile_list); ti++) {
 		for(int i = 0 ; i < Global.gs._animated_tile_list.length; i++)
 		{
 			if (tile.equals(Global.gs._animated_tile_list[i])) 
@@ -398,22 +407,6 @@ public class TextEffect
 	static void InitializeAnimatedTiles()
 	{
 	}
-
-	/*
-	static void SaveLoad_ANIT()
-	{
-		// In pre version 6, we has 16bit per tile, now we have 32bit per tile, convert it ;)
-		if (CheckSavegameVersion(6)) {
-			SlArray(_animated_tile_list, lengthof(_animated_tile_list), SLE_FILE_U16 | SLE_VAR_U32);
-		} else {
-			SlArray(_animated_tile_list, lengthof(_animated_tile_list), SLE_int);
-		}
-	}
-
-	/*
-	final Chunk Handler _animated_tile_chunk_handlers[] = {
-		{ 'ANIT', SaveLoad_ANIT, SaveLoad_ANIT, CH_RIFF | CH_LAST},
-	};*/
 
 
 	// TODO save/load more? _text_effect_list[] _text_message_list[]

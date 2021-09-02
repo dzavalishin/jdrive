@@ -42,6 +42,7 @@ import game.tables.Snd;
 import game.util.BitOps;
 import game.util.GameDate;
 import game.util.Sound;
+import game.util.Strings;
 
 public class Gui
 {
@@ -77,7 +78,6 @@ public class Gui
 
 	public static void SetupColorsAndInitialWindow()
 	{
-		//int i;
 		Window w;
 		int width,height;
 
@@ -1592,10 +1592,10 @@ public class Gui
 
 
 	static final Widget _scen_edit_town_gen_widgets[] = {
-		new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,                 Str.STR_018B_CLOSE_WINDOW),
+		new Widget(    Window.WWT_CLOSEBOX,  Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,                 Str.STR_018B_CLOSE_WINDOW),
 		new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   147,     0,    13, Str.STR_0233_TOWN_GENERATION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-		new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7,   148,   159,     0,    13, 0x0,                      Str.STR_STICKY_BUTTON),
-		new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   159,    14,    81, 0x0,                      Str.STR_NULL),
+		new Widget(    Window.WWT_STICKYBOX, Window.RESIZE_NONE,     7,   148,   159,     0,    13, 0x0,                      Str.STR_STICKY_BUTTON),
+		new Widget(    Window.WWT_IMGBTN,    Window.RESIZE_NONE,     7,     0,   159,    14,    81, 0x0,                      Str.STR_NULL),
 		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   157,    16,    27, Str.STR_0234_NEW_TOWN,        Str.STR_0235_CONSTRUCT_NEW_TOWN),
 		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   157,    29,    40, Str.STR_023D_RANDOM_TOWN,     Str.STR_023E_BUILD_TOWN_IN_RANDOM_LOCATION),
 		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   157,    42,    53, Str.STR_MANY_RANDOM_TOWNS,    Str.STR_RANDOM_TOWNS_TIP),
@@ -2087,40 +2087,39 @@ public class Gui
 	}
 
 	static final Widget _toolb_normal_widgets[] = {
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,    21,     0,    21, 0x2D6, Str.STR_0171_PAUSE_GAME),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    22,    43,     0,    21, Sprite.SPR_IMG_FASTFORWARD, Str.STR_FAST_FORWARD),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    44,    65,     0,    21, 0x2EF, Str.STR_0187_OPTIONS),
-	new Widget(    Window.WWT_PANEL_2,   Window.RESIZE_NONE,    14,    66,    87,     0,    21, 0x2D4, Str.STR_0172_SAVE_GAME_ABANDON_GAME),
-
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    96,   117,     0,    21, 0x2C4, Str.STR_0174_DISPLAY_MAP),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   118,   139,     0,    21, 0xFED, Str.STR_0176_DISPLAY_TOWN_DIRECTORY),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   140,   161,     0,    21, 0x2A7, Str.STR_02DC_DISPLAY_SUBSIDIES),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   162,   183,     0,    21, 0x513, Str.STR_0173_DISPLAY_LIST_OF_COMPANY),
-
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   191,   212,     0,    21, 0x2E1, Str.STR_0177_DISPLAY_COMPANY_FINANCES),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   213,   235,     0,    21, 0x2E7, Str.STR_0178_DISPLAY_COMPANY_GENERAL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   236,   257,     0,    21, 0x2E9, Str.STR_0179_DISPLAY_GRAPHS),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   258,   279,     0,    21, 0x2AC, Str.STR_017A_DISPLAY_COMPANY_LEAGUE),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   280,   301,     0,    21, 0x2E5, Str.STR_0312_FUND_CONSTRUCTION_OF_NEW),
-
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   310,   331,     0,    21, 0x2DB, Str.STR_017B_DISPLAY_LIST_OF_COMPANY),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   332,   353,     0,    21, 0x2DC, Str.STR_017C_DISPLAY_LIST_OF_COMPANY),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   354,   375,     0,    21, 0x2DD, Str.STR_017D_DISPLAY_LIST_OF_COMPANY),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   376,   397,     0,    21, 0x2DE, Str.STR_017E_DISPLAY_LIST_OF_COMPANY),
-
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   406,   427,     0,    21, 0x2DF, Str.STR_017F_ZOOM_THE_VIEW_IN),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   428,   449,     0,    21, 0x2E0, Str.STR_0180_ZOOM_THE_VIEW_OUT),
-
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   457,   478,     0,    21, 0x2D7, Str.STR_0181_BUILD_RAILROAD_TRACK),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   479,   500,     0,    21, 0x2D8, Str.STR_0182_BUILD_ROADS),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   501,   522,     0,    21, 0x2D9, Str.STR_0183_BUILD_SHIP_DOCKS),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   523,   544,     0,    21, 0x2DA, Str.STR_0184_BUILD_AIRPORTS),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   545,   566,     0,    21, 0xFF3, Str.STR_LANDSCAPING_TOOLBAR_TIP), // tree icon is 0x2E6
-
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   574,   595,     0,    21, 0x2C9, Str.STR_01D4_SHOW_SOUND_MUSIC_WINDOW),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   596,   617,     0,    21, 0x2A8, Str.STR_0203_SHOW_LAST_MESSAGE_NEWS),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   618,   639,     0,    21, 0x2D3, Str.STR_0186_LAND_BLOCK_INFORMATION),
-	//new Widget(   WIDGETS_END),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,    21,     0,    21, 0x2D6, Str.STR_0171_PAUSE_GAME),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    22,    43,     0,    21, Sprite.SPR_IMG_FASTFORWARD, Str.STR_FAST_FORWARD),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    44,    65,     0,    21, 0x2EF, Str.STR_0187_OPTIONS),
+		new Widget(      Window.WWT_PANEL_2, Window.RESIZE_NONE,    14,    66,    87,     0,    21, 0x2D4, Str.STR_0172_SAVE_GAME_ABANDON_GAME),
+	
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    96,   117,     0,    21, 0x2C4, Str.STR_0174_DISPLAY_MAP),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   118,   139,     0,    21, 0xFED, Str.STR_0176_DISPLAY_TOWN_DIRECTORY),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   140,   161,     0,    21, 0x2A7, Str.STR_02DC_DISPLAY_SUBSIDIES),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   162,   183,     0,    21, 0x513, Str.STR_0173_DISPLAY_LIST_OF_COMPANY),
+	
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   191,   212,     0,    21, 0x2E1, Str.STR_0177_DISPLAY_COMPANY_FINANCES),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   213,   235,     0,    21, 0x2E7, Str.STR_0178_DISPLAY_COMPANY_GENERAL),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   236,   257,     0,    21, 0x2E9, Str.STR_0179_DISPLAY_GRAPHS),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   258,   279,     0,    21, 0x2AC, Str.STR_017A_DISPLAY_COMPANY_LEAGUE),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   280,   301,     0,    21, 0x2E5, Str.STR_0312_FUND_CONSTRUCTION_OF_NEW),
+	
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   310,   331,     0,    21, 0x2DB, Str.STR_017B_DISPLAY_LIST_OF_COMPANY),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   332,   353,     0,    21, 0x2DC, Str.STR_017C_DISPLAY_LIST_OF_COMPANY),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   354,   375,     0,    21, 0x2DD, Str.STR_017D_DISPLAY_LIST_OF_COMPANY),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   376,   397,     0,    21, 0x2DE, Str.STR_017E_DISPLAY_LIST_OF_COMPANY),
+	
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   406,   427,     0,    21, 0x2DF, Str.STR_017F_ZOOM_THE_VIEW_IN),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   428,   449,     0,    21, 0x2E0, Str.STR_0180_ZOOM_THE_VIEW_OUT),
+	
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   457,   478,     0,    21, 0x2D7, Str.STR_0181_BUILD_RAILROAD_TRACK),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   479,   500,     0,    21, 0x2D8, Str.STR_0182_BUILD_ROADS),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   501,   522,     0,    21, 0x2D9, Str.STR_0183_BUILD_SHIP_DOCKS),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   523,   544,     0,    21, 0x2DA, Str.STR_0184_BUILD_AIRPORTS),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   545,   566,     0,    21, 0xFF3, Str.STR_LANDSCAPING_TOOLBAR_TIP), // tree icon is 0x2E6
+	
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   574,   595,     0,    21, 0x2C9, Str.STR_01D4_SHOW_SOUND_MUSIC_WINDOW),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   596,   617,     0,    21, 0x2A8, Str.STR_0203_SHOW_LAST_MESSAGE_NEWS),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   618,   639,     0,    21, 0x2D3, Str.STR_0186_LAND_BLOCK_INFORMATION),
 	};
 
 	static final WindowDesc _toolb_normal_desc = new WindowDesc(
@@ -2133,40 +2132,39 @@ public class Gui
 
 
 	static final Widget _toolb_scen_widgets[] = {
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,    21,     0,    21, 0x2D6,				Str.STR_0171_PAUSE_GAME),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    22,    43,     0,    21, Sprite.SPR_IMG_FASTFORWARD, Str.STR_FAST_FORWARD),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    44,    65,     0,    21, 0x2EF,				Str.STR_0187_OPTIONS),
-	new Widget(    Window.WWT_PANEL_2,   Window.RESIZE_NONE,    14,    66,    87,     0,    21, 0x2D4,				Str.STR_0297_SAVE_SCENARIO_LOAD_SCENARIO),
-
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    96,   225,     0,    21, 0x0,					Str.STR_NULL),
-
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   233,   362,     0,    21, 0x0,					Str.STR_NULL),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   236,   247,     5,    16, Sprite.SPR_ARROW_DOWN,	Str.STR_029E_MOVE_THE_STARTING_DATE),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   347,   358,     5,    16, Sprite.SPR_ARROW_UP,   Str.STR_029F_MOVE_THE_STARTING_DATE),
-
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   371,   392,     0,    21, 0x2C4,				Str.STR_0175_DISPLAY_MAP_TOWN_DIRECTORY),
-
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   400,   421,     0,    21, 0x2DF,				Str.STR_017F_ZOOM_THE_VIEW_IN),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   422,   443,     0,    21, 0x2E0,				Str.STR_0180_ZOOM_THE_VIEW_OUT),
-
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   452,   473,     0,    21, 0xFF3,				Str.STR_022E_LANDSCAPE_GENERATION),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   474,   495,     0,    21, 0xFED,				Str.STR_022F_TOWN_GENERATION),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   496,   517,     0,    21, 0x2E5,				Str.STR_0230_INDUSTRY_GENERATION),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   518,   539,     0,    21, 0x2D8,				Str.STR_0231_ROAD_CONSTRUCTION),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   540,   561,     0,    21, 0x2E6,				Str.STR_0288_PLANT_TREES),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   562,   583,     0,    21, 0xFF2,				Str.STR_0289_PLACE_SIGN),
-
-	new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   596,   617,     0,    21, 0x2C9,				Str.STR_01D4_SHOW_SOUND_MUSIC_WINDOW),
-	new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   618,   639,     0,    21, 0x2D3,				Str.STR_0186_LAND_BLOCK_INFORMATION),
-	//new Widget(   WIDGETS_END),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,    21,     0,    21, 0x2D6,				Str.STR_0171_PAUSE_GAME),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    22,    43,     0,    21, Sprite.SPR_IMG_FASTFORWARD, Str.STR_FAST_FORWARD),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    44,    65,     0,    21, 0x2EF,				Str.STR_0187_OPTIONS),
+		new Widget(    Window.WWT_PANEL_2,   Window.RESIZE_NONE,    14,    66,    87,     0,    21, 0x2D4,				Str.STR_0297_SAVE_SCENARIO_LOAD_SCENARIO),
+	
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,    96,   225,     0,    21, 0x0,					Str.STR_NULL),
+	
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   233,   362,     0,    21, 0x0,					Str.STR_NULL),
+		new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   236,   247,     5,    16, Sprite.SPR_ARROW_DOWN,	Str.STR_029E_MOVE_THE_STARTING_DATE),
+		new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   347,   358,     5,    16, Sprite.SPR_ARROW_UP,   Str.STR_029F_MOVE_THE_STARTING_DATE),
+	
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   371,   392,     0,    21, 0x2C4,				Str.STR_0175_DISPLAY_MAP_TOWN_DIRECTORY),
+	
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   400,   421,     0,    21, 0x2DF,				Str.STR_017F_ZOOM_THE_VIEW_IN),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   422,   443,     0,    21, 0x2E0,				Str.STR_0180_ZOOM_THE_VIEW_OUT),
+	
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   452,   473,     0,    21, 0xFF3,				Str.STR_022E_LANDSCAPE_GENERATION),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   474,   495,     0,    21, 0xFED,				Str.STR_022F_TOWN_GENERATION),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   496,   517,     0,    21, 0x2E5,				Str.STR_0230_INDUSTRY_GENERATION),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   518,   539,     0,    21, 0x2D8,				Str.STR_0231_ROAD_CONSTRUCTION),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   540,   561,     0,    21, 0x2E6,				Str.STR_0288_PLANT_TREES),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   562,   583,     0,    21, 0xFF2,				Str.STR_0289_PLACE_SIGN),
+	
+		new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
+		new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
+		new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
+		new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
+		new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
+		new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
+		new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   596,   617,     0,    21, 0x2C9,				Str.STR_01D4_SHOW_SOUND_MUSIC_WINDOW),
+		new Widget(      Window.WWT_EMPTY,   Window.RESIZE_NONE,     0,     0,     0,     0,     0, 0x0,					Str.STR_NULL),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,   618,   639,     0,    21, 0x2D3,				Str.STR_0186_LAND_BLOCK_INFORMATION),
 	};
 
 	static final ToolbarButtonProc _scen_toolbar_button_procs[] = {
@@ -2246,7 +2244,7 @@ public class Gui
 			case Window.WKC_F7: ToolbarScenBuildRoad(w); break;
 			case Window.WKC_F8: ToolbarScenPlantTrees(w); break;
 			case Window.WKC_F9: ToolbarScenPlaceSign(w); break;
-			// TODO case Window.WKC_F10: ShowMusicWindow(); break;
+			case Window.WKC_F10: MusicGui.ShowMusicWindow(); break;
 			case Window.WKC_F11: MiscGui.PlaceLandBlockInfo(); break;
 			case Window.WKC_CTRL | 'S': Global._make_screenshot = 1; break;
 			case Window.WKC_CTRL | 'G': Global._make_screenshot = 2; break;
@@ -2276,6 +2274,7 @@ public class Gui
 				w.SetWindowDirty();
 			}
 			break;
+
 		default:
 			break;
 
@@ -2290,7 +2289,6 @@ public class Gui
 		Gui::ScenEditToolbarWndProc
 	);
 
-	//extern GetNewsStringCallbackProc * final _get_news_string_callback[];
 
 
 	static boolean DrawScrollingStatusText(final NewsItem ni, int pos)
@@ -2302,7 +2300,7 @@ public class Gui
 		
 		str = ni.makeString();
 
-		String buf = Global.GetString(str);
+		String buf = Strings.GetString(str);
 
 		char [] s = buf.toCharArray();
 		char [] d = new char[256];
@@ -2410,10 +2408,9 @@ public class Gui
 	}
 
 	static final Widget _main_status_widgets[] = {
-			new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   139,     0,    11, 0x0,	Str.STR_NULL),
-			new Widget( Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,    14,   140,   499,     0,    11, 0x0, Str.STR_02B7_SHOW_LAST_MESSAGE_OR_NEWS),
-			new Widget( Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,    14,   500,   639,     0,    11, 0x0, Str.STR_NULL),
-	//{   WIDGETS_END},
+		new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   139,     0,    11, 0x0,	Str.STR_NULL),
+		new Widget( Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,    14,   140,   499,     0,    11, 0x0, Str.STR_02B7_SHOW_LAST_MESSAGE_OR_NEWS),
+		new Widget( Window.WWT_PUSHIMGBTN,   Window.RESIZE_NONE,    14,   500,   639,     0,    11, 0x0, Str.STR_NULL),
 	};
 
 	static final WindowDesc _main_status_desc = new WindowDesc(

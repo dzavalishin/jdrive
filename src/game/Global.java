@@ -385,9 +385,7 @@ public class Global
 	
 	
 	
-	public static int Random() {
-		return Hal.Random();
-	}
+	//public static int Random() {		return Hal.Random();	}
 
 
 
@@ -407,12 +405,14 @@ public class Global
 	public static final Integer[] _decode_parameters = new Integer[20];
 
 
+	@Deprecated
 	public static void SetDParam(int n, int v)
 	{
 		//assert(n < _decode_parameters.length);
 		_decode_parameters[n] = v;
 	}
 
+	@Deprecated
 	public static void SetDParam64(int n, long v)
 	{
 		//assert(n + 1 < lengthof(_decode_parameters));
@@ -516,7 +516,7 @@ public class Global
 
 
 
-
+	/*
 	public static String GetString(StringID string)
 	{
 		return Strings.GetString(string);
@@ -526,13 +526,7 @@ public class Global
 	{
 		return Strings.GetString(string);
 	}
-
-
-
-
-
-
-
+	*/
 	
 	public static void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
 	{
@@ -543,17 +537,6 @@ public class Global
 	{
 		MiscGui.ShowErrorMessage( new StringID(msg_1), new StringID(msg_2), x, y);
 	}
-
-
-
-
-
-
-
-
-
-
-
 
 
 

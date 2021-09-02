@@ -4,6 +4,7 @@ import game.Global;
 import game.Str;
 import game.Vehicle;
 import game.struct.SortStruct;
+import game.util.Strings;
 import game.xui.VehicleGui;
 
 public class VehicleNameSorter extends AbstractVehicleSorter
@@ -17,10 +18,10 @@ public class VehicleNameSorter extends AbstractVehicleSorter
 		int r;
 
 		Global.SetDParam(0, va.getString_id());
-		String buf1 = Global.GetString(Str.STR_JUST_STRING);
+		String buf1 = Strings.GetString(Str.STR_JUST_STRING);
 
 		Global.SetDParam(0, vb.getString_id());
-		String buf2 = Global.GetString(Str.STR_JUST_STRING);
+		String buf2 = Strings.GetString(Str.STR_JUST_STRING);
 
 
 		r = buf1.compareToIgnoreCase(buf2);

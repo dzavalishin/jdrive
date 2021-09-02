@@ -809,7 +809,7 @@ public class Main {
 			Global.SetDParam(2, Global.get_date());
 			//s = GetString(buf + strlen(_path.autosave_dir) + strlen(PATHSEP), Str.STR_4004);
 			//strcpy(s, ".sav");
-			s = Global.GetString(Str.STR_4004);
+			s = Strings.GetString(Str.STR_4004);
 
 			
 			//sprintf(buf, "%s%s", Global._path.autosave_dir, PATHSEP);

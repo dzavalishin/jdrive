@@ -755,7 +755,7 @@ public class Landscape extends GenLandTable
 
 	public static TileIndex AdjustTileCoordRandomly(TileIndex a, int rng)
 	{
-		int r = Global.Random();
+		int r = Hal.Random();
 
 		return new TileIndex(
 				a.TileX() + (BitOps.GB(r, 0, 8) * rng * 2 >> 8) - rng,

@@ -5,6 +5,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import game.AcceptedCargo;
 import game.Economy;
 import game.Global;
+import game.util.Strings;
 
 public class CargoPaymentRatesChart extends AbstractChart//JFrame// ApplicationFrame
 {
@@ -26,7 +27,7 @@ public class CargoPaymentRatesChart extends AbstractChart//JFrame// ApplicationF
 		for(int i=0; i!=AcceptedCargo.NUM_CARGO; i++) 
 		{
 			int iName = Global._cargoc.names_s[i];		
-			String sName = Global.GetString(iName);
+			String sName = Strings.GetString(iName);
 
 			//TODO gd.colors[i] = (byte) _cargo_legend_colors[i];
 			
