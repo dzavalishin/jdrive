@@ -193,8 +193,7 @@ public class Engine extends EngineTables implements Serializable
 		{
 			final Engine e = Global.gs._engines[i];
 			
-			// TODO XXX must make copy!
-			Global._engine_info[i] = EngineTables2.orig_engine_info[i];
+			Global._engine_info[i] = new EngineInfo( EngineTables2.orig_engine_info[i] );
 			
 			final EngineInfo ei= Global._engine_info[i];
 
