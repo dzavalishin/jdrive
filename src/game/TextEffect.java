@@ -37,9 +37,6 @@ public class TextEffect
 
 	static final int MAX_CHAT_MESSAGES = 10;
 
-	//static final TextEffect[] _text_effect_list = new TextEffect[30];
-	//static final TextMessage[] _text_message_list = new TextMessage[MAX_CHAT_MESSAGES];
-	
 	static final List<TextEffect> _text_effect_list = new ArrayList<>();
 	static final List<TextMessage> _text_message_list = new ArrayList<>();
 	
@@ -52,7 +49,6 @@ public class TextEffect
 	static final int _textmessage_box_bottom = 30; // Pixels from bottom
 	static final int _textmessage_box_max_width = 400; // Max width of box
 
-	//static Pixel _textmessage_backup[] = new Pixel[150 * 400]; // (y * max_width)
 	static final byte _textmessage_backup[] = new byte[150 * 400]; // (y * max_width)
 
 
@@ -80,58 +76,18 @@ public class TextEffect
 		//while (GetStringWidth(buf) > _textmessage_width - 9) 
 		//	buf[--length] = '\0';
 
-		/* Find an empty spot and put the message there * /
-		for (i = 0; i < MAX_CHAT_MESSAGES; i++) {
-			if (_text_message_list[i].message == null) {
-				// Empty spot
-				_text_message_list[i] = new TextMessage();
-
-				_text_message_list[i].message = buf;
-				_text_message_list[i].color = color;
-				_text_message_list[i].end_date = Global.get_date() + duration;
-
-				_textmessage_dirty = true;
-				return;
-			}
-		} */
 
 		_text_message_list.add( new TextMessage(buf, color, Global.get_date() + duration) );
 		
 		
-		// We did not found a free spot, trash the first one, and add to the end
-		//memmove(&_text_message_list[0], &_text_message_list[1], sizeof(_text_message_list[0]) * (MAX_CHAT_MESSAGES - 1));
-		//ttd_strlcpy(_text_message_list[MAX_CHAT_MESSAGES - 1].message, buf, sizeof(_text_message_list[MAX_CHAT_MESSAGES - 1].message));
-
 		while(_text_message_list.size() > MAX_CHAT_MESSAGES)
 			_text_message_list.remove(0);
 		
-		/*
-		for (i = 0; i < MAX_CHAT_MESSAGES-1; i++) 
-		{
-			_text_message_list[i] = _text_message_list[i+1];
-		}
-
-		_text_message_list[MAX_CHAT_MESSAGES - 1] = new TextMessage();
-
-		_text_message_list[MAX_CHAT_MESSAGES - 1].color = color;
-		_text_message_list[MAX_CHAT_MESSAGES - 1].end_date = Global.get_date() + duration;
-		_text_message_list[MAX_CHAT_MESSAGES - 1].message = buf;
-
 		_textmessage_dirty = true;
-		*/
 	}
 
 	public static void InitTextMessage()
 	{
-		/*
-		int i;
-
-		for (i = 0; i < MAX_CHAT_MESSAGES; i++) 
-		{
-			_text_message_list[i] = new TextMessage();
-			_text_message_list[i].message = null;
-		}*/
-
 		_textmessage_width = _textmessage_box_max_width;
 	}
 
@@ -191,34 +147,9 @@ public class TextEffect
 			
 			if (Global.get_date() > m.end_date) {
 				i.remove();
+				_textmessage_dirty = true;
 			}
 		}
-		
-		/*
-		int i;
-
-		for (i = 0; i < MAX_CHAT_MESSAGES; i++) {
-			if (_text_message_list[i].message == null) continue;
-
-			if (Global.get_date() > _text_message_list[i].end_date) {
-				/* Move the remaining messages over the current message 
-				if (i != MAX_CHAT_MESSAGES - 1)
-				{
-					for (int j = i; j < MAX_CHAT_MESSAGES-1; j++) 
-					{
-						_text_message_list[j] = _text_message_list[j+1];
-					}
-
-				}
-
-				/* Mark the last item as empty 
-				_text_message_list[MAX_CHAT_MESSAGES - 1].message = null;
-				_textmessage_dirty = true;
-
-				// Go one item back, because we moved the array 1 to the left 
-				i--;
-			}
-		}*/
 	}
 
 	// Draw the textmessage-box
@@ -234,15 +165,6 @@ public class TextEffect
 
 		if (Console.isFullSize()) return;
 
-		/* Check if we have anything to draw at all * /
-		has_message = false;
-		for ( i = 0; i < MAX_CHAT_MESSAGES; i++) {
-			if (_text_message_list[i].message == null) break;
-
-			has_message = true;
-		}
-		if (!has_message) return; */
-
 		if(_text_message_list.isEmpty()) return;
 		
 		// Make a copy of the screen as it is before painting (for undraw)
@@ -257,16 +179,6 @@ public class TextEffect
 		j = 0;
 		
 		// Paint the messages
-		/*for (i = MAX_CHAT_MESSAGES - 1; i >= 0; i--) {
-			if (_text_message_list[i].message == null) continue;
-
-			j++;
-			Gfx.GfxFillRect(_textmessage_box_left, Hal._screen.height-_textmessage_box_bottom-j*13-2, _textmessage_box_left+_textmessage_width - 1, Hal._screen.height-_textmessage_box_bottom-j*13+10, / * black, but with some alpha * / 0x322 | Sprite.USE_COLORTABLE);
-
-			Gfx.DoDrawString(_text_message_list[i].message, _textmessage_box_left + 2, Hal._screen.height - _textmessage_box_bottom - j * 13 - 1, 0x10);
-			Gfx.DoDrawString(_text_message_list[i].message, _textmessage_box_left + 3, Hal._screen.height - _textmessage_box_bottom - j * 13, _text_message_list[i].color);
-		}*/
-
 		for(TextMessage m : _text_message_list)
 		{
 			j++;
@@ -338,13 +250,6 @@ public class TextEffect
 
 	static void MoveAllTextEffects()
 	{
-		/*
-		for( TextEffect te : _text_effect_list) 
-		{
-			if (te.string_id.isValid()) 
-				te.MoveTextEffect();
-		}*/
-		
 		for( ListIterator<TextEffect> i = _text_effect_list.listIterator(); i.hasNext(); )
 		{
 			TextEffect te = i.next();
@@ -447,16 +352,16 @@ public class TextEffect
 	}
 
 
-	// TODO save/load more? _text_effect_list[] _text_message_list[]
+	// save/load more? _text_effect_list[] _text_message_list[] - no, it's meaningless
 
 	public static void loadGame(ObjectInputStream oin) throws ClassNotFoundException, IOException
 	{
-		//_animated_tile_list = (TileIndex[]) oin.readObject();
+		// Empty
 	}
 
 	public static void saveGame(ObjectOutputStream oos) throws IOException 
 	{
-		//oos.writeObject(_animated_tile_list);		
+		// Empty
 	}
 
 }
