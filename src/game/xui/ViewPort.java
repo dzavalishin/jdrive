@@ -1,5 +1,6 @@
 package game.xui;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -38,15 +39,13 @@ import game.util.AutoRail;
 import game.util.BitOps;
 import game.util.Pixel;
 
+
 /**
- * 
+ * ViewPort is part of window that shows game scene. Main window is just viewport. 
  *
  */
 
-
-
-
-public class ViewPort 
+public class ViewPort implements Serializable
 {
 
 	

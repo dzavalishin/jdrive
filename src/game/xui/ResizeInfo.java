@@ -1,6 +1,8 @@
 package game.xui;
 
-public class ResizeInfo 
+import java.io.Serializable;
+
+public class ResizeInfo implements Serializable
 {
 	public int width; /* Minimum width and height */
 	public int height;

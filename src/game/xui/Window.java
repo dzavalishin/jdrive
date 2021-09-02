@@ -1,5 +1,6 @@
 package game.xui;
 
+import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,7 +27,7 @@ import game.util.WindowConstants;
 import game.util.wcustom.*;
 //import game.WindowClass;
 
-public class Window extends WindowConstants
+public class Window extends WindowConstants implements Serializable
 {
 	int flags4;
 	int window_class;

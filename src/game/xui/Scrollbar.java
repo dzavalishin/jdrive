@@ -1,9 +1,11 @@
 package game.xui;
 
+import java.io.Serializable;
+
 import game.struct.Point;
 import game.util.BitOps;
 
-public class Scrollbar 
+public class Scrollbar implements Serializable
 {
 	private int count;
 	private int cap;

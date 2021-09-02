@@ -68,9 +68,7 @@ public class Gui
 	//};
 
 
-	/* main_gui.c */
 	public static int _station_show_coverage;
-	//PlaceProc *_place_proc;
 
 
 
@@ -135,8 +133,6 @@ public class Gui
 			final byte[] b = SpriteCache.GetNonSprite(0x307 + i);
 
 			assert(b != null);
-			//Global._color_list[i] = *(final ColorList*)(b + 0xC6);
-			
 			Global._color_list[i] = new ColorList( BitOps.subArray(b, 0xC6) );
 		}
 	}
@@ -258,7 +254,7 @@ public class Gui
 
 	public static void CcPlaySound10(boolean success, TileIndex tile, int p1, int p2)
 	{
-		//if (success) SndPlayTileFx(Snd.SND_12_EXPLOSION, tile);
+		if (success) Sound.SndPlayTileFx(Snd.SND_12_EXPLOSION, tile);
 	}
 
 
@@ -311,8 +307,6 @@ public class Gui
 			switch (index) {
 				case 0: MiscGui.ShowSaveLoadDialog(Global.SLD_SAVE_GAME); break;
 				case 1: MiscGui.ShowSaveLoadDialog(Global.SLD_LOAD_GAME); break;
-				//case 0: SaveLoad.save(); break;
-				//case 1: SaveLoad.load(); break;
 				case 2: IntroGui.AskExitToGameMenu();               break;
 				case 3: IntroGui.AskExitGame();                     break;
 			}
@@ -358,9 +352,6 @@ public class Gui
 		PlayerGui.ShowPlayerFinances(index);
 	}
 
-	/*#ifdef ENABLE_NETWORK
-	extern void ShowClientList();
-	#endif /* ENABLE_NETWORK */
 
 	static void MenuClickCompany(int index)
 	{
@@ -545,7 +536,6 @@ public class Gui
 	}
 
 
-	//typedef void MenuClickedProc(int index);
 
 	static final MenuClickedProc _menu_clicked_procs[] = {
 		null, /* 0 */
@@ -657,14 +647,12 @@ public class Gui
 	}
 
 	static final Widget _menu_widgets[] = {
-	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   159,     0, 65535,     0,	Str.STR_NULL),
-			//new Widget(   WIDGETS_END),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   159,     0, 65535,     0,	Str.STR_NULL),
 	};
 
 
 	static final Widget _player_menu_widgets[] = {
-			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   240,     0,    81,     0,	Str.STR_NULL),
-			//new Widget(   WIDGETS_END),
+		new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   240,     0,    81,     0,	Str.STR_NULL),
 	};
 
 
@@ -672,7 +660,6 @@ public class Gui
 	{
 		if (index >= 0) {
 
-			//FOR_ALL_PLAYERS(p)
 			Iterator<Player> i = Player.getIterator();
 			while(i.hasNext())
 			{
@@ -686,9 +673,7 @@ public class Gui
 	static void UpdatePlayerMenuHeight(Window w)
 	{
 		int num = 0;
-		//final Player p;
 
-		//FOR_ALL_PLAYERS(p) {
 		Iterator<Player> i = Player.getIterator();
 		while(i.hasNext())
 		{
@@ -708,8 +693,6 @@ public class Gui
 			w.SetWindowDirty();
 		}
 	}
-
-	//extern void DrawPlayerIcon(int p, int x, int y);
 
 	static void PlayerMenuWndProc(Window w, WindowEvent e)
 	{
@@ -738,7 +721,6 @@ public class Gui
 				sel--;
 			}
 
-			//FOR_ALL_PLAYERS(p) {
 			Iterator<Player> i = Player.getIterator();
 			while(i.hasNext())
 			{
@@ -967,7 +949,7 @@ public class Gui
 
 	static void ToolbarAirClick(Window w)
 	{
-		int []dis = {-1};
+		int [] dis = {-1};
 
 		Vehicle.forEach( (v) ->
 		{
@@ -1212,12 +1194,11 @@ public class Gui
 	}
 
 	static final Widget _ask_reset_landscape_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     4,     0,    10,     0,    13, Str.STR_00C5,									Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     4,    11,   179,     0,    13, Str.STR_022C_RESET_LANDSCAPE,	Str.STR_NULL),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     4,     0,   179,    14,    91, 0x0,												Str.STR_NULL),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    12,    25,    84,    72,    83, Str.STR_00C9_NO,								Str.STR_NULL),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    12,    95,   154,    72,    83, Str.STR_00C8_YES,							Str.STR_NULL),
-	//new Widget(   WIDGETS_END),
+		new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     4,     0,    10,     0,    13, Str.STR_00C5,									Str.STR_018B_CLOSE_WINDOW),
+		new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     4,    11,   179,     0,    13, Str.STR_022C_RESET_LANDSCAPE,	Str.STR_NULL),
+		new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     4,     0,   179,    14,    91, 0x0,												Str.STR_NULL),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    12,    25,    84,    72,    83, Str.STR_00C9_NO,								Str.STR_NULL),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    12,    95,   154,    72,    83, Str.STR_00C8_YES,							Str.STR_NULL),
 	};
 
 	// Ask first to reset landscape or to make a random landscape
@@ -1385,24 +1366,23 @@ public class Gui
 	}
 
 	static final Widget _scen_edit_land_gen_widgets[] = {
-	new Widget(  Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,                  Str.STR_018B_CLOSE_WINDOW),
-	new Widget(   Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_0223_LAND_GENERATION,  Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget( Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7,   170,   181,     0,    13, Str.STR_NULL,                  Str.STR_STICKY_BUTTON),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   181,    14,   101, Str.STR_NULL,                  Str.STR_NULL),
-
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,    23,    14,    35, Sprite.SPR_IMG_DYNAMITE,          Str.STR_018D_DEMOLISH_BUILDINGS_ETC),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    24,    45,    14,    35, Sprite.SPR_IMG_TERRAFORM_DOWN,    Str.STR_018F_RAISE_A_CORNER_OF_LAND),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    46,    67,    14,    35, Sprite.SPR_IMG_TERRAFORM_UP,      Str.STR_018E_LOWER_A_CORNER_OF_LAND),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    68,    89,    14,    35, Sprite.SPR_IMG_LEVEL_LAND,        Str.STR_LEVEL_LAND_TOOLTIP),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    90,   111,    14,    35, Sprite.SPR_IMG_BUILD_CANAL,       Str.STR_CREATE_LAKE),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   112,   134,    14,    35, Sprite.SPR_IMG_ROCKS,             Str.STR_028C_PLACE_ROCKY_AREAS_ON_LANDSCAPE),
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   135,   157,    14,    35, Sprite.SPR_IMG_LIGHTHOUSE_DESERT, Str.STR_NULL), // XXX - dynamic
-	new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   158,   179,    14,    35, Sprite.SPR_IMG_TRANSMITTER,       Str.STR_028E_PLACE_TRANSMITTER),
-	new Widget(   Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   139,   149,    43,    54, Str.STR_0224,                  Str.STR_0228_INCREASE_SIZE_OF_LAND_AREA),
-	new Widget(   Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   139,   149,    56,    67, Str.STR_0225,                  Str.STR_0229_DECREASE_SIZE_OF_LAND_AREA),
-	new Widget(   Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    34,   149,    75,    86, Str.STR_0226_RANDOM_LAND,      Str.STR_022A_GENERATE_RANDOM_LAND),
-	new Widget(   Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    34,   149,    88,    99, Str.STR_0227_RESET_LAND,       Str.STR_022B_RESET_LANDSCAPE),
-	//new Widget(   WIDGETS_END),
+		new Widget(  Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,                  Str.STR_018B_CLOSE_WINDOW),
+		new Widget(   Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_0223_LAND_GENERATION,  Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+		new Widget( Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7,   170,   181,     0,    13, Str.STR_NULL,                  Str.STR_STICKY_BUTTON),
+		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   181,    14,   101, Str.STR_NULL,                  Str.STR_NULL),
+	
+		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,    23,    14,    35, Sprite.SPR_IMG_DYNAMITE,          Str.STR_018D_DEMOLISH_BUILDINGS_ETC),
+		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    24,    45,    14,    35, Sprite.SPR_IMG_TERRAFORM_DOWN,    Str.STR_018F_RAISE_A_CORNER_OF_LAND),
+		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    46,    67,    14,    35, Sprite.SPR_IMG_TERRAFORM_UP,      Str.STR_018E_LOWER_A_CORNER_OF_LAND),
+		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    68,    89,    14,    35, Sprite.SPR_IMG_LEVEL_LAND,        Str.STR_LEVEL_LAND_TOOLTIP),
+		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    90,   111,    14,    35, Sprite.SPR_IMG_BUILD_CANAL,       Str.STR_CREATE_LAKE),
+		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   112,   134,    14,    35, Sprite.SPR_IMG_ROCKS,             Str.STR_028C_PLACE_ROCKY_AREAS_ON_LANDSCAPE),
+		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   135,   157,    14,    35, Sprite.SPR_IMG_LIGHTHOUSE_DESERT, Str.STR_NULL), // XXX - dynamic
+		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   158,   179,    14,    35, Sprite.SPR_IMG_TRANSMITTER,       Str.STR_028E_PLACE_TRANSMITTER),
+		new Widget(   Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   139,   149,    43,    54, Str.STR_0224,                  Str.STR_0228_INCREASE_SIZE_OF_LAND_AREA),
+		new Widget(   Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   139,   149,    56,    67, Str.STR_0225,                  Str.STR_0229_DECREASE_SIZE_OF_LAND_AREA),
+		new Widget(   Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    34,   149,    75,    86, Str.STR_0226_RANDOM_LAND,      Str.STR_022A_GENERATE_RANDOM_LAND),
+		new Widget(   Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    34,   149,    88,    99, Str.STR_0227_RESET_LAND,       Str.STR_022B_RESET_LANDSCAPE),
 	};
 
 	static final int _multi_terraform_coords[][] = {
@@ -1469,7 +1449,6 @@ public class Gui
 		'U'
 	};
 
-	//typedef void OnButtonClick(Window w);
 	static final OnButtonClick  _editor_terraform_button_proc[] = {
 		Gui::EditorTerraformClick_Dynamite,
 		Gui::EditorTerraformClick_LowerBigLand,
@@ -1494,15 +1473,13 @@ public class Gui
 
 			{
 				int n = _terraform_size * _terraform_size;
-				//final int8 *coords = &_multi_terraform_coords[0][0];
 				int ci = 0;
 				assert(n != 0);
 				do {
 					int x = _multi_terraform_coords[ci][0];
 					int y = _multi_terraform_coords[ci][1];
-					//Gfx.DrawSprite(Sprite.SPR_WHITE_POINT, 77 + coords[0], 55 + coords[1]);
+
 					Gfx.DrawSprite(Sprite.SPR_WHITE_POINT, 77 + x, 55 + y);
-					//coords += 2;
 					ci++;
 				} while (--n > 0);
 			}
@@ -1615,17 +1592,16 @@ public class Gui
 
 
 	static final Widget _scen_edit_town_gen_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,                 Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   147,     0,    13, Str.STR_0233_TOWN_GENERATION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
-	new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7,   148,   159,     0,    13, 0x0,                      Str.STR_STICKY_BUTTON),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   159,    14,    81, 0x0,                      Str.STR_NULL),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   157,    16,    27, Str.STR_0234_NEW_TOWN,        Str.STR_0235_CONSTRUCT_NEW_TOWN),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   157,    29,    40, Str.STR_023D_RANDOM_TOWN,     Str.STR_023E_BUILD_TOWN_IN_RANDOM_LOCATION),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   157,    42,    53, Str.STR_MANY_RANDOM_TOWNS,    Str.STR_RANDOM_TOWNS_TIP),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,    53,    68,    79, Str.STR_02A1_SMALL,           Str.STR_02A4_SELECT_TOWN_SIZE),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    54,   105,    68,    79, Str.STR_02A2_MEDIUM,          Str.STR_02A4_SELECT_TOWN_SIZE),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   106,   157,    68,    79, Str.STR_02A3_LARGE,           Str.STR_02A4_SELECT_TOWN_SIZE),
-	//new Widget(   WIDGETS_END),
+		new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,                 Str.STR_018B_CLOSE_WINDOW),
+		new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   147,     0,    13, Str.STR_0233_TOWN_GENERATION, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
+		new Widget(  Window.WWT_STICKYBOX,   Window.RESIZE_NONE,     7,   148,   159,     0,    13, 0x0,                      Str.STR_STICKY_BUTTON),
+		new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   159,    14,    81, 0x0,                      Str.STR_NULL),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   157,    16,    27, Str.STR_0234_NEW_TOWN,        Str.STR_0235_CONSTRUCT_NEW_TOWN),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   157,    29,    40, Str.STR_023D_RANDOM_TOWN,     Str.STR_023E_BUILD_TOWN_IN_RANDOM_LOCATION),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   157,    42,    53, Str.STR_MANY_RANDOM_TOWNS,    Str.STR_RANDOM_TOWNS_TIP),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,    53,    68,    79, Str.STR_02A1_SMALL,           Str.STR_02A4_SELECT_TOWN_SIZE),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,    54,   105,    68,    79, Str.STR_02A2_MEDIUM,          Str.STR_02A4_SELECT_TOWN_SIZE),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   106,   157,    68,    79, Str.STR_02A3_LARGE,           Str.STR_02A4_SELECT_TOWN_SIZE),
 	};
 
 	static void ScenEditTownGenWndProc(Window w, WindowEvent e)
@@ -1712,98 +1688,94 @@ public class Gui
 
 
 	static final Widget _scenedit_industry_normal_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_023F_INDUSTRY_GENERATION,	Str.STR_NULL),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   169,    14,   224, 0x0,											Str.STR_NULL),
-
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_MANY_RANDOM_INDUSTRIES,		Str.STR_RANDOM_INDUSTRIES_TIP),
-
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0240_COAL_MINE,			Str.STR_0262_CONSTRUCT_COAL_MINE),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0241_POWER_STATION,	Str.STR_0263_CONSTRUCT_POWER_STATION),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0242_SAWMILL,				Str.STR_0264_CONSTRUCT_SAWMILL),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81,    92, Str.STR_0243_FOREST,					Str.STR_0265_PLANT_FOREST),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94,   105, Str.STR_0244_OIL_REFINERY,		Str.STR_0266_CONSTRUCT_OIL_REFINERY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   107,   118, Str.STR_0245_OIL_RIG,				Str.STR_0267_CONSTRUCT_OIL_RIG_CAN_ONLY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   120,   131, Str.STR_0246_FACTORY,				Str.STR_0268_CONSTRUCT_FACTORY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   133,   144, Str.STR_0247_STEEL_MILL,			Str.STR_0269_CONSTRUCT_STEEL_MILL),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   146,   157, Str.STR_0248_FARM,						Str.STR_026A_CONSTRUCT_FARM),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   159,   170, Str.STR_0249_IRON_ORE_MINE,	Str.STR_026B_CONSTRUCT_IRON_ORE_MINE),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   172,   183, Str.STR_024A_OIL_WELLS,			Str.STR_026C_CONSTRUCT_OIL_WELLS),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   185,   196, Str.STR_024B_BANK,						Str.STR_026D_CONSTRUCT_BANK_CAN_ONLY),
-	//new Widget(   WIDGETS_END),
+		new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW),
+		new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_023F_INDUSTRY_GENERATION,	Str.STR_NULL),
+		new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   169,    14,   224, 0x0,											Str.STR_NULL),
+	
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_MANY_RANDOM_INDUSTRIES,		Str.STR_RANDOM_INDUSTRIES_TIP),
+	
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0240_COAL_MINE,			Str.STR_0262_CONSTRUCT_COAL_MINE),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0241_POWER_STATION,	Str.STR_0263_CONSTRUCT_POWER_STATION),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0242_SAWMILL,				Str.STR_0264_CONSTRUCT_SAWMILL),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81,    92, Str.STR_0243_FOREST,					Str.STR_0265_PLANT_FOREST),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94,   105, Str.STR_0244_OIL_REFINERY,		Str.STR_0266_CONSTRUCT_OIL_REFINERY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   107,   118, Str.STR_0245_OIL_RIG,				Str.STR_0267_CONSTRUCT_OIL_RIG_CAN_ONLY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   120,   131, Str.STR_0246_FACTORY,				Str.STR_0268_CONSTRUCT_FACTORY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   133,   144, Str.STR_0247_STEEL_MILL,			Str.STR_0269_CONSTRUCT_STEEL_MILL),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   146,   157, Str.STR_0248_FARM,						Str.STR_026A_CONSTRUCT_FARM),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   159,   170, Str.STR_0249_IRON_ORE_MINE,	Str.STR_026B_CONSTRUCT_IRON_ORE_MINE),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   172,   183, Str.STR_024A_OIL_WELLS,			Str.STR_026C_CONSTRUCT_OIL_WELLS),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   185,   196, Str.STR_024B_BANK,						Str.STR_026D_CONSTRUCT_BANK_CAN_ONLY),
 	};
 
 
 	static final Widget _scenedit_industry_hilly_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_023F_INDUSTRY_GENERATION,	Str.STR_NULL),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   169,    14,   224, 0x0,											Str.STR_NULL),
-
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_MANY_RANDOM_INDUSTRIES,		Str.STR_RANDOM_INDUSTRIES_TIP),
-
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0240_COAL_MINE,			Str.STR_0262_CONSTRUCT_COAL_MINE),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0241_POWER_STATION,	Str.STR_0263_CONSTRUCT_POWER_STATION),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_024C_PAPER_MILL,			Str.STR_026E_CONSTRUCT_PAPER_MILL),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81,    92, Str.STR_0243_FOREST,					Str.STR_0265_PLANT_FOREST),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94,   105, Str.STR_0244_OIL_REFINERY,		Str.STR_0266_CONSTRUCT_OIL_REFINERY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   107,   118, Str.STR_024D_FOOD_PROCESSING_PLANT,	Str.STR_026F_CONSTRUCT_FOOD_PROCESSING),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   120,   131, Str.STR_024E_PRINTING_WORKS,	Str.STR_0270_CONSTRUCT_PRINTING_WORKS),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   133,   144, Str.STR_024F_GOLD_MINE,			Str.STR_0271_CONSTRUCT_GOLD_MINE),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   146,   157, Str.STR_0248_FARM,						Str.STR_026A_CONSTRUCT_FARM),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   159,   170, Str.STR_024B_BANK,						Str.STR_0272_CONSTRUCT_BANK_CAN_ONLY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   172,   183, Str.STR_024A_OIL_WELLS,			Str.STR_026C_CONSTRUCT_OIL_WELLS),
-	//new Widget(   WIDGETS_END),
+		new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,								Str.STR_018B_CLOSE_WINDOW),
+		new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_023F_INDUSTRY_GENERATION,	Str.STR_NULL),
+		new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   169,    14,   224, 0x0,											Str.STR_NULL),
+	
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_MANY_RANDOM_INDUSTRIES,		Str.STR_RANDOM_INDUSTRIES_TIP),
+	
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0240_COAL_MINE,			Str.STR_0262_CONSTRUCT_COAL_MINE),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0241_POWER_STATION,	Str.STR_0263_CONSTRUCT_POWER_STATION),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_024C_PAPER_MILL,			Str.STR_026E_CONSTRUCT_PAPER_MILL),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81,    92, Str.STR_0243_FOREST,					Str.STR_0265_PLANT_FOREST),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94,   105, Str.STR_0244_OIL_REFINERY,		Str.STR_0266_CONSTRUCT_OIL_REFINERY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   107,   118, Str.STR_024D_FOOD_PROCESSING_PLANT,	Str.STR_026F_CONSTRUCT_FOOD_PROCESSING),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   120,   131, Str.STR_024E_PRINTING_WORKS,	Str.STR_0270_CONSTRUCT_PRINTING_WORKS),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   133,   144, Str.STR_024F_GOLD_MINE,			Str.STR_0271_CONSTRUCT_GOLD_MINE),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   146,   157, Str.STR_0248_FARM,						Str.STR_026A_CONSTRUCT_FARM),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   159,   170, Str.STR_024B_BANK,						Str.STR_0272_CONSTRUCT_BANK_CAN_ONLY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   172,   183, Str.STR_024A_OIL_WELLS,			Str.STR_026C_CONSTRUCT_OIL_WELLS),
 	};
 
 	static final Widget _scenedit_industry_desert_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,									Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_023F_INDUSTRY_GENERATION,		Str.STR_NULL),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   169,    14,   224, 0x0,												Str.STR_NULL),
-
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_MANY_RANDOM_INDUSTRIES,			Str.STR_RANDOM_INDUSTRIES_TIP),
-
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0250_LUMBER_MILL,			Str.STR_0273_CONSTRUCT_LUMBER_MILL_TO),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0251_FRUIT_PLANTATION,	Str.STR_0274_PLANT_FRUIT_PLANTATION),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0252_RUBBER_PLANTATION,Str.STR_0275_PLANT_RUBBER_PLANTATION),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81,    92, Str.STR_0244_OIL_REFINERY,			Str.STR_0266_CONSTRUCT_OIL_REFINERY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94,   105, Str.STR_024D_FOOD_PROCESSING_PLANT,	Str.STR_026F_CONSTRUCT_FOOD_PROCESSING),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   107,   118, Str.STR_0246_FACTORY,					Str.STR_0268_CONSTRUCT_FACTORY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   120,   131, Str.STR_0253_WATER_SUPPLY,			Str.STR_0276_CONSTRUCT_WATER_SUPPLY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   133,   144, Str.STR_0248_FARM,							Str.STR_026A_CONSTRUCT_FARM),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   146,   157, Str.STR_0254_WATER_TOWER,			Str.STR_0277_CONSTRUCT_WATER_TOWER_CAN),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   159,   170, Str.STR_024A_OIL_WELLS,				Str.STR_026C_CONSTRUCT_OIL_WELLS),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   172,   183, Str.STR_024B_BANK,							Str.STR_0272_CONSTRUCT_BANK_CAN_ONLY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   185,   196, Str.STR_0255_DIAMOND_MINE,			Str.STR_0278_CONSTRUCT_DIAMOND_MINE),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   198,   209, Str.STR_0256_COPPER_ORE_MINE,	Str.STR_0279_CONSTRUCT_COPPER_ORE_MINE),
-	//new Widget(   WIDGETS_END),
+		new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,									Str.STR_018B_CLOSE_WINDOW),
+		new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_023F_INDUSTRY_GENERATION,		Str.STR_NULL),
+		new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   169,    14,   224, 0x0,												Str.STR_NULL),
+	
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_MANY_RANDOM_INDUSTRIES,			Str.STR_RANDOM_INDUSTRIES_TIP),
+	
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0250_LUMBER_MILL,			Str.STR_0273_CONSTRUCT_LUMBER_MILL_TO),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0251_FRUIT_PLANTATION,	Str.STR_0274_PLANT_FRUIT_PLANTATION),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0252_RUBBER_PLANTATION,Str.STR_0275_PLANT_RUBBER_PLANTATION),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81,    92, Str.STR_0244_OIL_REFINERY,			Str.STR_0266_CONSTRUCT_OIL_REFINERY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94,   105, Str.STR_024D_FOOD_PROCESSING_PLANT,	Str.STR_026F_CONSTRUCT_FOOD_PROCESSING),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   107,   118, Str.STR_0246_FACTORY,					Str.STR_0268_CONSTRUCT_FACTORY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   120,   131, Str.STR_0253_WATER_SUPPLY,			Str.STR_0276_CONSTRUCT_WATER_SUPPLY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   133,   144, Str.STR_0248_FARM,							Str.STR_026A_CONSTRUCT_FARM),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   146,   157, Str.STR_0254_WATER_TOWER,			Str.STR_0277_CONSTRUCT_WATER_TOWER_CAN),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   159,   170, Str.STR_024A_OIL_WELLS,				Str.STR_026C_CONSTRUCT_OIL_WELLS),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   172,   183, Str.STR_024B_BANK,							Str.STR_0272_CONSTRUCT_BANK_CAN_ONLY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   185,   196, Str.STR_0255_DIAMOND_MINE,			Str.STR_0278_CONSTRUCT_DIAMOND_MINE),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   198,   209, Str.STR_0256_COPPER_ORE_MINE,	Str.STR_0279_CONSTRUCT_COPPER_ORE_MINE),
 	};
 
 	static final Widget _scenedit_industry_candy_widgets[] = {
-	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,										Str.STR_018B_CLOSE_WINDOW),
-	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_023F_INDUSTRY_GENERATION,Str.STR_NULL),
-	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   169,    14,   224, 0x0,													Str.STR_NULL),
-
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_MANY_RANDOM_INDUSTRIES,	Str.STR_RANDOM_INDUSTRIES_TIP),
-
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0257_COTTON_CANDY_FOREST,Str.STR_027A_PLANT_COTTON_CANDY_FOREST),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0258_CANDY_FACTORY,			Str.STR_027B_CONSTRUCT_CANDY_FACTORY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0259_BATTERY_FARM,				Str.STR_027C_CONSTRUCT_BATTERY_FARM),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81,    92, Str.STR_025A_COLA_WELLS,					Str.STR_027D_CONSTRUCT_COLA_WELLS),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94,   105, Str.STR_025B_TOY_SHOP,						Str.STR_027E_CONSTRUCT_TOY_SHOP),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   107,   118, Str.STR_025C_TOY_FACTORY,				Str.STR_027F_CONSTRUCT_TOY_FACTORY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   120,   131, Str.STR_025D_PLASTIC_FOUNTAINS,	Str.STR_0280_CONSTRUCT_PLASTIC_FOUNTAINS),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   133,   144, Str.STR_025E_FIZZY_DRINK_FACTORY,Str.STR_0281_CONSTRUCT_FIZZY_DRINK_FACTORY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   146,   157, Str.STR_025F_BUBBLE_GENERATOR,		Str.STR_0282_CONSTRUCT_BUBBLE_GENERATOR),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   159,   170, Str.STR_0260_TOFFEE_QUARRY,			Str.STR_0283_CONSTRUCT_TOFFEE_QUARRY),
-	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   172,   183, Str.STR_0261_SUGAR_MINE,					Str.STR_0284_CONSTRUCT_SUGAR_MINE),
-	//new Widget(   WIDGETS_END),
+		new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     7,     0,    10,     0,    13, Str.STR_00C5,										Str.STR_018B_CLOSE_WINDOW),
+		new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     7,    11,   169,     0,    13, Str.STR_023F_INDUSTRY_GENERATION,Str.STR_NULL),
+		new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,     7,     0,   169,    14,   224, 0x0,													Str.STR_NULL),
+	
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    16,    27, Str.STR_MANY_RANDOM_INDUSTRIES,	Str.STR_RANDOM_INDUSTRIES_TIP),
+	
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    42,    53, Str.STR_0257_COTTON_CANDY_FOREST,Str.STR_027A_PLANT_COTTON_CANDY_FOREST),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    55,    66, Str.STR_0258_CANDY_FACTORY,			Str.STR_027B_CONSTRUCT_CANDY_FACTORY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    68,    79, Str.STR_0259_BATTERY_FARM,				Str.STR_027C_CONSTRUCT_BATTERY_FARM),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    81,    92, Str.STR_025A_COLA_WELLS,					Str.STR_027D_CONSTRUCT_COLA_WELLS),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,    94,   105, Str.STR_025B_TOY_SHOP,						Str.STR_027E_CONSTRUCT_TOY_SHOP),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   107,   118, Str.STR_025C_TOY_FACTORY,				Str.STR_027F_CONSTRUCT_TOY_FACTORY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   120,   131, Str.STR_025D_PLASTIC_FOUNTAINS,	Str.STR_0280_CONSTRUCT_PLASTIC_FOUNTAINS),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   133,   144, Str.STR_025E_FIZZY_DRINK_FACTORY,Str.STR_0281_CONSTRUCT_FIZZY_DRINK_FACTORY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   146,   157, Str.STR_025F_BUBBLE_GENERATOR,		Str.STR_0282_CONSTRUCT_BUBBLE_GENERATOR),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   159,   170, Str.STR_0260_TOFFEE_QUARRY,			Str.STR_0283_CONSTRUCT_TOFFEE_QUARRY),
+		new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,     2,   167,   172,   183, Str.STR_0261_SUGAR_MINE,					Str.STR_0284_CONSTRUCT_SUGAR_MINE),
 	};
 
 
 	static boolean AnyTownExists()
 	{
-
-		//FOR_ALL_TOWNS(t) 
+		return Town.anyTownExist();
+		/*
 		Iterator<Town> ii = Town.getIterator();
 		while(ii.hasNext())
 		{
@@ -1811,9 +1783,8 @@ public class Gui
 			if (t.getXy() != null) return true;
 		}
 		return false;
+		*/
 	}
-
-	//extern Industry *CreateNewIndustry(TileIndex tile, int type);
 
 	static boolean TryBuildIndustry(TileIndex tile, int type)
 	{

@@ -1,5 +1,6 @@
 package game;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import game.ai.Ai;
@@ -23,7 +24,7 @@ import game.xui.MiscGui;
 import game.xui.VehicleGui;
 import game.xui.Window;
 
-public class Economy extends EconomeTables 
+public class Economy extends EconomeTables implements Serializable
 {
 
 	// Maximum possible loan
