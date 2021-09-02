@@ -2090,9 +2090,6 @@ implements IPoolItem, Serializable
 
 	static void UpdateTownUnwanted(Town t)
 	{
-		//Player p;
-
-		//FOR_ALL_PLAYERS(p) 
 		Player.forEach( (p) ->
 		{
 			if (t.unwanted[p.index.id] > 0)
@@ -2207,9 +2204,6 @@ implements IPoolItem, Serializable
 
 	public static void TownsMonthlyLoop()
 	{
-		//Town t;
-
-		//FOR_ALL_TOWNS(t)
 		Town.forEach( (t) ->
 		{
 			if (t.isValid()) 

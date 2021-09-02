@@ -803,7 +803,7 @@ public class Vehicle implements IPoolItem
 
 	public static Iterator<Vehicle> getIterator()
 	{
-		return Global.gs._vehicles.getIterator(); //pool.values().iterator();
+		return Global.gs._vehicles.getIterator();
 	}
 
 	private static Iterator<Vehicle> getIteratorFrom(int id) {
@@ -2811,7 +2811,7 @@ public class Vehicle implements IPoolItem
 		{
 			unit_num++;
 			restart = false;
-			//FOR_ALL_VEHICLES(u)
+
 			for( Iterator<Vehicle> i = Global.gs._vehicles.getIterator(); i.hasNext(); )
 			{
 				Vehicle u = i.next();

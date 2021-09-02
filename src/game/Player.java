@@ -16,7 +16,9 @@ import game.ids.PlayerID;
 import game.ids.StringID;
 import game.struct.HighScore;
 import game.struct.PlayerEconomyEntry;
+import game.tables.Snd;
 import game.util.BitOps;
+import game.util.Sound;
 import game.util.Strings;
 import game.xui.Gfx;
 import game.xui.PlayerGui;
@@ -435,7 +437,6 @@ public class Player implements Serializable
 	private boolean GenerateCompanyName_verify_name(StringID str, int strp)
 	{
 		// No player must have this name already
-		//FOR_ALL_PLAYERS(pp)
 		Iterator<Player> ii = Player.getIterator();
 		while(ii.hasNext())
 		{
@@ -611,8 +612,6 @@ public class Player implements Serializable
 				continue;
 			boolean restart = false;
 
-			//FOR_ALL_PLAYERS(pp)
-			//Player.forEach( (pp) ->
 			Iterator<Player> ii = Player.getIterator();
 			while(ii.hasNext())
 			{
@@ -790,12 +789,12 @@ public class Player implements Serializable
 			PlayerGui.ShowPlayerFinances(Global.gs._local_player.id);
 			Player p = GetPlayer(Global.gs._local_player);
 
-			/* TODO sound
+
 			if (p.num_valid_stat_ent > 5 && p.old_economy[0].performance_history < p.old_economy[4].performance_history) {
-				SndPlayFx(SND_01_BAD_YEAR);
+				Sound.SndPlayFx(Snd.SND_01_BAD_YEAR);
 			} else {
-				SndPlayFx(SND_00_GOOD_YEAR);
-			}*/
+				Sound.SndPlayFx(Snd.SND_00_GOOD_YEAR);
+			}
 		}
 	}
 

@@ -12,7 +12,9 @@ import game.struct.FindLengthOfTunnelResult;
 import game.struct.Point;
 import game.struct.TileDesc;
 import game.tables.RailTables;
+import game.tables.Snd;
 import game.util.BitOps;
+import game.util.Sound;
 import game.util.Sprites;
 import game.xui.Gfx;
 import game.xui.Gui;
@@ -924,7 +926,7 @@ public class Rail extends RailTables {
 			if (Cmd.CmdFailed(ValidateAutoDrag( trackdirPtr, x, y, ex, ey))) return Cmd.CMD_ERROR;
 			trackdir = trackdirPtr[0];
 		}
-		//if(0!=(flags & Cmd.DC_EXEC)) SndPlayTileFx(SND_20_SPLAT_2, TileIndex.TileVirtXY(x, y));
+		if(0!=(flags & Cmd.DC_EXEC)) Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, TileIndex.TileVirtXY(x, y));
 
 		for(;;) {
 			ret = Cmd.DoCommand(x, y, railtype, TrackdirToTrack(trackdir), flags, (mode == 0) ? Cmd.CMD_BUILD_SINGLE_RAIL : Cmd.CMD_REMOVE_SINGLE_RAIL);

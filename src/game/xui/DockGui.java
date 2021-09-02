@@ -9,6 +9,8 @@ import game.Terraform;
 import game.TileIndex;
 import game.WaterCmd;
 import game.ifaces.OnButtonClick;
+import game.tables.Snd;
+import game.util.Sound;
 
 public class DockGui 
 {
@@ -21,14 +23,14 @@ public class DockGui
 	static void CcBuildDocks(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
-			//SndPlayTileFx(SND_02_SPLAT, tile);
+			Sound.SndPlayTileFx(Snd.SND_02_SPLAT, tile);
 			ViewPort.ResetObjectToPlace();
 		}
 	}
 
 	public static void CcBuildCanal(boolean success, TileIndex tile, int p1, int p2)
 	{
-		//if (success) SndPlayTileFx(SND_02_SPLAT, tile);
+		if (success) Sound.SndPlayTileFx(Snd.SND_02_SPLAT, tile);
 	}
 
 
@@ -248,7 +250,7 @@ public class DockGui
 			case 3:
 			case 4:
 				Gui._station_show_coverage = e.widget - 3;
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 			}
@@ -319,7 +321,7 @@ public class DockGui
 			case 3:
 			case 4:
 				_ship_depot_direction =  (e.widget - 3);
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				UpdateDocksDirection();
 				w.SetWindowDirty();
 				break;

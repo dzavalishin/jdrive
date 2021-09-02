@@ -77,7 +77,6 @@ public class Ship {
 				best_depot[0] = null; /* Did not find target */
 			}
 		} else {
-			//FOR_ALL_DEPOTS(depot)
 			Depot.forEach( (depot) ->
 			{
 				TileIndex tile = depot.xy;
@@ -862,9 +861,6 @@ public class Ship {
 
 	public static void ShipsYearlyLoop()
 	{
-		//Vehicle v;
-
-		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
 			if (v.type == Vehicle.VEH_Ship) {

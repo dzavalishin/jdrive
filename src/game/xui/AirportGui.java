@@ -11,21 +11,19 @@ import game.Str;
 import game.Terraform;
 import game.TileIndex;
 import game.ifaces.OnButtonClick;
+import game.tables.Snd;
 import game.util.BitOps;
+import game.util.Sound;
 
 public class AirportGui 
 {
-
-
 	static int _selected_airport_type;
-
-	//static void ShowBuildAirportPicker();
 
 
 	private static void CcBuildAirport(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
-			//SndPlayTileFx(SND_1F_SPLAT, tile);
+			Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, tile);
 			ViewPort.ResetObjectToPlace();
 		}
 	}
@@ -192,12 +190,12 @@ public class AirportGui
 			switch (e.widget) {
 			case 3: case 4: case 5: case 6: case 7:
 				_selected_airport_type = e.widget - 3;
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 			case 8: case 9:
 				Gui._station_show_coverage = e.widget - 8;
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 			}

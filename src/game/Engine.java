@@ -870,7 +870,6 @@ public class Engine extends EngineTables implements Serializable
 	//static PlayerID GetBestPlayer(PlayerID pp)
 	static int GetBestPlayer(int pp)
 	{
-		//final Player p;
 		int best_hist;
 		//PlayerID 
 		int best_player;
@@ -879,8 +878,7 @@ public class Engine extends EngineTables implements Serializable
 		do {
 			best_hist = -1;
 			best_player = Owner.OWNER_SPECTATOR;
-			//FOR_ALL_PLAYERS(p)
-			//Player.forEach( (p) ->
+
 			Iterator<Player> ii = Player.getIterator();
 			while(ii.hasNext())
 			{
@@ -903,8 +901,6 @@ public class Engine extends EngineTables implements Serializable
 
 	public static void EnginesDailyLoop()
 	{
-		//EngineID i;
-
 		if (Global.get_cur_year() >= 130) return;
 
 		for (int i = 0; i != Global.gs._engines.length; i++) {
@@ -971,8 +967,6 @@ public class Engine extends EngineTables implements Serializable
 
 	static void NewVehicleAvailable(Engine e)
 	{
-		//Vehicle v;
-		//Player p;
 		//EngineID 
 		//int index = e - Global._engines;
 		int index = e.index;
@@ -980,7 +974,7 @@ public class Engine extends EngineTables implements Serializable
 		// In case the player didn't build the vehicle during the intro period,
 		// prevent that player from getting future intro periods for a while.
 		if(0 != (e.flags & ENGINE_INTRODUCING)) {
-			//FOR_ALL_PLAYERS(p)
+
 			Iterator<Player> ii = Player.getIterator();
 			while(ii.hasNext())
 			{
@@ -992,7 +986,6 @@ public class Engine extends EngineTables implements Serializable
 				/* We assume the user did NOT build it.. prove me wrong ;) */
 				p.block_preview = 20;
 
-				//FOR_ALL_VEHICLES(v)
 				Iterator<Vehicle> it = Vehicle.getIterator();
 				while(it.hasNext())
 				{
@@ -1022,7 +1015,6 @@ public class Engine extends EngineTables implements Serializable
 		if (IsWagon(index)) return;
 
 		// make maglev / monorail available
-		//FOR_ALL_PLAYERS(p)
 		Player.forEach( (p) ->
 		{
 			if (p.is_active) {
@@ -1568,26 +1560,6 @@ public class Engine extends EngineTables implements Serializable
 }
 
 
-
-/*
-typedef void DrawEngineProc(int x, int y, EngineID engine, int image_ormod);
-typedef void DrawEngineInfoProc(EngineID, int x, int y, int maxw);
-
-class DrawEngineInfo {
-	DrawEngineProc *engine_proc;
-	DrawEngineInfoProc *info_proc;
-} 
-
-*/
-
-
-
-/*
-typedef SpriteGroup *(*resolve_callback)
-	(final SpriteGroup *spritegroup,
-	final Vehicle veh, int callback_info, 
-	void *resolve_func); 
- */
 
 
 @FunctionalInterface

@@ -961,8 +961,6 @@ public class ViewPort
 			rect.right += 2;
 			rect.bottom += 2;
 
-			//FOR_ALL_STATIONS(st) 
-			//Station.forEach( (st) ->
 			Iterator<Station> ii = Station.getIterator();
 			while(ii.hasNext())
 			{
@@ -991,8 +989,6 @@ public class ViewPort
 			rect.right += 4;
 			rect.bottom += 5;
 
-			//FOR_ALL_STATIONS(st) 
-			//Station.forEach( (st) ->
 			Iterator<Station> ii = Station.getIterator();
 			while(ii.hasNext())
 			{
@@ -1786,8 +1782,6 @@ public class ViewPort
 
 	static boolean CheckClickOnStation(final ViewPort vp, int x, int y)
 	{
-		//final Station st;
-
 		if (0 == (Global._display_opt & Global.DO_SHOW_STATION_NAMES)) return false;
 
 
@@ -1855,8 +1849,6 @@ public class ViewPort
 
 	static boolean CheckClickOnSign(final ViewPort vp, int x, int y)
 	{
-		//final SignStruct ss;
-
 		if (0 == (Global._display_opt & Global.DO_SHOW_SIGNS)) return false;
 		Iterator<SignStruct> i = SignStruct.getIterator();
 
@@ -1921,15 +1913,12 @@ public class ViewPort
 
 	static boolean CheckClickOnWaypoint(final ViewPort vp, int x, int y)
 	{
-		//final Waypoint wp;
-
 		if (0 == (Global._display_opt & Global.DO_WAYPOINTS)) return false;
 
 		if (vp.zoom < 1) {
 			x = x - vp.left + vp.virtual_left;
 			y = y - vp.top + vp.virtual_top;
 
-			//FOR_ALL_WAYPOINTS(wp) {
 			Iterator<WayPoint> i = WayPoint.getIterator();
 			while(i.hasNext())
 			{
@@ -1947,7 +1936,6 @@ public class ViewPort
 			x = (x - vp.left + 1) * 2 + vp.virtual_left;
 			y = (y - vp.top + 1) * 2 + vp.virtual_top;
 
-			//FOR_ALL_WAYPOINTS(wp) {
 			Iterator<WayPoint> i = WayPoint.getIterator();
 			while(i.hasNext())
 			{
@@ -1964,7 +1952,7 @@ public class ViewPort
 		} else {
 			x = (x - vp.left + 3) * 4 + vp.virtual_left;
 			y = (y - vp.top + 3) * 4 + vp.virtual_top;
-			//FOR_ALL_WAYPOINTS(wp) {
+
 			Iterator<WayPoint> i = WayPoint.getIterator();
 			while(i.hasNext())
 			{

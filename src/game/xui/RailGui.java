@@ -15,7 +15,9 @@ import game.TileIndex;
 import game.WayPoint;
 import game.enums.TileTypes;
 import game.ifaces.OnButtonClick;
+import game.tables.Snd;
 import game.util.BitOps;
+import game.util.Sound;
 import game.util.Sprites;
 
 public class RailGui {
@@ -71,7 +73,7 @@ public class RailGui {
 
 	static void CcPlaySound1E(boolean success, TileIndex tile, int p1, int p2)
 	{
-		//if (success) SndPlayTileFx(SND_20_SPLAT_2, tile);
+		if (success) Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, tile);
 	}
 
 	static void GenericPlaceRail(TileIndex tile, int cmd)
@@ -132,7 +134,7 @@ public class RailGui {
 		if (success) {
 			int dir = p2;
 
-			//SndPlayTileFx(SND_20_SPLAT_2, tile);
+			Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, tile);
 			ViewPort.ResetObjectToPlace();
 
 			tile = tile.iadd(TileIndex.TileOffsByDir(dir));
@@ -163,7 +165,7 @@ public class RailGui {
 	static void CcStation(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
-			//SndPlayTileFx(SND_20_SPLAT_2, tile);
+			Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, tile);
 			ViewPort.ResetObjectToPlace();
 		}
 	}
@@ -221,7 +223,7 @@ public class RailGui {
 	static void CcBuildRailTunnel(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
-			//SndPlayTileFx(SND_20_SPLAT_2, tile);
+			Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, tile);
 			ViewPort.ResetObjectToPlace();
 		} else {
 			ViewPort.SetRedErrorSquare(Global._build_tunnel_endtile);
@@ -327,7 +329,7 @@ public class RailGui {
 	{
 		if (BitOps.HASBIT(w.disabled_state, 16)) return;
 		w.SetWindowDirty();
-		//SndPlayFx(SND_15_BEEP);
+		Sound.SndPlayFx(Snd.SND_15_BEEP);
 
 		w.click_state = BitOps.RETTOGGLEBIT(w.click_state, 16);
 		_remove_button_clicked = BitOps.HASBIT(w.click_state, 16);
@@ -716,7 +718,7 @@ public class RailGui {
 			case 3:
 			case 4:
 				_railstation.orientation =  (e.widget - 3);
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 
@@ -729,7 +731,7 @@ public class RailGui {
 			case 11:
 				_railstation.numtracks =  ((e.widget - 5) + 1);
 				_railstation.dragdrop = false;
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 
@@ -742,20 +744,20 @@ public class RailGui {
 			case 18:
 				_railstation.platlength =  ((e.widget - 12) + 1);
 				_railstation.dragdrop = false;
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 
 			case 19:
 				_railstation.dragdrop ^= true;
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 
 			case 20:
 			case 21:
 				Gui._station_show_coverage = e.widget - 20;
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 			}
@@ -843,7 +845,7 @@ public class RailGui {
 			case 5:
 			case 6:
 				_build_depot_direction =  (e.widget - 3);
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 			}
@@ -906,7 +908,7 @@ public class RailGui {
 			switch (e.widget) {
 			case 3: case 4: case 5: case 6: case 7:
 				_cur_waypoint_type =  (e.widget - 3 + w.hscroll.getPos());
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 			}
@@ -990,26 +992,26 @@ public class RailGui {
 			case 4: case 5: // select signal type
 				/* XXX TODO: take into account the scroll position for changing selected type */
 				_cur_signal_type =  (e.widget - 4);
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 			case 7: // decrease drag density
 				if (Global._patches.drag_signals_density > 1) {
 					Global._patches.drag_signals_density--;
-					//SndPlayFx(SND_15_BEEP);
+					Sound.SndPlayFx(Snd.SND_15_BEEP);
 					w.SetWindowDirty();
 				}
 				break;
 			case 8: // increase drag density
 				if (Global._patches.drag_signals_density < 20) {
 					Global._patches.drag_signals_density++;
-					//SndPlayFx(SND_15_BEEP);
+					Sound.SndPlayFx(Snd.SND_15_BEEP);
 					w.SetWindowDirty();
 				}
 				break;
 			case 9: // autosignal mode toggle button
 				_cur_autosig_compl = !_cur_autosig_compl;
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 			case 10: case 11: // presignal-type dropdown list

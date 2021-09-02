@@ -11,6 +11,7 @@ import game.tables.RoadTables;
 import game.tables.Snd;
 import game.util.ArrayPtr;
 import game.util.BitOps;
+import game.util.Sound;
 import game.util.TownTables;
 import game.xui.Gfx;
 import game.xui.RoadVehGui;
@@ -1103,7 +1104,7 @@ public class Road extends RoadTables
 					if (tile.GetTileSlope(null) == 0 && tile.EnsureNoVehicle() && BitOps.CHANCE16(1,20)) {
 						tile.getMap().m4 |= (BitOps.GB(tile.getMap().m4, 4, 3) <=  2 ? 7 : 6) << 4;
 
-						//SndPlayTileFx(SND_21_JACKHAMMER, tile);
+						Sound.SndPlayTileFx(Snd.SND_21_JACKHAMMER, tile);
 						Vehicle.CreateEffectVehicleAbove(
 								tile.TileX() * 16 + 7,
 								tile.TileY() * 16 + 7,

@@ -138,7 +138,6 @@ public class mAirport
 	//checks to see if we have used our quota at any municipal station;
 	static boolean MA_WithinVehicleQuota(Station st)
 	{
-		//Vehicle v;
 		int [] vehiclecount = { 0 };
 
 		if(!Global._patches.allow_municipal_airports) 
@@ -147,7 +146,6 @@ public class mAirport
 		if(st.owner.id != Owner.OWNER_TOWN)
 			return true;
 
-		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
 			Order order = v.orders;
@@ -322,13 +320,11 @@ public class mAirport
 	// same as above but isnt as stringent
 	public static void MA_EditorAddAirport(Town tn)
 	{
-		//Station st;
 		TileIndex tl;
 		PlayerID old_player = Global.gs._current_player;
 		
 		Global.gs._current_player = PlayerID.get( Owner.OWNER_TOWN );
 		
-		//FOR_ALL_STATIONS(st) 
 		Iterator<Station> it = Station.getIterator();
 		while(it.hasNext())
 		{

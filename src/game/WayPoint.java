@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.enums.StationClassID;
 import game.enums.TileTypes;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
@@ -341,7 +342,7 @@ public class WayPoint implements IPoolItem
 
 			// TODO GetCustomStation
 			//if (BitOps.GB(p1, 0, 8) < Station.GetNumCustomStations(StationClassID.STAT_CLASS_WAYP))
-			//	spec = Station.GetCustomStation(STAT_CLASS_WAYP, BitOps.GB(p1, 0, 8));
+				//spec = Station.GetCustomStation(StationClassID.STAT_CLASS_WAYP, BitOps.GB(p1, 0, 8));
 
 			if (spec != null) {
 				//SETBIT(Global._m[tile.getTile()].m3, 4);

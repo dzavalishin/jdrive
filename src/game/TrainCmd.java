@@ -3864,9 +3864,7 @@ public class TrainCmd extends TrainTables
 
 	public static void TrainsYearlyLoop()
 	{
-		//Vehicle v;
 
-		//FOR_ALL_VEHICLES(v) {
 		Iterator<Vehicle> it = Vehicle.getIterator();
 		while(it.hasNext())
 		{

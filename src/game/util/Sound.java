@@ -417,7 +417,7 @@ public class Sound {
 		SndPlayTileFx(snd.ordinal(), tile);
 	}
 
-	static void SndPlayTileFx(/*SoundFx*/ int  sound, TileIndex tile)
+	public static void SndPlayTileFx(/*SoundFx*/ int  sound, TileIndex tile)
 	{
 		/* emits sound from center (+ 8) of the tile */
 		int x = tile.TileX() * 16 + 8;

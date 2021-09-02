@@ -4,6 +4,7 @@ import game.struct.LandInfoData;
 
 import game.struct.Point;
 import game.struct.Textbuf;
+import game.tables.Snd;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ import game.struct.FiosItem;
 import game.util.BinaryString;
 import game.util.BitOps;
 import game.util.GameDate;
+import game.util.Sound;
 import game.util.Strings;
 import game.util.YearMonthDay;
 import game.util.FileIO;
@@ -367,7 +369,7 @@ public class MiscGui {
 			case 16: /* place trees randomly over the landscape*/
 				w.click_state |= 1 << 16;
 				w.flags4 |= 5 << Window.WF_TIMEOUT_SHL;
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				Tree.PlaceTreesRandomly();
 				Hal.MarkWholeScreenDirty();
 				break;

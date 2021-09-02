@@ -569,8 +569,6 @@ public class RoadVehGui
 		y = 15;
 		num[0] = w.vscroll.pos * w.hscroll.getCap();
 
-		//FOR_ALL_VEHICLES(v) 
-		//Vehicle.forEach( (v) ->
 		Iterator<Vehicle> ii = Vehicle.getIterator();
 		while(ii.hasNext())
 		{

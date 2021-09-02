@@ -14,7 +14,9 @@ import game.enums.GameModes;
 import game.enums.RoadStopType;
 import game.enums.TileTypes;
 import game.ifaces.OnButtonClick;
+import game.tables.Snd;
 import game.util.BitOps;
+import game.util.Sound;
 import game.util.Sprites;
 
 public class RoadGui 
@@ -33,7 +35,7 @@ public class RoadGui
 
 	static void CcPlaySound1D(boolean success, TileIndex tile, int p1, int p2)
 	{
-		//if (success) SndPlayTileFx(SND_1F_SPLAT, tile);
+		if (success) Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, tile);
 	}
 
 	static void PlaceRoad_NE(TileIndex tile)
@@ -57,7 +59,7 @@ public class RoadGui
 	static void CcBuildRoadTunnel(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
-			//SndPlayTileFx(SND_20_SPLAT_2, tile);
+			Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, tile);
 			ViewPort.ResetObjectToPlace();
 		} else {
 			ViewPort.SetRedErrorSquare(Global._build_tunnel_endtile);
@@ -82,7 +84,7 @@ public class RoadGui
 	private static void CcRoadDepot(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
-			//SndPlayTileFx(SND_1F_SPLAT, tile);
+			Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, tile);
 			ViewPort.ResetObjectToPlace();
 			BuildRoadOutsideStation(tile, p1);
 		}
@@ -158,7 +160,7 @@ public class RoadGui
 	{
 		if (BitOps.HASBIT(w.disabled_state, 11)) return;
 		w.SetWindowDirty();
-		//SndPlayFx(SND_15_BEEP);
+		Sound.SndPlayFx(Snd.SND_15_BEEP);
 		w.click_state = BitOps.RETTOGGLEBIT(w.click_state, 11);
 		ViewPort.SetSelectionRed(BitOps.HASBIT(w.click_state, 11));
 	}
@@ -366,7 +368,7 @@ public class RoadGui
 			switch (e.widget) {
 			case 3: case 4: case 5: case 6:
 				_road_depot_orientation = (byte) (e.widget - 3);
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 			}
@@ -443,12 +445,12 @@ public class RoadGui
 			switch (e.widget) {
 			case 3: case 4: case 5: case 6:
 				_road_station_picker_orientation = (byte) (e.widget - 3);
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 			case 7: case 8:
 				Gui._station_show_coverage = e.widget - 7;
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				w.SetWindowDirty();
 				break;
 			}

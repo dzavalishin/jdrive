@@ -131,12 +131,6 @@ public abstract class TownGui //extends Town
 			w.disabled_state = (w.as_def_d().data_1 == -1) ? (1 << 6) : 0;
 
 			{
-				//int y;
-				//final Player  p;
-				//StringID 
-				//int r;
-				//int str;
-
 				Global.SetDParam(0, w.window_number);
 				w.DrawWindowWidgets();
 
@@ -147,7 +141,6 @@ public abstract class TownGui //extends Town
 
 				Player.forEach( (p) ->
 				{
-					//if (p.isActive() && (BitOps.HASBIT(t.have_ratings, p.getIndex().id) || t.exclusivity.id == p.getIndex().id)) 
 					if (p.isActive() && (t.hasRatingsFor(p.getIndex().id) || t.isExclusive( p.getIndex().id)) ) 
 					{
 						GraphGui.DrawPlayerIcon(p.getIndex().id, 2, y[0]);
@@ -369,7 +362,6 @@ public abstract class TownGui //extends Town
 			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,    86,   171,   138,   149, Str.STR_023C_EXPAND,		Str.STR_023B_INCREASE_SIZE_OF_TOWN),
 			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,    13,   172,   243,   138,   149, Str.STR_0290_DELETE,		Str.STR_0291_DELETE_THIS_TOWN_COMPLETELY),
 			new Widget( Window.WWT_PUSHTXTBTN,	Window.RESIZE_NONE,	13,	  244,	 259,	138,   149,		  Str.STR_PLANE,		Str.STR_MA_AIRPORT_BUTTON_TOOLTIP),	 								
-			//{   WIDGETS_END},
 	};
 
 	static final WindowDesc _town_view_scen_desc = new WindowDesc(
@@ -406,25 +398,18 @@ public abstract class TownGui //extends Town
 			new Widget(  Window.WWT_SCROLLBAR, Window.RESIZE_BOTTOM,    13,   196,   207,    14,   189, 0x0,										Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
 			new Widget(    Window.WWT_PANEL,   	Window.RESIZE_TB,    	13,  		0,   195,    190,  201, 0x0,				Str.STR_NULL),
 			new Widget(  Window.WWT_RESIZEBOX,     Window.RESIZE_TB,    13,   196,   207,   190,   201, 0x0,										Str.STR_RESIZE_BUTTON),
-			//{   WIDGETS_END},
 	};
 
 
 
 	static void MakeSortedTownList()
 	{
-		//final Town t;
 		int [] n = {0};
 
 		/* Create array for sorting */
-		//_town_sort = realloc(_town_sort, GetTownPoolSize() * sizeof(_town_sort[0]));
 		_town_sort = new Integer[Town.GetTownPoolSize()];
-		//if (_town_sort == null)			Global.error("Could not allocate memory for the town-sorting-list");
 
-		Town.forEach( (t) ->
-		{
-			if (t.getXy() != null) _town_sort[n[0]++] = t.index;
-		});
+		Town.forEachValid( t -> _town_sort[n[0]++] = t.index );
 
 		_num_town_sort = n[0];
 

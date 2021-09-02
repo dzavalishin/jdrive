@@ -199,34 +199,11 @@ public class Order implements Serializable
 	 *
 	 * Allocate a new order
 	 *
-	 * @return Order* if a free space is found, else null.
+	 * @return Order if a free space is found, else null.
 	 *
 	 */
 	static Order AllocateOrder()
 	{
-		/*
-		Order [] ret = { null };
-
-		_order_pool.forEach( (ii,order) ->
-		{
-			if (order.type == OT_NOTHING) {
-				int index = order.index;
-				order.clean();
-				order.index = index;
-				order.next = null;
-
-				// TODO return order;
-				ret[0] = order;
-			}
-		});
-		if(ret[0] != null) return ret[0];
-
-		// Check if we can add a block to the pool 
-		if (_order_pool.AddBlockToPool()) 
-			return AllocateOrder();
-
-		return null;
-		 */
 		return new Order();
 	}
 
@@ -1093,55 +1070,6 @@ public class Order implements Serializable
 		return v.next_shared != null || v.prev_shared != null;
 	}
 
-
-	/*
-	private static IPoolItemFactory<Order> factory = new IPoolItemFactory<Order>() 
-	{		
-		@Override
-		public Order createObject() {
-			return new Order();
-		}
-	}; 
-
-	private static MemoryPool<Order> _order_pool = new MemoryPool<Order>(factory);
-
-
-	private Order getOrder(int index)
-	{
-		return _order_pool.GetItemFromPool(index);
-	}
-
-	private Order getOrder(OrderID index)
-	{
-		return _order_pool.GetItemFromPool(index.id);
-	}
-
-	@Override
-	public void setIndex(int index) {
-		this.index = index;		
-	}
-
-
-	static void InitializeOrders()
-	{
-		_order_pool.CleanPool();
-		_order_pool.AddBlockToPool();
-
-		Global._backup_orders_tile = null;
-	}
-
-
-	public static Iterator<Order> getIterator()
-	{
-		return _order_pool.getIterator(); // pool.values().iterator();
-	}
-
-	static void forEach( Consumer<Order> c )
-	{
-		_order_pool.forEach(c);
-	}
-
-	 */
 
 	static void InitializeOrders()
 	{

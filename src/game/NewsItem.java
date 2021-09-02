@@ -562,12 +562,10 @@ public class NewsItem {
 	// show news item in the ticker
 	static void ShowTicker(final NewsItem ni)
 	{
-		Window w;
-
-		//if (_news_ticker_sound) SndPlayFx(SND_16_MORSE);
+		if (Global._news_ticker_sound) Sound.SndPlayFx(Snd.SND_16_MORSE);
 
 		Global._statusbar_news_item = new NewsItem(ni);
-		w = Window.FindWindowById(Window.WC_STATUS_BAR, 0);
+		Window w = Window.FindWindowById(Window.WC_STATUS_BAR, 0);
 		if (w != null) w.as_def_d().data_1 = 360;
 	}
 

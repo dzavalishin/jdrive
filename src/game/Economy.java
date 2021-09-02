@@ -15,6 +15,7 @@ import game.struct.Pair;
 import game.struct.PlayerEconomyEntry;
 import game.struct.ScoreInfo;
 import game.tables.EconomeTables;
+import game.tables.Snd;
 import game.util.BitOps;
 import game.util.Prices;
 import game.xui.Gfx;
@@ -1468,7 +1469,7 @@ public class Economy extends EconomeTables
 				v.profit_this_year += profit;
 				Player.SubtractMoneyFromPlayer(-profit);
 
-				// if (Player.IsLocalPlayer()) SndPlayVehicleFx(SND_14_CASHTILL, v);
+				if (Player.IsLocalPlayer()) v.SndPlayVehicleFx(Snd.SND_14_CASHTILL);
 
 				MiscGui.ShowCostOrIncomeAnimation(v.getX_pos(), v.getY_pos(), v.z_pos, -profit);
 			}
