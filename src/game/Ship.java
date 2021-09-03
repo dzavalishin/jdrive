@@ -448,7 +448,7 @@ public class Ship {
 		}
 	}
 
-	// TODO state unused?
+	// state unused
 	static boolean ShipTrackFollower(TileIndex tile, Object o, int track, int length, int []state)
 	{
 		PathFindShip pfs = (PathFindShip) o;

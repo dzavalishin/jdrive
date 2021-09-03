@@ -1269,7 +1269,7 @@ public class Player implements Serializable
 					fwrite(&length, sizeof(length), 1, fp); // write away string length
 					fwrite(hs.company, length, 1, fp);
 					fwrite(&hs.score, sizeof(hs.score), 1, fp);
-					fwrite("", 2, 1, fp); // XXX - placeholder for hs.title, not saved anymore; compatibility 
+					fwrite("", 2, 1, fp); // placeholder for hs.title, not saved anymore; compatibility 
 				}
 			}
 			fclose(fp);
@@ -1294,7 +1294,7 @@ public class Player implements Serializable
 
 					fread(hs.company, 1, length, fp);
 					fread(&hs.score, sizeof(hs.score), 1, fp);
-					fseek(fp, 2, SEEK_CUR); // XXX - placeholder for hs.title, not saved anymore; compatibility 
+					fseek(fp, 2, SEEK_CUR); // placeholder for hs.title, not saved anymore; compatibility 
 					hs.title = EndGameGetPerformanceTitleFromValue(hs.score);
 				}
 			}

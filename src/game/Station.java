@@ -145,9 +145,6 @@ public class Station extends StationTables implements IPoolItem
 
 
 
-	//TODO private static final StationID CHECK_STATIONS_ERR = StationID.getInvalid();
-	//private static final Station CHECK_STATIONS_ERR = null; 
-
 	// Determines what station to operate on in the
 	//  tick handler.
 	public static int _station_tick_ctr = 0;
@@ -658,7 +655,6 @@ public class Station extends StationTables implements IPoolItem
 					closest_station[0] = t;
 				} else if (closest_station[0] != t) {
 					Global._error_message = Str.STR_3006_ADJOINS_MORE_THAN_ONE_EXISTING;
-					//return null; //CHECK_STATIONS_ERR;
 					if(canBuild!= null) canBuild[0] = false;
 					closest_station[0] = INVALID_STATION;
 					return true; // break loop

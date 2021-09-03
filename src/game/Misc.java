@@ -184,7 +184,7 @@ public class Misc extends MiscTables
 	};
 
 	// Save load date related variables as well as persistent tick counters
-	// XXX: currently some unrelated stuff is just put here
+	// currently some unrelated stuff is just put here
 	static void SaveLoad_DATE()
 	{
 		SlGlobList(_date_desc);

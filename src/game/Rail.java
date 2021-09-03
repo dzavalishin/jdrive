@@ -605,7 +605,7 @@ public class Rail extends RailTables {
 	{
 		TileIndex tile;
 		int tileh;
-		int m5; /* XXX: Used only as a cache, should probably be removed? */
+		int m5; /* Used only as a cache, should probably be removed? */
 		/* Track */ int  track = p2;
 		/*TrackBits*/ int  trackbit;
 		int cost = 0;
@@ -1530,7 +1530,7 @@ public class Rail extends RailTables {
 			if (BitOps.GB(tile.getMap().m3, 4, 4) == 0) 
 			{
 				tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 4, 4, 0);
-				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 6, 2, RAIL_TYPE_NORMAL >> 6); // XXX >> because the finalant is meant for direct application, not use with SB
+				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 6, 2, RAIL_TYPE_NORMAL >> 6); // XXX >> because the constant is meant for direct application, not use with SB
 				tile.getMap().m4 = BitOps.RETCLRBIT(tile.getMap().m4, 3); // remove any possible semaphores
 			}
 

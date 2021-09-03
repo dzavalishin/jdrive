@@ -1504,7 +1504,7 @@ public class Vehicle implements IPoolItem
 					if( veh != null )
 					{
 						v = GetVehicle(veh);
-						// TODO XXX we keep one veh per hash point! Fix!
+						// we keep one veh per hash point! Fix!
 
 						if( v != null &&
 								0 != (v.vehstatus & VS_HIDDEN) &&
