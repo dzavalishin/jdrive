@@ -174,8 +174,8 @@ public class MainWindow extends JPanel implements ActionListener
 	private  JMenuBar getMenu() {
 		JMenuBar menuBar = new JMenuBar();
         
-        JMenu connectionMenu = new JMenu("Game");
-        menuBar.add(connectionMenu);
+        JMenu gameMenu = new JMenu("Game");
+        menuBar.add(gameMenu);
 
         /*
         JMenuItem menuItemConnect = new JMenuItem("Fast");
@@ -190,11 +190,21 @@ public class MainWindow extends JPanel implements ActionListener
         menuItemExit.addActionListener( e -> Global._exit_game = true );
         // NB! Does not work per se - must process it manually below
         menuItemExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, KeyEvent.ALT_DOWN_MASK));
-        connectionMenu.add(menuItemExit);
+        gameMenu.add(menuItemExit);
 
-        JMenu mnNewMenu_1 = new JMenu("New menu");
-        menuBar.add(mnNewMenu_1);	        
-	
+        
+        
+        JMenu viewMenu = new JMenu("View");
+        menuBar.add(viewMenu);	        
+
+        JMenuItem menuItemTranspBuildings = new JMenuItem("Transparent buildings");
+        menuItemTranspBuildings.addActionListener( e -> 
+        { 
+        	Global._display_opt ^= Global.DO_TRANS_BUILDINGS;
+        	Hal.MarkWholeScreenDirty();
+        });
+        viewMenu.add(menuItemTranspBuildings);
+        
         return menuBar;
 	}
 
