@@ -1268,21 +1268,9 @@ public class Window extends WindowConstants implements Serializable
 		Global._no_scroll = 0;
 	}
 
-	public static void UnInitWindowSystem()
-	{
-
-		/*
-		//Window w;
-		// delete all malloced widgets
-		for (Window w : _windows) {
-			//free(w.widget);
-			w.widget = null;
-		}*/
-	}
 
 	public static void ResetWindowSystem()
 	{
-		UnInitWindowSystem();
 		InitWindowSystem();
 		ViewPort._thd.pos.x = 0;
 		ViewPort._thd.pos.y = 0;

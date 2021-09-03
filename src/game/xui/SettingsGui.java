@@ -146,7 +146,7 @@ public class SettingsGui extends SettingsTables
 				// TODO Window.ShowDropDownMenu(w, _dynlang.dropdown, _dynlang.curr, 24, 0, 0);
 				return;
 			case 26: case 27: /* Setup resolution dropdown */
-				Window.ShowDropDownMenu(w, BuildDynamicDropdown(Strings.SPECSTR_RESOLUTION_START, Global._num_resolutions), GetCurRes(), 27, 0, 0);
+				Window.ShowDropDownMenu(w, BuildDynamicDropdown(Strings.SPECSTR_RESOLUTION_START, 1/*Global._num_resolutions*/), GetCurRes(), 27, 0, 0);
 				return;
 			case 28: /* Click fullscreen on/off */
 				// TODO (_fullscreen) ? CLRBIT(w.click_state, 28) : SETBIT(w.click_state, 28);

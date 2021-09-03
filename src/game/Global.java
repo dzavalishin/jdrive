@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import game.Cheat.Cheats;
+import game.console.Console;
 import game.enums.GameModes;
 import game.enums.SwitchModes;
 import game.ids.StringID;
@@ -222,7 +223,7 @@ public class Global
 	public static int _cleared_town_rating;
 	public static int _caret_timer;
 	public static Vehicle _place_clicked_vehicle;
-	public static final int _num_resolutions = 1; // TODO _num_resolutions
+	//public static final int _num_resolutions = 1; 
 	public static int _make_screenshot;
 	
 	// Available aircraft types
@@ -323,7 +324,7 @@ public class Global
 		String buf = String.format(s, arg);
 
 		error( "dbg: %s\n", buf);
-		// TODO Console.IConsoleDebug(buf);
+		Console.IConsoleDebug(buf);
 	}
 
 	// instead of DEBUG(ai, 0)( printf args)

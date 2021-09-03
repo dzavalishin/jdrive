@@ -129,16 +129,6 @@ public class AirportFTAClass extends Airport // bring in constants
 		Oilrig = Heliport;  // exactly the same structure for heliport/oilrig, so share state machine
 	}
 
-	static void UnInitializeAirports()
-	{
-		/*
-		CountryAirport.AirportFTAClass_Destructor();
-		CityAirport.AirportFTAClass_Destructor();
-		Heliport.AirportFTAClass_Destructor();
-		MetropolitanAirport.AirportFTAClass_Destructor();
-		InternationalAirport.AirportFTAClass_Destructor();
-		*/
-	}
 
 	private AirportFTAClass(
 			//AirportFTAClass Airport,

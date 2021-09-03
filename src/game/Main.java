@@ -17,6 +17,7 @@ import game.enums.ThreadMsg;
 import game.ids.PlayerID;
 import game.struct.SmallFiosItem;
 import game.util.FileIO;
+import game.util.Music;
 import game.util.Sound;
 import game.util.Strings;
 import game.xui.Gfx;
@@ -158,33 +159,10 @@ public class Main {
 		//_industry_sort = null;
 	}
 
-	static void UnInitializeDynamicVariables()
-	{
-		/* Dynamic stuff needs to be free'd somewhere... */
-		// TODO do we need?
-		/*
-		CleanPool(&_town_pool);
-		CleanPool(&_industry_pool);
-		CleanPool(&_station_pool);
-		CleanPool(&_vehicle_pool);
-		CleanPool(&_sign_pool);
-		CleanPool(&_order_pool);
-		*/
-		//free(_station_sort);
-		//free(_vehicle_sort);
-		//free(_town_sort);
-		//free(_industry_sort);
-	}
 
-	static void UnInitializeGame()
-	{
-		Window.UnInitWindowSystem();
-	}
 
 	static void LoadIntroGame()
 	{
-		String filename;
-
 		Global._game_mode = GameModes.GM_MENU;
 		//CLRBITS(_display_opt, DO_TRANS_BUILDINGS); // don't make buildings transparent in intro
 		//Global._display_opt = 0; // TODO BitOps.RETCLRBITS( Global._display_opt, DO_TRANS_BUILDINGS );
@@ -199,7 +177,7 @@ public class Main {
 		Gui.SetupColorsAndInitialWindow();
 
 		// Generate a world.
-		filename = String.format( "%sopntitle.dat",  Global._path.data_dir );
+		String filename = String.format( "%sopntitle.dat",  Global._path.data_dir );
 		// TODO if (SaveLoad.SaveOrLoad(filename, SaveLoad.SL_LOAD) != SaveOrLoadResult.SL_OK) 
 		{
 			/*#if defined SECOND_DATA_DIR
@@ -423,24 +401,19 @@ public class Main {
 		 */
 
 		Global.hal.stop_video();
-		//_music_driver.stop(); TODO return
-		//_sound_driver.stop(); TODO return
+		Music.stop_song();
+		Sound.stop();
 
 		// TODO SaveToConfig();
 		SaveLoad.SaveToHighScore();
 
-		// uninitialize airport state machines
-		AirportFTAClass.UnInitializeAirports();
 
-		/* uninitialize variables that are allocated dynamic */
-		UnInitializeDynamicVariables();
 
 		/* stop the AI */
 		Ai.AI_Uninitialize();
 
 		/* Close all and any open filehandles */
 		FileIO.FioCloseAll();
-		UnInitializeGame();
 
 		System.exit(0);
 	}
@@ -952,15 +925,6 @@ public class Main {
 
 
 
-	/*/ before savegame version 4, the name of the company determined if it existed
-	static void CheckIsPlayerActive()
-	{
-		for( Player p: Global.gs._players )
-		{
-			if (p.name_1 != 0) p.is_active = true;
-		}
-	}*/
-
 
 
 	static boolean AfterLoadGame()
@@ -1068,101 +1032,5 @@ public class Main {
 
 
 
-/*
-class MyGetOptData 
-{
-	String opt;
-	int numleft;
-	String [] argv;
-	String arg;
-	String options;
-	//String cont;
-	
-	int curarg;
-	private int argpos;
-
-
-	public void MyGetOptInit( String []argv, final String options)
-	{
-		//this.cont = null;
-		this.numleft = argv.length;
-		this.argv = argv;
-		this.options = options;
-		
-		this.curarg = 0;
-		this.argpos = 0;
-		
-		this.arg = argv[0];
-	}
-
-	private boolean argEmpty()
-	{
-		return argpos >= arg.length();
-	}
-	
-	private char argChar()
-	{
-		return arg.charAt(argpos);
-	}
-	
-	public int MyGetOpt()
-	{
-		//String s;
-		String r;
-		String t;
-
-		//s = cont;
-		//if (s != null)			goto md_continue_here;
-
-		for (;;) {
-
-			if( argEmpty() )
-			{
-				//s = *argv++;
-				if (--numleft < 0) return -1;
-				arg = argv[++curarg];
-				argpos = 0;
-			}
-			
-			if(argChar() == '-') {
-				//md_continue_here:;
-				argpos++;
-				if (!argEmpty()) {
-					// Found argument, try to locate it in options.
-					if (argChar() == ':' || (r = strchr(options, argChar())) == null) {
-						// ERROR!
-						return -2;
-					}
-					if (r[1] == ':') {
-						// Item wants an argument. Check if the argument follows, or if it comes as a separate arg.
-						if (!*(t = s + 1)) {
-							// It comes as a separate arg. Check if out of args?
-							if (--numleft < 0 || *(t = *argv) == '-') {
-								// Check if item is optional?
-								if (r[2] != ':')
-									return -2;
-								numleft++;
-								t = null;
-							} else {
-								argv++;
-							}
-						}
-						opt = t;
-						cont = null;
-						return argChar();
-					}
-					opt = null;
-					cont = s;
-					return argChar();
-				}
-			} else {
-				// This is currently not supported.
-				return -2;
-			}
-		}
-	}
-
-}
-*/
 
 

@@ -188,14 +188,13 @@ public class Engine extends EngineTables implements Serializable
 	{
 		SetupEngineNames();
 
-		//for (e = _engines, ei = _engine_info; e != endof(_engines); e++, ei++) 
 		for (int i = 0; i < Global.gs._engines.length; i++ ) 
 		{
 			final Engine e = Global.gs._engines[i];
 			
 			Global._engine_info[i] = new EngineInfo( EngineTables2.orig_engine_info[i] );
 			
-			final EngineInfo ei= Global._engine_info[i];
+			final EngineInfo ei = Global._engine_info[i];
 
 			int r;
 
