@@ -161,11 +161,10 @@ public class Rail extends RailTables {
 
 
 	/*
+	 *
 	 * Functions describing logical relations between Tracks, TrackBits, Trackdirs
 	 * TrackdirBits, Direction and DiagDirections.
 	 *
-	 * TODO: Add #unndefs or something similar to remove the arrays used below
-	 * from the global scope and expose direct uses of them.
 	 */
 
 	/**
@@ -2388,7 +2387,7 @@ public class Rail extends RailTables {
 
 					// Find the next item 
 					//link = PATHFIND_GET_LINK_PTR(tpf, offs);
-					link = tpf.links[offs/4]; // TODO it generates offsets to 32 bit pointers?
+					link = tpf.links[offs/4]; //   it generates offsets to 32 bit pointers?
 					// Check if there is a vehicle on this tile 
 					if (SignalVehicleCheck(link.tile, link.flags)) {
 						ssd.stop = true;
@@ -3101,8 +3100,6 @@ static  byte SignalOnTrack(Track track) {
 	 * Functions describing logical relations between Tracks, TrackBits, Trackdirs
 	 * TrackdirBits, Direction and DiagDirections.
 	 *
-	 * TODO: Add #unndefs or something similar to remove the arrays used below
-	 * from the global scope and expose direct uses of them.
 	 */
 
 	/**

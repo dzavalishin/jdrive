@@ -1247,7 +1247,7 @@ public class Road extends RoadTables
 			tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 2, 1, 0);
 			tile.MarkTileDirtyByTile();
 		}
-		return 0; // TODO [dz] it was void, who uses ret val?
+		return 0; // Actually result seems to be ignored
 	}
 
 	static void ChangeTileOwner_Road(TileIndex tile, PlayerID old_player, PlayerID new_player)

@@ -40,7 +40,6 @@ public class RoadStop implements IPoolItem, Serializable
 		slot = new int[NUM_SLOTS];
 		station = 0;
 		type = 0;
-		//prev = next = null;
 	}
 
 	public RoadStop() {
@@ -50,13 +49,12 @@ public class RoadStop implements IPoolItem, Serializable
 	public RoadStop( RoadStop src ) {
 		clear();
 		xy = src.xy;
-		used = false; // TODO check usage!
+		used = false;
 		status = src.status;
 		index = 0;
 		slot = new int[NUM_SLOTS];
 		station = src.station;
 		type = src.type;
-		//prev = next = null;
 	}
 	
 	@Override
@@ -67,10 +65,8 @@ public class RoadStop implements IPoolItem, Serializable
 	@Override
 	public boolean isValid() { return used; }
 	
-	static final IPoolItemFactory<RoadStop> factory = new IPoolItemFactory<RoadStop>() {
-		/**
-		 * 
-		 */
+	static final IPoolItemFactory<RoadStop> factory = new IPoolItemFactory<RoadStop>() 
+	{
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -88,9 +84,6 @@ public class RoadStop implements IPoolItem, Serializable
 	{
 		Global.gs._roadstops.forEach(c);
 	}
-
-	
-	
 	
 	
 	static public RoadStopType GetRoadStopType(TileIndex tile)
@@ -105,8 +98,6 @@ public class RoadStop implements IPoolItem, Serializable
 		road_stop.used = true;
 		road_stop.status = 3; //stop is free
 		road_stop.slot[0] = road_stop.slot[1] = INVALID_SLOT;
-		//road_stop.next = null;
-		//road_stop.prev = previous;
 		road_stop.station = sindex;
 	}
 
@@ -136,12 +127,7 @@ public class RoadStop implements IPoolItem, Serializable
 
 	static int GetNumRoadStops(final Station st, RoadStopType type)
 	{
-		//int num = 0;
-		//RoadStop rs;
-
 		assert(st != null);
-		//for (rs = GetPrimaryRoadStop(st, type); rs != null; rs = rs.next) num++;
-
 		return GetPrimaryRoadStop(st, type).size();
 	}
 

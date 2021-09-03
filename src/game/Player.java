@@ -1007,7 +1007,7 @@ public class Player implements Serializable
 
 			p = DoStartupNewPlayer(false);
 
-			/* TODO #ifdef ENABLE_NETWORK
+			/*  #ifdef ENABLE_NETWORK
 			if (_networking && !_network_server && _local_player == OWNER_SPECTATOR)
 				// In case we are a client joining a server... 
 				DeleteWindowById(WC_NETWORK_STATUS_WINDOW, 0);
