@@ -1,6 +1,5 @@
 package game;
 
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -28,9 +27,9 @@ import game.xui.Window;
 
 public class MainWindow extends JPanel implements ActionListener
 {
-
 	private static final long serialVersionUID = 7030596255463826051L;
 
+	
 	public static final int TICK_TIME = 20;
 	public static final int TICKS_PER_SECOND = 1000 / TICK_TIME;
 
@@ -70,6 +69,7 @@ public class MainWindow extends JPanel implements ActionListener
 		//setMinimumSize(new Dimension(WIDTH, HEIGHT));
 		//setMaximumSize(new Dimension(WIDTH, HEIGHT));
 
+		frame.setFocusTraversalKeysEnabled(false); // Enable Tab key to pass through to us
 
 		frame.addKeyListener(new KeyListener() {		
 			//this.addKeyListener(new KeyListener() {		

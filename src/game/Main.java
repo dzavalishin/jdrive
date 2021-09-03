@@ -696,7 +696,7 @@ public class Main {
 			LoadIntroGame();
 			break;
 
-		case SM_SAVE: /* TODO Save game */
+		case SM_SAVE: /* Save game */
 			
 			if (SaveLoad.SaveOrLoad(_file_to_saveload.name, SaveLoad.SL_SAVE) != SaveOrLoadResult.SL_OK) {
 				Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
