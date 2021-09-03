@@ -53,7 +53,7 @@ implements Serializable
 
 	public static final int RATING_BRIBE_UP_STEP = 200;
 	public static final int RATING_BRIBE_MAXIMUM = 800;
-	public static final int RATING_BRIBE_DOWN_TO = -50; 					// XXX SHOULD BE SOMETHING LOWER?
+	public static final int RATING_BRIBE_DOWN_TO = -50;
 
 
 	public static final int ROAD_REMOVE = 0;

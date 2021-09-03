@@ -218,7 +218,7 @@ public class Sound {
 			{
 				if (mc.active) {
 					mc.mixInt8ToInt16(buffer, samples);
-					Global.debug("mix ch %x", mc.hashCode());
+					//Global.debug("mix ch %x", mc.hashCode());
 					if (mc.samples_left == 0) mc.closeChannel();
 				}
 			}

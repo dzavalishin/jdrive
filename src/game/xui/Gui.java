@@ -86,7 +86,6 @@ public class Gui
 		width = Hal._screen.width;
 		height = Hal._screen.height;
 
-		// XXX: these are not done
 		switch (Global._game_mode) {
 		case GM_MENU:
 			Window.deleteMain();

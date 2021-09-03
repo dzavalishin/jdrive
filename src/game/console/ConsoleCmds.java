@@ -1226,7 +1226,7 @@ public class ConsoleCmds extends Console
 	static void IConsoleDebugLibRegister()
 	{
 		// debugging variables and functions
-		//extern boolean _stdlib_con_developer; /* XXX extern in .c */
+		//extern boolean _stdlib_con_developer; 
 
 		//IConsoleVarRegister("con_developer",    &_stdlib_con_developer, ICONSOLE_VAR_BOOLEAN, "Enable/disable console debugging information (internal)");
 		Console.IConsoleCmdRegister("resettile",        ConsoleCmds::ConResetTile);

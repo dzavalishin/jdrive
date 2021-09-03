@@ -36,7 +36,7 @@ public class Gfx extends PaletteTabs
 
 	public static final Colour [] _cur_palette = new Colour[256];
 
-	// XXX doesn't really belong here, but the only
+	// doesn't really belong here, but the only
 	// consumers always use it in conjunction with DoDrawString()
 	public static final String UPARROW   = String.valueOf((char)0x80); // "\x80";
 	public static final String DOWNARROW = String.valueOf((char)0xAA); // "\xAA";
@@ -1002,10 +1002,10 @@ public class Gfx extends PaletteTabs
 						//byte b = ctab[src_data[i+src_shift]];
 						final int c = src.r(i) & 0xFF;
 						byte b;
-						// TODO XXX hack 
+						/*/ TO DO hack 
 						if( c > ctab.length)
 							b = (byte) c;
-						else
+						else */
 							b = ctab[c];
 
 						//if (b != 0) dst_data[i+dst_shift] = b;
