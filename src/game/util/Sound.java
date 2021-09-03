@@ -345,7 +345,7 @@ public class Sound {
 	{
 		int left_vol, right_vol;
 
-		Global.debug("start snd %d", sound);
+		//Global.debug("start snd %d", sound);
 		
 		if (volume == 0) return;
 		MixerChannel mc = _mixer.allocateChannel();
@@ -453,7 +453,7 @@ public class Sound {
 			DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
 			soundLine = (SourceDataLine) AudioSystem.getLine(info);
 			soundLine.open(audioFormat);
-			Global.debug("Sound buffer size %d", soundLine.getBufferSize() ); // shows 22048
+			//Global.debug("Sound buffer size %d", soundLine.getBufferSize() ); // shows 22048
 			soundLine.start();
 
 			int[] intBuffer = new int[SAMPLES_PER_XFER];

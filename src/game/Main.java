@@ -18,6 +18,7 @@ import game.ids.PlayerID;
 import game.struct.SmallFiosItem;
 import game.util.FileIO;
 import game.util.Music;
+import game.util.PushPlayer;
 import game.util.Sound;
 import game.util.Strings;
 import game.xui.Gfx;
@@ -40,7 +41,7 @@ public class Main {
 	 * caused by the user, i.e. missing files or fatal configuration errors.
 	 * Post-0.4.0 since Celestar doesn't want this in SVN before. --pasky */
 
-	
+
 	static void  error( String  s, Object ... args)
 	{
 		String buf = String.format(s, args);
@@ -80,7 +81,7 @@ public class Main {
 		try {
 			len = f.read(buf);
 		} catch (IOException e) {
-			
+
 			Global.error(e);
 			return null;
 		} finally
@@ -88,10 +89,10 @@ public class Main {
 			try {
 				f.close();
 			} catch (IOException e) {
-				
+
 				Global.error(e);
 			}
-			
+
 		}
 
 
@@ -111,23 +112,23 @@ public class Main {
 	{
 		String help =
 				"Command line options:\n" +
-				"  -v drv              = Set video driver (see below)\n" +
-				"  -s drv              = Set sound driver (see below)\n" +
-				"  -m drv              = Set music driver (see below)\n" +
-				"  -r res              = Set resolution (for instance 800x600)\n" +
-				"  -h                  = Display this help text\n" +
-				"  -t date             = Set starting date\n" +
-				"  -d [[fac=]lvl[,...]]= Debug mode\n" +
-				"  -e                  = Start Editor\n" +
-				"  -g [savegame]       = Start new/save game immediately\n" +
-				"  -G seed             = Set random seed\n" +
-				"  -n [ip#player:port] = Start networkgame\n" +
-				"  -D                  = Start dedicated server\n" +
-				"  -f                  = Fork into the background (dedicated only)\n" +
-				"  -i                  = Force to use the DOS palette (use this if you see a lot of pink)\n" +
-				"  -p #player          = Player as #player (deprecated) (network only)\n" +
-				"  -c config_file      = Use 'config_file' instead of 'openttd.cfg'\n"
-				;
+						"  -v drv              = Set video driver (see below)\n" +
+						"  -s drv              = Set sound driver (see below)\n" +
+						"  -m drv              = Set music driver (see below)\n" +
+						"  -r res              = Set resolution (for instance 800x600)\n" +
+						"  -h                  = Display this help text\n" +
+						"  -t date             = Set starting date\n" +
+						"  -d [[fac=]lvl[,...]]= Debug mode\n" +
+						"  -e                  = Start Editor\n" +
+						"  -g [savegame]       = Start new/save game immediately\n" +
+						"  -G seed             = Set random seed\n" +
+						"  -n [ip#player:port] = Start networkgame\n" +
+						"  -D                  = Start dedicated server\n" +
+						"  -f                  = Fork into the background (dedicated only)\n" +
+						"  -i                  = Force to use the DOS palette (use this if you see a lot of pink)\n" +
+						"  -p #player          = Player as #player (deprecated) (network only)\n" +
+						"  -c config_file      = Use 'config_file' instead of 'openttd.cfg'\n"
+						;
 
 		Hal.ShowInfo(help);
 	}
@@ -149,15 +150,6 @@ public class Main {
 		res[1] = BitOps.clamp(strtoul(t + 1, null, 0), 64, MAX_SCREEN_HEIGHT);
 	}*/
 
-	static void InitializeDynamicVariables()
-	{
-		// supposed to be unused in jaba code
-		/* Dynamic stuff needs to be initialized somewhere... */
-		//_station_sort  = null;
-		//_vehicle_sort  = null;
-		//_town_sort     = null;
-		//_industry_sort = null;
-	}
 
 
 
@@ -199,18 +191,12 @@ public class Main {
 
 	public static void main(String[] argv) 
 	{
-		//int argc = argv.length;
-		//MyGetOptData mgo = new MyGetOptData();
-		//int i;
 		boolean network = false;
 		//String network_conn = null;
 		//final String optformat;
-		//String musicdriver, sounddriver, videodriver;
 		//int resolution[] = {0,0};
 		int startdate = -1;
 		boolean dedicated = false;
-
-		//musicdriver = sounddriver = videodriver = null;
 
 		Global._game_mode = GameModes.GM_MENU;
 		Global._switch_mode = SwitchModes.SM_MENU;
@@ -227,34 +213,34 @@ public class Main {
 		//optformat = "bm:s:v:hDfn::eit:d::r:g::G:p:c:";
 
 		Getopt g = new Getopt("NextTTD", argv, "bhfc:t:g::"); //"n::ed::r:G:p:");
-		
+
 		int c;
 		while ((c = g.getopt()) != -1)
-		   {
-		     switch(c)
-		       {
-				case 'h': showhelp(); return;
-				
-				case 'f': Global._dedicated_forks = true; break;
-				case 'e': Global._switch_mode = SwitchModes.SM_EDITOR; break;
-				case 'b': Ai._ai.network_client = true; break;
+		{
+			switch(c)
+			{
+			case 'h': showhelp(); return;
 
-				case 'c': Global._path.config_file = g.getOptarg(); break;
-				case 't': startdate = Integer.parseInt(g.getOptarg()); break;
+			case 'f': Global._dedicated_forks = true; break;
+			case 'e': Global._switch_mode = SwitchModes.SM_EDITOR; break;
+			case 'b': Ai._ai.network_client = true; break;
 
-				case 'g':
-					if (g.getOptarg() != null) {
-						_file_to_saveload.name = g.getOptarg();
-						Global._switch_mode = SwitchModes.SM_LOAD;
-					} else
-						Global._switch_mode = SwitchModes.SM_NEWGAME;
-					break;
-		       }
-		   }
-		
+			case 'c': Global._path.config_file = g.getOptarg(); break;
+			case 't': startdate = Integer.parseInt(g.getOptarg()); break;
+
+			case 'g':
+				if (g.getOptarg() != null) {
+					_file_to_saveload.name = g.getOptarg();
+					Global._switch_mode = SwitchModes.SM_LOAD;
+				} else
+					Global._switch_mode = SwitchModes.SM_NEWGAME;
+				break;
+			}
+		}
+
 		/*
 		mgo.MyGetOptInit( argv, optformat);
-		
+
 		while ((i = mgo.MyGetOpt()) != -1) {
 			switch(i) {
 			case 'n': {
@@ -282,7 +268,7 @@ public class Main {
 			case -2:
 			}
 		}
-		*/
+		 */
 		if (Ai._ai.network_client && !network) {
 			Ai._ai.network_client = false;
 			Global.DEBUG_ai( 0, "[AI] Can't enable network-AI, because '-n' is not used\n");
@@ -308,8 +294,8 @@ public class Main {
 		if (Global._dedicated_forks && !dedicated)
 			Global._dedicated_forks = false;
 
-		Global.hal.start_video("");
-		
+		Global.hal.start_video();
+
 		// enumerate language files
 		Strings.InitializeLanguagePacks();
 
@@ -318,9 +304,6 @@ public class Main {
 
 		// initialize airport state machines
 		AirportFTAClass.InitializeAirports();
-
-		/* initialize all variables that are allocated dynamically */
-		InitializeDynamicVariables();
 
 		/* start the AI */
 		Ai.AI_Initialize();
@@ -336,7 +319,7 @@ public class Main {
 
 		//Engine.AddTypeToEngines(); // [dz] added, or StartupEngines crashes
 		//Engine.StartupEngines(); // [dz] added, or newgrf load crashes
-		
+
 		GfxInit.GfxLoadSprites();
 		Gfx.LoadStringWidthTable();
 
@@ -358,9 +341,9 @@ public class Main {
 		// TODO Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
 		GenerateWorld.doGenerateWorld(1, 256, 256); // Make the viewport initialization happy
-		
+
 		// GRFFile.CalculateRefitMasks();
-		
+
 		/*
 		if ((network) && (_network_available)) {
 			if (network_conn != null) {
@@ -381,11 +364,11 @@ public class Main {
 			}
 		}
 		 */
-		
+
 		// [dz] hacked in
 		//Hal._screen.width = 1024;
 		//Hal._screen.height = 768;
-		
+
 		Global.hal.main_loop();
 
 		// TODO WaitTillSaved();
@@ -447,7 +430,7 @@ public class Main {
 		case MSG_OTTD_SAVETHREAD_START: SaveFileStart(); break;
 		case MSG_OTTD_SAVETHREAD_DONE:  SaveFileDone(); break;
 		case MSG_OTTD_SAVETHREAD_ERROR: SaveFileError(); break;
-		*/
+		 */
 		default: assert false;
 		}
 
@@ -462,7 +445,7 @@ public class Main {
 		} else {
 			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_031C_SCREENSHOT_FAILED, 0, 0);
 		}
-		*/
+	 */
 	}
 
 	static void MakeNewGame()
@@ -575,7 +558,7 @@ public class Main {
 		DoCommandP(0, (Global._patches.autorenew ? 1 << 15 : 0 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
 
 		Global.hal.MarkWholeScreenDirty();
-		*/
+		 */
 	}
 
 	static boolean SafeSaveOrLoad(final String filename, int mode, GameModes newgm)
@@ -697,7 +680,7 @@ public class Main {
 			break;
 
 		case SM_SAVE: /* Save game */
-			
+
 			if (SaveLoad.SaveOrLoad(_file_to_saveload.name, SaveLoad.SL_SAVE) != SaveOrLoadResult.SL_OK) {
 				Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_4007_GAME_SAVE_FAILED, 0, 0);
 			} else {
@@ -711,7 +694,7 @@ public class Main {
 			Global.gs._local_player = PlayerID.getNone();
 			Hal.MarkWholeScreenDirty();
 			break;
-			
+
 		default:
 			assert false;
 			break;
@@ -753,20 +736,24 @@ public class Main {
 		} else {
 			// All these actions has to be done from OWNER_NONE
 			//  for multiplayer compatibility
-			PlayerID p =  Global.gs._current_player;
-			Global.gs._current_player = PlayerID.getNone();
+			
+			//PlayerID p =  Global.gs._current_player;
+			//Global.gs._current_player = PlayerID.getNone();
 
-			TextEffect.AnimateAnimatedTiles();
-			Global.gs.date.IncreaseDate();
-			Landscape.RunTileLoop();
-			Vehicle.CallVehicleTicks();
-			Landscape.CallLandscapeTick();
+			try(PushPlayer pp = new PushPlayer(PlayerID.getNone()))
+			{
+				TextEffect.AnimateAnimatedTiles();
+				Global.gs.date.IncreaseDate();
+				Landscape.RunTileLoop();
+				Vehicle.CallVehicleTicks();
+				Landscape.CallLandscapeTick();
 
-			// TODO Ai.AI_RunGameLoop();
+				// TODO Ai.AI_RunGameLoop();
 
-			Window.CallWindowTickEvent();
-			NewsItem.NewsLoop();
-			Global.gs._current_player = p;
+				Window.CallWindowTickEvent();
+				NewsItem.NewsLoop();
+			}
+			//Global.gs._current_player = p;
 		}
 	}
 
@@ -784,11 +771,11 @@ public class Main {
 			//strcpy(s, ".sav");
 			s = Strings.GetString(Str.STR_4004);
 
-			
+
 			//sprintf(buf, "%s%s", Global._path.autosave_dir, PATHSEP);
 			buf = String.format("%s%s%s.sav", Global._path.autosave_dir, File.separator, s);
 
-			
+
 		} else { /* generate a savegame name and number according to _patches.max_num_autosaves */
 			//sprintf(buf, "%s%sautosave%d.sav", _path.autosave_dir, PATHSEP, _autosave_ctr);
 			buf = String.format("%s%sautosave%d.sav", Global._path.autosave_dir, File.separator, Global._autosave_ctr);
@@ -798,7 +785,7 @@ public class Main {
 			if (Global._autosave_ctr >= Global._patches.max_num_autosaves) {
 				// we reached the limit for numbers of autosaves. We will start over
 				Global._autosave_ctr = 0;
-			
+
 			}
 		}
 
@@ -888,7 +875,7 @@ public class Main {
 		Hal.InteractiveRandom();
 
 		Window.updateScrollerTimeout();
-		
+
 
 		Global._caret_timer += 3;
 		Global._timer_counter += 8;
@@ -978,7 +965,7 @@ public class Main {
 
 		Gui.DoZoomInOutWindow(Gui.ZOOM_NONE, Window.getMain()); // update button status
 		Hal.MarkWholeScreenDirty();
- 
+
 		for( Player pp: Global.gs._players )
 			pp.avail_railtypes = Player.GetPlayerRailtypes(pp.index);
 
@@ -986,22 +973,22 @@ public class Main {
 	}
 
 
-	
+
 	static void DeterminePaths()
 	{
 		String cwd = null;
 		try {
 			cwd = new java.io.File(".").getCanonicalPath();
 		} catch (IOException e) {
-			
+
 			Global.error(e);
 			error(e.toString());
 		}
-		
+
 		//Global.printf("Start in '%s'", cwd);
-		
+
 		String slcwd = cwd + File.separator;
-		
+
 		Global._path.personal_dir = Global._path.game_data_dir = slcwd;
 
 
@@ -1024,9 +1011,9 @@ public class Main {
 		CreateDirectory(_path.save_dir, NULL);
 		CreateDirectory(_path.autosave_dir, NULL);
 		CreateDirectory(_path.scenario_dir, NULL);
-		*/
+		 */
 	}
-	
+
 
 }
 

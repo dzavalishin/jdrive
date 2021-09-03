@@ -153,11 +153,6 @@ public class Gfx extends PaletteTabs
 		Global.hal.make_dirty(left, top, width, height);
 	}
 
-	/*static void memset( int[] mem, int dst, int color, int count)
-	{
-		while(count-- > 0)
-			mem[dst++] = color;
-	}*/
 
 	public static void GfxFillRect(int left, int top, int right, int bottom, int color)
 	{
@@ -1882,16 +1877,15 @@ public class Gfx extends PaletteTabs
 	}
 
 
-	static void ScreenSizeChanged()
+	public static void ScreenSizeChanged()
 	{
-		/* TODO ScreenSizeChanged()
 		// check the dirty rect
 		if (Hal._invalid_rect.right >= Hal._screen.width) Hal._invalid_rect.right = Hal._screen.width;
 		if (Hal._invalid_rect.bottom >= Hal._screen.height) Hal._invalid_rect.bottom = Hal._screen.height;
 
 		// screen size changed and the old bitmap is invalid now, so we don't want to undraw it
 		Hal._cursor.visible = false;
-		 */
+
 	}
 
 	public static void UndrawMouseCursor()

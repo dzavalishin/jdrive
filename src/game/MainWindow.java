@@ -9,15 +9,17 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.Timer;
 
 import game.xui.Gfx;
@@ -69,6 +71,7 @@ public class MainWindow extends JPanel implements ActionListener
 		//setMinimumSize(new Dimension(WIDTH, HEIGHT));
 		//setMaximumSize(new Dimension(WIDTH, HEIGHT));
 
+		
 		frame.setFocusTraversalKeysEnabled(false); // Enable Tab key to pass through to us
 
 		frame.addKeyListener(new KeyListener() {		
@@ -84,8 +87,8 @@ public class MainWindow extends JPanel implements ActionListener
 		});
 
 
-		frame.addMouseListener( new MouseListener() 
-				//this.addMouseListener( new MouseListener() 
+		//frame.addMouseListener( new MouseListener() 
+		this.addMouseListener( new MouseListener() 
 				{
 
 			@Override
@@ -127,8 +130,8 @@ public class MainWindow extends JPanel implements ActionListener
 
 				});
 
-		frame.addMouseMotionListener( new MouseMotionListener() 
-				//this.addMouseMotionListener( new MouseMotionListener() 
+		//frame.addMouseMotionListener( new MouseMotionListener() 
+		this.addMouseMotionListener( new MouseMotionListener() 
 				{
 
 			@Override
@@ -153,12 +156,46 @@ public class MainWindow extends JPanel implements ActionListener
 				});
 
 		
-		frame.addMouseWheelListener( (e) -> {
+		//frame.addMouseWheelListener( (e) -> {
+		this.addMouseWheelListener( (e) -> {
 			Hal._cursor.setWheel( e.getWheelRotation() );
 			e.consume();
 		});
 		
+		frame.setJMenuBar(getMenu());
+		
+		//frame.set
+		requestFocus();
+		
 		timer.start();
+	}
+
+
+	private  JMenuBar getMenu() {
+		JMenuBar menuBar = new JMenuBar();
+        
+        JMenu connectionMenu = new JMenu("Game");
+        menuBar.add(connectionMenu);
+
+        /*
+        JMenuItem menuItemConnect = new JMenuItem("Fast");
+        menuItemConnect.addActionListener( e -> System.out.println("Connected") );
+        connectionMenu.add(menuItemConnect);
+
+        JMenuItem menuItemDisconnect = new JMenuItem("Disconnect");
+        menuItemDisconnect.addActionListener(e -> System.out.println("Disconnected") );
+        connectionMenu.add(menuItemDisconnect);
+		*/
+        JMenuItem menuItemExit = new JMenuItem("Exit");
+        menuItemExit.addActionListener( e -> Global._exit_game = true );
+        // NB! Does not work per se - must process it manually below
+        menuItemExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, KeyEvent.ALT_DOWN_MASK));
+        connectionMenu.add(menuItemExit);
+
+        JMenu mnNewMenu_1 = new JMenu("New menu");
+        menuBar.add(mnNewMenu_1);	        
+	
+        return menuBar;
 	}
 
 
@@ -185,9 +222,13 @@ public class MainWindow extends JPanel implements ActionListener
 		boolean meta_pressed = (e.getModifiersEx() & KeyEvent.META_DOWN_MASK) != 0;// _wnd.has_focus && GetAsyncKeyState(VK_CAPITAL)<0;
 		Gfx._dbg_screen_rect = meta_pressed; 
 
+		int key = e.getKeyCode();
+		
 		boolean prev_ff = Global._fast_forward;
 
-		switch(e.getKeyCode())
+		if( key == KeyEvent.VK_F4 && Global._alt_pressed ) { Global._exit_game = true; return; }
+		
+		switch(key)
 		{
 		case KeyEvent.VK_LEFT:	modDirKeys(1, pressed); break; 
 		case KeyEvent.VK_UP:	modDirKeys(2, pressed); break;
@@ -220,7 +261,6 @@ public class MainWindow extends JPanel implements ActionListener
 		}
 		else
 		{
-			int key = e.getKeyCode();
 			switch(key)
 			{
 
@@ -433,11 +473,26 @@ public class MainWindow extends JPanel implements ActionListener
 	}
 
 
-	private void processMouse(int x, int y) {
+	private void processMouse(int x, int y) 
+	{
+		/*
+		Point l = getLocation();
+		Point l2 = getParent().getLocation();
+		Point l3 = getParent().getParent().getLocation();;
 		// TODO hack
-		x -= 13; //myLocation.x;
-		y -= 36; //myLocation.y;
+		//x -= 13; //myLocation.x;
+		//y -= 36; //myLocation.y;
 
+		x -= l.x;
+		y -= l.y;
+
+		x -= l2.x;
+		y -= l2.y;
+
+		x -= l3.x;
+		y -= l3.y;
+		//Global.debug("loc %d.%d", l2.x, l2.y );
+		*/
 		Hal._cursor.processMouse(x, y);
 
 	}

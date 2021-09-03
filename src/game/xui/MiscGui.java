@@ -486,7 +486,6 @@ public class MiscGui {
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     4,     0,    10,     0,    13, Str.STR_00C5,							Str.STR_018B_CLOSE_WINDOW),
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     4,    11,   333,     0,    13, Str.STR_00B3_MESSAGE_FROM,	Str.STR_NULL),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     4,     0,   333,    14,   136, 0x0,										Str.STR_NULL),
-			//{   WIDGETS_END},
 	};
 
 	static void ErrmsgWndProc(Window w, WindowEvent e)
@@ -1600,7 +1599,6 @@ public class MiscGui {
 		return GameOptions._opt.landscape;
 	}
 
-	//extern void EnginesMonthlyLoop();
 
 	// p2 1 (increase) or -1 (decrease)
 	static int ClickChangeDateCheat(int p1, int p2)
