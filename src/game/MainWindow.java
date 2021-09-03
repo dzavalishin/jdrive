@@ -152,15 +152,6 @@ public class MainWindow extends JPanel implements ActionListener
 			}
 				});
 
-		/*frame.addMouseWheelListener( new MouseWheelListener() 
-		{			
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e) {
-				Hal._cursor.setWheel( e.getWheelRotation() );
-				e.consume();
-			}
-		});*/
-
 		
 		frame.addMouseWheelListener( (e) -> {
 			Hal._cursor.setWheel( e.getWheelRotation() );
@@ -194,14 +185,6 @@ public class MainWindow extends JPanel implements ActionListener
 		boolean meta_pressed = (e.getModifiersEx() & KeyEvent.META_DOWN_MASK) != 0;// _wnd.has_focus && GetAsyncKeyState(VK_CAPITAL)<0;
 		Gfx._dbg_screen_rect = meta_pressed; 
 
-		/*
-		Global._dirkeys = (byte)
-				(((e.getKeyCode() == KeyEvent.VK_LEFT) ? 1 : 0) +
-						((e.getKeyCode() == KeyEvent.VK_UP)  ? 2 : 0) +
-						((e.getKeyCode() == KeyEvent.VK_RIGHT)  ? 4 : 0) +
-						((e.getKeyCode() == KeyEvent.VK_DOWN)  ? 8 : 0));
-		 */
-
 		boolean prev_ff = Global._fast_forward;
 
 		switch(e.getKeyCode())
@@ -223,10 +206,7 @@ public class MainWindow extends JPanel implements ActionListener
 		}
 
 		if( prev_ff != Global._fast_forward)
-		{			
-			//Window w = Window.FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
 			Window.InvalidateWindow(Window.WC_MAIN_TOOLBAR, 0);
-		}
 
 		if(!pressed) return;
 
@@ -240,8 +220,8 @@ public class MainWindow extends JPanel implements ActionListener
 		}
 		else
 		{
-
-			switch(e.getKeyCode())
+			int key = e.getKeyCode();
+			switch(key)
 			{
 
 			case KeyEvent.VK_SPACE:		fKey = Window.WKC_SPACE;	break;
@@ -263,6 +243,13 @@ public class MainWindow extends JPanel implements ActionListener
 			case KeyEvent.VK_PAGE_UP:   fKey = Window.WKC_PAGEUP;	break;
 			case KeyEvent.VK_PAGE_DOWN: fKey = Window.WKC_PAGEDOWN;	break;
 
+			case KeyEvent.VK_DIVIDE:    fKey = Window.WKC_NUM_DIV;	break;
+			case KeyEvent.VK_MULTIPLY:  fKey = Window.WKC_NUM_MUL;	break;
+			case KeyEvent.VK_SUBTRACT:  fKey = Window.WKC_NUM_MINUS;	break;
+			case KeyEvent.VK_ADD:       fKey = Window.WKC_NUM_PLUS;	break;
+
+			case KeyEvent.VK_DECIMAL:   fKey = Window.WKC_NUM_DECIMAL;	break;
+			
 
 			case KeyEvent.VK_F1:	fKey = Window.WKC_F1;	break;
 			case KeyEvent.VK_F2:	fKey = Window.WKC_F2;	break;
@@ -277,6 +264,10 @@ public class MainWindow extends JPanel implements ActionListener
 			case KeyEvent.VK_F11:	fKey = Window.WKC_F11;	break;
 			case KeyEvent.VK_F12:	fKey = Window.WKC_F12;	break;
 
+			default:
+				if( key >= KeyEvent.VK_NUMPAD0 && key >= KeyEvent.VK_NUMPAD9 )
+					fKey = Window.WKC_NUM_0 + key - KeyEvent.VK_NUMPAD0;
+				
 			}
 		}
 
@@ -289,21 +280,6 @@ public class MainWindow extends JPanel implements ActionListener
 		Global._pressed_key = fKey << 16 | (aKey & 0xFFFF) | (shifts << 16);
 		//System.out.printf("k %x\n", Global._pressed_key );
 	}
-
-	/* TODO keys
-	 * 
-	 * 	AM(VK_NUMPAD0,VK_NUMPAD9, WKC_NUM_0, WKC_NUM_9),
-	AS(VK_DIVIDE,			WKC_NUM_DIV),
-	AS(VK_MULTIPLY,		WKC_NUM_MUL),
-	AS(VK_SUBTRACT,		WKC_NUM_MINUS),
-	AS(VK_ADD,				WKC_NUM_PLUS),
-	AS(VK_DECIMAL,		WKC_NUM_DECIMAL)
-
-	 * 
-	AM(VK_PRIOR,VK_DOWN, WKC_PAGEUP, WKC_DOWN),
-	 * 
-	 */
-
 
 
 
@@ -441,14 +417,6 @@ public class MainWindow extends JPanel implements ActionListener
 		byte[] gp = new byte[PALETTE_SIZE];
 		byte[] bp = new byte[PALETTE_SIZE];
 		byte[] ap = new byte[PALETTE_SIZE];
-		/*
-		java.util.Arrays.fill(ap, (byte) 255);
-		java.util.Arrays.fill(rp, (byte) 255);
-		java.util.Arrays.fill(gp, (byte) 255);
-		java.util.Arrays.fill(bp, (byte) 255);
-		//transparent
-		rp[0] = gp[0] = bp[0] = ap[0] = 0;
-		 */
 
 		if(Gfx._cur_palette == null || Gfx._cur_palette[0] == null) return;
 
