@@ -87,7 +87,7 @@ public class StationGui extends Station  // to get constants
 
 	private static SortStruct [] _station_sort;
 	public static final boolean [] _station_sort_dirty = new boolean[Global.MAX_PLAYERS];
-	private static boolean _global_station_sort_dirty;
+	private static boolean _global_station_sort_dirty = true;
 
 
 	static void GlobalSortStationList()
@@ -108,6 +108,7 @@ public class StationGui extends Station  // to get constants
 		Station.forEach( (st) ->
 		{
 			if (st.getXy() != null && st.getOwner().isNotNone()) {
+				_station_sort[n[0]] = new SortStruct();
 				_station_sort[n[0]].index = st.getIndex();
 				_station_sort[n[0]].owner = st.getOwner().id;
 				n[0]++;
@@ -581,6 +582,10 @@ public class StationGui extends Station  // to get constants
 			if (owner.isNotNone()) w.caption_color =  owner.id;
 			w.vscroll.setCap(5);
 		}
+	}
+
+	public static void requestSortStations() {
+		_global_station_sort_dirty = true;		
 	}
 
 
