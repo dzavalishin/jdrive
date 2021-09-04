@@ -20,6 +20,7 @@ import game.WayPoint;
 import game.enums.GameModes;
 import game.xui.MiscGui;
 import game.xui.PlayerGui;
+import game.xui.StationGui;
 import game.xui.Window;
 
 public class GameDate 
@@ -171,7 +172,7 @@ public class GameDate
 			Town.TownsMonthlyLoop();
 			Industry.IndustryMonthlyLoop();
 			//Station._global_station_sort_dirty();
-			Station._global_station_sort_dirty = true;
+			StationGui.requestSortStations();
 			/*#ifdef ENABLE_NETWORK
 			if (_network_server)
 				NetworkServerMonthlyLoop();

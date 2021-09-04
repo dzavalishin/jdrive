@@ -148,7 +148,7 @@ public class Station extends StationTables implements IPoolItem
 	// Determines what station to operate on in the
 	//  tick handler.
 	public static int _station_tick_ctr = 0;
-	public static boolean _global_station_sort_dirty = false;
+	//public static boolean _global_station_sort_dirty = false;
 
 	//
 	public static final int INVALID_STATION = RoadStop.INVALID_STATION;//0xFFFF;
@@ -222,7 +222,7 @@ public class Station extends StationTables implements IPoolItem
 		airport_queue = VehicleQueue.new_VQueue();
 		helicopter_queue = VehicleQueue.new_VQueue();
 
-		_global_station_sort_dirty = true; // build a new station
+		StationGui.requestSortStations(); // build a new station
 	}
 
 	// Update the virtual coords needed to draw the station sign.
@@ -2745,7 +2745,7 @@ public class Station extends StationTables implements IPoolItem
 
 		Global.DeleteName(st.string_id);
 		st.MarkStationDirty();
-		_global_station_sort_dirty = true; // delete station, remove sign
+		StationGui.requestSortStations(); // delete station, remove sign
 		Window.InvalidateWindowClasses(Window.WC_STATION_LIST);
 
 		index = st.index;
@@ -3312,7 +3312,7 @@ public class Station extends StationTables implements IPoolItem
 			Station st = GetStation(tile.getMap().m2);
 			tile.SetTileOwner(new_player);
 			st.owner = new_player;
-			_global_station_sort_dirty = true; // transfer ownership of station to another player
+			StationGui.requestSortStations();; // transfer ownership of station to another player
 			Window.InvalidateWindowClasses(Window.WC_STATION_LIST);
 		} else {
 			Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
@@ -3362,7 +3362,7 @@ public class Station extends StationTables implements IPoolItem
 		// set stations to be sorted on load of savegame
 		//memset(StationGui._station_sort_dirty, true, sizeof(_station_sort_dirty));
 		Arrays.fill(StationGui._station_sort_dirty, false);
-		_global_station_sort_dirty = true; // load of savegame
+		StationGui.requestSortStations(); // load of savegame
 	}
 
 
