@@ -1013,13 +1013,10 @@ public class ShipGui
 	{
 		//StationID 
 		int station = BitOps.GB(w.window_number, 16, 16);
-		if( station == 0xFFFF ) station = -1;
 		//PlayerID 
 		int owner = BitOps.GB(w.window_number, 0, 8);
 		vehiclelist_d vl = w.as_vehiclelist_d();
 
-		if( station == 0xFFFF ) station = Station.INVALID_STATION; // fucking bitstuffing
-		
 		switch(e.event) {
 		case WE_PAINT: {
 			int x = 2;

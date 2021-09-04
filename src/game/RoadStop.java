@@ -26,7 +26,6 @@ public class RoadStop implements IPoolItem, Serializable
 	int			station;
 	int			type;
 
-	public static final int INVALID_STATION = -1; 
 	public static final int INVALID_SLOT = -1; 
 	public static final int NUM_SLOTS = Station.NUM_SLOTS;
 	public static final int ROAD_STOP_LIMIT = 8;

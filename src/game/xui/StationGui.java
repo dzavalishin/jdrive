@@ -71,54 +71,47 @@ public class StationGui extends Station  // to get constants
 	{
 		public int compare(Station a, Station b)
 		{
-			/*int [] argv = new int[1];
-			argv[0] = a.index;
-			String buf1 = Strings.GetStringWithArgs(Str.STR_STATION, argv);
-
-			argv[0] = b.index;
-			String buf2 = Strings.GetStringWithArgs(Str.STR_STATION, argv); */
-
 			String buf1 = Strings.GetStringWithArgs(Str.STR_STATION, a.getIndex());
 			String buf2 = Strings.GetStringWithArgs(Str.STR_STATION, b.getIndex());
 			return buf1.compareTo(buf2);
 		}
 	}
 
-	private static class PlayerStationsInfo {
-		boolean dirty = true;
+	private static class PlayerStations {
+		boolean dirtySort = true;
 		List<Station> stations = new ArrayList<>();
 	}
 
-	private static Map<Integer, PlayerStationsInfo> sortedList;
+	private static Map<Integer, PlayerStations> playersStations;
 
 	public static void requestSortStations() {
-		sortedList = null;
+		playersStations = null;
 	}
 
 	public static void requestSortStations(int player) {
 		if (!isSortedListDirty()) {
-			PlayerStationsInfo info = sortedList.get(player);
+			PlayerStations info = playersStations.get(player);
 			if (info != null) {
-				info.dirty = true;
+				info.dirtySort = true;
 			}
 		}
 	}
 
 	private static boolean isSortedListDirty(int player) {
-		return isSortedListDirty() || sortedList.get(player) == null || sortedList.get(player).dirty;
+		return isSortedListDirty() || playersStations.get(player) == null || playersStations.get(player).dirtySort;
 	}
 
 	private static boolean isSortedListDirty() {
-		return sortedList == null;
+		return playersStations == null;
 	}
 
 	static void GlobalSortStationList()
 	{
-		sortedList = new HashMap<>();
+		playersStations = new HashMap<>();
 
 		Station.forEach( (station) -> {
 			if (station.isValid() && station.getOwner().isNotNone()) {
-				sortedList.computeIfAbsent(station.getOwner().id, (key) -> new PlayerStationsInfo() ).stations.add(station);
+				playersStations.computeIfAbsent(station.getOwner().id, (key) -> new PlayerStations() ).stations.add(station);
 			}
 		});
 
@@ -127,9 +120,9 @@ public class StationGui extends Station  // to get constants
 
 	static void MakeSortedStationList(int owner)
 	{
-		PlayerStationsInfo psi = sortedList.computeIfAbsent(owner, (key) -> new PlayerStationsInfo());
-		psi.stations.sort(new StationNameSorter());
-		psi.dirty = false;
+		PlayerStations ps = playersStations.computeIfAbsent(owner, (key) -> new PlayerStations());
+		ps.stations.sort(new StationNameSorter());
+		ps.dirtySort = false;
 
 		Global.DEBUG_misc( 1, "Resorting Stations list player %d...", owner+1);
 	}
@@ -145,7 +138,7 @@ public class StationGui extends Station  // to get constants
 			if (isSortedListDirty()) GlobalSortStationList();
 			if (isSortedListDirty(owner)) MakeSortedStationList(owner);
 
-			List<Station> stations = sortedList.get(owner).stations;
+			List<Station> stations = playersStations.get(owner).stations;
 			w.SetVScrollCount(stations.size());
 
 			/* draw widgets, with player's name in the caption */
@@ -204,9 +197,9 @@ public class StationGui extends Station  // to get constants
 					final PlayerID owner = PlayerID.get( w.window_number );
 					final Station  st;
 
-					if (id_v >= sortedList.get(owner.id).stations.size()) return; // click out of station bound
+					if (id_v >= playersStations.get(owner.id).stations.size()) return; // click out of station bound
 
-					st = sortedList.get(owner.id).stations.get(id_v);
+					st = playersStations.get(owner.id).stations.get(id_v);
 
 					assert(st.getXy() != null && st.getOwner() == owner);
 
