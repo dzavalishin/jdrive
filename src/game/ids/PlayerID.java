@@ -125,6 +125,14 @@ public class PlayerID extends AbstractID implements Serializable
 			throw new IllegalArgumentException("Invalid PlayerID: " + i);		
 	}
 
+	/**
+	 * Valid and not special value as NONE/WATER/TOWN/SPECTATOR
+	 * @return true if player is human/ai
+	 */
+	public boolean isValid() {
+		return id >= 0 && id < Global.MAX_PLAYERS;
+	}
+
 	
 	
 }

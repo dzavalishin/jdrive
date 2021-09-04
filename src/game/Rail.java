@@ -12,7 +12,9 @@ import game.struct.FindLengthOfTunnelResult;
 import game.struct.Point;
 import game.struct.TileDesc;
 import game.tables.RailTables;
+import game.tables.Snd;
 import game.util.BitOps;
+import game.util.Sound;
 import game.util.Sprites;
 import game.xui.Gfx;
 import game.xui.Gui;
@@ -159,11 +161,10 @@ public class Rail extends RailTables {
 
 
 	/*
+	 *
 	 * Functions describing logical relations between Tracks, TrackBits, Trackdirs
 	 * TrackdirBits, Direction and DiagDirections.
 	 *
-	 * TODO: Add #unndefs or something similar to remove the arrays used below
-	 * from the global scope and expose direct uses of them.
 	 */
 
 	/**
@@ -604,7 +605,7 @@ public class Rail extends RailTables {
 	{
 		TileIndex tile;
 		int tileh;
-		int m5; /* XXX: Used only as a cache, should probably be removed? */
+		int m5; /* Used only as a cache, should probably be removed? */
 		/* Track */ int  track = p2;
 		/*TrackBits*/ int  trackbit;
 		int cost = 0;
@@ -924,7 +925,7 @@ public class Rail extends RailTables {
 			if (Cmd.CmdFailed(ValidateAutoDrag( trackdirPtr, x, y, ex, ey))) return Cmd.CMD_ERROR;
 			trackdir = trackdirPtr[0];
 		}
-		//if(0!=(flags & Cmd.DC_EXEC)) SndPlayTileFx(SND_20_SPLAT_2, TileIndex.TileVirtXY(x, y));
+		if(0!=(flags & Cmd.DC_EXEC)) Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, TileIndex.TileVirtXY(x, y));
 
 		for(;;) {
 			ret = Cmd.DoCommand(x, y, railtype, TrackdirToTrack(trackdir), flags, (mode == 0) ? Cmd.CMD_BUILD_SINGLE_RAIL : Cmd.CMD_REMOVE_SINGLE_RAIL);
@@ -1529,7 +1530,7 @@ public class Rail extends RailTables {
 			if (BitOps.GB(tile.getMap().m3, 4, 4) == 0) 
 			{
 				tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 4, 4, 0);
-				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 6, 2, RAIL_TYPE_NORMAL >> 6); // XXX >> because the finalant is meant for direct application, not use with SB
+				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 6, 2, RAIL_TYPE_NORMAL >> 6); // XXX >> because the constant is meant for direct application, not use with SB
 				tile.getMap().m4 = BitOps.RETCLRBIT(tile.getMap().m4, 3); // remove any possible semaphores
 			}
 
@@ -2386,7 +2387,7 @@ public class Rail extends RailTables {
 
 					// Find the next item 
 					//link = PATHFIND_GET_LINK_PTR(tpf, offs);
-					link = tpf.links[offs/4]; // TODO it generates offsets to 32 bit pointers?
+					link = tpf.links[offs/4]; //   it generates offsets to 32 bit pointers?
 					// Check if there is a vehicle on this tile 
 					if (SignalVehicleCheck(link.tile, link.flags)) {
 						ssd.stop = true;
@@ -3099,8 +3100,6 @@ static  byte SignalOnTrack(Track track) {
 	 * Functions describing logical relations between Tracks, TrackBits, Trackdirs
 	 * TrackdirBits, Direction and DiagDirections.
 	 *
-	 * TODO: Add #unndefs or something similar to remove the arrays used below
-	 * from the global scope and expose direct uses of them.
 	 */
 
 	/**

@@ -220,7 +220,7 @@ public class Console //extends ConsoleCmds
 		Hal.MarkWholeScreenDirty();
 	}
 
-	static void IConsoleClose() {if (_iconsole_mode == IConsoleModes.ICONSOLE_OPENED) IConsoleSwitch();}
+	public static void IConsoleClose() {if (_iconsole_mode == IConsoleModes.ICONSOLE_OPENED) IConsoleSwitch();}
 	static void IConsoleOpen()  {if (_iconsole_mode == IConsoleModes.ICONSOLE_CLOSED) IConsoleSwitch();}
 
 	/**
@@ -343,7 +343,7 @@ public class Console //extends ConsoleCmds
 	 * debug() in debug.c. You need at least a level 2 (developer) for debugging
 	 * messages to show up
 	 */
-	static void IConsoleDebug(final String string)
+	public static void IConsoleDebug(final String string)
 	{
 		// TODO must be value of console var if (_stdlib_developer > 0)if (_stdlib_developer > 1)
 			IConsolePrintF(_icolour_dbg, "dbg: %s", string);
@@ -1051,6 +1051,10 @@ public class Console //extends ConsoleCmds
 			break;
 		}
 
+	}
+
+	public static boolean isFullSize() {
+		return _iconsole_mode == IConsoleModes.ICONSOLE_FULL;
 	}
 
 

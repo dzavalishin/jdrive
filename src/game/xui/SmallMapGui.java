@@ -17,9 +17,10 @@ import game.Vehicle;
 import game.enums.Owner;
 import game.struct.Point;
 import game.tables.SmallMapGuiTables;
+import game.tables.Snd;
 import game.util.BitOps;
 import game.util.Pixel;
-
+import game.util.Sound;
 import game.enums.TileTypes;
 
 public class SmallMapGui extends SmallMapGuiTables
@@ -359,13 +360,8 @@ public class SmallMapGui extends SmallMapGuiTables
 		small_map_draw_helper(x, y, dpi, ptr, tile_x, tile_y, type);
 
 		/* draw vehicles? */
-		if (type == 0 || type == 1) {
-			//Vehicle v;
-			//boolean skip;
-			//byte color;
-
-			//FOR_ALL_VEHICLES(v)
-			//Vehicle.forEach( (v) ->
+		if (type == 0 || type == 1) 
+		{
 			Iterator<Vehicle> ii = Vehicle.getIterator();
 			while(ii.hasNext())
 			{
@@ -597,14 +593,14 @@ public class SmallMapGui extends SmallMapGuiTables
 				_smallmap_type = e.widget - 5;
 
 				w.SetWindowDirty();
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				break;
 
 			case 12: /* toggle town names */
 				w.click_state ^= (1 << 12);
 				_smallmap_show_towns = BitOps.i2b( (w.click_state >> 12) & 1 );
 				w.SetWindowDirty();
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				break;
 			}
 			break;
@@ -653,10 +649,6 @@ public class SmallMapGui extends SmallMapGuiTables
 
 			x =  (((vp.virtual_width - (220*32)) / 2) + vp.virtual_left) / 4;
 			y = ((((vp.virtual_height- (120*32)) / 2) + vp.virtual_top ) / 2) - 32;
-			
-			// TODO XXX [dz] hack, small map crashes on negatives -- fixed!
-			//x = Math.max(x, 0);
-			//y = Math.max(y, 0);
 			
 			w.as_smallmap_d().scroll_x = (y-x) & ~0xF;
 			w.as_smallmap_d().scroll_y = (x+y) & ~0xF;

@@ -129,7 +129,6 @@ public class TrainGui
 
 	static void CcBuildWagon(boolean success, TileIndex tile, int p1, int p2)
 	{
-		//Vehicle v,*found;
 		Vehicle found;
 
 		if (!success)
@@ -137,7 +136,7 @@ public class TrainGui
 
 		// find a locomotive in the depot.
 		found = null;
-		//FOR_ALL_VEHICLES(v)
+
 		Iterator<Vehicle> ii = Vehicle.getIterator();
 		while(ii.hasNext())
 		{
@@ -401,7 +400,6 @@ public class TrainGui
 
 	static void DrawTrainDepotWindow(Window w)
 	{
-		//TileIndex tile;
 		Vehicle u;
 		int num,x,y,i, hnum;
 		Depot depot;
@@ -555,7 +553,6 @@ public class TrainGui
 		x -= 29; /* free wagons don't have an initial loco. */
 
 		/* and then the list of free wagons */
-		//FOR_ALL_VEHICLES(v) 
 		ii = Vehicle.getIterator();
 		while(ii.hasNext())
 		{

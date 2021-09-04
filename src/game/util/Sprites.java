@@ -308,17 +308,17 @@ public class Sprites {
 
 	/* Sprites for docks */
 	/* Docks consist of two tiles; the sloped one and the flat one */
-	public static final int SPR_DOCK_SLOPE_NE								= 2727;
-	public static final int SPR_DOCK_SLOPE_SE								= 2728;
-	public static final int SPR_DOCK_SLOPE_SW								= 2729;
-	public static final int SPR_DOCK_SLOPE_NW								= 2730;
-	public static final int SPR_DOCK_FLAT_X 								= 2731;	//for NE and SW
-	public static final int SPR_DOCK_FLAT_Y									= 2732;	//for NW and SE
-	public static final int SPR_BUOY												= 4076;	//XXX this sucks; because it displays wrong stuff on canals
+	public static final int SPR_DOCK_SLOPE_NE						= 2727;
+	public static final int SPR_DOCK_SLOPE_SE						= 2728;
+	public static final int SPR_DOCK_SLOPE_SW						= 2729;
+	public static final int SPR_DOCK_SLOPE_NW						= 2730;
+	public static final int SPR_DOCK_FLAT_X 						= 2731;	//for NE and SW
+	public static final int SPR_DOCK_FLAT_Y							= 2732;	//for NW and SE
+	public static final int SPR_BUOY								= 4076;	//XXX this sucks; because it displays wrong stuff on canals
 
 	/* Sprites for road */
-	public static final int SPR_ROAD_Y									= 1332;
-	public static final int SPR_ROAD_X									= 1333;
+	public static final int SPR_ROAD_Y								= 1332;
+	public static final int SPR_ROAD_X								= 1333;
 	public static final int SPR_ROAD_Y_SNOW							= 1351;
 	public static final int SPR_ROAD_X_SNOW							= 1352;
 

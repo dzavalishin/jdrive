@@ -36,7 +36,6 @@ public class UnmovableCmd extends UnmovableTables {
 		if (Global.gs._current_player.isWater()) {
 			boolean dodelete = false;
 
-			//FOR_ALL_PLAYERS(p)
 			Iterator<Player> ii = Player.getIterator();
 			while(ii.hasNext())
 			{

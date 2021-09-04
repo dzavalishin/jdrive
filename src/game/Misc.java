@@ -1,5 +1,6 @@
 package game;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 import game.tables.MiscTables;
@@ -7,14 +8,11 @@ import game.tables.MiscTables;
 public class Misc extends MiscTables 
 {
 
-	//char _name_array[512][32];
-
-
 	static final int NUM_CARGO = AcceptedCargo.NUM_CARGO;
 
 
 
-	// Calculate finalants that depend on the landscape type.
+	// Calculate constants that depend on the landscape type.
 	static void InitializeLandscapeVariables(boolean only_finalants)
 	{
 		final LandscapePredefVar lpd;
@@ -24,14 +22,9 @@ public class Misc extends MiscTables
 
 		lpd = _landscape_predef_var[GameOptions._opt.landscape];
 
-		//memcpy(Global._cargoc.ai_railwagon, lpd.railwagon_by_cargo, sizeof(lpd.railwagon_by_cargo));
-		//System.arraycopy(lpd.railwagon_by_cargo, 0, Global._cargoc.ai_railwagon, 0, );
-		//memcpy(Global._cargoc.ai_roadveh_start, lpd.road_veh_by_cargo_start,sizeof(lpd.road_veh_by_cargo_start));
-		//memcpy(Global._cargoc.ai_roadveh_count, lpd.road_veh_by_cargo_count,sizeof(lpd.road_veh_by_cargo_count));
-
-		Global._cargoc.ai_railwagon = lpd.railwagon_by_cargo; // TODO real copy?
-		Global._cargoc.ai_roadveh_start = lpd.road_veh_by_cargo_start;
-		Global._cargoc.ai_roadveh_count = lpd.road_veh_by_cargo_count;
+		Global._cargoc.ai_railwagon = Arrays.copyOf( lpd.railwagon_by_cargo, lpd.railwagon_by_cargo.length);
+		Global._cargoc.ai_roadveh_start = Arrays.copyOf( lpd.road_veh_by_cargo_start, lpd.road_veh_by_cargo_start.length );
+		Global._cargoc.ai_roadveh_count = Arrays.copyOf( lpd.road_veh_by_cargo_count, lpd.road_veh_by_cargo_count.length );
 		
 		for(i=0; i!=NUM_CARGO; i++) {
 			Global._cargoc.sprites[i] = lpd.sprites[i];
@@ -191,7 +184,7 @@ public class Misc extends MiscTables
 	};
 
 	// Save load date related variables as well as persistent tick counters
-	// XXX: currently some unrelated stuff is just put here
+	// currently some unrelated stuff is just put here
 	static void SaveLoad_DATE()
 	{
 		SlGlobList(_date_desc);

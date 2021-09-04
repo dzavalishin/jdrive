@@ -46,8 +46,7 @@ public class Sprite extends Sprites {
 	}
 
 	public static void UnloadSpriteGroup(SpriteGroup group) {
-		// TODO UnloadSpriteGroup stub
-
+		// free() is not needed in Java
 	}
 
 	public static int PLAYER_SPRITE_COLOR(PlayerID player) {

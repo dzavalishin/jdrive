@@ -11,6 +11,7 @@ import game.tables.IndustryTileTable;
 import game.tables.Snd;
 import game.util.BitOps;
 import game.util.Sound;
+import game.util.Strings;
 import game.xui.Gfx;
 import game.xui.Gui;
 import game.xui.MiscGui;
@@ -352,7 +353,6 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		return Landscape.GetPartialZ(ti.x & 0xF, ti.y & 0xF, ti.tileh) + ti.z;
 	}
 
-	@SuppressWarnings("SameReturnValue")
 	static int GetSlopeTileh_Industry(final TileInfo  ti)
 	{
 		return 0;
@@ -476,8 +476,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				m = tile.getMap().m3 + 1;
 
 				switch(m & 7) {
-				case 2:	//SndPlayTileFx(SND_2D_RIP_2, tile); break;
-				case 6: //SndPlayTileFx(SND_29_RIP, tile); break;
+				case 2:	Sound.SndPlayTileFx(Snd.SND_2D_RIP_2, tile); break;
+				case 6: Sound.SndPlayTileFx(Snd.SND_29_RIP, tile); break;
 				}
 
 				if (m >= 96) {
@@ -495,7 +495,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				m = tile.getMap().m3;
 
 				if (_industry_anim_offs[m] == 0xFF) {
-					//SndPlayTileFx(SND_30_CARTOON_SOUND, tile);
+					Sound.SndPlayTileFx(Snd.SND_30_CARTOON_SOUND, tile);
 				}
 
 				if (++m >= 70) {
@@ -578,7 +578,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				m = tile.getMap().m1;
 				m = (m & 3) + 1;
 				n = tile.getMap().m5;
-				/*
+				/* implemented below
 				if (m == 4 && (m=0,++n) == 32+1 && (n=30,b)) {
 					tile.getMap().m1 = 0x83;
 					tile.getMap().m5 = 29;
@@ -629,7 +629,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				if (state < 0x20 || state >= 0x180) {
 					if (0 == (tile.getMap().m1 & 0x40)) {
 						tile.getMap().m1 |= 0x40;
-						//SndPlayTileFx(SND_0B_MINING_MACHINERY, tile);
+						Sound.SndPlayTileFx(Snd.SND_0B_MINING_MACHINERY, tile);
 					}
 					if(0 != (state & 7))
 						return;
@@ -715,7 +715,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		int dir;
 		Vehicle v;
 
-		//SndPlayTileFx(SND_2E_EXTRAAcceptedCargo.CT_AND_POP, tile);
+		Sound.SndPlayTileFx(Snd.SND_2E_EXTRACT_AND_POP, tile);
 
 		dir = Hal.Random() & 3;
 
@@ -805,7 +805,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		case 10:
 			if (BitOps.CHANCE16(1,3)) {
-				//SndPlayTileFx(SND_0C_ELECTRIC_SPARK, tile);
+				Sound.SndPlayTileFx(Snd.SND_0C_ELECTRIC_SPARK, tile);
 				TextEffect.AddAnimatedTile(tile);
 			}
 			break;
@@ -1063,7 +1063,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 						Global.gs._current_player = PlayerID.getNone();
 						_industry_sound_ctr = 1;
 						_industry_sound_tile = tile;
-						//SndPlayTileFx(SND_38_CHAINSAW, tile);
+						Sound.SndPlayTileFx(Snd.SND_38_CHAINSAW, tile);
 
 						Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 						tile.SetMapExtraBits(0);
@@ -1080,32 +1080,23 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 	}
 
-	/*
-	static final byte _industry_sounds[][] = {
+
+	static final int _industry_sounds[][] = {
 			{0},
 			{0},
-			{1, SND_28_SAWMILL},
-			{0},
-			{0},
-			{0},
-			{1, SND_03_FACTORY_WHISTLE},
-			{1, SND_03_FACTORY_WHISTLE},
-			{0},
-			{3, SND_24_SHEEP},
+			{1, Snd.SND_28_SAWMILL.ordinal() },
 			{0},
 			{0},
 			{0},
+			{1, Snd.SND_03_FACTORY_WHISTLE.ordinal() },
+			{1, Snd.SND_03_FACTORY_WHISTLE.ordinal() },
 			{0},
-			{1, SND_28_SAWMILL},
+			{3, Snd.SND_24_SHEEP.ordinal() },
 			{0},
 			{0},
 			{0},
 			{0},
-			{0},
-			{0},
-			{0},
-			{0},
-			{1, SND_03_FACTORY_WHISTLE},
+			{1, Snd.SND_28_SAWMILL.ordinal() },
 			{0},
 			{0},
 			{0},
@@ -1114,24 +1105,33 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			{0},
 			{0},
 			{0},
-			{1, SND_33_PLASTIC_MINE},
+			{1, Snd.SND_03_FACTORY_WHISTLE.ordinal() },
+			{0},
+			{0},
+			{0},
+			{0},
+			{0},
+			{0},
+			{0},
+			{0},
+			{1, Snd.SND_33_PLASTIC_MINE.ordinal() },
 			{0},
 			{0},
 			{0},
 			{0},
 	};
-	 */
+	 
 
 	static void ProduceIndustryGoods(Industry i)
 	{
-		//int r;
-		//int num;
+		int [] r = {0};
+		int num;
 
 		/* play a sound? */
 		if ((i.counter & 0x3F) == 0) {
-			//if (BitOps.CHANCE16R(1,14,r) && (num=_industry_sounds[i.type][0]) != 0) {
-			//SndPlayTileFx(					_industry_sounds[i.type][1] + (((r >> 16) * num) >> 16),					i.xy);
-			//}
+			if (BitOps.CHANCE16R(1,14,r) && (num=_industry_sounds[i.type][0]) != 0) {
+				Sound.SndPlayTileFx( _industry_sounds[i.type][1] + (((r[0] >> 16) * num) >> 16), i.xy);
+			}
 		}
 
 		i.counter--;
@@ -1157,16 +1157,15 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			_industry_sound_ctr++;
 
 			if (_industry_sound_ctr == 75) {
-				//SndPlayTileFx(SND_37_BALLOON_SQUEAK, _industry_sound_tile);
+				Sound.SndPlayTileFx(Snd.SND_37_BALLOON_SQUEAK, _industry_sound_tile);
 			} else if (_industry_sound_ctr == 160) {
 				_industry_sound_ctr = 0;
-				//SndPlayTileFx(SND_36_CARTOON_CRASH, _industry_sound_tile);
+				Sound.SndPlayTileFx(Snd.SND_36_CARTOON_CRASH, _industry_sound_tile);
 			}
 		}
 
 		if (Global._game_mode == GameModes.GM_EDITOR) return;
 
-		//FOR_ALL_INDUSTRIES(i) 
 		Industry.forEach( (i) ->
 		{
 			if (i.isValid()) ProduceIndustryGoods(i);
@@ -1275,14 +1274,11 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	static Town CheckMultipleIndustryInTown(TileIndex tile, int type)
 	{
 		final Town t;
-		//final Industry  i;
 
 		t = Town.ClosestTownFromTile(tile, -1);
 
 		if (Global._patches.multiple_industry_per_town) return t;
 
-		//FOR_ALL_INDUSTRIES(i) 
-		//Industry.forEach( (i) ->
 		Iterator<Industry> ii = Industry.getIterator();
 		while(ii.hasNext())
 		{
@@ -1336,7 +1332,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		for(final IndustryTileTable it : itt) 
 		{
-			// TODO kill me and end table markers in tables
+			// kill me and end table markers in tables
 			if(it.ti.x == -0x80)
 				break;
 
@@ -1412,13 +1408,11 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	static boolean CheckIfTooCloseToIndustry(TileIndex tile, int type)
 	{
 		final IndustrySpec spec = _industry_spec[type];
-		//final Industry  i;
 
 		// accepting industries won't be close, not even with patch
 		if (Global._patches.same_industry_close && spec.accepts_cargo[0] == AcceptedCargo.CT_INVALID)
 			return true;
 
-		//FOR_ALL_INDUSTRIES(i) 
 		Iterator<Industry> ii = Industry.getIterator();
 		while(ii.hasNext())
 		{
@@ -1524,10 +1518,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		i.prod_level = 0x10;
 
-		//do
 		for(final IndustryTileTable it : itt)
 		{
-			// TODO kill me and end of list markers in arrays
+			// kill me and end of list markers in arrays
 			if(it.ti.x == -0x80)
 				break;
 			
@@ -1940,11 +1933,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	public static void IndustryMonthlyLoop()
 	{
-		//Industry i;
 		PlayerID old_player = Global.gs._current_player;
 		Global.gs._current_player = PlayerID.getNone();
 
-		//FOR_ALL_INDUSTRIES(i) 
 		Industry.forEach( (i) ->
 		{
 			if (i.isValid()) UpdateIndustryStatistics(i);
@@ -2596,10 +2587,10 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			// default to string sorting if they are otherwise equal
 			if (r == 0) {
 				Global.SetDParam(0, i.townId);
-				String buf1 = Global.GetString(Str.STR_TOWN);
+				String buf1 = Strings.GetString(Str.STR_TOWN);
 
 				Global.SetDParam(0, j.townId);
-				String buf2 = Global.GetString(Str.STR_TOWN);
+				String buf2 = Strings.GetString(Str.STR_TOWN);
 
 				r = buf1.compareToIgnoreCase(buf2);
 			}

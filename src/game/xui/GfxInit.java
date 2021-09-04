@@ -3,6 +3,7 @@ package game.xui;
 import game.Bridge;
 import game.Economy;
 import game.Engine;
+import game.GRFFile;
 import game.Global;
 import game.SpriteCache;
 import game.tables.EngineTables2;
@@ -454,8 +455,8 @@ public class GfxInit extends LandscapeSprites
 		Economy.ResetPriceBaseMultipliers();
 
 		// TODO was called from LoadNewGRF 
-		//GRFFile.ResetNewGRFData();
-		// TODO GRFFile.LoadNewGRF(load_index, i);
+		GRFFile.ResetNewGRFData();
+		GRFFile.LoadNewGRF(load_index, i);
 		
 	}
 

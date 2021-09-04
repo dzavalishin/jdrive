@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import game.Industry;
 import game.ifaces.IPoolItem;
@@ -107,6 +108,10 @@ public class MemoryPool<CType extends IPoolItem> implements Serializable
 
 	public int size() {
 		return pool.size();
+	}
+
+	public Stream<CType> stream() {
+		return pool.values().stream();		
 	}
 
 	

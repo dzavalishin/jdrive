@@ -4,6 +4,7 @@ import game.struct.LandInfoData;
 
 import game.struct.Point;
 import game.struct.Textbuf;
+import game.tables.Snd;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ import game.struct.FiosItem;
 import game.util.BinaryString;
 import game.util.BitOps;
 import game.util.GameDate;
+import game.util.Sound;
 import game.util.Strings;
 import game.util.YearMonthDay;
 import game.util.FileIO;
@@ -100,7 +102,7 @@ public class MiscGui {
 				//int pi = 0;
 				boolean found = false;
 				StringBuilder sb = new StringBuilder();
-				sb.append(Global.GetString(Str.STR_01CE_CARGO_ACCEPTED));
+				sb.append(Strings.GetString(Str.STR_01CE_CARGO_ACCEPTED));
 
 				for (i = 0; i < AcceptedCargo.NUM_CARGO; ++i) {
 					if (lid.ac.ct[i] > 0) {
@@ -121,7 +123,7 @@ public class MiscGui {
 							sb.append(Strings.GetStringWithArgs( Str.STR_01D1_8, (Object[])argv));
 						} else {
 							//p = Global.GetString(p, Global._cargoc.names_s[i]);
-							sb.append(Global.GetString( Global._cargoc.names_s[i]));
+							sb.append(Strings.GetString( Global._cargoc.names_s[i]));
 						}
 					}
 				}
@@ -367,7 +369,7 @@ public class MiscGui {
 			case 16: /* place trees randomly over the landscape*/
 				w.click_state |= 1 << 16;
 				w.flags4 |= 5 << Window.WF_TIMEOUT_SHL;
-				//SndPlayFx(SND_15_BEEP);
+				Sound.SndPlayFx(Snd.SND_15_BEEP);
 				Tree.PlaceTreesRandomly();
 				Hal.MarkWholeScreenDirty();
 				break;
@@ -484,7 +486,6 @@ public class MiscGui {
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,     4,     0,    10,     0,    13, Str.STR_00C5,							Str.STR_018B_CLOSE_WINDOW),
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,     4,    11,   333,     0,    13, Str.STR_00B3_MESSAGE_FROM,	Str.STR_NULL),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,     4,     0,   333,    14,   136, 0x0,										Str.STR_NULL),
-			//{   WIDGETS_END},
 	};
 
 	static void ErrmsgWndProc(Window w, WindowEvent e)
@@ -694,7 +695,7 @@ public class MiscGui {
 			w.DeleteWindow();
 		}
 
-		String buffer = Global.GetString(string_id);
+		String buffer = Strings.GetString(string_id);
 		right = Gfx.GetStringWidth(buffer) + 4;
 
 		bottom = 14;
@@ -970,7 +971,7 @@ public class MiscGui {
 
 		w = Window.AllocateWindowDesc(_query_string_desc);
 
-		_edit_str_buf = Global.GetString(str);
+		_edit_str_buf = Strings.GetString(str);
 		//_edit_str_buf[realmaxlen] = '\0';
 
 		if(0 != (maxlen & 0x1000)) {
@@ -1598,7 +1599,6 @@ public class MiscGui {
 		return GameOptions._opt.landscape;
 	}
 
-	//extern void EnginesMonthlyLoop();
 
 	// p2 1 (increase) or -1 (decrease)
 	static int ClickChangeDateCheat(int p1, int p2)

@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import game.enums.GameModes;
 import game.enums.Owner;
@@ -25,6 +26,7 @@ import game.struct.TileDesc;
 import game.struct.TileIndexDiffC;
 import game.util.BitOps;
 import game.util.IntContainer;
+import game.util.MemoryPool;
 import game.util.Strings;
 import game.util.TownTables;
 import game.xui.Gfx;
@@ -1143,7 +1145,7 @@ implements IPoolItem, Serializable
 			r = Hal.Random();
 
 			Global.SetDParam(0, r);
-			buf1 = Global.GetString(townnametype);
+			buf1 = Strings.GetString(townnametype);
 
 			// Check size and width
 			//if (strlen(buf1) >= 31 || Global.GetStringWidth(buf1) > 130) continue;
@@ -1159,7 +1161,7 @@ implements IPoolItem, Serializable
 					// We can't just compare the numbers since
 					// several numbers may map to a single name.
 					Global.SetDParam(0, t2.index);
-					buf2 = Global.GetString(Str.STR_TOWN);
+					buf2 = Strings.GetString(Str.STR_TOWN);
 					if (buf1.equals(buf2)) {
 						if (tries-- < 0) return false;
 						//goto restart;
@@ -2090,9 +2092,6 @@ implements IPoolItem, Serializable
 
 	static void UpdateTownUnwanted(Town t)
 	{
-		//Player p;
-
-		//FOR_ALL_PLAYERS(p) 
 		Player.forEach( (p) ->
 		{
 			if (t.unwanted[p.index.id] > 0)
@@ -2207,9 +2206,6 @@ implements IPoolItem, Serializable
 
 	public static void TownsMonthlyLoop()
 	{
-		//Town t;
-
-		//FOR_ALL_TOWNS(t)
 		Town.forEach( (t) ->
 		{
 			if (t.isValid()) 
@@ -2477,6 +2473,26 @@ implements IPoolItem, Serializable
 	public int getRatings(int playerId) {
 		return ratings[playerId];
 	}
+
+
+	/**
+	 * @return true if at least one valid town exist
+	 */
+	public static boolean anyTownExist()
+	{
+		return stream().anyMatch( t -> t.isValid() );
+	}
+	
+	/**
+	 * @return pool of items of this type
+	 */
+	static MemoryPool<Town> pool() { return Global.gs._towns; }
+	
+	/**
+	 * @return stream of items of this type
+	 */
+	static Stream<Town> stream() { return pool().stream(); }
+	
 	
 }
 

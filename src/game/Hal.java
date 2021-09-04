@@ -145,7 +145,7 @@ void SortResolutions(int count)
 
 
 	
-	public void start_video(String parm) 
+	public void start_video() 
 	{
 		JFrame frame = new JFrame("JTTD")
 		{
@@ -191,12 +191,15 @@ void SortResolutions(int count)
 		frame.setMaximumSize(maximumSize);
 
 		//frame.setIconImages(icons);
-		frame.setLayout(new FlowLayout(FlowLayout.LEADING));
+		//frame.setLayout(new FlowLayout(FlowLayout.LEADING));
 		//frame.add(new JLabel("--------------------"));
 
-		frame.add(mw);
+		//frame.add(mw);
 		//frame.add(new JLabel("--------------------"));
 
+		frame.setContentPane(mw);
+		
+		
 		//mw.setSize(MainWindow.WIDTH, MainWindow.HEIGHT);
 		//mw.setMinimumSize(new Dimension(MainWindow.WIDTH, MainWindow.HEIGHT));
 		//mw.setMaximumSize(new Dimension(MainWindow.WIDTH, MainWindow.HEIGHT));

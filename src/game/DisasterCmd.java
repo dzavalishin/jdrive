@@ -10,6 +10,7 @@ import game.struct.TileIndexDiff;
 import game.tables.DisasterTables;
 import game.tables.Snd;
 import game.util.BitOps;
+import game.util.Sound;
 
 public class DisasterCmd extends DisasterTables 
 {
@@ -374,7 +375,7 @@ public class DisasterCmd extends DisasterTables
 
 				Global.SetDParam(0, i.townId);
 				NewsItem.AddNewsItem(Str.STR_B002_OIL_REFINERY_EXPLOSION, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTile(), 0);
-				//SndPlayTileFx(SND_12_EXPLOSION, i.xy);
+				Sound.SndPlayTileFx(Snd.SND_12_EXPLOSION, i.xy);
 			}
 		} else if (v.getCurrent_order().station == 0) {
 			int x,y;
@@ -446,7 +447,7 @@ public class DisasterCmd extends DisasterTables
 
 				Global.SetDParam(0, i.townId);
 				NewsItem.AddNewsItem(Str.STR_B003_FACTORY_DESTROYED_IN_SUSPICIOUS, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTile(), 0);
-				//SndPlayTileFx(SND_12_EXPLOSION, i.xy);
+				Sound.SndPlayTileFx(Snd.SND_12_EXPLOSION, i.xy);
 			}
 		} else if (v.getCurrent_order().station == 0) {
 			int x,y;
@@ -517,7 +518,6 @@ public class DisasterCmd extends DisasterTables
 
 			v.getCurrent_order().station = 2;
 
-			//FOR_ALL_VEHICLES(u)
 			Vehicle.forEach( (u) ->
 			{
 				if (u.type == Vehicle.VEH_Train || u.type == Vehicle.VEH_Road) {
@@ -706,7 +706,6 @@ public class DisasterCmd extends DisasterTables
 		TileIndex tile = new TileIndex(Hal.Random());
 		x = tile.TileX() * 16 + 8;
 
-		//FOR_ALL_STATIONS(st)
 		Iterator<Station> ii = Station.getIterator();
 		while(ii.hasNext())
 		{
@@ -763,7 +762,6 @@ public class DisasterCmd extends DisasterTables
 
 		found = null;
 
-		//FOR_ALL_INDUSTRIES(i)
 		Iterator<Industry> ii = Industry.getIterator();
 		while(ii.hasNext())
 		{
@@ -990,12 +988,10 @@ public class DisasterCmd extends DisasterTables
 
 }
 
-//typedef void DisasterVehicleTickProc(Vehicle v);
 
 @FunctionalInterface
 interface DisasterVehicleTickProc extends Consumer<Vehicle> {}
 
-//typedef void DisasterInitProc();
 
 @FunctionalInterface
 interface DisasterInitProc

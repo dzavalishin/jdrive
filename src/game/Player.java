@@ -16,7 +16,9 @@ import game.ids.PlayerID;
 import game.ids.StringID;
 import game.struct.HighScore;
 import game.struct.PlayerEconomyEntry;
+import game.tables.Snd;
 import game.util.BitOps;
+import game.util.Sound;
 import game.util.Strings;
 import game.xui.Gfx;
 import game.xui.PlayerGui;
@@ -435,7 +437,6 @@ public class Player implements Serializable
 	private boolean GenerateCompanyName_verify_name(StringID str, int strp)
 	{
 		// No player must have this name already
-		//FOR_ALL_PLAYERS(pp)
 		Iterator<Player> ii = Player.getIterator();
 		while(ii.hasNext())
 		{
@@ -606,20 +607,18 @@ public class Player implements Serializable
 			president_name_1 = Strings.SPECSTR_PRESIDENT_NAME;
 
 			Global.SetDParam(0, president_name_2);
-			buffer = Global.GetString(president_name_1);
+			buffer = Strings.GetString(president_name_1);
 			if (buffer.length() >= 32 || Gfx.GetStringWidth(buffer) >= 94)
 				continue;
 			boolean restart = false;
 
-			//FOR_ALL_PLAYERS(pp)
-			//Player.forEach( (pp) ->
 			Iterator<Player> ii = Player.getIterator();
 			while(ii.hasNext())
 			{
 				Player pp =  ii.next();
 				if (pp.is_active && this != pp) {
 					Global.SetDParam(0, pp.president_name_2);
-					String buffer2 = Global.GetString(pp.president_name_1);
+					String buffer2 = Strings.GetString(pp.president_name_1);
 					if(buffer2.equalsIgnoreCase(buffer))
 					{
 						restart = true;
@@ -790,12 +789,12 @@ public class Player implements Serializable
 			PlayerGui.ShowPlayerFinances(Global.gs._local_player.id);
 			Player p = GetPlayer(Global.gs._local_player);
 
-			/* TODO sound
+
 			if (p.num_valid_stat_ent > 5 && p.old_economy[0].performance_history < p.old_economy[4].performance_history) {
-				SndPlayFx(SND_01_BAD_YEAR);
+				Sound.SndPlayFx(Snd.SND_01_BAD_YEAR);
 			} else {
-				SndPlayFx(SND_00_GOOD_YEAR);
-			}*/
+				Sound.SndPlayFx(Snd.SND_00_GOOD_YEAR);
+			}
 		}
 	}
 
@@ -1008,7 +1007,7 @@ public class Player implements Serializable
 
 			p = DoStartupNewPlayer(false);
 
-			/* TODO #ifdef ENABLE_NETWORK
+			/*  #ifdef ENABLE_NETWORK
 			if (_networking && !_network_server && _local_player == OWNER_SPECTATOR)
 				// In case we are a client joining a server... 
 				DeleteWindowById(WC_NETWORK_STATUS_WINDOW, 0);
@@ -1270,7 +1269,7 @@ public class Player implements Serializable
 					fwrite(&length, sizeof(length), 1, fp); // write away string length
 					fwrite(hs.company, length, 1, fp);
 					fwrite(&hs.score, sizeof(hs.score), 1, fp);
-					fwrite("", 2, 1, fp); // XXX - placeholder for hs.title, not saved anymore; compatibility 
+					fwrite("", 2, 1, fp); // placeholder for hs.title, not saved anymore; compatibility 
 				}
 			}
 			fclose(fp);
@@ -1295,7 +1294,7 @@ public class Player implements Serializable
 
 					fread(hs.company, 1, length, fp);
 					fread(&hs.score, sizeof(hs.score), 1, fp);
-					fseek(fp, 2, SEEK_CUR); // XXX - placeholder for hs.title, not saved anymore; compatibility 
+					fseek(fp, 2, SEEK_CUR); // placeholder for hs.title, not saved anymore; compatibility 
 					hs.title = EndGameGetPerformanceTitleFromValue(hs.score);
 				}
 			}
@@ -1606,7 +1605,7 @@ final Chunk Handler _player_chunk_handlers[] = {
 		Global.SetDParam(0, name_1);
 		Global.SetDParam(1, name_2);
 		Global.SetDParam(2, Global.get_date());
-		return Global.GetString(Str.STR_4004);
+		return Strings.GetString(Str.STR_4004);
 	}
 
 	public void DrawPlayerFace() {

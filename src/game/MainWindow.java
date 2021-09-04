@@ -1,6 +1,5 @@
 package game;
 
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -10,15 +9,17 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.Timer;
 
 import game.xui.Gfx;
@@ -28,9 +29,9 @@ import game.xui.Window;
 
 public class MainWindow extends JPanel implements ActionListener
 {
-
 	private static final long serialVersionUID = 7030596255463826051L;
 
+	
 	public static final int TICK_TIME = 20;
 	public static final int TICKS_PER_SECOND = 1000 / TICK_TIME;
 
@@ -70,6 +71,8 @@ public class MainWindow extends JPanel implements ActionListener
 		//setMinimumSize(new Dimension(WIDTH, HEIGHT));
 		//setMaximumSize(new Dimension(WIDTH, HEIGHT));
 
+		
+		frame.setFocusTraversalKeysEnabled(false); // Enable Tab key to pass through to us
 
 		frame.addKeyListener(new KeyListener() {		
 			//this.addKeyListener(new KeyListener() {		
@@ -84,8 +87,8 @@ public class MainWindow extends JPanel implements ActionListener
 		});
 
 
-		frame.addMouseListener( new MouseListener() 
-				//this.addMouseListener( new MouseListener() 
+		//frame.addMouseListener( new MouseListener() 
+		this.addMouseListener( new MouseListener() 
 				{
 
 			@Override
@@ -127,8 +130,8 @@ public class MainWindow extends JPanel implements ActionListener
 
 				});
 
-		frame.addMouseMotionListener( new MouseMotionListener() 
-				//this.addMouseMotionListener( new MouseMotionListener() 
+		//frame.addMouseMotionListener( new MouseMotionListener() 
+		this.addMouseMotionListener( new MouseMotionListener() 
 				{
 
 			@Override
@@ -152,22 +155,57 @@ public class MainWindow extends JPanel implements ActionListener
 			}
 				});
 
-		/*frame.addMouseWheelListener( new MouseWheelListener() 
-		{			
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e) {
-				Hal._cursor.setWheel( e.getWheelRotation() );
-				e.consume();
-			}
-		});*/
-
 		
-		frame.addMouseWheelListener( (e) -> {
+		//frame.addMouseWheelListener( (e) -> {
+		this.addMouseWheelListener( (e) -> {
 			Hal._cursor.setWheel( e.getWheelRotation() );
 			e.consume();
 		});
 		
+		frame.setJMenuBar(getMenu());
+		
+		//frame.set
+		requestFocus();
+		
 		timer.start();
+	}
+
+
+	private  JMenuBar getMenu() {
+		JMenuBar menuBar = new JMenuBar();
+        
+        JMenu gameMenu = new JMenu("Game");
+        menuBar.add(gameMenu);
+
+        /*
+        JMenuItem menuItemConnect = new JMenuItem("Fast");
+        menuItemConnect.addActionListener( e -> System.out.println("Connected") );
+        connectionMenu.add(menuItemConnect);
+
+        JMenuItem menuItemDisconnect = new JMenuItem("Disconnect");
+        menuItemDisconnect.addActionListener(e -> System.out.println("Disconnected") );
+        connectionMenu.add(menuItemDisconnect);
+		*/
+        JMenuItem menuItemExit = new JMenuItem("Exit");
+        menuItemExit.addActionListener( e -> Global._exit_game = true );
+        // NB! Does not work per se - must process it manually below
+        menuItemExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, KeyEvent.ALT_DOWN_MASK));
+        gameMenu.add(menuItemExit);
+
+        
+        
+        JMenu viewMenu = new JMenu("View");
+        menuBar.add(viewMenu);	        
+
+        JMenuItem menuItemTranspBuildings = new JMenuItem("Transparent buildings");
+        menuItemTranspBuildings.addActionListener( e -> 
+        { 
+        	Global._display_opt ^= Global.DO_TRANS_BUILDINGS;
+        	Hal.MarkWholeScreenDirty();
+        });
+        viewMenu.add(menuItemTranspBuildings);
+        
+        return menuBar;
 	}
 
 
@@ -194,17 +232,13 @@ public class MainWindow extends JPanel implements ActionListener
 		boolean meta_pressed = (e.getModifiersEx() & KeyEvent.META_DOWN_MASK) != 0;// _wnd.has_focus && GetAsyncKeyState(VK_CAPITAL)<0;
 		Gfx._dbg_screen_rect = meta_pressed; 
 
-		/*
-		Global._dirkeys = (byte)
-				(((e.getKeyCode() == KeyEvent.VK_LEFT) ? 1 : 0) +
-						((e.getKeyCode() == KeyEvent.VK_UP)  ? 2 : 0) +
-						((e.getKeyCode() == KeyEvent.VK_RIGHT)  ? 4 : 0) +
-						((e.getKeyCode() == KeyEvent.VK_DOWN)  ? 8 : 0));
-		 */
-
+		int key = e.getKeyCode();
+		
 		boolean prev_ff = Global._fast_forward;
 
-		switch(e.getKeyCode())
+		if( key == KeyEvent.VK_F4 && Global._alt_pressed ) { Global._exit_game = true; return; }
+		
+		switch(key)
 		{
 		case KeyEvent.VK_LEFT:	modDirKeys(1, pressed); break; 
 		case KeyEvent.VK_UP:	modDirKeys(2, pressed); break;
@@ -223,10 +257,7 @@ public class MainWindow extends JPanel implements ActionListener
 		}
 
 		if( prev_ff != Global._fast_forward)
-		{			
-			//Window w = Window.FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
 			Window.InvalidateWindow(Window.WC_MAIN_TOOLBAR, 0);
-		}
 
 		if(!pressed) return;
 
@@ -240,8 +271,7 @@ public class MainWindow extends JPanel implements ActionListener
 		}
 		else
 		{
-
-			switch(e.getKeyCode())
+			switch(key)
 			{
 
 			case KeyEvent.VK_SPACE:		fKey = Window.WKC_SPACE;	break;
@@ -263,6 +293,13 @@ public class MainWindow extends JPanel implements ActionListener
 			case KeyEvent.VK_PAGE_UP:   fKey = Window.WKC_PAGEUP;	break;
 			case KeyEvent.VK_PAGE_DOWN: fKey = Window.WKC_PAGEDOWN;	break;
 
+			case KeyEvent.VK_DIVIDE:    fKey = Window.WKC_NUM_DIV;	break;
+			case KeyEvent.VK_MULTIPLY:  fKey = Window.WKC_NUM_MUL;	break;
+			case KeyEvent.VK_SUBTRACT:  fKey = Window.WKC_NUM_MINUS;	break;
+			case KeyEvent.VK_ADD:       fKey = Window.WKC_NUM_PLUS;	break;
+
+			case KeyEvent.VK_DECIMAL:   fKey = Window.WKC_NUM_DECIMAL;	break;
+			
 
 			case KeyEvent.VK_F1:	fKey = Window.WKC_F1;	break;
 			case KeyEvent.VK_F2:	fKey = Window.WKC_F2;	break;
@@ -277,6 +314,10 @@ public class MainWindow extends JPanel implements ActionListener
 			case KeyEvent.VK_F11:	fKey = Window.WKC_F11;	break;
 			case KeyEvent.VK_F12:	fKey = Window.WKC_F12;	break;
 
+			default:
+				if( key >= KeyEvent.VK_NUMPAD0 && key >= KeyEvent.VK_NUMPAD9 )
+					fKey = Window.WKC_NUM_0 + key - KeyEvent.VK_NUMPAD0;
+				
 			}
 		}
 
@@ -289,21 +330,6 @@ public class MainWindow extends JPanel implements ActionListener
 		Global._pressed_key = fKey << 16 | (aKey & 0xFFFF) | (shifts << 16);
 		//System.out.printf("k %x\n", Global._pressed_key );
 	}
-
-	/* TODO keys
-	 * 
-	 * 	AM(VK_NUMPAD0,VK_NUMPAD9, WKC_NUM_0, WKC_NUM_9),
-	AS(VK_DIVIDE,			WKC_NUM_DIV),
-	AS(VK_MULTIPLY,		WKC_NUM_MUL),
-	AS(VK_SUBTRACT,		WKC_NUM_MINUS),
-	AS(VK_ADD,				WKC_NUM_PLUS),
-	AS(VK_DECIMAL,		WKC_NUM_DECIMAL)
-
-	 * 
-	AM(VK_PRIOR,VK_DOWN, WKC_PAGEUP, WKC_DOWN),
-	 * 
-	 */
-
 
 
 
@@ -441,14 +467,6 @@ public class MainWindow extends JPanel implements ActionListener
 		byte[] gp = new byte[PALETTE_SIZE];
 		byte[] bp = new byte[PALETTE_SIZE];
 		byte[] ap = new byte[PALETTE_SIZE];
-		/*
-		java.util.Arrays.fill(ap, (byte) 255);
-		java.util.Arrays.fill(rp, (byte) 255);
-		java.util.Arrays.fill(gp, (byte) 255);
-		java.util.Arrays.fill(bp, (byte) 255);
-		//transparent
-		rp[0] = gp[0] = bp[0] = ap[0] = 0;
-		 */
 
 		if(Gfx._cur_palette == null || Gfx._cur_palette[0] == null) return;
 
@@ -465,11 +483,26 @@ public class MainWindow extends JPanel implements ActionListener
 	}
 
 
-	private void processMouse(int x, int y) {
+	private void processMouse(int x, int y) 
+	{
+		/*
+		Point l = getLocation();
+		Point l2 = getParent().getLocation();
+		Point l3 = getParent().getParent().getLocation();;
 		// TODO hack
-		x -= 13; //myLocation.x;
-		y -= 36; //myLocation.y;
+		//x -= 13; //myLocation.x;
+		//y -= 36; //myLocation.y;
 
+		x -= l.x;
+		y -= l.y;
+
+		x -= l2.x;
+		y -= l2.y;
+
+		x -= l3.x;
+		y -= l3.y;
+		//Global.debug("loc %d.%d", l2.x, l2.y );
+		*/
 		Hal._cursor.processMouse(x, y);
 
 	}

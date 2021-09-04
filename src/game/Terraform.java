@@ -4,6 +4,8 @@ import java.util.function.Consumer;
 
 import game.enums.GameModes;
 import game.enums.TileTypes;
+import game.tables.Snd;
+import game.util.Sound;
 import game.xui.DockGui;
 import game.xui.Gui;
 import game.xui.MiscGui;
@@ -20,7 +22,7 @@ public class Terraform {
 	public static void CcTerraform(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
-			// TODO SndPlayTileFx(SND_1F_SPLAT, tile);
+			Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, tile);
 		} else {
 			ViewPort.SetRedErrorSquare(Global._terraform_err_tile);
 		}
@@ -69,7 +71,7 @@ public class Terraform {
 	static void GenerateRockyArea(TileIndex end, TileIndex start)
 	{
 		int size_x, size_y;
-		//boolean success = false;
+		boolean [] success = { false };
 		int sx = start.TileX();
 		int sy = start.TileY();
 		int ex = end.TileX();
@@ -89,12 +91,12 @@ public class Terraform {
 				Landscape.ModifyTile(tile, TileTypes.MP_CLEAR,
 						//TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) | 
 						TileTypes.MP_MAP5, (tile.getMap().m5 & ~0x1C) | 0xB);
-				//success = true;
+				success[0] = true;
 			}
 			return false;
 		}); // END_TILE_LOOP(tile, size_x, size_y, 0);
 
-		// TODO if (success) SndPlayTileFx(SND_1F_SPLAT, end);
+		if (success[0]) Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, end);
 	}
 
 	/**

@@ -23,12 +23,14 @@ import game.xui.ViewPort;
 import game.xui.Window;
 
 public class Sound {
-	private static final int SAMPLES_PER_XFER = 32;
+	//private static final int SAMPLES_PER_XFER = 32;
+	private static final int SAMPLES_PER_XFER = 16;
 	private static final int SOUND_SLOT = 31;
 	private static final int PANNING_LEVELS = 16;
 	private static int _file_count;
 	private static FileEntry[] _files;
 	private static Mixer _mixer;
+	private static boolean stopSound = false;
 	//private static int effect_vol = 127;
 
 
@@ -216,7 +218,7 @@ public class Sound {
 			{
 				if (mc.active) {
 					mc.mixInt8ToInt16(buffer, samples);
-					Global.debug("mix ch %x", mc.hashCode());
+					//Global.debug("mix ch %x", mc.hashCode());
 					if (mc.samples_left == 0) mc.closeChannel();
 				}
 			}
@@ -343,7 +345,7 @@ public class Sound {
 	{
 		int left_vol, right_vol;
 
-		Global.debug("start snd %d", sound);
+		//Global.debug("start snd %d", sound);
 		
 		if (volume == 0) return;
 		MixerChannel mc = _mixer.allocateChannel();
@@ -417,7 +419,7 @@ public class Sound {
 		SndPlayTileFx(snd.ordinal(), tile);
 	}
 
-	static void SndPlayTileFx(/*SoundFx*/ int  sound, TileIndex tile)
+	public static void SndPlayTileFx(/*SoundFx*/ int  sound, TileIndex tile)
 	{
 		/* emits sound from center (+ 8) of the tile */
 		int x = tile.TileX() * 16 + 8;
@@ -451,12 +453,13 @@ public class Sound {
 			DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
 			soundLine = (SourceDataLine) AudioSystem.getLine(info);
 			soundLine.open(audioFormat);
+			//Global.debug("Sound buffer size %d", soundLine.getBufferSize() ); // shows 22048
 			soundLine.start();
 
 			int[] intBuffer = new int[SAMPLES_PER_XFER];
 			byte[] byteBuffer = new byte[SAMPLES_PER_XFER*2];
 
-			while(!Global._exit_game) 
+			while((!stopSound) && (!Global._exit_game)) 
 			{
 				_mixer.mixSamples(intBuffer, intBuffer.length/2); // stereo!
 
@@ -481,6 +484,12 @@ public class Sound {
 				soundLine.close();
 			}
 		}
+	}
+
+
+	public static void stop() {
+		stopSound  = true;
+		
 	}
 
 

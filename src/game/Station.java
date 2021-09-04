@@ -145,9 +145,6 @@ public class Station extends StationTables implements IPoolItem
 
 
 
-	//TODO private static final StationID CHECK_STATIONS_ERR = StationID.getInvalid();
-	//private static final Station CHECK_STATIONS_ERR = null; 
-
 	// Determines what station to operate on in the
 	//  tick handler.
 	public static int _station_tick_ctr = 0;
@@ -658,7 +655,6 @@ public class Station extends StationTables implements IPoolItem
 					closest_station[0] = t;
 				} else if (closest_station[0] != t) {
 					Global._error_message = Str.STR_3006_ADJOINS_MORE_THAN_ONE_EXISTING;
-					//return null; //CHECK_STATIONS_ERR;
 					if(canBuild!= null) canBuild[0] = false;
 					closest_station[0] = INVALID_STATION;
 					return true; // break loop
@@ -724,13 +720,11 @@ public class Station extends StationTables implements IPoolItem
 	{
 		Station [] ret = {null};
 
-		//FOR_ALL_STATIONS(st) 
 		Global.gs._stations.forEach( (i,st) ->
 		{
 			if (!st.isValid()) {
 				StationID index = StationID.get(st.index);
 
-				//memset(st, 0, sizeof(Station));
 				st.clear();
 				st.index = index.id;
 
@@ -2169,15 +2163,10 @@ public class Station extends StationTables implements IPoolItem
 	/* Checks if any ship is servicing the buoy specified. Returns yes or no */
 	private static boolean CheckShipsOnBuoy(Station st)
 	{
-
 		boolean [] ret = {false};
-		//final  Vehicle v;
-		//FOR_ALL_VEHICLES(v) 
 		Vehicle.forEach( (v) ->
 		{
 			if (v.type == Vehicle.VEH_Ship) {
-				//final  Order *order;
-				//FOR_VEHICLE_ORDERS(v, order)
 				v.forEachOrder( (order) ->
 				{
 					if (order.type == Order.OT_GOTO_STATION && order.station == st.index) {
@@ -2771,13 +2760,10 @@ public class Station extends StationTables implements IPoolItem
 		}
 
 		//And do the same with aircraft that have the station as a hangar-stop
-		//FOR_ALL_VEHICLES(v)
 		Vehicle.forEach( (v) ->
 		{
 			boolean [] invalidate = {false};
 			if (v.type == Vehicle.VEH_Aircraft) {
-				//Order order;
-				//FOR_VEHICLE_ORDERS(v, order)
 				v.forEachOrder( (order) ->
 				{
 					if (order.type == Order.OT_GOTO_DEPOT && order.station == index) {
@@ -2804,12 +2790,10 @@ public class Station extends StationTables implements IPoolItem
 
 	public static void DeleteAllPlayerStations()
 	{
-		//Station st;
-
-		//FOR_ALL_STATIONS(st)
 		Global.gs._stations.forEach( (i,st) ->
 		{
-			if (st.isValid() && st.owner.id < Global.MAX_PLAYERS) DeleteStation(st);
+			//if (st.isValid() && st.owner.id < Global.MAX_PLAYERS) DeleteStation(st);
+			if (st.isValid() && st.owner.isValid()) DeleteStation(st);
 		});
 	}
 

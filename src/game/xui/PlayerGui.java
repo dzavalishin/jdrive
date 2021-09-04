@@ -253,7 +253,6 @@ public class PlayerGui
 			int x,y,pos;
 			int i;
 
-			//FOR_ALL_PLAYERS(p)
 			Iterator<Player> ii = Player.getIterator();
 			while(ii.hasNext())
 			{

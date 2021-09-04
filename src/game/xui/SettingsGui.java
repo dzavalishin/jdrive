@@ -4,10 +4,11 @@ import java.util.Iterator;
 
 import game.Cmd;
 import game.Currency;
-import game.Economy;
+import game.GRFFile;
 import game.GameOptions;
 import game.Global;
 import game.Hal;
+import game.Sprite;
 import game.Str;
 import game.Town;
 import game.Vehicle;
@@ -16,6 +17,7 @@ import game.ids.StringID;
 import game.struct.GameSettingData;
 import game.tables.CurrencySpec;
 import game.tables.SettingsTables;
+import game.util.BinaryString;
 import game.util.BitOps;
 import game.util.Strings;
 
@@ -144,7 +146,7 @@ public class SettingsGui extends SettingsTables
 				// TODO Window.ShowDropDownMenu(w, _dynlang.dropdown, _dynlang.curr, 24, 0, 0);
 				return;
 			case 26: case 27: /* Setup resolution dropdown */
-				Window.ShowDropDownMenu(w, BuildDynamicDropdown(Strings.SPECSTR_RESOLUTION_START, Global._num_resolutions), GetCurRes(), 27, 0, 0);
+				Window.ShowDropDownMenu(w, BuildDynamicDropdown(Strings.SPECSTR_RESOLUTION_START, 1/*Global._num_resolutions*/), GetCurRes(), 27, 0, 0);
 				return;
 			case 28: /* Click fullscreen on/off */
 				// TODO (_fullscreen) ? CLRBIT(w.click_state, 28) : SETBIT(w.click_state, 28);
@@ -881,7 +883,7 @@ public class SettingsGui extends SettingsTables
 
 	/** Network-safe changing of patch-settings.
 	 * @param p1 various bitstuffed elements
-	 * - p1 = (bit 0- 7) - the patches type (page) that is being changed (finalruction, network, ai)
+	 * - p1 = (bit 0- 7) - the patches type (page) that is being changed (construction, network, ai)
 	 * - p2 = (bit 8-15) - the actual patch (entry) being set inside the category
 	 * @param p2 the new value for the patch
 	 *
@@ -1024,19 +1026,19 @@ public class SettingsGui extends SettingsTables
 	static final int NEWGRF_WND_PROC_OFFSET_TOP_WIDGET = 14;
 	static final int NEWGRF_WND_PROC_ROWSIZE = 14;
 	//};
+	static GRFFile _sel_grffile;
 
 	static void NewgrfWndProc(Window w, WindowEvent e)
 	{
-		//static GRFFile _sel_grffile;
 		switch (e.event) {
 		case WE_PAINT: {
-			//int x, y = NEWGRF_WND_PROC_OFFSET_TOP_WIDGET;
-			//int i = 0;
-			//GRFFile *c = _first_grffile;
+			int x, y = NEWGRF_WND_PROC_OFFSET_TOP_WIDGET;
+			int i = 0;
+			GRFFile c = GRFFile._first_grffile;
 
 			w.DrawWindowWidgets();
-			/*
-			if (_first_grffile == null) { // no grf sets installed
+			
+			if (GRFFile._first_grffile == null) { // no grf sets installed
 				Gfx.DrawStringMultiCenter(140, 210, Str.STR_NEWGRF_NO_FILES_INSTALLED, 250);
 				break;
 			}
@@ -1048,30 +1050,30 @@ public class SettingsGui extends SettingsTables
 					// show highlighted item with a different background and highlighted text
 					if (h) Gfx.GfxFillRect(1, y + 1, 267, y + 12, 156);
 					// XXX - will be grf name later
-					Gfx.DoDrawString(c.filename, 25, y + 2, h ? 0xC : 0x10);
-					Gfx.DrawSprite(SPRITE_PALETTE(Sprite.SPR_SQUARE | PALETTE_TO_RED), 5, y + 2);
+					Gfx.DoDrawString(c.getFilename(), 25, y + 2, h ? 0xC : 0x10);
+					Gfx.DrawSprite(Sprite.SPRITE_PALETTE(Sprite.SPR_SQUARE | Sprite.PALETTE_TO_RED), 5, y + 2);
 					y += NEWGRF_WND_PROC_ROWSIZE;
 				}
 
-				c = c.next;
-				if (++i == w.vscroll.cap + w.vscroll.pos) break; // stop after displaying 12 items
+				c = c.getNext();
+				if (++i == w.vscroll.getCap() + w.vscroll.pos) break; // stop after displaying 12 items
 			}
 
-			//	 		Gfx.DoDrawString(_sel_grffile.setname, 120, 200, 0x01); // draw grf name
+			//Gfx.DoDrawString(_sel_grffile.setname, 120, 200, 0x01); // draw grf name
 
 			if (_sel_grffile == null) { // no grf file selected yet
 				Gfx.DrawStringMultiCenter(140, 210, Str.STR_NEWGRF_TIP, 250);
 			} else {
 				// draw filename
-				x = DrawString(5, 199, Str.STR_NEWGRF_FILENAME, 0);
-				Gfx.DoDrawString(_sel_grffile.filename, x + 2, 199, 0x01);
+				x = Gfx.DrawString(5, 199, Str.STR_NEWGRF_FILENAME, 0);
+				Gfx.DoDrawString(_sel_grffile.getFilename(), x + 2, 199, 0x01);
 
 				// draw grf id
 				x = Gfx.DrawString(5, 209, Str.STR_NEWGRF_GRF_ID, 0);
-				snprintf(_userstring, lengthof(_userstring), "%08X", _sel_grffile.grfid);
-				Gfx.DrawString(x + 2, 209, Str.STR_SPEC_USERSTRING, 0x01);
+				Strings._userstring = new BinaryString( String.format("%08X", _sel_grffile.getGrfid()) );
+				Gfx.DrawString(x + 2, 209, Strings.STR_SPEC_USERSTRING, 0x01);
 			}
-			*/
+			
 		} break;
 
 		case WE_CLICK:
@@ -1085,9 +1087,9 @@ public class SettingsGui extends SettingsTables
 
 				if (y >= w.vscroll.getCount()) return;
 
-				//_sel_grffile = _first_grffile;
+				_sel_grffile = GRFFile._first_grffile;
 				// get selected grf-file
-				//while (y-- != 0) _sel_grffile = _sel_grffile.next;
+				while (y-- != 0) _sel_grffile = _sel_grffile.getNext();
 
 				w.SetWindowDirty();
 			} break;
@@ -1110,7 +1112,7 @@ public class SettingsGui extends SettingsTables
 		}
 			 */
 		case WE_DESTROY:
-			// TODO _sel_grffile = null;
+			_sel_grffile = null;
 			Window.DeleteWindowById(Window.WC_QUERY_STRING, 0);
 			break;
 		default:
@@ -1145,22 +1147,22 @@ public class SettingsGui extends SettingsTables
 
 	static void ShowNewgrf()
 	{
-		/*
-		final GRFFile* c;
+		
+		GRFFile c;
 		Window w;
 		int count;
 
 		Window.DeleteWindowById(Window.WC_GAME_OPTIONS, 0);
-		w = AllocateWindowDesc(&_newgrf_desc);
+		w = Window.AllocateWindowDesc(_newgrf_desc);
 
 		count = 0;
-		for (c = _first_grffile; c != null; c = c.next) count++;
+		for (c = GRFFile._first_grffile; c != null; c = c.getNext()) count++;
 
-		w.vscroll.cap = 12;
-		w.vscroll.count = count;
+		w.vscroll.setCap(12);
+		w.vscroll.setCount(count);
 		w.vscroll.pos = 0;
 		w.disabled_state = (1 << 5) | (1 << 6) | (1 << 7);
-		*/
+		
 	}
 
 	/* state: 0 = none clicked, 0x01 = first clicked, 0x02 = second clicked */

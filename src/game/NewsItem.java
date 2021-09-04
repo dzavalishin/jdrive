@@ -11,6 +11,7 @@ import game.tables.Snd;
 import game.util.BitOps;
 import game.util.GameDate;
 import game.util.Sound;
+import game.util.Strings;
 import game.util.wcustom.def_d;
 import game.xui.Gfx;
 import game.xui.ViewPort;
@@ -562,12 +563,10 @@ public class NewsItem {
 	// show news item in the ticker
 	static void ShowTicker(final NewsItem ni)
 	{
-		Window w;
-
-		//if (_news_ticker_sound) SndPlayFx(SND_16_MORSE);
+		if (Global._news_ticker_sound) Sound.SndPlayFx(Snd.SND_16_MORSE);
 
 		Global._statusbar_news_item = new NewsItem(ni);
-		w = Window.FindWindowById(Window.WC_STATUS_BAR, 0);
+		Window w = Window.FindWindowById(Window.WC_STATUS_BAR, 0);
 		if (w != null) w.as_def_d().data_1 = 360;
 	}
 
@@ -719,7 +718,7 @@ public class NewsItem {
 			str = ni.string_id;
 		}
 
-		buffer = Global.GetString(str);
+		buffer = Strings.GetString(str);
 		/* Copy the just gotten string to another buffer to remove any formatting
 		 * from it such as big fonts, etc. * /
 		for (ptr = buffer, dest = buffer2; *ptr != '\0'; ptr++) {

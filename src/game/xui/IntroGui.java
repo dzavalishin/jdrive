@@ -38,10 +38,8 @@ public class IntroGui
 	new Widget( Window.WWT_PUSHTXTBTN, Window.RESIZE_NONE, 12, 168, 325, 177, 188, Str.STR_0304_QUIT,          Str.STR_0305_QUIT_OPENTTD),
 	};
 
-	//extern void HandleOnEditText(WindowEvent e);
-	//extern void HandleOnEditTextCancel();
 
-	//static  void CreateScenario() {_switch_mode = SM_EDITOR;}
+	static  void CreateScenario() {Global._switch_mode = SwitchModes.SM_EDITOR;}
 
 	static void SetNewLandscapeType(int landscape)
 	{
@@ -78,12 +76,7 @@ public class IntroGui
 			switch (e.widget) {
 			case 2: MiscGui.AskForNewGameToStart(); break;
 			case 3: MiscGui.ShowSaveLoadDialog(Global.SLD_LOAD_GAME); break;
-			
-			//case 3: 
-				//SaveLoad.load();
-				//break;
-			
-			case 4: /* TODO CreateScenario(); */ break;
+			case 4: CreateScenario(); break;
 			case 5: MiscGui.ShowSaveLoadDialog(Global.SLD_LOAD_SCENARIO); break;
 			case 6: case 7: case 8: case 9:
 				SetNewLandscapeType(e.widget - 6);

@@ -39,11 +39,8 @@ import game.tables.EngineTables;
 import game.util.BitOps;
 import game.util.wcustom.*;
 
-public class VehicleGui {
-	/* $Id: vehicle_gui.c 3298 2005-12-14 06:28:48Z tron $ */
-
-
-
+public class VehicleGui 
+{
 	public static final Sorting _sorting = new Sorting();
 
 	static int _internal_name_sorter_id; // internal StringID for default vehicle-names
@@ -92,20 +89,16 @@ public class VehicleGui {
 			Str.STR_SORT_BY_TOTAL_CAPACITY_PER_CARGOTYPE,
 			Str.STR_SORT_BY_RELIABILITY,
 			Str.STR_SORT_BY_MAX_SPEED,
-			//INVALID_STRING_ID
 	};
 
 	static final int[] _rail_types_list = {
 			Str.STR_RAIL_VEHICLES,
 			Str.STR_MONORAIL_VEHICLES,
 			Str.STR_MAGLEV_VEHICLES,
-			//INVALID_STRING_ID
 	};
 
 	public static void RebuildVehicleLists()
 	{
-		//Window w;
-		//for (w = _windows; w != _last_window; ++w)
 		Iterator<Window> it = Window.getIterator();
 		while(it.hasNext())
 		{
@@ -124,8 +117,6 @@ public class VehicleGui {
 
 	public static void ResortVehicleLists()
 	{
-		//Window w;
-		//for (w = _windows; w != _last_window; ++w)
 		Iterator<Window> it = Window.getIterator();
 		while(it.hasNext())
 		{
@@ -1108,15 +1099,5 @@ private static void show_cargo(ctype) {
 
 
 
-
-//struct vehiclelist_d;
-
-
-//extern const StringID _vehicle_sort_listing[];
-
-
-
-
-//interface VehicleComparator extends Comparator<SortStruct> {}
 
 

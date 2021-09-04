@@ -1,18 +1,19 @@
 package game.xui;
 
-import java.util.function.BiConsumer;
+import java.io.Serializable;
 
-public class WindowDesc {
-	public final int 			left;
-    public int top;
-    public final int width;
-    public final int height;
+public class WindowDesc implements Serializable 
+{
+	public final int	left;
+    public int			top;
+    public final int	width;
+    public final int	height;
 	final int 			cls;
 	final int 			parent_cls;
 	final int 			flags;
 	final Widget []		widgets;
-	//WindowProc *proc;
-    final BiConsumer<Window,WindowEvent> proc;
+	final WindowProc 	proc;
+    
 
 	// flags
 	public static final int WDF_STD_TOOLTIPS   = 1; /* use standard routine when displaying tooltips */
@@ -34,8 +35,8 @@ public class WindowDesc {
 			
 			int flags,
 			Widget []widgets,
-			//WindowProc *proc,
-			BiConsumer<Window,WindowEvent> proc
+			WindowProc proc
+			//BiConsumer<Window,WindowEvent> proc
 			) {
 		this.left = left;
 		this.top = top;
@@ -47,4 +48,4 @@ public class WindowDesc {
 		this.widgets = widgets;
 		this.proc = proc;
 	}
-}
+};

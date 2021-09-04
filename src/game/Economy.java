@@ -1,5 +1,6 @@
 package game;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import game.ai.Ai;
@@ -15,6 +16,7 @@ import game.struct.Pair;
 import game.struct.PlayerEconomyEntry;
 import game.struct.ScoreInfo;
 import game.tables.EconomeTables;
+import game.tables.Snd;
 import game.util.BitOps;
 import game.util.Prices;
 import game.xui.Gfx;
@@ -22,7 +24,7 @@ import game.xui.MiscGui;
 import game.xui.VehicleGui;
 import game.xui.Window;
 
-public class Economy extends EconomeTables 
+public class Economy extends EconomeTables implements Serializable
 {
 
 	// Maximum possible loan
@@ -879,7 +881,7 @@ public class Economy extends EconomeTables
 			return;
 
 		// Randomize cargo type
-		if ( 0 != (Global.Random()&1) && i.produced_cargo[1] != AcceptedCargo.CT_INVALID) {
+		if ( 0 != (Hal.Random()&1) && i.produced_cargo[1] != AcceptedCargo.CT_INVALID) {
 			cargo = i.produced_cargo[1];
 			trans = i.pct_transported[1];
 			total = i.total_production[1];
@@ -1468,7 +1470,7 @@ public class Economy extends EconomeTables
 				v.profit_this_year += profit;
 				Player.SubtractMoneyFromPlayer(-profit);
 
-				// if (Player.IsLocalPlayer()) SndPlayVehicleFx(SND_14_CASHTILL, v);
+				if (Player.IsLocalPlayer()) v.SndPlayVehicleFx(Snd.SND_14_CASHTILL);
 
 				MiscGui.ShowCostOrIncomeAnimation(v.getX_pos(), v.getY_pos(), v.z_pos, -profit);
 			}

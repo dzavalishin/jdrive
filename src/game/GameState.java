@@ -68,7 +68,8 @@ public class GameState implements Serializable
 	public final int [] _player_colors = new int[Global.MAX_PLAYERS];
 
 
-	final TileIndex _animated_tile_list[] = new TileIndex[256];
+	//final TileIndex _animated_tile_list[] = new TileIndex[256];
+	final List<TileIndex> _animated_tile_list = new ArrayList<>();
 
 
 	final MemoryPool<SignStruct> _signs = new MemoryPool<>(SignStruct.factory);
@@ -92,7 +93,6 @@ public class GameState implements Serializable
 
 
 
-	//static Window _windows[] = new Window[25];
-	public static final List<Window> _windows = new ArrayList<>();
+	public final List<Window> _windows = new ArrayList<>();
 	
 }

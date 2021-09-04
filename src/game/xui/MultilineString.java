@@ -5,6 +5,7 @@ import java.util.List;
 
 import game.Global;
 import game.ids.StringID;
+import game.util.Strings;
 
 public class MultilineString 
 {
@@ -77,7 +78,7 @@ public class MultilineString
 			}
 			
 			//num++;
-			//str[-1] = '\0'; TODO XXX why?
+			//str[-1] = '\0'; 
 			//if(sp > 0 ) sc[sp-1] = 0;
 			addLine( new String( sc, lineStart, last_space-lineStart), base );
 			sp = last_space;
@@ -112,7 +113,7 @@ public class MultilineString
 
 	private void _DrawStringMultiCenter(int x, int y, int str, int maxw)
 	{
-		breakLines(Global.GetString(str), maxw);
+		breakLines(Strings.GetString(str), maxw);
 		baseToMt();
 
 		y -= (mt >> 1) * getNum();
@@ -137,7 +138,7 @@ public class MultilineString
 	
 	private void _DrawStringMultiLine(int x, int y, StringID str, int maxw)
 	{
-		breakLines(Global.GetString(str), maxw);
+		breakLines(Strings.GetString(str), maxw);
 		baseToMt();
 
 		for(String src : strings) 

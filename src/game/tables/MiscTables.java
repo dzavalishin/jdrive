@@ -41,6 +41,21 @@ public class MiscTables
 			road_veh_by_cargo_count	= nrvcc;
 		}
 
+		public LandscapePredefVar( LandscapePredefVar src )
+		{
+			names                   = src.names;                  
+			weights                 = src.weights;                
+			sprites		            = src.sprites;		           
+                                                             
+			initial_cargo_payment	= src.initial_cargo_payment;	
+			transit_days_table_1	= src.transit_days_table_1;	
+			transit_days_table_2	= src.transit_days_table_2;	
+			railwagon_by_cargo		= src.railwagon_by_cargo;		
+                                                             
+			road_veh_by_cargo_start	= src.road_veh_by_cargo_start;
+			road_veh_by_cargo_count	= src.road_veh_by_cargo_count;
+		}
+		
 	} 
 
 

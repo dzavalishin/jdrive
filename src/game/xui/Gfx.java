@@ -16,6 +16,7 @@ import game.util.ArrayPtr;
 import game.util.BitOps;
 import game.util.Colour;
 import game.util.Pixel;
+import game.util.Strings;
 import game.xui.Gfx.BlitterParams;
 
 public class Gfx extends PaletteTabs 
@@ -35,7 +36,7 @@ public class Gfx extends PaletteTabs
 
 	public static final Colour [] _cur_palette = new Colour[256];
 
-	// XXX doesn't really belong here, but the only
+	// doesn't really belong here, but the only
 	// consumers always use it in conjunction with DoDrawString()
 	public static final String UPARROW   = String.valueOf((char)0x80); // "\x80";
 	public static final String DOWNARROW = String.valueOf((char)0xAA); // "\xAA";
@@ -152,11 +153,6 @@ public class Gfx extends PaletteTabs
 		Global.hal.make_dirty(left, top, width, height);
 	}
 
-	/*static void memset( int[] mem, int dst, int color, int count)
-	{
-		while(count-- > 0)
-			mem[dst++] = color;
-	}*/
 
 	public static void GfxFillRect(int left, int top, int right, int bottom, int color)
 	{
@@ -389,13 +385,13 @@ public class Gfx extends PaletteTabs
 	}*/
 	private static String TruncateStringID(StringID src, int maxw, int [] retmax)
 	{
-		return TruncateString(Global.GetString(src), maxw, retmax);
+		return TruncateString(Strings.GetString(src), maxw, retmax);
 	}
 
 	/* returns right coordinate */
 	public static int DrawString(int x, int y, int str, int color)
 	{
-		String buffer = Global.GetString(str);
+		String buffer = Strings.GetString(str);
 		return DoDrawString(buffer, x, y, color);
 	}
 	/* returns right coordinate */
@@ -417,7 +413,7 @@ public class Gfx extends PaletteTabs
 	{
 		//char buffer[512];
 
-		String buffer = Global.GetString(str);
+		String buffer = Strings.GetString(str);
 		DoDrawString(buffer, x - GetStringWidth(buffer), y, color);
 	}
 	
@@ -425,7 +421,7 @@ public class Gfx extends PaletteTabs
 	{
 		//char buffer[512];
 
-		String buffer = Global.GetString(str);
+		String buffer = Strings.GetString(str);
 		DoDrawString(buffer, x - GetStringWidth(buffer), y, color);
 	}
 
@@ -448,7 +444,7 @@ public class Gfx extends PaletteTabs
 		//char buffer[512];
 		int w;
 
-		String s = Global.GetString(str);
+		String s = Strings.GetString(str);
 
 		w = GetStringWidth(s);
 		DoDrawString(s, x - w / 2, y, color);
@@ -1001,10 +997,10 @@ public class Gfx extends PaletteTabs
 						//byte b = ctab[src_data[i+src_shift]];
 						final int c = src.r(i) & 0xFF;
 						byte b;
-						// TODO XXX hack 
+						/*/ TO DO hack 
 						if( c > ctab.length)
 							b = (byte) c;
-						else
+						else */
 							b = ctab[c];
 
 						//if (b != 0) dst_data[i+dst_shift] = b;
@@ -1881,16 +1877,15 @@ public class Gfx extends PaletteTabs
 	}
 
 
-	static void ScreenSizeChanged()
+	public static void ScreenSizeChanged()
 	{
-		/* TODO ScreenSizeChanged()
 		// check the dirty rect
 		if (Hal._invalid_rect.right >= Hal._screen.width) Hal._invalid_rect.right = Hal._screen.width;
 		if (Hal._invalid_rect.bottom >= Hal._screen.height) Hal._invalid_rect.bottom = Hal._screen.height;
 
 		// screen size changed and the old bitmap is invalid now, so we don't want to undraw it
 		Hal._cursor.visible = false;
-		 */
+
 	}
 
 	public static void UndrawMouseCursor()

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import game.Cheat.Cheats;
+import game.console.Console;
 import game.enums.GameModes;
 import game.enums.SwitchModes;
 import game.ids.StringID;
@@ -17,7 +18,6 @@ import game.struct.Point;
 import game.tables.CargoConst;
 import game.util.Paths;
 import game.util.Prices;
-import game.util.Strings;
 import game.xui.MiscGui;
 
 public class Global 
@@ -223,7 +223,7 @@ public class Global
 	public static int _cleared_town_rating;
 	public static int _caret_timer;
 	public static Vehicle _place_clicked_vehicle;
-	public static final int _num_resolutions = 1; // TODO _num_resolutions
+	//public static final int _num_resolutions = 1; 
 	public static int _make_screenshot;
 	
 	// Available aircraft types
@@ -324,7 +324,7 @@ public class Global
 		String buf = String.format(s, arg);
 
 		error( "dbg: %s\n", buf);
-		// TODO Console.IConsoleDebug(buf);
+		Console.IConsoleDebug(buf);
 	}
 
 	// instead of DEBUG(ai, 0)( printf args)
@@ -385,9 +385,7 @@ public class Global
 	
 	
 	
-	public static int Random() {
-		return Hal.Random();
-	}
+	//public static int Random() {		return Hal.Random();	}
 
 
 
@@ -407,12 +405,14 @@ public class Global
 	public static final Integer[] _decode_parameters = new Integer[20];
 
 
+	//@Deprecated
 	public static void SetDParam(int n, int v)
 	{
 		//assert(n < _decode_parameters.length);
 		_decode_parameters[n] = v;
 	}
 
+	//@Deprecated
 	public static void SetDParam64(int n, long v)
 	{
 		//assert(n + 1 < lengthof(_decode_parameters));
@@ -516,7 +516,7 @@ public class Global
 
 
 
-
+	/*
 	public static String GetString(StringID string)
 	{
 		return Strings.GetString(string);
@@ -526,13 +526,7 @@ public class Global
 	{
 		return Strings.GetString(string);
 	}
-
-
-
-
-
-
-
+	*/
 	
 	public static void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
 	{
@@ -543,17 +537,6 @@ public class Global
 	{
 		MiscGui.ShowErrorMessage( new StringID(msg_1), new StringID(msg_2), x, y);
 	}
-
-
-
-
-
-
-
-
-
-
-
 
 
 
