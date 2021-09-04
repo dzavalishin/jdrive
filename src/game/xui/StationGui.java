@@ -1,7 +1,10 @@
 package game.xui;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import game.AcceptedCargo;
 import game.AirCraft;
@@ -13,8 +16,6 @@ import game.Str;
 import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.StringID;
-import game.sort.GeneralOwnerSorter;
-import game.struct.SortStruct;
 import game.util.BinaryString;
 import game.util.BitOps;
 import game.util.Strings;
@@ -63,14 +64,12 @@ public class StationGui extends Station  // to get constants
 		if (rating != 0) Gfx.GfxFillRect(x + 1, y + 8, x + rating, y + 8, 0xD0);
 	}
 
-	static final int [] _num_station_sort = new int[Global.MAX_PLAYERS];
-
 	//static char _bufcache[64];
 	//static int _last_station_idx;
 
-	static class StationNameSorter implements Comparator<SortStruct>
+	static class StationNameSorter implements Comparator<Station>
 	{
-		public int compare(SortStruct a, SortStruct b)
+		public int compare(Station a, Station b)
 		{
 			/*int [] argv = new int[1];
 			argv[0] = a.index;
@@ -79,84 +78,58 @@ public class StationGui extends Station  // to get constants
 			argv[0] = b.index;
 			String buf2 = Strings.GetStringWithArgs(Str.STR_STATION, argv); */
 
-			String buf1 = Strings.GetStringWithArgs(Str.STR_STATION, a.index);
-			String buf2 = Strings.GetStringWithArgs(Str.STR_STATION, b.index);
+			String buf1 = Strings.GetStringWithArgs(Str.STR_STATION, a.getIndex());
+			String buf2 = Strings.GetStringWithArgs(Str.STR_STATION, b.getIndex());
 			return buf1.compareTo(buf2);
 		}
 	}
 
-	private static SortStruct [] _station_sort;
-	public static final boolean [] _station_sort_dirty = new boolean[Global.MAX_PLAYERS];
-	private static boolean _global_station_sort_dirty = true;
+	private static class PlayerStationsInfo {
+		boolean dirty = true;
+		List<Station> stations = new ArrayList<>();
+	}
 
+	private static Map<Integer, PlayerStationsInfo> sortedList;
+
+	public static void requestSortStations() {
+		sortedList = null;
+	}
+
+	public static void requestSortStations(int player) {
+		if (!isSortedListDirty()) {
+			PlayerStationsInfo info = sortedList.get(player);
+			if (info != null) {
+				info.dirty = true;
+			}
+		}
+	}
+
+	private static boolean isSortedListDirty(int player) {
+		return isSortedListDirty() || sortedList.get(player) == null || sortedList.get(player).dirty;
+	}
+
+	private static boolean isSortedListDirty() {
+		return sortedList == null;
+	}
 
 	static void GlobalSortStationList()
 	{
-		//final Station st;
-		int [] n = {0};
-		//int [] i;
+		sortedList = new HashMap<>();
 
-		// reset #-of stations to 0 because ++ is used for value-assignment
-		//memset(_num_station_sort, 0, sizeof(_num_station_sort));
-		Arrays.fill(_num_station_sort, 0);
-
-		/* Create array for sorting */
-		//_station_sort = realloc(_station_sort, GetStationPoolSize() * sizeof(_station_sort[0]));
-		_station_sort = new SortStruct[GetStationPoolSize()];
-		//if (_station_sort == null)			Global.error("Could not allocate memory for the station-sorting-list");
-
-		Station.forEach( (st) ->
-		{
-			if (st.getXy() != null && st.getOwner().isNotNone()) {
-				_station_sort[n[0]] = new SortStruct();
-				_station_sort[n[0]].index = st.getIndex();
-				_station_sort[n[0]].owner = st.getOwner().id;
-				n[0]++;
-				_num_station_sort[st.getOwner().id]++; // add number of stations of player
+		Station.forEach( (station) -> {
+			if (station.isValid() && station.getOwner().isNotNone()) {
+				sortedList.computeIfAbsent(station.getOwner().id, (key) -> new PlayerStationsInfo() ).stations.add(station);
 			}
 		});
-
-		// create cumulative station-ownership
-		// stations are stored as a cummulative index, eg 25, 41, 43. This means
-		// Player0: 25; Player1: (41-25) 16; Player2: (43-41) 2
-		//for (i = &_num_station_sort[1]; i != endof(_num_station_sort); i++) {
-		//	*i += *(i - 1);
-		//}
-		for (int si = 1; si < _num_station_sort.length; si++) {
-			_num_station_sort[si] += _num_station_sort[si-1];
-		}
-
-		Arrays.sort(_station_sort, new GeneralOwnerSorter());
-
-		// since indexes are messed up after adding/removing a station, mark all lists dirty
-		Arrays.fill(_station_sort_dirty, true);
-		//memset(_station_sort_dirty, true, sizeof(_station_sort_dirty));
-
-		_global_station_sort_dirty = false;
 
 		Global.DEBUG_misc( 1, "Resorting global station list...");
 	}
 
 	static void MakeSortedStationList(int owner)
 	{
-		/*
-		SortStruct firstelement;
-		int n = 0;
-
-		if (owner == 0) { // first element starts at 0th element and has n elements as described above
-			firstelement = _station_sort[0];
-			n = _num_station_sort[0];
-		} else { // nth element starts at the end of the previous one, and has n elements as described above
-			firstelement = _station_sort[_num_station_sort[owner - 1]];
-			n = _num_station_sort[owner] - _num_station_sort[owner - 1];
-		}
-
-		//_last_station_idx = 0; // used for "cache" in namesorting
-		qsort(firstelement, n, sizeof(_station_sort[0]), StationNameSorter); // sort by name
-		 */
-		Arrays.sort( _station_sort, new StationNameSorter() );
-
-		_station_sort_dirty[owner] = false;
+		PlayerStationsInfo psi = sortedList.computeIfAbsent(owner, (key) -> new PlayerStationsInfo());
+		psi.stations.sort(new StationNameSorter());
+		psi.dirty = false;
 
 		Global.DEBUG_misc( 1, "Resorting Stations list player %d...", owner+1);
 	}
@@ -167,22 +140,19 @@ public class StationGui extends Station  // to get constants
 		case WE_PAINT: {
 			//final PlayerID 
 			int owner = w.window_number;
-			int i;
 
 			// resort station window if stations have been added/removed
-			if (_global_station_sort_dirty) GlobalSortStationList();
-			if (_station_sort_dirty[owner]) MakeSortedStationList(owner);
+			if (isSortedListDirty()) GlobalSortStationList();
+			if (isSortedListDirty(owner)) MakeSortedStationList(owner);
 
-			// stations are stored as a cummulative index, eg 25, 41, 43. This means
-			// Player0: 25; Player1: (41-25) 16; Player2: (43-41) 2 stations
-			i = (owner == 0) ? 0 : _num_station_sort[owner - 1];
-			w.SetVScrollCount( _num_station_sort[owner] - i);
+			List<Station> stations = sortedList.get(owner).stations;
+			w.SetVScrollCount(stations.size());
 
 			/* draw widgets, with player's name in the caption */
 			{
-				final Player  p = Player.GetPlayer(owner);
-				Global.SetDParam(0, p.getName_1());
-				Global.SetDParam(1, p.getName_2());
+				final Player player = Player.GetPlayer(owner);
+				Global.SetDParam(0, player.getName_1());
+				Global.SetDParam(1, player.getName_2());
 				Global.SetDParam(2, w.vscroll.getCount());
 				w.DrawWindowWidgets();
 			}
@@ -197,31 +167,26 @@ public class StationGui extends Station  // to get constants
 					return;
 				}
 
-				i += w.vscroll.pos; // offset from sorted station list of current player
-				assert(i < _num_station_sort[owner]); // at least one station must exist
-
-				while (i < _num_station_sort[owner]) { // do until max number of stations of owner
-					final Station  st = Station.GetStation(_station_sort[i].index);
+				for(Station station: stations) {
 					int j;
 					int x;
 
-					assert(st.getXy() != null && st.getOwner().id == owner);
+					assert(station.isValid() && station.getOwner().id == owner);
 
-					Global.SetDParam(0, st.getIndex());
-					Global.SetDParam(1, st.getFacilities());
+					Global.SetDParam(0, station.getIndex());
+					Global.SetDParam(1, station.getFacilities());
 					x = Gfx.DrawString(xb, y, Str.STR_3049_0, 0) + 5;
 
 					// show cargo waiting and station ratings
 					for (j = 0; j != AcceptedCargo.NUM_CARGO; j++) {
-						int acc = BitOps.GB(st.goods[j].waiting_acceptance, 0, 12);
+						int acc = BitOps.GB(station.goods[j].waiting_acceptance, 0, 12);
 
 						if (acc != 0) {
-							StationsWndShowStationRating(x, y, j, acc, st.goods[j].rating);
+							StationsWndShowStationRating(x, y, j, acc, station.goods[j].rating);
 							x += 10;
 						}
 					}
 					y += 10;
-					i++; // next station
 					if (++p == w.vscroll.getCap()) break; // max number of stations in 1 window
 				}
 			}
@@ -239,11 +204,9 @@ public class StationGui extends Station  // to get constants
 					final PlayerID owner = PlayerID.get( w.window_number );
 					final Station  st;
 
-					id_v += (owner.id == 0) ? 0 : _num_station_sort[owner.id - 1]; // first element in list
+					if (id_v >= sortedList.get(owner.id).stations.size()) return; // click out of station bound
 
-					if (id_v >= _num_station_sort[owner.id]) return; // click out of station bound
-
-					st = Station.GetStation(_station_sort[id_v].index);
+					st = sortedList.get(owner.id).stations.get(id_v);
 
 					assert(st.getXy() != null && st.getOwner() == owner);
 
@@ -582,10 +545,6 @@ public class StationGui extends Station  // to get constants
 			if (owner.isNotNone()) w.caption_color =  owner.id;
 			w.vscroll.setCap(5);
 		}
-	}
-
-	public static void requestSortStations() {
-		_global_station_sort_dirty = true;		
 	}
 
 
