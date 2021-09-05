@@ -1,8 +1,10 @@
 package game.tables;
 
 import game.Sprite;
+import game.Str;
 import game.struct.DrawTileSeqStruct;
 import game.struct.DrawTileSprites;
+import game.struct.TileIndexDiffC;
 
 public class StationTables 
 {
@@ -808,6 +810,109 @@ public class StationTables
         new DrawTileSprites( 0xA4A, _station_display_datas_0112 ),
         new DrawTileSprites( 0xA4A, _station_display_datas_0113 ),
         new DrawTileSprites( 0xA4A, _station_display_datas_0114 ),
+	};
+	
+
+	
+	
+	// FIXME -- need to be embedded into Airport variable. Is dynamically
+	// deducteable from graphics-tile array, so will not be needed
+	public final static  byte _airport_size_x[] = {4, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+	public final static byte _airport_size_y[] = {3, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+
+	public static final  TileIndexDiffC _count_square_table[] = 
+		{
+				new TileIndexDiffC(-3, -3), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
+				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0)
+		};
+	
+
+	
+	//#define M(x) ((x) - Str.STR_SV_STNAME)
+	/*static final  int _gen_station_name_bits[] = {
+			0,                                      // 0 
+	1 << M(Str.STR_SV_STNAME_AIRPORT),          // 1 
+	1 << M(Str.STR_SV_STNAME_OILFIELD),         // 2 
+	1 << M(Str.STR_SV_STNAME_DOCKS),            // 3 
+	0x1FF << M(Str.STR_SV_STNAME_BUOY_1),       // 4 
+	1 << M(Str.STR_SV_STNAME_HELIPORT),         // 5 
+	};*/
+
+	public static int M(int x) { return ((x) - Str.STR_SV_STNAME); }
+
+	public static final  int _gen_station_name_bits[] = {
+			0,                                      /* 0 */
+			1 << (Str.STR_SV_STNAME_AIRPORT - Str.STR_SV_STNAME),          /* 1 */
+			1 << (Str.STR_SV_STNAME_OILFIELD - Str.STR_SV_STNAME),         /* 2 */
+			1 << (Str.STR_SV_STNAME_DOCKS - Str.STR_SV_STNAME),            /* 3 */
+			0x1FF << (Str.STR_SV_STNAME_BUOY_1 - Str.STR_SV_STNAME),       /* 4 */
+			1 << (Str.STR_SV_STNAME_HELIPORT - Str.STR_SV_STNAME),         /* 5 */
+	};
+
+	public static final  int _direction_and_table[] = {
+			~( (1<<M(Str.STR_SV_STNAME_WEST)) | (1<<M(Str.STR_SV_STNAME_EAST)) | (1<<M(Str.STR_SV_STNAME_NORTH)) ),
+			~( (1<<M(Str.STR_SV_STNAME_SOUTH)) | (1<<M(Str.STR_SV_STNAME_WEST)) | (1<<M(Str.STR_SV_STNAME_NORTH)) ),
+			~( (1<<M(Str.STR_SV_STNAME_SOUTH)) | (1<<M(Str.STR_SV_STNAME_EAST)) | (1<<M(Str.STR_SV_STNAME_NORTH)) ),
+			~( (1<<M(Str.STR_SV_STNAME_SOUTH)) | (1<<M(Str.STR_SV_STNAME_WEST)) | (1<<M(Str.STR_SV_STNAME_EAST)) ),
+	};
+
+
+	
+	// FIXME -- need to move to its corresponding Airport variable
+	// Country Airfield (small)
+	static final  byte _airport_map5_tiles_country[] = {
+			54, 53, 52, 65,
+			58, 57, 56, 55,
+			64, 63, 63, 62
+	};
+
+	// City Airport (large)
+	static final  byte _airport_map5_tiles_town[] = {
+			31,  9, 33,  9,  9, 32,
+			27, 36, 29, 34,  8, 10,
+			30, 11, 35, 13, 20, 21,
+			51, 12, 14, 17, 19, 28,
+			38, 13, 15, 16, 18, 39,
+			26, 22, 23, 24, 25, 26
+	};
+
+	// Metropolitain Airport (large) - 2 runways
+	static final  byte _airport_map5_tiles_metropolitan[] = {
+			31,  9, 33,  9,  9, 32,
+			27, 36, 29, 34,  8, 10,
+			30, 11, 35, 13, 20, 21,
+			102,  8,  8,  8,  8, 28,
+			83, 84, 84, 84, 84, 83,
+			26, 23, 23, 23, 23, 26
+	};
+
+	// International Airport (large) - 2 runways
+	static final  byte _airport_map5_tiles_international[] = {
+			88, 89, 89, 89, 89, 89,  88,
+			51,  8,  8,  8,  8,  8,  32,
+			30,  8, 11, 27, 11,  8,  10,
+			32,  8, 11, 27, 11,  8, 114,
+			87,  8, 11, 85, 11,  8, 114,
+			87,  8,  8,  8,  8,  8,  90,
+			26, 23, 23, 23, 23, 23,  26
+	};
+
+	// Heliport
+	static final  byte _airport_map5_tiles_heliport[] = {
+			66,
+	};
+
+	public static final  byte [][] _airport_map5_tiles = {
+			_airport_map5_tiles_country,				// Country Airfield (small)
+			_airport_map5_tiles_town,						// City Airport (large)
+			_airport_map5_tiles_heliport,				// Heliport
+			_airport_map5_tiles_metropolitan,   // Metropolitain Airport (large)
+			_airport_map5_tiles_international,	// International Airport (xlarge)
 	};
 	
 	
