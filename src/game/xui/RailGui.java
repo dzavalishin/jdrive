@@ -621,7 +621,8 @@ public class RailGui {
 
 		if (Global.gs._current_player.isSpectator()) return;
 
-		BiConsumer<Window,WindowEvent>  cmp = RailGui::BuildRailToolbWndProc;
+		//BiConsumer<Window,WindowEvent>  
+		WindowProc cmp = RailGui::BuildRailToolbWndProc;
 		
 		// don't recreate the window if we're clicking on a button and the window exists.
 		if (button < 0 || null == (w = Window.FindWindowById(Window.WC_BUILD_TOOLBAR, 0)) || (w.getWndproc() != cmp) ) {

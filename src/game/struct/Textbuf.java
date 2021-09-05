@@ -1,12 +1,16 @@
 package game.struct;
 
+import java.io.Serializable;
+
 import game.Global;
 import game.xui.Gfx;
 import game.xui.Widget;
 import game.xui.Window;
 
-public class Textbuf 
+public class Textbuf implements Serializable 
 {
+	private static final long serialVersionUID = 1L;
+	
 	private char [] buf;                  /* buffer in which text is saved */
 	public int maxlength; /* the maximum size of the buffer.  */
 	public int maxwidth; // Maxwidth specifies screensize in pixels

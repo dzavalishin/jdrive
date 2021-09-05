@@ -1,5 +1,6 @@
 package game;
 
+import java.io.Serializable;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -21,7 +22,8 @@ import game.xui.WindowDesc;
 import game.xui.WindowEvent;
 import game.xui.WindowMessage;
 
-public class NewsItem {
+public class NewsItem implements Serializable 
+{
 	StringID string_id;
 	int  duration;
 	int date;
