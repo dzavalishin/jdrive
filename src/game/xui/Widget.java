@@ -1,6 +1,11 @@
 package game.xui;
 
-public class Widget {
+import java.io.Serializable;
+
+public class Widget implements Serializable 
+{	
+	private static final long serialVersionUID = 1L;
+	
 	final int type;
 	final int resize_flag;
 	int color;

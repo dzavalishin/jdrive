@@ -1228,11 +1228,11 @@ public class Order implements Serializable
 	}
 
 	public boolean hasFlag(int flag) {
-		return BitOps.HASBIT(flags, flag);
+		return BitOps.HASBITS(flags, flag);
 	}
 
 	public boolean hasFlags(int flag) {
-		return BitOps.HASBIT(flags, flag);
+		return BitOps.HASBITS(flags, flag);
 	}
 
 	public void setFlags(int flag) {

@@ -1209,7 +1209,6 @@ public class Economy extends EconomeTables implements Serializable
 	 */
 	static boolean LoadWait(final Vehicle v, final Vehicle u) {
 		Vehicle w;
-		//final Vehicle x;
 		boolean has_any_cargo = false;
 
 		if(!u.getCurrent_order().hasFlag(Order.OF_FULL_LOAD)) return false;

@@ -58,7 +58,8 @@ public class Window extends WindowConstants implements Serializable
 	public AbstractWinCustom custom; // TODO replace it all with subclasses
 	public final int[] custom_array = new int[2];
 
-	BiConsumer<Window,WindowEvent> wndproc;
+	//BiConsumer<Window,WindowEvent> 
+	WindowProc wndproc;
 
 	public Window() {
 		left = top = width = height = flags4 = 0;
@@ -886,7 +887,8 @@ public class Window extends WindowConstants implements Serializable
 	 */
 	static Window AllocateWindow(
 			int x, int y, int width, int height,
-			BiConsumer<Window,WindowEvent> proc, /*WindowClass*/ int cls, final Widget[] widget)
+			//BiConsumer<Window,WindowEvent> proc, 
+			WindowProc proc, /*WindowClass*/ int cls, final Widget[] widget)
 	{
 		Window w = new Window();
 
@@ -964,7 +966,8 @@ public class Window extends WindowConstants implements Serializable
 			int exist_num,
 			int width,
 			int height,
-			BiConsumer<Window,WindowEvent> proc,
+			//BiConsumer<Window,WindowEvent> 
+			WindowProc proc,
 			int cls,
 			final Widget[] widget)
 	{
@@ -1149,7 +1152,8 @@ public class Window extends WindowConstants implements Serializable
 	Window AllocateWindowAutoPlace(
 			int width,
 			int height,
-			BiConsumer<Window,WindowEvent> proc,
+			//BiConsumer<Window,WindowEvent> 
+			WindowProc proc,
 			int cls,
 			final Widget[] widget) {
 

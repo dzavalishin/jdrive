@@ -1,5 +1,7 @@
 package game.util;
 
+import java.io.Serializable;
+
 import game.AirCraft;
 import game.Currency;
 import game.DisasterCmd;
@@ -23,8 +25,10 @@ import game.xui.PlayerGui;
 import game.xui.StationGui;
 import game.xui.Window;
 
-public class GameDate 
+public class GameDate implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+	
 	public int _date;
 	public int _date_fract;
 	public int _cur_year;

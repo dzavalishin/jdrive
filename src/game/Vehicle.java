@@ -1411,9 +1411,6 @@ public class Vehicle implements IPoolItem
 
 	boolean CanFillVehicle()
 	{
-		//Vehicle v = this;
-		//TileIndex tile = v.tile;
-
 		if (tile.IsTileType(TileTypes.MP_STATION) ||
 				(type == VEH_Ship && (
 						tile.iadd(TileIndex.TileDiffXY(1,  0)).IsTileType(TileTypes.MP_STATION) ||
