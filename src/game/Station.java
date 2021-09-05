@@ -31,6 +31,7 @@ import game.struct.TileIndexDiff;
 import game.struct.TileIndexDiffC;
 import game.tables.StationTables;
 import game.util.BitOps;
+import game.util.ByteArrayPtr;
 import game.util.IntContainer;
 import game.util.VehicleQueue;
 import game.xui.Gfx;
@@ -85,13 +86,6 @@ public class Station extends StationTables implements IPoolItem
 	VehicleID last_vehicle;
 	public GoodsEntry goods[] = new GoodsEntry[AcceptedCargo.NUM_CARGO];
 
-	// Stuff that is no longer used, but needed for conversion 
-	//TileIndex bus_tile_obsolete;
-	//TileIndex lorry_tile_obsolete;
-
-	//byte truck_stop_status_obsolete;
-	//byte bus_stop_status_obsolete;
-	//byte blocked_months_obsolete;
 
 
 
@@ -549,17 +543,6 @@ public class Station extends StationTables implements IPoolItem
 
 
 
-
-	/*enum {
-		// max stations: 64000 (64 * 1000) 
-		STATION_POOL_BLOCK_SIZE_BITS = 6,       // In bits, so (1 << 6) == 64 
-		STATION_POOL_MAX_BLOCKS      = 1000,
-
-		// max roadstops: 64000 (32 * 2000) 
-		ROADSTOP_POOL_BLOCK_SIZE_BITS = 5,       // In bits, so (1 << 5) == 32 
-		ROADSTOP_POOL_MAX_BLOCKS      = 2000,
-	};*/
-
 	/**
 	 * Called if a new block is added to the station-pool
 	 * /
@@ -568,30 +551,10 @@ public class Station extends StationTables implements IPoolItem
 		Station st;
 		FOR_ALL_STATIONS_FROM(st, start_item) st.index = start_item++;
 
-	}
-
-	/**
-	 * Called if a new block is added to the roadstop-pool
-	 * /
-	static void RoadStopPoolNewBlock(int start_item)
-	{
-		RoadStop rs;
-
-		FOR_ALL_ROADSTOPS_FROM(rs, start_item) rs.index = start_item++;
-	}
-	 */
-	/* Initialize the station-pool and roadstop-pool */
-	//MemoryPool _station_pool = { "Stations", STATION_POOL_MAX_BLOCKS, STATION_POOL_BLOCK_SIZE_BITS, sizeof(Station), &StationPoolNewBlock, 0, 0, null };
-	//MemoryPool _roadstop_pool = { "RoadStop", ROADSTOP_POOL_MAX_BLOCKS, ROADSTOP_POOL_BLOCK_SIZE_BITS, sizeof(RoadStop), &RoadStopPoolNewBlock, 0, 0, null };
+	} */
 
 
-	// FIXME -- need to be embedded into Airport variable. Is dynamically
-	// deducteable from graphics-tile array, so will not be needed
-	public final static  byte _airport_size_x[] = {4, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-	public final static byte _airport_size_y[] = {3, 6, 1, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
-	//void ShowAircraftDepotWindow(TileIndex tile);
-	//extern void UpdateAirplanesOnNewStation(Station st);
 
 	private void MarkStationDirty()
 	{
@@ -606,8 +569,11 @@ public class Station extends StationTables implements IPoolItem
 		}
 	}
 
-	// Calculate the radius of the station. Basicly it is the biggest
-	//    radius that is available within the Station 
+	/**
+	 *  Calculate the radius of the station. Basically it is the biggest
+	 *  radius that is available within the Station 
+	 *  
+	 */
 	private static int FindCatchmentRadius(final  Station  st)
 	{
 		int ret = 0;
@@ -738,16 +704,6 @@ public class Station extends StationTables implements IPoolItem
 	}
 
 
-	static final  TileIndexDiffC _count_square_table[] = 
-		{
-				new TileIndexDiffC(-3, -3), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0),
-				new TileIndexDiffC(-6,  1), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0), new TileIndexDiffC(1, 0)
-		};
 
 	private static int CountMapSquareAround(TileIndex tile, TileTypes type, int min, int max)
 	{
@@ -764,34 +720,6 @@ public class Station extends StationTables implements IPoolItem
 
 		return num;
 	}
-
-	//#define M(x) ((x) - Str.STR_SV_STNAME)
-	/*static final  int _gen_station_name_bits[] = {
-			0,                                      // 0 
-	1 << M(Str.STR_SV_STNAME_AIRPORT),          // 1 
-	1 << M(Str.STR_SV_STNAME_OILFIELD),         // 2 
-	1 << M(Str.STR_SV_STNAME_DOCKS),            // 3 
-	0x1FF << M(Str.STR_SV_STNAME_BUOY_1),       // 4 
-	1 << M(Str.STR_SV_STNAME_HELIPORT),         // 5 
-	};*/
-
-	private static int M(int x) { return ((x) - Str.STR_SV_STNAME); }
-
-	static final  int _gen_station_name_bits[] = {
-			0,                                      /* 0 */
-			1 << (Str.STR_SV_STNAME_AIRPORT - Str.STR_SV_STNAME),          /* 1 */
-			1 << (Str.STR_SV_STNAME_OILFIELD - Str.STR_SV_STNAME),         /* 2 */
-			1 << (Str.STR_SV_STNAME_DOCKS - Str.STR_SV_STNAME),            /* 3 */
-			0x1FF << (Str.STR_SV_STNAME_BUOY_1 - Str.STR_SV_STNAME),       /* 4 */
-			1 << (Str.STR_SV_STNAME_HELIPORT - Str.STR_SV_STNAME),         /* 5 */
-	};
-
-	static final  int _direction_and_table[] = {
-			~( (1<<M(Str.STR_SV_STNAME_WEST)) | (1<<M(Str.STR_SV_STNAME_EAST)) | (1<<M(Str.STR_SV_STNAME_NORTH)) ),
-			~( (1<<M(Str.STR_SV_STNAME_SOUTH)) | (1<<M(Str.STR_SV_STNAME_WEST)) | (1<<M(Str.STR_SV_STNAME_NORTH)) ),
-			~( (1<<M(Str.STR_SV_STNAME_SOUTH)) | (1<<M(Str.STR_SV_STNAME_EAST)) | (1<<M(Str.STR_SV_STNAME_NORTH)) ),
-			~( (1<<M(Str.STR_SV_STNAME_SOUTH)) | (1<<M(Str.STR_SV_STNAME_WEST)) | (1<<M(Str.STR_SV_STNAME_EAST)) ),
-	};
 
 	private static boolean GenerateStationName(Station st, TileIndex tile, int flag)
 	{
@@ -962,12 +890,7 @@ public class Station extends StationTables implements IPoolItem
 		int [] allowed_z = {-1};
 		int [] error = {0};
 
-		//int flat_z;
-		//int tileh;
-		//int z;
-
 		//BEGIN_TILE_LOOP(tile_cur, w, h, tile)
-
 		TileIndex.forEach(w, h, tile.getTile(), (tile_cur, h_cur, w_cur ) -> 
 		{
 
@@ -1114,35 +1037,26 @@ public class Station extends StationTables implements IPoolItem
 	}
 
 
-	private static  byte [] CreateSingle(byte [] layout, int n)
+	private static void CreateSingle(ByteArrayPtr layout, int n)
 	{
 		int i = n;
-		int li = 0;
-		do { layout[li++] = 0; } while (--i > 0);
-		
-		
-		final int j = ((n-1) >> 1)-n;
-		layout[j+n] = 2;
-		return layout;
+		do { layout.wpp( (byte) 0 ); } while (--i > 0);
+				
+		layout.w( ((n-1) >> 1)-n, (byte) 2 );
 	}
 
-	// TODO This code is wrong, rewrite lookling at C original
-	private static byte [] CreateMulti(byte [] layout, int n, int b)
+	private static void CreateMulti(ByteArrayPtr layout, int n, int b)
 	{
 		int i = n;
-		int li = 0;
-		do { 
-			layout[li++] =  (byte) b; 
-		}while (--i > 0);
+		do { layout.wpp( (byte) b ); } while (--i > 0);
 
 		if (n > 4) {
-			layout[0-n] = 0;
-			layout[n-1-n] = 0;
+			layout.w(0-n, (byte) 0);
+			layout.w(n-1-n, (byte) 0 );
 		}
-		return layout;
 	}
 
-	private static void GetStationLayout(byte [] layout, int numtracks, int plat_len, final  StationSpec spec)
+	private static void GetStationLayout(ByteArrayPtr layout, int numtracks, int plat_len, final  StationSpec spec)
 	{
 		if (spec != null && spec.lengths >= plat_len &&
 				spec.platforms[plat_len - 1] >= numtracks &&
@@ -1158,12 +1072,12 @@ public class Station extends StationTables implements IPoolItem
 		if (plat_len == 1) {
 			CreateSingle(layout, numtracks);
 		} else {
-			if(0 != (numtracks & 1)) layout = CreateSingle(layout, plat_len);
+			if(0 != (numtracks & 1)) CreateSingle(layout, plat_len);
 			numtracks >>= 1;
 
 		while (--numtracks >= 0) {
-			layout = CreateMulti(layout, plat_len, 4);
-			layout = CreateMulti(layout, plat_len, 6);
+			CreateMulti(layout, plat_len, 4);
+			CreateMulti(layout, plat_len, 6);
 		}
 		}
 	}
@@ -1292,7 +1206,7 @@ public class Station extends StationTables implements IPoolItem
 			// TODO statspec = (p2 & 0x10) != 0 ? GetCustomStation(Station.STAT_CLASS_DFLT, p2 >> 8) : null;
 			statspec = null;
 			byte [] layout_ptr = new byte[numtracks * plat_len];
-			GetStationLayout(layout_ptr, numtracks, plat_len, statspec);
+			GetStationLayout( new ByteArrayPtr(layout_ptr), numtracks, plat_len, statspec);
 
 			int lpi = 0; // layout_ptr index
 
@@ -1818,29 +1732,11 @@ public class Station extends StationTables implements IPoolItem
 			//noinspection AssertWithSideEffects
 			final boolean removeRet = primary_stop.remove(cur_stop);
 			assert removeRet;
-			//if (cur_stop.prev != null) cur_stop.prev.next = cur_stop.next;
-			//if (cur_stop.next != null) cur_stop.next.prev = cur_stop.prev;
 
 			//we only had one stop left
-			//if (cur_stop.next == null && cur_stop.prev == null)
 			if(primary_stop.isEmpty())
-			{
-				//so we remove ALL stops
-				//*primary_stop = null;
-				//if(is_truck)					st.truck_stops = null;
-				//else					st.bus_stops = null;
-
 				st.facilities &= (is_truck) ? ~FACIL_TRUCK_STOP : ~FACIL_BUS_STOP;
-			} /*else if (cur_stop == primary_stop) {
-				//removed the first stop in the list
-				//need to set the primary element to the next stop
-				//*primary_stop = (*primary_stop).next;
-				if(is_truck)
-					st.truck_stops = st.truck_stops.next;
-				else
-					st.bus_stops = st.bus_stops.next;
-			} */
-
+			
 			st.UpdateStationVirtCoordDirty();
 			st.DeleteStationIfEmpty();
 		}
@@ -1850,57 +1746,6 @@ public class Station extends StationTables implements IPoolItem
 
 
 
-	// FIXME -- need to move to its corresponding Airport variable
-	// Country Airfield (small)
-	static final  byte _airport_map5_tiles_country[] = {
-			54, 53, 52, 65,
-			58, 57, 56, 55,
-			64, 63, 63, 62
-	};
-
-	// City Airport (large)
-	static final  byte _airport_map5_tiles_town[] = {
-			31,  9, 33,  9,  9, 32,
-			27, 36, 29, 34,  8, 10,
-			30, 11, 35, 13, 20, 21,
-			51, 12, 14, 17, 19, 28,
-			38, 13, 15, 16, 18, 39,
-			26, 22, 23, 24, 25, 26
-	};
-
-	// Metropolitain Airport (large) - 2 runways
-	static final  byte _airport_map5_tiles_metropolitan[] = {
-			31,  9, 33,  9,  9, 32,
-			27, 36, 29, 34,  8, 10,
-			30, 11, 35, 13, 20, 21,
-			102,  8,  8,  8,  8, 28,
-			83, 84, 84, 84, 84, 83,
-			26, 23, 23, 23, 23, 26
-	};
-
-	// International Airport (large) - 2 runways
-	static final  byte _airport_map5_tiles_international[] = {
-			88, 89, 89, 89, 89, 89,  88,
-			51,  8,  8,  8,  8,  8,  32,
-			30,  8, 11, 27, 11,  8,  10,
-			32,  8, 11, 27, 11,  8, 114,
-			87,  8, 11, 85, 11,  8, 114,
-			87,  8,  8,  8,  8,  8,  90,
-			26, 23, 23, 23, 23, 23,  26
-	};
-
-	// Heliport
-	static final  byte _airport_map5_tiles_heliport[] = {
-			66,
-	};
-
-	static final  byte [][] _airport_map5_tiles = {
-			_airport_map5_tiles_country,				// Country Airfield (small)
-			_airport_map5_tiles_town,						// City Airport (large)
-			_airport_map5_tiles_heliport,				// Heliport
-			_airport_map5_tiles_metropolitan,   // Metropolitain Airport (large)
-			_airport_map5_tiles_international,	// International Airport (xlarge)
-	};
 
 	/** Place an Airport.
 	 * @param x,y tile coordinates where airport will be built
@@ -2378,10 +2223,6 @@ public class Station extends StationTables implements IPoolItem
 		return Global._price.remove_dock;
 	}
 
-	//#include "table/station_land.h"
-
-
-	//extern uint16 _custom_sprites_base;
 
 	private static void DrawTile_Station(TileInfo ti)
 	{
@@ -2515,7 +2356,6 @@ public class Station extends StationTables implements IPoolItem
 		return 0;
 	}
 
-	//private static void GetAcceptedCargo_Station(TileIndex tile, AcceptedCargo ac)
 	private static AcceptedCargo GetAcceptedCargo_Station(TileIndex tile)
 	{
 		return new AcceptedCargo();
