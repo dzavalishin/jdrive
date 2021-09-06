@@ -32,12 +32,10 @@ public class MainWindow extends JPanel implements ActionListener
 	private static final long serialVersionUID = 7030596255463826051L;
 
 	
-	public static final int TICK_TIME = 20;
+	public static final int TICK_TIME = 10;
 	public static final int TICKS_PER_SECOND = 1000 / TICK_TIME;
 
 	public static final int WIDTH = 1280;
-	//public static final int HEIGHT = 1024;
-	//public static final int HEIGHT = 960;
 	public static final int HEIGHT = 800;
 
 
@@ -94,7 +92,7 @@ public class MainWindow extends JPanel implements ActionListener
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_down = false;
-				if( e.getButton() == MouseEvent.BUTTON2 ) Window._right_button_down = false;								
+				if( e.getButton() == MouseEvent.BUTTON3 ) Window._right_button_down = false;								
 				e.consume();
 			}
 
@@ -102,7 +100,7 @@ public class MainWindow extends JPanel implements ActionListener
 			public void mousePressed(MouseEvent e) {
 				if( e.getButton() == MouseEvent.BUTTON1 ) Window._left_button_down = true;
 
-				if( e.getButton() == MouseEvent.BUTTON2 )
+				if( e.getButton() == MouseEvent.BUTTON3 )
 				{
 					Window._right_button_down = true;
 					Window._right_button_clicked = true; // yes, it is different - why?
@@ -485,26 +483,7 @@ public class MainWindow extends JPanel implements ActionListener
 
 	private void processMouse(int x, int y) 
 	{
-		/*
-		Point l = getLocation();
-		Point l2 = getParent().getLocation();
-		Point l3 = getParent().getParent().getLocation();;
-		// TODO hack
-		//x -= 13; //myLocation.x;
-		//y -= 36; //myLocation.y;
-
-		x -= l.x;
-		y -= l.y;
-
-		x -= l2.x;
-		y -= l2.y;
-
-		x -= l3.x;
-		y -= l3.y;
-		//Global.debug("loc %d.%d", l2.x, l2.y );
-		*/
 		Hal._cursor.processMouse(x, y);
-
 	}
 
 

@@ -29,6 +29,8 @@ import game.util.wcustom.*;
 
 public class Window extends WindowConstants implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+	
 	int flags4;
 	int window_class;
 	public int window_number;
@@ -53,12 +55,10 @@ public class Window extends WindowConstants implements Serializable
 	int desc_flags;
 
 	public WindowMessage message;// = new WindowMessage(); // used 
-	//byte custom[WINDOW_CUSTOM_SIZE];
-	//byte custom[];
+
 	public AbstractWinCustom custom; // TODO replace it all with subclasses
 	public final int[] custom_array = new int[2];
 
-	//BiConsumer<Window,WindowEvent> 
 	WindowProc wndproc;
 
 	public Window() {
@@ -119,10 +119,7 @@ public class Window extends WindowConstants implements Serializable
 	 */
 	public static boolean _scrolling_scrollbar = false;
 
-	/**
-	 * TODO control it from outside
-	 */
-	public static boolean _scrolling_viewport = false;
+	//public static boolean _scrolling_viewport = false;
 	static boolean _popup_menu_active;
 
 	public static int _special_mouse_mode;
@@ -1736,12 +1733,16 @@ public class Window extends WindowConstants implements Serializable
 		ViewPort vp;
 		int dx,dy, x, y, sub;
 
-		if (!_scrolling_viewport) return true;
+		if (!Hal._cursor.isScrollingViewport()) return true;
 
 		if (!_right_button_down) {
 			//stop_capt:;
+			/*
 			Hal._cursor.fix_at = false;
+			Hal._cursor.scrollRef = null;
 			_scrolling_viewport = false;
+			*/
+			Hal._cursor.stopViewportScrolling();
 			return true;
 		}
 
@@ -1749,36 +1750,42 @@ public class Window extends WindowConstants implements Serializable
 		if (w == null) //goto stop_capt;
 		{
 			//stop_capt:;
+			/*
 			Hal._cursor.fix_at = false;
+			Hal._cursor.scrollRef = null;
 			_scrolling_viewport = false;
+			*/
+			Hal._cursor.stopViewportScrolling();
 			return true;
 		}
 
+		/*
 		if (Global._patches.reverse_scroll) {
 			dx = -Hal._cursor.delta.x;
 			dy = -Hal._cursor.delta.y;
 		} else {
 			dx = Hal._cursor.delta.x;
 			dy = Hal._cursor.delta.y;
-		}
-
+		}*/
+		
+		Point d = Hal._cursor.getViewportScrollStep();
+		
 		if (w.window_class != WC_SMALLMAP) {
 			vp = w.IsPtInWindowViewport(Hal._cursor.pos.x, Hal._cursor.pos.y);
 			if (vp == null)
 				//goto stop_capt;
 			{
 				//stop_capt:;
-				Hal._cursor.fix_at = false;
-				_scrolling_viewport = false;
+				//Hal._cursor.fix_at = false;
+				//_scrolling_viewport = false;
+				Hal._cursor.stopViewportScrolling();
 				return true;
 			}
 
-			//((vp2_d)w.custom).scrollpos_x += dx << vp.zoom;
-			//((vp2_d)w.custom).scrollpos_y += dy << vp.zoom;
-			w.as_vp2_d().scrollpos_x += dx << vp.zoom;
-			w.as_vp2_d().scrollpos_y += dy << vp.zoom;
+			w.as_vp2_d().scrollpos_x += d.x << vp.zoom;
+			w.as_vp2_d().scrollpos_y += d.y << vp.zoom;
 
-			Hal._cursor.delta.x = Hal._cursor.delta.y = 0;
+			//Hal._cursor.delta.x = Hal._cursor.delta.y = 0;
 			return false;
 		} else {
 			// scroll the smallmap ?
@@ -1787,21 +1794,21 @@ public class Window extends WindowConstants implements Serializable
 			int hvx;
 			int hvy;
 
-			Hal._cursor.fix_at = true;
+			//Hal._cursor.fix_at = true;
 
 			x = ((smallmap_d)w.custom).scroll_x;
 			y = ((smallmap_d)w.custom).scroll_y;
 
-			sub = ((smallmap_d)w.custom).subscroll + dx;
+			sub = ((smallmap_d)w.custom).subscroll + d.x;
 
 			x -= (sub >> 2) << 4;
 			y += (sub >> 2) << 4;
 			sub &= 3;
 
-			x += (dy >> 1) << 4;
-			y += (dy >> 1) << 4;
+			x += (d.y >> 1) << 4;
+			y += (d.y >> 1) << 4;
 
-			if (0 != (dy & 1)) {
+			if (0 != (d.y & 1)) {
 				x += 16;
 				sub += 2;
 				if (sub > 3) {
@@ -1836,7 +1843,7 @@ public class Window extends WindowConstants implements Serializable
 			((smallmap_d)w.custom).scroll_y = y;
 			((smallmap_d)w.custom).subscroll = sub;
 
-			Hal._cursor.delta.x = Hal._cursor.delta.y = 0;
+			//Hal._cursor.delta.x = Hal._cursor.delta.y = 0;
 
 			w.SetWindowDirty();
 			return false;
@@ -1959,167 +1966,7 @@ public class Window extends WindowConstants implements Serializable
 			}
 	}
 
-	//extern void UpdateTileSelection();
-	//extern boolean VpHandlePlaceSizingDrag();
 
-	private static final int  scrollspeed = 2;
-	private static final int  scroll_edge = 20;
-
-	static void MouseLoop(int click, int mousewheel)
-	{
-		int x,y;
-		Window w;
-		ViewPort vp;
-
-		DecreaseWindowCounters();
-		HandlePlacePresize();
-		ViewPort.UpdateTileSelection();
-		if (!ViewPort.VpHandlePlaceSizingDrag())  return;
-		if (!HandleDragDrop())           return;
-		if (!HandlePopupMenu())          return;
-		if (!HandleWindowDragging())     return;
-		if (!HandleScrollbarScrolling()) return;
-		if (!HandleViewportScroll())     return;
-		HandleMouseOver();
-
-		x = Hal._cursor.pos.x;
-		y = Hal._cursor.pos.y;
-
-
-		if (click == 0 && mousewheel == 0) 
-		{
-			if (Global._patches.autoscroll && Global._game_mode != GameModes.GM_MENU && _mouse_inside) 
-			{
-				w = FindWindowFromPt(x, y);
-				
-				if (w == null || 0 != (w.flags4 & WF_DISABLE_VP_SCROLL) ) 
-					return;
-				
-				vp = w.IsPtInWindowViewport(x, y);
-				if (vp != null) {
-					vp2_d vpd = w.as_vp2_d();
-					x -= vp.left;
-					y -= vp.top;
-					//here allows scrolling in both x and y axis
-
-					if (x - scroll_edge < 0) {
-						vpd.scrollpos_x += (x - scroll_edge) * scrollspeed << vp.zoom;
-						//Global.printf("scroll left");
-						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
-
-					} else if (scroll_edge - (vp.width - x) > 0) {
-						vpd.scrollpos_x += (scroll_edge - (vp.width - x)) * scrollspeed << vp.zoom;
-						//Global.printf("scroll right");
-						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
-					}
-					if (y - scroll_edge < 0) {
-						vpd.scrollpos_y += (y - scroll_edge) * scrollspeed << vp.zoom;
-						//Global.printf("scroll up");
-						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
-					} else if (scroll_edge - (vp.height - y) > 0) {
-						vpd.scrollpos_y += (scroll_edge - (vp.height - y)) * scrollspeed << vp.zoom;
-						//Global.printf("scroll dn");
-						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
-					}
-
-				}
-			}
-			return;
-		}
-
-		w = FindWindowFromPt(x, y);
-		if (w == null) return;
-		w = MaybeBringWindowToFront(w);
-		vp = w.IsPtInWindowViewport(x, y);
-		if (vp != null) {
-			if (Global._game_mode == GameModes.GM_MENU) return;
-
-			// only allow zooming in-out in main window, or in viewports
-			if (mousewheel != 0 &&
-					(0 == (w.flags4 & WF_DISABLE_VP_SCROLL)) && (
-							w.window_class == WC_MAIN_WINDOW ||
-							w.window_class == WC_EXTRA_VIEW_PORT
-							)) {
-				Gui.ZoomInOrOutToCursorWindow(mousewheel < 0,w);
-			}
-
-			if (click == 1) {
-				Global.DEBUG_misc( 2, "cursor: 0x%X (%d)", Hal._cursor.sprite.id, Hal._cursor.sprite.id);
-				if (ViewPort._thd.place_mode != 0 &&
-						// query button and place sign button work in pause mode
-						Hal._cursor.sprite.id != Sprite.SPR_CURSOR_QUERY &&
-						Hal._cursor.sprite.id != Sprite.SPR_CURSOR_SIGN &&
-						Global._pause != 0 &&
-						!Global._cheats.build_in_pause.value) {
-					return;
-				}
-
-				if (ViewPort._thd.place_mode == 0) {
-					vp.HandleViewportClicked(x, y);
-				} else {
-					ViewPort.PlaceObject();
-				}
-			} else if (click == 2) {
-				if (0 == (w.flags4 & WF_DISABLE_VP_SCROLL)) {
-					_scrolling_viewport = true;
-					Hal._cursor.fix_at = true;
-				}
-			}
-		} else {
-			if (mousewheel != 0)
-				w.DispatchMouseWheelEvent(w.GetWidgetFromPos(x - w.left, y - w.top), mousewheel);
-
-			switch (click) {
-			case 1: DispatchLeftClickEvent(w, x - w.left, y - w.top);  break;
-			case 2: DispatchRightClickEvent(w, x - w.left, y - w.top); break;
-			}
-		}
-	}
-
-	public static void InputLoop()
-	{
-		int click;
-		int mousewheel;
-
-		Global.gs._current_player = Global.gs._local_player;
-
-		// Handle pressed keys
-		if (Global._pressed_key != 0) {
-			int key = Global._pressed_key; Global._pressed_key = 0;
-			HandleKeypress(key);
-		}
-
-		// Mouse event?
-		click = 0;
-		if (_left_button_down && !_left_button_clicked) {
-			//if (_left_button_clicked) {
-			_left_button_clicked = true;
-			//_left_button_clicked = false;
-			click = 1;
-		} else {
-			if (_right_button_clicked) {
-				_right_button_clicked = false;
-				click = 2;
-			} 
-			/*if (_right_button_down && !_right_button_clicked) {
-			_right_button_clicked = true;
-			click = 2;
-		}*/
-		}
-
-
-
-		if( !_left_button_down ) _left_button_clicked = false;
-		if( !_right_button_down ) _right_button_clicked = false;
-
-		mousewheel = 0;
-		if (0 != Hal._cursor.wheel) {
-			mousewheel = Hal._cursor.wheel;
-			Hal._cursor.wheel = 0;
-		}
-
-		MouseLoop(click, mousewheel);
-	}
 
 
 	static int _we4_timer;
@@ -3184,5 +3031,181 @@ public class Window extends WindowConstants implements Serializable
 
 
 
+	
+	
+	
+	
+	
+	
+	
+	private static final int  scrollspeed = 2;
+	private static final int  scroll_edge = 20;
+
+	static void MouseLoop(int click, int mousewheel)
+	{
+		int x,y;
+		Window w;
+		ViewPort vp;
+
+		DecreaseWindowCounters();
+		HandlePlacePresize();
+		ViewPort.UpdateTileSelection();
+		if (!ViewPort.VpHandlePlaceSizingDrag())	return;
+		if (!HandleDragDrop())           			return;
+		if (!HandlePopupMenu())          			return;
+		if (!HandleWindowDragging())     			return;
+		if (!HandleScrollbarScrolling()) 			return;
+		if (!HandleViewportScroll())     			return;
+		HandleMouseOver();
+
+		x = Hal._cursor.pos.x;
+		y = Hal._cursor.pos.y;
+
+
+		if (click == 0 && mousewheel == 0) 
+		{
+			if (Global._patches.autoscroll && Global._game_mode != GameModes.GM_MENU && _mouse_inside) 
+			{
+				w = FindWindowFromPt(x, y);
+				
+				if (w == null || 0 != (w.flags4 & WF_DISABLE_VP_SCROLL) ) 
+					return;
+				
+				vp = w.IsPtInWindowViewport(x, y);
+				if (vp != null) {
+					vp2_d vpd = w.as_vp2_d();
+					x -= vp.left;
+					y -= vp.top;
+					//here allows scrolling in both x and y axis
+
+					if (x - scroll_edge < 0) {
+						vpd.scrollpos_x += (x - scroll_edge) * scrollspeed << vp.zoom;
+						//Global.printf("scroll left");
+						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
+
+					} else if (scroll_edge - (vp.width - x) > 0) {
+						vpd.scrollpos_x += (scroll_edge - (vp.width - x)) * scrollspeed << vp.zoom;
+						//Global.printf("scroll right");
+						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
+					}
+					if (y - scroll_edge < 0) {
+						vpd.scrollpos_y += (y - scroll_edge) * scrollspeed << vp.zoom;
+						//Global.printf("scroll up");
+						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
+					} else if (scroll_edge - (vp.height - y) > 0) {
+						vpd.scrollpos_y += (scroll_edge - (vp.height - y)) * scrollspeed << vp.zoom;
+						//Global.printf("scroll dn");
+						//System.out.printf("scroll %d.%d w %d.%d %x\n", vpd.scrollpos_x, vpd.scrollpos_y, w.window_class, w.window_number, w.hashCode() );
+					}
+
+				}
+			}
+			return;
+		}
+
+		w = FindWindowFromPt(x, y);
+		if (w == null) return;
+		w = MaybeBringWindowToFront(w);
+		vp = w.IsPtInWindowViewport(x, y);
+		if (vp != null) {
+			if (Global._game_mode == GameModes.GM_MENU) return;
+
+			//Global.debug("in vp");
+			
+			// only allow zooming in-out in main window, or in viewports
+			if (mousewheel != 0 &&
+					(0 == (w.flags4 & WF_DISABLE_VP_SCROLL)) && (
+							w.window_class == WC_MAIN_WINDOW ||
+							w.window_class == WC_EXTRA_VIEW_PORT
+							)) {
+				Gui.ZoomInOrOutToCursorWindow(mousewheel < 0,w);
+			}
+
+			if (click == 1) {
+				Global.DEBUG_misc( 2, "cursor: 0x%X (%d)", Hal._cursor.sprite.id, Hal._cursor.sprite.id);
+				if (ViewPort._thd.place_mode != 0 &&
+						// query button and place sign button work in pause mode
+						Hal._cursor.sprite.id != Sprite.SPR_CURSOR_QUERY &&
+						Hal._cursor.sprite.id != Sprite.SPR_CURSOR_SIGN &&
+						Global._pause != 0 &&
+						!Global._cheats.build_in_pause.value) {
+					return;
+				}
+
+				if (ViewPort._thd.place_mode == 0) {
+					vp.HandleViewportClicked(x, y);
+				} else {
+					ViewPort.PlaceObject();
+				}
+			} else if (click == 2) {
+				//Global.debug("right click scroll vp");
+				if (0 == (w.flags4 & WF_DISABLE_VP_SCROLL)) {
+					/*
+					//Global.debug("do right click scroll vp");
+					_scrolling_viewport = true;
+					//Hal._cursor.fix_at = true;
+					Hal._cursor.scrollRef = new Point( Hal._cursor.pos );
+					*/
+					Hal._cursor.startViewportScrolling();
+				}
+			}
+		} else {
+			if (mousewheel != 0)
+				w.DispatchMouseWheelEvent(w.GetWidgetFromPos(x - w.left, y - w.top), mousewheel);
+
+			switch (click) {
+			case 1: DispatchLeftClickEvent(w, x - w.left, y - w.top);  break;
+			case 2: DispatchRightClickEvent(w, x - w.left, y - w.top); break;
+			}
+		}
+	}
+
+	public static void InputLoop()
+	{
+		int click;
+		int mousewheel;
+
+		Global.gs._current_player = Global.gs._local_player;
+
+		// Handle pressed keys
+		if (Global._pressed_key != 0) {
+			int key = Global._pressed_key; Global._pressed_key = 0;
+			HandleKeypress(key);
+		}
+
+		// Mouse event?
+		click = 0;
+		if (_left_button_down && !_left_button_clicked) {
+			//if (_left_button_clicked) {
+			_left_button_clicked = true;
+			//_left_button_clicked = false;
+			click = 1;
+		} else {
+			if (_right_button_clicked) {
+				_right_button_clicked = false;
+				click = 2;
+			} 
+			/*if (_right_button_down && !_right_button_clicked) {
+			_right_button_clicked = true;
+			click = 2;
+		}*/
+		}
+
+
+
+		if( !_left_button_down ) _left_button_clicked = false;
+		if( !_right_button_down ) _right_button_clicked = false;
+
+		mousewheel = 0;
+		if (0 != Hal._cursor.wheel) {
+			mousewheel = Hal._cursor.wheel;
+			Hal._cursor.wheel = 0;
+		}
+
+		MouseLoop(click, mousewheel);
+	}
+	
+	
+	
 } 
 

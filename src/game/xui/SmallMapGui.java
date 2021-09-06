@@ -607,11 +607,13 @@ public class SmallMapGui extends SmallMapGuiTables
 
 		case WE_RCLICK:
 			if (e.widget == 4) {
-				if (Window._scrolling_viewport)
+				/*if (Window._scrolling_viewport)
 					return;
 				Window._scrolling_viewport = true;
-				Hal._cursor.delta.x = 0;
-				Hal._cursor.delta.y = 0;
+				//Hal._cursor.delta.x = 0;				Hal._cursor.delta.y = 0;
+				Hal._cursor.scrollRef = new Point( Hal._cursor.pos ); */
+				Hal._cursor.startViewportScrolling();
+
 			}
 			break;
 
