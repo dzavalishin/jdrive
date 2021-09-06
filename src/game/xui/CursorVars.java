@@ -1,5 +1,6 @@
 package game.xui;
 
+import game.Hal;
 import game.Sprite;
 import game.ids.CursorID;
 import game.struct.Point;
@@ -13,6 +14,10 @@ public class CursorVars
 	final Point delta = new Point(0, 0);
 	final Point draw_pos = new Point(0, 0);
 	final Point draw_size = new Point(0, 0);
+	
+	public Point scrollRef; // reference point for right mouse button scroll
+	private boolean scrollingViewport = false;
+
 	CursorID sprite;
 
 	int wheel; // mouse wheel movement
@@ -60,19 +65,6 @@ public class CursorVars
 		animate_pos++;
 
 		SetCursorSprite(csprite);
-		/*
-		CursorID[] cur = cv.animate_cur;
-		CursorID sprite;
-
-		// ANIM_CURSOR_END is 0xFFFF in table/animcursors.h
-		if (cur[0] == null || cur[0].id == 0xFFFF) cur = cv.animate_list;
-
-		sprite = cur[0];
-		cv.animate_timeout = cur[1].id;
-		cv.animate_cur = new CursorId( cur.id + 2);
-
-		SetCursorSprite(sprite);
-		 */
 	}
 
 	public void setCursor(AnimCursor[] animcursors) 
@@ -147,6 +139,30 @@ public class CursorVars
 
 	public void setWheel(int wheelRotation) {
 		wheel = wheelRotation;		
+	}
+
+	public void startViewportScrolling() 
+	{
+		if (scrollingViewport)
+			return;
+		scrollingViewport = true;
+		Hal._cursor.scrollRef = new Point( Hal._cursor.pos );
+	}
+
+	public void stopViewportScrolling() {
+		//Hal._cursor.fix_at = false;
+		Hal._cursor.scrollRef = null;
+		scrollingViewport = false;
+	}
+
+	public boolean isScrollingViewport() { return scrollingViewport; }
+
+	public Point getViewportScrollStep() {
+		int dx = -(Hal._cursor.pos.x - Hal._cursor.scrollRef.x);
+		int dy = -(Hal._cursor.pos.y - Hal._cursor.scrollRef.y);
+		Hal._cursor.scrollRef = new Point(Hal._cursor.pos);
+
+		return new Point( dx, dy );
 	}
 
 

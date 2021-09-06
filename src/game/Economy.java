@@ -439,7 +439,7 @@ public class Economy extends EconomeTables implements Serializable
 			{
 				for (i = 0; i < 4; i++) {
 					/* 'Sell' the share if this player has any */
-					if (p.share_owners[i].equals(Global.gs._current_player))
+					if (p.share_owners[i] == null || p.share_owners[i].equals(Global.gs._current_player))
 						p.share_owners[i] = PlayerID.get( Owner.OWNER_SPECTATOR );
 				}
 			}

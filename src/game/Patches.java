@@ -41,7 +41,7 @@ public class Patches
 	public boolean invisible_trees = true; // don't show trees when buildings are transparent
 	public boolean no_servicing_if_no_breakdowns; // dont send vehicles to depot when breakdowns are disabled
 	public boolean link_terraform_toolbar = true; // display terraform toolbar when displaying rail, road, water and airport toolbars
-	public boolean reverse_scroll; // Right-Click-Scrolling scrolls in the opposite direction
+	//public boolean reverse_scroll = true; // Right-Click-Scrolling scrolls in the opposite direction
 
 	public byte toolbar_pos;			// position of toolbars, 0=left, 1=center, 2=right
 	public byte window_snap_radius = 6; // Windows snap at each other if closer than this
