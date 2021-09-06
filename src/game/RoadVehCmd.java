@@ -119,7 +119,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			v.z_height = 6;
 
 			v.road.setInDepot(); //state = 254;
-			v.vehstatus = Vehicle.VS_HIDDEN|Vehicle.VS_STOPPED|Vehicle.VS_DEFPAL;
+			v.assignStatus( Vehicle.VS_HIDDEN|Vehicle.VS_STOPPED|Vehicle.VS_DEFPAL );
 
 			v.spritenum = rvi.image_index;
 			v.cargo_type = rvi.cargo_type;
@@ -363,11 +363,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		if (v.type != Vehicle.VEH_Road || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if ( 0 !=(v.vehstatus & (Vehicle.VS_HIDDEN|Vehicle.VS_STOPPED)) ||
-				v.road.crashed_ctr != 0 ||
-				v.breakdown_ctr != 0 ||
-				v.road.overtaking != 0 ||
-				v.cur_speed < 5) {
+		if ( v.isHidden() || v.isStopped() ||
+				v.road.crashed_ctr != 0 || v.breakdown_ctr != 0 ||
+				v.road.overtaking != 0 || v.cur_speed < 5) {
 			return Cmd.CMD_ERROR;
 		}
 

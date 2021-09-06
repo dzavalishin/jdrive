@@ -919,7 +919,7 @@ public class Ship {
 			v.sprite_height = 6;
 			v.x_offs = -3;
 			v.y_offs = -3;
-			v.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_STOPPED | Vehicle.VS_DEFPAL;
+			v.assignStatus( Vehicle.VS_HIDDEN | Vehicle.VS_STOPPED | Vehicle.VS_DEFPAL );
 
 			v.spritenum = svi.image_index;
 			v.cargo_type = svi.cargo_type;

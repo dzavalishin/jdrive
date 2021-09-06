@@ -68,7 +68,7 @@ public class DisasterCmd extends DisasterTables
 		v.sprite_height = 2;
 		v.z_height = 5;
 		v.owner = PlayerID.getNone();
-		v.vehstatus = Vehicle.VS_UNCLICKABLE;
+		v.assignStatus( Vehicle.VS_UNCLICKABLE );
 		v.disaster.image_override = 0;
 		v.getCurrent_order().type = Order.OT_NOTHING;
 		v.getCurrent_order().flags = 0;

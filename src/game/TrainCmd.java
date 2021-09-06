@@ -422,7 +422,7 @@ public class TrainCmd extends TrainTables
 			u.rail.track = v.rail.track;
 			u.rail.railtype = v.rail.railtype;
 			u.build_year = v.getBuild_year();
-			u.vehstatus = v.vehstatus & ~Vehicle.VS_STOPPED;
+			u.assignStatus( v.getStatus() & ~Vehicle.VS_STOPPED );
 			u.rail.first_engine = v.getEngine_type();
 
 			// get more settings from rail vehicle info
@@ -504,7 +504,7 @@ public class TrainCmd extends TrainTables
 					v.owner = Global.gs._current_player;
 					v.z_height = 6;
 					v.rail.setInDepot(); //track =  0x80;
-					v.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_DEFPAL;
+					v.assignStatus( Vehicle.VS_HIDDEN | Vehicle.VS_DEFPAL );
 
 					v.subtype = 0;
 					v.SetTrainWagon();
@@ -579,7 +579,7 @@ public class TrainCmd extends TrainTables
 		u.z_pos = v.z_pos;
 		u.z_height = 6;
 		u.rail.setInDepot(); //track =  0x80;
-		u.vehstatus = v.vehstatus & ~Vehicle.VS_STOPPED;
+		u.assignStatus( v.getStatus() & ~Vehicle.VS_STOPPED );
 		u.subtype = 0;
 		u.SetMultiheaded();
 		u.spritenum =  (v.spritenum + 1);
@@ -669,7 +669,7 @@ public class TrainCmd extends TrainTables
 				v.z_pos = Landscape.GetSlopeZ(x,y);
 				v.z_height = 6;
 				v.rail.setInDepot(); //track =  0x80;
-				v.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_STOPPED | Vehicle.VS_DEFPAL;
+				v.assignStatus( Vehicle.VS_HIDDEN | Vehicle.VS_STOPPED | Vehicle.VS_DEFPAL );
 				v.spritenum = rvi.image_index;
 				v.cargo_type = rvi.cargo_type;
 				v.cargo_cap = rvi.capacity;
@@ -1368,12 +1368,17 @@ public class TrainCmd extends TrainTables
 
 		if (a != b) {
 			/* swap the hidden bits */
-			{
+			/*{
 				int tmp = (a.vehstatus & ~Vehicle.VS_HIDDEN) | (b.vehstatus&Vehicle.VS_HIDDEN);
 				b.vehstatus = (b.vehstatus & ~Vehicle.VS_HIDDEN) | (a.vehstatus&Vehicle.VS_HIDDEN);
 				a.vehstatus = tmp;
+			}*/
+			{
+				boolean tmp = b.isHidden();				
+				b.setHidden(a.isHidden());
+				a.setHidden(tmp);
 			}
-
+			
 			/* swap variables */
 			//swap_byte(&a.rail.track, &b.rail.track);
 			//swap_byte(&a.direction, &b.direction);
@@ -3826,7 +3831,10 @@ public class TrainCmd extends TrainTables
 			CheckIfTrainNeedsService(v);
 
 			// check if train hasn't advanced in its order list for a set number of days
-			if (Global._patches.lost_train_days != 0 && v.num_orders != 0 && 0==(v.vehstatus & (Vehicle.VS_STOPPED | Vehicle.VS_CRASHED) ) && ++v.rail.days_since_order_progr >= Global._patches.lost_train_days && v.owner.isLocalPlayer()) {
+			if (Global._patches.lost_train_days != 0 && v.num_orders != 0 
+					//&& 0==(v.vehstatus & (Vehicle.VS_STOPPED | Vehicle.VS_CRASHED) )
+					&& (!v.isStopped()) && (!v.isCrashed())
+					&& ++v.rail.days_since_order_progr >= Global._patches.lost_train_days && v.owner.isLocalPlayer()) {
 				v.rail.days_since_order_progr = 0;
 				Global.SetDParam(0, v.unitnumber.id);
 				NewsItem.AddNewsItem(

@@ -92,7 +92,7 @@ public class Vehicle implements IPoolItem
 	int acceleration; 		// used by train & aircraft
 	int progress;
 
-	int vehstatus;			// Status
+	private int vehstatus;			// Status
 	int last_station_visited;
 
 	int cargo_type;			// type of cargo this vehicle is carrying
@@ -861,10 +861,10 @@ public class Vehicle implements IPoolItem
 
 	//enum {
 	// max vehicles: 64000 (512 * 125) 
-	public static final int VEHICLES_POOL_BLOCK_SIZE_BITS = 9;       // In bits, so (1 << 9) == 512 
-	public static final int VEHICLES_POOL_MAX_BLOCKS      = 125;
+	//public static final int VEHICLES_POOL_BLOCK_SIZE_BITS = 9;       // In bits, so (1 << 9) == 512 
+	//public static final int VEHICLES_POOL_MAX_BLOCKS      = 125;
 
-	public static final int BLOCKS_FOR_SPECIAL_VEHICLES   = 2; //! Blocks needed for special vehicles
+	//public static final int BLOCKS_FOR_SPECIAL_VEHICLES   = 2; //! Blocks needed for special vehicles
 	//};*/
 
 
@@ -1058,17 +1058,19 @@ public class Vehicle implements IPoolItem
 
 	public static Vehicle ForceAllocateSpecialVehicle()
 	{
+		return AllocateVehicle();
+		
 		/* This stays a strange story.. there should always be room for special
 		 * vehicles (special effects all over the map), but with 65k of vehicles
 		 * is this realistic to double-check for that? For now we just reserve
 		 * BLOCKS_FOR_SPECIAL_VEHICLES times block_size vehicles that may only
-		 * be used for special vehicles.. should work nicely :) */
+		 * be used for special vehicles.. should work nicely :) * /
 
 		Vehicle [] ret = {null};
 
 		Global.gs._vehicles.forEach( (ii,v) ->
 		{
-			/* TODO speedup No more room for the special vehicles, return null */
+			// TO DO speedup No more room for the special vehicles, return null 
 			//if (v.index >= (1 << _vehicle_pool.block_size_bits) * BLOCKS_FOR_SPECIAL_VEHICLES)
 			//	return null;
 
@@ -1079,7 +1081,7 @@ public class Vehicle implements IPoolItem
 			}
 		});
 
-		return ret[0];
+		return ret[0]; */
 	}
 
 	/*
@@ -1095,12 +1097,13 @@ public class Vehicle implements IPoolItem
 	{
 		/* See note by ForceAllocateSpecialVehicle() why we skip the
 		 * first blocks */
-		final int offset = (1 << VEHICLES_POOL_BLOCK_SIZE_BITS) * BLOCKS_FOR_SPECIAL_VEHICLES;
+		//final int offset = (1 << VEHICLES_POOL_BLOCK_SIZE_BITS) * BLOCKS_FOR_SPECIAL_VEHICLES;
 
-		if (skip_vehicles[0] < (Global.gs._vehicles.total_items() - offset)) 
+		if (skip_vehicles[0] < (Global.gs._vehicles.total_items() )) //- offset)) 
 		{	// make sure the offset in the array is not larger than the array itself
 
-			Iterator<Vehicle> ii = getIteratorFrom(offset + skip_vehicles[0]);
+			//Iterator<Vehicle> ii = getIteratorFrom(offset + skip_vehicles[0]);
+			Iterator<Vehicle> ii = getIteratorFrom(skip_vehicles[0]);
 			while(ii != null && ii.hasNext())
 			{
 				Vehicle v = ii.next();
@@ -1122,10 +1125,10 @@ public class Vehicle implements IPoolItem
 	}
 
 
+	static int[] allocatorStartCounter = { 0 }; // TODO not static?
 	public static Vehicle AllocateVehicle()
 	{
-		int[] counter = { 0 }; // TODO not static?
-		return AllocateSingleVehicle(counter);
+		return AllocateSingleVehicle(allocatorStartCounter);
 	}
 
 
@@ -1180,7 +1183,7 @@ public class Vehicle implements IPoolItem
 
 	public static void InitializeVehicles()
 	{
-		int i;
+		//int i;
 
 		/* Clean the vehicle pool, and reserve enough blocks
 		 *  for the special vehicles, plus one for all the other
@@ -1188,8 +1191,7 @@ public class Vehicle implements IPoolItem
 		Global.gs._vehicles.CleanPool();
 		Global.gs._vehicles.AddBlockToPool();
 
-		for (i = 0; i < BLOCKS_FOR_SPECIAL_VEHICLES; i++)
-			Global.gs._vehicles.AddBlockToPool();
+		//for (i = 0; i < BLOCKS_FOR_SPECIAL_VEHICLES; i++)			Global.gs._vehicles.AddBlockToPool();
 
 		Global.gs._vehicle_hash.clear();
 	}
@@ -1338,7 +1340,6 @@ public class Vehicle implements IPoolItem
 			// the vehicle do not plan on stopping in the depot, so we stop it to ensure that it will not reserve the path
 			// out of the depot before we might autoreplace it to a different engine. The new engine would not own the reserved path
 			// we store that we stopped the vehicle, so autoreplace can start it again
-			//v.vehstatus |= VS_STOPPED;
 			v.stop();
 			v.leave_depot_instantly = true;
 		}
@@ -2138,7 +2139,7 @@ public class Vehicle implements IPoolItem
 	public static Vehicle CheckClickOnVehicle(final ViewPort vp, int x, int y)
 	{
 		Vehicle [] found = {null}; //, v;
-		int [] best_dist = {-1};
+		int [] best_dist = {Integer.MAX_VALUE};
 
 		if ( (x -= vp.getLeft()) >= vp.getWidth() ||
 				(y -= vp.getTop()) >= vp.getHeight())
@@ -3099,14 +3100,6 @@ public class Vehicle implements IPoolItem
 	public PlayerID getOwner() {		return owner;	}
 
 	
-	// TODO check against CmdStartStopTrain, replace code there with us
-	// TODO check against setStopped
-	public void stop() {
-		if (type == Vehicle.VEH_Train)
-			rail.days_since_order_progr = 0;
-		vehstatus |= Vehicle.VS_STOPPED;		
-	}
-
 	public TileIndex getTile() { return tile; }
 
 	/*
@@ -3607,25 +3600,33 @@ public class Vehicle implements IPoolItem
 		}
 		return str;
 	}
-	
-	
-	public boolean isStopped() { return 0 != (vehstatus & VS_STOPPED); }
-	public boolean isCrashed() { return 0 != (vehstatus & VS_CRASHED); }
-	public boolean isHidden() { return 0 != (vehstatus & VS_HIDDEN); }
-	public boolean isUnclickable() { return (vehstatus & VS_UNCLICKABLE) != 0; }
-	public boolean isTrainSlowing() { return (vehstatus & VS_TRAIN_SLOWING) != 0; }
-	public boolean isAircraftBroken() { return (vehstatus & VS_AIRCRAFT_BROKEN) != 0; }
-	
-
-	public boolean isBroken() { return breakdown_ctr == 1; }
 
 	
-	public void setHidden(boolean b) { setResetStatus(VS_HIDDEN, b); }
-	public void setStopped(boolean b) { setResetStatus(VS_STOPPED, b); }
-	public void setCrashed(boolean b) { setResetStatus(VS_CRASHED, b); }
-	public void setTrainSlowing(boolean b) { setResetStatus(VS_TRAIN_SLOWING, b); }
-	public void setDisaster(boolean b) { setResetStatus(VS_DISASTER, b); }
-	public void setAircraftBroken(boolean b) { setResetStatus(VS_AIRCRAFT_BROKEN, b); }
+	public void stop() {
+		if (type == Vehicle.VEH_Train)
+			rail.days_since_order_progr = 0;
+		vehstatus |= Vehicle.VS_STOPPED;		
+	}
+
+	
+	
+	public boolean isStopped() 			{ return 0 != (vehstatus & VS_STOPPED); }
+	public boolean isCrashed() 			{ return 0 != (vehstatus & VS_CRASHED); }
+	public boolean isHidden() 			{ return 0 != (vehstatus & VS_HIDDEN); }
+	public boolean isUnclickable() 		{ return 0 != (vehstatus & VS_UNCLICKABLE); }
+	public boolean isTrainSlowing() 	{ return 0 != (vehstatus & VS_TRAIN_SLOWING); }
+	public boolean isAircraftBroken() 	{ return 0 != (vehstatus & VS_AIRCRAFT_BROKEN); }
+	
+
+	public boolean isBroken() 			{ return breakdown_ctr == 1; }
+
+	
+	public void setHidden(boolean b)			{ setResetStatus(VS_HIDDEN, b); }
+	public void setStopped(boolean b)			{ setResetStatus(VS_STOPPED, b); }
+	public void setCrashed(boolean b)			{ setResetStatus(VS_CRASHED, b); }
+	public void setTrainSlowing(boolean b)		{ setResetStatus(VS_TRAIN_SLOWING, b); }
+	public void setDisaster(boolean b)			{ setResetStatus(VS_DISASTER, b); }
+	public void setAircraftBroken(boolean b)	{ setResetStatus(VS_AIRCRAFT_BROKEN, b); }
 	
 	public void toggleStopped() { vehstatus ^= Vehicle.VS_STOPPED; }
 
@@ -3636,6 +3637,10 @@ public class Vehicle implements IPoolItem
 		else vehstatus &= ~f;		
 	}
 
+	public void assignStatus(int s) { vehstatus = s; }
+	public int getStatus() { return vehstatus; }
+
+	
 	public UnitID getUnitnumber() { return unitnumber; }
 	public int getAge() { return age; }
 	public int getReliability() { return reliability; }
@@ -3780,6 +3785,8 @@ public class Vehicle implements IPoolItem
 			(top_coord + bottom_coord) / 2
 		);
 	}
+
+
 
 	
 }

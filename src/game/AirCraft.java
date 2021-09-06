@@ -211,8 +211,8 @@ public class AirCraft extends AirCraftTables {
 			u.sprite_width = u.sprite_height = 2;
 			u.z_height = 1;
 
-			v.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_STOPPED | Vehicle.VS_DEFPAL;
-			u.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_UNCLICKABLE | Vehicle.VS_DISASTER;
+			v.assignStatus( Vehicle.VS_HIDDEN | Vehicle.VS_STOPPED | Vehicle.VS_DEFPAL );
+			u.assignStatus( Vehicle.VS_HIDDEN | Vehicle.VS_UNCLICKABLE | Vehicle.VS_DISASTER );
 
 			v.spritenum = avi.image_index;
 			//			v.cargo_count = u.number_of_pieces = 0;
@@ -305,7 +305,7 @@ public class AirCraft extends AirCraftTables {
 				w.x_offs = w.y_offs = -1;
 				w.sprite_width = w.sprite_height = 2;
 				w.z_height = 1;
-				w.vehstatus = Vehicle.VS_HIDDEN | Vehicle.VS_UNCLICKABLE;
+				w.assignStatus( Vehicle.VS_HIDDEN | Vehicle.VS_UNCLICKABLE );
 				w.subtype = 6;
 				w.cur_image = Sprite.SPR_ROTOR_STOPPED;
 				w.random_bits = Vehicle.VehicleRandomBits();
@@ -2865,7 +2865,7 @@ public class AirCraft extends AirCraftTables {
 			Global.SetDParam(1, v.unitnumber.id);
 			w.DrawWindowWidgets();
 
-			if(0 != (v.vehstatus & Vehicle.VS_CRASHED)) {
+			if(v.isCrashed()) {
 				str = Str.STR_8863_CRASHED;
 			} else if(v.isStopped()) {
 				str = Str.STR_8861_STOPPED;
