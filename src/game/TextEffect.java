@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -64,7 +63,7 @@ public class TextEffect
 	{
 		String buf;
 		//int length;
-		int i;
+		//int i;
 
 		buf = String.format(message, args);
 
@@ -156,8 +155,7 @@ public class TextEffect
 	// Draw the textmessage-box
 	public static void DrawTextMessage()
 	{
-		int i, j;
-		boolean has_message;
+		//boolean has_message;
 
 		if (!_textmessage_dirty) return;
 
@@ -177,7 +175,7 @@ public class TextEffect
 		// Switch to _screen painting
 		Hal._cur_dpi = Hal._screen;
 
-		j = 0;
+		int j = 0;
 		
 		// Paint the messages
 		for(TextMessage m : _text_message_list)

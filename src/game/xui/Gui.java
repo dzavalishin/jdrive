@@ -41,6 +41,7 @@ import game.struct.Point;
 import game.tables.Snd;
 import game.util.BitOps;
 import game.util.GameDate;
+import game.util.ShortSounds;
 import game.util.Sound;
 import game.util.Strings;
 
@@ -232,7 +233,8 @@ public class Gui
 
 		if( 0 != (w.disabled_state & mask)) return false;
 
-		Sound.SndPlayFx(Snd.SND_15_BEEP);
+		//Sound.SndPlayFx(Snd.SND_15_BEEP);
+		ShortSounds.playBlipSound();
 		w.SetWindowDirty();
 
 		if(0 != (w.click_state & mask)) {
@@ -262,14 +264,16 @@ public class Gui
 		if (Global._networking && !Global._network_server) return; // only server can pause the game
 
 		if (Cmd.DoCommandP(null, Global._pause != 0 ? 0 : 1, 0, null, Cmd.CMD_PAUSE)) {
-			Sound.SndPlayFx(Snd.SND_15_BEEP);
+			//Sound.SndPlayFx(Snd.SND_15_BEEP);
+			ShortSounds.playBlipSound();
 		}
 	}
 
 	static void ToolbarFastForwardClick(Window w)
 	{
 		Global._fast_forward ^= true;
-		Sound.SndPlayFx(Snd.SND_15_BEEP);
+		//Sound.SndPlayFx(Snd.SND_15_BEEP);
+		ShortSounds.playBlipSound();
 	}
 
 
@@ -828,7 +832,8 @@ public class Gui
 
 		Window._popup_menu_active = true;
 
-		Sound.SndPlayFx(Snd.SND_15_BEEP);
+		//Sound.SndPlayFx(Snd.SND_15_BEEP);
+		ShortSounds.playBlipSound();
 
 		return w;
 	}
@@ -858,7 +863,10 @@ public class Gui
 		w.as_menu_d().checked_items = gray;
 		w.as_menu_d().disabled_items = 0;
 		Window._popup_menu_active = true;
-		Sound.SndPlayFx(Snd.SND_15_BEEP);
+		
+		//Sound.SndPlayFx(Snd.SND_15_BEEP);
+		ShortSounds.playBlipSound();
+		
 		return w;
 	}
 
@@ -1037,7 +1045,8 @@ public class Gui
 	{
 		if (DoZoomInOutWindow(ZOOM_IN, Window.getMain() )) {
 			w.HandleButtonClick(17);
-			Sound.SndPlayFx(Snd.SND_15_BEEP);
+			//Sound.SndPlayFx(Snd.SND_15_BEEP);
+			ShortSounds.playBlipSound();
 		}
 	}
 
@@ -1045,7 +1054,8 @@ public class Gui
 	{
 		if (DoZoomInOutWindow( ZOOM_OUT, Window.getMain() )) {
 			w.HandleButtonClick(18);
-			Sound.SndPlayFx(Snd.SND_15_BEEP);
+			//Sound.SndPlayFx(Snd.SND_15_BEEP);
+			ShortSounds.playBlipSound();
 		}
 	}
 
@@ -1149,7 +1159,8 @@ public class Gui
 	{
 		if (DoZoomInOutWindow(ZOOM_IN, Window.getMain())) {
 			w.HandleButtonClick(9);
-			Sound.SndPlayFx(Snd.SND_15_BEEP);
+			//Sound.SndPlayFx(Snd.SND_15_BEEP);
+			ShortSounds.playBlipSound();
 		}
 	}
 
@@ -1157,7 +1168,8 @@ public class Gui
 	{
 		if (DoZoomInOutWindow(ZOOM_OUT, Window.getMain())) {
 			w.HandleButtonClick(10);
-			Sound.SndPlayFx(Snd.SND_15_BEEP);
+			//Sound.SndPlayFx(Snd.SND_15_BEEP);
+			ShortSounds.playBlipSound();
 		}
 	}
 
@@ -1228,7 +1240,8 @@ public class Gui
 				if (mode!=0) { // reset landscape
 					ResetLandscape();
 				} else { // make random landscape
-					Sound.SndPlayFx(Snd.SND_15_BEEP);
+					//Sound.SndPlayFx(Snd.SND_15_BEEP);
+					ShortSounds.playBlipSound();
 					Global._switch_mode = SwitchModes.SM_GENRANDLAND;
 				}
 				break;
@@ -1513,7 +1526,9 @@ public class Gui
 				if (!BitOps.IS_INT_INSIDE(size, 1, 8 + 1))	return;
 				_terraform_size = (byte) size;
 
-				Sound.SndPlayFx(Snd.SND_15_BEEP);
+				//Sound.SndPlayFx(Snd.SND_15_BEEP);
+				ShortSounds.playBlipSound();
+				
 				w.SetWindowDirty();
 			} break;
 			case 14: /* gen random land */
@@ -1571,7 +1586,8 @@ public class Gui
 	static void ToolbarScenGenLand(Window w)
 	{
 		w.HandleButtonClick(11);
-		Sound.SndPlayFx(Snd.SND_15_BEEP);
+		//Sound.SndPlayFx(Snd.SND_15_BEEP);
+		ShortSounds.playBlipSound();
 
 		ShowEditorTerraformToolBar();
 	}
@@ -1680,7 +1696,8 @@ public class Gui
 	static void ToolbarScenGenTown(Window w)
 	{
 		w.HandleButtonClick(12);
-		Sound.SndPlayFx(Snd.SND_15_BEEP);
+		//Sound.SndPlayFx(Snd.SND_15_BEEP);
+		ShortSounds.playBlipSound();
 
 		Window.AllocateWindowDescFront(_scen_edit_town_gen_desc, 0);
 	}
@@ -1925,28 +1942,32 @@ public class Gui
 	static void ToolbarScenGenIndustry(Window w)
 	{
 		w.HandleButtonClick(13);
-		Sound.SndPlayFx(Snd.SND_15_BEEP);
+		//Sound.SndPlayFx(Snd.SND_15_BEEP);
+		ShortSounds.playBlipSound();
 		Window.AllocateWindowDescFront(_scenedit_industry_descs[GameOptions._opt.landscape],0);
 	}
 
 	static void ToolbarScenBuildRoad(Window w)
 	{
 		w.HandleButtonClick(14);
-		Sound.SndPlayFx(Snd.SND_15_BEEP);
+		//Sound.SndPlayFx(Snd.SND_15_BEEP);
+		ShortSounds.playBlipSound();
 		RoadGui.ShowBuildRoadScenToolbar();
 	}
 
 	static void ToolbarScenPlantTrees(Window w)
 	{
 		w.HandleButtonClick(15);
-		Sound.SndPlayFx(Snd.SND_15_BEEP);
+		//Sound.SndPlayFx(Snd.SND_15_BEEP);
+		ShortSounds.playBlipSound();
 		MiscGui.ShowBuildTreesScenToolbar();
 	}
 
 	static void ToolbarScenPlaceSign(Window w)
 	{
 		w.HandleButtonClick(16);
-		Sound.SndPlayFx(Snd.SND_15_BEEP);
+		//Sound.SndPlayFx(Snd.SND_15_BEEP);
+		ShortSounds.playBlipSound();
 		SelectSignTool();
 	}
 

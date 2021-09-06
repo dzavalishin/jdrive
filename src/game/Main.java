@@ -19,6 +19,7 @@ import game.struct.SmallFiosItem;
 import game.util.FileIO;
 import game.util.Music;
 import game.util.PushPlayer;
+import game.util.ShortSounds;
 import game.util.Sound;
 import game.util.Strings;
 import game.xui.Gfx;
@@ -313,6 +314,8 @@ public class Main {
 		Sound.MxInitialize(11025);
 		Sound.SoundInitialize("sample.cat");
 		//Sound.StartSound(2, 0, 50);
+		ShortSounds.preload();
+		ShortSounds.playFarmSound();
 
 		// This must be done early, since functions use the InvalidateWindow* calls
 		Window.InitWindowSystem();
@@ -323,7 +326,6 @@ public class Main {
 		GfxInit.GfxLoadSprites();
 		Gfx.LoadStringWidthTable();
 
-		//Global.DEBUG_misc( 1, "Loading drivers...");
 		// TODO _savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 
 		// initialize network-core
@@ -737,11 +739,11 @@ public class Main {
 			// All these actions has to be done from OWNER_NONE
 			//  for multiplayer compatibility
 			
-			//PlayerID p =  Global.gs._current_player;
-			//Global.gs._current_player = PlayerID.getNone();
+			PlayerID p =  Global.gs._current_player;
+			Global.gs._current_player = PlayerID.getNone();
 
-			try(PushPlayer pp = new PushPlayer(PlayerID.getNone()))
-			{
+			//try(PushPlayer pp = new PushPlayer(PlayerID.getNone()))
+			//{
 				TextEffect.AnimateAnimatedTiles();
 				Global.gs.date.IncreaseDate();
 				Landscape.RunTileLoop();
@@ -752,8 +754,8 @@ public class Main {
 
 				Window.CallWindowTickEvent();
 				NewsItem.NewsLoop();
-			}
-			//Global.gs._current_player = p;
+			//}
+			Global.gs._current_player = p;
 		}
 	}
 

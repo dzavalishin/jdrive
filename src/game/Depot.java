@@ -197,9 +197,8 @@ public class Depot implements IPoolItem, Serializable
 	public static Depot GetDepotByTile(TileIndex tile)
 	{
 		Depot [] ret = {null};
-		Global.gs._depots.forEach( (i,depot) ->
+		Global.gs._depots.forEach( depot ->
 		{
-			//if (depot.xy.getTile() == tile.getTile())
 			if (depot.xy.equals(tile))
 				ret[0] = depot;
 		});
@@ -214,7 +213,7 @@ public class Depot implements IPoolItem, Serializable
 	{
 		Depot [] ret = {null};
 
-		Global.gs._depots.forEach( (i,depot) ->
+		Global.gs._depots.forEach( depot ->
 		{
 			if (!depot.isValid()) {
 				int index = depot.index;

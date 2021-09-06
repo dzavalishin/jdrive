@@ -26,7 +26,8 @@ import game.xui.Window;
 
 public class Economy extends EconomeTables implements Serializable
 {
-
+	private static final long serialVersionUID = 1L;
+	
 	// Maximum possible loan
 	int max_loan;
 	int max_loan_unround;
@@ -121,9 +122,9 @@ public class Economy extends EconomeTables implements Serializable
 		{
 			int [] num = {0};
 
-			Station.forEach( (ii,st) ->
+			Station.forEach( st ->
 			{
-				if( st.getXy() != null && st.owner.equals(owner) ) {
+				if( st.isValid() && st.owner.equals(owner) ) {
 					int facil = st.facilities;
 					do num[0] += (facil&1); while ((facil >>= 1) > 0);
 				}
@@ -195,7 +196,7 @@ public class Economy extends EconomeTables implements Serializable
 		{
 			int [] num = { 0 };
 
-			Station.forEach( (ii,st) ->
+			Station.forEach( st ->
 			{
 				if (st.getXy() != null && st.owner.id == owner) {
 					int facil = st.facilities;
@@ -665,13 +666,11 @@ public class Economy extends EconomeTables implements Serializable
 
 	static void PlayersGenStatistics()
 	{
-		Station.forEach( (ii,st) ->
+		Station.forEachValid( st ->
 		{
-			if (st.getXy() != null) {
 				Global.gs._current_player = st.owner; 
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
 				Player.SubtractMoneyFromPlayer(Global._price.station_value >> 1);
-			}
 		});
 
 		if (!BitOps.HASBIT(1<<0|1<<3|1<<6|1<<9, Global.get_cur_month()))

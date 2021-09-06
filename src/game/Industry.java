@@ -10,6 +10,7 @@ import game.tables.IndustryTables;
 import game.tables.IndustryTileTable;
 import game.tables.Snd;
 import game.util.BitOps;
+import game.util.ShortSounds;
 import game.util.Sound;
 import game.util.Strings;
 import game.xui.Gfx;
@@ -471,7 +472,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		int m,n;
 
 		switch(tile.getMap().m5) {
-		case 174:
+		case 174: // Sugar mine
 			if ((Global._tick_counter & 1) == 0) {
 				m = tile.getMap().m3 + 1;
 
@@ -490,7 +491,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			}
 			break;
 
-		case 165:
+		case 165: // Toffee mine
 			if ((Global._tick_counter & 3) == 0) {
 				m = tile.getMap().m3;
 
@@ -508,7 +509,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			}
 			break;
 
-		case 162:
+		case 162: // Bubble gen
 			if ((Global._tick_counter&1) == 0) {
 				m = tile.getMap().m3;
 
@@ -536,7 +537,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			}
 			break;
 
-		case 143:
+		case 143: // Toy factory
 			if ((Global._tick_counter & 1) == 0) {
 				m = tile.getMap().m3 + 1;
 
@@ -561,6 +562,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			}
 			break;
 
+			// Plastic fountains
 		case 148: case 149: case 150: case 151:
 		case 152: case 153: case 154: case 155:
 			if ((Global._tick_counter & 3) == 0) {
@@ -571,6 +573,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			}
 			break;
 
+			// Oil wells
 		case 30: case 31: case 32:
 			if ((Global._tick_counter & 7) == 0) 
 			{
@@ -617,9 +620,10 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			}
 			break;
 
-		case 88:
-		case 48:
-		case 1: {
+		case 88: // Gold mine
+		case 48: // Copper ore mine
+		case 1: // Coal mine 
+		{
 			int state = Global._tick_counter & 0x7FF;
 
 			if ((state -= 0x400) < 0)
@@ -803,7 +807,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				SET_AND_UNANIMATE(tile, 0x4F, 0x83);
 			break;
 
-		case 10:
+		case 10: // Power station
 			if (BitOps.CHANCE16(1,3)) {
 				Sound.SndPlayTileFx(Snd.SND_0C_ELECTRIC_SPARK, tile);
 				TextEffect.AddAnimatedTile(tile);
@@ -1063,7 +1067,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 						Global.gs._current_player = PlayerID.getNone();
 						_industry_sound_ctr = 1;
 						_industry_sound_tile = tile;
-						Sound.SndPlayTileFx(Snd.SND_38_CHAINSAW, tile);
+						
+						//Sound.SndPlayTileFx(Snd.SND_38_CHAINSAW, tile);
+						ShortSounds.playSawMillSound();
 
 						Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 						tile.SetMapExtraBits(0);

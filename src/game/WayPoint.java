@@ -146,7 +146,7 @@ public class WayPoint implements IPoolItem
 		WayPoint [] ret = {null};
 
 		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
-		Global.gs._waypoints.forEach((i,wp) ->
+		Global.gs._waypoints.forEach( wp ->
 		{
 			if (!wp.isValid()) {
 				int index = wp.index;
@@ -188,11 +188,7 @@ public class WayPoint implements IPoolItem
 	/* Update all signs */
 	static void UpdateAllWaypointSigns()
 	{
-		Global.gs._waypoints.forEach((i,wp) ->
-		{
-			if(wp.isValid())
-				wp.UpdateWaypointSign();
-		});
+		Global.gs._waypoints.forEachValid( wp -> wp.UpdateWaypointSign() );
 	}
 
 	/* Set the default name for a WayPoint */
@@ -207,7 +203,8 @@ public class WayPoint implements IPoolItem
 		//used_waypoint.clear();
 		/* Find an unused WayPoint number belonging to this town */
 		//for (local_wp = GetWaypoint(0); local_wp != null; local_wp = (local_wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(local_wp.index + 1) : null) 
-		Global.gs._waypoints.forEach((ii,local_wp) ->
+		//Global.gs._waypoints.forEach((ii,local_wp) ->
+		Global.gs._waypoints.forEach( local_wp ->
 		{
 			if (this == local_wp)
 			{
@@ -399,7 +396,8 @@ public class WayPoint implements IPoolItem
 	/* Daily loop for waypoints */
 	public static void WaypointsDailyLoop()
 	{
-		Global.gs._waypoints.forEach((i,wp) -> {
+		//Global.gs._waypoints.forEach((i,wp) -> {
+		Global.gs._waypoints.forEach( wp -> {
 			if( (0 != wp.deleted) && (0 == --wp.deleted) )
 				wp.DoDeleteWaypoint();
 

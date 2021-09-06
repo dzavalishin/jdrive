@@ -147,6 +147,8 @@ void SortResolutions(int count)
 	
 	public void start_video() 
 	{
+		MainWindow.setLookAndFeel();
+		
 		JFrame frame = new JFrame("JTTD")
 		{
 

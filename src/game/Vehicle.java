@@ -32,6 +32,7 @@ import game.tables.BubbleMovement;
 import game.tables.EngineTables;
 import game.tables.Snd;
 import game.util.BitOps;
+import game.util.ShortSounds;
 import game.util.Sound;
 import game.xui.DrawPixelInfo;
 import game.xui.MiscGui;
@@ -984,7 +985,7 @@ public class Vehicle implements IPoolItem
 		int fy1 = y1;
 		int fy2 = y2;
 
-		Global.gs._vehicles.forEach( (ii,veh) ->
+		Global.gs._vehicles.forEach( veh ->
 		{
 			if ((veh.type == VEH_Train || veh.type == VEH_Road) && (z==0xFF || veh.z_pos == z)) {
 				if ((veh.x_pos>>4) >= fx1 && (veh.x_pos>>4) <= fx2 &&
@@ -1020,7 +1021,7 @@ public class Vehicle implements IPoolItem
 	public static void AfterLoadVehicles()
 	{
 
-		Global.gs._vehicles.forEach( (ii,v) ->
+		Global.gs._vehicles.forEach( v ->
 		{
 			v.first = null;
 			if (v.type != 0) {
@@ -1213,7 +1214,7 @@ public class Vehicle implements IPoolItem
 	{
 		Vehicle [] ret = {null};
 
-		Global.gs._vehicles.forEach( (ii,u) ->
+		Global.gs._vehicles.forEach( u ->
 		{
 			if (u.type == VEH_Train && u.next == v) ret[0] = u;
 		});
@@ -1366,13 +1367,15 @@ public class Vehicle implements IPoolItem
 	{
 		_first_veh_in_depot_list = null;	// now we are sure it's initialized at the start of each tick
 
-		Global.gs._vehicles.forEach( (ii,v) ->
+		/*Global.gs._vehicles.forEach( (ii,v) ->
 		{
 			if (v.type != 0) {
 				_vehicle_tick_procs[v.type - 0x10].accept(v);
 			}
-		});
+		});*/
 
+		Global.gs._vehicles.forEachValid( v -> { _vehicle_tick_procs[v.type - 0x10].accept(v); });
+		
 		// now we handle all the vehicles that entered a depot this tick
 		Vehicle v = _first_veh_in_depot_list;
 		while (v != null) {
@@ -2498,8 +2501,8 @@ public class Vehicle implements IPoolItem
 		boolean stopped = false;
 		boolean train_fits_in_station = false;
 		//MA vars
-		int i;
-		Station st;
+		//int i;
+		//Station st;
 		//END MA vars
 
 
@@ -2583,8 +2586,8 @@ public class Vehicle implements IPoolItem
 			//MA CHECKS
 			if(mAirport.MA_VehicleServesMS(v) > 0) 
 			{
-				for(i =  1; i <= mAirport.MA_VehicleServesMS(v) ; i++) {
-					st = Station.GetStation(mAirport.MA_Find_MS_InVehicleOrders(v, i).id);
+				for(int i =  1; i <= mAirport.MA_VehicleServesMS(v) ; i++) {
+					Station st = Station.GetStation(mAirport.MA_Find_MS_InVehicleOrders(v, i).id);
 					if(!mAirport.MA_WithinVehicleQuota(st)) {
 						Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 						return Cmd.CMD_ERROR;
@@ -3773,9 +3776,22 @@ public class Vehicle implements IPoolItem
 	}
 
 
+	// Called on breakdown
 	public void SndPlayVehicleFx(/*SoundFx*/ Snd snd)
 	{
-		SndPlayVehicleFx(snd.ordinal());
+		switch(type) {
+
+		case VEH_Road:
+			//ShortSounds.playMotorSound();
+			//break;
+		case VEH_Aircraft:	
+		case VEH_Train:		
+		case VEH_Ship:		
+			SndPlayVehicleFx(snd.ordinal());
+			break;
+
+		}
+		
 	}
 
 	void SndPlayVehicleFx(/*SoundFx*/ int snd)

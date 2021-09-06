@@ -134,7 +134,8 @@ public class RoadStop implements IPoolItem, Serializable
 	{
 		RoadStop[] ret = { null };
 	
-		Global.gs._roadstops.forEach( (Integer i, RoadStop rs) ->
+		//Global.gs._roadstops.forEach( (Integer i, RoadStop rs) ->
+		Global.gs._roadstops.forEach( rs ->
 		{
 			if (!rs.used) {
 				int index = rs.index;

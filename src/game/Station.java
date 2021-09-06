@@ -41,10 +41,6 @@ import game.xui.Window;
 
 public class Station extends StationTables implements IPoolItem
 {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	TileIndex xy;
@@ -235,10 +231,7 @@ public class Station extends StationTables implements IPoolItem
 	// Update the virtual coords needed to draw the station sign for all stations.
 	static void UpdateAllStationVirtCoord()
 	{
-		Global.gs._stations.forEach( (i,st) ->
-		{
-			if (st.isValid()) st.UpdateStationVirtCoord();
-		});
+		Global.gs._stations.forEachValid( st -> st.UpdateStationVirtCoord() );
 	}
 
 	// Update the station virt coords while making the modified parts dirty.
@@ -730,7 +723,7 @@ public class Station extends StationTables implements IPoolItem
 		int z,z2;
 		long tmp;
 
-		Global.gs._stations.forEach( (i,s) ->			
+		Global.gs._stations.forEach( s ->			
 		{
 			if (s != st && s.isValid() && s.town==t) {
 				int str = M(s.string_id);
@@ -854,7 +847,7 @@ public class Station extends StationTables implements IPoolItem
 		Station [] best_station = {null};
 		int [] threshold = {threshold_i};
 
-		Global.gs._stations.forEach( (i,st) ->			
+		Global.gs._stations.forEach( st ->			
 		{
 			if (st.isValid() && (owner.isSpectator() || st.owner.equals(owner))) {
 				int cur_dist = Map.DistanceManhattan(tile, st.xy);
@@ -1777,7 +1770,7 @@ public class Station extends StationTables implements IPoolItem
 		{
 			int [] num = {0};
  
-			Global.gs._stations.forEach( (i,st) ->
+			Global.gs._stations.forEach( st ->
 			{
 				if ( (st.owner == null || st.owner.id != Owner.OWNER_TOWN) 
 						&& st.isValid() 
@@ -2616,18 +2609,13 @@ public class Station extends StationTables implements IPoolItem
 		Subsidy.DeleteSubsidyWithStation(index);
 
 		st.airport_queue.clear();
-		//free(st.airport_queue);
-
 		st.helicopter_queue.clear();
-		//free(st.helicopter_queue);
-
 	}
 
 	public static void DeleteAllPlayerStations()
 	{
-		Global.gs._stations.forEach( (i,st) ->
+		Global.gs._stations.forEach( st ->
 		{
-			//if (st.isValid() && st.owner.id < Global.MAX_PLAYERS) DeleteStation(st);
 			if (st.isValid() && st.owner.isValid()) DeleteStation(st);
 		});
 	}
@@ -2827,10 +2815,7 @@ public class Station extends StationTables implements IPoolItem
 		st = GetStation(i);
 		if (st != null && st.isValid()) StationHandleBigTick(st);
 
-		Global.gs._stations.forEach( (ii,sst) ->
-		{
-			if (sst.isValid()) StationHandleSmallTick(sst);
-		});
+		Global.gs._stations.forEachValid( sst -> StationHandleSmallTick(sst) );
 	}
 
 	public static void StationMonthlyLoop()
@@ -2841,7 +2826,7 @@ public class Station extends StationTables implements IPoolItem
 
 	public static void ModifyStationRatingAround(TileIndex tile, PlayerID owner, int amount, int radius)
 	{
-		Global.gs._stations.forEach( (ii,st) ->
+		Global.gs._stations.forEach( st ->
 		{
 			if (st.isValid() && st.owner.equals(owner) &&
 					Map.DistanceManhattan(tile, st.xy) <= radius) {
@@ -3240,11 +3225,11 @@ public class Station extends StationTables implements IPoolItem
 		return 0 != (had_vehicle_of_type & HVOT_BUOY); /* XXX: We should really ditch this ugly coding and switch to something sane... */
 	}
 
-	public static void forEach(BiConsumer<Integer, Station> c) 
+	/*public static void forEach(BiConsumer<Integer, Station> c) 
 	{
 		Global.gs._stations.forEach(c);
 
-	}
+	}*/
 
 	public static Iterator<Station> getIterator()
 	{
