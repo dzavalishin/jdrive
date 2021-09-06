@@ -493,8 +493,8 @@ public class Engine extends EngineTables implements Serializable
 					case 0x1F: value =  veh.direction; break;
 					case 0x28: value =  veh.cur_image; break;
 					case 0x29: value =  veh.cur_image & 0xFF; break;
-					case 0x32: value =  veh.vehstatus; break;
-					case 0x33: value =  veh.vehstatus; break;
+					case 0x32: value =  veh.getStatus(); break;
+					case 0x33: value =  veh.getStatus(); break;
 					case 0x34: value =  veh.cur_speed; break;
 					case 0x35: value =  veh.cur_speed & 0xFF; break;
 					case 0x36: value =  veh.subspeed; break;
