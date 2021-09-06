@@ -19,6 +19,7 @@ import game.struct.RoadVehFindData;
 import game.tables.RoadVehCmdTables;
 import game.tables.Snd;
 import game.util.BitOps;
+import game.util.ShortSounds;
 import game.xui.Gfx;
 import game.xui.VehicleGui;
 import game.xui.ViewPort;
@@ -685,7 +686,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (s == Snd.SND_19_BUS_START_PULL_AWAY.ordinal() && (v.tick_counter & 3) == 0)
 			s = Snd.SND_1A_BUS_START_PULL_AWAY_WITH_HORN.ordinal();
 		
-		v.SndPlayVehicleFx(s);
+		//v.SndPlayVehicleFx(s);
+		ShortSounds.playMotorSound();
 
 	}
 

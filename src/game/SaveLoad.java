@@ -97,8 +97,7 @@ public class SaveLoad
 			oos = new ObjectOutputStream(fos);
 
 			writeAll(oos);
-
-
+			
 		} catch (FileNotFoundException e) {
 
 			Global.error(e);
@@ -141,9 +140,6 @@ public class SaveLoad
 
 		try( FileInputStream fis = new FileInputStream(filename) ) 
 		{
-
-			//fis = new FileInputStream("temp.sav");
-			//fis ; //Main._file_to_saveload.name);
 			oin = new ObjectInputStream(fis);
 
 			Window.DeleteAllNonVitalWindows();
@@ -153,13 +149,10 @@ public class SaveLoad
 			Hal.MarkWholeScreenDirty();
 
 		} catch (FileNotFoundException e) {
-
 			Global.error(e);
 		} catch (IOException e) {
-
 			Global.error(e);
 		} catch (ClassNotFoundException e) {
-
 			Global.error(e);
 		} 
 		finally
@@ -312,7 +305,6 @@ FileInputStream fis = new FileInputStream("settings.xml");
 
 
 
-
 	private static int getIntProperty(String name, int def) {
 		String v = prop.getProperty(name);
 
@@ -326,3 +318,4 @@ FileInputStream fis = new FileInputStream("settings.xml");
 
 	}
 }
+

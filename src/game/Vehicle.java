@@ -32,6 +32,7 @@ import game.tables.BubbleMovement;
 import game.tables.EngineTables;
 import game.tables.Snd;
 import game.util.BitOps;
+import game.util.ShortSounds;
 import game.util.Sound;
 import game.xui.DrawPixelInfo;
 import game.xui.MiscGui;
@@ -3775,9 +3776,22 @@ public class Vehicle implements IPoolItem
 	}
 
 
+	// Called on breakdown
 	public void SndPlayVehicleFx(/*SoundFx*/ Snd snd)
 	{
-		SndPlayVehicleFx(snd.ordinal());
+		switch(type) {
+
+		case VEH_Road:
+			//ShortSounds.playMotorSound();
+			//break;
+		case VEH_Aircraft:	
+		case VEH_Train:		
+		case VEH_Ship:		
+			SndPlayVehicleFx(snd.ordinal());
+			break;
+
+		}
+		
 	}
 
 	void SndPlayVehicleFx(/*SoundFx*/ int snd)

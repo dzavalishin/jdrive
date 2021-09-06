@@ -1,38 +1,82 @@
 package game.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.sound.sampled.Clip;
 
-public class RandomSoundClip {
+import game.Global;
+
+public class RandomSoundClip implements ISoundClip 
+{
 
 	
-	private Clip[] clips;
+	private List<Clip> clips = new ArrayList<>();
 
-	public RandomSoundClip(int nSounds, String fileNameStem) 
+	public RandomSoundClip(String folder, String fileNameStem) 
 	{
-		loadSounds( nSounds, fileNameStem );
+		loadSounds( folder, fileNameStem );
 	}
 	
-	private void loadSounds( int nSounds, String fileNameStem )
+	private void loadSounds( String folder, String fileNameStem )
 	{
-		clips = new Clip[nSounds];
-		
-		
-		for( int i = 0; i < nSounds; i++ )
+
+		Path dir = Path.of(folder);
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, fileNameStem+"*.wav")) 
 		{
-			String filename = fileNameStem + Integer.toString( i+1 ) + ".wav";
-					
-			clips[i] = 	ShortSounds.loadClip( ShortSounds.class.getResource(filename));	;			
+			for (Path entry: stream) {
+				//System.out.println("rnd sound "+entry.getFileName() );
+				
+				File file= entry.toFile();
+				//filename = String.format( "%s/%s", _fios_path, dirent.d_name);
+				final String name = file.getName();
+
+				//System.out.println("rnd sound "+name );
+
+				if(file.isDirectory()) continue;
+
+				Clip c; 
+				c = ShortSounds.loadClip( file.getAbsolutePath() );
+				// TODO from JAR
+				//c = ShortSounds.loadClip( ShortSounds.class.getResource(file.getAbsolutePath()));	
+				
+				clips.add(c);
+
+			}
+		} catch (IOException x) {
+			Global.error(x);
 		}
 		
+		
 	}
 	
-	public void playRandomSound()
+
+	private Clip getRandomSound() {
+		int ni = (int) (Math.random() * clips.size());
+		
+		ni %= clips.size(); // Shouldn't happen, but... :)
+		
+		final Clip c = clips.get(ni);
+		return c;
+	}
+
+	@Override
+	public void play()
 	{
-		int ni = (int) (Math.random() * clips.length);
-		
-		ni %= clips.length; // Shouldn't happen, but... :)
-		
-		ShortSounds.playClip( clips[ni] );
+		final Clip c = getRandomSound();
+		ShortSounds.playClip( c );
+	}
+
+	@Override
+	public void play(int vol, int pan) 
+	{
+		final Clip c = getRandomSound();
+		ShortSounds.playClip( c, vol, pan);
 	}
 	
 	

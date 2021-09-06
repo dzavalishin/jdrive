@@ -3,6 +3,8 @@ package game.struct;
 import game.Landscape;
 import game.TileIndex;
 import game.TileInfo;
+import game.util.BitOps;
+import game.xui.ViewPort;
 
 /**
  * 
@@ -90,6 +92,18 @@ public class Point implements Comparable<Point> {
 	@Override
 	public String toString() {		
 		return String.format("%d.%d", x, y);
+	}
+
+
+	/**
+	 * TODO make viewport to be child of ScreenSquare, replace ViewPort type with ScreenSquare 
+	 * @param vp 
+	 * @return true if this point coordinates are inside this viewport.
+	 */
+	public boolean isInside(ViewPort vp) 
+	{
+		return BitOps.IS_INSIDE_1D(x, vp.getVirtual_left(), vp.getVirtual_width()) &&
+				BitOps.IS_INSIDE_1D(y, vp.getVirtual_top(), vp.getVirtual_height()) ;
 	}
 	
 }

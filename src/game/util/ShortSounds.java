@@ -2,27 +2,37 @@ package game.util;
 
 
 
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Iterator;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.FloatControl.Type;
+
+import game.Global;
+import game.Landscape;
+import game.TileIndex;
+import game.struct.Point;
+import game.xui.MusicGui;
+import game.xui.ViewPort;
+import game.xui.Window;
 
 public class ShortSounds {
 
 	private static boolean enabled = true;
-	
-	private static Clip blipClip;
+
+	private static SingleSoundClip blipClip;
 	private static Clip teleportHumClip;
-	
+
 	private static RandomSoundClip randomMotorSound;
 	private static RandomSoundClip randomFarmSound;
-	
+	private static RandomSoundClip randomSawMillSound;
+
 	private static  FloatControl teleportHumVolume;
+
 
 
 	static public void setEnabled( boolean enabled )
@@ -41,13 +51,13 @@ public class ShortSounds {
 			loopForever(teleportHumClip);
 		else
 			teleportHumClip.stop();
-		
+
 	}
 
 	public static boolean isEnabled() { return ShortSounds.enabled; }
 
 
-	
+
 	public static Clip loadClip(URL url)
 	{
 		try {
@@ -56,32 +66,34 @@ public class ShortSounds {
 			AudioInputStream ais = AudioSystem.getAudioInputStream(url);
 			clip.open(ais);
 			return clip;
-		} catch (LineUnavailableException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedAudioFileException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Throwable e) {
+			Global.error(e);;
 		}
 
 		return null;
 	}
 
+
 	public static Clip loadClip( String fn )
 	{
-		return loadClip(ShortSounds.class.getResource(fn));
+		//return loadClip(ShortSounds.class.getResource(fn));
+		try {
+			return loadClip(new URL("file", null, fn));
+		} catch (MalformedURLException e) {
+			Global.error(e);
+			return null;
+		}
 	}
-	
+
 	static public void preload()
 	{
-		blipClip = loadClip( ShortSounds.class.getResource("/sounds/blip.wav"));
-	
-		randomFarmSound = new RandomSoundClip(3, "/sounds/farm-");
-		randomMotorSound = new RandomSoundClip(2, "/sounds/motor-");
-		
+		//blipClip = loadClip( ShortSounds.class.getResource("resources/sounds/blip.wav"));
+		blipClip = new SingleSoundClip( "resources/sounds/blip.wav" );
+
+		randomFarmSound = new RandomSoundClip("resources/sounds/", "farm-");
+		randomMotorSound = new RandomSoundClip("resources/sounds/", "motor-");
+		randomSawMillSound = new RandomSoundClip("resources/sounds/", "sawmill-");
+
 		//teleportHumClip.setLoopPoints(16000, 50000);
 		//teleportHumClip.setLoopPoints(23782, 50000);
 		//teleportHumVolume = (FloatControl) teleportHumClip.getControl(FloatControl.Type.MASTER_GAIN);//Type.MASTER_GAIN);
@@ -91,33 +103,50 @@ public class ShortSounds {
 
 	static void playClip(Clip c)
 	{
-		if( !ShortSounds.enabled ) return;
+		if( !ShortSounds.enabled || c == null ) return;
+
+		//FloatControl volc = (FloatControl) c.getControl(Type.VOLUME);
+		//volc.setValue(MusicGui.getEffectVolume()/128.0f); // TODO bring all vol to 0..1.0 rande and pan to -1..0..1
+		
+		ISoundClip.setVolume(c, MusicGui.getEffectVolume()/128.0f);
+		ISoundClip.setPan(c, 0);
 		
 		c.stop();
 		c.setFramePosition(0);
 		c.start();
 	}
 
+	public static void playClip(Clip c, int vol, int pan) 
+	{
+		if( !ShortSounds.enabled || c == null ) return;
+
+		c.stop();
+
+		ISoundClip.setPan(c, pan * 1.0f / ISoundClip.PANNING_LEVELS);
+		ISoundClip.setVolume(c, vol/128.0f);
+		
+		//FloatControl balc = (FloatControl) c.getControl(Type.BALANCE);
+		//balc.setValue(pan * 1.0f / ISoundClip.PANNING_LEVELS );
+		
+		//FloatControl volc = (FloatControl) c.getControl(Type.VOLUME);
+		//volc.setValue(vol/128.0f);
+		
+		c.setFramePosition(0);
+		c.start();
+	}
+	
 	private static void loopForever(Clip c)
 	{
 		c.loop(Clip.LOOP_CONTINUOUSLY);
 	}
-	
-	
 
-	public static void playMotorSound()		{ randomMotorSound.playRandomSound(); } // playClip(explosionClip); }
-	public static void playBlipSound()		{ playClip(blipClip);	}
-	public static void playFarmSound()    	{ randomFarmSound.playRandomSound(); }
 
-	
-	private static void setVolume(FloatControl fc, float x) {
-		if (x<0) x = 0;
-		if (x>1) x = 1;
-		float min = fc.getMinimum();
-		float max = fc.getMaximum();
-		fc.setValue((max-min)*x+min);
-	}
-	
+	public static void playBlipSound()		{ blipClip.play();;	}
+
+	public static void playMotorSound()		{ randomMotorSound.play(); } // playClip(explosionClip); }
+	public static void playFarmSound()    	{ randomFarmSound.play(); }
+	public static void playSawMillSound()	{ randomSawMillSound.play(); }
+
 	/**
 	 * 
 	 * @param volume 0...1
@@ -126,7 +155,7 @@ public class ShortSounds {
 	{
 		//if( !ShortSounds.enabled ) volume = 0;
 		//teleportHumVolume.setValue((float) -40);
-		setVolume(teleportHumVolume, (float) volume);
+		ISoundClip.setVolume(teleportHumVolume, (float) volume);
 	}
 
 	/**
@@ -135,6 +164,44 @@ public class ShortSounds {
 	public static void stop() {
 		setTeleportVolume(0);		
 	}
+
+	public static void SndPlayTileFx(ISoundClip sound, TileIndex tile)
+	{
+		/* emits sound from center (+ 8) of the tile */
+		int x = tile.TileX() * 16 + 8;
+		int y = tile.TileY() * 16 + 8;
+		Point pt = Point.RemapCoords(x, y, Landscape.GetSlopeZ(x, y));
+		SndPlayScreenCoordFx(sound, pt);
+	}
+
+	
+	private static final double _vol_factor_by_zoom[] = {1.0, 190.0/255, 134.0/255};
+	
+	public static void SndPlayScreenCoordFx(ISoundClip sound, Point p)
+	{
+		int vol = MusicGui.getEffectVolume();
+		if (vol == 0) return;
+		
+
+		Iterator<Window> ii = Window.getIterator();
+		while( ii.hasNext() )
+		{
+			Window w = ii.next();
+			final ViewPort vp = w.getViewport();
+
+			if (vp != null && p.isInside(vp) )
+			{
+				int left = (p.x - vp.getVirtual_left());
+				int pan = left / (vp.getVirtual_width() / ((ISoundClip.PANNING_LEVELS*2) + 1)) - ISoundClip.PANNING_LEVELS;
+
+				sound.play((int) (vol * _vol_factor_by_zoom[vp.getZoom()]), pan);
+				
+				return;
+			}
+		}
+
+	}
+
 
 
 }

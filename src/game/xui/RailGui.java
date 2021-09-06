@@ -65,11 +65,6 @@ public class RailGui {
 
 	private static final _Railstation _railstation = new _Railstation();
 
-	//static void HandleStationPlacement(TileIndex start, TileIndex end);
-	//static void ShowBuildTrainDepotPicker();
-	//static void ShowBuildWaypointPicker();
-	//static void ShowStationBuilder();
-	//static void ShowSignalBuilder();
 
 	static void CcPlaySound1E(boolean success, TileIndex tile, int p1, int p2)
 	{
