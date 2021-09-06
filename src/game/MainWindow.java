@@ -21,6 +21,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.Timer;
+import javax.swing.UIManager;
 
 import game.xui.Gfx;
 import game.xui.Window;
@@ -31,7 +32,7 @@ public class MainWindow extends JPanel implements ActionListener
 {
 	private static final long serialVersionUID = 7030596255463826051L;
 
-	
+
 	public static final int TICK_TIME = 10;
 	public static final int TICKS_PER_SECOND = 1000 / TICK_TIME;
 
@@ -56,8 +57,8 @@ public class MainWindow extends JPanel implements ActionListener
 	public void setScreen(byte[] screen2) {
 		this.screen = screen2;
 	}
-	
-	
+
+
 	public MainWindow(JFrame frame, byte[] screen2) 
 	{
 		this.frame = frame;
@@ -69,7 +70,7 @@ public class MainWindow extends JPanel implements ActionListener
 		//setMinimumSize(new Dimension(WIDTH, HEIGHT));
 		//setMaximumSize(new Dimension(WIDTH, HEIGHT));
 
-		
+
 		frame.setFocusTraversalKeysEnabled(false); // Enable Tab key to pass through to us
 
 		frame.addKeyListener(new KeyListener() {		
@@ -87,7 +88,7 @@ public class MainWindow extends JPanel implements ActionListener
 
 		//frame.addMouseListener( new MouseListener() 
 		this.addMouseListener( new MouseListener() 
-				{
+		{
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -126,11 +127,11 @@ public class MainWindow extends JPanel implements ActionListener
 				Window._mouse_inside = true;
 			}
 
-				});
+		});
 
 		//frame.addMouseMotionListener( new MouseMotionListener() 
 		this.addMouseMotionListener( new MouseMotionListener() 
-				{
+		{
 
 			@Override
 			public void mouseMoved(MouseEvent e) 
@@ -151,31 +152,31 @@ public class MainWindow extends JPanel implements ActionListener
 				e.consume();				
 				processMouse(x, y);
 			}
-				});
+		});
 
-		
+
 		//frame.addMouseWheelListener( (e) -> {
 		this.addMouseWheelListener( (e) -> {
 			Hal._cursor.setWheel( e.getWheelRotation() );
 			e.consume();
 		});
-		
+
 		frame.setJMenuBar(getMenu());
-		
+
 		//frame.set
 		requestFocus();
-		
+
 		timer.start();
 	}
 
 
 	private  JMenuBar getMenu() {
 		JMenuBar menuBar = new JMenuBar();
-        
-        JMenu gameMenu = new JMenu("Game");
-        menuBar.add(gameMenu);
 
-        /*
+		JMenu gameMenu = new JMenu("Game");
+		menuBar.add(gameMenu);
+
+		/*
         JMenuItem menuItemConnect = new JMenuItem("Fast");
         menuItemConnect.addActionListener( e -> System.out.println("Connected") );
         connectionMenu.add(menuItemConnect);
@@ -183,27 +184,27 @@ public class MainWindow extends JPanel implements ActionListener
         JMenuItem menuItemDisconnect = new JMenuItem("Disconnect");
         menuItemDisconnect.addActionListener(e -> System.out.println("Disconnected") );
         connectionMenu.add(menuItemDisconnect);
-		*/
-        JMenuItem menuItemExit = new JMenuItem("Exit");
-        menuItemExit.addActionListener( e -> Global._exit_game = true );
-        // NB! Does not work per se - must process it manually below
-        menuItemExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, KeyEvent.ALT_DOWN_MASK));
-        gameMenu.add(menuItemExit);
+		 */
+		JMenuItem menuItemExit = new JMenuItem("Exit");
+		menuItemExit.addActionListener( e -> Global._exit_game = true );
+		// NB! Does not work per se - must process it manually below
+		menuItemExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, KeyEvent.ALT_DOWN_MASK));
+		gameMenu.add(menuItemExit);
 
-        
-        
-        JMenu viewMenu = new JMenu("View");
-        menuBar.add(viewMenu);	        
 
-        JMenuItem menuItemTranspBuildings = new JMenuItem("Transparent buildings");
-        menuItemTranspBuildings.addActionListener( e -> 
-        { 
-        	Global._display_opt ^= Global.DO_TRANS_BUILDINGS;
-        	Hal.MarkWholeScreenDirty();
-        });
-        viewMenu.add(menuItemTranspBuildings);
-        
-        return menuBar;
+
+		JMenu viewMenu = new JMenu("View");
+		menuBar.add(viewMenu);	        
+
+		JMenuItem menuItemTranspBuildings = new JMenuItem("Transparent buildings");
+		menuItemTranspBuildings.addActionListener( e -> 
+		{ 
+			Global._display_opt ^= Global.DO_TRANS_BUILDINGS;
+			Hal.MarkWholeScreenDirty();
+		});
+		viewMenu.add(menuItemTranspBuildings);
+
+		return menuBar;
 	}
 
 
@@ -231,11 +232,11 @@ public class MainWindow extends JPanel implements ActionListener
 		Gfx._dbg_screen_rect = meta_pressed; 
 
 		int key = e.getKeyCode();
-		
+
 		boolean prev_ff = Global._fast_forward;
 
 		if( key == KeyEvent.VK_F4 && Global._alt_pressed ) { Global._exit_game = true; return; }
-		
+
 		switch(key)
 		{
 		case KeyEvent.VK_LEFT:	modDirKeys(1, pressed); break; 
@@ -297,7 +298,7 @@ public class MainWindow extends JPanel implements ActionListener
 			case KeyEvent.VK_ADD:       fKey = Window.WKC_NUM_PLUS;	break;
 
 			case KeyEvent.VK_DECIMAL:   fKey = Window.WKC_NUM_DECIMAL;	break;
-			
+
 
 			case KeyEvent.VK_F1:	fKey = Window.WKC_F1;	break;
 			case KeyEvent.VK_F2:	fKey = Window.WKC_F2;	break;
@@ -315,7 +316,7 @@ public class MainWindow extends JPanel implements ActionListener
 			default:
 				if( key >= KeyEvent.VK_NUMPAD0 && key >= KeyEvent.VK_NUMPAD9 )
 					fKey = Window.WKC_NUM_0 + key - KeyEvent.VK_NUMPAD0;
-				
+
 			}
 		}
 
@@ -487,6 +488,17 @@ public class MainWindow extends JPanel implements ActionListener
 	}
 
 
+	static void setLookAndFeel()
+	{
+		try {
+			// Set System L&F
+			UIManager.setLookAndFeel(
+					UIManager.getSystemLookAndFeelClassName());
+		} 
+		catch (Throwable e) {
+			// Ignore
+		}
+	}
 
 
 
