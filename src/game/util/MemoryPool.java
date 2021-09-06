@@ -1,10 +1,11 @@
 package game.util;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -13,10 +14,9 @@ import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 
 /**
- * We don't need mem mgmt in java.
- * Just keep a map of int to object.
  * 
- * TODO use dynamic array?
+ * Pool if game items.
+ * 
  */
 
 public class MemoryPool<CType extends IPoolItem> implements Serializable
@@ -57,19 +57,25 @@ public class MemoryPool<CType extends IPoolItem> implements Serializable
         return pool.size();
     }
 
-    public void forEach( BiConsumer<Integer,CType> c )
+   /*public void forEach( BiConsumer<Integer,CType> c )
     {
         pool.forEach( c );
-    }
+    }*/
 
     public void forEach( Consumer<CType> c )
     {
-        pool.forEach( (i,o) -> c.accept(o) );
+        //pool.forEach( (i,o) -> c.accept(o) );
+        // Fifgt concurrent mod
+        List<CType> s = new ArrayList<CType>(pool.values());
+        //s.forEach( (o) -> c.accept(o) );
+        s.forEach( c );
     }
 
     public void forEachValid( Consumer<CType> c )
     {
-        pool.forEach( (i,o) -> { if( o.isValid() ) c.accept(o); } );
+        //pool.forEach( (i,o) -> { if( o.isValid() ) c.accept(o); } );
+        List<CType> s = new ArrayList<CType>(pool.values());
+        s.forEach( o -> { if( o.isValid() ) c.accept(o); } );
     }
 
 	public boolean AddBlockToPool() 

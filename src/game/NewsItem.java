@@ -24,6 +24,8 @@ import game.xui.WindowMessage;
 
 public class NewsItem implements Serializable 
 {
+	private static final long serialVersionUID = 1L;
+	
 	StringID string_id;
 	int  duration;
 	int date;

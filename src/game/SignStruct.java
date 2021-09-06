@@ -129,11 +129,13 @@ public class SignStruct implements IPoolItem
 	 */
 	static void UpdateAllSignVirtCoords()
 	{
-		Global.gs._signs.forEach( (i,ss) ->
+		/*Global.gs._signs.forEach( (i,ss) ->
 		{
 			if (ss.str != null)
 				ss.UpdateSignVirtCoords();
-		});
+		});*/
+
+		Global.gs._signs.forEach( (ss) -> { if (ss.str != null) ss.UpdateSignVirtCoords(); } );
 	}
 
 	/**
@@ -160,7 +162,7 @@ public class SignStruct implements IPoolItem
 	{
 		SignStruct [] ret = {null};
  
-		Global.gs._signs.forEach( (i,ss) ->
+		Global.gs._signs.forEach( ss ->
 		{
 			if (ss.str == null) {
 				int index = ss.index;

@@ -737,11 +737,11 @@ public class Main {
 			// All these actions has to be done from OWNER_NONE
 			//  for multiplayer compatibility
 			
-			//PlayerID p =  Global.gs._current_player;
-			//Global.gs._current_player = PlayerID.getNone();
+			PlayerID p =  Global.gs._current_player;
+			Global.gs._current_player = PlayerID.getNone();
 
-			try(PushPlayer pp = new PushPlayer(PlayerID.getNone()))
-			{
+			//try(PushPlayer pp = new PushPlayer(PlayerID.getNone()))
+			//{
 				TextEffect.AnimateAnimatedTiles();
 				Global.gs.date.IncreaseDate();
 				Landscape.RunTileLoop();
@@ -752,8 +752,8 @@ public class Main {
 
 				Window.CallWindowTickEvent();
 				NewsItem.NewsLoop();
-			}
-			//Global.gs._current_player = p;
+			//}
+			Global.gs._current_player = p;
 		}
 	}
 
