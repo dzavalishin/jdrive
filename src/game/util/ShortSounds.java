@@ -10,7 +10,6 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.FloatControl.Type;
 
 import game.Global;
 import game.Landscape;
@@ -20,7 +19,20 @@ import game.xui.MusicGui;
 import game.xui.ViewPort;
 import game.xui.Window;
 
-public class ShortSounds {
+/**
+ * 
+ * TODO Only new sounds volume is controlled, old ones won't change.
+ * TODO Make list of all started sounds, control volume and stop them on request
+ * TODO Keep own volume/pan modifiers and reapply on volume change
+ * TODO Track viewport scroll and control pan accordingly
+ * 
+ * @author dz
+ *
+ */
+
+
+public class ShortSounds 
+{
 
 	private static boolean enabled = true;
 
@@ -125,12 +137,6 @@ public class ShortSounds {
 		ISoundClip.setPan(c, pan * 1.0f / ISoundClip.PANNING_LEVELS);
 		ISoundClip.setVolume(c, vol/128.0f);
 		
-		//FloatControl balc = (FloatControl) c.getControl(Type.BALANCE);
-		//balc.setValue(pan * 1.0f / ISoundClip.PANNING_LEVELS );
-		
-		//FloatControl volc = (FloatControl) c.getControl(Type.VOLUME);
-		//volc.setValue(vol/128.0f);
-		
 		c.setFramePosition(0);
 		c.start();
 	}
@@ -155,13 +161,13 @@ public class ShortSounds {
 	{
 		//if( !ShortSounds.enabled ) volume = 0;
 		//teleportHumVolume.setValue((float) -40);
-		ISoundClip.setVolume(teleportHumVolume, (float) volume);
+		ISoundClip.setVolume(teleportHumVolume, (float) volume); // redo with other setvolume method
 	}
 
 	/**
 	 * Called on level end, stop what is possible to stop.
 	 */
-	public static void stop() {
+	public static void stop() { // TODO call me
 		setTeleportVolume(0);		
 	}
 
