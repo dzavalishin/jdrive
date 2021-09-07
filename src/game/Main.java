@@ -182,7 +182,7 @@ public class Main {
 		}
 
 		Global._pause = 0;
-		Global.gs._local_player = null;
+		Global.gs._local_player = PlayerID.getNone();
 		Hal.MarkWholeScreenDirty();
 
 		// Play main theme
