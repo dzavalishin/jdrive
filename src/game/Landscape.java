@@ -507,7 +507,7 @@ public class Landscape extends GenLandTable
 
 	static void GenerateTerrain(int type, int flag)
 	{
-		int r;
+		long r;
 		int x;
 		int y;
 		int w;
@@ -521,17 +521,17 @@ public class Landscape extends GenLandTable
 		//Tile tile;
 		int direction;
 
-		r = Hal.Random();
-		template = SpriteCache.GetSprite((((r >> 24) * _genterrain_tbl_1[type]) >> 8) + _genterrain_tbl_2[type] + 4845);
+		r = Hal.Random32();
+		template = SpriteCache.GetSprite((int)(((r >> 24) * _genterrain_tbl_1[type]) >> 8) + _genterrain_tbl_2[type] + 4845);
 
-		x = r & Global.MapMaxX();
-		y = (r >> Global.MapLogX()) & Global.MapMaxY();
+		x = (int)(r & Global.MapMaxX());
+		y = (int)((r >> Global.MapLogX()) & Global.MapMaxY());
 
 
 		if (x < 2 || y < 2)
 			return;
 
-		direction =  BitOps.GB(r, 22, 2);
+		direction =  BitOps.GB((int)r, 22, 2);
 		if (0 != (direction & 1)) {
 			w = template.height;
 			h = template.width;
