@@ -1,6 +1,10 @@
 package game.util;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import game.*;
 import game.ids.StringID;
@@ -515,41 +519,41 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			final int nn = n != 0 ? 1 : 2;
 			return n%10==1 && n%100!=11 ? 0 : nn;
 		}
-			// Three forms, special case for one and two
-			// Used in:
-			//   Gaelige (Irish)
+		// Three forms, special case for one and two
+		// Used in:
+		//   Gaelige (Irish)
 		case 4:
 		{
 			final int nn = n==2 ? 1 : 2;
 			return n==1 ? 0 : nn;
 		}
-			// Three forms, special case for numbers ending in 1[2-9]
-			// Used in:
-			//   Lithuanian
+		// Three forms, special case for numbers ending in 1[2-9]
+		// Used in:
+		//   Lithuanian
 		case 5:
 		{
 			final int nn = n%10>=2 && (n%100<10 || n%100>=20) ? 1 : 2;
 			return n%10==1 && n%100!=11 ? 0 : nn;
 		}
-			// Three forms, special cases for numbers ending in 1 and 2, 3, 4, except those ending in 1[1-4]
-			// Used in:
-			//   Croatian, Czech, Russian, Slovak, Ukrainian
+		// Three forms, special cases for numbers ending in 1 and 2, 3, 4, except those ending in 1[1-4]
+		// Used in:
+		//   Croatian, Czech, Russian, Slovak, Ukrainian
 		case 6:
 		{
 			int nn = n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;
 			return n%10==1 && n%100!=11 ? 0 : nn;
 		}
-			// Three forms, special case for one and some numbers ending in 2, 3, or 4
-			// Used in:
-			//   Polish
+		// Three forms, special case for one and some numbers ending in 2, 3, or 4
+		// Used in:
+		//   Polish
 		case 7:
 		{
 			int nn = n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;
 			return n==1 ? 0 : nn;
 		}
-			// Four forms, special case for one and all numbers ending in 02, 03, or 04
-			// Used in:
-			//   Slovenian
+		// Four forms, special case for one and all numbers ending in 02, 03, or 04
+		// Used in:
+		//   Slovenian
 		case 8:
 		{
 			final int n0 = n%100==3 || n%100==4 ? 2 : 3;
@@ -568,10 +572,10 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 		//<NUM> {Length of each string} {each string}
 		int n = 0xFF & ca[cap++];
-		
+
 		int i, mylen=0,mypos=0;
 		int pos = 0;
-		
+
 		for(i=0; i != n; i++) 
 		{
 			int len = 0xFF & ca[cap++];
@@ -622,7 +626,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 		while ( stri < str.length && (b = (char) (0xFF & str[stri++])) != '\0') 
 		{
-			
+
 			switch (b) {
 			case 0x1: // {SETX}
 				buff.append( b );
@@ -648,10 +652,10 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			case 0x84: {// {VELOCITY}
 				int value = Getint(arg[argc++]);
 				if (GameOptions._opt_ptr.kilometers) value = value * 1648 >> 10;
-			buff.append( FormatCommaNumber(value) );
-			if (GameOptions._opt_ptr.kilometers) {	buff.append( " km/h" );	} 
-			else {	buff.append( " mph" );	}
-			break;
+		buff.append( FormatCommaNumber(value) );
+		if (GameOptions._opt_ptr.kilometers) {	buff.append( " km/h" );	} 
+		else {	buff.append( " mph" );	}
+		break;
 			}
 			// 0x85 is used as escape character..
 			case 0x85:
@@ -762,7 +766,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				buff += len;
 					 */
 
-					
+
 					//final byte* s = (final byte*)GetStringPtr(argv_orig[(byte)str[stri++]]); // contains the string that determines gender.
 					//final BinaryString s = StringGetStringPtr((Integer)arg[0xFF & str[stri++]]); // contains the string that determines gender.
 
@@ -778,7 +782,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 					//str = str.substring(skip[0] );
 					assert skip[0] >= 0;
 					stri += skip[0];
-					
+
 					//stri+=2;
 					//buff.append( " !!fixCase13!! " );
 					break;
@@ -1243,88 +1247,95 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	}
 
 	private static final String [] __elng =  {"english.lng"};
+	private final static String [] env = {
+			"LANGUAGE",
+			"LC_ALL",
+			"LC_MESSAGES",
+			"LANG"
+	};
 
 	// make a list of the available language packs. put the data in _dynlang struct.
 	public static void InitializeLanguagePacks()
 	{
 		_dynlang.file = __elng ;
 		ReadLanguagePack(0);
-		/* TODO XXX 
 
-		DynamicLanguages dl = &_dynlang;
-		int i;
-		int n;
-		int m;
+		DynamicLanguages dl = _dynlang;
+		int m = 0;
 		int def;
 		int fallback;
-		LanguagePack hdr;
-		FILE *in;
-		String files[32];
-		int j;
+		//LanguagePack hdr;
+		//FILE *in;
+		//String [] files = new String[32];
 
-		char lang[] = "en";
-		private final String env[] = {
-				"LANGUAGE",
-				"LC_ALL",
-				"LC_MESSAGES",
-				"LANG"
-		};
+		String lang = "en";
 
-		for (j = 0; j < lengthof(env); j++) {
-			final char* envlang = getenv(env[j]);
+		for (String en : env) {
+			final String envlang = System.getenv(en);
 			if (envlang != null) {
-				snprintf(lang, lengthof(lang), "%.2s", envlang);
+				lang = envlang;
 				break;
 			}
 		}
 
-		n = GetLanguageList(files, lengthof(files));
+		List<String> files = FileIO.GetLanguageList();
 
 		def = -1;
 		fallback = 0;
 
 		// go through the language files and make sure that they are valid.
-		for (i = m = 0; i != n; i++) {
+		for (String file : files) {
 			int j;
+			LanguagePack hdr = new LanguagePack();
 
-			String s = str_fmt("%s%s", _path.lang_dir, files[i]);
-			in = fopen(s, "rb");
-			free(s);
-			if (in == null ||
-					(j = fread(&hdr, sizeof(hdr), 1, in), fclose(in), j) != 1 ||
-					hdr.ident != TO_LE32(LANGUAGE_PACK_IDENT) ||
-					hdr.version != TO_LE32(LANGUAGE_PACK_VERSION)) {
-				free(files[i]);
+			String s = String.format("%s%s", Global._path.lang_dir, file);
+			//in = fopen(s, "rb");
+			try( FileInputStream in = new FileInputStream(s) )
+			{
+				if( !hdr.readFrom(in) )
+					continue;
+
+				if ( hdr.isValid() )
+					continue;
+			} catch (FileNotFoundException e) {
+				Global.error(e);
+				continue;
+			} catch (IOException e) {
+				Global.error(e);
 				continue;
 			}
 
-			dl.ent[m].file = files[i];
-			dl.ent[m].name = strdup(hdr.name);
 
-			if (strcmp(hdr.name, "English") == 0) fallback = m;
-			if (strcmp(hdr.isocode, lang) == 0) def = m;
+
+
+			dl.file[m] = file;
+			dl.name[m] = hdr.name;
+
+			if (hdr.name.equals("English")) fallback = m;
+			if (hdr.isocode.equals(lang)) def = m;
 
 			m++;
 		}
 		if (def == -1) def = fallback;
 
 		if (m == 0)
-			error(n == 0 ? "No available language packs" : "Invalid version of language packs");
+			Global.error(files.size() == 0 ? "No available language packs" : "Invalid version of language packs");
 
 		dl.num = m;
+		int i;
 		for (i = 0; i != dl.num; i++)
 			dl.dropdown[i] = SPECSTR_LANGUAGE_START + i;
-		dl.dropdown[i] = INVALID_STRING_ID;
+		dl.dropdown[i] = Str.INVALID_STRING;
 
 		for (i = 0; i != dl.num; i++)
-			if (strcmp(dl.ent[i].file, dl.curr_file) == 0) {
+			if (dl.file[i].equals(dl.curr_file)) {
 				def = i;
 				break;
 			}
 
 		if (!ReadLanguagePack(def))
-			error("can't read language pack '%s'", dl.ent[def].file);
-		 */
+			Global.error("can't read language pack '%s'", dl.file[def]);
+		
 	}
 
 	/*
@@ -1343,7 +1354,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		buf[2] = (char) (string >> 8);
 		return new BinaryString(buf);
 	}
-	*/
+	 */
 
 }
 
@@ -1376,7 +1387,7 @@ class LanguagePack {
 	 */
 
 
-	public boolean loadFromBytes( byte [] src)
+	public boolean loadFromBytes(byte [] src)
 	{
 		data = src; // TODO offsets are after header or include header size?
 		ByteBuffer bb = ByteBuffer.wrap(src);
@@ -1399,11 +1410,18 @@ class LanguagePack {
 		plural_form = bb.get();
 		return true;
 	}
+
+	public boolean isValid() {
+		// TODO
+		//return ident == TO_LE32(LANGUAGE_PACK_IDENT) && hdr.version == TO_LE32(LANGUAGE_PACK_VERSION);
+		return true;
+	}
+
+	public boolean readFrom(FileInputStream in) throws IOException {
+		byte[] src = in.readNBytes(144); // a bit less?
+		return loadFromBytes(src);
+	}
 }
 
-/*
-class YearMonthDay {
-	int year, month, day;
-} 
- */
+
 

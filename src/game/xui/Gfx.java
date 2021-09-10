@@ -523,7 +523,7 @@ public class Gfx extends PaletteTabs
 			}
 
 			num++;
-			//str[-1] = '\0'; TODO XXX why?
+			//str[-1] = '\0'; TODO X XX why?
 			if(sp > 0 ) sc[sp-1] = 0;
 		}
 	}

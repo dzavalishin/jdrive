@@ -4,7 +4,7 @@ import game.TileIndex;
 import game.enums.WindowEvents;
 import game.struct.Point;
 
-/* XXX - outside "byte event" so you can set event directly without going into
+/* [dz] - supposed to be not actual nymore - XX X - outside "byte event" so you can set event directly without going into
  * the union elements at first. Because of this every first element of the union
  * MUST BE 'byte event'. Whoever did this must get shot! Scheduled for immediate
  * rewrite after 0.4.0 */

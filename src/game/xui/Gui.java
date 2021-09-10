@@ -89,14 +89,14 @@ public class Gui
 
 		switch (Global._game_mode) {
 		case GM_MENU:
-			Window.deleteMain();
+			Window.deleteMain(); // [dz] hacked in
 			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
 			ViewPort.AssignWindowViewport( w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
 			IntroGui.ShowSelectGameWindow();
 			break;
 			
 		case GM_NORMAL:
-			Window.deleteMain();
+			Window.deleteMain(); // [dz] hacked in
 			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
 			ViewPort.AssignWindowViewport(w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
 
@@ -2555,58 +2555,6 @@ public class Gui
 	}
 
 
-	//void ShowSelectGameWindow();
-	//extern void ShowJoinStatusWindowAfterJoin();
-	/*
-	void SetupColorsAndInitialWindow()
-	{
-		int i;
-		Window w;
-		int width,height;
-
-		for (i = 0; i != 16; i++) {
-			final byte* b = GetNonSprite(0x307 + i);
-
-			assert(b);
-			_color_list[i] = *(final ColorList*)(b + 0xC6);
-		}
-
-		width = _screen.width;
-		height = _screen.height;
-
-		// XXX: these are not done
-		switch (_game_mode) {
-		case GameModes.GM_MENU:
-			w = AllocateWindow(0, 0, width, height, MainWindowWndProc, WC_MAIN_WINDOW, null);
-			AssignWindowViewport(w, 0, 0, width, height, TileXY(32, 32), 0);
-			ShowSelectGameWindow();
-			break;
-		case GameModes.GM_NORMAL:
-			w = AllocateWindow(0, 0, width, height, MainWindowWndProc, WC_MAIN_WINDOW, null);
-			AssignWindowViewport(w, 0, 0, width, height, TileXY(32, 32), 0);
-
-			ShowVitalWindows();
-
-			/* Bring joining GUI to front till the client is really joined * /
-			if (_networking && !_network_server)
-				ShowJoinStatusWindowAfterJoin();
-
-			break;
-		case GameModes.GM_EDITOR:
-			w = AllocateWindow(0, 0, width, height, MainWindowWndProc, WC_MAIN_WINDOW, null);
-			AssignWindowViewport(w, 0, 0, width, height, 0, 0);
-
-			w = AllocateWindowDesc(&_toolb_scen_desc);
-			w.disabled_state = 1 << 9;
-			CLRBITS(w.flags4, WF_WHITE_BORDER_MASK);
-
-			PositionMainToolbar(w); // already WC_MAIN_TOOLBAR passed (&_toolb_scen_desc)
-			break;
-		default:
-			NOT_REACHED();
-		}
-	}
-	*/
 	static void ShowVitalWindows()
 	{
 		Window w;

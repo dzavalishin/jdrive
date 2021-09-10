@@ -28,7 +28,7 @@ import game.Version;
 public class Main {
 
 
-	private static final String TMP_XXX = "tmp.xxx";
+	private static final String TMP_FILE_NAME = "tmp.xxx";
 	static final int C_DONTCOUNT = Emitter.C_DONTCOUNT;
 	static final int C_CASE = Emitter.C_CASE;
 
@@ -558,7 +558,7 @@ public class Main {
 
 	static void WriteStringsH(final String filename) throws FileNotFoundException
 	{
-		Writer out  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(TMP_XXX)));
+		Writer out  = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(TMP_FILE_NAME)));
 		//int next = -1;
 
 		try {
@@ -577,9 +577,9 @@ public class Main {
 		}
 		try {
 
-			if (CompareFiles(TMP_XXX, filename)) {
+			if (CompareFiles(TMP_FILE_NAME, filename)) {
 				// files are equal. tmp.xxx is not needed
-				Files.delete(Path.of(TMP_XXX));
+				Files.delete(Path.of(TMP_FILE_NAME));
 
 			} else {
 				// else rename tmp.xxx into filename
@@ -588,7 +588,7 @@ public class Main {
 				} catch (NoSuchFileException e) {
 					// Ignore
 				}
-				Files.move(Path.of(TMP_XXX), Path.of(filename), StandardCopyOption.REPLACE_EXISTING);
+				Files.move(Path.of(TMP_FILE_NAME), Path.of(filename), StandardCopyOption.REPLACE_EXISTING);
 				//if (rename("tmp.xxx", filename) == -1) Fatal("rename() failed");
 			}
 		}

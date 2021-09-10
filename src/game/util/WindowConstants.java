@@ -257,7 +257,7 @@ public class WindowConstants {
     First, you need to add a WWT_RESIZEBOX to the widgets, and you need
      to add the flag WDF_RESIZABLE to the window. Now the window is ready
      to resize itself.
-    As you may have noticed, all widgets have a RESIZE_XXX in their line.
+    As you may have noticed, all widgets have a RESIZE_XX in their line.
      This lines controls how the widgets behave on resize. RESIZE_NONE means
      it doesn't do anything. Any other option let's one of the borders
      move with the changed width/height. So if a widget has

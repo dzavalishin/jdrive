@@ -612,7 +612,58 @@ public class FileIO {
 		return f.canRead();
 	}
 
+	public static List<String> GetLanguageList() 
+	{
+		Path dir = Path.of(Global._path.lang_dir);
+		List<String> files = new ArrayList<>();
+		
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.lng")) 
+		{
+			for (Path entry: stream) {
+				System.out.println(entry.getFileName());
+				File file= entry.getFileName().toFile();
+				//filename = String.format( "%s/%s", _fios_path, dirent.d_name);
+				final String name = file.getName();
 
+				if(file.isDirectory())
+					continue;
+
+				files.add( name );
+
+			}
+		} catch (IOException x) {
+			System.err.println(x); // TODO err print
+		}
+		
+		return files;
+	}
+
+
+	/*
+int GetLanguageList(char **languages, int max)
+{
+	DIR *dir;
+	struct dirent *dirent;
+	int num = 0;
+
+	dir = opendir(_path.lang_dir);
+	if (dir != NULL) {
+		while ((dirent = readdir(dir)) != NULL) {
+			char *t = strrchr(dirent->d_name, '.');
+
+			if (t != NULL && strcmp(t, ".lng") == 0) {
+				languages[num++] = strdup(dirent->d_name);
+				if (num == max) break;
+			}
+		}
+		closedir(dir);
+	}
+
+	qsort(languages, num, sizeof(char*), LanguageCompareFunc);
+	return num;
+}
+	 * 
+	 */
 
 }
 
