@@ -391,7 +391,7 @@ public class Engine extends EngineTables implements Serializable
 
 	/*
 	typedef SpriteGroup *(*resolve_callback)(final SpriteGroup *spritegroup,
-			final Vehicle veh, int callback_info, void *resolve_func); /* XXX data pointer used as function pointer */
+			final Vehicle veh, int callback_info, void *resolve_func); /* data pointer used as function pointer */
 
 	static SpriteGroup ResolveVehicleSpriteGroup(
 			final SpriteGroup spritegroup,

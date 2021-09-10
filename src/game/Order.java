@@ -389,7 +389,7 @@ public class Order implements Serializable
 
 		if (sel_ord.id > v.num_orders) return Cmd.CMD_ERROR;
 
-		// XXX need? if (IsOrderPoolFull()) return_cmd_error(Str.STR_8831_NO_MORE_SPACE_FOR_ORDERS);
+		// need? if (IsOrderPoolFull()) return_cmd_error(Str.STR_8831_NO_MORE_SPACE_FOR_ORDERS);
 
 		/* XXX - This limit is only here because the backuppedorders can't
 		 * handle any more then this.. */

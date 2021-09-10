@@ -1551,27 +1551,6 @@ public class Station extends StationTables implements IPoolItem
 		return Global._price.build_rail >> 1;
 	}
 
-	/* XXX Rewrite
-	private static void FindRoadStationSpot(boolean truck_station, Station  st, RoadStop*** currstop, RoadStop** prev)
-	{
-		RoadStop primary_stop;
-
-		primary_stop = (truck_station) ? st.truck_stops : st.bus_stops;
-
-		if (*primary_stop == null) {
-			//we have no station of the type yet, so write a "primary station"
-			//(the one at st.foo_stops)
-	 *currstop = primary_stop;
-		} else {
-			//there are stops already, so append to the end of the list
-	 *prev = *primary_stop;
-	 *currstop = &(*primary_stop).next;
-			while (**currstop != null) {
-	 *prev = (*prev).next;
-	 *currstop = &(**currstop).next;
-			}
-		}
-	}*/
 
 	/** Build a bus station
 	 * @param x,y coordinates to build bus station at
@@ -1625,8 +1604,6 @@ public class Station extends StationTables implements IPoolItem
 
 			if (!CheckStationSpreadOut(st, tile, 1, 1))
 				return Cmd.CMD_ERROR;
-
-			//FindRoadStationSpot(type, st, currstop, prev);
 		} else {
 			Town t;
 
@@ -1634,8 +1611,6 @@ public class Station extends StationTables implements IPoolItem
 			if (st == null) return Cmd.CMD_ERROR;
 
 			st.town = t = Town.ClosestTownFromTile(tile, -1);
-
-			//FindRoadStationSpot(type, st, currstop, prev);
 
 			if (Global.gs._current_player.id < Global.MAX_PLAYERS && 0 != (flags&Cmd.DC_EXEC))
 				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global.gs._current_player.id);
@@ -1650,12 +1625,8 @@ public class Station extends StationTables implements IPoolItem
 		cost += (type) ? Global._price.build_truck_station : Global._price.build_bus_station;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			//point to the correct item in the _busstops or _truckstops array
-			//currstop = new RoadStop( road_stop );
-
 			//initialize an empty station
 			RoadStop.InitializeRoadStop(road_stop, /*prev,*/ tile, st.index);
-			//currstop.type = type ? 1 : 0;
 			road_stop.type = type ? 1 : 0;
 			if (0==st.facilities) st.xy = tile;
 			st.facilities |= (type) ? FACIL_TRUCK_STOP : FACIL_BUS_STOP;

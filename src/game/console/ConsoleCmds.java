@@ -1,5 +1,7 @@
 package game.console;
 
+import java.nio.file.Path;
+
 import game.Engine;
 import game.Global;
 import game.Landscape;
@@ -154,6 +156,19 @@ public class ConsoleCmds extends Console
 
 		return false;
 	}
+
+	static boolean ConPrintWorkingDirectory(String ... argv)
+	{
+		if (argv.length == 0) {
+			IConsoleHelp("Print out the current working directory. Usage: 'pwd'");
+			return true;
+		}
+
+		String path = Path.of(".").toAbsolutePath().toString();
+		IConsolePrint(_icolour_def, path);
+		return true;
+	}
+
 
 	/*
 	//extern boolean SafeSaveOrLoad(String filename, int mode, int newgm);
@@ -315,23 +330,6 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 
-	static boolean function(String ... argv)(ConPrintWorkingDirectory)
-	{
-		String path;
-
-		if (argv.length == 0) {
-			IConsoleHelp("Print out the current working directory. Usage: 'pwd'");
-			return true;
-		}
-
-		// XXX - Workaround for broken file handling
-		FiosGetSavegameList(&_fios_num, SLD_LOAD_GAME);
-		FiosFreeSavegameList();
-
-		FiosGetDescText(&path, null);
-		IConsolePrint(_icolour_def, path);
-		return true;
-	}
 
 	static boolean function(String ... argv)(ConClearBuffer)
 	{
@@ -1270,9 +1268,9 @@ public class ConsoleCmds extends Console
 		IConsoleCmdRegister("save",         ConSave);
 		IConsoleCmdRegister("ls",           ConListFiles);
 		IConsoleCmdRegister("cd",           ConChangeDirectory);
-		IConsoleCmdRegister("pwd",          ConPrintWorkingDirectory);
 		IConsoleCmdRegister("clear",        ConClearBuffer);
 		*/
+		IConsoleCmdRegister("pwd",          ConsoleCmds::ConPrintWorkingDirectory);
 		IConsoleCmdRegister("scrollto",     ConsoleCmds::ConScrollToTile);
 		IConsoleCmdRegister("resetengines", ConsoleCmds::ConResetEngines);
 		IConsoleCmdRegister("stopall",      ConsoleCmds::constopAllVehicles);
