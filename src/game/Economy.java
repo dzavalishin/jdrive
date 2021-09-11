@@ -1094,19 +1094,12 @@ public class Economy extends EconomeTables implements Serializable
 		Player p;
 
 		// check if there is an already existing subsidy that applies to us
-		//for(int i = 0; i < Subsidy._subsidies.length; i++) 
-		//{
-		//	Subsidy s = Subsidy._subsidies[i];
 		for( Subsidy s : Subsidy._subsidies )
 			/*if (s.cargo_type == cargo_type &&	s.age >= 12 && s.from == from.index && s.to == to.index)*/
 			if( s.appliesTo(from,to,cargo_type))
 				return true;
-		//}
 
 		/* check if there's a new subsidy that applies.. */
-		//for(int i = 0; i < Subsidy._subsidies.length; i++) 
-		//{
-		//	Subsidy s = Subsidy._subsidies[i];
 		for( Subsidy s : Subsidy._subsidies )
 		{
 			if (s.cargo_type == cargo_type && s.age < 12) 

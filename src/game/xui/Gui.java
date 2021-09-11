@@ -2328,8 +2328,8 @@ public class Gui
 		int sp = 0;
 		int dp = 0;
 		
-		for (;; sp++) {
-			if (s[sp] == '\0') {
+		for (; sp < s.length; sp++) {
+			if (s[sp] == '\0') { // kill me?
 				d[dp] = '\0';
 				break;
 			} else if (s[sp] == 0x0D) {
