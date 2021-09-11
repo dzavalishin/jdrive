@@ -2,6 +2,7 @@ package game;
 import game.enums.TransportType;
 import game.ids.CargoID;
 import game.ids.EngineID;
+import game.ids.PlayerID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
 import game.struct.GetNewVehiclePosResult;
@@ -895,7 +896,8 @@ public class Ship {
 		/* The ai_new queries the vehicle cost before building the route,
 		 * so we must check against cheaters no sooner than now. --pasky */
 		if (!tile.IsTileDepotType(TransportType.Water)) return Cmd.CMD_ERROR;
-		if (!tile.IsTileOwner( Global.gs._current_player.id)) return Cmd.CMD_ERROR;
+		//if (!tile.IsTileOwner( Global.gs._current_player.id)) return Cmd.CMD_ERROR;
+		if (!tile.IsTileOwner(PlayerID.getCurrent())) return Cmd.CMD_ERROR;
 
 		v = Vehicle.AllocateVehicle(); // TODO can pass type or make subobject for ship
 		if (v == null || /* Order.IsOrderPoolFull() || */
@@ -907,7 +909,7 @@ public class Ship {
 
 			v.unitnumber = unit_num;
 
-			v.owner = Global.gs._current_player;
+			v.owner = PlayerID.getCurrent();
 			v.tile = tile;
 			x = tile.TileX() * 16 + 8;
 			y = tile.TileY() * 16 + 8;

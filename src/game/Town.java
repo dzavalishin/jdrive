@@ -496,14 +496,14 @@ implements IPoolItem, Serializable
 		if ( 0 != (TownTables._house_more_flags[house] & 8) && 0 != (t.flags12 & GROW_BIT) && --t.time_until_rebuild == 0) {
 			t.time_until_rebuild =  (BitOps.GB(r, 16, 6) + 130);
 
-			Global.gs._current_player = PlayerID.get( Owner.OWNER_TOWN );
+			PlayerID.setCurrent( PlayerID.get( Owner.OWNER_TOWN ) );
 
 			t.ClearTownHouse(tile);
 
 			// rebuild with another house?
 			if (BitOps.GB(r, 24, 8) >= 12) DoBuildTownHouse(t, tile);
 
-			Global.gs._current_player = PlayerID.getNone();
+			PlayerID.setCurrentToNone();
 		}
 	}
 
@@ -530,8 +530,8 @@ implements IPoolItem, Serializable
 			Global._cleared_town_rating += rating;
 			Global._cleared_town = t = GetTown(tile.getMap().m2);
 
-			if (Global.gs._current_player.id < Global.MAX_PLAYERS) {
-				if (rating > t.ratings[Global.gs._current_player.id] 
+			if (!PlayerID.getCurrent().isSpecial()) {
+				if (rating > t.ratings[PlayerID.getCurrent().id] 
 						&& 0==(flags & Cmd.DC_NO_TOWN_RATING) 
 						&& !Global._cheats.magic_bulldozer.value) {
 					Global.SetDParam(0, t.index);
@@ -1076,12 +1076,12 @@ implements IPoolItem, Serializable
 		//if(disableGrow) return false;
 
 		// Current player is a town
-		PlayerID old_player = Global.gs._current_player;
-		Global.gs._current_player = Owner.OWNER_TOWN_ID;
+		PlayerID old_player = PlayerID.getCurrent();
+		PlayerID.setCurrent( Owner.OWNER_TOWN_ID );
 
 		boolean r = doGrowTown();
 
-		Global.gs._current_player = old_player;
+		PlayerID.setCurrent( old_player );
 		return r;
 	}
 
@@ -1836,7 +1836,7 @@ implements IPoolItem, Serializable
 
 	static void TownActionAdvertise(Town t, int action)
 	{
-		Station.ModifyStationRatingAround(t.xy, Global.gs._current_player,
+		Station.ModifyStationRatingAround(t.xy, PlayerID.getCurrent(),
 				_advertising_amount[action],
 				_advertising_radius[action]);
 	}
@@ -1870,10 +1870,10 @@ implements IPoolItem, Serializable
 			return false;
 
 
-		old = Global.gs._current_player;
-		Global.gs._current_player = PlayerID.getNone();
+		old = PlayerID.getCurrent();
+		PlayerID.setCurrentToNone();
 		r = Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
-		Global.gs._current_player = old;
+		PlayerID.setCurrent( old );
 
 		if (Cmd.CmdFailed(r)) return false;
 
@@ -1908,14 +1908,12 @@ implements IPoolItem, Serializable
 			new TileIndexDiffC( 0, 0)
 	};
 
-	public void TownActionBuildStatue( /*Town t,*/ int action)
+	public void TownActionBuildStatue(int action)
 	{
 		TileIndex tile = xy;
-		//final TileIndexDiffC p;
 
-		statues = BitOps.RETSETBIT(statues, Global.gs._current_player.id);
+		statues = BitOps.RETSETBIT(statues, PlayerID.getCurrent().id);
 
-		//for (p = _statue_tiles; p != endof(_statue_tiles); ++p) 
 		for (TileIndexDiffC statue_tile : _statue_tiles) {
 			if (DoBuildStatueOfCompany(tile)) return;
 			tile = tile.iadd(TileIndex.ToTileIndexDiff(statue_tile));
@@ -1932,18 +1930,17 @@ implements IPoolItem, Serializable
 	static void TownActionBuyRights(Town t, int action)
 	{
 		t.exclusive_counter = 12;
-		t.exclusivity = Global.gs._current_player;
+		t.exclusivity = PlayerID.getCurrent();
 
-		Station.ModifyStationRatingAround(t.xy, Global.gs._current_player, 130, 17);
+		Station.ModifyStationRatingAround(t.xy, PlayerID.getCurrent(), 130, 17);
 	}
 
 	static void TownActionBribe(Town t, int action)
 	{
-		if (0==Hal.RandomRange(15)) {
-			//Station st;
-
+		if (0==Hal.RandomRange(15)) 
+		{
 			// set as unwanted for 6 months
-			t.unwanted[Global.gs._current_player.id] = 6;
+			t.unwanted[PlayerID.getCurrent().id] = 6;
 
 			// set all close by station ratings to 0
 			Station.forEach( (st) ->
@@ -1963,8 +1960,8 @@ implements IPoolItem, Serializable
 			 *	ChangeTownRating is only for stuff in demolishing. Bribe failure should
 			 *	be independent of any cheat settings
 			 */
-			if (t.ratings[Global.gs._current_player.id] > TownTables.RATING_BRIBE_DOWN_TO) {
-				t.ratings[Global.gs._current_player.id] = TownTables.RATING_BRIBE_DOWN_TO;
+			if (t.ratings[PlayerID.getCurrent().id] > TownTables.RATING_BRIBE_DOWN_TO) {
+				t.ratings[PlayerID.getCurrent().id] = TownTables.RATING_BRIBE_DOWN_TO;
 			}
 		} else {
 			t.ChangeTownRating(TownTables.RATING_BRIBE_UP_STEP, TownTables.RATING_BRIBE_MAXIMUM);
@@ -2000,7 +1997,7 @@ implements IPoolItem, Serializable
 
 		t = GetTown(p1);
 
-		if (!BitOps.HASBIT(TownGui.GetMaskOfTownActions(null, Global.gs._current_player, t), p2)) return Cmd.CMD_ERROR;
+		if (!BitOps.HASBIT(TownGui.GetMaskOfTownActions(null, PlayerID.getCurrent(), t), p2)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 
@@ -2111,14 +2108,15 @@ implements IPoolItem, Serializable
 	{
 		Town t;
 
-		if (Global.gs._current_player.id >= Global.MAX_PLAYERS)
+		//if (Global.gs._current_player.id >= Global.MAX_PLAYERS)
+		if(PlayerID.getCurrent().isSpecial())
 			return true;
 
 		t = ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 		if (t == null)
 			return true;
 
-		if (t.ratings[Global.gs._current_player.id] > -200)
+		if (t.ratings[PlayerID.getCurrent().id] > -200)
 			return true;
 
 		Global._error_message = Str.STR_2009_LOCAL_AUTHORITY_REFUSES;
@@ -2158,14 +2156,16 @@ implements IPoolItem, Serializable
 
 		//	if magic_bulldozer cheat is active, town doesn't penaltize for removing stuff
 		if ( //t == null ||
-				Global.gs._current_player.id >= Global.MAX_PLAYERS ||
+				//Global.gs._current_player.id >= Global.MAX_PLAYERS 
+				PlayerID.getCurrent().isSpecial() 
+				||
 				(Global._cheats.magic_bulldozer.value && add < 0)) {
 			return;
 		}
 
-		have_ratings = BitOps.RETSETBIT(have_ratings, Global.gs._current_player.id);
+		have_ratings = BitOps.RETSETBIT(have_ratings, PlayerID.getCurrent().id);
 
-		rating = ratings[Global.gs._current_player.id];
+		rating = ratings[PlayerID.getCurrent().id];
 
 		if (add < 0) {
 			if (rating > max) {
@@ -2178,7 +2178,7 @@ implements IPoolItem, Serializable
 				if (rating > max) rating = max;
 			}
 		}
-		ratings[Global.gs._current_player.id] = rating;
+		ratings[PlayerID.getCurrent().id] = rating;
 	}
 
 	/*	penalty for removing town-owned stuff */
@@ -2194,7 +2194,8 @@ implements IPoolItem, Serializable
 		int modemod;
 
 		//	if magic_bulldozer cheat is active, town doesn't restrict your destructive actions
-		if (t == null || Global.gs._current_player.id >= Global.MAX_PLAYERS || Global._cheats.magic_bulldozer.value)
+		//if (t == null || Global.gs._current_player.id >= Global.MAX_PLAYERS || Global._cheats.magic_bulldozer.value)
+		if (t == null || PlayerID.getCurrent().isSpecial() || Global._cheats.magic_bulldozer.value)
 			return true;
 
 		/*	check if you're allowed to remove the street/bridge/tunnel/industry
@@ -2203,7 +2204,7 @@ implements IPoolItem, Serializable
 		 */
 		modemod = _default_rating_settings[GameOptions._opt.diff.town_council_tolerance][type];
 
-		if (t.ratings[Global.gs._current_player.id] < 16 + modemod && 0==(flags & Cmd.DC_NO_TOWN_RATING)) {
+		if (t.ratings[PlayerID.getCurrent().id] < 16 + modemod && 0==(flags & Cmd.DC_NO_TOWN_RATING)) {
 			Global.SetDParam(0, t.index);
 			Global._error_message = Str.STR_2009_LOCAL_AUTHORITY_REFUSES;
 			return false;

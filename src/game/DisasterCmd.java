@@ -27,10 +27,10 @@ public class DisasterCmd extends DisasterTables
 			break;
 
 		case MP_HOUSE: {
-			PlayerID p = Global.gs._current_player;
-			Global.gs._current_player = PlayerID.getNone();
+			PlayerID p = PlayerID.getCurrent();
+			PlayerID.setCurrentToNone();
 			Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
-			Global.gs._current_player = p;
+			PlayerID.setCurrent(p);
 			break;
 		}
 

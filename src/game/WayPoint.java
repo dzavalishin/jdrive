@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 
 import game.enums.TileTypes;
+import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
@@ -423,7 +424,7 @@ public class WayPoint implements IPoolItem
 		if (!tile.IsTileType(TileTypes.MP_RAILWAY) || !IsRailWaypoint(tile))
 			return Cmd.CMD_ERROR;
 
-		if (!tile.CheckTileOwnership() && !(Global.gs._current_player.isWater()))
+		if (!tile.CheckTileOwnership() && !(PlayerID.getCurrent().isWater()))
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle())

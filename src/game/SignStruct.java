@@ -204,7 +204,7 @@ public class SignStruct implements IPoolItem
 			ss.str = new StringID(Str.STR_280A_SIGN);
 			ss.x = x;
 			ss.y = y;
-			ss.owner = Global.gs._current_player; // owner of the sign; just eyecandy
+			ss.owner = PlayerID.getCurrent(); // owner of the sign; just eyecandy
 			ss.z = (byte) Landscape.GetSlopeZ(x,y);
 			ss.UpdateSignVirtCoords();
 			ss.MarkSignDirty();
@@ -241,7 +241,7 @@ public class SignStruct implements IPoolItem
 				Global.DeleteName(ss.str);
 				/* Assign the new one */
 				ss.str = str;
-				ss.owner = Global.gs._current_player;
+				ss.owner = PlayerID.getCurrent();
 
 				/* Update; mark sign dirty twice, because it can either becom longer, or shorter */
 				ss.MarkSignDirty();

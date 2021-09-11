@@ -10,7 +10,7 @@ import game.tables.ClearTables;
 import game.util.BitOps;
 import game.xui.ViewPort;
 
-// clear_cmd.c
+
 @SuppressWarnings("EmptyMethod")
 public class Clear extends ClearTables {
 
@@ -84,7 +84,6 @@ public class Clear extends ClearTables {
 	static void TerraformAddDirtyTile(TerraformerState ts, TileIndex tile)
 	{
 		int i, count;
-		//MutableTileIndex t;
 
 		count = ts.tile_table_count;
 		if (count >= 625) return;
@@ -441,7 +440,7 @@ public class Clear extends ClearTables {
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
 		if (tile.IsTileType( TileTypes.MP_UNMOVABLE) && tile.getMap().m5 == 3 &&
-				tile.IsTileOwner(Global.gs._current_player.id))
+				tile.IsTileOwner(PlayerID.getCurrent()))
 			return Cmd.return_cmd_error(Str.STR_5807_YOU_ALREADY_OWN_IT);
 
 		cost = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
@@ -516,7 +515,7 @@ public class Clear extends ClearTables {
 		tile = TileIndex.TileVirtXY(x, y);
 
 		if (!tile.IsTileType( TileTypes.MP_UNMOVABLE) || tile.getMap().m5 != 3) return Cmd.CMD_ERROR;
-		if (!tile.CheckTileOwnership() && !Global.gs._current_player.isWater()) return Cmd.CMD_ERROR;
+		if (!tile.CheckTileOwnership() && !PlayerID.getCurrent().isWater()) return Cmd.CMD_ERROR;
 
 
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;

@@ -1734,7 +1734,7 @@ public class MiscGui {
 
 					// draw colored flag for change player cheat
 					if (ce.str == Str.STR_CHEAT_CHANGE_PLAYER) {
-						DrawPlayerIcon(Global.gs._current_player, 156, y + 2);
+						DrawPlayerIcon(PlayerID.getCurrent(), 156, y + 2);
 					}
 				}
 

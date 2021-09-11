@@ -944,10 +944,11 @@ public class Engine extends EngineTables implements Serializable
 		if (!Engine.IsEngineIndex(p1)) return Cmd.CMD_ERROR;
 
 		e = Engine.GetEngine(p1);
-		if (GetBestPlayer(e.preview_player) != Global.gs._current_player.id) return Cmd.CMD_ERROR;
+		//if (GetBestPlayer(e.preview_player) != Global.gs._current_player.id) return Cmd.CMD_ERROR;
+		if (GetBestPlayer(e.preview_player) != PlayerID.getCurrent().id) return Cmd.CMD_ERROR;
 
 		if( 0 != (flags & Cmd.DC_EXEC))
-			AcceptEnginePreview(e, Global.gs._current_player);
+			AcceptEnginePreview(e, PlayerID.getCurrent());
 
 		return 0;
 	}
@@ -1164,7 +1165,7 @@ public class Engine extends EngineTables implements Serializable
 		if (e.type != type) return false;
 
 		// check if it's available
-		return e.isAvailableTo(Global.gs._current_player.id);
+		return e.isAvailableTo(PlayerID.getCurrent());
 	}
 
 

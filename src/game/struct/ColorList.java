@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class ColorList implements Serializable 
 {
+	private static final long serialVersionUID = 1L;
+	
 	public final int unk0;
     public final int unk1;
     public final int unk2;

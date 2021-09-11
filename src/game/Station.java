@@ -1140,7 +1140,7 @@ public class Station extends StationTables implements IPoolItem
 
 		// See if there is a deleted station close to us.
 		if (station == null) {
-			station = GetClosestStationFromTile(tile_org, 8, Global.gs._current_player);
+			station = GetClosestStationFromTile(tile_org, 8, PlayerID.getCurrent());
 			if (station != null && 0 != station.facilities) station = null;
 		}
 
@@ -1165,8 +1165,8 @@ public class Station extends StationTables implements IPoolItem
 			if (station == null) return Cmd.CMD_ERROR;
 
 			station.town = Town.ClosestTownFromTile(tile_org, -1);
-			if (Global.gs._current_player.id < Global.MAX_PLAYERS && 0 != (flags & Cmd.DC_EXEC))
-				station.town.have_ratings = BitOps.RETSETBIT(station.town.have_ratings, Global.gs._current_player.id);
+			if (!PlayerID.getCurrent().isSpecial() && 0 != (flags & Cmd.DC_EXEC))
+				station.town.have_ratings = BitOps.RETSETBIT(station.town.have_ratings, PlayerID.getCurrent().id);
 
 			if (!GenerateStationName(station, tile_org, 0)) return Cmd.CMD_ERROR;
 
@@ -1187,7 +1187,7 @@ public class Station extends StationTables implements IPoolItem
 			station.train_tile = new TileIndex( finalvalues[0] );
 			if (0 == station.facilities) station.xy = new TileIndex( finalvalues[0] );
 			station.facilities |= FACIL_TRAIN;
-			station.owner = Global.gs._current_player;
+			station.owner = PlayerID.getCurrent();
 
 			station.trainst_w = finalvalues[1];
 			station.trainst_h = finalvalues[2];
@@ -1322,7 +1322,7 @@ public class Station extends StationTables implements IPoolItem
 		// make sure the specified tile belongs to the current player, and that it is a railroad station.
 		if (!tile.IsTileType(TileTypes.MP_STATION) || tile.getMap().m5 >= 8 || !Global._patches.nonuniform_stations) return Cmd.CMD_ERROR;
 		st = GetStation(tile.getMap().m2);
-		if (!Global.gs._current_player.isWater() && (!Player.CheckOwnership(st.owner) || !tile.EnsureNoVehicle())) return Cmd.CMD_ERROR;
+		if (!PlayerID.getCurrent().isWater() && (!Player.CheckOwnership(st.owner) || !tile.EnsureNoVehicle())) return Cmd.CMD_ERROR;
 
 		// if we reached here, it means we can actually delete it. do that.
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -1486,11 +1486,11 @@ public class Station extends StationTables implements IPoolItem
 		int cost;
 
 		/* if there is flooding and non-uniform stations are enabled, remove platforms tile by tile */
-		if (Global.gs._current_player.isWater() && Global._patches.nonuniform_stations)
+		if (PlayerID.getCurrent().isWater() && Global._patches.nonuniform_stations)
 			return Cmd.DoCommandByTile(itile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_REMOVE_FROM_RAILROAD_STATION);
 
 		/* Current player owns the station? */
-		if (!Global.gs._current_player.isWater() && !Player.CheckOwnership(st.owner))
+		if (!PlayerID.getCurrent().isWater() && !Player.CheckOwnership(st.owner))
 			return Cmd.CMD_ERROR;
 
 		/* determine width and height of platforms */
@@ -1586,7 +1586,7 @@ public class Station extends StationTables implements IPoolItem
 
 		/* Find a station close to us */
 		if (st == null) {
-			st = GetClosestStationFromTile(tile, 8, Global.gs._current_player);
+			st = GetClosestStationFromTile(tile, 8, PlayerID.getCurrent());
 			if (st != null && 0 != st.facilities) st = null;
 		}
 
@@ -1612,8 +1612,8 @@ public class Station extends StationTables implements IPoolItem
 
 			st.town = t = Town.ClosestTownFromTile(tile, -1);
 
-			if (Global.gs._current_player.id < Global.MAX_PLAYERS && 0 != (flags&Cmd.DC_EXEC))
-				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global.gs._current_player.id);
+			if (!PlayerID.getCurrent().isSpecial() && 0 != (flags&Cmd.DC_EXEC))
+				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, PlayerID.getCurrent().id);
 
 			st.sign.setWidth_1(0);
 
@@ -1630,7 +1630,7 @@ public class Station extends StationTables implements IPoolItem
 			road_stop.type = type ? 1 : 0;
 			if (0==st.facilities) st.xy = tile;
 			st.facilities |= (type) ? FACIL_TRUCK_STOP : FACIL_BUS_STOP;
-			st.owner = Global.gs._current_player;
+			st.owner = PlayerID.getCurrent();
 
 			st.build_date = Global.get_date();
 
@@ -1664,7 +1664,7 @@ public class Station extends StationTables implements IPoolItem
 		RoadStop cur_stop;
 		boolean is_truck = tile.getMap().m5 < 0x47;
 
-		if (!Global.gs._current_player.isWater() && !Player.CheckOwnership(st.owner))
+		if (!PlayerID.getCurrent().isWater() && !Player.CheckOwnership(st.owner))
 			return Cmd.CMD_ERROR;
 
 		if (is_truck) { // truck stop
@@ -1750,7 +1750,10 @@ public class Station extends StationTables implements IPoolItem
 						&& st.airport_type != AirportFTAClass.AT_OILRIG)
 					num[0]++;
 			});
-			if (num[0] >= 2 && Global.gs._current_player.id != Owner.OWNER_TOWN) {
+
+			//if (num[0] >= 2 && Global.gs._current_player.id != Owner.OWNER_TOWN) 
+			if (num[0] >= 2 && !PlayerID.getCurrent().isTown()) 
+			{
 				Global.SetDParam(0, t.index);
 				return Cmd.return_cmd_error(Str.STR_2035_LOCAL_AUTHORITY_REFUSES);
 			}
@@ -1768,7 +1771,7 @@ public class Station extends StationTables implements IPoolItem
 
 		/* Find a station close to us */
 		if (st == null) {
-			st = GetClosestStationFromTile(tile, 8, Global.gs._current_player);
+			st = GetClosestStationFromTile(tile, 8, PlayerID.getCurrent());
 			if (st != null && 0 != st.facilities) st = null;
 		}
 
@@ -1789,8 +1792,8 @@ public class Station extends StationTables implements IPoolItem
 
 			st.town = t;
 
-			if (Global.gs._current_player.id < Global.MAX_PLAYERS && (flags & Cmd.DC_EXEC) != 0)
-				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global.gs._current_player.id);
+			if (!PlayerID.getCurrent().isSpecial() && (flags & Cmd.DC_EXEC) != 0)
+				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, PlayerID.getCurrent().id);
 
 			st.sign.setWidth_1(0);
 
@@ -1808,7 +1811,7 @@ public class Station extends StationTables implements IPoolItem
 		if( 0 != (flags & Cmd.DC_EXEC)) {
 			final AirportFTAClass afc = AirportFTAClass.GetAirport(p1);
 
-			st.owner = Global.gs._current_player;
+			st.owner = PlayerID.getCurrent();
 			if (Player.IsLocalPlayer() && afc.airport_depots.length /*nof_depots*/ != 0)
 				Depot._last_built_aircraft_depot_tile = tile.iadd( TileIndex.ToTileIndexDiff(afc.airport_depots[0]));
 
@@ -1864,7 +1867,7 @@ public class Station extends StationTables implements IPoolItem
 		int w,h;
 		int cost;
 
-		if (!Global.gs._current_player.isWater() && !Player.CheckOwnership(st.owner))
+		if (!PlayerID.getCurrent().isWater() && !Player.CheckOwnership(st.owner))
 			return Cmd.CMD_ERROR;
 
 		tile = st.airport_tile;
@@ -1986,7 +1989,9 @@ public class Station extends StationTables implements IPoolItem
 	{
 		TileIndex tile;
 
-		if (Global.gs._current_player.id >= Global.MAX_PLAYERS) {
+		//if (Global.gs._current_player.id >= Global.MAX_PLAYERS) 
+		if(PlayerID.getCurrent().isSpecial()) 
+		{
 			/* XXX: strange stuff */
 			return Cmd.return_cmd_error(Str.INVALID_STRING);
 		}
@@ -1998,8 +2003,8 @@ public class Station extends StationTables implements IPoolItem
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			st.dock_tile = null;
-			/* Buoys are marked in the Station struct by this flag. Yes, it is this
-			 * braindead.. */
+			/* Buoys are marked in the Station struct by this flag. 
+			 * Yes, it is this braindead.. */
 			st.facilities &= ~FACIL_DOCK;
 			st.had_vehicle_of_type &= ~HVOT_BUOY;
 
@@ -2095,7 +2100,7 @@ public class Station extends StationTables implements IPoolItem
 
 		/* Find a station close to us */
 		if (st == null) {
-			st = GetClosestStationFromTile(tile, 8, Global.gs._current_player);
+			st = GetClosestStationFromTile(tile, 8, PlayerID.getCurrent());
 			if (st!=null && 0 != st.facilities) st = null;
 		}
 
@@ -2114,8 +2119,8 @@ public class Station extends StationTables implements IPoolItem
 
 			st.town = t = Town.ClosestTownFromTile(tile, -1);
 
-			if (Global.gs._current_player.id < Global.MAX_PLAYERS && 0!= (flags&Cmd.DC_EXEC) )
-				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, Global.gs._current_player.id);
+			if (!PlayerID.getCurrent().isSpecial() && 0!= (flags&Cmd.DC_EXEC) )
+				t.have_ratings = BitOps.RETSETBIT(t.have_ratings, PlayerID.getCurrent().id);
 
 			st.sign.setWidth_1(0);
 
@@ -2128,7 +2133,7 @@ public class Station extends StationTables implements IPoolItem
 			st.dock_tile = tile;
 			if (0==st.facilities) st.xy = tile;
 			st.facilities |= FACIL_DOCK;
-			st.owner = Global.gs._current_player;
+			st.owner = PlayerID.getCurrent();
 
 			st.build_date = Global.get_date();
 

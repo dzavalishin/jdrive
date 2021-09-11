@@ -8,6 +8,7 @@ import game.enums.RoadStopType;
 import game.enums.TileTypes;
 import game.enums.TransportType;
 import game.ids.EngineID;
+import game.ids.PlayerID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
 import game.struct.FindRoadToChooseData;
@@ -94,7 +95,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		/* The ai_new queries the vehicle cost before building the route,
 		 * so we must check against cheaters no sooner than now. --pasky */
 		if (!Depot.IsTileDepotType(tile, TransportType.Road)) return Cmd.CMD_ERROR;
-		if (!tile.IsTileOwner(Global.gs._current_player)) return Cmd.CMD_ERROR;
+		if (!tile.IsTileOwner(PlayerID.getCurrent())) return Cmd.CMD_ERROR;
 
 		v = Vehicle.AllocateVehicle();
 		if (v == null ) // || IsOrderPoolFull())
@@ -110,7 +111,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 			v.unitnumber = unit_num;
 			v.direction = 0;
-			v.owner = Global.gs._current_player;
+			v.owner = PlayerID.getCurrent();
 
 			v.tile = tile;
 			x = tile.TileX() * 16 + 8;

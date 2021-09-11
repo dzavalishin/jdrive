@@ -205,7 +205,7 @@ public class Tree  extends TreeTables {
 						int treetype;
 						int m2;
 
-						if (Global._game_mode != GameModes.GM_EDITOR && Global.gs._current_player.id < Global.MAX_PLAYERS) {
+						if (Global._game_mode != GameModes.GM_EDITOR && !PlayerID.getCurrent().isSpecial()) {
 							Town t = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 							if (t != null)
 								t.ChangeTownRating(TownTables.RATING_TREE_UP_STEP, TownTables.RATING_TREE_MAXIMUM);
@@ -372,7 +372,7 @@ public class Tree  extends TreeTables {
 	{
 		int num;
 
-		if ( (0 != (flags & Cmd.DC_EXEC)) && Global.gs._current_player.id < Global.MAX_PLAYERS) {
+		if ( (0 != (flags & Cmd.DC_EXEC)) && !PlayerID.getCurrent().isSpecial()) {
 			Town t = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 			if (t != null)
 				t.ChangeTownRating(TownTables.RATING_TREE_DOWN_STEP, TownTables.RATING_TREE_MINIMUM);

@@ -34,7 +34,7 @@ public class UnmovableCmd extends UnmovableTables {
 		Player p = null;
 
 		/* Find player that has HQ flooded, and reset their location_of_house */
-		if (Global.gs._current_player.isWater()) {
+		if (PlayerID.getCurrent().isWater()) {
 			boolean dodelete = false;
 
 			Iterator<Player> ii = Player.getIterator();
@@ -209,7 +209,7 @@ public class UnmovableCmd extends UnmovableTables {
 		int m5 = tile.getMap().m5;
 
 		if(0 != (m5 & 0x80)) {
-			if (Global.gs._current_player.isWater()) return DestroyCompanyHQ(tile, Cmd.DC_EXEC);
+			if (PlayerID.getCurrent().isWater()) return DestroyCompanyHQ(tile, Cmd.DC_EXEC);
 			return Cmd.return_cmd_error(Str.STR_5804_COMPANY_HEADQUARTERS_IN);
 		}
 
@@ -218,7 +218,7 @@ public class UnmovableCmd extends UnmovableTables {
 
 		// checks if you're allowed to remove unmovable things
 		if (Global._game_mode != GameModes.GM_EDITOR 
-				&& !Global.gs._current_player.isWater()
+				&& !PlayerID.getCurrent().isWater()
 				&& ((flags & Cmd.DC_AUTO) != 0 || !Global._cheats.magic_bulldozer.value) )
 			return Cmd.return_cmd_error(Str.STR_5800_OBJECT_IN_THE_WAY);
 

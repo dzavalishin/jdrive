@@ -502,7 +502,7 @@ public class TrainCmd extends TrainTables
 					v.x_pos = x;
 					v.y_pos = y;
 					v.z_pos = Landscape.GetSlopeZ(x,y);
-					v.owner = Global.gs._current_player;
+					v.owner = PlayerID.getCurrent();
 					v.z_height = 6;
 					v.rail.setInDepot(); //track =  0x80;
 					v.assignStatus( Vehicle.VS_HIDDEN | Vehicle.VS_DEFPAL );
@@ -626,7 +626,7 @@ public class TrainCmd extends TrainTables
 		 * to the player. Doesn't matter if only the cost is queried */
 		if (0==(flags & Cmd.DC_QUERY_COST)) {
 			if (!Depot.IsTileDepotType(tile, TransportType.Rail)) return Cmd.CMD_ERROR;
-			if (!tile.IsTileOwner( Global.gs._current_player)) return Cmd.CMD_ERROR;
+			if (!tile.IsTileOwner( PlayerID.getCurrent())) return Cmd.CMD_ERROR;
 		}
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
@@ -664,7 +664,7 @@ public class TrainCmd extends TrainTables
 
 				v.direction = dir * 2 + 1;
 				v.tile = tile;
-				v.owner = Global.gs._current_player;
+				v.owner = PlayerID.getCurrent();
 				v.x_pos = (x |= _vehicle_initial_x_fract[dir]);
 				v.y_pos = (y |= _vehicle_initial_y_fract[dir]);
 				v.z_pos = Landscape.GetSlopeZ(x,y);

@@ -2499,13 +2499,9 @@ public class Vehicle implements IPoolItem
 		int cost, temp_cost = 0;
 		boolean stopped = false;
 		boolean train_fits_in_station = false;
-		//MA vars
-		//int i;
-		//Station st;
-		//END MA vars
 
 
-		Global.gs._current_player = v.owner;
+		PlayerID.setCurrent( v.owner );
 
 		assert(v.type == VEH_Train || v.type == VEH_Road || v.type == VEH_Ship || v.type == VEH_Aircraft);
 
@@ -2578,7 +2574,7 @@ public class Vehicle implements IPoolItem
 					NewsItem.AddNewsItem(message, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 				}
 				if (stopped) v.setStopped(false);
-				Global.gs._current_player = PlayerID.getNone();
+				PlayerID.setCurrentToNone();
 				return 0;
 			}
 
@@ -2628,7 +2624,7 @@ public class Vehicle implements IPoolItem
 		if (Player.IsLocalPlayer()) MiscGui.ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
 
 		if (stopped) v.setStopped(false);
-		Global.gs._current_player = PlayerID.getNone();
+		PlayerID.setCurrentToNone();
 
 		return 0;
 	}

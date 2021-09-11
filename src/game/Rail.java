@@ -636,7 +636,7 @@ public class Rail extends RailTables {
 				cost += ret;
 
 				if(0 != (flags & Cmd.DC_EXEC)) {
-					tile.SetTileOwner( Global.gs._current_player);
+					tile.SetTileOwner( PlayerID.getCurrent());
 					tile.getMap().m3 = BitOps.RETSB(tile.getMap().m3, 0, 4, p1);
 					tile.getMap().m5 = ((m5 & 0xC7) | 0x20); // railroad under bridge
 				}
@@ -657,7 +657,7 @@ public class Rail extends RailTables {
 				return Cmd.CMD_ERROR;
 			}
 			if ( (0 != (m5 & RAIL_TYPE_SPECIAL)) ||
-					!tile.IsTileOwner( Global.gs._current_player) ||
+					!tile.IsTileOwner( PlayerID.getCurrent()) ||
 					BitOps.GB(tile.getMap().m3, 0, 4) != p1) {
 				// Get detailed error message
 				return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
@@ -684,7 +684,7 @@ public class Rail extends RailTables {
 					)) {
 				if(0 != (flags & Cmd.DC_EXEC)) { // crossing
 					tile.getMap().m3 = 0xFF & tile.GetTileOwner().id; // road owner
-					tile.SetTileOwner(Global.gs._current_player); // rail owner
+					tile.SetTileOwner(PlayerID.getCurrent()); // rail owner
 					tile.getMap().m4 = 0xFF & p1;
 					tile.getMap().m5 = 0xFF & (0x10 | (track == TRACK_DIAG1 ? 0x08 : 0x00)); // level crossing
 				}
@@ -706,7 +706,7 @@ public class Rail extends RailTables {
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				tile.SetTileType(TileTypes.MP_RAILWAY);
-				tile.SetTileOwner( Global.gs._current_player);
+				tile.SetTileOwner( PlayerID.getCurrent());
 				tile.getMap().m2 = 0; // Bare land
 				tile.getMap().m3 = 0xFF & p1; // No signals, rail type
 				tile.getMap().m5 = 0xFF & trackbit;
@@ -747,7 +747,7 @@ public class Rail extends RailTables {
 		if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && !tile.IsTileType( TileTypes.MP_STREET) && !tile.IsTileType( TileTypes.MP_RAILWAY))
 			return Cmd.CMD_ERROR;
 
-		if (!Global.gs._current_player.isWater() && !Player.CheckTileOwnership(tile))
+		if (!PlayerID.getCurrent().isWater() && !Player.CheckTileOwnership(tile))
 			return Cmd.CMD_ERROR;
 
 		// allow building rail under bridge
@@ -1519,7 +1519,7 @@ public class Rail extends RailTables {
 			return Cmd.CMD_ERROR;
 
 		/* Only water can remove signals from anyone */
-		if (!Global.gs._current_player.isWater() && !Player.CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
+		if (!PlayerID.getCurrent().isWater() && !Player.CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
@@ -1635,7 +1635,7 @@ public class Rail extends RailTables {
 
 	static int RemoveTrainDepot(TileIndex tile, int flags)
 	{
-		if (!Player.CheckTileOwnership(tile) && !Global.gs._current_player.isWater())
+		if (!Player.CheckTileOwnership(tile) && !PlayerID.getCurrent().isWater())
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle())
@@ -1662,7 +1662,7 @@ public class Rail extends RailTables {
 			if(0 !=  (m5 & RAIL_TYPE_SPECIAL))
 				return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 
-			if (!tile.IsTileOwner( Global.gs._current_player.id))
+			if (!tile.IsTileOwner(PlayerID.getCurrent()))
 				return Cmd.return_cmd_error(Str.STR_1024_AREA_IS_OWNED_BY_ANOTHER);
 
 			return Cmd.return_cmd_error(Str.STR_1008_MUST_REMOVE_RAILROAD_TRACK);

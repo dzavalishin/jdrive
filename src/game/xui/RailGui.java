@@ -13,6 +13,7 @@ import game.TileIndex;
 import game.WayPoint;
 import game.enums.TileTypes;
 import game.enums.TransportType;
+import game.ids.PlayerID;
 import game.ifaces.OnButtonClick;
 import game.tables.Snd;
 import game.util.BitOps;
@@ -601,7 +602,7 @@ public class RailGui {
 	{
 		Window w;
 
-		if (Global.gs._current_player.isSpectator()) return;
+		if (PlayerID.getCurrent().isSpectator()) return;
 
 		//BiConsumer<Window,WindowEvent>  
 		WindowProc cmp = RailGui::BuildRailToolbWndProc;

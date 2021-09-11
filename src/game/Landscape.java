@@ -399,7 +399,7 @@ public class Landscape extends GenLandTable
 		}
 
 		if( 0 != (flags & (TileTypes.MP_MAPOWNER|TileTypes.MP_MAPOWNER_CURRENT)) ) {
-			/*PlayerID*/ int x = Global.gs._current_player.id;
+			/*PlayerID*/ int x = PlayerID.getCurrent().id;
 			if(0 != (flags & TileTypes.MP_MAPOWNER) ) x = args[p++];
 			tile.getMap().m1 = x;
 		}

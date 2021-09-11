@@ -269,11 +269,10 @@ public class mAirport
 	//the main procedure, does the checks and runs the process.
 	public static void MunicipalAirport(Town tn)
 	{
-		//Station st;
 		TileIndex tl; 
 
-		PlayerID old_player = Global.gs._current_player;
-		Global.gs._current_player = Owner.OWNER_TOWN_ID;
+		PlayerID old_player = PlayerID.getCurrent();
+		PlayerID.setCurrent( Owner.OWNER_TOWN_ID );
 
 		if(!Global._patches.allow_municipal_airports) 
 			MA_DestroyAirport(tn);
@@ -281,11 +280,10 @@ public class mAirport
 		if(!Global._patches.allow_municipal_airports 
 			|| (Global.get_cur_year() + 1920) < 1990 
 			|| tn.population < MA_MIN_POPULATION) {
-			Global.gs._current_player = old_player;
+			PlayerID.setCurrent(old_player);
 			return;
 		}
 
-		//FOR_ALL_STATIONS(st)
 		Iterator<Station> it = Station.getIterator();
 		while(it.hasNext())
 		{
@@ -296,7 +294,7 @@ public class mAirport
 				&& st.owner.isTown() 
 				&& st.town == tn) 
 			{
-				Global.gs._current_player = old_player;
+				PlayerID.setCurrent(old_player);
 				return;
 			}
 
@@ -307,23 +305,23 @@ public class mAirport
 		tl = MA_FindSite(tn);
 		
 		if(tl == TileIndex.INVALID_TILE) {
-			Global.gs._current_player = old_player;
+			PlayerID.setCurrent(old_player);
 			return;
 		}
 		
 		MA_BuildAirport(tl);
 		MA_AnnounceAirport(tn, tl);
 		
-		Global.gs._current_player = old_player;
+		PlayerID.setCurrent(old_player);
 	}
 
 	// same as above but isnt as stringent
 	public static void MA_EditorAddAirport(Town tn)
 	{
 		TileIndex tl;
-		PlayerID old_player = Global.gs._current_player;
+		PlayerID old_player = PlayerID.getCurrent();
 		
-		Global.gs._current_player = PlayerID.get( Owner.OWNER_TOWN );
+		PlayerID.setCurrent( PlayerID.get( Owner.OWNER_TOWN ) );
 		
 		Iterator<Station> it = Station.getIterator();
 		while(it.hasNext())
@@ -335,7 +333,7 @@ public class mAirport
 				&& st.town == tn
 				&& st.airport_type != AirportFTAClass.AT_OILRIG) { //not really needed but you never know
 					MA_DestroyAirport(tn);
-					Global.gs._current_player = old_player;
+					PlayerID.setCurrent(old_player);
 					return;
 			}
 		}
@@ -345,14 +343,14 @@ public class mAirport
 		if(Global.get_cur_year() + 1920 < INT_AIRPORT_YEAR) {
 			Global.SetDParam(0, tn.index);
 			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_TOO_EARLY, Str.INVALID_STRING, 300, 300);
-			Global.gs._current_player = old_player;
+			PlayerID.setCurrent(old_player);
 			return;
 		}
 
 		if(tn.population < MA_MIN_POPULATION) {
 			Global.SetDParam(0, tn.index);
 			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_LOW_POPULATION, Str.INVALID_STRING, 300, 300);
-			Global.gs._current_player = old_player;
+			PlayerID.setCurrent(old_player);
 			return;
 		}
 
@@ -361,14 +359,13 @@ public class mAirport
 		if(tl == TileIndex.INVALID_TILE) {
 			Global.SetDParam(0, tn.index);
 			Global.ShowErrorMessage(Str.STR_MA_CANT_BUILD_NO_SITE, Str.INVALID_STRING, 300, 300);
-			Global.gs._current_player = old_player;
+			PlayerID.setCurrent(old_player);
 			return;
 		}
 		
-		MA_BuildAirport(tl);
+		MA_BuildAirport(tl);		
 		
-		
-		Global.gs._current_player = old_player;		
+		PlayerID.setCurrent(old_player);		
 	}
 	
 	
