@@ -128,7 +128,7 @@ public class TrainCmd extends TrainTables
 
 	static boolean TrainShouldStop(final Vehicle  v, TileIndex tile)
 	{
-		final Order  o = v.getCurrent_order();
+		final Order o = v.getCurrent_order();
 
 		assert(v.type == Vehicle.VEH_Train);
 		assert(v.tile.IsTileType( TileTypes.MP_STATION));
@@ -1887,8 +1887,9 @@ public class TrainCmd extends TrainTables
 					v.cur_order_index++;
 				}
 
-				v.getCurrent_order().type = Order.OT_DUMMY;
-				v.getCurrent_order().flags = 0;
+				//v.getCurrent_order().type = Order.OT_DUMMY;
+				//v.getCurrent_order().flags = 0;
+				v.setCurrent_order(new Order(Order.OT_DUMMY));
 				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 			}
 			return 0;
@@ -1900,9 +1901,10 @@ public class TrainCmd extends TrainTables
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			v.dest_tile = tfdd.tile;
-			v.getCurrent_order().type = Order.OT_GOTO_DEPOT;
-			v.getCurrent_order().flags = Order.OF_NON_STOP | Order.OF_FULL_LOAD;
-			v.getCurrent_order().station = Depot.GetDepotByTile(tfdd.tile).index;
+			//v.getCurrent_order().type = Order.OT_GOTO_DEPOT;
+			//v.getCurrent_order().flags = Order.OF_NON_STOP | Order.OF_FULL_LOAD; // XXX must be OF_HALT_IN_DEPOT, not Order.OF_FULL_LOAD 
+			//v.getCurrent_order().station = Depot.GetDepotByTile(tfdd.tile).index;
+			v.setCurrent_order(new Order( Order.OT_GOTO_DEPOT, Order.OF_NON_STOP | Order.OF_HALT_IN_DEPOT, Depot.GetDepotByTile(tfdd.tile).index ) ); 
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 			/* If there is no depot in front, reverse automatically */
 			if (tfdd.reverse)
@@ -2393,8 +2395,9 @@ public class TrainCmd extends TrainTables
 
 		// check if we've reached a non-stop station while TTDPatch nonstop is enabled..
 		if (Global._patches.new_nonstop &&
-				0 != (v.getCurrent_order().flags & Order.OF_NON_STOP) &&
-				v.tile.IsTileType( TileTypes.MP_STATION) &&
+				//0 != (v.getCurrent_order().flags & Order.OF_NON_STOP) &&
+				v.getCurrent_order().hasFlag(Order.OF_NON_STOP) &&
+				v.tile.IsTileType(TileTypes.MP_STATION) &&
 				v.getCurrent_order().station == v.tile.getMap().m2) {
 			v.cur_order_index++;
 		}
@@ -2406,21 +2409,22 @@ public class TrainCmd extends TrainTables
 
 		// If no order, do nothing.
 		if (order == null) {
-			v.getCurrent_order().type = Order.OT_NOTHING;
-			v.getCurrent_order().flags = 0;
+			//v.getCurrent_order().type = Order.OT_NOTHING;
+			//v.getCurrent_order().flags = 0;
+			v.setCurrent_order(new Order(Order.OT_NOTHING));
 			v.dest_tile = null;
 			return false;
 		}
 
 		// If it is unchanged, keep it.
-		if (order.type    == v.getCurrent_order().type &&
+		if (
+				order.type    == v.getCurrent_order().type &&
 				order.flags   == v.getCurrent_order().flags &&
 				order.station == v.getCurrent_order().station)
 			return false;
 
 		// Otherwise set it, and determine the destination tile.
-		v.setCurrent_order(new Order( order ));
-
+		v.setCurrent_order(order);
 		v.dest_tile = null;
 
 		// store the station length if no shorter station was visited this order round
@@ -2509,11 +2513,12 @@ public class TrainCmd extends TrainTables
 
 			{
 				Order b = new Order( v.getCurrent_order() );
-				v.getCurrent_order().type = Order.OT_LEAVESTATION;
-				v.getCurrent_order().flags = 0;
-
+				//v.getCurrent_order().type = Order.OT_LEAVESTATION;
+				//v.getCurrent_order().flags = 0;
+				v.setCurrent_order(new Order(Order.OT_LEAVESTATION));
 				// If this was not the final order, don't remove it from the list.
-				if (0==(b.flags & Order.OF_NON_STOP)) return;
+				//if (0==(b.flags & Order.OF_NON_STOP)) return;
+				if(!b.hasFlag(Order.OF_NON_STOP)) return;
 			}
 		}
 
@@ -2582,16 +2587,18 @@ public class TrainCmd extends TrainTables
 		if (v.getCurrent_order().type == Order.OT_GOTO_STATION &&
 				v.getCurrent_order().station == station) {
 			// Yeah, keep the load/unload flags
-			// Non Stop now means if the order should be increased.
+			// Non Stop now means if the order should be increased. [dz] TODO XXX hack redo
 			v.getCurrent_order().type = Order.OT_LOADING;
 			v.getCurrent_order().flags &= Order.OF_FULL_LOAD | Order.OF_UNLOAD | Order.OF_TRANSFER;
 			v.getCurrent_order().setFlags(Order.OF_NON_STOP);
+			v.getCurrent_order().station = 0;
 		} else {
 			// No, just do a simple load
-			v.getCurrent_order().type = Order.OT_LOADING;
-			v.getCurrent_order().flags = 0;
+			//v.getCurrent_order().type = Order.OT_LOADING;
+			//v.getCurrent_order().flags = 0;
+			v.setCurrent_order(new Order(Order.OT_LOADING));
 		}
-		v.getCurrent_order().station = 0;
+		//v.getCurrent_order().station = 0;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_INC);
 		if (Economy.LoadUnloadVehicle(v) != 0) {
@@ -2995,9 +3002,11 @@ public class TrainCmd extends TrainTables
 						return;
 					}
 
-					if (v.getCurrent_order().type == Order.OT_LEAVESTATION) {
-						v.getCurrent_order().type = Order.OT_NOTHING;
-						v.getCurrent_order().flags = 0;
+					if (v.getCurrent_order().type == Order.OT_LEAVESTATION) 
+					{
+						//v.getCurrent_order().type = Order.OT_NOTHING;
+						//v.getCurrent_order().flags = 0;
+						v.setCurrent_order(new Order(Order.OT_NOTHING));
 						Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
 					}
 				}
@@ -3739,8 +3748,10 @@ public class TrainCmd extends TrainTables
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
 			Order t = new Order( v.getCurrent_order() );
-			v.getCurrent_order().type = Order.OT_DUMMY;
-			v.getCurrent_order().flags = 0;
+			
+			//v.getCurrent_order().type = Order.OT_DUMMY;
+			//v.getCurrent_order().flags = 0;
+			v.setCurrent_order(new Order(Order.OT_DUMMY));
 
 			if (BitOps.HASBIT(t.flags, Order.OFB_PART_OF_ORDERS)) { // Part of the orderlist?
 				v.rail.days_since_order_progr = 0;

@@ -64,10 +64,10 @@ public class Order implements Serializable
 		next = src.next; // TODO Do we need it?
 	}
 
-	public Order(int t, int f, int st) 
+	public Order(int type, int flags, int st) 
 	{
-		type = t;
-		flags = f;
+		this.type = type;
+		this.flags = flags;
 		station = st;
 	}
 
@@ -122,7 +122,7 @@ public class Order implements Serializable
 	public static final int OFB_HALT_IN_DEPOT     = 2;
 	public static final int OFB_SERVICE_IF_NEEDED = 2;
 	public static final int OFB_NON_STOP          = 3;
-
+	
 
 
 	/* Possible clone options */

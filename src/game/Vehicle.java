@@ -1330,8 +1330,8 @@ public class Vehicle implements IPoolItem
 		Vehicle v = this;
 		// we need to set v.leave_depot_instantly as we have no control of it's contents at this time
 		//if (BitOps.HASBIT(v.current_order.flags, Order.OFB_HALT_IN_DEPOT) && !BitOps.HASBIT(v.current_order.flags, Order.OFB_PART_OF_ORDERS) && v.current_order.type == Order.OT_GOTO_DEPOT) 
-		if (v.current_order.hasFlag(Order.OFB_HALT_IN_DEPOT) 
-				&& !v.current_order.hasFlag(Order.OFB_PART_OF_ORDERS) 
+		if (v.current_order.hasFlag(Order.OF_HALT_IN_DEPOT) 
+				&& !v.current_order.hasFlag(Order.OF_PART_OF_ORDERS) 
 				&& v.current_order.typeIs(Order.OT_GOTO_DEPOT) ) 
 		{
 			// we keep the vehicle in the depot since the user ordered it to stay
