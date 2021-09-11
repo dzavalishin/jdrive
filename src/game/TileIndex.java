@@ -338,21 +338,17 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	//  INVALID_TILE, because the y is wrapped. This is needed in
 	//  for example, farmland. When the tile is not wrapped,
 	//  the result will be tile + TileDiffXY(addx, addy)
-	public static int TileAddWrap(TileIndex tile, int addx, int addy)
-	{
-		int x = tile.TileX() + addx;
-		int y = tile.TileY() + addy;
-
-		// Are we about to wrap?
-		if (x < Global.MapMaxX() && y < Global.MapMaxY())
-			return tile.getTile() + TileIndex.TileDiffXY(addx, addy).diff;
-
-		return INVALID_TILE.getTile();
-	}
-
 	public TileIndex TileAddWrap(int addx, int addy)
 	{
-		return new TileIndex(TileAddWrap(this, addx, addy));
+		int x = this.TileX() + addx;
+		int y = this.TileY() + addy;
+
+		// Are we about to wrap?
+		if (x < Global.MapMaxX() && y < Global.MapMaxY() && x >= 0 && y >= 0) {
+			return new TileIndex(this.getTile() + TileIndex.TileDiffXY(addx, addy).diff);
+		}
+
+		return INVALID_TILE;
 	}
 
 

@@ -1031,13 +1031,12 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		if (BitOps.CHANCE16(1, 8)) {
 			int x = i.width  / 2 + Hal.Random() % 31 - 16;
 			int y = i.height / 2 + Hal.Random() % 31 - 16;
-			TileIndex tile = new TileIndex(
-					TileIndex.TileAddWrap( new TileIndex(i.xy), x, y));
+			TileIndex tile = new TileIndex(i.xy).TileAddWrap(x, y);
 			if (tile.isValid()) PlantFarmField(tile);
 		}
 	}
 
-	static final TileIndexDiffC _chop_dir[] = {
+	static final TileIndexDiffC[] _chop_dir = {
 			new TileIndexDiffC( 0,  1),
 			new TileIndexDiffC( 1,  0),
 			new TileIndexDiffC( 0, -1),
