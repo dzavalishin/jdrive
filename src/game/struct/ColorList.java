@@ -17,14 +17,13 @@ public class ColorList implements Serializable
 	{
 		int i = 0;
 		
-		unk0 = b[i++];		 
-		unk1 = b[i++];
-		unk2 = b[i++];
-		window_color_1a = b[i++];
-		window_color_1b = b[i++];
-		window_color_bga = b[i++];
-		window_color_bgb = b[i++];
-		window_color_2 = b[i++];		
+		unk0 = Byte.toUnsignedInt(b[i++]);		 
+		unk1 = Byte.toUnsignedInt(b[i++]);
+		unk2 = Byte.toUnsignedInt(b[i++]);
+		window_color_1a = Byte.toUnsignedInt(b[i++]);
+		window_color_1b = Byte.toUnsignedInt(b[i++]);
+		window_color_bga = Byte.toUnsignedInt(b[i++]);
+		window_color_bgb = Byte.toUnsignedInt(b[i++]);
+		window_color_2 = Byte.toUnsignedInt(b[i++]);		
 	}
-
 }
