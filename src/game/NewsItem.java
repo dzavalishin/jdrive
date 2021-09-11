@@ -185,7 +185,7 @@ public class NewsItem implements Serializable
 		//memset(ni, 0, sizeof(*ni));
 
 		ni.string_id = new StringID( string );
-		ni.display_mode = flags;
+		ni.display_mode = flags & 0xFF;
 		ni.flags = 0xFF & ((flags >> 8) | NF_NOEXPIRE);
 
 		// show this news message in color?
