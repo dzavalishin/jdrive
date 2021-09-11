@@ -561,6 +561,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	public static int TILE_MASK(int x) { return (x & Global.gs._map_tile_mask); }
 	public static void TILE_ASSERT(int x) { assert TILE_MASK(x) == x; }
 	
+	/** Assert that tile is not rolled over map border */
 	public void TILE_ASSERT() { assert TILE_MASK(tile) == tile; }
 
 

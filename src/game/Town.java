@@ -164,7 +164,7 @@ implements IPoolItem, Serializable
 		@Override
 		public Town createObject() { return new Town(); }
 	};
-	
+
 	@Override
 	public void setIndex(int index) {
 		this.index = index;
@@ -766,6 +766,7 @@ implements IPoolItem, Serializable
 
 	private static void build_road_and_exit(TileIndex tile, int rcmd, int t1index )
 	{
+		//Global.debug("build_road_and_exit @  %s", tile);
 		final int cmd = Cmd.DoCommandByTile(tile, rcmd, /*t1.index*/ t1index, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
 		if (!Cmd.CmdFailed(cmd))
 			_grow_town_result = -1;
@@ -917,7 +918,7 @@ implements IPoolItem, Serializable
 			build_road_and_exit(tile, rcmd, t1.index);
 			return;
 		}
-		// Quit if it selecting an appropiate bridge type fails a large number of times.
+		// Quit if it selecting an appropriate bridge type fails a large number of times.
 		j = 22;
 		{
 			int bridge_len = TunnelBridgeCmd.GetBridgeLength(tile, tmptile);
@@ -1025,33 +1026,23 @@ implements IPoolItem, Serializable
 	};
 
 
-	//static boolean disableGrow = true;
-	// Grow the town
-	// Returns true if a house was built, or no if the build failed.
-	boolean GrowTown()
+	private boolean doGrowTown()
 	{
 		TileIndex tile;
-		//TileIndexDiffC ptr;
 		TileInfo ti = new TileInfo();
-		PlayerID old_player;
-
-		//if(disableGrow) return false;
-
-		// Current player is a town
-		old_player = Global.gs._current_player;
-		Global.gs._current_player = Owner.OWNER_TOWN_ID;
 
 		// Find a road that we can base the construction on.
 		tile = xy;
- 
-		for (TileIndexDiffC ptr : _town_coord_mod) 
+
+		//if(BitOps.CHANCE16(4, 10)) // [dz] More roads - XXX hack, results are strange 
 		{
-			if (Road.GetRoadBitsByTile(tile) != 0) {
-				boolean r = GrowTownAtRoad(tile);
-				Global.gs._current_player = old_player;
-				return r;
+			for (TileIndexDiffC ptr : _town_coord_mod) 
+			{
+				if (Road.GetRoadBitsByTile(tile) != 0) 
+					return GrowTownAtRoad(tile);
+				
+				tile = tile.iadd(TileIndex.ToTileIndexDiff(ptr));
 			}
-			tile = tile.iadd(TileIndex.ToTileIndexDiff(ptr));
 		}
 
 		// No road available, try to build a random road block by
@@ -1066,15 +1057,31 @@ implements IPoolItem, Serializable
 			if (ti.tileh == 0 && (ti.type != TileTypes.MP_HOUSE.ordinal() || ti.map5 != 0)) {
 				if (!Cmd.CmdFailed(Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_AUTO, Cmd.CMD_LANDSCAPE_CLEAR))) {
 					Cmd.DoCommandByTile(tile, GenRandomRoadBits(), this.index, Cmd.DC_EXEC | Cmd.DC_AUTO, Cmd.CMD_BUILD_ROAD);
-					Global.gs._current_player = old_player;
 					return true;
 				}
 			}
 			tile = tile.iadd(TileIndex.ToTileIndexDiff(ptr));
 		}
 
-		Global.gs._current_player = old_player;
 		return false;
+	}
+	
+	
+	//static boolean disableGrow = true;
+	// Grow the town
+	// Returns true if a house was built, or no if the build failed.
+	boolean GrowTown()
+	{
+		//if(disableGrow) return false;
+
+		// Current player is a town
+		PlayerID old_player = Global.gs._current_player;
+		Global.gs._current_player = Owner.OWNER_TOWN_ID;
+
+		boolean r = doGrowTown();
+
+		Global.gs._current_player = old_player;
+		return r;
 	}
 
 	static final int _town_radius_data[][] = {
@@ -2045,7 +2052,7 @@ implements IPoolItem, Serializable
 		t.flags12 &= ~GROW_BIT;
 
 		int m;
-		
+
 		if (t.fund_buildings_months != 0) {
 			m = _grow_count_values1[Math.min(n[0], 5)];
 			t.fund_buildings_months--;
@@ -2127,7 +2134,7 @@ implements IPoolItem, Serializable
 
 		if(tile.IsTileType(TileTypes.MP_HOUSE) || (
 				tile.IsTileType( TileTypes.MP_STREET) && tile.GetRoadOwner().isTown() ) )
-				//(tile.IsLevelCrossing() ? tile.getMap().m3 : tile.GetTileOwner().id) == Owner.OWNER_TOWN) )
+			//(tile.IsLevelCrossing() ? tile.getMap().m3 : tile.GetTileOwner().id) == Owner.OWNER_TOWN) )
 			return GetTown(tile.getMap().m2);
 
 		Town.forEach( (t) ->
@@ -2414,7 +2421,7 @@ implements IPoolItem, Serializable
 		//oos.writeObject(GameState._towns);		
 	}
 
-	
+
 	public static class TownPopSorter implements Comparator<Integer> {
 		public int compare(Integer a, Integer b) {
 			final Town ta = GetTown(a);
@@ -2430,13 +2437,13 @@ implements IPoolItem, Serializable
 		{
 			int r;
 			Integer [] argv = new Integer[1];
-	
+
 			argv[0] = a;
 			String buf1 = Strings.GetStringWithArgs(Str.STR_TOWN, (Object[])argv);
-	
+
 			argv[0] = b;
 			String buf2 = Strings.GetStringWithArgs(Str.STR_TOWN, (Object[])argv);
-	
+
 			r = buf1.compareTo(buf2);
 			if(0 != (TownGui._town_sort_order & 1)) r = -r;
 			return r;
@@ -2482,18 +2489,18 @@ implements IPoolItem, Serializable
 	{
 		return stream().anyMatch( t -> t.isValid() );
 	}
-	
+
 	/**
 	 * @return pool of items of this type
 	 */
 	static MemoryPool<Town> pool() { return Global.gs._towns; }
-	
+
 	/**
 	 * @return stream of items of this type
 	 */
 	static Stream<Town> stream() { return pool().stream(); }
-	
-	
+
+
 }
 
 
