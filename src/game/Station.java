@@ -2460,8 +2460,8 @@ public class Station extends StationTables implements IPoolItem
 		}
 	}
 
-	static final  byte _enter_station_speedtable[] = {
-			(byte)215, (byte)195, (byte)175, (byte)155, (byte)135, 115, 95, 75, 55, 35, 15, 0
+	private static final int[] _enter_station_speedtable = {
+		215, 195, 175, 155, 135, 115, 95, 75, 55, 35, 15, 0
 	};
 
 	private static int VehicleEnter_Station(Vehicle v, TileIndex tile, int x, int y)
@@ -2490,11 +2490,11 @@ public class Station extends StationTables implements IPoolItem
 							if (dir != 2 && dir != 4) x = ~x & 0xF;
 							if (x == 12) return 2 | (station_id << 8); // enter Station 
 							if (x < 12) {
-								int spd;
-
 								v.setTrainSlowing(true);
-								spd = _enter_station_speedtable[x];
-								if (spd < v.cur_speed) v.cur_speed = spd;
+								int newMaxSpeed = _enter_station_speedtable[x];
+								if (newMaxSpeed < v.cur_speed) {
+									v.cur_speed = newMaxSpeed;
+								}
 							}
 						}
 					}

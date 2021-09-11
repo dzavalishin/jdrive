@@ -351,7 +351,7 @@ public class SettingsGui extends SettingsTables
 	//};
 
 	// Temporary holding place of values in the difficulty window until 'Save' is clicked
-	static GameOptions _opt_mod_temp;
+	static GameOptions _opt_mod_temp = new GameOptions();
 	// 0x383E = (1 << 13) | (1 << 12) | (1 << 11) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2) | (1 << 1)
 	//#define DIFF_INGAME_DISABLED_BUTTONS 0x383E
 
