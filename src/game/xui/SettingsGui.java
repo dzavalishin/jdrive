@@ -101,6 +101,7 @@ public class SettingsGui extends SettingsTables
 			Global.SetDParam(4, Str.STR_TOWNNAME_ORIGINAL_ENGLISH + GameOptions._opt_ptr.town_name);
 			Global.SetDParam(5, _autosave_dropdown[GameOptions._opt_ptr.autosave]);
 			Global.SetDParam(6, 0); // TODO Strings.SPECSTR_LANGUAGE_START + _dynlang.curr);
+			//Global.SetDParam(6, Strings.SPECSTR_LANGUAGE_START + _dynlang.curr);
 			//i = GetCurRes();
 			Global.SetDParam(7, 0); // TODO i == _num_resolutions ? Str.STR_RES_OTHER : Strings.SPECSTR_RESOLUTION_START + i);
 			Global.SetDParam(8, 0); // TODO Strings.SPECSTR_SCREENSHOT_START + _cur_screenshot_format);
@@ -314,13 +315,13 @@ public class SettingsGui extends SettingsTables
 			new GameSettingData(  0,   2,  1, Str.STR_6839_PERMISSIVE),
 	};
 
-	/*
-	static  boolean GetBitAndShift(int *b)
+	
+	static  boolean GetBitAndShift(int [] b)
 	{
-		int x = *b;
-		*b >>= 1;
-				return BitOps.HASBIT(x, 0);
-	}*/
+		int x = b[0];
+		b[0] >>= 1;
+		return BitOps.HASBIT(x, 0);
+	}
 
 
 	public static void SetDifficultyLevel(int mode, GameOptions gm_opt)
@@ -345,8 +346,8 @@ public class SettingsGui extends SettingsTables
 	//extern void StartupEconomy();
 
 	//enum {
-	//private static final int GAMEDIFF_WND_TOP_OFFSET = 45;
-	//private static final int GAMEDIFF_WND_ROWSIZE    = 9;
+	private static final int GAMEDIFF_WND_TOP_OFFSET = 45;
+	private static final int GAMEDIFF_WND_ROWSIZE    = 9;
 	//};
 
 	// Temporary holding place of values in the difficulty window until 'Save' is clicked
@@ -370,25 +371,26 @@ public class SettingsGui extends SettingsTables
 			}
 			break;
 		case WE_PAINT: {
-			int click_a, click_b, disabled;
+			//int click_a, click_b, 
 			int i;
 			int y, value;
 
 			w.click_state = (1 << 3) << _opt_mod_temp.diff_level; // have current difficulty button clicked
 			w.DrawWindowWidgets();
 
-			click_a = _difficulty_click_a;
-			click_b = _difficulty_click_b;
+			int [] click_a = { _difficulty_click_a };
+			int [] click_b = { _difficulty_click_b };
+			int [] disabled = { 0 };
 
 			/* XXX - Disabled buttons in normal gameplay. Bitshifted for each button to see if
 			 * that bit is set. If it is set, the button is disabled */
-			disabled = (Global._game_mode == GameModes.GM_NORMAL) ? DIFF_INGAME_DISABLED_BUTTONS : 0;
-			/* TODO GAME_DIFFICULTY
+			disabled[0] = (Global._game_mode == GameModes.GM_NORMAL) ? DIFF_INGAME_DISABLED_BUTTONS : 0;
+			/* GAME_DIFFICULTY */
 			y = GAMEDIFF_WND_TOP_OFFSET;
-			for (i = 0; i != GAME_DIFFICULTY_NUM; i++) {
-				Gfx.DrawFrameRect( 5, y,  5 + 8, y + 8, 3, GetBitAndShift(&click_a) ? (1 << 5) : 0);
-				Gfx.DrawFrameRect(15, y, 15 + 8, y + 8, 3, GetBitAndShift(&click_b) ? (1 << 5) : 0);
-				if (GetBitAndShift(&disabled) || (Global._networking && !Global._network_server)) {
+			for (i = 0; i != Global.GAME_DIFFICULTY_NUM; i++) {
+				Gfx.DrawFrameRect( 5, y,  5 + 8, y + 8, 3, GetBitAndShift(click_a) ? (1 << 5) : 0);
+				Gfx.DrawFrameRect(15, y, 15 + 8, y + 8, 3, GetBitAndShift(click_b) ? (1 << 5) : 0);
+				if (GetBitAndShift(disabled) || (Global._networking && !Global._network_server)) {
 					int color = Sprite.PALETTE_MODIFIER_GREYOUT | Global._color_list[3].unk2;
 					Gfx.GfxFillRect( 6, y + 1,  6 + 8, y + 8, color);
 					Gfx.GfxFillRect(16, y + 1, 16 + 8, y + 8, color);
@@ -398,13 +400,14 @@ public class SettingsGui extends SettingsTables
 				Gfx.DrawStringCentered(20, y, Str.STR_681A, 0);
 
 
-				value = _game_setting_info[i].str + ((int*)&_opt_mod_temp.diff)[i];
+				//value =  _game_setting_info[i].str + ((int*)&_opt_mod_temp.diff)[i];
+				value =  _game_setting_info[i].str + _opt_mod_temp.diff.getAsInt(i);
 				if (i == 4) value *= 1000; // XXX - handle currency option
 				Global.SetDParam(0, value);
 				Gfx.DrawString(30, y, Str.STR_6805_MAXIMUM_NO_COMPETITORS + i, 0);
 
 				y += GAMEDIFF_WND_ROWSIZE + 2; // space items apart a bit
-			} */
+			} 
 		} break;
 
 		case WE_CLICK:
@@ -422,7 +425,6 @@ public class SettingsGui extends SettingsTables
 				x = e.pt.x - 5;
 				if (!BitOps.IS_INT_INSIDE(x, 0, 21)) // Button area
 					return;
-				/* TODO
 
 				y = e.pt.y - GAMEDIFF_WND_TOP_OFFSET;
 				if (y < 0)
@@ -430,7 +432,7 @@ public class SettingsGui extends SettingsTables
 
 				// Get button from Y coord.
 				btn = y / (GAMEDIFF_WND_ROWSIZE + 2);
-				if (btn >= GAME_DIFFICULTY_NUM || y % (GAMEDIFF_WND_ROWSIZE + 2) >= 9)
+				if (btn >= Global.GAME_DIFFICULTY_NUM || y % (GAMEDIFF_WND_ROWSIZE + 2) >= 9)
 					return;
 
 				// Clicked disabled button?
@@ -441,24 +443,25 @@ public class SettingsGui extends SettingsTables
 
 				_difficulty_timeout = 5;
 
-				
-				val = ((int*)&_opt_mod_temp.diff)[btn];
+				//val = ((int*)&_opt_mod_temp.diff)[btn];
+				val = _opt_mod_temp.diff.getAsInt(btn);
 
-				info = &_game_setting_info[btn]; // get information about the difficulty setting
+				info = _game_setting_info[btn]; // get information about the difficulty setting
 				if (x >= 10) {
 					// Increase button clicked
 					val = Math.min(val + info.step, info.max);
-					SETBIT(_difficulty_click_b, btn);
+					_difficulty_click_b = BitOps.RETSETBIT(_difficulty_click_b, btn);
 				} else {
 					// Decrease button clicked
 					val = Math.max(val - info.step, info.min);
-					SETBIT(_difficulty_click_a, btn);
+					_difficulty_click_a = BitOps.RETSETBIT(_difficulty_click_a, btn);
 				}
 
 				// save value in temporary variable
-				((int*)&_opt_mod_temp.diff)[btn] = val;
-				SetDifficultyLevel(3, &_opt_mod_temp); // set difficulty level to custom
-				*/
+				//((int*)&_opt_mod_temp.diff)[btn] = val;
+				_opt_mod_temp.diff.setAsInt(btn,val);
+				SetDifficultyLevel(3, _opt_mod_temp); // set difficulty level to custom
+				
 				w.SetWindowDirty();
 			}	break;
 			case 3: case 4: case 5: case 6: /* Easy / Medium / Hard / Custom */
@@ -467,18 +470,20 @@ public class SettingsGui extends SettingsTables
 				w.SetWindowDirty();
 				break;
 			case 7: /* Highscore Table */
-				// TODO ShowHighscoreTable(_opt_mod_temp.diff_level, -1);
+				PlayerGui.ShowHighscoreTable(_opt_mod_temp.diff_level, -1);
 				break;
 			case 10: { /* Save button - save changes */
 				int btn, val;
-				/* TODO difficuilty
-				for (btn = 0; btn != GAME_DIFFICULTY_NUM; btn++) {
-					val = ((int*)&_opt_mod_temp.diff)[btn];
+				/* difficulty */
+				for (btn = 0; btn != Global.GAME_DIFFICULTY_NUM; btn++) {
+					//val = ((int*)&_opt_mod_temp.diff)[btn];
+					val = _opt_mod_temp.diff.getAsInt(btn);
 					// if setting has changed, change it
-					if (val != ((int*)&_opt_ptr.diff)[btn])
-						Cmd.DoCommandP(0, btn, val, null, Cmd.CMD_CHANGE_DIFFICULTY_LEVEL);
-				} */
-				// TODO Cmd.DoCommandP(null, -1, _opt_mod_temp.diff_level, null, Cmd.CMD_CHANGE_DIFFICULTY_LEVEL);
+					//if (val != ((int*)&_opt_ptr.diff)[btn])
+					if (val != GameOptions._opt_ptr.diff.getAsInt(btn))
+						Cmd.DoCommandP(null, btn, val, null, Cmd.CMD_CHANGE_DIFFICULTY_LEVEL);
+				} 
+				Cmd.DoCommandP(null, -1, _opt_mod_temp.diff_level, null, Cmd.CMD_CHANGE_DIFFICULTY_LEVEL);
 				w.DeleteWindow();
 				// If we are in the editor, we should reload the economy.
 				//  This way when you load a game, the max loan and interest rate
@@ -535,7 +540,9 @@ public class SettingsGui extends SettingsTables
 		Window.DeleteWindowById(Window.WC_GAME_OPTIONS, 0);
 		/* Copy current settings (ingame or in intro) to temporary holding place
 		 * change that when setting stuff, copy back on clicking 'OK' */
-		// TODO memcpy(&_opt_mod_temp, GameOptions._opt_ptr, sizeof(GameOptions));
+		// memcpy(&_opt_mod_temp, GameOptions._opt_ptr, sizeof(GameOptions));
+		_opt_mod_temp = new GameOptions();
+		_opt_mod_temp.assign( GameOptions._opt_ptr );
 		Window.AllocateWindowDesc(_game_difficulty_desc);
 	}
 
@@ -621,7 +628,7 @@ public class SettingsGui extends SettingsTables
 
 	static int EngineRenewMoneyUpdate(int p1)
 	{
-		// TODO (int)?
+		// TODO (int)? Pass long?
 		Cmd.DoCommandP(null, 2, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 		return 0;
 	}

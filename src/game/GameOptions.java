@@ -39,7 +39,7 @@ public class GameOptions
 		autosave = src.autosave;
 		road_side = src.road_side;
 	}
-
+	
 }
 
 

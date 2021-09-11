@@ -1240,7 +1240,6 @@ public class ConsoleCmds extends Console
 	public static void IConsoleStdLibRegister()
 	{
 		// stdlib
-		//extern byte _stdlib_developer; /* XXX extern in .c */
 
 		// default variables and functions
 		IConsoleCmdRegister("help",         ConsoleCmds::ConHelp);

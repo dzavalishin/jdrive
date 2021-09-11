@@ -390,12 +390,6 @@ public class Order implements Serializable
 
 		if (sel_ord > v.num_orders) return Cmd.CMD_ERROR;
 
-		// need? if (IsOrderPoolFull()) return_cmd_error(Str.STR_8831_NO_MORE_SPACE_FOR_ORDERS);
-
-		/* XXX - This limit is only here because the backuppedorders can't
-		 * handle any more then this.. */
-		//if (v.num_orders >= MAX_BACKUP_ORDER_COUNT) return_cmd_error(Str.STR_8832_TOO_MANY_ORDERS);
-
 		/* For ships, make sure that the station is not too far away from the
 		 * previous destination, for human players with new pathfinding disabled */
 		if (v.type == Vehicle.VEH_Ship && v.owner.IS_HUMAN_PLAYER() &&
@@ -648,7 +642,7 @@ public class Order implements Serializable
 	{
 		Vehicle v;
 		Order order;
-		//OrderID sel_ord = OrderID.get(BitOps.GB(p1, 16, 16)); // XXX - automatically truncated to 8 bits.
+		//OrderID sel_ord = OrderID.get(BitOps.GB(p1, 16, 16)); // X XX - automatically truncated to 8 bits.
 		int sel_ord = BitOps.GB(p1, 16, 16); // XXX - automatically truncated to 8 bits. [dz] I don't get it
 		VehicleID veh   = VehicleID.get( BitOps.GB(p1,  0, 16) );
 
