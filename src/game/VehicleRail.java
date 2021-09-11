@@ -1,5 +1,7 @@
 package game;
 
+import java.util.EnumSet;
+
 import game.ids.EngineID;
 
 public class VehicleRail extends VehicleChild 
@@ -37,7 +39,8 @@ public class VehicleRail extends VehicleChild
 	int force_proceed;
 	int railtype;
 
-	int flags;
+	//int flags;
+	EnumSet<VehicleRailFlags> flags = EnumSet.noneOf(VehicleRailFlags.class); 
 
 	int pbs_status;
 	TileIndex pbs_end_tile;
@@ -81,8 +84,8 @@ public class VehicleRail extends VehicleChild
 
 		track =
 		force_proceed =
-		railtype =
-		flags =
+		railtype = 0;
+		flags.clear();
 		pbs_status = 0;
 		
 		pbs_end_tile = null;
@@ -118,3 +121,16 @@ public class VehicleRail extends VehicleChild
 
 
 }
+
+
+enum VehicleRailFlags 
+{
+	Reversing,
+
+	// used to calculate if train is going up or down
+	GoingUp, GoingDown,
+
+	// used to store if a wagon is powered or not
+	PoweredWagon	
+}
+
