@@ -14,6 +14,7 @@ import game.Station;
 import game.Str;
 import game.TileIndex;
 import game.Vehicle;
+import game.enums.TransportType;
 import game.ids.StringID;
 import game.util.BitOps;
 import game.util.YearMonthDay;
@@ -305,7 +306,7 @@ public class RoadVehGui
 				Vehicle v;
 				int h;
 				v = Vehicle.GetVehicle(w.window_number);
-				h = (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_ROAD) && v.isStopped()) ? (1<< 7) : (1 << 11);
+				h = (Depot.IsTileDepotType(v.getTile(), TransportType.Road) && v.isStopped()) ? (1<< 7) : (1 << 11);
 				if (h != w.hidden_state) {
 					w.hidden_state = h;
 					w.SetWindowDirty();
@@ -920,7 +921,7 @@ public class RoadVehGui
 				VehicleGui.DrawVehicleProfitButton(v, x, y + 13);
 
 				Global.SetDParam(0, v.getUnitnumber().id);
-				if (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_ROAD) && v.isHidden())
+				if (Depot.IsTileDepotType(v.getTile(), TransportType.Road) && v.isHidden())
 					str = Str.STR_021F;
 				else
 					str = v.getAge() > v.getMax_age() - 366 ? Str.STR_00E3 : Str.STR_00E2;
@@ -979,7 +980,7 @@ public class RoadVehGui
 
 				tile = Depot._last_built_road_depot_tile;
 				do {
-					if (Depot.IsTileDepotType(tile, Global.TRANSPORT_ROAD) && tile.IsTileOwner( Global.gs._local_player)) {
+					if (Depot.IsTileDepotType(tile, TransportType.Road) && tile.IsTileOwner( Global.gs._local_player)) {
 						ShowRoadDepotWindow(tile);
 						ShowBuildRoadVehWindow(tile);
 						return;

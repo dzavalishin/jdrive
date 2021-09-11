@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 import game.util.BitOps;
@@ -112,21 +113,21 @@ public class Depot implements IPoolItem, Serializable
 	/**
 	 * Check if a tile is a depot of the given type.
 	 */
-	//static private boolean IsTileDepotType(TileIndex tile, TransportType type)
-	public static boolean IsTileDepotType(TileIndex tile, int type)
+	//public static boolean IsTileDepotType(TileIndex tile, int type)
+	static public boolean IsTileDepotType(TileIndex tile, TransportType type)
 	{
 		if( tile == null ) return false;
 		
 		switch(type)
 		{
-			case Global.TRANSPORT_RAIL:
-				return tile.IsTileType( TileTypes.MP_RAILWAY) && (tile.getMap().m5 & 0xFC) == 0xC0;
+			case Rail:
+				return tile.IsTileType(TileTypes.MP_RAILWAY) && (tile.getMap().m5 & 0xFC) == 0xC0;
 
-			case Global.TRANSPORT_ROAD:
-				return tile.IsTileType( TileTypes.MP_STREET) && (tile.getMap().m5 & 0xF0) == 0x20;
+			case Road:
+				return tile.IsTileType(TileTypes.MP_STREET) && (tile.getMap().m5 & 0xF0) == 0x20;
 
-			case Global.TRANSPORT_WATER:
-				return tile.IsTileType( TileTypes.MP_WATER) && (tile.getMap().m5 & ~3) == 0x80;
+			case Water:
+				return tile.IsTileType(TileTypes.MP_WATER) && (tile.getMap().m5 & ~3) == 0x80;
 
 			default:
 				assert false;
@@ -138,18 +139,19 @@ public class Depot implements IPoolItem, Serializable
 	 * Returns the direction the exit of the depot on the given tile is facing.
 	 */
 	//private DiagDirection GetDepotDirection(TileIndex tile, TransportType type)
-	public static /*DiagDirection*/ int GetDepotDirection(TileIndex tile, int type)
+	//public static /*DiagDirection*/ int GetDepotDirection(TileIndex tile, int type)
+	public static /*DiagDirection*/ int GetDepotDirection(TileIndex tile, TransportType type)
 	{
 		assert(IsTileDepotType(tile, type));
 
 		switch (type)
 		{
-			case Global.TRANSPORT_RAIL:
-			case Global.TRANSPORT_ROAD:
+			case Rail:
+			case Road:
 				/* Rail and road store a diagonal direction in bits 0 and 1 */
 				//return BitOps.GB(Global._m[tile.getTile()].m5, 0, 2);
 				return BitOps.GB(tile.M().m5, 0, 2);
-			case Global.TRANSPORT_WATER:
+			case Water:
 				/* Water is stubborn, it stores the directions in a different order. */
 				//switch (BitOps.GB(Global._m[tile.getTile()].m5, 0, 2)) 
 				switch (BitOps.GB(tile.M().m5, 0, 2)) 

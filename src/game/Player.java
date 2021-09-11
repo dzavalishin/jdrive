@@ -153,12 +153,12 @@ public class Player implements Serializable
 	}
 
 	public static Player GetCurrentPlayer() {
-		return GetPlayer(Global.gs._current_player);
+		return GetPlayer(PlayerID.getCurrent());
 	}
 
 	static boolean IsLocalPlayer()
 	{
-		return Global.gs._local_player.id == Global.gs._current_player.id;
+		return Global.gs._local_player.id == Global.gs.getCurrentPlayer().id;
 	}
 
 
@@ -332,7 +332,7 @@ public class Player implements Serializable
 	public static boolean CheckPlayerHasMoney(int cost)
 	{
 		if (cost > 0) {
-			PlayerID pid = Global.gs._current_player;
+			PlayerID pid = PlayerID.getCurrent();
 			if (pid.id < Global.MAX_PLAYERS && cost > GetPlayer(pid).money64) {
 				Global.SetDParam(0, cost);
 				Global._error_message = Str.STR_0003_NOT_ENOUGH_CASH_REQUIRES;
@@ -359,7 +359,7 @@ public class Player implements Serializable
 
 	static void SubtractMoneyFromPlayer(int cost)
 	{
-		PlayerID pid = Global.gs._current_player;
+		PlayerID pid = PlayerID.getCurrent();
 		if (pid.id < Global.MAX_PLAYERS)
 			GetPlayer(pid).SubtractMoneyFromAnyPlayer(cost);
 	}
@@ -411,7 +411,7 @@ public class Player implements Serializable
 	{
 		assert(owner.id <= Owner.OWNER_WATER);
 
-		if (owner.equals(Global.gs._current_player))
+		if (owner.equals(PlayerID.getCurrent()))
 			return true;
 		Global._error_message = Str.STR_013B_OWNED_BY;
 		GetNameOfOwner(owner, new TileIndex(0) );
@@ -424,7 +424,7 @@ public class Player implements Serializable
 
 		assert(owner.id <= Owner.OWNER_WATER);
 
-		if (owner.equals(Global.gs._current_player))
+		if (owner.equals(PlayerID.getCurrent()))
 			return true;
 		Global._error_message = Str.STR_013B_OWNED_BY;
 
@@ -872,10 +872,10 @@ public class Player implements Serializable
 	static int CmdReplaceVehicle(int x, int y, int flags, int p1, int p2)
 	{
 		Player p;
-		if (!(Global.gs._current_player.id < Global.MAX_PLAYERS))
+		if (!(!PlayerID.getCurrent().isSpecial()))
 			return Cmd.CMD_ERROR;
 
-		p = GetPlayer(Global.gs._current_player);
+		p = GetCurrentPlayer(); // Player(Global.gs.getCurrentPlayer());
 		switch (BitOps.GB(p1, 0, 3)) {
 		case 0:
 			if (p.engine_renew == ( 0 != BitOps.GB(p2, 0, 1)) )
@@ -995,7 +995,7 @@ public class Player implements Serializable
 	 */
 	static int CmdPlayerCtrl(int x, int y, int flags, int p1, int p2)
 	{
-		if(0 != (flags & Cmd.DC_EXEC)) Global.gs._current_player = PlayerID.getNone();
+		if(0 != (flags & Cmd.DC_EXEC)) PlayerID.setCurrentToNone();
 
 		switch (p1) {
 		case 0: { // Create a new Player 
@@ -1382,7 +1382,7 @@ public class Player implements Serializable
 	/* Validate functions for rail building */
 	static boolean ValParamRailtype(int rail) 
 	{ 
-		return BitOps.HASBIT(GetPlayer(Global.gs._current_player).avail_railtypes, rail);
+		return BitOps.HASBIT(GetPlayer(PlayerID.getCurrent()).avail_railtypes, rail);
 	}
 
 

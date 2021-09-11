@@ -4,7 +4,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import game.ids.OrderID;
+import game.enums.TransportType;
 import game.ids.VehicleID;
 import game.util.BitOps;
 import game.xui.VehicleGui;
@@ -64,10 +64,10 @@ public class Order implements Serializable
 		next = src.next; // TODO Do we need it?
 	}
 
-	public Order(int t, int f, int st) 
+	public Order(int type, int flags, int st) 
 	{
-		type = t;
-		flags = f;
+		this.type = type;
+		this.flags = flags;
 		station = st;
 	}
 
@@ -122,7 +122,7 @@ public class Order implements Serializable
 	public static final int OFB_HALT_IN_DEPOT     = 2;
 	public static final int OFB_SERVICE_IF_NEEDED = 2;
 	public static final int OFB_NON_STOP          = 3;
-
+	
 
 
 	/* Possible clone options */
@@ -222,7 +222,8 @@ public class Order implements Serializable
 	{
 		Vehicle v;
 		VehicleID veh   = VehicleID.get( BitOps.GB(p1,  0, 16) );
-		OrderID sel_ord = OrderID.get( BitOps.GB(p1, 16, 16) );
+		//OrderID sel_ord = OrderID.get( BitOps.GB(p1, 16, 16) );
+		int sel_ord = BitOps.GB(p1, 16, 16);
 		Order new_order = UnpackOrder(p2);
 
 		if (!veh.IsVehicleIndex()) 
@@ -326,15 +327,15 @@ public class Order implements Serializable
 
 				switch (v.type) {
 				case Vehicle.VEH_Train:
-					if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
+					if (!Depot.IsTileDepotType(dp.xy, TransportType.Rail)) return Cmd.CMD_ERROR;
 					break;
 
 				case Vehicle.VEH_Road:
-					if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_ROAD)) return Cmd.CMD_ERROR;
+					if (!Depot.IsTileDepotType(dp.xy, TransportType.Road)) return Cmd.CMD_ERROR;
 					break;
 
 				case Vehicle.VEH_Ship:
-					if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_WATER)) return Cmd.CMD_ERROR;
+					if (!Depot.IsTileDepotType(dp.xy, TransportType.Water)) return Cmd.CMD_ERROR;
 					break;
 
 				default: return Cmd.CMD_ERROR;
@@ -387,22 +388,16 @@ public class Order implements Serializable
 		default: return Cmd.CMD_ERROR;
 		}
 
-		if (sel_ord.id > v.num_orders) return Cmd.CMD_ERROR;
-
-		// XXX need? if (IsOrderPoolFull()) return_cmd_error(Str.STR_8831_NO_MORE_SPACE_FOR_ORDERS);
-
-		/* XXX - This limit is only here because the backuppedorders can't
-		 * handle any more then this.. */
-		//if (v.num_orders >= MAX_BACKUP_ORDER_COUNT) return_cmd_error(Str.STR_8832_TOO_MANY_ORDERS);
+		if (sel_ord > v.num_orders) return Cmd.CMD_ERROR;
 
 		/* For ships, make sure that the station is not too far away from the
 		 * previous destination, for human players with new pathfinding disabled */
 		if (v.type == Vehicle.VEH_Ship && v.owner.IS_HUMAN_PLAYER() &&
-				sel_ord.id != 0 && v.GetVehicleOrder(sel_ord.id - 1).type == OT_GOTO_STATION
+				sel_ord != 0 && v.GetVehicleOrder(sel_ord - 1).type == OT_GOTO_STATION
 				&& !Global._patches.new_pathfinding_all) {
 
 			int dist = Map.DistanceManhattan(
-					Station.GetStation(v.GetVehicleOrder(sel_ord.id - 1).station).getXy(),
+					Station.GetStation(v.GetVehicleOrder(sel_ord - 1).station).getXy(),
 					Station.GetStation(new_order.station).getXy()
 					);
 			if (dist >= 130)
@@ -420,9 +415,9 @@ public class Order implements Serializable
 			} else {
 				/* Try to get the previous item (we are inserting above the
 				    selected) */
-				Order order = v.GetVehicleOrder(sel_ord.id - 1);
+				Order order = v.GetVehicleOrder(sel_ord - 1);
 
-				if (order == null && v.GetVehicleOrder(sel_ord.id) != null) {
+				if (order == null && v.GetVehicleOrder(sel_ord) != null) {
 					/* There is no previous item, so we are altering v.orders itself
 					    But because the orders can be shared, we copy the info over
 					    the v.orders, so we don't have to change the pointers of
@@ -453,7 +448,7 @@ public class Order implements Serializable
 
 				/* If there is added an order before the current one, we need
 				to update the selected Order */
-				if (sel_ord.id <= u.cur_order_index) {
+				if (sel_ord <= u.cur_order_index) {
 					int cur = u.cur_order_index + 1;
 					/* Check if we don't go out of bound */
 					if (cur < u.num_orders)
@@ -496,7 +491,8 @@ public class Order implements Serializable
 	{
 		Vehicle v, u;
 		VehicleID veh_id = VehicleID.get( p1 );
-		OrderID sel_ord = OrderID.get( p2 );
+		//OrderID sel_ord = OrderID.get( p2 );
+		final int sel_ord = p2;
 		Order order;
 
 		if (!Vehicle.IsVehicleIndex(veh_id.id)) return Cmd.CMD_ERROR;
@@ -504,26 +500,26 @@ public class Order implements Serializable
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		/* If we did not select an order, we maybe want to de-clone the orders */
-		if (sel_ord.id >= v.num_orders)
+		if (sel_ord >= v.num_orders)
 			return DecloneOrder(v, flags);
 
 		order = v.GetVehicleOrder(sel_ord);
 		if (order == null) return Cmd.CMD_ERROR;
 
 		if (0 != (flags & Cmd.DC_EXEC)) {
-			if (v.GetVehicleOrder(sel_ord.id - 1) == null) {
-				if (v.GetVehicleOrder(sel_ord.id + 1) != null) {
+			if (v.GetVehicleOrder(sel_ord - 1) == null) {
+				if (v.GetVehicleOrder(sel_ord + 1) != null) {
 					/* First item, but not the last, so we need to alter v.orders
 					    Because we can have shared order, we copy the data
 					    from the next item over the deleted */
-					order = v.GetVehicleOrder(sel_ord.id + 1);
+					order = v.GetVehicleOrder(sel_ord + 1);
 					SwapOrders(v.orders, order);
 				} else {
 					/* Last item, so clean the list */
 					v.orders = null;
 				}
 			} else {
-				v.GetVehicleOrder(sel_ord.id - 1).next = order.next;
+				v.GetVehicleOrder(sel_ord - 1).next = order.next;
 			}
 
 			/* Give the item free */
@@ -553,7 +549,7 @@ public class Order implements Serializable
 					}
 				}
 
-				if (sel_ord.id < u.cur_order_index)
+				if (sel_ord < u.cur_order_index)
 					u.cur_order_index--;
 
 				/* If we removed the last order, make sure the shared vehicles
@@ -564,7 +560,7 @@ public class Order implements Serializable
 
 				/* NON-stop flag is misused to see if a train is in a station that is
 				 * on his order list or not */
-				if (sel_ord.id == u.cur_order_index && u.getCurrent_order().type == OT_LOADING &&
+				if (sel_ord == u.cur_order_index && u.getCurrent_order().type == OT_LOADING &&
 						BitOps.HASBIT(u.getCurrent_order().flags, OFB_NON_STOP)) {
 					u.getCurrent_order().flags = 0;
 				}
@@ -646,7 +642,8 @@ public class Order implements Serializable
 	{
 		Vehicle v;
 		Order order;
-		OrderID sel_ord = OrderID.get(BitOps.GB(p1, 16, 16)); // XXX - automatically truncated to 8 bits.
+		//OrderID sel_ord = OrderID.get(BitOps.GB(p1, 16, 16)); // X XX - automatically truncated to 8 bits.
+		int sel_ord = BitOps.GB(p1, 16, 16); // XXX - automatically truncated to 8 bits. [dz] I don't get it
 		VehicleID veh   = VehicleID.get( BitOps.GB(p1,  0, 16) );
 
 		if (!veh.IsVehicleIndex()) return Cmd.CMD_ERROR;
@@ -656,7 +653,7 @@ public class Order implements Serializable
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		/* Is it a valid order? */
-		if (sel_ord.id >= v.num_orders) return Cmd.CMD_ERROR;
+		if (sel_ord >= v.num_orders) return Cmd.CMD_ERROR;
 
 		order = v.GetVehicleOrder(sel_ord);
 		if (order.type != OT_GOTO_STATION &&
@@ -688,7 +685,7 @@ public class Order implements Serializable
 				Vehicle u = v.GetFirstVehicleFromSharedList();
 				while (u != null) {
 					/* toggle u.current_order "Full load" flag if it changed */
-					if (sel_ord.id == u.cur_order_index &&
+					if (sel_ord == u.cur_order_index &&
 							BitOps.HASBIT(u.getCurrent_order().flags, OFB_FULL_LOAD) != BitOps.HASBIT(order.flags, OFB_FULL_LOAD))
 						u.getCurrent_order().flags = BitOps.RETTOGGLEBIT(u.getCurrent_order().flags, OFB_FULL_LOAD);
 					u.InvalidateVehicleOrder();
@@ -790,7 +787,7 @@ public class Order implements Serializable
 
 		case CO_COPY: {
 			Vehicle src;
-			int delta;
+			
 
 			if (!veh_src.IsVehicleIndex()) return Cmd.CMD_ERROR;
 
@@ -822,7 +819,7 @@ public class Order implements Serializable
 			}
 
 			/* make sure there are orders available */
-			delta = dst.IsOrderListShared() ? src.num_orders + 1 : src.num_orders - dst.num_orders;
+			//int delta = dst.IsOrderListShared() ? src.num_orders + 1 : src.num_orders - dst.num_orders;
 			//if (!HasOrderPoolFree(delta))					return_cmd_error(Str.STR_8831_NO_MORE_SPACE_FOR_ORDERS);
 
 			if (0 != (flags & Cmd.DC_EXEC)) {
@@ -882,7 +879,8 @@ public class Order implements Serializable
 	static int CmdRestoreOrderIndex(int x, int y, int flags, int p1, int p2)
 	{
 		Vehicle v;
-		OrderID cur_ord = OrderID.get( BitOps.GB(p2,  0, 16) );
+		//OrderID cur_ord = OrderID.get( BitOps.GB(p2,  0, 16) );
+		int cur_ord = BitOps.GB(p2,  0, 16);
 		int serv_int = BitOps.GB(p2, 16, 16);
 
 		if (!Vehicle.IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
@@ -890,10 +888,10 @@ public class Order implements Serializable
 		v = Vehicle.GetVehicle(p1);
 		/* Check the vehicle type and ownership, and if the service interval and order are in range */
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
-		if (serv_int != Depot.GetServiceIntervalClamped(serv_int) || cur_ord.id >= v.num_orders) return Cmd.CMD_ERROR;
+		if (serv_int != Depot.GetServiceIntervalClamped(serv_int) || cur_ord >= v.num_orders) return Cmd.CMD_ERROR;
 
 		if (0 != (flags & Cmd.DC_EXEC)) {
-			v.cur_order_index = cur_ord.id;
+			v.cur_order_index = cur_ord;
 			v.service_interval = serv_int;
 		}
 

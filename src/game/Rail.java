@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import game.TrackPathFinder.TPFHashEnt;
 import game.enums.Owner;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.FindLengthOfTunnelResult;
@@ -635,7 +636,7 @@ public class Rail extends RailTables {
 				cost += ret;
 
 				if(0 != (flags & Cmd.DC_EXEC)) {
-					tile.SetTileOwner( Global.gs._current_player);
+					tile.SetTileOwner( PlayerID.getCurrent());
 					tile.getMap().m3 = BitOps.RETSB(tile.getMap().m3, 0, 4, p1);
 					tile.getMap().m5 = ((m5 & 0xC7) | 0x20); // railroad under bridge
 				}
@@ -656,7 +657,7 @@ public class Rail extends RailTables {
 				return Cmd.CMD_ERROR;
 			}
 			if ( (0 != (m5 & RAIL_TYPE_SPECIAL)) ||
-					!tile.IsTileOwner( Global.gs._current_player) ||
+					!tile.IsTileOwner( PlayerID.getCurrent()) ||
 					BitOps.GB(tile.getMap().m3, 0, 4) != p1) {
 				// Get detailed error message
 				return Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
@@ -683,7 +684,7 @@ public class Rail extends RailTables {
 					)) {
 				if(0 != (flags & Cmd.DC_EXEC)) { // crossing
 					tile.getMap().m3 = 0xFF & tile.GetTileOwner().id; // road owner
-					tile.SetTileOwner(Global.gs._current_player); // rail owner
+					tile.SetTileOwner(PlayerID.getCurrent()); // rail owner
 					tile.getMap().m4 = 0xFF & p1;
 					tile.getMap().m5 = 0xFF & (0x10 | (track == TRACK_DIAG1 ? 0x08 : 0x00)); // level crossing
 				}
@@ -705,7 +706,7 @@ public class Rail extends RailTables {
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				tile.SetTileType(TileTypes.MP_RAILWAY);
-				tile.SetTileOwner( Global.gs._current_player);
+				tile.SetTileOwner( PlayerID.getCurrent());
 				tile.getMap().m2 = 0; // Bare land
 				tile.getMap().m3 = 0xFF & p1; // No signals, rail type
 				tile.getMap().m5 = 0xFF & trackbit;
@@ -746,7 +747,7 @@ public class Rail extends RailTables {
 		if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && !tile.IsTileType( TileTypes.MP_STREET) && !tile.IsTileType( TileTypes.MP_RAILWAY))
 			return Cmd.CMD_ERROR;
 
-		if (!Global.gs._current_player.isWater() && !Player.CheckTileOwnership(tile))
+		if (!PlayerID.getCurrent().isWater() && !Player.CheckTileOwnership(tile))
 			return Cmd.CMD_ERROR;
 
 		// allow building rail under bridge
@@ -973,7 +974,7 @@ public class Rail extends RailTables {
 	 * @param p2 depot direction (0 through 3), where 0 is NE, 1 is SE, 2 is SW, 3 is NW
 	 *
 	 * TODO When checking for the tile slope,
-	 * distingush between "Flat land required" and "land sloped in wrong direction"
+	 * distinguish between "Flat land required" and "land sloped in wrong direction"
 	 */
 	public static int CmdBuildTrainDepot(int x, int y, int flags, int p1, int p2)
 	{
@@ -1518,7 +1519,7 @@ public class Rail extends RailTables {
 			return Cmd.CMD_ERROR;
 
 		/* Only water can remove signals from anyone */
-		if (!Global.gs._current_player.isWater() && !Player.CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
+		if (!PlayerID.getCurrent().isWater() && !Player.CheckTileOwnership(tile)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
@@ -1634,14 +1635,14 @@ public class Rail extends RailTables {
 
 	static int RemoveTrainDepot(TileIndex tile, int flags)
 	{
-		if (!Player.CheckTileOwnership(tile) && !Global.gs._current_player.isWater())
+		if (!Player.CheckTileOwnership(tile) && !PlayerID.getCurrent().isWater())
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle())
 			return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			/* Track */ int  track = TrackdirToTrack(DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, Global.TRANSPORT_RAIL)));
+			/* Track */ int  track = TrackdirToTrack(DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, TransportType.Rail)));
 
 			Depot.DoDeleteDepot(tile);
 			SetSignalsOnBothDir(tile, track);
@@ -1661,7 +1662,7 @@ public class Rail extends RailTables {
 			if(0 !=  (m5 & RAIL_TYPE_SPECIAL))
 				return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 
-			if (!tile.IsTileOwner( Global.gs._current_player.id))
+			if (!tile.IsTileOwner(PlayerID.getCurrent()))
 				return Cmd.return_cmd_error(Str.STR_1024_AREA_IS_OWNED_BY_ANOTHER);
 
 			return Cmd.return_cmd_error(Str.STR_1008_MUST_REMOVE_RAILROAD_TRACK);
@@ -2262,7 +2263,7 @@ public class Rail extends RailTables {
 				}
 
 				return true;
-			} else if (Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL)) {
+			} else if (Depot.IsTileDepotType(tile, TransportType.Rail)) {
 				return true; // don't look further if the tile is a depot
 			}
 		}
@@ -2491,7 +2492,7 @@ public class Rail extends RailTables {
 			ssd.has_presignal = false;
 			ssd.has_pbssignal = 0; //false;
 
-			Pathfind.FollowTrack(tile, 0xC000 | Global.TRANSPORT_RAIL, direction, Rail::SetSignalsEnumProc, Rail::SetSignalsAfterProc, ssd);
+			Pathfind.FollowTrack(tile, TransportType.Rail, 0xC000, direction, Rail::SetSignalsEnumProc, Rail::SetSignalsAfterProc, ssd);
 			ChangeSignalStates(ssd);
 
 			// remember the result only for the first iteration.
@@ -2674,13 +2675,13 @@ public class Rail extends RailTables {
 
 
 	//static int GetTileTrackStatus_Track(TileIndex tile, TransportType mode)
-	static int GetTileTrackStatus_Track(TileIndex tile, int mode)
+	static int GetTileTrackStatus_Track(TileIndex tile, TransportType mode)
 	{
 		int a;
 		int b;
 		int ret;
 
-		if (mode != Global.TRANSPORT_RAIL) return 0;
+		if (mode != TransportType.Rail) return 0;
 
 		int m5 = tile.getMap().m5;
 
@@ -2720,7 +2721,7 @@ public class Rail extends RailTables {
 
 	static void ClickTile_Track(TileIndex tile)
 	{
-		if (tile.IsTileDepotType(Global.TRANSPORT_RAIL)) {
+		if (tile.IsTileDepotType(TransportType.Rail)) {
 			TrainGui.ShowTrainDepotWindow(tile);
 		} else if (tile.IsRailWaypoint()) {
 			Gui.ShowRenameWaypointWindow(WayPoint.GetWaypointByTile(tile));
@@ -2782,10 +2783,10 @@ public class Rail extends RailTables {
 		int length;
 
 		// this routine applies only to trains in depot tiles
-		if (v.type != Vehicle.VEH_Train || !tile.IsTileDepotType(Global.TRANSPORT_RAIL)) return 0;
+		if (v.type != Vehicle.VEH_Train || !tile.IsTileDepotType(TransportType.Rail)) return 0;
 
 		/* depot direction */
-		dir = Depot.GetDepotDirection(tile, Global.TRANSPORT_RAIL);
+		dir = Depot.GetDepotDirection(tile, TransportType.Rail);
 
 		/* calculate the point where the following wagon should be activated */
 		/* this depends on the length of the current vehicle */
@@ -3438,20 +3439,20 @@ static  byte SignalOnTrack(Track track) {
 	 * TRANSPORT_RAIL.
 	 */
 	//static  /*TransportType*/ int GetCrossingTransportType(TileIndex tile, Track track)
-	static  /*TransportType*/ int GetCrossingTransportType(TileIndex tile, /* Track */ int  track)
+	static TransportType GetCrossingTransportType(TileIndex tile, /* Track */ int  track)
 	{
 		/* XXX: Nicer way to write this? */
 		switch(track)
 		{
 		/* When map5 bit 3 is set, the road runs in the y direction (DIAG2) */
 		case TRACK_DIAG1:
-			return (BitOps.HASBIT(tile.getMap().m5, 3) ? Global.TRANSPORT_RAIL : Global.TRANSPORT_ROAD);
+			return (BitOps.HASBIT(tile.getMap().m5, 3) ? TransportType.Rail : TransportType.Road);
 		case TRACK_DIAG2:
-			return (BitOps.HASBIT(tile.getMap().m5, 3) ? Global.TRANSPORT_ROAD : Global.TRANSPORT_RAIL);
+			return (BitOps.HASBIT(tile.getMap().m5, 3) ? TransportType.Road : TransportType.Rail);
 		default:
 			assert false;
 		}
-		return Global.INVALID_TRANSPORT;
+		return TransportType.Invalid; // Global.INVALID_TRANSPORT;
 	}
 
 

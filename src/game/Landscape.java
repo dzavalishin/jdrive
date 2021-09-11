@@ -2,6 +2,7 @@ package game;
 
 import game.enums.Owner;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.TileDesc;
@@ -254,7 +255,7 @@ public class Landscape extends GenLandTable
 	}
 
 	//static int GetTileTrackStatus(TileIndex tile, TransportType mode)
-	public static int GetTileTrackStatus(TileIndex tile, int mode)
+	public static int GetTileTrackStatus(TileIndex tile, /*int*/ TransportType mode)
 	{
 		return _tile_type_procs[tile.GetTileType().ordinal()].get_tile_track_status_proc.applyAsInt(tile, mode);
 	}
@@ -398,7 +399,7 @@ public class Landscape extends GenLandTable
 		}
 
 		if( 0 != (flags & (TileTypes.MP_MAPOWNER|TileTypes.MP_MAPOWNER_CURRENT)) ) {
-			/*PlayerID*/ int x = Global.gs._current_player.id;
+			/*PlayerID*/ int x = PlayerID.getCurrent().id;
 			if(0 != (flags & TileTypes.MP_MAPOWNER) ) x = args[p++];
 			tile.getMap().m1 = x;
 		}

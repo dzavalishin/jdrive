@@ -13,6 +13,7 @@ import game.TileIndex;
 import game.enums.GameModes;
 import game.enums.RoadStopType;
 import game.enums.TileTypes;
+import game.ids.PlayerID;
 import game.ifaces.OnButtonClick;
 import game.tables.Snd;
 import game.util.BitOps;
@@ -314,7 +315,7 @@ public class RoadGui
 
 	static void ShowBuildRoadToolbar()
 	{
-		if (Global.gs._current_player.isSpectator()) return;
+		if (PlayerID.getCurrent().isSpectator()) return;
 		Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);
 		Window.AllocateWindowDesc(_build_road_desc);
 		if (Global._patches.link_terraform_toolbar) Terraform.ShowTerraformToolbar();

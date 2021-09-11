@@ -166,7 +166,7 @@ public class AirCraft extends AirCraftTables {
 		// to just query the cost, it is not neccessary to have a valid tile (automation/AI)
 		if(0 != (flags & Cmd.DC_QUERY_COST)) return value;
 
-		if (!IsAircraftHangarTile(tile) || !tile.IsTileOwner(Global.gs._current_player)) return Cmd.CMD_ERROR;
+		if (!IsAircraftHangarTile(tile) || !tile.IsTileOwner(PlayerID.getCurrent())) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
@@ -188,7 +188,7 @@ public class AirCraft extends AirCraftTables {
 			v.type = u.type = Vehicle.VEH_Aircraft;
 			v.direction = 3;
 
-			v.owner = u.owner = Global.gs._current_player;
+			v.owner = u.owner = PlayerID.getCurrent();
 
 			v.tile = tile;
 			//			u.tile = 0;
@@ -298,7 +298,7 @@ public class AirCraft extends AirCraftTables {
 
 				w.type = Vehicle.VEH_Aircraft;
 				w.direction = 0;
-				w.owner = Global.gs._current_player;
+				w.owner = PlayerID.getCurrent();
 				w.x_pos = v.getX_pos();
 				w.y_pos = v.getY_pos();
 				w.z_pos = v.z_pos + 5;
@@ -1671,9 +1671,9 @@ public class AirCraft extends AirCraftTables {
 				p.EngineHasReplacement(v.getEngine_type()) ||
 				(p.engine_renew && v.age - v.max_age > p.engine_renew_months * 30)
 				)) {
-			Global.gs._current_player = Global.gs._local_player;
+			PlayerID.setCurrent( Global.gs._local_player );
 			Cmd.DoCommandP(v.tile, v.index, 1, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
-			Global.gs._current_player = PlayerID.getNone();
+			PlayerID.setCurrentToNone();
 		}
 	}
 
@@ -1800,9 +1800,9 @@ public class AirCraft extends AirCraftTables {
 			if (p.EngineHasReplacement(v.getEngine_type()) ||
 					(p.engine_renew && v.age - v.max_age > (p.engine_renew_months * 30))) {
 				// send the aircraft to the hangar at next airport (bit 17 set)
-				Global.gs._current_player = Global.gs._local_player;
+				PlayerID.setCurrent( Global.gs._local_player );
 				Cmd.DoCommandP(v.tile, v.index, 1 << 16, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
-				Global.gs._current_player = PlayerID.getNone();
+				PlayerID.setCurrentToNone();
 			}
 		}
 	}

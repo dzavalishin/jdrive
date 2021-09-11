@@ -37,9 +37,18 @@ public interface ISoundClip
 		fc.setValue(20f * (float) Math.log10(vol));
 	}	
 
-	static void setPan(Clip c, float x) {
+	// TODO on some systems pan is not available. Return back to own mixer?
+	static void setPan(Clip c, float x) 
+	{
+		try 
+		{
 		FloatControl fc = (FloatControl) c.getControl(Type.PAN);
 		fc.setValue(x);
+		}
+		catch(Throwable e)
+		{
+			// Ignore
+		}
 	}	
 
 }

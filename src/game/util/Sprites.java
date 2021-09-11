@@ -314,7 +314,7 @@ public class Sprites {
 	public static final int SPR_DOCK_SLOPE_NW						= 2730;
 	public static final int SPR_DOCK_FLAT_X 						= 2731;	//for NE and SW
 	public static final int SPR_DOCK_FLAT_Y							= 2732;	//for NW and SE
-	public static final int SPR_BUOY								= 4076;	//XXX this sucks; because it displays wrong stuff on canals
+	public static final int SPR_BUOY								= 4076;	//XXX this sucks; because it displays wrong stuff on canals (no canal borders, just water)
 
 	/* Sprites for road */
 	public static final int SPR_ROAD_Y								= 1332;

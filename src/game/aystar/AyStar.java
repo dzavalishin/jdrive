@@ -2,6 +2,7 @@ package game.aystar;
 
 import game.NPFFoundTargetData;
 import game.TileIndex;
+import game.enums.TransportType;
 import game.struct.OpenListNode;
 import game.struct.PathNode;
 import game.util.Hash;
@@ -22,6 +23,7 @@ public abstract class AyStar extends AyStarDefs
 
 	public Object user_target;
 	public final int [] user_data = new int[10];
+	public TransportType userTransportType = TransportType.Invalid;
 
 	// [dz] can be some superclass or interface of NPFFoundTargetData? 
 	public NPFFoundTargetData user_path;

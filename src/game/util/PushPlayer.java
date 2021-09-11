@@ -1,6 +1,5 @@
 package game.util;
 
-import game.Global;
 import game.ids.PlayerID;
 
 /**
@@ -21,14 +20,14 @@ public class PushPlayer implements AutoCloseable
 	private PlayerID old_player;
 
 	public PushPlayer(PlayerID player) {
-		old_player = Global.gs._current_player;
-		Global.gs._current_player = player;
+		old_player = PlayerID.getCurrent();
+		PlayerID.setCurrent( player );
 	}
 	
 	@Override
 	public void close() //throws Exception 
 	{
-		Global.gs._current_player = old_player;
+		PlayerID.setCurrent(old_player);
 	}
 
 }

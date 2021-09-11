@@ -49,7 +49,7 @@ public class MiscCmd {
 		}
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			Global.gs._player_colors[Global.gs._current_player.id] = colour;
+			Global.gs._player_colors[PlayerID.getCurrent().id] = colour;
 			p.player_color = colour;
 			Hal.MarkWholeScreenDirty();
 		}
@@ -74,7 +74,7 @@ public class MiscCmd {
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			/* Loan the maximum amount or not? */
-			final int v = (Global.gs._current_player.IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000;
+			final int v = (PlayerID.getCurrent().IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000;
 			int loan = (p2 != 0) ? Global.gs._economy.getMax_loan() - p.current_loan : v;
 
 			p.money64 += loan;
@@ -109,7 +109,7 @@ public class MiscCmd {
 			loan = Math.max(loan, 10000);
 			loan -= loan % 10000;
 		} else {
-			loan = Math.min(loan, (Global.gs._current_player.IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000);
+			loan = Math.min(loan, (PlayerID.getCurrent().IS_HUMAN_PLAYER() || Global._patches.ainew_active) ? 10000 : 50000);
 		}
 
 		if (p.getMoney() < loan) {
@@ -239,10 +239,10 @@ public class MiscCmd {
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			/* Add money to player */
-			PlayerID old_cp = Global.gs._current_player;
-			Global.gs._current_player = PlayerID.get( p2 );
+			PlayerID old_cp = PlayerID.getCurrent();
+			PlayerID.setCurrent( PlayerID.get( p2 ) );
 			Player.SubtractMoneyFromPlayer(-amount);
-			Global.gs._current_player = old_cp;
+			PlayerID.setCurrent(old_cp);
 		}
 
 		/* Subtract money from local-player */
@@ -264,7 +264,8 @@ public class MiscCmd {
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			if (p1 != (int)-1L) {
-				// TODO ((int*)&GameOptions._opt_ptr.diff)[p1] = p2;
+				// ((int*)&GameOptions._opt_ptr.diff)[p1] = p2;
+				GameOptions._opt_ptr.diff.setAsInt(p1, p2);
 				GameOptions._opt_ptr.diff_level = 3; // custom difficulty level
 			} else
 				GameOptions._opt_ptr.diff_level = (byte) p2;

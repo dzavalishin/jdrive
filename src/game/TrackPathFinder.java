@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.RememberData;
 import game.util.BitOps;
@@ -27,7 +28,7 @@ public class TrackPathFinder extends Pathfind
 
 	int the_dir;
 
-	int tracktype;
+	TransportType tracktype;
 	int var2;
 	boolean disable_tile_hash;
 	boolean hasbit_13;
@@ -201,7 +202,7 @@ public class TrackPathFinder extends Pathfind
 
 		if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
 			if (BitOps.GB(tile.getMap().m5, 0, 2) != direction ||
-					BitOps.GB(tile.getMap().m5, 2, 2) != tpf.tracktype) {
+					BitOps.GB(tile.getMap().m5, 2, 2) != tpf.tracktype.getValue()) {
 				return;
 			}
 			tile = new MutableTileIndex( SkipToEndOfTunnel(tpf, tile, direction) );
@@ -209,7 +210,7 @@ public class TrackPathFinder extends Pathfind
 		tile.madd( TileIndex.TileOffsByDir(direction) );
 
 		/* Check in case of rail if the owner is the same */
-		if (tpf.tracktype == Global.TRANSPORT_RAIL) {
+		if (tpf.tracktype == TransportType.Rail) {
 			if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE))
 				if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE))
 					/* Check if we are on a bridge (middle parts don't have an owner */
@@ -315,7 +316,7 @@ public class TrackPathFinder extends Pathfind
 		int owner = -1;
 
 		/* XXX: Mode 2 is currently only used for ships, why is this code here? */
-		if (tpf.tracktype == Global.TRANSPORT_RAIL) {
+		if (tpf.tracktype == TransportType.Rail) {
 			if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE)) {
 				owner = tile.GetTileOwner().id;
 				/* Check if we are on the middle of a bridge (has no owner) */
@@ -332,7 +333,7 @@ public class TrackPathFinder extends Pathfind
 		tile.TILE_MASK();
 
 		/* Check in case of rail if the owner is the same */
-		if (tpf.tracktype == Global.TRANSPORT_RAIL) {
+		if (tpf.tracktype == TransportType.Rail) {
 			if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE))
 				/* Check if we are on the middle of a bridge (has no owner) */
 				if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) || (tile.getMap().m5 & 0xC0) != 0xC0)
@@ -413,17 +414,6 @@ public class TrackPathFinder extends Pathfind
 
 
 
-	static TileIndex SkipToEndOfTunnel(TrackPathFinder tpf, TileIndex tile, int direction)
-	{
-		FindLengthOfTunnelResult flotr;
-		tpf.TPFSetTileBit(tpf, tile, 14);
-		flotr = FindLengthOfTunnel(tile, direction);
-		tpf.rd.cur_length += flotr.length;
-		tpf.TPFSetTileBit(tpf, flotr.tile, 14);
-		return flotr.tile;
-	}
-
-
 	public Set<Entry<Integer, TPFHashEnt>> entrySet() {
 		return tileBits.entrySet();
 	}
@@ -434,6 +424,17 @@ public class TrackPathFinder extends Pathfind
 	// -------------------------------------------------
 	// Static methods
 	// -------------------------------------------------
+
+
+	static TileIndex SkipToEndOfTunnel(TrackPathFinder tpf, TileIndex tile, int direction)
+	{
+		FindLengthOfTunnelResult flotr;
+		tpf.TPFSetTileBit(tpf, tile, 14);
+		flotr = FindLengthOfTunnel(tile, direction);
+		tpf.rd.cur_length += flotr.length;
+		tpf.TPFSetTileBit(tpf, flotr.tile, 14);
+		return flotr.tile;
+	}
 
 
 
