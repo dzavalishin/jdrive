@@ -1,5 +1,7 @@
 package game.ids;
 
+/* This is meaningless - used as simple index into the order list, so int is more than Ok
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,3 +36,4 @@ public class OrderID extends AbstractID
 	}
 	
 }
+*/

@@ -642,7 +642,9 @@ public class Main {
 				LoadIntroGame();
 				Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			} else {
-				// [dz] Global.gs._local_player = PlayerID.get(0);
+				// [dz] TODO hack, it's null - saved as null? 
+				Global.gs._current_player = PlayerID.get(0);
+				Global.gs._local_player = PlayerID.get(0);
 				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE); // decrease pause counter (was increased from opening load dialog)
 				/*
 				if (_network_server)

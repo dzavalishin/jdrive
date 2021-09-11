@@ -13,7 +13,6 @@ import game.enums.TileTypes;
 import game.enums.TransportType;
 import game.ids.CargoID;
 import game.ids.EngineID;
-import game.ids.OrderID;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ids.UnitID;
@@ -185,7 +184,7 @@ public class Vehicle implements IPoolItem
 		string_id = 0;
 
 		unitnumber = null;
-		owner = PlayerID.get(-1); // TODO value?
+		owner = PlayerID.getNone();//  PlayerID.get(-1); // TO DO value?
 
 		tile = null;	
 		dest_tile = null;
@@ -720,7 +719,7 @@ public class Vehicle implements IPoolItem
 		return order;
 	}
 
-	public Order GetVehicleOrder(OrderID id) { return GetVehicleOrder(id.id); }
+	//public Order GetVehicleOrder(OrderID id) { return GetVehicleOrder(id.id); }
 
 	/* Returns the last order of a vehicle, or null if it doesn't exists */
 	public Order GetLastVehicleOrder()
@@ -2965,8 +2964,8 @@ public class Vehicle implements IPoolItem
 	public static void BackupVehicleOrders(final Vehicle v, BackuppedOrders bak)
 	{
 		/* Save general info */
-		bak.orderindex       = OrderID.get(v.cur_order_index);
-		bak.service_interval = v.service_interval;
+		bak.currentOrderIndex = v.cur_order_index;
+		bak.service_interval  = v.service_interval;
 
 		/* Safe custom string, if any */
 		if ((v.string_id & 0xF800) != 0x7800) {
@@ -2982,25 +2981,22 @@ public class Vehicle implements IPoolItem
 			bak.clone = VehicleID.get( u.index );
 		} else {
 			/* Else copy the orders */
-			//Order dest;
-
-			//dest = bak.order;
 
 			/* We do not have shared orders */
 			bak.clone = VehicleID.getInvalid();
 
 			/* Copy the orders */
 			for(Order order = v.orders; order != null; order = order.next )
-			{
 				bak.order.add(new Order(order) );
-			}
-			/* End the list with an Order.OT_NOTHING */
+			
+			/* End the list with an Order.OT_NOTHING [dz] no, not an array, no need for marker
 			//dest.type = Order.OT_NOTHING;
 			//dest.next = null;
 			Order empty_order = new Order(Order.OT_NOTHING);
 			//empty_order.type = Order.OT_NOTHING;
 			//empty_order.next = null;
 			bak.order.add(empty_order);
+			*/
 		}
 	}
 
@@ -3042,7 +3038,7 @@ public class Vehicle implements IPoolItem
 		}
 
 		/* Restore vehicle order-index and service interval */
-		Cmd.DoCommandP(null, v.index, bak.orderindex.id | (bak.service_interval << 16) , null, Cmd.CMD_RESTORE_ORDER_INDEX);
+		Cmd.DoCommandP(null, v.index, bak.currentOrderIndex | (bak.service_interval << 16) , null, Cmd.CMD_RESTORE_ORDER_INDEX);
 	}
 
 
