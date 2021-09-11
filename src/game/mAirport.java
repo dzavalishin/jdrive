@@ -10,22 +10,6 @@ import game.ids.StationID;
 public class mAirport 
 {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	final static float PI = 3.141f; // duuuuuuuuuuhhhhhh
 	final static int INT_AIRPORT_YEAR = 1990;
 	final static int MA_MIN_POPULATION = 15000;
