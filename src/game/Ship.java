@@ -1,4 +1,5 @@
 package game;
+import game.enums.TransportType;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.UnitID;
@@ -23,7 +24,7 @@ public class Ship {
 
 	static int GetTileShipTrackStatus(TileIndex tile)
 	{
-		int r = tile.GetTileTrackStatus(Global.TRANSPORT_WATER);
+		int r = tile.GetTileTrackStatus(TransportType.Water);
 		return  (r | r >>> 8);
 	}
 
@@ -70,7 +71,7 @@ public class Ship {
 		{
 			NPFFoundTargetData ftd;
 			int trackdir = v.GetVehicleTrackdir();
-			ftd = Npf.NPFRouteToDepotTrialError(v.tile, trackdir, Global.TRANSPORT_WATER, v.owner, Rail.INVALID_RAILTYPE);
+			ftd = Npf.NPFRouteToDepotTrialError(v.tile, trackdir, TransportType.Water, v.owner, Rail.INVALID_RAILTYPE);
 			if (ftd.best_bird_dist == 0) {
 				best_depot[0] = Depot.GetDepotByTile(ftd.node.tile); /* Found target */
 			} else {
@@ -80,7 +81,7 @@ public class Ship {
 			Depot.forEach( (depot) ->
 			{
 				TileIndex tile = depot.xy;
-				if (depot.isValid() && tile.IsTileDepotType(Global.TRANSPORT_WATER) && tile.IsTileOwner(v.owner)) {
+				if (depot.isValid() && tile.IsTileDepotType(TransportType.Water) && tile.IsTileOwner(v.owner)) {
 					int dist = Map.DistanceManhattan(tile, tile2);
 					if (dist < best_dist[0]) {
 						best_dist[0] = dist;
@@ -523,8 +524,8 @@ public class Ship {
 			pfs.best_bird_dist = -1;
 			pfs.best_length = -1;
 
-			//FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], (TPFEnumProc*)ShipTrackFollower, null, &pfs);
-			Pathfind.FollowTrack(tile, 0x3800 | Global.TRANSPORT_WATER, _ship_search_directions[i][dir], Ship::ShipTrackFollower, null, pfs);
+			//FollowTrack(tile, 0x3800 | TransportType.Water, _ship_search_directions[i][dir], (TPFEnumProc*)ShipTrackFollower, null, &pfs);
+			Pathfind.FollowTrack(tile, TransportType.Water, 0x3800, _ship_search_directions[i][dir], Ship::ShipTrackFollower, null, pfs);
 
 			if( TryTrack(best_track, i, pfs, ship_dir, best_length, best_bird_dist) )
 			{
@@ -555,7 +556,7 @@ public class Ship {
 
 			Npf.NPFFillWithOrderData(fstd, v);
 
-			ftd = Npf.NPFRouteToStationOrTile(src_tile, trackdir, fstd, Global.TRANSPORT_WATER, v.owner, Rail.INVALID_RAILTYPE, Pbs.PBS_MODE_NONE);
+			ftd = Npf.NPFRouteToStationOrTile(src_tile, trackdir, fstd, TransportType.Water, v.owner, Rail.INVALID_RAILTYPE, Pbs.PBS_MODE_NONE);
 
 			if (ftd.best_trackdir != 0xff) {
 				/* If ftd.best_bird_dist is 0, we found our target and ftd.best_trackdir contains
@@ -615,7 +616,7 @@ public class Ship {
 
 	static int GetAvailShipTracks(TileIndex tile, int dir)
 	{
-		int r = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_WATER);
+		int r = Landscape.GetTileTrackStatus(tile, TransportType.Water);
 		return  (r | r >>> 8) & _ship_sometracks[dir];
 	}
 
@@ -893,7 +894,7 @@ public class Ship {
 
 		/* The ai_new queries the vehicle cost before building the route,
 		 * so we must check against cheaters no sooner than now. --pasky */
-		if (!tile.IsTileDepotType(Global.TRANSPORT_WATER)) return Cmd.CMD_ERROR;
+		if (!tile.IsTileDepotType(TransportType.Water)) return Cmd.CMD_ERROR;
 		if (!tile.IsTileOwner( Global.gs._current_player.id)) return Cmd.CMD_ERROR;
 
 		v = Vehicle.AllocateVehicle(); // TODO can pass type or make subobject for ship
@@ -977,8 +978,8 @@ public class Ship {
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		//if (!v.tile.IsTileDepotType(Global.TRANSPORT_WATER) || v.road.state != 0x80 || 0==(v.vehstatus&Vehicle.VS_STOPPED))
-		if (!v.tile.IsTileDepotType(Global.TRANSPORT_WATER) || !v.ship.isInDepot() || !v.isStopped())
+		//if (!v.tile.IsTileDepotType(TransportType.Water) || v.road.state != 0x80 || 0==(v.vehstatus&Vehicle.VS_STOPPED))
+		if (!v.tile.IsTileDepotType(TransportType.Water) || !v.ship.isInDepot() || !v.isStopped())
 			return Cmd.return_cmd_error(Str.STR_980B_SHIP_MUST_BE_STOPPED_IN);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -1109,7 +1110,7 @@ public class Ship {
 
 		if (v.type != Vehicle.VEH_Ship || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_WATER) || !v.isStopped() || !v.ship.isInDepot())
+		if (!Depot.IsTileDepotType(v.tile, TransportType.Water) || !v.isStopped() || !v.ship.isInDepot())
 				return Cmd.return_cmd_error(Str.STR_980B_SHIP_MUST_BE_STOPPED_IN);
 
 

@@ -16,6 +16,7 @@ import game.Station;
 import game.Str;
 import game.TileIndex;
 import game.Vehicle;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.StringID;
@@ -495,7 +496,7 @@ public class ShipGui
 			if (Engine.ShipVehInfo(v.getEngine_type().id).refittable != 0 &&
 					v.isStopped() &&
 					v.ship.isInDepot() &&
-					Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_WATER))
+					Depot.IsTileDepotType(v.getTile(), TransportType.Water))
 				disabled = 0;
 
 			if (!v.getOwner().isLocalPlayer())
@@ -596,7 +597,7 @@ public class ShipGui
 			Vehicle v;
 			int h;
 			v = Vehicle.GetVehicle(w.window_number);
-			h = Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_WATER) && v.isHidden() ? (1<< 7) : (1 << 11);
+			h = Depot.IsTileDepotType(v.getTile(), TransportType.Water) && v.isHidden() ? (1<< 7) : (1 << 11);
 			if (h != w.hidden_state) {
 				w.hidden_state = h;
 				w.SetWindowDirty();
@@ -1068,7 +1069,7 @@ public class ShipGui
 
 				Global.SetDParam(0, v.getUnitnumber().id);
 				
-				if (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_WATER) && v.isHidden())
+				if (Depot.IsTileDepotType(v.getTile(), TransportType.Water) && v.isHidden())
 					str = Str.STR_021F;
 				else
 					str = v.getAge() > v.getMax_age() - 366 ? Str.STR_00E3 : Str.STR_00E2;
@@ -1135,7 +1136,7 @@ public class ShipGui
 			}
 			
 			do {
-				if (Depot.IsTileDepotType(tile, Global.TRANSPORT_WATER) && tile.IsTileOwner(Global.gs._local_player)) 
+				if (Depot.IsTileDepotType(tile, TransportType.Water) && tile.IsTileOwner(Global.gs._local_player)) 
 				{
 					ShowShipDepotWindow(tile);
 					ShowBuildShipWindow(tile);

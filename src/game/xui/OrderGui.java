@@ -14,6 +14,7 @@ import game.Vehicle;
 import game.WayPoint;
 import game.mAirport;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.util.BitOps;
 
 public class OrderGui {
@@ -232,7 +233,7 @@ public class OrderGui {
 
 			case MP_WATER:
 				if (v.getType() != Vehicle.VEH_Ship) break;
-				if (Depot.IsTileDepotType(tile, Global.TRANSPORT_WATER) &&
+				if (Depot.IsTileDepotType(tile, TransportType.Water) &&
 						tile.IsTileOwner(Global.gs._local_player)) {
 					switch (tile.getMap().m5) {
 						case 0x81: tile = tile.isub(TileIndex.TileDiffXY(1, 0)); break;

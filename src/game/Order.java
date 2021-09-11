@@ -4,6 +4,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import game.enums.TransportType;
 import game.ids.OrderID;
 import game.ids.VehicleID;
 import game.util.BitOps;
@@ -326,15 +327,15 @@ public class Order implements Serializable
 
 				switch (v.type) {
 				case Vehicle.VEH_Train:
-					if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
+					if (!Depot.IsTileDepotType(dp.xy, TransportType.Rail)) return Cmd.CMD_ERROR;
 					break;
 
 				case Vehicle.VEH_Road:
-					if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_ROAD)) return Cmd.CMD_ERROR;
+					if (!Depot.IsTileDepotType(dp.xy, TransportType.Road)) return Cmd.CMD_ERROR;
 					break;
 
 				case Vehicle.VEH_Ship:
-					if (!Depot.IsTileDepotType(dp.xy, Global.TRANSPORT_WATER)) return Cmd.CMD_ERROR;
+					if (!Depot.IsTileDepotType(dp.xy, TransportType.Water)) return Cmd.CMD_ERROR;
 					break;
 
 				default: return Cmd.CMD_ERROR;

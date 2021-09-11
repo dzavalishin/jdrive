@@ -67,11 +67,11 @@ public class Global
 	 * bridges. For now, you should just not change the values for road
 	 * and rail.
 	 */
-	public static final int TRANSPORT_RAIL = 0;
-	public static final int TRANSPORT_ROAD = 1;
-	public static final int TRANSPORT_WATER  = 2;
-	public static final int TRANSPORT_END = 3;
-	public static final int INVALID_TRANSPORT = 0xff;
+	//public static final int TRANSPORT_RAIL = 0;
+	//public static final int TRANSPORT_ROAD = 1;
+	//public static final int TRANSPORT_WATER  = 2;
+	//public static final int TRANSPORT_END = 3;
+	//public static final int INVALID_TRANSPORT = 0xff;
 
 
 	public static final boolean AYSTAR_DEBUG = true;

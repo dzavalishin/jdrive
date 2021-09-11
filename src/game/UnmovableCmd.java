@@ -5,6 +5,7 @@ import java.util.Iterator;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.DrawTileSeqStruct;
@@ -316,7 +317,7 @@ public class UnmovableCmd extends UnmovableTables {
 	}
 
 
-	static int GetTileTrackStatus_Unmovable(TileIndex tile, /*TransportType*/ int mode)
+	static int GetTileTrackStatus_Unmovable(TileIndex tile, /*int*/ TransportType mode)
 	{
 		return 0;
 	}

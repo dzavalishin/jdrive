@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.function.Function;
 
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.struct.Point;
 import game.struct.TileIndexDiff;
@@ -712,7 +713,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	}
 	
 	
-	public boolean IsTileDepotType(int transportType) {
+	public boolean IsTileDepotType(TransportType transportType) {
 		return Depot.IsTileDepotType(this, transportType);
 	}
 
@@ -784,7 +785,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return Landscape.GetPartialZ(x, y, corners);
 	}
 	
-	public int GetTileTrackStatus(int mode) {
+	public int GetTileTrackStatus(TransportType mode) {
 		return Landscape.GetTileTrackStatus(this, mode);
 	}
 

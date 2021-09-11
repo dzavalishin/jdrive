@@ -6,6 +6,7 @@ import game.xui.ViewPort;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.TileDesc;
@@ -1386,21 +1387,21 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	}
 
 
-	static int GetTileTrackStatus_TunnelBridge(TileIndex tile, /*TransportType*/ int mode)
+	static int GetTileTrackStatus_TunnelBridge(TileIndex tile, /*int*/ TransportType mode)
 	{
 		int result;
 		int m5 = tile.getMap().m5;
 
 		if ((m5 & 0xF0) == 0) {
 			/* This is a tunnel */
-			if (BitOps.GB(m5, 2, 2) == mode) {
+			if (BitOps.GB(m5, 2, 2) == mode.getValue()) {
 				/* Tranport in the tunnel is compatible */
 				return (0 !=(m5&1)) ? 0x202 : 0x101;
 			}
 		} else if(0 != (m5 & 0x80)) {
 			/* This is a bridge */
 			result = 0;
-			if (BitOps.GB(m5, 1, 2) == mode) {
+			if (BitOps.GB(m5, 1, 2) == mode.getValue()) {
 				/* Transport over the bridge is compatible */
 				result = (0 !=(m5 & 1)) ? 0x202 : 0x101;
 			}
@@ -1412,11 +1413,11 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 						/* Clear ground */
 						return result;
 					} else {
-						if (mode != Global.TRANSPORT_WATER) return result;
+						if (mode != TransportType.Water) return result;
 					}
 				} else {
 					/* Transport underneath */
-					if (BitOps.GB(m5, 3, 2) != mode) {
+					if (BitOps.GB(m5, 3, 2) != mode.getValue()) {
 						/* Incompatible transport underneath */
 						return result;
 					}

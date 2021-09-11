@@ -25,6 +25,7 @@ import game.xui.WindowEvent;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
@@ -849,7 +850,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		ShowIndustryViewWindow(tile.getMap().m2);
 	}
 
-	static int GetTileTrackStatus_Industry(TileIndex tile, /*TransportType*/ int mode)
+	static int GetTileTrackStatus_Industry(TileIndex tile, /*int*/ TransportType mode)
 	{
 		return 0;
 	}

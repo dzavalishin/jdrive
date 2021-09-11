@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.HashLink;
 import game.struct.StackedItem;
@@ -311,7 +312,7 @@ public class NewTrackPathFinder extends Pathfind
 				if (!tile.IsTileType( TileTypes.MP_RAILWAY) || !Rail.IsPlainRailTile(tile)) {
 					// We found a tile which is not a normal railway tile.
 					// Determine which tracks that exist on this tile.
-					bits = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_RAIL) & _tpfmode1_and[direction];
+					bits = Landscape.GetTileTrackStatus(tile, TransportType.Rail) & _tpfmode1_and[direction];
 					bits = (bits | (bits >> 8)) & 0x3F;
 
 					// Check that the tile contains exactly one track

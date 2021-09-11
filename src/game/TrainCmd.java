@@ -3,6 +3,7 @@ package game;
 import java.util.Iterator;
 
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.PlayerID;
@@ -624,7 +625,7 @@ public class TrainCmd extends TrainTables
 		/* Check if the train is actually being built in a depot belonging
 		 * to the player. Doesn't matter if only the cost is queried */
 		if (0==(flags & Cmd.DC_QUERY_COST)) {
-			if (!Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL)) return Cmd.CMD_ERROR;
+			if (!Depot.IsTileDepotType(tile, TransportType.Rail)) return Cmd.CMD_ERROR;
 			if (!tile.IsTileOwner( Global.gs._current_player)) return Cmd.CMD_ERROR;
 		}
 
@@ -748,7 +749,7 @@ public class TrainCmd extends TrainTables
 		TileIndex tile = v.tile;
 
 		/* check if stopped in a depot */
-		if (!tile.IsTileDepotType(Global.TRANSPORT_RAIL) || v.cur_speed != 0) {
+		if (!tile.IsTileDepotType(TransportType.Rail) || v.cur_speed != 0) {
 			Global._error_message = Str.STR_881A_TRAINS_CAN_ONLY_BE_ALTERED;
 			return -1;
 		}
@@ -1533,7 +1534,7 @@ public class TrainCmd extends TrainTables
 			to_tile = GetVehicleTileOutOfTunnel(u, true);
 
 			Global.DEBUG_pbs(2, "pbs: (%i) choose reverse (RV), tile:%x, trackdir:%i",v.unitnumber,  u.tile, trackdir);
-			ftd = Npf.NPFRouteToStationOrTile(to_tile, trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_ANY);
+			ftd = Npf.NPFRouteToStationOrTile(to_tile, trackdir, fstd, TransportType.Rail, v.owner, v.rail.railtype, Pbs.PBS_MODE_ANY);
 
 			if (ftd.best_trackdir == 0xFF) {
 				Global.DEBUG_pbs(0, "pbs: (%i) no nodes encountered (RV)", v.unitnumber);
@@ -1563,7 +1564,7 @@ public class TrainCmd extends TrainTables
 			int ts;
 			assert(tile.isValid());
 
-			ts = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_RAIL);
+			ts = Landscape.GetTileTrackStatus(tile, TransportType.Rail);
 			ts &= Rail.TrackdirReachesTrackdirs(trackdir);
 
 			assert(ts != 0 && BitOps.KillFirstBit2x64(ts) == 0);
@@ -1579,7 +1580,7 @@ public class TrainCmd extends TrainTables
 				Pbs.PBSReserveTrack(to_tile, trackdir & 7);
 		}
 
-		if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_RAIL))
+		if (Depot.IsTileDepotType(v.tile, TransportType.Rail))
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 
 
@@ -1614,7 +1615,7 @@ public class TrainCmd extends TrainTables
 
 		AdvanceWagons(v, false);
 
-		if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_RAIL))
+		if (Depot.IsTileDepotType(v.tile, TransportType.Rail))
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 
 		v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_REVERSING);
@@ -1817,7 +1818,7 @@ public class TrainCmd extends TrainTables
 		tfdd.best_length = -1;
 		tfdd.reverse = false;
 
-		if (tile.IsTileDepotType(Global.TRANSPORT_RAIL)){
+		if (tile.IsTileDepotType(TransportType.Rail)){
 			tfdd.tile = tile;
 			tfdd.best_length = 0;
 			return tfdd;
@@ -1832,7 +1833,7 @@ public class TrainCmd extends TrainTables
 			/*Trackdir*/ int trackdir_rev = Rail.ReverseTrackdir(last.GetVehicleTrackdir());
 
 			assert (trackdir != Rail.INVALID_TRACKDIR);
-			ftd = Npf.NPFRouteToDepotBreadthFirstTwoWay(v.tile, trackdir, last.tile, trackdir_rev, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Npf.NPF_INFINITE_PENALTY);
+			ftd = Npf.NPFRouteToDepotBreadthFirstTwoWay(v.tile, trackdir, last.tile, trackdir_rev, TransportType.Rail, v.owner, v.rail.railtype, Npf.NPF_INFINITE_PENALTY);
 			if (ftd.best_bird_dist == 0) {
 				/* Found target */
 				tfdd.tile = ftd.node.tile;
@@ -1970,7 +1971,7 @@ public class TrainCmd extends TrainTables
 			}
 
 			// No smoke in depots or tunnels
-			if (Depot.IsTileDepotType(v.tile, Global.TRANSPORT_RAIL) || v.tile.IsTunnelTile())
+			if (Depot.IsTileDepotType(v.tile, TransportType.Rail) || v.tile.IsTunnelTile())
 				continue;
 
 			if (effect_type == 0) {
@@ -2057,7 +2058,7 @@ public class TrainCmd extends TrainTables
 				Npf.NPFFillWithOrderData(fstd, v);
 
 				Global.DEBUG_pbs(2, "pbs: (%i) choose depot (DP), tile:%x, trackdir:%i",v.unitnumber,  v.tile, trackdir);
-				ftd = Npf.NPFRouteToStationOrTile(v.tile, trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_GREEN);
+				ftd = Npf.NPFRouteToStationOrTile(v.tile, trackdir, fstd, TransportType.Rail, v.owner, v.rail.railtype, Pbs.PBS_MODE_GREEN);
 
 				// we found a way out of the pbs block
 				if (Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_EXIT)) {
@@ -2187,13 +2188,13 @@ public class TrainCmd extends TrainTables
 				if (v.rail.pbs_status != Pbs.PBS_STAT_NEED_PATH) Pbs.PBSClearPath(tile, BitOps.FindFirstBit2x64(pbs_tracks), v.rail.pbs_end_tile, v.rail.pbs_end_trackdir);
 
 				// try to find a route to a green exit signal
-				ftd = Npf.NPFRouteToStationOrTile(tile.isub(TileIndex.TileOffsByDir(enterdir)), trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_ANY);
+				ftd = Npf.NPFRouteToStationOrTile(tile.isub(TileIndex.TileOffsByDir(enterdir)), trackdir, fstd, TransportType.Rail, v.owner, v.rail.railtype, Pbs.PBS_MODE_ANY);
 
 				v.rail.pbs_end_tile = ftd.node.tile;
 				v.rail.pbs_end_trackdir = ftd.node.direction;
 
 			} else
-				ftd = Npf.NPFRouteToStationOrTile(tile.isub(TileIndex.TileOffsByDir(enterdir)), trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_NONE);
+				ftd = Npf.NPFRouteToStationOrTile(tile.isub(TileIndex.TileOffsByDir(enterdir)), trackdir, fstd, TransportType.Rail, v.owner, v.rail.railtype, Pbs.PBS_MODE_NONE);
 
 			if (ftd.best_trackdir == 0xff) {
 				/* We are already at our target. Just do something */
@@ -2302,7 +2303,7 @@ public class TrainCmd extends TrainTables
 			assert(trackdir != 0xff);
 			assert(trackdir_rev != 0xff);
 
-			ftd = Npf.NPFRouteToStationOrTileTwoWay(v.tile, trackdir, last.tile, trackdir_rev, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_NONE);
+			ftd = Npf.NPFRouteToStationOrTileTwoWay(v.tile, trackdir, last.tile, trackdir_rev, fstd, TransportType.Rail, v.owner, v.rail.railtype, Pbs.PBS_MODE_NONE);
 
 			if (ftd.best_bird_dist != 0) {
 				/* We didn't find anything, just keep on going straight ahead */
@@ -3015,7 +3016,7 @@ public class TrainCmd extends TrainTables
 
 			/* Get the status of the tracks in the new tile and mask
 			 * away the bits that aren't reachable. */
-			ts = Landscape.GetTileTrackStatus(gp.new_tile, Global.TRANSPORT_RAIL) & _reachable_tracks[enterdir];
+			ts = Landscape.GetTileTrackStatus(gp.new_tile, TransportType.Rail) & _reachable_tracks[enterdir];
 
 			/* Combine the from & to directions.
 			 * Now, the lower byte contains the track status, and the byte at bit 16 contains
@@ -3065,7 +3066,7 @@ public class TrainCmd extends TrainTables
 						Npf.NPFFillWithOrderData(fstd, v);
 
 						Global.DEBUG_pbs(2, "pbs: (%i) choose signal (TC), tile:%x, trackdir:%i",v.unitnumber,  gp.new_tile, trackdir);
-						ftd = Npf.NPFRouteToStationOrTile(gp.new_tile, trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_GREEN);
+						ftd = Npf.NPFRouteToStationOrTile(gp.new_tile, trackdir, fstd, TransportType.Rail, v.owner, v.rail.railtype, Pbs.PBS_MODE_GREEN);
 
 						if (v.rail.force_proceed != 0)
 						{
@@ -3529,7 +3530,7 @@ public class TrainCmd extends TrainTables
 			/* Calculate next tile */
 			tile = tile.iadd(TileIndex.TileOffsByDir(t));
 			// determine the track status on the next tile.
-			ts = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_RAIL) & _reachable_tracks[t];
+			ts = Landscape.GetTileTrackStatus(tile, TransportType.Rail) & _reachable_tracks[t];
 
 			// if there are tracks on the new tile, pick one (trackdir will only be used when its a signal tile, in which case only 1 trackdir is accessible for us)
 			if(0 != (ts & Rail.TRACKDIR_BIT_MASK) )
@@ -3599,7 +3600,7 @@ public class TrainCmd extends TrainTables
 				Npf.NPFFillWithOrderData(fstd, v);
 
 				Global.DEBUG_pbs(2, "pbs: (%i) choose signal (CEOL), tile:%x  trackdir:%i", v.unitnumber, tile, trackdir);
-				ftd = Npf.NPFRouteToStationOrTile(tile, trackdir, fstd, Global.TRANSPORT_RAIL, v.owner, v.rail.railtype, Pbs.PBS_MODE_GREEN);
+				ftd = Npf.NPFRouteToStationOrTile(tile, trackdir, fstd, TransportType.Rail, v.owner, v.rail.railtype, Pbs.PBS_MODE_GREEN);
 
 				if (ftd.best_trackdir != 0xFF && Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_EXIT)) {
 					if (!(Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_BLOCKED) || Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_RED))) {

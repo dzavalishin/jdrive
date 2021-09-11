@@ -6,6 +6,7 @@ import java.util.List;
 import game.enums.Owner;
 import game.enums.RoadStopType;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.EngineID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
@@ -92,7 +93,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		/* The ai_new queries the vehicle cost before building the route,
 		 * so we must check against cheaters no sooner than now. --pasky */
-		if (!Depot.IsTileDepotType(tile, Global.TRANSPORT_ROAD)) return Cmd.CMD_ERROR;
+		if (!Depot.IsTileDepotType(tile, TransportType.Road)) return Cmd.CMD_ERROR;
 		if (!tile.IsTileOwner(Global.gs._current_player)) return Cmd.CMD_ERROR;
 
 		v = Vehicle.AllocateVehicle();
@@ -229,7 +230,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		if (!Depot.IsTileDepotType(v.tile, Global.TRANSPORT_ROAD) || !v.road.isInDepot() || !v.isStopped())
+		if (!Depot.IsTileDepotType(v.tile, TransportType.Road) || !v.road.isInDepot() || !v.isStopped())
 			return Cmd.return_cmd_error(Str.STR_9013_MUST_BE_STOPPED_INSIDE);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -280,7 +281,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			/* See where we are now */
 			/*Trackdir*/ int trackdir = v.GetVehicleTrackdir();
 
-			ftd = Npf.NPFRouteToDepotBreadthFirst(v.tile, trackdir, Global.TRANSPORT_ROAD, v.owner, Rail.INVALID_RAILTYPE);
+			ftd = Npf.NPFRouteToDepotBreadthFirst(v.tile, trackdir, TransportType.Road, v.owner, Rail.INVALID_RAILTYPE);
 			if (ftd.best_bird_dist == 0)
 				return Depot.GetDepotByTile(ftd.node.tile); /* Target found */
 			else
@@ -293,7 +294,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 			/* search in all directions */
 			for(i=0; i!=4; i++)
-				Pathfind.FollowTrack(tile, 0x2000 | Global.TRANSPORT_ROAD, i, RoadVehCmd::EnumRoadSignalFindDepot, null, rfdd);
+				Pathfind.FollowTrack(tile, TransportType.Road, 0x2000, i, RoadVehCmd::EnumRoadSignalFindDepot, null, rfdd);
 
 			if (rfdd.best_length == -1)
 				return null;
@@ -845,7 +846,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	{
 		int bits;
 
-		bits = Landscape.GetTileTrackStatus(od.tile, Global.TRANSPORT_ROAD)&0x3F;
+		bits = Landscape.GetTileTrackStatus(od.tile, TransportType.Road)&0x3F;
 
 		if (0==(od.tilebits & bits) || 0!=(bits&0x3C) || 0!=(bits & 0x3F3F0000))
 			return true;
@@ -870,7 +871,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (v.road.state >= 32 || (v.road.state&7) > 1 )
 			return;
 
-		tt = Landscape.GetTileTrackStatus(v.tile, Global.TRANSPORT_ROAD) & 0x3F;
+		tt = Landscape.GetTileTrackStatus(v.tile, TransportType.Road) & 0x3F;
 		if ((tt & 3) == 0)
 			return;
 		if ((tt & 0x3C) != 0)
@@ -971,7 +972,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		{
 			int r;
-			r = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_ROAD);
+			r = Landscape.GetTileTrackStatus(tile, TransportType.Road);
 			signal  = BitOps.GB(r, 16, 16);
 			bitmask = BitOps.GB(r,  0, 16);
 		}
@@ -1036,7 +1037,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			trackdir = (byte) Rail.DiagdirToDiagTrackdir(enterdir);
 			//debug("Finding path. Enterdir: %d, Trackdir: %d", enterdir, trackdir);
 
-			ftd = Npf.NPFRouteToStationOrTile(tile.isub( TileIndex.TileOffsByDir(enterdir) ), trackdir, fstd, Global.TRANSPORT_ROAD, v.owner, Rail.INVALID_RAILTYPE, Pbs.PBS_MODE_NONE);
+			ftd = Npf.NPFRouteToStationOrTile(tile.isub( TileIndex.TileOffsByDir(enterdir) ), trackdir, fstd, TransportType.Road, v.owner, Rail.INVALID_RAILTYPE, Pbs.PBS_MODE_NONE);
 			if (ftd.best_trackdir == 0xff) {
 				/* We are already at our target. Just do something */
 				//TODO: maybe display error?
@@ -1097,7 +1098,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 					if (best_track == -1) best_track = i; // in case we don't find the path, just pick a track
 					frd.maxtracklen = -1;
 					frd.mindist = -1;
-					Pathfind.FollowTrack(tile, 0x3000 | Global.TRANSPORT_ROAD, _road_pf_directions[i], RoadVehCmd::EnumRoadTrackFindDist, null, frd);
+					Pathfind.FollowTrack(tile, TransportType.Road, 0x3000, _road_pf_directions[i], RoadVehCmd::EnumRoadTrackFindDist, null, frd);
 
 					if (frd.mindist < best_dist || (frd.mindist==best_dist && frd.maxtracklen < best_maxlen)) {
 						best_dist = frd.mindist;
@@ -1127,7 +1128,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		fstd.dest_coords = tile;
 		fstd.station_index = -1;	// indicates that the destination is a tile, not a station
 
-		return Npf.NPFRouteToStationOrTile(v.tile, trackdir, fstd, Global.TRANSPORT_ROAD, v.owner, Rail.INVALID_RAILTYPE, Pbs.PBS_MODE_NONE).best_path_dist;
+		return Npf.NPFRouteToStationOrTile(v.tile, trackdir, fstd, TransportType.Road, v.owner, Rail.INVALID_RAILTYPE, Pbs.PBS_MODE_NONE).best_path_dist;
 	}
 
 	/*

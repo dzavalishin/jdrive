@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import game.enums.GameModes;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.CargoID;
 import game.ids.EngineID;
 import game.ids.OrderID;
@@ -32,7 +33,6 @@ import game.tables.BubbleMovement;
 import game.tables.EngineTables;
 import game.tables.Snd;
 import game.util.BitOps;
-import game.util.ShortSounds;
 import game.util.Sound;
 import game.xui.DrawPixelInfo;
 import game.xui.MiscGui;
@@ -2748,7 +2748,7 @@ public class Vehicle implements IPoolItem
 		{
 		case VEH_Train:
 			if (rail.isInDepot()) /* We'll assume the train is facing outwards */
-				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, Global.TRANSPORT_RAIL)); /* Train in depot */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, TransportType.Rail)); /* Train in depot */
 
 			if (rail.isInTunnel()) /* train in tunnel, so just use his direction and assume a diagonal track */
 				return Rail.DiagdirToDiagTrackdir((direction >> 1) & 3);
@@ -2759,13 +2759,13 @@ public class Vehicle implements IPoolItem
 			//if (v.ship.state == 0x80)  /* Inside a depot? */
 			if (ship.isInDepot())  /* Inside a depot? */
 				/* We'll assume the ship is facing outwards */
-				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, Global.TRANSPORT_WATER)); /* Ship in depot */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, TransportType.Water)); /* Ship in depot */
 
 			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(ship.state),direction);
 
 		case VEH_Road:
 			if (road.isInDepot()) /* We'll assume the road vehicle is facing outwards */
-				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, Global.TRANSPORT_ROAD)); /* Road vehicle in depot */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, TransportType.Road)); /* Road vehicle in depot */
 
 			if (tile.IsRoadStationTile()) /* We'll assume the road vehicle is facing outwards */
 				return Rail.DiagdirToDiagTrackdir(Station.GetRoadStationDir(tile)); /* Road vehicle in a station */

@@ -1,7 +1,5 @@
 package game.xui;
 
-import java.util.function.BiConsumer;
-
 import game.Bridge;
 import game.Cmd;
 import game.Global;
@@ -14,6 +12,7 @@ import game.Terraform;
 import game.TileIndex;
 import game.WayPoint;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ifaces.OnButtonClick;
 import game.tables.Snd;
 import game.util.BitOps;
@@ -21,18 +20,6 @@ import game.util.Sound;
 import game.util.Sprites;
 
 public class RailGui {
-
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
 	//static RailType _cur_railtype;
 	static int _cur_railtype;
@@ -185,7 +172,7 @@ public class RailGui {
 		int trackstat;
 		int i;
 
-		trackstat = tile.GetTileTrackStatus(Global.TRANSPORT_RAIL);
+		trackstat = tile.GetTileTrackStatus(TransportType.Rail);
 
 		if(0 != (trackstat & 0x30)) // N-S direction
 			trackstat = (Global._tile_fract_coords.x <= Global._tile_fract_coords.y) ? 0x20 : 0x10;

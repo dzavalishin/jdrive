@@ -3,6 +3,7 @@ package game;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.Point;
@@ -132,7 +133,7 @@ public class Road extends RoadTables
 
 	static int GetRoadBitsByTile(TileIndex tile)
 	{
-		int r = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_ROAD);
+		int r = Landscape.GetTileTrackStatus(tile, TransportType.Road);
 		return (r | (r >> 8));
 	}
 
@@ -1162,13 +1163,13 @@ public class Road extends RoadTables
 			0x0, 0x0, 0x0, 0x10, 0x0, 0x2, 0x8, 0x1A, 0x0, 0x4, 0x1, 0x15, 0x20, 0x26, 0x29, 0x3F,
 	};
 
-	static int GetTileTrackStatus_Road(TileIndex tile, /*TransportType*/ int mode)
+	static int GetTileTrackStatus_Road(TileIndex tile, /*int*/ TransportType mode)
 	{
-		if (mode == Global.TRANSPORT_RAIL) {
+		if (mode == TransportType.Rail) {
 			if (!tile.IsLevelCrossing())
 				return 0;
 			return 0 != (tile.getMap().m5 & 8) ? 0x101 : 0x202;
-		} else if  (mode == Global.TRANSPORT_ROAD) {
+		} else if  (mode == TransportType.Road) {
 			int b = tile.getMap().m5;
 			if ((b & 0xF0) == 0) {
 				/* Ordinary road */

@@ -1,6 +1,7 @@
 package game;
 
 import game.enums.Owner;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.TileDesc;
@@ -66,7 +67,7 @@ public class DummyLand {
 		/* not used */
 	}
 
-	static int GetTileTrackStatus_Dummy(TileIndex tile, /*TransportType*/ int mode)
+	static int GetTileTrackStatus_Dummy(TileIndex tile, /*int*/ TransportType mode)
 	{
 		return 0;
 	}

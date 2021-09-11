@@ -1,6 +1,7 @@
 package game;
 import game.enums.GameModes;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.TileDesc;
@@ -868,7 +869,7 @@ public class Clear extends ClearTables {
 		/* not used */
 	}
 
-	static int GetTileTrackStatus_Clear(TileIndex tile, int mode)
+	static int GetTileTrackStatus_Clear(TileIndex tile, TransportType mode)
 	{
 		return 0;
 	}

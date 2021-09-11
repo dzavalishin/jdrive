@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.RoadStopType;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.StringID;
@@ -2353,20 +2353,20 @@ public class Station extends StationTables implements IPoolItem
 	static final  byte tile_track_status_rail[] = { 1, 2, 1, 2, 1, 2, 1, 2 };
 
 	//private static int GetTileTrackStatus_Station(TileIndex tile, TransportType mode)
-	private static int GetTileTrackStatus_Station(TileIndex tile, int mode)
+	private static int GetTileTrackStatus_Station(TileIndex tile, TransportType mode)
 	{
 		int i = tile.getMap().m5;
 		int j = 0;
 
 		switch (mode) {
-		case Global.TRANSPORT_RAIL:
+		case Rail:
 			if (i < 8) {
 				j = tile_track_status_rail[i];
 			}
 			j += (j << 8);
 			break;
 
-		case Global.TRANSPORT_WATER:
+		case Water:
 			// buoy is coded as a station, it is always on open water
 			// (0x3F, all tracks available)
 			if (i == 0x52) j = 0x3F;

@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
@@ -572,7 +573,7 @@ implements IPoolItem, Serializable
 		return td;
 	}
 
-	static int GetTileTrackStatus_Town(TileIndex tile, int mode)
+	static int GetTileTrackStatus_Town(TileIndex tile, TransportType mode)
 	{
 		/* not used */
 		return 0;

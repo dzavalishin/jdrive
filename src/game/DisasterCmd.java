@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.struct.GetNewVehiclePosResult;
 import game.struct.TileIndexDiff;
@@ -653,7 +654,7 @@ public class DisasterCmd extends DisasterTables
 		tile = v.tile.iadd( TileIndex.TileOffsByDir(v.direction >> 1) );
 		if (tile.IsValidTile() ) 
 		{
-			int r=Landscape.GetTileTrackStatus(tile,Global.TRANSPORT_WATER);
+			int r=Landscape.GetTileTrackStatus(tile,TransportType.Water);
 			if( (((r&0xFF) + (0xFF & (r >> 8))) == 0x3F) && !BitOps.CHANCE16(1,90)) 
 			{
 				v.GetNewVehiclePos(gp);
