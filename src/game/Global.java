@@ -429,7 +429,8 @@ public class Global
 	static void InjectDParam(int amount)
 	{
 		//memmove(_decode_parameters + amount, _decode_parameters, sizeof(_decode_parameters) - amount * sizeof(int));
-		System.arraycopy(_decode_parameters, amount, _decode_parameters, 0, _decode_parameters.length - amount);
+		//System.arraycopy(_decode_parameters, amount, _decode_parameters, 0, _decode_parameters.length - amount);
+		System.arraycopy(_decode_parameters, 0, _decode_parameters, amount, _decode_parameters.length - amount);
 	}
 
 	public static void COPY_IN_DPARAM(int offs, Integer [] src, int num) 

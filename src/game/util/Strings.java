@@ -821,11 +821,12 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				// WARNING. It's prohibited for the included string to consume any arguments.
 				// For included strings that consume argument, you should use STRING1, STRING2 etc.
 				// To debug stuff you can set argv to null and it will tell you
-				int acnt = arg.length - argc;
-				Object [] acopy = new Object[acnt];
-				System.arraycopy(arg, argc, acopy, 0, acnt);
+				//int acnt = arg.length - argc;
+				//Object [] acopy = new Object[acnt];
+				//System.arraycopy(arg, argc, acopy, 0, acnt);
 				//argc += acnt; // TODO wrong, must get used count from GetStringWithArgs 
-				buff.append( GetStringWithArgs(sstri, acopy) );
+				//buff.append( GetStringWithArgs(sstri, acopy) );
+				buff.append( GetStringWithArgs(sstri) ); // 0 args
 				modifier = 0;
 				break;
 			}
