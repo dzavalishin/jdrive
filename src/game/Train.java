@@ -1,7 +1,6 @@
 package game;
 
 import game.tables.TrainTables;
-import game.util.BitOps;
 
 public class Train extends TrainTables 
 {
@@ -28,7 +27,8 @@ public class Train extends TrainTables
 				vweight += rvi.weight;
 
 				// powered wagons have extra weight added
-				if (BitOps.HASBIT(u.rail.flags, Vehicle.VRF_POWEREDWAGON))
+				//if (BitOps.HASBIT(u.rail.flags, Vehicle.VRF_POWEREDWAGON))
+				if(u.rail.flags.contains(VehicleRailFlags.PoweredWagon))
 					vweight += Engine.RailVehInfo(v.getEngine_type().id).pow_wag_weight;
 			}
 

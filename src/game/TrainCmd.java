@@ -1,5 +1,6 @@
 package game;
 
+import java.util.EnumSet;
 import java.util.Iterator;
 
 import game.enums.TileTypes;
@@ -78,7 +79,8 @@ public class TrainCmd extends TrainTables
 				power += rvi_u.power;
 
 				// check if its a powered wagon
-				u.rail.flags = BitOps.RETCLRBIT(u.rail.flags, Vehicle.VRF_POWEREDWAGON);
+				//u.rail.flags = BitOps.RETCLRBIT(u.rail.flags, Vehicle.VRF_POWEREDWAGON);
+				u.rail.flags.remove(VehicleRailFlags.PoweredWagon);
 				if ((rvi_v.pow_wag_power != 0) && rvi_u.isWagon() && Engine.UsesWagonOverride(u)) {
 					if (BitOps.HASBIT(rvi_u.callbackmask, CBM_WAGON_POWER)) {
 						int callback = Engine.GetCallBackResult(CBID_WAGON_POWER,  u.getEngine_type(), u);
@@ -89,7 +91,8 @@ public class TrainCmd extends TrainTables
 
 					if (u.rail.cached_vis_effect < 0x40) {
 						/* wagon is powered */
-						u.rail.flags = BitOps.RETSETBIT(u.rail.flags, Vehicle.VRF_POWEREDWAGON); // cache 'powered' status
+						//u.rail.flags = BitOps.RETSETBIT(u.rail.flags, Vehicle.VRF_POWEREDWAGON); // cache 'powered' status
+						u.rail.flags.add(VehicleRailFlags.PoweredWagon); // cache 'powered' status
 						power += rvi_v.pow_wag_power;
 					}
 				}
@@ -244,9 +247,9 @@ public class TrainCmd extends TrainTables
 			if (u.rail.isInDepot()) //track == 0x80)
 				max_speed = Math.min(61, max_speed);
 
-			if (BitOps.HASBIT(u.rail.flags, Vehicle.VRF_GOINGUP)) {
+			if(u.rail.flags.contains(VehicleRailFlags.GoingUp)) {
 				incl += u.rail.cached_veh_weight * 60;		//3% slope, quite a bit actually
-			} else if (BitOps.HASBIT(u.rail.flags, Vehicle.VRF_GOINGDOWN)) {
+			} else if(u.rail.flags.contains(VehicleRailFlags.GoingDown)) {
 				incl -= u.rail.cached_veh_weight * 60;
 			}
 		}
@@ -1333,18 +1336,31 @@ public class TrainCmd extends TrainTables
 	static void SwapTrainFlags(VehicleRail rail1, VehicleRail rail2)
 	//byte *swap_flag1, byte *swap_flag2)
 	{
-		int flag1, flag2;
+		//int flag1, flag2;
 
-		flag1 = rail1.flags; //*swap_flag1;
-		flag2 = rail2.flags;
+		EnumSet<VehicleRailFlags> flag1 = EnumSet.copyOf( rail1.flags ); //*swap_flag1;
+		EnumSet<VehicleRailFlags> flag2 = EnumSet.copyOf( rail2.flags );
 
 		// Clear the flags 
-		rail1.flags = BitOps.RETCLRBIT(rail1.flags, Vehicle.VRF_GOINGUP);
+		/*rail1.flags = BitOps.RETCLRBIT(rail1.flags, Vehicle.VRF_GOINGUP);
 		rail1.flags = BitOps.RETCLRBIT(rail1.flags, Vehicle.VRF_GOINGDOWN);
 		rail2.flags = BitOps.RETCLRBIT(rail2.flags, Vehicle.VRF_GOINGUP);
-		rail2.flags = BitOps.RETCLRBIT(rail2.flags, Vehicle.VRF_GOINGDOWN);
+		rail2.flags = BitOps.RETCLRBIT(rail2.flags, Vehicle.VRF_GOINGDOWN);*/
+		
+		boolean up1 = rail1.flags.remove(VehicleRailFlags.GoingUp);
+		boolean dn1 = rail1.flags.remove(VehicleRailFlags.GoingDown);
+
+		boolean up2 = rail2.flags.remove(VehicleRailFlags.GoingUp);
+		boolean dn2 = rail2.flags.remove(VehicleRailFlags.GoingDown);
 
 		// Reverse the rail-flags (if needed) 
+		if(up1) rail2.flags.add(VehicleRailFlags.GoingUp);
+		if(dn1) rail2.flags.add(VehicleRailFlags.GoingDown);
+		
+		if(up2) rail1.flags.add(VehicleRailFlags.GoingUp);
+		if(dn2) rail1.flags.add(VehicleRailFlags.GoingDown);
+		
+		/*
 		if (BitOps.HASBIT(flag1, Vehicle.VRF_GOINGUP)) {
 			rail2.flags = BitOps.RETSETBIT(rail2.flags, Vehicle.VRF_GOINGDOWN);
 		} else if (BitOps.HASBIT(flag1, Vehicle.VRF_GOINGDOWN)) {
@@ -1354,7 +1370,7 @@ public class TrainCmd extends TrainTables
 			rail1.flags = BitOps.RETSETBIT(rail1.flags, Vehicle.VRF_GOINGDOWN);
 		} else if (BitOps.HASBIT(flag2, Vehicle.VRF_GOINGDOWN)) {
 			rail1.flags = BitOps.RETSETBIT(rail1.flags, Vehicle.VRF_GOINGUP);
-		}
+		}*/
 	}
 
 
@@ -1538,14 +1554,16 @@ public class TrainCmd extends TrainTables
 
 			if (ftd.best_trackdir == 0xFF) {
 				Global.DEBUG_pbs(0, "pbs: (%i) no nodes encountered (RV)", v.unitnumber);
-				v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_REVERSING);
+				//v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_REVERSING);
+				v.rail.flags.remove(VehicleRailFlags.Reversing);
 				return;
 			}
 
 			// we found a way out of the pbs block
 			if (Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_EXIT)) {
 				if (Npf.NPFGetFlag(ftd.node, Npf.NPF_FLAG_PBS_BLOCKED)) {
-					v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_REVERSING);
+					//v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_REVERSING);
+					v.rail.flags.remove(VehicleRailFlags.Reversing);
 					return;
 				}
 			}
@@ -1618,7 +1636,8 @@ public class TrainCmd extends TrainTables
 		if (Depot.IsTileDepotType(v.tile, TransportType.Rail))
 			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 
-		v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_REVERSING);
+		//v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_REVERSING);
+		v.rail.flags.remove(VehicleRailFlags.Reversing);
 	}
 
 	/** Reverse train.
@@ -1645,7 +1664,9 @@ public class TrainCmd extends TrainTables
 
 		if( 0 !=  (flags & Cmd.DC_EXEC)) {
 			if (Global._patches.realistic_acceleration && v.cur_speed != 0) {
-				v.rail.flags = BitOps.RETTOGGLEBIT(v.rail.flags, Vehicle.VRF_REVERSING);
+				//v.rail.flags = BitOps.RETTOGGLEBIT(v.rail.flags, Vehicle.VRF_REVERSING);
+				if(!v.rail.flags.remove(VehicleRailFlags.Reversing))
+					v.rail.flags.add(VehicleRailFlags.Reversing);
 			} else {
 				v.cur_speed = 0;
 				SetLastSpeed(v, 0);
@@ -2532,7 +2553,9 @@ public class TrainCmd extends TrainTables
 		int spd;
 		int accel;
 
-		if ( v.isStopped() || BitOps.HASBIT(v.rail.flags, Vehicle.VRF_REVERSING)) {
+		//if ( v.isStopped() || BitOps.HASBIT(v.rail.flags, Vehicle.VRF_REVERSING)) 
+		if ( v.isStopped() || v.rail.flags.contains(VehicleRailFlags.Reversing)) 
+		{
 			if (Global._patches.realistic_acceleration) {
 				accel = GetTrainAcceleration(v, AM_BRAKE) * 2;
 			} else {
@@ -2622,16 +2645,22 @@ public class TrainCmd extends TrainTables
 		old_z = v.z_pos;
 		v.z_pos = new_z;
 
-		if (new_tile) {
-			v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_GOINGUP);
-			v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_GOINGDOWN);
+		if (new_tile) 
+		{
+			//v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_GOINGUP);
+			//v.rail.flags = BitOps.RETCLRBIT(v.rail.flags, Vehicle.VRF_GOINGDOWN);
+			v.rail.flags.remove(VehicleRailFlags.GoingUp);
+			v.rail.flags.remove(VehicleRailFlags.GoingDown);
 
 			if (new_z != old_z) {
 				TileIndex tile = TileIndex.TileVirtXY(v.getX_pos(), v.getY_pos());
 
 				// XXX workaround, whole UP/DOWN detection needs overhaul
 				if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) || (tile.getMap().m5 & 0x80) != 0)
-					v.rail.flags = BitOps.RETSETBIT(v.rail.flags, (new_z > old_z) ? Vehicle.VRF_GOINGUP : Vehicle.VRF_GOINGDOWN);
+				{
+					//v.rail.flags = BitOps.RETSETBIT(v.rail.flags, (new_z > old_z) ? Vehicle.VRF_GOINGUP : Vehicle.VRF_GOINGDOWN);
+					v.rail.flags.add((new_z > old_z) ? VehicleRailFlags.GoingUp : VehicleRailFlags.GoingDown);
+				}
 			}
 		}
 
@@ -3652,9 +3681,10 @@ public class TrainCmd extends TrainTables
 			v.breakdown_ctr--;
 		}
 
-		if (BitOps.HASBIT(v.rail.flags, Vehicle.VRF_REVERSING) && v.cur_speed == 0) {
+		//if (BitOps.HASBIT(v.rail.flags, Vehicle.VRF_REVERSING) && v.cur_speed == 0) 
+		if( v.rail.flags.contains(VehicleRailFlags.Reversing) && v.cur_speed == 0) 		
 			ReverseTrainDirection(v);
-		}
+		
 
 		/* exit if train is stopped */
 		if ( v.isStopped() && v.cur_speed == 0)
