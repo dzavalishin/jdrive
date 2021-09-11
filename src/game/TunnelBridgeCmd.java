@@ -6,6 +6,7 @@ import game.xui.ViewPort;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.TileDesc;
@@ -256,8 +257,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 
 		// Towns are not allowed to use bridges on slopes.
-		allow_on_slopes = (!Global.gs._is_old_ai_player
-				&& Global.gs._current_player.id != Owner.OWNER_TOWN && Global._patches.build_on_slopes);
+		//allow_on_slopes = (!Global.gs._is_old_ai_player && Global.gs._current_player.id != Owner.OWNER_TOWN && Global._patches.build_on_slopes);
+		allow_on_slopes = (!Global.gs._is_old_ai_player && PlayerID.getCurrent().isTown() && Global._patches.build_on_slopes);
 
 		/* Try and clear the start landscape */
 
@@ -408,7 +409,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 			bridge_len += 2;	// begin and end tiles/ramps
 
-			if (Global.gs._current_player.id < Global.MAX_PLAYERS && !Global.gs._is_old_ai_player)
+			if (!PlayerID.getCurrent().isSpecial() && !Global.gs._is_old_ai_player)
 				bridge_len = CalcBridgeLenCostFactor(bridge_len);
 
 			cost += ((long)bridge_len * Global._price.build_bridge * b.price) >> 8;
@@ -731,7 +732,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			int cost;
 
 			// check if we own the tile below the bridge..
-			if (!Global.gs._current_player.isWater() && (!Player.CheckTileOwnership(tile) || !Vehicle.EnsureNoVehicleZ(tile, tile.TilePixelHeight())))
+			if (!PlayerID.getCurrent().isWater() && (!Player.CheckTileOwnership(tile) || !Vehicle.EnsureNoVehicleZ(tile, tile.TilePixelHeight())))
 				return Cmd.CMD_ERROR;
 
 			cost = 0 != (tile.getMap().m5 & 8) ? Global._price.remove_road * 2 : Global._price.remove_rail;
@@ -761,7 +762,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		tile = FindEdgesOfBridge(tile, endtile);
 
 		// floods, scenario editor can always destroy bridges
-		if (!Global.gs._current_player.isWater() && Global._game_mode != GameModes.GM_EDITOR && !Player.CheckTileOwnership(tile)) {
+		if (!PlayerID.getCurrent().isWater() && Global._game_mode != GameModes.GM_EDITOR && !Player.CheckTileOwnership(tile)) {
 			if (!(Global._patches.extra_dynamite || Global._cheats.magic_bulldozer.value) || !tile.IsTileOwner(Owner.OWNER_TOWN))
 				return Cmd.CMD_ERROR;
 		}
@@ -1386,21 +1387,21 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	}
 
 
-	static int GetTileTrackStatus_TunnelBridge(TileIndex tile, /*TransportType*/ int mode)
+	static int GetTileTrackStatus_TunnelBridge(TileIndex tile, /*int*/ TransportType mode)
 	{
 		int result;
 		int m5 = tile.getMap().m5;
 
 		if ((m5 & 0xF0) == 0) {
 			/* This is a tunnel */
-			if (BitOps.GB(m5, 2, 2) == mode) {
+			if (BitOps.GB(m5, 2, 2) == mode.getValue()) {
 				/* Tranport in the tunnel is compatible */
 				return (0 !=(m5&1)) ? 0x202 : 0x101;
 			}
 		} else if(0 != (m5 & 0x80)) {
 			/* This is a bridge */
 			result = 0;
-			if (BitOps.GB(m5, 1, 2) == mode) {
+			if (BitOps.GB(m5, 1, 2) == mode.getValue()) {
 				/* Transport over the bridge is compatible */
 				result = (0 !=(m5 & 1)) ? 0x202 : 0x101;
 			}
@@ -1412,11 +1413,11 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 						/* Clear ground */
 						return result;
 					} else {
-						if (mode != Global.TRANSPORT_WATER) return result;
+						if (mode != TransportType.Water) return result;
 					}
 				} else {
 					/* Transport underneath */
-					if (BitOps.GB(m5, 3, 2) != mode) {
+					if (BitOps.GB(m5, 3, 2) != mode.getValue()) {
 						/* Incompatible transport underneath */
 						return result;
 					}

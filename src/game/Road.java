@@ -3,6 +3,7 @@ package game;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.Point;
@@ -86,7 +87,8 @@ public class Road extends RoadTables
 			return true;
 
 		// Only do the special processing for actual players.
-		if (Global.gs._current_player.id >= Global.MAX_PLAYERS)
+		//if (Global.gs._current_player.id >= Global.MAX_PLAYERS)
+		if(PlayerID.getCurrent().isSpecial())
 			return true;
 
 		// A railway crossing has the road owner in the map3_lo byte.
@@ -95,8 +97,7 @@ public class Road extends RoadTables
 		} else {
 			owner = tile.GetTileOwner().id;
 		}
-		// Only do the special processing if the road is owned
-		// by a town
+		// Only do the special processing if the road is owned by a town
 		if (owner != Owner.OWNER_TOWN) {
 			return owner == Owner.OWNER_NONE || Player.CheckOwnership( PlayerID.get( owner ) );
 		}
@@ -132,7 +133,7 @@ public class Road extends RoadTables
 
 	static int GetRoadBitsByTile(TileIndex tile)
 	{
-		int r = Landscape.GetTileTrackStatus(tile, Global.TRANSPORT_ROAD);
+		int r = Landscape.GetTileTrackStatus(tile, TransportType.Road);
 		return (r | (r >> 8));
 	}
 
@@ -401,7 +402,7 @@ public class Road extends RoadTables
 		/* Road pieces are max 4 bitset values (NE, NW, SE, SW) and town can only be non-zero
 		 * if a non-player is building the road */
 		if ((pieces >> 4) != 0 
-				|| (Global.gs._current_player.id < Global.MAX_PLAYERS && p2 != 0) 
+				|| (!PlayerID.getCurrent().isSpecial() && p2 != 0) 
 				|| !Town.IsTownIndex(p2)) 
 			return Cmd.CMD_ERROR;
 
@@ -448,7 +449,7 @@ public class Road extends RoadTables
 							//TileTypes.MP_SETTYPE(TileTypes.MP_STREET) |
 							TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5,
 							p2,
-							Global.gs._current_player.id, /* map3_lo */
+							PlayerID.getCurrent().id, /* map3_lo */
 							tile.getMap().m3 & 0xF,    /* map3_hi */
 							m5 /* map5 */
 							);
@@ -532,7 +533,7 @@ public class Road extends RoadTables
 				tile.SetTileType( TileTypes.MP_STREET);
 				tile.getMap().m5 = 0;
 				tile.getMap().m2 = 0xFF & p2;
-				tile.SetTileOwner( Global.gs._current_player);
+				tile.SetTileOwner( PlayerID.getCurrent());
 			}
 
 			tile.getMap().m5 |= pieces;
@@ -732,7 +733,7 @@ public class Road extends RoadTables
 
 	static int RemoveRoadDepot(TileIndex tile, int flags)
 	{
-		if (!Player.CheckTileOwnership(tile) && !Global.gs._current_player.isWater())
+		if (!Player.CheckTileOwnership(tile) && !PlayerID.getCurrent().isWater())
 			return Cmd.CMD_ERROR;
 
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
@@ -1162,13 +1163,13 @@ public class Road extends RoadTables
 			0x0, 0x0, 0x0, 0x10, 0x0, 0x2, 0x8, 0x1A, 0x0, 0x4, 0x1, 0x15, 0x20, 0x26, 0x29, 0x3F,
 	};
 
-	static int GetTileTrackStatus_Road(TileIndex tile, /*TransportType*/ int mode)
+	static int GetTileTrackStatus_Road(TileIndex tile, /*int*/ TransportType mode)
 	{
-		if (mode == Global.TRANSPORT_RAIL) {
+		if (mode == TransportType.Rail) {
 			if (!tile.IsLevelCrossing())
 				return 0;
 			return 0 != (tile.getMap().m5 & 8) ? 0x101 : 0x202;
-		} else if  (mode == Global.TRANSPORT_ROAD) {
+		} else if  (mode == TransportType.Road) {
 			int b = tile.getMap().m5;
 			if ((b & 0xF0) == 0) {
 				/* Ordinary road */

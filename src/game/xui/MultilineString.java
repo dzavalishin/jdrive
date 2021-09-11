@@ -116,7 +116,7 @@ public class MultilineString
 		breakLines(Strings.GetString(str), maxw);
 		baseToMt();
 
-		y -= (mt >> 1) * getNum();
+		y -= (mt >> 1) * (getLineCount() - 1);
 
 		for(String src : strings) 
 		{
@@ -151,7 +151,7 @@ public class MultilineString
 		Gfx._stringwidth_base = 0;
 	}
 
-	private int getNum() {
+	private int getLineCount() {
 		return strings.size();
 	}
 

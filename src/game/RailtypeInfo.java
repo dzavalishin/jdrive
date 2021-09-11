@@ -131,7 +131,7 @@ enum RailTileType
 {
 	RAIL_TYPE_NORMAL         ( 0x0 ),
 	RAIL_TYPE_SIGNALS        ( 0x40 ),
-	RAIL_TYPE_UNUSED         ( 0x80 ), // XXX: Maybe this could become waypoints? 
+	RAIL_TYPE_UNUSED         ( 0x80 ), // X XX: Maybe this could become waypoints? 
 	RAIL_TYPE_DEPOT_WAYPOINT ( 0xC0 ), // Is really depots and waypoints... 
 	RAIL_TILE_TYPE_MASK      ( 0xC0 );
 

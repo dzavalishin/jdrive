@@ -25,6 +25,7 @@ import game.xui.WindowEvent;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
@@ -407,9 +408,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		 * with magic_bulldozer cheat you can destroy industries
 		 * (area around OILRIG is water, so water shouldn't flood it
 		 */
-		if ((!Global.gs._current_player.isWater() && Global._game_mode != GameModes.GM_EDITOR &&
+		if ((!PlayerID.getCurrent().isWater() && Global._game_mode != GameModes.GM_EDITOR &&
 				!Global._cheats.magic_bulldozer.value) ||
-				(Global.gs._current_player.isWater() && i.type == IT_OIL_RIG) ) {
+				(PlayerID.getCurrent().isWater() && i.type == IT_OIL_RIG) ) {
 			Global.SetDParam(0, Str.STR_4802_COAL_MINE + i.type);
 			return Cmd.return_cmd_error(Str.STR_4800_IN_THE_WAY);
 		}
@@ -849,7 +850,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		ShowIndustryViewWindow(tile.getMap().m2);
 	}
 
-	static int GetTileTrackStatus_Industry(TileIndex tile, /*TransportType*/ int mode)
+	static int GetTileTrackStatus_Industry(TileIndex tile, /*int*/ TransportType mode)
 	{
 		return 0;
 	}
@@ -1031,13 +1032,12 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		if (BitOps.CHANCE16(1, 8)) {
 			int x = i.width  / 2 + Hal.Random() % 31 - 16;
 			int y = i.height / 2 + Hal.Random() % 31 - 16;
-			TileIndex tile = new TileIndex(
-					TileIndex.TileAddWrap( new TileIndex(i.xy), x, y));
+			TileIndex tile = new TileIndex(i.xy).TileAddWrap(x, y);
 			if (tile.isValid()) PlantFarmField(tile);
 		}
 	}
 
-	static final TileIndexDiffC _chop_dir[] = {
+	static final TileIndexDiffC[] _chop_dir = {
 			new TileIndexDiffC( 0,  1),
 			new TileIndexDiffC( 1,  0),
 			new TileIndexDiffC( 0, -1),
@@ -1061,10 +1061,10 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				do {
 					tile.TILE_MASK();
 					if (tile.IsTileType( TileTypes.MP_TREES)) {
-						PlayerID old_player = Global.gs._current_player;
+						PlayerID old_player = PlayerID.getCurrent();
 						/* found a tree */
 
-						Global.gs._current_player = PlayerID.getNone();
+						PlayerID.setCurrentToNone();
 						_industry_sound_ctr = 1;
 						_industry_sound_tile = tile;
 						
@@ -1076,7 +1076,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 						i.cargo_waiting[0] = Math.min(0xffff, i.cargo_waiting[0] + 45);
 
-						Global.gs._current_player = old_player;
+						PlayerID.setCurrent(old_player);
 						return;
 					}
 					tile.madd( TileIndex.ToTileIndexDiff(_chop_dir[dir]) );
@@ -1699,8 +1699,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 
 		if (GameOptions._opt.diff.number_industries != 0) {
-			PlayerID old_player = Global.gs._current_player;
-			Global.gs._current_player = PlayerID.getNone();
+			PlayerID old_player = PlayerID.getCurrent();
+			PlayerID.setCurrentToNone();
 			assert(num > 0);
 
 			do {
@@ -1711,7 +1711,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				}
 			} while (--num > 0);
 
-			Global.gs._current_player = old_player;
+			PlayerID.setCurrent(old_player);
 		}
 	}
 
@@ -1939,8 +1939,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	public static void IndustryMonthlyLoop()
 	{
-		PlayerID old_player = Global.gs._current_player;
-		Global.gs._current_player = PlayerID.getNone();
+		PlayerID old_player = PlayerID.getCurrent();
+		PlayerID.setCurrentToNone();
 
 		Industry.forEach( (i) ->
 		{
@@ -1955,7 +1955,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			if (i != null && i.isValid()) ChangeIndustryProduction(i);
 		}
 
-		Global.gs._current_player = old_player;
+		PlayerID.setCurrent(old_player);
 
 		// production-change
 		_industry_sort_dirty = true;

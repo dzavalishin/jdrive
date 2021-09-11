@@ -8,6 +8,7 @@ import java.util.function.ToIntBiFunction;
 import game.AcceptedCargo;
 import game.TileIndex;
 import game.TileInfo;
+import game.enums.TransportType;
 import game.struct.ProducedCargo;
 import game.struct.TileDesc;
 
@@ -24,7 +25,7 @@ public class TileTypeProcs implements Serializable
 			ToIntBiFunction<TileIndex, Byte> clear_tile,
 			Function<TileIndex,AcceptedCargo> get_accepted_cargo,
 			Function<TileIndex,TileDesc> get_tile_desc,
-			ToIntBiFunction<TileIndex,Integer> get_tile_track_status, 
+			ToIntBiFunction<TileIndex,TransportType> get_tile_track_status, 
 			Consumer<TileIndex> click_tile,
 			Consumer<TileIndex> animate_tile,
 			Consumer<TileIndex> tile_loop,
@@ -92,7 +93,7 @@ public class TileTypeProcs implements Serializable
 	
 	//abstract int get_tile_track_status_proc(TileIndex tile, TransportType mode);
 	//ToIntBiFunction<TileIndex,TransportType> get_tile_track_status_proc; 
-	public final ToIntBiFunction<TileIndex,Integer> get_tile_track_status_proc;
+	public final ToIntBiFunction<TileIndex,TransportType> get_tile_track_status_proc;
 	
 	//abstract void click_tile_proc(TileIndex tile);
 	public final Consumer<TileIndex> click_tile_proc;

@@ -425,7 +425,7 @@ public class Cmd {
 		if (--_docommand_recursive == 0) {
 			Player.SubtractMoneyFromPlayer(res);
 			// XXX - Old AI hack which doesn't use DoCommandDP; update last build coord of player
-			if ( (x|y) != 0 && Global.gs._current_player.id < Global.MAX_PLAYERS) {
+			if ( (x|y) != 0 && !PlayerID.getCurrent().isSpecial()) {
 				Player.GetCurrentPlayer().last_build_coordinate = TileIndex.TileVirtXY(x, y);
 			}
 		}
@@ -436,9 +436,10 @@ public class Cmd {
 
 	static long GetAvailableMoneyForCommand()
 	{
-		PlayerID pid = Global.gs._current_player;
-		if (pid.id >= Global.MAX_PLAYERS) return 0x7FFFFFFF; // max int
-		return Player.GetPlayer(pid).getMoney();
+		//PlayerID pid = Global.gs._current_player;
+		//if (pid.id >= Global.MAX_PLAYERS) return 0x7FFFFFFF; // max int
+		if( PlayerID.getCurrent().isSpecial() ) return Integer.MAX_VALUE;
+		return Player.GetCurrentPlayer().getMoney();
 	}
 
 	// toplevel network safe docommand function for the current player. must not be called recursively.
@@ -474,7 +475,7 @@ public class Cmd {
 
 		/** Spectator has no rights except for the dedicated server which
 		 * is a spectator but is the server, so can do anything */
-		if (Global.gs._current_player.isSpectator() && !Global._network_dedicated) {
+		if (PlayerID.getCurrent().isSpectator() && !Global._network_dedicated) {
 			Global.ShowErrorMessage(Global._error_message, Global._error_message_2, x, y);
 			Global._cmd_text = null;
 			return false;
@@ -580,7 +581,7 @@ public class Cmd {
 		#endif /* ENABLE_NETWORK */
 
 		// update last build coordinate of player.
-		if ( tile != null && Global.gs._current_player.id < Global.MAX_PLAYERS) 
+		if ( tile != null && !PlayerID.getCurrent().isSpecial()) 
 			Player.GetCurrentPlayer().last_build_coordinate = tile;
 
 		/* Actually try and execute the command. If no cost-type is given

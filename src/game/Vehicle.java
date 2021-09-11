@@ -10,9 +10,9 @@ import java.util.function.Consumer;
 
 import game.enums.GameModes;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.CargoID;
 import game.ids.EngineID;
-import game.ids.OrderID;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ids.UnitID;
@@ -32,7 +32,6 @@ import game.tables.BubbleMovement;
 import game.tables.EngineTables;
 import game.tables.Snd;
 import game.util.BitOps;
-import game.util.ShortSounds;
 import game.util.Sound;
 import game.xui.DrawPixelInfo;
 import game.xui.MiscGui;
@@ -185,7 +184,7 @@ public class Vehicle implements IPoolItem
 		string_id = 0;
 
 		unitnumber = null;
-		owner = PlayerID.get(-1); // TODO value?
+		owner = PlayerID.getNone();//  PlayerID.get(-1); // TO DO value?
 
 		tile = null;	
 		dest_tile = null;
@@ -720,7 +719,7 @@ public class Vehicle implements IPoolItem
 		return order;
 	}
 
-	public Order GetVehicleOrder(OrderID id) { return GetVehicleOrder(id.id); }
+	//public Order GetVehicleOrder(OrderID id) { return GetVehicleOrder(id.id); }
 
 	/* Returns the last order of a vehicle, or null if it doesn't exists */
 	public Order GetLastVehicleOrder()
@@ -1331,8 +1330,8 @@ public class Vehicle implements IPoolItem
 		Vehicle v = this;
 		// we need to set v.leave_depot_instantly as we have no control of it's contents at this time
 		//if (BitOps.HASBIT(v.current_order.flags, Order.OFB_HALT_IN_DEPOT) && !BitOps.HASBIT(v.current_order.flags, Order.OFB_PART_OF_ORDERS) && v.current_order.type == Order.OT_GOTO_DEPOT) 
-		if (v.current_order.hasFlag(Order.OFB_HALT_IN_DEPOT) 
-				&& !v.current_order.hasFlag(Order.OFB_PART_OF_ORDERS) 
+		if (v.current_order.hasFlag(Order.OF_HALT_IN_DEPOT) 
+				&& !v.current_order.hasFlag(Order.OF_PART_OF_ORDERS) 
 				&& v.current_order.typeIs(Order.OT_GOTO_DEPOT) ) 
 		{
 			// we keep the vehicle in the depot since the user ordered it to stay
@@ -2500,13 +2499,9 @@ public class Vehicle implements IPoolItem
 		int cost, temp_cost = 0;
 		boolean stopped = false;
 		boolean train_fits_in_station = false;
-		//MA vars
-		//int i;
-		//Station st;
-		//END MA vars
 
 
-		Global.gs._current_player = v.owner;
+		PlayerID.setCurrent( v.owner );
 
 		assert(v.type == VEH_Train || v.type == VEH_Road || v.type == VEH_Ship || v.type == VEH_Aircraft);
 
@@ -2579,7 +2574,7 @@ public class Vehicle implements IPoolItem
 					NewsItem.AddNewsItem(message, NewsItem.NEWS_FLAGS(NewsItem.NM_SMALL, NewsItem.NF_VIEWPORT|NewsItem.NF_VEHICLE, NewsItem.NT_ADVICE, 0), v.index, 0);
 				}
 				if (stopped) v.setStopped(false);
-				Global.gs._current_player = PlayerID.getNone();
+				PlayerID.setCurrentToNone();
 				return 0;
 			}
 
@@ -2629,7 +2624,7 @@ public class Vehicle implements IPoolItem
 		if (Player.IsLocalPlayer()) MiscGui.ShowCostOrIncomeAnimation(v.x_pos, v.y_pos, v.z_pos, cost);
 
 		if (stopped) v.setStopped(false);
-		Global.gs._current_player = PlayerID.getNone();
+		PlayerID.setCurrentToNone();
 
 		return 0;
 	}
@@ -2748,7 +2743,7 @@ public class Vehicle implements IPoolItem
 		{
 		case VEH_Train:
 			if (rail.isInDepot()) /* We'll assume the train is facing outwards */
-				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, Global.TRANSPORT_RAIL)); /* Train in depot */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, TransportType.Rail)); /* Train in depot */
 
 			if (rail.isInTunnel()) /* train in tunnel, so just use his direction and assume a diagonal track */
 				return Rail.DiagdirToDiagTrackdir((direction >> 1) & 3);
@@ -2759,13 +2754,13 @@ public class Vehicle implements IPoolItem
 			//if (v.ship.state == 0x80)  /* Inside a depot? */
 			if (ship.isInDepot())  /* Inside a depot? */
 				/* We'll assume the ship is facing outwards */
-				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, Global.TRANSPORT_WATER)); /* Ship in depot */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, TransportType.Water)); /* Ship in depot */
 
 			return Rail.TrackDirectionToTrackdir(BitOps.FIND_FIRST_BIT(ship.state),direction);
 
 		case VEH_Road:
 			if (road.isInDepot()) /* We'll assume the road vehicle is facing outwards */
-				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, Global.TRANSPORT_ROAD)); /* Road vehicle in depot */
+				return Rail.DiagdirToDiagTrackdir(Depot.GetDepotDirection(tile, TransportType.Road)); /* Road vehicle in depot */
 
 			if (tile.IsRoadStationTile()) /* We'll assume the road vehicle is facing outwards */
 				return Rail.DiagdirToDiagTrackdir(Station.GetRoadStationDir(tile)); /* Road vehicle in a station */
@@ -2965,8 +2960,8 @@ public class Vehicle implements IPoolItem
 	public static void BackupVehicleOrders(final Vehicle v, BackuppedOrders bak)
 	{
 		/* Save general info */
-		bak.orderindex       = OrderID.get(v.cur_order_index);
-		bak.service_interval = v.service_interval;
+		bak.currentOrderIndex = v.cur_order_index;
+		bak.service_interval  = v.service_interval;
 
 		/* Safe custom string, if any */
 		if ((v.string_id & 0xF800) != 0x7800) {
@@ -2982,25 +2977,22 @@ public class Vehicle implements IPoolItem
 			bak.clone = VehicleID.get( u.index );
 		} else {
 			/* Else copy the orders */
-			//Order dest;
-
-			//dest = bak.order;
 
 			/* We do not have shared orders */
 			bak.clone = VehicleID.getInvalid();
 
 			/* Copy the orders */
 			for(Order order = v.orders; order != null; order = order.next )
-			{
 				bak.order.add(new Order(order) );
-			}
-			/* End the list with an Order.OT_NOTHING */
+			
+			/* End the list with an Order.OT_NOTHING [dz] no, not an array, no need for marker
 			//dest.type = Order.OT_NOTHING;
 			//dest.next = null;
 			Order empty_order = new Order(Order.OT_NOTHING);
 			//empty_order.type = Order.OT_NOTHING;
 			//empty_order.next = null;
 			bak.order.add(empty_order);
+			*/
 		}
 	}
 
@@ -3042,7 +3034,7 @@ public class Vehicle implements IPoolItem
 		}
 
 		/* Restore vehicle order-index and service interval */
-		Cmd.DoCommandP(null, v.index, bak.orderindex.id | (bak.service_interval << 16) , null, Cmd.CMD_RESTORE_ORDER_INDEX);
+		Cmd.DoCommandP(null, v.index, bak.currentOrderIndex | (bak.service_interval << 16) , null, Cmd.CMD_RESTORE_ORDER_INDEX);
 	}
 
 

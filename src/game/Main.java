@@ -18,7 +18,6 @@ import game.ids.PlayerID;
 import game.struct.SmallFiosItem;
 import game.util.FileIO;
 import game.util.Music;
-import game.util.PushPlayer;
 import game.util.ShortSounds;
 import game.util.Sound;
 import game.util.Strings;
@@ -479,7 +478,7 @@ public class Main {
 			Player.DoStartupNewPlayer(false);
 
 			Global.gs._local_player = PlayerID.get(0); 
-			Global.gs._current_player = Global.gs._local_player;
+			PlayerID.setCurrent(Global.gs._local_player);
 			Cmd.DoCommandP(null, (Global._patches.autorenew ? (1 << 15) : 0 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 		}
 
@@ -556,7 +555,7 @@ public class Main {
 		// TODO StartupDisasters();
 
 		Global.gs._local_player = null;
-		Global.gs._current_player = Global.gs._local_player;
+		PlayerID.setCurrent( Global.gs._local_player;
 		DoCommandP(0, (Global._patches.autorenew ? 1 << 15 : 0 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
 
 		Global.hal.MarkWholeScreenDirty();
@@ -643,7 +642,9 @@ public class Main {
 				LoadIntroGame();
 				Global.ShowErrorMessage(Str.INVALID_STRING, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			} else {
-				// [dz] Global.gs._local_player = PlayerID.get(0);
+				// [dz] TODO hack, it's null - saved as null? 
+				PlayerID.setCurrent( PlayerID.get(0) );
+				Global.gs._local_player = PlayerID.get(0);
 				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE); // decrease pause counter (was increased from opening load dialog)
 				/*
 				if (_network_server)
@@ -739,8 +740,8 @@ public class Main {
 			// All these actions has to be done from OWNER_NONE
 			//  for multiplayer compatibility
 			
-			PlayerID p =  Global.gs._current_player;
-			Global.gs._current_player = PlayerID.getNone();
+			PlayerID p =  PlayerID.getCurrent();
+			PlayerID.setCurrentToNone();
 
 			//try(PushPlayer pp = new PushPlayer(PlayerID.getNone()))
 			//{
@@ -755,7 +756,7 @@ public class Main {
 				Window.CallWindowTickEvent();
 				NewsItem.NewsLoop();
 			//}
-			Global.gs._current_player = p;
+			PlayerID.setCurrent( p );
 		}
 	}
 
