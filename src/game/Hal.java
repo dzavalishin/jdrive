@@ -100,13 +100,15 @@ void SortResolutions(int count)
 		}
 	}
 	
-	private static java.util.Random rng = new java.util.Random();
+	private static final java.util.Random rng = new java.util.Random();
 	
 	public static int Random() {		
-		//return (int) (Math.random() * Integer.MAX_VALUE);
-		return Math.abs(rng.nextInt());
+		return (Math.abs(rng.nextInt())) & 0xFFFF;
 	}
 
+	public static long Random32() {		
+		return Math.abs(rng.nextLong()) & 0xFFFFFFFFL;
+	}
 
 	public static int InteractiveRandom()
 	{

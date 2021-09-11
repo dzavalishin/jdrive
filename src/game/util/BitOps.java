@@ -234,11 +234,8 @@ public class BitOps {
 		//return ((uint)((a)-(min)) < (uint)((max)-(min)))
 	}
 
-	public static boolean CHANCE16(int a, int b) 
-	{ 
-		final int r = Hal.Random();
-		final int v = (int)( (Integer.MAX_VALUE*2L * (double)a) / b );
-		return Integer.compareUnsigned( r, v ) <= 0;
+	public static boolean CHANCE16(int a, int b) { 
+		return Hal.Random() <= (0xFFFF * a) / b; 
 	}
 	
 	public static boolean CHANCE16R(int a, int b, int [] rv) 
