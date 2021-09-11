@@ -36,6 +36,7 @@ import game.struct.FiosItem;
 import game.util.BinaryString;
 import game.util.BitOps;
 import game.util.GameDate;
+import game.util.IntContainer;
 import game.util.Sound;
 import game.util.Strings;
 import game.util.YearMonthDay;
@@ -180,10 +181,13 @@ public class MiscGui {
 
 		lid.ac = Landscape.GetAcceptedCargo(tile);
 		lid.td = Landscape.GetTileDesc(tile);
+		
+		IntContainer ic  = new IntContainer();
+		int sl = tile.GetTileSlope(ic);
 
 		//#if defined(_DEBUG)
 		Global.DEBUG_misc( 0, "TILE: %x (%d,%d)", tile.hashCode(), tile.TileX(), tile.TileY());
-		Global.DEBUG_misc( 0, "TILE: %x ", tile.hashCode());
+		//Global.DEBUG_misc( 0, "TILE: %x ", tile.hashCode());
 		Global.DEBUG_misc( 0, "type         = %x", tile.getMap().type);
 		Global.DEBUG_misc( 0, "height       = %d", tile.getMap().height);
 		Global.DEBUG_misc( 0, "m1           = %x", tile.getMap().m1);
@@ -191,6 +195,8 @@ public class MiscGui {
 		Global.DEBUG_misc( 0, "m3           = %x", tile.getMap().m3);
 		Global.DEBUG_misc( 0, "m4           = %x", tile.getMap().m4);
 		Global.DEBUG_misc( 0, "m5           = %x", tile.getMap().m5);
+		Global.DEBUG_misc( 0, "extra        = %x", tile.getMap().extra);
+		Global.DEBUG_misc( 0, "slope/h      = %d/%d", sl, ic.v);
 		//#endif
 	}
 

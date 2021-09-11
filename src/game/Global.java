@@ -323,7 +323,7 @@ public class Global
 	{
 		String buf = String.format(s, arg);
 
-		error( "dbg: %s\n", buf);
+		printf( "dbg: %s", buf);
 		Console.IConsoleDebug(buf);
 	}
 
