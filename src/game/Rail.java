@@ -547,7 +547,7 @@ public class Rail extends RailTables {
 			if(tileh != 2)
 			{
 				i+=2;
-				if(tileh == 4)
+				if(tileh != 4)
 				{
 					i+=2;
 					if( tileh != 8) return 0;
