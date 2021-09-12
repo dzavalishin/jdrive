@@ -889,7 +889,7 @@ public class Road extends RoadTables
 			int y = ti.y | drts.subcoord_y;
 			int z = ti.z;
 			if (ti.tileh != 0) z = Landscape.GetSlopeZ(x, y);
-			ViewPort.AddSortableSpriteToDraw(image, x, y, 2, 2, 0x10, z);
+			ViewPort.AddSortableSpriteToDraw(drts.image, x, y, 2, 2, 0x10, z);
 			//drts++;
 		}
 	}
