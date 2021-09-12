@@ -361,7 +361,7 @@ public class FileIO {
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*")) 
 		{
 			for (Path entry: stream) {
-				System.out.println(entry.getFileName());
+				//System.out.println(entry.getFileName());
 				File file = entry.toFile();
 				//filename = String.format( "%s/%s", _fios_path, dirent.d_name);
 				if(file.isDirectory() && file.getName().charAt(0) != '.') 
@@ -376,7 +376,8 @@ public class FileIO {
 	
 			}
 		} catch (IOException x) {
-			System.err.println(x); // TODO err print
+			//System.err.println(x);
+			Global.error(x);
 		}
 	}
 
@@ -415,7 +416,7 @@ public class FileIO {
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.{sav,scn}")) 
 		{
 			for (Path entry: stream) {
-				System.out.println(entry.getFileName());
+				//System.out.println(entry.getFileName());
 				File file= entry.getFileName().toFile();
 				//filename = String.format( "%s/%s", _fios_path, dirent.d_name);
 				final String name = file.getName();
@@ -434,7 +435,8 @@ public class FileIO {
 
 			}
 		} catch (IOException x) {
-			System.err.println(x); // TODO err print
+			//System.err.println(x); 
+			Global.error(x);
 		}
 
 
@@ -476,7 +478,7 @@ public class FileIO {
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.scn")) 
 		{
 			for (Path entry: stream) {
-				System.out.println(entry.getFileName());
+				//System.out.println(entry.getFileName());
 				File file= entry.getFileName().toFile();
 				//filename = String.format( "%s/%s", _fios_path, dirent.d_name);
 				final String name = file.getName();
@@ -493,7 +495,8 @@ public class FileIO {
 
 			}
 		} catch (IOException x) {
-			System.err.println(x); // TODO err print
+			//System.err.println(x);
+			Global.error(x);
 		}
 
 		//qsort(_fios_items + sort_start, _fios_count - sort_start, sizeof(FiosItem), compare_FiosItems);
@@ -616,7 +619,7 @@ public class FileIO {
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.lng")) 
 		{
 			for (Path entry: stream) {
-				System.out.println(entry.getFileName());
+				//System.out.println(entry.getFileName());
 				File file= entry.getFileName().toFile();
 				//filename = String.format( "%s/%s", _fios_path, dirent.d_name);
 				final String name = file.getName();
@@ -628,7 +631,8 @@ public class FileIO {
 
 			}
 		} catch (IOException x) {
-			System.err.println(x); // TODO err print
+			//System.err.println(x);
+			Global.error(x);
 		}
 		
 		return files;

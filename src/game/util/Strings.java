@@ -3,8 +3,8 @@ package game.util;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Locale;
 
 import game.*;
 import game.ids.StringID;
@@ -13,7 +13,7 @@ import game.tables.CurrencySpec;
 public class Strings extends StringTable
 {
 
-	static final DynamicLanguages _dynlang = new DynamicLanguages();
+	public static final DynamicLanguages _dynlang = new DynamicLanguages();
 
 	public static BinaryString _userstring;
 
@@ -80,7 +80,6 @@ public class Strings extends StringTable
 	public static final int STR_SPEC_USERSTRING = 0xF808;
 
 
-	// TODO fix me
 	private static BinaryString []_langpack_offs;
 	private static LanguagePack _langpack;
 	private static final int [] _langtab_num = new int [32]; // Offset into langpack offs
@@ -215,11 +214,6 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		return _langpack_offs[_langtab_start[string>> 11] + (string & 0x7FF)];
 	}
 
-	/* TODO rewrite
-	static const char []GetStringPtr(StringID string)
-	{
-		return _langpack_offs[_langtab_start[string >> 11] + (string & 0x7FF)];
-	}*/
 
 	// The highest 8 bits of string contain the "case index".
 	// These 8 bits will only be set when FormatString wants to print
@@ -227,7 +221,6 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	// should set those bits.
 	public static String GetStringWithArgs(int string, Object ... argv )
 	{
-		//StringBuilder buffr = new StringBuilder();
 		int index = BitOps.GB(string,  0, 11);
 		int tab   = BitOps.GB(string, 11,  5);
 
@@ -828,7 +821,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				//int acnt = arg.length - argc;
 				//Object [] acopy = new Object[acnt];
 				//System.arraycopy(arg, argc, acopy, 0, acnt);
-				//argc += acnt; // TODO wrong, must get used count from GetStringWithArgs 
+				//argc += acnt; // TO DO wrong, must get used count from GetStringWithArgs 
 				//buff.append( GetStringWithArgs(sstri, acopy) );
 				buff.append( GetStringWithArgs(sstri) ); // 0 args
 				modifier = 0;
@@ -946,13 +939,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	private static String StationGetSpecialString(int x)
 	{
 		StringBuilder buff = new StringBuilder();
-		/*
-    if (x & 0x01) buff.append( '\x94' );
-	if (x & 0x02) buff.append( '\x95' );
-	if (x & 0x04) buff.append( '\x96' );
-	if (x & 0x08) buff.append( '\x97' );
-	if (x & 0x10) buff.append( '\x98' );
-		 */
+
 		if( 0 != (x & 0x01)) buff.append( 0x94 );
 		if( 0 !=  (x & 0x02)) buff.append( 0x95 );
 		if( 0 !=  (x & 0x04)) buff.append( 0x96 );
@@ -1134,9 +1121,9 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 		// language name?
 		if (BitOps.IS_INT_INSIDE(ind, (SPECSTR_LANGUAGE_START - 0x70E4), (SPECSTR_LANGUAGE_END - 0x70E4) + 1)) {
-			//int i = ind - (SPECSTR_LANGUAGE_START - 0x70E4);
-			// TODO return i == _dynlang.curr ? _langpack.own_name : _dynlang.ent[i].name;
-			return "English";
+			int i = ind - (SPECSTR_LANGUAGE_START - 0x70E4);
+			return i == _dynlang.curr ? _langpack.own_name : _dynlang.name[i];
+			//return "English";
 		}
 
 		// resolution size?
@@ -1160,7 +1147,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 
 
-	// remap a string ID from the old format to the new format
+	/* unused / remap a string ID from the old format to the new format
 	//static StringID RemapOldStringID(StringID s)
 	static int RemapOldStringID(int s)
 	{
@@ -1180,12 +1167,12 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			else
 				return s;
 		}
-	}
+	} */
 
-	static boolean ReadLanguagePack(int lang_index)
+	public static boolean ReadLanguagePack(int lang_index)
 	{
 
-		int tot_count, i;
+		//int tot_count, i;
 		LanguagePack lang_pack = new LanguagePack();
 		//int len;
 		//char [][]langpack_offs;
@@ -1195,18 +1182,12 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		byte[] lang_pack_bytes = Main.ReadFileToMem(lang, 100000);
 		if (lang_pack_bytes == null) return false;
 
-		/* TODO 
-		if ( //lang_pack_bytes.length < sizeof(LanguagePack) ||
-				lang_pack.ident != BitOps.TO_LE32(LANGUAGE_PACK_IDENT) ||
-				lang_pack.version != BitOps.TO_LE32(LANGUAGE_PACK_VERSION)) {
-			return false;
-		} */
-
+		/*
 		lang_pack.name = BitOps.stringFromBytes(lang_pack_bytes, 8, 32 );
 		lang_pack.own_name = BitOps.stringFromBytes(lang_pack_bytes, 40, 32 );
-
-		tot_count = 0;
-		for (i = 0; i != 32; i++) {
+		*/
+		int tot_count = 0;
+		for (int i = 0; i != 32; i++) {
 			int off = BitOps.READ_LE_UINT16(lang_pack_bytes, 88+i*2);
 			lang_pack.offsets[i] = off;
 			int num = lang_pack.offsets[i];
@@ -1214,16 +1195,16 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			_langtab_num[i] = num;
 			tot_count += num;
 		}
-
+		
+		lang_pack.loadFromBytes(lang_pack_bytes);
+		
 		// Allocate offsets
-		//langpack_offs = malloc(tot_count * sizeof(*langpack_offs));
-
 		langpack_offs = new BinaryString[tot_count]; 
 
 		// Fill offsets
 		byte[] s = BitOps.subArray(lang_pack_bytes, 0x9c); //0x9d);		
 		int sp = 0;
-		for (i = 0; i != tot_count; i++) {
+		for (int i = 0; i != tot_count; i++) {
 			int len = s[sp++];
 			len &= 0xFF;
 			//*s++ = '\0'; // zero terminate the string before.
@@ -1247,7 +1228,6 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	}
 
-	private static final String [] __elng =  {"english.lng"};
 	private final static String [] env = {
 			"LANGUAGE",
 			"LC_ALL",
@@ -1258,45 +1238,43 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	// make a list of the available language packs. put the data in _dynlang struct.
 	public static void InitializeLanguagePacks()
 	{
-		_dynlang.file = __elng ;
-		ReadLanguagePack(0);
-
 		DynamicLanguages dl = _dynlang;
 		int m = 0;
-		int def;
-		int fallback;
-		//LanguagePack hdr;
-		//FILE *in;
-		//String [] files = new String[32];
 
-		String lang = "en";
+		Locale lcl = Locale.getDefault();
+		String lang = lcl.getLanguage();
 
-		for (String en : env) {
-			final String envlang = System.getenv(en);
-			if (envlang != null) {
-				lang = envlang;
-				break;
+		if(lang == null)
+		{
+			lang = "en";
+
+			for (String en : env) {
+				final String envlang = System.getenv(en);
+				if (envlang != null) {
+					lang = envlang;
+					break;
+				}
 			}
 		}
 
 		List<String> files = FileIO.GetLanguageList();
 
-		def = -1;
-		fallback = 0;
+		int def = -1;
+		int fallback = 0;
 
 		// go through the language files and make sure that they are valid.
 		for (String file : files) {
-			int j;
+			//int j;
 			LanguagePack hdr = new LanguagePack();
 
 			String s = String.format("%s%s", Global._path.lang_dir, file);
-			//in = fopen(s, "rb");
+
 			try( FileInputStream in = new FileInputStream(s) )
 			{
 				if( !hdr.readFrom(in) )
 					continue;
 
-				if ( hdr.isValid() )
+				if ( !hdr.isValid() )
 					continue;
 			} catch (FileNotFoundException e) {
 				Global.error(e);
@@ -1313,7 +1291,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 			dl.name[m] = hdr.name;
 
 			if (hdr.name.equals("English")) fallback = m;
-			if (hdr.isocode.equals(lang)) def = m;
+			if (hdr.isocode.substring(0,2).equals(lang)) def = m;
 
 			m++;
 		}
@@ -1336,92 +1314,9 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 		if (!ReadLanguagePack(def))
 			Global.error("can't read language pack '%s'", dl.file[def]);
-		
+
 	}
 
-	/*
-	public static BinaryString InlineString(StringID string) {
-		char[] buf = new char[3];
-		buf[0] = 0x81;
-		buf[1] = (char) (string.id & 0xFF);
-		buf[2] = (char) (string.id >> 8);
-		return new BinaryString(buf);
-	}
-
-	public static BinaryString InlineString(int string) {
-		char[] buf = new char[3];
-		buf[0] = 0x81;
-		buf[1] = (char) (string & 0xFF);
-		buf[2] = (char) (string >> 8);
-		return new BinaryString(buf);
-	}
-	 */
-
-}
-
-
-
-
-class LanguagePack {
-	int ident;
-	int version;			// 32-bits of auto generated version info which is basically a hash of strings.h
-
-	String name;			// the international name of this language
-	String own_name;	// the localized name of this language	
-	String isocode;	// the ISO code for the language (not country code)
-
-	final int[] offsets = new int[32];	// the offsets
-	byte plural_form;		// how to compute plural forms
-
-	byte data[];
-
-	/* Orig C struct is
-	int32 ident;
-	int32 version;				// +4 32-bits of auto generated version info which is basically a hash of strings.h
-	char name[32];				// +8 the international name of this language
-	char own_name[32];			// +40 the localized name of this language
-	char isocode[16];			// +72 the ISO code for the language (not country code)
-	int16 offsets[32];			// +88 the offsets
-	byte plural_form;			// +152 how to compute plural forms
-	byte pad[3];				// +153 pad header to be a multiple of 4
-	char data[VARARRAY_SIZE];	// +156
-	 */
-
-
-	public boolean loadFromBytes(byte [] src)
-	{
-		data = src; // TODO offsets are after header or include header size?
-		ByteBuffer bb = ByteBuffer.wrap(src);
-
-		ident = bb.getInt();
-		version = bb.getInt();
-
-		byte [] nameChars = new byte[32]; 
-		bb.get(nameChars);
-
-		byte [] ownNameChars = new byte[32]; 
-		bb.get(ownNameChars);
-
-		byte [] isoChars = new byte[16]; 
-		bb.get(isoChars);
-
-		for( int i = 0; i < offsets.length; i++ )
-			offsets[i] = bb.getInt();
-
-		plural_form = bb.get();
-		return true;
-	}
-
-	public boolean isValid() {
-		// TODO
-		//return ident == TO_LE32(LANGUAGE_PACK_IDENT) && hdr.version == TO_LE32(LANGUAGE_PACK_VERSION);
-		return true;
-	}
-
-	public boolean readFrom(FileInputStream in) throws IOException {
-		byte[] src = in.readNBytes(144); // a bit less?
-		return loadFromBytes(src);
-	}
 }
 
 

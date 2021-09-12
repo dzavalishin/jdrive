@@ -2073,7 +2073,7 @@ public class GRFFile
 		_cur_grffile.grfid = grfid;
 		_cur_grffile.flags |= 0x0001; /* set active flag */
 
-		Global.DEBUG_grf( 1, "[%s] Loaded GRFv%d set %08lx - %s:\n%s",
+		Global.DEBUG_grf( 1, "[%s] Loaded GRFv%d set %08x - %s:\n%s",
 				_cur_grffile.getFilename(), version, grfid, name, info);
 	}
 
@@ -2780,6 +2780,7 @@ public class GRFFile
 	static boolean initialized = false; // XXX yikes
 	static final String [] _newgrf_files = //new String[32];
 		{
+				"russian.grf",	
 				"xussr.grf"	
 		};
 
