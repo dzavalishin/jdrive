@@ -531,10 +531,10 @@ public class Rail extends RailTables {
 	public static int GetRailFoundation(int tileh, int bits)
 	{
 
-		if ((~_valid_tileh_slopes[0][tileh] & bits) == 0)
+		if (((~_valid_tileh_slopes[0][tileh]) & bits) == 0)
 			return 0;
 
-		if ((~_valid_tileh_slopes[1][tileh] & bits) == 0)
+		if (((~_valid_tileh_slopes[1][tileh]) & bits) == 0)
 			return tileh;
 
 		//if ( ((i=0, tileh == 1) || (i+=2, tileh == 2) || (i+=2, tileh == 4) || (i+=2, tileh == 8) ) && (bits == TRACK_BIT_DIAG1 || (i++, bits == TRACK_BIT_DIAG2)))
@@ -547,7 +547,7 @@ public class Rail extends RailTables {
 			if(tileh != 2)
 			{
 				i+=2;
-				if(tileh == 4)
+				if(tileh != 4)
 				{
 					i+=2;
 					if( tileh != 8) return 0;
@@ -555,8 +555,8 @@ public class Rail extends RailTables {
 			}			
 		}
 
-		if(bits == TRACK_BIT_DIAG1) return i;
-		if(bits == TRACK_BIT_DIAG2) return i+1;
+		if(bits == TRACK_BIT_DIAG1) return 15+i;
+		if(bits == TRACK_BIT_DIAG2) return 15+i+1;
 		
 		return 0;
 	}
@@ -706,7 +706,7 @@ public class Rail extends RailTables {
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				tile.SetTileType(TileTypes.MP_RAILWAY);
-				tile.SetTileOwner( PlayerID.getCurrent());
+				tile.SetTileOwner(PlayerID.getCurrent());
 				tile.getMap().m2 = 0; // Bare land
 				tile.getMap().m3 = 0xFF & p1; // No signals, rail type
 				tile.getMap().m5 = 0xFF & trackbit;
