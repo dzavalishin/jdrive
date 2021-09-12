@@ -19,6 +19,8 @@ import game.util.Pixel;
 import game.util.Strings;
 import game.xui.Gfx.BlitterParams;
 
+import static game.util.WindowConstants.*;
+
 public class Gfx extends PaletteTabs 
 {
 
@@ -182,8 +184,8 @@ public class Gfx extends PaletteTabs
 		dst = new Pixel( dpi.dst_ptr,  top * dpi.pitch + left );
 		//dst = top * dpi.pitch + left;
 
-		if (0==(color & Sprite.PALETTE_MODIFIER_GREYOUT)) {
-			if (0==(color & Sprite.USE_COLORTABLE)) {
+		if (!BitOps.HASBITS(color, Sprite.PALETTE_MODIFIER_GREYOUT)) {
+			if (!BitOps.HASBITS(color, Sprite.USE_COLORTABLE)) {
 				do {
 					//memset(dpi.dst_ptr, dst, color, right);
 					dst.memset( (byte)color, right );
@@ -195,10 +197,9 @@ public class Gfx extends PaletteTabs
 				final byte[] ctab = BitOps.subArray( SpriteCache.GetNonSprite(color & Sprite.COLORTABLE_MASK), 1 );
 
 				do {
-					int i;
-					for (i = 0; i != right; i++) 
+					for (int i = 0; i != right; i++) 
 						//dpi.dst_ptr[dst+i] = ctab[i%ctab.length]; //ctab[dst+i];
-						dst.w(i, ctab[i%ctab.length]); //ctab[dst+i];
+						dst.w(i, ctab[dst.r(i) & 0xFF]); //ctab[dst+i];
 					dst.madd( dpi.pitch );
 				} while (--bottom > 0);
 			}
@@ -677,13 +678,13 @@ public class Gfx extends PaletteTabs
 		int color_3 = Global._color_list[ctab].window_color_bgb;
 		int color = Global._color_list[ctab].window_color_2;
 
-		if (0 ==(flags & 0x8)) {
-			if (0==(flags & 0x20)) {
+		if (0 ==(flags & FR_NOBORDER)) {
+			if (0==(flags & FR_LOWERED)) {
 				GfxFillRect(left, top, left, bottom - 1, color);
 				GfxFillRect(left + 1, top, right - 1, top, color);
 				GfxFillRect(right, top, right, bottom - 1, color_2);
 				GfxFillRect(left, bottom, right, bottom, color_2);
-				if (0==(flags & 0x10)) {
+				if (0==(flags & FR_BORDERONLY)) {
 					GfxFillRect(left + 1, top + 1, right - 1, bottom - 1, color_interior);
 				}
 			} else {
@@ -691,12 +692,12 @@ public class Gfx extends PaletteTabs
 				GfxFillRect(left + 1, top, right, top, color_2);
 				GfxFillRect(right, top + 1, right, bottom - 1, color);
 				GfxFillRect(left + 1, bottom, right, bottom, color);
-				if (0==(flags & 0x10)) {
+				if (0==(flags & FR_BORDERONLY)) {
 					GfxFillRect(left + 1, top + 1, right - 1, bottom - 1,
-							0 != (flags & 0x40) ? color_interior : color_3);
+							0 != (flags & FR_DARKENED) ? color_interior : color_3);
 				}
 			}
-		} else if(0 != (flags & 0x1)) {
+		} else if (0 != (flags & FR_TRANSPARENT)) {
 			// transparency
 			GfxFillRect(left, top, right, bottom, 0x322 | Sprite.USE_COLORTABLE);
 		} else {
@@ -1562,14 +1563,14 @@ public class Gfx extends PaletteTabs
 	}
 
 
-	static final BlitZoomFunc zf_tile[] =
+	static final BlitZoomFunc[] zf_tile =
 		{
 				Gfx::GfxBlitTileZoomIn,
 				Gfx::GfxBlitTileZoomMedium,
 				Gfx::GfxBlitTileZoomOut,
 		};
 
-	static final BlitZoomFunc zf_uncomp[] =
+	static final BlitZoomFunc[] zf_uncomp =
 		{
 				Gfx::GfxBlitZoomInUncomp,
 				Gfx::GfxBlitZoomMediumUncomp,
@@ -1583,7 +1584,7 @@ public class Gfx extends PaletteTabs
 		byte info;
 		BlitterParams bp = new BlitterParams(dpi.dst_ptr);
 
-		int zoom_mask = ~((1 << dpi.zoom) - 1);
+		int zoom_mask = -(1 << dpi.zoom);
 
 		/* decode sprite header */
 		x += sprite.getX_offs();

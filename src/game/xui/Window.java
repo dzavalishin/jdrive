@@ -18,6 +18,7 @@ import game.console.Console;
 import game.enums.GameModes;
 import game.enums.WindowEvents;
 import game.ids.AbstractID;
+import game.ids.PlayerID;
 import game.ids.StringID;
 import game.struct.Point;
 import game.struct.Rect;
@@ -3136,7 +3137,7 @@ public class Window extends WindowConstants implements Serializable
 		int click;
 		int mousewheel;
 
-		Global.gs._current_player = Global.gs._local_player;
+		PlayerID.setCurrent( Global.gs._local_player );
 
 		// Handle pressed keys
 		if (Global._pressed_key != 0) {

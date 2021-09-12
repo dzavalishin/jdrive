@@ -864,7 +864,7 @@ public class GRFFile
 						dts.seq = null;
 						while (true) {
 							//DrawTileSeqStruct dtss;
-	
+
 							// no relative bounding box support
 							//dts.seq = realloc((void*)dts.seq, ++seq_count * sizeof(DrawTileSeqStruct));
 							//dts.seq = new DrawTileSeqStruct[++seq_count];
@@ -929,13 +929,13 @@ public class GRFFile
 					if (length > stat.lengths) {
 						//stat.platforms = realloc(stat.platforms, length);
 						stat.platforms = Arrays.copyOf(stat.platforms, length);
-						
+
 						//memset(stat.platforms + stat.lengths, 0, length - stat.lengths);
 						Arrays.fill(stat.platforms, stat.lengths, length - stat.lengths, (byte)0 );
-						
+
 						//stat.layouts = realloc(stat.layouts, length * sizeof(*stat.layouts));
 						stat.layouts = Arrays.copyOf(stat.layouts, length);
-						
+
 						//memset(stat.layouts + stat.lengths, 0,								(length - stat.lengths) * sizeof(*stat.layouts));
 						Arrays.fill(stat.layouts, stat.lengths, length - stat.lengths, null );
 
@@ -952,7 +952,7 @@ public class GRFFile
 						//memset(stat.layouts[l] + stat.platforms[l], 0, (number - stat.platforms[l]) * sizeof(**stat.layouts));
 
 						Arrays.fill( stat.layouts[l], stat.platforms[l], number - stat.platforms[l], null );  
-						
+
 						stat.platforms[l] = number;
 					}
 
@@ -1415,7 +1415,7 @@ public class GRFFile
 
 			group = new SpriteGroup();
 			group.type = SpriteGroupType.SGT_DETERMINISTIC;
-			
+
 			assert group instanceof DeterministicSpriteGroup;
 			dg = (DeterministicSpriteGroup)group; //.g.determ;
 
@@ -1560,7 +1560,7 @@ public class GRFFile
 
 		group = new SpriteGroup();
 		group.type = SpriteGroupType.SGT_REAL;
-		
+
 		assert group instanceof RealSpriteGroup;
 		RealSpriteGroup rg = (RealSpriteGroup) group;
 
@@ -1857,7 +1857,7 @@ public class GRFFile
 		}
 
 		int len = bufp.hasBytesLeft();
-		
+
 		//name = (final String )buf;
 		len -= (lang & 0x80) != 0 ? 6 : 5;
 		for (; id < endid && len > 0; id++) 
@@ -2454,7 +2454,7 @@ public class GRFFile
 				}
 			}
 		}
-		*/
+		 */
 	}
 
 
@@ -2598,7 +2598,7 @@ public class GRFFile
 			/* 0x10 */ null  // TODO implement
 	};
 
-	
+
 
 	/* Here we perform initial decoding of some special sprites (as are they
 	 * described at http://www.ttdpatch.net/src/newgrf.txt, but this is only a very
@@ -2624,9 +2624,9 @@ public class GRFFile
 
 		byte [] buf = FileIO.FioReadBlock(num);
 		if (buf == null) Global.fail("DecodeSpecialSprite: Could not allocate memory or read data");
-		
+
 		DataLoader bufp = new DataLoader(buf);
-		
+
 		action = bufp.r(0);
 
 		if (action >= handlers.length) {
@@ -2641,6 +2641,9 @@ public class GRFFile
 		}
 		//free(buf);
 	}
+
+	/** Signature of a container version 2 GRF. */
+	private static final int _grf_cont_v2_sig[] = { 0 , 0, 'G', 'R', 'F', 0x82, 0x0D, 0x0A, 0x1A, 0x0A};
 
 
 	static void LoadNewGRFFile(final String  filename, int file_index, int stage)
@@ -2660,7 +2663,7 @@ public class GRFFile
 			_cur_grffile = GetFileByFilename(filename);
 			if (_cur_grffile == null) 
 				Global.fail("File ``%s'' lost in cache.\n", filename);
-			
+
 			if (0==(_cur_grffile.flags & 0x0001)) return;
 		}
 
@@ -2668,6 +2671,27 @@ public class GRFFile
 		_file_index = file_index; // XXX
 
 		Global.DEBUG_grf( 7, "Reading NewGRF-file '%s'", filename);
+
+
+		boolean newGrfFormat = true;
+		for(int c : _grf_cont_v2_sig )
+		{
+			if( c != FileIO.FioReadByte() )
+			{
+				newGrfFormat = false;
+				break;
+			}
+		}
+
+		if(newGrfFormat)
+		{
+			loadV2Offsets();
+			// need code to load it
+			Global.error("Custom .grf format is not supported yet.");
+			return;
+		}
+		else
+			FileIO.FioSeekTo(0, FileIO.SEEK_SET);
 
 		/* Skip the first sprite; we don't care about how many sprites this
 		 * does contain; newest TTDPatches and George's longvehicles don't
@@ -2678,6 +2702,7 @@ public class GRFFile
 			Global.error("Custom .grf has invalid format.");
 			return;
 		}
+
 
 		_skip_sprites = 0; // XXX
 
@@ -2724,13 +2749,41 @@ public class GRFFile
 	}
 
 
+	/**
+	 * Parse the sprite section of GRFs.
+	 */
+	private static void loadV2Offsets() {
+
+		//if (file.GetContainerVersion() >= 2) 
+		
+		/* Seek to sprite section of the GRF. */
+		int data_offset = FileIO.FioReadDword();
+		long old_pos = FileIO.FioGetPos();
+		FileIO.FioSeekTo(data_offset, FileIO.SEEK_CUR);
+
+		/* Loop over all sprite section entries and store the file
+		 * offset for each newly encountered ID. */
+		int id, prev_id = 0;
+		while ((id = FileIO.FioReadDword()) != 0) {
+			//if (id != prev_id) _grf_sprite_offsets[id] = file.GetPos() - 4;
+			prev_id = id;
+			Global.DEBUG_grf( 7, "Sprite id %d", id);
+			int len = FileIO.FioReadDword();
+			FileIO.FioSkipBytes(len);
+		}
+
+		/* Continue processing the data section. */
+		FileIO.FioSeekTo(old_pos, FileIO.SEEK_SET);
+
+	}
+
 	static boolean initialized = false; // XXX yikes
 	static final String [] _newgrf_files = //new String[32];
 		{
-			"xussr.grf"	
+				"xussr.grf"	
 		};
-			
-			
+
+
 	public static void LoadNewGRF(int load_index, int file_index)
 	{
 		int stage;
@@ -2929,7 +2982,7 @@ class DataLoader extends Pixel
 	public void check_length( int wanted, String where ) 
 	{
 		int real = hasBytesLeft();
-		
+
 		if (real < wanted) { 
 			GRFFile.grfmsg(GRFFile.severity.GMS_ERROR, "%s/%d: Invalid special sprite length %d (expected %d)!", 
 					where, GRFFile._cur_spriteid - GRFFile._cur_grffile.sprite_offset, real, wanted); 

@@ -1876,7 +1876,7 @@ public class Gui
 				return;
 			}
 
-			Global.gs._current_player = PlayerID.getNone();
+			PlayerID.setCurrentToNone();
 			Global._generating_world = true;
 			Gui._ignore_restrictions = true;
 			if (!TryBuildIndustry(e.tile,type)) {
@@ -2019,7 +2019,7 @@ public class Gui
 			Gfx.GfxFillRect(0, 0, w.width-1, w.height-1, 0xB4 | Sprite.PALETTE_MODIFIER_GREYOUT);
 
 			// if spectator, disable things
-			if (Global.gs._current_player.isSpectator()){
+			if (PlayerID.getCurrent().isSpectator()){
 				w.disabled_state |= (1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23);
 			} else {
 				w.disabled_state &= ~((1 << 19) | (1<<20) | (1<<21) | (1<<22) | (1<<23));
@@ -2328,8 +2328,8 @@ public class Gui
 		int sp = 0;
 		int dp = 0;
 		
-		for (;; sp++) {
-			if (s[sp] == '\0') {
+		for (; sp < s.length; sp++) {
+			if (s[sp] == '\0') { // kill me?
 				d[dp] = '\0';
 				break;
 			} else if (s[sp] == 0x0D) {

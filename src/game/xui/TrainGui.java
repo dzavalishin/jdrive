@@ -16,6 +16,7 @@ import game.Str;
 import game.TileIndex;
 import game.TrainCmd;
 import game.Vehicle;
+import game.enums.TransportType;
 import game.ids.StringID;
 import game.ids.VehicleID;
 import game.struct.GetDepotVehiclePtData;
@@ -1470,7 +1471,7 @@ public class TrainGui
 				VehicleGui.DrawVehicleProfitButton(v, x, y + 13);
 
 				Global.SetDParam(0, v.getUnitnumber().id);
-				if (Depot.IsTileDepotType(v.getTile(), Global.TRANSPORT_RAIL) && v.isHidden())
+				if (Depot.IsTileDepotType(v.getTile(), TransportType.Rail) && v.isHidden())
 					str = Str.STR_021F;
 				else
 					str = v.getAge() > v.getMax_age() - 366 ? Str.STR_00E3 : Str.STR_00E2;
@@ -1536,7 +1537,7 @@ public class TrainGui
 					break;
 				}
 				do {
-					if (Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL) && tile.IsTileOwner(Global.gs._local_player)) {
+					if (Depot.IsTileDepotType(tile, TransportType.Rail) && tile.IsTileOwner(Global.gs._local_player)) {
 						ShowTrainDepotWindow(tile);
 						ShowBuildTrainWindow(tile);
 						return;

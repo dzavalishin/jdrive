@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import game.enums.GameModes;
 import game.enums.TileTypes;
+import game.ids.PlayerID;
 import game.tables.Snd;
 import game.util.Sound;
 import game.xui.DockGui;
@@ -300,7 +301,7 @@ public class Terraform {
 
 	public static void ShowTerraformToolbar()
 	{
-		if (Global.gs._current_player.isSpectator()) return;
+		if (PlayerID.getCurrent().isSpectator()) return;
 		Window.AllocateWindowDescFront(_terraform_desc, 0);
 	}
 	

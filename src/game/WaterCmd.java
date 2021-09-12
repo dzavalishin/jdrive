@@ -3,6 +3,7 @@ package game;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
 import game.struct.Point;
@@ -366,7 +367,7 @@ public class WaterCmd extends WaterTables
 
 			if(0 != (flags & Cmd.DC_AUTO) )return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 			// don't allow water to delete it.
-			if (Global.gs._current_player.isWater()) return Cmd.CMD_ERROR;
+			if (PlayerID.getCurrent().isWater()) return Cmd.CMD_ERROR;
 			// move to the middle tile..
 			return RemoveShiplift(tile.iadd( TileIndex.ToTileIndexDiff(_shiplift_tomiddle_offs[m5 & 0xF])), flags) ;
 		} else {
@@ -597,7 +598,7 @@ public class WaterCmd extends WaterTables
 
 				case MP_CLEAR:
 				case MP_TREES:
-					Global.gs._current_player = PlayerID.get( Owner.OWNER_WATER );
+					PlayerID.setCurrent( PlayerID.getWater() );
 					if (!Cmd.CmdFailed(Cmd.DoCommandByTile(target, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR))) {
 						Landscape.ModifyTile(
 							target, TileTypes.MP_WATER,
@@ -632,7 +633,7 @@ public class WaterCmd extends WaterTables
 				}
 			}
 
-			Global.gs._current_player = PlayerID.get( Owner.OWNER_WATER );
+			PlayerID.setCurrent( PlayerID.getWater() );
 			{
 				Vehicle v = Vehicle.FindVehicleOnTileZ(target, 0);
 				if (v != null) FloodVehicle(v);
@@ -719,7 +720,7 @@ public class WaterCmd extends WaterTables
 		}
 		// Global.gs._current_player can be changed by TileLoopWaterHelper.. reset it back
 		//   here
-		Global.gs._current_player = PlayerID.getNone();
+		PlayerID.setCurrentToNone();
 
 		// edges
 		if (tile.TileX() == 0 && BitOps.IS_INT_INSIDE(tile.TileY(), 1, Global.MapSizeY() - 3 + 1)) //NE
@@ -743,12 +744,12 @@ public class WaterCmd extends WaterTables
 	private static final byte _shipdepot_tracks[] = {1,1,2,2};
 	private static final byte _shiplift_tracks[] = {1,2,1,2,1,2,1,2,1,2,1,2};
 
-	static int GetTileTrackStatus_Water(TileIndex tile, /*TransportType*/ int mode)
+	static int GetTileTrackStatus_Water(TileIndex tile, /*int*/ TransportType mode)
 	{
 		int m5;
 		int b;
 
-		if (mode != Global.TRANSPORT_WATER)
+		if (mode != TransportType.Water)
 			return 0;
 
 		m5 = tile.getMap().m5;

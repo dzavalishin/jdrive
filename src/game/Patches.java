@@ -73,7 +73,7 @@ public class Patches
 	public boolean ai_disable_veh_ship;		// disable types for AI
 	public int starting_date;		// starting date
 	public int ending_date;		// end of the game (just show highscore)
-	public int colored_news_date = 1920; // when does newspaper become colored?
+	public int colored_news_date = 1980; // when does newspaper become colored?
 
 	public boolean keep_all_autosave;		// name the autosave in a different way.
 	public boolean autosave_on_exit = true;		// save an autosave when you quit the game, but do not ask "Do you really want to quit?"

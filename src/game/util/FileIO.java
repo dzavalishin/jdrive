@@ -398,7 +398,6 @@ public class FileIO {
 		// Show subdirectories first
 		loadDirs(items, dir);
 
-
 		/*{
 			// XXX ugly global variables ... 
 			byte order = _savegame_sort_order;
@@ -413,7 +412,6 @@ public class FileIO {
 		/* Show savegame files
 		 * .SAV OpenTTD saved game
 		 */
-
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.{sav,scn}")) 
 		{
 			for (Path entry: stream) {
@@ -454,9 +452,7 @@ public class FileIO {
 		if (_fios_scn_path == null) 
 			_fios_scn_path = Global._path.scenario_dir;		
 
-		_fios_path = _fios_scn_path;
-
-		
+		_fios_path = _fios_scn_path;		
 
 		// Show subdirectories first
 		Path dir = new File(_fios_path).toPath();

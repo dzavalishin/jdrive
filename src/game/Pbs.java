@@ -1,5 +1,6 @@
 package game;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.struct.FindLengthOfTunnelResult;
 import game.util.BitOps;
 
@@ -362,7 +363,7 @@ public class Pbs {
 						ssd.cur++;
 					}
 					return true;
-			} else if (Depot.IsTileDepotType(tile, Global.TRANSPORT_RAIL))
+			} else if (Depot.IsTileDepotType(tile, TransportType.Rail))
 				return true; // don't look further if the tile is a depot
 		}
 		return false;
@@ -386,7 +387,7 @@ public class Pbs {
 
 		ssd.cur = 0;
 
-		Pathfind.FollowTrack(tilep, 0xC000 | Global.TRANSPORT_RAIL, direction, Pbs::SetSignalsEnumProcPBS, null, ssd);
+		Pathfind.FollowTrack(tilep, TransportType.Rail, 0xC000, direction, Pbs::SetSignalsEnumProcPBS, null, ssd);
 		
 		for(i=0; i!=ssd.cur; i++) {
 			TileIndex tile = ssd.tile[i];

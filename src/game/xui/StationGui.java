@@ -480,7 +480,7 @@ public class StationGui extends Station  // to get constants
 			case 12: { /* Show a list of scheduled aircraft to this station */
 				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs have no owners, show the scheduled aircraft of current player */
-				PlayerID owner = (st.getOwner().isNone()) ? Global.gs._current_player : st.getOwner();
+				PlayerID owner = (st.getOwner().isNone()) ? PlayerID.getCurrent() : st.getOwner();
 				AirCraft.ShowPlayerAircraft(owner.id, w.window_number);
 				break;
 			}
@@ -488,7 +488,7 @@ public class StationGui extends Station  // to get constants
 			case 13: { /* Show a list of scheduled ships to this station */
 				final Station st = Station.GetStation(w.window_number);
 				/* Since oilrigs/bouys have no owners, show the scheduled ships of current player */
-				PlayerID owner = (st.getOwner().isNone()) ? Global.gs._current_player : st.getOwner();
+				PlayerID owner = (st.getOwner().isNone()) ? PlayerID.getCurrent() : st.getOwner();
 				ShipGui.ShowPlayerShips(owner, StationID.get( w.window_number ) );
 				break;
 			}

@@ -24,6 +24,18 @@ public class GameState implements Serializable
 	private static final long serialVersionUID = 1L;
 	
 	// -------------------------------------------------------------------
+	// Player
+	// -------------------------------------------------------------------
+
+	//public PlayerID _current_player = PlayerID.getNone();
+	private PlayerID _current_player = PlayerID.getNone();
+	public PlayerID _local_player = PlayerID.getNone();
+	public final boolean _is_old_ai_player = false;
+
+	public PlayerID getCurrentPlayer() { return _current_player; }
+	public void setCurrentPlayer(PlayerID p) { _current_player = p; }
+	
+	// -------------------------------------------------------------------
 	// Big and structured stuff
 	// -------------------------------------------------------------------
 
@@ -42,11 +54,7 @@ public class GameState implements Serializable
 	public int _map_size_x = 256;
 	public int _map_size_y = 256;
 	public int _map_tile_mask;
-	public int _map_size;
-	
-	public PlayerID _current_player = PlayerID.getNone();
-	public PlayerID _local_player = PlayerID.getNone();
-	public final boolean _is_old_ai_player = false;
+	public int _map_size;	
 	
 	int _yearly_expenses_type; // TODO fixme, use parameter where possible
 	int _cur_player_tick_index;
@@ -94,5 +102,9 @@ public class GameState implements Serializable
 
 
 	public final List<Window> _windows = new ArrayList<>();
+
+
+
+
 	
 }

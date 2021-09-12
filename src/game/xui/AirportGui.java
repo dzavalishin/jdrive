@@ -10,6 +10,7 @@ import game.Station;
 import game.Str;
 import game.Terraform;
 import game.TileIndex;
+import game.ids.PlayerID;
 import game.ifaces.OnButtonClick;
 import game.tables.Snd;
 import game.util.BitOps;
@@ -133,7 +134,7 @@ public class AirportGui
 
 	static void ShowBuildAirToolbar()
 	{
-		if (Global.gs._current_player.isSpectator()) return;
+		if (PlayerID.getCurrent().isSpectator()) return;
 		Window.DeleteWindowById(Window.WC_BUILD_TOOLBAR, 0);
 		Window.AllocateWindowDescFront(_air_toolbar_desc, 0);
 		if (Global._patches.link_terraform_toolbar) Terraform.ShowTerraformToolbar();

@@ -67,11 +67,11 @@ public class Global
 	 * bridges. For now, you should just not change the values for road
 	 * and rail.
 	 */
-	public static final int TRANSPORT_RAIL = 0;
-	public static final int TRANSPORT_ROAD = 1;
-	public static final int TRANSPORT_WATER  = 2;
-	public static final int TRANSPORT_END = 3;
-	public static final int INVALID_TRANSPORT = 0xff;
+	//public static final int TRANSPORT_RAIL = 0;
+	//public static final int TRANSPORT_ROAD = 1;
+	//public static final int TRANSPORT_WATER  = 2;
+	//public static final int TRANSPORT_END = 3;
+	//public static final int INVALID_TRANSPORT = 0xff;
 
 
 	public static final boolean AYSTAR_DEBUG = true;
@@ -323,7 +323,7 @@ public class Global
 	{
 		String buf = String.format(s, arg);
 
-		error( "dbg: %s\n", buf);
+		printf( "dbg: %s", buf);
 		Console.IConsoleDebug(buf);
 	}
 
@@ -429,7 +429,8 @@ public class Global
 	static void InjectDParam(int amount)
 	{
 		//memmove(_decode_parameters + amount, _decode_parameters, sizeof(_decode_parameters) - amount * sizeof(int));
-		System.arraycopy(_decode_parameters, amount, _decode_parameters, 0, _decode_parameters.length - amount);
+		//System.arraycopy(_decode_parameters, amount, _decode_parameters, 0, _decode_parameters.length - amount);
+		System.arraycopy(_decode_parameters, 0, _decode_parameters, amount, _decode_parameters.length - amount);
 	}
 
 	public static void COPY_IN_DPARAM(int offs, Integer [] src, int num) 

@@ -1,6 +1,7 @@
 package game;
 
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.struct.FindLengthOfTunnelResult;
 import game.tables.TrackPathFinderTables;
 import game.util.BitOps;
@@ -92,7 +93,7 @@ public abstract class Pathfind extends TrackPathFinderTables
 
 
 
-	static void FollowTrack(TileIndex tile, int flags, int direction, TPFEnumProc enum_proc, TPFAfterProc after_proc, Object data)
+	static void FollowTrack(TileIndex tile, TransportType type, int flags, int direction, TPFEnumProc enum_proc, TPFAfterProc after_proc, Object data)
 	{
 		TrackPathFinder tpf = new TrackPathFinder();
 
@@ -114,7 +115,7 @@ public abstract class Pathfind extends TrackPathFinderTables
 		tpf.hasbit_13 = BitOps.HASBIT(flags, 13);		 /* 0x2000 */
 
 
-		tpf.tracktype = (byte)flags;
+		tpf.tracktype = type; // (byte)flags;
 
 		if (BitOps.HASBIT(flags, 11)) {
 			tpf.rd.pft_var6 = 0xFF;

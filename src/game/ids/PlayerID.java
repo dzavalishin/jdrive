@@ -44,6 +44,11 @@ public class PlayerID extends AbstractID implements Serializable
 		return get(Owner.OWNER_NONE);
 	}
 	
+	/** Get 'OWNER_NONE' user */
+	public static PlayerID getWater() 
+	{
+		return get(Owner.OWNER_WATER);
+	}
 	
 
 	public boolean IS_HUMAN_PLAYER()
@@ -63,7 +68,8 @@ public class PlayerID extends AbstractID implements Serializable
 
 	public boolean isCurrentPlayer() 
 	{ 
-		return equals( Global.gs._current_player ); 
+		//return equals( Global.gs._current_player ); 
+		return equals( getCurrent() ); 
 	}
 
 	public boolean isSpectator()
@@ -133,6 +139,27 @@ public class PlayerID extends AbstractID implements Serializable
 		return id >= 0 && id < Global.MAX_PLAYERS;
 	}
 
+	/**
+	 * 
+	 * @return true if not a regular player, but NONE/WATER/TOWN/etc
+	 */
+	public boolean isSpecial() {
+		// TODO validate
+		return  id >= Global.MAX_PLAYERS;
+	}
 	
+	
+	// -------------------------------------------------------------------
+	// Delegates
+	// -------------------------------------------------------------------
+
+	public static PlayerID getCurrent() { return Global.gs.getCurrentPlayer(); }
+	public static void setCurrent(PlayerID p) 
+	{  
+		Global.gs.setCurrentPlayer( p ); 
+	}
+
+	/** Set current player to no one */
+	public static void setCurrentToNone() {	setCurrent(getNone()); }
 	
 }

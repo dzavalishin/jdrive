@@ -315,8 +315,8 @@ public class Economy extends EconomeTables implements Serializable
 	// use Owner.OWNER_SPECTATOR as new_player to delete the player.
 	static void ChangeOwnershipOfPlayerItems(PlayerID old_player, PlayerID new_player)
 	{
-		PlayerID old = Global.gs._current_player;
-		Global.gs._current_player = old_player;
+		PlayerID old = PlayerID.getCurrent();
+		PlayerID.setCurrent(old_player);
 
 		if (new_player.isSpectator()) {
 
@@ -440,18 +440,18 @@ public class Economy extends EconomeTables implements Serializable
 			{
 				for (i = 0; i < 4; i++) {
 					/* 'Sell' the share if this player has any */
-					if (p.share_owners[i] == null || p.share_owners[i].equals(Global.gs._current_player))
+					if (p.share_owners[i] == null || p.share_owners[i].equals(PlayerID.getCurrent()))
 						p.share_owners[i] = PlayerID.get( Owner.OWNER_SPECTATOR );
 				}
 			}
 
-			Player p = Global.gs._current_player.GetPlayer();
+			Player p = PlayerID.getCurrent().GetPlayer();
 			/* Sell all the shares that people have on this company */
 			for (i = 0; i < 4; i++)
 				p.share_owners[i] = PlayerID.get( Owner.OWNER_SPECTATOR );
 		}
 
-		Global.gs._current_player = old;
+		PlayerID.setCurrent(old);
 
 		Hal.MarkWholeScreenDirty();
 	}
@@ -668,10 +668,12 @@ public class Economy extends EconomeTables implements Serializable
 	{
 		Station.forEachValid( st ->
 		{
-				Global.gs._current_player = st.owner; 
+				PlayerID.setCurrent(st.owner); 
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
 				Player.SubtractMoneyFromPlayer(Global._price.station_value >> 1);
 		});
+		
+		PlayerID.setCurrentToNone(); // [dz] clean up
 
 		if (!BitOps.HASBIT(1<<0|1<<3|1<<6|1<<9, Global.get_cur_month()))
 			return;
@@ -763,7 +765,7 @@ public class Economy extends EconomeTables implements Serializable
 			final Player p = ii.next();
 			if (!p.is_active) continue;
 
-			Global.gs._current_player = p.index;
+			PlayerID.setCurrent(p.index);
 			Player.SET_EXPENSES_TYPE(Player.EXPENSES_LOAN_INT);
 
 			Player.SubtractMoneyFromPlayer(BitOps.BIGMULUS(p.current_loan, interest, 16));
@@ -771,6 +773,8 @@ public class Economy extends EconomeTables implements Serializable
 			Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 			Player.SubtractMoneyFromPlayer(Global._price.station_value >> 2);
 		}
+		
+		PlayerID.setCurrentToNone(); // [dz] or else it can be null?
 	}
 
 	void HandleEconomyFluctuations()
@@ -1090,19 +1094,12 @@ public class Economy extends EconomeTables implements Serializable
 		Player p;
 
 		// check if there is an already existing subsidy that applies to us
-		//for(int i = 0; i < Subsidy._subsidies.length; i++) 
-		//{
-		//	Subsidy s = Subsidy._subsidies[i];
 		for( Subsidy s : Subsidy._subsidies )
 			/*if (s.cargo_type == cargo_type &&	s.age >= 12 && s.from == from.index && s.to == to.index)*/
 			if( s.appliesTo(from,to,cargo_type))
 				return true;
-		//}
 
 		/* check if there's a new subsidy that applies.. */
-		//for(int i = 0; i < Subsidy._subsidies.length; i++) 
-		//{
-		//	Subsidy s = Subsidy._subsidies[i];
 		for( Subsidy s : Subsidy._subsidies )
 		{
 			if (s.cargo_type == cargo_type && s.age < 12) 
@@ -1137,7 +1134,7 @@ public class Economy extends EconomeTables implements Serializable
 				pair = s.SetupSubsidyDecodeParam(false);
 				Global.InjectDParam(2);
 
-				p = Global.gs._current_player.GetPlayer();
+				p = PlayerID.getCurrent().GetPlayer();
 				Global.SetDParam(0, p.name_1);
 				Global.SetDParam(1, p.name_2);
 				NewsItem.AddNewsItem(
@@ -1162,7 +1159,7 @@ public class Economy extends EconomeTables implements Serializable
 
 		// Update player statistics
 		{
-			Player p = Global.gs._current_player.GetPlayer();
+			Player p = PlayerID.getCurrent().GetPlayer();
 			p.cur_economy.delivered_cargo += num_pieces;
 			p.cargo_types = BitOps.RETSETBIT(p.cargo_types, cargo_type);
 		}
@@ -1277,8 +1274,8 @@ public class Economy extends EconomeTables implements Serializable
 
 		v.cur_speed = 0;
 
-		old_player = Global.gs._current_player;
-		Global.gs._current_player = v.owner;
+		old_player = PlayerID.getCurrent();
+		PlayerID.setCurrent(v.owner);
 
 		st = Station.GetStation(last_visited = v.last_station_visited);
 
@@ -1474,7 +1471,7 @@ public class Economy extends EconomeTables implements Serializable
 			}
 		}
 
-		Global.gs._current_player = old_player;
+		PlayerID.setCurrent(old_player);
 		return result;
 	}
 
@@ -1485,7 +1482,7 @@ public class Economy extends EconomeTables implements Serializable
 			AddInflation();
 		PlayersPayInterest();
 		// Reset the _current_player flag
-		Global.gs._current_player = PlayerID.getNone();
+		PlayerID.setCurrentToNone();
 		HandleEconomyFluctuations();
 		SubsidyMonthlyHandler();
 	}
@@ -1499,14 +1496,14 @@ public class Economy extends EconomeTables implements Serializable
 		Global.SetDParam(0, p.name_1);
 		Global.SetDParam(1, p.name_2);
 		Global.SetDParam(2, p.getBankrupt_value());
-		NewsItem.AddNewsItem( new StringID(Global.gs._current_player.id + 16*2), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
+		NewsItem.AddNewsItem( new StringID(PlayerID.getCurrent().id + 16*2), NewsItem.NEWS_FLAGS(NewsItem.NM_CALLBACK, 0, NewsItem.NT_COMPANY_INFO, NewsItem.DNC_BANKRUPCY),0,0);
 
 		// original code does this a little bit differently
 		pi = p.index.id;
-		ChangeOwnershipOfPlayerItems(PlayerID.get(pi), Global.gs._current_player);
+		ChangeOwnershipOfPlayerItems(PlayerID.get(pi), PlayerID.getCurrent());
 
 		if (p.getBankrupt_value() == 0) {
-			owner = Global.gs._current_player.GetPlayer();
+			owner = PlayerID.getCurrent().GetPlayer();
 			owner.current_loan += p.current_loan;
 		}
 

@@ -11,6 +11,7 @@ import game.Rail;
 import game.Station;
 import game.TileIndex;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.OpenListNode;
@@ -67,7 +68,7 @@ public class NpfAyStar extends AyStar
 		int i;
 		/*TrackdirBits*/ int trackdirbits, ts;
 		//TransportType type = aystar.user_data[NPF_TYPE];
-		int type = this.user_data[Npf.NPF_TYPE];
+		TransportType type = this.userTransportType;// user_data[Npf.NPF_TYPE];
 		/* Initialize to 0, so we can jump out (return) somewhere an have no neighbours */
 		this.num_neighbours = 0;
 		Global.DEBUG_npf( 4, "Expanding: (%d, %d, %d) [%d]", src_tile.TileX(), src_tile.TileY(), src_trackdir, src_tile.getTile());
@@ -83,7 +84,7 @@ public class NpfAyStar extends AyStar
 			flotr = Pathfind.FindLengthOfTunnel(src_tile, src_exitdir);
 			dst_tile = flotr.tile;
 		} else {
-			if (type != Global.TRANSPORT_WATER && (src_tile.IsRoadStationTile() || src_tile.IsTileDepotType(type)))
+			if (type != TransportType.Water && (src_tile.IsRoadStationTile() || src_tile.IsTileDepotType(type)))
 			{
 				/* This is a road station or a train or road depot. We can enter and exit
 				 * those from one side only. Trackdirs don't support that (yet), so we'll
@@ -100,7 +101,7 @@ public class NpfAyStar extends AyStar
 				 * otherwise (only for trains, since only with trains you can
 				 * (sometimes) reach tiles after reversing that you couldn't reach
 				 * without reversing. */
-				if (src_trackdir == Rail.DiagdirToDiagTrackdir(Rail.ReverseDiagdir(exitdir)) && type == Global.TRANSPORT_RAIL)
+				if (src_trackdir == Rail.DiagdirToDiagTrackdir(Rail.ReverseDiagdir(exitdir)) && type == TransportType.Rail)
 					/* We are headed inwards. We can only reverse here, so we'll not
 					 * consider this direction, but jump ahead to the reverse direction.
 					 * It would be nicer to return one neighbour here (the reverse
@@ -128,7 +129,7 @@ public class NpfAyStar extends AyStar
 		}
 
 		/* check correct rail type (mono, maglev, etc) */
-		if (type == Global.TRANSPORT_RAIL) {
+		if (type == TransportType.Rail) {
 			/* RailType */ int dst_type = Rail.GetTileRailType( dst_tile, src_trackdir);
 			if (!Rail.IsCompatibleRail(this.user_data[Npf.NPF_RAILTYPE], dst_type))
 				return;
@@ -140,7 +141,7 @@ public class NpfAyStar extends AyStar
 		}
 
 		/* Determine available tracks */
-		if (type != Global.TRANSPORT_WATER && (dst_tile.IsRoadStationTile() || dst_tile.IsTileDepotType(type)))
+		if (type != TransportType.Water && (dst_tile.IsRoadStationTile() || dst_tile.IsTileDepotType(type)))
 		{
 			/* Road stations and road and train depots return 0 on GTTS, so we have to do this by hand... */
 			/*DiagDirection*/ int exitdir;
@@ -161,7 +162,7 @@ public class NpfAyStar extends AyStar
 		Global.DEBUG_npf( 4, "Next node: (%d, %d) [%d], possible trackdirs: %#x", dst_tile.TileX(), dst_tile.TileY(), dst_tile.getTile(), trackdirbits);
 		/* Select only trackdirs we can reach from our current trackdir */
 		trackdirbits &= Rail.TrackdirReachesTrackdirs(src_trackdir);
-		if (Global._patches.forbid_90_deg && (type == Global.TRANSPORT_RAIL || type == Global.TRANSPORT_WATER)) /* Filter out trackdirs that would make 90 deg turns for trains */
+		if (Global._patches.forbid_90_deg && (type == TransportType.Rail || type == TransportType.Water)) /* Filter out trackdirs that would make 90 deg turns for trains */
 
 			trackdirbits &= ~Rail.TrackdirCrossesTrackdirs(src_trackdir);
 

@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import game.Global;
 import game.Player;
 import game.util.Strings;
 

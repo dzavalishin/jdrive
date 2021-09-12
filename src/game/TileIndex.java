@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.function.Function;
 
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.struct.Point;
 import game.struct.TileIndexDiff;
@@ -338,21 +339,17 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	//  INVALID_TILE, because the y is wrapped. This is needed in
 	//  for example, farmland. When the tile is not wrapped,
 	//  the result will be tile + TileDiffXY(addx, addy)
-	public static int TileAddWrap(TileIndex tile, int addx, int addy)
-	{
-		int x = tile.TileX() + addx;
-		int y = tile.TileY() + addy;
-
-		// Are we about to wrap?
-		if (x < Global.MapMaxX() && y < Global.MapMaxY())
-			return tile.getTile() + TileIndex.TileDiffXY(addx, addy).diff;
-
-		return INVALID_TILE.getTile();
-	}
-
 	public TileIndex TileAddWrap(int addx, int addy)
 	{
-		return new TileIndex(TileAddWrap(this, addx, addy));
+		int x = this.TileX() + addx;
+		int y = this.TileY() + addy;
+
+		// Are we about to wrap?
+		if (x < Global.MapMaxX() && y < Global.MapMaxY() && x >= 0 && y >= 0) {
+			return new TileIndex(this.getTile() + TileIndex.TileDiffXY(addx, addy).diff);
+		}
+
+		return INVALID_TILE;
 	}
 
 
@@ -561,6 +558,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	public static int TILE_MASK(int x) { return (x & Global.gs._map_tile_mask); }
 	public static void TILE_ASSERT(int x) { assert TILE_MASK(x) == x; }
 	
+	/** Assert that tile is not rolled over map border */
 	public void TILE_ASSERT() { assert TILE_MASK(tile) == tile; }
 
 
@@ -711,7 +709,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	}
 	
 	
-	public boolean IsTileDepotType(int transportType) {
+	public boolean IsTileDepotType(TransportType transportType) {
 		return Depot.IsTileDepotType(this, transportType);
 	}
 
@@ -783,7 +781,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return Landscape.GetPartialZ(x, y, corners);
 	}
 	
-	public int GetTileTrackStatus(int mode) {
+	public int GetTileTrackStatus(TransportType mode) {
 		return Landscape.GetTileTrackStatus(this, mode);
 	}
 
