@@ -3,10 +3,12 @@ package game.util;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import game.Global;
 import game.Vehicle;
@@ -39,7 +41,7 @@ public class VehicleHash implements Serializable
 	}
 
 	//ArrayList<VehicleID> list = new ArrayList<VehicleID>();
-	final Map<Integer,VehicleID> map = new HashMap<>();
+	final Map<Integer, Set<VehicleID>> map = new HashMap<>();
 
 	public List<VehicleID> get(int x1, int y1, int x2, int y2) {
 		x1 >>= DELETE_BITS; // down
@@ -54,9 +56,10 @@ public class VehicleHash implements Serializable
 		{
 			for(int y = y1; y <= y2; y++ )
 			{
-				VehicleID item = map.get(hashFunc(x, y));
-				if(item != null)
-					list.add(item);
+				Set<VehicleID> vehicles = map.get(hashFunc(x, y));
+				if (vehicles != null) {
+					list.addAll(vehicles);
+				}
 			}
 		}
 
@@ -68,11 +71,17 @@ public class VehicleHash implements Serializable
 		int hash1 = hashFunc(prev);
 		int hash2 = hashFunc(tobe);
 
-		//if( hash1 == hash2 ) return;
+		VehicleID vid = VehicleID.get(vehicle.index);
+		Set<VehicleID> removeFrom = map.get(hash1);
+		if (removeFrom != null) {
+			removeFrom.remove(vid);
+			if (removeFrom.isEmpty()) {
+				map.remove(hash1);
+			}
+		}
 
-		map.remove(Integer.valueOf(hash1));
-		map.put(Integer.valueOf(hash2), VehicleID.get(vehicle.index));
-
+		Set<VehicleID> addTo = map.computeIfAbsent(hash2, (x) -> new HashSet<>());
+		addTo.add(vid);
 	}
 
 	public void clear() {
@@ -81,25 +90,33 @@ public class VehicleHash implements Serializable
 
 	public void remove(Point point, Vehicle vehicle) {
 		int hash1 = hashFunc(point);
-		VehicleID old = map.remove(Integer.valueOf(hash1));
-
-		if( old == null ) //|| old.id != vehicle.index )
+		VehicleID vid = VehicleID.get(vehicle.index);
+		boolean removed = false;
+		Set<VehicleID> removeFrom = map.get(hash1);
+		if (removeFrom != null) {
+			removed = removeFrom.remove(vid);
+			if (removeFrom.isEmpty()) {
+				map.remove(hash1);
+			}
+		}
+		
+		if (!removed) //|| old.id != vehicle.index )
 		{
 			Global.error("can't remove vehicle from position hash");
-			Iterator<Entry<Integer, VehicleID>> iterator = map.entrySet().iterator();
 
-			while (iterator.hasNext()) 
+			Iterator<Entry<Integer, Set<VehicleID>>> iterator = map.entrySet().iterator();
+			while (iterator.hasNext())
 			{
-				Entry<Integer, VehicleID> entry = iterator.next();
-				if (vehicle.index == entry.getValue().id ) 
-				{
-					iterator.remove();
+				Set<VehicleID> set = iterator.next().getValue();
+				if (set.remove(vid)) {
+					if (set.isEmpty()) {
+						iterator.remove();
+					}
 					Global.error("removed iterating");
 					return;
 				}
-			}			
+			}
 			Global.error("unable to remove iterating");
-			return;
 		}
 		
 		// TODO debug me
