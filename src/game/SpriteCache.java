@@ -8,22 +8,9 @@ public class SpriteCache {
 
 	final static int SPRITE_CACHE_SIZE = 1024*1024;
 
-	//#define WANT_NEW_LRU
-
 	static final Sprite[] _sprite_ptr = new Sprite[Sprite.MAX_SPRITES];
 	static final int [] _sprite_file_pos = new int[Sprite.MAX_SPRITES];
 
-	//#if defined(WANT_NEW_LRU)
-	//static int _sprite_lru_new[Sprite.MAX_SPRITES];
-	//#else
-	//static int _sprite_lru[MAX_SPRITES];
-	//static int _sprite_lru_cur[MAX_SPRITES];
-	//#endif
-
-
-	//static int _sprite_lru_counter;
-	//static MemBlock _spritecache_ptr;
-	//static int _compact_cache_counter;
 
 
 	private static boolean ReadSpriteHeaderSkipData() {
@@ -67,7 +54,6 @@ public class SpriteCache {
 		return true;
 	}
 
-	// static void* AllocSprite(size_t);
 
 	private static Sprite ReadSprite(int id)
 	{
@@ -89,14 +75,9 @@ public class SpriteCache {
 		num  = FileIO.FioReadWord();
 		type = FileIO.FioReadByte();
 		if (type == 0xFF) {
-			//byte[] dest = new byte[num]; // AllocSprite(num);
-
-			//_sprite_ptr[id] = dest;
-			//FileIO.FioReadBlock(dest, num);
 			byte[] dest = FileIO.FioReadBlock(num);
 
-			//return dest;
-			// Suppose that 0xFF is non-sprite used to keep some data
+			// Type == 0xFF is non-sprite used to keep some data
 			// Create and return special sprite
 			return new DataCarrier(dest);
 		} else {
@@ -464,12 +445,12 @@ public class SpriteCache {
 	}
 
 	
-	// TODO do we need it?
+	/*/ TODO do we need it?
 	public static byte[] GetNonSpriteData(SpriteID sprite)
 	{
 		DataCarrier dc = (DataCarrier) GetRawSprite(sprite);
 		return dc.data;
-	}
+	}*/
 
 	public static byte[] GetNonSprite(int sprite)
 	{
@@ -480,6 +461,7 @@ public class SpriteCache {
 	
 	public static void GfxInitSpriteMem()
 	{
+		// Unused
 	}
 	
 
