@@ -1,0 +1,693 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0076)http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#classA -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="Author" content="Oskar Eisemuth">
+<title>TTDPatch Landscape Data usage</title>
+<style type="text/css">
+	html, body {
+		margin: 0; padding: 0;
+	}
+	body {
+		padding: 1em 1em 10em 1em;
+		font-size: 76%;
+		font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	}
+	a { color: #00f; }
+	h1 {
+		background: #eee;
+		border-bottom: 2px solid #ccc;
+		font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+		font-size: 1.4em;
+		font-weight: bold;
+		padding: 4px;
+		color: #000;
+	}
+	h3 {
+		border-left: 2px solid #ccc;
+		border-bottom: 2px solid #ccc;
+		font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+		font-size: 1.2em;
+		font-weight: bold;
+		background: #eee;
+		padding: 3px;
+		color: #000;
+		margin: 30px 0 0 0; 
+	}
+	
+	h4 {
+		border-bottom: 1px solid #ccc;
+		font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+		font-size: 1em;
+		font-weight: bold;
+		background: #eee;
+		padding: 2px;
+		color: #000;
+	}
+	
+	#navigation li { margin: 4px 0; }
+
+	.classdesc pre {
+		font-size: 0.9em;
+		color: blue;
+		font-family: monospace "MonospaceCSS";
+/* Otherwise firefox and safari doesn't support font-size */
+		font-weight : normal;
+		font-variant : normal;
+		font-style : normal;
+		font-stretch : normal;
+		line-height : normal;
+		margin: 5px;
+	}
+	
+	.comment { color: #060; }
+
+	.bittable { text-align: left; }
+	.bittable td { font-size: 1em; }
+	.bittable td.bits {
+		text-align: right;
+		vertical-align: top;
+		background: #ccc;
+		color: #000;
+		width: 4em;
+	}
+	.bittable td.bitsmerge, .bittable td.bitsmergestart {
+		text-align: right;
+		vertical-align: top;
+		background: #ccc;
+		color: #000;
+		border-left: 2px solid red;
+		width: 4em;
+	}
+	.bittable td.bitsmergestart {
+		border-top: 2px solid red;
+	}	
+	ul {
+		margin: 4px 0;
+		padding: 0 3em;
+	}
+
+	#landscapenav a { text-decoration: none; }
+	
+	#landscapes2 { display: none; }
+	
+	#landscapenav2 {
+		margin: 0;
+		padding: 2px 1em;
+		position: fixed;
+		left: 0;
+		bottom: 0;
+		right: 0;	
+		background: #eee;
+		border-top: 1px solid #ccc;
+	}
+	#landscapenav2 li { 
+		list-style: none;
+		display: inline;
+	}
+	#landscapenav2 a {
+		text-decoration: none;
+		white-space: nowrap;
+		font-size: 0.8em;
+		background: #ddd;
+		padding: 0 2em;
+	}
+	
+	.warn {	color: #f00; }
+	.planned { color: #090;	}
+</style>
+</head>
+<body>
+<h1>TTDPatch Landscape Data usage</h1>
+
+<h3>Introduction / Usage</h3>
+<p>This document tries to collect all usage of bits in the landscape data of a TTD(Patch) Game,
+If you have a css capable browser the red line marks will show bits with different meaning, red texts means important aspects, green are planned features.</p>
+
+<h3>Version History</h3>
+<ul>
+	<li>1.2 - Class9 L3 bits 8-13 for advzfunctions, Class A: newobjects</li>
+	<li>1.1a - Class5 L3 bit7 - town owned drive drive-through station</li>
+	<li>1.1 - Class9 documented bridge head L5 bit 5 - south bridge head</li>
+	<li>1.0 - Class6 added river bit, random informations, <br>added Class 9 L8 usage<br>new fast navigation bar at the bottom</li>
+	<li>0.9a - Class9 added aqueduct/canal bridge bit, removed L7 double description</li>
+	<li>0.9 - Class9 added new enhancetunnel bit usage,<br>added Class1 trace restrict bit</li>
+	<li>0.8 - Class9 added missing tunnel type (road/rail),<br>added planned L8 usage,<br>added Class4 tree info (5..4 2 is snow or desert)</li>
+	<li>0.7a - Class9 added sealevel canal bit, made the css a bit more IE friendly, fixed XHTML structure (a) seelevel canal buoy bit</li>
+	<li>0.6 - Class5 added tram and truck stops, corrected trams on bridgeheads</li>
+	<li>0.5a - Class8 tile description, added newindustries note, (a) removed wrong Class5 tram bit</li>
+	<li>0.4 - added Class5 Station Tile description</li>
+	<li>0.3 - Class 6,7,8,9,A still missing industry/house tile descriptions</li>
+	<li>0.2b - Class 2, Class 3, Class 4, Class 5, Intro</li>
+	<li>0.1 - First Release only Class 0 and Class 1</li>
+</ul>
+
+<h3>Landscape Classes</h3>
+<ul id="landscapenav">
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class0">Class 0 - Grass</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class1">Class 1 - Railway &amp; Rail Depots</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class2">Class 2 - Street, Crossings &amp; Road Depots</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class3">Class 3 - Townbuilding</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class4">Class 4 - Trees</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class5">Class 5 - Station</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class6">Class 6 - Water &amp; Canals</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class7">Class 7 - Bordertiles</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class8">Class 8 - Industry</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class9">Class 9 - Bridges &amp; Tunnels</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#classA">Class A - HQ &amp; Landscape objects</a></li>
+</ul>
+<p>Landscape Array 4 (L4) holds the class in bits 7..4 and the height of the north corner in 3..0</p>
+<p>L6 and above are TTDPatch specific "extra" arrays and are zeroed by default.</p>
+<div id="class0" class="classdesc">
+<h4>Class 0 - Grass</h4>
+<ul>
+	<li>L7: unused</li>
+	<li>L6: unused</li>
+	<li>L5:
+	<table class="bittable">
+		<tbody><tr><td class="bits">7..5:</td><td>Update Counter incremented on every periodic processing for tile types other than 03, 07, 0B and 10 and above<br>on wraparound the tile is updated (for fields, the type of fields in L3 is increased, for other types the tile type in L5 is increased)<br>(for snow and desert, these bits are not used, tile is updated on every periodic processing)</td></tr>
+		<tr><td class="bits">4..0:</td><td>Type:
+<pre>0x00  bare land
+0x01  1/3 grass
+0x02  2/3 grass
+0x03  full grass
+0x07  rough land
+0x0B  rocks
+0x0F  fields; type of fields in L3 bits 3..0
+0x10  1/4 snow
+0x11  2/4 snow
+0x12  3/4 snow
+0x13  full snow
+0x15  partial desert
+0x17  full desert
+</pre>
+</td></tr>
+	</tbody></table>
+</li>
+	<li>L3:
+	<table class="bittable">
+		<tbody><tr><td class="bits">15..13:</td><td>type of hedge on the SW border of the tile (1 through 6, or 0=none)</td></tr>
+		<tr><td class="bits">12..10:</td><td>same for the SE border</td></tr>
+		<tr><td class="bits">3..0:</td><td>Fields: type of fields (legal values: 0 through 9)</td></tr>
+	</tbody></table>
+	</li>
+	<li>L2: unused</li>
+	<li>L1: <a class="owner" href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#owner">owner</a> of the tile (normally 0x10)</li>
+</ul>
+</div>
+<!-- class1 -->
+<div id="class1" class="classdesc">
+<h4>Class 1 - Railway &amp; Rail Depots</h4>
+<ul>
+	<li class="planned">L8: (planned build year)</li>
+	<li>L7: unused <span class="planned">(planned abadone rail)</span></li>
+	<li>L6:
+	<table class="bittable">
+		<tbody><tr><td class="bitsmerge">7..4:</td><td>PBS for track with signals (with the same meaning as L2)</td></tr>
+		<tr><td class="bitsmerge">3:</td><td>PBS for track with signals bit 3 indicates that it's a PBS signal</td></tr>
+		<tr><td class="bitsmerge">5..0:</td><td>PBS for plain track (with the same meaning as L5)</td></tr>
+	</tbody></table>
+	</li>
+	<li>L5: 
+	<table class="bittable">
+		<tbody><tr><td class="bits">7:</td><td>railway track (clear) or depot (set)</td></tr>
+		<tr><td class="bits">6:</td><td>has signal, set by depots aswell</td></tr>
+		<tr><td class="bits">5..0:</td><td>track layout:
+<pre>bit 0:  in the X direction
+bit 1:  in the Y direction
+bit 2:  in the north corner (direction W-E)
+bit 3:  in the south corner (direction W-E)
+bit 4:  in the west corner (direction N-S)
+bit 5: 	in the east corner (direction N-S)
+</pre>or depot exit: 00 = NE, 01 = SE, 02 = SW, 03 = NW
+</td></tr>
+	</tbody></table>
+	</li>
+	<li>L3: 
+	<table class="bittable">
+	<tbody><tr><td class="bits">15..8:</td><td>Presignals:<pre>bit 8: 	set if pre-signal bits are valid (used for automatic pre-signal setups)
+bit 9:  set for pre-signals and combo signals
+bit 10: set for exit signals and combo signals
+bit 11: set = semaphore signals, clear = light signals
+bit 12: set = Trace restriction, Signal is restricted
+bit 15: set = manual pre-signal setup
+</pre>
+</td></tr>
+<tr><td class="bits">7..4:</td><td>Signal present
+<ul>
+<li>For track in the X direction:<pre>bit 6: 	signal in the SW direction
+bit 7: 	signal in the NE direction
+</pre></li>
+<li>For track in the Y direction:<pre>bit 6: 	signal in the NW direction
+bit 7: 	signal in the SE direction
+</pre></li>
+<li>For tracks in the W-E direction:<pre>bit 4:  signal in the W direction on the track in the S corner
+bit 5: 	signal in the E direction on the track in the S corner
+bit 6: 	signal in the W direction on the track in the N corner
+bit 7: 	signal in the E direction on the track in the N corner
+</pre></li>
+<li>For tracks in the N-S direction:<pre>bit 4: 	signal in the S direction on the track in the E corner
+bit 5: 	signal in the N direction on the track in the E corner
+bit 6: 	signal in the S direction on the track in the W corner
+bit 7: 	signal in the N direction on the track in the W corner
+</pre></li></ul></td></tr>
+		<tr><td class="bits">3..0:</td><td><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#tracktyp" class="detailinfo">track type</a></td></tr>		
+	</tbody></table>
+	</li>
+	<li>L2:
+	<table class="bittable">
+		<tbody><tr><td class="bits">7..4:</td><td>if signal: bit set = signal shows green; same bits as in L3</td></tr>
+		<tr><td class="bits">3..0:</td><td>type of land &amp; fence for railway tracks:
+<pre>0x00  on bare land
+0x01  on grass, no fences
+0x02  fence on the NW side
+0x03  fence on the SE side
+0x04  fences on the NW and SE sides
+0x05  fence on the NE side
+0x06  fence on the SW side
+0x07  fences on the NE and SW sides
+0x08  fence on the E side (track in the W corner)
+0x09  fence on the W side (track in the E corner)
+0x0A  fence on the S side (track in the N corner)
+0x0B  fence on the N side (track in the S corner)
+0x0C  on snow or desert</pre>
+</td></tr>
+	</tbody></table>
+	</li>
+	<li>L1: <a class="detailinfo" href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#owner">owner</a> of the track/depot</li>
+</ul>
+</div>
+
+<!-- class2 -->
+<div id="class2" class="classdesc">
+<h4>Class 2 - Street, Crossings &amp; Road Depots</h4>
+<ul>
+	<li class="planned">L8: (planned build year)</li>
+	<li>L7: One-way roads
+	<table class="bittable">
+		<tbody><tr><td class="bits">4..7:</td><td>unused</td></tr>
+		<tr><td class="bits">0..3:</td><td>One-way remove routeing bits</td></tr>
+	</tbody></table>
+	</li>
+	<li>L6: Abandoned roads; time until being abandoned</li>
+	<li>L5: 
+	<table class="bittable">
+		<tbody><tr><td class="bits">7..6:</td><td>cleared, unused?</td></tr>
+		<tr><td class="bits">5:</td><td>Set = Road depot</td></tr>
+		<tr><td class="bits">4:</td><td>Set = Crossing Rail/Road</td></tr>
+		<tr><td class="bitsmerge">3..0:</td><td>Road layout:
+<pre>bit 0:  NW piece
+bit 1:  SW piece
+bit 2:  SE piece
+bit 3:  NE piece
+</pre>or road depot exit: 00 = NE, 01 = SE, 02 = SW, 03 = NW
+</td></tr>
+		<tr><td class="bitsmerge">3:</td><td>Crossing: Set = road in Y direction</td></tr>
+		<tr><td class="bitsmerge">2:</td><td>Crossing: Set = enabled crossing light</td></tr>
+	</tbody></table>
+	</li>
+	<li>L3: 
+	<table class="bittable">
+		<tbody><tr><td class="bits">15:</td><td>On snow or desert</td></tr>
+		<tr><td class="bits">14..12:</td><td>unknown/unused?</td></tr>
+		<tr><td class="bits">11..8:</td><td>Crossings: <a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#tracktyp" class="detailinfo">track type</a></td></tr>
+		<tr><td class="bitsmerge">0..7:</td><td>Crossings: <a class="detailinfo" href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#owner">owner</a> of the road</td></tr>
+		<tr><td class="bitsmerge">0..3:</td><td>Tram routeing bits, same as L5; for depots bit 0 set = tram depot</td></tr>
+	</tbody></table>
+	</li>
+	<li>L2:
+	<table class="bittable">
+		<tbody><tr><td class="bits">7..3:</td><td>unknown/unused?</td></tr>
+		<tr><td class="bits">0..2:</td><td>0 - on bare land, 1 - on grass, 2 - paved, 3 - with streetlights, 5 - tree-lined, 6 - on grass with road works, 7 - paved with road<br>
+		Crossings: all above 1 = paved</td></tr>
+	</tbody></table>
+	</li>
+	<li>L1: <a class="detailinfo" href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#owner">owner</a> of the road / road depot or <span class="warn">railway track</span></li>
+</ul>
+</div>
+
+<!-- class3 -->
+<div id="class3" class="classdesc">
+<h4>Class 3 - Townbuilding</h4>
+<ul>
+	<li>L7: Newhouses: Year of construction</li>
+	<li>L6: Newhouses: Random bits</li>
+	<li>L5: 
+	<table class="bittable">
+		<tbody><tr><td class="bitsmerge">7:</td><td>Final position of lift in 5..0 (building types 04 and 05)</td></tr>
+		<tr><td class="bitsmerge">7..3:</td><td>Newhouses current animation frame</td></tr>
+		<tr><td class="bitsmerge">5..0:</td><td>If bit 7 is set, final position of lift divided by 6 (valid values 0..6 except 1) (types 04 and 05)</td></tr>
+		<tr><td class="bitsmerge">2..0:</td><td>Construction counter, for buildings under construction incremented on every periodic tile processing, on wraparound the stage of construction in L3 is increased</td></tr>
+	</tbody></table>
+	</li>
+	<li>L3: 
+	<table class="bittable">
+		<tbody><tr><td class="bits">15..8:</td><td>Newhouses real building type (for new house types) or zero (meaning it's an old type)</td></tr>
+		<tr><td class="bits">7..6:</td><td>Stage of construction (3 = completed)</td></tr>
+		<tr><td class="bits">5..0:</td><td>Newhouses random triggers activated so far</td></tr>
+	</tbody></table>
+	</li>
+	<li>L2: building type / newhouses substitute building type (valid 0x00 till 0x6D)</li>
+	<li>L1:
+	<table class="bittable">
+		<tbody><tr><td class="bitsmerge">7..0:</td><td>Newhouses periodic processings remaining before activating random triggers 1 and 2</td></tr>
+		<tr><td class="bitsmerge">7:</td><td>Set = lift moveing (types 04 and 05)</td></tr>
+		<tr><td class="bitsmerge">6..0:</td><td>Lift position (types 04 and 05)</td></tr>
+	</tbody></table> 
+	</li>
+</ul>
+</div>
+
+<!-- class4 -->
+<div id="class4" class="classdesc">
+<h4>Class 4 - Trees</h4>
+<ul>
+	<li>L7: unused</li>
+	<li>L6: unused</li>
+	<li>L5: 
+	<table class="bittable">
+		<tbody><tr><td class="bitsmerge">7..6:</td><td>Tree count minus one</td></tr>
+		<tr><td class="bitsmerge">2..0:</td><td>Growth status: 0..2 - one of trees is growing, 3 - all trees are fully grown, 4..6 - one of trees is withering</td></tr>
+	</tbody></table>
+	</li>
+	<li>L3: 
+	<table class="bittable">
+		<tbody><tr><td class="bits">15..13:</td><td>Type of hedge on the SW border of the tile (1 through 6, or 0=none)</td></tr>
+		<tr><td class="bits">12..10:</td><td>Type of hedge on the SE border of the tile (1 through 6, or 0=none)</td></tr>
+		<tr><td class="bits">9..8:</td><td>unknown/unused?</td></tr>
+		<tr><td class="bits">7..0:</td><td>Tree types:
+<pre>0x00..0x0B  temperate climate trees
+0x0C..0x13  sub-arctic climate trees
+0x14..0x1A  rainforest trees
+0x1B        cactus plants
+0x1C..0x1F  sub-tropical climate, non-rainforest, non-desert trees
+0x20..0x28  toyland trees
+</pre></td></tr>
+	</tbody></table>
+	</li>
+	<li>L2:
+	<table class="bittable">
+		<tbody><tr><td class="bits">7..6:</td><td>amount of snow or desert (desert always set 3 in TTD)</td></tr>
+		<tr><td class="bits">5..4:</td><td>0 = on grass, 1 = on rough land, 2 = on snow or desert</td></tr>
+		<tr><td class="bits">3..0:</td><td>update counter, incremented on every periodic processing, on wraparound the growth status is updated (or, if it's 3, a random action is taken)</td></tr>
+	</tbody></table>
+	</li>
+	<li>L1: <a class="detailinfo" href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#owner">owner</a> of the trees (normally 0x10)</li>
+</ul>
+</div>
+
+<!-- class5 -->
+<div id="class5" class="classdesc">
+<h4>Class 5 - Stations</h4>
+<ul>
+	<li class="planned">L8: (planned build year)</li>
+	<li>L7: reversed for PBS usage</li>
+	<li>L6: NewStations random bits</li>
+	<li>L5: Tile type:
+<pre>0x00..0x07  railway station  (bit 0 set Y else X direction)
+            00..01  open platform
+            02..03  open platform with station building
+            04..07  roofed platform
+0x08..0x33  large airport
+            0B,21,22 pad 1, pad 3, pad 2
+            16..1A  runway middle, 1A runway ending
+            1C      control tower
+            20      hangar
+            27..32  radar (animated)
+            33      transmitter
+0x34..0x41  small airport
+            3A..3D wind meter (animated)
+            3E..40 runway: south,middle,north
+            41     hangar
+0x42        heliport
+0x43..0x46  lorry loading area; exits: NE,SE,SW,NW
+0x47..0x4A  bus station; exits: NE,SE,SW,NW
+0x4B        oilfield
+0x4C..0x51  ship dock; coast parts SW,NW,NE,SE; water parts: 0x50 = X direction, 0x51 = Y direction
+0x52        buoy
+0x53..0x54  busstop
+0x55..0x56  tramstop
+0x57..0x58  truckstop
+0x59..0x5A  cargotramstop
+</pre>
+	</li>
+	<li>L3: 
+	<table class="bittable">
+		<tbody><tr><td class="bits">15..8:</td><td>Newstations stationgrfid</td></tr>
+		<tr><td class="bitsmerge">7:</td><td>PBS State</td></tr>
+		<tr><td class="bitsmerge">7:</td><td>For stops the road belongs to a town</td></tr>
+		<tr><td class="bits">6..4:</td><td>unknown/unused</td></tr>
+		<tr><td class="bitsmerge">3..0:</td><td><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#tracktyp" class="detailinfo">Track type</a> of railway stations, otherwise must be 0.</td></tr>
+		<tr><td class="bitsmerge">0:</td><td>Set if buoy is in a seelevel canal</td></tr>
+	</tbody></table>
+	</li>
+	<li>L2: Index into the array of stations</li>
+	<li>L1: <a class="detailinfo" href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#owner">owner</a> of the station</li>
+</ul>
+</div>
+
+
+<!-- class6 -->
+<div id="class6" class="classdesc">
+<h4>Class 6 - Water &amp; Canals</h4>
+<ul>
+	<li>L7: unused</li>
+	<li>L6: random byte for canals/river</li>
+	<li>L5: Tile type:
+<pre>0x00  water
+0x01  coast or riverbank
+0x02  canals: lock/lift
+0x03  river rapids
+0x80  ship depot, NE part (X direction)
+0x81  ship depot, SW part (X direction)
+0x82  ship depot, NW part (Y direction)
+0x83  ship depot, SE part (Y direction)
+</pre>
+	</li>
+	<li>L3:	
+	<table class="bittable">
+		<tbody><tr><td class="bits">15..2:</td><td>unused</td></tr>
+		<tr><td class="bits">1..0:</td><td>canals/river type: 1 = canals, 3 = rivers <span class="warn">Not stored fo height &gt; 0 in old TTDPatch versions</span></td></tr>
+	</tbody></table>
+	</li>
+	<li>L2: canals, type of locks (valid 0x00..0x0B) if L5 set to 0x02</li>
+	<li>L1: <a class="detailinfo" href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#owner">owner</a> of the tile, usually 0x11 or owner of depot</li>
+</ul>
+</div>
+
+
+
+<!-- class7 -->
+<div id="class7" class="classdesc">
+<h4>Class 7 - Bordertiles</h4>
+<p>Border tiles are invisible tiles to prevent algorithms to warparound. (they are added at the south edges of the map), some TTD functions accidentally overwrite bits there!</p>
+</div>
+
+<!-- class8-->
+<div id="class8" class="classdesc">
+<h4>Class 8 - Industry</h4>
+<ul>
+	<li>L7: Newindustries random triggers activated so far</li>
+	<li>L6: Newindustries random bits</li>
+	<li>L5: Tile type (valid 00..AE) (not the same as in the array of industries, substitute type for newindustries):
+<pre>0x00..0x06  coal mine         0x00 wheel tower,
+                              0x01 wheel tower animated, state in L1 bits 5..0; L1 bit 6 set = sound generated
+0x07..0x0A  power station     0x08 chimney,
+                              0x0A transformer with animation progress in L1 bits 5..2 (valid range 0..7)
+0x0B..0x0F  sawmill
+0x10..0x11  forest            0x11 trees cut down
+0x12..0x17  oil refinery
+0x18..0x1C  oil rig
+0x1D..0x20  oil wells         0x1D not animated,
+                              0x1E..0x20 with various stages of animation; progress of animation in L1 bits 1..0
+0x21..0x26  farm
+0x27..0x2A  factory (temperate climate)
+0x2B..0x2E  printing works
+0x2F..ßx33  copper ore mine   0x2F wheel tower, 
+                              0x30 wheel tower animated, state in L1 bits 5..0; L1 bit 6 set = sound generated 
+                              0x31 chimney
+0x34..0x39  steel mill
+0x3A..0x3B  bank (temperate climate)
+0x3C..0x3F  food processing plant
+0x40..0x47  paper mill
+0x48..0x58  gold mine         0x4F wheel tower,
+                              0x58 wheel tower animated, state in L1 bits 5..0; L1 bit 6 set = sound generated
+0x59..0x5A  bank (sub-arctic or sub-tropical climate)
+0x5B..0x63  diamond mine
+0x64..0x73  iron ore mine
+0x74        fruit plantation
+0x75        rubber plantation
+0x76..0x77  water supply
+0x78        water tower
+0x79..0x7C  factory (sub-tropical climate)
+0x7D..0x80  lumber mill
+0x81..0x82  candyfloss forest 0x82 candyfloss 'trees' cut down
+0x83..0x86  sweet factory
+0x87..0x88  battery farm      0x88 batteries 'reaped'
+0x89        cola wells
+0x8A..0x8D  toy shop
+0x8E..0x93  toy factory       0x8F animated, state in low byte L3 (valid 0x00..0x31) <span class="warn">uses L3 high byte, see note.</span>
+0x94..0x9B  plastic fountains (various stages of cyclic animation)
+0x9C..0x9F  fizzy drink factory
+0xA0..0xA3  bubble generator
+                              0xA1  generators
+                              0xA2..bubble capture facility, animation state in low byte of L3 (valid 0x00..0x27)
+0xA4..0xA6  toffee quarry     0xA5  animated, state in low byte L3 (valid range 0x00..0x45)
+0xA7..0xAE  sugar mine        0xAE  animated, state in low byte L3 (valid range 0x00..0x5F)
+
+Note for 0x8F toy factory:
+Tile animation is started (high byte of L3 zeroed) on the periodic processing if industry array field 2C is nonzero.
+While it is in progress the high byte of L3 holds the number of animation cycles that have already taken place;
+when this number reaches 8 the animation is stopped.
+
+</pre>
+	</li>
+	<li>L3: 
+	<table class="bittable">
+		<tbody><tr><td class="bitsmerge">15..8:</td><td>Toy factory: Number of animation cycles that have already taken place; when this number reaches 8 the animation is stopped. (depends on the industry array field 2C)</td></tr>
+		<tr><td class="bitsmerge">15..8:</td><td>Newindustries: new type (zero if old type) <span class="warn">The toy factories will only run the first animation with newindustries enabled without touching this.</span></td></tr>
+		<tr><td class="bits">7..0:</td><td>Toyland industries: Animation state (range of valid stages depend on tile type)</td></tr>
+	</tbody></table>
+	</li>
+	<li>L2: Index into the array of industries</li>
+	<li>L1: 
+	<table class="bittable">
+		<tbody><tr><td class="bits">7:</td><td>set = construction finished</td></tr>
+		<tr><td class="bits">6:</td><td>set = sound already generated</td></tr>
+		<tr><td class="bitsmerge">5..0:</td><td>Animation state</td></tr>
+		<tr><td class="bitsmerge">5..2:</td><td>Transformer (0x0A): Animation state (valid range 0..7)</td></tr>
+		<tr><td class="bitsmerge">4..2:</td><td>construction counter, for buildings under construction incremented on every periodic tile processing</td></tr>
+		<tr><td class="bitsmerge">1..0:</td><td>stage of construction (3 = completed)</td></tr>
+	</tbody></table>
+	</li>
+</ul>
+</div>
+
+<!-- class9-->
+<div id="class9" class="classdesc">
+<h4>Class 9 - Bridges &amp; Tunnels</h4>
+<ul>
+	<li>L8:
+	<table class="bittable">
+		<tbody><tr><td class="bits">15..8:</td><td>build year for bridgeheads otherwise 0</td></tr>
+		<tr><td class="bits">7..0:</td><td>type of bridge (with newbridges) otherwise 0</td></tr>
+	</tbody></table>
+	</li>	
+	<li>L7: Higherbridges, height or enhanced tunnels
+	<table class="bittable">
+		<tbody><tr><td class="bitsmerge">7..0:</td><td>Height for Higherbridges</td></tr>
+		<tr><td class="bitsmerge">7:</td><td>Set = Enhancetunnels</td></tr>
+		<tr><td class="bitsmerge">6:</td><td>Diagonal track direction 2 present
+		<pre>	
+L5 bit 0-1 give tunnel direction. Diagonal track number = Direction as route bit numbers.
+Tunnel direction 0 (NE) 1=5, 2=2
+Tunnel direction 1 (SE) 1=3, 2=5
+Tunnel direction 2 (SW) 1=3, 2=4
+Tunnel direction 3 (NW) 1=2, 2=4
+		</pre>
+		</td></tr>		
+		<tr><td class="bitsmerge">5:</td><td>Diagonal track direction 1 present</td></tr>
+		<tr><td class="bitsmerge">4:</td><td>Set = Perpendicular track <b>not</b> present</td></tr>
+		<tr><td class="bitsmerge">3..0:</td><td><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#tracktyp" class="detailinfo">Track type</a></td></tr>
+	</tbody></table>
+	</li>
+	<li>L6: Rail PBS or<br>
+	Abandoned roads time until being abandoned</li>
+	<li>L5:
+	<table class="bittable">
+		<tbody><tr><td class="bits">7:</td><td>Set = Bridge else Tunnel</td></tr>
+		<tr><td class="bits">6:</td><td>Set = Bridge middle part else bridgehead (for tunnels clear)</td></tr>
+		<tr><td class="bits">5:</td><td>Set = Route under Bridge, else land or water (see 4..3) bridgeheads = south end, for tunnels clear</td></tr>
+		<tr><td class="bitsmerge">4:</td><td>Tunnel: clear</td></tr>
+		<tr><td class="bitsmerge">3..2:</td><td>Tunnel: 0 - railway tunnel, 1 - road tunnel</td></tr>
+		<tr><td class="bitsmerge">4..3:</td><td>Bridges: If Bit 5 set transport route under bridge (0 = railway, 1 = road) else <br>
+		land under bridge: 0 - grass, snow or desert, 1 - water </td></tr>
+		<tr><td class="bitsmerge">2..1:</td><td>Bridges: 0 - railway bridge, 1 - road bridge, 2 - aqueduct</td></tr>
+		<tr><td class="bitsmerge">1..0:</td><td>Tunnel: entrance towards: 0 = NE, 1 = SE, 2 = SW, 3 = NW</td></tr>
+		<tr><td class="bitsmerge">0:</td><td>Bridges: Set = Bridge in Y direction else in X direction</td></tr>
+	</tbody></table>
+	</li>
+	<li>L3: 
+	<table class="bittable">
+		<tbody><tr><td class="bits">15:</td><td>Set = on snow or desert</td></tr>
+		<tr><td class="bitsmerge">13..8:</td><td>advzfunctions: track route bits to xor with the perpendicular track direction</td></tr>
+		<tr><td class="bitsmerge">11..8:</td><td>Tram routeing bits for custombridgeheads</td></tr>
+		<tr><td class="bitsmerge">9..4:</td><td>Custombridgeheads route bits, for roads 7..4</td></tr>
+		<tr><td class="bitsmerge">7..4:</td><td><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#tracktyp" class="detailinfo">Track type</a> on the bridge, must be 0 for road bridge</td></tr>
+		<tr><td class="bitsmergestart">3..0:</td><td><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#tracktyp" class="detailinfo">Track type</a> of tunnel, on bridgehead or under bridge, must be 0 for road</td></tr>
+		<tr><td class="bitsmerge">0..1:</td><td>1 = Canals or 3 = river if L5 defines a water tile</td></tr>
+	</tbody></table>
+	</li>
+	<li>L2:
+	<table class="bittable">
+		<tbody><tr><td class="bits">7..4:</td><td>Bridge type:
+		<pre>0x00  wooden
+0x01  concrete
+0x02  girder, steel
+0x03  suspension, concrete
+0x04  suspension, steel
+0x05  suspension, steel
+0x06  cantilever, steel
+0x07  cantilever, steel
+0x08  cantilever, steel
+0x09  girder, steel
+0x0A  tubular, steel		
+		</pre>
+		</td></tr>
+		<tr><td class="bits">3..0:</td><td>Bridge Piece for middle parts (0..5)</td></tr>
+	</tbody></table>
+	</li>
+	<li>L1: <a class="detailinfo" href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#owner">owner</a> of the tile, bridgehead owner or for bridgesmiddle parts the owner of the land under it.</li>
+</ul>
+</div>
+
+<!-- classA-->
+<div id="classA" class="classdesc">
+<h4>Class A - HQ &amp; Landscape objects</h4>
+<ul>
+	<li>L7: unused</li>
+	<li>L6: newobjects: random bits</li>
+	<li>L5: Tile type:
+<pre>0x00  transmitter
+0x01  lighthouse
+0x02  company statue
+0x03  company-owned land
+0x04  ??
+0x05  newobject
+0x80..0x93  company hq (5 sets of 4 tiles, updated by company performance 4 times a year)
+</pre>
+	</li>
+	<li>L3: newobjects: word index into a newobjects array</li>
+	<li>L2: newobjects: XY index, X in the low 4bits</li>
+	<li>L1: <a class="detailinfo" href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#owner">owner</a> of the tile  (lighthouses and transmitters usually 0x10)</li>
+</ul>
+</div>
+
+<h3>Additional Info</h3>
+
+<h4 id="owner">Owner</h4>
+<p>Owner values 0x00 through 0x07 are companies (they're indices into the array of companies), 0x10 is no owner, 0x11 appears to be reserved for water, 80 and above are towns (in this case the low 7 bits contain an index into the town array).</p>
+
+<h4 id="tracktyp">Track Type</h4>
+<p>TTD track types: 0 - conventional railway, 1 - monorail, 2 - maglev</p>
+
+
+<h4 id="landscapes2">Landscape Classes</h4>
+<ul id="landscapenav2">
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class0">Class 0 - Grass</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class1">Class 1 - Railway &amp; Rail Depots</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class2">Class 2 - Street, Crossings &amp; Road Depots</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class3">Class 3 - Townbuilding</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class4">Class 4 - Trees</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class5">Class 5 - Station</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class6">Class 6 - Water &amp; Canals</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class7">Class 7 - Bordertiles</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class8">Class 8 - Industry</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#class9">Class 9 - Bridges &amp; Tunnels</a></li>
+	<li><a href="http://www.bytetransfer.de/projects/ttdpatch/docs/landscapeusage.html#classA">Class A - HQ &amp; Landscape objects</a></li>
+</ul>
+<h4 id="copyright">Copyright</h4>
+<p>Most class descriptions are copied from "TTD savegame internals" by Marcin Grzegorczyk</p>
+<p>Copyright © 2006-2008 Oskar Eisemuth, 2003-2006 by Marcin Grzegorczyk.</p>
+
+
+</body></html>

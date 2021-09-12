@@ -461,7 +461,6 @@ public class Window extends WindowConstants implements Serializable
 	void DispatchMouseWheelEvent(int widgeti, int wheel)
 	{
 		Widget wi1, wi2;
-		//Scrollbar sb;
 
 		if (widgeti < 0) return;
 
@@ -510,34 +509,6 @@ public class Window extends WindowConstants implements Serializable
 		Gfx.SetDirtyBlocks(left, top, left + width, top + height);
 	}
 
-	/*
-	static void DispatchMouseWheelEvent(Window  w, int widget, int wheel)
-	{
-		Widget wi1, wi2;
-		Scrollbar sb;
-
-		if (widget < 0) return;
-
-		wi1 = w.widget.get(widget);
-		wi2 = w.widget.get(widget + 1);
-
-		/* The listbox can only scroll if scrolling was done on the scrollbar itself,
-	 * or on the listbox (and the next item is (must be) the scrollbar)
-	 * XXX - should be rewritten as a widget-dependent scroller but that's
-	 * not happening until someone rewrites the whole widget-code * /
-		if ((sb = w.vscroll,  wi1.type == WWT_SCROLLBAR)  || (sb = w.vscroll2, wi1.type == WWT_SCROLL2BAR)  ||
-				(sb = w.vscroll2, wi2.type == WWT_SCROLL2BAR) || (sb = w.vscroll, wi2.type == WWT_SCROLLBAR) ) {
-
-			if (sb.count > sb.cap) {
-				int pos = BitOps.clamp(sb.pos + wheel, 0, sb.count - sb.cap);
-				if (pos != sb.pos) {
-					sb.pos = pos;
-					w.SetWindowDirty();
-				}
-			}
-		}
-	}
-	 */
 
 	static void DrawOverlappedWindowForAll(int left, int top, int right, int bottom)
 	{
@@ -2535,7 +2506,7 @@ public class Window extends WindowConstants implements Serializable
 			Point pt;
 			int c1,c2;
 
-			assert(r.right - r.left == 11); // XXX - to ensure the same sizes are used everywhere!
+			assert(r.right - r.left == 11); // X XX - to ensure the same sizes are used everywhere!
 
 			// draw up/down buttons
 			clicked = (flags4 & (WF_SCROLL_UP | WF_HSCROLL | WF_SCROLL2)) == (WF_SCROLL_UP | WF_SCROLL2);
@@ -2569,7 +2540,7 @@ public class Window extends WindowConstants implements Serializable
 			Point pt;
 			int c1,c2;
 
-			assert(r.bottom - r.top == 11); // XXX - to ensure the same sizes are used everywhere!
+			assert(r.bottom - r.top == 11); // X XX - to ensure the same sizes are used everywhere!
 
 			clicked = (flags4 & (WF_SCROLL_UP | WF_HSCROLL)) == (WF_SCROLL_UP | WF_HSCROLL);
 			Gfx.DrawFrameRect(r.left, r.top, r.left + 9, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
@@ -2634,7 +2605,7 @@ public class Window extends WindowConstants implements Serializable
 		}
 
 		case WWT_STICKYBOX: {
-			assert(r.right - r.left == 11); // XXX - to ensure the same sizes are used everywhere!
+			assert(r.right - r.left == 11); // X XX - to ensure the same sizes are used everywhere!
 
 			clicked = 0 != (flags4 & WF_STICKY);
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, (clicked) ? FR_LOWERED : 0);
@@ -2660,7 +2631,7 @@ public class Window extends WindowConstants implements Serializable
 		}
 
 		case WWT_CAPTION: {
-			assert(r.bottom - r.top == 13); // XXX - to ensure the same sizes are used everywhere!
+			assert(r.bottom - r.top == 13); // X XX - to ensure the same sizes are used everywhere!
 			Gfx.DrawFrameRect(r.left, r.top, r.right, r.bottom, wi.color, FR_BORDERONLY);
 			Gfx.DrawFrameRect(r.left+1, r.top+1, r.right-1, r.bottom-1, wi.color, (caption_color == 0xFF) ? FR_LOWERED | FR_DARKENED : FR_LOWERED | FR_DARKENED | FR_BORDERONLY);
 

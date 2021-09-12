@@ -100,8 +100,8 @@ public class SettingsGui extends SettingsTables
 			Global.SetDParam(3, Str.STR_02E9_DRIVE_ON_LEFT + GameOptions._opt_ptr.road_side);
 			Global.SetDParam(4, Str.STR_TOWNNAME_ORIGINAL_ENGLISH + GameOptions._opt_ptr.town_name);
 			Global.SetDParam(5, _autosave_dropdown[GameOptions._opt_ptr.autosave]);
-			Global.SetDParam(6, 0); // TODO Strings.SPECSTR_LANGUAGE_START + _dynlang.curr);
-			//Global.SetDParam(6, Strings.SPECSTR_LANGUAGE_START + _dynlang.curr);
+			//Global.SetDParam(6, 0); // TODO Strings.SPECSTR_LANGUAGE_START + _dynlang.curr);
+			Global.SetDParam(6, Strings.SPECSTR_LANGUAGE_START + Strings._dynlang.curr);
 			//i = GetCurRes();
 			Global.SetDParam(7, 0); // TODO i == _num_resolutions ? Str.STR_RES_OTHER : Strings.SPECSTR_RESOLUTION_START + i);
 			Global.SetDParam(8, 0); // TODO Strings.SPECSTR_SCREENSHOT_START + _cur_screenshot_format);
@@ -144,7 +144,7 @@ public class SettingsGui extends SettingsTables
 			case 21: /* Save customized vehicle-names to disk */
 				return;
 			case 23: case 24: /* Setup interface language dropdown */
-				// TODO Window.ShowDropDownMenu(w, _dynlang.dropdown, _dynlang.curr, 24, 0, 0);
+				Window.ShowDropDownMenu(w, Strings._dynlang.dropdown, Strings._dynlang.curr, 24, 0, 0);
 				return;
 			case 26: case 27: /* Setup resolution dropdown */
 				Window.ShowDropDownMenu(w, BuildDynamicDropdown(Strings.SPECSTR_RESOLUTION_START, 1/*Global._num_resolutions*/), GetCurRes(), 27, 0, 0);
@@ -198,7 +198,7 @@ public class SettingsGui extends SettingsTables
 				w.SetWindowDirty();
 				break;
 			case 24: /* Change interface language */
-				// TODO ReadLanguagePack(e.index);
+				Strings.ReadLanguagePack(e.index);
 				Hal.MarkWholeScreenDirty();
 				break;
 			case 27: /* Change resolution */
