@@ -534,8 +534,9 @@ public class AiTools implements AiConst
 	static int AiNew_GetSpecialVehicleFlag(Player p, Vehicle v) {
 		int i;
 		for (i=0;i<AI_MAX_SPECIAL_VEHICLES;i++) {
-			if (p.ainew.special_vehicles[i].veh_id.id == v.index) {
-				return p.ainew.special_vehicles[i].flag;
+			final Ai_SpecialVehicle sv = p.ainew.special_vehicles[i];
+			if (sv != null && sv.veh_id.id == v.index) {
+				return sv.flag;
 			}
 		}
 
@@ -544,25 +545,34 @@ public class AiTools implements AiConst
 	}
 
 	static boolean AiNew_SetSpecialVehicleFlag(Player p, Vehicle v, int flag) {
-		int i, new_id = -1;
-		for (i=0;i<AI_MAX_SPECIAL_VEHICLES;i++) {
+		int i; //, new_id = -1;
+		for (i=0;i<AI_MAX_SPECIAL_VEHICLES;i++) 
+		{
+			if (p.ainew.special_vehicles[i] == null )
+			{
+				p.ainew.special_vehicles[i] = new Ai_SpecialVehicle();
+				p.ainew.special_vehicles[i].veh_id = VehicleID.get( v.index );
+				p.ainew.special_vehicles[i].flag = flag;
+				return true;
+			}
+			
 			if (p.ainew.special_vehicles[i].veh_id.id == v.index) {
 				p.ainew.special_vehicles[i].flag |= flag;
 				return true;
 			}
-			if (new_id == -1 && p.ainew.special_vehicles[i].veh_id == null &&
+			/*if (new_id == -1 && p.ainew.special_vehicles[i].veh_id == null &&
 				p.ainew.special_vehicles[i].flag == 0)
-				new_id = i;
+				new_id = i;*/
 		}
 
 		// Out of special_vehicle spots :s
-		if (new_id == -1) {
+		//if (new_id == -1) {
 			Global.DEBUG_ai( 1, "special_vehicles list is too small :(");
 			return false;
-		}
-		p.ainew.special_vehicles[new_id].veh_id = VehicleID.get( v.index );
-		p.ainew.special_vehicles[new_id].flag = flag;
-		return true;
+		//}
+		//p.ainew.special_vehicles[new_id].veh_id = VehicleID.get( v.index );
+		//p.ainew.special_vehicles[new_id].flag = flag;
+		//return true;
 	}
 	
 

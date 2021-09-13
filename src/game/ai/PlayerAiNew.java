@@ -1,12 +1,15 @@
 package game.ai;
 
+import java.io.Serializable;
+
 import game.TileIndex;
+import game.aystar.AyStar;
 import game.ids.VehicleID;
 
-public class PlayerAiNew implements AiConst 
+public class PlayerAiNew implements AiConst, Serializable 
 {
 
-	AiState state;
+	AiState state = AiState.STARTUP;
 	int tick;
 	int idle;
 
@@ -18,9 +21,8 @@ public class PlayerAiNew implements AiConst
 					//  long we are trying something, and just abort if it takes too long
 
 	// Pathfinder stuff
-	Ai_PathFinderInfo path_info;
-	//AyStar *pathfinder;
-	//AyStar pathfinder;
+	Ai_PathFinderInfo path_info = new Ai_PathFinderInfo();
+	AyStar pathfinder;
 
 	// Route stuff
 

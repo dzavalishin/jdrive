@@ -106,9 +106,9 @@ public class Trolly extends AiTools
 
 	// This function picks out a task we are going to do.
 	//  Currently supported:
-//	    - Make new route
-//	    - Check route
-//	    - Build HQ
+	//	    - Make new route
+	//	    - Check route
+	//	    - Build HQ
 	static void AiNew_State_WakeUp(Player p)
 	{
 		long money;
@@ -161,16 +161,16 @@ public class Trolly extends AiTools
 		}
 
 		if (Global._patches.ai_disable_veh_roadveh && (
-					p.ainew.action == AiAction.BUS_ROUTE ||
-					p.ainew.action == AiAction.TRUCK_ROUTE
+				p.ainew.action == AiAction.BUS_ROUTE ||
+				p.ainew.action == AiAction.TRUCK_ROUTE
 				)) {
 			p.ainew.action = AiAction.NONE;
 			return;
 		}
 
 		if (Global._patches.ai_disable_veh_roadveh && (
-					p.ainew.action == AiAction.BUS_ROUTE ||
-					p.ainew.action == AiAction.TRUCK_ROUTE
+				p.ainew.action == AiAction.BUS_ROUTE ||
+				p.ainew.action == AiAction.TRUCK_ROUTE
 				)) {
 			p.ainew.action = AiAction.NONE;
 			return;
@@ -255,7 +255,7 @@ public class Trolly extends AiTools
 				Station st = ii.next();
 				// Is it an active station
 				if (!st.isValid()) continue;
-				
+
 				// Do we own it?
 				if (st.getOwner().isCurrentPlayer()) {
 					// Are we talking busses?
@@ -303,7 +303,7 @@ public class Trolly extends AiTools
 			int j = 0;
 
 			Town town = i.getTown();
-			
+
 			if (town != null && town.getRatings(PlayerID.getCurrent().id) < 0 && Ai.AI_CHANCE16(1,4)) return false;
 
 			// No limits on delevering stations!
@@ -473,11 +473,11 @@ public class Trolly extends AiTools
 					p.ainew.state = AiState.FIND_STATION;
 
 					Global.DEBUG_ai(1,
-						"[AiNew - LocateRoute] Found bus-route of %d tiles long (from %d to %d)",
-						Map.DistanceManhattan(Town.GetTown(p.ainew.from_ic).getXy(), Town.GetTown(p.ainew.temp).getXy()),
-						p.ainew.from_ic,
-						p.ainew.temp
-					);
+							"[AiNew - LocateRoute] Found bus-route of %d tiles long (from %d to %d)",
+							Map.DistanceManhattan(Town.GetTown(p.ainew.from_ic).getXy(), Town.GetTown(p.ainew.temp).getXy()),
+							p.ainew.from_ic,
+							p.ainew.temp
+							);
 
 					p.ainew.from_tile = null;
 					p.ainew.to_tile = null;
@@ -533,11 +533,11 @@ public class Trolly extends AiTools
 						p.ainew.state = AiState.FIND_STATION;
 
 						Global.DEBUG_ai(1,
-							"[AiNew - LocateRoute] Found truck-route of %d tiles long (from %d to %d)",
-							Map.DistanceManhattan(ind_fic.xy, ind_tmp.xy),
-							p.ainew.from_ic,
-							p.ainew.temp
-						);
+								"[AiNew - LocateRoute] Found truck-route of %d tiles long (from %d to %d)",
+								Map.DistanceManhattan(ind_fic.xy, ind_tmp.xy),
+								p.ainew.from_ic,
+								p.ainew.temp
+								);
 
 						p.ainew.from_tile = null;
 						p.ainew.to_tile = null;
@@ -585,7 +585,7 @@ public class Trolly extends AiTools
 				}
 			}
 		}*/
-		
+
 		Vehicle.forEach( v -> {
 			v.forEachOrder( order -> {
 				if (order.getType() == Order.OT_GOTO_STATION 
@@ -593,7 +593,7 @@ public class Trolly extends AiTools
 					// This vehicle has this city in its list
 					count[0]++;
 				}
-				
+
 			});
 		});
 
@@ -652,30 +652,30 @@ public class Trolly extends AiTools
 		while(ii.hasNext())
 		{
 			Station st = ii.next();
-			
+
 			if (!st.isValid()) continue; 
-				
+
 			if (!st.getOwner().isCurrentPlayer()) continue;
-				
-					if (p.ainew.tbt == AI_BUS && (Station.FACIL_BUS_STOP & st.getFacilities()) == Station.FACIL_BUS_STOP) {
-						if (st.town == town) {
-							// Check how much cargo there is left in the station
-							if ((st.goods[p.ainew.cargo].waiting_acceptance & 0xFFF) > Engine.RoadVehInfo(vi).capacity * AI_STATION_REUSE_MULTIPLER) {
-								if (AiNew_CheckVehicleStation(p, st)) {
-									// We did found a station that was good enough!
-									new_tile = st.getXy();
-									// Cheap way to get the direction of the station...
-									//  Bus stations save it as 0x47 .. 0x4A, so decrease it with 0x47, and tada!
-									//direction = _m[st.xy].m5 - 0x47;
-									direction = st.getXy().M().m5 - 0x47;
-									break;
-								}
-							}
-							count++;
+
+			if (p.ainew.tbt == AI_BUS && (Station.FACIL_BUS_STOP & st.getFacilities()) == Station.FACIL_BUS_STOP) {
+				if (st.town == town) {
+					// Check how much cargo there is left in the station
+					if ((st.goods[p.ainew.cargo].waiting_acceptance & 0xFFF) > Engine.RoadVehInfo(vi).capacity * AI_STATION_REUSE_MULTIPLER) {
+						if (AiNew_CheckVehicleStation(p, st)) {
+							// We did found a station that was good enough!
+							new_tile = st.getXy();
+							// Cheap way to get the direction of the station...
+							//  Bus stations save it as 0x47 .. 0x4A, so decrease it with 0x47, and tada!
+							//direction = _m[st.xy].m5 - 0x47;
+							direction = st.getXy().M().m5 - 0x47;
+							break;
 						}
 					}
-				
-			
+					count++;
+				}
+			}
+
+
 		}
 		// We are going to add a new station...
 		if (new_tile == null) count++;
@@ -803,18 +803,18 @@ public class Trolly extends AiTools
 			else
 				p.ainew.path_info.rail_or_road = false;
 
+			//AyStar pathfinder = new AIAyStar();
+			p.ainew.pathfinder = new_AyStar_AiPathFinder(12, p.ainew.path_info);
+			// First, clean the pathfinder with our new begin and endpoints
+			//clean_AyStar_AiPathFinder(pathfinder, p.ainew.path_info);
 
 			p.ainew.temp = 0;
 		}
 
-		//AyStar pathfinder = new AIAyStar();
-		AyStar pathfinder = new_AyStar_AiPathFinder(12, p.ainew.path_info);
-		// First, clean the pathfinder with our new begin and endpoints
-		//clean_AyStar_AiPathFinder(pathfinder, p.ainew.path_info);
 
-		
+
 		// Start the pathfinder
-		r = pathfinder.main();
+		r = p.ainew.pathfinder.main();
 		// If it return: no match, stop it...
 		if (r == AyStar.AYSTAR_NO_PATH) {
 			Global.DEBUG_ai(1,"[AiNew] PathFinder found no route!");
@@ -1274,31 +1274,31 @@ public class Trolly extends AiTools
 		}
 
 		{
-		idx = 0;
-		//order.type = OT_GOTO_STATION;
-		//order.flags = 0;
-		//order.station = _m[p.ainew.to_tile].m2;
-		int flags = 0;
-		if (p.ainew.tbt == AI_TRUCK && p.ainew.to_deliver)
-			flags |= Order.OF_FULL_LOAD;
+			idx = 0;
+			//order.type = OT_GOTO_STATION;
+			//order.flags = 0;
+			//order.station = _m[p.ainew.to_tile].m2;
+			int flags = 0;
+			if (p.ainew.tbt == AI_TRUCK && p.ainew.to_deliver)
+				flags |= Order.OF_FULL_LOAD;
 			//order.flags |= OF_FULL_LOAD;
-		Order order = new Order( Order.OT_GOTO_STATION, flags, p.ainew.to_tile.M().m2 ); 
-		Ai.AI_DoCommand(0, p.ainew.veh_id.id + (idx << 16), Order.PackOrder(order), Cmd.DC_EXEC, Cmd.CMD_INSERT_ORDER);
+			Order order = new Order( Order.OT_GOTO_STATION, flags, p.ainew.to_tile.M().m2 ); 
+			Ai.AI_DoCommand(0, p.ainew.veh_id.id + (idx << 16), Order.PackOrder(order), Cmd.DC_EXEC, Cmd.CMD_INSERT_ORDER);
 		}
-		
+
 		{
-		idx = 0;
-		//order.type = OT_GOTO_STATION;
-		//order.flags = 0;
-		//order.station = _m[p.ainew.from_tile].m2;
-		int flags = 0;
-		if (p.ainew.tbt == AI_TRUCK && p.ainew.from_deliver)
-			flags |= Order.OF_FULL_LOAD;
+			idx = 0;
+			//order.type = OT_GOTO_STATION;
+			//order.flags = 0;
+			//order.station = _m[p.ainew.from_tile].m2;
+			int flags = 0;
+			if (p.ainew.tbt == AI_TRUCK && p.ainew.from_deliver)
+				flags |= Order.OF_FULL_LOAD;
 			//order.flags |= OF_FULL_LOAD;
-		Order order = new Order( Order.OT_GOTO_STATION, flags, p.ainew.from_tile.M().m2 ); 
-		Ai.AI_DoCommand(0, p.ainew.veh_id.id + (idx << 16), Order.PackOrder(order), Cmd.DC_EXEC, Cmd.CMD_INSERT_ORDER);
+			Order order = new Order( Order.OT_GOTO_STATION, flags, p.ainew.from_tile.M().m2 ); 
+			Ai.AI_DoCommand(0, p.ainew.veh_id.id + (idx << 16), Order.PackOrder(order), Cmd.DC_EXEC, Cmd.CMD_INSERT_ORDER);
 		}
-		
+
 		// Start the engines!
 		p.ainew.state = AiState.START_VEHICLE;
 	}
@@ -1385,7 +1385,7 @@ public class Trolly extends AiTools
 		while(ii.hasNext())
 		{
 			Vehicle v = ii.next();
-			
+
 			if (v.getType() == 0) continue;
 			if (!v.getOwner().equals(p.getIndex())) continue;
 			// Currently, we only know how to handle road-vehicles
@@ -1402,25 +1402,25 @@ public class Trolly extends AiTools
 	//   Keeps things logical
 	// It really should be in the same order as the AI_STATE's are!
 	static final AiNew_StateFunction _ainew_state[] = {
-		null,
-		Trolly::AiNew_State_FirstTime,
-		Trolly::AiNew_State_Nothing,
-		Trolly::AiNew_State_WakeUp,
-		Trolly::AiNew_State_LocateRoute,
-		Trolly::AiNew_State_FindStation,
-		Trolly::AiNew_State_FindPath,
-		Trolly::AiNew_State_FindDepot,
-		Trolly::AiNew_State_VerifyRoute,
-		Trolly::AiNew_State_BuildStation,
-		Trolly::AiNew_State_BuildPath,
-		Trolly::AiNew_State_BuildDepot,
-		Trolly::AiNew_State_BuildVehicle,
-		Trolly::AiNew_State_GiveOrders,
-		Trolly::AiNew_State_StartVehicle,
-		Trolly::AiNew_State_RepayMoney,
-		Trolly::AiNew_State_CheckAllVehicles,
-		Trolly::AiNew_State_ActionDone,
-		null,
+			null,
+			Trolly::AiNew_State_FirstTime,
+			Trolly::AiNew_State_Nothing,
+			Trolly::AiNew_State_WakeUp,
+			Trolly::AiNew_State_LocateRoute,
+			Trolly::AiNew_State_FindStation,
+			Trolly::AiNew_State_FindPath,
+			Trolly::AiNew_State_FindDepot,
+			Trolly::AiNew_State_VerifyRoute,
+			Trolly::AiNew_State_BuildStation,
+			Trolly::AiNew_State_BuildPath,
+			Trolly::AiNew_State_BuildDepot,
+			Trolly::AiNew_State_BuildVehicle,
+			Trolly::AiNew_State_GiveOrders,
+			Trolly::AiNew_State_StartVehicle,
+			Trolly::AiNew_State_RepayMoney,
+			Trolly::AiNew_State_CheckAllVehicles,
+			Trolly::AiNew_State_ActionDone,
+			null,
 	};
 
 	static void AiNew_OnTick(Player p)
@@ -1448,18 +1448,18 @@ public class Trolly extends AiTools
 		// If we come here, we can do a tick.. do so!
 		AiNew_OnTick(p);
 	}
-	
-	
-	
 
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
 }
 
 

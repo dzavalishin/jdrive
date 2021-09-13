@@ -174,7 +174,8 @@ public class Ai {
 	 */
 	static int AI_DoCommand(TileIndex tile, int p1, int p2, int flags, int procc)
 	{
-		return AI_DoCommand(tile.getTile(), p1, p2, flags, procc);
+		final int t = tile == null ? 0 : tile.getTile();
+		return AI_DoCommand(t, p1, p2, flags, procc);
 	}	
 	/**
 	 * Executes a raw DoCommand for the AI.

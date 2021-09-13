@@ -280,6 +280,7 @@ public class AIAyStar extends AyStar implements AiConst
 				}
 
 				// The tile can be connected
+				neighbours[num_neighbours] = new AyStarNode();
 				neighbours[num_neighbours].tile = atile;
 				neighbours[num_neighbours].user_data[0] = 0;
 				neighbours[num_neighbours++].direction = 0;
@@ -315,6 +316,7 @@ public class AIAyStar extends AyStar implements AiConst
 					ret = Ai.AI_DoCommand(tile, new_tile.getTile(), (0 << 8) + (Bridge.MAX_BRIDGES / 2), Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
 					if (Cmd.CmdFailed(ret)) continue;
 					// We can build a bridge here.. add him to the neighbours
+					neighbours[num_neighbours] = new AyStarNode();
 					neighbours[num_neighbours].tile = new_tile;
 					neighbours[num_neighbours].user_data[0] = AI_PATHFINDER_FLAG_BRIDGE + (dir << 8);
 					neighbours[num_neighbours++].direction = 0;
