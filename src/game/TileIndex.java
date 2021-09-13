@@ -20,7 +20,7 @@ import game.xui.ViewPort;
 public class TileIndex implements Comparable<TileIndex>, Serializable
 {
 	private static final long serialVersionUID = 2317687924857389962L;
-	
+
 	protected int tile;
 
 
@@ -77,12 +77,12 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 	public static final TileIndex INVALID_TILE = getInvalid(); //new TileIndex(-1);
 
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TileIndex) {
@@ -244,7 +244,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	{
 		return tile & Global.MapMaxX();
 	}
-	
+
 	public int getX()
 	{
 		return tile & Global.MapMaxX();
@@ -375,7 +375,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	 * 
 	 * Identical to tile.iadd( TileOffsByDir(dir) )
 	 * 
-	**/
+	 **/
 	public  TileIndex OffsetByDir(int dir)
 	{
 		//extern final TileIndexDiffC _tileoffs_by_dir[4];
@@ -506,7 +506,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return GetTileType() == type;
 	}
 
-	
+
 	public boolean IsTunnelTile()
 	{
 		return IsTileType(TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(Global.gs._m[tile].m5, 4, 4) == 0;
@@ -546,7 +546,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		Global.gs._m[tile].m1 = owner;
 	}
 
-	
+
 	/**
 	 * Get owner of road for this tile. Take rail/road crossings in account.
 	 * @return Owner
@@ -572,7 +572,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	{
 		return GetTileOwner().equals(owner);
 	}
-	
+
 
 	public static TileIndexDiff ToTileIndexDiff(TileIndexDiffC tidc)
 	{
@@ -582,7 +582,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 
 	public static int TILE_MASK(int x) { return (x & Global.gs._map_tile_mask); }
 	public static void TILE_ASSERT(int x) { assert TILE_MASK(x) == x; }
-	
+
 	/** Assert that tile is not rolled over map border */
 	public void TILE_ASSERT() { assert TILE_MASK(tile) == tile; }
 
@@ -645,13 +645,13 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	{
 		while(true)
 		{
-		 TileIndex t = new TileIndex(
-				 Hal.Random() % Global.MapMaxX(),
-				 Hal.Random() % Global.MapMaxY()
-				 );
-		 
-		 if( t.IsValidTile())
-			 return t;		 
+			TileIndex t = new TileIndex(
+					Hal.Random() % Global.MapMaxX(),
+					Hal.Random() % Global.MapMaxY()
+					);
+
+			if( t.IsValidTile())
+				return t;		 
 		}		
 	}
 
@@ -719,7 +719,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		ni.tile += (y * Global.MapSizeX()) + x;
 		return ni;
 	}
-	
+
 	/**
 	 * Immutable sub - steps back with given x and y 
 	 * @param x
@@ -732,8 +732,8 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		ni.tile -= (y * Global.MapSizeX()) + x;
 		return ni;
 	}
-	
-	
+
+
 	public boolean IsTileDepotType(TransportType transportType) {
 		return Depot.IsTileDepotType(this, transportType);
 	}
@@ -772,11 +772,11 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	//} Direction;
 
 
-	
+
 	// -----------------------------------------------
 	// Ex-macros
 	// -----------------------------------------------
-	
+
 	public static TileIndex TILE_ADDXY(TileIndex tile, int i, int j) {		
 		return tile.iadd(i, j);
 	}
@@ -788,12 +788,12 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	public static TileIndex TILE_ADD(TileIndex tile, int diff) {
 		return tile.iadd(diff);
 	}
-	
-	
+
+
 	// -----------------------------------------------
 	// Delegates
 	// -----------------------------------------------
-	
+
 	public boolean EnsureNoVehicle() {
 		return Vehicle.EnsureNoVehicle(this);
 	}
@@ -805,7 +805,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	public static int GetPartialZ(int x, int y, int corners) {
 		return Landscape.GetPartialZ(x, y, corners);
 	}
-	
+
 	public int GetTileTrackStatus(TransportType mode) {
 		return Landscape.GetTileTrackStatus(this, mode);
 	}
@@ -818,7 +818,28 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return Rail.GetRailTileType(this);
 	}
 
+	public boolean isRoad() 
+	{
+		return
+				// MP_STREET, but not a road depot?
+				(typeIs(TileTypes.MP_STREET) && !IsTileDepotType(TransportType.Road)) ||
+				(typeIs(TileTypes.MP_TUNNELBRIDGE) && (
+						// road tunnel?
+						((M().m5 & 0x80) == 0 && (M().m5 & 0x4) == 0x4) ||
+						// road bridge?
+						((M().m5 & 0x80) != 0 && (M().m5 & 0x2) == 0x2)
+						));
+	}
 
+
+	// Checks if a tile 'a' is between the tiles 'b' and 'c'
+	//#define TILES_BETWEEN(a, b, c) (TileX(a) >= TileX(b) && TileX(a) <= TileX(c) && TileY(a) >= TileY(b) && TileY(a) <= TileY(c))
+	public static boolean TILES_BETWEEN(TileIndex a, TileIndex b, TileIndex c)
+	{
+		return
+				a.TileX() >= b.TileX() && a.TileX() <= c.TileX() 
+				&& a.TileY() >= b.TileY() && a.TileY() <= c.TileY();
+	}
 
 }
 

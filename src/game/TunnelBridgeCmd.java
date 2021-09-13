@@ -151,7 +151,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		return Math.abs(x2 + y2 - x1 - y1) - 1;
 	}
 
-	static boolean CheckBridge_Stuff(int bridge_type, int bridge_len)
+	public static boolean CheckBridge_Stuff(int bridge_type, int bridge_len)
 	{
 		final Bridge b = Bridge._bridge[bridge_type];
 		int max; // max possible length of a bridge (with patch 100)
@@ -1017,7 +1017,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		}
 	}
 
-	static int GetBridgeFoundation(int tileh, int direction)
+	public static int GetBridgeFoundation(int tileh, int direction)
 	{
 		//int i;
 		// normal level sloped building (7, 11, 13, 14)

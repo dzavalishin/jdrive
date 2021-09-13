@@ -2483,7 +2483,11 @@ implements IPoolItem, Serializable
 		return ratings[playerId];
 	}
 
+	public int getRoad_build_months() {
+		return road_build_months;
+	}
 
+	
 	/**
 	 * @return true if at least one valid town exist
 	 */
@@ -2510,6 +2514,7 @@ implements IPoolItem, Serializable
 		// TODO is it correct?
 		return GetTownPoolSize();
 	}
+
 
 
 }

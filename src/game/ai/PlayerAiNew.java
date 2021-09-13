@@ -1,15 +1,11 @@
 package game.ai;
 
 import game.TileIndex;
-import game.ai.Trolly.AiAction;
-import game.ai.Trolly.AiState;
-import game.aystar.AyStar;
 import game.ids.VehicleID;
 
-public class PlayerAiNew {
+public class PlayerAiNew implements AiConst 
+{
 
-	public static final int AI_MAX_SPECIAL_VEHICLES = 100;
-	
 	AiState state;
 	int tick;
 	int idle;
@@ -24,7 +20,7 @@ public class PlayerAiNew {
 	// Pathfinder stuff
 	Ai_PathFinderInfo path_info;
 	//AyStar *pathfinder;
-	AyStar pathfinder;
+	//AyStar pathfinder;
 
 	// Route stuff
 

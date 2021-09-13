@@ -23,252 +23,14 @@ import game.Vehicle;
 import game.aystar.AyStar;
 import game.enums.RoadStopType;
 import game.enums.TileTypes;
+import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ids.VehicleID;
 import game.util.BitOps;
 import game.util.Strings;
 
-public class Trolly {
-
-	/*
-	 * These defines can be altered to change the behavoir of the AI
-	 *
-	 * WARNING:
-	 *   This can also alter the AI in a negative way. I will never claim these settings
-	 *   are perfect, but don't change them if you don't know what the effect is.
-	 */
-
-	// How many times it the H multiplied. The higher, the more it will go straight to the
-	//   end point. The lower, how more it will find the route with the lowest cost.
-	//   also: the lower, the longer it takes before route is calculated..
-	public static final int  AI_PATHFINDER_H_MULTIPLER = 100;
-
-	// How many loops may AyStar do before it stops
-	//   0 = infinite
-	public static final int  AI_PATHFINDER_LOOPS_PER_TICK = 5;
-
-	// How long may the AI search for one route?
-	//   0 = infinite
-	// This number is the number of tiles tested.
-	//  It takes (AI_PATHFINDER_MAX_SEARCH_NODES / AI_PATHFINDER_LOOPS_PER_TICK) ticks
-	//  to get here.. with 5000 / 10 = 500. 500 / 74 (one day) = 8 days till it aborts
-	//   (that is: if the AI is on VERY FAST! :p
-	public static final int  AI_PATHFINDER_MAX_SEARCH_NODES = 5000;
-
-	// If you enable this, the AI is not allowed to make 90degree turns
-	//public static final int  AI_PATHFINDER_NO_90DEGREES_TURN
-
-	// Below are defines for the g-calculation
-
-	// Standard penalty given to a tile
-	public static final int  AI_PATHFINDER_PENALTY = 150;
-	// The penalty given to a tile that is going up
-	public static final int  AI_PATHFINDER_TILE_GOES_UP_PENALTY = 450;
-	// The penalty given to a tile which would have to use fundation
-	public static final int  AI_PATHFINDER_FOUNDATION_PENALTY = 100;
-	// Changing direction is a penalty, to prevent curved ways (with that: slow ways)
-	public static final int  AI_PATHFINDER_DIRECTION_CHANGE_PENALTY = 200;
-	// Same penalty, only for when road already exists
-	public static final int  AI_PATHFINDER_DIRECTION_CHANGE_ON_EXISTING_ROAD_PENALTY = 50;
-	// A diagonal track cost the same as a straigh, but a diagonal is faster... so give
-	//  a bonus for using diagonal track
-	//#ifdef AI_PATHFINDER_NO_90DEGREES_TURN
-	//public static final int  AI_PATHFINDER_DIAGONAL_BONUS 95
-	//#else
-	public static final int  AI_PATHFINDER_DIAGONAL_BONUS = 75;
-	//#endif
-	// If a roadblock already exists, it gets a bonus
-	public static final int  AI_PATHFINDER_ROAD_ALREADY_EXISTS_BONUS = 140;
-	// To prevent 3 direction changes in 3 tiles, this penalty is given in such situation
-	public static final int  AI_PATHFINDER_CURVE_PENALTY = 200;
-
-	// Penalty a bridge gets per length
-	public static final int  AI_PATHFINDER_BRIDGE_PENALTY = 180;
-	// The penalty for a bridge going up
-	public static final int  AI_PATHFINDER_BRIDGE_GOES_UP_PENALTY = 1000;
-
-	// Tunnels are expensive...
-	//  Because of that, every tile the cost is increased with 1/8th of his value
-	//  This is also true if you are building a tunnel yourself
-	public static final int  AI_PATHFINDER_TUNNEL_PENALTY = 350;
-
-	/*
-	 * Ai_New defines
-	 */
-
-	// How long may we search cities and industry for a new route?
-	public static final int  AI_LOCATE_ROUTE_MAX_COUNTER = 200;
-
-	// How many days must there be between building the first station and the second station
-	//  within one city. This number is in days and should be more than 4 months.
-	public static final int  AI_CHECKCITY_DATE_BETWEEN = 180;
-
-	// How many cargo is needed for one station in a city?
-	public static final int  AI_CHECKCITY_CARGO_PER_STATION = 60;
-	// How much cargo must there not be used in a city before we can build a new station?
-	public static final int  AI_CHECKCITY_NEEDED_CARGO = 50;
-	// When there is already a station which takes the same good and the rating of that
-	//  city is higher then this numer, we are not going to attempt to build anything
-	//  there
-	public static final int  AI_CHECKCITY_CARGO_RATING = 50;
-	// But, there is a chance of 1 out of this number, that we do ;)
-	public static final int  AI_CHECKCITY_CARGO_RATING_CHANCE = 5;
-	// If a city is too small to contain a station, there is a small chance
-	//  that we still do so.. just to make the city bigger!
-	public static final int  AI_CHECKCITY_CITY_CHANCE = 5;
-
-	// This number indicates for every unit of cargo, how many tiles two stations maybe be away
-	//  from eachother. In other words: if we have 120 units of cargo in one station, and 120 units
-	//  of the cargo in the other station, both stations can be 96 units away from eachother, if the
-	//  next number is 0.4.
-	public static final double  AI_LOCATEROUTE_BUS_CARGO_DISTANCE = 0.4;
-	public static final double  AI_LOCATEROUTE_TRUCK_CARGO_DISTANCE = 0.7;
-	// In whole tiles, the minimum distance for a truck route
-	public static final int  AI_LOCATEROUTE_TRUCK_MIN_DISTANCE = 30;
-
-	// The amount of tiles in a square from -X to +X that is scanned for a station spot
-	//  (so if this number is 10, 20x20 = 400 tiles are scanned for _the_ perfect spot
-	// Safe values are between 15 and 5
-	public static final int  AI_FINDSTATION_TILE_RANGE = 10;
-
-	// Building on normal speed goes very fast. Idle this amount of ticks between every
-	//  building part. It is calculated like this: (4 - competitor_speed) * num + 1
-	//  where competitor_speed is between 0 (very slow) to 4 (very fast)
-	public static final int  AI_BUILDPATH_PAUSE = 10;
-
-	// Minimum % of reliabilty a vehicle has to have before the AI buys it
-	public static final int  AI_VEHICLE_MIN_RELIABILTY = 60;
-
-	// The minimum amount of money a player should always have
-	public static final int  AI_MINIMUM_MONEY = 15000;
-
-	// If the most cheap route is build, how much is it going to cost..
-	// This is to prevent the AI from trying to build a route which can not be paid for
-	public static final int  AI_MINIMUM_BUS_ROUTE_MONEY = 25000;
-	public static final int  AI_MINIMUM_TRUCK_ROUTE_MONEY = 35000;
-
-	// The minimum amount of money before we are going to repay any money
-	public static final int  AI_MINIMUM_LOAN_REPAY_MONEY = 40000;
-	// How many repays do we do if we have enough money to do so?
-	//  Every repay is 10000
-	public static final int  AI_LOAN_REPAY = 2;
-	// How much income must we have before paying back a loan? Month-based (and looked at the last month)
-	public static final int  AI_MINIMUM_INCOME_FOR_LOAN = 7000;
-
-	// If there is <num> time as much cargo in the station then the vehicle can handle
-	//  reuse the station instead of building a new one!
-	public static final int  AI_STATION_REUSE_MULTIPLER = 2;
-
-	// No more than this amount of vehicles per station..
-	public static final int  AI_CHECK_MAX_VEHICLE_PER_STATION = 10;
-
-	// How many thick between building 2 vehicles
-	public static final int  AI_BUILD_VEHICLE_TIME_BETWEEN = Global.DAY_TICKS;
-
-	// How many days must there between vehicle checks
-	//  The more often, the less non-money-making lines there will be
-	//   but the unfair it may seem to a human player
-	public static final int  AI_DAYS_BETWEEN_VEHICLE_CHECKS = 30;
-
-	// How money profit does a vehicle needs to make to stay in order
-	//  This is the profit of this year + profit of last year
-	//  But also for vehicles that are just one year old. In other words:
-	//   Vehicles of 2 years do easier meet this setting then vehicles
-	//   of one year. This is a very good thing. New vehicles are filtered,
-	//   while old vehicles stay longer, because we do get less in return.
-	public static final int  AI_MINIMUM_ROUTE_PROFIT = 1000;
-
-	// A vehicle is considered lost when he his cargo is more than 180 days old
-	public static final int  AI_VEHICLE_LOST_DAYS = 180;
-
-	// How many times may the AI try to find a route before it gives up
-	public static final int  AI_MAX_TRIES_FOR_SAME_ROUTE = 8;
-
-	/*
-	 * End of defines
-	 */
-
-	// This stops 90degrees curves
-	static final int _illegal_curves[] = {
-		255, 255, // Horz and vert, don't have the effect
-		5, // upleft and upright are not valid
-		4, // downright and downleft are not valid
-		2, // downleft and upleft are not valid
-		3, // upright and downright are not valid
-	};
-
-	enum AiState {
-		STARTUP,
-		FIRST_TIME,
-		NOTHING,
-		WAKE_UP,
-		LOCATE_ROUTE,
-		FIND_STATION,
-		FIND_PATH,
-		FIND_DEPOT,
-		VERIFY_ROUTE,
-		BUILD_STATION,
-		BUILD_PATH,
-		BUILD_DEPOT,
-		BUILD_VEHICLE,
-		GIVE_ORDERS,
-		START_VEHICLE,
-		REPAY_MONEY,
-		CHECK_ALL_VEHICLES,
-		ACTION_DONE,
-		STOP, // Temporary function to stop the AI
-	};
-
-	// Used for tbt (train/bus/truck)
-	//enum {
-		public static final int AI_TRAIN = 0;
-				public static final int AI_BUS = 1;
-				public static final int AI_TRUCK = 2;
-	//};
-
-	static public enum AiAction {
-		NONE,
-		BUS_ROUTE,
-		TRUCK_ROUTE,
-		REPAY_LOAN,
-		CHECK_ALL_VEHICLES,
-	};
-
-	// Used for from_type/to_type
-	//enum {
-	public static final int AI_NO_TYPE = 0;
-			public static final int AI_CITY = 1;
-		public static final int AI_INDUSTRY = 2;
-	//};
-
-	// Flags for in the vehicle
-	//enum {
-		public static final int AI_VEHICLEFLAG_SELL = 1;
-		// Remember, flags must be in power of 2
-	//};
-
-	public static final int  AI_NO_CARGO = 0xFF; // Means that there is no cargo defined yet (used for industry)
-	public static final int  AI_NEED_CARGO = 0xFE; // Used when the AI needs to find out a cargo for the route
-	public static final TileIndex  AI_STATION_RANGE() { return TileIndex.TileXY(Global.MapMaxX(), Global.MapMaxY()); }
-
-	public static final int  AI_PATHFINDER_NO_DIRECTION = -1;
-
-	// Flags used in user_data
-	public static final int  AI_PATHFINDER_FLAG_BRIDGE = 1;
-	public static final int  AI_PATHFINDER_FLAG_TUNNEL = 2;
-
-	//typedef void AiNew_StateFunction(Player p);
-
-
-
-	
-
-	
-	
-	
-	
-	
-	
+public class Trolly extends AiTools  
+{
 
 	/*
 	 * This AI was created as a direct reaction to the big demand for some good AIs
@@ -309,7 +71,7 @@ public class Trolly {
 		p.ainew.path_info.start_tile_br = null;
 		p.ainew.path_info.end_tile_tl = null;
 		p.ainew.path_info.end_tile_br = null;
-		p.ainew.pathfinder = new_AyStar_AiPathFinder(12, p.ainew.path_info);
+		//p.ainew.pathfinder = new_AyStar_AiPathFinder(12, p.ainew.path_info);
 
 		p.ainew.idle = 0;
 		p.ainew.last_vehiclecheck_date = Global.get_date();
@@ -474,11 +236,11 @@ public class Trolly {
 			int j = 0;
 
 			// We don't like roadconstructions, don't even true such a city
-			if (t.road_build_months != 0) return false;
+			if (t.getRoad_build_months() != 0) return false;
 
 			// Check if the rating in a city is high enough
 			//  If not, take a chance if we want to continue
-			if (t.ratings[_current_player] < 0 && Ai.AI_CHANCE16(1,4)) return false;
+			if (t.getRatings(PlayerID.getCurrent().id) < 0 && Ai.AI_CHANCE16(1,4)) return false;
 
 			if (t.max_pass - t.act_pass < AI_CHECKCITY_NEEDED_CARGO && !Ai.AI_CHANCE16(1,AI_CHECKCITY_CITY_CHANCE)) return false;
 
@@ -542,13 +304,13 @@ public class Trolly {
 
 			Town town = i.getTown();
 			
-			if (i.town != null && i.town.ratings[PlayerID.getCurrent().id] < 0 && Ai.AI_CHANCE16(1,4)) return false;
+			if (town != null && town.getRatings(PlayerID.getCurrent().id) < 0 && Ai.AI_CHANCE16(1,4)) return false;
 
 			// No limits on delevering stations!
 			//  Or for industry that does not give anything yet
-			if (i.produced_cargo[0] == 0xFF || i.total_production[0] == 0) return true;
+			if (i.getProduced_cargo(0) == 0xFF || i.getTotal_production(0) == 0) return true;
 
-			if (i.total_production[0] - i.total_transported[0] < AI_CHECKCITY_NEEDED_CARGO) return false;
+			if (i.getTotal_production(0) - i.getTotal_transported(0) < AI_CHECKCITY_NEEDED_CARGO) return false;
 
 			// Check if we have build a station in this town the last 6 months
 			//  else we don't do it. This is done, because stat updates can be slow
@@ -566,7 +328,7 @@ public class Trolly {
 					// Are we talking trucks?
 					if (p.ainew.tbt == AI_TRUCK && (Station.FACIL_TRUCK_STOP & st.getFacilities()) != Station.FACIL_TRUCK_STOP) continue;
 					// Is it the same city as we are in now?
-					if (st.town != i.town) continue;
+					if (st.town != town) continue;
 					// When was this station build?
 					if (Global.get_date() - st.getBuild_date() < AI_CHECKCITY_DATE_BETWEEN) return false;
 					// Cound the amount of stations in this city that we own
@@ -576,13 +338,13 @@ public class Trolly {
 					//  we want to know if this station gets the same good. If so,
 					//  we want to know its rating. If it is too high, we are not going
 					//  to build there
-					if (i.produced_cargo[0] == 0xFF) continue;
+					if (i.getProduced_cargo(0) == 0xFF) continue;
 					// It does not take this cargo
-					if (0 == st.goods[i.produced_cargo[0]].last_speed) continue;
+					if (0 == st.goods[i.getProduced_cargo(0)].last_speed) continue;
 					// Is it around our industry
 					if (Map.DistanceManhattan(st.getXy(), i.xy) > 5) continue;
 					// It does take this cargo.. what is his rating?
-					if (st.goods[i.produced_cargo[0]].rating < AI_CHECKCITY_CARGO_RATING) continue;
+					if (st.goods[i.getProduced_cargo(0)].rating < AI_CHECKCITY_CARGO_RATING) continue;
 					j++;
 					// The rating is high.. a little chance that we still continue
 					//  But if there are 2 stations of this size, we never go on...
@@ -595,7 +357,7 @@ public class Trolly {
 			// We are about to add one...
 			count++;
 			// Check if we the city can provide enough cargo for this amount of stations..
-			if (count * AI_CHECKCITY_CARGO_PER_STATION > i.total_production[0]) return false;
+			if (count * AI_CHECKCITY_CARGO_PER_STATION > i.getTotal_production(0)) return false;
 
 			// All check are okay, so we can build here!
 			return true;
@@ -730,12 +492,12 @@ public class Trolly {
 				// First we check if the from_ic produces cargo that this ic accepts
 				final Industry ind_fic = Industry.GetIndustry(p.ainew.from_ic);
 				final Industry ind_tmp = Industry.GetIndustry(p.ainew.temp);
-				if (ind_fic.produced_cargo[0] != 0xFF && ind_fic.total_production[0] != 0) {
+				if (ind_fic.getProduced_cargo(0) != 0xFF && ind_fic.getTotal_production(0) != 0) {
 					for (i=0;i<3;i++) {
-						if (ind_tmp.accepts_cargo[i] == 0xFF) break;
-						if (ind_fic.produced_cargo[0] == ind_tmp.accepts_cargo[i]) {
+						if (ind_tmp.getAccepts_cargo(i) == 0xFF) break;
+						if (ind_fic.getProduced_cargo(0) == ind_tmp.getAccepts_cargo(i)) {
 							// Found a compatbiel industry
-							max_cargo = ind_fic.total_production[0] - ind_fic.total_transported[0];
+							max_cargo = ind_fic.getTotal_production(0) - ind_fic.getTotal_transported(0);
 							found = true;
 							p.ainew.from_deliver = true;
 							p.ainew.to_deliver = false;
@@ -743,14 +505,14 @@ public class Trolly {
 						}
 					}
 				}
-				if (!found && ind_tmp.produced_cargo[0] != 0xFF && ind_tmp.total_production[0] != 0) {
+				if (!found && ind_tmp.getProduced_cargo(0) != 0xFF && ind_tmp.getTotal_production(0) != 0) {
 					// If not check if the current ic produces cargo that the from_ic accepts
 					for (i=0;i<3;i++) {
-						if (ind_fic.accepts_cargo[i] == 0xFF) break;
-						if (ind_tmp.produced_cargo[0] == ind_fic.accepts_cargo[i]) {
+						if (ind_fic.getAccepts_cargo(i) == 0xFF) break;
+						if (ind_tmp.getProduced_cargo(0) == ind_fic.getAccepts_cargo(i)) {
 							// Found a compatbiel industry
 							found = true;
-							max_cargo = ind_tmp.total_production[0] - ind_fic.total_transported[0];
+							max_cargo = ind_tmp.getTotal_production(0) - ind_fic.getTotal_transported(0);
 							p.ainew.from_deliver = false;
 							p.ainew.to_deliver = true;
 							break;
@@ -764,9 +526,9 @@ public class Trolly {
 							Map.DistanceManhattan(ind_fic.xy, ind_tmp.xy) <= max_cargo * AI_LOCATEROUTE_TRUCK_CARGO_DISTANCE) {
 						p.ainew.to_ic = p.ainew.temp;
 						if (p.ainew.from_deliver) {
-							p.ainew.cargo = ind_fic.produced_cargo[0];
+							p.ainew.cargo = ind_fic.getProduced_cargo(0);
 						} else {
-							p.ainew.cargo = ind_tmp.produced_cargo[0];
+							p.ainew.cargo = ind_tmp.getProduced_cargo(0);
 						}
 						p.ainew.state = AiState.FIND_STATION;
 
@@ -983,7 +745,7 @@ public class Trolly {
 			// Truck station locater works differently.. a station can be on any place
 			//  as long as it is in range. So we give back code AI_STATION_RANGE
 			//  so the pathfinder routine can work it out!
-			new_tile = AI_STATION_RANGE();
+			new_tile = AiConst.AI_STATION_RANGE();
 			direction = AI_PATHFINDER_NO_DIRECTION;
 		}
 
@@ -1012,7 +774,7 @@ public class Trolly {
 		// First time, init some data
 		if (p.ainew.temp == -1) {
 			// Init path_info
-			if (p.ainew.from_tile.equals(AI_STATION_RANGE())) 
+			if (p.ainew.from_tile.equals(AiConst.AI_STATION_RANGE())) 
 			{
 				Industry fromi = Industry.GetIndustry(p.ainew.from_ic);
 				// For truck routes we take a range around the industry
@@ -1025,7 +787,7 @@ public class Trolly {
 				p.ainew.path_info.start_direction = p.ainew.from_direction;
 			}
 
-			if (p.ainew.to_tile.equals(AI_STATION_RANGE())) {
+			if (p.ainew.to_tile.equals(AiConst.AI_STATION_RANGE())) {
 				Industry toi = Industry.GetIndustry(p.ainew.to_ic);
 				p.ainew.path_info.end_tile_tl = toi.xy.isub(TileIndex.TileDiffXY(1, 1));
 				p.ainew.path_info.end_tile_br = toi.xy.iadd(TileIndex.TileDiffXY(toi.getWidth()+1, toi.getHeight()+1));
@@ -1041,14 +803,18 @@ public class Trolly {
 			else
 				p.ainew.path_info.rail_or_road = false;
 
-			// First, clean the pathfinder with our new begin and endpoints
-			clean_AyStar_AiPathFinder(p.ainew.pathfinder, p.ainew.path_info);
 
 			p.ainew.temp = 0;
 		}
 
+		//AyStar pathfinder = new AIAyStar();
+		AyStar pathfinder = new_AyStar_AiPathFinder(12, p.ainew.path_info);
+		// First, clean the pathfinder with our new begin and endpoints
+		//clean_AyStar_AiPathFinder(pathfinder, p.ainew.path_info);
+
+		
 		// Start the pathfinder
-		r = p.ainew.pathfinder.main();
+		r = pathfinder.main();
 		// If it return: no match, stop it...
 		if (r == AyStar.AYSTAR_NO_PATH) {
 			Global.DEBUG_ai(1,"[AiNew] PathFinder found no route!");
@@ -1190,9 +956,9 @@ public class Trolly {
 			// Calculating tiles a day a vehicle moves is not easy.. this is how it must be done!
 			tiles_a_day = Engine.RoadVehInfo(i).max_speed * Global.DAY_TICKS / 256 / 16;
 			if (p.ainew.from_deliver)
-				max_cargo = Industry.GetIndustry(p.ainew.from_ic).total_production[0];
+				max_cargo = Industry.GetIndustry(p.ainew.from_ic).getTotal_production(0);
 			else
-				max_cargo = Industry.GetIndustry(p.ainew.to_ic).total_production[0];
+				max_cargo = Industry.GetIndustry(p.ainew.to_ic).getTotal_production(0);
 
 			// This is because moving 60% is more than we can dream of!
 			max_cargo *= 0.6;
@@ -1259,9 +1025,9 @@ public class Trolly {
 		if (p.ainew.to_direction == AI_PATHFINDER_NO_DIRECTION) {
 			p.ainew.to_direction = AiNew_GetDirection(p.ainew.path_info.route[0], p.ainew.path_info.route[1]);
 		}
-		if (p.ainew.from_tile.equals(AI_STATION_RANGE()))
+		if (p.ainew.from_tile.equals(AiConst.AI_STATION_RANGE()))
 			p.ainew.from_tile = p.ainew.path_info.route[p.ainew.path_info.route_length-1];
-		if (p.ainew.to_tile.equals(AI_STATION_RANGE()))
+		if (p.ainew.to_tile.equals(AiConst.AI_STATION_RANGE()))
 			p.ainew.to_tile = p.ainew.path_info.route[0];
 
 		p.ainew.state = AiState.BUILD_STATION;
@@ -1485,11 +1251,11 @@ public class Trolly {
 		 *  on ;) -- TrueLight -- 21-11-2005 */
 		if (p.ainew.tbt == AI_TRAIN) {
 		} else {
-			p.ainew.veh_id = _new_roadveh_id;
+			p.ainew.veh_id = Global._new_roadveh_id;
 		}
 
 		if (!p.ainew.veh_main_id.equals(VehicleID.getInvalid())) {
-			Ai.AI_DoCommand(0, p.ainew.veh_id + (p.ainew.veh_main_id << 16), 0, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
+			Ai.AI_DoCommand(0, p.ainew.veh_id.id + (p.ainew.veh_main_id.id << 16), 0, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
 
 			p.ainew.state = AiState.START_VEHICLE;
 			return;
@@ -1586,9 +1352,10 @@ public class Trolly {
 
 
 				// We are already sending him back
-				if (AiNew_GetSpecialVehicleFlag(p, v) & AI_VEHICLEFLAG_SELL) {
-					if (v.type == Vehicle.VEH_Road && IsTileDepotType(v.tile, TRANSPORT_ROAD) &&
-							(v.vehstatus&VS_STOPPED)) {
+				if(0 != (AiNew_GetSpecialVehicleFlag(p, v) & AI_VEHICLEFLAG_SELL)) {
+					if (v.getType() == Vehicle.VEH_Road && Depot.IsTileDepotType(v.getTile(), TransportType.Road) &&
+							//(v.vehstatus&VS_STOPPED) 
+							v.isStopped()) {
 						// We are at the depot, sell the vehicle
 						Ai.AI_DoCommand(0, v.index, 0, Cmd.DC_EXEC, Cmd.CMD_SELL_ROAD_VEH);
 					}
@@ -1689,269 +1456,6 @@ public class Trolly {
 	
 	
 	
-	
-	
-	
-	
-	// Build HQ
-//  Params:
-//    tile : tile where HQ is going to be build
-static boolean AiNew_Build_CompanyHQ(Player p, TileIndex tile)
-{
-	if (Cmd.CmdFailed(Ai.AI_DoCommand(tile, 0, 0, Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_COMPANY_HQ)))
-		return false;
-	Ai.AI_DoCommand(tile, 0, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_COMPANY_HQ);
-	return true;
-}
-
-
-// Build station
-//  Params:
-//    type : AI_TRAIN/AI_BUS/AI_TRUCK : indicates the type of station
-//    tile : tile where station is going to be build
-//    length : in case of AI_TRAIN: length of station
-//    numtracks : in case of AI_TRAIN: tracks of station
-//    direction : the direction of the station
-//    flag : flag passed to DoCommand (normally 0 to get the cost or DC_EXEC to build it)
-static int AiNew_Build_Station(Player p, int type, TileIndex tile, int length, int numtracks, int direction, int flag)
-{
-	if (type == AI_TRAIN)
-		return Ai.AI_DoCommand(tile.getTile(), direction + (numtracks << 8) + (length << 16), 0, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_RAILROAD_STATION);
-
-	if (type == AI_BUS)
-		return Ai.AI_DoCommand(tile.getTile(), direction, RoadStopType.RS_BUS.ordinal(), flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_STOP);
-
-	return Ai.AI_DoCommand(tile.getTile(), direction, RoadStopType.RS_TRUCK.ordinal(), flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_STOP);
-}
-
-
-// Builds a brdige. The second best out of the ones available for this player
-//  Params:
-//   tile_a : starting point
-//   tile_b : end point
-//   flag : flag passed to DoCommand
-static int AiNew_Build_Bridge(Player p, TileIndex tile_a, TileIndex tile_b, byte flag)
-{
-	int bridge_type, bridge_len, type, type2;
-
-	// Find a good bridgetype (the best money can buy)
-	bridge_len = TunnelBridgeCmd.GetBridgeLength(tile_a, tile_b);
-	type = type2 = 0;
-	for (bridge_type = MAX_BRIDGES-1; bridge_type >= 0; bridge_type--) {
-		if (CheckBridge_Stuff(bridge_type, bridge_len)) {
-			type2 = type;
-			type = bridge_type;
-			// We found two bridges, exit
-			if (type2 != 0) break;
-		}
-	}
-	// There is only one bridge that can be build..
-	if (type2 == 0 && type != 0) type2 = type;
-
-	// Now, simply, build the bridge!
-	if (p.ainew.tbt == AI_TRAIN)
-		return Ai.AI_DoCommand(tile_a.getTile(), tile_b.getTile(), (0<<8) + type2, flag | Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
-
-	return Ai.AI_DoCommand(tile_a.getTile(), tile_b.getTile(), (0x80 << 8) + type2, flag | Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
-}
-
-
-// Build the route part by part
-// Basicly what this function do, is build that amount of parts of the route
-//  that go in the same direction. It sets 'part' to the last part of the route builded.
-//  The return value is the cost for the builded parts
-//
-//  Params:
-//   PathFinderInfo : Pointer to the PathFinderInfo used for AiPathFinder
-//   part : Which part we need to build
-//
-// TODO: skip already builded road-pieces (e.g.: cityroad)
-static int AiNew_Build_RoutePart(Player p, Ai_PathFinderInfo PathFinderInfo, int flag)
-{
-	int part = PathFinderInfo.position;
-	byte [] route_extra = PathFinderInfo.route_extra;
-	//TileIndex *route = PathFinderInfo.route;
-	int dir;
-	int old_dir = -1;
-	int cost = 0;
-	int res;
-	// We need to calculate the direction with the parent of the parent.. so we skip
-	//  the first pieces and the last piece
-	if (part < 1) part = 1;
-	// When we are done, stop it
-	if (part >= PathFinderInfo.route_length - 1) { PathFinderInfo.position = -2; return 0; }
-
-
-	if (PathFinderInfo.rail_or_road) {
-		// Tunnel code
-		if ((AI_PATHFINDER_FLAG_TUNNEL & route_extra[part]) != 0) {
-			cost += Ai.AI_DoCommand(route[part], 0, 0, flag, Cmd.CMD_BUILD_TUNNEL);
-			PathFinderInfo.position++;
-			// TODO: problems!
-			if (Cmd.CmdFailed(cost)) {
-				Global.DEBUG_ai(0, "[AiNew - BuildPath] We have a serious problem: tunnel could not be build!");
-				return 0;
-			}
-			return cost;
-		}
-		// Bridge code
-		if ((AI_PATHFINDER_FLAG_BRIDGE & route_extra[part]) != 0) {
-			cost += AiNew_Build_Bridge(p, route[part], route[part-1], flag);
-			PathFinderInfo.position++;
-			// TODO: problems!
-			if (Cmd.CmdFailed(cost)) {
-				Global.DEBUG_ai(0, "[AiNew - BuildPath] We have a serious problem: bridge could not be build!");
-				return 0;
-			}
-			return cost;
-		}
-
-		// Build normal rail
-		// Keep it doing till we go an other way
-		if (route_extra[part-1] == 0 && route_extra[part] == 0) {
-			while (route_extra[part] == 0) {
-				// Get the current direction
-				dir = AiNew_GetRailDirection(route[part-1], route[part], route[part+1]);
-				// Is it the same as the last one?
-				if (old_dir != -1 && old_dir != dir) break;
-				old_dir = dir;
-				// Build the tile
-				res = Ai.AI_DoCommand(route[part], 0, dir, flag, Cmd.CMD_BUILD_SINGLE_RAIL);
-				if (Cmd.CmdFailed(res)) {
-					// Problem.. let's just abort it all!
-					p.ainew.state = AI_STATE_NOTHING;
-					return 0;
-				}
-				cost += res;
-				// Go to the next tile
-				part++;
-				// Check if it is still in range..
-				if (part >= PathFinderInfo.route_length - 1) break;
-			}
-			part--;
-		}
-		// We want to return the last position, so we go back one
-		PathFinderInfo.position = part;
-	} else {
-		// Tunnel code
-		if ((AI_PATHFINDER_FLAG_TUNNEL & route_extra[part]) != 0) {
-			cost += Ai.AI_DoCommand(route[part], 0x200, 0, flag, Cmd.CMD_BUILD_TUNNEL);
-			PathFinderInfo.position++;
-			// TODO: problems!
-			if (Cmd.CmdFailed(cost)) {
-				Global.DEBUG_ai(0, "[AiNew - BuildPath] We have a serious problem: tunnel could not be build!");
-				return 0;
-			}
-			return cost;
-		}
-		// Bridge code
-		if ((AI_PATHFINDER_FLAG_BRIDGE & route_extra[part]) != 0) {
-			cost += AiNew_Build_Bridge(p, route[part], route[part+1], flag);
-			PathFinderInfo.position++;
-			// TODO: problems!
-			if (Cmd.CmdFailed(cost)) {
-				Global.DEBUG_ai(0, "[AiNew - BuildPath] We have a serious problem: bridge could not be build!");
-				return 0;
-			}
-			return cost;
-		}
-
-		// Build normal road
-		// Keep it doing till we go an other way
-		// EnsureNoVehicle makes sure we don't build on a tile where a vehicle is. This way
-		//  it will wait till the vehicle is gone..
-		if (route_extra[part-1] == 0 && route_extra[part] == 0 && (flag != Cmd.DC_EXEC || EnsureNoVehicle(route[part]))) {
-			while (route_extra[part] == 0 && (flag != Cmd.DC_EXEC || EnsureNoVehicle(route[part]))) {
-				// Get the current direction
-				dir = AiNew_GetRoadDirection(route[part-1], route[part], route[part+1]);
-				// Is it the same as the last one?
-				if (old_dir != -1 && old_dir != dir) break;
-				old_dir = dir;
-				// There is already some road, and it is a bridge.. don't build!!!
-				if (!IsTileType(route[part], MP_TUNNELBRIDGE)) {
-					// Build the tile
-					res = AI_DoCommand(route[part], dir, 0, flag | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
-					// Currently, we ignore CMD_ERRORs!
-					if (Cmd.CmdFailed(res) && flag == Cmd.DC_EXEC && !IsTileType(route[part], MP_STREET) && !EnsureNoVehicle(route[part])) {
-						// Problem.. let's just abort it all!
-						Global.DEBUG_ai(0, "Darn, the route could not be builded.. aborting!");
-						p.ainew.state = AI_STATE_NOTHING;
-						return 0;
-					}
-
-					if (!Cmd.CmdFailed(res)) cost += res;
-				}
-				// Go to the next tile
-				part++;
-				// Check if it is still in range..
-				if (part >= PathFinderInfo.route_length - 1) break;
-			}
-			part--;
-			// We want to return the last position, so we go back one
-		}
-		if (!EnsureNoVehicle(route[part]) && flag == Cmd.DC_EXEC) part--;
-		PathFinderInfo.position = part;
-	}
-
-	return cost;
-}
-
-
-// This functions tries to find the best vehicle for this type of cargo
-// It returns vehicle_id or -1 if not found
-static int AiNew_PickVehicle(Player p)
-{
-	if (p.ainew.tbt == AI_TRAIN) {
-		// Not supported yet
-		return -1;
-	} else {
-		int start, count, i, ret = Cmd.CMD_ERROR;
-		start = _cargoc.ai_roadveh_start[p.ainew.cargo];
-		count = _cargoc.ai_roadveh_count[p.ainew.cargo];
-
-		// Let's check it backwards.. we simply want to best engine available..
-		for (i = start + count - 1; i >= start; i--) {
-			// Is it availiable?
-			// Also, check if the reliability of the vehicle is above the AI_VEHICLE_MIN_RELIABILTY
-			if (!BitOps.HASBIT(Engine.GetEngine(i).player_avail, _current_player) || Engine.GetEngine(i).getReliability() * 100 < AI_VEHICLE_MIN_RELIABILTY << 16) continue;
-			// Can we build it?
-			ret = Ai.AI_DoCommand(0, i, 0, Cmd.DC_QUERY_COST, Cmd.CMD_BUILD_ROAD_VEH);
-			if (!Cmd.CmdFailed(ret)) break;
-		}
-		// We did not find a vehicle :(
-		if (Cmd.CmdFailed(ret)) return -1;
-		return i;
-	}
-}
-
-
-// Builds the best vehicle possible
-static int AiNew_Build_Vehicle(Player p, TileIndex tile, int flag)
-{
-	int i = AiNew_PickVehicle(p);
-	if (i == -1) return Cmd.CMD_ERROR;
-
-	if (p.ainew.tbt == AI_TRAIN) return Cmd.CMD_ERROR;
-
-	return Ai.AI_DoCommand(tile, i, 0, flag, Cmd.CMD_BUILD_ROAD_VEH);
-}
-
-//private static final byte _roadbits_by_dir[] = {2,1,8,4};
-
-static int AiNew_Build_Depot(Player p, TileIndex tile, int direction, int flag)
-{
-	int ret, ret2;
-	if (p.ainew.tbt == AI_TRAIN)
-		return Ai.AI_DoCommand(tile.getTile(), 0, direction, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_TRAIN_DEPOT);
-
-	ret = Ai.AI_DoCommand(tile.getTile(), direction, 0, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_DEPOT);
-	if (Cmd.CmdFailed(ret)) return ret;
-	// Try to build the road from the depot
-	ret2 = Ai.AI_DoCommand(tile.OffsetByDir(direction), _roadbits_by_dir[direction], 0, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
-	// If it fails, ignore it..
-	if (Cmd.CmdFailed(ret2)) return ret;
-	return ret + ret2;
-}
 	
 	
 	

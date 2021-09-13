@@ -240,7 +240,7 @@ public class Ai {
 	 */
 	static void AI_RunTick(PlayerID player)
 	{
-		//extern void AiNewDoGameLoop(Player *p);
+		//extern void AiNewDoGameLoop(Player p);
 
 		Player p = Player.GetPlayer(player);
 		//_current_player = player;

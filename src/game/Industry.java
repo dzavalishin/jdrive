@@ -2769,6 +2769,22 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		return height;
 	}
 
+	public int getProduced_cargo(int i) {
+		return produced_cargo[i];
+	}
+
+	public int getTotal_production(int i) {
+		return total_production[i];
+	}
+
+	public int getTotal_transported(int i) {
+		return total_transported[i];
+	}
+
+	public int getAccepts_cargo(int i) {
+		return accepts_cargo[i];
+	}
+
 
 
 }
