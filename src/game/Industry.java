@@ -1300,7 +1300,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		return t;
 	}
 
-	private Town getTown() {
+	public Town getTown() {
 		return Town.GetTown(townId);
 	}
 
@@ -2759,6 +2759,14 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	public static int getCount()
 	{
 		return _total_industries;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
 	}
 
 

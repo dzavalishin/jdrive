@@ -369,6 +369,21 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return TileIndex.ToTileIndexDiff(_tileoffs_by_dir[dir]);
 	}
 
+	/** 
+	 * 
+	 * Offset this tile by given direction, return new tile 
+	 * 
+	 * Identical to tile.iadd( TileOffsByDir(dir) )
+	 * 
+	**/
+	public  TileIndex OffsetByDir(int dir)
+	{
+		//extern final TileIndexDiffC _tileoffs_by_dir[4];
+
+		assert(dir < _tileoffs_by_dir.length);
+		return iadd( ToTileIndexDiff(_tileoffs_by_dir[dir]) );
+	}
+
 
 	public static TileIndexDiffC TileIndexDiffCByDir(int dir) {
 		//extern final TileIndexDiffC _tileoffs_by_dir[4];
@@ -487,6 +502,11 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return GetTileType() == type;
 	}
 
+	public boolean typeIs(TileTypes type) {
+		return GetTileType() == type;
+	}
+
+	
 	public boolean IsTunnelTile()
 	{
 		return IsTileType(TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(Global.gs._m[tile].m5, 4, 4) == 0;
@@ -548,6 +568,11 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 		return GetTileOwner().id == owner;
 	}
 
+	public boolean ownerIs(PlayerID owner)
+	{
+		return GetTileOwner().equals(owner);
+	}
+	
 
 	public static TileIndexDiff ToTileIndexDiff(TileIndexDiffC tidc)
 	{
@@ -792,6 +817,7 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	public int GetRailTileType() {
 		return Rail.GetRailTileType(this);
 	}
+
 
 
 }

@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import game.AcceptedCargo;
 import game.Cmd;
+import game.Depot;
 import game.Engine;
 import game.GameOptions;
 import game.Global;
@@ -17,10 +18,14 @@ import game.Str;
 import game.TileIndex;
 import game.TileInfo;
 import game.Town;
+import game.TunnelBridgeCmd;
 import game.Vehicle;
 import game.aystar.AyStar;
+import game.enums.RoadStopType;
 import game.enums.TileTypes;
 import game.ids.PlayerID;
+import game.ids.VehicleID;
+import game.util.BitOps;
 import game.util.Strings;
 
 public class Trolly {
@@ -294,7 +299,7 @@ public class Trolly {
 		// We first have to init some things
 
 		if (PlayerID.getCurrent().id == 1 || Ai._ai.network_client) {
-			ShowErrorMessage(Strings.INVALID_STRING_ID, TEMP_AI_IN_PROGRESS, 0, 0);
+			Global.ShowErrorMessage(Str.INVALID_STRING_ID().id, Str.TEMP_AI_IN_PROGRESS, 0, 0);
 		}
 
 		// The PathFinder (AyStar)
@@ -352,7 +357,7 @@ public class Trolly {
 			// We have no HQ yet, build one on a random place
 			// Random till we found a place for it!
 			// TODO: this should not be on a random place..
-			AiNew_Build_CompanyHQ(p, Ai.AI_Random() % Global.MapSize());
+			AiNew_Build_CompanyHQ(p, TileIndex.get( Ai.AI_Random() % Global.MapSize()) );
 			// Enough for now, but we want to come back here the next time
 			//  so we do not change any status
 			return;
@@ -496,7 +501,7 @@ public class Trolly {
 					// Is it the same city as we are in now?
 					if (st.town != t) continue;
 					// When was this station build?
-					if (Global.get_date() - st.build_date < AI_CHECKCITY_DATE_BETWEEN) return false;
+					if (Global.get_date() - st.getBuild_date() < AI_CHECKCITY_DATE_BETWEEN) return false;
 					// Cound the amount of stations in this city that we own
 					count++;
 				} else {
@@ -535,6 +540,8 @@ public class Trolly {
 			int count = 0;
 			int j = 0;
 
+			Town town = i.getTown();
+			
 			if (i.town != null && i.town.ratings[PlayerID.getCurrent().id] < 0 && Ai.AI_CHANCE16(1,4)) return false;
 
 			// No limits on delevering stations!
@@ -561,7 +568,7 @@ public class Trolly {
 					// Is it the same city as we are in now?
 					if (st.town != i.town) continue;
 					// When was this station build?
-					if (Global.get_date() - st.build_date < AI_CHECKCITY_DATE_BETWEEN) return false;
+					if (Global.get_date() - st.getBuild_date() < AI_CHECKCITY_DATE_BETWEEN) return false;
 					// Cound the amount of stations in this city that we own
 					count++;
 				} else {
@@ -721,12 +728,14 @@ public class Trolly {
 				int i;
 				// TODO: in max_cargo, also check other cargo (beside [0])
 				// First we check if the from_ic produces cargo that this ic accepts
-				if (Industry.GetIndustry(p.ainew.from_ic).produced_cargo[0] != 0xFF && Industry.GetIndustry(p.ainew.from_ic).total_production[0] != 0) {
+				final Industry ind_fic = Industry.GetIndustry(p.ainew.from_ic);
+				final Industry ind_tmp = Industry.GetIndustry(p.ainew.temp);
+				if (ind_fic.produced_cargo[0] != 0xFF && ind_fic.total_production[0] != 0) {
 					for (i=0;i<3;i++) {
-						if (Industry.GetIndustry(p.ainew.temp).accepts_cargo[i] == 0xFF) break;
-						if (Industry.GetIndustry(p.ainew.from_ic).produced_cargo[0] == Industry.GetIndustry(p.ainew.temp).accepts_cargo[i]) {
+						if (ind_tmp.accepts_cargo[i] == 0xFF) break;
+						if (ind_fic.produced_cargo[0] == ind_tmp.accepts_cargo[i]) {
 							// Found a compatbiel industry
-							max_cargo = Industry.GetIndustry(p.ainew.from_ic).total_production[0] - Industry.GetIndustry(p.ainew.from_ic).total_transported[0];
+							max_cargo = ind_fic.total_production[0] - ind_fic.total_transported[0];
 							found = true;
 							p.ainew.from_deliver = true;
 							p.ainew.to_deliver = false;
@@ -734,14 +743,14 @@ public class Trolly {
 						}
 					}
 				}
-				if (!found && Industry.GetIndustry(p.ainew.temp).produced_cargo[0] != 0xFF && Industry.GetIndustry(p.ainew.temp).total_production[0] != 0) {
+				if (!found && ind_tmp.produced_cargo[0] != 0xFF && ind_tmp.total_production[0] != 0) {
 					// If not check if the current ic produces cargo that the from_ic accepts
 					for (i=0;i<3;i++) {
-						if (Industry.GetIndustry(p.ainew.from_ic).accepts_cargo[i] == 0xFF) break;
-						if (Industry.GetIndustry(p.ainew.temp).produced_cargo[0] == Industry.GetIndustry(p.ainew.from_ic).accepts_cargo[i]) {
+						if (ind_fic.accepts_cargo[i] == 0xFF) break;
+						if (ind_tmp.produced_cargo[0] == ind_fic.accepts_cargo[i]) {
 							// Found a compatbiel industry
 							found = true;
-							max_cargo = Industry.GetIndustry(p.ainew.temp).total_production[0] - Industry.GetIndustry(p.ainew.from_ic).total_transported[0];
+							max_cargo = ind_tmp.total_production[0] - ind_fic.total_transported[0];
 							p.ainew.from_deliver = false;
 							p.ainew.to_deliver = true;
 							break;
@@ -751,19 +760,19 @@ public class Trolly {
 				if (found) {
 					// Yeah, they are compatible!!!
 					// Check the length against the amount of goods
-					if (Map.DistanceManhattan(Industry.GetIndustry(p.ainew.from_ic).xy, Industry.GetIndustry(p.ainew.temp).xy) > AI_LOCATEROUTE_TRUCK_MIN_DISTANCE &&
-							Map.DistanceManhattan(Industry.GetIndustry(p.ainew.from_ic).xy, Industry.GetIndustry(p.ainew.temp).xy) <= max_cargo * AI_LOCATEROUTE_TRUCK_CARGO_DISTANCE) {
+					if (Map.DistanceManhattan(ind_fic.xy, ind_tmp.xy) > AI_LOCATEROUTE_TRUCK_MIN_DISTANCE &&
+							Map.DistanceManhattan(ind_fic.xy, ind_tmp.xy) <= max_cargo * AI_LOCATEROUTE_TRUCK_CARGO_DISTANCE) {
 						p.ainew.to_ic = p.ainew.temp;
 						if (p.ainew.from_deliver) {
-							p.ainew.cargo = Industry.GetIndustry(p.ainew.from_ic).produced_cargo[0];
+							p.ainew.cargo = ind_fic.produced_cargo[0];
 						} else {
-							p.ainew.cargo = Industry.GetIndustry(p.ainew.temp).produced_cargo[0];
+							p.ainew.cargo = ind_tmp.produced_cargo[0];
 						}
 						p.ainew.state = AiState.FIND_STATION;
 
 						Global.DEBUG_ai(1,
 							"[AiNew - LocateRoute] Found truck-route of %d tiles long (from %d to %d)",
-							Map.DistanceManhattan(Industry.GetIndustry(p.ainew.from_ic).xy, Industry.GetIndustry(p.ainew.temp).xy),
+							Map.DistanceManhattan(ind_fic.xy, ind_tmp.xy),
 							p.ainew.from_ic,
 							p.ainew.temp
 						);
@@ -804,7 +813,7 @@ public class Trolly {
 		// Also check if we don't have already a lot of busses to this city...
 		FOR_ALL_VEHICLES(v) {
 			if (v.owner == _current_player) {
-				const Order *order;
+				final Order *order;
 
 				FOR_VEHICLE_ORDERS(v, order) {
 					if (order.type == OT_GOTO_STATION && GetStation(order.station) == st) {
@@ -919,29 +928,30 @@ public class Trolly {
 			int x, y, i = 0;
 			int r;
 			int best;
-			int [] accepts = new int[AcceptedCargo.NUM_CARGO];
+			//int [] accepts = new int[AcceptedCargo.NUM_CARGO];
 			TileIndex [] found_spot = new TileIndex[AI_FINDSTATION_TILE_RANGE*AI_FINDSTATION_TILE_RANGE*4];
 			int [] found_best = new int[AI_FINDSTATION_TILE_RANGE*AI_FINDSTATION_TILE_RANGE*4];
 			// To find a good spot we scan a range from the center, a get the point
 			//  where we get the most cargo and where it is buildable.
 			// TODO: also check for station of myself and make sure we are not
 			//   taking eachothers passangers away (bad result when it does not)
-			for (x = TileX(tile) - AI_FINDSTATION_TILE_RANGE; x <= TileX(tile) + AI_FINDSTATION_TILE_RANGE; x++) {
-				for (y = TileY(tile) - AI_FINDSTATION_TILE_RANGE; y <= TileY(tile) + AI_FINDSTATION_TILE_RANGE; y++) {
-					new_tile = TileXY(x, y);
+			for (x = tile.TileX() - AI_FINDSTATION_TILE_RANGE; x <= tile.TileX() + AI_FINDSTATION_TILE_RANGE; x++) {
+				for (y = tile.TileY() - AI_FINDSTATION_TILE_RANGE; y <= tile.TileY() + AI_FINDSTATION_TILE_RANGE; y++) {
+					new_tile = TileIndex.TileXY(x, y);
 					if (new_tile.IsTileType(TileTypes.MP_CLEAR) || new_tile.IsTileType(TileTypes.MP_TREES)) {
+						AcceptedCargo accepts = new AcceptedCargo();
 						// This tile we can build on!
 						// Check acceptance
 						// XXX - Get the catchment area
 						Station.GetAcceptanceAroundTiles(accepts, new_tile, 1, 1, 4);
 						// >> 3 == 0 means no cargo
-						if (accepts[p.ainew.cargo] >> 3 == 0) continue;
+						if (accepts.ct[p.ainew.cargo] >> 3 == 0) continue;
 						// See if we can build the station
 						r = AiNew_Build_Station(p, p.ainew.tbt, new_tile, 0, 0, 0, Cmd.DC_QUERY_COST);
 						if (Cmd.CmdFailed(r)) continue;
 						// We can build it, so add it to found_spot
 						found_spot[i] = new_tile;
-						found_best[i++] = accepts[p.ainew.cargo];
+						found_best[i++] = accepts.ct[p.ainew.cargo];
 					}
 				}
 			}
@@ -973,7 +983,7 @@ public class Trolly {
 			// Truck station locater works differently.. a station can be on any place
 			//  as long as it is in range. So we give back code AI_STATION_RANGE
 			//  so the pathfinder routine can work it out!
-			new_tile = AI_STATION_RANGE;
+			new_tile = AI_STATION_RANGE();
 			direction = AI_PATHFINDER_NO_DIRECTION;
 		}
 
@@ -1002,10 +1012,12 @@ public class Trolly {
 		// First time, init some data
 		if (p.ainew.temp == -1) {
 			// Init path_info
-			if (p.ainew.from_tile == AI_STATION_RANGE) {
+			if (p.ainew.from_tile.equals(AI_STATION_RANGE())) 
+			{
+				Industry fromi = Industry.GetIndustry(p.ainew.from_ic);
 				// For truck routes we take a range around the industry
-				p.ainew.path_info.start_tile_tl = Industry.GetIndustry(p.ainew.from_ic).xy - TileDiffXY(1, 1);
-				p.ainew.path_info.start_tile_br = Industry.GetIndustry(p.ainew.from_ic).xy + TileDiffXY(Industry.GetIndustry(p.ainew.from_ic).width, Industry.GetIndustry(p.ainew.from_ic).height) + TileDiffXY(1, 1);
+				p.ainew.path_info.start_tile_tl = fromi.xy.isub(TileIndex.TileDiffXY(1, 1));
+				p.ainew.path_info.start_tile_br = fromi.xy.iadd(TileIndex.TileDiffXY(fromi.getWidth()+1, fromi.getHeight()+1));
 				p.ainew.path_info.start_direction = p.ainew.from_direction;
 			} else {
 				p.ainew.path_info.start_tile_tl = p.ainew.from_tile;
@@ -1013,9 +1025,10 @@ public class Trolly {
 				p.ainew.path_info.start_direction = p.ainew.from_direction;
 			}
 
-			if (p.ainew.to_tile == AI_STATION_RANGE) {
-				p.ainew.path_info.end_tile_tl = Industry.GetIndustry(p.ainew.to_ic).xy - TileDiffXY(1, 1);
-				p.ainew.path_info.end_tile_br = Industry.GetIndustry(p.ainew.to_ic).xy + TileDiffXY(Industry.GetIndustry(p.ainew.to_ic).width, Industry.GetIndustry(p.ainew.to_ic).height) + TileDiffXY(1, 1);
+			if (p.ainew.to_tile.equals(AI_STATION_RANGE())) {
+				Industry toi = Industry.GetIndustry(p.ainew.to_ic);
+				p.ainew.path_info.end_tile_tl = toi.xy.isub(TileIndex.TileDiffXY(1, 1));
+				p.ainew.path_info.end_tile_br = toi.xy.iadd(TileIndex.TileDiffXY(toi.getWidth()+1, toi.getHeight()+1));
 				p.ainew.path_info.end_direction = p.ainew.to_direction;
 			} else {
 				p.ainew.path_info.end_tile_tl = p.ainew.to_tile;
@@ -1062,24 +1075,27 @@ public class Trolly {
 		// But first we walk through the route see if we can find a depot that is ours
 		//  this keeps things nice ;)
 		int g, i, r;
-		int j;
+		//int j;
 		TileIndex tile;
 		assert(p.ainew.state == AiState.FIND_DEPOT);
 
 		p.ainew.depot_tile = null;
 
-		for (i=2;i<p.ainew.path_info.route_length-2;i++) {
+		for (i=2;i<p.ainew.path_info.route_length-2;i++) 
+		{
 			tile = p.ainew.path_info.route[i];
-			for (j = 0; j < 4; j++) {
-				if (IsTileType(tile + TileOffsByDir(j), TileTypes.MP_STREET)) {
+			for (int j = 0; j < 4; j++) 
+			{
+				final TileIndex offsetTile = tile.OffsetByDir(j);
+				if (offsetTile.typeIs(TileTypes.MP_STREET)) {
 					// Its a street, test if it is a depot
-					if (_m[tile + TileOffsByDir(j)].m5 & 0x20) {
+					if(0 != (offsetTile.M().m5 & 0x20)) {
 						// We found a depot, is it ours? (TELL ME!!!)
-						if (IsTileOwner(tile + TileOffsByDir(j), PlayerID.getCurrent())) {
+						if (offsetTile.ownerIs(PlayerID.getCurrent())) {
 							// Now, is it pointing to the right direction.........
-							if (GB(_m[tile + TileOffsByDir(j)].m5, 0, 2) == (j ^ 2)) {
+							if (BitOps.GB(offsetTile.M().m5, 0, 2) == (j ^ 2)) {
 								// Yeah!!!
-								p.ainew.depot_tile = tile + TileOffsByDir(j);
+								p.ainew.depot_tile = offsetTile;
 								p.ainew.depot_direction = j ^ 2; // Reverse direction
 								p.ainew.state = AiState.VERIFY_ROUTE;
 								return;
@@ -1106,29 +1122,29 @@ public class Trolly {
 
 			tile = p.ainew.path_info.route[i];
 
-			for (j = 0; j < 4; j++) {
+			for (int j = 0; j < 4; j++) {
 				// It may not be placed on the road/rail itself
 				// And because it is not build yet, we can't see it on the tile..
 				// So check the surrounding tiles :)
-				if (tile + TileOffsByDir(j) == p.ainew.path_info.route[i-1] ||
-						tile + TileOffsByDir(j) == p.ainew.path_info.route[i+1])
+				if (tile.OffsetByDir(j).equals( p.ainew.path_info.route[i-1] ) ||
+						tile.OffsetByDir(j).equals( p.ainew.path_info.route[i+1] ) )
 					continue;
 				// Not around a bridge?
 				if (p.ainew.path_info.route_extra[i] != 0) continue;
-				if (IsTileType(tile, TileTypes.MP_TUNNELBRIDGE)) continue;
+				if (tile.IsTileType(TileTypes.MP_TUNNELBRIDGE)) continue;
 				// Is the terrain clear?
-				if (IsTileType(tile + TileOffsByDir(j), TileTypes.MP_CLEAR) ||
-						IsTileType(tile + TileOffsByDir(j), TileTypes.MP_TREES)) {
-					TileInfo ti;
+				if (tile.OffsetByDir(j).typeIs(TileTypes.MP_CLEAR) ||
+						tile.OffsetByDir(j).typeIs(TileTypes.MP_TREES)) {
+					TileInfo ti = new TileInfo();
 					Landscape.FindLandscapeHeightByTile(ti, tile);
 					// If the current tile is on a slope (tileh != 0) then we do not allow this
 					if (ti.tileh != 0) continue;
 					// Check if everything went okay..
-					r = AiNew_Build_Depot(p, tile + TileOffsByDir(j), j ^ 2, 0);
+					r = AiNew_Build_Depot(p, tile.OffsetByDir(j), j ^ 2, 0);
 					if (Cmd.CmdFailed(r)) continue;
 					// Found a spot!
 					p.ainew.new_cost += r;
-					p.ainew.depot_tile = tile + TileOffsByDir(j);
+					p.ainew.depot_tile = tile.OffsetByDir(j);
 					p.ainew.depot_direction = j ^ 2; // Reverse direction
 					p.ainew.state = AiState.VERIFY_ROUTE;
 					return;
@@ -1224,7 +1240,7 @@ public class Trolly {
 
 		// Check how much it it going to cost us..
 		for (i=0;i<res;i++) {
-			p.ainew.new_cost += AiNew_Build_Vehicle(p, 0, Cmd.DC_QUERY_COST);
+			p.ainew.new_cost += AiNew_Build_Vehicle(p, null, Cmd.DC_QUERY_COST);
 		}
 
 		// Now we know how much the route is going to cost us
@@ -1243,9 +1259,9 @@ public class Trolly {
 		if (p.ainew.to_direction == AI_PATHFINDER_NO_DIRECTION) {
 			p.ainew.to_direction = AiNew_GetDirection(p.ainew.path_info.route[0], p.ainew.path_info.route[1]);
 		}
-		if (p.ainew.from_tile == AI_STATION_RANGE)
+		if (p.ainew.from_tile.equals(AI_STATION_RANGE()))
 			p.ainew.from_tile = p.ainew.path_info.route[p.ainew.path_info.route_length-1];
-		if (p.ainew.to_tile == AI_STATION_RANGE)
+		if (p.ainew.to_tile.equals(AI_STATION_RANGE()))
 			p.ainew.to_tile = p.ainew.path_info.route[0];
 
 		p.ainew.state = AiState.BUILD_STATION;
@@ -1261,19 +1277,19 @@ public class Trolly {
 		int res = 0;
 		assert(p.ainew.state == AiState.BUILD_STATION);
 		if (p.ainew.temp == 0) {
-			if (!IsTileType(p.ainew.from_tile, TileTypes.MP_STATION))
-				res = AiNew_Build_Station(p, p.ainew.tbt, p.ainew.from_tile, 0, 0, p.ainew.from_direction, DC_EXEC);
+			if (!p.ainew.from_tile.typeIs(TileTypes.MP_STATION))
+				res = AiNew_Build_Station(p, p.ainew.tbt, p.ainew.from_tile, 0, 0, p.ainew.from_direction, Cmd.DC_EXEC);
 		} else {
-			if (!IsTileType(p.ainew.to_tile, TileTypes.MP_STATION))
-				res = AiNew_Build_Station(p, p.ainew.tbt, p.ainew.to_tile, 0, 0, p.ainew.to_direction, DC_EXEC);
+			if (!p.ainew.to_tile.typeIs(TileTypes.MP_STATION))
+				res = AiNew_Build_Station(p, p.ainew.tbt, p.ainew.to_tile, 0, 0, p.ainew.to_direction, Cmd.DC_EXEC);
 			p.ainew.state = AiState.BUILD_PATH;
 		}
-		if (CmdFailed(res)) {
+		if (Cmd.CmdFailed(res)) {
 			Global.DEBUG_ai(0,"[AiNew - BuildStation] Strange but true... station can not be build!");
 			p.ainew.state = AiState.NOTHING;
 			// If the first station _was_ build, destroy it
 			if (p.ainew.temp != 0)
-				AI_DoCommand(p.ainew.from_tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
+				Ai.AI_DoCommand(p.ainew.from_tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 			return;
 		}
 		p.ainew.temp++;
@@ -1315,14 +1331,14 @@ public class Trolly {
 				int i, ret;
 				for (i=0;i<2;i++) {
 					if (i == 0) {
-						tile = p.ainew.from_tile + TileOffsByDir(p.ainew.from_direction);
+						tile = p.ainew.from_tile.OffsetByDir(p.ainew.from_direction);
 						dir1 = p.ainew.from_direction - 1;
 						if (dir1 < 0) dir1 = 3;
 						dir2 = p.ainew.from_direction + 1;
 						if (dir2 > 3) dir2 = 0;
 						dir3 = p.ainew.from_direction;
 					} else {
-						tile = p.ainew.to_tile + TileOffsByDir(p.ainew.to_direction);
+						tile = p.ainew.to_tile.OffsetByDir(p.ainew.to_direction);
 						dir1 = p.ainew.to_direction - 1;
 						if (dir1 < 0) dir1 = 3;
 						dir2 = p.ainew.to_direction + 1;
@@ -1330,38 +1346,45 @@ public class Trolly {
 						dir3 = p.ainew.to_direction;
 					}
 
-					ret = AI_DoCommand(tile, _roadbits_by_dir[dir1], 0, DC_EXEC | DC_NO_WATER, CMD_BUILD_ROAD);
-					if (!CmdFailed(ret)) {
-						dir1 = TileOffsByDir(dir1);
-						if (IsTileType(tile + dir1, TileTypes.MP_CLEAR) || IsTileType(tile + dir1, TileTypes.MP_TREES)) {
-							ret = AI_DoCommand(tile+dir1, AiNew_GetRoadDirection(tile, tile+dir1, tile+dir1+dir1), 0, DC_EXEC | DC_NO_WATER, CMD_BUILD_ROAD);
-							if (!CmdFailed(ret)) {
-								if (IsTileType(tile + dir1 + dir1, TileTypes.MP_CLEAR) || IsTileType(tile + dir1 + dir1, TileTypes.MP_TREES))
-									AI_DoCommand(tile+dir1+dir1, AiNew_GetRoadDirection(tile+dir1, tile+dir1+dir1, tile+dir1+dir1+dir1), 0, DC_EXEC | DC_NO_WATER, CMD_BUILD_ROAD);
+					ret = Ai.AI_DoCommand(tile, _roadbits_by_dir[dir1], 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
+					if (!Cmd.CmdFailed(ret)) {
+						TileIndex toff = tile.OffsetByDir(dir1);
+						TileIndex toff2 = toff.OffsetByDir(dir1);
+						if (toff.IsTileType(TileTypes.MP_CLEAR) || toff.IsTileType(TileTypes.MP_TREES)) {
+							ret = Ai.AI_DoCommand(toff, AiNew_GetRoadDirection(tile, toff, toff2), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
+							if (!Cmd.CmdFailed(ret)) {
+								if (toff2.IsTileType(TileTypes.MP_CLEAR) || toff2.IsTileType(TileTypes.MP_TREES))
+									Ai.AI_DoCommand(toff2, AiNew_GetRoadDirection(toff, toff2, toff2.OffsetByDir(dir1)), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
 							}
 						}
 					}
 
-					ret = AI_DoCommand(tile, _roadbits_by_dir[dir2], 0, DC_EXEC | DC_NO_WATER, CMD_BUILD_ROAD);
-					if (!CmdFailed(ret)) {
-						dir2 = TileOffsByDir(dir2);
-						if (IsTileType(tile + dir2, TileTypes.MP_CLEAR) || IsTileType(tile + dir2, TileTypes.MP_TREES)) {
-							ret = AI_DoCommand(tile+dir2, AiNew_GetRoadDirection(tile, tile+dir2, tile+dir2+dir2), 0, DC_EXEC | DC_NO_WATER, CMD_BUILD_ROAD);
-							if (!CmdFailed(ret)) {
-								if (IsTileType(tile + dir2 + dir2, TileTypes.MP_CLEAR) || IsTileType(tile + dir2 + dir2, TileTypes.MP_TREES))
-									AI_DoCommand(tile+dir2+dir2, AiNew_GetRoadDirection(tile+dir2, tile+dir2+dir2, tile+dir2+dir2+dir2), 0, DC_EXEC | DC_NO_WATER, CMD_BUILD_ROAD);
+					ret = Ai.AI_DoCommand(tile, _roadbits_by_dir[dir2], 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
+					if (!Cmd.CmdFailed(ret)) {
+						//dir2 = TileOffsByDir(dir2);
+						TileIndex toff = tile.OffsetByDir(dir2);
+						TileIndex toff2 = toff.OffsetByDir(dir2);
+						TileIndex toff3 = toff2.OffsetByDir(dir2);
+						if (toff.IsTileType(TileTypes.MP_CLEAR) || toff.IsTileType(TileTypes.MP_TREES)) {
+							ret = Ai.AI_DoCommand(toff, AiNew_GetRoadDirection(tile, toff, toff2), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
+							if (!Cmd.CmdFailed(ret)) {
+								if(toff2.IsTileType(TileTypes.MP_CLEAR) || toff2.IsTileType(TileTypes.MP_TREES))
+									Ai.AI_DoCommand(toff2, AiNew_GetRoadDirection(toff, toff2, toff3), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
 							}
 						}
 					}
 
-					ret = AI_DoCommand(tile, _roadbits_by_dir[dir3^2], 0, DC_EXEC | DC_NO_WATER, CMD_BUILD_ROAD);
-					if (!CmdFailed(ret)) {
-						dir3 = TileOffsByDir(dir3);
-						if (IsTileType(tile + dir3, TileTypes.MP_CLEAR) || IsTileType(tile + dir3, TileTypes.MP_TREES)) {
-							ret = AI_DoCommand(tile+dir3, AiNew_GetRoadDirection(tile, tile+dir3, tile+dir3+dir3), 0, DC_EXEC | DC_NO_WATER, CMD_BUILD_ROAD);
-							if (!CmdFailed(ret)) {
-								if (IsTileType(tile + dir3 + dir3, TileTypes.MP_CLEAR) || IsTileType(tile + dir3 + dir3, TileTypes.MP_TREES))
-									AI_DoCommand(tile+dir3+dir3, AiNew_GetRoadDirection(tile+dir3, tile+dir3+dir3, tile+dir3+dir3+dir3), 0, DC_EXEC | DC_NO_WATER, CMD_BUILD_ROAD);
+					ret = Ai.AI_DoCommand(tile, _roadbits_by_dir[dir3^2], 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
+					if (!Cmd.CmdFailed(ret)) {
+						//dir3 = TileOffsByDir(dir3);
+						TileIndex toff = tile.OffsetByDir(dir3);
+						TileIndex toff2 = toff.OffsetByDir(dir3);
+						TileIndex toff3 = toff2.OffsetByDir(dir3);
+						if(toff.IsTileType(TileTypes.MP_CLEAR) || toff.IsTileType(TileTypes.MP_TREES)) {
+							ret = Ai.AI_DoCommand(toff, AiNew_GetRoadDirection(tile, toff, toff2), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
+							if (!Cmd.CmdFailed(ret)) {
+								if (toff2.IsTileType(TileTypes.MP_CLEAR) || toff2.IsTileType(TileTypes.MP_TREES))
+									Ai.AI_DoCommand(toff2, AiNew_GetRoadDirection(toff, toff2, toff3), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
 							}
 						}
 					}
@@ -1369,7 +1392,7 @@ public class Trolly {
 			}
 
 
-			DEBUG_ai(1,"[AiNew] Done building the path (cost: %d)", p.ainew.new_cost);
+			Global.DEBUG_ai(1,"[AiNew] Done building the path (cost: %d)", p.ainew.new_cost);
 			p.ainew.state = AiState.BUILD_DEPOT;
 		}
 	}
@@ -1381,8 +1404,8 @@ public class Trolly {
 		int res = 0;
 		assert(p.ainew.state == AiState.BUILD_DEPOT);
 
-		if (p.ainew.depot_tile.IsTileType(TileTypes.MP_STREET) && _m[p.ainew.depot_tile].m5 & 0x20) {
-			if (IsTileOwner(p.ainew.depot_tile, _current_player)) {
+		if (p.ainew.depot_tile.IsTileType(TileTypes.MP_STREET) && 0 != (p.ainew.depot_tile.M().m5 & 0x20)) {
+			if (p.ainew.depot_tile.ownerIs(PlayerID.getCurrent())) {
 				// The depot is already builded!
 				p.ainew.state = AiState.BUILD_VEHICLE;
 				return;
@@ -1394,19 +1417,19 @@ public class Trolly {
 		}
 
 		// There is a bus on the tile we want to build road on... idle till he is gone! (BAD PERSON! :p)
-		if (!EnsureNoVehicle(p.ainew.depot_tile + TileOffsByDir(p.ainew.depot_direction)))
+		if (!p.ainew.depot_tile.OffsetByDir(p.ainew.depot_direction).EnsureNoVehicle())
 			return;
 
-		res = AiNew_Build_Depot(p, p.ainew.depot_tile, p.ainew.depot_direction, DC_EXEC);
-		if (CmdFailed(res)) {
-			DEBUG_ai(0,"[AiNew - BuildDepot] Strange but true... depot can not be build!");
+		res = AiNew_Build_Depot(p, p.ainew.depot_tile, p.ainew.depot_direction, Cmd.DC_EXEC);
+		if (Cmd.CmdFailed(res)) {
+			Global.DEBUG_ai(0,"[AiNew - BuildDepot] Strange but true... depot can not be build!");
 			p.ainew.state = AiState.NOTHING;
 			return;
 		}
 
 		p.ainew.state = AiState.BUILD_VEHICLE;
 		p.ainew.idle = 10;
-		p.ainew.veh_main_id = (VehicleID)-1;
+		p.ainew.veh_main_id = VehicleID.getInvalid();
 	}
 
 
@@ -1431,7 +1454,7 @@ public class Trolly {
 
 		// Build the vehicle
 		res = AiNew_Build_Vehicle(p, p.ainew.depot_tile, Cmd.DC_EXEC);
-		if (CmdFailed(res)) {
+		if (Cmd.CmdFailed(res)) {
 			// This happens when the AI can't build any more vehicles!
 			p.ainew.state = AiState.NOTHING;
 			return;
@@ -1449,7 +1472,7 @@ public class Trolly {
 	static void AiNew_State_GiveOrders(Player p)
 	{
 		int idx;
-		Order order;
+		//Order order;
 
 		assert(p.ainew.state == AiState.GIVE_ORDERS);
 
@@ -1465,8 +1488,8 @@ public class Trolly {
 			p.ainew.veh_id = _new_roadveh_id;
 		}
 
-		if (p.ainew.veh_main_id != (VehicleID)-1) {
-			AI_DoCommand(0, p.ainew.veh_id + (p.ainew.veh_main_id << 16), 0, DC_EXEC, CMD_CLONE_ORDER);
+		if (!p.ainew.veh_main_id.equals(VehicleID.getInvalid())) {
+			Ai.AI_DoCommand(0, p.ainew.veh_id + (p.ainew.veh_main_id << 16), 0, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
 
 			p.ainew.state = AiState.START_VEHICLE;
 			return;
@@ -1477,28 +1500,39 @@ public class Trolly {
 		// Very handy for AI, goto depot.. but yeah, it needs to be activated ;)
 		if (Global._patches.gotodepot) {
 			idx = 0;
-			order.type = OT_GOTO_DEPOT;
-			order.flags = OF_UNLOAD;
-			order.station = GetDepotByTile(p.ainew.depot_tile).index;
-			AI_DoCommand(0, p.ainew.veh_id + (idx << 16), PackOrder(order), DC_EXEC, CMD_INSERT_ORDER);
+			//order.type = OT_GOTO_DEPOT;
+			//order.flags = OF_UNLOAD;
+			//order.station = GetDepotByTile(p.ainew.depot_tile).index;
+			Order order = new Order( Order.OT_GOTO_DEPOT, Order.OF_UNLOAD, Depot.GetDepotByTile(p.ainew.depot_tile).getIndex() );
+			Ai.AI_DoCommand(0, p.ainew.veh_id.id + (idx << 16), Order.PackOrder(order), Cmd.DC_EXEC, Cmd.CMD_INSERT_ORDER);
 		}
 
+		{
 		idx = 0;
-		order.type = OT_GOTO_STATION;
-		order.flags = 0;
-		order.station = _m[p.ainew.to_tile].m2;
+		//order.type = OT_GOTO_STATION;
+		//order.flags = 0;
+		//order.station = _m[p.ainew.to_tile].m2;
+		int flags = 0;
 		if (p.ainew.tbt == AI_TRUCK && p.ainew.to_deliver)
-			order.flags |= OF_FULL_LOAD;
-		AI_DoCommand(0, p.ainew.veh_id + (idx << 16), PackOrder(order), DC_EXEC, CMD_INSERT_ORDER);
-
+			flags |= Order.OF_FULL_LOAD;
+			//order.flags |= OF_FULL_LOAD;
+		Order order = new Order( Order.OT_GOTO_STATION, flags, p.ainew.to_tile.M().m2 ); 
+		Ai.AI_DoCommand(0, p.ainew.veh_id.id + (idx << 16), Order.PackOrder(order), Cmd.DC_EXEC, Cmd.CMD_INSERT_ORDER);
+		}
+		
+		{
 		idx = 0;
-		order.type = OT_GOTO_STATION;
-		order.flags = 0;
-		order.station = _m[p.ainew.from_tile].m2;
+		//order.type = OT_GOTO_STATION;
+		//order.flags = 0;
+		//order.station = _m[p.ainew.from_tile].m2;
+		int flags = 0;
 		if (p.ainew.tbt == AI_TRUCK && p.ainew.from_deliver)
-			order.flags |= OF_FULL_LOAD;
-		AI_DoCommand(0, p.ainew.veh_id + (idx << 16), PackOrder(order), DC_EXEC, CMD_INSERT_ORDER);
-
+			flags |= Order.OF_FULL_LOAD;
+			//order.flags |= OF_FULL_LOAD;
+		Order order = new Order( Order.OT_GOTO_STATION, flags, p.ainew.from_tile.M().m2 ); 
+		Ai.AI_DoCommand(0, p.ainew.veh_id.id + (idx << 16), Order.PackOrder(order), Cmd.DC_EXEC, Cmd.CMD_INSERT_ORDER);
+		}
+		
 		// Start the engines!
 		p.ainew.state = AiState.START_VEHICLE;
 	}
@@ -1556,7 +1590,7 @@ public class Trolly {
 					if (v.type == Vehicle.VEH_Road && IsTileDepotType(v.tile, TRANSPORT_ROAD) &&
 							(v.vehstatus&VS_STOPPED)) {
 						// We are at the depot, sell the vehicle
-						AI_DoCommand(0, v.index, 0, DC_EXEC, CMD_SELL_ROAD_VEH);
+						Ai.AI_DoCommand(0, v.index, 0, Cmd.DC_EXEC, Cmd.CMD_SELL_ROAD_VEH);
 					}
 					return;
 				}
@@ -1564,8 +1598,8 @@ public class Trolly {
 				if (!AiNew_SetSpecialVehicleFlag(p, v, AI_VEHICLEFLAG_SELL)) return;
 				{
 					int ret = 0;
-					if (v.type == Vehicle.VEH_Road)
-						ret = AI_DoCommand(0, v.index, 0, DC_EXEC, CMD_SEND_ROADVEH_TO_DEPOT);
+					if (v.getType() == Vehicle.VEH_Road)
+						ret = Ai.AI_DoCommand(0, v.index, 0, Cmd.DC_EXEC, Cmd.CMD_SEND_ROADVEH_TO_DEPOT);
 					// This means we can not find a depot :s
 					//				if (CmdFailed(ret))
 				}
@@ -1650,6 +1684,274 @@ public class Trolly {
 	
 	
 	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	// Build HQ
+//  Params:
+//    tile : tile where HQ is going to be build
+static boolean AiNew_Build_CompanyHQ(Player p, TileIndex tile)
+{
+	if (Cmd.CmdFailed(Ai.AI_DoCommand(tile, 0, 0, Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_COMPANY_HQ)))
+		return false;
+	Ai.AI_DoCommand(tile, 0, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_COMPANY_HQ);
+	return true;
+}
+
+
+// Build station
+//  Params:
+//    type : AI_TRAIN/AI_BUS/AI_TRUCK : indicates the type of station
+//    tile : tile where station is going to be build
+//    length : in case of AI_TRAIN: length of station
+//    numtracks : in case of AI_TRAIN: tracks of station
+//    direction : the direction of the station
+//    flag : flag passed to DoCommand (normally 0 to get the cost or DC_EXEC to build it)
+static int AiNew_Build_Station(Player p, int type, TileIndex tile, int length, int numtracks, int direction, int flag)
+{
+	if (type == AI_TRAIN)
+		return Ai.AI_DoCommand(tile.getTile(), direction + (numtracks << 8) + (length << 16), 0, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_RAILROAD_STATION);
+
+	if (type == AI_BUS)
+		return Ai.AI_DoCommand(tile.getTile(), direction, RoadStopType.RS_BUS.ordinal(), flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_STOP);
+
+	return Ai.AI_DoCommand(tile.getTile(), direction, RoadStopType.RS_TRUCK.ordinal(), flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_STOP);
+}
+
+
+// Builds a brdige. The second best out of the ones available for this player
+//  Params:
+//   tile_a : starting point
+//   tile_b : end point
+//   flag : flag passed to DoCommand
+static int AiNew_Build_Bridge(Player p, TileIndex tile_a, TileIndex tile_b, byte flag)
+{
+	int bridge_type, bridge_len, type, type2;
+
+	// Find a good bridgetype (the best money can buy)
+	bridge_len = TunnelBridgeCmd.GetBridgeLength(tile_a, tile_b);
+	type = type2 = 0;
+	for (bridge_type = MAX_BRIDGES-1; bridge_type >= 0; bridge_type--) {
+		if (CheckBridge_Stuff(bridge_type, bridge_len)) {
+			type2 = type;
+			type = bridge_type;
+			// We found two bridges, exit
+			if (type2 != 0) break;
+		}
+	}
+	// There is only one bridge that can be build..
+	if (type2 == 0 && type != 0) type2 = type;
+
+	// Now, simply, build the bridge!
+	if (p.ainew.tbt == AI_TRAIN)
+		return Ai.AI_DoCommand(tile_a.getTile(), tile_b.getTile(), (0<<8) + type2, flag | Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
+
+	return Ai.AI_DoCommand(tile_a.getTile(), tile_b.getTile(), (0x80 << 8) + type2, flag | Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
+}
+
+
+// Build the route part by part
+// Basicly what this function do, is build that amount of parts of the route
+//  that go in the same direction. It sets 'part' to the last part of the route builded.
+//  The return value is the cost for the builded parts
+//
+//  Params:
+//   PathFinderInfo : Pointer to the PathFinderInfo used for AiPathFinder
+//   part : Which part we need to build
+//
+// TODO: skip already builded road-pieces (e.g.: cityroad)
+static int AiNew_Build_RoutePart(Player p, Ai_PathFinderInfo PathFinderInfo, int flag)
+{
+	int part = PathFinderInfo.position;
+	byte [] route_extra = PathFinderInfo.route_extra;
+	//TileIndex *route = PathFinderInfo.route;
+	int dir;
+	int old_dir = -1;
+	int cost = 0;
+	int res;
+	// We need to calculate the direction with the parent of the parent.. so we skip
+	//  the first pieces and the last piece
+	if (part < 1) part = 1;
+	// When we are done, stop it
+	if (part >= PathFinderInfo.route_length - 1) { PathFinderInfo.position = -2; return 0; }
+
+
+	if (PathFinderInfo.rail_or_road) {
+		// Tunnel code
+		if ((AI_PATHFINDER_FLAG_TUNNEL & route_extra[part]) != 0) {
+			cost += Ai.AI_DoCommand(route[part], 0, 0, flag, Cmd.CMD_BUILD_TUNNEL);
+			PathFinderInfo.position++;
+			// TODO: problems!
+			if (Cmd.CmdFailed(cost)) {
+				Global.DEBUG_ai(0, "[AiNew - BuildPath] We have a serious problem: tunnel could not be build!");
+				return 0;
+			}
+			return cost;
+		}
+		// Bridge code
+		if ((AI_PATHFINDER_FLAG_BRIDGE & route_extra[part]) != 0) {
+			cost += AiNew_Build_Bridge(p, route[part], route[part-1], flag);
+			PathFinderInfo.position++;
+			// TODO: problems!
+			if (Cmd.CmdFailed(cost)) {
+				Global.DEBUG_ai(0, "[AiNew - BuildPath] We have a serious problem: bridge could not be build!");
+				return 0;
+			}
+			return cost;
+		}
+
+		// Build normal rail
+		// Keep it doing till we go an other way
+		if (route_extra[part-1] == 0 && route_extra[part] == 0) {
+			while (route_extra[part] == 0) {
+				// Get the current direction
+				dir = AiNew_GetRailDirection(route[part-1], route[part], route[part+1]);
+				// Is it the same as the last one?
+				if (old_dir != -1 && old_dir != dir) break;
+				old_dir = dir;
+				// Build the tile
+				res = Ai.AI_DoCommand(route[part], 0, dir, flag, Cmd.CMD_BUILD_SINGLE_RAIL);
+				if (Cmd.CmdFailed(res)) {
+					// Problem.. let's just abort it all!
+					p.ainew.state = AI_STATE_NOTHING;
+					return 0;
+				}
+				cost += res;
+				// Go to the next tile
+				part++;
+				// Check if it is still in range..
+				if (part >= PathFinderInfo.route_length - 1) break;
+			}
+			part--;
+		}
+		// We want to return the last position, so we go back one
+		PathFinderInfo.position = part;
+	} else {
+		// Tunnel code
+		if ((AI_PATHFINDER_FLAG_TUNNEL & route_extra[part]) != 0) {
+			cost += Ai.AI_DoCommand(route[part], 0x200, 0, flag, Cmd.CMD_BUILD_TUNNEL);
+			PathFinderInfo.position++;
+			// TODO: problems!
+			if (Cmd.CmdFailed(cost)) {
+				Global.DEBUG_ai(0, "[AiNew - BuildPath] We have a serious problem: tunnel could not be build!");
+				return 0;
+			}
+			return cost;
+		}
+		// Bridge code
+		if ((AI_PATHFINDER_FLAG_BRIDGE & route_extra[part]) != 0) {
+			cost += AiNew_Build_Bridge(p, route[part], route[part+1], flag);
+			PathFinderInfo.position++;
+			// TODO: problems!
+			if (Cmd.CmdFailed(cost)) {
+				Global.DEBUG_ai(0, "[AiNew - BuildPath] We have a serious problem: bridge could not be build!");
+				return 0;
+			}
+			return cost;
+		}
+
+		// Build normal road
+		// Keep it doing till we go an other way
+		// EnsureNoVehicle makes sure we don't build on a tile where a vehicle is. This way
+		//  it will wait till the vehicle is gone..
+		if (route_extra[part-1] == 0 && route_extra[part] == 0 && (flag != Cmd.DC_EXEC || EnsureNoVehicle(route[part]))) {
+			while (route_extra[part] == 0 && (flag != Cmd.DC_EXEC || EnsureNoVehicle(route[part]))) {
+				// Get the current direction
+				dir = AiNew_GetRoadDirection(route[part-1], route[part], route[part+1]);
+				// Is it the same as the last one?
+				if (old_dir != -1 && old_dir != dir) break;
+				old_dir = dir;
+				// There is already some road, and it is a bridge.. don't build!!!
+				if (!IsTileType(route[part], MP_TUNNELBRIDGE)) {
+					// Build the tile
+					res = AI_DoCommand(route[part], dir, 0, flag | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
+					// Currently, we ignore CMD_ERRORs!
+					if (Cmd.CmdFailed(res) && flag == Cmd.DC_EXEC && !IsTileType(route[part], MP_STREET) && !EnsureNoVehicle(route[part])) {
+						// Problem.. let's just abort it all!
+						Global.DEBUG_ai(0, "Darn, the route could not be builded.. aborting!");
+						p.ainew.state = AI_STATE_NOTHING;
+						return 0;
+					}
+
+					if (!Cmd.CmdFailed(res)) cost += res;
+				}
+				// Go to the next tile
+				part++;
+				// Check if it is still in range..
+				if (part >= PathFinderInfo.route_length - 1) break;
+			}
+			part--;
+			// We want to return the last position, so we go back one
+		}
+		if (!EnsureNoVehicle(route[part]) && flag == Cmd.DC_EXEC) part--;
+		PathFinderInfo.position = part;
+	}
+
+	return cost;
+}
+
+
+// This functions tries to find the best vehicle for this type of cargo
+// It returns vehicle_id or -1 if not found
+static int AiNew_PickVehicle(Player p)
+{
+	if (p.ainew.tbt == AI_TRAIN) {
+		// Not supported yet
+		return -1;
+	} else {
+		int start, count, i, ret = Cmd.CMD_ERROR;
+		start = _cargoc.ai_roadveh_start[p.ainew.cargo];
+		count = _cargoc.ai_roadveh_count[p.ainew.cargo];
+
+		// Let's check it backwards.. we simply want to best engine available..
+		for (i = start + count - 1; i >= start; i--) {
+			// Is it availiable?
+			// Also, check if the reliability of the vehicle is above the AI_VEHICLE_MIN_RELIABILTY
+			if (!BitOps.HASBIT(Engine.GetEngine(i).player_avail, _current_player) || Engine.GetEngine(i).getReliability() * 100 < AI_VEHICLE_MIN_RELIABILTY << 16) continue;
+			// Can we build it?
+			ret = Ai.AI_DoCommand(0, i, 0, Cmd.DC_QUERY_COST, Cmd.CMD_BUILD_ROAD_VEH);
+			if (!Cmd.CmdFailed(ret)) break;
+		}
+		// We did not find a vehicle :(
+		if (Cmd.CmdFailed(ret)) return -1;
+		return i;
+	}
+}
+
+
+// Builds the best vehicle possible
+static int AiNew_Build_Vehicle(Player p, TileIndex tile, int flag)
+{
+	int i = AiNew_PickVehicle(p);
+	if (i == -1) return Cmd.CMD_ERROR;
+
+	if (p.ainew.tbt == AI_TRAIN) return Cmd.CMD_ERROR;
+
+	return Ai.AI_DoCommand(tile, i, 0, flag, Cmd.CMD_BUILD_ROAD_VEH);
+}
+
+//private static final byte _roadbits_by_dir[] = {2,1,8,4};
+
+static int AiNew_Build_Depot(Player p, TileIndex tile, int direction, int flag)
+{
+	int ret, ret2;
+	if (p.ainew.tbt == AI_TRAIN)
+		return Ai.AI_DoCommand(tile.getTile(), 0, direction, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_TRAIN_DEPOT);
+
+	ret = Ai.AI_DoCommand(tile.getTile(), direction, 0, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_DEPOT);
+	if (Cmd.CmdFailed(ret)) return ret;
+	// Try to build the road from the depot
+	ret2 = Ai.AI_DoCommand(tile.OffsetByDir(direction), _roadbits_by_dir[direction], 0, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
+	// If it fails, ignore it..
+	if (Cmd.CmdFailed(ret2)) return ret;
+	return ret + ret2;
+}
 	
 	
 	

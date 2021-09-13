@@ -52,32 +52,22 @@ public class Ai {
 		//
 	}
 
-	/*
-	public static void AI_Initialize() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public static void AI_Uninitialize() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	//public static void AI_StartNewAI(PlayerID index) {
-	public static void AI_StartNewAI(int index) {
-		// TODO Auto-generated method stub
-		Global.error("Ai?");
-	}
-
-	public static void AI_PlayerDied(PlayerID owner) {
-		// TODO Auto-generated method stub
-		Global.error("Ai?");
-		
-	}
-	*/
 	//#define AI_CHANCE16(a,b)    ((uint16)     AI_Random()  <= (uint16)((65536 * a) / b))
 	//#define AI_CHANCE16R(a,b,r) ((uint16)(r = AI_Random()) <= (uint16)((65536 * a) / b))
 
+	public static boolean AI_CHANCE16(int a, int b)
+	{		
+		return AI_Random() <= (0xFFFF & ((65536 * a) / b));
+	}
+	
+	//#define AI_CHANCE16R(a,b,r) ((uint16)(r = AI_Random()) <= (uint16)((65536 * a) / b))
+	
+	public static boolean AI_CHANCE16R(int a, int b, int [] r)
+	{
+		r[0] = AI_Random();
+		return r[0] <= (0xFFFF & ((65536 * a) / b));
+	}
+	
 	/**
 	 * The random-function that should be used by ALL AIs.
 	 */
@@ -178,6 +168,14 @@ public class Ai {
 		}
 	}
 
+	
+	/**
+	 * Executes a raw DoCommand for the AI.
+	 */
+	static int AI_DoCommand(TileIndex tile, int p1, int p2, int flags, int procc)
+	{
+		return AI_DoCommand(tile.getTile(), p1, p2, flags, procc);
+	}	
 	/**
 	 * Executes a raw DoCommand for the AI.
 	 */

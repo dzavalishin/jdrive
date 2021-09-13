@@ -141,7 +141,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		return Cmd.CMD_ERROR;
 	}
 
-	static int GetBridgeLength(TileIndex begin, TileIndex end)
+	public static int GetBridgeLength(TileIndex begin, TileIndex end)
 	{
 		int x1 = begin.TileX();
 		int y1 = begin.TileY();
