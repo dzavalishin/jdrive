@@ -1,9 +1,12 @@
 package game.ai;
 
+import game.Bridge;
 import game.Cmd;
 import game.Global;
 import game.Landscape;
 import game.Map;
+import game.Rail;
+import game.Road;
 import game.TileIndex;
 import game.TileInfo;
 import game.TunnelBridgeCmd;
@@ -34,7 +37,7 @@ public class AIAyStar extends AyStar implements AiConst
 		// Check if we hit the end-tile
 		if (TileIndex.TILES_BETWEEN(current.tile, PathFinderInfo.end_tile_tl, PathFinderInfo.end_tile_br)) {
 			// We are at the end-tile, check if we had a direction or something...
-			if (PathFinderInfo.end_direction != AI_PATHFINDER_NO_DIRECTION && AiNew_GetDirection(current.tile, parent.path.node.tile) != PathFinderInfo.end_direction) {
+			if (PathFinderInfo.end_direction != AI_PATHFINDER_NO_DIRECTION && AiTools.AiNew_GetDirection(current.tile, parent.path.node.tile) != PathFinderInfo.end_direction) {
 				// We are not pointing the right way, invalid tile
 				return AYSTAR_INVALID_NODE;
 			}
@@ -63,16 +66,16 @@ public class AIAyStar extends AyStar implements AiConst
 			// Skip if the tile was from a bridge or tunnel
 			if (parent.path.node.user_data[0] == 0 && current.user_data[0] == 0) {
 				if (PathFinderInfo.rail_or_road) {
-					r = GetRailFoundation(parent_ti.tileh, 1 << AiNew_GetRailDirection(parent.path.parent.node.tile, parent.path.node.tile, current.tile));
+					r = Rail.GetRailFoundation(parent_ti.tileh, 1 << AiTools.AiNew_GetRailDirection(parent.path.parent.node.tile, parent.path.node.tile, current.tile));
 					// Maybe is BRIDGE_NO_FOUNDATION a bit strange here, but it contains just the right information..
-					if (r >= 15 || (r == 0 && (BRIDGE_NO_FOUNDATION & (1 << ti.tileh)))) {
+					if (r >= 15 || (r == 0 && 0 != (BRIDGE_NO_FOUNDATION & (1 << ti.tileh)))) {
 						res += AI_PATHFINDER_TILE_GOES_UP_PENALTY;
 					} else {
 						res += AI_PATHFINDER_FOUNDATION_PENALTY;
 					}
 				} else {
-					if (!(parent.path.node.tile.isRoad() && IsTileType(parent.path.node.tile, MP_TUNNELBRIDGE))) {
-						r = GetRoadFoundation(parent_ti.tileh, AiNew_GetRoadDirection(parent.path.parent.node.tile, parent.path.node.tile, current.tile));
+					if (!(parent.path.node.tile.isRoad() && parent.path.node.tile.typeIs(TileTypes.MP_TUNNELBRIDGE))) {
+						r = Road.GetRoadFoundation(parent_ti.tileh, AiTools.AiNew_GetRoadDirection(parent.path.parent.node.tile, parent.path.node.tile, current.tile));
 						if (r >= 15 || r == 0)
 							res += AI_PATHFINDER_TILE_GOES_UP_PENALTY;
 						else
@@ -96,12 +99,12 @@ public class AIAyStar extends AyStar implements AiConst
 			res += AI_PATHFINDER_BRIDGE_PENALTY * TunnelBridgeCmd.GetBridgeLength(current.tile, parent.path.node.tile);
 			// Check if we are going up or down, first for the starting point
 			// In user_data[0] is at the 8th bit the direction
-			if (!(BRIDGE_NO_FOUNDATION & (1 << parent_ti.tileh))) {
+			if (0==(BRIDGE_NO_FOUNDATION & (1 << parent_ti.tileh))) {
 				if (TunnelBridgeCmd.GetBridgeFoundation(parent_ti.tileh, (current.user_data[0] >> 8) & 1) < 15)
 					res += AI_PATHFINDER_BRIDGE_GOES_UP_PENALTY;
 			}
 			// Second for the end point
-			if (!(BRIDGE_NO_FOUNDATION & (1 << ti.tileh))) {
+			if (0==(BRIDGE_NO_FOUNDATION & (1 << ti.tileh))) {
 				if (TunnelBridgeCmd.GetBridgeFoundation(ti.tileh, (current.user_data[0] >> 8) & 1) < 15)
 					res += AI_PATHFINDER_BRIDGE_GOES_UP_PENALTY;
 			}
@@ -114,7 +117,7 @@ public class AIAyStar extends AyStar implements AiConst
 		//  This way, we get almost the fastest way in tiles, and a very good speed on the track
 		if (!PathFinderInfo.rail_or_road) {
 			if (parent.path.parent != null &&
-					AiNew_GetDirection(current.tile, parent.path.node.tile) != AiNew_GetDirection(parent.path.node.tile, parent.path.parent.node.tile)) {
+					AiTools.AiNew_GetDirection(current.tile, parent.path.node.tile) != AiTools.AiNew_GetDirection(parent.path.node.tile, parent.path.parent.node.tile)) {
 				// When road exists, we don't like turning, but its free, so don't be to piggy about it
 				if (parent.path.node.tile.isRoad())
 					res += AI_PATHFINDER_DIRECTION_CHANGE_ON_EXISTING_ROAD_PENALTY;
@@ -125,8 +128,8 @@ public class AIAyStar extends AyStar implements AiConst
 			// For rail we have 1 exeption: diagonal rail..
 			// So we fetch 2 raildirection. That of the current one, and of the one before that
 			if (parent.path.parent != null && parent.path.parent.parent != null) {
-				int dir1 = AiNew_GetRailDirection(parent.path.parent.node.tile, parent.path.node.tile, current.tile);
-				int dir2 = AiNew_GetRailDirection(parent.path.parent.parent.node.tile, parent.path.parent.node.tile, parent.path.node.tile);
+				int dir1 = AiTools.AiNew_GetRailDirection(parent.path.parent.node.tile, parent.path.node.tile, current.tile);
+				int dir2 = AiTools.AiNew_GetRailDirection(parent.path.parent.parent.node.tile, parent.path.parent.node.tile, parent.path.node.tile);
 				// First, see if we are on diagonal path, that is better than straight path
 				if (dir1 > 1) { res -= AI_PATHFINDER_DIAGONAL_BONUS; }
 
@@ -138,7 +141,7 @@ public class AIAyStar extends AyStar implements AiConst
 						res += AI_PATHFINDER_DIRECTION_CHANGE_PENALTY;
 					}
 					if (parent.path.parent.parent.parent != null) {
-						int dir3 = AiNew_GetRailDirection(parent.path.parent.parent.parent.node.tile, parent.path.parent.parent.node.tile, parent.path.parent.node.tile);
+						int dir3 = AiTools.AiNew_GetRailDirection(parent.path.parent.parent.parent.node.tile, parent.path.parent.parent.node.tile, parent.path.parent.node.tile);
 						// Check if we changed 3 tiles of direction in 3 tiles.. bad!!!
 						if ((dir1 == 0 || dir1 == 1) && dir2 > 1 && (dir3 == 0 || dir3 == 1)) {
 							res += AI_PATHFINDER_CURVE_PENALTY;
@@ -163,8 +166,8 @@ public class AIAyStar extends AyStar implements AiConst
 		int r, r2;
 		if (PathFinderInfo.end_direction != AI_PATHFINDER_NO_DIRECTION) {
 			// The station is pointing to a direction, add a tile towards that direction, so the H-value is more accurate
-			r = Map.DistanceManhattan(current.tile, PathFinderInfo.end_tile_tl + TileOffsByDir(PathFinderInfo.end_direction));
-			r2 = Map.DistanceManhattan(current.tile, PathFinderInfo.end_tile_br + TileOffsByDir(PathFinderInfo.end_direction));
+			r = Map.DistanceManhattan(current.tile, PathFinderInfo.end_tile_tl.OffsetByDir(PathFinderInfo.end_direction));
+			r2 = Map.DistanceManhattan(current.tile, PathFinderInfo.end_tile_br.OffsetByDir(PathFinderInfo.end_direction));
 		} else {
 			// No direction, so just get the fastest route to the station
 			r = Map.DistanceManhattan(current.tile, PathFinderInfo.end_tile_tl);
@@ -182,7 +185,7 @@ public class AIAyStar extends AyStar implements AiConst
 	{
 		int i;
 		int ret;
-		int dir;
+		//int dir;
 
 		Ai_PathFinderInfo PathFinderInfo = (Ai_PathFinderInfo)user_target;
 
@@ -199,14 +202,14 @@ public class AIAyStar extends AyStar implements AiConst
 				//  We do this simply by just building the tile!
 
 				// If the next step is a bridge, we have to enter it the right way
-				if (!PathFinderInfo.rail_or_road && IsRoad(atile)) {
+				if (!PathFinderInfo.rail_or_road && atile.isRoad()) {
 					if (atile.IsTileType(TileTypes.MP_TUNNELBRIDGE)) {
 						// An existing bridge... let's test the direction ;)
-						if ((_m[atile].m5 & 1U) != (i & 1)) continue;
+						if ((atile.M().m5 & 1) != (i & 1)) continue;
 						// This problem only is valid for tunnels:
 						// When the last tile was not yet a tunnel, check if we enter from the right side..
-						if ((_m[atile].m5 & 0x80) == 0) {
-							if (i != (_m[atile].m5 & 3U)) continue;
+						if ((atile.M().m5 & 0x80) == 0) {
+							if (i != (atile.M().m5 & 3)) continue;
 						}
 					}
 				}
@@ -214,7 +217,7 @@ public class AIAyStar extends AyStar implements AiConst
 				if (!PathFinderInfo.rail_or_road && ctile.isRoad()) {
 					if (ctile.IsTileType(TileTypes.MP_TUNNELBRIDGE)) {
 						// An existing bridge/tunnel... let's test the direction ;)
-						if ((_m[ctile].m5 & 1U) != (i & 1)) continue;
+						if ((ctile.M().m5 & 1) != (i & 1)) continue;
 					}
 				}
 
@@ -224,14 +227,14 @@ public class AIAyStar extends AyStar implements AiConst
 					//  This means we can only point forward.. get the direction from the user_data
 					if (i != (current.path.node.user_data[0] >> 8)) continue;
 				}
-				dir = 0;
+				int dir = 0;
 
 				// First, check if we have a parent
 				if (current.path.parent == null && current.path.node.user_data[0] == 0) {
 					// If not, this means we are at the starting station
 					if (PathFinderInfo.start_direction != AI_PATHFINDER_NO_DIRECTION) {
 						// We do need a direction?
-						if (AiNew_GetDirection(ctile, atile) != PathFinderInfo.start_direction) {
+						if (AiTools.AiNew_GetDirection(ctile, atile) != PathFinderInfo.start_direction) {
 							// We are not pointing the right way, invalid tile
 							continue;
 						}
@@ -239,7 +242,7 @@ public class AIAyStar extends AyStar implements AiConst
 				} else if (current.path.node.user_data[0] == 0) {
 					if (PathFinderInfo.rail_or_road) {
 						// Rail check
-						dir = AiNew_GetRailDirection(current.path.parent.node.tile, ctile, atile);
+						dir = AiTools.AiNew_GetRailDirection(current.path.parent.node.tile, ctile, atile);
 						ret = Ai.AI_DoCommand(ctile, 0, dir, Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_SINGLE_RAIL);
 						if (Cmd.CmdFailed(ret)) continue;
 						/*#ifdef AI_PATHFINDER_NO_90DEGREES_TURN
@@ -253,16 +256,16 @@ public class AIAyStar extends AyStar implements AiConst
 						#endif */
 					} else {
 						// Road check
-						dir = AiNew_GetRoadDirection(current.path.parent.node.tile, ctile, atile);
+						dir = AiTools.AiNew_GetRoadDirection(current.path.parent.node.tile, ctile, atile);
 						if (ctile.isRoad()) {
 							if (ctile.IsTileType(TileTypes.MP_TUNNELBRIDGE)) {
 								// We have a bridge, how nicely! We should mark it...
 								dir = 0;
 							} else {
 								// It already has road.. check if we miss any bits!
-								if ((_m[ctile].m5 & dir) != dir) {
+								if ((ctile.M().m5 & dir) != dir) {
 									// We do miss some pieces :(
-									dir &= ~_m[ctile].m5;
+									dir &= ~ctile.M().m5;
 								} else {
 									dir = 0;
 								}
@@ -285,9 +288,9 @@ public class AIAyStar extends AyStar implements AiConst
 
 		// Next step, check for bridges and tunnels
 		if (current.path.parent != null && current.path.node.user_data[0] == 0) {
-			TileInfo ti;
+			TileInfo ti = new TileInfo();
 			// First we get the dir from this tile and his parent
-			int dir = AiNew_GetDirection(current.path.parent.node.tile, current.path.node.tile);
+			int dir = AiTools.AiNew_GetDirection(current.path.parent.node.tile, current.path.node.tile);
 			// It means we can only walk with the track, so the bridge has to be in the same direction
 			TileIndex tile = current.path.node.tile;
 			TileIndex new_tile = tile;
@@ -309,7 +312,7 @@ public class AIAyStar extends AyStar implements AiConst
 					if (TileIndex.TILES_BETWEEN(new_tile, PathFinderInfo.end_tile_tl, PathFinderInfo.end_tile_br)) break;
 
 					// Try building the bridge..
-					ret = AI_DoCommand(tile, new_tile, (0 << 8) + (MAX_BRIDGES / 2), Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
+					ret = Ai.AI_DoCommand(tile, new_tile.getTile(), (0 << 8) + (Bridge.MAX_BRIDGES / 2), Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
 					if (Cmd.CmdFailed(ret)) continue;
 					// We can build a bridge here.. add him to the neighbours
 					neighbours[num_neighbours].tile = new_tile;
@@ -353,7 +356,7 @@ public class AIAyStar extends AyStar implements AiConst
 		if (current.path.node.user_data[0] != 0) return AyStar.AYSTAR_DONE;
 		if (TileIndex.TILES_BETWEEN(current.path.node.tile, PathFinderInfo.end_tile_tl, PathFinderInfo.end_tile_br))
 			if (current.path.node.tile.typeIs(TileTypes.MP_CLEAR) || current.path.node.tile.typeIs(TileTypes.MP_TREES))
-				if (current.path.parent == null || TestCanBuildStationHere(current.path.node.tile, AiNew_GetDirection(current.path.parent.node.tile, current.path.node.tile)))
+				if (current.path.parent == null || AiTools.TestCanBuildStationHere(current.path.node.tile, AiTools.AiNew_GetDirection(current.path.parent.node.tile, current.path.node.tile)))
 					return AyStar.AYSTAR_FOUND_END_NODE;
 
 		return AyStar.AYSTAR_DONE;

@@ -781,7 +781,7 @@ public class Road extends RoadTables
 
 
 
-	static int GetRoadFoundation(int tileh, int bits)
+	public static int GetRoadFoundation(int tileh, int bits)
 	{
 		// normal level sloped building
 		if ((~_valid_tileh_slopes_road[1][tileh] & bits) == 0)

@@ -261,7 +261,7 @@ public class Ai {
 	 * The gameloop for AIs.
 	 *  Handles one tick for all the AIs.
 	 */
-	void AI_RunGameLoop()
+	public static void AI_RunGameLoop()
 	{
 		/* Don't do anything if ai is disabled */
 		if (!_ai.enabled) return;
@@ -322,7 +322,7 @@ public class Ai {
 	/**
 	 * This AI player died. Give it some chance to make a final puf.
 	 */
-	void AI_PlayerDied(PlayerID player)
+	public static void AI_PlayerDied(PlayerID player)
 	{
 		if (_ai.network_client && _ai.network_playas == player.id)
 			_ai.network_playas = Owner.OWNER_SPECTATOR;
@@ -334,7 +334,7 @@ public class Ai {
 	/**
 	 * Initialize some AI-related stuff.
 	 */
-	void AI_Initialize()
+	public static void AI_Initialize()
 	{
 		boolean ai_network_client = _ai.network_client;
 
@@ -354,7 +354,7 @@ public class Ai {
 	/**
 	 * Deinitializer for AI-related stuff.
 	 */
-	void AI_Uninitialize()
+	public static void AI_Uninitialize()
 	{
 		Player.forEach( p -> { if (p.isActive() && p.isAi()) AI_PlayerDied(p.getIndex()); });
 	}

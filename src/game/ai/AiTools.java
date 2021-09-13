@@ -6,18 +6,14 @@ import game.Engine;
 import game.Global;
 import game.Player;
 import game.TileIndex;
-import game.TileInfo;
 import game.TunnelBridgeCmd;
 import game.Vehicle;
 import game.aystar.AyStar;
-import game.aystar.AyStarNode;
 import game.enums.RoadStopType;
 import game.enums.TileTypes;
-import game.enums.TransportType;
+import game.ids.PlayerID;
 import game.ids.VehicleID;
-import game.struct.OpenListNode;
 import game.struct.PathNode;
-import game.util.BitOps;
 
 public class AiTools implements AiConst 
 {
@@ -26,7 +22,7 @@ public class AiTools implements AiConst
 
 	// Tests if a station can be build on the given spot
 	// TODO: make it train compatible
-	static boolean TestCanBuildStationHere(TileIndex tile, byte dir)
+	static boolean TestCanBuildStationHere(TileIndex tile, int dir)
 	{
 		Player p = Player.GetCurrentPlayer();
 
@@ -145,9 +141,6 @@ public class AiTools implements AiConst
 
 
 
-	//enum {
-	static int BRIDGE_NO_FOUNDATION = 1 << 0 | 1 << 3 | 1 << 6 | 1 << 9 | 1 << 12;
-	//};
 
 
 
@@ -390,7 +383,8 @@ public class AiTools implements AiConst
 			for (i = start + count - 1; i >= start; i--) {
 				// Is it availiable?
 				// Also, check if the reliability of the vehicle is above the AI_VEHICLE_MIN_RELIABILTY
-				if (!BitOps.HASBIT(Engine.GetEngine(i).player_avail, _current_player) || Engine.GetEngine(i).getReliability() * 100 < AI_VEHICLE_MIN_RELIABILTY << 16) continue;
+				//if (!BitOps.HASBIT(Engine.GetEngine(i).player_avail, PlayerID.getCurrent().id) || Engine.GetEngine(i).getReliability() * 100 < AI_VEHICLE_MIN_RELIABILTY << 16) continue;
+				if (!Engine.GetEngine(i).isAvailableTo(PlayerID.getCurrent()) || Engine.GetEngine(i).getReliability() * 100 < AI_VEHICLE_MIN_RELIABILTY << 16) continue;
 				// Can we build it?
 				ret = Ai.AI_DoCommand(0, i, 0, Cmd.DC_QUERY_COST, Cmd.CMD_BUILD_ROAD_VEH);
 				if (!Cmd.CmdFailed(ret)) break;
@@ -413,7 +407,7 @@ public class AiTools implements AiConst
 		return Ai.AI_DoCommand(tile, i, 0, flag, Cmd.CMD_BUILD_ROAD_VEH);
 	}
 
-	//private static final byte _roadbits_by_dir[] = {2,1,8,4};
+	private static final byte _roadbits_by_dir[] = {2,1,8,4};
 
 	static int AiNew_Build_Depot(Player p, TileIndex tile, int direction, int flag)
 	{
@@ -540,7 +534,7 @@ public class AiTools implements AiConst
 	static int AiNew_GetSpecialVehicleFlag(Player p, Vehicle v) {
 		int i;
 		for (i=0;i<AI_MAX_SPECIAL_VEHICLES;i++) {
-			if (p.ainew.special_vehicles[i].veh_id == v.index) {
+			if (p.ainew.special_vehicles[i].veh_id.id == v.index) {
 				return p.ainew.special_vehicles[i].flag;
 			}
 		}

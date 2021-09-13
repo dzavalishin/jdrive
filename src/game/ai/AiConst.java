@@ -162,22 +162,22 @@ public interface AiConst {
 	 * End of defines
 	 */
 
-	
-	
-	
-	
-	
+
+
+
+
+
 	// Used for from_type/to_type
 	//enum {
 	public static final int AI_NO_TYPE = 0;
-			public static final int AI_CITY = 1;
-		public static final int AI_INDUSTRY = 2;
+	public static final int AI_CITY = 1;
+	public static final int AI_INDUSTRY = 2;
 	//};
 
 	// Flags for in the vehicle
 	//enum {
-		public static final int AI_VEHICLEFLAG_SELL = 1;
-		// Remember, flags must be in power of 2
+	public static final int AI_VEHICLEFLAG_SELL = 1;
+	// Remember, flags must be in power of 2
 	//};
 
 	public static final int  AI_NO_CARGO = 0xFF; // Means that there is no cargo defined yet (used for industry)
@@ -193,24 +193,27 @@ public interface AiConst {
 
 
 	public static final int AI_MAX_SPECIAL_VEHICLES = 100;
-	
-	
-	
+
+
+
 	// This stops 90degrees curves
 	static final int _illegal_curves[] = {
-		255, 255, // Horz and vert, don't have the effect
-		5, // upleft and upright are not valid
-		4, // downright and downleft are not valid
-		2, // downleft and upleft are not valid
-		3, // upright and downright are not valid
+			255, 255, // Horz and vert, don't have the effect
+			5, // upleft and upright are not valid
+			4, // downright and downleft are not valid
+			2, // downleft and upleft are not valid
+			3, // upright and downright are not valid
 	};
 
 	// Used for tbt (train/bus/truck)
 	//enum {
-		public static final int AI_TRAIN = 0;
-				public static final int AI_BUS = 1;
-				public static final int AI_TRUCK = 2;
+	public static final int AI_TRAIN = 0;
+	public static final int AI_BUS = 1;
+	public static final int AI_TRUCK = 2;
 	//};
-;
-	
+	//enum {
+	static int BRIDGE_NO_FOUNDATION = 1 << 0 | 1 << 3 | 1 << 6 | 1 << 9 | 1 << 12;
+	//};
+
+
 }

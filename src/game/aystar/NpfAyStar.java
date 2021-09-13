@@ -32,7 +32,7 @@ public class NpfAyStar extends AyStar
 	 */
 	//static void NPFSaveTargetData(AyStar  as, OpenListNode  current)
 	@Override
-	void foundEndNode(OpenListNode current)	
+	protected void foundEndNode(OpenListNode current)	
 	{
 		NPFFoundTargetData ftd = user_path;
 		ftd.best_trackdir = current.path.node.user_data[Npf.NPF_TRACKDIR_CHOICE];
@@ -57,7 +57,7 @@ public class NpfAyStar extends AyStar
 	 * copy AyStarNode.user_data[NPF_NODE_FLAGS] from the parent */
 	//static void NPFFollowTrack(AyStar  aystar, OpenListNode  current)
 	@Override
-	void getNeighbours(OpenListNode current)
+	protected void getNeighbours(OpenListNode current)
 	{
 		/*Trackdir*/ /*Trackdir*/
 		int src_trackdir = current.path.node.direction;
@@ -217,7 +217,7 @@ public class NpfAyStar extends AyStar
 	}
 
 	@Override
-	int calculateH(AyStarNode current, OpenListNode parent) {
+	protected int calculateH(AyStarNode current, OpenListNode parent) {
 		return CalculateH.apply(this, current, parent);
 	}
 
@@ -227,7 +227,7 @@ public class NpfAyStar extends AyStar
 	}
 
 	@Override
-	int calculateG(AyStarNode current, OpenListNode parent) {
+	protected int calculateG(AyStarNode current, OpenListNode parent) {
 		return CalculateG.apply(this, current, parent);
 	}
 
@@ -252,7 +252,7 @@ public class NpfAyStar extends AyStar
 	}
 
 	@Override
-	void beforeExit() 
+	protected void beforeExit() 
 	{ 
 		if( null != BeforeExit ) BeforeExit.apply(this);
 	} 
