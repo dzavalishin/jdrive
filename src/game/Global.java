@@ -304,7 +304,7 @@ public class Global
 
 	//void DEBUG(name, level) if (level == 0 || _debug_ ## name ## _level >= level) debug
 
-	static int _debug_ai_level = 0;
+	static int _debug_ai_level = 10;
 	static int _debug_driver_level = 0;
 	static int _debug_grf_level = 0;
 	static int _debug_map_level = 0;

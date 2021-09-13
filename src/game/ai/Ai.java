@@ -314,7 +314,7 @@ public class Ai {
 	{
 		//assert(player.id < Global.MAX_PLAYERS);
 		assert(!player.isSpecial());
-
+		if(_ai_player[player.id] == null ) _ai_player[player.id] = new AIPlayer();
 		/* Called if a new AI is booted */
 		_ai_player[player.id].active = true;
 	}
@@ -356,7 +356,7 @@ public class Ai {
 	 */
 	public static void AI_Uninitialize()
 	{
-		Player.forEach( p -> { if (p.isActive() && p.isAi()) AI_PlayerDied(p.getIndex()); });
+		Player.forEach( p -> { if (p != null && p.isActive() && p.isAi()) AI_PlayerDied(p.getIndex()); });
 	}
 	
 	
