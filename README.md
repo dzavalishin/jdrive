@@ -8,6 +8,13 @@ Current state: The game is basically playable - aircrafts, trains, ships and roa
 
 You're welcome to take part in testing and/or development!
 
+## News
+
+  * AI is operational
+  * Language packs support restored
+  * Sounds/MIDI music are working 
+
+
 Screenshots:
 
 ![27 Aug 2021](https://raw.githubusercontent.com/dzavalishin/jdrive/master/docs/history/2021-08-27_18-20-18.png)
