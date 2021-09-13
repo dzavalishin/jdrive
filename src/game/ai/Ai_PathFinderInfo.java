@@ -8,8 +8,8 @@ public class Ai_PathFinderInfo {
 	TileIndex start_tile_br; // br = bottom-right
 	TileIndex end_tile_tl; // tl = top-left
 	TileIndex end_tile_br; // br = bottom-right
-	byte start_direction; // 0 to 3 or AI_PATHFINDER_NO_DIRECTION
-	byte end_direction; // 0 to 3 or AI_PATHFINDER_NO_DIRECTION
+	int start_direction; // 0 to 3 or AI_PATHFINDER_NO_DIRECTION
+	int end_direction; // 0 to 3 or AI_PATHFINDER_NO_DIRECTION
 
 	final TileIndex[] route;
 	final byte[] route_extra; // Some extra information about the route like bridge/tunnel

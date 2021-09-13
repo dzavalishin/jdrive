@@ -55,7 +55,7 @@ public class Landscape extends GenLandTable
 	};
 
 
-	static void FindLandscapeHeightByTile(TileInfo ti, TileIndex tile)
+	public static void FindLandscapeHeightByTile(TileInfo ti, TileIndex tile)
 	{
 		assert(tile.getTile() < Global.MapSize());
 

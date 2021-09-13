@@ -2798,7 +2798,7 @@ public class Vehicle implements IPoolItem
 		return result;
 	}
 
-	static UnitID GetFreeUnitNumber(int type)
+	public static UnitID GetFreeUnitNumber(int type)
 	{
 		int unit_num = 0;
 
@@ -3757,6 +3757,7 @@ public class Vehicle implements IPoolItem
 	public int getNum_orders() { return num_orders; }
 	public int getCur_order_index() { return cur_order_index; }
 	public int getCur_speed() { return cur_speed;	}
+	public int getCargo_days() { return cargo_days;	}
 
 	public Order getCurrent_order() {
 		return current_order;
@@ -3793,6 +3794,7 @@ public class Vehicle implements IPoolItem
 			(top_coord + bottom_coord) / 2
 		);
 	}
+
 
 
 

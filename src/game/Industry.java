@@ -2752,7 +2752,14 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 
 
-
+	/**
+	 * 
+	 * @return Total number of industries in game.
+	 */
+	public static int getCount()
+	{
+		return _total_industries;
+	}
 
 
 

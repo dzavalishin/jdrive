@@ -2502,6 +2502,15 @@ implements IPoolItem, Serializable
 	 */
 	static Stream<Town> stream() { return pool().stream(); }
 
+	/**
+	 * 
+	 * @return Total count of towns in game
+	 */
+	public static int GetCount() {
+		// TODO is it correct?
+		return GetTownPoolSize();
+	}
+
 
 }
 

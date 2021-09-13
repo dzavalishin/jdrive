@@ -77,7 +77,7 @@ public class Map {
 
 
 
-	static int DistanceManhattan(TileIndex t0, TileIndex t1)
+	public static int DistanceManhattan(TileIndex t0, TileIndex t1)
 	{
 		final int dx = Math.abs(t0.TileX() - t1.TileX());
 		final int dy = Math.abs(t0.TileY() - t1.TileY());

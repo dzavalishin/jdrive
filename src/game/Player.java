@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import game.ai.Ai;
+import game.ai.PlayerAiNew;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.ids.EngineID;
@@ -64,9 +65,9 @@ public class Player implements Serializable
 	int bankrupt_value;
 
 	boolean is_active;
-	public int is_ai;
+	private boolean is_ai;
 	// TODO PlayerAI ai = new PlayerAI();
-	// TODO PlayerAiNew ainew;
+	public PlayerAiNew ainew = new PlayerAiNew();
 
 	final long [][] yearly_expenses = new long[3][13];
 
@@ -97,20 +98,21 @@ public class Player implements Serializable
 
 
 		inaugurated_year = num_valid_stat_ent = quarters_of_bankrupcy = bankrupt_asked =
-				is_ai = player_color = player_money_fraction = avail_railtypes = block_preview = 0;
+				player_color = player_money_fraction = avail_railtypes = block_preview = 0;
 
 		name_2 = name_1 = president_name_1 = current_loan = bankrupt_timeout =
 				bankrupt_value = cargo_types = engine_renew_months = 0;
 
 		money64 = engine_renew_money = president_name_2 = face = 0;
 
-		engine_renew = renew_keep_length = false;
+		is_ai = engine_renew = renew_keep_length = false;
 		
 		cur_economy = new PlayerEconomyEntry();
 	}
 
 	
 	public boolean isActive() { return is_active; }
+	public boolean isAi() { return is_ai; }
 	public PlayerID getIndex() { return index; }
 	public long getMoney() { return money64; }
 
@@ -665,7 +667,7 @@ public class Player implements Serializable
 
 		p.money64 = /*p.player_money*/ p.current_loan = Integer.MAX_VALUE; // TODO return this 100000;
 
-		p.is_ai = (byte) (is_ai ? 1 : 0);
+		p.is_ai = is_ai;
 		// TODO p.ai.state = 5; /* AIS_WANT_NEW_ROUTE */
 		p.share_owners[0] = p.share_owners[1] = p.share_owners[2] = p.share_owners[3] = 
 				PlayerID.get( Owner.OWNER_SPECTATOR );
@@ -688,7 +690,7 @@ public class Player implements Serializable
 		Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 
 		if (is_ai && (!Global._networking || Global._network_server) && Ai._ai.enabled)
-			Ai.AI_StartNewAI(p.index.id);
+			Ai.AI_StartNewAI(p.index);
 
 		return p;
 	}
@@ -707,7 +709,7 @@ public class Player implements Serializable
 		// count number of competitors
 		n = 0;
 		for( Player p : Global.gs._players ) {
-			if (p.is_active && p.is_ai != 0)
+			if (p.isActive() && p.isAi())
 				n++;
 		}
 
@@ -1023,7 +1025,7 @@ public class Player implements Serializable
 							Global.gs._local_player = PlayerID.get( Owner.OWNER_SPECTATOR );
 							if (Ai._ai.network_playas != Owner.OWNER_SPECTATOR) {
 								/* If we didn't join the game as a spectator, activate the AI */
-								Ai.AI_StartNewAI(Ai._ai.network_playas);
+								Ai.AI_StartNewAI(PlayerID.get( Ai._ai.network_playas ));
 							}
 						} else {
 							Global.gs._local_player = p.index;
@@ -1592,8 +1594,8 @@ final Chunk Handler _player_chunk_handlers[] = {
 			//p.UpdatePlayerMoney32();
 
 			// This is needed so an AI is attached to a loaded AI 
-			if (p.is_ai != 0 && (!Global._networking || Global._network_server) && Ai._ai.enabled)
-				Ai.AI_StartNewAI(p.index.id);
+			if (p.isAi() && (!Global._networking || Global._network_server) && Ai._ai.enabled)
+				Ai.AI_StartNewAI(p.index);
 		}
 	}
 

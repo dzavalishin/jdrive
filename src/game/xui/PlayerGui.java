@@ -535,7 +535,7 @@ public class PlayerGui
 						dis = BitOps.RETSETBIT(dis, 9);
 
 					/* Only 25% left to buy. If the player is human, disable buying it up.. TODO issues! */
-					if (GetAmountOwnedBy(p, PlayerID.get(Owner.OWNER_SPECTATOR) ) == 1 && 0==p.is_ai) 
+					if (GetAmountOwnedBy(p, PlayerID.get(Owner.OWNER_SPECTATOR) ) == 1 && !p.isAi()) 
 						dis = BitOps.RETSETBIT(dis, 9);
 
 					/* If the player doesn't own any shares, disable sell button */

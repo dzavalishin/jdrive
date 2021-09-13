@@ -8,5 +8,5 @@ public class AIStruct {
 
 	/* For network-clients (a OpenTTD client who acts as an AI connected to a server) */
 	public boolean network_client;    //! Are we a network_client?
-	public byte network_playas;   //! The current network player we are connected as
+	public int network_playas;   //! The current network player we are connected as
 }
