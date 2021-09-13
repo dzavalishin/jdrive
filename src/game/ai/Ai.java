@@ -146,7 +146,7 @@ public class Ai {
 	 * Needed for SP; we need to delay DoCommand with 1 tick, because else events
 	 *  will make infinite loops (AIScript).
 	 */
-	void AI_PutCommandInQueue(int player, int tile, int p1, int p2, int procc)
+	static void AI_PutCommandInQueue(int player, int tile, int p1, int p2, int procc)
 	{
 		AICommand com;
 
