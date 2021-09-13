@@ -289,7 +289,7 @@ class SpriteGroup {
 
 
 class RealSpriteGroup extends SpriteGroup {
-	// XXX: Would anyone ever need more than 16 spritesets? Maybe we should
+	// Would anyone ever need more than 16 spritesets? Maybe we should
 	// use even less, now we take whole 8kb for custom sprites table, oh my!
 	int sprites_per_set; // means number of directions - 4 or 8
 

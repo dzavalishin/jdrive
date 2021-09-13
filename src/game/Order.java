@@ -192,7 +192,7 @@ public class Order implements Serializable
 		order1.next = order2.next;
 
 		AssignOrder(order2, temp_order);
-		order2.next = temp_next.next;
+		order2.next = temp_next; //temp_next.next;
 	}
 
 	/**

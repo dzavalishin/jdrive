@@ -751,7 +751,7 @@ public class Main {
 				Vehicle.CallVehicleTicks();
 				Landscape.CallLandscapeTick();
 
-				// TODO Ai.AI_RunGameLoop();
+				Ai.AI_RunGameLoop();
 
 				Window.CallWindowTickEvent();
 				NewsItem.NewsLoop();

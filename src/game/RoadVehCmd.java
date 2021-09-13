@@ -813,7 +813,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		x = x - v.getX_pos() + 1;
 		y = y - v.getY_pos() + 1;
 
-		if (x > 2 || y > 2)
+		if (x > 2 || y > 2 || x < 0 || y < 0)
 			return v.direction;
 		return _roadveh_new_dir[y*4+x];
 	}

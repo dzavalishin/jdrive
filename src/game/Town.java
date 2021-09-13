@@ -2483,7 +2483,11 @@ implements IPoolItem, Serializable
 		return ratings[playerId];
 	}
 
+	public int getRoad_build_months() {
+		return road_build_months;
+	}
 
+	
 	/**
 	 * @return true if at least one valid town exist
 	 */
@@ -2501,6 +2505,16 @@ implements IPoolItem, Serializable
 	 * @return stream of items of this type
 	 */
 	static Stream<Town> stream() { return pool().stream(); }
+
+	/**
+	 * 
+	 * @return Total count of towns in game
+	 */
+	public static int GetCount() {
+		// TODO is it correct?
+		return GetTownPoolSize();
+	}
+
 
 
 }

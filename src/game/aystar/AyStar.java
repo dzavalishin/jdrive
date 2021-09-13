@@ -47,7 +47,7 @@ public abstract class AyStar extends AyStarDefs
 	/* These will contain the open and closed lists */
 
 	/* The actual closed list */
-	final Hash ClosedListHash = new Hash();
+	protected final Hash ClosedListHash = new Hash();
 	/* The open queue */
 	final TTDQueue<OpenListNode> OpenListQueue = new TTDQueueImpl<>();
 	/* An extra hash to speed up the process of looking up an element in
@@ -384,12 +384,12 @@ public abstract class AyStar extends AyStarDefs
 	// To be defined by caller
 	
 	public abstract int endNodeCheck(OpenListNode current);
-	abstract int calculateG (AyStarNode current, OpenListNode parent);
-	abstract int calculateH(AyStarNode current, OpenListNode parent);
-	abstract void getNeighbours(OpenListNode current);
+	protected abstract int calculateG (AyStarNode current, OpenListNode parent);
+	protected abstract int calculateH(AyStarNode current, OpenListNode parent);
+	protected abstract void getNeighbours(OpenListNode current);
 		
-	void beforeExit() { } 
-	void foundEndNode(OpenListNode current) { }	
+	protected void beforeExit() { } 
+	protected void foundEndNode(OpenListNode current) { }	
 }
 
 

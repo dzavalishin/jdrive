@@ -1629,7 +1629,7 @@ public class Economy extends EconomeTables implements Serializable
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 		p = PlayerID.get(p1).GetPlayer();
 
-		if (0 == p.is_ai) return Cmd.CMD_ERROR;
+		if (!p.isAi()) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			DoAcquireCompany(p);

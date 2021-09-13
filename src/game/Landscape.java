@@ -55,7 +55,7 @@ public class Landscape extends GenLandTable
 	};
 
 
-	static void FindLandscapeHeightByTile(TileInfo ti, TileIndex tile)
+	public static void FindLandscapeHeightByTile(TileInfo ti, TileIndex tile)
 	{
 		assert(tile.getTile() < Global.MapSize());
 
@@ -673,7 +673,7 @@ public class Landscape extends GenLandTable
 			}
 			if( !broken )// (data == endof(_make_desert_or_rainforest_data))
 			{
-				Global.debug("desert ");
+				//Global.debug("desert ");
 				tile.SetMapExtraBits(TileInfo.EXTRABITS_DESERT);
 			}
 		}

@@ -3458,9 +3458,12 @@ public class Station extends StationTables implements IPoolItem
 	public int getIndex() { return index; }
 	public int getFacilities() { return facilities; }
 	public ViewportSign getSign() {		return sign;	}
+	public int getBuild_date() {		return build_date;	}
 
 
 	public boolean hasNoFacilities() { return 0 == facilities; }
+
+
 
 
 

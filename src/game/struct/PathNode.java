@@ -8,7 +8,7 @@ public class PathNode {
 	public PathNode parent;
 
 	public PathNode() {
-		node = null;
+		node = new AyStarNode();
 		parent = null;
 		
 	}

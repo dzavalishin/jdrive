@@ -1,15 +1,15 @@
-package game;
+package game.ai;
 
-import game.ai.Ai_PathFinderInfo;
-import game.ai.Ai_SpecialVehicle;
+import java.io.Serializable;
+
+import game.TileIndex;
 import game.aystar.AyStar;
 import game.ids.VehicleID;
 
-public class PlayerAiNew {
+public class PlayerAiNew implements AiConst, Serializable 
+{
 
-	public static final int AI_MAX_SPECIAL_VEHICLES = 100;
-	
-	int state;
+	AiState state = AiState.STARTUP;
 	int tick;
 	int idle;
 
@@ -21,17 +21,16 @@ public class PlayerAiNew {
 					//  long we are trying something, and just abort if it takes too long
 
 	// Pathfinder stuff
-	Ai_PathFinderInfo path_info;
-	//AyStar *pathfinder;
+	Ai_PathFinderInfo path_info = new Ai_PathFinderInfo();
 	AyStar pathfinder;
 
 	// Route stuff
 
-	byte cargo;
-	byte tbt; // train/bus/truck 0/1/2 AI_TRAIN/AI_BUS/AI_TRUCK
+	int cargo;
+	int tbt; // train/bus/truck 0/1/2 AI_TRAIN/AI_BUS/AI_TRUCK TODO enum
 	int new_cost;
 
-	byte action;
+	AiAction action;
 
 	int last_id; // here is stored the last id of the searched city/industry
 	int last_vehiclecheck_date; // Used in CheckVehicle
@@ -40,24 +39,24 @@ public class PlayerAiNew {
 	TileIndex from_tile;
 	TileIndex to_tile;
 
-	byte from_direction;
-	byte to_direction;
+	int from_direction;
+	int to_direction;
 
 	boolean from_deliver; // True if this is the station that GIVES cargo
 	boolean to_deliver;
 
 	TileIndex depot_tile;
-	byte depot_direction;
+	int depot_direction;
 
-	byte amount_veh; // How many vehicles we are going to build in this route
-	byte cur_veh; // How many vehicles did we bought?
+	int amount_veh; // How many vehicles we are going to build in this route
+	int cur_veh; // How many vehicles did we bought?
 	VehicleID veh_id; // Used when bought a vehicle
 	VehicleID veh_main_id; // The ID of the first vehicle, for shared copy
 
 	int from_ic; // ic = industry/city. This is the ID of them
-	byte from_type; // AI_NO_TYPE/AI_CITY/AI_INDUSTRY
+	int from_type; // AI_NO_TYPE/AI_CITY/AI_INDUSTRY
 	int to_ic;
-	byte to_type;
+	int to_type;
 	
 	
 	public PlayerAiNew() {

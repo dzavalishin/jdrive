@@ -53,7 +53,7 @@ public class PlayerID extends AbstractID implements Serializable
 
 	public boolean IS_HUMAN_PLAYER()
 	{
-		return 0 == Player.GetPlayer(this).is_ai;
+		return !Player.GetPlayer(this).isAi();
 	}
 
 	public boolean IS_INTERACTIVE_PLAYER()
