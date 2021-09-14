@@ -36,8 +36,7 @@ import game.ids.StringID;
 import game.ifaces.MenuClickedProc;
 import game.ifaces.OnButtonClick;
 import game.ifaces.ToolbarButtonProc;
-import game.net.Net;
-import game.net.NetDefs;
+import game.net.NetGui;
 import game.net.NetworkPasswordType;
 import game.struct.ColorList;
 import game.struct.Point;
@@ -105,11 +104,11 @@ public class Gui
 
 			ShowVitalWindows();
 
-			/* TODO Net
+			
 			// Bring joining GUI to front till the client is really joined 
 			if (Global._networking && !Global._network_server)
-				ShowJoinStatusWindowAfterJoin();
-			*/
+				NetGui.ShowJoinStatusWindowAfterJoin();
+			
 			
 			break;
 			
@@ -447,28 +446,28 @@ public class Gui
 	{
 		_rename_id = desttype + (dest << 8);
 		_rename_what = 2;
-		ShowChatWindow(Str.STR_EMPTY, Str.STR_NETWORK_CHAT_QUERY_CAPTION, 150, 338, 1, 0);
+		NetGui.ShowChatWindow(new StringID(Str.STR_EMPTY), new StringID(Str.STR_NETWORK_CHAT_QUERY_CAPTION), 150, 338, 1, 0);
 	}
 
 	public static void ShowNetworkGiveMoneyWindow(int player)
 	{
 		_rename_id = player;
 		_rename_what = 3;
-		ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_GIVE_MONEY_CAPTION, 30, 180, 1, 0);
+		MiscGui.ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_GIVE_MONEY_CAPTION, 30, 180, 1, 0);
 	}
 
 	public static void ShowNetworkNeedGamePassword()
 	{
 		_rename_id = NetworkPasswordType.NETWORK_GAME_PASSWORD.ordinal();
 		_rename_what = 4;
-		ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_GAME_PASSWORD_CAPTION, 20, 180, Window.WC_SELECT_GAME, 0);
+		MiscGui.ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_GAME_PASSWORD_CAPTION, 20, 180, Window.WC_SELECT_GAME, 0);
 	}
 
 	void ShowNetworkNeedCompanyPassword()
 	{
 		_rename_id = NetworkPasswordType.NETWORK_COMPANY_PASSWORD.ordinal();
 		_rename_what = 4;
-		ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_COMPANY_PASSWORD_CAPTION, 20, 180, Window.WC_SELECT_GAME, 0);
+		MiscGui.ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_COMPANY_PASSWORD_CAPTION, 20, 180, Window.WC_SELECT_GAME, 0);
 	}
 
 	

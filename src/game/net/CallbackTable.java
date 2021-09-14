@@ -3,9 +3,7 @@ package game.net;
 import game.AirCraft;
 import game.Bridge;
 import game.SignStruct;
-import game.Station;
 import game.Terraform;
-import game.Town;
 import game.ifaces.CommandCallback;
 import game.xui.AirportGui;
 import game.xui.DockGui;
@@ -14,8 +12,6 @@ import game.xui.RailGui;
 import game.xui.RoadGui;
 import game.xui.RoadVehGui;
 import game.xui.ShipGui;
-import game.xui.StationGui;
-import game.xui.TownGui;
 import game.xui.TrainGui;
 
 // If you add a callback for DoCommandP, also add the callback in here
@@ -45,7 +41,7 @@ public class CallbackTable {
 		/* 0x10 */ Gui::CcPlaySound10,
 		/* 0x11 */ RoadGui::CcPlaySound1D,
 		/* 0x12 */ RailGui::CcPlaySound1E,
-		/* 0x13 */ Station::CcStation,
+		/* 0x13 */ RailGui::CcStation,
 		/* 0x14 */ Terraform::CcTerraform,
 		/* 0x15 */ AirCraft::CcCloneAircraft,
 		/* 0x16 */ RoadVehGui::CcCloneRoadVeh,

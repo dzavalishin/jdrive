@@ -20,4 +20,5 @@ public class NetworkClientState {
 
 	public boolean hasValidSocket() { return socket != null; }
 
+	NetworkClientInfo ci;
 }

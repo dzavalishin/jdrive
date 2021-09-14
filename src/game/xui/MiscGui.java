@@ -957,7 +957,7 @@ public class MiscGui {
 	//static char _orig_str_buf[lengthof(_edit_str_buf)];
 	private static String _orig_str_buf = "";
 
-	static void ShowQueryString(int str, int caption, int maxlen, int maxwidth, int window_class, int window_number)
+	public static void ShowQueryString(int str, int caption, int maxlen, int maxwidth, int window_class, int window_number)
 	{
 		ShowQueryString( new StringID(str), new StringID(caption), maxlen, maxwidth, window_class, window_number );
 	}	
@@ -1065,7 +1065,7 @@ public class MiscGui {
 	// Colors for fios types
 	/*	FIOS_TYPE_FILE, FIOS_TYPE_OLDFILE etc. different colours */
 	public final static byte _fios_colors[] = {13, 9, 9, 6, 5, 6, 5};
-	private static List<FiosItem> _fios_list;
+	public static List<FiosItem> _fios_list;
 	private static FiosItem o_dir = new FiosItem();
 
 	public static void BuildFileList()

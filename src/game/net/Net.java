@@ -44,11 +44,11 @@ import game.xui.Window;
 public class Net implements NetDefs 
 {
 
-	public static NetworkGameList _network_game_list;
+	//public static NetworkGameList _network_game_list;
 
 	public static NetworkGameInfo _network_game_info;
 	public static NetworkPlayerInfo [] _network_player_info = new NetworkPlayerInfo[Global.MAX_PLAYERS];
-	public static NetworkClientInfo [] _network_client_info = new NetworkClientInfo[MAX_CLIENT_INFO];
+	//public static NetworkClientInfo [] _network_client_info = new NetworkClientInfo[MAX_CLIENT_INFO];
 
 	public static String _network_player_name;
 	public static String _network_default_ip;
@@ -121,13 +121,13 @@ public class Net implements NetDefs
 
 	private static int _network_clients_connected = 0;
 
-	static final NetworkClientState [] _clients = new NetworkClientState[MAX_CLIENTS];
+	//static final NetworkClientState [] _clients = new NetworkClientState[MAX_CLIENTS];
 	static CommandPacket _local_command_queue;
 
 	static int _network_client_index = NETWORK_SERVER_INDEX + 1;
 	static ServerSocket _listensocket;
 
-
+	static final List<NetworkClientState> _clients = new ArrayList<>();
 
 
 
@@ -150,10 +150,17 @@ public class Net implements NetDefs
 	// Function that looks up the CI for a given client-index
 	NetworkClientInfo NetworkFindClientInfoFromIndex(int client_index)
 	{
+		/*
 		for (NetworkClientInfo ci : _network_client_info)
 			if (ci.client_index == client_index)
 				return ci;
-
+		*/
+		for( NetworkClientState cs : _clients )
+		{
+			if( cs.index == client_index )
+				return cs.ci;
+		}
+		
 		return null;
 	}
 
@@ -171,7 +178,7 @@ public class Net implements NetDefs
 	//  if the user did not send it yet, Client #<no> is used.
 	static String NetworkGetClientName(final NetworkClientState cs)
 	{
-		NetworkClientInfo ci = _network_client_info[cs - _clients];
+		NetworkClientInfo ci = cs.ci; // _network_client_info[cs - _clients];
 		if (ci.client_name.length() == 0)
 			return String.format("Client #%d", cs.index);
 		else
@@ -311,7 +318,7 @@ public class Net implements NetDefs
 			SEND_COMMAND(PacketType.CLIENT_ERROR, errorno);
 
 			// Dequeue all commands before closing the socket
-			NetworkSend_Packets(_clients[0]);
+			NetworkSend_Packets(_clients.get(0)); // [dz] why 0?
 		}
 
 		Global._switch_mode = SwitchModes.SM_MENU;
@@ -460,7 +467,7 @@ public class Net implements NetDefs
 	{
 		NetworkClientState cs;
 		NetworkClientInfo ci;
-		int client_no = 0;
+		//int client_no = 0;
 
 		if (Global._network_server) {
 			// Can we handle a new client?
@@ -471,13 +478,14 @@ public class Net implements NetDefs
 				return null;
 
 			// Register the login
-			client_no = _network_clients_connected++;
+			//client_no = 
+			_network_clients_connected++;
 		}
 
 		//cs = &_clients[client_no];
 		//memset(cs, 0, sizeof(*cs));
 		cs = new NetworkClientState();
-		_clients[client_no] = cs;
+		//_clients[client_no] = cs;
 
 		cs.socket = s;
 		cs.last_frame = 0;
@@ -488,8 +496,9 @@ public class Net implements NetDefs
 
 		if (Global._network_server) {
 			ci = new NetworkClientInfo();
-			_network_client_info[cs - _clients] = ci; //DEREF_CLIENT_INFO(cs);
+			//_network_client_info[cs - _clients] = ci; //DEREF_CLIENT_INFO(cs);
 			//memset(ci, 0, sizeof(*ci));
+			cs.ci = ci;
 
 			cs.index = _network_client_index++;
 			ci.client_index = cs.index;
@@ -498,6 +507,8 @@ public class Net implements NetDefs
 			Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 		}
 
+		_clients.add(cs);
+		
 		return cs;
 	}
 
@@ -565,7 +576,7 @@ public class Net implements NetDefs
 		}
 
 		// Close the gap in the client-list
-		NetworkClientInfo ci = _network_client_info[cs - _clients]; // DEREF_CLIENT_INFO(cs);
+		NetworkClientInfo ci = cs.ci; // [cs - _clients]; // DEREF_CLIENT_INFO(cs);
 
 		if (Global._network_server) {
 			// We just lost one client :(
@@ -573,17 +584,20 @@ public class Net implements NetDefs
 				_network_game_info.clients_on--;
 			_network_clients_connected--;
 
+			_clients.remove(cs);
+			
+			/*
 			while ((cs + 1) != _clients[MAX_CLIENTS] && (cs + 1).socket != null) {
 				*cs = *(cs + 1);
 				*ci = *(ci + 1);
 				cs++;
 				ci++;
-			}
+			} */
 
 			Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 		}
 
-		// Reset the status of the last socket
+		// Reset the status of the last socket [dz] meaningless in Java code?
 		cs.socket = null;
 		cs.status = ClientStatus.INACTIVE;
 		cs.index = NETWORK_EMPTY_INDEX;
@@ -709,8 +723,7 @@ public class Net implements NetDefs
 
 			{
 				// Save the IP of the client
-				NetworkClientInfo ci;
-				ci = _network_client_info[cs - _clients]; // DEREF_CLIENT_INFO(cs);
+				NetworkClientInfo ci = cs.ci; //[cs - _clients]; // DEREF_CLIENT_INFO(cs);
 				ci.client_ip = sin.sin_addr.s_addr;
 			}
 		}
@@ -811,7 +824,7 @@ public class Net implements NetDefs
 
 		// Clean the client_info memory
 		//memset(_network_client_info, 0, sizeof(_network_client_info));
-		_network_client_info = new NetworkClientInfo[MAX_CLIENT_INFO];
+		//_network_client_info = new NetworkClientInfo[MAX_CLIENT_INFO];
 		//memset(_network_player_info, 0, sizeof(_network_player_info));
 		_network_player_info = new NetworkPlayerInfo[Global.MAX_PLAYERS];
 		_network_lobby_company_count = 0;
@@ -889,14 +902,22 @@ public class Net implements NetDefs
 	 * by the function that generates the config file. */
 	static void NetworkRebuildHostList()
 	{
-		int i = 0;
-		NetworkGameList item = _network_game_list;
+		/*NetworkGameList item = _network_game_list;
 		while (item != null && i != _network_host_list.length) {
 			if (item.manually)
 				_network_host_list[i++] = String.format("%s:%d", item.info.hostname, item.port);
 			item = item.next;
-		}
+		}*/
 
+		int i = 0;
+		for(NetworkGameList item : NetworkGameList._network_game_list)
+		{
+			if( i >= _network_host_list.length ) break;
+			
+			if (item.manually)
+				_network_host_list[i++] = String.format("%s:%d", item.info.hostname, item.port);
+		}
+		
 		for (; i < _network_host_list.length; i++) {
 			_network_host_list[i] = "";
 		}
@@ -1227,7 +1248,7 @@ public class Net implements NetDefs
 					//#endif
 					NetworkError(Str.STR_NETWORK_ERR_DESYNC);
 					Global.DEBUG_net( 0, "[NET] Sync error detected!");
-					NetworkClientError(NetworkRecvStatus.DESYNC, _clients[0]);
+					NetworkClientError(NetworkRecvStatus.DESYNC, _clients.get(0));
 					return false;
 				}
 
@@ -1385,7 +1406,7 @@ public class Net implements NetDefs
 	}
 
 
-	private static void SEND_COMMAND(PacketType clientAck, Object ... args ) {
+	protected static void SEND_COMMAND(PacketType clientAck, Object ... args ) {
 		// TODO Auto-generated method stub
 
 	}
@@ -1580,7 +1601,7 @@ public class Net implements NetDefs
 		CommandPacket c = new CommandPacket();
 		byte temp_callback;
 
-		c.player = _local_player;
+		c.player =  Global.gs._local_player;
 		c.next = null;
 		c.tile = tile;
 		c.p1 = p1;
@@ -1616,7 +1637,7 @@ public class Net implements NetDefs
 
 			// And we queue it for delivery to the clients
 			FOR_ALL_CLIENTS(cs -> {
-				if (cs.status > STATUS_AUTH) {
+				if (cs.status.ordinal() > ClientStatus.AUTH.ordinal()) {
 					NetworkAddCommandQueue(cs, c);
 				}
 			});
@@ -1735,7 +1756,7 @@ public class Net implements NetDefs
 			for(NetworkClientState cs : _clients) 
 			{
 				if( !cs.hasValidSocket() ) continue;
-				ci = _network_client_info[cs - _clients];
+				ci = cs.ci; //[cs - _clients];
 				if (ci.client_playas == dest) {
 					SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, from_index, false, msg);
 					if (cs.index == from_index) {

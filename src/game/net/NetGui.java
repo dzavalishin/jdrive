@@ -2,6 +2,7 @@ package game.net;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Iterator;
 
 import game.Global;
 import game.Hal;
@@ -122,14 +123,25 @@ public class NetGui extends Net implements NetDefs
 				int y = NET_PRC__OFFSET_TOP_WIDGET + 3;
 				int n = 0;
 				int pos = w.vscroll.getPos();
-				final NetworkGameList cur_item = _network_game_list;
+				//final NetworkGameList cur_item = _network_game_list;
+				
+				Iterator<NetworkGameList> gli = NetworkGameList._network_game_list.iterator();
 
-				while (pos > 0 && cur_item != null) {
+				/*while (pos > 0 && cur_item != null) {
 					pos--;
 					cur_item = cur_item.next;
+				}*/
+
+				while (pos > 0 && gli.hasNext()) {
+					pos--;
+					gli.next();
 				}
 
-				while (cur_item != null) {
+				//while (cur_item != null) 
+				while (gli.hasNext()) 
+				{
+					final NetworkGameList cur_item = gli.next();
+					
 					boolean compatible =
 						cur_item.info.server_revision.equals(Version.NAME) ||
 						cur_item.info.server_revision.equals(NOREV_STRING);
@@ -156,7 +168,7 @@ public class NetGui extends Net implements NetDefs
 						Gfx.DrawSprite(Sprite.SPR_FLAGS_BASE + cur_item.info.server_lang, 206, y);
 					}
 
-					cur_item = cur_item.next;
+					//cur_item = cur_item.next;
 					y += NET_PRC__SIZE_OF_ROW;
 					if (++n == w.vscroll.getCap()) break; // max number of games in the window
 				}
@@ -250,17 +262,23 @@ public class NetGui extends Net implements NetDefs
 				id_v += w.vscroll.getPos();
 
 				{
-					NetworkGameList cur_item = _network_game_list;
-					for (; id_v > 0 && cur_item != null; id_v--)
-						cur_item = cur_item.next;
+					//NetworkGameList cur_item = _network_game_list;
+					Iterator<NetworkGameList> gli = NetworkGameList._network_game_list.iterator();
 
-					if (cur_item == null) {
+					//for (; id_v > 0 && cur_item != null; id_v--)
+					//	cur_item = cur_item.next;
+					for (; id_v > 0 && gli.hasNext(); id_v--)
+						gli.next();
+
+					//if (cur_item == null)
+					if(!gli.hasNext())
+					{
 						// click out of vehicle bounds
 						_selected_item = null;
 						w.SetWindowDirty();
 						return;
 					}
-					_selected_item = cur_item;
+					_selected_item = gli.next();
 				}
 				w.SetWindowDirty();
 			} break;
@@ -271,7 +289,7 @@ public class NetGui extends Net implements NetDefs
 				}
 				break;
 			case 12: { // Add a server
-					ShowQueryString(
+				MiscGui.ShowQueryString(
 					Strings.BindCString(_network_default_ip),
 					Str.STR_NETWORK_ENTER_IP,
 					31 | 0x1000,  // maximum number of characters OR
@@ -316,7 +334,7 @@ public class NetGui extends Net implements NetDefs
 			if (_selected_field != 3) {
 				if ( e.keycode == Window.WKC_DELETE ) { // press 'delete' to remove servers
 					if (_selected_item != null) {
-						NetworkGameListRemoveItem(_selected_item);
+						NetworkGameList.removeItem(_selected_item);
 						NetworkRebuildHostList();
 						w.SetWindowDirty();
 						_network_game_count--;
@@ -453,8 +471,7 @@ public class NetGui extends Net implements NetDefs
 			break;
 
 		case WE_PAINT: {
-			int y = NSSWND_START, pos;
-			final FiosItem item;
+			int y = NSSWND_START, pos;			
 
 			Global.SetDParam(7, Str.STR_NETWORK_LAN_INTERNET + BitOps.b2i(_network_advertise));
 			Global.SetDParam(9, Str.STR_NETWORK_2_CLIENTS + _network_game_info.clients_max - 2);
@@ -476,8 +493,10 @@ public class NetGui extends Net implements NetDefs
 
 			// draw list of maps
 			pos = w.vscroll.getPos();
-			while (pos < _fios_num + 1) {
-				item = _fios_list + pos - 1;
+			//while (pos < _fios_num + 1) 
+			while (pos < MiscGui._fios_list.size() + 1) 
+			{
+				final FiosItem item = MiscGui._fios_list.get( pos - 1 );
 				if (item == _selected_map || (pos == 0 && _selected_map == null))
 					Gfx.GfxFillRect(11, y - 1, 259, y + 10, 155); // show highlighted item with a different colour
 
@@ -499,7 +518,7 @@ public class NetGui extends Net implements NetDefs
 				break;
 
 			case 4: /* Set password button */
-				ShowQueryString(Strings.BindCString(_network_server_password),
+				MiscGui.ShowQueryString(Strings.BindCString(_network_server_password),
 					Str.STR_NETWORK_SET_PASSWORD, 20, 250, w.getWindow_class(), w.window_number);
 				break;
 
@@ -509,7 +528,7 @@ public class NetGui extends Net implements NetDefs
 				y += w.vscroll.getPos();
 				if (y >= w.vscroll.getCount()) return;
 
-				_selected_map = (y == 0) ? null : _fios_list + y - 1;
+				_selected_map = (y == 0) ? null : MiscGui._fios_list.get( y - 1 );
 				w.SetWindowDirty();
 				} break;
 			case 7: case 8: /* Connection type */
@@ -630,7 +649,7 @@ public class NetGui extends Net implements NetDefs
 		Global._saveload_mode = Global.SLD_NEW_GAME;
 		MiscGui.BuildFileList();
 		w.vscroll.setCap(9);
-		w.vscroll.setCount(_fios_num+1);
+		w.vscroll.setCount(MiscGui._fios_list.size()+1);
 
 		w.as_querystr_d().text.setCaret( true );
 		w.as_querystr_d().text.maxlength = MAX_QUERYSTR_LEN - 1;
@@ -899,10 +918,12 @@ public class NetGui extends Net implements NetDefs
 	// Finds the Xth client-info that is active
 	static final NetworkClientInfo NetworkFindClientInfo(int client_no)
 	{
-		for (NetworkClientInfo ci : _network_client_info) {
+		//for (NetworkClientInfo ci : _network_client_info) 
+		for (NetworkClientState cs : _clients) 
+		{
 			// Skip non-active items
-			if (ci.client_index == NETWORK_EMPTY_INDEX) continue;
-			if (client_no == 0) return ci;
+			if (cs.ci.client_index == NETWORK_EMPTY_INDEX) continue;
+			if (client_no == 0) return cs.ci;
 			client_no--;
 		}
 
@@ -913,7 +934,7 @@ public class NetGui extends Net implements NetDefs
 	static void ClientList_Kick(int client_no)
 	{
 		if (client_no < Global.MAX_PLAYERS)
-			SEND_COMMAND(PACKET_SERVER_ERROR,_clients[client_no], NETWORK_ERROR_KICKED);
+			SEND_COMMAND(PacketType.SERVER_ERROR,_clients.get(client_no), NetworkErrorCode.KICKED);
 	}
 
 	static void ClientList_Ban(int client_no)
@@ -930,7 +951,7 @@ public class NetGui extends Net implements NetDefs
 		}
 
 		if (client_no < Global.MAX_PLAYERS)
-			SEND_COMMAND(PACKET_SERVER_ERROR,_clients[client_no], NETWORK_ERROR_KICKED);
+			SEND_COMMAND(PacketType.SERVER_ERROR,_clients.get(client_no), NetworkErrorCode.KICKED);
 	}
 
 	static String ntoa(long raw) {
@@ -952,18 +973,18 @@ public class NetGui extends Net implements NetDefs
 	static void ClientList_SpeakToClient(int client_no)
 	{
 		if (NetworkFindClientInfo(client_no) != null)
-			ShowNetworkChatQueryWindow(DestType.CLIENT, NetworkFindClientInfo(client_no).client_index);
+			Gui.ShowNetworkChatQueryWindow(DestType.CLIENT.ordinal(), NetworkFindClientInfo(client_no).client_index);
 	}
 
 	static void ClientList_SpeakToPlayer(int client_no)
 	{
 		if (NetworkFindClientInfo(client_no) != null)
-			ShowNetworkChatQueryWindow(DestType.PLAYER, NetworkFindClientInfo(client_no).client_playas);
+			Gui.ShowNetworkChatQueryWindow(DestType.PLAYER.ordinal(), NetworkFindClientInfo(client_no).client_playas);
 	}
 
 	static void ClientList_SpeakToAll(int client_no)
 	{
-		ShowNetworkChatQueryWindow(DestType.BROADCAST, 0);
+		Gui.ShowNetworkChatQueryWindow(DestType.BROADCAST.ordinal(), 0);
 	}
 
 	static void ClientList_None(int client_no)
@@ -986,10 +1007,16 @@ public class NetGui extends Net implements NetDefs
 	{
 		int num = 0;
 
-		// Should be replaced with a loop through all clients
+		/*/ Should be replaced with a loop through all clients
 		for (NetworkClientInfo ci : _network_client_info) {
 			// Skip non-active items
 			if (ci.client_index == NETWORK_EMPTY_INDEX) continue;
+			num++;
+		}*/
+
+		for (NetworkClientState cs : _clients) {
+			// Skip non-active items
+			if (cs.ci.client_index == NETWORK_EMPTY_INDEX) continue;
 			num++;
 		}
 
@@ -1168,7 +1195,10 @@ public class NetGui extends Net implements NetDefs
 
 			y = CLNWND_OFFSET;
 
-			for (NetworkClientInfo ci : _network_client_info) {
+			//for (NetworkClientInfo ci : _network_client_info) 
+			for (NetworkClientState cs : _clients) 
+			{
+				NetworkClientInfo ci = cs.ci;
 				// Skip non-active items
 				if (ci.client_index == NETWORK_EMPTY_INDEX) continue;
 
@@ -1314,7 +1344,7 @@ public class NetGui extends Net implements NetDefs
 		Window.AllocateWindowDesc(_network_join_status_window_desc);
 	}
 
-	void ShowJoinStatusWindowAfterJoin()
+	public static void ShowJoinStatusWindowAfterJoin()
 	{
 		/* This is a special instant of ShowJoinStatusWindow, because
 		    it is opened after the map is loaded, but the client maybe is not
@@ -1367,7 +1397,7 @@ public class NetGui extends Net implements NetDefs
 
 		case WE_PAINT:
 			w.DrawWindowWidgets();
-			DrawEditBox(w, 1);
+			MiscGui.DrawEditBox(w, 1);
 			break;
 
 		case WE_CLICK:
@@ -1401,7 +1431,7 @@ public class NetGui extends Net implements NetDefs
 		} break;
 
 		case WE_DESTROY:
-			SendWindowMessage(Window.WC_NEWS_WINDOW, 0, WindowEvents.WE_DESTROY, 0, 0);
+			Window.SendWindowMessage(Window.WC_NEWS_WINDOW, 0, WindowEvents.WE_DESTROY.ordinal(), 0, 0);
 			Global._no_scroll = BitOps.RETCLRBIT(Global._no_scroll, Global.SCROLL_CHAT);
 			// If the window is not closed yet, it means it still needs to send a CANCEL
 			if (!chatClosed) {
@@ -1434,7 +1464,7 @@ public class NetGui extends Net implements NetDefs
 		NetGui::ChatWindowWndProc
 	);
 
-	void ShowChatWindow(StringID str, StringID caption, int maxlen, int maxwidth, int window_class, int window_number)
+	public static void ShowChatWindow(StringID str, StringID caption, int maxlen, int maxwidth, int window_class, int window_number)
 	{
 		Window w;
 
