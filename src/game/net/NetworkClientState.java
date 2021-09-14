@@ -1,7 +1,9 @@
 package game.net;
 
+import java.net.Socket;
+
 public class NetworkClientState {
-	//SOCKET socket;
+	Socket socket;
 	int index;
 	int last_frame;
 	int last_frame_server;
@@ -15,5 +17,7 @@ public class NetworkClientState {
 	Packet packet_recv; // Partially received packet
 
 	CommandPacket command_queue; // The command-queue awaiting delivery
+
+	public boolean hasValidSocket() { return socket != null; }
 
 }

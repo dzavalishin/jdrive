@@ -1295,7 +1295,7 @@ public class NetGui extends Net implements NetDefs
 		NetGui::NetworkJoinStatusWindowWndProc
 	);
 
-	void ShowJoinStatusWindow()
+	static void ShowJoinStatusWindow()
 	{
 		Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 		_network_join_status = NetworkJoinStatus.CONNECTING;

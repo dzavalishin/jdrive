@@ -794,7 +794,7 @@ public class Console //extends ConsoleCmds
 	 * individual tokens (seperated by spaces), then execute it if possible
 	 * @param cmdstr string to be parsed and executed
 	 */
-	static void IConsoleCmdExec(final String cmdstr)
+	public static void IConsoleCmdExec(final String cmdstr)
 	{
 		IConsoleCmd   cmd    = null;
 		IConsoleAlias alias  = null;

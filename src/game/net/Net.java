@@ -1,14 +1,38 @@
 package game.net;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.function.Consumer;
 
+import game.Cmd;
+import game.GameOptions;
 import game.Global;
+import game.Hal;
 import game.Main;
 import game.Str;
 import game.TextEffect;
+import game.TileIndex;
+import game.Version;
 import game.console.Console;
+import game.enums.Owner;
 import game.enums.SwitchModes;
+import game.ids.PlayerID;
 import game.ids.StringID;
+import game.ifaces.CommandCallback;
+import game.util.GameDate;
 import game.util.Strings;
 import game.xui.Window;
 
@@ -33,7 +57,8 @@ public class Net implements NetDefs
 	public static int _last_sync_frame; // Used in the server to store the last time a sync packet was sent to clients.
 
 	// networking settings
-	public static int [] _network_ip_list = new int[MAX_INTERFACES + 1]; // Network IPs
+	//public static int [] _network_ip_list = new int[MAX_INTERFACES + 1]; // Network IPs
+	public static final List<InetAddress> _network_ip_list= new ArrayList<>();
 	public static int _network_game_count;
 
 	public static int _network_lobby_company_count;
@@ -90,29 +115,33 @@ public class Net implements NetDefs
 	public static String [] _network_ban_list = new String[MAX_BANS];
 
 	private static int _network_clients_connected = 0;
-	
+
 	static final NetworkClientState [] _clients = new NetworkClientState[MAX_CLIENTS];
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	static CommandPacket _local_command_queue;
+
+	static int _network_client_index = NETWORK_SERVER_INDEX + 1;
+	static ServerSocket _listensocket;
+
+
+
+
+
+	//#define DEREF_CLIENT_INFO(cs) (&_network_client_info[cs - _clients])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	// Function that looks up the CI for a given client-index
 	NetworkClientInfo NetworkFindClientInfoFromIndex(int client_index)
@@ -138,7 +167,7 @@ public class Net implements NetDefs
 	//  if the user did not send it yet, Client #<no> is used.
 	static String NetworkGetClientName(final NetworkClientState cs)
 	{
-		NetworkClientInfo ci = DEREF_CLIENT_INFO(cs);
+		NetworkClientInfo ci = _network_client_info[cs - _clients];
 		if (ci.client_name.length() == 0)
 			return String.format("Client #%d", cs.index);
 		else
@@ -158,57 +187,57 @@ public class Net implements NetDefs
 		String buf  = String.format(str, args);
 
 		switch (action) {
-			case JOIN:
-				temp = Strings.GetString(Str.STR_NETWORK_CLIENT_JOINED);
-				message = String.format("*** %s %s", name, temp);
-				break;
-			case LEAVE:
-				temp = Strings.GetString(Str.STR_NETWORK_ERR_LEFT);
-				message = String.format("*** %s %s (%s)", name, temp, buf);
-				break;
-			case GIVE_MONEY:
-				if (self_send) {
-					Strings.SetDParamStr(0, name);
-					SetDParam(1, atoi(buf));
-					temp = Strings.GetString(Str.STR_NETWORK_GAVE_MONEY_AWAY);
-					message = String.format("*** %s", temp);
-				} else {
-					SetDParam(0, atoi(buf));
-					temp = Strings.GetString(Str.STR_NETWORK_GIVE_MONEY);
-					message = String.format("*** %s %s", name, temp);
-				}
-				break;
-			case CHAT_PLAYER:
-				if (self_send) {
-					Strings.SetDParamStr(0, name);
-					temp = Strings.GetString(Str.STR_NETWORK_CHAT_TO_COMPANY);
-					message = String.format("%s %s", temp, buf);
-				} else {
-					Strings.SetDParamStr(0, name);
-					temp = Strings.GetString(Str.STR_NETWORK_CHAT_COMPANY);
-					message = String.format("%s %s", temp, buf);
-				}
-				break;
-			case CHAT_CLIENT:
-				if (self_send) {
-					Strings.SetDParamStr(0, name);
-					temp = Strings.GetString(Str.STR_NETWORK_CHAT_TO_CLIENT);
-					message = String.format("%s %s", temp, buf);
-				} else {
-					Strings.SetDParamStr(0, name);
-					temp = Strings.GetString(Str.STR_NETWORK_CHAT_CLIENT);
-					message = String.format("%s %s", temp, buf);
-				}
-				break;
-			case NAME_CHANGE:
-				temp = Strings.GetString(Str.STR_NETWORK_NAME_CHANGE);
-				message = String.format("*** %s %s %s", name, temp, buf);
-				break;
-			default:
+		case JOIN:
+			temp = Strings.GetString(Str.STR_NETWORK_CLIENT_JOINED);
+			message = String.format("*** %s %s", name, temp);
+			break;
+		case LEAVE:
+			temp = Strings.GetString(Str.STR_NETWORK_ERR_LEFT);
+			message = String.format("*** %s %s (%s)", name, temp, buf);
+			break;
+		case GIVE_MONEY:
+			if (self_send) {
 				Strings.SetDParamStr(0, name);
-				temp = Strings.GetString(Str.STR_NETWORK_CHAT_ALL);
+				Global.SetDParam(1, Integer.parseInt(buf));
+				temp = Strings.GetString(Str.STR_NETWORK_GAVE_MONEY_AWAY);
+				message = String.format("*** %s", temp);
+			} else {
+				Global.SetDParam(0, Integer.parseInt(buf));
+				temp = Strings.GetString(Str.STR_NETWORK_GIVE_MONEY);
+				message = String.format("*** %s %s", name, temp);
+			}
+			break;
+		case CHAT_PLAYER:
+			if (self_send) {
+				Strings.SetDParamStr(0, name);
+				temp = Strings.GetString(Str.STR_NETWORK_CHAT_TO_COMPANY);
 				message = String.format("%s %s", temp, buf);
-				break;
+			} else {
+				Strings.SetDParamStr(0, name);
+				temp = Strings.GetString(Str.STR_NETWORK_CHAT_COMPANY);
+				message = String.format("%s %s", temp, buf);
+			}
+			break;
+		case CHAT_CLIENT:
+			if (self_send) {
+				Strings.SetDParamStr(0, name);
+				temp = Strings.GetString(Str.STR_NETWORK_CHAT_TO_CLIENT);
+				message = String.format("%s %s", temp, buf);
+			} else {
+				Strings.SetDParamStr(0, name);
+				temp = Strings.GetString(Str.STR_NETWORK_CHAT_CLIENT);
+				message = String.format("%s %s", temp, buf);
+			}
+			break;
+		case NAME_CHANGE:
+			temp = Strings.GetString(Str.STR_NETWORK_NAME_CHANGE);
+			message = String.format("*** %s %s %s", name, temp, buf);
+			break;
+		default:
+			Strings.SetDParamStr(0, name);
+			temp = Strings.GetString(Str.STR_NETWORK_CHAT_ALL);
+			message = String.format("%s %s", temp, buf);
+			break;
 		}
 
 		Console.IConsolePrintF(color, "%s", message);
@@ -268,17 +297,17 @@ public class Net implements NetDefs
 		}
 
 		switch(res) {
-			case DESYNC: errorno = NetworkErrorCode.DESYNC; break;
-			case SAVEGAME: errorno = NetworkErrorCode.SAVEGAME_FAILED; break;
-			default: errorno = NetworkErrorCode.GENERAL;
+		case DESYNC: errorno = NetworkErrorCode.DESYNC; break;
+		case SAVEGAME: errorno = NetworkErrorCode.SAVEGAME_FAILED; break;
+		default: errorno = NetworkErrorCode.GENERAL;
 		}
 		// This means we fucked up and the server closed the connection
 		if (res != NetworkRecvStatus.SERVER_ERROR && res != NetworkRecvStatus.SERVER_FULL &&
 				res != NetworkRecvStatus.SERVER_BANNED) {
-			SEND_COMMAND(PACKET_CLIENT_ERROR, errorno);
+			SEND_COMMAND(PacketType.CLIENT_ERROR, errorno);
 
 			// Dequeue all commands before closing the socket
-			NetworkSend_Packets(DEREF_CLIENT(0));
+			NetworkSend_Packets(_clients[0]);
 		}
 
 		Global._switch_mode = SwitchModes.SM_MENU;
@@ -287,8 +316,28 @@ public class Net implements NetDefs
 	}
 
 	// Find all IP-aliases for this host
-	static void NetworkFindIPs()
+	static void NetworkFindIPs() throws SocketException
 	{
+		Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+		while(e.hasMoreElements())
+		{
+			NetworkInterface n = e.nextElement();
+			Enumeration<InetAddress> ee = n.getInetAddresses();
+			while (ee.hasMoreElements())
+			{
+				InetAddress i = ee.nextElement();
+				//System.out.println(i.getHostAddress());
+
+				if(i.isLoopbackAddress()) continue;
+
+				_network_ip_list.add(i);
+				Global.DEBUG_net( 3, "my addr %s", i.getHostAddress());
+			}
+		}		
+
+
+
+		/*
 		int i, last;
 
 		ifaddrs ifap, ifa;
@@ -331,11 +380,14 @@ public class Net implements NetDefs
 			Global.DEBUG_net( 3, " %d) %s", i, inet_ntoa(*(struct in_addr *)&_network_ip_list[i]));//inet_ntoa(inaddr));
 			i++;
 		}
+		 */
 	}
 
 	// Resolve a hostname to a inet_addr
-	long NetworkResolveHost(final String hostname)
+	static InetAddress NetworkResolveHost(final String hostname) throws UnknownHostException
 	{
+		return InetAddress.getByName(hostname); 
+		/*
 		in_addr_t ip;
 
 		// First try: is it an ip address?
@@ -353,12 +405,13 @@ public class Net implements NetDefs
 			}
 		}
 		return ip;
+		 */
 	}
 
 	/**
 	// Converts a string to ip/port/player
-	* @param s  Format: IP#player:port
-	*/
+	 * @param s  Format: IP#player:port
+	 */
 	boolean ParseConnectionString(final String []player, final String []port, String [] host, String s)
 	{
 		int epl = s.indexOf(':');
@@ -373,7 +426,7 @@ public class Net implements NetDefs
 		int eip = s.indexOf('#');
 		//if(eip < 0) return false;
 		if(eip == 0) return false;
-		
+
 		if(eip > 0)
 		{
 			host[0] = s.substring(0,eip);
@@ -381,23 +434,23 @@ public class Net implements NetDefs
 		}
 		else 
 			host[0] = s;
-		
+
 		return true;
 		/*String p;
 		for (p = connection_string; *p != '\0'; p++) {
 			if (*p == '#') {
-				*player = p + 1;
-				*p = '\0';
+		 *player = p + 1;
+		 *p = '\0';
 			} else if (*p == ':') {
-				*port = p + 1;
-				*p = '\0';
+		 *port = p + 1;
+		 *p = '\0';
 			}
 		}*/
 	}
 
 	// Creates a new client from a socket
 	//   Used both by the server and the client
-	static NetworkClientState NetworkAllocClient(SOCKET s)
+	static NetworkClientState NetworkAllocClient(Socket s)
 	{
 		NetworkClientState cs;
 		NetworkClientInfo ci;
@@ -415,8 +468,11 @@ public class Net implements NetDefs
 			client_no = _network_clients_connected++;
 		}
 
-		cs = &_clients[client_no];
-		memset(cs, 0, sizeof(*cs));
+		//cs = &_clients[client_no];
+		//memset(cs, 0, sizeof(*cs));
+		cs = new NetworkClientState();
+		_clients[client_no] = cs;
+
 		cs.socket = s;
 		cs.last_frame = 0;
 		cs.quited = false;
@@ -425,12 +481,13 @@ public class Net implements NetDefs
 		cs.last_frame_server = Global._frame_counter;
 
 		if (Global._network_server) {
-			ci = DEREF_CLIENT_INFO(cs);
-			memset(ci, 0, sizeof(*ci));
+			ci = new NetworkClientInfo();
+			_network_client_info[cs - _clients] = ci; //DEREF_CLIENT_INFO(cs);
+			//memset(ci, 0, sizeof(*ci));
 
 			cs.index = _network_client_index++;
 			ci.client_index = cs.index;
-			ci.join_date = _date;
+			ci.join_date = Global.get_date();
 
 			Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 		}
@@ -443,19 +500,19 @@ public class Net implements NetDefs
 	{
 		NetworkClientInfo ci;
 		// Socket is already dead
-		if (cs.socket == INVALID_SOCKET) {
+		if (cs.socket == null) {
 			cs.quited = true;
 			return;
 		}
 
 		Global.DEBUG_net( 1, "[NET] Closed client connection");
 
-		if (!cs.quited && Global._network_server && cs.status > STATUS_INACTIVE) {
+		if (!cs.quited && Global._network_server && cs.status.ordinal() > ClientStatus.INACTIVE.ordinal()) {
 			// We did not receive a leave message from this client...
 			NetworkErrorCode errorno = NetworkErrorCode.CONNECTION_LOST;
 			String str;
 			String client_name;
-			NetworkClientState new_cs;
+			//NetworkClientState new_cs;
 
 			client_name = NetworkGetClientName(cs);
 
@@ -465,29 +522,32 @@ public class Net implements NetDefs
 			NetworkTextMessage(NetworkAction.LEAVE, 1, false, client_name, "%s", str);
 
 			// Inform other clients of this... strange leaving ;)
-			FOR_ALL_CLIENTS(new_cs) {
-				if (new_cs.status > STATUS_AUTH && cs != new_cs) {
-					SEND_COMMAND(PACKET_SERVER_ERROR_QUIT, new_cs, cs.index, errorno);
+			//FOR_ALL_CLIENTS(new_cs) 
+			for(NetworkClientState new_cs : _clients) 
+			{
+				if (new_cs.status.ordinal() > ClientStatus.AUTH.ordinal() && cs != new_cs) {
+					SEND_COMMAND(PacketType.SERVER_ERROR_QUIT, new_cs, cs.index, errorno);
 				}
 			}
 		}
 
 		/* When the client was PRE_ACTIVE, the server was in pause mode, so unpause */
-		if (cs.status == STATUS_PRE_ACTIVE && _network_pause_on_join) {
-			DoCommandP(0, 0, 0, null, CMD_PAUSE);
+		if (cs.status == ClientStatus.PRE_ACTIVE && _network_pause_on_join) {
+			Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE);
 			NetworkServer_HandleChat(NetworkAction.CHAT, DESTTYPE_BROADCAST, 0, "Game unpaused", NETWORK_SERVER_INDEX);
 		}
 
-		closesocket(cs.socket);
+		cs.socket.close();
 		cs.writable = false;
 		cs.quited = true;
 
 		// Free all pending and partially received packets
-		while (cs.packet_queue != null) {
+		/*while (cs.packet_queue != null) {
 			Packet p = cs.packet_queue.next;
 			//free(cs.packet_queue);
 			cs.packet_queue = p;
-		}
+		}*/
+		cs.packet_queue = null;
 		//free(cs.packet_recv);
 		cs.packet_recv = null;
 
@@ -498,27 +558,27 @@ public class Net implements NetDefs
 		}
 
 		// Close the gap in the client-list
-		ci = DEREF_CLIENT_INFO(cs);
+		ci = _network_client_info[cs - _clients]; // DEREF_CLIENT_INFO(cs);
 
 		if (Global._network_server) {
 			// We just lost one client :(
-			if (cs.status > STATUS_INACTIVE)
+			if (cs.status.ordinal() > ClientStatus.INACTIVE.ordinal())
 				_network_game_info.clients_on--;
 			_network_clients_connected--;
 
-			while ((cs + 1) != DEREF_CLIENT(MAX_CLIENTS) && (cs + 1).socket != INVALID_SOCKET) {
+			while ((cs + 1) != _clients[MAX_CLIENTS] && (cs + 1).socket != null) {
 				*cs = *(cs + 1);
 				*ci = *(ci + 1);
 				cs++;
 				ci++;
 			}
 
-			InvalidateWindow(WC_CLIENT_LIST, 0);
+			Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 		}
 
 		// Reset the status of the last socket
-		cs.socket = INVALID_SOCKET;
-		cs.status = STATUS_INACTIVE;
+		cs.socket = null;
+		cs.status = ClientStatus.INACTIVE;
 		cs.index = NETWORK_EMPTY_INDEX;
 		ci.client_index = NETWORK_EMPTY_INDEX;
 	}
@@ -526,11 +586,18 @@ public class Net implements NetDefs
 	// A client wants to connect to a server
 	static boolean NetworkConnect(final String hostname, int port)
 	{
-		SOCKET s;
-		sockaddr_in sin;
 
 		Global.DEBUG_net( 1, "[NET] Connecting to %s %d", hostname, port);
 
+		Socket s;
+
+
+		s = new Socket(hostname,port);
+
+		//s.set
+
+		/*
+		sockaddr_in sin;
 		s = socket(AF_INET, SOCK_STREAM, 0);
 		if (s == INVALID_SOCKET) {
 			ClientStartError("socket() failed");
@@ -552,11 +619,12 @@ public class Net implements NetDefs
 
 		if (!SetNonBlocking(s))
 			Global.DEBUG_net( 0, "[NET] Setting non-blocking failed"); // XXX should this be an error?
+		 */
 
 		// in client mode, only the first client field is used. it's pointing to the server.
 		NetworkAllocClient(s);
 
-		ShowJoinStatusWindow();
+		NetGui.ShowJoinStatusWindow();
 
 		//memcpy(&network_tmp_patches, &Global._patches, sizeof(_patches));
 		memcpy(network_tmp_patches, Global._patches );
@@ -567,21 +635,21 @@ public class Net implements NetDefs
 	// For the server, to accept new clients
 	static void NetworkAcceptClients()
 	{
-		sockaddr_in sin;
-		SOCKET s;
+		//sockaddr_in sin;
+		Socket s;
 		NetworkClientState cs;
 		int i;
 		boolean banned;
 
 		// Should never ever happen.. is it possible??
-		assert(_listensocket != INVALID_SOCKET);
+		assert(_listensocket != null);
 
 		for (;;) {
-			socklen_t sin_len;
+			//socklen_t sin_len;
 
-			sin_len = sizeof(sin);
-			s = accept(_listensocket, (struct sockaddr*)&sin, &sin_len);
-			if (s == INVALID_SOCKET) return;
+			//sin_len = sizeof(sin);
+			s = _listensocket.accept();
+			if (s == null) return; // XXX Can be?
 
 			SetNonBlocking(s); // XXX error handling?
 
@@ -591,22 +659,20 @@ public class Net implements NetDefs
 
 			/* Check if the client is banned */
 			banned = false;
-			for (i = 0; i < lengthof(_network_ban_list); i++) {
+			for (i = 0; i < _network_ban_list.length; i++) {
 				if (_network_ban_list[i] == null)
 					continue;
 
-				if (sin.sin_addr.s_addr == inet_addr(_network_ban_list[i])) {
-					Packet *p = NetworkSend_Init(PACKET_SERVER_BANNED);
+				//if (sin.sin_addr.s_addr == inet_addr(_network_ban_list[i])) {
+				if( s.getInetAddress().equals(NetworkResolveHost(_network_ban_list[i]))) {
+					Packet p = NetworkSend_Init(PacketType.SERVER_BANNED);
 
 					Global.DEBUG_net( 1, "[NET] Banned ip tried to join (%s), refused", _network_ban_list[i]);
 
-					p.buffer[0] = p.size & 0xFF;
-					p.buffer[1] = p.size >> 8;
+					p.sendTo(s);
+					s.close();
 
-					send(s, p.buffer, p.size, 0);
-					closesocket(s);
-
-					free(p);
+					//free(p);
 
 					banned = true;
 					break;
@@ -620,44 +686,42 @@ public class Net implements NetDefs
 			if (cs == null) {
 				// no more clients allowed?
 				// Send to the client that we are full!
-				Packet *p = NetworkSend_Init(PACKET_SERVER_FULL);
+				Packet p = NetworkSend_Init(PacketType.SERVER_FULL);
+				p.sendTo(s);
+				s.close();
 
-				p.buffer[0] = p.size & 0xFF;
-				p.buffer[1] = p.size >> 8;
-
-				send(s, p.buffer, p.size, 0);
-				closesocket(s);
-
-				free(p);
+				//free(p);
 
 				continue;
 			}
 
 			// a new client has connected. We set him at inactive for now
-			//  maybe he is only requesting server-info. Till he has sent a PACKET_CLIENT_MAP_OK
+			//  maybe he is only requesting server-info. Till he has sent a PacketType.CLIENT_MAP_OK
 			//  the client stays inactive
-			cs.status = STATUS_INACTIVE;
+			cs.status = ClientStatus.INACTIVE;
 
 			{
 				// Save the IP of the client
 				NetworkClientInfo ci;
-				ci = DEREF_CLIENT_INFO(cs);
+				ci = _network_client_info[cs - _clients]; // DEREF_CLIENT_INFO(cs);
 				ci.client_ip = sin.sin_addr.s_addr;
 			}
 		}
 	}
 
 	// Set up the listen socket for the server
-	static boolean NetworkListen()
+	static boolean NetworkListen() throws IOException
 	{
-		SOCKET ls;
-		sockaddr_in sin;
+		ServerSocket ls;
+		//sockaddr_in sin;
 		int port;
 
 		port = _network_server_port;
 
 		Global.DEBUG_net( 1, "[NET] Listening on %s:%d", _network_server_bind_ip_host, port);
 
+		ls = new ServerSocket(port);
+		/* TODO
 		ls = socket(AF_INET, SOCK_STREAM, 0);
 		if (ls == INVALID_SOCKET) {
 			ServerStartError("socket() on listen socket failed");
@@ -685,10 +749,12 @@ public class Net implements NetDefs
 			return false;
 		}
 
-		if (listen(ls, 1) != 0) {
+		if (ls.listen(1) != 0) {
 			ServerStartError("listen() failed");
 			return false;
 		}
+
+		 */
 
 		_listensocket = ls;
 
@@ -702,7 +768,7 @@ public class Net implements NetDefs
 
 		FOR_ALL_CLIENTS(cs) {
 			if (!Global._network_server) {
-				SEND_COMMAND(PACKET_CLIENT_QUIT, "leaving");
+				SEND_COMMAND(PacketType.CLIENT_QUIT, "leaving");
 				NetworkSend_Packets(cs);
 			}
 			NetworkCloseClient(cs);
@@ -710,8 +776,8 @@ public class Net implements NetDefs
 
 		if (Global._network_server) {
 			// We are a server, also close the listensocket
-			closesocket(_listensocket);
-			_listensocket = INVALID_SOCKET;
+			_listensocket.close();;
+			_listensocket = null;
 			Global.DEBUG_net( 1, "[NET] Closed listener");
 			NetworkUDPClose();
 		}
@@ -720,21 +786,23 @@ public class Net implements NetDefs
 	// Inits the network (cleans sockets and stuff)
 	static void NetworkInitialize()
 	{
-		NetworkClientState cs;
+		//NetworkClientState cs;
 
 		_local_command_queue = null;
 
 		// Clean all client-sockets
-		memset(_clients, 0, sizeof(_clients));
-		for (cs : _clients) {
-			cs.socket = INVALID_SOCKET;
-			cs.status = STATUS_INACTIVE;
+		//memset(_clients, 0, sizeof(_clients));
+		for (NetworkClientState cs : _clients) {
+			cs.socket = null;
+			cs.status = ClientStatus.INACTIVE;
 			cs.command_queue = null;
 		}
 
 		// Clean the client_info memory
-		memset(_network_client_info, 0, sizeof(_network_client_info));
-		memset(_network_player_info, 0, sizeof(_network_player_info));
+		//memset(_network_client_info, 0, sizeof(_network_client_info));
+		_network_client_info = new NetworkClientInfo[MAX_CLIENT_INFO];
+		//memset(_network_player_info, 0, sizeof(_network_player_info));
+		_network_player_info = new NetworkPlayerInfo[Global.MAX_PLAYERS];
 		_network_lobby_company_count = 0;
 
 		_sync_frame = 0;
@@ -765,12 +833,12 @@ public class Net implements NetDefs
 		// Try to connect
 		Global._networking = NetworkConnect(host, port);
 
-//		ttd_strlcpy(_network_last_host, host, sizeof(_network_last_host));
-//		_network_last_port = port;
+		//		ttd_strlcpy(_network_last_host, host, sizeof(_network_last_host));
+		//		_network_last_port = port;
 
 		// We are connected
 		if (Global._networking) {
-			SEND_COMMAND(PACKET_CLIENT_COMPANY_INFO );
+			SEND_COMMAND(PacketType.CLIENT_COMPANY_INFO );
 			return null;
 		}
 
@@ -842,7 +910,7 @@ public class Net implements NetDefs
 
 		// We are connected
 		if (Global._networking) {
-			IConsoleCmdExec("exec scripts/on_client.scr 0");
+			Console.IConsoleCmdExec("exec scripts/on_client.scr 0");
 			NetworkClient_Connected();
 		} else {
 			// Connecting failed
@@ -863,33 +931,33 @@ public class Net implements NetDefs
 			_network_game_info.server_name = "Unnamed Server";
 
 		// The server is a client too ;)
-		if (_network_dedicated) {
+		if (Global._network_dedicated) {
 			_network_game_info.clients_on = 0;
 			_network_game_info.dedicated = true;
 		} else {
 			_network_game_info.clients_on = 1;
 			_network_game_info.dedicated = false;
 		}
-		ttd_strlcpy(_network_game_info.server_revision, _openttd_revision, sizeof(_network_game_info.server_revision));
+		_network_game_info.server_revision = Version.NAME;
 		_network_game_info.spectators_on = 0;
-		_network_game_info.game_date = _date;
-		_network_game_info.start_date = ConvertIntDate(_patches.starting_date);
-		_network_game_info.map_width = MapSizeX();
-		_network_game_info.map_height = MapSizeY();
-		_network_game_info.map_set = _opt.landscape;
+		_network_game_info.game_date = Global.get_date();
+		_network_game_info.start_date = GameDate.ConvertIntDate(Global._patches.starting_date);
+		_network_game_info.map_width = Global.MapSizeX();
+		_network_game_info.map_height = Global.MapSizeY();
+		_network_game_info.map_set = GameOptions._opt.landscape;
 
-		_network_game_info.use_password = (_network_server_password[0] != '\0');
+		_network_game_info.use_password = !_network_server_password.isBlank();
 
 		// We use _network_client_info[MAX_CLIENT_INFO - 1] to store the server-data in it
 		//  The index is NETWORK_SERVER_INDEX ( = 1)
-		ci = &_network_client_info[MAX_CLIENT_INFO - 1];
+		ci = _network_client_info[MAX_CLIENT_INFO - 1];
 		memset(ci, 0, sizeof(*ci));
 
 		ci.client_index = NETWORK_SERVER_INDEX;
-		if (_network_dedicated)
-			ci.client_playas = OWNER_SPECTATOR;
+		if (Global._network_dedicated)
+			ci.client_playas = Owner.OWNER_SPECTATOR;
 		else
-			ci.client_playas = _local_player + 1;
+			ci.client_playas = PlayerID.getCurrent().id + 1;
 		ci.client_name = _network_player_name;
 		ci.unique_id = _network_unique_id;
 	}
@@ -899,8 +967,8 @@ public class Net implements NetDefs
 		if (!Global._network_available) return false;
 
 		/* Call the pre-scripts */
-		IConsoleCmdExec("exec scripts/pre_server.scr 0");
-		if (_network_dedicated) IConsoleCmdExec("exec scripts/pre_dedicated.scr 0");
+		Console.IConsoleCmdExec("exec scripts/pre_server.scr 0");
+		if (Global._network_dedicated) Console.IConsoleCmdExec("exec scripts/pre_dedicated.scr 0");
 
 		NetworkInitialize();
 		if (!NetworkListen())
@@ -908,7 +976,7 @@ public class Net implements NetDefs
 
 		// Try to start UDP-server
 		_network_udp_server = true;
-		_network_udp_server = NetworkUDPListen(&_udp_server_socket, _network_server_bind_ip, _network_server_port, false);
+		_network_udp_server = NetworkUDPListen(_udp_server_socket, _network_server_bind_ip, _network_server_port, false);
 
 		Global._network_server = true;
 		Global._networking = true;
@@ -918,17 +986,17 @@ public class Net implements NetDefs
 		_last_sync_frame = 0;
 		_network_own_client_index = NETWORK_SERVER_INDEX;
 
-		if (!_network_dedicated)
-			_network_playas = 1;
+		if (!Global._network_dedicated)
+			Global._network_playas = 1;
 
 		_network_clients_connected = 0;
 
 		NetworkInitGameInfo();
 
 		// execute server initialization script
-		IConsoleCmdExec("exec scripts/on_server.scr 0");
+		Console.IConsoleCmdExec("exec scripts/on_server.scr 0");
 		// if the server is dedicated ... add some other script
-		if (_network_dedicated) IConsoleCmdExec("exec scripts/on_dedicated.scr 0");
+		if (Global._network_dedicated) Console.IConsoleCmdExec("exec scripts/on_dedicated.scr 0");
 
 		/* Try to register us to the master server */
 		_network_last_advertise_date = 0;
@@ -943,7 +1011,7 @@ public class Net implements NetDefs
 		if (Global._network_server) {
 			NetworkClientState cs;
 			FOR_ALL_CLIENTS(cs) {
-				SEND_COMMAND(PACKET_SERVER_NEWGAME, cs);
+				SEND_COMMAND(PacketType.SERVER_NEWGAME, cs);
 				NetworkSend_Packets(cs);
 			}
 		}
@@ -968,7 +1036,7 @@ public class Net implements NetDefs
 		if (Global._network_server) {
 			//NetworkClientState cs;
 			FOR_ALL_CLIENTS(cs -> {
-				SEND_COMMAND(PACKET_SERVER_SHUTDOWN, cs);
+				SEND_COMMAND(PacketType.SERVER_SHUTDOWN, cs);
 				NetworkSend_Packets(cs);
 			});
 		}
@@ -976,7 +1044,7 @@ public class Net implements NetDefs
 		if (_network_advertise)
 			NetworkUDPRemoveAdvertise();
 
-		DeleteWindowById(WC_NETWORK_STATUS_WINDOW, 0);
+		Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
 		NetworkClose();
 
@@ -1005,21 +1073,28 @@ public class Net implements NetDefs
 				s.accept(cs);
 		}
 	}
-	
+
 	// Receives something from the network
 	static boolean NetworkReceive()
 	{
 		//NetworkClientState cs;
 		int n;
-		fd_set read_fd, write_fd;
-		 timeval tv;
+		//fd_set read_fd, write_fd;
+		//timeval tv;
 
-		FD_ZERO(&read_fd);
-		FD_ZERO(&write_fd);
+		Selector selector = Selector.open();
+
+		//FD_ZERO(&read_fd);
+		//FD_ZERO(&write_fd);
 
 		FOR_ALL_CLIENTS(cs) {
-			FD_SET(cs.socket, &read_fd);
-			FD_SET(cs.socket, &write_fd);
+			//FD_SET(cs.socket, &read_fd);
+			//FD_SET(cs.socket, &write_fd);
+
+			SocketChannel socketChannel = null; // XXX
+			socketChannel.configureBlocking(false);
+			socketChannel.register(selector, SelectionKey.OP_READ);
+			socketChannel.register(selector, SelectionKey.OP_WRITE);
 		}
 
 		// take care of listener port
@@ -1027,20 +1102,23 @@ public class Net implements NetDefs
 			FD_SET(_listensocket, &read_fd);
 		}
 
-		tv.tv_sec = tv.tv_usec = 0; // don't block at all.
+		//tv.tv_sec = tv.tv_usec = 0; // don't block at all.
 
-		n = select(FD_SETSIZE, &read_fd, &write_fd, null, &tv);
+		//n = select(FD_SETSIZE, &read_fd, &write_fd, null, &tv);
 		if (n == -1 && !Global._network_server) NetworkError(Str.STR_NETWORK_ERR_LOSTCONNECTION);
 
+		int count = selector.selectNow();
+
+		/*
 		// accept clients..
 		if (Global._network_server && FD_ISSET(_listensocket, &read_fd))
 			NetworkAcceptClients();
 
 		// read stuff from clients
 		for(cs : _clients)
-			{
+		{
 			if(!cs.hasValidSocket()) continue;
-			
+
 			cs.writable = !!FD_ISSET(cs.socket, &write_fd);
 			if (FD_ISSET(cs.socket, &read_fd)) {
 				if (Global._network_server)
@@ -1058,7 +1136,8 @@ public class Net implements NetDefs
 					}
 				}
 			}
-		});
+		}
+		*/
 		return true;
 	}
 
@@ -1070,9 +1149,9 @@ public class Net implements NetDefs
 			if (cs.writable) {
 				NetworkSend_Packets(cs);
 
-				if (cs.status == STATUS_MAP) {
+				if (cs.status == ClientStatus.MAP) {
 					// This client is in the middle of a map-send, call the function for that
-					SEND_COMMAND(PACKET_SERVER_MAP, cs);
+					SEND_COMMAND(PacketType.SERVER_MAP, cs);
 				}
 			}
 		});
@@ -1097,7 +1176,7 @@ public class Net implements NetDefs
 				// If we reach here, it means for whatever reason, we've already executed
 				// past the command we need to execute.
 				Global.DEBUG_net( 0, "[NET] Trying to execute a packet in the past!");
-				assert(0);
+				assert false;
 			}
 
 			// We can execute this command
@@ -1110,7 +1189,7 @@ public class Net implements NetDefs
 		// Just a safety check, to be removed in the future.
 		// Make sure that no older command appears towards the end of the queue
 		// In that case we missed executing it. This will never happen.
-		for(cp = _local_command_queue; cp; cp = cp.next) {
+		for(cp = _local_command_queue; cp != null; cp = cp.next) {
 			assert(Global._frame_counter < cp.frame);
 		}
 
@@ -1127,14 +1206,14 @@ public class Net implements NetDefs
 		// Check if we are in sync!
 		if (_sync_frame != 0) {
 			if (_sync_frame == Global._frame_counter) {
-	//#ifdef NETWORK_SEND_DOUBLE_SEED
-	//			if (_sync_seed_1 != _random_seeds[0][0] || _sync_seed_2 != _random_seeds[0][1]) {
-	//#else
+				//#ifdef NETWORK_SEND_DOUBLE_SEED
+				//			if (_sync_seed_1 != _random_seeds[0][0] || _sync_seed_2 != _random_seeds[0][1]) {
+				//#else
 				if (_sync_seed_1 != Global._random_seeds[0][0]) {
-	//#endif
+					//#endif
 					NetworkError(Str.STR_NETWORK_ERR_DESYNC);
 					Global.DEBUG_net( 0, "[NET] Sync error detected!");
-					NetworkClientError(NetworkRecvStatus.DESYNC, DEREF_CLIENT(0));
+					NetworkClientError(NetworkRecvStatus.DESYNC, _clients[0]);
 					return false;
 				}
 
@@ -1143,7 +1222,7 @@ public class Net implements NetDefs
 				//   frame as he is.. so we can start playing!
 				if (_network_first_time) {
 					_network_first_time = false;
-					SEND_COMMAND(PACKET_CLIENT_ACK);
+					SEND_COMMAND(PacketType.CLIENT_ACK);
 				}
 
 				_sync_frame = 0;
@@ -1156,16 +1235,17 @@ public class Net implements NetDefs
 		return true;
 	}
 
+
 	// We have to do some UDP checking
 	void NetworkUDPGameLoop()
 	{
 		if (_network_udp_server) {
 			NetworkUDPReceive(_udp_server_socket);
-			if (_udp_master_socket != INVALID_SOCKET) {
+			if (_udp_master_socket != null) {
 				NetworkUDPReceive(_udp_master_socket);
 			}
 		}
-		else if (_udp_client_socket != INVALID_SOCKET) {
+		else if (_udp_client_socket != null) {
 			NetworkUDPReceive(_udp_client_socket);
 			if (_network_udp_broadcast > 0)
 				_network_udp_broadcast--;
@@ -1197,9 +1277,9 @@ public class Net implements NetDefs
 			Main.StateGameLoop();
 
 			_sync_seed_1 = Global._random_seeds[0][0];
-	//#ifdef NETWORK_SEND_DOUBLE_SEED
-	//		_sync_seed_2 = _random_seeds[0][1];
-	//#endif
+			//#ifdef NETWORK_SEND_DOUBLE_SEED
+			//		_sync_seed_2 = _random_seeds[0][1];
+			//#endif
 
 			NetworkServer_Tick(send_frame);
 		} else {
@@ -1223,15 +1303,20 @@ public class Net implements NetDefs
 
 	static void NetworkGenerateUniqueId()
 	{
-		md5_state_t state;
-		md5_byte_t digest[16];
-		char hex_output[16*2 + 1];
-		char coding_string[NETWORK_NAME_LENGTH];
-		int di;
+		//md5_state_t state;
+		//md5_byte_t digest[16];
+		//char hex_output[16*2 + 1];
+		//int di;
 
-		snprintf(coding_string, sizeof(coding_string), "%d%s", (int)Random(), "OpenTTD Unique ID");
+		String coding_string = String.format("%d%s", (int)Hal.Random(), "OpenTTD Unique ID");
 
-		/* Generate the MD5 hash */
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		byte[] thedigest = md.digest(coding_string.getBytes());
+
+		byte[] digest = md.digest();
+		BigInteger bigInt = new BigInteger(1,digest);
+		_network_unique_id = bigInt.toString(16);		
+		/* Generate the MD5 hash * /
 		md5_init(&state);
 		md5_append(&state, (final md5_byte_t*)coding_string, strlen(coding_string));
 		md5_finish(&state, digest);
@@ -1239,8 +1324,9 @@ public class Net implements NetDefs
 		for (di = 0; di < 16; ++di)
 			sprintf(hex_output + di * 2, "%02x", digest[di]);
 
-		/* _network_unique_id is our id */
+		/* _network_unique_id is our id * /
 		snprintf(_network_unique_id, sizeof(_network_unique_id), "%s", hex_output);
+		 */
 	}
 
 	// This tries to launch the network for a given OS
@@ -1248,7 +1334,7 @@ public class Net implements NetDefs
 	{
 		Global.DEBUG_net( 3, "[NET][Core] Starting network...");
 
-	    // Network is available
+		// Network is available
 		Global._network_available = true;
 		Global._network_dedicated = false;
 		_network_last_advertise_date = 0;
@@ -1261,7 +1347,7 @@ public class Net implements NetDefs
 		_network_server_bind_ip_host = ntoa(_network_server_bind_ip);
 
 		/* Generate an unique id when there is none yet */
-		if (_network_unique_id[0] == '\0')
+		if (_network_unique_id.isBlank())
 			NetworkGenerateUniqueId();
 
 		//memset(&_network_game_info, 0, sizeof(_network_game_info));
@@ -1283,11 +1369,289 @@ public class Net implements NetDefs
 		Global.DEBUG_net( 3, "[NET][Core] Shutting down the network.");
 		Global._network_available = false;
 	}
-	
-	
-	
-	
-	
-	
-	
+
+
+	private static void SEND_COMMAND(PacketType clientAck, Object ... args ) {
+		// TODO Auto-generated method stub
+
+	}
+
+
+
+
+	// Create a packet for sending
+	static Packet NetworkSend_Init(PacketType type)
+	{
+		return new Packet(type);
+		/*
+		Packet packet = new Packet();
+		// An error is inplace here, because it simply means we ran out of memory.
+		//if (packet == null) error("Failed to allocate Packet");
+
+		// Skip the size so we can write that in before sending the packet
+		packet.size = sizeof(packet.size);
+		packet.buffer[packet.size++] = type;
+		packet.pos = 0;
+
+		return packet;
+		 */
+	}
+
+
+	// Sends all the buffered packets out for this client
+	//  it stops when:
+	//   1) all packets are send (queue is empty)
+	//   2) the OS reports back that it can not send any more
+	//        data right now (full network-buffer, it happens ;))
+	//   3) sending took too long
+	static boolean NetworkSend_Packets(NetworkClientState cs)
+	{
+		int res;
+		Packet p;
+
+		// We can not write to this socket!!
+		if (!cs.writable) return false;
+		if (cs.socket == null) return false;
+
+		p = cs.packet_queue;
+		while (p != null) {
+			//res = send(cs.socket, p.buffer + p.pos, p.size - p.pos, 0);
+			res = p.sendTo(cs.socket);
+			if (res == -1) {
+				int err = GET_LAST_ERROR();
+				if (err != EWOULDBLOCK) {
+					// Something went wrong.. close client!
+					Global.DEBUG_net(0,"[NET] send() failed with error %d", err);
+					CloseConnection(cs);
+					return false;
+				}
+				return true;
+			}
+			if (res == 0) {
+				// Client/server has left us :(
+				CloseConnection(cs);
+				return false;
+			}
+
+			p.pos += res;
+
+			// Is this packet sent?
+			if (p.pos == p.size) {
+				// Go to the next packet
+				cs.packet_queue = p.next;
+				//free(p);
+				p = cs.packet_queue;
+			} else
+				return true;
+		}
+
+		return true;
+	}
+
+	Packet NetworkRecv_Packet(NetworkClientState cs, NetworkRecvStatus [] status)
+	{
+		int res;
+		Packet p;
+
+		status[0] = NetworkRecvStatus.OKAY;
+
+		if (cs.socket == null) return null;
+
+		if (cs.packet_recv == null) {
+			cs.packet_recv = new Packet();
+			//if (cs.packet_recv == null) error("Failed to allocate packet");
+			// Set pos to zero!
+			//cs.packet_recv.pos = 0;
+			//cs.packet_recv.size = 0; // Can be ommited, just for safety reasons
+		}
+
+		p = cs.packet_recv;
+
+		// Read packet size
+		if (p.pos < sizeof(PacketSize)) {
+			while (p.pos < sizeof(PacketSize)) {
+				// Read the size of the packet
+				res = recv(cs.socket, p.buffer + p.pos, sizeof(PacketSize) - p.pos, 0);
+				if (res == -1) {
+					int err = GET_LAST_ERROR();
+					if (err != EWOULDBLOCK) {
+						// Something went wrong..
+						if (err != 104) // 104 is Connection Reset by Peer
+							Global.DEBUG_net(  0, "[NET] recv() failed with error %d", err);
+						status[0] = CloseConnection(cs);
+						return null;
+					}
+					// Connection would block, so stop for now
+					return null;
+				}
+				if (res == 0) {
+					// Client/server has left us :(
+					status[0] = CloseConnection(cs);
+					return null;
+				}
+				p.pos += res;
+			}
+
+			p.size = 0xFF & p.buffer[0];
+			p.size |= (0xFF & p.buffer[1]) << 8;
+
+			if (p.size > Packet.SEND_MTU) {
+				status[0] = CloseConnection(cs);
+				return null;
+			}
+		}
+
+		// Read rest of packet
+		while (p.pos < p.size) {
+			res = recv(cs.socket, p.buffer + p.pos, p.size - p.pos, 0);
+			if (res == -1) {
+				int err = GET_LAST_ERROR();
+				if (err != EWOULDBLOCK) {
+					// Something went wrong..
+					if (err != 104) // 104 is Connection Reset by Peer
+						Global.DEBUG_net(  0, "[NET] recv() failed with error %d", err);
+					status[0] = CloseConnection(cs);
+					return null;
+				}
+				// Connection would block
+				return null;
+			}
+			if (res == 0) {
+				// Client/server has left us :(
+				status[0] = CloseConnection(cs);
+				return null;
+			}
+
+			p.pos += res;
+		}
+
+		// We have a complete packet, return it!
+		p.pos = 2;
+		p.next = null; // Should not be needed, but who knows...
+
+		// Prepare for receiving a new packet
+		cs.packet_recv = null;
+
+		return p;
+	}
+
+	// Add a command to the local command queue
+	void NetworkAddCommandQueue(NetworkClientState cs, CommandPacket cp)
+	{
+		CommandPacket new_cp = new CommandPacket();
+
+		*new_cp = *cp;
+
+		if (cs.command_queue == null)
+			cs.command_queue = new_cp;
+		else {
+			CommandPacket c = cs.command_queue;
+			while (c.next != null) c = c.next;
+			c.next = new_cp;
+		}
+	}
+
+	// Prepare a DoCommand to be send over the network
+	void NetworkSend_Command(TileIndex tile, int p1, int p2, int cmd, CommandCallback callback)
+	{
+		CommandPacket c = new CommandPacket();
+		byte temp_callback;
+
+		c.player = _local_player;
+		c.next = null;
+		c.tile = tile;
+		c.p1 = p1;
+		c.p2 = p2;
+		c.cmd = cmd;
+		c.callback = 0;
+
+		temp_callback = 0;
+
+		while (temp_callback < _callback_table_count && _callback_table[temp_callback] != callback)
+			temp_callback++;
+		if (temp_callback == _callback_table_count) {
+			Global.DEBUG_net(  0, "[NET] Unknown callback. (Pointer: %p) No callback sent.", callback);
+			temp_callback = 0; /* _callback_table[0] == null */
+		}
+
+		if (Global._network_server) {
+			// We are the server, so set the command to be executed next possible frame
+			c.frame = _frame_counter_max + 1;
+		} else {
+			c.frame = 0; // The client can't tell which frame, so just make it 0
+		}
+
+		c.text = (Global._cmd_text != null) ? Global._cmd_text : "";
+
+		if (Global._network_server) {
+			// If we are the server, we queue the command in our 'special' queue.
+			//   In theory, we could execute the command right away, but then the
+			//   client on the server can do everything 1 tick faster than others.
+			//   So to keep the game fair, we delay the command with 1 tick
+			//   which gives about the same speed as most clients.
+			NetworkClientState cs;
+
+			// And we queue it for delivery to the clients
+			FOR_ALL_CLIENTS(cs) {
+				if (cs.status > STATUS_AUTH) {
+					NetworkAddCommandQueue(cs, c);
+				}
+			}
+
+			// Only the server gets the callback, because clients should not get them
+			c.callback = temp_callback;
+			if (_local_command_queue == null) {
+				_local_command_queue = c;
+			} else {
+				// Find last packet
+				CommandPacket cp = _local_command_queue;
+				while (cp.next != null) cp = cp.next;
+				cp.next = c;
+			}
+
+			return;
+		}
+
+		// Clients send their command to the server and forget all about the packet
+		c.callback = temp_callback;
+		SEND_COMMAND(PACKET_CLIENT_COMMAND,c);
+	}
+
+	// Execute a DoCommand we received from the network
+	static void NetworkExecuteCommand(CommandPacket cp)
+	{
+		PlayerID.setCurrent( cp.player );
+		Global._cmd_text = cp.text;
+		/* cp.callback is unsigned. so we don't need to do lower bounds checking. */
+		if (cp.callback > _callback_table_count) {
+			Global.DEBUG_net( 0, "[NET] Received out-of-bounds callback! (%d)", cp.callback);
+			cp.callback = 0;
+		}
+		Cmd.DoCommandP(cp.tile, cp.p1, cp.p2, _callback_table[cp.callback], cp.cmd | Cmd.CMD_NETWORK_COMMAND);
+	}
+
+
+
+	// Functions to help NetworkRecv_Packet/NetworkSend_Packet a bit
+	//  A socket can make errors. When that happens
+	//  this handles what to do.
+	// For clients: close connection and drop back to main-menu
+	// For servers: close connection and that is it
+	static NetworkRecvStatus CloseConnection(NetworkClientState cs)
+	{
+		NetworkCloseClient(cs);
+
+		// Clients drop back to the main menu
+		if (!Global._network_server) {
+			Global._switch_mode = SwitchModes.SM_MENU;
+			Global._networking = false;
+			Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_LOSTCONNECTION);
+
+			return NetworkRecvStatus.CONN_LOST;
+		}
+
+		return NetworkRecvStatus.OKAY;
+	}
+
+
 }
