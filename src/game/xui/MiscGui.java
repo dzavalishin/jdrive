@@ -791,7 +791,8 @@ public class MiscGui {
 
 
 
-	static int HandleEditBoxKey(Window w, int wid, WindowEvent we)
+	// TODO move to Textbuf or Window
+	public static int HandleEditBoxKey(Window w, int wid, WindowEvent we)
 	{
 		we.cont = false;
 
@@ -826,13 +827,15 @@ public class MiscGui {
 	}
 
 
-	static void HandleEditBox(Window w, int wid)
+	// TODO move to Textbuf or Window
+	public static void HandleEditBox(Window w, int wid)
 	{
 		if (w.as_querystr_d().text.HandleCaret()) 
 			w.InvalidateWidget(wid);
 	}
 
-	static void DrawEditBox(Window w, int wid)
+	// TODO move to Textbuf or Window
+	public static void DrawEditBox(Window w, int wid)
 	{
 		final Widget wi = w.widget.get(wid);
 		final Textbuf tb = w.as_querystr_d().text;
@@ -1060,11 +1063,12 @@ public class MiscGui {
 
 
 	// Colors for fios types
-	final static byte _fios_colors[] = {13, 9, 9, 6, 5, 6, 5};
+	/*	FIOS_TYPE_FILE, FIOS_TYPE_OLDFILE etc. different colours */
+	public final static byte _fios_colors[] = {13, 9, 9, 6, 5, 6, 5};
 	private static List<FiosItem> _fios_list;
 	private static FiosItem o_dir = new FiosItem();
 
-	static void BuildFileList()
+	public static void BuildFileList()
 	{
 		
 		_fios_path_changed = true;
@@ -1366,7 +1370,7 @@ public class MiscGui {
 			_save_dialog_scen_desc,
 	};
 
-	static void ShowSaveLoadDialog(int mode)
+	public static void ShowSaveLoadDialog(int mode)
 	{
 		Window w;
 
@@ -1525,7 +1529,7 @@ public class MiscGui {
 		}
 	}
 
-	static void SetFiosType(final FiosType type)
+	public static void SetFiosType(final FiosType type)
 	{
 
 		switch (type) {

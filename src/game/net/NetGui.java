@@ -1,30 +1,47 @@
 package game.net;
 
+import game.Global;
+import game.Hal;
+import game.Main;
+import game.Sprite;
 import game.Str;
+import game.enums.Owner;
+import game.enums.WindowEvents;
+import game.ids.StringID;
+import game.struct.FiosItem;
+import game.util.BitOps;
+import game.util.FileIO;
+import game.util.Strings;
+import game.xui.Gfx;
+import game.xui.IntroGui;
+import game.xui.MiscGui;
 import game.xui.Widget;
 import game.xui.Window;
+import game.xui.WindowDesc;
+import game.xui.WindowEvent;
 
-public class NetGui {
+public class NetGui extends Net implements NetDefs 
+{
 
 
 	private static final int  BGC = 5;
 	private static final int BTC = 15;
 	private static final int MAX_QUERYSTR_LEN = 64;
-	static char _edit_str_buf[MAX_QUERYStr.STR_LEN*2];
+	//static char _edit_str_buf[MAX_QUERYStr.STR_LEN*2];
 
-	static byte _selected_field;
+	static int _selected_field;
 	static boolean _first_time_show_network_game_window = true;
 
-	static final StringID _connection_types_dropdown[] = {
+	static final int _connection_types_dropdown[] = {
 		Str.STR_NETWORK_LAN_INTERNET,
 		Str.STR_NETWORK_INTERNET_ADVERTISE,
-		INVALID_STRING_ID
+		Str.INVALID_STRING_ID().id
 	};
 
-	static final StringID _lan_internet_types_dropdown[] = {
+	static final int _lan_internet_types_dropdown[] = {
 		Str.STR_NETWORK_LAN,
 		Str.STR_NETWORK_INTERNET,
-		INVALID_STRING_ID
+		Str.INVALID_STRING_ID().id
 	};
 
 	//enum {
@@ -35,7 +52,7 @@ public class NetGui {
 	//};
 
 	static NetworkGameList _selected_item = null;
-	static int8 _selected_company_item = -1;
+	static int _selected_company_item = -1;
 
 	//extern final char _openttd_revision[];
 
@@ -44,58 +61,59 @@ public class NetGui {
 	// called when a new server is found on the network
 	void UpdateNetworkGameWindow(boolean unselect)
 	{
-		Window  w = FindWindowById(Window.WC_NETWORK_WINDOW, 0);
+		Window  w = Window.FindWindowById(Window.WC_NETWORK_WINDOW, 0);
 
 		if (w != null) {
 			if (unselect) _selected_item = null;
-			w.vscroll.count = _network_game_count;
-			SetWindowDirty(w);
+			w.vscroll.setCount(_network_game_count);
+			w.SetWindowDirty();
 		}
 	}
 
 	static void NetworkGameWindowWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_CREATE: /* focus input box */
+		case WE_CREATE: /* focus input box */
 			_selected_field = 3;
 			_selected_item = null;
 			break;
 
-		case WindowEvents.WE_PAINT: {
-			final NetworkGameList* sel = _selected_item;
+		case WE_PAINT: {
+			final NetworkGameList sel = _selected_item;
 
 			w.disabled_state = 0;
 
 			if (sel == null) {
-				SETBIT(w.disabled_state, 17); SETBIT(w.disabled_state, 18);
+				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 17); 
+				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 18);
 			} else if (!sel.online) {
-				SETBIT(w.disabled_state, 17); // Server offline, join button disabled
+				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 17); // Server offline, join button disabled
 			} else if (sel.info.clients_on == sel.info.clients_max) {
-				SETBIT(w.disabled_state, 17); // Server full, join button disabled
+				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 17); // Server full, join button disabled
 
 				// revisions don't match, check if server has no revision; then allow connection
 			} else if (strncmp(sel.info.server_revision, _openttd_revision, NETWORK_REVISION_LENGTH - 1) != 0) {
 				if (strncmp(sel.info.server_revision, NOREV_STRING, sizeof(sel.info.server_revision)) != 0)
-					SETBIT(w.disabled_state, 17); // Revision mismatch, join button disabled
+					w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 17); // Revision mismatch, join button disabled
 			}
 
 			Global.SetDParam(0, 0x00);
 			Global.SetDParam(7, _lan_internet_types_dropdown[_network_lan_internet]);
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			DrawEditBox(w, 3);
 
-			DrawString(9, 23, Str.STR_NETWORK_PLAYER_NAME, 2);
-			DrawString(9, 43, Str.STR_NETWORK_CONNECTION, 2);
+			Gfx.DrawString(9, 23, Str.STR_NETWORK_PLAYER_NAME, 2);
+			Gfx.DrawString(9, 43, Str.STR_NETWORK_CONNECTION, 2);
 
-			DrawString(15, 63, Str.STR_NETWORK_GAME_NAME, 2);
-			DrawString(135, 63, Str.STR_NETWORK_CLIENTS_CAPTION, 2);
+			Gfx.DrawString(15, 63, Str.STR_NETWORK_GAME_NAME, 2);
+			Gfx.DrawString(135, 63, Str.STR_NETWORK_CLIENTS_CAPTION, 2);
 
 			{ // draw list of games
 				int y = NET_PRC__OFFSET_TOP_WIDGET + 3;
 				int n = 0;
-				int pos = w.vscroll.pos;
-				final NetworkGameList *cur_item = _network_game_list;
+				int pos = w.vscroll.getPos();
+				final NetworkGameList cur_item = _network_game_list;
 
 				while (pos > 0 && cur_item != null) {
 					pos--;
@@ -111,11 +129,11 @@ public class NetGui {
 						Gfx.GfxFillRect(11, y - 2, 218, y + 9, 10); // show highlighted item with a different colour
 
 					Global.SetDParamStr(0, cur_item.info.server_name);
-					DrawStringTruncated(15, y, Str.STR_02BD, 16, 110);
+					Gfx.DrawStringTruncated(15, y, Str.STR_02BD, 16, 110);
 
 					Global.SetDParam(0, cur_item.info.clients_on);
 					Global.SetDParam(1, cur_item.info.clients_max);
-					DrawString(135, y, Str.STR_NETWORK_CLIENTS_ONLINE, 2);
+					Gfx.DrawString(135, y, Str.STR_NETWORK_CLIENTS_ONLINE, 2);
 
 					// only draw icons if the server is online
 					if (cur_item.online) {
@@ -123,7 +141,7 @@ public class NetGui {
 						if (cur_item.info.use_password) Gfx.DrawSprite(Sprite.SPR_LOCK, 186, y - 1);
 
 						// draw red or green icon, depending on compatibility with server.
-						Gfx.DrawSprite(Sprite.SPR_BLOT | (compatible ? PALETTE_TO_GREEN : PALETTE_TO_RED), 195, y);
+						Gfx.DrawSprite(Sprite.SPR_BLOT | (compatible ? Sprite.PALETTE_TO_GREEN : Sprite.PALETTE_TO_RED), 195, y);
 
 						// draw flag according to server language
 						Gfx.DrawSprite(Sprite.SPR_FLAGS_BASE + cur_item.info.server_lang, 206, y);
@@ -131,7 +149,7 @@ public class NetGui {
 
 					cur_item = cur_item.next;
 					y += NET_PRC__SIZE_OF_ROW;
-					if (++n == w.vscroll.cap) break; // max number of games in the window
+					if (++n == w.vscroll.getCap()) break; // max number of games in the window
 				}
 			}
 
@@ -151,44 +169,44 @@ public class NetGui {
 
 
 				Global.SetDParamStr(0, sel.info.server_name);
-				DrawStringCenteredTruncated(w.widget[16].left, w.widget[16].right, 42, Str.STR_ORANGE, 16); // game name
+				Gfx.DrawStringCenteredTruncated(w.getWidget(16).left, w.getWidget(16).right, 42, Str.STR_ORANGE, 16); // game name
 
 				Global.SetDParamStr(0, sel.info.map_name);
-				DrawStringCenteredTruncated(w.widget[16].left, w.widget[16].right, 54, Str.STR_02BD, 16); // map name
+				Gfx.DrawStringCenteredTruncated(w.getWidget(16).left, w.getWidget(16).right, 54, Str.STR_02BD, 16); // map name
 
 				Global.SetDParam(0, sel.info.clients_on);
 				Global.SetDParam(1, sel.info.clients_max);
-				DrawString(260, y, Str.STR_NETWORK_CLIENTS, 2); // clients on the server / maximum slots
+				Gfx.DrawString(260, y, Str.STR_NETWORK_CLIENTS, 2); // clients on the server / maximum slots
 				y += 10;
 
 				Global.SetDParam(0, Str.STR_NETWORK_LANG_ANY + sel.info.server_lang);
-				DrawString(260, y, Str.STR_NETWORK_LANGUAGE, 2); // server language
+				Gfx.DrawString(260, y, Str.STR_NETWORK_LANGUAGE, 2); // server language
 				y += 10;
 
 				Global.SetDParam(0, Str.STR_TEMPERATE_LANDSCAPE + sel.info.map_set);
-				DrawString(260, y, Str.STR_NETWORK_TILESET, 2); // tileset
+				Gfx.DrawString(260, y, Str.STR_NETWORK_TILESET, 2); // tileset
 				y += 10;
 
 				Global.SetDParam(0, sel.info.map_width);
 				Global.SetDParam(1, sel.info.map_height);
-				DrawString(260, y, Str.STR_NETWORK_MAP_SIZE, 2); // map size
+				Gfx.DrawString(260, y, Str.STR_NETWORK_MAP_SIZE, 2); // map size
 				y += 10;
 
 				Global.SetDParamStr(0, sel.info.server_revision);
-				DrawString(260, y, Str.STR_NETWORK_SERVER_VERSION, 2); // server version
+				Gfx.DrawString(260, y, Str.STR_NETWORK_SERVER_VERSION, 2); // server version
 				y += 10;
 
 				Global.SetDParamStr(0, sel.info.hostname);
 				Global.SetDParam(1, sel.port);
-				DrawString(260, y, Str.STR_NETWORK_SERVER_ADDRESS, 2); // server address
+				Gfx.DrawString(260, y, Str.STR_NETWORK_SERVER_ADDRESS, 2); // server address
 				y += 10;
 
 				Global.SetDParam(0, sel.info.start_date);
-				DrawString(260, y, Str.STR_NETWORK_START_DATE, 2); // start date
+				Gfx.DrawString(260, y, Str.STR_NETWORK_START_DATE, 2); // start date
 				y += 10;
 
 				Global.SetDParam(0, sel.info.game_date);
-				DrawString(260, y, Str.STR_NETWORK_CURRENT_DATE, 2); // current date
+				Gfx.DrawString(260, y, Str.STR_NETWORK_CURRENT_DATE, 2); // current date
 				y += 10;
 
 				y += 2;
@@ -199,7 +217,7 @@ public class NetGui {
 				} else if (sel.info.clients_on == sel.info.clients_max) {
 					// Show: server full, when clients_on == clients_max
 					Gfx.DrawStringMultiCenter(365, y, Str.STR_NETWORK_SERVER_FULL, 2); // server full
-				} else if (sel.info.use_password) {
+				} else if (0 != sel.info.use_password) {
 					Gfx.DrawStringMultiCenter(365, y, Str.STR_NETWORK_PASSWORD, 2); // password warning
 				}
 
@@ -207,35 +225,35 @@ public class NetGui {
 			}
 		}	break;
 
-		case WindowEvents.WE_CLICK:
-			_selected_field = e.click.widget;
-			switch (e.click.widget) {
+		case WE_CLICK:
+			_selected_field = e.widget;
+			switch (e.widget) {
 			case 0: case 14: /* Close 'X' | Cancel button */
 				Window.DeleteWindowById(Window.WC_NETWORK_WINDOW, 0);
 				break;
 			case 4: case 5:
-				ShowDropDownMenu(w, _lan_internet_types_dropdown, _network_lan_internet, 5, 0, 0); // do it for widget 5
+				w.ShowDropDownMenu( _lan_internet_types_dropdown, _network_lan_internet, 5, 0, 0); // do it for widget 5
 				break;
 			case 9: { /* Matrix to show networkgames */
-				int id_v = (e.click.pt.y - NET_PRC__OFFSET_TOP_WIDGET) / NET_PRC__SIZE_OF_ROW;
+				int id_v = (e.pt.y - NET_PRC__OFFSET_TOP_WIDGET) / NET_PRC__SIZE_OF_ROW;
 
-				if (id_v >= w.vscroll.cap) return; // click out of bounds
-				id_v += w.vscroll.pos;
+				if (id_v >= w.vscroll.getCap()) return; // click out of bounds
+				id_v += w.vscroll.getPos();
 
 				{
-					NetworkGameList *cur_item = _network_game_list;
+					NetworkGameList cur_item = _network_game_list;
 					for (; id_v > 0 && cur_item != null; id_v--)
 						cur_item = cur_item.next;
 
 					if (cur_item == null) {
 						// click out of vehicle bounds
 						_selected_item = null;
-						SetWindowDirty(w);
+						w.SetWindowDirty();
 						return;
 					}
 					_selected_item = cur_item;
 				}
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 			} break;
 			case 11: /* Find server automatically */
 				switch (_network_lan_internet) {
@@ -271,30 +289,30 @@ public class NetGui {
 
 		}	break;
 
-		case WindowEvents.WE_DROPDOWN_SELECT: /* we have selected a dropdown item in the list */
-			switch(e.dropdown.button) {
+		case WE_DROPDOWN_SELECT: /* we have selected a dropdown item in the list */
+			switch(e.button) {
 				case 5:
-					_network_lan_internet = e.dropdown.index;
+					_network_lan_internet = e.index;
 					break;
 			}
 
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 			break;
 
-		case WindowEvents.WE_MOUSELOOP:
+		case WE_MOUSELOOP:
 			if (_selected_field == 3) HandleEditBox(w, 3);
 			break;
 
-		case WindowEvents.WE_KEYPRESS:
+		case WE_KEYPRESS:
 			if (_selected_field != 3) {
-				if ( e.keypress.keycode == WKC_DELETE ) { // press 'delete' to remove servers
+				if ( e.keycode == WKC_DELETE ) { // press 'delete' to remove servers
 					if (_selected_item != null) {
 						NetworkGameListRemoveItem(_selected_item);
 						NetworkRebuildHostList();
-						SetWindowDirty(w);
+						w.SetWindowDirty();
 						_network_game_count--;
 						// reposition scrollbar
-						if (_network_game_count >= w.vscroll.cap && w.vscroll.pos > _network_game_count-w.vscroll.cap) w.vscroll.pos--;
+						if (_network_game_count >= w.vscroll.cap && w.vscroll.getPos() > _network_game_count-w.vscroll.getCap()) w.vscroll.pos--;
 						UpdateNetworkGameWindow(false);
 						_selected_item = null;
 					}
@@ -306,15 +324,15 @@ public class NetGui {
 
 			// The name is only allowed when it starts with a letter!
 			if (_edit_str_buf[0] != '\0' && _edit_str_buf[0] != ' ') {
-				ttd_strlcpy(_network_player_name, _edit_str_buf, lengthof(_network_player_name));
+				_network_player_name = _edit_str_buf;
 			} else {
-				ttd_strlcpy(_network_player_name, "Player", lengthof(_network_player_name));
+				_network_player_name = "Player";
 			}
 
 			break;
 
-		case WindowEvents.WE_ON_EDIT_TEXT: {
-			NetworkAddServer(e.edittext.str);
+		case WE_ON_EDIT_TEXT: {
+			NetworkAddServer(e.str);
 			NetworkRebuildHostList();
 		} break;
 		}
@@ -352,13 +370,13 @@ public class NetGui {
 
 	};
 
-	static final WindowDesc _network_game_window_desc = {
+	static final WindowDesc _network_game_window_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 490, 215,
 		Window.WC_NETWORK_WINDOW,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 		_network_game_window_widgets,
-		NetworkGameWindowWndProc,
-	};
+		NetGui::NetworkGameWindowWndProc
+	);
 
 	void ShowNetworkGameWindow()
 	{
@@ -380,16 +398,16 @@ public class NetGui {
 		ttd_strlcpy(_edit_str_buf, _network_player_name, MAX_QUERYStr.STR_LEN);
 		w.vscroll.cap = 8;
 
-		WP(w, querystr_d).text.caret = true;
-		WP(w, querystr_d).text.maxlength = MAX_QUERYStr.STR_LEN - 1;
-		WP(w, querystr_d).text.maxwidth = 120;
-		WP(w, querystr_d).text.buf = _edit_str_buf;
-		UpdateTextBufferSize(WP(w, querystr_d).text);
+		w.as_querystr_d().text.caret = true;
+		w.as_querystr_d().text.maxlength = MAX_QUERYStr.STR_LEN - 1;
+		w.as_querystr_d().text.maxwidth = 120;
+		w.as_querystr_d().text.buf = _edit_str_buf;
+		UpdateTextBufferSize(w.as_querystr_d().text);
 
 		UpdateNetworkGameWindow(true);
 	}
 
-	static final StringID _players_dropdown[] = {
+	static final int _players_dropdown[] = {
 		Str.STR_NETWORK_2_CLIENTS,
 		Str.STR_NETWORK_3_CLIENTS,
 		Str.STR_NETWORK_4_CLIENTS,
@@ -399,157 +417,157 @@ public class NetGui {
 		Str.STR_NETWORK_8_CLIENTS,
 		Str.STR_NETWORK_9_CLIENTS,
 		Str.STR_NETWORK_10_CLIENTS,
-		INVALID_STRING_ID
+		Str.INVALID_STRING_ID().id
 	};
 
-	static final StringID _language_dropdown[] = {
+	static final int _language_dropdown[] = {
 		Str.STR_NETWORK_LANG_ANY,
 		Str.STR_NETWORK_LANG_ENGLISH,
 		Str.STR_NETWORK_LANG_GERMAN,
 		Str.STR_NETWORK_LANG_FRENCH,
-		INVALID_STRING_ID
+		Str.INVALID_STRING_ID().id
 	};
 
-	enum {
-		NSSWND_START = 64,
-		NSSWND_ROWSIZE = 12
-	};
+	//enum {
+		static final int NSSWND_START = 64;
+		static final int NSSWND_ROWSIZE = 12;
+	//};
 
 	static void NetworkStartServerWindowWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_CREATE: /* focus input box */
+		case WE_CREATE: /* focus input box */
 			_selected_field = 3;
-			_network_game_info.use_password = (_network_server_password[0] != '\0');
+			_network_game_info.use_password = (_network_server_password.length() != 0);
 			break;
 
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			int y = NSSWND_START, pos;
-			final FiosItem *item;
+			final FiosItem item;
 
-			Global.SetDParam(7, Str.STR_NETWORK_LAN_INTERNET + _network_advertise);
+			Global.SetDParam(7, Str.STR_NETWORK_LAN_INTERNET + BitOps.b2i(_network_advertise));
 			Global.SetDParam(9, Str.STR_NETWORK_2_CLIENTS + _network_game_info.clients_max - 2);
 			Global.SetDParam(11, Str.STR_NETWORK_LANG_ANY + _network_game_info.server_lang);
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			Gfx.GfxFillRect(11, 63, 259, 171, 0xD7);
 
-			DrawEditBox(w, 3);
+			MiscGui.DrawEditBox(w, 3);
 
-			DrawString(10, 22, Str.STR_NETWORK_NEW_GAME_NAME, 2);
+			Gfx.DrawString(10, 22, Str.STR_NETWORK_NEW_GAME_NAME, 2);
 
-			DrawString(10, 43, Str.STR_NETWORK_SELEAcceptedCargo.CT_MAP, 2);
-			DrawString(280, 63, Str.STR_NETWORK_CONNECTION, 2);
-			DrawString(280, 95, Str.STR_NETWORK_NUMBER_OF_CLIENTS, 2);
-			DrawString(280, 127, Str.STR_NETWORK_LANGUAGE_SPOKEN, 2);
+			Gfx.DrawString(10, 43, Str.STR_NETWORK_SELECT_MAP, 2);
+			Gfx.DrawString(280, 63, Str.STR_NETWORK_CONNECTION, 2);
+			Gfx.DrawString(280, 95, Str.STR_NETWORK_NUMBER_OF_CLIENTS, 2);
+			Gfx.DrawString(280, 127, Str.STR_NETWORK_LANGUAGE_SPOKEN, 2);
 
 			if (_network_game_info.use_password) Gfx.DoDrawString("*", 408, 23, 3);
 
 			// draw list of maps
-			pos = w.vscroll.pos;
+			pos = w.vscroll.getPos();
 			while (pos < _fios_num + 1) {
 				item = _fios_list + pos - 1;
 				if (item == _selected_map || (pos == 0 && _selected_map == null))
 					Gfx.GfxFillRect(11, y - 1, 259, y + 10, 155); // show highlighted item with a different colour
 
-				if (pos == 0) DrawString(14, y, Str.STR_4010_GENERATE_RANDOM_NEW_GAME, 9);
-				else Gfx.DoDrawString(item.title, 14, y, _fios_colors[item.type] );
+				if (pos == 0) Gfx.DrawString(14, y, Str.STR_4010_GENERATE_RANDOM_NEW_GAME, 9);
+				else Gfx.DoDrawString(item.title, 14, y, MiscGui._fios_colors[item.type.ordinal()] );
 				pos++;
 				y += NSSWND_ROWSIZE;
 
-				if (y >= w.vscroll.cap * NSSWND_ROWSIZE + NSSWND_START) break;
+				if (y >= w.vscroll.getCap() * NSSWND_ROWSIZE + NSSWND_START) break;
 			}
 		}	break;
 
-		case WindowEvents.WE_CLICK:
-			_selected_field = e.click.widget;
-			switch (e.click.widget) {
+		case WE_CLICK:
+			_selected_field = e.widget;
+			switch (e.widget) {
 			case 0: /* Close 'X' */
 			case 15: /* Cancel button */
 				ShowNetworkGameWindow();
 				break;
 
 			case 4: /* Set password button */
-				ShowQueryString(BindCString(_network_server_password),
+				ShowQueryString(Strings.BindCString(_network_server_password),
 					Str.STR_NETWORK_SET_PASSWORD, 20, 250, w.window_class, w.window_number);
 				break;
 
 			case 5: { /* Select map */
-				int y = (e.click.pt.y - NSSWND_START) / NSSWND_ROWSIZE;
+				int y = (e.pt.y - NSSWND_START) / NSSWND_ROWSIZE;
 
-				y += w.vscroll.pos;
-				if (y >= w.vscroll.count) return;
+				y += w.vscroll.getPos();
+				if (y >= w.vscroll.getCount()) return;
 
 				_selected_map = (y == 0) ? null : _fios_list + y - 1;
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 				} break;
 			case 7: case 8: /* Connection type */
-				ShowDropDownMenu(w, _connection_types_dropdown, _network_advertise, 8, 0, 0); // do it for widget 8
+				w.ShowDropDownMenu( _connection_types_dropdown, BitOps.b2i(_network_advertise), 8, 0, 0); // do it for widget 8
 				break;
 			case 9: case 10: /* Number of Players */
-				ShowDropDownMenu(w, _players_dropdown, _network_game_info.clients_max - 2, 10, 0, 0); // do it for widget 10
+				w.ShowDropDownMenu( _players_dropdown, _network_game_info.clients_max - 2, 10, 0, 0); // do it for widget 10
 				return;
 			case 11: case 12: /* Language */
-				ShowDropDownMenu(w, _language_dropdown, _network_game_info.server_lang, 12, 0, 0); // do it for widget 12
+				w.ShowDropDownMenu( _language_dropdown, _network_game_info.server_lang, 12, 0, 0); // do it for widget 12
 				return;
 			case 13: /* Start game */
 				_is_network_server = true;
-				ttd_strlcpy(_network_server_name, WP(w, querystr_d).text.buf, sizeof(_network_server_name));
-				UpdateTextBufferSize(WP(w, querystr_d).text);
+				_network_server_name = w.as_querystr_d().text.getString();
+				w.as_querystr_d().text.UpdateTextBufferSize();
 				if (_selected_map == null) { // start random new game
-					GenRandomNewGame(Hal.Random(), InteractiveHal.Random());
+					IntroGui.GenRandomNewGame(Hal.Random(), Hal.InteractiveRandom());
 				} else { // load a scenario
-					char *name = FiosBrowseTo(_selected_map);
+					String name = FileIO.FiosBrowseTo(_selected_map);
 					if (name != null) {
-						SetFiosType(_selected_map.type);
-						ttd_strlcpy(_file_to_saveload.name, name, sizeof(_file_to_saveload.name));
-						ttd_strlcpy(_file_to_saveload.title, _selected_map.title, sizeof(_file_to_saveload.title));
+						MiscGui.SetFiosType(_selected_map.type);
+						Main._file_to_saveload.name = name;
+						Main._file_to_saveload.title = _selected_map.title;
 
-						DeleteWindow(w);
-						StartScenarioEditor(Hal.Random(), InteractiveHal.Random());
+						w.DeleteWindow();
+						IntroGui.StartScenarioEditor(Hal.Random(), Hal.InteractiveRandom());
 					}
 				}
 				break;
 			case 14: /* Load game */
 				_is_network_server = true;
-				ttd_strlcpy(_network_server_name, WP(w, querystr_d).text.buf, sizeof(_network_server_name));
-				UpdateTextBufferSize(WP(w, querystr_d).text);
+				_network_server_name = w.as_querystr_d().text.getString();
+				w.as_querystr_d().text.UpdateTextBufferSize();
 				/* XXX - Window.WC_NETWORK_WINDOW should stay, but if it stays, it gets
 				 * copied all the elements of 'load game' and upon closing that, it segfaults */
 				Window.DeleteWindowById(Window.WC_NETWORK_WINDOW, 0);
-				ShowSaveLoadDialog(SLD_LOAD_GAME);
+				MiscGui.ShowSaveLoadDialog(Global.SLD_LOAD_GAME);
 				break;
 			}
 			break;
 
-		case WindowEvents.WE_DROPDOWN_SELECT: /* we have selected a dropdown item in the list */
-			switch(e.dropdown.button) {
+		case WE_DROPDOWN_SELECT: /* we have selected a dropdown item in the list */
+			switch(e.button) {
 				case 8:
-					_network_advertise = (e.dropdown.index != 0);
+					_network_advertise = (e.index != 0);
 					break;
 				case 10:
-					_network_game_info.clients_max = e.dropdown.index + 2;
+					_network_game_info.clients_max = e.index + 2;
 					break;
 				case 12:
-					_network_game_info.server_lang = e.dropdown.index;
+					_network_game_info.server_lang = e.index;
 					break;
 			}
 
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 			break;
 
-		case WindowEvents.WE_MOUSELOOP:
-			if (_selected_field == 3) HandleEditBox(w, 3);
+		case WE_MOUSELOOP:
+			if (_selected_field == 3) MiscGui.HandleEditBox(w, 3);
 			break;
 
-		case WindowEvents.WE_KEYPRESS:
-			if (_selected_field == 3) HandleEditBoxKey(w, 3, e);
+		case WE_KEYPRESS:
+			if (_selected_field == 3) MiscGui.HandleEditBoxKey(w, 3, e);
 			break;
 
-		case WindowEvents.WE_ON_EDIT_TEXT: {
-			ttd_strlcpy(_network_server_password, e.edittext.str, lengthof(_network_server_password));
-			_network_game_info.use_password = (_network_server_password[0] != '\0');
-			SetWindowDirty(w);
+		case WE_ON_EDIT_TEXT: {
+			_network_server_password = e.str;
+			_network_game_info.use_password = _network_server_password.length() != 0;
+			w.SetWindowDirty();
 		} break;
 		}
 	}
@@ -562,7 +580,7 @@ public class NetGui {
 	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,   BGC,   100,   272,    22,    33, 0x0,														Str.STR_NETWORK_NEW_GAME_NAME_TIP),
 	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,   BTC,   285,   405,    22,    33, Str.STR_NETWORK_SET_PASSWORD,			Str.STR_NETWORK_PASSWORD_TIP),
 
-	new Widget(          Window.WWT_6,   Window.RESIZE_NONE,   BGC,    10,   271,    62,   172, 0x0,														Str.STR_NETWORK_SELEAcceptedCargo.CT_MAP_TIP),
+	new Widget(          Window.WWT_6,   Window.RESIZE_NONE,   BGC,    10,   271,    62,   172, 0x0,														Str.STR_NETWORK_SELECT_MAP_TIP),
 	new Widget(  Window.WWT_SCROLLBAR,   Window.RESIZE_NONE,   BGC,   260,   271,    63,   171, 0x0,														Str.STR_0190_SCROLL_BAR_SCROLLS_LIST),
 
 	new Widget(          Window.WWT_6,   Window.RESIZE_NONE,   BGC,   280,   410,    77,    88, Str.STR_NETWORK_COMBO1,						Str.STR_NETWORK_CONNECTION_TIP),
@@ -577,35 +595,35 @@ public class NetGui {
 	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,   BTC,    40,   140,   180,   191, Str.STR_NETWORK_START_GAME,				Str.STR_NETWORK_START_GAME_TIP),
 	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,   BTC,   150,   250,   180,   191, Str.STR_NETWORK_LOAD_GAME,					Str.STR_NETWORK_LOAD_GAME_TIP),
 	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,   BTC,   260,   360,   180,   191, Str.STR_012E_CANCEL,								Str.STR_NULL),
-	new Widget(   WIDGETS_END),
+
 	};
 
-	static final WindowDesc _network_start_server_window_desc = {
+	static final WindowDesc _network_start_server_window_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 420, 200,
 		Window.WC_NETWORK_WINDOW,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 		_network_start_server_window_widgets,
-		NetworkStartServerWindowWndProc,
-	};
+		NetGui::NetworkStartServerWindowWndProc
+	);
 
 	static void ShowNetworkStartServerWindow()
 	{
 		Window w;
 		Window.DeleteWindowById(Window.WC_NETWORK_WINDOW, 0);
 
-		w = AllocateWindowDesc(_network_start_server_window_desc);
-		ttd_strlcpy(_edit_str_buf, _network_server_name, MAX_QUERYStr.STR_LEN);
+		w = Window.AllocateWindowDesc(_network_start_server_window_desc);
+		_edit_str_buf = _network_server_name;
 
-		_saveload_mode = SLD_NEW_GAME;
-		BuildFileList();
-		w.vscroll.cap = 9;
-		w.vscroll.count = _fios_num+1;
+		Global._saveload_mode = Global.SLD_NEW_GAME;
+		MiscGui.BuildFileList();
+		w.vscroll.setCap(9);
+		w.vscroll.setCount(_fios_num+1);
 
-		WP(w, querystr_d).text.caret = true;
-		WP(w, querystr_d).text.maxlength = MAX_QUERYStr.STR_LEN - 1;
-		WP(w, querystr_d).text.maxwidth = 160;
-		WP(w, querystr_d).text.buf = _edit_str_buf;
-		UpdateTextBufferSize(WP(w, querystr_d).text);
+		w.as_querystr_d().text.setCaret( true );
+		w.as_querystr_d().text.maxlength = MAX_QUERYSTR_LEN - 1;
+		w.as_querystr_d().text.maxwidth = 160;
+		w.as_querystr_d().text.buf = _edit_str_buf;
+		w.as_querystr_d().text.UpdateTextBufferSize();
 	}
 
 	static byte NetworkLobbyFindCompanyIndex(byte pos)
@@ -615,7 +633,7 @@ public class NetGui {
 		/* Scroll through all _network_player_info and get the 'pos' item
 		    that is not empty */
 		for (i = 0; i < Global.MAX_PLAYERS; i++) {
-			if (_network_player_info[i].company_name[0] != '\0') {
+			if (_network_player_info[i].company_name.length() != 0) {
 				if (pos-- == 0) return i;
 			}
 		}
@@ -626,26 +644,26 @@ public class NetGui {
 	static void NetworkLobbyWindowWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			int y = NET_PRC__OFFSET_TOP_WIDGET_COMPANY, pos;
 
 			w.disabled_state = (_selected_company_item == -1) ? 1 << 7 : 0;
 
 			if (_network_lobby_company_count == Global.MAX_PLAYERS)
-				SETBIT(w.disabled_state, 8);
+				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 8);
 			/* You can not join a server as spectator when it has no companies active..
 			     it causes some nasty crashes */
 			if (_network_lobby_company_count == 0)
-				SETBIT(w.disabled_state, 9);
+				w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 9);
 
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			Global.SetDParamStr(0, _selected_item.info.server_name);
-			DrawString(10, 22, Str.STR_NETWORK_PREPARE_TO_JOIN, 2);
+			Gfx.DrawString(10, 22, Str.STR_NETWORK_PREPARE_TO_JOIN, 2);
 
 			// draw company list
 			Gfx.GfxFillRect(11, 41, 154, 165, 0xD7);
-			pos = w.vscroll.pos;
+			pos = w.vscroll.getPos();
 			while (pos < _network_lobby_company_count) {
 				byte index = NetworkLobbyFindCompanyIndex(pos);
 				boolean income = false;
@@ -659,7 +677,7 @@ public class NetGui {
 				/* If the company's income was positive puts a green dot else a red dot */
 				if ((_network_player_info[index].income) >= 0)
 					income = true;
-				Gfx.DrawSprite(Sprite.SPR_BLOT | (income ? PALETTE_TO_GREEN : PALETTE_TO_RED), 145, y);
+				Gfx.DrawSprite(Sprite.SPR_BLOT | (income ? Sprite.PALETTE_TO_GREEN : Sprite.PALETTE_TO_RED), 145, y);
 
 				pos++;
 				y += NET_PRC__SIZE_OF_ROW_COMPANY;
@@ -674,27 +692,27 @@ public class NetGui {
 				y = 65;
 
 				Global.SetDParamStr(0, _network_player_info[_selected_company_item].company_name);
-				DrawString(x, y, Str.STR_NETWORK_COMPANY_NAME, 2);
+				Gfx.DrawString(x, y, Str.STR_NETWORK_COMPANY_NAME, 2);
 				y += 10;
 
 				Global.SetDParam(0, _network_player_info[_selected_company_item].inaugurated_year + MAX_YEAR_BEGIN_REAL);
-				DrawString(x, y, Str.STR_NETWORK_INAUGURATION_YEAR, 2); // inauguration year
+				Gfx.DrawString(x, y, Str.STR_NETWORK_INAUGURATION_YEAR, 2); // inauguration year
 				y += 10;
 
 				Global.SetDParam64(0, _network_player_info[_selected_company_item].company_value);
-				DrawString(x, y, Str.STR_NETWORK_VALUE, 2); // company value
+				Gfx.DrawString(x, y, Str.STR_NETWORK_VALUE, 2); // company value
 				y += 10;
 
 				Global.SetDParam64(0, _network_player_info[_selected_company_item].money);
-				DrawString(x, y, Str.STR_NETWORK_CURRENT_BALANCE, 2); // current balance
+				Gfx.DrawString(x, y, Str.STR_NETWORK_CURRENT_BALANCE, 2); // current balance
 				y += 10;
 
 				Global.SetDParam64(0, _network_player_info[_selected_company_item].income);
-				DrawString(x, y, Str.STR_NETWORK_LAST_YEARS_INCOME, 2); // last year's income
+				Gfx.DrawString(x, y, Str.STR_NETWORK_LAST_YEARS_INCOME, 2); // last year's income
 				y += 10;
 
 				Global.SetDParam(0, _network_player_info[_selected_company_item].performance);
-				DrawString(x, y, Str.STR_NETWORK_PERFORMANCE, 2); // performance
+				Gfx.DrawString(x, y, Str.STR_NETWORK_PERFORMANCE, 2); // performance
 				y += 10;
 
 				Global.SetDParam(0, _network_player_info[_selected_company_item].num_vehicle[0]);
@@ -702,7 +720,7 @@ public class NetGui {
 				Global.SetDParam(2, _network_player_info[_selected_company_item].num_vehicle[2]);
 				Global.SetDParam(3, _network_player_info[_selected_company_item].num_vehicle[3]);
 				Global.SetDParam(4, _network_player_info[_selected_company_item].num_vehicle[4]);
-				DrawString(x, y, Str.STR_NETWORK_VEHICLES, 2); // vehicles
+				Gfx.DrawString(x, y, Str.STR_NETWORK_VEHICLES, 2); // vehicles
 				y += 10;
 
 				Global.SetDParam(0, _network_player_info[_selected_company_item].num_station[0]);
@@ -710,39 +728,39 @@ public class NetGui {
 				Global.SetDParam(2, _network_player_info[_selected_company_item].num_station[2]);
 				Global.SetDParam(3, _network_player_info[_selected_company_item].num_station[3]);
 				Global.SetDParam(4, _network_player_info[_selected_company_item].num_station[4]);
-				DrawString(x, y, Str.STR_NETWORK_STATIONS, 2); // stations
+				Gfx.DrawString(x, y, Str.STR_NETWORK_STATIONS, 2); // stations
 				y += 10;
 
 				Global.SetDParamStr(0, _network_player_info[_selected_company_item].players);
-				DrawString(x, y, Str.STR_NETWORK_PLAYERS, 2); // players
+				Gfx.DrawString(x, y, Str.STR_NETWORK_PLAYERS, 2); // players
 				y += 10;
 			}
 		}	break;
 
-		case WindowEvents.WE_CLICK:
-			switch(e.click.widget) {
+		case WE_CLICK:
+			switch(e.widget) {
 			case 0: case 11: /* Close 'X' | Cancel button */
 				ShowNetworkGameWindow();
 				break;
 			case 3: /* Company list */
-				_selected_company_item = (e.click.pt.y - NET_PRC__OFFSET_TOP_WIDGET_COMPANY) / NET_PRC__SIZE_OF_ROW_COMPANY;
+				_selected_company_item = (e.pt.y - NET_PRC__OFFSET_TOP_WIDGET_COMPANY) / NET_PRC__SIZE_OF_ROW_COMPANY;
 
 				if (_selected_company_item >= w.vscroll.cap) {
 					// click out of bounds
 					_selected_company_item = -1;
-					SetWindowDirty(w);
+					w.SetWindowDirty();
 					return;
 				}
 				_selected_company_item += w.vscroll.pos;
 				if (_selected_company_item >= _network_lobby_company_count) {
 					_selected_company_item = -1;
-					SetWindowDirty(w);
+					w.SetWindowDirty();
 					return;
 				}
 
 				_selected_company_item = NetworkLobbyFindCompanyIndex(_selected_company_item);
 
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 				break;
 			case 7: /* Join company */
 				if (_selected_company_item != -1) {
@@ -788,16 +806,16 @@ public class NetGui {
 	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,   BTC,   158,   268,   190,   201, Str.STR_NETWORK_REFRESH,				Str.STR_NETWORK_REFRESH_TIP),
 	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,   BTC,   278,   388,   175,   186, Str.STR_012E_CANCEL,						Str.STR_NULL),
 
-	new Widget(   WIDGETS_END),
+
 	};
 
-	static final WindowDesc _network_lobby_window_desc = {
+	static final WindowDesc _network_lobby_window_desc = new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 420, 210,
 		Window.WC_NETWORK_WINDOW,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 		_network_lobby_window_widgets,
-		NetworkLobbyWindowWndProc,
-	};
+		NetGui::NetworkLobbyWindowWndProc
+	);
 
 
 	static void ShowNetworkLobbyWindow()
@@ -833,36 +851,35 @@ public class NetGui {
 	// Some standard bullshit.. defines variables ;)
 	//static void ClientListWndProc(Window w, WindowEvent e);
 	//static void ClientListPopupWndProc(Window w, WindowEvent e);
-	static byte _selected_clientlist_item = 255;
-	static byte _selected_clientlist_y = 0;
-	static char _clientlist_action[MAX_CLIENTLIST_ACTION][50];
-	static ClientList_Action_Proc _clientlist_proc[MAX_CLIENTLIST_ACTION];
+	static int _selected_clientlist_item = 255;
+	static int _selected_clientlist_y = 0;
+	//static char _clientlist_action[MAX_CLIENTLIST_ACTION][50];
+	//static ClientList_Action_Proc _clientlist_proc[MAX_CLIENTLIST_ACTION];
 
-	enum {
-		CLNWND_OFFSET = 16,
-		CLNWND_ROWSIZE = 10
-	};
+	//enum {
+		static final int CLNWND_OFFSET = 16;
+		static final int CLNWND_ROWSIZE = 10;
+	//};
 
 	static final Widget _client_list_widgets[] = {
 	new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,                 Str.STR_018B_CLOSE_WINDOW),
 	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   249,     0,    13, Str.STR_NETWORK_CLIENT_LIST,  Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 
 	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   249,    14,    14 + CLNWND_ROWSIZE + 1, 0x0, Str.STR_NULL),
-	new Widget(   WIDGETS_END),
 	};
 
 	static final Widget _client_list_popup_widgets[] = {
 	new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   99,     0,     0,     0,	Str.STR_NULL),
-	new Widget(   WIDGETS_END),
+
 	};
 
-	static WindowDesc _client_list_desc = {
+	static WindowDesc _client_list_desc = new WindowDesc(
 		-1, -1, 250, 1,
 		Window.WC_CLIENT_LIST,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 		_client_list_widgets,
-		ClientListWndProc
-	};
+		NetGui::ClientListWndProc
+	);
 
 	// Finds the Xth client-info that is active
 	static final NetworkClientInfo NetworkFindClientInfo(byte client_no)
@@ -944,7 +961,7 @@ public class NetGui {
 	static boolean CheckClientListHeight(Window w)
 	{
 		int num = 0;
-		NetworkClientInfo *ci;
+		NetworkClientInfo ci;
 
 		// Should be replaced with a loop through all clients
 		for (ci = _network_client_info; ci != _network_client_info[MAX_CLIENT_INFO]; ci++) {
@@ -958,10 +975,10 @@ public class NetGui {
 		// If height is changed
 		if (w.height != CLNWND_OFFSET + num + 1) {
 			// XXX - magic unfortunately; (num + 2) has to be one bigger than heigh (num + 1)
-			SetWindowDirty(w);
-			w.widget[2].bottom = w.widget[2].top + num + 2;
+			w.SetWindowDirty();
+			w.getWidget(2).bottom = w.getWidget(2).top + num + 2;
 			w.height = CLNWND_OFFSET + num + 1;
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 			return false;
 		}
 		return true;
@@ -987,7 +1004,7 @@ public class NetGui {
 	static Window PopupClientList(Window w, int client_no, int x, int y)
 	{
 		int i, h;
-		final NetworkClientInfo* ci;
+		final NetworkClientInfo ci;
 		Window.DeleteWindowById(Window.WC_TOOLBAR_MENU, 0);
 
 		// Clean the current actions
@@ -1044,13 +1061,13 @@ public class NetGui {
 
 		// Allocate the popup
 		w = AllocateWindow(x, y, 100, h + 1, ClientListPopupWndProc, Window.WC_TOOLBAR_MENU, _client_list_popup_widgets);
-		w.widget[0].bottom = w.widget[0].top + h;
+		w.getWidget(0).bottom = w.getWidget(0).top + h;
 
 		w.flags4 &= ~WF_WHITE_BORDER_MASK;
-		WP(w,menu_d).item_count = 0;
+		w.as_menu_d().item_count = 0;
 		// Save our client
-		WP(w,menu_d).main_button = client_no;
-		WP(w,menu_d).sel_index = 0;
+		w.as_menu_d().main_button = client_no;
+		w.as_menu_d().sel_index = 0;
 		// We are a popup
 		_popup_menu_active = true;
 
@@ -1061,13 +1078,13 @@ public class NetGui {
 	static void ClientListPopupWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			int i, y, sel;
 			byte colour;
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			// Draw the actions
-			sel = WP(w,menu_d).sel_index;
+			sel = w.as_menu_d().sel_index;
 			y = 1;
 			for (i = 0; i < MAX_CLIENTLIST_ACTION; i++, y += CLNWND_ROWSIZE) {
 				if (_clientlist_action[i][0] == '\0') continue;
@@ -1087,7 +1104,7 @@ public class NetGui {
 			int index = (e.popupmenu.pt.y - w.top) / CLNWND_ROWSIZE;
 
 			if (index >= 0 && e.popupmenu.pt.y >= w.top)
-				HandleClientListPopupClick(index, WP(w,menu_d).main_button);
+				HandleClientListPopupClick(index, w.as_menu_d().main_button);
 
 			// Sometimes, because of the bad DeleteWindow-proc, the 'w' pointer is
 			//  invalid after the last functions (mostly because it kills a window
@@ -1101,11 +1118,11 @@ public class NetGui {
 			// Our mouse hoovers over an action? Select it!
 			int index = (e.popupmenu.pt.y - w.top) / CLNWND_ROWSIZE;
 
-			if (index == -1 || index == WP(w,menu_d).sel_index)
+			if (index == -1 || index == w.as_menu_d().sel_index)
 				return;
 
-			WP(w,menu_d).sel_index = index;
-			SetWindowDirty(w);
+			w.as_menu_d().sel_index = index;
+			w.SetWindowDirty();
 		} break;
 
 		}
@@ -1115,15 +1132,15 @@ public class NetGui {
 	static void ClientListWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT: {
-			NetworkClientInfo *ci;
+		case WE_PAINT: {
+			NetworkClientInfo ci;
 			int y, i = 0;
 			byte colour;
 
 			// Check if we need to reset the height
 			if (!CheckClientListHeight(w)) break;
 
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
 			y = CLNWND_OFFSET;
 
@@ -1138,9 +1155,9 @@ public class NetGui {
 					colour = 0x10;
 
 				if (ci.client_index == NETWORK_SERVER_INDEX) {
-					DrawString(4, y, Str.STR_NETWORK_SERVER, colour);
+					Gfx.DrawString(4, y, Str.STR_NETWORK_SERVER, colour);
 				} else {
-					DrawString(4, y, Str.STR_NETWORK_CLIENT, colour);
+					Gfx.DrawString(4, y, Str.STR_NETWORK_CLIENT, colour);
 				}
 
 				// Filter out spectators
@@ -1156,7 +1173,7 @@ public class NetGui {
 		case WindowEvents.WE_CLICK:
 			// Show the popup with option
 			if (_selected_clientlist_item != 255) {
-				PopupClientList(w, _selected_clientlist_item, e.click.pt.x + w.left, e.click.pt.y + w.top);
+				PopupClientList(w, _selected_clientlist_item, e.pt.x + w.left, e.pt.y + w.top);
 			}
 
 			break;
@@ -1166,7 +1183,7 @@ public class NetGui {
 			if (e.mouseover.pt.y == -1) {
 				_selected_clientlist_y = 0;
 				_selected_clientlist_item = 255;
-				SetWindowDirty(w);
+				w.SetWindowDirty();
 				break;
 			}
 			// It did not change.. no update!
@@ -1180,7 +1197,7 @@ public class NetGui {
 				_selected_clientlist_item = 255;
 
 			// Repaint
-			SetWindowDirty(w);
+			w.SetWindowDirty();
 			break;
 
 		case WindowEvents.WE_DESTROY: case WindowEvents.WE_CREATE:
@@ -1193,20 +1210,21 @@ public class NetGui {
 
 	void ShowClientList()
 	{
-		Window w = AllocateWindowDescFront(_client_list_desc, 0);
+		Window w = Window.AllocateWindowDescFront(_client_list_desc, 0);
 		if (w != null) w.window_number = 0;
 	}
 
-	extern void SwitchMode(int new_mode);
+	//extern void SwitchMode(int new_mode);
 
 	static void NetworkJoinStatusWindowWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
-		case WindowEvents.WE_PAINT: {
+		case WE_PAINT: {
 			byte progress; // used for progress bar
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 
-			DrawStringCentered(125, 35, Str.STR_NETWORK_CONNECTING_1 + _network_join_status, 14);
+			// TODO are ordinals correct?
+			Gfx.DrawStringCentered(125, 35, Str.STR_NETWORK_CONNECTING_1 + _network_join_status.ordinal(), 14);
 			switch (_network_join_status) {
 				case NETWORK_JOIN_STATUS_CONNECTING: case NETWORK_JOIN_STATUS_AUTHORIZING:
 				case NETWORK_JOIN_STATUS_GETTING_COMPANY_INFO:
@@ -1214,13 +1232,13 @@ public class NetGui {
 					break;
 				case NETWORK_JOIN_STATUS_WAITING:
 					Global.SetDParam(0, _network_join_waiting);
-					DrawStringCentered(125, 46, Str.STR_NETWORK_CONNECTING_WAITING, 14);
+					Gfx.DrawStringCentered(125, 46, Str.STR_NETWORK_CONNECTING_WAITING, 14);
 					progress = 15; // third stage is 15%
 					break;
 				case NETWORK_JOIN_STATUS_DOWNLOADING:
 					Global.SetDParam(0, _network_join_kbytes);
 					Global.SetDParam(1, _network_join_kbytes_total);
-					DrawStringCentered(125, 46, Str.STR_NETWORK_CONNECTING_DOWNLOADING, 14);
+					Gfx.DrawStringCentered(125, 46, Str.STR_NETWORK_CONNECTING_DOWNLOADING, 14);
 					/* Fallthrough */
 				default: /* Waiting is 15%, so the resting receivement of map is maximum 70% */
 					progress = 15 + _network_join_kbytes * (100 - 15) / _network_join_kbytes_total;
@@ -1231,7 +1249,7 @@ public class NetGui {
 		}	break;
 
 		case WindowEvents.WE_CLICK:
-			switch (e.click.widget) {
+			switch (e.widget) {
 				case 0: /* Close 'X' */
 				case 3: /* Disconnect button */
 					NetworkDisconnect();
@@ -1250,16 +1268,16 @@ public class NetGui {
 	new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   249,     0,    13, Str.STR_NETWORK_CONNECTING, Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     0,   249,    14,    84, 0x0,Str.STR_NULL),
 	new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,   BTC,    75,   175,    69,    80, Str.STR_NETWORK_DISCONNECT, Str.STR_NULL),
-	new Widget(   WIDGETS_END),
+
 	};
 
-	static final WindowDesc _network_join_status_window_desc = {
+	static final WindowDesc _network_join_status_window_desc = 	new WindowDesc(
 		Window.WDP_CENTER, Window.WDP_CENTER, 250, 85,
 		Window.WC_NETWORK_STATUS_WINDOW, 0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET,
 		_network_join_status_window_widget,
-		NetworkJoinStatusWindowWndProc,
-	};
+		NetGui::NetworkJoinStatusWindowWndProc
+	);
 
 	void ShowJoinStatusWindow()
 	{
@@ -1279,58 +1297,64 @@ public class NetGui {
 	}
 
 
+	static boolean chatClosed = false;
 
+	void NetChatSend(Window w)
+	{
+		String buf = w.as_querystr_d().text.getString().strip();
+		
+		if (buf.length() == 0) {
+			w.DeleteWindow();
+		} else {
+			int wnd_class = w.as_querystr_d().wnd_class;
+			int wnd_num = w.as_querystr_d().wnd_num;
+			Window parent;
+
+			// Mask the edit-box as closed, so we don't send out a CANCEL
+			chatClosed = true;
+
+			w.DeleteWindow();
+
+			parent = Window.FindWindowById(wnd_class, wnd_num);
+			if (parent != null) {
+				WindowEvent e = new WindowEvent();
+				e.event = WindowEvents.WE_ON_EDIT_TEXT;
+				e.str = buf;
+				parent.wndproc(parent, e);
+			}
+		}
+		
+	}
 	//#define MAX_QUERYSTR_LEN 64
 
 	static void ChatWindowWndProc(Window w, WindowEvent e)
 	{
-		static boolean closed = false;
 
 		switch (e.event) {
-		case WindowEvents.WE_CREATE:
-			SendWindowMessage(Window.WC_NEWS_WINDOW, 0, WindowEvents.WE_CREATE, w.height, 0);
-			SETBIT(_no_scroll, SCROLL_CHAT); // do not scroll the game with the arrow-keys
-			closed = false;
+		case WE_CREATE:
+			Window.SendWindowMessage(Window.WC_NEWS_WINDOW, 0, WindowEvents.WE_CREATE.ordinal(), w.getHeight(), 0);
+			Global._no_scroll = BitOps.RETSETBIT(Global._no_scroll, SCROLL_CHAT); // do not scroll the game with the arrow-keys
+			chatClosed = false;
 			break;
 
 		case WindowEvents.WE_PAINT:
-			DrawWindowWidgets(w);
+			w.DrawWindowWidgets();
 			DrawEditBox(w, 1);
 			break;
 
 		case WindowEvents.WE_CLICK:
-			switch (e.click.widget) {
+			switch (e.widget) {
 			case 3: DeleteWindow(w); break; // Cancel
 			case 2: // Send
-	press_ok:;
-				if (strcmp(WP(w, querystr_d).text.buf, WP(w, querystr_d).text.buf + MAX_QUERYStr.STR_LEN) == 0) {
-					DeleteWindow(w);
-				} else {
-					char *buf = WP(w, querystr_d).text.buf;
-					WindowClass wnd_class = WP(w, querystr_d).wnd_class;
-					WindowNumber wnd_num = WP(w, querystr_d).wnd_num;
-					Window parent;
-
-					// Mask the edit-box as closed, so we don't send out a CANCEL
-					closed = true;
-
-					DeleteWindow(w);
-
-					parent = FindWindowById(wnd_class, wnd_num);
-					if (parent != null) {
-						WindowEvent e = new WindowEvent();
-						e.event = WindowEvents.WE_ON_EDIT_TEXT;
-						e.edittext.str = buf;
-						parent.wndproc(parent, e);
-					}
-				}
+	//press_ok:;
+				NetChatSend(w);
 				break;
 			}
 			break;
 
 		case WindowEvents.WE_MOUSELOOP: {
-			if (!FindWindowById(WP(w,querystr_d).wnd_class, WP(w,querystr_d).wnd_num)) {
-				DeleteWindow(w);
+			if (!FindWindowById(w.as_querystr_d().wnd_class, w.as_querystr_d().wnd_num)) {
+				w.DeleteWindow();
 				return;
 			}
 			HandleEditBox(w, 1);
@@ -1339,7 +1363,9 @@ public class NetGui {
 		case WindowEvents.WE_KEYPRESS: {
 			switch(HandleEditBoxKey(w, 1, e)) {
 			case 1: // Return
-				goto press_ok;
+				//goto press_ok;
+				NetChatSend(w);
+				break;
 			case 2: // Escape
 				DeleteWindow(w);
 				break;
@@ -1348,10 +1374,10 @@ public class NetGui {
 
 		case WindowEvents.WE_DESTROY:
 			SendWindowMessage(Window.WC_NEWS_WINDOW, 0, WindowEvents.WE_DESTROY, 0, 0);
-			CLRBIT(_no_scroll, SCROLL_CHAT);
+			Global._no_scroll = BitOps.RETCLRBIT(Global._no_scroll, SCROLL_CHAT);
 			// If the window is not closed yet, it means it still needs to send a CANCEL
-			if (!closed) {
-				Window parent = FindWindowById(WP(w,querystr_d).wnd_class, WP(w,querystr_d).wnd_num);
+			if (!chatClosed) {
+				Window parent = FindWindowById(w.as_querystr_d().wnd_class, w.as_querystr_d().wnd_num);
 				if (parent != null) {
 					WindowEvent e;
 					e.event = WindowEvents.WE_ON_EDIT_TEXT_CANCEL;
@@ -1367,18 +1393,18 @@ public class NetGui {
 	new Widget(     Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,     2,   399,     1,    12, Str.STR_NULL,         Str.STR_NULL), // text box
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   400,   519,     1,    12, Str.STR_NETWORK_SEND, Str.STR_NULL), // send button
 	new Widget(    Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   520,   639,     1,    12, Str.STR_012E_CANCEL,  Str.STR_NULL), // cancel button
-	new Widget(   WIDGETS_END),
+	
 	};
 
-	static final WindowDesc _chat_window_desc = {
+	static final WindowDesc _chat_window_desc = new WindowDesc(
 		Window.WDP_CENTER, -26, 640, 14, // x, y, width, height
 		Window.WC_SEND_NETWORK_MSG,0,
 		WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET,
 		_chat_window_widgets,
-		ChatWindowWndProc
-	};
+		NetGui::ChatWindowWndProc
+	);
 
-	void ShowChatWindow(StringID str, StringID caption, int maxlen, int maxwidth, WindowClass window_class, WindowNumber window_number)
+	void ShowChatWindow(StringID str, StringID caption, int maxlen, int maxwidth, int window_class, int window_number)
 	{
 		Window w;
 
@@ -1395,14 +1421,14 @@ public class NetGui {
 		w = AllocateWindowDesc(_chat_window_desc);
 
 		w.click_state = 1 << 1;
-		WP(w,querystr_d).caption = caption;
-		WP(w,querystr_d).wnd_class = window_class;
-		WP(w,querystr_d).wnd_num = window_number;
-		WP(w,querystr_d).text.caret = false;
-		WP(w,querystr_d).text.maxlength = maxlen - 1;
-		WP(w,querystr_d).text.maxwidth = maxwidth;
-		WP(w,querystr_d).text.buf = _edit_str_buf;
-		UpdateTextBufferSize(WP(w, querystr_d).text);
+		w.as_querystr_d().caption = caption;
+		w.as_querystr_d().wnd_class = window_class;
+		w.as_querystr_d().wnd_num = window_number;
+		w.as_querystr_d().text.caret = false;
+		w.as_querystr_d().text.maxlength = maxlen - 1;
+		w.as_querystr_d().text.maxwidth = maxwidth;
+		w.as_querystr_d().text.buf = _edit_str_buf;
+		UpdateTextBufferSize(w.as_querystr_d().text);
 	}
 
 

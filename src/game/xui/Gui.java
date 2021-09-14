@@ -60,7 +60,7 @@ public class Gui
 
 
 	/*	FIOS_TYPE_FILE, FIOS_TYPE_OLDFILE etc. different colours */
-	static byte _fios_colors[];
+	//static byte _fios_colors[];
 
 
 	//enum {

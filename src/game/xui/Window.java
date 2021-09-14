@@ -1886,7 +1886,7 @@ public class Window extends WindowConstants implements Serializable
 	 * @param wparam Specifies additional message-specific information
 	 * @param lparam Specifies additional message-specific information
 	 */
-	static void SendWindowMessage(int wnd_class, int wnd_num, int msg, int wparam, int lparam)
+	public static void SendWindowMessage(int wnd_class, int wnd_num, int msg, int wparam, int lparam)
 	{
 		Window w = FindWindowById(wnd_class, wnd_num);
 		if (w != null) SendWindowMessageW(w, msg, wparam, lparam);
@@ -2800,7 +2800,11 @@ public class Window extends WindowConstants implements Serializable
 		}
 	}
 
-	//void ShowDropDownMenu(Window w, final StringID []strings, int selected, int button, int disabled_mask, int hidden_mask)
+	public void ShowDropDownMenu(final int []strings, int selected, int button, int disabled_mask, int hidden_mask)
+	{
+		ShowDropDownMenu(this, strings, selected, button, disabled_mask, hidden_mask);
+	}
+	
 	public static void ShowDropDownMenu(Window w, final int []strings, int selected, int button, int disabled_mask, int hidden_mask)
 	{
 		int num;
