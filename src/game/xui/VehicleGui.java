@@ -104,7 +104,7 @@ public class VehicleGui
 		{
 			Window w = it.next();
 
-			switch (w.window_class) {
+			switch (w.getWindow_class()) {
 			case Window.WC_TRAINS_LIST: case Window.WC_ROADVEH_LIST:
 			case Window.WC_SHIPS_LIST:  case Window.WC_AIRCRAFT_LIST:
 				w.as_vehiclelist_d().flags |= Vehicle.VL_REBUILD;
@@ -122,7 +122,7 @@ public class VehicleGui
 		{
 			Window w = it.next();
 
-			switch (w.window_class) {
+			switch (w.getWindow_class()) {
 			case Window.WC_TRAINS_LIST: case Window.WC_ROADVEH_LIST:
 			case Window.WC_SHIPS_LIST:  case Window.WC_AIRCRAFT_LIST:
 				w.as_vehiclelist_d().flags |= Vehicle.VL_RESORT;

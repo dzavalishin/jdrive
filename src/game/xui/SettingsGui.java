@@ -1310,7 +1310,7 @@ public class SettingsGui extends SettingsTables
 						new StringID( Str.STR_CURRENCY_CHANGE_PARAMETER ),
 						len + 1, // maximum number of characters OR
 						250, // characters up to this width pixels, whichever is satisfied first
-						w.window_class,
+						w.getWindow_class(),
 						w.window_number);
 			}
 

@@ -15,6 +15,7 @@ import game.enums.Owner;
 import game.enums.SwitchModes;
 import game.enums.ThreadMsg;
 import game.ids.PlayerID;
+import game.net.Net;
 import game.struct.SmallFiosItem;
 import game.util.FileIO;
 import game.util.Music;
@@ -587,28 +588,28 @@ public class Main {
 
 	public static void SwitchMode(SwitchModes new_mode)
 	{
-		/*
+		
 		// If we are saving something, the network stays in his current state
-		if (new_mode != SM_SAVE) {
+		if (new_mode != SwitchModes.SM_SAVE) {
 			// If the network is active, make it not-active
-			if (_networking) {
-				if (_network_server && (new_mode == SM_LOAD || new_mode == SM_NEWGAME)) {
-					NetworkReboot();
-					NetworkUDPClose();
+			if (Global._networking) {
+				if (Global._network_server && (new_mode == SwitchModes.SM_LOAD || new_mode == SwitchModes.SM_NEWGAME)) {
+					Net.NetworkReboot();
+					Net.NetworkUDPClose();
 				} else {
-					NetworkDisconnect();
-					NetworkUDPClose();
+					Net.NetworkDisconnect();
+					Net.NetworkUDPClose();
 				}
 			}
 
 			// If we are a server, we restart the server
-			if (_is_network_server) {
+			if (Net._is_network_server) {
 				// But not if we are going to the menu
-				if (new_mode != SM_MENU) {
-					NetworkServerStart();
+				if (new_mode != SwitchModes.SM_MENU) {
+					Net.NetworkServerStart();
 				} else {
 					// This client no longer wants to be a network-server
-					_is_network_server = false;
+					Net._is_network_server = false;
 				}
 			}
 		}
@@ -712,7 +713,7 @@ public class Main {
 	// The state must not be changed from anywhere
 	// but here.
 	// That check is enforced in DoCommand.
-	static void StateGameLoop()
+	public static void StateGameLoop()
 	{
 		// dont execute the state loop during pause
 		if (Global._pause != 0) return;

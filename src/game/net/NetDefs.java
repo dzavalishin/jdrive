@@ -55,17 +55,6 @@ public interface NetDefs {
 
 
 
-	enum NetworkJoinStatus {
-		NETWORK_JOIN_STATUS_CONNECTING,
-		NETWORK_JOIN_STATUS_AUTHORIZING,
-		NETWORK_JOIN_STATUS_WAITING,
-		NETWORK_JOIN_STATUS_DOWNLOADING,
-		NETWORK_JOIN_STATUS_PROCESSING,
-		NETWORK_JOIN_STATUS_REGISTERING,
-
-		NETWORK_JOIN_STATUS_GETTING_COMPANY_INFO,
-	} ;
-
 	// language ids for server_lang and client_lang
 	//enum NetworkLanguage {
 	public static final int NETLANG_ANY = 0;
@@ -86,7 +75,10 @@ public interface NetDefs {
 	//boolean _network_server; // network-server is active
 	//boolean _network_dedicated; // are we a dedicated server?
 	//byte _network_playas; // an id to play as..
-
+	// The client-info-server-index is always 1
+	public static final int   NETWORK_SERVER_INDEX = 1;
+	public static final int   NETWORK_EMPTY_INDEX = 0; 
+	
 
 
 }

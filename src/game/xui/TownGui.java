@@ -299,7 +299,7 @@ public abstract class TownGui //extends Town
 
 			case 8: /* rename */
 				Global.SetDParam(0, w.window_number);
-				MiscGui.ShowQueryString(Str.STR_TOWN, Str.STR_2007_RENAME_TOWN, 31, 130, w.window_class, w.window_number);
+				MiscGui.ShowQueryString(Str.STR_TOWN, Str.STR_2007_RENAME_TOWN, 31, 130, w.getWindow_class(), w.window_number);
 				break;
 
 			case 9: /* expand town */

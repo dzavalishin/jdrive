@@ -2917,6 +2917,8 @@ public class Window extends WindowConstants implements Serializable
 	public int getLeft() { return left; }
 	public int getTop() { return top; }
 
+	public void setHeight(int i) { height = i; }
+	
 	public Widget getWidget(int i) { return widget.get(i); }
 	public int getWindowClass() { return window_class; }
 
@@ -3180,6 +3182,11 @@ public class Window extends WindowConstants implements Serializable
 
 		MouseLoop(click, mousewheel);
 	}
+
+	public int getWindow_class() {
+		return window_class;
+	}
+
 	
 	
 	

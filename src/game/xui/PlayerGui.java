@@ -602,14 +602,14 @@ public class PlayerGui
 				final Player  p = Player.GetPlayer(w.window_number);
 				w.as_def_d().byte_1 = 0;
 				Global.SetDParam(0, p.getPresident_name_2());
-				MiscGui.ShowQueryString( new StringID( p.getPresident_name_1() ), new StringID( Str.STR_700B_PRESIDENT_S_NAME ), 31, 94, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID( p.getPresident_name_1() ), new StringID( Str.STR_700B_PRESIDENT_S_NAME ), 31, 94, w.getWindow_class(), w.window_number);
 			} break;
 
 			case 6: {/* change company name */
 				Player p = Player.GetPlayer(w.window_number);
 				w.as_def_d().byte_1 = 1;
 				Global.SetDParam(0, p.getName_2());
-				MiscGui.ShowQueryString( new StringID(p.getName_1()), new StringID(Str.STR_700A_COMPANY_NAME), 31, 150, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID(p.getName_1()), new StringID(Str.STR_700A_COMPANY_NAME), 31, 150, w.getWindow_class(), w.window_number);
 			} break;
 
 			case 7: {/* build hq */

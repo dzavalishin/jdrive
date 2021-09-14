@@ -36,6 +36,9 @@ import game.ids.StringID;
 import game.ifaces.MenuClickedProc;
 import game.ifaces.OnButtonClick;
 import game.ifaces.ToolbarButtonProc;
+import game.net.Net;
+import game.net.NetDefs;
+import game.net.NetworkPasswordType;
 import game.struct.ColorList;
 import game.struct.Point;
 import game.tables.Snd;
@@ -242,7 +245,7 @@ public class Gui
 			return false;
 		}
 
-		ViewPort.SetObjectToPlace(cursor, mode, w.window_class, w.window_number);
+		ViewPort.SetObjectToPlace(cursor, mode, w.getWindow_class(), w.window_number);
 		w.click_state |= mask;
 		Global._place_proc = placeproc;
 		return true;
@@ -438,37 +441,37 @@ public class Gui
 		AirportGui.ShowBuildAirToolbar();
 	}
 
-	/*#ifdef ENABLE_NETWORK
+	
 
-	void ShowNetworkChatQueryWindow(byte desttype, byte dest)
+	public static void ShowNetworkChatQueryWindow(int desttype, int dest)
 	{
 		_rename_id = desttype + (dest << 8);
 		_rename_what = 2;
 		ShowChatWindow(Str.STR_EMPTY, Str.STR_NETWORK_CHAT_QUERY_CAPTION, 150, 338, 1, 0);
 	}
 
-	void ShowNetworkGiveMoneyWindow(byte player)
+	public static void ShowNetworkGiveMoneyWindow(int player)
 	{
 		_rename_id = player;
 		_rename_what = 3;
 		ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_GIVE_MONEY_CAPTION, 30, 180, 1, 0);
 	}
 
-	void ShowNetworkNeedGamePassword()
+	public static void ShowNetworkNeedGamePassword()
 	{
-		_rename_id = NETWORK_GAME_PASSWORD;
+		_rename_id = NetworkPasswordType.NETWORK_GAME_PASSWORD.ordinal();
 		_rename_what = 4;
-		ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_GAME_PASSWORD_CAPTION, 20, 180, WC_SELECT_GAME, 0);
+		ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_GAME_PASSWORD_CAPTION, 20, 180, Window.WC_SELECT_GAME, 0);
 	}
 
 	void ShowNetworkNeedCompanyPassword()
 	{
-		_rename_id = NETWORK_COMPANY_PASSWORD;
+		_rename_id = NetworkPasswordType.NETWORK_COMPANY_PASSWORD.ordinal();
 		_rename_what = 4;
-		ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_COMPANY_PASSWORD_CAPTION, 20, 180, WC_SELECT_GAME, 0);
+		ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_COMPANY_PASSWORD_CAPTION, 20, 180, Window.WC_SELECT_GAME, 0);
 	}
 
-	#endif /* ENABLE_NETWORK */
+	
 
 	public static void ShowRenameSignWindow(final SignStruct ss)
 	{
@@ -1008,7 +1011,7 @@ public class Gui
 		{
 			Window wt = null;
 
-			switch (w.window_class) {
+			switch (w.getWindow_class()) {
 				case Window.WC_MAIN_WINDOW:
 					wt = Window.FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
 					break;

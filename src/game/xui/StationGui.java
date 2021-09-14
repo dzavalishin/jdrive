@@ -462,7 +462,7 @@ public class StationGui extends Station  // to get constants
 
 			case 9: {
 				Global.SetDParam(0, w.window_number);
-				MiscGui.ShowQueryString( new StringID( Str.STR_STATION ), new StringID( Str.STR_3030_RENAME_STATION_LOADING ), 31, 180, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID( Str.STR_STATION ), new StringID( Str.STR_3030_RENAME_STATION_LOADING ), 31, 180, w.getWindow_class(), w.window_number);
 			} break;
 
 			case 10: { /* Show a list of scheduled trains to this station */

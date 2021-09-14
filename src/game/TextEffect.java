@@ -59,7 +59,7 @@ public class TextEffect
 	 * @param message
 	 * @param args
 	 */
-	static void AddTextMessage(int color, int duration, final String message, Object ... args)
+	public static void AddTextMessage(int color, int duration, final String message, Object ... args)
 	{
 		String buf;
 		//int length;

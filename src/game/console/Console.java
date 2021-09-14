@@ -325,7 +325,7 @@ public class Console //extends ConsoleCmds
 	 * by any other means. Uses printf() style format, for more information look
 	 * at @IConsolePrint()
 	 */
-	static void IConsolePrintF(int color_code, final String s, Object ... args)
+	public static void IConsolePrintF(int color_code, final String s, Object ... args)
 	{
 		//va_list va;
 		String buf = String.format(s, args);
