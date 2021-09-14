@@ -129,7 +129,7 @@ public class Net implements NetDefs
 
 	static final List<NetworkClientState> _clients = new ArrayList<>();
 
-
+	static Socket _udp_client_socket;
 
 
 

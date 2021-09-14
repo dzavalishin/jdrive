@@ -3,7 +3,12 @@ package game.net;
 import java.net.InetAddress;
 import java.net.Socket;
 
-public class NetUDP {
+import game.GameOptions;
+import game.Global;
+import game.Player;
+
+public class NetUDP extends Net 
+{
 
 	//
 	// This file handles all the LAN-stuff
@@ -35,7 +40,7 @@ public class NetUDP {
 
 	static NetworkClientState _udp_cs;
 
-	void NetworkPacketReceive_PACKET_UDP_CLIENT_FIND_SERVER_command(Packet p, InetAddress client_addr)
+	static void NetworkPacketReceive_PACKET_UDP_CLIENT_FIND_SERVER_command(Packet p, InetAddress client_addr)
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_CLIENT_FIND_SERVER)
 	{
 		Packet packet;
@@ -46,51 +51,51 @@ public class NetUDP {
 		packet = NetworkSend_Init(PACKET_UDP_SERVER_RESPONSE);
 
 		// Update some game_info
-		_network_game_info.game_date = _date;
-		_network_game_info.map_width = MapSizeX();
-		_network_game_info.map_height = MapSizeY();
-		_network_game_info.map_set = GameOptions._opt.landscape;
+		Net._network_game_info.game_date = Global.get_date();
+		Net._network_game_info.map_width = Global.MapSizeX();
+		Net._network_game_info.map_height = Global.MapSizeY();
+		Net._network_game_info.map_set = GameOptions._opt.landscape;
 
 		NetworkSend_byte (packet, NETWORK_GAME_INFO_VERSION);
-		NetworkSend_string(packet, _network_game_info.server_name);
-		NetworkSend_string(packet, _network_game_info.server_revision);
-		NetworkSend_byte (packet, _network_game_info.server_lang);
-		NetworkSend_byte (packet, _network_game_info.use_password);
-		NetworkSend_byte (packet, _network_game_info.clients_max);
-		NetworkSend_byte (packet, _network_game_info.clients_on);
-		NetworkSend_byte (packet, _network_game_info.spectators_on);
-		NetworkSend_int(packet, _network_game_info.game_date);
-		NetworkSend_int(packet, _network_game_info.start_date);
-		NetworkSend_string(packet, _network_game_info.map_name);
-		NetworkSend_int(packet, _network_game_info.map_width);
-		NetworkSend_int(packet, _network_game_info.map_height);
-		NetworkSend_byte (packet, _network_game_info.map_set);
-		NetworkSend_byte (packet, _network_game_info.dedicated);
+		NetworkSend_string(packet, Net._network_game_info.server_name);
+		NetworkSend_string(packet, Net._network_game_info.server_revision);
+		NetworkSend_byte (packet, Net._network_game_info.server_lang);
+		NetworkSend_byte (packet, Net._network_game_info.use_password);
+		NetworkSend_byte (packet, Net._network_game_info.clients_max);
+		NetworkSend_byte (packet, Net._network_game_info.clients_on);
+		NetworkSend_byte (packet, Net._network_game_info.spectators_on);
+		NetworkSend_int(packet, Net._network_game_info.game_date);
+		NetworkSend_int(packet, Net._network_game_info.start_date);
+		NetworkSend_string(packet, Net._network_game_info.map_name);
+		NetworkSend_int(packet, Net._network_game_info.map_width);
+		NetworkSend_int(packet, Net._network_game_info.map_height);
+		NetworkSend_byte (packet, Net._network_game_info.map_set);
+		NetworkSend_byte (packet, Net._network_game_info.dedicated);
 
 		// Let the client know that we are here
 		NetworkSendUDP_Packet(_udp_server_socket, packet, client_addr);
 
-		free(packet);
+		//free(packet);
 
-		Global.DEBUG_net( 2)("[NET][UDP] Queried from %s", inet_ntoa(client_addr.sin_addr));
+		Global.DEBUG_net( 2, "[NET][UDP] Queried from %s", inet_ntoa(client_addr.sin_addr));
 	}
 
-	void NetworkPacketReceive_PACKET_UDP_SERVER_RESPONSE_command(Packet p, InetAddress client_addr)
+	static void NetworkPacketReceive_PACKET_UDP_SERVER_RESPONSE_command(Packet p, InetAddress client_addr)
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_SERVER_RESPONSE)
 	{
-		NetworkGameList *item;
+		NetworkGameList item;
 		byte game_info_version;
 
 		// Just a fail-safe.. should never happen
 		if (_network_udp_server)
 			return;
 
-		game_info_version = NetworkRecv_byte(&_udp_cs, p);
+		game_info_version = NetworkRecv_byte(_udp_cs, p);
 
 		if (_udp_cs.quited)
 			return;
 
-		Global.DEBUG_net( 6)("[NET][UDP] Server response from %s:%d", inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
+		Global.DEBUG_net( 6, "[NET][UDP] Server response from %s:%d", inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
 
 		// Find next item
 		item = NetworkGameListAddItem(inet_addr(inet_ntoa(client_addr.sin_addr)), ntohs(client_addr.sin_port));
@@ -123,10 +128,10 @@ public class NetUDP {
 
 		item.online = true;
 
-		UpdateNetworkGameWindow(false);
+		NetGui.UpdateNetworkGameWindow(false);
 	}
 
-	void NetworkPacketReceive_PACKET_UDP_CLIENT_DETAIL_INFO_command(Packet p, InetAddress client_addr)
+	static void NetworkPacketReceive_PACKET_UDP_CLIENT_DETAIL_INFO_command(Packet p, InetAddress client_addr)
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_CLIENT_DETAIL_INFO)
 	{
 		NetworkClientState cs;
@@ -240,7 +245,7 @@ public class NetUDP {
 		free(packet);
 	}
 
-	void NetworkPacketReceive_PACKET_UDP_MASTER_RESPONSE_LIST_command(Packet p, InetAddress client_addr)
+	static void NetworkPacketReceive_PACKET_UDP_MASTER_RESPONSE_LIST_command(Packet p, InetAddress client_addr)
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_MASTER_RESPONSE_LIST) 
 	{
 		int i;
@@ -254,7 +259,7 @@ public class NetUDP {
 		 * an int (ip) and an int (port) for each pair
 		 */
 
-		ver = NetworkRecv_byte(&_udp_cs, p);
+		ver = NetworkRecv_byte(_udp_cs, p);
 
 		if (_udp_cs.quited)
 			return;
@@ -269,7 +274,7 @@ public class NetUDP {
 	}
 
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_MASTER_ACK_REGISTER) 
-	void NetworkPacketReceive_PACKET_UDP_MASTER_ACK_REGISTER_command(Packet p, InetAddress client_addr)
+	static void NetworkPacketReceive_PACKET_UDP_MASTER_ACK_REGISTER_command(Packet p, InetAddress client_addr)
 	{
 		_network_advertise_retries = 0;
 		Global.DEBUG_net( 2,"[NET][UDP] We are advertised on the master-server!");
@@ -280,18 +285,21 @@ public class NetUDP {
 	}
 
 
-	// The layout for the receive-functions by UDP
-	//typedef void NetworkUDPPacket(Packet p, InetAddress client_addr);
 
 	static NetworkUDPPacket _network_udp_packet[] = {
-		RECEIVE_COMMAND(PACKET_UDP_CLIENT_FIND_SERVER),
-		RECEIVE_COMMAND(PACKET_UDP_SERVER_RESPONSE),
-		RECEIVE_COMMAND(PACKET_UDP_CLIENT_DETAIL_INFO),
+		//RECEIVE_COMMAND(PACKET_UDP_CLIENT_FIND_SERVER),
+		NetUDP::NetworkPacketReceive_PACKET_UDP_CLIENT_FIND_SERVER_command,
+		//RECEIVE_COMMAND(PACKET_UDP_SERVER_RESPONSE),
+		NetUDP::NetworkPacketReceive_PACKET_UDP_SERVER_RESPONSE_command,
+		//RECEIVE_COMMAND(PACKET_UDP_CLIENT_DETAIL_INFO),
+		NetUDP::NetworkPacketReceive_PACKET_UDP_CLIENT_DETAIL_INFO_command,
 		null,
 		null,
-		RECEIVE_COMMAND(PACKET_UDP_MASTER_ACK_REGISTER),
+		//RECEIVE_COMMAND(PACKET_UDP_MASTER_ACK_REGISTER),
+		NetUDP::NetworkPacketReceive_PACKET_UDP_MASTER_ACK_REGISTER_command,
 		null,
-		RECEIVE_COMMAND(PACKET_UDP_MASTER_RESPONSE_LIST),
+		//RECEIVE_COMMAND(PACKET_UDP_MASTER_RESPONSE_LIST),
+		NetUDP::NetworkPacketReceive_PACKET_UDP_MASTER_RESPONSE_LIST_command,
 		null
 	};
 
@@ -308,12 +316,12 @@ public class NetUDP {
 		_udp_cs.socket = null;
 		_udp_cs.quited = false;
 
-		type = NetworkRecv_byte(&_udp_cs, p);
+		type = NetworkRecv_byte(_udp_cs, p);
 
 		if (type < PACKET_UDP_END && _network_udp_packet[type] != null && !_udp_cs.quited) {
-			_network_udp_packet[type](p, client_addr);
+			_network_udp_packet[type].accept(p, client_addr);
 		}	else {
-			Global.DEBUG_net( 0)("[NET][UDP] Received invalid packet type %d", type);
+			Global.DEBUG_net( 0, "[NET][UDP] Received invalid packet type %d", type);
 		}
 	}
 
@@ -328,11 +336,11 @@ public class NetUDP {
 		p.buffer[1] = p.size >> 8;
 
 		// Send the buffer
-		res = sendto(udp, p.buffer, p.size, 0, recv, sizeof(*recv));
+		res = sendto(udp, p.buffer, p.size, 0, recv, sizeof(recv));
 
 		// Check for any errors, but ignore it for the rest
 		if (res == -1) {
-			Global.DEBUG_net( 1)("[NET][UDP] Send error: %i", GET_LAST_ERROR());
+			Global.DEBUG_net( 1, "[NET][UDP] Send error: %i", GET_LAST_ERROR());
 		}
 	}
 
@@ -342,18 +350,18 @@ public class NetUDP {
 		InetAddress sin;
 
 		// Make sure socket is closed
-		closesocket(*udp);
+		closesocket(udp);
 
-		*udp = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-		if (*udp == null) {
-			Global.DEBUG_net( 1)("[NET][UDP] Failed to start UDP support");
+		udp = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+		if (udp == null) {
+			Global.DEBUG_net( 1, "[NET][UDP] Failed to start UDP support");
 			return false;
 		}
 
 		// set nonblocking mode for socket
 		{
-			unsigned long blocking = 1;
-			setsockopt(*udp, SOL_SOCKET, SO_NONBLOCK, &blocking, null);
+			long blocking = 1;
+			setsockopt(udp, SOL_SOCKET, SO_NONBLOCK, &blocking, null);
 		}
 
 		sin.sin_family = AF_INET;
@@ -361,18 +369,18 @@ public class NetUDP {
 		sin.sin_addr.s_addr = host;
 		sin.sin_port = htons(port);
 
-		if (bind(*udp, (struct sockaddr*)&sin, sizeof(sin)) != 0) {
-			Global.DEBUG_net( 1) ("[NET][UDP] error: bind failed on %s:%i", inet_ntoa(*(struct in_addr *)&host), port);
+		if (bind(udp, sin, sizeof(sin)) != 0) {
+			Global.DEBUG_net( 1, "[NET][UDP] error: bind failed on %s:%i", inet_ntoa(*(struct in_addr *)&host), port);
 			return false;
 		}
 
 		if (broadcast) {
 			/* Enable broadcast */
 			unsigned long val = 1;
-			setsockopt(*udp, SOL_SOCKET, SO_BROADCAST, (char *) &val , sizeof(val));
+			setsockopt(udp, SOL_SOCKET, SO_BROADCAST, (char *) &val , sizeof(val));
 		}
 
-		Global.DEBUG_net( 1)("[NET][UDP] Listening on port %s:%d", inet_ntoa(*(struct in_addr *)&host), port);
+		Global.DEBUG_net( 1, "[NET][UDP] Listening on port %s:%d", inet_ntoa(*(struct in_addr *)&host), port);
 
 		return true;
 	}
@@ -380,7 +388,7 @@ public class NetUDP {
 	// Close UDP connection
 	void NetworkUDPClose()
 	{
-		Global.DEBUG_net( 1) ("[NET][UDP] Closed listeners");
+		Global.DEBUG_net( 1, "[NET][UDP] Closed listeners");
 
 		if (_network_udp_server) {
 			if (_udp_server_socket != null) {
@@ -461,7 +469,7 @@ public class NetUDP {
 			// Make the address a broadcast address
 			bcptr[3] = 255;
 
-			Global.DEBUG_net( 6)("[NET][UDP] Broadcasting to %s", inet_ntoa(*(struct in_addr *)&bcaddr));
+			Global.DEBUG_net( 6, "[NET][UDP] Broadcasting to %s", inet_ntoa(*(struct in_addr *)&bcaddr));
 
 			out_addr.sin_family = AF_INET;
 			out_addr.sin_port = htons(_network_server_port);
@@ -481,7 +489,7 @@ public class NetUDP {
 		Packet p;
 
 		if (_udp_client_socket == null)
-			if (!NetworkUDPListen(&_udp_client_socket, 0, 0, true))
+			if (!NetworkUDPListen(_udp_client_socket, 0, 0, true))
 				return;
 
 		p = NetworkSend_Init(PACKET_UDP_CLIENT_GET_LIST);
@@ -495,7 +503,7 @@ public class NetUDP {
 
 		NetworkSendUDP_Packet(_udp_client_socket, p, &out_addr);
 
-		Global.DEBUG_net( 2)("[NET][UDP] Queried Master Server at %s:%d", inet_ntoa(out_addr.sin_addr),ntohs(out_addr.sin_port));
+		Global.DEBUG_net( 2, "[NET][UDP] Queried Master Server at %s:%d", inet_ntoa(out_addr.sin_addr),ntohs(out_addr.sin_port));
 
 		free(p);
 	}
@@ -509,10 +517,10 @@ public class NetUDP {
 
 		// No UDP-socket yet..
 		if (_udp_client_socket == null)
-			if (!NetworkUDPListen(&_udp_client_socket, 0, 0, true))
+			if (!NetworkUDPListen(_udp_client_socket, 0, 0, true))
 				return;
 
-		Global.DEBUG_net( 0)("[NET][UDP] Searching server");
+		Global.DEBUG_net( 0, "[NET][UDP] Searching server");
 
 		NetworkUDPBroadCast(_udp_client_socket);
 		_network_udp_broadcast = 300; // Stay searching for 300 ticks
@@ -522,12 +530,12 @@ public class NetUDP {
 	{
 		InetAddress out_addr;
 		Packet p;
-		NetworkGameList *item;
-		char hostname[NETWORK_HOSTNAME_LENGTH];
+		NetworkGameList item;
+		String hostname;
 
 		// No UDP-socket yet..
 		if (_udp_client_socket == null)
-			if (!NetworkUDPListen(&_udp_client_socket, 0, 0, true))
+			if (!NetworkUDPListen(_udp_client_socket, 0, 0, true))
 				return null;
 
 		ttd_strlcpy(hostname, host, sizeof(hostname));
@@ -555,7 +563,7 @@ public class NetUDP {
 	}
 
 	/* Remove our advertise from the master-server */
-	void NetworkUDPRemoveAdvertise()
+	static void NetworkUDPRemoveAdvertise()
 	{
 		InetAddress out_addr;
 		Packet p;
@@ -569,7 +577,7 @@ public class NetUDP {
 			if (!NetworkUDPListen(&_udp_master_socket, _network_server_bind_ip, 0, false))
 				return;
 
-		Global.DEBUG_net( 2)("[NET][UDP] Removing advertise..");
+		Global.DEBUG_net( 2, "[NET][UDP] Removing advertise..");
 
 		/* Find somewhere to send */
 		out_addr.sin_family = AF_INET;
@@ -644,4 +652,13 @@ public class NetUDP {
 	}
 	
 	
+}
+
+
+// The layout for the receive-functions by UDP
+//typedef void NetworkUDPPacket(Packet p, InetAddress client_addr);
+@FunctionalInterface
+interface NetworkUDPPacket
+{
+	void accept(Packet p, InetAddress client_addr);
 }
