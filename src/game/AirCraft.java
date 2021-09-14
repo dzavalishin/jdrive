@@ -2396,7 +2396,7 @@ public class AirCraft extends AirCraftTables {
 		}
 	}
 
-	static void CcBuildAircraft(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildAircraft(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			final Vehicle  v = Vehicle.GetVehicle(Global._new_aircraft_id);
@@ -2409,7 +2409,7 @@ public class AirCraft extends AirCraftTables {
 		}
 	}
 
-	static void CcCloneAircraft(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcCloneAircraft(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) ShowAircraftViewWindow(Vehicle.GetVehicle(Global._new_aircraft_id));
 	}

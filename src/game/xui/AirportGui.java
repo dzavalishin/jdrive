@@ -21,7 +21,7 @@ public class AirportGui
 	static int _selected_airport_type;
 
 
-	private static void CcBuildAirport(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildAirport(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, tile);

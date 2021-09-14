@@ -18,6 +18,7 @@ import game.util.BinaryString;
 public class Packet {
 	
 	public static final int SEND_MTU = 1460;
+	public static final int SIZE_SIZE = 2; // packet size is 2 bytes
 
 	
 	Packet next;

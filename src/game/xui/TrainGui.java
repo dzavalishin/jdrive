@@ -128,7 +128,7 @@ public class TrainGui
 		}
 	}
 
-	static void CcBuildWagon(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildWagon(boolean success, TileIndex tile, int p1, int p2)
 	{
 		Vehicle found;
 
@@ -161,7 +161,7 @@ public class TrainGui
 		}
 	}
 
-	static void CcBuildLoco(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildLoco(boolean success, TileIndex tile, int p1, int p2)
 	{
 		final Vehicle  v;
 
@@ -175,7 +175,7 @@ public class TrainGui
 		ShowTrainViewWindow(v);
 	}
 
-	static void CcCloneTrain(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcCloneTrain(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) ShowTrainViewWindow(Vehicle.GetVehicle(Global._new_train_id));
 	}

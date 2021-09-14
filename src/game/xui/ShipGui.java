@@ -313,7 +313,7 @@ public class ShipGui
 		w.caption_color = 0xFF & v.getOwner().id;
 	}
 
-	static void CcBuildShip(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildShip(boolean success, TileIndex tile, int p1, int p2)
 	{
 		final Vehicle  v;
 		if (!success) return;
@@ -326,7 +326,7 @@ public class ShipGui
 		ShowShipViewWindow(v);
 	}
 
-	static void CcCloneShip(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcCloneShip(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) ShowShipViewWindow(Vehicle.GetVehicle(Global._new_ship_id));
 	}

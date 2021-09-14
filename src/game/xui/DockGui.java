@@ -21,7 +21,7 @@ public class DockGui
 
 	static int _ship_depot_direction;
 
-	static void CcBuildDocks(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildDocks(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			Sound.SndPlayTileFx(Snd.SND_02_SPLAT, tile);

@@ -231,7 +231,7 @@ public class RoadVehGui
 		w.caption_color = (byte) v.getOwner().id;
 	}
 
-	static void CcCloneRoadVeh(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcCloneRoadVeh(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) ShowRoadVehViewWindow(Vehicle.GetVehicle(Global._new_roadveh_id));
 	}
@@ -410,7 +410,7 @@ public class RoadVehGui
 		}
 	}
 
-	static void CcBuildRoadVeh(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildRoadVeh(boolean success, TileIndex tile, int p1, int p2)
 	{
 		final Vehicle  v;
 

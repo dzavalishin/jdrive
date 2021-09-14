@@ -48,7 +48,7 @@ public class Bridge
 		flags = o;       
 	}
 
-	static void CcBuildBridge(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildBridge(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) Sound.SndPlayTileFx(Snd.SND_27_BLACKSMITH_ANVIL, tile);
 	}

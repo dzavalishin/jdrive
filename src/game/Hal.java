@@ -81,7 +81,7 @@ void SortResolutions(int count)
 	qsort(_resolutions, count, sizeof(_resolutions[0]), compare_res);
 }
 	 */
-	int GetDrawStringPlayerColor(PlayerID player)
+	public static int GetDrawStringPlayerColor(PlayerID player)
 	{
 		// Get the color for DrawString-subroutines which matches the color
 		//  of the player - TODO -1??!!

@@ -854,7 +854,7 @@ public class Window extends WindowConstants implements Serializable
 	 * @param widget @see Widget pointer to the window layout and various elements
 	 * @return @see Window pointer of the newly created window
 	 */
-	static Window AllocateWindow(
+	public static Window AllocateWindow(
 			int x, int y, int width, int height,
 			//BiConsumer<Window,WindowEvent> proc, 
 			WindowProc proc, /*WindowClass*/ int cls, final Widget[] widget)

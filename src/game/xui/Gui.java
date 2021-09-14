@@ -1595,7 +1595,7 @@ public class Gui
 		ShowEditorTerraformToolBar();
 	}
 
-	static void CcBuildTown(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildTown(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, tile);

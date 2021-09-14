@@ -34,7 +34,7 @@ public class RoadGui
 	static byte _road_depot_orientation;
 	static byte _road_station_picker_orientation;
 
-	static void CcPlaySound1D(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcPlaySound1D(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, tile);
 	}
@@ -57,7 +57,7 @@ public class RoadGui
 	}
 
 
-	static void CcBuildRoadTunnel(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildRoadTunnel(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, tile);
@@ -82,7 +82,7 @@ public class RoadGui
 		}
 	}
 
-	private static void CcRoadDepot(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcRoadDepot(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, tile);

@@ -344,6 +344,8 @@ public class NetGui extends Net implements NetDefs
 			NetworkAddServer(e.str);
 			NetworkRebuildHostList();
 		} break;
+		default:
+			break;
 		}
 	}
 
@@ -578,6 +580,8 @@ public class NetGui extends Net implements NetDefs
 			_network_game_info.use_password = _network_server_password.length() != 0;
 			w.SetWindowDirty();
 		} break;
+		default:
+			break;
 		}
 	}
 
@@ -792,6 +796,8 @@ public class NetGui extends Net implements NetDefs
 
 		case WE_CREATE:
 			_selected_company_item = -1;
+		default:
+			break;
 		}
 	}
 
@@ -904,13 +910,13 @@ public class NetGui extends Net implements NetDefs
 	}
 
 	// Here we start to define the options out of the menu
-	static void ClientList_Kick(byte client_no)
+	static void ClientList_Kick(int client_no)
 	{
 		if (client_no < Global.MAX_PLAYERS)
 			SEND_COMMAND(PACKET_SERVER_ERROR,_clients[client_no], NETWORK_ERROR_KICKED);
 	}
 
-	static void ClientList_Ban(byte client_no)
+	static void ClientList_Ban(int client_no)
 	{
 		int i;
 		int ip = NetworkFindClientInfo(client_no).client_ip;
@@ -937,30 +943,30 @@ public class NetGui extends Net implements NetDefs
 	    }
 	}
 	
-	static void ClientList_GiveMoney(byte client_no)
+	static void ClientList_GiveMoney(int client_no)
 	{
 		if (NetworkFindClientInfo(client_no) != null)
 			Gui.ShowNetworkGiveMoneyWindow(NetworkFindClientInfo(client_no).client_playas - 1);
 	}
 
-	static void ClientList_SpeakToClient(byte client_no)
+	static void ClientList_SpeakToClient(int client_no)
 	{
 		if (NetworkFindClientInfo(client_no) != null)
-			ShowNetworkChatQueryWindow(DESTTYPE_CLIENT, NetworkFindClientInfo(client_no).client_index);
+			ShowNetworkChatQueryWindow(DestType.CLIENT, NetworkFindClientInfo(client_no).client_index);
 	}
 
-	static void ClientList_SpeakToPlayer(byte client_no)
+	static void ClientList_SpeakToPlayer(int client_no)
 	{
 		if (NetworkFindClientInfo(client_no) != null)
-			ShowNetworkChatQueryWindow(DESTTYPE_PLAYER, NetworkFindClientInfo(client_no).client_playas);
+			ShowNetworkChatQueryWindow(DestType.PLAYER, NetworkFindClientInfo(client_no).client_playas);
 	}
 
-	static void ClientList_SpeakToAll(byte client_no)
+	static void ClientList_SpeakToAll(int client_no)
 	{
-		ShowNetworkChatQueryWindow(DESTTYPE_BROADCAST, 0);
+		ShowNetworkChatQueryWindow(DestType.BROADCAST, 0);
 	}
 
-	static void ClientList_None(byte client_no)
+	static void ClientList_None(int client_no)
 	{
 		// No action ;)
 	}
@@ -1038,23 +1044,23 @@ public class NetGui extends Net implements NetDefs
 
 		i = 0;
 		if (_network_own_client_index != ci.client_index) {
-			Strings.GetString(_clientlist_action[i], Str.STR_NETWORK_CLIENTLIST_SPEAK_TO_CLIENT);
-			_clientlist_proc[i++] = ClientList_SpeakToClient;
+			_clientlist_action[i] = Strings.GetString(Str.STR_NETWORK_CLIENTLIST_SPEAK_TO_CLIENT);
+			_clientlist_proc[i++] = NetGui::ClientList_SpeakToClient;
 		}
 
 		if (ci.client_playas >= 1 && ci.client_playas <= Global.MAX_PLAYERS) {
-			Strings.GetString(_clientlist_action[i], Str.STR_NETWORK_CLIENTLIST_SPEAK_TO_COMPANY);
-			_clientlist_proc[i++] = ClientList_SpeakToPlayer;
+			_clientlist_action[i] = Strings.GetString(Str.STR_NETWORK_CLIENTLIST_SPEAK_TO_COMPANY);
+			_clientlist_proc[i++] = NetGui::ClientList_SpeakToPlayer;
 		}
-		Strings.GetString(_clientlist_action[i], Str.STR_NETWORK_CLIENTLIST_SPEAK_TO_ALL);
-		_clientlist_proc[i++] = ClientList_SpeakToAll;
+		_clientlist_action[i] = Strings.GetString(Str.STR_NETWORK_CLIENTLIST_SPEAK_TO_ALL);
+		_clientlist_proc[i++] = NetGui::ClientList_SpeakToAll;
 
 		if (_network_own_client_index != ci.client_index) {
 			if (Global._network_playas >= 1 && Global._network_playas <= Global.MAX_PLAYERS) {
 				// We are no spectator
 				if (ci.client_playas >= 1 && ci.client_playas <= Global.MAX_PLAYERS) {
-					Strings.GetString(_clientlist_action[i], Str.STR_NETWORK_CLIENTLIST_GIVE_MONEY);
-					_clientlist_proc[i++] = ClientList_GiveMoney;
+					_clientlist_action[i] = Strings.GetString(Str.STR_NETWORK_CLIENTLIST_GIVE_MONEY);
+					_clientlist_proc[i++] = NetGui::ClientList_GiveMoney;
 				}
 			}
 		}
@@ -1062,22 +1068,22 @@ public class NetGui extends Net implements NetDefs
 		// A server can kick clients (but not hisself)
 		if (Global._network_server && _network_own_client_index != ci.client_index) {
 			_clientlist_action[i] = Strings.GetString(Str.STR_NETWORK_CLIENTLIST_KICK);
-			_clientlist_proc[i++] = ClientList_Kick;
+			_clientlist_proc[i++] = NetGui::ClientList_Kick;
 
 			_clientlist_action[i] ="Ban";
-			_clientlist_proc[i++] = ClientList_Ban;
+			_clientlist_proc[i++] = NetGui::ClientList_Ban;
 		}
 
 		if (i == 0) {
 			_clientlist_action[i] = Strings.GetString(Str.STR_NETWORK_CLIENTLIST_NONE);
-			_clientlist_proc[i++] = ClientList_None;
+			_clientlist_proc[i++] = NetGui::ClientList_None;
 		}
 
 		/* Calculate the height */
 		h = ClientListPopupHeigth();
 
 		// Allocate the popup
-		w = AllocateWindow(x, y, 100, h + 1, ClientListPopupWndProc, Window.WC_TOOLBAR_MENU, _client_list_popup_widgets);
+		w = Window.AllocateWindow(x, y, 100, h + 1, NetGui::ClientListPopupWndProc, Window.WC_TOOLBAR_MENU, _client_list_popup_widgets);
 		w.getWidget(0).bottom = w.getWidget(0).top + h;
 
 		w.flags4 &= ~WF_WHITE_BORDER_MASK;
@@ -1118,9 +1124,9 @@ public class NetGui extends Net implements NetDefs
 
 		case WE_POPUPMENU_SELECT: {
 			// We selected an action
-			int index = (e.pt.y - w.top) / CLNWND_ROWSIZE;
+			int index = (e.pt.y - w.getTop()) / CLNWND_ROWSIZE;
 
-			if (index >= 0 && e.pt.y >= w.top)
+			if (index >= 0 && e.pt.y >= w.getTop())
 				HandleClientListPopupClick(index, w.as_menu_d().main_button);
 
 			// Sometimes, because of the bad DeleteWindow-proc, the 'w' pointer is
@@ -1141,6 +1147,8 @@ public class NetGui extends Net implements NetDefs
 			w.as_menu_d().sel_index = index;
 			w.SetWindowDirty();
 		} break;
+		default:
+			break;
 
 		}
 	}
@@ -1221,6 +1229,8 @@ public class NetGui extends Net implements NetDefs
 			_selected_clientlist_item = 255;
 			_selected_clientlist_y = 0;
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -1275,6 +1285,8 @@ public class NetGui extends Net implements NetDefs
 					break;
 			}
 			break;
+		default:
+			break;
 
 		}
 	}
@@ -1299,7 +1311,7 @@ public class NetGui extends Net implements NetDefs
 	{
 		Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 		_network_join_status = NetworkJoinStatus.CONNECTING;
-		AllocateWindowDesc(_network_join_status_window_desc);
+		Window.AllocateWindowDesc(_network_join_status_window_desc);
 	}
 
 	void ShowJoinStatusWindowAfterJoin()
@@ -1353,14 +1365,14 @@ public class NetGui extends Net implements NetDefs
 			chatClosed = false;
 			break;
 
-		case WindowEvents.WE_PAINT:
+		case WE_PAINT:
 			w.DrawWindowWidgets();
 			DrawEditBox(w, 1);
 			break;
 
-		case WindowEvents.WE_CLICK:
+		case WE_CLICK:
 			switch (e.widget) {
-			case 3: DeleteWindow(w); break; // Cancel
+			case 3: w.DeleteWindow(); break; // Cancel
 			case 2: // Send
 	//press_ok:;
 				NetChatSend(w);
@@ -1368,15 +1380,15 @@ public class NetGui extends Net implements NetDefs
 			}
 			break;
 
-		case WindowEvents.WE_MOUSELOOP: {
-			if (!FindWindowById(w.as_querystr_d().wnd_class, w.as_querystr_d().wnd_num)) {
+		case WE_MOUSELOOP: {
+			if (null == Window.FindWindowById(w.as_querystr_d().wnd_class, w.as_querystr_d().wnd_num)) {
 				w.DeleteWindow();
 				return;
 			}
 			MiscGui.HandleEditBox(w, 1);
 		} break;
 
-		case WindowEvents.WE_KEYPRESS: {
+		case WE_KEYPRESS: {
 			switch(MiscGui.HandleEditBoxKey(w, 1, e)) {
 			case 1: // Return
 				//goto press_ok;
@@ -1388,18 +1400,20 @@ public class NetGui extends Net implements NetDefs
 			}
 		} break;
 
-		case WindowEvents.WE_DESTROY:
+		case WE_DESTROY:
 			SendWindowMessage(Window.WC_NEWS_WINDOW, 0, WindowEvents.WE_DESTROY, 0, 0);
 			Global._no_scroll = BitOps.RETCLRBIT(Global._no_scroll, Global.SCROLL_CHAT);
 			// If the window is not closed yet, it means it still needs to send a CANCEL
 			if (!chatClosed) {
-				Window parent = FindWindowById(w.as_querystr_d().wnd_class, w.as_querystr_d().wnd_num);
+				Window parent = Window.FindWindowById(w.as_querystr_d().wnd_class, w.as_querystr_d().wnd_num);
 				if (parent != null) {
-					WindowEvent e;
-					e.event = WindowEvents.WE_ON_EDIT_TEXT_CANCEL;
-					parent.wndproc(parent, e);
+					WindowEvent e1 = new WindowEvent();
+					e1.event = WindowEvents.WE_ON_EDIT_TEXT_CANCEL;
+					parent.wndproc(parent, e1);
 				}
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -1434,7 +1448,7 @@ public class NetGui extends Net implements NetDefs
 
 		_edit_str_buf = _orig_edit_str_buf;
 
-		w = AllocateWindowDesc(_chat_window_desc);
+		w = Window.AllocateWindowDesc(_chat_window_desc);
 
 		w.click_state = 1 << 1;
 		w.as_querystr_d().caption = caption;
