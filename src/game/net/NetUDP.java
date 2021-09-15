@@ -48,7 +48,7 @@ public class NetUDP extends Net
 
 	static NetworkClientState _udp_cs;
 
-	static void NetworkPacketReceive_PACKET_UDP_CLIENT_FIND_SERVER_command(Packet p, SocketAddress client_addr)
+	static void NetworkPacketReceive_PACKET_UDP_CLIENT_FIND_SERVER_command(Packet p, SocketAddress client_addr) throws IOException
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_CLIENT_FIND_SERVER)
 	{
 		Packet packet;
@@ -93,14 +93,11 @@ public class NetUDP extends Net
 	static void NetworkPacketReceive_PACKET_UDP_SERVER_RESPONSE_command(Packet p, SocketAddress client_addr)
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_SERVER_RESPONSE)
 	{
-		NetworkGameList item;
-		byte game_info_version;
-
 		// Just a fail-safe.. should never happen
 		if (_network_udp_server)
 			return;
 
-		game_info_version = NetworkRecv_byte(_udp_cs, p);
+		//byte game_info_version = NetworkRecv_byte(_udp_cs, p);
 
 		if (_udp_cs.quited)
 			return;
@@ -108,8 +105,11 @@ public class NetUDP extends Net
 		Global.DEBUG_net( 6, "[NET][UDP] Server response from %s:%d", inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
 
 		// Find next item
-		item = NetworkGameListAddItem(inet_addr(inet_ntoa(client_addr.sin_addr)), ntohs(client_addr.sin_port));
+		NetworkGameList item = NetworkGameList.addItem(client_addr);
 
+		item.info = (NetworkGameInfo) p.decodeObject();
+		
+		/*
 		if (game_info_version == 1) {
 			NetworkRecv_string(&_udp_cs, p, item.info.server_name, sizeof(item.info.server_name));
 			NetworkRecv_string(&_udp_cs, p, item.info.server_revision, sizeof(item.info.server_revision));
@@ -135,7 +135,7 @@ public class NetUDP extends Net
 			if (item.info.hostname[0] == '\0')
 				snprintf(item.info.hostname, sizeof(item.info.hostname), "%s", inet_ntoa(client_addr.sin_addr));
 		}
-
+		*/
 		item.online = true;
 
 		NetGui.UpdateNetworkGameWindow(false);
@@ -598,7 +598,7 @@ public class NetUDP extends Net
 		/* Packet is: Version, server_port */
 		p.append((byte)NETWORK_MASTER_SERVER_VERSION);
 		p.appendInt(_network_server_port);
-		NetworkSendUDP_Packet(_udp_master_socket, p, out_addr);
+		NetworkSendUDP_Packet(_udp_master_socket[0], p, out_addr);
 	}
 
 	/* Register us to the master server
@@ -661,5 +661,5 @@ public class NetUDP extends Net
 @FunctionalInterface
 interface NetworkUDPPacket
 {
-	void accept(Packet p, SocketAddress client_addr);
+	void accept(Packet p, SocketAddress client_addr)  throws IOException;
 }

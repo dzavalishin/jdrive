@@ -1,6 +1,8 @@
 package game.net;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +53,15 @@ public class NetworkGameList {
 	{
 		Global.DEBUG_net( 4, "[NET][GameList] Removed server from list");
 		_network_game_list.remove(remove);
+	}
+
+	public static NetworkGameList addItem(SocketAddress addr) {
+		if (addr instanceof InetSocketAddress) {
+			InetSocketAddress ia = (InetSocketAddress) addr;
+			return addItem( ia.getAddress(), ia.getPort() );			
+		}
+		Global.fail("Unknown addr type %s", addr);
+		return null;
 	}
 
 }

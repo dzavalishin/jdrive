@@ -1,7 +1,9 @@
 package game.net;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -107,6 +109,15 @@ public class Packet {
 	}
 
 
+	public int getType() { return type; }
+
+
+	public void append(byte b) {
+		data.append(b);		
+	}
+
+
+	
 	public void encodeObject(Object o) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -115,11 +126,19 @@ public class Packet {
 		data = new BinaryString(bos.toByteArray());
 	}
 
-	public int getType() { return type; }
-
-
-	public void append(byte b) {
-		data.append(b);		
+	
+	public Object decodeObject() throws IOException, ClassNotFoundException {
+		
+		char[] ca = data.toCharArray();
+		byte [] ba = new byte[ca.length];
+		
+		for(int i = 0; i < ca.length; i++)
+			ba[i] = (byte) ca[i];
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(ba); 
+		ObjectInputStream ois = new ObjectInputStream(bais);
+		
+		return ois.readObject();
 	}
 
 }
