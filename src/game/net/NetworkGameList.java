@@ -1,5 +1,6 @@
 package game.net;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import game.Global;
 // Also, it handles the request to a server for data about the server
 public class NetworkGameList {
 	NetworkGameInfo info;
-	int ip;
+	InetAddress ip;
 	int port;
 	boolean online;																		// False if the server did not respond (default status)
 	boolean manually;																	// True if the server was added manually
@@ -22,11 +23,11 @@ public class NetworkGameList {
 
 
 
-	static NetworkGameList addItem(int ip, int port)
+	static NetworkGameList addItem(InetAddress ha, int port)
 	{
 		for( NetworkGameList item : _network_game_list )
 		{
-			if (item.ip == ip && item.port == port)
+			if (item.ip.equals(ha) && item.port == port)
 				return item;
 		}
 
@@ -35,7 +36,7 @@ public class NetworkGameList {
 		NetworkGameList item = new NetworkGameList();
 
 		//item.next = NULL;
-		item.ip = ip;
+		item.ip = ha;
 		item.port = port;
 		Net._network_game_count++;
 

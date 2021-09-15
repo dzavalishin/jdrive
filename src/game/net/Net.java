@@ -73,7 +73,7 @@ public class Net implements NetDefs
 	/* We use bind_ip and bind_ip_host, where bind_ip_host is the readable form of
 	    bind_ip_host, and bind_ip the numeric value, because we want a nice number
 	    in the openttd.cfg, but we wants to use the int internally.. */
-	public static int _network_server_bind_ip;
+	public static InetAddress _network_server_bind_ip;
 	public static String _network_server_bind_ip_host;
 	public static boolean _is_network_server; // Does this client wants to be a network-server?
 	public static String _network_server_name;
@@ -1417,7 +1417,7 @@ public class Net implements NetDefs
 
 
 
-	// Create a packet for sending
+	/*/ Create a packet for sending
 	static Packet NetworkSend_Init(PacketType type)
 	{
 		return new Packet(type);
@@ -1432,8 +1432,8 @@ public class Net implements NetDefs
 		packet.pos = 0;
 
 		return packet;
-		 */
-	}
+		 * /
+	} */
 
 
 	// Sends all the buffered packets out for this client
