@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 import game.util.BinaryString;
 
@@ -28,7 +28,7 @@ public class Packet {
 	public static final int HEADER_SIZE = 3;
 
 	@Deprecated
-	Packet next;
+	Packet next = null;
 	//int size;
 	//int pos;
 	//byte [] buffer = new byte[SEND_MTU];
@@ -60,10 +60,12 @@ public class Packet {
 		return buffer;
 	}
 
-	public void sendTo(Socket s) throws IOException 
+	public void sendTo(SocketChannel socket) throws IOException 
 	{	
 		byte [] buffer = encode();
-		s.getOutputStream().write(buffer, 0, buffer.length);		
+		//socket.getOutputStream().write(buffer, 0, buffer.length);
+		ByteBuffer bb = ByteBuffer.wrap(buffer);  
+		socket.write(bb); // TODO XXX might write part of packet!
 	}
 
 	public void sendTo(DatagramSocket udp, SocketAddress a) throws IOException 
@@ -83,15 +85,27 @@ public class Packet {
 		parse(rdata); // TODO success? throw?
 	}
 
+	public Packet(int packetType, byte[] rdata) {
+		type = packetType;
+		data = new BinaryString( rdata, 0, rdata.length );
+	}
+
+
 	void parse(byte [] rdata )
 	{
-		int len;
-		len = Byte.toUnsignedInt(rdata[0]);
-		len |= Byte.toUnsignedInt(rdata[1]) << 8;
+		int len = parseLen(rdata);
 		type = Byte.toUnsignedInt(rdata[2]);
 
 		data = new BinaryString( rdata, HEADER_SIZE, len-1 );
 	}
+
+	public static int parseLen(byte[] rdata) {
+		int len;
+		len = Byte.toUnsignedInt(rdata[0]);
+		len |= Byte.toUnsignedInt(rdata[1]) << 8;
+		return len;
+	}
+
 
 	public void encodeObject(Object o) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 

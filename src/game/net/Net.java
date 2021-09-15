@@ -5,18 +5,25 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import game.Cmd;
@@ -126,7 +133,8 @@ public class Net implements NetDefs
 	static CommandPacket _local_command_queue;
 
 	static int _network_client_index = NETWORK_SERVER_INDEX + 1;
-	static ServerSocket _listensocket;
+	//static ServerSocket _listensocket;
+	static ServerSocketChannel _listensocket;
 
 	static final List<NetworkClientState> _clients = new ArrayList<>();
 
@@ -151,19 +159,19 @@ public class Net implements NetDefs
 
 
 	// Function that looks up the CI for a given client-index
-	NetworkClientInfo NetworkFindClientInfoFromIndex(int client_index)
+	static NetworkClientInfo NetworkFindClientInfoFromIndex(int client_index)
 	{
 		/*
 		for (NetworkClientInfo ci : _network_client_info)
 			if (ci.client_index == client_index)
 				return ci;
-		*/
+		 */
 		for( NetworkClientState cs : _clients )
 		{
 			if( cs.index == client_index )
 				return cs.ci;
 		}
-		
+
 		return null;
 	}
 
@@ -428,7 +436,7 @@ public class Net implements NetDefs
 	// Converts a string to ip/port/player
 	 * @param s  Format: IP#player:port
 	 */
-	boolean ParseConnectionString(final String []player, final String []port, String [] host, String s)
+	static boolean ParseConnectionString(final String []player, final String []port, String [] host, String s)
 	{
 		int epl = s.indexOf(':');
 		//if(epl < 0) return false;
@@ -466,7 +474,7 @@ public class Net implements NetDefs
 
 	// Creates a new client from a socket
 	//   Used both by the server and the client
-	static NetworkClientState NetworkAllocClient(Socket s)
+	static NetworkClientState NetworkAllocClient(SocketChannel sc)
 	{
 		NetworkClientState cs;
 		NetworkClientInfo ci;
@@ -490,7 +498,7 @@ public class Net implements NetDefs
 		cs = new NetworkClientState();
 		//_clients[client_no] = cs;
 
-		cs.socket = s;
+		cs.socket = sc;
 		cs.last_frame = 0;
 		cs.quited = false;
 
@@ -511,7 +519,7 @@ public class Net implements NetDefs
 		}
 
 		_clients.add(cs);
-		
+
 		return cs;
 	}
 
@@ -558,7 +566,11 @@ public class Net implements NetDefs
 			NetworkServer_HandleChat(NetworkAction.CHAT, DestType.BROADCAST, 0, "Game unpaused", NETWORK_SERVER_INDEX);
 		}
 
-		cs.socket.close();
+		try {
+			cs.socket.close();
+		} catch (IOException e) {			
+			Global.error(e);// e.printStackTrace();
+		}
 		cs.writable = false;
 		cs.quited = true;
 
@@ -570,7 +582,7 @@ public class Net implements NetDefs
 		}*/
 		cs.packet_queue = null;
 		//free(cs.packet_recv);
-		cs.packet_recv = null;
+		//cs.packet_recv = null;
 
 		while (cs.command_queue != null) {
 			CommandPacket p = cs.command_queue.next;
@@ -588,11 +600,11 @@ public class Net implements NetDefs
 			_network_clients_connected--;
 
 			_clients.remove(cs);
-			
+
 			/*
 			while ((cs + 1) != _clients[MAX_CLIENTS] && (cs + 1).socket != null) {
-				*cs = *(cs + 1);
-				*ci = *(ci + 1);
+			 *cs = *(cs + 1);
+			 *ci = *(ci + 1);
 				cs++;
 				ci++;
 			} */
@@ -657,93 +669,77 @@ public class Net implements NetDefs
 	}
 
 	// For the server, to accept new clients
-	static void NetworkAcceptClients()
+	static void NetworkAcceptClients(SocketChannel sc) throws IOException
 	{
 		//sockaddr_in sin;
-		Socket s;
 		NetworkClientState cs;
 		int i;
 		boolean banned;
 
-		// Should never ever happen.. is it possible??
-		assert(_listensocket != null);
+		sc.configureBlocking(false);
+		InetSocketAddress remote = (InetSocketAddress) sc.getRemoteAddress();
 
-		for (;;) {
-			//socklen_t sin_len;
+		Global.DEBUG_net( 1, "[NET] Client connected from %s.%d on frame %d", remote.getHostString(), remote.getPort(), Global._frame_counter);
 
-			//sin_len = sizeof(sin);
-			s = _listensocket.accept();
-			if (s == null) return; // XXX Can be?
+		// TODO SetNoDelay(s); // XXX error handling?
 
-			SetNonBlocking(s); // XXX error handling?
-
-			Global.DEBUG_net( 1, "[NET] Client connected from %s on frame %d", inet_ntoa(sin.sin_addr), Global._frame_counter);
-
-			SetNoDelay(s); // XXX error handling?
-
-			/* Check if the client is banned */
-			banned = false;
-			for (i = 0; i < _network_ban_list.length; i++) {
-				if (_network_ban_list[i] == null)
-					continue;
-
-				//if (sin.sin_addr.s_addr == inet_addr(_network_ban_list[i])) {
-				if( s.getInetAddress().equals(NetworkResolveHost(_network_ban_list[i]))) {
-					Packet p = NetworkSend_Init(PacketType.SERVER_BANNED);
-
-					Global.DEBUG_net( 1, "[NET] Banned ip tried to join (%s), refused", _network_ban_list[i]);
-
-					p.sendTo(s);
-					s.close();
-
-					//free(p);
-
-					banned = true;
-					break;
-				}
-			}
-			/* If this client is banned, continue with next client */
-			if (banned)
+		/* Check if the client is banned */
+		banned = false;
+		for (i = 0; i < _network_ban_list.length; i++) {
+			if (_network_ban_list[i] == null)
 				continue;
 
-			cs = NetworkAllocClient(s);
-			if (cs == null) {
-				// no more clients allowed?
-				// Send to the client that we are full!
-				Packet p = NetworkSend_Init(PacketType.SERVER_FULL);
-				p.sendTo(s);
-				s.close();
+			//if (sin.sin_addr.s_addr == inet_addr(_network_ban_list[i])) {
+			if( remote.getAddress().equals(NetworkResolveHost(_network_ban_list[i]))) {
+				Packet p = new Packet(PacketType.SERVER_BANNED);
+
+				Global.DEBUG_net( 1, "[NET] Banned ip tried to join (%s), refused", _network_ban_list[i]);
+
+				p.sendTo(sc);
+				sc.close();
 
 				//free(p);
 
-				continue;
+				banned = true;
+				break;
 			}
+		}
+		/* If this client is banned, continue with next client */
+		if (banned)
+			return;
 
-			// a new client has connected. We set him at inactive for now
-			//  maybe he is only requesting server-info. Till he has sent a PacketType.CLIENT_MAP_OK
-			//  the client stays inactive
-			cs.status = ClientStatus.INACTIVE;
+		cs = NetworkAllocClient(sc);
+		if (cs == null) {
+			// no more clients allowed?
+			// Send to the client that we are full!
+			Packet p = new Packet(PacketType.SERVER_FULL);
+			p.sendTo(sc);
+			sc.close();
+			return;
+		}
 
-			{
-				// Save the IP of the client
-				NetworkClientInfo ci = cs.ci; //[cs - _clients]; // DEREF_CLIENT_INFO(cs);
-				ci.client_ip = sin.sin_addr.s_addr;
-			}
+		// a new client has connected. We set him at inactive for now
+		//  maybe he is only requesting server-info. Till he has sent a PacketType.CLIENT_MAP_OK
+		//  the client stays inactive
+		cs.status = ClientStatus.INACTIVE;
+
+		{
+			// Save the IP of the client
+			NetworkClientInfo ci = cs.ci; //[cs - _clients]; // DEREF_CLIENT_INFO(cs);
+			ci.client_ip = remote.getAddress();
 		}
 	}
 
-	// Set up the listen socket for the server
-	static boolean NetworkListen() throws IOException
-	{
-		ServerSocket ls;
-		//sockaddr_in sin;
-		int port;
 
-		port = _network_server_port;
+	// Set up the listen socket for the server
+	static void NetworkListen() throws IOException
+	{
+		//sockaddr_in sin;
+		int port = _network_server_port;
 
 		Global.DEBUG_net( 1, "[NET] Listening on %s:%d", _network_server_bind_ip_host, port);
 
-		ls = new ServerSocket(port);
+		//ServerSocket  ls = new ServerSocket(port);
 		/* TODO
 		ls = socket(AF_INET, SOCK_STREAM, 0);
 		if (ls == INVALID_SOCKET) {
@@ -779,9 +775,9 @@ public class Net implements NetDefs
 
 		 */
 
-		_listensocket = ls;
+		_listensocket = ServerSocketChannel.open();
 
-		return true;
+		//return true;
 	}
 
 	// Close all current connections
@@ -806,7 +802,7 @@ public class Net implements NetDefs
 			_listensocket.close();;
 			_listensocket = null;
 			Global.DEBUG_net( 1, "[NET] Closed listener");
-			NetworkUDPClose();
+			NetUDP.NetworkUDPClose();
 		}
 	}
 
@@ -837,7 +833,7 @@ public class Net implements NetDefs
 
 		_network_reconnect = 0;
 
-		NetworkUDPInitialize();
+		NetUDP.NetworkUDPInitialize();
 	}
 
 	// Query a server to fetch his game-info
@@ -850,7 +846,7 @@ public class Net implements NetDefs
 		NetworkDisconnect();
 
 		if (game_info) {
-			return NetworkUDPQueryServer(host, port);
+			return NetUDP.NetworkUDPQueryServer(host, port);
 		}
 
 		NetworkInitialize();
@@ -916,18 +912,18 @@ public class Net implements NetDefs
 		for(NetworkGameList item : NetworkGameList._network_game_list)
 		{
 			if( i >= _network_host_list.length ) break;
-			
+
 			if (item.manually)
 				_network_host_list[i++] = String.format("%s:%d", item.info.hostname, item.port);
 		}
-		
+
 		for (; i < _network_host_list.length; i++) {
 			_network_host_list[i] = "";
 		}
 	}
 
 	// Used by clients, to connect to a server
-	static boolean NetworkClientConnectGame(final String host, int port)
+	public static boolean NetworkClientConnectGame(final String host, int port)
 	{
 		if (!Global._network_available) return false;
 
@@ -937,7 +933,7 @@ public class Net implements NetDefs
 		_network_last_port = port;
 
 		NetworkDisconnect();
-		NetworkUDPClose();
+		NetUDP.NetworkUDPClose();
 		NetworkInitialize();
 
 		// Try to connect
@@ -997,7 +993,7 @@ public class Net implements NetDefs
 		ci.unique_id = _network_unique_id;
 	}
 
-	boolean NetworkServerStart()
+	public static boolean NetworkServerStart()
 	{
 		if (!Global._network_available) return false;
 
@@ -1006,12 +1002,18 @@ public class Net implements NetDefs
 		if (Global._network_dedicated) Console.IConsoleCmdExec("exec scripts/pre_dedicated.scr 0");
 
 		NetworkInitialize();
-		if (!NetworkListen())
+		//if (!NetworkListen())			return false;
+		try {
+			NetworkListen();
+		} catch (IOException e) {
+			Global.error(e);
+			//e.printStackTrace();
 			return false;
+		} 
 
 		// Try to start UDP-server
 		_network_udp_server = true;
-		_network_udp_server = NetworkUDPListen(_udp_server_socket, _network_server_bind_ip, _network_server_port, false);
+		_network_udp_server = NetUDP.NetworkUDPListen(_udp_server_socket, _network_server_bind_ip, _network_server_port, false);
 
 		Global._network_server = true;
 		Global._networking = true;
@@ -1035,13 +1037,13 @@ public class Net implements NetDefs
 
 		/* Try to register us to the master server */
 		_network_last_advertise_date = 0;
-		NetworkUDPAdvertise();
+		NetUDP.NetworkUDPAdvertise();
 		return true;
 	}
 
 	// The server is rebooting...
 	// The only difference with NetworkDisconnect, is the packets that is sent
-	void NetworkReboot()
+	public static void NetworkReboot()
 	{
 		if (Global._network_server) {
 			//NetworkClientState cs;
@@ -1069,7 +1071,7 @@ public class Net implements NetDefs
 	}
 
 	// We want to disconnect from the host/clients
-	static void NetworkDisconnect()
+	public static void NetworkDisconnect()
 	{
 		if (Global._network_server) {
 			//NetworkClientState cs;
@@ -1080,7 +1082,7 @@ public class Net implements NetDefs
 		}
 
 		if (_network_advertise)
-			NetworkUDPRemoveAdvertise();
+			NetUDP.NetworkUDPRemoveAdvertise();
 
 		Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
@@ -1113,7 +1115,7 @@ public class Net implements NetDefs
 	}
 
 	// Receives something from the network
-	static boolean NetworkReceive()
+	static boolean NetworkReceive() throws IOException
 	{
 		//NetworkClientState cs;
 		int n;
@@ -1129,23 +1131,82 @@ public class Net implements NetDefs
 			//FD_SET(cs.socket, &read_fd);
 			//FD_SET(cs.socket, &write_fd);
 
-			SocketChannel socketChannel = null; // XXX
-			socketChannel.configureBlocking(false);
-			socketChannel.register(selector, SelectionKey.OP_READ);
-			socketChannel.register(selector, SelectionKey.OP_WRITE);
+			SocketChannel socketChannel = cs.socket;
+
+			try {
+				socketChannel.configureBlocking(false);
+				socketChannel.register(selector, SelectionKey.OP_READ);
+				socketChannel.register(selector, SelectionKey.OP_WRITE);
+			} catch (IOException e) {
+				Global.error("Nonblocking net IO failed: %s", e);
+			}
 		});
 
 		// take care of listener port
 		if (Global._network_server) {
-			FD_SET(_listensocket, &read_fd);
+			//FD_SET(_listensocket, &read_fd);
+			_listensocket.configureBlocking(false);
+			_listensocket.register(selector, SelectionKey.OP_CONNECT);
 		}
 
 		//tv.tv_sec = tv.tv_usec = 0; // don't block at all.
 
-		//n = select(FD_SETSIZE, &read_fd, &write_fd, null, &tv);
-		if (n == -1 && !Global._network_server) NetworkError(Str.STR_NETWORK_ERR_LOSTCONNECTION);
-
 		int count = selector.selectNow();
+		//n = select(FD_SETSIZE, &read_fd, &write_fd, null, &tv);
+		//if (n == -1 && !Global._network_server) NetworkError(Str.STR_NETWORK_ERR_LOSTCONNECTION);
+
+		if( count == 0 ) 
+			return true;
+
+		Set<SelectionKey> selectedKeys = selector.selectedKeys();
+		Iterator<SelectionKey> iterator = selectedKeys.iterator();
+
+		while (iterator.hasNext()) {
+			SelectionKey key = (SelectionKey) iterator.next();
+			iterator.remove();
+			if (key.isAcceptable()) {
+				SocketChannel sc = _listensocket.accept();
+				/*
+				sc.register(selector, SelectionKey.
+						OP_READ); */
+				System.out.println("Connection Accepted: " + sc.getLocalAddress() + "n");
+				NetworkAcceptClients(sc);
+			}
+			
+			if (key.isWritable()) {
+				SocketChannel sc = (SocketChannel) key.channel();
+				NetworkClientState cs = getClientForSocketChannel(sc);
+				if( cs != null ) cs.writable = true;
+			}
+			
+			if (key.isReadable()) {
+				SocketChannel sc = (SocketChannel) key.channel();
+				NetworkClientState cs = getClientForSocketChannel(sc);
+				
+				if(cs == null)
+					continue;
+				{
+					Global.error("Invalid socket channel %s", sc);
+					sc.close();
+				}
+				
+				if (Global._network_server)
+					NetworkServer_ReadPackets(cs);
+				else {
+					NetworkRecvStatus res;
+					// The client already was quiting!
+					if (cs.quited) return false;
+					if ((res = NetworkClient_ReadPackets(cs)) != NetworkRecvStatus.OKAY) {
+						// The client made an error of which we can not recover
+						//   close the client and drop back to main menu
+
+						NetworkClientError(res, cs);
+						return false;
+					}
+				}
+			}
+		}
+
 
 		/*
 		// accept clients..
@@ -1177,6 +1238,23 @@ public class Net implements NetDefs
 		}
 		 */
 		return true;
+	}
+
+	// TODO can we do it better?
+	private static NetworkClientState getClientForSocketChannel(SocketChannel sc) throws IOException 
+	{
+		for(NetworkClientState cs : _clients)
+		{
+			if(!cs.hasValidSocket()) continue;
+
+			if( cs.socket.equals(sc) )
+				return cs;
+		}
+
+		Global.error("Invalid socket channel %s", sc);
+		sc.close();
+		
+		return null;
 	}
 
 	// This sends all buffered commands (if possible)
@@ -1275,16 +1353,16 @@ public class Net implements NetDefs
 
 
 	// We have to do some UDP checking
-	void NetworkUDPGameLoop()
+	public static void NetworkUDPGameLoop()
 	{
 		if (_network_udp_server) {
-			NetworkUDPReceive(_udp_server_socket);
+			NetUDP.NetworkUDPReceive(_udp_server_socket[0]);
 			if (_udp_master_socket != null) {
-				NetworkUDPReceive(_udp_master_socket);
+				NetUDP.NetworkUDPReceive(_udp_master_socket[0]);
 			}
 		}
-		else if (_udp_client_socket != null) {
-			NetworkUDPReceive(_udp_client_socket);
+		else if (_udp_client_socket[0] != null) {
+			NetUDP.NetworkUDPReceive(_udp_client_socket[0]);
 			if (_network_udp_broadcast > 0)
 				_network_udp_broadcast--;
 		}
@@ -1292,7 +1370,7 @@ public class Net implements NetDefs
 
 	// The main loop called from ttd.c
 	//  Here we also have to do StateGameLoop if needed!
-	void NetworkGameLoop()
+	public static void NetworkGameLoop()
 	{
 		if (!Global._networking) return;
 
@@ -1339,7 +1417,7 @@ public class Net implements NetDefs
 		NetworkSend();
 	}
 
-	static void NetworkGenerateUniqueId()
+	static void NetworkGenerateUniqueId() throws NoSuchAlgorithmException
 	{
 		//md5_state_t state;
 		//md5_byte_t digest[16];
@@ -1349,9 +1427,8 @@ public class Net implements NetDefs
 		String coding_string = String.format("%d%s", (int)Hal.Random(), "OpenTTD Unique ID");
 
 		MessageDigest md = MessageDigest.getInstance("MD5");
-		byte[] thedigest = md.digest(coding_string.getBytes());
+		byte[] digest = md.digest(coding_string.getBytes());
 
-		byte[] digest = md.digest();
 		BigInteger bigInt = new BigInteger(1,digest);
 		_network_unique_id = bigInt.toString(16);		
 		/* Generate the MD5 hash * /
@@ -1379,15 +1456,21 @@ public class Net implements NetDefs
 		_network_advertise_retries = 0;
 
 		/* Load the ip from the openttd.cfg */
-		_network_server_bind_ip = inet_addr(_network_server_bind_ip_host);
+		_network_server_bind_ip = NetworkResolveHost(_network_server_bind_ip_host);
 		/* And put the data back in it in case it was an invalid ip */
 		//snprintf(_network_server_bind_ip_host, sizeof(_network_server_bind_ip_host), "%s", inet_ntoa(*(struct in_addr *)&_network_server_bind_ip));
-		_network_server_bind_ip_host = ntoa(_network_server_bind_ip);
+		_network_server_bind_ip_host = _network_server_bind_ip.getHostName();
 
 		/* Generate an unique id when there is none yet */
 		if (_network_unique_id.isBlank())
-			NetworkGenerateUniqueId();
-
+		{
+			try {
+				NetworkGenerateUniqueId();
+			} catch (NoSuchAlgorithmException e) {
+				//e.printStackTrace();
+				Global.fail("NetworkGenerateUniqueId: %s", e);
+			}
+		}
 		//memset(&_network_game_info, 0, sizeof(_network_game_info));
 		_network_game_info = new NetworkGameInfo();
 
@@ -1432,7 +1515,7 @@ public class Net implements NetDefs
 		packet.pos = 0;
 
 		return packet;
-		 * /
+	 * /
 	} */
 
 
@@ -1444,18 +1527,24 @@ public class Net implements NetDefs
 	//   3) sending took too long
 	static boolean NetworkSend_Packets(NetworkClientState cs)
 	{
-		int res;
-		Packet p;
+		//int res;
 
 		// We can not write to this socket!!
 		if (!cs.writable) return false;
 		if (cs.socket == null) return false;
 
-		p = cs.packet_queue;
-		while (p != null) {
+		Packet p = cs.packet_queue;
+		if(null == p) return true;
+		//while (p != null) {
 			//res = send(cs.socket, p.buffer + p.pos, p.size - p.pos, 0);
-			res = p.sendTo(cs.socket);
-			if (res == -1) {
+			try {
+				p.sendTo(cs.socket);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+			/*if (res == -1) {
 				int err = GET_LAST_ERROR();
 				if (err != EWOULDBLOCK) {
 					// Something went wrong.. close client!
@@ -1469,115 +1558,77 @@ public class Net implements NetDefs
 				// Client/server has left us :(
 				CloseConnection(cs);
 				return false;
-			}
+			}*/
 
-			p.pos += res;
+			//p.pos += res;
 
 			// Is this packet sent?
-			if (p.pos == p.size) {
+			//if (p.pos == p.size) 
+			{
 				// Go to the next packet
 				cs.packet_queue = p.next;
 				//free(p);
 				p = cs.packet_queue;
-			} else
-				return true;
-		}
+			} 
+			//else				return true;
+		//}
 
 		return true;
 	}
 
-	Packet NetworkRecv_Packet(NetworkClientState cs, NetworkRecvStatus [] status)
+	Packet NetworkRecv_Packet(NetworkClientState cs, NetworkRecvStatus [] status) throws IOException
 	{
-		int res;
-		Packet p;
+		//int res;
+		//Packet p;
 
 		status[0] = NetworkRecvStatus.OKAY;
 
 		if (cs.socket == null) return null;
 
+		/*
 		if (cs.packet_recv == null) {
 			cs.packet_recv = new Packet();
 			//if (cs.packet_recv == null) error("Failed to allocate packet");
 			// Set pos to zero!
 			//cs.packet_recv.pos = 0;
 			//cs.packet_recv.size = 0; // Can be ommited, just for safety reasons
+		}*/
+
+		//InputStream is = cs.socket.getInputStream();
+		//byte [] buffer = new byte[Packet.SEND_MTU];
+		ByteBuffer bb = ByteBuffer.allocate(Packet.HEADER_SIZE);
+		int len = cs.socket.read(bb);
+		
+		if(len != Packet.HEADER_SIZE)
+		{
+			Global.DEBUG_net(  0, "[NET] recv() failed, can't read header");
+			status[0] = CloseConnection(cs);
+			return null;
 		}
 
-		InputStream is = cs.socket.getInputStream();
+		byte[] header = bb.array();
+		//Packet p = new Packet(bb.array());
+		//cs.packet_recv = p;
+		int packetType = header[2];
+		int packetLen = Packet.parseLen(header);
 
-		byte [] buffer = new byte[Packet.SEND_MTU];
-
-		p = cs.packet_recv;
-
-		int p_size = 0;
-		int p_pos = 0;
-
-		// Read packet size
-		if (p_pos < Packet.SIZE_SIZE) {
-			while (p_pos < Packet.SIZE_SIZE) {
-				// Read the size of the packet
-				res = recv(cs.socket, buffer + p_pos, Packet.SIZE_SIZE - p_pos, 0);
-				if (res == -1) {
-					int err = GET_LAST_ERROR();
-					if (err != EWOULDBLOCK) {
-						// Something went wrong..
-						if (err != 104) // 104 is Connection Reset by Peer
-							Global.DEBUG_net(  0, "[NET] recv() failed with error %d", err);
-						status[0] = CloseConnection(cs);
-						return null;
-					}
-					// Connection would block, so stop for now
-					return null;
-				}
-				if (res == 0) {
-					// Client/server has left us :(
-					status[0] = CloseConnection(cs);
-					return null;
-				}
-				p_pos += res;
-			}
-
-			p_size = 0xFF & buffer[0];
-			p_size |= (0xFF & buffer[1]) << 8;
-
-			if (p_size > Packet.SEND_MTU) {
-				status[0] = CloseConnection(cs);
-				return null;
-			}
+		ByteBuffer data = ByteBuffer.allocate(packetLen);
+		len = cs.socket.read(data);
+		
+		if(len != packetLen)
+		{
+			Global.DEBUG_net(  0, "[NET] recv() failed, can't read data (%d)", packetLen);
+			status[0] = CloseConnection(cs);
+			return null;
 		}
 
-		// Read rest of packet
-		while (p_pos < p_size) {
-			res = recv(cs.socket, buffer + p_pos, p_size - p_pos, 0);
-			if (res == -1) {
-				int err = GET_LAST_ERROR();
-				if (err != EWOULDBLOCK) {
-					// Something went wrong..
-					if (err != 104) // 104 is Connection Reset by Peer
-						Global.DEBUG_net(  0, "[NET] recv() failed with error %d", err);
-					status[0] = CloseConnection(cs);
-					return null;
-				}
-				// Connection would block
-				return null;
-			}
-			if (res == 0) {
-				// Client/server has left us :(
-				status[0] = CloseConnection(cs);
-				return null;
-			}
 
-			p_pos += res;
-		}
-
-		p.data.setLength(p_size);
-
-		// We have a complete packet, return it!
-		p.pos = 2;
-		p.next = null; // Should not be needed, but who knows...
+		Packet p = new Packet( packetType, data.array() );
+		
+		//p.next = null; // Should not be needed, but who knows...
 
 		// Prepare for receiving a new packet
-		cs.packet_recv = null;
+		//cs.packet_recv = null;
 
 		return p;
 	}
@@ -1702,13 +1753,13 @@ public class Net implements NetDefs
 
 
 
-	void NetworkServer_HandleChat(NetworkAction action, DestType desttype, int dest, String msg, int from_index)
+	static void NetworkServer_HandleChat(NetworkAction action, DestType desttype, int dest, String msg, int from_index)
 	{
 		//NetworkClientState cs;
 		NetworkClientInfo ci, ci_own, ci_to;
 
 		final int playerColor = Hal.GetDrawStringPlayerColor(PlayerID.get(ci.client_playas-1));
-		
+
 		switch (desttype) {
 		case CLIENT:
 			/* Are we sending to the server? */

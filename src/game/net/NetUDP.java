@@ -400,7 +400,7 @@ public class NetUDP extends Net
 	}
 
 	// Close UDP connection
-	void NetworkUDPClose()
+	public static void NetworkUDPClose()
 	{
 		Global.DEBUG_net( 1, "[NET][UDP] Closed listeners");
 
@@ -427,7 +427,7 @@ public class NetUDP extends Net
 	}
 
 	// Receive something on UDP level
-	void NetworkUDPReceive(DatagramSocket udp)
+	static void NetworkUDPReceive(DatagramSocket udp)
 	{
 		InetAddress client_addr;
 		//socklen_t client_len;
@@ -543,7 +543,7 @@ public class NetUDP extends Net
 		_network_udp_broadcast = 300; // Stay searching for 300 ticks
 	}
 
-	NetworkGameList NetworkUDPQueryServer(final String host, int port)
+	static NetworkGameList NetworkUDPQueryServer(final String host, int port)
 	{
 		Packet p;
 		NetworkGameList item;
@@ -603,7 +603,7 @@ public class NetUDP extends Net
 
 	/* Register us to the master server
 	     This function checks if it needs to send an advertise */
-	void NetworkUDPAdvertise()
+	static void NetworkUDPAdvertise()
 	{
 		/* Check if we should send an advertise */
 		if (!Global._networking || !Global._network_server || !_network_udp_server || !_network_advertise)
@@ -642,11 +642,11 @@ public class NetUDP extends Net
 		NetworkSendUDP_Packet(_udp_master_socket, p, out_addr);
 	}
 
-	void NetworkUDPInitialize()
+	static void NetworkUDPInitialize()
 	{
-		_udp_client_socket = null;
-		_udp_server_socket = null;
-		_udp_master_socket = null;
+		_udp_client_socket[0] = null;
+		_udp_server_socket[0] = null;
+		_udp_master_socket[0] = null;
 
 		_network_udp_server = false;
 		_network_udp_broadcast = 0;

@@ -1,9 +1,10 @@
 package game.net;
 
-import java.net.Socket;
+import java.nio.channels.SocketChannel;
 
 public class NetworkClientState {
-	Socket socket;
+	//Socket socket;
+	SocketChannel socket;
 	int index;
 	int last_frame;
 	int last_frame_server;
@@ -14,7 +15,7 @@ public class NetworkClientState {
 	boolean quited;
 
 	Packet packet_queue; // Packets that are awaiting delivery
-	Packet packet_recv; // Partially received packet
+	//Packet packet_recv; // Partially received packet
 
 	CommandPacket command_queue; // The command-queue awaiting delivery
 

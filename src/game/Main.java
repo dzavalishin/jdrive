@@ -16,6 +16,7 @@ import game.enums.SwitchModes;
 import game.enums.ThreadMsg;
 import game.ids.PlayerID;
 import game.net.Net;
+import game.net.NetUDP;
 import game.struct.SmallFiosItem;
 import game.util.FileIO;
 import game.util.Music;
@@ -595,10 +596,10 @@ public class Main {
 			if (Global._networking) {
 				if (Global._network_server && (new_mode == SwitchModes.SM_LOAD || new_mode == SwitchModes.SM_NEWGAME)) {
 					Net.NetworkReboot();
-					Net.NetworkUDPClose();
+					NetUDP.NetworkUDPClose();
 				} else {
 					Net.NetworkDisconnect();
-					Net.NetworkUDPClose();
+					NetUDP.NetworkUDPClose();
 				}
 			}
 
@@ -885,24 +886,24 @@ public class Main {
 		Global._timer_counter += 8;
 		Hal.CursorTick();
 
-		/* #ifdef ENABLE_NETWORK
+		//* #ifdef ENABLE_NETWORK
 		// Check for UDP stuff
-		NetworkUDPGameLoop();
+		NetUDP.NetworkUDPGameLoop();
 
-		if (_networking) {
+		if (Global._networking) {
 			// Multiplayer
-			NetworkGameLoop();
+			Net.NetworkGameLoop();
 		} else {
-			if (_network_reconnect > 0 && --_network_reconnect == 0) {
+			if (Net._network_reconnect > 0 && --Net._network_reconnect == 0) {
 				// This means that we want to reconnect to the last host
 				// We do this here, because it means that the network is really closed
-				NetworkClientConnectGame(_network_last_host, _network_last_port);
+				Net.NetworkClientConnectGame(Net._network_last_host, Net._network_last_port);
 			}
 			// Singleplayer
 			StateGameLoop();
 		}
-	#else */
-		StateGameLoop();
+	//#else */
+		//StateGameLoop();
 		//#endif /* ENABLE_NETWORK */
 
 		if (0 == Global._pause && 0 != (Global._display_opt & Global.DO_FULL_ANIMATION) ) Gfx.DoPaletteAnimations();
