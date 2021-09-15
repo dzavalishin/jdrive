@@ -3,6 +3,7 @@ package game.net;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
@@ -129,7 +130,9 @@ public class Net implements NetDefs
 
 	static final List<NetworkClientState> _clients = new ArrayList<>();
 
-	static Socket _udp_client_socket;
+	static DatagramSocket [] _udp_client_socket = {null};
+	static DatagramSocket [] _udp_server_socket = {null};
+	static DatagramSocket [] _udp_master_socket = {null};
 
 
 

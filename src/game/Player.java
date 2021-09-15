@@ -1380,7 +1380,6 @@ public class Player implements Serializable
 			p.accept(i.next());
 	}
 
-
 	/* Validate functions for rail building */
 	static boolean ValParamRailtype(int rail) 
 	{ 

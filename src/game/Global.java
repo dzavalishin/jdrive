@@ -308,7 +308,7 @@ public class Global
 	static int _debug_map_level = 0;
 	static int _debug_misc_level = 0;
 	static int _debug_ms_level = 0;
-	static int _debug_net_level = 0;
+	static int _debug_net_level = 10;
 	static int _debug_spritecache_level = 0;
 	static int _debug_oldloader_level = 0;
 	static int _debug_pbs_level = 0;

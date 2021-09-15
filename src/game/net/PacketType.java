@@ -34,7 +34,26 @@ public enum PacketType {
 	SERVER_NEWGAME,
 	SERVER_RCON,
 	CLIENT_RCON,
-	END // Should ALWAYS be on the end of this list!! (period) [dz] really?
+
+	UDP_CLIENT_FIND_SERVER,
+	UDP_SERVER_RESPONSE,
+	UDP_CLIENT_DETAIL_INFO,
+	UDP_SERVER_DETAIL_INFO, // Is not used in OpenTTD itself, only for external querying
+	UDP_SERVER_REGISTER, // Packet to register itself to the master server
+	UDP_MASTER_ACK_REGISTER, // Packet indicating registration has succedeed
+	UDP_CLIENT_GET_LIST, // Request for serverlist from master server
+	UDP_MASTER_RESPONSE_LIST, // Response from master server with server ip's + port's
+	UDP_SERVER_UNREGISTER, // Request to be removed from the server-list
+	PACKET_UDP_END,
+	//END // Should ALWAYS be on the end of this list!! (period) [dz] really?
+	;
+
+	static boolean isUdpRange(int type) {
+		return type >= UDP_CLIENT_FIND_SERVER.ordinal() && type < PACKET_UDP_END.ordinal();
+	} 
+
+	boolean isUdpRange() { return isUdpRange(ordinal()); }
+	
 	
 	
 }

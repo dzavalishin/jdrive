@@ -4,6 +4,7 @@ import game.Global;
 
 public interface NetDefs {
 
+	public static final int NETWORK_MASTER_SERVER_VERSION = 1;
 
 	// If this line is enable, every frame will have a sync test
 	//  this is not needed in normal games. Normal is like 1 sync in 100

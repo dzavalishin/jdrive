@@ -284,8 +284,8 @@ public class NetGui extends Net implements NetDefs
 			} break;
 			case 11: /* Find server automatically */
 				switch (_network_lan_internet) {
-					case 0: NetworkUDPSearchGame(); break;
-					case 1: NetworkUDPQueryMasterServer(); break;
+					case 0: NetUDP.NetworkUDPSearchGame(); break;
+					case 1: NetUDP.NetworkUDPQueryMasterServer(); break;
 				}
 				break;
 			case 12: { // Add a server
