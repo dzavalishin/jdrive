@@ -349,9 +349,10 @@ public class NetGui extends Net implements NetDefs
 
 			if (MiscGui.HandleEditBoxKey(w, 3, e) == 1) break; // enter pressed
 
+			String s = w.as_querystr_d().text.getString();
 			// The name is only allowed when it starts with a letter!
-			if (_edit_str_buf[0] != '\0' && _edit_str_buf[0] != ' ') {
-				_network_player_name = _edit_str_buf;
+			if (!Character.isWhitespace(s.charAt(0))) { 
+				_network_player_name = s;
 			} else {
 				_network_player_name = "Player";
 			}
@@ -424,13 +425,14 @@ public class NetGui extends Net implements NetDefs
 		}
 
 		w = Window.AllocateWindowDesc(_network_game_window_desc);
-		_edit_str_buf = _network_player_name;
+		//_edit_str_buf = _network_player_name;
 		w.vscroll.setCap(8);
 
 		w.as_querystr_d().text.setCaret( true );
 		w.as_querystr_d().text.maxlength = MAX_QUERYSTR_LEN - 1;
 		w.as_querystr_d().text.maxwidth = 120;
-		w.as_querystr_d().text.buf = _edit_str_buf;
+		//w.as_querystr_d().text.buf = _edit_str_buf;
+		w.as_querystr_d().text.setText(_network_player_name);
 		w.as_querystr_d().text.UpdateTextBufferSize();
 
 		UpdateNetworkGameWindow(true);
@@ -644,7 +646,7 @@ public class NetGui extends Net implements NetDefs
 		Window.DeleteWindowById(Window.WC_NETWORK_WINDOW, 0);
 
 		w = Window.AllocateWindowDesc(_network_start_server_window_desc);
-		_edit_str_buf = _network_server_name;
+		//_edit_str_buf = _network_server_name;
 
 		Global._saveload_mode = Global.SLD_NEW_GAME;
 		MiscGui.BuildFileList();
@@ -654,7 +656,8 @@ public class NetGui extends Net implements NetDefs
 		w.as_querystr_d().text.setCaret( true );
 		w.as_querystr_d().text.maxlength = MAX_QUERYSTR_LEN - 1;
 		w.as_querystr_d().text.maxwidth = 160;
-		w.as_querystr_d().text.buf = _edit_str_buf;
+		//w.as_querystr_d().text.buf = _edit_str_buf;
+		w.as_querystr_d().text.setText(_network_server_name);
 		w.as_querystr_d().text.UpdateTextBufferSize();
 	}
 
@@ -862,7 +865,8 @@ public class NetGui extends Net implements NetDefs
 		NetworkQueryServer(_network_last_host, _network_last_port, false);
 
 		w = Window.AllocateWindowDesc(_network_lobby_window_desc);
-		_edit_str_buf = "";
+		//_edit_str_buf = "";
+		w.as_querystr_d().text.setText("");
 		w.vscroll.setPos(0);
 		w.vscroll.setCap(8);
 	}
@@ -940,12 +944,12 @@ public class NetGui extends Net implements NetDefs
 	static void ClientList_Ban(int client_no)
 	{
 		int i;
-		int ip = NetworkFindClientInfo(client_no).client_ip;
+		InetAddress ip = NetworkFindClientInfo(client_no).client_ip;
 
 		for (i = 0; i < _network_ban_list.length; i++) {
 			if (_network_ban_list[i] == null || _network_ban_list[i].length() == 0) {
 				//_network_ban_list[i] = strdup(inet_ntoa(*(struct in_addr *)&ip));
-				_network_ban_list[i] = ntoa(ip);
+				_network_ban_list[i] = ip.getHostAddress();
 				break;
 			}
 		}
@@ -1113,13 +1117,14 @@ public class NetGui extends Net implements NetDefs
 		w = Window.AllocateWindow(x, y, 100, h + 1, NetGui::ClientListPopupWndProc, Window.WC_TOOLBAR_MENU, _client_list_popup_widgets);
 		w.getWidget(0).bottom = w.getWidget(0).top + h;
 
-		w.flags4 &= ~WF_WHITE_BORDER_MASK;
+		w.disableWhiteBorder();
 		w.as_menu_d().item_count = 0;
 		// Save our client
 		w.as_menu_d().main_button = client_no;
 		w.as_menu_d().sel_index = 0;
 		// We are a popup
-		Window._popup_menu_active = true;
+		
+		Window.activatePopup();
 
 		return w;
 	}
@@ -1378,7 +1383,8 @@ public class NetGui extends Net implements NetDefs
 				WindowEvent e = new WindowEvent();
 				e.event = WindowEvents.WE_ON_EDIT_TEXT;
 				e.str = buf;
-				parent.wndproc(parent, e);
+				//parent.wndproc(parent, e);
+				parent.sendEvent(e);
 			}
 		}
 		
@@ -1439,7 +1445,8 @@ public class NetGui extends Net implements NetDefs
 				if (parent != null) {
 					WindowEvent e1 = new WindowEvent();
 					e1.event = WindowEvents.WE_ON_EDIT_TEXT_CANCEL;
-					parent.wndproc(parent, e1);
+					//parent.wndproc(parent, e1);
+					parent.sendEvent(e1);
 				}
 			}
 			break;
@@ -1468,16 +1475,21 @@ public class NetGui extends Net implements NetDefs
 	{
 		Window w;
 
-	//#define _orig_edit_str_buf (_edit_str_buf+MAX_QUERYStr.STR_LEN)
+	//#define _orig_edit_str_buf (_edit_str_buf+MAX_QUERYSTR_LEN)
 
 		Window.DeleteWindowById(Window.WC_SEND_NETWORK_MSG, 0);
 
-		Strings.GetString(_orig_edit_str_buf, str);
+		/*
+		_orig_edit_str_buf = Strings.GetString(str);
 
-		_orig_edit_str_buf[maxlen] = '\0';
+		//_orig_edit_str_buf[maxlen] = '\0';
+		_orig_edit_str_buf = _orig_edit_str_buf.substring(0, maxlen);
 
 		_edit_str_buf = _orig_edit_str_buf;
-
+		*/
+		
+		//_edit_str_buf = Strings.GetString(str);
+		
 		w = Window.AllocateWindowDesc(_chat_window_desc);
 
 		w.click_state = 1 << 1;
@@ -1487,7 +1499,8 @@ public class NetGui extends Net implements NetDefs
 		w.as_querystr_d().text.setCaret(false);
 		w.as_querystr_d().text.maxlength = maxlen - 1;
 		w.as_querystr_d().text.maxwidth = maxwidth;
-		w.as_querystr_d().text.buf = _edit_str_buf;
+		w.as_querystr_d().text.setText( Strings.GetString(str) );
+		//w.as_querystr_d().text.buf = _edit_str_buf;
 		w.as_querystr_d().text.UpdateTextBufferSize();
 	}
 

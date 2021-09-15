@@ -3187,6 +3187,18 @@ public class Window extends WindowConstants implements Serializable
 		return window_class;
 	}
 
+	public void sendEvent(WindowEvent e) {
+		wndproc.accept(this, e);		
+	}
+
+	public void disableWhiteBorder() {
+		flags4 &= ~WF_WHITE_BORDER_MASK;
+	}
+
+	public static void activatePopup() {
+		_popup_menu_active = true;		
+	}
+
 	
 	
 	
