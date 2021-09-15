@@ -407,8 +407,20 @@ public class NetUDP extends Net
 		//return true;
 	}
 
+	
 	// Close UDP connection
-	public static void NetworkUDPClose() throws IOException
+	public static void NetworkUDPClose()
+	{
+		try {
+			doNetworkUDPClose();
+		} catch (IOException e) {
+			// e.printStackTrace();
+			Global.error("NetworkUDPClose: %s", e);
+		}
+
+	}
+	// Close UDP connection
+	public static void doNetworkUDPClose() throws IOException
 	{
 		Global.DEBUG_net( 1, "[NET][UDP] Closed listeners");
 

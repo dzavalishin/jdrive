@@ -626,10 +626,7 @@ public class Net implements NetDefs
 
 		Global.DEBUG_net( 1, "[NET] Connecting to %s %d", hostname, port);
 
-		Socket s;
-
-
-		s = new Socket(hostname,port);
+		//Socket s = new Socket(hostname,port);
 
 		//s.set
 
@@ -659,7 +656,7 @@ public class Net implements NetDefs
 		 */
 
 		// in client mode, only the first client field is used. it's pointing to the server.
-		NetworkAllocClient(s);
+		NetworkAllocClient(SocketChannel.open());
 
 		NetGui.ShowJoinStatusWindow();
 
@@ -800,7 +797,12 @@ public class Net implements NetDefs
 
 		if (Global._network_server) {
 			// We are a server, also close the listensocket
-			_listensocket.close();;
+			try {
+				_listensocket.close();
+			} catch (IOException e) {
+				// e.printStackTrace();
+				Global.error(e);
+			};
 			_listensocket = null;
 			Global.DEBUG_net( 1, "[NET] Closed listener");
 			NetUDP.NetworkUDPClose();
@@ -983,7 +985,7 @@ public class Net implements NetDefs
 		// We use _network_client_info[MAX_CLIENT_INFO - 1] to store the server-data in it
 		//  The index is NETWORK_SERVER_INDEX ( = 1)
 		ci = _network_client_info[MAX_CLIENT_INFO - 1];
-		memset(ci, 0, sizeof(*ci));
+		memset(ci, 0, sizeof(ci));
 
 		ci.client_index = NETWORK_SERVER_INDEX;
 		if (Global._network_dedicated)
@@ -1014,7 +1016,13 @@ public class Net implements NetDefs
 
 		// Try to start UDP-server
 		_network_udp_server = true;
-		_network_udp_server = NetUDP.NetworkUDPListen(_udp_server_socket, _network_server_bind_ip, _network_server_port, false);
+		try {
+			NetUDP.NetworkUDPListen(_udp_server_socket, new InetSocketAddress(_network_server_bind_ip, _network_server_port), false);
+		} catch (IOException e) {
+			// e.printStackTrace();
+			Global.error(e);
+			_network_udp_server = false;
+		}
 
 		Global._network_server = true;
 		Global._networking = true;
@@ -1352,9 +1360,18 @@ public class Net implements NetDefs
 		return true;
 	}
 
-
-	// We have to do some UDP checking
 	public static void NetworkUDPGameLoop()
+	{
+		try {
+			doNetworkUDPGameLoop();
+		} catch (IOException e) {
+			// e.printStackTrace();
+			Global.error(e);
+		}
+	}
+		
+	// We have to do some UDP checking
+	public static void doNetworkUDPGameLoop() throws IOException
 	{
 		if (_network_udp_server) {
 			NetUDP.NetworkUDPReceive(_udp_server_socket[0]);
@@ -1445,8 +1462,19 @@ public class Net implements NetDefs
 		 */
 	}
 
-	// This tries to launch the network for a given OS
+	
 	void NetworkStartUp()
+	{
+		try {
+			doNetworkStartUp();
+		} catch (UnknownHostException | SocketException e) {
+			// e.printStackTrace();
+			Global.error(e);
+		}
+	}
+		
+	// This tries to launch the network for a given OS
+	void doNetworkStartUp() throws UnknownHostException, SocketException
 	{
 		Global.DEBUG_net( 3, "[NET][Core] Starting network...");
 
@@ -1754,18 +1782,19 @@ public class Net implements NetDefs
 
 
 
-	static void NetworkServer_HandleChat(NetworkAction action, DestType desttype, int dest, String msg, int from_index)
+	static void NetworkServer_HandleChat(NetworkAction action, DestType desttype, int dest, String msg, final int from_index)
 	{
 		//NetworkClientState cs;
-		NetworkClientInfo ci, ci_own, ci_to;
-
+		final NetworkClientInfo ci = NetworkFindClientInfoFromIndex(from_index);
 		final int playerColor = Hal.GetDrawStringPlayerColor(PlayerID.get(ci.client_playas-1));
+		
+		NetworkClientInfo ci_own; //, ci_to;
+
 
 		switch (desttype) {
 		case CLIENT:
 			/* Are we sending to the server? */
 			if (dest == NETWORK_SERVER_INDEX) {
-				ci = NetworkFindClientInfoFromIndex(from_index);
 				/* Display the text locally, and that is it */
 				if (ci != null)
 					NetworkTextMessage(action, playerColor, false, ci.client_name, "%s", msg);
@@ -1785,8 +1814,8 @@ public class Net implements NetDefs
 			// Display the message locally (so you know you have sent it)
 			if (from_index != dest) {
 				if (from_index == NETWORK_SERVER_INDEX) {
-					ci = NetworkFindClientInfoFromIndex(from_index);
-					ci_to = NetworkFindClientInfoFromIndex(dest);
+					//ci = NetworkFindClientInfoFromIndex(from_index);
+					NetworkClientInfo ci_to = NetworkFindClientInfoFromIndex(dest);
 					if (ci != null && ci_to != null)
 						NetworkTextMessage(action, playerColor, true, ci_to.client_name, "%s", msg);
 				} else {
@@ -1806,22 +1835,22 @@ public class Net implements NetDefs
 			boolean show_local = true; // If this is false, the message is already displayed
 			// on the client who did sent it.
 			/* Find all clients that belong to this player */
-			ci_to = null;
+			NetworkClientInfo ci_to = null;
 			//FOR_ALL_CLIENTS(cs) {
 			for(NetworkClientState cs : _clients) 
 			{
 				if( !cs.hasValidSocket() ) continue;
-				ci = cs.ci; //[cs - _clients];
-				if (ci.client_playas == dest) {
+				NetworkClientInfo lci = cs.ci; //[cs - _clients];
+				if (lci.client_playas == dest) {
 					SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, from_index, false, msg);
 					if (cs.index == from_index) {
 						show_local = false;
 					}
-					ci_to = ci; // Remember a client that is in the company for company-name
+					ci_to = lci; // Remember a client that is in the company for company-name
 				}
 			}
 
-			ci = NetworkFindClientInfoFromIndex(from_index);
+			//ci = NetworkFindClientInfoFromIndex(from_index);
 			ci_own = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
 			if (ci != null && ci_own != null && ci_own.client_playas == dest) {
 				NetworkTextMessage(action, playerColor, false, ci.client_name, "%s", msg);
@@ -1833,6 +1862,8 @@ public class Net implements NetDefs
 			/* There is no such player */
 			if (ci_to == null) break;
 
+			final NetworkClientInfo ci_to_final = ci_to;
+			
 			// Display the message locally (so you know you have sent it)
 			if (ci != null && show_local) {
 				if (from_index == NETWORK_SERVER_INDEX) {
@@ -1843,7 +1874,7 @@ public class Net implements NetDefs
 				} else {
 					FOR_ALL_CLIENTS(cs -> {
 						if (cs.index == from_index) {
-							SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, ci_to.client_index, true, msg);
+							SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, ci_to_final.client_index, true, msg);
 						}
 					});
 				}
@@ -1857,7 +1888,7 @@ public class Net implements NetDefs
 			FOR_ALL_CLIENTS(cs -> {
 				SEND_COMMAND(PacketType.SERVER_CHAT,cs, action, from_index, false, msg);
 			});
-			ci = NetworkFindClientInfoFromIndex(from_index);
+			//ci = NetworkFindClientInfoFromIndex(from_index);
 			if (ci != null)
 				NetworkTextMessage(action, playerColor, false, ci.client_name, "%s", msg);
 			break;
