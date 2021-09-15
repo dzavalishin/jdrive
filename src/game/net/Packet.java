@@ -9,6 +9,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 import java.nio.channels.SocketChannel;
 
 import game.util.BinaryString;
@@ -70,16 +71,18 @@ public class Packet {
 		socket.write(bb); // TODO XXX might write part of packet!
 	}
 
-	public void sendTo(DatagramSocket udp, SocketAddress a) throws IOException 
+	public void sendTo(DatagramChannel _udp_client_socket, SocketAddress a) throws IOException 
 	{
 		byte [] buffer = encode();
-		
+		/*
 		DatagramPacket sendPacket = 
 				new DatagramPacket(buffer, buffer.length, a );
 						//a, Net.NETWORK_DEFAULT_PORT); // TODO just default port?
 		
-		udp.send(sendPacket);
-
+		_udp_client_socket.send(sendPacket);
+		*/
+		ByteBuffer bb = ByteBuffer.wrap(buffer);
+		_udp_client_socket.write(bb);
 	}
 
 

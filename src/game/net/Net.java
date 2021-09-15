@@ -13,6 +13,7 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -138,9 +139,9 @@ public class Net implements NetDefs
 
 	static final List<NetworkClientState> _clients = new ArrayList<>();
 
-	static DatagramSocket [] _udp_client_socket = {null};
-	static DatagramSocket [] _udp_server_socket = {null};
-	static DatagramSocket [] _udp_master_socket = {null};
+	static DatagramChannel [] _udp_client_socket = {null};
+	static DatagramChannel [] _udp_server_socket = {null};
+	static DatagramChannel [] _udp_master_socket = {null};
 
 
 

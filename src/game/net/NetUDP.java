@@ -1,14 +1,16 @@
 package game.net;
 
 import java.io.IOException;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.net.StandardSocketOptions;
+import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 import java.util.Enumeration;
 
 import game.GameOptions;
@@ -90,7 +92,7 @@ public class NetUDP extends Net
 		Global.DEBUG_net( 2, "[NET][UDP] Queried from %s", client_addr);
 	}
 
-	static void NetworkPacketReceive_PACKET_UDP_SERVER_RESPONSE_command(Packet p, SocketAddress client_addr)
+	static void NetworkPacketReceive_PACKET_UDP_SERVER_RESPONSE_command(Packet p, SocketAddress client_addr) throws ClassNotFoundException, IOException
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_SERVER_RESPONSE)
 	{
 		// Just a fail-safe.. should never happen
@@ -102,7 +104,8 @@ public class NetUDP extends Net
 		if (_udp_cs.quited)
 			return;
 
-		Global.DEBUG_net( 6, "[NET][UDP] Server response from %s:%d", inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
+		//Global.DEBUG_net( 6, "[NET][UDP] Server response from %s:%d", inet_ntoa(client_addr.sin_addr),ntohs(client_addr.sin_port));
+		Global.DEBUG_net( 6, "[NET][UDP] Server response from %s", client_addr);
 
 		// Find next item
 		NetworkGameList item = NetworkGameList.addItem(client_addr);
@@ -146,7 +149,6 @@ public class NetUDP extends Net
 	{
 		NetworkClientState cs;
 		NetworkClientInfo ci;
-		Packet packet;
 		//Player player;
 		int [] active = {0};
 		byte current = 0;
@@ -156,7 +158,7 @@ public class NetUDP extends Net
 		if (!_network_udp_server)
 			return;
 
-		packet = NetworkSend_Init(PacketType.UDP_SERVER_DETAIL_INFO);
+		Packet packet = new Packet(PacketType.UDP_SERVER_DETAIL_INFO);
 
 		/*FOR_ALL_PLAYERS(player) {
 			if (player.is_active)
@@ -165,22 +167,24 @@ public class NetUDP extends Net
 
 		Player.forEach( pl -> { if (pl.isActive()) active[0]++; } );
 
-		/* Send the amount of active companies */
+		// TODO content
+		
+		/* Send the amount of active companies * /
 		NetworkSend_byte (packet, NETWORK_COMPANY_INFO_VERSION);
 		NetworkSend_byte (packet, active);
 
-		/* Fetch the latest version of everything */
+		/* Fetch the latest version of everything * /
 		NetworkPopulateCompanyInfo();
 
-		/* Go through all the players */
+		/* Go through all the players * /
 		FOR_ALL_PLAYERS(player) {
-			/* Skip non-active players */
+			/* Skip non-active players * /
 			if (!player.is_active)
 				continue;
 
 			current++;
 
-			/* Send the information */
+			/* Send the information * /
 			NetworkSend_byte (packet, current);
 
 			NetworkSend_string(packet, _network_player_info[player.index].company_name);
@@ -190,7 +194,7 @@ public class NetUDP extends Net
 			NetworkSend_int64(packet, _network_player_info[player.index].income);
 			NetworkSend_int(packet, _network_player_info[player.index].performance);
 
-			/* Send 1 if there is a passord for the company else send 0 */
+			/* Send 1 if there is a passord for the company else send 0 * /
 			if (_network_player_info[player.index].password[0] != '\0') {
 				NetworkSend_byte (packet, 1);
 			} else {
@@ -203,58 +207,56 @@ public class NetUDP extends Net
 			for (i = 0; i < NETWORK_STATION_TYPES; i++)
 				NetworkSend_int(packet, _network_player_info[player.index].num_station[i]);
 
-			/* Find the clients that are connected to this player */
+			/* Find the clients that are connected to this player * /
 			FOR_ALL_CLIENTS(cs) {
 				ci = DEREF_CLIENT_INFO(cs);
 				if ((ci.client_playas - 1) == player.index) {
-					/* The byte == 1 indicates that a client is following */
+					/* The byte == 1 indicates that a client is following * /
 					NetworkSend_byte(packet, 1);
 					NetworkSend_string(packet, ci.client_name);
 					NetworkSend_string(packet, ci.unique_id);
 					NetworkSend_int(packet, ci.join_date);
 				}
 			}
-			/* Also check for the server itself */
+			/* Also check for the server itself * /
 			ci = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
 			if ((ci.client_playas - 1) == player.index) {
-				/* The byte == 1 indicates that a client is following */
+				/* The byte == 1 indicates that a client is following * /
 				NetworkSend_byte(packet, 1);
 				NetworkSend_string(packet, ci.client_name);
 				NetworkSend_string(packet, ci.unique_id);
 				NetworkSend_int(packet, ci.join_date);
 			}
 
-			/* Indicates end of client list */
+			/* Indicates end of client list * /
 			NetworkSend_byte(packet, 0);
 		}
 
-		/* And check if we have any spectators */
+		/* And check if we have any spectators * /
 		FOR_ALL_CLIENTS(cs) {
 			ci = DEREF_CLIENT_INFO(cs);
 			if ((ci.client_playas - 1) > Global.MAX_PLAYERS) {
-				/* The byte == 1 indicates that a client is following */
+				/* The byte == 1 indicates that a client is following * /
 				NetworkSend_byte(packet, 1);
 				NetworkSend_string(packet, ci.client_name);
 				NetworkSend_string(packet, ci.unique_id);
 				NetworkSend_int(packet, ci.join_date);
 			}
 		}
-		/* Also check for the server itself */
+		/* Also check for the server itself * /
 		ci = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
 		if ((ci.client_playas - 1) > Global.MAX_PLAYERS) {
-			/* The byte == 1 indicates that a client is following */
+			/* The byte == 1 indicates that a client is following * /
 			NetworkSend_byte(packet, 1);
 			NetworkSend_string(packet, ci.client_name);
 			NetworkSend_string(packet, ci.unique_id);
 			NetworkSend_int(packet, ci.join_date);
 		}
 
-		/* Indicates end of client list */
+		/* Indicates end of client list * /
 		NetworkSend_byte(packet, 0);
-
-		NetworkSendUDP_Packet(_udp_server_socket, packet, client_addr);
-
-		free(packet);
+		*/
+		NetworkSendUDP_Packet(_udp_server_socket[0], packet, client_addr);
 	}
 
 	static void NetworkPacketReceive_PACKET_UDP_MASTER_RESPONSE_LIST_command(Packet p, SocketAddress client_addr)
@@ -269,7 +271,7 @@ public class NetUDP extends Net
 		 * then an int which indicates how many
 		 * ip:port pairs are in this packet, after that
 		 * an int (ip) and an int (port) for each pair
-		 */
+		 * /
 
 		ver = NetworkRecv_byte(_udp_cs, p);
 
@@ -283,6 +285,7 @@ public class NetUDP extends Net
 				NetworkUDPQueryServer(inet_ntoa(ip), port);
 			}
 		}
+		*/
 	}
 
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_MASTER_ACK_REGISTER) 
@@ -320,7 +323,7 @@ public class NetUDP extends Net
 	//assert_compile(lengthof(_network_udp_packet) == PACKET_UDP_END);
 
 
-	void NetworkHandleUDPPacket(Packet p, SocketAddress client_addr)
+	static void NetworkHandleUDPPacket(Packet p, SocketAddress client_addr)
 	{
 		/* Fake a client, so we can see when there is an illegal packet */
 		_udp_cs.socket = null;
@@ -329,7 +332,12 @@ public class NetUDP extends Net
 		int type = p.getType(); //NetworkRecv_byte(_udp_cs, p);
 
 		if (PacketType.isUdpRange(type) && _network_udp_packet[type] != null && !_udp_cs.quited) {
-			_network_udp_packet[type].accept(p, client_addr);
+			try {
+				_network_udp_packet[type].accept(p, client_addr);
+			} catch (IOException | ClassNotFoundException e) {
+				//e.printStackTrace();
+				Global.DEBUG_net( 0, "[NET][UDP] Failed to process packet type %d: %s", type, e);
+			}
 		}	else {
 			Global.DEBUG_net( 0, "[NET][UDP] Received invalid packet type %d", type);
 		}
@@ -337,10 +345,10 @@ public class NetUDP extends Net
 
 
 	// Send a packet over UDP
-	static void NetworkSendUDP_Packet(DatagramSocket udp, Packet p, SocketAddress a)
+	static void NetworkSendUDP_Packet(DatagramChannel _udp_client_socket, Packet p, SocketAddress a)
 	{
 		try {			
-			p.sendTo(udp,a);
+			p.sendTo(_udp_client_socket,a);
 		} catch (IOException e) {
 			//  e.printStackTrace();
 			Global.DEBUG_net( 1, "[NET][UDP] Send error: %s", e );
@@ -362,29 +370,28 @@ public class NetUDP extends Net
 	}
 
 	// Start UDP listener
-	static boolean NetworkUDPListen(DatagramSocket [] udp, InetAddress host, int port, boolean broadcast)
+	//static void NetworkUDPListen(DatagramChannel [] udp, InetAddress host, int port, boolean broadcast) throws IOException
+	static void NetworkUDPListen(DatagramChannel [] udp, SocketAddress sa, boolean broadcast) throws IOException
 	{
-		InetAddress sin;
+		//InetAddress sin;
 
 		// Make sure socket is closed
 		if( null != udp[0]) udp[0].close();		
 		
 		//udp = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-		udp[0] = new DatagramSocket(Net.NETWORK_DEFAULT_PORT);
+		//udp[0] = new DatagramSocket(Net.NETWORK_DEFAULT_PORT);
+		udp[0] = DatagramChannel.open();
 
-		if (udp[0] == null) {
+		/*if (udp[0] == null) {
 			Global.DEBUG_net( 1, "[NET][UDP] Failed to start UDP support");
 			return false;
-		}
+		}*/
 		
 		// set nonblocking mode for socket
-		{
-			long blocking = 1;
-			setsockopt(udp, SOL_SOCKET, SO_NONBLOCK, blocking, null);
-		}
+		udp[0].configureBlocking(false);
 
-		SocketAddress sa = new InetSocketAddress(host, port);
-		udp[0].bind(sa);
+		//SocketAddress sa = new InetSocketAddress(host, port);
+		if( sa != null ) udp[0].bind(sa);
 
 		/*if (bind(udp, sin, sizeof(sin)) != 0) {
 			Global.DEBUG_net( 1, "[NET][UDP] error: bind failed on %s:%d", host, port);
@@ -392,15 +399,16 @@ public class NetUDP extends Net
 		}*/
 
 		if (broadcast)
-			udp[0].setBroadcast(true);
+			udp[0].setOption(StandardSocketOptions.SO_BROADCAST, true);
+			//udp[0].setBroadcast(true);
 
-		Global.DEBUG_net( 1, "[NET][UDP] Listening on port %s:%d", host, port);
+		Global.DEBUG_net( 1, "[NET][UDP] Listening on %s", sa );
 
-		return true;
+		//return true;
 	}
 
 	// Close UDP connection
-	public static void NetworkUDPClose()
+	public static void NetworkUDPClose() throws IOException
 	{
 		Global.DEBUG_net( 1, "[NET][UDP] Closed listeners");
 
@@ -427,34 +435,38 @@ public class NetUDP extends Net
 	}
 
 	// Receive something on UDP level
-	static void NetworkUDPReceive(DatagramSocket udp)
+	static void NetworkUDPReceive(DatagramChannel udp) throws IOException
 	{
-		InetAddress client_addr;
+		//InetAddress client_addr;
 		//socklen_t client_len;
-		int nbytes;
+		//int nbytes;
 		//static Packet p = null;
-		int packet_len;
+		//int packet_len;
 
 		// If p is null, malloc him.. this prevents unneeded mallocs
 		//if (p == null)			p = new Packet();
 
 		//packet_len = sizeof(p.buffer);
-		client_len = sizeof(client_addr);
+		//client_len = sizeof(client_addr);
 
-		byte [] pbuffer = new byte[2048];
+		//byte [] pbuffer = new byte[2048];
 		
 		// Try to receive anything
-		nbytes = recvfrom(udp, pbuffer, pbuffer.length, 0, client_addr, client_len);
+		//nbytes = recvfrom(udp, pbuffer, pbuffer.length, 0, client_addr, client_len);
+		
+		ByteBuffer dst = ByteBuffer.allocate(Packet.SEND_MTU*2);
+		SocketAddress client_addr = udp.receive(dst);
 
 		// We got some bytes.. just asume we receive the whole packet
-		if (nbytes > 0) {
+		//if (nbytes > 0) 
+		{
 			/*/ Get the size of the buffer
 			p.size = (int)p.buffer[0];
 			p.size += (int)p.buffer[1] << 8;
 			// Put the position on the right place
 			p.pos = 2;
 			p.next = null; */
-			Packet p = new Packet(pbuffer);
+			Packet p = new Packet(dst.array());
 
 			// Handle the packet
 			NetworkHandleUDPPacket(p, client_addr);
@@ -466,13 +478,10 @@ public class NetUDP extends Net
 	}
 
 	// Broadcast to all ips
-	static void NetworkUDPBroadCast(DatagramSocket udp) throws SocketException
+	static void NetworkUDPBroadCast(DatagramChannel udp) throws SocketException
 	{
-		InetAddress out_addr;
-		Packet p;
-
 		// Init the packet
-		p = new Packet(PacketType.UDP_CLIENT_FIND_SERVER);
+		Packet p = new Packet(PacketType.UDP_CLIENT_FIND_SERVER);
 
 		// Go through all the ips on this pc
 		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -496,29 +505,41 @@ public class NetUDP extends Net
 		}
 	}
 
+	private static void checkRestartListen(DatagramChannel [] udp, SocketAddress sa, boolean broadcast) {
+		if (udp[0] == null)
+		{
+			try {
+			NetworkUDPListen(udp, sa, broadcast);
+			} catch (Exception e) {
+				Global.error(e);
+				return;
+			}
+		}
+	}
 
+	
 	// Request the the server-list from the master server
 	static void NetworkUDPQueryMasterServer()
 	{
-		if (_udp_client_socket[0] == null)
-		{
-			if (!NetworkUDPListen(_udp_client_socket, null, 0, true)) // TODO will listen on port 0?
-				return;
-		}
+		checkRestartListen(_udp_client_socket, null, true);
 
 		Packet p = new Packet(PacketType.UDP_CLIENT_GET_LIST);
 
-		InetAddress ha = NetworkResolveHost(NETWORK_MASTER_SERVER_HOST);
-		InetSocketAddress out_addr = new InetSocketAddress(ha, NETWORK_MASTER_SERVER_PORT);
-		
+		try {
+			InetAddress ha = NetworkResolveHost(NETWORK_MASTER_SERVER_HOST);
+			InetSocketAddress out_addr = new InetSocketAddress(ha, NETWORK_MASTER_SERVER_PORT);	
 
-		// packet only contains protocol version
-		p.append((byte)Net.NETWORK_MASTER_SERVER_VERSION);
+			// packet only contains protocol version
+			p.append((byte)Net.NETWORK_MASTER_SERVER_VERSION);
 
-		NetworkSendUDP_Packet(_udp_client_socket[0], p, out_addr);
+			NetworkSendUDP_Packet(_udp_client_socket[0], p, out_addr);
+		} catch (UnknownHostException e) {
+			// e.printStackTrace();
+			Global.error("Can't QueryMasterServer(): %s", e);
+		}
 
-		Global.DEBUG_net( 2, "[NET][UDP] Queried Master Server at %s:%d", out_addr.getAddress(), out_addr.getPort());
 	}
+
 
 	// Find all servers
 	static void NetworkUDPSearchGame()
@@ -528,10 +549,12 @@ public class NetUDP extends Net
 			return;
 
 		// No UDP-socket yet..
-		if (_udp_client_socket == null)
+		/*if (_udp_client_socket == null)
 			if (!NetworkUDPListen(_udp_client_socket, null, 0, true))
-				return;
+				return; */
 
+		checkRestartListen(_udp_client_socket, null, true);
+		
 		Global.DEBUG_net( 0, "[NET][UDP] Searching server");
 
 		try {
@@ -550,12 +573,20 @@ public class NetUDP extends Net
 		String hostname;
 
 		// No UDP-socket yet..
-		if (_udp_client_socket == null)
+		/*if (_udp_client_socket == null)
 			if (!NetworkUDPListen(_udp_client_socket, null, 0, true))
-				return null;
+				return null; */
+		checkRestartListen(_udp_client_socket, null, true);
 
 		hostname = host;
-		InetAddress ha = NetworkResolveHost(host);
+		InetAddress ha = null;
+		try {
+			ha = NetworkResolveHost(host);
+		} catch (UnknownHostException e) {
+			//  e.printStackTrace();
+			Global.error("Can't resolve %s: %s", host, e);
+			return null;
+		}
 		SocketAddress out_addr = new InetSocketAddress(ha, port); 
 		
 		// Clear item in gamelist
@@ -582,22 +613,31 @@ public class NetUDP extends Net
 		if (!Global._networking || !Global._network_server || !_network_udp_server)
 			return;
 
-		/* check for socket */
+		/* check for socket * /
 		if (_udp_master_socket == null)
 			if (!NetworkUDPListen(_udp_master_socket, _network_server_bind_ip, 0, false))
-				return;
+				return; */
+
+		checkRestartListen(_udp_master_socket, new InetSocketAddress(_network_server_bind_ip, 0), false);
 
 		Global.DEBUG_net( 2, "[NET][UDP] Removing advertise..");
 
 		/* Find somewhere to send */
-		InetAddress ha = NetworkResolveHost(NETWORK_MASTER_SERVER_HOST);
+		InetAddress ha = null;
+		try {
+			ha = NetworkResolveHost(NETWORK_MASTER_SERVER_HOST);
+		} catch (UnknownHostException e) {
+			// e.printStackTrace();
+			Global.error("Can't adv to master %s: %s", NETWORK_MASTER_SERVER_HOST, e );
+			return;
+		}
 		SocketAddress out_addr = new InetSocketAddress(ha, NETWORK_MASTER_SERVER_PORT);
 		
 		/* Send the packet */
 		Packet p = new Packet(PacketType.UDP_SERVER_UNREGISTER);
 		/* Packet is: Version, server_port */
 		p.append((byte)NETWORK_MASTER_SERVER_VERSION);
-		p.appendInt(_network_server_port);
+		// TODO content p.appendInt(_network_server_port);
 		NetworkSendUDP_Packet(_udp_master_socket[0], p, out_addr);
 	}
 
@@ -609,10 +649,11 @@ public class NetUDP extends Net
 		if (!Global._networking || !Global._network_server || !_network_udp_server || !_network_advertise)
 			return;
 
-		/* check for socket */
+		/* check for socket * /
 		if (_udp_master_socket == null)
 			if (!NetworkUDPListen(_udp_master_socket, _network_server_bind_ip, 0, false))
-				return;
+				return; */
+		checkRestartListen(_udp_master_socket, new InetSocketAddress(_network_server_bind_ip, 0), false);
 
 		/* Only send once in the 450 game-days (about 15 minutes) */
 		if (_network_advertise_retries == 0) {
@@ -628,18 +669,25 @@ public class NetUDP extends Net
 		_network_last_advertise_date = Global.get_date();
 
 		/* Find somewhere to send */
-		InetAddress ha = NetworkResolveHost(NETWORK_MASTER_SERVER_HOST);
+		InetAddress ha = null;
+		try {
+			ha = NetworkResolveHost(NETWORK_MASTER_SERVER_HOST);
+		} catch (UnknownHostException e) {
+			// e.printStackTrace();
+			Global.error("Can't adv to master %s: %s", NETWORK_MASTER_SERVER_HOST, e );
+			return;
+		}
 		SocketAddress out_addr = new InetSocketAddress(ha, NETWORK_MASTER_SERVER_PORT);
 
 		Global.DEBUG_net( 1,"[NET][UDP] Advertising to master server");
 
 		/* Send the packet */
 		Packet p = new Packet(PacketType.UDP_SERVER_REGISTER);
-		/* Packet is: WELCOME_MESSAGE, Version, server_port */
+		/* TODO content Packet is: WELCOME_MESSAGE, Version, server_port * /
 		NetworkSend_string(p, NETWORK_MASTER_SERVER_WELCOME_MESSAGE);
 		NetworkSend_byte(p, NETWORK_MASTER_SERVER_VERSION);
-		NetworkSend_int(p, _network_server_port);
-		NetworkSendUDP_Packet(_udp_master_socket, p, out_addr);
+		NetworkSend_int(p, _network_server_port); */
+		NetworkSendUDP_Packet(_udp_master_socket[0], p, out_addr);
 	}
 
 	static void NetworkUDPInitialize()
@@ -661,5 +709,5 @@ public class NetUDP extends Net
 @FunctionalInterface
 interface NetworkUDPPacket
 {
-	void accept(Packet p, SocketAddress client_addr)  throws IOException;
+	void accept(Packet p, SocketAddress client_addr)  throws IOException, ClassNotFoundException;
 }
