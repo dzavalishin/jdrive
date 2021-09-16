@@ -1,19 +1,29 @@
 package game.net;
 
+import game.Global;
+import game.Str;
+import game.ids.StringID;
+import game.xui.Window;
+
 public interface NetClient {
 
 	// So we don't make too much typos ;)
-	//#define MY_CLIENT DEREF_CLIENT(0)
+	//#define MY_CLIENT() DEREF_CLIENT(0)
 
 	static int last_ack_frame;
 
+	static Object MY_CLIENT() {
+		 TODO 
+		return null;
+	}
+	
 
 	// **********
 	// Sending functions
 	//   void NetworkPacketSend_ ## type ## _command() has no parameters
 	// **********
 
-	void NetworkPacketSend_PACKET_CLIENT_COMPANY_INFO_command()
+	static void NetworkPacketSend_PACKET_CLIENT_COMPANY_INFO_command()
 	{
 		//
 		// Packet: CLIENT_COMPANY_INFO
@@ -22,14 +32,15 @@ public interface NetClient {
 		//    <none>
 		//
 		Packet p;
-		_network_join_status = NETWORK_JOIN_STATUS_GETTING_COMPANY_INFO;
+		Net._network_join_status = NetworkJoinStatus.GETTING_COMPANY_INFO;
 		Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
-		p = NetworkSend_Init(PACKET_CLIENT_COMPANY_INFO);
-		NetworkSend_Packet(p, MY_CLIENT);
+		p = new Packet(PacketType.CLIENT_COMPANY_INFO);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	void NetworkPacketSend_ ## type ## _command()(PACKET_CLIENT_JOIN)
+
+	static void NetworkPacketSend_PACKET_CLIENT_JOIN_command()
 	{
 		//
 		// Packet: CLIENT_JOIN
@@ -43,19 +54,19 @@ public interface NetClient {
 		//
 
 		Packet p;
-		_network_join_status = NETWORK_JOIN_STATUS_AUTHORIZING;
+		Net._network_join_status = NetworkJoinStatus.AUTHORIZING;
 		Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
-		p = NetworkSend_Init(PACKET_CLIENT_JOIN);
+		p = new Packet(PacketType.CLIENT_JOIN);
 		NetworkSend_string(p, _openttd_revision);
 		NetworkSend_string(p, _network_player_name); // Player name
 		NetworkSend_byte(p, _network_playas); // PlayAs
 		NetworkSend_byte(p, NETLANG_ANY); // Language
 		NetworkSend_string(p, _network_unique_id);
-		NetworkSend_Packet(p, MY_CLIENT);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	void NetworkPacketSend_ ## type ## _command()_PARAM(PACKET_CLIENT_PASSWORD)(NetworkPasswordType type, final char *password)
+	static void NetworkPacketSend_PACKET_CLIENT_PASSWORD_command(NetworkPasswordType type, final String password)
 	{
 		//
 		// Packet: CLIENT_PASSWORD
@@ -64,13 +75,13 @@ public interface NetClient {
 		//    byte:  NetworkPasswordType
 		//    String: Password
 		//
-		Packet p = NetworkSend_Init(PACKET_CLIENT_PASSWORD);
+		Packet p = new Packet(PacketType.CLIENT_PASSWORD);
 		NetworkSend_byte(p, type);
 		NetworkSend_string(p, password);
-		NetworkSend_Packet(p, MY_CLIENT);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	void NetworkPacketSend_ ## type ## _command()(PACKET_CLIENT_GETMAP)
+	static void NetworkPacketSend_PACKET_CLIENT_GETMAP_command()
 	{
 		//
 		// Packet: CLIENT_GETMAP
@@ -79,11 +90,11 @@ public interface NetClient {
 		//    <none>
 		//
 
-		Packet p = NetworkSend_Init(PACKET_CLIENT_GETMAP);
-		NetworkSend_Packet(p, MY_CLIENT);
+		Packet p = new Packet(PACKET_CLIENT_GETMAP);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	void NetworkPacketSend_ ## type ## _command()(PACKET_CLIENT_MAP_OK)
+	static void NetworkPacketSend_PACKET_CLIENT_MAP_OK_command()
 	{
 		//
 		// Packet: CLIENT_MAP_OK
@@ -92,11 +103,11 @@ public interface NetClient {
 		//    <none>
 		//
 
-		Packet p = NetworkSend_Init(PACKET_CLIENT_MAP_OK);
-		NetworkSend_Packet(p, MY_CLIENT);
+		Packet p = new Packet(PacketType.CLIENT_MAP_OK);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	void NetworkPacketSend_ ## type ## _command()(PACKET_CLIENT_ACK)
+	static void NetworkPacketSend_PACKET_CLIENT_ACK_command()
 	{
 		//
 		// Packet: CLIENT_ACK
@@ -105,14 +116,14 @@ public interface NetClient {
 		//    int: current FrameCounter of the client
 		//
 
-		Packet p = NetworkSend_Init(PACKET_CLIENT_ACK);
+		Packet p = new Packet(PacketType.CLIENT_ACK);
 
 		NetworkSend_int(p, _frame_counter);
-		NetworkSend_Packet(p, MY_CLIENT);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
 	// Send a command packet to the server
-	void NetworkPacketSend_ ## type ## _command()_PARAM(PACKET_CLIENT_COMMAND)(CommandPacket cp)
+	static void NetworkPacketSend_PACKET_CLIENT_COMMAND_command(CommandPacket cp)
 	{
 		//
 		// Packet: CLIENT_COMMAND
@@ -127,7 +138,7 @@ public interface NetClient {
 		//    byte:  CallBackID (see callback_table.c)
 		//
 
-		Packet p = NetworkSend_Init(PACKET_CLIENT_COMMAND);
+		Packet p = new Packet(PacketType.CLIENT_COMMAND);
 
 		NetworkSend_byte(p, cp.player);
 		NetworkSend_int(p, cp.cmd);
@@ -137,11 +148,11 @@ public interface NetClient {
 		NetworkSend_string(p, cp.text);
 		NetworkSend_byte(p, cp.callback);
 
-		NetworkSend_Packet(p, MY_CLIENT);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
 	// Send a chat-packet over the network
-	void NetworkPacketSend_ ## type ## _command()_PARAM(PACKET_CLIENT_CHAT)(NetworkAction action, DestType desttype, int dest, final char *msg)
+	static void NetworkPacketSend_PACKET_CLIENT_CHAT_command(NetworkAction action, DestType desttype, int dest, final String msg)
 	{
 		//
 		// Packet: CLIENT_CHAT
@@ -153,17 +164,17 @@ public interface NetClient {
 		//    String: Message (max MAX_TEXT_MSG_LEN)
 		//
 
-		Packet p = NetworkSend_Init(PACKET_CLIENT_CHAT);
+		Packet p = new Packet(PacketType.CLIENT_CHAT);
 
 		NetworkSend_byte(p, action);
 		NetworkSend_byte(p, desttype);
 		NetworkSend_byte(p, dest);
 		NetworkSend_string(p, msg);
-		NetworkSend_Packet(p, MY_CLIENT);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
 	// Send an error-packet over the network
-	void NetworkPacketSend_ ## type ## _command()_PARAM(PACKET_CLIENT_ERROR)(NetworkErrorCode errorno)
+	static void NetworkPacketSend_PACKET_CLIENT_ERROR_command(NetworkErrorCode errorno)
 	{
 		//
 		// Packet: CLIENT_ERROR
@@ -171,13 +182,13 @@ public interface NetClient {
 		// Data:
 		//    byte:  ErrorID (see network_data.h, NetworkErrorCode)
 		//
-		Packet p = NetworkSend_Init(PACKET_CLIENT_ERROR);
+		Packet p = new Packet(PacketType.CLIENT_ERROR);
 
 		NetworkSend_byte(p, errorno);
-		NetworkSend_Packet(p, MY_CLIENT);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	void NetworkPacketSend_ ## type ## _command()_PARAM(PACKET_CLIENT_SET_PASSWORD)(final char *password)
+	static void NetworkPacketSend_PACKET_CLIENT_SET_PASSWORD_command(final String password)
 	{
 		//
 		// Packet: PACKET_CLIENT_SET_PASSWORD
@@ -185,13 +196,13 @@ public interface NetClient {
 		// Data:
 		//    String: Password
 		//
-		Packet p = NetworkSend_Init(PACKET_CLIENT_SET_PASSWORD);
+		Packet p = new Packet(PacketType.CLIENT_SET_PASSWORD);
 
 		NetworkSend_string(p, password);
-		NetworkSend_Packet(p, MY_CLIENT);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	void NetworkPacketSend_ ## type ## _command()_PARAM(PACKET_CLIENT_SET_NAME)(final char *name)
+	static void NetworkPacketSend_PACKET_CLIENT_SET_NAME_command(final String name)
 	{
 		//
 		// Packet: PACKET_CLIENT_SET_NAME
@@ -199,14 +210,14 @@ public interface NetClient {
 		// Data:
 		//    String: Name
 		//
-		Packet p = NetworkSend_Init(PACKET_CLIENT_SET_NAME);
+		Packet p = new Packet(PacketType.CLIENT_SET_NAME);
 
 		NetworkSend_string(p, name);
-		NetworkSend_Packet(p, MY_CLIENT);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
 	// Send an quit-packet over the network
-	void NetworkPacketSend_ ## type ## _command()_PARAM(PACKET_CLIENT_QUIT)(final char *leavemsg)
+	static void NetworkPacketSend_PACKET_CLIENT_QUIT_command(final String leavemsg)
 	{
 		//
 		// Packet: CLIENT_QUIT
@@ -214,107 +225,107 @@ public interface NetClient {
 		// Data:
 		//    String: leave-message
 		//
-		Packet p = NetworkSend_Init(PACKET_CLIENT_QUIT);
+		Packet p = new Packet(PacketType.CLIENT_QUIT);
 
 		NetworkSend_string(p, leavemsg);
-		NetworkSend_Packet(p, MY_CLIENT);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	void NetworkPacketSend_PACKET_CLIENT_RCON_command(final char *pass, final char *command)
+	static void NetworkPacketSend_PACKET_CLIENT_RCON_command(final String pass, final String command)
 	{
-		Packet p = NetworkSend_Init(PACKET_CLIENT_RCON);
+		Packet p = new Packet(PacketType.CLIENT_RCON);
 		NetworkSend_string(p, pass);
 		NetworkSend_string(p, command);
-		NetworkSend_Packet(p, MY_CLIENT);
+		NetworkSend_Packet(p, MY_CLIENT());
 	}
 
 
 	// **********
 	// Receiving functions
-	//   DEF_CLIENT_RECEIVE_COMMAND has parameter: Packet p
+	//   void NetworkPacketReceive_ ## type ## _command(NetworkClientState cs, Packet p) has parameter: Packet p
 	// **********
 
-	extern boolean SafeSaveOrLoad(final char *filename, int mode, int newgm);
+	//extern boolean SafeSaveOrLoad(final String filename, int mode, int newgm);
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_FULL)
+	static void NetworkPacketReceive_PACKET_SERVER_FULL_command(NetworkClientState cs, Packet p)
 	{
 		// We try to join a server which is full
 		_switch_mode_errorstr = Str.STR_NETWORK_ERR_SERVER_FULL;
 		Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
-		return NETWORK_RECV_STATUS_SERVER_FULL;
+		return NetworkRecvStatus.SERVER_FULL;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_BANNED)
+	static void NetworkPacketReceive_PACKET_SERVER_BANNED_command(NetworkClientState cs, Packet p)
 	{
 		// We try to join a server where we are banned
-		_switch_mode_errorstr = Str.STR_NETWORK_ERR_SERVER_BANNED;
+		Global._switch_mode_errorstr = new StringID( Str.STR_NETWORK_ERR_SERVER_BANNED );
 		Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
-		return NETWORK_RECV_STATUS_SERVER_BANNED;
+		return NetworkRecvStatus.SERVER_BANNED;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_COMPANY_INFO)
+	static void NetworkPacketReceive_PACKET_SERVER_COMPANY_INFO_command(NetworkClientState cs, Packet p)
 	{
 		byte company_info_version;
 		int i;
 
-		company_info_version = NetworkRecv_byte(MY_CLIENT, p);
+		company_info_version = NetworkRecv_byte(MY_CLIENT(), p);
 
-		if (!MY_CLIENT.quited && company_info_version == NETWORK_COMPANY_INFO_VERSION) {
+		if (!MY_CLIENT().quited && company_info_version == NETWORK_COMPANY_INFO_VERSION) {
 			byte total;
 			byte current;
 
-			total = NetworkRecv_byte(MY_CLIENT, p);
+			total = NetworkRecv_byte(MY_CLIENT(), p);
 
 			// There is no data at all..
 			if (total == 0)
-				return NETWORK_RECV_STATUS_CLOSE_QUERY;
+				return NetworkRecvStatus.CLOSE_QUERY;
 
-			current = NetworkRecv_byte(MY_CLIENT, p);
+			current = NetworkRecv_byte(MY_CLIENT(), p);
 			if (current >= Global.MAX_PLAYERS)
-				return NETWORK_RECV_STATUS_CLOSE_QUERY;
+				return NetworkRecvStatus.CLOSE_QUERY;
 
 			_network_lobby_company_count++;
 
-			NetworkRecv_string(MY_CLIENT, p, _network_player_info[current].company_name, sizeof(_network_player_info[current].company_name));
-			_network_player_info[current].inaugurated_year = NetworkRecv_byte(MY_CLIENT, p);
-			_network_player_info[current].company_value = NetworkRecv_int64(MY_CLIENT, p);
-			_network_player_info[current].money = NetworkRecv_int64(MY_CLIENT, p);
-			_network_player_info[current].income = NetworkRecv_int64(MY_CLIENT, p);
-			_network_player_info[current].performance = NetworkRecv_int(MY_CLIENT, p);
-			_network_player_info[current].use_password = NetworkRecv_byte(MY_CLIENT, p);
+			NetworkRecv_string(MY_CLIENT(), p, _network_player_info[current].company_name, sizeof(_network_player_info[current].company_name));
+			_network_player_info[current].inaugurated_year = NetworkRecv_byte(MY_CLIENT(), p);
+			_network_player_info[current].company_value = NetworkRecv_int64(MY_CLIENT(), p);
+			_network_player_info[current].money = NetworkRecv_int64(MY_CLIENT(), p);
+			_network_player_info[current].income = NetworkRecv_int64(MY_CLIENT(), p);
+			_network_player_info[current].performance = NetworkRecv_int(MY_CLIENT(), p);
+			_network_player_info[current].use_password = NetworkRecv_byte(MY_CLIENT(), p);
 			for (i = 0; i < NETWORK_VEHICLE_TYPES; i++)
-				_network_player_info[current].num_vehicle[i] = NetworkRecv_int(MY_CLIENT, p);
+				_network_player_info[current].num_vehicle[i] = NetworkRecv_int(MY_CLIENT(), p);
 			for (i = 0; i < NETWORK_STATION_TYPES; i++)
-				_network_player_info[current].num_station[i] = NetworkRecv_int(MY_CLIENT, p);
+				_network_player_info[current].num_station[i] = NetworkRecv_int(MY_CLIENT(), p);
 
-			NetworkRecv_string(MY_CLIENT, p, _network_player_info[current].players, sizeof(_network_player_info[current].players));
+			NetworkRecv_string(MY_CLIENT(), p, _network_player_info[current].players, sizeof(_network_player_info[current].players));
 
 			Window.InvalidateWindow(Window.WC_NETWORK_WINDOW, 0);
 
-			return NETWORK_RECV_STATUS_OKAY;
+			return NetworkRecvStatus.OKAY;
 		}
 
-		return NETWORK_RECV_STATUS_CLOSE_QUERY;
+		return NetworkRecvStatus.CLOSE_QUERY;
 	}
 
 	// This packet contains info about the client (playas and name)
 	//  as client we save this in NetworkClientInfo, linked via 'index'
 	//  which is always an unique number on a server.
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_CLIENT_INFO)
+	static void NetworkPacketReceive_PACKET_SERVER_CLIENT_INFO_command(NetworkClientState cs, Packet p)
 	{
 		NetworkClientInfo *ci;
-		int index = NetworkRecv_int(MY_CLIENT, p);
-		byte playas = NetworkRecv_byte(MY_CLIENT, p);
+		int index = NetworkRecv_int(MY_CLIENT(), p);
+		byte playas = NetworkRecv_byte(MY_CLIENT(), p);
 		char name[NETWORK_NAME_LENGTH];
 		char unique_id[NETWORK_NAME_LENGTH];
 
-		NetworkRecv_string(MY_CLIENT, p, name, sizeof(name));
-		NetworkRecv_string(MY_CLIENT, p, unique_id, sizeof(unique_id));
+		NetworkRecv_string(MY_CLIENT(), p, name, sizeof(name));
+		NetworkRecv_string(MY_CLIENT(), p, unique_id, sizeof(unique_id));
 
-		if (MY_CLIENT.quited)
-			return NETWORK_RECV_STATUS_CONN_LOST;
+		if (MY_CLIENT().quited)
+			return NetworkRecvStatus.CONN_LOST;
 
 		/* Do we receive a change of data? Most likely we changed playas */
 		if (index == _network_own_client_index) {
@@ -344,7 +355,7 @@ public interface NetClient {
 
 			Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 
-			return NETWORK_RECV_STATUS_OKAY;
+			return NetworkRecvStatus.OKAY;
 		}
 
 		// We don't have this index yet, find an empty index, and put the data there
@@ -358,16 +369,16 @@ public interface NetClient {
 
 			Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 
-			return NETWORK_RECV_STATUS_OKAY;
+			return NetworkRecvStatus.OKAY;
 		}
 
 		// Here the program should never ever come.....
-		return NETWORK_RECV_STATUS_MALFORMED_PACKET;
+		return NetworkRecvStatus.MALFORMED_PACKET;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_ERROR)
+	static void NetworkPacketReceive_PACKET_SERVER_ERROR_command(NetworkClientState cs, Packet p)
 	{
-		NetworkErrorCode error = NetworkRecv_byte(MY_CLIENT, p);
+		NetworkErrorCode error = NetworkRecv_byte(MY_CLIENT(), p);
 
 		if (error == NETWORK_ERROR_NOT_AUTHORIZED || error == NETWORK_ERROR_NOT_EXPECTED ||
 				error == NETWORK_ERROR_PLAYER_MISMATCH) {
@@ -387,58 +398,58 @@ public interface NetClient {
 
 		Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
-		return NETWORK_RECV_STATUS_SERVER_ERROR;
+		return NetworkRecvStatus.SERVER_ERROR;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_NEED_PASSWORD)
+	static void NetworkPacketReceive_PACKET_SERVER_NEED_PASSWORD_command(NetworkClientState cs, Packet p)
 	{
 		NetworkPasswordType type;
-		type = NetworkRecv_byte(MY_CLIENT, p);
+		type = NetworkRecv_byte(MY_CLIENT(), p);
 
 		if (type == NETWORK_GAME_PASSWORD) {
 			ShowNetworkNeedGamePassword();
-			return NETWORK_RECV_STATUS_OKAY;
+			return NetworkRecvStatus.OKAY;
 		} else if (type == NETWORK_COMPANY_PASSWORD) {
 			ShowNetworkNeedCompanyPassword();
-			return NETWORK_RECV_STATUS_OKAY;
+			return NetworkRecvStatus.OKAY;
 		}
 
-		return NETWORK_RECV_STATUS_MALFORMED_PACKET;
+		return NetworkRecvStatus.MALFORMED_PACKET;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_WELCOME)
+	static void NetworkPacketReceive_PACKET_SERVER_WELCOME_command(NetworkClientState cs, Packet p)
 	{
-		_network_own_client_index = NetworkRecv_int(MY_CLIENT, p);
+		_network_own_client_index = NetworkRecv_int(MY_CLIENT(), p);
 
 		// Start receiving the map
-		SEND_COMMAND(PACKET_CLIENT_GETMAP)();
-		return NETWORK_RECV_STATUS_OKAY;
+		NetworkPacketSend_PACKET_CLIENT_GETMAP_command();
+		return NetworkRecvStatus.OKAY;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_WAIT)
+	static void NetworkPacketReceive_PACKET_SERVER_WAIT_command(NetworkClientState cs, Packet p)
 	{
-		_network_join_status = NETWORK_JOIN_STATUS_WAITING;
-		_network_join_waiting = NetworkRecv_byte(MY_CLIENT, p);
+		Net._network_join_status = NetworkJoinStatus.WAITING;
+		Net._network_join_waiting = NetworkRecv_byte(MY_CLIENT(), p);
 		Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
 		// We are put on hold for receiving the map.. we need GUI for this ;)
-		DEBUG(net, 1)("[NET] The server is currently busy sending the map to someone else.. please hold..." );
-		DEBUG(net, 1)("[NET]  There are %d clients in front of you", _network_join_waiting);
+		Global.DEBUG_net( 1, "[NET] The server is currently busy sending the map to someone else.. please hold..." );
+		Global.DEBUG_net( 1, "[NET]  There are %d clients in front of you", Net._network_join_waiting);
 
-		return NETWORK_RECV_STATUS_OKAY;
+		return NetworkRecvStatus.OKAY;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_MAP)
+	static void NetworkPacketReceive_PACKET_SERVER_MAP_command(NetworkClientState cs, Packet p)
 	{
-		static char filename[256];
-		static FILE *file_pointer;
+		static String filename;
+		//static FILE *file_pointer;
 
 		byte maptype;
 
-		maptype = NetworkRecv_byte(MY_CLIENT, p);
+		maptype = NetworkRecv_byte(MY_CLIENT(), p);
 
-		if (MY_CLIENT.quited)
-			return NETWORK_RECV_STATUS_CONN_LOST;
+		if (MY_CLIENT().quited)
+			return NetworkRecvStatus.CONN_LOST;
 
 		// First packet, init some stuff
 		if (maptype == MAP_PACKET_START) {
@@ -448,18 +459,18 @@ public interface NetClient {
 			file_pointer = fopen(filename, "wb");
 			if (file_pointer == null) {
 				_switch_mode_errorstr = Str.STR_NETWORK_ERR_SAVEGAMEERROR;
-				return NETWORK_RECV_STATUS_SAVEGAME;
+				return NetworkRecvStatus.SAVEGAME;
 			}
 
-			_frame_counter = _frame_counter_server = _frame_counter_max = NetworkRecv_int(MY_CLIENT, p);
+			_frame_counter = _frame_counter_server = _frame_counter_max = NetworkRecv_int(MY_CLIENT(), p);
 
-			_network_join_status = NETWORK_JOIN_STATUS_DOWNLOADING;
+			Net._network_join_status = NetworkJoinStatus.DOWNLOADING;
 			_network_join_kbytes = 0;
-			_network_join_kbytes_total = NetworkRecv_int(MY_CLIENT, p) / 1024;
+			_network_join_kbytes_total = NetworkRecv_int(MY_CLIENT(), p) / 1024;
 			Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
 			// The first packet does not contain any more data
-			return NETWORK_RECV_STATUS_OKAY;
+			return NetworkRecvStatus.OKAY;
 		}
 
 		if (maptype == MAP_PACKET_NORMAL) {
@@ -471,14 +482,14 @@ public interface NetClient {
 		}
 
 		if (maptype == MAP_PACKET_PATCH) {
-			NetworkRecvPatchSettings(MY_CLIENT, p);
+			NetworkRecvPatchSettings(MY_CLIENT(), p);
 		}
 
 		// Check if this was the last packet
 		if (maptype == MAP_PACKET_END) {
 			fclose(file_pointer);
 
-			_network_join_status = NETWORK_JOIN_STATUS_PROCESSING;
+			Net._network_join_status = NetworkJoinStatus.PROCESSING;
 			Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
 			// The map is done downloading, load it
@@ -486,13 +497,13 @@ public interface NetClient {
 			if (!SafeSaveOrLoad(filename, SL_LOAD, GameModes.GM_NORMAL)) {
 				Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 				_switch_mode_errorstr = Str.STR_NETWORK_ERR_SAVEGAMEERROR;
-				return NETWORK_RECV_STATUS_SAVEGAME;
+				return NetworkRecvStatus.SAVEGAME;
 			}
 
-			GameOptions._opt_ptr = &GameOptions._opt; // during a network game you are always in-game
+			GameOptions._opt_ptr = GameOptions._opt; // during a network game you are always in-game
 
 			// Say we received the map and loaded it correctly!
-			SEND_COMMAND(PACKET_CLIENT_MAP_OK)();
+			NetworkPacketSend_PACKET_CLIENT_MAP_OK_command();
 
 			if (_network_playas == 0 || _network_playas > Global.MAX_PLAYERS ||
 					!GetPlayer(_network_playas - 1).is_active) {
@@ -529,59 +540,59 @@ public interface NetClient {
 			}
 		}
 
-		return NETWORK_RECV_STATUS_OKAY;
+		return NetworkRecvStatus.OKAY;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_FRAME)
+	static void NetworkPacketReceive_PACKET_SERVER_FRAME_command(NetworkClientState cs, Packet p)
 	{
-		_frame_counter_server = NetworkRecv_int(MY_CLIENT, p);
-		_frame_counter_max = NetworkRecv_int(MY_CLIENT, p);
-	#ifdef ENABLE_NETWORK_SYNC_EVERY_FRAME
+		_frame_counter_server = NetworkRecv_int(MY_CLIENT(), p);
+		_frame_counter_max = NetworkRecv_int(MY_CLIENT(), p);
+	//#ifdef ENABLE_NETWORK_SYNC_EVERY_FRAME
 		// Test if the server supports this option
 		//  and if we are at the frame the server is
 		if (p.pos < p.size) {
 			_sync_frame = _frame_counter_server;
-			_sync_seed_1 = NetworkRecv_int(MY_CLIENT, p);
-	#ifdef NETWORK_SEND_DOUBLE_SEED
-			_sync_seed_2 = NetworkRecv_int(MY_CLIENT, p);
-	#endif
+			_sync_seed_1 = NetworkRecv_int(MY_CLIENT(), p);
+	//#ifdef NETWORK_SEND_DOUBLE_SEED
+	//		_sync_seed_2 = NetworkRecv_int(MY_CLIENT(), p);
+	//#endif
 		}
-	#endif
-		DEBUG(net, 7)("[NET] Received FRAME %d",_frame_counter_server);
+	//#endif
+		Global.DEBUG_net( 7, "[NET] Received FRAME %d",_frame_counter_server);
 
 		// Let the server know that we received this frame correctly
 		//  We do this only once per day, to save some bandwidth ;)
 		if (!_network_first_time && last_ack_frame < _frame_counter) {
 			last_ack_frame = _frame_counter + DAY_TICKS;
-			DEBUG(net,6)("[NET] Sent ACK at %d", _frame_counter);
-			SEND_COMMAND(PACKET_CLIENT_ACK)();
+			DEBUG(net,6, "[NET] Sent ACK at %d", _frame_counter);
+			NetworkPacketSend_PACKET_CLIENT_ACK_command();
 		}
 
-		return NETWORK_RECV_STATUS_OKAY;
+		return NetworkRecvStatus.OKAY;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_SYNC)
+	static void NetworkPacketReceive_PACKET_SERVER_SYNC_command(NetworkClientState cs, Packet p)
 	{
-		_sync_frame = NetworkRecv_int(MY_CLIENT, p);
-		_sync_seed_1 = NetworkRecv_int(MY_CLIENT, p);
-	#ifdef NETWORK_SEND_DOUBLE_SEED
-		_sync_seed_2 = NetworkRecv_int(MY_CLIENT, p);
-	#endif
+		_sync_frame = NetworkRecv_int(MY_CLIENT(), p);
+		_sync_seed_1 = NetworkRecv_int(MY_CLIENT(), p);
+	//#ifdef NETWORK_SEND_DOUBLE_SEED
+	//	_sync_seed_2 = NetworkRecv_int(MY_CLIENT(), p);
+	//#endif
 
-		return NETWORK_RECV_STATUS_OKAY;
+		return NetworkRecvStatus.OKAY;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_COMMAND)
+	static void NetworkPacketReceive_PACKET_SERVER_COMMAND_command(NetworkClientState cs, Packet p)
 	{
-		CommandPacket cp = malloc(sizeof(CommandPacket));
-		cp.player = NetworkRecv_byte(MY_CLIENT, p);
-		cp.cmd = NetworkRecv_int(MY_CLIENT, p);
-		cp.p1 = NetworkRecv_int(MY_CLIENT, p);
-		cp.p2 = NetworkRecv_int(MY_CLIENT, p);
-		cp.tile = NetworkRecv_int(MY_CLIENT, p);
-		NetworkRecv_string(MY_CLIENT, p, cp.text, sizeof(cp.text));
-		cp.callback = NetworkRecv_byte(MY_CLIENT, p);
-		cp.frame = NetworkRecv_int(MY_CLIENT, p);
+		CommandPacket cp = new CommandPacket();
+		cp.player = NetworkRecv_byte(MY_CLIENT(), p);
+		cp.cmd = NetworkRecv_int(MY_CLIENT(), p);
+		cp.p1 = NetworkRecv_int(MY_CLIENT(), p);
+		cp.p2 = NetworkRecv_int(MY_CLIENT(), p);
+		cp.tile = NetworkRecv_int(MY_CLIENT(), p);
+		NetworkRecv_string(MY_CLIENT(), p, cp.text, sizeof(cp.text));
+		cp.callback = NetworkRecv_byte(MY_CLIENT(), p);
+		cp.frame = NetworkRecv_int(MY_CLIENT(), p);
 		cp.next = null;
 
 		// The server did send us this command..
@@ -596,24 +607,24 @@ public interface NetClient {
 			c.next = cp;
 		}
 
-		return NETWORK_RECV_STATUS_OKAY;
+		return NetworkRecvStatus.OKAY;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_CHAT)
+	static void NetworkPacketReceive_PACKET_SERVER_CHAT_command(NetworkClientState cs, Packet p)
 	{
-		NetworkAction action = NetworkRecv_byte(MY_CLIENT, p);
+		NetworkAction action = NetworkRecv_byte(MY_CLIENT(), p);
 		char msg[MAX_TEXT_MSG_LEN];
 		NetworkClientInfo *ci = null, *ci_to;
 		int index;
 		char name[NETWORK_NAME_LENGTH];
 		boolean self_send;
 
-		index = NetworkRecv_int(MY_CLIENT, p);
-		self_send = NetworkRecv_byte(MY_CLIENT, p);
-		NetworkRecv_string(MY_CLIENT, p, msg, MAX_TEXT_MSG_LEN);
+		index = NetworkRecv_int(MY_CLIENT(), p);
+		self_send = NetworkRecv_byte(MY_CLIENT(), p);
+		NetworkRecv_string(MY_CLIENT(), p, msg, MAX_TEXT_MSG_LEN);
 
 		ci_to = NetworkFindClientInfoFromIndex(index);
-		if (ci_to == null) return NETWORK_RECV_STATUS_OKAY;
+		if (ci_to == null) return NetworkRecvStatus.OKAY;
 
 		/* Do we display the action locally? */
 		if (self_send) {
@@ -627,7 +638,7 @@ public interface NetClient {
 				case NETWORK_ACTION_GIVE_MONEY:
 					/* For speak to player or give money, we need the player-name */
 					if (ci_to.client_playas > Global.MAX_PLAYERS)
-						return NETWORK_RECV_STATUS_OKAY; // This should never happen
+						return NetworkRecvStatus.OKAY; // This should never happen
 					Global.GetString(name, GetPlayer(ci_to.client_playas-1).name_1);
 					ci = NetworkFindClientInfoFromIndex(_network_own_client_index);
 					break;
@@ -644,18 +655,18 @@ public interface NetClient {
 
 		if (ci != null)
 			NetworkTextMessage(action, GetDrawStringPlayerColor(ci.client_playas-1), self_send, name, "%s", msg);
-		return NETWORK_RECV_STATUS_OKAY;
+		return NetworkRecvStatus.OKAY;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_ERROR_QUIT)
+	static void NetworkPacketReceive_PACKET_SERVER_ERROR_QUIT_command(NetworkClientState cs, Packet p)
 	{
 		int errorno;
 		char str[100];
 		int index;
 		NetworkClientInfo *ci;
 
-		index = NetworkRecv_int(MY_CLIENT, p);
-		errorno = NetworkRecv_byte(MY_CLIENT, p);
+		index = NetworkRecv_int(MY_CLIENT(), p);
+		errorno = NetworkRecv_byte(MY_CLIENT(), p);
 
 		Global.GetString(str, Str.STR_NETWORK_ERR_CLIENT_GENERAL + errorno);
 
@@ -669,17 +680,17 @@ public interface NetClient {
 
 		Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 
-		return NETWORK_RECV_STATUS_OKAY;
+		return NetworkRecvStatus.OKAY;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_QUIT)
+	static void NetworkPacketReceive_PACKET_SERVER_QUIT_command(NetworkClientState cs, Packet p)
 	{
 		char str[100];
 		int index;
 		NetworkClientInfo *ci;
 
-		index = NetworkRecv_int(MY_CLIENT, p);
-		NetworkRecv_string(MY_CLIENT, p, str, lengthof(str));
+		index = NetworkRecv_int(MY_CLIENT(), p);
+		NetworkRecv_string(MY_CLIENT(), p, str, lengthof(str));
 
 		ci = NetworkFindClientInfoFromIndex(index);
 		if (ci != null) {
@@ -688,21 +699,21 @@ public interface NetClient {
 			// The client is gone, give the NetworkClientInfo free
 			ci.client_index = NETWORK_EMPTY_INDEX;
 		} else {
-			DEBUG(net, 0)("[NET] Error - unknown client (%d) is leaving the game", index);
+			Global.DEBUG_net( 0, "[NET] Error - unknown client (%d) is leaving the game", index);
 		}
 
 		Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 
 		// If we come here it means we could not locate the client.. strange :s
-		return NETWORK_RECV_STATUS_OKAY;
+		return NetworkRecvStatus.OKAY;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_JOIN)
+	static void NetworkPacketReceive_PACKET_SERVER_JOIN_command(NetworkClientState cs, Packet p)
 	{
 		int index;
 		NetworkClientInfo *ci;
 
-		index = NetworkRecv_int(MY_CLIENT, p);
+		index = NetworkRecv_int(MY_CLIENT(), p);
 
 		ci = NetworkFindClientInfoFromIndex(index);
 		if (ci != null)
@@ -710,17 +721,17 @@ public interface NetClient {
 
 		Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 
-		return NETWORK_RECV_STATUS_OKAY;
+		return NetworkRecvStatus.OKAY;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_SHUTDOWN)
+	static void NetworkPacketReceive_PACKET_SERVER_SHUTDOWN_command(NetworkClientState cs, Packet p)
 	{
 		_switch_mode_errorstr = Str.STR_NETWORK_SERVER_SHUTDOWN;
 
-		return NETWORK_RECV_STATUS_SERVER_ERROR;
+		return NetworkRecvStatus.SERVER_ERROR;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_NEWGAME)
+	static void NetworkPacketReceive_PACKET_SERVER_NEWGAME_command(NetworkClientState cs, Packet p)
 	{
 		// To trottle the reconnects a bit, every clients waits
 		//  his Global.gs._local_player value before reconnecting
@@ -729,32 +740,32 @@ public interface NetClient {
 		_network_reconnect = Math.min(Global.gs._local_player + 1, 10);
 		_switch_mode_errorstr = Str.STR_NETWORK_SERVER_REBOOT;
 
-		return NETWORK_RECV_STATUS_SERVER_ERROR;
+		return NetworkRecvStatus.SERVER_ERROR;
 	}
 
-	DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_RCON)
+	static void NetworkPacketReceive_PACKET_SERVER_RCON_command(NetworkClientState cs, Packet p)
 	{
 		char rcon_out[NETWORK_RCONCOMMAND_LENGTH];
 		int color_code;
 
-		color_code = NetworkRecv_int(MY_CLIENT, p);
-		NetworkRecv_string(MY_CLIENT, p, rcon_out, sizeof(rcon_out));
+		color_code = NetworkRecv_int(MY_CLIENT(), p);
+		NetworkRecv_string(MY_CLIENT(), p, rcon_out, sizeof(rcon_out));
 
 		IConsolePrint(color_code, rcon_out);
 
-		return NETWORK_RECV_STATUS_OKAY;
+		return NetworkRecvStatus.OKAY;
 	}
 
 
 
 	// The layout for the receive-functions by the client
-	typedef NetworkRecvStatus NetworkClientPacket(Packet p);
+	//typedef NetworkRecvStatus NetworkClientPacket(Packet p);
 
 	// This array matches PacketType. At an incoming
 	//  packet it is matches against this array
 	//  and that way the right function to handle that
 	//  packet is found.
-	static NetworkClientPacket* final _network_client_packet[] = {
+	static NetworkClientPacket _network_client_packet[] = {
 		RECEIVE_COMMAND(PACKET_SERVER_FULL),
 		RECEIVE_COMMAND(PACKET_SERVER_BANNED),
 		null, /*PACKET_CLIENT_JOIN,*/
@@ -790,19 +801,20 @@ public interface NetClient {
 	};
 
 	// If this fails, check the array above with network_data.h
-	assert_compile(lengthof(_network_client_packet) == PACKET_END);
+	//assert_compile(lengthof(_network_client_packet) == PACKET_END);
 
-	extern final SettingDesc patch_settings[];
+	//extern final SettingDesc patch_settings[];
 
 	// This is a TEMPORARY solution to get the patch-settings
 	//  to the client. When the patch-settings are saved in the savegame
 	//  this should be removed!!
-	void NetworkRecvPatchSettings(NetworkClientState cs, Packet p)
+	static void NetworkRecvPatchSettings(NetworkClientState cs, Packet p)
 	{
-		final SettingDesc *item;
+		final SettingDesc item;
 
 		item = patch_settings;
 
+		/* TODO
 		while (item.name != null) {
 			switch (item.flags) {
 				case SDT_BOOL:
@@ -820,33 +832,33 @@ public interface NetClient {
 					break;
 			}
 			item++;
-		}
+		} */
 	}
 
 	// Is called after a client is connected to the server
-	void NetworkClient_Connected()
+	static void NetworkClient_Connected()
 	{
 		// Set the frame-counter to 0 so nothing happens till we are ready
 		_frame_counter = 0;
 		_frame_counter_server = 0;
 		last_ack_frame = 0;
 		// Request the game-info
-		SEND_COMMAND(PACKET_CLIENT_JOIN)();
+		NetworkPacketSend_ ## type ## _command(PACKET_CLIENT_JOIN)();
 	}
 
 	// Reads the packets from the socket-stream, if available
 	NetworkRecvStatus NetworkClient_ReadPackets(NetworkClientState cs)
 	{
 		Packet p;
-		NetworkRecvStatus res = NETWORK_RECV_STATUS_OKAY;
+		NetworkRecvStatus res = NetworkRecvStatus.OKAY;
 
-		while (res == NETWORK_RECV_STATUS_OKAY && (p = NetworkRecv_Packet(cs, &res)) != null) {
-			byte type = NetworkRecv_byte(MY_CLIENT, p);
-			if (type < PACKET_END && _network_client_packet[type] != null && !MY_CLIENT.quited) {
+		while (res == NetworkRecvStatus.OKAY && (p = NetworkRecv_Packet(cs, &res)) != null) {
+			byte type = NetworkRecv_byte(MY_CLIENT(), p);
+			if (type < PACKET_END && _network_client_packet[type] != null && !MY_CLIENT().quited) {
 				res = _network_client_packet[type](p);
 			} else {
-				res = NETWORK_RECV_STATUS_MALFORMED_PACKET;
-				DEBUG(net, 0)("[NET][client] Received invalid packet type %d", type);
+				res = NetworkRecvStatus.MALFORMED_PACKET;
+				Global.DEBUG_net( 0, "[NET][client] Received invalid packet type %d", type);
 			}
 
 			//free(p);
