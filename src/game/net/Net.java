@@ -957,6 +957,8 @@ public class Net implements NetDefs
 		return Global._networking;
 	}
 
+	static NetworkClientInfo serverCi = new NetworkClientInfo(); // TODO must be in common list? No?
+	
 	static void NetworkInitGameInfo()
 	{
 		NetworkClientInfo ci;
@@ -987,8 +989,10 @@ public class Net implements NetDefs
 
 		// We use _network_client_info[MAX_CLIENT_INFO - 1] to store the server-data in it
 		//  The index is NETWORK_SERVER_INDEX ( = 1)
-		ci = _network_client_info[MAX_CLIENT_INFO - 1];
-		memset(ci, 0, sizeof(ci));
+		//ci = _network_client_info[MAX_CLIENT_INFO - 1];
+		//memset(ci, 0, sizeof(ci));
+		serverCi = new NetworkClientInfo();
+		ci = serverCi;
 
 		ci.client_index = NETWORK_SERVER_INDEX;
 		if (Global._network_dedicated)
@@ -1320,10 +1324,11 @@ public class Net implements NetDefs
 		// Just a safety check, to be removed in the future.
 		// Make sure that no older command appears towards the end of the queue
 		// In that case we missed executing it. This will never happen.
-		for(cp = _local_command_queue; cp != null; cp = cp.next) {
-			assert(Global._frame_counter < cp.frame);
-		}
-
+		//for(cp = _local_command_queue; cp != null; cp = cp.next) {
+		//	assert(Global._frame_counter < cp.frame);
+		//}
+		for(CommandPacket cp : _local_command_queue) 
+			assert(Global._frame_counter < cp.frame);		
 	}
 
 	static boolean NetworkDoClientLoop()
@@ -1736,17 +1741,15 @@ public class Net implements NetDefs
 
 			// Only the server gets the callback, because clients should not get them
 			c.callback = temp_callback;
-			if (_local_command_queue == null) {
+			_local_command_queue.add(c);
+			/*if (_local_command_queue == null) {
 				_local_command_queue = c;
 			} else {
-				/*
 				// Find last packet
 				CommandPacket cp = _local_command_queue;
 				while (cp.next != null) cp = cp.next;
 				cp.next = c;
-				*/
-				_local_command_queue.add(cp);
-			}
+			}*/
 
 			return;
 		}
