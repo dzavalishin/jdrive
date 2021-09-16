@@ -1,11 +1,14 @@
 package game.net;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 
 import game.Cmd;
 import game.GameOptions;
 import game.Global;
 import game.Hal;
+import game.Main;
 import game.Player;
 import game.SaveLoad;
 import game.Str;
@@ -60,8 +63,7 @@ public interface NetClient extends NetTools, NetDefs
 	static int last_ack_frame = -1; // TODO [dz] -1?
 
 	static NetworkClientState MY_CLIENT() {
-		 TODO 
-		return null;
+		return Net._clients.get(0); // [dz] can it be just a static object?
 	}
 	
 
@@ -339,19 +341,19 @@ public interface NetClient extends NetTools, NetDefs
 
 			Net._network_lobby_company_count++;
 
-			_network_player_info[current].company_name = NetworkRecv_string(MY_CLIENT(), p);
-			_network_player_info[current].inaugurated_year = NetworkRecv_byte(MY_CLIENT(), p);
-			_network_player_info[current].company_value = NetworkRecv_int64(MY_CLIENT(), p);
-			_network_player_info[current].money = NetworkRecv_int64(MY_CLIENT(), p);
-			_network_player_info[current].income = NetworkRecv_int64(MY_CLIENT(), p);
-			_network_player_info[current].performance = NetworkRecv_int(MY_CLIENT(), p);
-			_network_player_info[current].use_password = NetworkRecv_byte(MY_CLIENT(), p);
+			Net._network_player_info[current].company_name = NetworkRecv_string(MY_CLIENT(), p);
+			Net._network_player_info[current].inaugurated_year = NetworkRecv_byte(MY_CLIENT(), p);
+			Net._network_player_info[current].company_value = NetworkRecv_int64(MY_CLIENT(), p);
+			Net._network_player_info[current].money = NetworkRecv_int64(MY_CLIENT(), p);
+			Net._network_player_info[current].income = NetworkRecv_int64(MY_CLIENT(), p);
+			Net._network_player_info[current].performance = NetworkRecv_int(MY_CLIENT(), p);
+			Net._network_player_info[current].use_password = NetworkRecv_byte(MY_CLIENT(), p);
 			for (i = 0; i < NETWORK_VEHICLE_TYPES; i++)
-				_network_player_info[current].num_vehicle[i] = NetworkRecv_int(MY_CLIENT(), p);
+				Net._network_player_info[current].num_vehicle[i] = NetworkRecv_int(MY_CLIENT(), p);
 			for (i = 0; i < NETWORK_STATION_TYPES; i++)
-				_network_player_info[current].num_station[i] = NetworkRecv_int(MY_CLIENT(), p);
+				Net._network_player_info[current].num_station[i] = NetworkRecv_int(MY_CLIENT(), p);
 
-			_network_player_info[current].players = NetworkRecv_string(MY_CLIENT(), p);
+			Net._network_player_info[current].players = NetworkRecv_string(MY_CLIENT(), p);
 
 			Window.InvalidateWindow(Window.WC_NETWORK_WINDOW, 0);
 
@@ -492,7 +494,8 @@ public interface NetClient extends NetTools, NetDefs
 		return NetworkRecvStatus.OKAY;
 	}
 
-	static String recvMapFilename;
+	static String recvMapFilename = "";
+	static FileOutputStream file_pointer = null;
 	static NetworkRecvStatus NetworkPacketReceive_PACKET_SERVER_MAP_command(NetworkClientState cs, Packet p)
 	{
 		//static FILE *file_pointer;
@@ -509,7 +512,8 @@ public interface NetClient extends NetTools, NetDefs
 			// The name for the temp-map
 			recvMapFilename = String.format( "%s%snetwork_client.tmp",  Global._path.autosave_dir, File.separator);
 
-			file_pointer = fopen(recvMapFilename, "wb");
+			file_pointer = new FileOutputStream(recvMapFilename);
+			//file_pointer = fopen(recvMapFilename, "wb");
 			if (file_pointer == null) {
 				Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_SAVEGAMEERROR);
 				return NetworkRecvStatus.SAVEGAME;
@@ -528,8 +532,9 @@ public interface NetClient extends NetTools, NetDefs
 
 		if (maptype == MapPacket.MAP_PACKET_NORMAL.ordinal()) {
 			// We are still receiving data, put it to the file
-			fwrite(p.buffer + p.pos, 1, p.size - p.pos, file_pointer);
-
+			//fwrite(p.buffer + p.pos, 1, p.size - p.pos, file_pointer);
+			file_pointer.write(data, pos, len);
+			
 			Net._network_join_kbytes = ftell(file_pointer) / 1024;
 			Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 		}
@@ -540,14 +545,14 @@ public interface NetClient extends NetTools, NetDefs
 
 		// Check if this was the last packet
 		if (maptype == MapPacket.MAP_PACKET_END.ordinal()) {
-			fclose(file_pointer);
+			file_pointer.close();
 
 			Net._network_join_status = NetworkJoinStatus.PROCESSING;
 			Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
 			// The map is done downloading, load it
 			// Load the map
-			if (!SafeSaveOrLoad(recvMapFilename, SaveLoad.SL_LOAD, GameModes.GM_NORMAL)) {
+			if (!Main.SafeSaveOrLoad(recvMapFilename, SaveLoad.SL_LOAD, GameModes.GM_NORMAL)) {
 				Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 				Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_SAVEGAMEERROR);
 				return NetworkRecvStatus.SAVEGAME;
@@ -569,7 +574,7 @@ public interface NetClient extends NetTools, NetDefs
 					/* We have arrived and ready to start playing; send a command to make a new player;
 					 * the server will give us a client-id and let us in */
 					Global.gs._local_player = PlayerID.get(0);
-					NetworkSend_Command(0, 0, 0, Cmd.CMD_PLAYER_CTRL, null);
+					Net.NetworkSend_Command(null, 0, 0, Cmd.CMD_PLAYER_CTRL, null);
 					Global.gs._local_player = PlayerID.get(Owner.OWNER_SPECTATOR);
 				}
 			} else {

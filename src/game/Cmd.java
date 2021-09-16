@@ -1,9 +1,11 @@
 package game;
 
 import game.enums.GameModes;
+import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ifaces.CommandCallback;
 import game.ifaces.CommandProc;
+import game.net.Net;
 import game.xui.MiscGui;
 import game.xui.SettingsGui;
 
@@ -569,16 +571,16 @@ public class Cmd {
 		// * send it to the command-queue and abort execution
 		// * If we are a dedicated server temporarily switch local player, otherwise
 		// * the other parties won't be able to execute our command and will desync.
-		// * @todo Rewrite dedicated server to something more than a dirty hack!
-		if (_networking && !(cmd & Cmd.CMD_NETWORK_COMMAND)) {
-			if (_network_dedicated) Global.gs._local_player = 0;
-			NetworkSend_Command(tile, p1, p2, cmd, callback);
-			if (_network_dedicated) Global.gs._local_player = Owner.OWNER_SPECTATOR;
+		// * @todo Rewrite dedicated server to something more than a dirty hack! */
+		if (Global._networking && 0==(cmd & Cmd.CMD_NETWORK_COMMAND)) {
+			if (Global._network_dedicated) Global.gs._local_player = PlayerID.get(0);
+			Net.NetworkSend_Command(tile, p1, p2, cmd, callback);
+			if (Global._network_dedicated) Global.gs._local_player = Owner.OWNER_SPECTATOR_ID;
 			_docommand_recursive = 0;
 			Global._cmd_text = null;
 			return true;
 		}
-		#endif /* ENABLE_NETWORK */
+		//#endif /* ENABLE_NETWORK */
 
 		// update last build coordinate of player.
 		if ( tile != null && !PlayerID.getCurrent().isSpecial()) 

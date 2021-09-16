@@ -1688,7 +1688,7 @@ public class Net implements NetDefs, NetClient
 	}
 
 	// Prepare a DoCommand to be send over the network
-	void NetworkSend_Command(TileIndex tile, int p1, int p2, int cmd, CommandCallback callback)
+	public static void NetworkSend_Command(TileIndex tile, int p1, int p2, int cmd, CommandCallback callback)
 	{
 		CommandPacket c = new CommandPacket();
 		byte temp_callback;

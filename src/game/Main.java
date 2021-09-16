@@ -314,6 +314,7 @@ public class Main {
 		Global.DEBUG_misc( 1, "Loading sound effects...");
 		Sound.MxInitialize(11025);
 		Sound.SoundInitialize("sample.cat");
+		//Sound.SoundInitialize("opensfx.cat"); 16 bit samples support is not finished
 		//Sound.StartSound(2, 0, 50);
 		ShortSounds.preload();
 		ShortSounds.playFarmSound();
@@ -564,7 +565,7 @@ public class Main {
 		 */
 	}
 
-	static boolean SafeSaveOrLoad(final String filename, int mode, GameModes newgm)
+	public static boolean SafeSaveOrLoad(final String filename, int mode, GameModes newgm)
 	{
 		GameModes ogm = Global._game_mode;
 		SaveOrLoadResult r;

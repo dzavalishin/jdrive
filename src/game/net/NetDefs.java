@@ -4,7 +4,8 @@ import game.Global;
 
 public interface NetDefs {
 
-	public static final int NETWORK_MASTER_SERVER_VERSION = 1;
+	public static final int NETWORK_MASTER_SERVER_VERSION = 0; // 0 for 1st release of NextTTD
+	public static final int NETWORK_COMPANY_INFO_VERSION  = 0; // 0 for 1st release of NextTTD
 
 	// If this line is enable, every frame will have a sync test
 	//  this is not needed in normal games. Normal is like 1 sync in 100
