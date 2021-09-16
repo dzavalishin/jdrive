@@ -7,10 +7,10 @@ public interface NetServer extends NetTools, NetDefs
 
 	// **********
 	// Sending functions
-	//   DEF_SERVER_SEND_COMMAND has parameter: NetworkClientState cs
+	//   void NetworkPacketSend_ ## type ## _command(NetworkClientState cs) has parameter: NetworkClientState cs
 	// **********
 
-	DEF_SERVER_SEND_COMMAND_PARAM(PACKET_SERVER_CLIENT_INFO)(NetworkClientState cs, NetworkClientInfo ci)
+	void NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(NetworkClientState cs)()(NetworkClientState cs, NetworkClientInfo ci)
 	{
 		//
 		// Packet: SERVER_CLIENT_INFO
@@ -25,7 +25,7 @@ public interface NetServer extends NetTools, NetDefs
 		Packet p;
 
 		if (ci.client_index != NETWORK_EMPTY_INDEX) {
-			p = NetworkSend_Init(PACKET_SERVER_CLIENT_INFO);
+			p = new Packet(PACKET_SERVER_CLIENT_INFO);
 			NetworkSend_int(p, ci.client_index);
 			NetworkSend_byte (p, ci.client_playas);
 			NetworkSend_string(p, ci.client_name);
@@ -35,7 +35,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	DEF_SERVER_SEND_COMMAND(PACKET_SERVER_COMPANY_INFO)
+	void NetworkPacketSend_PACKET_SERVER_COMPANY_INFO_command(NetworkClientState cs)()
 	{
 	//
 		// Packet: SERVER_COMPANY_INFO
@@ -56,7 +56,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 
 		if (active == 0) {
-			Packet p = NetworkSend_Init(PACKET_SERVER_COMPANY_INFO);
+			Packet p = new Packet(PACKET_SERVER_COMPANY_INFO);
 
 			NetworkSend_byte (p, NETWORK_COMPANY_INFO_VERSION);
 			NetworkSend_byte (p, active);
@@ -71,7 +71,7 @@ public interface NetServer extends NetTools, NetDefs
 			if (!player.is_active)
 				continue;
 
-			p = NetworkSend_Init(PACKET_SERVER_COMPANY_INFO);
+			p = new Packet(PACKET_SERVER_COMPANY_INFO);
 
 			NetworkSend_byte (p, NETWORK_COMPANY_INFO_VERSION);
 			NetworkSend_byte (p, active);
@@ -105,7 +105,7 @@ public interface NetServer extends NetTools, NetDefs
 			NetworkSend_Packet(p, cs);
 		}
 
-		p = NetworkSend_Init(PACKET_SERVER_COMPANY_INFO);
+		p = new Packet(PACKET_SERVER_COMPANY_INFO);
 
 		NetworkSend_byte (p, NETWORK_COMPANY_INFO_VERSION);
 		NetworkSend_byte (p, 0);
@@ -113,7 +113,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkSend_Packet(p, cs);
 	}
 
-	DEF_SERVER_SEND_COMMAND_PARAM(PACKET_SERVER_ERROR)(NetworkClientState cs, NetworkErrorCode error)
+	void NetworkPacketSend_PACKET_SERVER_ERROR_command(NetworkClientState cs)()(NetworkClientState cs, NetworkErrorCode error)
 	{
 		//
 		// Packet: SERVER_ERROR
@@ -126,7 +126,7 @@ public interface NetServer extends NetTools, NetDefs
 		char str[100];
 		char client_name[NETWORK_CLIENT_NAME_LENGTH];
 
-		Packet p = NetworkSend_Init(PACKET_SERVER_ERROR);
+		Packet p = new Packet(PACKET_SERVER_ERROR);
 		NetworkSend_byte(p, error);
 		NetworkSend_Packet(p, cs);
 
@@ -136,7 +136,7 @@ public interface NetServer extends NetTools, NetDefs
 
 			Global.GetString(str, Str.STR_NETWORK_ERR_CLIENT_GENERAL + error);
 
-			DEBUG(net, 2)("[NET] %s made an error (%s) and his connection is closed", client_name, str);
+			Global.DEBUG_net( 2)("[NET] %s made an error (%s) and his connection is closed", client_name, str);
 
 			NetworkTextMessage(NETWORK_ACTION_LEAVE, 1, false, client_name, "%s", str);
 
@@ -151,7 +151,7 @@ public interface NetServer extends NetTools, NetDefs
 				}
 			}
 		} else {
-			DEBUG(net, 2)("[NET] Clientno %d has made an error and his connection is closed", cs.index);
+			Global.DEBUG_net( 2)("[NET] Clientno %d has made an error and his connection is closed", cs.index);
 		}
 
 		cs.quited = true;
@@ -163,7 +163,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkCloseClient(cs);
 	}
 
-	DEF_SERVER_SEND_COMMAND_PARAM(PACKET_SERVER_NEED_PASSWORD)(NetworkClientState cs, NetworkPasswordType type)
+	void NetworkPacketSend_PACKET_SERVER_NEED_PASSWORD_command(NetworkClientState cs)()(NetworkClientState cs, NetworkPasswordType type)
 	{
 		//
 		// Packet: SERVER_NEED_PASSWORD
@@ -172,12 +172,12 @@ public interface NetServer extends NetTools, NetDefs
 		//    byte:  Type of password
 		//
 
-		Packet p = NetworkSend_Init(PACKET_SERVER_NEED_PASSWORD);
+		Packet p = new Packet(PACKET_SERVER_NEED_PASSWORD);
 		NetworkSend_byte(p, type);
 		NetworkSend_Packet(p, cs);
 	}
 
-	DEF_SERVER_SEND_COMMAND(PACKET_SERVER_WELCOME)
+	void NetworkPacketSend_PACKET_SERVER_WELCOME_command(NetworkClientState cs)()
 	{
 		//
 		// Packet: SERVER_WELCOME
@@ -196,7 +196,7 @@ public interface NetServer extends NetTools, NetDefs
 		cs.status = STATUS_AUTH;
 		_network_game_info.clients_on++;
 
-		p = NetworkSend_Init(PACKET_SERVER_WELCOME);
+		p = new Packet(PACKET_SERVER_WELCOME);
 		NetworkSend_int(p, cs.index);
 		NetworkSend_Packet(p, cs);
 
@@ -209,7 +209,7 @@ public interface NetServer extends NetTools, NetDefs
 		SEND_COMMAND(PACKET_SERVER_CLIENT_INFO)(cs, NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX));
 	}
 
-	DEF_SERVER_SEND_COMMAND(PACKET_SERVER_WAIT)
+	void NetworkPacketSend_PACKET_SERVER_WAIT_command(NetworkClientState cs)()
 	{
 		//
 		// Packet: PACKET_SERVER_WAIT
@@ -228,13 +228,13 @@ public interface NetServer extends NetTools, NetDefs
 				waiting++;
 		}
 
-		p = NetworkSend_Init(PACKET_SERVER_WAIT);
+		p = new Packet(PACKET_SERVER_WAIT);
 		NetworkSend_byte(p, waiting);
 		NetworkSend_Packet(p, cs);
 	}
 
 	// This sends the map to the client
-	DEF_SERVER_SEND_COMMAND(PACKET_SERVER_MAP)
+	void NetworkPacketSend_PACKET_SERVER_MAP_command(NetworkClientState cs)()
 	{
 		//
 		// Packet: SERVER_MAP
@@ -272,7 +272,7 @@ public interface NetServer extends NetTools, NetDefs
 			fseek(file_pointer, 0, SEEK_END);
 
 			// Now send the _frame_counter and how many packets are coming
-			p = NetworkSend_Init(PACKET_SERVER_MAP);
+			p = new Packet(PACKET_SERVER_MAP);
 			NetworkSend_byte(p, MAP_PACKET_START);
 			NetworkSend_int(p, _frame_counter);
 			NetworkSend_int(p, ftell(file_pointer));
@@ -292,7 +292,7 @@ public interface NetServer extends NetTools, NetDefs
 			int i;
 			int res;
 			for (i = 0; i < sent_packets; i++) {
-				Packet p = NetworkSend_Init(PACKET_SERVER_MAP);
+				Packet p = new Packet(PACKET_SERVER_MAP);
 				NetworkSend_byte(p, MAP_PACKET_NORMAL);
 				res = fread(p.buffer + p.size, 1, SEND_MTU - p.size, file_pointer);
 				if (ferror(file_pointer)) {
@@ -306,8 +306,7 @@ public interface NetServer extends NetTools, NetDefs
 
 					// XXX - Delete this when patch-settings are saved in-game
 					NetworkSendPatchSettings(cs);
-
-					p = NetworkSend_Init(PACKET_SERVER_MAP);
+					p = new Packet(PACKET_SERVER_MAP);
 					NetworkSend_byte(p, MAP_PACKET_END);
 					NetworkSend_Packet(p, cs);
 
@@ -354,7 +353,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	DEF_SERVER_SEND_COMMAND_PARAM(PACKET_SERVER_JOIN)(NetworkClientState cs, int client_index)
+	void NetworkPacketSend_PACKET_SERVER_JOIN_command(NetworkClientState cs)()(NetworkClientState cs, int client_index)
 	{
 		//
 		// Packet: SERVER_JOIN
@@ -365,7 +364,7 @@ public interface NetServer extends NetTools, NetDefs
 		//    int:  Client-Index
 		//
 
-		Packet p = NetworkSend_Init(PACKET_SERVER_JOIN);
+		Packet p = new Packet(PACKET_SERVER_JOIN);
 
 		NetworkSend_int(p, client_index);
 
@@ -373,7 +372,7 @@ public interface NetServer extends NetTools, NetDefs
 	}
 
 
-	DEF_SERVER_SEND_COMMAND(PACKET_SERVER_FRAME)
+	void NetworkPacketSend_PACKET_SERVER_FRAME_command(NetworkClientState cs)()
 	{
 		//
 		// Packet: SERVER_FRAME
@@ -386,7 +385,7 @@ public interface NetServer extends NetTools, NetDefs
 		//      (last two depends on compile-settings, and are not default settings)
 		//
 
-		Packet p = NetworkSend_Init(PACKET_SERVER_FRAME);
+		Packet p = new Packet(PACKET_SERVER_FRAME);
 		NetworkSend_int(p, _frame_counter);
 		NetworkSend_int(p, _frame_counter_max);
 	#ifdef ENABLE_NETWORK_SYNC_EVERY_FRAME
@@ -398,7 +397,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkSend_Packet(p, cs);
 	}
 
-	DEF_SERVER_SEND_COMMAND(PACKET_SERVER_SYNC)
+	void NetworkPacketSend_PACKET_SERVER_SYNC_command(NetworkClientState cs)()
 	{
 		//
 		// Packet: SERVER_SYNC
@@ -410,7 +409,7 @@ public interface NetServer extends NetTools, NetDefs
 		//      (last one depends on compile-settings, and are not default settings)
 		//
 
-		Packet p = NetworkSend_Init(PACKET_SERVER_SYNC);
+		Packet p = new Packet(PACKET_SERVER_SYNC);
 		NetworkSend_int(p, _frame_counter);
 		NetworkSend_int(p, _sync_seed_1);
 
@@ -420,7 +419,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkSend_Packet(p, cs);
 	}
 
-	DEF_SERVER_SEND_COMMAND_PARAM(PACKET_SERVER_COMMAND)(NetworkClientState cs, CommandPacket cp)
+	void NetworkPacketSend_PACKET_SERVER_COMMAND_command(NetworkClientState cs)()(NetworkClientState cs, CommandPacket cp)
 	{
 		//
 		// Packet: SERVER_COMMAND
@@ -436,7 +435,7 @@ public interface NetServer extends NetTools, NetDefs
 		//    int: Frame of execution
 		//
 
-		Packet p = NetworkSend_Init(PACKET_SERVER_COMMAND);
+		Packet p = new Packet(PACKET_SERVER_COMMAND);
 
 		NetworkSend_byte(p, cp.player);
 		NetworkSend_int(p, cp.cmd);
@@ -450,7 +449,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkSend_Packet(p, cs);
 	}
 
-	DEF_SERVER_SEND_COMMAND_PARAM(PACKET_SERVER_CHAT)(NetworkClientState cs, NetworkAction action, int client_index, boolean self_send, final char *msg)
+	void NetworkPacketSend_PACKET_SERVER_CHAT_command(NetworkClientState cs)()(NetworkClientState cs, NetworkAction action, int client_index, boolean self_send, final char *msg)
 	{
 		//
 		// Packet: SERVER_CHAT
@@ -461,7 +460,7 @@ public interface NetServer extends NetTools, NetDefs
 		//    String: Message (max MAX_TEXT_MSG_LEN)
 		//
 
-		Packet p = NetworkSend_Init(PACKET_SERVER_CHAT);
+		Packet p = new Packet(PACKET_SERVER_CHAT);
 
 		NetworkSend_byte(p, action);
 		NetworkSend_int(p, client_index);
@@ -471,7 +470,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkSend_Packet(p, cs);
 	}
 
-	DEF_SERVER_SEND_COMMAND_PARAM(PACKET_SERVER_ERROR_QUIT)(NetworkClientState cs, int client_index, NetworkErrorCode errorno)
+	void NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(NetworkClientState cs)()(NetworkClientState cs, int client_index, NetworkErrorCode errorno)
 	{
 		//
 		// Packet: SERVER_ERROR_QUIT
@@ -482,7 +481,7 @@ public interface NetServer extends NetTools, NetDefs
 		//    byte:  ErrorID (see network_data.h, NetworkErrorCode)
 		//
 
-		Packet p = NetworkSend_Init(PACKET_SERVER_ERROR_QUIT);
+		Packet p = new Packet(PACKET_SERVER_ERROR_QUIT);
 
 		NetworkSend_int(p, client_index);
 		NetworkSend_byte(p, errorno);
@@ -490,7 +489,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkSend_Packet(p, cs);
 	}
 
-	DEF_SERVER_SEND_COMMAND_PARAM(PACKET_SERVER_QUIT)(NetworkClientState cs, int client_index, final char *leavemsg)
+	void NetworkPacketSend_PACKET_SERVER_QUIT_command(NetworkClientState cs)()(NetworkClientState cs, int client_index, final char *leavemsg)
 	{
 		//
 		// Packet: SERVER_ERROR_QUIT
@@ -501,7 +500,7 @@ public interface NetServer extends NetTools, NetDefs
 		//    String: leave-message
 		//
 
-		Packet p = NetworkSend_Init(PACKET_SERVER_QUIT);
+		Packet p = new Packet(PACKET_SERVER_QUIT);
 
 		NetworkSend_int(p, client_index);
 		NetworkSend_string(p, leavemsg);
@@ -509,7 +508,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkSend_Packet(p, cs);
 	}
 
-	DEF_SERVER_SEND_COMMAND(PACKET_SERVER_SHUTDOWN)
+	void NetworkPacketSend_PACKET_SERVER_SHUTDOWN_command(NetworkClientState cs)()
 	{
 		//
 		// Packet: SERVER_SHUTDOWN
@@ -518,11 +517,11 @@ public interface NetServer extends NetTools, NetDefs
 		//     <none>
 		//
 
-		Packet p = NetworkSend_Init(PACKET_SERVER_SHUTDOWN);
+		Packet p = new Packet(PACKET_SERVER_SHUTDOWN);
 		NetworkSend_Packet(p, cs);
 	}
 
-	DEF_SERVER_SEND_COMMAND(PACKET_SERVER_NEWGAME)
+	void NetworkPacketSend_PACKET_SERVER_NEWGAME_command(NetworkClientState cs)
 	{
 		//
 		// Packet: PACKET_SERVER_NEWGAME
@@ -531,13 +530,13 @@ public interface NetServer extends NetTools, NetDefs
 		//     <none>
 		//
 
-		Packet p = NetworkSend_Init(PACKET_SERVER_NEWGAME);
+		Packet p = new Packet(PACKET_SERVER_NEWGAME);
 		NetworkSend_Packet(p, cs);
 	}
 
-	DEF_SERVER_SEND_COMMAND_PARAM(PACKET_SERVER_RCON)(NetworkClientState cs, int color, final char *command)
+	void NetworkPacketSend_PACKET_SERVER_RCON_command(NetworkClientState cs)()(NetworkClientState cs, int color, final char *command)
 	{
-		Packet p = NetworkSend_Init(PACKET_SERVER_RCON);
+		Packet p = new Packet(PACKET_SERVER_RCON);
 
 		NetworkSend_int(p, color);
 		NetworkSend_string(p, command);
@@ -546,15 +545,15 @@ public interface NetServer extends NetTools, NetDefs
 
 	// **********
 	// Receiving functions
-	//   DEF_SERVER_RECEIVE_COMMAND has parameter: NetworkClientState cs, Packet p
+	//   void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p) has parameter: NetworkClientState cs, Packet p
 	// **********
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMPANY_INFO)
+	void NetworkPacketReceive_PACKET_CLIENT_COMPANY_INFO_command(NetworkClientState *cs, Packet *p)()
 	{
 		SEND_COMMAND(PACKET_SERVER_COMPANY_INFO)(cs);
 	}
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_JOIN)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_JOIN)
 	{
 		char name[NETWORK_NAME_LENGTH];
 		char unique_id[NETWORK_NAME_LENGTH];
@@ -626,7 +625,7 @@ public interface NetServer extends NetTools, NetDefs
 			_network_player_info[playas-1].months_empty = 0;
 	}
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_PASSWORD)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_PASSWORD)
 	{
 		NetworkPasswordType type;
 		char password[NETWORK_PASSWORD_LENGTH];
@@ -671,7 +670,7 @@ public interface NetServer extends NetTools, NetDefs
 		return;
 	}
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_GETMAP)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_GETMAP)
 	{
 		NetworkClientState new_cs;
 
@@ -696,7 +695,7 @@ public interface NetServer extends NetTools, NetDefs
 		SEND_COMMAND(PACKET_SERVER_MAP)(cs);
 	}
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_MAP_OK)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_MAP_OK)
 	{
 		// Client has the map, now start syncing
 		if (cs.status == STATUS_DONE_MAP && !cs.quited) {
@@ -763,7 +762,7 @@ public interface NetServer extends NetTools, NetDefs
 	 * @param *cs the connected client that has sent the command
 	 * @param *p the packet in which the command was sent
 	 */
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_COMMAND)
 	{
 		NetworkClientState new_cs;
 		final NetworkClientInfo ci;
@@ -857,7 +856,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_ERROR)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_ERROR)
 	{
 		// This packets means a client noticed an error and is reporting this
 		//  to us. Display the error and report it to the other clients
@@ -876,7 +875,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		Global.GetString(str, Str.STR_NETWORK_ERR_CLIENT_GENERAL + errorno);
 
-		DEBUG(net, 2)("[NET] %s reported an error and is closing his connection (%s)", client_name, str);
+		Global.DEBUG_net( 2)("[NET] %s reported an error and is closing his connection (%s)", client_name, str);
 
 		NetworkTextMessage(NETWORK_ACTION_LEAVE, 1, false, client_name, "%s", str);
 
@@ -889,7 +888,7 @@ public interface NetServer extends NetTools, NetDefs
 		cs.quited = true;
 	}
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_QUIT)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_QUIT)
 	{
 		// The client wants to leave. Display this and report it to the other
 		//  clients.
@@ -918,7 +917,7 @@ public interface NetServer extends NetTools, NetDefs
 		cs.quited = true;
 	}
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_ACK)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_ACK)
 	{
 		int frame = NetworkRecv_int(cs, p);
 
@@ -1030,7 +1029,7 @@ public interface NetServer extends NetTools, NetDefs
 			}
 			break;
 		default:
-			DEBUG(net, 0)("[NET][Server] Received unknown destination type %d. Doing broadcast instead.");
+			Global.DEBUG_net( 0)("[NET][Server] Received unknown destination type %d. Doing broadcast instead.");
 			/* fall-through to next case */
 		case DESTTYPE_BROADCAST:
 			FOR_ALL_CLIENTS(cs) {
@@ -1043,7 +1042,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_CHAT)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_CHAT)
 	{
 		NetworkAction action = NetworkRecv_byte(cs, p);
 		DestType desttype = NetworkRecv_byte(cs, p);
@@ -1055,7 +1054,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkServer_HandleChat(action, desttype, dest, msg, cs.index);
 	}
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_SET_PASSWORD)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_SET_PASSWORD)
 	{
 		char password[NETWORK_PASSWORD_LENGTH];
 		NetworkClientInfo ci;
@@ -1068,7 +1067,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_SET_NAME)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_SET_NAME)
 	{
 		char client_name[NETWORK_CLIENT_NAME_LENGTH];
 		NetworkClientInfo ci;
@@ -1089,7 +1088,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_RCON)
+	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_RCON)
 	{
 		char pass[NETWORK_PASSWORD_LENGTH];
 		char command[NETWORK_RCONCOMMAND_LENGTH];
@@ -1101,11 +1100,11 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkRecv_string(cs, p, command, sizeof(command));
 
 		if (strncmp(pass, _network_game_info.rcon_password, sizeof(pass)) != 0) {
-			DEBUG(net, 0)("[RCon] Wrong password from client-id %d", cs.index);
+			Global.DEBUG_net( 0)("[RCon] Wrong password from client-id %d", cs.index);
 			return;
 		}
 
-		DEBUG(net, 0)("[RCon] Client-id %d executed: %s", cs.index, command);
+		Global.DEBUG_net( 0)("[RCon] Client-id %d executed: %s", cs.index, command);
 
 		_redirect_console_to_client = cs.index;
 		IConsoleCmdExec(command);
@@ -1168,7 +1167,7 @@ public interface NetServer extends NetTools, NetDefs
 	void NetworkSendPatchSettings(NetworkClientState cs)
 	{
 		final SettingDesc *item;
-		Packet p = NetworkSend_Init(PACKET_SERVER_MAP);
+		Packet p = new Packet(PACKET_SERVER_MAP);
 		NetworkSend_byte(p, MAP_PACKET_PATCH);
 		// Now send all the patch-settings in a pretty order..
 
@@ -1327,7 +1326,7 @@ public interface NetServer extends NetTools, NetDefs
 	static void NetworkCheckRestartMap()
 	{
 		if (_network_restart_game_date != 0 && _cur_year + MAX_YEAR_BEGIN_REAL >= _network_restart_game_date) {
-			DEBUG(net, 0)("Auto-restarting map. Year %d reached.", _cur_year + MAX_YEAR_BEGIN_REAL);
+			Global.DEBUG_net( 0)("Auto-restarting map. Year %d reached.", _cur_year + MAX_YEAR_BEGIN_REAL);
 
 			_random_seeds[0][0] = Hal.Random();
 			_random_seeds[0][1] = InteractiveHal.Random();
@@ -1451,7 +1450,7 @@ public interface NetServer extends NetTools, NetDefs
 			if (type < PACKET_END && _network_server_packet[type] != null && !cs.quited)
 				_network_server_packet[type](cs, p);
 			else
-				DEBUG(net, 0)("[NET][Server] Received invalid packet type %d", type);
+				Global.DEBUG_net( 0)("[NET][Server] Received invalid packet type %d", type);
 			free(p);
 		}
 
