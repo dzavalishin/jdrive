@@ -553,7 +553,7 @@ public interface NetServer extends NetTools, NetDefs
 		SEND_COMMAND(PACKET_SERVER_COMPANY_INFO)(cs);
 	}
 
-	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_JOIN)
+	void NetworkPacketReceive_PACKET_CLIENT_JOIN_command(NetworkClientState *cs, Packet *p)()
 	{
 		char name[NETWORK_NAME_LENGTH];
 		char unique_id[NETWORK_NAME_LENGTH];
@@ -625,7 +625,7 @@ public interface NetServer extends NetTools, NetDefs
 			_network_player_info[playas-1].months_empty = 0;
 	}
 
-	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_PASSWORD)
+	void NetworkPacketReceive_PACKET_CLIENT_PASSWORD_command(NetworkClientState *cs, Packet *p)()
 	{
 		NetworkPasswordType type;
 		char password[NETWORK_PASSWORD_LENGTH];
@@ -670,7 +670,7 @@ public interface NetServer extends NetTools, NetDefs
 		return;
 	}
 
-	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_GETMAP)
+	void NetworkPacketReceive_PACKET_CLIENT_GETMAP_command(NetworkClientState *cs, Packet *p)()
 	{
 		NetworkClientState new_cs;
 
@@ -695,7 +695,7 @@ public interface NetServer extends NetTools, NetDefs
 		SEND_COMMAND(PACKET_SERVER_MAP)(cs);
 	}
 
-	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_MAP_OK)
+	void NetworkPacketReceive_PACKET_CLIENT_MAP_OK_command(NetworkClientState *cs, Packet *p)()
 	{
 		// Client has the map, now start syncing
 		if (cs.status == STATUS_DONE_MAP && !cs.quited) {
@@ -762,7 +762,7 @@ public interface NetServer extends NetTools, NetDefs
 	 * @param *cs the connected client that has sent the command
 	 * @param *p the packet in which the command was sent
 	 */
-	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_COMMAND)
+	void NetworkPacketReceive_PACKET_CLIENT_COMMAND_command(NetworkClientState *cs, Packet *p)()
 	{
 		NetworkClientState new_cs;
 		final NetworkClientInfo ci;
@@ -856,7 +856,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_ERROR)
+	void NetworkPacketReceive_PACKET_CLIENT_ERROR_command(NetworkClientState *cs, Packet *p)()
 	{
 		// This packets means a client noticed an error and is reporting this
 		//  to us. Display the error and report it to the other clients
@@ -888,7 +888,7 @@ public interface NetServer extends NetTools, NetDefs
 		cs.quited = true;
 	}
 
-	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_QUIT)
+	void NetworkPacketReceive_PACKET_CLIENT_QUIT_command(NetworkClientState *cs, Packet *p)()
 	{
 		// The client wants to leave. Display this and report it to the other
 		//  clients.
@@ -917,7 +917,7 @@ public interface NetServer extends NetTools, NetDefs
 		cs.quited = true;
 	}
 
-	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_ACK)
+	void NetworkPacketReceive_PACKET_CLIENT_ACK_command(NetworkClientState *cs, Packet *p)()
 	{
 		int frame = NetworkRecv_int(cs, p);
 
@@ -1054,7 +1054,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkServer_HandleChat(action, desttype, dest, msg, cs.index);
 	}
 
-	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_SET_PASSWORD)
+	void NetworkPacketReceive_PACKET_CLIENT_SET_PASSWORD_command(NetworkClientState *cs, Packet *p)()
 	{
 		char password[NETWORK_PASSWORD_LENGTH];
 		NetworkClientInfo ci;
@@ -1067,7 +1067,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_SET_NAME)
+	void NetworkPacketReceive_PACKET_CLIENT_SET_NAME_command(NetworkClientState *cs, Packet *p)()
 	{
 		char client_name[NETWORK_CLIENT_NAME_LENGTH];
 		NetworkClientInfo ci;
@@ -1088,7 +1088,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	void NetworkPacketReceive_ ## type ## _command(NetworkClientState *cs, Packet *p)(PACKET_CLIENT_RCON)
+	void NetworkPacketReceive_PACKET_CLIENT_RCON_command(NetworkClientState *cs, Packet *p)()
 	{
 		char pass[NETWORK_PASSWORD_LENGTH];
 		char command[NETWORK_RCONCOMMAND_LENGTH];
@@ -1120,59 +1120,58 @@ public interface NetServer extends NetTools, NetDefs
 	//  packet it is matches against this array
 	//  and that way the right function to handle that
 	//  packet is found.
-	static NetworkServerPacket* final _network_server_packet[] = {
+	static NetworkServerPacket final _network_server_packet[] = {
 		null, /*PACKET_SERVER_FULL,*/
 		null, /*PACKET_SERVER_BANNED,*/
-		RECEIVE_COMMAND(PACKET_CLIENT_JOIN),
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_JOIN_command,
 		null, /*PACKET_SERVER_ERROR,*/
-		RECEIVE_COMMAND(PACKET_CLIENT_COMPANY_INFO),
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_COMPANY_INFO_command,
 		null, /*PACKET_SERVER_COMPANY_INFO,*/
 		null, /*PACKET_SERVER_CLIENT_INFO,*/
 		null, /*PACKET_SERVER_NEED_PASSWORD,*/
-		RECEIVE_COMMAND(PACKET_CLIENT_PASSWORD),
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_PASSWORD_command,
 		null, /*PACKET_SERVER_WELCOME,*/
-		RECEIVE_COMMAND(PACKET_CLIENT_GETMAP),
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_GETMAP_command,
 		null, /*PACKET_SERVER_WAIT,*/
 		null, /*PACKET_SERVER_MAP,*/
-		RECEIVE_COMMAND(PACKET_CLIENT_MAP_OK),
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_MAP_OK_command,
 		null, /*PACKET_SERVER_JOIN,*/
 		null, /*PACKET_SERVER_FRAME,*/
 		null, /*PACKET_SERVER_SYNC,*/
-		RECEIVE_COMMAND(PACKET_CLIENT_ACK),
-		RECEIVE_COMMAND(PACKET_CLIENT_COMMAND),
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_ACK_command,
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_COMMAND_command,
 		null, /*PACKET_SERVER_COMMAND,*/
-		RECEIVE_COMMAND(PACKET_CLIENT_CHAT),
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_CHAT_command,
 		null, /*PACKET_SERVER_CHAT,*/
-		RECEIVE_COMMAND(PACKET_CLIENT_SET_PASSWORD),
-		RECEIVE_COMMAND(PACKET_CLIENT_SET_NAME),
-		RECEIVE_COMMAND(PACKET_CLIENT_QUIT),
-		RECEIVE_COMMAND(PACKET_CLIENT_ERROR),
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_SET_PASSWORD_command,
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_SET_NAME_command,
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_QUIT_command,
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_ERROR_command,
 		null, /*PACKET_SERVER_QUIT,*/
 		null, /*PACKET_SERVER_ERROR_QUIT,*/
 		null, /*PACKET_SERVER_SHUTDOWN,*/
 		null, /*PACKET_SERVER_NEWGAME,*/
 		null, /*PACKET_SERVER_RCON,*/
-		RECEIVE_COMMAND(PACKET_CLIENT_RCON),
+		NetServer::NetworkPacketReceive_PACKET_CLIENT_RCON_command,
 	};
 
 	// If this fails, check the array above with network_data.h
-	assert_compile(lengthof(_network_server_packet) == PACKET_END);
+	//assert_compile(lengthof(_network_server_packet) == PACKET_END);
 
 
-	extern final SettingDesc patch_settings[];
 
 	// This is a TEMPORARY solution to get the patch-settings
 	//  to the client. When the patch-settings are saved in the savegame
 	//  this should be removed!!
 	void NetworkSendPatchSettings(NetworkClientState cs)
 	{
-		final SettingDesc *item;
+		final SettingDesc item;
 		Packet p = new Packet(PACKET_SERVER_MAP);
 		NetworkSend_byte(p, MAP_PACKET_PATCH);
 		// Now send all the patch-settings in a pretty order..
 
 		item = patch_settings;
-
+		/*
 		while (item.name != null) {
 			switch (item.flags) {
 				case SDT_BOOL:
@@ -1190,7 +1189,7 @@ public interface NetServer extends NetTools, NetDefs
 					break;
 			}
 			item++;
-		}
+		}*/
 
 		NetworkSend_Packet(p, cs);
 	}
