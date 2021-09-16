@@ -131,7 +131,8 @@ public class Net implements NetDefs
 	private static int _network_clients_connected = 0;
 
 	//static final NetworkClientState [] _clients = new NetworkClientState[MAX_CLIENTS];
-	static CommandPacket _local_command_queue;
+	//static CommandPacket _local_command_queue;
+	static final List<CommandPacket> _local_command_queue = new ArrayList<>();
 
 	static int _network_client_index = NETWORK_SERVER_INDEX + 1;
 	//static ServerSocket _listensocket;
@@ -582,14 +583,15 @@ public class Net implements NetDefs
 			cs.packet_queue = p;
 		}*/
 		cs.packet_queue = null;
+		//cs.packet_queue.
 		//free(cs.packet_recv);
 		//cs.packet_recv = null;
 
-		while (cs.command_queue != null) {
+		/*while (cs.command_queue != null) {
 			CommandPacket p = cs.command_queue.next;
 			//free(cs.command_queue);
 			cs.command_queue = p;
-		}
+		}*/
 
 		// Close the gap in the client-list
 		NetworkClientInfo ci = cs.ci; // [cs - _clients]; // DEREF_CLIENT_INFO(cs);
@@ -621,7 +623,7 @@ public class Net implements NetDefs
 	}
 
 	// A client wants to connect to a server
-	static boolean NetworkConnect(final String hostname, int port)
+	static boolean NetworkConnect(final String hostname, int port) throws IOException
 	{
 
 		Global.DEBUG_net( 1, "[NET] Connecting to %s %d", hostname, port);
@@ -661,7 +663,7 @@ public class Net implements NetDefs
 		NetGui.ShowJoinStatusWindow();
 
 		//memcpy(&network_tmp_patches, &Global._patches, sizeof(_patches));
-		memcpy(network_tmp_patches, Global._patches );
+		// TODO [dz] XXX memcpy(network_tmp_patches, Global._patches );
 
 		return true;
 	}
@@ -814,7 +816,8 @@ public class Net implements NetDefs
 	{
 		//NetworkClientState cs;
 
-		_local_command_queue = null;
+		//_local_command_queue = null;
+		_local_command_queue.clear();
 
 		// Clean all client-sockets
 		//memset(_clients, 0, sizeof(_clients));
@@ -1073,7 +1076,8 @@ public class Net implements NetDefs
 			_local_command_queue = _local_command_queue.next;
 			//free(p);
 		}*/
-		_local_command_queue = null;
+		//_local_command_queue = null;
+		_local_command_queue.clear();
 
 		Global._networking = false;
 		Global._network_server = false;
@@ -1103,11 +1107,11 @@ public class Net implements NetDefs
 			_local_command_queue = _local_command_queue.next;
 			free(p);
 		}*/
-		_local_command_queue = null;
+		_local_command_queue.clear(); // = null;
 
 		if (Global._networking && !Global._network_server) {
 			//memcpy(&_patches, &network_tmp_patches, sizeof(_patches));
-			memcpy(_patches, network_tmp_patches);
+			// TODO [dz] XXX memcpy(_patches, network_tmp_patches);
 		}
 
 		Global._networking = false;
@@ -1285,13 +1289,15 @@ public class Net implements NetDefs
 	// Handle the local-command-queue
 	static void NetworkHandleLocalQueue()
 	{
-		CommandPacket cp;
-		CommandPacket cp_prev;
+		//CommandPacket cp;
+		//CommandPacket cp_prev;
 
-		cp_prev = _local_command_queue;
+		//cp_prev = _local_command_queue;
 
-		while ( (cp = cp_prev) != null) {
-
+		//while ( (cp = cp_prev) != null)
+		while(!_local_command_queue.isEmpty())
+		{
+			CommandPacket cp = _local_command_queue.remove(0); 
 			// The queue is always in order, which means
 			// that the first element will be executed first.
 			if (Global._frame_counter < cp.frame)
@@ -1307,7 +1313,7 @@ public class Net implements NetDefs
 			// We can execute this command
 			NetworkExecuteCommand(cp);
 
-			cp_prev = cp.next;
+			//cp_prev = cp.next;
 			//free(cp);
 		}
 
@@ -1665,6 +1671,8 @@ public class Net implements NetDefs
 	// Add a command to the local command queue
 	void NetworkAddCommandQueue(NetworkClientState cs, CommandPacket cp)
 	{
+		cs.command_queue.add(cp); // TODO make sure it is not modified - Java Record or just final for all fields
+		/*
 		CommandPacket new_cp = new CommandPacket();
 
 		*new_cp = *cp;
@@ -1676,6 +1684,7 @@ public class Net implements NetDefs
 			while (c.next != null) c = c.next;
 			c.next = new_cp;
 		}
+		*/
 	}
 
 	// Prepare a DoCommand to be send over the network
@@ -1685,7 +1694,7 @@ public class Net implements NetDefs
 		byte temp_callback;
 
 		c.player =  Global.gs._local_player;
-		c.next = null;
+		//c.next = null;
 		c.tile = tile;
 		c.p1 = p1;
 		c.p2 = p2;
@@ -1730,10 +1739,13 @@ public class Net implements NetDefs
 			if (_local_command_queue == null) {
 				_local_command_queue = c;
 			} else {
+				/*
 				// Find last packet
 				CommandPacket cp = _local_command_queue;
 				while (cp.next != null) cp = cp.next;
 				cp.next = c;
+				*/
+				_local_command_queue.add(cp);
 			}
 
 			return;

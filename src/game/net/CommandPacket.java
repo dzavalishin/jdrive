@@ -4,7 +4,7 @@ import game.TileIndex;
 import game.ids.PlayerID;
 
 public class CommandPacket {
-	CommandPacket next;
+	//CommandPacket next;
 	PlayerID player; /// player that is executing the command
 	int cmd;    /// command being executed
 	int p1;     /// parameter p1

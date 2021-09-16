@@ -1,6 +1,8 @@
 package game.net;
 
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NetworkClientState {
 	//Socket socket;
@@ -17,7 +19,8 @@ public class NetworkClientState {
 	Packet packet_queue; // Packets that are awaiting delivery
 	//Packet packet_recv; // Partially received packet
 
-	CommandPacket command_queue; // The command-queue awaiting delivery
+	//CommandPacket command_queue; // The command-queue awaiting delivery
+	List<CommandPacket> command_queue = new ArrayList<>();
 
 	public boolean hasValidSocket() { return socket != null; }
 
