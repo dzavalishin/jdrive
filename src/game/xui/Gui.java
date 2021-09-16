@@ -463,7 +463,7 @@ public class Gui
 		MiscGui.ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_GAME_PASSWORD_CAPTION, 20, 180, Window.WC_SELECT_GAME, 0);
 	}
 
-	void ShowNetworkNeedCompanyPassword()
+	public static void ShowNetworkNeedCompanyPassword()
 	{
 		_rename_id = NetworkPasswordType.NETWORK_COMPANY_PASSWORD.ordinal();
 		_rename_what = 4;

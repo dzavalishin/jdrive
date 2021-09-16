@@ -115,10 +115,6 @@ public class Packet {
 	public int getType() { return type; }
 
 
-	public void append(byte b) {
-		data.append(b);		
-	}
-
 
 	
 	public void encodeObject(Object o) throws IOException {
@@ -142,6 +138,24 @@ public class Packet {
 		ObjectInputStream ois = new ObjectInputStream(bais);
 		
 		return ois.readObject();
+	}
+
+
+	public void append(byte b) {
+		data.append(b);		
+	}
+
+	public void appendInt(int i) 
+	{
+		data.append( (byte) (i >> 24) );
+		data.append( (byte) (i >> 16) );
+		data.append( (byte) (i >> 8) );
+		data.append( (byte) i );		
+	}
+
+
+	public void append(String s) {
+		data.append(s);		
 	}
 
 }

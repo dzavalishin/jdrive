@@ -50,7 +50,7 @@ import game.xui.Window;
 // #define FOR_ALL_CLIENTS(cs) for (cs = _clients; cs != &_clients[MAX_CLIENTS] && cs->socket != INVALID_SOCKET; cs++)
 //#define DEREF_CLIENT_INFO(cs) (&_network_client_info[cs - _clients])
 
-public class Net implements NetDefs 
+public class Net implements NetDefs, NetClient 
 {
 
 	//public static NetworkGameList _network_game_list;
@@ -1532,11 +1532,6 @@ public class Net implements NetDefs
 	}
 
 
-	protected static void SEND_COMMAND(PacketType clientAck, Object ... args ) {
-		// TODO Auto-generated method stub
-
-	}
-
 
 
 
@@ -1910,4 +1905,18 @@ public class Net implements NetDefs
 		}
 	}
 
+	
+	static void NetworkSend_Packet(Packet p, Object my_CLIENT) {
+		// TODO Auto-generated method stub
+		implement me
+		
+	}
+
+
+	protected static void SEND_COMMAND(PacketType clientAck, Object ... args ) {
+		// TODO Auto-generated method stub
+		implement me
+	}
+	
+	
 }
