@@ -1,17 +1,23 @@
 package game.net;
 
+import java.io.File;
+
 import game.Cmd;
 import game.GameOptions;
 import game.Global;
+import game.Hal;
 import game.Player;
 import game.SaveLoad;
 import game.Str;
+import game.TileIndex;
 import game.Version;
 import game.ai.Ai;
+import game.console.Console;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ids.StringID;
+import game.util.BitOps;
 import game.util.Strings;
 import game.xui.Gui;
 import game.xui.Window;
@@ -34,6 +40,18 @@ public interface NetClient extends NetTools, NetDefs
 		
 	}
 	
+	
+	public static byte NetworkRecv_byte(NetworkClientState my_CLIENT, Packet p) {
+		return p.nextByte();
+	}
+	
+	public static int NetworkRecv_int(NetworkClientState my_CLIENT, Packet p) {
+		return p.nextInt();
+	}
+
+	public static long NetworkRecv_int64(NetworkClientState my_CLIENT, Packet p) {
+		return p.nextLong();
+	}
 	
 	
 	// So we don't make too much typos ;)
@@ -321,7 +339,7 @@ public interface NetClient extends NetTools, NetDefs
 
 			Net._network_lobby_company_count++;
 
-			NetworkRecv_string(MY_CLIENT(), p, _network_player_info[current].company_name, sizeof(_network_player_info[current].company_name));
+			_network_player_info[current].company_name = NetworkRecv_string(MY_CLIENT(), p);
 			_network_player_info[current].inaugurated_year = NetworkRecv_byte(MY_CLIENT(), p);
 			_network_player_info[current].company_value = NetworkRecv_int64(MY_CLIENT(), p);
 			_network_player_info[current].money = NetworkRecv_int64(MY_CLIENT(), p);
@@ -333,7 +351,7 @@ public interface NetClient extends NetTools, NetDefs
 			for (i = 0; i < NETWORK_STATION_TYPES; i++)
 				_network_player_info[current].num_station[i] = NetworkRecv_int(MY_CLIENT(), p);
 
-			NetworkRecv_string(MY_CLIENT(), p, _network_player_info[current].players, sizeof(_network_player_info[current].players));
+			_network_player_info[current].players = NetworkRecv_string(MY_CLIENT(), p);
 
 			Window.InvalidateWindow(Window.WC_NETWORK_WINDOW, 0);
 
@@ -342,6 +360,8 @@ public interface NetClient extends NetTools, NetDefs
 
 		return NetworkRecvStatus.CLOSE_QUERY;
 	}
+
+
 
 	// This packet contains info about the client (playas and name)
 	//  as client we save this in NetworkClientInfo, linked via 'index'
@@ -377,7 +397,7 @@ public interface NetClient extends NetTools, NetDefs
 		if (ci != null) {
 			if (playas == ci.client_playas && !name.equals(ci.client_name)) {
 				// Client name changed, display the change
-				NetworkTextMessage(NetworkAction.NAME_CHANGE, 1, false, ci.client_name, "%s", name);
+				Net.NetworkTextMessage(NetworkAction.NAME_CHANGE, 1, false, ci.client_name, "%s", name);
 			} else if (playas != ci.client_playas) {
 				// The player changed from client-player..
 				// Do not display that for now
@@ -411,7 +431,7 @@ public interface NetClient extends NetTools, NetDefs
 
 	static NetworkRecvStatus NetworkPacketReceive_PACKET_SERVER_ERROR_command(NetworkClientState cs, Packet p)
 	{
-		NetworkErrorCode error = NetworkRecv_byte(MY_CLIENT(), p);
+		NetworkErrorCode error = NetworkErrorCode.value( NetworkRecv_byte(MY_CLIENT(), p) );
 
 		if (error == NetworkErrorCode.NOT_AUTHORIZED || error == NetworkErrorCode.NOT_EXPECTED ||
 				error == NetworkErrorCode.PLAYER_MISMATCH) {
@@ -437,12 +457,12 @@ public interface NetClient extends NetTools, NetDefs
 	static NetworkRecvStatus NetworkPacketReceive_PACKET_SERVER_NEED_PASSWORD_command(NetworkClientState cs, Packet p)
 	{
 		NetworkPasswordType type;
-		type = NetworkRecv_byte(MY_CLIENT(), p);
+		type = NetworkPasswordType.value( NetworkRecv_byte(MY_CLIENT(), p) );
 
-		if (type == NETWORK_GAME_PASSWORD) {
+		if (type == NetworkPasswordType.NETWORK_GAME_PASSWORD) {
 			Gui.ShowNetworkNeedGamePassword();
 			return NetworkRecvStatus.OKAY;
-		} else if (type == NETWORK_COMPANY_PASSWORD) {
+		} else if (type == NetworkPasswordType.NETWORK_COMPANY_PASSWORD) {
 			Gui.ShowNetworkNeedCompanyPassword();
 			return NetworkRecvStatus.OKAY;
 		}
@@ -487,19 +507,19 @@ public interface NetClient extends NetTools, NetDefs
 		// First packet, init some stuff
 		if (maptype == MapPacket.MAP_PACKET_START.ordinal()) {
 			// The name for the temp-map
-			sprintf(recvMapFilename, "%s%snetwork_client.tmp",  _path.autosave_dir, PATHSEP);
+			recvMapFilename = String.format( "%s%snetwork_client.tmp",  Global._path.autosave_dir, File.separator);
 
 			file_pointer = fopen(recvMapFilename, "wb");
 			if (file_pointer == null) {
-				Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_SAVEGAMEERROR;
+				Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_SAVEGAMEERROR);
 				return NetworkRecvStatus.SAVEGAME;
 			}
 
-			_frame_counter = _frame_counter_server = _frame_counter_max = NetworkRecv_int(MY_CLIENT(), p);
+			Global._frame_counter = Net._frame_counter_server = Net._frame_counter_max = NetworkRecv_int(MY_CLIENT(), p);
 
 			Net._network_join_status = NetworkJoinStatus.DOWNLOADING;
-			_network_join_kbytes = 0;
-			_network_join_kbytes_total = NetworkRecv_int(MY_CLIENT(), p) / 1024;
+			Net._network_join_kbytes = 0;
+			Net._network_join_kbytes_total = NetworkRecv_int(MY_CLIENT(), p) / 1024;
 			Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
 			// The first packet does not contain any more data
@@ -510,7 +530,7 @@ public interface NetClient extends NetTools, NetDefs
 			// We are still receiving data, put it to the file
 			fwrite(p.buffer + p.pos, 1, p.size - p.pos, file_pointer);
 
-			_network_join_kbytes = ftell(file_pointer) / 1024;
+			Net._network_join_kbytes = ftell(file_pointer) / 1024;
 			Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 		}
 
@@ -585,7 +605,7 @@ public interface NetClient extends NetTools, NetDefs
 		// Test if the server supports this option
 		//  and if we are at the frame the server is
 		if (p.pos < p.size) {
-			Net._sync_frame = _frame_counter_server;
+			Net._sync_frame = Net._frame_counter_server;
 			Net._sync_seed_1 = NetworkRecv_int(MY_CLIENT(), p);
 	//#ifdef NETWORK_SEND_DOUBLE_SEED
 	//		_sync_seed_2 = NetworkRecv_int(MY_CLIENT(), p);
@@ -619,11 +639,11 @@ public interface NetClient extends NetTools, NetDefs
 	static NetworkRecvStatus NetworkPacketReceive_PACKET_SERVER_COMMAND_command(NetworkClientState cs, Packet p)
 	{
 		CommandPacket cp = new CommandPacket();
-		cp.player = NetworkRecv_byte(MY_CLIENT(), p);
+		cp.player = PlayerID.get( NetworkRecv_byte(MY_CLIENT(), p) );
 		cp.cmd = NetworkRecv_int(MY_CLIENT(), p);
 		cp.p1 = NetworkRecv_int(MY_CLIENT(), p);
 		cp.p2 = NetworkRecv_int(MY_CLIENT(), p);
-		cp.tile = NetworkRecv_int(MY_CLIENT(), p);
+		cp.tile = TileIndex.get( NetworkRecv_int(MY_CLIENT(), p) );
 		cp.text = NetworkRecv_string(MY_CLIENT(), p);
 		cp.callback = NetworkRecv_byte(MY_CLIENT(), p);
 		cp.frame = NetworkRecv_int(MY_CLIENT(), p);
@@ -657,10 +677,10 @@ public interface NetClient extends NetTools, NetDefs
 		boolean self_send;
 
 		index = NetworkRecv_int(MY_CLIENT(), p);
-		self_send = NetworkRecv_byte(MY_CLIENT(), p);
-		NetworkRecv_string(MY_CLIENT(), p, msg, MAX_TEXT_MSG_LEN);
+		self_send = BitOps.i2b( NetworkRecv_byte(MY_CLIENT(), p) );
+		msg = NetworkRecv_string(MY_CLIENT(), p);
 
-		ci_to = NetworkFindClientInfoFromIndex(index);
+		ci_to = Net.NetworkFindClientInfoFromIndex(index);
 		if (ci_to == null) return NetworkRecvStatus.OKAY;
 
 		/* Do we display the action locally? */
@@ -668,7 +688,7 @@ public interface NetClient extends NetTools, NetDefs
 			switch (action) {
 				case CHAT_CLIENT:
 					/* For speak to client we need the client-name */
-					snprintf(name, sizeof(name), "%s", ci_to.client_name);
+					name = ci_to.client_name;
 					ci = Net.NetworkFindClientInfoFromIndex(Net._network_own_client_index);
 					break;
 				case CHAT_PLAYER:
@@ -687,30 +707,30 @@ public interface NetClient extends NetTools, NetDefs
 			}
 		} else {
 			/* Display message from somebody else */
-			snprintf(name, sizeof(name), "%s", ci_to.client_name);
+			name = ci_to.client_name;
 			ci = ci_to;
 		}
 
 		if (ci != null)
-			NetworkTextMessage(action, GetDrawStringPlayerColor(ci.client_playas-1), self_send, name, "%s", msg);
+			Net.NetworkTextMessage(action, Hal.GetDrawStringPlayerColor(ci.client_playas-1), self_send, name, "%s", msg);
 		return NetworkRecvStatus.OKAY;
 	}
 
+
 	static NetworkRecvStatus NetworkPacketReceive_PACKET_SERVER_ERROR_QUIT_command(NetworkClientState cs, Packet p)
 	{
-		int errorno;
-		String str;
+		int errorno;		
 		int index;
 		NetworkClientInfo ci;
 
 		index = NetworkRecv_int(MY_CLIENT(), p);
 		errorno = NetworkRecv_byte(MY_CLIENT(), p);
 
-		Global.GetString(str, Str.STR_NETWORK_ERR_CLIENT_GENERAL + errorno);
+		String str = Strings.GetString(Str.STR_NETWORK_ERR_CLIENT_GENERAL + errorno);
 
-		ci = NetworkFindClientInfoFromIndex(index);
+		ci = Net.NetworkFindClientInfoFromIndex(index);
 		if (ci != null) {
-			NetworkTextMessage(NetworkAction.LEAVE, 1, false, ci.client_name, "%s", str);
+			Net.NetworkTextMessage(NetworkAction.LEAVE, 1, false, ci.client_name, "%s", str);
 
 			// The client is gone, give the NetworkClientInfo free
 			ci.client_index = NETWORK_EMPTY_INDEX;
@@ -723,16 +743,15 @@ public interface NetClient extends NetTools, NetDefs
 
 	static NetworkRecvStatus NetworkPacketReceive_PACKET_SERVER_QUIT_command(NetworkClientState cs, Packet p)
 	{
-		String  tr;
 		int index;
 		NetworkClientInfo ci;
 
 		index = NetworkRecv_int(MY_CLIENT(), p);
-		NetworkRecv_string(MY_CLIENT(), p, str, lengthof(str));
+		String str = NetworkRecv_string(MY_CLIENT(), p);
 
-		ci = NetworkFindClientInfoFromIndex(index);
+		ci = Net.NetworkFindClientInfoFromIndex(index);
 		if (ci != null) {
-			NetworkTextMessage(NetworkAction.LEAVE, 1, false, ci.client_name, "%s", str);
+			Net.NetworkTextMessage(NetworkAction.LEAVE, 1, false, ci.client_name, "%s", str);
 
 			// The client is gone, give the NetworkClientInfo free
 			ci.client_index = NETWORK_EMPTY_INDEX;
@@ -753,9 +772,9 @@ public interface NetClient extends NetTools, NetDefs
 
 		index = NetworkRecv_int(MY_CLIENT(), p);
 
-		ci = NetworkFindClientInfoFromIndex(index);
+		ci = Net.NetworkFindClientInfoFromIndex(index);
 		if (ci != null)
-			NetworkTextMessage(NetworkAction.JOIN, 1, false, ci.client_name, "");
+			Net.NetworkTextMessage(NetworkAction.JOIN, 1, false, ci.client_name, "");
 
 		Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
 
@@ -775,7 +794,7 @@ public interface NetClient extends NetTools, NetDefs
 		//  his Global.gs._local_player value before reconnecting
 		// Owner.OWNER_SPECTATOR is currently 255, so to avoid long wait periods
 		//  set the max to 10.
-		_network_reconnect = Math.min(Global.gs._local_player + 1, 10);
+		Net._network_reconnect = Math.min(Global.gs._local_player.id + 1, 10);
 		Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_SERVER_REBOOT);
 
 		return NetworkRecvStatus.SERVER_ERROR;
@@ -783,13 +802,10 @@ public interface NetClient extends NetTools, NetDefs
 
 	static NetworkRecvStatus NetworkPacketReceive_PACKET_SERVER_RCON_command(NetworkClientState cs, Packet p)
 	{
-		String rcon_out;
-		int color_code;
+		int color_code = NetworkRecv_int(MY_CLIENT(), p);
+		String rcon_out = NetworkRecv_string(MY_CLIENT(), p);
 
-		color_code = NetworkRecv_int(MY_CLIENT(), p);
-		NetworkRecv_string(MY_CLIENT(), p, rcon_out, sizeof(rcon_out));
-
-		IConsolePrint(color_code, rcon_out);
+		Console.IConsolePrint(color_code, rcon_out);
 
 		return NetworkRecvStatus.OKAY;
 	}
@@ -892,17 +908,17 @@ public interface NetClient extends NetTools, NetDefs
 
 		while (res[0] == NetworkRecvStatus.OKAY && (p = NetworkRecv_Packet(cs, res)) != null) {
 			byte type = NetworkRecv_byte(MY_CLIENT(), p);
-			if (type < PACKET_END && _network_client_packet[type] != null && !MY_CLIENT().quited) {
-				res = _network_client_packet[type].accept(p);
+			if (type < PacketType.END.ordinal() && _network_client_packet[type] != null && !MY_CLIENT().quited) {
+				res[0] = _network_client_packet[type].accept(cs,p);
 			} else {
-				res = NetworkRecvStatus.MALFORMED_PACKET;
+				res[0] = NetworkRecvStatus.MALFORMED_PACKET;
 				Global.DEBUG_net( 0, "[NET][client] Received invalid packet type %d", type);
 			}
 
 			//free(p);
 		}
 
-		return res;
+		return res[0];
 	}
 
 

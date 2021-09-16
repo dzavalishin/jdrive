@@ -34,6 +34,7 @@ public enum PacketType {
 	SERVER_NEWGAME,
 	SERVER_RCON,
 	CLIENT_RCON,
+	END, // Should ALWAYS be on the end of this list!! (period)
 
 	UDP_CLIENT_FIND_SERVER,
 	UDP_SERVER_RESPONSE,
@@ -45,7 +46,6 @@ public enum PacketType {
 	UDP_MASTER_RESPONSE_LIST, // Response from master server with server ip's + port's
 	UDP_SERVER_UNREGISTER, // Request to be removed from the server-list
 	PACKET_UDP_END,
-	//END // Should ALWAYS be on the end of this list!! (period) [dz] really?
 	;
 
 	static boolean isUdpRange(int type) {

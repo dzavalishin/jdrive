@@ -81,6 +81,10 @@ void SortResolutions(int count)
 	qsort(_resolutions, count, sizeof(_resolutions[0]), compare_res);
 }
 	 */
+	public static int GetDrawStringPlayerColor(int i) {
+		return GetDrawStringPlayerColor(PlayerID.get(i));
+	}
+	
 	public static int GetDrawStringPlayerColor(PlayerID player)
 	{
 		// Get the color for DrawString-subroutines which matches the color
@@ -337,6 +341,10 @@ void SortResolutions(int count)
 	public void ShowOSErrorBox(String buf) {
 		JOptionPane.showMessageDialog(null, buf);
 	}
+
+
+
+
 	
 	
 }

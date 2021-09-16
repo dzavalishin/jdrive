@@ -158,4 +158,28 @@ public class Packet {
 		data.append(s);		
 	}
 
+
+	
+	private ByteBuffer getBB() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public byte nextByte() {
+		ByteBuffer bb = getBB();
+		return bb.get();
+	}
+
+	public int nextInt() {
+		ByteBuffer bb = getBB();
+		return bb.getInt();
+	}
+
+
+	public long nextLong() {
+		ByteBuffer bb = getBB();
+		return bb.getLong();
+	}
+
+
 }

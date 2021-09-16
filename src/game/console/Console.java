@@ -277,7 +277,7 @@ public class Console //extends ConsoleCmds
 	 * @param color_code the colour of the command. Red in case of errors, etc.
 	 * @param string the message entered or output on the console (notice, error, etc.)
 	 */
-	static void IConsolePrint(int color_code, final String  string)
+	public static void IConsolePrint(int color_code, final String  string)
 	{
 		/*#ifdef ENABLE_NETWORK
 		if (_redirect_console_to_client != 0) {

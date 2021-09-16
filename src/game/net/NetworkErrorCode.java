@@ -17,5 +17,11 @@ public enum NetworkErrorCode {
 	WRONG_PASSWORD,
 	PLAYER_MISMATCH, // Happens in CLIENT_COMMAND
 	KICKED,
-	CHEATER,
+	CHEATER,;
+
+	static NetworkErrorCode values[] = values();
+	
+	static NetworkErrorCode value(int ord) {
+		return values[ord];
+	}
 }
