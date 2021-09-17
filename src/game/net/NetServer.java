@@ -1,5 +1,7 @@
 package game.net;
 
+import java.io.File;
+
 import game.Cmd;
 import game.Global;
 import game.Player;
@@ -112,7 +114,7 @@ public interface NetServer extends NetTools, NetDefs
 			return;
 		}
 
-		NetServer.NetworkPopulateCompanyInfo();
+		NetworkPopulateCompanyInfo();
 
 		Player.forEach(player -> {
 			if (!player.isActive())
@@ -177,21 +179,21 @@ public interface NetServer extends NetTools, NetDefs
 		String client_name;
 
 		Packet p = new Packet(PacketType.SERVER_ERROR);
-		NetworkSend_byte(p, error);
+		NetworkSend_byte(p, (byte) error.ordinal());
 		Net.NetworkSend_Packet(p, cs);
 
 		// Only send when the current client was in game
-		if (cs.status > ClientStatus.AUTH) {
+		if (cs.status.ordinal() > ClientStatus.AUTH.ordinal()) {
 			client_name = Net.NetworkGetClientName(cs);
 
-			str = Global.GetString(Str.STR_NETWORK_ERR_CLIENT_GENERAL + error);
+			str = Strings.GetString(Str.STR_NETWORK_ERR_CLIENT_GENERAL + error.ordinal());
 
 			Global.DEBUG_net( 2, "[NET] %s made an error (%s) and his connection is closed", client_name, str);
 
 			Net.NetworkTextMessage(NetworkAction.LEAVE, 1, false, client_name, "%s", str);
 
 			Net.FOR_ALL_CLIENTS(new_cs -> {
-				if (new_cs.status > ClientStatus.AUTH && new_cs != cs) {
+				if (new_cs.status.ordinal() > ClientStatus.AUTH.ordinal() && new_cs != cs) {
 					// Some errors we filter to a more general error. Clients don't have to know the real
 					//  reason a joining failed.
 					if (error == NetworkErrorCode.NOT_AUTHORIZED || error == NetworkErrorCode.NOT_EXPECTED || error == NetworkErrorCode.WRONG_REVISION)
@@ -199,7 +201,7 @@ public interface NetServer extends NetTools, NetDefs
 
 					NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(new_cs, cs.index, error);
 				}
-			}
+			});
 		} else {
 			Global.DEBUG_net( 2, "[NET] Clientno %d has made an error and his connection is closed", cs.index);
 		}
@@ -240,11 +242,11 @@ public interface NetServer extends NetTools, NetDefs
 		//NetworkClientState new_cs;
 
 		// Invalid packet when status is AUTH or higher
-		if (cs.status >= ClientStatus.AUTH)
+		if (cs.status.ordinal() >= ClientStatus.AUTH.ordinal())
 			return;
 
 		cs.status = ClientStatus.AUTH;
-		_network_game_info.clients_on++;
+		Net._network_game_info.clients_on++;
 
 		p = new Packet(PacketType.SERVER_WELCOME);
 		NetworkSend_int(p, cs.index);
@@ -252,11 +254,11 @@ public interface NetServer extends NetTools, NetDefs
 
 			// Transmit info about all the active clients
 		Net.FOR_ALL_CLIENTS(new_cs -> {
-			if (new_cs != cs && new_cs.status > ClientStatus.AUTH)
+			if (new_cs != cs && new_cs.status.ordinal() > ClientStatus.AUTH.ordinal())
 				NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, DEREF_CLIENT_INFO(new_cs));
 		});
 		// Also send the info of the server
-		NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX));
+		NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, Net.NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX));
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_WAIT_command(NetworkClientState cs)
@@ -280,7 +282,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 
 		Packet p = new Packet(PacketType.SERVER_WAIT);
-		NetworkSend_byte(p, waiting);
+		NetworkSend_byte(p, (byte) waiting);
 		Net.NetworkSend_Packet(p, cs);
 	}
 
@@ -309,7 +311,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		String filename;
 
-		if (cs.status < ClientStatus.AUTH) {
+		if (cs.status.ordinal() < ClientStatus.AUTH.ordinal()) {
 			// Illegal call, return error and ignore the packet
 			NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NetworkErrorCode.NOT_AUTHORIZED);
 			return;
@@ -318,7 +320,7 @@ public interface NetServer extends NetTools, NetDefs
 			Packet p;
 
 			// Make a dump of the current game
-			sprintf(filename, "%s%snetwork_server.tmp",  Global._path.autosave_dir, PATHSEP);
+			filename = String.format("%s%snetwork_server.tmp",  Global._path.autosave_dir, File.separator);
 			if (SaveOrLoad(filename, SaveLoad.SL_SAVE) != SL_OK) error("network savedump failed");
 
 			file_pointer = fopen(filename, "rb");
@@ -367,12 +369,12 @@ public interface NetServer extends NetTools, NetDefs
 					file_pointer.close();
 
 					{
-						NetworkClientState new_cs;
+						//NetworkClientState new_cs;
 						boolean new_map_client = false;
 						// Check if there is a client waiting for receiving the map
 						//  and start sending him the map
 						//FOR_ALL_CLIENTS(new_cs) 
-						for( NetworkClientState cs : Net._clients )
+						for( NetworkClientState new_cs : Net._clients )
 						{
 							if (new_cs.status == ClientStatus.MAP_WAIT) {
 								// Check if we already have a new client to send the map to
@@ -621,8 +623,8 @@ public interface NetServer extends NetTools, NetDefs
 
 	//#if defined(WITH_REV) || defined(WITH_REV_HACK)
 		// Check if the client has revision control enabled
-		if (strncmp(NOREV_STRING, client_revision, sizeof(client_revision)) != 0) {
-			if (strncmp(_network_game_info.server_revision, client_revision, sizeof(_network_game_info.server_revision) - 1) != 0) {
+		if (!NOREV_STRING.equals(client_revision)) {
+			if (!Net._network_game_info.server_revision.equals(client_revision)) {
 				// Different revisions!!
 				NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NetworkErrorCode.WRONG_REVISION);
 
@@ -708,7 +710,7 @@ public interface NetServer extends NetTools, NetDefs
 		} else if (cs.status == ClientStatus.INACTIVE && type == NETWORK_COMPANY_PASSWORD) {
 			ci = DEREF_CLIENT_INFO(cs);
 
-			if (strncmp(password, _network_player_info[ci.client_playas - 1].password, sizeof(password)) != 0) {
+			if (!password.equals(Net._network_player_info[ci.client_playas - 1].password)) {
 				// Password is invalid
 				NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NetworkErrorCode.WRONG_PASSWORD);
 				return;
@@ -729,7 +731,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		// The client was never joined.. so this is impossible, right?
 		//  Ignore the packet, give the client a warning, and close his connection
-		if (cs.status < ClientStatus.AUTH || cs.quited) {
+		if (cs.status.ordinal() < ClientStatus.AUTH.ordinal() || cs.quited) {
 			NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NetworkErrorCode.NOT_AUTHORIZED);
 			return;
 		}
@@ -935,7 +937,7 @@ public interface NetServer extends NetTools, NetDefs
 		Net.NetworkTextMessage(NetworkAction.LEAVE, 1, false, client_name, "%s", str);
 
 		Net.FOR_ALL_CLIENTS(new_cs -> {
-			if (new_cs.status > ClientStatus.AUTH) {
+			if (new_cs.status.ordinal() > ClientStatus.AUTH.ordinal()) {
 				NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(new_cs, cs.index, errorno);
 			}
 		});
