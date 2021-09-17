@@ -30,9 +30,9 @@ public class Console //extends ConsoleCmds
 	static Map<String,IConsoleAlias> _iconsole_aliases = new HashMap<>(); // list of registred aliases
 
 	// ** console colors/modes ** //
-	static byte _icolour_def;
-	static byte _icolour_err;
-	static byte _icolour_warn;
+	public static byte _icolour_def;
+	public static byte _icolour_err;
+	public static byte _icolour_warn;
 	static byte _icolour_dbg;
 	static byte _icolour_cmd;
 	static IConsoleModes _iconsole_mode = IConsoleModes.ICONSOLE_CLOSED;

@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Properties;
 
+import game.enums.SaveOrLoadResult;
 import game.struct.HighScore;
 import game.xui.Window;
 
@@ -30,14 +31,6 @@ public class SaveLoad
 	public static final int SL_LOAD = 0;
 	public static final int SL_SAVE = 1;
 	//public static final int SL_OLD_LOAD = 2;
-
-	enum SaveOrLoadResult
-	{
-		SL_OK, // completed successfully
-		SL_ERROR, // error that was caught before internal structures were modified
-		SL_REINIT, // error that was caught in the middle of updating game state, need to clear it. (can only happen during load)
-	}
-
 
 	/**
 	 * Main Save or Load function where the high-level saveload functions are

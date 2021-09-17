@@ -3,15 +3,20 @@ package game.net;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.RandomAccessFile;
+import java.util.Iterator;
 
+import game.AcceptedCargo;
 import game.Cmd;
 import game.Global;
+import game.Hal;
 import game.Player;
 import game.SaveLoad;
 import game.Station;
 import game.Str;
 import game.TileIndex;
 import game.Vehicle;
+import game.console.Console;
+import game.enums.SaveOrLoadResult;
 import game.ids.PlayerID;
 import game.util.BitOps;
 import game.util.Strings;
@@ -764,12 +769,12 @@ public interface NetServer extends NetTools, NetDefs
 	{
 		// Client has the map, now start syncing
 		if (cs.status == ClientStatus.DONE_MAP && !cs.quited) {
-			String client_name;
+			;
 			//NetworkClientState new_cs;
 
-			NetworkGetClientName(client_name, sizeof(client_name), cs);
+			String client_name = Net.NetworkGetClientName(cs);
 
-			NetworkTextMessage(NetworkAction.JOIN, 1, false, client_name, "");
+			Net.NetworkTextMessage(NetworkAction.JOIN, 1, false, client_name, "");
 
 			// Mark the client as pre-active, and wait for an ACK
 			//  so we know he is done loading and in sync with us
@@ -780,8 +785,8 @@ public interface NetServer extends NetTools, NetDefs
 
 			// This is the frame the client receives
 			//  we need it later on to make sure the client is not too slow
-			cs.last_frame = _frame_counter;
-			cs.last_frame_server = _frame_counter;
+			cs.last_frame = Global._frame_counter;
+			cs.last_frame_server = Global._frame_counter;
 
 			Net.FOR_ALL_CLIENTS(new_cs -> {
 				if (new_cs.status.ordinal() > ClientStatus.AUTH.ordinal()) {
@@ -790,9 +795,9 @@ public interface NetServer extends NetTools, NetDefs
 				}
 			});
 
-			if (_network_pause_on_join) {
+			if (Net._network_pause_on_join) {
 				/* Now pause the game till the client is in sync */
-				DoCommandP(0, 1, 0, null, Cmd.CMD_PAUSE);
+				Cmd.DoCommandP(null, 1, 0, null, Cmd.CMD_PAUSE);
 
 				NetworkServer_HandleChat(NetworkAction.CHAT, DestType.BROADCAST, 0, "Game paused (incoming client)", NETWORK_SERVER_INDEX);
 			}
@@ -812,12 +817,12 @@ public interface NetServer extends NetTools, NetDefs
 		byte flags = GetCommandFlags(cp.cmd);
 
 		if (flags & Cmd.CMD_SERVER && ci.client_index != NETWORK_SERVER_INDEX) {
-			IConsolePrintF(_icolour_err, "WARNING: server only command from player %d (IP: %s), kicking...", ci.client_playas, GetPlayerIP(ci));
+			Console.IConsolePrintF(Console._icolour_err, "WARNING: server only command from player %d (IP: %s), kicking...", ci.client_playas, GetPlayerIP(ci));
 			return false;
 		}
 
 		if (flags & Cmd.CMD_OFFLINE) {
-			IConsolePrintF(_icolour_err, "WARNING: offline only command from player %d (IP: %s), kicking...", ci.client_playas, GetPlayerIP(ci));
+			Console.IConsolePrintF(Console._icolour_err, "WARNING: offline only command from player %d (IP: %s), kicking...", ci.client_playas, GetPlayerIP(ci));
 			return false;
 		}
 		return true;
@@ -857,7 +862,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		/* Check if cp.cmd is valid */
 		if (!IsValidCommand(cp.cmd)) {
-			IConsolePrintF(_icolour_err, "WARNING: invalid command from player %d (IP: %s).", ci.client_playas, GetPlayerIP(ci));
+			Console.IConsolePrintF(Console._icolour_err, "WARNING: invalid command from player %d (IP: %s).", ci.client_playas, GetPlayerIP(ci));
 			NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NetworkErrorCode.NOT_EXPECTED);
 			return;
 		}
@@ -872,7 +877,7 @@ public interface NetServer extends NetTools, NetDefs
 		 * something pretty naughty (or a bug), and will be kicked
 		 */
 		if (!(cp.cmd == Cmd.CMD_PLAYER_CTRL && cp.p1 == 0) && ci.client_playas - 1 != cp.player) {
-			IConsolePrintF(_icolour_err, "WARNING: player %d (IP: %s) tried to execute a command as player %d, kicking...",
+			Console.IConsolePrintF(Console._icolour_err, "WARNING: player %d (IP: %s) tried to execute a command as player %d, kicking...",
 										 ci.client_playas - 1, GetPlayerIP(ci), cp.player);
 			NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NetworkErrorCode.PLAYER_MISMATCH);
 			return;
@@ -895,7 +900,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		// The frame can be executed in the same frame as the next frame-packet
 		//  That frame just before that frame is saved in _frame_counter_max
-		cp.frame = _frame_counter_max + 1;
+		cp.frame = Net._frame_counter_max + 1;
 		cp.next  = null;
 
 		// Queue the command for the clients (are send at the end of the frame
@@ -910,7 +915,10 @@ public interface NetServer extends NetTools, NetDefs
 		});
 
 		cp.callback = 0;
-		// Queue the command on the server
+		
+		Net._local_command_queue.add(cp);
+		
+		/*/ Queue the command on the server
 		if (_local_command_queue == null) {
 			_local_command_queue = cp;
 		} else {
@@ -918,7 +926,7 @@ public interface NetServer extends NetTools, NetDefs
 			CommandPacket c = _local_command_queue;
 			while (c.next != null) c = c.next;
 			c.next = cp;
-		}
+		}*/
 	}
 
 	static void NetworkPacketReceive_PACKET_CLIENT_ERROR_command(NetworkClientState cs, Packet p)
@@ -986,18 +994,18 @@ public interface NetServer extends NetTools, NetDefs
 
 		/* The client is trying to catch up with the server */
 		if (cs.status == ClientStatus.PRE_ACTIVE) {
-			/* The client is not yet catched up? */
+			// The client is not yet catched up? 
 			if (frame + Global.DAY_TICKS < Global._frame_counter)
 				return;
 
-			/* Now he is! Unpause the game */
+			// Now he is! Unpause the game 
 			cs.status = ClientStatus.ACTIVE;
 
 			if (Net._network_pause_on_join) {
 				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE);
 				NetworkServer_HandleChat(NetworkAction.CHAT, DestType.BROADCAST, 0, "Game unpaused", NETWORK_SERVER_INDEX);
 			}
-		}
+		} 
 
 		// The client received the frame, make note of it
 		cs.last_frame = frame;
@@ -1013,13 +1021,13 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkClientInfo ci, ci_own, ci_to;
 
 		switch (desttype) {
-		case DestType.CLIENT:
+		case CLIENT:
 			/* Are we sending to the server? */
 			if (dest == NETWORK_SERVER_INDEX) {
-				ci = NetworkFindClientInfoFromIndex(from_index);
+				ci = Net.NetworkFindClientInfoFromIndex(from_index);
 				/* Display the text locally, and that is it */
 				if (ci != null)
-					NetworkTextMessage(action, GetDrawStringPlayerColor(ci.client_playas-1), false, ci.client_name, "%s", msg);
+					Net.NetworkTextMessage(action, GetDrawStringPlayerColor(ci.client_playas-1), false, ci.client_name, "%s", msg);
 			} else {
 				/* Else find the client to send the message to */
 				//Net.FOR_ALL_CLIENTS(cs -> 
@@ -1035,10 +1043,10 @@ public interface NetServer extends NetTools, NetDefs
 			// Display the message locally (so you know you have sent it)
 			if (from_index != dest) {
 				if (from_index == NETWORK_SERVER_INDEX) {
-					ci = NetworkFindClientInfoFromIndex(from_index);
-					ci_to = NetworkFindClientInfoFromIndex(dest);
+					ci = Net.NetworkFindClientInfoFromIndex(from_index);
+					ci_to = Net.NetworkFindClientInfoFromIndex(dest);
 					if (ci != null && ci_to != null)
-						NetworkTextMessage(action, GetDrawStringPlayerColor(ci.client_playas-1), true, ci_to.client_name, "%s", msg);
+						Net.NetworkTextMessage(action, GetDrawStringPlayerColor(ci.client_playas-1), true, ci_to.client_name, "%s", msg);
 				} else {
 					//FOR_ALL_CLIENTS(cs) 
 					for( NetworkClientState cs : Net._clients )
@@ -1051,7 +1059,7 @@ public interface NetServer extends NetTools, NetDefs
 				}
 			}
 			break;
-		case DestType.PLAYER: {
+		case PLAYER: {
 			boolean show_local = true; // If this is false, the message is already displayed
 															// on the client who did sent it.
 			/* Find all clients that belong to this player */
@@ -1069,8 +1077,8 @@ public interface NetServer extends NetTools, NetDefs
 				}
 			}
 
-			ci = NetworkFindClientInfoFromIndex(from_index);
-			ci_own = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
+			ci = Net.NetworkFindClientInfoFromIndex(from_index);
+			ci_own = Net.NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
 			if (ci != null && ci_own != null && ci_own.client_playas == dest) {
 				NetworkTextMessage(action, GetDrawStringPlayerColor(ci.client_playas-1), false, ci.client_name, "%s", msg);
 				if (from_index == NETWORK_SERVER_INDEX)
@@ -1084,8 +1092,8 @@ public interface NetServer extends NetTools, NetDefs
 			// Display the message locally (so you know you have sent it)
 			if (ci != null && show_local) {
 				if (from_index == NETWORK_SERVER_INDEX) {
-					Sring name = Global.GetString(GetPlayer(ci_to.client_playas-1).name_1);
-					NetworkTextMessage(action, GetDrawStringPlayerColor(ci_own.client_playas-1), true, name, "%s", msg);
+					String name = Strings.GetString(Player.GetPlayer(ci_to.client_playas-1).getName_1());
+					Net.NetworkTextMessage(action, GetDrawStringPlayerColor(ci_own.client_playas-1), true, name, "%s", msg);
 				} else {
 					//FOR_ALL_CLIENTS(cs)
 					for( NetworkClientState cs : Net._clients )
@@ -1101,14 +1109,14 @@ public interface NetServer extends NetTools, NetDefs
 		default:
 			Global.DEBUG_net( 0, "[NET][Server] Received unknown destination type %d. Doing broadcast instead.");
 			/* fall-through to next case */
-		case DestType.BROADCAST:
-			Net.FOR_ALL_CLIENTS(cs -> {
+		case BROADCAST:
+			Net.FOR_ALL_CLIENTS( (cs) -> {
 				NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, from_index, false, msg);
 			});
 			
-			ci = NetworkFindClientInfoFromIndex(from_index);
+			ci = Net.NetworkFindClientInfoFromIndex(from_index);
 			if (ci != null)
-				NetworkTextMessage(action, GetDrawStringPlayerColor(ci.client_playas-1), false, ci.client_name, "%s", msg);
+				Net.NetworkTextMessage(action, GetDrawStringPlayerColor(ci.client_playas-1), false, ci.client_name, "%s", msg);
 			break;
 		}
 	}
@@ -1132,7 +1140,7 @@ public interface NetServer extends NetTools, NetDefs
 		ci = DEREF_CLIENT_INFO(cs);
 
 		if (ci.client_playas <= Global.MAX_PLAYERS) {
-			_network_player_info[ci.client_playas - 1].password = password;
+			Net._network_player_info[ci.client_playas - 1].password = password;
 		}
 	}
 
@@ -1150,8 +1158,8 @@ public interface NetServer extends NetTools, NetDefs
 		if (ci != null) {
 			// Display change
 			if (NetworkFindName(client_name)) {
-				NetworkTextMessage(NetworkAction.NAME_CHANGE, 1, false, ci.client_name, "%s", client_name);
-				ttd_strlcpy(ci.client_name, client_name, sizeof(ci.client_name));
+				Net.NetworkTextMessage(NetworkAction.NAME_CHANGE, 1, false, ci.client_name, "%s", client_name);
+				ci.client_name = client_name;
 				NetworkUpdateClientInfo(ci.client_index);
 			}
 		}
@@ -1165,7 +1173,7 @@ public interface NetServer extends NetTools, NetDefs
 		String pass = NetworkRecv_string(cs, p);
 		String command = NetworkRecv_string(cs, p);
 
-		if (strncmp(pass, _network_game_info.rcon_password, sizeof(pass)) != 0) {
+		if (!pass.equals(Net._network_game_info.rcon_password)) {
 			Global.DEBUG_net( 0, "[RCon] Wrong password from client-id %d", cs.index);
 			return;
 		}
@@ -1231,7 +1239,7 @@ public interface NetServer extends NetTools, NetDefs
 	{
 		final SettingDesc item;
 		Packet p = new Packet(PacketType.SERVER_MAP);
-		NetworkSend_byte(p, MapPacket.MapPacket.MAP_PACKET_PATCH);
+		NetworkSend_byte(p, MapPacket.MAP_PACKET_PATCH);
 		// Now send all the patch-settings in a pretty order..
 
 		item = patch_settings;
@@ -1271,70 +1279,72 @@ public interface NetServer extends NetTools, NetDefs
 		int months_empty;
 
 		//FOR_ALL_PLAYERS(p)
-		ii = Player.getIterator();
+		Iterator<Player> ii = Player.getIterator();
 		while(ii.hasNext())
 		{
 			Player p = ii.next();
-			if (!p.is_active) {
+			int pindex = p.getIndex().id;
+			
+			if (!p.isActive()) {
 				//memset(&_network_player_info[p.index], 0, sizeof(NetworkPlayerInfo));
-				Net._network_player_info[p.index] = new NetworkPlayerInfo(); 
+				Net._network_player_info[pindex] = new NetworkPlayerInfo(); 
 				continue;
 			}
 
 			// Clean the info but not the password
-			String password = Net._network_player_info[p.index].password;
-			months_empty = _network_player_info[p.index].months_empty;
+			String password = Net._network_player_info[pindex].password;
+			months_empty = Net._network_player_info[pindex].months_empty;
 			//memset(&_network_player_info[p.index], 0, sizeof(NetworkPlayerInfo));
-			Net._network_player_info[p.index] = new NetworkPlayerInfo();
-			_network_player_info[p.index].months_empty = months_empty;
-			_network_player_info[p.index].password = password;
+			Net._network_player_info[pindex] = new NetworkPlayerInfo();
+			Net._network_player_info[pindex].months_empty = months_empty;
+			Net._network_player_info[pindex].password = password;
 
 			// Grap the company name
-			Global.SetDParam(0, p.name_1);
-			Global.SetDParam(1, p.name_2);
-			Net._network_player_info[p.index].company_name = Strings.GetString(Str.STR_JUST_STRING);
+			Global.SetDParam(0, p.getName_1());
+			Global.SetDParam(1, p.getName_2());
+			Net._network_player_info[pindex].company_name = Strings.GetString(Str.STR_JUST_STRING);
 
 			// Check the income
-			if (Global.get_cur_year() - 1 == p.inaugurated_year)
+			if (Global.get_cur_year() - 1 == p.getInaugurated_year())
 				// The player is here just 1 year, so display [2], else display[1]
 				for (i = 0; i < 13; i++)
-					Net._network_player_info[p.index].income -= p.yearly_expenses[2][i];
+					Net._network_player_info[pindex].income -= p.yearly_expenses[2][i];
 			else
 				for (i = 0; i < 13; i++)
-					Net._network_player_info[p.index].income -= p.yearly_expenses[1][i];
+					Net._network_player_info[pindex].income -= p.yearly_expenses[1][i];
 
 			// Set some general stuff
-			Net._network_player_info[p.index].inaugurated_year = p.inaugurated_year;
-			Net._network_player_info[p.index].company_value = p.old_economy[0].company_value;
-			Net._network_player_info[p.index].money = p.money64;
-			Net._network_player_info[p.index].performance = p.old_economy[0].performance_history;
+			Net._network_player_info[pindex].inaugurated_year = p.getInaugurated_year();
+			Net._network_player_info[pindex].company_value = p.old_economy[0].company_value;
+			Net._network_player_info[pindex].money = p.getMoney();
+			Net._network_player_info[pindex].performance = p.old_economy[0].performance_history;
 		}
 
 		// Go through all vehicles and count the type of vehicles
 		//FOR_ALL_VEHICLES(v)
-		vi = Vehicle.getIterator();
+		Iterator<Vehicle> vi = Vehicle.getIterator();
 		while(vi.hasNext())
 		{
 			Vehicle v = vi.next();
 			
 			if (v.owner < Global.MAX_PLAYERS)
-				switch (v.type) {
+				switch (v.getType()) {
 					case Vehicle.VEH_Train:
-						if (IsFrontEngine(v))
-							_network_player_info[v.owner].num_vehicle[0]++;
+						if (v.IsFrontEngine())
+							Net._network_player_info[v.owner].num_vehicle[0]++;
 						break;
 					case Vehicle.VEH_Road:
 						if (v.cargo_type != AcceptedCargo.CT_PASSENGERS)
-							_network_player_info[v.owner].num_vehicle[1]++;
+							Net._network_player_info[v.owner].num_vehicle[1]++;
 						else
-							_network_player_info[v.owner].num_vehicle[2]++;
+							Net._network_player_info[v.owner].num_vehicle[2]++;
 						break;
 					case Vehicle.VEH_Aircraft:
-						if (v.subtype <= 2)
-							_network_player_info[v.owner].num_vehicle[3]++;
+						if (v.getSubtype() <= 2)
+							Net._network_player_info[v.owner].num_vehicle[3]++;
 						break;
 					case Vehicle.VEH_Ship:
-						_network_player_info[v.owner].num_vehicle[4]++;
+						Net._network_player_info[v.owner].num_vehicle[4]++;
 						break;
 					case Vehicle.VEH_Special:
 					case Vehicle.VEH_Disaster:
@@ -1346,36 +1356,37 @@ public interface NetServer extends NetTools, NetDefs
 		//FOR_ALL_STATIONS(s)
 		Station.forEach( (s) -> 
 		{
-			if (s.owner < Global.MAX_PLAYERS) {
-				if ((s.facilities & FACIL_TRAIN))
-					_network_player_info[s.owner].num_station[0]++;
-				if ((s.facilities & FACIL_TRUCK_STOP))
-					_network_player_info[s.owner].num_station[1]++;
-				if ((s.facilities & FACIL_BUS_STOP))
-					_network_player_info[s.owner].num_station[2]++;
-				if ((s.facilities & FACIL_AIRPORT))
-					_network_player_info[s.owner].num_station[3]++;
-				if ((s.facilities & FACIL_DOCK))
-					_network_player_info[s.owner].num_station[4]++;
+			if (s.getOwner().isValid()) 
+			{
+				int f = s.getFacilities();
+				int oid = s.getOwner().id;
+				if (0 !=(f & Station.FACIL_TRAIN))
+					Net._network_player_info[oid].num_station[0]++;
+				if (0 !=(f & Station.FACIL_TRUCK_STOP))
+					Net._network_player_info[oid].num_station[1]++;
+				if (0 !=(f & Station.FACIL_BUS_STOP))
+					Net._network_player_info[oid].num_station[2]++;
+				if (0 !=(f & Station.FACIL_AIRPORT))
+					Net._network_player_info[oid].num_station[3]++;
+				if (0 !=(f & Station.FACIL_DOCK))
+					Net._network_player_info[oid].num_station[4]++;
 			}
 		});
 
 		ci = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
 		// Register local player (if not dedicated)
 		if (ci != null && ci.client_playas > 0  && ci.client_playas <= Global.MAX_PLAYERS)
-			ttd_strlcpy(_network_player_info[ci.client_playas-1].players, ci.client_name, sizeof(_network_player_info[ci.client_playas-1].players));
+			Net._network_player_info[ci.client_playas-1].players = ci.client_name;
 
-		Net.FOR_ALL_CLIENTS(cs -> {
-			String client_name;
-
-			NetworkGetClientName(client_name, sizeof(client_name), cs);
+		Net.FOR_ALL_CLIENTS( (cs) -> {
+			String client_name = Net.NetworkGetClientName(cs);
 
 			ci = DEREF_CLIENT_INFO(cs);
 			if (ci != null && ci.client_playas > 0 && ci.client_playas <= Global.MAX_PLAYERS) {
-				if (strlen(_network_player_info[ci.client_playas-1].players) != 0)
-					ttd_strlcat(_network_player_info[ci.client_playas - 1].players, ", ", lengthof(_network_player_info[ci.client_playas - 1].players));
+				if(!Net._network_player_info[ci.client_playas-1].players.isBlank())
+					Net._network_player_info[ci.client_playas - 1].players += ", ";
 
-				ttd_strlcat(_network_player_info[ci.client_playas - 1].players, client_name, lengthof(_network_player_info[ci.client_playas - 1].players));
+				Net._network_player_info[ci.client_playas - 1].players += client_name;
 			}
 		});
 	}
@@ -1386,13 +1397,12 @@ public interface NetServer extends NetTools, NetDefs
 		//NetworkClientState cs;
 		NetworkClientInfo ci;
 
-		ci = NetworkFindClientInfoFromIndex(client_index);
+		ci = Net.NetworkFindClientInfoFromIndex(client_index);
 
 		if (ci == null)
 			return;
 
-		Net.FOR_ALL_CLIENTS(cs -> { NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, ci); } );
-		}
+		Net.FOR_ALL_CLIENTS( (cs) -> { NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, ci); } );		
 	}
 
 	//extern void SwitchMode(int new_mode);
@@ -1400,11 +1410,11 @@ public interface NetServer extends NetTools, NetDefs
 	/* Check if we want to restart the map */
 	static void NetworkCheckRestartMap()
 	{
-		if (_network_restart_game_date != 0 && _cur_year + MAX_YEAR_BEGIN_REAL >= _network_restart_game_date) {
-			Global.DEBUG_net( 0, "Auto-restarting map. Year %d reached.", _cur_year + MAX_YEAR_BEGIN_REAL);
+		if (Net._network_restart_game_date != 0 && Global.get_cur_year() + Global.MAX_YEAR_BEGIN_REAL >= Net._network_restart_game_date) {
+			Global.DEBUG_net( 0, "Auto-restarting map. Year %d reached.", Global.get_cur_year() + Global.MAX_YEAR_BEGIN_REAL);
 
-			_random_seeds[0][0] = Hal.Random();
-			_random_seeds[0][1] = InteractiveHal.Random();
+			Global._random_seeds[0][0] = Hal.Random();
+			Global._random_seeds[0][1] = Hal.InteractiveRandom();
 
 			Global.SwitchMode(SM_NEWGAME);
 		}
@@ -1446,36 +1456,36 @@ public interface NetServer extends NetTools, NetDefs
 		//FOR_ALL_PLAYERS(p) 
 		Player.forEach(p -> {
 			/* Skip the non-active once */
-			if (!p.is_active || p.is_ai)
+			if (!p.isActive() || p.isAi())
 				continue;
 
 			if (!clients_in_company[p.index]) {
 				/* The company is empty for one month more */
-				_network_player_info[p.index].months_empty++;
+				Net._network_player_info[p.index].months_empty++;
 
 				/* Is the company empty for autoclean_unprotected-months, and is there no protection? */
-				if (_network_player_info[p.index].months_empty > _network_autoclean_unprotected && _network_player_info[p.index].password[0] == '\0') {
+				if (Net._network_player_info[p.index].months_empty > _network_autoclean_unprotected && _network_player_info[p.index].password[0] == '\0') {
 					/* Shut the company down */
 					DoCommandP(0, 2, p.index, null, Cmd.CMD_PLAYER_CTRL);
-					IConsolePrintF(_icolour_def, "Auto-cleaned company #%d", p.index+1);
+					Console.IConsolePrintF(Console._icolour_def, "Auto-cleaned company #%d", p.index+1);
 				}
 				/* Is the compnay empty for autoclean_protected-months, and there is a protection? */
-				if (_network_player_info[p.index].months_empty > _network_autoclean_protected && _network_player_info[p.index].password[0] != '\0') {
+				if (Net._network_player_info[p.index].months_empty > _network_autoclean_protected && _network_player_info[p.index].password[0] != '\0') {
 					/* Unprotect the company */
-					_network_player_info[p.index].password[0] = '\0';
-					IConsolePrintF(_icolour_def, "Auto-removed protection from company #%d", p.index+1);
-					_network_player_info[p.index].months_empty = 0;
+					Net._network_player_info[p.index].password = "";
+					Console.IConsolePrintF(Console._icolour_def, "Auto-removed protection from company #%d", p.index+1);
+					Net._network_player_info[p.index].months_empty = 0;
 				}
 			} else {
 				/* It is not empty, reset the date */
-				_network_player_info[p.index].months_empty = 0;
+				Net._network_player_info[p.index].months_empty = 0;
 			}
 		});
 	}
 
 	// This function changes new_name to a name that is unique (by adding #1 ...)
 	//  and it returns true if that succeeded.
-	boolean NetworkFindName(String new_name)
+	static boolean NetworkFindName(String new_name)
 	{
 		//NetworkClientState new_cs;
 		NetworkClientInfo ci;
@@ -1492,16 +1502,16 @@ public interface NetServer extends NetTools, NetDefs
 			for( NetworkClientState new_cs : Net._clients )
 			{
 				ci = DEREF_CLIENT_INFO(new_cs);
-				if (strncmp(ci.client_name, new_name, NETWORK_CLIENT_NAME_LENGTH) == 0) {
+				if (ci.client_name.equals(new_name)) {
 					// Name already in use
 					found_name = false;
 					break;
 				}
 			}
 			// Check if it is the same as the server-name
-			ci = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
+			ci = Net.NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
 			if (ci != null) {
-				if (strncmp(ci.client_name, new_name, NETWORK_CLIENT_NAME_LENGTH) == 0) {
+				if (ci.client_name.equals(new_name)) {
 					// Name already in use
 					found_name = false;
 				}
@@ -1512,7 +1522,7 @@ public interface NetServer extends NetTools, NetDefs
 
 				// Stop if we tried for more than 50 times..
 				if (number++ > 50) break;
-				snprintf(new_name, NETWORK_CLIENT_NAME_LENGTH, "%s #%d", original_name, number);
+				new_name = String.format("%s #%d", original_name, number);
 			}
 		}
 
@@ -1520,7 +1530,7 @@ public interface NetServer extends NetTools, NetDefs
 	}
 
 	// Reads a packet from the stream
-	boolean NetworkServer_ReadPackets(NetworkClientState cs)
+	static boolean NetworkServer_ReadPackets(NetworkClientState cs)
 	{
 		Packet p;
 		NetworkRecvStatus [] res = {null};
@@ -1536,7 +1546,7 @@ public interface NetServer extends NetTools, NetDefs
 		return true;
 	}
 
-	// Handle the local command-queue
+	static // Handle the local command-queue
 	void NetworkHandleCommandQueue(NetworkClientState cs) {
 		CommandPacket cp;
 
@@ -1549,7 +1559,7 @@ public interface NetServer extends NetTools, NetDefs
 	}
 
 	// This is called every tick if this is a _network_server
-	void NetworkServer_Tick(boolean send_frame)
+	static void NetworkServer_Tick(boolean send_frame)
 	{
 		//NetworkClientState cs;
 	//#ifndef ENABLE_NETWORK_SYNC_EVERY_FRAME
@@ -1557,8 +1567,8 @@ public interface NetServer extends NetTools, NetDefs
 	//#endif
 
 	//#ifndef ENABLE_NETWORK_SYNC_EVERY_FRAME
-		if (_frame_counter >= _last_sync_frame + _network_sync_freq) {
-			_last_sync_frame = _frame_counter;
+		if (Global._frame_counter >= Net._last_sync_frame + Net._network_sync_freq) {
+			Net._last_sync_frame = Global._frame_counter;
 			send_sync = true;
 		}
 	//#endif
@@ -1571,19 +1581,19 @@ public interface NetServer extends NetTools, NetDefs
 			// Check if the speed of the client is what we can expect from a client
 			if (cs.status == ClientStatus.ACTIVE) {
 				// 1 lag-point per day
-				int lag = NetworkCalculateLag(cs) / DAY_TICKS;
+				int lag = NetworkCalculateLag(cs) / Global.DAY_TICKS;
 				if (lag > 0) {
 					if (lag > 3) {
 						// Client did still not report in after 4 game-day, drop him
 						//  (that is, the 3 of above, + 1 before any lag is counted)
-						IConsolePrintF(_icolour_err,"Client #%d is dropped because the client did not respond for more than 4 game-days", cs.index);
-						NetworkCloseClient(cs);
+						Console.IConsolePrintF(Console._icolour_err,"Client #%d is dropped because the client did not respond for more than 4 game-days", cs.index);
+						Net.NetworkCloseClient(cs);
 						continue;
 					}
 
 					// Report once per time we detect the lag
 					if (cs.lag_test == 0) {
-						IConsolePrintF(_icolour_warn,"[%d] Client #%d is slow, try increasing *net_frame_freq to a higher value!", _frame_counter, cs.index);
+						Console.IConsolePrintF(Console._icolour_warn,"[%d] Client #%d is slow, try increasing *net_frame_freq to a higher value!", Global._frame_counter, cs.index);
 						cs.lag_test = 1;
 					}
 				} else {
@@ -1592,12 +1602,12 @@ public interface NetServer extends NetTools, NetDefs
 			} else if (cs.status == ClientStatus.PRE_ACTIVE) {
 				int lag = NetworkCalculateLag(cs);
 				if (lag > _network_max_join_time) {
-					IConsolePrintF(_icolour_err,"Client #%d is dropped because it took longer than %d ticks for him to join", cs.index, _network_max_join_time);
+					Console.IConsolePrintF(Console._icolour_err,"Client #%d is dropped because it took longer than %d ticks for him to join", cs.index, _network_max_join_time);
 					NetworkCloseClient(cs);
 				}
 			}
 
-			if (cs.status >= ClientStatus.PRE_ACTIVE) {
+			if (cs.status.ordinal() >= ClientStatus.PRE_ACTIVE.ordinal()) {
 				// Check if we can send command, and if we have anything in the queue
 				NetworkHandleCommandQueue(cs);
 
@@ -1617,12 +1627,12 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkUDPAdvertise();
 	}
 
-	void NetworkServerYearlyLoop()
+	static void NetworkServerYearlyLoop()
 	{
 		NetworkCheckRestartMap();
 	}
 
-	void NetworkServerMonthlyLoop()
+	static void NetworkServerMonthlyLoop()
 	{
 		NetworkAutoCleanCompanies();
 	}
