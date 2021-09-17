@@ -1,11 +1,14 @@
 package game.net;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.RandomAccessFile;
 
 import game.Cmd;
 import game.Global;
 import game.Player;
 import game.SaveLoad;
+import game.Station;
 import game.Str;
 import game.TileIndex;
 import game.Vehicle;
@@ -255,7 +258,7 @@ public interface NetServer extends NetTools, NetDefs
 			// Transmit info about all the active clients
 		Net.FOR_ALL_CLIENTS(new_cs -> {
 			if (new_cs != cs && new_cs.status.ordinal() > ClientStatus.AUTH.ordinal())
-				NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, DEREF_CLIENT_INFO(new_cs));
+				NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, cs.ci ); //DEREF_CLIENT_INFO(new_cs));
 		});
 		// Also send the info of the server
 		NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, Net.NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX));
@@ -287,7 +290,7 @@ public interface NetServer extends NetTools, NetDefs
 	}
 
 	
-	//static FILE *file_pointer;
+	static RandomAccessFile file_pointer;
 	static int sent_packets; // How many packets we did send succecfully last time
 	
 	// This sends the map to the client
@@ -298,12 +301,12 @@ public interface NetServer extends NetTools, NetDefs
 		// Function: Sends the map to the client, or a part of it (it is splitted in
 		//   a lot of multiple packets)
 		// Data:
-		//    byte:  packet-type (MAP_PACKET_START, MAP_PACKET_NORMAL and MAP_PACKET_END)
-		//  if MAP_PACKET_START:
+		//    byte:  packet-type (MapPacket.MAP_PACKET_START, MapPacket.MAP_PACKET_NORMAL and MapPacket.MAP_PACKET_END)
+		//  if MapPacket.MapPacket.MAP_PACKET_START:
 		//    int: The current FrameCounter
-		//  if MAP_PACKET_NORMAL:
+		//  if MapPacket.MAP_PACKET_NORMAL:
 		//    piece of the map (till max-size of packet)
-		//  if MAP_PACKET_END:
+		//  if MapPacket.MAP_PACKET_END:
 		//    int: seed0 of player
 		//    int: seed1 of player
 		//      last 2 are repeated Global.MAX_PLAYERS time
@@ -321,19 +324,23 @@ public interface NetServer extends NetTools, NetDefs
 
 			// Make a dump of the current game
 			filename = String.format("%s%snetwork_server.tmp",  Global._path.autosave_dir, File.separator);
-			if (SaveOrLoad(filename, SaveLoad.SL_SAVE) != SL_OK) error("network savedump failed");
+			if (SaveLoad.SaveOrLoad(filename, SaveLoad.SL_SAVE) != SaveOrLoadResult.SL_OK) Global.error("network savedump failed");
 
-			file_pointer = fopen(filename, "rb");
-			fseek(file_pointer, 0, SEEK_END);
+			//file_pointer = fopen(filename, "rb");
+			File f = new File(filename);
+			file_pointer = new RandomAccessFile(f, "r");
+			//fseek(file_pointer, 0, SEEK_END);
+			//file_pointer.se
 
 			// Now send the _frame_counter and how many packets are coming
 			p = new Packet(PacketType.SERVER_MAP);
-			NetworkSend_byte(p, MAP_PACKET_START);
-			NetworkSend_int(p, _frame_counter);
-			NetworkSend_int(p, ftell(file_pointer));
+			NetworkSend_byte(p, (byte) MapPacket.MAP_PACKET_START.ordinal());
+			NetworkSend_int(p, Global._frame_counter);
+			NetworkSend_int(p, (int) f.length()); // ftell(file_pointer));
 			Net.NetworkSend_Packet(p, cs);
 
-			fseek(file_pointer, 0, SEEK_SET);
+			//fseek(file_pointer, 0, SEEK_SET);
+			file_pointer.seek(0);
 
 			sent_packets = 4; // We start with trying 4 packets
 
@@ -348,10 +355,10 @@ public interface NetServer extends NetTools, NetDefs
 			int res;
 			for (i = 0; i < sent_packets; i++) {
 				Packet p = new Packet(PacketType.SERVER_MAP);
-				NetworkSend_byte(p, MAP_PACKET_NORMAL);
+				NetworkSend_byte(p, MapPacket.MAP_PACKET_NORMAL);
 				res = fread(p.buffer + p.size, 1, SEND_MTU - p.size, file_pointer);
 				if (ferror(file_pointer)) {
-					error("Error reading temporary network savegame!");
+					Global.error("Error reading temporary network savegame!");
 				}
 				p.size += res;
 				Net.NetworkSend_Packet(p, cs);
@@ -360,7 +367,7 @@ public interface NetServer extends NetTools, NetDefs
 					// XXX - Delete this when patch-settings are saved in-game
 					NetworkSendPatchSettings(cs);
 					Packet pe = new Packet(PacketType.SERVER_MAP);
-					NetworkSend_byte(pe, MAP_PACKET_END);
+					NetworkSend_byte(pe, (byte) MapPacket.MAP_PACKET_END.ordinal());
 					Net.NetworkSend_Packet(pe, cs);
 
 					// Set the status to DONE_MAP, no we will wait for the client
@@ -615,7 +622,8 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkClientInfo ci;
 		String test_name;
 		byte playas;
-		NetworkLanguage client_lang;
+		//NetworkLanguage client_lang;
+		int client_lang;
 		String client_revision;
 
 
@@ -623,7 +631,7 @@ public interface NetServer extends NetTools, NetDefs
 
 	//#if defined(WITH_REV) || defined(WITH_REV_HACK)
 		// Check if the client has revision control enabled
-		if (!NOREV_STRING.equals(client_revision)) {
+		if (!NetGui.NOREV_STRING.equals(client_revision)) {
 			if (!Net._network_game_info.server_revision.equals(client_revision)) {
 				// Different revisions!!
 				NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NetworkErrorCode.WRONG_REVISION);
@@ -655,7 +663,7 @@ public interface NetServer extends NetTools, NetDefs
 			return;
 		}
 
-		ci = DEREF_CLIENT_INFO(cs);
+		ci = cs.ci; // DEREF_CLIENT_INFO(cs);
 
 		ci.client_name = test_name;
 		ci.unique_id = unique_id;
@@ -689,7 +697,7 @@ public interface NetServer extends NetTools, NetDefs
 		type = NetworkRecv_byte(cs, p);
 		password = NetworkRecv_string(cs, p);
 
-		if (cs.status == ClientStatus.INACTIVE && type == NETWORK_GAME_PASSWORD) {
+		if (cs.status == ClientStatus.INACTIVE && type == NetworkPasswordType.NETWORK_GAME_PASSWORD) {
 			// Check game-password
 			if (!password.equals(Net._network_game_info.server_password)) {
 				// Password is invalid
@@ -697,10 +705,10 @@ public interface NetServer extends NetTools, NetDefs
 				return;
 			}
 
-			ci = DEREF_CLIENT_INFO(cs);
+			ci = cs.ci; //DEREF_CLIENT_INFO(cs);
 
 			if (ci.client_playas <= Global.MAX_PLAYERS && !Net._network_player_info[ci.client_playas - 1].password.isBlank()) {
-				NetworkPacketSend_PACKET_SERVER_NEED_PASSWORD_command(cs, NETWORK_COMPANY_PASSWORD);
+				NetworkPacketSend_PACKET_SERVER_NEED_PASSWORD_command(cs, NetworkPasswordType.NETWORK_COMPANY_PASSWORD);
 				return;
 			}
 
@@ -708,7 +716,7 @@ public interface NetServer extends NetTools, NetDefs
 			NetworkPacketSend_PACKET_SERVER_WELCOME_command(cs);
 			return;
 		} else if (cs.status == ClientStatus.INACTIVE && type == NETWORK_COMPANY_PASSWORD) {
-			ci = DEREF_CLIENT_INFO(cs);
+			ci = cs.ci; //DEREF_CLIENT_INFO(cs);
 
 			if (!password.equals(Net._network_player_info[ci.client_playas - 1].password)) {
 				// Password is invalid
@@ -1223,7 +1231,7 @@ public interface NetServer extends NetTools, NetDefs
 	{
 		final SettingDesc item;
 		Packet p = new Packet(PacketType.SERVER_MAP);
-		NetworkSend_byte(p, MAP_PACKET_PATCH);
+		NetworkSend_byte(p, MapPacket.MapPacket.MAP_PACKET_PATCH);
 		// Now send all the patch-settings in a pretty order..
 
 		item = patch_settings;
@@ -1255,8 +1263,8 @@ public interface NetServer extends NetTools, NetDefs
 	{
 		//String password;
 		//Player p;
-		Vehicle v;
-		Station s;
+		//Vehicle v;
+		//Station s;
 		//NetworkClientState cs;
 		NetworkClientInfo ci;
 		int i;
@@ -1335,7 +1343,9 @@ public interface NetServer extends NetTools, NetDefs
 		}
 
 		// Go through all stations and count the types of stations
-		FOR_ALL_STATIONS(s) {
+		//FOR_ALL_STATIONS(s)
+		Station.forEach( (s) -> 
+		{
 			if (s.owner < Global.MAX_PLAYERS) {
 				if ((s.facilities & FACIL_TRAIN))
 					_network_player_info[s.owner].num_station[0]++;
@@ -1348,7 +1358,7 @@ public interface NetServer extends NetTools, NetDefs
 				if ((s.facilities & FACIL_DOCK))
 					_network_player_info[s.owner].num_station[4]++;
 			}
-		}
+		});
 
 		ci = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
 		// Register local player (if not dedicated)
@@ -1418,7 +1428,7 @@ public interface NetServer extends NetTools, NetDefs
 		memset(clients_in_company, 0, sizeof(clients_in_company));
 
 		/* Detect the active companies */
-		FOR_ALL_CLIENTS(cs -> {
+		Net.FOR_ALL_CLIENTS(cs -> {
 			ci = DEREF_CLIENT_INFO(cs);
 			if (ci.client_playas >= 1 && ci.client_playas <= Global.MAX_PLAYERS) {
 				clients_in_company[ci.client_playas-1] = true;

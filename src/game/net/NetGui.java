@@ -37,7 +37,7 @@ public class NetGui extends Net implements NetDefs
 	private static final int MAX_QUERYSTR_LEN = 64;
 	//static char _edit_str_buf[MAX_QUERYStr.STR_LEN*2];
 
-	private static final String NOREV_STRING = "norev000";
+	static final String NOREV_STRING = "norev000";
 	
 	static int _selected_field;
 	static boolean _first_time_show_network_game_window = true;

@@ -46,7 +46,7 @@ public class SaveLoad
 	 * @param mode Save or load. Load can also be a TTD(Patch) game. Use SL_LOAD, SL_OLD_LOAD or SL_SAVE
 	 * @return Return the results of the action. SL_OK, SL_ERROR or SL_REINIT ("unload" the game)
 	 */
-	static SaveOrLoadResult SaveOrLoad(String filename, int mode)
+	public static SaveOrLoadResult SaveOrLoad(String filename, int mode)
 	{
 
 		/* An instance of saving is already active, so don't go saving again * /
