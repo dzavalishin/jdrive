@@ -1,7 +1,10 @@
 package game.net;
 
+import game.Cmd;
 import game.Global;
 import game.Player;
+import game.SaveLoad;
+import game.Str;
 import game.util.BitOps;
 
 public interface NetServer extends NetTools, NetDefs
@@ -34,6 +37,12 @@ public interface NetServer extends NetTools, NetDefs
 		return p.nextLong();
 	}
 
+	public static String NetworkRecv_string(NetworkClientState cs, Packet p) {
+		 TODO Auto-generated method stub
+		return null;
+	}
+
+	
 	
 	// Is the network enabled?
 
@@ -77,23 +86,20 @@ public interface NetServer extends NetTools, NetDefs
 
 		int i;
 
-		//Player player;
-		Packet p;
-
 		int [] active = {0};
 
-		FOR_ALL_PLAYERS(player) {
+		/*FOR_ALL_PLAYERS(player) {
 			if (player.is_active)
 				active++;
-		}
+		}*/
 		
-		Player.forEach( pl -> if (pl.isActive()) active[0]++; );
+		Player.forEach( pl -> { if (pl.isActive()) active[0]++; } );
 
 		if (active[0] == 0) {
 			Packet p = new Packet(PacketType.SERVER_COMPANY_INFO);
 
 			NetworkSend_byte (p, NETWORK_COMPANY_INFO_VERSION);
-			NetworkSend_byte (p, active[0]);
+			NetworkSend_byte (p, (byte)active[0]);
 
 			Net.NetworkSend_Packet(p, cs);
 			return;
@@ -101,48 +107,50 @@ public interface NetServer extends NetTools, NetDefs
 
 		NetworkPopulateCompanyInfo();
 
-		FOR_ALL_PLAYERS(player) {
-			if (!player.is_active)
+		Player.forEach(player -> {
+			if (!player.isActive())
 				continue;
 
-			p = new Packet(PacketType.SERVER_COMPANY_INFO);
+			Packet p = new Packet(PacketType.SERVER_COMPANY_INFO);
 
-			NetworkSend_byte (p, NETWORK_COMPANY_INFO_VERSION);
-			NetworkSend_byte (p, active);
-			NetworkSend_byte (p, player.index);
+			NetworkSend_byte (p, (byte) NETWORK_COMPANY_INFO_VERSION);
+			NetworkSend_byte (p, (byte) active[0]);
+			NetworkSend_byte (p, (byte) player.getIndex().id);
 
-			NetworkSend_string(p, _network_player_info[player.index].company_name);
-			NetworkSend_byte (p, _network_player_info[player.index].inaugurated_year);
-			NetworkSend_int64(p, _network_player_info[player.index].company_value);
-			NetworkSend_int64(p, _network_player_info[player.index].money);
-			NetworkSend_int64(p, _network_player_info[player.index].income);
-			NetworkSend_int(p, _network_player_info[player.index].performance);
+			int ix = player.getIndex().id;
+			
+			NetworkSend_string(p, Net._network_player_info[ix].company_name);
+			NetworkSend_byte (p, Net._network_player_info[ix].inaugurated_year);
+			NetworkSend_int64(p, Net._network_player_info[ix].company_value);
+			NetworkSend_int64(p, Net._network_player_info[ix].money);
+			NetworkSend_int64(p, Net._network_player_info[ix].income);
+			NetworkSend_int(p, Net._network_player_info[ix].performance);
 
 			/* Send 1 if there is a passord for the company else send 0 */
-			if (_network_player_info[player.index].password[0] != '\0') {
-				NetworkSend_byte (p, 1);
+			if (!Net._network_player_info[ix].password.isBlank()) {
+				NetworkSend_byte (p, (byte) 1);
 			} else {
-				NetworkSend_byte (p, 0);
+				NetworkSend_byte (p, (byte) 0);
 			}
 
 			for (i = 0; i < NETWORK_VEHICLE_TYPES; i++)
-				NetworkSend_int(p, _network_player_info[player.index].num_vehicle[i]);
+				NetworkSend_int(p, Net._network_player_info[ix].num_vehicle[i]);
 
 			for (i = 0; i < NETWORK_STATION_TYPES; i++)
-				NetworkSend_int(p, _network_player_info[player.index].num_station[i]);
+				NetworkSend_int(p, Net._network_player_info[ix].num_station[i]);
 
-			if (_network_player_info[player.index].players[0] == '\0')
+			if (Net._network_player_info[ix].players.isBlank())
 				NetworkSend_string(p, "<none>");
 			else
-				NetworkSend_string(p, _network_player_info[player.index].players);
+				NetworkSend_string(p, Net._network_player_info[ix].players);
 
 			Net.NetworkSend_Packet(p, cs);
-		}
+		});
 
-		p = new Packet(PacketType.SERVER_COMPANY_INFO);
+		Packet p = new Packet(PacketType.SERVER_COMPANY_INFO);
 
-		NetworkSend_byte (p, NETWORK_COMPANY_INFO_VERSION);
-		NetworkSend_byte (p, 0);
+		NetworkSend_byte (p, (byte) NETWORK_COMPANY_INFO_VERSION);
+		NetworkSend_byte (p, (byte) 0);
 
 		Net.NetworkSend_Packet(p, cs);
 	}
@@ -165,17 +173,17 @@ public interface NetServer extends NetTools, NetDefs
 		Net.NetworkSend_Packet(p, cs);
 
 		// Only send when the current client was in game
-		if (cs.status > STATUS_AUTH) {
+		if (cs.status > ClientStatus.AUTH) {
 			NetworkGetClientName(client_name, sizeof(client_name), cs);
 
-			Global.GetString(str, Str.STR_NETWORK_ERR_CLIENT_GENERAL + error);
+			str = Global.GetString(Str.STR_NETWORK_ERR_CLIENT_GENERAL + error);
 
 			Global.DEBUG_net( 2, "[NET] %s made an error (%s) and his connection is closed", client_name, str);
 
-			NetworkTextMessage(NETWORK_ACTION_LEAVE, 1, false, client_name, "%s", str);
+			NetworkTextMessage(NetworkAction.LEAVE, 1, false, client_name, "%s", str);
 
 			FOR_ALL_CLIENTS(new_cs) {
-				if (new_cs.status > STATUS_AUTH && new_cs != cs) {
+				if (new_cs.status > ClientStatus.AUTH && new_cs != cs) {
 					// Some errors we filter to a more general error. Clients don't have to know the real
 					//  reason a joining failed.
 					if (error == NETWORK_ERROR_NOT_AUTHORIZED || error == NETWORK_ERROR_NOT_EXPECTED || error == NETWORK_ERROR_WRONG_REVISION)
@@ -194,7 +202,7 @@ public interface NetServer extends NetTools, NetDefs
 		Net.NetworkSend_Packets(cs);
 
 		// The client made a mistake, so drop his connection now!
-		NetworkCloseClient(cs);
+		Net.NetworkCloseClient(cs);
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_NEED_PASSWORD_command(NetworkClientState cs, NetworkPasswordType type)
@@ -224,10 +232,10 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkClientState new_cs;
 
 		// Invalid packet when status is AUTH or higher
-		if (cs.status >= STATUS_AUTH)
+		if (cs.status >= ClientStatus.AUTH)
 			return;
 
-		cs.status = STATUS_AUTH;
+		cs.status = ClientStatus.AUTH;
 		_network_game_info.clients_on++;
 
 		p = new Packet(PacketType.SERVER_WELCOME);
@@ -236,7 +244,7 @@ public interface NetServer extends NetTools, NetDefs
 
 			// Transmit info about all the active clients
 		FOR_ALL_CLIENTS(new_cs) {
-			if (new_cs != cs && new_cs.status > STATUS_AUTH)
+			if (new_cs != cs && new_cs.status > ClientStatus.AUTH)
 				NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, DEREF_CLIENT_INFO(new_cs));
 		}
 		// Also send the info of the server
@@ -254,15 +262,14 @@ public interface NetServer extends NetTools, NetDefs
 		//
 		int waiting = 0;
 		NetworkClientState new_cs;
-		Packet p;
 
 		// Count how many players are waiting in the queue
 		FOR_ALL_CLIENTS(new_cs) {
-			if (new_cs.status == STATUS_MAP_WAIT)
+			if (new_cs.status == ClientStatus.MAP_WAIT)
 				waiting++;
 		}
 
-		p = new Packet(PacketType.SERVER_WAIT);
+		Packet p = new Packet(PacketType.SERVER_WAIT);
 		NetworkSend_byte(p, waiting);
 		Net.NetworkSend_Packet(p, cs);
 	}
@@ -292,17 +299,17 @@ public interface NetServer extends NetTools, NetDefs
 
 		String filename;
 
-		if (cs.status < STATUS_AUTH) {
+		if (cs.status < ClientStatus.AUTH) {
 			// Illegal call, return error and ignore the packet
 			NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NETWORK_ERROR_NOT_AUTHORIZED);
 			return;
 		}
-		if (cs.status == STATUS_AUTH) {
+		if (cs.status == ClientStatus.AUTH) {
 			Packet p;
 
 			// Make a dump of the current game
-			sprintf(filename, "%s%snetwork_server.tmp",  _path.autosave_dir, PATHSEP);
-			if (SaveOrLoad(filename, SL_SAVE) != SL_OK) error("network savedump failed");
+			sprintf(filename, "%s%snetwork_server.tmp",  Global._path.autosave_dir, PATHSEP);
+			if (SaveOrLoad(filename, SaveLoad.SL_SAVE) != SL_OK) error("network savedump failed");
 
 			file_pointer = fopen(filename, "rb");
 			fseek(file_pointer, 0, SEEK_END);
@@ -318,13 +325,13 @@ public interface NetServer extends NetTools, NetDefs
 
 			sent_packets = 4; // We start with trying 4 packets
 
-			cs.status = STATUS_MAP;
+			cs.status = ClientStatus.MAP;
 			/* Mark the start of download */
-			cs.last_frame = _frame_counter;
-			cs.last_frame_server = _frame_counter;
+			cs.last_frame = Global._frame_counter;
+			cs.last_frame_server = Global._frame_counter;
 		}
 
-		if (cs.status == STATUS_MAP) {
+		if (cs.status == ClientStatus.MAP) {
 			int i;
 			int res;
 			for (i = 0; i < sent_packets; i++) {
@@ -338,18 +345,16 @@ public interface NetServer extends NetTools, NetDefs
 				Net.NetworkSend_Packet(p, cs);
 				if (feof(file_pointer)) {
 					// Done reading!
-					Packet p;
-
 					// XXX - Delete this when patch-settings are saved in-game
 					NetworkSendPatchSettings(cs);
-					p = new Packet(PacketType.SERVER_MAP);
-					NetworkSend_byte(p, MAP_PACKET_END);
-					Net.NetworkSend_Packet(p, cs);
+					Packet pe = new Packet(PacketType.SERVER_MAP);
+					NetworkSend_byte(pe, MAP_PACKET_END);
+					Net.NetworkSend_Packet(pe, cs);
 
 					// Set the status to DONE_MAP, no we will wait for the client
 					//  to send it is ready (maybe that happens like never ;))
-					cs.status = STATUS_DONE_MAP;
-					fclose(file_pointer);
+					cs.status = ClientStatus.DONE_MAP;
+					file_pointer.close();
 
 					{
 						NetworkClientState new_cs;
@@ -357,11 +362,11 @@ public interface NetServer extends NetTools, NetDefs
 						// Check if there is a client waiting for receiving the map
 						//  and start sending him the map
 						FOR_ALL_CLIENTS(new_cs) {
-							if (new_cs.status == STATUS_MAP_WAIT) {
+							if (new_cs.status == ClientStatus.MAP_WAIT) {
 								// Check if we already have a new client to send the map to
 								if (!new_map_client) {
 									// If not, this client will get the map
-									new_cs.status = STATUS_AUTH;
+									new_cs.status = ClientStatus.AUTH;
 									new_map_client = true;
 									NetworkPacketSend_PACKET_SERVER_MAP_command(new_cs);
 								} else {
@@ -600,7 +605,7 @@ public interface NetServer extends NetTools, NetDefs
 		String client_revision;
 
 
-		NetworkRecv_string(cs, p, client_revision, sizeof(client_revision));
+		client_revision = NetworkRecv_string(cs, p);
 
 	//#if defined(WITH_REV) || defined(WITH_REV_HACK)
 		// Check if the client has revision control enabled
@@ -614,20 +619,20 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	//#endif
 
-		NetworkRecv_string(cs, p, name, sizeof(name));
+		name = NetworkRecv_string(cs, p);
 		playas = NetworkRecv_byte(cs, p);
 		client_lang = NetworkRecv_byte(cs, p);
-		NetworkRecv_string(cs, p, unique_id, sizeof(unique_id));
+		unique_id = NetworkRecv_string(cs, p);
 
 		if (cs.quited)
 			return;
 
 		// Check if someone else already has that name
-		snprintf(test_name, sizeof(test_name), "%s", name);
+		test_name = name;
 
-		if (test_name[0] == '\0') {
+		if (test_name.isBlank()) {
 			// We need a valid name.. make it Player
-			snprintf(test_name, sizeof(test_name), "Player");
+			test_name = "Player";
 		}
 
 		if (!NetworkFindName(test_name)) {
@@ -638,17 +643,17 @@ public interface NetServer extends NetTools, NetDefs
 
 		ci = DEREF_CLIENT_INFO(cs);
 
-		snprintf(ci.client_name, sizeof(ci.client_name), "%s", test_name);
-		snprintf(ci.unique_id, sizeof(ci.unique_id), "%s", unique_id);
+		ci.client_name = test_name;
+		ci.unique_id = unique_id;
 		ci.client_playas = playas;
 		ci.client_lang = client_lang;
 
 		// We now want a password from the client
 		//  else we do not allow him in!
-		if (_network_game_info.use_password)
+		if (Net._network_game_info.use_password)
 			NetworkPacketSend_PACKET_SERVER_NEED_PASSWORD_command(cs, NETWORK_GAME_PASSWORD);
 		else {
-			if (ci.client_playas > 0 && ci.client_playas <= Global.MAX_PLAYERS && _network_player_info[ci.client_playas - 1].password[0] != '\0') {
+			if (ci.client_playas > 0 && ci.client_playas <= Global.MAX_PLAYERS && !Net._network_player_info[ci.client_playas - 1].password.isBlank()) {
 				NetworkPacketSend_PACKET_SERVER_NEED_PASSWORD_command(cs, NETWORK_COMPANY_PASSWORD);
 			}
 			else {
@@ -658,7 +663,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		/* Make sure companies to who people try to join are not autocleaned */
 		if (playas >= 1 && playas <= Global.MAX_PLAYERS)
-			_network_player_info[playas-1].months_empty = 0;
+			Net._network_player_info[playas-1].months_empty = 0;
 	}
 
 	static void NetworkPacketReceive_PACKET_CLIENT_PASSWORD_command(NetworkClientState cs, Packet p)
@@ -668,11 +673,11 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkClientInfo ci;
 
 		type = NetworkRecv_byte(cs, p);
-		NetworkRecv_string(cs, p, password, sizeof(password));
+		password = NetworkRecv_string(cs, p);
 
-		if (cs.status == STATUS_INACTIVE && type == NETWORK_GAME_PASSWORD) {
+		if (cs.status == ClientStatus.INACTIVE && type == NETWORK_GAME_PASSWORD) {
 			// Check game-password
-			if (strncmp(password, _network_game_info.server_password, sizeof(password)) != 0) {
+			if (!password.equals(Net._network_game_info.server_password)) {
 				// Password is invalid
 				NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NETWORK_ERROR_WRONG_PASSWORD);
 				return;
@@ -680,7 +685,7 @@ public interface NetServer extends NetTools, NetDefs
 
 			ci = DEREF_CLIENT_INFO(cs);
 
-			if (ci.client_playas <= Global.MAX_PLAYERS && _network_player_info[ci.client_playas - 1].password[0] != '\0') {
+			if (ci.client_playas <= Global.MAX_PLAYERS && !Net._network_player_info[ci.client_playas - 1].password.isBlank()) {
 				NetworkPacketSend_PACKET_SERVER_NEED_PASSWORD_command(cs, NETWORK_COMPANY_PASSWORD);
 				return;
 			}
@@ -688,7 +693,7 @@ public interface NetServer extends NetTools, NetDefs
 			// Valid password, allow user
 			NetworkPacketSend_PACKET_SERVER_WELCOME_command(cs);
 			return;
-		} else if (cs.status == STATUS_INACTIVE && type == NETWORK_COMPANY_PASSWORD) {
+		} else if (cs.status == ClientStatus.INACTIVE && type == NETWORK_COMPANY_PASSWORD) {
 			ci = DEREF_CLIENT_INFO(cs);
 
 			if (strncmp(password, _network_player_info[ci.client_playas - 1].password, sizeof(password)) != 0) {
@@ -712,16 +717,16 @@ public interface NetServer extends NetTools, NetDefs
 
 		// The client was never joined.. so this is impossible, right?
 		//  Ignore the packet, give the client a warning, and close his connection
-		if (cs.status < STATUS_AUTH || cs.quited) {
+		if (cs.status < ClientStatus.AUTH || cs.quited) {
 			NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NETWORK_ERROR_NOT_AUTHORIZED);
 			return;
 		}
 
 		// Check if someone else is receiving the map
 		FOR_ALL_CLIENTS(new_cs) {
-			if (new_cs.status == STATUS_MAP) {
+			if (new_cs.status == ClientStatus.MAP) {
 				// Tell the new client to wait
-				cs.status = STATUS_MAP_WAIT;
+				cs.status = ClientStatus.MAP_WAIT;
 				NetworkPacketSend_PACKET_SERVER_WAIT_command(cs);
 				return;
 			}
@@ -734,17 +739,17 @@ public interface NetServer extends NetTools, NetDefs
 	static void NetworkPacketReceive_PACKET_CLIENT_MAP_OK_command(NetworkClientState cs, Packet p)
 	{
 		// Client has the map, now start syncing
-		if (cs.status == STATUS_DONE_MAP && !cs.quited) {
+		if (cs.status == ClientStatus.DONE_MAP && !cs.quited) {
 			String client_name;
 			NetworkClientState new_cs;
 
 			NetworkGetClientName(client_name, sizeof(client_name), cs);
 
-			NetworkTextMessage(NETWORK_ACTION_JOIN, 1, false, client_name, "");
+			NetworkTextMessage(NetworkAction.JOIN, 1, false, client_name, "");
 
 			// Mark the client as pre-active, and wait for an ACK
 			//  so we know he is done loading and in sync with us
-			cs.status = STATUS_PRE_ACTIVE;
+			cs.status = ClientStatus.PRE_ACTIVE;
 			NetworkHandleCommandQueue(cs);
 			NetworkPacketSend_PACKET_SERVER_FRAME_command(cs);
 			NetworkPacketSend_PACKET_SERVER_SYNC_command(cs);
@@ -755,7 +760,7 @@ public interface NetServer extends NetTools, NetDefs
 			cs.last_frame_server = _frame_counter;
 
 			FOR_ALL_CLIENTS(new_cs) {
-				if (new_cs.status > STATUS_AUTH) {
+				if (new_cs.status > ClientStatus.AUTH) {
 					NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(new_cs, DEREF_CLIENT_INFO(cs));
 					NetworkPacketSend_PACKET_SERVER_JOIN_command(new_cs, cs.index);
 				}
@@ -765,7 +770,7 @@ public interface NetServer extends NetTools, NetDefs
 				/* Now pause the game till the client is in sync */
 				DoCommandP(0, 1, 0, null, Cmd.CMD_PAUSE);
 
-				NetworkServer_HandleChat(NETWORK_ACTION_CHAT, DESTTYPE_BROADCAST, 0, "Game paused (incoming client)", NETWORK_SERVER_INDEX);
+				NetworkServer_HandleChat(NetworkAction.CHAT, DESTTYPE_BROADCAST, 0, "Game paused (incoming client)", NETWORK_SERVER_INDEX);
 			}
 		} else {
 			// Wrong status for this packet, give a warning to client, and close connection
@@ -808,7 +813,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		// The client was never joined.. so this is impossible, right?
 		//  Ignore the packet, give the client a warning, and close his connection
-		if (cs.status < STATUS_DONE_MAP || cs.quited) {
+		if (cs.status < ClientStatus.DONE_MAP || cs.quited) {
 			NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NETWORK_ERROR_NOT_EXPECTED);
 			return;
 		}
@@ -872,7 +877,7 @@ public interface NetServer extends NetTools, NetDefs
 		// Queue the command for the clients (are send at the end of the frame
 		//   if they can handle it ;))
 		FOR_ALL_CLIENTS(new_cs) {
-			if (new_cs.status > STATUS_AUTH) {
+			if (new_cs.status > ClientStatus.AUTH) {
 				// Callbacks are only send back to the client who sent them in the
 				//  first place. This filters that out.
 				cp.callback = (new_cs != cs) ? 0 : callback;
@@ -902,7 +907,7 @@ public interface NetServer extends NetTools, NetDefs
 		String client_name;
 
 		// The client was never joined.. thank the client for the packet, but ignore it
-		if (cs.status < STATUS_DONE_MAP || cs.quited) {
+		if (cs.status < ClientStatus.DONE_MAP || cs.quited) {
 			cs.quited = true;
 			return;
 		}
@@ -913,10 +918,10 @@ public interface NetServer extends NetTools, NetDefs
 
 		Global.DEBUG_net( 2, "[NET] %s reported an error and is closing his connection (%s)", client_name, str);
 
-		NetworkTextMessage(NETWORK_ACTION_LEAVE, 1, false, client_name, "%s", str);
+		NetworkTextMessage(NetworkAction.LEAVE, 1, false, client_name, "%s", str);
 
 		FOR_ALL_CLIENTS(new_cs) {
-			if (new_cs.status > STATUS_AUTH) {
+			if (new_cs.status > ClientStatus.AUTH) {
 				NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(new_cs, cs.index, errorno);
 			}
 		}
@@ -933,7 +938,7 @@ public interface NetServer extends NetTools, NetDefs
 		String client_name;
 
 		// The client was never joined.. thank the client for the packet, but ignore it
-		if (cs.status < STATUS_DONE_MAP || cs.quited) {
+		if (cs.status < ClientStatus.DONE_MAP || cs.quited) {
 			cs.quited = true;
 			return;
 		}
@@ -942,10 +947,10 @@ public interface NetServer extends NetTools, NetDefs
 
 		NetworkGetClientName(client_name, sizeof(client_name), cs);
 
-		NetworkTextMessage(NETWORK_ACTION_LEAVE, 1, false, client_name, "%s", str);
+		NetworkTextMessage(NetworkAction.LEAVE, 1, false, client_name, "%s", str);
 
 		FOR_ALL_CLIENTS(new_cs) {
-			if (new_cs.status > STATUS_AUTH) {
+			if (new_cs.status > ClientStatus.AUTH) {
 				NetworkPacketSend_PACKET_SERVER_QUIT_command(new_cs, cs.index, str);
 			}
 		}
@@ -958,17 +963,17 @@ public interface NetServer extends NetTools, NetDefs
 		int frame = NetworkRecv_int(cs, p);
 
 		/* The client is trying to catch up with the server */
-		if (cs.status == STATUS_PRE_ACTIVE) {
+		if (cs.status == ClientStatus.PRE_ACTIVE) {
 			/* The client is not yet catched up? */
-			if (frame + DAY_TICKS < _frame_counter)
+			if (frame + Global.DAY_TICKS < Global._frame_counter)
 				return;
 
 			/* Now he is! Unpause the game */
-			cs.status = STATUS_ACTIVE;
+			cs.status = ClientStatus.ACTIVE;
 
-			if (_network_pause_on_join) {
-				DoCommandP(0, 0, 0, null, Cmd.CMD_PAUSE);
-				NetworkServer_HandleChat(NETWORK_ACTION_CHAT, DESTTYPE_BROADCAST, 0, "Game unpaused", NETWORK_SERVER_INDEX);
+			if (Net._network_pause_on_join) {
+				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE);
+				NetworkServer_HandleChat(NetworkAction.CHAT, DESTTYPE_BROADCAST, 0, "Game unpaused", NETWORK_SERVER_INDEX);
 			}
 		}
 
@@ -1051,8 +1056,7 @@ public interface NetServer extends NetTools, NetDefs
 			// Display the message locally (so you know you have sent it)
 			if (ci != null && show_local) {
 				if (from_index == NETWORK_SERVER_INDEX) {
-					char name[NETWORK_NAME_LENGTH];
-					Global.GetString(name, GetPlayer(ci_to.client_playas-1).name_1);
+					Sring name = Global.GetString(GetPlayer(ci_to.client_playas-1).name_1);
 					NetworkTextMessage(action, GetDrawStringPlayerColor(ci_own.client_playas-1), true, name, "%s", msg);
 				} else {
 					FOR_ALL_CLIENTS(cs) {
@@ -1115,7 +1119,7 @@ public interface NetServer extends NetTools, NetDefs
 		if (ci != null) {
 			// Display change
 			if (NetworkFindName(client_name)) {
-				NetworkTextMessage(NETWORK_ACTION_NAME_CHANGE, 1, false, ci.client_name, "%s", client_name);
+				NetworkTextMessage(NetworkAction.NAME_CHANGE, 1, false, ci.client_name, "%s", client_name);
 				ttd_strlcpy(ci.client_name, client_name, sizeof(ci.client_name));
 				NetworkUpdateClientInfo(ci.client_index);
 			}
@@ -1124,14 +1128,11 @@ public interface NetServer extends NetTools, NetDefs
 
 	static void NetworkPacketReceive_PACKET_CLIENT_RCON_command(NetworkClientState cs, Packet p)
 	{
-		char pass[NETWORK_PASSWORD_LENGTH];
-		char command[NETWORK_RCONCOMMAND_LENGTH];
-
-		if (_network_game_info.rcon_password[0] == '\0')
+		if (Net._network_game_info.rcon_password.isBlank())
 			return;
 
-		NetworkRecv_string(cs, p, pass, sizeof(pass));
-		NetworkRecv_string(cs, p, command, sizeof(command));
+		String pass = NetworkRecv_string(cs, p);
+		String command = NetworkRecv_string(cs, p);
 
 		if (strncmp(pass, _network_game_info.rcon_password, sizeof(pass)) != 0) {
 			Global.DEBUG_net( 0, "[RCon] Wrong password from client-id %d", cs.index);
@@ -1140,11 +1141,12 @@ public interface NetServer extends NetTools, NetDefs
 
 		Global.DEBUG_net( 0, "[RCon] Client-id %d executed: %s", cs.index, command);
 
-		_redirect_console_to_client = cs.index;
-		IConsoleCmdExec(command);
-		_redirect_console_to_client = 0;
+		Console._redirect_console_to_client = cs.index;
+		Console.IConsoleCmdExec(command);
+		Console._redirect_console_to_client = 0;
 		return;
 	}
+
 
 
 	// This array matches PacketType. At an incoming
@@ -1518,7 +1520,7 @@ public interface NetServer extends NetTools, NetDefs
 		//  do their frame!
 		FOR_ALL_CLIENTS(cs) {
 			// Check if the speed of the client is what we can expect from a client
-			if (cs.status == STATUS_ACTIVE) {
+			if (cs.status == ClientStatus.ACTIVE) {
 				// 1 lag-point per day
 				int lag = NetworkCalculateLag(cs) / DAY_TICKS;
 				if (lag > 0) {
@@ -1538,7 +1540,7 @@ public interface NetServer extends NetTools, NetDefs
 				} else {
 					cs.lag_test = 0;
 				}
-			} else if (cs.status == STATUS_PRE_ACTIVE) {
+			} else if (cs.status == ClientStatus.PRE_ACTIVE) {
 				int lag = NetworkCalculateLag(cs);
 				if (lag > _network_max_join_time) {
 					IConsolePrintF(_icolour_err,"Client #%d is dropped because it took longer than %d ticks for him to join", cs.index, _network_max_join_time);
@@ -1546,7 +1548,7 @@ public interface NetServer extends NetTools, NetDefs
 				}
 			}
 
-			if (cs.status >= STATUS_PRE_ACTIVE) {
+			if (cs.status >= ClientStatus.PRE_ACTIVE) {
 				// Check if we can send command, and if we have anything in the queue
 				NetworkHandleCommandQueue(cs);
 
