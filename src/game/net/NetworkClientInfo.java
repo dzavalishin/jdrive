@@ -11,4 +11,8 @@ public class NetworkClientInfo
 		InetAddress client_ip;                             /// IP-address of the client (so he can be banned)
 		int join_date;                             /// Gamedate the player has joined
 		String unique_id;          /// Every play sends an unique id so we can indentify him
+		
+		public String GetPlayerIP() {
+			return client_ip.toString();
+		}
 }
