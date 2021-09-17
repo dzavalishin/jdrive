@@ -2,6 +2,7 @@ package game.net;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Iterator;
@@ -341,7 +342,12 @@ public interface NetServer extends NetTools, NetDefs
 
 			//file_pointer = fopen(filename, "rb");
 			File f = new File(filename);
-			Net._server_file_pointer = new RandomAccessFile(f, "r");
+			try {
+				Net._server_file_pointer = new RandomAccessFile(f, "r");
+			} catch (FileNotFoundException e) {
+				// e.printStackTrace();
+				Global.fail("Send map: %s", e); // Crash TODO - disconnect client
+			}
 			//fseek(file_pointer, 0, SEEK_END);
 			//file_pointer.se
 
@@ -353,7 +359,12 @@ public interface NetServer extends NetTools, NetDefs
 			Net.NetworkSend_Packet(p, cs);
 
 			//fseek(file_pointer, 0, SEEK_SET);
-			Net._server_file_pointer.seek(0);
+			try {
+				Net._server_file_pointer.seek(0);
+			} catch (IOException e) {
+				// e.printStackTrace();
+				Global.fail("Send map: %s", e); // Crash TODO - disconnect client
+			}
 
 			Net.server_sent_packets = 4; // We start with trying 4 packets
 
@@ -375,7 +386,13 @@ public interface NetServer extends NetTools, NetDefs
 				byte [] buffer = new byte[Packet.SEND_MTU];
 
 				//res = fread(p.buffer + p.size, 1, SEND_MTU - p.size, file_pointer);
-				int res = Net._server_file_pointer.read(buffer);
+				int res = -1;
+				try {
+					res = Net._server_file_pointer.read(buffer);
+				} catch (IOException e) {
+					// e.printStackTrace();
+					Global.fail("Send map: %s", e); // Crash TODO - disconnect client					
+				}
 				p.setBuffer(buffer);
 
 				/* TODO if (ferror(file_pointer)) {
@@ -399,7 +416,12 @@ public interface NetServer extends NetTools, NetDefs
 					// Set the status to DONE_MAP, no we will wait for the client
 					//  to send it is ready (maybe that happens like never ;))
 					cs.status = ClientStatus.DONE_MAP;
-					Net._server_file_pointer.close();
+					try {
+						Net._server_file_pointer.close();
+					} catch (IOException e) {
+						// e.printStackTrace();
+						Global.error(e); // Read - can ignore
+					}
 
 					{
 						//NetworkClientState new_cs;
@@ -858,7 +880,7 @@ public interface NetServer extends NetTools, NetDefs
 	 * @param *cs the connected client that has sent the command
 	 * @param *p the packet in which the command was sent
 	 */
-	static void NetworkPacketReceive_PACKET_CLIENT_COMMAND_command(NetworkClientState cs, Packet p)
+	static void NetworkPacketReceive_PACKET_CLIENT_COMMAND_command(NetworkClientState cs, Packet p )
 	{
 		//NetworkClientState new_cs;
 		final NetworkClientInfo ci;
@@ -920,8 +942,11 @@ public interface NetServer extends NetTools, NetDefs
 				return;
 			}
 
+			// XXX [dz] must implement some more robust 
+			int csIndex = Net._clients.indexOf(cs);
+			assert csIndex >= 0;
 			// XXX - UGLY! p2 is mis-used to get the client-id in CmdPlayerCtrl
-			cp.p2 = cs - _clients;
+			cp.p2 = csIndex;//cs - _clients;
 		}
 
 		// The frame can be executed in the same frame as the next frame-packet
