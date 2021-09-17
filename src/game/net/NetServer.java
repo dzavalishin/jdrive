@@ -1,10 +1,40 @@
 package game.net;
 
+import game.Global;
 import game.Player;
+import game.util.BitOps;
 
 public interface NetServer extends NetTools, NetDefs
 {
+	// TODO convert to Packet methods
+	public static void NetworkSend_byte(Packet p, byte b) {
+		p.append(b);	
+	}
 
+	public static void NetworkSend_int(Packet p, int i) {
+		p.appendInt(i);		
+	}
+	
+	public static void NetworkSend_string(Packet p, String s) {
+		p.appendInt(s.length());
+		p.append(s);
+		
+	}
+	
+	
+	public static byte NetworkRecv_byte(NetworkClientState my_CLIENT, Packet p) {
+		return p.nextByte();
+	}
+	
+	public static int NetworkRecv_int(NetworkClientState my_CLIENT, Packet p) {
+		return p.nextInt();
+	}
+
+	public static long NetworkRecv_int64(NetworkClientState my_CLIENT, Packet p) {
+		return p.nextLong();
+	}
+
+	
 	// Is the network enabled?
 
 	// **********
@@ -29,11 +59,11 @@ public interface NetServer extends NetTools, NetDefs
 		if (ci.client_index != NETWORK_EMPTY_INDEX) {
 			p = new Packet(PacketType.SERVER_CLIENT_INFO);
 			NetworkSend_int(p, ci.client_index);
-			NetworkSend_byte (p, ci.client_playas);
+			NetworkSend_byte (p, (byte) ci.client_playas);
 			NetworkSend_string(p, ci.client_name);
 			NetworkSend_string(p, ci.unique_id);
 
-			NetworkSend_Packet(p, cs);
+			Net.NetworkSend_Packet(p, cs);
 		}
 	}
 
@@ -65,7 +95,7 @@ public interface NetServer extends NetTools, NetDefs
 			NetworkSend_byte (p, NETWORK_COMPANY_INFO_VERSION);
 			NetworkSend_byte (p, active[0]);
 
-			NetworkSend_Packet(p, cs);
+			Net.NetworkSend_Packet(p, cs);
 			return;
 		}
 
@@ -106,7 +136,7 @@ public interface NetServer extends NetTools, NetDefs
 			else
 				NetworkSend_string(p, _network_player_info[player.index].players);
 
-			NetworkSend_Packet(p, cs);
+			Net.NetworkSend_Packet(p, cs);
 		}
 
 		p = new Packet(PacketType.SERVER_COMPANY_INFO);
@@ -114,7 +144,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkSend_byte (p, NETWORK_COMPANY_INFO_VERSION);
 		NetworkSend_byte (p, 0);
 
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_ERROR_command(NetworkClientState cs, NetworkErrorCode error)
@@ -132,7 +162,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		Packet p = new Packet(PacketType.SERVER_ERROR);
 		NetworkSend_byte(p, error);
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 
 		// Only send when the current client was in game
 		if (cs.status > STATUS_AUTH) {
@@ -161,7 +191,7 @@ public interface NetServer extends NetTools, NetDefs
 		cs.quited = true;
 
 		// Make sure the data get's there before we close the connection
-		NetworkSend_Packets(cs);
+		Net.NetworkSend_Packets(cs);
 
 		// The client made a mistake, so drop his connection now!
 		NetworkCloseClient(cs);
@@ -177,8 +207,8 @@ public interface NetServer extends NetTools, NetDefs
 		//
 
 		Packet p = new Packet(PacketType.SERVER_NEED_PASSWORD);
-		NetworkSend_byte(p, type);
-		NetworkSend_Packet(p, cs);
+		NetworkSend_byte(p, (byte) type.ordinal());
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_WELCOME_command(NetworkClientState cs)
@@ -202,7 +232,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		p = new Packet(PacketType.SERVER_WELCOME);
 		NetworkSend_int(p, cs.index);
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 
 			// Transmit info about all the active clients
 		FOR_ALL_CLIENTS(new_cs) {
@@ -234,9 +264,13 @@ public interface NetServer extends NetTools, NetDefs
 
 		p = new Packet(PacketType.SERVER_WAIT);
 		NetworkSend_byte(p, waiting);
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 	}
 
+	
+	//static FILE *file_pointer;
+	static int sent_packets; // How many packets we did send succecfully last time
+	
 	// This sends the map to the client
 	static void NetworkPacketSend_PACKET_SERVER_MAP_command(NetworkClientState cs)
 	{
@@ -257,8 +291,6 @@ public interface NetServer extends NetTools, NetDefs
 		//
 
 		String filename;
-		//static FILE *file_pointer;
-		static int sent_packets; // How many packets we did send succecfully last time
 
 		if (cs.status < STATUS_AUTH) {
 			// Illegal call, return error and ignore the packet
@@ -280,7 +312,7 @@ public interface NetServer extends NetTools, NetDefs
 			NetworkSend_byte(p, MAP_PACKET_START);
 			NetworkSend_int(p, _frame_counter);
 			NetworkSend_int(p, ftell(file_pointer));
-			NetworkSend_Packet(p, cs);
+			Net.NetworkSend_Packet(p, cs);
 
 			fseek(file_pointer, 0, SEEK_SET);
 
@@ -303,7 +335,7 @@ public interface NetServer extends NetTools, NetDefs
 					error("Error reading temporary network savegame!");
 				}
 				p.size += res;
-				NetworkSend_Packet(p, cs);
+				Net.NetworkSend_Packet(p, cs);
 				if (feof(file_pointer)) {
 					// Done reading!
 					Packet p;
@@ -312,7 +344,7 @@ public interface NetServer extends NetTools, NetDefs
 					NetworkSendPatchSettings(cs);
 					p = new Packet(PacketType.SERVER_MAP);
 					NetworkSend_byte(p, MAP_PACKET_END);
-					NetworkSend_Packet(p, cs);
+					Net.NetworkSend_Packet(p, cs);
 
 					// Set the status to DONE_MAP, no we will wait for the client
 					//  to send it is ready (maybe that happens like never ;))
@@ -346,7 +378,7 @@ public interface NetServer extends NetTools, NetDefs
 			}
 
 			// Send all packets (forced) and check if we have send it all
-			NetworkSend_Packets(cs);
+			Net.NetworkSend_Packets(cs);
 			if (cs.packet_queue == null) {
 				// All are sent, increase the sent_packets
 				sent_packets *= 2;
@@ -372,7 +404,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		NetworkSend_int(p, client_index);
 
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 
@@ -390,15 +422,15 @@ public interface NetServer extends NetTools, NetDefs
 		//
 
 		Packet p = new Packet(PacketType.SERVER_FRAME);
-		NetworkSend_int(p, _frame_counter);
-		NetworkSend_int(p, _frame_counter_max);
-	#ifdef ENABLE_NETWORK_SYNC_EVERY_FRAME
-		NetworkSend_int(p, _sync_seed_1);
-	#ifdef NETWORK_SEND_DOUBLE_SEED
-		NetworkSend_int(p, _sync_seed_2);
-	#endif
-	#endif
-		NetworkSend_Packet(p, cs);
+		NetworkSend_int(p, Global._frame_counter);
+		NetworkSend_int(p, Net._frame_counter_max);
+	//#ifdef ENABLE_NETWORK_SYNC_EVERY_FRAME
+		NetworkSend_int(p, Net._sync_seed_1);
+	//#ifdef NETWORK_SEND_DOUBLE_SEED
+		NetworkSend_int(p, Net._sync_seed_2);
+	//#endif
+	//#endif
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_SYNC_command(NetworkClientState cs)
@@ -414,13 +446,13 @@ public interface NetServer extends NetTools, NetDefs
 		//
 
 		Packet p = new Packet(PacketType.SERVER_SYNC);
-		NetworkSend_int(p, _frame_counter);
-		NetworkSend_int(p, _sync_seed_1);
+		NetworkSend_int(p, Global._frame_counter);
+		NetworkSend_int(p, Net._sync_seed_1);
 
-	#ifdef NETWORK_SEND_DOUBLE_SEED
-		NetworkSend_int(p, _sync_seed_2);
-	#endif
-		NetworkSend_Packet(p, cs);
+	//#ifdef NETWORK_SEND_DOUBLE_SEED
+		NetworkSend_int(p, Net._sync_seed_2);
+	//#endif
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_COMMAND_command(NetworkClientState cs, CommandPacket cp)
@@ -441,16 +473,16 @@ public interface NetServer extends NetTools, NetDefs
 
 		Packet p = new Packet(PacketType.SERVER_COMMAND);
 
-		NetworkSend_byte(p, cp.player);
+		NetworkSend_byte(p, (byte) cp.player.id);
 		NetworkSend_int(p, cp.cmd);
 		NetworkSend_int(p, cp.p1);
 		NetworkSend_int(p, cp.p2);
-		NetworkSend_int(p, cp.tile);
+		NetworkSend_int(p, cp.tile.getTile());
 		NetworkSend_string(p, cp.text);
-		NetworkSend_byte(p, cp.callback);
+		NetworkSend_byte(p, (byte) cp.callback);
 		NetworkSend_int(p, cp.frame);
 
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_CHAT_command(NetworkClientState cs, NetworkAction action, int client_index, boolean self_send, final String msg)
@@ -466,12 +498,12 @@ public interface NetServer extends NetTools, NetDefs
 
 		Packet p = new Packet(PacketType.SERVER_CHAT);
 
-		NetworkSend_byte(p, action);
+		NetworkSend_byte(p, (byte) action.ordinal());
 		NetworkSend_int(p, client_index);
-		NetworkSend_byte(p, self_send);
+		NetworkSend_byte(p, (byte) BitOps.b2i(self_send));
 		NetworkSend_string(p, msg);
 
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(NetworkClientState cs, int client_index, NetworkErrorCode errorno)
@@ -488,9 +520,9 @@ public interface NetServer extends NetTools, NetDefs
 		Packet p = new Packet(PacketType.SERVER_ERROR_QUIT);
 
 		NetworkSend_int(p, client_index);
-		NetworkSend_byte(p, errorno);
+		NetworkSend_byte(p, (byte) errorno.ordinal());
 
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_QUIT_command(NetworkClientState cs, int client_index, final String leavemsg)
@@ -509,7 +541,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkSend_int(p, client_index);
 		NetworkSend_string(p, leavemsg);
 
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_SHUTDOWN_command(NetworkClientState cs)
@@ -522,7 +554,7 @@ public interface NetServer extends NetTools, NetDefs
 		//
 
 		Packet p = new Packet(PacketType.SERVER_SHUTDOWN);
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_NEWGAME_command(NetworkClientState cs)
@@ -535,7 +567,7 @@ public interface NetServer extends NetTools, NetDefs
 		//
 
 		Packet p = new Packet(PacketType.SERVER_NEWGAME);
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	static void NetworkPacketSend_PACKET_SERVER_RCON_command(NetworkClientState cs, int color, final String command)
@@ -544,7 +576,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		NetworkSend_int(p, color);
 		NetworkSend_string(p, command);
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	// **********
@@ -570,7 +602,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		NetworkRecv_string(cs, p, client_revision, sizeof(client_revision));
 
-	#if defined(WITH_REV) || defined(WITH_REV_HACK)
+	//#if defined(WITH_REV) || defined(WITH_REV_HACK)
 		// Check if the client has revision control enabled
 		if (strncmp(NOREV_STRING, client_revision, sizeof(client_revision)) != 0) {
 			if (strncmp(_network_game_info.server_revision, client_revision, sizeof(_network_game_info.server_revision) - 1) != 0) {
@@ -580,7 +612,7 @@ public interface NetServer extends NetTools, NetDefs
 				return;
 			}
 		}
-	#endif
+	//#endif
 
 		NetworkRecv_string(cs, p, name, sizeof(name));
 		playas = NetworkRecv_byte(cs, p);
@@ -866,8 +898,8 @@ public interface NetServer extends NetTools, NetDefs
 		//  to us. Display the error and report it to the other clients
 		NetworkClientState new_cs;
 		byte errorno = NetworkRecv_byte(cs, p);
-		char str[100];
-		char client_name[NETWORK_CLIENT_NAME_LENGTH];
+		String str;
+		String client_name;
 
 		// The client was never joined.. thank the client for the packet, but ignore it
 		if (cs.status < STATUS_DONE_MAP || cs.quited) {
@@ -897,8 +929,8 @@ public interface NetServer extends NetTools, NetDefs
 		// The client wants to leave. Display this and report it to the other
 		//  clients.
 		NetworkClientState new_cs;
-		char str[100];
-		char client_name[NETWORK_CLIENT_NAME_LENGTH];
+		String str;
+		String client_name;
 
 		// The client was never joined.. thank the client for the packet, but ignore it
 		if (cs.status < STATUS_DONE_MAP || cs.quited) {
@@ -951,7 +983,7 @@ public interface NetServer extends NetTools, NetDefs
 	static void NetworkServer_HandleChat(NetworkAction action, DestType desttype, int dest, final char *msg, int from_index)
 	{
 		NetworkClientState cs;
-		NetworkClientInfo ci, *ci_own, *ci_to;
+		NetworkClientInfo ci, ci_own, ci_to;
 
 		switch (desttype) {
 		case DESTTYPE_CLIENT:
@@ -1190,7 +1222,7 @@ public interface NetServer extends NetTools, NetDefs
 			item++;
 		}*/
 
-		NetworkSend_Packet(p, cs);
+		Net.NetworkSend_Packet(p, cs);
 	}
 
 	// This update the company_info-stuff
