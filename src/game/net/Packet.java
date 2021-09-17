@@ -196,5 +196,11 @@ public class Packet {
 	}
 
 
+	public void setBuffer(byte[] buffer) {
+		data.assign(buffer);
+		
+	}
+
+
 
 }

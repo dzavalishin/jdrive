@@ -338,7 +338,7 @@ public class Cmd {
 	};
 
 	/* This function range-checks a cmd, and checks if the cmd is not null */
-	boolean IsValidCommand(int cmd)
+	public static boolean IsValidCommand(int cmd)
 	{
 		cmd &= 0xFF;
 
@@ -348,7 +348,7 @@ public class Cmd {
 				_command_proc_table[cmd].proc != null;
 	}
 
-	int GetCommandFlags(int cmd) {return _command_proc_table[cmd & 0xFF].flags;}
+	public static int GetCommandFlags(int cmd) {return _command_proc_table[cmd & 0xFF].flags;}
 
 	public static int DoCommandByTile(TileIndex tile, int p1, int p2, int flags, int procc)
 	{

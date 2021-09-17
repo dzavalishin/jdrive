@@ -91,7 +91,7 @@ public class Net implements NetDefs, NetClient
 	public static int _network_max_join_time;             //! Time a client can max take to join
 	public static boolean _network_pause_on_join;               //! Pause the game when a client tries to join (more chance of succeeding join)
 
-	public static int _redirect_console_to_client;
+	//public static int _redirect_console_to_client;
 
 	public static int _network_sync_freq;
 	public static int _network_frame_freq;
@@ -269,7 +269,7 @@ public class Net implements NetDefs, NetClient
 	}
 
 	// Calculate the frame-lag of a client
-	int NetworkCalculateLag(final NetworkClientState cs)
+	static int NetworkCalculateLag(final NetworkClientState cs)
 	{
 		int lag = cs.last_frame_server - cs.last_frame;
 		// This client has missed his ACK packet after 1 DAY_TICKS..
@@ -1611,7 +1611,7 @@ public class Net implements NetDefs, NetClient
 		return true;
 	}
 
-	Packet NetworkRecv_Packet(NetworkClientState cs, NetworkRecvStatus [] status) throws IOException
+	static Packet NetworkRecv_Packet(NetworkClientState cs, NetworkRecvStatus [] status) throws IOException
 	{
 		//int res;
 		//Packet p;

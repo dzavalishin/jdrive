@@ -8,5 +8,11 @@ public enum NetworkAction {
 	CHAT_PLAYER,
 	CHAT_CLIENT,
 	GIVE_MONEY,
-	NAME_CHANGE,
+	NAME_CHANGE,;
+
+	static NetworkAction values[] = values();
+	
+	static NetworkAction value(int v) {
+		return values[v];
+	}
 }

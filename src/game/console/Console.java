@@ -107,11 +107,11 @@ public class Console //extends ConsoleCmds
 		_iconsole_mode = IConsoleModes.ICONSOLE_CLOSED;
 		_iconsole_win = null;
 
-		/*
+		
 		#ifdef ENABLE_NETWORK // * Initialize network only variables 
 		_redirect_console_to_client = 0;
 		#endif
-		 */
+		
 
 
 		_iconsole_cmdline.maxlength = ICON_CMDLN_SIZE - 1;
@@ -268,6 +268,8 @@ public class Console //extends ConsoleCmds
 		//UpdateTextBufferSize(_iconsole_cmdline);
 	}
 
+
+	public static int _redirect_console_to_client = 0;
 	/**
 	 * Handle the printing of text entered into the console or redirected there
 	 * by any other means. Text can be redirected to other players in a network game
@@ -279,14 +281,14 @@ public class Console //extends ConsoleCmds
 	 */
 	public static void IConsolePrint(int color_code, final String  string)
 	{
-		/*#ifdef ENABLE_NETWORK
+		//#ifdef ENABLE_NETWORK
 		if (_redirect_console_to_client != 0) {
-			/* Redirect the string to the client * /
+			/* Redirect the string to the client */
 			SEND_COMMAND(PACKET_SERVER_RCON)(NetworkFindClientStateFromIndex(_redirect_console_to_client), color_code, string);
 			return;
 		}
-		#endif
-		 */
+		//#endif
+		 
 
 		if (Global._network_dedicated) {
 			Global.error("%s\n", string);
