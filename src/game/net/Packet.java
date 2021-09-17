@@ -182,4 +182,13 @@ public class Packet {
 	}
 
 
+	public String nextString() {
+		ByteBuffer bb = getBB();
+		int len = bb.getInt();
+		byte[] sdata = new byte[len];
+		bb.get(sdata, 0, len);
+		return new String(sdata);
+	}
+
+
 }

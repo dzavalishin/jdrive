@@ -1669,7 +1669,7 @@ public class Net implements NetDefs, NetClient
 	}
 
 	// Add a command to the local command queue
-	void NetworkAddCommandQueue(NetworkClientState cs, CommandPacket cp)
+	static void NetworkAddCommandQueue(NetworkClientState cs, CommandPacket cp)
 	{
 		cs.command_queue.add(cp); // TODO make sure it is not modified - Java Record or just final for all fields
 		/*
