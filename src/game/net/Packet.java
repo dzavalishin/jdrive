@@ -154,6 +154,11 @@ public class Packet {
 	}
 
 
+	public void appendLong(long l) {
+		appendInt((int) l);
+		appendInt((int) (l >>> 32));
+	}
+
 	public void append(String s) {
 		data.append(s);		
 	}
@@ -189,6 +194,7 @@ public class Packet {
 		bb.get(sdata, 0, len);
 		return new String(sdata);
 	}
+
 
 
 }
