@@ -14,6 +14,6 @@ public class NetworkPlayerInfo implements NetDefs
 		int [] num_station = new int [NETWORK_STATION_TYPES];			// How many stations are there of this type?
 		//char players[NETWORK_PLAYERS_LENGTH];						// The players that control this company (Name1, name2, ..)
 		String players;
-		int months_empty;														// How many months the company is empty
+		public int months_empty;														// How many months the company is empty
 
 }

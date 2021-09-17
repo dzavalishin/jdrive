@@ -8,6 +8,8 @@ import java.util.Map;
 
 import game.Global;
 import game.Hal;
+import game.net.Net;
+import game.net.NetServer;
 import game.struct.Textbuf;
 import game.util.BitOps;
 import game.util.Strings;
@@ -108,9 +110,9 @@ public class Console //extends ConsoleCmds
 		_iconsole_win = null;
 
 		
-		#ifdef ENABLE_NETWORK // * Initialize network only variables 
+		//#ifdef ENABLE_NETWORK // * Initialize network only variables 
 		_redirect_console_to_client = 0;
-		#endif
+		//#endif
 		
 
 
@@ -284,7 +286,7 @@ public class Console //extends ConsoleCmds
 		//#ifdef ENABLE_NETWORK
 		if (_redirect_console_to_client != 0) {
 			/* Redirect the string to the client */
-			SEND_COMMAND(PACKET_SERVER_RCON)(NetworkFindClientStateFromIndex(_redirect_console_to_client), color_code, string);
+			NetServer.NetworkPacketSend_PACKET_SERVER_RCON_command(Net.NetworkFindClientStateFromIndex(_redirect_console_to_client), color_code, string);
 			return;
 		}
 		//#endif

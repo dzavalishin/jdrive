@@ -1,15 +1,11 @@
 package game.net;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.math.BigInteger;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -52,7 +48,12 @@ import game.xui.Window;
 
 public class Net implements NetDefs, NetClient 
 {
+	public static int client_last_ack_frame = -1; // TODO [dz] -1?
 
+	public static RandomAccessFile _server_file_pointer = null;
+	public static int server_sent_packets = 0; // How many packets we did send succecfully last time
+
+	
 	//public static NetworkGameList _network_game_list;
 
 	public static NetworkGameInfo _network_game_info;
@@ -178,7 +179,7 @@ public class Net implements NetDefs, NetClient
 	}
 
 	// Function that looks up the CS for a given client-index
-	NetworkClientState NetworkFindClientStateFromIndex(int client_index)
+	public static NetworkClientState NetworkFindClientStateFromIndex(int client_index)
 	{
 		for (NetworkClientState cs : _clients)
 			if (cs.index == client_index)
@@ -328,7 +329,8 @@ public class Net implements NetDefs, NetClient
 		// This means we fucked up and the server closed the connection
 		if (res != NetworkRecvStatus.SERVER_ERROR && res != NetworkRecvStatus.SERVER_FULL &&
 				res != NetworkRecvStatus.SERVER_BANNED) {
-			SEND_COMMAND(PacketType.CLIENT_ERROR, errorno);
+			//SEND_COMMAND(PacketType.CLIENT_ERROR, errorno);
+			NetClient.NetworkPacketSend_PACKET_CLIENT_ERROR_command(errorno);
 
 			// Dequeue all commands before closing the socket
 			NetworkSend_Packets(_clients.get(0)); // [dz] why 0?
@@ -557,7 +559,9 @@ public class Net implements NetDefs, NetClient
 				if( !new_cs.hasValidSocket() ) continue;
 
 				if (new_cs.status.ordinal() > ClientStatus.AUTH.ordinal() && cs != new_cs) {
-					SEND_COMMAND(PacketType.SERVER_ERROR_QUIT, new_cs, cs.index, errorno);
+					//SEND_COMMAND(PacketType.SERVER_ERROR_QUIT, new_cs, cs.index, errorno);
+					//SEND_COMMAND(PACKET_SERVER_ERROR_QUIT)(new_cs, cs->index, errorno);
+					NetServer.NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(new_cs, cs.index, errorno);
 				}
 			}
 		}
@@ -582,7 +586,7 @@ public class Net implements NetDefs, NetClient
 			//free(cs.packet_queue);
 			cs.packet_queue = p;
 		}*/
-		cs.packet_queue = null;
+		cs.packet_queue.clear();;
 		//cs.packet_queue.
 		//free(cs.packet_recv);
 		//cs.packet_recv = null;
@@ -623,7 +627,7 @@ public class Net implements NetDefs, NetClient
 	}
 
 	// A client wants to connect to a server
-	static boolean NetworkConnect(final String hostname, int port) throws IOException
+	static void NetworkConnect(final String hostname, int port) throws IOException
 	{
 
 		Global.DEBUG_net( 1, "[NET] Connecting to %s %d", hostname, port);
@@ -665,7 +669,7 @@ public class Net implements NetDefs, NetClient
 		//memcpy(&network_tmp_patches, &Global._patches, sizeof(_patches));
 		// TODO [dz] XXX memcpy(network_tmp_patches, Global._patches );
 
-		return true;
+		//return true;
 	}
 
 	// For the server, to accept new clients
@@ -791,7 +795,8 @@ public class Net implements NetDefs, NetClient
 			if( !cs.hasValidSocket() ) continue;
 
 			if (!Global._network_server) {
-				SEND_COMMAND(PacketType.CLIENT_QUIT, "leaving");
+				//SEND_COMMAND(PacketType.CLIENT_QUIT, "leaving");
+				NetClient.NetworkPacketSend_PACKET_CLIENT_QUIT_command("leaving");
 				NetworkSend_Packets(cs);
 			}
 			NetworkCloseClient(cs);
@@ -860,14 +865,23 @@ public class Net implements NetDefs, NetClient
 		Global._network_server = false;
 
 		// Try to connect
-		Global._networking = NetworkConnect(host, port);
+		Global._networking = false;
+
+		try {
+			NetworkConnect(host, port);
+			Global._networking = true;
+		} catch (IOException e) {
+			// e.printStackTrace();
+			Global.error(e);
+		}
 
 		//		ttd_strlcpy(_network_last_host, host, sizeof(_network_last_host));
 		//		_network_last_port = port;
 
 		// We are connected
 		if (Global._networking) {
-			SEND_COMMAND(PacketType.CLIENT_COMPANY_INFO );
+			//SEND_COMMAND(PacketType.CLIENT_COMPANY_INFO );
+			NetClient.NetworkPacketSend_PACKET_CLIENT_COMPANY_INFO_command();
 			return null;
 		}
 
@@ -943,12 +957,21 @@ public class Net implements NetDefs, NetClient
 		NetworkInitialize();
 
 		// Try to connect
-		Global._networking = NetworkConnect(host, port);
+		//Global._networking = NetworkConnect(host, port);
+		Global._networking = false;
+
+		try {
+			NetworkConnect(host, port);
+			Global._networking = true;
+		} catch (IOException e) {
+			// e.printStackTrace();
+			Global.error(e);
+		}
 
 		// We are connected
 		if (Global._networking) {
 			Console.IConsoleCmdExec("exec scripts/on_client.scr 0");
-			NetworkClient_Connected();
+			NetClient.NetworkClient_Connected();
 		} else {
 			// Connecting failed
 			NetworkError(Str.STR_NETWORK_ERR_NOCONNECTION);
@@ -958,7 +981,7 @@ public class Net implements NetDefs, NetClient
 	}
 
 	static NetworkClientInfo serverCi = new NetworkClientInfo(); // TODO must be in common list? No?
-	
+
 	static void NetworkInitGameInfo()
 	{
 		NetworkClientInfo ci;
@@ -1067,7 +1090,8 @@ public class Net implements NetDefs, NetClient
 			for(NetworkClientState cs : _clients) 
 			{
 				if( !cs.hasValidSocket() ) continue;
-				SEND_COMMAND(PacketType.SERVER_NEWGAME, cs);
+				//SEND_COMMAND(PacketType.SERVER_NEWGAME, cs);
+				NetServer.NetworkPacketSend_PACKET_SERVER_NEWGAME_command(cs);
 				NetworkSend_Packets(cs);
 			}
 		}
@@ -1093,7 +1117,7 @@ public class Net implements NetDefs, NetClient
 		if (Global._network_server) {
 			//NetworkClientState cs;
 			FOR_ALL_CLIENTS(cs -> {
-				SEND_COMMAND(PacketType.SERVER_SHUTDOWN, cs);
+				NetServer.NetworkPacketSend_PACKET_SERVER_SHUTDOWN_command(cs);
 				NetworkSend_Packets(cs);
 			});
 		}
@@ -1135,7 +1159,7 @@ public class Net implements NetDefs, NetClient
 	static boolean NetworkReceive() throws IOException
 	{
 		//NetworkClientState cs;
-		int n;
+		//int n;
 		//fd_set read_fd, write_fd;
 		//timeval tv;
 
@@ -1189,31 +1213,31 @@ public class Net implements NetDefs, NetClient
 				System.out.println("Connection Accepted: " + sc.getLocalAddress() + "n");
 				NetworkAcceptClients(sc);
 			}
-			
+
 			if (key.isWritable()) {
 				SocketChannel sc = (SocketChannel) key.channel();
 				NetworkClientState cs = getClientForSocketChannel(sc);
 				if( cs != null ) cs.writable = true;
 			}
-			
+
 			if (key.isReadable()) {
 				SocketChannel sc = (SocketChannel) key.channel();
 				NetworkClientState cs = getClientForSocketChannel(sc);
-				
+
 				if(cs == null)
 					continue;
 				{
 					Global.error("Invalid socket channel %s", sc);
 					sc.close();
 				}
-				
+
 				if (Global._network_server)
-					NetworkServer_ReadPackets(cs);
+					NetServer.NetworkServer_ReadPackets(cs);
 				else {
 					NetworkRecvStatus res;
 					// The client already was quiting!
 					if (cs.quited) return false;
-					if ((res = NetworkClient_ReadPackets(cs)) != NetworkRecvStatus.OKAY) {
+					if ((res = NetClient.NetworkClient_ReadPackets(cs)) != NetworkRecvStatus.OKAY) {
 						// The client made an error of which we can not recover
 						//   close the client and drop back to main menu
 
@@ -1270,7 +1294,7 @@ public class Net implements NetDefs, NetClient
 
 		Global.error("Invalid socket channel %s", sc);
 		sc.close();
-		
+
 		return null;
 	}
 
@@ -1284,7 +1308,7 @@ public class Net implements NetDefs, NetClient
 
 				if (cs.status == ClientStatus.MAP) {
 					// This client is in the middle of a map-send, call the function for that
-					SEND_COMMAND(PacketType.SERVER_MAP, cs);
+					NetServer.NetworkPacketSend_PACKET_SERVER_MAP_command(cs);
 				}
 			}
 		});
@@ -1358,7 +1382,7 @@ public class Net implements NetDefs, NetClient
 				//   frame as he is.. so we can start playing!
 				if (_network_first_time) {
 					_network_first_time = false;
-					SEND_COMMAND(PacketType.CLIENT_ACK);
+					NetClient.NetworkPacketSend_PACKET_CLIENT_ACK_command();
 				}
 
 				_sync_frame = 0;
@@ -1380,7 +1404,7 @@ public class Net implements NetDefs, NetClient
 			Global.error(e);
 		}
 	}
-		
+
 	// We have to do some UDP checking
 	public static void doNetworkUDPGameLoop() throws IOException
 	{
@@ -1403,7 +1427,14 @@ public class Net implements NetDefs, NetClient
 	{
 		if (!Global._networking) return;
 
-		if (!NetworkReceive()) return;
+		boolean networkReceiveStatus = false;
+		try {
+			networkReceiveStatus = NetworkReceive();
+		} catch (IOException e) {
+			// e.printStackTrace();
+			Global.error(e);
+		}
+		if (!networkReceiveStatus) return;
 
 		if (Global._network_server) {
 			boolean send_frame = false;
@@ -1426,7 +1457,7 @@ public class Net implements NetDefs, NetClient
 			//		_sync_seed_2 = _random_seeds[0][1];
 			//#endif
 
-			NetworkServer_Tick(send_frame);
+			NetServer.NetworkServer_Tick(send_frame);
 		} else {
 			// Client
 
@@ -1473,7 +1504,9 @@ public class Net implements NetDefs, NetClient
 		 */
 	}
 
-	
+
+
+
 	void NetworkStartUp()
 	{
 		try {
@@ -1483,7 +1516,7 @@ public class Net implements NetDefs, NetClient
 			Global.error(e);
 		}
 	}
-		
+
 	// This tries to launch the network for a given OS
 	void doNetworkStartUp() throws UnknownHostException, SocketException
 	{
@@ -1568,18 +1601,18 @@ public class Net implements NetDefs, NetClient
 		if (!cs.writable) return false;
 		if (cs.socket == null) return false;
 
-		Packet p = cs.packet_queue;
+		Packet p = cs.packet_queue.remove(0);
 		if(null == p) return true;
 		//while (p != null) {
-			//res = send(cs.socket, p.buffer + p.pos, p.size - p.pos, 0);
-			try {
-				p.sendTo(cs.socket);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return false;
-			}
-			/*if (res == -1) {
+		//res = send(cs.socket, p.buffer + p.pos, p.size - p.pos, 0);
+		try {
+			p.sendTo(cs.socket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+		/*if (res == -1) {
 				int err = GET_LAST_ERROR();
 				if (err != EWOULDBLOCK) {
 					// Something went wrong.. close client!
@@ -1595,17 +1628,17 @@ public class Net implements NetDefs, NetClient
 				return false;
 			}*/
 
-			//p.pos += res;
+		//p.pos += res;
 
-			// Is this packet sent?
-			//if (p.pos == p.size) 
-			{
-				// Go to the next packet
-				cs.packet_queue = p.next;
-				//free(p);
-				p = cs.packet_queue;
-			} 
-			//else				return true;
+		// Is this packet sent?
+		//if (p.pos == p.size) 
+		/*{
+			// Go to the next packet
+			cs.packet_queue = p.next;
+			//free(p);
+			p = cs.packet_queue;
+		} */
+		//else				return true;
 		//}
 
 		return true;
@@ -1633,7 +1666,7 @@ public class Net implements NetDefs, NetClient
 		//byte [] buffer = new byte[Packet.SEND_MTU];
 		ByteBuffer bb = ByteBuffer.allocate(Packet.HEADER_SIZE);
 		int len = cs.socket.read(bb);
-		
+
 		if(len != Packet.HEADER_SIZE)
 		{
 			Global.DEBUG_net(  0, "[NET] recv() failed, can't read header");
@@ -1649,7 +1682,7 @@ public class Net implements NetDefs, NetClient
 
 		ByteBuffer data = ByteBuffer.allocate(packetLen);
 		len = cs.socket.read(data);
-		
+
 		if(len != packetLen)
 		{
 			Global.DEBUG_net(  0, "[NET] recv() failed, can't read data (%d)", packetLen);
@@ -1659,7 +1692,7 @@ public class Net implements NetDefs, NetClient
 
 
 		Packet p = new Packet( packetType, data.array() );
-		
+
 		//p.next = null; // Should not be needed, but who knows...
 
 		// Prepare for receiving a new packet
@@ -1675,7 +1708,7 @@ public class Net implements NetDefs, NetClient
 		/*
 		CommandPacket new_cp = new CommandPacket();
 
-		*new_cp = *cp;
+		 *new_cp = *cp;
 
 		if (cs.command_queue == null)
 			cs.command_queue = new_cp;
@@ -1684,7 +1717,7 @@ public class Net implements NetDefs, NetClient
 			while (c.next != null) c = c.next;
 			c.next = new_cp;
 		}
-		*/
+		 */
 	}
 
 	// Prepare a DoCommand to be send over the network
@@ -1751,7 +1784,8 @@ public class Net implements NetDefs, NetClient
 
 		// Clients send their command to the server and forget all about the packet
 		c.callback = temp_callback;
-		SEND_COMMAND(PacketType.CLIENT_COMMAND,c);
+		NetClient.NetworkPacketSend_PACKET_CLIENT_COMMAND_command(c);
+
 	}
 
 	// Execute a DoCommand we received from the network
@@ -1797,7 +1831,7 @@ public class Net implements NetDefs, NetClient
 		//NetworkClientState cs;
 		final NetworkClientInfo ci = NetworkFindClientInfoFromIndex(from_index);
 		final int playerColor = Hal.GetDrawStringPlayerColor(PlayerID.get(ci.client_playas-1));
-		
+
 		NetworkClientInfo ci_own; //, ci_to;
 
 
@@ -1815,7 +1849,8 @@ public class Net implements NetDefs, NetClient
 				{
 					if( !cs.hasValidSocket() ) continue;
 					if (cs.index == dest) {
-						SEND_COMMAND(PacketType.SERVER_CHAT,cs, action, from_index, false, msg);
+						//SEND_COMMAND(PacketType.SERVER_CHAT,cs, action, from_index, false, msg);
+						NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, from_index, false, msg);
 						break;
 					}
 				}
@@ -1834,7 +1869,8 @@ public class Net implements NetDefs, NetClient
 					{
 						if( !cs.hasValidSocket() ) continue;
 						if (cs.index == from_index) {
-							SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, dest, true, msg);
+							//SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, dest, true, msg);
+							NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, dest, true, msg);
 							break;
 						}
 					}
@@ -1852,7 +1888,8 @@ public class Net implements NetDefs, NetClient
 				if( !cs.hasValidSocket() ) continue;
 				NetworkClientInfo lci = cs.ci; //[cs - _clients];
 				if (lci.client_playas == dest) {
-					SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, from_index, false, msg);
+					//SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, from_index, false, msg);
+					NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, from_index, false, msg);
 					if (cs.index == from_index) {
 						show_local = false;
 					}
@@ -1873,7 +1910,7 @@ public class Net implements NetDefs, NetClient
 			if (ci_to == null) break;
 
 			final NetworkClientInfo ci_to_final = ci_to;
-			
+
 			// Display the message locally (so you know you have sent it)
 			if (ci != null && show_local) {
 				if (from_index == NETWORK_SERVER_INDEX) {
@@ -1884,7 +1921,8 @@ public class Net implements NetDefs, NetClient
 				} else {
 					FOR_ALL_CLIENTS(cs -> {
 						if (cs.index == from_index) {
-							SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, ci_to_final.client_index, true, msg);
+							//SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, ci_to_final.client_index, true, msg);
+							NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, ci_to_final.client_index, true, msg);
 						}
 					});
 				}
@@ -1895,8 +1933,8 @@ public class Net implements NetDefs, NetClient
 			Global.DEBUG_net( 0, "[NET][Server] Received unknown destination type %d. Doing broadcast instead.");
 			/* fall-through to next case */
 		case BROADCAST:
-			FOR_ALL_CLIENTS(cs -> {
-				SEND_COMMAND(PacketType.SERVER_CHAT,cs, action, from_index, false, msg);
+			FOR_ALL_CLIENTS( (cs) -> {
+				NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, from_index, false, msg);
 			});
 			//ci = NetworkFindClientInfoFromIndex(from_index);
 			if (ci != null)
@@ -1905,18 +1943,33 @@ public class Net implements NetDefs, NetClient
 		}
 	}
 
-	
-	static void NetworkSend_Packet(Packet p, Object my_CLIENT) {
-		// TODO Auto-generated method stub
-		implement me
+
+	static void NetworkSend_Packet(Packet p, NetworkClientState cs) {
+		assert p != null;
+
+		cs.packet_queue.add(p);
 		
+		/*/ Locate last packet buffered for the client
+		p = cs->packet_queue;
+		if (p == NULL) {
+			// No packets yet
+			cs->packet_queue = packet;
+		} else {
+			// Skip to the last packet
+			while (p->next != NULL) p = p->next;
+			p->next = packet;
+		} */
+	}
+
+	public static NetworkClientState getClient(int pid) {
+		return _clients.get(pid);
 	}
 
 
-	protected static void SEND_COMMAND(PacketType clientAck, Object ... args ) {
+	/*protected static void SEND_COMMAND(PacketType clientAck, Object ... args ) {
 		// TODO Auto-generated method stub
 		implement me
-	}
-	
-	
+	}*/
+
+
 }

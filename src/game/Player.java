@@ -16,6 +16,7 @@ import game.ids.EngineID;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.net.Net;
+import game.net.NetServer;
 import game.net.NetworkClientInfo;
 import game.struct.HighScore;
 import game.struct.PlayerEconomyEntry;
@@ -1041,13 +1042,14 @@ public class Player implements Serializable
 				if (Global._network_server) {
 					// * XXX - UGLY! p2 (pid) is mis-used to fetch the client-id, done at server-side
 					//  * in network_server.c:838, function DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND) 
-					NetworkClientInfo ci = _network_client_info[pid];
-					ci.client_playas = p.index + 1;
-					NetworkUpdateClientInfo(ci.client_index);
+					//NetworkClientInfo ci = _network_client_info[pid];
+					NetworkClientInfo ci = Net.getClient(pid).getCi();
+					ci.client_playas = p.index.id + 1;
+					NetServer.NetworkUpdateClientInfo(ci.client_index);
 
 					if (ci.client_playas != 0 && ci.client_playas <= Global.MAX_PLAYERS) {
 						PlayerID player_backup = Global.gs._local_player;
-						_network_player_info[p.index].months_empty = 0;
+						Net._network_player_info[p.index.id].months_empty = 0;
 
 						// XXX - When a client joins, we automatically set its name to the
 						// * player's name (for some reason). As it stands now only the server
@@ -1069,7 +1071,9 @@ public class Player implements Serializable
 			} else if (Global._network_server) {
 				// * XXX - UGLY! p2 (pid) is mis-used to fetch the client-id, done at server-side
 				// * in network_server.c:838, function DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND) 
-				NetworkClientInfo ci = _network_client_info[pid];
+				//NetworkClientInfo ci = Net._network_client_info[pid];
+				//Net._clients.get(pid).ci
+				NetworkClientInfo ci = Net.getClient(pid).getCi();
 				ci.client_playas = Owner.OWNER_SPECTATOR;
 				NetServer.NetworkUpdateClientInfo(ci.client_index);
 			}
@@ -1632,6 +1636,18 @@ final Chunk Handler _player_chunk_handlers[] = {
 	public boolean isRenew_keep_length() {		return renew_keep_length;	}
 
 	public void setMoney(long m) { money64 = m; }
+
+	public boolean isEngine_renew() {
+		return engine_renew;
+	}
+
+	public int getEngine_renew_months() {
+		return engine_renew_months;
+	}
+
+	public long getEngine_renew_money() {
+		return engine_renew_money;
+	}
 
 
 

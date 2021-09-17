@@ -306,9 +306,6 @@ public interface NetServer extends NetTools, NetDefs
 	}
 
 
-	static RandomAccessFile file_pointer = null;
-	static int sent_packets = 0; // How many packets we did send succecfully last time
-
 	// This sends the map to the client
 	static void NetworkPacketSend_PACKET_SERVER_MAP_command(NetworkClientState cs)
 	{
@@ -344,7 +341,7 @@ public interface NetServer extends NetTools, NetDefs
 
 			//file_pointer = fopen(filename, "rb");
 			File f = new File(filename);
-			file_pointer = new RandomAccessFile(f, "r");
+			Net._server_file_pointer = new RandomAccessFile(f, "r");
 			//fseek(file_pointer, 0, SEEK_END);
 			//file_pointer.se
 
@@ -356,9 +353,9 @@ public interface NetServer extends NetTools, NetDefs
 			Net.NetworkSend_Packet(p, cs);
 
 			//fseek(file_pointer, 0, SEEK_SET);
-			file_pointer.seek(0);
+			Net._server_file_pointer.seek(0);
 
-			sent_packets = 4; // We start with trying 4 packets
+			Net.server_sent_packets = 4; // We start with trying 4 packets
 
 			cs.status = ClientStatus.MAP;
 			/* Mark the start of download */
@@ -371,14 +368,14 @@ public interface NetServer extends NetTools, NetDefs
 			//int res;
 			int psize = 0;
 
-			for (i = 0; i < sent_packets; i++) {
+			for (i = 0; i < Net.server_sent_packets; i++) {
 				Packet p = new Packet(PacketType.SERVER_MAP);
 				NetworkSend_byte(p, (byte) MapPacket.MAP_PACKET_NORMAL.ordinal());
 
 				byte [] buffer = new byte[Packet.SEND_MTU];
 
 				//res = fread(p.buffer + p.size, 1, SEND_MTU - p.size, file_pointer);
-				int res = file_pointer.read(buffer);
+				int res = Net._server_file_pointer.read(buffer);
 				p.setBuffer(buffer);
 
 				/* TODO if (ferror(file_pointer)) {
@@ -402,7 +399,7 @@ public interface NetServer extends NetTools, NetDefs
 					// Set the status to DONE_MAP, no we will wait for the client
 					//  to send it is ready (maybe that happens like never ;))
 					cs.status = ClientStatus.DONE_MAP;
-					file_pointer.close();
+					Net._server_file_pointer.close();
 
 					{
 						//NetworkClientState new_cs;
@@ -434,12 +431,12 @@ public interface NetServer extends NetTools, NetDefs
 
 			// Send all packets (forced) and check if we have send it all
 			Net.NetworkSend_Packets(cs);
-			if (cs.packet_queue == null) {
+			if (cs.packet_queue.isEmpty()) {
 				// All are sent, increase the sent_packets
-				sent_packets *= 2;
+				Net.server_sent_packets *= 2;
 			} else {
 				// Not everything is sent, decrease the sent_packets
-				if (sent_packets > 1) sent_packets /= 2;
+				if (Net.server_sent_packets > 1) Net.server_sent_packets /= 2;
 			}
 		}
 	}

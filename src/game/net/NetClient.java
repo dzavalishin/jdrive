@@ -3,6 +3,8 @@ package game.net;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 import game.Cmd;
 import game.GameOptions;
@@ -56,11 +58,15 @@ public interface NetClient extends NetTools, NetDefs
 		return p.nextLong();
 	}
 	
+	public static String NetworkRecv_string(NetworkClientState cs, Packet p) {
+		return p.nextString();
+	}
+
+	
+	
 	
 	// So we don't make too much typos ;)
 	//#define MY_CLIENT() DEREF_CLIENT(0)
-
-	static int last_ack_frame = -1; // TODO [dz] -1?
 
 	static NetworkClientState MY_CLIENT() {
 		return Net._clients.get(0); // [dz] can it be just a static object?
@@ -495,7 +501,7 @@ public interface NetClient extends NetTools, NetDefs
 	}
 
 	static String recvMapFilename = "";
-	static FileOutputStream file_pointer = null;
+	static RandomAccessFile file_pointer = null;
 	static NetworkRecvStatus NetworkPacketReceive_PACKET_SERVER_MAP_command(NetworkClientState cs, Packet p)
 	{
 		//static FILE *file_pointer;
@@ -512,7 +518,8 @@ public interface NetClient extends NetTools, NetDefs
 			// The name for the temp-map
 			recvMapFilename = String.format( "%s%snetwork_client.tmp",  Global._path.autosave_dir, File.separator);
 
-			file_pointer = new FileOutputStream(recvMapFilename);
+			File f = new File(recvMapFilename);
+			file_pointer = new RandomAccessFile(f, "w"); //new FileOutputStream(recvMapFilename);
 			//file_pointer = fopen(recvMapFilename, "wb");
 			if (file_pointer == null) {
 				Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_SAVEGAMEERROR);
@@ -533,9 +540,11 @@ public interface NetClient extends NetTools, NetDefs
 		if (maptype == MapPacket.MAP_PACKET_NORMAL.ordinal()) {
 			// We are still receiving data, put it to the file
 			//fwrite(p.buffer + p.pos, 1, p.size - p.pos, file_pointer);
-			file_pointer.write(data, pos, len);
+			byte []  buf = p.asByteArray();
+			file_pointer.write(buf, 0, buf.length);
 			
-			Net._network_join_kbytes = ftell(file_pointer) / 1024;
+			//Net._network_join_kbytes = ftell(file_pointer) / 1024;
+			Net._network_join_kbytes = (int) (file_pointer.getFilePointer() / 1024);
 			Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 		}
 
@@ -581,9 +590,9 @@ public interface NetClient extends NetTools, NetDefs
 				// take control over an existing company
 				Global.gs._local_player = PlayerID.get(Global._network_playas - 1);
 				final Player lp = Player.GetPlayer(Global.gs._local_player);
-				Global._patches.autorenew = lp.engine_renew;
-				Global._patches.autorenew_months = lp.engine_renew_months;
-				Global._patches.autorenew_money = lp.engine_renew_money;
+				Global._patches.autorenew = lp.isEngine_renew();
+				Global._patches.autorenew_months = lp.getEngine_renew_months();
+				Global._patches.autorenew_money = lp.getEngine_renew_money();
 				Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 			}
 
@@ -609,20 +618,21 @@ public interface NetClient extends NetTools, NetDefs
 	//#ifdef ENABLE_NETWORK_SYNC_EVERY_FRAME
 		// Test if the server supports this option
 		//  and if we are at the frame the server is
-		if (p.pos < p.size) {
+		// TODO XXX [dz] I don't get it
+		/*if (p.pos < p.size) {
 			Net._sync_frame = Net._frame_counter_server;
 			Net._sync_seed_1 = NetworkRecv_int(MY_CLIENT(), p);
 	//#ifdef NETWORK_SEND_DOUBLE_SEED
 	//		_sync_seed_2 = NetworkRecv_int(MY_CLIENT(), p);
 	//#endif
-		}
+		} */
 	//#endif
 		Global.DEBUG_net( 7, "[NET] Received FRAME %d", Net._frame_counter_server);
 
 		// Let the server know that we received this frame correctly
 		//  We do this only once per day, to save some bandwidth ;)
-		if (!Net._network_first_time && last_ack_frame < Global._frame_counter) {
-			last_ack_frame = Global._frame_counter + Global.DAY_TICKS;
+		if (!Net._network_first_time && Net.client_last_ack_frame < Global._frame_counter) {
+			Net.client_last_ack_frame = Global._frame_counter + Global.DAY_TICKS;
 			Global.DEBUG_net(6, "[NET] Sent ACK at %d", Global._frame_counter);
 			NetworkPacketSend_PACKET_CLIENT_ACK_command();
 		}
@@ -674,11 +684,11 @@ public interface NetClient extends NetTools, NetDefs
 
 	static NetworkRecvStatus NetworkPacketReceive_PACKET_SERVER_CHAT_command(NetworkClientState cs, Packet p)
 	{
-		NetworkAction action = NetworkRecv_byte(MY_CLIENT(), p);
+		NetworkAction action = NetworkAction.value( NetworkRecv_byte(MY_CLIENT(), p) );
 		String msg;
 		NetworkClientInfo ci = null, ci_to;
 		int index;
-		String name;
+		String name = null;
 		boolean self_send;
 
 		index = NetworkRecv_int(MY_CLIENT(), p);
@@ -869,9 +879,7 @@ public interface NetClient extends NetTools, NetDefs
 	//  this should be removed!!
 	static void NetworkRecvPatchSettings(NetworkClientState cs, Packet p)
 	{
-		final SettingDesc item;
-
-		item = patch_settings;
+		//final SettingDesc item = patch_settings;
 
 		/* TODO
 		while (item.name != null) {
@@ -900,18 +908,18 @@ public interface NetClient extends NetTools, NetDefs
 		// Set the frame-counter to 0 so nothing happens till we are ready
 		Global._frame_counter = 0;
 		Net._frame_counter_server = 0;
-		last_ack_frame = 0;
+		Net.client_last_ack_frame = 0;
 		// Request the game-info
 		NetworkPacketSend_PACKET_CLIENT_JOIN_command();
 	}
 
 	// Reads the packets from the socket-stream, if available
-	static NetworkRecvStatus NetworkClient_ReadPackets(NetworkClientState cs)
+	static NetworkRecvStatus NetworkClient_ReadPackets(NetworkClientState cs) throws IOException
 	{
 		Packet p;
 		NetworkRecvStatus [] res = { NetworkRecvStatus.OKAY };
 
-		while (res[0] == NetworkRecvStatus.OKAY && (p = NetworkRecv_Packet(cs, res)) != null) {
+		while (res[0] == NetworkRecvStatus.OKAY && (p = Net.NetworkRecv_Packet(cs, res)) != null) {
 			byte type = NetworkRecv_byte(MY_CLIENT(), p);
 			if (type < PacketType.END.ordinal() && _network_client_packet[type] != null && !MY_CLIENT().quited) {
 				res[0] = _network_client_packet[type].accept(cs,p);

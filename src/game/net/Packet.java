@@ -30,8 +30,7 @@ public class Packet {
 	public static final int SIZE_SIZE = 2; // packet size is 2 bytes
 	public static final int HEADER_SIZE = 3;
 
-	@Deprecated
-	Packet next = null;
+	//@Deprecated	Packet next = null;
 	//int size;
 	//int pos;
 	//byte [] buffer = new byte[SEND_MTU];

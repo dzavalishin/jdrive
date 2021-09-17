@@ -1669,7 +1669,7 @@ public class AirCraft extends AirCraftTables {
 		// check if the aircraft needs to be replaced or renewed and send it to a hangar if needed
 		if (v.owner.isLocalPlayer() && (
 				p.EngineHasReplacement(v.getEngine_type()) ||
-				(p.engine_renew && v.age - v.max_age > p.engine_renew_months * 30)
+				(p.isEngine_renew() && v.age - v.max_age > p.getEngine_renew_months() * 30)
 				)) {
 			PlayerID.setCurrent( Global.gs._local_player );
 			Cmd.DoCommandP(v.tile, v.index, 1, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);
@@ -1798,7 +1798,7 @@ public class AirCraft extends AirCraftTables {
 		if (v.getCurrent_order().type != Order.OT_GOTO_DEPOT && v.owner.isLocalPlayer()) {
 			// only the vehicle owner needs to calculate the rest (locally)
 			if (p.EngineHasReplacement(v.getEngine_type()) ||
-					(p.engine_renew && v.age - v.max_age > (p.engine_renew_months * 30))) {
+					(p.isEngine_renew() && v.age - v.max_age > (p.getEngine_renew_months() * 30))) {
 				// send the aircraft to the hangar at next airport (bit 17 set)
 				PlayerID.setCurrent( Global.gs._local_player );
 				Cmd.DoCommandP(v.tile, v.index, 1 << 16, null, Cmd.CMD_SEND_AIRCRAFT_TO_HANGAR | Cmd.CMD_SHOW_NO_ERROR);

@@ -2246,7 +2246,7 @@ public class Vehicle implements IPoolItem
 		if(!v.owner.isLocalPlayer()) return;
 
 		// Do not show getting-old message if autorenew is active
-		if (Player.GetPlayer(v.owner).engine_renew) return;
+		if (Player.GetPlayer(v.owner).isEngine_renew()) return;
 
 		Global.SetDParam(0, _vehicle_type_names[v.type - 0x10]);
 		Global.SetDParam(1, v.unitnumber.id);
@@ -2532,8 +2532,8 @@ public class Vehicle implements IPoolItem
 				}
 
 				// check if the vehicle should be replaced
-				if (!p.engine_renew ||
-						w.age - w.max_age < (p.engine_renew_months * 30) || // replace if engine is too old
+				if (!p.isEngine_renew() ||
+						w.age - w.max_age < (p.getEngine_renew_months() * 30) || // replace if engine is too old
 						w.max_age == 0) { // rail cars got a max age of 0
 					if (!p.EngineHasReplacement(w.engine_type)) // updates to a new model
 						continue;
@@ -2558,8 +2558,8 @@ public class Vehicle implements IPoolItem
 				cost += temp_cost;
 			} while (w.type == VEH_Train && (w = w.GetNextVehicle()) != null);
 
-			if (0 == (flags & Cmd.DC_EXEC) && (Cmd.CmdFailed(temp_cost) || p.money64 < (int)(cost + p.engine_renew_money) || cost == 0)) {
-				if (p.money64 < (int)(cost + p.engine_renew_money) && ( Global.gs._local_player.equals(v.owner) ) && cost != 0) {
+			if (0 == (flags & Cmd.DC_EXEC) && (Cmd.CmdFailed(temp_cost) || p.money64 < (int)(cost + p.getEngine_renew_money()) || cost == 0)) {
+				if (p.money64 < (int)(cost + p.getEngine_renew_money()) && ( Global.gs._local_player.equals(v.owner) ) && cost != 0) {
 					int message;
 					Global.SetDParam(0, v.unitnumber.id);
 					switch (v.type) {

@@ -7,11 +7,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import game.SaveLoad.SaveOrLoadResult;
 import game.ai.Ai;
 import game.console.Console;
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.SaveOrLoadResult;
 import game.enums.SwitchModes;
 import game.enums.ThreadMsg;
 import game.ids.PlayerID;

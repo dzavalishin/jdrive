@@ -16,7 +16,8 @@ public class NetworkClientState {
 	boolean writable; // is client ready to write to?
 	boolean quited;
 
-	Packet packet_queue; // Packets that are awaiting delivery
+	//Packet packet_queue; // Packets that are awaiting delivery
+	List<Packet> packet_queue = new ArrayList<>();
 	//Packet packet_recv; // Partially received packet
 
 	//CommandPacket command_queue; // The command-queue awaiting delivery
@@ -25,4 +26,6 @@ public class NetworkClientState {
 	public boolean hasValidSocket() { return socket != null; }
 
 	NetworkClientInfo ci;
+
+	public NetworkClientInfo getCi() { return ci; }
 }

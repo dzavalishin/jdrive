@@ -938,7 +938,7 @@ public class NetGui extends Net implements NetDefs
 	static void ClientList_Kick(int client_no)
 	{
 		if (client_no < Global.MAX_PLAYERS)
-			SEND_COMMAND(PacketType.SERVER_ERROR,_clients.get(client_no), NetworkErrorCode.KICKED);
+			NetServer.NetworkPacketSend_PACKET_SERVER_ERROR_command(_clients.get(client_no), NetworkErrorCode.KICKED);
 	}
 
 	static void ClientList_Ban(int client_no)
@@ -955,7 +955,7 @@ public class NetGui extends Net implements NetDefs
 		}
 
 		if (client_no < Global.MAX_PLAYERS)
-			SEND_COMMAND(PacketType.SERVER_ERROR,_clients.get(client_no), NetworkErrorCode.KICKED);
+			NetServer.NetworkPacketSend_PACKET_SERVER_ERROR_command(_clients.get(client_no), NetworkErrorCode.KICKED);
 	}
 
 	static String ntoa(long raw) {
