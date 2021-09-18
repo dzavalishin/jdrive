@@ -177,7 +177,7 @@ public class NetGui extends Net implements NetDefs
 			// right menu
 			Gfx.GfxFillRect(252, 23, 478, 65, 157);
 			if (sel == null) {
-				Gfx.DrawStringMultiCenter(365, 40, Str.STR_NETWORK_GAME_INFO, 0);
+				Gfx.DrawStringMultiCenter(365, 40, Str.STR_NETWORK_GAME_INFO, 0); // TODO Error: word too long in '??????????' 
 			} else if (!sel.online) {
 				Strings.SetDParamStr(0, sel.info.server_name);
 				Gfx.DrawStringMultiCenter(365, 42, Str.STR_ORANGE, 2); // game name
