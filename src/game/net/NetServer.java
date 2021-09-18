@@ -1,7 +1,6 @@
 package game.net;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -40,8 +39,8 @@ public interface NetServer extends NetTools, NetDefs
 		p.appendLong(l);		
 	}
 
-	public static void NetworkSend_string(Packet p, String s) {
-		p.appendInt(s.length());
+	public static void NetworkSend_string(Packet p, String s) throws IOException {
+		//p.appendInt(s.length());
 		p.append(s);
 
 	}
@@ -72,7 +71,7 @@ public interface NetServer extends NetTools, NetDefs
 	//   void NetworkPacketSend_ ## type ## _command(NetworkClientState cs) has parameter: NetworkClientState cs
 	// **********
 
-	static void NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(NetworkClientState cs, NetworkClientInfo ci)
+	static void NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(NetworkClientState cs, NetworkClientInfo ci) throws IOException
 	{
 		//
 		// Packet: SERVER_CLIENT_INFO
@@ -97,7 +96,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	static void NetworkPacketSend_PACKET_SERVER_COMPANY_INFO_command(NetworkClientState cs)
+	static void NetworkPacketSend_PACKET_SERVER_COMPANY_INFO_command(NetworkClientState cs) throws IOException
 	{
 		//
 		// Packet: SERVER_COMPANY_INFO
@@ -249,7 +248,7 @@ public interface NetServer extends NetTools, NetDefs
 		Net.NetworkSend_Packet(p, cs);
 	}
 
-	static void NetworkPacketSend_PACKET_SERVER_WELCOME_command(NetworkClientState cs)
+	static void NetworkPacketSend_PACKET_SERVER_WELCOME_command(NetworkClientState cs) throws IOException
 	{
 		//
 		// Packet: SERVER_WELCOME
@@ -273,10 +272,12 @@ public interface NetServer extends NetTools, NetDefs
 		Net.NetworkSend_Packet(p, cs);
 
 		// Transmit info about all the active clients
-		Net.FOR_ALL_CLIENTS(new_cs -> {
+		//Net.FOR_ALL_CLIENTS(new_cs -> 
+		for( NetworkClientState new_cs : Net._clients )
+		{
 			if (new_cs != cs && new_cs.status.ordinal() > ClientStatus.AUTH.ordinal())
 				NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, cs.ci ); //DEREF_CLIENT_INFO(new_cs));
-		});
+		}
 		// Also send the info of the server
 		NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, Net.NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX));
 	}
@@ -308,7 +309,7 @@ public interface NetServer extends NetTools, NetDefs
 
 
 	// This sends the map to the client
-	static void NetworkPacketSend_PACKET_SERVER_MAP_command(NetworkClientState cs)
+	static void NetworkPacketSend_PACKET_SERVER_MAP_command(NetworkClientState cs) throws IOException
 	{
 		//
 		// Packet: SERVER_MAP
@@ -393,7 +394,7 @@ public interface NetServer extends NetTools, NetDefs
 					// e.printStackTrace();
 					Global.fail("Send map: %s", e); // Crash TODO - disconnect client					
 				}
-				p.setBuffer(buffer);
+				p.append(buffer);
 
 				/* TODO if (ferror(file_pointer)) {
 					Global.error("Error reading temporary network savegame!");
@@ -529,7 +530,7 @@ public interface NetServer extends NetTools, NetDefs
 		Net.NetworkSend_Packet(p, cs);
 	}
 
-	static void NetworkPacketSend_PACKET_SERVER_COMMAND_command(NetworkClientState cs, CommandPacket cp)
+	static void NetworkPacketSend_PACKET_SERVER_COMMAND_command(NetworkClientState cs, CommandPacket cp) throws IOException
 	{
 		//
 		// Packet: SERVER_COMMAND
@@ -559,7 +560,7 @@ public interface NetServer extends NetTools, NetDefs
 		Net.NetworkSend_Packet(p, cs);
 	}
 
-	static void NetworkPacketSend_PACKET_SERVER_CHAT_command(NetworkClientState cs, NetworkAction action, int client_index, boolean self_send, final String msg)
+	static void NetworkPacketSend_PACKET_SERVER_CHAT_command(NetworkClientState cs, NetworkAction action, int client_index, boolean self_send, final String msg) throws IOException
 	{
 		//
 		// Packet: SERVER_CHAT
@@ -604,7 +605,7 @@ public interface NetServer extends NetTools, NetDefs
 		Net.NetworkSend_Packet(p, cs);
 	}
 
-	static void NetworkPacketSend_PACKET_SERVER_QUIT_command(NetworkClientState cs, int client_index, final String leavemsg)
+	static void NetworkPacketSend_PACKET_SERVER_QUIT_command(NetworkClientState cs, int client_index, final String leavemsg) throws IOException
 	{
 		//
 		// Packet: SERVER_ERROR_QUIT
@@ -649,7 +650,7 @@ public interface NetServer extends NetTools, NetDefs
 		Net.NetworkSend_Packet(p, cs);
 	}
 
-	static void NetworkPacketSend_PACKET_SERVER_RCON_command(NetworkClientState cs, int color, final String command)
+	static void NetworkPacketSend_PACKET_SERVER_RCON_command(NetworkClientState cs, int color, final String command) throws IOException
 	{
 		Packet p = new Packet(PacketType.SERVER_RCON);
 
@@ -663,12 +664,12 @@ public interface NetServer extends NetTools, NetDefs
 	//   void NetworkPacketReceive_ ## type ## _command(NetworkClientState cs, Packet p) has parameter: NetworkClientState cs, Packet p
 	// **********
 
-	static void NetworkPacketReceive_PACKET_CLIENT_COMPANY_INFO_command(NetworkClientState cs, Packet p)
+	static void NetworkPacketReceive_PACKET_CLIENT_COMPANY_INFO_command(NetworkClientState cs, Packet p) throws IOException
 	{
 		NetworkPacketSend_PACKET_SERVER_COMPANY_INFO_command(cs);
 	}
 
-	static void NetworkPacketReceive_PACKET_CLIENT_JOIN_command(NetworkClientState cs, Packet p)
+	static void NetworkPacketReceive_PACKET_CLIENT_JOIN_command(NetworkClientState cs, Packet p) throws IOException
 	{
 		String name;
 		String unique_id;
@@ -741,7 +742,7 @@ public interface NetServer extends NetTools, NetDefs
 			Net._network_player_info[playas-1].months_empty = 0;
 	}
 
-	static void NetworkPacketReceive_PACKET_CLIENT_PASSWORD_command(NetworkClientState cs, Packet p)
+	static void NetworkPacketReceive_PACKET_CLIENT_PASSWORD_command(NetworkClientState cs, Packet p) throws IOException
 	{
 		NetworkPasswordType type;
 		String password;
@@ -786,7 +787,7 @@ public interface NetServer extends NetTools, NetDefs
 		return;
 	}
 
-	static void NetworkPacketReceive_PACKET_CLIENT_GETMAP_command(NetworkClientState cs, Packet p)
+	static void NetworkPacketReceive_PACKET_CLIENT_GETMAP_command(NetworkClientState cs, Packet p) throws IOException
 	{
 		//NetworkClientState new_cs;
 
@@ -813,7 +814,7 @@ public interface NetServer extends NetTools, NetDefs
 		NetworkPacketSend_PACKET_SERVER_MAP_command(cs);
 	}
 
-	static void NetworkPacketReceive_PACKET_CLIENT_MAP_OK_command(NetworkClientState cs, Packet p)
+	static void NetworkPacketReceive_PACKET_CLIENT_MAP_OK_command(NetworkClientState cs, Packet p) throws IOException
 	{
 		// Client has the map, now start syncing
 		if (cs.status == ClientStatus.DONE_MAP && !cs.quited) {
@@ -836,12 +837,14 @@ public interface NetServer extends NetTools, NetDefs
 			cs.last_frame = Global._frame_counter;
 			cs.last_frame_server = Global._frame_counter;
 
-			Net.FOR_ALL_CLIENTS(new_cs -> {
+			//Net.FOR_ALL_CLIENTS(new_cs -> 
+			for( NetworkClientState new_cs : Net._clients )
+			{
 				if (new_cs.status.ordinal() > ClientStatus.AUTH.ordinal()) {
 					NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(new_cs, cs.ci ); // DEREF_CLIENT_INFO(cs));
 					NetworkPacketSend_PACKET_SERVER_JOIN_command(new_cs, cs.index);
 				}
-			});
+			}
 
 			if (Net._network_pause_on_join) {
 				/* Now pause the game till the client is in sync */
@@ -1012,7 +1015,7 @@ public interface NetServer extends NetTools, NetDefs
 		cs.quited = true;
 	}
 
-	static void NetworkPacketReceive_PACKET_CLIENT_QUIT_command(NetworkClientState cs, Packet p)
+	static void NetworkPacketReceive_PACKET_CLIENT_QUIT_command(NetworkClientState cs, Packet p) throws IOException
 	{
 		// The client wants to leave. Display this and report it to the other
 		//  clients.
@@ -1030,16 +1033,18 @@ public interface NetServer extends NetTools, NetDefs
 
 		Net.NetworkTextMessage(NetworkAction.LEAVE, 1, false, client_name, "%s", str);
 
-		Net.FOR_ALL_CLIENTS(new_cs -> {
+		//Net.FOR_ALL_CLIENTS(new_cs -> 
+		for( NetworkClientState new_cs : Net._clients )
+		{
 			if (new_cs.status.ordinal() > ClientStatus.AUTH.ordinal()) {
 				NetworkPacketSend_PACKET_SERVER_QUIT_command(new_cs, cs.index, str);
 			}
-		});
+		}
 
 		cs.quited = true;
 	}
 
-	static void NetworkPacketReceive_PACKET_CLIENT_ACK_command(NetworkClientState cs, Packet p)
+	static void NetworkPacketReceive_PACKET_CLIENT_ACK_command(NetworkClientState cs, Packet p) throws IOException
 	{
 		int frame = NetworkRecv_int(cs, p);
 
@@ -1066,7 +1071,7 @@ public interface NetServer extends NetTools, NetDefs
 
 
 
-	static void NetworkServer_HandleChat(NetworkAction action, DestType desttype, int dest, final String msg, int from_index)
+	static void NetworkServer_HandleChat(NetworkAction action, DestType desttype, int dest, final String msg, int from_index) throws IOException
 	{
 		//NetworkClientState cs;
 		NetworkClientInfo ci, ci_own, ci_to;
@@ -1161,9 +1166,11 @@ public interface NetServer extends NetTools, NetDefs
 			Global.DEBUG_net( 0, "[NET][Server] Received unknown destination type %d. Doing broadcast instead.");
 			/* fall-through to next case */
 		case BROADCAST:
-			Net.FOR_ALL_CLIENTS( (cs) -> {
+			//Net.FOR_ALL_CLIENTS( (cs) -> 
+			for( NetworkClientState cs : Net._clients )
+			{
 				NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, from_index, false, msg);
-			});
+			}
 
 			ci = Net.NetworkFindClientInfoFromIndex(from_index);
 			if (ci != null)
@@ -1172,7 +1179,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	static void NetworkPacketReceive_PACKET_CLIENT_CHAT_command(NetworkClientState cs, Packet p)
+	static void NetworkPacketReceive_PACKET_CLIENT_CHAT_command(NetworkClientState cs, Packet p) throws IOException
 	{
 		NetworkAction action = NetworkAction.value( NetworkRecv_byte(cs, p) );
 		DestType desttype = DestType.value( NetworkRecv_byte(cs, p) );
@@ -1195,7 +1202,7 @@ public interface NetServer extends NetTools, NetDefs
 		}
 	}
 
-	static void NetworkPacketReceive_PACKET_CLIENT_SET_NAME_command(NetworkClientState cs, Packet p)
+	static void NetworkPacketReceive_PACKET_CLIENT_SET_NAME_command(NetworkClientState cs, Packet p) throws IOException
 	{
 
 		NetworkClientInfo ci;
@@ -1446,17 +1453,16 @@ public interface NetServer extends NetTools, NetDefs
 	}
 
 	// Send a packet to all clients with updated info about this client_index
-	static void NetworkUpdateClientInfo(int client_index)
+	static void NetworkUpdateClientInfo(int client_index) throws IOException
 	{
-		//NetworkClientState cs;
-		NetworkClientInfo ci;
-
-		ci = Net.NetworkFindClientInfoFromIndex(client_index);
+		NetworkClientInfo ci = Net.NetworkFindClientInfoFromIndex(client_index);
 
 		if (ci == null)
 			return;
 
-		Net.FOR_ALL_CLIENTS( (cs) -> { NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, ci); } );		
+		//Net.FOR_ALL_CLIENTS( (cs) -> { NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, ci); } );		
+		for( NetworkClientState cs : Net._clients )
+			NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(cs, ci);
 	}
 
 	//extern void SwitchMode(int new_mode);
@@ -1607,7 +1613,7 @@ public interface NetServer extends NetTools, NetDefs
 	}
 
 	static // Handle the local command-queue
-	void NetworkHandleCommandQueue(NetworkClientState cs) {
+	void NetworkHandleCommandQueue(NetworkClientState cs) throws IOException {
 		//CommandPacket cp;
 
 		for( CommandPacket cp : cs.command_queue)
@@ -1622,7 +1628,7 @@ public interface NetServer extends NetTools, NetDefs
 	}
 
 	// This is called every tick if this is a _network_server
-	static void NetworkServer_Tick(boolean send_frame)
+	static void NetworkServer_Tick(boolean send_frame) throws IOException
 	{
 		//NetworkClientState cs;
 		//#ifndef ENABLE_NETWORK_SYNC_EVERY_FRAME
@@ -1709,7 +1715,7 @@ public interface NetServer extends NetTools, NetDefs
 
 @FunctionalInterface
 interface NetworkServerPacket {
-	void accept(NetworkClientState cs, Packet p);
+	void accept(NetworkClientState cs, Packet p) throws IOException;
 }
 
 

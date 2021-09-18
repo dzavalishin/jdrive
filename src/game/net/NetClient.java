@@ -39,8 +39,8 @@ public interface NetClient extends NetTools, NetDefs
 		p.appendInt(i);		
 	}
 	
-	public static void NetworkSend_string(Packet p, String s) {
-		p.appendInt(s.length());
+	public static void NetworkSend_string(Packet p, String s) throws IOException {
+		//p.appendInt(s.length());
 		p.append(s);
 		
 	}
@@ -95,7 +95,7 @@ public interface NetClient extends NetTools, NetDefs
 	}
 
 
-	static void NetworkPacketSend_PACKET_CLIENT_JOIN_command()
+	static void NetworkPacketSend_PACKET_CLIENT_JOIN_command() throws IOException
 	{
 		//
 		// Packet: CLIENT_JOIN
@@ -121,7 +121,7 @@ public interface NetClient extends NetTools, NetDefs
 		Net.NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	static void NetworkPacketSend_PACKET_CLIENT_PASSWORD_command(NetworkPasswordType type, final String password)
+	static void NetworkPacketSend_PACKET_CLIENT_PASSWORD_command(NetworkPasswordType type, final String password) throws IOException
 	{
 		//
 		// Packet: CLIENT_PASSWORD
@@ -182,7 +182,7 @@ public interface NetClient extends NetTools, NetDefs
 
 
 	// Send a command packet to the server
-	static void NetworkPacketSend_PACKET_CLIENT_COMMAND_command(CommandPacket cp)
+	static void NetworkPacketSend_PACKET_CLIENT_COMMAND_command(CommandPacket cp) throws IOException
 	{
 		//
 		// Packet: CLIENT_COMMAND
@@ -211,7 +211,7 @@ public interface NetClient extends NetTools, NetDefs
 	}
 
 	// Send a chat-packet over the network
-	static void NetworkPacketSend_PACKET_CLIENT_CHAT_command(NetworkAction action, DestType desttype, int dest, final String msg)
+	static void NetworkPacketSend_PACKET_CLIENT_CHAT_command(NetworkAction action, DestType desttype, int dest, final String msg) throws IOException
 	{
 		//
 		// Packet: CLIENT_CHAT
@@ -247,7 +247,7 @@ public interface NetClient extends NetTools, NetDefs
 		Net.NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	static void NetworkPacketSend_PACKET_CLIENT_SET_PASSWORD_command(final String password)
+	static void NetworkPacketSend_PACKET_CLIENT_SET_PASSWORD_command(final String password) throws IOException
 	{
 		//
 		// Packet: PACKET_CLIENT_SET_PASSWORD
@@ -261,7 +261,7 @@ public interface NetClient extends NetTools, NetDefs
 		Net.NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	static void NetworkPacketSend_PACKET_CLIENT_SET_NAME_command(final String name)
+	static void NetworkPacketSend_PACKET_CLIENT_SET_NAME_command(final String name) throws IOException
 	{
 		//
 		// Packet: PACKET_CLIENT_SET_NAME
@@ -276,7 +276,7 @@ public interface NetClient extends NetTools, NetDefs
 	}
 
 	// Send an quit-packet over the network
-	static void NetworkPacketSend_PACKET_CLIENT_QUIT_command(final String leavemsg)
+	static void NetworkPacketSend_PACKET_CLIENT_QUIT_command(final String leavemsg) throws IOException
 	{
 		//
 		// Packet: CLIENT_QUIT
@@ -290,7 +290,7 @@ public interface NetClient extends NetTools, NetDefs
 		Net.NetworkSend_Packet(p, MY_CLIENT());
 	}
 
-	static void NetworkPacketSend_PACKET_CLIENT_RCON_command(final String pass, final String command)
+	static void NetworkPacketSend_PACKET_CLIENT_RCON_command(final String pass, final String command) throws IOException
 	{
 		Packet p = new Packet(PacketType.CLIENT_RCON);
 		NetworkSend_string(p, pass);
@@ -500,8 +500,6 @@ public interface NetClient extends NetTools, NetDefs
 		return NetworkRecvStatus.OKAY;
 	}
 
-	static String recvMapFilename = "";
-	static RandomAccessFile file_pointer = null;
 	static NetworkRecvStatus NetworkPacketReceive_PACKET_SERVER_MAP_command(NetworkClientState cs, Packet p)
 	{
 		//static FILE *file_pointer;
@@ -516,12 +514,12 @@ public interface NetClient extends NetTools, NetDefs
 		// First packet, init some stuff
 		if (maptype == MapPacket.MAP_PACKET_START.ordinal()) {
 			// The name for the temp-map
-			recvMapFilename = String.format( "%s%snetwork_client.tmp",  Global._path.autosave_dir, File.separator);
+			Net.recvMapFilename = String.format( "%s%snetwork_client.tmp",  Global._path.autosave_dir, File.separator);
 
-			File f = new File(recvMapFilename);
-			file_pointer = new RandomAccessFile(f, "w"); //new FileOutputStream(recvMapFilename);
+			File f = new File(Net.recvMapFilename);
+			Net.client_file_pointer = new RandomAccessFile(f, "w"); //new FileOutputStream(recvMapFilename);
 			//file_pointer = fopen(recvMapFilename, "wb");
-			if (file_pointer == null) {
+			if (Net.client_file_pointer == null) {
 				Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_SAVEGAMEERROR);
 				return NetworkRecvStatus.SAVEGAME;
 			}
@@ -541,10 +539,10 @@ public interface NetClient extends NetTools, NetDefs
 			// We are still receiving data, put it to the file
 			//fwrite(p.buffer + p.pos, 1, p.size - p.pos, file_pointer);
 			byte []  buf = p.asByteArray();
-			file_pointer.write(buf, 0, buf.length);
+			Net.client_file_pointer.write(buf, 0, buf.length);
 			
 			//Net._network_join_kbytes = ftell(file_pointer) / 1024;
-			Net._network_join_kbytes = (int) (file_pointer.getFilePointer() / 1024);
+			Net._network_join_kbytes = (int) (Net.client_file_pointer.getFilePointer() / 1024);
 			Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 		}
 
@@ -554,14 +552,14 @@ public interface NetClient extends NetTools, NetDefs
 
 		// Check if this was the last packet
 		if (maptype == MapPacket.MAP_PACKET_END.ordinal()) {
-			file_pointer.close();
+			Net.client_file_pointer.close();
 
 			Net._network_join_status = NetworkJoinStatus.PROCESSING;
 			Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
 			// The map is done downloading, load it
 			// Load the map
-			if (!Main.SafeSaveOrLoad(recvMapFilename, SaveLoad.SL_LOAD, GameModes.GM_NORMAL)) {
+			if (!Main.SafeSaveOrLoad(Net.recvMapFilename, SaveLoad.SL_LOAD, GameModes.GM_NORMAL)) {
 				Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 				Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_SAVEGAMEERROR);
 				return NetworkRecvStatus.SAVEGAME;
@@ -903,7 +901,7 @@ public interface NetClient extends NetTools, NetDefs
 	}
 
 	// Is called after a client is connected to the server
-	static void NetworkClient_Connected()
+	static void NetworkClient_Connected() throws IOException
 	{
 		// Set the frame-counter to 0 so nothing happens till we are ready
 		Global._frame_counter = 0;

@@ -5,14 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SocketChannel;
-
-import game.util.BinaryString;
+import java.nio.charset.Charset;
 
 /**
  * 2 bytes size
@@ -34,73 +31,55 @@ public class Packet {
 	//int size;
 	//int pos;
 	//byte [] buffer = new byte[SEND_MTU];
-	BinaryString data = new BinaryString();
-	int type;
-
-	public Packet(PacketType type) {
-		//data.append((char)type.ordinal());
-		this.type = type.ordinal();
-	}
+	//BinaryString data = new BinaryString();
+	private int type;
+	private ByteBuffer data;
+	private ByteArrayOutputStream collector = null;
 
 
-	private byte [] encode()
-	{
-		int size = data.length();
-		byte [] buffer = new byte[size+HEADER_SIZE];
-
-		buffer[0] = (byte) (size & 0xFF);
-		buffer[1] = (byte) (size >> 8);
-		buffer[2] = (byte) type;
-
-		for(int i = 0; i < size; i++)
-		{
-			char c = data.charAt(i);
-			assert(c <= 0xFF);
-			buffer[i+HEADER_SIZE] = (byte) c;
-		}
-
-		return buffer;
-	}
-
-	public void sendTo(SocketChannel socket) throws IOException 
-	{	
-		byte [] buffer = encode();
-		//socket.getOutputStream().write(buffer, 0, buffer.length);
-		ByteBuffer bb = ByteBuffer.wrap(buffer);  
-		socket.write(bb); // TODO XXX might write part of packet!
-	}
-
-	public void sendTo(DatagramChannel _udp_client_socket, SocketAddress a) throws IOException 
-	{
-		byte [] buffer = encode();
-		/*
-		DatagramPacket sendPacket = 
-				new DatagramPacket(buffer, buffer.length, a );
-						//a, Net.NETWORK_DEFAULT_PORT); // TODO just default port?
-		
-		_udp_client_socket.send(sendPacket);
-		*/
-		ByteBuffer bb = ByteBuffer.wrap(buffer);
-		_udp_client_socket.write(bb);
-	}
+	public int getType() { return type; }
 
 
+
+
+
+
+
+	
+
+	
+	// -------------------------------------------------------------------
+	// Incoming packets
+	// -------------------------------------------------------------------
+	
+
+	/**
+	 * Parse incoming packet.
+	 * @param rdata Raw data from network.
+	 */
 	public Packet(byte [] rdata) {
 		parse(rdata); // TODO success? throw?
 	}
 
+	/**
+	 * Parse incoming packet.
+	 * @param Already extracted from data stream packet type
+	 * @param rdata Data from network, excluding packet size and type fields.
+	 */
 	public Packet(int packetType, byte[] rdata) {
 		type = packetType;
-		data = new BinaryString( rdata, 0, rdata.length );
+		//data = new BinaryString( rdata, 0, rdata.length );
+		data = ByteBuffer.wrap(rdata, 0, rdata.length);
 	}
 
 
-	void parse(byte [] rdata )
+	private void parse(byte [] rdata )
 	{
 		int len = parseLen(rdata);
 		type = Byte.toUnsignedInt(rdata[2]);
 
-		data = new BinaryString( rdata, HEADER_SIZE, len-1 );
+		//data = new BinaryString( rdata, HEADER_SIZE, len-1 );
+		data = ByteBuffer.wrap(rdata, HEADER_SIZE, len-1);
 	}
 
 	public static int parseLen(byte[] rdata) {
@@ -110,46 +89,84 @@ public class Packet {
 		return len;
 	}
 
-
-	public int getType() { return type; }
-
-
-
-	
-	public void encodeObject(Object o) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
-		ObjectOutputStream oos = new ObjectOutputStream(bos);
-		oos.writeObject(o);
-		assert data.length() == 0; // Must be empty, we're overwriting
-		data = new BinaryString(bos.toByteArray());
+	public byte[] asByteArray() {
+		return data.array();
 	}
 
 	
+	public byte nextByte() {
+		return data.get();
+	}
+
+	public int nextInt() {
+		return data.getInt();
+	}
+
+
+	public long nextLong() {
+		return data.getLong();
+	}
+
+
+	public String nextString() {
+		int len = data.getInt();
+		byte[] sdata = new byte[len];
+		data.get(sdata, 0, len);
+		return new String(sdata);
+	}
+
+
+	/**
+	 * Extract object from packet.
+	 * <br>
+	 * NB! Can't be used with other nextXXX methods. Only one object per packet.
+	 * TODO change it - use ByteArrayInputStream?
+	 * @return Object decoded.
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
 	public Object decodeObject() throws IOException, ClassNotFoundException {
 		
-		char[] ca = data.toCharArray();
+		/*char[] ca = data.toCharArray();
 		byte [] ba = new byte[ca.length];
 		
 		for(int i = 0; i < ca.length; i++)
 			ba[i] = (byte) ca[i];
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(ba); 
+		ByteArrayInputStream bais = new ByteArrayInputStream(ba); */
+		ByteArrayInputStream bais = new ByteArrayInputStream(data.array());
 		ObjectInputStream ois = new ObjectInputStream(bais);
 		
 		return ois.readObject();
 	}
 
+	
+	
+	// -------------------------------------------------------------------
+	// Outgoing packets - TODO split in two classes?
+	// -------------------------------------------------------------------
+
+	/**
+	 * Create paket to be sent.
+	 * @param type Type of packet.
+	 */
+	public Packet(PacketType type) {
+		//data.append((char)type.ordinal());
+		this.type = type.ordinal();
+		data = null;
+		collector = new ByteArrayOutputStream();
+	}
 
 	public void append(byte b) {
-		data.append(b);		
+		collector.write(b);
 	}
 
 	public void appendInt(int i) 
 	{
-		data.append( (byte) (i >> 24) );
-		data.append( (byte) (i >> 16) );
-		data.append( (byte) (i >> 8) );
-		data.append( (byte) i );		
+		collector.write( (byte) (i >> 24) );
+		collector.write( (byte) (i >> 16) );
+		collector.write( (byte) (i >> 8) );
+		collector.write( (byte) i );		
 	}
 
 
@@ -158,48 +175,84 @@ public class Packet {
 		appendInt((int) (l >>> 32));
 	}
 
-	public void append(String s) {
-		data.append(s);		
+	final static Charset forName = Charset.forName("ISO-8859-1");
+	
+	public void append(String s) throws IOException {
+		//data.append(s);		
+		appendInt(s.length());
+		collector.write(s.getBytes(forName));
 	}
 
 
 	
-	private ByteBuffer getBB() {
-		// TODO Auto-generated method stub
-		
+
+
+	public void append(byte[] buffer) throws IOException {
+		//data.assign(buffer);
+		collector.write(buffer);
 	}
+
+
+
+	private byte [] encode()
+	{
+		byte[] sdata = collector.toByteArray();
+		
+		int size = sdata.length;
+		byte [] buffer = new byte[size+HEADER_SIZE];
+
+		buffer[0] = (byte) (size & 0xFF);
+		buffer[1] = (byte) (size >> 8);
+		buffer[2] = (byte) type;
+
+		// TODO Arraycopy
+		for(int i = 0; i < size; i++)
+		{
+			byte c = sdata[i];
+			buffer[i+HEADER_SIZE] = (byte) c;
+		}
+
+		return buffer;
+	}
+
+	public void encodeObject(Object o) throws IOException {
+		//ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		ObjectOutputStream oos = new ObjectOutputStream(collector);
+		oos.writeObject(o);
+		//assert data.length() == 0; // Must be empty, we're overwriting
+		//data = new BinaryString(bos.toByteArray());
+	}
+
 	
-	public byte nextByte() {
-		ByteBuffer bb = getBB();
-		return bb.get();
+	
+	public void sendTo(SocketChannel socket) throws IOException 
+	{	
+		byte [] buffer = encode();
+		//socket.getOutputStream().write(buffer, 0, buffer.length);
+		ByteBuffer bb = ByteBuffer.wrap(buffer);  
+		int len = socket.write(bb); // TODO XXX might write part of packet!
+		assert len == buffer.length;
 	}
 
-	public int nextInt() {
-		ByteBuffer bb = getBB();
-		return bb.getInt();
-	}
+	public void sendTo(DatagramChannel udp, SocketAddress a) throws IOException 
+	{
+		byte [] buffer = encode();
 
-
-	public long nextLong() {
-		ByteBuffer bb = getBB();
-		return bb.getLong();
-	}
-
-
-	public String nextString() {
-		ByteBuffer bb = getBB();
-		int len = bb.getInt();
-		byte[] sdata = new byte[len];
-		bb.get(sdata, 0, len);
-		return new String(sdata);
-	}
-
-
-	public void setBuffer(byte[] buffer) {
-		data.assign(buffer);
-		
+		ByteBuffer bb = ByteBuffer.wrap(buffer);
+		int len = udp.write(bb);
+		assert len == buffer.length;
 	}
 
 
 
+
+
+
+
+
+
+
+	
+	
+	
 }

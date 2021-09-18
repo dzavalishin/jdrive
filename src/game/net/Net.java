@@ -48,7 +48,10 @@ import game.xui.Window;
 
 public class Net implements NetDefs, NetClient 
 {
+	public static RandomAccessFile client_file_pointer = null;
 	public static int client_last_ack_frame = -1; // TODO [dz] -1?
+	public static String recvMapFilename = "";
+
 
 	public static RandomAccessFile _server_file_pointer = null;
 	public static int server_sent_packets = 0; // How many packets we did send succecfully last time
@@ -787,16 +790,17 @@ public class Net implements NetDefs, NetClient
 	// Close all current connections
 	static void NetworkClose()
 	{
-		//NetworkClientState cs;
-
-		//FOR_ALL_CLIENTS(cs) {
 		for(NetworkClientState cs : _clients) 
 		{
 			if( !cs.hasValidSocket() ) continue;
 
 			if (!Global._network_server) {
 				//SEND_COMMAND(PacketType.CLIENT_QUIT, "leaving");
-				NetClient.NetworkPacketSend_PACKET_CLIENT_QUIT_command("leaving");
+				try {
+					NetClient.NetworkPacketSend_PACKET_CLIENT_QUIT_command("leaving");
+				} catch (IOException e) {
+					Global.error(e);
+				}
 				NetworkSend_Packets(cs);
 			}
 			NetworkCloseClient(cs);
@@ -1308,7 +1312,11 @@ public class Net implements NetDefs, NetClient
 
 				if (cs.status == ClientStatus.MAP) {
 					// This client is in the middle of a map-send, call the function for that
-					NetServer.NetworkPacketSend_PACKET_SERVER_MAP_command(cs);
+					try {
+						NetServer.NetworkPacketSend_PACKET_SERVER_MAP_command(cs);
+					} catch (IOException e) {
+						Global.error(e);
+					}
 				}
 			}
 		});
@@ -1457,7 +1465,11 @@ public class Net implements NetDefs, NetClient
 			//		_sync_seed_2 = _random_seeds[0][1];
 			//#endif
 
-			NetServer.NetworkServer_Tick(send_frame);
+			try {
+				NetServer.NetworkServer_Tick(send_frame);
+			} catch (IOException e) {
+				Global.error(e);
+			}
 		} else {
 			// Client
 
@@ -1503,6 +1515,7 @@ public class Net implements NetDefs, NetClient
 		snprintf(_network_unique_id, sizeof(_network_unique_id), "%s", hex_output);
 		 */
 	}
+
 
 
 
@@ -1826,7 +1839,7 @@ public class Net implements NetDefs, NetClient
 
 
 
-	static void NetworkServer_HandleChat(NetworkAction action, DestType desttype, int dest, String msg, final int from_index)
+	static void NetworkServer_HandleChat(NetworkAction action, DestType desttype, int dest, String msg, final int from_index) throws IOException
 	{
 		//NetworkClientState cs;
 		final NetworkClientInfo ci = NetworkFindClientInfoFromIndex(from_index);

@@ -286,7 +286,12 @@ public class Console //extends ConsoleCmds
 		//#ifdef ENABLE_NETWORK
 		if (_redirect_console_to_client != 0) {
 			/* Redirect the string to the client */
-			NetServer.NetworkPacketSend_PACKET_SERVER_RCON_command(Net.NetworkFindClientStateFromIndex(_redirect_console_to_client), color_code, string);
+			try {
+				NetServer.NetworkPacketSend_PACKET_SERVER_RCON_command(Net.NetworkFindClientStateFromIndex(_redirect_console_to_client), color_code, string);
+			} catch (IOException e) {
+				// e.printStackTrace();
+				Global.error(e);
+			}
 			return;
 		}
 		//#endif

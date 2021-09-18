@@ -1,5 +1,6 @@
 package game;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -1045,7 +1046,11 @@ public class Player implements Serializable
 					//NetworkClientInfo ci = _network_client_info[pid];
 					NetworkClientInfo ci = Net.getClient(pid).getCi();
 					ci.client_playas = p.index.id + 1;
-					NetServer.NetworkUpdateClientInfo(ci.client_index);
+					try {
+						NetServer.NetworkUpdateClientInfo(ci.client_index);
+					} catch (IOException e) {
+						Global.error(e);
+					}
 
 					if (ci.client_playas != 0 && ci.client_playas <= Global.MAX_PLAYERS) {
 						PlayerID player_backup = Global.gs._local_player;
@@ -1075,7 +1080,11 @@ public class Player implements Serializable
 				//Net._clients.get(pid).ci
 				NetworkClientInfo ci = Net.getClient(pid).getCi();
 				ci.client_playas = Owner.OWNER_SPECTATOR;
-				NetServer.NetworkUpdateClientInfo(ci.client_index);
+				try {
+					NetServer.NetworkUpdateClientInfo(ci.client_index);
+				} catch (IOException e) {
+					Global.error(e);
+				}
 			}
 			//#else */
 			//}
