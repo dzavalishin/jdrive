@@ -1089,7 +1089,12 @@ public class Net implements NetDefs, NetClient
 
 		/* Try to register us to the master server */
 		_network_last_advertise_date = 0;
-		NetUDP.NetworkUDPAdvertise();
+		try {
+			NetUDP.NetworkUDPAdvertise();
+		} catch (IOException e) {
+			// e.printStackTrace();
+			Global.error(e);
+		}
 		return true;
 	}
 

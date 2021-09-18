@@ -1,6 +1,7 @@
 package game.net;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
@@ -12,6 +13,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.Enumeration;
+import java.util.Iterator;
 
 import game.GameOptions;
 import game.Global;
@@ -179,10 +181,10 @@ public class NetUDP extends Net
 		NetGui.UpdateNetworkGameWindow(false);
 	}
 
-	static void NetworkPacketReceive_PACKET_UDP_CLIENT_DETAIL_INFO_command(Packet p, SocketAddress client_addr)
+	static void NetworkPacketReceive_PACKET_UDP_CLIENT_DETAIL_INFO_command(Packet p, SocketAddress client_addr) throws IOException
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_CLIENT_DETAIL_INFO)
 	{
-		NetworkClientState cs;
+		//NetworkClientState cs;
 		NetworkClientInfo ci;
 		//Player player;
 		int [] active = {0};
@@ -202,52 +204,59 @@ public class NetUDP extends Net
 
 		Player.forEach( pl -> { if (pl.isActive()) active[0]++; } );
 
-		// TODO content
-		
-		/* Send the amount of active companies */
-		NetworkSend_byte (packet, NETWORK_COMPANY_INFO_VERSION);
-		NetworkSend_byte (packet, active);
+		// Send the amount of active companies
+		NetworkSend_byte (packet, (byte) NETWORK_COMPANY_INFO_VERSION);
+		NetworkSend_byte (packet, (byte) active[0]);
 
 		// Fetch the latest version of everything 
-		NetworkPopulateCompanyInfo();
+		NetServer.NetworkPopulateCompanyInfo();
 
 		// Go through all the players 
-		FOR_ALL_PLAYERS(player) {
+		//FOR_ALL_PLAYERS(player) 
+		Iterator<Player> ii = Player.getIterator();
+		while(ii.hasNext())
+		{
+			Player player = ii.next();
+			
 			// Skip non-active players 
-			if (!player.is_active)
+			if (!player.isActive())
 				continue;
 
 			current++;
 
+			int pindex = player.getIndex().id;
+			
 			// Send the information
 			NetworkSend_byte (packet, current);
 
-			NetworkSend_string(packet, _network_player_info[player.index].company_name);
-			NetworkSend_byte (packet, _network_player_info[player.index].inaugurated_year);
-			NetworkSend_int64(packet, _network_player_info[player.index].company_value);
-			NetworkSend_int64(packet, _network_player_info[player.index].money);
-			NetworkSend_int64(packet, _network_player_info[player.index].income);
-			NetworkSend_int(packet, _network_player_info[player.index].performance);
+			NetworkSend_string(packet, _network_player_info[pindex].company_name);
+			NetworkSend_byte (packet, (byte) _network_player_info[pindex].inaugurated_year);
+			NetworkSend_int64(packet, _network_player_info[pindex].company_value);
+			NetworkSend_int64(packet, _network_player_info[pindex].money);
+			NetworkSend_int64(packet, _network_player_info[pindex].income);
+			NetworkSend_int(packet, _network_player_info[pindex].performance);
 
 			// Send 1 if there is a passord for the company else send 0
-			if (_network_player_info[player.index].password[0] != '\0') {
-				NetworkSend_byte (packet, 1);
+			if (!Net._network_player_info[pindex].password.isBlank()) {
+				NetworkSend_byte (packet, (byte) 1);
 			} else {
-				NetworkSend_byte (packet, 0);
+				NetworkSend_byte (packet, (byte) 0);
 			}
 
 			for (i = 0; i < NETWORK_VEHICLE_TYPES; i++)
-				NetworkSend_int(packet, _network_player_info[player.index].num_vehicle[i]);
+				NetworkSend_int(packet, _network_player_info[pindex].num_vehicle[i]);
 
 			for (i = 0; i < NETWORK_STATION_TYPES; i++)
-				NetworkSend_int(packet, _network_player_info[player.index].num_station[i]);
+				NetworkSend_int(packet, _network_player_info[pindex].num_station[i]);
 
 			// Find the clients that are connected to this player
-			FOR_ALL_CLIENTS(cs) {
-				ci = DEREF_CLIENT_INFO(cs);
-				if ((ci.client_playas - 1) == player.index) {
+			//FOR_ALL_CLIENTS(cs) 
+			for( NetworkClientState cs : Net._clients )
+			{
+				ci = cs.ci; // DEREF_CLIENT_INFO(cs);
+				if ((ci.client_playas - 1) == pindex) {
 					// The byte == 1 indicates that a client is following
-					NetworkSend_byte(packet, 1);
+					NetworkSend_byte(packet, (byte) 1);
 					NetworkSend_string(packet, ci.client_name);
 					NetworkSend_string(packet, ci.unique_id);
 					NetworkSend_int(packet, ci.join_date);
@@ -255,24 +264,26 @@ public class NetUDP extends Net
 			}
 			// Also check for the server itself
 			ci = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
-			if ((ci.client_playas - 1) == player.index) {
+			if ((ci.client_playas - 1) == pindex) {
 				// The byte == 1 indicates that a client is following
-				NetworkSend_byte(packet, 1);
+				NetworkSend_byte(packet, (byte) 1);
 				NetworkSend_string(packet, ci.client_name);
 				NetworkSend_string(packet, ci.unique_id);
 				NetworkSend_int(packet, ci.join_date);
 			}
 
 			// Indicates end of client list
-			NetworkSend_byte(packet, 0);
+			NetworkSend_byte(packet, (byte) 0);
 		}
 
 		// And check if we have any spectators
-		FOR_ALL_CLIENTS(cs) {
-			ci = DEREF_CLIENT_INFO(cs);
+		//FOR_ALL_CLIENTS(cs) 
+		for( NetworkClientState cs : Net._clients )
+		{
+			ci = cs.ci; // DEREF_CLIENT_INFO(cs);
 			if ((ci.client_playas - 1) > Global.MAX_PLAYERS) {
 				// The byte == 1 indicates that a client is following
-				NetworkSend_byte(packet, 1);
+				NetworkSend_byte(packet, (byte) 1);
 				NetworkSend_string(packet, ci.client_name);
 				NetworkSend_string(packet, ci.unique_id);
 				NetworkSend_int(packet, ci.join_date);
@@ -282,19 +293,19 @@ public class NetUDP extends Net
 		ci = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
 		if ((ci.client_playas - 1) > Global.MAX_PLAYERS) {
 			// The byte == 1 indicates that a client is following
-			NetworkSend_byte(packet, 1);
+			NetworkSend_byte(packet, (byte) 1);
 			NetworkSend_string(packet, ci.client_name);
 			NetworkSend_string(packet, ci.unique_id);
 			NetworkSend_int(packet, ci.join_date);
 		}
 
 		// Indicates end of client list
-		NetworkSend_byte(packet, 0);
-		*/
+		NetworkSend_byte(packet, (byte) 0);
+
 		NetworkSendUDP_Packet(_udp_server_socket[0], packet, client_addr);
 	}
 
-	static void NetworkPacketReceive_PACKET_UDP_MASTER_RESPONSE_LIST_command(Packet p, SocketAddress client_addr)
+	static void NetworkPacketReceive_PACKET_UDP_MASTER_RESPONSE_LIST_command(Packet p, SocketAddress client_addr) throws UnknownHostException
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_MASTER_RESPONSE_LIST) 
 	{
 		int i;
@@ -306,7 +317,7 @@ public class NetUDP extends Net
 		 * then an int which indicates how many
 		 * ip:port pairs are in this packet, after that
 		 * an int (ip) and an int (port) for each pair
-		 * /
+		 */
 
 		ver = NetworkRecv_byte(_udp_cs, p);
 
@@ -315,12 +326,15 @@ public class NetUDP extends Net
 
 		if (ver == 1) {
 			for (i = NetworkRecv_int(_udp_cs, p); i != 0 ; i--) {
-				ip.s_addr = TO_LE32(NetworkRecv_int(_udp_cs, p));
+				int ip = NetworkRecv_int(_udp_cs, p);
 				port = NetworkRecv_int(_udp_cs, p);
-				NetworkUDPQueryServer(inet_ntoa(ip), port);
+				byte[] bytes = BigInteger.valueOf(ip).toByteArray();
+				InetAddress ia = InetAddress.getByAddress(bytes);
+				String host = ia.getHostAddress();
+				NetworkUDPQueryServer(host, port);
 			}
 		}
-		*/
+
 	}
 
 	//DEF_UDP_RECEIVE_COMMAND(PACKET_UDP_MASTER_ACK_REGISTER) 
@@ -330,7 +344,7 @@ public class NetUDP extends Net
 		Global.DEBUG_net( 2,"[NET][UDP] We are advertised on the master-server!");
 
 		if (!_network_advertise)
-			/* We are advertised, but we don't want to! */
+			// We are advertised, but we don't want to!
 			NetworkUDPRemoveAdvertise();
 	}
 
@@ -360,7 +374,7 @@ public class NetUDP extends Net
 
 	static void NetworkHandleUDPPacket(Packet p, SocketAddress client_addr)
 	{
-		/* Fake a client, so we can see when there is an illegal packet */
+		// Fake a client, so we can see when there is an illegal packet
 		_udp_cs.socket = null;
 		_udp_cs.quited = false;
 
@@ -653,10 +667,10 @@ public class NetUDP extends Net
 		return item;
 	}
 
-	/* Remove our advertise from the master-server */
+	// Remove our advertise from the master-server
 	static void NetworkUDPRemoveAdvertise()
 	{
-		/* Check if we are advertising */
+		// Check if we are advertising
 		if (!Global._networking || !Global._network_server || !_network_udp_server)
 			return;
 
@@ -669,7 +683,7 @@ public class NetUDP extends Net
 
 		Global.DEBUG_net( 2, "[NET][UDP] Removing advertise..");
 
-		/* Find somewhere to send */
+		// Find somewhere to send
 		InetAddress ha = null;
 		try {
 			ha = NetworkResolveHost(NETWORK_MASTER_SERVER_HOST);
@@ -680,9 +694,9 @@ public class NetUDP extends Net
 		}
 		SocketAddress out_addr = new InetSocketAddress(ha, NETWORK_MASTER_SERVER_PORT);
 		
-		/* Send the packet */
+		// Send the packet
 		Packet p = new Packet(PacketType.UDP_SERVER_UNREGISTER);
-		/* Packet is: Version, server_port */
+		// Packet is: Version, server_port
 		p.append((byte)NETWORK_MASTER_SERVER_VERSION);
 		// TODO content p.appendInt(_network_server_port);
 		NetworkSendUDP_Packet(_udp_master_socket[0], p, out_addr);
@@ -692,7 +706,7 @@ public class NetUDP extends Net
 	     This function checks if it needs to send an advertise */
 	static void NetworkUDPAdvertise() throws IOException
 	{
-		/* Check if we should send an advertise */
+		// Check if we should send an advertise
 		if (!Global._networking || !Global._network_server || !_network_udp_server || !_network_advertise)
 			return;
 
@@ -702,7 +716,7 @@ public class NetUDP extends Net
 				return; */
 		checkRestartListen(_udp_master_socket, new InetSocketAddress(_network_server_bind_ip, 0), false);
 
-		/* Only send once in the 450 game-days (about 15 minutes) */
+		// Only send once in the 450 game-days (about 15 minutes)
 		if (_network_advertise_retries == 0) {
 			if ( (_network_last_advertise_date + ADVERTISE_NORMAL_INTERVAL) > Global.get_date())
 				return;
@@ -715,7 +729,7 @@ public class NetUDP extends Net
 		_network_advertise_retries--;
 		_network_last_advertise_date = Global.get_date();
 
-		/* Find somewhere to send */
+		// Find somewhere to send
 		InetAddress ha = null;
 		try {
 			ha = NetworkResolveHost(NETWORK_MASTER_SERVER_HOST);
@@ -728,7 +742,7 @@ public class NetUDP extends Net
 
 		Global.DEBUG_net( 1,"[NET][UDP] Advertising to master server");
 
-		/* Send the packet */
+		// Send the packet
 		Packet p = new Packet(PacketType.UDP_SERVER_REGISTER);
 		// TODO content Packet is: WELCOME_MESSAGE, Version, server_port
 		NetworkSend_string(p, NETWORK_MASTER_SERVER_WELCOME_MESSAGE);
