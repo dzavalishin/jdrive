@@ -566,7 +566,6 @@ public class Cmd {
 			}
 		}
 
-		/*#ifdef ENABLE_NETWORK
 		//** If we are in network, and the command is not from the network
 		// * send it to the command-queue and abort execution
 		// * If we are a dedicated server temporarily switch local player, otherwise
@@ -580,7 +579,6 @@ public class Cmd {
 			Global._cmd_text = null;
 			return true;
 		}
-		//#endif /* ENABLE_NETWORK */
 
 		// update last build coordinate of player.
 		if ( tile != null && !PlayerID.getCurrent().isSpecial()) 

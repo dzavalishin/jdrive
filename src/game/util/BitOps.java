@@ -65,6 +65,12 @@ public class BitOps {
 		return a;
 	}
 
+	static public long clamp(long a, long min, long max)
+	{
+		if (a <= min) return min;
+		if (a >= max) return max;
+		return a;
+	}
 
 	static public int BIGMULSS(int a, int b, int shift) {
 		return (int)(((long)(a) * (long)(b)) >> (shift));

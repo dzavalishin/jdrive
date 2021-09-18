@@ -3,7 +3,7 @@ package game.net;
 public class NetworkPlayerInfo implements NetDefs 
 {
 		String company_name;					// Company name
-		String password;					// The password for the player
+		public String password;					// The password for the player
 		int inaugurated_year;													// What year the company started in
 		long company_value;														// The company value
 		long money;																		// The amount of money the company has

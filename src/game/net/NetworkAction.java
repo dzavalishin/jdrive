@@ -15,4 +15,9 @@ public enum NetworkAction {
 	static NetworkAction value(int v) {
 		return values[v];
 	}
+
+	public static NetworkAction uiAction(int id) {
+		// NetworkAction.CHAT + (id & 0xFF)
+		return value(CHAT.ordinal() + (id & 0xFF) );
+	}
 }

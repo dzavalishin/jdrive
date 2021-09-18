@@ -11,11 +11,14 @@ import game.Sprite;
 import game.Str;
 import game.TileIndex;
 import game.Vehicle;
+import game.console.ConsoleCmds;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ids.StringID;
+import game.net.Net;
 import game.util.BitOps;
+import game.util.Strings;
 
 public class PlayerGui 
 {
@@ -636,13 +639,14 @@ public class PlayerGui
 				Cmd.DoCommandP(null, w.window_number, 0, null, Cmd.CMD_SELL_SHARE_IN_COMPANY | Cmd.CMD_MSG(Str.STR_707C_CAN_T_SELL_25_SHARE_IN));
 				break;
 			case 11: { /* Password protect company */
-				/*#ifdef ENABLE_NETWORK
-				if (!IsWindowOfPrototype(w, _other_player_company_widgets)) {
+
+				if (!Window.IsWindowOfPrototype(w,_other_player_company_widgets)) {
 					w.as_def_d().byte_1 = 2;
-					ShowQueryString(Strings.BindCString(_network_player_info[Global.gs._local_player].password),
-							Str.STR_SET_COMPANY_PASSWORD, sizeof(_network_player_info[Global.gs._local_player].password), 250, w.window_class, w.window_number);
+					final String password = Net._network_player_info[Global.gs._local_player.id].password;
+					MiscGui.ShowQueryString(Strings.BindCString(password),
+							Str.STR_SET_COMPANY_PASSWORD, 20 /* TODO is this maxlen correct? */, 250, w.window_class, w.window_number);
 				}
-				#endif */
+
 			}	break;
 			}
 
@@ -678,11 +682,10 @@ public class PlayerGui
 			case 1: /* Change company name */
 				Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_CHANGE_COMPANY_NAME | Cmd.CMD_MSG(Str.STR_700C_CAN_T_CHANGE_COMPANY_NAME));
 				break;
-				/*#ifdef ENABLE_NETWORK
 			case 2: // Change company password 
-				if (*b == '\0') *b = '*'; // empty password is a '*' because of console argument
-				NetworkChangeCompanyPassword(1, &b);
-				#endif */
+				if (b.isBlank()) b = "*"; // empty password is a '*' because of console argument
+				ConsoleCmds.NetworkChangeCompanyPassword(b);
+
 			}
 		} break;
 		

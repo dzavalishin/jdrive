@@ -7,7 +7,7 @@ public enum DestType {
 
 	static DestType [] values = values();
 	
-	static DestType value(int v) {
+	public static DestType value(int v) {
 		return values[v];
 	}
 }

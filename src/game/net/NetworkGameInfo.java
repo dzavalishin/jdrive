@@ -18,7 +18,7 @@ public class NetworkGameInfo {
 		int spectators_on;															// How many spectators do we have?
 		int game_date;																// Current date
 		int start_date;															// When the game started
-		String map_name;							// Map which is played ["random" for a randomized map]
+		public String map_name;							// Map which is played ["random" for a randomized map]
 		int map_width;																// Map width
 		int map_height;															// Map height
 		int map_set;																		// Graphical set

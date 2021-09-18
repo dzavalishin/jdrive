@@ -1,5 +1,6 @@
 package game;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
 
@@ -10,6 +11,9 @@ import game.ids.StationID;
 import game.ids.StringID;
 import game.ids.UnitID;
 import game.ids.VehicleID;
+import game.net.Net;
+import game.net.NetServer;
+import game.net.NetworkClientInfo;
 import game.struct.FoundRoute;
 import game.struct.GoodsEntry;
 import game.struct.Pair;
@@ -510,28 +514,34 @@ public class Economy extends EconomeTables implements Serializable
 				p.bankrupt_asked = (byte) 255;
 				p.bankrupt_timeout = 0x456;
 			} else {
-				/*#ifdef ENABLE_NETWORK
-					if (owner.IS_HUMAN_PLAYER() && _network_server) {
+					if (owner.IS_HUMAN_PLAYER() && Global._network_server) {
 						// If we are the server, make sure it is clear that his player is no
 						//  longer with us!
-						NetworkClientInfo *ci;
-						NetworkClientState *cs;
+						//NetworkClientInfo ci;
+						//NetworkClientState cs;
 						// * Find all clients that were in control of this company * /
-						FOR_ALL_CLIENTS(cs) {
-							ci = DEREF_CLIENT_INFO(cs);
-							if ((ci.client_playas-1) == owner) {
+						//FOR_ALL_CLIENTS(cs) 
+						//for(NetworkClientState cs : Net.getClients())
+						Net.FOR_ALL_CLIENTS(cs ->
+						{
+							NetworkClientInfo ci = cs.getCi(); // DEREF_CLIENT_INFO(cs);
+							if ((ci.client_playas-1) == owner.id) {
 								ci.client_playas = Owner.OWNER_SPECTATOR;
 								// Send the new info to all the clients
-								NetworkUpdateClientInfo(_network_own_client_index);
+								try {
+									NetServer.NetworkUpdateClientInfo(Net._network_own_client_index);
+								} catch (IOException e) {
+									// e.printStackTrace();
+									Global.error(e);
+								}
 							}
-						}
+						});
 					}
 					// Make sure the player no longer controls the company
-					if (owner.IS_HUMAN_PLAYER(owner) && owner.equals(_local_player)) {
+					if (owner.IS_HUMAN_PLAYER() && owner.equals(Global.gs._local_player)) {
 						// Switch the player to spectator..
-						_local_player = Owner.OWNER_SPECTATOR;
+						Global.gs._local_player = Owner.OWNER_SPECTATOR_ID;
 					}
-	#endif /* ENABLE_NETWORK */
 
 				// Convert everything the player owns to NO_OWNER
 				p.money64 = Player.INITIAL_MONEY;

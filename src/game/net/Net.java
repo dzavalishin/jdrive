@@ -1164,7 +1164,7 @@ public class Net implements NetDefs, NetClient
 		Global._network_server = false;
 	}
 
-	static void FOR_ALL_CLIENTS(Consumer<NetworkClientState> s) 
+	public static void FOR_ALL_CLIENTS(Consumer<NetworkClientState> s) 
 	{
 		for (NetworkClientState cs : _clients)
 		{

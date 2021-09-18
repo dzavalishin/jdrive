@@ -18,6 +18,8 @@ import game.TrainCmd;
 import game.Vehicle;
 import game.WayPoint;
 import game.enums.GameModes;
+import game.net.Net;
+import game.net.NetServer;
 import game.xui.MiscGui;
 import game.xui.PlayerGui;
 import game.xui.StationGui;
@@ -175,10 +177,10 @@ public class GameDate implements Serializable
 			Industry.IndustryMonthlyLoop();
 			//Station._global_station_sort_dirty();
 			StationGui.requestSortStations();
-			/*#ifdef ENABLE_NETWORK
-			if (_network_server)
-				NetworkServerMonthlyLoop();
-	#endif /* ENABLE_NETWORK */
+
+			if (Global._network_server)
+				NetServer.NetworkServerMonthlyLoop();
+
 		}
 
 		/* check if we entered a new year? */
@@ -193,10 +195,9 @@ public class GameDate implements Serializable
 		RoadVehCmd.RoadVehiclesYearlyLoop();
 		AirCraft.AircraftYearlyLoop();
 		Ship.ShipsYearlyLoop();
-		/*#ifdef ENABLE_NETWORK
-		if (_network_server)
-			NetworkServerYearlyLoop();
-	#endif /* ENABLE_NETWORK */
+
+		if (Global._network_server)
+			NetServer.NetworkServerYearlyLoop();
 
 		/* check if we reached end of the game (31 dec 2050) */
 		if (_cur_year == Global._patches.ending_date - Global.MAX_YEAR_BEGIN_REAL) {
@@ -230,9 +231,8 @@ public class GameDate implements Serializable
 		//YearMonthDay.ConvertDayToYMD(ymd, _date = date);
 		_cur_year = ymd.year;
 		_cur_month = ymd.month;
-	/*#ifdef ENABLE_NETWORK
-		_network_last_advertise_date = 0;
-	#endif /* ENABLE_NETWORK */
+		Net._network_last_advertise_date = 0;
+
 	}
 
 	public void reset_date_fract() {

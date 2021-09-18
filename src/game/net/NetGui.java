@@ -408,7 +408,7 @@ public class NetGui extends Net implements NetDefs
 		NetGui::NetworkGameWindowWndProc
 	);
 
-	static void ShowNetworkGameWindow()
+	public static void ShowNetworkGameWindow()
 	{
 		int i;
 		Window w;
@@ -1269,7 +1269,7 @@ public class NetGui extends Net implements NetDefs
 		}
 	}
 
-	void ShowClientList()
+	public static void ShowClientList()
 	{
 		Window w = Window.AllocateWindowDescFront(_client_list_desc, 0);
 		if (w != null) w.window_number = 0;

@@ -1,5 +1,6 @@
 package game.xui;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -36,7 +37,11 @@ import game.ids.StringID;
 import game.ifaces.MenuClickedProc;
 import game.ifaces.OnButtonClick;
 import game.ifaces.ToolbarButtonProc;
+import game.net.DestType;
+import game.net.Net;
+import game.net.NetClient;
 import game.net.NetGui;
+import game.net.NetworkAction;
 import game.net.NetworkPasswordType;
 import game.struct.ColorList;
 import game.struct.Point;
@@ -154,13 +159,10 @@ public class Gui
 	static void HandleOnEditTextCancel()
 	{
 		switch (_rename_what) {
-		/*
-	#ifdef ENABLE_NETWORK
 		case 4:
-			NetworkDisconnect();
-			ShowNetworkGameWindow();
+			Net.NetworkDisconnect();
+			NetGui.ShowNetworkGameWindow();
 			break;
-	#endif /* ENABLE_NETWORK */
 		}
 	}
 
@@ -183,36 +185,49 @@ public class Gui
 				return;
 			Cmd.DoCommandP(null, id, 0, null, Cmd.CMD_RENAME_WAYPOINT | Cmd.CMD_MSG(Str.STR_CANT_CHANGE_WAYPOINT_NAME));
 			break;
-	/* #ifdef ENABLE_NETWORK
+	
 		case 2: // Speak to.. 
-			if (!_network_server)
-				SEND_COMMAND(PACKET_CLIENT_CHAT)(NETWORK_ACTION_CHAT + (id & 0xFF), id & 0xFF, (id >> 8) & 0xFF, e.edittext.str);
+			if (!Global._network_server)
+				try {
+					NetClient.NetworkPacketSend_PACKET_CLIENT_CHAT_command(NetworkAction.uiAction(id), DestType.value( id & 0xFF ), (id >> 8) & 0xFF, e.str);
+				} catch (IOException e1) {
+					Global.error(e1);
+				}
 			else
-				NetworkServer_HandleChat(NETWORK_ACTION_CHAT + (id & 0xFF), id & 0xFF, (id >> 8) & 0xFF, e.edittext.str, NETWORK_SERVER_INDEX);
+				// TODO NetworkServer_HandleChat( NetworkAction.uiAction(id), id & 0xFF, (id >> 8) & 0xFF, e.str, NETWORK_SERVER_INDEX);
 			break;
+			/*
 		case 3: { // Give money, you can only give money in excess of loan 
-			final Player *p = GetPlayer(_current_player);
-			int32 money = min(p.money64 - p.current_loan, atoi(e.edittext.str) / _currency.rate);
-			char msg[20];
+			final Player p = Player.GetCurrentPlayer();
+			// TODO _currency
+			//long money = min(p.getMoney() - p.getCurrent_loan(), Integer.parseInt(e.str) / Currency._currency.rate);
+			long money = Long.min(p.getMoney() - p.getCurrent_loan(), Integer.parseInt(e.str) / 1);
+			String msg;
 
-			money = clamp(money, 0, 20000000); // Clamp between 20 million and 0
+			money = BitOps.clamp(money, 0, 20000000); // Clamp between 20 million and 0
 
-			// Give 'id' the money, and substract it from ourself
-			if (!Cmd.DoCommandP(0, money, id, null, Cmd.CMD_GIVE_MONEY | Cmd.CMD_MSG(Str.STR_INSUFFICIENT_FUNDS))) break;
+			// Give 'id' the money, and substract it from ourself TODO (int)money
+			if (!Cmd.DoCommandP(null, (int)money, id, null, Cmd.CMD_GIVE_MONEY | Cmd.CMD_MSG(Str.STR_INSUFFICIENT_FUNDS))) break;
 
 			// Inform the player of this action
-			snprintf(msg, sizeof(msg), "%d", money);
+			//snprintf(msg, sizeof(msg), "%d", money);
+			msg = Long.toString(money);
 
-			if (!_network_server)
-				SEND_COMMAND(PACKET_CLIENT_CHAT)(NETWORK_ACTION_GIVE_MONEY, DESTTYPE_PLAYER, id + 1, msg);
+			// TODO server must be in _clients somehow - looked up by NETWORK_SERVER_INDEX
+			if (!Global._network_server)
+				NetClient.NetworkPacketSend_PACKET_CLIENT_CHAT_command(NetworkAction.GIVE_MONEY, DestType.PLAYER, id + 1, msg);
 			else
-				NetworkServer_HandleChat(NETWORK_ACTION_GIVE_MONEY, DESTTYPE_PLAYER, id + 1, msg, NETWORK_SERVER_INDEX);
-			break;
-		}
+				Net.NetworkServer_HandleChat(NetworkAction.GIVE_MONEY, DestType.PLAYER, id + 1, msg, NETWORK_SERVER_INDEX);
+			break; 
+		}*/
 		case 4: // Game-Password and Company-Password 
-			SEND_COMMAND(PACKET_CLIENT_PASSWORD)(id, e.edittext.str);
+			try {
+				NetClient.NetworkPacketSend_PACKET_CLIENT_PASSWORD_command(NetworkPasswordType.value(id), e.str);
+			} catch (IOException e1) {
+				Global.error(e1);
+			}
 			break;
-	#endif /* ENABLE_NETWORK */
+	
 		}
 	}
 
@@ -360,10 +375,8 @@ public class Gui
 
 	static void MenuClickCompany(int index)
 	{
-		if (Global._networking && index == 0) {
-	/*#ifdef ENABLE_NETWORK
-			ShowClientList();
-	#endif /* ENABLE_NETWORK */
+		if (Global._networking && index == 0) {	
+			NetGui.ShowClientList();
 		} else {
 			if (Global._networking) index--;
 			PlayerGui.ShowPlayerCompany(index);
@@ -2541,11 +2554,10 @@ public class Gui
 					Hal.MarkWholeScreenDirty();
 					break;
 
-	/*#ifdef ENABLE_NETWORK
+	
 				case Window.WKC_RETURN: case 'T' | Window.WKC_SHIFT:
-					if (_networking) ShowNetworkChatQueryWindow(DESTTYPE_BROADCAST, 0);
+					if (Global._networking) ShowNetworkChatQueryWindow(DestType.BROADCAST.ordinal(), 0);
 					break;
-	#endif */
 
 				default: return;
 			}

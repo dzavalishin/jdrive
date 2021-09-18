@@ -6,6 +6,7 @@ import game.Main;
 import game.Str;
 import game.enums.GameModes;
 import game.enums.SwitchModes;
+import game.net.NetGui;
 
 public class IntroGui 
 {
@@ -88,12 +89,13 @@ public class IntroGui
 				Window.ShowDropDownMenu(w, mapsizes, Global._patches.map_y - 6, 13, 0, 0);
 				break;
 			case 15:
-	/*#ifdef ENABLE_NETWORK
-				if (!_network_available) {
-					ShowErrorMessage(INVALID_STRING_ID, Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
+
+				if (!Global._network_available) {
+					//ShowErrorMessage(INVALID_STRING_ID, Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
+					Global.ShowErrorMessage(Str.INVALID_STRING , Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
 				} else
-					ShowNetworkGameWindow();
-	#else*/
+					NetGui.ShowNetworkGameWindow();
+	//#else
 				Global.ShowErrorMessage(Str.INVALID_STRING , Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
 	//#endif
 				break;

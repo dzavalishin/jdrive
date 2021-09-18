@@ -6,7 +6,7 @@ public enum NetworkPasswordType {
 
 	static final NetworkPasswordType values[] = values();
 	
-	static NetworkPasswordType value(int ord) {
+	public static NetworkPasswordType value(int ord) {
 		return values[ord];
 	}
 }

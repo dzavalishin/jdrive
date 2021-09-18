@@ -631,10 +631,8 @@ public class Main {
 			break;
 
 		case SM_START_SCENARIO: /* New Game -. Choose one of the preset scenarios */
-			/*#ifdef ENABLE_NETWORK
-				if (_network_server)
-					snprintf(_network_game_info.map_name, NETWORK_NAME_LENGTH, "%s (Loaded scenario)", _file_to_saveload.title);
-			/* ENABLE_NETWORK */
+				if (Global._network_server)
+					Net._network_game_info.map_name = String.format("%s (Loaded scenario)", _file_to_saveload.title);
 			StartScenario();
 			break;
 
@@ -887,7 +885,6 @@ public class Main {
 		Global._timer_counter += 8;
 		Hal.CursorTick();
 
-		//* #ifdef ENABLE_NETWORK
 		// Check for UDP stuff
 		NetUDP.NetworkUDPGameLoop();
 
@@ -903,9 +900,6 @@ public class Main {
 			// Singleplayer
 			StateGameLoop();
 		}
-	//#else */
-		//StateGameLoop();
-		//#endif /* ENABLE_NETWORK */
 
 		if (0 == Global._pause && 0 != (Global._display_opt & Global.DO_FULL_ANIMATION) ) Gfx.DoPaletteAnimations();
 

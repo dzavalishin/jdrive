@@ -1013,11 +1013,10 @@ public class Player implements Serializable
 
 			p = DoStartupNewPlayer(false);
 
-			/*  #ifdef ENABLE_NETWORK
-			if (_networking && !_network_server && _local_player == OWNER_SPECTATOR)
+
+			if (Global._networking && !Global._network_server && Global.gs._local_player.isSpectator())
 				// In case we are a client joining a server... 
-				DeleteWindowById(WC_NETWORK_STATUS_WINDOW, 0);
-			#endif /* ENABLE_NETWORK */
+				Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
 			if (p != null) {
 				if (Global.gs._local_player.isSpectator() && (!Ai._ai.network_client || Ai._ai.network_playas == Owner.OWNER_SPECTATOR)) {
@@ -1039,7 +1038,7 @@ public class Player implements Serializable
 				} else if (p.index.isLocalPlayer()) {
 					Cmd.DoCommandP(TileIndex.get(0), ((Global._patches.autorenew ? 1:0) << 15 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 				}
-				// #ifdef ENABLE_NETWORK
+
 				if (Global._network_server) {
 					// * XXX - UGLY! p2 (pid) is mis-used to fetch the client-id, done at server-side
 					//  * in network_server.c:838, function DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND) 
@@ -1086,9 +1085,6 @@ public class Player implements Serializable
 					Global.error(e);
 				}
 			}
-			//#else */
-			//}
-			//#endif /* ENABLE_NETWORK */
 		} break;
 
 		case 1: /* Make a new AI Player */
