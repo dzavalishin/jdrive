@@ -238,7 +238,7 @@ public class Global
 
 	// Net
 	public static boolean _networking = false;
-	public static boolean _network_available = false;  // is network mode available?
+	public static boolean _network_available = true;  // is network mode available?
 	public static boolean _network_server = false; // network-server is active
 	public static boolean _network_dedicated = false; // are we a dedicated server?
 	public static int _network_playas; // an id to play as..

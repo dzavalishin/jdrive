@@ -12,8 +12,6 @@ public class IntroGui
 {
 
 
-	//extern void SwitchMode(int new_mode);
-
 	static final Widget _select_game_widgets[] = {
 	new Widget(    Window.WWT_CAPTION, Window.RESIZE_NONE, 13,   0, 335,   0,  13, Str.STR_0307_OPENTTD,       Str.STR_NULL),
 	new Widget(     Window.WWT_IMGBTN, Window.RESIZE_NONE, 13,   0, 335,  14, 196, Str.STR_NULL,               Str.STR_NULL),

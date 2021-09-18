@@ -59,11 +59,11 @@ public class Net implements NetDefs, NetClient
 	
 	//public static NetworkGameList _network_game_list;
 
-	public static NetworkGameInfo _network_game_info;
+	public static NetworkGameInfo _network_game_info = new NetworkGameInfo();
 	public static NetworkPlayerInfo [] _network_player_info = new NetworkPlayerInfo[Global.MAX_PLAYERS];
 	//public static NetworkClientInfo [] _network_client_info = new NetworkClientInfo[MAX_CLIENT_INFO];
 
-	public static String _network_player_name;
+	public static String _network_player_name = "Player";
 	public static String _network_default_ip;
 
 	public static int _network_own_client_index;
@@ -88,8 +88,8 @@ public class Net implements NetDefs, NetClient
 	public static InetAddress _network_server_bind_ip;
 	public static String _network_server_bind_ip_host;
 	public static boolean _is_network_server; // Does this client wants to be a network-server?
-	public static String _network_server_name;
-	public static String _network_server_password;
+	public static String _network_server_name = "";
+	public static String _network_server_password = "";
 	public static String _network_rcon_password;
 
 	public static int _network_max_join_time;             //! Time a client can max take to join
@@ -1205,7 +1205,8 @@ public class Net implements NetDefs, NetClient
 		if (Global._network_server) {
 			//FD_SET(_listensocket, &read_fd);
 			_listensocket.configureBlocking(false);
-			_listensocket.register(selector, SelectionKey.OP_CONNECT);
+			//_listensocket.register(selector, SelectionKey.OP_CONNECT);
+			_listensocket.register(selector, SelectionKey.OP_ACCEPT);
 		}
 
 		//tv.tv_sec = tv.tv_usec = 0; // don't block at all.
@@ -1432,7 +1433,7 @@ public class Net implements NetDefs, NetClient
 	{
 		if (_network_udp_server) {
 			NetUDP.NetworkUDPReceive(_udp_server_socket[0]);
-			if (_udp_master_socket != null) {
+			if (_udp_master_socket[0] != null) {
 				NetUDP.NetworkUDPReceive(_udp_master_socket[0]);
 			}
 		}

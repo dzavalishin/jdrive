@@ -498,7 +498,7 @@ public class NetGui extends Net implements NetDefs
 			//while (pos < _fios_num + 1) 
 			while (pos < MiscGui._fios_list.size() + 1) 
 			{
-				final FiosItem item = MiscGui._fios_list.get( pos - 1 );
+				final FiosItem item = pos > 0 ? MiscGui._fios_list.get( pos - 1 ) : null;
 				if (item == _selected_map || (pos == 0 && _selected_map == null))
 					Gfx.GfxFillRect(11, y - 1, 259, y + 10, 155); // show highlighted item with a different colour
 

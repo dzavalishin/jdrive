@@ -519,7 +519,8 @@ public class NetUDP extends Net
 		SocketAddress client_addr = udp.receive(dst);
 
 		// We got some bytes.. just asume we receive the whole packet
-		//if (nbytes > 0) 
+		//if (nbytes > 0)
+		if(null != client_addr)
 		{
 			/*/ Get the size of the buffer
 			p.size = (int)p.buffer[0];
