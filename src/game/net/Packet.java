@@ -201,8 +201,10 @@ public class Packet {
 		int size = sdata.length;
 		byte [] buffer = new byte[size+HEADER_SIZE];
 
-		buffer[0] = (byte) (size & 0xFF);
-		buffer[1] = (byte) (size >> 8);
+		int nsize = size+1;  // 1 is for type
+		
+		buffer[0] = (byte) (nsize & 0xFF);
+		buffer[1] = (byte) (nsize >> 8);
 		buffer[2] = (byte) type;
 
 		// TODO Arraycopy
@@ -239,7 +241,8 @@ public class Packet {
 		byte [] buffer = encode();
 
 		ByteBuffer bb = ByteBuffer.wrap(buffer);
-		int len = udp.write(bb);
+		//int len = udp.write(bb);
+		int len = udp.send(bb, a);
 		assert len == buffer.length;
 	}
 
