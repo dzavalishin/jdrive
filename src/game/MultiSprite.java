@@ -37,7 +37,7 @@ public class MultiSprite {
 		
 		SingleSprite ss = new SingleSprite(type, spriteData);
 		
-		
+		// TODO store in map?
 		
 	}
 	
