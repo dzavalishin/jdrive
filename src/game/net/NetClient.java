@@ -2,6 +2,7 @@ package game.net;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -517,12 +518,19 @@ public interface NetClient extends NetTools, NetDefs
 			Net.recvMapFilename = String.format( "%s%snetwork_client.tmp",  Global._path.autosave_dir, File.separator);
 
 			File f = new File(Net.recvMapFilename);
-			Net.client_file_pointer = new RandomAccessFile(f, "w"); //new FileOutputStream(recvMapFilename);
-			//file_pointer = fopen(recvMapFilename, "wb");
-			if (Net.client_file_pointer == null) {
+			try {
+				Net.client_file_pointer = new RandomAccessFile(f, "w");
+			} catch (FileNotFoundException e) {
+				// e.printStackTrace();
+				Global.error(e);
 				Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_SAVEGAMEERROR);
 				return NetworkRecvStatus.SAVEGAME;
-			}
+			} //new FileOutputStream(recvMapFilename);
+			//file_pointer = fopen(recvMapFilename, "wb");
+			/*if (Net.client_file_pointer == null) {
+				Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_SAVEGAMEERROR);
+				return NetworkRecvStatus.SAVEGAME;
+			}*/
 
 			Global._frame_counter = Net._frame_counter_server = Net._frame_counter_max = NetworkRecv_int(MY_CLIENT(), p);
 
@@ -539,10 +547,20 @@ public interface NetClient extends NetTools, NetDefs
 			// We are still receiving data, put it to the file
 			//fwrite(p.buffer + p.pos, 1, p.size - p.pos, file_pointer);
 			byte []  buf = p.asByteArray();
-			Net.client_file_pointer.write(buf, 0, buf.length);
+			try {
+				Net.client_file_pointer.write(buf, 0, buf.length);
+			} catch (IOException e) {
+				Global.error(e);
+				Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_SAVEGAMEERROR);
+				return NetworkRecvStatus.SAVEGAME; // TODO right?
+			}
 			
 			//Net._network_join_kbytes = ftell(file_pointer) / 1024;
-			Net._network_join_kbytes = (int) (Net.client_file_pointer.getFilePointer() / 1024);
+			try {
+				Net._network_join_kbytes = (int) (Net.client_file_pointer.getFilePointer() / 1024);
+			} catch (IOException e) {
+				Global.error(e);
+			}
 			Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);
 		}
 
@@ -552,7 +570,13 @@ public interface NetClient extends NetTools, NetDefs
 
 		// Check if this was the last packet
 		if (maptype == MapPacket.MAP_PACKET_END.ordinal()) {
-			Net.client_file_pointer.close();
+			try {
+				Net.client_file_pointer.close();
+			} catch (IOException e) {
+				Global.error(e);
+				Global._switch_mode_errorstr = new StringID(Str.STR_NETWORK_ERR_SAVEGAMEERROR);
+				return NetworkRecvStatus.SAVEGAME; // TODO [dz] is this error handling correct?
+			}
 
 			Net._network_join_status = NetworkJoinStatus.PROCESSING;
 			Window.InvalidateWindow(Window.WC_NETWORK_STATUS_WINDOW, 0);

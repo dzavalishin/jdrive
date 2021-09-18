@@ -572,7 +572,11 @@ public class Net implements NetDefs, NetClient
 		/* When the client was PRE_ACTIVE, the server was in pause mode, so unpause */
 		if (cs.status == ClientStatus.PRE_ACTIVE && _network_pause_on_join) {
 			Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE);
-			NetworkServer_HandleChat(NetworkAction.CHAT, DestType.BROADCAST, 0, "Game unpaused", NETWORK_SERVER_INDEX);
+			try {
+				NetworkServer_HandleChat(NetworkAction.CHAT, DestType.BROADCAST, 0, "Game unpaused", NETWORK_SERVER_INDEX);
+			} catch (IOException e) {
+				Global.error(e);
+			}
 		}
 
 		try {
@@ -975,7 +979,12 @@ public class Net implements NetDefs, NetClient
 		// We are connected
 		if (Global._networking) {
 			Console.IConsoleCmdExec("exec scripts/on_client.scr 0");
-			NetClient.NetworkClient_Connected();
+			try {
+				NetClient.NetworkClient_Connected();
+			} catch (IOException e) {
+				Global.error(e);
+				NetworkError(Str.STR_NETWORK_ERR_NOCONNECTION); // TODO disconnect?
+			}
 		} else {
 			// Connecting failed
 			NetworkError(Str.STR_NETWORK_ERR_NOCONNECTION);
@@ -1797,7 +1806,12 @@ public class Net implements NetDefs, NetClient
 
 		// Clients send their command to the server and forget all about the packet
 		c.callback = temp_callback;
-		NetClient.NetworkPacketSend_PACKET_CLIENT_COMMAND_command(c);
+		try {
+			NetClient.NetworkPacketSend_PACKET_CLIENT_COMMAND_command(c);
+		} catch (IOException e) {
+			// TODO error handling?
+			e.printStackTrace();
+		}
 
 	}
 
@@ -1935,7 +1949,12 @@ public class Net implements NetDefs, NetClient
 					FOR_ALL_CLIENTS(cs -> {
 						if (cs.index == from_index) {
 							//SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, ci_to_final.client_index, true, msg);
-							NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, ci_to_final.client_index, true, msg);
+							try {
+								NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, ci_to_final.client_index, true, msg);
+							} catch (IOException e) {
+								// e.printStackTrace();
+								Global.error(e);
+							}
 						}
 					});
 				}
@@ -1947,7 +1966,11 @@ public class Net implements NetDefs, NetClient
 			/* fall-through to next case */
 		case BROADCAST:
 			FOR_ALL_CLIENTS( (cs) -> {
-				NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, from_index, false, msg);
+				try {
+					NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, from_index, false, msg);
+				} catch (IOException e) {
+					Global.error(e);
+				}
 			});
 			//ci = NetworkFindClientInfoFromIndex(from_index);
 			if (ci != null)

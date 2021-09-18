@@ -19,6 +19,41 @@ import game.Player;
 
 public class NetUDP extends Net 
 {
+	// TODO convert to Packet methods
+	public static void NetworkSend_byte(Packet p, byte b) {
+		p.append(b);	
+	}
+
+	public static void NetworkSend_int(Packet p, int i) {
+		p.appendInt(i);		
+	}
+
+	public static void NetworkSend_int64(Packet p, long l) {
+		p.appendLong(l);		
+	}
+
+	public static void NetworkSend_string(Packet p, String s) throws IOException {
+		//p.appendInt(s.length());
+		p.append(s);
+
+	}
+
+
+	public static byte NetworkRecv_byte(NetworkClientState my_CLIENT, Packet p) {
+		return p.nextByte();
+	}
+
+	public static int NetworkRecv_int(NetworkClientState my_CLIENT, Packet p) {
+		return p.nextInt();
+	}
+
+	public static long NetworkRecv_int64(NetworkClientState my_CLIENT, Packet p) {
+		return p.nextLong();
+	}
+
+	public static String NetworkRecv_string(NetworkClientState cs, Packet p) {
+		return p.nextString();
+	}
 
 	//
 	// This file handles all the LAN-stuff
@@ -169,22 +204,22 @@ public class NetUDP extends Net
 
 		// TODO content
 		
-		/* Send the amount of active companies * /
+		/* Send the amount of active companies */
 		NetworkSend_byte (packet, NETWORK_COMPANY_INFO_VERSION);
 		NetworkSend_byte (packet, active);
 
-		/* Fetch the latest version of everything * /
+		// Fetch the latest version of everything 
 		NetworkPopulateCompanyInfo();
 
-		/* Go through all the players * /
+		// Go through all the players 
 		FOR_ALL_PLAYERS(player) {
-			/* Skip non-active players * /
+			// Skip non-active players 
 			if (!player.is_active)
 				continue;
 
 			current++;
 
-			/* Send the information * /
+			// Send the information
 			NetworkSend_byte (packet, current);
 
 			NetworkSend_string(packet, _network_player_info[player.index].company_name);
@@ -194,7 +229,7 @@ public class NetUDP extends Net
 			NetworkSend_int64(packet, _network_player_info[player.index].income);
 			NetworkSend_int(packet, _network_player_info[player.index].performance);
 
-			/* Send 1 if there is a passord for the company else send 0 * /
+			// Send 1 if there is a passord for the company else send 0
 			if (_network_player_info[player.index].password[0] != '\0') {
 				NetworkSend_byte (packet, 1);
 			} else {
@@ -207,53 +242,53 @@ public class NetUDP extends Net
 			for (i = 0; i < NETWORK_STATION_TYPES; i++)
 				NetworkSend_int(packet, _network_player_info[player.index].num_station[i]);
 
-			/* Find the clients that are connected to this player * /
+			// Find the clients that are connected to this player
 			FOR_ALL_CLIENTS(cs) {
 				ci = DEREF_CLIENT_INFO(cs);
 				if ((ci.client_playas - 1) == player.index) {
-					/* The byte == 1 indicates that a client is following * /
+					// The byte == 1 indicates that a client is following
 					NetworkSend_byte(packet, 1);
 					NetworkSend_string(packet, ci.client_name);
 					NetworkSend_string(packet, ci.unique_id);
 					NetworkSend_int(packet, ci.join_date);
 				}
 			}
-			/* Also check for the server itself * /
+			// Also check for the server itself
 			ci = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
 			if ((ci.client_playas - 1) == player.index) {
-				/* The byte == 1 indicates that a client is following * /
+				// The byte == 1 indicates that a client is following
 				NetworkSend_byte(packet, 1);
 				NetworkSend_string(packet, ci.client_name);
 				NetworkSend_string(packet, ci.unique_id);
 				NetworkSend_int(packet, ci.join_date);
 			}
 
-			/* Indicates end of client list * /
+			// Indicates end of client list
 			NetworkSend_byte(packet, 0);
 		}
 
-		/* And check if we have any spectators * /
+		// And check if we have any spectators
 		FOR_ALL_CLIENTS(cs) {
 			ci = DEREF_CLIENT_INFO(cs);
 			if ((ci.client_playas - 1) > Global.MAX_PLAYERS) {
-				/* The byte == 1 indicates that a client is following * /
+				// The byte == 1 indicates that a client is following
 				NetworkSend_byte(packet, 1);
 				NetworkSend_string(packet, ci.client_name);
 				NetworkSend_string(packet, ci.unique_id);
 				NetworkSend_int(packet, ci.join_date);
 			}
 		}
-		/* Also check for the server itself * /
+		// Also check for the server itself
 		ci = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
 		if ((ci.client_playas - 1) > Global.MAX_PLAYERS) {
-			/* The byte == 1 indicates that a client is following * /
+			// The byte == 1 indicates that a client is following
 			NetworkSend_byte(packet, 1);
 			NetworkSend_string(packet, ci.client_name);
 			NetworkSend_string(packet, ci.unique_id);
 			NetworkSend_int(packet, ci.join_date);
 		}
 
-		/* Indicates end of client list * /
+		// Indicates end of client list
 		NetworkSend_byte(packet, 0);
 		*/
 		NetworkSendUDP_Packet(_udp_server_socket[0], packet, client_addr);
@@ -625,8 +660,8 @@ public class NetUDP extends Net
 		if (!Global._networking || !Global._network_server || !_network_udp_server)
 			return;
 
-		/* check for socket * /
-		if (_udp_master_socket == null)
+		// check for socket
+		/*if (_udp_master_socket == null)
 			if (!NetworkUDPListen(_udp_master_socket, _network_server_bind_ip, 0, false))
 				return; */
 
@@ -655,14 +690,14 @@ public class NetUDP extends Net
 
 	/* Register us to the master server
 	     This function checks if it needs to send an advertise */
-	static void NetworkUDPAdvertise()
+	static void NetworkUDPAdvertise() throws IOException
 	{
 		/* Check if we should send an advertise */
 		if (!Global._networking || !Global._network_server || !_network_udp_server || !_network_advertise)
 			return;
 
-		/* check for socket * /
-		if (_udp_master_socket == null)
+		// check for socket
+		/*if (_udp_master_socket == null)
 			if (!NetworkUDPListen(_udp_master_socket, _network_server_bind_ip, 0, false))
 				return; */
 		checkRestartListen(_udp_master_socket, new InetSocketAddress(_network_server_bind_ip, 0), false);
@@ -695,10 +730,10 @@ public class NetUDP extends Net
 
 		/* Send the packet */
 		Packet p = new Packet(PacketType.UDP_SERVER_REGISTER);
-		/* TODO content Packet is: WELCOME_MESSAGE, Version, server_port * /
+		// TODO content Packet is: WELCOME_MESSAGE, Version, server_port
 		NetworkSend_string(p, NETWORK_MASTER_SERVER_WELCOME_MESSAGE);
-		NetworkSend_byte(p, NETWORK_MASTER_SERVER_VERSION);
-		NetworkSend_int(p, _network_server_port); */
+		NetworkSend_byte(p, (byte) NETWORK_MASTER_SERVER_VERSION);
+		NetworkSend_int(p, _network_server_port); 
 		NetworkSendUDP_Packet(_udp_master_socket[0], p, out_addr);
 	}
 
