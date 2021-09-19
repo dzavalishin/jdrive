@@ -91,8 +91,11 @@ public class NewGrf {
 			int len = readInt();
 			int type = readByte();
 			
-			byte [] spriteData = new byte[len-1];
-			f.read(spriteData);
+			//byte [] spriteData = new byte[len-1];
+			//f.read(spriteData);
+			byte [] spriteData = new byte[len];
+			f.read(spriteData, 1, len-1);
+			spriteData[0] = (byte) type;
 			
 			parseSprite( id, type, spriteData );
 		}

@@ -1,6 +1,7 @@
 package game;
 
 import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
@@ -18,6 +19,7 @@ import javax.swing.JLabel;
 
 import game.exceptions.InvalidSpriteFormat;
 import game.util.BitOps;
+import game.xui.Gfx;
 
 public class SingleSprite 
 {
@@ -27,17 +29,20 @@ public class SingleSprite
 	private boolean hasPalette;
 	private boolean hasTransparency;
 	private boolean exactSize;
-	
+
 	private int zoomLevel = 0;
-	
+
 	private int ySize;
 	private int xSize;
-	
+
 	private int xOffset;
 	private int yOffset;
 
 	private int uncompressedSize = -1;
 	private int pixelStride;
+	
+	private BufferedImage palImage; // decoded image in palette based format
+	private BufferedImage rgbImage; // decoded image in RGBA format
 
 	public SingleSprite(int type, byte[] spriteData) throws InvalidSpriteFormat 
 	{
@@ -53,16 +58,17 @@ public class SingleSprite
 		hasPalette		= BitOps.HASBIT(type, 2);
 		hasTransparency = BitOps.HASBIT(type, 3);
 		exactSize		= BitOps.HASBIT(type, 6);
-		
+
 		pixelStride = 0;
-		
+
 		if(hasRGB) pixelStride += 3;
 		if(hasAlpha) pixelStride += 1;
 		if(hasPalette) pixelStride += 1;
-		
+
 		ByteBuffer bb = ByteBuffer.wrap(spriteData);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
-		
+
+		bb.get(); // skip type
 		zoomLevel = 0xFF & bb.get();
 
 		ySize = bb.getShort();
@@ -70,13 +76,13 @@ public class SingleSprite
 
 		xOffset = bb.getShort(); 
 		yOffset = bb.getShort();
-		
+
 		Global.debug("%s",toString());
-		
+
 		if(hasTransparency)
 		{
 			uncompressedSize  = bb.getInt();
-			
+
 			byte [] decompData = new byte[uncompressedSize];
 			//Arrays.fill(decompData, (byte)0);
 
@@ -85,11 +91,11 @@ public class SingleSprite
 			ByteBuffer bb2 = ByteBuffer.wrap(decompData);
 			bb2.order(ByteOrder.LITTLE_ENDIAN);
 
-			
+
 			int imageSize = xSize * ySize * pixelStride;
 			byte [] image = new byte[imageSize];
-			
-			
+
+
 			decodeTile(image, bb2);
 			convertImageArray(image);
 		}
@@ -101,7 +107,7 @@ public class SingleSprite
 			decompress(image,bb);
 			convertImageArray(image);
 		}
-	
+
 	}
 
 
@@ -109,27 +115,27 @@ public class SingleSprite
 		boolean dwords = uncompressedSize >= 65536;
 
 		int [] offsets = new int[ySize];
-		
+
 		int start = bb.position();
-		
+
 		int mayBeCount = bb.get();
-		
+
 		for(int i = 0; i < ySize; i++ )
 		{
 			if(dwords)
 				offsets[i] = bb.getInt();
 			else
 				offsets[i] = /*dwords ? bb.getInt() :*/ bb.getShort() & 0xFFFF;
-				//offsets[i] = /*dwords ? bb.getInt() :*/ bb.get() & 0xFF;
+			//offsets[i] = /*dwords ? bb.getInt() :*/ bb.get() & 0xFF;
 		}
-		
+
 		for(int i = 0; i < ySize; i++ )
 		{
 			bb.position(offsets[i] + start);
 			//bb.position(offsets[i]-1);
 			decodeLine( i, decompData, bb);
 		}		
-		
+
 	}
 
 	private void decodeLine(int i, byte[] decompData, ByteBuffer bb) {
@@ -141,35 +147,35 @@ public class SingleSprite
 		{
 			int cinfo = words ? (0xFFFF & bb.getShort()) : (0xFF & bb.get());
 			int coffs = words ? (0xFFFF & bb.getShort()) : (0xFF & bb.get());
-			
+
 			boolean last = 0 != ( cinfo & (words ? 0x8000 : 0x80) );
-			
+
 			if(words) cinfo &= 0x7FFF;
 			else cinfo &= 0x7F;
 
 			assert cinfo <= xSize;
-			
+
 			cinfo *= pixelStride;
 			coffs *= pixelStride;
-			
+
 			byte [] src = new byte[cinfo];
 			bb.get(src);
-		
+
 			System.arraycopy(src, 0, decompData, lineStart+coffs, cinfo);
-			
+
 			if( last ) return;
 		}
 	}
 
-	
+
 	@Override
 	public String toString() {		
 		return String.format("SingleSprite %s (has %s %s %s) %d.%d zoom %d",
 				hasTransparency ? "Tile" : "NotTile",
-				hasRGB? "RGB" : "",
-				hasAlpha ? "Alpha" : "",
-				hasPalette? "Palette" : "",
-						xSize, ySize, zoomLevel
+						hasRGB? "RGB" : "",
+								hasAlpha ? "Alpha" : "",
+										hasPalette? "Palette" : "",
+												xSize, ySize, zoomLevel
 				);
 	}
 
@@ -177,9 +183,48 @@ public class SingleSprite
 	 * Extract ARGB and palette images from given byte array
 	 * @param image
 	 */
-	private void convertImageArray(byte[] image) {
-		BufferedImage img = createBufferedImage(image, xSize, ySize);
-		DisplayImage(img);
+	private void convertImageArray(byte[] image) 
+	{
+		// Q'n'D display
+		if( hasPalette && !hasRGB && !hasAlpha )
+		{
+			palImage = createBufferedImage(image, xSize, ySize);
+			DisplayImage(palImage);
+			// TODO generate an RGBA image out of palette one
+		}
+		else
+		{
+			assert hasRGB;
+			
+			int pixels = xSize * ySize;
+			
+			byte [] palImageBuf = null;
+			byte [] rgbImageBuf = new byte[pixels * 4]; // allways alpha
+			
+			if( hasPalette ) palImageBuf = new byte[pixels]; 
+			
+			int rgbp = 0;
+			int palp = 0;
+			int srcp = 0;
+			
+			for(int i = 0; i < pixels; i++)
+			{
+				rgbImageBuf[rgbp++] = image[srcp++]; // R
+				rgbImageBuf[rgbp++] = image[srcp++]; // G
+				rgbImageBuf[rgbp++] = image[srcp++]; // B
+				
+				int a = 0xFF;
+				if(hasAlpha) a = image[srcp++];
+				rgbImageBuf[rgbp++] = (byte) a;
+				
+				if(hasPalette)
+					palImageBuf[palp++] = image[srcp++];
+			}
+			
+			if(hasPalette)
+				palImage = createBufferedImage(palImageBuf, xSize, ySize);
+		}
+		
 	}
 
 	/**
@@ -190,49 +235,68 @@ public class SingleSprite
 	 * @return
 	 */
 	private BufferedImage createBufferedImage(byte[] pixels, int width, int height) {
-	    SampleModel sm = getIndexSampleModel(width, height);
-	    DataBuffer db = new DataBufferByte(pixels, width*height, 0);
-	    WritableRaster raster = Raster.createWritableRaster(sm, db, null);
-	    IndexColorModel cm = getDefaultColorModel();
-	    BufferedImage image = new BufferedImage(cm, raster, false, null);
-	    return image;
+		SampleModel sm = getIndexSampleModel(width, height);
+		DataBuffer db = new DataBufferByte(pixels, width*height, 0);
+		WritableRaster raster = Raster.createWritableRaster(sm, db, null);
+		IndexColorModel cm = getDefaultColorModel();
+		BufferedImage image = new BufferedImage(cm, raster, false, null);
+		return image;
 	}	
 
 	private SampleModel getIndexSampleModel(int width, int height) {
-	    IndexColorModel icm = getDefaultColorModel();
-	    WritableRaster wr = icm.createCompatibleWritableRaster(1, 1);
-	    SampleModel sampleModel = wr.getSampleModel();
-	    sampleModel = sampleModel.createCompatibleSampleModel(width, height);
-	    return sampleModel;
+		IndexColorModel icm = getDefaultColorModel();
+		WritableRaster wr = icm.createCompatibleWritableRaster(1, 1);
+		SampleModel sampleModel = wr.getSampleModel();
+		sampleModel = sampleModel.createCompatibleSampleModel(width, height);
+		return sampleModel;
 	}
 
 	private IndexColorModel getDefaultColorModel() {
-	    byte[] r = new byte[256];
-	    byte[] g = new byte[256];
-	    byte[] b = new byte[256];
-	    for(int i=0; i<256; i++) {
-	       r[i]=(byte)i;
-	       g[i]=(byte)i;
-	       b[i]=(byte)i;
-	    }
-	    IndexColorModel defaultColorModel = new IndexColorModel(8, 256, r, g, b);
-	    return defaultColorModel;
+		byte[] r = new byte[256];
+		byte[] g = new byte[256];
+		byte[] b = new byte[256];
+
+		for(int i=0; i<256; i++) {
+			r[i]=(byte)i;
+			g[i]=(byte)i;
+			b[i]=(byte)i;
+		}
+
+		if(Gfx._cur_palette != null && Gfx._cur_palette[0] != null) 
+		{
+			for(int i = 0; i < 256; i++)
+			{
+				//ap[i] = (byte) 0xFF;
+				r[i] = Gfx._cur_palette[i].r;
+				g[i] = Gfx._cur_palette[i].g;
+				b[i] = Gfx._cur_palette[i].b;
+			}
+		}
+
+		IndexColorModel defaultColorModel = new IndexColorModel(8, 256, r, g, b);
+		return defaultColorModel;
 	}	
-	
-	
+
+
 	public void DisplayImage(BufferedImage img)
-    {
-        ImageIcon icon=new ImageIcon(img);
-        JFrame frame=new JFrame();
-        frame.setLayout(new FlowLayout());
-        frame.setSize(200,300);
-        JLabel lbl=new JLabel();
-        lbl.setIcon(icon);
-        frame.add(lbl);
-        frame.setVisible(true);
-        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    }	
-	
+	{
+		Image dimg = img.getScaledInstance(xSize*4, ySize*4, Image.SCALE_SMOOTH);
+		
+		ImageIcon icon=new ImageIcon(dimg);
+		
+		JFrame frame=new JFrame();
+		frame.setLayout(new FlowLayout());
+		frame.setSize(200,300);
+		
+		JLabel lbl=new JLabel();
+		lbl.setIcon(icon);
+		//lbl.setSize(xSize*2, ySize*2);
+		
+		frame.add(lbl);
+		frame.setVisible(true);
+		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}	
+
 	/**
 	 * <h1>Compression algorithm</h1>
 
@@ -268,12 +332,12 @@ public class SingleSprite
    </pre>
 
    <p>Use this to extract length and offset:
-   
+
    <pre>
    unsigned long length = -(code >> 3);
    unsigned long offset = ( (code & 7) << 8 ) | lofs;
    </pre>
-   
+
    <p>It's important that the variables are unsigned and at least two bytes
    large.
 
@@ -284,18 +348,18 @@ public class SingleSprite
 	 * @param decompData
 	 * @param bb
 	 */
-	
+
 	private void decompress(byte[] decompData, ByteBuffer bb) 
 	{		
 		ByteBuffer to = ByteBuffer.wrap(decompData);
-		
+
 		while(bb.hasRemaining())
 		{
 			int code = bb.get() & 0xFF;
-			
+
 			boolean repeat = 0 != (code & 0x80);
 			code &= 0x7F;
-			
+
 			if(!repeat)
 			{
 				final int len = code;
@@ -308,10 +372,10 @@ public class SingleSprite
 			// copy from old data
 
 			int lofs = bb.get() & 0xFF;
-			
+
 			int length = code >> 3;
 			int offset = ( (code & 7) << 8 ) | lofs;
-			
+
 			int toPos = to.position();
 			to.position(toPos - offset);
 
@@ -321,5 +385,5 @@ public class SingleSprite
 			to.put(copy);
 		}
 	}
-	
+
 }
