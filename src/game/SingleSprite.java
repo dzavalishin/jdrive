@@ -102,7 +102,7 @@ public class SingleSprite
 		else
 		{
 			int imageSize = xSize * ySize * pixelStride;
-			byte [] image = new byte[imageSize];
+			byte [] image = new byte[imageSize+1]; // TODO +1 is for debug
 			//bb.get(image);
 			decompress(image,bb);
 			convertImageArray(image);
@@ -384,6 +384,10 @@ public class SingleSprite
 			to.position(toPos);
 			to.put(copy);
 		}
+		
+		int topos = to.position();
+		if(topos != decompData.length)
+			Global.error("SingleSprite.decompress() topos %d, decompData.length %d ", topos, decompData.length );
 	}
 
 }
