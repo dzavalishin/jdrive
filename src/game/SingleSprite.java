@@ -2,7 +2,11 @@ package game;
 
 import java.awt.FlowLayout;
 import java.awt.Image;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
@@ -11,11 +15,12 @@ import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import game.exceptions.InvalidSpriteFormat;
 import game.util.BitOps;
@@ -173,7 +178,7 @@ public class SingleSprite
 	@Override
 	public String toString() {		
 		return String.format("SingleSprite %s (has %s %s %s) %d.%d zoom %d",
-				hasTransparency ? "Tile" : "NotTile",
+				hasTransparency ? " IsTile" : "NotTile",
 						hasRGB? "RGB" : "",
 								hasAlpha ? "Alpha" : "",
 										hasPalette? "Palette" : "",
@@ -191,7 +196,7 @@ public class SingleSprite
 		if( hasPalette && !hasRGB && !hasAlpha )
 		{
 			palImage = createBufferedImage(image, xSize, ySize);
-			DisplayImage(palImage);
+			//DisplayImage(palImage); // TODO make scrollable sprite viewer
 			// TODO generate an RGBA image out of palette one
 		}
 		else
@@ -225,9 +230,31 @@ public class SingleSprite
 			
 			if(hasPalette)
 				palImage = createBufferedImage(palImageBuf, xSize, ySize);
+			
+				rgbImage = createRgbaImage(rgbImageBuf, xSize, ySize);
 		}
 		
 	}
+
+	private static BufferedImage createRgbaImage(byte[] imageBuf, int width, int height) {
+	    // Convert RGBA byte array to Image - TODO use samplesPerPixel/bandOffsets to extract rgba from rgb+palatte data?
+		// like samplesPerPixel = 5; bandOffsets = {0,1,2,3}; // RGBA order, M skipped
+	    int samplesPerPixel = 4;
+	    int[] bandOffsets = {0,1,2,3}; // RGBA order - [dz] or BRGA? Why 'bgraPixelData' name?
+
+	    //byte[] bgraPixelData = new byte[width * height * samplesPerPixel];
+
+	    DataBuffer buffer = new DataBufferByte(imageBuf, imageBuf.length);
+	    WritableRaster raster = Raster.createInterleavedRaster(buffer, width, height, samplesPerPixel * width, samplesPerPixel, bandOffsets, null);
+
+	    ColorModel colorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), true, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
+
+	    BufferedImage image = new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), null);
+
+	    //System.out.println("image: " + image); // Should print: image: BufferedImage@<hash>: type = 0 ...
+	    return image;
+	}
+
 
 	/**
 	 * Create Image for indexed color picture byte array
@@ -286,13 +313,13 @@ public class SingleSprite
 		
 		ImageIcon icon=new ImageIcon(dimg);
 		
-		JFrame frame = getFrame();
+		JPanel p = getFramePanel();
 		
 		JLabel lbl=new JLabel();
 		lbl.setIcon(icon);
 		//lbl.setSize(xSize*2, ySize*2);
 		
-		frame.add(lbl);
+		p.add(lbl);
 		//frame.setVisible(true);
 		frame.pack();
 		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -300,15 +327,22 @@ public class SingleSprite
 
 
 	private static JFrame frame = null;
-	private JFrame getFrame() {
+	private static JPanel panel = null;
+	
+	private JPanel getFramePanel() {
 		if(frame == null)
 			{		
 			frame = new JFrame();
 			frame.setLayout(new FlowLayout());
 			frame.setSize(200,300);
 			frame.setVisible(true);
+			
+			panel = new JPanel();
+			JScrollPane scrPane = new JScrollPane(panel);
+			
+			frame.add(scrPane);
 			}
-		return frame;
+		return panel;
 	}	
 
 	/**
@@ -404,4 +438,28 @@ public class SingleSprite
 			Global.error("SingleSprite.decompress() topos %d, decompData.length %d ", topos, decompData.length );
 	}
 
+
+	
+	// -------------------------------------------------------------------
+	// Getters
+	// -------------------------------------------------------------------
+	
+	public boolean isAlpha() {		return hasAlpha;	}
+	public boolean isPalette() {		return hasPalette;	}
+
+	public int getZoomLevel() {		return zoomLevel;	}
+
+	public int getySize() {		return ySize;	}
+	public int getxSize() {		return xSize;	}
+
+	public int getxOffset() {		return xOffset;	}
+	public int getyOffset() {		return yOffset;	}
+
+
+	public BufferedImage getPalImage() {		return palImage;	}
+	public BufferedImage getRgbImage() {		return rgbImage;	}
+
+	public BufferedImage getImage() {		return rgbImage == null ? palImage : rgbImage ;	}
+
+	
 }

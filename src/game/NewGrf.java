@@ -88,7 +88,7 @@ public class NewGrf {
 		// offset for each newly encountered ID. 
 		int id;
 		while ((id = readInt()) != 0) {
-			Global.DEBUG_grf( 7, "Sprite id %d", id);
+			Global.DEBUG_grf( 7, "NewGrf Sprite id %d", id);
 			int len = readInt();
 			int type = readByte();
 			
