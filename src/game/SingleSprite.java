@@ -49,6 +49,13 @@ public class SingleSprite
 	private BufferedImage palImage; // decoded image in palette based format
 	private BufferedImage rgbImage; // decoded image in RGBA format
 
+	/**
+	 * Parse sprite out of NewGRF file.
+	 * 
+	 * @param type Sprite type (TODO remove from parameters, load from data array)
+	 * @param spriteData Part of file representing sprite
+	 * @throws InvalidSpriteFormat If can't decode
+	 */
 	public SingleSprite(int type, byte[] spriteData) throws InvalidSpriteFormat 
 	{
 		if( type == 0xFF )
@@ -115,6 +122,16 @@ public class SingleSprite
 			convertImageArray(image);
 		}
 
+	}
+
+
+	/**
+	 * Create self from SingleSprite of different zoom level
+	 * @param src SingleSprite to use as source
+	 * @param newZoomLevel Zoom level for me.
+	 */
+	public SingleSprite(SingleSprite src, int newZoomLevel) {
+		// TODO Auto-generated constructor stub
 	}
 
 

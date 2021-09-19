@@ -1,7 +1,11 @@
 package game;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+
 import game.exceptions.InvalidSpriteFormat;
-import game.util.BitOps;
 
 /**
  * 
@@ -14,7 +18,9 @@ import game.util.BitOps;
 public class MultiSprite {
 
 	private int id;
-
+	private List<SingleSprite> list = new ArrayList<>();
+	private Map<Integer,SingleSprite> zoom = new HashMap<>();
+	
 	public MultiSprite(int id) {
 		this.id = id;
 	}
@@ -36,9 +42,51 @@ public class MultiSprite {
 		}
 		
 		SingleSprite ss = new SingleSprite(type, spriteData);
+		list.add(ss);		
+		zoom.put(ss.getZoomLevel(), ss);
+	}
+
+	SingleSprite get(int zoomLevel)
+	{
+		SingleSprite ss = zoom.get(zoomLevel);
 		
-		// TODO store in map?
+		if(ss == null)
+		{
+			if(zoom.isEmpty())
+				return null;
+			ss = generateZoomLevel(zoomLevel);
+			if(ss != null)
+			{
+				assert ss.getZoomLevel() == zoomLevel;
+				zoom.put(ss.getZoomLevel(), ss);
+			}
+		}
 		
+		return ss;
+	}
+
+	private SingleSprite generateZoomLevel(int zoomLevel) {
+		SingleSprite src = getLargest();
+		
+		assert src.getZoomLevel() != zoomLevel;
+		
+		return new SingleSprite( src, zoomLevel );
+	}
+
+	private SingleSprite getLargest() {
+		int maxX = 0;
+		SingleSprite best = null;
+		
+		for(SingleSprite ss : list)
+		{
+			if(ss.getxSize() > maxX)
+			{
+				maxX = ss.getxSize();
+				best = ss;
+			}
+		}
+		
+		return best;
 	}
 	
 }
