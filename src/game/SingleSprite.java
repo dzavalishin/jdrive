@@ -92,12 +92,6 @@ public class SingleSprite
 	
 	}
 
-	private void decompress(byte[] decompData, ByteBuffer bb) {
-		while(true)
-		{
-			
-		}
-	}
 
 	private void decodeTile(byte[] decompData, ByteBuffer bb) {
 		boolean dwords = uncompressedSize >= 65536;
@@ -178,4 +172,96 @@ public class SingleSprite
 
 	
 
+	
+	
+	
+	/**
+	 * <h1>Compression algorithm</h1>
+
+   <p>The compression used is a variation on the LZ77 algorithm which
+   detects redundancy and losslessly reduces the size of the data. Here's
+   how the compressed data looks in a GRF file.
+
+   <p>The compressed stream contains either a pointer to an earlier location
+   and a length, which means that these bytes are copied over from the
+   given location, or it contains a length and a verbatim chunk which is
+   copied to the output stream.
+
+   <pre>
+   BYTE code
+          The high bit of the code shows whether this is a verbatim chunk
+          (not set) or a repetition of earlier data (set).
+   </pre>
+
+   <p>The meaning of the following bytes depends on whether the high bit of
+   code is set.
+
+   <p>If the high bit is not set, what follows is code&0x7f bytes of
+   verbatim data.
+
+   <p>If the high bit is set, the code has a slightly different meaning.
+   Bits 3 to 7 are now three bits to a length value, stating how much
+   data should be copied from the earlier location. Bits 0 to 2 are the
+   high bits of an offset, with the low bits being in the next byte.
+
+   <pre>
+   BYTE lofs
+          Low bits of the offset
+   </pre>
+
+   <p>Use this to extract length and offset:
+   
+   <pre>
+   unsigned long length = -(code >> 3);
+   unsigned long offset = ( (code & 7) << 8 ) | lofs;
+   </pre>
+   
+   <p>It's important that the variables are unsigned and at least two bytes
+   large.
+
+   <p>The offset is counted backwards from the current location. So you
+   subtract the offset from your position in the output stream and copy
+   the given number of bytes.
+
+	 * @param decompData
+	 * @param bb
+	 */
+	
+	private void decompress(byte[] decompData, ByteBuffer bb) 
+	{		
+		ByteBuffer to = ByteBuffer.wrap(decompData);
+		
+		while(bb.hasRemaining())
+		{
+			int code = bb.get() & 0xFF;
+			
+			boolean repeat = 0 != (code & 0x80);
+			code &= 0x7F;
+			
+			if(!repeat)
+			{
+				final int len = code;
+				byte [] copy = new byte[len];
+				bb.get(copy);
+				to.put(copy);
+				continue;
+			}
+
+			// copy from old data
+
+			int lofs = bb.get() & 0xFF;
+			
+			int length = code >> 3;
+			int offset = ( (code & 7) << 8 ) | lofs;
+			
+			int toPos = to.position();
+			to.position(toPos - offset);
+
+			byte [] copy = new byte[length];
+			to.get(copy);
+			to.position(toPos);
+			to.put(copy);
+		}
+	}
+	
 }
