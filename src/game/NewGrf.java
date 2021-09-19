@@ -81,6 +81,7 @@ public class NewGrf {
 
 	void loadSprites() throws IOException, InvalidSpriteFormat 
 	{
+		// reference is grf.cpp:256
 		f.seek(spriteOffset);
 
 		// Loop over all sprite section entries and store the file

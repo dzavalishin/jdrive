@@ -39,7 +39,7 @@ public class SingleSprite
 	private int yOffset;
 
 	private int uncompressedSize = -1;
-	private int pixelStride;
+	private int bpp;
 	
 	private BufferedImage palImage; // decoded image in palette based format
 	private BufferedImage rgbImage; // decoded image in RGBA format
@@ -59,11 +59,11 @@ public class SingleSprite
 		hasTransparency = BitOps.HASBIT(type, 3);
 		exactSize		= BitOps.HASBIT(type, 6);
 
-		pixelStride = 0;
+		bpp = 0;
 
-		if(hasRGB) pixelStride += 3;
-		if(hasAlpha) pixelStride += 1;
-		if(hasPalette) pixelStride += 1;
+		if(hasRGB) bpp += 3;
+		if(hasAlpha) bpp += 1;
+		if(hasPalette) bpp += 1;
 
 		ByteBuffer bb = ByteBuffer.wrap(spriteData);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
@@ -81,7 +81,7 @@ public class SingleSprite
 
 		if(hasTransparency)
 		{
-			uncompressedSize  = bb.getInt();
+			uncompressedSize = bb.getInt();
 
 			byte [] decompData = new byte[uncompressedSize];
 			//Arrays.fill(decompData, (byte)0);
@@ -92,7 +92,7 @@ public class SingleSprite
 			bb2.order(ByteOrder.LITTLE_ENDIAN);
 
 
-			int imageSize = xSize * ySize * pixelStride;
+			int imageSize = xSize * ySize * bpp;
 			byte [] image = new byte[imageSize];
 
 
@@ -101,8 +101,10 @@ public class SingleSprite
 		}
 		else
 		{
-			int imageSize = xSize * ySize * pixelStride;
-			byte [] image = new byte[imageSize+1]; // TODO +1 is for debug
+			uncompressedSize = xSize * ySize * bpp;
+			
+			int imageSize = xSize * ySize * bpp;
+			byte [] image = new byte[imageSize];
 			//bb.get(image);
 			decompress(image,bb);
 			convertImageArray(image);
@@ -118,7 +120,7 @@ public class SingleSprite
 
 		int start = bb.position();
 
-		int mayBeCount = bb.get();
+		//int mayBeCount = bb.get();
 
 		for(int i = 0; i < ySize; i++ )
 		{
@@ -141,7 +143,7 @@ public class SingleSprite
 	private void decodeLine(int i, byte[] decompData, ByteBuffer bb) {
 		boolean words = xSize >= 256;
 
-		int lineStart = pixelStride * i * xSize; 
+		int lineStart = bpp * i * xSize; 
 
 		while(true)
 		{
@@ -155,8 +157,8 @@ public class SingleSprite
 
 			assert cinfo <= xSize;
 
-			cinfo *= pixelStride;
-			coffs *= pixelStride;
+			cinfo *= bpp;
+			coffs *= bpp;
 
 			byte [] src = new byte[cinfo];
 			bb.get(src);
@@ -284,17 +286,29 @@ public class SingleSprite
 		
 		ImageIcon icon=new ImageIcon(dimg);
 		
-		JFrame frame=new JFrame();
-		frame.setLayout(new FlowLayout());
-		frame.setSize(200,300);
+		JFrame frame = getFrame();
 		
 		JLabel lbl=new JLabel();
 		lbl.setIcon(icon);
 		//lbl.setSize(xSize*2, ySize*2);
 		
 		frame.add(lbl);
-		frame.setVisible(true);
+		//frame.setVisible(true);
+		frame.pack();
 		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+
+
+	private static JFrame frame = null;
+	private JFrame getFrame() {
+		if(frame == null)
+			{		
+			frame = new JFrame();
+			frame.setLayout(new FlowLayout());
+			frame.setSize(200,300);
+			frame.setVisible(true);
+			}
+		return frame;
 	}	
 
 	/**
@@ -355,14 +369,14 @@ public class SingleSprite
 
 		while(bb.hasRemaining())
 		{
-			int code = bb.get() & 0xFF;
+			int code = bb.get();// & 0xFF;
 
-			boolean repeat = 0 != (code & 0x80);
-			code &= 0x7F;
+			//boolean repeat = 0 != (code & 0x80);
+			//code &= 0x7F;
 
-			if(!repeat)
+			if( code >= 0 ) //!repeat)
 			{
-				final int len = code;
+				final int len = (code == 0) ? 0x80 : code; // Undocumented
 				byte [] copy = new byte[len];
 				bb.get(copy);
 				to.put(copy);
@@ -373,7 +387,7 @@ public class SingleSprite
 
 			int lofs = bb.get() & 0xFF;
 
-			int length = code >> 3;
+			int length = -(code >> 3); // code >> 3;
 			int offset = ( (code & 7) << 8 ) | lofs;
 
 			int toPos = to.position();
