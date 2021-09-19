@@ -66,14 +66,40 @@ public class SingleSprite
 			uncompressedSize  = bb.getInt();
 			
 			byte [] decompData = new byte[uncompressedSize];
-			Arrays.fill(decompData, (byte)0);
+			//Arrays.fill(decompData, (byte)0);
+
+			decompress(decompData,bb);
+
+			ByteBuffer bb2 = ByteBuffer.wrap(decompData);
+			bb2.order(ByteOrder.LITTLE_ENDIAN);
+
 			
-			decompressTile(decompData, bb);
+			int imageSize = xSize * ySize * pixelStride;
+			byte [] image = new byte[imageSize];
+			
+			
+			decodeTile(image, bb2);
+			convertImageArray(image);
+		}
+		else
+		{
+			int imageSize = xSize * ySize * pixelStride;
+			byte [] image = new byte[imageSize];
+			//bb.get(image);
+			decompress(image,bb);
+			convertImageArray(image);
 		}
 	
 	}
 
-	private void decompressTile(byte[] decompData, ByteBuffer bb) {
+	private void decompress(byte[] decompData, ByteBuffer bb) {
+		while(true)
+		{
+			
+		}
+	}
+
+	private void decodeTile(byte[] decompData, ByteBuffer bb) {
 		boolean dwords = uncompressedSize >= 65536;
 
 		int [] offsets = new int[ySize];
@@ -118,6 +144,7 @@ public class SingleSprite
 			assert cinfo <= xSize;
 			
 			cinfo *= pixelStride;
+			coffs *= pixelStride;
 			
 			byte [] src = new byte[cinfo];
 			bb.get(src);
@@ -131,7 +158,7 @@ public class SingleSprite
 	
 	@Override
 	public String toString() {		
-		return String.format("SingleSprite %s has %s %s %s %d.%d zoom %d",
+		return String.format("SingleSprite %s (has %s %s %s) %d.%d zoom %d",
 				hasTransparency ? "Tile" : "NotTile",
 				hasRGB? "RGB" : "",
 				hasAlpha ? "Alpha" : "",
@@ -139,4 +166,16 @@ public class SingleSprite
 						xSize, ySize, zoomLevel
 				);
 	}
+
+	/**
+	 * Extract ARGB and palette images from given byte array
+	 * @param image
+	 */
+	private void convertImageArray(byte[] image) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+
 }
