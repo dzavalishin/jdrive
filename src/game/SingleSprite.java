@@ -1,8 +1,20 @@
 package game;
 
+import java.awt.FlowLayout;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import game.exceptions.InvalidSpriteFormat;
 import game.util.BitOps;
@@ -166,14 +178,60 @@ public class SingleSprite
 	 * @param image
 	 */
 	private void convertImageArray(byte[] image) {
-		// TODO Auto-generated method stub
-		
+		BufferedImage img = createBufferedImage(image, xSize, ySize);
+		DisplayImage(img);
 	}
 
-	
+	/**
+	 * Create Image for indexed color picture byte array
+	 * @param pixels
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	private BufferedImage createBufferedImage(byte[] pixels, int width, int height) {
+	    SampleModel sm = getIndexSampleModel(width, height);
+	    DataBuffer db = new DataBufferByte(pixels, width*height, 0);
+	    WritableRaster raster = Raster.createWritableRaster(sm, db, null);
+	    IndexColorModel cm = getDefaultColorModel();
+	    BufferedImage image = new BufferedImage(cm, raster, false, null);
+	    return image;
+	}	
 
+	private SampleModel getIndexSampleModel(int width, int height) {
+	    IndexColorModel icm = getDefaultColorModel();
+	    WritableRaster wr = icm.createCompatibleWritableRaster(1, 1);
+	    SampleModel sampleModel = wr.getSampleModel();
+	    sampleModel = sampleModel.createCompatibleSampleModel(width, height);
+	    return sampleModel;
+	}
+
+	private IndexColorModel getDefaultColorModel() {
+	    byte[] r = new byte[256];
+	    byte[] g = new byte[256];
+	    byte[] b = new byte[256];
+	    for(int i=0; i<256; i++) {
+	       r[i]=(byte)i;
+	       g[i]=(byte)i;
+	       b[i]=(byte)i;
+	    }
+	    IndexColorModel defaultColorModel = new IndexColorModel(8, 256, r, g, b);
+	    return defaultColorModel;
+	}	
 	
 	
+	public void DisplayImage(BufferedImage img)
+    {
+        ImageIcon icon=new ImageIcon(img);
+        JFrame frame=new JFrame();
+        frame.setLayout(new FlowLayout());
+        frame.setSize(200,300);
+        JLabel lbl=new JLabel();
+        lbl.setIcon(icon);
+        frame.add(lbl);
+        frame.setVisible(true);
+        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }	
 	
 	/**
 	 * <h1>Compression algorithm</h1>
