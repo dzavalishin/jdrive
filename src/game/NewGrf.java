@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import game.exceptions.InvalidFileFormat;
+import game.exceptions.InvalidSpriteFormat;
 
 /**
  * New .GRF sprite loader
@@ -33,9 +34,23 @@ public class NewGrf {
 		if(!checkFormat())
 			throw new InvalidFileFormat(name);
 		loadOffsets();
-		loadSprites();
+		//loadSprites();
 	}
 
+	public NewGrf(String name) throws IOException, InvalidFileFormat {
+		this(new File("resources/",name));
+	}
+
+	private int readInt() throws IOException {
+		return Integer.reverseBytes(f.readInt());
+	}
+
+	/** Read UNSIGNED byte */
+	private int readByte() throws IOException {
+		return f.read();
+	}
+	
+	
 	private boolean checkFormat() throws IOException {
 		for(int c : _grf_cont_v2_sig )
 		{
@@ -53,8 +68,8 @@ public class NewGrf {
 	{
 		
 		/* Seek to sprite section of the GRF. */
-		spriteOffset = f.readInt();
-		dataCompressionFormat = f.read();		
+		spriteOffset = readInt() + _grf_cont_v2_sig.length + 4;
+		dataCompressionFormat = readByte();		
 		dataOffset = f.getFilePointer();
 
 
@@ -63,17 +78,18 @@ public class NewGrf {
 		
 	}
 
-	private void loadSprites() throws IOException 
+
+	void loadSprites() throws IOException, InvalidSpriteFormat 
 	{
 		f.seek(spriteOffset);
 
 		// Loop over all sprite section entries and store the file
 		// offset for each newly encountered ID. 
 		int id;
-		while ((id = f.readInt()) != 0) {
+		while ((id = readInt()) != 0) {
 			Global.DEBUG_grf( 7, "Sprite id %d", id);
-			int len = f.readInt();
-			int type = f.read();
+			int len = readInt();
+			int type = readByte();
 			
 			byte [] spriteData = new byte[len-1];
 			f.read(spriteData);
@@ -82,7 +98,7 @@ public class NewGrf {
 		}
 	}
 
-	private void parseSprite(int id, int type, byte[] spriteData) {
+	private void parseSprite(int id, int type, byte[] spriteData) throws InvalidSpriteFormat {
 		MultiSprite ms = map.computeIfAbsent(id, MultiSprite::new );
 		
 		ms.load(type, spriteData);

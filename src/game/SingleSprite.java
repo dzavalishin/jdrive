@@ -1,6 +1,7 @@
 package game;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import game.exceptions.InvalidSpriteFormat;
@@ -48,6 +49,7 @@ public class SingleSprite
 		if(hasPalette) pixelStride += 1;
 		
 		ByteBuffer bb = ByteBuffer.wrap(spriteData);
+		bb.order(ByteOrder.LITTLE_ENDIAN);
 		
 		zoomLevel = 0xFF & bb.get();
 
