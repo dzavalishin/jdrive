@@ -80,14 +80,21 @@ public class SingleSprite
 		
 		int start = bb.position();
 		
+		int mayBeCount = bb.get();
+		
 		for(int i = 0; i < ySize; i++ )
 		{
-			offsets[i] = dwords ? bb.getInt() : bb.getShort();
+			if(dwords)
+				offsets[i] = bb.getInt();
+			else
+				offsets[i] = /*dwords ? bb.getInt() :*/ bb.getShort() & 0xFFFF;
+				//offsets[i] = /*dwords ? bb.getInt() :*/ bb.get() & 0xFF;
 		}
 		
 		for(int i = 0; i < ySize; i++ )
 		{
 			bb.position(offsets[i] + start);
+			//bb.position(offsets[i]-1);
 			decodeLine( i, decompData, bb);
 		}		
 		
@@ -108,6 +115,10 @@ public class SingleSprite
 			if(words) cinfo &= 0x7FFF;
 			else cinfo &= 0x7F;
 
+			assert cinfo <= xSize;
+			
+			cinfo *= pixelStride;
+			
 			byte [] src = new byte[cinfo];
 			bb.get(src);
 		
