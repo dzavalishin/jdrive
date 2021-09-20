@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
 import game.exceptions.InvalidFileFormat;
 import game.exceptions.InvalidSpriteFormat;
+import game.util.BitOps;
 
 /**
  * New .GRF sprite loader
@@ -66,22 +68,16 @@ public class NewGrf {
 	 */
 	private void loadOffsets() throws IOException 
 	{
-		
-		/* Seek to sprite section of the GRF. */
 		spriteOffset = readInt() + _grf_cont_v2_sig.length + 4;
 		dataCompressionFormat = readByte();		
 		dataOffset = f.getFilePointer();
-
-
-		// Continue processing the data section. 
-		//FileIO.FioSeekTo(old_pos, FileIO.SEEK_SET);
-		
 	}
 
 
-	void loadSprites() throws IOException, InvalidSpriteFormat 
+	private void loadSprites() throws IOException, InvalidSpriteFormat 
 	{
 		// reference is grf.cpp:256
+		// Seek to sprite section of the GRF. 
 		f.seek(spriteOffset);
 
 		// Loop over all sprite section entries and store the file
@@ -106,6 +102,52 @@ public class NewGrf {
 		MultiSprite ms = map.computeIfAbsent(id, MultiSprite::new );
 		
 		ms.load(type, spriteData);
+	}
+
+	private void loadData() throws IOException
+	{
+		f.seek(dataOffset);
+
+		int size;
+		for(int index = 0; (size = readInt()) != 0; index++) {
+			int type = readByte();
+			Global.DEBUG_grf( 7, "NewGrf data index %d size %d type %x", index, size, type);
+			
+			byte [] data = new byte[size];
+			f.read(data);
+			
+			parseData( index, type, data );
+		}	
+	}
+	
+	
+	private void parseData(int index, int type, byte[] data) {
+		switch(type)
+		{
+		case 0xFD: // reference
+			assert data.length == 4;
+			int ref = BitOps.READ_LE_UINT32(data, 0);
+			Global.DEBUG_grf( 0, "NewGrf sprite reference index %d ref %d", index, ref);
+			// TODO and now what?
+			break;
+
+		case 0xFF: // ?
+			Global.DEBUG_grf( 0, "NewGrf blob index %d size %d", index, data.length);
+			BitOps.hexDump(data);
+			// TODO and now what?
+			break;
+
+		default: // ?
+			Global.DEBUG_grf( 0, "NewGrf unknown type %d blob index %d size %d", type, index, data.length);
+			break;
+			
+		}
+		
+	}
+
+	public void load() throws IOException, InvalidSpriteFormat {
+		loadSprites();
+		loadData();		
 	}	
 	
 }
