@@ -74,7 +74,7 @@ public class NewGrf {
 	}
 
 
-	private void loadSprites() throws IOException, InvalidSpriteFormat 
+	void loadSprites() throws IOException, InvalidSpriteFormat 
 	{
 		// reference is grf.cpp:256
 		// Seek to sprite section of the GRF. 

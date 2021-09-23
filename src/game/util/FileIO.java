@@ -3,6 +3,7 @@ package game.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import game.Global;
+import game.Main;
 import game.Str;
 import game.enums.FiosType;
 import game.enums.GameModes;
@@ -636,6 +638,54 @@ public class FileIO {
 		}
 		
 		return files;
+	}
+
+	public static byte [] ReadFileToMem( String filename, int maxsize)
+	{
+		byte [] buf = new byte[maxsize];
+		/*if( buf == null )
+		{
+			error("ReadFileToMem: out of memory");
+			return null;
+		}*/
+	
+		RandomAccessFile f;
+		try {
+			f = new RandomAccessFile(filename,"r" );
+		} catch (FileNotFoundException e) {
+			Main.error("ReadFileToMem: no file '%s'", filename );
+			return null;
+		}
+	
+		int len;
+		try {
+			len = f.read(buf);
+		} catch (IOException e) {
+	
+			Global.error(e);
+			return null;
+		} finally
+		{
+			try {
+				f.close();
+			} catch (IOException e) {
+	
+				Global.error(e);
+			}
+	
+		}
+	
+	
+		if( len < 0 )
+		{
+			Main.error("ReadFileToMem: no data");
+			return null;
+		}
+	
+		byte ret[] = new byte[len];
+		System.arraycopy(buf, 0, ret, 0, len);
+		buf = null;
+		return ret;
 	}
 
 
