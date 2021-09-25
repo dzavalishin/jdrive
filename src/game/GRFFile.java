@@ -35,7 +35,7 @@ public class GRFFile
 	static GRFFile _cur_grffile;
 	public static GRFFile _first_grffile;
 	static int _cur_spriteid;
-	static int _cur_stage;
+	//private static int _cur_stage;
 
 	/* 32 * 8 = 256 flags. Apparently TTDPatch uses this many.. */
 	static final int[] _ttdpatch_flags = new int[8];
@@ -44,21 +44,6 @@ public class GRFFile
 
 
 
-
-
-	static final int _vehcounts[] = {
-			/* GSF_TRAIN */    Global.NUM_TRAIN_ENGINES,
-			/* GSF_ROAD */     Global.NUM_ROAD_ENGINES,
-			/* GSF_SHIP */     Global.NUM_SHIP_ENGINES,
-			/* GSF_AIRCRAFT */ Global.NUM_AIRCRAFT_ENGINES
-	};
-
-	static final int _vehshifts[] = {
-			/* GSF_TRAIN */    0,
-			/* GSF_ROAD */     Global.ROAD_ENGINES_INDEX,
-			/* GSF_SHIP */     Global.SHIP_ENGINES_INDEX,
-			/* GSF_AIRCRAFT */ Global.AIRCRAFT_ENGINES_INDEX,
-	};
 
 
 
@@ -360,7 +345,7 @@ public class GRFFile
 	/* XXX: We consider GRF files trusted. It would be trivial to exploit OTTD by
 	 * a crafted invalid GRF file. We should tell that to the user somehow, or
 	 * better make this more robust in the future. */
-	static void DecodeSpecialSprite(NewGrfActionProcessor proc, final String  filename, int num, int stage)
+	void DecodeSpecialSprite(NewGrfActionProcessor proc, final String  filename, int num, int stage)
 	{
 		//byte[] buf = new byte[num]; // malloc(num);
 		byte action;
@@ -369,7 +354,7 @@ public class GRFFile
 		byte [] buf = FileIO.FioReadBlock(num);
 		if (buf == null) Global.fail("DecodeSpecialSprite: Could not allocate memory or read data");
 
-		DataLoader bufp = new DataLoader(buf);
+		DataLoader bufp = new DataLoader(buf, sprite_offset);
 
 		action = bufp.r(0);
 
@@ -446,7 +431,7 @@ public class GRFFile
 
 			if (type == 0xFF) {
 				if (_skip_sprites == 0) {
-					DecodeSpecialSprite(proc, filename, num, stage);
+					_cur_grffile.DecodeSpecialSprite(proc, filename, num, stage);
 					continue;
 				} else {
 					FileIO.FioSkipBytes(num);
@@ -539,7 +524,7 @@ public class GRFFile
 			int slot = file_index;
 			int j;
 
-			_cur_stage = stage;
+			//_cur_stage = stage;
 			_cur_spriteid = load_index;
 			for (j = 0; j != _newgrf_files.length && _newgrf_files[j] != null; j++) {
 				if (!FileIO.FiosCheckFileExists(_newgrf_files[j])) {

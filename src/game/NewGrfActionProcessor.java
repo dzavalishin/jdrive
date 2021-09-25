@@ -45,6 +45,9 @@ public class NewGrfActionProcessor
 	private byte [] last_engines;
 	private int last_engines_count;
 
+
+	private int stage;
+
 	
 	// -------------------------------------------------------------------
 	// Entry points
@@ -57,6 +60,7 @@ public class NewGrfActionProcessor
 	
 	public void processAction(byte action, DataLoader bufp, int stage) 
 	{
+		this.stage = stage;
 		/* XXX: There is a difference between staged loading in TTDPatch and
 		 * here.  In TTDPatch, for some reason actions 1 and 2 are carried out
 		 * during stage 0, whilst action 3 is carried out during stage 1 (to
@@ -1060,7 +1064,7 @@ public class NewGrfActionProcessor
 	}
 
 	/* Action 0x00 */
-	void VehicleChangeInfo(DataLoader bufp) //, int len)
+	private void VehicleChangeInfo(DataLoader bufp) //, int len)
 	{
 		//byte *bufend = buf + len;
 		int i;
@@ -1871,7 +1875,7 @@ public class NewGrfActionProcessor
 			param_val = GameOptions._opt.landscape;
 			break;
 		case 0x84:    /* .grf loading stage, 0=initialization, 1=activation */
-			param_val = GRFFile._cur_stage;
+			param_val = stage;
 			break;
 		case 0x85:    /* TTDPatch flags, only for bit tests */
 			param_val = GRFFile._ttdpatch_flags[cond_val / 0x20];
@@ -2012,7 +2016,7 @@ public class NewGrfActionProcessor
 		msgid = 0xFF & bufp.r(3);
 	
 		// Undocumented TTDPatch feature.
-		if ((severity & 0x80) == 0 && GRFFile._cur_stage == 0)
+		if ((severity & 0x80) == 0 && stage == 0)
 			return;
 		severity &= 0x7F;
 	

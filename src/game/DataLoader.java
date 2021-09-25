@@ -6,10 +6,11 @@ import game.util.ByteArrayPtr;
 
 class DataLoader extends ByteArrayPtr
 {
-	//Pixel ptr; // TODO Pixel is a misleading name. It is a byte[] pointer
+	private final int sprite_offset;
 
-	public DataLoader(byte[] start) {
+	public DataLoader(byte[] start, int sprite_offset) {
 		super(start);
+		this.sprite_offset = sprite_offset;
 	}
 
 
@@ -17,6 +18,7 @@ class DataLoader extends ByteArrayPtr
 
 	public DataLoader(DataLoader bufp, int shift) {
 		super( bufp, shift );
+		sprite_offset = bufp.sprite_offset;
 	}
 
 
@@ -124,7 +126,7 @@ class DataLoader extends ByteArrayPtr
 
 		if (real < wanted) { 
 			GRFFile.grfmsg(GRFFile.severity.GMS_ERROR, "%s/%d: Invalid special sprite length %d (expected %d)!", 
-					where, GRFFile._cur_spriteid - GRFFile._cur_grffile.sprite_offset, real, wanted); 
+					where, GRFFile._cur_spriteid - sprite_offset, real, wanted); 
 			//throw new GrfLoadException();
 			Global.fail("NewGrf is dead");
 		} 
