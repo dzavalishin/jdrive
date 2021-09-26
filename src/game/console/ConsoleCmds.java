@@ -1,16 +1,8 @@
 package game.console;
 
-import java.nio.file.Path;
-
-import game.Engine;
 import game.Global;
-import game.Landscape;
-import game.TileIndex;
-import game.Vehicle;
-import game.xui.ViewPort;
-import game.xui.Window;
 
-public class ConsoleCmds extends Console
+public class ConsoleCmds extends DefaultConsole
 {
 
 	// ** scriptfile handling ** //
@@ -81,92 +73,7 @@ public class ConsoleCmds extends Console
 
 	static void IConsoleHelp(String str)
 	{
-		Console.IConsolePrintF(Console._icolour_warn, "- %s", str);
-	}
-
-	static boolean constopAllVehicles(String ... argv)
-	{
-		//Vehicle v;
-		if (argv.length == 0) {
-			IConsoleHelp("Stops all vehicles in the game. For debugging only! Use at your own risk... Usage: 'stopall'");
-			return true;
-		}
-
-		Vehicle.forEach( (v) ->
-		{
-			if (v.isValid()) {
-				/* Code ripped from CmdStartStopTrain. Can't call it, because of
-				 * ownership problems, so we'll duplicate some code, for now */
-				v.stop();
-				Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
-				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.getTile().getTile());
-			}
-		});
-		return true;
-	}
-
-	
-	static boolean ConResetEngines(String ... argv)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("Reset status data of all engines. This might solve some issues with 'lost' engines. Usage: 'resetengines'");
-			return true;
-		}
-
-		Engine.StartupEngines();
-		return true;
-	}
-
-	//#ifdef _DEBUG
-	static boolean ConResetTile(String ... argv)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("Reset a tile to bare land. Usage: 'resettile <tile>'");
-			IConsoleHelp("Tile can be either decimal (34161) or hexadecimal (0x4a5B)");
-			return true;
-		}
-
-		if (argv.length == 2) {
-			int [] result = {0};
-			if (Console.GetArgumentInteger(result, argv[1])) {
-				Landscape.DoClearSquare(TileIndex.get(result[0]));
-				return true;
-			}
-		}
-
-		return false;
-	}
-	//#endif /* _DEBUG */
-
-	static boolean ConScrollToTile(String ... argv)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("Center the screen on a given tile. Usage: 'scrollto <tile>'");
-			IConsoleHelp("Tile can be either decimal (34161) or hexadecimal (0x4a5B)");
-			return true;
-		}
-
-		if (argv.length == 2) {
-			int [] result = {0};
-			if (Console.GetArgumentInteger(result, argv[1])) {
-				ViewPort.ScrollMainWindowToTile(TileIndex.get(result[0]));
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	static boolean ConPrintWorkingDirectory(String ... argv)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("Print out the current working directory. Usage: 'pwd'");
-			return true;
-		}
-
-		String path = Path.of(".").toAbsolutePath().toString();
-		IConsolePrint(_icolour_def, path);
-		return true;
+		DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn, "- %s", str);
 	}
 
 
@@ -781,25 +688,6 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 	*/
-	static boolean ConAlias(String ... argv)
-	{
-		IConsoleAlias alias;
-
-		if (argv.length == 0) {
-			IConsoleHelp("Add a new alias, or redefine the behaviour of an existing alias . Usage: 'alias <name> <command>'");
-			return true;
-		}
-
-		if (argv.length < 3) return false;
-
-		alias = IConsoleAliasGet(argv[1]);
-		if (alias == null) {
-			IConsoleAliasRegister(argv[1], argv[2]);
-		} else {
-			alias.cmdline = argv[2];
-		}
-		return true;
-	}
 
 	/*
 	static boolean function(String ... argv)(ConScreenShot)
@@ -921,102 +809,7 @@ public class ConsoleCmds extends Console
 		return true;
 	}
 */
-	static boolean ConHelp(String ... argv)
-	{
-		if (argv.length == 2) {
-			IConsoleCmd cmd;
-			//final IConsoleVar variable;
-			final IConsoleAlias alias;
 
-			cmd = IConsoleCmdGet(argv[1]);
-			if (cmd != null) {
-				cmd.proc.accept();
-				return true;
-			}
-
-			alias = IConsoleAliasGet(argv[1]);
-			if (alias != null) {
-				cmd = IConsoleCmdGet(alias.cmdline);
-				if (cmd != null) {
-					cmd.proc.accept();
-					return true;
-				}
-				IConsolePrintF(_icolour_err, "ERROR: alias is of special type, please see its execution-line: '%s'", alias.cmdline);
-				return true;
-			}
-
-			final IConsoleVar variable = IConsoleVarGet(argv[1]);
-			if (variable != null && variable.help != null) {
-				IConsoleHelp(variable.help);
-				return true;
-			}
-
-			IConsoleError("command or variable not found");
-			return true;
-		}
-
-		IConsolePrint(13, " ---- NextTTD Console Help ---- ");
-		IConsolePrint( 1, " - variables: [command to list all variables: list_vars]");
-		IConsolePrint( 1, " set value with '<var> = <value>', use '++/--' to in-or decrement");
-		IConsolePrint( 1, " or omit '=' and just '<var> <value>'. get value with typing '<var>'");
-		IConsolePrint( 1, " - commands: [command to list all commands: list_cmds]");
-		IConsolePrint( 1, " call commands with '<command> <arg2> <arg3>...'");
-		IConsolePrint( 1, " - to assign strings, or use them as arguments, enclose it within quotes");
-		IConsolePrint( 1, " like this: '<command> \"string argument with spaces\"'");
-		IConsolePrint( 1, " - use 'help <command> | <variable>' to get specific information");
-		IConsolePrint( 1, " - scroll console output with shift + (up | down) | (pageup | pagedown))");
-		IConsolePrint( 1, " - scroll console input history with the up | down arrows");
-		IConsolePrint( 1, "");
-		return true;
-	}
-
-	static boolean ConListCommands(String ... argv)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("List all registered commands. Usage: 'list_cmds [<pre-filter>]'");
-			return true;
-		}
-
-		for (IConsoleCmd cmd : _iconsole_cmds.values())
-		{
-			if (argv[1] == null || cmd.name.equals( argv[1]) ) {
-					IConsolePrintF(_icolour_def, "%s", cmd.name);
-			}
-		}
-
-		return true;
-	}
-
-	static boolean ConListVariables(String ... argv)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("List all registered variables. Usage: 'list_vars [<pre-filter>]'");
-			return true;
-		}
-
-		for (IConsoleVar variable : _iconsole_vars.values()) {
-			if (argv[1] == null || variable.name.equals(argv[1]))
-				IConsolePrintF(_icolour_def, "%s", variable.name);
-		}
-
-		return true;
-	}
-
-	static boolean ConListAliases(String ... argv)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("List all registered aliases. Usage: 'list_aliases [<pre-filter>]'");
-			return true;
-		}
-
-		for (IConsoleAlias alias : _iconsole_aliases.values()) {
-			if (argv[1] == null || alias.name.equals(argv[1]))
-				IConsolePrintF(_icolour_def, "%s => %s", alias.name, alias.cmdline);
-		}
-
-		return true;
-	}
-	
 	/*
 	#ifdef ENABLE_NETWORK
 
@@ -1198,22 +991,22 @@ public class ConsoleCmds extends Console
 	}
 	#endif /* ENABLE_NETWORK */
 
-	static boolean ConListDumpVariables(String ... argv)
-	{
-
-		if (argv.length == 0) {
-			IConsoleHelp("List all variables with their value. Usage: 'dump_vars [<pre-filter>]'");
-			return true;
-		}
-
-
-		for (IConsoleVar ivar : Console._iconsole_vars.values()) {
-			if (argv[1] == null || ivar.name.equals(argv[1]))
-				ivar.IConsoleVarPrintGetValue();
-		}
-
-		return true;
-	}
+//	static boolean ConListDumpVariables(String ... argv)
+//	{
+//
+//		if (argv.length == 0) {
+//			IConsoleHelp("List all variables with their value. Usage: 'dump_vars [<pre-filter>]'");
+//			return true;
+//		}
+//
+//
+//		for (IConsoleVar ivar : Console._iconsole_vars.values()) {
+//			if (argv[1] == null || ivar.name.equals(argv[1]))
+//				ivar.IConsoleVarPrintGetValue();
+//		}
+//
+//		return true;
+//	}
 
 
 	//#ifdef _DEBUG
@@ -1227,7 +1020,6 @@ public class ConsoleCmds extends Console
 		//extern boolean _stdlib_con_developer; 
 
 		//IConsoleVarRegister("con_developer",    &_stdlib_con_developer, ICONSOLE_VAR_BOOLEAN, "Enable/disable console debugging information (internal)");
-		Console.IConsoleCmdRegister("resettile",        ConsoleCmds::ConResetTile);
 		//IConsoleAliasRegister("dbg_echo",       "echo %A; echo %B");
 		//IConsoleAliasRegister("dbg_echo2",      "echo %!");
 	}
@@ -1242,11 +1034,6 @@ public class ConsoleCmds extends Console
 		// stdlib
 
 		// default variables and functions
-		IConsoleCmdRegister("help",         ConsoleCmds::ConHelp);
-		IConsoleCmdRegister("list_cmds",    ConsoleCmds::ConListCommands);
-		IConsoleCmdRegister("list_vars",    ConsoleCmds::ConListVariables);
-		IConsoleCmdRegister("list_aliases", ConsoleCmds::ConListAliases);
-		IConsoleCmdRegister("alias",        ConsoleCmds::ConAlias);
 		/*
 		IConsoleCmdRegister("debug_level",  ConDebugLevel);
 		IConsoleCmdRegister("dump_vars",    ConListDumpVariables);
@@ -1269,10 +1056,6 @@ public class ConsoleCmds extends Console
 		IConsoleCmdRegister("cd",           ConChangeDirectory);
 		IConsoleCmdRegister("clear",        ConClearBuffer);
 		*/
-		IConsoleCmdRegister("pwd",          ConsoleCmds::ConPrintWorkingDirectory);
-		IConsoleCmdRegister("scrollto",     ConsoleCmds::ConScrollToTile);
-		IConsoleCmdRegister("resetengines", ConsoleCmds::ConResetEngines);
-		IConsoleCmdRegister("stopall",      ConsoleCmds::constopAllVehicles);
 
 		/*
 		IConsoleAliasRegister("dir",      "ls");
@@ -1281,8 +1064,6 @@ public class ConsoleCmds extends Console
 		IConsoleAliasRegister("new_map",  "newgame");
 		IConsoleAliasRegister("new_game", "newgame");
 		*/
-
-		Console.IConsoleVarRegister("developer", /*_stdlib_developer,*/ IConsoleVarTypes.ICONSOLE_VAR_BYTE, "Redirect debugging output from the console/command line to the ingame console (value 2). Default value: 1");
 
 		/* networking variables and functions */
 		/*#ifdef ENABLE_NETWORK
