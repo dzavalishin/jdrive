@@ -26,6 +26,7 @@ import game.Town;
 import game.Vehicle;
 import game.WayPoint;
 import game.console.Console;
+import game.console.ConsoleFactory;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.SwitchModes;
@@ -531,7 +532,9 @@ public class Gui
 	{
 		switch (index) {
 			case 0: MiscGui.PlaceLandBlockInfo(); break;
-			case 2: Console.IConsoleSwitch();     break;
+			case 2:
+				ConsoleFactory.INSTANCE.getCurrentConsole().ifPresent(Console::switchState);
+				break;
 			case 3: Global._make_screenshot = 1; break;
 			case 4: Global._make_screenshot = 2; break;
 			case 5: MiscGui.ShowAboutWindow();    break;
@@ -2484,7 +2487,7 @@ public class Gui
 		case WE_KEYPRESS:
 			//if (e.keycode == Window.WKC_BACKQUOTE) {
 			if (e.ascii == '`') {
-				Console.IConsoleSwitch();
+				ConsoleFactory.INSTANCE.getCurrentConsole().ifPresent(c -> c.switchState());
 				e.cont = false;
 				break;
 			}

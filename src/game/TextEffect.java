@@ -1,13 +1,7 @@
 package game;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-
 import game.console.Console;
+import game.console.ConsoleFactory;
 import game.enums.GameModes;
 import game.ids.StringID;
 import game.struct.TextMessage;
@@ -17,6 +11,14 @@ import game.xui.CursorVars;
 import game.xui.DrawPixelInfo;
 import game.xui.Gfx;
 import game.xui.ViewPort;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Optional;
 
 public class TextEffect 
 {
@@ -162,7 +164,9 @@ public class TextEffect
 		// First undraw if needed
 		UndrawTextMessage();
 
-		if (Console.isFullSize()) return;
+		Optional<Console> currentConsole = ConsoleFactory.INSTANCE.getCurrentConsole();
+		if (currentConsole.isPresent() && currentConsole.get().isFullSize())
+			return;
 
 		if(_text_message_list.isEmpty()) return;
 		

@@ -1,15 +1,8 @@
 package game;
 
-import gnu.getopt.Getopt;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
 import game.SaveLoad.SaveOrLoadResult;
 import game.ai.Ai;
-import game.console.Console;
+import game.console.ConsoleFactory;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.SwitchModes;
@@ -18,20 +11,14 @@ import game.exceptions.InvalidFileFormat;
 import game.exceptions.InvalidSpriteFormat;
 import game.ids.PlayerID;
 import game.struct.SmallFiosItem;
-import game.util.FileIO;
-import game.util.Music;
-import game.util.ShortSounds;
-import game.util.Sound;
-import game.util.Strings;
-import game.xui.Gfx;
-import game.xui.GfxInit;
-import game.xui.Gui;
-import game.xui.MiscGui;
-import game.xui.MusicGui;
-import game.xui.SettingsGui;
-import game.xui.VehicleGui;
-import game.xui.Window;
-import game.util.BitOps;
+import game.util.*;
+import game.xui.*;
+import gnu.getopt.Getopt;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 public class Main {
 
@@ -343,7 +330,8 @@ public class Main {
 			SettingsGui.SetDifficultyLevel(0, GameOptions._opt_newgame);
 
 		// initialize the ingame console
-		Console.IConsoleInit();
+		ConsoleFactory.INSTANCE.getConsole();
+//		Console.IConsoleInit();
 		VehicleGui.InitializeGUI();
 		// TODO Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
