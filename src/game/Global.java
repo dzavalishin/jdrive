@@ -1,24 +1,20 @@
 package game;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-
 import game.Cheat.Cheats;
-import game.console.Console;
+import game.console.ConsoleFactory;
 import game.enums.GameModes;
 import game.enums.SwitchModes;
 import game.ids.StringID;
 import game.ids.VehicleID;
-import game.struct.BackuppedOrders;
-import game.struct.ColorList;
-import game.struct.EngineInfo;
-import game.struct.HighScore;
-import game.struct.Point;
+import game.struct.*;
 import game.tables.CargoConst;
 import game.util.Paths;
 import game.util.Prices;
 import game.xui.MiscGui;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class Global 
 {
@@ -322,7 +318,9 @@ public class Global
 		String buf = String.format(s, arg);
 
 		printf( "dbg: %s", buf);
-		Console.IConsoleDebug(buf);
+		ConsoleFactory.INSTANCE.getCurrentConsole().ifPresent(c -> {
+			c.debug(s);
+		});
 	}
 
 	// instead of DEBUG(ai, 0)( printf args)

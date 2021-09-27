@@ -1,20 +1,8 @@
 package game.xui;
 
-import java.io.Serializable;
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.function.BiConsumer;
-
-import game.Global;
-import game.Hal;
-import game.Sprite;
-import game.Str;
-import game.TextEffect;
-import game.TileIndex;
+import game.*;
 import game.console.Console;
+import game.console.ConsoleFactory;
 import game.enums.GameModes;
 import game.enums.WindowEvents;
 import game.ids.AbstractID;
@@ -26,6 +14,14 @@ import game.util.BitOps;
 import game.util.Pixel;
 import game.util.WindowConstants;
 import game.util.wcustom.*;
+
+import java.io.Serializable;
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.function.BiConsumer;
 //import game.WindowClass;
 
 public class Window extends WindowConstants implements Serializable
@@ -1228,7 +1224,7 @@ public class Window extends WindowConstants implements Serializable
 
 	public static void InitWindowSystem()
 	{
-		Console.IConsoleClose();
+		ConsoleFactory.INSTANCE.closeConsole();
 
 		Global.gs._windows.clear(); // Kill all windows
 		
@@ -2172,7 +2168,7 @@ public class Window extends WindowConstants implements Serializable
 				continue; // don't modify top,left
 			}
 
-			Console.IConsoleResize();
+			ConsoleFactory.INSTANCE.getCurrentConsole().ifPresent(Console::resize);
 
 			if (w.window_class == WC_MAIN_TOOLBAR) {
 				top = w.top;

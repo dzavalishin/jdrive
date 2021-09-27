@@ -2687,7 +2687,7 @@ public class GRFFile
 		{
 			loadV2Offsets();
 			// need code to load it
-			Global.error("Custom .grf format is not supported yet.");
+			Global.error("TODO connect NewGrf loader");
 			return;
 		}
 		else

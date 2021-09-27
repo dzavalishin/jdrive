@@ -1,40 +1,36 @@
 package game.console;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 import game.Global;
 import game.Hal;
-import game.net.Net;
-import game.net.NetServer;
+import game.console.commands.Alias;
+import game.console.commands.AliasRegistry;
+import game.console.commands.Command;
+import game.console.commands.CommandRegistry;
+import game.console.variables.Variable;
+import game.console.variables.VariableRegistry;
 import game.struct.Textbuf;
 import game.util.BitOps;
 import game.util.Strings;
-import game.xui.Gfx;
-import game.xui.Widget;
-import game.xui.Window;
-import game.xui.WindowDesc;
-import game.xui.WindowEvent;
+import game.xui.*;
 
-public class Console //extends ConsoleCmds 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
+
+import static game.console.ConsoleColor.WHITE;
+
+public class DefaultConsole implements Console//extends ConsoleCmds
 {
 	// maximum length of a typed in command
 	public static final int ICON_CMDLN_SIZE = 255;
 	// maximum length of a totally expanded command
 	public static final int  ICON_MAX_STREAMSIZE = 1024;
 
-	// ** console parser ** //
-	static Map<String,IConsoleCmd>   _iconsole_cmds = new HashMap<>();    // list of registred commands
-	static Map<String,IConsoleVar>   _iconsole_vars = new HashMap<>();    // list of registred vars
-	static Map<String,IConsoleAlias> _iconsole_aliases = new HashMap<>(); // list of registred aliases
-
 	// ** console colors/modes ** //
-	public static byte _icolour_def;
-	public static byte _icolour_err;
-	public static byte _icolour_warn;
+	static byte _icolour_def;
+	static byte _icolour_err;
+	static byte _icolour_warn;
 	static byte _icolour_dbg;
 	static byte _icolour_cmd;
 	static IConsoleModes _iconsole_mode = IConsoleModes.ICONSOLE_CLOSED;
@@ -87,15 +83,15 @@ public class Console //extends ConsoleCmds
 			//new Widget( WIDGETS_END )
 	};
 
-	static final WindowDesc _iconsole_window_desc = new WindowDesc(
+	final WindowDesc _iconsole_window_desc = new WindowDesc(
 			0, 0, 2, 2,
 			Window.WC_CONSOLE, 0,
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 			_iconsole_window_widgets,
-			Console::windowProc
+			this::windowProc
 			);
 
-	public static void IConsoleInit()
+	private static void IConsoleInit()
 	{
 		_iconsole_output_file = null;
 		_icolour_def  =  1;
@@ -109,11 +105,11 @@ public class Console //extends ConsoleCmds
 		_iconsole_mode = IConsoleModes.ICONSOLE_CLOSED;
 		_iconsole_win = null;
 
-		
-		//#ifdef ENABLE_NETWORK // * Initialize network only variables 
+		/*
+		#ifdef ENABLE_NETWORK // * Initialize network only variables 
 		_redirect_console_to_client = 0;
-		//#endif
-		
+		#endif
+		 */
 
 
 		_iconsole_cmdline.maxlength = ICON_CMDLN_SIZE - 1;
@@ -125,6 +121,26 @@ public class Console //extends ConsoleCmds
 		ConsoleCmds.IConsoleStdLibRegister();
 		IConsoleClearCommand();
 		IConsoleHistoryAdd("");
+	}
+
+	@Override
+	public void println(String str, ConsoleColor color) {
+		IConsolePrint(color.getColorCode(), str);
+	}
+
+	@Override
+	public void debug(String str) {
+		println(str, ConsoleColor.BROWN);
+	}
+
+	@Override
+	public void init() {
+		IConsoleInit();
+	}
+
+	@Override
+	public void switchState() {
+		IConsoleSwitch();
 	}
 
 	static private void IConsoleClearBuffer()
@@ -182,7 +198,7 @@ public class Console //extends ConsoleCmds
 		CloseConsoleLogIfActive();
 	}
 
-	public static void IConsoleResize()
+	public void resize()
 	{
 		_iconsole_win = Window.FindWindowById(Window.WC_CONSOLE, 0);
 
@@ -202,7 +218,7 @@ public class Console //extends ConsoleCmds
 	/**
 	 * Turn on/off
 	 */
-	public static void IConsoleSwitch()
+	private void IConsoleSwitch()
 	{
 		switch (_iconsole_mode) {
 		case ICONSOLE_CLOSED:
@@ -222,8 +238,13 @@ public class Console //extends ConsoleCmds
 		Hal.MarkWholeScreenDirty();
 	}
 
-	public static void IConsoleClose() {if (_iconsole_mode == IConsoleModes.ICONSOLE_OPENED) IConsoleSwitch();}
-	static void IConsoleOpen()  {if (_iconsole_mode == IConsoleModes.ICONSOLE_CLOSED) IConsoleSwitch();}
+	@Override
+	public void close() {
+		if (_iconsole_mode == IConsoleModes.ICONSOLE_OPENED)
+			IConsoleSwitch();
+	}
+
+//	static void IConsoleOpen()  {if (_iconsole_mode == IConsoleModes.ICONSOLE_CLOSED) IConsoleSwitch();}
 
 	/**
 	 * Add the entered line into the history so you can look it back
@@ -270,8 +291,6 @@ public class Console //extends ConsoleCmds
 		//UpdateTextBufferSize(_iconsole_cmdline);
 	}
 
-
-	public static int _redirect_console_to_client = 0;
 	/**
 	 * Handle the printing of text entered into the console or redirected there
 	 * by any other means. Text can be redirected to other players in a network game
@@ -281,21 +300,16 @@ public class Console //extends ConsoleCmds
 	 * @param color_code the colour of the command. Red in case of errors, etc.
 	 * @param string the message entered or output on the console (notice, error, etc.)
 	 */
-	public static void IConsolePrint(int color_code, final String  string)
+	static void IConsolePrint(int color_code, final String  string)
 	{
-		//#ifdef ENABLE_NETWORK
+		/*#ifdef ENABLE_NETWORK
 		if (_redirect_console_to_client != 0) {
-			/* Redirect the string to the client */
-			try {
-				NetServer.NetworkPacketSend_PACKET_SERVER_RCON_command(Net.NetworkFindClientStateFromIndex(_redirect_console_to_client), color_code, string);
-			} catch (IOException e) {
-				// e.printStackTrace();
-				Global.error(e);
-			}
+			/* Redirect the string to the client * /
+			SEND_COMMAND(PACKET_SERVER_RCON)(NetworkFindClientStateFromIndex(_redirect_console_to_client), color_code, string);
 			return;
 		}
-		//#endif
-		 
+		#endif
+		 */
 
 		if (Global._network_dedicated) {
 			Global.error("%s\n", string);
@@ -334,7 +348,7 @@ public class Console //extends ConsoleCmds
 	 * by any other means. Uses printf() style format, for more information look
 	 * at @IConsolePrint()
 	 */
-	public static void IConsolePrintF(int color_code, final String s, Object ... args)
+	static void IConsolePrintF(int color_code, final String s, Object ... args)
 	{
 		//va_list va;
 		String buf = String.format(s, args);
@@ -352,7 +366,7 @@ public class Console //extends ConsoleCmds
 	 * debug() in debug.c. You need at least a level 2 (developer) for debugging
 	 * messages to show up
 	 */
-	public static void IConsoleDebug(final String string)
+	private static void IConsoleDebug(final String string)
 	{
 		// TODO must be value of console var if (_stdlib_developer > 0)if (_stdlib_developer > 1)
 			IConsolePrintF(_icolour_dbg, "dbg: %s", string);
@@ -408,33 +422,6 @@ public class Console //extends ConsoleCmds
 		return true;
 	}
 
-
-	/**
-	 * Add a hook to a command that will be triggered at certain points
-	 * @param name name of the command that the hook is added to
-	 * @param type type of hook that is added (ACCESS, BEFORE and AFTER change)
-	 * @param proc function called when the hook criteria is met
-	 */
-	static void IConsoleCmdHookAdd(final String name, IConsoleHookTypes type, IConsoleHook proc)
-	{
-		IConsoleCmd cmd = IConsoleCmdGet(name);
-		if (cmd == null) return;
-		cmd.hook.IConsoleHookAdd(type, proc);
-	}
-
-	/**
-	 * Add a hook to a variable that will be triggered at certain points
-	 * @param name name of the variable that the hook is added to
-	 * @param type type of hook that is added (ACCESS, BEFORE and AFTER change)
-	 * @param proc function called when the hook criteria is met
-	 */
-	static void IConsoleVarHookAdd(final String name, IConsoleHookTypes type, IConsoleHook proc)
-	{
-		IConsoleVar variable = IConsoleVarGet(name);
-		if (variable == null) return;
-		variable.hook.IConsoleHookAdd(type, proc);
-	}
-
 	/**
 	 * Perhaps ugly macro, but this saves us the trouble of writing the same function
 	 * three types, just with different variables. Yes, templates would be handy. It was
@@ -477,83 +464,6 @@ public class Console //extends ConsoleCmds
 	}
 	 */
 
-	/**
-	 * Register a new command to be used in the console
-	 * @param name name of the command that will be used
-	 * @param proc function that will be called upon execution of command
-	 */
-	static void IConsoleCmdRegister(final String name, IConsoleCmdProc proc)
-	{
-		IConsoleCmd item_new = new IConsoleCmd();
-
-		//item_new.next = null;
-		item_new.proc = proc;
-		item_new.name = name;
-
-		item_new.hook.access = null;
-		item_new.hook.pre = null;
-		item_new.hook.post = null;
-
-		//IConsoleAddSorted(_iconsole_cmds, item_new, "a command");
-		if( _iconsole_cmds.get(name) != null )
-		{
-			IConsoleError("a command with this name already exists; insertion aborted");      
-			return;                                                                       
-		}
-
-		_iconsole_cmds.put(name, item_new);
-	}
-
-	/**
-	 * Find the command pointed to by its string
-	 * @param name command to be found
-	 * @return return Cmdstruct of the found command, or null on failure
-	 */
-	static IConsoleCmd IConsoleCmdGet(final String name)
-	{
-		/*IConsoleCmd item;
-		//for( IConsoleCmd item : _iconsole_cmds )
-		for (item = _iconsole_cmds; item != null; item = item.next) 
-			if( item.name.equalsIgnoreCase(name) ) return item;
-		 */
-		return _iconsole_cmds.get(name);
-	}
-
-	/**
-	 * Register a an alias for an already existing command in the console
-	 * @param name name of the alias that will be used
-	 * @param cmd name of the command that 'name' will be alias of
-	 */
-	static void IConsoleAliasRegister(final String name, final String cmd)
-	{
-		//String new_alias = new String(name);
-		//String cmd_aliased = new String(cmd);
-		IConsoleAlias item_new = new IConsoleAlias();
-
-		//item_new.next = null;
-		item_new.cmdline = cmd;
-		item_new.name = name;
-
-		//IConsoleAddSorted(_iconsole_aliases, item_new, IConsoleAlias, "an alias");
-		if( _iconsole_aliases.get(name) != null )
-		{
-			IConsoleError("an alias with this name already exists; insertion aborted");      
-			return;                                                                       
-		}
-
-		_iconsole_aliases.put(name, item_new);
-	}
-
-	/**
-	 * Find the alias pointed to by its string
-	 * @param name alias to be found
-	 * @return return Aliasstruct of the found alias, or null on failure
-	 */
-	static IConsoleAlias IConsoleAliasGet(final String name)
-	{
-		return _iconsole_aliases.get(name);
-	}
-
 	/** copy in an argument into the alias stream * /
 	static  int IConsoleCopyInParams(String dst, final String src, uint bufpos)
 	{
@@ -563,6 +473,13 @@ public class Console //extends ConsoleCmds
 		return len;
 	}*/
 
+	private void executeAlias(Alias alias) {
+		String cmd = alias.getCommand();
+		Arrays.stream(cmd.split(";")).forEach(c -> {
+			IConsoleCmdExec(c.trim());
+		});
+	}
+
 	/**
 	 * An alias is just another name for a command, or for more commands
 	 * Execute it as well.
@@ -570,8 +487,8 @@ public class Console //extends ConsoleCmds
 	 * @param tokencount the number of parameters passed
 	 * @param tokens are the parameters given to the original command (0 is the first param)
 	 */
-	static void IConsoleAliasExec(final IConsoleAlias alias, int tokencount, String ... tokens)
-	{
+//	static void IConsoleAliasExec(final IConsoleAlias alias, int tokencount, String ... tokens)
+//	{
 	/*
 		final String cmdptr;
 		String [] aliases = new String[ICON_MAX_ALIAS_LINES]
@@ -641,7 +558,7 @@ public class Console //extends ConsoleCmds
 
 		for (i = 0; i <= (int)a_index; i++) IConsoleCmdExec(aliases[i]); // execute each alias in turn
 	*/
-	}
+//	}
 
 	/**
 	 * Special function for adding string-type variables. They in addition
@@ -658,70 +575,22 @@ public class Console //extends ConsoleCmds
 	}
 
 	/**
-	 * Register a new variable to be used in the console
-	 * @param name name of the variable that will be used
-	 * @param addr memory location the variable will point to
-	 * @param help the help string shown for the variable
-	 * @param type the type of the variable (simple atomic) so we know which values it can get
-	 */
-	//static void IConsoleVarRegister(final String name, Object addr, IConsoleVarTypes type, final String help)
-	static void IConsoleVarRegister(final String name, IConsoleVarTypes type, final String help)
-	{
-		IConsoleVar item_new = new IConsoleVar(); //malloc(sizeof(IConsoleVar));
-
-		item_new.help = help;
-
-		//item_new.next = null;
-		item_new.name = name;
-		//item_new.addr = addr;
-		item_new.proc = null;
-		item_new.type = type;
-
-		item_new.hook.access = null;
-		item_new.hook.pre = null;
-		item_new.hook.post = null;
-
-		//IConsoleAddSorted(_iconsole_vars, item_new, IConsoleVar, "a variable");
-		if( _iconsole_vars.get(name) != null )
-		{
-			IConsoleError("a var with this name already exists; insertion aborted");      
-			return;                                                                       
-		}
-
-		_iconsole_vars.put(name, item_new);
-	}
-
-	/**
-	 * Find the variable pointed to by its string
-	 * @param name variable to be found
-	 * @return return Varstruct of the found variable, or null on failure
-	 */
-	static IConsoleVar IConsoleVarGet(final String name)
-	{
-		return _iconsole_vars.get(name);
-	}
-
-
-
-
-
-	/**
 	 * Print out the value of the variable when asked
 	 */
-	static void IConsoleVarPrintGetValue(final IConsoleVar variable)
-	{
-		String value;
-		/* Some variables need really specific handling, handle this in its
-		 * callback function */
-		if (variable.proc != null) {
-			//var.proc.accept(0, null);
-			variable.proc.accept();
-			return;
-		}
-
-		value = variable.IConsoleVarGetStringValue();
-		IConsolePrintF(_icolour_warn, "Current value for '%s' is:  %s", variable.name, value);
-	}
+//	static void IConsoleVarPrintGetValue(final IConsoleVar variable)
+//	{
+//		String value;
+//		/* Some variables need really specific handling, handle this in its
+//		 * callback function */
+//		if (variable.proc != null) {
+//			//var.proc.accept(0, null);
+//			variable.proc.accept();
+//			return;
+//		}
+//
+//		value = variable.IConsoleVarGetStringValue();
+//		IConsolePrintF(_icolour_warn, "Current value for '%s' is:  %s", variable.name, value);
+//	}
 
 
 	/**
@@ -731,204 +600,123 @@ public class Console //extends ConsoleCmds
 	 * @param tokencount how many additional parameters have been given to the commandline
 	 * @param token the actual parameters the variable was called with
 	 */
-	static void IConsoleVarExec(final IConsoleVar variable, int tokencount, String ... token)
-	{
-		String tokenptr = token[0];
-		int t_index = tokencount;
-
-		if (_stdlib_con_developer)
-			IConsolePrintF(_icolour_dbg, "condbg: requested command is a variable");
-
-		if (tokencount == 0) { /* Just print out value */
-			IConsoleVarPrintGetValue(variable);
-			return;
-		}
-
-		/* Use of assignment sign is not mandatory but supported, so just 'ignore it appropiately' */
-		if (tokenptr.equalsIgnoreCase("=")) {
-			tokencount--;
-			tokenptr = token[1];
-		}
-
-		if (tokencount == 1) {
-			/* Some variables need really special handling, handle it in their callback procedure */
-			if (variable.proc != null) {
-				variable.proc.accept(token[t_index - tokencount]); // set the new value
-				return;
-			}
-			/* Strings need special processing. No need to convert the argument to
-			 * an integer value, just copy over the argument on a one-by-one basis */
-			if (variable.type == IConsoleVarTypes.ICONSOLE_VAR_STRING) {
-				variable.IConsoleVarSetStringvalue(token[t_index - tokencount]);
-				return;
-			} else {
-				int [] value = {0};
-
-				if (GetArgumentInteger(value, token[t_index - tokencount])) {
-					variable.IConsoleVarSetValue(value[0]);
-					return;
-				}
-			}
-
-			/* Increase or decrease the value by one. This of course can only happen to 'number' types */
-			if (tokenptr.equals("++") && variable.type != IConsoleVarTypes.ICONSOLE_VAR_STRING) {
-				variable.IConsoleVarSetValue(variable.IConsoleVarGetValue() + 1);
-				return;
-			}
-
-			if (tokenptr.equals("--") && variable.type != IConsoleVarTypes.ICONSOLE_VAR_STRING) {
-				variable.IConsoleVarSetValue(variable.IConsoleVarGetValue() - 1);
-				return;
-			}
-		}
-
-		IConsoleError("invalid variable assignment");
-	}
-
-	/**
-	 * Add a callback function to the variable. Some variables need
-	 * very special processing, which can only be done with custom code
-	 * @param name name of the variable the callback function is added to
-	 * @param proc the function called
-	 */
-	static void IConsoleVarProcAdd(final String name, IConsoleCmdProc proc)
-	{
-		IConsoleVar variable = IConsoleVarGet(name);
-		if (variable == null) return;
-		variable.proc = proc;
-	}
+//	static void IConsoleVarExec(final IConsoleVar variable, int tokencount, String ... token)
+//	{
+//		String tokenptr = token[0];
+//		int t_index = tokencount;
+//
+//		if (_stdlib_con_developer)
+//			IConsolePrintF(_icolour_dbg, "condbg: requested command is a variable");
+//
+//		if (tokencount == 0) { /* Just print out value */
+//			IConsoleVarPrintGetValue(variable);
+//			return;
+//		}
+//
+//		/* Use of assignment sign is not mandatory but supported, so just 'ignore it appropiately' */
+//		if (tokenptr.equalsIgnoreCase("=")) {
+//			tokencount--;
+//			tokenptr = token[1];
+//		}
+//
+//		if (tokencount == 1) {
+//			/* Some variables need really special handling, handle it in their callback procedure */
+//			if (variable.proc != null) {
+//				variable.proc.accept(token[t_index - tokencount]); // set the new value
+//				return;
+//			}
+//			/* Strings need special processing. No need to convert the argument to
+//			 * an integer value, just copy over the argument on a one-by-one basis */
+//			if (variable.type == IConsoleVarTypes.ICONSOLE_VAR_STRING) {
+//				variable.IConsoleVarSetStringvalue(token[t_index - tokencount]);
+//				return;
+//			} else {
+//				int [] value = {0};
+//
+//				if (GetArgumentInteger(value, token[t_index - tokencount])) {
+//					variable.IConsoleVarSetValue(value[0]);
+//					return;
+//				}
+//			}
+//
+//			/* Increase or decrease the value by one. This of course can only happen to 'number' types */
+//			if (tokenptr.equals("++") && variable.type != IConsoleVarTypes.ICONSOLE_VAR_STRING) {
+//				variable.IConsoleVarSetValue(variable.IConsoleVarGetValue() + 1);
+//				return;
+//			}
+//
+//			if (tokenptr.equals("--") && variable.type != IConsoleVarTypes.ICONSOLE_VAR_STRING) {
+//				variable.IConsoleVarSetValue(variable.IConsoleVarGetValue() - 1);
+//				return;
+//			}
+//		}
+//
+//		IConsoleError("invalid variable assignment");
+//	}
 
 	/**
 	 * Execute a given command passed to us. First chop it up into
 	 * individual tokens (seperated by spaces), then execute it if possible
 	 * @param cmdstr string to be parsed and executed
 	 */
-	public static void IConsoleCmdExec(final String cmdstr)
+	void IConsoleCmdExec(final String cmdstr)
 	{
-		IConsoleCmd   cmd    = null;
-		IConsoleAlias alias  = null;
-		//IConsoleVar   variable    = null;
+		UserInput input = new SingleLineUserInput(cmdstr);
 
-		//final String cmdptr;
-		String [] tokens = new String[ICON_TOKEN_COUNT];
-		char [] tokenstream = new char[ICON_MAX_STREAMSIZE];
-		int t_index, tstream_i;
-
-		boolean longtoken = false;
-		boolean foundtoken = false;
-
-		if (cmdstr.length() == 0 || cmdstr.charAt(0) == '#') return; // comments
-
-		for (int i = 0; i < cmdstr.length(); i++) {
-			char c = cmdstr.charAt(i);
-
-			if (!BitOps.IsValidAsciiChar(c)) {
-				IConsoleError("command contains malformed characters, aborting");
-				IConsolePrintF(_icolour_err, "ERROR: command was: '%s'", cmdstr);
-				return;
-			}
-		}
-
-		if (_stdlib_con_developer)
-			IConsolePrintF(_icolour_dbg, "condbg: executing cmdline: '%s'", cmdstr);
-
-		//memset(&tokens, 0, sizeof(tokens));
-		//memset(&tokenstream, 0, sizeof(tokenstream));
-		Arrays.fill(tokens, null);
-		Arrays.fill(tokenstream, (char)0);
-
-		/* 1. Split up commandline into tokens, seperated by spaces, commands
-		 * enclosed in "" are taken as one token. We can only go as far as the amount
-		 * of characters in our stream or the max amount of tokens we can handle */
-		t_index = 0;
-		tstream_i = 0;
-		for (int i = 0; true; i++) {
-			
-			if(i >= cmdstr.length())
-			{
-				if(foundtoken) tokens[t_index++] = new String(tokenstream, 0, tstream_i);
-				break;
-			}
-
-			if (t_index >= tokens.length || tstream_i >= tokenstream.length) 
-				break;
-			
-			char c = cmdstr.charAt(i);
-
-			switch (c) {
-			case ' ': /* Token seperator */
-				if (!foundtoken) break;
-
-				if (longtoken) {
-					tokenstream[tstream_i++] = c;
+		input.words().findAny().ifPresent(c -> {
+			Optional<Command> commandHandler = CommandRegistry.INSTANCE.getCommand(c);
+			if (commandHandler.isPresent()) {
+				commandHandler.get().run(this, input);
+			} else {
+				Optional<Alias>	alias = AliasRegistry.INSTANCE.get(c);
+				if (alias.isPresent()) {
+					executeAlias(alias.get());
 				} else {
-					//tokenstream[tstream_i] = 0;
-					tokens[t_index++] = new String(tokenstream, 0, tstream_i);
-					tstream_i = 0;
-					foundtoken = false;
-				}
-
-				//tstream_i++;
-				break;
-			case '"': /* Tokens enclosed in "" are one token */
-				longtoken = !longtoken;
-				break;
-
-			default: /* Normal character */
-				tokenstream[tstream_i++] = c;
-
-				if (!foundtoken) {
-					//tokens[t_index++] = &tokenstream[tstream_i - 1];
-					foundtoken = true;
-				}
-				break;
-			}
-		}
-
-		if (_stdlib_con_developer) {
-			int i;
-			for (i = 0; tokens[i] != null; i++)
-				IConsolePrintF(_icolour_dbg, "condbg: token %d is: '%s'", i, tokens[i]);
-		}
-
-		if (tokens[0] == null) return; // don't execute empty commands
-		/* 2. Determine type of command (cmd, alias or variable) and execute
-		 * First try commands, then aliases, and finally variables. Execute
-		 * the found action taking into account its hooking code
-		 */
-		cmd = IConsoleCmdGet(tokens[0]);
-		if (cmd != null && cmd.hook != null) {
-			if (cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_ACCESS)) {
-				cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_PRE_ACTION);
-				if (cmd.proc.accept(tokens)) { // index started with 0
-					cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_POST_ACTION);
-				} else { 
-					cmd.proc.accept(); // if command failed, give help
+					Optional<Variable> variable = VariableRegistry.INSTANCE.get(c);
+					if (variable.isPresent()) {
+						println(variable.get().rawValue(), WHITE);
+					}
+					else {
+						IConsoleError("command or variable not found");
+					}
 				}
 			}
-			return;
-		}
+		});
 
-		t_index--; // ignore the variable-name for comfort for both aliases and variaables
-		alias = IConsoleAliasGet(tokens[0]);
-		if (alias != null) {
-			IConsoleAliasExec(alias, t_index, tokens[1]);
-			return;
-		}
 
-		IConsoleVar variable = IConsoleVarGet(tokens[0]);
-		if (variable != null) {
-			if (variable.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_ACCESS))
-				IConsoleVarExec(variable, t_index, tokens[1], tokens[2]);
+//		cmd = IConsoleCmdGet(command.get());
+//		if (cmd != null && cmd.hook != null) {
+//			if (cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_ACCESS)) {
+//				cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_PRE_ACTION);
+//				if (cmd.proc.accept("")) { // index started with 0
+//					cmd.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_POST_ACTION);
+//				} else {
+//					cmd.proc.accept(); // if command failed, give help
+//				}
+//			}
+//			return;
+//		}
+//
+//		t_index--; // ignore the variable-name for comfort for both aliases and variaables
+//		alias = IConsoleAliasGet(command.get());
+//		if (alias != null) {
+//			IConsoleAliasExec(alias, t_index, tokens[1]);
+//			return;
+//		}
+//
+//		IConsoleVar variable = IConsoleVarGet(command.get());
+//		if (variable != null) {
+//			if (variable.hook.IConsoleHookHandle(IConsoleHookTypes.ICONSOLE_HOOK_ACCESS))
+//				IConsoleVarExec(variable, t_index, tokens[1], tokens[2]);
+//
+//			return;
+//		}
 
-			return;
-		}
 
-		IConsoleError("command or variable not found");
 	}
 
 
-	private static void windowProc( Window w, WindowEvent e)
+	private void windowProc( Window w, WindowEvent e)
 	{
 		switch (e.event) {
 		case WE_PAINT: {
@@ -1016,7 +804,7 @@ public class Console //extends ConsoleCmds
 				break;
 			case Window.WKC_CTRL | Window.WKC_RETURN:
 				_iconsole_mode = (_iconsole_mode == IConsoleModes.ICONSOLE_FULL) ? IConsoleModes.ICONSOLE_OPENED : IConsoleModes.ICONSOLE_FULL;
-				IConsoleResize();
+				resize();
 				Hal.MarkWholeScreenDirty();
 				break;
 			case (Window.WKC_CTRL | 'V'):
@@ -1062,9 +850,21 @@ public class Console //extends ConsoleCmds
 
 	}
 
-	public static boolean isFullSize() {
+	public boolean isFullSize() {
 		return _iconsole_mode == IConsoleModes.ICONSOLE_FULL;
 	}
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
