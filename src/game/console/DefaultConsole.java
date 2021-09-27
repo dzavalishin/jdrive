@@ -143,6 +143,11 @@ public class DefaultConsole implements Console//extends ConsoleCmds
 		IConsoleSwitch();
 	}
 
+	@Override
+	public void clear() {
+		IConsoleClear();
+	}
+
 	static private void IConsoleClearBuffer()
 	{
 		int i;
@@ -473,92 +478,21 @@ public class DefaultConsole implements Console//extends ConsoleCmds
 		return len;
 	}*/
 
-	private void executeAlias(Alias alias) {
+	private void executeAlias(Alias alias, UserInput input) {
 		String cmd = alias.getCommand();
 		Arrays.stream(cmd.split(";")).forEach(c -> {
-			IConsoleCmdExec(c.trim());
+			var command = c.trim();
+			if (command.contains("%+")) {
+				command = command.replace("%+", String.join(" ", input.parameters()));
+			} else if (command.contains("%!")) {
+				command = command.replace("%!", "\"" + String.join(" ", input.parameters()) + "\"");
+			} else {
+				command = String.format(command.replaceAll("%[A-Z]", "%s"), input.parameters().toArray());
+			}
+			IConsoleCmdExec(command);
 		});
 	}
 
-	/**
-	 * An alias is just another name for a command, or for more commands
-	 * Execute it as well.
-	 * @param alias is the alias of the command
-	 * @param tokencount the number of parameters passed
-	 * @param tokens are the parameters given to the original command (0 is the first param)
-	 */
-//	static void IConsoleAliasExec(final IConsoleAlias alias, int tokencount, String ... tokens)
-//	{
-	/*
-		final String cmdptr;
-		String [] aliases = new String[ICON_MAX_ALIAS_LINES]
-		String aliasstream[ICON_MAX_STREAMSIZE];
-		int i;
-		int a_index, astream_i;
-
-		memset(&aliases, 0, sizeof(aliases));
-		memset(&aliasstream, 0, sizeof(aliasstream));
-
-		if (_stdlib_con_developer)
-			IConsolePrintF(_icolour_dbg, "condbg: requested command is an alias; parsing...");
-
-		aliases[0] = aliasstream;
-		for (cmdptr = alias.cmdline, a_index = 0, astream_i = 0; *cmdptr != '\0'; cmdptr++) {
-			if (a_index >= lengthof(aliases) || astream_i >= lengthof(aliasstream)) break;
-
-			switch (*cmdptr) {
-			case '\'': // ' will double for "" 
-				aliasstream[astream_i++] = '"';
-				break;
-			case ';': // Cmd seperator, start new command 
-				aliasstream[astream_i] = '\0';
-				aliases[++a_index] = &aliasstream[++astream_i];
-				cmdptr++;
-				break;
-			case '%': // Some or all parameters 
-				cmdptr++;
-				switch (*cmdptr) {
-				case '+': { // All parameters seperated: "[param 1]" "[param 2]" 
-					for (i = 0; i != tokencount; i++) {
-						aliasstream[astream_i++] = '"';
-						astream_i += IConsoleCopyInParams(&aliasstream[astream_i], tokens[i], astream_i);
-						aliasstream[astream_i++] = '"';
-						aliasstream[astream_i++] = ' ';
-					}
-				} break;
-				case '!': { // Merge the parameters to one: "[param 1] [param 2] [param 3...]" 
-					aliasstream[astream_i++] = '"';
-					for (i = 0; i != tokencount; i++) {
-						astream_i += IConsoleCopyInParams(&aliasstream[astream_i], tokens[i], astream_i);
-						aliasstream[astream_i++] = ' ';
-					}
-					aliasstream[astream_i++] = '"';
-
-				} break;
-				default: { // One specific parameter: %A = [param 1] %B = [param 2] ... 
-					int param = *cmdptr - 'A';
-
-					if (param < 0 || param >= tokencount) {
-						IConsoleError("too many or wrong amount of parameters passed to alias, aborting");
-						IConsolePrintF(_icolour_warn, "Usage of alias '%s': %s", alias.name, alias.cmdline);
-						return;
-					}
-
-					aliasstream[astream_i++] = '"';
-					astream_i += IConsoleCopyInParams(&aliasstream[astream_i], tokens[param], astream_i);
-					aliasstream[astream_i++] = '"';
-				} break;
-				} break;
-
-			default:
-				aliasstream[astream_i++] = *cmdptr;
-				break;
-			}
-		}
-
-		for (i = 0; i <= (int)a_index; i++) IConsoleCmdExec(aliases[i]); // execute each alias in turn
-	*/
-//	}
 
 	/**
 	 * Special function for adding string-type variables. They in addition
@@ -670,7 +604,7 @@ public class DefaultConsole implements Console//extends ConsoleCmds
 			} else {
 				Optional<Alias>	alias = AliasRegistry.INSTANCE.get(c);
 				if (alias.isPresent()) {
-					executeAlias(alias.get());
+					executeAlias(alias.get(), input);
 				} else {
 					Optional<Variable> variable = VariableRegistry.INSTANCE.get(c);
 					if (variable.isPresent()) {

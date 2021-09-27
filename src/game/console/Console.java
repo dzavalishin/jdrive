@@ -40,6 +40,11 @@ public interface Console {
     void switchState();
 
     /**
+     * clear console
+     */
+    void clear();
+
+    /**
      * @return true if console mode is full size
      */
     boolean isFullSize();
