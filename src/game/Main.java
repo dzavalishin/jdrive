@@ -1,35 +1,24 @@
 package game;
 
+import game.SaveLoad.SaveOrLoadResult;
+import game.ai.Ai;
+import game.console.ConsoleFactory;
+import game.enums.GameModes;
+import game.enums.Owner;
+import game.enums.SwitchModes;
+import game.enums.ThreadMsg;
+import game.exceptions.InvalidFileFormat;
+import game.exceptions.InvalidSpriteFormat;
+import game.ids.PlayerID;
+import game.struct.SmallFiosItem;
+import game.util.*;
+import game.xui.*;
 import gnu.getopt.Getopt;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-import game.SaveLoad.SaveOrLoadResult;
-import game.ai.Ai;
-import game.console.Console;
-import game.enums.GameModes;
-import game.enums.Owner;
-import game.enums.SwitchModes;
-import game.enums.ThreadMsg;
-import game.ids.PlayerID;
-import game.struct.SmallFiosItem;
-import game.util.FileIO;
-import game.util.Music;
-import game.util.ShortSounds;
-import game.util.Sound;
-import game.util.Strings;
-import game.xui.Gfx;
-import game.xui.GfxInit;
-import game.xui.Gui;
-import game.xui.MiscGui;
-import game.xui.MusicGui;
-import game.xui.SettingsGui;
-import game.xui.VehicleGui;
-import game.xui.Window;
-import game.util.BitOps;
 
 public class Main {
 
@@ -189,7 +178,7 @@ public class Main {
 	}
 
 
-	public static void main(String[] argv) 
+	public static void main(String[] argv) throws IOException, InvalidFileFormat, InvalidSpriteFormat 
 	{
 		boolean network = false;
 		//String network_conn = null;
@@ -325,6 +314,10 @@ public class Main {
 		GfxInit.GfxLoadSprites();
 		Gfx.LoadStringWidthTable();
 
+		
+		//NewGrf test = new NewGrf("xussr.grf");
+		//test.loadSprites();
+		
 		// TODO _savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 
 		// initialize network-core
@@ -337,7 +330,8 @@ public class Main {
 			SettingsGui.SetDifficultyLevel(0, GameOptions._opt_newgame);
 
 		// initialize the ingame console
-		Console.IConsoleInit();
+		ConsoleFactory.INSTANCE.getConsole();
+//		Console.IConsoleInit();
 		VehicleGui.InitializeGUI();
 		// TODO Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
@@ -509,8 +503,6 @@ public class Main {
 		Hal.MarkWholeScreenDirty();
 	}
 
-	//void StartupPlayers();
-	//void StartupDisasters();
 
 	/**
 	 * Start Scenario starts a new game based on a scenario.
