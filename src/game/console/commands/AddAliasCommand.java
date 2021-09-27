@@ -52,7 +52,7 @@ public class AddAliasCommand implements Command {
 
             String alias = getParameter(0, iterator);
             String command = getParameter(1, iterator);
-            AliasRegistry.INSTANCE.put(new DefaultAlias(alias, command));
+            AliasRegistry.INSTANCE.put(new DefaultAlias(alias, command.replaceAll("\\s\\s+", " ")));
         }
     }
 }
