@@ -272,20 +272,6 @@ public class ConsoleCmds extends DefaultConsole
 		return true;
 	}
 
-
-	static boolean function(String ... argv)(ConClearBuffer)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("Clear the console buffer. Usage: 'clear'");
-			return true;
-		}
-
-		IConsoleClearBuffer();
-		InvalidateWindow(WC_CONSOLE, 0);
-		return true;
-	}
-
-
 	// ********************************* //
 	// * Network Core Console Commands * //
 	// ********************************* //
@@ -685,30 +671,6 @@ public class ConsoleCmds extends DefaultConsole
 	}
 
 
-	static boolean function(String ... argv)(ConEcho)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("Print back the first argument to the console. Usage: 'echo <arg>'");
-			return true;
-		}
-
-		if (argv.length < 2) return false;
-		IConsolePrint(_icolour_def, argv[1]);
-		return true;
-	}
-
-	static boolean function(String ... argv)(ConEchoC)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("Print back the first argument to the console in a given colour. Usage: 'echoc <colour> <arg2>'");
-			return true;
-		}
-
-		if (argv.length < 3) return false;
-		IConsolePrint(atoi(argv[1]), argv[2]);
-		return true;
-	}
-
 	extern void SwitchMode(int new_mode);
 
 	static boolean function(String ... argv)(ConNewGame)
@@ -817,17 +779,6 @@ public class ConsoleCmds extends DefaultConsole
 			IConsolePrintF(_icolour_def, "Current debug-level: '%s'", GetDebugString());
 		} else SetDebugString(argv[1]);
 
-		return true;
-	}
-
-	static boolean function(String ... argv)(ConExit)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("Exit the game. Usage: 'exit'");
-			return true;
-		}
-
-		_exit_game = true;
 		return true;
 	}
 
@@ -1044,15 +995,11 @@ public class ConsoleCmds extends DefaultConsole
 		/*
 		IConsoleCmdRegister("debug_level",  ConDebugLevel);
 		IConsoleCmdRegister("dump_vars",    ConListDumpVariables);
-		IConsoleCmdRegister("echo",         ConEcho);
-		IConsoleCmdRegister("echoc",        ConEchoC);
 		IConsoleCmdRegister("exec",         ConExec);
-		IConsoleCmdRegister("exit",         ConExit);
 		IConsoleCmdRegister("part",         ConPart);
 		IConsoleCmdRegister("info_cmd",     ConInfoCmd);
 		IConsoleCmdRegister("info_var",     ConInfoVar);
 		IConsoleCmdRegister("newgame",      ConNewGame);
-		IConsoleCmdRegister("quit",         ConExit);
 		IConsoleCmdRegister("return",       ConReturn);
 		IConsoleCmdRegister("screenshot",   ConScreenShot);
 		IConsoleCmdRegister("script",       ConScript);
@@ -1061,7 +1008,6 @@ public class ConsoleCmds extends DefaultConsole
 		IConsoleCmdRegister("save",         ConSave);
 		IConsoleCmdRegister("ls",           ConListFiles);
 		IConsoleCmdRegister("cd",           ConChangeDirectory);
-		IConsoleCmdRegister("clear",        ConClearBuffer);
 		*/
 
 		/*

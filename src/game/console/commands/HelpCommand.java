@@ -55,7 +55,7 @@ public class HelpCommand implements Command {
                console.println(v.getName() + " - " + v.getDescription(), BLUE);
             });
             AliasRegistry.INSTANCE.get(name).ifPresent(a -> {
-                Optional<Command> command = CommandRegistry.INSTANCE.getCommand(name);
+                Optional<Command> command = CommandRegistry.INSTANCE.getCommand(a.getCommand());
                 if (command.isPresent()) {
                     command.get().getCommandDocumentation().lines().forEach(s -> console.println(s, BLUE));
                 } else {
