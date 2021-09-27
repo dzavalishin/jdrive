@@ -13,6 +13,7 @@ public class AliasRegistry {
 
     {
         put(new DefaultAlias("lc", "list_cmds"));
+        put(new DefaultAlias("quit", "exit"));
     }
 
     private AliasRegistry() {}
