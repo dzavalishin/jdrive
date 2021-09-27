@@ -23,6 +23,10 @@ public class CommandRegistry {
         put(new ScrollToCommand());
         put(new ListVariablesCommand());
         put(new ListAliasesCommand());
+        put(new EchoCommand());
+        put(new EchoColoredCommand());
+        put(new ExitCommand());
+        put(new ClearCommand());
 
         if (Global.debugEnabled)
             put(new ResetTileCommand());

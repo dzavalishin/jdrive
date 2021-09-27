@@ -39,7 +39,7 @@ public class SingleLineUserInput implements UserInput {
                 parameter = new StringBuilder(w.substring(1) + " ");
                 quotedParameter = true;
                 if (w.endsWith("\"")) {
-                    result.add(parameter.substring(0, parameter.length() - 1));
+                    result.add(parameter.substring(0, parameter.length() - 2));
                     quotedParameter = false;
                 }
             } else {

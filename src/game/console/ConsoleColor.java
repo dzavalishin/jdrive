@@ -1,5 +1,8 @@
 package game.console;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * Console colors
  */
@@ -22,5 +25,14 @@ public enum ConsoleColor {
      */
     public int getColorCode() {
         return colorCode;
+    }
+
+    /**
+     * find console color by color code
+     *
+     * @return console color
+     */
+    public static Optional<ConsoleColor> fromInteger(int colorCode) {
+        return Arrays.stream(ConsoleColor.values()).filter(c -> c.getColorCode() == colorCode).findFirst();
     }
 }
