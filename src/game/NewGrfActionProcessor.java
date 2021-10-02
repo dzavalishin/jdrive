@@ -2246,8 +2246,8 @@ public class NewGrfActionProcessor
 		}
 	}
 
-	///* 0x00 */ NewGrfActionProcessor::VehicleChangeInfo,
 	static final SpecialSpriteHandler handlers[] = {
+			/* 0x00 */ NewGrfActionProcessor::VehicleChangeInfo,
 			/* 0x01 */ NewGrfActionProcessor::NewSpriteSet,
 			/* 0x02 */ NewGrfActionProcessor::NewSpriteGroup,
 			/* 0x03 */ NewGrfActionProcessor::NewVehicle_SpriteGroupMapping,
