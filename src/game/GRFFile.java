@@ -129,6 +129,10 @@ public class GRFFile
 			"This file is for %s version of TTD.",
 			"Designed to be used with %s.",
 			"Invalid parameter %s.",
+
+			"TODO err msg 4 - %s.",
+			"TODO err msg 5 - %s.",
+			"TODO err msg 6 - %s.",
 	};
 
 	static void InitializeGRFSpecial()

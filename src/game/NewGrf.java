@@ -24,13 +24,13 @@ public class NewGrf {
 	private int spriteOffset;
 	private long dataOffset;
 	private int dataCompressionFormat;
-	
+
 	private Map<Integer,MultiSprite> map = new HashMap<>();
 
 
 	/** Signature of a container version 2 GRF. */
 	private static final int _grf_cont_v2_sig[] = { 0 , 0, 'G', 'R', 'F', 0x82, 0x0D, 0x0A, 0x1A, 0x0A};
-	
+
 	public NewGrf(File name) throws IOException, InvalidFileFormat {
 		f = new RandomAccessFile(name, "r");
 		if(!checkFormat())
@@ -51,8 +51,8 @@ public class NewGrf {
 	private int readByte() throws IOException {
 		return f.read();
 	}
-	
-	
+
+
 	private boolean checkFormat() throws IOException {
 		for(int c : _grf_cont_v2_sig )
 		{
@@ -87,41 +87,45 @@ public class NewGrf {
 			Global.DEBUG_grf( 7, "NewGrf Sprite id %d", id);
 			int len = readInt();
 			int type = readByte();
-			
+
 			//byte [] spriteData = new byte[len-1];
 			//f.read(spriteData);
 			byte [] spriteData = new byte[len];
 			f.read(spriteData, 1, len-1);
 			spriteData[0] = (byte) type;
-			
+
 			parseSprite( id, type, spriteData );
 		}
 	}
 
 	private void parseSprite(int id, int type, byte[] spriteData) throws InvalidSpriteFormat {
 		MultiSprite ms = map.computeIfAbsent(id, MultiSprite::new );
-		
+
 		ms.load(type, spriteData);
 	}
 
 	private void loadData() throws IOException
 	{
-		f.seek(dataOffset);
+		for(int stage = 0; stage < 2; stage++) 
+		{
+			f.seek(dataOffset);
 
-		int size;
-		for(int index = 0; (size = readInt()) != 0; index++) {
-			int type = readByte();
-			Global.DEBUG_grf( 7, "NewGrf data index %d size %d type %x", index, size, type);
-			
-			byte [] data = new byte[size];
-			f.read(data);
-			
-			parseData( index, type, data );
-		}	
+			int size;
+			for(int index = 0; (size = readInt()) != 0; index++) {
+				int type = readByte();
+				Global.DEBUG_grf( 7, "NewGrf data index %d size %d type %x", index, size, type);
+
+				byte [] data = new byte[size];
+				f.read(data);
+
+				parseData( index, type, data, stage );
+			}
+		}
 	}
-	
-	
-	private void parseData(int index, int type, byte[] data) {
+
+
+	private void parseData(int index, int type, byte[] data, int stage) 
+	{
 		switch(type)
 		{
 		case 0xFD: // reference
@@ -134,22 +138,34 @@ public class NewGrf {
 		case 0xFF: // ?
 			Global.DEBUG_grf( 0, "NewGrf blob index %d size %d", index, data.length);
 			BitOps.hexDump(data);
-			// TODO and now what?
+
+			// TODO and now what? is it correct? No - must implement stages
+			NewGrfActionProcessor proc = new NewGrfActionProcessor(index); // index == sprite offset?				
+
+			DataLoader bufp = new DataLoader(data, index); // index == sprite offset?
+			byte action = bufp.r(0);
+			if(action < 0)
+			{
+				Global.DEBUG_grf( 0, "NewGrf unknown action %d blob index %d size %d", type, index, data.length);
+				break;
+			}
+			proc.processAction(action,bufp,stage);
+
 			break;
 
 		default: // ?
 			Global.DEBUG_grf( 0, "NewGrf unknown type %d blob index %d size %d", type, index, data.length);
 			break;
-			
+
 		}
-		
+
 	}
 
 	public void load() throws IOException, InvalidSpriteFormat {
 		loadSprites();
 		loadData();		
 	}	
-	
+
 }
 
 
