@@ -347,17 +347,11 @@ public class GRFFile
 	 * better make this more robust in the future. */
 	void DecodeSpecialSprite(NewGrfActionProcessor proc, final String  filename, int num, int stage)
 	{
-		//byte[] buf = new byte[num]; // malloc(num);
-		byte action;
-
-
 		byte [] buf = FileIO.FioReadBlock(num);
 		if (buf == null) Global.fail("DecodeSpecialSprite: Could not allocate memory or read data");
 
 		DataLoader bufp = new DataLoader(buf, sprite_offset);
-
-		action = bufp.r(0);
-
+		byte action = bufp.r(0);
 		proc.processAction(action,bufp,stage);
 	}
 
