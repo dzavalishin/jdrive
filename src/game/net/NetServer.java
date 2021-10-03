@@ -17,7 +17,8 @@ import game.Station;
 import game.Str;
 import game.TileIndex;
 import game.Vehicle;
-import game.console.Console;
+import game.console.ConsoleFactory;
+import game.console.DefaultConsole;
 import game.enums.SaveOrLoadResult;
 import game.enums.SwitchModes;
 import game.ids.PlayerID;
@@ -378,7 +379,7 @@ public interface NetServer extends NetTools, NetDefs
 		if (cs.status == ClientStatus.MAP) {
 			int i;
 			//int res;
-			int psize = 0;
+			//int psize = 0;
 
 			for (i = 0; i < Net.server_sent_packets; i++) {
 				Packet p = new Packet(PacketType.SERVER_MAP);
@@ -402,7 +403,7 @@ public interface NetServer extends NetTools, NetDefs
 
 				if( res >= 0 )
 				{
-					psize += res;
+					//psize += res;
 					Net.NetworkSend_Packet(p, cs);
 				}
 				else //if (feof(file_pointer))  
@@ -868,12 +869,12 @@ public interface NetServer extends NetTools, NetDefs
 		int flags = Cmd.GetCommandFlags(cp.cmd);
 
 		if ( 0 != (flags & Cmd.CMD_SERVER) && ci.client_index != NETWORK_SERVER_INDEX) {
-			Console.IConsolePrintF(Console._icolour_err, "WARNING: server only command from player %d (IP: %s), kicking...", ci.client_playas, ci.GetPlayerIP());
+			DefaultConsole.IConsolePrintF(DefaultConsole._icolour_err, "WARNING: server only command from player %d (IP: %s), kicking...", ci.client_playas, ci.GetPlayerIP());
 			return false;
 		}
 
 		if(0 != (flags & Cmd.CMD_OFFLINE)) {
-			Console.IConsolePrintF(Console._icolour_err, "WARNING: offline only command from player %d (IP: %s), kicking...", ci.client_playas, ci.GetPlayerIP());
+			DefaultConsole.IConsolePrintF(DefaultConsole._icolour_err, "WARNING: offline only command from player %d (IP: %s), kicking...", ci.client_playas, ci.GetPlayerIP());
 			return false;
 		}
 		return true;
@@ -913,7 +914,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		/* Check if cp.cmd is valid */
 		if (!Cmd.IsValidCommand(cp.cmd)) {
-			Console.IConsolePrintF(Console._icolour_err, "WARNING: invalid command from player %d (IP: %s).", ci.client_playas, ci.GetPlayerIP());
+			DefaultConsole.IConsolePrintF(DefaultConsole._icolour_err, "WARNING: invalid command from player %d (IP: %s).", ci.client_playas, ci.GetPlayerIP());
 			NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NetworkErrorCode.NOT_EXPECTED);
 			return;
 		}
@@ -928,7 +929,7 @@ public interface NetServer extends NetTools, NetDefs
 		 * something pretty naughty (or a bug), and will be kicked
 		 */
 		if (!(cp.cmd == Cmd.CMD_PLAYER_CTRL && cp.p1 == 0) && ci.client_playas - 1 != cp.player.id) {
-			Console.IConsolePrintF(Console._icolour_err, "WARNING: player %d (IP: %s) tried to execute a command as player %d, kicking...",
+			DefaultConsole.IConsolePrintF(DefaultConsole._icolour_err, "WARNING: player %d (IP: %s) tried to execute a command as player %d, kicking...",
 					ci.client_playas - 1, ci.GetPlayerIP(), cp.player);
 			NetworkPacketSend_PACKET_SERVER_ERROR_command(cs, NetworkErrorCode.PLAYER_MISMATCH);
 			return;
@@ -1238,9 +1239,10 @@ public interface NetServer extends NetTools, NetDefs
 
 		Global.DEBUG_net( 0, "[RCon] Client-id %d executed: %s", cs.index, command);
 
-		Console._redirect_console_to_client = cs.index;
-		Console.IConsoleCmdExec(command);
-		Console._redirect_console_to_client = 0;
+		DefaultConsole._redirect_console_to_client = cs.index;
+		//DefaultConsole.IConsoleCmdExec(command);
+		ConsoleFactory.INSTANCE.getConsole().IConsoleCmdExec(command);
+		DefaultConsole._redirect_console_to_client = 0;
 		return;
 	}
 
@@ -1533,13 +1535,13 @@ public interface NetServer extends NetTools, NetDefs
 				if (Net._network_player_info[pindex].months_empty > Net._network_autoclean_unprotected && Net._network_player_info[pindex].password.isBlank()) {
 					/* Shut the company down */
 					Cmd.DoCommandP(null, 2, pindex, null, Cmd.CMD_PLAYER_CTRL);
-					Console.IConsolePrintF(Console._icolour_def, "Auto-cleaned company #%d", pindex+1);
+					DefaultConsole.IConsolePrintF(DefaultConsole._icolour_def, "Auto-cleaned company #%d", pindex+1);
 				}
 				/* Is the compnay empty for autoclean_protected-months, and there is a protection? */
 				if (Net._network_player_info[pindex].months_empty > Net._network_autoclean_protected && !Net._network_player_info[pindex].password.isBlank()) {
 					/* Unprotect the company */
 					Net._network_player_info[pindex].password = "";
-					Console.IConsolePrintF(Console._icolour_def, "Auto-removed protection from company #%d", pindex+1);
+					DefaultConsole.IConsolePrintF(DefaultConsole._icolour_def, "Auto-removed protection from company #%d", pindex+1);
 					Net._network_player_info[pindex].months_empty = 0;
 				}
 			} else {
@@ -1655,14 +1657,14 @@ public interface NetServer extends NetTools, NetDefs
 					if (lag > 3) {
 						// Client did still not report in after 4 game-day, drop him
 						//  (that is, the 3 of above, + 1 before any lag is counted)
-						Console.IConsolePrintF(Console._icolour_err,"Client #%d is dropped because the client did not respond for more than 4 game-days", cs.index);
+						DefaultConsole.IConsolePrintF(DefaultConsole._icolour_err,"Client #%d is dropped because the client did not respond for more than 4 game-days", cs.index);
 						Net.NetworkCloseClient(cs);
 						continue;
 					}
 
 					// Report once per time we detect the lag
 					if (cs.lag_test == 0) {
-						Console.IConsolePrintF(Console._icolour_warn,"[%d] Client #%d is slow, try increasing *net_frame_freq to a higher value!", Global._frame_counter, cs.index);
+						DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn,"[%d] Client #%d is slow, try increasing *net_frame_freq to a higher value!", Global._frame_counter, cs.index);
 						cs.lag_test = 1;
 					}
 				} else {
@@ -1671,7 +1673,7 @@ public interface NetServer extends NetTools, NetDefs
 			} else if (cs.status == ClientStatus.PRE_ACTIVE) {
 				int lag = Net.NetworkCalculateLag(cs);
 				if (lag > Net._network_max_join_time) {
-					Console.IConsolePrintF(Console._icolour_err,"Client #%d is dropped because it took longer than %d ticks for him to join", cs.index, Net._network_max_join_time);
+					DefaultConsole.IConsolePrintF(DefaultConsole._icolour_err,"Client #%d is dropped because it took longer than %d ticks for him to join", cs.index, Net._network_max_join_time);
 					Net.NetworkCloseClient(cs);
 				}
 			}

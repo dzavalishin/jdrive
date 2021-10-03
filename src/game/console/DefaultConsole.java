@@ -8,6 +8,8 @@ import game.console.commands.Command;
 import game.console.commands.CommandRegistry;
 import game.console.variables.Variable;
 import game.console.variables.VariableRegistry;
+import game.net.Net;
+import game.net.NetServer;
 import game.struct.Textbuf;
 import game.util.BitOps;
 import game.util.Strings;
@@ -22,15 +24,18 @@ import static game.console.ConsoleColor.WHITE;
 
 public class DefaultConsole implements Console//extends ConsoleCmds
 {
+	// TODO refactor me - modified from network code for remote console cmd execution
+	public static int _redirect_console_to_client = 0;
+	
 	// maximum length of a typed in command
 	public static final int ICON_CMDLN_SIZE = 255;
 	// maximum length of a totally expanded command
 	public static final int  ICON_MAX_STREAMSIZE = 1024;
 
 	// ** console colors/modes ** //
-	static byte _icolour_def;
-	static byte _icolour_err;
-	static byte _icolour_warn;
+	public static byte _icolour_def;
+	public static byte _icolour_err;
+	public static byte _icolour_warn;
 	static byte _icolour_dbg;
 	static byte _icolour_cmd;
 	static IConsoleModes _iconsole_mode = IConsoleModes.ICONSOLE_CLOSED;
@@ -105,12 +110,7 @@ public class DefaultConsole implements Console//extends ConsoleCmds
 		_iconsole_mode = IConsoleModes.ICONSOLE_CLOSED;
 		_iconsole_win = null;
 
-		/*
-		#ifdef ENABLE_NETWORK // * Initialize network only variables 
 		_redirect_console_to_client = 0;
-		#endif
-		 */
-
 
 		_iconsole_cmdline.maxlength = ICON_CMDLN_SIZE - 1;
 
@@ -126,6 +126,11 @@ public class DefaultConsole implements Console//extends ConsoleCmds
 	@Override
 	public void println(String str, ConsoleColor color) {
 		IConsolePrint(color.getColorCode(), str);
+	}
+
+	@Override
+	public void println(String str, int color) {
+		IConsolePrint(color, str);
 	}
 
 	@Override
@@ -307,14 +312,21 @@ public class DefaultConsole implements Console//extends ConsoleCmds
 	 */
 	static void IConsolePrint(int color_code, final String  string)
 	{
-		/*#ifdef ENABLE_NETWORK
+		///*#ifdef ENABLE_NETWORK
 		if (_redirect_console_to_client != 0) {
-			/* Redirect the string to the client * /
-			SEND_COMMAND(PACKET_SERVER_RCON)(NetworkFindClientStateFromIndex(_redirect_console_to_client), color_code, string);
+			/* Redirect the string to the client */
+			//SEND_COMMAND(PACKET_SERVER_RCON)(Net.NetworkFindClientStateFromIndex(_redirect_console_to_client), color_code, string);
+			try {
+				NetServer.NetworkPacketSend_PACKET_SERVER_RCON_command(Net.NetworkFindClientStateFromIndex(_redirect_console_to_client), color_code, string);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				Global.error(e);
+			}
 			return;
 		}
-		#endif
-		 */
+		//#endif
+
 
 		if (Global._network_dedicated) {
 			Global.error("%s\n", string);
@@ -353,15 +365,9 @@ public class DefaultConsole implements Console//extends ConsoleCmds
 	 * by any other means. Uses printf() style format, for more information look
 	 * at @IConsolePrint()
 	 */
-	static void IConsolePrintF(int color_code, final String s, Object ... args)
+	public static void IConsolePrintF(int color_code, final String s, Object ... args)
 	{
-		//va_list va;
 		String buf = String.format(s, args);
-
-		//va_start(va, s);
-		//vsnprintf(buf, sizeof(buf), s, va);
-		//va_end(va);
-
 		IConsolePrint(color_code, buf);
 	}
 
@@ -593,7 +599,8 @@ public class DefaultConsole implements Console//extends ConsoleCmds
 	 * individual tokens (seperated by spaces), then execute it if possible
 	 * @param cmdstr string to be parsed and executed
 	 */
-	void IConsoleCmdExec(final String cmdstr)
+	@Override
+	public void IConsoleCmdExec(final String cmdstr)
 	{
 		UserInput input = new SingleLineUserInput(cmdstr);
 

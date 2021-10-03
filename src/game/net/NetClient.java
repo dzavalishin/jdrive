@@ -1,9 +1,7 @@
 package game.net;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
@@ -18,7 +16,7 @@ import game.Str;
 import game.TileIndex;
 import game.Version;
 import game.ai.Ai;
-import game.console.Console;
+import game.console.ConsoleFactory;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.ids.PlayerID;
@@ -842,7 +840,8 @@ public interface NetClient extends NetTools, NetDefs
 		int color_code = NetworkRecv_int(MY_CLIENT(), p);
 		String rcon_out = NetworkRecv_string(MY_CLIENT(), p);
 
-		Console.IConsolePrint(color_code, rcon_out);
+		//Console.IConsolePrint(color_code, rcon_out);
+		ConsoleFactory.INSTANCE.getConsole().println(rcon_out, color_code);
 
 		return NetworkRecvStatus.OKAY;
 	}

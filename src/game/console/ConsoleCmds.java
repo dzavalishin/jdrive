@@ -1,6 +1,10 @@
 package game.console;
 
+import java.io.IOException;
+
 import game.Global;
+import game.net.Net;
+import game.net.NetClient;
 
 public class ConsoleCmds extends DefaultConsole
 {

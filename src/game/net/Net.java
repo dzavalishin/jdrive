@@ -33,7 +33,7 @@ import game.Str;
 import game.TextEffect;
 import game.TileIndex;
 import game.Version;
-import game.console.Console;
+import game.console.ConsoleFactory;
 import game.enums.Owner;
 import game.enums.SwitchModes;
 import game.ids.PlayerID;
@@ -268,7 +268,8 @@ public class Net implements NetDefs, NetClient
 			break;
 		}
 
-		Console.IConsolePrintF(color, "%s", message);
+		//Console.IConsolePrintF(color, "%s", );
+		ConsoleFactory.INSTANCE.getConsole().println(message, color);
 		TextEffect.AddTextMessage(color, duration, "%s", message);
 	}
 
@@ -978,7 +979,7 @@ public class Net implements NetDefs, NetClient
 
 		// We are connected
 		if (Global._networking) {
-			Console.IConsoleCmdExec("exec scripts/on_client.scr 0");
+			ConsoleFactory.INSTANCE.getConsole().IConsoleCmdExec("exec scripts/on_client.scr 0");
 			try {
 				NetClient.NetworkClient_Connected();
 			} catch (IOException e) {
@@ -1044,8 +1045,9 @@ public class Net implements NetDefs, NetClient
 		if (!Global._network_available) return false;
 
 		/* Call the pre-scripts */
-		Console.IConsoleCmdExec("exec scripts/pre_server.scr 0");
-		if (Global._network_dedicated) Console.IConsoleCmdExec("exec scripts/pre_dedicated.scr 0");
+		
+		if (Global._network_dedicated)
+			ConsoleFactory.INSTANCE.getConsole().IConsoleCmdExec("exec scripts/pre_server.scr 0");
 
 		NetworkInitialize();
 		//if (!NetworkListen())			return false;
@@ -1083,9 +1085,10 @@ public class Net implements NetDefs, NetClient
 		NetworkInitGameInfo();
 
 		// execute server initialization script
-		Console.IConsoleCmdExec("exec scripts/on_server.scr 0");
+		ConsoleFactory.INSTANCE.getConsole().IConsoleCmdExec("exec scripts/on_server.scr 0");
 		// if the server is dedicated ... add some other script
-		if (Global._network_dedicated) Console.IConsoleCmdExec("exec scripts/on_dedicated.scr 0");
+		if (Global._network_dedicated) 
+			ConsoleFactory.INSTANCE.getConsole().IConsoleCmdExec("exec scripts/on_dedicated.scr 0");
 
 		/* Try to register us to the master server */
 		_network_last_advertise_date = 0;
