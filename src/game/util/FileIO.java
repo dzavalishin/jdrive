@@ -17,57 +17,47 @@ import game.enums.FiosType;
 import game.enums.GameModes;
 import game.struct.FiosItem;
 
-/*************************************************/
-/* FILE IO ROUTINES ******************************/
-/*************************************************/
+/*************************************************
+ * 
+ * @author dz
+ *
+ * File IO code, a bit outdated
+ *  
+**/
 
-public class FileIO {
+public class FileIO 
+{
 
-	//private static final int FIO_BUFFER_SIZE = 512;
-
-	public static final int SEEK_SET = 0; // TODO check
+	public static final int SEEK_SET = 0;
 	public static final int SEEK_CUR = 1;
-
-	//byte *buffer, *buffer_end;
-	//static long pos;
-	//FILE *cur_fh;
-	//FILE *handles[32];
-	//byte buffer_start[512];
-
-	//FileInputStream fis = new FileInputStream(raf.getFD());
-	//BufferedInputStream bis = new BufferedInputStream(fis);
 
 	static BufferedRandomAccessFile cur_fh;
 	static final BufferedRandomAccessFile[] handles = new BufferedRandomAccessFile[32];
 
 
-	//static FileIO _fio = this;
-
 	// Get current position in file
 	public static long FioGetPos()
 	{
-		//return _fio.pos + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
-		//return pos;// + (_fio.buffer - _fio.buffer_start) - FIO_BUFFER_SIZE;
 		return cur_fh.getFilePointer();
-
 	}
 
 	public static void FioSeekTo(long ppos, int mode)
 	{
 		if (mode == SEEK_CUR) ppos += FioGetPos();
-		//_fio.buffer = _fio.buffer_end = _fio.buffer_start + FIO_BUFFER_SIZE;
-		//fseek(_fio.cur_fh, (_fio.pos=pos), SEEK_SET);
 		try {
-			//cur_fh.seek(pos=ppos);
 			cur_fh.seek(ppos);
-		} catch (IOException e) {
-			
+		} catch (IOException e) {			
 			Global.error(e);
 			System.exit(33);
 		}
 	}
 
-	// Seek to a file and a position
+	/**
+	 * Seek to a file and a position
+	 * 
+	 * @param ppos File and position index
+	 * 
+	 */
 	public static void FioSeekToFile(long ppos)
 	{
 		//assert pos > 0;
@@ -78,21 +68,11 @@ public class FileIO {
 	}
 
 	// Use int to prevent signed conversion to int in caller
-	//public static byte FioReadByte()
 	public static int FioReadByte()
 	{
-		/*
-		if (_fio.buffer == _fio.buffer_end) {
-			_fio.pos += FIO_BUFFER_SIZE;
-			fread(_fio.buffer = _fio.buffer_start, 1, FIO_BUFFER_SIZE, _fio.cur_fh);
-		}
-		return *_fio.buffer++;
-		 */
-
 		int d = 0;
 		try {
 			d = cur_fh.read();
-			//pos++;
 		} catch (IOException e) {
 			
 			Global.error(e);
@@ -106,16 +86,6 @@ public class FileIO {
 	public static void FioSkipBytes(int n)
 	{
 		cur_fh.skip(n);
-		//pos += n;
-		/*
-		for(;;) {
-			//int m = min(_fio.buffer_end - _fio.buffer, n);
-			//_fio.buffer += m;
-			//n -= m;
-			if (n <= 0) break;
-			FioReadByte(); // TODO faster
-			n--;
-		}*/
 	}
 
 
@@ -142,9 +112,6 @@ public class FileIO {
 	public static byte[] FioReadBlock(int size)
 	{
 		FioSeekTo(FioGetPos(), SEEK_SET);
-		//pos += size;
-		//fread(ptr, 1, size, _fio.cur_fh);
-		//return cur_fh.readNBytes(size);
 
 		byte[] buf = new byte[size];
 		try {
@@ -159,8 +126,8 @@ public class FileIO {
 
 	private static void FioCloseFile(int slot)
 	{
-		if (handles[slot] != null) {
-			//fclose(_fio.handles[slot]);
+		if (handles[slot] != null) 
+		{
 			try {
 				handles[slot].close();
 			} catch (IOException e) {
@@ -194,41 +161,6 @@ public class FileIO {
 		return f != null;
 	}
 
-	/*boolean FiosCheckFileExists(String filename)
-	{
-		FILE *f;
-		char buf[MAX_PATH];
-
-		sprintf(buf, "%s%s", _path.data_dir, filename);
-
-		f = fopen(buf, "rb");
-		#if !defined(WIN32)
-		if (f == NULL) {
-			String s;
-			// Make lower case and try again
-			for(s=buf + strlen(_path.data_dir) - 1; *s != 0; s++)
-	 *s = tolower(*s);
-			f = fopen(buf, "rb");
-
-			#if defined SECOND_DATA_DIR
-			// tries in the 2nd data directory
-			if (f == NULL) {
-				sprintf(buf, "%s%s", _path.second_data_dir, filename);
-				for(s=buf + strlen(_path.second_data_dir) - 1; *s != 0; s++)
-	 *s = tolower(*s);
-				f = fopen(buf, "rb");
-			}
-			#endif
-		}
-		#endif
-
-		if (f == NULL)
-			return false;
-		else {
-			fclose(f);
-			return true;
-		}
-	}*/
 
 	public static BufferedRandomAccessFile FioFOpenFile(String filename)
 	{
@@ -236,9 +168,6 @@ public class FileIO {
 		String buf;
 
 		buf = String.format( "%s%s", Global._path.data_dir, filename);
-
-		//FileInputStream fis = new FileInputStream(buf);
-		//f = new BufferedInputStream(fis);
 
 		try {
 			f = new BufferedRandomAccessFile(buf,"r", 10240 );
@@ -567,15 +496,6 @@ public class FileIO {
 
 		File f = new File(path[0]);
 		free = f.getFreeSpace();
-		
-		/*{
-			struct statvfs s;
-
-			if (statvfs(*path, &s) == 0) {
-				free = (uint64)s.f_frsize * s.f_bavail >> 20;
-			} else
-				return STR_4006_UNABLE_TO_READ_DRIVE;
-		}*/
 		
 		if( free == 0 ) return Str.STR_4006_UNABLE_TO_READ_DRIVE;
 		
