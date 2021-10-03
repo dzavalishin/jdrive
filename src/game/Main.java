@@ -266,9 +266,8 @@ public class Main {
 		GfxInit.GfxLoadSprites();
 		Gfx.LoadStringWidthTable();
 
-		
-		NewGrf test = new NewGrf("xussr.grf");
-		test.load();
+		//NewGrf test = new NewGrf("xussr.grf");
+		//test.load();
 		
 		// TODO _savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 

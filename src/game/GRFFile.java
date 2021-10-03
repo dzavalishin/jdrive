@@ -420,7 +420,7 @@ public class GRFFile
 			return;
 		}
 
-		NewGrfActionProcessor proc = new NewGrfActionProcessor(_cur_grffile.sprite_offset);				
+		NewGrfActionProcessor proc = new NewGrfActionProcessorOld(_cur_grffile.sprite_offset);				
 
 		_skip_sprites = 0; // XXX
 

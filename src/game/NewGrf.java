@@ -14,6 +14,8 @@ import game.util.BitOps;
 
 /**
  * New .GRF sprite loader
+ *
+ * TODO File parsing is ok, but processing of actions with NewGrfActionProcessor crashes on xussr.grf
  * 
  * @author dz
  *
@@ -140,7 +142,7 @@ public class NewGrf {
 			BitOps.hexDump(data);
 
 			// TODO and now what? is it correct? No - must implement stages
-			NewGrfActionProcessor proc = new NewGrfActionProcessor(index); // index == sprite offset?				
+			NewGrfActionProcessor proc = new NewGrfActionProcessorNew(index); // index == sprite offset?				
 
 			DataLoader bufp = new DataLoader(data, index); // index == sprite offset?
 			byte action = bufp.r(0);

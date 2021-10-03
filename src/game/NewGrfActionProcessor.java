@@ -10,7 +10,7 @@ import game.struct.EngineInfo;
 import game.util.BitOps;
 import game.xui.TrainGui;
 
-public class NewGrfActionProcessor 
+public abstract class NewGrfActionProcessor 
 {
 	final int sprite_offset;
 
@@ -1115,6 +1115,10 @@ public class NewGrfActionProcessor
 				GRFFile.grfmsg(GRFFile.severity.GMS_ERROR, "VehicleChangeInfo: Last engine ID %d out of bounds (max %d), skipping.", engine + numinfo, _vehcounts[feature]);
 				return;
 			}
+			if (engine < 0 ) {
+				GRFFile.grfmsg(GRFFile.severity.GMS_ERROR, "VehicleChangeInfo: First engine ID %d < 0, skipping.", engine);
+				return;
+			}
 			//ei = Global._engine_info[engine + _vehshifts[feature]];
 			ei = Global._engine_info;
 			e = engine + _vehshifts[feature];
@@ -1236,7 +1240,8 @@ public class NewGrfActionProcessor
 				);
 	
 		for (i = 0; i < num_sets * num_ents; i++) {
-			SpriteCache.LoadNextSprite(GRFFile._cur_spriteid++, GRFFile._file_index);
+			//SpriteCache.LoadNextSprite(GRFFile._cur_spriteid++, GRFFile._file_index);
+			loadSprite(GRFFile._cur_spriteid++, bufp);
 		}
 	}
 
@@ -1515,16 +1520,16 @@ public class NewGrfActionProcessor
 		int c, i;
 	
 		bufp.check_length( 7, "VehicleMapSpriteGroup");
-		bufp.grf_load_byte();
-		feature = bufp.grf_load_ubyte(); // buf[1];
-		int tmp2 = bufp.grf_load_ubyte(); // buf[2] 
+		//bufp.grf_load_byte();
+		feature = bufp.ur(1); // bufp.grf_load_ubyte(); // buf[1];
+		int tmp2 = bufp.ur(2); // bufp.grf_load_ubyte(); // buf[2] 
 		idcount = tmp2 & 0x7F; // buf[2] & 0x7F;
 		wagover = (tmp2 & 0x80) == 0x80;
 		bufp.check_length( 3 + idcount, "VehicleMapSpriteGroup");
 		cidcount = bufp.r(3 + idcount);
 		bufp.check_length( 4 + idcount + cidcount * 3, "VehicleMapSpriteGroup");
 	
-		Global.DEBUG_grf( 6, "VehicleMapSpriteGroup: Feature %d, %d ids, %d cids, wagon override %d.",
+		Global.DEBUG_grf( 6, "VehicleMapSpriteGroup: Feature %d, %d ids, %d cids, wagon override %s.",
 				feature, idcount, cidcount, wagover);
 	
 		if (feature > GSF_STATION) {
@@ -2265,6 +2270,10 @@ public class NewGrfActionProcessor
 			/* 0x0F */ null, // TODO implement
 			/* 0x10 */ null  // TODO implement
 	};
+
+	
+	abstract protected void loadSprite(int i, DataLoader bufp);
+
 	
 	
 }
