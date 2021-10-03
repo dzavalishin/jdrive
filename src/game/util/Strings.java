@@ -287,7 +287,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	}
 
 	// This function is used to "bind" a C string to a OpenTTD dparam slot.
-	static void SetDParamStr(int n, final String str)
+	public static void SetDParamStr(int n, final String str)
 	{
 		Global.SetDParam(n, BindCString(str));
 	}

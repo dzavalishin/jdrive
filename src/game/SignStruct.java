@@ -276,7 +276,7 @@ public class SignStruct implements IPoolItem
 	 * Callback function that is called after a sign is placed
 	 *
 	 */
-	static void CcPlaceSign(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcPlaceSign(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			Gui.ShowRenameSignWindow(_new_sign_struct);

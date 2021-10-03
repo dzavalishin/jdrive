@@ -128,7 +128,7 @@ public class TrainGui
 		}
 	}
 
-	static void CcBuildWagon(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildWagon(boolean success, TileIndex tile, int p1, int p2)
 	{
 		Vehicle found;
 
@@ -161,7 +161,7 @@ public class TrainGui
 		}
 	}
 
-	static void CcBuildLoco(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildLoco(boolean success, TileIndex tile, int p1, int p2)
 	{
 		final Vehicle  v;
 
@@ -175,7 +175,7 @@ public class TrainGui
 		ShowTrainViewWindow(v);
 	}
 
-	static void CcCloneTrain(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcCloneTrain(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) ShowTrainViewWindow(Vehicle.GetVehicle(Global._new_train_id));
 	}
@@ -288,7 +288,7 @@ public class TrainGui
 				if (sel_eng != Engine.INVALID_ENGINE) {
 					w.as_buildtrain_d().rename_engine = sel_eng;
 					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng),
-						new StringID( Str.STR_886A_RENAME_TRAIN_VEHICLE_TYPE ), 31, 160, w.window_class, w.window_number);
+						new StringID( Str.STR_886A_RENAME_TRAIN_VEHICLE_TYPE ), 31, 160, w.getWindow_class(), w.window_number);
 				}
 			} break;
 			}
@@ -1269,7 +1269,7 @@ public class TrainGui
 			case 2: /* name train */
 				v = Vehicle.GetVehicle(w.window_number);
 				Global.SetDParam(0, v.getUnitnumber().id);
-				MiscGui.ShowQueryString( new StringID( v.getString_id() ), new StringID( Str.STR_8865_NAME_TRAIN ), 31, 150, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID( v.getString_id() ), new StringID( Str.STR_8865_NAME_TRAIN ), 31, 150, w.getWindow_class(), w.window_number);
 				break;
 			/*	
 			case 6:	// inc serv interval 

@@ -1,5 +1,6 @@
 package game;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -15,6 +16,9 @@ import game.enums.Owner;
 import game.ids.EngineID;
 import game.ids.PlayerID;
 import game.ids.StringID;
+import game.net.Net;
+import game.net.NetServer;
+import game.net.NetworkClientInfo;
 import game.struct.HighScore;
 import game.struct.PlayerEconomyEntry;
 import game.tables.Snd;
@@ -1009,11 +1013,10 @@ public class Player implements Serializable
 
 			p = DoStartupNewPlayer(false);
 
-			/*  #ifdef ENABLE_NETWORK
-			if (_networking && !_network_server && _local_player == OWNER_SPECTATOR)
+
+			if (Global._networking && !Global._network_server && Global.gs._local_player.isSpectator())
 				// In case we are a client joining a server... 
-				DeleteWindowById(WC_NETWORK_STATUS_WINDOW, 0);
-			#endif /* ENABLE_NETWORK */
+				Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);
 
 			if (p != null) {
 				if (Global.gs._local_player.isSpectator() && (!Ai._ai.network_client || Ai._ai.network_playas == Owner.OWNER_SPECTATOR)) {
@@ -1035,17 +1038,22 @@ public class Player implements Serializable
 				} else if (p.index.isLocalPlayer()) {
 					Cmd.DoCommandP(TileIndex.get(0), ((Global._patches.autorenew ? 1:0) << 15 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 				}
-				/* #ifdef ENABLE_NETWORK
-				if (_network_server) {
+
+				if (Global._network_server) {
 					// * XXX - UGLY! p2 (pid) is mis-used to fetch the client-id, done at server-side
 					//  * in network_server.c:838, function DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND) 
-					NetworkClientInfo *ci = &_network_client_info[pid];
-					ci.client_playas = p.index + 1;
-					NetworkUpdateClientInfo(ci.client_index);
+					//NetworkClientInfo ci = _network_client_info[pid];
+					NetworkClientInfo ci = Net.getClient(pid).getCi();
+					ci.client_playas = p.index.id + 1;
+					try {
+						NetServer.NetworkUpdateClientInfo(ci.client_index);
+					} catch (IOException e) {
+						Global.error(e);
+					}
 
-					if (ci.client_playas != 0 && ci.client_playas <= MAX_PLAYERS) {
-						PlayerID player_backup = _local_player;
-						_network_player_info[p.index].months_empty = 0;
+					if (ci.client_playas != 0 && ci.client_playas <= Global.MAX_PLAYERS) {
+						PlayerID player_backup = Global.gs._local_player;
+						Net._network_player_info[p.index.id].months_empty = 0;
 
 						// XXX - When a client joins, we automatically set its name to the
 						// * player's name (for some reason). As it stands now only the server
@@ -1058,22 +1066,25 @@ public class Player implements Serializable
 						// * TODO: Perhaps this could be improved by when the client is ready
 						// * with joining to let it send itself the command, and not the server?
 						// * For example in network_client.c:534? 
-						_cmd_text = ci.client_name;
-						_local_player = ci.client_playas - 1;
-						NetworkSend_Command(0, 0, 0, Cmd.CMD_CHANGE_PRESIDENT_NAME, null);
-						_local_player = player_backup;
+						Global._cmd_text = ci.client_name;
+						Global.gs._local_player = PlayerID.get( ci.client_playas - 1 );
+						Net.NetworkSend_Command(null, 0, 0, Cmd.CMD_CHANGE_PRESIDENT_NAME, null);
+						Global.gs._local_player = player_backup;
 					}
 				}
-			} else if (_network_server) {
+			} else if (Global._network_server) {
 				// * XXX - UGLY! p2 (pid) is mis-used to fetch the client-id, done at server-side
 				// * in network_server.c:838, function DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND) 
-				NetworkClientInfo *ci = &_network_client_info[pid];
-				ci.client_playas = OWNER_SPECTATOR;
-				NetworkUpdateClientInfo(ci.client_index);
+				//NetworkClientInfo ci = Net._network_client_info[pid];
+				//Net._clients.get(pid).ci
+				NetworkClientInfo ci = Net.getClient(pid).getCi();
+				ci.client_playas = Owner.OWNER_SPECTATOR;
+				try {
+					NetServer.NetworkUpdateClientInfo(ci.client_index);
+				} catch (IOException e) {
+					Global.error(e);
+				}
 			}
-			#else */
-			}
-			//#endif /* ENABLE_NETWORK */
 		} break;
 
 		case 1: /* Make a new AI Player */
@@ -1380,7 +1391,6 @@ public class Player implements Serializable
 			p.accept(i.next());
 	}
 
-
 	/* Validate functions for rail building */
 	static boolean ValParamRailtype(int rail) 
 	{ 
@@ -1631,6 +1641,18 @@ final Chunk Handler _player_chunk_handlers[] = {
 	public boolean isRenew_keep_length() {		return renew_keep_length;	}
 
 	public void setMoney(long m) { money64 = m; }
+
+	public boolean isEngine_renew() {
+		return engine_renew;
+	}
+
+	public int getEngine_renew_months() {
+		return engine_renew_months;
+	}
+
+	public long getEngine_renew_money() {
+		return engine_renew_money;
+	}
 
 
 

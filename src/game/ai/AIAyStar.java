@@ -334,20 +334,23 @@ public class AIAyStar extends AyStar implements AiConst
 					(dir == 3 && ti.tileh == 9)) {
 				// Now simply check if a tunnel can be build
 				ret = Ai.AI_DoCommand(tile, (PathFinderInfo.rail_or_road?0:0x200), 0, Cmd.DC_AUTO, Cmd.CMD_BUILD_TUNNEL);
-				Landscape.FindLandscapeHeightByTile(ti, Global._build_tunnel_endtile);
-				if (!Cmd.CmdFailed(ret) && (ti.tileh == 3 || ti.tileh == 6 || ti.tileh == 9 || ti.tileh == 12)) {
-					neighbours[num_neighbours].tile = Global._build_tunnel_endtile;
-					neighbours[num_neighbours].user_data[0] = AI_PATHFINDER_FLAG_TUNNEL + (dir << 8);
-					neighbours[num_neighbours++].direction = 0;
+				if(null != Global._build_tunnel_endtile)
+				{
+					Landscape.FindLandscapeHeightByTile(ti, Global._build_tunnel_endtile);
+					if (!Cmd.CmdFailed(ret) && (ti.tileh == 3 || ti.tileh == 6 || ti.tileh == 9 || ti.tileh == 12)) {
+						neighbours[num_neighbours].tile = Global._build_tunnel_endtile;
+						neighbours[num_neighbours].user_data[0] = AI_PATHFINDER_FLAG_TUNNEL + (dir << 8);
+						neighbours[num_neighbours++].direction = 0;
+					}
 				}
 			}
 		}
 	}
 
-	
-	
-	
-	
+
+
+
+
 	//static int AyStar_AiPathFinder_EndNodeCheck(AyStar aystar, OpenListNode current)
 	// Check if the current tile is in our end-area
 	@Override
@@ -387,6 +390,6 @@ public class AIAyStar extends AyStar implements AiConst
 		PathFinderInfo.route_length = i;
 		Global.DEBUG_ai( 1, "[Ai-PathFinding] Found route of %d nodes long in %d nodes of searching", i, ClosedListHash.Hash_Size());
 	}
-	
+
 
 }

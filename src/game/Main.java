@@ -1,24 +1,24 @@
 package game;
 
-import game.SaveLoad.SaveOrLoadResult;
 import game.ai.Ai;
 import game.console.ConsoleFactory;
 import game.enums.GameModes;
 import game.enums.Owner;
+import game.enums.SaveOrLoadResult;
 import game.enums.SwitchModes;
 import game.enums.ThreadMsg;
 import game.exceptions.InvalidFileFormat;
 import game.exceptions.InvalidSpriteFormat;
 import game.ids.PlayerID;
+import game.net.Net;
+import game.net.NetUDP;
 import game.struct.SmallFiosItem;
 import game.util.*;
 import game.xui.*;
 import gnu.getopt.Getopt;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 
 public class Main {
 
@@ -253,6 +253,7 @@ public class Main {
 		Global.DEBUG_misc( 1, "Loading sound effects...");
 		Sound.MxInitialize(11025);
 		Sound.SoundInitialize("sample.cat");
+		//Sound.SoundInitialize("opensfx.cat"); 16 bit samples support is not finished
 		//Sound.StartSound(2, 0, 50);
 		ShortSounds.preload();
 		ShortSounds.playFarmSound();
@@ -505,7 +506,7 @@ public class Main {
 		 */
 	}
 
-	static boolean SafeSaveOrLoad(final String filename, int mode, GameModes newgm)
+	public static boolean SafeSaveOrLoad(final String filename, int mode, GameModes newgm)
 	{
 		GameModes ogm = Global._game_mode;
 		SaveOrLoadResult r;
@@ -530,28 +531,28 @@ public class Main {
 
 	public static void SwitchMode(SwitchModes new_mode)
 	{
-		/*
+		
 		// If we are saving something, the network stays in his current state
-		if (new_mode != SM_SAVE) {
+		if (new_mode != SwitchModes.SM_SAVE) {
 			// If the network is active, make it not-active
-			if (_networking) {
-				if (_network_server && (new_mode == SM_LOAD || new_mode == SM_NEWGAME)) {
-					NetworkReboot();
-					NetworkUDPClose();
+			if (Global._networking) {
+				if (Global._network_server && (new_mode == SwitchModes.SM_LOAD || new_mode == SwitchModes.SM_NEWGAME)) {
+					Net.NetworkReboot();
+					NetUDP.NetworkUDPClose();
 				} else {
-					NetworkDisconnect();
-					NetworkUDPClose();
+					Net.NetworkDisconnect();
+					NetUDP.NetworkUDPClose();
 				}
 			}
 
 			// If we are a server, we restart the server
-			if (_is_network_server) {
+			if (Net._is_network_server) {
 				// But not if we are going to the menu
-				if (new_mode != SM_MENU) {
-					NetworkServerStart();
+				if (new_mode != SwitchModes.SM_MENU) {
+					Net.NetworkServerStart();
 				} else {
 					// This client no longer wants to be a network-server
-					_is_network_server = false;
+					Net._is_network_server = false;
 				}
 			}
 		}
@@ -571,10 +572,8 @@ public class Main {
 			break;
 
 		case SM_START_SCENARIO: /* New Game -. Choose one of the preset scenarios */
-			/*#ifdef ENABLE_NETWORK
-				if (_network_server)
-					snprintf(_network_game_info.map_name, NETWORK_NAME_LENGTH, "%s (Loaded scenario)", _file_to_saveload.title);
-			/* ENABLE_NETWORK */
+				if (Global._network_server)
+					Net._network_game_info.map_name = String.format("%s (Loaded scenario)", _file_to_saveload.title);
 			StartScenario();
 			break;
 
@@ -655,7 +654,7 @@ public class Main {
 	// The state must not be changed from anywhere
 	// but here.
 	// That check is enforced in DoCommand.
-	static void StateGameLoop()
+	public static void StateGameLoop()
 	{
 		// dont execute the state loop during pause
 		if (Global._pause != 0) return;
@@ -827,25 +826,21 @@ public class Main {
 		Global._timer_counter += 8;
 		Hal.CursorTick();
 
-		/* #ifdef ENABLE_NETWORK
 		// Check for UDP stuff
-		NetworkUDPGameLoop();
+		NetUDP.NetworkUDPGameLoop();
 
-		if (_networking) {
+		if (Global._networking) {
 			// Multiplayer
-			NetworkGameLoop();
+			Net.NetworkGameLoop();
 		} else {
-			if (_network_reconnect > 0 && --_network_reconnect == 0) {
+			if (Net._network_reconnect > 0 && --Net._network_reconnect == 0) {
 				// This means that we want to reconnect to the last host
 				// We do this here, because it means that the network is really closed
-				NetworkClientConnectGame(_network_last_host, _network_last_port);
+				Net.NetworkClientConnectGame(Net._network_last_host, Net._network_last_port);
 			}
 			// Singleplayer
 			StateGameLoop();
 		}
-	#else */
-		StateGameLoop();
-		//#endif /* ENABLE_NETWORK */
 
 		if (0 == Global._pause && 0 != (Global._display_opt & Global.DO_FULL_ANIMATION) ) Gfx.DoPaletteAnimations();
 

@@ -114,6 +114,7 @@ public class Sound {
 		int volume_right;
 
 		int flags;
+		private int bps; // bits per sample
 
 		void setChannelVolume(int left, int right)
 		{
@@ -127,9 +128,12 @@ public class Sound {
 			active = true;
 		}
 
-		void setChannelRawSrc( byte [] mem, int size, int rate, int flags )
+		void setChannelRawSrc( FileEntry fe, int flags )
 		{
-			memory = mem;
+			int size = fe.file_size;
+			int rate = fe.rate;
+			bps = fe.bits_per_sample;
+			memory = fe.data;
 			this.flags = flags;
 			frac_pos = 0;
 			pos = 0;
@@ -151,6 +155,7 @@ public class Sound {
 			memory = null;
 		}
 
+		// TODO still does not work with 16 bit samples :(
 		void mixInt8ToInt16(int [] buffer, int samples)
 		{			
 			int bufferPos = 0;
@@ -161,9 +166,13 @@ public class Sound {
 
 			Pixel b = new Pixel( memory, pos );
 
+			boolean x2 = bps == 16;
+			if(x2) samples /= 2;
+			
 			if (frac_speed == 0x10000) {
 				// Special case when frac_speed is 0x10000
 				do {
+					if(x2) b.inc();
 					buffer[bufferPos+0] += b.r(0) * volume_left >> 8;
 					buffer[bufferPos+1] += b.r(0) * volume_right >> 8;
 					b.inc();
@@ -171,11 +180,12 @@ public class Sound {
 				} while (--samples > 0);
 			} else {
 				do {
-					buffer[bufferPos+0] += b.r(0) * volume_left >> 8;
-					buffer[bufferPos+1] += b.r(0) * volume_right >> 8;
+					buffer[bufferPos+0] += b.r(x2? 1:0) * volume_left >> 8;
+					buffer[bufferPos+1] += b.r(x2? 1:0) * volume_right >> 8;
 					bufferPos += 2;
 					frac_pos += frac_speed;
 					b.madd( frac_pos >> 16 );
+					if(x2) b.madd( frac_pos >> 16 );
 					frac_pos &= 0xffff;
 				} while (--samples > 0);
 			}
@@ -234,7 +244,13 @@ public class Sound {
 		int i;
 
 		FileIO.FioOpenFile(SOUND_SLOT, filename);
-		count = FileIO.FioReadDword() / 8;
+		count = FileIO.FioReadDword();
+		
+		boolean newFormat = BitOps.HASBIT(count, 31);
+		count &= ~0x80000000;
+		
+		count /= 8; 
+		
 		FileEntry [] fea = new FileEntry[count];
 
 		_file_count = count;
@@ -244,7 +260,7 @@ public class Sound {
 
 		for (i = 0; i != count; i++) {
 			fea[i] = new FileEntry();
-			fea[i].file_offset = FileIO.FioReadDword();
+			fea[i].file_offset = FileIO.FioReadDword() & ~0x80000000;
 			fea[i].file_size = FileIO.FioReadDword();
 		}
 
@@ -258,7 +274,7 @@ public class Sound {
 			byte[] nameBytes = FileIO.FioReadBlock(FileIO.FioReadByte()); // Read the name of the sound
 			String name = BitOps.stringFromBytes(nameBytes, 0, nameBytes.length);
 
-			if(!name.equals("Corrupt sound")) {
+			if(newFormat || !name.equals("Corrupt sound")) {
 				FileIO.FioSeekTo(12, FileIO.SEEK_CUR); // Skip past RIFF header
 
 				// Read riff tags
@@ -327,15 +343,19 @@ public class Sound {
 			FileIO.FioSeekToFile(fe.file_offset);
 			mem = FileIO.FioReadBlock(fe.file_size);
 
-			for (i = 0; i != fe.file_size; i++)
-				mem[i] += -128; // Convert unsigned sound data to signed
-
+			if(fe.bits_per_sample == 8)
+			{
+				for (i = 0; i != fe.file_size; i++)
+					mem[i] += -128; // Convert unsigned sound data to signed
+			}
+			
 			fe.data = mem;
 		}
 
-		assert(fe.bits_per_sample == 8 && fe.channels == 1 && fe.file_size != 0 && fe.rate != 0);
-
-		mc.setChannelRawSrc(fe.data, fe.file_size, fe.rate, 0);
+		assert( fe.channels == 1 && fe.file_size != 0 && fe.rate != 0);
+		assert fe.bits_per_sample == 8 || fe.bits_per_sample == 16;
+		
+		mc.setChannelRawSrc(fe, 0);
 
 		return true;
 	}

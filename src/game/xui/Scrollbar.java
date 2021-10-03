@@ -89,6 +89,10 @@ public class Scrollbar implements Serializable
 		if (num < 0) num = 0;
 		if (num < pos) pos = num;
 	}
+
+	public void setPos(int i) { pos = i; }
+
+	public void decrementPos() { pos--; }
 	
 	
 }
