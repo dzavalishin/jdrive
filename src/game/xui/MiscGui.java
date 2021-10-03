@@ -791,7 +791,8 @@ public class MiscGui {
 
 
 
-	static int HandleEditBoxKey(Window w, int wid, WindowEvent we)
+	// TODO move to Textbuf or Window
+	public static int HandleEditBoxKey(Window w, int wid, WindowEvent we)
 	{
 		we.cont = false;
 
@@ -826,13 +827,15 @@ public class MiscGui {
 	}
 
 
-	static void HandleEditBox(Window w, int wid)
+	// TODO move to Textbuf or Window
+	public static void HandleEditBox(Window w, int wid)
 	{
 		if (w.as_querystr_d().text.HandleCaret()) 
 			w.InvalidateWidget(wid);
 	}
 
-	static void DrawEditBox(Window w, int wid)
+	// TODO move to Textbuf or Window
+	public static void DrawEditBox(Window w, int wid)
 	{
 		final Widget wi = w.widget.get(wid);
 		final Textbuf tb = w.as_querystr_d().text;
@@ -954,7 +957,7 @@ public class MiscGui {
 	//static char _orig_str_buf[lengthof(_edit_str_buf)];
 	private static String _orig_str_buf = "";
 
-	static void ShowQueryString(int str, int caption, int maxlen, int maxwidth, int window_class, int window_number)
+	public static void ShowQueryString(int str, int caption, int maxlen, int maxwidth, int window_class, int window_number)
 	{
 		ShowQueryString( new StringID(str), new StringID(caption), maxlen, maxwidth, window_class, window_number );
 	}	
@@ -1060,11 +1063,12 @@ public class MiscGui {
 
 
 	// Colors for fios types
-	final static byte _fios_colors[] = {13, 9, 9, 6, 5, 6, 5};
-	private static List<FiosItem> _fios_list;
+	/*	FIOS_TYPE_FILE, FIOS_TYPE_OLDFILE etc. different colours */
+	public final static byte _fios_colors[] = {13, 9, 9, 6, 5, 6, 5};
+	public static List<FiosItem> _fios_list;
 	private static FiosItem o_dir = new FiosItem();
 
-	static void BuildFileList()
+	public static void BuildFileList()
 	{
 		
 		_fios_path_changed = true;
@@ -1366,7 +1370,7 @@ public class MiscGui {
 			_save_dialog_scen_desc,
 	};
 
-	static void ShowSaveLoadDialog(int mode)
+	public static void ShowSaveLoadDialog(int mode)
 	{
 		Window w;
 
@@ -1525,7 +1529,7 @@ public class MiscGui {
 		}
 	}
 
-	static void SetFiosType(final FiosType type)
+	public static void SetFiosType(final FiosType type)
 	{
 
 		switch (type) {

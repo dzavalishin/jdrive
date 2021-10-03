@@ -1,5 +1,6 @@
 package game.xui;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -37,6 +38,12 @@ import game.ids.StringID;
 import game.ifaces.MenuClickedProc;
 import game.ifaces.OnButtonClick;
 import game.ifaces.ToolbarButtonProc;
+import game.net.DestType;
+import game.net.Net;
+import game.net.NetClient;
+import game.net.NetGui;
+import game.net.NetworkAction;
+import game.net.NetworkPasswordType;
 import game.struct.ColorList;
 import game.struct.Point;
 import game.tables.Snd;
@@ -61,7 +68,7 @@ public class Gui
 
 
 	/*	FIOS_TYPE_FILE, FIOS_TYPE_OLDFILE etc. different colours */
-	static byte _fios_colors[];
+	//static byte _fios_colors[];
 
 
 	//enum {
@@ -103,11 +110,11 @@ public class Gui
 
 			ShowVitalWindows();
 
-			/* TODO Net
+			
 			// Bring joining GUI to front till the client is really joined 
 			if (Global._networking && !Global._network_server)
-				ShowJoinStatusWindowAfterJoin();
-			*/
+				NetGui.ShowJoinStatusWindowAfterJoin();
+			
 			
 			break;
 			
@@ -153,13 +160,10 @@ public class Gui
 	static void HandleOnEditTextCancel()
 	{
 		switch (_rename_what) {
-		/*
-	#ifdef ENABLE_NETWORK
 		case 4:
-			NetworkDisconnect();
-			ShowNetworkGameWindow();
+			Net.NetworkDisconnect();
+			NetGui.ShowNetworkGameWindow();
 			break;
-	#endif /* ENABLE_NETWORK */
 		}
 	}
 
@@ -182,36 +186,49 @@ public class Gui
 				return;
 			Cmd.DoCommandP(null, id, 0, null, Cmd.CMD_RENAME_WAYPOINT | Cmd.CMD_MSG(Str.STR_CANT_CHANGE_WAYPOINT_NAME));
 			break;
-	/* #ifdef ENABLE_NETWORK
+	
 		case 2: // Speak to.. 
-			if (!_network_server)
-				SEND_COMMAND(PACKET_CLIENT_CHAT)(NETWORK_ACTION_CHAT + (id & 0xFF), id & 0xFF, (id >> 8) & 0xFF, e.edittext.str);
+			if (!Global._network_server)
+				try {
+					NetClient.NetworkPacketSend_PACKET_CLIENT_CHAT_command(NetworkAction.uiAction(id), DestType.value( id & 0xFF ), (id >> 8) & 0xFF, e.str);
+				} catch (IOException e1) {
+					Global.error(e1);
+				}
 			else
-				NetworkServer_HandleChat(NETWORK_ACTION_CHAT + (id & 0xFF), id & 0xFF, (id >> 8) & 0xFF, e.edittext.str, NETWORK_SERVER_INDEX);
+				// TODO NetworkServer_HandleChat( NetworkAction.uiAction(id), id & 0xFF, (id >> 8) & 0xFF, e.str, NETWORK_SERVER_INDEX);
 			break;
+			/*
 		case 3: { // Give money, you can only give money in excess of loan 
-			final Player *p = GetPlayer(_current_player);
-			int32 money = min(p.money64 - p.current_loan, atoi(e.edittext.str) / _currency.rate);
-			char msg[20];
+			final Player p = Player.GetCurrentPlayer();
+			// TODO _currency
+			//long money = min(p.getMoney() - p.getCurrent_loan(), Integer.parseInt(e.str) / Currency._currency.rate);
+			long money = Long.min(p.getMoney() - p.getCurrent_loan(), Integer.parseInt(e.str) / 1);
+			String msg;
 
-			money = clamp(money, 0, 20000000); // Clamp between 20 million and 0
+			money = BitOps.clamp(money, 0, 20000000); // Clamp between 20 million and 0
 
-			// Give 'id' the money, and substract it from ourself
-			if (!Cmd.DoCommandP(0, money, id, null, Cmd.CMD_GIVE_MONEY | Cmd.CMD_MSG(Str.STR_INSUFFICIENT_FUNDS))) break;
+			// Give 'id' the money, and substract it from ourself TODO (int)money
+			if (!Cmd.DoCommandP(null, (int)money, id, null, Cmd.CMD_GIVE_MONEY | Cmd.CMD_MSG(Str.STR_INSUFFICIENT_FUNDS))) break;
 
 			// Inform the player of this action
-			snprintf(msg, sizeof(msg), "%d", money);
+			//snprintf(msg, sizeof(msg), "%d", money);
+			msg = Long.toString(money);
 
-			if (!_network_server)
-				SEND_COMMAND(PACKET_CLIENT_CHAT)(NETWORK_ACTION_GIVE_MONEY, DESTTYPE_PLAYER, id + 1, msg);
+			// TODO server must be in _clients somehow - looked up by NETWORK_SERVER_INDEX
+			if (!Global._network_server)
+				NetClient.NetworkPacketSend_PACKET_CLIENT_CHAT_command(NetworkAction.GIVE_MONEY, DestType.PLAYER, id + 1, msg);
 			else
-				NetworkServer_HandleChat(NETWORK_ACTION_GIVE_MONEY, DESTTYPE_PLAYER, id + 1, msg, NETWORK_SERVER_INDEX);
-			break;
-		}
+				Net.NetworkServer_HandleChat(NetworkAction.GIVE_MONEY, DestType.PLAYER, id + 1, msg, NETWORK_SERVER_INDEX);
+			break; 
+		}*/
 		case 4: // Game-Password and Company-Password 
-			SEND_COMMAND(PACKET_CLIENT_PASSWORD)(id, e.edittext.str);
+			try {
+				NetClient.NetworkPacketSend_PACKET_CLIENT_PASSWORD_command(NetworkPasswordType.value(id), e.str);
+			} catch (IOException e1) {
+				Global.error(e1);
+			}
 			break;
-	#endif /* ENABLE_NETWORK */
+	
 		}
 	}
 
@@ -243,7 +260,7 @@ public class Gui
 			return false;
 		}
 
-		ViewPort.SetObjectToPlace(cursor, mode, w.window_class, w.window_number);
+		ViewPort.SetObjectToPlace(cursor, mode, w.getWindow_class(), w.window_number);
 		w.click_state |= mask;
 		Global._place_proc = placeproc;
 		return true;
@@ -359,10 +376,8 @@ public class Gui
 
 	static void MenuClickCompany(int index)
 	{
-		if (Global._networking && index == 0) {
-	/*#ifdef ENABLE_NETWORK
-			ShowClientList();
-	#endif /* ENABLE_NETWORK */
+		if (Global._networking && index == 0) {	
+			NetGui.ShowClientList();
 		} else {
 			if (Global._networking) index--;
 			PlayerGui.ShowPlayerCompany(index);
@@ -439,37 +454,37 @@ public class Gui
 		AirportGui.ShowBuildAirToolbar();
 	}
 
-	/*#ifdef ENABLE_NETWORK
+	
 
-	void ShowNetworkChatQueryWindow(byte desttype, byte dest)
+	public static void ShowNetworkChatQueryWindow(int desttype, int dest)
 	{
 		_rename_id = desttype + (dest << 8);
 		_rename_what = 2;
-		ShowChatWindow(Str.STR_EMPTY, Str.STR_NETWORK_CHAT_QUERY_CAPTION, 150, 338, 1, 0);
+		NetGui.ShowChatWindow(new StringID(Str.STR_EMPTY), new StringID(Str.STR_NETWORK_CHAT_QUERY_CAPTION), 150, 338, 1, 0);
 	}
 
-	void ShowNetworkGiveMoneyWindow(byte player)
+	public static void ShowNetworkGiveMoneyWindow(int player)
 	{
 		_rename_id = player;
 		_rename_what = 3;
-		ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_GIVE_MONEY_CAPTION, 30, 180, 1, 0);
+		MiscGui.ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_GIVE_MONEY_CAPTION, 30, 180, 1, 0);
 	}
 
-	void ShowNetworkNeedGamePassword()
+	public static void ShowNetworkNeedGamePassword()
 	{
-		_rename_id = NETWORK_GAME_PASSWORD;
+		_rename_id = NetworkPasswordType.NETWORK_GAME_PASSWORD.ordinal();
 		_rename_what = 4;
-		ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_GAME_PASSWORD_CAPTION, 20, 180, WC_SELECT_GAME, 0);
+		MiscGui.ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_GAME_PASSWORD_CAPTION, 20, 180, Window.WC_SELECT_GAME, 0);
 	}
 
-	void ShowNetworkNeedCompanyPassword()
+	public static void ShowNetworkNeedCompanyPassword()
 	{
-		_rename_id = NETWORK_COMPANY_PASSWORD;
+		_rename_id = NetworkPasswordType.NETWORK_COMPANY_PASSWORD.ordinal();
 		_rename_what = 4;
-		ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_COMPANY_PASSWORD_CAPTION, 20, 180, WC_SELECT_GAME, 0);
+		MiscGui.ShowQueryString(Str.STR_EMPTY, Str.STR_NETWORK_NEED_COMPANY_PASSWORD_CAPTION, 20, 180, Window.WC_SELECT_GAME, 0);
 	}
 
-	#endif /* ENABLE_NETWORK */
+	
 
 	public static void ShowRenameSignWindow(final SignStruct ss)
 	{
@@ -1011,7 +1026,7 @@ public class Gui
 		{
 			Window wt = null;
 
-			switch (w.window_class) {
+			switch (w.getWindow_class()) {
 				case Window.WC_MAIN_WINDOW:
 					wt = Window.FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
 					break;
@@ -1595,7 +1610,7 @@ public class Gui
 		ShowEditorTerraformToolBar();
 	}
 
-	static void CcBuildTown(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildTown(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, tile);
@@ -2542,11 +2557,10 @@ public class Gui
 					Hal.MarkWholeScreenDirty();
 					break;
 
-	/*#ifdef ENABLE_NETWORK
+	
 				case Window.WKC_RETURN: case 'T' | Window.WKC_SHIFT:
-					if (_networking) ShowNetworkChatQueryWindow(DESTTYPE_BROADCAST, 0);
+					if (Global._networking) ShowNetworkChatQueryWindow(DestType.BROADCAST.ordinal(), 0);
 					break;
-	#endif */
 
 				default: return;
 			}

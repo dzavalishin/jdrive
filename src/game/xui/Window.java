@@ -850,7 +850,7 @@ public class Window extends WindowConstants implements Serializable
 	 * @param widget @see Widget pointer to the window layout and various elements
 	 * @return @see Window pointer of the newly created window
 	 */
-	static Window AllocateWindow(
+	public static Window AllocateWindow(
 			int x, int y, int width, int height,
 			//BiConsumer<Window,WindowEvent> proc, 
 			WindowProc proc, /*WindowClass*/ int cls, final Widget[] widget)
@@ -1882,7 +1882,7 @@ public class Window extends WindowConstants implements Serializable
 	 * @param wparam Specifies additional message-specific information
 	 * @param lparam Specifies additional message-specific information
 	 */
-	static void SendWindowMessage(int wnd_class, int wnd_num, int msg, int wparam, int lparam)
+	public static void SendWindowMessage(int wnd_class, int wnd_num, int msg, int wparam, int lparam)
 	{
 		Window w = FindWindowById(wnd_class, wnd_num);
 		if (w != null) SendWindowMessageW(w, msg, wparam, lparam);
@@ -2796,7 +2796,11 @@ public class Window extends WindowConstants implements Serializable
 		}
 	}
 
-	//void ShowDropDownMenu(Window w, final StringID []strings, int selected, int button, int disabled_mask, int hidden_mask)
+	public void ShowDropDownMenu(final int []strings, int selected, int button, int disabled_mask, int hidden_mask)
+	{
+		ShowDropDownMenu(this, strings, selected, button, disabled_mask, hidden_mask);
+	}
+	
 	public static void ShowDropDownMenu(Window w, final int []strings, int selected, int button, int disabled_mask, int hidden_mask)
 	{
 		int num;
@@ -2909,6 +2913,8 @@ public class Window extends WindowConstants implements Serializable
 	public int getLeft() { return left; }
 	public int getTop() { return top; }
 
+	public void setHeight(int i) { height = i; }
+	
 	public Widget getWidget(int i) { return widget.get(i); }
 	public int getWindowClass() { return window_class; }
 
@@ -3172,6 +3178,23 @@ public class Window extends WindowConstants implements Serializable
 
 		MouseLoop(click, mousewheel);
 	}
+
+	public int getWindow_class() {
+		return window_class;
+	}
+
+	public void sendEvent(WindowEvent e) {
+		wndproc.accept(this, e);		
+	}
+
+	public void disableWhiteBorder() {
+		flags4 &= ~WF_WHITE_BORDER_MASK;
+	}
+
+	public static void activatePopup() {
+		_popup_menu_active = true;		
+	}
+
 	
 	
 	

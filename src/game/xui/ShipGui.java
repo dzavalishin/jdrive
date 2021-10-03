@@ -243,7 +243,7 @@ public class ShipGui
 			case 2: /* rename */
 				v = Vehicle.GetVehicle(w.window_number);
 				Global.SetDParam(0, v.getUnitnumber().id);
-				MiscGui.ShowQueryString( new StringID(v.getString_id()), new StringID(Str.STR_9831_NAME_SHIP), 31, 150, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID(v.getString_id()), new StringID(Str.STR_9831_NAME_SHIP), 31, 150, w.getWindow_class(), w.window_number);
 				break;
 			case 5: /* increase int */
 			case 6: /* decrease int */
@@ -313,7 +313,7 @@ public class ShipGui
 		w.caption_color = 0xFF & v.getOwner().id;
 	}
 
-	static void CcBuildShip(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildShip(boolean success, TileIndex tile, int p1, int p2)
 	{
 		final Vehicle  v;
 		if (!success) return;
@@ -326,7 +326,7 @@ public class ShipGui
 		ShowShipViewWindow(v);
 	}
 
-	static void CcCloneShip(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcCloneShip(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) ShowShipViewWindow(Vehicle.GetVehicle(Global._new_ship_id));
 	}
@@ -408,7 +408,7 @@ public class ShipGui
 				if (sel_eng != Engine.INVALID_ENGINE) {
 					w.as_buildtrain_d().rename_engine = sel_eng;
 					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng),
-							new StringID( Str.STR_9838_RENAME_SHIP_TYPE ), 31, 160, w.window_class, w.window_number);
+							new StringID( Str.STR_9838_RENAME_SHIP_TYPE ), 31, 160, w.getWindow_class(), w.window_number);
 				}
 			}	break;
 			}

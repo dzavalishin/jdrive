@@ -234,10 +234,10 @@ public class Global
 
 	// Net
 	public static boolean _networking = false;
-	public static boolean _network_available = false;  // is network mode available?
+	public static boolean _network_available = true;  // is network mode available?
 	public static boolean _network_server = false; // network-server is active
 	public static boolean _network_dedicated = false; // are we a dedicated server?
-	public static byte _network_playas; // an id to play as..
+	public static int _network_playas; // an id to play as..
 
 	// main/startup
 	//public static String _config_file;
@@ -304,7 +304,7 @@ public class Global
 	static int _debug_map_level = 0;
 	static int _debug_misc_level = 0;
 	static int _debug_ms_level = 0;
-	static int _debug_net_level = 0;
+	static int _debug_net_level = 10;
 	static int _debug_spritecache_level = 0;
 	static int _debug_oldloader_level = 0;
 	static int _debug_pbs_level = 0;
@@ -378,6 +378,11 @@ public class Global
 			debug( s, arg );
 	}
 
+	public static void DEBUG_net( int level, String s, Object ... arg )
+	{
+		if( level <= _debug_net_level )
+			debug( s, arg );
+	}
 	
 	
 	

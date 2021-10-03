@@ -160,7 +160,7 @@ public class RoadVehGui
 			case 2: /* rename */
 				v = Vehicle.GetVehicle(w.window_number);
 				Global.SetDParam(0, v.getUnitnumber().id);
-				MiscGui.ShowQueryString( new StringID(v.getString_id()), new StringID(Str.STR_902C_NAME_ROAD_VEHICLE), 31, 150, w.window_class, w.window_number);
+				MiscGui.ShowQueryString( new StringID(v.getString_id()), new StringID(Str.STR_902C_NAME_ROAD_VEHICLE), 31, 150, w.getWindow_class(), w.window_number);
 				break;
 
 			case 5: /* increase int */
@@ -231,7 +231,7 @@ public class RoadVehGui
 		w.caption_color = (byte) v.getOwner().id;
 	}
 
-	static void CcCloneRoadVeh(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcCloneRoadVeh(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) ShowRoadVehViewWindow(Vehicle.GetVehicle(Global._new_roadveh_id));
 	}
@@ -410,7 +410,7 @@ public class RoadVehGui
 		}
 	}
 
-	static void CcBuildRoadVeh(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildRoadVeh(boolean success, TileIndex tile, int p1, int p2)
 	{
 		final Vehicle  v;
 
@@ -454,7 +454,7 @@ public class RoadVehGui
 				if (sel_eng != Engine.INVALID_ENGINE) {
 					w.as_buildtrain_d().rename_engine = sel_eng;
 					MiscGui.ShowQueryString(Engine.GetCustomEngineName(sel_eng),
-						new StringID( Str.STR_9036_RENAME_ROAD_VEHICLE_TYPE ), 31, 160, w.window_class, w.window_number);
+						new StringID( Str.STR_9036_RENAME_ROAD_VEHICLE_TYPE ), 31, 160, w.getWindow_class(), w.window_number);
 				}
 			}	break;
 			}

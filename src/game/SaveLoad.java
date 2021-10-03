@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Properties;
 
+import game.enums.SaveOrLoadResult;
 import game.struct.HighScore;
 import game.xui.Window;
 
@@ -31,14 +32,6 @@ public class SaveLoad
 	public static final int SL_SAVE = 1;
 	//public static final int SL_OLD_LOAD = 2;
 
-	enum SaveOrLoadResult
-	{
-		SL_OK, // completed successfully
-		SL_ERROR, // error that was caught before internal structures were modified
-		SL_REINIT, // error that was caught in the middle of updating game state, need to clear it. (can only happen during load)
-	}
-
-
 	/**
 	 * Main Save or Load function where the high-level saveload functions are
 	 * handled. It opens the savegame, selects format and checks versions
@@ -46,7 +39,7 @@ public class SaveLoad
 	 * @param mode Save or load. Load can also be a TTD(Patch) game. Use SL_LOAD, SL_OLD_LOAD or SL_SAVE
 	 * @return Return the results of the action. SL_OK, SL_ERROR or SL_REINIT ("unload" the game)
 	 */
-	static SaveOrLoadResult SaveOrLoad(String filename, int mode)
+	public static SaveOrLoadResult SaveOrLoad(String filename, int mode)
 	{
 
 		/* An instance of saving is already active, so don't go saving again * /

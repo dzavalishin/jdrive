@@ -34,7 +34,7 @@ public class RoadGui
 	static byte _road_depot_orientation;
 	static byte _road_station_picker_orientation;
 
-	static void CcPlaySound1D(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcPlaySound1D(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, tile);
 	}
@@ -57,7 +57,7 @@ public class RoadGui
 	}
 
 
-	static void CcBuildRoadTunnel(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildRoadTunnel(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, tile);
@@ -82,7 +82,7 @@ public class RoadGui
 		}
 	}
 
-	private static void CcRoadDepot(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcRoadDepot(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			Sound.SndPlayTileFx(Snd.SND_1F_SPLAT, tile);
@@ -428,7 +428,7 @@ public class RoadGui
 			} else
 				ViewPort.SetTileSelectSize(1, 1);
 
-			image = (w.window_class == Window.WC_BUS_STATION) ? 0x47 : 0x43;
+			image = (w.getWindow_class() == Window.WC_BUS_STATION) ? 0x47 : 0x43;
 
 			Station.StationPickerDrawSprite(103, 35, 0, image);
 			Station.StationPickerDrawSprite(103, 85, 0, image+1);
@@ -437,7 +437,7 @@ public class RoadGui
 
 			Gfx.DrawStringCentered(70, 120, Str.STR_3066_COVERAGE_AREA_HIGHLIGHT, 0);
 			MiscGui.DrawStationCoverageAreaText(2, 146,
-				((w.window_class == Window.WC_BUS_STATION) ? (1<<AcceptedCargo.CT_PASSENGERS) : ~(1<<AcceptedCargo.CT_PASSENGERS)),
+				((w.getWindow_class() == Window.WC_BUS_STATION) ? (1<<AcceptedCargo.CT_PASSENGERS) : ~(1<<AcceptedCargo.CT_PASSENGERS)),
 				3);
 
 		} break;

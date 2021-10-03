@@ -2468,12 +2468,12 @@ public class ViewPort implements Serializable
 
 	static void SetObjectToPlaceWnd(CursorID icon, int mode, Window w)
 	{
-		SetObjectToPlace(icon.id, mode, w.window_class, w.window_number);
+		SetObjectToPlace(icon.id, mode, w.getWindow_class(), w.window_number);
 	}
 
 	public static void SetObjectToPlaceWnd(int icon, int mode, Window w)
 	{
-		SetObjectToPlace(icon, mode, w.window_class, w.window_number);
+		SetObjectToPlace(icon, mode, w.getWindow_class(), w.window_number);
 	}
 
 	//#include "table/animcursors.h"

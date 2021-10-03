@@ -259,7 +259,7 @@ public class GraphGui
 	/* GRAPH LEGEND */
 	/****************/
 
-	static void DrawPlayerIcon(int p, int x, int y)
+	public static void DrawPlayerIcon(int p, int x, int y)
 	{
 		Gfx.DrawSprite(Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(p) + 0x2EB), x, y);
 	}

@@ -72,6 +72,10 @@ public class BinaryString
 		pos = usedLen;
 	}
 
+	public BinaryString(byte[] ba) {
+		this(ba, 0, ba.length);
+	}
+
 	public char charAt(int i)
 	{
 		return mem[i];

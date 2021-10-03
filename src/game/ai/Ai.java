@@ -8,6 +8,7 @@ import game.Player;
 import game.TileIndex;
 import game.enums.Owner;
 import game.ids.PlayerID;
+import game.net.Net;
 
 public class Ai {
 
@@ -216,13 +217,13 @@ public class Ai {
 		old_lp = Global.gs._local_player;
 		Global.gs._local_player = Global.gs.getCurrentPlayer();
 
-	/*#ifdef ENABLE_NETWORK
+	//*#ifdef ENABLE_NETWORK
 		// Send the command 
-		if (_networking)
+		if (Global._networking)
 			// Network is easy, send it to his handler 
-			NetworkSend_Command(tile, p1, p2, procc, null);
+			Net.NetworkSend_Command(TileIndex.get(tile), p1, p2, procc, null);
 		else
-	#endif*/
+	//#endif*/
 			/* If we execute BuildCommands directly in SP, we have a big problem with events
 			 *  so we need to delay is for 1 tick */
 			AI_PutCommandInQueue(Global.gs.getCurrentPlayer().id, tile, p1, p2, procc);

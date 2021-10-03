@@ -6,12 +6,11 @@ import game.Main;
 import game.Str;
 import game.enums.GameModes;
 import game.enums.SwitchModes;
+import game.net.NetGui;
 
 public class IntroGui 
 {
 
-
-	//extern void SwitchMode(int new_mode);
 
 	static final Widget _select_game_widgets[] = {
 	new Widget(    Window.WWT_CAPTION, Window.RESIZE_NONE, 13,   0, 335,   0,  13, Str.STR_0307_OPENTTD,       Str.STR_NULL),
@@ -88,12 +87,13 @@ public class IntroGui
 				Window.ShowDropDownMenu(w, mapsizes, Global._patches.map_y - 6, 13, 0, 0);
 				break;
 			case 15:
-	/*#ifdef ENABLE_NETWORK
-				if (!_network_available) {
-					ShowErrorMessage(INVALID_STRING_ID, Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
+
+				if (!Global._network_available) {
+					//ShowErrorMessage(INVALID_STRING_ID, Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
+					Global.ShowErrorMessage(Str.INVALID_STRING , Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
 				} else
-					ShowNetworkGameWindow();
-	#else*/
+					NetGui.ShowNetworkGameWindow();
+	//#else
 				Global.ShowErrorMessage(Str.INVALID_STRING , Str.STR_NETWORK_ERR_NOTAVAILABLE, 0, 0);
 	//#endif
 				break;
@@ -133,7 +133,7 @@ public class IntroGui
 		Window.AllocateWindowDesc(_select_game_desc);
 	}
 
-	static void GenRandomNewGame(int rnd1, int rnd2)
+	public static void GenRandomNewGame(int rnd1, int rnd2)
 	{
 		Global._random_seeds[0][0] = rnd1;
 		Global._random_seeds[0][1] = rnd2;
@@ -141,7 +141,7 @@ public class IntroGui
 		Main.SwitchMode(SwitchModes.SM_NEWGAME);
 	}
 
-	static void StartScenarioEditor(int rnd1, int rnd2)
+	public static void StartScenarioEditor(int rnd1, int rnd2)
 	{
 		Global._random_seeds[0][0] = rnd1;
 		Global._random_seeds[0][1] = rnd2;

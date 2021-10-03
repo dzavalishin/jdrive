@@ -1,6 +1,10 @@
 package game.console;
 
+import java.io.IOException;
+
 import game.Global;
+import game.net.Net;
+import game.net.NetClient;
 
 public class ConsoleCmds extends DefaultConsole
 {
@@ -11,6 +15,41 @@ public class ConsoleCmds extends DefaultConsole
 
 	// ** console command / variable defines ** //
 
+	// Also use from within player_gui to change the password graphically 
+	public static boolean NetworkChangeCompanyPassword(String ... argv)
+	{
+		int  lpid = Global.gs._local_player.id;
+		
+		if (argv.length == 0) {
+			if (lpid >= Global.MAX_PLAYERS) return true; // dedicated server
+			IConsolePrintF(_icolour_warn, "Current value for 'company_pw': %s", Net._network_player_info[lpid].password);
+			return true;
+		}
+
+		if (lpid >= Global.MAX_PLAYERS) {
+			IConsoleError("You have to own a company to make use of this command.");
+			return false;
+		}
+
+		if (argv.length != 1) return false;
+
+		if (argv[0].equals("*"))
+			argv[0] = "";
+
+		Net._network_player_info[lpid].password = argv[0];
+
+		if (!Global._network_server)
+			try {
+				NetClient.NetworkPacketSend_PACKET_CLIENT_SET_PASSWORD_command(Net._network_player_info[lpid].password);
+			} catch (IOException e) {
+				Global.error(e);
+			}
+
+		IConsolePrintF(_icolour_warn, "'company_pw' changed to:  %s", Net._network_player_info[lpid].password);
+
+		return true;
+	}
+	
 
 	/* **************************** */
 	/* variable and command hooks   */
@@ -843,34 +882,6 @@ public class ConsoleCmds extends DefaultConsole
 		return true;
 	}
 
-	// Also use from within player_gui to change the password graphically 
-	boolean NetworkChangeCompanyPassword(String ... argv)
-	{
-		if (argv.length == 0) {
-			if (_local_player >= MAX_PLAYERS) return true; // dedicated server
-			IConsolePrintF(_icolour_warn, "Current value for 'company_pw': %s", _network_player_info[_local_player].password);
-			return true;
-		}
-
-		if (_local_player >= MAX_PLAYERS) {
-			IConsoleError("You have to own a company to make use of this command.");
-			return false;
-		}
-
-		if (argv.length != 1) return false;
-
-		if (strncmp(argv[0], "*", sizeof(_network_player_info[_local_player].password)) == 0)
-			argv[0][0] = '\0';
-
-		ttd_strlcpy(_network_player_info[_local_player].password, argv[0], sizeof(_network_player_info[_local_player].password));
-
-		if (!_network_server)
-			SEND_COMMAND(PACKET_CLIENT_SET_PASSWORD)(_network_player_info[_local_player].password);
-
-		IConsolePrintF(_icolour_warn, "'company_pw' changed to:  %s", _network_player_info[_local_player].password);
-
-		return true;
-	}
 
 	DEF_CONSOLE_HOOK(ConProcPlayerName)
 	{

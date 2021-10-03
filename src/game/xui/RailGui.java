@@ -54,7 +54,7 @@ public class RailGui {
 	private static final _Railstation _railstation = new _Railstation();
 
 
-	static void CcPlaySound1E(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcPlaySound1E(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, tile);
 	}
@@ -112,7 +112,7 @@ public class RailGui {
 	};
 
 
-	static void CcRailDepot(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcRailDepot(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			int dir = p2;
@@ -145,7 +145,7 @@ public class RailGui {
 		}
 	}
 
-	static void CcStation(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcStation(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, tile);
@@ -203,7 +203,7 @@ public class RailGui {
 		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_X_OR_Y);
 	}
 
-	static void CcBuildRailTunnel(boolean success, TileIndex tile, int p1, int p2)
+	public static void CcBuildRailTunnel(boolean success, TileIndex tile, int p1, int p2)
 	{
 		if (success) {
 			Sound.SndPlayTileFx(Snd.SND_20_SPLAT_2, tile);
