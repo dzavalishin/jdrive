@@ -1179,7 +1179,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		BinaryString []langpack_offs;
 
 		String lang = String.format("%s%s", Global._path.lang_dir, _dynlang.file[lang_index]);
-		byte[] lang_pack_bytes = Main.ReadFileToMem(lang, 100000);
+		byte[] lang_pack_bytes = FileIO.ReadFileToMem(lang, 100000);
 		if (lang_pack_bytes == null) return false;
 
 		/*

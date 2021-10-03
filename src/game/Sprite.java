@@ -382,6 +382,45 @@ class CallbackResultSpriteGroup extends SpriteGroup {
 class ResultSpriteGroup extends SpriteGroup {
 	int result;
 	int sprites;
+	
+	/**
+	 * Creates a spritegroup representing a callback result
+	 * @param value The value that was used to represent this callback result
+	 * @return A spritegroup representing that callback result
+	 */
+	static ResultSpriteGroup NewCallBackResultSpriteGroup(int value)
+	{
+		ResultSpriteGroup group = new ResultSpriteGroup(); //calloc(1, sizeof(*group));
+
+		group.type = SpriteGroupType.SGT_CALLBACK;
+
+		// Old style callback results have the highest byte 0xFF so signify it is a callback result
+		// New style ones only have the highest bit set (allows 15-bit results, instead of just 8)
+		if ((value >> 8) == 0xFF)
+			value &= 0xFF;
+		else
+			value &= ~0x8000;
+
+		group.result = value;
+
+		return group;
+	}
+
+	/**
+	 * Creates a spritegroup representing a sprite number result.
+	 * @param value The sprite number.
+	 * @param sprites The number of sprites per set.
+	 * @return A spritegroup representing the sprite number result.
+	 */
+	static ResultSpriteGroup NewResultSpriteGroup(int value, int sprites)
+	{
+		ResultSpriteGroup group = new ResultSpriteGroup();
+		group.type = SpriteGroupType.SGT_RESULT;
+		group.result = value;
+		group.sprites = sprites;
+		return group;
+	}
+	
 }
 
 enum SpriteGroupType {

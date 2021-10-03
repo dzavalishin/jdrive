@@ -34,7 +34,7 @@ public class Main {
 	 * Post-0.4.0 since Celestar doesn't want this in SVN before. --pasky */
 
 
-	static void  error( String  s, Object ... args)
+	public static void  error( String  s, Object ... args)
 	{
 		String buf = String.format(s, args);
 
@@ -51,54 +51,6 @@ public class Main {
 		Hal.ShowInfo(buf);
 	}
 
-
-	public static byte [] ReadFileToMem( String filename, int maxsize)
-	{
-		byte [] buf = new byte[maxsize];
-		/*if( buf == null )
-		{
-			error("ReadFileToMem: out of memory");
-			return null;
-		}*/
-
-		RandomAccessFile f;
-		try {
-			f = new RandomAccessFile(filename,"r" );
-		} catch (FileNotFoundException e) {
-			error("ReadFileToMem: no file '%s'", filename );
-			return null;
-		}
-
-		int len;
-		try {
-			len = f.read(buf);
-		} catch (IOException e) {
-
-			Global.error(e);
-			return null;
-		} finally
-		{
-			try {
-				f.close();
-			} catch (IOException e) {
-
-				Global.error(e);
-			}
-
-		}
-
-
-		if( len < 0 )
-		{
-			error("ReadFileToMem: no data");
-			return null;
-		}
-
-		byte ret[] = new byte[len];
-		System.arraycopy(buf, 0, ret, 0, len);
-		buf = null;
-		return ret;
-	}
 
 	static void showhelp()
 	{
@@ -318,9 +270,8 @@ public class Main {
 		GfxInit.GfxLoadSprites();
 		Gfx.LoadStringWidthTable();
 
-		
 		//NewGrf test = new NewGrf("xussr.grf");
-		//test.loadSprites();
+		//test.load();
 		
 		// TODO _savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 

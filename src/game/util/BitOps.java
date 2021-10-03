@@ -4,6 +4,7 @@ import game.tables.TrackPathFinderTables;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
 import game.Hal;
@@ -396,6 +397,15 @@ public class BitOps {
 		return (0xFF & lo) + ((0xFF & hi) << 8);
 	}
 
+	public static int READ_LE_UINT32(byte[] b, int shift) 
+	{
+		int b3 = b[3+shift];
+		int b2 = b[2+shift];
+		int b1 = b[1+shift];
+		int b0 = b[0+shift];
+		return (0xFF & b0) + ((0xFF & b1) << 8) + ((0xFF & b2) << 16) + ((0xFF & b3) << 24);
+	}
+
 	public static String stringFromBytes(byte[] b, int start, int len) {
 		//return new String( b, start, len, StandardCharsets.ISO_8859_1 );
 		char [] ca = new char[len];
@@ -428,6 +438,50 @@ public class BitOps {
 	}
 
 	
+	
+	
+	public static void hexDump(byte[] array) {
+		System.out.println(formatHexDump(array));
+	}
+
+	public static void HexDump(byte[] array, int offset, int length) {
+		System.out.println(formatHexDump(array, offset, length));
+	}
+
+	public static String formatHexDump(byte[] array) {
+		return formatHexDump(array, 0, array.length);
+		}	
+	public static String formatHexDump(byte[] array, int offset, int length) {
+        final int width = 16;
+
+        StringBuilder builder = new StringBuilder();
+
+        for (int rowOffset = offset; rowOffset < offset + length; rowOffset += width) {
+            builder.append(String.format("%06d:  ", rowOffset));
+
+            for (int index = 0; index < width; index++) {
+                if (rowOffset + index < array.length) {
+                    builder.append(String.format("%02x ", array[rowOffset + index]));
+                } else {
+                    builder.append("   ");
+                }
+            }
+
+            if (rowOffset < array.length) {
+                int asciiWidth = Math.min(width, array.length - rowOffset);
+                builder.append("  |  ");
+                try {
+                    builder.append(new String(array, rowOffset, asciiWidth, "UTF-8").replaceAll("\r\n", " ").replaceAll("\n", " "));
+                } catch (UnsupportedEncodingException ignored) {
+                    //If UTF-8 isn't available as an encoding then what can we do?!
+                }
+            }
+
+            builder.append(String.format("%n"));
+        }
+
+        return builder.toString();
+    }	
 	
 	/*
 	static  int BIGMULSS(int a, int b, int shift) {
