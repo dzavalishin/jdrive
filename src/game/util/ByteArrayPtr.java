@@ -69,6 +69,15 @@ public class ByteArrayPtr implements IArrayPtr
 		return read( shift );
 	}
 	
+	/**
+	 * Read unsigned byte
+	 * @param shift position to read from
+	 * @return Integer 0..255
+	 */
+	public int ur( int shift )
+	{
+		return 0xFF & read( shift );
+	}
 
 	
 	
