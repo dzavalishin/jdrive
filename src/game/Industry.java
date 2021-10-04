@@ -663,8 +663,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void MakeIndustryTileBiggerCase8(TileIndex tile)
 	{
-		TileInfo ti = new TileInfo();
-		Landscape.FindLandscapeHeight(ti, tile.TileX() * 16, tile.TileY() * 16);
+		TileInfo ti = Landscape.FindLandscapeHeight(tile.TileX() * 16, tile.TileY() * 16);
 		Vehicle.CreateEffectVehicle(ti.x + 15, ti.y + 14, ti.z + 59 + (ti.tileh != 0 ? 8 : 0), Vehicle.EV_CHIMNEY_SMOKE);
 	}
 

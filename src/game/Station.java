@@ -72,7 +72,7 @@ public class Station extends StationTables implements IPoolItem
 	int stat_id; // custom graphics station id in the @class_id class
 	int build_date;
 
-	private int airport_flags;
+	private int airport_flags; // Airport tile blocks - forbid entering tile
 	//StationID index;
 	int index;
 	VehicleQueue airport_queue;			// airport queue
@@ -123,7 +123,7 @@ public class Station extends StationTables implements IPoolItem
 	}
 
 
-	public Station() {
+	private Station() {
 		clear();
 	}
 	
@@ -138,41 +138,6 @@ public class Station extends StationTables implements IPoolItem
 	//  tick handler.
 	public static int _station_tick_ctr = 0;
 
-	//
-	public static final int INVALID_STATION = 0xFFFF;
-	public static final int INVALID_SLOT = RoadStop.INVALID_SLOT;
-	static public final int INVALID_VEHICLE = Vehicle.INVALID_VEHICLE;
-
-	public static final int NUM_SLOTS = 2;
-
-
-	public static final int FACIL_TRAIN = 1;
-	public static final int FACIL_TRUCK_STOP = 2;
-	public static final int FACIL_BUS_STOP = 4;
-	public static final int FACIL_AIRPORT = 8;
-	public static final int FACIL_DOCK = 0x10;
-
-
-	//		public static final int HVOT_PENDING_DELETE = 1<<0; // not needed anymore
-	public static final int HVOT_TRAIN = 1<<1;
-	public static final int HVOT_BUS = 1 << 2;
-	public static final int HVOT_TRUCK = 1 << 3;
-	public static final int HVOT_AIRCRAFT = 1 << 4;
-	public static final int HVOT_SHIP = 1 << 5;
-	/* This bit is used to mark stations. No; it does not belong here; but what
-	 * can we do? ;-) */
-	public static final int HVOT_BUOY = 1 << 6;
-
-	public static final int CA_BUS = 3;
-	public static final int CA_TRUCK = 3;
-	public static final int CA_AIR_OILPAD = 3;
-	public static final int CA_TRAIN = 4;
-	public static final int CA_AIR_HELIPORT = 4;
-	public static final int CA_AIR_SMALL = 4;
-	public static final int CA_AIR_LARGE = 5;
-	public static final int CA_DOCK = 5;
-	public static final int CA_AIR_METRO = 6;
-	public static final int CA_AIR_INTER = 8;
 
 
 	private void StationInitialize(TileIndex tile)
@@ -424,7 +389,7 @@ public class Station extends StationTables implements IPoolItem
 			rect.MergePoint( cur_rs.xy);
 		}
 
-		rad = (Global._patches.modified_catchment) ? FindCatchmentRadius(this) : 4;
+		rad = (Global._patches.modified_catchment) ? FindCatchmentRadius() : 4;
 
 		// And retrieve the acceptance.
 		if (rect.max_x >= rect.min_x) {
@@ -534,20 +499,6 @@ public class Station extends StationTables implements IPoolItem
 
 
 
-
-	/**
-	 * Called if a new block is added to the station-pool
-	 * /
-	static void StationPoolNewBlock(int start_item)
-	{
-		Station st;
-		FOR_ALL_STATIONS_FROM(st, start_item) st.index = start_item++;
-
-	} */
-
-
-
-
 	private void MarkStationDirty()
 	{
 		if (sign.getWidth_1() != 0) {
@@ -566,17 +517,17 @@ public class Station extends StationTables implements IPoolItem
 	 *  radius that is available within the Station 
 	 *  
 	 */
-	private static int FindCatchmentRadius(final  Station  st)
+	private int FindCatchmentRadius()
 	{
 		int ret = 0;
 
-		if (!st.bus_stops.isEmpty())   ret = Math.max(ret, CA_BUS);
-		if (!st.truck_stops.isEmpty()) ret = Math.max(ret, CA_TRUCK);
-		if (st.train_tile != null) ret = Math.max(ret, CA_TRAIN);
-		if (st.dock_tile != null)  ret = Math.max(ret, CA_DOCK);
+		if (!bus_stops.isEmpty())   ret = Math.max(ret, CA_BUS);
+		if (!truck_stops.isEmpty()) ret = Math.max(ret, CA_TRUCK);
+		if (train_tile != null) ret = Math.max(ret, CA_TRAIN);
+		if (dock_tile != null)  ret = Math.max(ret, CA_DOCK);
 
-		if (st.airport_tile != null) {
-			switch (st.airport_type) {
+		if (airport_tile != null) {
+			switch (airport_type) {
 			case Airport.AT_OILRIG:        ret = Math.max(ret, CA_AIR_OILPAD);   break;
 			case Airport.AT_SMALL:         ret = Math.max(ret, CA_AIR_SMALL);    break;
 			case Airport.AT_HELIPORT:      ret = Math.max(ret, CA_AIR_HELIPORT); break;
@@ -640,9 +591,9 @@ public class Station extends StationTables implements IPoolItem
 		}
 	}
 
-	private static boolean CheckStationSpreadOut(Station st, TileIndex tile, int w, int h)
+	private boolean CheckStationSpreadOut(TileIndex tile, int w, int h)
 	{
-		StationID station_index = StationID.get(st.index);
+		StationID station_index = StationID.get(index);
 		int i;
 		int x1 = tile.TileX();
 		int y1 = tile.TileY();
@@ -672,7 +623,7 @@ public class Station extends StationTables implements IPoolItem
 		return true;
 	}
 
-	private static Station AllocateStation() {
+	public static Station AllocateStation() {
 		Iterator<Station> iterator = Global.gs._stations.getIterator();
 		while(iterator.hasNext() ) {
 			Station station = iterator.next();
@@ -1157,7 +1108,7 @@ public class Station extends StationTables implements IPoolItem
 			}
 
 			//XXX can't we pack this in the "else" part of the if above?
-			if (!CheckStationSpreadOut(station, tile_org, w_org, h_org)) return Cmd.CMD_ERROR;
+			if (!station.CheckStationSpreadOut(tile_org, w_org, h_org)) return Cmd.CMD_ERROR;
 		}	else {
 			// Create a new station
 			station = AllocateStation();
@@ -1601,7 +1552,7 @@ public class Station extends StationTables implements IPoolItem
 			if (st.owner.isNotNone() && !st.owner.isCurrentPlayer())
 				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
-			if (!CheckStationSpreadOut(st, tile, 1, 1))
+			if (!st.CheckStationSpreadOut(tile, 1, 1))
 				return Cmd.CMD_ERROR;
 		} else {
 			Town t;
@@ -1655,22 +1606,21 @@ public class Station extends StationTables implements IPoolItem
 		return cost;
 	}
 
-	// TODO to method
 	// Remove a bus station TODO use ArrayList for stops fields!
-	private static int RemoveRoadStop(Station st, int flags, TileIndex tile)
+	private int RemoveRoadStop(int flags, TileIndex tile)
 	{
 		List<RoadStop> primary_stop;
 		RoadStop cur_stop;
 		boolean is_truck = tile.getMap().m5 < 0x47;
 
-		if (!PlayerID.getCurrent().isWater() && !Player.CheckOwnership(st.owner))
+		if (!PlayerID.getCurrent().isWater() && !Player.CheckOwnership(owner))
 			return Cmd.CMD_ERROR;
 
 		if (is_truck) { // truck stop
-			primary_stop = st.truck_stops;
+			primary_stop = truck_stops;
 			cur_stop = RoadStop.GetRoadStopByTile(tile, RoadStopType.RS_TRUCK);
 		} else {
-			primary_stop = st.bus_stops;
+			primary_stop = bus_stops;
 			cur_stop = RoadStop.GetRoadStopByTile(tile, RoadStopType.RS_BUS);
 		}
 
@@ -1698,10 +1648,10 @@ public class Station extends StationTables implements IPoolItem
 
 			//we only had one stop left
 			if(primary_stop.isEmpty())
-				st.facilities &= (is_truck) ? ~FACIL_TRUCK_STOP : ~FACIL_BUS_STOP;
+				facilities &= (is_truck) ? ~FACIL_TRUCK_STOP : ~FACIL_BUS_STOP;
 			
-			st.UpdateStationVirtCoordDirty();
-			st.DeleteStationIfEmpty();
+			UpdateStationVirtCoordDirty();
+			DeleteStationIfEmpty();
 		}
 
 		return (is_truck) ? Global._price.remove_truck_station : Global._price.remove_bus_station;
@@ -1778,7 +1728,7 @@ public class Station extends StationTables implements IPoolItem
 			if (st.owner.isNotNone() && !st.owner.isCurrentPlayer() )
 				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
-			if (!CheckStationSpreadOut(st, tile, 1, 1))
+			if (!st.CheckStationSpreadOut(tile, 1, 1))
 				return Cmd.CMD_ERROR;
 
 			if (st.airport_tile != null)
@@ -1921,17 +1871,14 @@ public class Station extends StationTables implements IPoolItem
 	 */
 	public static int CmdBuildBuoy(int x, int y, int flags, int p1, int p2)
 	{
-		TileInfo ti = new TileInfo();
-		Station st;
-
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		Landscape.FindLandscapeHeight(ti, x, y);
+		TileInfo ti = Landscape.FindLandscapeHeight(x, y);
 
 		if (ti.type != TileTypes.MP_WATER.ordinal() || ti.tileh != 0 || ti.map5 != 0 || ti.tile == null)
 			return Cmd.return_cmd_error(Str.STR_304B_SITE_UNSUITABLE);
 
-		st = AllocateStation();
+		Station st = AllocateStation();
 		if (st == null) return Cmd.CMD_ERROR;
 
 		st.town = Town.ClosestTownFromTile(ti.tile, -1);
@@ -1967,7 +1914,7 @@ public class Station extends StationTables implements IPoolItem
 	}
 
 	/* Checks if any ship is servicing the buoy specified. Returns yes or no */
-	private static boolean CheckShipsOnBuoy(Station st)
+	private boolean CheckShipsOnBuoy()
 	{
 		boolean [] ret = {false};
 		Vehicle.forEach( (v) ->
@@ -1975,7 +1922,7 @@ public class Station extends StationTables implements IPoolItem
 			if (v.type == Vehicle.VEH_Ship) {
 				v.forEachOrder( (order) ->
 				{
-					if (order.type == Order.OT_GOTO_STATION && order.station == st.index) {
+					if (order.type == Order.OT_GOTO_STATION && order.station == index) {
 						ret[0] = true;
 					}
 				});
@@ -1984,10 +1931,8 @@ public class Station extends StationTables implements IPoolItem
 		return ret[0];
 	}
 
-	private static int RemoveBuoy(Station st, int flags)
+	private int RemoveBuoy(int flags)
 	{
-		TileIndex tile;
-
 		//if (Global.gs._current_player.id >= Global.MAX_PLAYERS) 
 		if(PlayerID.getCurrent().isSpecial()) 
 		{
@@ -1995,17 +1940,17 @@ public class Station extends StationTables implements IPoolItem
 			return Cmd.return_cmd_error(Str.INVALID_STRING);
 		}
 
-		tile = st.dock_tile;
+		TileIndex tile = dock_tile;
 
-		if (CheckShipsOnBuoy(st))   return Cmd.return_cmd_error(Str.STR_BUOY_IS_IN_USE);
+		if (CheckShipsOnBuoy())   return Cmd.return_cmd_error(Str.STR_BUOY_IS_IN_USE);
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			st.dock_tile = null;
+			dock_tile = null;
 			/* Buoys are marked in the Station struct by this flag. 
 			 * Yes, it is this braindead.. */
-			st.facilities &= ~FACIL_DOCK;
-			st.had_vehicle_of_type &= ~HVOT_BUOY;
+			facilities &= ~FACIL_DOCK;
+			had_vehicle_of_type &= ~HVOT_BUOY;
 
 			Landscape.ModifyTile(tile, TileTypes.MP_WATER,
 					//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) |
@@ -2014,8 +1959,8 @@ public class Station extends StationTables implements IPoolItem
 					0			/* map5 */
 					);
 
-			st.UpdateStationVirtCoordDirty();
-			st.DeleteStationIfEmpty();
+			UpdateStationVirtCoordDirty();
+			DeleteStationIfEmpty();
 		}
 
 		return Global._price.remove_truck_station;
@@ -2037,7 +1982,6 @@ public class Station extends StationTables implements IPoolItem
 	 */
 	public static int CmdBuildDock(int x, int y, int flags, int p1, int p2)
 	{
-		TileInfo ti = new TileInfo();
 		int direction;
 		int cost;
 		TileIndex tile, tile_cur;
@@ -2045,7 +1989,7 @@ public class Station extends StationTables implements IPoolItem
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		Landscape.FindLandscapeHeight(ti, x, y);
+		TileInfo ti = Landscape.FindLandscapeHeight(x, y);
 
 		/*
 		if ((direction=0,ti.tileh) != 3 &&
@@ -2107,7 +2051,7 @@ public class Station extends StationTables implements IPoolItem
 			if(st.owner.isNotNone() && !st.owner.isCurrentPlayer())
 				return Cmd.return_cmd_error(Str.STR_3009_TOO_CLOSE_TO_ANOTHER_STATION);
 
-			if (!CheckStationSpreadOut(st, tile, 1, 1)) return Cmd.CMD_ERROR;
+			if (!st.CheckStationSpreadOut(tile, 1, 1)) return Cmd.CMD_ERROR;
 
 			if (st.dock_tile != null) return Cmd.return_cmd_error(Str.STR_304C_TOO_CLOSE_TO_ANOTHER_DOCK);
 		} else {
@@ -2160,14 +2104,14 @@ public class Station extends StationTables implements IPoolItem
 		return Global._price.build_dock;
 	}
 
-	private static int RemoveDock(Station st, int flags)
+	private int RemoveDock(int flags)
 	{
 		TileIndex tile1;
 		TileIndex tile2;
 
-		if (!Player.CheckOwnership(st.owner)) return Cmd.CMD_ERROR;
+		if (!Player.CheckOwnership(owner)) return Cmd.CMD_ERROR;
 
-		tile1 = st.dock_tile;
+		tile1 = dock_tile;
 		tile2 = tile1.iadd( TileIndex.TileOffsByDir(tile1.M().m5 - 0x4C) );
 
 		if (!tile1.EnsureNoVehicle()) return Cmd.CMD_ERROR;
@@ -2181,11 +2125,11 @@ public class Station extends StationTables implements IPoolItem
 					//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
 					TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0);
 
-			st.dock_tile = null;
-			st.facilities &= ~FACIL_DOCK;
+			dock_tile = null;
+			facilities &= ~FACIL_DOCK;
 
-			st.UpdateStationVirtCoordDirty();
-			st.DeleteStationIfEmpty();
+			UpdateStationVirtCoordDirty();
+			DeleteStationIfEmpty();
 		}
 
 		return Global._price.remove_dock;
@@ -2595,16 +2539,15 @@ public class Station extends StationTables implements IPoolItem
 		});
 	}
 
-	private static void CheckOrphanedSlots(final Station st, RoadStopType rst)
+	private void CheckOrphanedSlots(RoadStopType rst)
 	{
-		for(RoadStop rs : RoadStop.GetPrimaryRoadStop(st, rst))
-			checkStop(st, rst, rs);
+		for(RoadStop rs : RoadStop.GetPrimaryRoadStop(this, rst))
+			checkStop(rst, rs);
 	}
 
 
-	private static void checkStop(final Station st, RoadStopType rst, RoadStop rs) 
+	private void checkStop(RoadStopType rst, RoadStop rs) 
 	{
-
 		for (int k = 0; k < RoadStop.NUM_SLOTS; k++) 
 		{
 			if (rs.slot[k] != INVALID_SLOT) {
@@ -2613,7 +2556,7 @@ public class Station extends StationTables implements IPoolItem
 				if (v.type != Vehicle.VEH_Road || v.road.slot != rs) {
 					Global.DEBUG_ms( 0,
 							"Multistop: Orphaned %s slot at 0x%X of station %d (don't panic)",
-							(rst == RoadStopType.RS_BUS) ? "bus" : "truck", rs.xy, st.index);
+							(rst == RoadStopType.RS_BUS) ? "bus" : "truck", rs.xy, index);
 					rs.slot[k] = INVALID_SLOT;
 				}
 			}
@@ -2621,15 +2564,15 @@ public class Station extends StationTables implements IPoolItem
 	}
 
 	/* this function is called for one station each tick */
-	private static void StationHandleBigTick(Station st)
+	private void StationHandleBigTick()
 	{
-		st.UpdateStationAcceptance(true);
+		UpdateStationAcceptance(true);
 
-		if (st.facilities == 0 && ++st.delete_ctr >= 8) DeleteStation(st);
+		if (facilities == 0 && ++delete_ctr >= 8) DeleteStation(this);
 
 		// Here we saveguard against orphaned slots
-		CheckOrphanedSlots(st, RoadStopType.RS_BUS);
-		CheckOrphanedSlots(st, RoadStopType.RS_TRUCK);
+		CheckOrphanedSlots(RoadStopType.RS_BUS);
+		CheckOrphanedSlots(RoadStopType.RS_TRUCK);
 	}
 
 	private static byte byte_inc_sat_RET(byte p) { // TODO to BitOps + test
@@ -2644,19 +2587,18 @@ public class Station extends StationTables implements IPoolItem
 		return p; 
 		}
 
-	private static void UpdateStationRating(Station st)
+	private void UpdateStationRating()
 	{
 		//GoodsEntry ge;
 		int rating;
-		StationID index;
+		//StationID index;
 		int waiting;
 		boolean waiting_changed = false;
 
-		st.time_since_load = byte_inc_sat_RET((byte) st.time_since_load);
-		st.time_since_unload = byte_inc_sat_RET((byte) st.time_since_unload);
+		time_since_load = byte_inc_sat_RET((byte) time_since_load);
+		time_since_unload = byte_inc_sat_RET((byte) time_since_unload);
 
-		//do {
-		for( GoodsEntry ge : st.goods )
+		for( GoodsEntry ge : goods )
 		{
 			if (ge.enroute_from != INVALID_STATION) {
 				ge.enroute_time = byte_inc_sat_RET((byte) ge.enroute_time);
@@ -2684,13 +2626,13 @@ public class Station extends StationTables implements IPoolItem
 					}
 				}
 
-				if (st.owner.id < Global.MAX_PLAYERS && BitOps.HASBIT(st.town.statues, st.owner.id))
+				if (owner.id < Global.MAX_PLAYERS && BitOps.HASBIT(town.statues, owner.id))
 					rating += 26;
 
 				{
 					int days = ge.days_since_pickup;
-					if (st.last_vehicle.id != INVALID_VEHICLE &&
-							Vehicle.GetVehicle(st.last_vehicle).type == Vehicle.VEH_Ship)
+					if (last_vehicle.id != INVALID_VEHICLE &&
+							Vehicle.GetVehicle(last_vehicle).type == Vehicle.VEH_Ship)
 						days >>= 2;
 				if(days <= 21) 
 				{
@@ -2757,24 +2699,24 @@ public class Station extends StationTables implements IPoolItem
 			}
 		} //while (++ge != endof(st.goods));
 
-		index = StationID.get( st.index );
+		StationID id = StationID.get( index );
 
 		if (waiting_changed)
-			Window.InvalidateWindow(Window.WC_STATION_VIEW, index);
+			Window.InvalidateWindow(Window.WC_STATION_VIEW, id);
 		else
-			Window.InvalidateWindowWidget(Window.WC_STATION_VIEW, index.id, 5);
+			Window.InvalidateWindowWidget(Window.WC_STATION_VIEW, id.id, 5);
 	}
 
 	/* called for every station each tick */
-	private static void StationHandleSmallTick(Station st)
+	private void StationHandleSmallTick()
 	{
-		if (st.facilities == 0) return;
+		if (facilities == 0) return;
 
-		int b = st.delete_ctr + 1;
+		int b = delete_ctr + 1;
 		if (b >= 185) b = 0;
-		st.delete_ctr = b;
+		delete_ctr = b;
 
-		if (b == 0) UpdateStationRating(st);
+		if (b == 0) UpdateStationRating();
 	}
 
 	public static void OnTick_Station()
@@ -2788,9 +2730,9 @@ public class Station extends StationTables implements IPoolItem
 		if (++_station_tick_ctr == GetStationPoolSize()) _station_tick_ctr = 0;
 
 		st = GetStation(i);
-		if (st != null && st.isValid()) StationHandleBigTick(st);
+		if (st != null && st.isValid()) st.StationHandleBigTick();
 
-		Global.gs._stations.forEachValid( sst -> StationHandleSmallTick(sst) );
+		Global.gs._stations.forEachValid( sst -> sst.StationHandleSmallTick() );
 	}
 
 	public static void StationMonthlyLoop()
@@ -2929,7 +2871,7 @@ public class Station extends StationTables implements IPoolItem
 					{ // if we have other fac. than a cargo bay or the cargo is not passengers
 						if (Global._patches.modified_catchment) 
 						{
-							ss.rad = FindCatchmentRadius(st);
+							ss.rad = st.FindCatchmentRadius();
 							ss.x_min_prod = ss.y_min_prod = 9;
 							ss.x_max_prod = 8 + ss.w_prod;
 							ss.y_max_prod = 8 + ss.h_prod;
@@ -3135,9 +3077,9 @@ public class Station extends StationTables implements IPoolItem
 		if (m5 < 8) return RemoveRailroadStation(st, tile, flags);
 		// original airports < 67, new airports between 83 - 114
 		if (m5 < 0x43 || (m5 >= 83 && m5 <= 114)) return RemoveAirport(st, flags);
-		if (m5 < 0x4B) return RemoveRoadStop(st, flags, tile);
-		if (m5 == 0x52) return RemoveBuoy(st, flags);
-		if (m5 != 0x4B && m5 < 0x53) return RemoveDock(st, flags);
+		if (m5 < 0x4B) return st.RemoveRoadStop(flags, tile);
+		if (m5 == 0x52) return st.RemoveBuoy(flags);
+		if (m5 != 0x4B && m5 < 0x53) return st.RemoveDock(flags);
 
 		return Cmd.CMD_ERROR;
 	}

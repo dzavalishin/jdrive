@@ -746,10 +746,10 @@ public class ViewPort implements Serializable
 	{
 		ViewportDrawer vd = _cur_vd;
 		int x, y, width, height;
-		TileInfo ti = new TileInfo();
+		//TileInfo ti = new TileInfo();
 		boolean direction;
 
-		_cur_ti = ti;
+		//_cur_ti = ti;
 
 		// Transform into tile coordinates and round to closest full tile
 		//#if !defined(NEW_ROTATION)
@@ -777,7 +777,8 @@ public class ViewPort implements Serializable
 			int y_cur = y;
 
 			do {
-				Landscape.FindLandscapeHeight(ti, x_cur, y_cur);
+				TileInfo ti = Landscape.FindLandscapeHeight(x_cur, y_cur);
+				_cur_ti = ti;
 				//#if !defined(NEW_ROTATION)
 				y_cur += 0x10;
 				x_cur -= 0x10;

@@ -69,8 +69,10 @@ public class Landscape extends GenLandTable
 	}
 
 	/** find the landscape height for the coordinates x y */
-	public static void FindLandscapeHeight(TileInfo ti, int x, int y)
+	public static TileInfo FindLandscapeHeight(int x, int y)
 	{
+		TileInfo ti = new TileInfo();
+		
 		ti.x = x;
 		ti.y = y;
 
@@ -83,10 +85,11 @@ public class Landscape extends GenLandTable
 			ti.tile = null;
 			ti.map5 = 0;
 			ti.z = 0;
-			return;
+			return ti;
 		}
 
 		FindLandscapeHeightByTile(ti, TileIndex.TileVirtXY(x, y));
+		return ti;
 	}
 
 	static int GetPartialZ(int x, int y, int corners)
@@ -186,9 +189,7 @@ public class Landscape extends GenLandTable
 
 	public static int GetSlopeZ(int x,  int y)
 	{
-		TileInfo ti = new TileInfo();
-
-		FindLandscapeHeight(ti, x, y);
+		TileInfo ti = FindLandscapeHeight(x, y);
 		return _tile_type_procs[ti.type].get_slope_z_proc.apply(ti);
 	}
 
@@ -215,11 +216,11 @@ public class Landscape extends GenLandTable
 	{
 		int sprite_base = Sprite.SPR_SLOPES_BASE-14;
 
-		TileInfo ti2 = new TileInfo();
+		TileInfo ti2;// = new TileInfo();
 
-		FindLandscapeHeight(ti2, ti.x, ti.y - 1);
+		ti2 = FindLandscapeHeight(ti.x, ti.y - 1);
 		if (hasFoundation(ti2, true)) sprite_base += 22;		// foundation in NW direction
-		FindLandscapeHeight(ti2, ti.x - 1, ti.y);
+		ti2 = FindLandscapeHeight(ti.x - 1, ti.y);
 		if (hasFoundation(ti2, false)) sprite_base += 22 * 2;	// foundation in NE direction
 
 		if (f < 15) {

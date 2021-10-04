@@ -16,17 +16,13 @@ import game.Str;
 import game.ids.PlayerID;
 import game.ids.StationID;
 import game.ids.StringID;
+import game.tables.StationTables;
 import game.util.BinaryString;
 import game.util.BitOps;
 import game.util.Strings;
 
-public class StationGui extends Station  // to get constants
+public class StationGui extends StationTables  // to get constants
 {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	static final int _rating_colors[] = {152,32,15,174,208,194,191,55,184,10,191,48};
 
 
