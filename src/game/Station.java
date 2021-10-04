@@ -72,8 +72,7 @@ public class Station extends StationTables implements IPoolItem
 	int stat_id; // custom graphics station id in the @class_id class
 	int build_date;
 
-	//int airport_flags;
-	int airport_flags;
+	private int airport_flags;
 	//StationID index;
 	int index;
 	VehicleQueue airport_queue;			// airport queue
@@ -3462,6 +3461,32 @@ public class Station extends StationTables implements IPoolItem
 
 
 	public boolean hasNoFacilities() { return 0 == facilities; }
+
+	// NB! Bit mask!
+
+	public boolean hasAirportBlocks(int block) {
+		return BitOps.HASBITS(airport_flags, block);
+	}
+
+	public void resetAirportBlocks(int blocks) {
+		airport_flags = BitOps.RETCLRBITS(airport_flags, blocks);
+	}
+
+	public void setAirportBlocks(int blocks) {
+		airport_flags = BitOps.RETSETBITS(airport_flags, blocks);		
+	}
+
+	// NB! Bit number!
+
+	public boolean hasAirportBlock(int i) {
+		return BitOps.HASBIT(airport_flags, i);
+	}
+
+	public void setAirportBlock(int i) {
+		airport_flags = BitOps.RETSETBIT(airport_flags, i); // occupy 
+	}
+
+
 
 
 

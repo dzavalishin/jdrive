@@ -1196,7 +1196,8 @@ public class AirCraft extends AirCraftTables {
 			// clear runway-in on all airports, set by crashing plane
 			// small airports use AIRPORT_BUSY, city airports use RUNWAY_IN_OUT_block, etc.
 			// but they all share the same number
-			st.airport_flags = BitOps.RETCLRBITS(st.airport_flags, Airport.RUNWAY_IN_block);
+			//st.airport_flags = BitOps.RETCLRBITS(st.airport_flags, Airport.RUNWAY_IN_block);
+			st.resetAirportBlocks(Airport.RUNWAY_IN_block);
 
 			v.BeginVehicleMove();
 			v.EndVehicleMove();
@@ -1776,7 +1777,8 @@ public class AirCraft extends AirCraftTables {
 						// if there are multiple runways, plane won't know which one it took (because
 						// they all have heading LANDING). And also occupy that block!
 						v.air.pos = current.next_position;
-						st.airport_flags = BitOps.RETSETBITS(st.airport_flags, airport.getLayoutItem(v.air.pos).block);
+						//st.airport_flags = BitOps.RETSETBITS(st.airport_flags, airport.getLayoutItem(v.air.pos).block);
+						st.setAirportBlocks(airport.getLayoutItem(v.air.pos).block);
 						return;
 					}
 					v.cur_speed = tcur_speed;
@@ -1875,7 +1877,8 @@ public class AirCraft extends AirCraftTables {
 		if (airport.getLayoutItem(v.air.previous_pos).block != airport.getLayoutItem(v.air.pos).block) {
 			Station  st = Station.GetStation(v.air.targetairport);
 
-			st.airport_flags = BitOps.RETCLRBITS(st.airport_flags, airport.getLayoutItem(v.air.previous_pos).block);
+			//st.airport_flags = BitOps.RETCLRBITS(st.airport_flags, airport.getLayoutItem(v.air.previous_pos).block);
+			st.resetAirportBlocks(airport.getLayoutItem(v.air.previous_pos).block);
 		}
 	}
 
@@ -1955,7 +1958,9 @@ public class AirCraft extends AirCraftTables {
 				airport_flags |= current_pos.block;
 			}
 
-			if (BitOps.HASBITS(st.airport_flags, airport_flags)) {
+			//if (BitOps.HASBITS(st.airport_flags, airport_flags)) 
+			if(st.hasAirportBlocks(airport_flags)) 
+			{
 				v.cur_speed = 0;
 				v.subspeed = 0;
 				return true;
@@ -1992,14 +1997,17 @@ public class AirCraft extends AirCraftTables {
 			// checking, because it has been set by the airplane before
 			if (current_pos.block == next.block) airport_flags ^= next.block;
 
-			if (BitOps.HASBITS(st.airport_flags, airport_flags)) {
+			//if (BitOps.HASBITS(st.airport_flags, airport_flags)) 
+			if(st.hasAirportBlocks(airport_flags)) 
+			{
 				v.cur_speed = 0;
 				v.subspeed = 0;
 				return false;
 			}
 
 			if (next.block != AirConstants.NOTHING_block) {
-				st.airport_flags = BitOps.RETSETBITS(st.airport_flags, airport_flags); // occupy next block
+				//st.airport_flags = BitOps.RETSETBITS(st.airport_flags, airport_flags); // occupy next block
+				st.setAirportBlocks(airport_flags);
 			}
 		}
 		return true;
@@ -2009,10 +2017,13 @@ public class AirCraft extends AirCraftTables {
 	{
 		Station st = Station.GetStation(v.air.targetairport);
 		for (; i < last_terminal; i++) {
-			if (!BitOps.HASBIT(st.airport_flags, i)) {
+			//if (!BitOps.HASBIT(st.airport_flags, i)) 
+			if (!st.hasAirportBlock(i)) 
+			{
 				// TERMINAL# HELIPAD#
 				v.air.state = i + Airport.TERM1; // start moving to that terminal/helipad
-				st.airport_flags = BitOps.RETSETBIT(st.airport_flags, i); // occupy terminal/helipad
+				//st.airport_flags = BitOps.RETSETBIT(st.airport_flags, i); // occupy terminal/helipad
+				st.setAirportBlock(i); // occupy terminal/helipad
 				return true;
 			}
 		}
@@ -2040,7 +2051,9 @@ public class AirCraft extends AirCraftTables {
 			temp = airport.getLayoutItem(v.air.pos).next_in_chain;
 			while (temp != null) {
 				if (temp.heading == 255) {
-					if (!BitOps.HASBITS(st.airport_flags, temp.block)) {
+					//if (!BitOps.HASBITS(st.airport_flags, temp.block)) 
+					if (!st.hasAirportBlocks(temp.block)) 
+					{
 						int target_group;
 						int i;
 						int group_start = 0;
@@ -2088,7 +2101,9 @@ public class AirCraft extends AirCraftTables {
 			temp = airport.getLayoutItem(v.air.pos).next_in_chain;
 			while (temp != null) {
 				if (temp.heading == 255) {
-					if (!BitOps.HASBITS(st.airport_flags, temp.block)) {
+					//if (!BitOps.HASBITS(st.airport_flags, temp.block)) 
+					if (!st.hasAirportBlocks(temp.block)) 
+					{
 						int target_group;
 						int i;
 						int group_start = 0;
@@ -2171,16 +2186,16 @@ public class AirCraft extends AirCraftTables {
 		}
 	}
 
-	static void UpdateOilRig()
+	/*static void UpdateOilRig()
 	{
 		Station.forEach( (st) ->
 		{
 			if (st.airport_type == 5) st.airport_type = Airport.AT_OILRIG;
 		});
-	}
+	}*/
 
 	// need to be called to load aircraft from old version
-	static void UpdateOldAircraft()
+	/*static void UpdateOldAircraft()
 	{
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 
@@ -2219,7 +2234,7 @@ public class AirCraft extends AirCraftTables {
 				SetAircraftPosition(v_oldstyle, gp.x, gp.y, GetAircraftFlyingAltitude(v_oldstyle));
 			}
 		}
-	}
+	}*/
 
 	static void UpdateAirplanesOnNewStation(Station st)
 	{
