@@ -556,7 +556,11 @@ public class ViewPort implements Serializable
 
 		cs = new ChildScreenSpriteToDraw();
 
-		if (vd.last_parent == null) return; // TODO whine here?
+		if (vd.last_parent == null) 
+		{
+			Global.error("AddChildSpriteScreen failed: vd.last_parent == null");
+			return;
+		}
 
 		vd.last_parent.children.add(cs);
 

@@ -106,7 +106,7 @@ public class Ship {
 				0 != (v.getCurrent_order().flags & Order.OF_HALT_IN_DEPOT))
 			return;
 
-		if (Global._patches.gotodepot && v.VehicleHasDepotOrders()) return;
+		if (Global._patches.gotodepot.get() && v.VehicleHasDepotOrders()) return;
 
 		depot = FindClosestShipDepot(v);
 

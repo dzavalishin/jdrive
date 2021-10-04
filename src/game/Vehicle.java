@@ -352,7 +352,7 @@ public class Vehicle implements IPoolItem
 		int old_expenses_type = Global.gs._yearly_expenses_type;
 		assert income >= 0;
 
-		if(Global._patches.allow_municipal_airports) {
+		if(Global._patches.allow_municipal_airports.get()) {
 			double tax = (income / 100.0) * 20; //_patches.municipal_airports_tax;
 
 			MiscGui.ShowCostOrIncomeAnimation(x_pos ,y_pos ,z_pos - 13, (int)tax);

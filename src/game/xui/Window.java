@@ -1419,9 +1419,9 @@ public class Window extends WindowConstants implements Serializable
 				nx = x;
 				ny = y;
 
-				if (Global._patches.window_snap_radius != 0) {
-					int hsnap = Global._patches.window_snap_radius;
-					int vsnap = Global._patches.window_snap_radius;
+				if (Global._patches.window_snap_radius.get() != 0) {
+					int hsnap = Global._patches.window_snap_radius.get();
+					int vsnap = Global._patches.window_snap_radius.get();
 					int delta;
 
 					//for (v = _windows; v != _last_window; ++v) 

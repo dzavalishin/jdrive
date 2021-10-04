@@ -395,7 +395,7 @@ public class AirCraft extends AirCraftTables {
 
 		if (v.type != Vehicle.VEH_Aircraft || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
-		if (Global._patches.allow_municipal_airports 
+		if (Global._patches.allow_municipal_airports.get() 
 				&& mAirport.MA_VehicleIsAtMunicipalAirport(v) 
 				&& !v.isStopped())
 			return Cmd.return_cmd_error(Str.STR_MA_CANT_STOP_AT_MUNICIPAL);
@@ -580,7 +580,7 @@ public class AirCraft extends AirCraftTables {
 				(v.getCurrent_order().flags & Order.OF_HALT_IN_DEPOT))
 			return;
 
-		if (Global._patches.gotodepot && v.VehicleHasDepotOrders()) return;
+		if (Global._patches.gotodepot.get() && v.VehicleHasDepotOrders()) return;
 
 		st = Station.GetStation(v.getCurrent_order().station);
 
@@ -1590,7 +1590,7 @@ public class AirCraft extends AirCraftTables {
 			AircraftEventHandler_EnterTerminal(v, airport);
 			// on an airport with helipads, a helicopter will always land there
 			// and get serviced at the same time - patch setting
-			if (Global._patches.serviceathelipad) {
+			if (Global._patches.serviceathelipad.get()) {
 				if (v.subtype == 0 && airport.helipads != null) {
 					// an exerpt of ServiceAircraft, without the invisibility stuff
 					v.date_of_last_service = Global.get_date();

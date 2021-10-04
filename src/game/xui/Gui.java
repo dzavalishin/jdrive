@@ -2378,7 +2378,7 @@ public class Gui
 			w.DrawWindowWidgets();
 			Global.SetDParam(0, Global.get_date());
 			Gfx.DrawStringCentered(
-				70, 1, (Global._pause != 0 || Global._patches.status_long_date) ? Str.STR_00AF : Str.STR_00AE, 0
+				70, 1, (Global._pause != 0 || Global._patches.status_long_date.get()) ? Str.STR_00AF : Str.STR_00AE, 0
 			);
 
 			if (p != null) {

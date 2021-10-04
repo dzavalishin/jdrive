@@ -245,7 +245,7 @@ public class Order implements Serializable
 				return Cmd.CMD_ERROR;
 
 			//MA checks
-			if(Global._patches.allow_municipal_airports && !mAirport.MA_WithinVehicleQuota(Station.GetStation(new_order.station))) {
+			if(Global._patches.allow_municipal_airports.get() && !mAirport.MA_WithinVehicleQuota(Station.GetStation(new_order.station))) {
 				Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 				return Cmd.CMD_ERROR;
 				//End MA checks

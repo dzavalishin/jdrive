@@ -3813,7 +3813,7 @@ public class TrainCmd extends TrainTables
 		if (Global._patches.servint_trains == 0)                   return;
 		if (!v.VehicleNeedsService())                        return;
 		if(v.isStopped())                      return;
-		if (Global._patches.gotodepot && v.VehicleHasDepotOrders()) return;
+		if (Global._patches.gotodepot.get() && v.VehicleHasDepotOrders()) return;
 
 		// Don't interfere with a depot visit scheduled by the user, or a
 		// depot visit by the order list.

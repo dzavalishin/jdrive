@@ -1493,7 +1493,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		i.production_rate[0] = spec.production_rate[0];
 		i.production_rate[1] = spec.production_rate[1];
 
-		if (Global._patches.smooth_economy) {
+		if (Global._patches.smooth_economy.get()) {
 			i.production_rate[0] =  Math.min((Hal.RandomRange(256) + 128) * i.production_rate[0] >> 8 , 255);
 			i.production_rate[1] =  Math.min((Hal.RandomRange(256) + 128) * i.production_rate[1] >> 8 , 255);
 		}
@@ -1615,7 +1615,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		/* If the patch for raw-material industries is not on, you cannot build raw-material industries.
 		 * Raw material industries are industries that do not accept cargo (at least for now)
 		 * Exclude the lumber mill (only "raw" industry that can be built) */
-		if (!Global._patches.build_rawmaterial_ind &&
+		if (!Global._patches.build_rawmaterial_ind.get() &&
 				spec.accepts_cargo[0] == AcceptedCargo.CT_INVALID &&
 				spec.accepts_cargo[1] == AcceptedCargo.CT_INVALID &&
 				spec.accepts_cargo[2] == AcceptedCargo.CT_INVALID &&
@@ -1830,7 +1830,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		if (i.prod_level == 0) {
 			DeleteIndustry(i);
-		} else if (Global._patches.smooth_economy) {
+		} else if (Global._patches.smooth_economy.get()) {
 			ExtChangeIndustryProduction(i);
 		}
 	}
@@ -1949,7 +1949,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		/* 3% chance that we start a new industry */
 		if (BitOps.CHANCE16(3, 100)) {
 			MaybeNewIndustry(Hal.Random());
-		} else if (!Global._patches.smooth_economy && _total_industries > 0) {
+		} else if (!Global._patches.smooth_economy.get() && _total_industries > 0) {
 			Industry i = GetIndustry(Hal.RandomRange(_total_industries));
 			if (i != null && i.isValid()) ChangeIndustryProduction(i);
 		}
@@ -2326,7 +2326,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	public static void ShowBuildIndustryWindow()
 	{
-		Window.AllocateWindowDescFront(_industry_window_desc[BitOps.b2i(Global._patches.build_rawmaterial_ind)][GameOptions._opt_ptr.landscape],0);
+		Window.AllocateWindowDescFront(_industry_window_desc[BitOps.b2i(Global._patches.build_rawmaterial_ind.get())][GameOptions._opt_ptr.landscape],0);
 	}
 
 	private static boolean NEED_ALTERB(Industry i) 

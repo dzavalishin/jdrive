@@ -479,7 +479,7 @@ public class MiscGui {
 
 	static final Integer [] _errmsg_decode_params = new Integer[20];
 	static StringID _errmsg_message_1, _errmsg_message_2;
-	static int _errmsg_duration = 50; // TODO [dz] why?
+	static int _errmsg_duration = 0;
 
 
 	static final Widget _errmsg_widgets[] = {
@@ -570,7 +570,7 @@ public class MiscGui {
 		_errmsg_message_1 = msg_1;
 		_errmsg_message_2 = msg_2;
 		Global.COPY_OUT_DPARAM(_errmsg_decode_params, 0, _errmsg_decode_params.length);
-		_errmsg_duration = Global._patches.errmsg_duration;
+		_errmsg_duration = Global._patches.errmsg_duration.get();
 		if (0== _errmsg_duration)
 			return;
 

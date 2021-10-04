@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import game.Cmd;
 import game.Currency;
+import game.Engine;
 import game.GRFFile;
 import game.GameOptions;
 import game.Global;
@@ -12,10 +13,16 @@ import game.Sprite;
 import game.Str;
 import game.Town;
 import game.Vehicle;
+import game.console.DefaultConsole;
 import game.enums.GameModes;
 import game.ids.StringID;
 import game.struct.GameSettingData;
+import game.tables.BooleanPatchVariable;
+import game.tables.CurrencyPatchVariable;
 import game.tables.CurrencySpec;
+import game.tables.PatchEntry;
+import game.tables.PatchPage;
+import game.tables.PatchVariable;
 import game.tables.SettingsTables;
 import game.util.BinaryString;
 import game.util.BitOps;
@@ -60,8 +67,8 @@ public class SettingsGui extends SettingsTables
 			}
 		}
 		return i;
-		*/
-		
+		 */
+
 		return 0;
 	}
 
@@ -82,8 +89,16 @@ public class SettingsGui extends SettingsTables
 		case WE_PAINT: {
 			//int i;
 			/*StringID*/ int str = Str.STR_02BE_DEFAULT;
-			//w.disabled_state = (Global._vehicle_design_names & 1) ? (++str, 0) : (1 << 21);
-			
+			//w.disabled_state = (Global._vehicle_design_names & 1) != 0 ? (++str, 0) : (1 << 21);
+
+			w.disabled_state = 1 << 21;
+
+			if((Global._vehicle_design_names & 1) != 0)
+			{
+				++str;			
+				w.disabled_state = 0;
+			}
+
 			if((Global._vehicle_design_names & 1)!=0)
 			{
 				++str;
@@ -93,20 +108,20 @@ public class SettingsGui extends SettingsTables
 			{
 				w.disabled_state = (1 << 21);
 			}
-			
+
 			Global.SetDParam(0, str);
 			Global.SetDParam(1, Currency._currency_string_list[GameOptions._opt_ptr.currency]);
 			Global.SetDParam(2, (GameOptions._opt_ptr.kilometers ? 1 : 0) + Str.STR_0139_IMPERIAL_MILES);
 			Global.SetDParam(3, Str.STR_02E9_DRIVE_ON_LEFT + GameOptions._opt_ptr.road_side);
 			Global.SetDParam(4, Str.STR_TOWNNAME_ORIGINAL_ENGLISH + GameOptions._opt_ptr.town_name);
 			Global.SetDParam(5, _autosave_dropdown[GameOptions._opt_ptr.autosave]);
-			//Global.SetDParam(6, 0); // TODO Strings.SPECSTR_LANGUAGE_START + _dynlang.curr);
 			Global.SetDParam(6, Strings.SPECSTR_LANGUAGE_START + Strings._dynlang.curr);
 			//i = GetCurRes();
-			Global.SetDParam(7, Str.STR_RES_OTHER); // TODO i == _num_resolutions ? Str.STR_RES_OTHER : Strings.SPECSTR_RESOLUTION_START + i);
+			Global.SetDParam(7, Str.STR_RES_OTHER); // i == _num_resolutions ? Str.STR_RES_OTHER : Strings.SPECSTR_RESOLUTION_START + i);
 			Global.SetDParam(8, Strings.SPECSTR_SCREENSHOT_START); // TODO Strings.SPECSTR_SCREENSHOT_START + _cur_screenshot_format);
-			
-			// TODO (_fullscreen) ? SETBIT(w.click_state, 28) : CLRBIT(w.click_state, 28); // fullscreen button
+
+			// (_fullscreen) ? SETBIT(w.click_state, 28) : CLRBIT(w.click_state, 28); // fullscreen button
+			fullScreenSwitch(w);
 
 			w.DrawWindowWidgets();
 			Gfx.DrawString(20, 175, Str.STR_OPTIONS_FULLSCREEN, 0); // fullscreen
@@ -139,7 +154,7 @@ public class SettingsGui extends SettingsTables
 				Window.ShowDropDownMenu(w, _autosave_dropdown, GameOptions._opt_ptr.autosave, 17, 0, 0);
 				return;
 			case 19: case 20: /* Setup customized vehicle-names dropdown */
-				// TODO Window.ShowDropDownMenu(w, _designnames_dropdown, (Global._vehicle_design_names & 1) ? 1 : 0, 20, (Global._vehicle_design_names & 2) ? 0 : 2, 0);
+				Window.ShowDropDownMenu(w, _designnames_dropdown, (Global._vehicle_design_names & 1) != 0 ? 1 : 0, 20, (Global._vehicle_design_names & 2) != 0 ? 0 : 2, 0);
 				return;
 			case 21: /* Save customized vehicle-names to disk */
 				return;
@@ -150,9 +165,11 @@ public class SettingsGui extends SettingsTables
 				Window.ShowDropDownMenu(w, BuildDynamicDropdown(Strings.SPECSTR_RESOLUTION_START, 1/*Global._num_resolutions*/), GetCurRes(), 27, 0, 0);
 				return;
 			case 28: /* Click fullscreen on/off */
-				// TODO (_fullscreen) ? CLRBIT(w.click_state, 28) : SETBIT(w.click_state, 28);
-				// TODO ToggleFullScreen(!_fullscreen); // toggle full-screen on/off
-				// TODO w.SetWindowDirty();
+				// (_fullscreen) ? CLRBIT(w.click_state, 28) : SETBIT(w.click_state, 28);
+				fullScreenSwitch(w);
+
+				Global.hal.ToggleFullScreen(!Global._fullscreen); // toggle full-screen on/off
+				w.SetWindowDirty();
 				return;
 			case 30: case 31: /* Setup screenshot format dropdown */
 				// TODO Window.ShowDropDownMenu(w, BuildDynamicDropdown(SPECStr.STR_SCREENSHOT_START, _num_screenshot_formats), _cur_screenshot_format, 31, 0, 0);
@@ -164,10 +181,10 @@ public class SettingsGui extends SettingsTables
 			switch (e.button) {
 			case 20: /* Vehicle design names */
 				if (e.index == 0) {
-					// TODO DeleteCustomEngineNames();
+					Engine.DeleteCustomEngineNames();
 					Hal.MarkWholeScreenDirty();
 				} else if (0==(Global._vehicle_design_names & 1)) {
-					// TODO LoadCustomEngineNames();
+					Engine.LoadCustomEngineNames();
 					Hal.MarkWholeScreenDirty();
 				}
 				break;
@@ -218,6 +235,13 @@ public class SettingsGui extends SettingsTables
 			break;
 		}
 
+	}
+
+	private static void fullScreenSwitch(Window w) {
+		if(Global._fullscreen) 
+			w.click_state = BitOps.RETSETBIT(w.click_state, 28); 
+		else 
+			w.click_state = BitOps.RETCLRBIT(w.click_state, 28); // fullscreen button
 	}
 
 	/** Change the side of the road vehicles drive on (server only).
@@ -315,12 +339,12 @@ public class SettingsGui extends SettingsTables
 			new GameSettingData(  0,   2,  1, Str.STR_6839_PERMISSIVE),
 	};
 
-	
+
 	static  boolean GetBitAndShift(int [] b)
 	{
 		int x = b[0];
 		b[0] >>= 1;
-		return BitOps.HASBIT(x, 0);
+				return BitOps.HASBIT(x, 0);
 	}
 
 
@@ -337,7 +361,7 @@ public class SettingsGui extends SettingsTables
 			{
 				//((int*)&gm_opt.diff)[i] = _default_game_diff[mode][i];
 			}
-			*/
+			 */
 			gm_opt.diff = _default_game_diff[mode];
 		}
 
@@ -461,7 +485,7 @@ public class SettingsGui extends SettingsTables
 				//((int*)&_opt_mod_temp.diff)[btn] = val;
 				_opt_mod_temp.diff.setAsInt(btn,val);
 				SetDifficultyLevel(3, _opt_mod_temp); // set difficulty level to custom
-				
+
 				w.SetWindowDirty();
 			}	break;
 			case 3: case 4: case 5: case 6: /* Easy / Medium / Hard / Custom */
@@ -533,7 +557,7 @@ public class SettingsGui extends SettingsTables
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 			_game_difficulty_widgets,
 			SettingsGui::GameDifficultyWndProc
-	);
+			);
 
 	public static void ShowGameDifficulty()
 	{
@@ -676,8 +700,8 @@ public class SettingsGui extends SettingsTables
 		default: NOT_REACHED();
 		}
 	}
-	*/
-	
+	 */
+
 	static void PatchesSelectionWndProc(Window w, WindowEvent e)
 	{
 		switch (e.event) {
@@ -692,154 +716,152 @@ public class SettingsGui extends SettingsTables
 			w.click_state = 1 << (w.as_def_d().data_1 + 4);
 
 			w.DrawWindowWidgets();
-			/*
-			x = 0;
-			y = 46;
-			clk = w.as_def_d().data_2;
-			page = Global._patches_page[w.as_def_d().data_1];
-			for (i = 0, pe = page.entries; i != page.num; i++, pe++) {
+
+			int x = 0;
+			int y = 46;
+			int clk = w.as_def_d().data_2;
+
+			PatchPage page = _patches_page[w.as_def_d().data_1];
+
+			for (int i = 0; i != page.entries.length; i++) 
+			{
 				boolean disabled = false;
 				boolean editable = true;
+				PatchEntry pe = page.entries[i];
 
-				if ((pe.flags & PF_NETWORK_ONLY) && !Global._networking)
+				if ((pe.isNetworkOnly()) && !Global._networking)
 					editable = false;
 
 				// We do not allow changes of some items when we are a client in a networkgame
-				if (!(pe.flags & PF_PLAYERBASED) && Global._networking && !Global._network_server)
+				if (!(pe.isPlayerBased()) && Global._networking && !Global._network_server)
 					editable = false;
-				if (pe.type == PE_BOOL) {
+
+				if (pe.getVariable() instanceof BooleanPatchVariable) {
+					BooleanPatchVariable bv = (BooleanPatchVariable) pe.getVariable();
 					if (editable)
-						Gfx.DrawFrameRect(x+5, y+1, x+15+9, y+9, (*(boolean*)pe.variable) ? 6 : 4, (*(boolean*)pe.variable) ? Window.FR_LOWERED : 0);
+						Gfx.DrawFrameRect(x+5, y+1, x+15+9, y+9, bv.get() ? 6 : 4, bv.get() ? Window.FR_LOWERED : 0);
 					else
-						Gfx.DrawFrameRect(x+5, y+1, x+15+9, y+9, (*(boolean*)pe.variable) ? 7 : 9, (*(boolean*)pe.variable) ? Window.FR_LOWERED : 0);
-					Global.SetDParam(0, *(boolean*)pe.variable ? Str.STR_CONFIG_PATCHES_ON : Str.STR_CONFIG_PATCHES_OFF);
+						Gfx.DrawFrameRect(x+5, y+1, x+15+9, y+9, bv.get() ? 7 : 9, bv.get() ? Window.FR_LOWERED : 0);
+					Global.SetDParam(0, bv.get() ? Str.STR_CONFIG_PATCHES_ON : Str.STR_CONFIG_PATCHES_OFF);
 				} else {
 					Gfx.DrawFrameRect(x+5, y+1, x+5+9, y+9, 3, clk == i*2+1 ? Window.FR_LOWERED : 0);
 					Gfx.DrawFrameRect(x+15, y+1, x+15+9, y+9, 3, clk == i*2+2 ? Window.FR_LOWERED : 0);
 					if (!editable) {
-						int color = PALETTE_MODIFIER_GREYOUT | Global._color_list[3].unk2;
+						int color = Sprite.PALETTE_MODIFIER_GREYOUT | Global._color_list[3].unk2;
 						Gfx.GfxFillRect(x+6, y+2, x+6+8, y+9, color);
 						Gfx.GfxFillRect(x+16, y+2, x+16+8, y+9, color);
 					}
 					Gfx.DrawStringCentered(x+10, y+1, Str.STR_6819, 0);
 					Gfx.DrawStringCentered(x+20, y+1, Str.STR_681A, 0);
 
-					val = ReadPE(pe);
-					if (pe.type == PE_CURRENCY) val /= _currency.rate;
-					disabled = ((val == 0) && (pe.flags & PF_0ISDIS));
+					int val = pe.ReadPE();
+					// TODO if (pe.getVariable() instanceof CurrencyPatchVariable) val /= Currency._currency.rate;
+					disabled = ((val == 0) && (pe.zeroIsDisable()));
+
 					if (disabled) {
 						Global.SetDParam(0, Str.STR_CONFIG_PATCHES_DISABLED);
 					} else {
 						Global.SetDParam(1, val);
-						if (pe.type == PE_CURRENCY)
+						if (pe.getVariable() instanceof CurrencyPatchVariable)
 							Global.SetDParam(0, Str.STR_CONFIG_PATCHES_CURRENCY);
 						else {
-							if (pe.flags & PF_MULTISTRING)
-								Global.SetDParam(0, pe.str + val + 1);
+							if (pe.isMultistring())
+								Global.SetDParam(0, pe.getString() + val + 1);
 							else
-								Global.SetDParam(0, pe.flags & PF_NOCOMMA ? Str.STR_CONFIG_PATCHES_INT32 : Str.STR_7024);
+								Global.SetDParam(0, pe.isNoComma() ? Str.STR_CONFIG_PATCHES_INT32 : Str.STR_7024);
 						}
 					}
 				}
-				Gfx.DrawString(30, y+1, (pe.str)+disabled, 0);
+				Gfx.DrawString(30, y+1, (pe.getString())+BitOps.b2i(disabled) , 0);
 				y += 11;
 			}
 			break;
-			*/
+			/* */
 		}
 
 		case WE_CLICK:
 			switch(e.widget) {
-			case 3: /* TODO {
-				int x,y;
-				int btn;
-				final PatchPage *page;
-				final PatchEntry *pe;
-
-				y = e.pt.y - 46 - 1;
+			case 3: {
+				int y = e.pt.y - 46 - 1;
 				if (y < 0) return;
 
-				btn = y / 11;
+				int btn = y / 11;
 				if (y % 11 > 9) return;
 
-				page = &Global._patches_page[w.as_def_d().data_1];
-				if (btn >= page.num) return;
-				pe = &page.entries[btn];
+				final PatchPage page = _patches_page[w.as_def_d().data_1];
+				if (btn >= page.entries.length) return;
+				final PatchEntry pe = page.entries[btn];
 
-				x = e.pt.x - 5;
+				int x = e.pt.x - 5;
 				if (x < 0) return;
 
-				if (((pe.flags & PF_NETWORK_ONLY) && !Global._networking) || // return if action is only active in network
-						(!(pe.flags & PF_PLAYERBASED) && Global._networking && !Global._network_server)) // return if only server can change it
+				if (((pe.isNetworkOnly()) && !Global._networking) || // return if action is only active in network
+						(!(pe.isPlayerBased()) && Global._networking && !Global._network_server)) // return if only server can change it
 					return;
 
 				if (x < 21) { // clicked on the icon on the left side. Either scroller or boolean on/off
-					int val = ReadPE(pe), oval = val;
+					int val = pe.ReadPE();
+					int oval = val;
 
-					switch(pe.type) {
-					case PE_BOOL:
+					if( pe.isBoolean() )
 						val ^= 1;
-						break;
-					case PE_UINT8:
-					case PE_INT16:
-					case PE_UINT16:
-					case PE_INT32:
-					case PE_CURRENCY:
-						// don't allow too fast scrolling
-						if ((w.flags4 & Window.WF_TIMEOUT_MASK) > 2 << Window.WF_TIMEOUT_SHL) {
-							Global._left_button_clicked = false;
-							return;
-						}
 
-						if (x >= 10) {
-							//increase
-							if (pe.flags & PF_0ISDIS && val == 0)
-								val = pe.min;
-							else
-								val += pe.step;
-							if (val > pe.max) val = pe.max;
-						} else {
-							// decrease
-							if (val <= pe.min && pe.flags & PF_0ISDIS) {
-								val = 0;
-							} else {
-								val -= pe.step;
-								if (val < pe.min) val = pe.min;
-							}
-						}
-
-						if (val != oval) {
-							w.as_def_d().data_2 = btn * 2 + 1 + ((x>=10) ? 1 : 0);
-							w.flags4 |= 5 << Window.WF_TIMEOUT_SHL;
-							_left_button_clicked = false;
-						}
-						break;
+					// don't allow too fast scrolling
+					if ((w.flags4 & Window.WF_TIMEOUT_MASK) > 2 << Window.WF_TIMEOUT_SHL) {
+						Window._left_button_clicked = false;
+						return;
 					}
+
+					if (x >= 10) {
+						//increase
+						if (pe.zeroIsDisable() && val == 0)
+							val = pe.min;
+						else
+							val += pe.step;
+						if (val > pe.max) val = pe.max;
+					} else {
+						// decrease
+						if (val <= pe.min && pe.zeroIsDisable()) {
+							val = 0;
+						} else {
+							val -= pe.step;
+							if (val < pe.min) val = pe.min;
+						}
+					}
+
+					if (val != oval) {
+						w.as_def_d().data_2 = btn * 2 + 1 + ((x>=10) ? 1 : 0);
+						w.flags4 |= 5 << Window.WF_TIMEOUT_SHL;
+						Window._left_button_clicked = false;
+					}
+
+
 					if (val != oval) {
 						// To make patch-changes network-safe
-						if (pe.type == PE_CURRENCY) val /= _currency.rate;
+						// TODO if (pe.isCurrency()) val /= _currency.rate;
 						// If an item is playerbased, we do not send it over the network (if any)
-						if (pe.flags & PF_PLAYERBASED) {
-							WritePE(pe, val);
+						if (pe.isPlayerBased()) {
+							pe.WritePE(val);
 						} else {
 							// Else we do
-							Cmd.DoCommandP(0, (byte)w.as_def_d().data_1 + ((byte)btn << 8), val, null, Cmd.CMD_CHANGE_PATCH_SETTING);
+							Cmd.DoCommandP( null, (byte)w.as_def_d().data_1 + ((byte)btn << 8), val, null, Cmd.CMD_CHANGE_PATCH_SETTING);
 						}
 						w.SetWindowDirty();
 
-						if (pe.click_proc != null) // call callback function
-							pe.click_proc(val);
+						//if (pe.click_proc != null)							pe.click_proc(val);
+						// call callback function
+						pe.onClick();
 					}
 				} else {
-					if (pe.type != PE_BOOL && !(pe.flags & PF_MULTISTRING)) { // do not open editbox
+					if (!pe.isBoolean() && !(pe.isMultistring())) { // do not open editbox
 						w.as_def_d().data_3 = btn;
-						Global.SetDParam(0, ReadPE(pe));
-						ShowQueryString(Str.STR_CONFIG_PATCHES_INT32, Str.STR_CONFIG_PATCHES_QUERY_CAPT, 10, 100, Window.WC_GAME_OPTIONS, 0);
+						Global.SetDParam(0, pe.ReadPE());
+						MiscGui.ShowQueryString(Str.STR_CONFIG_PATCHES_INT32, Str.STR_CONFIG_PATCHES_QUERY_CAPT, 10, 100, Window.WC_GAME_OPTIONS, 0);
 					}
 				}
 
 				break;
-			} */
+			} /* */
 			case 4: case 5: case 6: case 7: case 8: case 9:
 				w.as_def_d().data_1 = e.widget - 4;
 				Window.DeleteWindowById(Window.WC_QUERY_STRING, 0);
@@ -874,8 +896,8 @@ public class SettingsGui extends SettingsTables
 				if (pe.click_proc != null) // call callback function
 					pe.click_proc(pe);
 					//pe.click_proc(*(int*)pe.variable);
-					 * 
-					 */
+				 * 
+				 */
 			}
 			break;
 		}
@@ -899,42 +921,37 @@ public class SettingsGui extends SettingsTables
 	 */
 	public static int CmdChangePatchSetting(int x, int y, int flags, int p1, int p2)
 	{
-		/* TODO
 		byte pcat = (byte) BitOps.GB(p1, 0, 8);
 		byte pel  = (byte) BitOps.GB(p1, 8, 8);
 
-		if (pcat >= lengthof(Global._patches_page)) return Cmd.CMD_ERROR;
-		if (pel >= Global._patches_page[pcat].num) return Cmd.CMD_ERROR;
+		if (pcat >= _patches_page.length) return Cmd.CMD_ERROR;
+		if (pel >= _patches_page[pcat].entries.length) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			final PatchEntry pe = Global._patches_page[pcat].entries[pel];
-			WritePE(pe, (int)p2);
+			final PatchEntry pe = _patches_page[pcat].entries[pel];
+			pe.WritePE((int)p2);
 
 			Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
 		}
 
 		return 0;
-		*/
-		return Cmd.CMD_ERROR;
+		/* */
+		//return Cmd.CMD_ERROR;
 	}
 
-	/*
-	static final PatchEntry IConsoleGetPatch(final char *name, int *page, int *entry)
+	static final PatchEntry IConsoleGetPatch(final String name, int [] page, int [] entry)
 	{
-		final PatchPage pp;
-		final PatchEntry pe;
-
-		for (*page = 0; *page < lengthof(Global._patches_page); (*page)++) {
-			pp = &Global._patches_page[*page];
-			for (*entry = 0; *entry < pp.num; (*entry)++) {
-				pe = &pp.entries[*entry];
-				if (strncmp(pe.console_name, name, sizeof(pe.console_name)) == 0)
+		for (page[0] = 0; page[0] < _patches_page.length; page[0]++) {
+			final PatchPage pp = _patches_page[page[0]];
+			for (entry[0] = 0; entry[0] < pp.entries.length; entry[0]++) {
+				final PatchEntry pe = pp.entries[entry[0]];
+				if (pe.nameIs(name))
 					return pe;
 			}
 		}
 
 		return null;
-	}*/
+	}
 
 	/* Those 2 functions need to be here, else we have to make some stuff non-static
 	    and besides, it is also better to keep stuff like this at the same place */
@@ -973,9 +990,9 @@ public class SettingsGui extends SettingsTables
 
 			IConsolePrintF(_icolour_warn, "'%s' changed to:  %s", name, tval2);
 		}
-		*/
+		 */
 	}
-	
+
 
 	void IConsoleGetPatchSetting(final String name)
 	{
@@ -997,8 +1014,8 @@ public class SettingsGui extends SettingsTables
 		}
 
 		IConsolePrintF(_icolour_warn, "Current value for '%s' is: '%s'", name, value);
-		*/
-		// TODO Console.IConsolePrintF(Console._icolour_warn, "Not impl- "); // TODO
+		 */
+		DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn, "Not impl"); // TODO
 	}
 
 	static final Widget _patches_selection_widgets[] = {
@@ -1021,7 +1038,7 @@ public class SettingsGui extends SettingsTables
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET,
 			_patches_selection_widgets,
 			SettingsGui::PatchesSelectionWndProc
-	);
+			);
 
 	static void ShowPatchesSelection()
 	{
@@ -1044,7 +1061,7 @@ public class SettingsGui extends SettingsTables
 			GRFFile c = GRFFile._first_grffile;
 
 			w.DrawWindowWidgets();
-			
+
 			if (GRFFile._first_grffile == null) { // no grf sets installed
 				Gfx.DrawStringMultiCenter(140, 210, Str.STR_NEWGRF_NO_FILES_INSTALLED, 250);
 				break;
@@ -1080,7 +1097,7 @@ public class SettingsGui extends SettingsTables
 				Strings._userstring = new BinaryString( String.format("%08X", _sel_grffile.getGrfid()) );
 				Gfx.DrawString(x + 2, 209, Strings.STR_SPEC_USERSTRING, 0x01);
 			}
-			
+
 		} break;
 
 		case WE_CLICK:
@@ -1141,7 +1158,7 @@ public class SettingsGui extends SettingsTables
 
 			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,     3,     5,   138,   261,   272, Str.STR_NEWGRF_APPLY_CHANGES,		Str.STR_NULL),
 			new Widget( Window.WWT_PUSHTXTBTN,   Window.RESIZE_NONE,     3,   142,   274,   261,   272, Str.STR_012E_CANCEL,							Str.STR_NULL),
-			
+
 	};
 
 	static final WindowDesc _newgrf_desc = new WindowDesc(
@@ -1150,11 +1167,11 @@ public class SettingsGui extends SettingsTables
 			WindowDesc.WDF_STD_TOOLTIPS | WindowDesc.WDF_STD_BTN | WindowDesc.WDF_DEF_WIDGET | WindowDesc.WDF_UNCLICK_BUTTONS,
 			_newgrf_widgets,
 			SettingsGui::NewgrfWndProc
-	);
+			);
 
 	static void ShowNewgrf()
 	{
-		
+
 		GRFFile c;
 		Window w;
 		int count;
@@ -1169,7 +1186,7 @@ public class SettingsGui extends SettingsTables
 		w.vscroll.setCount(count);
 		w.vscroll.pos = 0;
 		w.disabled_state = (1 << 5) | (1 << 6) | (1 << 7);
-		
+
 	}
 
 	/* state: 0 = none clicked, 0x01 = first clicked, 0x02 = second clicked */
@@ -1371,7 +1388,7 @@ public class SettingsGui extends SettingsTables
 			new Widget(   Window.WWT_CLOSEBOX,   Window.RESIZE_NONE,    14,     0,    10,     0,    13, Str.STR_00C5,						Str.STR_018B_CLOSE_WINDOW),
 			new Widget(    Window.WWT_CAPTION,   Window.RESIZE_NONE,    14,    11,   229,     0,    13, Str.STR_CURRENCY_WINDOW,	Str.STR_018C_WINDOW_TITLE_DRAG_THIS),
 			new Widget(      Window.WWT_PANEL,   Window.RESIZE_NONE,    14,     0,   229,    14,   119, 0x0,									Str.STR_NULL),
-			
+
 	};
 
 	static final WindowDesc _cust_currency_desc = new WindowDesc(

@@ -100,7 +100,7 @@ public class Engine extends EngineTables implements Serializable
 
 	//void ShowEnginePreviewWindow(EngineID engine);
 
-	static void DeleteCustomEngineNames()
+	public static void DeleteCustomEngineNames()
 	{
 		int i;
 		//StringID 
@@ -115,7 +115,7 @@ public class Engine extends EngineTables implements Serializable
 		Global._vehicle_design_names &= ~1;
 	}
 
-	static void LoadCustomEngineNames()
+	public static void LoadCustomEngineNames()
 	{
 		// XXX: not done */
 		Global.DEBUG_misc( 1, "LoadCustomEngineNames: not done");

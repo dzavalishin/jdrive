@@ -791,7 +791,7 @@ public class Player implements Serializable
 			}
 		}
 
-		if (Global._patches.show_finances && Global.gs._local_player.id != Owner.OWNER_SPECTATOR) {
+		if (Global._patches.show_finances.get() && Global.gs._local_player.id != Owner.OWNER_SPECTATOR) {
 			PlayerGui.ShowPlayerFinances(Global.gs._local_player.id);
 			Player p = GetPlayer(Global.gs._local_player);
 

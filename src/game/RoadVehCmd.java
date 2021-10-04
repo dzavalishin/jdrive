@@ -1550,7 +1550,7 @@ class RoadDriveEntry {
 		if(v.isStopped())
 			return;
 
-		if (Global._patches.gotodepot && v.VehicleHasDepotOrders())
+		if (Global._patches.gotodepot.get() && v.VehicleHasDepotOrders())
 			return;
 
 		// Don't interfere with a depot visit scheduled by the user, or a
