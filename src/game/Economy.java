@@ -18,64 +18,35 @@ import game.struct.FoundRoute;
 import game.struct.GoodsEntry;
 import game.struct.Pair;
 import game.struct.PlayerEconomyEntry;
-import game.struct.ScoreInfo;
 import game.tables.EconomeTables;
 import game.tables.Snd;
 import game.util.BitOps;
 import game.util.Prices;
 import game.xui.Gfx;
 import game.xui.MiscGui;
+import game.xui.PlayerGui;
 import game.xui.VehicleGui;
 import game.xui.Window;
 
 public class Economy extends EconomeTables implements Serializable
 {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 	
 	// Maximum possible loan
-	int max_loan;
-	int max_loan_unround;
+	private int max_loan;
+	private double max_loan_unround;
 	// Economy fluctuation status
-	int fluct;
+	private int fluct;
 	// Interest
-	int interest_rate;
-	int infl_amount;
-	int infl_amount_pr;
+	private int interest_rate;
+	private int infl_amount;
+	private int infl_amount_pr;
 
 
 
-	public static final int SCORE_VEHICLES = 0;
-	public static final int SCORE_STATIONS = 1;
-	public static final int SCORE_MIN_PROFIT = 2;
-	public static final int SCORE_MIN_INCOME = 3;
-	public static final int SCORE_MAX_INCOME = 4;
-	public static final int SCORE_DELIVERED = 5;
-	public static final int SCORE_CARGO = 6;
-	public static final int SCORE_MONEY = 7;
-	public static final int SCORE_LOAN = 8;
-	public static final int SCORE_TOTAL = 9; // This must always be the last entry
 
-	public static final int NUM_SCORE = 10; // How many scores are there..
-
-	public static final int SCORE_MAX = 1000; 	// The max score that can be in the performance history
-	//  the scores together of public static final int SCORE_info is allowed to be more!
-
-	//static ScoreInfo _score_info[];
 	public static final long[][] _score_part = new long [Global.MAX_PLAYERS][NUM_SCORE];
 
-	// Score info
-	public static final ScoreInfo _score_info[] = {
-			new ScoreInfo( SCORE_VEHICLES,		120, 			100),
-			new ScoreInfo( SCORE_STATIONS,		80, 			100),
-			new ScoreInfo( SCORE_MIN_PROFIT,	10000,		100),
-			new ScoreInfo( SCORE_MIN_INCOME,	50000,		50),
-			new ScoreInfo( SCORE_MAX_INCOME,	100000,		100),
-			new ScoreInfo( SCORE_DELIVERED,		40000, 		400),
-			new ScoreInfo( SCORE_CARGO,				8,				50),
-			new ScoreInfo( SCORE_MONEY,				10000000,	50),
-			new ScoreInfo( SCORE_LOAN,				250000,		50),
-			new ScoreInfo( SCORE_TOTAL,				0,				0)
-	};
 
 	//int _score_part[MAX_PLAYERS][NUM_SCORE];
 
@@ -134,7 +105,7 @@ public class Economy extends EconomeTables implements Serializable
 				}
 			});
 
-			value = num[0] * Global._price.station_value * 25L;
+			value = (long) (num[0] * Global._price.station_value * 25L);
 		}
 
 		{
@@ -680,7 +651,7 @@ public class Economy extends EconomeTables implements Serializable
 		{
 				PlayerID.setCurrent(st.owner); 
 				Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
-				Player.SubtractMoneyFromPlayer(Global._price.station_value >> 1);
+				Player.SubtractMoneyFromPlayer((int) (Global._price.station_value/2));
 		});
 		
 		PlayerID.setCurrentToNone(); // [dz] clean up
@@ -723,7 +694,6 @@ public class Economy extends EconomeTables implements Serializable
 	}
 
 
-	// TODO AddSingleInflation
 	/*
 	static void AddSingleInflation(int *value, int *frac, int amt)
 	{
@@ -736,33 +706,40 @@ public class Economy extends EconomeTables implements Serializable
 	 */
 	void AddInflation()
 	{
-		/* TODO
+
 		int i;
 		int inf = infl_amount * 54;
+		double infd = 1.0 + ((inf+0.0) / (1<<16));
 
-		for (i = 0; i != NUM_PRICES; i++) {
-			AddSingleInflation((int*)&_price + i, _price_frac + i, inf);
+		for (i = 0; i != Prices.NUM_PRICES; i++) {
+			//AddSingleInflation((int*)&_price + i, _price_frac + i, inf);
+			double p = Global._price.getPrice(i);
+			Global._price.setPrice(i, p*infd);
 		}
 
-		max_loan_unround += BIGMULUS(max_loan_unround, inf, 16);
+		//max_loan_unround += BIGMULUS(max_loan_unround, inf, 16);
+		max_loan_unround *= infd; 
 
 		if (max_loan + 50000 <= max_loan_unround)
 			max_loan += 50000;
 
 		inf = infl_amount_pr * 54;
-		for (i = 0; i != NUM_CARGO; i++) {
-			AddSingleInflation(
+		infd = 1.0 + (inf+0.0 / (1<<16));
+		for (i = 0; i != AcceptedCargo.NUM_CARGO; i++) {
+			/*AddSingleInflation(
 				(int*)_cargo_payment_rates + i,
 				_cargo_payment_rates_frac + i,
 				inf
-			);
+			);*/
+			
+			Global._cargo_payment_rates[i] *= infd;
 		}
 
-		InvalidateWindowClasses(WC_BUILD_VEHICLE);
-		InvalidateWindowClasses(WC_REPLACE_VEHICLE);
-		InvalidateWindowClasses(WC_VEHICLE_DETAILS);
-		InvalidateWindow(WC_PAYMENT_RATES, 0);
-		 */
+		Window.InvalidateWindowClasses(Window.WC_BUILD_VEHICLE);
+		Window.InvalidateWindowClasses(Window.WC_REPLACE_VEHICLE);
+		Window.InvalidateWindowClasses(Window.WC_VEHICLE_DETAILS);
+		Window.InvalidateWindow(Window.WC_PAYMENT_RATES, 0);
+
 	}
 
 	void PlayersPayInterest()
@@ -781,7 +758,8 @@ public class Economy extends EconomeTables implements Serializable
 			Player.SubtractMoneyFromPlayer(BitOps.BIGMULUS(p.current_loan, interest, 16));
 
 			Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
-			Player.SubtractMoneyFromPlayer(Global._price.station_value >> 2);
+			//Player.SubtractMoneyFromPlayer(Global._price.station_value >> 2);
+			Player.SubtractMoneyFromPlayer((int) (Global._price.station_value/4));
 		}
 		
 		PlayerID.setCurrentToNone(); // [dz] or else it can be null?
@@ -852,7 +830,7 @@ public class Economy extends EconomeTables implements Serializable
 			}
 			//((int*)&Global._price)[i] = price;
 			Global._price.setPrice(i, price);
-			Global._price_frac[i] = 0;
+			//Global._price_frac[i] = 0;
 		}
 
 		interest_rate = GameOptions._opt.diff.initial_interest;
@@ -864,25 +842,30 @@ public class Economy extends EconomeTables implements Serializable
 
 
 
-	static void FindSubsidyPassengerRoute(FoundRoute fr)
+	private static FoundRoute FindSubsidyPassengerRoute()
 	{
 		Town from,to;
+		FoundRoute fr = new FoundRoute();
+
 
 		fr.distance = -1;
 
 		fr.from = from = Town.getRandomTown();//Town.GetTown(Hal.RandomRange(Town._total_towns));
 		if (from.getXy() == null || from.population < 400)
-			return;
+			return null;
 
 		fr.to = to = Town.getRandomTown();//Town.GetTown(Hal.RandomRange(Town._total_towns));
 		if (from==to || to.getXy() == null || to.population < 400 || to.pct_pass_transported > 42)
-			return;
+			return null;
 
 		fr.distance = Map.DistanceManhattan(from.getXy(), to.getXy());
+		
+		return fr;
 	}
 
-	static void FindSubsidyCargoRoute(FoundRoute fr)
+	static FoundRoute FindSubsidyCargoRoute()
 	{
+		FoundRoute fr = new FoundRoute();
 		Industry i;
 		int trans, total;
 		int cargo;
@@ -891,7 +874,7 @@ public class Economy extends EconomeTables implements Serializable
 
 		fr.from = i = Industry.GetIndustry(Hal.RandomRange(Industry._total_industries));
 		if (!i.isValid())
-			return;
+			return null;
 
 		// Randomize cargo type
 		if ( 0 != (Hal.Random()&1) && i.produced_cargo[1] != AcceptedCargo.CT_INVALID) {
@@ -908,7 +891,7 @@ public class Economy extends EconomeTables implements Serializable
 		//  or if the cargo type is passengers
 		//  or if the pct transported is already large enough
 		if (total == 0 || trans > 42 || cargo == AcceptedCargo.CT_INVALID || cargo == AcceptedCargo.CT_PASSENGERS)
-			return;
+			return null;
 
 		fr.cargo = cargo;
 
@@ -918,7 +901,7 @@ public class Economy extends EconomeTables implements Serializable
 
 			// Only want big towns
 			if (t.getXy() == null || t.population < 900)
-				return;
+				return null;
 			fr.distance = Map.DistanceManhattan(i.xy, t.getXy());
 			fr.to = t;
 		} else {
@@ -930,19 +913,18 @@ public class Economy extends EconomeTables implements Serializable
 					(cargo != i2.accepts_cargo[0] &&
 					cargo != i2.accepts_cargo[1] &&
 					cargo != i2.accepts_cargo[2]))
-				return;
+				return null;
 			fr.distance = Map.DistanceManhattan(i.xy, i2.xy);
 			fr.to = i2;
 		}
+		
+		return fr;
 	}
 
 	static void SubsidyMonthlyHandler()
 	{
-		//Subsidy s;
 		Pair pair;
-		//Station st;
 		int n;
-		FoundRoute fr = new FoundRoute();
 		boolean modified = false;
 
 		for(Subsidy s : Subsidy._subsidies ) 
@@ -969,8 +951,8 @@ public class Economy extends EconomeTables implements Serializable
 
 			n = 1000;
 			do {
-				FindSubsidyPassengerRoute(fr);
-				if(fr.to == null) continue; // [dz] hack
+				FoundRoute fr = FindSubsidyPassengerRoute();
+				if(fr == null) continue;
 				
 				if (fr.distance <= 70 && (fr.to instanceof Town) ) {
 					s.cargo_type = AcceptedCargo.CT_PASSENGERS;
@@ -987,8 +969,8 @@ public class Economy extends EconomeTables implements Serializable
 					}
 					continue;
 				}
-				FindSubsidyCargoRoute(fr);
-				if (fr.distance <= 70 && fr.distance > 0) {
+				fr = FindSubsidyCargoRoute();
+				if (fr != null && fr.distance <= 70 && fr.distance > 0) {
 					s.cargo_type = fr.cargo;
 					s.from = ((Industry)fr.from).index;
 					s.to = (fr.cargo == AcceptedCargo.CT_GOODS || fr.cargo == AcceptedCargo.CT_FOOD) ? ((Town)fr.to).index : ((Industry)fr.to).index;
@@ -1008,7 +990,7 @@ public class Economy extends EconomeTables implements Serializable
 			Window.InvalidateWindow(Window.WC_SUBSIDIES_LIST, 0);
 	}
 
-	/*
+	/* TODO save
 	static final SaveLoad _subsidies_desc[] = {
 		SLE_VAR(Subsidy,cargo_type,		SLE_UINT8),
 		SLE_VAR(Subsidy,age,					SLE_UINT8),
@@ -1066,7 +1048,7 @@ public class Economy extends EconomeTables implements Serializable
 		}
 		if (f < 31) f = 31;
 
-		return BitOps.BIGMULSS(dist * f * num_pieces, Global._cargo_payment_rates[cargo], 21);
+		return BitOps.BIGMULSS(dist * f * num_pieces, (int) Global._cargo_payment_rates[cargo], 21);
 	}
 
 	static void DeliverGoodsToIndustry(TileIndex xy, int cargo_type, int num_pieces)
@@ -1309,13 +1291,6 @@ public class Economy extends EconomeTables implements Serializable
 					//<<<<<<< .mine
 					//profit += DeliverGoods(v.cargo_count, v.cargo_type, v.cargo_source, last_visited, v.cargo_days);				
 
-
-
-
-
-
-
-
 					//=======
 
 					/* Aircraft planespeed patch: don't let profit get out of control because
@@ -1542,46 +1517,42 @@ public class Economy extends EconomeTables implements Serializable
 	 */
 	public static int CmdBuyShareInCompany(int x, int y, int flags, int p1, int p2)
 	{
-		// TODO CmdBuyShareInCompany
-		return Cmd.CMD_ERROR;
-		/*
-		Player p;
-		long cost;
-
 		// Check if buying shares is allowed (protection against modified clients 
 		if (p1 >= Global.MAX_PLAYERS || !Global._patches.allow_shares) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
-		p = PlayerID.get(p1).GetPlayer();
+		Player p = PlayerID.get(p1).GetPlayer();
 
 		// Protect new companies from hostile takeovers 
-		if (Global._cur_year - p.inaugurated_year < 6) return_cmd_error(Str.STR_7080_PROTECTED);
+		if (Global.get_cur_year() - p.inaugurated_year < 6) return Cmd.return_cmd_error(Str.STR_7080_PROTECTED);
 
 		// Those lines are here for network-protection (clients can be slow) 
-		if (GetAmountOwnedBy(p, Owner.OWNER_SPECTATOR) == 0) return 0;
+		if (PlayerGui.GetAmountOwnedBy(p, PlayerID.getSpectator() ) == 0) return 0;
 
 		// We can not buy out a real player (temporarily). TODO: well, enable it obviously 
-		if (GetAmountOwnedBy(p, Owner.OWNER_SPECTATOR) == 1 && !p.is_ai) return 0;
+		if (PlayerGui.GetAmountOwnedBy(p, PlayerID.getSpectator() ) == 1 && !p.isAi()) return 0;
 
-		cost = CalculateCompanyValue(p) >> 2;
-		if (flags & DC_EXEC) {
-			PlayerID b = p.share_owners;
+		long cost = CalculateCompanyValue(p) >> 2;
+		if(0 != (flags & Cmd.DC_EXEC) ) {
+			PlayerID [] bp = p.share_owners;
+			int b = 0;
 			int i;
 
-			while (*b != Owner.OWNER_SPECTATOR) b++; // share owners is guaranteed to contain at least one Owner.OWNER_SPECTATOR 
-		 *b = _current_player;
+			while(!bp[b].equals(Owner.OWNER_SPECTATOR)) 
+				b++; // share owners is guaranteed to contain at least one Owner.OWNER_SPECTATOR 
+		 
+			bp[b] = PlayerID.getCurrent(); // _current_player;
 
-			for (i = 0; p.share_owners[i] == _current_player;) {
+			for (i = 0; p.share_owners[i].isCurrentPlayer();) {
 				if (++i == 4) {
 					p.bankrupt_value = 0;
 					DoAcquireCompany(p);
 					break;
 				}
 			}
-			InvalidateWindow(WC_COMPANY, (int)p1);
+			Window.InvalidateWindow(Window.WC_COMPANY, (int)p1);
 		}
-		return cost;
-		 */
+		return (int) cost; // TODO long truncated
 	}
 
 	/** Sell shares in an opposing company.
@@ -1591,32 +1562,28 @@ public class Economy extends EconomeTables implements Serializable
 	 */
 	public static int CmdSellShareInCompany(int x, int y, int flags, int p1, int p2)
 	{
-		return Cmd.CMD_ERROR;
-		/*
-		Player p;
-		long cost;
-
 		// Check if buying shares is allowed (protection against modified clients 
-		if (p1 >= Global.MAX_PLAYERS || !Global._patches.allow_shares) return CMD_ERROR;
+		if (p1 >= Global.MAX_PLAYERS || !Global._patches.allow_shares) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
-		p = new PLayerID(p1).GetPlayer();
+		Player p = PlayerID.get(p1).GetPlayer();
 
 		// Those lines are here for network-protection (clients can be slow) 
-		if (GetAmountOwnedBy(p, _current_player) == 0) return 0;
+		if (PlayerGui.GetAmountOwnedBy(p, PlayerID.getCurrent()) == 0) return 0;
 
 		// adjust it a little to make it less profitable to sell and buy 
-		cost = CalculateCompanyValue(p) >> 2;
+		long cost = CalculateCompanyValue(p) >> 2;
 		cost = -(cost - (cost >> 7));
 
-		if (flags & DC_EXEC) {
-			PlayerID b = p.share_owners;
-			while (*b != _current_player) b++; // share owners is guaranteed to contain player 
-		 *b = Owner.OWNER_SPECTATOR;
+		if(0 != (flags & Cmd.DC_EXEC)) {
+			PlayerID [] bp = p.share_owners;
+			int b = 0;
+			while (!bp[b].isCurrentPlayer()) 
+				b++; // share owners is guaranteed to contain player 
+			bp[b] = PlayerID.getSpectator();
 			Window.InvalidateWindow(Window.WC_COMPANY, (int)p1);
 		}
-		return cost;
-		 */
+		return (int) cost; // TODO long truncated
 	}
 
 	/** Buy up another company.
@@ -1650,39 +1617,22 @@ public class Economy extends EconomeTables implements Serializable
 	// Prices
 	static void SaveLoad_PRIC()
 	{
-		SlArray(&_price, NUM_PRICES, SLE_INT32);
-		SlArray(&_price_frac, NUM_PRICES, SLE_UINT16);
+		SlArray(&_price, NUM_PRICES, SLE_INT32); // TODO save
 	}
 
 	// Cargo payment rates
 	static void SaveLoad_CAPR()
 	{
-		SlArray(&_cargo_payment_rates, NUM_CARGO, SLE_INT32);
-		SlArray(&_cargo_payment_rates_frac, NUM_CARGO, SLE_UINT16);
+		SlArray(&_cargo_payment_rates, NUM_CARGO, SLE_INT32); // TODO save
 	}
 
-	static final SaveLoad _economy_desc[] = {
-		SLE_VAR(Economy,max_loan,						SLE_INT32),
-		SLE_VAR(Economy,max_loan_unround,		SLE_INT32),
-		SLE_VAR(Economy,fluct,							SLE_FILE_I16 | SLE_VAR_I32),
-		SLE_VAR(Economy,interest_rate,			SLE_UINT8),
-		SLE_VAR(Economy,infl_amount,				SLE_UINT8),
-		SLE_VAR(Economy,infl_amount_pr,			SLE_UINT8),
-		SLE_END()
-	};
 
 	// Economy variables
 	static void SaveLoad_ECMY()
 	{
-		SlObject(&Global._economy, _economy_desc);
+		SlObject(&Global._economy, _economy_desc); // TODO save?
 	}
 
-	final ChunkHandler _economy_chunk_handlers[] = {
-		{ 'PRIC', SaveLoad_PRIC, SaveLoad_PRIC, CH_RIFF | CH_AUTO_LENGTH},
-		{ 'CAPR', SaveLoad_CAPR, SaveLoad_CAPR, CH_RIFF | CH_AUTO_LENGTH},
-		{ 'SUBS', Save_SUBS,			Load_SUBS, CH_ARRAY},
-		{ 'ECMY', SaveLoad_ECMY, SaveLoad_ECMY, CH_RIFF | CH_LAST},
-	};
 	 */
 
 	public int getMax_loan() { return max_loan; }

@@ -160,10 +160,10 @@ public class Global
 	public static final int NUM_PRICES = 49;
 
 	public static final Prices _price = new Prices();
-	public static final int [] _price_frac = new int[NUM_PRICES];
+	//public static final int [] _price_frac = new int[NUM_PRICES];
 
-	public static final int []_cargo_payment_rates = new int[AcceptedCargo.NUM_CARGO];
-	public static final int [] _cargo_payment_rates_frac = new int[AcceptedCargo.NUM_CARGO];
+	public static final double []_cargo_payment_rates = new double[AcceptedCargo.NUM_CARGO];
+	//public static final int [] _cargo_payment_rates_frac = new int[AcceptedCargo.NUM_CARGO];
 	public static final CargoConst _cargoc = new CargoConst();
 
 	/* --- 1 Day is 74 ticks ---
@@ -405,6 +405,17 @@ public class Global
 	//public static Object[] _decode_parameters = new Object[20];
 	public static final Integer[] _decode_parameters = new Integer[20];
 
+	/**
+	 * Lot of prices are double, truncate 'em here - TODO
+	 * @param n parameter index
+	 * @param v parameter value, will be truncated to integer
+	 */
+	@Deprecated
+	public static void SetDParam(int n, double v)
+	{
+		//assert(n < _decode_parameters.length);
+		_decode_parameters[n] = (int) v; 
+	}
 
 	//@Deprecated
 	public static void SetDParam(int n, int v)

@@ -1644,7 +1644,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		if(0 != (flags & Cmd.DC_EXEC)) DoCreateNewIndustry(i, tile, p1, it, t, Owner.OWNER_NONE);
 
-		return (Global._price.build_industry >> 5) * _industry_type_costs[p1];
+		return ( ((int)Global._price.build_industry) >> 5) * _industry_type_costs[p1];
 	}
 
 
@@ -2089,7 +2089,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			if (ViewPort._thd.place_mode == 1 && ViewPort._thd.window_class == Window.WC_BUILD_INDUSTRY) {
 				int ind_type = _build_industry_types[GameOptions._opt_ptr.landscape][w.as_def_d().data_1];
 
-				Global.SetDParam(0, (Global._price.build_industry >> 5) * _industry_type_costs[ind_type]);
+				Global.SetDParam(0, (((int)Global._price.build_industry) >> 5) * _industry_type_costs[ind_type]);
 				Gfx.DrawStringCentered(85, w.getHeight() - 21, Str.STR_482F_COST, 0);
 			}
 			break;

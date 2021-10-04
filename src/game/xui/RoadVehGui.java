@@ -36,13 +36,13 @@ public class RoadVehGui
 		//YearMonthDay.ConvertDayToYMD(ymd, e.getIntro_date());
 
 		/* Purchase cost - Max speed */
-		Global.SetDParam(0, rvi.base_cost * (Global._price.roadveh_base>>3)>>5);
+		Global.SetDParam(0, rvi.base_cost * (((int)Global._price.roadveh_base)>>3)>>5);
 		Global.SetDParam(1, rvi.max_speed * 10 >> 5);
 		Gfx.DrawString(x, y, Str.STR_PURCHASE_INFO_COST_SPEED, 0);
 		y += 10;
 
 		/* Running cost */
-		Global.SetDParam(0, rvi.running_cost * Global._price.roadveh_running >> 8);
+		Global.SetDParam(0, rvi.running_cost * ((int)Global._price.roadveh_running) >> 8);
 		Gfx.DrawString(x, y, Str.STR_PURCHASE_INFO_RUNNINGCOST, 0);
 		y += 10;
 
@@ -101,7 +101,7 @@ public class RoadVehGui
 
 				Global.SetDParam(0, (v.getAge() + 365 < v.getMax_age()) ? Str.STR_AGE : Str.STR_AGE_RED);
 				Global.SetDParam(2, v.getMax_age() / 366);
-				Global.SetDParam(3, Engine.RoadVehInfo(v.getEngine_type().id).running_cost * Global._price.roadveh_running >> 8);
+				Global.SetDParam(3, ((int)(Engine.RoadVehInfo(v.getEngine_type().id).running_cost * Global._price.roadveh_running)) >> 8);
 				Gfx.DrawString(2, 15, Str.STR_900D_AGE_RUNNING_COST_YR, 0);
 			}
 

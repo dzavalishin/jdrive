@@ -13,7 +13,7 @@ public class Misc extends MiscTables
 
 
 	// Calculate constants that depend on the landscape type.
-	static void InitializeLandscapeVariables(boolean only_finalants)
+	static void InitializeLandscapeVariables(boolean only_constants)
 	{
 		final LandscapePredefVar lpd;
 		int i;
@@ -35,9 +35,9 @@ public class Misc extends MiscTables
 			Global._cargoc.names_short[i] = (str += 0x20);
 			Global._cargoc.weights[i] = lpd.weights[i];
 
-			if (!only_finalants) {
+			if (!only_constants) {
 				Global._cargo_payment_rates[i] = lpd.initial_cargo_payment[i];
-				Global._cargo_payment_rates_frac[i] = 0;
+				//Global._cargo_payment_rates_frac[i] = 0;
 			}
 
 			Global._cargoc.transit_days_1[i] = lpd.transit_days_table_1[i];

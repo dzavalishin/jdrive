@@ -1,7 +1,42 @@
 package game.tables;
 
+import game.struct.ScoreInfo;
+
 public class EconomeTables {
 
+	public static final int SCORE_VEHICLES = 0;
+	public static final int SCORE_STATIONS = 1;
+	public static final int SCORE_MIN_PROFIT = 2;
+	public static final int SCORE_MIN_INCOME = 3;
+	public static final int SCORE_MAX_INCOME = 4;
+	public static final int SCORE_DELIVERED = 5;
+	public static final int SCORE_CARGO = 6;
+	public static final int SCORE_MONEY = 7;
+	public static final int SCORE_LOAN = 8;
+	public static final int SCORE_TOTAL = 9; // This must always be the last entry
+
+	public static final int NUM_SCORE = 10; // How many scores are there..
+
+	public static final int SCORE_MAX = 1000; 	// The max score that can be in the performance history
+	//  the scores together of public static final int SCORE_info is allowed to be more!
+	
+	
+	// Score info
+	public static final ScoreInfo _score_info[] = {
+			new ScoreInfo( SCORE_VEHICLES,		120, 		100),
+			new ScoreInfo( SCORE_STATIONS,		80, 		100),
+			new ScoreInfo( SCORE_MIN_PROFIT,	10000,		100),
+			new ScoreInfo( SCORE_MIN_INCOME,	50000,		50),
+			new ScoreInfo( SCORE_MAX_INCOME,	100000,		100),
+			new ScoreInfo( SCORE_DELIVERED,		40000, 		400),
+			new ScoreInfo( SCORE_CARGO,			8,			50),
+			new ScoreInfo( SCORE_MONEY,			10000000,	50),
+			new ScoreInfo( SCORE_LOAN,			250000,		50),
+			new ScoreInfo( SCORE_TOTAL,			0,			0)
+	};
+	
+	
+	
 	protected static final byte[] _price_category = {
 			0, 2, 2, 2, 2, 2, 2, 2,
 			2, 2, 2, 2, 2, 2, 2, 2,

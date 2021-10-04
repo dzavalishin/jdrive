@@ -69,7 +69,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	static int EstimateRoadVehCost(/*EngineID*/ int engine_type)
 	{
-		return ((Global._price.roadveh_base >> 3) * Engine.RoadVehInfo(engine_type).base_cost) >> 5;
+		return ((int)(((Global._price.roadveh_base / 8) * Engine.RoadVehInfo(engine_type).base_cost))) >> 5;
 	}
 
 	/** Build a road vehicle.
@@ -1694,7 +1694,7 @@ class RoadDriveEntry {
 		if(v.isStopped())
 			return;
 
-		cost = Engine.RoadVehInfo(v.getEngine_type().id).running_cost * Global._price.roadveh_running / 364;
+		cost = (int) (Engine.RoadVehInfo(v.getEngine_type().id).running_cost * Global._price.roadveh_running / 364);
 
 		v.profit_this_year -= cost >> 8;
 

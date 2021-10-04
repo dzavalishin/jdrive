@@ -373,7 +373,7 @@ public class WayPoint implements IPoolItem
 			wp.RedrawWaypointSign();
 		}
 
-		return Global._price.build_train_depot;
+		return (int) Global._price.build_train_depot;
 	}
 
 	/* Internal handler to delete a WayPoint */
@@ -455,7 +455,7 @@ public class WayPoint implements IPoolItem
 			}
 		}
 
-		return Global._price.remove_train_depot;
+		return (int) Global._price.remove_train_depot;
 	}
 
 	/** Delete a WayPoint

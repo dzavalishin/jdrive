@@ -587,7 +587,7 @@ public class Rail extends RailTables {
 				} else if (!Global._patches.build_on_slopes || Global.gs._is_old_ai_player) {
 					return Cmd.return_cmd_error(Str.STR_1000_LAND_SLOPED_IN_WRONG_DIRECTION);
 				} else {
-					return Global._price.terraform;
+					return (int) Global._price.terraform;
 				}
 			}
 		}
@@ -719,7 +719,7 @@ public class Rail extends RailTables {
 			SetSignalsOnBothDir(tile, track);
 		}
 
-		return cost + Global._price.build_rail;
+		return (int) (cost + Global._price.build_rail);
 	}
 
 
@@ -735,7 +735,7 @@ public class Rail extends RailTables {
 		/*TrackBits*/ int  trackbit;
 		TileIndex tile;
 		byte m5;
-		int cost = Global._price.remove_rail;
+		int cost = (int) Global._price.remove_rail;
 
 		if (!ValParamTrackOrientation(p2)) return Cmd.CMD_ERROR;
 		trackbit = TrackToTrackBits(track);
@@ -767,7 +767,7 @@ public class Rail extends RailTables {
 				return Cmd.CMD_ERROR;
 
 			if (0==(flags & Cmd.DC_EXEC))
-				return Global._price.remove_rail;
+				return (int) Global._price.remove_rail;
 
 			tile.SetTileOwner( Owner.OWNER_NONE);
 			tile.getMap().m5 = tile.getMap().m5 & 0xC7;
@@ -788,7 +788,7 @@ public class Rail extends RailTables {
 			}
 
 			if (0==(flags & Cmd.DC_EXEC))
-				return Global._price.remove_rail;
+				return (int) Global._price.remove_rail;
 
 			tile.getMap().m5 = m5;
 			tile.SetTileOwner( tile.getMap().m3);
@@ -1033,7 +1033,7 @@ public class Rail extends RailTables {
 
 		}
 
-		return cost + Global._price.build_train_depot;
+		return (int) (cost + Global._price.build_train_depot);
 	}
 
 	/** Build signals, alternate between double/single, signal/semaphore,
@@ -1096,11 +1096,11 @@ public class Rail extends RailTables {
 		//if ((tile.getMap().m3 & _signals_table_both[track]) == 0) {
 		if (!HasSignalOnTrack(tile, track)) {
 			// build new signals
-			cost = Global._price.build_signals;
+			cost = (int) Global._price.build_signals;
 		} else {
 			if (p2 != 0 && semaphore != HasSemaphores(tile, track)) {
 				// convert signals <. semaphores
-				cost = Global._price.build_signals + Global._price.remove_signals;
+				cost = (int) (Global._price.build_signals + Global._price.remove_signals);
 			} else {
 				// it is free to change orientation/pre-exit-combo signals
 				cost = 0;
@@ -1540,7 +1540,7 @@ public class Rail extends RailTables {
 			tile.MarkTileDirtyByTile();
 		}
 
-		return Global._price.remove_signals;
+		return (int) Global._price.remove_signals;
 	}
 
 	/** Remove signals on a stretch of track.
@@ -1567,7 +1567,7 @@ public class Rail extends RailTables {
 			tile.MarkTileDirtyByTile();
 		}
 
-		return Global._price.build_rail / 2;
+		return (int) (Global._price.build_rail / 2);
 	}
 
 	//extern int DoConvertStationRail(TileIndex tile, int totype, boolean exec);
@@ -1648,7 +1648,7 @@ public class Rail extends RailTables {
 			SetSignalsOnBothDir(tile, track);
 		}
 
-		return Global._price.remove_train_depot;
+		return (int) Global._price.remove_train_depot;
 	}
 
 	static int ClearTile_Track(TileIndex tile, int flags)

@@ -454,12 +454,12 @@ public class Clear extends ClearTables {
 				);
 		}
 
-		return cost + Global._price.purchase_land * 10;
+		return (int) (cost + Global._price.purchase_land * 10);
 	}
 
 
 	static final int empty = 0;
-	static final int[] clear_price_table = {
+	static final double[] clear_price_table = {
 		empty,
 		Global._price.clear_1,
 		Global._price.clear_1,
@@ -492,7 +492,7 @@ public class Clear extends ClearTables {
 	
 	static int ClearTile_Clear(TileIndex tile, byte flags)
 	{
-		final int price = clear_price_table[BitOps.GB(tile.getMap().m5, 0, 5)];
+		final int price = (int) clear_price_table[BitOps.GB(tile.getMap().m5, 0, 5)];
 
 		if( 0 != (flags & Cmd.DC_EXEC)) 
 			Landscape.DoClearSquare(tile);
@@ -523,7 +523,7 @@ public class Clear extends ClearTables {
 		if( 0 != (flags & Cmd.DC_EXEC) )
 			Landscape.DoClearSquare(tile);
 
-		return - Global._price.purchase_land * 2;
+		return (int) (- Global._price.purchase_land * 2);
 	}
 
 

@@ -212,7 +212,7 @@ public class Road extends RoadTables
 				//goto return_error;
 				return Cmd.return_cmd_error(Str.INVALID_STRING);
 			}
-			cost = Global._price.remove_road * 2;
+			cost = (int) (Global._price.remove_road * 2);
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], TownTables.RATING_ROAD_MINIMUM);
@@ -279,7 +279,7 @@ public class Road extends RoadTables
 					}
 				}
 
-				cost = Global._price.remove_road * 2;
+				cost = (int) (Global._price.remove_road * 2);
 				if(0 != (flags & Cmd.DC_EXEC) ) {
 					int pbs_track = Pbs.PBSTileReserved(tile);
 					t.ChangeTownRating(-road_remove_cost[BitOps.b2i(edge_road)], TownTables.RATING_ROAD_MINIMUM);
@@ -369,7 +369,7 @@ public class Road extends RoadTables
 
 			// foundation is used. Whole tile is leveled up
 			if ((~_valid_tileh_slopes_road[1][tileh] & road_bits) == 0) {
-				return 0 !=existing ? 0 : Global._price.terraform;
+				return 0 !=existing ? 0 : (int)Global._price.terraform;
 			}
 
 			// partly leveled up tile, only if there's no road on that tile
@@ -377,7 +377,7 @@ public class Road extends RoadTables
 				// force full pieces.
 				pieces[0] |= (pieces[0] & 0xC) >> 2;
 				pieces[0] |= (pieces[0] & 0x3) << 2;
-				return (pieces[0] == (ROAD_NE|ROAD_SW) || pieces[0] == (ROAD_SE|ROAD_NW)) ? Global._price.terraform : Cmd.CMD_ERROR;
+				return (pieces[0] == (ROAD_NE|ROAD_SW) || pieces[0] == (ROAD_SE|ROAD_NW)) ? (int)Global._price.terraform : Cmd.CMD_ERROR;
 			}
 		}
 		return Cmd.CMD_ERROR;
@@ -453,7 +453,7 @@ public class Road extends RoadTables
 					if (pbs_track != 0)
 						Pbs.PBSReserveTrack(tile, BitOps.FIND_FIRST_BIT(pbs_track));
 				}
-				return Global._price.build_road * 2;
+				return (int) (Global._price.build_road * 2);
 			} else if (ti.type == TileTypes.MP_TUNNELBRIDGE.ordinal()) {
 
 				/* check for flat land */
@@ -477,7 +477,7 @@ public class Road extends RoadTables
 					return Cmd.return_cmd_error(Str.STR_3807_CAN_T_BUILD_ON_WATER);
 
 				/* all checked, can build road now! */
-				cost = Global._price.build_road * 2;
+				cost = (int) (Global._price.build_road * 2);
 				if(0 != (flags & Cmd.DC_EXEC) ) {
 					Landscape.ModifyTile(tile, TileTypes.MP_NOCHANGE,
 							TileTypes.MP_MAPOWNER_CURRENT | TileTypes.MP_MAP5,
@@ -558,7 +558,7 @@ public class Road extends RoadTables
 			tile.MarkTileDirtyByTile();
 		}
 
-		return Global._price.build_rail >> 1;
+		return (int) (Global._price.build_rail/2);
 	}
 
 
@@ -724,7 +724,7 @@ public class Road extends RoadTables
 					);
 
 		}
-		return cost + Global._price.build_road_depot;
+		return (int) (cost + Global._price.build_road_depot);
 	}
 
 	static int RemoveRoadDepot(TileIndex tile, int flags)
@@ -736,7 +736,7 @@ public class Road extends RoadTables
 
 		if(0 != (flags & Cmd.DC_EXEC)) Depot.DoDeleteDepot(tile);
 
-		return Global._price.remove_road_depot;
+		return (int) Global._price.remove_road_depot;
 	}
 
 	private static int M( int x) { return  (1<<(x)); }

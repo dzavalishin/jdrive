@@ -110,7 +110,6 @@ public class Vehicle implements IPoolItem
 	int cur_order_index; 	//! The index to the current order
 
 	Order orders;           //! Pointer to the first order for this vehicle
-	//OrderID num_orders = new OrderID(0);      //! How many orders there are in the list TODO [dz] its just int?
 	int num_orders;      	//! How many orders there are in the list 
 
 	Vehicle next_shared;    //! If not null, this points to the next vehicle that shared the order
@@ -268,7 +267,7 @@ public class Vehicle implements IPoolItem
 		air = new VehicleAir();
 		road = new VehicleRoad();
 		special = new VehicleSpecial();
-		disaster = null; // TODO create me in disaster 
+		disaster = null; 
 		ship = new VehicleShip();
 
 		air.desired_speed = 1;
@@ -313,6 +312,12 @@ public class Vehicle implements IPoolItem
 	public static final int EV_BUBBLE          = 9;
 
 
+	/*
+	 *	These command macros are used to call vehicle type specific commands with non type specific commands
+	 *	it should be used like: Cmd.DoCommandP(x, y, p1, p2, flags, CMD_STARTSTOP_VEH(v.type))
+	 *	that line will start/stop a vehicle no matter what type it is
+	 *	VEH_Train is used as an offset because the vehicle type values doesn't start with 0
+	 */
 
 	private static int CMD_BUILD_VEH(int x) { return _veh_build_proc_table[ x - VEH_Train]; }
 	private static int CMD_SELL_VEH(int x)	{ return _veh_sell_proc_table[ x - VEH_Train]; }
@@ -706,7 +711,14 @@ public class Vehicle implements IPoolItem
 		return type != 0;
 	}
 
-	/* ERROR FIXME text Returns order 'index' of a vehicle or null when it doesn't exists */
+	/**
+	 * 
+	 * Returns order of a vehicle or null when order with given index doesn't exists
+	 * 
+	 * @param index Order index
+	 * @return Order or null
+	 * 
+	 */
 	public Order GetVehicleOrder(int index)
 	{
 		Order order = orders;
@@ -719,7 +731,6 @@ public class Vehicle implements IPoolItem
 		return order;
 	}
 
-	//public Order GetVehicleOrder(OrderID id) { return GetVehicleOrder(id.id); }
 
 	/* Returns the last order of a vehicle, or null if it doesn't exists */
 	public Order GetLastVehicleOrder()
@@ -825,17 +836,7 @@ public class Vehicle implements IPoolItem
 	//#define GEN_HASH(x,y) (((x & 0x1F80)>>7) + ((y & 0xFC0)))
 	//int GEN_HASH(int x, int y) { return  ((x & 0x1F80)>>7) + (y & 0xFC0); }
 	//int GEN_HASH(int x, int y) { return  (x + y) & 0xFFFF; }
-	/*
-	 *	These command macros are used to call vehicle type specific commands with non type specific commands
-	 *	it should be used like: Cmd.DoCommandP(x, y, p1, p2, flags, CMD_STARTSTOP_VEH(v.type))
-	 *	that line will start/stop a vehicle nomatter what type it is
-	 *	VEH_Train is used as an offset because the vehicle type values doesn't start with 0
-	 */
 
-	// TODO used?
-	//#define CMD_BUILD_VEH(x)		   _veh_build_proc_table[ x - VEH_Train]
-	//#define CMD_SELL_VEH(x)				_veh_sell_proc_table[ x - VEH_Train]
-	//#define CMD_REFIT_VEH(x)		   _veh_refit_proc_table[ x - VEH_Train]
 
 	static final int _veh_build_proc_table[] = {
 			Cmd.CMD_BUILD_RAIL_VEHICLE,
@@ -907,7 +908,6 @@ public class Vehicle implements IPoolItem
 
 	public Object EnsureNoVehicleProc(Object data)
 	{
-		// TODO [dz] can tile be null for valid vehicle?
 		if (tile == null || !tile.equals(data) || type == VEH_Disaster)
 			return null;
 
@@ -1125,7 +1125,7 @@ public class Vehicle implements IPoolItem
 	}
 
 
-	static int[] allocatorStartCounter = { 0 }; // TODO not static?
+	static int[] allocatorStartCounter = { 0 }; // TODO unused? Was used to keep space for special vehicles?
 	public static Vehicle AllocateVehicle()
 	{
 		return AllocateSingleVehicle(allocatorStartCounter);

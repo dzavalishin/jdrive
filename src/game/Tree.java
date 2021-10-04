@@ -383,7 +383,7 @@ public class Tree  extends TreeTables {
 
 		if(0 != (flags & Cmd.DC_EXEC)) Landscape.DoClearSquare(tile);
 
-		return num * Global._price.remove_trees;
+		return (int) (num * Global._price.remove_trees);
 	}
 
 	static AcceptedCargo GetAcceptedCargo_Trees(TileIndex tile )

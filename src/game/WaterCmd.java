@@ -106,7 +106,7 @@ public class WaterCmd extends WaterTables
 			);
 		}
 
-		return cost + Global._price.build_ship_depot;
+		return (int) (cost + Global._price.build_ship_depot);
 	}
 
 	static int RemoveShipDepot(TileIndex tile, int flags)
@@ -137,7 +137,7 @@ public class WaterCmd extends WaterTables
 					TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0);
 		}
 
-		return Global._price.remove_ship_depot;
+		return (int) Global._price.remove_ship_depot;
 	}
 
 	// build a shiplift
@@ -173,7 +173,7 @@ public class WaterCmd extends WaterTables
 					TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR, Owner.OWNER_WATER, 0x18 + dir);
 		}
 
-		return Global._price.clear_water * 22 >> 3;
+		return (int) (Global._price.clear_water * 22 / 8);
 	}
 
 	static int RemoveShiplift(TileIndex tile, int flags)
@@ -190,7 +190,7 @@ public class WaterCmd extends WaterTables
 			Landscape.DoClearSquare(tile.isub(delta));
 		}
 
-		return Global._price.clear_water * 2;
+		return (int) (Global._price.clear_water * 2);
 	}
 
 	static void MarkTilesAroundDirty(TileIndex tile)
@@ -348,17 +348,17 @@ public class WaterCmd extends WaterTables
 			if (m5 == 0) {
 				if(0 != (flags & Cmd.DC_EXEC) )
 					Landscape.DoClearSquare(tile);
-				return Global._price.clear_water;
+				return (int) Global._price.clear_water;
 			} else if (m5 == 1) {
 				slope = tile.GetTileSlope(null);
 				if (slope == 8 || slope == 4 || slope == 2 || slope == 1) {
 					if(0 != (flags & Cmd.DC_EXEC) )
 						Landscape.DoClearSquare(tile);
-					return Global._price.clear_water;
+					return (int) Global._price.clear_water;
 				}
 				if(0 != (flags & Cmd.DC_EXEC) )
 					Landscape.DoClearSquare(tile);
-				return Global._price.purchase_land;
+				return (int) Global._price.purchase_land;
 			} else
 				return Cmd.CMD_ERROR;
 		} else if ((m5 & 0x10) == 0x10) {

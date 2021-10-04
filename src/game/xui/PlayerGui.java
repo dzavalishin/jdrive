@@ -483,7 +483,7 @@ public class PlayerGui
 		}
 	}
 
-	static int GetAmountOwnedBy(final Player p, PlayerID owner)
+	public static int GetAmountOwnedBy(final Player p, PlayerID owner)
 	{
 		return BitOps.b2i(owner.equals(p.share_owners[0])) +
 				BitOps.b2i(owner.equals(p.share_owners[1])) +

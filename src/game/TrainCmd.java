@@ -457,92 +457,92 @@ public class TrainCmd extends TrainTables
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
 		rvi = Engine.RailVehInfo(engine.id);
-		value = (rvi.base_cost * Global._price.build_railwagon) >> 8;
+		value = (int) ((rvi.base_cost * Global._price.build_railwagon) / 256);
 
-			num_vehicles = 1 + CountArticulatedParts(rvi, engine);
+		num_vehicles = 1 + CountArticulatedParts(rvi, engine);
 
-			if (0==(flags & Cmd.DC_QUERY_COST)) {
-				Vehicle [] vl = new Vehicle[11]; // Allow for wagon and upto 10 artic parts.
-				Vehicle  v;
-				int x;
-				int y;
+		if (0==(flags & Cmd.DC_QUERY_COST)) {
+			Vehicle [] vl = new Vehicle[11]; // Allow for wagon and upto 10 artic parts.
+			Vehicle  v;
+			int x;
+			int y;
 
-				if (!Vehicle.AllocateVehicles(vl, num_vehicles))
-					return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
+			if (!Vehicle.AllocateVehicles(vl, num_vehicles))
+				return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
-				if(0 != (flags & Cmd.DC_EXEC)) {
-					Vehicle u;
-					int dir;
+			if(0 != (flags & Cmd.DC_EXEC)) {
+				Vehicle u;
+				int dir;
 
-					v = vl[0];
-					v.spritenum = rvi.image_index;
+				v = vl[0];
+				v.spritenum = rvi.image_index;
 
-					u = null;
+				u = null;
 
-					//FOR_ALL_VEHICLES(w) 
-					Iterator<Vehicle> it = Vehicle.getIterator();
-					while(it.hasNext())
-					{
-						final Vehicle  w = it.next();
+				//FOR_ALL_VEHICLES(w) 
+				Iterator<Vehicle> it = Vehicle.getIterator();
+				while(it.hasNext())
+				{
+					final Vehicle  w = it.next();
 
-						if (w.type == Vehicle.VEH_Train && w.tile.equals(tile) &&
-								w.IsFreeWagon() && w.getEngine_type().equals(engine)) {
-							u = w.GetLastVehicleInChain();
-							break;
-						}
+					if (w.type == Vehicle.VEH_Train && w.tile.equals(tile) &&
+							w.IsFreeWagon() && w.getEngine_type().equals(engine)) {
+						u = w.GetLastVehicleInChain();
+						break;
 					}
-
-					v.engine_type = engine;
-
-					dir = BitOps.GB(tile.getMap().m5, 0, 2);
-
-					v.direction = dir * 2 + 1;
-					v.tile = tile;
-
-					x = tile.TileX() * TileInfo.TILE_SIZE | _vehicle_initial_x_fract[dir];
-					y = tile.TileY() * TileInfo.TILE_SIZE | _vehicle_initial_y_fract[dir];
-
-					v.x_pos = x;
-					v.y_pos = y;
-					v.z_pos = Landscape.GetSlopeZ(x,y);
-					v.owner = PlayerID.getCurrent();
-					v.z_height = 6;
-					v.rail.setInDepot(); //track =  0x80;
-					v.assignStatus( Vehicle.VS_HIDDEN | Vehicle.VS_DEFPAL );
-
-					v.subtype = 0;
-					v.SetTrainWagon();
-					if (u != null) {
-						u.next = v;
-					} else {
-						v.SetFreeWagon();
-					}
-
-					v.cargo_type = rvi.cargo_type;
-					v.cargo_cap = rvi.capacity;
-					v.value = value;
-					//			v.day_counter = 0;
-
-					v.rail.railtype = Engine.GetEngine(engine).getRailtype();
-
-					v.build_year =  Global.get_cur_year();
-					v.type = Vehicle.VEH_Train;
-					v.cur_image = 0xAC2;
-					v.random_bits = Vehicle.VehicleRandomBits();
-
-					AddArticulatedParts(rvi, vl);
-
-					Global._new_wagon_id = VehicleID.get(v.index);
-					Global._new_vehicle_id = VehicleID.get(v.index);
-
-					v.VehiclePositionChanged();
-					TrainConsistChanged(v.GetFirstVehicleInChain());
-
-					Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
 				}
-			}
 
-			return value;
+				v.engine_type = engine;
+
+				dir = BitOps.GB(tile.getMap().m5, 0, 2);
+
+				v.direction = dir * 2 + 1;
+				v.tile = tile;
+
+				x = tile.TileX() * TileInfo.TILE_SIZE | _vehicle_initial_x_fract[dir];
+				y = tile.TileY() * TileInfo.TILE_SIZE | _vehicle_initial_y_fract[dir];
+
+				v.x_pos = x;
+				v.y_pos = y;
+				v.z_pos = Landscape.GetSlopeZ(x,y);
+				v.owner = PlayerID.getCurrent();
+				v.z_height = 6;
+				v.rail.setInDepot(); //track =  0x80;
+				v.assignStatus( Vehicle.VS_HIDDEN | Vehicle.VS_DEFPAL );
+
+				v.subtype = 0;
+				v.SetTrainWagon();
+				if (u != null) {
+					u.next = v;
+				} else {
+					v.SetFreeWagon();
+				}
+
+				v.cargo_type = rvi.cargo_type;
+				v.cargo_cap = rvi.capacity;
+				v.value = value;
+				//			v.day_counter = 0;
+
+				v.rail.railtype = Engine.GetEngine(engine).getRailtype();
+
+				v.build_year =  Global.get_cur_year();
+				v.type = Vehicle.VEH_Train;
+				v.cur_image = 0xAC2;
+				v.random_bits = Vehicle.VehicleRandomBits();
+
+				AddArticulatedParts(rvi, vl);
+
+				Global._new_wagon_id = VehicleID.get(v.index);
+				Global._new_vehicle_id = VehicleID.get(v.index);
+
+				v.VehiclePositionChanged();
+				TrainConsistChanged(v.GetFirstVehicleInChain());
+
+				Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
+			}
+		}
+
+		return value;
 	}
 
 	// Move all free vehicles in the depot to the train
@@ -570,7 +570,7 @@ public class TrainCmd extends TrainTables
 
 	static int EstimateTrainCost(final RailVehicleInfo  rvi)
 	{
-		return (rvi.base_cost * (Global._price.build_railvehicle >> 3)) >> 5;
+		return (rvi.base_cost * (((int)Global._price.build_railvehicle) >> 3)) >> 5;
 	}
 
 	static void AddRearEngineToMultiheadedTrain(Vehicle v, Vehicle u, boolean building)
@@ -590,13 +590,13 @@ public class TrainCmd extends TrainTables
 		u.cargo_type = v.getCargo_type();
 		u.cargo_cap = v.getCargo_cap();
 		u.rail.railtype = v.rail.railtype;
-		
+
 		if (building) 
 			v.next = u;
-		
+
 		u.engine_type = v.getEngine_type();
 		u.build_year = v.getBuild_year();
-		
+
 		if (building) 
 			v.value >>= 1;
 
@@ -1338,15 +1338,15 @@ public class TrainCmd extends TrainTables
 	{
 		//int flag1, flag2;
 
-		EnumSet<VehicleRailFlags> flag1 = EnumSet.copyOf( rail1.flags ); //*swap_flag1;
-		EnumSet<VehicleRailFlags> flag2 = EnumSet.copyOf( rail2.flags );
+		//EnumSet<VehicleRailFlags> flag1 = EnumSet.copyOf( rail1.flags ); //*swap_flag1;
+		//EnumSet<VehicleRailFlags> flag2 = EnumSet.copyOf( rail2.flags );
 
 		// Clear the flags 
 		/*rail1.flags = BitOps.RETCLRBIT(rail1.flags, Vehicle.VRF_GOINGUP);
 		rail1.flags = BitOps.RETCLRBIT(rail1.flags, Vehicle.VRF_GOINGDOWN);
 		rail2.flags = BitOps.RETCLRBIT(rail2.flags, Vehicle.VRF_GOINGUP);
 		rail2.flags = BitOps.RETCLRBIT(rail2.flags, Vehicle.VRF_GOINGDOWN);*/
-		
+
 		boolean up1 = rail1.flags.remove(VehicleRailFlags.GoingUp);
 		boolean dn1 = rail1.flags.remove(VehicleRailFlags.GoingDown);
 
@@ -1356,10 +1356,10 @@ public class TrainCmd extends TrainTables
 		// Reverse the rail-flags (if needed) 
 		if(up1) rail2.flags.add(VehicleRailFlags.GoingUp);
 		if(dn1) rail2.flags.add(VehicleRailFlags.GoingDown);
-		
+
 		if(up2) rail1.flags.add(VehicleRailFlags.GoingUp);
 		if(dn2) rail1.flags.add(VehicleRailFlags.GoingDown);
-		
+
 		/*
 		if (BitOps.HASBIT(flag1, Vehicle.VRF_GOINGUP)) {
 			rail2.flags = BitOps.RETSETBIT(rail2.flags, Vehicle.VRF_GOINGDOWN);
@@ -1395,7 +1395,7 @@ public class TrainCmd extends TrainTables
 				b.setHidden(a.isHidden());
 				a.setHidden(tmp);
 			}
-			
+
 			/* swap variables */
 			//swap_byte(&a.rail.track, &b.rail.track);
 			//swap_byte(&a.direction, &b.direction);
@@ -1730,7 +1730,8 @@ public class TrainCmd extends TrainTables
 			 * some nice [Refit] button near each wagon. --pasky */
 			if (!Vehicle.CanRefitTo(v.getEngine_type(), CargoID.get(new_cid) )) continue;
 
-			if (v.getCargo_cap() != 0) {
+			if (v.getCargo_cap() != 0) 
+			{
 				final RailVehicleInfo rvi = Engine.RailVehInfo(v.getEngine_type().id);
 				int amount = CALLBACK_FAILED;
 
@@ -1779,17 +1780,17 @@ public class TrainCmd extends TrainTables
 				if (amount != 0) 
 				{
 					if (new_cid != v.getCargo_type()) 
-						cost += Global._price.build_railvehicle >> 8;
+						cost += Global._price.build_railvehicle / 256;
 
-		num += amount;
-		if(0 != (flags & Cmd.DC_EXEC) ) 
-		{
-			v.cargo_count = 0;
-			v.cargo_type = new_cid;
-			v.cargo_cap = amount;
-			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
-			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
-		}
+					num += amount;
+					if(0 != (flags & Cmd.DC_EXEC) ) 
+					{
+						v.cargo_count = 0;
+						v.cargo_type = new_cid;
+						v.cargo_cap = amount;
+						Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
+						Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.tile);
+					}
 				}
 			}
 		} while ( (v=v.next) != null );
@@ -1875,8 +1876,8 @@ public class TrainCmd extends TrainTables
 			tfdd.reverse = true;
 			// search in backwards direction
 			i = (v.direction^4) >> 1;
-			if (0==(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
-			Pathfind.NewTrainPathfind(tile, TileIndex.get(0), i, (NTPEnumProc)TrainCmd::NtpCallbFindDepot, tfdd);
+		if (0==(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
+		Pathfind.NewTrainPathfind(tile, TileIndex.get(0), i, (NTPEnumProc)TrainCmd::NtpCallbFindDepot, tfdd);
 		}
 		}
 
@@ -3509,7 +3510,7 @@ public class TrainCmd extends TrainTables
 			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 
 			v.SndPlayVehicleFx((GameOptions._opt.landscape != Landscape.LT_CANDY) ?			
-				Snd.SND_10_TRAIN_BREAKDOWN : Snd.SND_3A_COMEDY_BREAKDOWN_2);
+					Snd.SND_10_TRAIN_BREAKDOWN : Snd.SND_3A_COMEDY_BREAKDOWN_2);
 
 			if(!v.isHidden()) {
 				Vehicle u = v.CreateEffectVehicleRel(4, 4, 5, Vehicle.EV_BREAKDOWN_SMOKE);
@@ -3684,7 +3685,7 @@ public class TrainCmd extends TrainTables
 		//if (BitOps.HASBIT(v.rail.flags, Vehicle.VRF_REVERSING) && v.cur_speed == 0) 
 		if( v.rail.flags.contains(VehicleRailFlags.Reversing) && v.cur_speed == 0) 		
 			ReverseTrainDirection(v);
-		
+
 
 		/* exit if train is stopped */
 		if ( v.isStopped() && v.cur_speed == 0)
@@ -3778,7 +3779,7 @@ public class TrainCmd extends TrainTables
 			Window.InvalidateWindow(Window.WC_VEHICLE_VIEW, v.index);
 
 			Order t = new Order( v.getCurrent_order() );
-			
+
 			//v.getCurrent_order().type = Order.OT_DUMMY;
 			//v.getCurrent_order().flags = 0;
 			v.setCurrent_order(new Order(Order.OT_DUMMY));

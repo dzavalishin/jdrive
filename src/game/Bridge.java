@@ -174,7 +174,7 @@ public class Bridge
 					final Bridge b = _bridge[bridge_type];
 					// bridge is accepted, add to list
 					// add to terraforming & bulldozing costs the cost of the bridge itself (not computed with DC_QUERY_COST)
-					_bridgedata.costs[j] = (int) (ret + (((long)tot_bridgedata_len * Global._price.build_bridge * b.price) >> 8));
+					_bridgedata.costs[j] = (int) (ret + (((long)tot_bridgedata_len * ((int)Global._price.build_bridge) * b.price) >> 8));
 					_bridgedata.indexes[j] = (byte) bridge_type;
 					j++;
 				}

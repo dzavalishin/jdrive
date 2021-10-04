@@ -45,7 +45,7 @@ public class TrainGui
 		//YearMonthDay.ConvertDayToYMD(ymd, e.getIntro_date());
 
 		/* Purchase Cost - Engine weight */
-		Global.SetDParam(0, rvi.base_cost * (Global._price.build_railvehicle >> 3) >> 5);
+		Global.SetDParam(0, ((int)(rvi.base_cost * (Global._price.build_railvehicle / 8))) >> 5);
 		Global.SetDParam(1, rvi.weight << multihead);
 		Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_COST_WEIGHT, 0);
 		y += 10;
@@ -57,7 +57,7 @@ public class TrainGui
 		y += 10;
 
 		/* Running cost */
-		Global.SetDParam(0, (rvi.running_cost_base * Global._price.running_rail[rvi.engclass] >> 8) << multihead);
+		Global.SetDParam(0, ((int)((rvi.running_cost_base * Global._price.running_rail[rvi.engclass] / 256))) << multihead);
 		Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_RUNNINGCOST, 0);
 		y += 10;
 
@@ -103,7 +103,7 @@ public class TrainGui
 		boolean refittable = (Global._engine_info[engine_number].refit_mask != 0);
 
 		/* Purchase cost */
-		Global.SetDParam(0, (rvi.base_cost * Global._price.build_railwagon) >> 8);
+		Global.SetDParam(0, (rvi.base_cost * Global._price.build_railwagon) / 256);
 		Gfx.DrawString(x, y, Str.STR_PURCHASE_INFO_COST, 0);
 		y += 10;
 

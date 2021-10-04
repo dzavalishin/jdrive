@@ -15,6 +15,7 @@ import game.enums.SwitchModes;
 import game.enums.WindowEvents;
 import game.ids.StringID;
 import game.struct.FiosItem;
+import game.struct.Textbuf;
 import game.util.BitOps;
 import game.util.FileIO;
 import game.util.Strings;
@@ -111,7 +112,7 @@ public class NetGui extends Net implements NetDefs
 			Global.SetDParam(7, _lan_internet_types_dropdown[_network_lan_internet]);
 			w.DrawWindowWidgets();
 
-			MiscGui.DrawEditBox(w, 3);
+			Textbuf.DrawEditBox(w, 3);
 
 			Gfx.DrawString(9, 23, Str.STR_NETWORK_PLAYER_NAME, 2);
 			Gfx.DrawString(9, 43, Str.STR_NETWORK_CONNECTION, 2);
@@ -327,7 +328,7 @@ public class NetGui extends Net implements NetDefs
 			break;
 
 		case WE_MOUSELOOP:
-			if (_selected_field == 3) MiscGui.HandleEditBox(w, 3);
+			if (_selected_field == 3) Textbuf.HandleEditBox(w, 3);
 			break;
 
 		case WE_KEYPRESS:
@@ -347,7 +348,7 @@ public class NetGui extends Net implements NetDefs
 				break;
 			}
 
-			if (MiscGui.HandleEditBoxKey(w, 3, e) == 1) break; // enter pressed
+			if (Textbuf.HandleEditBoxKey(w, 3, e) == 1) break; // enter pressed
 
 			String s = w.as_querystr_d().text.getString();
 			// The name is only allowed when it starts with a letter!
@@ -482,7 +483,7 @@ public class NetGui extends Net implements NetDefs
 
 			Gfx.GfxFillRect(11, 63, 259, 171, 0xD7);
 
-			MiscGui.DrawEditBox(w, 3);
+			Textbuf.DrawEditBox(w, 3);
 
 			Gfx.DrawString(10, 22, Str.STR_NETWORK_NEW_GAME_NAME, 2);
 
@@ -589,11 +590,11 @@ public class NetGui extends Net implements NetDefs
 			break;
 
 		case WE_MOUSELOOP:
-			if (_selected_field == 3) MiscGui.HandleEditBox(w, 3);
+			if (_selected_field == 3) Textbuf.HandleEditBox(w, 3);
 			break;
 
 		case WE_KEYPRESS:
-			if (_selected_field == 3) MiscGui.HandleEditBoxKey(w, 3, e);
+			if (_selected_field == 3) Textbuf.HandleEditBoxKey(w, 3, e);
 			break;
 
 		case WE_ON_EDIT_TEXT: {
@@ -1403,7 +1404,7 @@ public class NetGui extends Net implements NetDefs
 
 		case WE_PAINT:
 			w.DrawWindowWidgets();
-			MiscGui.DrawEditBox(w, 1);
+			Textbuf.DrawEditBox(w, 1);
 			break;
 
 		case WE_CLICK:
@@ -1421,11 +1422,11 @@ public class NetGui extends Net implements NetDefs
 				w.DeleteWindow();
 				return;
 			}
-			MiscGui.HandleEditBox(w, 1);
+			Textbuf.HandleEditBox(w, 1);
 		} break;
 
 		case WE_KEYPRESS: {
-			switch(MiscGui.HandleEditBoxKey(w, 1, e)) {
+			switch(Textbuf.HandleEditBoxKey(w, 1, e)) {
 			case 1: // Return
 				//goto press_ok;
 				NetChatSend(w);

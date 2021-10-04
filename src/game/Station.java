@@ -1081,7 +1081,7 @@ public class Station extends StationTables implements IPoolItem
 		// If DC_EXEC is in flag, do not want to pass it to CheckFlatLandBelow, because of a nice bug
 		//  for detail info, see: https://sourceforge.net/tracker/index.php?func=detail&aid=1029064&group_id=103924&atid=636365
 		if (Cmd.CmdFailed(ret = CheckFlatLandBelow(tile_org, w_org, h_org, flags&~Cmd.DC_EXEC, 5 << direction, Global._patches.nonuniform_stations ? est : null))) return Cmd.CMD_ERROR;
-		cost = ret + (numtracks * Global._price.train_station_track + Global._price.train_station_length) * plat_len;
+		cost = (int) (ret + (numtracks * Global._price.train_station_track + Global._price.train_station_length) * plat_len);
 
 		// Make sure there are no similar stations around us.
 		boolean [] canBuild = {true};
@@ -1288,7 +1288,7 @@ public class Station extends StationTables implements IPoolItem
 				st.DeleteStationIfEmpty();
 			}
 		}
-		return Global._price.remove_rail_station;
+		return (int) Global._price.remove_rail_station;
 	}
 
 
@@ -1451,7 +1451,7 @@ public class Station extends StationTables implements IPoolItem
 		assert(w != 0 && h != 0);
 
 		/* cost is area * constant */
-		cost = w*h*Global._price.remove_rail_station;
+		cost = (int) (w*h*Global._price.remove_rail_station);
 
 		/* clear all areas of the Station */
 		do {
@@ -1498,7 +1498,7 @@ public class Station extends StationTables implements IPoolItem
 			tile.MarkTileDirtyByTile();
 		}
 
-		return Global._price.build_rail >> 1;
+		return (int) (Global._price.build_rail/2);
 	}
 
 
@@ -1654,7 +1654,7 @@ public class Station extends StationTables implements IPoolItem
 			DeleteStationIfEmpty();
 		}
 
-		return (is_truck) ? Global._price.remove_truck_station : Global._price.remove_bus_station;
+		return (int) ((is_truck) ? Global._price.remove_truck_station : Global._price.remove_bus_station);
 	}
 
 
@@ -1824,7 +1824,7 @@ public class Station extends StationTables implements IPoolItem
 		w = _airport_size_x[st.airport_type];
 		h = _airport_size_y[st.airport_type];
 
-		cost = w * h * Global._price.remove_airport;
+		cost = (int) (w * h * Global._price.remove_airport);
 
 		int [] err = {0};
 		{
@@ -1910,7 +1910,7 @@ public class Station extends StationTables implements IPoolItem
 			Window.InvalidateWindow(Window.WC_STATION_LIST, st.owner.id);
 		}
 
-		return Global._price.build_dock;
+		return (int) Global._price.build_dock;
 	}
 
 	/* Checks if any ship is servicing the buoy specified. Returns yes or no */
@@ -1963,7 +1963,7 @@ public class Station extends StationTables implements IPoolItem
 			DeleteStationIfEmpty();
 		}
 
-		return Global._price.remove_truck_station;
+		return (int) Global._price.remove_truck_station;
 	}
 
 	static final  TileIndexDiffC _dock_tileoffs_chkaround[] = {
@@ -2101,7 +2101,7 @@ public class Station extends StationTables implements IPoolItem
 			st.UpdateStationAcceptance(false);
 			Window.InvalidateWindow(Window.WC_STATION_LIST, st.owner);
 		}
-		return Global._price.build_dock;
+		return (int) Global._price.build_dock;
 	}
 
 	private int RemoveDock(int flags)
@@ -2132,7 +2132,7 @@ public class Station extends StationTables implements IPoolItem
 			DeleteStationIfEmpty();
 		}
 
-		return Global._price.remove_dock;
+		return (int) Global._price.remove_dock;
 	}
 
 
