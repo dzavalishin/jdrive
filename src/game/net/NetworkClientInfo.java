@@ -15,4 +15,10 @@ public class NetworkClientInfo
 		public String GetPlayerIP() {
 			return client_ip.toString();
 		}
+
+		public String getAddress() {
+			return client_ip.getHostAddress();
+		}
+
+		public String getUniqueId() { return unique_id; }
 }

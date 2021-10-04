@@ -1,16 +1,15 @@
 package game.console.commands;
 
+import static game.console.ConsoleColor.WHITE;
+
+import java.util.List;
+
 import game.console.Console;
-import game.console.ConsoleColor;
 import game.console.UserInput;
 import game.console.parameters.DefaultParameter;
 import game.console.parameters.DefaultParameterDescription;
 import game.console.parameters.Parameter;
 import game.console.parameters.Type;
-
-import java.util.List;
-
-import static game.console.ConsoleColor.WHITE;
 
 /**
  * Echo command implementation

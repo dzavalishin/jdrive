@@ -28,4 +28,8 @@ public class NetworkClientState {
 	NetworkClientInfo ci;
 
 	public NetworkClientInfo getCi() { return ci; }
+	public ClientStatus getStatus() { return status; }
+	public int getIndex() {
+		return index;
+	}
 }
