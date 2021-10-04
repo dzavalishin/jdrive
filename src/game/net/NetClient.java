@@ -610,7 +610,7 @@ public interface NetClient extends NetTools, NetDefs
 				// take control over an existing company
 				Global.gs._local_player = PlayerID.get(Global._network_playas - 1);
 				final Player lp = Player.GetPlayer(Global.gs._local_player);
-				Global._patches.autorenew = lp.isEngine_renew();
+				Global._patches.autorenew.set( lp.isEngine_renew() );
 				Global._patches.autorenew_months = lp.getEngine_renew_months();
 				Global._patches.autorenew_money = lp.getEngine_renew_money();
 				Window.DeleteWindowById(Window.WC_NETWORK_STATUS_WINDOW, 0);

@@ -1463,7 +1463,7 @@ public class Economy extends EconomeTables implements Serializable
 	public void PlayersMonthlyLoop()
 	{
 		PlayersGenStatistics();
-		if (Global._patches.inflation && Global.get_cur_year() < Global.MAX_YEAR_END)
+		if (Global._patches.inflation.get() && Global.get_cur_year() < Global.MAX_YEAR_END)
 			AddInflation();
 		PlayersPayInterest();
 		// Reset the _current_player flag

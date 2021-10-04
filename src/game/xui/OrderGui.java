@@ -195,7 +195,7 @@ public class OrderGui {
 		int st_index;
 
 		// check depot first
-		if (Global._patches.gotodepot) {
+		if (Global._patches.gotodepot.get()) {
 			switch (tile.GetTileType()) {
 			case MP_RAILWAY:
 				if (v.getType() == Vehicle.VEH_Train && tile.IsTileOwner(Global.gs._local_player)) {

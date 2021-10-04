@@ -100,7 +100,7 @@ public class Engine extends EngineTables implements Serializable
 
 	//void ShowEnginePreviewWindow(EngineID engine);
 
-	static void DeleteCustomEngineNames()
+	public static void DeleteCustomEngineNames()
 	{
 		int i;
 		//StringID 
@@ -115,7 +115,7 @@ public class Engine extends EngineTables implements Serializable
 		Global._vehicle_design_names &= ~1;
 	}
 
-	static void LoadCustomEngineNames()
+	public static void LoadCustomEngineNames()
 	{
 		// XXX: not done */
 		Global.DEBUG_misc( 1, "LoadCustomEngineNames: not done");
@@ -160,7 +160,7 @@ public class Engine extends EngineTables implements Serializable
 			// time's up for this engine
 			// make it either available to all players (if never_expire_vehicles is enabled and if it was available earlier)
 			// or disable this engine completely
-			e.player_avail =  ((Global._patches.never_expire_vehicles && e.player_avail != 0)? -1 : 0);
+			e.player_avail =  ((Global._patches.never_expire_vehicles.get() && e.player_avail != 0)? -1 : 0);
 			e.reliability = e.reliability_final;
 		}
 	}

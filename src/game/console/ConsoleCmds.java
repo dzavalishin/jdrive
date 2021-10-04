@@ -839,23 +839,6 @@ public class ConsoleCmds extends DefaultConsole
 		return true;
 	}
 
-	static boolean function(String ... argv)(ConPatch)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("Change patch variables for all players. Usage: 'patch <name> [<value>]'");
-			IConsoleHelp("Omitting <value> will print out the current value of the patch-setting.");
-			return true;
-		}
-
-		if (argv.length == 1 || argv.length > 3) return false;
-
-		if (argv.length == 2) {
-			IConsoleGetPatchSetting(argv[1]);
-		} else
-			IConsoleSetPatchSetting(argv[1], argv[2]);
-
-		return true;
-	}
 	#endif /* ENABLE_NETWORK */
 
 //	static boolean ConListDumpVariables(String ... argv)

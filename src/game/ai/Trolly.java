@@ -18,16 +18,13 @@ import game.Str;
 import game.TileIndex;
 import game.TileInfo;
 import game.Town;
-import game.TunnelBridgeCmd;
 import game.Vehicle;
 import game.aystar.AyStar;
-import game.enums.RoadStopType;
 import game.enums.TileTypes;
 import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ids.VehicleID;
 import game.util.BitOps;
-import game.util.Strings;
 
 public class Trolly extends AiTools  
 {
@@ -111,8 +108,6 @@ public class Trolly extends AiTools
 	//	    - Build HQ
 	static void AiNew_State_WakeUp(Player p)
 	{
-		long money;
-		int c;
 		assert(p.ainew.state == AiState.WAKE_UP);
 		// First, check if we have a HQ
 		if (p.getLocation_of_house() == null) {
@@ -125,11 +120,11 @@ public class Trolly extends AiTools
 			return;
 		}
 
-		money = p.getMoney() - AI_MINIMUM_MONEY;
+		long money = p.getMoney() - AI_MINIMUM_MONEY;
 
 		// Let's pick an action!
 		if (p.ainew.action == AiAction.NONE) {
-			c = Ai.AI_Random() & 0xFF;
+			int c = Ai.AI_Random() & 0xFF;
 			if (p.getCurrent_loan() > 0 &&
 					p.old_economy[1].income > AI_MINIMUM_INCOME_FOR_LOAN &&
 					c < 10) {
@@ -138,7 +133,7 @@ public class Trolly extends AiTools
 				// Check all vehicles once in a while
 				p.ainew.action = AiAction.CHECK_ALL_VEHICLES;
 				p.ainew.last_vehiclecheck_date = Global.get_date();
-			} else if (c < 100 && !Global._patches.ai_disable_veh_roadveh) {
+			} else if (c < 100 && !Global._patches.ai_disable_veh_roadveh.get()) {
 				// Do we have any spots for road-vehicles left open?
 				if (Vehicle.GetFreeUnitNumber(Vehicle.VEH_Road).id <= Global._patches.max_roadveh) {
 					if (c < 85)
@@ -146,11 +141,11 @@ public class Trolly extends AiTools
 					else
 						p.ainew.action = AiAction.BUS_ROUTE;
 				}
-			}/* else if (c < 200 && !Global.Global._patches.ai_disable_veh_train) {
-				if (Vehicle.GetFreeUnitNumber(Vehicle.VEH_Train) <= Global._patches.max_trains) {
-					p.ainew.action = AiAction.TRAIN_ROUTE;
+			} else if (c < 200 && !Global._patches.ai_disable_veh_train.get()) {
+				if (Vehicle.GetFreeUnitNumber(Vehicle.VEH_Train).id <= Global._patches.max_trains) {
+					// TODO p.ainew.action = AiAction.TRAIN_ROUTE;
 				}
-			}*/
+			}
 
 			p.ainew.counter = 0;
 		}
@@ -160,7 +155,7 @@ public class Trolly extends AiTools
 			return;
 		}
 
-		if (Global._patches.ai_disable_veh_roadveh && (
+		if (Global._patches.ai_disable_veh_roadveh.get() && (
 				p.ainew.action == AiAction.BUS_ROUTE ||
 				p.ainew.action == AiAction.TRUCK_ROUTE
 				)) {
@@ -168,7 +163,7 @@ public class Trolly extends AiTools
 			return;
 		}
 
-		if (Global._patches.ai_disable_veh_roadveh && (
+		if (Global._patches.ai_disable_veh_roadveh.get() && (
 				p.ainew.action == AiAction.BUS_ROUTE ||
 				p.ainew.action == AiAction.TRUCK_ROUTE
 				)) {
@@ -1264,7 +1259,7 @@ public class Trolly extends AiTools
 		}
 
 		// Very handy for AI, goto depot.. but yeah, it needs to be activated ;)
-		if (Global._patches.gotodepot) {
+		if (Global._patches.gotodepot.get()) {
 			idx = 0;
 			//order.type = OT_GOTO_DEPOT;
 			//order.flags = OF_UNLOAD;

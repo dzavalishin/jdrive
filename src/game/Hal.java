@@ -67,7 +67,7 @@ public class Hal
 		return false;
 	}
 
-	void ToggleFullScreen(boolean fs) {toggle_fullscreen(fs);}
+	public void ToggleFullScreen(boolean fs) {toggle_fullscreen(fs);}
 	/*
 static int  compare_res(const void *pa, const void *pb)
 {

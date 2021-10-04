@@ -59,7 +59,7 @@ public class mAirport
 	//checks if a plane is allowed to stop
 	static boolean MA_VehicleIsAtMunicipalAirport(Vehicle v)
 	{
-		if(!Global._patches.allow_municipal_airports)
+		if(!Global._patches.allow_municipal_airports.get())
 			return false;
 		
 		return v.tile.GetTileOwner().isTown();
@@ -124,7 +124,7 @@ public class mAirport
 	{
 		int [] vehiclecount = { 0 };
 
-		if(!Global._patches.allow_municipal_airports) 
+		if(!Global._patches.allow_municipal_airports.get()) 
 			return true;
 
 		if(st.owner.id != Owner.OWNER_TOWN)
@@ -153,7 +153,7 @@ public class mAirport
 	public static boolean MA_OwnerHandler(PlayerID owner)
 	{
 
-		if(!Global._patches.allow_municipal_airports) 
+		if(!Global._patches.allow_municipal_airports.get()) 
 			return false;
 		
 		return (owner.isTown());
@@ -258,10 +258,10 @@ public class mAirport
 		PlayerID old_player = PlayerID.getCurrent();
 		PlayerID.setCurrent( Owner.OWNER_TOWN_ID );
 
-		if(!Global._patches.allow_municipal_airports) 
+		if(!Global._patches.allow_municipal_airports.get()) 
 			MA_DestroyAirport(tn);
 		
-		if(!Global._patches.allow_municipal_airports 
+		if(!Global._patches.allow_municipal_airports.get() 
 			|| (Global.get_cur_year() + 1920) < 1990 
 			|| tn.population < MA_MIN_POPULATION) {
 			PlayerID.setCurrent(old_player);
@@ -322,7 +322,7 @@ public class mAirport
 			}
 		}
 
-		if(!Global._patches.allow_municipal_airports) return;
+		if(!Global._patches.allow_municipal_airports.get()) return;
 
 		if(Global.get_cur_year() + 1920 < INT_AIRPORT_YEAR) {
 			Global.SetDParam(0, tn.index);

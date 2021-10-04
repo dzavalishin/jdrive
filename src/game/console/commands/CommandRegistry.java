@@ -27,6 +27,7 @@ public class CommandRegistry {
         put(new EchoColoredCommand());
         put(new ExitCommand());
         put(new ClearCommand());
+        put(new PatchCommand());
 
         put(new NetworkClientsCommand());
         put(new BanCommand());
