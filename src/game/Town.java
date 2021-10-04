@@ -524,7 +524,7 @@ implements IPoolItem, Serializable
 			return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 
 		house = tile.getMap().m4;
-		cost = Global._price.remove_house * TownTables._housetype_remove_cost[house] >> 8;
+		cost = ((int)(Global._price.remove_house * TownTables._housetype_remove_cost[house])) >> 8;
 
 			rating = TownTables._housetype_remove_ratingmod[house];
 			Global._cleared_town_rating += rating;
@@ -1998,7 +1998,7 @@ implements IPoolItem, Serializable
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 
-		cost = (Global._price.build_industry >> 8) * _town_action_costs[p2];
+		cost = (int) ((Global._price.build_industry / 256) * _town_action_costs[p2]);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			_town_action_proc[p2].accept(t, p2);

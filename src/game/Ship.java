@@ -141,7 +141,7 @@ public class Ship {
 
 		if( v.isStopped()) return;
 
-		cost = EngineGui.ShipVehInfo(v.getEngine_type().id).running_cost * Global._price.ship_running / 364;
+		cost = (int) (EngineGui.ShipVehInfo(v.getEngine_type().id).running_cost * Global._price.ship_running / 364);
 		v.profit_this_year -= cost >> 8;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);
@@ -390,7 +390,7 @@ public class Ship {
 
 	static int EstimateShipCost(/*EngineID*/ int engine_type)
 	{
-		return EngineGui.ShipVehInfo(engine_type).base_cost * (Global._price.ship_base>>3)>>5;
+		return ((int)(EngineGui.ShipVehInfo(engine_type).base_cost * (Global._price.ship_base/8)))>>5;
 	}
 
 	static void ShipEnterDepot(Vehicle v)
@@ -1124,7 +1124,7 @@ public class Ship {
 
 		cost = 0;
 		if (v.owner.IS_HUMAN_PLAYER() && new_cid.id != v.getCargo_type()) {
-			cost = Global._price.ship_base >> 7;
+			cost = ((int)Global._price.ship_base) >> 7;
 		}
 
 		if(0!= (flags & Cmd.DC_EXEC)) {

@@ -78,8 +78,8 @@ public abstract class TownGui //extends Town
 			}
 
 			// Things worth more than this are not shown
-			long avail = Player.GetPlayer(pid).getMoney() + Global._price.station_value * 200L;
-			ref = Global._price.build_industry >> 8;
+			long avail = (long) (Player.GetPlayer(pid).getMoney() + Global._price.station_value * 200L);
+			ref = (int) (Global._price.build_industry / 256);
 
 				for (i = 0; i != Town._town_action_costs.length; i++, avail_buttons >>= 1) {
 					if (BitOps.HASBIT(avail_buttons, 0) && avail >= Town._town_action_costs[i] * ref) {
@@ -202,7 +202,7 @@ public abstract class TownGui //extends Town
 				int i = w.as_def_d().data_1;
 
 				if (i != -1) {
-					Global.SetDParam(1, (Global._price.build_industry >> 8) * Town._town_action_costs[i]);
+					Global.SetDParam(1, (Global._price.build_industry / 256) * Town._town_action_costs[i]);
 					Global.SetDParam(0, Str.STR_2046_SMALL_ADVERTISING_CAMPAIGN + i);
 					Gfx.DrawStringMultiLine(2, 159, new StringID(Str.STR_204D_INITIATE_A_SMALL_LOCAL + i), 313);
 				}

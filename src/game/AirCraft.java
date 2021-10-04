@@ -138,7 +138,7 @@ public class AirCraft extends AirCraftTables {
 
 	static int EstimateAircraftCost(EngineID engine_type)
 	{
-		return Engine.AircraftVehInfo(engine_type.id).base_cost * (Global._price.aircraft_base>>3)>>5;
+		return Engine.AircraftVehInfo(engine_type.id).base_cost * (((int)Global._price.aircraft_base)>>3)>>5;
 	}
 
 
@@ -549,7 +549,7 @@ public class AirCraft extends AirCraftTables {
 
 		cost = 0;
 		if (v.owner.IS_HUMAN_PLAYER() && new_cid.id != v.getCargo_type()) {
-			cost = Global._price.aircraft_base >> 7;
+			cost = ((int)Global._price.aircraft_base) >> 7;
 		}
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -600,8 +600,6 @@ public class AirCraft extends AirCraftTables {
 
 	public static void OnNewDay_Aircraft(Vehicle v)
 	{
-		int cost;
-
 		if (v.subtype > 2) return;
 
 		if ((++v.day_counter & 7) == 0) v.DecreaseVehicleValue();
@@ -614,7 +612,7 @@ public class AirCraft extends AirCraftTables {
 
 		if(v.isStopped()) return;
 
-		cost = Engine.AircraftVehInfo(v.getEngine_type().id).running_cost * Global._price.aircraft_running / 364;
+		int cost = (int) (Engine.AircraftVehInfo(v.getEngine_type().id).running_cost * Global._price.aircraft_running / 364);
 
 		v.profit_this_year -= cost >> 8;
 
@@ -2347,7 +2345,7 @@ public class AirCraft extends AirCraftTables {
 		//YearMonthDay.ConvertDayToYMD(ymd, e.getIntro_date());
 
 		/* Purchase cost - Max speed */
-		Global.SetDParam(0, avi.base_cost * (Global._price.aircraft_base>>3)>>5);
+		Global.SetDParam(0, avi.base_cost * (((int)Global._price.aircraft_base)>>3)>>5);
 		Global.SetDParam(1, avi.max_speed * 8);
 		Gfx.DrawString(x, y, Str.STR_PURCHASE_INFO_COST_SPEED, 0);
 		y += 10;
@@ -2359,7 +2357,7 @@ public class AirCraft extends AirCraftTables {
 		y += 10;
 
 		/* Running cost */
-		Global.SetDParam(0, avi.running_cost * Global._price.aircraft_running >> 8);
+		Global.SetDParam(0, avi.running_cost * ((int)Global._price.aircraft_running) >> 8);
 		Gfx.DrawString(x, y, Str.STR_PURCHASE_INFO_RUNNINGCOST, 0);
 		y += 10;
 
@@ -2662,7 +2660,7 @@ public class AirCraft extends AirCraftTables {
 
 				Global.SetDParam(0, (v.age + 365 < v.max_age) ? Str.STR_AGE : Str.STR_AGE_RED);
 				Global.SetDParam(2, v.max_age / 366);
-				Global.SetDParam(3, Global._price.aircraft_running * Engine.AircraftVehInfo(v.getEngine_type().id).running_cost >> 8);
+				Global.SetDParam(3, ((int)Global._price.aircraft_running) * Engine.AircraftVehInfo(v.getEngine_type().id).running_cost >> 8);
 				Gfx.DrawString(2, 15, Str.STR_A00D_AGE_RUNNING_COST_YR, 0);
 			}
 

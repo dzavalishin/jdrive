@@ -27,27 +27,28 @@ public class Strings extends StringTable
 	public static final int SPECSTR_TOWNNAME_START = 0x20C0;
 	public static final int SPECSTR_TOWNNAME_ENGLISH = SPECSTR_TOWNNAME_START;
 	public static final int SPECSTR_TOWNNAME_RUSSIAN = SPECSTR_TOWNNAME_START+1;
-	/*
-		public static final int SPECSTR_TOWNNAME_FRENCH;
-		public static final int SPECSTR_TOWNNAME_GERMAN;
-		public static final int SPECSTR_TOWNNAME_AMERICAN;
-		public static final int SPECSTR_TOWNNAME_LATIN;
-		public static final int SPECSTR_TOWNNAME_SILLY;
-		public static final int SPECSTR_TOWNNAME_SWEDISH;
-		public static final int SPECSTR_TOWNNAME_DUTCH;
-		public static final int SPECSTR_TOWNNAME_FINNISH;
-		public static final int SPECSTR_TOWNNAME_POLISH;
-		public static final int SPECSTR_TOWNNAME_SLOVAKISH;
-		public static final int SPECSTR_TOWNNAME_NORWEGIAN;
-		public static final int SPECSTR_TOWNNAME_HUNGARIAN;
-		public static final int SPECSTR_TOWNNAME_AUSTRIAN;
-		public static final int SPECSTR_TOWNNAME_ROMANIAN;
+	public static final int SPECSTR_TOWNNAME_FRENCH = SPECSTR_TOWNNAME_START+2;
+	public static final int SPECSTR_TOWNNAME_GERMAN = SPECSTR_TOWNNAME_START+3;
+	public static final int SPECSTR_TOWNNAME_AMERICAN = SPECSTR_TOWNNAME_START+4;
+	public static final int SPECSTR_TOWNNAME_LATIN = SPECSTR_TOWNNAME_START+5;
+	public static final int SPECSTR_TOWNNAME_SILLY = SPECSTR_TOWNNAME_START+6;
+	public static final int SPECSTR_TOWNNAME_SWEDISH = SPECSTR_TOWNNAME_START+7;
+	public static final int SPECSTR_TOWNNAME_DUTCH = SPECSTR_TOWNNAME_START+8;
+	public static final int SPECSTR_TOWNNAME_FINNISH = SPECSTR_TOWNNAME_START+9;
+	public static final int SPECSTR_TOWNNAME_POLISH = SPECSTR_TOWNNAME_START+10;
+	public static final int SPECSTR_TOWNNAME_SLOVAKISH = SPECSTR_TOWNNAME_START+11;
+	public static final int SPECSTR_TOWNNAME_NORWEGIAN = SPECSTR_TOWNNAME_START+12;
+	public static final int SPECSTR_TOWNNAME_HUNGARIAN = SPECSTR_TOWNNAME_START+13;
+	public static final int SPECSTR_TOWNNAME_AUSTRIAN = SPECSTR_TOWNNAME_START+14;
+	public static final int SPECSTR_TOWNNAME_ROMANIAN = SPECSTR_TOWNNAME_START+15;
+		/*
 		public static final int SPECSTR_TOWNNAME_CZECH;
 		public static final int SPECSTR_TOWNNAME_SWISS;
 		public static final int SPECSTR_TOWNNAME_DANISH;
 		public static final int SPECSTR_TOWNNAME_LAST = SPECSTR_TOWNNAME_DANISH;
 	 */
-	public static final int SPECSTR_TOWNNAME_LAST = SPECSTR_TOWNNAME_RUSSIAN;
+	//public static final int SPECSTR_TOWNNAME_LAST = SPECSTR_TOWNNAME_RUSSIAN;
+	public static final int SPECSTR_TOWNNAME_LAST = SPECSTR_TOWNNAME_ROMANIAN;
 
 	// special strings for player names on the form "TownName transport".
 	public static final int SPECSTR_PLAYERNAME_START = 0x70EA;

@@ -50,6 +50,10 @@ public class PlayerID extends AbstractID implements Serializable
 		return get(Owner.OWNER_WATER);
 	}
 	
+	/** Get 'OWNER_SPECTATOR' user */
+	public static PlayerID getSpectator() {
+		return get(Owner.OWNER_SPECTATOR);
+	}
 
 	public boolean IS_HUMAN_PLAYER()
 	{
@@ -161,5 +165,6 @@ public class PlayerID extends AbstractID implements Serializable
 
 	/** Set current player to no one */
 	public static void setCurrentToNone() {	setCurrent(getNone()); }
+
 	
 }

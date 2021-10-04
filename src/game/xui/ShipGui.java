@@ -38,7 +38,7 @@ public class ShipGui
 		final Engine  e;
 
 		/* Purchase cost - Max speed */
-		Global.SetDParam(0, svi.base_cost * (Global._price.ship_base>>3)>>5);
+		Global.SetDParam(0, ((int)(svi.base_cost * (Global._price.ship_base/8)))>>5);
 		Global.SetDParam(1, svi.max_speed * 10 >> 5);
 		Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_COST_SPEED, 0);
 		y += 10;
@@ -51,7 +51,7 @@ public class ShipGui
 		y += 10;
 
 		/* Running cost */
-		Global.SetDParam(0, svi.running_cost * Global._price.ship_running >> 8);
+		Global.SetDParam(0, ((int)(svi.running_cost * Global._price.ship_running)) >> 8);
 		Gfx.DrawString(x,y, Str.STR_PURCHASE_INFO_RUNNINGCOST, 0);
 		y += 10;
 
@@ -184,7 +184,7 @@ public class ShipGui
 
 				Global.SetDParam(0, (v.getAge() + 365 < v.getMax_age()) ? Str.STR_AGE : Str.STR_AGE_RED);
 				Global.SetDParam(2, v.getMax_age() / 366);
-				Global.SetDParam(3, Engine.ShipVehInfo(v.getEngine_type().id).running_cost * Global._price.ship_running >> 8);
+				Global.SetDParam(3, Engine.ShipVehInfo(v.getEngine_type().id).running_cost * Global._price.ship_running / 256 );
 				Gfx.DrawString(2, 15, Str.STR_9812_AGE_RUNNING_COST_YR, 0);
 			}
 

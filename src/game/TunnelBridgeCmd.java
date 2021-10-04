@@ -136,7 +136,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 		// slope foundations
 		if ((0 !=(BRIDGE_FULL_LEVELED_FOUNDATION & (1 << tileh))) || (0 !=(BRIDGE_PARTLY_LEVELED_FOUNDATION & (1 << tileh))) )
-			return Global._price.terraform;
+			return (int) Global._price.terraform;
 
 		return Cmd.CMD_ERROR;
 	}
@@ -412,7 +412,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			if (!PlayerID.getCurrent().isSpecial() && !Global.gs._is_old_ai_player)
 				bridge_len = CalcBridgeLenCostFactor(bridge_len);
 
-			cost += ((long)bridge_len * Global._price.build_bridge * b.price) >> 8;
+			cost += ((long)(bridge_len * Global._price.build_bridge * b.price)) >> 8;
 		}
 
 		return cost;
@@ -543,7 +543,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			Rail.UpdateSignalsOnSegment(end_tile, (direction!=0)?7:1);
 		}
 
-		return cost + Global._price.build_tunnel;
+		return (int) (cost + Global._price.build_tunnel);
 	}
 
 	/** Build Tunnel.
@@ -688,7 +688,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			if (tile.IsTileOwner(Owner.OWNER_TOWN) && Global._game_mode != GameModes.GM_EDITOR)
 				t.ChangeTownRating(TownTables.RATING_TUNNEL_BRIDGE_DOWN_STEP, TownTables.RATING_TUNNEL_BRIDGE_MINIMUM);
 		}
-		return Global._price.clear_tunnel * (length[0] + 1);
+		return (int) (Global._price.clear_tunnel * (length[0] + 1));
 	}
 
 	static TileIndex FindEdgesOfBridge(TileIndex tile, TileIndex [] endtile)
@@ -736,7 +736,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			if (!PlayerID.getCurrent().isWater() && (!Player.CheckTileOwnership(tile) || !Vehicle.EnsureNoVehicleZ(tile, tile.TilePixelHeight())))
 				return Cmd.CMD_ERROR;
 
-			cost = 0 != (tile.getMap().m5 & 8) ? Global._price.remove_road * 2 : Global._price.remove_rail;
+			cost = (int) (0 != (tile.getMap().m5 & 8) ? Global._price.remove_road * 2 : Global._price.remove_rail);
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				tile.getMap().m5 = (tile.getMap().m5 & ~0x38);
@@ -751,7 +751,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 			// check for vehicles under bridge
 			if (!Vehicle.EnsureNoVehicleZ(tile, tile.TilePixelHeight())) return Cmd.CMD_ERROR;
-			cost = Global._price.clear_water;
+			cost = (int) Global._price.clear_water;
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				tile.getMap().m5 = (tile.getMap().m5 & ~0x38);
 				tile.SetTileOwner(Owner.OWNER_NONE);
@@ -846,7 +846,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 		}
 
-		return ((((endtile[0].getTile() - tile.getTile()) >> (direction!=0?8:0))&0xFF)+1) * Global._price.clear_bridge;
+		return (int) (((((endtile[0].getTile() - tile.getTile()) >> (direction!=0?8:0))&0xFF)+1) * Global._price.clear_bridge);
 	}
 
 	static int ClearTile_TunnelBridge(TileIndex tile, byte flags)
@@ -889,7 +889,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				tile.MarkTileDirtyByTile();
 				end1.MarkTileDirtyByTile();
 			}
-			return (length[0] + 1) * (Global._price.build_rail >> 1);
+			return (length[0] + 1) * (int)(Global._price.build_rail/2);
 		} else if ((tile.getMap().m5 & 0xF8) == 0xE0) {
 			// bridge middle part with rail below
 			// only check for train under bridge
@@ -903,7 +903,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				tile.getMap().m3 =  BitOps.RETSB(tile.getMap().m3, 0, 4, totype);
 				tile.MarkTileDirtyByTile();
 			}
-			return Global._price.build_rail >> 1;
+			return (int) (Global._price.build_rail/2);
 		} else if ((tile.getMap().m5 & 0xC6) == 0x80) {
 			TileIndex starttile;
 			int cost;
@@ -938,7 +938,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					}
 					tile.MarkTileDirtyByTile();
 				}
-				cost += Global._price.build_rail >> 1;
+				cost += Global._price.build_rail/2;
 	tile = tile.iadd( BitOps.GB(tile.getMap().m5, 0, 1)!=0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
 			} while (tile.getTile() <= end2[0].getTile());
 

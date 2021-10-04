@@ -3,9 +3,12 @@ package game.struct;
 import java.io.Serializable;
 
 import game.Global;
+import game.Hal;
+import game.util.BitOps;
 import game.xui.Gfx;
 import game.xui.Widget;
 import game.xui.Window;
+import game.xui.WindowEvent;
 
 public class Textbuf implements Serializable 
 {
@@ -210,5 +213,59 @@ public class Textbuf implements Serializable
 	public boolean isCaret() { return caret; }
 	public int getCaretXOffs() { return caretxoffs; }
 	public int getWidth() { return width; }
+
+
+	public static int HandleEditBoxKey(Window w, int wid, WindowEvent we)
+	{
+		we.cont = false;
+		final Textbuf tb = w.as_querystr_d().text;
+		
+		switch (we.keycode) {
+		case Window.WKC_ESC: return 2;
+		case Window.WKC_RETURN: case Window.WKC_NUM_ENTER: return 1;
+		case (Window.WKC_CTRL | 'V'):
+			if (Hal.InsertTextBufferClipboard(tb))
+				w.InvalidateWidget(wid);
+		break;
+		case (Window.WKC_CTRL | 'U'):
+			tb.DeleteTextBufferAll();
+		w.InvalidateWidget(wid);
+		break;
+		case Window.WKC_BACKSPACE: case Window.WKC_DELETE:
+			if (tb.DeleteTextBufferChar(we.keycode))
+				w.InvalidateWidget(wid);
+			break;
+		case Window.WKC_LEFT: case Window.WKC_RIGHT: case Window.WKC_END: case Window.WKC_HOME:
+			if (tb.MoveTextBufferPos(we.keycode))
+				w.InvalidateWidget(wid);
+			break;
+		default:
+			if (BitOps.IsValidAsciiChar(we.ascii)) {
+				if (tb.InsertTextBufferChar((char) we.ascii))
+					w.InvalidateWidget(wid);
+			} else // key wasn't caught
+				we.cont = true;
+		}
+	
+		return 0;
+	}
+
+
+	public static void DrawEditBox(Window w, int wid)
+	{
+		//final Widget wi = w.widget.get(wid);
+		final Widget wi = w.getWidget(wid);
+		final Textbuf tb = w.as_querystr_d().text;
+	
+		Gfx.GfxFillRect(wi.left+1, wi.top+1, wi.right-1, wi.bottom-1, 215);
+		tb.drawToWidget(wi);
+	}
+
+
+	public static void HandleEditBox(Window w, int wid)
+	{
+		if (w.as_querystr_d().text.HandleCaret()) 
+			w.InvalidateWidget(wid);
+	}
 	
 }

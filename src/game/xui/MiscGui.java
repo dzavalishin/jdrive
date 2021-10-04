@@ -479,7 +479,7 @@ public class MiscGui {
 
 	static final Integer [] _errmsg_decode_params = new Integer[20];
 	static StringID _errmsg_message_1, _errmsg_message_2;
-	static int _errmsg_duration = 100; // TODO [dz] why?
+	static int _errmsg_duration = 50; // TODO [dz] why?
 
 
 	static final Widget _errmsg_widgets[] = {
@@ -791,59 +791,6 @@ public class MiscGui {
 
 
 
-	// TODO move to Textbuf or Window
-	public static int HandleEditBoxKey(Window w, int wid, WindowEvent we)
-	{
-		we.cont = false;
-
-		switch (we.keycode) {
-		case Window.WKC_ESC: return 2;
-		case Window.WKC_RETURN: case Window.WKC_NUM_ENTER: return 1;
-		case (Window.WKC_CTRL | 'V'):
-			if (Hal.InsertTextBufferClipboard(w.as_querystr_d().text))
-				w.InvalidateWidget(wid);
-		break;
-		case (Window.WKC_CTRL | 'U'):
-			w.as_querystr_d().text.DeleteTextBufferAll();
-		w.InvalidateWidget(wid);
-		break;
-		case Window.WKC_BACKSPACE: case Window.WKC_DELETE:
-			if (w.as_querystr_d().text.DeleteTextBufferChar(we.keycode))
-				w.InvalidateWidget(wid);
-			break;
-		case Window.WKC_LEFT: case Window.WKC_RIGHT: case Window.WKC_END: case Window.WKC_HOME:
-			if (w.as_querystr_d().text.MoveTextBufferPos(we.keycode))
-				w.InvalidateWidget(wid);
-			break;
-		default:
-			if (BitOps.IsValidAsciiChar(we.ascii)) {
-				if (w.as_querystr_d().text.InsertTextBufferChar((char) we.ascii))
-					w.InvalidateWidget(wid);
-			} else // key wasn't caught
-				we.cont = true;
-		}
-
-		return 0;
-	}
-
-
-	// TODO move to Textbuf or Window
-	public static void HandleEditBox(Window w, int wid)
-	{
-		if (w.as_querystr_d().text.HandleCaret()) 
-			w.InvalidateWidget(wid);
-	}
-
-	// TODO move to Textbuf or Window
-	public static void DrawEditBox(Window w, int wid)
-	{
-		final Widget wi = w.widget.get(wid);
-		final Textbuf tb = w.as_querystr_d().text;
-
-		Gfx.GfxFillRect(wi.left+1, wi.top+1, wi.right-1, wi.bottom-1, 215);
-		tb.drawToWidget(wi);
-	}
-
 	private static void QueryStringWndProc_press_ok(Window w, boolean [] closed)
 	{
 		if (w.as_querystr_d().orig != null &&
@@ -884,7 +831,7 @@ public class MiscGui {
 			Global.SetDParam(0, w.as_querystr_d().caption.id);
 			w.DrawWindowWidgets();
 
-			DrawEditBox(w, 5);
+			Textbuf.DrawEditBox(w, 5);
 			break;
 
 		case WE_CLICK:
@@ -902,11 +849,11 @@ public class MiscGui {
 				w.DeleteWindow();
 				return;
 			}
-			HandleEditBox(w, 5);
+			Textbuf.HandleEditBox(w, 5);
 		} break;
 
 		case WE_KEYPRESS: {
-			switch (HandleEditBoxKey(w, 5, e)) {
+			switch (Textbuf.HandleEditBoxKey(w, 5, e)) {
 			case 1: // Return
 				//goto press_ok;
 				QueryStringWndProc_press_ok(w, closed);
@@ -1133,7 +1080,7 @@ public class MiscGui {
 
 	static void GenerateFileName()
 	{
-		/* Check if we are not a specatator who wants to generate a name..
+		/* Check if we are not a spectator who wants to generate a name..
 		    Let's use the name of player #0 for now. */
 		final Player  p = Player.GetPlayer(Global.gs._local_player.id < Global.MAX_PLAYERS ? Global.gs._local_player.id : 0);
 
@@ -1155,18 +1102,15 @@ public class MiscGui {
 			switch (Global._saveload_mode) {
 			case Global.SLD_SAVE_GAME:
 			case Global.SLD_LOAD_GAME:
-				//ttd_strlcpy(&o_dir.name[0], _path.save_dir, sizeof(o_dir.name));
 				o_dir.name = Global._path.save_dir;
 				break;
 
 			case Global.SLD_SAVE_SCENARIO:
 			case Global.SLD_LOAD_SCENARIO:
-				//ttd_strlcpy(&o_dir.name[0], _path.scenario_dir, sizeof(o_dir.name));
 				o_dir.name = Global._path.scenario_dir;
 				break;
 
 			default:
-				//ttd_strlcpy(&o_dir.name[0], _path.personal_dir, sizeof(o_dir.name));
 				o_dir.name = Global._path.personal_dir;
 			}
 			break;
@@ -1203,7 +1147,7 @@ public class MiscGui {
 			}
 
 			if (Global._saveload_mode == Global.SLD_SAVE_GAME || Global._saveload_mode == Global.SLD_SAVE_SCENARIO) {
-				DrawEditBox(w, 10);
+				Textbuf.DrawEditBox(w, 10);
 			}
 			break;
 		}
@@ -1270,7 +1214,7 @@ public class MiscGui {
 			}
 			break;
 		case WE_MOUSELOOP:
-			HandleEditBox(w, 10);
+			Textbuf.HandleEditBox(w, 10);
 			break;
 		case WE_KEYPRESS:
 			if (e.keycode == Window.WKC_ESC) {
@@ -1279,7 +1223,7 @@ public class MiscGui {
 			}
 
 			if (Global._saveload_mode == Global.SLD_SAVE_GAME || Global._saveload_mode == Global.SLD_SAVE_SCENARIO) {
-				if (HandleEditBoxKey(w, 10, e) == 1) // Press Enter 
+				if (Textbuf.HandleEditBoxKey(w, 10, e) == 1) // Press Enter 
 					w.HandleButtonClick(12);
 			}
 			break;

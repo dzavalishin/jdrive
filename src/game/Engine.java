@@ -1323,12 +1323,12 @@ public class Engine extends EngineTables implements Serializable
 		final RailVehicleInfo rvi = RailVehInfo(engine);
 		int multihead = rvi.isMulttihead() ? 1 : 0;
 
-		Global.SetDParam(0, (Global._price.build_railvehicle >> 3) * rvi.base_cost >> 5);
+		Global.SetDParam(0, (((int)Global._price.build_railvehicle) >> 3) * rvi.base_cost >> 5);
 		Global.SetDParam(2, rvi.getMax_speed() * 10 >> 4);
 		Global.SetDParam(3, rvi.power << multihead);
 		Global.SetDParam(1, rvi.weight << multihead);
 
-		Global.SetDParam(4, rvi.running_cost_base * Global._price.running_rail[rvi.engclass] >> 8 << multihead);
+		Global.SetDParam(4, rvi.running_cost_base * ((int)Global._price.running_rail[rvi.engclass]) >> 8 << multihead);
 
 		if (rvi.capacity != 0) {
 			Global.SetDParam(5, Global._cargoc.names_long[rvi.cargo_type]);
@@ -1375,11 +1375,11 @@ public class Engine extends EngineTables implements Serializable
 	static void DrawAircraftEngineInfo(int engine, int x, int y, int maxw)
 	{
 		final AircraftVehicleInfo avi = AircraftVehInfo(engine);
-		Global.SetDParam(0, (Global._price.aircraft_base >> 3) * avi.base_cost >> 5);
+		Global.SetDParam(0, (((int)Global._price.aircraft_base) >> 3) * avi.base_cost >> 5);
 		Global.SetDParam(1, avi.max_speed << 3);
 		Global.SetDParam(2, avi.passenger_capacity);
 		Global.SetDParam(3, avi.mail_capacity);
-		Global.SetDParam(4, avi.running_cost * Global._price.aircraft_running >> 8);
+		Global.SetDParam(4, avi.running_cost * ((int)Global._price.aircraft_running) >> 8);
 
 		Gfx.DrawStringMultiCenter(x, y, Str.STR_A02E_COST_MAX_SPEED_CAPACITY, maxw);
 	}
@@ -1419,9 +1419,9 @@ public class Engine extends EngineTables implements Serializable
 	{
 		final RoadVehicleInfo rvi = RoadVehInfo(engine);
 
-		Global.SetDParam(0, (Global._price.roadveh_base >> 3) * rvi.base_cost >> 5);
+		Global.SetDParam(0, (((int)Global._price.roadveh_base) >> 3) * rvi.base_cost >> 5);
 		Global.SetDParam(1, rvi.max_speed * 10 >> 5);
-		Global.SetDParam(2, rvi.running_cost * Global._price.roadveh_running >> 8);
+		Global.SetDParam(2, rvi.running_cost * ((int)Global._price.roadveh_running) >> 8);
 
 		Global.SetDParam(4, rvi.capacity);
 		Global.SetDParam(3, Global._cargoc.names_long[rvi.cargo_type] );
@@ -1462,11 +1462,11 @@ public class Engine extends EngineTables implements Serializable
 	static void DrawShipEngineInfo(int engine, int x, int y, int maxw)
 	{
 		final ShipVehicleInfo svi = ShipVehInfo(engine);
-		Global.SetDParam(0, svi.base_cost * (Global._price.ship_base >> 3) >> 5);
+		Global.SetDParam(0, svi.base_cost * (((int)Global._price.ship_base) >> 3) >> 5);
 		Global.SetDParam(1, svi.max_speed * 10 >> 5);
 		Global.SetDParam(2, Global._cargoc.names_long[svi.cargo_type]);
 		Global.SetDParam(3, svi.capacity);
-		Global.SetDParam(4, svi.running_cost * Global._price.ship_running >> 8);
+		Global.SetDParam(4, svi.running_cost * ((int)Global._price.ship_running) >> 8);
 		Gfx.DrawStringMultiCenter(x, y, Str.STR_982E_COST_MAX_SPEED_CAPACITY, maxw);
 	}
 
