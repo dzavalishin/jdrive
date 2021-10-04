@@ -7,5 +7,8 @@ public enum ClientStatus {
 	MAP,
 	DONE_MAP,
 	PRE_ACTIVE,
-	ACTIVE,
+	ACTIVE;
+	
+	//private static String stat_str[] = {"inactive", "authorized", "waiting", "loading map", "map done", "ready", "active"};
+
 }

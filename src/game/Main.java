@@ -1,5 +1,8 @@
 package game;
 
+import java.io.File;
+import java.io.IOException;
+
 import game.ai.Ai;
 import game.console.ConsoleFactory;
 import game.enums.GameModes;
@@ -11,14 +14,25 @@ import game.exceptions.InvalidFileFormat;
 import game.exceptions.InvalidSpriteFormat;
 import game.ids.PlayerID;
 import game.net.Net;
+import game.net.NetDefs;
+import game.net.NetGui;
 import game.net.NetUDP;
 import game.struct.SmallFiosItem;
-import game.util.*;
-import game.xui.*;
+import game.util.BitOps;
+import game.util.FileIO;
+import game.util.Music;
+import game.util.ShortSounds;
+import game.util.Sound;
+import game.util.Strings;
+import game.xui.Gfx;
+import game.xui.GfxInit;
+import game.xui.Gui;
+import game.xui.MiscGui;
+import game.xui.MusicGui;
+import game.xui.SettingsGui;
+import game.xui.VehicleGui;
+import game.xui.Window;
 import gnu.getopt.Getopt;
-
-import java.io.File;
-import java.io.IOException;
 
 public class Main {
 
@@ -133,7 +147,7 @@ public class Main {
 	public static void main(String[] argv) throws IOException, InvalidFileFormat, InvalidSpriteFormat 
 	{
 		boolean network = false;
-		//String network_conn = null;
+		String network_conn = null;
 		//final String optformat;
 		//int resolution[] = {0,0};
 		int startdate = -1;
@@ -153,7 +167,7 @@ public class Main {
 
 		//optformat = "bm:s:v:hDfn::eit:d::r:g::G:p:c:";
 
-		Getopt g = new Getopt("NextTTD", argv, "bhfc:t:g::"); //"n::ed::r:G:p:");
+		Getopt g = new Getopt("NextTTD", argv, "behfc:t:g::n::"); //"d::r:G:p:");
 
 		int c;
 		while ((c = g.getopt()) != -1)
@@ -167,6 +181,20 @@ public class Main {
 			case 'b': Ai._ai.network_client = true; break;
 
 			case 'c': Global._path.config_file = g.getOptarg(); break;
+			
+			case 'n': {
+				network = true;
+				// Optional, you can give an IP
+				network_conn = g.getOptarg();
+			} break; 
+
+			case 'p': {
+				int netp = Integer.parseInt(g.getOptarg());
+				// Play as an other player in network games
+				if(BitOps.IS_INT_INSIDE(netp, 1, Global.MAX_PLAYERS)) 
+					Global._network_playas = netp;
+			} break;
+
 			case 't': startdate = Integer.parseInt(g.getOptarg()); break;
 
 			case 'g':
@@ -184,14 +212,6 @@ public class Main {
 
 		while ((i = mgo.MyGetOpt()) != -1) {
 			switch(i) {
-			case 'n': {
-				network = true;
-				if (mgo.opt != null)
-					// Optional, you can give an IP
-					network_conn = mgo.opt;
-				else
-					network_conn = null;
-			} break; 
 			//case 'r': ParseResolution(resolution, mgo.opt); break;
 			case 'd': {
 				if (mgo.opt != null) SetDebugString(mgo.opt);
@@ -199,11 +219,6 @@ public class Main {
 
 			case 'G':
 				Global._random_seeds[0][0] = Integer.parseInt(mgo.opt);
-				break;
-			case 'p': {
-				int netp = Integer.parseInt(mgo.opt);
-				// Play as an other player in network games
-				if (BitOps.IS_INT_INSIDE(i, 1, Global.MAX_PLAYERS)) Global._network_playas =  netp;
 				break;
 			}
 			case -2:
@@ -273,7 +288,7 @@ public class Main {
 		// TODO _savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 
 		// initialize network-core
-		// TODO NetworkStartUp();
+		Net.NetworkStartUp();
 
 		GameOptions._opt_ptr = GameOptions._opt_newgame;
 
@@ -285,50 +300,44 @@ public class Main {
 		ConsoleFactory.INSTANCE.getConsole();
 //		Console.IConsoleInit();
 		VehicleGui.InitializeGUI();
-		// TODO Console.IConsoleCmdExec("exec scripts/autoexec.scr 0");
+		ConsoleFactory.INSTANCE.getConsole().IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
 		GenerateWorld.doGenerateWorld(1, 256, 256); // Make the viewport initialization happy
 
 		// GRFFile.CalculateRefitMasks();
 
-		/*
-		if ((network) && (_network_available)) {
+		if ((network) && (Global._network_available)) {
 			if (network_conn != null) {
-				final String port = null;
-				final String player = null;
-				uint16 rport;
+				final String [] host = { null };
+				final String [] port = { null };
+				final String [] player = { null };
+				int rport;
 
-				rport = NETWORK_DEFAULT_PORT;
+				rport = NetDefs.NETWORK_DEFAULT_PORT;
 
-				ParseConnectionString(&player, &port, network_conn);
+				Net.ParseConnectionString(player, port, host, network_conn);
 
-				if (player != null) _network_playas = Integer.parseInt(player);
-				if (port != null) rport = Integer.parseInt(port);
+				if (player != null) Global._network_playas = Integer.parseInt(player[0]);
+				if (port != null) rport = Integer.parseInt(port[0]);
 
 				LoadIntroGame();
 				Global._switch_mode = SwitchModes.SM_NONE;
-				NetworkClientConnectGame(network_conn, rport);
+				NetGui.NetworkClientConnectGame(host[0], rport);
 			}
 		}
-		 */
 
-		// [dz] hacked in
-		//Hal._screen.width = 1024;
-		//Hal._screen.height = 768;
 
 		Global.hal.main_loop();
 
 		// TODO WaitTillSaved();
 		//Console.IConsoleFree();
 
-		/*
-		if (_network_available) {
+		if (Global._network_available) {
 			// Shut down the network and close any open connections
-			NetworkDisconnect();
-			NetworkUDPClose();
-			NetworkShutDown();
+			Net.NetworkDisconnect();
+			NetUDP.NetworkUDPClose();
+			Net.NetworkShutDown();
 		}
-		 */
 
 		Global.hal.stop_video();
 		Music.stop_song();
@@ -463,13 +472,13 @@ public class Main {
 	 */
 	static void StartScenario()
 	{
-		/*
+		//*
 		Global._game_mode = GameModes.GM_NORMAL;
 
 		// invalid type
-		if (_file_to_saveload.mode == SL_INVALID) {
+		if (_file_to_saveload.mode == SaveLoad.SL_INVALID) {
 			Global.error("Savegame is obsolete or invalid format: %s\n", _file_to_saveload.name);
-			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+			Global.ShowErrorMessage(Str.INVALID_STRING_ID().id, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 			Global._game_mode = GameModes.GM_MENU;
 			return;
 		}
@@ -483,9 +492,9 @@ public class Main {
 		Gui.SetupColorsAndInitialWindow();
 
 		// Load game
-		if (SaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode) != SL_OK) {
+		if (SaveLoad.SaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode) != SaveOrLoadResult.SL_OK) {
 			LoadIntroGame();
-			Global.ShowErrorMessage(Str.INVALID_STRING_ID, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
+			Global.ShowErrorMessage(Str.INVALID_STRING_ID().id, Str.STR_4009_GAME_LOAD_FAILED, 0, 0);
 		}
 
 		GameOptions._opt_ptr = GameOptions._opt;
@@ -496,14 +505,15 @@ public class Main {
 		// Inititalize data
 		Player.StartupPlayers();
 		Engine.StartupEngines();
-		// TODO StartupDisasters();
+		DisasterCmd.StartupDisasters();
 
 		Global.gs._local_player = null;
-		PlayerID.setCurrent( Global.gs._local_player;
-		DoCommandP(0, (Global._patches.autorenew ? 1 << 15 : 0 ) | (Global._patches.autorenew_months << 16) | 4, Global._patches.autorenew_money, null, CMD_REPLACE_VEHICLE);
+		PlayerID.setCurrent( Global.gs._local_player );
+		// TODO arg 2 long truncated
+		Cmd.DoCommandP(null, (Global._patches.autorenew ? 1 << 15 : 0 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 
-		Global.hal.MarkWholeScreenDirty();
-		 */
+		Hal.MarkWholeScreenDirty();
+		/* */
 	}
 
 	public static boolean SafeSaveOrLoad(final String filename, int mode, GameModes newgm)

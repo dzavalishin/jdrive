@@ -34,6 +34,7 @@ import game.TextEffect;
 import game.TileIndex;
 import game.Version;
 import game.console.ConsoleFactory;
+import game.console.DefaultConsole;
 import game.enums.Owner;
 import game.enums.SwitchModes;
 import game.ids.PlayerID;
@@ -67,7 +68,7 @@ public class Net implements NetDefs, NetClient
 	public static String _network_default_ip;
 
 	public static int _network_own_client_index;
-	public static String _network_unique_id; // Our own unique ID
+	public static String _network_unique_id = null; // Our own unique ID
 
 	public static int _frame_counter_server; // The frame_counter of the server, if in network-mode
 	public static int _frame_counter_max; // To where we may go with our clients
@@ -165,7 +166,7 @@ public class Net implements NetDefs, NetClient
 
 
 	// Function that looks up the CI for a given client-index
-	static NetworkClientInfo NetworkFindClientInfoFromIndex(int client_index)
+	public static NetworkClientInfo NetworkFindClientInfoFromIndex(int client_index)
 	{
 		/*
 		for (NetworkClientInfo ci : _network_client_info)
@@ -174,7 +175,7 @@ public class Net implements NetDefs, NetClient
 		 */
 		for( NetworkClientState cs : _clients )
 		{
-			if( cs.index == client_index )
+			if( cs.getIndex() == client_index )
 				return cs.ci;
 		}
 
@@ -185,7 +186,7 @@ public class Net implements NetDefs, NetClient
 	public static NetworkClientState NetworkFindClientStateFromIndex(int client_index)
 	{
 		for (NetworkClientState cs : _clients)
-			if (cs.index == client_index)
+			if (cs.getIndex() == client_index)
 				return cs;
 
 		return null;
@@ -197,7 +198,7 @@ public class Net implements NetDefs, NetClient
 	{
 		NetworkClientInfo ci = cs.ci; // _network_client_info[cs - _clients];
 		if (ci.client_name.length() == 0)
-			return String.format("Client #%d", cs.index);
+			return String.format("Client #%d", cs.getIndex());
 		else
 			return String.format("%s", ci.client_name);
 	}
@@ -274,7 +275,7 @@ public class Net implements NetDefs, NetClient
 	}
 
 	// Calculate the frame-lag of a client
-	static int NetworkCalculateLag(final NetworkClientState cs)
+	public static int NetworkCalculateLag(final NetworkClientState cs)
 	{
 		int lag = cs.last_frame_server - cs.last_frame;
 		// This client has missed his ACK packet after 1 DAY_TICKS..
@@ -444,7 +445,7 @@ public class Net implements NetDefs, NetClient
 	// Converts a string to ip/port/player
 	 * @param s  Format: IP#player:port
 	 */
-	static boolean ParseConnectionString(final String []player, final String []port, String [] host, String s)
+	public static boolean ParseConnectionString(final String []player, final String []port, String [] host, String s)
 	{
 		int epl = s.indexOf(':');
 		//if(epl < 0) return false;
@@ -520,7 +521,7 @@ public class Net implements NetDefs, NetClient
 			cs.ci = ci;
 
 			cs.index = _network_client_index++;
-			ci.client_index = cs.index;
+			ci.client_index = cs.getIndex();
 			ci.join_date = Global.get_date();
 
 			Window.InvalidateWindow(Window.WC_CLIENT_LIST, 0);
@@ -565,7 +566,7 @@ public class Net implements NetDefs, NetClient
 				if (new_cs.status.ordinal() > ClientStatus.AUTH.ordinal() && cs != new_cs) {
 					//SEND_COMMAND(PacketType.SERVER_ERROR_QUIT, new_cs, cs.index, errorno);
 					//SEND_COMMAND(PACKET_SERVER_ERROR_QUIT)(new_cs, cs->index, errorno);
-					NetServer.NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(new_cs, cs.index, errorno);
+					NetServer.NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(new_cs, cs.getIndex(), errorno);
 				}
 			}
 		}
@@ -1538,7 +1539,7 @@ public class Net implements NetDefs, NetClient
 
 
 
-	void NetworkStartUp()
+	public static void NetworkStartUp()
 	{
 		try {
 			doNetworkStartUp();
@@ -1549,7 +1550,7 @@ public class Net implements NetDefs, NetClient
 	}
 
 	// This tries to launch the network for a given OS
-	void doNetworkStartUp() throws UnknownHostException, SocketException
+	static void doNetworkStartUp() throws UnknownHostException, SocketException
 	{
 		Global.DEBUG_net( 3, "[NET][Core] Starting network...");
 
@@ -1566,7 +1567,7 @@ public class Net implements NetDefs, NetClient
 		_network_server_bind_ip_host = _network_server_bind_ip.getHostName();
 
 		/* Generate an unique id when there is none yet */
-		if (_network_unique_id.isBlank())
+		if (_network_unique_id == null)
 		{
 			try {
 				NetworkGenerateUniqueId();
@@ -1589,7 +1590,7 @@ public class Net implements NetDefs, NetClient
 	}
 
 	// This shuts the network down
-	void NetworkShutDown()
+	public static void NetworkShutDown()
 	{
 		Global.DEBUG_net( 3, "[NET][Core] Shutting down the network.");
 		Global._network_available = false;
@@ -1884,7 +1885,7 @@ public class Net implements NetDefs, NetClient
 				for(NetworkClientState cs : _clients) 
 				{
 					if( !cs.hasValidSocket() ) continue;
-					if (cs.index == dest) {
+					if (cs.getIndex() == dest) {
 						//SEND_COMMAND(PacketType.SERVER_CHAT,cs, action, from_index, false, msg);
 						NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, from_index, false, msg);
 						break;
@@ -1904,7 +1905,7 @@ public class Net implements NetDefs, NetClient
 					for(NetworkClientState cs : _clients) 
 					{
 						if( !cs.hasValidSocket() ) continue;
-						if (cs.index == from_index) {
+						if (cs.getIndex() == from_index) {
 							//SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, dest, true, msg);
 							NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, dest, true, msg);
 							break;
@@ -1926,7 +1927,7 @@ public class Net implements NetDefs, NetClient
 				if (lci.client_playas == dest) {
 					//SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, from_index, false, msg);
 					NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, from_index, false, msg);
-					if (cs.index == from_index) {
+					if (cs.getIndex() == from_index) {
 						show_local = false;
 					}
 					ci_to = lci; // Remember a client that is in the company for company-name
@@ -1956,7 +1957,7 @@ public class Net implements NetDefs, NetClient
 					NetworkTextMessage(action, playerColorOwn, true, name, "%s", msg);
 				} else {
 					FOR_ALL_CLIENTS(cs -> {
-						if (cs.index == from_index) {
+						if (cs.getIndex() == from_index) {
 							//SEND_COMMAND(PacketType.SERVER_CHAT, cs, action, ci_to_final.client_index, true, msg);
 							try {
 								NetServer.NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, ci_to_final.client_index, true, msg);
@@ -2008,6 +2009,24 @@ public class Net implements NetDefs, NetClient
 
 	public static NetworkClientState getClient(int pid) {
 		return _clients.get(pid);
+	}
+
+	/**
+	 * Check if the company has active players 
+	 * @param index company index
+	 * @return 
+	 */
+	public static boolean companyHasPlayers(int index) {
+		//FOR_ALL_CLIENTS(cs) 
+		for( NetworkClientState cs : Net._clients )
+		{
+			NetworkClientInfo ci = cs.getCi(); //DEREF_CLIENT_INFO(cs);
+			if (ci.client_playas - 1 == index) {
+				DefaultConsole.IConsoleError("Cannot remove company: a client is connected to that company.");
+				return true;
+			}
+		}
+		return false;
 	}
 
 

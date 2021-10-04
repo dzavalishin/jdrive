@@ -219,11 +219,11 @@ public interface NetServer extends NetTools, NetDefs
 					if (error == NetworkErrorCode.NOT_AUTHORIZED || error == NetworkErrorCode.NOT_EXPECTED || error == NetworkErrorCode.WRONG_REVISION)
 						error = NetworkErrorCode.ILLEGAL_PACKET;
 
-					NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(new_cs, cs.index, error);
+					NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(new_cs, cs.getIndex(), error);
 				}
 			}
 		} else {
-			Global.DEBUG_net( 2, "[NET] Clientno %d has made an error and his connection is closed", cs.index);
+			Global.DEBUG_net( 2, "[NET] Clientno %d has made an error and his connection is closed", cs.getIndex());
 		}
 
 		cs.quited = true;
@@ -269,7 +269,7 @@ public interface NetServer extends NetTools, NetDefs
 		Net._network_game_info.clients_on++;
 
 		p = new Packet(PacketType.SERVER_WELCOME);
-		NetworkSend_int(p, cs.index);
+		NetworkSend_int(p, cs.getIndex());
 		Net.NetworkSend_Packet(p, cs);
 
 		// Transmit info about all the active clients
@@ -843,7 +843,7 @@ public interface NetServer extends NetTools, NetDefs
 			{
 				if (new_cs.status.ordinal() > ClientStatus.AUTH.ordinal()) {
 					NetworkPacketSend_PACKET_SERVER_CLIENT_INFO_command(new_cs, cs.ci ); // DEREF_CLIENT_INFO(cs));
-					NetworkPacketSend_PACKET_SERVER_JOIN_command(new_cs, cs.index);
+					NetworkPacketSend_PACKET_SERVER_JOIN_command(new_cs, cs.getIndex());
 				}
 			}
 
@@ -1009,7 +1009,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		Net.FOR_ALL_CLIENTS(new_cs -> {
 			if (new_cs.status.ordinal() > ClientStatus.AUTH.ordinal()) {
-				NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(new_cs, cs.index, errorno);
+				NetworkPacketSend_PACKET_SERVER_ERROR_QUIT_command(new_cs, cs.getIndex(), errorno);
 			}
 		});
 
@@ -1038,7 +1038,7 @@ public interface NetServer extends NetTools, NetDefs
 		for( NetworkClientState new_cs : Net._clients )
 		{
 			if (new_cs.status.ordinal() > ClientStatus.AUTH.ordinal()) {
-				NetworkPacketSend_PACKET_SERVER_QUIT_command(new_cs, cs.index, str);
+				NetworkPacketSend_PACKET_SERVER_QUIT_command(new_cs, cs.getIndex(), str);
 			}
 		}
 
@@ -1090,7 +1090,7 @@ public interface NetServer extends NetTools, NetDefs
 				//Net.FOR_ALL_CLIENTS(cs -> 
 				for( NetworkClientState cs : Net._clients )
 				{
-					if (cs.index == dest) {
+					if (cs.getIndex() == dest) {
 						NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, from_index, false, msg);
 						break;
 					}
@@ -1108,7 +1108,7 @@ public interface NetServer extends NetTools, NetDefs
 					//FOR_ALL_CLIENTS(cs) 
 					for( NetworkClientState cs : Net._clients )
 					{
-						if (cs.index == from_index) {
+						if (cs.getIndex() == from_index) {
 							NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, dest, true, msg);
 							break;
 						}
@@ -1127,7 +1127,7 @@ public interface NetServer extends NetTools, NetDefs
 				ci = cs.ci; //DEREF_CLIENT_INFO(cs);
 				if (ci.client_playas == dest) {
 					NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, from_index, false, msg);
-					if (cs.index == from_index) {
+					if (cs.getIndex() == from_index) {
 						show_local = false;
 					}
 					ci_to = ci; // Remember a client that is in the company for company-name
@@ -1155,7 +1155,7 @@ public interface NetServer extends NetTools, NetDefs
 					//FOR_ALL_CLIENTS(cs)
 					for( NetworkClientState cs : Net._clients )
 					{
-						if (cs.index == from_index) {
+						if (cs.getIndex() == from_index) {
 							NetworkPacketSend_PACKET_SERVER_CHAT_command(cs, action, ci_to.client_index, true, msg);
 						}
 					}
@@ -1188,7 +1188,7 @@ public interface NetServer extends NetTools, NetDefs
 
 		String msg = NetworkRecv_string(cs, p);
 
-		NetworkServer_HandleChat(action, desttype, dest, msg, cs.index);
+		NetworkServer_HandleChat(action, desttype, dest, msg, cs.getIndex());
 	}
 
 	static void NetworkPacketReceive_PACKET_CLIENT_SET_PASSWORD_command(NetworkClientState cs, Packet p)
@@ -1233,13 +1233,13 @@ public interface NetServer extends NetTools, NetDefs
 		String command = NetworkRecv_string(cs, p);
 
 		if (!pass.equals(Net._network_game_info.rcon_password)) {
-			Global.DEBUG_net( 0, "[RCon] Wrong password from client-id %d", cs.index);
+			Global.DEBUG_net( 0, "[RCon] Wrong password from client-id %d", cs.getIndex());
 			return;
 		}
 
-		Global.DEBUG_net( 0, "[RCon] Client-id %d executed: %s", cs.index, command);
+		Global.DEBUG_net( 0, "[RCon] Client-id %d executed: %s", cs.getIndex(), command);
 
-		DefaultConsole._redirect_console_to_client = cs.index;
+		DefaultConsole._redirect_console_to_client = cs.getIndex();
 		//DefaultConsole.IConsoleCmdExec(command);
 		ConsoleFactory.INSTANCE.getConsole().IConsoleCmdExec(command);
 		DefaultConsole._redirect_console_to_client = 0;
@@ -1657,14 +1657,14 @@ public interface NetServer extends NetTools, NetDefs
 					if (lag > 3) {
 						// Client did still not report in after 4 game-day, drop him
 						//  (that is, the 3 of above, + 1 before any lag is counted)
-						DefaultConsole.IConsolePrintF(DefaultConsole._icolour_err,"Client #%d is dropped because the client did not respond for more than 4 game-days", cs.index);
+						DefaultConsole.IConsolePrintF(DefaultConsole._icolour_err,"Client #%d is dropped because the client did not respond for more than 4 game-days", cs.getIndex());
 						Net.NetworkCloseClient(cs);
 						continue;
 					}
 
 					// Report once per time we detect the lag
 					if (cs.lag_test == 0) {
-						DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn,"[%d] Client #%d is slow, try increasing *net_frame_freq to a higher value!", Global._frame_counter, cs.index);
+						DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn,"[%d] Client #%d is slow, try increasing *net_frame_freq to a higher value!", Global._frame_counter, cs.getIndex());
 						cs.lag_test = 1;
 					}
 				} else {
@@ -1673,7 +1673,7 @@ public interface NetServer extends NetTools, NetDefs
 			} else if (cs.status == ClientStatus.PRE_ACTIVE) {
 				int lag = Net.NetworkCalculateLag(cs);
 				if (lag > Net._network_max_join_time) {
-					DefaultConsole.IConsolePrintF(DefaultConsole._icolour_err,"Client #%d is dropped because it took longer than %d ticks for him to join", cs.index, Net._network_max_join_time);
+					DefaultConsole.IConsolePrintF(DefaultConsole._icolour_err,"Client #%d is dropped because it took longer than %d ticks for him to join", cs.getIndex(), Net._network_max_join_time);
 					Net.NetworkCloseClient(cs);
 				}
 			}

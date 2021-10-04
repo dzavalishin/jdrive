@@ -399,7 +399,7 @@ public class DefaultConsole implements Console//extends ConsoleCmds
 	 * It is possible to print error information to the console. This can include
 	 * game errors, or errors in general you would want the user to notice
 	 */
-	static void IConsoleError(final String  string)
+	public static void IConsoleError(final String  string)
 	{
 		IConsolePrintF(_icolour_err, "ERROR: %s", string);
 	}

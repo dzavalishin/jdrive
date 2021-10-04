@@ -2,9 +2,15 @@ package game.console;
 
 import java.io.IOException;
 
+import game.Cmd;
 import game.Global;
+import game.Player;
 import game.net.Net;
 import game.net.NetClient;
+import game.net.NetGui;
+import game.net.NetServer;
+import game.net.NetworkClientInfo;
+import game.net.NetworkErrorCode;
 
 public class ConsoleCmds extends DefaultConsole
 {
@@ -55,60 +61,60 @@ public class ConsoleCmds extends DefaultConsole
 	/* variable and command hooks   */
 	/* **************************** */
 
-	/*#ifdef ENABLE_NETWORK
+	//*#ifdef ENABLE_NETWORK
 
-	static  boolean NetworkAvailable(void)
+	static boolean NetworkAvailable()
 	{
-		if (!_network_available) {
+		if (!Global._network_available) {
 			IConsoleError("You cannot use this command because there is no network available.");
 			return false;
 		}
 		return true;
 	}
 
-	DEF_CONSOLE_HOOK(ConHookServerOnly)
+	static boolean ConHookServerOnly()
 	{
 		if (!NetworkAvailable()) return false;
 
-		if (!_network_server) {
+		if (!Global._network_server) {
 			IConsoleError("This command/variable is only available to a network server.");
 			return false;
 		}
 		return true;
 	}
 
-	DEF_CONSOLE_HOOK(ConHookClientOnly)
+	static boolean ConHookClientOnly()
 	{
 		if (!NetworkAvailable()) return false;
 
-		if (_network_server) {
+		if (Global._network_server) {
 			IConsoleError("This command/variable is not available to a network server.");
 			return false;
 		}
 		return true;
 	}
 
-	DEF_CONSOLE_HOOK(ConHookNeedNetwork)
+	static boolean ConHookNeedNetwork()
 	{
 		if (!NetworkAvailable()) return false;
 
-		if (!_networking) {
+		if (!Global._networking) {
 			IConsoleError("Not connected. This command/variable is only available in multiplayer.");
 			return false;
 		}
 		return true;
 	}
 
-	DEF_CONSOLE_HOOK(ConHookNoNetwork)
+	static boolean ConHookNoNetwork()
 	{
-		if (_networking) {
+		if (Global._networking) {
 			IConsoleError("This command/variable is forbidden in multiplayer.");
 			return false;
 		}
 		return true;
 	}
 
-	#endif /* ENABLE_NETWORK */
+	//#endif /* ENABLE_NETWORK */
 
 	static void IConsoleHelp(String str)
 	{
@@ -275,58 +281,17 @@ public class ConsoleCmds extends DefaultConsole
 		FiosFreeSavegameList();
 		return true;
 	}
-
+	*/
 	// ********************************* //
 	// * Network Core Console Commands * //
 	// ********************************* //
-	#ifdef ENABLE_NETWORK
+	//#ifdef ENABLE_NETWORK
 
-	static boolean function(String ... argv)(ConBan)
+	// TODO convert to new style command classes
+
+	static boolean ConUnBan(String ... argv)
 	{
-		NetworkClientInfo *ci;
-		uint32 index;
-
-		if (argv.length == 0) {
-			IConsoleHelp("Ban a player from a network game. Usage: 'ban <client-id>'");
-			IConsoleHelp("For client-id's, see the command 'clients'");
-			return true;
-		}
-
-		if (argv.length != 2) return false;
-
-		index = atoi(argv[1]);
-
-		if (index == NETWORK_SERVER_INDEX) {
-			IConsolePrint(_icolour_def, "Silly boy, you can not ban yourself!");
-			return true;
-		}
-		if (index == 0) {
-			IConsoleError("Invalid Client-ID");
-			return true;
-		}
-
-		ci = NetworkFindClientInfoFromIndex(index);
-
-		if (ci != null) {
-			uint i;
-			// Add user to ban-list 
-			for (i = 0; i < lengthof(_network_ban_list); i++) {
-				if (_network_ban_list[i] == null || _network_ban_list[i][0] == '\0') {
-					_network_ban_list[i] = strdup(inet_ntoa(*(struct in_addr *)&ci.client_ip));
-					break;
-				}
-			}
-
-			SEND_COMMAND(PACKET_SERVER_ERROR)(NetworkFindClientStateFromIndex(index), NETWORK_ERROR_KICKED);
-		} else
-			IConsoleError("Client-ID not found");
-
-		return true;
-	}
-
-	static boolean function(String ... argv)(ConUnBan)
-	{
-		uint i, index;
+		int i, index;
 
 		if (argv.length == 0) {
 			IConsoleHelp("Unban a player from a network game. Usage: 'unban <ip | id>'");
@@ -336,15 +301,15 @@ public class ConsoleCmds extends DefaultConsole
 
 		if (argv.length != 2) return false;
 
-		index = (strchr(argv[1], '.') == null) ? atoi(argv[1]) : 0;
+		index = (argv[1].indexOf('.') < 0) ? Integer.parseInt(argv[1]) : 0;
 		index--;
 
-		for (i = 0; i < lengthof(_network_ban_list); i++) {
-			if (_network_ban_list[i] == null || _network_ban_list[i][0] == '\0')
+		for (i = 0; i < Net._network_ban_list.length; i++) {
+			if (Net._network_ban_list[i] == null || Net._network_ban_list[i].isBlank())
 				continue;
 
-			if (strncmp(_network_ban_list[i], argv[1], strlen(_network_ban_list[i])) == 0 || index == i) {
-				_network_ban_list[i][0] = '\0';
+			if (Net._network_ban_list[i].equals(argv[1]) || index == i) {
+				Net._network_ban_list[i] = null;
 				IConsolePrint(_icolour_def, "IP unbanned.");
 				return true;
 			}
@@ -354,10 +319,8 @@ public class ConsoleCmds extends DefaultConsole
 		return true;
 	}
 
-	static boolean function(String ... argv)(ConBanList)
+	static boolean ConBanList(String ... argv)
 	{
-		uint i;
-
 		if (argv.length == 0) {
 			IConsoleHelp("List the IP's of banned clients: Usage 'banlist'");
 			return true;
@@ -365,25 +328,25 @@ public class ConsoleCmds extends DefaultConsole
 
 		IConsolePrint(_icolour_def, "Banlist: ");
 
-		for (i = 0; i < lengthof(_network_ban_list); i++) {
-			if (_network_ban_list[i] == null || _network_ban_list[i][0] == '\0')
+		for (int i = 0; i < Net._network_ban_list.length; i++) {
+			if (Net._network_ban_list[i] == null || Net._network_ban_list[i].isBlank())
 				continue;
 
-			IConsolePrintF(_icolour_def, "  %d) %s", i + 1, _network_ban_list[i]);
+			IConsolePrintF(_icolour_def, "  %d) %s", i + 1, Net._network_ban_list[i]);
 		}
 
 		return true;
 	}
 
-	static boolean function(String ... argv)(ConPauseGame)
+	static boolean ConPauseGame(String ... argv)
 	{
 		if (argv.length == 0) {
 			IConsoleHelp("Pause a network game. Usage: 'pause'");
 			return true;
 		}
 
-		if (_pause == 0) {
-			DoCommandP(0, 1, 0, null, CMD_PAUSE);
+		if (Global._pause == 0) {
+			Cmd.DoCommandP(null, 1, 0, null, Cmd.CMD_PAUSE);
 			IConsolePrint(_icolour_def, "Game paused.");
 		} else
 			IConsolePrint(_icolour_def, "Game is already paused.");
@@ -391,15 +354,15 @@ public class ConsoleCmds extends DefaultConsole
 		return true;
 	}
 
-	static boolean function(String ... argv)(ConUnPauseGame)
+	static boolean ConUnPauseGame(String ... argv)
 	{
 		if (argv.length == 0) {
 			IConsoleHelp("Unpause a network game. Usage: 'unpause'");
 			return true;
 		}
 
-		if (_pause != 0) {
-			DoCommandP(0, 0, 0, null, CMD_PAUSE);
+		if (Global._pause != 0) {
+			Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE);
 			IConsolePrint(_icolour_def, "Game unpaused.");
 		} else
 			IConsolePrint(_icolour_def, "Game is already unpaused.");
@@ -407,47 +370,13 @@ public class ConsoleCmds extends DefaultConsole
 		return true;
 	}
 
-	static boolean function(String ... argv)(ConRcon)
+
+	
+
+	static boolean ConKick(String ... argv)
 	{
-		if (argv.length == 0) {
-			IConsoleHelp("Remote control the server from another client. Usage: 'rcon <password> <command>'");
-			IConsoleHelp("Remember to enclose the command in quotes, otherwise only the first parameter is sent");
-			return true;
-		}
-
-		if (argv.length < 3) return false;
-
-		SEND_COMMAND(PACKET_CLIENT_RCON)(argv[1], argv[2]);
-		return true;
-	}
-
-	static boolean function(String ... argv)(finalatus)
-	{
-		static String stat_str[] = {"inactive", "authorized", "waiting", "loading map", "map done", "ready", "active"};
-		String status;
-		final NetworkClientState *cs;
-
-		if (argv.length == 0) {
-			IConsoleHelp("List the status of all clients connected to the server: Usage 'status'");
-			return true;
-		}
-
-		FOR_ALL_CLIENTS(cs) {
-			int lag = NetworkCalculateLag(cs);
-			final NetworkClientInfo *ci = DEREF_CLIENT_INFO(cs);
-
-			status = (cs.status <= STATUS_ACTIVE) ? stat_str[cs.status] : "unknown";
-			IConsolePrintF(8, "Client #%1d  name: '%s'  status: '%s'  frame-lag: %3d  company: %1d  IP: %s  unique-id: '%s'",
-				cs.index, ci.client_name, status, lag, ci.client_playas, GetPlayerIP(ci), ci.unique_id);
-		}
-
-		return true;
-	}
-
-	static boolean function(String ... argv)(ConKick)
-	{
-		NetworkClientInfo *ci;
-		uint32 index;
+		NetworkClientInfo ci;
+		int index;
 
 		if (argv.length == 0) {
 			IConsoleHelp("Kick a player from a network game. Usage: 'kick <client-id>'");
@@ -457,8 +386,8 @@ public class ConsoleCmds extends DefaultConsole
 
 		if (argv.length != 2) return false;
 
-		index = atoi(argv[1]);
-		if (index == NETWORK_SERVER_INDEX) {
+		index = Integer.parseInt(argv[1]);
+		if (index == Net.NETWORK_SERVER_INDEX) {
 			IConsolePrint(_icolour_def, "Silly boy, you can not kick yourself!");
 			return true;
 		}
@@ -467,22 +396,22 @@ public class ConsoleCmds extends DefaultConsole
 			return true;
 		}
 
-		ci = NetworkFindClientInfoFromIndex(index);
+		ci = Net.NetworkFindClientInfoFromIndex(index);
 
 		if (ci != null) {
-			SEND_COMMAND(PACKET_SERVER_ERROR)(NetworkFindClientStateFromIndex(index), NETWORK_ERROR_KICKED);
+			//SEND_COMMAND(PACKET_SERVER_ERROR)(NetworkFindClientStateFromIndex(index), NetworkErrorCode.KICKED);
+			NetServer.NetworkPacketSend_PACKET_SERVER_ERROR_command(Net.NetworkFindClientStateFromIndex(index), NetworkErrorCode.KICKED);
 		} else
 			IConsoleError("Client-id not found");
 
 		return true;
 	}
 
-	static boolean function(String ... argv)(ConResetCompany)
+	static boolean ConResetCompany(String ... argv)
 	{
-		Player *p;
-		NetworkClientState *cs;
-		NetworkClientInfo *ci;
-		byte index;
+		Player p;
+		//NetworkClientState cs;
+		NetworkClientInfo ci;
 
 		if (argv.length == 0) {
 			IConsoleHelp("Remove an idle company from the game. Usage: 'reset_company <company-id>'");
@@ -492,73 +421,50 @@ public class ConsoleCmds extends DefaultConsole
 
 		if (argv.length != 2) return false;
 
-		index = atoi(argv[1]);
+		int index = Integer.parseInt(argv[1]);
 
 		// Check valid range 
-		if (index < 1 || index > MAX_PLAYERS) {
-			IConsolePrintF(_icolour_err, "Company does not exist. Company-id must be between 1 and %d.", MAX_PLAYERS);
+		if (index < 1 || index > Global.MAX_PLAYERS) {
+			IConsolePrintF(_icolour_err, "Company does not exist. Company-id must be between 1 and %d.", Global.MAX_PLAYERS);
 			return true;
 		}
 
 		// Check if company does exist 
 		index--;
-		p = GetPlayer(index);
-		if (!p.is_active) {
+		p = Player.GetPlayer(index);
+		if (!p.isActive()) {
 			IConsoleError("Company does not exist.");
 			return true;
 		}
 
-		if (p.is_ai) {
+		if (p.isAi()) {
 			IConsoleError("Company is owned by an AI.");
 			return true;
 		}
 
-		// Check if the company has active players 
-		FOR_ALL_CLIENTS(cs) {
-			ci = DEREF_CLIENT_INFO(cs);
-			if (ci.client_playas - 1 == index) {
-				IConsoleError("Cannot remove company: a client is connected to that company.");
-				return true;
-			}
-		}
-		ci = NetworkFindClientInfoFromIndex(NETWORK_SERVER_INDEX);
+		Net.companyHasPlayers(index);
+		
+		// TODO [dz] does NetworkFindClientInfoFromIndex really return server record for Net.NETWORK_SERVER_INDEX?
+		ci = Net.NetworkFindClientInfoFromIndex(Net.NETWORK_SERVER_INDEX);
 		if (ci.client_playas - 1 == index) {
 			IConsoleError("Cannot remove company: the server is connected to that company.");
 			return true;
 		}
 
 		// It is safe to remove this company 
-		DoCommandP(0, 2, index, null, CMD_PLAYER_CTRL);
+		Cmd.DoCommandP(null, 2, index, null, Cmd.CMD_PLAYER_CTRL);
 		IConsolePrint(_icolour_def, "Company deleted.");
 
 		return true;
 	}
 
-	static boolean function(String ... argv)(ConNetworkClients)
+
+	static boolean ConNetworkConnect(String ... argv)
 	{
-		NetworkClientInfo *ci;
-
-		if (argv.length == 0) {
-			IConsoleHelp("Get a list of connected clients including their ID, name, company-id, and IP. Usage: 'clients'");
-			return true;
-		}
-
-		for (ci = _network_client_info; ci != &_network_client_info[MAX_CLIENT_INFO]; ci++) {
-			if (ci.client_index != NETWORK_EMPTY_INDEX) {
-				IConsolePrintF(8, "Client #%1d  name: '%s'  company: %1d  IP: %s",
-					ci.client_index, ci.client_name, ci.client_playas, GetPlayerIP(ci));
-			}
-		}
-
-		return true;
-	}
-
-	static boolean function(String ... argv)(ConNetworkConnect)
-	{
-		char *ip;
-		String port = null;
-		String player = null;
-		uint16 rport;
+		String [] ip = {null};
+		String [] port = {null};
+		String [] player = {null};
+		int rport;
 
 		if (argv.length == 0) {
 			IConsoleHelp("Connect to a remote OTTD server and join the game. Usage: 'connect <ip>'");
@@ -568,30 +474,29 @@ public class ConsoleCmds extends DefaultConsole
 
 		if (argv.length < 2) return false;
 
-		if (_networking) // We are in network-mode, first close it!
-			NetworkDisconnect();
+		if (Global._networking) // We are in network-mode, first close it!
+			Net.NetworkDisconnect();
 
-		ip = argv[1];
-		rport = NETWORK_DEFAULT_PORT;
+		rport = Net.NETWORK_DEFAULT_PORT;
 
-		ParseConnectionString(&player, &port, ip);
+		NetGui.ParseConnectionString(player, port, ip, argv[1]);
 
-		IConsolePrintF(_icolour_def, "Connecting to %s...", ip);
+		IConsolePrintF(_icolour_def, "Connecting to %s...", ip[0]);
 		if (player != null) {
-			_network_playas = atoi(player);
-			IConsolePrintF(_icolour_def, "    player-no: %s", player);
+			Global._network_playas = Integer.parseInt(player[0]);
+			IConsolePrintF(_icolour_def, "    player-no: %s", player[0]);
 		}
 		if (port != null) {
-			rport = atoi(port);
-			IConsolePrintF(_icolour_def, "    port: %s", port);
+			rport = Integer.parseInt(port[0]);
+			IConsolePrintF(_icolour_def, "    port: %s", port[0]);
 		}
 
-		NetworkClientConnectGame(ip, rport);
+		Net.NetworkClientConnectGame(ip[0], rport);
 
 		return true;
 	}
 
-	#endif /* ENABLE_NETWORK */
+	//#endif /* ENABLE_NETWORK */
 
 	/* ******************************** */
 	/*   script file console commands   */
@@ -861,7 +766,7 @@ public class ConsoleCmds extends DefaultConsole
 		return true;
 	}
 
-	DEF_CONSOLE_HOOK(ConHookServerPW)
+	static boolean ConHookServerPW()
 	{
 		if (strncmp(_network_server_password, "*", NETWORK_PASSWORD_LENGTH) == 0) {
 			_network_server_password[0] = '\0';
@@ -872,7 +777,7 @@ public class ConsoleCmds extends DefaultConsole
 		return true;
 	}
 
-	DEF_CONSOLE_HOOK(ConHookRconPW)
+	static boolean ConHookRconPW()
 	{
 		if (strncmp(_network_rcon_password, "*", NETWORK_PASSWORD_LENGTH) == 0)
 			_network_rcon_password[0] = '\0';
@@ -883,7 +788,7 @@ public class ConsoleCmds extends DefaultConsole
 	}
 
 
-	DEF_CONSOLE_HOOK(ConProcPlayerName)
+	static boolean ConProcPlayerName()
 	{
 		NetworkClientInfo *ci = NetworkFindClientInfoFromIndex(_network_own_client_index);
 
@@ -905,13 +810,13 @@ public class ConsoleCmds extends DefaultConsole
 		return true;
 	}
 
-	DEF_CONSOLE_HOOK(ConHookServerName)
+	static boolean ConHookServerName()
 	{
 		ttd_strlcpy(_network_game_info.server_name, _network_server_name, sizeof(_network_game_info.server_name));
 		return true;
 	}
 
-	DEF_CONSOLE_HOOK(ConHookServerAdvertise)
+	static boolean ConHookServerAdvertise()
 	{
 		if (!_network_advertise) // remove us from advertising
 			NetworkUDPRemoveAdvertise();

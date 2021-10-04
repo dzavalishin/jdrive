@@ -28,6 +28,11 @@ public class CommandRegistry {
         put(new ExitCommand());
         put(new ClearCommand());
 
+        put(new NetworkClientsCommand());
+        put(new BanCommand());
+        put(new NetworkStatusCommand());
+        put(new NetworkRemoteConsoleCommand());
+
         if (Global.debugEnabled)
             put(new ResetTileCommand());
     }
