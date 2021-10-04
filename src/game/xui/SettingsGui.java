@@ -638,10 +638,9 @@ public class SettingsGui extends SettingsTables
 		return InValidateDetailsWindow(0);
 	}
 
-	static int EngineRenewUpdate(int p1)
+	public static void EngineRenewUpdate(PatchVariable pv)
 	{
-		Cmd.DoCommandP(null, 0, BitOps.b2i( Global._patches.autorenew ), null, Cmd.CMD_REPLACE_VEHICLE);
-		return 0;
+		Cmd.DoCommandP(null, 0, BitOps.b2i( Global._patches.autorenew.get() ), null, Cmd.CMD_REPLACE_VEHICLE);
 	}
 
 	static int EngineRenewMonthsUpdate(int p1)
@@ -877,27 +876,21 @@ public class SettingsGui extends SettingsTables
 
 		case WE_ON_EDIT_TEXT: {
 			if (e.str != null) {
-				/*
-				final PatchPage page = Global._patches_page[w.as_def_d().data_1];
+				final PatchPage page = _patches_page[w.as_def_d().data_1];
 				final PatchEntry pe = page.entries[w.as_def_d().data_3];
 				int val;
-				val = atoi(e.edittext.str);
-				if (pe.type == PE_CURRENCY) val /= _currency.rate;
+				val = Integer.parseInt(e.str);
+				// TODO if (pe.type == PE_CURRENCY) val /= _currency.rate;
 				// If an item is playerbased, we do not send it over the network (if any)
-				if (pe.flags & PF_PLAYERBASED) {
-					WritePE(pe, val);
+				if (pe.isPlayerBased()) {
+					pe.WritePE(val);
 				} else {
 					// Else we do
 					Cmd.DoCommandP( null, (byte)w.as_def_d().data_1 + ((byte)w.as_def_d().data_3 << 8), val, null, Cmd.CMD_CHANGE_PATCH_SETTING);
-				} */
+				} 
 				w.SetWindowDirty();
 
-				/* TODO
-				if (pe.click_proc != null) // call callback function
-					pe.click_proc(pe);
-					//pe.click_proc(*(int*)pe.variable);
-				 * 
-				 */
+				pe.onClick();
 			}
 			break;
 		}
@@ -955,66 +948,63 @@ public class SettingsGui extends SettingsTables
 
 	/* Those 2 functions need to be here, else we have to make some stuff non-static
 	    and besides, it is also better to keep stuff like this at the same place */
-	void IConsoleSetPatchSetting(final String name, final String value)
+	public static void IConsoleSetPatchSetting(final String name, final String value)
 	{
-		/*
-		final PatchEntry *pe;
-		int page, entry;
+		int [] page = {-1};
+		int [] entry = {-1};
 		int val;
 
-		pe = IConsoleGetPatch(name, &page, &entry);
+		final PatchEntry pe = IConsoleGetPatch(name, page, entry);
 
 		if (pe == null) {
-			IConsolePrintF(_icolour_warn, "'%s' is an unknown patch setting.", name);
+			DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn, "'%s' is an unknown patch setting.", name);
 			return;
 		}
 
-		sscanf(value, "%d", &val);
+		//sscanf(value, "%d", &val);
+		val = Integer.parseInt(value);
 
-		if (pe.type == PE_CURRENCY) // currency can be different on each client
-			val /= _currency.rate;
+		// currency can be different on each client
+		// TODO if (pe.type == PE_CURRENCY) 			val /= _currency.rate;
 
 		// If an item is playerbased, we do not send it over the network (if any)
-		if (pe.flags & PF_PLAYERBASED) {
-			WritePE(pe, val);
+		if (pe.isPlayerBased()) {
+			pe.WritePE(val);
 		} else // Else we do
-			Cmd.DoCommandP(0, page + (entry << 8), val, null, Cmd.CMD_CHANGE_PATCH_SETTING);
+			Cmd.DoCommandP(null, page[0] + (entry[0] << 8), val, null, Cmd.CMD_CHANGE_PATCH_SETTING);
 
 		{
-			char tval[20];
-			final char *tval2 = value;
-			if (pe.type == PE_BOOL) {
-				snprintf(tval, sizeof(tval), (val == 1) ? "on" : "off");
-				tval2 = tval;
-			}
+			String tval = value;
+			if (pe.isBoolean()) 
+				tval = (val == 1) ? "on" : "off";
 
-			IConsolePrintF(_icolour_warn, "'%s' changed to:  %s", name, tval2);
+			DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn, "'%s' changed to:  %s", name, tval);
 		}
-		 */
 	}
 
 
-	void IConsoleGetPatchSetting(final String name)
+	public static void IConsoleGetPatchSetting(final String name)
 	{
-		/*
-		char value[20];
-		int page, entry;
-		final PatchEntry *pe = IConsoleGetPatch(name, &page, &entry);
+
+		String value;
+		int [] page = {-1};
+		int [] entry = {-1};
+		final PatchEntry pe = IConsoleGetPatch(name, page, entry);
 
 		// We did not find the patch setting 
 		if (pe == null) {
-			IConsolePrintF(_icolour_warn, "'%s' is an unknown patch setting.", name);
+			DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn, "'%s' is an unknown patch setting.", name);
 			return;
 		}
 
-		if (pe.type == PE_BOOL) {
-			snprintf(value, sizeof(value), (ReadPE(pe) == 1) ? "on" : "off");
+		if (pe.isBoolean()) {
+			value = (pe.ReadPE() != 0) ? "on" : "off";
 		} else {
-			snprintf(value, sizeof(value), "%d", ReadPE(pe));
+			value = Integer.toString(pe.ReadPE());
 		}
 
-		IConsolePrintF(_icolour_warn, "Current value for '%s' is: '%s'", name, value);
-		 */
+		DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn, "Current value for '%s' is: '%s'", name, value);
+
 		DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn, "Not impl"); // TODO
 	}
 
@@ -1083,7 +1073,7 @@ public class SettingsGui extends SettingsTables
 				if (++i == w.vscroll.getCap() + w.vscroll.pos) break; // stop after displaying 12 items
 			}
 
-			//Gfx.DoDrawString(_sel_grffile.setname, 120, 200, 0x01); // draw grf name
+			// TODO Gfx.DoDrawString(_sel_grffile.setname, 120, 200, 0x01); // draw grf name
 
 			if (_sel_grffile == null) { // no grf file selected yet
 				Gfx.DrawStringMultiCenter(140, 210, Str.STR_NEWGRF_TIP, 250);

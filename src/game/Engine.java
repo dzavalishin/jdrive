@@ -160,7 +160,7 @@ public class Engine extends EngineTables implements Serializable
 			// time's up for this engine
 			// make it either available to all players (if never_expire_vehicles is enabled and if it was available earlier)
 			// or disable this engine completely
-			e.player_avail =  ((Global._patches.never_expire_vehicles && e.player_avail != 0)? -1 : 0);
+			e.player_avail =  ((Global._patches.never_expire_vehicles.get() && e.player_avail != 0)? -1 : 0);
 			e.reliability = e.reliability_final;
 		}
 	}

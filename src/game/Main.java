@@ -434,7 +434,7 @@ public class Main {
 
 			Global.gs._local_player = PlayerID.get(0); 
 			PlayerID.setCurrent(Global.gs._local_player);
-			Cmd.DoCommandP(null, (Global._patches.autorenew ? (1 << 15) : 0 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
+			Cmd.DoCommandP(null, (Global._patches.autorenew.get() ? (1 << 15) : 0 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 		}
 
 		Hal.MarkWholeScreenDirty();
@@ -510,7 +510,7 @@ public class Main {
 		Global.gs._local_player = null;
 		PlayerID.setCurrent( Global.gs._local_player );
 		// TODO arg 2 long truncated
-		Cmd.DoCommandP(null, (Global._patches.autorenew ? 1 << 15 : 0 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
+		Cmd.DoCommandP(null, (Global._patches.autorenew.get() ? 1 << 15 : 0 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 
 		Hal.MarkWholeScreenDirty();
 		/* */

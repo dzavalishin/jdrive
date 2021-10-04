@@ -890,7 +890,7 @@ public class Player implements Serializable
 			if(0 != (flags & Cmd.DC_EXEC)) {
 				p.engine_renew = ( 0 != BitOps.GB(p2, 0, 1) );
 				if (IsLocalPlayer()) {
-					Global._patches.autorenew = p.engine_renew;
+					Global._patches.autorenew.set( p.engine_renew );
 					Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
 				}
 			}
@@ -955,7 +955,7 @@ public class Player implements Serializable
 				p.engine_renew_money = p2;
 
 				if (IsLocalPlayer()) {
-					Global._patches.autorenew = p.engine_renew;
+					Global._patches.autorenew.set( p.engine_renew );
 					Global._patches.autorenew_months = p.engine_renew_months;
 					Global._patches.autorenew_money = p.engine_renew_money;
 					Window.InvalidateWindow(Window.WC_GAME_OPTIONS, 0);
@@ -1036,7 +1036,7 @@ public class Player implements Serializable
 						Hal.MarkWholeScreenDirty();
 					}
 				} else if (p.index.isLocalPlayer()) {
-					Cmd.DoCommandP(TileIndex.get(0), ((Global._patches.autorenew ? 1:0) << 15 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
+					Cmd.DoCommandP(TileIndex.get(0), ((Global._patches.autorenew.get() ? 1:0) << 15 ) | (Global._patches.autorenew_months << 16) | 4, (int)Global._patches.autorenew_money, null, Cmd.CMD_REPLACE_VEHICLE);
 				}
 
 				if (Global._network_server) {

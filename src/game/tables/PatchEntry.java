@@ -1,23 +1,26 @@
 package game.tables;
 
+import java.util.function.Consumer;
+
+import game.util.BitOps;
+
 public class PatchEntry {
 	private PatchVariable var;
 	private int flags;						// selector flags
-	
+
 	//StringID 
 	private int str;						// string with descriptive text
 	private String console_name;			// the name this patch has in console
 
 	public final int min, max;		// range for spinbox setting
 	public final int step;			// step for spinbox
-	
+
 	//PatchButtonClick* click_proc;	// callback procedure
 	private Object proc; // Unused?
-	
+
 	public PatchEntry(int flags, int str, String name, PatchVariable var, 
-			int min, int max, int step, Object proc) 
+			int min, int max, int step, Consumer<PatchVariable> proc) 
 	{
-		
 		this.flags = flags;
 		this.str = str;
 		console_name = name;
@@ -26,19 +29,16 @@ public class PatchEntry {
 		this.max = max;
 		this.step = step;
 		this.proc = proc;
-		
 	}
 
 	public PatchVariable getVariable() { return var; }
 	public int getString() { return str; }
-	
 
-	public void WritePE(int value) { var.setValue(value); }
-	public int ReadPE() { return var.getValue(); }
+
 
 	public boolean nameIs(String name) { return console_name.equals(name); }
 
-	
+
 	public boolean isNetworkOnly() {
 		return 0 != (flags & SettingsTables.PF_NETWORK_ONLY);
 	}
@@ -72,6 +72,27 @@ public class PatchEntry {
 		return var instanceof CurrencyPatchVariable;
 	}
 
+	public int ReadPE() 
+	{
+		// TODO in CurrencyPatchVariable case PE_CURRENCY:  return (*(int*)pe.variable) * _currency.rate;
 
+		return var.getValue(); 
+	}
+
+	public void WritePE(int value) 
+	{ 
+		var.setValue(value); 
+
+		if (zeroIsDisable() && value <= 0) {
+			var.setValue(0);
+			return;
+		}
+
+		// "clamp" 'disabled' value to smallest type
+		if(isBoolean())
+			var.setValue(value);
+		else
+			var.setValue(BitOps.clamp(value, min, max));	
+	}
 
 }

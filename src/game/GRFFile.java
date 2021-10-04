@@ -144,7 +144,7 @@ public class GRFFile
 				| (Global._patches.longbridges ? (1 << 0x0F) : 0)           /* longbridges */
 				| (1 << 0x12)  /* presignals */
 				| (1 << 0x13)  /* extpresignals */
-				| (Global._patches.never_expire_vehicles ? (1 << 0x16) : 0) /* enginespersist */
+				| (Global._patches.never_expire_vehicles.get() ? (1 << 0x16) : 0) /* enginespersist */
 				| (1 << 0x1B); /* multihead */
 		_ttdpatch_flags[1] = (Global._patches.mammoth_trains ? (1 << 0x08) : 0)        /* mammothtrains */
 				| (1 << 0x09)  /* trainrefit */

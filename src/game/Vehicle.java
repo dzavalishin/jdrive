@@ -1424,7 +1424,7 @@ public class Vehicle implements IPoolItem
 						))) {
 
 			// If patch is active, use alternative CanFillVehicle-function
-			if (Global._patches.full_load_any)
+			if (Global._patches.full_load_any.get())
 				return CanFillVehicle_FullLoadAny(this);
 
 			Vehicle v = this;

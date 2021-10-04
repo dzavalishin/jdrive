@@ -3,6 +3,7 @@ package game.tables;
 import game.GameDifficulty;
 import game.Global;
 import game.Str;
+import game.xui.SettingsGui;
 
 public class SettingsTables 
 {
@@ -149,10 +150,10 @@ public class SettingsTables
 
 			//PE_BOOL,		PF_PLAYERBASED, Str.STR_CONFIG_PATCHES_WARN_INCOME_LESS, "train_income_warn", &Global._patches.train_income_warn,				0,  0,  0, null),
 			//PE_UINT8,	PF_MULTISTRING | PF_PLAYERBASED, Str.STR_CONFIG_PATCHES_ORDER_REVIEW, "order_review_system", &Global._patches.order_review_system,0,2,  1, null),
-			//PE_BOOL,		0, Str.STR_CONFIG_PATCHES_NEVER_EXPIRE_VEHICLES, "never_expire_vehicles", &Global._patches.never_expire_vehicles,0,0,0, null),
+			new PatchEntry(0, Str.STR_CONFIG_PATCHES_NEVER_EXPIRE_VEHICLES, "never_expire_vehicles", Global._patches.never_expire_vehicles,0,0,0, null),
 
 			//PE_UINT16, PF_0ISDIS | PF_PLAYERBASED, Str.STR_CONFIG_PATCHES_LOST_TRAIN_DAYS, "lost_train_days", &Global._patches.lost_train_days,	180,720, 60, null),
-			//PE_BOOL,     PF_PLAYERBASED, Str.STR_CONFIG_PATCHES_AUTORENEW_VEHICLE, "autorenew",        &Global._patches.autorenew,                   0, 0, 0, &EngineRenewUpdate),
+			new PatchEntry(PF_PLAYERBASED, Str.STR_CONFIG_PATCHES_AUTORENEW_VEHICLE, "autorenew",        Global._patches.autorenew,                   0, 0, 0, SettingsGui::EngineRenewUpdate),
 			//PE_INT16,	  PF_PLAYERBASED, Str.STR_CONFIG_PATCHES_AUTORENEW_MONTHS,  "autorenew_months", &Global._patches.autorenew_months,         -12, 12, 1, &EngineRenewMonthsUpdate),
 			//PE_CURRENCY, PF_PLAYERBASED, Str.STR_CONFIG_PATCHES_AUTORENEW_MONEY,   "autorenew_money",  &Global._patches.autorenew_money,  0, 2000000, 100000, &EngineRenewMoneyUpdate),
 
@@ -173,7 +174,7 @@ public class SettingsTables
 
 	static final PatchEntry _patches_stations[] = {
 			//PE_BOOL,		0, Str.STR_CONFIG_PATCHES_JOINSTATIONS,			"join_stations", &Global._patches.join_stations,						0,  0,  0, null),
-			//PE_BOOL,		0, Str.STR_CONFIG_PATCHES_FULLLOADANY,			"full_load_any", &Global._patches.full_load_any,						0,  0,  0, null),
+			new PatchEntry(0, Str.STR_CONFIG_PATCHES_FULLLOADANY,			"full_load_any", Global._patches.full_load_any,						0,  0,  0, null),
 			//PE_BOOL,		0, Str.STR_CONFIG_PATCHES_IMPROVEDLOAD,			"improved_load", &Global._patches.improved_load,						0,  0,  0, null),
 			//PE_BOOL,		0, Str.STR_CONFIG_PATCHES_SELECTGOODS,			"select_goods",  &Global._patches.selectgoods,							0,  0,  0, null),
 			//PE_BOOL,		0, Str.STR_CONFIG_PATCHES_NEW_NONSTOP,			"new_nonstop", &Global._patches.new_nonstop,							0,  0,  0, null),

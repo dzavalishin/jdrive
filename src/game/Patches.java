@@ -12,7 +12,7 @@ public class Patches
 	public boolean auto_pbs_placement = true;// automatic pbs signal placement
 	public boolean mammoth_trains = true;		// allow very long trains
 	public boolean join_stations;			// allow joining of train stations
-	public boolean full_load_any = true;			// new full load calculation, any cargo must be full
+	public BooleanPatchVariable full_load_any = new BooleanPatchVariable(true);			// new full load calculation, any cargo must be full
 	public boolean improved_load;			// improved loading algorithm
 	public byte station_spread = 12;		// amount a station may spread
 	public BooleanPatchVariable inflation = new BooleanPatchVariable(true);					// disable inflation
@@ -61,7 +61,7 @@ public class Patches
 	public int servint_aircraft = 20;// service interval for aircraft
 	public int servint_ships = 40;		// service interval for ships
 
-	public boolean autorenew = true;
+	public BooleanPatchVariable autorenew = new BooleanPatchVariable(true);
 	public int autorenew_months = 10;
 	public long autorenew_money = 1000;
 
@@ -84,7 +84,7 @@ public class Patches
 	public byte max_num_autosaves = 10;		// controls how many autosavegames are made before the game starts to overwrite (names them 0 to max_num_autosaves - 1)
 	public boolean extra_dynamite = true;			// extra dynamite
 
-	public boolean never_expire_vehicles; // never expire vehicles
+	public BooleanPatchVariable never_expire_vehicles = new BooleanPatchVariable(); // never expire vehicles
 	public byte extend_vehicle_life;	// extend vehicle life by this many years
 
 	public boolean auto_euro;						// automatically switch to euro in 2002
