@@ -649,9 +649,10 @@ public class TownNameGenerator extends TownNameTables
 		*/
 
 	/*
-	// DO WE NEED THIS ANY MORE?
+	// DO WE NEED THIS ANY MORE? 
 	#define FIXNUM(x, y, z) (((((x) << 16) / (y)) + 1) << z)
 
+	// [dz] unused
 	int GetOldTownName(int townnameparts, byte old_town_name_type)
 	{
 		switch (old_town_name_type) {
