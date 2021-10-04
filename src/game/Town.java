@@ -1035,15 +1035,12 @@ implements IPoolItem, Serializable
 		// Find a road that we can base the construction on.
 		tile = xy;
 
-		//if(BitOps.CHANCE16(4, 10)) // [dz] More roads - XXX hack, results are strange 
+		for (TileIndexDiffC ptr : _town_coord_mod) 
 		{
-			for (TileIndexDiffC ptr : _town_coord_mod) 
-			{
-				if (Road.GetRoadBitsByTile(tile) != 0) 
-					return GrowTownAtRoad(tile);
-				
-				tile = tile.iadd(TileIndex.ToTileIndexDiff(ptr));
-			}
+			if (Road.GetRoadBitsByTile(tile) != 0) 
+				return GrowTownAtRoad(tile);
+			
+			tile = tile.iadd(TileIndex.ToTileIndexDiff(ptr));
 		}
 
 		// No road available, try to build a random road block by

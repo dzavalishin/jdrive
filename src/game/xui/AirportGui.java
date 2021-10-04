@@ -1,7 +1,7 @@
 package game.xui;
 
 import game.Airport;
-import game.AirportFTAClass;
+import game.Airport;
 import game.Cmd;
 import game.Depot;
 import game.Global;
@@ -151,7 +151,7 @@ public class AirportGui
 			if (w.as_def_d().close) return;
 
 			sel = _selected_airport_type;
-			avail_airports = AirportFTAClass.GetValidAirports();
+			avail_airports = Airport.GetValidAirports();
 
 			if (!BitOps.HASBIT(avail_airports, 0) && sel == Airport.AT_SMALL) sel = Airport.AT_LARGE;
 			if (!BitOps.HASBIT(avail_airports, 1) && sel == Airport.AT_LARGE) sel = Airport.AT_SMALL;

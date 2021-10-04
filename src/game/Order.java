@@ -241,7 +241,7 @@ public class Order implements Serializable
 			st = Station.GetStation(new_order.station);
 
 			if (!st.IsValidStation() ||
-					(st.airport_type != AirportFTAClass.AT_OILRIG && !(st.IsBuoy()) && !Player.CheckOwnership(st.owner) && !mAirport.MA_OwnerHandler(st.owner)))
+					(st.airport_type != Airport.AT_OILRIG && !(st.IsBuoy()) && !Player.CheckOwnership(st.owner) && !mAirport.MA_OwnerHandler(st.owner)))
 				return Cmd.CMD_ERROR;
 
 			//MA checks
@@ -311,9 +311,9 @@ public class Order implements Serializable
 				st = Station.GetStation(new_order.station);
 
 				if (!st.IsValidStation() ||
-						(st.airport_type != AirportFTAClass.AT_OILRIG && !Player.CheckOwnership(st.owner)) ||
+						(st.airport_type != Airport.AT_OILRIG && !Player.CheckOwnership(st.owner)) ||
 						0 == (st.facilities & Station.FACIL_AIRPORT) ||
-						AirportFTAClass.GetAirport(st.airport_type).nof_depots() == 0) {
+						Airport.GetAirport(st.airport_type).nof_depots() == 0) {
 					return Cmd.CMD_ERROR;
 				}
 			} else {
