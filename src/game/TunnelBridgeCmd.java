@@ -177,9 +177,9 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		int bridge_type;
 		int rail_or_road, railtype;
 		int sx,sy;
-		TileInfo ti_start = new TileInfo(); /* OPT: only 2 of those are ever used */
-		TileInfo ti_end = new TileInfo(); /* OPT: only 2 of those are ever used */
-		TileInfo ti = new TileInfo(); /* OPT: only 2 of those are ever used */
+		//TileInfo ti_start = new TileInfo(); /* OPT: only 2 of those are ever used */
+		//TileInfo ti_end = new TileInfo(); /* OPT: only 2 of those are ever used */
+		//TileInfo ti = new TileInfo(); /* OPT: only 2 of those are ever used */
 		int bridge_len;
 		int odd_middle_part;
 		int direction;
@@ -234,8 +234,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		if (!CheckBridge_Stuff(bridge_type, bridge_len)) return Cmd.return_cmd_error(Str.STR_5015_CAN_T_BUILD_BRIDGE_HERE);
 
 		/* retrieve landscape height and ensure it's on land */
-		Landscape.FindLandscapeHeight(ti_end, sx, sy);
-		Landscape.FindLandscapeHeight(ti_start, x, y);
+		TileInfo ti_end = Landscape.FindLandscapeHeight(sx, sy);
+		TileInfo ti_start = Landscape.FindLandscapeHeight(x, y);
 		if (
 				((ti_end.type == TileTypes.MP_WATER.ordinal()) && ti_end.map5 == 0) ||
 				((ti_start.type == TileTypes.MP_WATER.ordinal()) && ti_start.map5 == 0)
@@ -316,7 +316,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				x += 16;
 			}
 
-			Landscape.FindLandscapeHeight(ti, x, y);
+			TileInfo ti = Landscape.FindLandscapeHeight(x, y);
 
 			Global._error_message = Str.STR_5009_LEVEL_LAND_OR_WATER_REQUIRED;
 			if (ti.tileh != 0 && ti.z >= ti_start.z) return Cmd.CMD_ERROR;
@@ -455,7 +455,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		TileIndex end_tile;
 		int direction;
 		int cost, ret;
-		TileInfo ti = new TileInfo();
+		//TileInfo ti = new TileInfo();
 		int z;
 
 		if (x > Global.MapMaxX() * 16 - 1 || y > Global.MapMaxY() * 16 - 1)
@@ -483,7 +483,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 		cost = 0;
 
-		Landscape.FindLandscapeHeight(ti, x2, y2);
+		TileInfo ti = Landscape.FindLandscapeHeight(x2, y2);
 		end_tile = ti.tile;
 		z = ti.z;
 
@@ -501,7 +501,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 
 			if (x2 == x && y2 == y) break;
 
-			Landscape.FindLandscapeHeight(ti, x2, y2);
+			ti = Landscape.FindLandscapeHeight(x2, y2);
 			if (ti.z <= z) return Cmd.CMD_ERROR;
 
 			if (!Global._cheats.crossing_tunnels.value && !TunnelBridgeCmd.CheckTunnelInWay(ti.tile, z))
@@ -513,7 +513,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 			if (cost >= 400000000) cost = 400000000;
 		}
 
-		Landscape.FindLandscapeHeight(ti, x2, y2);
+		ti = Landscape.FindLandscapeHeight(x2, y2);
 		if (ti.z != z) return Cmd.CMD_ERROR;
 
 		if (exc_tile != 1) {
@@ -553,8 +553,8 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 	 */
 	static int CmdBuildTunnel(int x, int y, int flags, int p1, int p2)
 	{
-		TileInfo ti = new TileInfo();
-		TileInfo tiorg = new TileInfo();
+		//TileInfo ti = new TileInfo();
+		//TileInfo tiorg = new TileInfo();
 		int direction;
 		int z;
 		//TileIndex 
@@ -570,7 +570,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		Global._build_tunnel_endtile = null;
 		//excavated_tile = null;
 
-		Landscape.FindLandscapeHeight(tiorg, x, y);
+		TileInfo tiorg = Landscape.FindLandscapeHeight(x, y);
 
 		if (!tiorg.tile.EnsureNoVehicle())
 			return Cmd.CMD_ERROR;
@@ -597,10 +597,11 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 		}
 
 		z = tiorg.z;
+		TileInfo ti;
 		do {
 			x += _build_tunnel_coord_mod[direction];
 			y += _build_tunnel_coord_mod[direction+1];
-			Landscape.FindLandscapeHeight(ti, x, y);
+			ti = Landscape.FindLandscapeHeight(x, y);
 		} while (z != ti.z);
 		Global._build_tunnel_endtile = ti.tile;
 

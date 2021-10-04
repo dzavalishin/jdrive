@@ -103,8 +103,8 @@ public class SettingsGui extends SettingsTables
 			//Global.SetDParam(6, 0); // TODO Strings.SPECSTR_LANGUAGE_START + _dynlang.curr);
 			Global.SetDParam(6, Strings.SPECSTR_LANGUAGE_START + Strings._dynlang.curr);
 			//i = GetCurRes();
-			Global.SetDParam(7, 0); // TODO i == _num_resolutions ? Str.STR_RES_OTHER : Strings.SPECSTR_RESOLUTION_START + i);
-			Global.SetDParam(8, 0); // TODO Strings.SPECSTR_SCREENSHOT_START + _cur_screenshot_format);
+			Global.SetDParam(7, Str.STR_RES_OTHER); // TODO i == _num_resolutions ? Str.STR_RES_OTHER : Strings.SPECSTR_RESOLUTION_START + i);
+			Global.SetDParam(8, Strings.SPECSTR_SCREENSHOT_START); // TODO Strings.SPECSTR_SCREENSHOT_START + _cur_screenshot_format);
 			
 			// TODO (_fullscreen) ? SETBIT(w.click_state, 28) : CLRBIT(w.click_state, 28); // fullscreen button
 
@@ -131,8 +131,8 @@ public class SettingsGui extends SettingsTables
 				Window.ShowDropDownMenu(w, _driveside_dropdown, GameOptions._opt_ptr.road_side, 11, i, 0);
 			} return;
 			case 13: case 14: { /* Setup townname dropdown */
-				//int i = GameOptions._opt_ptr.town_name;
-				// TODO Window.ShowDropDownMenu(w, BuildDynamicDropdown(Str.STR_TOWNNAME_ORIGINAL_ENGLISH, Strings.SPECSTR_TOWNNAME_LAST - SPECStr.STR_TOWNNAME_START + 1), i, 14, (Global._game_mode == GameModes.GM_MENU) ? 0 : (-1) ^ (1 << i), 0);
+				int i = GameOptions._opt_ptr.town_name;
+				Window.ShowDropDownMenu(w, BuildDynamicDropdown(Str.STR_TOWNNAME_ORIGINAL_ENGLISH, Strings.SPECSTR_TOWNNAME_LAST - Strings.SPECSTR_TOWNNAME_START + 1), i, 14, (Global._game_mode == GameModes.GM_MENU) ? 0 : (-1) ^ (1 << i), 0);
 				return;
 			}
 			case 16: case 17: /* Setup autosave dropdown */

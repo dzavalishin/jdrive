@@ -1,17 +1,57 @@
 package game.tables;
 
+import game.RoadStop;
 import game.Sprite;
 import game.Str;
+import game.Vehicle;
 import game.struct.DrawTileSeqStruct;
 import game.struct.DrawTileSprites;
 import game.struct.TileIndexDiffC;
 
 public class StationTables 
 {
+	//
+	public static final int INVALID_STATION = 0xFFFF;
+	public static final int INVALID_SLOT = RoadStop.INVALID_SLOT;
+	static public final int INVALID_VEHICLE = Vehicle.INVALID_VEHICLE;
+
+	public static final int NUM_SLOTS = 2;
+
+
+	public static final int FACIL_TRAIN = 1;
+	public static final int FACIL_TRUCK_STOP = 2;
+	public static final int FACIL_BUS_STOP = 4;
+	public static final int FACIL_AIRPORT = 8;
+	public static final int FACIL_DOCK = 0x10;
+
+
+	//		public static final int HVOT_PENDING_DELETE = 1<<0; // not needed anymore
+	public static final int HVOT_TRAIN = 1<<1;
+	public static final int HVOT_BUS = 1 << 2;
+	public static final int HVOT_TRUCK = 1 << 3;
+	public static final int HVOT_AIRCRAFT = 1 << 4;
+	public static final int HVOT_SHIP = 1 << 5;
+	/* This bit is used to mark stations. No; it does not belong here; but what
+	 * can we do? ;-) */
+	public static final int HVOT_BUOY = 1 << 6;
+
+	public static final int CA_BUS = 3;
+	public static final int CA_TRUCK = 3;
+	public static final int CA_AIR_OILPAD = 3;
+	public static final int CA_TRAIN = 4;
+	public static final int CA_AIR_HELIPORT = 4;
+	public static final int CA_AIR_SMALL = 4;
+	public static final int CA_AIR_LARGE = 5;
+	public static final int CA_DOCK = 5;
+	public static final int CA_AIR_METRO = 6;
+	public static final int CA_AIR_INTER = 8;
+	
+	
+	
 	private static final int PALETTE_MODIFIER_COLOR = Sprite.PALETTE_MODIFIER_COLOR;
 	private static final int PALETTE_TO_TRANSPARENT = Sprite.PALETTE_TO_TRANSPARENT;
 
-	/* $Id: station_land.h 3289 2005-12-11 10:36:48Z tron $ */
+
 
 	private static DrawTileSeqStruct TILE_SEQ_END()	
 	{ 

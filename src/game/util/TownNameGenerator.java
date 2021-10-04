@@ -88,16 +88,13 @@ public class TownNameGenerator extends TownNameTables
 	}
 
 
-/*
-	static byte MakeEnglishAdditionalTownName(String buf, int seed)
-	{
-		int i;
 
-		//null terminates the string for strcat
-		strcpy(buf, "");
+	static String MakeEnglishAdditionalTownName(int seed)
+	{
+		String buf = "";
 
 		// optional first segment
-		i = SeedChanceBias(0, lengthof(name_additional_english_prefix), seed, 50);
+		int i = SeedChanceBias(0, lengthof(name_additional_english_prefix), seed, 50);
 		if (i >= 0)
 			buf += (name_additional_english_prefix[i]);
 
@@ -120,24 +117,24 @@ public class TownNameGenerator extends TownNameTables
 		if (i >= 0)
 			buf += ( name_additional_english_3[i]);
 
-		ReplaceWords("Cunt", "East", buf);
-		ReplaceWords("Slag", "Pits", buf);
-		ReplaceWords("Slut", "Edin", buf);
-		ReplaceWords("Fart", "Boot", buf);
-		ReplaceWords("Drar", "Quar", buf);
-		ReplaceWords("Dreh", "Bash", buf);
-		ReplaceWords("Frar", "Shor", buf);
-		ReplaceWords("Grar", "Aber", buf);
-		ReplaceWords("Brar", "Over", buf);
-		ReplaceWords("Wrar", "Stan", buf);
+		buf = RetReplaceWords("Cunt", "East", buf);
+		buf = RetReplaceWords("Slag", "Pits", buf);
+		buf = RetReplaceWords("Slut", "Edin", buf);
+		buf = RetReplaceWords("Fart", "Boot", buf);
+		buf = RetReplaceWords("Drar", "Quar", buf);
+		buf = RetReplaceWords("Dreh", "Bash", buf);
+		buf = RetReplaceWords("Frar", "Shor", buf);
+		buf = RetReplaceWords("Grar", "Aber", buf);
+		buf = RetReplaceWords("Brar", "Over", buf);
+		buf = RetReplaceWords("Wrar", "Stan", buf);
 
-		return 0;
+		return buf;
 	}
 
-	static byte MakeAustrianTownName(String buf, int seed)
+	static String MakeAustrianTownName(int seed)
 	{
 		int i, j = 0;
-		strcpy(buf, "");
+		String buf = "";
 
 		// Bad, Maria, Gross, ...
 		i = SeedChanceBias(0, lengthof(name_austrian_a1), seed, 15);
@@ -169,16 +166,16 @@ public class TownNameGenerator extends TownNameTables
 			buf += ( name_austrian_b2[SeedChance(5, lengthof(name_austrian_b2), seed)]);
 		}
 
-		return 0;
+		return buf;
 	}
 
-	static byte MakeGermanTownName(String buf, int seed)
+	static String MakeGermanTownName(int seed)
 	{
-		uint i;
-		uint seed_derivative;
+		int i;
+		int seed_derivative;
 
 		//null terminates the string for strcat
-		strcpy(buf, "");
+		String buf = "";
 
 		seed_derivative = SeedChance(7, 28, seed);
 
@@ -211,34 +208,32 @@ public class TownNameGenerator extends TownNameTables
 				buf += ( name_german_4_am[i - lengthof(name_german_4_an_der)]);
 			}
 		}
-		return 0;
+		return buf;
 	}
 
-	static byte MakeSpanishTownName(String buf, int seed)
+	static String MakeSpanishTownName(int seed)
 	{
-		strcpy(buf, name_spanish_real[SeedChance(0, lengthof(name_spanish_real), seed)]);
-		return 0;
+		return name_spanish_real[SeedChance(0, lengthof(name_spanish_real), seed)];
 	}
 
-	static byte MakeFrenchTownName(String buf, int seed)
+	static String MakeFrenchTownName(int seed)
 	{
-		strcpy(buf, name_french_real[SeedChance(0, lengthof(name_french_real), seed)]);
-		return 0;
+		return name_french_real[SeedChance(0, lengthof(name_french_real), seed)];
 	}
 
-	static byte MakeSillyTownName(String buf, int seed)
+	static String MakeSillyTownName(int seed)
 	{
-		strcpy(buf, name_silly_1[SeedChance( 0, lengthof(name_silly_1), seed)]);
+		String buf = name_silly_1[SeedChance( 0, lengthof(name_silly_1), seed)];
 		buf += ( name_silly_2[SeedChance(16, lengthof(name_silly_2), seed)]);
-		return 0;
+		return buf;
 	}
 
-	static byte MakeSwedishTownName(String buf, int seed)
+	static String MakeSwedishTownName(int seed)
 	{
 		int i;
 
 		//null terminates the string for strcat
-		strcpy(buf, "");
+		String buf = "";
 
 		// optional first segment
 		i = SeedChanceBias(0, lengthof(name_swedish_1), seed, 50);
@@ -256,15 +251,15 @@ public class TownNameGenerator extends TownNameTables
 
 		buf += ( name_swedish_3[SeedChance(16, lengthof(name_swedish_3), seed)]);
 
-		return 0;
+		return buf;
 	}
 
-	static byte MakeDutchTownName(String buf, int seed)
+	static String MakeDutchTownName(int seed)
 	{
 		int i;
 
 		//null terminates the string for strcat
-		strcpy(buf, "");
+		String buf = "";
 
 		// optional first segment
 		i = SeedChanceBias(0, lengthof(name_dutch_1), seed, 50);
@@ -280,13 +275,13 @@ public class TownNameGenerator extends TownNameTables
 		}
 		buf += ( name_dutch_5[SeedChance(15, lengthof(name_dutch_5), seed)]);
 
-		return 0;
+		return buf;
 	}
 
-	static byte MakeFinnishTownName(String buf, int seed)
+	static String MakeFinnishTownName(int seed)
 	{
 		//null terminates the string for strcat
-		strcpy(buf, "");
+		String buf = "";
 
 		// Select randomly if town name should consists of one or two parts.
 		if (SeedChance(0, 15, seed) >= 10) {
@@ -296,16 +291,16 @@ public class TownNameGenerator extends TownNameTables
 			buf += ( name_finnish_2[SeedChance(10, lengthof(name_finnish_2), seed)]);
 		}
 
-		return 0;
+		return buf;
 	}
 
-	static byte MakePolishTownName(String buf, int seed)
+	static String MakePolishTownName(int seed)
 	{
-		uint i;
-		uint j;
+		int i;
+		int j;
 
 		//null terminates the string for strcat
-		strcpy(buf, "");
+		String buf = "";
 
 		// optional first segment
 		i = SeedChance(0,
@@ -342,19 +337,20 @@ public class TownNameGenerator extends TownNameTables
 			if (j >= 4 && j < 16)
 				buf += ( name_polish_3_n[SeedChance(10, lengthof(name_polish_3_n), seed)]);
 		}
-		return 0;
+		return buf;
 	}
 
-	static byte MakeCzechTownName(String buf, int seed)
+	/*
+	static String MakeCzechTownName(int seed)
 	{
 		// Probability of prefixes/suffixes 
 		// 0..11 prefix, 12..13 prefix+suffix, 14..17 suffix, 18..31 nothing 
 		int prob_tails;
-		bool do_prefix, do_suffix, dynamic_subst;
+		boolean do_prefix, do_suffix, dynamic_subst;
 		// IDs of the respective parts 
 		int prefix = 0, ending = 0, suffix = 0;
-		uint postfix = 0;
-		uint stem;
+		int postfix = 0;
+		int stem;
 		// The select criteria. 
 		CzechGender gender;
 		CzechChoose choose;
@@ -362,14 +358,13 @@ public class TownNameGenerator extends TownNameTables
 
 		// 1:3 chance to use a real name.
 		if (SeedChance(0, 4, seed) == 0) {
-			strcpy(buf, name_czech_real[SeedChance(4, lengthof(name_czech_real), seed)]);
-			return 0;
+			return name_czech_real[SeedChance(4, lengthof(name_czech_real), seed)];
 		}
 
 		// NUL terminates the string for strcat()
-		strcpy(buf, "");
+		String buf = "";
 
-		prob_tails = SeedModChance(2, 32, seed);
+		prob_tails = SeedChance(2, 32, seed);
 		do_prefix = prob_tails < 12;
 		do_suffix = prob_tails > 11 && prob_tails < 17;
 
@@ -386,7 +381,7 @@ public class TownNameGenerator extends TownNameTables
 			choose = name_czech_subst_full[stem].choose;
 			allow = name_czech_subst_full[stem].allow;
 		} else {
-			unsigned int map[lengthof(name_czech_subst_ending)];
+			int [] map = new int[name_czech_subst_ending.length];
 			int ending_start = -1, ending_stop = -1;
 			int i;
 
@@ -416,7 +411,7 @@ public class TownNameGenerator extends TownNameTables
 
 			// Localize the array segment containing a good gender
 			for (ending = 0; ending < (int) lengthof(name_czech_subst_ending); ending++) {
-				final CzechNameSubst *e = &name_czech_subst_ending[ending];
+				final CzechNameSubst e = name_czech_subst_ending[ending];
 
 				if (gender == CZG_FREE ||
 						(gender == CZG_NFREE && e->gender != CZG_SNEUT && e->gender != CZG_PNEUT) ||
@@ -437,7 +432,7 @@ public class TownNameGenerator extends TownNameTables
 			// Make a sequential map of the items with good mask
 			i = 0;
 			for (ending = ending_start; ending <= ending_stop; ending++) {
-				final CzechNameSubst *e = &name_czech_subst_ending[ending];
+				final CzechNameSubst e = name_czech_subst_ending[ending];
 
 				if ((e->choose & choose) == choose && (e->allow & allow) != 0)
 					map[i++] = ending;
@@ -493,7 +488,7 @@ public class TownNameGenerator extends TownNameTables
 							(poststr[1] != 'v' || poststr[1] != endstr[1]) &&
 							poststr[2] != endstr[1])
 						) {
-					uint buflen;
+					int buflen;
 					buf += ( poststr);
 					buflen = strlen(buf);
 
@@ -517,24 +512,23 @@ public class TownNameGenerator extends TownNameTables
 			buf += ( name_czech_suffix[suffix]);
 		}
 
-		return 0;
+		return buf;
+	}
+	*/
+
+	static String MakeRomanianTownName(int seed)
+	{
+		return name_romanian_real[SeedChance(0, lengthof(name_romanian_real), seed)];
 	}
 
-	static byte MakeRomanianTownName(String buf, int seed)
+	static String MakeSlovakTownName(int seed)
 	{
-		strcpy(buf, name_romanian_real[SeedChance(0, lengthof(name_romanian_real), seed)]);
-		return 0;
+		return name_slovak_real[SeedChance(0, lengthof(name_slovak_real), seed)];
 	}
 
-	static byte MakeSlovakTownName(String buf, int seed)
+	static String MakeNorwegianTownName(int seed)
 	{
-		strcpy(buf, name_slovak_real[SeedChance(0, lengthof(name_slovak_real), seed)]);
-		return 0;
-	}
-
-	static byte MakeNorwegianTownName(String buf, int seed)
-	{
-		strcpy(buf, "");
+		String buf = "";
 
 		// Use first 4 bit from seed to decide whether or not this town should
 		// have a real name 3/16 chance.  Bit 0-3
@@ -548,21 +542,18 @@ public class TownNameGenerator extends TownNameTables
 			buf += ( name_norwegian_2[SeedChance(11, lengthof(name_norwegian_2), seed)]);
 		}
 
-		return 0;
+		return buf;
 	}
 
-	static byte MakeHungarianTownName(String buf, int seed)
+	static String MakeHungarianTownName(int seed)
 	{
-		uint i;
-
-		//null terminates the string for strcat
-		strcpy(buf, "");
+		String buf = "";
 
 		if (SeedChance(12, 15, seed) < 3) {
 			buf += ( name_hungarian_real[SeedChance(0, lengthof(name_hungarian_real), seed)]);
 		} else {
 			// optional first segment
-			i = SeedChance(3, lengthof(name_hungarian_1) * 3, seed);
+			int i = SeedChance(3, lengthof(name_hungarian_1) * 3, seed);
 			if (i < lengthof(name_hungarian_1))
 				buf += ( name_hungarian_1[i]);
 
@@ -577,24 +568,20 @@ public class TownNameGenerator extends TownNameTables
 			}
 		}
 
-		return 0;
+		return buf;
 	}
 
-	static byte MakeSwissTownName(String buf, int seed)
+	static String MakeSwissTownName( int seed)
 	{
-		strcpy(buf, name_swiss_real[SeedChance(0, lengthof(name_swiss_real), seed)]);
-		return 0;
+		return name_swiss_real[SeedChance(0, lengthof(name_swiss_real), seed)];
 	}
 
-	static byte MakeDanishTownName(String buf, int seed)
+	static String MakeDanishTownName(int seed)
 	{
-		int i;
-
-		// null terminates the string for strcat
-		strcpy(buf, "");
+		String buf = "";
 
 		// optional first segment
-		i = SeedChanceBias(0, lengthof(name_danish_1), seed, 50);
+		int i = SeedChanceBias(0, lengthof(name_danish_1), seed, 50);
 		if (i >= 0)
 			buf += ( name_danish_1[i]);
 
@@ -602,12 +589,12 @@ public class TownNameGenerator extends TownNameTables
 		buf += ( name_danish_2[SeedChance( 7, lengthof(name_danish_2), seed)]);
 		buf += ( name_danish_3[SeedChance(16, lengthof(name_danish_3), seed)]);
 
-		return 0;
+		return buf;
 	}
-*/
+
 	static String MakeRussianTownName(int seed)
 	{
-		return name_russian_real[SeedChance(0, lengthof(name_russian_real), seed)];
+		return RussianTownNameTables.name_russian_real[SeedChance(0, lengthof(RussianTownNameTables.name_russian_real), seed)];
 	}
 
 
@@ -615,6 +602,23 @@ public class TownNameGenerator extends TownNameTables
 	{
 		TownNameGenerator::MakeEnglishOriginalTownName,
 		TownNameGenerator::MakeRussianTownName,
+		TownNameGenerator::MakeFrenchTownName,
+		TownNameGenerator::MakeGermanTownName,
+		TownNameGenerator::MakeEnglishAdditionalTownName,
+		TownNameGenerator::MakeSpanishTownName,
+		TownNameGenerator::MakeSillyTownName,
+		TownNameGenerator::MakeSwedishTownName,
+		TownNameGenerator::MakeDutchTownName,
+		TownNameGenerator::MakeFinnishTownName,
+		TownNameGenerator::MakePolishTownName,
+		TownNameGenerator::MakeSlovakTownName,
+		TownNameGenerator::MakeNorwegianTownName,
+		TownNameGenerator::MakeHungarianTownName,
+		TownNameGenerator::MakeAustrianTownName,
+		TownNameGenerator::MakeRomanianTownName,
+		//TownNameGenerator::MakeCzechTownName,
+		TownNameGenerator::MakeSwissTownName,
+		TownNameGenerator::MakeDanishTownName,
 	};
 	
 	

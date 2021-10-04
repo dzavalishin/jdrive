@@ -518,7 +518,7 @@ public class WayPoint implements IPoolItem
 	Station ComposeWaypointStation(TileIndex tile)
 	{
 		WayPoint wp = WayPoint.GetWaypointByTile(tile);
-		Station stat = new Station();
+		Station stat = Station.AllocateStation();//new Station();
 
 		stat.train_tile = stat.xy = wp.xy;
 		stat.town = Town.GetTown(wp.town_index);

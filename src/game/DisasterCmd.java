@@ -185,7 +185,8 @@ public class DisasterCmd extends DisasterTables
 					BitOps.IS_INT_INSIDE(tile.getMap().m5, 8, 0x43) &&
 					tile.GetTileOwner().IS_HUMAN_PLAYER()) {
 				st = Station.GetStation(tile.getMap().m2);
-				st.airport_flags = BitOps.RETCLRBITS(st.airport_flags, Airport.RUNWAY_IN_block);
+				//st.airport_flags = BitOps.RETCLRBITS(st.airport_flags, Airport.RUNWAY_IN_block);
+				st.resetAirportBlocks(Airport.RUNWAY_IN_block);
 			}
 
 			SetDisasterVehiclePos(v, v.getX_pos(), v.getY_pos(), v.z_pos);
@@ -228,7 +229,8 @@ public class DisasterCmd extends DisasterTables
 				tile.GetTileOwner().IS_HUMAN_PLAYER()) {
 
 			st = Station.GetStation(tile.getMap().m2);
-			st.airport_flags = BitOps.RETSETBITS(st.airport_flags, Airport.RUNWAY_IN_block);
+			//st.airport_flags = BitOps.RETSETBITS(st.airport_flags, Airport.RUNWAY_IN_block);
+			st.setAirportBlocks(Airport.RUNWAY_IN_block);
 		}
 	}
 

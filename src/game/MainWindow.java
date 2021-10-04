@@ -444,7 +444,7 @@ public class MainWindow extends JPanel implements ActionListener
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-		//flush(); // TODO kill me
+		//flush(); 
 		//repaint();
 		//frame.repaint();
 

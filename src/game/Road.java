@@ -147,8 +147,6 @@ public class Road extends RoadTables
 	 */
 	public static int CmdRemoveRoad(int x, int y, int flags, int p1, int p2)
 	{
-
-		TileInfo ti = new TileInfo();
 		int cost;
 		TileIndex tile;
 		//PlayerID 
@@ -165,13 +163,13 @@ public class Road extends RoadTables
 		if(0 != (pieces >> 4))
 			return Cmd.CMD_ERROR;
 
-		Landscape.FindLandscapeHeight(ti, x, y);
+		TileInfo ti = Landscape.FindLandscapeHeight(x, y);
 		tile = ti.tile;
 
 		if (!tile.IsTileType( TileTypes.MP_STREET) && !tile.IsTileType( TileTypes.MP_TUNNELBRIDGE)) return Cmd.CMD_ERROR;
 
 		// owner for railroad crossing is stored somewhere else
-		// XXX - Fix this so for a given tiletype the owner of the type is in the same variable
+		// XXX - Fix this so for a given tiletype the owner of the type is in the same variable [dz] impossible
 		owner = tile.IsLevelCrossing() ? tile.getMap().m3 : tile.GetTileOwner().id;
 
 		if (owner == Owner.OWNER_TOWN && Global._game_mode != GameModes.GM_EDITOR) {
@@ -392,7 +390,6 @@ public class Road extends RoadTables
 	 */
 	public static int CmdBuildRoad(int x, int y, int flags, int p1, int p2)
 	{
-		TileInfo ti = new TileInfo();
 		int cost;
 		int pieces = p1, existing = 0;
 		TileIndex tile;
@@ -406,7 +403,7 @@ public class Road extends RoadTables
 				|| !Town.IsTownIndex(p2)) 
 			return Cmd.CMD_ERROR;
 
-		Landscape.FindLandscapeHeight(ti, x, y);
+		TileInfo ti = Landscape.FindLandscapeHeight(x, y);
 		tile = ti.tile;
 
 		// allow building road under bridge
@@ -686,7 +683,6 @@ public class Road extends RoadTables
 	 */
 	public static int CmdBuildRoadDepot(int x, int y, int flags, int p1, int p2)
 	{
-		TileInfo ti = new TileInfo();
 		int cost;
 		Depot dep;
 		TileIndex tile;
@@ -695,7 +691,7 @@ public class Road extends RoadTables
 
 		if (p1 > 3) return Cmd.CMD_ERROR; // check direction
 
-		Landscape.FindLandscapeHeight(ti, x, y);
+		TileInfo ti = Landscape.FindLandscapeHeight(x, y);
 
 		tile = ti.tile;
 
