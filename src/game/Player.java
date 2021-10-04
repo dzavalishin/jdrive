@@ -70,7 +70,7 @@ public class Player implements Serializable
 
 	boolean is_active;
 	private boolean is_ai;
-	// TODO PlayerAI ai = new PlayerAI();
+	//  PlayerAI ai = new PlayerAI();
 	public PlayerAiNew ainew = new PlayerAiNew();
 
 	final long [][] yearly_expenses = new long[3][13];
