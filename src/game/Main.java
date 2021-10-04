@@ -259,7 +259,7 @@ public class Main {
 		// TODO InitializeScreenshotFormats();
 
 		// initialize airport state machines
-		AirportFTAClass.InitializeAirports();
+		Airport.InitializeAirports();
 
 		/* start the AI */
 		Ai.AI_Initialize();

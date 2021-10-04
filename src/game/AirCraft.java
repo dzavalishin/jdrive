@@ -64,7 +64,7 @@ public class AirCraft extends AirCraftTables {
 			Station st = ii.next();
 
 			if (st.owner.equals(v.owner) && 0 != (st.facilities & Station.FACIL_AIRPORT) &&
-					AirportFTAClass.GetAirport(st.airport_type).nof_depots() > 0) {
+					Airport.GetAirport(st.airport_type).nof_depots() > 0) {
 				int distance;
 
 				// don't crash the plane if we know it can't land at the airport
@@ -256,15 +256,15 @@ public class AirCraft extends AirCraftTables {
 			 * of all depots, it is simple */
 			{
 				final Station  st = Station.GetStation(tile.getMap().m2);
-				final AirportFTAClass apc = AirportFTAClass.GetAirport(st.airport_type);
+				final Airport apc = Airport.GetAirport(st.airport_type);
 				int i;
 
 				int nof_depots = apc.airport_depots.length;
 
 				for (i = 0; i < /*apc.*/nof_depots; i++) {
 					if( st.airport_tile.iadd( TileIndex.ToTileIndexDiff(apc.airport_depots[i])).equals(tile) ) {
-						assert(apc.layout[i].heading == Airport.HANGAR);
-						v.air.pos = apc.layout[i].position;
+						assert(apc.getLayoutItem(i).heading == Airport.HANGAR);
+						v.air.pos = apc.getLayoutItem(i).position;
 						break;
 					}
 				}
@@ -447,7 +447,7 @@ public class AirCraft extends AirCraftTables {
 			Station st = Station.GetStation(next_airport_index);
 			// If an airport doesn't have terminals (so no landing space for airports),
 			// it surely doesn't have any hangars
-			if (!st.IsValidStation() || st.airport_tile == null || AirportFTAClass.GetAirport(st.airport_type).nof_depots() == 0) {
+			if (!st.IsValidStation() || st.airport_tile == null || Airport.GetAirport(st.airport_type).nof_depots() == 0) {
 				StationID station;
 
 				if (p2 != 0) return Cmd.CMD_ERROR;
@@ -585,7 +585,7 @@ public class AirCraft extends AirCraftTables {
 		st = Station.GetStation(v.getCurrent_order().station);
 
 		// only goto depot if the target airport has terminals (eg. it is airport)
-		if (st.getXy() != null && st.airport_tile != null && AirportFTAClass.GetAirport(st.airport_type).terminals != null) {
+		if (st.getXy() != null && st.airport_tile != null && Airport.GetAirport(st.airport_type).terminals != null) {
 			//			printf("targetairport = %d, st.index = %d\n", v.air.targetairport, st.index);
 			//			v.air.targetairport = st.index;
 			v.getCurrent_order().type = Order.OT_GOTO_DEPOT;
@@ -882,7 +882,7 @@ public class AirCraft extends AirCraftTables {
 		}
 
 		// get airport moving data
-		assert(v.air.pos < AirportFTAClass.GetAirport(st.airport_type).nofelements);
+		assert(v.air.pos < Airport.GetAirport(st.airport_type).getNofElements());
 		amd = _airport_moving_datas[st.airport_type][v.air.pos];
 
 		// Helicopter raise
@@ -1491,15 +1491,15 @@ public class AirCraft extends AirCraftTables {
 	static void AircraftNextAirportPos_and_Order(Vehicle v)
 	{
 		final Station  st;
-		final AirportFTAClass airport;
+		final Airport airport;
 
 		if (v.getCurrent_order().type == Order.OT_GOTO_STATION ||
 				v.getCurrent_order().type == Order.OT_GOTO_DEPOT)
 			v.air.targetairport = v.getCurrent_order().station;
 
 		st = Station.GetStation(v.air.targetairport);
-		airport = AirportFTAClass.GetAirport(st.airport_type);
-		v.air.pos = v.air.previous_pos = airport.entry_point;
+		airport = Airport.GetAirport(st.airport_type);
+		v.air.pos = v.air.previous_pos = airport.getEntryPoint();
 	}
 
 	static void AircraftLeaveHangar(Vehicle v)
@@ -1531,24 +1531,24 @@ public class AirCraft extends AirCraftTables {
 	////////////////////////////////////////////////////////////////////////////////
 	///////////////////   AIRCRAFT MOVEMENT SCHEME  ////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////
-	static void AircraftEventHandler_EnterTerminal(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_EnterTerminal(Vehicle v, final Airport airport)
 	{
 		AircraftEntersTerminal(v);
-		v.air.state = Airport.layout[v.air.pos].heading;
+		v.air.state = airport.getLayoutItem(v.air.pos).heading;
 	}
 
-	static void AircraftEventHandler_EnterHangar(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_EnterHangar(Vehicle v, final Airport airport)
 	{
 		AircraftEnterHangar(v);
-		v.air.state = Airport.layout[v.air.pos].heading;
+		v.air.state = airport.getLayoutItem(v.air.pos).heading;
 	}
 
 	// In an Airport Hangar
-	static void AircraftEventHandler_InHangar(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_InHangar(Vehicle v, final Airport airport)
 	{
 		// if we just arrived, execute EnterHangar first
 		if (v.air.previous_pos != v.air.pos) {
-			AircraftEventHandler_EnterHangar(v, Airport);
+			AircraftEventHandler_EnterHangar(v, airport);
 			return;
 		}
 
@@ -1564,27 +1564,27 @@ public class AirCraft extends AirCraftTables {
 			return;
 
 		// if the block of the next position is busy, stay put
-		if (AirportHasBlock(v, Airport.layout[v.air.pos], Airport)) return;
+		if (AirportHasBlock(v, airport.getLayoutItem(v.air.pos), airport)) return;
 
 		// We are already at the target airport, we need to find a terminal
 		if (v.getCurrent_order().station == v.air.targetairport) {
 			// FindFreeTerminal:
 			// 1. Find a free terminal, 2. Occupy it, 3. Set the vehicle's state to that terminal
 			if (v.subtype != 0) {
-				if (!AirportFindFreeTerminal(v, Airport)) return; // airplane
+				if (!AirportFindFreeTerminal(v, airport)) return; // airplane
 			} else {
-				if (!AirportFindFreeHelipad(v, Airport)) return; // helicopter
+				if (!AirportFindFreeHelipad(v, airport)) return; // helicopter
 			}
 		} else { // Else prepare for launch.
 			// airplane goto state takeoff, helicopter to helitakeoff
 			v.air.state = (v.subtype != 0) ? game.Airport.TAKEOFF : game.Airport.HELITAKEOFF;
 		}
 		AircraftLeaveHangar(v);
-		AirportMove(v, Airport);
+		AirportMove(v, airport);
 	}
 
 	// At one of the Airport's Terminals
-	static void AircraftEventHandler_AtTerminal(Vehicle v, final AirportFTAClass airport)
+	static void AircraftEventHandler_AtTerminal(Vehicle v, final Airport airport)
 	{
 		// if we just arrived, execute EnterTerminal first
 		if (v.air.previous_pos != v.air.pos) {
@@ -1606,7 +1606,7 @@ public class AirCraft extends AirCraftTables {
 		if (v.getCurrent_order().type == Order.OT_NOTHING) return;
 
 		// if the block of the next position is busy, stay put
-		if (AirportHasBlock(v, airport.layout[v.air.pos], airport)) {
+		if (AirportHasBlock(v, airport.getLayoutItem(v.air.pos), airport)) {
 			return;
 		}
 
@@ -1634,31 +1634,31 @@ public class AirCraft extends AirCraftTables {
 		AirportMove(v, airport);
 	}
 
-	static void AircraftEventHandler_General(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_General(Vehicle v, final Airport Airport)
 	{
 		Global.DEBUG_misc( 0, "OK, you shouldn't be here, check your Airport Scheme!");
 		assert false;
 	}
 
-	static void AircraftEventHandler_TakeOff(Vehicle v, final AirportFTAClass airport) {
+	static void AircraftEventHandler_TakeOff(Vehicle v, final Airport airport) {
 		PlayAircraftSound(v); // play takeoffsound for airplanes
 		v.air.state = Airport.STARTTAKEOFF;
 	}
 
-	static void AircraftEventHandler_StartTakeOff(Vehicle v, final AirportFTAClass airport)
+	static void AircraftEventHandler_StartTakeOff(Vehicle v, final Airport airport)
 	{
 		v.sprite_width = v.sprite_height = 24; // ??? no idea what this is
 		v.air.state = Airport.ENDTAKEOFF;
 	}
 
-	static void AircraftEventHandler_EndTakeOff(Vehicle v, final AirportFTAClass airport)
+	static void AircraftEventHandler_EndTakeOff(Vehicle v, final Airport airport)
 	{
 		v.air.state = Airport.FLYING;
 		// get the next position to go to, differs per airport
 		AircraftNextAirportPos_and_Order(v);
 	}
 
-	static void AircraftEventHandler_HeliTakeOff(Vehicle v, final AirportFTAClass airport)
+	static void AircraftEventHandler_HeliTakeOff(Vehicle v, final Airport airport)
 	{
 		final Player  p = Player.GetPlayer(v.owner);
 		v.sprite_width = v.sprite_height = 24; // ??? no idea what this is
@@ -1677,7 +1677,7 @@ public class AirCraft extends AirCraftTables {
 		}
 	}
 
-	static void AircraftEventHandler_Flying(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_Flying(Vehicle v, final Airport airport)
 	{
 		Station st;
 		int landingtype;
@@ -1693,7 +1693,7 @@ public class AirCraft extends AirCraftTables {
 		// all other airports -. all types of flying devices (ALL)
 		// heliport/oilrig, etc -. no airplanes (HELICOPTERS_ONLY)
 		// runway busy or not allowed to use this airstation, circle
-		if (! (v.subtype == Airport.acc_planes ||
+		if (! (v.subtype == airport.getAccPlanes() ||
 				st.airport_tile == null || 
 				(st.owner.isNotNone() && !st.owner.equals(v.owner) && !mAirport.MA_OwnerHandler(st.owner)) )) {
 
@@ -1701,7 +1701,7 @@ public class AirCraft extends AirCraftTables {
 			// if it is an airplane, look for LANDING, for helicopter HELILANDING
 			// it is possible to choose from multiple landing runways, so loop until a free one is found
 			landingtype = (v.subtype != 0) ? AirConstants.LANDING : AirConstants.HELILANDING;
-			current = Airport.layout[v.air.pos].next_in_chain;
+			current = airport.getLayoutItem(v.air.pos).next_in_chain;
 			while (current != null) {
 				if (current.heading == landingtype) {
 
@@ -1734,7 +1734,7 @@ public class AirCraft extends AirCraftTables {
 
 					// If we're on top, go in
 					if(st.airport_queue.getTop() == v && (Global._patches.aircraft_queueing && v.subtype != 0)) {
-						if (!AirportHasBlock(v, current, Airport)) {			
+						if (!AirportHasBlock(v, current, airport)) {			
 							can_land = true;
 							st.airport_queue.pop();
 						} else {
@@ -1744,7 +1744,7 @@ public class AirCraft extends AirCraftTables {
 
 					// Helicopters have their own queue
 					if(v.subtype == 0 && st.helicopter_queue.getTop() == v && Global._patches.aircraft_queueing) {
-						if (!AirportHasBlock(v, current, Airport)) {
+						if (!AirportHasBlock(v, current, airport)) {
 							can_land = true;
 							st.helicopter_queue.pop();
 						} else {
@@ -1766,7 +1766,7 @@ public class AirCraft extends AirCraftTables {
 						} else {
 							can_land = false;
 						}*/
-						can_land = !AirportHasBlock(v, current, Airport);
+						can_land = !AirportHasBlock(v, current, airport);
 					}
 
 
@@ -1776,7 +1776,7 @@ public class AirCraft extends AirCraftTables {
 						// if there are multiple runways, plane won't know which one it took (because
 						// they all have heading LANDING). And also occupy that block!
 						v.air.pos = current.next_position;
-						st.airport_flags = BitOps.RETSETBITS(st.airport_flags, Airport.layout[v.air.pos].block);
+						st.airport_flags = BitOps.RETSETBITS(st.airport_flags, airport.getLayoutItem(v.air.pos).block);
 						return;
 					}
 					v.cur_speed = tcur_speed;
@@ -1786,10 +1786,10 @@ public class AirCraft extends AirCraftTables {
 			}
 		}
 		v.air.state = AirConstants.FLYING;
-		v.air.pos = Airport.layout[v.air.pos].next_position;
+		v.air.pos = airport.getLayoutItem(v.air.pos).next_position;
 	}
 
-	static void AircraftEventHandler_Landing(Vehicle v, final AirportFTAClass airport)
+	static void AircraftEventHandler_Landing(Vehicle v, final Airport airport)
 	{
 		final Player  p = Player.GetPlayer(v.owner);
 		AircraftLandAirplane(v);  // maybe crash airplane
@@ -1807,16 +1807,16 @@ public class AirCraft extends AirCraftTables {
 		}
 	}
 
-	static void AircraftEventHandler_HeliLanding(Vehicle v, final AirportFTAClass airport)
+	static void AircraftEventHandler_HeliLanding(Vehicle v, final Airport airport)
 	{
 		AircraftLand(v); // helicopters don't crash
 		v.air.state = Airport.HELIENDLANDING;
 	}
 
-	static void AircraftEventHandler_EndLanding(Vehicle v, final AirportFTAClass airport)
+	static void AircraftEventHandler_EndLanding(Vehicle v, final Airport airport)
 	{
 		// next block busy, don't do a thing, just wait
-		if (AirportHasBlock(v, airport.layout[v.air.pos], airport)) return;
+		if (AirportHasBlock(v, airport.getLayoutItem(v.air.pos), airport)) return;
 
 		// if going to terminal (Order.OT_GOTO_STATION) choose one
 		// 1. in case all terminals are busy AirportFindFreeTerminal() returns false or
@@ -1829,10 +1829,10 @@ public class AirCraft extends AirCraftTables {
 
 	}
 
-	static void AircraftEventHandler_HeliEndLanding(Vehicle v, final AirportFTAClass Airport)
+	static void AircraftEventHandler_HeliEndLanding(Vehicle v, final Airport airport)
 	{
 		// next block busy, don't do a thing, just wait
-		if (AirportHasBlock(v, Airport.layout[v.air.pos], Airport)) return;
+		if (AirportHasBlock(v, airport.getLayoutItem(v.air.pos), airport)) return;
 
 		// if going to helipad (Order.OT_GOTO_STATION) choose one. If airport doesn't have helipads, choose terminal
 		// 1. in case all terminals/helipads are busy (AirportFindFreeHelipad() returns false) or
@@ -1842,9 +1842,9 @@ public class AirCraft extends AirCraftTables {
 		// the reason behind this is that if an airport has a terminal, it also has a hangar. Airplanes
 		// must go to a hangar.
 		if (v.getCurrent_order().type == Order.OT_GOTO_STATION) {
-			if (AirportFindFreeHelipad(v, Airport)) return;
+			if (AirportFindFreeHelipad(v, airport)) return;
 		}
-		v.air.state = (Airport.terminals != null) ? AirConstants.HANGAR : AirConstants.HELITAKEOFF;
+		v.air.state = (airport.terminals != null) ? AirConstants.HANGAR : AirConstants.HELITAKEOFF;
 	}
 
 	static final AircraftStateHandler [] _aircraft_state_handlers = {
@@ -1869,27 +1869,27 @@ public class AirCraft extends AirCraftTables {
 			AirCraft::AircraftEventHandler_HeliEndLanding,	// HELIENDLANDING = 18
 	};
 
-	static void AirportClearBlock(final Vehicle  v, final AirportFTAClass Airport)
+	static void AirportClearBlock(final Vehicle  v, final Airport airport)
 	{
 		// we have left the previous block, and entered the new one. Free the previous block
-		if (Airport.layout[v.air.previous_pos].block != Airport.layout[v.air.pos].block) {
+		if (airport.getLayoutItem(v.air.previous_pos).block != airport.getLayoutItem(v.air.pos).block) {
 			Station  st = Station.GetStation(v.air.targetairport);
 
-			st.airport_flags = BitOps.RETCLRBITS(st.airport_flags, Airport.layout[v.air.previous_pos].block);
+			st.airport_flags = BitOps.RETCLRBITS(st.airport_flags, airport.getLayoutItem(v.air.previous_pos).block);
 		}
 	}
 
-	static void AirportGoToNextPosition(Vehicle v, final AirportFTAClass Airport)
+	static void AirportGoToNextPosition(Vehicle v, final Airport airport)
 	{
 		// if aircraft is not in position, wait until it is
 		if (!AircraftController(v)) return;
 
-		AirportClearBlock(v, Airport);
-		AirportMove(v, Airport); // move aircraft to next position
+		AirportClearBlock(v, airport);
+		AirportMove(v, airport); // move aircraft to next position
 	}
 
 	// gets pos from vehicle and next orders
-	static boolean AirportMove(Vehicle v, final AirportFTAClass airport)
+	static boolean AirportMove(Vehicle v, final Airport airport)
 	{
 		AirportFTA current;
 		int prev_pos;
@@ -1897,12 +1897,12 @@ public class AirCraft extends AirCraftTables {
 
 
 		// error handling
-		if (v.air.pos >= airport.nofelements) {
-			Global.DEBUG_misc( 0, "position %d is not valid for current airport. Max position is %d", v.air.pos, airport.nofelements-1);
-			assert(v.air.pos < airport.nofelements);
+		if (v.air.pos >= airport.getNofElements()) {
+			Global.DEBUG_misc( 0, "position %d is not valid for current airport. Max position is %d", v.air.pos, airport.getNofElements()-1);
+			assert(v.air.pos < airport.getNofElements());
 		}
 
-		current = airport.layout[v.air.pos];
+		current = airport.getLayoutItem(v.air.pos);
 		// we have arrived in an important state (eg terminal, hangar, etc.)
 		if (current.heading == v.air.state) {
 			prev_pos =  v.air.pos; // location could be changed in state, so save it before-hand
@@ -1934,19 +1934,19 @@ public class AirCraft extends AirCraftTables {
 		} while (current != null);
 
 		Global.DEBUG_misc( 0, "Cannot move further on Airport...! pos:%d state:%d", v.air.pos, v.air.state);
-		Global.DEBUG_misc( 0, "Airport entry point: %d, Vehicle: %d", airport.entry_point, v.index);
+		Global.DEBUG_misc( 0, "Airport entry point: %d, Vehicle: %d", airport.getEntryPoint(), v.index);
 		assert false;
 		return false;
 	}
 
 	// returns true if the road ahead is busy, eg. you must wait before proceeding
-	static boolean AirportHasBlock(Vehicle v, AirportFTA current_pos, final AirportFTAClass Airport)
+	static boolean AirportHasBlock(Vehicle v, AirportFTA current_pos, final Airport airport)
 	{
-		final AirportFTA reference = Airport.layout[v.air.pos];
-		final AirportFTA next = Airport.layout[current_pos.next_position];
+		final AirportFTA reference = airport.getLayoutItem(v.air.pos);
+		final AirportFTA next = airport.getLayoutItem(current_pos.next_position);
 
 		// same block, then of course we can move
-		if (Airport.layout[current_pos.position].block != next.block) {
+		if (airport.getLayoutItem(current_pos.position).block != next.block) {
 			final Station  st = Station.GetStation(v.air.targetairport);
 			int airport_flags = next.block;
 
@@ -1965,14 +1965,14 @@ public class AirCraft extends AirCraftTables {
 	}
 
 	// returns true on success. Eg, next block was free and we have occupied it
-	static boolean AirportSetBlocks(Vehicle v, AirportFTA current_pos, final AirportFTAClass Airport)
+	static boolean AirportSetBlocks(Vehicle v, AirportFTA current_pos, final Airport airport)
 	{
-		AirportFTA next = Airport.layout[current_pos.next_position];
-		AirportFTA reference = Airport.layout[v.air.pos];
+		AirportFTA next = airport.getLayoutItem(current_pos.next_position);
+		AirportFTA reference = airport.getLayoutItem(v.air.pos);
 		AirportFTA current;
 
 		// if the next position is in another block, check it and wait until it is free
-		if (Airport.layout[current_pos.position].block != next.block) {
+		if (airport.getLayoutItem(current_pos.position).block != next.block) {
 			int airport_flags = next.block;
 			Station  st = Station.GetStation(v.air.targetairport);
 
@@ -2019,17 +2019,8 @@ public class AirCraft extends AirCraftTables {
 		return false;
 	}
 
-	static int GetNumTerminals(final AirportFTAClass Airport)
-	{
-		int num = 0;
-		int i;
 
-		for (i = Airport.terminals[0]; i > 0; i--) num += Airport.terminals[i];
-
-		return num;
-	}
-
-	static boolean AirportFindFreeTerminal(Vehicle v, final AirportFTAClass Airport)
+	static boolean AirportFindFreeTerminal(Vehicle v, final Airport airport)
 	{
 		AirportFTA temp;
 		Station st;
@@ -2044,9 +2035,9 @@ public class AirCraft extends AirCraftTables {
 			possible groups are checked	(in this case group 1, since that is after group 0). If that
 			fails, then attempt fails and plane waits
 		 */
-		if (Airport.terminals[0] > 1) {
+		if (airport.terminals[0] > 1) {
 			st = Station.GetStation(v.air.targetairport);
-			temp = Airport.layout[v.air.pos].next_in_chain;
+			temp = airport.getLayoutItem(v.air.pos).next_in_chain;
 			while (temp != null) {
 				if (temp.heading == 255) {
 					if (!BitOps.HASBITS(st.airport_flags, temp.block)) {
@@ -2063,9 +2054,9 @@ public class AirCraft extends AirCraftTables {
 						//that means, sum up all terminals of
 						//groups with lower number
 						for (i = 1; i < target_group; i++)
-							group_start += Airport.terminals[i];
+							group_start += airport.terminals[i];
 
-						group_end = group_start + Airport.terminals[target_group];
+						group_end = group_start + airport.terminals[target_group];
 						if (FreeTerminal(v, group_start, group_end)) return true;
 					}
 				} else {
@@ -2078,21 +2069,12 @@ public class AirCraft extends AirCraftTables {
 		}
 
 		// if there is only 1 terminalgroup, all terminals are checked (starting from 0 to max)
-		return FreeTerminal(v, 0, GetNumTerminals(Airport));
-	}
-
-	static int GetNumHelipads(final AirportFTAClass Airport)
-	{
-		int num = 0;
-		int i;
-
-		for (i = Airport.helipads[0]; i > 0; i--) num += Airport.helipads[i];
-
-		return num;
+		return FreeTerminal(v, 0, airport.GetNumTerminals());
 	}
 
 
-	static boolean AirportFindFreeHelipad(Vehicle v, final AirportFTAClass airport)
+
+	static boolean AirportFindFreeHelipad(Vehicle v, final Airport airport)
 	{
 		Station st;
 		AirportFTA temp;
@@ -2103,7 +2085,7 @@ public class AirCraft extends AirCraftTables {
 		// if there are more helicoptergroups, pick one, just as in AirportFindFreeTerminal()
 		if (airport.helipads[0] > 1) {
 			st = Station.GetStation(v.air.targetairport);
-			temp = airport.layout[v.air.pos].next_in_chain;
+			temp = airport.getLayoutItem(v.air.pos).next_in_chain;
 			while (temp != null) {
 				if (temp.heading == 255) {
 					if (!BitOps.HASBITS(st.airport_flags, temp.block)) {
@@ -2135,7 +2117,7 @@ public class AirCraft extends AirCraftTables {
 		} else {
 			// only 1 helicoptergroup, check all helipads
 			// The blocks for helipads start after the last terminal (MAX_TERMINALS)
-			return FreeTerminal(v, AirportFTAClass.MAX_TERMINALS, GetNumHelipads(airport) + AirportFTAClass.MAX_TERMINALS);
+			return FreeTerminal(v, Airport.MAX_TERMINALS, airport.GetNumHelipads() + Airport.MAX_TERMINALS);
 		}
 		return false;	// it shouldn't get here anytime, but just to be sure
 	}
@@ -2169,7 +2151,7 @@ public class AirCraft extends AirCraftTables {
 		// pass the right airport structure to the functions
 		// DEREF_STATION gets target airport (Station st), its type is passed to GetAirport
 		// that returns the correct layout depending on type
-		AirportGoToNextPosition(v, AirportFTAClass.GetAirport(Station.GetStation(v.air.targetairport).airport_type));
+		AirportGoToNextPosition(v, Airport.GetAirport(Station.GetStation(v.air.targetairport).airport_type));
 	}
 
 	static void Aircraft_Tick(Vehicle v)
@@ -2242,13 +2224,13 @@ public class AirCraft extends AirCraftTables {
 	static void UpdateAirplanesOnNewStation(Station st)
 	{
 		// only 1 station is updated per function call, so it is enough to get entry_point once
-		final AirportFTAClass ap = AirportFTAClass.GetAirport(st.airport_type);
+		final Airport ap = Airport.GetAirport(st.airport_type);
 
 		Vehicle.forEach( (v) -> updateOneAirplaneOnNewStation(st, ap, v) );
 	}
 
 	private static void updateOneAirplaneOnNewStation(
-			Station st, final AirportFTAClass ap, Vehicle v) {
+			Station st, final Airport ap, Vehicle v) {
 		GetNewVehiclePosResult gp = new GetNewVehiclePosResult();
 
 		if (v.type != Vehicle.VEH_Aircraft || v.subtype > 2)
@@ -2264,7 +2246,7 @@ public class AirCraft extends AirCraftTables {
 		 */
 		if (v.air.state >= Airport.FLYING) 
 		{	// circle around
-			v.air.pos = v.air.previous_pos = ap.entry_point;
+			v.air.pos = v.air.previous_pos = ap.getEntryPoint();
 			v.air.state = Airport.FLYING;
 			// landing plane needs to be reset to flying height (only if in pause mode upgrade,
 			// in normal mode, plane is reset in AircraftController. It doesn't hurt for FLYING
@@ -2276,10 +2258,10 @@ public class AirCraft extends AirCraftTables {
 			int takeofftype = (v.subtype == 0) ? Airport.HELITAKEOFF : Airport.ENDTAKEOFF;
 			// search in airportdata for that heading
 			// easiest to do, since this doesn't happen a lot
-			for (int cnt = 0; cnt < ap.nofelements; cnt++) 
+			for (int cnt = 0; cnt < ap.getNofElements(); cnt++) 
 			{
-				if (ap.layout[cnt].heading == takeofftype) {
-					v.air.pos = ap.layout[cnt].position;
+				if (ap.getLayoutItem(cnt).heading == takeofftype) {
+					v.air.pos = ap.getLayoutItem(cnt).position;
 					break;
 				}
 			}

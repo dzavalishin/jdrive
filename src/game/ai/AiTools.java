@@ -47,7 +47,7 @@ public class AiTools implements AiConst
 
 
 
-	/* XXX ignored, standard hash func used. Must be ok?
+	/* [dz] ignored, standard hash func used. Must be ok?
 	// Calculates the hash
 	//   Currently it is a 10 bit hash, so the hash array has a max depth of 6 bits (so 64)
 	static int AiPathFinder_Hash(int key1, int key2)

@@ -247,7 +247,7 @@ public class mAirport
 		});
 		//END_TILE_LOOP(tl, 7, 7, buildtile)
 		
-		Cmd.DoCommandByTile(buildtile, AirportFTAClass.AT_INTERNATIONAL, 0, Cmd.DC_EXEC, Cmd.CMD_BUILD_AIRPORT);
+		Cmd.DoCommandByTile(buildtile, Airport.AT_INTERNATIONAL, 0, Cmd.DC_EXEC, Cmd.CMD_BUILD_AIRPORT);
 	}
 
 	//the main procedure, does the checks and runs the process.
@@ -315,7 +315,7 @@ public class mAirport
 				&& st.facilities == Station.FACIL_AIRPORT
 				&& st.owner.isTown() 
 				&& st.town == tn
-				&& st.airport_type != AirportFTAClass.AT_OILRIG) { //not really needed but you never know
+				&& st.airport_type != Airport.AT_OILRIG) { //not really needed but you never know
 					MA_DestroyAirport(tn);
 					PlayerID.setCurrent(old_player);
 					return;

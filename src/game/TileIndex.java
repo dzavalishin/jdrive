@@ -13,9 +13,14 @@ import game.util.BitOps;
 import game.util.IntContainer;
 import game.xui.ViewPort;
 
-// TODO make == work for TileIndex or we're busted - make fabric and disable new(), 
+// [dz]
+// make == work for TileIndex or we're busted - make fabric and disable new(), 
 // return same TileIndex for each TileIndex.tile
 // same with Mutable
+// [dz] nope, can't save state keeping == working, so keep eye on not using ==
+// with TileIndex
+
+
 
 public class TileIndex implements Comparable<TileIndex>, Serializable
 {
@@ -32,7 +37,10 @@ public class TileIndex implements Comparable<TileIndex>, Serializable
 	public TileIndex(int x, int y)
 	{
 		tile = (y * Global.MapSizeX()) + x;
-		//assert( tile >= 0 ); // TODO XXX can be out of map? [dz] smallmap uses us out of map :(
+		// can be out of map? 
+		// [dz] smallmap uses us out of map :( 
+		// [dz] that was due to the error, brought check back
+		assert( tile >= 0 ); 
 		// TODO assert < max
 	}
 

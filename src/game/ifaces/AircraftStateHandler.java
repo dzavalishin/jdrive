@@ -2,11 +2,11 @@ package game.ifaces;
 
 import java.util.function.BiConsumer;
 
-import game.AirportFTAClass;
+import game.Airport;
 import game.Vehicle;
 
-//typedef void AircraftStateHandler(Vehicle v, final AirportFTAClass Airport);
+//typedef void AircraftStateHandler(Vehicle v, final Airport Airport);
 
 @FunctionalInterface
-public interface AircraftStateHandler extends BiConsumer<Vehicle, AirportFTAClass> {}
+public interface AircraftStateHandler extends BiConsumer<Vehicle, Airport> {}
 

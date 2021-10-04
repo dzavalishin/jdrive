@@ -220,7 +220,7 @@ public class Station extends StationTables implements IPoolItem
 		Point pt = Point.RemapCoords2(xy.TileX() * 16, xy.TileY() * 16);
 
 		pt.y -= 32;
-		if ( (0 != (facilities & FACIL_AIRPORT)) && airport_type == AirportFTAClass.AT_OILRIG) pt.y -= 16;
+		if ( (0 != (facilities & FACIL_AIRPORT)) && airport_type == Airport.AT_OILRIG) pt.y -= 16;
 
 		Global.SetDParam(0, index);
 		Global.SetDParam(1, facilities);
@@ -578,12 +578,12 @@ public class Station extends StationTables implements IPoolItem
 
 		if (st.airport_tile != null) {
 			switch (st.airport_type) {
-			case AirportFTAClass.AT_OILRIG:        ret = Math.max(ret, CA_AIR_OILPAD);   break;
-			case AirportFTAClass.AT_SMALL:         ret = Math.max(ret, CA_AIR_SMALL);    break;
-			case AirportFTAClass.AT_HELIPORT:      ret = Math.max(ret, CA_AIR_HELIPORT); break;
-			case AirportFTAClass.AT_LARGE:         ret = Math.max(ret, CA_AIR_LARGE);    break;
-			case AirportFTAClass.AT_METROPOLITAN:  ret = Math.max(ret, CA_AIR_METRO);    break;
-			case AirportFTAClass.AT_INTERNATIONAL: ret = Math.max(ret, CA_AIR_INTER);    break;
+			case Airport.AT_OILRIG:        ret = Math.max(ret, CA_AIR_OILPAD);   break;
+			case Airport.AT_SMALL:         ret = Math.max(ret, CA_AIR_SMALL);    break;
+			case Airport.AT_HELIPORT:      ret = Math.max(ret, CA_AIR_HELIPORT); break;
+			case Airport.AT_LARGE:         ret = Math.max(ret, CA_AIR_LARGE);    break;
+			case Airport.AT_METROPOLITAN:  ret = Math.max(ret, CA_AIR_METRO);    break;
+			case Airport.AT_INTERNATIONAL: ret = Math.max(ret, CA_AIR_INTER);    break;
 			}
 		}
 
@@ -603,7 +603,7 @@ public class Station extends StationTables implements IPoolItem
 				{
 					Station st = GetStation(t);
 					// you cannot take control of an oilrig!!
-					if (st.airport_type == AirportFTAClass.AT_OILRIG && st.facilities == (FACIL_AIRPORT|FACIL_DOCK))
+					if (st.airport_type == Airport.AT_OILRIG && st.facilities == (FACIL_AIRPORT|FACIL_DOCK))
 						//continue;
 						return false;
 				}
@@ -1728,7 +1728,7 @@ public class Station extends StationTables implements IPoolItem
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		/* Check if a valid, buildable airport was chosen for construction */
-		if (p1 > _airport_map5_tiles.length || !BitOps.HASBIT(AirportFTAClass.GetValidAirports(), p1)) return Cmd.CMD_ERROR;
+		if (p1 > _airport_map5_tiles.length || !BitOps.HASBIT(Airport.GetValidAirports(), p1)) return Cmd.CMD_ERROR;
 
 		tile = TileIndex.TileVirtXY(x, y);
 
@@ -1747,7 +1747,7 @@ public class Station extends StationTables implements IPoolItem
 						&& st.isValid() 
 						&& st.town == t 
 						&& 0 != (st.facilities&FACIL_AIRPORT) 
-						&& st.airport_type != AirportFTAClass.AT_OILRIG)
+						&& st.airport_type != Airport.AT_OILRIG)
 					num[0]++;
 			});
 
@@ -1799,7 +1799,7 @@ public class Station extends StationTables implements IPoolItem
 
 			// if airport type equals Heliport then generate
 			// type 5 name, which is heliport, otherwise airport names (1)
-			if (!GenerateStationName(st, tile, (p1 == AirportFTAClass.AT_HELIPORT) ? 5 : 1))
+			if (!GenerateStationName(st, tile, (p1 == Airport.AT_HELIPORT) ? 5 : 1))
 				return Cmd.CMD_ERROR;
 
 			if(0 != (flags & Cmd.DC_EXEC))
@@ -1809,7 +1809,7 @@ public class Station extends StationTables implements IPoolItem
 		cost += Global._price.build_airport * w * h;
 
 		if( 0 != (flags & Cmd.DC_EXEC)) {
-			final AirportFTAClass afc = AirportFTAClass.GetAirport(p1);
+			final Airport afc = Airport.GetAirport(p1);
 
 			st.owner = PlayerID.getCurrent();
 			if (Player.IsLocalPlayer() && afc.airport_depots.length /*nof_depots*/ != 0)
@@ -1899,7 +1899,7 @@ public class Station extends StationTables implements IPoolItem
 		if( err[0] != 0 ) return err[0];
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			final  AirportFTAClass afc = AirportFTAClass.GetAirport(st.airport_type);
+			final  Airport afc = Airport.GetAirport(st.airport_type);
 			int i;
 
 			for (i = 0; i < afc.nof_depots(); ++i)
@@ -3056,7 +3056,7 @@ public class Station extends StationTables implements IPoolItem
 
 		st.owner = PlayerID.getNone();
 		st.airport_flags = 0;
-		st.airport_type = AirportFTAClass.AT_OILRIG;
+		st.airport_type = Airport.AT_OILRIG;
 		st.xy = tile;
 		//st.bus_stops = new Array;
 		//st.truck_stops = null;
