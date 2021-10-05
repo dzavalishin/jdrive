@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
+import game.Player.PlayerHiScoreComparator;
 import game.ai.Ai;
 import game.ai.PlayerAiNew;
 import game.enums.GameModes;
@@ -32,6 +36,7 @@ import game.xui.Window;
 
 public class Player implements Serializable 
 {
+
 
 	private static final long serialVersionUID = 1L;
 
@@ -1170,7 +1175,7 @@ public class Player implements Serializable
 
 
 	// Save the highscore for the Player 
-	static int SaveHighScoreValue(final Player p)
+	public static int SaveHighScoreValue(final Player p)
 	{
 
 		HighScore[] hs = Global._highscore_table[GameOptions._opt.diff_level];
@@ -1191,6 +1196,7 @@ public class Player implements Serializable
 				//memmove(&hs[i + 1], &hs[i], sizeof(HighScore) * (lengthof(_highscore_table[0]) - i - 1));
 				System.arraycopy(hs, i, hs, i+1, hs.length - i - 1);
 
+				/*
 				Global.SetDParam(0, p.president_name_1);
 				Global.SetDParam(1, p.president_name_2);
 				Global.SetDParam(2, p.name_1);
@@ -1199,6 +1205,11 @@ public class Player implements Serializable
 				hs[i].company = buf;
 				hs[i].score = score;
 				hs[i].title = Strings.GetString(EndGameGetPerformanceTitleFromValue(score));
+				 */
+				//hs[i].score = score;
+				hs[i].initFromPlayer(p,score);				
+
+
 				return i;
 			}
 		}
@@ -1206,118 +1217,54 @@ public class Player implements Serializable
 		return -1; // too bad; we did not make it into the top5
 	}
 
-	/* Sort all players given their performance * /
-	static int  HighScoreSorter(final void *a, final void *b)
-	{
-		final Player pa = *(final Player* final*)a;
-		final Player pb = *(final Player* final*)b;
 
-		return pb.old_economy[0].performance_history - pa.old_economy[0].performance_history;
-	} */
-
-	/* Save the highscores in a network game when it has ended 
+	//* Save the highscores in a network game when it has ended 
 	//#define LAST_HS_ITEM lengthof(_highscore_table) - 1
-	static byte SaveHighScoreValueNetwork()
+	private static final int LAST_HS_ITEM = Global._highscore_table.length - 1;
+	public static int SaveHighScoreValueNetwork()
 	{
-		Player player_sort[MAX_PLAYERS];
-		size_t count = 0;
-		byte player = -1;
+		//Player [] player_sort = new Player[Global.MAX_PLAYERS];
+		//int count = 0;
+		int player = -1;
 
-		//* Sort all active players with the highest score first 
+		List<Player> player_sort = new ArrayList<>();
+
+		/* Sort all active players with the highest score first 
 		for( Player p : _players ) {
-			if (p.is_active)
+			if (p.isActive())
 				player_sort[count++] = p;
-		}
-		qsort(player_sort, count, sizeof(player_sort[0]), HighScoreSorter);
+		}*/
 
+		Player.forEach( p -> { if (p.isActive()) player_sort.add(p); } );
+		Collections.sort(player_sort, new PlayerHiScoreComparator());
+
+		//* Copy over Top5 companies 
+		//for (int i = 0; i < Global._highscore_table[LAST_HS_ITEM].length && i < count; i++) {
+		//	Player p_cur = player_sort.get(i);
+		int i = 0;
+		for(Player p : player_sort)
 		{
-			HighScore hs;
-			Player* final *p_cur = &player_sort[0];
-			ubyte i;
+			HighScore hs = new HighScore();
+			hs.initFromPlayer(p,p.old_economy[0].performance_history);
 
-			memset(_highscore_table[LAST_HS_ITEM], 0, sizeof(_highscore_table[0]));
+			Global._highscore_table[LAST_HS_ITEM][i] = hs;
+			// get the ranking of the local player
+			if (p.index.isLocalPlayer())
+				player = i;
 
-			//* Copy over Top5 companies 
-			for (i = 0; i < lengthof(_highscore_table[LAST_HS_ITEM]) && i < count; i++) {
-				char buf[sizeof(_highscore_table[0].company)];
-
-				hs = &_highscore_table[LAST_HS_ITEM][i];
-				Global.SetDParam(0, (*p_cur).president_name_1);
-				Global.SetDParam(1, (*p_cur).president_name_2);
-				Global.SetDParam(2, (*p_cur).name_1);
-				Global.SetDParam(3, (*p_cur).name_2);
-				GetString(buf, Str.STR_HIGHSCORE_NAME); // get manager/company name string
-
-				ttd_strlcpy(hs.company, buf, sizeof(buf));
-				hs.score = (*p_cur).old_economy[0].performance_history;
-				hs.title = EndGameGetPerformanceTitleFromValue(hs.score);
-
-				// get the ranking of the local player
-				if ((*p_cur).index.equals(_local_player))
-					player = i;
-
-				p_cur++;
-			}
+			i++;
+			if( i >= Global._highscore_table[LAST_HS_ITEM].length )
+				break;
 		}
 
 		// Add top5 players to highscore table 
 		return player;
 	}
-	 */
+	/* */
 
-	/* Save HighScore table to file * /
-	static void SaveToHighScore()
-	{
-		FILE *fp = fopen(_highscore_file, "wb");
 
-		if (fp != null) {
-			int i;
-			HighScore hs;
 
-			for (i = 0; i < LAST_HS_ITEM; i++) { // don't save network highscores
-				for (hs = _highscore_table[i]; hs != endof(_highscore_table[i]); hs++) {
-					// First character is a command character, so strlen will fail on that 
-					byte length = min(sizeof(hs.company), (hs.company[0] == '\0') ? 0 : strlen(&hs.company[1]) + 1);
 
-					fwrite(&length, sizeof(length), 1, fp); // write away string length
-					fwrite(hs.company, length, 1, fp);
-					fwrite(&hs.score, sizeof(hs.score), 1, fp);
-					fwrite("", 2, 1, fp); // placeholder for hs.title, not saved anymore; compatibility 
-				}
-			}
-			fclose(fp);
-		}
-	}
-
-	/* Initialize the highscore table to 0 and if any file exists, load in values * /
-	static void LoadFromHighScore()
-	{
-		FILE *fp = fopen(_highscore_file, "rb");
-
-		memset(_highscore_table, 0, sizeof(_highscore_table));
-
-		if (fp != null) {
-			int i;
-			HighScore hs;
-
-			for (i = 0; i < LAST_HS_ITEM; i++) { // don't load network highscores
-				for (hs = _highscore_table[i]; hs != endof(_highscore_table[i]); hs++) {
-					byte length;
-					fread(&length, sizeof(length), 1, fp);
-
-					fread(hs.company, 1, length, fp);
-					fread(&hs.score, sizeof(hs.score), 1, fp);
-					fseek(fp, 2, SEEK_CUR); // placeholder for hs.title, not saved anymore; compatibility 
-					hs.title = EndGameGetPerformanceTitleFromValue(hs.score);
-				}
-			}
-			fclose(fp);
-		}
-
-		// Initialize end of game variable (when to show highscore chart) 
-		Global._patches.ending_date = 2051;
-	}
-	 */
 	public void InitialiseEngineReplacement()
 	{
 		//EngineID engine;
@@ -1655,6 +1602,27 @@ final Chunk Handler _player_chunk_handlers[] = {
 	}
 
 
+	/* Sort all players given their performance * /
+	static int  HighScoreSorter(final void *a, final void *b)
+	{
+		final Player pa = *(final Player* final*)a;
+		final Player pb = *(final Player* final*)b;
+
+		return pb.old_economy[0].performance_history - pa.old_economy[0].performance_history;
+	} */
+
+	public static class PlayerHiScoreComparator implements Comparator<Player> {
+
+		@Override
+		public int compare(Player pa, Player pb) {
+			return pb.old_economy[0].performance_history - pa.old_economy[0].performance_history;
+		}
+
+
+	}
 
 
 }
+
+
+

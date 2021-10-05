@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import game.Cmd;
 import game.Economy;
+import game.GameOptions;
 import game.Global;
 import game.Hal;
 import game.Player;
@@ -872,7 +873,7 @@ public class PlayerGui
 			Global.SetDParam(1, w.window_number + Str.STR_6801_EASY);
 			Gfx.DrawStringMultiCenter(x + (640 / 2), y + 62, !Global._networking ? Str.STR_0211_TOP_COMPANIES_WHO_REACHED : Str.STR_TOP_COMPANIES_NETWORK_GAME, 500);
 
-			/* TODO Draw Highscore peepz */ 
+			/* Draw Highscore peepz */ 
 			for (int i = 0; i < hs.length; i++) {
 				Global.SetDParam(0, i + 1);
 				Gfx.DrawString(x + 40, y + 140 + (i * 55), Str.STR_0212, 0x10);
@@ -975,17 +976,17 @@ public class PlayerGui
 							w.as_highscore_d().background_img = Sprite.SPR_TYCOON_IMG2_BEGIN;
 					}
 
-					/* TODO In a network game show the endscores of the custom difficulty 'network' which is the last one
-					 * as well as generate a TOP5 of that game, and not an all-time top5. 
+					// * In a network game show the endscores of the custom difficulty 'network' 
+					// * which is the last one as well as generate a TOP5 of that game, and not an all-time top5. 
 					if (Global._networking) {
-						w.window_number = lengthof(_highscore_table) - 1;
-						w.as_highscore_d().rank = SaveHighScoreValueNetwork();
+						w.window_number = Global._highscore_table.length - 1;
+						w.as_highscore_d().rank = Player.SaveHighScoreValueNetwork();
 					} else {
 						// in single player _local player is always valid
 						final Player p = Player.GetPlayer(Global.gs._local_player);
 						w.window_number = GameOptions._opt.diff_level;
-						w.as_highscore_d().rank = SaveHighScoreValue(p);
-					}*/
+						w.as_highscore_d().rank = Player.SaveHighScoreValue(p);
+					}
 				}
 			}
 
