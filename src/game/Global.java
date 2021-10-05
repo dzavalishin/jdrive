@@ -105,7 +105,6 @@ public class Global
 	public static boolean _rightclick_emulate;
 
 	public static int _display_hz;
-	//public static int _fullscreen_bpp;
 
 
 
@@ -137,12 +136,6 @@ public class Global
 	public static final BackuppedOrders [] _backup_orders_data = { new BackuppedOrders() };
 
 	/* Access Vehicle Data */
-	//#include "table/engines.h"
-	//public static  finalEngineInfo orig_engine_info[TOTAL_NUM_ENGINES];
-	//public static  finalRailVehicleInfo orig_rail_vehicle_info[NUM_TRAIN_ENGINES];
-	//public static  finalShipVehicleInfo orig_ship_vehicle_info[NUM_SHIP_ENGINES];
-	//public static  finalAircraftVehicleInfo orig_aircraft_vehicle_info[NUM_AIRCRAFT_ENGINES];
-	//public static  finalRoadVehicleInfo orig_road_vehicle_info[NUM_ROAD_ENGINES];
 
 	public static final EngineInfo []			_engine_info = new EngineInfo[TOTAL_NUM_ENGINES];
 	public static final RailVehicleInfo []		_rail_vehicle_info = new RailVehicleInfo[NUM_TRAIN_ENGINES];
@@ -181,7 +174,6 @@ public class Global
 	public static final int MAX_YEAR_END = 170;
 
 
-	//public static int get_date() { return _date; }
 	
 	public static int _tick_counter;
 	public static int _frame_counter;
@@ -220,7 +212,6 @@ public class Global
 	public static int _cleared_town_rating;
 	public static int _caret_timer;
 	public static Vehicle _place_clicked_vehicle;
-	//public static final int _num_resolutions = 1; 
 	public static int _make_screenshot;
 	
 	// Available aircraft types

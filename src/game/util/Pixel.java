@@ -42,5 +42,6 @@ public class Pixel extends ByteArrayPtr
 		wor(2, BitOps.GB(val, 16, 8) );
 		wor(3, BitOps.GB(val, 24, 8) );
 	}
+
 	
 }

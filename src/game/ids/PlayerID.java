@@ -55,6 +55,12 @@ public class PlayerID extends AbstractID implements Serializable
 		return get(Owner.OWNER_SPECTATOR);
 	}
 
+	/** Get Global.gs._local_player */
+	public static PlayerID getLocal() {
+		return Global.gs._local_player;
+	}
+
+	
 	public boolean IS_HUMAN_PLAYER()
 	{
 		return !Player.GetPlayer(this).isAi();
@@ -165,6 +171,7 @@ public class PlayerID extends AbstractID implements Serializable
 
 	/** Set current player to no one */
 	public static void setCurrentToNone() {	setCurrent(getNone()); }
+
 
 	
 }

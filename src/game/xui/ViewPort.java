@@ -48,7 +48,7 @@ import game.util.Strings;
 
 public class ViewPort implements Serializable
 {
-
+	private static final long serialVersionUID = 1L;
 	
 	public int left,top;												// screen coordinates for the viewport
 	int width, height;									// screen width/height for the viewport
@@ -56,7 +56,7 @@ public class ViewPort implements Serializable
 	int virtual_left, virtual_top;			// virtual coordinates
 	int virtual_width, virtual_height;	// these are just width << zoom, height << zoom
 
-	byte zoom;
+	int zoom;
 
 	// don't need
 	//boolean active; // used instead of bit in _active_viewports
@@ -130,12 +130,23 @@ public class ViewPort implements Serializable
 		_viewports.add(this);
 	}
 
+
 	public ViewPort() {
 		//_viewports.add(this);
 	}
 
 
-
+	public ViewPort(int left, int top, int width, int height, int zoom) {
+		this.zoom = zoom;
+		this.left = 0;
+		this.top = 0;
+		this.virtual_width = width;
+		this.width = width >> zoom;
+		this.virtual_height = height;
+		this.height = height >> zoom;
+		this.virtual_left = left;
+		this.virtual_top = top;
+	}
 
 
 	static boolean _added_tile_sprite;
@@ -1379,7 +1390,7 @@ public class ViewPort implements Serializable
 		Hal._cur_dpi = dpi;
 	}
 
-	static void ViewportDoDraw(final ViewPort vp, int left, int top, int right, int bottom)
+	public static void ViewportDoDraw(final ViewPort vp, int left, int top, int right, int bottom)
 	{
 		ViewportDrawer vd = new ViewportDrawer();
 		int mask;

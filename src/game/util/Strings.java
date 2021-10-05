@@ -374,11 +374,9 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	private static String FormatYmdString(int number)
 	{
-		//final String src;
 		StringBuilder buff = new StringBuilder();
 
 		YearMonthDay ymd = new YearMonthDay(number);
-		//YearMonthDay.ConvertDayToYMD(ymd, number);
 
 		buff.append(StringGetStringPtr(ymd.day + STR_01AC_1ST - 1));
 
@@ -392,11 +390,9 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	private static String FormatMonthAndYear(int number)
 	{
-		//String src;
 		StringBuilder buff = new StringBuilder();
 
 		YearMonthDay ymd = new YearMonthDay(number);
-		//YearMonthDay.ConvertDayToYMD(ymd, number);
 
 		//for (src = GetStringPtr(STR_MONTH_JAN + ymd.month); (*buff++ = *src++) != '\0';) {}
 		buff.append( StringGetStringPtr(STR_MONTH_JAN + ymd.month) );
@@ -412,7 +408,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 		StringBuilder buff = new StringBuilder();
 
 		YearMonthDay ymd = new YearMonthDay(number);
-		//YearMonthDay.ConvertDayToYMD(ymd, number);
+
 		buff.append( String.format(" %02d-%02d-%04d", ymd.day, ymd.month + 1, ymd.year + Global.MAX_YEAR_BEGIN_REAL) );
 
 		return buff.toString();
@@ -420,8 +416,6 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 	private static String FormatGenericCurrency(CurrencySpec spec, long number, boolean compact)
 	{
-		//final String s;
-		//char c;
 		char buf[] = new char[40];
 		int bi;
 		int j;
@@ -1173,10 +1167,7 @@ private  final int *GetArgvPtr(final int **argv, int n)
 	public static boolean ReadLanguagePack(int lang_index)
 	{
 
-		//int tot_count, i;
 		LanguagePack lang_pack = new LanguagePack();
-		//int len;
-		//char [][]langpack_offs;
 		BinaryString []langpack_offs;
 
 		String lang = String.format("%s%s", Global._path.lang_dir, _dynlang.file[lang_index]);
@@ -1265,7 +1256,6 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 		// go through the language files and make sure that they are valid.
 		for (String file : files) {
-			//int j;
 			LanguagePack hdr = new LanguagePack();
 
 			String s = String.format("%s%s", Global._path.lang_dir, file);
@@ -1285,9 +1275,6 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				continue;
 			}
 
-
-
-
 			dl.file[m] = file;
 			dl.name[m] = hdr.name;
 
@@ -1296,15 +1283,19 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 			m++;
 		}
+		
 		if (def == -1) def = fallback;
 
 		if (m == 0)
 			Global.error(files.size() == 0 ? "No available language packs" : "Invalid version of language packs");
 
 		dl.num = m;
+		
 		int i;
+		
 		for (i = 0; i != dl.num; i++)
 			dl.dropdown[i] = SPECSTR_LANGUAGE_START + i;
+		
 		dl.dropdown[i] = Str.INVALID_STRING;
 
 		for (i = 0; i != dl.num; i++)

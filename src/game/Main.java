@@ -21,6 +21,7 @@ import game.struct.SmallFiosItem;
 import game.util.BitOps;
 import game.util.FileIO;
 import game.util.Music;
+import game.util.ScreenShot;
 import game.util.ShortSounds;
 import game.util.Sound;
 import game.util.Strings;
@@ -394,14 +395,14 @@ public class Main {
 	}
 
 	static void ShowScreenshotResult(boolean b)
-	{/* TODO
+	{
 		if (b) {
-			SetDParamStr(0, _screenshot_name);
-			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_031B_SCREENSHOT_SUCCESSFULLY, 0, 0);
+			Global.SetDParamStr(0, Global._screenshot_name);
+			Global.ShowErrorMessage(Str.INVALID_STRING_ID().id, Str.STR_031B_SCREENSHOT_SUCCESSFULLY, 0, 0);
 		} else {
-			Global.ShowErrorMessage(INVALID_STRING_ID, Str.STR_031C_SCREENSHOT_FAILED, 0, 0);
+			Global.ShowErrorMessage(Str.INVALID_STRING_ID().id, Str.STR_031C_SCREENSHOT_FAILED, 0, 0);
 		}
-	 */
+
 	}
 
 	static void MakeNewGame()
@@ -806,19 +807,20 @@ public class Main {
 		// handle scrolling of the main window
 		if (0 != Global._dirkeys) HandleKeyScrolling();
 
-		/* TODO // make a screenshot?
-		if ((m=_make_screenshot) != 0) {
-			_make_screenshot = 0;
-			switch(m) {
+		// make a screenshot?
+		int shot = Global._make_screenshot;
+		if(shot != 0) {
+			Global._make_screenshot = 0;
+			switch(shot) {
 			case 1: // make small screenshot
-				UndrawMouseCursor();
-				ShowScreenshotResult(MakeScreenshot());
+				Gfx.UndrawMouseCursor();
+				ShowScreenshotResult(ScreenShot.MakeScreenshot());
 				break;
 			case 2: // make large screenshot
-				ShowScreenshotResult(MakeWorldScreenshot(-(int)MapMaxX() * TILE_PIXELS, 0, (MapMaxX() + MapMaxY()) * TILE_PIXELS, (MapMaxX() + MapMaxY()) * TILE_PIXELS >> 1, 0));
+				ShowScreenshotResult(ScreenShot.MakeWorldScreenshot(-(int)Global.MapMaxX() * TileInfo.TILE_PIXELS, 0, (Global.MapMaxX() + Global.MapMaxY()) * TileInfo.TILE_PIXELS, (Global.MapMaxX() + Global.MapMaxY()) * TileInfo.TILE_PIXELS >> 1, 0));
 				break;
 			}
-		} */
+		}
 
 		// switch game mode?
 		if ((m=Global._switch_mode) != SwitchModes.SM_NONE) {
