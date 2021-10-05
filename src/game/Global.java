@@ -319,7 +319,7 @@ public class Global
 
 		printf( "dbg: %s", buf);
 		ConsoleFactory.INSTANCE.getCurrentConsole().ifPresent(c -> {
-			c.debug(s);
+			c.debug(buf);
 		});
 	}
 
