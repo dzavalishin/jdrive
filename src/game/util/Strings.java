@@ -1130,9 +1130,8 @@ private  final int *GetArgvPtr(final int **argv, int n)
 
 		// screenshot format name?
 		if (BitOps.IS_INT_INSIDE(ind, (SPECSTR_SCREENSHOT_START - 0x70E4), (SPECSTR_SCREENSHOT_END - 0x70E4) + 1)) {
-			//int i = ind - (SPECSTR_SCREENSHOT_START - 0x70E4);
-			// TODO return GetScreenshotFormatDesc(i);
-			return "PNG";
+			int i = ind - (SPECSTR_SCREENSHOT_START - 0x70E4);
+			return ScreenShot.GetScreenshotFormatDesc(i);
 		}
 
 		assert false;

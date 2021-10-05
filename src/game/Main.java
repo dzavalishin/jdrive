@@ -257,7 +257,7 @@ public class Main {
 		Strings.InitializeLanguagePacks();
 
 		// initialize screenshot formats
-		// TODO InitializeScreenshotFormats();
+		ScreenShot.InitializeScreenshotFormats();
 
 		// initialize airport state machines
 		Airport.InitializeAirports();

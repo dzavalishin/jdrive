@@ -26,6 +26,7 @@ import game.tables.PatchVariable;
 import game.tables.SettingsTables;
 import game.util.BinaryString;
 import game.util.BitOps;
+import game.util.ScreenShot;
 import game.util.Strings;
 
 public class SettingsGui extends SettingsTables 
@@ -118,7 +119,8 @@ public class SettingsGui extends SettingsTables
 			Global.SetDParam(6, Strings.SPECSTR_LANGUAGE_START + Strings._dynlang.curr);
 			//i = GetCurRes();
 			Global.SetDParam(7, Str.STR_RES_OTHER); // i == _num_resolutions ? Str.STR_RES_OTHER : Strings.SPECSTR_RESOLUTION_START + i);
-			Global.SetDParam(8, Strings.SPECSTR_SCREENSHOT_START); // TODO Strings.SPECSTR_SCREENSHOT_START + _cur_screenshot_format);
+			//Global.SetDParam(8, Strings.SPECSTR_SCREENSHOT_START); // TODO Strings.SPECSTR_SCREENSHOT_START + _cur_screenshot_format);
+			Global.SetDParam(8, Strings.SPECSTR_SCREENSHOT_START + ScreenShot._cur_screenshot_format);
 
 			// (_fullscreen) ? SETBIT(w.click_state, 28) : CLRBIT(w.click_state, 28); // fullscreen button
 			fullScreenSwitch(w);
@@ -172,7 +174,7 @@ public class SettingsGui extends SettingsTables
 				w.SetWindowDirty();
 				return;
 			case 30: case 31: /* Setup screenshot format dropdown */
-				// TODO Window.ShowDropDownMenu(w, BuildDynamicDropdown(SPECStr.STR_SCREENSHOT_START, _num_screenshot_formats), _cur_screenshot_format, 31, 0, 0);
+				Window.ShowDropDownMenu(w, BuildDynamicDropdown(Strings.SPECSTR_SCREENSHOT_START, ScreenShot._num_screenshot_formats), ScreenShot._cur_screenshot_format, 31, 0, 0);
 				return;
 			}
 			break;
@@ -222,7 +224,7 @@ public class SettingsGui extends SettingsTables
 				// TODO if (e.index < _num_resolutions && ChangeResInGame(_resolutions[e.index][0],_resolutions[e.index][1])) w.SetWindowDirty();
 				break;
 			case 31: /* Change screenshot format */
-				// TODO SetScreenshotFormat(e.index);
+				ScreenShot.SetScreenshotFormat(e.index);
 				w.SetWindowDirty();
 				break;
 			}

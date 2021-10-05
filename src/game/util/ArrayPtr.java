@@ -154,6 +154,13 @@ public class ArrayPtr<ItemType> implements IArrayPtr
 	public ItemType[] getMem() 		{		return mem;		}
 
 	// --------------------------------------------------------------
+	// Setters
+	// --------------------------------------------------------------
+	
+	@Override
+	public void setPos(int pos) { displ = pos; }
+
+	// --------------------------------------------------------------
 	// State
 	// --------------------------------------------------------------
 
@@ -168,6 +175,7 @@ public class ArrayPtr<ItemType> implements IArrayPtr
 
 		return displ >= from.displ && displ <= to.displ;
 	}
+
 
 
 }
