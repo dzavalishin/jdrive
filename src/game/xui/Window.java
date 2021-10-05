@@ -27,7 +27,7 @@ import java.util.function.BiConsumer;
 public class Window extends WindowConstants implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	int flags4;
 	int window_class;
 	public int window_number;
@@ -99,7 +99,7 @@ public class Window extends WindowConstants implements Serializable
 
 	public static boolean _right_button_down;
 	public static boolean _right_button_clicked;
-	
+
 	/** 
 	 * Mouse is inside our OS level window.
 	 * 
@@ -456,12 +456,7 @@ public class Window extends WindowConstants implements Serializable
 	 */
 	void DispatchMouseWheelEvent(int widgeti, int wheel)
 	{
-		Widget wi1, wi2;
-
 		if (widgeti < 0) return;
-
-		wi1 = widget.get(widgeti);
-		wi2 = widget.get(widgeti + 1);
 
 		/* The listbox can only scroll if scrolling was 
 		 * done on the scrollbar itself,
@@ -471,18 +466,24 @@ public class Window extends WindowConstants implements Serializable
 		 * widget-dependent scroller but that's
 		 * not happening until someone rewrites 
 		 * the whole widget-code */
+		Widget wi1 = widget.get(widgeti);
+
 		if(wi1.type == WWT_SCROLLBAR) 
 			scrollBarDirty(this, wheel, vscroll);
 
 		if(wi1.type == WWT_SCROLL2BAR) 
 			scrollBarDirty(this, wheel, vscroll2);		
 
-		if(wi2.type == WWT_SCROLL2BAR) 
-			scrollBarDirty(this, wheel, vscroll2);
+		if( widget.size() > widgeti + 1 )
+		{
+			Widget wi2 = widget.get(widgeti + 1);
 
-		if (wi2.type == WWT_SCROLLBAR)  
-			scrollBarDirty(this, wheel, vscroll);
+			if(wi2.type == WWT_SCROLL2BAR) 
+				scrollBarDirty(this, wheel, vscroll2);
 
+			if (wi2.type == WWT_SCROLLBAR)  
+				scrollBarDirty(this, wheel, vscroll);
+		}
 	}
 
 
@@ -497,7 +498,7 @@ public class Window extends WindowConstants implements Serializable
 				w.SetWindowDirty();
 			}
 		}
-		*/
+		 */
 	}
 
 	public void SetWindowDirty()
@@ -621,7 +622,7 @@ public class Window extends WindowConstants implements Serializable
 
 		Window w = FindWindowById(wc, wn);
 		if(w == null) throw new InvalidParameterException();
-		
+
 		vp = w.viewport;
 		w.viewport = null;
 		if (vp != null) {
@@ -1227,7 +1228,7 @@ public class Window extends WindowConstants implements Serializable
 		ConsoleFactory.INSTANCE.closeConsole();
 
 		Global.gs._windows.clear(); // Kill all windows
-		
+
 		//memset(&_windows, 0, sizeof(_windows));
 		//_last_window = _windows;
 		//memset(_viewports, 0, sizeof(_viewports));
@@ -1709,7 +1710,7 @@ public class Window extends WindowConstants implements Serializable
 			Hal._cursor.fix_at = false;
 			Hal._cursor.scrollRef = null;
 			_scrolling_viewport = false;
-			*/
+			 */
 			Hal._cursor.stopViewportScrolling();
 			return true;
 		}
@@ -1722,7 +1723,7 @@ public class Window extends WindowConstants implements Serializable
 			Hal._cursor.fix_at = false;
 			Hal._cursor.scrollRef = null;
 			_scrolling_viewport = false;
-			*/
+			 */
 			Hal._cursor.stopViewportScrolling();
 			return true;
 		}
@@ -1735,9 +1736,9 @@ public class Window extends WindowConstants implements Serializable
 			dx = Hal._cursor.delta.x;
 			dy = Hal._cursor.delta.y;
 		}*/
-		
+
 		Point d = Hal._cursor.getViewportScrollStep();
-		
+
 		if (w.window_class != WC_SMALLMAP) {
 			vp = w.IsPtInWindowViewport(Hal._cursor.pos.x, Hal._cursor.pos.y);
 			if (vp == null)
@@ -2144,7 +2145,7 @@ public class Window extends WindowConstants implements Serializable
 			w = FindWindowById(WC_MAIN_TOOLBAR, 0);
 
 		if(w == null) throw new InvalidParameterException();
-		
+
 		switch (Global._patches.toolbar_pos) {
 		case 1:  w.left = (Hal._screen.width - w.width) >> 1; break;
 		case 2:  w.left = Hal._screen.width - w.width; break;
@@ -2800,7 +2801,7 @@ public class Window extends WindowConstants implements Serializable
 	{
 		ShowDropDownMenu(this, strings, selected, button, disabled_mask, hidden_mask);
 	}
-	
+
 	public static void ShowDropDownMenu(Window w, final int []strings, int selected, int button, int disabled_mask, int hidden_mask)
 	{
 		int num;
@@ -2824,7 +2825,7 @@ public class Window extends WindowConstants implements Serializable
 		//for (i = 0; strings[i] != Global.INVALID_STRING_ID; i++) {}
 		for (i = 0; i < strings.length && strings[i] != Str.INVALID_STRING; i++) 
 			;
-		
+
 		if (i == 0) return;
 
 		wi = w.widget.get(button);
@@ -2891,18 +2892,18 @@ public class Window extends WindowConstants implements Serializable
 	public static void deleteMain()
 	{
 		// TODO delete all?
-		
+
 		Window w = FindWindowById(WC_MAIN_WINDOW, 0);
 		if( w != null ) w.DeleteWindow();
-		
+
 		w = FindWindowById(Window.WC_MAIN_TOOLBAR, 0);
 		if( w != null ) w.DeleteWindow();
 
 		w = FindWindowById(Window.WC_SAVELOAD, 0);
 		if( w != null ) w.DeleteWindow();
-		
+
 	}
-	
+
 	public void setSize(int w, int h) {
 		width = w;
 		height = h;		
@@ -2914,7 +2915,7 @@ public class Window extends WindowConstants implements Serializable
 	public int getTop() { return top; }
 
 	public void setHeight(int i) { height = i; }
-	
+
 	public Widget getWidget(int i) { return widget.get(i); }
 	public int getWindowClass() { return window_class; }
 
@@ -2976,8 +2977,8 @@ public class Window extends WindowConstants implements Serializable
 		Global.gs._saved_scrollpos_zoom = w.viewport.zoom;
 		//}
 	}
-	
-	
+
+
 	public void setTop(int top) {
 		this.top = top;
 	}
@@ -3005,13 +3006,13 @@ public class Window extends WindowConstants implements Serializable
 
 
 
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
 	private static final int  scrollspeed = 2;
 	private static final int  scroll_edge = 20;
 
@@ -3041,10 +3042,10 @@ public class Window extends WindowConstants implements Serializable
 			if (Global._patches.autoscroll && Global._game_mode != GameModes.GM_MENU && _mouse_inside) 
 			{
 				w = FindWindowFromPt(x, y);
-				
+
 				if (w == null || 0 != (w.flags4 & WF_DISABLE_VP_SCROLL) ) 
 					return;
-				
+
 				vp = w.IsPtInWindowViewport(x, y);
 				if (vp != null) {
 					vp2_d vpd = w.as_vp2_d();
@@ -3085,7 +3086,7 @@ public class Window extends WindowConstants implements Serializable
 			if (Global._game_mode == GameModes.GM_MENU) return;
 
 			//Global.debug("in vp");
-			
+
 			// only allow zooming in-out in main window, or in viewports
 			if (mousewheel != 0 &&
 					(0 == (w.flags4 & WF_DISABLE_VP_SCROLL)) && (
@@ -3119,7 +3120,7 @@ public class Window extends WindowConstants implements Serializable
 					_scrolling_viewport = true;
 					//Hal._cursor.fix_at = true;
 					Hal._cursor.scrollRef = new Point( Hal._cursor.pos );
-					*/
+					 */
 					Hal._cursor.startViewportScrolling();
 				}
 			}
@@ -3195,8 +3196,8 @@ public class Window extends WindowConstants implements Serializable
 		_popup_menu_active = true;		
 	}
 
-	
-	
-	
+
+
+
 } 
 

@@ -34,7 +34,7 @@ public class Player implements Serializable
 {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	int name_2;
 	int name_1;
 
@@ -97,7 +97,7 @@ public class Player implements Serializable
 		old_economy = new PlayerEconomyEntry[24];
 		for(int i = 0; i < old_economy.length; i++ )
 			old_economy[i] = new PlayerEconomyEntry();
-		
+
 		engine_replacement = new int[Global.TOTAL_NUM_ENGINES];
 
 
@@ -110,11 +110,11 @@ public class Player implements Serializable
 		money64 = engine_renew_money = president_name_2 = face = 0;
 
 		is_ai = engine_renew = renew_keep_length = false;
-		
+
 		cur_economy = new PlayerEconomyEntry();
 	}
 
-	
+
 	public boolean isActive() { return is_active; }
 	public boolean isAi() { return is_ai; }
 	public PlayerID getIndex() { return index; }
@@ -277,7 +277,7 @@ public class Player implements Serializable
 
 			//skip_mouth:;
 		} while(false); // goto target
-		 
+
 
 		// draw the hair 
 		{
@@ -1155,54 +1155,54 @@ public class Player implements Serializable
 			Str.STR_0218_MOGUL,
 			Str.STR_0219_TYCOON_OF_THE_CENTURY,
 	};
-	
+
 
 	//static StringID EndGameGetPerformanceTitleFromValue(int value)
 	public static int EndGameGetPerformanceTitleFromValue(int value)
 	{
 
 		long lvalue = BitOps.minu(value, 1000) >>> 6;
-				if (lvalue >= _endgame_perf_titles.length) 
-					lvalue = _endgame_perf_titles.length - 1L;
+					if (lvalue >= _endgame_perf_titles.length) 
+						lvalue = _endgame_perf_titles.length - 1L;
 
-				return _endgame_perf_titles[(int) lvalue];
+					return _endgame_perf_titles[(int) lvalue];
 	}
 
 
 	// Save the highscore for the Player 
 	static int SaveHighScoreValue(final Player p)
 	{
-		
-	HighScore[] hs = Global._highscore_table[GameOptions._opt.diff_level];
-	int i;
-	int score = p.old_economy[0].performance_history;
 
-	// Exclude cheaters from the honour of being in the highscore table 
-	if (Cheat.CheatHasBeenUsed())
-		return -1;
+		HighScore[] hs = Global._highscore_table[GameOptions._opt.diff_level];
+		int i;
+		int score = p.old_economy[0].performance_history;
 
-	for (i = 0; i < hs.length; i++) 
-	{
-		// You are in the TOP5. Move all values one down and save us there 
-		if (hs[i].score <= score) {
-			//char buf[sizeof(hs[i].company)];
+		// Exclude cheaters from the honour of being in the highscore table 
+		if (Cheat.CheatHasBeenUsed())
+			return -1;
 
-			// move all elements one down starting from the replaced one
-			//memmove(&hs[i + 1], &hs[i], sizeof(HighScore) * (lengthof(_highscore_table[0]) - i - 1));
-			System.arraycopy(hs, i, hs, i+1, hs.length - i - 1);
-			
-			Global.SetDParam(0, p.president_name_1);
-			Global.SetDParam(1, p.president_name_2);
-			Global.SetDParam(2, p.name_1);
-			Global.SetDParam(3, p.name_2);
-			String buf = Strings.GetString(Str.STR_HIGHSCORE_NAME); // get manager/company name string
-			hs[i].company = buf;
-			hs[i].score = score;
-			hs[i].title = Strings.GetString(EndGameGetPerformanceTitleFromValue(score));
-			return i;
+		for (i = 0; i < hs.length; i++) 
+		{
+			// You are in the TOP5. Move all values one down and save us there 
+			if (hs[i].score <= score) {
+				//char buf[sizeof(hs[i].company)];
+
+				// move all elements one down starting from the replaced one
+				//memmove(&hs[i + 1], &hs[i], sizeof(HighScore) * (lengthof(_highscore_table[0]) - i - 1));
+				System.arraycopy(hs, i, hs, i+1, hs.length - i - 1);
+
+				Global.SetDParam(0, p.president_name_1);
+				Global.SetDParam(1, p.president_name_2);
+				Global.SetDParam(2, p.name_1);
+				Global.SetDParam(3, p.name_2);
+				String buf = Strings.GetString(Str.STR_HIGHSCORE_NAME); // get manager/company name string
+				hs[i].company = buf;
+				hs[i].score = score;
+				hs[i].title = Strings.GetString(EndGameGetPerformanceTitleFromValue(score));
+				return i;
+			}
 		}
-	}
-		
+
 		return -1; // too bad; we did not make it into the top5
 	}
 

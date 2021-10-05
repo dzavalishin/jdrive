@@ -17,6 +17,7 @@ import game.enums.Owner;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.net.Net;
+import game.struct.HighScore;
 import game.util.BitOps;
 import game.util.Strings;
 
@@ -854,7 +855,7 @@ public class PlayerGui
 	{
 		switch (e.event) {
 		case WE_PAINT: {
-			// TODO final HighScore hs = _highscore_table[w.window_number];
+			final HighScore [] hs = Global._highscore_table[w.window_number];
 			int x, y;
 			//byte i;
 
@@ -871,20 +872,21 @@ public class PlayerGui
 			Global.SetDParam(1, w.window_number + Str.STR_6801_EASY);
 			Gfx.DrawStringMultiCenter(x + (640 / 2), y + 62, !Global._networking ? Str.STR_0211_TOP_COMPANIES_WHO_REACHED : Str.STR_TOP_COMPANIES_NETWORK_GAME, 500);
 
-			/* TODO Draw Highscore peepz 
-			for (i = 0; i < lengthof(_highscore_table[0]); i++) {
+			/* TODO Draw Highscore peepz */ 
+			for (int i = 0; i < hs.length; i++) {
 				Global.SetDParam(0, i + 1);
 				Gfx.DrawString(x + 40, y + 140 + (i * 55), Str.STR_0212, 0x10);
 
-				if (hs[i].company[0] != '\0') {
+				if (!hs[i].company.isBlank()) {
 					int colour = (w.as_highscore_d().rank == (int)i) ? 0x3 : 0x10; // draw new highscore in red
 
 					Gfx.DoDrawString(hs[i].company, x + 71, y + 140 + (i * 55), colour);
-					Global.SetDParam(0, hs[i].title);
+					//Global.SetDParam(0, hs[i].title);
+					Strings.SetDParamStr(0, hs[i].title);
 					Global.SetDParam(1, hs[i].score);
 					Gfx.DrawString(x + 71, y + 160 + (i * 55), Str.STR_HIGHSCORE_STATS, colour);
 				}
-			}*/
+			}/* */
 		} break;
 
 		case WE_CLICK: /* Onclick to close window, and in destroy event handle the rest */

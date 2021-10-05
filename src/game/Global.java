@@ -10,6 +10,7 @@ import game.struct.*;
 import game.tables.CargoConst;
 import game.util.Paths;
 import game.util.Prices;
+import game.util.Strings;
 import game.xui.MiscGui;
 
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class Global
 	public static final boolean debugEnabled = true;
 
 	public static GameState gs = new GameState(); 
-	static HighScore [][] _highscore_table = new HighScore[5][5]; // 4 difficulty-settings (+ network); top 5
+	public static HighScore [][] _highscore_table = new HighScore[5][5]; // 4 difficulty-settings (+ network); top 5
 	
 	public static final int MAX_PLAYERS = 8;
 	public static final int MAX_SCREEN_WIDTH = 2048;
@@ -432,6 +433,11 @@ public class Global
 		_decode_parameters[n + 1] = (int) (v >> 32);
 	}
 
+	public static void SetDParamStr(int n, final String str)
+	{
+		Strings.SetDParamStr(n, str);
+	}
+	
 	static Object GetDParam(int n)
 	{
 		//assert(n < lengthof(_decode_parameters));
