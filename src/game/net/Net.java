@@ -632,7 +632,7 @@ public class Net implements NetDefs, NetClient
 		cs.socket = null;
 		cs.status = ClientStatus.INACTIVE;
 		cs.index = NETWORK_EMPTY_INDEX;
-		ci.client_index = NETWORK_EMPTY_INDEX;
+		if(ci != null) ci.client_index = NETWORK_EMPTY_INDEX;
 	}
 
 	// A client wants to connect to a server

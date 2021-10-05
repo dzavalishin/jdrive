@@ -459,42 +459,6 @@ public class ConsoleCmds extends DefaultConsole
 	}
 
 
-	static boolean ConNetworkConnect(String ... argv)
-	{
-		String [] ip = {null};
-		String [] port = {null};
-		String [] player = {null};
-		int rport;
-
-		if (argv.length == 0) {
-			IConsoleHelp("Connect to a remote OTTD server and join the game. Usage: 'connect <ip>'");
-			IConsoleHelp("IP can contain port and player: 'IP#Player:Port', eg: 'server.ottd.org#2:443'");
-			return true;
-		}
-
-		if (argv.length < 2) return false;
-
-		if (Global._networking) // We are in network-mode, first close it!
-			Net.NetworkDisconnect();
-
-		rport = Net.NETWORK_DEFAULT_PORT;
-
-		NetGui.ParseConnectionString(player, port, ip, argv[1]);
-
-		IConsolePrintF(_icolour_def, "Connecting to %s...", ip[0]);
-		if (player != null) {
-			Global._network_playas = Integer.parseInt(player[0]);
-			IConsolePrintF(_icolour_def, "    player-no: %s", player[0]);
-		}
-		if (port != null) {
-			rport = Integer.parseInt(port[0]);
-			IConsolePrintF(_icolour_def, "    port: %s", port[0]);
-		}
-
-		Net.NetworkClientConnectGame(ip[0], rport);
-
-		return true;
-	}
 
 	//#endif /* ENABLE_NETWORK */
 
