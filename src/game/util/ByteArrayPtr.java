@@ -172,6 +172,13 @@ public class ByteArrayPtr implements IArrayPtr
 	@Override
 	public int getPos() 			{		return displ;	}
 
+	// --------------------------------------------------------------
+	// Setters
+	// --------------------------------------------------------------
+	
+	@Override
+	public void setPos(int i) { displ = i; }
+	
 
 	// --------------------------------------------------------------
 	// State

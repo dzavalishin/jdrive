@@ -238,8 +238,8 @@ FileInputStream fis = new FileInputStream("settings.xml");
 
 	static void LoadFromHighScore()
 	{
-		// If can't load 
-		//Global._highscore_table = new HighScore[5][5];
+		// If can't load - clear 
+		Global._highscore_table = new HighScore[5][5];
 
 		File fn = new File( Global._path.personal_dir, HISCORE_FILE_NAME );
 

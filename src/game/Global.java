@@ -10,6 +10,7 @@ import game.struct.*;
 import game.tables.CargoConst;
 import game.util.Paths;
 import game.util.Prices;
+import game.util.Strings;
 import game.xui.MiscGui;
 
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class Global
 	public static final boolean debugEnabled = true;
 
 	public static GameState gs = new GameState(); 
-	static HighScore [][] _highscore_table = new HighScore[5][5]; // 4 difficulty-settings (+ network); top 5
+	public static HighScore [][] _highscore_table = new HighScore[5][5]; // 4 difficulty-settings (+ network); top 5
 	
 	public static final int MAX_PLAYERS = 8;
 	public static final int MAX_SCREEN_WIDTH = 2048;
@@ -104,7 +105,6 @@ public class Global
 	public static boolean _rightclick_emulate;
 
 	public static int _display_hz;
-	//public static int _fullscreen_bpp;
 
 
 
@@ -136,12 +136,6 @@ public class Global
 	public static final BackuppedOrders [] _backup_orders_data = { new BackuppedOrders() };
 
 	/* Access Vehicle Data */
-	//#include "table/engines.h"
-	//public static  finalEngineInfo orig_engine_info[TOTAL_NUM_ENGINES];
-	//public static  finalRailVehicleInfo orig_rail_vehicle_info[NUM_TRAIN_ENGINES];
-	//public static  finalShipVehicleInfo orig_ship_vehicle_info[NUM_SHIP_ENGINES];
-	//public static  finalAircraftVehicleInfo orig_aircraft_vehicle_info[NUM_AIRCRAFT_ENGINES];
-	//public static  finalRoadVehicleInfo orig_road_vehicle_info[NUM_ROAD_ENGINES];
 
 	public static final EngineInfo []			_engine_info = new EngineInfo[TOTAL_NUM_ENGINES];
 	public static final RailVehicleInfo []		_rail_vehicle_info = new RailVehicleInfo[NUM_TRAIN_ENGINES];
@@ -180,7 +174,6 @@ public class Global
 	public static final int MAX_YEAR_END = 170;
 
 
-	//public static int get_date() { return _date; }
 	
 	public static int _tick_counter;
 	public static int _frame_counter;
@@ -219,7 +212,6 @@ public class Global
 	public static int _cleared_town_rating;
 	public static int _caret_timer;
 	public static Vehicle _place_clicked_vehicle;
-	//public static final int _num_resolutions = 1; 
 	public static int _make_screenshot;
 	
 	// Available aircraft types
@@ -319,7 +311,7 @@ public class Global
 
 		printf( "dbg: %s", buf);
 		ConsoleFactory.INSTANCE.getCurrentConsole().ifPresent(c -> {
-			c.debug(s);
+			c.debug(buf);
 		});
 	}
 
@@ -432,6 +424,11 @@ public class Global
 		_decode_parameters[n + 1] = (int) (v >> 32);
 	}
 
+	public static void SetDParamStr(int n, final String str)
+	{
+		Strings.SetDParamStr(n, str);
+	}
+	
 	static Object GetDParam(int n)
 	{
 		//assert(n < lengthof(_decode_parameters));

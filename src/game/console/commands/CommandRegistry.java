@@ -33,6 +33,7 @@ public class CommandRegistry {
         put(new BanCommand());
         put(new NetworkStatusCommand());
         put(new NetworkRemoteConsoleCommand());
+        put(new NetworkConnectCommand());
 
         if (Global.debugEnabled)
             put(new ResetTileCommand());

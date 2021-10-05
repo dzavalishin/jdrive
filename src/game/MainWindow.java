@@ -23,6 +23,7 @@ import javax.swing.KeyStroke;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 
+import game.util.Colour;
 import game.xui.Gfx;
 import game.xui.Window;
 
@@ -462,6 +463,7 @@ public class MainWindow extends JPanel implements ActionListener
 	private static IndexColorModel icm = null; 
 	public void makePalette()
 	{
+		/*
 		byte[] rp = new byte[PALETTE_SIZE];
 		byte[] gp = new byte[PALETTE_SIZE];
 		byte[] bp = new byte[PALETTE_SIZE];
@@ -478,9 +480,34 @@ public class MainWindow extends JPanel implements ActionListener
 		}
 
 		icm = new IndexColorModel(8, PALETTE_SIZE, rp, gp, bp, ap);
+		*/
+		if(Gfx._cur_palette == null || Gfx._cur_palette[0] == null) return;
+		icm = makePalette(Gfx._cur_palette);
 		Gfx._pal_last_dirty = -1;
 	}
 
+	public static IndexColorModel makePalette(Colour [] palette)
+	{
+		int size = palette.length;
+		
+		byte[] rp = new byte[size];
+		byte[] gp = new byte[size];
+		byte[] bp = new byte[size];
+		byte[] ap = new byte[size];
+
+		if(palette == null || palette[0] == null) return null;
+
+		for(int i = 0; i < size; i++)
+		{
+			ap[i] = (byte) 0xFF;
+			rp[i] = palette[i].r;
+			gp[i] = palette[i].g;
+			bp[i] = palette[i].b;
+		}
+
+		return new IndexColorModel(8, PALETTE_SIZE, rp, gp, bp, ap);
+	}
+	
 
 	private void processMouse(int x, int y) 
 	{

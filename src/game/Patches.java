@@ -76,7 +76,7 @@ public class Patches
 	public BooleanPatchVariable ai_disable_veh_aircraft = new BooleanPatchVariable();		// disable types for AI
 	public BooleanPatchVariable ai_disable_veh_ship = new BooleanPatchVariable();		// disable types for AI
 	public int starting_date;		// starting date
-	public int ending_date;		// end of the game (just show highscore)
+	public int ending_date = 2051;		// end of the game (just show highscore)
 	public int colored_news_date = 1980; // when does newspaper become colored?
 
 	public boolean keep_all_autosave;		// name the autosave in a different way.

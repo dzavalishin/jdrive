@@ -24,5 +24,11 @@ public interface IArrayPtr {
 	 */
 	public int getPos();
 	public int getDisplacement(); // same as above	
+
+	/**
+	 * Set current position.
+	 * @param pos Position of pointer in base array.
+	 */
+	void setPos(int pos);
 	
 }
