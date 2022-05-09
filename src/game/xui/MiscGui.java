@@ -981,6 +981,7 @@ public class MiscGui {
 		w = Window.AllocateWindowDesc(_query_string_desc);
 
 		_edit_str_buf = Strings.GetString(str);
+		if(_edit_str_buf == null) _edit_str_buf = ""; // TODO why null?
 		//_edit_str_buf[realmaxlen] = '\0';
 
 		if(0 != (maxlen & 0x1000)) {
