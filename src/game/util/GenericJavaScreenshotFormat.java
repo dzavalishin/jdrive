@@ -80,7 +80,7 @@ public abstract class GenericJavaScreenshotFormat extends ScreenshotFormat
 
 	}
 	
-	/* fails
+	/* TODO fails - in Russian locale file name is in Russian, but encoding is wrong
 	// TODO Cyrillic only. Can we support other languages? Locale?
 	public String convert(String s) throws UnsupportedEncodingException {
 	    //final byte[] bytes = s.getBytes("Windows-1251");
@@ -111,7 +111,6 @@ public abstract class GenericJavaScreenshotFormat extends ScreenshotFormat
 	}
 
 	/*private void writeRow(Pixel buff, int i) {
-		// TODO Auto-generated method stub
 		
 	}*/
 
