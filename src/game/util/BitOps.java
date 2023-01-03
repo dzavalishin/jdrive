@@ -481,7 +481,19 @@ public class BitOps {
         }
 
         return builder.toString();
-    }	
+    }
+
+	public static int inc_sat_RET(int p) { // TODO  test
+		int b = (p + 1); 
+		if (b != 0) p = b; 
+		return p; 
+	}
+
+	public static byte byte_inc_sat_RET(byte p) { // TODO test
+		byte b = (byte) (p + 1); 
+		if (b != 0) p = b; 
+		return p; 
+	}	
 	
 	/*
 	static  int BIGMULSS(int a, int b, int shift) {
