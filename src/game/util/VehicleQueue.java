@@ -26,9 +26,9 @@ public abstract class VehicleQueue implements Serializable
 	public abstract boolean	push(Vehicle item);
 	public abstract Vehicle	pop();
 	public abstract Vehicle	getTop();
-	public abstract void		clean();
-	public abstract void		clear();
-	public abstract void		del(Vehicle item);
+	public abstract void	clean();
+	public abstract void	clear();
+	public abstract void	del(Vehicle item);
 	public abstract int		getPos(Vehicle item);
 
 	protected VehicleQueue() {
@@ -121,7 +121,7 @@ class VQImpl extends VehicleQueue implements Serializable
 			dirty = false;
 			v = oldItem.data;
 			v.queue_item = null;
-			//free(oldItem);
+
 			return v;
 		}
 
@@ -130,10 +130,7 @@ class VQImpl extends VehicleQueue implements Serializable
 			bottom.above = null;
 
 		v = oldItem.data;
-
 		v.queue_item = null;
-
-		//free(oldItem);
 
 		offset++;
 		size--;
@@ -224,8 +221,6 @@ class VQImpl extends VehicleQueue implements Serializable
 			below.above = above;
 
 		v.queue_item = null;
-
-		//free(current);
 
 		size--;
 		dirty = true;
