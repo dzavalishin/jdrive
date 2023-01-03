@@ -16,7 +16,7 @@ public class PatchEntry {
 	public final int step;			// step for spinbox
 
 	//PatchButtonClick* click_proc;	// callback procedure
-	private Object proc; // Unused?
+	private Consumer<PatchVariable> proc; // Unused?
 
 	public PatchEntry(int flags, int str, String name, PatchVariable var, 
 			int min, int max, int step, Consumer<PatchVariable> proc) 
@@ -60,8 +60,7 @@ public class PatchEntry {
 	}
 
 	public void onClick() {
-		// TODO callback
-		// if (proc != null) proc.accept(var);
+		if (proc != null) proc.accept(var);
 	}
 
 	public boolean isBoolean() {		
