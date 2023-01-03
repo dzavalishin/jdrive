@@ -10,7 +10,7 @@ import game.ids.StationID;
 public class mAirport 
 {
 
-	final static float PI = 3.141f; // duuuuuuuuuuhhhhhh
+	//final static float PI = 3.141f; // duuuuuuuuuuhhhhhh
 	final static int INT_AIRPORT_YEAR = 1990;
 	final static int MA_MIN_POPULATION = 15000;
 	final static int MA_MAX_DISTANCE_FROM_TOWN = 15;
@@ -82,43 +82,10 @@ public class mAirport
 	//converts degrees to radians
 	static float D2R(int degrees)
 	{
-		return (float) (degrees * (PI / 180.0));
+		//return (float) (degrees * (PI / 180.0));
+		return (float) (degrees * (Math.PI / 180.0));
 	}
-	/*
-	//calculates tax
-	void MA_Tax(int income, Vehicle v)
-	{
-		int old_expenses_type = Player._yearly_expenses_type;
 
-		if(Global._patches.allow_municipal_airports) {
-			float tax = 0;
-			tax = (income / 100.0) * 20; //Global._patches.municipal_airports_tax;
-
-			ShowCostOrIncomeAnimation(v.x_pos ,v.y_pos ,v.z_pos - 13, tax);
-
-			switch(v.type) {
-
-			case Vehicle.VEH_Aircraft:	
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_AIRCRAFT_RUN);
-				break;
-			case Vehicle.VEH_Train:		
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_RUN);
-				break;
-			case Vehicle.VEH_Ship:		
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);				
-				break;
-			case Vehicle.VEH_Road:		
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVehicle.VEH_RUN);				
-				break;
-
-			}
-			
-			SubtractMoneyFromPlayer(tax);
-			Player._yearly_expenses_type = old_expenses_type;
-		}
-		return;
-	}
-	*/
 	//checks to see if we have used our quota at any municipal station;
 	static boolean MA_WithinVehicleQuota(Station st)
 	{
