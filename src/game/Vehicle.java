@@ -146,7 +146,7 @@ public class Vehicle implements IPoolItem
 	int value;
 
 	// Current position in a vehicle queue - can only belong to one queue at a time
-	public VQueueItem queue_item; // TODO VehicleQueue accesses me, why?
+	public VQueueItem queue_item;
 
 
 	// TODO temp we create all of them, redo
@@ -154,7 +154,7 @@ public class Vehicle implements IPoolItem
 	public VehicleAir air = new VehicleAir();
 	public VehicleRoad road = new VehicleRoad();
 	public VehicleSpecial special = new VehicleSpecial();
-	public VehicleDisaster disaster; // TODO create me in disaster 
+	public VehicleDisaster disaster;  
 	public VehicleShip ship = new VehicleShip();
 
 
