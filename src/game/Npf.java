@@ -125,7 +125,7 @@ public class Npf {
 	/* The cost of each trackdir. A diagonal piece is the full NPF_TILE_LENGTH,
 	 * the shorter piece is sqrt(2)/2*NPF_TILE_LENGTH =~ 0.7071
 	 */
-	static final int NPF_STRAIGHT_LENGTH = NPF_TILE_LENGTH * Map.STRAIGHT_TRACK_LENGTH;
+	static final int NPF_STRAIGHT_LENGTH = (int) (NPF_TILE_LENGTH * Map.STRAIGHT_TRACK_LENGTH);
 
 	//static final int _trackdir_length[TRACKDIR_END] = 
 	static final int _trackdir_length[] = 
@@ -155,7 +155,7 @@ public class Npf {
 
 		/* Don't factor out NPF_TILE_LENGTH below, this will round values and lose
 		 * precision */
-		return diagTracks * NPF_TILE_LENGTH + straightTracks * NPF_TILE_LENGTH * Map.STRAIGHT_TRACK_LENGTH;
+		return diagTracks * NPF_TILE_LENGTH + (int) (straightTracks * NPF_TILE_LENGTH * Map.STRAIGHT_TRACK_LENGTH);
 	}
 
 	/**
