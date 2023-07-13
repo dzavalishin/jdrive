@@ -6,13 +6,17 @@ import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.enums.StationClassID;
 import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
+import game.struct.DrawTileSeqStruct;
+import game.struct.DrawTileSprites;
 import game.struct.Point;
 import game.util.BitOps;
+import game.xui.Gfx;
 import game.xui.ViewPort;
 
 public class WayPoint implements IPoolItem
@@ -252,18 +256,16 @@ public class WayPoint implements IPoolItem
 	 */
 	static void UpdateAllWaypointCustomGraphics()
 	{
-		//WayPoint wp;
-
 		//for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null)
-		/* TODO UpdateAllWaypointCustomGraphics
-		_waypoint_pool.forEach((ix,wp) ->
+
+		WayPoint.forEach( wp ->
 		{
 			int i;
 
 			if (wp.grfid != 0) 
 			{
-				for (i = 0; i < GetNumCustomStations(STAT_CLASS_WAYP); i++) {
-					final StationSpec spec = GetCustomStation(STAT_CLASS_WAYP, i);
+				for (i = 0; i < StationClass.GetNumCustomStations(StationClassID.STAT_CLASS_WAYP); i++) {
+					final StationSpec spec = StationClass.GetCustomStation(StationClassID.STAT_CLASS_WAYP, i);
 					if (spec != null && spec.grfid == wp.grfid && spec.localidx == wp.localidx) {
 						wp.stat_id =  i;
 						break;
@@ -271,7 +273,7 @@ public class WayPoint implements IPoolItem
 				}
 			}
 		});
-		*/
+		/* */
 	}
 
 	/** Convert existing rail to WayPoint. Eg build a WayPoint station over
@@ -293,7 +295,7 @@ public class WayPoint implements IPoolItem
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
 		/* if custom gfx are used, make sure it is within bounds */
-		// TODO if (p1 >= GetNumCustomStations(STAT_CLASS_WAYP)) return Cmd.CMD_ERROR;
+		if (p1 >= StationClass.GetNumCustomStations(StationClassID.STAT_CLASS_WAYP)) return Cmd.CMD_ERROR;
 
 		//if (!tile.IsTileType(TileTypes.MP_RAILWAY) || ((dir = 0, tile.getMap().m5 != 1) && (dir = 1, tile.getMap().m5 != 2)))
 		//	return Cmd.return_cmd_error(Str.STR_1005_NO_SUITABLE_RAILROAD_TRACK);
@@ -332,14 +334,13 @@ public class WayPoint implements IPoolItem
 		}
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			final StationSpec spec = null;
+			StationSpec spec = null;
 			boolean reserved = Pbs.PBSTileReserved(tile) != 0;
 			Landscape.ModifyTile(tile, TileTypes.MP_NOCHANGE,
 					TileTypes.MP_MAP2 | TileTypes.MP_MAP5, wp.index, RAIL_TYPE_WAYPOINT | dir);
 
-			// TODO GetCustomStation
-			//if (BitOps.GB(p1, 0, 8) < Station.GetNumCustomStations(StationClassID.STAT_CLASS_WAYP))
-				//spec = Station.GetCustomStation(StationClassID.STAT_CLASS_WAYP, BitOps.GB(p1, 0, 8));
+			if (BitOps.GB(p1, 0, 8) < StationClass.GetNumCustomStations(StationClassID.STAT_CLASS_WAYP))
+				spec = StationClass.GetCustomStation(StationClassID.STAT_CLASS_WAYP, BitOps.GB(p1, 0, 8));
 
 			if (spec != null) {
 				//SETBIT(Global._m[tile.getTile()].m3, 4);
@@ -515,7 +516,7 @@ public class WayPoint implements IPoolItem
 	}
 
 	/* This hacks together some dummy one-shot Station structure for a WayPoint. */
-	Station ComposeWaypointStation(TileIndex tile)
+	static Station ComposeWaypointStation(TileIndex tile)
 	{
 		WayPoint wp = WayPoint.GetWaypointByTile(tile);
 		Station stat = Station.AllocateStation();//new Station();
@@ -530,9 +531,7 @@ public class WayPoint implements IPoolItem
 		return stat;
 	}
 
-	//extern uint16 _custom_sprites_base;
 
-	// TODO fixme
 	/* Draw a WayPoint */
 	public static void DrawWaypointSprite(int x, int y, int stat_id, /* RailType */ int railtype)
 	{
@@ -540,7 +539,7 @@ public class WayPoint implements IPoolItem
 		//int relocation;
 		//final DrawTileSprites cust;
 		//final DrawTileSeqStruct seq;
-		//final RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
+		final RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
 		int ormod, img;
 
 		ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player));
@@ -548,23 +547,22 @@ public class WayPoint implements IPoolItem
 		x += 33;
 		y += 17;
 
-		// TODO stat = GetCustomStation(STAT_CLASS_WAYP, stat_id);
-		//if (stat == null) {
-			// stat is null for default waypoints and when WayPoint graphics are
-			// not loaded.
+		StationSpec stat = StationClass.GetCustomStation(StationClassID.STAT_CLASS_WAYP, stat_id);
+		if (stat == null) {
+			// stat is null for default waypoints and when WayPoint graphics are not loaded.
 			Rail.DrawDefaultWaypointSprite(x, y, railtype);
 			return;
-		//}
-		/*
-		relocation = GetCustomStationRelocation(stat, null, 1);
+		}
+
+		int relocation = Station.GetCustomStationRelocation(stat, null, 1);
 		// emulate station tile - open with building
 		// add 1 to get the other direction
-		cust = stat.renderdata[2];
+		DrawTileSprites cust = stat.renderdata[2];
 
-		img = cust.ground_sprite.id;
-		img += (img < _custom_sprites_base) ? rti.total_offset : railtype;
+		img = cust.ground_sprite;
+		img += (img < GRFFile._custom_sprites_base) ? rti.total_offset.id : railtype;
 
-		if (img & PALETTE_MODIFIER_COLOR) img = (img & Sprite.SPRITE_MASK);
+		if(0 != (img & Sprite.PALETTE_MODIFIER_COLOR)) img = (img & Sprite.SPRITE_MASK);
 		Gfx.DrawSprite(img, x, y);
 
 		//foreach_draw_tile_seq(seq, cust.seq) 
@@ -578,30 +576,10 @@ public class WayPoint implements IPoolItem
 			int image = seq.image + relocation;
 			Gfx.DrawSprite((image & Sprite.SPRITE_MASK) | ormod, x + pt.x, y + pt.y);
 		}
-		*/
+		
 	}
 	
 	
-	/* Fix savegames which stored waypoints in their old format * /
-void FixOldWaypoints()
-{
-	WayPoint *wp;
-
-	// Convert the old 'town_or_string', to 'string' / 'town' / 'town_cn' * /
-	for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
-    {
-		if (wp.xy == 0)
-			continue;
-
-		wp.town_index = ClosestTownFromTile(wp.xy, (int)-1).index;
-		wp.town_cn = 0;
-		if (wp.string & 0xC000) {
-			wp.town_cn = wp.string & 0x3F;
-			wp.string = STR_NULL;
-		}
-	}
-}
-	 */
 
 	static void InitializeWaypoints()
 	{
@@ -642,7 +620,7 @@ void FixOldWaypoints()
 		
 		@Override
 		void load_proc() {
-			// TODO Auto-generated method stub
+
 			
 		}
 	};

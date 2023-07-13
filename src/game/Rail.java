@@ -5,10 +5,13 @@ import java.util.function.Consumer;
 
 import game.TrackPathFinder.TPFHashEnt;
 import game.enums.Owner;
+import game.enums.StationClassID;
 import game.enums.TileTypes;
 import game.enums.TransportType;
 import game.ids.PlayerID;
 import game.ifaces.TileTypeProcs;
+import game.struct.DrawTileSeqStruct;
+import game.struct.DrawTileSprites;
 import game.struct.FindLengthOfTunnelResult;
 import game.struct.Point;
 import game.struct.TileDesc;
@@ -206,7 +209,6 @@ public class Rail extends RailTables {
 	 * that trackdir.
 	 */
 	public static  /*DiagDirection*/ int  TrackdirToExitdir(/*Trackdir*/ int trackdir) {
-		//extern final DiagDirection _trackdir_to_exitdir[TRACKDIR_END];
 		return _trackdir_to_exitdir[trackdir];
 	}
 
@@ -820,7 +822,7 @@ public class Rail extends RailTables {
 			if (GetTrackBits(tile)  == 0) {
 				/* The tile has no tracks left, it is no longer a rail tile */
 				Landscape.DoClearSquare(tile);
-				/* XXX: This is an optimisation, right? Is it really worth the ugly goto? */
+
 				//goto skip_mark_dirty;
 				SetSignalsOnBothDir(tile, track);
 
@@ -1531,7 +1533,7 @@ public class Rail extends RailTables {
 			if (BitOps.GB(tile.getMap().m3, 4, 4) == 0) 
 			{
 				tile.getMap().m2 = BitOps.RETSB(tile.getMap().m2, 4, 4, 0);
-				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 6, 2, RAIL_TYPE_NORMAL >> 6); // XXX >> because the constant is meant for direct application, not use with SB
+				tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 6, 2, RAIL_TYPE_NORMAL >> 6); // >> because the constant is meant for direct application, not use with SB
 				tile.getMap().m4 = BitOps.RETCLRBIT(tile.getMap().m4, 3); // remove any possible semaphores
 			}
 
@@ -2053,13 +2055,13 @@ public class Rail extends RailTables {
 			if (WayPoint.IsRailWaypoint(ti.tile) && BitOps.HASBIT(ti.tile.getMap().m3, 4)) {
 				// look for customization
 				int stat_id = WayPoint.GetWaypointByTile(ti.tile).stat_id;
-				//final StationSpec stat = null; // TODO Station.GetCustomStation(STAT_CLASS_WAYP, stat_id);
+				final StationSpec stat =  StationClass.GetCustomStation(StationClassID.STAT_CLASS_WAYP, stat_id);
 
-				/*if (stat != null) {
-					final DrawTileSeqStruct seq;
+				if (stat != null) {
+					//final DrawTileSeqStruct seq;
 					// emulate station tile - open with building
 					final DrawTileSprites cust = stat.renderdata[2 + (m5 & 0x1)];
-					int relocation = GetCustomStationRelocation(stat, ComposeWaypointStation(ti.tile), 0);
+					int relocation = Station.GetCustomStationRelocation(stat, WayPoint.ComposeWaypointStation(ti.tile), 0);
 
 					//* We don't touch the 0x8000 bit. In all this
 					// * waypoint code, it is used to indicate that
@@ -2071,21 +2073,25 @@ public class Rail extends RailTables {
 					// * up to the GRF file to decide that. *
 
 					int simage = cust.ground_sprite;
-					simage += (simage < _custom_sprites_base) ? rti.total_offset : GetRailType(ti.tile);
+					simage += (simage < GRFFile._custom_sprites_base) ? rti.total_offset.id : GetRailType(ti.tile);
 
 					ViewPort.DrawGroundSprite(simage);
 
 					// #define foreach_draw_tile_seq(idx, list) for (idx = list; ((byte) idx->delta_x) != 0x80; idx++)
 					//foreach_draw_tile_seq(seq, cust.seq)
-					for (seq = cust.seq; ((byte) seq.delta_x) != 0x80; seq++)
+					//for (seq = cust.seq; ((byte) seq.delta_x) != 0x80; seq++)
+					for (DrawTileSeqStruct seq : cust.seq)
 					{
+						if( (0xFF & seq.delta_x) == 0x80 )
+							break;
+								
 						int image = seq.image + relocation;
 						DrawSpecialBuilding(image, 0, ti,
 								seq.delta_x, seq.delta_y, seq.delta_z,
 								seq.width, seq.height, seq.unk);
 					}
 					return;
-				}*/
+				}
 			}
 
 			DrawTrackSeqStruct[] drssa = _track_depot_layout_table[type];
@@ -2927,17 +2933,12 @@ public class Rail extends RailTables {
 
 
 
-	/**
-	 * Functions to map tracks to the corresponding bits in the signal
-	 * presence/status bytes in the map. You should not use these directly, but
-	 * wrapper functions below instead. XXX: Which are these?
-	 */
 
 	/**
 	 * Maps a trackdir to the bit that stores its status in the map arrays, in the
 	 * direction along with the trackdir.
-	 * / TODO who fills map arrays?
-final byte _signal_along_trackdir[TRACKDIR_END];
+	 * / 
+
 static  byte SignalAlongTrackdir(Trackdir trackdir) {return _signal_along_trackdir[trackdir];}
 
 /**
@@ -3184,7 +3185,6 @@ static  byte SignalOnTrack(Track track) {
 	 * that trackdir.
 	 * /
 	static  DiagDirection TrackdirToExitdir(Trackdir trackdir) {
-		final DiagDirection _trackdir_to_exitdir[TRACKDIR_END];
 		return _trackdir_to_exitdir[trackdir];
 	} */
 

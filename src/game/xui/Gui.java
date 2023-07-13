@@ -42,6 +42,7 @@ import game.net.DestType;
 import game.net.Net;
 import game.net.NetClient;
 import game.net.NetGui;
+import game.net.NetServer;
 import game.net.NetworkAction;
 import game.net.NetworkPasswordType;
 import game.struct.ColorList;
@@ -49,6 +50,7 @@ import game.struct.Point;
 import game.tables.Snd;
 import game.util.BitOps;
 import game.util.GameDate;
+import game.util.ScreenShot;
 import game.util.ShortSounds;
 import game.util.Sound;
 import game.util.Strings;
@@ -195,7 +197,12 @@ public class Gui
 					Global.error(e1);
 				}
 			else
-				// TODO NetworkServer_HandleChat( NetworkAction.uiAction(id), id & 0xFF, (id >> 8) & 0xFF, e.str, NETWORK_SERVER_INDEX);
+				try {
+					NetServer.NetworkServer_HandleChat( NetworkAction.uiAction(id), DestType.value(id & 0xFF), (id >> 8) & 0xFF, e.str, Net.NETWORK_SERVER_INDEX);
+				} catch (IOException e2) {
+					// e2.printStackTrace();
+					Global.error(e2);
+				}
 			break;
 			/*
 		case 3: { // Give money, you can only give money in excess of loan 
@@ -550,8 +557,8 @@ public class Gui
 			case 2:
 				ConsoleFactory.INSTANCE.getCurrentConsole().ifPresent(Console::switchState);
 				break;
-			case 3: Global._make_screenshot = 1; break;
-			case 4: Global._make_screenshot = 2; break;
+			case 3: ScreenShot._make_screenshot = 1; break;
+			case 4: ScreenShot._make_screenshot = 2; break;
 			case 5: MiscGui.ShowAboutWindow();    break;
 		}
 	}
@@ -1407,7 +1414,7 @@ public class Gui
 		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    68,    89,    14,    35, Sprite.SPR_IMG_LEVEL_LAND,        Str.STR_LEVEL_LAND_TOOLTIP),
 		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,    90,   111,    14,    35, Sprite.SPR_IMG_BUILD_CANAL,       Str.STR_CREATE_LAKE),
 		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   112,   134,    14,    35, Sprite.SPR_IMG_ROCKS,             Str.STR_028C_PLACE_ROCKY_AREAS_ON_LANDSCAPE),
-		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   135,   157,    14,    35, Sprite.SPR_IMG_LIGHTHOUSE_DESERT, Str.STR_NULL), // XXX - dynamic
+		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   135,   157,    14,    35, Sprite.SPR_IMG_LIGHTHOUSE_DESERT, Str.STR_NULL), // dynamic
 		new Widget(    Window.WWT_IMGBTN,   Window.RESIZE_NONE,    14,   158,   179,    14,    35, Sprite.SPR_IMG_TRANSMITTER,       Str.STR_028E_PLACE_TRANSMITTER),
 		new Widget(   Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   139,   149,    43,    54, Str.STR_0224,                  Str.STR_0228_INCREASE_SIZE_OF_LAND_AREA),
 		new Widget(   Window.WWT_TEXTBTN,   Window.RESIZE_NONE,    14,   139,   149,    56,    67, Str.STR_0225,                  Str.STR_0229_DECREASE_SIZE_OF_LAND_AREA),
@@ -2083,8 +2090,8 @@ public class Gui
 			case Window.WKC_SHIFT | Window.WKC_F10:AirportGui.ShowBuildAirToolbar(); break;
 			case Window.WKC_SHIFT | Window.WKC_F11: MiscGui.ShowBuildTreesToolbar(); break;
 			case Window.WKC_SHIFT | Window.WKC_F12: MusicGui.ShowMusicWindow(); break;
-			case Window.WKC_CTRL  | 'S': Global._make_screenshot = 1; break;
-			case Window.WKC_CTRL  | 'G': Global._make_screenshot = 2; break;
+			case Window.WKC_CTRL  | 'S': ScreenShot._make_screenshot = 1; break;
+			case Window.WKC_CTRL  | 'G': ScreenShot._make_screenshot = 2; break;
 			//case Window.WKC_CTRL | Window.WKC_ALT | 'C': if (!_networking) ShowCheatWindow(); break;
 			case 'A': RailGui.ShowBuildRailToolbar(_last_built_railtype, 4); break; /* Invoke Autorail */
 			case 'L': Terraform.ShowTerraformToolbar(); break;
@@ -2284,8 +2291,8 @@ public class Gui
 			case Window.WKC_F9: ToolbarScenPlaceSign(w); break;
 			case Window.WKC_F10: MusicGui.ShowMusicWindow(); break;
 			case Window.WKC_F11: MiscGui.PlaceLandBlockInfo(); break;
-			case Window.WKC_CTRL | 'S': Global._make_screenshot = 1; break;
-			case Window.WKC_CTRL | 'G': Global._make_screenshot = 2; break;
+			case Window.WKC_CTRL | 'S': ScreenShot._make_screenshot = 1; break;
+			case Window.WKC_CTRL | 'G': ScreenShot._make_screenshot = 2; break;
 			case 'L': ShowEditorTerraformToolBar(); break;
 			}
 			break;

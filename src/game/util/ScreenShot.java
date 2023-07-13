@@ -103,31 +103,29 @@ public class ScreenShot
 	
 	static String MakeScreenshotName(final String ext)
 	{
-		String base;
-		int serial;
-
 		if (Global._game_mode == GameModes.GM_EDITOR || Global._game_mode == GameModes.GM_MENU 
 				|| PlayerID.getLocal().isSpectator()) { 
-			Global._screenshot_name = "screenshot";
+			ScreenShot._screenshot_name = "screenshot";
 		} else {
 			final Player p = PlayerID.getLocal().GetPlayer(); 
 			Global.SetDParam(0, p.getName_1());
 			Global.SetDParam(1, p.getName_2());
 			Global.SetDParam(2, Global.get_date());
-			Global._screenshot_name = Strings.GetString(Str.STR_4004);
+			ScreenShot._screenshot_name = Strings.GetString(Str.STR_4004);
 		}
 
 		//base = strchr(Global._screenshot_name, 0);		base[0] = '.'; strcpy(base + 1, ext);
 		
-		Global._screenshot_name += ".";
-		Global._screenshot_name += ext;
+		//Global._screenshot_name += ".";
+		//Global._screenshot_name += ext;
 
-		serial = 0;
+		int serial = 0;
 		for (;;) {
-			filename = String.format("%s%s", Global._path.personal_dir, Global._screenshot_name);
+			filename = String.format("%s%s.%s", Global._path.personal_dir, ScreenShot._screenshot_name, ext);
 			if (!FileIO.FileExists(filename))
 				break;
-			base = String.format(" #%d.%s", ++serial, ext);
+			//base = String.format(" #%d.%s", ++serial, ext);
+			filename = String.format("%s%s_%d.%s", Global._path.personal_dir, ScreenShot._screenshot_name, ++serial, ext);			
 		}
 
 		return filename;
@@ -145,6 +143,9 @@ public class ScreenShot
 		final ScreenshotFormat sf = _screenshot_formats[_cur_screenshot_format];
 		return sf.proc(MakeScreenshotName(sf.extension), ScreenShot::LargeWorldCallback, vp, vp.getWidth(), vp.getHeight(), 8, Gfx._cur_palette);
 	}
+
+	public static String _screenshot_name;
+	public static int _make_screenshot;
 	
 	
 }

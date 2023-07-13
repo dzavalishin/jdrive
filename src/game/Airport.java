@@ -6,6 +6,7 @@ import game.tables.AirConstants;
 import game.tables.AirCraftTables;
 import game.tables.AirportFTAbuildup;
 import game.util.BitOps;
+import game.xui.Window;
 
 public class Airport extends AirConstants 
 {
@@ -16,6 +17,8 @@ public class Airport extends AirConstants
 	private int acc_planes;					// accept airplanes or helicopters or both
 	final TileIndexDiffC[] airport_depots;	// gives the position of the depots on the airports
 	private AirportFTA layout[];			// state machine for airport
+
+	
 
 
 	public static final int MAX_ELEMENTS = 255;
@@ -220,6 +223,8 @@ public class Airport extends AirConstants
 	
 	
 	
+
+
 	static int AirportGetNofElements(final AirportFTAbuildup [] FA)
 	{
 		int i;
@@ -313,7 +318,7 @@ public class Airport extends AirConstants
 
 	static Airport GetAirport(final int airport_type)
 	{
-		//FIXME -- AircraftNextAirportPos_and_Order . Needs something nicer, don't like this code
+		// -- AircraftNextAirportPos_and_Order . Needs something nicer, don't like this code
 		// needs constant change if more airports are added
 		switch (airport_type) {
 		case AT_SMALL: return CountryAirport; 
@@ -323,14 +328,14 @@ public class Airport extends AirConstants
 		case AT_OILRIG: return Oilrig; 
 		case AT_INTERNATIONAL: return InternationalAirport; 
 		default:
-			/* #ifdef DEBUG__
-			printf("Airport AircraftNextAirportPos_and_Order not yet implemented\n");
-			#endif */
 			assert(airport_type <= AT_INTERNATIONAL);
 		}
 		return null;
 	}
 
+
+	// Available aircraft types
+	private static int _avail_aircraft = 0;
 	
 	/** Get buildable airport bitmask.
 	 * @return get all buildable airports at this given time, bitmasked.
@@ -339,13 +344,27 @@ public class Airport extends AirConstants
 	 * TODO set availability of airports by year, instead of airplane
 	 */
 	public static int GetValidAirports()	{
-		int bytemask = Global._avail_aircraft; /// sets the first 3 bytes, 0 - 2, @see AdjustAvailAircraft()
+		int bytemask = _avail_aircraft; /// sets the first 3 bytes, 0 - 2, @see AdjustAvailAircraft()
 
 		// 1980-1-1 is -. 21915
 		// 1990-1-1 is -. 25568
 		if (Global.get_date() >= 21915) bytemask = BitOps.RETSETBIT(bytemask, 3); // metropilitan airport 1980
 		if (Global.get_date() >= 25568) bytemask = BitOps.RETSETBIT(bytemask, 4); // international airport 1990
 		return bytemask;
+	}
+
+	static void AdjustAvailAircraft()
+	{
+		int date = Global.get_date();
+		byte avail = 0;
+		if (date >= 12784) avail |= 2; // big airport
+		if (date < 14610 || Global._patches.always_small_airport) avail |= 1;  // small airport
+		if (date >= 15706) avail |= 4; // enable heliport
+	
+		if (avail != _avail_aircraft) {
+			_avail_aircraft = avail;
+			Window.InvalidateWindow(Window.WC_BUILD_STATION, 0);
+		}
 	}
 	
 }

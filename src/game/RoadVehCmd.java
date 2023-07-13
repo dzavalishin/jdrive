@@ -18,6 +18,7 @@ import game.struct.OvertakeData;
 import game.struct.Point;
 import game.struct.RoadFindDepotData;
 import game.struct.RoadVehFindData;
+import game.tables.EngineTables2;
 import game.tables.RoadVehCmdTables;
 import game.tables.Snd;
 import game.util.BitOps;
@@ -37,12 +38,11 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		int img = v.spritenum;
 		int image;
 
-		// TODO custom
-		/*if (Sprite.is_custom_sprite(img)) {
-			image = GetCustomVehicleSprite(v, direction);
+		if (Sprite.is_custom_sprite(img)) {
+			image = Engine.GetCustomVehicleSprite(v, direction);
 			if (image != 0) return image;
-			img = orig_road_vehicle_info[v.engine_type - Global.ROAD_ENGINES_INDEX].image_index;
-		}*/
+			img = EngineTables2.orig_road_vehicle_info[v.engine_type.id - Global.ROAD_ENGINES_INDEX].image_index;
+		}
 
 		image = direction + _roadveh_images[img];
 		if (v.cargo_count >= (v.getCargo_cap() >> 1))
@@ -54,16 +54,15 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	{
 		int spritenum = Engine.RoadVehInfo(engine).image_index;
 
-		// TODO custom spr
-		/*if (Sprite.is_custom_sprite(spritenum)) {
-			int sprite = GetCustomVehicleIcon(engine, 6);
+		if (Sprite.is_custom_sprite(spritenum)) {
+			int sprite = Engine.GetCustomVehicleIcon(engine, 6);
 
-			if (sprite) {
+			if (sprite != 0) {
 				Gfx.DrawSprite(sprite | image_ormod, x, y);
 				return;
 			}
-			spritenum = orig_road_vehicle_info[engine - ROAD_ENGINES_INDEX].image_index;
-		}*/
+			spritenum = EngineTables2.orig_road_vehicle_info[engine - Global.ROAD_ENGINES_INDEX].image_index;
+		}
 		Gfx.DrawSprite((6 + _roadveh_images[spritenum]) | image_ormod, x, y);
 	}
 
@@ -103,8 +102,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 		/* find the first free roadveh id */
 		unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Road);
-		// TODO if (unit_num.id > Global._patches.max_roadveh.id)
-		//	return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
+		if (unit_num.id > Global._patches.max_roadveh)
+			return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 		if(0!= (flags & Cmd.DC_EXEC)) {
 			final RoadVehicleInfo rvi = Engine.RoadVehInfo(p1);
@@ -1630,7 +1629,7 @@ class RoadDriveEntry {
 
 				//first we need to find out how far our stations are away.
 				Global.DEBUG_ms( 2, "Multistop: Attempting to obtain a slot for vehicle %d at station %d (%d.%d)", v.unitnumber.id, st.index, st.getXy().getX(), st.getXy().getY() );
-				//for(; rs != null; rs = rs.next)
+
 				for( RoadStop rs : rsl )
 				{
 					// Only consider those with at least a free slot.
@@ -1638,7 +1637,7 @@ class RoadDriveEntry {
 						continue;
 
 					// Previously the NPF pathfinder was used here even if NPF is OFF.. WTF?
-					assert(Station.NUM_SLOTS == 2);
+					//assert(Station.NUM_SLOTS == 2);
 					dist = Map.DistanceManhattan(v.tile, rs.xy);
 
 					// Check if the station is located BEHIND the vehicle..
@@ -1698,11 +1697,11 @@ class RoadDriveEntry {
 
 		v.profit_this_year -= cost >> 8;
 
-					Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_RUN);
-					Player.SubtractMoneyFromPlayerFract(v.owner, cost);
+		Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_RUN);
+		Player.SubtractMoneyFromPlayerFract(v.owner, cost);
 
-					Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
-					Window.InvalidateWindowClasses(Window.WC_ROADVEH_LIST);
+		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
+		Window.InvalidateWindowClasses(Window.WC_ROADVEH_LIST);
 	}
 
 

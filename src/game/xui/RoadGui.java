@@ -41,13 +41,13 @@ public class RoadGui
 
 	static void PlaceRoad_NE(TileIndex tile)
 	{
-		_place_road_flag = (byte) ((BitOps.b2i( Global._tile_fract_coords.y >= 8) ) + 4);
+		_place_road_flag = (byte) ((BitOps.b2i( ViewPort._tile_fract_coords.y >= 8) ) + 4);
 		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_FIX_X);
 	}
 
 	static void PlaceRoad_NW(TileIndex tile)
 	{
-		_place_road_flag = (byte) (BitOps.b2i(Global._tile_fract_coords.x >= 8) + 0);
+		_place_road_flag = (byte) (BitOps.b2i(ViewPort._tile_fract_coords.x >= 8) + 0);
 		ViewPort.VpStartPlaceSizing(tile, ViewPort.VPM_FIX_Y);
 	}
 

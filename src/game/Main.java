@@ -112,8 +112,7 @@ public class Main {
 	static void LoadIntroGame()
 	{
 		Global._game_mode = GameModes.GM_MENU;
-		//CLRBITS(_display_opt, DO_TRANS_BUILDINGS); // don't make buildings transparent in intro
-		//Global._display_opt = 0; // TODO BitOps.RETCLRBITS( Global._display_opt, DO_TRANS_BUILDINGS );
+		// don't make buildings transparent in intro
 		Global._display_opt = (byte) BitOps.RETCLRBITS( Global._display_opt, Global.DO_TRANS_BUILDINGS );
 		GameOptions._opt_ptr = GameOptions._opt_newgame;
 
@@ -397,7 +396,7 @@ public class Main {
 	static void ShowScreenshotResult(boolean b)
 	{
 		if (b) {
-			Global.SetDParamStr(0, Global._screenshot_name);
+			Global.SetDParamStr(0, ScreenShot._screenshot_name);
 			Global.ShowErrorMessage(Str.INVALID_STRING_ID().id, Str.STR_031B_SCREENSHOT_SUCCESSFULLY, 0, 0);
 		} else {
 			Global.ShowErrorMessage(Str.INVALID_STRING_ID().id, Str.STR_031C_SCREENSHOT_FAILED, 0, 0);
@@ -808,9 +807,9 @@ public class Main {
 		if (0 != Global._dirkeys) HandleKeyScrolling();
 
 		// make a screenshot?
-		int shot = Global._make_screenshot;
+		int shot = ScreenShot._make_screenshot;
 		if(shot != 0) {
-			Global._make_screenshot = 0;
+			ScreenShot._make_screenshot = 0;
 			switch(shot) {
 			case 1: // make small screenshot
 				Gfx.UndrawMouseCursor();
@@ -956,15 +955,15 @@ public class Main {
 		if (Global._path.config_file == null)
 			Global._path.config_file =  Global._path.personal_dir + "nextttd.cfg";
 
-		/* TODO paths
+		/*  paths
 		_highscore_file = str_fmt("%shs.dat", _path.personal_dir);
 		_log_file = str_fmt("%sopenttd.log", _path.personal_dir);
+		 */
 
 		// make (auto)save and scenario folder
-		CreateDirectory(_path.save_dir, NULL);
-		CreateDirectory(_path.autosave_dir, NULL);
-		CreateDirectory(_path.scenario_dir, NULL);
-		 */
+		FileIO.mkdir(Global._path.save_dir);
+		FileIO.mkdir(Global._path.autosave_dir);
+		FileIO.mkdir(Global._path.scenario_dir);
 	}
 
 

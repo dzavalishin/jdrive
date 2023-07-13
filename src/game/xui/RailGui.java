@@ -70,7 +70,7 @@ public class RailGui {
 
 	static void PlaceRail_N(TileIndex tile)
 	{
-		int cmd = Global._tile_fract_coords.x > Global._tile_fract_coords.y ? 4 : 5;
+		int cmd = ViewPort._tile_fract_coords.x > ViewPort._tile_fract_coords.y ? 4 : 5;
 		GenericPlaceRail(tile, cmd);
 	}
 
@@ -81,7 +81,7 @@ public class RailGui {
 
 	static void PlaceRail_E(TileIndex tile)
 	{
-		int cmd = Global._tile_fract_coords.x + Global._tile_fract_coords.y <= 15 ? 2 : 3;
+		int cmd = ViewPort._tile_fract_coords.x + ViewPort._tile_fract_coords.y <= 15 ? 2 : 3;
 		GenericPlaceRail(tile, cmd);
 	}
 
@@ -176,10 +176,10 @@ public class RailGui {
 		trackstat = tile.GetTileTrackStatus(TransportType.Rail);
 
 		if(0 != (trackstat & 0x30)) // N-S direction
-			trackstat = (Global._tile_fract_coords.x <= Global._tile_fract_coords.y) ? 0x20 : 0x10;
+			trackstat = (ViewPort._tile_fract_coords.x <= ViewPort._tile_fract_coords.y) ? 0x20 : 0x10;
 
 		if(0 !=  (trackstat & 0x0C)) // E-W direction
-			trackstat = (Global._tile_fract_coords.x + Global._tile_fract_coords.y <= 15) ? 4 : 8;
+			trackstat = (ViewPort._tile_fract_coords.x + ViewPort._tile_fract_coords.y <= 15) ? 4 : 8;
 
 		// Lookup the bit index
 		i = 0;

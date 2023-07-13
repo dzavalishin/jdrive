@@ -130,20 +130,6 @@ public class Engine extends EngineTables implements Serializable
 		LoadCustomEngineNames();
 	}
 
-	static void AdjustAvailAircraft()
-	{
-		int date = Global.get_date();
-		byte avail = 0;
-		if (date >= 12784) avail |= 2; // big airport
-		if (date < 14610 || Global._patches.always_small_airport) avail |= 1;  // small airport
-		if (date >= 15706) avail |= 4; // enable heliport
-
-		if (avail != Global._avail_aircraft) {
-			Global._avail_aircraft = avail;
-			Window.InvalidateWindow(Window.WC_BUILD_STATION, 0);
-		}
-	}
-
 	static void CalcEngineReliability(Engine e)
 	{
 		int age = e.age;
@@ -247,7 +233,7 @@ public class Engine extends EngineTables implements Serializable
 		   even if it is not a vehicle (yet)*/
 		}
 
-		AdjustAvailAircraft();
+		Airport.AdjustAvailAircraft();
 	}
 
 	// TODO: We don't support cargo-specific wagon overrides. Pretty exotic... ;-) --pasky
@@ -605,7 +591,7 @@ public class Engine extends EngineTables implements Serializable
 		return group;
 	}
 
-	static int GetCustomEngineSprite(EngineID engine, final Vehicle v, byte direction)
+	static int GetCustomEngineSprite(EngineID engine, final Vehicle v, int direction)
 	{
 		SpriteGroup group;
 		final RealSpriteGroup rsg;
@@ -1058,7 +1044,7 @@ public class Engine extends EngineTables implements Serializable
 				}
 			}
 		}
-		AdjustAvailAircraft();
+		Airport.AdjustAvailAircraft();
 	}
 
 	/** Rename an engine.
@@ -1501,10 +1487,20 @@ public class Engine extends EngineTables implements Serializable
 	}
 
 	
+	public static int GetCustomVehicleSprite(Vehicle v, int direction) 
+	{
+		return GetCustomEngineSprite(v.engine_type, v, direction);
+	}
+	
+	public static int GetCustomVehicleIcon(int et, int direction) 
+	{
+		return GetCustomEngineSprite( EngineID.get(et), null, direction);
+	}
+	
 	public static void loadGame(ObjectInputStream oin)
 	{
 		//Global.gs._engines = (Engine[]) oin.readObject();
-		AdjustAvailAircraft();
+		Airport.AdjustAvailAircraft();
 	}
 
 	public static void saveGame(ObjectOutputStream oos) 

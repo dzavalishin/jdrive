@@ -35,14 +35,12 @@ import game.xui.TownGui;
 import game.xui.ViewPort;
 import game.xui.Window;
 
-public class Town 
-//extends TownTables 
-implements IPoolItem, Serializable 
+public class Town implements IPoolItem, Serializable 
 {
 
 	private static final long serialVersionUID = 1L;
 
-	TileIndex xy;
+	private TileIndex xy;
 
 	// Current population of people and amount of houses.
 	int num_houses;
@@ -961,8 +959,6 @@ implements IPoolItem, Serializable
 			mask = GetTownRoadMask(tile);
 
 			// Try to grow the town from this point
-			//GrowTownInTile(&tile,mask,block,t);
-
 			{
 				TileIndex [] tip = { tile };				
 				GrowTownInTile(tip,mask,block,this);
@@ -1757,7 +1753,7 @@ implements IPoolItem, Serializable
 	}
 
 	// Called from GUI
-	public void DeleteTown(/*Town t*/)
+	public void DeleteTown()
 	{
 
 		// Delete town authority window
@@ -1801,7 +1797,7 @@ implements IPoolItem, Serializable
 	}
 
 	// Called from GUI
-	public void ExpandTown(/*Town t*/)
+	public void ExpandTown()
 	{
 		int amount, n;
 
@@ -1826,7 +1822,6 @@ implements IPoolItem, Serializable
 			2, 4, 9, 35, 48, 53, 117, 175
 	};
 
-	//typedef void TownActionProc(Town t, int action);
 
 	static final byte _advertising_amount[] = {0x40, 0x70, (byte)0xA0};
 	static final byte _advertising_radius[] = {10,15,20};
@@ -1976,7 +1971,6 @@ implements IPoolItem, Serializable
 			Town::TownActionBribe
 	};
 
-	//extern int GetMaskOfTownActions(int *nump, PlayerID pid, final Town t);
 
 	/** Do a town action.
 	 * This performs an action such as advertising, building a statue, funding buildings,
@@ -2252,17 +2246,17 @@ implements IPoolItem, Serializable
 			Town::DrawTile_Town,						/* draw_tile_proc */
 			Town::GetSlopeZ_Town,						/* get_slope_z_proc */
 			Town::ClearTile_Town,						/* clear_tile_proc */
-			Town::GetAcceptedCargo_Town,		/* get_accepted_cargo_proc */
-			Town::GetTileDesc_Town,					/* get_tile_desc_proc */
-			Town::GetTileTrackStatus_Town,	/* get_tile_track_status_proc */
+			Town::GetAcceptedCargo_Town,				/* get_accepted_cargo_proc */
+			Town::GetTileDesc_Town,						/* get_tile_desc_proc */
+			Town::GetTileTrackStatus_Town,				/* get_tile_track_status_proc */
 			Town::ClickTile_Town,						/* click_tile_proc */
-			Town::AnimateTile_Town,					/* animate_tile_proc */
+			Town::AnimateTile_Town,						/* animate_tile_proc */
 			Town::TileLoop_Town,						/* tile_loop_clear */
-			Town::ChangeTileOwner_Town,			/* change_tile_owner_clear */
-			null,											/* get_produced_cargo_proc */
-			null,											/* vehicle_enter_tile_proc */
-			null,											/* vehicle_leave_tile_proc */
-			Town::GetSlopeTileh_Town				/* get_slope_tileh_proc */
+			Town::ChangeTileOwner_Town,					/* change_tile_owner_clear */
+			null,										/* get_produced_cargo_proc */
+			null,										/* vehicle_enter_tile_proc */
+			null,										/* vehicle_leave_tile_proc */
+			Town::GetSlopeTileh_Town					/* get_slope_tileh_proc */
 			);
 
 

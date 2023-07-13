@@ -92,10 +92,10 @@ public class StationClass
 	 * @param sclass Index of the station class.
 	 * @return Number of stations in the class.
 	 */
-	static int GetNumCustomStations(/*StationClassID*/ int  sclass)
+	static int GetNumCustomStations(StationClassID sclass)
 	{
-		assert(sclass < STAT_CLASS_MAX);
-		return station_classes[sclass].stations;
+		assert(sclass.ordinal() < STAT_CLASS_MAX);
+		return station_classes[sclass.ordinal()].stations;
 	}
 
 	/**
@@ -123,11 +123,11 @@ public class StationClass
 	 * @param station The station index with the class.
 	 * @return The station spec.
 	 */
-	static StationSpec GetCustomStation(/*StationClassID*/ int  sclass, int station)
+	static StationSpec GetCustomStation(StationClassID sclass, int station)
 	{
-		assert(sclass < STAT_CLASS_MAX);
-		if (station < station_classes[sclass].stations)
-			return station_classes[sclass].spec[station];
+		assert(sclass.ordinal() < STAT_CLASS_MAX);
+		if (station < station_classes[sclass.ordinal()].stations)
+			return station_classes[sclass.ordinal()].spec[station];
 
 		// If the custom station isn't defined any more, then the GRF file
 		// probably was not loaded.
