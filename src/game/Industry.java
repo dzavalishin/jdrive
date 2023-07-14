@@ -157,36 +157,29 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 
 	
-	/**
-	 * Check if an Industry really exists.
-	 * /
-	public static boolean IsValidIndustry(Industry industry)
-	{
-		return industry.isValid(); 
-	} */
 
 	/**
 	 * Get the pointer to the industry with index 'index'
 	 */
 	public static Industry GetIndustry(int index)
 	{
-		return Global.gs._industies.GetItemFromPool(index);
+		return Global.gs._industries.GetItemFromPool(index);
 	}
 
 
 	public static Iterator<Industry> getIterator()
 	{
-		return Global.gs._industies.getIterator(); 
+		return Global.gs._industries.getIterator(); 
 	}
 
 	static void forEach( Consumer<Industry> c )
 	{
-		Global.gs._industies.forEach(c);
+		Global.gs._industries.forEach(c);
 	}
 
 	static void forEachValid( Consumer<Industry> c )
 	{
-		Global.gs._industies.forEachValid(c);
+		Global.gs._industries.forEachValid(c);
 	}
 
 
@@ -204,16 +197,13 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void IndustryDrawTileProc1(final TileInfo ti)
 	{
-		final DrawIndustrySpec1Struct d;
-		int image;
-
 		if (0 == (ti.tile.getMap().m1 & 0x80)) return;
 
-		d = _draw_industry_spec1[ti.tile.getMap().m3];
+		final DrawIndustrySpec1Struct d = _draw_industry_spec1[ti.tile.getMap().m3];
 
 		ViewPort.AddChildSpriteScreen(0x12A7 + d.image_1, d.x, 0);
 
-		image = d.image_2;
+		int image = d.image_2;
 		if (image != 0) ViewPort.AddChildSpriteScreen(0x12B0 + image - 1, 8, 41);
 
 		image = d.image_3;
@@ -278,7 +268,6 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 	}
 
-	//typedef void IndustryDrawTileProc(final TileInfo ti);
 	static final IndustryDrawTileProc  _industry_draw_tile_procs[] = {
 			Industry::IndustryDrawTileProc1,
 			Industry::IndustryDrawTileProc2,
@@ -289,14 +278,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void DrawTile_Industry(TileInfo ti)
 	{
-		final Industry  ind;
-		final DrawIndustryTileStruct dits;
-		int z;
-		int image, ormod;
-
 		/* Pointer to industry */
-		ind = GetIndustry(ti.tile.getMap().m2);
-		ormod = (ind.color_map + 0x307) << Sprite.PALETTE_SPRITE_START;
+		final Industry ind = GetIndustry(ti.tile.getMap().m2);
+		int ormod = (ind.color_map + 0x307) << Sprite.PALETTE_SPRITE_START;
 
 		/* Retrieve pointer to the draw industry tile struct */
 		final int ii = (ti.map5 << 2) | BitOps.GB(ti.tile.getMap().m1, 0, 2);
@@ -307,13 +291,13 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			return;
 		}
 		
-		dits = _industry_draw_tile_data[ii];
+		final DrawIndustryTileStruct dits = _industry_draw_tile_data[ii];
 
-		image = dits.sprite_1;
+		int image = dits.sprite_1;
 		if( (0 != (image & Sprite.PALETTE_MODIFIER_COLOR)) && (image & Sprite.PALETTE_SPRITE_MASK) == 0)
 			image |= ormod;
 
-		z =  ti.z;
+		int z =  ti.z;
 		/* Add bricks below the industry? */
 		if(0 != (ti.tileh & 0xF)) {
 			ViewPort.AddSortableSpriteToDraw(Sprite.SPR_FOUNDATION_BASE + (ti.tileh & 0xF), ti.x, ti.y, 16, 16, 7, z);
@@ -431,10 +415,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	static void TransportIndustryGoods(TileIndex tile)
 	{
 		Industry  i = GetIndustry(tile.getMap().m2);
-		int cw, am;
 
 		// [dz] uncommented check for i.produced_cargo[0] > 0 - why it was commented out?
-		cw = Math.min(i.cargo_waiting[0], 255);
+		int cw = Math.min(i.cargo_waiting[0], 255);
 		if (cw > _industry_min_cargo[i.type] && i.produced_cargo[0] > 0) {
 			int m5;
 
@@ -445,7 +428,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 			i.last_mo_production[0] += cw;
 
-			am = Station.MoveGoodsToStation(i.xy, i.width, i.height, i.produced_cargo[0], cw);
+			int am = Station.MoveGoodsToStation(i.xy, i.width, i.height, i.produced_cargo[0], cw);
 			i.last_mo_transported[0] += am;
 			if (am != 0 && (m5 = 0xFF & _industry_produce_map5[tile.getMap().m5]) != 0xFF) {
 				tile.getMap().m1 = 0x80;
@@ -462,7 +445,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 			i.last_mo_production[1] += cw;
 
-			am = Station.MoveGoodsToStation(i.xy, i.width, i.height, i.produced_cargo[1], cw);
+			int am = Station.MoveGoodsToStation(i.xy, i.width, i.height, i.produced_cargo[1], cw);
 			i.last_mo_transported[1] += am;
 		}
 	}
@@ -716,14 +699,11 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void TileLoopIndustryCase161(TileIndex tile)
 	{
-		int dir;
-		Vehicle v;
-
 		Sound.SndPlayTileFx(Snd.SND_2E_EXTRACT_AND_POP, tile);
 
-		dir = Hal.Random() & 3;
+		int dir = Hal.Random() & 3;
 
-		v = Vehicle.CreateEffectVehicleAbove(
+		Vehicle v = Vehicle.CreateEffectVehicleAbove(
 				tile.TileX() * 16 + _tileloop_ind_case_161[dir + 0],
 				tile.TileY() * 16 + _tileloop_ind_case_161[dir + 4],
 				_tileloop_ind_case_161[dir + 8],
@@ -872,7 +852,6 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void DeleteIndustry(Industry i)
 	{
-		//BEGIN_TILE_LOOP(tile_cur, i.width, i.height, i.xy);
 		TileIndex.forAll( i.width, i.height, i.xy, (tile_cur) ->
 		{
 			if (tile_cur.IsTileType( TileTypes.MP_INDUSTRY)) {
@@ -884,7 +863,6 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			}
 			return false;
 		});
-		//END_TILE_LOOP(tile_cur, i.width, i.height, i.xy);
 
 		i.xy = null;
 		_industry_sort_dirty = true;
@@ -957,11 +935,6 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void PlantFarmField(TileIndex itile)
 	{
-		int size_x, size_y;
-		int r;
-		//int count;
-		int type, type2;
-
 		MutableTileIndex tile = new MutableTileIndex(itile);
 
 		if (GameOptions._opt.landscape == Landscape.LT_HILLY) {
@@ -970,10 +943,11 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 
 		/* determine field size */
-		r = (Hal.Random() & 0x303) + 0x404;
+		int r = (Hal.Random() & 0x303) + 0x404;
 		if (GameOptions._opt.landscape == Landscape.LT_HILLY) r += 0x404;
-		size_x = BitOps.GB(r, 0, 8);
-		size_y = BitOps.GB(r, 8, 8);
+		
+		int size_x = BitOps.GB(r, 0, 8);
+		int size_y = BitOps.GB(r, 8, 8);
 
 		/* offset tile to match size */
 		tile.msub( TileIndex.TileDiffXY(size_x / 2, size_y / 2) );
@@ -981,21 +955,19 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		/* check the amount of bad tiles */
 		int [] count = {0};
 
-		//BEGIN_TILE_LOOP(cur_tile, size_x, size_y, tile)
 		TileIndex.forAll(size_x, size_y, tile, (cur_tile) ->
 		{
 			//cur_tile = TILE_MASK(cur_tile);
 			count[0] += IsBadFarmFieldTile(cur_tile.TILE_MASK()) ? 1 : 0;
 			return false;
 		});
-		//END_TILE_LOOP(cur_tile, size_x, size_y, tile)
 
 		if (count[0] * 2 >= size_x * size_y) return;
 
 		/* determine type of field */
 		r = Hal.Random();
-		type = ((r & 0xE0) | 0xF);
-		type2 = BitOps.GB(r, 8, 8) * 9 >> 8;
+		int type = ((r & 0xE0) | 0xF);
+		int type2 = BitOps.GB(r, 8, 8) * 9 >> 8;
 
 		final int ftype = type;
 		/* make field */
@@ -1156,8 +1128,6 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void OnTick_Industry()
 	{
-		//Industry i;
-
 		if (_industry_sound_ctr != 0) {
 			_industry_sound_ctr++;
 
@@ -1468,14 +1438,13 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		}
 
 		/* Check if we can add a block to the pool */
-		return Global.gs._industies.AddBlockToPool() ? AllocateIndustry() : null;
+		return Global.gs._industries.AddBlockToPool() ? AllocateIndustry() : null;
 	}
 
 
 
 	static void DoCreateNewIndustry(Industry  i, TileIndex tile, int type, final IndustryTileTable [] itt, final Town t, int owner)
 	{
-		final IndustrySpec spec;
 		int r;
 		int j;
 
@@ -1483,7 +1452,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		i.width = i.height = 0;
 		i.type = type;
 
-		spec = _industry_spec[type];
+		final IndustrySpec spec = _industry_spec[type];
 
 		i.produced_cargo[0] = spec.produced_cargo[0];
 		i.produced_cargo[1] = spec.produced_cargo[1];
@@ -1650,28 +1619,22 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	public static Industry CreateNewIndustry(TileIndex tile, int type)
 	{
-		final Town t;
-		final IndustryTileTable [] it;
-		Industry i;
-
-		final IndustrySpec spec;
-
 		if (!CheckSuitableIndustryPos(tile)) return null;
 
-		spec = _industry_spec[type];
+		final IndustrySpec spec = _industry_spec[type];
 
 		if (!_check_new_industry_procs[spec.check_proc].check(tile, type)) return null;
 
-		t = CheckMultipleIndustryInTown(tile, type);
+		final Town t = CheckMultipleIndustryInTown(tile, type);
 		if (t == null) return null;
 
 		/* pick a random layout */
-		it = spec.table[Hal.RandomRange(spec.table.length)];
+		final IndustryTileTable [] it = spec.table[Hal.RandomRange(spec.table.length)];
 
 		if (!CheckIfIndustryTilesAreFree(tile, it, type, t)) return null;
 		if (!CheckIfTooCloseToIndustry(tile, type)) return null;
 
-		i = AllocateIndustry();
+		Industry i = AllocateIndustry();
 		if (i == null) return null;
 
 		DoCreateNewIndustry(i, tile, type, it, t, Owner.OWNER_NONE);
@@ -1703,9 +1666,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			assert(num > 0);
 
 			do {
-				int i;
-
-				for (i = 0; i < 2000; i++) {
+				for (int i = 0; i < 2000; i++) {
 					if (CreateNewIndustry(Hal.RandomTile(), type) != null) break;
 				}
 			} while (--num > 0);
@@ -1964,8 +1925,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void InitializeIndustries()
 	{
-		Global.gs._industies.CleanPool();
-		Global.gs._industies.AddBlockToPool();
+		Global.gs._industries.CleanPool();
+		Global.gs._industries.AddBlockToPool();
 
 		_total_industries = 0;
 		_industry_sort_dirty = true;
@@ -2610,7 +2571,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	{
 		_industry_sort_dirty = false;
 		/* Create array for sorting */
-		_industry_sort = Global.gs._industies.getValuesArray();
+		_industry_sort = Global.gs._industries.getValuesArray();
 
 		if (_industry_sort == null)
 			Global.fail("Could not allocate memory for the industry-sorting-list");

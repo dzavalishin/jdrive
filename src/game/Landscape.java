@@ -421,13 +421,10 @@ public class Landscape extends GenLandTable
 
 	static void RunTileLoop()
 	{
-		int tile;
-		int count;
-
-		tile = Global._cur_tileloop_tile;
+		int tile = Global._cur_tileloop_tile;
 
 		assert( (tile & ~TILELOOP_ASSERTMASK) == 0);
-		count = (Global.MapSizeX() / TILELOOP_SIZE) * (Global.MapSizeY() / TILELOOP_SIZE);
+		int count = (Global.MapSizeX() / TILELOOP_SIZE) * (Global.MapSizeY() / TILELOOP_SIZE);
 		do {
 			TileIndex itile = new TileIndex(tile);
 			final int ordinal = itile.GetTileType().ordinal();

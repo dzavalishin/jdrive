@@ -10,7 +10,6 @@ public class Tile implements Serializable
 
 	private static final long serialVersionUID = -6829939704826964776L;
 	
-	//byte type_height;
 	public int type;
 	public int height;
 

@@ -83,7 +83,7 @@ public class GameState implements Serializable
 	final MemoryPool<SignStruct> _signs = new MemoryPool<>(SignStruct.factory);
 	
 	/* Initialize the industry-pool */
-	final MemoryPool<Industry> _industies = new MemoryPool<>(Industry.factory);
+	final MemoryPool<Industry> _industries = new MemoryPool<>(Industry.factory);
 	//static MemoryPool<Town> _town_pool = new MemoryPool<Town>(Town::new);
 	final MemoryPool<Town> _towns = new MemoryPool<>(Town.factory);
 	public final Engine [] _engines = new Engine[Global.TOTAL_NUM_ENGINES];
