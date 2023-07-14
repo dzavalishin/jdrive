@@ -201,7 +201,7 @@ public class Depot implements IPoolItem, Serializable
 		Depot [] ret = {null};
 		Global.gs._depots.forEach( depot ->
 		{
-			if (depot.xy.equals(tile))
+			if( depot.isValid() && depot.xy.equals(tile))
 				ret[0] = depot;
 		});
 
