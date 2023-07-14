@@ -508,12 +508,11 @@ public class RoadVehGui
 
 	static void ShowBuildRoadVehWindow(TileIndex tile)
 	{
-		Window w;
+		final int wn = tile != null ? tile.getTile() : -1;
+		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, wn);
 
-		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.getTile());
-
-		w = Window.AllocateWindowDesc(_new_road_veh_desc);
-		w.window_number = tile.getTile();
+		Window w = Window.AllocateWindowDesc(_new_road_veh_desc);
+		w.window_number = wn;
 		w.vscroll.setCap(8);
 		w.widget.get(2).unkA = (w.vscroll.getCap() << 8) + 1;
 

@@ -120,7 +120,6 @@ public class RailTables {
 	/** These are a combination of tracks and directions. Values are 0-5 in one
 		direction (corresponding to the Track enum) and 8-13 in the other direction. */
 
-	// TODO Duplicated elsewhere - find and kill
 
 	//typedef enum TrackdirBits {
 	public static final int TRACKDIR_BIT_DIAG1_NE = 0x1;
@@ -306,7 +305,7 @@ public class RailTables {
 
 
 
-	/* XXX: Below 3 tables store duplicate data. Maybe remove some? */
+	/* Below 3 tables store duplicate data. Maybe remove some? */
 	/* Maps a trackdir to the bit that stores its status in the map arrays, in the
 	 * direction along with the trackdir */
 	protected static final int _signal_along_trackdir[] = {
@@ -373,7 +372,6 @@ public class RailTables {
 	/* Maps a trackdir to the (4-way) direction the tile is exited when following
 	 * that trackdir */
 
-	// TODO Duplicate
 
 	//final DiagDirection _trackdir_to_exitdir[] = 
 	protected static final int _trackdir_to_exitdir[] = 
@@ -395,7 +393,7 @@ public class RailTables {
 
 	//final Trackdir _track_enterdir_to_trackdir[][DIAGDIR_END] = 
 	protected static final int _track_enterdir_to_trackdir[][] = 
-		{ // TODO: replace magic with enums
+		{ 
 				{TRACKDIR_DIAG1_NE, INVALID_TRACKDIR,  TRACKDIR_DIAG1_SW, INVALID_TRACKDIR},
 				{INVALID_TRACKDIR,  TRACKDIR_DIAG2_SE, INVALID_TRACKDIR,  TRACKDIR_DIAG2_NW},
 				{INVALID_TRACKDIR,  TRACKDIR_UPPER_E,  TRACKDIR_UPPER_W,  INVALID_TRACKDIR},

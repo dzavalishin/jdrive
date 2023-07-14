@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.enums.RoadStopType;
+import game.enums.StationClassID;
 import game.enums.TileTypes;
 import game.enums.TransportType;
 import game.ids.PlayerID;
@@ -1146,8 +1147,8 @@ public class Station extends StationTables implements IPoolItem
 
 			tile_delta = direction != 0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0);
 
-			// TODO statspec = (p2 & 0x10) != 0 ? GetCustomStation(Station.STAT_CLASS_DFLT, p2 >> 8) : null;
-			statspec = null;
+			statspec = (p2 & 0x10) != 0 ? StationClass.GetCustomStation(StationClassID.STAT_CLASS_DFLT, p2 >> 8) : null;
+			//statspec = null;
 			byte [] layout_ptr = new byte[numtracks * plat_len];
 			GetStationLayout( new ByteArrayPtr(layout_ptr), numtracks, plat_len, statspec);
 
@@ -1412,7 +1413,7 @@ public class Station extends StationTables implements IPoolItem
 		}
 	}
 
-	public static int GetCustomStationRelocation(final  StationSpec spec, final  Station st, byte ctype)
+	public static int GetCustomStationRelocation(final StationSpec spec, final Station st, int ctype)
 	{
 		final  RealSpriteGroup rsg = ResolveStationSpriteGroup(spec.spritegroup[ctype], st);
 
@@ -1606,7 +1607,12 @@ public class Station extends StationTables implements IPoolItem
 		return cost;
 	}
 
-	// Remove a bus station TODO use ArrayList for stops fields!
+	/**
+	 * Remove a truck/bus station 
+	 * @param flags
+	 * @param tile
+	 * @return
+	 */
 	private int RemoveRoadStop(int flags, TileIndex tile)
 	{
 		List<RoadStop> primary_stop;
@@ -2158,21 +2164,20 @@ public class Station extends StationTables implements IPoolItem
 		if (ti.tileh != 0 && (ti.map5 < 0x4C || ti.map5 > 0x51))
 			Landscape.DrawFoundation(ti, ti.tileh);
 
-		/* TODO custom
-		if (_m[ti.tile].m3 & 0x10) {
+		if(0 != (ti.tile.M().m3 & 0x10)) {
 			// look for customization
-			final  StationSpec statspec = GetCustomStation(STAT_CLASS_DFLT, _m[ti.tile].m4);
+			final  StationSpec statspec = StationClass.GetCustomStation(StationClassID.STAT_CLASS_DFLT, ti.tile.M().m4);
 
 			//debug("Cust-o-mized %p", statspec);
 
 			if (statspec != null) {
-				final  Station  st = GetStation(_m[ti.tile].m2);
+				final  Station  st = GetStation(ti.tile.M().m2);
 
 				relocation = GetCustomStationRelocation(statspec, st, 0);
 				//debug("Relocation %d", relocation);
 				t = statspec.renderdata[ti.map5];
 			}
-		} */
+		} /* */
 
 		if (t == null) 
 			t = _station_display_datas[ti.map5];
@@ -2575,18 +2580,6 @@ public class Station extends StationTables implements IPoolItem
 		CheckOrphanedSlots(RoadStopType.RS_TRUCK);
 	}
 
-	private static byte byte_inc_sat_RET(byte p) { // TODO to BitOps + test
-		byte b = (byte) (p + 1); 
-		if (b != 0) p = b; 
-		return p; 
-		}
-	
-	private static int inc_sat_RET(int p) { // TODO to BitOps + test
-		int b = (p + 1); 
-		if (b != 0) p = b; 
-		return p; 
-		}
-
 	private void UpdateStationRating()
 	{
 		//GoodsEntry ge;
@@ -2595,14 +2588,14 @@ public class Station extends StationTables implements IPoolItem
 		int waiting;
 		boolean waiting_changed = false;
 
-		time_since_load = byte_inc_sat_RET((byte) time_since_load);
-		time_since_unload = byte_inc_sat_RET((byte) time_since_unload);
+		time_since_load = BitOps.byte_inc_sat_RET((byte) time_since_load);
+		time_since_unload = BitOps.byte_inc_sat_RET((byte) time_since_unload);
 
 		for( GoodsEntry ge : goods )
 		{
 			if (ge.enroute_from != INVALID_STATION) {
-				ge.enroute_time = byte_inc_sat_RET((byte) ge.enroute_time);
-				ge.days_since_pickup = inc_sat_RET(ge.days_since_pickup);
+				ge.enroute_time = BitOps.byte_inc_sat_RET((byte) ge.enroute_time);
+				ge.days_since_pickup = BitOps.inc_sat_RET(ge.days_since_pickup);
 
 				rating = 0;
 

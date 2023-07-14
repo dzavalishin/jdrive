@@ -58,6 +58,7 @@ public class ViewPort implements Serializable
 
 	int zoom;
 
+
 	// don't need
 	//boolean active; // used instead of bit in _active_viewports
 
@@ -117,7 +118,9 @@ public class ViewPort implements Serializable
 
 
 
+	public static final Point _tile_fract_coords = new Point(0,0);
 	public static final TileHighlightData _thd = new TileHighlightData();
+	
 	public static final List<ViewPort> _viewports = new ArrayList<>();
 
 	public void removeFromAll()
@@ -2035,8 +2038,8 @@ public class ViewPort implements Serializable
 			pt.y += 8;
 		}
 
-		Global._tile_fract_coords.x = pt.x & 0xF;
-		Global._tile_fract_coords.y = pt.y & 0xF;
+		_tile_fract_coords.x = pt.x & 0xF;
+		_tile_fract_coords.y = pt.y & 0xF;
 
 		w = Window.GetCallbackWnd();
 		if (w != null) {
@@ -2241,9 +2244,9 @@ public class ViewPort implements Serializable
 	 * The lower bits (0-3) are the track type. */
 	static byte Check2x1AutoRail(int mode)
 	{
-		int fxpy = Global._tile_fract_coords.x + Global._tile_fract_coords.y;
+		int fxpy = ViewPort._tile_fract_coords.x + ViewPort._tile_fract_coords.y;
 		int sxpy = (_thd.selend.x & 0xF) + (_thd.selend.y & 0xF);
-		int fxmy = Global._tile_fract_coords.x - Global._tile_fract_coords.y;
+		int fxmy = ViewPort._tile_fract_coords.x - ViewPort._tile_fract_coords.y;
 		int sxmy = (_thd.selend.x & 0xF) - (_thd.selend.y & 0xF);
 
 		switch(mode) {

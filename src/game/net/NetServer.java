@@ -1074,7 +1074,6 @@ public interface NetServer extends NetTools, NetDefs
 
 	static void NetworkServer_HandleChat(NetworkAction action, DestType desttype, int dest, final String msg, int from_index) throws IOException
 	{
-		//NetworkClientState cs;
 		NetworkClientInfo ci, ci_own, ci_to;
 
 		switch (desttype) {

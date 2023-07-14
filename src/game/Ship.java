@@ -8,6 +8,7 @@ import game.ids.VehicleID;
 import game.struct.GetNewVehiclePosResult;
 import game.struct.NPFFindStationOrTileData;
 import game.struct.TileIndexDiffC;
+import game.tables.EngineTables2;
 import game.tables.Snd;
 import game.util.BitOps;
 import game.xui.EngineGui;
@@ -32,16 +33,16 @@ public class Ship {
 	public static void DrawShipEngine(int x, int y, /*EngineID*/ int engine, int image_ormod)
 	{
 		int spritenum = EngineGui.ShipVehInfo(engine).image_index;
-		// TODO custom spr
-		/*if (is_custom_sprite(spritenum)) {
-			int sprite = GetCustomVehicleIcon(engine, 6);
+
+		if (Sprite.is_custom_sprite(spritenum)) {
+			int sprite = Engine.GetCustomVehicleIcon(engine, 6);
 
 			if (sprite != 0) {
 				Gfx.DrawSprite(sprite | image_ormod, x, y);
 				return;
 			}
-			spritenum = orig_ship_vehicle_info[engine.id - Global.SHIP_ENGINES_INDEX].image_index;
-		}*/
+			spritenum = EngineTables2.orig_ship_vehicle_info[engine - Global.SHIP_ENGINES_INDEX].image_index;
+		}/**/
 		Gfx.DrawSprite((6 + _ship_sprites[spritenum]) | image_ormod, x, y);
 	}
 
@@ -49,19 +50,18 @@ public class Ship {
 	{
 		int spritenum = v.spritenum;
 
-		/* TODO custom
-		if (is_custom_sprite(spritenum)) {
-			int sprite = GetCustomVehicleSprite(v, direction);
+
+		if (Sprite.is_custom_sprite(spritenum)) {
+			int sprite = Engine.GetCustomVehicleSprite(v, direction);
 
 			if (sprite != 0) return sprite;
-			spritenum = orig_ship_vehicle_info[v.engine_type.id - Global.SHIP_ENGINES_INDEX].image_index;
-		} */
+			spritenum = EngineTables2.orig_ship_vehicle_info[v.engine_type.id - Global.SHIP_ENGINES_INDEX].image_index;
+		} /**/
 		return _ship_sprites[spritenum] + direction;
 	}
 
 	static Depot  FindClosestShipDepot(final Vehicle  v)
 	{
-		//final Depot  depot;
 		Depot [] best_depot = { null };
 		//int dist;
 		int [] best_dist = { -1 };

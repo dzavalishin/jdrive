@@ -608,6 +608,11 @@ public class FileIO
 		return ret;
 	}
 
+	public static void mkdir(String dirName ) {
+		File dir = new File(dirName);
+		dir.mkdirs();
+	}
+
 
 	/*
 int GetLanguageList(char **languages, int max)

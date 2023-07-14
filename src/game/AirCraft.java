@@ -15,6 +15,7 @@ import game.struct.Point;
 import game.tables.AirConstants;
 import game.tables.AirCraftTables;
 import game.tables.AirportMovingData;
+import game.tables.EngineTables2;
 import game.tables.Snd;
 import game.util.BitOps;
 import game.util.YearMonthDay;
@@ -106,14 +107,12 @@ public class AirCraft extends AirCraftTables {
 	{
 		int spritenum = v.spritenum;
 
-		// TODO custom
-		/*
 		if (Sprite.is_custom_sprite(spritenum)) {
 			int sprite = Engine.GetCustomVehicleSprite(v, direction);
 
 			if (sprite != 0) return sprite;
 			spritenum = EngineTables2.orig_aircraft_vehicle_info[v.engine_type.id - Global.AIRCRAFT_ENGINES_INDEX].image_index;
-		} */
+		} 
 		return direction + _aircraft_sprite[spritenum];
 	}
 
@@ -122,12 +121,12 @@ public class AirCraft extends AirCraftTables {
 		int spritenum = Engine.AircraftVehInfo(engine).image_index;
 		int sprite = (6 + _aircraft_sprite[spritenum]);
 
-		/** TODO custom
+
 		if (Sprite.is_custom_sprite(spritenum)) {
-			sprite = GetCustomVehicleIcon(engine, 6);
+			sprite = Engine.GetCustomVehicleIcon(engine, 6);
 			if (0==sprite)
-				spritenum = orig_aircraft_vehicle_info[engine - Global.AIRCRAFT_ENGINES_INDEX].image_index;
-		}*/
+				spritenum = EngineTables2.orig_aircraft_vehicle_info[engine - Global.AIRCRAFT_ENGINES_INDEX].image_index;
+		}
 
 		Gfx.DrawSprite(sprite | image_ormod, x, y);
 
@@ -982,7 +981,7 @@ public class AirCraft extends AirCraftTables {
 		} else {
 			// Helicopters
 			if(v.queue_item != null)
-				desired_dist = v.queue_item.queue.getPos( v) * 75;
+				desired_dist = v.queue_item.queue.getPos(v) * 75;
 			else
 				desired_dist = st.helicopter_queue.size * 75;
 		}
@@ -2539,13 +2538,11 @@ public class AirCraft extends AirCraftTables {
 
 	static void ShowBuildAircraftWindow(TileIndex tile)
 	{
-		Window w;
-
 		final int wn = tile == null ? 0 : tile.tile; // TODO check use of window_number
 
 		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, wn);
 
-		w = Window.AllocateWindowDesc(_new_aircraft_desc);
+		Window w = Window.AllocateWindowDesc(_new_aircraft_desc);
 		w.window_number = wn; 
 		w.vscroll.setCap(4);
 		w.getWidget(2).unkA = (w.vscroll.getCap() << 8) + 1;

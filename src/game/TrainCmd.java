@@ -16,6 +16,7 @@ import game.struct.NPFFindStationOrTileData;
 import game.struct.RailtypeSlowdownParams;
 import game.struct.TileIndexDiff;
 import game.struct.TrainCollideChecker;
+import game.tables.EngineTables2;
 import game.tables.Snd;
 import game.tables.TrainTables;
 import game.util.BitOps;
@@ -317,11 +318,11 @@ public class TrainCmd extends TrainTables
 		int base;
 
 		if (Sprite.is_custom_sprite(img)) {
-			/* TODO is_custom_sprite(img)
-			base = GetCustomVehicleSprite(v, direction + 4 * (Sprite.IS_CUSTOM_SECONDHEAD_SPRITE(img) ? 1 : 0 ) );
+			
+			base = Engine.GetCustomVehicleSprite(v, direction + 4 * (Sprite.IS_CUSTOM_SECONDHEAD_SPRITE(img) ? 1 : 0 ) );
 			if (base != 0) return base;
 			img = EngineTables2.orig_rail_vehicle_info[v.engine_type.id].image_index;
-			 */
+			
 			assert false;
 		}
 
@@ -331,7 +332,7 @@ public class TrainCmd extends TrainTables
 		return base;
 	}
 
-	//extern int _traininfo_vehicle_pitch;
+
 
 	public static void DrawTrainEngine(int x, int y, /*EngineID*/int engine, int image_ormod)
 	{

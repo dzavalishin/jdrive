@@ -36,7 +36,6 @@ public class Road extends RoadTables
 
 	static boolean HasTileRoadAt(TileIndex tile, int i)
 	{
-		int mask;
 		int b;
 
 		switch (tile.GetTileType()) {
@@ -60,7 +59,7 @@ public class Road extends RoadTables
 			return ((~(b - 0x43) & 3) == i);
 
 		case MP_TUNNELBRIDGE:
-			mask = GetRoadBitsByTile(tile);
+			int mask = GetRoadBitsByTile(tile);
 			b = 10; if(0 != (mask & 1)) break;
 			b = 5;  if(0 != (mask & 2)) break;
 			return false;
@@ -74,7 +73,6 @@ public class Road extends RoadTables
 
 	static boolean CheckAllowRemoveRoad(TileIndex tile, int br, boolean []edge_road)
 	{
-		int blocks;
 		int owner;
 		int n;
 		edge_road[0] = true;
@@ -82,7 +80,7 @@ public class Road extends RoadTables
 		if (Global._game_mode == GameModes.GM_EDITOR)
 			return true;
 
-		blocks = GetRoadBitsByTile(tile);
+		int blocks = GetRoadBitsByTile(tile);
 		if (blocks == 0)
 			return true;
 
@@ -1067,7 +1065,7 @@ public class Road extends RoadTables
 
 	static void TileLoop_Road(TileIndex tile)
 	{
-		Town t;
+		//Town t;
 		int grp;
 
 		if (GameOptions._opt.landscape == Landscape.LT_HILLY) {
@@ -1088,7 +1086,7 @@ public class Road extends RoadTables
 			return;
 
 		if (BitOps.GB(tile.getMap().m4, 4, 3) < 6) {
-			t = Town.ClosestTownFromTile(tile, -1);
+			Town t = Town.ClosestTownFromTile(tile, -1);
 
 			grp = 0;
 			if (t != null) {

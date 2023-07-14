@@ -119,7 +119,6 @@ public class SettingsGui extends SettingsTables
 			Global.SetDParam(6, Strings.SPECSTR_LANGUAGE_START + Strings._dynlang.curr);
 			//i = GetCurRes();
 			Global.SetDParam(7, Str.STR_RES_OTHER); // i == _num_resolutions ? Str.STR_RES_OTHER : Strings.SPECSTR_RESOLUTION_START + i);
-			//Global.SetDParam(8, Strings.SPECSTR_SCREENSHOT_START); // TODO Strings.SPECSTR_SCREENSHOT_START + _cur_screenshot_format);
 			Global.SetDParam(8, Strings.SPECSTR_SCREENSHOT_START + ScreenShot._cur_screenshot_format);
 
 			// (_fullscreen) ? SETBIT(w.click_state, 28) : CLRBIT(w.click_state, 28); // fullscreen button
@@ -1006,8 +1005,6 @@ public class SettingsGui extends SettingsTables
 		}
 
 		DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn, "Current value for '%s' is: '%s'", name, value);
-
-		DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn, "Not impl"); // TODO
 	}
 
 	static final Widget _patches_selection_widgets[] = {

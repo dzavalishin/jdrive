@@ -57,9 +57,10 @@ public class Trolly extends AiTools
 		assert(p.ainew.state == AiState.FIRST_TIME);
 		// We first have to init some things
 
+		/* TODO alpha AI message
 		if (PlayerID.getCurrent().id == 1 || Ai._ai.network_client) {
 			Global.ShowErrorMessage(Str.INVALID_STRING_ID().id, Str.TEMP_AI_IN_PROGRESS, 0, 0);
-		}
+		} */
 
 		// The PathFinder (AyStar)
 		// TODO: Maybe when an AI goes bankrupt, this is de-init

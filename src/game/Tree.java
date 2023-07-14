@@ -17,9 +17,9 @@ import game.util.TownTables;
 import game.xui.ViewPort;
 
 
-public class Tree  extends TreeTables {
+public class Tree extends TreeTables {
 
-	private static int _trees_tick_ctr; // TODO usage?
+	private static int _trees_tick_ctr;
 
 	static int GetRandomTreeType(TileIndex tile, int seed)
 	{
@@ -77,9 +77,9 @@ public class Tree  extends TreeTables {
 			int r = Hal.Random();
 			int x = BitOps.GB(r, 0, 5) - 16;
 			int y = BitOps.GB(r, 8, 5) - 16;
-			//int dist = myabs(x) + myabs(y);
+
 			int dist = Math.abs(x) + Math.abs(y);
-			// TODO use or create TileIndex method
+
 			TileIndex cur_tile = new TileIndex( TileIndex.TILE_MASK(tile.getTile() + TileIndex.TileDiffXY(x, y).diff) );
 
 			/* Only on tiles within 13 squares from tile,
@@ -629,7 +629,7 @@ public class Tree  extends TreeTables {
 
 		/* place a tree at a random spot */
 		r = Hal.Random();
-		tile = new TileIndex( TileIndex.TILE_MASK(r) ); // TODO use TileIndex random generator func?
+		tile = new TileIndex( TileIndex.TILE_MASK(r) );
 		if (tile.IsTileType(TileTypes.MP_CLEAR)) 
 		{
 			m =  (tile.getMap().m5 & 0x1C);

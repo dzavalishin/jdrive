@@ -204,19 +204,12 @@ public class Global
 	// etc
 	// Skip aging of cargo?
 	public static int _age_cargo_skip_counter;
-	public static final Point _tile_fract_coords = new Point(0,0); // TODO to ViewPort?
-	public static String _screenshot_name;
 	public static byte _vehicle_design_names;
 	public static int _get_z_hint;
 	public static Town _cleared_town = null;
 	public static int _cleared_town_rating;
 	public static int _caret_timer;
 	public static Vehicle _place_clicked_vehicle;
-	public static int _make_screenshot;
-	
-	// Available aircraft types
-	public static int _avail_aircraft = 0; // TODO who assigns?
-
 	// Position in tile loop
 	public static int _cur_tileloop_tile = 0;
 	//public static int _cur_tileloop_tile;
@@ -526,17 +519,9 @@ public class Global
 
 
 
-	/*
-	public static String GetString(StringID string)
-	{
-		return Strings.GetString(string);
-	}
 
-	public static String GetString(int string)
-	{
-		return Strings.GetString(string);
-	}
-	*/
+	
+	
 	
 	public static void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
 	{

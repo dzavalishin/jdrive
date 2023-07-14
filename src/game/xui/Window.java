@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.function.BiConsumer;
-//import game.WindowClass;
+
 
 public class Window extends WindowConstants implements Serializable
 {
@@ -111,10 +111,7 @@ public class Window extends WindowConstants implements Serializable
 	static int _scrollbar_size;
 	static int _scroller_click_timeout;
 
-	/**
-	 * TODO Controlled from Widget
-	 */
-	public static boolean _scrolling_scrollbar = false;
+	private static boolean _scrolling_scrollbar = false;
 
 	//public static boolean _scrolling_viewport = false;
 	static boolean _popup_menu_active;
@@ -720,13 +717,15 @@ public class Window extends WindowConstants implements Serializable
 		return (wc == WC_MAIN_TOOLBAR || wc == WC_STATUS_BAR || wc == WC_NEWS_WINDOW || wc == WC_SEND_NETWORK_MSG);
 	}
 
-	/** On clicking on a window, make it the frontmost window of all. However
+	/** 
+	 * On clicking on a window, make it the frontmost window of all. However
 	 * there are certain windows that always need to be on-top; these include
+	 * 
 	 * - Toolbar, Statusbar (always on)
 	 * - New window, Chatbar (only if open)
-	 * @param w window that is put into the foreground
+	 * 
 	 */
-	Window BringWindowToFront()
+	void BringWindowToFront()
 	{
 		Window v;
 
@@ -738,7 +737,7 @@ public class Window extends WindowConstants implements Serializable
 		while(true) 
 		{
 			i--;
-			if( i < 0 ) return this;
+			if( i < 0 ) return;
 			v = Global.gs._windows.get(i);
 			if( !v.IsVitalWindow() )
 				break;
@@ -752,7 +751,7 @@ public class Window extends WindowConstants implements Serializable
 		Global.gs._windows.add(i, this);
 		SetWindowDirty();
 
-		return this; // TODO kill me, make void
+		//return this; // kill me, make void
 	}
 	/*
 	Window BringWindowToFront(Window w)
@@ -1700,7 +1699,7 @@ public class Window extends WindowConstants implements Serializable
 	{
 		Window w;
 		ViewPort vp;
-		int dx,dy, x, y, sub;
+		//int dx,dy, x, y, sub;
 
 		if (!Hal._cursor.isScrollingViewport()) return true;
 
@@ -1765,10 +1764,10 @@ public class Window extends WindowConstants implements Serializable
 
 			//Hal._cursor.fix_at = true;
 
-			x = ((smallmap_d)w.custom).scroll_x;
-			y = ((smallmap_d)w.custom).scroll_y;
+			int x = ((smallmap_d)w.custom).scroll_x;
+			int y = ((smallmap_d)w.custom).scroll_y;
 
-			sub = ((smallmap_d)w.custom).subscroll + d.x;
+			int sub = ((smallmap_d)w.custom).subscroll + d.x;
 
 			x -= (sub >> 2) << 4;
 			y += (sub >> 2) << 4;
@@ -1819,12 +1818,12 @@ public class Window extends WindowConstants implements Serializable
 		}
 	}
 
-	static Window MaybeBringWindowToFront(Window w)
+	private void MaybeBringWindowToFront()
 	{
-		Window u;
+		//Window u;
 
-		if( w.isTopMostWindow() )
-			return w;
+		if( isTopMostWindow() )
+			return;
 
 		/* TODO XXX Rewrite
 		for (u = w; ++u != _last_window;) 
@@ -1844,7 +1843,8 @@ public class Window extends WindowConstants implements Serializable
 		}
 		 */
 		// TODO XXX Remove - hacked in!
-		return w.BringWindowToFront();
+		//return 
+		BringWindowToFront();
 
 		//return w;
 	}
@@ -3080,7 +3080,7 @@ public class Window extends WindowConstants implements Serializable
 
 		w = FindWindowFromPt(x, y);
 		if (w == null) return;
-		w = MaybeBringWindowToFront(w);
+		w.MaybeBringWindowToFront();
 		vp = w.IsPtInWindowViewport(x, y);
 		if (vp != null) {
 			if (Global._game_mode == GameModes.GM_MENU) return;
