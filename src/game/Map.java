@@ -16,7 +16,7 @@ public class Map {
 	 * Watch out! There are _no_ brackets around here, to prevent intermediate
 	 * rounding! Be careful when using this!
 	 * This value should be sqrt(2)/2 ~ 0.7071 */
-	public static final int STRAIGHT_TRACK_LENGTH = 7071/10000;
+	public static final float STRAIGHT_TRACK_LENGTH = 0.7071f;
 
 	
 	
