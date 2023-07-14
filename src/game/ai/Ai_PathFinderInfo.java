@@ -1,9 +1,14 @@
 package game.ai;
 
+import java.io.Serializable;
+
 import game.TileIndex;
 
-public class Ai_PathFinderInfo {
-
+public class Ai_PathFinderInfo implements Serializable 
+{
+	private static final long serialVersionUID = 7658977316051551511L;
+	
+	
 	TileIndex start_tile_tl; // tl = top-left
 	TileIndex start_tile_br; // br = bottom-right
 	TileIndex end_tile_tl; // tl = top-left
