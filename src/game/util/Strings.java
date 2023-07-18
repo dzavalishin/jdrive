@@ -639,11 +639,12 @@ private  final int *GetArgvPtr(final int **argv, int n)
 				break;
 			case 0x84: {// {VELOCITY}
 				int value = Getint(arg[argc++]);
-				if (GameOptions._opt_ptr.kilometers) value = value * 1648 >> 10;
-		buff.append( FormatCommaNumber(value) );
-		if (GameOptions._opt_ptr.kilometers) {	buff.append( " km/h" );	} 
-		else {	buff.append( " mph" );	}
-		break;
+				if (GameOptions._opt_ptr.kilometers) 
+					value = value * 1648 >> 10;
+				buff.append( FormatCommaNumber(value) );
+				if (GameOptions._opt_ptr.kilometers) {	buff.append( " km/h" );	} 
+				else {	buff.append( " mph" );	}
+				break;
 			}
 			// 0x85 is used as escape character..
 			case 0x85:

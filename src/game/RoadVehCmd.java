@@ -79,17 +79,13 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 */
 	static int CmdBuildRoadVeh(int x, int y, int flags, int p1, int p2)
 	{
-		int cost;
-		Vehicle v;
-		UnitID unit_num;
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
-		Engine e;
 
 		if (!Engine.IsEngineBuildable(p1, Vehicle.VEH_Road)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_NEW_VEHICLES);
 
-		cost = EstimateRoadVehCost(p1);
+		int cost = EstimateRoadVehCost(p1);
 		if(0 != (flags & Cmd.DC_QUERY_COST)) return cost;
 
 		/* The ai_new queries the vehicle cost before building the route,
@@ -97,12 +93,12 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (!Depot.IsTileDepotType(tile, TransportType.Road)) return Cmd.CMD_ERROR;
 		if (!tile.IsTileOwner(PlayerID.getCurrent())) return Cmd.CMD_ERROR;
 
-		v = Vehicle.AllocateVehicle();
+		Vehicle v = Vehicle.AllocateVehicle();
 		if (v == null ) // || IsOrderPoolFull())
 			return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
 		/* find the first free roadveh id */
-		unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Road);
+		UnitID unit_num = Vehicle.GetFreeUnitNumber(Vehicle.VEH_Road);
 		// TODO if (unit_num.id > Global._patches.max_roadveh.id)
 		//	return Cmd.return_cmd_error(Str.STR_00E1_TOO_MANY_VEHICLES_IN_GAME);
 
@@ -145,7 +141,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			v.max_speed = rvi.max_speed;
 			v.engine_type = EngineID.get(p1);
 
-			e = Engine.GetEngine(p1);
+			Engine e = Engine.GetEngine(p1);
 			v.reliability = e.getReliability();
 			v.reliability_spd_dec = e.reliability_spd_dec;
 			v.max_age = e.getLifelength() * 366;
@@ -182,11 +178,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 */
 	static int CmdStartStopRoadVeh(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v;
-
 		if (!Vehicle.IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
 
-		v = Vehicle.GetVehicle(p1);
+		Vehicle v = Vehicle.GetVehicle(p1);
 
 		if (v.type != Vehicle.VEH_Road || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
@@ -221,11 +215,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 */
 	static int CmdSellRoadVeh(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v;
-
 		if (!Vehicle.IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
 
-		v = Vehicle.GetVehicle(p1);
+		Vehicle v = Vehicle.GetVehicle(p1);
 
 		if (v.type != Vehicle.VEH_Road || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
@@ -271,7 +263,6 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	static Depot FindClosestRoadDepot(Vehicle v)
 	{
 		TileIndex tile = v.tile;
-		int i;
 
 		if (v.road.isInTunnel()) tile = TunnelBridgeCmd.GetVehicleOutOfTunnelTile(v);
 
@@ -294,7 +285,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			rfdd.best_length = -1;
 
 			/* search in all directions */
-			for(i=0; i!=4; i++)
+			for(int i=0; i!=4; i++)
 				Pathfind.FollowTrack(tile, TransportType.Road, 0x2000, i, RoadVehCmd::EnumRoadSignalFindDepot, null, rfdd);
 
 			if (rfdd.best_length == -1)
@@ -311,12 +302,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 */
 	static int CmdSendRoadVehToDepot(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v;
-		final Depot dep;
-
 		if (!Vehicle.IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
 
-		v = Vehicle.GetVehicle(p1);
+		Vehicle v = Vehicle.GetVehicle(p1);
 
 		if (v.type != Vehicle.VEH_Road || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
@@ -337,7 +325,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 			return 0;
 		}
 
-		dep = FindClosestRoadDepot(v);
+		final Depot dep = FindClosestRoadDepot(v);
 		if (dep == null) return Cmd.return_cmd_error(Str.STR_9019_UNABLE_TO_FIND_LOCAL_DEPOT);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -358,11 +346,9 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 */
 	static int CmdTurnRoadVeh(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v;
-
 		if (!Vehicle.IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
 
-		v = Vehicle.GetVehicle(p1);
+		Vehicle v = Vehicle.GetVehicle(p1);
 
 		if (v.type != Vehicle.VEH_Road || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
@@ -386,12 +372,11 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	 */
 	static int CmdChangeRoadVehServiceInt(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v;
 		int serv_int = Depot.GetServiceIntervalClamped(p2); /* Double check the service interval from the user-input */
 
 		if (serv_int != p2 || !Vehicle.IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
 
-		v = Vehicle.GetVehicle(p1);
+		Vehicle v = Vehicle.GetVehicle(p1);
 
 		if (v.type != Vehicle.VEH_Road || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
@@ -450,14 +435,12 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	static int SetRoadVehPosition(Vehicle v, int x, int y)
 	{
-		int new_z, old_z;
-
 		// need this hint so it returns the right z coordinate on bridges.
 		Global._get_z_hint = v.z_pos;
-		new_z = Landscape.GetSlopeZ(v.x_pos=x, v.y_pos=y);
+		int new_z = Landscape.GetSlopeZ(v.x_pos=x, v.y_pos=y);
 		Global._get_z_hint = 0;
 
-		old_z = v.z_pos;
+		int old_z = v.z_pos;
 		v.z_pos = new_z;
 
 		v.VehiclePositionChanged();
@@ -501,14 +484,12 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	static void RoadVehCrash(Vehicle v)
 	{
-		int pass;
-
 		v.road.crashed_ctr++;
 		v.setCrashed(true);
 
 		Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
 
-		pass = 1;
+		int pass = 1;
 		if (v.getCargo_type() == 0)
 			pass += v.cargo_count;
 		v.cargo_count = 0;
@@ -527,12 +508,10 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	static void RoadVehCheckTrainCrash(Vehicle v)
 	{
-		TileIndex tile;
-
 		if (v.road.isInTunnel())
 			return;
 
-		tile = v.tile;
+		TileIndex tile = v.tile;
 
 		// Make sure it's a road/rail crossing
 		if (!tile.IsTileType( TileTypes.MP_STREET) || !tile.IsLevelCrossing())
@@ -574,9 +553,6 @@ public class RoadVehCmd extends RoadVehCmdTables {
 
 	static void ProcessRoadVehOrder(Vehicle v)
 	{
-		final Order order;
-		final Station st;
-
 		if (v.getCurrent_order().type >= Order.OT_GOTO_DEPOT && v.getCurrent_order().type <= Order.OT_LEAVESTATION) {
 			// Let a depot order in the orderlist interrupt.
 			if (v.getCurrent_order().type != Order.OT_GOTO_DEPOT ||
@@ -593,7 +569,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (v.cur_order_index >= v.num_orders)
 			v.cur_order_index = 0;
 
-		order = v.GetVehicleOrder(v.cur_order_index);
+		final Order order = v.GetVehicleOrder(v.cur_order_index);
 
 		if (order == null) {
 			v.getCurrent_order().type = Order.OT_NOTHING;
@@ -614,7 +590,7 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		if (order.type == Order.OT_GOTO_STATION) {
 			if (order.station == v.last_station_visited)
 				v.last_station_visited = Station.INVALID_STATION;
-			st = Station.GetStation(order.station);
+			final Station st = Station.GetStation(order.station);
 
 			{
 				int mindist = Integer.MAX_VALUE;
@@ -718,7 +694,6 @@ public class RoadVehCmd extends RoadVehCmdTables {
 	static Vehicle RoadVehFindCloseTo(Vehicle v, int x, int y, int dir)
 	{
 		RoadVehFindData rvf = new RoadVehFindData();
-		Vehicle u;
 
 		if (v.road.reverse_ctr != 0)
 			return null;
@@ -727,7 +702,8 @@ public class RoadVehCmd extends RoadVehCmdTables {
 		rvf.y = y;
 		rvf.dir = dir;
 		rvf.veh = v;
-		u = (Vehicle) Vehicle.VehicleFromPos(TileIndex.TileVirtXY(x, y), rvf, RoadVehCmd::EnumCheckRoadVehClose);
+
+		Vehicle u = (Vehicle) Vehicle.VehicleFromPos(TileIndex.TileVirtXY(x, y), rvf, RoadVehCmd::EnumCheckRoadVehClose);
 
 		// This code protects a roadvehicle from being blocked for ever
 		//  If more than 1480 / 74 days a road vehicle is blocked, it will

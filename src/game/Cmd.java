@@ -240,52 +240,52 @@ public class Cmd {
 
 			new Command(Order::CmdModifyOrder,                         0), /*  42 */
 			new Command(Order::CmdSkipOrder,                           0), /*  43 */
-			new Command(Order::CmdDeleteOrder,                         0), /*  44 */
-			new Command(Order::CmdInsertOrder,                         0), /*  45 */
+			new Command(Order::CmdDeleteOrder,									0), /*  44 */
+			new Command(Order::CmdInsertOrder,									0), /*  45 */
 
-			new Command(TrainCmd::CmdChangeTrainServiceInt,               0), /*  46 */
+			new Command(TrainCmd::CmdChangeTrainServiceInt,						0), /*  46 */
 
-			new Command(Industry::CmdBuildIndustry,                       0), /*  47 */
-			new Command(UnmovableCmd::CmdBuildCompanyHQ,                      0), /*  48 */
-			new Command(MiscCmd::CmdSetPlayerFace,                       0), /*  49 */
-			new Command(MiscCmd::CmdSetPlayerColor,                      0), /*  50 */
+			new Command(Industry::CmdBuildIndustry,								0), /*  47 */
+			new Command(UnmovableCmd::CmdBuildCompanyHQ,						0), /*  48 */
+			new Command(MiscCmd::CmdSetPlayerFace,								0), /*  49 */
+			new Command(MiscCmd::CmdSetPlayerColor,								0), /*  50 */
 
-			new Command(MiscCmd::CmdIncreaseLoan,                        0), /*  51 */
-			new Command(MiscCmd::CmdDecreaseLoan,                        0), /*  52 */
+			new Command(MiscCmd::CmdIncreaseLoan,								0), /*  51 */
+			new Command(MiscCmd::CmdDecreaseLoan,								0), /*  52 */
 
-			new Command(Engine::CmdWantEnginePreview,                   0), /*  53 */
+			new Command(Engine::CmdWantEnginePreview,							0), /*  53 */
 
-			new Command(Vehicle::CmdNameVehicle,                         0), /*  54 */
-			new Command(Engine::CmdRenameEngine,                        0), /*  55 */
+			new Command(Vehicle::CmdNameVehicle,								0), /*  54 */
+			new Command(Engine::CmdRenameEngine,								0), /*  55 */
 
-			new Command(MiscCmd::CmdChangeCompanyName,                   0), /*  56 */
-			new Command(MiscCmd::CmdChangePresidentName,                 0), /*  57 */
+			new Command(MiscCmd::CmdChangeCompanyName,							0), /*  56 */
+			new Command(MiscCmd::CmdChangePresidentName,						0), /*  57 */
 
-			new Command(Station::CmdRenameStation,                       0), /*  58 */
+			new Command(Station::CmdRenameStation,								0), /*  58 */
 
-			new Command(AirCraft::CmdSellAircraft,                        0), /*  59 */
-			new Command(AirCraft::CmdStartStopAircraft,                   0), /*  60 */
+			new Command(AirCraft::CmdSellAircraft,								0), /*  59 */
+			new Command(AirCraft::CmdStartStopAircraft,							0), /*  60 */
 
-			new Command(AirCraft::CmdBuildAircraft,                       0), /*  61 */
-			new Command(AirCraft::CmdSendAircraftToHangar,                0), /*  62 */
-			new Command(AirCraft::CmdChangeAircraftServiceInt,            0), /*  63 */
-			new Command(AirCraft::CmdRefitAircraft,                       0), /*  64 */
+			new Command(AirCraft::CmdBuildAircraft,								0), /*  61 */
+			new Command(AirCraft::CmdSendAircraftToHangar,						0), /*  62 */
+			new Command(AirCraft::CmdChangeAircraftServiceInt,					0), /*  63 */
+			new Command(AirCraft::CmdRefitAircraft,								0), /*  64 */
 
-			new Command(SignStruct::CmdPlaceSign,                           0), /*  65 */
-			new Command(SignStruct::CmdRenameSign,                          0), /*  66 */
+			new Command(SignStruct::CmdPlaceSign,								0), /*  65 */
+			new Command(SignStruct::CmdRenameSign,								0), /*  66 */
 
-			new Command(RoadVehCmd::CmdBuildRoadVeh,                        0), /*  67 */
-			new Command(RoadVehCmd::CmdStartStopRoadVeh,                    0), /*  68 */
-			new Command(RoadVehCmd::CmdSellRoadVeh,                         0), /*  69 */
-			new Command(RoadVehCmd::CmdSendRoadVehToDepot,                  0), /*  70 */
-			new Command(RoadVehCmd::CmdTurnRoadVeh,                         0), /*  71 */
-			new Command(RoadVehCmd::CmdChangeRoadVehServiceInt,             0), /*  72 */
+			new Command(RoadVehCmd::CmdBuildRoadVeh,							0), /*  67 */
+			new Command(RoadVehCmd::CmdStartStopRoadVeh,						0), /*  68 */
+			new Command(RoadVehCmd::CmdSellRoadVeh,								0), /*  69 */
+			new Command(RoadVehCmd::CmdSendRoadVehToDepot,						0), /*  70 */
+			new Command(RoadVehCmd::CmdTurnRoadVeh,								0), /*  71 */
+			new Command(RoadVehCmd::CmdChangeRoadVehServiceInt,					0), /*  72 */
 
-			new Command(MiscCmd::CmdPause,                      Cmd.CMD_SERVER), /*  73 */
+			new Command(MiscCmd::CmdPause,							Cmd.CMD_SERVER), /*  73 */
 
-			new Command(Economy::CmdBuyShareInCompany,                   0), /*  74 */
-			new Command(Economy::CmdSellShareInCompany,                  0), /*  75 */
-			new Command(Economy::CmdBuyCompany,                          0), /*  76 */
+			new Command(Economy::CmdBuyShareInCompany,							0), /*  74 */
+			new Command(Economy::CmdSellShareInCompany,							0), /*  75 */
+			new Command(Economy::CmdBuyCompany,									0), /*  76 */
 
 			new Command(Town::CmdBuildTown,                 Cmd.CMD_OFFLINE), /*  77 */
 			new Command(null,                                   0), /*  78 */
@@ -365,9 +365,6 @@ public class Cmd {
 
 	public static int DoCommand(int x, int y, int p1, int p2, int flags, int procc)
 	{
-		int res;
-		CommandProc proc;
-
 		/* Do not even think about executing out-of-bounds tile-commands */
 		//if (TileIndex.TileVirtXY(x, y) > MapSize()) {
 		if (!TileIndex.TileVirtXY(x, y).IsValidTile()) {
@@ -375,7 +372,7 @@ public class Cmd {
 			return Cmd.CMD_ERROR;
 		}
 
-		proc = _command_proc_table[procc].proc;
+		CommandProc proc = _command_proc_table[procc].proc;
 
 		if (_docommand_recursive == 0) Global._error_message = Str.INVALID_STRING;
 
@@ -384,7 +381,7 @@ public class Cmd {
 		// only execute the test call if it's toplevel, or we're not execing.
 		if (_docommand_recursive == 1 || 0 == (flags & Cmd.DC_EXEC) || 0 != (flags & Cmd.DC_FORCETEST) ) 
 		{
-			res = proc.exec(x, y, flags&~Cmd.DC_EXEC, p1, p2);
+			int res = proc.exec(x, y, flags&~Cmd.DC_EXEC, p1, p2);
 			if (CmdFailed(res)) {
 				if(0 != (res & 0xFFFF)) Global._error_message = res & 0xFFFF;
 				{
@@ -414,7 +411,7 @@ public class Cmd {
 
 		/* Execute the command here. All cost-relevant functions set the expenses type
 		 * themselves with "Player.SET_EXPENSES_TYPE(...);" at the beginning of the function */
-		res = proc.exec(x, y, flags, p1, p2);
+		int res = proc.exec(x, y, flags, p1, p2);
 		if (CmdFailed(res)) {
 			if(0 != (res & 0xFFFF)) Global._error_message = res & 0xFFFF;
 			//error:

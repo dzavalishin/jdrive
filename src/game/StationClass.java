@@ -104,13 +104,10 @@ public class StationClass
 	 */
 	static void SetCustomStation(StationSpec spec)
 	{
-		StationClass station_class;
-		int i;
-
 		assert(spec.sclass.ordinal() < STAT_CLASS_MAX);
-		station_class = station_classes[spec.sclass.ordinal()];
+		StationClass station_class = station_classes[spec.sclass.ordinal()];
 
-		i = station_class.stations++;
+		int i = station_class.stations++;
 		//station_class.spec = realloc(station_class.spec, station_class.stations * sizeof(*station_class.spec));
 		station_class.spec = Arrays.copyOf(station_class.spec, station_class.stations);
 

@@ -519,8 +519,12 @@ public class MusicGui
 	
 	static class MusicFileSettings {
 		int playlist;
-		int music_vol = 100;
-		int effect_vol = 100;
+		
+		//int music_vol = 100;
+		//int effect_vol = 100;
+		int music_vol = 20;
+		int effect_vol = 10;
+		
 		byte [] custom_1 = new byte[33];
 		byte [] custom_2 = new byte[33];
 		boolean btn_down;

@@ -2195,30 +2195,28 @@ public class Vehicle implements IPoolItem
 	void CheckVehicleBreakdown()
 	{
 		int rel, rel_old;
-		int r;
-		int chance;
-		Vehicle v = this;
+		//Vehicle v = this;
 
 		/* decrease reliability */
-		v.reliability = rel = Math.max((rel_old = v.reliability) - v.reliability_spd_dec, 0);
+		reliability = rel = Math.max((rel_old = reliability) - reliability_spd_dec, 0);
 		if ((rel_old >> 8) != (rel >> 8))
-			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
+			Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, index);
 
-		if (v.breakdown_ctr != 0 || v.isStopped() ||
-				v.cur_speed < 5 || Global._game_mode == GameModes.GM_MENU) {
+		if (breakdown_ctr != 0 || isStopped() ||
+				cur_speed < 5 || Global._game_mode == GameModes.GM_MENU) {
 			return;
 		}
 
-		r = Hal.Random();
+		int r = Hal.Random();
 
 		/* increase chance of failure */
-		chance = v.breakdown_chance + 1;
+		int chance = breakdown_chance + 1;
 		if (BitOps.CHANCE16I(1,25,r)) chance += 25;
-		v.breakdown_chance =  Math.min(255, chance);
+		breakdown_chance =  Math.min(255, chance);
 
 		/* calculate reliability value to use in comparison */
-		rel = v.reliability;
-		if (v.type == VEH_Ship) rel += 0x6666;
+		rel = reliability;
+		if (type == VEH_Ship) rel += 0x6666;
 
 		/* disabled breakdowns? */
 		if (GameOptions._opt.diff.vehicle_breakdowns < 1) return;
@@ -2227,10 +2225,10 @@ public class Vehicle implements IPoolItem
 		if (GameOptions._opt.diff.vehicle_breakdowns == 1) rel += 0x6666;
 
 		/* check if to break down */
-		if (_breakdown_chance[Math.min(rel, 0xffff) >> 10] <= v.breakdown_chance) {
-			v.breakdown_ctr    =  (BitOps.GB(r, 16, 6) + 0x3F);
-			v.breakdown_delay  =  (BitOps.GB(r, 24, 7) + 0x80);
-			v.breakdown_chance = 0;
+		if (_breakdown_chance[Math.min(rel, 0xffff) >> 10] <= breakdown_chance) {
+			breakdown_ctr    =  (BitOps.GB(r, 16, 6) + 0x3F);
+			breakdown_delay  =  (BitOps.GB(r, 24, 7) + 0x80);
+			breakdown_chance = 0;
 		}
 	}
 
@@ -2255,23 +2253,23 @@ public class Vehicle implements IPoolItem
 
 	void AgeVehicle()
 	{
-		Vehicle v = this;
+		//Vehicle v = this;
 
-		if (v.age < 65535)
-			v.age++;
+		if(age < 65535)
+			age++;
 
-		int agep = v.age - v.max_age;
+		int agep = age - max_age;
 		if (agep == 366*0 || agep == 366*1 || agep == 366*2 || agep == 366*3 || agep == 366*4)
-			v.reliability_spd_dec <<= 1;
+			reliability_spd_dec <<= 1;
 
-		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
+		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, index);
 
 		if (agep == -366) {
-			ShowVehicleGettingOld(v, Str.STR_01A0_IS_GETTING_OLD);
+			ShowVehicleGettingOld( this, Str.STR_01A0_IS_GETTING_OLD );
 		} else if (agep == 0) {
-			ShowVehicleGettingOld(v, Str.STR_01A1_IS_GETTING_VERY_OLD);
+			ShowVehicleGettingOld( this, Str.STR_01A1_IS_GETTING_VERY_OLD );
 		} else if (agep == 366*1 || agep == 366*2 || agep == 366*3 || agep == 366*4 || agep == 366*5) {
-			ShowVehicleGettingOld(v, Str.STR_01A2_IS_GETTING_VERY_OLD_AND);
+			ShowVehicleGettingOld( this, Str.STR_01A2_IS_GETTING_VERY_OLD_AND );
 		}
 	}
 
@@ -2282,16 +2280,14 @@ public class Vehicle implements IPoolItem
 	 */
 	static int CmdCloneVehicle(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v_front, v;
-		Vehicle w_front, w, w_rear;
-		int cost, total_cost = 0;
+		int total_cost = 0;
 
 		if (!IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
-		v = Vehicle.GetVehicle(p1);
-		v_front = v;
+		Vehicle v = Vehicle.GetVehicle(p1);
+		Vehicle v_front = v;
 		//w = null;
-		w_front = null;
-		w_rear = null;
+		Vehicle w_front = null;
+		Vehicle w_rear = null;
 
 
 		/*
@@ -2327,14 +2323,14 @@ public class Vehicle implements IPoolItem
 				continue;
 			}
 
-			cost = Cmd.DoCommand(x, y, v.engine_type.id, 1, flags, CMD_BUILD_VEH(v.type));
+			int cost = Cmd.DoCommand(x, y, v.engine_type.id, 1, flags, CMD_BUILD_VEH(v.type));
 
 			if (Cmd.CmdFailed(cost)) return cost;
 
 			total_cost += cost;
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				w = GetVehicle(Global._new_vehicle_id);
+				Vehicle w = GetVehicle(Global._new_vehicle_id);
 
 				if (v.type != VEH_Road) { // road vehicles can't be refitted
 					if (v.cargo_type != w.cargo_type) {
@@ -2402,7 +2398,6 @@ public class Vehicle implements IPoolItem
 	 */
 	static int ReplaceVehicle(Vehicle [] w, byte flags)
 	{
-		int cost;
 		Vehicle old_v = w[0];
 		final Player p = Player.GetPlayer(old_v.owner);
 		EngineID new_engine_type;
@@ -2414,7 +2409,7 @@ public class Vehicle implements IPoolItem
 		new_engine_type = p.EngineReplacement(old_v.engine_type);
 		if (new_engine_type.id == INVALID_ENGINE) new_engine_type = old_v.engine_type;
 
-		cost = Cmd.DoCommand(old_v.x_pos, old_v.y_pos, new_engine_type.id, 1, flags, CMD_BUILD_VEH(old_v.type));
+		int cost = Cmd.DoCommand(old_v.x_pos, old_v.y_pos, new_engine_type.id, 1, flags, CMD_BUILD_VEH(old_v.type));
 		if (Cmd.CmdFailed(cost)) return cost;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -2493,7 +2488,6 @@ public class Vehicle implements IPoolItem
 	 */
 	static int MaybeReplaceVehicle(Vehicle v)
 	{
-		Vehicle w;
 		final Player p = Player.GetPlayer(v.owner);
 		byte flags = 0;
 		int cost, temp_cost = 0;
@@ -2524,7 +2518,7 @@ public class Vehicle implements IPoolItem
 
 		for (;;) {
 			cost = 0;
-			w = v;
+			Vehicle w = v;
 			do {
 				if (w.type == VEH_Train && w.IsMultiheaded() && !w.IsTrainEngine()) {
 					/* we build the rear ends of multiheaded trains with the front ones */
@@ -2601,7 +2595,7 @@ public class Vehicle implements IPoolItem
 		if (train_fits_in_station) {
 			// the train fitted in the stations it got in it's orders, so we should make sure that it still do
 			Vehicle temp;
-			w = v;
+			Vehicle w = v;
 			while (v.rail.shortest_platform[0]*16 < v.rail.cached_total_length) {
 				// the train is too long. We will remove cars one by one from the start of the train until it's short enough
 				while (w != null && !(Engine.RailVehInfo(w.engine_type.id).isWagon()) ) {
@@ -2637,10 +2631,9 @@ public class Vehicle implements IPoolItem
 	 */
 	public static int CmdNameVehicle(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v;
-
 		if (!IsVehicleIndex(p1) || Global._cmd_text == null) return Cmd.CMD_ERROR;
-		v = GetVehicle(p1);
+
+		Vehicle v = GetVehicle(p1);
 		if (!Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		StringID str = Global.AllocateNameUnique(Global._cmd_text, 2);

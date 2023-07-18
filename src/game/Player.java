@@ -37,7 +37,6 @@ import game.xui.Window;
 public class Player implements Serializable 
 {
 
-
 	private static final long serialVersionUID = 1L;
 
 	int name_2;
@@ -48,7 +47,6 @@ public class Player implements Serializable
 
 	public int face;
 
-	//int player_money;
 	int current_loan;
 	long money64; // internal 64-bit version of the money. the 32-bit field will be clamped to plus minus 2 billion
 
@@ -387,16 +385,6 @@ public class Player implements Serializable
 			p.SubtractMoneyFromAnyPlayer(cost);
 	}
 
-	// the player_money field is kept as it is, but money64 contains the actual amount of money.
-	/*public void UpdatePlayerMoney32()
-	{
-		if (money64 < -2000000000)
-			player_money = -2000000000;
-		else if (money64 > 2000000000)
-			player_money = 2000000000;
-		else
-			player_money = (int)money64;
-	}*/
 
 	public static void GetNameOfOwner(PlayerID owner, TileIndex tile)
 	{
@@ -479,21 +467,17 @@ public class Player implements Serializable
 	{
 		Player p = this;
 
-		TileIndex tile;
-		Town t;
 		StringID str;
-		//Player pp;
 		int strp;
-		//String buffer;
 
 		if (name_1 != Str.STR_SV_UNNAMED)
 			return;
 
-		tile = last_build_coordinate;
+		TileIndex tile = last_build_coordinate;
 		if (tile == null)
 			return;
 
-		t = Town.ClosestTownFromTile(tile, -1);
+		Town t = Town.ClosestTownFromTile(tile, -1);
 
 		if( t != null && BitOps.IS_INT_INSIDE(t.townnametype, Strings.SPECSTR_TOWNNAME_START, Strings.SPECSTR_TOWNNAME_LAST+1)) 
 		{
@@ -532,7 +516,7 @@ public class Player implements Serializable
 
 	private static void COLOR_SWAP( byte colors[], int i, int j)  
 	{ 
-		byte t=colors[i];colors[i]=colors[j];colors[j]=t; 
+		byte t = colors[i]; colors[i] = colors[j]; colors[j] = t; 
 	} 
 
 	static final byte _color_sort[] = {2, 2, 3, 2, 3, 2, 3, 2, 3, 2, 2, 2, 3, 1, 1, 1};
@@ -543,9 +527,7 @@ public class Player implements Serializable
 	{
 		byte [] colors = new byte [16];
 		int pcolor, t2;
-		int i,j,n;
-		int r;
-		//Player p;
+		int i,n;
 
 		// Initialize array
 		for(i=0; i!=16; i++)
@@ -554,14 +536,14 @@ public class Player implements Serializable
 		// And randomize it
 		n = 100;
 		do {
-			r = Hal.Random();
+			int r = Hal.Random();
 			COLOR_SWAP( colors, BitOps.GB(r, 0, 4), BitOps.GB(r, 4, 4));
 		} while (--n > 0);
 
 		// Bubble sort it according to the values in table 1
 		i = 16;
 		do {
-			for(j=0; j!=15; j++) {
+			for(int j=0; j!=15; j++) {
 				if (_color_sort[colors[j]] < _color_sort[colors[j+1]]) {
 					COLOR_SWAP( colors, j,j+1);
 				}
@@ -569,7 +551,6 @@ public class Player implements Serializable
 		} while (--i > 0);
 
 		// Move the colors that look similar to each player's color to the side
-		//FOR_ALL_PLAYERS(p)
 		for( Player p : Global.gs._players )
 			if (p.is_active) {
 				pcolor = p.player_color;
@@ -608,7 +589,6 @@ public class Player implements Serializable
 
 	private void GeneratePresidentName() // Player p)
 	{
-		//Player pp;
 		String buffer;
 
 		for(;;) {
@@ -645,12 +625,10 @@ public class Player implements Serializable
 
 	private static Player AllocatePlayer()
 	{
-		//Player p;
 		// Find a free slot
 		for( Player p : Global.gs._players ) {
 			if (!p.is_active) {
 				int i = p.index.id;
-				//memset(p, 0, sizeof(Player));
 				p.clear();
 				p.index = PlayerID.get(i);
 				return p;
@@ -712,11 +690,8 @@ public class Player implements Serializable
 
 	private static void MaybeStartNewPlayer()
 	{
-		int n;
-		//Player p;
-
 		// count number of competitors
-		n = 0;
+		int n = 0;
 		for( Player p : Global.gs._players ) {
 			if (p.isActive() && p.isAi())
 				n++;
@@ -735,9 +710,7 @@ public class Player implements Serializable
 
 	static void InitializePlayers()
 	{
-		int i;
-
-		for(i = 0; i != Global.MAX_PLAYERS; i++)
+		for(int i = 0; i != Global.MAX_PLAYERS; i++)
 		{
 			Global.gs._players[i] = new Player();
 			Global.gs._players[i].index=PlayerID.get(i);
@@ -747,12 +720,10 @@ public class Player implements Serializable
 
 	static void OnTick_Players()
 	{
-		Player p;
-
 		if (Global._game_mode == GameModes.GM_EDITOR)
 			return;
 
-		p = GetPlayer(Global.gs._cur_player_tick_index);
+		Player p = GetPlayer(Global.gs._cur_player_tick_index);
 		Global.gs._cur_player_tick_index = (Global.gs._cur_player_tick_index + 1) % Global.MAX_PLAYERS;
 		if (p.name_1 != 0) p.GenerateCompanyName();
 
@@ -775,8 +746,6 @@ public class Player implements Serializable
 
 	public static void PlayersYearlyLoop()
 	{
-		//Player p;
-
 		// Copy statistics
 		for( Player p : Global.gs._players ) 
 		{
@@ -824,9 +793,8 @@ public class Player implements Serializable
 	static byte GetPlayerRailtypes(PlayerID p)
 	{
 		byte rt = 0;
-		int i;
 
-		for (i = 0; i != Global.TOTAL_NUM_ENGINES; i++) {
+		for (int i = 0; i != Global.TOTAL_NUM_ENGINES; i++) {
 			final Engine e = Engine.GetEngine(i);
 
 			//final RailVehicleInfo info = Engine.RailVehInfo(i);
@@ -1010,13 +978,11 @@ public class Player implements Serializable
 
 		switch (p1) {
 		case 0: { // Create a new Player 
-			Player p;
-			//PlayerID pid = p2;
 			int pid = p2;
 
 			if (0 == (flags & Cmd.DC_EXEC) || pid >= Global.MAX_PLAYERS) return 0;
 
-			p = DoStartupNewPlayer(false);
+			Player p = DoStartupNewPlayer(false);
 
 
 			if (Global._networking && !Global._network_server && Global.gs._local_player.isSpectator())
@@ -1099,13 +1065,11 @@ public class Player implements Serializable
 			break;
 
 		case 2: { /* Delete a Player */
-			Player p;
-
 			if (p2 >= Global.MAX_PLAYERS) return Cmd.CMD_ERROR;
 
 			if (0 == (flags & Cmd.DC_EXEC)) return 0;
 
-			p = GetPlayer(p2);
+			Player p = GetPlayer(p2);
 
 			/* Only allow removal of HUMAN companies */
 			if (p.index.IS_HUMAN_PLAYER()) {
@@ -1165,7 +1129,6 @@ public class Player implements Serializable
 	//static StringID EndGameGetPerformanceTitleFromValue(int value)
 	public static int EndGameGetPerformanceTitleFromValue(int value)
 	{
-
 		long lvalue = BitOps.minu(value, 1000) >>> 6;
 					if (lvalue >= _endgame_perf_titles.length) 
 						lvalue = _endgame_perf_titles.length - 1L;
@@ -1179,14 +1142,13 @@ public class Player implements Serializable
 	{
 
 		HighScore[] hs = Global._highscore_table[GameOptions._opt.diff_level];
-		int i;
 		int score = p.old_economy[0].performance_history;
 
 		// Exclude cheaters from the honour of being in the highscore table 
 		if (Cheat.CheatHasBeenUsed())
 			return -1;
 
-		for (i = 0; i < hs.length; i++) 
+		for (int i = 0; i < hs.length; i++) 
 		{
 			// You are in the TOP5. Move all values one down and save us there 
 			if (hs[i].score <= score) {
@@ -1223,17 +1185,9 @@ public class Player implements Serializable
 	private static final int LAST_HS_ITEM = Global._highscore_table.length - 1;
 	public static int SaveHighScoreValueNetwork()
 	{
-		//Player [] player_sort = new Player[Global.MAX_PLAYERS];
-		//int count = 0;
 		int player = -1;
 
 		List<Player> player_sort = new ArrayList<>();
-
-		/* Sort all active players with the highest score first 
-		for( Player p : _players ) {
-			if (p.isActive())
-				player_sort[count++] = p;
-		}*/
 
 		Player.forEach( p -> { if (p.isActive()) player_sort.add(p); } );
 		Collections.sort(player_sort, new PlayerHiScoreComparator());
@@ -1267,10 +1221,7 @@ public class Player implements Serializable
 
 	public void InitialiseEngineReplacement()
 	{
-		//EngineID engine;
-		int engine;
-
-		for (engine = 0; engine < Global.TOTAL_NUM_ENGINES; engine++)
+		for( int engine = 0; engine < Global.TOTAL_NUM_ENGINES; engine++ )
 			engine_replacement[engine] = Engine.INVALID_ENGINE;
 	}
 

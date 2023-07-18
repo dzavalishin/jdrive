@@ -447,6 +447,8 @@ public class ViewPort implements Serializable
 
 		assert((image & Sprite.SPRITE_MASK) < Sprite.MAX_SPRITES);
 
+		assert(image != 50760238); // TODO debug!
+		
 		ts = new TileSpriteToDraw();
 
 		ts.image = image;
@@ -2007,16 +2009,13 @@ public class ViewPort implements Serializable
 
 	public static Vehicle CheckMouseOverVehicle()
 	{
-		final Window  w;
-		final ViewPort  vp;
-
 		int x = Hal._cursor.pos.x;
 		int y = Hal._cursor.pos.y;
 
-		w = Window.FindWindowFromPt(x, y);
+		final Window  w = Window.FindWindowFromPt(x, y);
 		if (w == null) return null;
 
-		vp = w.IsPtInWindowViewport(x, y);
+		final ViewPort vp = w.IsPtInWindowViewport(x, y);
 		return (vp != null) ? Vehicle.CheckClickOnVehicle(vp, x, y) : null;
 	}
 
@@ -2024,10 +2023,7 @@ public class ViewPort implements Serializable
 
 	static void PlaceObject()
 	{
-		Point pt;
-		Window w;
-
-		pt = GetTileBelowCursor();
+		Point pt = GetTileBelowCursor();
 		if (pt.x == -1) return;
 
 		if (_thd.place_mode == VHM_POINT) {
@@ -2038,7 +2034,7 @@ public class ViewPort implements Serializable
 		Global._tile_fract_coords.x = pt.x & 0xF;
 		Global._tile_fract_coords.y = pt.y & 0xF;
 
-		w = Window.GetCallbackWnd();
+		Window w = Window.GetCallbackWnd();
 		if (w != null) {
 			WindowEvent e = new WindowEvent();
 
@@ -2053,9 +2049,7 @@ public class ViewPort implements Serializable
 	/* scrolls the viewport in a window to a given location */
 	static boolean ScrollWindowTo(int x , int y, Window  w)
 	{
-		Point pt;
-
-		pt = MapXYZToViewport(w.getViewport(), x, y, Landscape.GetSlopeZ(x, y));
+		Point pt = MapXYZToViewport(w.getViewport(), x, y, Landscape.GetSlopeZ(x, y));
 		w.as_vp_d().follow_vehicle = VehicleID.get( Vehicle.INVALID_VEHICLE ).id;
 
 		if (w.as_vp_d().scrollpos_x == pt.x && w.as_vp_d().scrollpos_y == pt.y)
@@ -2092,9 +2086,7 @@ public class ViewPort implements Serializable
 
 	public static void SetRedErrorSquare(TileIndex tile)
 	{
-		TileIndex old;
-
-		old = _thd.redsq;
+		TileIndex old = _thd.redsq;
 		_thd.redsq = tile;
 
 		if (tile == null || !tile.equals(old)) {
@@ -2277,12 +2269,11 @@ public class ViewPort implements Serializable
 	{
 		int d;
 		int b;//=6;
-		int w,h;
 
 		int dx = thd.selstart.x - (thd.selend.x&~0xF);
 		int dy = thd.selstart.y - (thd.selend.y&~0xF);
-		w = Math.abs(dx) + 16;
-		h = Math.abs(dy) + 16;
+		int w = Math.abs(dx) + 16;
+		int h = Math.abs(dy) + 16;
 
 		if (TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y).equals(TileIndex.TileVirtXY(x, y)) ) { // check if we're only within one tile
 			if (method == VPM_RAILDIRS)
@@ -2378,9 +2369,6 @@ public class ViewPort implements Serializable
 	// while dragging
 	public static void VpSelectTilesWithMethod(int x, int y, int method)
 	{
-		int sx;
-		int sy;
-
 		if (x == -1) {
 			_thd.selend.x = -1;
 			return;
@@ -2399,8 +2387,8 @@ public class ViewPort implements Serializable
 			y += 8;
 		}
 
-		sx = _thd.selstart.x;
-		sy = _thd.selstart.y;
+		int sx = _thd.selstart.x;
+		int sy = _thd.selstart.y;
 
 		switch (method) {
 		case VPM_FIX_X:
@@ -2434,7 +2422,6 @@ public class ViewPort implements Serializable
 	// while dragging
 	static boolean VpHandlePlaceSizingDrag()
 	{
-		Window w;
 		WindowEvent e = new WindowEvent();
 
 		if (Window._special_mouse_mode != Window.WSM_SIZING) return true;
@@ -2442,7 +2429,7 @@ public class ViewPort implements Serializable
 		e.userdata = _thd.userdata;
 
 		// stop drag mode if the window has been closed
-		w = Window.FindWindowById(_thd.window_class,_thd.window_number);
+		Window w = Window.FindWindowById(_thd.window_class,_thd.window_number);
 		if (w == null) {
 			ResetObjectToPlace();
 			return false;
@@ -2501,12 +2488,10 @@ public class ViewPort implements Serializable
 	}*/
 	public static void SetObjectToPlace(int icon, int mode, int window_class, int window_num)
 	{
-		Window w;
-
 		// undo clicking on button
 		if (_thd.place_mode != 0) {
 			_thd.place_mode = 0;
-			w = Window.FindWindowById(_thd.window_class, _thd.window_number);
+			Window w = Window.FindWindowById(_thd.window_class, _thd.window_number);
 			if (w != null) w.CallWindowEventNP(WindowEvents.WE_ABORT_PLACE_OBJ);
 		}
 

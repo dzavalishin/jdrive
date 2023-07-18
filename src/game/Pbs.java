@@ -282,7 +282,6 @@ public class Pbs {
 
 	static void PBSClearPath(TileIndex tile, /*Trackdir*/ int trackdir, TileIndex end_tile, /*Trackdir*/ int end_trackdir) {
 		int res;
-		FindLengthOfTunnelResult flotr;
 		
 		assert(tile.IsValidTile());
 		assert(Rail.IsValidTrackdir(trackdir));
@@ -297,7 +296,7 @@ public class Pbs {
 					BitOps.GB(tile.getMap().m5, 4, 4) == 0 &&
 					BitOps.GB(tile.getMap().m5, 0, 2) == Rail.TrackdirToExitdir(trackdir)) {
 				// this is a tunnel
-				flotr = Pathfind.FindLengthOfTunnel(tile, Rail.TrackdirToExitdir(trackdir));
+				FindLengthOfTunnelResult flotr = Pathfind.FindLengthOfTunnel(tile, Rail.TrackdirToExitdir(trackdir));
 
 				tile = flotr.tile;
 			} else {
@@ -383,13 +382,12 @@ public class Pbs {
 		SetSignalsDataPbs ssd = new SetSignalsDataPbs();
 		boolean result = PBSIsPbsSignal(tilep, trackdir);
 		/*DiagDirection*/ int direction = Rail.TrackdirToExitdir(trackdir);//GetDepotDirection(tile,TRANSPORT_RAIL);
-		int i;
 
 		ssd.cur = 0;
 
 		Pathfind.FollowTrack(tilep, TransportType.Rail, 0xC000, direction, Pbs::SetSignalsEnumProcPBS, null, ssd);
 		
-		for(i=0; i!=ssd.cur; i++) {
+		for(int i=0; i!=ssd.cur; i++) {
 			TileIndex tile = ssd.tile[i];
 			byte bit = ssd.bit[i];
 			if (!PBSIsPbsSignal(tile, bit) && !PBSIsPbsSignal(tile, bit | 8))

@@ -239,13 +239,11 @@ public class mAirport
 	{
 		TileIndex buildtile = buildtile_p.iadd(-3,-3);
 
-		//BEGIN_TILE_LOOP(tl, 7, 7, buildtile)
 		TileIndex.forAll( 7, 7, buildtile, (tl) ->
 		{
 			Cmd.DoCommandByTile(tl, 0, 0, Cmd.DC_EXEC,Cmd.CMD_LANDSCAPE_CLEAR);
 			return false;
 		});
-		//END_TILE_LOOP(tl, 7, 7, buildtile)
 		
 		Cmd.DoCommandByTile(buildtile, Airport.AT_INTERNATIONAL, 0, Cmd.DC_EXEC, Cmd.CMD_BUILD_AIRPORT);
 	}
@@ -253,8 +251,6 @@ public class mAirport
 	//the main procedure, does the checks and runs the process.
 	public static void MunicipalAirport(Town tn)
 	{
-		TileIndex tl; 
-
 		PlayerID old_player = PlayerID.getCurrent();
 		PlayerID.setCurrent( Owner.OWNER_TOWN_ID );
 
@@ -284,9 +280,7 @@ public class mAirport
 
 		}
 		
-
-		
-		tl = MA_FindSite(tn);
+		TileIndex tl = MA_FindSite(tn);
 		
 		if(tl == TileIndex.INVALID_TILE) {
 			PlayerID.setCurrent(old_player);
@@ -302,7 +296,6 @@ public class mAirport
 	// same as above but isnt as stringent
 	public static void MA_EditorAddAirport(Town tn)
 	{
-		TileIndex tl;
 		PlayerID old_player = PlayerID.getCurrent();
 		
 		PlayerID.setCurrent( PlayerID.get( Owner.OWNER_TOWN ) );
@@ -338,7 +331,7 @@ public class mAirport
 			return;
 		}
 
-		tl = MA_FindSite(tn);
+		TileIndex tl = MA_FindSite(tn);
 
 		if(tl == TileIndex.INVALID_TILE) {
 			Global.SetDParam(0, tn.index);

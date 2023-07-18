@@ -139,46 +139,6 @@ public class Order implements Serializable
 
 	/**
 	 *
-	 * Unpacks a order from savegames made with TTD(Patch)
-	 *
-	 * /
-	Order UnpackOldOrder(int packed)
-	{
-		Order order = new Order();
-		order.type    = BitOps.GB(packed, 0, 4);
-		order.flags   = BitOps.GB(packed, 4, 4);
-		order.station = BitOps.GB(packed, 8, 8);
-		order.next    = null;
-
-		// Sanity check
-		// TTD stores invalid orders as OT_NOTHING with non-zero flags/station
-		if (order.type == OT_NOTHING && (order.flags != 0 || order.station != 0)) {
-			order.type = OT_DUMMY;
-			order.flags = 0;
-		}
-
-		return order;
-	}
-
-	/**
-	 *
-	 * Unpacks a order from savegames with version 4 and lower
-	 *
-	 * /
-	Order UnpackVersion4Order(int packed)
-	{
-		Order order = new Order();
-		order.type    = BitOps.GB(packed, 0, 4);
-		order.flags   = BitOps.GB(packed, 4, 4);
-		order.station = BitOps.GB(packed, 8, 8);
-		order.next    = null;
-		order.index   = 0; // avoid compiler warning
-		return order;
-	}
-
-
-	/**
-	 *
 	 * Swap two orders
 	 *
 	 */
@@ -305,10 +265,8 @@ public class Order implements Serializable
 
 		case OT_GOTO_DEPOT: {
 			if (v.type == Vehicle.VEH_Aircraft) {
-				final Station st;
-
 				if (!Station.IsStationIndex(new_order.station)) return Cmd.CMD_ERROR;
-				st = Station.GetStation(new_order.station);
+				final Station st = Station.GetStation(new_order.station);
 
 				if (!st.IsValidStation() ||
 						(st.airport_type != Airport.AT_OILRIG && !Player.CheckOwnership(st.owner)) ||
@@ -317,10 +275,8 @@ public class Order implements Serializable
 					return Cmd.CMD_ERROR;
 				}
 			} else {
-				final Depot dp;
-
 				if (!Depot.IsDepotIndex(new_order.station)) return Cmd.CMD_ERROR;
-				dp = Depot.GetDepot(new_order.station);
+				final Depot dp = Depot.GetDepot(new_order.station);
 
 				if (!dp.isValid() || !Player.CheckOwnership(dp.xy.GetTileOwner()))
 					return Cmd.CMD_ERROR;
@@ -361,12 +317,10 @@ public class Order implements Serializable
 		}
 
 		case OT_GOTO_WAYPOINT: {
-			WayPoint wp;
-
 			if (v.type != Vehicle.VEH_Train) return Cmd.CMD_ERROR;
 
 			if (!WayPoint.IsWaypointIndex(new_order.station)) return Cmd.CMD_ERROR;
-			wp = WayPoint.GetWaypoint(new_order.station);
+			WayPoint wp = WayPoint.GetWaypoint(new_order.station);
 
 			if (!Player.CheckOwnership(wp.xy.GetTileOwner())) return Cmd.CMD_ERROR;
 
@@ -489,14 +443,13 @@ public class Order implements Serializable
 	 */
 	static int CmdDeleteOrder(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v, u;
 		VehicleID veh_id = VehicleID.get( p1 );
 		//OrderID sel_ord = OrderID.get( p2 );
 		final int sel_ord = p2;
 		Order order;
 
 		if (!Vehicle.IsVehicleIndex(veh_id.id)) return Cmd.CMD_ERROR;
-		v = Vehicle.GetVehicle(veh_id);
+		Vehicle v = Vehicle.GetVehicle(veh_id);
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		/* If we did not select an order, we maybe want to de-clone the orders */
@@ -536,7 +489,7 @@ public class Order implements Serializable
 			}
 
 
-			u = v.GetFirstVehicleFromSharedList();
+			Vehicle u = v.GetFirstVehicleFromSharedList();
 			while (u != null) {
 				u.num_orders--;
 
@@ -584,11 +537,10 @@ public class Order implements Serializable
 	 */
 	static int CmdSkipOrder(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v;
 		VehicleID veh_id = VehicleID.get( p1 );
 
 		if (!veh_id.IsVehicleIndex()) return Cmd.CMD_ERROR;
-		v = Vehicle.GetVehicle(veh_id);
+		Vehicle v = Vehicle.GetVehicle(veh_id);
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		if (0 != (flags & Cmd.DC_EXEC)) {
@@ -640,8 +592,6 @@ public class Order implements Serializable
 	 */
 	static int CmdModifyOrder(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v;
-		Order order;
 		//OrderID sel_ord = OrderID.get(BitOps.GB(p1, 16, 16)); // X XX - automatically truncated to 8 bits.
 		int sel_ord = BitOps.GB(p1, 16, 16); // XXX - automatically truncated to 8 bits. [dz] I don't get it
 		VehicleID veh   = VehicleID.get( BitOps.GB(p1,  0, 16) );
@@ -649,13 +599,13 @@ public class Order implements Serializable
 		if (!veh.IsVehicleIndex()) return Cmd.CMD_ERROR;
 		if (p2 != OFB_FULL_LOAD && p2 != OFB_UNLOAD && p2 != OFB_NON_STOP && p2 != OFB_TRANSFER) return Cmd.CMD_ERROR;
 
-		v = Vehicle.GetVehicle(veh);
+		Vehicle v = Vehicle.GetVehicle(veh);
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		/* Is it a valid order? */
 		if (sel_ord >= v.num_orders) return Cmd.CMD_ERROR;
 
-		order = v.GetVehicleOrder(sel_ord);
+		Order order = v.GetVehicleOrder(sel_ord);
 		if (order.type != OT_GOTO_STATION &&
 				(order.type != OT_GOTO_DEPOT || p2 == OFB_UNLOAD) &&
 				(order.type != OT_GOTO_WAYPOINT || p2 != OFB_NON_STOP))
@@ -705,27 +655,21 @@ public class Order implements Serializable
 	 */
 	static int CmdCloneOrder(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle dst;
 		VehicleID veh_src = VehicleID.get( BitOps.GB(p1, 16, 16) );
 		VehicleID veh_dst = VehicleID.get( BitOps.GB(p1,  0, 16) );
 
-		//MA Vars;
-		Station st;
-		int i;
-		//End MA Vars;
-
 		if (!veh_dst.IsVehicleIndex()) return Cmd.CMD_ERROR;
 
-		dst = Vehicle.GetVehicle(veh_dst);
+		Vehicle dst = Vehicle.GetVehicle(veh_dst);
 
 		if (dst.type == 0 || !Player.CheckOwnership(dst.owner)) return Cmd.CMD_ERROR;
 
 		//MA checks
 		if(mAirport.MA_VehicleServesMS(Vehicle.GetVehicle(veh_src)) > 0) 
 		{
-			for(i =  1; i <= mAirport.MA_VehicleServesMS(Vehicle.GetVehicle(veh_src)) ; i++) 
+			for(int i =  1; i <= mAirport.MA_VehicleServesMS(Vehicle.GetVehicle(veh_src)) ; i++) 
 			{
-				st = Station.GetStation(mAirport.MA_Find_MS_InVehicleOrders(Vehicle.GetVehicle(veh_src), i).id);
+				Station st = Station.GetStation(mAirport.MA_Find_MS_InVehicleOrders(Vehicle.GetVehicle(veh_src), i).id);
 				if(!mAirport.MA_WithinVehicleQuota(st)) 
 				{ 
 					Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
@@ -786,12 +730,9 @@ public class Order implements Serializable
 		} break;
 
 		case CO_COPY: {
-			Vehicle src;
-			
-
 			if (!veh_src.IsVehicleIndex()) return Cmd.CMD_ERROR;
 
-			src = Vehicle.GetVehicle(veh_src);
+			Vehicle src = Vehicle.GetVehicle(veh_src);
 
 			/* Sanity checks */
 			if (src.type == 0 || !Player.CheckOwnership(src.owner) || dst.type != src.type || dst == src)
@@ -823,9 +764,6 @@ public class Order implements Serializable
 			//if (!HasOrderPoolFree(delta))					return_cmd_error(Str.STR_8831_NO_MORE_SPACE_FOR_ORDERS);
 
 			if (0 != (flags & Cmd.DC_EXEC)) {
-				//final Order order;
-				Order order_dst;
-
 				/* If the destination vehicle had a OrderList, destroy it */
 				dst.DeleteVehicleOrders();
 
@@ -835,7 +773,7 @@ public class Order implements Serializable
 					AssignOrder(dst.orders, src.orders);
 				}
 
-				order_dst = dst.orders;
+				Order order_dst = dst.orders;
 
 				for(Order order_src = src.orders; order_src != null && order_src.next != null; order_src = order_src.next )
 				{
@@ -878,14 +816,13 @@ public class Order implements Serializable
 	 */
 	static int CmdRestoreOrderIndex(int x, int y, int flags, int p1, int p2)
 	{
-		Vehicle v;
 		//OrderID cur_ord = OrderID.get( BitOps.GB(p2,  0, 16) );
 		int cur_ord = BitOps.GB(p2,  0, 16);
 		int serv_int = BitOps.GB(p2, 16, 16);
 
 		if (!Vehicle.IsVehicleIndex(p1)) return Cmd.CMD_ERROR;
 
-		v = Vehicle.GetVehicle(p1);
+		Vehicle v = Vehicle.GetVehicle(p1);
 		/* Check the vehicle type and ownership, and if the service interval and order are in range */
 		if (v.type == 0 || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 		if (serv_int != Depot.GetServiceIntervalClamped(serv_int) || cur_ord >= v.num_orders) return Cmd.CMD_ERROR;
@@ -905,7 +842,7 @@ public class Order implements Serializable
 	 */
 	static boolean CheckOrders(int data_a, int data_b)
 	{
-		final Vehicle  v = Vehicle.GetVehicle(data_a);
+		final Vehicle v = Vehicle.GetVehicle(data_a);
 
 		/* Does the user wants us to check things? */
 		if (Global._patches.order_review_system == 0) return false;
@@ -924,7 +861,6 @@ public class Order implements Serializable
 		if (v.owner.equals(Global.gs._local_player) && v.day_counter % 20 == 0) {
 			int n_st, problem_type = -1;
 			//final Order order;
-			Station st;
 			//int message = 0;
 
 			/* Check the order list */
@@ -948,7 +884,7 @@ public class Order implements Serializable
 					TileIndex required_tile;
 
 					n_st++;
-					st = Station.GetStation(order.station);
+					Station st = Station.GetStation(order.station);
 					required_tile = v.GetStationTileForVehicle(st);
 					if (required_tile == null) problem_type = 3;
 				}
