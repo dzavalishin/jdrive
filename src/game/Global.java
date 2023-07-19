@@ -194,7 +194,7 @@ public class Global
 	public static byte _no_scroll;
 
 	// IN/OUT parameters to commands
-	// byte _yearly_expenses_type;
+	public static int _yearly_expenses_type;
 	public static TileIndex _terraform_err_tile;
 	public static TileIndex _build_tunnel_endtile;
 	public static boolean _generating_world = false;

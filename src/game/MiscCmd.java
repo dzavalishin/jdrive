@@ -214,7 +214,7 @@ public class MiscCmd {
 		final Player p = Player.GetCurrentPlayer();
 		int amount = Math.min(p1, 20000000);
 
-		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
+		//Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 
 		/* You can only transfer funds that is in excess of your loan */
 		if (p.money64 - p.current_loan < amount || amount <= 0) return Cmd.CMD_ERROR;
@@ -224,7 +224,7 @@ public class MiscCmd {
 			/* Add money to player */
 			PlayerID old_cp = PlayerID.getCurrent();
 			PlayerID.setCurrent( PlayerID.get( p2 ) );
-			Player.SubtractMoneyFromPlayer(-amount);
+			Player.SubtractMoneyFromPlayer(-amount,Player.EXPENSES_OTHER);
 			PlayerID.setCurrent(old_cp);
 		}
 

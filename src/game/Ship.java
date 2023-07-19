@@ -144,8 +144,8 @@ public class Ship {
 		cost = (int) (EngineGui.ShipVehInfo(v.getEngine_type().id).running_cost * Global._price.ship_running / 364);
 		v.profit_this_year -= cost >> 8;
 
-		Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);
-		Player.SubtractMoneyFromPlayerFract(v.owner, cost);
+		//Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);
+		Player.SubtractMoneyFromPlayerFract(v.owner, cost, Player.EXPENSES_SHIP_RUN);
 
 		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 		//we need this for the profit

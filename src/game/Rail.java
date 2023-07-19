@@ -978,7 +978,7 @@ public class Rail extends RailTables {
 	 */
 	public static int CmdBuildTrainDepot(int x, int y, int flags, int p1, int p2)
 	{
-		Depot d;
+		//Depot d;
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		int cost, ret;
 		int tileh;
@@ -1013,7 +1013,7 @@ public class Rail extends RailTables {
 		if (Cmd.CmdFailed(ret)) return Cmd.CMD_ERROR;
 		cost = ret;
 
-		d = Depot.AllocateDepot();
+		Depot d = Depot.AllocateDepot();
 		if (d == null) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {

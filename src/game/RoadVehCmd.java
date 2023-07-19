@@ -1674,11 +1674,11 @@ class RoadDriveEntry {
 
 		v.profit_this_year -= cost >> 8;
 
-					Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_RUN);
-					Player.SubtractMoneyFromPlayerFract(v.owner, cost);
+		//Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_RUN);
+		Player.SubtractMoneyFromPlayerFract(v.owner, cost, Player.EXPENSES_ROADVEH_RUN);
 
-					Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
-					Window.InvalidateWindowClasses(Window.WC_ROADVEH_LIST);
+		Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
+		Window.InvalidateWindowClasses(Window.WC_ROADVEH_LIST);
 	}
 
 

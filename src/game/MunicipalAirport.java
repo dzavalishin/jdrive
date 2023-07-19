@@ -113,7 +113,7 @@ public class MunicipalAirport
 		if(!Global._patches.allow_municipal_airports.get()) 
 			return true;
 
-		if(st.owner.id != Owner.OWNER_TOWN)
+		if(!st.owner.isTown())
 			return true;
 
 		Vehicle.forEach( (v) ->
@@ -152,7 +152,7 @@ public class MunicipalAirport
 	 * @param radius
 	 * @param angle
 	 * @param centre
-	 * @return
+	 * @return Tile
 	 */
 	private static TileIndex circularPos(int radius, int angle, TileIndex centre)
 	{

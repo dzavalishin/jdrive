@@ -3886,8 +3886,8 @@ public class TrainCmd extends TrainTables
 
 				v.profit_this_year -= cost >> 8;
 
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_RUN);
-				Player.SubtractMoneyFromPlayerFract(v.owner, cost);
+				//Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_RUN);
+				Player.SubtractMoneyFromPlayerFract(v.owner, cost, Player.EXPENSES_TRAIN_RUN);
 
 				Window.InvalidateWindow(Window.WC_VEHICLE_DETAILS, v.index);
 				Window.InvalidateWindowClasses(Window.WC_TRAINS_LIST);

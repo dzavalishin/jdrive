@@ -349,7 +349,7 @@ public class Vehicle implements IPoolItem
 	//calculates tax
 	public void municipalAirportTax(int income)
 	{
-		int old_expenses_type = Global.gs._yearly_expenses_type;
+		//int old_expenses_type = Global.gs._yearly_expenses_type;
 		assert income >= 0;
 
 		if(Global._patches.allow_municipal_airports.get()) {
@@ -357,25 +357,25 @@ public class Vehicle implements IPoolItem
 
 			MiscGui.ShowCostOrIncomeAnimation(x_pos ,y_pos ,z_pos - 13, (int)tax);
 
-			switch(type) {
+			int etype = switch(type) {
 
-			case VEH_Aircraft:	
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_AIRCRAFT_RUN);
-				break;
-			case VEH_Train:		
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_RUN);
-				break;
-			case VEH_Ship:		
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);				
-				break;
-			case VEH_Road:		
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_RUN);				
-				break;
+			case VEH_Aircraft: yield Player.EXPENSES_AIRCRAFT_RUN; 	
+				//Player.SET_EXPENSES_TYPE(Player.EXPENSES_AIRCRAFT_RUN);
+				//break;
+			case VEH_Train:	yield Player.EXPENSES_TRAIN_RUN;	
+				//Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_RUN);
+				//break;
+			case VEH_Ship: yield Player.EXPENSES_SHIP_RUN;		
+				//Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);				
+				//break;
+			case VEH_Road: yield Player.EXPENSES_ROADVEH_RUN;		
+				//Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVEH_RUN);				
+				//break;
+			default: yield Player.EXPENSES_OTHER; // can't happen
+			};
 
-			}
-
-			Player.SubtractMoneyFromPlayer((int)tax);
-			Global.gs._yearly_expenses_type = old_expenses_type;
+			Player.SubtractMoneyFromPlayer((int)tax, etype);
+			//Global.gs._yearly_expenses_type = old_expenses_type;
 		}
 	}
 

@@ -582,7 +582,7 @@ public class Cmd {
 
 		/* Actually try and execute the command. If no cost-type is given
 		 * use the construction one */
-		Global.gs._yearly_expenses_type = Player.EXPENSES_CONSTRUCTION;
+		Global._yearly_expenses_type = Player.EXPENSES_CONSTRUCTION;
 		res2 = proc.exec(x,y, flags|Cmd.DC_EXEC, p1, p2);
 
 		// If notest is on, it means the result of the test can be different than

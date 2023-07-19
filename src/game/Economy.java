@@ -650,8 +650,8 @@ public class Economy extends EconomeTables implements Serializable
 		Station.forEachValid( st ->
 		{
 				PlayerID.setCurrent(st.owner); 
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
-				Player.SubtractMoneyFromPlayer((int) (Global._price.station_value/2));
+				//Player.SET_EXPENSES_TYPE(Player.EXPENSES_PROPERTY);
+				Player.SubtractMoneyFromPlayer((int) (Global._price.station_value/2), Player.EXPENSES_PROPERTY);
 		});
 		
 		PlayerID.setCurrentToNone(); // [dz] clean up
@@ -753,13 +753,13 @@ public class Economy extends EconomeTables implements Serializable
 			if (!p.is_active) continue;
 
 			PlayerID.setCurrent(p.index);
-			Player.SET_EXPENSES_TYPE(Player.EXPENSES_LOAN_INT);
+			
+			//Player.SET_EXPENSES_TYPE(Player.EXPENSES_LOAN_INT);
+			Player.SubtractMoneyFromPlayer(BitOps.BIGMULUS(p.current_loan, interest, 16), Player.EXPENSES_LOAN_INT);
 
-			Player.SubtractMoneyFromPlayer(BitOps.BIGMULUS(p.current_loan, interest, 16));
-
-			Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
+			//Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 			//Player.SubtractMoneyFromPlayer(Global._price.station_value >> 2);
-			Player.SubtractMoneyFromPlayer((int) (Global._price.station_value/4));
+			Player.SubtractMoneyFromPlayer((int) (Global._price.station_value/4), Player.EXPENSES_OTHER);
 		}
 		
 		PlayerID.setCurrentToNone(); // [dz] or else it can be null?

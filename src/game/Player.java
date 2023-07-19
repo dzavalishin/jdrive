@@ -126,7 +126,7 @@ public class Player implements Serializable
 
 	public static final long INITIAL_MONEY = 100000000;
 
-	public static void SET_EXPENSES_TYPE(int x) { Global.gs._yearly_expenses_type = x; }
+	public static void SET_EXPENSES_TYPE(int x) { Global._yearly_expenses_type = x; }
 
 	public static final int EXPENSES_CONSTRUCTION = 0;
 	public static final int EXPENSES_NEW_VEHICLES = 1;
@@ -350,29 +350,36 @@ public class Player implements Serializable
 		return true;
 	}
 
-	private void SubtractMoneyFromAnyPlayer(int cost)
+	private void SubtractMoneyFromAnyPlayer(int cost, int expenceType)
 	{
 		money64 -= cost;
-		//UpdatePlayerMoney32();
 
-		yearly_expenses[0][Global.gs._yearly_expenses_type] += cost;
+		//if(expenceType < 0) expenceType = Global.gs._yearly_expenses_type;
+		
+		yearly_expenses[0][expenceType] += cost;
 
-		if(0 != ( ( 1 << Global.gs._yearly_expenses_type ) & (1<<7|1<<8|1<<9|1<<10)) )
+		if(0 != ( ( 1 << expenceType ) & (1<<7|1<<8|1<<9|1<<10)) )
 			cur_economy.income -= cost;
-		else if(0 != (( 1 << Global.gs._yearly_expenses_type ) & (1<<2|1<<3|1<<4|1<<5|1<<6|1<<11)) )
+		else if(0 != (( 1 << expenceType ) & (1<<2|1<<3|1<<4|1<<5|1<<6|1<<11)) )
 			cur_economy.expenses -= cost;
 
 		InvalidatePlayerWindows();
 	}
 
+	
 	static void SubtractMoneyFromPlayer(int cost)
+	{
+		SubtractMoneyFromPlayer(cost, Global._yearly_expenses_type);
+	}
+	
+	static void SubtractMoneyFromPlayer(int cost, int expenceType)
 	{
 		PlayerID pid = PlayerID.getCurrent();
 		if (pid.id < Global.MAX_PLAYERS)
-			GetPlayer(pid).SubtractMoneyFromAnyPlayer(cost);
+			GetPlayer(pid).SubtractMoneyFromAnyPlayer(cost, expenceType);
 	}
 
-	public static void SubtractMoneyFromPlayerFract(PlayerID player, int cost)
+	public static void SubtractMoneyFromPlayerFract(PlayerID player, int cost, int expenceType)
 	{
 		Player p = GetPlayer(player);
 		int m = p.player_money_fraction;
@@ -381,7 +388,7 @@ public class Player implements Serializable
 		if (p.player_money_fraction > m)
 			cost++;
 		if (cost != 0)
-			p.SubtractMoneyFromAnyPlayer(cost);
+			p.SubtractMoneyFromAnyPlayer(cost, expenceType);
 	}
 
 

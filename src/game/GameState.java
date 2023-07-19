@@ -56,7 +56,7 @@ public class GameState implements Serializable
 	public int _map_tile_mask;
 	public int _map_size;	
 	
-	int _yearly_expenses_type; // TODO fixme, use parameter where possible
+	//int _yearly_expenses_type; // TODO fixme, use parameter where possible
 	int _cur_player_tick_index;
 	int _next_competitor_start;
 	
