@@ -341,7 +341,7 @@ public class RailGui {
 	static void DoRailroadTrack(int mode)
 	{
 		//Cmd.DoCommandP(TileIndex.TileVirtXY(ViewPort._thd.selstart.x, ViewPort._thd.selstart.y), TileIndex.TileVirtXY(ViewPort._thd.selend.x, ViewPort._thd.selend.y).getTile(), _cur_railtype | (mode << 4), null,
-		Cmd.DoCommandP(ViewPort._thd.getStartTile(), ViewPort._thd.getEndTile().getTile(), _cur_railtype | (mode << 4), null,
+		Cmd.DoCommandP(ViewPort._thd.getStartTile(), ViewPort._thd.getEndTile().getTileIndex(), _cur_railtype | (mode << 4), null,
 				_remove_button_clicked ?
 						Cmd.CMD_REMOVE_RAILROAD_TRACK | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1012_CAN_T_REMOVE_RAILROAD_TRACK) :
 							Cmd.CMD_BUILD_RAILROAD_TRACK  | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1011_CAN_T_BUILD_RAILROAD_TRACK)
@@ -375,7 +375,7 @@ public class RailGui {
 		// game can specify his/her own signal density
 		Cmd.DoCommandP(
 				thd.getStartTile(), //TileIndex.TileVirtXY(thd.selstart.x, thd.selstart.y),
-				thd.getEndTile().getTile(),// TileIndex.TileVirtXY(thd.selend.x, thd.selend.y).tile,
+				thd.getEndTile().getTileIndex(),// TileIndex.TileVirtXY(thd.selend.x, thd.selend.y).tile,
 				(Global._ctrl_pressed ? 1 << 3 : 0) | (trackstat << 4) | (Global._patches.drag_signals_density << 24),
 				RailGui::CcPlaySound1E,
 				_remove_button_clicked ?
@@ -502,7 +502,7 @@ public class RailGui {
 					if (Terraform.GUIPlaceProcDragXY(e)) break;
 
 					if ((e.userdata >> 4) == Gui.GUI_PlaceProc_ConvertRailArea >> 4)
-						Cmd.DoCommandP(end_tile, start_tile.getTile(), _cur_railtype, null/*RailGui::CcPlaySound10*/, Cmd.CMD_CONVERT_RAIL | Cmd.CMD_MSG(Str.STR_CANT_CONVERT_RAIL));
+						Cmd.DoCommandP(end_tile, start_tile.getTileIndex(), _cur_railtype, null/*RailGui::CcPlaySound10*/, Cmd.CMD_CONVERT_RAIL | Cmd.CMD_MSG(Str.STR_CANT_CONVERT_RAIL));
 				} else if (e.userdata == ViewPort.VPM_X_AND_Y_LIMITED) {
 					HandleStationPlacement(start_tile, end_tile);
 				} else

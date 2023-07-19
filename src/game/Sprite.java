@@ -40,6 +40,7 @@ public class Sprite extends Sprites {
 	{
 		return SpriteCache.GetSprite(sprite);
 	}
+	
 	public static Sprite GetSprite(int sprite)
 	{
 		return SpriteCache.GetSprite(sprite);
@@ -78,8 +79,6 @@ public class Sprite extends Sprites {
 
 	static SpriteGroup EvalDeterministicSpriteGroup(final DeterministicSpriteGroup dsg, int value)
 	{
-		int i;
-
 		value >>= dsg.shift_num; // This should bring us to the byte range.
 		value &= dsg.and_mask;
 
@@ -97,7 +96,7 @@ public class Sprite extends Sprites {
 			break;
 		}
 
-		for (i = 0; i < dsg.num_ranges; i++) {
+		for(int i = 0; i < dsg.num_ranges; i++) {
 			DeterministicSpriteGroupRange range = dsg.ranges[i];
 
 			if (range.low <= value && value <= range.high)
@@ -134,14 +133,11 @@ public class Sprite extends Sprites {
 	//static SpriteGroup [] EvalRandomizedSpriteGroup(final RandomizedSpriteGroup rsg, byte random_bits)
 	static SpriteGroup EvalRandomizedSpriteGroup(final RandomizedSpriteGroup rsg, int random_bits)
 	{
-		int mask;
-		int index;
-
 		/* Noone likes mangling with bits, but you don't get around it here.
 		 * Sorry. --pasky */
 		// rsg.num_groups is always power of 2
-		mask = (rsg.num_groups - 1) << rsg.lowest_randbit;
-		index = (random_bits & mask) >> rsg.lowest_randbit;
+		int mask = (rsg.num_groups - 1) << rsg.lowest_randbit;
+		int index = (random_bits & mask) >> rsg.lowest_randbit;
 		assert(index < rsg.num_groups);
 		return rsg.groups[index];
 	}

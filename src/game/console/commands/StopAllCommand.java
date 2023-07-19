@@ -36,7 +36,7 @@ public class StopAllCommand implements Command {
                  * ownership problems, so we'll duplicate some code, for now */
                 v.stop();
                 Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, Vehicle.STATUS_BAR);
-                Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.getTile().getTile());
+                Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.getTile().getTileIndex());
             }
         });
     }

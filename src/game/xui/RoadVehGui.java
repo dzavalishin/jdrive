@@ -510,10 +510,10 @@ public class RoadVehGui
 	{
 		Window w;
 
-		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.getTile());
+		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, tile.getTileIndex());
 
 		w = Window.AllocateWindowDesc(_new_road_veh_desc);
-		w.window_number = tile.getTile();
+		w.window_number = tile.getTileIndex();
 		w.vscroll.setCap(8);
 		w.widget.get(2).unkA = (w.vscroll.getCap() << 8) + 1;
 
@@ -820,7 +820,7 @@ public class RoadVehGui
 	{
 		Window w;
 
-		w = Window.AllocateWindowDescFront(_road_depot_desc, tile.getTile());
+		w = Window.AllocateWindowDescFront(_road_depot_desc, tile.getTileIndex());
 		if (w!=null) {
 			w.caption_color = (byte) TileIndex.get(w.window_number).GetTileOwner().id;
 			w.hscroll.setCap(5);

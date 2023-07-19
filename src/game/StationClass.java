@@ -31,7 +31,7 @@ public class StationClass
 
 	/**
 	 * Reset station classes to their default state.
-	 * This includes initialising the Default and Waypoint classes with an empty
+	 * This includes initializing the Default and Waypoint classes with an empty
 	 * entry, for standard stations and waypoints.
 	 */
 	void ResetStationClasses()
@@ -39,13 +39,8 @@ public class StationClass
 		/*StationClassID*/ int  i;
 		for (i = 0; i < STAT_CLASS_MAX; i++) {
 			station_classes[i].id = 0;
-
-			//free(station_classes[i].name);
 			station_classes[i].name = null;
-
 			station_classes[i].stations = 0;
-
-			//free(station_classes[i].spec);
 			station_classes[i].spec = null;
 		}
 
@@ -65,10 +60,11 @@ public class StationClass
 
 	/**
 	 * Allocate a station class for the given class id.
-	 * @param classid A 32 bit value identifying the class.
+	 * 
+	 * @param sclass A 32 bit value identifying the class.
 	 * @return Index into station_classes of allocated class.
 	 */
-	/*StationClassID*/ static StationClassID  AllocateStationClass(int sclass)
+	static StationClassID  AllocateStationClass(int sclass)
 	{
 		/*StationClassID*/ int  i;
 
@@ -108,7 +104,6 @@ public class StationClass
 		StationClass station_class = station_classes[spec.sclass.ordinal()];
 
 		int i = station_class.stations++;
-		//station_class.spec = realloc(station_class.spec, station_class.stations * sizeof(*station_class.spec));
 		station_class.spec = Arrays.copyOf(station_class.spec, station_class.stations);
 
 		station_class.spec[i] = spec;
@@ -129,6 +124,10 @@ public class StationClass
 		// If the custom station isn't defined any more, then the GRF file
 		// probably was not loaded.
 		return null;
+	}
+
+	public static StationSpec GetCustomStation(StationClassID statClassWayp, int stat_id) {
+		return GetCustomStation(statClassWayp.ordinal(), stat_id);
 	}
 	
 	

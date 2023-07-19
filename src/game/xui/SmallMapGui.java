@@ -200,17 +200,23 @@ public class SmallMapGui extends SmallMapGuiTables
 
 	static  int GetSmallMapVegetationPixels(TileIndex tile)
 	{
-		TileTypes t = GetEffectiveTileType(tile);
-		int i;
-		int bits;
-
-		switch (t) {
-		case MP_CLEAR:
-			i = (tile.getMap().m5 & 0x1F) - 4;
+		if(tile.isClear())
+		{
+			int i = (tile.getMap().m5 & 0x1F) - 4;
 			if (i >= 0) i >>= 2;
-			bits = _vegetation_clear_bits[i + 4];
+			return _vegetation_clear_bits[i + 4];
+		}
+		
+		int bits;
+		TileTypes t = GetEffectiveTileType(tile);
+		switch(t) {
+		/*
+		case MP_CLEAR:
+			int i = (tile.getMap().m5 & 0x1F) - 4;
+			if (i >= 0) i >>= 2;
+			int bits = _vegetation_clear_bits[i + 4];
 			break;
-
+		*/
 			case MP_INDUSTRY:
 				bits = BitOps.IS_BYTE_INSIDE(tile.getMap().m5, 0x10, 0x12) ? MKCOLOR(0xD0D0D0D0) : MKCOLOR(0xB5B5B5B5);
 				break;

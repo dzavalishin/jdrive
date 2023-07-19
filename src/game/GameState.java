@@ -40,7 +40,7 @@ public class GameState implements Serializable
 	// -------------------------------------------------------------------
 
 	/** Game map */
-	public Tile _m[];
+	public AbstractTile _m[];
 	
 	public final GameDate date = new GameDate();
 	public final Economy _economy = new Economy();

@@ -202,7 +202,7 @@ public interface NetClient extends NetTools, NetDefs
 		NetworkSend_int(p, cp.cmd);
 		NetworkSend_int(p, cp.p1);
 		NetworkSend_int(p, cp.p2);
-		NetworkSend_int(p, cp.tile.getTile());
+		NetworkSend_int(p, cp.tile.getTileIndex());
 		NetworkSend_string(p, cp.text);
 		NetworkSend_byte(p, (byte) cp.callback);
 

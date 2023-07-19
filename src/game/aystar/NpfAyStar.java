@@ -71,7 +71,7 @@ public class NpfAyStar extends AyStar
 		TransportType type = this.userTransportType;// user_data[Npf.NPF_TYPE];
 		/* Initialize to 0, so we can jump out (return) somewhere an have no neighbours */
 		this.num_neighbours = 0;
-		Global.DEBUG_npf( 4, "Expanding: (%d, %d, %d) [%d]", src_tile.TileX(), src_tile.TileY(), src_trackdir, src_tile.getTile());
+		Global.DEBUG_npf( 4, "Expanding: (%d, %d, %d) [%d]", src_tile.TileX(), src_tile.TileY(), src_trackdir, src_tile.getTileIndex());
 
 		endNodeCheck(current);
 
@@ -159,7 +159,7 @@ public class NpfAyStar extends AyStar
 		}
 		trackdirbits = ts & Rail.TRACKDIR_BIT_MASK; /* Filter out signal status and the unused bits */
 
-		Global.DEBUG_npf( 4, "Next node: (%d, %d) [%d], possible trackdirs: %#x", dst_tile.TileX(), dst_tile.TileY(), dst_tile.getTile(), trackdirbits);
+		Global.DEBUG_npf( 4, "Next node: (%d, %d) [%d], possible trackdirs: %#x", dst_tile.TileX(), dst_tile.TileY(), dst_tile.getTileIndex(), trackdirbits);
 		/* Select only trackdirs we can reach from our current trackdir */
 		trackdirbits &= Rail.TrackdirReachesTrackdirs(src_trackdir);
 		if (Global._patches.forbid_90_deg && (type == TransportType.Rail || type == TransportType.Water)) /* Filter out trackdirs that would make 90 deg turns for trains */

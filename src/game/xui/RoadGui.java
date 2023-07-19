@@ -262,12 +262,12 @@ public class RoadGui
 					ViewPort.ResetObjectToPlace();
 					Bridge.ShowBuildBridgeWindow(start_tile, end_tile, 0x80);
 				} else if (e.userdata != 4) {
-					Cmd.DoCommandP(end_tile, start_tile.getTile(), _place_road_flag, null/*CcPlaySound1D*/,
+					Cmd.DoCommandP(end_tile, start_tile.getTileIndex(), _place_road_flag, null/*CcPlaySound1D*/,
 						_remove_button_clicked ?
 						Cmd.CMD_REMOVE_LONG_ROAD | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1805_CAN_T_REMOVE_ROAD_FROM) :
 						Cmd.CMD_BUILD_LONG_ROAD | Cmd.CMD_AUTO | Cmd.CMD_NO_WATER | Cmd.CMD_MSG(Str.STR_1804_CAN_T_BUILD_ROAD_HERE));
 				} else {
-					Cmd.DoCommandP(end_tile, start_tile.getTile(), _place_road_flag, null/*CcPlaySound10*/, Cmd.CMD_CLEAR_AREA | Cmd.CMD_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
+					Cmd.DoCommandP(end_tile, start_tile.getTileIndex(), _place_road_flag, null/*CcPlaySound10*/, Cmd.CMD_CLEAR_AREA | Cmd.CMD_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
 				}
 			}
 			break;

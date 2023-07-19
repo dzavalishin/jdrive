@@ -373,7 +373,7 @@ public class UnmovableCmd extends UnmovableTables {
 		j = Map.ScaleByMapSize(40); // maximum number of radio towers on the map
 		do {
 			tile = Hal.RandomTile();
-			if (tile.IsTileType( TileTypes.MP_CLEAR) && tile.GetTileSlope(h) == 0 && h.v >= 32) {
+			if (tile.isClear() && tile.GetTileSlope(h) == 0 && h.v >= 32) {
 				if(!checkRadioTowerNearby(tile))
 					continue;
 				tile.SetTileType(TileTypes.MP_UNMOVABLE);
@@ -415,7 +415,7 @@ public class UnmovableCmd extends UnmovableTables {
 				tile = tile.iadd( TileIndex.ToTileIndexDiff(_tile_add[dir]) );
 				tile.TILE_MASK();
 
-			} while (!(tile.IsTileType( TileTypes.MP_CLEAR) && tile.GetTileSlope(h) == 0 && h.v <= 16));
+			} while (!(tile.isClear() && tile.GetTileSlope(h) == 0 && h.v <= 16));
 			if(restart) continue;
 
 			tile.TILE_ASSERT();

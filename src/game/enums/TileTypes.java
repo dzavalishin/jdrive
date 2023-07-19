@@ -29,6 +29,8 @@ public enum TileTypes {
 	public static final int MP_MAPOWNER_CURRENT = 1<<4;
 	public static final int MP_MAPOWNER = 1<<5;
 
+	public static final int MP_ANIM_CLEAR = 1 << 6; // [dz] clear anim field 
+
 	public static final int MP_TYPE_MASK = 0xF << 8;
 
 	public static final int MP_MAP2_CLEAR = 1 << 12;

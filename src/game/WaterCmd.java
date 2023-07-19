@@ -582,6 +582,10 @@ public class WaterCmd extends WaterTables
 
 		if (TileIndex.TILE_ADD(tile, TileIndex.ToTileIndexDiff(offs[3])).TileHeight() != 0 ||
 				TileIndex.TILE_ADD(tile, TileIndex.ToTileIndexDiff(offs[4])).TileHeight() != 0) {
+			
+			if(target.isClear())
+				convertToWater(target);
+			
 			// make coast..
 			switch (target.GetTileType()) {
 				case MP_RAILWAY: {
@@ -596,18 +600,9 @@ public class WaterCmd extends WaterTables
 				}
 				/* FALLTHROUGH */
 
-				case MP_CLEAR:
+				//case MP_CLEAR:
 				case MP_TREES:
-					PlayerID.setCurrent( PlayerID.getWater() );
-					if (!Cmd.CmdFailed(Cmd.DoCommandByTile(target, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR))) {
-						Landscape.ModifyTile(
-							target, TileTypes.MP_WATER,
-							//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
-							TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR |
-								TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR,
-							Owner.OWNER_WATER, 1
-						);
-					}
+					convertToWater(target);
 					break;
 
 				case MP_TUNNELBRIDGE:
@@ -649,6 +644,19 @@ public class WaterCmd extends WaterTables
 					0
 				);
 			}
+		}
+	}
+
+	private static void convertToWater(TileIndex target) {
+		PlayerID.setCurrent( PlayerID.getWater() );
+		if (!Cmd.CmdFailed(Cmd.DoCommandByTile(target, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR))) {
+			Landscape.ModifyTile(
+				target, TileTypes.MP_WATER,
+				//TileTypes.MP_SETTYPE(TileTypes.MP_WATER) | 
+				TileTypes.MP_MAPOWNER | TileTypes.MP_MAP5 | TileTypes.MP_MAP2_CLEAR |
+					TileTypes.MP_MAP3LO_CLEAR | TileTypes.MP_MAP3HI_CLEAR,
+				Owner.OWNER_WATER, 1
+			);
 		}
 	}
 

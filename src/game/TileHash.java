@@ -21,7 +21,7 @@ public class TileHash<ItemType>
 
 	public void add(TileIndex tileIndex, ItemType item)
 	{
-		add(tileIndex.getTile(), item);
+		add(tileIndex.getTileIndex(), item);
 	}
 	
 	public void add(int tileIndex, ItemType item)
@@ -41,7 +41,7 @@ public class TileHash<ItemType>
 	
 	public void remove(TileIndex tileIndex, ItemType item)
 	{
-		remove(tileIndex.getTile(), item);
+		remove(tileIndex.getTileIndex(), item);
 	}
 	
 	public void remove(int tileIndex, ItemType item)
@@ -57,7 +57,7 @@ public class TileHash<ItemType>
 
 	public List<ItemType> get(TileIndex tileIndex)
 	{
-		return get(tileIndex.getTile());
+		return get(tileIndex.getTileIndex());
 	}
 	
 	
@@ -71,7 +71,7 @@ public class TileHash<ItemType>
 	
 	public List<ItemType> clear(TileIndex tileIndex)
 	{
-		return clear(tileIndex.getTile());
+		return clear(tileIndex.getTileIndex());
 	}
 	
 	public List<ItemType> clear(int tileIndex)

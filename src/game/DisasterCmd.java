@@ -20,6 +20,12 @@ public class DisasterCmd extends DisasterTables
 	{
 		if (!tile.EnsureNoVehicle()) return;
 
+		if(tile.isClear())
+		{
+			Landscape.DoClearSquare(tile);
+			return;
+		}
+		
 		switch (tile.GetTileType()) {
 		case MP_RAILWAY:
 			if (tile.GetTileOwner().IS_HUMAN_PLAYER() && !tile.IsRailWaypoint()) 
@@ -35,7 +41,7 @@ public class DisasterCmd extends DisasterTables
 		}
 
 		case MP_TREES:
-		case MP_CLEAR:
+		//case MP_CLEAR:
 			Landscape.DoClearSquare(tile);
 			break;
 
@@ -330,7 +336,8 @@ public class DisasterCmd extends DisasterTables
 			TileIndex tile = TileIndex.get(t);
 
 			if (tile.IsTileType( TileTypes.MP_INDUSTRY) && tile.getMap().m2 == i.index) {
-				tile.getMap().m1 = 0;
+				//tile.getMap().m1 = 0;
+				tile.SetTileOwner(0);
 				tile.MarkTileDirtyByTile();
 			}
 		}
@@ -380,7 +387,7 @@ public class DisasterCmd extends DisasterTables
 				DestructIndustry(i);
 
 				Global.SetDParam(0, i.townId);
-				NewsItem.AddNewsItem(Str.STR_B002_OIL_REFINERY_EXPLOSION, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTile(), 0);
+				NewsItem.AddNewsItem(Str.STR_B002_OIL_REFINERY_EXPLOSION, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTileIndex(), 0);
 				Sound.SndPlayTileFx(Snd.SND_12_EXPLOSION, i.xy);
 			}
 		} else if (v.getCurrent_order().station == 0) {
@@ -452,7 +459,7 @@ public class DisasterCmd extends DisasterTables
 				DestructIndustry(i);
 
 				Global.SetDParam(0, i.townId);
-				NewsItem.AddNewsItem(Str.STR_B003_FACTORY_DESTROYED_IN_SUSPICIOUS, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTile(), 0);
+				NewsItem.AddNewsItem(Str.STR_B003_FACTORY_DESTROYED_IN_SUSPICIOUS, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.getTileIndex(), 0);
 				Sound.SndPlayTileFx(Snd.SND_12_EXPLOSION, i.xy);
 			}
 		} else if (v.getCurrent_order().station == 0) {
@@ -538,7 +545,7 @@ public class DisasterCmd extends DisasterTables
 			Global.SetDParam(0, t.index);
 			NewsItem.AddNewsItem(Str.STR_B004_UFO_LANDS_NEAR,
 					NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ACCIDENT, 0),
-					v.tile.getTile(),
+					v.tile.getTileIndex(),
 					0);
 
 			Vehicle u = Vehicle.ForceAllocateSpecialVehicle();
@@ -882,7 +889,7 @@ public class DisasterCmd extends DisasterTables
 
 		y = 8;
 		dir = 3;
-		if(0 != (r.getTile() & 0x80000000)) { y = Global.MapMaxX() * 16 - 8 - 1; dir = 7; }
+		if(0 != (r.getTileIndex() & 0x80000000)) { y = Global.MapMaxX() * 16 - 8 - 1; dir = 7; }
 		InitializeDisasterVehicle(v, x, y, 0, dir,13);
 		v.age = 0;
 	}
@@ -901,7 +908,7 @@ public class DisasterCmd extends DisasterTables
 
 		y = 8;
 		dir = 3;
-		if(0 != (r.getTile() & 0x80000000)) { y = Global.MapMaxX() * 16 - 8 - 1; dir = 7; }
+		if(0 != (r.getTileIndex() & 0x80000000)) { y = Global.MapMaxX() * 16 - 8 - 1; dir = 7; }
 		InitializeDisasterVehicle(v, x, y, 0, dir,14);
 		v.age = 0;
 	}
@@ -921,7 +928,7 @@ public class DisasterCmd extends DisasterTables
 
 					Global.SetDParam(0, i.townId);
 					NewsItem.AddNewsItem(Str.STR_B005_COAL_MINE_SUBSIDENCE_LEAVES,
-							NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.iadd(1, 1).getTile(), 0);
+							NewsItem.NEWS_FLAGS(NewsItem.NM_THIN,NewsItem.NF_VIEWPORT|NewsItem.NF_TILE,NewsItem.NT_ACCIDENT,0), i.xy.iadd(1, 1).getTileIndex(), 0);
 
 					{
 						TileIndex tile = i.xy;

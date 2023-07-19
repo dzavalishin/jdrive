@@ -384,7 +384,7 @@ public abstract class TownGui //extends Town
 
 		if (w != null) {
 			w.flags4 |= Window.WF_DISABLE_VP_SCROLL;
-			ViewPort.AssignWindowViewport(w, 3, 17, 0xFE, 0x56, Town.GetTown(town).getXy().getTile(), 1);
+			ViewPort.AssignWindowViewport(w, 3, 17, 0xFE, 0x56, Town.GetTown(town).getXy().getTileIndex(), 1);
 		}
 	}
 

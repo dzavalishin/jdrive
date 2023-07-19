@@ -207,7 +207,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		final DrawIndustrySpec1Struct d;
 		int image;
 
-		if (0 == (ti.tile.getMap().m1 & 0x80)) return;
+		if (0 == (ti.tile.getMap().anim & 0x80)) return;
 
 		d = _draw_industry_spec1[ti.tile.getMap().m3];
 
@@ -227,7 +227,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 	{
 		int x = 0;
 
-		if(0 != (ti.tile.getMap().m1 & 0x80)) {
+		if(0 != (ti.tile.getMap().anim & 0x80)) {
 			x = _industry_anim_offs[ti.tile.getMap().m3];
 			if (x == 0xFF)
 				x = 0;
@@ -239,7 +239,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void IndustryDrawTileProc3(final TileInfo ti)
 	{
-		if(0!=(ti.tile.getMap().m1 & 0x80)) {
+		if(0!=(ti.tile.getMap().anim & 0x80)) {
 			ViewPort.AddChildSpriteScreen(0x128B, 5, _industry_anim_offs_2[ti.tile.getMap().m3]);
 		} else {
 			ViewPort.AddChildSpriteScreen(4746, 3, 67);
@@ -266,7 +266,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void DrawCoalPlantSparkles(final TileInfo ti)
 	{
-		int image = ti.tile.getMap().m1;
+		int image = ti.tile.getMap().anim;
 		if(0 != (image & 0x80)) {
 			image = BitOps.GB(image, 2, 5);
 			if (image != 0 && image < 7) {
@@ -299,7 +299,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		ormod = (ind.color_map + 0x307) << Sprite.PALETTE_SPRITE_START;
 
 		/* Retrieve pointer to the draw industry tile struct */
-		final int ii = (ti.map5 << 2) | BitOps.GB(ti.tile.getMap().m1, 0, 2);
+		final int ii = (ti.map5 << 2) | BitOps.GB(ti.tile.getMap().anim, 0, 2);
 		
 		if(ii >= _industry_draw_tile_data.length )
 		{
@@ -391,7 +391,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		td.owner = i.owner;
 		td.str = Str.STR_4802_COAL_MINE + i.type;
-		if ((tile.getMap().m1 & 0x80) == 0) {
+		if ((tile.getMap().anim & 0x80) == 0) {
 			Global.SetDParamX(td.dparam, 0, td.str);
 			td.str = Str.STR_2058_UNDER_CONSTRUCTION;
 		}
@@ -430,11 +430,10 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static void TransportIndustryGoods(TileIndex tile)
 	{
-		Industry  i = GetIndustry(tile.getMap().m2);
-		int cw, am;
+		Industry i = GetIndustry(tile.getMap().m2);
 
 		// [dz] uncommented check for i.produced_cargo[0] > 0 - why it was commented out?
-		cw = Math.min(i.cargo_waiting[0], 255);
+		int cw = Math.min(i.cargo_waiting[0], 255);
 		if (cw > _industry_min_cargo[i.type] && i.produced_cargo[0] > 0) {
 			int m5;
 
@@ -445,10 +444,10 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 			i.last_mo_production[0] += cw;
 
-			am = Station.MoveGoodsToStation(i.xy, i.width, i.height, i.produced_cargo[0], cw);
+			int am = Station.MoveGoodsToStation(i.xy, i.width, i.height, i.produced_cargo[0], cw);
 			i.last_mo_transported[0] += am;
 			if (am != 0 && (m5 = 0xFF & _industry_produce_map5[tile.getMap().m5]) != 0xFF) {
-				tile.getMap().m1 = 0x80;
+				tile.getMap().anim = 0x80;
 				tile.getMap().m5 = 0xFF & m5;
 				tile.MarkTileDirtyByTile();
 			}
@@ -462,7 +461,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 			i.last_mo_production[1] += cw;
 
-			am = Station.MoveGoodsToStation(i.xy, i.width, i.height, i.produced_cargo[1], cw);
+			int am = Station.MoveGoodsToStation(i.xy, i.width, i.height, i.produced_cargo[1], cw);
 			i.last_mo_transported[1] += am;
 		}
 	}
@@ -527,12 +526,12 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			// Sparks on a coal plant
 		case 10:
 			if ((Global._tick_counter & 3) == 0) {
-				m = tile.getMap().m1;
+				m = tile.getMap().anim;
 				if (BitOps.GB(m, 2, 5) == 6) {
-					tile.getMap().m1 = BitOps.RETSB(tile.getMap().m1, 2, 5, 0);
+					tile.getMap().anim = BitOps.RETSB(tile.getMap().anim, 2, 5, 0);
 					TextEffect.DeleteAnimatedTile(tile);
 				} else {
-					tile.getMap().m1 = m + (1<<2);
+					tile.getMap().anim = m + (1<<2);
 					tile.MarkTileDirtyByTile();
 				}
 			}
@@ -579,16 +578,16 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			if ((Global._tick_counter & 7) == 0) 
 			{
 				boolean b = BitOps.CHANCE16(1,7);
-				m = tile.getMap().m1;
+				m = tile.getMap().anim;
 				m = (m & 3) + 1;
 				n = tile.getMap().m5;
 				/* implemented below
 				if (m == 4 && (m=0,++n) == 32+1 && (n=30,b)) {
-					tile.getMap().m1 = 0x83;
+					tile.getMap().anim = 0x83;
 					tile.getMap().m5 = 29;
 					TextEffect.DeleteAnimatedTile(tile);
 				} else {
-					tile.getMap().m1 = BitOps.RETSB(tile.getMap().m1, 0, 2, m);
+					tile.getMap().anim = BitOps.RETSB(tile.getMap().anim, 0, 2, m);
 					tile.getMap().m5 = 0xFF & n;
 					tile.MarkTileDirtyByTile();
 				}
@@ -604,7 +603,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 						n=30;
 						if(b)
 						{
-							tile.getMap().m1 = 0x83;
+							tile.getMap().anim = 0x83;
 							tile.getMap().m5 = 29;
 							TextEffect.DeleteAnimatedTile(tile);
 							doelse = false;
@@ -614,7 +613,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 				if(doelse)
 				{
-					tile.getMap().m1 = BitOps.RETSB(tile.getMap().m1, 0, 2, m);
+					tile.getMap().anim = BitOps.RETSB(tile.getMap().anim, 0, 2, m);
 					tile.getMap().m5 = 0xFF & n;
 					tile.MarkTileDirtyByTile();
 				}
@@ -632,8 +631,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 			if (state < 0x1A0) {
 				if (state < 0x20 || state >= 0x180) {
-					if (0 == (tile.getMap().m1 & 0x40)) {
-						tile.getMap().m1 |= 0x40;
+					if (0 == (tile.getMap().anim & 0x40)) {
+						tile.getMap().anim |= 0x40;
 						Sound.SndPlayTileFx(Snd.SND_0B_MINING_MACHINERY, tile);
 					}
 					if(0 != (state & 7))
@@ -642,9 +641,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 					if(0 != (state & 3))
 						return;
 				}
-				m = (tile.getMap().m1 + 1) | 0x40;
+				m = (tile.getMap().anim + 1) | 0x40;
 				if (m > 0xC2) m = 0xC0;
-				tile.getMap().m1 = m;
+				tile.getMap().anim = m;
 				tile.MarkTileDirtyByTile();
 			} else if (state >= 0x200 && state < 0x3A0) {
 				int i;
@@ -652,9 +651,9 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				if(0 != (state & i))
 					return;
 
-				m = (tile.getMap().m1 & 0xBF) - 1;
+				m = (tile.getMap().anim & 0xBF) - 1;
 				if (m < 0x80) m = 0x82;
-				tile.getMap().m1 = m;				
+				tile.getMap().anim = m;				
 				tile.MarkTileDirtyByTile();
 			}
 		} break;
@@ -672,17 +671,17 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		int b = ((size + (1<<2)) & (3<<2));
 
 		if (b != 0) {
-			tile.getMap().m1 = b | (size & 3);
+			tile.getMap().anim = b | (size & 3);
 			return;
 		}
 
 		size =  ((size + 1) & 3);
 		if (size == 3) size |= 0x80;
-		tile.getMap().m1 = size | b;
+		tile.getMap().anim = size | b;
 
 		tile.MarkTileDirtyByTile();
 
-		if (0 == (tile.getMap().m1 & 0x80))
+		if (0 == (tile.getMap().anim & 0x80))
 			return;
 
 		switch(tile.getMap().m5) {
@@ -733,8 +732,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		if (v != null) v.special.unk2 = dir;
 	}
 
-	private static void SET_AND_ANIMATE(TileIndex tile, int a, int b)   { tile.getMap().m5 = 0xFF & a; tile.getMap().m1 = b; TextEffect.AddAnimatedTile(tile); }
-	private static void SET_AND_UNANIMATE(TileIndex tile, int a, int b) { tile.getMap().m5 = 0xFF & a; tile.getMap().m1 = b; TextEffect.DeleteAnimatedTile(tile); }
+	private static void SET_AND_ANIMATE(TileIndex tile, int a, int b)   { tile.getMap().m5 = 0xFF & a; tile.getMap().anim = b; TextEffect.AddAnimatedTile(tile); }
+	private static void SET_AND_UNANIMATE(TileIndex tile, int a, int b) { tile.getMap().m5 = 0xFF & a; tile.getMap().anim = b; TextEffect.DeleteAnimatedTile(tile); }
 
 
 	static void TileLoop_Industry(TileIndex tile)
@@ -744,8 +743,8 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		/*if(mm5 > _industry_map5_animation_next.length )
 			tile.getMap().m5 = mm5 = 0x18; // oilrig? just for fun */
 
-		if (0 == (tile.getMap().m1 & 0x80)) {
-			MakeIndustryTileBigger(tile, tile.getMap().m1);
+		if (0 == (tile.getMap().anim & 0x80)) {
+			MakeIndustryTileBigger(tile, tile.getMap().anim);
 			return;
 		}
 
@@ -756,7 +755,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		
 		int n = _industry_map5_animation_next[mm5];
 		if (n != 255) {
-			tile.getMap().m1 = 0;
+			tile.getMap().anim = 0;
 			tile.getMap().m5 = 0xFF & n;
 			tile.MarkTileDirtyByTile();
 			return;
@@ -897,6 +896,14 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 	static boolean IsBadFarmFieldTile(TileIndex tile)
 	{
+		if(tile.isClear())
+		{
+			int m5 = tile.getMap().m5 & 0x1C;
+			return m5 == 0xC || m5 == 0x10;
+		}
+		
+		return tile.GetTileType() != TileTypes.MP_TREES;
+		/*
 		switch (tile.GetTileType()) {
 		case MP_CLEAR: {
 			int m5 = tile.getMap().m5 & 0x1C;
@@ -908,11 +915,17 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		default:
 			return true;
-		}
+		}*/
 	}
 
 	static boolean IsBadFarmFieldTile2(TileIndex tile)
 	{
+		if(tile.isClear())
+			return (tile.getMap().m5 & 0x1C) == 0x10;
+			
+		return tile.GetTileType() != TileTypes.MP_TREES;
+		
+		/*
 		switch (tile.GetTileType()) {
 		case MP_CLEAR: {
 			int m5 = tile.getMap().m5 & 0x1C;
@@ -924,7 +937,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		default:
 			return true;
-		}
+		}*/
 	}
 
 	static void SetupFarmFieldFence(TileIndex itile, int size, int type, int direction)
@@ -937,7 +950,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			//tile = tile.TILE_MASK();
 			tile.TILE_MASK();
 
-			if (tile.IsTileType( TileTypes.MP_CLEAR) || tile.IsTileType( TileTypes.MP_TREES)) {
+			if (tile.isClear() || tile.IsTileType(TileTypes.MP_TREES)) {
 
 				or = 0xFF & type;
 				if (or == 1 && BitOps.CHANCE16(1, 7)) or = 2;
@@ -999,7 +1012,6 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 
 		final int ftype = type;
 		/* make field */
-		//BEGIN_TILE_LOOP(cur_tile, size_x, size_y, tile)
 		TileIndex.forAll(size_x, size_y, tile, (cur_tile1) ->
 		{
 			TileIndex cur_tile = cur_tile1.TILE_MASK();
@@ -1013,7 +1025,6 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 			}
 			return false;
 		});
-		//END_TILE_LOOP(cur_tile, size_x, size_y, tile)
 
 		type = 3;
 		if (GameOptions._opt.landscape != Landscape.LT_HILLY && GameOptions._opt.landscape != Landscape.LT_DESERT) {
@@ -1048,7 +1059,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 		MutableTileIndex tile = new MutableTileIndex( i.xy );
 		int a;
 
-		if ((tile.getMap().m1 & 0x80) == 0) return;
+		if ((tile.getMap().anim & 0x80) == 0) return;
 
 		/* search outwards as a rectangular spiral */
 		for (a = 1; a != 41; a += 2) {
@@ -1544,7 +1555,7 @@ public class Industry extends IndustryTables implements IPoolItem, Serializable
 				cur_tile.SetTileType(TileTypes.MP_INDUSTRY);
 				cur_tile.getMap().m5 = 0xFF & it.map5;
 				cur_tile.getMap().m2 = i.index;
-				cur_tile.getMap().m1 = Global._generating_world ? 0x1E : 0; /* maturity */
+				cur_tile.getMap().anim = Global._generating_world ? 0x1E : 0; /* maturity */
 				
 				//Global.printf("industry m5 = %x @%d.%d\n", cur_tile.getMap().m5, cur_tile.TileX(), cur_tile.TileY() );
 			}

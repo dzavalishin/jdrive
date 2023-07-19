@@ -1,5 +1,7 @@
 package game.ai;
 
+import java.io.Serializable;
+
 import game.Bridge;
 import game.Cmd;
 import game.Global;
@@ -16,9 +18,9 @@ import game.enums.TileTypes;
 import game.struct.OpenListNode;
 import game.struct.PathNode;
 
-public class AIAyStar extends AyStar implements AiConst 
+public class AIAyStar extends AyStar implements AiConst, Serializable 
 {
-
+	private static final long serialVersionUID = -8938690736486383208L;
 
 	//static int AyStar_AiPathFinder_CalculateG(AyStar aystar, AyStarNode current, OpenListNode parent)
 	// The most important function: it calculates the g-value
@@ -313,7 +315,7 @@ public class AIAyStar extends AyStar implements AiConst
 					if (TileIndex.TILES_BETWEEN(new_tile, PathFinderInfo.end_tile_tl, PathFinderInfo.end_tile_br)) break;
 
 					// Try building the bridge..
-					ret = Ai.AI_DoCommand(tile, new_tile.getTile(), (0 << 8) + (Bridge.MAX_BRIDGES / 2), Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
+					ret = Ai.AI_DoCommand(tile, new_tile.getTileIndex(), (0 << 8) + (Bridge.MAX_BRIDGES / 2), Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
 					if (Cmd.CmdFailed(ret)) continue;
 					// We can build a bridge here.. add him to the neighbours
 					neighbours[num_neighbours] = new AyStarNode();
@@ -360,7 +362,7 @@ public class AIAyStar extends AyStar implements AiConst
 		// It is not allowed to have a station on the end of a bridge or tunnel ;)
 		if (current.path.node.user_data[0] != 0) return AyStar.AYSTAR_DONE;
 		if (TileIndex.TILES_BETWEEN(current.path.node.tile, PathFinderInfo.end_tile_tl, PathFinderInfo.end_tile_br))
-			if (current.path.node.tile.typeIs(TileTypes.MP_CLEAR) || current.path.node.tile.typeIs(TileTypes.MP_TREES))
+			if (current.path.node.tile.isClear() || current.path.node.tile.typeIs(TileTypes.MP_TREES))
 				if (current.path.parent == null || AiTools.TestCanBuildStationHere(current.path.node.tile, AiTools.AiNew_GetDirection(current.path.parent.node.tile, current.path.node.tile)))
 					return AyStar.AYSTAR_FOUND_END_NODE;
 

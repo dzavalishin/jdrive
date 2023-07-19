@@ -1812,7 +1812,7 @@ public class TrainCmd extends TrainTables
 	// crashed!
 	static TrainFindDepotData FindClosestTrainDepot(Vehicle v)
 	{
-		int i;
+		//int i;
 		TrainFindDepotData tfdd = new TrainFindDepotData();
 		TileIndex tile = v.tile;
 
@@ -1831,13 +1831,12 @@ public class TrainCmd extends TrainTables
 		if (v.rail.track == 0x40) tile = TunnelBridgeCmd.GetVehicleOutOfTunnelTile(v);
 
 		if (Global._patches.new_pathfinding_all) {
-			NPFFoundTargetData ftd;
 			Vehicle  last = v.GetLastVehicleInChain();
 			/*Trackdir*/ int trackdir = v.GetVehicleTrackdir();
 			/*Trackdir*/ int trackdir_rev = Rail.ReverseTrackdir(last.GetVehicleTrackdir());
 
 			assert (trackdir != Rail.INVALID_TRACKDIR);
-			ftd = Npf.NPFRouteToDepotBreadthFirstTwoWay(v.tile, trackdir, last.tile, trackdir_rev, TransportType.Rail, v.owner, v.rail.railtype, Npf.NPF_INFINITE_PENALTY);
+			NPFFoundTargetData ftd = Npf.NPFRouteToDepotBreadthFirstTwoWay(v.tile, trackdir, last.tile, trackdir_rev, TransportType.Rail, v.owner, v.rail.railtype, Npf.NPF_INFINITE_PENALTY);
 			if (ftd.best_bird_dist == 0) {
 				/* Found target */
 				tfdd.tile = ftd.node.tile;
@@ -1851,16 +1850,18 @@ public class TrainCmd extends TrainTables
 			}
 		} else {
 			// search in the forward direction first.
-			i = v.direction >> 1;
-		if (0==(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
-		Pathfind.NewTrainPathfind(tile, TileIndex.get(0), i, (NTPEnumProc)TrainCmd::NtpCallbFindDepot, tfdd);
-		if (tfdd.best_length == -1){
-			tfdd.reverse = true;
-			// search in backwards direction
-			i = (v.direction^4) >> 1;
-		if (0==(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
-		Pathfind.NewTrainPathfind(tile, TileIndex.get(0), i, (NTPEnumProc)TrainCmd::NtpCallbFindDepot, tfdd);
-		}
+			int i = v.direction >> 1;
+
+			if (0==(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
+			
+			Pathfind.NewTrainPathfind(tile, TileIndex.get(0), i, (NTPEnumProc)TrainCmd::NtpCallbFindDepot, tfdd);
+			if (tfdd.best_length == -1) {
+				tfdd.reverse = true;
+				// search in backwards direction
+				i = (v.direction^4) >> 1;
+				if (0==(v.direction & 1) && v.rail.track != _state_dir_table[i]) i = (i - 1) & 3;
+				Pathfind.NewTrainPathfind(tile, TileIndex.get(0), i, (NTPEnumProc)TrainCmd::NtpCallbFindDepot, tfdd);
+			}
 		}
 
 		return tfdd;

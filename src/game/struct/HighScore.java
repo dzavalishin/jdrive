@@ -7,9 +7,9 @@ import game.util.Strings;
 
 public class HighScore 
 {
-	public String	company = "";
-	public String	title = ""; 
-	public int 		score = 0;
+	public String company = "";
+	public String title = ""; 
+	public int    score = 0;
 
 	public void initFromPlayer(Player p, int score) 
 	{

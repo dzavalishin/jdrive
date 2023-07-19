@@ -6,8 +6,7 @@ import game.util.BitOps;
 
 
 
-/** @file pbs.c Path-Based-Signalling implementation file
- *  @see pbs.h */
+/** @file  Path-Based-Signaling implementation  */
 
 /* reserved track encoding:
  normal railway tracks:
@@ -25,7 +24,7 @@ import game.util.BitOps;
 public class Pbs {
 
 	/**
-	 * finalants used for pbs_mode argument of npf-functions
+	 * Constants used for pbs_mode argument of npf-functions
 	 */
 	//enum pbs_modes {
 	public static final int PBS_MODE_NONE = 0;    // no pbs
@@ -317,22 +316,18 @@ public class Pbs {
 		assert(tile.IsValidTile());
 		assert(Rail.IsValidTrackdir(trackdir));
 
-		if (!Global._patches.new_pathfinding_all)
+		if(!Global._patches.new_pathfinding_all)
 			return false;
 
-		if (!tile.IsTileType( TileTypes.MP_RAILWAY))
+		if(!tile.IsTileType( TileTypes.MP_RAILWAY))
 			return false;
 
-		if (Rail.GetRailTileType(tile) != Rail.RAIL_TYPE_SIGNALS)
+		if(Rail.GetRailTileType(tile) != Rail.RAIL_TYPE_SIGNALS)
 			return false;
 
-		if (!Rail.HasSignalOnTrackdir(tile, trackdir))
+		if(!Rail.HasSignalOnTrackdir(tile, trackdir))
 			return false;
 
-		/*if (Rail.GetSignalType(tile, Rail.TrackdirToTrack(trackdir)) == 4)
-			return true;
-		else
-			return false;*/
 		return Rail.GetSignalType(tile, Rail.TrackdirToTrack(trackdir)) == 4;
 	}
 
@@ -397,11 +392,6 @@ public class Pbs {
 
 		return result;
 	}
-	
-	
-	
-	
-	
 	
 	
 	

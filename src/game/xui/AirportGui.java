@@ -94,7 +94,7 @@ public class AirportGui
 
 		case WE_PLACE_MOUSEUP:
 			if (e.pt.x != -1) {
-				Cmd.DoCommandP(e.tile, e.starttile.getTile(), 0, /*CcPlaySound10*/ null, Cmd.CMD_CLEAR_AREA | Cmd.CMD_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
+				Cmd.DoCommandP(e.tile, e.starttile.getTileIndex(), 0, /*CcPlaySound10*/ null, Cmd.CMD_CLEAR_AREA | Cmd.CMD_MSG(Str.STR_00B5_CAN_T_CLEAR_THIS_AREA));
 			}
 			break;
 

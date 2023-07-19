@@ -953,7 +953,7 @@ public class Ship {
 
 			v.VehiclePositionChanged();
 
-			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.getTile());
+			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.getTileIndex());
 			VehicleGui.RebuildVehicleLists();
 			Window.InvalidateWindow(Window.WC_COMPANY, v.owner.id);
 			if (Player.IsLocalPlayer())
@@ -985,7 +985,7 @@ public class Ship {
 			return Cmd.return_cmd_error(Str.STR_980B_SHIP_MUST_BE_STOPPED_IN);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.getTile());
+			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.getTileIndex());
 			VehicleGui.RebuildVehicleLists();
 			Window.InvalidateWindow(Window.WC_COMPANY, v.owner.id);
 			Window.DeleteWindowById(Window.WC_VEHICLE_VIEW, v.index);
@@ -1015,7 +1015,7 @@ public class Ship {
 		if( 0 != (flags & Cmd.DC_EXEC)) {
 			v.toggleStopped();
 			Window.InvalidateWindowWidget(Window.WC_VEHICLE_VIEW, v.index, STATUS_BAR);
-			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.getTile());
+			Window.InvalidateWindow(Window.WC_VEHICLE_DEPOT, v.tile.getTileIndex());
 			Window.InvalidateWindowClasses(Window.WC_SHIPS_LIST);
 		}
 

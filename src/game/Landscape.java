@@ -15,7 +15,7 @@ import game.xui.ViewPort;
 public class Landscape extends GenLandTable
 {
 
-	private static final int PLAIN_TERRAIN_MAX = 8; // Orig valuie was 3
+	private static final int PLAIN_TERRAIN_MAX = 8; // Orig value was 3
 	
 	/* Landscape types */
 	//enum {
@@ -57,7 +57,7 @@ public class Landscape extends GenLandTable
 
 	public static void FindLandscapeHeightByTile(TileInfo ti, TileIndex tile)
 	{
-		assert(tile.getTile() < Global.MapSize());
+		assert(tile.getTileIndex() < Global.MapSize());
 
 		IntContainer ic = new IntContainer();
 
@@ -68,6 +68,8 @@ public class Landscape extends GenLandTable
 		ti.z = ic.v;
 	}
 
+	//private static Tile voidTile = new Tile();
+	
 	/** find the landscape height for the coordinates x y */
 	public static TileInfo FindLandscapeHeight(int x, int y)
 	{
@@ -268,9 +270,6 @@ public class Landscape extends GenLandTable
 
 	public static AcceptedCargo GetAcceptedCargo(TileIndex tile)
 	{
-		//AcceptedCargo ac = new AcceptedCargo();
-		//memset(ac, 0, sizeof(AcceptedCargo));
-		//ac.clear();
 		return _tile_type_procs[tile.GetTileType().ordinal()].get_accepted_cargo_proc.apply(tile);
 	}
 
@@ -286,7 +285,12 @@ public class Landscape extends GenLandTable
 
 	public static void DrawTile(TileInfo ti)
 	{
-		_tile_type_procs[ti.type].draw_tile_proc.accept(ti);
+		if(ti.tile != null)
+		{
+			ti.tile.DrawTile(ti);
+		}
+		else
+			_tile_type_procs[ti.type].draw_tile_proc.accept(ti);
 	}
 
 	public static TileDesc GetTileDesc(TileIndex tile)
@@ -370,7 +374,6 @@ public class Landscape extends GenLandTable
 	/* utility function used to modify a tile */
 	public static void ModifyTile(TileIndex tile, TileTypes type, int flags, int ... args)
 	{
-		//int i;
 		int p = 0;
 
 		/*
@@ -381,6 +384,9 @@ public class Landscape extends GenLandTable
 		assert 0 == BitOps.GB(flags, 8, 4); // type was here
 		if(type != TileTypes.MP_NOCHANGE) tile.SetTileType( type );
 
+		if( 0 != (flags & TileTypes.MP_ANIM_CLEAR))
+			tile.getMap().anim = 0;
+		
 		if( 0 != (flags & (TileTypes.MP_MAP2_CLEAR | TileTypes.MP_MAP2)) ) {
 			int x = 0;
 			if(0 != (flags & TileTypes.MP_MAP2)) x = args[p++];
@@ -402,7 +408,8 @@ public class Landscape extends GenLandTable
 		if( 0 != (flags & (TileTypes.MP_MAPOWNER|TileTypes.MP_MAPOWNER_CURRENT)) ) {
 			/*PlayerID*/ int x = PlayerID.getCurrent().id;
 			if(0 != (flags & TileTypes.MP_MAPOWNER) ) x = args[p++];
-			tile.getMap().m1 = x;
+			//tile.getMap().m1 = x;
+			tile.SetTileOwner(x);
 		}
 
 		if( 0 != (flags & TileTypes.MP_MAP5) ) {
@@ -421,13 +428,10 @@ public class Landscape extends GenLandTable
 
 	static void RunTileLoop()
 	{
-		int tile;
-		int count;
-
-		tile = Global._cur_tileloop_tile;
+		int tile = Global._cur_tileloop_tile;
 
 		assert( (tile & ~TILELOOP_ASSERTMASK) == 0);
-		count = (Global.MapSizeX() / TILELOOP_SIZE) * (Global.MapSizeY() / TILELOOP_SIZE);
+		int count = (Global.MapSizeX() / TILELOOP_SIZE) * (Global.MapSizeY() / TILELOOP_SIZE);
 		do {
 			TileIndex itile = new TileIndex(tile);
 			final int ordinal = itile.GetTileType().ordinal();
@@ -459,20 +463,7 @@ public class Landscape extends GenLandTable
 		Global.gs._m = new Tile[map_size];
 
 		for (i = 0; i < map_size; i++) 
-		{
 			Global.gs._m[i] = new Tile();
-
-			/*
-			Global._m[i].type        = TileTypes.MP_CLEAR.ordinal();
-			Global._m[i].height      = 0;
-			Global._m[i].m1          = Owner.OWNER_NONE;
-			Global._m[i].m2          = 0;
-			Global._m[i].m3          = 0;
-			Global._m[i].m4          = 0;
-			Global._m[i].m5          = 3;
-			Global._m[i].extra       = 0;
-			*/
-		}
 
 		// create void tiles at the border
 		for (i = 0; i < Global.MapMaxY(); ++i)
@@ -496,7 +487,7 @@ public class Landscape extends GenLandTable
 		{
 			TileIndex tile = new TileIndex(ti);
 
-			if (tile.IsTileType(TileTypes.MP_CLEAR) && tile.GetTileSlope(h) == 0 && h.v == 0) {
+			if (tile.isClear() && tile.GetTileSlope(h) == 0 && h.v == 0) {
 				tile.SetTileType(TileTypes.MP_WATER);
 				tile.getMap().m5 = 0;
 				tile.SetTileOwner(Owner.OWNER_WATER);
@@ -509,31 +500,27 @@ public class Landscape extends GenLandTable
 
 	static void GenerateTerrain(int type, int flag)
 	{
-		long r;
-		int x;
-		int y;
 		int w;
 		int h;
 
-		final Sprite template;		
-		final byte[] p;
+		//final byte[] p;
 
 		int pi = 0; // p index
 		//TileIndex tile;
 		//Tile tile;
-		int direction;
+		//int direction;
 
-		r = Hal.Random32();
-		template = SpriteCache.GetSprite((int)(((r >> 24) * _genterrain_tbl_1[type]) >> 8) + _genterrain_tbl_2[type] + 4845);
+		long r = Hal.Random32();
+		final Sprite template = SpriteCache.GetSprite((int)(((r >> 24) * _genterrain_tbl_1[type]) >> 8) + _genterrain_tbl_2[type] + 4845);
 
-		x = (int)(r & Global.MapMaxX());
-		y = (int)((r >> Global.MapLogX()) & Global.MapMaxY());
+		int x = (int)(r & Global.MapMaxX());
+		int y = (int)((r >> Global.MapLogX()) & Global.MapMaxY());
 
 
 		if (x < 2 || y < 2)
 			return;
 
-		direction =  BitOps.GB((int)r, 22, 2);
+		int direction =  BitOps.GB((int)r, 22, 2);
 		if (0 != (direction & 1)) {
 			w = template.height;
 			h = template.width;
@@ -541,7 +528,8 @@ public class Landscape extends GenLandTable
 			w = template.width;
 			h = template.height;
 		}
-		p = template.data;
+
+		final byte[] p = template.data;
 
 		if (0 != (flag & 4)) {
 			int xw = x * Global.MapSizeY();
@@ -637,13 +625,9 @@ public class Landscape extends GenLandTable
 	}
 
 
-	//#include "table/genland.h"
 
 	static void CreateDesertOrRainForest()
 	{
-		//TileIndex tile;
-		//TileIndexDiffC data;
-		int i;
 		boolean broken = false;
 
 		for(int ti = 0; ti != Global.MapSize(); ++ti) 
@@ -679,7 +663,7 @@ public class Landscape extends GenLandTable
 			}
 		}
 
-		for (i = 0; i != 256; i++)
+		for(int i = 0; i != 256; i++)
 			RunTileLoop();
 
 		broken = false;
@@ -692,8 +676,7 @@ public class Landscape extends GenLandTable
 			for( TileIndexDiffC data : _make_desert_or_rainforest_data)
 			{
 				TileIndex t = new TileIndex( TileIndex.TILE_MASK(ti + TileIndex.ToTileIndexDiff(data).diff));
-				if (t.IsTileType(TileTypes.MP_CLEAR) 
-						&& (t.getMap().m5 & 0x1c) == 0x14) 
+				if (t.isClear() && (t.getMap().m5 & 0x1c) == 0x14) 
 				{
 					broken = true;
 					break;

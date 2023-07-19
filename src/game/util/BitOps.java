@@ -13,7 +13,13 @@ import game.Hal;
 public class BitOps {
 	private BitOps() { } // Prevent construction
 
-	/// Fetch n bits starting at bit s from x
+	/** Fetch n bits starting at bit s from x
+	 * 
+	 * @param x fetch from
+	 * @param s starting bit
+	 * @param n num of bits
+	 * @return bits fetched
+	 */
 	static public int GB(int x, int s, int n) { return (x >> s) & ((1 << n) - 1); }
 
 	/// Set n bits starting at bit s in x to d

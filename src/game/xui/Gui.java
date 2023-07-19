@@ -99,14 +99,14 @@ public class Gui
 		case GM_MENU:
 			Window.deleteMain(); // [dz] hacked in
 			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
-			ViewPort.AssignWindowViewport( w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
+			ViewPort.AssignWindowViewport( w, 0, 0, width, height, new TileIndex(32, 32).getTileIndex(), 0);
 			IntroGui.ShowSelectGameWindow();
 			break;
 			
 		case GM_NORMAL:
 			Window.deleteMain(); // [dz] hacked in
 			w = Window.AllocateWindow(0, 0, width, height, Gui::MainWindowWndProc, Window.WC_MAIN_WINDOW, null);
-			ViewPort.AssignWindowViewport(w, 0, 0, width, height, new TileIndex(32, 32).getTile(), 0);
+			ViewPort.AssignWindowViewport(w, 0, 0, width, height, new TileIndex(32, 32).getTileIndex(), 0);
 
 			ShowVitalWindows();
 
@@ -1363,7 +1363,7 @@ public class Gui
 
 	static void PlaceProc_LightHouse(TileIndex tile)
 	{
-		if (!tile.IsTileType(TileTypes.MP_CLEAR) || TileIndex.IsSteepTileh(tile.GetTileSlope(null))) {
+		if (!tile.isClear() || TileIndex.IsSteepTileh(tile.GetTileSlope(null))) {
 			return;
 		}
 
@@ -1375,7 +1375,7 @@ public class Gui
 
 	static void PlaceProc_Transmitter(TileIndex tile)
 	{
-		if (!tile.IsTileType(TileTypes.MP_CLEAR) || TileIndex.IsSteepTileh(tile.GetTileSlope(null))) {
+		if (!tile.isClear() || TileIndex.IsSteepTileh(tile.GetTileSlope(null))) {
 			return;
 		}
 

@@ -58,7 +58,7 @@ class HashKey implements Comparable<HashKey>
 
 	@Override
 	public int compareTo(HashKey k) {
-		int i = tile.getTile() - k.tile.getTile();
+		int i = tile.getTileIndex() - k.tile.getTileIndex();
 		if( i == 0 )
 			i = direction - k.direction;
 		
@@ -68,7 +68,7 @@ class HashKey implements Comparable<HashKey>
 
 	@Override
 	public int hashCode() {		
-		return (tile.getTile() << 2) + direction;
+		return (tile.getTileIndex() << 2) + direction;
 	}
 	
 	

@@ -88,7 +88,7 @@ public class Terraform {
 		//BEGIN_TILE_LOOP(tile, size_x, size_y, TileXY(sx, sy)) 
 		TileIndex.forAll( size_x, size_y, TileIndex.TileXY(sx, sy), (tile) ->
 		{
-			if (tile.IsTileType(TileTypes.MP_CLEAR) || tile.IsTileType( TileTypes.MP_TREES)) {
+			if (tile.isClear() || tile.IsTileType( TileTypes.MP_TREES)) {
 				Landscape.ModifyTile(tile, TileTypes.MP_CLEAR,
 						//TileTypes.MP_SETTYPE(TileTypes.MP_CLEAR) | 
 						TileTypes.MP_MAP5, (tile.getMap().m5 & ~0x1C) | 0xB);

@@ -547,7 +547,7 @@ public class Station extends StationTables implements IPoolItem
 		if(canBuild!= null) canBuild[0] = true;
 		// check around to see if there's any stations there
 		//BEGIN_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
-		TileIndex.forAll(w + 2, h + 2, tile.isub( TileIndex.TileDiffXY(1, 1) ).getTile(), (tile_cur) -> {
+		TileIndex.forAll(w + 2, h + 2, tile.isub( TileIndex.TileDiffXY(1, 1) ).getTileIndex(), (tile_cur) -> {
 			if (tile_cur.IsTileType(TileTypes.MP_STATION)) {
 				/*StationID*/ int t = tile_cur.getMap().m2;
 				{
@@ -833,8 +833,7 @@ public class Station extends StationTables implements IPoolItem
 		int [] allowed_z = {-1};
 		int [] error = {0};
 
-		//BEGIN_TILE_LOOP(tile_cur, w, h, tile)
-		TileIndex.forEach(w, h, tile.getTile(), (tile_cur, h_cur, w_cur ) -> 
+		TileIndex.forEach(w, h, tile.getTileIndex(), (tile_cur, h_cur, w_cur ) -> 
 		{
 
 			if (!Vehicle.EnsureNoVehicle(tile_cur))
@@ -916,7 +915,6 @@ public class Station extends StationTables implements IPoolItem
 
 			return false;
 		});
-		//END_TILE_LOOP(tile_cur, w, h, tile)
 
 		if(error[0] != 0) return error[0]; 
 
@@ -1072,7 +1070,7 @@ public class Station extends StationTables implements IPoolItem
 		if (h_org > Global._patches.station_spread || w_org > Global._patches.station_spread) return Cmd.CMD_ERROR;
 
 		// these values are those that will be stored in train_tile and station_platforms
-		finalvalues[0] = tile_org.getTile();
+		finalvalues[0] = tile_org.getTileIndex();
 		finalvalues[1] = w_org;
 		finalvalues[2] = h_org;
 
@@ -1412,7 +1410,7 @@ public class Station extends StationTables implements IPoolItem
 		}
 	}
 
-	public static int GetCustomStationRelocation(final  StationSpec spec, final  Station st, byte ctype)
+	public static int GetCustomStationRelocation(final  StationSpec spec, final  Station st, int ctype)
 	{
 		final  RealSpriteGroup rsg = ResolveStationSpriteGroup(spec.spritegroup[ctype], st);
 
@@ -2977,11 +2975,11 @@ public class Station extends StationTables implements IPoolItem
 		Station st = AllocateStation();
 
 		if (st == null) {
-			Global.DEBUG_misc( 0, "Couldn't allocate station for oilrig at %#X, reverting to oilrig only...", tile.getTile());
+			Global.DEBUG_misc( 0, "Couldn't allocate station for oilrig at %#X, reverting to oilrig only...", tile.getTileIndex());
 			return;
 		}
 		if (!GenerateStationName(st, tile, 2)) {
-			Global.DEBUG_misc( 0, "Couldn't allocate station-name for oilrig at %#X, reverting to oilrig only...", tile.getTile());
+			Global.DEBUG_misc( 0, "Couldn't allocate station-name for oilrig at %#X, reverting to oilrig only...", tile.getTileIndex());
 			return;
 		}
 

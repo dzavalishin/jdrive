@@ -37,7 +37,7 @@ public class AyStarNode
 	
 	@Override
 	public int hashCode() {
-		return (tile.getTile() << 2) + direction;
+		return (tile.getTileIndex() << 2) + direction;
 	}
 	
 }

@@ -36,9 +36,6 @@ public class Clear extends ClearTables {
 
 	static int TerraformAllowTileProcess(TerraformerState ts, TileIndex tile)
 	{
-		//MutableTileIndex t;
-		//int count;
-
 		if (tile.TileX() == Global.MapMaxX() || tile.TileY() == Global.MapMaxY()) 
 			return -1;
 
@@ -52,7 +49,7 @@ public class Clear extends ClearTables {
 		for( int i = 0; i < ts.tile_table_count; i++ )
 		{
 			TileIndex t = ts.tile_table[i];
-			if (t.getTile() == tile.getTile()) return 0;
+			if (t.getTileIndex() == tile.getTileIndex()) return 0;
 		}
 		
 		return 1;
@@ -75,7 +72,7 @@ public class Clear extends ClearTables {
 			if( i++ >= ts.modheight_count)
 				break;
 			
-			if (mod.tile.getTile() == tile.getTile()) return mod.height;
+			if (mod.tile.getTileIndex() == tile.getTileIndex()) return mod.height;
 		}
 
 		return tile.TileHeight();
@@ -83,12 +80,10 @@ public class Clear extends ClearTables {
 
 	static void TerraformAddDirtyTile(TerraformerState ts, TileIndex tile)
 	{
-		int i, count;
-
-		count = ts.tile_table_count;
+		int count = ts.tile_table_count;
 		if (count >= 625) return;
 
-		for(i = 0; i < count; i++) {
+		for(int i = 0; i < count; i++) {
 			if (ts.tile_table[i].equals(tile)) return;
 		}
 
@@ -113,7 +108,7 @@ public class Clear extends ClearTables {
 		int r;
 		boolean skip_clear = false;
 
-		assert(tile.getTile() < Global.MapSize());
+		assert(tile.getTileIndex() < Global.MapSize());
 
 		if ((r=TerraformAllowTileProcess(ts, tile)) <= 0)
 			return r;
@@ -165,11 +160,11 @@ public class Clear extends ClearTables {
 	
 	static boolean TerraformTileHeight(TerraformerState ts, TileIndex tile, int height)
 	{
-		int nh;
+		//int nh;
 		//TerraformerHeightMod mod;
-		int count;
+		//int count;
 
-		assert(tile.getTile() < Global.MapSize());
+		assert(tile.getTileIndex() < Global.MapSize());
 
 		if (height < 0) {
 			Global._error_message = Str.STR_1003_ALREADY_AT_SEA_LEVEL;
@@ -180,7 +175,7 @@ public class Clear extends ClearTables {
 
 		if (height > 15) return false;
 
-		nh = TerraformGetHeightOfTile(ts, tile);
+		int nh = TerraformGetHeightOfTile(ts, tile);
 		if (nh < 0 || height == nh) return false;
 
 		if (TerraformProc(ts, tile, 0) < 0) return false;
@@ -189,7 +184,7 @@ public class Clear extends ClearTables {
 		if (TerraformProc(ts, tile.iadd( TileIndex.TileDiffXY(-1,  0)), 3) < 0) return false;
 
 		//mod = ts.modheight;
-		count = ts.modheight_count;
+		int count = ts.modheight_count;
 		int i;
 		for (i = 0; /*i < count*/; i++ ) {
 			if (count == 0) {
@@ -210,7 +205,7 @@ public class Clear extends ClearTables {
 		ts.cost += Global._price.terraform;
 
 		{
-			int direction = ts.direction, r;
+			int direction = ts.direction;
 			//final TileIndexDiffC ttm;
 
 
@@ -219,7 +214,7 @@ public class Clear extends ClearTables {
 			{
 				tile = tile.iadd( TileIndex.ToTileIndexDiff(ttm) );
 
-				r = TerraformGetHeightOfTile(ts, tile);
+				int r = TerraformGetHeightOfTile(ts, tile);
 				if (r != height && r-direction != height && r+direction != height) {
 					if (!TerraformTileHeight(ts, tile, r+direction))
 						return false;
@@ -238,7 +233,7 @@ public class Clear extends ClearTables {
 	static int CmdTerraformLand(int x, int y, int flags, int p1, int p2)
 	{
 		TerraformerState ts = new TerraformerState();
-		TileIndex tile;
+		//TileIndex tile;
 		int direction;
 
 		TerraformerHeightMod [] modheight_data = new TerraformerHeightMod[576];
@@ -256,10 +251,10 @@ public class Clear extends ClearTables {
 		ts.modheight = modheight_data;
 		ts.tile_table = new TileIndex[625]; // tile_table_data;
 
-		tile = TileIndex.TileVirtXY(x, y);
+		TileIndex tile = TileIndex.TileVirtXY(x, y);
 
 		/* Make an extra check for map-bounds cause we add tiles to the originating tile */
-		if (tile.iadd( TileIndex.TileDiffXY(1, 1)).getTile() > Global.MapSize()) return Cmd.CMD_ERROR;
+		if (tile.iadd( TileIndex.TileDiffXY(1, 1)).getTileIndex() > Global.MapSize()) return Cmd.CMD_ERROR;
 
 		if(0 != (p1 & 1)) {
 			if (!TerraformTileHeight(ts, tile.iadd( TileIndex.TileDiffXY(1, 0) ),
@@ -365,9 +360,9 @@ public class Clear extends ClearTables {
 	static int CmdLevelLand(int ex, int ey, int flags, int pp1, int p2)
 	{
 		//int size_x, size_y;
-		int sx, sy;
-		int h;
-		TileIndex tile;
+		//int sx, sy;
+		//int h;
+		//TileIndex tile;
 		//int ret, cost, money;
 		int [] cost = {0};
 		long [] money = {0};
@@ -379,16 +374,17 @@ public class Clear extends ClearTables {
 		TileIndex p1 = new TileIndex(pp1);
 		
 		// remember level height
-		h = p1.TileHeight();
+		int h = p1.TileHeight();
 
 		ex >>= 4; ey >>= 4;
 
 		// make sure sx,sy are smaller than ex,ey
-		sx = p1.TileX();
-		sy = p1.TileY();
+		int sx = p1.TileX();
+		int sy = p1.TileY();
 		if (ex < sx) { int t = sx; sx = ex; ex = t; } // intswap(ex, sx);
 		if (ey < sy) { int t = sy; sy = ey; ey = t; } // intswap(ey, sy);
-		tile = TileIndex.TileXY(sx, sy);
+		
+		TileIndex tile = TileIndex.TileXY(sx, sy);
 
 		int size_x = ex-sx+1;
 		int size_y = ey-sy+1;
@@ -396,7 +392,6 @@ public class Clear extends ClearTables {
 		money[0] = Cmd.GetAvailableMoneyForCommand();
 		//cost[0] = 0;
 
-		//BEGIN_TILE_LOOP(tile2, size_x, size_y, tile) 
 		TileIndex.forAll( size_x, size_y, tile, (tile2) ->
 		{
 			int curh = tile2.TileHeight();
@@ -417,7 +412,7 @@ public class Clear extends ClearTables {
 				curh += (curh > h) ? -1 : 1;
 			}
 			return false;
-		}); //END_TILE_LOOP(tile2, size_x, size_y, tile)
+		});
 
 		return (cost[0] == 0) ? Cmd.CMD_ERROR : cost[0];
 	}
@@ -430,12 +425,10 @@ public class Clear extends ClearTables {
 	 */
 	static int CmdPurchaseLandArea(int x, int y, int flags, int p1, int p2)
 	{
-		TileIndex tile;
-		int cost;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		tile = TileIndex.TileVirtXY(x, y);
+		TileIndex tile = TileIndex.TileVirtXY(x, y);
 
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
@@ -443,7 +436,7 @@ public class Clear extends ClearTables {
 				tile.IsTileOwner(PlayerID.getCurrent()))
 			return Cmd.return_cmd_error(Str.STR_5807_YOU_ALREADY_OWN_IT);
 
-		cost = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
+		int cost = Cmd.DoCommandByTile(tile, 0, 0, flags, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(cost)) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -508,11 +501,9 @@ public class Clear extends ClearTables {
 	 */
 	static int CmdSellLandArea(int x, int y, int flags, int p1, int p2)
 	{
-		TileIndex tile;
-
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
 
-		tile = TileIndex.TileVirtXY(x, y);
+		TileIndex tile = TileIndex.TileVirtXY(x, y);
 
 		if (!tile.IsTileType( TileTypes.MP_UNMOVABLE) || tile.getMap().m5 != 3) return Cmd.CMD_ERROR;
 		if (!tile.CheckTileOwnership() && !PlayerID.getCurrent().isWater()) return Cmd.CMD_ERROR;
@@ -620,6 +611,7 @@ public class Clear extends ClearTables {
 	{
 		boolean self, neighbour;
 		TileIndex dirty = TileIndex.INVALID_TILE;
+		/*
 		final TileTypes type = tile.GetTileType();
 		
 		switch (type) {
@@ -631,8 +623,14 @@ public class Clear extends ClearTables {
 			default:
 				self = false;
 				break;
-		}
+		}*/
+		// land type == partial desert
+		if(tile.isClear())
+			self = (BitOps.GB(tile.getMap().m5, 0, 5) == 15);
+		else
+			self = false;
 
+		/*
 		switch (tile.iadd(1, 0).GetTileType()) {
 			case MP_CLEAR:
 				// land type == partial desert
@@ -642,8 +640,14 @@ public class Clear extends ClearTables {
 			default:
 				neighbour = false;
 				break;
-		}
+		}*/
 
+		// land type == partial desert
+		if(tile.iadd(1, 0).isClear())
+			neighbour = (BitOps.GB(tile.iadd(1, 0).M().m5, 0, 5) == 15);
+		else
+			neighbour = false;
+		
 		if (BitOps.GB(tile.getMap().m4, 5, 3) == 0) { //fence?
 			if (self != neighbour) {
 				tile.getMap().m4 =  BitOps.RETSB(tile.getMap().m4, 5, 3, 3);
@@ -656,6 +660,7 @@ public class Clear extends ClearTables {
 			}
 		}
 
+		/*
 		switch (tile.iadd(0, 1).GetTileType()) {
 			case MP_CLEAR:
 				// land type == partial desert
@@ -665,7 +670,13 @@ public class Clear extends ClearTables {
 			default:
 				neighbour = false;
 				break;
-		}
+		}*/
+
+		// land type == partial desert
+		if(tile.iadd(0, 1).isClear())
+			neighbour = (BitOps.GB(tile.iadd(0, 1).M().m5, 0, 5) == 15);
+		else
+			neighbour = false;
 
 		if (BitOps.GB(tile.getMap().m4, 2, 3) == 0) {
 			if (self != neighbour) {
@@ -779,7 +790,7 @@ public class Clear extends ClearTables {
 		if ((m5 & 0x1C) == 0x10 || (m5 & 0x1C) == 0x14) return; // 1C == 0001 1100 - ??
 
 		if ((m5 & 0x1C) != 0xC) {
-			if ((m5 & 3) == 3) return; // full frass/full show
+			if ((m5 & 3) == 3) return; // full grass/full show
 
 			if (Global._game_mode != GameModes.GM_EDITOR) {
 				if( Hal.RandomRange(20) >= 2) // add some randomness to growth rate
@@ -820,14 +831,13 @@ public class Clear extends ClearTables {
 
 	static void GenerateClearTile()
 	{
-		int i;
 		TileIndex tile;
 
 		/* add hills */
-		i = Map.ScaleByMapSize(BitOps.GB(Hal.Random(), 0, 10) + 0x400);
+		int i = Map.ScaleByMapSize(BitOps.GB(Hal.Random(), 0, 10) + 0x400);
 		do {
 			tile = TileIndex.RandomTile();
-			if (tile.IsTileType( TileTypes.MP_CLEAR)) 
+			if (tile.isClear()) 
 				tile.getMap().m5 = 0xFF & BitOps.RETSB(tile.getMap().m5, 2, 2, 1);
 		} while (--i > 0);
 
@@ -836,7 +846,7 @@ public class Clear extends ClearTables {
 		do {
 			int r = Hal.Random();
 			tile = TileIndex.RandomTileSeed(r);
-			if (tile.IsTileType( TileTypes.MP_CLEAR)) {
+			if (tile.isClear()) {
 				int j = BitOps.GB(r, 16, 4) + 5;
 				for(;;) {
 					TileIndex tile_new = null;
@@ -851,7 +861,7 @@ public class Clear extends ClearTables {
 							break;
 						}
 						tile_new = tile.iadd( TileIndex.TileOffsByDir(BitOps.GB(Hal.Random(), 0, 2)) );
-					} while (!tile.IsTileType( TileTypes.MP_CLEAR));
+					} while (!tile.isClear());
 					
 					if(getOut) break;
 					

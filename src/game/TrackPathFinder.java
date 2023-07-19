@@ -58,21 +58,21 @@ public class TrackPathFinder extends Pathfind
 	// -------------------------------------------------
 
 
-	boolean TPFSetTileBit(TrackPathFinder tpf, TileIndex tile, int dir)
+	boolean TPFSetTileBit(TileIndex tile, int dir)
 	{
 		int bits = 1 << dir;
 
-		if (tpf.disable_tile_hash)
+		if (disable_tile_hash)
 			return true;
 
-		TPFHashEnt e = tileBits.get(tile.getTile());
+		TPFHashEnt e = tileBits.get(tile.getTileIndex());
 		/* unused hash entry, set the appropriate bit in it and return true
 		 * to indicate that a bit was set. */
 		if( e == null )
 		{
 			e = new TPFHashEnt();
 			e.bits = bits;
-			tileBits.put(tile.getTile(), e);
+			tileBits.put(tile.getTileIndex(), e);
 			return true;
 		}
 		else
@@ -192,25 +192,25 @@ public class TrackPathFinder extends Pathfind
 
 	void TPFMode1(TileIndex tilep, int direction)
 	{
-		TrackPathFinder tpf = this;
+		//TrackPathFinder tpf = this;
 		MutableTileIndex tile = new MutableTileIndex(tilep); 
 
 		int bits;
-		int i;
+		//int i;
 		//RememberData rdCopy;
 		TileIndex tile_org = tile;
 
 		if (tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) && BitOps.GB(tile.getMap().m5, 4, 4) == 0) {
 			if (BitOps.GB(tile.getMap().m5, 0, 2) != direction ||
-					BitOps.GB(tile.getMap().m5, 2, 2) != tpf.tracktype.getValue()) {
+					BitOps.GB(tile.getMap().m5, 2, 2) != tracktype.getValue()) {
 				return;
 			}
-			tile = new MutableTileIndex( SkipToEndOfTunnel(tpf, tile, direction) );
+			tile = new MutableTileIndex( SkipToEndOfTunnel(tile, direction) );
 		}
 		tile.madd( TileIndex.TileOffsByDir(direction) );
 
 		/* Check in case of rail if the owner is the same */
-		if (tpf.tracktype == TransportType.Rail) {
+		if (tracktype == TransportType.Rail) {
 			if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE))
 				if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE))
 					/* Check if we are on a bridge (middle parts don't have an owner */
@@ -220,39 +220,39 @@ public class TrackPathFinder extends Pathfind
 								return;
 		}
 
-		tpf.rd.cur_length++;
+		rd.cur_length++;
 
-		bits = Landscape.GetTileTrackStatus(tile, tpf.tracktype);
+		bits = Landscape.GetTileTrackStatus(tile, tracktype);
 
-		if (bits != tpf.var2) {
+		if (bits != var2) {
 			bits &= _tpfmode1_and[direction];
 			bits = bits | (bits>>8);
 		}
 		bits &= 0xBF;
 
 		if (bits != 0) {
-			if (!tpf.disable_tile_hash || (tpf.rd.cur_length <= 64 && (BitOps.KILL_FIRST_BIT(bits) == 0 || ++tpf.rd.depth <= 7))) {
+			if (!disable_tile_hash || (rd.cur_length <= 64 && (BitOps.KILL_FIRST_BIT(bits) == 0 || ++rd.depth <= 7))) {
 				do {
-					i = BitOps.FIND_FIRST_BIT(bits);
+					int i = BitOps.FIND_FIRST_BIT(bits);
 					bits = BitOps.KILL_FIRST_BIT(bits);
 
-					tpf.the_dir = (_otherdir_mask[direction] & (1 << i)) != 0 ? (i+8) : i;
-					RememberData rdCopy = tpf.rd;
+					the_dir = (_otherdir_mask[direction] & (1 << i)) != 0 ? (i+8) : i;
+					RememberData rdCopy = new RememberData(rd);
 
 					{
-						int [] iptr = { tpf.rd.pft_var6 };
-						if (TPFSetTileBit(tpf, tile, tpf.the_dir) &&
-								!tpf.enum_proc.enumerate(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, iptr) ) 
+						int [] iptr = { rd.pft_var6 };
+						if (TPFSetTileBit(tile, the_dir) &&
+								!enum_proc.enumerate(tile, userdata, the_dir, rd.cur_length, iptr) ) 
 						{
-							tpf.rd.pft_var6 = iptr[0];
-							tpf.TPFMode1(tile, _tpf_new_direction[tpf.the_dir]);
+							rd.pft_var6 = iptr[0];
+							TPFMode1(tile, _tpf_new_direction[the_dir]);
 						}
 						else
 						{
-							tpf.rd.pft_var6 = iptr[0];
+							rd.pft_var6 = iptr[0];
 						}
 					}
-					tpf.rd = rdCopy;
+					rd = rdCopy;
 				} while (bits != 0);
 			}
 		}
@@ -266,16 +266,16 @@ public class TrackPathFinder extends Pathfind
 		/* If we are doing signal setting, we must reverse at evere tile, so we
 		 * iterate all the tracks in a signal block, even when a normal train would
 		 * not reach it (for example, when two lines merge */
-		if (tpf.hasbit_13)
+		if (hasbit_13)
 			return;
 
 		tile = new MutableTileIndex( tile_org );
 		direction ^= 2;
 
-		bits = Landscape.GetTileTrackStatus(tile, tpf.tracktype);
+		bits = Landscape.GetTileTrackStatus(tile, tracktype);
 		bits |= (bits >> 8);
 
-		if ( (0xFF & bits) != tpf.var2) {
+		if ( (0xFF & bits) != var2) {
 			bits &= _bits_mask[direction];
 		}
 
@@ -284,22 +284,22 @@ public class TrackPathFinder extends Pathfind
 			return;
 
 		do {
-			i = BitOps.FIND_FIRST_BIT(bits);
+			int i = BitOps.FIND_FIRST_BIT(bits);
 			bits = BitOps.KILL_FIRST_BIT(bits);
 
-			tpf.the_dir = (_otherdir_mask[direction] & (1 << i)) != 0 ? (i+8) : i;
-			RememberData rdCopy = tpf.rd;
-			if (TPFSetTileBit(tpf, tile, tpf.the_dir) ) 
+			the_dir = (_otherdir_mask[direction] & (1 << i)) != 0 ? (i+8) : i;
+			RememberData rdCopy = new RememberData(rd);
+			if (TPFSetTileBit(tile, the_dir) ) 
 			{
-				int [] iptr = { tpf.rd.pft_var6 };
-				boolean ret = tpf.enum_proc.enumerate(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, iptr);
-				tpf.rd.pft_var6 = iptr[0];
+				int [] iptr = { rd.pft_var6 };
+				boolean ret = enum_proc.enumerate(tile, userdata, the_dir, rd.cur_length, iptr);
+				rd.pft_var6 = iptr[0];
 
 				if(!ret ) {
-					tpf.TPFMode1(tile, _tpf_new_direction[tpf.the_dir]);
+					TPFMode1(tile, _tpf_new_direction[the_dir]);
 				}
 			}
-			tpf.rd = rdCopy;
+			rd = rdCopy;
 		} while (bits != 0);
 	}
 
@@ -308,7 +308,7 @@ public class TrackPathFinder extends Pathfind
 
 	public void TPFMode2( TileIndex tile, int direction)
 	{
-		TrackPathFinder tpf = this;
+		//TrackPathFinder tpf = this;
 
 		int bits;
 		int i = 0;
@@ -316,7 +316,7 @@ public class TrackPathFinder extends Pathfind
 		int owner = -1;
 
 		/* XXX: Mode 2 is currently only used for ships, why is this code here? */
-		if (tpf.tracktype == TransportType.Rail) {
+		if (tracktype == TransportType.Rail) {
 			if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE)) {
 				owner = tile.GetTileOwner().id;
 				/* Check if we are on the middle of a bridge (has no owner) */
@@ -333,7 +333,7 @@ public class TrackPathFinder extends Pathfind
 		tile.TILE_MASK();
 
 		/* Check in case of rail if the owner is the same */
-		if (tpf.tracktype == TransportType.Rail) {
+		if (tracktype == TransportType.Rail) {
 			if (tile.IsTileType( TileTypes.MP_RAILWAY) || tile.IsTileType( TileTypes.MP_STATION) || tile.IsTileType( TileTypes.MP_TUNNELBRIDGE))
 				/* Check if we are on the middle of a bridge (has no owner) */
 				if (!tile.IsTileType( TileTypes.MP_TUNNELBRIDGE) || (tile.getMap().m5 & 0xC0) != 0xC0)
@@ -341,10 +341,10 @@ public class TrackPathFinder extends Pathfind
 						return;
 		}
 
-		if (++tpf.rd.cur_length > 50)
+		if (++rd.cur_length > 50)
 			return;
 
-		bits = Landscape.GetTileTrackStatus(tile, tpf.tracktype);
+		bits = Landscape.GetTileTrackStatus(tile, tracktype);
 		bits = 0xFF & ((bits | (bits >> 8)) & _bits_mask[direction]);
 		if (bits == 0)
 			return;
@@ -362,7 +362,7 @@ public class TrackPathFinder extends Pathfind
 				bits>>=1;
 			}
 
-			_rd = tpf.rd;
+			_rd = new RememberData(rd);
 			//goto continue_here;
 			skipStart = true;
 		}
@@ -376,27 +376,27 @@ public class TrackPathFinder extends Pathfind
 					++i;
 					continue;
 				}
-				_rd = tpf.rd;
+				_rd = new RememberData(rd);
 
 				// Change direction 4 times only
-				if ((byte)i != tpf.rd.pft_var6) {
-					if(++tpf.rd.depth > 4) {
-						tpf.rd = _rd;
+				if ((byte)i != rd.pft_var6) {
+					if(++rd.depth > 4) {
+						rd = _rd;
 						return;
 					}
-					tpf.rd.pft_var6 = i;
+					rd.pft_var6 = i;
 				}
 			}
 			//continue_here:;
 			skipStart = false;
 
-			tpf.the_dir = BitOps.HASBIT(_otherdir_mask[direction],i) ? (i+8) : i;
+			the_dir = BitOps.HASBIT(_otherdir_mask[direction],i) ? (i+8) : i;
 
-			if (!tpf.enum_proc.enumerate(tile, tpf.userdata, tpf.the_dir, tpf.rd.cur_length, null)) {
-				tpf.TPFMode2( tile, _tpf_new_direction[tpf.the_dir]);
+			if (!enum_proc.enumerate(tile, userdata, the_dir, rd.cur_length, null)) {
+				TPFMode2( tile, _tpf_new_direction[the_dir]);
 			}
 
-			tpf.rd = _rd;
+			rd = _rd;
 			
 			++i;
 		} while ( (bits>>>=1) != 0);
@@ -426,13 +426,12 @@ public class TrackPathFinder extends Pathfind
 	// -------------------------------------------------
 
 
-	static TileIndex SkipToEndOfTunnel(TrackPathFinder tpf, TileIndex tile, int direction)
+	TileIndex SkipToEndOfTunnel(TileIndex tile, int direction)
 	{
-		FindLengthOfTunnelResult flotr;
-		tpf.TPFSetTileBit(tpf, tile, 14);
-		flotr = FindLengthOfTunnel(tile, direction);
-		tpf.rd.cur_length += flotr.length;
-		tpf.TPFSetTileBit(tpf, flotr.tile, 14);
+		TPFSetTileBit(tile, 14);
+		FindLengthOfTunnelResult flotr = FindLengthOfTunnel(tile, direction);
+		rd.cur_length += flotr.length;
+		TPFSetTileBit(flotr.tile, 14);
 		return flotr.tile;
 	}
 

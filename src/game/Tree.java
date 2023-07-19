@@ -17,7 +17,7 @@ import game.util.TownTables;
 import game.xui.ViewPort;
 
 
-public class Tree  extends TreeTables {
+public class Tree extends TreeTables {
 
 	private static int _trees_tick_ctr; // TODO usage?
 
@@ -45,12 +45,11 @@ public class Tree  extends TreeTables {
 	static void PlaceTree(TileIndex tile, int r, int m5_or)
 	{
 		int tree = GetRandomTreeType(tile, BitOps.GB(r, 24, 8));
-		int m5;
 
 		if (tree >= 0) {
 			tile.SetTileType(TileTypes.MP_TREES);
 
-			m5 = BitOps.GB(r, 16, 8);
+			int m5 = BitOps.GB(r, 16, 8);
 			if (BitOps.GB(m5, 0, 3) == 7) m5--; // there is no growth state 7
 
 			tile.getMap().m5 = (m5 & 0x07);	// growth state;
@@ -71,20 +70,18 @@ public class Tree  extends TreeTables {
 
 	static void DoPlaceMoreTrees(TileIndex tile)
 	{
-		int i;
-
-		for (i = 0; i < 1000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			int r = Hal.Random();
 			int x = BitOps.GB(r, 0, 5) - 16;
 			int y = BitOps.GB(r, 8, 5) - 16;
 			//int dist = myabs(x) + myabs(y);
 			int dist = Math.abs(x) + Math.abs(y);
 			// TODO use or create TileIndex method
-			TileIndex cur_tile = new TileIndex( TileIndex.TILE_MASK(tile.getTile() + TileIndex.TileDiffXY(x, y).diff) );
+			TileIndex cur_tile = new TileIndex( TileIndex.TILE_MASK(tile.getTileIndex() + TileIndex.TileDiffXY(x, y).diff) );
 
 			/* Only on tiles within 13 squares from tile,
 			    on clear tiles, and NOT on farm-tiles or rocks */
-			if (dist <= 13 && cur_tile.IsTileType(TileTypes.MP_CLEAR) &&
+			if (dist <= 13 && cur_tile.isClear() &&
 					(cur_tile.getMap().m5 & 0x1F) != 0x0F && (cur_tile.getMap().m5 & 0x1C) != 8) {
 				PlaceTree(cur_tile, r, dist <= 6 ? 0xC0 : 0);
 			}
@@ -101,15 +98,13 @@ public class Tree  extends TreeTables {
 
 	public static void PlaceTreesRandomly()
 	{
-		int i;
-
-		i = Map.ScaleByMapSize(1000);
+		int i = Map.ScaleByMapSize(1000);
 		do {
 			int r = Hal.Random();
 			//TileIndex tile = TileIndex.RandomTileSeed(r);
 			TileIndex tile = TileIndex.RandomTile();
 			/* Only on clear tiles, and NOT on farm-tiles or rocks */
-			if (tile.IsTileType( TileTypes.MP_CLEAR) && (tile.getMap().m5 & 0x1F) != 0x0F && (tile.getMap().m5 & 0x1C) != 8) {
+			if (tile.isClear() && (tile.getMap().m5 & 0x1F) != 0x0F && (tile.getMap().m5 & 0x1C) != 8) {
 				PlaceTree(tile, r, 0);
 			}
 		} while (--i > 0);
@@ -121,7 +116,7 @@ public class Tree  extends TreeTables {
 			do {
 				int r = Hal.Random();
 				TileIndex tile = TileIndex.RandomTileSeed(r);
-				if (tile.IsTileType( TileTypes.MP_CLEAR) && tile.GetMapExtraBits() == 2) {
+				if (tile.isClear() && tile.GetMapExtraBits() == 2) {
 					PlaceTree(tile, r, 0);
 				}
 			} while (--i > 0);
@@ -130,11 +125,9 @@ public class Tree  extends TreeTables {
 
 	static void GenerateTrees()
 	{
-		int i;
-
 		if (GameOptions._opt.landscape != Landscape.LT_CANDY) PlaceMoreTrees();
 
-		for (i = GameOptions._opt.landscape == Landscape.LT_HILLY ? 15 : 6; i != 0; i--) {
+		for(int i = GameOptions._opt.landscape == Landscape.LT_HILLY ? 15 : 6; i != 0; i--) {
 			PlaceTreesRandomly();
 		}
 	}
@@ -146,9 +139,6 @@ public class Tree  extends TreeTables {
 	 */
 	static int CmdPlantTree(int ex, int ey, int flags, int p1, int p2)
 	{
-		int cost;
-		int sx, sy, x, y;
-
 		if (p2 > Global.MapSize()) return Cmd.CMD_ERROR;
 		/* Check the tree type. It can be random or some valid value within the current climate */
 		if (p1 != -1 && p1 - _tree_base_by_landscape[GameOptions._opt.landscape] >= _tree_count_by_landscape[GameOptions._opt.landscape]) return Cmd.CMD_ERROR;
@@ -158,38 +148,22 @@ public class Tree  extends TreeTables {
 		TileIndex tp2 = new TileIndex(p2);
 
 		// make sure sx,sy are smaller than ex,ey
-		sx = tp2.TileX();
-		sy = tp2.TileY();
+		int sx = tp2.TileX();
+		int sy = tp2.TileY();
 		ex /= 16; ey /= 16;
 		if (ex < sx) { int t = sx; sx = ex; ex = t; } // intswap(ex, sx);
 		if (ey < sy) { int t = sy; sy = ey; ey = t; } // intswap(ey, sy);
 
-		cost = 0; // total cost
+		int cost = 0; // total cost
 
-		for (x = sx; x <= ex; x++) {
-			for (y = sy; y <= ey; y++) {
+		for(int x = sx; x <= ex; x++) {
+			for(int y = sy; y <= ey; y++) {
 				TileIndex tile = TileIndex.TileXY(x, y);
 
 				if (!tile.EnsureNoVehicle()) continue;
 
-				switch (tile.GetTileType()) {
-				case MP_TREES:
-					// no more space for trees?
-					if (Global._game_mode != GameModes.GM_EDITOR && (tile.getMap().m5 & 0xC0) == 0xC0) {
-						Global._error_message = Str.STR_2803_TREE_ALREADY_HERE;
-						continue;
-					}
-
-					if( 0 != (flags & Cmd.DC_EXEC)) {
-						tile.getMap().m5 += 0x40;
-						tile.getMap().m5 &= 0xFF;
-						tile.MarkTileDirtyByTile();
-					}
-					// 2x as expensive to add more trees to an existing tile
-					cost += Global._price.build_trees * 2;
-					break;
-
-				case MP_CLEAR:
+				if(tile.isClear())
+				{
 					if (!tile.IsTileOwner(Owner.OWNER_NONE)) {
 						Global._error_message = Str.STR_2804_SITE_UNSUITABLE;
 						continue;
@@ -243,7 +217,83 @@ public class Tree  extends TreeTables {
 							tile.SetMapExtraBits(2);
 					}
 					cost += Global._price.build_trees;
+					
+				}
+				
+				switch (tile.GetTileType()) {
+				case MP_TREES:
+					// no more space for trees?
+					if (Global._game_mode != GameModes.GM_EDITOR && (tile.getMap().m5 & 0xC0) == 0xC0) {
+						Global._error_message = Str.STR_2803_TREE_ALREADY_HERE;
+						continue;
+					}
+
+					if( 0 != (flags & Cmd.DC_EXEC)) {
+						tile.getMap().m5 += 0x40;
+						tile.getMap().m5 &= 0xFF;
+						tile.MarkTileDirtyByTile();
+					}
+					// 2x as expensive to add more trees to an existing tile
+					cost += Global._price.build_trees * 2;
 					break;
+
+				/*
+				case MP_CLEAR:
+					if (!tile.IsTileOwner(Owner.OWNER_NONE)) {
+						Global._error_message = Str.STR_2804_SITE_UNSUITABLE;
+						continue;
+					}
+
+					// it's expensive to clear farmland
+					if ((tile.getMap().m5 & 0x1F) == 0xF)
+						cost += Global._price.clear_3;
+					else if ((tile.getMap().m5 & 0x1C) == 8)
+						cost += Global._price.clear_2;
+
+					if( 0 != (flags & Cmd.DC_EXEC)) {
+						int treetype;
+						int m2;
+
+						if (Global._game_mode != GameModes.GM_EDITOR && !PlayerID.getCurrent().isSpecial()) {
+							Town t = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
+							if (t != null)
+								t.ChangeTownRating(TownTables.RATING_TREE_UP_STEP, TownTables.RATING_TREE_MAXIMUM);
+						}
+
+						switch (tile.getMap().m5 & 0x1C) {
+						case 0x04:
+							m2 = 16;
+							break;
+
+						case 0x10:
+							m2 = ((tile.getMap().m5 & 3) << 6) | 0x20;
+							break;
+
+						default:
+							m2 = 0;
+							break;
+						}
+
+						treetype = p1;
+						if (treetype == -1) {
+							treetype = GetRandomTreeType(tile, BitOps.GB(Hal.Random(), 24, 8));
+							if (treetype == -1) treetype = 27;
+						}
+
+						Landscape.ModifyTile(tile, TileTypes.MP_TREES,
+								//TileTypes.MP_SETTYPE(TileTypes.MP_TREES) |
+								TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI_CLEAR | TileTypes.MP_MAP5,
+								m2, // map2 
+								treetype, // map3lo 
+								Global._game_mode == GameModes.GM_EDITOR ? 3 : 0 // map5 
+								);
+
+						if (Global._game_mode == GameModes.GM_EDITOR && BitOps.IS_INT_INSIDE(treetype, 0x14, 0x1B))
+							tile.SetMapExtraBits(2);
+					}
+					cost += Global._price.build_trees;
+					*/
+					//break;
 
 				default:
 					Global._error_message = Str.STR_2804_SITE_UNSUITABLE;
@@ -262,14 +312,11 @@ public class Tree  extends TreeTables {
 
 	static void DrawTile_Trees(TileInfo ti)
 	{
-		int m2;
-		int z;
-
 		//final int [] s;
 		//final TreePos d;
 		//final Point [] d;
 
-		m2 = ti.tile.getMap().m2;
+		int m2 = ti.tile.getMap().m2;
 
 		if ((m2 & 0x30) == 0) {
 			Clear.DrawClearLandTile(ti, 3);
@@ -281,7 +328,7 @@ public class Tree  extends TreeTables {
 
 		Clear.DrawClearLandFence(ti);
 
-		z = ti.z;
+		int z = ti.z;
 		if (ti.tileh != 0) {
 			z += 4;
 			if (TileIndex.IsSteepTileh(ti.tileh))
@@ -291,7 +338,6 @@ public class Tree  extends TreeTables {
 		ArrayPtr<Integer> s;
 		{
 			int tmp = ti.x;
-			int index;
 
 			tmp = BitOps.ROR16(tmp, 2);
 			tmp -= ti.y;
@@ -302,7 +348,7 @@ public class Tree  extends TreeTables {
 
 			d = new ArrayPtr<>( _tree_layout_xy[BitOps.GB(tmp, 4, 2)] );
 
-			index = BitOps.GB(tmp, 6, 2) + (ti.tile.M().m3 << 2);
+			int index = BitOps.GB(tmp, 6, 2) + (ti.tile.M().m3 << 2);
 
 			/* different tree styles above one of the grounds */
 			if ((m2 & 0xB0) == 0xA0 && index >= 48 && index < 80)
@@ -370,15 +416,13 @@ public class Tree  extends TreeTables {
 
 	static int ClearTile_Trees(TileIndex tile, int flags)
 	{
-		int num;
-
 		if ( (0 != (flags & Cmd.DC_EXEC)) && !PlayerID.getCurrent().isSpecial()) {
 			Town t = Town.ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 			if (t != null)
 				t.ChangeTownRating(TownTables.RATING_TREE_DOWN_STEP, TownTables.RATING_TREE_MINIMUM);
 		}
 
-		num = BitOps.GB(tile.getMap().m5, 6, 2) + 1;
+		int num = BitOps.GB(tile.getMap().m5, 6, 2) + 1;
 		if (BitOps.IS_INT_INSIDE(tile.getMap().m3, 20, 26 + 1)) num *= 4;
 
 		if(0 != (flags & Cmd.DC_EXEC)) Landscape.DoClearSquare(tile);
@@ -395,25 +439,20 @@ public class Tree  extends TreeTables {
 	static TileDesc GetTileDesc_Trees(TileIndex tile)
 	{
 		TileDesc td = new TileDesc();
-		int m3;
-		//StringID str;
-		int str;
-
 		td.owner =  tile.GetTileOwner().id;
 
-		m3 = tile.getMap().m3;
+		int m3 = tile.getMap().m3;
 		//(str=Str.STR_2810_CACTUS_PLANTS, b==0x1B) ||
 		//(str=Str.STR_280F_RAINFOREST, IS_BYTE_INSIDE(b, 0x14, 0x1A+1)) ||
 		//(str=Str.STR_280E_TREES, true);
 
-		str=Str.STR_2810_CACTUS_PLANTS;
+		int str=Str.STR_2810_CACTUS_PLANTS;
 		if(m3!=0x1B) 
 		{
 			str=Str.STR_280F_RAINFOREST;
 			if( !BitOps.IS_BYTE_INSIDE(m3, 0x14, (0x1A+1)))
 				str=Str.STR_280E_TREES;
 		}
-
 
 		td.str = str;
 		return td;
@@ -451,13 +490,12 @@ public class Tree  extends TreeTables {
 
 	static void TileLoopTreesAlps(TileIndex tile)
 	{
-		int tmp, m2;
-		int k;
+		int m2;
 
 		/* distance from snow line, in steps of 8 */
-		k = tile.GetTileZ() - GameOptions._opt.snow_line;
+		int k = tile.GetTileZ() - GameOptions._opt.snow_line;
 
-		tmp =  (tile.getMap().m2 & 0xF0);
+		int tmp =  (tile.getMap().m2 & 0xF0);
 
 		if (k < -8) {
 			if ((tmp & 0x30) != 0x20) return;
@@ -503,9 +541,6 @@ public class Tree  extends TreeTables {
 
 	static void TileLoop_Trees(TileIndex tile)
 	{
-		int m5;
-		int m2;
-
 		if (GameOptions._opt.landscape == Landscape.LT_DESERT) {
 			TileLoopTreesDesert(tile);
 		} else if (GameOptions._opt.landscape == Landscape.LT_HILLY) {
@@ -518,7 +553,7 @@ public class Tree  extends TreeTables {
 		tile.getMap().m2 = BitOps.RETAB(tile.getMap().m2, 0, 4, 1);
 		if (BitOps.GB(tile.getMap().m2, 0, 4) != 0) return;
 
-		m5 = tile.getMap().m5;
+		int m5 = tile.getMap().m5;
 		if (BitOps.GB(m5, 0, 3) == 3) {
 			/* regular sized tree */
 			if (GameOptions._opt.landscape == Landscape.LT_DESERT && tile.getMap().m3 != 0x1B && tile.GetMapExtraBits() == 1) {
@@ -542,7 +577,7 @@ public class Tree  extends TreeTables {
 					//tile += TileIndex.ToTileIndexDiff(_tileloop_trees_dir[Hal.Random() & 7]);
 					tile = tile.iadd( TileIndex.ToTileIndexDiff(_tileloop_trees_dir[Hal.Random() & 7]) );
 
-					if (!tile.IsTileType( TileTypes.MP_CLEAR)) return;
+					if(!tile.isClear()) return;
 
 					if ( (tile.getMap().m5 & 0x1C) == 4) {
 						tile.getMap().m2 = 0x10;
@@ -575,7 +610,7 @@ public class Tree  extends TreeTables {
 				tile.SetTileType(TileTypes.MP_CLEAR);
 
 				m5 = 3;
-				m2 = tile.getMap().m2;
+				int m2 = tile.getMap().m2;
 				if ((m2 & 0x30) != 0) { // on snow/desert or rough land
 					m5 =  ((m2 >> 6) | 0x10);
 					if ((m2 & 0x30) != 0x20) // if not on snow/desert, then on rough land
@@ -594,7 +629,6 @@ public class Tree  extends TreeTables {
 
 	static void OnTick_Trees()
 	{
-		int r;
 		TileIndex tile;
 		int m;
 		int tree;
@@ -602,12 +636,12 @@ public class Tree  extends TreeTables {
 		/* place a tree at a random rainforest spot */
 		if (GameOptions._opt.landscape == Landscape.LT_DESERT )
 		{
-			r = Hal.Random();
+			int r = Hal.Random();
 			tile = TileIndex.RandomTileSeed(r);
 			m = tile.getMap().m5 & 0x1C;
 			if(
 					(tile.GetMapExtraBits() == 2) &&
-					tile.IsTileType(TileTypes.MP_CLEAR) &&
+					tile.isClear() &&
 					(m <= 4) &&
 					(tree = GetRandomTreeType(tile, BitOps.GB(r, 24, 8))) >= 0
 					) 
@@ -628,9 +662,9 @@ public class Tree  extends TreeTables {
 		_trees_tick_ctr = 0x7F;
 
 		/* place a tree at a random spot */
-		r = Hal.Random();
+		int r = Hal.Random();
 		tile = new TileIndex( TileIndex.TILE_MASK(r) ); // TODO use TileIndex random generator func?
-		if (tile.IsTileType(TileTypes.MP_CLEAR)) 
+		if(tile.isClear()) 
 		{
 			m =  (tile.getMap().m5 & 0x1C);
 			if(

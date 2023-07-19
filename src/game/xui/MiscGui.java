@@ -84,7 +84,7 @@ public class MiscGui {
 			}
 			Gfx.DrawStringCentered(140, 38, str, 0);
 
-			Strings._userstring = new BinaryString( String.format("0x%X", lid.tile.getTile()) );
+			Strings._userstring = new BinaryString( String.format("0x%X", lid.tile.getTileIndex()) );
 			Global.SetDParam(0, lid.tile.TileX());
 			Global.SetDParam(1, lid.tile.TileY());
 			Global.SetDParam(2, Strings.STR_SPEC_USERSTRING);
@@ -190,7 +190,8 @@ public class MiscGui {
 		//Global.DEBUG_misc( 0, "TILE: %x ", tile.hashCode());
 		Global.DEBUG_misc( 0, "type         = %x", tile.getMap().type);
 		Global.DEBUG_misc( 0, "height       = %d", tile.getMap().height);
-		Global.DEBUG_misc( 0, "m1           = %x", tile.getMap().m1);
+		Global.DEBUG_misc( 0, "own          = %x", tile.getMap().getOwner().id);
+		Global.DEBUG_misc( 0, "anim         = %x", tile.getMap().anim);
 		Global.DEBUG_misc( 0, "m2           = %x", tile.getMap().m2);
 		Global.DEBUG_misc( 0, "m3           = %x", tile.getMap().m3);
 		Global.DEBUG_misc( 0, "m4           = %x", tile.getMap().m4);
@@ -393,7 +394,7 @@ public class MiscGui {
 
 		case WE_PLACE_MOUSEUP:
 			if (e.pt.x != -1) {
-				Cmd.DoCommandP(e.tile, _tree_to_plant, e.starttile.getTile(), null,
+				Cmd.DoCommandP(e.tile, _tree_to_plant, e.starttile.getTileIndex(), null,
 						Cmd.CMD_PLANT_TREE | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_2805_CAN_T_PLANT_TREE_HERE));
 			}
 			break;

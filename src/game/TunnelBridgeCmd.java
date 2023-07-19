@@ -839,14 +839,14 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 					Landscape.DoClearSquare(c);
 				}
 				c.madd( direction!=0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
-			} while (c.getTile() <= endtile[0].getTile());
+			} while (c.getTileIndex() <= endtile[0].getTileIndex());
 
 			Rail.SetSignalsOnBothDir(tile, direction);
 			Rail.SetSignalsOnBothDir(endtile[0], direction);
 
 		}
 
-		return (int) (((((endtile[0].getTile() - tile.getTile()) >> (direction!=0?8:0))&0xFF)+1) * Global._price.clear_bridge);
+		return (int) (((((endtile[0].getTileIndex() - tile.getTileIndex()) >> (direction!=0?8:0))&0xFF)+1) * Global._price.clear_bridge);
 	}
 
 	static int ClearTile_TunnelBridge(TileIndex tile, byte flags)
@@ -940,7 +940,7 @@ public class TunnelBridgeCmd extends TunnelBridgeTables
 				}
 				cost += Global._price.build_rail/2;
 	tile = tile.iadd( BitOps.GB(tile.getMap().m5, 0, 1)!=0 ? TileIndex.TileDiffXY(0, 1) : TileIndex.TileDiffXY(1, 0) );
-			} while (tile.getTile() <= end2[0].getTile());
+			} while (tile.getTileIndex() <= end2[0].getTileIndex());
 
 			return cost;
 		} else

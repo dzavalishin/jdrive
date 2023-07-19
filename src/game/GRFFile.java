@@ -81,12 +81,8 @@ public class GRFFile
 
 	static void grfmsg(severity severity, String str, Object ... args)
 	{
-		int export_severity = 0;
-		String buf;
-
-		buf = String.format(str, args);
-
-		export_severity = 2 - (severity == GRFFile.severity.GMS_FATAL ? 2 : severity.ordinal());
+		String buf = String.format(str, args);
+		int export_severity = 2 - (severity == GRFFile.severity.GMS_FATAL ? 2 : severity.ordinal());
 		Global.DEBUG_grf( export_severity, "[%s][%s] %s", _cur_grffile.getFilename(), severitystr[severity.ordinal()], buf);
 	}
 
@@ -279,9 +275,7 @@ public class GRFFile
 
 	static void InitNewGRFFile(final String  filename, int sprite_offset)
 	{
-		GRFFile newfile;
-
-		newfile = GetFileByFilename(filename);
+		GRFFile newfile = GetFileByFilename(filename);
 		if (newfile != null) {
 			/* We already loaded it once. */
 			newfile.sprite_offset = sprite_offset;
@@ -311,9 +305,7 @@ public class GRFFile
 	static void CalculateRefitMasks()
 	{
 		//EngineID 
-		int engine;
-
-		for (engine = 0; engine < Global.TOTAL_NUM_ENGINES; engine++) {
+		for (int engine = 0; engine < Global.TOTAL_NUM_ENGINES; engine++) {
 			int mask = 0;
 			int not_mask = 0;
 			int xor_mask = Global._engine_info[engine].refit_mask;
@@ -365,7 +357,6 @@ public class GRFFile
 
 	static void LoadNewGRFFile(final String  filename, int file_index, int stage)
 	{
-		int num;
 
 		/* A .grf file is activated only if it was active when the game was
 		 * started.  If a game is loaded, only its active .grfs will be
@@ -424,6 +415,7 @@ public class GRFFile
 
 		_skip_sprites = 0; // XXX
 
+		int num;
 		while ((num = FileIO.FioReadWord()) != 0) {
 			int type = FileIO.FioReadByte();
 
@@ -505,8 +497,6 @@ public class GRFFile
 
 	public static void LoadNewGRF(int load_index, int file_index)
 	{
-		int stage;
-
 		if (!initialized) {
 			InitializeGRFSpecial();
 			initialized = true;
@@ -518,7 +508,7 @@ public class GRFFile
 		 * in each loading stage, (try to) open each file specified in the config
 		 * and load information from it. */
 		_custom_sprites_base = load_index;
-		for (stage = 0; stage < 2; stage++) {
+		for (int stage = 0; stage < 2; stage++) {
 			int slot = file_index;
 			int j;
 

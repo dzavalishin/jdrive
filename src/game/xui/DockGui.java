@@ -152,7 +152,7 @@ public class DockGui
 				if ((e.userdata & 0xF) == ViewPort.VPM_X_AND_Y) { // dragged actions
 					Terraform.GUIPlaceProcDragXY(e);
 				} else if (e.userdata == ViewPort.VPM_X_OR_Y) {
-					Cmd.DoCommandP(e.tile, e.starttile.getTile(), 0, DockGui::CcBuildCanal, Cmd.CMD_BUILD_CANAL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_CANT_BUILD_CANALS));
+					Cmd.DoCommandP(e.tile, e.starttile.getTileIndex(), 0, DockGui::CcBuildCanal, Cmd.CMD_BUILD_CANAL | Cmd.CMD_AUTO | Cmd.CMD_MSG(Str.STR_CANT_BUILD_CANALS));
 				}
 			}
 			break;

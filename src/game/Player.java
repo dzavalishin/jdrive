@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
-import game.Player.PlayerHiScoreComparator;
 import game.ai.Ai;
 import game.ai.PlayerAiNew;
 import game.enums.GameModes;
@@ -465,10 +464,10 @@ public class Player implements Serializable
 
 	private void GenerateCompanyName()
 	{
-		Player p = this;
+		//Player p = this;
 
-		StringID str;
-		int strp;
+		//StringID str;
+		//int strp;
 
 		if (name_1 != Str.STR_SV_UNNAMED)
 			return;
@@ -481,14 +480,14 @@ public class Player implements Serializable
 
 		if( t != null && BitOps.IS_INT_INSIDE(t.townnametype, Strings.SPECSTR_TOWNNAME_START, Strings.SPECSTR_TOWNNAME_LAST+1)) 
 		{
-			str = new StringID( t.townnametype - Strings.SPECSTR_TOWNNAME_START + Strings.SPECSTR_PLAYERNAME_START );
-			strp = t.townnameparts;
+			StringID str = new StringID( t.townnametype - Strings.SPECSTR_TOWNNAME_START + Strings.SPECSTR_PLAYERNAME_START );
+			int strp = t.townnameparts;
 
 			//verify_name:;
 
 			if( GenerateCompanyName_verify_name(str, strp) )
 			{
-				GenerateCompanyName_set_name(p, t, str, strp);
+				GenerateCompanyName_set_name(this, t, str, strp);
 				return;
 			}
 		}
@@ -496,16 +495,16 @@ public class Player implements Serializable
 		while(true)
 		{
 			if (president_name_1 == Strings.SPECSTR_PRESIDENT_NAME) {
-				str = new StringID( Strings.SPECSTR_ANDCO_NAME );
-				strp = president_name_2;
-				GenerateCompanyName_set_name(p, t, str, strp);
+				StringID str = new StringID( Strings.SPECSTR_ANDCO_NAME );
+				int strp = president_name_2;
+				GenerateCompanyName_set_name(this, t, str, strp);
 				return;
 			} else {
-				str = new StringID( Strings.SPECSTR_ANDCO_NAME );
-				strp = Hal.Random();
+				StringID str = new StringID( Strings.SPECSTR_ANDCO_NAME );
+				int strp = Hal.Random();
 				if( GenerateCompanyName_verify_name(str, strp) )
 				{
-					GenerateCompanyName_set_name(p, t, str, strp);
+					GenerateCompanyName_set_name(this, t, str, strp);
 					return;
 				}
 			}
@@ -527,14 +526,14 @@ public class Player implements Serializable
 	{
 		byte [] colors = new byte [16];
 		int pcolor, t2;
-		int i,n;
+		int i;
 
 		// Initialize array
 		for(i=0; i!=16; i++)
 			colors[i] = (byte) i;
 
 		// And randomize it
-		n = 100;
+		int n = 100;
 		do {
 			int r = Hal.Random();
 			COLOR_SWAP( colors, BitOps.GB(r, 0, 4), BitOps.GB(r, 4, 4));
@@ -589,8 +588,6 @@ public class Player implements Serializable
 
 	private void GeneratePresidentName() // Player p)
 	{
-		String buffer;
-
 		for(;;) {
 			//restart:;
 
@@ -598,7 +595,7 @@ public class Player implements Serializable
 			president_name_1 = Strings.SPECSTR_PRESIDENT_NAME;
 
 			Global.SetDParam(0, president_name_2);
-			buffer = Strings.GetString(president_name_1);
+			String buffer = Strings.GetString(president_name_1);
 			if (buffer.length() >= 32 || Gfx.GetStringWidth(buffer) >= 94)
 				continue;
 			boolean restart = false;
@@ -640,9 +637,7 @@ public class Player implements Serializable
 
 	static Player DoStartupNewPlayer(boolean is_ai)
 	{
-		Player p;
-
-		p = AllocatePlayer();
+		Player p = AllocatePlayer();
 		if (p == null)
 			return null;
 
@@ -812,10 +807,8 @@ public class Player implements Serializable
 
 	private static void DeletePlayerStuff(PlayerID pi)
 	{
-		Player p;
-
 		DeletePlayerWindows(pi);
-		p = GetPlayer(pi);
+		Player p = GetPlayer(pi);
 		Global.DeleteName(p.name_1);
 		Global.DeleteName(p.president_name_1);
 		p.name_1 = 0;
@@ -850,11 +843,10 @@ public class Player implements Serializable
 	 */
 	static int CmdReplaceVehicle(int x, int y, int flags, int p1, int p2)
 	{
-		Player p;
 		if (!(!PlayerID.getCurrent().isSpecial()))
 			return Cmd.CMD_ERROR;
 
-		p = GetCurrentPlayer(); // Player(Global.gs.getCurrentPlayer());
+		Player p = GetCurrentPlayer(); // Player(Global.gs.getCurrentPlayer());
 		switch (BitOps.GB(p1, 0, 3)) {
 		case 0:
 			if (p.engine_renew == ( 0 != BitOps.GB(p2, 0, 1)) )
@@ -1130,17 +1122,17 @@ public class Player implements Serializable
 	public static int EndGameGetPerformanceTitleFromValue(int value)
 	{
 		long lvalue = BitOps.minu(value, 1000) >>> 6;
-					if (lvalue >= _endgame_perf_titles.length) 
-						lvalue = _endgame_perf_titles.length - 1L;
+					
+		if (lvalue >= _endgame_perf_titles.length) 
+			lvalue = _endgame_perf_titles.length - 1L;
 
-					return _endgame_perf_titles[(int) lvalue];
+		return _endgame_perf_titles[(int) lvalue];
 	}
 
 
 	// Save the highscore for the Player 
 	public static int SaveHighScoreValue(final Player p)
 	{
-
 		HighScore[] hs = Global._highscore_table[GameOptions._opt.diff_level];
 		int score = p.old_economy[0].performance_history;
 
@@ -1152,7 +1144,6 @@ public class Player implements Serializable
 		{
 			// You are in the TOP5. Move all values one down and save us there 
 			if (hs[i].score <= score) {
-				//char buf[sizeof(hs[i].company)];
 
 				// move all elements one down starting from the replaced one
 				//memmove(&hs[i + 1], &hs[i], sizeof(HighScore) * (lengthof(_highscore_table[0]) - i - 1));
@@ -1553,23 +1544,13 @@ final Chunk Handler _player_chunk_handlers[] = {
 	}
 
 
-	/* Sort all players given their performance * /
-	static int  HighScoreSorter(final void *a, final void *b)
+	/* Sort all players given their performance */
+	public static class PlayerHiScoreComparator implements Comparator<Player> 
 	{
-		final Player pa = *(final Player* final*)a;
-		final Player pb = *(final Player* final*)b;
-
-		return pb.old_economy[0].performance_history - pa.old_economy[0].performance_history;
-	} */
-
-	public static class PlayerHiScoreComparator implements Comparator<Player> {
-
 		@Override
 		public int compare(Player pa, Player pb) {
 			return pb.old_economy[0].performance_history - pa.old_economy[0].performance_history;
 		}
-
-
 	}
 
 

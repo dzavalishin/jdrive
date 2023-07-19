@@ -464,7 +464,7 @@ public class ShipGui
 	{
 		Window w;
 
-		int wn = tile == null ? -1 : tile.getTile();
+		int wn = tile == null ? -1 : tile.getTileIndex();
 		
 		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, wn );
 
@@ -930,7 +930,7 @@ public class ShipGui
 
 	public static void ShowShipDepotWindow(TileIndex tile)
 	{
-		Window  w = Window.AllocateWindowDescFront(_ship_depot_desc,tile.getTile());
+		Window  w = Window.AllocateWindowDescFront(_ship_depot_desc,tile.getTileIndex());
 
 		if (w != null) {
 			w.caption_color = 0xFF & TileIndex.get(w.window_number).GetTileOwner().id;

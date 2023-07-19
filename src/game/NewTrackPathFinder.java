@@ -69,14 +69,14 @@ public class NewTrackPathFinder extends Pathfind
 
 		//hash = PATHFIND_HASH_TILE(tile);
 
-		NTPHashItem hi = tpf.hash.get(tile.getTile());
+		NTPHashItem hi = tpf.hash.get(tile.getTileIndex());
 		if( hi == null )
 		{
 			// never visited before?
 			hi = new NTPHashItem();
 			hi.bits = dir;
 			hi.distance = length;
-			tpf.hash.put(tile.getTile(), hi);
+			tpf.hash.put(tile.getTileIndex(), hi);
 		}
 		else
 		{
@@ -175,7 +175,7 @@ public class NewTrackPathFinder extends Pathfind
 	 */
 	public boolean NtpCheck( TileIndex tile, int dir, int length)
 	{
-		NTPHashItem hi = hash.get(tile.getTile());
+		NTPHashItem hi = hash.get(tile.getTileIndex());
 		assert( hi != null);
 
 		assert( hi.bits == dir );

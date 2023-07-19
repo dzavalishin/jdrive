@@ -695,7 +695,7 @@ public class Trolly extends AiTools
 			for (x = tile.TileX() - AI_FINDSTATION_TILE_RANGE; x <= tile.TileX() + AI_FINDSTATION_TILE_RANGE; x++) {
 				for (y = tile.TileY() - AI_FINDSTATION_TILE_RANGE; y <= tile.TileY() + AI_FINDSTATION_TILE_RANGE; y++) {
 					new_tile = TileIndex.TileXY(x, y);
-					if (new_tile.IsTileType(TileTypes.MP_CLEAR) || new_tile.IsTileType(TileTypes.MP_TREES)) {
+					if (new_tile.isClear() || new_tile.IsTileType(TileTypes.MP_TREES)) {
 						AcceptedCargo accepts = new AcceptedCargo();
 						// This tile we can build on!
 						// Check acceptance
@@ -894,7 +894,7 @@ public class Trolly extends AiTools
 				if (p.ainew.path_info.route_extra[i] != 0) continue;
 				if (tile.IsTileType(TileTypes.MP_TUNNELBRIDGE)) continue;
 				// Is the terrain clear?
-				if (tile.OffsetByDir(j).typeIs(TileTypes.MP_CLEAR) ||
+				if (tile.OffsetByDir(j).isClear() ||
 						tile.OffsetByDir(j).typeIs(TileTypes.MP_TREES)) {
 					TileInfo ti = new TileInfo();
 					Landscape.FindLandscapeHeightByTile(ti, tile);
@@ -1111,10 +1111,10 @@ public class Trolly extends AiTools
 					if (!Cmd.CmdFailed(ret)) {
 						TileIndex toff = tile.OffsetByDir(dir1);
 						TileIndex toff2 = toff.OffsetByDir(dir1);
-						if (toff.IsTileType(TileTypes.MP_CLEAR) || toff.IsTileType(TileTypes.MP_TREES)) {
+						if (toff.isClear() || toff.IsTileType(TileTypes.MP_TREES)) {
 							ret = Ai.AI_DoCommand(toff, AiNew_GetRoadDirection(tile, toff, toff2), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
 							if (!Cmd.CmdFailed(ret)) {
-								if (toff2.IsTileType(TileTypes.MP_CLEAR) || toff2.IsTileType(TileTypes.MP_TREES))
+								if (toff2.isClear() || toff2.IsTileType(TileTypes.MP_TREES))
 									Ai.AI_DoCommand(toff2, AiNew_GetRoadDirection(toff, toff2, toff2.OffsetByDir(dir1)), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
 							}
 						}
@@ -1126,10 +1126,10 @@ public class Trolly extends AiTools
 						TileIndex toff = tile.OffsetByDir(dir2);
 						TileIndex toff2 = toff.OffsetByDir(dir2);
 						TileIndex toff3 = toff2.OffsetByDir(dir2);
-						if (toff.IsTileType(TileTypes.MP_CLEAR) || toff.IsTileType(TileTypes.MP_TREES)) {
+						if (toff.isClear() || toff.IsTileType(TileTypes.MP_TREES)) {
 							ret = Ai.AI_DoCommand(toff, AiNew_GetRoadDirection(tile, toff, toff2), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
 							if (!Cmd.CmdFailed(ret)) {
-								if(toff2.IsTileType(TileTypes.MP_CLEAR) || toff2.IsTileType(TileTypes.MP_TREES))
+								if(toff2.isClear() || toff2.IsTileType(TileTypes.MP_TREES))
 									Ai.AI_DoCommand(toff2, AiNew_GetRoadDirection(toff, toff2, toff3), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
 							}
 						}
@@ -1141,10 +1141,10 @@ public class Trolly extends AiTools
 						TileIndex toff = tile.OffsetByDir(dir3);
 						TileIndex toff2 = toff.OffsetByDir(dir3);
 						TileIndex toff3 = toff2.OffsetByDir(dir3);
-						if(toff.IsTileType(TileTypes.MP_CLEAR) || toff.IsTileType(TileTypes.MP_TREES)) {
+						if(toff.isClear() || toff.IsTileType(TileTypes.MP_TREES)) {
 							ret = Ai.AI_DoCommand(toff, AiNew_GetRoadDirection(tile, toff, toff2), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
 							if (!Cmd.CmdFailed(ret)) {
-								if (toff2.IsTileType(TileTypes.MP_CLEAR) || toff2.IsTileType(TileTypes.MP_TREES))
+								if (toff2.isClear() || toff2.IsTileType(TileTypes.MP_TREES))
 									Ai.AI_DoCommand(toff2, AiNew_GetRoadDirection(toff, toff2, toff3), 0, Cmd.DC_EXEC | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);
 							}
 						}

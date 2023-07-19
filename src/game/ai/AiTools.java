@@ -186,12 +186,12 @@ public class AiTools implements AiConst
 	static int AiNew_Build_Station(Player p, int type, TileIndex tile, int length, int numtracks, int direction, int flag)
 	{
 		if (type == AI_TRAIN)
-			return Ai.AI_DoCommand(tile.getTile(), direction + (numtracks << 8) + (length << 16), 0, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_RAILROAD_STATION);
+			return Ai.AI_DoCommand(tile.getTileIndex(), direction + (numtracks << 8) + (length << 16), 0, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_RAILROAD_STATION);
 
 		if (type == AI_BUS)
-			return Ai.AI_DoCommand(tile.getTile(), direction, RoadStopType.RS_BUS.ordinal(), flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_STOP);
+			return Ai.AI_DoCommand(tile.getTileIndex(), direction, RoadStopType.RS_BUS.ordinal(), flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_STOP);
 
-		return Ai.AI_DoCommand(tile.getTile(), direction, RoadStopType.RS_TRUCK.ordinal(), flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_STOP);
+		return Ai.AI_DoCommand(tile.getTileIndex(), direction, RoadStopType.RS_TRUCK.ordinal(), flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_STOP);
 	}
 
 
@@ -220,9 +220,9 @@ public class AiTools implements AiConst
 
 		// Now, simply, build the bridge!
 		if (p.ainew.tbt == AI_TRAIN)
-			return Ai.AI_DoCommand(tile_a.getTile(), tile_b.getTile(), (0<<8) + type2, flag | Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
+			return Ai.AI_DoCommand(tile_a.getTileIndex(), tile_b.getTileIndex(), (0<<8) + type2, flag | Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
 
-		return Ai.AI_DoCommand(tile_a.getTile(), tile_b.getTile(), (0x80 << 8) + type2, flag | Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
+		return Ai.AI_DoCommand(tile_a.getTileIndex(), tile_b.getTileIndex(), (0x80 << 8) + type2, flag | Cmd.DC_AUTO, Cmd.CMD_BUILD_BRIDGE);
 	}
 
 
@@ -413,9 +413,9 @@ public class AiTools implements AiConst
 	{
 		int ret, ret2;
 		if (p.ainew.tbt == AI_TRAIN)
-			return Ai.AI_DoCommand(tile.getTile(), 0, direction, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_TRAIN_DEPOT);
+			return Ai.AI_DoCommand(tile.getTileIndex(), 0, direction, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_TRAIN_DEPOT);
 
-		ret = Ai.AI_DoCommand(tile.getTile(), direction, 0, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_DEPOT);
+		ret = Ai.AI_DoCommand(tile.getTileIndex(), direction, 0, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD_DEPOT);
 		if (Cmd.CmdFailed(ret)) return ret;
 		// Try to build the road from the depot
 		ret2 = Ai.AI_DoCommand(tile.OffsetByDir(direction), _roadbits_by_dir[direction], 0, flag | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_BUILD_ROAD);

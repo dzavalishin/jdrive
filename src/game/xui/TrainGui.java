@@ -344,7 +344,7 @@ public class TrainGui
 	{
 		Window w;
 
-		int wn = tile == null ? -1 : tile.getTile();
+		int wn = tile == null ? -1 : tile.getTileIndex();
 		
 		Window.DeleteWindowById(Window.WC_BUILD_VEHICLE, wn);
 
@@ -542,7 +542,7 @@ public class TrainGui
 			Vehicle v = ii.next();
 			if (v.getType() == Vehicle.VEH_Train &&
 					v.IsFrontEngine() &&
-					v.getTile().getTile() == w.window_number &&
+					v.getTile().getTileIndex() == w.window_number &&
 					v.rail.isInDepot() &&
 					--row < 0) {
 						skip = w.hscroll.pos;
@@ -560,7 +560,7 @@ public class TrainGui
 			Vehicle v = ii.next();
 			if (v.getType() == Vehicle.VEH_Train &&
 					v.IsFreeWagon() &&
-					v.getTile().getTile() == w.window_number &&
+					v.getTile().getTileIndex() == w.window_number &&
 					v.rail.isInDepot() &&
 					--row < 0)
 			{
@@ -855,7 +855,7 @@ public class TrainGui
 	{
 		Window w;
 
-		w = Window.AllocateWindowDescFront(_train_depot_desc, tile.getTile());
+		w = Window.AllocateWindowDescFront(_train_depot_desc, tile.getTileIndex());
 		if (null != w) {
 			TileIndex wt = TileIndex.get(w.window_number);
 		

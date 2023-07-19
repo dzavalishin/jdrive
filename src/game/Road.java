@@ -588,7 +588,7 @@ public class Road extends RoadTables
 		if (BitOps.HASBIT(p2, 2)  && start_tile.TileX() != end_tile.TileX()) return Cmd.CMD_ERROR; // y-axis
 
 		/* Swap start and ending tile, also the half-tile drag var (bit 0 and 1) */
-		if (start_tile.getTile() > end_tile.getTile() || (start_tile.getTile() == end_tile.getTile() && BitOps.HASBIT(p2, 0))) {
+		if (start_tile.getTileIndex() > end_tile.getTileIndex() || (start_tile.getTileIndex() == end_tile.getTileIndex() && BitOps.HASBIT(p2, 0))) {
 			TileIndex t = start_tile;
 			start_tile = end_tile;
 			end_tile = t;
@@ -643,7 +643,7 @@ public class Road extends RoadTables
 		if (BitOps.HASBIT(p2, 2)  && start_tile.TileX() != end_tile.TileX()) return Cmd.CMD_ERROR; // y-axis
 
 		/* Swap start and ending tile, also the half-tile drag var (bit 0 and 1) */
-		if (start_tile.getTile() > end_tile.getTile() || (start_tile.getTile() == end_tile.getTile() && BitOps.HASBIT(p2, 0))) 
+		if (start_tile.getTileIndex() > end_tile.getTileIndex() || (start_tile.getTileIndex() == end_tile.getTileIndex() && BitOps.HASBIT(p2, 0))) 
 		{
 			TileIndex t = start_tile;
 			start_tile = end_tile;

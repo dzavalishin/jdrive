@@ -250,7 +250,7 @@ implements IPoolItem, Serializable
 
 	static void TownDrawHouseLift(final TileInfo ti)
 	{
-		ViewPort.AddChildSpriteScreen(0x5A3, 0xE, 0x3C - BitOps.GB(ti.tile.getMap().m1, 0, 7));
+		ViewPort.AddChildSpriteScreen(0x5A3, 0xE, 0x3C - BitOps.GB(ti.tile.getMap().anim, 0, 7));
 	}
 
 	static final TownDrawTileProc[] _town_draw_tile_procs = {
@@ -343,11 +343,11 @@ implements IPoolItem, Serializable
 			return;
 		}
 
-		if (0 == ((old = tile.getMap().m1) & 0x80)) 
+		if (0 == ((old = tile.getMap().anim) & 0x80)) 
 		{
 			int i;
 
-			tile.getMap().m1 |= 0x80;
+			tile.getMap().anim |= 0x80;
 
 			do {
 				i = (Hal.Random() & 7) - 1;
@@ -356,13 +356,13 @@ implements IPoolItem, Serializable
 			tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 0, 6, i);
 		}
 
-		a = BitOps.GB(tile.getMap().m1, 0, 7);
+		a = BitOps.GB(tile.getMap().anim, 0, 7);
 		b = BitOps.GB(tile.getMap().m5, 0, 6) * 6;
 		a += (a < b) ? 1 : -1;
-		tile.getMap().m1 = BitOps.RETSB(tile.getMap().m1, 0, 7, a);
+		tile.getMap().anim = BitOps.RETSB(tile.getMap().anim, 0, 7, a);
 
 		if (a == b) {
-			tile.getMap().m1 &= 0x7F;
+			tile.getMap().anim &= 0x7F;
 			tile.getMap().m5 &= 0x40;
 			TextEffect.DeleteAnimatedTile(tile);
 		}
@@ -1305,7 +1305,7 @@ implements IPoolItem, Serializable
 
 		// Can only build on clear flat areas.
 		Landscape.FindLandscapeHeightByTile(ti, tile);
-		if (ti.type != TileTypes.MP_CLEAR.ordinal() || ti.tileh != 0)
+		if( (!ti.tile.isClear()) || ti.tileh != 0)
 			return Cmd.return_cmd_error(Str.STR_0239_SITE_UNSUITABLE);
 
 		// Check distance to all other towns.
@@ -1344,7 +1344,7 @@ implements IPoolItem, Serializable
 
 			// Make sure the tile is plain
 			Landscape.FindLandscapeHeightByTile(ti, tile);
-			if (ti.type != TileTypes.MP_CLEAR.ordinal() || ti.tileh != 0)
+			if( (!ti.tile.isClear()) || ti.tileh != 0)
 				continue;
 
 			// Check not too close to a town
@@ -1586,35 +1586,35 @@ implements IPoolItem, Serializable
 				m5 = BitOps.GB(r, 16, 6);
 			}
 
-			assert(tile.IsTileType( TileTypes.MP_CLEAR));
+			assert(tile.isClear());
 
 			Landscape.ModifyTile(tile, TileTypes.MP_HOUSE,
 					//TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | 
-					TileTypes.MP_MAP3HI | TileTypes.MP_MAP3LO | TileTypes.MP_MAP2 | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
+					TileTypes.MP_ANIM_CLEAR | TileTypes.MP_MAP3HI | TileTypes.MP_MAP3LO | TileTypes.MP_MAP2 | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
 					t.index,
 					m3lo,   /* map3_lo */
 					house,  /* map3_hi */
-					0,     /* map_owner */
+					PlayerID.getNone().id,     /* map_owner */
 					m5		 /* map5 */
 					);
 
 			eflags = _housetype_extra_flags[house];
 
 			if(0 != (eflags&0x18)) {
-				assert(tile.iadd(0, 1).IsTileType(TileTypes.MP_CLEAR));
+				assert(tile.iadd(0, 1).isClear());
 				Landscape.ModifyTile(tile.iadd(0, 1), TileTypes.MP_HOUSE,
 						//TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | 
-						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
+						TileTypes.MP_ANIM_CLEAR | TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
 						t.index,
 						m3lo,			/* map3_lo */
 						++house,	/* map3_hi */
-						0,				/* map_owner */
+						PlayerID.getNone().id,				/* map_owner */
 						m5				/* map5 */
 						);
 			}
 
 			if(0 != (eflags&0x14)) {
-				assert(tile.iadd(1, 0).IsTileType(TileTypes.MP_CLEAR));
+				assert(tile.iadd(1, 0).isClear());
 				Landscape.ModifyTile(tile.iadd(1, 0), TileTypes.MP_HOUSE,
 						//TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | 
 						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
@@ -1627,7 +1627,7 @@ implements IPoolItem, Serializable
 			}
 
 			if(0 != (eflags&0x10)) {
-				assert(tile.iadd(1, 1).IsTileType(TileTypes.MP_CLEAR));
+				assert(tile.iadd(1, 1).isClear());
 				Landscape.ModifyTile(tile.iadd(1, 1), TileTypes.MP_HOUSE,
 						//TileTypes.MP_SETTYPE(TileTypes.MP_HOUSE) | 
 						TileTypes.MP_MAP2 | TileTypes.MP_MAP3LO | TileTypes.MP_MAP3HI | TileTypes.MP_MAP5 | TileTypes.MP_MAPOWNER,
@@ -1851,7 +1851,7 @@ implements IPoolItem, Serializable
 		Global.SetDParam(2, p.name_2);
 
 		NewsItem.AddNewsItem(Str.STR_2055_TRAFFIC_CHAOS_IN_ROAD_REBUILDING,
-				NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_GENERAL, 0), t.xy.getTile(), 0);
+				NewsItem.NEWS_FLAGS(NewsItem.NM_NORMAL, NewsItem.NF_TILE, NewsItem.NT_GENERAL, 0), t.xy.getTileIndex(), 0);
 	}
 
 	static boolean DoBuildStatueOfCompany(TileIndex tile)
@@ -1863,7 +1863,7 @@ implements IPoolItem, Serializable
 		Landscape.FindLandscapeHeightByTile(ti, tile);
 		if (ti.tileh != 0) return false;
 
-		if (ti.type != TileTypes.MP_HOUSE.ordinal() && ti.type != TileTypes.MP_CLEAR.ordinal() && ti.type != TileTypes.MP_TREES.ordinal())
+		if (ti.type != TileTypes.MP_HOUSE.ordinal() && (!ti.tile.isClear()) && ti.type != TileTypes.MP_TREES.ordinal())
 			return false;
 
 

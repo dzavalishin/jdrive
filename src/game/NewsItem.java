@@ -159,9 +159,6 @@ public class NewsItem implements Serializable
 	//static public void AddNewsItem(StringID string, int flags, int data_a, int data_b)
 	static public void AddValidatedNewsItem( int string, int flags, int data_a, int data_b, BiPredicate<Integer, Integer> valid)
 	{
-		NewsItem ni;
-		Window w;
-
 		if (Global._game_mode == GameModes.GM_MENU)
 			return;
 
@@ -181,7 +178,7 @@ public class NewsItem implements Serializable
 
 		_news_items[_latest_news] = new NewsItem(); // just make new one
 		// add news to _latest_news
-		ni = _news_items[_latest_news];
+		NewsItem ni = _news_items[_latest_news];
 		//memset(ni, 0, sizeof(*ni));
 
 		ni.string_id = new StringID( string );
@@ -200,7 +197,7 @@ public class NewsItem implements Serializable
 		ni.isValid = valid;
 		Global.COPY_OUT_DPARAM(ni.params, 0, ni.params.length);
 
-		w = Window.FindWindowById(Window.WC_MESSAGE_HISTORY, 0);
+		Window w = Window.FindWindowById(Window.WC_MESSAGE_HISTORY, 0);
 		if (w == null) return;
 		w.SetWindowDirty();
 		w.vscroll.setCount(_total_news);
@@ -538,7 +535,7 @@ public class NewsItem implements Serializable
 			w = Window.AllocateWindowDesc(_news_type13_desc);
 			if( 0 != (ni.flags & NF_VIEWPORT) )
 				ViewPort.AssignWindowViewport( w, 2, 58, 0x1AA, 0x6E,
-						ni.data_a.getTile() | ((0 != (ni.flags & NF_VEHICLE)) ? 0x80000000 : 0), 0);
+						ni.data_a.getTileIndex() | ((0 != (ni.flags & NF_VEHICLE)) ? 0x80000000 : 0), 0);
 			break;
 		}
 
@@ -547,7 +544,7 @@ public class NewsItem implements Serializable
 			w = Window.AllocateWindowDesc(_news_type2_desc);
 			if( 0 != (ni.flags & NF_VIEWPORT) )
 				ViewPort.AssignWindowViewport( w, 2, 58, 0x1AA, 0x46,
-						ni.data_a.getTile() | ((0 != (ni.flags & NF_VEHICLE)) ? 0x80000000 : 0), 0);
+						ni.data_a.getTileIndex() | ((0 != (ni.flags & NF_VEHICLE)) ? 0x80000000 : 0), 0);
 			break;
 		}
 
@@ -556,7 +553,7 @@ public class NewsItem implements Serializable
 			w = Window.AllocateWindowDesc(_news_type0_desc, 0);
 			if( 0 != (ni.flags & NF_VIEWPORT) )
 				ViewPort.AssignWindowViewport(w, 3, 17, 0x112, 0x2F,
-						ni.data_a.getTile() | ((0 != (ni.flags & NF_VEHICLE)) ? 0x80000000 : 0), 0);
+						ni.data_a.getTileIndex() | ((0 != (ni.flags & NF_VEHICLE)) ? 0x80000000 : 0), 0);
 			break;
 		}
 		}
@@ -618,7 +615,7 @@ public class NewsItem implements Serializable
 			if (Global.get_date() - _news_items_age[ni.type] > ni.date) return;
 
 			// execute the validation function to see if this item is still valid
-			if (ni.isValid != null && !ni.isValid.test(ni.data_a.getTile(), ni.data_b.getTile())) return;
+			if (ni.isValid != null && !ni.isValid.test(ni.data_a.getTileIndex(), ni.data_b.getTileIndex())) return;
 
 			switch (GetNewsDisplayValue(ni.type)) {
 			case 0: { /* Off - show nothing only a small reminder in the status bar */

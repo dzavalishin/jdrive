@@ -1164,13 +1164,10 @@ public class ViewPort implements Serializable
 
 	public static void UpdateViewportSignPos(ViewportSign sign, int left, int top, int str)
 	{
-		String buffer;
-		int w;
-
 		sign.setTop(top);
 
-		buffer = Strings.GetString(str);
-		w = Gfx.GetStringWidth(buffer) + 3;
+		String buffer = Strings.GetString(str);
+		int w = Gfx.GetStringWidth(buffer) + 3;
 		sign.setWidth_1(w);
 		sign.setLeft(left - w / 2);
 
