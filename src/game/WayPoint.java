@@ -6,13 +6,17 @@ import java.io.ObjectOutputStream;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
+import game.enums.StationClassID;
 import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ids.StringID;
 import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
+import game.struct.DrawTileSeqStruct;
+import game.struct.DrawTileSprites;
 import game.struct.Point;
 import game.util.BitOps;
+import game.xui.Gfx;
 import game.xui.ViewPort;
 
 public class WayPoint implements IPoolItem
@@ -35,7 +39,7 @@ public class WayPoint implements IPoolItem
 	public int town_cn;      ///< The Nth WayPoint for this town (consecutive number)
 	public StringID string;   ///< If this is zero (i.e. no custom name), town + town_cn is used for naming
 
-	public ViewportSign sign; ///< Dimensions of sign (not saved)
+	public ViewportSign sign; ///< Dimensions of sign
 	public int build_date; ///< Date of construction
 
 	public int stat_id;      ///< ID of WayPoint within the WayPoint class (not saved)
@@ -77,7 +81,7 @@ public class WayPoint implements IPoolItem
 		town_index = 0;
 		town_cn = 0;
 		string = null;
-		sign = null;
+		sign = new ViewportSign();
 		build_date = 0;
 		stat_id = 0;
 		grfid = 0;
@@ -286,8 +290,8 @@ public class WayPoint implements IPoolItem
 	static int CmdBuildTrainWaypoint(int x, int y, int flags, int p1, int p2)
 	{
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
-		WayPoint wp;
-		int tileh;
+		//WayPoint wp;
+		//int tileh;
 		int dir;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_CONSTRUCTION);
@@ -314,14 +318,14 @@ public class WayPoint implements IPoolItem
 
 		if (!tile.EnsureNoVehicle()) return Cmd.CMD_ERROR;
 
-		tileh = tile.GetTileSlope(null);
+		int tileh = tile.GetTileSlope(null);
 		if (tileh != 0) {
 			if (!Global._patches.build_on_slopes ||  TileIndex.IsSteepTileh(tileh) || 0==(tileh & (0x3 << dir)) || 0==(tileh & ~(0x3 << dir)))
 				return Cmd.return_cmd_error(Str.STR_0007_FLAT_LAND_REQUIRED);
 		}
 
 		/* Check if there is an already existing, deleted, WayPoint close to us that we can reuse. */
-		wp = FindDeletedWaypointCloseTo(tile);
+		WayPoint wp = FindDeletedWaypointCloseTo(tile);
 		if (wp == null) {
 			wp = AllocateWaypoint();
 			if (wp == null) return Cmd.CMD_ERROR;
@@ -418,7 +422,7 @@ public class WayPoint implements IPoolItem
 	/* Remove a WayPoint */
 	static int RemoveTrainWaypoint(TileIndex tile, int flags, boolean justremove)
 	{
-		WayPoint wp;
+		//WayPoint wp;
 
 		/* Make sure it's a WayPoint */
 		if (!tile.IsTileType(TileTypes.MP_RAILWAY) || !IsRailWaypoint(tile))
@@ -433,7 +437,7 @@ public class WayPoint implements IPoolItem
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			int direction = tile.getMap().m5 & RAIL_WAYPOINT_TRACK_MASK;
 
-			wp = GetWaypointByTile(tile);
+			WayPoint wp = GetWaypointByTile(tile);
 
 			wp.deleted = 30; // let it live for this many days before we do the actual deletion.
 			wp.RedrawWaypointSign();
@@ -477,18 +481,17 @@ public class WayPoint implements IPoolItem
 	 */
 	static int CmdRenameWaypoint(int x, int y, int flags, int p1, int p2)
 	{
-		WayPoint wp;
-		StringID str;
+		//StringID str;
 
 		if (!IsWaypointIndex(p1)) return Cmd.CMD_ERROR;
 
 		if (Global._cmd_text != null) {
-			str = Global.AllocateNameUnique(Global._cmd_text, 0);
+			StringID str = Global.AllocateNameUnique(Global._cmd_text, 0);
 			if (str == null)
 				return Cmd.CMD_ERROR;
 
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				wp = GetWaypoint(p1);
+				WayPoint wp = GetWaypoint(p1);
 				if (wp.string.id != Str.STR_NULL)
 					Global.DeleteName(wp.string);
 
@@ -502,7 +505,7 @@ public class WayPoint implements IPoolItem
 			}
 		} else {
 			if(0 != (flags & Cmd.DC_EXEC)) {
-				wp = GetWaypoint(p1);
+				WayPoint wp = GetWaypoint(p1);
 				if (wp.string.id != Str.STR_NULL)
 					Global.DeleteName(wp.string);
 
@@ -540,31 +543,33 @@ public class WayPoint implements IPoolItem
 		//int relocation;
 		//final DrawTileSprites cust;
 		//final DrawTileSeqStruct seq;
-		//final RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
-		int ormod, img;
+		final RailtypeInfo rti = Rail.GetRailTypeInfo(railtype);
+		//int ormod, img;
 
-		ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player));
+		int ormod = Sprite.SPRITE_PALETTE(Sprite.PLAYER_SPRITE_COLOR(Global.gs._local_player));
 
 		x += 33;
 		y += 17;
-
-		// TODO stat = GetCustomStation(STAT_CLASS_WAYP, stat_id);
-		//if (stat == null) {
+		 
+		final StationSpec stat = StationClass.GetCustomStation(StationClassID.STAT_CLASS_WAYP, stat_id);
+		if (stat == null) {
 			// stat is null for default waypoints and when WayPoint graphics are
 			// not loaded.
 			Rail.DrawDefaultWaypointSprite(x, y, railtype);
 			return;
-		//}
-		/*
-		relocation = GetCustomStationRelocation(stat, null, 1);
+		}
+
+		// Untested
+		
+		int relocation = Station.GetCustomStationRelocation(stat, null, 1);
 		// emulate station tile - open with building
 		// add 1 to get the other direction
-		cust = stat.renderdata[2];
+		final DrawTileSprites cust = stat.renderdata[2];
 
-		img = cust.ground_sprite.id;
-		img += (img < _custom_sprites_base) ? rti.total_offset : railtype;
+		int img = cust.ground_sprite;
+		img += (img < GRFFile._custom_sprites_base) ? rti.total_offset.id : railtype;
 
-		if (img & PALETTE_MODIFIER_COLOR) img = (img & Sprite.SPRITE_MASK);
+		if( 0 != (img & Sprite.PALETTE_MODIFIER_COLOR) ) img = (img & Sprite.SPRITE_MASK);
 		Gfx.DrawSprite(img, x, y);
 
 		//foreach_draw_tile_seq(seq, cust.seq) 
@@ -578,30 +583,10 @@ public class WayPoint implements IPoolItem
 			int image = seq.image + relocation;
 			Gfx.DrawSprite((image & Sprite.SPRITE_MASK) | ormod, x + pt.x, y + pt.y);
 		}
-		*/
+		
 	}
 	
 	
-	/* Fix savegames which stored waypoints in their old format * /
-void FixOldWaypoints()
-{
-	WayPoint *wp;
-
-	// Convert the old 'town_or_string', to 'string' / 'town' / 'town_cn' * /
-	for (wp = GetWaypoint(0); wp != null; wp = (wp.index + 1 < GetWaypointPoolSize()) ? GetWaypoint(wp.index + 1) : null) 
-    {
-		if (wp.xy == 0)
-			continue;
-
-		wp.town_index = ClosestTownFromTile(wp.xy, (int)-1).index;
-		wp.town_cn = 0;
-		if (wp.string & 0xC000) {
-			wp.town_cn = wp.string & 0x3F;
-			wp.string = STR_NULL;
-		}
-	}
-}
-	 */
 
 	static void InitializeWaypoints()
 	{
