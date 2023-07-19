@@ -2434,7 +2434,7 @@ public class Vehicle implements IPoolItem
 				Cmd.DoCommand(0, 0, (INVALID_VEHICLE << 16) | old_v.index, 0, Cmd.DC_EXEC, Cmd.CMD_MOVE_RAIL_VEHICLE);
 			} else {
 				// copy/clone the orders
-				Cmd.DoCommand(0, 0, (old_v.index << 16) | new_v.index, old_v.IsOrderListShared() ? Order.CO_SHARE : Order.CO_COPY, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
+				Cmd.DoCommand(0, 0, (old_v.index << 16) | new_v.index, old_v.isOrderListShared() ? Order.CO_SHARE : Order.CO_COPY, Cmd.DC_EXEC, Cmd.CMD_CLONE_ORDER);
 				new_v.cur_order_index = old_v.cur_order_index;
 				VehicleGui.ChangeVehicleViewWindow(old_v, new_v);
 				new_v.profit_this_year = old_v.profit_this_year;
@@ -2847,13 +2847,13 @@ public class Vehicle implements IPoolItem
 	 */
 	public void DeleteVehicleOrders()
 	{
-		Order order, cur;
+		//Order order, cur;
 
 		if(orders == null) return;
 		
 		/* If we have a shared order-list, don't delete the list, but just
 		    remove our pointer */
-		if (Order.IsOrderListShared(this)) {
+		if (isOrderListShared()) {
 			Vehicle u = this;
 
 			orders = null;
@@ -2881,7 +2881,7 @@ public class Vehicle implements IPoolItem
 		}
 
 		/* Remove the orders */
-		cur = orders;
+		Order cur = orders;
 		orders = null;
 		num_orders = 0;
 
@@ -2894,7 +2894,7 @@ public class Vehicle implements IPoolItem
 			}
 		}
 
-		order = null;
+		Order order = null;
 		while (cur != null) {
 			if (order != null) {
 				order.type = Order.OT_NOTHING;
@@ -2964,7 +2964,7 @@ public class Vehicle implements IPoolItem
 		}
 
 		/* If we have shared orders, store it on a special way */
-		if (v.IsOrderListShared()) {
+		if (v.isOrderListShared()) {
 			final Vehicle u = (v.next_shared != null) ? v.next_shared : v.prev_shared;
 
 			bak.clone = VehicleID.get( u.index );
@@ -2989,10 +2989,21 @@ public class Vehicle implements IPoolItem
 		}
 	}
 
-	public boolean IsOrderListShared() {
-		return Order.IsOrderListShared(this);
-	}
+	//public boolean IsOrderListShared() {		return Order.IsOrderListShared(this);	}
 
+	/**
+	 *
+	 * Check if we share our orders with an other vehicle
+	 *
+	 * @return Returns the vehicle who has the same order
+	 *
+	 */
+	public boolean isOrderListShared()
+	{
+		return next_shared != null || prev_shared != null;
+	}
+	
+	
 	/**
 	 *
 	 * Restore vehicle orders that are backupped via BackupVehicleOrders

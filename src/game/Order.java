@@ -992,17 +992,6 @@ public class Order implements Serializable
 	}
 
 
-	/**
-	 *
-	 * Check if we share our orders with an other vehicle
-	 *
-	 * @return Returns the vehicle who has the same order
-	 *
-	 */
-	static boolean IsOrderListShared(final Vehicle v)
-	{
-		return v.next_shared != null || v.prev_shared != null;
-	}
 
 
 	static void InitializeOrders()

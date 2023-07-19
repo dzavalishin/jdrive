@@ -72,7 +72,7 @@ public class OrderGui {
 		if (v.getType() != Vehicle.VEH_Train)
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 6); //disable non-stop for non-trains
 
-		shared_orders = v.IsOrderListShared();
+		shared_orders = v.isOrderListShared();
 
 		if (v.getNum_orders() + (shared_orders?1:0) <= w.as_order_d().sel)
 			w.disabled_state = BitOps.RETSETBIT(w.disabled_state, 5); /* delete */

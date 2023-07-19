@@ -360,7 +360,7 @@ public class Cmd {
 	}
 
 
-	static int _docommand_recursive;
+	private static int _docommand_recursive;
 
 	public static int DoCommand(int x, int y, int p1, int p2, int flags, int procc)
 	{
