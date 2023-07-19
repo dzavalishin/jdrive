@@ -145,7 +145,8 @@ public class Global
 	
 	
 
-	public static int _news_display_opt = 0xAAAAAAAA; //  All news on
+	//public static int _news_display_opt = 0xAAAAAAAA; //  All news on
+	public static int _news_display_opt = 0; //  All news off
 	public static boolean _news_ticker_sound = false;
 	public static NewsItem _statusbar_news_item = null;
 

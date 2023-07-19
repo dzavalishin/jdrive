@@ -2573,11 +2573,11 @@ public class Vehicle implements IPoolItem
 			}
 
 			//MA CHECKS
-			if(mAirport.MA_VehicleServesMS(v) > 0) 
+			if(MunicipalAirport.MA_VehicleServesMS(v) > 0) 
 			{
-				for(int i =  1; i <= mAirport.MA_VehicleServesMS(v) ; i++) {
-					Station st = Station.GetStation(mAirport.MA_Find_MS_InVehicleOrders(v, i).id);
-					if(!mAirport.MA_WithinVehicleQuota(st)) {
+				for(int i =  1; i <= MunicipalAirport.MA_VehicleServesMS(v) ; i++) {
+					Station st = Station.GetStation(MunicipalAirport.MA_Find_MS_InVehicleOrders(v, i).id);
+					if(!MunicipalAirport.MA_WithinVehicleQuota(st)) {
 						Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 						return Cmd.CMD_ERROR;
 					}

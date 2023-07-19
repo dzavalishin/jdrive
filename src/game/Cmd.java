@@ -342,7 +342,6 @@ public class Cmd {
 	{
 		cmd &= 0xFF;
 
-
 		return
 				cmd < _command_proc_table.length &&
 				_command_proc_table[cmd].proc != null;

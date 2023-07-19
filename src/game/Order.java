@@ -201,11 +201,11 @@ public class Order implements Serializable
 			st = Station.GetStation(new_order.station);
 
 			if (!st.IsValidStation() ||
-					(st.airport_type != Airport.AT_OILRIG && !(st.IsBuoy()) && !Player.CheckOwnership(st.owner) && !mAirport.MA_OwnerHandler(st.owner)))
+					(st.airport_type != Airport.AT_OILRIG && !(st.IsBuoy()) && !Player.CheckOwnership(st.owner) && !MunicipalAirport.MA_OwnerHandler(st.owner)))
 				return Cmd.CMD_ERROR;
 
 			//MA checks
-			if(Global._patches.allow_municipal_airports.get() && !mAirport.MA_WithinVehicleQuota(Station.GetStation(new_order.station))) {
+			if(Global._patches.allow_municipal_airports.get() && !MunicipalAirport.MA_WithinVehicleQuota(Station.GetStation(new_order.station))) {
 				Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 				return Cmd.CMD_ERROR;
 				//End MA checks
@@ -665,12 +665,12 @@ public class Order implements Serializable
 		if (dst.type == 0 || !Player.CheckOwnership(dst.owner)) return Cmd.CMD_ERROR;
 
 		//MA checks
-		if(mAirport.MA_VehicleServesMS(Vehicle.GetVehicle(veh_src)) > 0) 
+		if(MunicipalAirport.MA_VehicleServesMS(Vehicle.GetVehicle(veh_src)) > 0) 
 		{
-			for(int i =  1; i <= mAirport.MA_VehicleServesMS(Vehicle.GetVehicle(veh_src)) ; i++) 
+			for(int i =  1; i <= MunicipalAirport.MA_VehicleServesMS(Vehicle.GetVehicle(veh_src)) ; i++) 
 			{
-				Station st = Station.GetStation(mAirport.MA_Find_MS_InVehicleOrders(Vehicle.GetVehicle(veh_src), i).id);
-				if(!mAirport.MA_WithinVehicleQuota(st)) 
+				Station st = Station.GetStation(MunicipalAirport.MA_Find_MS_InVehicleOrders(Vehicle.GetVehicle(veh_src), i).id);
+				if(!MunicipalAirport.MA_WithinVehicleQuota(st)) 
 				{ 
 					Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 					return Cmd.CMD_ERROR;

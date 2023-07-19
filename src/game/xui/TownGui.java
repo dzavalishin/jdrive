@@ -9,7 +9,7 @@ import game.Player;
 import game.Sprite;
 import game.Str;
 import game.Town;
-import game.mAirport;
+import game.MunicipalAirport;
 import game.enums.GameModes;
 import game.enums.Owner;
 import game.ids.PlayerID;
@@ -310,7 +310,7 @@ public abstract class TownGui //extends Town
 				t.DeleteTown();
 				break;
 			case 11:
-				mAirport.MA_EditorAddAirport(t);
+				MunicipalAirport.MA_EditorAddAirport(t);
 				// TODO Console.IConsolePrintF(100100100, "it works");
 			}
 			break;

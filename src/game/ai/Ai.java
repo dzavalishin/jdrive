@@ -104,32 +104,26 @@ public class Ai {
 	 */
 	static void AI_DequeueCommands(int player)
 	{
-		AICommand com, entry_com;
-
-		entry_com = _ai_player[player].queue;
+		AICommand com = _ai_player[player].queue;
 
 		/* It happens that DoCommandP issues a new DoCommandAI which adds a new command
 		 *  to this very same queue (don't argue about this, if it currently doesn't
 		 *  happen I can tell you it will happen with AIScript -- TrueLight). If we
-		 *  do not make the queue null, that commands will be dequeued immediatly.
-		 *  Therefor we safe the entry-point to entry_com, and make the queue null, so
+		 *  do not make the queue null, that commands will be dequeued immediately.
+		 *  Therefore we safe the entry-point to entry_com, and make the queue null, so
 		 *  the new queue can be safely built up. */
 		_ai_player[player].queue = null;
 		_ai_player[player].queue_tail = null;
 
 		/* Dequeue all commands */
-		while ((com = entry_com) != null) {
-			//_current_player = player;
+		while (com != null) {
 			Global.gs.setCurrentPlayer(PlayerID.get(player));
 
 			/* Copy the DP back in place */
 			Global._cmd_text = com.text;
 			Cmd.DoCommandP( TileIndex.get(com.tile), com.p1, com.p2, null, com.procc);
-
-			/* Free item */
-			entry_com = com.next;
-			//if (com.text != null)				free(com.text);
-			//free(com);
+			
+			com = com.next;
 		}
 	}
 
@@ -143,11 +137,11 @@ public class Ai {
 
 		if (_ai_player[player].queue_tail == null) {
 			/* There is no item in the queue yet, create the queue */
-			_ai_player[player].queue = new AICommand(); // malloc(sizeof(AICommand));
+			_ai_player[player].queue = new AICommand(); 
 			_ai_player[player].queue_tail = _ai_player[player].queue;
 		} else {
 			/* Add an item at the end */
-			_ai_player[player].queue_tail.next = new AICommand(); // malloc(sizeof(AICommand));
+			_ai_player[player].queue_tail.next = new AICommand(); 
 			_ai_player[player].queue_tail = _ai_player[player].queue_tail.next;
 		}
 

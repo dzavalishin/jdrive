@@ -12,7 +12,7 @@ import game.Str;
 import game.TileIndex;
 import game.Vehicle;
 import game.WayPoint;
-import game.mAirport;
+import game.MunicipalAirport;
 import game.enums.TileTypes;
 import game.enums.TransportType;
 import game.ids.PlayerID;
@@ -267,7 +267,7 @@ public class OrderGui {
 		if (tile.IsTileType( TileTypes.MP_STATION)) {
 			final Station  st = Station.GetStation(st_index = tile.getMap().m2);
 			
-			if (st.getOwner().equals(PlayerID.getCurrent()) || st.getOwner().isNone() || mAirport.MA_OwnerHandler(st.getOwner())) {
+			if (st.getOwner().equals(PlayerID.getCurrent()) || st.getOwner().isNone() || MunicipalAirport.MA_OwnerHandler(st.getOwner())) {
 				byte facil;
 				
 				/*

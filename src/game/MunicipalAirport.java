@@ -7,7 +7,12 @@ import game.enums.TileTypes;
 import game.ids.PlayerID;
 import game.ids.StationID;
 
-public class mAirport 
+/**
+ * Municipal Airport
+ *
+ */
+
+public class MunicipalAirport 
 {
 
 	final static float PI = 3.141f; // duuuuuuuuuuhhhhhh
@@ -41,12 +46,11 @@ public class mAirport
 	static StationID MA_Find_MS_InVehicleOrders(Vehicle v, int count)
 	{
 		Order order = v.orders;
-		Station st;
 		int stationcount = 0;
 
 		while(order != null)
 		{
-			st = Station.GetStation(order.station);
+			Station st = Station.GetStation(order.station);
 			if(st.owner.isTown())
 				stationcount++;
 			if(stationcount == count) 
@@ -160,7 +164,7 @@ public class mAirport
 		
 	}
 
-	static //returns a position of a tile on the circuference of a circle;
+	static //returns a position of a tile on the circumference of a circle;
 	TileIndex CircularPos(int radius, int angle, TileIndex centre)
 	{
 		return TileIndex.TileXY(
@@ -174,8 +178,7 @@ public class mAirport
 		TileIndex candidatetile = candidatetile_p.iadd(-4, -4);
 		boolean [] retcode = { true };
 		int tileHeight = candidatetile.TileHeight();
-		//BEGIN_TILE_LOOP(tl, 9, 9, candidatetile)
-		//TileIndex.forEach( 9, 9, candidatetile.tile, (tl) ->
+
 		TileIndex.forAll(9, 9, candidatetile.tile, (tl) ->
 		{
 
@@ -184,10 +187,10 @@ public class mAirport
 				return true;
 			}
 
-			if(
-					tl.GetTileType() == TileTypes.MP_UNMOVABLE || 
-							tl.GetTileType() == TileTypes.MP_INDUSTRY || 
-							tl.GetTileType() == TileTypes.MP_WATER) {
+			if( tl.GetTileType() == TileTypes.MP_UNMOVABLE || 
+					tl.GetTileType() == TileTypes.MP_INDUSTRY || 
+					tl.GetTileType() == TileTypes.MP_WATER) 
+			{
 				retcode[0] = false;
 				return true;
 			}
@@ -209,19 +212,27 @@ public class mAirport
 
 			return false;
 		});
-		//END_TILE_LOOP(tl, 9, 9, candidatetile)
 		
 		return retcode[0];
 	}
 
-	//adds a news item for display
+	/**
+	 * Adds a news item for display
+	 * 
+	 * @param tn
+	 * @param tl
+	 */
 	static void MA_AnnounceAirport(Town tn, TileIndex tl)
 	{
 		Global.SetDParam(0 ,tn.index);
 		NewsItem.AddNewsItem(Str.STR_MA_BUILT_MUNICIPAL_AIRPORT, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ECONOMY, 0), tl.tile, 0);
 	}
 
-	//looks for a goodsite (works in outward spiral)
+	/**
+	 *  looks for a good site (works in outward spiral)
+	 * @param tn Town
+	 * @return Site
+	 */
 	static TileIndex MA_FindSite(Town tn)
 	{
 		int angle,radius;
@@ -249,7 +260,7 @@ public class mAirport
 	}
 
 	//the main procedure, does the checks and runs the process.
-	public static void MunicipalAirport(Town tn)
+	public static void monthlyLoop(Town tn)
 	{
 		PlayerID old_player = PlayerID.getCurrent();
 		PlayerID.setCurrent( Owner.OWNER_TOWN_ID );

@@ -42,7 +42,6 @@ public class NewsItem implements Serializable
 	/* The validation functions for news items get called immediately
 	 * before the news are supposed to be shown. If this funcion returns
 	 * false, the news item won't be displayed. */
-	//boolean (*isValid) ( int data_a, int data_b );
 	BiPredicate<Integer, Integer> isValid;
 
 
@@ -70,7 +69,7 @@ public class NewsItem implements Serializable
 		isValid = src.isValid;
 	}
 
-	void clear()
+	private void clear()
 	{
 		string_id = null;
 		duration = 0;
@@ -81,6 +80,41 @@ public class NewsItem implements Serializable
 		isValid = null;
 	}
 
+	
+	
+	
+	
+	
+	public StringID makeString() 
+	{
+		if (display_mode == 3) {
+			return new StringID( NewsItem._get_news_string_callback[callback].apply(this) );
+		} else {
+			Global.COPY_IN_DPARAM(0, params, params.length);
+			return string_id;
+		}
+	}
+
+
+	public StringID getString_id() {
+		return string_id;
+	}
+	
+	
+	
+	
+	// -------------------------------------------------------------------
+	// Static stuff
+	// -------------------------------------------------------------------
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	public static final int NT_ARRIVAL_PLAYER = 0;
 	public static final int NT_ARRIVAL_OTHER = 1;
@@ -134,7 +168,7 @@ public class NewsItem implements Serializable
 	 */
 
 	static final int  MAX_NEWS = 30;
-	static final byte   INVALID_NEWS = -1;
+	static final byte INVALID_NEWS = -1;
 
 	static final NewsItem[] _news_items = new NewsItem[MAX_NEWS];
 	static int _current_news = INVALID_NEWS; // points to news item that should be shown next
@@ -179,7 +213,6 @@ public class NewsItem implements Serializable
 		_news_items[_latest_news] = new NewsItem(); // just make new one
 		// add news to _latest_news
 		NewsItem ni = _news_items[_latest_news];
-		//memset(ni, 0, sizeof(*ni));
 
 		ni.string_id = new StringID( string );
 		ni.display_mode = flags & 0xFF;
@@ -576,16 +609,14 @@ public class NewsItem implements Serializable
 	// Only if nothing is in the newsticker and no newspaper is displayed
 	static boolean ReadyForNextItem()
 	{
-		final Window w;
 		int item = (_forced_news == INVALID_NEWS) ? _current_news : _forced_news;
-		NewsItem ni;
 
 		if (item >= MAX_NEWS || item < 0) return true;
-		ni = _news_items[item];
+		NewsItem ni = _news_items[item];
 
 		// Ticker message
 		// Check if the status bar message is still being displayed?
-		w = Window.FindWindowById(Window.WC_STATUS_BAR, 0);
+		final Window w = Window.FindWindowById(Window.WC_STATUS_BAR, 0);
 		if (w != null && w.as_def_d().data_1 > -1280) return false;
 
 		// Newspaper message
@@ -606,10 +637,8 @@ public class NewsItem implements Serializable
 
 		// if we're not at the last item, than move on
 		if (_current_news != _latest_news) {
-			NewsItem ni;
-
 			_current_news = increaseIndex(_current_news);
-			ni = _news_items[_current_news];
+			NewsItem ni = _news_items[_current_news];
 
 			// check the date, don't show too old items
 			if (Global.get_date() - _news_items_age[ni.type] > ni.date) return;
@@ -708,7 +737,6 @@ public class NewsItem implements Serializable
 	static void DrawNewsString(int x, int y, int color, final NewsItem ni, int maxw)
 	{
 		//char buffer[512], buffer2[512];
-		String buffer;
 		//char *ptr, *dest;
 		StringID str;
 
@@ -719,7 +747,7 @@ public class NewsItem implements Serializable
 			str = ni.string_id;
 		}
 
-		buffer = Strings.GetString(str);
+		String buffer = Strings.GetString(str);
 		/* Copy the just gotten string to another buffer to remove any formatting
 		 * from it such as big fonts, etc. * /
 		for (ptr = buffer, dest = buffer2; *ptr != '\0'; ptr++) {
@@ -838,10 +866,8 @@ public class NewsItem implements Serializable
 
 	public static void ShowMessageHistory()
 	{
-		Window w;
-
 		Window.DeleteWindowById(Window.WC_MESSAGE_HISTORY, 0);
-		w = Window.AllocateWindowDesc(_message_history_desc);
+		Window w = Window.AllocateWindowDesc(_message_history_desc);
 
 		if (w != null) {
 			w.vscroll.setCap(10);
@@ -1066,20 +1092,6 @@ public class NewsItem implements Serializable
 
 
 
-	public StringID makeString() 
-	{
-		if (display_mode == 3) {
-			return new StringID( NewsItem._get_news_string_callback[callback].apply(this) );
-		} else {
-			Global.COPY_IN_DPARAM(0, params, params.length);
-			return string_id;
-		}
-	}
-
-
-	public StringID getString_id() {
-		return string_id;
-	}
 
 
 }

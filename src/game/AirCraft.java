@@ -396,7 +396,7 @@ public class AirCraft extends AirCraftTables {
 		if (v.type != Vehicle.VEH_Aircraft || !Player.CheckOwnership(v.owner)) return Cmd.CMD_ERROR;
 
 		if (Global._patches.allow_municipal_airports.get() 
-				&& mAirport.MA_VehicleIsAtMunicipalAirport(v) 
+				&& MunicipalAirport.MA_VehicleIsAtMunicipalAirport(v) 
 				&& !v.isStopped())
 			return Cmd.return_cmd_error(Str.STR_MA_CANT_STOP_AT_MUNICIPAL);
 
@@ -1666,7 +1666,7 @@ public class AirCraft extends AirCraftTables {
 		// runway busy or not allowed to use this airstation, circle
 		if (! (v.subtype == airport.getAccPlanes() ||
 				st.airport_tile == null || 
-				(st.owner.isNotNone() && !st.owner.equals(v.owner) && !mAirport.MA_OwnerHandler(st.owner)) )) {
+				(st.owner.isNotNone() && !st.owner.equals(v.owner) && !MunicipalAirport.MA_OwnerHandler(st.owner)) )) {
 
 			// {32,FLYING,NOTHING_block,37}, {32,LANDING,N,33}, {32,HELILANDING,N,41},
 			// if it is an airplane, look for LANDING, for helicopter HELILANDING

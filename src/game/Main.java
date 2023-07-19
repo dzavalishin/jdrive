@@ -704,7 +704,8 @@ public class Main {
 				Vehicle.CallVehicleTicks();
 				Landscape.CallLandscapeTick();
 
-				Ai.AI_RunGameLoop();
+				// TODO temp turned off
+				// Ai.AI_RunGameLoop();
 
 				Window.CallWindowTickEvent();
 				NewsItem.NewsLoop();

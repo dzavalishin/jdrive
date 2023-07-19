@@ -102,7 +102,7 @@ implements IPoolItem, Serializable
 	// Fund buildings program in action?
 	int fund_buildings_months;
 
-	// Fund road refinalruction in action?
+	// Fund road reconstruction in action?
 	int road_build_months;
 
 	// Index in town array
@@ -262,7 +262,6 @@ implements IPoolItem, Serializable
 	static void DrawTile_Town(TileInfo ti)
 	{
 		final DrawTownTileStruct dcts;
-		int z;
 		int image;
 
 		/* Retrieve pointer to the draw town tile struct */
@@ -271,15 +270,17 @@ implements IPoolItem, Serializable
 			int gfx   = ti.tile.getMap().m4;
 			int stage =  BitOps.GB(ti.tile.getMap().m3, 6, 2);
 			int variant;
+
 			variant  = ti.x >> 4;
-		variant ^= ti.x >> 6;
-		variant ^= ti.y >> 4;
-		variant -= ti.y >> 6;
-		variant &= 3;
-		dcts = TownTables._town_draw_tile_data[gfx << 4 | variant << 2 | stage];
+			variant ^= ti.x >> 6;
+			variant ^= ti.y >> 4;
+			variant -= ti.y >> 6;
+			variant &= 3;
+			
+			dcts = TownTables._town_draw_tile_data[gfx << 4 | variant << 2 | stage];
 		}
 
-		z =  ti.z;
+		int z =  ti.z;
 
 		/* Add bricks below the house? */
 		if(0 != (ti.tileh)) {
@@ -330,7 +331,6 @@ implements IPoolItem, Serializable
 	static void AnimateTile_Town(TileIndex tile)
 	{
 		int old;
-		int a,b;
 
 		if( 0 != (Global._tick_counter & 3)) return;
 
@@ -356,8 +356,8 @@ implements IPoolItem, Serializable
 			tile.getMap().m5 = BitOps.RETSB(tile.getMap().m5, 0, 6, i);
 		}
 
-		a = BitOps.GB(tile.getMap().anim, 0, 7);
-		b = BitOps.GB(tile.getMap().m5, 0, 6) * 6;
+		int a = BitOps.GB(tile.getMap().anim, 0, 7);
+		int b = BitOps.GB(tile.getMap().m5, 0, 6) * 6;
 		a += (a < b) ? 1 : -1;
 		tile.getMap().anim = BitOps.RETSB(tile.getMap().anim, 0, 7, a);
 
@@ -451,16 +451,12 @@ implements IPoolItem, Serializable
 
 	static void TileLoop_Town(TileIndex tile)
 	{
-		int house;
-		Town t;
-		int r;
-
 		if ((tile.getMap().m3 & 0xC0) != 0xC0) {
 			MakeTownHouseBigger(tile);
 			return;
 		}
 
-		house = tile.getMap().m4;
+		int house = tile.getMap().m4;
 		if ( 0 != (TownTables._housetype_extra_flags[house] & 0x20) &&
 				0 == (tile.getMap().m5 & 0x80) &&
 				BitOps.CHANCE16(1, 2) &&
@@ -469,9 +465,9 @@ implements IPoolItem, Serializable
 			tile.getMap().m5 = ((tile.getMap().m5 & 0x40) | 0x80);
 		}
 
-		t = GetTown(tile.getMap().m2);
+		Town t = GetTown(tile.getMap().m2);
 
-		r = Hal.Random();
+		int r = Hal.Random();
 
 		if (BitOps.GB(r, 0, 8) < TownTables._housetype_population[house]) {
 			int amt = BitOps.GB(r, 0, 8) / 8 + 1;
@@ -514,8 +510,6 @@ implements IPoolItem, Serializable
 
 	static int ClearTile_Town(TileIndex tile, byte flags)
 	{
-		int house, rating;
-		int cost;
 		Town t;
 
 		// safety checks
@@ -523,28 +517,28 @@ implements IPoolItem, Serializable
 		if (0 != (flags&Cmd.DC_AUTO) && 0 == (flags&Cmd.DC_AI_BUILDING)) 
 			return Cmd.return_cmd_error(Str.STR_2004_BUILDING_MUST_BE_DEMOLISHED);
 
-		house = tile.getMap().m4;
-		cost = ((int)(Global._price.remove_house * TownTables._housetype_remove_cost[house])) >> 8;
+		int house = tile.getMap().m4;
+		int cost = ((int)(Global._price.remove_house * TownTables._housetype_remove_cost[house])) >> 8;
 
-			rating = TownTables._housetype_remove_ratingmod[house];
-			Global._cleared_town_rating += rating;
-			Global._cleared_town = t = GetTown(tile.getMap().m2);
+		int rating = TownTables._housetype_remove_ratingmod[house];
+		Global._cleared_town_rating += rating;
+		Global._cleared_town = t = GetTown(tile.getMap().m2);
 
-			if (!PlayerID.getCurrent().isSpecial()) {
-				if (rating > t.ratings[PlayerID.getCurrent().id] 
-						&& 0==(flags & Cmd.DC_NO_TOWN_RATING) 
-						&& !Global._cheats.magic_bulldozer.value) {
-					Global.SetDParam(0, t.index);
-					return Cmd.return_cmd_error(Str.STR_2009_LOCAL_AUTHORITY_REFUSES);
-				}
+		if (!PlayerID.getCurrent().isSpecial()) {
+			if (rating > t.ratings[PlayerID.getCurrent().id] 
+					&& 0==(flags & Cmd.DC_NO_TOWN_RATING) 
+					&& !Global._cheats.magic_bulldozer.value) {
+				Global.SetDParam(0, t.index);
+				return Cmd.return_cmd_error(Str.STR_2009_LOCAL_AUTHORITY_REFUSES);
 			}
+		}
 
-			if(0 != (flags & Cmd.DC_EXEC)) {
-				t.ChangeTownRating(-rating, TownTables.RATING_HOUSE_MINIMUM);
-				t.ClearTownHouse(tile);
-			}
+		if(0 != (flags & Cmd.DC_EXEC)) {
+			t.ChangeTownRating(-rating, TownTables.RATING_HOUSE_MINIMUM);
+			t.ClearTownHouse(tile);
+		}
 
-			return cost;
+		return cost;
 	}
 
 	static AcceptedCargo GetAcceptedCargo_Town(TileIndex tile)
@@ -613,25 +607,24 @@ implements IPoolItem, Serializable
 			grow_counter =  i;
 		}
 
-		UpdateTownRadius();
+		updateRadius();
 	}
 
 	static void OnTick_Town()
 	{
 		if (Global._game_mode == GameModes.GM_EDITOR) return;
 
-		/* Make sure each town's tickhandler invocation frequency is about the
+		/* Make sure each town's tick handler invocation frequency is about the
 		 * same - TOWN_GROWTH_FREQUENCY - independent on the number of towns. */
 		for (_cur_town_iter += GetTownPoolSize();
 				_cur_town_iter >= TOWN_GROWTH_FREQUENCY;
 				_cur_town_iter -= TOWN_GROWTH_FREQUENCY) {
 			int i = _cur_town_ctr;
-			Town t;
 
 			if (++_cur_town_ctr >= GetTownPoolSize())
 				_cur_town_ctr = 0;
 
-			t = GetTown(i);
+			Town t = GetTown(i);
 
 			if(t != null && t.isValid()) t.TownTickHandler();
 		}
@@ -673,7 +666,6 @@ implements IPoolItem, Serializable
 	static boolean IsRoadAllowedHere(TileIndex tile, int dir)
 	{
 		int k;
-		int slope;
 
 		// If this assertion fails, it might be because the world contains
 		//  land at the edges. This is not ok.
@@ -690,7 +682,7 @@ implements IPoolItem, Serializable
 					return false;
 			}
 
-			slope = tile.GetTileSlope(null);
+			int slope = tile.GetTileSlope(null);
 			if (slope == 0) {
 				//no_slope:
 				// Tile has no slope
@@ -738,11 +730,9 @@ implements IPoolItem, Serializable
 
 	static boolean TerraformTownTile(TileIndex tile, int edges, int dir)
 	{
-		int r;
-
 		tile.TILE_ASSERT();
 
-		r = Cmd.DoCommandByTile(tile, edges, dir, Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_TERRAFORM_LAND);
+		int r = Cmd.DoCommandByTile(tile, edges, dir, Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_TERRAFORM_LAND);
 		if (Cmd.CmdFailed(r) || r >= 126 * 16) return false;
 		Cmd.DoCommandByTile(tile, edges, dir, Cmd.DC_AUTO | Cmd.DC_NO_WATER | Cmd.DC_EXEC, Cmd.CMD_TERRAFORM_LAND);
 		return true;
@@ -773,13 +763,13 @@ implements IPoolItem, Serializable
 			_grow_town_result = -1;
 	}
 
-	static void GrowTownInTile(TileIndex [] tile_ptr, int mask, int block, Town t1)
+	private static void growInTile(TileIndex [] tile_ptr, int mask, int block, Town t1)
 	{
-		int a,b,rcmd;
-		TileIndex tmptile;
+		int rcmd;
+		//TileIndex tmptile;
 		TileInfo ti = new TileInfo();
 		int i;
-		int j;
+		//int j;
 		TileIndex tile = tile_ptr[0];
 
 		tile.TILE_ASSERT();
@@ -797,8 +787,8 @@ implements IPoolItem, Serializable
 			if (!IsRoadAllowedHere(tile, block)) return;
 
 			// Randomize new road block numbers
-			a = block;
-			b = block ^ 2;
+			int a = block;
+			int b = block ^ 2;
 			if (BitOps.CHANCE16(1, 4)) {
 				do {
 					a = BitOps.GB(Hal.Random(), 0, 2);
@@ -844,7 +834,7 @@ implements IPoolItem, Serializable
 			if (BitOps.HASBIT(mask, i)) return;
 
 			// This is the tile we will reach if we extend to this direction.
-			tmptile = tile.iadd( TileIndex.ToTileIndexDiff(_roadblock_tileadd[i]));
+			TileIndex tmptile = tile.iadd( TileIndex.ToTileIndexDiff(_roadblock_tileadd[i]));
 
 			// Don't do it if it reaches to water.
 			if (tmptile.IsWaterTile()) return;
@@ -898,10 +888,10 @@ implements IPoolItem, Serializable
 			return;
 		}
 
-		tmptile = tile;
+		TileIndex tmptile = tile;
 
 		// Now it contains the direction of the slope
-		j = -11;	// max 11 tile long bridges
+		int j = -11;	// max 11 tile long bridges
 		do {
 			if (++j == 0)
 			{
@@ -939,12 +929,12 @@ implements IPoolItem, Serializable
 
 
 	/**
-	 * Returns true if a house was built, or no if the build failed.
+	 *  
 	 *  
 	 * @param itile
-	 * @return
+	 * @return true if a house was built, or no if the build failed.
 	 */
-	boolean GrowTownAtRoad(TileIndex itile)
+	private boolean growAtRoad(TileIndex itile)
 	{
 		int mask;
 		int block = 5; // special case
@@ -965,7 +955,7 @@ implements IPoolItem, Serializable
 
 			{
 				TileIndex [] tip = { tile };				
-				GrowTownInTile(tip,mask,block,this);
+				growInTile(tip,mask,block,this);
 				tile = new MutableTileIndex( tip[0] );
 			}
 
@@ -987,7 +977,7 @@ implements IPoolItem, Serializable
 				else if (Global._game_mode == GameModes.GM_EDITOR) {
 					/* If we are in the SE, and this road-piece has no town owner yet, it just found an
 					 *  owner :) (happy happy happy road now) */
-					tile.SetTileOwner(Owner.OWNER_TOWN);
+					tile.SetTileOwner(Owner.OWNER_TOWN_ID);
 					tile.getMap().m2 = this.index;
 				}
 			}
@@ -1027,7 +1017,7 @@ implements IPoolItem, Serializable
 	};
 
 
-	private boolean doGrowTown()
+	private boolean doGrow()
 	{
 		TileIndex tile;
 		TileInfo ti = new TileInfo();
@@ -1038,7 +1028,7 @@ implements IPoolItem, Serializable
 		for (TileIndexDiffC ptr : _town_coord_mod) 
 		{
 			if (Road.GetRoadBitsByTile(tile) != 0) 
-				return GrowTownAtRoad(tile);
+				return growAtRoad(tile);
 			
 			tile = tile.iadd(TileIndex.ToTileIndexDiff(ptr));
 		}
@@ -1065,18 +1055,15 @@ implements IPoolItem, Serializable
 	}
 	
 	
-	//static boolean disableGrow = true;
 	// Grow the town
 	// Returns true if a house was built, or no if the build failed.
 	boolean GrowTown()
 	{
-		//if(disableGrow) return false;
-
 		// Current player is a town
 		PlayerID old_player = PlayerID.getCurrent();
 		PlayerID.setCurrent( Owner.OWNER_TOWN_ID );
 
-		boolean r = doGrowTown();
+		boolean r = doGrow();
 
 		PlayerID.setCurrent( old_player );
 		return r;
@@ -1108,7 +1095,7 @@ implements IPoolItem, Serializable
 			{121, 81,  0, 49, 36}, // 88
 	};
 
-	void UpdateTownRadius()
+	void updateRadius()
 	{
 
 		if (num_houses < 92) {
@@ -1131,10 +1118,6 @@ implements IPoolItem, Serializable
 
 	static boolean CreateTownName(int []townnameparts)
 	{
-		//Town t2;
-		String buf1;
-		String buf2;
-		int r;
 		/* Do not set too low tries, since when we run out of names, we loop
 		 * for #tries only one time anyway - then we stop generating more
 		 * towns. Do not show it too high neither, since looping through all
@@ -1147,10 +1130,10 @@ implements IPoolItem, Serializable
 
 		for(;;) {
 			//restart:
-			r = Hal.Random();
+			int r = Hal.Random();
 
 			Global.SetDParam(0, r);
-			buf1 = Strings.GetString(townnametype);
+			String buf1 = Strings.GetString(townnametype);
 
 			// Check size and width
 			//if (strlen(buf1) >= 31 || Global.GetStringWidth(buf1) > 130) continue;
@@ -1166,7 +1149,7 @@ implements IPoolItem, Serializable
 					// We can't just compare the numbers since
 					// several numbers may map to a single name.
 					Global.SetDParam(0, t2.index);
-					buf2 = Strings.GetString(Str.STR_TOWN);
+					String buf2 = Strings.GetString(Str.STR_TOWN);
 					if (buf1.equals(buf2)) {
 						if (tries-- < 0) return false;
 						//goto restart;
@@ -1183,18 +1166,20 @@ implements IPoolItem, Serializable
 		}
 	}
 
-	void UpdateTownMaxPass()
+	/**
+	 * Update max passengers and mail
+	 */
+	
+	void updateMaxPass()
 	{
 		max_pass = population >> 3;
-						max_mail = population >> 4;
+		max_mail = population >> 4;
 	}
 
 	static void DoCreateTown(Town t, TileIndex tile, int townnameparts)
 	{
-		int x, i;
-
 		// clear the town struct
-		i = t.index;
+		int i = t.index;
 
 		t.clear();
 		t.index = i;
@@ -1202,7 +1187,7 @@ implements IPoolItem, Serializable
 		t.xy = tile;
 		t.num_houses = 0;
 		t.time_until_rebuild = 10;
-		t.UpdateTownRadius();
+		t.updateRadius();
 		t.flags12 = 0;
 		t.population = 0;
 		t.grow_counter = 0;
@@ -1238,12 +1223,12 @@ implements IPoolItem, Serializable
 		t.UpdateTownVirtCoord();
 		TownGui._town_sort_dirty = true;
 
-		x = (Hal.Random() & 0xF) + 8;
+		int x = (Hal.Random() & 0xF) + 8;
 		if (Global._game_mode == GameModes.GM_EDITOR)
 			x = Global._new_town_size * 16 + 3;
 
 		t.num_houses += x;
-		t.UpdateTownRadius();
+		t.updateRadius();
 
 		i = x * 4;
 		do {
@@ -1251,8 +1236,8 @@ implements IPoolItem, Serializable
 		} while (--i > 0);
 
 		t.num_houses -= x;
-		t.UpdateTownRadius();
-		t.UpdateTownMaxPass();
+		t.updateRadius();
+		t.updateMaxPass();
 	}
 
 	static Town AllocateTown()
@@ -1291,7 +1276,6 @@ implements IPoolItem, Serializable
 	{
 		TileIndex tile = TileIndex.TileVirtXY(x, y);
 		TileInfo ti = new TileInfo();
-		Town t;
 		int [] townnameparts = { 0 };
 
 		/* Only in the scenario editor */
@@ -1317,7 +1301,7 @@ implements IPoolItem, Serializable
 			return Cmd.return_cmd_error(Str.STR_023A_TOO_MANY_TOWNS);
 
 		// Allocate town struct
-		t = AllocateTown();
+		Town t = AllocateTown();
 		if (t == null) return Cmd.return_cmd_error(Str.STR_023A_TOO_MANY_TOWNS);
 
 		// Create the town
@@ -1331,14 +1315,12 @@ implements IPoolItem, Serializable
 
 	public static Town CreateRandomTown(int attempts)
 	{
-		TileIndex tile;
 		TileInfo ti = new TileInfo();
-		Town t;
 		int [] townnameparts = { 0 };
 
 		do {
 			// Generate a tile index not too close from the edge
-			tile = Hal.RandomTile();
+			TileIndex tile = Hal.RandomTile();
 			if (Map.DistanceFromEdge(tile) < 5) // TODO [dz] was 20
 				continue;
 
@@ -1356,7 +1338,7 @@ implements IPoolItem, Serializable
 				break;
 
 			// Allocate a town struct
-			t = AllocateTown();
+			Town t = AllocateTown();
 			if (t == null)
 				break;
 
@@ -1380,8 +1362,6 @@ implements IPoolItem, Serializable
 
 		// give it a last try, but now more aggressive
 		if (num == 0 && CreateRandomTown(10000) == null) {
-			//Town t;
-			//FOR_ALL_TOWNS(t) 
 			Iterator<Town> ii = Town.getIterator();
 			while(ii.hasNext())
 			{ 
@@ -1404,15 +1384,11 @@ implements IPoolItem, Serializable
 
 	static boolean CheckBuildHouseMode(Town t1, TileIndex tile, int tileh, int mode)
 	{
-		int b;
-		int slope;
-
-
-		slope = tile.GetTileSlope(null);
+		int slope = tile.GetTileSlope(null);
 		if(0 != (slope & 0x10))
 			return false;
 
-		b = 0;
+		int b = 0;
 		if ( 0 != (slope & 0xF) && 0 != (~slope & _masks[mode])) b = ~b;
 		if ( 0 != (tileh & 0xF) && 0 != (~tileh & _masks[mode+4])) b = ~b;
 		if (b != 0)
@@ -1423,15 +1399,12 @@ implements IPoolItem, Serializable
 
 	public int GetTownRadiusGroup( /*final Town t,*/ TileIndex tile)
 	{
-		int dist;
-		int i,smallest;
-
-		dist = Map.DistanceSquare(tile, xy);
+		int dist = Map.DistanceSquare(tile, xy);
 		if (fund_buildings_months != 0 && dist <= 25)
 			return 4;
 
-		smallest = 0;
-		for (i = 0; i != radius.length; i++) {
+		int smallest = 0;
+		for(int i = 0; i != radius.length; i++) {
 			if (dist < radius[i])
 				smallest = i;
 		}
@@ -1448,11 +1421,9 @@ implements IPoolItem, Serializable
 
 	static boolean CheckFree2x2Area(Town t1, TileIndex tilep)
 	{
-		int i;
-
 		MutableTileIndex tile = new MutableTileIndex(tilep);
 
-		for(i=0; i!=4; i++) {
+		for(int i=0; i!=4; i++) {
 			tile.madd( TileIndex.ToTileIndexDiff(_tile_add[i]) );
 
 			if (tile.GetTileSlope(null) != 0)
@@ -1471,7 +1442,6 @@ implements IPoolItem, Serializable
 		int bitmask;
 		int house;
 		int slope;
-		int z;
 		int oneof;
 
 		MutableTileIndex tile = new MutableTileIndex(itile);
@@ -1479,7 +1449,7 @@ implements IPoolItem, Serializable
 		// Above snow?
 		IntContainer zp = new IntContainer();
 		slope = tile.GetTileSlope(zp);
-		z = zp.v;
+		int z = zp.v;
 
 		// Get the town zone type
 		{
@@ -1643,15 +1613,13 @@ implements IPoolItem, Serializable
 		// ENDING
 	}
 
-	public boolean BuildTownHouse( /*Town t,*/ TileIndex tile)
+	public boolean BuildTownHouse( TileIndex tile)
 	{
-		int r;
-
 		// make sure it's possible
 		if (!tile.EnsureNoVehicle()) return false;
 		if(0 != (tile.GetTileSlope(null) & 0x10)) return false;
 
-		r = Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_LANDSCAPE_CLEAR);
+		int r = Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC | Cmd.DC_AUTO | Cmd.DC_NO_WATER, Cmd.CMD_LANDSCAPE_CLEAR);
 		if (Cmd.CmdFailed(r)) return false;
 
 		DoBuildTownHouse(this, tile);
@@ -1669,7 +1637,6 @@ implements IPoolItem, Serializable
 	void ClearTownHouse(TileIndex tilep)
 	{
 		int house = tilep.getMap().m4;
-		int eflags;
 
 		assert(tilep.IsTileType( TileTypes.MP_HOUSE));
 
@@ -1718,7 +1685,7 @@ implements IPoolItem, Serializable
 		}
 
 		// Do the actual clearing of tiles
-		eflags = _housetype_extra_flags[house];
+		int eflags = _housetype_extra_flags[house];
 		DoClearTownHouseHelper(tile);
 		if(0 != (eflags & 0x14)) DoClearTownHouseHelper(tile.iadd(1, 0));
 		if(0 !=  (eflags & 0x18)) DoClearTownHouseHelper(tile.iadd(0, 1));
@@ -1732,14 +1699,11 @@ implements IPoolItem, Serializable
 	 */
 	static int CmdRenameTown(int x, int y, int flags, int p1, int p2)
 	{
-		StringID str;
-		Town t;
-
 		if (!IsTownIndex(p1) || Global._cmd_text == null) return Cmd.CMD_ERROR;
 
-		t = GetTown(p1);
+		Town t = GetTown(p1);
 
-		str = Global.AllocateNameUnique(Global._cmd_text, 4);
+		StringID str = Global.AllocateNameUnique(Global._cmd_text, 4);
 		//if (str == null) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
@@ -1757,7 +1721,7 @@ implements IPoolItem, Serializable
 	}
 
 	// Called from GUI
-	public void DeleteTown(/*Town t*/)
+	public void DeleteTown()
 	{
 
 		// Delete town authority window
@@ -1801,24 +1765,22 @@ implements IPoolItem, Serializable
 	}
 
 	// Called from GUI
-	public void ExpandTown(/*Town t*/)
+	public void ExpandTown()
 	{
-		int amount, n;
-
 		Global._generating_world = true;
 
 		/* The more houses, the faster we grow */
-		amount = Hal.RandomRange(num_houses / 10) + 3;
+		int amount = Hal.RandomRange(num_houses / 10) + 3;
 		num_houses += amount;
-		UpdateTownRadius();
+		updateRadius();
 
-		n = amount * 10;
+		int n = amount * 10;
 		do GrowTown(); while (--n > 0);
 
 		num_houses -= amount;
-		UpdateTownRadius();
+		updateRadius();
 
-		UpdateTownMaxPass();
+		updateMaxPass();
 		Global._generating_world = false;
 	}
 
@@ -1840,13 +1802,11 @@ implements IPoolItem, Serializable
 
 	static void TownActionRoadRebuild(Town t, int action)
 	{
-		final Player  p;
-
 		t.road_build_months = 6;
 
 		Global.SetDParam(0, t.index);
 
-		p = Player.GetCurrentPlayer();
+		final Player p = Player.GetCurrentPlayer();
 		Global.SetDParam(1, p.name_1);
 		Global.SetDParam(2, p.name_2);
 
@@ -1857,8 +1817,6 @@ implements IPoolItem, Serializable
 	static boolean DoBuildStatueOfCompany(TileIndex tile)
 	{
 		TileInfo ti = new TileInfo();
-		PlayerID old;
-		int r;
 
 		Landscape.FindLandscapeHeightByTile(ti, tile);
 		if (ti.tileh != 0) return false;
@@ -1867,9 +1825,9 @@ implements IPoolItem, Serializable
 			return false;
 
 
-		old = PlayerID.getCurrent();
+		PlayerID old = PlayerID.getCurrent();
 		PlayerID.setCurrentToNone();
-		r = Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
+		int r = Cmd.DoCommandByTile(tile, 0, 0, Cmd.DC_EXEC, Cmd.CMD_LANDSCAPE_CLEAR);
 		PlayerID.setCurrent( old );
 
 		if (Cmd.CmdFailed(r)) return false;
@@ -1949,7 +1907,7 @@ implements IPoolItem, Serializable
 				}
 			});
 
-			// only show errormessage to the executing player. All errors are handled command.c
+			// only show error message to the executing player. All errors are handled command.c
 			// but this is special, because it can only 'fail' on a Cmd.DC_EXEC
 			if (Player.IsLocalPlayer()) Global.ShowErrorMessage(Str.STR_BRIBE_FAILED_2, Str.STR_BRIBE_FAILED, 0, 0);
 
@@ -1987,18 +1945,15 @@ implements IPoolItem, Serializable
 	 */
 	static int CmdDoTownAction(int x, int y, int flags, int p1, int p2)
 	{
-		int cost;
-		Town t;
-
 		if (!IsTownIndex(p1) || p2 > _town_action_proc.length) return Cmd.CMD_ERROR;
 
-		t = GetTown(p1);
+		Town t = GetTown(p1);
 
 		if (!BitOps.HASBIT(TownGui.GetMaskOfTownActions(null, PlayerID.getCurrent(), t), p2)) return Cmd.CMD_ERROR;
 
 		Player.SET_EXPENSES_TYPE(Player.EXPENSES_OTHER);
 
-		cost = (int) ((Global._price.build_industry / 256) * _town_action_costs[p2]);
+		int cost = (int) ((Global._price.build_industry / 256) * _town_action_costs[p2]);
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			_town_action_proc[p2].accept(t, p2);
@@ -2016,13 +1971,13 @@ implements IPoolItem, Serializable
 	};
 
 
-	static void UpdateTownGrowRate(Town t)
+	void updateGrowRate()
 	{
 		// Reset player ratings if they're low
 		Player.forEach( (p) ->
 		{
-			if (p.is_active && t.ratings[p.index.id] <= 200) {
-				t.ratings[p.index.id] += 5;
+			if (p.is_active && ratings[p.index.id] <= 200) {
+				ratings[p.index.id] += 5;
 			}
 		});
 
@@ -2032,25 +1987,25 @@ implements IPoolItem, Serializable
 		{
 			if( st.getXy() == null ) return;
 
-			if (Map.DistanceSquare(st.getXy(), t.xy) <= t.radius[0]) {
+			if (Map.DistanceSquare(st.getXy(), xy) <= radius[0]) {
 				if (st.time_since_load <= 20 || st.time_since_unload <= 20) {
 					n[0]++;
-					if (st.owner.id < Global.MAX_PLAYERS && t.ratings[st.owner.id] <= 1000-12)
-						t.ratings[st.owner.id] += 12;
+					if (st.owner.id < Global.MAX_PLAYERS && ratings[st.owner.id] <= 1000-12)
+						ratings[st.owner.id] += 12;
 				} else {
-					if (st.owner.id < Global.MAX_PLAYERS && t.ratings[st.owner.id] >= -1000+15)
-						t.ratings[st.owner.id] -= 15;
+					if (st.owner.id < Global.MAX_PLAYERS && ratings[st.owner.id] >= -1000+15)
+						ratings[st.owner.id] -= 15;
 				}
 			}
 		});
 
-		t.flags12 &= ~GROW_BIT;
+		flags12 &= ~GROW_BIT;
 
 		int m;
 
-		if (t.fund_buildings_months != 0) {
+		if (fund_buildings_months != 0) {
 			m = _grow_count_values1[Math.min(n[0], 5)];
-			t.fund_buildings_months--;
+			fund_buildings_months--;
 		} else if (n[0] == 0) {
 			m = 160;
 			if (!BitOps.CHANCE16(1, 12))
@@ -2060,56 +2015,53 @@ implements IPoolItem, Serializable
 		}
 
 		if (GameOptions._opt.landscape == Landscape.LT_HILLY) {
-			if (t.xy.TilePixelHeight() >= GameOptions._opt.snow_line && t.act_food == 0 && t.population > 90)
+			if (xy.TilePixelHeight() >= GameOptions._opt.snow_line && act_food == 0 && population > 90)
 				return;
 		} else if (GameOptions._opt.landscape == Landscape.LT_DESERT) {
-			if (t.xy.GetMapExtraBits() == TileInfo.EXTRABITS_DESERT && (t.act_food==0 || t.act_water==0) && t.population > 60)
+			if (xy.GetMapExtraBits() == TileInfo.EXTRABITS_DESERT && (act_food==0 || act_water==0) && population > 60)
 				return;
 		}
 
-		t.growth_rate =  (m / (t.num_houses / 50 + 1));
-		if (m <= t.grow_counter)
-			t.grow_counter = m;
+		growth_rate =  (m / (num_houses / 50 + 1));
+		if (m <= grow_counter)
+			grow_counter = m;
 
-		t.flags12 |= GROW_BIT;
+		flags12 |= GROW_BIT;
 	}
 
-	static void UpdateTownAmounts(Town t)
+	void updateAmounts()
 	{
 		// Using +1 here to prevent overflow and division by zero
-		t.pct_pass_transported =  (t.new_act_pass * 256 / (t.new_max_pass + 1));
+		pct_pass_transported =  (new_act_pass * 256 / (new_max_pass + 1));
 
-		t.max_pass = t.new_max_pass; t.new_max_pass = 0;
-		t.act_pass = t.new_act_pass; t.new_act_pass = 0;
-		t.act_food = t.new_act_food; t.new_act_food = 0;
-		t.act_water = t.new_act_water; t.new_act_water = 0;
+		max_pass = new_max_pass; new_max_pass = 0;
+		act_pass = new_act_pass; new_act_pass = 0;
+		act_food = new_act_food; new_act_food = 0;
+		act_water = new_act_water; new_act_water = 0;
 
 		// Using +1 here to prevent overflow and division by zero
-		t.pct_mail_transported =  (t.new_act_mail * 256 / (t.new_max_mail + 1));
-		t.max_mail = t.new_max_mail; t.new_max_mail = 0;
-		t.act_mail = t.new_act_mail; t.new_act_mail = 0;
+		pct_mail_transported =  (new_act_mail * 256 / (new_max_mail + 1));
+		max_mail = new_max_mail; new_max_mail = 0;
+		act_mail = new_act_mail; new_act_mail = 0;
 
-		Window.InvalidateWindow(Window.WC_TOWN_VIEW, t.index);
+		Window.InvalidateWindow(Window.WC_TOWN_VIEW, index);
 	}
 
-	static void UpdateTownUnwanted(Town t)
+	void updateUnwanted()
 	{
 		Player.forEach( (p) ->
 		{
-			if (t.unwanted[p.index.id] > 0)
-				t.unwanted[p.index.id]--;
+			if (unwanted[p.index.id] > 0)
+				unwanted[p.index.id]--;
 		});
 	}
 
 	static boolean CheckIfAuthorityAllows(TileIndex tile)
 	{
-		Town t;
-
-		//if (Global.gs._current_player.id >= Global.MAX_PLAYERS)
 		if(PlayerID.getCurrent().isSpecial())
 			return true;
 
-		t = ClosestTownFromTile(tile, Global._patches.dist_local_authority);
+		Town t = ClosestTownFromTile(tile, Global._patches.dist_local_authority);
 		if (t == null)
 			return true;
 
@@ -2149,8 +2101,6 @@ implements IPoolItem, Serializable
 
 	void ChangeTownRating(int add, int max)
 	{
-		int rating;
-
 		//	if magic_bulldozer cheat is active, town doesn't penaltize for removing stuff
 		if ( //t == null ||
 				//Global.gs._current_player.id >= Global.MAX_PLAYERS 
@@ -2162,7 +2112,7 @@ implements IPoolItem, Serializable
 
 		have_ratings = BitOps.RETSETBIT(have_ratings, PlayerID.getCurrent().id);
 
-		rating = ratings[PlayerID.getCurrent().id];
+		int rating = ratings[PlayerID.getCurrent().id];
 
 		if (add < 0) {
 			if (rating > max) {
@@ -2188,8 +2138,6 @@ implements IPoolItem, Serializable
 
 	static boolean CheckforTownRating(TileIndex tile, int flags, Town t, int type)
 	{
-		int modemod;
-
 		//	if magic_bulldozer cheat is active, town doesn't restrict your destructive actions
 		//if (t == null || Global.gs._current_player.id >= Global.MAX_PLAYERS || Global._cheats.magic_bulldozer.value)
 		if (t == null || PlayerID.getCurrent().isSpecial() || Global._cheats.magic_bulldozer.value)
@@ -2199,7 +2147,7 @@ implements IPoolItem, Serializable
 		 *	owned by a town	no removal if rating is lower than ... depends now on
 		 *	difficulty setting. Minimum town rating selected by difficulty level
 		 */
-		modemod = _default_rating_settings[GameOptions._opt.diff.town_council_tolerance][type];
+		int modemod = _default_rating_settings[GameOptions._opt.diff.town_council_tolerance][type];
 
 		if (t.ratings[PlayerID.getCurrent().id] < 16 + modemod && 0==(flags & Cmd.DC_NO_TOWN_RATING)) {
 			Global.SetDParam(0, t.index);
@@ -2223,10 +2171,10 @@ implements IPoolItem, Serializable
 					if(--t.exclusive_counter==0)
 						t.exclusivity = PlayerID.get(-1);
 
-				UpdateTownGrowRate(t);
-				UpdateTownAmounts(t);
-				UpdateTownUnwanted(t);
-				mAirport.MunicipalAirport(t);
+				t.updateGrowRate();
+				t.updateAmounts();
+				t.updateUnwanted();
+				MunicipalAirport.monthlyLoop(t);
 			}
 		});
 	}
@@ -2285,7 +2233,7 @@ implements IPoolItem, Serializable
 		Town.forEach( (t) ->
 		{
 			if (t.isValid()) {
-				t.UpdateTownRadius();
+				t.updateRadius();
 				t.UpdateTownVirtCoord();
 			}
 		});

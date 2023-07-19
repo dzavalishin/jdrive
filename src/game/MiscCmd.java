@@ -30,16 +30,12 @@ public class MiscCmd {
 	 */
 	static int CmdSetPlayerColor(int x, int y, int flags, int p1, int p2)
 	{
-		Player p;
-		byte colour;
-
 		if (p2 >= 16) return Cmd.CMD_ERROR; // max 16 colours
-		colour = (byte) p2;
+		byte colour = (byte) p2;
 
-		p = Player.GetCurrentPlayer();
+		Player p = Player.GetCurrentPlayer();
 
 		/* Ensure no two companies have the same colour */
-		//FOR_ALL_PLAYERS(pp)
 		Iterator<Player> ii = Player.getIterator();
 		while(ii.hasNext())
 		{
@@ -63,9 +59,7 @@ public class MiscCmd {
 	 */
 	static int CmdIncreaseLoan(int x, int y, int flags, int p1, int p2)
 	{
-		Player p;
-
-		p = Player.GetCurrentPlayer();
+		Player p = Player.GetCurrentPlayer();
 
 		if (p.current_loan >= Global.gs._economy.getMax_loan()) {
 			Global.SetDParam(0, Global.gs._economy.getMax_loan());
@@ -79,7 +73,6 @@ public class MiscCmd {
 
 			p.money64 += loan;
 			p.current_loan += loan;
-			//p.UpdatePlayerMoney32();
 			p.InvalidatePlayerWindows();
 		}
 
@@ -93,14 +86,11 @@ public class MiscCmd {
 	 */
 	static int CmdDecreaseLoan(int x, int y, int flags, int p1, int p2)
 	{
-		Player p;
-		long loan;
-
-		p = Player.GetCurrentPlayer();
+		Player p = Player.GetCurrentPlayer();
 
 		if (p.current_loan == 0) return Cmd.return_cmd_error(Str.STR_702D_LOAN_ALREADY_REPAYED);
 
-		loan = p.current_loan;
+		long loan = p.current_loan;
 
 		/* p2 is true while CTRL is pressed (repay all possible loan, or max money you have)
 		 * Repay any loan in chunks of 10.000 pounds */
@@ -120,7 +110,6 @@ public class MiscCmd {
 		if(0 != (flags & Cmd.DC_EXEC)) {
 			p.money64 -= loan;
 			p.current_loan -= loan;
-			//p.UpdatePlayerMoney32();
 			p.InvalidatePlayerWindows();
 		}
 		return 0;
@@ -133,16 +122,13 @@ public class MiscCmd {
 	 */
 	static int CmdChangeCompanyName(int x, int y, int flags, int p1, int p2)
 	{
-		StringID  str;
-		Player p;
-
 		if (Global._cmd_text == null) return Cmd.CMD_ERROR;
 
-		str = Global.AllocateNameUnique(Global._cmd_text, 4);
+		StringID str = Global.AllocateNameUnique(Global._cmd_text, 4);
 		if (str == null) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			p = Player.GetCurrentPlayer();
+			Player p = Player.GetCurrentPlayer();
 			Global.DeleteName(p.name_1);
 			p.name_1 = str.id;
 			Hal.MarkWholeScreenDirty();
@@ -159,16 +145,13 @@ public class MiscCmd {
 	 */
 	static int CmdChangePresidentName(int x, int y, int flags, int p1, int p2)
 	{
-		StringID str;
-		Player p;
-
 		if (Global._cmd_text == null) return Cmd.CMD_ERROR;
 
-		str = Global.AllocateNameUnique(Global._cmd_text, 4);
+		StringID str = Global.AllocateNameUnique(Global._cmd_text, 4);
 		if (str == null) return Cmd.CMD_ERROR;
 
 		if(0 != (flags & Cmd.DC_EXEC)) {
-			p = Player.GetCurrentPlayer();
+			Player p = Player.GetCurrentPlayer();
 			Global.DeleteName(p.president_name_1);
 			p.president_name_1 = str.id;
 
@@ -220,7 +203,7 @@ public class MiscCmd {
 
 	/** Transfer funds (money) from one player to another.
 	 * To prevent abuse	in multiplayer games you can only send money to other
-	 * players if you have paid off your loan (either explicitely, or implicitely
+	 * players if you have paid off your loan (either explicitely, or implicitly
 	 * given the fact that you have more money than loan).
 	 * @param x,y unused
 	 * @param p1 the amount of money to transfer; max 20.000.000
