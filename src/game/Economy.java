@@ -1440,12 +1440,12 @@ public class Economy extends EconomeTables implements Serializable
 				if (Station.GetStation(last_visited).owner.isTown() 
 						&& Station.GetStation(original_cargo_source.id).owner.isTown())
 
-					v.MA_Tax(profit*2);
+					v.municipalAirportTax(profit*2);
 
 				else if (Station.GetStation(last_visited).owner.isTown() 
 						|| Station.GetStation(original_cargo_source.id).owner.isTown())
 
-					v.MA_Tax(profit);
+					v.municipalAirportTax(profit);
 
 				v.profit_this_year += profit;
 				Player.SubtractMoneyFromPlayer(-profit);

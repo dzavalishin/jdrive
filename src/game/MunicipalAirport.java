@@ -15,7 +15,7 @@ import game.ids.StationID;
 public class MunicipalAirport 
 {
 
-	final static float PI = 3.141f; // duuuuuuuuuuhhhhhh
+	//final static float PI = 3.141f; // duuuuuuuuuuhhhhhh
 	final static int INT_AIRPORT_YEAR = 1990;
 	final static int MA_MIN_POPULATION = 15000;
 	final static int MA_MAX_DISTANCE_FROM_TOWN = 15;
@@ -23,8 +23,13 @@ public class MunicipalAirport
 	final static int MA_MAX_AIRPORTS_PER_TOWN = 2;
 	final static int MA_MAX_PLANES_QUOTA = 5;
 
-	//Checks if a vehicle serves an MS returns the amount that it serves 
-	static int MA_VehicleServesMS(Vehicle v)
+	/**
+	 * Checks if a vehicle serves an municipal station  
+	 *  
+	 * @param v Vehicle
+	 * @return the amount of municipal stations that it serves
+	 */
+	static int vehicleServesMS(Vehicle v)
 	{
 		Order order = v.orders;
 		int stationcount = 0;
@@ -41,9 +46,15 @@ public class MunicipalAirport
 		return stationcount;
 	}
 
-	// finds a municipal station in a vehicles order list the count
-	// arg is for which municipal station in the list ie. 1st, 2nd 
-	static StationID MA_Find_MS_InVehicleOrders(Vehicle v, int count)
+	/**
+	 * 
+	 * Finds a municipal station in a vehicles order list the count
+	 * 
+	 * @param v Vehicle
+	 * @param count for which municipal station in the list ie. 1st, 2nd
+	 * @return Station
+	 */
+	public static StationID find_MS_InVehicleOrders(Vehicle v, int count)
 	{
 		Order order = v.orders;
 		int stationcount = 0;
@@ -61,7 +72,7 @@ public class MunicipalAirport
 	}
 
 	//checks if a plane is allowed to stop
-	static boolean MA_VehicleIsAtMunicipalAirport(Vehicle v)
+	static boolean vehicleIsAtMunicipalAirport(Vehicle v)
 	{
 		if(!Global._patches.allow_municipal_airports.get())
 			return false;
@@ -70,7 +81,7 @@ public class MunicipalAirport
 	}	
 
 	//does exactly what it says on the tin
-	static void MA_DestroyAirport(Town tn)
+	private static void destroyAirport(Town tn)
 	{
 		Station.forEach( (st) ->
 		{
@@ -84,47 +95,18 @@ public class MunicipalAirport
 	}
 
 	//converts degrees to radians
-	static float D2R(int degrees)
+	private static float D2R(int degrees)
 	{
-		return (float) (degrees * (PI / 180.0));
+		return (float) (degrees * (Math.PI / 180.0));
 	}
-	/*
-	//calculates tax
-	void MA_Tax(int income, Vehicle v)
-	{
-		int old_expenses_type = Player._yearly_expenses_type;
 
-		if(Global._patches.allow_municipal_airports) {
-			float tax = 0;
-			tax = (income / 100.0) * 20; //Global._patches.municipal_airports_tax;
-
-			ShowCostOrIncomeAnimation(v.x_pos ,v.y_pos ,v.z_pos - 13, tax);
-
-			switch(v.type) {
-
-			case Vehicle.VEH_Aircraft:	
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_AIRCRAFT_RUN);
-				break;
-			case Vehicle.VEH_Train:		
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_TRAIN_RUN);
-				break;
-			case Vehicle.VEH_Ship:		
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_SHIP_RUN);				
-				break;
-			case Vehicle.VEH_Road:		
-				Player.SET_EXPENSES_TYPE(Player.EXPENSES_ROADVehicle.VEH_RUN);				
-				break;
-
-			}
-			
-			SubtractMoneyFromPlayer(tax);
-			Player._yearly_expenses_type = old_expenses_type;
-		}
-		return;
-	}
-	*/
-	//checks to see if we have used our quota at any municipal station;
-	static boolean MA_WithinVehicleQuota(Station st)
+	/** 
+	 * Checks to see if we have used our quota at any municipal station
+	 * 
+	 * @param st
+	 * @return
+	 */
+	static boolean withinVehicleQuota(Station st)
 	{
 		int [] vehiclecount = { 0 };
 
@@ -154,7 +136,7 @@ public class MunicipalAirport
 	}
 
 	//saves me changing too much code elsewhere
-	public static boolean MA_OwnerHandler(PlayerID owner)
+	public static boolean ownerHandler(PlayerID owner)
 	{
 
 		if(!Global._patches.allow_municipal_airports.get()) 
@@ -164,16 +146,29 @@ public class MunicipalAirport
 		
 	}
 
-	static //returns a position of a tile on the circumference of a circle;
-	TileIndex CircularPos(int radius, int angle, TileIndex centre)
+	/**
+	 * Returns a position of a tile on the circumference of a circle;
+	 * 
+	 * @param radius
+	 * @param angle
+	 * @param centre
+	 * @return
+	 */
+	private static TileIndex circularPos(int radius, int angle, TileIndex centre)
 	{
 		return TileIndex.TileXY(
 				(int)(centre.TileX() + (Math.cos(D2R(angle)) * radius)), 
 				(int)(centre.TileY() + (Math.sin(D2R(angle)) * radius)));
 	}
 
-	//checks if site is level and buildable
-	static boolean MA_CheckCandidate(TileIndex candidatetile_p, Town tn)
+	/** 
+	 * Checks if site is level and buildable
+	 * 
+	 * @param candidatetile_p
+	 * @param tn
+	 * @return
+	 */
+	private static boolean checkCandidate(TileIndex candidatetile_p, Town tn)
 	{
 		TileIndex candidatetile = candidatetile_p.iadd(-4, -4);
 		boolean [] retcode = { true };
@@ -222,31 +217,30 @@ public class MunicipalAirport
 	 * @param tn
 	 * @param tl
 	 */
-	static void MA_AnnounceAirport(Town tn, TileIndex tl)
+	private static void announceAirport(Town tn, TileIndex tl)
 	{
 		Global.SetDParam(0 ,tn.index);
 		NewsItem.AddNewsItem(Str.STR_MA_BUILT_MUNICIPAL_AIRPORT, NewsItem.NEWS_FLAGS(NewsItem.NM_THIN, NewsItem.NF_VIEWPORT|NewsItem.NF_TILE, NewsItem.NT_ECONOMY, 0), tl.tile, 0);
 	}
 
 	/**
-	 *  looks for a good site (works in outward spiral)
+	 * Looks for a good site (works in outward spiral)
+	 * 
 	 * @param tn Town
 	 * @return Site
 	 */
-	static TileIndex MA_FindSite(Town tn)
+	private static TileIndex findSite(Town tn)
 	{
-		int angle,radius;
-
-		for(radius = MA_MIN_DISTANCE_FROM_TOWN; (radius <= MA_MAX_DISTANCE_FROM_TOWN); radius++) {
-			for(angle = 0; (angle <= 360); angle++) {		
-				if(MA_CheckCandidate(CircularPos(radius, angle, tn.getXy()), tn)) return CircularPos(radius, angle, tn.getXy());
+		for(int radius = MA_MIN_DISTANCE_FROM_TOWN; (radius <= MA_MAX_DISTANCE_FROM_TOWN); radius++) {
+			for(int angle = 0; (angle <= 360); angle++) {		
+				if(checkCandidate(circularPos(radius, angle, tn.getXy()), tn)) return circularPos(radius, angle, tn.getXy());
 			}//angle
 		}//radius
 		return TileIndex.getInvalid();
 	}
 
 	//the fun bit 
-	static void MA_BuildAirport(TileIndex buildtile_p)
+	private static void buildAirport(TileIndex buildtile_p)
 	{
 		TileIndex buildtile = buildtile_p.iadd(-3,-3);
 
@@ -266,7 +260,7 @@ public class MunicipalAirport
 		PlayerID.setCurrent( Owner.OWNER_TOWN_ID );
 
 		if(!Global._patches.allow_municipal_airports.get()) 
-			MA_DestroyAirport(tn);
+			destroyAirport(tn);
 		
 		if(!Global._patches.allow_municipal_airports.get() 
 			|| (Global.get_cur_year() + 1920) < 1990 
@@ -291,21 +285,21 @@ public class MunicipalAirport
 
 		}
 		
-		TileIndex tl = MA_FindSite(tn);
+		TileIndex tl = findSite(tn);
 		
 		if(tl == TileIndex.INVALID_TILE) {
 			PlayerID.setCurrent(old_player);
 			return;
 		}
 		
-		MA_BuildAirport(tl);
-		MA_AnnounceAirport(tn, tl);
+		buildAirport(tl);
+		announceAirport(tn, tl);
 		
 		PlayerID.setCurrent(old_player);
 	}
 
 	// same as above but isnt as stringent
-	public static void MA_EditorAddAirport(Town tn)
+	public static void editorAddAirport(Town tn)
 	{
 		PlayerID old_player = PlayerID.getCurrent();
 		
@@ -320,7 +314,7 @@ public class MunicipalAirport
 				&& st.owner.isTown() 
 				&& st.town == tn
 				&& st.airport_type != Airport.AT_OILRIG) { //not really needed but you never know
-					MA_DestroyAirport(tn);
+					destroyAirport(tn);
 					PlayerID.setCurrent(old_player);
 					return;
 			}
@@ -342,7 +336,7 @@ public class MunicipalAirport
 			return;
 		}
 
-		TileIndex tl = MA_FindSite(tn);
+		TileIndex tl = findSite(tn);
 
 		if(tl == TileIndex.INVALID_TILE) {
 			Global.SetDParam(0, tn.index);
@@ -351,7 +345,7 @@ public class MunicipalAirport
 			return;
 		}
 		
-		MA_BuildAirport(tl);		
+		buildAirport(tl);		
 		
 		PlayerID.setCurrent(old_player);		
 	}

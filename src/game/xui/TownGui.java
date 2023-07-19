@@ -310,7 +310,7 @@ public abstract class TownGui //extends Town
 				t.DeleteTown();
 				break;
 			case 11:
-				MunicipalAirport.MA_EditorAddAirport(t);
+				MunicipalAirport.editorAddAirport(t);
 				// TODO Console.IConsolePrintF(100100100, "it works");
 			}
 			break;

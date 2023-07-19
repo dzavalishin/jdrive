@@ -347,7 +347,7 @@ public class Vehicle implements IPoolItem
 
 
 	//calculates tax
-	public void MA_Tax(int income)
+	public void municipalAirportTax(int income)
 	{
 		int old_expenses_type = Global.gs._yearly_expenses_type;
 		assert income >= 0;
@@ -383,7 +383,7 @@ public class Vehicle implements IPoolItem
 	void VehicleServiceInDepot()
 	{
 		if (tile.GetTileOwner().isTown()) 
-			MA_Tax(value);
+			municipalAirportTax(value);
 
 		date_of_last_service = Global.get_date();
 		breakdowns_since_last_service = 0;
@@ -2573,11 +2573,11 @@ public class Vehicle implements IPoolItem
 			}
 
 			//MA CHECKS
-			if(MunicipalAirport.MA_VehicleServesMS(v) > 0) 
+			if(MunicipalAirport.vehicleServesMS(v) > 0) 
 			{
-				for(int i =  1; i <= MunicipalAirport.MA_VehicleServesMS(v) ; i++) {
-					Station st = Station.GetStation(MunicipalAirport.MA_Find_MS_InVehicleOrders(v, i).id);
-					if(!MunicipalAirport.MA_WithinVehicleQuota(st)) {
+				for(int i =  1; i <= MunicipalAirport.vehicleServesMS(v) ; i++) {
+					Station st = Station.GetStation(MunicipalAirport.find_MS_InVehicleOrders(v, i).id);
+					if(!MunicipalAirport.withinVehicleQuota(st)) {
 						Global._error_message = Str.STR_MA_EXCEED_MAX_QUOTA;
 						return Cmd.CMD_ERROR;
 					}
