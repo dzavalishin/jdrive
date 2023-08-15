@@ -1,0 +1,1198 @@
+package com.dzavalishin.tables;
+
+import com.dzavalishin.struct.Point;
+
+public class RoadVehCmdTables 
+{
+
+
+	public static final int _roadveh_images[] = {
+			0xCD4, 0xCDC, 0xCE4, 0xCEC, 0xCF4, 0xCFC, 0xD0C, 0xD14,
+			0xD24, 0xD1C, 0xD2C, 0xD04, 0xD1C, 0xD24, 0xD6C, 0xD74,
+			0xD7C, 0xC14, 0xC1C, 0xC24, 0xC2C, 0xC34, 0xC3C, 0xC4C,
+			0xC54, 0xC64, 0xC5C, 0xC6C, 0xC44, 0xC5C, 0xC64, 0xCAC,
+			0xCB4, 0xCBC, 0xD94, 0xD9C, 0xDA4, 0xDAC, 0xDB4, 0xDBC,
+			0xDCC, 0xDD4, 0xDE4, 0xDDC, 0xDEC, 0xDC4, 0xDDC, 0xDE4,
+			0xE2C, 0xE34, 0xE3C, 0xC14, 0xC1C, 0xC2C, 0xC3C, 0xC4C,
+			0xC5C, 0xC64, 0xC6C, 0xC74, 0xC84, 0xC94, 0xCA4
+	};
+
+	public static final int _roadveh_full_adder[] = {
+			0,  88,   0,   0,   0,   0,  48,  48,
+			48,  48,   0,   0,  64,  64,   0,  16,
+			16,   0,  88,   0,   0,   0,   0,  48,
+			48,  48,  48,   0,   0,  64,  64,   0,
+			16,  16,   0,  88,   0,   0,   0,   0,
+			48,  48,  48,  48,   0,   0,  64,  64,
+			0,  16,  16,   0,   8,   8,   8,   8,
+			0,   0,   0,   8,   8,   8,   8
+	};
+
+
+	public static final int _road_veh_fp_ax_or[] = {
+			0x100,0x200,1,2,
+	};
+
+	public static final int _road_veh_fp_ax_and[] = {
+			0x1009, 0x16, 0x520, 0x2A00
+	};
+
+	public static final byte _road_reverse_table[] = {
+			6, 7, 14, 15
+	};
+
+	public static final int _road_pf_table_3[] = {
+			0x910, 0x1600, 0x2005, 0x2A
+	};
+
+	public static final int _road_pf_directions[] = {
+			0, 1, 0, 1, 2, 1, 255, 255,
+			2, 3, 3, 2, 3, 0, 255, 255,
+	};
+
+
+
+	//#define MKIT(a,b,c,d) ((a&0xFF)<<24) | ((b&0xFF)<<16) | ((c&0xFF)<<8) | ((d&0xFF)<<0)
+	private static int MKIT(int a, int b, int c, int d) { return ((a&0xFF)<<24) | ((b&0xFF)<<16) | ((c&0xFF)<<8) | ((d&0xFF)<<0); }
+
+	public static final int _delta_xy_table[] = {
+			MKIT(3, 3, -1, -1),
+			MKIT(3, 7, -1, -3),
+			MKIT(3, 3, -1, -1),
+			MKIT(7, 3, -3, -1),
+			MKIT(3, 3, -1, -1),
+			MKIT(3, 7, -1, -3),
+			MKIT(3, 3, -1, -1),
+			MKIT(7, 3, -3, -1),
+	};
+
+
+	public static final byte _road_veh_data_1[] = {
+			20, 20, 16, 16, 0, 0, 0, 0,
+			19, 19, 15, 15, 0, 0, 0, 0,
+			16, 16, 12, 12, 0, 0, 0, 0,
+			15, 15, 11, 11
+	};
+
+	public static final byte _roadveh_data_2[] = { 0,1,8,9 };
+
+	public static final short _dists[] = {
+			-4, -8, -4, -1, 4, 8, 4, 1,
+			-4, -1, 4, 8, 4, 1, -4, -8,
+		};
+
+	public static final byte _roadveh_new_dir[] = {
+			0, 7, 6, 0,
+			1, 0, 5, 0,
+			2, 3, 4
+		};
+
+	
+	protected static final int _turn_prob[] = { -1, 0, 0, 1 };
+
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	public static class RoadDriveEntry extends Point 
+	{
+		public RoadDriveEntry(int i, int j) 
+		{
+			super(i,j);
+		}
+	}	
+	
+	
+	
+	
+
+	static final RoadDriveEntry _roadveh_drive_data_0[] = {
+		new RoadDriveEntry(15,5),
+		new RoadDriveEntry(14,5),
+		new RoadDriveEntry(13,5),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(11,5),
+		new RoadDriveEntry(10,5),
+		new RoadDriveEntry(9,5),
+		new RoadDriveEntry(8,5),
+		new RoadDriveEntry(7,5),
+		new RoadDriveEntry(6,5),
+		new RoadDriveEntry(5,5),
+		new RoadDriveEntry(4,5),
+		new RoadDriveEntry(3,5),
+		new RoadDriveEntry(2,5),
+		new RoadDriveEntry(1,5),
+		new RoadDriveEntry(0,5),
+		new RoadDriveEntry(0x80,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_1[] = {
+		new RoadDriveEntry(5,0),
+		new RoadDriveEntry(5,1),
+		new RoadDriveEntry(5,2),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(5,4),
+		new RoadDriveEntry(5,5),
+		new RoadDriveEntry(5,6),
+		new RoadDriveEntry(5,7),
+		new RoadDriveEntry(5,8),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(5,10),
+		new RoadDriveEntry(5,11),
+		new RoadDriveEntry(5,12),
+		new RoadDriveEntry(5,13),
+		new RoadDriveEntry(5,14),
+		new RoadDriveEntry(5,15),
+		new RoadDriveEntry(0x81,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_2[] = {
+		new RoadDriveEntry(5,0),
+		new RoadDriveEntry(5,1),
+		new RoadDriveEntry(5,2),
+		new RoadDriveEntry(4,3),
+		new RoadDriveEntry(3,4),
+		new RoadDriveEntry(2,5),
+		new RoadDriveEntry(1,5),
+		new RoadDriveEntry(0,5),
+		new RoadDriveEntry(0x80,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_3[] = {
+		new RoadDriveEntry(15,5),
+		new RoadDriveEntry(14,5),
+		new RoadDriveEntry(13,5),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(11,5),
+		new RoadDriveEntry(10,5),
+		new RoadDriveEntry(9,6),
+		new RoadDriveEntry(8,7),
+		new RoadDriveEntry(7,8),
+		new RoadDriveEntry(6,9),
+		new RoadDriveEntry(5,10),
+		new RoadDriveEntry(5,11),
+		new RoadDriveEntry(5,12),
+		new RoadDriveEntry(5,13),
+		new RoadDriveEntry(5,14),
+		new RoadDriveEntry(5,15),
+		new RoadDriveEntry(0x81,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_4[] = {
+		new RoadDriveEntry(5,0),
+		new RoadDriveEntry(5,1),
+		new RoadDriveEntry(5,2),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(5,4),
+		new RoadDriveEntry(5,5),
+		new RoadDriveEntry(6,6),
+		new RoadDriveEntry(7,7),
+		new RoadDriveEntry(8,8),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(10,9),
+		new RoadDriveEntry(11,9),
+		new RoadDriveEntry(12,9),
+		new RoadDriveEntry(13,9),
+		new RoadDriveEntry(14,9),
+		new RoadDriveEntry(15,9),
+		new RoadDriveEntry(0x82,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_5[] = {
+		new RoadDriveEntry(0,9),
+		new RoadDriveEntry(1,9),
+		new RoadDriveEntry(2,9),
+		new RoadDriveEntry(3,10),
+		new RoadDriveEntry(4,11),
+		new RoadDriveEntry(5,12),
+		new RoadDriveEntry(5,13),
+		new RoadDriveEntry(5,14),
+		new RoadDriveEntry(5,15),
+		new RoadDriveEntry(0x81,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_6[] = {
+		new RoadDriveEntry(0,6),
+		new RoadDriveEntry(0,7),
+		new RoadDriveEntry(0,8),
+		new RoadDriveEntry(0,9),
+		new RoadDriveEntry(0x42,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_7[] = {
+		new RoadDriveEntry(6,15),
+		new RoadDriveEntry(7,15),
+		new RoadDriveEntry(8,15),
+		new RoadDriveEntry(9,15),
+		new RoadDriveEntry(0x43,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_8[] = {
+		new RoadDriveEntry(0,9),
+		new RoadDriveEntry(1,9),
+		new RoadDriveEntry(2,9),
+		new RoadDriveEntry(3,9),
+		new RoadDriveEntry(4,9),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(6,9),
+		new RoadDriveEntry(7,9),
+		new RoadDriveEntry(8,9),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(10,9),
+		new RoadDriveEntry(11,9),
+		new RoadDriveEntry(12,9),
+		new RoadDriveEntry(13,9),
+		new RoadDriveEntry(14,9),
+		new RoadDriveEntry(15,9),
+		new RoadDriveEntry(0x82,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_9[] = {
+		new RoadDriveEntry(9,15),
+		new RoadDriveEntry(9,14),
+		new RoadDriveEntry(9,13),
+		new RoadDriveEntry(9,12),
+		new RoadDriveEntry(9,11),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(9,8),
+		new RoadDriveEntry(9,7),
+		new RoadDriveEntry(9,6),
+		new RoadDriveEntry(9,5),
+		new RoadDriveEntry(9,4),
+		new RoadDriveEntry(9,3),
+		new RoadDriveEntry(9,2),
+		new RoadDriveEntry(9,1),
+		new RoadDriveEntry(9,0),
+		new RoadDriveEntry(0x83,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_10[] = {
+		new RoadDriveEntry(0,9),
+		new RoadDriveEntry(1,9),
+		new RoadDriveEntry(2,9),
+		new RoadDriveEntry(3,9),
+		new RoadDriveEntry(4,9),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(6,8),
+		new RoadDriveEntry(7,7),
+		new RoadDriveEntry(8,6),
+		new RoadDriveEntry(9,5),
+		new RoadDriveEntry(9,4),
+		new RoadDriveEntry(9,3),
+		new RoadDriveEntry(9,2),
+		new RoadDriveEntry(9,1),
+		new RoadDriveEntry(9,0),
+		new RoadDriveEntry(0x83,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_11[] = {
+		new RoadDriveEntry(9,15),
+		new RoadDriveEntry(9,14),
+		new RoadDriveEntry(9,13),
+		new RoadDriveEntry(10,12),
+		new RoadDriveEntry(11,11),
+		new RoadDriveEntry(12,10),
+		new RoadDriveEntry(13,9),
+		new RoadDriveEntry(14,9),
+		new RoadDriveEntry(15,9),
+		new RoadDriveEntry(0x82,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_12[] = {
+		new RoadDriveEntry(15,5),
+		new RoadDriveEntry(14,5),
+		new RoadDriveEntry(13,5),
+		new RoadDriveEntry(12,4),
+		new RoadDriveEntry(11,3),
+		new RoadDriveEntry(10,2),
+		new RoadDriveEntry(9,1),
+		new RoadDriveEntry(9,0),
+		new RoadDriveEntry(0x83,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_13[] = {
+		new RoadDriveEntry(9,15),
+		new RoadDriveEntry(9,14),
+		new RoadDriveEntry(9,13),
+		new RoadDriveEntry(9,12),
+		new RoadDriveEntry(9,11),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(8,9),
+		new RoadDriveEntry(7,8),
+		new RoadDriveEntry(6,7),
+		new RoadDriveEntry(5,6),
+		new RoadDriveEntry(4,5),
+		new RoadDriveEntry(3,5),
+		new RoadDriveEntry(2,5),
+		new RoadDriveEntry(1,5),
+		new RoadDriveEntry(0,5),
+		new RoadDriveEntry(0x80,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_14[] = {
+		new RoadDriveEntry(15,8),
+		new RoadDriveEntry(15,7),
+		new RoadDriveEntry(15,6),
+		new RoadDriveEntry(15,5),
+		new RoadDriveEntry(0x40,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_15[] = {
+		new RoadDriveEntry(8,0),
+		new RoadDriveEntry(7,0),
+		new RoadDriveEntry(6,0),
+		new RoadDriveEntry(5,0),
+		new RoadDriveEntry(0x41,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_16[] = {
+		new RoadDriveEntry(15,9),
+		new RoadDriveEntry(14,9),
+		new RoadDriveEntry(13,9),
+		new RoadDriveEntry(12,9),
+		new RoadDriveEntry(11,9),
+		new RoadDriveEntry(10,9),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(8,9),
+		new RoadDriveEntry(7,9),
+		new RoadDriveEntry(6,9),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(4,9),
+		new RoadDriveEntry(3,9),
+		new RoadDriveEntry(2,9),
+		new RoadDriveEntry(1,9),
+		new RoadDriveEntry(0,9),
+		new RoadDriveEntry(0x80,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_17[] = {
+		new RoadDriveEntry(9,0),
+		new RoadDriveEntry(9,1),
+		new RoadDriveEntry(9,2),
+		new RoadDriveEntry(9,3),
+		new RoadDriveEntry(9,4),
+		new RoadDriveEntry(9,5),
+		new RoadDriveEntry(9,6),
+		new RoadDriveEntry(9,7),
+		new RoadDriveEntry(9,8),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(9,11),
+		new RoadDriveEntry(9,12),
+		new RoadDriveEntry(9,13),
+		new RoadDriveEntry(9,14),
+		new RoadDriveEntry(9,15),
+		new RoadDriveEntry(0x81,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_18[] = {
+		new RoadDriveEntry(9,0),
+		new RoadDriveEntry(9,1),
+		new RoadDriveEntry(9,2),
+		new RoadDriveEntry(9,3),
+		new RoadDriveEntry(9,4),
+		new RoadDriveEntry(9,5),
+		new RoadDriveEntry(8,6),
+		new RoadDriveEntry(7,7),
+		new RoadDriveEntry(6,8),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(4,9),
+		new RoadDriveEntry(3,9),
+		new RoadDriveEntry(2,9),
+		new RoadDriveEntry(1,9),
+		new RoadDriveEntry(0,9),
+		new RoadDriveEntry(0x80,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_19[] = {
+		new RoadDriveEntry(15,9),
+		new RoadDriveEntry(14,9),
+		new RoadDriveEntry(13,9),
+		new RoadDriveEntry(12,10),
+		new RoadDriveEntry(11,11),
+		new RoadDriveEntry(10,12),
+		new RoadDriveEntry(9,13),
+		new RoadDriveEntry(9,14),
+		new RoadDriveEntry(9,15),
+		new RoadDriveEntry(0x81,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_20[] = {
+		new RoadDriveEntry(9,0),
+		new RoadDriveEntry(9,1),
+		new RoadDriveEntry(10,2),
+		new RoadDriveEntry(11,3),
+		new RoadDriveEntry(12,4),
+		new RoadDriveEntry(13,5),
+		new RoadDriveEntry(14,5),
+		new RoadDriveEntry(15,5),
+		new RoadDriveEntry(0x82,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_21[] = {
+		new RoadDriveEntry(0,5),
+		new RoadDriveEntry(1,5),
+		new RoadDriveEntry(2,5),
+		new RoadDriveEntry(3,5),
+		new RoadDriveEntry(4,5),
+		new RoadDriveEntry(5,6),
+		new RoadDriveEntry(6,7),
+		new RoadDriveEntry(7,8),
+		new RoadDriveEntry(8,9),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(9,11),
+		new RoadDriveEntry(9,12),
+		new RoadDriveEntry(9,13),
+		new RoadDriveEntry(9,14),
+		new RoadDriveEntry(9,15),
+		new RoadDriveEntry(0x81,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_22[] = {
+		new RoadDriveEntry(0,8),
+		new RoadDriveEntry(0,7),
+		new RoadDriveEntry(0,6),
+		new RoadDriveEntry(0,5),
+		new RoadDriveEntry(0x42,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_23[] = {
+		new RoadDriveEntry(8,15),
+		new RoadDriveEntry(7,15),
+		new RoadDriveEntry(6,15),
+		new RoadDriveEntry(5,15),
+		new RoadDriveEntry(0x43,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_24[] = {
+		new RoadDriveEntry(0,5),
+		new RoadDriveEntry(1,5),
+		new RoadDriveEntry(2,5),
+		new RoadDriveEntry(3,5),
+		new RoadDriveEntry(4,5),
+		new RoadDriveEntry(5,5),
+		new RoadDriveEntry(6,5),
+		new RoadDriveEntry(7,5),
+		new RoadDriveEntry(8,5),
+		new RoadDriveEntry(9,5),
+		new RoadDriveEntry(10,5),
+		new RoadDriveEntry(11,5),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(13,5),
+		new RoadDriveEntry(14,5),
+		new RoadDriveEntry(15,5),
+		new RoadDriveEntry(0x82,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_25[] = {
+		new RoadDriveEntry(5,15),
+		new RoadDriveEntry(5,14),
+		new RoadDriveEntry(5,13),
+		new RoadDriveEntry(5,12),
+		new RoadDriveEntry(5,11),
+		new RoadDriveEntry(5,10),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(5,8),
+		new RoadDriveEntry(5,7),
+		new RoadDriveEntry(5,6),
+		new RoadDriveEntry(5,5),
+		new RoadDriveEntry(5,4),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(5,2),
+		new RoadDriveEntry(5,1),
+		new RoadDriveEntry(5,0),
+		new RoadDriveEntry(0x83,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_26[] = {
+		new RoadDriveEntry(0,5),
+		new RoadDriveEntry(1,5),
+		new RoadDriveEntry(2,5),
+		new RoadDriveEntry(3,4),
+		new RoadDriveEntry(4,3),
+		new RoadDriveEntry(5,2),
+		new RoadDriveEntry(5,1),
+		new RoadDriveEntry(5,0),
+		new RoadDriveEntry(0x83,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_27[] = {
+		new RoadDriveEntry(5,15),
+		new RoadDriveEntry(5,14),
+		new RoadDriveEntry(5,13),
+		new RoadDriveEntry(5,12),
+		new RoadDriveEntry(5,11),
+		new RoadDriveEntry(5,10),
+		new RoadDriveEntry(6,9),
+		new RoadDriveEntry(7,8),
+		new RoadDriveEntry(8,7),
+		new RoadDriveEntry(9,6),
+		new RoadDriveEntry(10,5),
+		new RoadDriveEntry(11,5),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(13,5),
+		new RoadDriveEntry(14,5),
+		new RoadDriveEntry(15,5),
+		new RoadDriveEntry(0x82,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_28[] = {
+		new RoadDriveEntry(15,9),
+		new RoadDriveEntry(14,9),
+		new RoadDriveEntry(13,9),
+		new RoadDriveEntry(12,9),
+		new RoadDriveEntry(11,9),
+		new RoadDriveEntry(10,9),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(8,8),
+		new RoadDriveEntry(7,7),
+		new RoadDriveEntry(6,6),
+		new RoadDriveEntry(5,5),
+		new RoadDriveEntry(5,4),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(5,2),
+		new RoadDriveEntry(5,1),
+		new RoadDriveEntry(5,0),
+		new RoadDriveEntry(0x83,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_29[] = {
+		new RoadDriveEntry(5,15),
+		new RoadDriveEntry(5,14),
+		new RoadDriveEntry(5,13),
+		new RoadDriveEntry(5,12),
+		new RoadDriveEntry(4,11),
+		new RoadDriveEntry(3,10),
+		new RoadDriveEntry(2,9),
+		new RoadDriveEntry(1,9),
+		new RoadDriveEntry(0,9),
+		new RoadDriveEntry(0x80,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_30[] = {
+		new RoadDriveEntry(15,6),
+		new RoadDriveEntry(15,7),
+		new RoadDriveEntry(15,8),
+		new RoadDriveEntry(15,9),
+		new RoadDriveEntry(0x40,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_31[] = {
+		new RoadDriveEntry(6,0),
+		new RoadDriveEntry(7,0),
+		new RoadDriveEntry(8,0),
+		new RoadDriveEntry(9,0),
+		new RoadDriveEntry(0x41,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_32[] = {
+		new RoadDriveEntry(15,5),
+		new RoadDriveEntry(14,5),
+		new RoadDriveEntry(13,6),
+		new RoadDriveEntry(13,7),
+		new RoadDriveEntry(13,8),
+		new RoadDriveEntry(13,9),
+		new RoadDriveEntry(13,10),
+		new RoadDriveEntry(13,11),
+		new RoadDriveEntry(12,12),
+		new RoadDriveEntry(11,12),
+		new RoadDriveEntry(10,12),
+		new RoadDriveEntry(9,12),
+		new RoadDriveEntry(8,12),
+		new RoadDriveEntry(7,12),
+		new RoadDriveEntry(6,12),
+		new RoadDriveEntry(5,11),
+		new RoadDriveEntry(5,10),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(5,8),
+		new RoadDriveEntry(5,7),
+		new RoadDriveEntry(5,6),
+		new RoadDriveEntry(5,7),
+		new RoadDriveEntry(5,8),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(5,10),
+		new RoadDriveEntry(5,11),
+		new RoadDriveEntry(6,12),
+		new RoadDriveEntry(7,12),
+		new RoadDriveEntry(8,12),
+		new RoadDriveEntry(9,12),
+		new RoadDriveEntry(10,12),
+		new RoadDriveEntry(11,12),
+		new RoadDriveEntry(12,12),
+		new RoadDriveEntry(13,11),
+		new RoadDriveEntry(13,10),
+		new RoadDriveEntry(14,9),
+		new RoadDriveEntry(15,9),
+		new RoadDriveEntry(0x82,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_33[] = {
+		new RoadDriveEntry(5,0),
+		new RoadDriveEntry(5,1),
+		new RoadDriveEntry(6,2),
+		new RoadDriveEntry(7,2),
+		new RoadDriveEntry(8,2),
+		new RoadDriveEntry(9,2),
+		new RoadDriveEntry(10,2),
+		new RoadDriveEntry(11,2),
+		new RoadDriveEntry(12,3),
+		new RoadDriveEntry(12,4),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(12,6),
+		new RoadDriveEntry(12,7),
+		new RoadDriveEntry(12,8),
+		new RoadDriveEntry(12,9),
+		new RoadDriveEntry(11,10),
+		new RoadDriveEntry(10,10),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(8,10),
+		new RoadDriveEntry(7,10),
+		new RoadDriveEntry(6,10),
+		new RoadDriveEntry(7,10),
+		new RoadDriveEntry(8,10),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(10,10),
+		new RoadDriveEntry(11,10),
+		new RoadDriveEntry(12,9),
+		new RoadDriveEntry(12,8),
+		new RoadDriveEntry(12,7),
+		new RoadDriveEntry(12,6),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(12,4),
+		new RoadDriveEntry(12,3),
+		new RoadDriveEntry(11,2),
+		new RoadDriveEntry(10,2),
+		new RoadDriveEntry(9,1),
+		new RoadDriveEntry(9,0),
+		new RoadDriveEntry(0x83,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_34[] = {
+		new RoadDriveEntry(15,5),
+		new RoadDriveEntry(14,5),
+		new RoadDriveEntry(13,6),
+		new RoadDriveEntry(13,7),
+		new RoadDriveEntry(13,8),
+		new RoadDriveEntry(13,9),
+		new RoadDriveEntry(13,10),
+		new RoadDriveEntry(13,11),
+		new RoadDriveEntry(12,12),
+		new RoadDriveEntry(11,12),
+		new RoadDriveEntry(10,12),
+		new RoadDriveEntry(9,11),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(9,8),
+		new RoadDriveEntry(9,7),
+		new RoadDriveEntry(9,6),
+		new RoadDriveEntry(9,7),
+		new RoadDriveEntry(9,8),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(9,11),
+		new RoadDriveEntry(10,12),
+		new RoadDriveEntry(11,12),
+		new RoadDriveEntry(12,12),
+		new RoadDriveEntry(13,11),
+		new RoadDriveEntry(13,10),
+		new RoadDriveEntry(14,9),
+		new RoadDriveEntry(15,9),
+		new RoadDriveEntry(0x82,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_35[] = {
+		new RoadDriveEntry(5,0),
+		new RoadDriveEntry(5,1),
+		new RoadDriveEntry(6,2),
+		new RoadDriveEntry(7,2),
+		new RoadDriveEntry(8,2),
+		new RoadDriveEntry(9,2),
+		new RoadDriveEntry(10,2),
+		new RoadDriveEntry(11,2),
+		new RoadDriveEntry(12,3),
+		new RoadDriveEntry(12,4),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(11,6),
+		new RoadDriveEntry(10,6),
+		new RoadDriveEntry(9,6),
+		new RoadDriveEntry(8,6),
+		new RoadDriveEntry(7,6),
+		new RoadDriveEntry(6,6),
+		new RoadDriveEntry(7,6),
+		new RoadDriveEntry(8,6),
+		new RoadDriveEntry(9,6),
+		new RoadDriveEntry(10,6),
+		new RoadDriveEntry(11,6),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(12,4),
+		new RoadDriveEntry(12,3),
+		new RoadDriveEntry(11,2),
+		new RoadDriveEntry(10,2),
+		new RoadDriveEntry(9,1),
+		new RoadDriveEntry(9,0),
+		new RoadDriveEntry(0x83,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_40[] = {
+		new RoadDriveEntry(0,9),
+		new RoadDriveEntry(1,9),
+		new RoadDriveEntry(2,8),
+		new RoadDriveEntry(2,7),
+		new RoadDriveEntry(2,6),
+		new RoadDriveEntry(2,5),
+		new RoadDriveEntry(2,4),
+		new RoadDriveEntry(3,3),
+		new RoadDriveEntry(4,3),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(6,3),
+		new RoadDriveEntry(7,3),
+		new RoadDriveEntry(8,3),
+		new RoadDriveEntry(9,3),
+		new RoadDriveEntry(10,4),
+		new RoadDriveEntry(10,5),
+		new RoadDriveEntry(10,6),
+		new RoadDriveEntry(10,7),
+		new RoadDriveEntry(10,8),
+		new RoadDriveEntry(10,9),
+		new RoadDriveEntry(10,8),
+		new RoadDriveEntry(10,7),
+		new RoadDriveEntry(10,6),
+		new RoadDriveEntry(10,5),
+		new RoadDriveEntry(10,4),
+		new RoadDriveEntry(9,3),
+		new RoadDriveEntry(8,3),
+		new RoadDriveEntry(7,3),
+		new RoadDriveEntry(6,3),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(4,3),
+		new RoadDriveEntry(3,3),
+		new RoadDriveEntry(2,4),
+		new RoadDriveEntry(1,5),
+		new RoadDriveEntry(0,5),
+		new RoadDriveEntry(0x80,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_41[] = {
+		new RoadDriveEntry(9,15),
+		new RoadDriveEntry(9,14),
+		new RoadDriveEntry(8,13),
+		new RoadDriveEntry(7,13),
+		new RoadDriveEntry(6,13),
+		new RoadDriveEntry(5,13),
+		new RoadDriveEntry(4,13),
+		new RoadDriveEntry(3,12),
+		new RoadDriveEntry(3,11),
+		new RoadDriveEntry(3,10),
+		new RoadDriveEntry(3,9),
+		new RoadDriveEntry(3,8),
+		new RoadDriveEntry(3,7),
+		new RoadDriveEntry(3,6),
+		new RoadDriveEntry(4,5),
+		new RoadDriveEntry(5,5),
+		new RoadDriveEntry(6,5),
+		new RoadDriveEntry(7,5),
+		new RoadDriveEntry(8,5),
+		new RoadDriveEntry(9,5),
+		new RoadDriveEntry(8,5),
+		new RoadDriveEntry(7,5),
+		new RoadDriveEntry(6,5),
+		new RoadDriveEntry(5,5),
+		new RoadDriveEntry(4,5),
+		new RoadDriveEntry(3,6),
+		new RoadDriveEntry(3,7),
+		new RoadDriveEntry(3,8),
+		new RoadDriveEntry(3,9),
+		new RoadDriveEntry(3,10),
+		new RoadDriveEntry(3,11),
+		new RoadDriveEntry(3,12),
+		new RoadDriveEntry(4,13),
+		new RoadDriveEntry(5,14),
+		new RoadDriveEntry(5,15),
+		new RoadDriveEntry(0x81,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_42[] = {
+		new RoadDriveEntry(0,9),
+		new RoadDriveEntry(1,9),
+		new RoadDriveEntry(2,8),
+		new RoadDriveEntry(2,7),
+		new RoadDriveEntry(2,6),
+		new RoadDriveEntry(2,5),
+		new RoadDriveEntry(2,4),
+		new RoadDriveEntry(3,3),
+		new RoadDriveEntry(4,3),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(6,4),
+		new RoadDriveEntry(6,5),
+		new RoadDriveEntry(6,6),
+		new RoadDriveEntry(6,7),
+		new RoadDriveEntry(6,8),
+		new RoadDriveEntry(6,9),
+		new RoadDriveEntry(6,8),
+		new RoadDriveEntry(6,7),
+		new RoadDriveEntry(6,6),
+		new RoadDriveEntry(6,5),
+		new RoadDriveEntry(6,4),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(4,3),
+		new RoadDriveEntry(3,3),
+		new RoadDriveEntry(2,4),
+		new RoadDriveEntry(1,5),
+		new RoadDriveEntry(0,5),
+		new RoadDriveEntry(0x80,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_43[] = {
+		new RoadDriveEntry(9,15),
+		new RoadDriveEntry(9,14),
+		new RoadDriveEntry(8,13),
+		new RoadDriveEntry(7,13),
+		new RoadDriveEntry(6,13),
+		new RoadDriveEntry(5,13),
+		new RoadDriveEntry(4,13),
+		new RoadDriveEntry(3,12),
+		new RoadDriveEntry(3,11),
+		new RoadDriveEntry(3,10),
+		new RoadDriveEntry(4,9),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(6,9),
+		new RoadDriveEntry(7,9),
+		new RoadDriveEntry(8,9),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(8,9),
+		new RoadDriveEntry(7,9),
+		new RoadDriveEntry(6,9),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(4,9),
+		new RoadDriveEntry(3,10),
+		new RoadDriveEntry(3,11),
+		new RoadDriveEntry(3,12),
+		new RoadDriveEntry(4,13),
+		new RoadDriveEntry(5,14),
+		new RoadDriveEntry(5,15),
+		new RoadDriveEntry(0x81,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_48[] = {
+		new RoadDriveEntry(15,9),
+		new RoadDriveEntry(14,9),
+		new RoadDriveEntry(13,10),
+		new RoadDriveEntry(13,11),
+		new RoadDriveEntry(12,12),
+		new RoadDriveEntry(11,12),
+		new RoadDriveEntry(10,12),
+		new RoadDriveEntry(9,12),
+		new RoadDriveEntry(8,12),
+		new RoadDriveEntry(7,12),
+		new RoadDriveEntry(6,12),
+		new RoadDriveEntry(5,11),
+		new RoadDriveEntry(5,10),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(5,8),
+		new RoadDriveEntry(5,7),
+		new RoadDriveEntry(5,6),
+		new RoadDriveEntry(5,7),
+		new RoadDriveEntry(5,8),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(5,10),
+		new RoadDriveEntry(5,11),
+		new RoadDriveEntry(6,12),
+		new RoadDriveEntry(7,12),
+		new RoadDriveEntry(8,12),
+		new RoadDriveEntry(9,12),
+		new RoadDriveEntry(10,12),
+		new RoadDriveEntry(11,12),
+		new RoadDriveEntry(12,12),
+		new RoadDriveEntry(13,11),
+		new RoadDriveEntry(13,10),
+		new RoadDriveEntry(13,9),
+		new RoadDriveEntry(13,8),
+		new RoadDriveEntry(13,7),
+		new RoadDriveEntry(13,6),
+		new RoadDriveEntry(14,5),
+		new RoadDriveEntry(15,5),
+		new RoadDriveEntry(0x82,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_49[] = {
+		new RoadDriveEntry(9,0),
+		new RoadDriveEntry(9,1),
+		new RoadDriveEntry(10,2),
+		new RoadDriveEntry(11,2),
+		new RoadDriveEntry(12,3),
+		new RoadDriveEntry(12,4),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(12,6),
+		new RoadDriveEntry(12,7),
+		new RoadDriveEntry(12,8),
+		new RoadDriveEntry(12,9),
+		new RoadDriveEntry(11,10),
+		new RoadDriveEntry(10,10),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(8,10),
+		new RoadDriveEntry(7,10),
+		new RoadDriveEntry(6,10),
+		new RoadDriveEntry(7,10),
+		new RoadDriveEntry(8,10),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(10,10),
+		new RoadDriveEntry(11,10),
+		new RoadDriveEntry(12,9),
+		new RoadDriveEntry(12,8),
+		new RoadDriveEntry(12,7),
+		new RoadDriveEntry(12,6),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(12,4),
+		new RoadDriveEntry(12,3),
+		new RoadDriveEntry(11,2),
+		new RoadDriveEntry(10,2),
+		new RoadDriveEntry(9,2),
+		new RoadDriveEntry(8,2),
+		new RoadDriveEntry(7,2),
+		new RoadDriveEntry(6,2),
+		new RoadDriveEntry(5,1),
+		new RoadDriveEntry(5,0),
+		new RoadDriveEntry(0x83,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_50[] = {
+		new RoadDriveEntry(15,9),
+		new RoadDriveEntry(14,9),
+		new RoadDriveEntry(13,10),
+		new RoadDriveEntry(13,11),
+		new RoadDriveEntry(12,12),
+		new RoadDriveEntry(11,12),
+		new RoadDriveEntry(10,12),
+		new RoadDriveEntry(9,11),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(9,8),
+		new RoadDriveEntry(9,7),
+		new RoadDriveEntry(9,6),
+		new RoadDriveEntry(9,7),
+		new RoadDriveEntry(9,8),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(9,10),
+		new RoadDriveEntry(9,11),
+		new RoadDriveEntry(10,12),
+		new RoadDriveEntry(11,12),
+		new RoadDriveEntry(12,12),
+		new RoadDriveEntry(13,11),
+		new RoadDriveEntry(13,10),
+		new RoadDriveEntry(13,9),
+		new RoadDriveEntry(13,8),
+		new RoadDriveEntry(13,7),
+		new RoadDriveEntry(13,6),
+		new RoadDriveEntry(14,5),
+		new RoadDriveEntry(15,5),
+		new RoadDriveEntry(0x82,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_51[] = {
+		new RoadDriveEntry(9,0),
+		new RoadDriveEntry(9,1),
+		new RoadDriveEntry(10,2),
+		new RoadDriveEntry(11,2),
+		new RoadDriveEntry(12,3),
+		new RoadDriveEntry(12,4),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(11,6),
+		new RoadDriveEntry(10,6),
+		new RoadDriveEntry(9,6),
+		new RoadDriveEntry(8,6),
+		new RoadDriveEntry(7,6),
+		new RoadDriveEntry(6,6),
+		new RoadDriveEntry(7,6),
+		new RoadDriveEntry(8,6),
+		new RoadDriveEntry(9,6),
+		new RoadDriveEntry(10,6),
+		new RoadDriveEntry(11,6),
+		new RoadDriveEntry(12,5),
+		new RoadDriveEntry(12,4),
+		new RoadDriveEntry(12,3),
+		new RoadDriveEntry(11,2),
+		new RoadDriveEntry(10,2),
+		new RoadDriveEntry(9,2),
+		new RoadDriveEntry(8,2),
+		new RoadDriveEntry(7,2),
+		new RoadDriveEntry(6,2),
+		new RoadDriveEntry(5,1),
+		new RoadDriveEntry(5,0),
+		new RoadDriveEntry(0x83,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_56[] = {
+		new RoadDriveEntry(0,5),
+		new RoadDriveEntry(1,5),
+		new RoadDriveEntry(2,4),
+		new RoadDriveEntry(3,3),
+		new RoadDriveEntry(4,3),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(6,3),
+		new RoadDriveEntry(7,3),
+		new RoadDriveEntry(8,3),
+		new RoadDriveEntry(9,3),
+		new RoadDriveEntry(10,4),
+		new RoadDriveEntry(10,5),
+		new RoadDriveEntry(10,6),
+		new RoadDriveEntry(10,7),
+		new RoadDriveEntry(10,8),
+		new RoadDriveEntry(10,9),
+		new RoadDriveEntry(10,8),
+		new RoadDriveEntry(10,7),
+		new RoadDriveEntry(10,6),
+		new RoadDriveEntry(10,5),
+		new RoadDriveEntry(10,4),
+		new RoadDriveEntry(9,3),
+		new RoadDriveEntry(8,3),
+		new RoadDriveEntry(7,3),
+		new RoadDriveEntry(6,3),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(4,3),
+		new RoadDriveEntry(3,3),
+		new RoadDriveEntry(2,4),
+		new RoadDriveEntry(2,5),
+		new RoadDriveEntry(2,6),
+		new RoadDriveEntry(2,7),
+		new RoadDriveEntry(2,8),
+		new RoadDriveEntry(1,9),
+		new RoadDriveEntry(0,9),
+		new RoadDriveEntry(0x80,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_57[] = {
+		new RoadDriveEntry(5,15),
+		new RoadDriveEntry(5,14),
+		new RoadDriveEntry(4,13),
+		new RoadDriveEntry(3,12),
+		new RoadDriveEntry(3,11),
+		new RoadDriveEntry(3,10),
+		new RoadDriveEntry(3,9),
+		new RoadDriveEntry(3,8),
+		new RoadDriveEntry(3,7),
+		new RoadDriveEntry(3,6),
+		new RoadDriveEntry(4,5),
+		new RoadDriveEntry(5,5),
+		new RoadDriveEntry(6,5),
+		new RoadDriveEntry(7,5),
+		new RoadDriveEntry(8,5),
+		new RoadDriveEntry(9,5),
+		new RoadDriveEntry(8,5),
+		new RoadDriveEntry(7,5),
+		new RoadDriveEntry(6,5),
+		new RoadDriveEntry(5,5),
+		new RoadDriveEntry(4,5),
+		new RoadDriveEntry(3,6),
+		new RoadDriveEntry(3,7),
+		new RoadDriveEntry(3,8),
+		new RoadDriveEntry(3,9),
+		new RoadDriveEntry(3,10),
+		new RoadDriveEntry(3,11),
+		new RoadDriveEntry(3,12),
+		new RoadDriveEntry(4,13),
+		new RoadDriveEntry(5,13),
+		new RoadDriveEntry(6,13),
+		new RoadDriveEntry(7,13),
+		new RoadDriveEntry(8,13),
+		new RoadDriveEntry(9,14),
+		new RoadDriveEntry(9,15),
+		new RoadDriveEntry(0x81,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_58[] = {
+		new RoadDriveEntry(0,5),
+		new RoadDriveEntry(1,5),
+		new RoadDriveEntry(2,4),
+		new RoadDriveEntry(3,3),
+		new RoadDriveEntry(4,3),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(6,4),
+		new RoadDriveEntry(6,5),
+		new RoadDriveEntry(6,6),
+		new RoadDriveEntry(6,7),
+		new RoadDriveEntry(6,8),
+		new RoadDriveEntry(6,9),
+		new RoadDriveEntry(6,8),
+		new RoadDriveEntry(6,7),
+		new RoadDriveEntry(6,6),
+		new RoadDriveEntry(6,5),
+		new RoadDriveEntry(6,4),
+		new RoadDriveEntry(5,3),
+		new RoadDriveEntry(4,3),
+		new RoadDriveEntry(3,3),
+		new RoadDriveEntry(2,4),
+		new RoadDriveEntry(2,5),
+		new RoadDriveEntry(2,6),
+		new RoadDriveEntry(2,7),
+		new RoadDriveEntry(2,8),
+		new RoadDriveEntry(1,9),
+		new RoadDriveEntry(0,9),
+		new RoadDriveEntry(0x80,0)
+	};
+	static final RoadDriveEntry _roadveh_drive_data_59[] = {
+		new RoadDriveEntry(5,15),
+		new RoadDriveEntry(5,14),
+		new RoadDriveEntry(4,13),
+		new RoadDriveEntry(3,12),
+		new RoadDriveEntry(3,11),
+		new RoadDriveEntry(3,10),
+		new RoadDriveEntry(4,9),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(6,9),
+		new RoadDriveEntry(7,9),
+		new RoadDriveEntry(8,9),
+		new RoadDriveEntry(9,9),
+		new RoadDriveEntry(8,9),
+		new RoadDriveEntry(7,9),
+		new RoadDriveEntry(6,9),
+		new RoadDriveEntry(5,9),
+		new RoadDriveEntry(4,9),
+		new RoadDriveEntry(3,10),
+		new RoadDriveEntry(3,11),
+		new RoadDriveEntry(3,12),
+		new RoadDriveEntry(4,13),
+		new RoadDriveEntry(5,13),
+		new RoadDriveEntry(6,13),
+		new RoadDriveEntry(7,13),
+		new RoadDriveEntry(8,13),
+		new RoadDriveEntry(9,14),
+		new RoadDriveEntry(9,15),
+		new RoadDriveEntry(0x81,0)
+	};
+
+	protected static final RoadDriveEntry  _road_drive_data[][] = {
+		_roadveh_drive_data_0,
+		_roadveh_drive_data_1,
+		_roadveh_drive_data_2,
+		_roadveh_drive_data_3,
+		_roadveh_drive_data_4,
+		_roadveh_drive_data_5,
+		_roadveh_drive_data_6,
+		_roadveh_drive_data_7,
+		_roadveh_drive_data_8,
+		_roadveh_drive_data_9,
+		_roadveh_drive_data_10,
+		_roadveh_drive_data_11,
+		_roadveh_drive_data_12,
+		_roadveh_drive_data_13,
+		_roadveh_drive_data_14,
+		_roadveh_drive_data_15,
+		_roadveh_drive_data_16,
+		_roadveh_drive_data_17,
+		_roadveh_drive_data_18,
+		_roadveh_drive_data_19,
+		_roadveh_drive_data_20,
+		_roadveh_drive_data_21,
+		_roadveh_drive_data_22,
+		_roadveh_drive_data_23,
+		_roadveh_drive_data_24,
+		_roadveh_drive_data_25,
+		_roadveh_drive_data_26,
+		_roadveh_drive_data_27,
+		_roadveh_drive_data_28,
+		_roadveh_drive_data_29,
+		_roadveh_drive_data_30,
+		_roadveh_drive_data_31,
+		_roadveh_drive_data_32,
+		_roadveh_drive_data_33,
+		_roadveh_drive_data_34,
+		_roadveh_drive_data_35,
+		null,
+		null,
+		null,
+		null,
+		_roadveh_drive_data_40,
+		_roadveh_drive_data_41,
+		_roadveh_drive_data_42,
+		_roadveh_drive_data_43,
+		null,
+		null,
+		null,
+		null,
+		_roadveh_drive_data_48,
+		_roadveh_drive_data_49,
+		_roadveh_drive_data_50,
+		_roadveh_drive_data_51,
+		null,
+		null,
+		null,
+		null,
+		_roadveh_drive_data_56,
+		_roadveh_drive_data_57,
+		_roadveh_drive_data_58,
+		_roadveh_drive_data_59,
+		null,
+		null,
+		null,
+		null,
+	};
+	
+	
+	
+	
+	
+	
+	
+	
+}

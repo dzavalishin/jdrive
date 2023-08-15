@@ -28,3 +28,7 @@ hs_err_pid*
 test/test-report/*.txt
 test/test-report/*.xml
 hiscore.xml
+/.idea/
+/target/
+/dependency-reduced-pom.xml
+/.settings/

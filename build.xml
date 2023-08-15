@@ -17,7 +17,7 @@
         <jar destfile="${dir.jarfile}/JDrive.jar">
             <manifest>
                 <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
-                <attribute name="Rsrc-Main-Class" value="game.Main"/>
+                <attribute name="Rsrc-Main-Class" value="com.dzavalishin.game.Main"/>
                 <attribute name="Class-Path" value="."/>
                 <attribute name="Rsrc-Class-Path" value="./ org.junit.jupiter.api_5.7.1.v20210222-1948.jar org.junit.jupiter.engine_5.7.1.v20210222-1948.jar org.junit.jupiter.migrationsupport_5.7.1.v20210222-1948.jar org.junit.jupiter.params_5.7.1.v20210222-1948.jar org.junit.platform.commons_1.7.1.v20210222-1948.jar org.junit.platform.engine_1.7.1.v20210222-1948.jar org.junit.platform.launcher_1.7.1.v20210222-1948.jar org.junit.platform.runner_1.7.1.v20210222-1948.jar org.junit.platform.suite.api_1.7.1.v20210222-1948.jar org.junit.vintage.engine_5.7.1.v20210222-1948.jar org.opentest4j_1.2.0.v20190826-0900.jar org.apiguardian_1.1.0.v20190826-0900.jar org.junit_4.13.0.v20200204-1500.jar org.hamcrest.core_1.3.0.v20180420-1519.jar"/>
             </manifest>
