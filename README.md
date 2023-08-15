@@ -89,8 +89,15 @@ public static boolean anyTownExist()
 
 ## Why Java
 
-  * Portability for free. It just runs everywhere. Really.
-  * Cleaner code. (Not yet, but I'm on my way:)
-  * It is easier to build complex data structures in a language with GC.
-  * Mature graphics, sound and midi subsystems
+* Portability for free. It just runs everywhere. Really.
+* Cleaner code. (Not yet, but I'm on my way:)
+* It is easier to build complex data structures in a language with GC.
+* Mature graphics, sound and midi subsystems
 
+
+
+
+## Build and run
+
+* just run ```mvnw clean install``` to generate the executable
+* then ```java -jar target\jdrive-1.0.0-SNAPSHOT.jar```
