@@ -4,11 +4,11 @@ import game.struct.OpenListNode;
 
 /**
  * This function is called to check if the end-tile is found
- *  return values can be:
- *	AYSTAR_FOUND_END_NODE : indicates this is the end tile
- *	AYSTAR_DONE : indicates this is not the end tile (or direction was wrong)
- *
- *
+ * return values can be:
+ * AYSTAR_FOUND_END_NODE : indicates this is the end tile
+ * AYSTAR_DONE : indicates this is not the end tile (or direction was wrong)
+ * <p>
+ * <p>
  * The 2nd parameter should be OpenListNode, and NOT AyStarNode. AyStarNode is
  * part of OpenListNode and so it could be accessed without any problems.
  * The good part about OpenListNode is, and how AIs use it, that you can
@@ -18,5 +18,5 @@ import game.struct.OpenListNode;
  */
 @FunctionalInterface
 public interface AyStar_EndNodeCheck {
-	int apply(AyStar as, OpenListNode current);
+    int apply(AyStar as, OpenListNode current);
 }

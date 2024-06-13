@@ -3,22 +3,21 @@ package game.struct;
 import game.ids.StringID;
 
 public class CheatEntry {
-	//public ce_type type;    // type of selector
-	public int flags;		// selector flags
-	public StringID str; // string with descriptive text
-	public Object variable; // pointer to the variable
-	public boolean [] been_used; // has this cheat been used before?
-	public CheckButtonClick click_proc; // procedure
-	public int min,max; // range for spinbox setting
-	public int step;   // step for spinbox
+    //public ce_type type;    // type of selector
+    public int flags;        // selector flags
+    public StringID str; // string with descriptive text
+    public Object variable; // pointer to the variable
+    public boolean[] been_used; // has this cheat been used before?
+    public CheckButtonClick click_proc; // procedure
+    public int min, max; // range for spinbox setting
+    public int step;   // step for spinbox
 }
 
 //typedef int CheckButtonClick(int, int);
 
 @FunctionalInterface
-interface CheckButtonClick
-{
-	int click(int a, int b);
+interface CheckButtonClick {
+    int click(int a, int b);
 }
 /*
 enum ce_type {

@@ -13,28 +13,25 @@ import game.Global;
 import game.MainWindow;
 
 /**
- * 
  * Uses super.extension to determine file format.
- * 
+ * <p>
  * See ImageIO.write(image, __extension__, outputfile);
- * 
- * @author dz
  *
+ * @author dz
  */
-public abstract class GenericJavaScreenshotFormat extends ScreenshotFormat 
-{
-	private BufferedImage image;
+public abstract class GenericJavaScreenshotFormat extends ScreenshotFormat {
+    private BufferedImage image;
 
 
-	protected GenericJavaScreenshotFormat(String name, String extension) {
-		super(name, extension);
-	}
+    protected GenericJavaScreenshotFormat(String name, String extension) {
+        super(name, extension);
+    }
 
-	@Override
-	public boolean proc(String name, ScreenshotCallback getter, Object userData, int w, int h, int i,
-			Colour[] curPalette) {
-	
-		makeImage(w, h, curPalette);
+    @Override
+    public boolean proc(String name, ScreenshotCallback getter, Object userData, int w, int h, int i,
+                        Colour[] curPalette) {
+
+        makeImage(w, h, curPalette);
 		
 		/*
 		// use by default 64k temp memory
@@ -61,24 +58,23 @@ public abstract class GenericJavaScreenshotFormat extends ScreenshotFormat
 			
 		} while (y != h);
 		*/
-		
-		// now generate the bitmap bits
-		byte[] bufd = new byte[w * h]; // by default generate 128 lines at a time.		
-		Pixel buff = new Pixel(bufd); 
-		getter.get(userData, buff, 0, w, h);
-		image.setData(Raster.createRaster(image.getSampleModel(), new DataBufferByte(bufd, bufd.length), new java.awt.Point(0,0) ) );
-		
-		return writeFile(name);
-	}
 
-	void makeImage(int width, int height, Colour[] curPalette)
-	{
-		IndexColorModel icm =  MainWindow.makePalette(curPalette);
-		image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED, icm);
+        // now generate the bitmap bits
+        byte[] bufd = new byte[w * h]; // by default generate 128 lines at a time.
+        Pixel buff = new Pixel(bufd);
+        getter.get(userData, buff, 0, w, h);
+        image.setData(Raster.createRaster(image.getSampleModel(), new DataBufferByte(bufd, bufd.length), new java.awt.Point(0, 0)));
 
-		//image.setData(Raster.createRaster(image.getSampleModel(), new DataBufferByte(screen, screen.length), new java.awt.Point(0,0) ) );
+        return writeFile(name);
+    }
 
-	}
+    void makeImage(int width, int height, Colour[] curPalette) {
+        IndexColorModel icm = MainWindow.makePalette(curPalette);
+        image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED, icm);
+
+        //image.setData(Raster.createRaster(image.getSampleModel(), new DataBufferByte(screen, screen.length), new java.awt.Point(0,0) ) );
+
+    }
 	
 	/* TODO fails - in Russian locale file name is in Russian, but encoding is wrong
 	// TODO Cyrillic only. Can we support other languages? Locale?
@@ -89,8 +85,8 @@ public abstract class GenericJavaScreenshotFormat extends ScreenshotFormat
 		final byte[] bytes = s.getBytes("UTF-8");
 		return new String(bytes, "Windows-1251");
 	} */
-	
-	private boolean writeFile(String name) {
+
+    private boolean writeFile(String name) {
 		
 		/*try {
 			name = convert(name);
@@ -98,17 +94,17 @@ public abstract class GenericJavaScreenshotFormat extends ScreenshotFormat
 			// e1.printStackTrace();
 			Global.error(e1);
 		}*/
-		
-		File outputfile = new File(name);
-		try {
-			ImageIO.write(image, extension, outputfile);
-		} catch (IOException e) {
-			// e.printStackTrace();
-			Global.error(e);
-			return false;
-		}		
-		return true;
-	}
+
+        File outputfile = new File(name);
+        try {
+            ImageIO.write(image, extension, outputfile);
+        } catch (IOException e) {
+            // e.printStackTrace();
+            Global.error(e);
+            return false;
+        }
+        return true;
+    }
 
 	/*private void writeRow(Pixel buff, int i) {
 		

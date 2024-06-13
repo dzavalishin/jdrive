@@ -4,40 +4,38 @@ import java.util.Arrays;
 
 import game.TileIndex;
 
-public class AyStarNode 
-{
-	public TileIndex tile;
-	public int direction;
-	public final int[] user_data;
+public class AyStarNode {
+    public TileIndex tile;
+    public int direction;
+    public final int[] user_data;
 
-	
-	public AyStarNode() {
-		user_data = new int[2];
-	}
 
-	public AyStarNode(AyStarNode node) {
-		tile = node.tile;
-		direction = node.direction;
-		user_data = new int[2];
-		System.arraycopy(node.user_data, 0, user_data, 0, user_data.length);						
-	}
+    public AyStarNode() {
+        user_data = new int[2];
+    }
 
-	@Override
-	public boolean equals(Object obj) 
-	{
-		if (obj instanceof AyStarNode) {
-			AyStarNode him = (AyStarNode) obj;
+    public AyStarNode(AyStarNode node) {
+        tile = node.tile;
+        direction = node.direction;
+        user_data = new int[2];
+        System.arraycopy(node.user_data, 0, user_data, 0, user_data.length);
+    }
 
-			if( direction != him.direction ) return false;
-			if( !tile.equals(him.tile) ) return false;
-			return Arrays.equals(user_data, him.user_data);
-		}
-		return super.equals(obj);
-	}
-	
-	@Override
-	public int hashCode() {
-		return (tile.getTile() << 2) + direction;
-	}
-	
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AyStarNode) {
+            AyStarNode him = (AyStarNode) obj;
+
+            if (direction != him.direction) return false;
+            if (!tile.equals(him.tile)) return false;
+            return Arrays.equals(user_data, him.user_data);
+        }
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return (tile.getTile() << 2) + direction;
+    }
+
 }

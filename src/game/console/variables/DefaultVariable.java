@@ -16,9 +16,9 @@ public class DefaultVariable implements Variable {
     /**
      * ctor
      *
-     * @param name variable name
-     * @param type variable type
-     * @param description variable description
+     * @param name             variable name
+     * @param type             variable type
+     * @param description      variable description
      * @param rawValueSupplier variable supplier
      */
     public DefaultVariable(String name,
@@ -34,10 +34,10 @@ public class DefaultVariable implements Variable {
     /**
      * ctor
      *
-     * @param name variable name
-     * @param type variable type
+     * @param name        variable name
+     * @param type        variable type
      * @param description variable description
-     * @param rawValue variable rawValue
+     * @param rawValue    variable rawValue
      */
     public DefaultVariable(String name,
                            Type type,

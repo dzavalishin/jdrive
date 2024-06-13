@@ -7,22 +7,20 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import game.Player;
 import game.util.Strings;
 
-public class CompanyValueGraph extends AbstractChart
-{
-	private static final long serialVersionUID = 1L;
+public class CompanyValueGraph extends AbstractChart {
+    private static final long serialVersionUID = 1L;
 
-	public CompanyValueGraph() {
-		super(
-				"Company value" ,
-				"Company value vs time",
-				"Days", "Money"
-				);
-	}
+    public CompanyValueGraph() {
+        super(
+                "Company value",
+                "Company value vs time",
+                "Days", "Money"
+        );
+    }
 
-	@Override
-	protected DefaultCategoryDataset createDataset( ) 
-	{
-		DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
+    @Override
+    protected DefaultCategoryDataset createDataset() {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
 		/*
 			for(int i=0; i!=AcceptedCargo.NUM_CARGO; i++) 
@@ -39,36 +37,34 @@ public class CompanyValueGraph extends AbstractChart
 			}*/
 
 
-		Iterator<Player> ii = Player.getIterator();
-		while(ii.hasNext())
-		{
-			Player p = ii.next();
-			String sName = Strings.GetString(p.getName_1()) + " " + Strings.GetString(p.getName_2());
+        Iterator<Player> ii = Player.getIterator();
+        while (ii.hasNext()) {
+            Player p = ii.next();
+            String sName = Strings.GetString(p.getName_1()) + " " + Strings.GetString(p.getName_2());
 
-			if (p.isActive()) {
-				//gd.colors[numd] = (byte) Global._color_list[p.getColor()].window_color_bgb;
-				for(int j=20; --j >= 0;) 
-				{
-					//gd.cost[numd][i] 
-					long value = (j >= p.num_valid_stat_ent) ? 0 : (long)p.old_economy[j].company_value;
-					dataset.addValue( value , sName , Integer.toString(j) );
+            if (p.isActive()) {
+                //gd.colors[numd] = (byte) Global._color_list[p.getColor()].window_color_bgb;
+                for (int j = 20; --j >= 0; ) {
+                    //gd.cost[numd][i]
+                    long value = (j >= p.num_valid_stat_ent) ? 0 : (long) p.old_economy[j].company_value;
+                    dataset.addValue(value, sName, Integer.toString(j));
 
-					//i++;
-				}
-			}
-			//numd++;
-		}
+                    //i++;
+                }
+            }
+            //numd++;
+        }
 
-		return dataset;
-	}
+        return dataset;
+    }
 
-	public static void showChart() {
-		CompanyValueGraph chart = new CompanyValueGraph();
-		chart.display();
-	}
+    public static void showChart() {
+        CompanyValueGraph chart = new CompanyValueGraph();
+        chart.display();
+    }
 
 
-	//public static void main( String[ ] args ) {		showChart();	}
+    //public static void main( String[ ] args ) {		showChart();	}
 
 }
 

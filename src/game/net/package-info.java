@@ -1,5 +1,5 @@
 package game.net;
 
 /**
- * Network game. TODO Incomplete. 
-**/
+ * Network game. TODO Incomplete.
+ **/

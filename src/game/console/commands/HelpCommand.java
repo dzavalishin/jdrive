@@ -52,7 +52,7 @@ public class HelpCommand implements Command {
                         .forEach(s -> console.println(s, BLUE));
             });
             VariableRegistry.INSTANCE.get(name).ifPresent(v -> {
-               console.println(v.getName() + " - " + v.getDescription(), BLUE);
+                console.println(v.getName() + " - " + v.getDescription(), BLUE);
             });
             AliasRegistry.INSTANCE.get(name).ifPresent(a -> {
                 Optional<Command> command = CommandRegistry.INSTANCE.getCommand(a.getCommand());

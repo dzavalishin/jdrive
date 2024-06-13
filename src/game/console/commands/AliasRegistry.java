@@ -16,7 +16,8 @@ public class AliasRegistry {
         put(new DefaultAlias("quit", "exit"));
     }
 
-    private AliasRegistry() {}
+    private AliasRegistry() {
+    }
 
     /**
      * get alias by name

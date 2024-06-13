@@ -5,5 +5,5 @@ package game.aystar;
  */
 @FunctionalInterface
 public interface AyStar_BeforeExit {
-	void apply(AyStar as);
+    void apply(AyStar as);
 }

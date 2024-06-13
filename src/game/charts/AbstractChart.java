@@ -9,34 +9,32 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.ui.RefineryUtilities;
 
-public abstract class AbstractChart extends JFrame 
-{
-	private static final long serialVersionUID = 1L;
+public abstract class AbstractChart extends JFrame {
+    private static final long serialVersionUID = 1L;
 
-	abstract DefaultCategoryDataset createDataset(); 
-	
-	protected AbstractChart( 
-			String applicationTitle , String chartTitle,
-			String legendX, String legendY
-			) 
-	{
-		super(applicationTitle);
-		JFreeChart lineChart = ChartFactory.createLineChart(
-				chartTitle,
-				legendX, legendY,
-				createDataset(),
-				PlotOrientation.VERTICAL,
-				true,true,false);
+    abstract DefaultCategoryDataset createDataset();
 
-		ChartPanel chartPanel = new ChartPanel( lineChart );
-		chartPanel.setPreferredSize( new java.awt.Dimension( 660 , 367 ) );
-		setContentPane( chartPanel );
-	}
+    protected AbstractChart(
+            String applicationTitle, String chartTitle,
+            String legendX, String legendY
+    ) {
+        super(applicationTitle);
+        JFreeChart lineChart = ChartFactory.createLineChart(
+                chartTitle,
+                legendX, legendY,
+                createDataset(),
+                PlotOrientation.VERTICAL,
+                true, true, false);
 
-	protected void display() {
-		pack();
-		RefineryUtilities.centerFrameOnScreen( this );
-		setVisible( true );
-	}
-	
+        ChartPanel chartPanel = new ChartPanel(lineChart);
+        chartPanel.setPreferredSize(new java.awt.Dimension(660, 367));
+        setContentPane(chartPanel);
+    }
+
+    protected void display() {
+        pack();
+        RefineryUtilities.centerFrameOnScreen(this);
+        setVisible(true);
+    }
+
 }

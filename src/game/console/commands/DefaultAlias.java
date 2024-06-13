@@ -10,7 +10,7 @@ public class DefaultAlias implements Alias {
     /**
      * ctor
      *
-     * @param name alias name
+     * @param name    alias name
      * @param command alias command
      */
     public DefaultAlias(String name, String command) {

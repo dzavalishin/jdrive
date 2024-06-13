@@ -4,9 +4,9 @@ package game.console.parameters;
  * Parameter's and value's types
  */
 public enum Type {
-    STRING  (new StringValueResolver()),
-    INTEGER (new IntegerValueResolver()),
-    BOOLEAN (new BooleanValueResolver()),
+    STRING(new StringValueResolver()),
+    INTEGER(new IntegerValueResolver()),
+    BOOLEAN(new BooleanValueResolver()),
     ;
 
     private final ValueResolver resolver;
@@ -19,7 +19,7 @@ public enum Type {
      * resolve parameter
      *
      * @param value raw parameter value
-     * @param <T> parameter type
+     * @param <T>   parameter type
      * @return parsed parameter value
      */
     public <T> T resolve(String value) {

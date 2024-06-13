@@ -1,15 +1,15 @@
 package game.enums;
 
 public enum SwitchModes {
-	SM_NONE,
-	SM_NEWGAME,
-	SM_EDITOR,
-	SM_LOAD,
-	SM_MENU,
-	SM_SAVE,
-	SM_GENRANDLAND,
-	SM_LOAD_SCENARIO,
-	SM_START_SCENARIO,
+    SM_NONE,
+    SM_NEWGAME,
+    SM_EDITOR,
+    SM_LOAD,
+    SM_MENU,
+    SM_SAVE,
+    SM_GENRANDLAND,
+    SM_LOAD_SCENARIO,
+    SM_START_SCENARIO,
 
 	/*
 	SM_NONE = 0,

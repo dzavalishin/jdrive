@@ -6,4 +6,5 @@ import game.xui.Window;
 
 @FunctionalInterface
 public
-interface ToolbarButtonProc extends Consumer<Window> {}
+interface ToolbarButtonProc extends Consumer<Window> {
+}

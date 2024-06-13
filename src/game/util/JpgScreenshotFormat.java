@@ -1,11 +1,10 @@
 package game.util;
 
-public class JpgScreenshotFormat extends GenericJavaScreenshotFormat 
-{
+public class JpgScreenshotFormat extends GenericJavaScreenshotFormat {
 
-	protected JpgScreenshotFormat() {
-		super("jpg", "jpg");
-	}
+    protected JpgScreenshotFormat() {
+        super("jpg", "jpg");
+    }
 
 
 }

@@ -5,89 +5,84 @@ import java.util.function.Consumer;
 
 import game.tables.MiscTables;
 
-public class Misc extends MiscTables 
-{
+public class Misc extends MiscTables {
 
-	static final int NUM_CARGO = AcceptedCargo.NUM_CARGO;
-
+    static final int NUM_CARGO = AcceptedCargo.NUM_CARGO;
 
 
-	// Calculate constants that depend on the landscape type.
-	static void InitializeLandscapeVariables(boolean only_constants)
-	{
-		final LandscapePredefVar lpd;
-		int i;
-		//StringID 
-		int str;
+    // Calculate constants that depend on the landscape type.
+    static void InitializeLandscapeVariables(boolean only_constants) {
+        final LandscapePredefVar lpd;
+        int i;
+        //StringID
+        int str;
 
-		lpd = _landscape_predef_var[GameOptions._opt.landscape];
+        lpd = _landscape_predef_var[GameOptions._opt.landscape];
 
-		Global._cargoc.ai_railwagon = Arrays.copyOf( lpd.railwagon_by_cargo, lpd.railwagon_by_cargo.length);
-		Global._cargoc.ai_roadveh_start = Arrays.copyOf( lpd.road_veh_by_cargo_start, lpd.road_veh_by_cargo_start.length );
-		Global._cargoc.ai_roadveh_count = Arrays.copyOf( lpd.road_veh_by_cargo_count, lpd.road_veh_by_cargo_count.length );
-		
-		for(i=0; i!=NUM_CARGO; i++) {
-			Global._cargoc.sprites[i] = lpd.sprites[i];
+        Global._cargoc.ai_railwagon = Arrays.copyOf(lpd.railwagon_by_cargo, lpd.railwagon_by_cargo.length);
+        Global._cargoc.ai_roadveh_start = Arrays.copyOf(lpd.road_veh_by_cargo_start, lpd.road_veh_by_cargo_start.length);
+        Global._cargoc.ai_roadveh_count = Arrays.copyOf(lpd.road_veh_by_cargo_count, lpd.road_veh_by_cargo_count.length);
 
-			str = lpd.names[i];
-			Global._cargoc.names_s[i] = str;
-			Global._cargoc.names_long[i] = (str += 0x40);
-			Global._cargoc.names_short[i] = (str += 0x20);
-			Global._cargoc.weights[i] = lpd.weights[i];
+        for (i = 0; i != NUM_CARGO; i++) {
+            Global._cargoc.sprites[i] = lpd.sprites[i];
 
-			if (!only_constants) {
-				Global._cargo_payment_rates[i] = lpd.initial_cargo_payment[i];
-				//Global._cargo_payment_rates_frac[i] = 0;
-			}
+            str = lpd.names[i];
+            Global._cargoc.names_s[i] = str;
+            Global._cargoc.names_long[i] = (str += 0x40);
+            Global._cargoc.names_short[i] = (str += 0x20);
+            Global._cargoc.weights[i] = lpd.weights[i];
 
-			Global._cargoc.transit_days_1[i] = lpd.transit_days_table_1[i];
-			Global._cargoc.transit_days_2[i] = lpd.transit_days_table_2[i];
-		}
-	}
+            if (!only_constants) {
+                Global._cargo_payment_rates[i] = lpd.initial_cargo_payment[i];
+                //Global._cargo_payment_rates_frac[i] = 0;
+            }
 
-	static void OnNewDay_EffectVehicle(Vehicle v) { /* empty */ }
+            Global._cargoc.transit_days_1[i] = lpd.transit_days_table_1[i];
+            Global._cargoc.transit_days_2[i] = lpd.transit_days_table_2[i];
+        }
+    }
 
-
-	static final OnNewVehicleDayProc[] _on_new_vehicle_day_proc = {
-		TrainCmd::OnNewDay_Train,
-		RoadVehCmd::OnNewDay_RoadVeh,
-		Ship::OnNewDay_Ship,
-		AirCraft::OnNewDay_Aircraft,
-		Misc::OnNewDay_EffectVehicle,
-		DisasterCmd::OnNewDay_DisasterVehicle,
-	};
+    static void OnNewDay_EffectVehicle(Vehicle v) { /* empty */ }
 
 
-
-	static final int _autosave_months[] = {
-		0, // never
-		0xFFF, // every month
-		0x249, // every 3 months
-		0x041, // every 6 months
-		0x001, // every 12 months
-	};
-
-	/**
-	 * Runs the day_proc for every DAY_TICKS vehicle starting at daytick.
-	 */
-	public static void RunVehicleDayProc(int daytick)
-	{
-		int total = Global.gs._vehicles.total_items();
-
-		for (int i = daytick; i < total; i += Global.DAY_TICKS) {
-			Vehicle v = Vehicle.GetVehicle(i);
-			if (v.type != 0)
-				_on_new_vehicle_day_proc[v.type - 0x10].accept(v);
-		}
-		
-		//Global.gs._vehicle_pool.forEachValid( (v) -> _on_new_vehicle_day_proc[v.type - 0x10].accept(v) );
-	}
+    static final OnNewVehicleDayProc[] _on_new_vehicle_day_proc = {
+            TrainCmd::OnNewDay_Train,
+            RoadVehCmd::OnNewDay_RoadVeh,
+            Ship::OnNewDay_Ship,
+            AirCraft::OnNewDay_Aircraft,
+            Misc::OnNewDay_EffectVehicle,
+            DisasterCmd::OnNewDay_DisasterVehicle,
+    };
 
 
-	//!We're writing an own sort algorithm here, as
-	//!qsort isn't stable
-	//!Since the number of elements will be low, a
-	//!simple bubble sort will have to do :)
+    static final int _autosave_months[] = {
+            0, // never
+            0xFFF, // every month
+            0x249, // every 3 months
+            0x041, // every 6 months
+            0x001, // every 12 months
+    };
+
+    /**
+     * Runs the day_proc for every DAY_TICKS vehicle starting at daytick.
+     */
+    public static void RunVehicleDayProc(int daytick) {
+        int total = Global.gs._vehicles.total_items();
+
+        for (int i = daytick; i < total; i += Global.DAY_TICKS) {
+            Vehicle v = Vehicle.GetVehicle(i);
+            if (v.type != 0)
+                _on_new_vehicle_day_proc[v.type - 0x10].accept(v);
+        }
+
+        //Global.gs._vehicle_pool.forEachValid( (v) -> _on_new_vehicle_day_proc[v.type - 0x10].accept(v) );
+    }
+
+
+    //!We're writing an own sort algorithm here, as
+    //!qsort isn't stable
+    //!Since the number of elements will be low, a
+    //!simple bubble sort will have to do :)
 	/*
 	void bubblesort(void *base, size_t nmemb, size_t size, int(*compar)(final void *, final void *))
 	{
@@ -474,13 +469,14 @@ public class Misc extends MiscTables
 		{ 'CHTS', Save_CHTS, Load_CHTS, CH_RIFF | CH_LAST}
 	};
 	*/
-	
+
 }
 
 
 //typedef void OnNewVehicleDayProc(Vehicle v);
 
 @FunctionalInterface
-interface OnNewVehicleDayProc extends Consumer<Vehicle> {}
+interface OnNewVehicleDayProc extends Consumer<Vehicle> {
+}
 
 

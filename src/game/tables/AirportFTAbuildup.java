@@ -3,29 +3,25 @@ package game.tables;
 //state machine input struct (from external file, etc.)
 //Finite sTate mAchine --> FTA
 
-public class AirportFTAbuildup 
-{
+public class AirportFTAbuildup {
 
-	public final int position;							// the position that an airplane is at
-	public final int heading;								// the current orders (eg. TAKEOFF, HANGAR, ENDLANDING, etc.)
-	public final int block;								// the block this position is on on the airport (st->airport_flags)
-	public final int next_in_chain;					// next position from this position
+    public final int position;                            // the position that an airplane is at
+    public final int heading;                                // the current orders (eg. TAKEOFF, HANGAR, ENDLANDING, etc.)
+    public final int block;                                // the block this position is on on the airport (st->airport_flags)
+    public final int next_in_chain;                    // next position from this position
 
-	public AirportFTAbuildup(int p, int h, int b, int n) 
-	{
-		position = p;
-		heading = h;
-		block = b;
-		next_in_chain = n;
-	}
+    public AirportFTAbuildup(int p, int h, int b, int n) {
+        position = p;
+        heading = h;
+        block = b;
+        next_in_chain = n;
+    }
 
 
-
-
-	///////////////////////////////////////////////////////////////////////
-	/////**********Movement Machine on Airports*********************///////
-	//first element of depots array tells us how many depots there are (to know size of array)
-	//this may be changed later when airports are moved to external file
+    ///////////////////////////////////////////////////////////////////////
+    /////**********Movement Machine on Airports*********************///////
+    //first element of depots array tells us how many depots there are (to know size of array)
+    //this may be changed later when airports are moved to external file
 /*	
 	static final TileIndexDiffC _airport_depots_country[] = {
 			new TileIndexDiffC(3, 0)};

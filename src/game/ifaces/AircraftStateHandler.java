@@ -8,5 +8,6 @@ import game.Vehicle;
 //typedef void AircraftStateHandler(Vehicle v, final Airport Airport);
 
 @FunctionalInterface
-public interface AircraftStateHandler extends BiConsumer<Vehicle, Airport> {}
+public interface AircraftStateHandler extends BiConsumer<Vehicle, Airport> {
+}
 

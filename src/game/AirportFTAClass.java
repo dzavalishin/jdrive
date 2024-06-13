@@ -109,13 +109,5 @@ static byte AirportBlockToString(int block)
 	 */
 
 
-
-
-
-
-
-
-
-
 //}
 

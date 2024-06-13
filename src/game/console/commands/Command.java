@@ -55,9 +55,9 @@ public interface Command {
     /**
      * returns resolved command parameter by index
      *
-     * @param id parameter index
+     * @param id              parameter index
      * @param inputParameters user input
-     * @param <T> result type
+     * @param <T>             result type
      * @return resolved command parameter
      */
     default <T> T getParameter(int id, Iterator<String> inputParameters) {

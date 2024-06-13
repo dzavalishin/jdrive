@@ -12,114 +12,106 @@ import game.net.NetServer;
 import game.net.NetworkClientInfo;
 import game.net.NetworkErrorCode;
 
-public class ConsoleCmds extends DefaultConsole
-{
+public class ConsoleCmds extends DefaultConsole {
 
-	// ** scriptfile handling ** //
-	//static FILE *_script_file;
-	static boolean _script_running;
+    // ** scriptfile handling ** //
+    //static FILE *_script_file;
+    static boolean _script_running;
 
-	// ** console command / variable defines ** //
+    // ** console command / variable defines ** //
 
-	// Also use from within player_gui to change the password graphically 
-	public static boolean NetworkChangeCompanyPassword(String ... argv)
-	{
-		int  lpid = Global.gs._local_player.id;
-		
-		if (argv.length == 0) {
-			if (lpid >= Global.MAX_PLAYERS) return true; // dedicated server
-			IConsolePrintF(_icolour_warn, "Current value for 'company_pw': %s", Net._network_player_info[lpid].password);
-			return true;
-		}
+    // Also use from within player_gui to change the password graphically
+    public static boolean NetworkChangeCompanyPassword(String... argv) {
+        int lpid = Global.gs._local_player.id;
 
-		if (lpid >= Global.MAX_PLAYERS) {
-			IConsoleError("You have to own a company to make use of this command.");
-			return false;
-		}
+        if (argv.length == 0) {
+            if (lpid >= Global.MAX_PLAYERS) return true; // dedicated server
+            IConsolePrintF(_icolour_warn, "Current value for 'company_pw': %s", Net._network_player_info[lpid].password);
+            return true;
+        }
 
-		if (argv.length != 1) return false;
+        if (lpid >= Global.MAX_PLAYERS) {
+            IConsoleError("You have to own a company to make use of this command.");
+            return false;
+        }
 
-		if (argv[0].equals("*"))
-			argv[0] = "";
+        if (argv.length != 1) return false;
 
-		Net._network_player_info[lpid].password = argv[0];
+        if (argv[0].equals("*"))
+            argv[0] = "";
 
-		if (!Global._network_server)
-			try {
-				NetClient.NetworkPacketSend_PACKET_CLIENT_SET_PASSWORD_command(Net._network_player_info[lpid].password);
-			} catch (IOException e) {
-				Global.error(e);
-			}
+        Net._network_player_info[lpid].password = argv[0];
 
-		IConsolePrintF(_icolour_warn, "'company_pw' changed to:  %s", Net._network_player_info[lpid].password);
+        if (!Global._network_server)
+            try {
+                NetClient.NetworkPacketSend_PACKET_CLIENT_SET_PASSWORD_command(Net._network_player_info[lpid].password);
+            } catch (IOException e) {
+                Global.error(e);
+            }
 
-		return true;
-	}
-	
+        IConsolePrintF(_icolour_warn, "'company_pw' changed to:  %s", Net._network_player_info[lpid].password);
 
-	/* **************************** */
-	/* variable and command hooks   */
-	/* **************************** */
+        return true;
+    }
 
-	//*#ifdef ENABLE_NETWORK
 
-	static boolean NetworkAvailable()
-	{
-		if (!Global._network_available) {
-			IConsoleError("You cannot use this command because there is no network available.");
-			return false;
-		}
-		return true;
-	}
+    /* **************************** */
+    /* variable and command hooks   */
+    /* **************************** */
 
-	static boolean ConHookServerOnly()
-	{
-		if (!NetworkAvailable()) return false;
+    //*#ifdef ENABLE_NETWORK
 
-		if (!Global._network_server) {
-			IConsoleError("This command/variable is only available to a network server.");
-			return false;
-		}
-		return true;
-	}
+    static boolean NetworkAvailable() {
+        if (!Global._network_available) {
+            IConsoleError("You cannot use this command because there is no network available.");
+            return false;
+        }
+        return true;
+    }
 
-	static boolean ConHookClientOnly()
-	{
-		if (!NetworkAvailable()) return false;
+    static boolean ConHookServerOnly() {
+        if (!NetworkAvailable()) return false;
 
-		if (Global._network_server) {
-			IConsoleError("This command/variable is not available to a network server.");
-			return false;
-		}
-		return true;
-	}
+        if (!Global._network_server) {
+            IConsoleError("This command/variable is only available to a network server.");
+            return false;
+        }
+        return true;
+    }
 
-	static boolean ConHookNeedNetwork()
-	{
-		if (!NetworkAvailable()) return false;
+    static boolean ConHookClientOnly() {
+        if (!NetworkAvailable()) return false;
 
-		if (!Global._networking) {
-			IConsoleError("Not connected. This command/variable is only available in multiplayer.");
-			return false;
-		}
-		return true;
-	}
+        if (Global._network_server) {
+            IConsoleError("This command/variable is not available to a network server.");
+            return false;
+        }
+        return true;
+    }
 
-	static boolean ConHookNoNetwork()
-	{
-		if (Global._networking) {
-			IConsoleError("This command/variable is forbidden in multiplayer.");
-			return false;
-		}
-		return true;
-	}
+    static boolean ConHookNeedNetwork() {
+        if (!NetworkAvailable()) return false;
 
-	//#endif /* ENABLE_NETWORK */
+        if (!Global._networking) {
+            IConsoleError("Not connected. This command/variable is only available in multiplayer.");
+            return false;
+        }
+        return true;
+    }
 
-	static void IConsoleHelp(String str)
-	{
-		DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn, "- %s", str);
-	}
+    static boolean ConHookNoNetwork() {
+        if (Global._networking) {
+            IConsoleError("This command/variable is forbidden in multiplayer.");
+            return false;
+        }
+        return true;
+    }
+
+    //#endif /* ENABLE_NETWORK */
+
+    static void IConsoleHelp(String str) {
+        DefaultConsole.IConsolePrintF(DefaultConsole._icolour_warn, "- %s", str);
+    }
 
 
 	/*
@@ -282,189 +274,180 @@ public class ConsoleCmds extends DefaultConsole
 		return true;
 	}
 	*/
-	// ********************************* //
-	// * Network Core Console Commands * //
-	// ********************************* //
-	//#ifdef ENABLE_NETWORK
+    // ********************************* //
+    // * Network Core Console Commands * //
+    // ********************************* //
+    //#ifdef ENABLE_NETWORK
 
-	// TODO convert to new style command classes
+    // TODO convert to new style command classes
 
-	static boolean ConUnBan(String ... argv)
-	{
-		int i, index;
+    static boolean ConUnBan(String... argv) {
+        int i, index;
 
-		if (argv.length == 0) {
-			IConsoleHelp("Unban a player from a network game. Usage: 'unban <ip | id>'");
-			IConsoleHelp("For a list of banned IP's, see the command 'banlist'");
-			return true;
-		}
+        if (argv.length == 0) {
+            IConsoleHelp("Unban a player from a network game. Usage: 'unban <ip | id>'");
+            IConsoleHelp("For a list of banned IP's, see the command 'banlist'");
+            return true;
+        }
 
-		if (argv.length != 2) return false;
+        if (argv.length != 2) return false;
 
-		index = (argv[1].indexOf('.') < 0) ? Integer.parseInt(argv[1]) : 0;
-		index--;
+        index = (argv[1].indexOf('.') < 0) ? Integer.parseInt(argv[1]) : 0;
+        index--;
 
-		for (i = 0; i < Net._network_ban_list.length; i++) {
-			if (Net._network_ban_list[i] == null || Net._network_ban_list[i].isBlank())
-				continue;
+        for (i = 0; i < Net._network_ban_list.length; i++) {
+            if (Net._network_ban_list[i] == null || Net._network_ban_list[i].isBlank())
+                continue;
 
-			if (Net._network_ban_list[i].equals(argv[1]) || index == i) {
-				Net._network_ban_list[i] = null;
-				IConsolePrint(_icolour_def, "IP unbanned.");
-				return true;
-			}
-		}
+            if (Net._network_ban_list[i].equals(argv[1]) || index == i) {
+                Net._network_ban_list[i] = null;
+                IConsolePrint(_icolour_def, "IP unbanned.");
+                return true;
+            }
+        }
 
-		IConsolePrint(_icolour_def, "IP not in ban-list.");
-		return true;
-	}
+        IConsolePrint(_icolour_def, "IP not in ban-list.");
+        return true;
+    }
 
-	static boolean ConBanList(String ... argv)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("List the IP's of banned clients: Usage 'banlist'");
-			return true;
-		}
+    static boolean ConBanList(String... argv) {
+        if (argv.length == 0) {
+            IConsoleHelp("List the IP's of banned clients: Usage 'banlist'");
+            return true;
+        }
 
-		IConsolePrint(_icolour_def, "Banlist: ");
+        IConsolePrint(_icolour_def, "Banlist: ");
 
-		for (int i = 0; i < Net._network_ban_list.length; i++) {
-			if (Net._network_ban_list[i] == null || Net._network_ban_list[i].isBlank())
-				continue;
+        for (int i = 0; i < Net._network_ban_list.length; i++) {
+            if (Net._network_ban_list[i] == null || Net._network_ban_list[i].isBlank())
+                continue;
 
-			IConsolePrintF(_icolour_def, "  %d) %s", i + 1, Net._network_ban_list[i]);
-		}
+            IConsolePrintF(_icolour_def, "  %d) %s", i + 1, Net._network_ban_list[i]);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	static boolean ConPauseGame(String ... argv)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("Pause a network game. Usage: 'pause'");
-			return true;
-		}
+    static boolean ConPauseGame(String... argv) {
+        if (argv.length == 0) {
+            IConsoleHelp("Pause a network game. Usage: 'pause'");
+            return true;
+        }
 
-		if (Global._pause == 0) {
-			Cmd.DoCommandP(null, 1, 0, null, Cmd.CMD_PAUSE);
-			IConsolePrint(_icolour_def, "Game paused.");
-		} else
-			IConsolePrint(_icolour_def, "Game is already paused.");
+        if (Global._pause == 0) {
+            Cmd.DoCommandP(null, 1, 0, null, Cmd.CMD_PAUSE);
+            IConsolePrint(_icolour_def, "Game paused.");
+        } else
+            IConsolePrint(_icolour_def, "Game is already paused.");
 
-		return true;
-	}
+        return true;
+    }
 
-	static boolean ConUnPauseGame(String ... argv)
-	{
-		if (argv.length == 0) {
-			IConsoleHelp("Unpause a network game. Usage: 'unpause'");
-			return true;
-		}
+    static boolean ConUnPauseGame(String... argv) {
+        if (argv.length == 0) {
+            IConsoleHelp("Unpause a network game. Usage: 'unpause'");
+            return true;
+        }
 
-		if (Global._pause != 0) {
-			Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE);
-			IConsolePrint(_icolour_def, "Game unpaused.");
-		} else
-			IConsolePrint(_icolour_def, "Game is already unpaused.");
+        if (Global._pause != 0) {
+            Cmd.DoCommandP(null, 0, 0, null, Cmd.CMD_PAUSE);
+            IConsolePrint(_icolour_def, "Game unpaused.");
+        } else
+            IConsolePrint(_icolour_def, "Game is already unpaused.");
 
-		return true;
-	}
+        return true;
+    }
 
 
-	
+    static boolean ConKick(String... argv) {
+        NetworkClientInfo ci;
+        int index;
 
-	static boolean ConKick(String ... argv)
-	{
-		NetworkClientInfo ci;
-		int index;
+        if (argv.length == 0) {
+            IConsoleHelp("Kick a player from a network game. Usage: 'kick <client-id>'");
+            IConsoleHelp("For client-id's, see the command 'clients'");
+            return true;
+        }
 
-		if (argv.length == 0) {
-			IConsoleHelp("Kick a player from a network game. Usage: 'kick <client-id>'");
-			IConsoleHelp("For client-id's, see the command 'clients'");
-			return true;
-		}
+        if (argv.length != 2) return false;
 
-		if (argv.length != 2) return false;
+        index = Integer.parseInt(argv[1]);
+        if (index == Net.NETWORK_SERVER_INDEX) {
+            IConsolePrint(_icolour_def, "Silly boy, you can not kick yourself!");
+            return true;
+        }
+        if (index == 0) {
+            IConsoleError("Invalid client-id");
+            return true;
+        }
 
-		index = Integer.parseInt(argv[1]);
-		if (index == Net.NETWORK_SERVER_INDEX) {
-			IConsolePrint(_icolour_def, "Silly boy, you can not kick yourself!");
-			return true;
-		}
-		if (index == 0) {
-			IConsoleError("Invalid client-id");
-			return true;
-		}
+        ci = Net.NetworkFindClientInfoFromIndex(index);
 
-		ci = Net.NetworkFindClientInfoFromIndex(index);
+        if (ci != null) {
+            //SEND_COMMAND(PACKET_SERVER_ERROR)(NetworkFindClientStateFromIndex(index), NetworkErrorCode.KICKED);
+            NetServer.NetworkPacketSend_PACKET_SERVER_ERROR_command(Net.NetworkFindClientStateFromIndex(index), NetworkErrorCode.KICKED);
+        } else
+            IConsoleError("Client-id not found");
 
-		if (ci != null) {
-			//SEND_COMMAND(PACKET_SERVER_ERROR)(NetworkFindClientStateFromIndex(index), NetworkErrorCode.KICKED);
-			NetServer.NetworkPacketSend_PACKET_SERVER_ERROR_command(Net.NetworkFindClientStateFromIndex(index), NetworkErrorCode.KICKED);
-		} else
-			IConsoleError("Client-id not found");
+        return true;
+    }
 
-		return true;
-	}
+    static boolean ConResetCompany(String... argv) {
+        Player p;
+        //NetworkClientState cs;
+        NetworkClientInfo ci;
 
-	static boolean ConResetCompany(String ... argv)
-	{
-		Player p;
-		//NetworkClientState cs;
-		NetworkClientInfo ci;
+        if (argv.length == 0) {
+            IConsoleHelp("Remove an idle company from the game. Usage: 'reset_company <company-id>'");
+            IConsoleHelp("For company-id's, see the list of companies from the dropdown menu. Player 1 is 1, etc.");
+            return true;
+        }
 
-		if (argv.length == 0) {
-			IConsoleHelp("Remove an idle company from the game. Usage: 'reset_company <company-id>'");
-			IConsoleHelp("For company-id's, see the list of companies from the dropdown menu. Player 1 is 1, etc.");
-			return true;
-		}
+        if (argv.length != 2) return false;
 
-		if (argv.length != 2) return false;
+        int index = Integer.parseInt(argv[1]);
 
-		int index = Integer.parseInt(argv[1]);
+        // Check valid range
+        if (index < 1 || index > Global.MAX_PLAYERS) {
+            IConsolePrintF(_icolour_err, "Company does not exist. Company-id must be between 1 and %d.", Global.MAX_PLAYERS);
+            return true;
+        }
 
-		// Check valid range 
-		if (index < 1 || index > Global.MAX_PLAYERS) {
-			IConsolePrintF(_icolour_err, "Company does not exist. Company-id must be between 1 and %d.", Global.MAX_PLAYERS);
-			return true;
-		}
+        // Check if company does exist
+        index--;
+        p = Player.GetPlayer(index);
+        if (!p.isActive()) {
+            IConsoleError("Company does not exist.");
+            return true;
+        }
 
-		// Check if company does exist 
-		index--;
-		p = Player.GetPlayer(index);
-		if (!p.isActive()) {
-			IConsoleError("Company does not exist.");
-			return true;
-		}
+        if (p.isAi()) {
+            IConsoleError("Company is owned by an AI.");
+            return true;
+        }
 
-		if (p.isAi()) {
-			IConsoleError("Company is owned by an AI.");
-			return true;
-		}
+        Net.companyHasPlayers(index);
 
-		Net.companyHasPlayers(index);
-		
-		// TODO [dz] does NetworkFindClientInfoFromIndex really return server record for Net.NETWORK_SERVER_INDEX?
-		ci = Net.NetworkFindClientInfoFromIndex(Net.NETWORK_SERVER_INDEX);
-		if (ci.client_playas - 1 == index) {
-			IConsoleError("Cannot remove company: the server is connected to that company.");
-			return true;
-		}
+        // TODO [dz] does NetworkFindClientInfoFromIndex really return server record for Net.NETWORK_SERVER_INDEX?
+        ci = Net.NetworkFindClientInfoFromIndex(Net.NETWORK_SERVER_INDEX);
+        if (ci.client_playas - 1 == index) {
+            IConsoleError("Cannot remove company: the server is connected to that company.");
+            return true;
+        }
 
-		// It is safe to remove this company 
-		Cmd.DoCommandP(null, 2, index, null, Cmd.CMD_PLAYER_CTRL);
-		IConsolePrint(_icolour_def, "Company deleted.");
+        // It is safe to remove this company
+        Cmd.DoCommandP(null, 2, index, null, Cmd.CMD_PLAYER_CTRL);
+        IConsolePrint(_icolour_def, "Company deleted.");
 
-		return true;
-	}
+        return true;
+    }
 
 
+    //#endif /* ENABLE_NETWORK */
 
-	//#endif /* ENABLE_NETWORK */
-
-	/* ******************************** */
-	/*   script file console commands   */
-	/* ******************************** */
+    /* ******************************** */
+    /*   script file console commands   */
+    /* ******************************** */
 	/*
 	static boolean function(String ... argv)(ConExec)
 	{
@@ -518,9 +501,9 @@ public class ConsoleCmds extends DefaultConsole
 	}
 
 	/* **************************** */
-	/*   default console commands   */
-	/* **************************** */
-	//extern boolean CloseConsoleLogIfActive(void);
+    /*   default console commands   */
+    /* **************************** */
+    //extern boolean CloseConsoleLogIfActive(void);
 	/*
 	static boolean function(String ... argv)(ConScript)
 	{
@@ -823,31 +806,29 @@ public class ConsoleCmds extends DefaultConsole
 //	}
 
 
-	//#ifdef _DEBUG
-	/* ****************************************** */
-	/*  debug commands and variables */
-	/* ****************************************** */
+    //#ifdef _DEBUG
+    /* ****************************************** */
+    /*  debug commands and variables */
+    /* ****************************************** */
 
-	static void IConsoleDebugLibRegister()
-	{
-		// debugging variables and functions
-		//extern boolean _stdlib_con_developer; 
+    static void IConsoleDebugLibRegister() {
+        // debugging variables and functions
+        //extern boolean _stdlib_con_developer;
 
-		//IConsoleVarRegister("con_developer",    &_stdlib_con_developer, ICONSOLE_VAR_BOOLEAN, "Enable/disable console debugging information (internal)");
-		//IConsoleAliasRegister("dbg_echo",       "echo %A; echo %B");
-		//IConsoleAliasRegister("dbg_echo2",      "echo %!");
-	}
-	//#endif
+        //IConsoleVarRegister("con_developer",    &_stdlib_con_developer, ICONSOLE_VAR_BOOLEAN, "Enable/disable console debugging information (internal)");
+        //IConsoleAliasRegister("dbg_echo",       "echo %A; echo %B");
+        //IConsoleAliasRegister("dbg_echo2",      "echo %!");
+    }
+    //#endif
 
-	/* ****************************************** */
-	/*  console command and variable registration */
-	/* ****************************************** */
+    /* ****************************************** */
+    /*  console command and variable registration */
+    /* ****************************************** */
 
-	public static void IConsoleStdLibRegister()
-	{
-		// stdlib
+    public static void IConsoleStdLibRegister() {
+        // stdlib
 
-		// default variables and functions
+        // default variables and functions
 		/*
 		IConsoleCmdRegister("debug_level",  ConDebugLevel);
 		IConsoleCmdRegister("dump_vars",    ConListDumpVariables);
@@ -874,7 +855,7 @@ public class ConsoleCmds extends DefaultConsole
 		IConsoleAliasRegister("new_game", "newgame");
 		*/
 
-		/* networking variables and functions */
+        /* networking variables and functions */
 		/*#ifdef ENABLE_NETWORK
 		// Networking commands 
 		IConsoleCmdRegister("say",             ConSay);
@@ -975,9 +956,9 @@ public class ConsoleCmds extends DefaultConsole
 
 	#endif /* ENABLE_NETWORK */
 
-		// debugging stuff
-		if(Global.debugEnabled)
-			IConsoleDebugLibRegister();
-	}
+        // debugging stuff
+        if (Global.debugEnabled)
+            IConsoleDebugLibRegister();
+    }
 
 }

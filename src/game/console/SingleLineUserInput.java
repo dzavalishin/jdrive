@@ -34,7 +34,7 @@ public class SingleLineUserInput implements UserInput {
         List<String> result = new ArrayList<>();
         StringBuilder parameter = new StringBuilder();
         boolean quotedParameter = false;
-        for (String w: words().skip(1).collect(Collectors.toList())) {
+        for (String w : words().skip(1).collect(Collectors.toList())) {
             if (w.startsWith("\"")) {
                 parameter = new StringBuilder(w.substring(1) + " ");
                 quotedParameter = true;
@@ -44,7 +44,7 @@ public class SingleLineUserInput implements UserInput {
                 }
             } else {
                 if (!quotedParameter) {
-                   result.add(w);
+                    result.add(w);
                 } else if (w.endsWith("\"")) {
                     result.add(parameter.append(" ").append(w, 0, w.length() - 1).toString());
                     quotedParameter = false;

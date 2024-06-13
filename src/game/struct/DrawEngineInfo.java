@@ -1,16 +1,15 @@
 package game.struct;
 
 
-
 public class DrawEngineInfo {
 
-	public final DrawEngineProc engine_proc;
-	public final DrawEngineInfoProc info_proc;
+    public final DrawEngineProc engine_proc;
+    public final DrawEngineInfoProc info_proc;
 
-	public DrawEngineInfo(DrawEngineProc ep, DrawEngineInfoProc eip) {
-		engine_proc = ep;
-		info_proc = eip;
-	}
+    public DrawEngineInfo(DrawEngineProc ep, DrawEngineInfoProc eip) {
+        engine_proc = ep;
+        info_proc = eip;
+    }
 
 }
 

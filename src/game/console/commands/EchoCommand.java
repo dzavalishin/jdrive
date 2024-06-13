@@ -22,6 +22,7 @@ public class EchoCommand implements Command {
             ),
             Type.STRING
     ));
+
     @Override
     public List<Parameter> getParameters() {
         return commandParameters;

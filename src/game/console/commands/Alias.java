@@ -16,7 +16,7 @@ package game.console.commands;
  */
 public interface Alias {
     /**
-      * @return alias name
+     * @return alias name
      */
     String getName();
 

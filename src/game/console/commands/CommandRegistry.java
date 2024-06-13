@@ -39,7 +39,8 @@ public class CommandRegistry {
             put(new ResetTileCommand());
     }
 
-    private CommandRegistry() {}
+    private CommandRegistry() {
+    }
 
     /**
      * returns command implementation by command name
@@ -54,7 +55,7 @@ public class CommandRegistry {
     /**
      * put command implementation into registry
      *
-     * @param commandName command name
+     * @param commandName    command name
      * @param implementation command implementation
      */
     public void putCommand(String commandName, Command implementation) {

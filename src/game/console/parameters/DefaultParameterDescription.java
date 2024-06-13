@@ -4,8 +4,8 @@ package game.console.parameters;
  * Default {@link ParameterDescription} implementation
  */
 public class DefaultParameterDescription implements ParameterDescription {
-   private final String name;
-   private final String description;
+    private final String name;
+    private final String description;
 
     /**
      * ctor
@@ -19,7 +19,7 @@ public class DefaultParameterDescription implements ParameterDescription {
     /**
      * ctor
      *
-     * @param name parameter name
+     * @param name        parameter name
      * @param description parameter description
      */
     public DefaultParameterDescription(String name, String description) {

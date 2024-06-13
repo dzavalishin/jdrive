@@ -4,178 +4,187 @@ import java.util.Arrays;
 
 /**
  * Smart pointer to any array
- * 
+ * <p>
  * Maintains displacement from memory start.
- * 
- * @author dz
  *
+ * @author dz
  */
 
-public class ArrayPtr<ItemType> implements IArrayPtr 
-{
+public class ArrayPtr<ItemType> implements IArrayPtr {
 
-	private final ItemType [] mem; // real mem
-	private int displ;		// current displacement
+    private final ItemType[] mem; // real mem
+    private int displ;        // current displacement
 
-	// --------------------------------------------------------------
-	// Constructors
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
+    // Constructors
+    // --------------------------------------------------------------
 
-	public ArrayPtr( ItemType [] start ) {
-		mem = start;
-		displ = 0;
-	}
+    public ArrayPtr(ItemType[] start) {
+        mem = start;
+        displ = 0;
+    }
 
-	public ArrayPtr( ItemType [] start, int pos ) {
-		mem = start;
-		displ = pos;
-	}
+    public ArrayPtr(ItemType[] start, int pos) {
+        mem = start;
+        displ = pos;
+    }
 
-	public ArrayPtr( ArrayPtr<ItemType> p ) {
-		mem = p.mem;
-		displ = p.displ;
-	}
+    public ArrayPtr(ArrayPtr<ItemType> p) {
+        mem = p.mem;
+        displ = p.displ;
+    }
 
-	public ArrayPtr(ArrayPtr<ItemType> p, int shift) {
-		mem = p.mem;
-		displ = p.displ + shift;
-	}
-	
-	// --------------------------------------------------------------
-	// Read/write
-	// --------------------------------------------------------------
-	
+    public ArrayPtr(ArrayPtr<ItemType> p, int shift) {
+        mem = p.mem;
+        displ = p.displ + shift;
+    }
 
-	public void write( int shift, ItemType b )
-	{
-		mem[ displ + shift ] = b;
-	}
-
-	/**
-	 * Write a pixel to this video ptr
-	 * @param shift from current ptr pos
-	 * @param b data to write
-	 */
-	public void w( int shift, ItemType b )
-	{
-		write(shift,b);
-	}
-
-	/**
-	 * Write ++ - write item at current position and increment pointer.
-	 * @param v
-	 */
-	public void wpp( ItemType v ) 
-	{
-		write(0,v);
-		displ++;			
-	}
-
-	public ItemType read( int shift )
-	{
-		return mem[ displ + shift ];
-	}
-
-	public ItemType r( int shift )
-	{
-		return read( shift );
-	}
-
-	public ItemType r() {
-		return read(0);
-	}
-
-	/**
-	 * read ++ - read item at current position and increment pointer.
-	 */
-	public ItemType rpp() {
-		ItemType r = read(0);
-		displ++;			
-		return r;
-	}
+    // --------------------------------------------------------------
+    // Read/write
+    // --------------------------------------------------------------
 
 
+    public void write(int shift, ItemType b) {
+        mem[displ + shift] = b;
+    }
 
-	// --------------------------------------------------------------
-	// Special write
-	// --------------------------------------------------------------
+    /**
+     * Write a pixel to this video ptr
+     *
+     * @param shift from current ptr pos
+     * @param b     data to write
+     */
+    public void w(int shift, ItemType b) {
+        write(shift, b);
+    }
 
-	public void copyFrom(ArrayPtr<ItemType> src, int num) 
-	{
-		System.arraycopy(src.mem, src.displ, mem, displ, num);		
-	}
+    /**
+     * Write ++ - write item at current position and increment pointer.
+     *
+     * @param v
+     */
+    public void wpp(ItemType v) {
+        write(0, v);
+        displ++;
+    }
 
-	public void setRange(ItemType value, int right) {
-		for( int i = displ; i < displ+right; i++ )
-			mem[i] = value;		
-	}
+    public ItemType read(int shift) {
+        return mem[displ + shift];
+    }
+
+    public ItemType r(int shift) {
+        return read(shift);
+    }
+
+    public ItemType r() {
+        return read(0);
+    }
+
+    /**
+     * read ++ - read item at current position and increment pointer.
+     */
+    public ItemType rpp() {
+        ItemType r = read(0);
+        displ++;
+        return r;
+    }
 
 
-	// --------------------------------------------------------------
-	// Static converters
-	// --------------------------------------------------------------
+    // --------------------------------------------------------------
+    // Special write
+    // --------------------------------------------------------------
 
-	public static Integer[] toIntegerArray(int [] iia) 
-	{
-		//Integer[] ia = (Integer[]) Arrays.stream(iia).mapToObj( (iv) -> Integer.valueOf(iv) ).toArray();
-		Integer[] ia = new Integer[iia.length];
-		for( int i = 0; i < iia.length; i++)
-			ia[i] = iia[i];
-		return ia;
-	}
-	public static Long[] toLongArray(long[] li) {
-		return Arrays.stream(li).mapToObj( (lv) -> Long.valueOf(lv) ).toArray(Long[]::new);
-	}
+    public void copyFrom(ArrayPtr<ItemType> src, int num) {
+        System.arraycopy(src.mem, src.displ, mem, displ, num);
+    }
 
-	// --------------------------------------------------------------
-	// Move position
-	// --------------------------------------------------------------
-	
-	public void madd( int add ) { displ += add; }
-	public void shift( int add ) { displ += add; }
+    public void setRange(ItemType value, int right) {
+        for (int i = displ; i < displ + right; i++)
+            mem[i] = value;
+    }
 
-	@Override
-	public void inc() { displ++; }
 
-	@Override
-	public void dec() { displ--; }
+    // --------------------------------------------------------------
+    // Static converters
+    // --------------------------------------------------------------
 
-	
-	// --------------------------------------------------------------
-	// Getters
-	// --------------------------------------------------------------
+    public static Integer[] toIntegerArray(int[] iia) {
+        //Integer[] ia = (Integer[]) Arrays.stream(iia).mapToObj( (iv) -> Integer.valueOf(iv) ).toArray();
+        Integer[] ia = new Integer[iia.length];
+        for (int i = 0; i < iia.length; i++)
+            ia[i] = iia[i];
+        return ia;
+    }
 
-	@Override
-	public int getDisplacement() 	{		return displ;	}
+    public static Long[] toLongArray(long[] li) {
+        return Arrays.stream(li).mapToObj((lv) -> Long.valueOf(lv)).toArray(Long[]::new);
+    }
 
-	@Override
-	public int getPos() 			{		return displ;	}
+    // --------------------------------------------------------------
+    // Move position
+    // --------------------------------------------------------------
 
-	public ItemType[] getMem() 		{		return mem;		}
+    public void madd(int add) {
+        displ += add;
+    }
 
-	// --------------------------------------------------------------
-	// Setters
-	// --------------------------------------------------------------
-	
-	@Override
-	public void setPos(int pos) { displ = pos; }
+    public void shift(int add) {
+        displ += add;
+    }
 
-	// --------------------------------------------------------------
-	// State
-	// --------------------------------------------------------------
+    @Override
+    public void inc() {
+        displ++;
+    }
 
-	@Override
-	public boolean hasCurrent() {			
-		return displ >= 0 && displ < mem.length;
-	}
+    @Override
+    public void dec() {
+        displ--;
+    }
 
-	public boolean inside(ArrayPtr<ItemType> from, ArrayPtr<ItemType> to) {
-		assert( mem == from.mem );
-		assert( mem == to.mem );		
 
-		return displ >= from.displ && displ <= to.displ;
-	}
+    // --------------------------------------------------------------
+    // Getters
+    // --------------------------------------------------------------
 
+    @Override
+    public int getDisplacement() {
+        return displ;
+    }
+
+    @Override
+    public int getPos() {
+        return displ;
+    }
+
+    public ItemType[] getMem() {
+        return mem;
+    }
+
+    // --------------------------------------------------------------
+    // Setters
+    // --------------------------------------------------------------
+
+    @Override
+    public void setPos(int pos) {
+        displ = pos;
+    }
+
+    // --------------------------------------------------------------
+    // State
+    // --------------------------------------------------------------
+
+    @Override
+    public boolean hasCurrent() {
+        return displ >= 0 && displ < mem.length;
+    }
+
+    public boolean inside(ArrayPtr<ItemType> from, ArrayPtr<ItemType> to) {
+        assert (mem == from.mem);
+        assert (mem == to.mem);
+
+        return displ >= from.displ && displ <= to.displ;
+    }
 
 
 }

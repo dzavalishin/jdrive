@@ -27,27 +27,26 @@ import game.Global;
  * This class is a version of the one published at
  * https://code.google.com/p/jmzreader/wiki/BufferedRandomAccessFile augmented to handle unsigned
  * bytes. The original class is published under Apache 2.0 license. Fix is marked below
- *
+ * <p>
  * This is an optimized version of the RandomAccessFile class as described by Nick Zhang on
  * JavaWorld.com. The article can be found at
  * http://www.javaworld.com/javaworld/javatips/jw-javatip26.html
  *
  * @author jg
  */
-public class BufferedRandomAccessFile extends RandomAccessFile
-{
+public class BufferedRandomAccessFile extends RandomAccessFile {
     /**
      * Uses a byte instead of a char buffer for efficiency reasons.
      */
     private final byte[] buffer;
     private int bufend = 0;
     private int bufpos = 0;
-    
+
     /**
      * The position inside the actual file.
      */
     private long realpos = 0;
-    
+
     /**
      * Buffer size.
      */
@@ -57,17 +56,16 @@ public class BufferedRandomAccessFile extends RandomAccessFile
      * Creates a new instance of the BufferedRandomAccessFile.
      *
      * @param filename The path of the file to open.
-     * @param mode Specifies the mode to use ("r", "rw", etc.) See the BufferedLineReader
-     * documentation for more information.
-     * @param bufsize The buffer size (in bytes) to use.
+     * @param mode     Specifies the mode to use ("r", "rw", etc.) See the BufferedLineReader
+     *                 documentation for more information.
+     * @param bufsize  The buffer size (in bytes) to use.
      * @throws FileNotFoundException If the mode is "r" but the given string does not denote an
-     * existing regular file, or if the mode begins with "rw" but the given string does not denote
-     * an existing, writable regular file and a new regular file of that name cannot be created, or
-     * if some other error occurs while opening or creating the file.
+     *                               existing regular file, or if the mode begins with "rw" but the given string does not denote
+     *                               an existing, writable regular file and a new regular file of that name cannot be created, or
+     *                               if some other error occurs while opening or creating the file.
      */
     public BufferedRandomAccessFile(String filename, String mode, int bufsize)
-            throws FileNotFoundException
-    {
+            throws FileNotFoundException {
         super(filename, mode);
         BUFSIZE = bufsize;
         buffer = new byte[BUFSIZE];
@@ -76,18 +74,17 @@ public class BufferedRandomAccessFile extends RandomAccessFile
     /**
      * Creates a new instance of the BufferedRandomAccessFile.
      *
-     * @param file The file to open.
-     * @param mode Specifies the mode to use ("r", "rw", etc.) See the BufferedLineReader
-     * documentation for more information.
+     * @param file    The file to open.
+     * @param mode    Specifies the mode to use ("r", "rw", etc.) See the BufferedLineReader
+     *                documentation for more information.
      * @param bufsize The buffer size (in bytes) to use.
      * @throws FileNotFoundException If the mode is "r" but the given file path does not denote an
-     * existing regular file, or if the mode begins with "rw" but the given file path does not denote
-     * an existing, writable regular file and a new regular file of that name cannot be created, or
-     * if some other error occurs while opening or creating the file.
+     *                               existing regular file, or if the mode begins with "rw" but the given file path does not denote
+     *                               an existing, writable regular file and a new regular file of that name cannot be created, or
+     *                               if some other error occurs while opening or creating the file.
      */
     public BufferedRandomAccessFile(File file, String mode, int bufsize)
-            throws FileNotFoundException
-    {
+            throws FileNotFoundException {
         super(file, mode);
         BUFSIZE = bufsize;
         buffer = new byte[BUFSIZE];
@@ -97,14 +94,11 @@ public class BufferedRandomAccessFile extends RandomAccessFile
      * {@inheritDoc}
      */
     @Override
-    public final int read() throws IOException
-    {
-        if (bufpos >= bufend && fillBuffer() < 0)
-        {
+    public final int read() throws IOException {
+        if (bufpos >= bufend && fillBuffer() < 0) {
             return -1;
         }
-        if (bufend == 0)
-        {
+        if (bufend == 0) {
             return -1;
         }
         // FIX to handle unsigned bytes
@@ -118,14 +112,12 @@ public class BufferedRandomAccessFile extends RandomAccessFile
      * @return The total number of bytes read into the buffer, or -1 if there is no more data
      * because the end of the file has been reached.
      * @throws IOException If the first byte cannot be read for any reason other than end of file,
-     * or if the random access file has been closed, or if some other I/O error occurs.
+     *                     or if the random access file has been closed, or if some other I/O error occurs.
      */
-    private int fillBuffer() throws IOException
-    {
+    private int fillBuffer() throws IOException {
         int n = super.read(buffer, 0, BUFSIZE);
 
-        if (n >= 0)
-        {
+        if (n >= 0) {
             realpos += n;
             bufend = n;
             bufpos = 0;
@@ -138,8 +130,7 @@ public class BufferedRandomAccessFile extends RandomAccessFile
      *
      * @throws IOException If an I/O error occurs.
      */
-    private void invalidate() throws IOException
-    {
+    private void invalidate() throws IOException {
         bufend = 0;
         bufpos = 0;
         realpos = super.getFilePointer();
@@ -149,17 +140,14 @@ public class BufferedRandomAccessFile extends RandomAccessFile
      * {@inheritDoc}
      */
     @Override
-    public int read(byte[] b, int off, int len) throws IOException
-    {
+    public int read(byte[] b, int off, int len) throws IOException {
         int curLen = len; // length of what is left to read (shrinks)
         int curOff = off; // offset where to put read data (grows)
         int totalRead = 0;
 
-        while (true)
-        {
+        while (true) {
             int leftover = bufend - bufpos;
-            if (curLen <= leftover)
-            {
+            if (curLen <= leftover) {
                 System.arraycopy(buffer, bufpos, b, curOff, curLen);
                 bufpos += curLen;
                 return totalRead + curLen;
@@ -168,15 +156,11 @@ public class BufferedRandomAccessFile extends RandomAccessFile
             System.arraycopy(buffer, bufpos, b, curOff, leftover);
             totalRead += leftover;
             bufpos += leftover;
-            if (fillBuffer() > 0)
-            {
+            if (fillBuffer() > 0) {
                 curOff += leftover;
                 curLen -= leftover;
-            }
-            else
-            {
-                if (totalRead == 0)
-                {
+            } else {
+                if (totalRead == 0) {
                     return -1;
                 }
                 return totalRead;
@@ -196,29 +180,24 @@ public class BufferedRandomAccessFile extends RandomAccessFile
      * {@inheritDoc}
      */
     @Override
-    public void seek(long pos) throws IOException
-    {
+    public void seek(long pos) throws IOException {
         int n = (int) (realpos - pos);
-        if (n >= 0 && n <= bufend)
-        {
+        if (n >= 0 && n <= bufend) {
             bufpos = bufend - n;
-        }
-        else
-        {
+        } else {
             super.seek(pos);
             invalidate();
         }
     }
-    
-    
-    void skip(int bytes)
-    {
-    	try {
-			seek(getFilePointer() + bytes);
-		} catch (IOException e) {
-			
-			Global.error(e);
-			System.exit(33);
-		}
+
+
+    void skip(int bytes) {
+        try {
+            seek(getFilePointer() + bytes);
+        } catch (IOException e) {
+
+            Global.error(e);
+            System.exit(33);
+        }
     }
 }

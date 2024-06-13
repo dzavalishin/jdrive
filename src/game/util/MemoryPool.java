@@ -14,16 +14,13 @@ import game.ifaces.IPoolItem;
 import game.ifaces.IPoolItemFactory;
 
 /**
- * 
  * Pool if game items.
- * 
  */
 
-public class MemoryPool<CType extends IPoolItem> implements Serializable
-{
-	private static final long serialVersionUID = -6590423407301731923L;
-	
-	private final Map<Integer,CType> pool = new HashMap<>();
+public class MemoryPool<CType extends IPoolItem> implements Serializable {
+    private static final long serialVersionUID = -6590423407301731923L;
+
+    private final Map<Integer, CType> pool = new HashMap<>();
     private final IPoolItemFactory<CType> ctor;
     //private static int lastIndex = 1;
     //private static int lastIndex = 0;
@@ -31,29 +28,25 @@ public class MemoryPool<CType extends IPoolItem> implements Serializable
 
 
     public MemoryPool(IPoolItemFactory<CType> ctor) {
-		this.ctor = ctor;
-		CleanPool();
-	}
-    
-    public void CleanPool()
-    {
+        this.ctor = ctor;
+        CleanPool();
+    }
+
+    public void CleanPool() {
         pool.clear();
         lastIndex = 0;
     }
 
-    public CType GetItemFromPool(int index)
-    {
+    public CType GetItemFromPool(int index) {
         return pool.get(index);
     }
 
-    public void PutItemToPool(CType item, int index)
-    {
+    public void PutItemToPool(CType item, int index) {
         pool.put(index, item);
     }
 
 
-    public int total_items()
-    {
+    public int total_items() {
         return pool.size();
     }
 
@@ -62,65 +55,62 @@ public class MemoryPool<CType extends IPoolItem> implements Serializable
         pool.forEach( c );
     }*/
 
-    public void forEach( Consumer<CType> c )
-    {
+    public void forEach(Consumer<CType> c) {
         //pool.forEach( (i,o) -> c.accept(o) );
         // Fifgt concurrent mod
         List<CType> s = new ArrayList<CType>(pool.values());
         //s.forEach( (o) -> c.accept(o) );
-        s.forEach( c );
+        s.forEach(c);
     }
 
-    public void forEachValid( Consumer<CType> c )
-    {
+    public void forEachValid(Consumer<CType> c) {
         //pool.forEach( (i,o) -> { if( o.isValid() ) c.accept(o); } );
         List<CType> s = new ArrayList<CType>(pool.values());
-        s.forEach( o -> { if( o.isValid() ) c.accept(o); } );
+        s.forEach(o -> {
+            if (o.isValid()) c.accept(o);
+        });
     }
 
-	public boolean AddBlockToPool() 
-	{
-		int key = lastIndex ++;
-		CType o = ctor.createObject();
-		o.setIndex(key);
-		pool.put(key, o);
-		
-		return true;
-	}
+    public boolean AddBlockToPool() {
+        int key = lastIndex++;
+        CType o = ctor.createObject();
+        o.setIndex(key);
+        pool.put(key, o);
 
-	/**
-	 * Adds blocks to the pool if needed (and possible) till index fits inside the pool
-	 *
-	 * @return Returns false if adding failed
-	 */
-	public boolean AddBlockIfNeeded(int index)
-	{
-		while (index >= total_items()) {
-			if (!AddBlockToPool())
-				return false;
-		}
+        return true;
+    }
 
-		return true;
-	}
+    /**
+     * Adds blocks to the pool if needed (and possible) till index fits inside the pool
+     *
+     * @return Returns false if adding failed
+     */
+    public boolean AddBlockIfNeeded(int index) {
+        while (index >= total_items()) {
+            if (!AddBlockToPool())
+                return false;
+        }
 
-	public Iterator<CType> getIterator()
-	{
-		return pool.values().iterator();
-	}
+        return true;
+    }
 
-	public Industry[] getValuesArray() {
-		return pool.values().toArray(Industry[]::new);
-	}
+    public Iterator<CType> getIterator() {
+        return pool.values().iterator();
+    }
 
-	public int size() {
-		return pool.size();
-	}
+    public Industry[] getValuesArray() {
+        return pool.values().toArray(Industry[]::new);
+    }
 
-	public Stream<CType> stream() {
-		return pool.values().stream();		
-	}
+    public int size() {
+        return pool.size();
+    }
 
-	
+    public Stream<CType> stream() {
+        return pool.values().stream();
+    }
+
+
 }
 
 

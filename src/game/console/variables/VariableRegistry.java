@@ -15,14 +15,15 @@ public class VariableRegistry {
 
     {
         put(new DefaultVariable(
-               "developer",
+                "developer",
                 Type.INTEGER,
                 "Redirect debugging output from the console/command line to the ingame console (value 2). Default value: 1\"",
                 "1"
         ));
     }
 
-    private VariableRegistry() {}
+    private VariableRegistry() {
+    }
 
     /**
      * get variable by name

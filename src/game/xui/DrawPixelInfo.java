@@ -3,101 +3,96 @@ package game.xui;
 import game.Hal;
 import game.util.Pixel;
 
-public class DrawPixelInfo 
-{
-	public Pixel dst_ptr; // Smart pointer
-	
-	public int left, top;
+public class DrawPixelInfo {
+    public Pixel dst_ptr; // Smart pointer
 
-	public int width;
-	public int height;
-	public int pitch;
-	public int zoom;
-	
-	public DrawPixelInfo(DrawPixelInfo src) {
-		assignFrom(src);
-	}
+    public int left, top;
 
-	public DrawPixelInfo() {
-		// TODO require at least dst_ptr
-	}
+    public int width;
+    public int height;
+    public int pitch;
+    public int zoom;
 
-	public void assignFrom(DrawPixelInfo dpi) 
-	{
-		if(dpi.dst_ptr == null) 
-			dst_ptr = null;
-		else 
-			dst_ptr = new Pixel(dpi.dst_ptr); 
-		
-		left = dpi.left; 
-		top = dpi.top; 
-		width = dpi.width; 
-		height = dpi.height;
-		pitch = dpi.pitch;
-		zoom = dpi.zoom;
-	}
+    public DrawPixelInfo(DrawPixelInfo src) {
+        assignFrom(src);
+    }
 
-	
-	static boolean FillDrawPixelInfo(DrawPixelInfo n,  DrawPixelInfo o, int left, int top, int width, int height)
-	{
-		int t;
+    public DrawPixelInfo() {
+        // TODO require at least dst_ptr
+    }
 
-		if (o == null) o = Hal._cur_dpi;
+    public void assignFrom(DrawPixelInfo dpi) {
+        if (dpi.dst_ptr == null)
+            dst_ptr = null;
+        else
+            dst_ptr = new Pixel(dpi.dst_ptr);
 
-		n.zoom = 0;
+        left = dpi.left;
+        top = dpi.top;
+        width = dpi.width;
+        height = dpi.height;
+        pitch = dpi.pitch;
+        zoom = dpi.zoom;
+    }
 
-		assert(width > 0);
-		assert(height > 0);
 
-		n.left = 0;
-		if ((left -= o.left) < 0) {
-			width += left;
-			if (width < 0) return false;
-			n.left = -left;
-			left = 0;
-		}
+    static boolean FillDrawPixelInfo(DrawPixelInfo n, DrawPixelInfo o, int left, int top, int width, int height) {
+        int t;
 
-		if ((t=width + left - o.width) > 0) {
-			width -= t;
-			if (width < 0) return false;
-		}
-		n.width = width;
+        if (o == null) o = Hal._cur_dpi;
 
-		n.top = 0;
-		if ((top -= o.top) < 0) {
-			height += top;
-			if (height < 0) return false;
-			n.top = -top;
-			top = 0;
-		}
+        n.zoom = 0;
 
-		n.pitch = o.pitch;
-		//n.dst_ptr = o.dst_ptr + left + top * o.pitch;
-		n.dst_ptr = new Pixel(o.dst_ptr, left + top * o.pitch);
+        assert (width > 0);
+        assert (height > 0);
 
-		if ((t=height + top - o.height) > 0) {
-			height -= t;
-			if (height < 0) return false;
-		}
-		n.height = height;
+        n.left = 0;
+        if ((left -= o.left) < 0) {
+            width += left;
+            if (width < 0) return false;
+            n.left = -left;
+            left = 0;
+        }
 
-		return true;
-	}
+        if ((t = width + left - o.width) > 0) {
+            width -= t;
+            if (width < 0) return false;
+        }
+        n.width = width;
 
-	public void init(int width2, int height2, byte[] screen) 
-	{
-		dst_ptr = new Pixel( screen );
-		height = height2;
-		width = width2;
-		pitch = width2 * 1;
-		left = 0;
-		top = 0;
-		zoom = 0;
-	}
+        n.top = 0;
+        if ((top -= o.top) < 0) {
+            height += top;
+            if (height < 0) return false;
+            n.top = -top;
+            top = 0;
+        }
 
-	public void setScreen(byte[] screen) 
-	{
-		dst_ptr = new Pixel( screen );
-	}
-	
+        n.pitch = o.pitch;
+        //n.dst_ptr = o.dst_ptr + left + top * o.pitch;
+        n.dst_ptr = new Pixel(o.dst_ptr, left + top * o.pitch);
+
+        if ((t = height + top - o.height) > 0) {
+            height -= t;
+            if (height < 0) return false;
+        }
+        n.height = height;
+
+        return true;
+    }
+
+    public void init(int width2, int height2, byte[] screen) {
+        dst_ptr = new Pixel(screen);
+        height = height2;
+        width = width2;
+        pitch = width2 * 1;
+        left = 0;
+        top = 0;
+        zoom = 0;
+    }
+
+    public void setScreen(byte[] screen) {
+        dst_ptr = new Pixel(screen);
+    }
+
 }

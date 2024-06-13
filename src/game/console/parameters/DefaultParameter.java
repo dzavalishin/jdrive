@@ -11,7 +11,7 @@ public class DefaultParameter implements Parameter {
      * ctor
      *
      * @param description parameter description
-     * @param type parameter type
+     * @param type        parameter type
      */
     public DefaultParameter(ParameterDescription description, Type type) {
         this.description = description;

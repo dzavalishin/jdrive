@@ -5,17 +5,17 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 class LanguagePack {
-	int ident;
-	int version;			// 32-bits of auto generated version info which is basically a hash of strings.h
+    int ident;
+    int version;            // 32-bits of auto generated version info which is basically a hash of strings.h
 
-	String name;			// the international name of this language
-	String own_name;	// the localized name of this language	
-	String isocode;	// the ISO code for the language (not country code)
+    String name;            // the international name of this language
+    String own_name;    // the localized name of this language
+    String isocode;    // the ISO code for the language (not country code)
 
-	final int[] offsets = new int[32];	// the offsets
-	byte plural_form;		// how to compute plural forms
+    final int[] offsets = new int[32];    // the offsets
+    byte plural_form;        // how to compute plural forms
 
-	byte data[];
+    byte data[];
 	
 	/* Orig C struct is
 	int32 ident;
@@ -30,9 +30,8 @@ class LanguagePack {
 	 */
 
 
-	public boolean loadFromBytes(byte [] src)
-	{
-		data = src; 
+    public boolean loadFromBytes(byte[] src) {
+        data = src;
 		/*
 		ByteBuffer bb = ByteBuffer.wrap(src);
 
@@ -53,16 +52,16 @@ class LanguagePack {
 
 		plural_form = bb.get();
 		*/
-		
-		name = BitOps.stringFromBytes(src, 8, 32 ).strip();
-		own_name = BitOps.stringFromBytes(src, 40, 32 ).strip();
-		isocode = BitOps.stringFromBytes(src, 72, 16 ).strip();
 
-		
-		return isValid();
-	}
+        name = BitOps.stringFromBytes(src, 8, 32).strip();
+        own_name = BitOps.stringFromBytes(src, 40, 32).strip();
+        isocode = BitOps.stringFromBytes(src, 72, 16).strip();
 
-	public boolean isValid() {
+
+        return isValid();
+    }
+
+    public boolean isValid() {
 		/* TODO 
 		if ( //lang_pack_bytes.length < sizeof(LanguagePack) ||
 				lang_pack.ident != BitOps.TO_LE32(LANGUAGE_PACK_IDENT) ||
@@ -70,12 +69,12 @@ class LanguagePack {
 			return false;
 		} */
 
-		//return ident == TO_LE32(LANGUAGE_PACK_IDENT) && hdr.version == TO_LE32(LANGUAGE_PACK_VERSION);
-		return true;
-	}
+        //return ident == TO_LE32(LANGUAGE_PACK_IDENT) && hdr.version == TO_LE32(LANGUAGE_PACK_VERSION);
+        return true;
+    }
 
-	public boolean readFrom(FileInputStream in) throws IOException {
-		byte[] src = in.readNBytes(144); // a bit less?
-		return loadFromBytes(src);
-	}
+    public boolean readFrom(FileInputStream in) throws IOException {
+        byte[] src = in.readNBytes(144); // a bit less?
+        return loadFromBytes(src);
+    }
 }

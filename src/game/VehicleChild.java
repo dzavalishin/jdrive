@@ -4,16 +4,14 @@ import java.io.Serializable;
 
 /**
  * Replaces union in C Vehicle struct
- * 
- * @author dz
  *
+ * @author dz
  */
-public abstract class VehicleChild implements Serializable
-{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public abstract class VehicleChild implements Serializable {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	abstract void clear();
+    abstract void clear();
 }

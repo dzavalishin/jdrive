@@ -2,11 +2,10 @@ package game.tables;
 
 /**
  * Just type tag
- * @author dz
  *
+ * @author dz
  */
-public class CurrencyPatchVariable extends IntegerPatchVariable 
-{
-	// TODO read - case PE_CURRENCY:  return (*(int*)pe.variable) * _currency.rate;
+public class CurrencyPatchVariable extends IntegerPatchVariable {
+    // TODO read - case PE_CURRENCY:  return (*(int*)pe.variable) * _currency.rate;
 
 }

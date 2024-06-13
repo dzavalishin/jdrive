@@ -6,4 +6,5 @@ import game.Town;
 
 @FunctionalInterface
 public
-interface TownActionProc extends BiConsumer<Town,Integer> {}
+interface TownActionProc extends BiConsumer<Town, Integer> {
+}

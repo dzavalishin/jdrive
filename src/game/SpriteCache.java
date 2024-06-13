@@ -6,152 +6,150 @@ import game.util.FileIO;
 public class SpriteCache {
 
 
-	final static int SPRITE_CACHE_SIZE = 1024*1024;
+    final static int SPRITE_CACHE_SIZE = 1024 * 1024;
 
-	static final Sprite[] _sprite_ptr = new Sprite[Sprite.MAX_SPRITES];
-	static final int [] _sprite_file_pos = new int[Sprite.MAX_SPRITES];
-
-
-
-	private static boolean ReadSpriteHeaderSkipData() {
-		int num = FileIO.FioReadWord();
-		int type; // treat as unsigned, thus int
-
-		if (num == 0)
-			return false;
-
-		type = FileIO.FioReadByte();
-		if (type == 0xFF) {
-			//Global.debug("nonspr %d", num);
-			FileIO.FioSkipBytes(num);
-			return true;
-		}
-
-		FileIO.FioSkipBytes(7);
-		num -= 8;
-
-		//Global.debug("spr %d", num);
-
-		if (num == 0)
-			return true;
-
-		if (0 != (type & 2)) {
-			FileIO.FioSkipBytes(num);
-		} else {
-			while (num > 0) {
-				byte i = (byte) FileIO.FioReadByte();
-				if (i >= 0) {
-					num -= i;
-					FileIO.FioSkipBytes(i);
-				} else {
-					i = (byte) -(i >> 3);
-					num -= i;
-					FileIO.FioReadByte();
-				}
-			}
-		}
-
-		return true;
-	}
+    static final Sprite[] _sprite_ptr = new Sprite[Sprite.MAX_SPRITES];
+    static final int[] _sprite_file_pos = new int[Sprite.MAX_SPRITES];
 
 
-	private static Sprite ReadSprite(int id)
-	{
-		int num;
-		int type; // treated as unsigned, thus int
+    private static boolean ReadSpriteHeaderSkipData() {
+        int num = FileIO.FioReadWord();
+        int type; // treat as unsigned, thus int
 
-		//Global.DEBUG_spritecache( 9, "load sprite %d", id);
+        if (num == 0)
+            return false;
 
-		if (_sprite_file_pos[id] == 0 && id != 0) {
-			Global.error(
-				"Tried to load non-existing sprite #%d.\n"+
-				"Probable cause: Wrong/missing NewGRFs",
-				id
-			);
-		}
+        type = FileIO.FioReadByte();
+        if (type == 0xFF) {
+            //Global.debug("nonspr %d", num);
+            FileIO.FioSkipBytes(num);
+            return true;
+        }
 
-		FileIO.FioSeekToFile(_sprite_file_pos[id]);
+        FileIO.FioSkipBytes(7);
+        num -= 8;
 
-		num  = FileIO.FioReadWord();
-		type = FileIO.FioReadByte();
-		if (type == 0xFF) {
-			byte[] dest = FileIO.FioReadBlock(num);
+        //Global.debug("spr %d", num);
 
-			// Type == 0xFF is non-sprite used to keep some data
-			// Create and return special sprite
-			return new DataCarrier(dest);
-		} else {
-			int height = FileIO.FioReadByte();
-			int width  = FileIO.FioReadWord();
-			Sprite sprite;
-			byte[] dest;
+        if (num == 0)
+            return true;
 
-			num = (0 != (type & 0x02)) ? width * height : (num - 8);
-			sprite = new Sprite(num); // AllocSprite(sizeof(*sprite) + num);
-			//sprite = new Sprite(); // AllocSprite(sizeof(*sprite) + num);
-			_sprite_ptr[id] = sprite;
-			sprite.info   = type;
-			sprite.height = ((id != 142) ? height : 10); // Compensate for a TTD bug
-			sprite.width  = width;
-			sprite.x_offs = FileIO.FioReadSignedWord();
-			sprite.y_offs = FileIO.FioReadSignedWord();
+        if (0 != (type & 2)) {
+            FileIO.FioSkipBytes(num);
+        } else {
+            while (num > 0) {
+                byte i = (byte) FileIO.FioReadByte();
+                if (i >= 0) {
+                    num -= i;
+                    FileIO.FioSkipBytes(i);
+                } else {
+                    i = (byte) -(i >> 3);
+                    num -= i;
+                    FileIO.FioReadByte();
+                }
+            }
+        }
 
-			dest = sprite.data;
-			int di = 0;
-			while (num > 0) {
-				byte i = (byte) FileIO.FioReadByte(); // treat as signed!
+        return true;
+    }
 
-				if (i >= 0) {
-					num -= i;
-					for (; i > 0; --i) 
-						dest[di++] = (byte) FileIO.FioReadByte();
-				} else {
-					//const byte* rel = dest - (((i & 7) << 8) | FileIO.FioReadByte());
-					int relp = di - (((i & 7) << 8) | FileIO.FioReadByte());
 
-					i = (byte) -(i >> 3);
-					num -= i;
+    private static Sprite ReadSprite(int id) {
+        int num;
+        int type; // treated as unsigned, thus int
 
-					for (; i > 0; --i) 
-						dest[di++] = dest[relp++];
-				}
-			}
+        //Global.DEBUG_spritecache( 9, "load sprite %d", id);
 
-			return sprite;
-		}
-	}
+        if (_sprite_file_pos[id] == 0 && id != 0) {
+            Global.error(
+                    "Tried to load non-existing sprite #%d.\n" +
+                            "Probable cause: Wrong/missing NewGRFs",
+                    id
+            );
+        }
 
-	public static boolean LoadNextSprite(int load_index, int file_index) {
-		int file_pos = (int) (FileIO.FioGetPos() | ( (file_index & 0xFF) << 24));
+        FileIO.FioSeekToFile(_sprite_file_pos[id]);
 
-		if (!ReadSpriteHeaderSkipData())
-			return false;
+        num = FileIO.FioReadWord();
+        type = FileIO.FioReadByte();
+        if (type == 0xFF) {
+            byte[] dest = FileIO.FioReadBlock(num);
 
-		_sprite_file_pos[load_index] = file_pos;
+            // Type == 0xFF is non-sprite used to keep some data
+            // Create and return special sprite
+            return new DataCarrier(dest);
+        } else {
+            int height = FileIO.FioReadByte();
+            int width = FileIO.FioReadWord();
+            Sprite sprite;
+            byte[] dest;
 
-		_sprite_ptr[load_index] = null;
+            num = (0 != (type & 0x02)) ? width * height : (num - 8);
+            sprite = new Sprite(num); // AllocSprite(sizeof(*sprite) + num);
+            //sprite = new Sprite(); // AllocSprite(sizeof(*sprite) + num);
+            _sprite_ptr[id] = sprite;
+            sprite.info = type;
+            sprite.height = ((id != 142) ? height : 10); // Compensate for a TTD bug
+            sprite.width = width;
+            sprite.x_offs = FileIO.FioReadSignedWord();
+            sprite.y_offs = FileIO.FioReadSignedWord();
 
-		// #if defined(WANT_NEW_LRU)
-		//_sprite_lru_new[load_index] = 0;
-		/*
-		 * #else _sprite_lru[load_index] = 0xFFFF; _sprite_lru_cur[load_index] = 0;
-		 * #endif
-		 */
+            dest = sprite.data;
+            int di = 0;
+            while (num > 0) {
+                byte i = (byte) FileIO.FioReadByte(); // treat as signed!
 
-		return true;
-	}
+                if (i >= 0) {
+                    num -= i;
+                    for (; i > 0; --i)
+                        dest[di++] = (byte) FileIO.FioReadByte();
+                } else {
+                    //const byte* rel = dest - (((i & 7) << 8) | FileIO.FioReadByte());
+                    int relp = di - (((i & 7) << 8) | FileIO.FioReadByte());
 
-	public static void DupSprite(int old, int newp) {
-		_sprite_file_pos[newp] = _sprite_file_pos[old];
-		_sprite_ptr[newp] = null;
-	}
+                    i = (byte) -(i >> 3);
+                    num -= i;
 
-	public static void SkipSprites(int count) {
-		for (; count > 0; --count) {
-			if (!ReadSpriteHeaderSkipData())
-				return;
-		}
-	}
+                    for (; i > 0; --i)
+                        dest[di++] = dest[relp++];
+                }
+            }
+
+            return sprite;
+        }
+    }
+
+    public static boolean LoadNextSprite(int load_index, int file_index) {
+        int file_pos = (int) (FileIO.FioGetPos() | ((file_index & 0xFF) << 24));
+
+        if (!ReadSpriteHeaderSkipData())
+            return false;
+
+        _sprite_file_pos[load_index] = file_pos;
+
+        _sprite_ptr[load_index] = null;
+
+        // #if defined(WANT_NEW_LRU)
+        //_sprite_lru_new[load_index] = 0;
+        /*
+         * #else _sprite_lru[load_index] = 0xFFFF; _sprite_lru_cur[load_index] = 0;
+         * #endif
+         */
+
+        return true;
+    }
+
+    public static void DupSprite(int old, int newp) {
+        _sprite_file_pos[newp] = _sprite_file_pos[old];
+        _sprite_ptr[newp] = null;
+    }
+
+    public static void SkipSprites(int count) {
+        for (; count > 0; --count) {
+            if (!ReadSpriteHeaderSkipData())
+                return;
+        }
+    }
 
 /*
 	#define S_FREE_MASK 1
@@ -416,33 +414,29 @@ public class SpriteCache {
 		return p;
 	}*/
 
-	private static Sprite GetRawSprite(SpriteID sprite)
-	{
-		return GetRawSprite(sprite.id);	
-	}
-	
-	private static Sprite GetRawSprite(int sprite)
-	{
-		Sprite p;
+    private static Sprite GetRawSprite(SpriteID sprite) {
+        return GetRawSprite(sprite.id);
+    }
 
-		assert(sprite < Sprite.MAX_SPRITES);
+    private static Sprite GetRawSprite(int sprite) {
+        Sprite p;
+
+        assert (sprite < Sprite.MAX_SPRITES);
 
 
-		p = _sprite_ptr[sprite];
-		// Load the sprite, if it is not loaded, yet
-		if (p == null) p = ReadSprite(sprite);
-		return p;
-	}	
+        p = _sprite_ptr[sprite];
+        // Load the sprite, if it is not loaded, yet
+        if (p == null) p = ReadSprite(sprite);
+        return p;
+    }
 
-	public static Sprite GetSprite(SpriteID sprite)
-	{
-		return GetRawSprite(sprite);
-	}
+    public static Sprite GetSprite(SpriteID sprite) {
+        return GetRawSprite(sprite);
+    }
 
-	public static Sprite GetSprite(int sprite)
-	{
-		return GetRawSprite(sprite);
-	}
+    public static Sprite GetSprite(int sprite) {
+        return GetRawSprite(sprite);
+    }
 
 	
 	/*/ TODO do we need it?
@@ -452,18 +446,16 @@ public class SpriteCache {
 		return dc.data;
 	}*/
 
-	public static byte[] GetNonSprite(int sprite)
-	{
-		DataCarrier dc = (DataCarrier) GetRawSprite(sprite);
-		return dc.data;
-	}
-	
-	
-	public static void GfxInitSpriteMem()
-	{
-		// Unused
-	}
-	
+    public static byte[] GetNonSprite(int sprite) {
+        DataCarrier dc = (DataCarrier) GetRawSprite(sprite);
+        return dc.data;
+    }
+
+
+    public static void GfxInitSpriteMem() {
+        // Unused
+    }
+
 
 }
 

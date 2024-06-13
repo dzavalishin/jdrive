@@ -5,5 +5,5 @@ import game.ids.PlayerID;
 
 @FunctionalInterface
 public interface ChangeOwnerInterface {
-	void apply(TileIndex tile, PlayerID old_player, PlayerID new_player);
+    void apply(TileIndex tile, PlayerID old_player, PlayerID new_player);
 }
